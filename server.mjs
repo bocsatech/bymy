@@ -3,7 +3,6 @@ import { readFileSync, existsSync } from "fs";
 import { join, extname } from "path";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
-import { importListings, openChromeForImport } from "./lib/import-listings.mjs";
 import { findChromeExecutable } from "./lib/chrome-launcher.mjs";
 import {
   saveListing,
@@ -260,6 +259,7 @@ async function handleOpenChrome(req, res) {
   const logs = [];
 
   try {
+    const { openChromeForImport } = await import("./lib/import-listings.mjs");
     await openChromeForImport(url, {
       onProgress: (message) => logs.push(message),
     });
@@ -305,6 +305,7 @@ async function handleImport(req, res) {
   };
 
   try {
+    const { importListings } = await import("./lib/import-listings.mjs");
     const result = await importListings(url, {
       limit: body.limit ?? 20,
       autoSave: body.autoSave !== false,

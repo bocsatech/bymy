@@ -93,6 +93,19 @@ const PUBLIC = join(__dirname, "public");
 const PORT = Number(process.env.PORT ?? 3456);
 const HOST = "127.0.0.1";
 
+function publicBaseUrl(req) {
+  const fromEnv = String(process.env.PUBLIC_BASE_URL ?? "").trim().replace(/\/$/, "");
+  if (fromEnv) return fromEnv;
+  const vercel = String(process.env.VERCEL_URL ?? "").trim().replace(/\/$/, "");
+  if (vercel) return `https://${vercel}`;
+  const forwardedHost = req?.headers?.["x-forwarded-host"];
+  if (forwardedHost) {
+    const proto = String(req.headers["x-forwarded-proto"] ?? "https").split(",")[0].trim();
+    return `${proto}://${String(forwardedHost).split(",")[0].trim()}`;
+  }
+  return `http://${HOST}:${PORT}`;
+}
+
 let fugvenyBusy = false;
 
 const MIME = {
@@ -741,8 +754,9 @@ async function handlePartnersApi(req, res, pathname) {
   }
 }
 
-async function sendActivationEmail(email, activationToken) {
-  const link = `http://${HOST}:${PORT}/aktivalas.html?token=${encodeURIComponent(activationToken)}`;
+async function sendActivationEmail(email, activationToken, baseUrl) {
+  const root = (baseUrl ?? `http://${HOST}:${PORT}`).replace(/\/$/, "");
+  const link = `${root}/aktivalas.html?token=${encodeURIComponent(activationToken)}`;
   console.log(`Aktiváló link → ${email}: ${link}`);
   try {
     await sendMail({
@@ -858,13 +872,34 @@ async function handleAuthApi(req, res, pathname) {
     if (pathname === "/api/auth/register" && req.method === "POST") {
       const body = await readBody(req);
       const registered = await registerUser(body.email, body.password, body.passwordConfirm ?? body.password_confirm);
+      const siteRoot = publicBaseUrl(req);
+
+      // Felhő + nincs SMTP: azonnal aktiválás (iOS app token + user mezőt vár).
+      if (isSupabaseBackend() && !isSmtpConfigured()) {
+        const { user, session } = await activateUserByToken(registered.activationToken);
+        sendJson(
+          res,
+          200,
+          {
+            ok: true,
+            needsActivation: false,
+            email: registered.email,
+            user,
+            token: session.token,
+            message: "Regisztráció sikeres.",
+          },
+          { "Set-Cookie": sessionCookieHeader(session.token, session.expires) }
+        );
+        return;
+      }
+
       let mail = { sent: false, link: null, error: null };
       try {
-        mail = await sendActivationEmail(registered.email, registered.activationToken);
+        mail = await sendActivationEmail(registered.email, registered.activationToken, siteRoot);
       } catch (error) {
         mail = {
           sent: false,
-          link: `http://${HOST}:${PORT}/aktivalas.html?token=${encodeURIComponent(registered.activationToken)}`,
+          link: `${siteRoot}/aktivalas.html?token=${encodeURIComponent(registered.activationToken)}`,
           error: error.message,
         };
         console.warn("Aktiváló email hiba:", error.message ?? error);
@@ -901,7 +936,7 @@ async function handleAuthApi(req, res, pathname) {
       const created = await createActivationForEmail(body.email);
       let mail;
       try {
-        mail = await sendActivationEmail(created.email, created.activationToken);
+        mail = await sendActivationEmail(created.email, created.activationToken, publicBaseUrl(req));
       } catch (error) {
         sendJson(res, 502, { error: `Email küldés sikertelen: ${error.message}` });
         return;
@@ -921,7 +956,8 @@ async function handleAuthApi(req, res, pathname) {
     if (pathname === "/api/auth/login" && req.method === "POST") {
       const body = await readBody(req);
       try {
-        const { user, session } = await loginUser(body.email, body.password);
+        const skipActivation = isSupabaseBackend() && !isSmtpConfigured();
+        const { user, session } = await loginUser(body.email, body.password, { skipActivationCheck: skipActivation });
         sendJson(
           res,
           200,

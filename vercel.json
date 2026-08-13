@@ -1,7 +1,14 @@
 {
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api" }
+  ],
   "functions": {
-    "api/**/*.mjs": {
-      "maxDuration": 60
+    "api/index.mjs": {
+      "maxDuration": 60,
+      "excludeFiles": "{node_modules/playwright/**,node_modules/playwright-core/**}"
+    },
+    "api/ping.mjs": {
+      "excludeFiles": "{node_modules/playwright/**,node_modules/playwright-core/**}"
     }
   }
 }

@@ -70,6 +70,7 @@ import {
   createActivationForEmail,
   findOrCreateOAuthUser,
   saveUserProfile,
+  mergeUserProfileJson,
   sessionCookieHeader,
   setUserDisplayName,
 } from "./lib/web-users-store.mjs";
@@ -972,6 +973,30 @@ async function handleAuthApi(req, res, pathname) {
       return;
     }
 
+    if (pathname === "/api/auth/avatar" && req.method === "PUT") {
+      if (!currentUser) {
+        sendJson(res, 401, { error: "Nem vagy bejelentkezve." });
+        return;
+      }
+      const body = await readBody(req);
+      const avatarDataUrl = String(body.avatarDataUrl ?? "").trim();
+      const user = await mergeUserProfileJson(currentUser.id, { avatarDataUrl });
+      sendJson(res, 200, { ok: true, user, token });
+      return;
+    }
+
+    if (pathname === "/api/auth/prefs" && req.method === "PUT") {
+      if (!currentUser) {
+        sendJson(res, 401, { error: "Nem vagy bejelentkezve." });
+        return;
+      }
+      const body = await readBody(req);
+      const pageLayout = body.pageLayout ?? body.page_layout ?? null;
+      const user = await mergeUserProfileJson(currentUser.id, { pageLayout });
+      sendJson(res, 200, { ok: true, user, token });
+      return;
+    }
+
     if (pathname === "/api/auth/profile" && req.method === "PUT") {
       if (!currentUser) {
         sendJson(res, 401, { error: "Nem vagy bejelentkezve. Jelentkezz be újra." });
@@ -1048,6 +1073,8 @@ export async function handleHttpRequest(req, res) {
       profilesPath,
       users,
       backend: isSupabaseBackend() ? "supabase" : "sqlite",
+      service: "bymy-autosweb",
+      listingsMine: true,
     });
     return;
   }
@@ -1157,7 +1184,7 @@ server.listen(PORT, HOST, async () => {
     ensureProfilesStore();
     ensureSmtpExample();
     ensureOAuthExample();
-    initMessagingSchema();
+    await initMessagingSchema();
     console.log("Üzenetek API: /api/messages/*");
   } catch (error) {
     console.warn("Profil/SMTP/OAuth/Messages store:", error.message ?? error);

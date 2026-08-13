@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="hu">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="autosweb-version" content="auth20260805localdb9" />
+    <title>Fiókom — Add el autod.hu</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/css/style.css?v=auth20260725" />
+    <link rel="stylesheet" href="/css/site-app.css?v=auth20260805localdb9" />
+  </head>
+  <body class="site-app settings-page mm-page" data-site-page="beallitasok" data-auth-init="manual">
+    <div class="local-banner">LOCALHOST — Fiókom · user DB: ~/.autosweb/ · v=localdb9</div>
+
+    <header class="site-header site-app-header">
+      <div class="site-app-header-inner">
+        <a class="site-app-logo" href="/">Add el autod.hu</a>
+        <nav class="import-nav site-app-nav" aria-label="Oldalak">
+          <a class="import-nav-link" href="/">Főoldal</a>
+          <a class="import-nav-link" href="/import.html">Import</a>
+          <a class="import-nav-link" href="/listings.html">Hirdetések</a>
+          <a class="import-nav-link" href="/fugveny.html">Függvény</a>
+        </nav>
+        <div class="header-actions site-header-actions">
+          <div class="site-header-auth-row">
+            <a class="site-header-btn site-header-btn--ghost" href="/belepes.html" data-auth-login>Belépés</a>
+            <a class="site-header-btn site-header-btn--ghost" href="/regisztracio.html" data-auth-register>Regisztráció</a>
+            <a class="site-header-btn site-header-btn--ghost" href="/hirdetesfeladas.html" data-auth-guard>Hirdetésfeladás</a>
+          </div>
+          <nav class="site-header-tools" aria-label="Fiók eszközök">
+            <button type="button" class="site-header-tool" aria-label="Értesítések" title="Értesítések">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M12 3.5a5 5 0 0 0-5 5v1.6c0 .9-.3 1.8-.8 2.5L4.8 15h14.4l-1.4-2.4a5 5 0 0 1-.8-2.5V8.5a5 5 0 0 0-5-5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+                <path d="M9.6 17.2a2.5 2.5 0 0 0 4.8 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+              </svg>
+            </button>
+            <button type="button" class="site-header-tool" aria-label="Mentett keresések" title="Mentett keresések">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M11.2 3.8 12.7 8l4.4.3-3.4 2.9 1.1 4.3-3.8-2.4-3.8 2.4 1.1-4.3L5.9 8.3l4.4-.3L11.2 3.8Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+                <circle cx="17.2" cy="17.2" r="3.1" stroke="currentColor" stroke-width="1.6"/>
+                <path d="m19.4 19.4 2 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+              </svg>
+            </button>
+            <button type="button" class="site-header-tool site-header-tool--count" aria-label="Kedvencek" title="Kedvencek">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M12 20s-6.8-4.2-9-7.7C1.4 9.7 2.7 6.5 5.7 5.6c1.8-.5 3.6.2 4.6 1.6 1-1.4 2.8-2.1 4.6-1.6 3 .9 4.3 4.1 2.7 6.7C18.8 15.8 12 20 12 20Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+              </svg>
+              <span class="site-header-tool-count" data-fav-count>1</span>
+            </button>
+            <button type="button" class="site-header-tool" aria-label="Üzenetek" title="Üzenetek">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <rect x="3.5" y="5" width="17" height="12.5" rx="2.5" stroke="currentColor" stroke-width="1.7"/>
+                <path d="M7.5 9.2h9M7.5 12.5h6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+              </svg>
+            </button>
+            <div class="site-header-avatar-wrap" data-avatar-menu>
+              <button
+                type="button"
+                class="site-header-avatar"
+                data-auth-avatar
+                data-avatar-toggle
+                aria-expanded="false"
+                aria-haspopup="menu"
+                aria-label="Profil menü"
+                title="Profil"
+              >
+                <span data-avatar-letter>A</span>
+                <img data-avatar-img alt="" hidden width="40" height="40" />
+              </button>
+              <div class="site-avatar-dropdown" data-avatar-dropdown role="menu" hidden>
+                <p class="site-avatar-guest" data-avatar-guest>A menühöz jelentkezz be.</p>
+                <div data-avatar-member hidden>
+                  <button type="button" class="site-avatar-item" data-avatar-photo-btn role="menuitem">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="3.2" stroke="currentColor" stroke-width="1.6"/><path d="M5.5 19.2c1.6-3 3.8-4.4 6.5-4.4s4.9 1.4 6.5 4.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+                    <span class="site-avatar-item-label">Profilkép feltöltése</span>
+                  </button>
+                  <input type="file" accept="image/jpeg,image/png,image/webp" data-avatar-file hidden />
+                  <a class="site-avatar-item" href="/beallitasok.html?szekcio=attekintes" role="menuitem">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1.2" stroke="currentColor" stroke-width="1.6"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.2" stroke="currentColor" stroke-width="1.6"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.2" stroke="currentColor" stroke-width="1.6"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.2" stroke="currentColor" stroke-width="1.6"/></svg>
+                    <span class="site-avatar-item-label">Áttekintés</span>
+                  </a>
+                  <a class="site-avatar-item" href="/beallitasok.html?szekcio=uzenetek" role="menuitem">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="5" width="17" height="12.5" rx="2.5" stroke="currentColor" stroke-width="1.6"/><path d="M7.5 9.2h9M7.5 12.5h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+                    <span class="site-avatar-item-label">Üzenetek</span>
+                  </a>
+                  <a class="site-avatar-item" href="/beallitasok.html?szekcio=keresesek" role="menuitem">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M11.2 3.8 12.7 8l4.4.3-3.4 2.9 1.1 4.3-3.8-2.4-3.8 2.4 1.1-4.3L5.9 8.3l4.4-.3L11.2 3.8Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><circle cx="17.2" cy="17.2" r="3" stroke="currentColor" stroke-width="1.5"/><path d="m19.4 19.4 1.8 1.8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                    <span class="site-avatar-item-label">Mentett kereséseim</span>
+                  </a>
+                  <a class="site-avatar-item" href="/beallitasok.html?szekcio=parkolo" role="menuitem">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 20s-6.8-4.2-9-7.7C1.4 9.7 2.7 6.5 5.7 5.6c1.8-.5 3.6.2 4.6 1.6 1-1.4 2.8-2.1 4.6-1.6 3 .9 4.3 4.1 2.7 6.7C18.8 15.8 12 20 12 20Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+                    <span class="site-avatar-item-label">Kedvencek <span class="site-avatar-item-count">(1)</span></span>
+                  </a>
+                  <a class="site-avatar-item" href="/beallitasok.html?szekcio=uzenetek" role="menuitem">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7.5h16v10.2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7.5Z" stroke="currentColor" stroke-width="1.6"/><path d="M8 7.5V5.8A2.3 2.3 0 0 1 10.3 3.5h3.4A2.3 2.3 0 0 1 16 5.8v1.7" stroke="currentColor" stroke-width="1.6"/></svg>
+                    <span class="site-avatar-item-label">Érdeklődések <span class="site-avatar-item-count">(1)</span></span>
+                    <span class="site-avatar-badge" aria-label="1 új">1</span>
+                  </a>
+                  <a class="site-avatar-item" href="/beallitasok.html?szekcio=hirdetes" role="menuitem">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 14.5h2.2l1.3-2.5h7l1.4 2.5H18a2 2 0 0 1 2 2v2.2a1.3 1.3 0 0 1-1.3 1.3h-.7" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="7.2" cy="18.7" r="1.5" stroke="currentColor" stroke-width="1.5"/><circle cx="15.5" cy="18.7" r="1.5" stroke="currentColor" stroke-width="1.5"/></svg>
+                    <span class="site-avatar-item-label">Hirdetéseim</span>
+                  </a>
+                  <a class="site-avatar-item" href="/hirdetesfeladas.html" data-auth-guard role="menuitem">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5.5 11.5 12 4.8l6.5 6.7" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M7.2 10.8V19h9.6v-8.2" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M10 19v-5h4v5" stroke="currentColor" stroke-width="1.6"/></svg>
+                    <span class="site-avatar-item-label">Direkt eladás</span>
+                  </a>
+                  <a class="site-avatar-item" href="/beallitasok.html?szekcio=hirdetes" role="menuitem">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 15.2h2l1.2-2.3h7.2L16.8 15.2H19a1.8 1.8 0 0 1 1.8 1.8v2.1a1.2 1.2 0 0 1-1.2 1.2h-1" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="8" cy="19.2" r="1.4" stroke="currentColor" stroke-width="1.5"/><circle cx="15.5" cy="19.2" r="1.4" stroke="currentColor" stroke-width="1.5"/><path d="M7.2 15.1 8.4 9.8h7.2l1.3 5.3" stroke="currentColor" stroke-width="1.5"/></svg>
+                    <span class="site-avatar-item-label">Járműveim</span>
+                  </a>
+                  <a class="site-avatar-item" href="/beallitasok.html?szekcio=fiok" role="menuitem">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3.1" stroke="currentColor" stroke-width="1.6"/><path d="M12 4.5v1.6M12 17.9v1.6M4.5 12h1.6M17.9 12h1.6M6.8 6.8l1.1 1.1M16.1 16.1l1.1 1.1M17.2 6.8l-1.1 1.1M7.9 16.1l-1.1 1.1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                    <span class="site-avatar-item-label">Beállítások</span>
+                  </a>
+                  <a class="site-avatar-item" href="/beallitasok.html?szekcio=uzenetek" role="menuitem">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6.5 15.2c1.4-1.8 3.3-2.8 5.5-2.8s4.1 1 5.5 2.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M9.2 9.2 12 4.8l2.8 4.4H9.2Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8.2 19h7.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+                    <span class="site-avatar-item-label">Kommunikáció</span>
+                  </a>
+                  <div class="site-avatar-footer">
+                    <p class="site-avatar-logged">Bejelentkezve mint <strong data-avatar-user>—</strong></p>
+                    <button type="button" class="site-avatar-logout" data-auth-logout>Kijelentkezés</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+</nav>
+        </div>
+      </div>
+    </header>
+
+    <main class="mm-shell">
+      <aside class="mm-side" aria-label="Fiók menü">
+        <p class="mm-side-kicker">Fiókom</p>
+        <h1 class="mm-side-title">Üdv, <span data-mm-hello>—</span></h1>
+        <nav class="mm-nav">
+          <a class="mm-nav-link" href="?szekcio=attekintes" data-mm-nav="attekintes">Áttekintés</a>
+          <a class="mm-nav-link" href="?szekcio=parkolo" data-mm-nav="parkolo">Parkoló</a>
+          <a class="mm-nav-link" href="?szekcio=keresesek" data-mm-nav="keresesek">Mentett kereséseim</a>
+          <a class="mm-nav-link" href="?szekcio=uzenetek" data-mm-nav="uzenetek">Üzenetek <span class="mm-nav-badge" data-mm-msg-count hidden>0</span></a>
+          <a class="mm-nav-link" href="?szekcio=hirdetes" data-mm-nav="hirdetes">Hirdetésem</a>
+          <a class="mm-nav-link" href="?szekcio=fiok" data-mm-nav="fiok">Fiók szerkesztése</a>
+        </nav>
+        <button type="button" class="mm-side-logout" data-auth-logout>Kijelentkezés</button>
+      </aside>
+
+      <div class="mm-main">
+        <!-- Áttekintés -->
+        <section class="mm-panel" data-mm-panel="attekintes" hidden>
+          <header class="mm-panel-head">
+            <h2 class="mm-panel-title">Áttekintés</h2>
+            <p class="mm-panel-lead">Gyors elérés a fiókod fontos részeihez.</p>
+          </header>
+          <div class="mm-cards">
+            <a class="mm-card" href="?szekcio=parkolo">
+              <strong>Parkoló</strong>
+              <span data-mm-stat-park>0 jármű</span>
+            </a>
+            <a class="mm-card" href="?szekcio=keresesek">
+              <strong>Mentett keresések</strong>
+              <span data-mm-stat-search>0 keresés</span>
+            </a>
+            <a class="mm-card" href="?szekcio=uzenetek">
+              <strong>Üzenetek</strong>
+              <span data-mm-stat-msg>0 olvasatlan</span>
+            </a>
+            <a class="mm-card" href="?szekcio=hirdetes">
+              <strong>Hirdetésem</strong>
+              <span>Hirdetés kezelése</span>
+            </a>
+            <a class="mm-card" href="?szekcio=fiok">
+              <strong>Fiók szerkesztése</strong>
+              <span>Személyes adatok, jelszó</span>
+            </a>
+          </div>
+        </section>
+
+        <!-- Parkoló -->
+        <section class="mm-panel" data-mm-panel="parkolo" hidden>
+          <header class="mm-panel-head">
+            <h2 class="mm-panel-title">Parkoló</h2>
+            <p class="mm-panel-lead">Ide kerülnek a kedvenc / „parkolt” járműveid. Jegyzetet is írhatsz hozzájuk.</p>
+          </header>
+          <form id="mm-park-add" class="mm-inline-form">
+            <input type="text" name="title" required placeholder="Pl. BMW 320d 2018" aria-label="Jármű megnevezése" />
+            <input type="text" name="price" placeholder="Ár (opcionális)" aria-label="Ár" />
+            <button type="submit" class="site-header-btn site-header-btn--primary">Parkolás</button>
+          </form>
+          <div id="mm-park-list" class="mm-list"></div>
+          <p class="mm-empty" id="mm-park-empty" hidden>Még nincs jármű a parkolóban.</p>
+        </section>
+
+        <!-- Mentett keresések -->
+        <section class="mm-panel" data-mm-panel="keresesek" hidden>
+          <header class="mm-panel-head">
+            <h2 class="mm-panel-title">Mentett kereséseim</h2>
+            <p class="mm-panel-lead">Mentett szűréseid. Bekapcsolhatod az értesítést új találatokra.</p>
+          </header>
+          <form id="mm-search-add" class="mm-inline-form">
+            <input type="text" name="name" required placeholder="Keresés neve (pl. Audi A4 diesel)" aria-label="Keresés neve" />
+            <input type="text" name="query" placeholder="Szűrő szövegesen" aria-label="Szűrő" />
+            <label class="mm-check-inline"><input type="checkbox" name="notify" /> Értesítés</label>
+            <button type="submit" class="site-header-btn site-header-btn--primary">Mentés</button>
+          </form>
+          <div id="mm-search-list" class="mm-list"></div>
+          <p class="mm-empty" id="mm-search-empty" hidden>Nincs mentett keresésed.</p>
+        </section>
+
+        <!-- Üzenetek -->
+        <section class="mm-panel" data-mm-panel="uzenetek" hidden>
+          <header class="mm-panel-head">
+            <h2 class="mm-panel-title">Üzenetek</h2>
+            <p class="mm-panel-lead">A platformon belüli üzenetek — így biztonságosabb a kommunikáció.</p>
+          </header>
+          <div id="mm-msg-list" class="mm-list"></div>
+          <p class="mm-empty" id="mm-msg-empty" hidden>Nincs üzeneted.</p>
+        </section>
+
+        <!-- Hirdetésem -->
+        <section class="mm-panel" data-mm-panel="hirdetes" hidden>
+          <header class="mm-panel-head">
+            <h2 class="mm-panel-title">Hirdetésem</h2>
+            <p class="mm-panel-lead">Itt kezelheted az aktív hirdetésedet (szerkesztés, megtekintés, új feladás).</p>
+          </header>
+          <div class="mm-ad-box">
+            <p id="mm-ad-status">Hirdetéseid a Hirdetések listában és a feladáson keresztül érhetők el.</p>
+            <div class="mm-ad-actions">
+              <a class="site-header-btn site-header-btn--primary" href="/listings.html">Hirdetéseim megnyitása</a>
+              <a class="site-header-btn site-header-btn--outline" href="/hirdetesfeladas.html" data-auth-guard>Hirdetés szerkesztése / feladás</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- Fiók szerkesztése = /meinmobile/bearbeiten -->
+        <section class="mm-panel" data-mm-panel="fiok" hidden>
+          <header class="mm-panel-head">
+            <h2 class="mm-panel-title">Fiók szerkesztése</h2>
+            <p class="mm-panel-lead">Személyes adatok, jelszó, hírlevél — mint a mobile.de „Konto bearbeiten” oldalon.</p>
+          </header>
+
+          <div class="settings-card">
+            <h3 class="settings-card-title">Személyes adatok</h3>
+            <p id="settings-profile-summary" class="mm-panel-lead">Mentett név: még nincs</p>
+            <p id="settings-profile-flash" class="settings-flash" role="status" hidden></p>
+            <div class="settings-avatar-row">
+              <div class="settings-avatar" aria-hidden="true">
+                <span id="settings-avatar-letter">A</span>
+                <img id="settings-avatar-img" alt="" hidden width="72" height="72" />
+              </div>
+              <div class="settings-avatar-actions">
+                <button type="button" class="site-header-btn site-header-btn--outline" id="settings-avatar-upload">Profilkép feltöltése</button>
+                <button type="button" class="settings-link-btn" id="settings-avatar-remove">Kép törlése</button>
+                <input type="file" id="settings-avatar-file" accept="image/jpeg,image/png,image/webp" hidden />
+              </div>
+            </div>
+            <p id="settings-avatar-flash" class="settings-flash" role="status" hidden></p>
+
+            <form id="mm-profile-form" class="settings-form" action="#" method="post" onsubmit="return false;">
+              <label class="login-field">
+                <span class="login-label">Megszólítás</span>
+                <select name="salutation">
+                  <option value="">—</option>
+                  <option value="ur">Úr</option>
+                  <option value="holgy">Hölgy</option>
+                  <option value="egyeb">Egyéb</option>
+                </select>
+              </label>
+              <div class="mm-grid-2">
+                <label class="login-field">
+                  <span class="login-label">Keresztnév</span>
+                  <input type="text" name="firstName" required autocomplete="given-name" />
+                </label>
+                <label class="login-field">
+                  <span class="login-label">Vezetéknév</span>
+                  <input type="text" name="lastName" required autocomplete="family-name" />
+                </label>
+              </div>
+              <label class="login-field">
+                <span class="login-label">Utca, házszám</span>
+                <input type="text" name="street" autocomplete="street-address" />
+              </label>
+              <div class="mm-grid-2">
+                <label class="login-field">
+                  <span class="login-label">Irányítószám</span>
+                  <input type="text" name="postalCode" autocomplete="postal-code" />
+                </label>
+                <label class="login-field">
+                  <span class="login-label">Város</span>
+                  <input type="text" name="city" autocomplete="address-level2" />
+                </label>
+              </div>
+              <label class="login-field">
+                <span class="login-label">Ország</span>
+                <input type="text" name="country" value="Magyarország" autocomplete="country-name" />
+              </label>
+              <label class="login-field">
+                <span class="login-label">Telefon</span>
+                <input type="tel" name="phone" autocomplete="tel" placeholder="+36 …" />
+              </label>
+              <label class="login-field">
+                <span class="login-label">Email</span>
+                <p class="settings-readonly" id="settings-email">—</p>
+              </label>
+              <label class="login-field">
+                <span class="login-label">Fióktípus</span>
+                <select name="accountType">
+                  <option value="private">Magánszemély</option>
+                  <option value="business">Vállalkozás (nem kereskedő)</option>
+                </select>
+              </label>
+              <label class="login-field" data-mm-company-wrap hidden>
+                <span class="login-label">Cégnév</span>
+                <input type="text" name="company" autocomplete="organization" />
+              </label>
+              <p id="settings-profile-path" class="mm-panel-lead" hidden></p>
+              <button type="submit" class="site-header-btn site-header-btn--primary" id="mm-profile-save">Adatok mentése</button>
+            </form>
+          </div>
+
+          <div class="settings-card" id="settings-db-card">
+            <h3 class="settings-card-title">Helyi adatbázis (Autosweb)</h3>
+            <p class="mm-panel-lead">Ez NEM a Supabase — csak a gépeden: ~/.autosweb/</p>
+            <pre id="settings-db-inspect" class="settings-db-inspect">Betöltés…</pre>
+            <button type="button" class="site-header-btn site-header-btn--outline" id="settings-db-refresh">Adatbázis frissítése</button>
+          </div>
+
+          <div class="settings-card">
+            <h3 class="settings-card-title">Jelszó módosítása</h3>
+            <form id="settings-password-form" class="settings-form">
+              <label class="login-field">
+                <span class="login-label">Jelenlegi jelszó</span>
+                <input type="password" name="current_password" autocomplete="current-password" required />
+              </label>
+              <label class="login-field">
+                <span class="login-label">Új jelszó</span>
+                <input type="password" name="new_password" autocomplete="new-password" required minlength="4" />
+              </label>
+              <label class="login-field">
+                <span class="login-label">Új jelszó mégegyszer</span>
+                <input type="password" name="new_password_confirm" autocomplete="new-password" required minlength="4" />
+              </label>
+              <p id="settings-password-flash" class="settings-flash" role="status" hidden></p>
+              <button type="submit" class="site-header-btn site-header-btn--primary">Jelszó mentése</button>
+            </form>
+          </div>
+
+          <div class="settings-card">
+            <h3 class="settings-card-title">Hírlevél és értesítések</h3>
+            <form id="settings-notify-form" class="settings-form">
+              <label class="settings-check"><input type="checkbox" name="messages" /><span>Üzenetek e-mailben</span></label>
+              <label class="settings-check"><input type="checkbox" name="favorites" /><span>Parkoló: árváltozás</span></label>
+              <label class="settings-check"><input type="checkbox" name="interests" /><span>Érdeklődések</span></label>
+              <label class="settings-check"><input type="checkbox" name="newsletter" /><span>Hírlevél / tippek (marketing)</span></label>
+              <p id="settings-notify-flash" class="settings-flash" role="status" hidden></p>
+              <button type="submit" class="site-header-btn site-header-btn--primary">Értesítések mentése</button>
+            </form>
+          </div>
+
+          <div class="settings-card settings-card--danger">
+            <h3 class="settings-card-title">Fiók törlése</h3>
+            <p class="mm-panel-lead">A fiók törlése végleges ezen a gépen (helyi demó-fiók).</p>
+            <div class="settings-account-actions">
+              <button type="button" class="settings-danger-btn" id="settings-delete-account">Fiók törlése</button>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <script src="/js/site-avatar-menu.js?v=auth20260805localdb9" type="module"></script>
+    <script src="/js/beallitasok-app.js?v=auth20260805localdb9" type="module"></script>
+  </body>
+</html>

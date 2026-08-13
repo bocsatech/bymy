@@ -1,0 +1,1224 @@
+import { createServer } from "http";
+import { readFileSync, existsSync } from "fs";
+import { join, extname } from "path";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
+import { importListings, openChromeForImport } from "./lib/import-listings.mjs";
+import { findChromeExecutable } from "./lib/chrome-launcher.mjs";
+import {
+  saveListing,
+  getListing,
+  getLatestListing,
+  listListingsWithPreview,
+  deleteListing,
+  deleteAllListings,
+  dbStats,
+  listFieldDefs,
+  findListingBySourceUrl,
+  listingSourceExists,
+  getDbPath,
+  closeDb,
+} from "./lib/db.mjs";
+import { getSiteBlocks, saveSiteBlocks } from "./lib/site-blocks.mjs";
+import {
+  deleteQuery,
+  listFugvenyLists,
+  loadQueries,
+  predictOne,
+  runSavedQuery,
+  saveQuery,
+  scoreList,
+  trainFugvenyModel,
+} from "./lib/fugveny-api.mjs";
+import {
+  deletePartner,
+  getPartner,
+  getPartnerRecommendations,
+  getPostalCode,
+  importPartners,
+  listPartners,
+  listPostalCities,
+  partnerStats,
+  savePartner,
+  upsertPostalCodes,
+} from "./lib/partners.mjs";
+import { PARTNER_CATEGORIES } from "./lib/partner-categories.mjs";
+import { estimateValuation, valuationOptions } from "./lib/valuation.mjs";
+import {
+  ensureVehicleCatalog,
+  getVehicleCatalog,
+  catalogSummary,
+  listModelTypes,
+  listModelYears,
+} from "./lib/vehicle-catalog.mjs";
+import {
+  SESSION_COOKIE,
+  changeUserPassword,
+  clearSessionCookieHeader,
+  deleteUserAccount,
+  destroySession,
+  getSessionTokenFromRequest,
+  countWebUsers,
+  inspectWebUsersDb,
+  getProfilesFilePath,
+  ensureProfilesStore,
+  getUserById,
+  getUserBySessionToken,
+  loginUser,
+  registerUser,
+  activateUserByToken,
+  createActivationForEmail,
+  findOrCreateOAuthUser,
+  saveUserProfile,
+  sessionCookieHeader,
+  setUserDisplayName,
+} from "./lib/web-users.mjs";
+import { ensureSmtpExample, isSmtpConfigured, sendMail, smtpConfigPath } from "./lib/mail.mjs";
+import {
+  appleNameFromForm,
+  buildAuthorizeUrl,
+  createOAuthState,
+  ensureOAuthExample,
+  exchangeOAuthCode,
+  listOAuthProviders,
+  loadOAuthConfig,
+  oauthConfigPath,
+  parseOAuthState,
+} from "./lib/oauth.mjs";
+import { listingImageDir, resolveListingImageFile, fetchRemoteListingImage, clearListingImageFiles } from "./lib/listing-image.mjs";
+import { handleMessagesApi, initMessagingSchema } from "./lib/messaging.mjs";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const PUBLIC = join(__dirname, "public");
+const PORT = Number(process.env.PORT ?? 3456);
+const HOST = "127.0.0.1";
+
+let fugvenyBusy = false;
+
+const MIME = {
+  ".html": "text/html; charset=utf-8",
+  ".css": "text/css; charset=utf-8",
+  ".js": "text/javascript; charset=utf-8",
+  ".json": "application/json; charset=utf-8",
+  ".svg": "image/svg+xml",
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".webp": "image/webp",
+};
+
+let importRunning = false;
+
+function readBody(req) {
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    req.on("data", (chunk) => chunks.push(chunk));
+    req.on("end", () => {
+      try {
+        const raw = Buffer.concat(chunks).toString("utf8");
+        resolve(raw ? JSON.parse(raw) : {});
+      } catch (error) {
+        reject(error);
+      }
+    });
+    req.on("error", reject);
+  });
+}
+
+function readRawBody(req) {
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    req.on("data", (chunk) => chunks.push(chunk));
+    req.on("end", () => resolve(Buffer.concat(chunks).toString("utf8")));
+    req.on("error", reject);
+  });
+}
+
+function parseFormBody(raw) {
+  const params = new URLSearchParams(raw || "");
+  const out = {};
+  for (const [key, value] of params.entries()) out[key] = value;
+  return out;
+}
+
+function sendRedirect(res, location, headers = {}) {
+  res.writeHead(302, { Location: location, ...headers });
+  res.end();
+}
+
+async function handleMediaProxy(req, res) {
+  try {
+    const urlObj = new URL(req.url ?? "", `http://${HOST}:${PORT}`);
+    const target = urlObj.searchParams.get("url");
+    if (!target) {
+      sendJson(res, 400, { error: "Hiányzó url paraméter." });
+      return;
+    }
+    const { buffer, contentType } = await fetchRemoteListingImage(target);
+    res.writeHead(200, {
+      "Content-Type": contentType,
+      "Cache-Control": "public, max-age=86400",
+      "Content-Length": String(buffer.length),
+    });
+    res.end(buffer);
+  } catch (error) {
+    const status = error.code === "FORBIDDEN_IMAGE" ? 403 : 502;
+    sendJson(res, status, { error: error.message ?? "Kép proxy hiba." });
+  }
+}
+
+function sendJson(res, status, data, headers = {}) {
+  res.writeHead(status, {
+    "Content-Type": "application/json; charset=utf-8",
+    "Cache-Control": "no-store",
+    ...headers,
+  });
+  res.end(JSON.stringify(data));
+}
+
+function serveStatic(path, res) {
+  const rel = path === "/" ? "index.html" : path.replace(/^\//, "");
+
+  // Hirdetésképek: ~/.autosweb/uploads (túléli a frissítést)
+  if (rel.startsWith("uploads/listings/")) {
+    const uploadFile = resolveListingImageFile(`/${rel}`);
+    if (uploadFile) {
+      const ext = extname(uploadFile);
+      res.writeHead(200, {
+        "Content-Type": MIME[ext] ?? "application/octet-stream",
+        "Cache-Control": "public, max-age=86400",
+      });
+      res.end(readFileSync(uploadFile));
+      return;
+    }
+  }
+
+  const filePath = join(PUBLIC, rel);
+  if (!filePath.startsWith(PUBLIC) || !existsSync(filePath)) {
+    res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" });
+    res.end("404 — nem található");
+    return;
+  }
+  const ext = extname(filePath);
+  if (ext === ".html") {
+    let html = readFileSync(filePath, "utf8");
+    if (html.includes("<!-- AD_FORM -->")) {
+      const partialPath = join(PUBLIC, "partials", "ad-form.html");
+      if (existsSync(partialPath)) {
+        html = html.replace("<!-- AD_FORM -->", readFileSync(partialPath, "utf8"));
+      }
+    }
+    if (html.includes("<!-- HOME_SEARCH_SIDEBAR -->")) {
+      html = html.replace(
+        "<!-- HOME_SEARCH_SIDEBAR -->",
+        readFileSync(join(PUBLIC, "partials", "home-search-sidebar.html"), "utf8")
+      );
+    }
+    if (html.includes("<!-- SITE_SIDE_LEFT -->")) {
+      html = html.replace(
+        "<!-- SITE_SIDE_LEFT -->",
+        readFileSync(join(PUBLIC, "partials", "site-side-left.html"), "utf8")
+      );
+    }
+    if (html.includes("<!-- SITE_SIDE_RIGHT -->")) {
+      html = html.replace(
+        "<!-- SITE_SIDE_RIGHT -->",
+        readFileSync(join(PUBLIC, "partials", "site-side-right.html"), "utf8")
+      );
+    }
+    if (html.includes("<!-- SITE_SIDE_CONTROLS -->")) {
+      html = html.replace(
+        "<!-- SITE_SIDE_CONTROLS -->",
+        readFileSync(join(PUBLIC, "partials", "site-side-controls.html"), "utf8")
+      );
+    }
+    res.writeHead(200, {
+      "Content-Type": MIME[".html"],
+      "Cache-Control": "no-store, no-cache, must-revalidate",
+    });
+    res.end(html);
+    return;
+  }
+  res.writeHead(200, {
+    "Content-Type": MIME[ext] ?? "application/octet-stream",
+    "Cache-Control": "no-store, no-cache, must-revalidate",
+  });
+  res.end(readFileSync(filePath));
+}
+
+async function handleOpenChrome(req, res) {
+  let body;
+  try {
+    body = await readBody(req);
+  } catch {
+    sendJson(res, 400, { error: "Érvénytelen JSON." });
+    return;
+  }
+
+  const url = String(body.url ?? "https://www.hasznaltauto.hu/szemelyauto").trim();
+  const logs = [];
+
+  try {
+    await openChromeForImport(url, {
+      onProgress: (message) => logs.push(message),
+    });
+    sendJson(res, 200, { ok: true, logs, chrome: findChromeExecutable() });
+  } catch (error) {
+    sendJson(res, 500, {
+      error: error.message ?? String(error),
+      logs,
+      chrome: findChromeExecutable(),
+    });
+  }
+}
+
+async function handleImport(req, res) {
+  if (importRunning) {
+    sendJson(res, 409, { error: "Már fut egy import." });
+    return;
+  }
+
+  let body;
+  try {
+    body = await readBody(req);
+  } catch {
+    sendJson(res, 400, { error: "Érvénytelen JSON." });
+    return;
+  }
+
+  const url = String(body.url ?? "").trim();
+  if (!url) {
+    sendJson(res, 400, { error: "Adj meg hasznaltauto.hu lista- vagy hirdetés URL-t." });
+    return;
+  }
+
+  importRunning = true;
+  res.writeHead(200, {
+    "Content-Type": "text/event-stream; charset=utf-8",
+    "Cache-Control": "no-cache, no-store",
+    Connection: "keep-alive",
+  });
+
+  const send = (payload) => {
+    res.write(`data: ${JSON.stringify(payload)}\n\n`);
+  };
+
+  try {
+    const result = await importListings(url, {
+      limit: body.limit ?? 20,
+      autoSave: body.autoSave !== false,
+      onProgress: (message) => send({ type: "log", message }),
+    });
+    send({ type: "done", result });
+  } catch (error) {
+    send({ type: "error", message: error.message ?? String(error) });
+  } finally {
+    importRunning = false;
+    res.end();
+  }
+}
+
+async function handleListingsApi(req, res, pathname) {
+  const latestMatch = pathname === "/api/listings/latest";
+  const listMatch = pathname === "/api/listings";
+  const batchMatch = pathname === "/api/listings/batch";
+  const idMatch = pathname.match(/^\/api\/listings\/(\d+)$/);
+
+  if (pathname === "/api/db/stats" && req.method === "GET") {
+    sendJson(res, 200, dbStats());
+    return;
+  }
+
+  if (pathname === "/api/field-defs" && req.method === "GET") {
+    sendJson(res, 200, { fields: listFieldDefs() });
+    return;
+  }
+
+  if (latestMatch && req.method === "GET") {
+    sendJson(res, 200, { listing: getLatestListing() });
+    return;
+  }
+
+  if (listMatch && req.method === "GET") {
+    const url = new URL(req.url ?? "", `http://${HOST}`);
+    const limit = Math.min(Math.max(Number(url.searchParams.get("limit") ?? 50), 1), 500);
+    const status = url.searchParams.get("status");
+    sendJson(res, 200, { listings: listListingsWithPreview({ limit, status }) });
+    return;
+  }
+
+  if (idMatch && req.method === "GET") {
+    const listing = getListing(Number(idMatch[1]));
+    if (!listing) {
+      sendJson(res, 404, { error: "Nincs ilyen hirdetés." });
+      return;
+    }
+    sendJson(res, 200, { listing });
+    return;
+  }
+
+  if (batchMatch && req.method === "POST") {
+    let body;
+    try {
+      body = await readBody(req);
+    } catch {
+      sendJson(res, 400, { error: "Érvénytelen JSON." });
+      return;
+    }
+
+    const forms = Array.isArray(body.forms) ? body.forms : Array.isArray(body.items) ? body.items : null;
+    if (!forms?.length) {
+      sendJson(res, 400, { error: "Hiányzó hirdetés lista (forms)." });
+      return;
+    }
+    if (forms.length > 80) {
+      sendJson(res, 400, { error: "Egyszerre max. 80 hirdetés menthető." });
+      return;
+    }
+
+    const status = body.status ?? "feladott";
+    const results = [];
+    let savedCount = 0;
+    let skippedCount = 0;
+
+    for (const formData of forms) {
+      if (!formData || typeof formData !== "object") {
+        results.push({ skipped: true, reason: "invalid" });
+        skippedCount += 1;
+        continue;
+      }
+      const sourceUrl = String(formData.forras_url || "").trim();
+      const hasznaltautoId = String(formData.hasznaltauto_hirdetes_id || "").trim();
+      if (listingSourceExists({ sourceUrl, hasznaltautoId })) {
+        results.push({ skipped: true, reason: "duplicate", forras_url: sourceUrl });
+        skippedCount += 1;
+        continue;
+      }
+      const saved = saveListing(formData, null, { status });
+      results.push({ skipped: false, listing: saved });
+      savedCount += 1;
+    }
+
+    sendJson(res, 200, { savedCount, skippedCount, count: forms.length, results });
+    return;
+  }
+
+  if (listMatch && req.method === "POST") {
+    let body;
+    try {
+      body = await readBody(req);
+    } catch {
+      sendJson(res, 400, { error: "Érvénytelen JSON." });
+      return;
+    }
+
+    const formData = body.form ?? body;
+    const listingId = body.id != null ? Number(body.id) : null;
+    if (!formData || typeof formData !== "object") {
+      sendJson(res, 400, { error: "Hiányzó űrlap adat." });
+      return;
+    }
+
+    const saved = saveListing(formData, listingId, { status: body.status });
+    if (!saved) {
+      sendJson(res, 404, { error: "Nincs ilyen hirdetés." });
+      return;
+    }
+    sendJson(res, 200, { listing: saved });
+    return;
+  }
+
+  if (pathname === "/api/listings/all" && req.method === "DELETE") {
+    const result = deleteAllListings();
+    const images = clearListingImageFiles();
+    sendJson(res, 200, { ok: true, deleted: result.deleted, imagesRemoved: images.removed });
+    return;
+  }
+
+  if (idMatch && req.method === "DELETE") {
+    deleteListing(Number(idMatch[1]));
+    sendJson(res, 200, { ok: true });
+    return;
+  }
+
+  sendJson(res, 405, { error: "Nem támogatott művelet." });
+}
+
+async function handleFugvenyApi(req, res, pathname) {
+  try {
+    if (pathname === "/api/fugveny/lists" && req.method === "GET") {
+      sendJson(res, 200, listFugvenyLists());
+      return;
+    }
+
+    if (pathname === "/api/fugveny/queries" && req.method === "GET") {
+      sendJson(res, 200, { queries: loadQueries() });
+      return;
+    }
+
+    if (pathname === "/api/fugveny/queries" && req.method === "POST") {
+      const body = await readBody(req);
+      sendJson(res, 200, { query: saveQuery(body) });
+      return;
+    }
+
+    const delMatch = pathname.match(/^\/api\/fugveny\/queries\/([^/]+)$/);
+    if (delMatch && req.method === "DELETE") {
+      sendJson(res, 200, deleteQuery(decodeURIComponent(delMatch[1])));
+      return;
+    }
+
+    if (pathname === "/api/fugveny/queries/run" && req.method === "POST") {
+      const body = await readBody(req);
+      const id = body.id;
+      if (!id) {
+        sendJson(res, 400, { error: "Hiányzó lekérdezés id." });
+        return;
+      }
+      const result = runSavedQuery(id);
+      if (result.mode === "estimate") {
+        const pred = await predictOne(result.params || {});
+        sendJson(res, 200, { ...result, prediction: pred });
+        return;
+      }
+      sendJson(res, 200, result);
+      return;
+    }
+
+    if (pathname === "/api/fugveny/predict" && req.method === "POST") {
+      const body = await readBody(req);
+      const pred = await predictOne(body);
+      sendJson(res, 200, pred);
+      return;
+    }
+
+    if (pathname === "/api/fugveny/train" && req.method === "POST") {
+      if (fugvenyBusy) {
+        sendJson(res, 409, { error: "Már fut egy tanítás / pontozás." });
+        return;
+      }
+      const body = await readBody(req);
+      if (!body.listId) {
+        sendJson(res, 400, { error: "Válassz listát (listId)." });
+        return;
+      }
+      fugvenyBusy = true;
+      try {
+        const result = await trainFugvenyModel(body);
+        sendJson(res, 200, result);
+      } finally {
+        fugvenyBusy = false;
+      }
+      return;
+    }
+
+    if (pathname === "/api/fugveny/score" && req.method === "POST") {
+      if (fugvenyBusy) {
+        sendJson(res, 409, { error: "Már fut egy tanítás / pontozás." });
+        return;
+      }
+      const body = await readBody(req);
+      if (!body.listId) {
+        sendJson(res, 400, { error: "Válassz listát (listId)." });
+        return;
+      }
+      fugvenyBusy = true;
+      try {
+        const result = await scoreList(body);
+        sendJson(res, 200, result);
+      } finally {
+        fugvenyBusy = false;
+      }
+      return;
+    }
+
+    sendJson(res, 404, { error: "Ismeretlen fugveny API." });
+  } catch (error) {
+    sendJson(res, 500, { error: error.message ?? String(error) });
+  }
+}
+
+async function handleVehicleCatalogApi(req, res, pathname) {
+  if (req.method !== "GET") {
+    sendJson(res, 405, { error: "Csak GET." });
+    return;
+  }
+
+  const catalog = getVehicleCatalog();
+  if (!catalog?.gyartmanyok?.length) {
+    sendJson(res, 404, {
+      error: "Nincs járműkatalógus. Futtasd: npm run import:catalog -- ~/Desktop/lista.csv",
+    });
+    return;
+  }
+
+  // Márkák + modellek — a típusok nélkül, hogy az oldal gyorsan induljon.
+  if (pathname === "/api/vehicle-catalog") {
+    sendJson(res, 200, catalogSummary(catalog));
+    return;
+  }
+
+  // Egy modell évjáratai és típusai.
+  if (pathname === "/api/vehicle-catalog/tipusok") {
+    const url = new URL(req.url ?? "", `http://${HOST}`);
+    const gyartmany = url.searchParams.get("gyartmany") ?? "";
+    const modell = url.searchParams.get("modell") ?? "";
+    const ev = url.searchParams.get("ev");
+
+    if (!gyartmany || !modell) {
+      sendJson(res, 400, { error: "gyartmany és modell kötelező." });
+      return;
+    }
+
+    sendJson(res, 200, {
+      gyartmany,
+      modell,
+      ev: ev || null,
+      evek: listModelYears(catalog, gyartmany, modell),
+      tipusok: listModelTypes(catalog, gyartmany, modell, ev),
+    });
+    return;
+  }
+
+  sendJson(res, 404, { error: "Ismeretlen katalógus API." });
+}
+
+async function handleValuationApi(req, res, pathname) {
+  try {
+    if (pathname === "/api/valuation/options" && req.method === "GET") {
+      sendJson(res, 200, valuationOptions());
+      return;
+    }
+
+    if (pathname === "/api/valuation/estimate" && req.method === "GET") {
+      const url = new URL(req.url ?? "", `http://${HOST}`);
+      const result = estimateValuation({
+        gyartmany: url.searchParams.get("gyartmany"),
+        modell_tipus: url.searchParams.get("modell_tipus"),
+        gyartasi_ev: url.searchParams.get("gyartasi_ev"),
+        km: url.searchParams.get("km"),
+      });
+      if (result.error) {
+        sendJson(res, 400, result);
+        return;
+      }
+      sendJson(res, 200, result);
+      return;
+    }
+
+    sendJson(res, 404, { error: "Ismeretlen értékbecslő API." });
+  } catch (error) {
+    sendJson(res, 500, { error: error.message ?? String(error) });
+  }
+}
+
+async function handlePartnersApi(req, res, pathname) {
+  try {
+    const recommendMatch = pathname === "/api/partners/recommendations";
+
+    if (recommendMatch && req.method === "GET") {
+      const url = new URL(req.url ?? "", `http://${HOST}`);
+      const postalCode = url.searchParams.get("postal_code") ?? url.searchParams.get("iranyitoszam");
+      if (!postalCode) {
+        sendJson(res, 400, { error: "Hiányzó irányítószám." });
+        return;
+      }
+      sendJson(res, 200, getPartnerRecommendations(postalCode));
+      return;
+    }
+
+    if (pathname === "/api/partners/categories" && req.method === "GET") {
+      sendJson(res, 200, { categories: PARTNER_CATEGORIES });
+      return;
+    }
+
+    if (pathname === "/api/partners/stats" && req.method === "GET") {
+      sendJson(res, 200, partnerStats());
+      return;
+    }
+
+    if (pathname === "/api/partners" && req.method === "GET") {
+      sendJson(res, 200, { partners: listPartners() });
+      return;
+    }
+
+    if (pathname === "/api/partners/import" && req.method === "POST") {
+      let body;
+      try {
+        body = await readBody(req);
+      } catch {
+        sendJson(res, 400, { error: "Érvénytelen JSON." });
+        return;
+      }
+      const rows = body.partners ?? body.rows ?? body;
+      if (!Array.isArray(rows)) {
+        sendJson(res, 400, { error: "Hiányzó partners tömb." });
+        return;
+      }
+      sendJson(res, 200, { results: importPartners(rows) });
+      return;
+    }
+
+    if (pathname === "/api/postal-codes/lookup" && req.method === "GET") {
+      const url = new URL(req.url ?? "", `http://${HOST}`);
+      const postalCode = url.searchParams.get("postal_code") ?? url.searchParams.get("iranyitoszam");
+      const origin = getPostalCode(postalCode);
+      if (!origin) {
+        sendJson(res, 404, { error: `Ismeretlen irányítószám: ${postalCode ?? ""}`.trim() });
+        return;
+      }
+      sendJson(res, 200, origin);
+      return;
+    }
+
+    if (pathname === "/api/postal-codes/cities" && req.method === "GET") {
+      sendJson(res, 200, { cities: listPostalCities() });
+      return;
+    }
+
+    if (pathname === "/api/postal-codes/import" && req.method === "POST") {
+      let body;
+      try {
+        body = await readBody(req);
+      } catch {
+        sendJson(res, 400, { error: "Érvénytelen JSON." });
+        return;
+      }
+      const rows = body.postal_codes ?? body.rows ?? body;
+      if (!Array.isArray(rows)) {
+        sendJson(res, 400, { error: "Hiányzó postal_codes tömb." });
+        return;
+      }
+      sendJson(res, 200, upsertPostalCodes(rows));
+      return;
+    }
+
+    const idMatch = pathname.match(/^\/api\/partners\/(\d+)$/);
+
+    if (idMatch && req.method === "GET") {
+      const partner = getPartner(Number(idMatch[1]));
+      if (!partner) {
+        sendJson(res, 404, { error: "Nincs ilyen partner." });
+        return;
+      }
+      sendJson(res, 200, { partner });
+      return;
+    }
+
+    if (pathname === "/api/partners" && req.method === "POST") {
+      let body;
+      try {
+        body = await readBody(req);
+      } catch {
+        sendJson(res, 400, { error: "Érvénytelen JSON." });
+        return;
+      }
+      const partnerId = body.id != null ? Number(body.id) : null;
+      try {
+        const saved = savePartner(body, partnerId);
+        if (!saved) {
+          sendJson(res, 404, { error: "Nincs ilyen partner." });
+          return;
+        }
+        sendJson(res, 200, { partner: saved });
+      } catch (error) {
+        sendJson(res, 400, { error: error.message ?? String(error) });
+      }
+      return;
+    }
+
+    if (idMatch && req.method === "DELETE") {
+      deletePartner(Number(idMatch[1]));
+      sendJson(res, 200, { ok: true });
+      return;
+    }
+
+    sendJson(res, 404, { error: "Ismeretlen partners API." });
+  } catch (error) {
+    sendJson(res, 500, { error: error.message ?? String(error) });
+  }
+}
+
+async function sendActivationEmail(email, activationToken) {
+  const link = `http://${HOST}:${PORT}/aktivalas.html?token=${encodeURIComponent(activationToken)}`;
+  console.log(`Aktiváló link → ${email}: ${link}`);
+  try {
+    await sendMail({
+      to: email,
+      subject: "Add el autod.hu — fiók aktiválása",
+      text: `Szia!\n\nAktiváld a fiókodat ezen a linken (24 óráig érvényes):\n${link}\n\nHa nem te regisztráltál, hagyd figyelmen kívül ezt a levelet.\n`,
+      html: `<p>Szia!</p><p>Aktiváld a fiókodat (24 óráig érvényes):</p><p><a href="${link}">${link}</a></p><p>Ha nem te regisztráltál, hagyd figyelmen kívül.</p>`,
+    });
+    return { sent: true, link };
+  } catch (error) {
+    if (error.code === "SMTP_NOT_CONFIGURED") {
+      return { sent: false, link, error: error.message };
+    }
+    throw error;
+  }
+}
+
+async function handleAuthApi(req, res, pathname) {
+  try {
+    const token = getSessionTokenFromRequest(req);
+    const currentUser = getUserBySessionToken(token);
+
+    if (pathname === "/api/auth/me" && req.method === "GET") {
+      sendJson(res, 200, { user: currentUser, token: currentUser ? token : null });
+      return;
+    }
+
+    if (pathname === "/api/auth/db" && req.method === "GET") {
+      sendJson(res, 200, {
+        ok: true,
+        loggedIn: Boolean(currentUser),
+        currentEmail: currentUser?.email || null,
+        currentProfile: currentUser?.profile || null,
+        smtpConfigured: isSmtpConfigured(),
+        smtpPath: smtpConfigPath(),
+        oauthPath: oauthConfigPath(),
+        oauthProviders: listOAuthProviders(),
+        ...inspectWebUsersDb(),
+      });
+      return;
+    }
+
+    if (pathname === "/api/auth/oauth/providers" && req.method === "GET") {
+      ensureOAuthExample();
+      sendJson(res, 200, {
+        providers: listOAuthProviders(),
+        configPath: oauthConfigPath(),
+        publicBaseUrl: loadOAuthConfig()?.publicBaseUrl || `http://${HOST}:${PORT}`,
+      });
+      return;
+    }
+
+    const oauthStartMatch = pathname.match(/^\/api\/auth\/oauth\/start\/(google|apple|facebook)$/);
+    if (oauthStartMatch && req.method === "GET") {
+      const provider = oauthStartMatch[1];
+      ensureOAuthExample();
+      const urlObj = new URL(req.url ?? "", `http://${HOST}:${PORT}`);
+      const next = urlObj.searchParams.get("next") || "/hirdetesfeladas.html";
+      try {
+        const state = createOAuthState(provider, next);
+        const authorizeUrl = buildAuthorizeUrl(provider, state);
+        sendRedirect(res, authorizeUrl);
+      } catch (error) {
+        const msg = encodeURIComponent(error.message ?? "OAuth indítás sikertelen");
+        sendRedirect(res, `/belepes.html?oauth_error=${msg}`);
+      }
+      return;
+    }
+
+    const oauthCbMatch = pathname.match(/^\/api\/auth\/oauth\/callback\/(google|apple|facebook)$/);
+    if (oauthCbMatch && (req.method === "GET" || req.method === "POST")) {
+      const provider = oauthCbMatch[1];
+      try {
+        let params;
+        if (req.method === "POST") {
+          const raw = await readRawBody(req);
+          const type = String(req.headers["content-type"] || "");
+          if (type.includes("application/json")) {
+            params = raw ? JSON.parse(raw) : {};
+          } else {
+            params = parseFormBody(raw);
+          }
+        } else {
+          const urlObj = new URL(req.url ?? "", `http://${HOST}:${PORT}`);
+          params = Object.fromEntries(urlObj.searchParams.entries());
+        }
+
+        if (params.error) {
+          throw new Error(params.error_description || params.error);
+        }
+
+        const stateInfo = parseOAuthState(params.state, provider);
+        const identity = await exchangeOAuthCode(provider, params.code);
+        if (provider === "apple") {
+          const appleName = appleNameFromForm(params.user);
+          if (appleName && !identity.name) identity.name = appleName;
+        }
+
+        const { user, session } = findOrCreateOAuthUser(identity);
+        const nextPath = stateInfo.next.startsWith("/") ? stateInfo.next : "/hirdetesfeladas.html";
+        sendRedirect(res, nextPath, {
+          "Set-Cookie": sessionCookieHeader(session.token, session.expires),
+        });
+        console.log(`OAuth OK (${provider}): ${user.email}`);
+      } catch (error) {
+        const msg = encodeURIComponent(error.message ?? "OAuth sikertelen");
+        sendRedirect(res, `/belepes.html?oauth_error=${msg}`);
+        console.warn("OAuth hiba:", error.message ?? error);
+      }
+      return;
+    }
+
+    if (pathname === "/api/auth/register" && req.method === "POST") {
+      const body = await readBody(req);
+      const registered = registerUser(body.email, body.password, body.passwordConfirm ?? body.password_confirm);
+      let mail = { sent: false, link: null, error: null };
+      try {
+        mail = await sendActivationEmail(registered.email, registered.activationToken);
+      } catch (error) {
+        mail = {
+          sent: false,
+          link: `http://${HOST}:${PORT}/aktivalas.html?token=${encodeURIComponent(registered.activationToken)}`,
+          error: error.message,
+        };
+        console.warn("Aktiváló email hiba:", error.message ?? error);
+      }
+      sendJson(res, 200, {
+        ok: true,
+        needsActivation: true,
+        email: registered.email,
+        emailSent: mail.sent,
+        activationLink: mail.sent ? undefined : mail.link,
+        message: mail.sent
+          ? `Küldtünk aktiváló emailt ide: ${registered.email}`
+          : mail.error
+            ? `Regisztráció OK, de az email nem ment ki (${mail.error}). Használd a linket / terminál logot.`
+            : `SMTP nincs beállítva. Aktiváló link (terminálban is): ${mail.link}`,
+      });
+      return;
+    }
+
+    if (pathname === "/api/auth/activate" && req.method === "POST") {
+      const body = await readBody(req);
+      const { user, session } = activateUserByToken(body.token);
+      sendJson(
+        res,
+        200,
+        { ok: true, user, token: session.token },
+        { "Set-Cookie": sessionCookieHeader(session.token, session.expires) }
+      );
+      return;
+    }
+
+    if (pathname === "/api/auth/resend-activation" && req.method === "POST") {
+      const body = await readBody(req);
+      const created = createActivationForEmail(body.email);
+      let mail;
+      try {
+        mail = await sendActivationEmail(created.email, created.activationToken);
+      } catch (error) {
+        sendJson(res, 502, { error: `Email küldés sikertelen: ${error.message}` });
+        return;
+      }
+      sendJson(res, 200, {
+        ok: true,
+        email: created.email,
+        emailSent: mail.sent,
+        activationLink: mail.sent ? undefined : mail.link,
+        message: mail.sent
+          ? `Új aktiváló emailt küldtünk: ${created.email}`
+          : `SMTP nincs beállítva. Link: ${mail.link}`,
+      });
+      return;
+    }
+
+    if (pathname === "/api/auth/login" && req.method === "POST") {
+      const body = await readBody(req);
+      try {
+        const { user, session } = loginUser(body.email, body.password);
+        sendJson(
+          res,
+          200,
+          { user, token: session.token },
+          { "Set-Cookie": sessionCookieHeader(session.token, session.expires) }
+        );
+      } catch (error) {
+        if (error.code === "EMAIL_NOT_VERIFIED") {
+          sendJson(res, 403, { error: error.message, code: "EMAIL_NOT_VERIFIED", email: body.email });
+          return;
+        }
+        throw error;
+      }
+      return;
+    }
+
+    if (pathname === "/api/auth/logout" && req.method === "POST") {
+      destroySession(token);
+      sendJson(res, 200, { ok: true }, { "Set-Cookie": clearSessionCookieHeader() });
+      return;
+    }
+
+    if (pathname === "/api/auth/password" && req.method === "POST") {
+      if (!currentUser) {
+        sendJson(res, 401, { error: "Nem vagy bejelentkezve." });
+        return;
+      }
+      const body = await readBody(req);
+      changeUserPassword(
+        currentUser.id,
+        body.currentPassword ?? body.current_password,
+        body.newPassword ?? body.new_password,
+        body.newPasswordConfirm ?? body.new_password_confirm
+      );
+      sendJson(res, 200, { ok: true });
+      return;
+    }
+
+    if (pathname === "/api/auth/profile" && req.method === "GET") {
+      if (!currentUser) {
+        sendJson(res, 401, { error: "Nem vagy bejelentkezve." });
+        return;
+      }
+      sendJson(res, 200, {
+        user: currentUser,
+        profile: currentUser.profile,
+        displayName: currentUser.displayName,
+        token,
+      });
+      return;
+    }
+
+    if (pathname === "/api/auth/profile" && req.method === "PUT") {
+      if (!currentUser) {
+        sendJson(res, 401, { error: "Nem vagy bejelentkezve. Jelentkezz be újra." });
+        return;
+      }
+      const body = await readBody(req);
+      if (body.displayName !== undefined && body.profile === undefined) {
+        const displayName = setUserDisplayName(currentUser.id, body.displayName);
+        const user = getUserById(currentUser.id);
+        sendJson(res, 200, { displayName, user, token });
+        return;
+      }
+      const saved = saveUserProfile(currentUser.id, body.profile ?? body);
+      const { _savedTo, ...profile } = saved;
+      const user = getUserById(currentUser.id);
+      if (!user?.profile?.firstName) {
+        sendJson(res, 500, { error: "A mentés nem íródott a helyi adatbázisba." });
+        return;
+      }
+      console.log(
+        `Profil mentve → ${_savedTo || getProfilesFilePath()} | ${currentUser.email} | ${profile.firstName} ${profile.lastName}`
+      );
+      sendJson(res, 200, {
+        profile,
+        user,
+        token,
+        savedTo: _savedTo || getProfilesFilePath(),
+      });
+      return;
+    }
+
+    if (pathname === "/api/auth/account" && req.method === "DELETE") {
+      if (!currentUser) {
+        sendJson(res, 401, { error: "Nem vagy bejelentkezve." });
+        return;
+      }
+      deleteUserAccount(currentUser.id);
+      sendJson(res, 200, { ok: true }, { "Set-Cookie": clearSessionCookieHeader() });
+      return;
+    }
+
+    sendJson(res, 404, { error: "Ismeretlen auth API." });
+  } catch (error) {
+    const message = error.message ?? String(error);
+    const status =
+      message.includes("bejelentkezve") || message.includes("Hibás")
+        ? 401
+        : message.includes("már regisztrálva") || message.includes("kötelező") || message.includes("egyezik")
+          ? 400
+          : 400;
+    sendJson(res, status, { error: message });
+  }
+}
+
+const server = createServer(async (req, res) => {
+  const pathname = req.url?.split("?")[0] || "/";
+
+  if (pathname === "/api/health" && req.method === "GET") {
+    let users = 0;
+    let dbPath = "";
+    let profilesPath = "";
+    try {
+      dbPath = getDbPath();
+      users = countWebUsers();
+      profilesPath = getProfilesFilePath();
+    } catch {
+      /* ignore */
+    }
+    sendJson(res, 200, {
+      ok: true,
+      version: readFileSync(join(PUBLIC, "version.txt"), "utf8").trim(),
+      chrome: findChromeExecutable(),
+      dbPath,
+      profilesPath,
+      users,
+    });
+    return;
+  }
+
+  if (pathname === "/api/media/proxy" && req.method === "GET") {
+    await handleMediaProxy(req, res);
+    return;
+  }
+
+  if (pathname.startsWith("/api/auth")) {
+    await handleAuthApi(req, res, pathname);
+    return;
+  }
+
+  if (pathname.startsWith("/api/messages")) {
+    await handleMessagesApi(req, res, pathname);
+    return;
+  }
+
+  if (pathname === "/api/open-chrome" && req.method === "POST") {
+    await handleOpenChrome(req, res);
+    return;
+  }
+
+  if (pathname === "/api/import" && req.method === "POST") {
+    await handleImport(req, res);
+    return;
+  }
+
+  if (pathname === "/api/site-blocks" && req.method === "GET") {
+    const url = new URL(req.url ?? "", `http://${HOST}`);
+    const page = url.searchParams.get("page");
+    sendJson(res, 200, getSiteBlocks(page));
+    return;
+  }
+
+  if (pathname === "/api/site-blocks" && req.method === "PUT") {
+    let body;
+    try {
+      body = await readBody(req);
+    } catch {
+      sendJson(res, 400, { error: "Érvénytelen JSON." });
+      return;
+    }
+    sendJson(res, 200, saveSiteBlocks(body));
+    return;
+  }
+
+  if (
+    pathname === "/api/db/stats" ||
+    pathname === "/api/field-defs" ||
+    pathname === "/api/listings" ||
+    pathname === "/api/listings/latest" ||
+    pathname.startsWith("/api/listings/")
+  ) {
+    await handleListingsApi(req, res, pathname);
+    return;
+  }
+
+  if (pathname.startsWith("/api/fugveny")) {
+    await handleFugvenyApi(req, res, pathname);
+    return;
+  }
+
+  if (pathname.startsWith("/api/valuation")) {
+    await handleValuationApi(req, res, pathname);
+    return;
+  }
+
+  if (pathname.startsWith("/api/vehicle-catalog")) {
+    await handleVehicleCatalogApi(req, res, pathname);
+    return;
+  }
+
+  if (pathname.startsWith("/api/partners") || pathname.startsWith("/api/postal-codes")) {
+    await handlePartnersApi(req, res, pathname);
+    return;
+  }
+
+  if (pathname.startsWith("/api/")) {
+    sendJson(res, 404, { error: "Ismeretlen API." });
+    return;
+  }
+
+  serveStatic(pathname, res);
+});
+
+function shutdown(signal) {
+  console.log(`\nLeállítás (${signal}) — adatbázis zárása…`);
+  try {
+    closeDb();
+  } catch {
+    /* ignore */
+  }
+  server.close(() => process.exit(0));
+  setTimeout(() => process.exit(0), 1500).unref();
+}
+
+process.on("SIGINT", () => shutdown("SIGINT"));
+process.on("SIGTERM", () => shutdown("SIGTERM"));
+
+server.listen(PORT, HOST, async () => {
+  try {
+    ensureProfilesStore();
+    ensureSmtpExample();
+    ensureOAuthExample();
+    initMessagingSchema();
+    console.log("Üzenetek API: /api/messages/*");
+  } catch (error) {
+    console.warn("Profil/SMTP/OAuth/Messages store:", error.message ?? error);
+  }
+  console.log(`Autosweb: http://${HOST}:${PORT}`);
+  console.log(`User DB: ${getDbPath()}`);
+  try {
+    console.log(`Hirdetésképek: ${listingImageDir()}`);
+  } catch (error) {
+    console.warn("Upload mappa:", error.message ?? error);
+  }
+  if (isSmtpConfigured()) {
+    console.log(`SMTP: beállítva (${smtpConfigPath()})`);
+  } else {
+    console.warn(
+      `SMTP: NINCS — másold ~/.autosweb/smtp.example.json → smtp.json (Gmail app jelszó). Futtasd: autosweb/mac/smtp-beallitas.command`
+    );
+  }
+  const oauthProviders = listOAuthProviders();
+  const enabledOauth = oauthProviders.filter((p) => p.enabled).map((p) => p.label);
+  if (enabledOauth.length) {
+    console.log(`OAuth: ${enabledOauth.join(", ")} (${oauthConfigPath()})`);
+  } else {
+    console.warn(
+      `OAuth: nincs aktív provider — szerkeszd: ${oauthConfigPath()} (példa: ~/.autosweb/oauth.example.json). Futtasd: autosweb/mac/oauth-beallitas.command`
+    );
+  }
+  console.log("Import: hasznaltauto.hu → helyi űrlap (nem ad fel hirdetést).");
+  try {
+    const stats = dbStats();
+    const users = countWebUsers();
+    console.log(
+      `SQLite: ${stats.path} (${stats.listings} hirdetés, ${stats.cells} cella, ${users} user)`
+    );
+    console.log(`Profil fájl: ${getProfilesFilePath()}`);
+  } catch (error) {
+    console.warn("SQLite inicializálás:", error.message ?? error);
+  }
+  try {
+    const catalog = ensureVehicleCatalog();
+    if (catalog?.gyartmanyok?.length) {
+      const modelCount = Object.values(catalog.modellek ?? {}).reduce(
+        (n, arr) => n + arr.length,
+        0
+      );
+      console.log(
+        `Járműkatalógus: ${catalog.gyartmanyok.length} márka, ${modelCount} modell (${catalog.source ?? "?"})`
+      );
+    } else {
+      console.warn(
+        "Járműkatalógus: nincs — futtasd: npm run import:catalog -- ~/Desktop/lista.csv"
+      );
+    }
+  } catch (error) {
+    console.warn("Járműkatalógus:", error.message ?? error);
+  }
+  try {
+    const { seedDemoPartnersIfEmpty } = await import("./scripts/seed-partners.mjs");
+    const seedResult = seedDemoPartnersIfEmpty();
+    if (seedResult.seeded) {
+      console.log(
+        `Partnerek: demo adatok betöltve (${seedResult.stats.activePaid} fizetős aktív)`
+      );
+    }
+  } catch (error) {
+    console.warn("Partner seed:", error.message ?? error);
+  }
+});

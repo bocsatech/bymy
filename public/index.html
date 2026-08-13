@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="hu">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="autosweb-version" content="chromeStrip20260808" />
+    <title>Add el autod.hu</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/css/style.css?v=automax20260720homelist" />
+    <link rel="stylesheet" href="/css/site-app.css?v=auth20260730avatar3" />
+    <link rel="stylesheet" href="/css/site-side.css?v=home20260725unifiedscroll" />
+    <link rel="stylesheet" href="/css/home.css?v=homeimg20260807" />
+    <style id="home-scroll-fix">
+      /* Inline: cache-biztos — a teljes oldal görget, külön görgetősáv nincs sehol. */
+      html:has(body.home-page) {
+        overflow-y: auto !important;
+        height: auto !important;
+      }
+      body.home-page {
+        overflow: visible !important;
+        height: auto !important;
+        max-height: none !important;
+        display: block !important;
+      }
+      body.home-page .home-main {
+        min-height: 0 !important;
+        overflow: visible !important;
+        display: block !important;
+      }
+      body.home-page .home-layout {
+        min-height: 0 !important;
+        overflow: visible !important;
+        align-items: start !important;
+      }
+      body.home-page .home-center {
+        min-height: 0 !important;
+        overflow: visible !important;
+      }
+      /* Sem a hirdetéslistának, sem az oldalsávnak nincs saját görgetője. */
+      body.home-page .home-listings-panel,
+      body.home-page .home-info-sidebar,
+      body.home-page .home-partner-results,
+      body.home-page .site-side-card {
+        overflow: visible !important;
+        max-height: none !important;
+      }
+    </style>
+  </head>
+  <body class="home-page site-page site-app" data-site-page="home">
+    <div class="local-banner">LOCALHOST — mentett és közzétett hirdetések (legfrissebb elöl)</div>
+
+    <header class="site-header home-header">
+      <div class="home-header-inner">
+        <a class="home-logo" href="/">Add el autod.hu</a>
+        <nav class="home-nav" aria-label="Oldalak">
+          <a class="home-nav-link active" href="/">Főoldal</a>
+          <a class="home-nav-link" href="/import.html">Import</a>
+          <a class="home-nav-link" href="/listings.html">Hirdetések</a>
+          <a class="home-nav-link" href="/fugveny.html">Függvény</a>
+        </nav>
+        <div class="header-actions site-header-actions">
+          <div class="site-header-auth-row">
+            <a class="site-header-btn site-header-btn--ghost" href="/belepes.html" data-auth-login>Belépés</a>
+            <a class="site-header-btn site-header-btn--ghost" href="/regisztracio.html" data-auth-register>Regisztráció</a>
+            <a class="site-header-btn site-header-btn--ghost" href="/hirdetesfeladas.html" data-auth-guard>Hirdetésfeladás</a>
+          </div>
+          <nav class="site-header-tools" aria-label="Fiók eszközök">
+            <button type="button" class="site-header-tool" aria-label="Értesítések" title="Értesítések">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M12 3.5a5 5 0 0 0-5 5v1.6c0 .9-.3 1.8-.8 2.5L4.8 15h14.4l-1.4-2.4a5 5 0 0 1-.8-2.5V8.5a5 5 0 0 0-5-5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+                <path d="M9.6 17.2a2.5 2.5 0 0 0 4.8 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+              </svg>
+            </button>
+            <button type="button" class="site-header-tool" aria-label="Mentett keresések" title="Mentett keresések">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M11.2 3.8 12.7 8l4.4.3-3.4 2.9 1.1 4.3-3.8-2.4-3.8 2.4 1.1-4.3L5.9 8.3l4.4-.3L11.2 3.8Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+                <circle cx="17.2" cy="17.2" r="3.1" stroke="currentColor" stroke-width="1.6"/>
+                <path d="m19.4 19.4 2 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+              </svg>
+            </button>
+            <button type="button" class="site-header-tool site-header-tool--count" aria-label="Kedvencek" title="Kedvencek">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M12 20s-6.8-4.2-9-7.7C1.4 9.7 2.7 6.5 5.7 5.6c1.8-.5 3.6.2 4.6 1.6 1-1.4 2.8-2.1 4.6-1.6 3 .9 4.3 4.1 2.7 6.7C18.8 15.8 12 20 12 20Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+              </svg>
+              <span class="site-header-tool-count" data-fav-count>1</span>
+            </button>
+            <button type="button" class="site-header-tool" aria-label="Üzenetek" title="Üzenetek">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <rect x="3.5" y="5" width="17" height="12.5" rx="2.5" stroke="currentColor" stroke-width="1.7"/>
+                <path d="M7.5 9.2h9M7.5 12.5h6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+              </svg>
+            </button>
+            <div class="site-header-avatar-wrap" data-avatar-menu>
+              <button
+                type="button"
+                class="site-header-avatar"
+                data-auth-avatar
+                data-avatar-toggle
+                aria-expanded="false"
+                aria-haspopup="menu"
+                aria-label="Profil menü"
+                title="Profil"
+              >
+                <span data-avatar-letter>A</span>
+                <img data-avatar-img alt="" hidden width="40" height="40" />
+              </button>
+              <div class="site-avatar-dropdown" data-avatar-dropdown role="menu" hidden>
+                <p class="site-avatar-guest" data-avatar-guest>A menühöz jelentkezz be.</p>
+                <div data-avatar-member hidden>
+                  <button type="button" class="site-avatar-item" data-avatar-photo-btn role="menuitem">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="3.2" stroke="currentColor" stroke-width="1.6"/><path d="M5.5 19.2c1.6-3 3.8-4.4 6.5-4.4s4.9 1.4 6.5 4.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+                    <span class="site-avatar-item-label">Profilkép feltöltése</span>
+                  </button>
+                  <input type="file" accept="image/jpeg,image/png,image/webp" data-avatar-file hidden />
+                  <a class="site-avatar-item" href="/beallitasok.html?szekcio=attekintes" role="menuitem">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1.2" stroke="currentColor" stroke-width="1.6"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.2" stroke="currentColor" stroke-width="1.6"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.2" stroke="currentColor" stroke-width="1.6"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.2" stroke="currentColor" stroke-width="1.6"/></svg>
+                    <span class="site-avatar-item-label">Áttekintés</span>
+                  </a>
+                  <a class="site-avatar-item" href="/beallitasok.html?szekcio=uzenetek" role="menuitem">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="5" width="17" height="12.5" rx="2.5" stroke="currentColor" stroke-width="1.6"/><path d="M7.5 9.2h9M7.5 12.5h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+                    <span class="site-avatar-item-label">Üzenetek</span>
+                  </a>
+                  <a class="site-avatar-item" href="/beallitasok.html?szekcio=keresesek" role="menuitem">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M11.2 3.8 12.7 8l4.4.3-3.4 2.9 1.1 4.3-3.8-2.4-3.8 2.4 1.1-4.3L5.9 8.3l4.4-.3L11.2 3.8Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><circle cx="17.2" cy="17.2" r="3" stroke="currentColor" stroke-width="1.5"/><path d="m19.4 19.4 1.8 1.8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                    <span class="site-avatar-item-label">Mentett kereséseim</span>
+                  </a>
+                  <a class="site-avatar-item" href="/beallitasok.html?szekcio=parkolo" role="menuitem">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 20s-6.8-4.2-9-7.7C1.4 9.7 2.7 6.5 5.7 5.6c1.8-.5 3.6.2 4.6 1.6 1-1.4 2.8-2.1 4.6-1.6 3 .9 4.3 4.1 2.7 6.7C18.8 15.8 12 20 12 20Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+                    <span class="site-avatar-item-label">Kedvencek <span class="site-avatar-item-count">(1)</span></span>
+                  </a>
+                  <a class="site-avatar-item" href="/beallitasok.html?szekcio=uzenetek" role="menuitem">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7.5h16v10.2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7.5Z" stroke="currentColor" stroke-width="1.6"/><path d="M8 7.5V5.8A2.3 2.3 0 0 1 10.3 3.5h3.4A2.3 2.3 0 0 1 16 5.8v1.7" stroke="currentColor" stroke-width="1.6"/></svg>
+                    <span class="site-avatar-item-label">Érdeklődések <span class="site-avatar-item-count">(1)</span></span>
+                    <span class="site-avatar-badge" aria-label="1 új">1</span>
+                  </a>
+                  <a class="site-avatar-item" href="/beallitasok.html?szekcio=hirdetes" role="menuitem">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 14.5h2.2l1.3-2.5h7l1.4 2.5H18a2 2 0 0 1 2 2v2.2a1.3 1.3 0 0 1-1.3 1.3h-.7" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="7.2" cy="18.7" r="1.5" stroke="currentColor" stroke-width="1.5"/><circle cx="15.5" cy="18.7" r="1.5" stroke="currentColor" stroke-width="1.5"/></svg>
+                    <span class="site-avatar-item-label">Hirdetéseim</span>
+                  </a>
+                  <a class="site-avatar-item" href="/hirdetesfeladas.html" data-auth-guard role="menuitem">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5.5 11.5 12 4.8l6.5 6.7" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M7.2 10.8V19h9.6v-8.2" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M10 19v-5h4v5" stroke="currentColor" stroke-width="1.6"/></svg>
+                    <span class="site-avatar-item-label">Direkt eladás</span>
+                  </a>
+                  <a class="site-avatar-item" href="/beallitasok.html?szekcio=hirdetes" role="menuitem">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 15.2h2l1.2-2.3h7.2L16.8 15.2H19a1.8 1.8 0 0 1 1.8 1.8v2.1a1.2 1.2 0 0 1-1.2 1.2h-1" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="8" cy="19.2" r="1.4" stroke="currentColor" stroke-width="1.5"/><circle cx="15.5" cy="19.2" r="1.4" stroke="currentColor" stroke-width="1.5"/><path d="M7.2 15.1 8.4 9.8h7.2l1.3 5.3" stroke="currentColor" stroke-width="1.5"/></svg>
+                    <span class="site-avatar-item-label">Járműveim</span>
+                  </a>
+                  <a class="site-avatar-item" href="/beallitasok.html?szekcio=fiok" role="menuitem">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3.1" stroke="currentColor" stroke-width="1.6"/><path d="M12 4.5v1.6M12 17.9v1.6M4.5 12h1.6M17.9 12h1.6M6.8 6.8l1.1 1.1M16.1 16.1l1.1 1.1M17.2 6.8l-1.1 1.1M7.9 16.1l-1.1 1.1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                    <span class="site-avatar-item-label">Beállítások</span>
+                  </a>
+                  <a class="site-avatar-item" href="/beallitasok.html?szekcio=uzenetek" role="menuitem">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6.5 15.2c1.4-1.8 3.3-2.8 5.5-2.8s4.1 1 5.5 2.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M9.2 9.2 12 4.8l2.8 4.4H9.2Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8.2 19h7.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+                    <span class="site-avatar-item-label">Kommunikáció</span>
+                  </a>
+                  <div class="site-avatar-footer">
+                    <p class="site-avatar-logged">Bejelentkezve mint <strong data-avatar-user>—</strong></p>
+                    <button type="button" class="site-avatar-logout" data-auth-logout>Kijelentkezés</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+</nav>
+        </div>
+      </div>
+    </header>
+
+    <section class="home-ad-strip" aria-label="Banner hirdetések">
+      <div class="home-ad-strip-inner">
+        <article class="home-ad-slot" data-ad-slot="header-left">
+          <p class="home-ad-slot-label">Hirdetés</p>
+          <div class="home-ad-slot-frame">
+            <a class="home-ad-slot-link" data-ad-link href="#" hidden>
+              <img class="home-ad-slot-image" data-ad-image alt="" width="728" height="90" />
+            </a>
+            <div class="home-ad-slot-placeholder" data-ad-placeholder>Hirdetési hely</div>
+          </div>
+        </article>
+        <article class="home-ad-slot" data-ad-slot="header-right">
+          <p class="home-ad-slot-label">Hirdetés</p>
+          <div class="home-ad-slot-frame">
+            <a class="home-ad-slot-link" data-ad-link href="#" hidden>
+              <img class="home-ad-slot-image" data-ad-image alt="" width="728" height="90" />
+            </a>
+            <div class="home-ad-slot-placeholder" data-ad-placeholder>Hirdetési hely</div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <main class="home-main">
+      <section class="home-category-bar" aria-label="Kategóriák">
+        <div class="home-category-track" role="group" aria-label="Gyors kategóriák">
+          <button type="button" class="home-category-card home-category-card--uj home-category-card--has-photo" data-category="uj">
+            <span class="home-category-visual" aria-hidden="true">
+              <img
+                class="home-category-photo"
+                src="/images/categories/uj.png?v=20260729png"
+                alt=""
+                width="486"
+                height="236"
+                loading="lazy"
+                decoding="async"
+              />
+            </span>
+            <span class="home-category-foot">
+              <span class="home-category-icon" aria-hidden="true">✨</span>
+              <span class="home-category-text"><strong>Új</strong><span>Friss modell</span></span>
+            </span>
+          </button>
+          <button type="button" class="home-category-card home-category-card--benzin home-category-card--has-photo" data-category="benzin">
+            <span class="home-category-visual" aria-hidden="true">
+              <img
+                class="home-category-photo"
+                src="/images/categories/benzin.png?v=20260729png"
+                alt=""
+                width="486"
+                height="236"
+                loading="lazy"
+                decoding="async"
+              />
+            </span>
+            <span class="home-category-foot">
+              <span class="home-category-icon" aria-hidden="true">⛽</span>
+              <span class="home-category-text"><strong>Benzin</strong><span>Otto motor</span></span>
+            </span>
+          </button>
+          <button type="button" class="home-category-card home-category-card--diesel home-category-card--has-photo" data-category="diesel">
+            <span class="home-category-visual" aria-hidden="true">
+              <img
+                class="home-category-photo"
+                src="/images/categories/diesel.png?v=20260729png"
+                alt=""
+                width="466"
+                height="242"
+                loading="lazy"
+                decoding="async"
+              />
+            </span>
+            <span class="home-category-foot">
+              <span class="home-category-icon" aria-hidden="true">🛢</span>
+              <span class="home-category-text"><strong>Diesel</strong><span>Dízelmotor</span></span>
+            </span>
+          </button>
+          <button type="button" class="home-category-card home-category-card--elektromos home-category-card--has-photo" data-category="elektromos">
+            <span class="home-category-visual" aria-hidden="true">
+              <img
+                class="home-category-photo"
+                src="/images/categories/elektromos.png?v=20260729png"
+                alt=""
+                width="462"
+                height="231"
+                loading="lazy"
+                decoding="async"
+              />
+            </span>
+            <span class="home-category-foot">
+              <span class="home-category-icon" aria-hidden="true">⚡</span>
+              <span class="home-category-text"><strong>Elektromos</strong><span>Zöld hajtás</span></span>
+            </span>
+          </button>
+          <button type="button" class="home-category-card home-category-card--hybrid home-category-card--has-photo" data-category="hybrid">
+            <span class="home-category-visual" aria-hidden="true">
+              <img
+                class="home-category-photo"
+                src="/images/categories/hybrid.png?v=20260729png"
+                alt=""
+                width="486"
+                height="247"
+                loading="lazy"
+                decoding="async"
+              />
+            </span>
+            <span class="home-category-foot">
+              <span class="home-category-icon" aria-hidden="true">🔋</span>
+              <span class="home-category-text"><strong>Hybrid</strong><span>Kombinált</span></span>
+            </span>
+          </button>
+          <button type="button" class="home-category-card home-category-card--leasing home-category-card--has-photo" data-category="leasing">
+            <span class="home-category-visual" aria-hidden="true">
+              <img
+                class="home-category-photo"
+                src="/images/categories/leasing.png?v=20260729png"
+                alt=""
+                width="460"
+                height="224"
+                loading="lazy"
+                decoding="async"
+              />
+            </span>
+            <span class="home-category-foot">
+              <span class="home-category-icon" aria-hidden="true">📄</span>
+              <span class="home-category-text"><strong>Leasing</strong><span>Havi díj</span></span>
+            </span>
+          </button>
+          <button type="button" class="home-category-card home-category-card--berelheto home-category-card--has-photo" data-category="berelheto">
+            <span class="home-category-visual" aria-hidden="true">
+              <img
+                class="home-category-photo"
+                src="/images/categories/berelheto.png?v=20260729png"
+                alt=""
+                width="470"
+                height="228"
+                loading="lazy"
+                decoding="async"
+              />
+            </span>
+            <span class="home-category-foot">
+              <span class="home-category-icon" aria-hidden="true">🔑</span>
+              <span class="home-category-text"><strong>Bérelhető</strong><span>Rövid táv</span></span>
+            </span>
+          </button>
+          <button type="button" class="home-category-card home-category-card--ot home-category-card--has-photo" data-category="ot">
+            <span class="home-category-visual" aria-hidden="true">
+              <img
+                class="home-category-photo"
+                src="/images/categories/ot.png?v=20260729png"
+                alt=""
+                width="480"
+                height="233"
+                loading="lazy"
+                decoding="async"
+              />
+            </span>
+            <span class="home-category-foot">
+              <span class="home-category-icon" aria-hidden="true">🏛</span>
+              <span class="home-category-text"><strong>OT</strong><span>Oldtimer</span></span>
+            </span>
+          </button>
+        </div>
+      </section>
+
+      <section class="home-stats-bar" aria-label="Összesítő">
+        <div class="home-stats-track">
+          <article
+            class="home-stats-card home-stats-card--filter home-stats-card--inputs"
+            id="home-stats-total-card"
+            tabindex="0"
+            role="button"
+            aria-label="Összes hirdetés a megadott körzetben"
+          >
+            <span class="home-stats-icon" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+                <path d="M4 8.5h3l1.2-2.2h7.6L16 8.5h2a1.5 1.5 0 0 1 1.5 1.5v6a1.5 1.5 0 0 1-1.5 1.5H4a1.5 1.5 0 0 1-1.5-1.5v-6A1.5 1.5 0 0 1 4 8.5Z" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M7.5 14.5h7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+            </span>
+            <div class="home-stats-copy">
+              <p class="home-stats-label">Összes hirdetés</p>
+              <div class="home-stats-radius-fields">
+                <label class="home-stats-radius-field">
+                  <span>Irányítószám</span>
+                  <input
+                    id="home-stats-postal"
+                    class="home-stats-radius-input"
+                    type="text"
+                    inputmode="numeric"
+                    maxlength="4"
+                    placeholder="pl. 8000"
+                    autocomplete="postal-code"
+                  />
+                </label>
+                <label class="home-stats-radius-field">
+                  <span>Sugár (km)</span>
+                  <input
+                    id="home-stats-radius-km"
+                    class="home-stats-radius-input"
+                    type="number"
+                    min="1"
+                    step="1"
+                    placeholder="km"
+                  />
+                </label>
+              </div>
+              <p class="home-stats-value" id="home-stats-total-count">—</p>
+              <p class="home-stats-meta" id="home-stats-total-meta"></p>
+            </div>
+          </article>
+
+          <article
+            class="home-stats-card home-stats-card--filter"
+            id="home-stats-recent-card"
+            tabindex="0"
+            role="button"
+            aria-label="Új hirdetések az elmúlt 24 órában a megadott körzetben"
+          >
+            <span class="home-stats-icon" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+                <path d="M3.5 10.5h2.4l1.4-2.6h7.2l1.4 2.6H18a1.8 1.8 0 0 1 1.8 1.8v4.4a1.8 1.8 0 0 1-1.8 1.8H3.5a1.8 1.8 0 0 1-1.8-1.8v-4.4a1.8 1.8 0 0 1 1.8-1.8Z" stroke="currentColor" stroke-width="1.5"/>
+                <circle cx="7" cy="14.5" r="1.4" fill="currentColor"/>
+                <circle cx="15" cy="14.5" r="1.4" fill="currentColor"/>
+              </svg>
+            </span>
+            <div class="home-stats-copy">
+              <p class="home-stats-label">Új hirdetések</p>
+              <p class="home-stats-value" id="home-stats-recent-count">—</p>
+              <p class="home-stats-meta" id="home-stats-recent-meta">Kattints — az első kockában megadott körzetben.</p>
+            </div>
+          </article>
+
+          <article class="home-stats-card home-stats-card--quicksearch">
+            <form class="home-qs-form" id="home-qs-form">
+              <p class="home-qs-status" id="home-qs-status" hidden></p>
+              <div class="home-qs-row">
+                <label class="home-qs-field home-qs-field--wide">
+                  <span class="home-qs-label">Márka</span>
+                  <select class="home-qs-control" id="qs-gyartmany">
+                    <option value="">Mindegy</option>
+                  </select>
+                </label>
+
+                <label class="home-qs-field home-qs-field--wide">
+                  <span class="home-qs-label">Modell</span>
+                  <select class="home-qs-control" id="qs-modell">
+                    <option value="">Mindegy</option>
+                  </select>
+                </label>
+
+                <label class="home-qs-field home-qs-field--wide">
+                  <span class="home-qs-label">Típus</span>
+                  <select class="home-qs-control" id="qs-tipus">
+                    <option value="">Mindegy</option>
+                  </select>
+                </label>
+              </div>
+
+              <div class="home-qs-row">
+                <label class="home-qs-field home-qs-field--wide">
+                  <span class="home-qs-label">Üzemanyag</span>
+                  <select class="home-qs-control" id="qs-uzemanyag">
+                    <option value="">Mindegy</option>
+                    <option value="benzin">Benzin</option>
+                    <option value="diesel">Diesel</option>
+                    <option value="hybrid">Hybrid</option>
+                    <option value="benzin-gaz">Benzin/Gáz</option>
+                    <option value="elektromos">Elektromos</option>
+                  </select>
+                </label>
+
+                <div class="home-qs-pair">
+                  <label class="home-qs-field home-qs-field--narrow">
+                    <span class="home-qs-label">Évjárat</span>
+                    <select class="home-qs-control" id="qs-ev-tol" aria-label="Évjárat -tól">
+                      <option value="">-tól</option>
+                    </select>
+                  </label>
+                  <label class="home-qs-field home-qs-field--narrow">
+                    <select class="home-qs-control" id="qs-ev-ig" aria-label="Évjárat -ig">
+                      <option value="">-ig</option>
+                    </select>
+                  </label>
+                </div>
+
+                <div class="home-qs-pair">
+                  <label class="home-qs-field home-qs-field--narrow">
+                    <span class="home-qs-label">Vételár</span>
+                    <select class="home-qs-control" id="qs-ar-tol" aria-label="Vételár -tól">
+                      <option value="">-tól</option>
+                    </select>
+                    <span class="home-qs-suffix" aria-hidden="true">Ft</span>
+                  </label>
+                  <label class="home-qs-field home-qs-field--narrow">
+                    <select class="home-qs-control" id="qs-ar-ig" aria-label="Vételár -ig">
+                      <option value="">-ig</option>
+                    </select>
+                    <span class="home-qs-suffix" aria-hidden="true">Ft</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="home-qs-row home-qs-row--actions">
+                <button type="submit" class="home-qs-submit">Keresés</button>
+                <div class="home-qs-actions-secondary">
+                  <button type="button" class="home-qs-action home-qs-action--advanced" id="qs-reszletes">
+                    Részletes keresés
+                  </button>
+                  <button type="reset" class="home-qs-action">Visszaállítás</button>
+                </div>
+              </div>
+            </form>
+          </article>
+        </div>
+      </section>
+
+      <div class="site-layout home-layout">
+        <aside class="site-side site-side--left home-info-sidebar" data-site-side="left" aria-label="Hasznos információ">
+          <section
+            class="home-partner-rec is-collapsed"
+            id="home-partner-recommendations"
+            aria-labelledby="home-partner-rec-title"
+          >
+            <button
+              type="button"
+              class="home-partner-rec-toggle"
+              id="home-partner-rec-toggle"
+              aria-expanded="false"
+              aria-controls="home-partner-rec-body"
+            >
+              <span class="home-partner-rec-title" id="home-partner-rec-title">Szolgáltatók a közeledben</span>
+              <span class="home-partner-rec-chevron" aria-hidden="true"></span>
+            </button>
+            <div class="home-partner-rec-body" id="home-partner-rec-body" hidden>
+            <p class="home-partner-rec-lead">Add meg az irányítószámod, és ajánlunk fizetős partnereket 30 km-en belül.</p>
+            <form id="home-partner-postal-form" class="home-partner-postal-form">
+              <label class="home-partner-postal-field">
+                <span class="home-partner-postal-label">Irányítószám</span>
+                <input
+                  id="home-partner-postal-input"
+                  class="home-partner-postal-input"
+                  type="text"
+                  inputmode="numeric"
+                  maxlength="4"
+                  pattern="[0-9]{4}"
+                  placeholder="pl. 8000"
+                  required
+                  autocomplete="postal-code"
+                />
+              </label>
+              <button type="submit" class="home-partner-postal-btn">Ajánlások</button>
+            </form>
+            <p id="home-partner-postal-status" class="home-partner-postal-status" hidden></p>
+            <div id="home-partner-results" class="home-partner-results" hidden></div>
+            </div>
+          </section>
+
+          <section
+            class="home-valuation-rec is-collapsed"
+            id="home-valuation"
+            aria-labelledby="home-valuation-title"
+          >
+            <button
+              type="button"
+              class="home-valuation-toggle"
+              id="home-valuation-toggle"
+              aria-expanded="false"
+              aria-controls="home-valuation-body"
+            >
+              <span class="home-valuation-title" id="home-valuation-title">Értékbecslő</span>
+              <span class="home-valuation-chevron" aria-hidden="true"></span>
+            </button>
+            <div class="home-valuation-body" id="home-valuation-body" hidden>
+              <p class="home-valuation-lead">Márka, modell, évjárat és típus a listából — átlagár a mentett hirdetésekből.</p>
+              <form id="home-valuation-form" class="home-valuation-form">
+                <label class="home-valuation-field">
+                  <span class="home-valuation-label">Márka</span>
+                  <select id="valuation-gyartmany" name="gyartmany" required>
+                    <option value="">Válassz márkát</option>
+                  </select>
+                </label>
+                <label class="home-valuation-field">
+                  <span class="home-valuation-label">Modell</span>
+                  <select id="valuation-modell" name="modell">
+                    <option value="">Előbb válassz márkát</option>
+                  </select>
+                </label>
+                <label class="home-valuation-field">
+                  <span class="home-valuation-label">Évjárat</span>
+                  <select id="valuation-ev" name="gyartasi_ev">
+                    <option value="">Mindegy</option>
+                  </select>
+                </label>
+                <label class="home-valuation-field">
+                  <span class="home-valuation-label">Típus</span>
+                  <select id="valuation-tipus" name="tipus">
+                    <option value="">Mindegy</option>
+                  </select>
+                </label>
+                <label class="home-valuation-field">
+                  <span class="home-valuation-label">Futott km</span>
+                  <input
+                    name="km"
+                    type="number"
+                    min="0"
+                    step="1000"
+                    placeholder="120 000"
+                    inputmode="numeric"
+                  />
+                </label>
+                <button type="submit" class="home-valuation-btn">Átlagár</button>
+              </form>
+              <p id="home-valuation-status" class="home-valuation-status" hidden></p>
+              <div id="home-valuation-result" class="home-valuation-result" hidden></div>
+            </div>
+          </section>
+
+          <div class="site-side-card home-info-card">
+            <h2 class="site-side-title" data-side-title>Hasznos információ</h2>
+            <div class="site-video-list" data-side-videos></div>
+            <div class="home-trust-block">
+              <h3 class="home-trust-title">Miért Add el autod.hu?</h3>
+              <ul class="home-trust-list">
+                <li>Átlátható árak</li>
+                <li>Friss hirdetések</li>
+                <li>Egyszerű keresés</li>
+              </ul>
+              <a class="home-trust-link" href="/import.html">Vásárlási checklist →</a>
+            </div>
+          </div>
+        </aside>
+
+        <section class="site-center home-center" aria-label="Hirdetések">
+          <div class="home-quick-filters" role="group" aria-label="Gyors szűrők">
+            <button type="button" class="home-quick-pill" data-quick-preset="under10m">10 M Ft alatt</button>
+            <button type="button" class="home-quick-pill" data-quick-preset="lowKm">Alacsony km</button>
+            <button type="button" class="home-quick-pill" data-quick-preset="hybridEv">Hibrid &amp; EV</button>
+            <button type="button" class="home-quick-pill" data-quick-preset="fresh">Frissen feladott</button>
+            <button type="button" class="home-quick-pill" data-quick-preset="firstCar">Első autó</button>
+          </div>
+          <div class="home-listings-panel">
+            <div id="home-grid-track" class="home-grid-track" role="list"></div>
+            <p id="home-empty" class="home-empty" hidden>
+              Még nincs hirdetés. Importálj, mentsd az adatbázisba (Import oldal), majd frissítsd a főoldalt — a legfrissebb mentések itt jelennek meg.
+            </p>
+            <section class="home-ad-strip home-ad-strip--bottom" aria-label="Banner hirdetések a listában">
+              <div class="home-ad-strip-inner">
+                <article class="home-ad-slot" data-ad-slot="grid-bottom-left">
+                  <p class="home-ad-slot-label">Hirdetés</p>
+                  <div class="home-ad-slot-frame">
+                    <a class="home-ad-slot-link" data-ad-link href="#" hidden>
+                      <img class="home-ad-slot-image" data-ad-image alt="" width="728" height="90" />
+                    </a>
+                    <div class="home-ad-slot-placeholder" data-ad-placeholder>Hirdetési hely</div>
+                  </div>
+                </article>
+                <article class="home-ad-slot" data-ad-slot="grid-bottom-right">
+                  <p class="home-ad-slot-label">Hirdetés</p>
+                  <div class="home-ad-slot-frame">
+                    <a class="home-ad-slot-link" data-ad-link href="#" hidden>
+                      <img class="home-ad-slot-image" data-ad-image alt="" width="728" height="90" />
+                    </a>
+                    <div class="home-ad-slot-placeholder" data-ad-placeholder>Hirdetési hely</div>
+                  </div>
+                </article>
+              </div>
+            </section>
+            <section class="home-bottom-extra" aria-label="További tartalom"></section>
+          </div>
+        </section>
+
+      </div>
+    </main>
+
+    <footer class="site-content-bar" id="site-content-bar" aria-label="Tartalom szerkesztése">
+      <div class="site-content-bar-inner">
+        <button type="button" class="site-side-edit" id="site-side-edit">Tartalom szerkesztése</button>
+        <div id="site-side-toolbar" class="site-side-toolbar" hidden>
+          <button type="button" class="site-side-btn" id="site-side-save">Tartalom mentése</button>
+          <button type="button" class="site-side-btn site-side-btn--ghost" id="site-side-cancel">Mégse</button>
+        </div>
+      </div>
+    </footer>
+
+    <script src="/js/partner-recommendations-init.js?v=partners20260726acc4" type="module"></script>
+    <script src="/js/home-valuation-init.js?v=valuation20260728catalog" type="module"></script>
+    <script src="/js/home-app.js?v=chromeStrip20260808" type="module"></script>
+    <script src="/js/site-avatar-menu.js?v=auth20260805localdb9" type="module"></script>
+
+    <script src="/js/site-auth.js?v=auth20260805localdb9" type="module"></script>
+  </body>
+</html>

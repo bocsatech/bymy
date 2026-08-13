@@ -1,0 +1,11 @@
+node_modules/
+.import-profile/
+.chrome-import-profile/
+/data/
+.env
+.env.local
+.env*.local
+*.db
+*.db-wal
+*.db-shm
+public/uploads/listings/

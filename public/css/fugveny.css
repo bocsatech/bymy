@@ -1,0 +1,291 @@
+.fugveny-page {
+  --fg-ink: #14201c;
+  --fg-muted: #5a6b63;
+  --fg-line: #d5ddd8;
+  --fg-panel: #f3f6f4;
+  --fg-accent: #1f6b4a;
+  --fg-accent-soft: #e5f3ec;
+  --fg-warn: #8a5a12;
+  background:
+    radial-gradient(900px 420px at 10% -10%, #e8f5ee 0%, transparent 55%),
+    linear-gradient(180deg, #f7faf8 0%, #eef2f0 100%);
+  color: var(--fg-ink);
+  min-height: 100vh;
+}
+
+.fugveny-page .local-banner {
+  background: #1f6b4a;
+}
+
+.fugveny-main {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem 3rem;
+}
+
+.fugveny-hero {
+  margin-bottom: 1.5rem;
+}
+
+.fugveny-hero h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.35rem;
+}
+
+.fugveny-hero p {
+  margin: 0;
+  color: var(--fg-muted);
+  max-width: 42rem;
+  line-height: 1.45;
+}
+
+.fugveny-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 900px) {
+  .fugveny-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.fugveny-panel {
+  background: #fff;
+  border: 1px solid var(--fg-line);
+  border-radius: 12px;
+  padding: 1rem 1.1rem 1.15rem;
+  box-shadow: 0 1px 0 rgba(20, 32, 28, 0.04);
+}
+
+.fugveny-panel h2 {
+  margin: 0 0 0.75rem;
+  font-size: 1.05rem;
+}
+
+.fugveny-panel h3 {
+  margin: 1rem 0 0.5rem;
+  font-size: 0.92rem;
+  color: var(--fg-muted);
+  font-weight: 600;
+}
+
+.fugveny-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  max-height: 280px;
+  overflow: auto;
+}
+
+.fugveny-list-item {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.65rem;
+  align-items: center;
+  text-align: left;
+  border: 1px solid var(--fg-line);
+  background: var(--fg-panel);
+  border-radius: 10px;
+  padding: 0.55rem 0.7rem;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+}
+
+.fugveny-list-item:hover {
+  border-color: #a9c4b6;
+}
+
+.fugveny-list-item.active {
+  border-color: var(--fg-accent);
+  background: var(--fg-accent-soft);
+}
+
+.fugveny-list-item strong {
+  display: block;
+  font-size: 0.92rem;
+}
+
+.fugveny-list-item span {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--fg-muted);
+}
+
+.fugveny-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.85rem;
+}
+
+.fugveny-btn {
+  border: 0;
+  border-radius: 8px;
+  padding: 0.55rem 0.9rem;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--fg-accent);
+  color: #fff;
+}
+
+.fugveny-btn:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.fugveny-btn.secondary {
+  background: #fff;
+  color: var(--fg-ink);
+  border: 1px solid var(--fg-line);
+}
+
+.fugveny-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.55rem 0.7rem;
+}
+
+.fugveny-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+  color: var(--fg-muted);
+}
+
+.fugveny-form label.wide {
+  grid-column: 1 / -1;
+}
+
+.fugveny-form input,
+.fugveny-form select {
+  border: 1px solid var(--fg-line);
+  border-radius: 8px;
+  padding: 0.45rem 0.55rem;
+  font: inherit;
+  color: var(--fg-ink);
+  background: #fff;
+}
+
+.fugveny-result {
+  margin-top: 0.85rem;
+  padding: 0.75rem 0.85rem;
+  border-radius: 10px;
+  background: var(--fg-accent-soft);
+  border: 1px solid #c5e0d2;
+  font-size: 0.95rem;
+}
+
+.fugveny-result strong {
+  font-size: 1.25rem;
+}
+
+.fugveny-log {
+  margin-top: 0.75rem;
+  white-space: pre-wrap;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.75rem;
+  color: var(--fg-muted);
+  max-height: 160px;
+  overflow: auto;
+  background: #111814;
+  color: #d7e6dc;
+  border-radius: 8px;
+  padding: 0.65rem 0.75rem;
+}
+
+.fugveny-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.fugveny-chip {
+  background: var(--fg-panel);
+  border: 1px solid var(--fg-line);
+  border-radius: 999px;
+  padding: 0.25rem 0.65rem;
+  font-size: 0.78rem;
+}
+
+.fugveny-table-wrap {
+  overflow: auto;
+  max-height: 320px;
+  margin-top: 0.75rem;
+  border: 1px solid var(--fg-line);
+  border-radius: 10px;
+}
+
+.fugveny-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+
+.fugveny-table th,
+.fugveny-table td {
+  padding: 0.4rem 0.5rem;
+  border-bottom: 1px solid var(--fg-line);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.fugveny-table th {
+  position: sticky;
+  top: 0;
+  background: var(--fg-panel);
+}
+
+.fugveny-empty {
+  color: var(--fg-muted);
+  font-size: 0.9rem;
+}
+
+.fugveny-queries {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.fugveny-query-row {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid var(--fg-line);
+  border-radius: 8px;
+  padding: 0.45rem 0.55rem;
+  background: #fff;
+}
+
+.fugveny-query-row .name {
+  font-weight: 600;
+  font-size: 0.88rem;
+}
+
+.fugveny-query-row .meta {
+  font-size: 0.75rem;
+  color: var(--fg-muted);
+}
+
+.fugveny-status {
+  min-height: 1.25rem;
+  margin: 0.5rem 0 0;
+  font-size: 0.85rem;
+  color: var(--fg-muted);
+}
+
+.fugveny-status.error {
+  color: #9b2c2c;
+}
+
+.fugveny-status.ok {
+  color: var(--fg-accent);
+}

@@ -1,0 +1,601 @@
+        <section class="step-panel" data-step="1">
+          <h2 class="import-step-label">Alapadatok</h2>
+          <div class="card">
+            <div class="card-body">
+              <input type="hidden" id="hirdetes_cime" name="hirdetes_cime" />
+
+              <div class="form-grid">
+                <div class="field-row full field-row--vehicle-top">
+                  <div class="labeled-field">
+                    <label for="gyartasi_ev">Gyártási év: <span class="req">*</span></label>
+                    <div class="inline-2">
+                      <select id="gyartasi_ev" name="gyartasi_ev" required></select>
+                      <select id="gyartasi_honap" name="gyartasi_honap">
+                        <option value="">hó</option>
+                        <option>1</option><option>2</option><option>3</option><option>4</option>
+                        <option>5</option><option>6</option><option>7</option><option>8</option>
+                        <option>9</option><option>10</option><option>11</option><option>12</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="labeled-field">
+                    <label for="forgalomba_helyezes_ev">Első magyarországi forgalomba helyezés:</label>
+                    <div class="inline-2">
+                      <select id="forgalomba_helyezes_ev" name="forgalomba_helyezes_ev"></select>
+                      <select id="forgalomba_helyezes_honap" name="forgalomba_helyezes_honap">
+                        <option value="">hó</option>
+                        <option>1</option><option>2</option><option>3</option><option>4</option>
+                        <option>5</option><option>6</option><option>7</option><option>8</option>
+                        <option>9</option><option>10</option><option>11</option><option>12</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="labeled-field">
+                    <label for="muszaki_ev">Műszaki vizsga érvényes:</label>
+                    <div class="inline-2">
+                      <select id="muszaki_ev" name="muszaki_ev"></select>
+                      <select id="muszaki_honap" name="muszaki_honap">
+                        <option value="">hó</option>
+                        <option>1</option><option>2</option><option>3</option><option>4</option>
+                        <option>5</option><option>6</option><option>7</option><option>8</option>
+                        <option>9</option><option>10</option><option>11</option><option>12</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="field-row full field-row--pair">
+                  <div class="labeled-field">
+                    <label for="allapot">Állapot: <span class="req">*</span></label>
+                    <select id="allapot" name="allapot" required>
+                      <option value="">Válasszon</option>
+                      <option>Normál</option>
+                      <option>Újszerű</option>
+                      <option>Sérülésmentes</option>
+                      <option>Sérült</option>
+                    </select>
+                  </div>
+                  <div class="labeled-field">
+                    <label for="tulajdonosok_szama">Tulajdonosok száma:</label>
+                    <select id="tulajdonosok_szama" name="tulajdonosok_szama">
+                      <option value="">—</option>
+                      <option>1</option>
+                      <option>2</option>
+                      <option>3</option>
+                      <option>4+</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="field-row full">
+                  <div class="labeled-field">
+                    <label for="gyartmany">Gyártmány: <span class="req">*</span></label>
+                    <select id="gyartmany" name="gyartmany" required>
+                      <option value="">Válasszon</option>
+                    </select>
+                  </div>
+                  <div class="labeled-field">
+                    <label for="modell">Modell: <span class="req">*</span></label>
+                    <select id="modell" name="modell" required>
+                      <option value="">Először válassz gyártmányt</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="field-row full field-row--tipus">
+                  <div class="labeled-field">
+                    <label for="tipus_katalogus">Típus a katalógusból:</label>
+                    <select id="tipus_katalogus">
+                      <option value="">Előbb gyártmány, modell és gyártási év</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="field-row full field-row--pair field-row--tipus-egyeb">
+                  <div class="labeled-field">
+                    <label for="tipus">Típus: <span class="req">*</span></label>
+                    <input id="tipus" name="tipus" type="text" class="auto-filled" required />
+                  </div>
+                  <div class="labeled-field">
+                    <label for="egyeb_tipus">Egyéb típus:</label>
+                    <input id="egyeb_tipus" name="egyeb_tipus" type="text" />
+                  </div>
+                </div>
+
+                <div class="field-row full field-row--pair">
+                  <div class="labeled-field">
+                    <label for="kivitel">Kivitel: <span class="req">*</span> <a href="#" class="help-link">Segítség</a></label>
+                    <select id="kivitel" name="kivitel" required>
+                      <option value="">Válasszon</option>
+                      <option>Szedán</option>
+                      <option>Ferdehátú</option>
+                      <option>Kombi</option>
+                      <option>SUV / Crossover</option>
+                      <option>Egyterű</option>
+                      <option>Kupé</option>
+                      <option>Cabrio</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="field-row full field-row--pair">
+                  <div class="labeled-field">
+                    <label for="ajtok">Ajtók száma:</label>
+                    <select id="ajtok" name="ajtok">
+                      <option value="">—</option>
+                      <option>2</option><option>3</option><option>4</option><option>5</option>
+                    </select>
+                  </div>
+                  <div class="labeled-field">
+                    <label for="szemelyek">Szállítható szem. száma:</label>
+                    <div class="suffix-field">
+                      <input id="szemelyek" name="szemelyek" type="number" min="1" max="9" />
+                      <span>fő</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="field-row full">
+                  <div class="labeled-field">
+                    <label for="okmany_jelleg">Okmányok jellege: <span class="req">*</span></label>
+                    <select id="okmany_jelleg" name="okmany_jelleg" required>
+                      <option value="">Válasszon</option>
+                      <option>Érvényes magyar okmányokkal</option>
+                      <option>Érvényes külföldi okmányokkal</option>
+                    </select>
+                  </div>
+                  <div class="labeled-field">
+                    <label for="okmany_ervenyesseg">Okmányok érvényessége: <span class="req">*</span></label>
+                    <select id="okmany_ervenyesseg" name="okmany_ervenyesseg" required>
+                      <option value="">Válasszon</option>
+                      <option>Érvényes</option>
+                      <option>Lejárt</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="field-row full field-row--km">
+                  <div class="labeled-field">
+                    <label for="km">Km. óra állás: <span class="req">*</span></label>
+                    <div class="suffix-field">
+                      <input id="km" name="km" type="number" min="0" required />
+                      <span>km</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="field-row full field-row--pair">
+                  <div class="labeled-field">
+                    <label for="alvazszam">Alvázszám (VIN): <a href="#" class="help-link">Segítség</a></label>
+                    <input id="alvazszam" name="alvazszam" type="text" maxlength="17" autocomplete="off" />
+                  </div>
+                  <div class="labeled-field">
+                    <label for="rendszam">Rendszám:</label>
+                    <input id="rendszam" name="rendszam" type="text" maxlength="8" autocomplete="off" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="step-panel hidden" data-step="2">
+          <h2 class="import-step-label">Műszaki adatok</h2>
+          <div class="card">
+            <div class="card-body">
+              <div class="field-row full field-row--tech-top">
+                <div class="labeled-field labeled-field--fuel">
+                  <label for="uzemanyag">Üzemanyag: <span class="req">*</span></label>
+                  <select id="uzemanyag" name="uzemanyag" required>
+                    <option value="">Válasszon</option>
+                  </select>
+                </div>
+                <div class="labeled-field labeled-field--henger">
+                  <label for="hengerurtartalom">Hengerűrtartalom:</label>
+                  <div class="suffix-field">
+                    <input id="hengerurtartalom" name="hengerurtartalom" type="number" class="auto-filled" />
+                    <span>cm³</span>
+                  </div>
+                </div>
+                <div class="labeled-field labeled-field--power">
+                  <label for="teljesitmeny_kw">Teljesítmény:</label>
+                  <input id="teljesitmeny_kw" name="teljesitmeny_kw" type="number" class="auto-filled" />
+                  <span class="power-unit">kW</span>
+                  <span id="le-display" class="hint-inline">(= 0 LE)</span>
+                  <input type="hidden" id="teljesitmeny_le" name="teljesitmeny_le" />
+                </div>
+              </div>
+              <div class="form-grid">
+                <label for="kornyezetvedelmi">Környezetvédelmi oszt.: <a href="#" class="help-link">Segítség</a></label>
+                <input id="kornyezetvedelmi" name="kornyezetvedelmi" type="text" />
+
+                <label for="co2_kibocsatas" class="fuel-combustion-only">CO₂-kibocsátás:</label>
+                <div class="suffix-field fuel-combustion-only">
+                  <input id="co2_kibocsatas" name="co2_kibocsatas" type="number" min="0" step="1" />
+                  <span>g/km</span>
+                </div>
+
+                <label for="fogyasztas_varosi" class="fuel-combustion-only">Városi fogyasztás:</label>
+                <div class="suffix-field fuel-combustion-only">
+                  <input id="fogyasztas_varosi" name="fogyasztas_varosi" type="number" min="0" step="0.1" />
+                  <span>l/100 km</span>
+                </div>
+
+                <label for="fogyasztas_orszaguti" class="fuel-combustion-only">Országúti fogyasztás:</label>
+                <div class="suffix-field fuel-combustion-only">
+                  <input id="fogyasztas_orszaguti" name="fogyasztas_orszaguti" type="number" min="0" step="0.1" />
+                  <span>l/100 km</span>
+                </div>
+
+                <label for="fogyasztas_kombinalt" class="fuel-combustion-only">Kombinált fogyasztás:</label>
+                <div class="suffix-field fuel-combustion-only">
+                  <input id="fogyasztas_kombinalt" name="fogyasztas_kombinalt" type="number" min="0" step="0.1" />
+                  <span>l/100 km</span>
+                </div>
+
+                <label for="sebessegvalto">Sebességváltó:</label>
+                <div>
+                  <select id="sebessegvalto" name="sebessegvalto" class="auto-filled">
+                    <option value="">—</option>
+                    <option>Manuális (5 seb.)</option>
+                    <option>Manuális (6 seb.)</option>
+                    <option>Automata</option>
+                    <option>Fokozatmentes automata</option>
+                  </select>
+                  <label class="check inline-check">
+                    <input type="checkbox" name="felezo_valto" value="1" /> felező váltó
+                  </label>
+                </div>
+
+                <label for="hajtas">Hajtás:</label>
+                <select id="hajtas" name="hajtas" class="auto-filled">
+                  <option value="">—</option>
+                  <option>Első kerék</option>
+                  <option>Hátsó kerék</option>
+                  <option>Összkerék</option>
+                </select>
+
+                <label for="henger_elrendezes">Henger-elrendezés:</label>
+                <select id="henger_elrendezes" name="henger_elrendezes">
+                  <option value="">—</option>
+                  <option>Sor</option>
+                  <option>V</option>
+                  <option>Boxer</option>
+                  <option>W</option>
+                </select>
+
+                <label for="sajat_tomeg">Saját tömeg:</label>
+                <div class="suffix-field">
+                  <input id="sajat_tomeg" name="sajat_tomeg" type="number" />
+                  <span>kg</span>
+                </div>
+
+                <label for="ossztomeg">Össztömeg:</label>
+                <div class="suffix-field">
+                  <input id="ossztomeg" name="ossztomeg" type="number" />
+                  <span>kg</span>
+                </div>
+
+                <label for="karpit1">Kárpit színe (1):</label>
+                <input id="karpit1" name="karpit1" type="text" />
+
+                <label for="karpit2">Kárpit színe (2):</label>
+                <input id="karpit2" name="karpit2" type="text" />
+
+                <label for="szin">Szín:</label>
+                <div>
+                  <input id="szin" name="szin" type="text" />
+                  <label class="check inline-check"><input type="checkbox" name="metalfeny" value="1" /> metál</label>
+                </div>
+
+                <label for="tetto">Tető:</label>
+                <input id="tetto" name="tetto" type="text" />
+
+                <label for="csomagtarto">Csomagtartó:</label>
+                <div class="suffix-field">
+                  <input id="csomagtarto" name="csomagtarto" type="number" />
+                  <span>liter</span>
+                </div>
+
+                <label for="belso_azonosito">Belső azonosító: <a href="#" class="help-link">Segítség</a></label>
+                <input id="belso_azonosito" name="belso_azonosito" type="text" />
+              </div>
+            </div>
+          </div>
+
+          <div class="card fuel-electric-only hidden" id="electric-fields-card">
+            <div class="card-head">Elektromos / hibrid adatok</div>
+            <div class="card-body form-grid">
+              <label for="akkumulator_kwh">Akkumulátor kapacitás:</label>
+              <div class="suffix-field">
+                <input id="akkumulator_kwh" name="akkumulator_kwh" type="number" min="0" step="0.1" />
+                <span>kWh</span>
+              </div>
+
+              <label for="hatotav">Hatótáv:</label>
+              <div class="suffix-field">
+                <input id="hatotav" name="hatotav" type="number" min="0" step="1" />
+                <span>km</span>
+              </div>
+
+              <label for="tolto_csatlakozas">Töltőcsatlakozó:</label>
+              <select id="tolto_csatlakozas" name="tolto_csatlakozas">
+                <option value="">—</option>
+                <option>Type 2</option>
+                <option>CCS</option>
+                <option>CHAdeMO</option>
+                <option>Schuko / hálózati</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head">Gumi méretek</div>
+            <div class="card-body form-grid">
+              <label>Nyári gumi méret:</label>
+              <div class="tire-row">
+                <input name="nyari_gumi_szelesseg" type="text" placeholder="szélesség" />
+                <span>/</span>
+                <input name="nyari_gumi_magassag" type="text" placeholder="magasság" />
+                <span>R</span>
+                <input name="nyari_gumi_atmero" type="text" placeholder="átmérő" />
+              </div>
+              <label>Hátsó nyári gumi méret:</label>
+              <div class="tire-row">
+                <input name="hatso_nyari_szelesseg" type="text" />
+                <span>/</span>
+                <input name="hatso_nyari_magassag" type="text" />
+                <span>R</span>
+                <input name="hatso_nyari_atmero" type="text" />
+              </div>
+              <label>Téli gumi méret:</label>
+              <div class="tire-row">
+                <input name="teli_gumi_szelesseg" type="text" />
+                <span>/</span>
+                <input name="teli_gumi_magassag" type="text" />
+                <span>R</span>
+                <input name="teli_gumi_atmero" type="text" />
+              </div>
+              <label>Hátsó téli gumi méret:</label>
+              <div class="tire-row">
+                <input name="hatso_teli_szelesseg" type="text" />
+                <span>/</span>
+                <input name="hatso_teli_magassag" type="text" />
+                <span>R</span>
+                <input name="hatso_teli_atmero" type="text" />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="step-panel hidden" data-step="3">
+          <h2 class="import-step-label">Extrák és felszereltség</h2>
+          <div class="card">
+            <div class="card-head">Felszereltség</div>
+            <div class="card-body">
+              <p class="hint">
+                Automatikus extra lista kitöltése: A rendszer automatikusan kitölti az autó felszereltségét a
+                rendelkezésre álló adatok alapján. Hirdetés véglegesítése előtt kérjük, mindig ellenőrizze ezek
+                valódiságát.
+              </p>
+              <div class="form-grid compact">
+                <label for="klima">Klíma</label>
+                <select id="klima" name="klima">
+                  <option value="">—</option>
+                </select>
+              </div>
+              <div class="form-grid compact owner-flags">
+                <label>Tulajdonos jellemzők:</label>
+                <div class="inline-checks">
+                  <label class="check inline-check"><input type="checkbox" name="nem_dohanyzo" value="1" /> nem dohányzó autó</label>
+                  <label class="check inline-check"><input type="checkbox" name="holgy_tulajdonos" value="1" /> hölgy tulajdonostól</label>
+                </div>
+              </div>
+              <div id="equipment-sections"></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head">Egyéb információk</div>
+            <div class="card-body">
+              <div id="egyeb-info-sections" class="equipment-grid"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="step-panel hidden" data-step="4">
+          <div class="card">
+            <div class="card-body">
+              <div class="upload-zone" id="upload-zone">
+                <strong>Húzd ide a képeket, vagy kattints a tallózáshoz</strong>
+                <span>Legfeljebb 12 kép · JPG, PNG</span>
+                <input id="photo-input" type="file" accept="image/*" multiple hidden />
+              </div>
+              <div class="photo-grid" id="photo-grid"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="step-panel hidden" data-step="5">
+          <h2 class="import-step-label">Hirdetés és elérhetőség</h2>
+          <div id="ad-panel">
+            <div class="card">
+              <div class="card-head">Hitel és bérlés</div>
+              <div class="card-body form-grid">
+                <label for="hitel">Hitel:</label>
+                <select id="hitel" name="hitel">
+                  <option value="">—</option>
+                  <option>Hitel/leasing</option>
+                  <option>Csak készpénz</option>
+                </select>
+                <label for="kezdo_reszlet">Kezdőrészlet:</label>
+                <div class="suffix-field">
+                  <input id="kezdo_reszlet" name="kezdo_reszlet" type="number" min="0" step="1000" />
+                  <span>Ft</span>
+                </div>
+                <label for="havi_reszlet">Havi részlet:</label>
+                <div class="suffix-field">
+                  <input id="havi_reszlet" name="havi_reszlet" type="number" min="0" step="1000" />
+                  <span>Ft</span>
+                </div>
+                <label for="futamido">Futamidő:</label>
+                <div class="suffix-field">
+                  <input id="futamido" name="futamido" type="number" min="0" step="1" />
+                  <span>hónap</span>
+                </div>
+                <label>Bérelhető:</label>
+                <label class="check inline-check"><input type="checkbox" name="berelheto" value="1" /> Igen</label>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-head">Ár</div>
+              <div class="card-body form-grid">
+                <label for="vetelar">Vételár: <span class="req">*</span></label>
+                <div class="suffix-field">
+                  <input id="vetelar" name="vetelar" type="number" min="0" step="1000" required />
+                  <span>Ft</span>
+                </div>
+
+                <label for="vetelar_eur">Ár (EUR):</label>
+                <div class="suffix-field">
+                  <input id="vetelar_eur" name="vetelar_eur" type="number" min="0" step="1" />
+                  <span>EUR</span>
+                </div>
+
+                <label for="forgalomba_helyezes_ar">Forgalomba helyezés ára:</label>
+                <div class="suffix-field">
+                  <input id="forgalomba_helyezes_ar" name="forgalomba_helyezes_ar" type="number" min="0" step="1000" />
+                  <span>Ft</span>
+                </div>
+
+                <label>Ár jellemzők:</label>
+                <div class="inline-checks">
+                  <label class="check inline-check"><input type="checkbox" name="alkudhato" value="1" /> alkudható</label>
+                  <label class="check inline-check"><input type="checkbox" name="csere" value="1" /> csere érdekel</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-head">Hirdetési csomag</div>
+              <div class="card-body packages">
+                <label class="package selected">
+                  <input type="radio" name="csomag" value="ingyenes" checked hidden />
+                  <h3>Ingyenes csomag</h3>
+                  <div class="price">0 Ft</div>
+                </label>
+                <label class="package">
+                  <input type="radio" name="csomag" value="kiemeles" hidden />
+                  <h3>Frissítés + kiemelés</h3>
+                  <div class="price">4 990 Ft</div>
+                </label>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-head">Leírás és elérhetőség</div>
+              <div class="card-body form-grid">
+                <label for="leiras">Leírás:</label>
+                <div>
+                  <textarea id="leiras" name="leiras" rows="6"></textarea>
+                  <p class="hint">A kereső a leírásban szereplő szövegben nem tud keresni!</p>
+                </div>
+
+                <label>Megtalálható: <span class="req">*</span></label>
+                <div class="inline-2">
+                  <select id="megye" name="megye" required>
+                    <option value="">vármegye</option>
+                    <option>Budapest</option>
+                    <option>Pest</option>
+                    <option>Fejér</option>
+                    <option>Győr-Moson-Sopron</option>
+                    <option>Komárom-Esztergom</option>
+                    <option>Veszprém</option>
+                    <option>Baranya</option>
+                    <option>Bács-Kiskun</option>
+                    <option>Békés</option>
+                    <option>Borsod-Abaúj-Zemplén</option>
+                    <option>Csongrád-Csanád</option>
+                    <option>Hajdú-Bihar</option>
+                    <option>Heves</option>
+                    <option>Jász-Nagykun-Szolnok</option>
+                    <option>Nógrád</option>
+                    <option>Somogy</option>
+                    <option>Szabolcs-Szatmár-Bereg</option>
+                    <option>Tolna</option>
+                    <option>Vas</option>
+                    <option>Zala</option>
+                  </select>
+                  <input id="telepules" name="telepules" type="text" placeholder="település" required />
+                </div>
+
+                <label for="iranyitoszam">Irányítószám:</label>
+                <input id="iranyitoszam" name="iranyitoszam" type="text" inputmode="numeric" maxlength="4" placeholder="pl. 1011" />
+
+                <label for="megtekintesi_cim">Megtekintési cím:</label>
+                <div>
+                  <input id="megtekintesi_cim" name="megtekintesi_cim" type="text" />
+                  <p class="hint">Ha üresen hagyja: „Megtekinthető: telefonon egyeztetett helyszínen”.</p>
+                </div>
+
+                <label>Email megjelenítése:</label>
+                <label class="check"><input type="checkbox" name="email_megjelenik" value="1" /> Megjelenjen az email címe is</label>
+
+                <label for="email">E-mail:</label>
+                <input id="email" name="email" type="email" />
+
+                <label>1. Telefonszám: <span class="req">*</span></label>
+                <div class="phone-row">
+                  <input name="telefon1_orszag" type="text" value="+36" class="phone-part" />
+                  <span>/</span>
+                  <input name="telefon1_korzet" type="text" placeholder="30" class="phone-part" required />
+                  <span>/</span>
+                  <input name="telefon1_szam" type="text" placeholder="123 4567" class="phone-part wide" required />
+                </div>
+
+                <label>2. Telefonszám:</label>
+                <div class="phone-row">
+                  <input name="telefon2_orszag" type="text" value="+36" class="phone-part" />
+                  <span>/</span>
+                  <input name="telefon2_korzet" type="text" class="phone-part" />
+                  <span>/</span>
+                  <input name="telefon2_szam" type="text" class="phone-part wide" />
+                </div>
+
+                <label>3. Telefonszám:</label>
+                <div class="phone-row">
+                  <input name="telefon3_orszag" type="text" value="+36" class="phone-part" />
+                  <span>/</span>
+                  <input name="telefon3_korzet" type="text" class="phone-part" />
+                  <span>/</span>
+                  <input name="telefon3_szam" type="text" class="phone-part wide" />
+                </div>
+
+                <label for="video_url">Videó link (YouTube):</label>
+                <input id="video_url" name="video_url" type="url" placeholder="https://www.youtube.com/watch?v=..." />
+
+                <label for="beszelt_nyelvek">Beszélt nyelvek:</label>
+                <input id="beszelt_nyelvek" name="beszelt_nyelvek" type="text" placeholder="pl. magyar, angol, német" />
+              </div>
+            </div>
+          </div>
+
+          <input type="hidden" id="forras_url" name="forras_url" />
+          <input type="hidden" id="hasznaltauto_hirdetes_id" name="hasznaltauto_hirdetes_id" />
+
+          <div class="card hidden" id="success-panel">
+            <div class="card-body success-box">
+              <h2>Adatok mentve (helyi piszkozat)</h2>
+              <p id="summary-text" class="hint"></p>
+              <p class="hint">Ez csak a gépeden van — nem kerül fel a Használtautó.hu-ra.</p>
+              <button type="button" class="btn btn-primary" id="new-ad-btn">Új hirdetés</button>
+            </div>
+          </div>
+        </section>
+
+        <div class="footer-actions" id="footer-actions">
+          <button type="button" class="btn btn-secondary hidden" id="back-btn">Vissza</button>
+          <div></div>
+          <button type="button" class="btn btn-primary" id="next-btn">Hirdetésfeladás folytatása</button>
+        </div>

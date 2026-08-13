@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="hu">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="autosweb-version" content="fugveny20260724" />
+    <title>Függvény — CatBoost ár</title>
+    <link rel="stylesheet" href="/css/style.css?v=fugveny20260724" />
+    <link rel="stylesheet" href="/css/site-app.css?v=auth20260730avatar3" />
+    <link rel="stylesheet" href="/css/fugveny.css?v=fugveny20260724" />
+  </head>
+  <body class="site-app fugveny-page">
+    <div class="local-banner">LOCALHOST — Függvény / CatBoost (listák · tanítás · árlekérdezés)</div>
+
+    <header class="site-header site-app-header">
+      <div class="site-app-header-inner">
+        <a class="site-app-logo" href="/">Add el autod.hu</a>
+        <nav class="import-nav site-app-nav" aria-label="Oldalak">
+          <a class="import-nav-link" href="/">Főoldal</a>
+          <a class="import-nav-link" href="/import.html">Import</a>
+          <a class="import-nav-link" href="/listings.html">Hirdetések</a>
+          <a class="import-nav-link active" href="/fugveny.html">Függvény</a>
+        </nav>
+        <div class="header-actions site-header-actions">
+          <div class="site-header-auth-row">
+            <a class="site-header-btn site-header-btn--ghost" href="/belepes.html" data-auth-login>Belépés</a>
+            <a class="site-header-btn site-header-btn--ghost" href="/regisztracio.html" data-auth-register>Regisztráció</a>
+            <a class="site-header-btn site-header-btn--ghost" href="/hirdetesfeladas.html" data-auth-guard>Hirdetésfeladás</a>
+          </div>
+          <nav class="site-header-tools" aria-label="Fiók eszközök">
+            <button type="button" class="site-header-tool" aria-label="Értesítések" title="Értesítések">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M12 3.5a5 5 0 0 0-5 5v1.6c0 .9-.3 1.8-.8 2.5L4.8 15h14.4l-1.4-2.4a5 5 0 0 1-.8-2.5V8.5a5 5 0 0 0-5-5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+                <path d="M9.6 17.2a2.5 2.5 0 0 0 4.8 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+              </svg>
+            </button>
+            <button type="button" class="site-header-tool" aria-label="Mentett keresések" title="Mentett keresések">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M11.2 3.8 12.7 8l4.4.3-3.4 2.9 1.1 4.3-3.8-2.4-3.8 2.4 1.1-4.3L5.9 8.3l4.4-.3L11.2 3.8Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+                <circle cx="17.2" cy="17.2" r="3.1" stroke="currentColor" stroke-width="1.6"/>
+                <path d="m19.4 19.4 2 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+              </svg>
+            </button>
+            <button type="button" class="site-header-tool site-header-tool--count" aria-label="Kedvencek" title="Kedvencek">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M12 20s-6.8-4.2-9-7.7C1.4 9.7 2.7 6.5 5.7 5.6c1.8-.5 3.6.2 4.6 1.6 1-1.4 2.8-2.1 4.6-1.6 3 .9 4.3 4.1 2.7 6.7C18.8 15.8 12 20 12 20Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+              </svg>
+              <span class="site-header-tool-count" data-fav-count>1</span>
+            </button>
+            <button type="button" class="site-header-tool" aria-label="Üzenetek" title="Üzenetek">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <rect x="3.5" y="5" width="17" height="12.5" rx="2.5" stroke="currentColor" stroke-width="1.7"/>
+                <path d="M7.5 9.2h9M7.5 12.5h6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+              </svg>
+            </button>
+            <div class="site-header-avatar-wrap" data-avatar-menu>
+              <button
+                type="button"
+                class="site-header-avatar"
+                data-auth-avatar
+                data-avatar-toggle
+                aria-expanded="false"
+                aria-haspopup="menu"
+                aria-label="Profil menü"
+                title="Profil"
+              >
+                <span data-avatar-letter>A</span>
+                <img data-avatar-img alt="" hidden width="40" height="40" />
+              </button>
+              <div class="site-avatar-dropdown" data-avatar-dropdown role="menu" hidden>
+                <p class="site-avatar-guest" data-avatar-guest>A menühöz jelentkezz be.</p>
+                <div data-avatar-member hidden>
+                  <button type="button" class="site-avatar-item" data-avatar-photo-btn role="menuitem">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="3.2" stroke="currentColor" stroke-width="1.6"/><path d="M5.5 19.2c1.6-3 3.8-4.4 6.5-4.4s4.9 1.4 6.5 4.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+                    <span class="site-avatar-item-label">Profilkép feltöltése</span>
+                  </button>
+                  <input type="file" accept="image/jpeg,image/png,image/webp" data-avatar-file hidden />
+                  <a class="site-avatar-item" href="/beallitasok.html?szekcio=attekintes" role="menuitem">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1.2" stroke="currentColor" stroke-width="1.6"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.2" stroke="currentColor" stroke-width="1.6"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.2" stroke="currentColor" stroke-width="1.6"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.2" stroke="currentColor" stroke-width="1.6"/></svg>
+                    <span class="site-avatar-item-label">Áttekintés</span>
+                  </a>
+                  <a class="site-avatar-item" href="/beallitasok.html?szekcio=uzenetek" role="menuitem">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="5" width="17" height="12.5" rx="2.5" stroke="currentColor" stroke-width="1.6"/><path d="M7.5 9.2h9M7.5 12.5h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+                    <span class="site-avatar-item-label">Üzenetek</span>
+                  </a>
+                  <a class="site-avatar-item" href="/beallitasok.html?szekcio=keresesek" role="menuitem">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M11.2 3.8 12.7 8l4.4.3-3.4 2.9 1.1 4.3-3.8-2.4-3.8 2.4 1.1-4.3L5.9 8.3l4.4-.3L11.2 3.8Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><circle cx="17.2" cy="17.2" r="3" stroke="currentColor" stroke-width="1.5"/><path d="m19.4 19.4 1.8 1.8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                    <span class="site-avatar-item-label">Mentett kereséseim</span>
+                  </a>
+                  <a class="site-avatar-item" href="/beallitasok.html?szekcio=parkolo" role="menuitem">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 20s-6.8-4.2-9-7.7C1.4 9.7 2.7 6.5 5.7 5.6c1.8-.5 3.6.2 4.6 1.6 1-1.4 2.8-2.1 4.6-1.6 3 .9 4.3 4.1 2.7 6.7C18.8 15.8 12 20 12 20Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+                    <span class="site-avatar-item-label">Kedvencek <span class="site-avatar-item-count">(1)</span></span>
+                  </a>
+                  <a class="site-avatar-item" href="/beallitasok.html?szekcio=uzenetek" role="menuitem">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7.5h16v10.2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7.5Z" stroke="currentColor" stroke-width="1.6"/><path d="M8 7.5V5.8A2.3 2.3 0 0 1 10.3 3.5h3.4A2.3 2.3 0 0 1 16 5.8v1.7" stroke="currentColor" stroke-width="1.6"/></svg>
+                    <span class="site-avatar-item-label">Érdeklődések <span class="site-avatar-item-count">(1)</span></span>
+                    <span class="site-avatar-badge" aria-label="1 új">1</span>
+                  </a>
+                  <a class="site-avatar-item" href="/beallitasok.html?szekcio=hirdetes" role="menuitem">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 14.5h2.2l1.3-2.5h7l1.4 2.5H18a2 2 0 0 1 2 2v2.2a1.3 1.3 0 0 1-1.3 1.3h-.7" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="7.2" cy="18.7" r="1.5" stroke="currentColor" stroke-width="1.5"/><circle cx="15.5" cy="18.7" r="1.5" stroke="currentColor" stroke-width="1.5"/></svg>
+                    <span class="site-avatar-item-label">Hirdetéseim</span>
+                  </a>
+                  <a class="site-avatar-item" href="/hirdetesfeladas.html" data-auth-guard role="menuitem">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5.5 11.5 12 4.8l6.5 6.7" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M7.2 10.8V19h9.6v-8.2" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M10 19v-5h4v5" stroke="currentColor" stroke-width="1.6"/></svg>
+                    <span class="site-avatar-item-label">Direkt eladás</span>
+                  </a>
+                  <a class="site-avatar-item" href="/beallitasok.html?szekcio=hirdetes" role="menuitem">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 15.2h2l1.2-2.3h7.2L16.8 15.2H19a1.8 1.8 0 0 1 1.8 1.8v2.1a1.2 1.2 0 0 1-1.2 1.2h-1" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="8" cy="19.2" r="1.4" stroke="currentColor" stroke-width="1.5"/><circle cx="15.5" cy="19.2" r="1.4" stroke="currentColor" stroke-width="1.5"/><path d="M7.2 15.1 8.4 9.8h7.2l1.3 5.3" stroke="currentColor" stroke-width="1.5"/></svg>
+                    <span class="site-avatar-item-label">Járműveim</span>
+                  </a>
+                  <a class="site-avatar-item" href="/beallitasok.html?szekcio=fiok" role="menuitem">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3.1" stroke="currentColor" stroke-width="1.6"/><path d="M12 4.5v1.6M12 17.9v1.6M4.5 12h1.6M17.9 12h1.6M6.8 6.8l1.1 1.1M16.1 16.1l1.1 1.1M17.2 6.8l-1.1 1.1M7.9 16.1l-1.1 1.1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                    <span class="site-avatar-item-label">Beállítások</span>
+                  </a>
+                  <a class="site-avatar-item" href="/beallitasok.html?szekcio=uzenetek" role="menuitem">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6.5 15.2c1.4-1.8 3.3-2.8 5.5-2.8s4.1 1 5.5 2.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M9.2 9.2 12 4.8l2.8 4.4H9.2Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8.2 19h7.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+                    <span class="site-avatar-item-label">Kommunikáció</span>
+                  </a>
+                  <div class="site-avatar-footer">
+                    <p class="site-avatar-logged">Bejelentkezve mint <strong data-avatar-user>—</strong></p>
+                    <button type="button" class="site-avatar-logout" data-auth-logout>Kijelentkezés</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+</nav>
+        </div>
+      </div>
+    </header>
+
+    <main class="fugveny-main">
+      <section class="fugveny-hero">
+        <h1>Függvény</h1>
+        <p>
+          Töltsd be a scrapelt listákat a <code>~/Downloads/fugveny</code> mappából, tanítsd a CatBoost
+          ár-modellt, majd ments árlekérdezéseket (becslés / olcsó találatok).
+        </p>
+      </section>
+
+      <div class="fugveny-grid">
+        <section class="fugveny-panel">
+          <h2>1. Listák</h2>
+          <p id="fugveny-lists-empty" class="fugveny-empty">Listák betöltése…</p>
+          <div id="fugveny-lists" class="fugveny-list" hidden></div>
+          <div class="fugveny-actions">
+            <button type="button" class="fugveny-btn secondary" id="fugveny-refresh">Frissítés</button>
+            <button type="button" class="fugveny-btn" id="fugveny-train" disabled>Tanítás (CatBoost)</button>
+            <button type="button" class="fugveny-btn secondary" id="fugveny-score" disabled>Lista pontozása</button>
+          </div>
+          <p id="fugveny-train-status" class="fugveny-status"></p>
+          <div id="fugveny-metrics" class="fugveny-metrics"></div>
+          <pre id="fugveny-log" class="fugveny-log" hidden></pre>
+        </section>
+
+        <section class="fugveny-panel">
+          <h2>2. Árlekérdezés</h2>
+          <form id="fugveny-estimate-form" class="fugveny-form">
+            <label
+              >Gyártmány
+              <select id="fugveny-gyartmany" name="gyartmany" required>
+                <option value="">Válasszon</option>
+              </select>
+            </label>
+            <label
+              >Modell
+              <select id="fugveny-modell" name="modell" required>
+                <option value="">Előbb válassz gyártmányt</option>
+              </select>
+            </label>
+            <label class="wide"
+              >Típus
+              <select id="fugveny-tipus" name="tipus">
+                <option value="">Előbb gyártmány, modell és év</option>
+              </select>
+            </label>
+            <label
+              >Üzemanyag
+              <select name="uzemanyag">
+                <option>Diesel</option>
+                <option>Benzin</option>
+                <option>Hibrid</option>
+                <option>Elektromos</option>
+                <option>LPG</option>
+              </select>
+            </label>
+            <label
+              >Év
+              <select id="fugveny-ev" name="ev">
+                <option value="">Mindegy</option>
+              </select>
+            </label>
+            <label>Hónap <input name="honap" type="number" min="1" max="12" placeholder="5" /></label>
+            <label>cm³ <input name="ccm" type="number" placeholder="1968" /></label>
+            <label>kW <input name="kw" type="number" placeholder="150" /></label>
+            <label>LE <input name="le" type="number" placeholder="204" /></label>
+            <label>Km <input name="km" type="number" placeholder="120000" /></label>
+            <div class="fugveny-actions" style="grid-column: 1 / -1">
+              <button type="submit" class="fugveny-btn">Becslés</button>
+              <button type="button" class="fugveny-btn secondary" id="fugveny-save-estimate">Mentés lekérdezésként</button>
+            </div>
+          </form>
+          <div id="fugveny-estimate-result" class="fugveny-result" hidden></div>
+        </section>
+
+        <section class="fugveny-panel" style="grid-column: 1 / -1">
+          <h2>3. Mentett lekérdezések</h2>
+          <form id="fugveny-filter-form" class="fugveny-form">
+            <label>Név <input name="name" placeholder="Audi A6 olcsó &lt; −8%" required /></label>
+            <label
+              >Típus
+              <select name="type">
+                <option value="undervalued">Olcsó a piachoz képest</option>
+                <option value="filter">Szűrés scored listán</option>
+                <option value="estimate">Egyedi becslés (űrlap)</option>
+              </select>
+            </label>
+            <label>Gyártmány <input name="gyartmany" placeholder="Audi" /></label>
+            <label>Modell <input name="modell" placeholder="A6" /></label>
+            <label>Max km <input name="maxKm" type="number" placeholder="200000" /></label>
+            <label>Min év <input name="minEv" type="number" placeholder="2016" /></label>
+            <label>Max év <input name="maxEv" type="number" placeholder="2022" /></label>
+            <label>Max eltérés % <input name="maxElteresPct" type="number" step="0.1" placeholder="-5" value="-5" /></label>
+            <label>Limit <input name="limit" type="number" value="30" /></label>
+            <div class="fugveny-actions" style="grid-column: 1 / -1">
+              <button type="submit" class="fugveny-btn">Lekérdezés mentése</button>
+            </div>
+          </form>
+
+          <h3>Mentett</h3>
+          <div id="fugveny-queries" class="fugveny-queries"></div>
+          <p id="fugveny-queries-empty" class="fugveny-empty">Még nincs mentett lekérdezés.</p>
+
+          <div id="fugveny-query-table-wrap" class="fugveny-table-wrap" hidden>
+            <table class="fugveny-table" id="fugveny-query-table">
+              <thead></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <p id="fugveny-query-status" class="fugveny-status"></p>
+        </section>
+      </div>
+    </main>
+
+    <script type="module" src="/js/fugveny-app.js?v=fugveny20260728catalog"></script>
+    <script src="/js/site-avatar-menu.js?v=auth20260805localdb9" type="module"></script>
+
+    <script src="/js/site-auth.js?v=auth20260805localdb9" type="module"></script>
+  </body>
+</html>

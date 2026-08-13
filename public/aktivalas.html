@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="hu">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="autosweb-version" content="auth20260805mail1" />
+    <title>Fiók aktiválása — Add el autod.hu</title>
+    <link rel="stylesheet" href="/css/style.css?v=auth20260805mail1" />
+    <link rel="stylesheet" href="/css/site-app.css?v=auth20260805mail1" />
+  </head>
+  <body class="site-app login-page" data-site-page="aktivalas" data-auth-init="manual">
+    <div class="local-banner">LOCALHOST — email aktiválás</div>
+    <header class="site-header site-app-header">
+      <div class="site-app-header-inner">
+        <a class="site-app-logo" href="/">Add el autod.hu</a>
+      </div>
+    </header>
+    <main class="login-main">
+      <section class="login-card" aria-labelledby="activate-title">
+        <h1 class="login-title" id="activate-title">Fiók aktiválása</h1>
+        <p class="login-lead">Ha az emailben lévő linkre kattintottál, az aktiválás automatikus. Ha nem kaptál levelet, küldd újra.</p>
+        <p id="activate-status" class="login-lead" role="status" hidden></p>
+        <form id="resend-form" class="login-form">
+          <label class="login-field">
+            <span class="login-label">Email</span>
+            <input type="email" name="email" required placeholder="pelda@email.hu" />
+          </label>
+          <button type="submit" class="site-header-btn site-header-btn--primary login-submit">Aktiváló email újraküldése</button>
+        </form>
+        <p class="login-hint"><a href="/belepes.html">Belépés</a> · <a href="/regisztracio.html">Regisztráció</a></p>
+      </section>
+    </main>
+    <script type="module">
+      import { initActivatePage } from "/js/site-auth.js?v=auth20260805mail1";
+      initActivatePage();
+    </script>
+  </body>
+</html>

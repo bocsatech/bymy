@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="hu">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="autosweb-version" content="partners20260725" />
+    <title>Partnerek — Add el autod.hu</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/css/style.css?v=partners20260725" />
+    <link rel="stylesheet" href="/css/site-app.css?v=auth20260730avatar2" />
+    <link rel="stylesheet" href="/css/partners.css?v=partners20260725" />
+  </head>
+  <body class="site-app partners-page" data-site-page="partners">
+    <div class="local-banner">LOCALHOST — fizetős partner adatbázis kezelése</div>
+
+    <header class="site-header site-app-header">
+      <div class="site-app-header-inner">
+        <a class="site-app-logo" href="/">Add el autod.hu</a>
+        <nav class="import-nav site-app-nav" aria-label="Oldalak">
+          <a class="import-nav-link" href="/">Főoldal</a>
+          <a class="import-nav-link" href="/import.html">Import</a>
+          <a class="import-nav-link" href="/listings.html">Hirdetések</a>
+          <a class="import-nav-link" href="/fugveny.html">Függvény</a>
+          <a class="import-nav-link active" href="/partners.html">Partnerek</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="partners-main">
+      <header class="partners-header">
+        <h1 class="partners-title">Fizetős partnerek</h1>
+        <p class="partners-lead">
+          Csak aktív, fizetős partnerek jelennek meg a főoldali ajánlóban. Irányítószám alapján, max 30 km.
+        </p>
+        <p id="partners-stats" class="partners-stats">—</p>
+      </header>
+
+      <div class="partners-grid">
+        <section class="partners-panel" aria-labelledby="partner-form-title">
+          <h2 class="partners-panel-title" id="partner-form-title">Új partner</h2>
+          <form id="partner-form" class="partners-form">
+            <label class="partners-field">
+              <span>Név</span>
+              <input name="name" type="text" required />
+            </label>
+            <label class="partners-field">
+              <span>Cím</span>
+              <input name="address" type="text" required />
+            </label>
+            <label class="partners-field partners-field--short">
+              <span>Irányítószám</span>
+              <input name="postal_code" type="text" inputmode="numeric" maxlength="4" required />
+            </label>
+            <label class="partners-field">
+              <span>Telefon</span>
+              <input name="phone" type="tel" required />
+            </label>
+            <label class="partners-field">
+              <span>Nyitvatartás</span>
+              <input name="opening_hours" type="text" placeholder="H–P 8–17" />
+            </label>
+            <label class="partners-field">
+              <span>Google Place ID</span>
+              <input name="google_place_id" type="text" />
+            </label>
+            <div class="partners-field-row">
+              <label class="partners-field">
+                <span>Google értékelés</span>
+                <input name="google_rating" type="number" min="0" max="5" step="0.1" />
+              </label>
+              <label class="partners-field">
+                <span>Értékelések száma</span>
+                <input name="google_review_count" type="number" min="0" step="1" />
+              </label>
+            </div>
+            <fieldset class="partners-services">
+              <legend>Szolgáltatások</legend>
+              <div class="partners-services-grid" id="partner-services-grid"></div>
+            </fieldset>
+            <div class="partners-checks">
+              <label><input name="is_active" type="checkbox" checked /> Aktív</label>
+              <label><input name="is_paid" type="checkbox" /> Fizetős (ajánlható)</label>
+            </div>
+            <label class="partners-field">
+              <span>Fizetés lejárata</span>
+              <input name="paid_until" type="date" />
+            </label>
+            <div class="partners-form-actions">
+              <button type="submit" class="site-header-btn site-header-btn--primary">Mentés</button>
+              <button type="button" class="site-header-btn site-header-btn--ghost" id="partner-form-reset">Új űrlap</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="partners-panel partners-panel--list" aria-labelledby="partners-list-title">
+          <h2 class="partners-panel-title" id="partners-list-title">Partnerlista</h2>
+          <div id="partners-list" class="partners-list"></div>
+        </section>
+      </div>
+
+      <section class="partners-panel partners-panel--wide">
+        <h2 class="partners-panel-title">JSON import</h2>
+        <p class="partners-help">Tömb formátum: <code>[{ "name": "...", "postal_code": "8000", "services": ["autoszerelo"], "is_paid": true }]</code></p>
+        <textarea id="partner-import-json" class="partners-import" rows="8" placeholder='[{"name":"...", "address":"...", "postal_code":"8000", "phone":"...", "services":["autoszerelo"], "is_paid":true}]'></textarea>
+        <button type="button" class="site-header-btn site-header-btn--ghost" id="partner-import-btn">Importálás</button>
+        <p id="partner-import-status" class="partners-import-status" hidden></p>
+      </section>
+
+      <section class="partners-panel partners-panel--wide">
+        <h2 class="partners-panel-title">Ajánló előnézet</h2>
+        <div class="partners-preview-row">
+          <input id="partner-preview-postal" type="text" inputmode="numeric" maxlength="4" placeholder="8000" />
+          <button type="button" class="site-header-btn site-header-btn--ghost" id="partner-preview-btn">Lekérdezés</button>
+        </div>
+        <pre id="partner-preview-out" class="partners-preview-out">—</pre>
+      </section>
+    </main>
+
+    <script type="module">
+      import { PARTNER_CATEGORIES } from "/js/partner-categories-data.js?v=partners20260725";
+      const grid = document.getElementById("partner-services-grid");
+      for (const cat of PARTNER_CATEGORIES) {
+        const label = document.createElement("label");
+        label.className = "partners-service-check";
+        label.innerHTML = `<input type="checkbox" name="services" value="${cat.id}" /> ${cat.label}`;
+        grid.append(label);
+      }
+    </script>
+    <script type="module" src="/js/partners-app.js?v=partners20260725"></script>
+  </body>
+</html>

@@ -1,0 +1,887 @@
+import { UZEMANYAG_CATEGORIES, EQUIPMENT_SECTIONS, KLIM_OPTIONS } from "./equipment-data.js";
+import { EGYEB_INFO_OPTIONS } from "./egyeb-info-data.js";
+import { initVehicleCatalogSelects, typeNameForField } from "./vehicle-catalog-client.js";
+
+export function createAdForm(options = {}) {
+  const mode = options.mode ?? "wizard";
+  const storageKey = options.storageKey ?? "hirdetes-local-draft";
+
+  const form = document.getElementById("ad-form");
+  if (!form) return null;
+
+  const panels = [...document.querySelectorAll(".step-panel")];
+  const indicators = [...document.querySelectorAll("[data-step-indicator]")];
+  const backBtn = document.getElementById("back-btn");
+  const nextBtn = document.getElementById("next-btn");
+  const footerActions = document.getElementById("footer-actions");
+  const automaxStepTitle = document.getElementById("automax-step-title");
+  const automaxStepLead = document.getElementById("automax-step-lead");
+  const uploadZone = document.getElementById("upload-zone");
+  const photoInput = document.getElementById("photo-input");
+  const photoGrid = document.getElementById("photo-grid");
+  const summaryText = document.getElementById("summary-text");
+  const newAdBtn = document.getElementById("new-ad-btn");
+  const adPanel = document.getElementById("ad-panel");
+  const successPanel = document.getElementById("success-panel");
+
+  const TOTAL_STEPS = 5;
+  const gyartasiEv = document.getElementById("gyartasi_ev");
+  const muszakiEv = document.getElementById("muszaki_ev");
+  const forgalombaHelyezesEv = document.getElementById("forgalomba_helyezes_ev");
+  const gyartmany = document.getElementById("gyartmany");
+  const modell = document.getElementById("modell");
+  const tipus = document.getElementById("tipus");
+  const tipusKatalogus = document.getElementById("tipus_katalogus");
+  const hirdetesCime = document.getElementById("hirdetes_cime");
+  const teljesitmenyKw = document.getElementById("teljesitmeny_kw");
+  const teljesitmenyLe = document.getElementById("teljesitmeny_le");
+  const leDisplay = document.getElementById("le-display");
+  const klima = document.getElementById("klima");
+  const equipmentRoot = document.getElementById("equipment-sections");
+  const egyebInfoRoot = document.getElementById("egyeb-info-sections");
+  const uzemanyag = document.getElementById("uzemanyag");
+  const fuelMain = document.getElementById("fuel-main");
+  const fuelSubpanels = document.getElementById("fuel-subpanels");
+  const fuelSelected = document.getElementById("fuel-selected");
+
+  let currentStep = 1;
+
+const AUTO_FILL_PRESETS = {
+  TESLA: { tipus: "Long Range AWD", hengerurtartalom: "", uzemanyag: "Elektromos", sebessegvalto: "Automata", hajtas: "Összkerék", teljesitmeny_kw: "258" },
+  VOLKSWAGEN: { tipus: "1.6 TDI", hengerurtartalom: "1598", uzemanyag: "Dízel", sebessegvalto: "Manuális (6 seb.)", hajtas: "Első kerék", teljesitmeny_kw: "77" },
+  TOYOTA: { tipus: "1.8 Hybrid", hengerurtartalom: "1798", uzemanyag: "Benzin/elektromos", sebessegvalto: "Fokozatmentes automata", hajtas: "Első kerék", teljesitmeny_kw: "72" },
+};
+
+function fillYearSelect(select) {
+  if (!select) return;
+  const now = new Date().getFullYear();
+  const empty = document.createElement("option");
+  empty.value = "";
+  empty.textContent = "év";
+  select.appendChild(empty);
+  for (let year = now; year >= 1980; year -= 1) {
+    const option = document.createElement("option");
+    option.value = String(year);
+    option.textContent = String(year);
+    select.appendChild(option);
+  }
+}
+
+function normalizeFuelValue(value) {
+  const aliases = {
+    Diesel: "Dízel",
+    "Diesel/elektromos": "Dízel/elektromos",
+  };
+  return aliases[value] ?? value;
+}
+
+function renderFuelDropdown() {
+  if (!uzemanyag || uzemanyag.tagName !== "SELECT") return;
+
+  const current = normalizeFuelValue(uzemanyag.value);
+  uzemanyag.innerHTML = "";
+
+  const empty = document.createElement("option");
+  empty.value = "";
+  empty.textContent = "Válasszon!";
+  uzemanyag.appendChild(empty);
+
+  for (const category of UZEMANYAG_CATEGORIES) {
+    if (category.children?.length) {
+      const group = document.createElement("optgroup");
+      group.label = category.label;
+
+      for (const child of category.children) {
+        const option = document.createElement("option");
+        option.value = child.value;
+        option.textContent = child.label;
+        group.appendChild(option);
+      }
+
+      uzemanyag.appendChild(group);
+      continue;
+    }
+
+    if (!category.value) continue;
+
+    const option = document.createElement("option");
+    option.value = category.value;
+    option.textContent = category.label;
+    uzemanyag.appendChild(option);
+  }
+
+  if (current) uzemanyag.value = current;
+}
+
+function renderFuelSelector() {
+  if (!fuelMain || !fuelSubpanels || uzemanyag?.tagName === "SELECT") return;
+
+  fuelMain.innerHTML = "";
+  fuelSubpanels.innerHTML = "";
+
+  for (const category of UZEMANYAG_CATEGORIES) {
+    const mainBtn = document.createElement("button");
+    mainBtn.type = "button";
+    mainBtn.className = "fuel-btn";
+    mainBtn.dataset.categoryId = category.id;
+    mainBtn.textContent = category.label;
+
+    if (category.children) {
+      mainBtn.addEventListener("click", () => toggleFuelPanel(category.id));
+    } else {
+      mainBtn.addEventListener("click", () => selectFuel(category.value, category.id));
+    }
+
+    fuelMain.appendChild(mainBtn);
+
+    if (!category.children) continue;
+
+    const panel = document.createElement("div");
+    panel.className = "fuel-subpanel";
+    panel.dataset.panelFor = category.id;
+
+    for (const child of category.children) {
+      const subBtn = document.createElement("button");
+      subBtn.type = "button";
+      subBtn.className = "fuel-btn";
+      subBtn.dataset.parentId = category.id;
+      subBtn.dataset.value = child.value;
+      subBtn.textContent = child.label;
+      subBtn.addEventListener("click", () => selectFuel(child.value, category.id, child.label));
+      panel.appendChild(subBtn);
+    }
+
+    fuelSubpanels.appendChild(panel);
+  }
+}
+
+function toggleFuelPanel(categoryId) {
+  const targetPanel = document.querySelector(`.fuel-subpanel[data-panel-for="${categoryId}"]`);
+  const willOpen = !targetPanel?.classList.contains("open");
+
+  document.querySelectorAll(".fuel-subpanel").forEach((panel) => panel.classList.remove("open"));
+  document.querySelectorAll(".fuel-btn[data-category-id]").forEach((btn) => btn.classList.remove("parent-open"));
+
+  if (willOpen && targetPanel) {
+    targetPanel.classList.add("open");
+    document.querySelector(`.fuel-btn[data-category-id="${categoryId}"]`)?.classList.add("parent-open");
+  }
+}
+
+function closeFuelPanels() {
+  document.querySelectorAll(".fuel-subpanel").forEach((panel) => panel.classList.remove("open"));
+  document.querySelectorAll(".fuel-btn.parent-open").forEach((btn) => btn.classList.remove("parent-open"));
+}
+
+function syncFuelButtonState(categoryId, subLabel = null) {
+  document.querySelectorAll(".fuel-btn").forEach((btn) => btn.classList.remove("active"));
+
+  if (categoryId) {
+    const mainBtn = document.querySelector(`.fuel-btn[data-category-id="${categoryId}"]`);
+    mainBtn?.classList.add("active");
+  }
+
+  if (subLabel) {
+    const subBtn = [...document.querySelectorAll(".fuel-btn[data-parent-id]")].find(
+      (btn) => btn.dataset.parentId === categoryId && btn.textContent === subLabel
+    );
+    subBtn?.classList.add("active");
+  }
+}
+
+function selectFuel(value, categoryId, subLabel = null) {
+  if (!uzemanyag) return;
+  uzemanyag.value = value;
+  uzemanyag.dataset.userEdited = "1";
+
+  if (fuelMain && uzemanyag.tagName !== "SELECT") {
+    closeFuelPanels();
+    syncFuelButtonState(categoryId, subLabel);
+
+    const category = UZEMANYAG_CATEGORIES.find((item) => item.id === categoryId);
+    const display = subLabel ? `${category?.label ?? ""} — ${subLabel}` : value;
+    if (fuelSelected) fuelSelected.textContent = `Kiválasztva: ${display}`;
+  }
+
+  syncFuelDependentFields();
+  saveDraft();
+}
+
+function restoreFuelSelection(value) {
+  if (!value) return;
+
+  if (uzemanyag?.tagName === "SELECT") {
+    uzemanyag.value = normalizeFuelValue(value);
+    syncFuelDependentFields();
+    return;
+  }
+
+  for (const category of UZEMANYAG_CATEGORIES) {
+    if (category.value === value) {
+      selectFuel(value, category.id);
+      return;
+    }
+    if (category.children) {
+      const child = category.children.find((item) => item.value === value);
+      if (child) {
+        selectFuel(value, category.id, child.label);
+        return;
+      }
+    }
+  }
+
+  if (uzemanyag && !uzemanyag.value) {
+    uzemanyag.value = value;
+    if (fuelSelected) fuelSelected.textContent = `Kiválasztva: ${value}`;
+    syncFuelDependentFields();
+  }
+}
+
+function renderKlimaOptions() {
+  for (const option of KLIM_OPTIONS) {
+    const el = document.createElement("option");
+    el.value = option;
+    el.textContent = option;
+    klima.appendChild(el);
+  }
+}
+
+function renderEgyebInfo() {
+  if (!egyebInfoRoot) return;
+  egyebInfoRoot.innerHTML = "";
+  for (const item of EGYEB_INFO_OPTIONS) {
+    const id = `info_${item.replace(/[^a-z0-9]+/gi, "_").toLowerCase()}`;
+    const label = document.createElement("label");
+    label.className = "check";
+    label.innerHTML = `<input type="checkbox" name="egyeb_info" value="${item}" id="${id}" /> ${item}`;
+    egyebInfoRoot.appendChild(label);
+  }
+}
+
+function renderEquipment() {
+  equipmentRoot.innerHTML = "";
+  for (const [key, section] of Object.entries(EQUIPMENT_SECTIONS)) {
+    const block = document.createElement("div");
+    block.className = "equipment-block";
+    block.innerHTML = `<h3>${section.title}</h3>`;
+    const grid = document.createElement("div");
+    grid.className = "equipment-grid";
+    for (const item of section.items) {
+      const id = `${key}_${item.replace(/[^a-z0-9]+/gi, "_").toLowerCase()}`;
+      const label = document.createElement("label");
+      label.className = "check";
+      label.innerHTML = `<input type="checkbox" name="felszereltseg" value="${item}" id="${id}" /> ${item}`;
+      grid.appendChild(label);
+    }
+    block.appendChild(grid);
+    equipmentRoot.appendChild(block);
+  }
+}
+
+function applyAutoFill() {
+  const preset = AUTO_FILL_PRESETS[gyartmany.value];
+  document.querySelectorAll(".auto-filled").forEach((field) => {
+    field.classList.remove("auto-filled");
+    if (!field.dataset.userEdited) field.value = "";
+  });
+
+  if (!preset) return;
+
+  for (const [name, value] of Object.entries(preset)) {
+    if (name === "modell") continue;
+    const field = form.elements.namedItem(name);
+    if (!field || field.dataset.userEdited === "1") continue;
+    field.value = value;
+    if (name !== "uzemanyag") field.classList.add("auto-filled");
+  }
+  modell?.classList.remove("auto-filled");
+  syncFuelDependentFields();
+  updateLeDisplay();
+  fitAllFormFields();
+}
+
+function isElectricFuel(value) {
+  return String(value ?? "").trim().toLowerCase() === "elektromos";
+}
+
+function syncFuelDependentFields() {
+  const value = uzemanyag?.value ?? "";
+  const electric = isElectricFuel(value);
+  document.querySelectorAll(".fuel-electric-only").forEach((el) => {
+    el.classList.toggle("hidden", !electric);
+  });
+  document.querySelectorAll(".fuel-combustion-only").forEach((el) => {
+    el.classList.toggle("hidden", electric);
+  });
+}
+
+function updateLeDisplay() {
+  const kw = Number(teljesitmenyKw.value);
+  const le = Number.isFinite(kw) ? Math.round(kw * 1.36) : 0;
+  leDisplay.textContent = `(= ${le.toLocaleString("hu-HU")} LE)`;
+  if (teljesitmenyLe) teljesitmenyLe.value = le > 0 ? String(le) : "";
+}
+
+function updateTitle() {
+  if (!hirdetesCime || hirdetesCime?.dataset.userEdited === "1") return;
+  const parts = [gyartmany.value, modell.value, tipus.value].filter(Boolean);
+  const year = gyartasiEv.value;
+  hirdetesCime.value = parts.length
+    ? `Eladó ${parts.join(" ")}${year ? ` (${year})` : ""}`
+    : "";
+  if (hirdetesCime.type !== "hidden") fitInputWidth(hirdetesCime);
+}
+
+function measureTextWidth(text, font) {
+  const measure = document.createElement("span");
+  measure.style.cssText = "position:absolute;visibility:hidden;white-space:nowrap;";
+  measure.style.font = font;
+  measure.textContent = text || " ";
+  document.body.appendChild(measure);
+  const width = measure.offsetWidth;
+  measure.remove();
+  return width;
+}
+
+function shouldUseFluidFieldWidths() {
+  return (
+    document.body.classList.contains("theme-m7") ||
+    document.body.classList.contains("theme-automax") ||
+    document.body.classList.contains("site-app")
+  );
+}
+
+function fitSelectWidth(select) {
+  if (!select || select.tagName !== "SELECT") return;
+  if (shouldUseFluidFieldWidths()) return;
+  const style = getComputedStyle(select);
+  const option = select.options[select.selectedIndex];
+  const text = option?.text?.trim() || "—";
+  select.style.width = `${Math.ceil(measureTextWidth(text, style.font)) + 34}px`;
+}
+
+function fitInputWidth(input) {
+  if (!input || input.tagName !== "INPUT") return;
+  if (shouldUseFluidFieldWidths()) return;
+  if (input.type === "checkbox" || input.type === "radio" || input.type === "file") return;
+  const style = getComputedStyle(input);
+  const text = input.value?.trim() || input.placeholder?.trim() || " ";
+  const min = input.type === "number" ? 3 : 2;
+  const width = Math.max(measureTextWidth(text, style.font), min * 8);
+  input.style.width = `${Math.ceil(width) + 22}px`;
+}
+
+function fitAllFormFields() {
+  if (shouldUseFluidFieldWidths()) {
+    form.querySelectorAll("select, input, textarea").forEach((el) => {
+      el.style.width = "";
+    });
+    return;
+  }
+  form.querySelectorAll("select").forEach(fitSelectWidth);
+  form.querySelectorAll('input:not([type="checkbox"]):not([type="radio"]):not([type="file"])').forEach(fitInputWidth);
+  if (hirdetesCime) fitInputWidth(hirdetesCime);
+}
+
+function wrapMdOutlinedFields() {
+  document.querySelectorAll(".form-grid").forEach((grid) => {
+    const items = [...grid.children];
+    for (const el of items) {
+      if (el.tagName !== "LABEL") continue;
+      const next = el.nextElementSibling;
+      if (!next || next.closest(".md-outlined")) continue;
+      if (next.classList.contains("full") || next.classList.contains("field-row")) continue;
+      const wrap = document.createElement("div");
+      wrap.className = "md-outlined";
+      grid.insertBefore(wrap, el);
+      wrap.append(el, next);
+    }
+  });
+
+  document.querySelectorAll(".labeled-field, .autofelvitele-title").forEach((block) => {
+    block.classList.add("md-outlined");
+  });
+
+  document.querySelectorAll(".md-outlined, .labeled-field").forEach((wrap) => {
+    if (wrap.querySelector("#gyartasi_ev, #muszaki_ev")) {
+      wrap.classList.add("md-has-calendar");
+    }
+  });
+}
+
+function showSuccess() {
+  adPanel?.classList.add("hidden");
+  successPanel?.classList.remove("hidden");
+  footerActions.classList.add("hidden");
+}
+
+function resetSuccess() {
+  adPanel?.classList.remove("hidden");
+  successPanel?.classList.add("hidden");
+  footerActions.classList.remove("hidden");
+}
+
+function goToStep(step) {
+  if (step < 1 || step > TOTAL_STEPS || step === currentStep) return;
+  saveDraft();
+  if (currentStep === TOTAL_STEPS) resetSuccess();
+  showStep(step);
+}
+
+function updateAutomaxStepHeader(step) {
+  if (!automaxStepTitle) return;
+  const activeIndicator = indicators.find((el) => Number(el.dataset.stepIndicator) === step);
+  automaxStepTitle.textContent = activeIndicator?.textContent?.trim() || "";
+
+  if (!automaxStepLead) return;
+  const panel = panels.find((el) => Number(el.dataset.step) === step);
+  const hint = panel?.querySelector(".card-body > .hint, .form-grid + .hint");
+  const uploadStrong = panel?.querySelector(".upload-zone strong");
+  const cardHead = panel?.querySelector(".card-head");
+
+  let lead = "";
+  if (step === 1) {
+    lead = "A csillaggal jelölt mezők kitöltése kötelező!";
+  } else if (hint) {
+    lead = hint.textContent.trim();
+  } else if (uploadStrong) {
+    lead = uploadStrong.textContent.trim();
+  } else if (cardHead) {
+    lead = cardHead.textContent.trim();
+  }
+
+  automaxStepLead.textContent = lead;
+  automaxStepLead.hidden = !lead;
+}
+
+function showStep(step) {
+  currentStep = step;
+  panels.forEach((panel) => {
+    panel.classList.toggle("hidden", Number(panel.dataset.step) !== step);
+  });
+  indicators.forEach((indicator) => {
+    const n = Number(indicator.dataset.stepIndicator);
+    indicator.classList.toggle("active", n === step);
+    indicator.classList.toggle("done", n < step);
+  });
+  updateAutomaxStepHeader(step);
+  backBtn.classList.toggle("hidden", step <= 1);
+  if (step === TOTAL_STEPS && successPanel && !successPanel.classList.contains("hidden")) {
+    footerActions.classList.add("hidden");
+  } else {
+    footerActions.classList.remove("hidden");
+  }
+  if (step === 1) nextBtn.textContent = "Hirdetésfeladás folytatása";
+  if (step === 2) nextBtn.textContent = "Tovább az extrákhoz";
+  if (step === 3) nextBtn.textContent = "Tovább a képekhez";
+  if (step === 4) nextBtn.textContent = "Tovább a hirdetéshez";
+  if (step === 5) nextBtn.textContent = "Mentés / összegzés";
+}
+
+function collectFormData() {
+  const data = Object.fromEntries(new FormData(form).entries());
+  data.felszereltseg = [...form.querySelectorAll('input[name="felszereltseg"]:checked')].map((el) => el.value);
+  data.egyeb_info = [...form.querySelectorAll('input[name="egyeb_info"]:checked')].map((el) => el.value);
+  return data;
+}
+
+function saveDraft() {
+  if (mode === "import") return;
+  localStorage.setItem(storageKey, JSON.stringify(collectFormData()));
+}
+
+function ensureSelectOption(select, value) {
+  if (!select || !value) return;
+  const has = [...select.options].some((option) => option.value === value || option.textContent === value);
+  if (!has) {
+    const option = document.createElement("option");
+    option.value = value;
+    option.textContent = value;
+    select.appendChild(option);
+  }
+  select.value = value;
+}
+
+function applyFormData(data, { fromImport = false } = {}) {
+  if (!data || typeof data !== "object") return;
+
+  form.querySelectorAll('input[name="felszereltseg"]').forEach((box) => {
+    box.checked = false;
+  });
+  form.querySelectorAll('input[name="egyeb_info"]').forEach((box) => {
+    box.checked = false;
+  });
+
+  for (const [key, value] of Object.entries(data)) {
+    if (key === "felszereltseg" || key === "egyeb_info") continue;
+    const field = form.elements.namedItem(key);
+    if (!field) continue;
+    const appliedValue = key === "gyartmany" && value ? String(value).toUpperCase() : value;
+    if (field instanceof RadioNodeList) {
+      [...field].forEach((node) => {
+        node.checked = node.value === appliedValue;
+      });
+    } else if (field.type === "checkbox") {
+      field.checked = appliedValue === "1" || appliedValue === true || appliedValue === "on";
+    } else if (field.tagName === "SELECT") {
+      ensureSelectOption(field, appliedValue);
+    } else {
+      field.value = appliedValue;
+    }
+    if (fromImport) {
+      field.dataset.userEdited = "1";
+      field.classList.remove("auto-filled");
+    }
+  }
+
+  for (const item of data.felszereltseg ?? []) {
+    const needle = String(item).toLowerCase();
+    const box = [...form.querySelectorAll('input[name="felszereltseg"]')].find(
+      (el) => el.value === item || el.value.toLowerCase() === needle || el.value.toLowerCase().includes(needle)
+    );
+    if (box) box.checked = true;
+  }
+
+  for (const item of data.egyeb_info ?? []) {
+    const needle = String(item).toLowerCase();
+    const box = [...form.querySelectorAll('input[name="egyeb_info"]')].find(
+      (el) => el.value === item || el.value.toLowerCase() === needle
+    );
+    if (box) box.checked = true;
+  }
+
+  if (data.hirdetes_cime && hirdetesCime) {
+    hirdetesCime.dataset.userEdited = "1";
+  }
+
+  syncPackageSelection();
+  if (fromImport && data.hirdetes_cime && hirdetesCime) {
+    hirdetesCime.value = data.hirdetes_cime;
+    hirdetesCime.dataset.userEdited = "1";
+    fitInputWidth(hirdetesCime);
+  } else {
+    updateTitle();
+  }
+
+  const kmInput = document.getElementById("km");
+  if (kmInput && data.km != null && String(data.km).trim() !== "") {
+    kmInput.value = String(data.km);
+    if (fromImport) kmInput.dataset.userEdited = "1";
+  }
+  updateLeDisplay();
+  restoreFuelSelection(data.uzemanyag);
+  syncFuelDependentFields();
+  fitAllFormFields();
+  if (mode === "import") {
+    options.onApplied?.(data);
+  } else {
+    saveDraft();
+    goToStep(1);
+  }
+}
+
+function restoreDraft() {
+  if (mode === "import") return;
+  try {
+    const raw = localStorage.getItem(storageKey);
+    if (!raw) return;
+    applyFormData(JSON.parse(raw));
+  } catch {
+    /* ignore */
+  }
+}
+
+function showAllSteps() {
+  panels.forEach((panel) => panel.classList.remove("hidden"));
+}
+
+function resetForm() {
+  form.reset();
+  form.querySelectorAll('input[name="felszereltseg"]').forEach((box) => {
+    box.checked = false;
+  });
+  form.querySelectorAll('input[name="egyeb_info"]').forEach((box) => {
+    box.checked = false;
+  });
+  if (fuelSelected) fuelSelected.textContent = "";
+  syncFuelDependentFields();
+  updateTitle();
+  fitAllFormFields();
+}
+
+function validateFields(names) {
+  for (const name of names) {
+    const field = form.elements.namedItem(name);
+    const value = field?.value?.trim?.() ?? "";
+    if (!value) {
+      field?.focus();
+      return false;
+    }
+  }
+  return true;
+}
+
+function validateStep(step) {
+  const basicRequired = [
+    "gyartasi_ev",
+    "gyartmany",
+    "modell",
+    "tipus",
+    "kivitel",
+    "allapot",
+    "okmany_jelleg",
+    "okmany_ervenyesseg",
+    "km",
+  ];
+  const techRequired = ["uzemanyag"];
+  const adRequired = [
+    "vetelar",
+    "megye",
+    "telepules",
+    "telefon1_korzet",
+    "telefon1_szam",
+  ];
+
+  if (step === 1) {
+    if (!validateFields(basicRequired)) {
+      alert("Kérjük, töltsd ki a kötelező (*) mezőket.");
+      return false;
+    }
+    return true;
+  }
+
+  if (step === 2) {
+    if (!validateFields(techRequired)) {
+      alert("Kérjük, válassz üzemanyagot a Műszaki adatoknál.");
+      return false;
+    }
+    return true;
+  }
+
+  if (step === TOTAL_STEPS) {
+    if (!validateFields(basicRequired)) {
+      alert("Kérjük, töltsd ki a kötelező (*) mezőket az Alapadatok fülön.");
+      goToStep(1);
+      return false;
+    }
+    if (!validateFields(techRequired)) {
+      alert("Kérjük, válassz üzemanyagot a Műszaki adatoknál.");
+      goToStep(2);
+      return false;
+    }
+    if (!validateFields(adRequired)) {
+      alert("Kérjük, töltsd ki a kötelező (*) mezőket.");
+      return false;
+    }
+    return true;
+  }
+
+  return true;
+}
+
+function buildSummary() {
+  const data = collectFormData();
+  const phone = `${data.telefon1_orszag ?? ""} ${data.telefon1_korzet ?? ""} ${data.telefon1_szam ?? ""}`.trim();
+  summaryText.textContent = `${data.hirdetes_cime || `${data.gyartmany} ${data.modell}`} · ${Number(data.km).toLocaleString("hu-HU")} km · ${Number(data.vetelar).toLocaleString("hu-HU")} Ft · ${phone}`;
+}
+
+function syncPackageSelection() {
+  document.querySelectorAll(".package").forEach((card) => {
+    const radio = card.querySelector('input[type="radio"]');
+    card.classList.toggle("selected", radio?.checked);
+  });
+}
+
+function renderPhotoPreview(files) {
+  photoGrid.innerHTML = "";
+  const list = [...(files ?? [])].slice(0, 12);
+  if (list.length === 0) {
+    for (let i = 1; i <= 6; i += 1) {
+      const slot = document.createElement("div");
+      slot.className = "photo-slot";
+      slot.textContent = i === 1 ? "1. főkép" : `${i}.`;
+      photoGrid.appendChild(slot);
+    }
+    return;
+  }
+  list.forEach((file, index) => {
+    const slot = document.createElement("div");
+    slot.className = "photo-slot";
+    const img = document.createElement("img");
+    img.src = URL.createObjectURL(file);
+    img.alt = file.name;
+    img.style.width = "100%";
+    img.style.height = "100%";
+    img.style.objectFit = "cover";
+    img.style.borderRadius = "6px";
+    slot.appendChild(img);
+    if (index === 0) slot.title = "Főkép";
+    photoGrid.appendChild(slot);
+  });
+}
+
+form.querySelectorAll(".auto-filled, #tipus, #hengerurtartalom, #sebessegvalto, #hajtas, #teljesitmeny_kw").forEach((field) => {
+  field?.addEventListener("input", () => {
+    field.dataset.userEdited = "1";
+    field.classList.remove("auto-filled");
+  });
+});
+
+[gyartmany, modell, tipus, gyartasiEv].forEach((field) => {
+  field?.addEventListener("input", updateTitle);
+  field?.addEventListener("change", updateTitle);
+});
+
+hirdetesCime?.addEventListener("input", () => {
+  hirdetesCime.dataset.userEdited = "1";
+});
+
+gyartmany?.addEventListener("change", applyAutoFill);
+teljesitmenyKw?.addEventListener("input", updateLeDisplay);
+
+if (mode === "wizard") {
+  backBtn?.addEventListener("click", () => {
+    if (currentStep > 1) goToStep(currentStep - 1);
+  });
+
+  indicators.forEach((indicator) => {
+    const step = Number(indicator.dataset.stepIndicator);
+    indicator.setAttribute("role", "tab");
+    indicator.setAttribute("tabindex", "0");
+    indicator.addEventListener("click", () => goToStep(step));
+    indicator.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        goToStep(step);
+      }
+    });
+  });
+
+  nextBtn?.addEventListener("click", () => {
+    if (!validateStep(currentStep)) return;
+    saveDraft();
+    if (currentStep < TOTAL_STEPS) {
+      goToStep(currentStep + 1);
+      return;
+    }
+    buildSummary();
+    const formData = collectFormData();
+    options.onWizardComplete?.(formData);
+    showSuccess();
+  });
+
+  newAdBtn?.addEventListener("click", () => {
+    form.reset();
+    localStorage.removeItem(storageKey);
+    renderPhotoPreview([]);
+    resetSuccess();
+    updateTitle();
+    fitAllFormFields();
+    showStep(1);
+  });
+
+  form.addEventListener("input", saveDraft);
+  form.addEventListener("change", saveDraft);
+
+  uploadZone?.addEventListener("click", () => photoInput.click());
+  uploadZone?.addEventListener("dragover", (event) => {
+    event.preventDefault();
+    uploadZone.style.borderColor = "#f57c00";
+  });
+  uploadZone?.addEventListener("dragleave", () => {
+    uploadZone.style.borderColor = "";
+  });
+  uploadZone?.addEventListener("drop", (event) => {
+    event.preventDefault();
+    uploadZone.style.borderColor = "";
+    if (event.dataTransfer?.files?.length) {
+      photoInput.files = event.dataTransfer.files;
+      renderPhotoPreview(event.dataTransfer.files);
+    }
+  });
+  photoInput?.addEventListener("change", () => {
+    if (photoInput.files) renderPhotoPreview(photoInput.files);
+  });
+}
+
+form.addEventListener("input", (event) => {
+  const target = event.target;
+  if (target.matches("select")) fitSelectWidth(target);
+  else if (target.matches('input:not([type="checkbox"]):not([type="radio"]):not([type="file"])')) fitInputWidth(target);
+});
+
+form.addEventListener("change", (event) => {
+  if (event.target.matches("select")) fitSelectWidth(event.target);
+});
+
+document.querySelectorAll(".package").forEach((card) => {
+  card.addEventListener("click", () => {
+    const radio = card.querySelector('input[type="radio"]');
+    if (radio) radio.checked = true;
+    syncPackageSelection();
+    saveDraft();
+  });
+});
+
+fillYearSelect(gyartasiEv);
+fillYearSelect(muszakiEv);
+fillYearSelect(forgalombaHelyezesEv);
+initVehicleCatalogSelects({
+  brandSelect: gyartmany,
+  modelSelect: modell,
+  yearSelect: gyartasiEv,
+  tipusSelect: tipusKatalogus,
+  // A gyártási év listája marad a teljes évsor — csak a típusokat szűri.
+  yearFromCatalog: false,
+  brandEmptyLabel: "Válasszon",
+  modelEmptyLabel: "Válasszon",
+  tipusEmptyLabel: "Válasszon típust",
+  onChange: () => {
+    applyAutoFill();
+    updateTitle();
+    fitAllFormFields();
+  },
+}).catch(() => {});
+
+tipusKatalogus?.addEventListener("change", () => {
+  if (!tipusKatalogus.value || !tipus) return;
+  tipus.value = typeNameForField(tipusKatalogus.value, modell?.value);
+  tipus.dataset.userEdited = "1";
+  tipus.classList.remove("auto-filled");
+  updateTitle();
+  fitAllFormFields();
+  saveDraft();
+});
+renderFuelDropdown();
+renderFuelSelector();
+renderKlimaOptions();
+renderEquipment();
+renderEgyebInfo();
+wrapMdOutlinedFields();
+syncFuelDependentFields();
+fitAllFormFields();
+
+uzemanyag?.addEventListener("change", () => {
+  if (uzemanyag.tagName !== "SELECT") return;
+  uzemanyag.dataset.userEdited = "1";
+  syncFuelDependentFields();
+  saveDraft();
+});
+
+if (mode === "wizard") {
+  restoreDraft();
+  renderPhotoPreview([]);
+  showStep(1);
+} else {
+  showAllSteps();
+}
+
+return {
+  applyFormData,
+  collectFormData,
+  resetForm,
+  showAllSteps,
+  syncFuelDependentFields,
+  fitAllFormFields,
+};
+}

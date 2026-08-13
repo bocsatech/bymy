@@ -1,0 +1,1449 @@
+/* AUTOMAX prémium dizájn — szövegek változatlanok */
+
+.theme-automax {
+  --ax-orange: #ff5500;
+  --ax-orange-dim: #cc4400;
+  --ax-bg: #000000;
+  --ax-surface: #0a0a0a;
+  --ax-border: #ffffff;
+  --ax-text: #ffffff;
+  --ax-muted: #888888;
+  --ax-label: #ffffff;
+  --m7-field-border: #ffffff;
+  --m7-field-radius: 4px;
+  --m7-field-height: 48px;
+  --m7-label-accent: var(--ax-orange);
+  --m7-label-default: var(--ax-label);
+  --m7-placeholder: #555555;
+  --primary: var(--ax-orange);
+  --orange-dark: var(--ax-orange-dim);
+  --text: var(--ax-text);
+  --muted: var(--ax-muted);
+  --bg: var(--ax-bg);
+  --border: var(--ax-border);
+  --surface-container: var(--ax-surface);
+  --surface-container-low: #111111;
+  --blue-link: var(--ax-orange);
+}
+
+body.theme-automax {
+  font-family: Inter, system-ui, sans-serif;
+  background: var(--ax-bg);
+  color: var(--ax-text);
+}
+
+body.theme-automax .inline-checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+}
+
+body.theme-automax .owner-flags .inline-checks {
+  align-items: center;
+}
+
+body.theme-automax .local-banner {
+  background: #0a0a0a;
+  color: #444;
+  border-bottom: 1px solid #151515;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 6px 48px;
+}
+
+/* —— Fejléc + lépéssáv —— */
+.theme-automax .site-header,
+.theme-automax .automax-header {
+  background: #000;
+  border-bottom: 1px solid #1a1a1a;
+  box-shadow: none;
+}
+
+.theme-automax .header-top {
+  max-width: none;
+  padding: 22px 48px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  gap: 24px;
+}
+
+.theme-automax .header-actions {
+  position: absolute;
+  right: 48px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.theme-automax .header-actions,
+.theme-automax .header-actions a {
+  color: #777;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+}
+
+.theme-automax .header-actions a:hover {
+  color: #fff;
+  text-decoration: none;
+}
+
+.theme-automax .header-actions .btn-primary {
+  background: transparent;
+  color: var(--ax-orange);
+  border: 1px solid var(--ax-orange);
+  border-radius: 0;
+  box-shadow: none;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 10px 18px;
+}
+
+.theme-automax .header-actions .btn-primary:hover {
+  background: var(--ax-orange);
+  color: #000;
+}
+
+/* Lépéssáv a fejlécben */
+.theme-automax .automax-header .steps {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px 32px;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  border-radius: 0;
+  padding: 0;
+  margin: 0;
+  overflow: visible;
+}
+
+.theme-automax .step {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 0 8px;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  border-bottom: 3px solid transparent;
+  background: transparent !important;
+  color: #444;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  box-shadow: none !important;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.theme-automax .step::before {
+  content: "0" attr(data-step-indicator);
+  width: auto;
+  height: auto;
+  min-width: 0;
+  padding: 0;
+  border-radius: 0;
+  background: transparent !important;
+  color: inherit;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.theme-automax .step.active {
+  color: #fff;
+  border-bottom-color: var(--ax-orange);
+}
+
+.theme-automax .step.active::before {
+  color: #fff;
+}
+
+.theme-automax .step.done {
+  color: #555;
+}
+
+.theme-automax .step.done::before {
+  color: #555;
+}
+
+/* —— Layout: bal űrlap, jobb panel —— */
+.page-automax {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 38%);
+  min-height: calc(100vh - 88px);
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+
+.automax-main {
+  padding: 40px 56px 64px;
+  background: #000;
+  min-width: 0;
+}
+
+/* Lépés cím (Playfair) */
+.automax-step-header {
+  margin-bottom: 28px;
+}
+
+.automax-step-title {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: clamp(36px, 4vw, 52px);
+  font-weight: 600;
+  color: #fff;
+  margin: 0 0 12px;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+}
+
+.automax-step-lead {
+  margin: 0;
+  color: var(--ax-orange);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.5;
+  max-width: 640px;
+}
+
+.automax-step-lead[hidden] {
+  display: none;
+}
+
+/* —— Jobb panel —— */
+.automax-panel {
+  position: relative;
+  background: #000;
+  overflow: hidden;
+  border-left: 1px solid #1a1a1a;
+}
+
+.automax-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.55) 0%,
+    rgba(0, 0, 0, 0.08) 38%,
+    rgba(0, 0, 0, 0.15) 62%,
+    rgba(0, 0, 0, 0.82) 100%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+.automax-panel-glow,
+.automax-car-visual {
+  display: none;
+}
+
+.automax-panel-content {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  min-height: 520px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 56px 40px 48px;
+  gap: 32px;
+}
+
+.automax-panel-quote {
+  position: relative;
+  padding-top: 8px;
+}
+
+.automax-panel-quote::before {
+  content: "\201C";
+  position: absolute;
+  left: -8px;
+  top: -28px;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 72px;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.12);
+  pointer-events: none;
+}
+
+.theme-automax .automax-panel .m7-sidebar-title {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: clamp(22px, 2.2vw, 30px);
+  font-weight: 600;
+  color: #fff;
+  text-align: left;
+  margin: 0 0 12px;
+  line-height: 1.3;
+  position: relative;
+  z-index: 1;
+}
+
+.theme-automax .automax-panel .m7-sidebar-lead {
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 13px;
+  text-align: left;
+  margin: 0;
+  line-height: 1.6;
+  max-width: 280px;
+}
+
+.theme-automax .m7-sidebar-features {
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.theme-automax .m7-feature-icon--orange,
+.theme-automax .m7-feature-icon--green,
+.theme-automax .m7-feature-icon--purple {
+  background: rgba(255, 85, 0, 0.15);
+  color: var(--ax-orange);
+  border: 1px solid rgba(255, 85, 0, 0.25);
+}
+
+.theme-automax .m7-feature-text strong {
+  color: #ccc;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.theme-automax .m7-feature-text > span {
+  color: #666;
+  font-size: 11px;
+}
+
+.theme-automax .m7-sidebar-tip {
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid #333;
+  border-radius: 4px;
+  backdrop-filter: blur(4px);
+  padding: 16px 18px;
+}
+
+.theme-automax .m7-tip-text strong {
+  color: #fff;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.theme-automax .m7-tip-text > span {
+  color: #888;
+  font-size: 12px;
+}
+
+.theme-automax .m7-tip-icon {
+  color: var(--ax-orange);
+}
+
+/* —— Kategória —— */
+.theme-automax .category-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  background: transparent;
+  box-shadow: none;
+  border: 0;
+  padding: 0;
+  margin-bottom: 32px;
+  color: #555;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+}
+
+.theme-automax .category-bar strong {
+  color: #888;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+}
+
+/* —— Kártyák, űrlap —— */
+.theme-automax .card {
+  background: transparent;
+  box-shadow: none;
+  border: 0;
+  margin-bottom: 0;
+}
+
+.theme-automax .card-body {
+  padding: 0;
+}
+
+.theme-automax .card-head {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 22px;
+  color: #fff;
+  border-bottom-color: #222;
+  padding-left: 0;
+}
+
+.theme-automax .autofelvitele {
+  border-bottom-color: #222;
+  margin-bottom: 28px;
+  padding-bottom: 20px;
+}
+
+.theme-automax .autofelvitele-label {
+  color: var(--ax-label);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.theme-automax .fuel-btn {
+  background: #111;
+  border: 1px solid #333;
+  color: #888;
+  border-radius: 0;
+}
+
+.theme-automax .fuel-btn.active {
+  background: var(--ax-orange);
+  border-color: var(--ax-orange);
+  color: #000;
+  font-weight: 700;
+}
+
+.theme-automax .fuel-selected,
+.theme-automax .hint,
+.theme-automax .hint-inline {
+  color: #666;
+}
+
+.theme-automax .form-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px 28px;
+}
+
+.theme-automax .form-grid > .md-outlined {
+  width: 100%;
+  justify-self: stretch;
+}
+
+.theme-automax .field-row.full {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px 28px;
+  width: 100% !important;
+}
+
+.theme-automax .form-grid > .field-row.full,
+.theme-automax .form-grid > .full {
+  grid-column: 1 / -1;
+}
+
+.theme-automax .field-row.full:has(.labeled-field:nth-child(3):last-child),
+.theme-automax .field-row--vehicle-dates {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.theme-automax .field-row--vehicle-top {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.theme-automax .field-row--km,
+.theme-automax .field-row--tipus {
+  grid-template-columns: 1fr !important;
+}
+
+.theme-automax .field-row--km .labeled-field,
+.theme-automax .field-row--tipus .labeled-field {
+  max-width: calc(50% - 14px);
+}
+
+.theme-automax .field-row.full .labeled-field {
+  width: 100%;
+  min-width: 0;
+}
+
+.theme-automax .labeled-field {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.theme-automax .field-row.full .labeled-field input,
+.theme-automax .field-row.full .labeled-field select {
+  width: 100% !important;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* —— Mezők: címke felül, sötét input —— */
+.theme-automax .md-outlined,
+.theme-automax .labeled-field.md-outlined,
+.theme-automax .autofelvitele-title.md-outlined {
+  display: grid;
+  gap: 8px;
+}
+
+.theme-automax .form-grid label {
+  color: #fff;
+}
+
+.theme-automax .md-outlined > label,
+.theme-automax .labeled-field > label,
+.theme-automax .autofelvitele-title > label {
+  position: static;
+  transform: none;
+  background: transparent;
+  padding: 0;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ax-label);
+  pointer-events: auto;
+}
+
+.theme-automax .md-outlined > label .req,
+.theme-automax .labeled-field > label .req {
+  color: var(--ax-orange);
+}
+
+.theme-automax .md-outlined:focus-within > label,
+.theme-automax .labeled-field:focus-within > label {
+  color: var(--ax-orange);
+}
+
+.theme-automax .md-outlined > select,
+.theme-automax .md-outlined > input:not([type="checkbox"]):not([type="radio"]),
+.theme-automax .labeled-field > select,
+.theme-automax .labeled-field > input,
+.theme-automax .autofelvitele-title > input {
+  width: 100% !important;
+  height: var(--m7-field-height);
+  background: var(--ax-surface);
+  border: 1px solid var(--ax-border);
+  border-radius: var(--m7-field-radius);
+  color: #fff;
+  padding: 12px 14px;
+  font-size: 14px;
+  box-shadow: none;
+}
+
+.theme-automax .md-outlined > select,
+.theme-automax .labeled-field > select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23888' d='M1.4 1.4 6 6l4.6-4.6L12 3.8 6 9.8.4 3.8z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 36px;
+}
+
+.theme-automax .md-outlined > select:focus,
+.theme-automax .md-outlined > input:focus,
+.theme-automax .labeled-field > select:focus,
+.theme-automax .labeled-field > input:focus {
+  border-color: var(--ax-orange);
+  box-shadow: 0 0 0 1px var(--ax-orange);
+  outline: none;
+}
+
+.theme-automax .labeled-field.md-outlined > .inline-2,
+.theme-automax .md-outlined > .inline-2,
+.theme-automax .labeled-field.md-outlined > .suffix-field,
+.theme-automax .md-outlined > .suffix-field {
+  background: var(--ax-surface);
+  border: 1px solid var(--ax-border);
+  border-radius: var(--m7-field-radius);
+  min-height: var(--m7-field-height);
+  padding: 4px 8px;
+  width: 100%;
+}
+
+.theme-automax .labeled-field.md-outlined > .inline-2 select,
+.theme-automax .md-outlined > .inline-2 select,
+.theme-automax .labeled-field.md-outlined > .inline-2 input {
+  background: transparent;
+  border: 0 !important;
+  color: #fff;
+  height: 38px;
+}
+
+.theme-automax .labeled-field.md-outlined > .suffix-field input,
+.theme-automax .md-outlined > .suffix-field input {
+  background: transparent;
+  border: 0 !important;
+  color: #fff;
+  width: 100% !important;
+}
+
+.theme-automax .labeled-field.md-outlined > .suffix-field span,
+.theme-automax .md-outlined > .suffix-field span {
+  color: #888;
+}
+
+.theme-automax input.auto-filled,
+.theme-automax select.auto-filled {
+  background: var(--ax-surface);
+  border-color: #ffffff;
+}
+
+.theme-automax .help-link {
+  color: var(--ax-orange);
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 11px;
+}
+
+.theme-automax .form-grid textarea,
+.theme-automax .md-outlined > textarea {
+  background: var(--ax-surface);
+  border: 1px solid var(--ax-border);
+  color: #fff;
+  min-height: 140px;
+}
+
+.theme-automax .check {
+  color: #aaa;
+}
+
+.theme-automax .upload-zone {
+  background: #0a0a0a;
+  border-color: #333;
+  color: #888;
+}
+
+.theme-automax .upload-zone strong {
+  color: #fff;
+}
+
+.theme-automax .package {
+  background: #0a0a0a;
+  border-color: #333;
+}
+
+.theme-automax .package.selected {
+  border-color: var(--ax-orange);
+  background: rgba(255, 85, 0, 0.08);
+}
+
+.theme-automax .package h3,
+.theme-automax .package .price {
+  color: #fff;
+}
+
+/* —— Lábléc gombok —— */
+.theme-automax .footer-actions {
+  margin-top: 48px;
+  padding-top: 0;
+  border-top: 0;
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+.theme-automax .footer-actions .btn-secondary {
+  background: transparent;
+  color: #666;
+  border: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 11px;
+  padding: 16px 0;
+}
+
+.theme-automax .footer-actions .btn-secondary:hover {
+  color: #aaa;
+}
+
+.theme-automax #next-btn.btn-primary,
+.theme-automax #new-ad-btn.btn-primary {
+  background: var(--ax-orange);
+  color: #000;
+  border-radius: 0;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 18px 40px;
+  box-shadow: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.theme-automax #next-btn.btn-primary::after,
+.theme-automax #new-ad-btn.btn-primary::after {
+  content: "";
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath fill='%23000' d='M3 8h8M9 5l3 3-3 3' stroke='%23000' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  flex-shrink: 0;
+}
+
+.theme-automax #next-btn.btn-primary:hover {
+  background: #ff7722;
+  color: #000;
+}
+
+.theme-automax .success-box h2 {
+  font-family: "Playfair Display", Georgia, serif;
+  color: #fff;
+}
+
+/* Lépésalcím alatt már megjelenő szövegek elrejtése (duplikáció nélkül) */
+.theme-automax .step-panel[data-step="3"] > .card > .card-body > .hint:first-of-type,
+.theme-automax .step-panel[data-step="4"] .upload-zone strong {
+  display: none;
+}
+
+@media (max-width: 1200px) {
+  .theme-automax .header-top {
+    flex-direction: column;
+    gap: 20px;
+    padding-bottom: 18px;
+  }
+
+  .theme-automax .header-actions {
+    position: static;
+    transform: none;
+  }
+}
+
+@media (max-width: 1100px) {
+  .page-automax {
+    grid-template-columns: 1fr;
+  }
+
+  .automax-panel {
+    min-height: 360px;
+    border-left: 0;
+    border-top: 1px solid #1a1a1a;
+  }
+
+  .automax-car-visual {
+    display: none;
+  }
+
+  .automax-main {
+    padding: 28px 24px 48px;
+  }
+
+  .theme-automax .header-top {
+    padding: 18px 24px;
+  }
+
+  body.theme-automax .local-banner {
+    padding: 6px 24px;
+  }
+
+  .theme-automax .field-row--vehicle-top,
+  .theme-automax .field-row--vehicle-dates {
+    grid-template-columns: 1fr;
+  }
+
+  .theme-automax .field-row--km .labeled-field,
+  .theme-automax .field-row--tipus .labeled-field {
+    max-width: none;
+  }
+
+  .theme-automax .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .theme-automax .field-row.full {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+body.theme-automax .import-panel {
+  margin-bottom: 20px;
+  border-color: var(--ax-border);
+}
+
+body.theme-automax .import-panel.collapsed .card-body {
+  display: none;
+}
+
+body.theme-automax .import-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+body.theme-automax .btn-sm {
+  padding: 6px 12px;
+  font-size: 0.85rem;
+}
+
+body.theme-automax .import-url-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: stretch;
+}
+
+body.theme-automax .import-url-row input {
+  flex: 1 1 280px;
+  min-height: var(--m7-field-height);
+  padding: 0 14px;
+  border: 1px solid var(--ax-border);
+  border-radius: var(--m7-field-radius);
+  background: var(--ax-surface);
+  color: var(--ax-text);
+}
+
+body.theme-automax .import-log {
+  margin-top: 12px;
+  max-height: 140px;
+  overflow: auto;
+  padding: 10px 12px;
+  border: 1px solid var(--ax-border);
+  border-radius: var(--m7-field-radius);
+  background: #111;
+  font-size: 0.85rem;
+  color: var(--ax-muted);
+}
+
+body.theme-automax .import-log-line + .import-log-line {
+  margin-top: 4px;
+}
+
+body.theme-automax .import-upgrade-warn {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border: 1px solid #c45a00;
+  border-radius: var(--m7-field-radius);
+  background: rgba(196, 90, 0, 0.12);
+  color: #ffb366;
+  font-size: 0.9rem;
+}
+
+body.theme-automax .import-results {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+body.theme-automax .import-result-row {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  width: 100%;
+  text-align: left;
+  padding: 12px 14px;
+  border: 1px solid var(--ax-border);
+  border-radius: var(--m7-field-radius);
+  background: var(--ax-surface);
+  color: var(--ax-text);
+  cursor: pointer;
+}
+
+body.theme-automax .import-result-row:hover {
+  border-color: var(--ax-orange);
+}
+
+body.theme-automax .import-hint-steps {
+  margin-top: 8px;
+  font-size: 0.85rem;
+}
+
+body.theme-automax .import-url-row .btn-secondary {
+  flex: 0 0 auto;
+}
+
+/* —— Import oldal —— */
+body.import-page .page-import {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 1rem 1.25rem 3rem;
+}
+
+body.theme-automax .import-nav {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+body.theme-automax .import-nav--inline {
+  margin-left: auto;
+}
+
+body.theme-automax .import-nav-link {
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+  text-decoration: none;
+  color: #444;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+body.theme-automax .import-nav-link.active,
+body.theme-automax .import-nav-link:hover {
+  background: #fff3e0;
+  color: #e65100;
+}
+
+body.theme-automax .import-db-badge {
+  font-size: 0.85rem;
+  color: #666;
+  background: #f5f5f5;
+  padding: 0.35rem 0.65rem;
+  border-radius: 6px;
+}
+
+body.theme-automax .import-cells-card {
+  margin-top: 1.25rem;
+}
+
+body.theme-automax .import-cells-step {
+  margin-bottom: 1.5rem;
+}
+
+body.theme-automax .import-cells-step-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 0.75rem;
+  color: #333;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 0.35rem;
+}
+
+body.theme-automax .import-cells-grid {
+  display: grid;
+  gap: 0.65rem;
+}
+
+body.theme-automax .import-cell-row {
+  display: grid;
+  grid-template-columns: minmax(140px, 34%) 1fr;
+  gap: 0.75rem;
+  align-items: start;
+}
+
+@media (max-width: 640px) {
+  body.theme-automax .import-cell-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+body.theme-automax .import-cell-label {
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: #555;
+  padding-top: 0.45rem;
+}
+
+body.theme-automax .import-cell-row input,
+body.theme-automax .import-cell-row textarea,
+body.theme-automax .import-extras-block textarea {
+  width: 100%;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font: inherit;
+  background: #fafafa;
+}
+
+body.theme-automax .import-cell-row input:focus,
+body.theme-automax .import-cell-row textarea:focus,
+body.theme-automax .import-extras-block textarea:focus {
+  outline: 2px solid #ffb74d;
+  background: #fff;
+}
+
+body.theme-automax .import-extras-block {
+  margin-top: 1rem;
+}
+
+body.theme-automax .import-extras-block label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.35rem;
+  font-size: 0.9rem;
+}
+
+body.theme-automax .import-save-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-top: 1px solid #eee;
+  background: #fafafa;
+  position: sticky;
+  bottom: 0;
+}
+
+body.theme-automax .import-save-status {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+body.theme-automax .import-save-status--ok {
+  color: #2e7d32;
+  font-weight: 500;
+}
+
+body.theme-automax .import-save-status--err {
+  color: #c62828;
+  font-weight: 500;
+}
+
+body.import-page .import-form-section {
+  margin-top: 1.5rem;
+}
+
+body.import-page .import-form-head {
+  margin-bottom: 1rem;
+}
+
+body.import-page .import-form-title {
+  margin: 0 0 0.35rem;
+  font-size: 1.25rem;
+}
+
+body.import-page .step-panel,
+body.import-page .step-panel.hidden {
+  display: block !important;
+  margin-bottom: 1.25rem;
+}
+
+body.import-page .step-panel[data-step="4"] {
+  display: none !important;
+}
+
+body.import-page #footer-actions,
+body.import-page #success-panel,
+body.import-page .packages {
+  display: none !important;
+}
+
+body.import-page .import-form-section .card {
+  margin-bottom: 1rem;
+}
+
+.import-step-label {
+  display: none;
+}
+
+body.import-page .import-step-label {
+  display: block;
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 1.5rem 0 0.75rem;
+  padding-bottom: 0.35rem;
+  border-bottom: 2px solid #f57c00;
+  color: #333;
+}
+
+body.import-page .import-step-label:first-child {
+  margin-top: 0;
+}
+
+body.import-page .card-body > .hint,
+body.import-page .form-grid .full.hint,
+body.import-page .help-link {
+  display: none;
+}
+
+body.import-page #ad-form {
+  display: block;
+}
+
+body.import-page #ad-form .labeled-field label,
+body.import-page #ad-form .form-grid > label,
+body.import-page #ad-form .autofelvitele-label {
+  color: #ddd;
+}
+
+body.import-page #ad-form input,
+body.import-page #ad-form select,
+body.import-page #ad-form textarea {
+  background: #1a1a1a;
+  border-color: #444;
+  color: #fff;
+}
+
+body.import-page .import-save-bar {
+  background: #111;
+  border-top: 1px solid #333;
+}
+
+/* —— Hirdetések lista oldal —— */
+body.listings-page .page-listings {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 1rem 1.25rem 3rem;
+}
+
+body.listings-page .listings-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+body.listings-page .ha-card-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* —— Hasznaltauto.hu stílusú hirdetéskártya —— */
+body.listings-page .ha-card {
+  display: block;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  background: #fff;
+  color: #222;
+  border: 1px solid #d8d8d8;
+  border-radius: 2px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  padding: 0;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+body.listings-page .ha-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.16);
+}
+
+body.listings-page .ha-card--selected {
+  border-color: #006699;
+  box-shadow: 0 0 0 2px rgba(0, 102, 153, 0.35);
+}
+
+body.listings-page .ha-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.65rem 0.85rem 0.35rem;
+}
+
+body.listings-page .ha-card-title {
+  margin: 0;
+  flex: 1;
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.35;
+  color: #006699;
+  letter-spacing: 0.01em;
+}
+
+body.listings-page .ha-card-price {
+  flex-shrink: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #111;
+  white-space: nowrap;
+}
+
+body.listings-page .ha-card-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  padding: 0 0.85rem 0.55rem;
+}
+
+body.listings-page .ha-badge {
+  display: inline-block;
+  padding: 0.15rem 0.45rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  line-height: 1.3;
+  border-radius: 2px;
+}
+
+body.listings-page .ha-badge--status.ha-badge--mentett {
+  background: #5a9fd4;
+  color: #fff;
+}
+
+body.listings-page .ha-badge--status.ha-badge--feladott {
+  background: #88b04b;
+  color: #fff;
+}
+
+body.listings-page .ha-badge--feature {
+  background: #ececec;
+  color: #444;
+  font-weight: 600;
+}
+
+body.listings-page .ha-card-body {
+  display: grid;
+  grid-template-columns: 140px 1fr 100px;
+  gap: 0.75rem;
+  padding: 0 0.85rem 0.65rem;
+  align-items: start;
+}
+
+@media (max-width: 720px) {
+  body.listings-page .ha-card-body {
+    grid-template-columns: 110px 1fr;
+  }
+
+  body.listings-page .ha-card-dealer {
+    display: none;
+  }
+}
+
+body.listings-page .ha-card-photo-empty {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background: #f2f2f2;
+  border: 1px solid #e0e0e0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #aaa;
+}
+
+body.listings-page .ha-card-photo-img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  background: #f2f2f2;
+  border: 1px solid #e0e0e0;
+}
+
+body.listings-page .ha-card-photo-icon svg {
+  display: block;
+}
+
+body.listings-page .ha-card-main {
+  min-width: 0;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: #333;
+}
+
+body.listings-page .ha-card-spec {
+  margin: 0 0 0.4rem;
+}
+
+body.listings-page .ha-card-km {
+  text-decoration: underline;
+}
+
+body.listings-page .ha-card-desc {
+  margin: 0 0 0.35rem;
+  color: #444;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+body.listings-page .ha-card-code {
+  margin: 0 0 0.25rem;
+  color: #666;
+  font-size: 0.78rem;
+}
+
+body.listings-page .ha-card-location {
+  margin: 0;
+  color: #88b04b;
+  font-size: 0.78rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+body.listings-page .ha-card-pin {
+  display: inline-block;
+  width: 10px;
+  height: 13px;
+  background: #88b04b;
+  clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
+  flex-shrink: 0;
+}
+
+body.listings-page .ha-card-dealer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+body.listings-page .ha-card-dealer-logo {
+  width: 100%;
+  min-height: 48px;
+  border: 1px solid #e0e0e0;
+  background: #fafafa;
+  color: #888;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0.35rem;
+}
+
+body.listings-page .ha-card-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.45rem 0.85rem;
+  border-top: 1px solid #e8e8e8;
+  font-size: 0.72rem;
+  color: #888;
+}
+
+body.listings-page .ha-card-foot-mark {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #004b91;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+body.listings-page .listings-detail-card {
+  margin-top: 1.25rem;
+}
+
+body.listings-page .listings-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 1rem 0 1.25rem;
+}
+
+body.listings-page .listings-filter-btn {
+  padding: 0.45rem 0.9rem;
+  border-radius: 6px;
+  border: 1px solid var(--ax-border);
+  background: var(--ax-surface);
+  color: var(--ax-text);
+  cursor: pointer;
+  font: inherit;
+}
+
+body.listings-page .listings-filter-btn.active,
+body.listings-page .listings-filter-btn:hover {
+  border-color: var(--ax-orange);
+  color: var(--ax-orange);
+}
+
+body.listings-page .listings-layout {
+  display: none;
+}
+
+body.listings-page .listings-row--active {
+  border-color: var(--ax-orange);
+  box-shadow: 0 0 0 1px var(--ax-orange);
+}
+
+body.listings-page .listings-row-meta {
+  font-size: 0.85rem;
+  color: var(--ax-muted);
+}
+
+body.listings-page .listings-status {
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+}
+
+body.listings-page .listings-status--mentett {
+  color: #7ec8ff;
+}
+
+body.listings-page .listings-status--feladott {
+  color: #9be7a0;
+}
+
+body.listings-page .listings-detail-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+body.listings-page .listings-detail-title {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+body.listings-page .listings-detail-meta {
+  margin: 0.35rem 0 0;
+  font-size: 0.85rem;
+  color: var(--ax-muted);
+  word-break: break-word;
+}
+
+body.listings-page .listings-detail-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+body.listings-page .listings-publish-btn {
+  color: #9be7a0;
+  border-color: #385;
+}
+
+body.listings-page .listings-delete-btn {
+  color: #ffb4b4;
+  border-color: #633;
+}
+
+body.listings-page .listings-empty {
+  color: var(--ax-muted);
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+body.listings-page .import-cell-label {
+  color: var(--ax-muted);
+}
+
+body.listings-page .import-cell-value {
+  color: var(--ax-text);
+  word-break: break-word;
+}
+
+body.listings-page .import-cells-step-title {
+  color: var(--ax-orange);
+  border-bottom-color: #333;
+}
+
+body.import-page .import-nav-link {
+  color: var(--ax-muted);
+}
+
+body.import-page .import-nav-link.active,
+body.import-page .import-nav-link:hover {
+  background: rgba(255, 85, 0, 0.15);
+  color: var(--ax-orange);
+}
+
+body.theme-automax .listings-inline-link {
+  color: var(--ax-orange);
+  font-weight: 600;
+}

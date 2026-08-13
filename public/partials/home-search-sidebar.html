@@ -1,0 +1,116 @@
+<aside class="home-filter-sidebar" aria-label="Részletes keresés">
+  <div class="home-filter-card">
+    <div class="home-filter-head">
+      <h2 class="home-filter-title">Szűrés</h2>
+      <button type="button" class="home-filter-clear" id="filter-reset">Törlés</button>
+    </div>
+    <form id="home-filter-form" class="home-filter-form">
+      <input type="hidden" name="uzemanyag_quick" id="filter-uzemanyag-quick" value="" />
+
+      <div class="home-filter-fuel-btns" role="group" aria-label="Üzemanyag gyorsválasztó">
+        <button type="button" class="home-filter-fuel-btn" data-fuel-quick="benzin">Benzin</button>
+        <button type="button" class="home-filter-fuel-btn" data-fuel-quick="diesel">Diesel</button>
+        <button type="button" class="home-filter-fuel-btn" data-fuel-quick="hybrid">Hybrid</button>
+        <button type="button" class="home-filter-fuel-btn" data-fuel-quick="benzin-gaz">Benzin/Gáz</button>
+        <button type="button" class="home-filter-fuel-btn" data-fuel-quick="elektromos">Elektromos</button>
+      </div>
+
+      <label class="home-filter-field">
+        <span class="home-filter-label">Márka</span>
+        <select id="filter-gyartmany" name="gyartmany"><option value="">Mindegy</option></select>
+      </label>
+      <label class="home-filter-field">
+        <span class="home-filter-label">Modell</span>
+        <select id="filter-modell" name="modell"><option value="">Mindegy</option></select>
+      </label>
+      <label class="home-filter-field">
+        <span class="home-filter-label">Évjárat</span>
+        <select id="filter-ev-jarat" name="ev_jarat"><option value="">Mindegy</option></select>
+      </label>
+      <label class="home-filter-field">
+        <span class="home-filter-label">Típus</span>
+        <select id="filter-tipus-katalogus" name="tipus_katalogus"><option value="">Mindegy</option></select>
+      </label>
+
+      <div class="home-filter-field">
+        <span class="home-filter-label">Ár (Ft)</span>
+        <div class="home-filter-range">
+          <input type="number" name="ar_tol" placeholder="Min." min="0" step="100000" aria-label="Ár minimum" />
+          <span class="home-filter-range-sep" aria-hidden="true">–</span>
+          <input type="number" name="ar_ig" placeholder="Max." min="0" step="100000" aria-label="Ár maximum" />
+        </div>
+      </div>
+      <div class="home-filter-field">
+        <span class="home-filter-label">Évjárat (év)</span>
+        <div class="home-filter-range">
+          <input type="number" name="ev_tol" placeholder="Min." min="1900" max="2100" step="1" aria-label="Évjárat minimum" />
+          <span class="home-filter-range-sep" aria-hidden="true">–</span>
+          <input type="number" name="ev_ig" placeholder="Max." min="1900" max="2100" step="1" aria-label="Évjárat maximum" />
+        </div>
+      </div>
+      <div class="home-filter-field">
+        <span class="home-filter-label">Futott km</span>
+        <div class="home-filter-range">
+          <input type="number" name="km_tol" placeholder="Min." min="0" step="1000" aria-label="Futott km minimum" />
+          <span class="home-filter-range-sep" aria-hidden="true">–</span>
+          <input type="number" name="km_ig" placeholder="Max." min="0" step="1000" aria-label="Futott km maximum" />
+        </div>
+      </div>
+
+      <button
+        type="button"
+        class="home-filter-more-toggle"
+        id="filter-more-toggle"
+        aria-expanded="false"
+        aria-controls="filter-more"
+      >
+        <span class="home-filter-more-icon" aria-hidden="true">☰</span>
+        További szűrők
+      </button>
+
+      <div class="home-filter-more" id="filter-more" hidden>
+        <label class="home-filter-field">
+          <span class="home-filter-label">Kivitel</span>
+          <select id="filter-kivitel" name="kivitel"><option value="">Mindegy</option></select>
+        </label>
+        <label class="home-filter-field">
+          <span class="home-filter-label">Típusjel</span>
+          <input type="text" name="tipus" placeholder="pl. 320d" />
+        </label>
+        <div class="home-filter-field">
+          <span class="home-filter-label">Heng. tart. (cm³)</span>
+          <div class="home-filter-range">
+            <input type="number" name="ccm_tol" placeholder="Min." min="0" step="100" aria-label="Hengerűrtartalom minimum" />
+            <span class="home-filter-range-sep" aria-hidden="true">–</span>
+            <input type="number" name="ccm_ig" placeholder="Max." min="0" step="100" aria-label="Hengerűrtartalom maximum" />
+          </div>
+        </div>
+        <label class="home-filter-field">
+          <span class="home-filter-label">Állapot</span>
+          <select id="filter-allapot" name="allapot"><option value="">Mindegy</option></select>
+        </label>
+        <label class="home-filter-field">
+          <span class="home-filter-label">Ajtók száma</span>
+          <select id="filter-ajtok" name="ajtok"><option value="">Mindegy</option></select>
+        </label>
+        <label class="home-filter-field">
+          <span class="home-filter-label">Ülések száma</span>
+          <select id="filter-ulesek" name="ulesek"><option value="">Mindegy</option></select>
+        </label>
+        <fieldset class="home-filter-checks">
+          <legend class="home-filter-label">Felszereltség</legend>
+          <label><input type="checkbox" name="feat_automata" /> automata</label>
+          <label><input type="checkbox" name="feat_tempomat" /> tempomat</label>
+          <label><input type="checkbox" name="feat_osszker" /> összkerékmeghajtás</label>
+          <label><input type="checkbox" name="feat_alufelni" /> alufelni</label>
+          <label><input type="checkbox" name="feat_elektromos_ablak" /> elektromos ablak</label>
+          <label><input type="checkbox" name="feat_vonohorog" /> vonóhorog</label>
+          <label><input type="checkbox" name="feat_isofix" /> ISOFIX rendszer</label>
+          <label><input type="checkbox" name="feat_esp" /> ESP (menetstabilizátor)</label>
+          <label><input type="checkbox" name="feat_szervizkonyv" /> szervizkönyv</label>
+          <label><input type="checkbox" name="feat_veteran" /> veterán</label>
+        </fieldset>
+      </div>
+
+      <button type="submit" class="home-filter-submit" id="filter-submit">
+        <span id="filter-result-count">0</span> találat mutatása

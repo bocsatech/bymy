@@ -1,7 +1,6 @@
-import { handleHttpRequest } from "../server.mjs";
-
 export default async function handler(req, res) {
   try {
+    const { handleHttpRequest } = await import("../server.mjs");
     await handleHttpRequest(req, res);
   } catch (error) {
     if (!res.headersSent) {

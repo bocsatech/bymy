@@ -1,1 +1,13 @@
-{}
+{
+  "framework": null,
+  "buildCommand": "node scripts/embed-ad-form.mjs",
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api" }
+  ],
+  "functions": {
+    "api/index.mjs": {
+      "maxDuration": 60,
+      "excludeFiles": "{node_modules/playwright/**,node_modules/playwright-core/**}"
+    }
+  }
+}

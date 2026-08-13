@@ -14,6 +14,7 @@ import {
   dbStats,
   listFieldDefs,
   listingSourceExists,
+  updateListingFoKep,
   getDbPath,
   closeDb,
 } from "./lib/db-store.mjs";
@@ -86,6 +87,7 @@ import {
   parseOAuthState,
 } from "./lib/oauth.mjs";
 import { listingImageDir, resolveListingImageFile, fetchRemoteListingImage, clearListingImageFiles } from "./lib/listing-image.mjs";
+import { saveListingPhotos } from "./lib/listing-photos.mjs";
 import { handleMessagesApi, initMessagingSchema } from "./lib/messaging.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -434,11 +436,41 @@ async function handleListingsApi(req, res, pathname) {
       return;
     }
 
-    const saved = await saveListing(formData, listingId, { status: body.status });
+    let saved = await saveListing(formData, listingId, { status: body.status });
     if (!saved) {
       sendJson(res, 404, { error: "Nincs ilyen hirdetés." });
       return;
     }
+
+    const photos = Array.isArray(body.photos) ? body.photos : [];
+    if (photos.length) {
+      try {
+        const urls = await saveListingPhotos(saved.id, photos);
+        if (urls[0]) {
+          const updated = await updateListingFoKep(saved.id, urls[0]);
+          if (updated) saved = updated;
+          else saved = { ...saved, fo_kep: urls[0] };
+          if (urls.length > 1 && saved.preview) {
+            saved = {
+              ...saved,
+              preview: {
+                ...saved.preview,
+                imageUrl: urls[0],
+                imageUrls: urls,
+              },
+            };
+          }
+        }
+      } catch (error) {
+        console.warn("Hirdetéskép mentés:", error.message ?? error);
+        sendJson(res, 500, {
+          error: `A kép mentése sikertelen: ${error.message ?? error}`,
+          listing: saved,
+        });
+        return;
+      }
+    }
+
     sendJson(res, 200, { listing: saved });
     return;
   }

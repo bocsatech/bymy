@@ -14,11 +14,11 @@ import {
   deleteAllListings,
   dbStats,
   listFieldDefs,
-  findListingBySourceUrl,
   listingSourceExists,
   getDbPath,
   closeDb,
-} from "./lib/db.mjs";
+} from "./lib/db-store.mjs";
+import { isSupabaseBackend } from "./lib/supabase/client.mjs";
 import { getSiteBlocks, saveSiteBlocks } from "./lib/site-blocks.mjs";
 import {
   deleteQuery,
@@ -72,7 +72,7 @@ import {
   saveUserProfile,
   sessionCookieHeader,
   setUserDisplayName,
-} from "./lib/web-users.mjs";
+} from "./lib/web-users-store.mjs";
 import { ensureSmtpExample, isSmtpConfigured, sendMail, smtpConfigPath } from "./lib/mail.mjs";
 import {
   appleNameFromForm,
@@ -325,17 +325,17 @@ async function handleListingsApi(req, res, pathname) {
   const idMatch = pathname.match(/^\/api\/listings\/(\d+)$/);
 
   if (pathname === "/api/db/stats" && req.method === "GET") {
-    sendJson(res, 200, dbStats());
+    sendJson(res, 200, await dbStats());
     return;
   }
 
   if (pathname === "/api/field-defs" && req.method === "GET") {
-    sendJson(res, 200, { fields: listFieldDefs() });
+    sendJson(res, 200, { fields: await listFieldDefs() });
     return;
   }
 
   if (latestMatch && req.method === "GET") {
-    sendJson(res, 200, { listing: getLatestListing() });
+    sendJson(res, 200, { listing: await getLatestListing() });
     return;
   }
 
@@ -343,12 +343,12 @@ async function handleListingsApi(req, res, pathname) {
     const url = new URL(req.url ?? "", `http://${HOST}`);
     const limit = Math.min(Math.max(Number(url.searchParams.get("limit") ?? 50), 1), 500);
     const status = url.searchParams.get("status");
-    sendJson(res, 200, { listings: listListingsWithPreview({ limit, status }) });
+    sendJson(res, 200, { listings: await listListingsWithPreview({ limit, status }) });
     return;
   }
 
   if (idMatch && req.method === "GET") {
-    const listing = getListing(Number(idMatch[1]));
+    const listing = await getListing(Number(idMatch[1]));
     if (!listing) {
       sendJson(res, 404, { error: "Nincs ilyen hirdetés." });
       return;
@@ -389,12 +389,12 @@ async function handleListingsApi(req, res, pathname) {
       }
       const sourceUrl = String(formData.forras_url || "").trim();
       const hasznaltautoId = String(formData.hasznaltauto_hirdetes_id || "").trim();
-      if (listingSourceExists({ sourceUrl, hasznaltautoId })) {
+      if (await listingSourceExists({ sourceUrl, hasznaltautoId })) {
         results.push({ skipped: true, reason: "duplicate", forras_url: sourceUrl });
         skippedCount += 1;
         continue;
       }
-      const saved = saveListing(formData, null, { status });
+      const saved = await saveListing(formData, null, { status });
       results.push({ skipped: false, listing: saved });
       savedCount += 1;
     }
@@ -419,7 +419,7 @@ async function handleListingsApi(req, res, pathname) {
       return;
     }
 
-    const saved = saveListing(formData, listingId, { status: body.status });
+    const saved = await saveListing(formData, listingId, { status: body.status });
     if (!saved) {
       sendJson(res, 404, { error: "Nincs ilyen hirdetés." });
       return;
@@ -429,14 +429,14 @@ async function handleListingsApi(req, res, pathname) {
   }
 
   if (pathname === "/api/listings/all" && req.method === "DELETE") {
-    const result = deleteAllListings();
+    const result = await deleteAllListings();
     const images = clearListingImageFiles();
     sendJson(res, 200, { ok: true, deleted: result.deleted, imagesRemoved: images.removed });
     return;
   }
 
   if (idMatch && req.method === "DELETE") {
-    deleteListing(Number(idMatch[1]));
+    await deleteListing(Number(idMatch[1]));
     sendJson(res, 200, { ok: true });
     return;
   }
@@ -761,7 +761,7 @@ async function sendActivationEmail(email, activationToken) {
 async function handleAuthApi(req, res, pathname) {
   try {
     const token = getSessionTokenFromRequest(req);
-    const currentUser = getUserBySessionToken(token);
+    const currentUser = await getUserBySessionToken(token);
 
     if (pathname === "/api/auth/me" && req.method === "GET") {
       sendJson(res, 200, { user: currentUser, token: currentUser ? token : null });
@@ -778,7 +778,7 @@ async function handleAuthApi(req, res, pathname) {
         smtpPath: smtpConfigPath(),
         oauthPath: oauthConfigPath(),
         oauthProviders: listOAuthProviders(),
-        ...inspectWebUsersDb(),
+        ...(await inspectWebUsersDb()),
       });
       return;
     }
@@ -839,7 +839,7 @@ async function handleAuthApi(req, res, pathname) {
           if (appleName && !identity.name) identity.name = appleName;
         }
 
-        const { user, session } = findOrCreateOAuthUser(identity);
+        const { user, session } = await findOrCreateOAuthUser(identity);
         const nextPath = stateInfo.next.startsWith("/") ? stateInfo.next : "/hirdetesfeladas.html";
         sendRedirect(res, nextPath, {
           "Set-Cookie": sessionCookieHeader(session.token, session.expires),
@@ -855,7 +855,7 @@ async function handleAuthApi(req, res, pathname) {
 
     if (pathname === "/api/auth/register" && req.method === "POST") {
       const body = await readBody(req);
-      const registered = registerUser(body.email, body.password, body.passwordConfirm ?? body.password_confirm);
+      const registered = await registerUser(body.email, body.password, body.passwordConfirm ?? body.password_confirm);
       let mail = { sent: false, link: null, error: null };
       try {
         mail = await sendActivationEmail(registered.email, registered.activationToken);
@@ -884,7 +884,7 @@ async function handleAuthApi(req, res, pathname) {
 
     if (pathname === "/api/auth/activate" && req.method === "POST") {
       const body = await readBody(req);
-      const { user, session } = activateUserByToken(body.token);
+      const { user, session } = await activateUserByToken(body.token);
       sendJson(
         res,
         200,
@@ -896,7 +896,7 @@ async function handleAuthApi(req, res, pathname) {
 
     if (pathname === "/api/auth/resend-activation" && req.method === "POST") {
       const body = await readBody(req);
-      const created = createActivationForEmail(body.email);
+      const created = await createActivationForEmail(body.email);
       let mail;
       try {
         mail = await sendActivationEmail(created.email, created.activationToken);
@@ -919,7 +919,7 @@ async function handleAuthApi(req, res, pathname) {
     if (pathname === "/api/auth/login" && req.method === "POST") {
       const body = await readBody(req);
       try {
-        const { user, session } = loginUser(body.email, body.password);
+        const { user, session } = await loginUser(body.email, body.password);
         sendJson(
           res,
           200,
@@ -937,7 +937,7 @@ async function handleAuthApi(req, res, pathname) {
     }
 
     if (pathname === "/api/auth/logout" && req.method === "POST") {
-      destroySession(token);
+      await destroySession(token);
       sendJson(res, 200, { ok: true }, { "Set-Cookie": clearSessionCookieHeader() });
       return;
     }
@@ -948,7 +948,7 @@ async function handleAuthApi(req, res, pathname) {
         return;
       }
       const body = await readBody(req);
-      changeUserPassword(
+      await changeUserPassword(
         currentUser.id,
         body.currentPassword ?? body.current_password,
         body.newPassword ?? body.new_password,
@@ -979,14 +979,14 @@ async function handleAuthApi(req, res, pathname) {
       }
       const body = await readBody(req);
       if (body.displayName !== undefined && body.profile === undefined) {
-        const displayName = setUserDisplayName(currentUser.id, body.displayName);
-        const user = getUserById(currentUser.id);
+        const displayName = await setUserDisplayName(currentUser.id, body.displayName);
+        const user = await getUserById(currentUser.id);
         sendJson(res, 200, { displayName, user, token });
         return;
       }
-      const saved = saveUserProfile(currentUser.id, body.profile ?? body);
+      const saved = await saveUserProfile(currentUser.id, body.profile ?? body);
       const { _savedTo, ...profile } = saved;
-      const user = getUserById(currentUser.id);
+      const user = await getUserById(currentUser.id);
       if (!user?.profile?.firstName) {
         sendJson(res, 500, { error: "A mentés nem íródott a helyi adatbázisba." });
         return;
@@ -1008,7 +1008,7 @@ async function handleAuthApi(req, res, pathname) {
         sendJson(res, 401, { error: "Nem vagy bejelentkezve." });
         return;
       }
-      deleteUserAccount(currentUser.id);
+      await deleteUserAccount(currentUser.id);
       sendJson(res, 200, { ok: true }, { "Set-Cookie": clearSessionCookieHeader() });
       return;
     }
@@ -1026,7 +1026,7 @@ async function handleAuthApi(req, res, pathname) {
   }
 }
 
-const server = createServer(async (req, res) => {
+export async function handleHttpRequest(req, res) {
   const pathname = req.url?.split("?")[0] || "/";
 
   if (pathname === "/api/health" && req.method === "GET") {
@@ -1034,8 +1034,8 @@ const server = createServer(async (req, res) => {
     let dbPath = "";
     let profilesPath = "";
     try {
-      dbPath = getDbPath();
-      users = countWebUsers();
+      dbPath = await getDbPath();
+      users = await countWebUsers();
       profilesPath = getProfilesFilePath();
     } catch {
       /* ignore */
@@ -1047,6 +1047,7 @@ const server = createServer(async (req, res) => {
       dbPath,
       profilesPath,
       users,
+      backend: isSupabaseBackend() ? "supabase" : "sqlite",
     });
     return;
   }
@@ -1132,7 +1133,9 @@ const server = createServer(async (req, res) => {
   }
 
   serveStatic(pathname, res);
-});
+}
+
+const server = createServer(handleHttpRequest);
 
 function shutdown(signal) {
   console.log(`\nLeállítás (${signal}) — adatbázis zárása…`);
@@ -1148,6 +1151,7 @@ function shutdown(signal) {
 process.on("SIGINT", () => shutdown("SIGINT"));
 process.on("SIGTERM", () => shutdown("SIGTERM"));
 
+if (!process.env.VERCEL) {
 server.listen(PORT, HOST, async () => {
   try {
     ensureProfilesStore();
@@ -1159,7 +1163,11 @@ server.listen(PORT, HOST, async () => {
     console.warn("Profil/SMTP/OAuth/Messages store:", error.message ?? error);
   }
   console.log(`Autosweb: http://${HOST}:${PORT}`);
-  console.log(`User DB: ${getDbPath()}`);
+  try {
+    console.log(`User DB: ${await getDbPath()}`);
+  } catch (error) {
+    console.warn("DB path:", error.message ?? error);
+  }
   try {
     console.log(`Hirdetésképek: ${listingImageDir()}`);
   } catch (error) {
@@ -1183,10 +1191,10 @@ server.listen(PORT, HOST, async () => {
   }
   console.log("Import: hasznaltauto.hu → helyi űrlap (nem ad fel hirdetést).");
   try {
-    const stats = dbStats();
-    const users = countWebUsers();
+    const stats = await dbStats();
+    const users = await countWebUsers();
     console.log(
-      `SQLite: ${stats.path} (${stats.listings} hirdetés, ${stats.cells} cella, ${users} user)`
+      `${isSupabaseBackend() ? "Supabase" : "SQLite"}: ${stats.path} (${stats.listings} hirdetés, ${stats.cells} cella, ${users} user)`
     );
     console.log(`Profil fájl: ${getProfilesFilePath()}`);
   } catch (error) {
@@ -1222,3 +1230,4 @@ server.listen(PORT, HOST, async () => {
     console.warn("Partner seed:", error.message ?? error);
   }
 });
+}

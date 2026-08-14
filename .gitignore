@@ -10,3 +10,4 @@ node_modules/
 *.db-shm
 public/uploads/listings/
 .DS_Store
+.vercel

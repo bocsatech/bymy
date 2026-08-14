@@ -81,10 +81,14 @@ import {
   createOAuthState,
   ensureOAuthExample,
   exchangeOAuthCode,
+  IOS_OAUTH_CALLBACK,
+  isMobileOAuthNext,
   listOAuthProviders,
   loadOAuthConfig,
+  mobileOAuthCompleteUrl,
   oauthConfigPath,
   parseOAuthState,
+  verifyAppleIdentityToken,
 } from "./lib/oauth.mjs";
 import { listingImageDir, resolveListingImageFile, fetchRemoteListingImage, clearListingImageFiles } from "./lib/listing-image.mjs";
 import { saveListingPhotos } from "./lib/listing-photos.mjs";
@@ -285,6 +289,51 @@ async function handleOpenChrome(req, res) {
       logs,
       chrome: findChromeExecutable(),
     });
+  }
+}
+
+async function handleImportDiscover(req, res) {
+  let body;
+  try {
+    body = await readBody(req);
+  } catch {
+    sendJson(res, 400, { error: "Érvénytelen JSON." });
+    return;
+  }
+  try {
+    const { discoverFromHtml } = await import("./lib/import-client.mjs");
+    const html = String(body.html ?? body.listHtml ?? "");
+    const pageUrl = String(body.pageUrl ?? body.listUrl ?? "");
+    const discovered = discoverFromHtml(html, pageUrl);
+    sendJson(res, 200, { ok: true, ...discovered });
+  } catch (error) {
+    sendJson(res, 400, { error: error.message ?? String(error) });
+  }
+}
+
+async function handleImportClient(req, res) {
+  let body;
+  try {
+    body = await readBody(req);
+  } catch {
+    sendJson(res, 400, { error: "Érvénytelen JSON." });
+    return;
+  }
+  try {
+    const { importFromClient } = await import("./lib/import-client.mjs");
+    const result = await importFromClient({
+      listHtml: body.listHtml,
+      listUrl: body.listUrl,
+      listings: body.listings,
+      autoSave: body.autoSave !== false,
+      limit: body.limit,
+      visibleTitle: body.visibleTitle,
+      visibleImage: body.visibleImage,
+      visibleDescription: body.visibleDescription,
+    });
+    sendJson(res, 200, { ok: true, result });
+  } catch (error) {
+    sendJson(res, 400, { error: error.message ?? String(error) });
   }
 }
 
@@ -832,7 +881,11 @@ async function handleAuthApi(req, res, pathname) {
     }
 
     if (pathname === "/api/auth/oauth/providers" && req.method === "GET") {
-      ensureOAuthExample();
+      try {
+        ensureOAuthExample();
+      } catch {
+        /* serverless: ignore */
+      }
       sendJson(res, 200, {
         providers: listOAuthProviders(),
         configPath: oauthConfigPath(),
@@ -844,16 +897,45 @@ async function handleAuthApi(req, res, pathname) {
     const oauthStartMatch = pathname.match(/^\/api\/auth\/oauth\/start\/(google|apple|facebook)$/);
     if (oauthStartMatch && req.method === "GET") {
       const provider = oauthStartMatch[1];
-      ensureOAuthExample();
       const urlObj = new URL(req.url ?? "", `http://${HOST}:${PORT}`);
-      const next = urlObj.searchParams.get("next") || "/hirdetesfeladas.html";
+      const mobile = urlObj.searchParams.get("mobile") === "1";
+      const next = mobile
+        ? IOS_OAUTH_CALLBACK
+        : urlObj.searchParams.get("next") || "/hirdetesfeladas.html";
       try {
         const state = createOAuthState(provider, next);
         const authorizeUrl = buildAuthorizeUrl(provider, state);
         sendRedirect(res, authorizeUrl);
       } catch (error) {
         const msg = encodeURIComponent(error.message ?? "OAuth indítás sikertelen");
-        sendRedirect(res, `/belepes.html?oauth_error=${msg}`);
+        if (mobile || isMobileOAuthNext(next)) {
+          sendRedirect(res, mobileOAuthCompleteUrl({ error: error.message ?? "OAuth indítás sikertelen" }));
+        } else {
+          sendRedirect(res, `/belepes.html?oauth_error=${msg}`);
+        }
+      }
+      return;
+    }
+
+    if (pathname === "/api/auth/oauth/native" && req.method === "POST") {
+      const body = await readBody(req);
+      const provider = String(body.provider ?? "").trim().toLowerCase();
+      try {
+        if (provider !== "apple") {
+          throw new Error("Ez a social belépés az appban Safari-n keresztül megy.");
+        }
+        const identity = await verifyAppleIdentityToken(body.identityToken ?? body.id_token);
+        const fullName = String(body.fullName ?? body.name ?? "").trim();
+        if (fullName) identity.name = fullName;
+        const { user, session } = await findOrCreateOAuthUser(identity);
+        sendJson(
+          res,
+          200,
+          { ok: true, token: session.token, user },
+          { "Set-Cookie": sessionCookieHeader(session.token, session.expires) }
+        );
+      } catch (error) {
+        sendJson(res, 400, { error: error.message ?? "Social belépés sikertelen." });
       }
       return;
     }
@@ -861,8 +943,8 @@ async function handleAuthApi(req, res, pathname) {
     const oauthCbMatch = pathname.match(/^\/api\/auth\/oauth\/callback\/(google|apple|facebook)$/);
     if (oauthCbMatch && (req.method === "GET" || req.method === "POST")) {
       const provider = oauthCbMatch[1];
+      let params = {};
       try {
-        let params;
         if (req.method === "POST") {
           const raw = await readRawBody(req);
           const type = String(req.headers["content-type"] || "");
@@ -888,14 +970,30 @@ async function handleAuthApi(req, res, pathname) {
         }
 
         const { user, session } = await findOrCreateOAuthUser(identity);
-        const nextPath = stateInfo.next.startsWith("/") ? stateInfo.next : "/hirdetesfeladas.html";
-        sendRedirect(res, nextPath, {
-          "Set-Cookie": sessionCookieHeader(session.token, session.expires),
-        });
+        if (stateInfo.mobile || isMobileOAuthNext(stateInfo.next)) {
+          sendRedirect(res, mobileOAuthCompleteUrl({ token: session.token }), {
+            "Set-Cookie": sessionCookieHeader(session.token, session.expires),
+          });
+        } else {
+          const nextPath = stateInfo.next.startsWith("/") ? stateInfo.next : "/hirdetesfeladas.html";
+          sendRedirect(res, nextPath, {
+            "Set-Cookie": sessionCookieHeader(session.token, session.expires),
+          });
+        }
         console.log(`OAuth OK (${provider}): ${user.email}`);
       } catch (error) {
         const msg = encodeURIComponent(error.message ?? "OAuth sikertelen");
-        sendRedirect(res, `/belepes.html?oauth_error=${msg}`);
+        let mobile = false;
+        try {
+          mobile = Boolean(parseOAuthState(params.state).mobile);
+        } catch {
+          mobile = false;
+        }
+        if (mobile) {
+          sendRedirect(res, mobileOAuthCompleteUrl({ error: error.message ?? "OAuth sikertelen" }));
+        } else {
+          sendRedirect(res, `/belepes.html?oauth_error=${msg}`);
+        }
         console.warn("OAuth hiba:", error.message ?? error);
       }
       return;
@@ -1170,6 +1268,16 @@ export async function handleHttpRequest(req, res) {
 
   if (pathname === "/api/import" && req.method === "POST") {
     await handleImport(req, res);
+    return;
+  }
+
+  if (pathname === "/api/import/discover" && req.method === "POST") {
+    await handleImportDiscover(req, res);
+    return;
+  }
+
+  if (pathname === "/api/import/client" && req.method === "POST") {
+    await handleImportClient(req, res);
     return;
   }
 

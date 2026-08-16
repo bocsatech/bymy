@@ -4,6 +4,17 @@
  * A háttérkép cseréjéhez csak az auto.html fájlban lévő
  * data-auto-hero-image <img> src értékét kell módosítani.
  */
+
+/* Ugyanaz a tartalomsáv, mint a főoldalon / hub oldalakon (--hub-max: 1120px). */
+body.home-page[data-site-page="auto"] .home-main,
+body.home-page[data-site-page="auto"] .home-ad-strip-inner {
+  max-width: 1120px;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  box-sizing: border-box;
+}
+
 .auto-search-hero {
   position: relative;
   isolation: isolate;
@@ -86,13 +97,15 @@
 }
 
 .auto-search-panel {
-  width: min(1180px, 96%);
+  width: 100%;
+  max-width: 100%;
   padding: 2.1rem 2rem;
   border: 1px solid rgba(255, 255, 255, 0.35);
   border-radius: 10px;
   background: transparent;
   box-shadow: none;
   backdrop-filter: none;
+  box-sizing: border-box;
 }
 
 .auto-search-title {
@@ -255,7 +268,7 @@
   }
 
   .auto-search-panel {
-    width: min(980px, 96%);
+    width: 100%;
   }
 }
 

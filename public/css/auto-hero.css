@@ -145,51 +145,6 @@ body.home-page[data-site-page="auto"] .home-ad-strip-inner {
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
 }
 
-.auto-body-types {
-  display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: 0.2rem;
-  margin-bottom: 0.75rem;
-}
-
-.auto-body-type {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.25rem;
-  min-height: 72px;
-  padding: 0.25rem 0.1rem;
-  border: 1px solid transparent;
-  border-radius: 4px;
-  background: transparent;
-  color: #f3f4f6;
-  font: inherit;
-  font-size: 0.68rem;
-  line-height: 1.15;
-  text-decoration: none;
-  cursor: pointer;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
-}
-
-.auto-body-type:hover,
-.auto-body-type:focus-visible,
-.auto-body-type.is-active {
-  border-color: rgba(255, 255, 255, 0.55);
-  background: rgba(255, 255, 255, 0.08);
-  color: #fff;
-}
-
-.auto-body-type img {
-  width: 72px;
-  max-width: 100%;
-  height: 40px;
-  object-fit: contain;
-  display: block;
-  pointer-events: none;
-}
-
 /* —— Form: kompakt mezők, átlátszó panel —— */
 .auto-search-panel .home-qs-form {
   gap: 0.55rem;
@@ -379,22 +334,6 @@ body.home-page[data-site-page="auto"] .home-ad-strip-inner {
 
   .auto-search-panel {
     padding: 0.85rem 0.75rem;
-  }
-
-  .auto-body-types {
-    display: flex;
-    overflow-x: auto;
-    padding-bottom: 0.2rem;
-  }
-
-  .auto-body-type {
-    flex: 0 0 78px;
-    min-height: 70px;
-  }
-
-  .auto-body-type img {
-    width: 68px;
-    height: 38px;
   }
 
   .auto-search-panel .home-qs-row {

@@ -3202,6 +3202,72 @@ body.site-app .mm-ad-box {
   padding: 1rem 1.1rem;
 }
 
+body.site-app .hero-settings-subtitle {
+  margin: 1.1rem 0 0.55rem;
+  font-size: 0.95rem;
+  font-weight: 650;
+  color: #1a1f2c;
+}
+
+body.site-app .hero-pick-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+  gap: 0.7rem;
+}
+
+body.site-app .hero-pick {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0.4rem;
+  border: 2px solid #dfe3ea;
+  border-radius: 12px;
+  background: #f8f9fb;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: #1a1f2c;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+body.site-app .hero-pick:hover {
+  border-color: #9aa7bd;
+}
+
+body.site-app .hero-pick.is-active {
+  border-color: #e30613;
+  box-shadow: 0 0 0 1px #e30613;
+}
+
+body.site-app .hero-pick img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  border-radius: 8px;
+  background: #e8ebf0;
+}
+
+body.site-app .hero-pick span {
+  font-size: 0.82rem;
+  line-height: 1.25;
+  padding: 0 0.15rem 0.15rem;
+}
+
+body.site-app .hero-settings-upload {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+body.site-app .hero-settings-upload .login-field {
+  flex: 1 1 220px;
+  margin: 0;
+}
+
 body.site-app .mm-ad-actions {
   display: flex;
   flex-wrap: wrap;

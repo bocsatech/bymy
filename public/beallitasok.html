@@ -57,7 +57,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/css/style.css?v=auth20260725" />
-    <link rel="stylesheet" href="/css/site-app.css?v=mobileStable2" />
+    <link rel="stylesheet" href="/css/site-app.css?v=heroSettings1" />
   </head>
   <body class="site-app settings-page mm-page" data-site-page="beallitasok" data-auth-init="manual">
     <div class="local-banner">Bymy — Fiókom · user DB: ~/.bymy/ · v=localdb9</div>
@@ -114,6 +114,7 @@
           <a class="mm-nav-link" href="?szekcio=keresesek" data-mm-nav="keresesek">Mentett kereséseim</a>
           <a class="mm-nav-link" href="?szekcio=uzenetek" data-mm-nav="uzenetek">Üzenetek <span class="mm-nav-badge" data-mm-msg-count hidden>0</span></a>
           <a class="mm-nav-link" href="?szekcio=hirdetes" data-mm-nav="hirdetes">Hirdetésem</a>
+          <a class="mm-nav-link" href="?szekcio=megjelenes" data-mm-nav="megjelenes">Megjelenés</a>
           <a class="mm-nav-link" href="?szekcio=fiok" data-mm-nav="fiok">Beállítások</a>
         </nav>
         <button type="button" class="mm-side-logout" data-auth-logout>Kijelentkezés</button>
@@ -142,6 +143,10 @@
             <a class="mm-card" href="?szekcio=hirdetes">
               <strong>Hirdetésem</strong>
               <span>Hirdetés kezelése</span>
+            </a>
+            <a class="mm-card" href="?szekcio=megjelenes">
+              <strong>Megjelenés</strong>
+              <span>Autó oldal háttérkép</span>
             </a>
             <a class="mm-card" href="?szekcio=fiok">
               <strong>Beállítások</strong>
@@ -198,6 +203,39 @@
               <a class="site-header-btn site-header-btn--primary" href="/listings.html">Hirdetéseim megnyitása</a>
               <a class="site-header-btn site-header-btn--outline" href="/hirdetesfeladas.html" data-auth-guard>Hirdetés szerkesztése / feladás</a>
             </div>
+          </div>
+        </section>
+
+        <!-- Megjelenés — autó hero háttér (mindenkinek) -->
+        <section class="mm-panel" data-mm-panel="megjelenes" hidden>
+          <header class="mm-panel-head">
+            <h2 class="mm-panel-title">Megjelenés</h2>
+            <p class="mm-panel-lead">Az Autó oldal kereső háttérképe — a kiválasztott kép minden látogatónál megjelenik.</p>
+          </header>
+
+          <div class="mm-ad-box hero-settings">
+            <p class="settings-acc-hint">Válassz egy előre feltöltött képet, vagy tölts fel sajátot (JPEG / PNG / WebP, max. 8 MB).</p>
+            <p id="hero-settings-flash" class="settings-flash" role="status" hidden></p>
+
+            <h3 class="hero-settings-subtitle">Előre feltöltött képek</h3>
+            <div id="hero-preset-grid" class="hero-pick-grid" role="list"></div>
+
+            <h3 class="hero-settings-subtitle">Saját feltöltések</h3>
+            <div id="hero-upload-grid" class="hero-pick-grid" role="list"></div>
+            <p id="hero-upload-empty" class="mm-empty" hidden>Még nincs saját feltöltés.</p>
+
+            <div class="hero-settings-upload">
+              <label class="login-field">
+                <span class="login-label">Új kép feltöltése</span>
+                <input type="file" id="hero-upload-file" accept="image/jpeg,image/png,image/webp" />
+              </label>
+              <button type="button" class="settings-btn-primary" id="hero-upload-btn">Feltöltés és beállítás</button>
+            </div>
+
+            <p class="settings-acc-caption">
+              Aktív kép:
+              <a id="hero-active-link" href="/auto.html" target="_blank" rel="noopener">Autó oldal megnyitása</a>
+            </p>
           </div>
         </section>
 
@@ -402,8 +440,8 @@
       </div>
     </main>
 
-    <script src="/js/site-avatar-menu.js?v=willhabenHdr1" type="module"></script>
-    <script src="/js/beallitasok-app.js?v=authAcct1" type="module"></script>
+    <script src="/js/site-avatar-menu.js?v=heroSettings1" type="module"></script>
+    <script src="/js/beallitasok-app.js?v=heroSettings1" type="module"></script>
   
     <script>
       (function () {

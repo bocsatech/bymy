@@ -1,6 +1,6 @@
 /**
  * Fiókom — mobile.de Mein mobile / Konto bearbeiten mintára.
- * Szekciók: attekintes | parkolo | keresesek | uzenetek | hirdetes | fiok
+ * Szekciók: attekintes | parkolo | keresesek | uzenetek | hirdetes | megjelenes | fiok
  */
 
 import {
@@ -34,13 +34,16 @@ const SEARCH_RADIUS_KEY = "bymy_stats_radius_km";
 const REC_POSTAL_KEY = "bymy_partner_postal_code";
 const REC_RADIUS_KEY = "bymy_partner_radius_km";
 const MAX_BYTES = 2.5 * 1024 * 1024;
+const HERO_MAX_BYTES = 8 * 1024 * 1024;
 const AVATAR_SIZE = 256;
-const SECTIONS = ["attekintes", "parkolo", "keresesek", "uzenetek", "hirdetes", "fiok"];
+const SECTIONS = ["attekintes", "parkolo", "keresesek", "uzenetek", "hirdetes", "megjelenes", "fiok"];
 const SEARCH_RADIUS_OPTIONS = [5, 10, 15, 20, 30, 50, 75, 100];
 const REC_RADIUS_OPTIONS = [5, 10, 15, 20, 30];
+const AUTH_TOKEN_KEY = "bymy-auth-token";
 
 let lastLookedUpPostal = "";
 let cityLookupBusy = false;
+let heroState = null;
 
 function readPhotos() {
   try {
@@ -152,8 +155,151 @@ function setSection(section) {
       keresesek: "Mentett kereséseim",
       uzenetek: "Üzenetek",
       hirdetes: "Hirdetésem",
+      megjelenes: "Megjelenés",
       fiok: "Beállítások",
     }[next] + " — Fiókom";
+}
+
+function authHeaders() {
+  let token = "";
+  try {
+    token = localStorage.getItem(AUTH_TOKEN_KEY) || "";
+  } catch {
+    token = "";
+  }
+  return {
+    "Content-Type": "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+}
+
+async function heroApi(url, options = {}) {
+  const res = await fetch(url, {
+    credentials: "same-origin",
+    ...options,
+    headers: {
+      ...authHeaders(),
+      ...(options.headers || {}),
+    },
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || "Kérés sikertelen.");
+  return data;
+}
+
+function fileToDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    if (!file || !/^image\/(jpeg|png|webp)$/i.test(file.type)) {
+      reject(new Error("Csak JPG, PNG vagy WebP tölthető fel."));
+      return;
+    }
+    if (file.size > HERO_MAX_BYTES) {
+      reject(new Error("A kép maximum 8 MB lehet."));
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ""));
+    reader.onerror = () => reject(new Error("A képet nem sikerült beolvasni."));
+    reader.readAsDataURL(file);
+  });
+}
+
+function renderHeroPickGrid(container, items, activeUrl) {
+  if (!container) return;
+  container.innerHTML = "";
+  for (const item of items) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "hero-pick" + (item.url === activeUrl ? " is-active" : "");
+    btn.setAttribute("role", "listitem");
+    btn.setAttribute("data-hero-url", item.url);
+    btn.title = item.label || "Kép";
+    btn.innerHTML = `
+      <img src="${String(item.url).replace(/"/g, "&quot;")}" alt="" loading="lazy" />
+      <span>${String(item.label || "Kép")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")}</span>
+    `;
+    container.appendChild(btn);
+  }
+}
+
+function renderHeroSettings(state) {
+  heroState = state;
+  const active = state?.activeUrl || "";
+  renderHeroPickGrid(document.getElementById("hero-preset-grid"), state?.presets || [], active);
+  const uploads = state?.uploads || [];
+  renderHeroPickGrid(document.getElementById("hero-upload-grid"), uploads, active);
+  const empty = document.getElementById("hero-upload-empty");
+  if (empty) empty.hidden = uploads.length > 0;
+}
+
+async function loadHeroSettings() {
+  const flash = document.getElementById("hero-settings-flash");
+  try {
+    const data = await heroApi("/api/site-hero");
+    renderHeroSettings(data);
+  } catch (error) {
+    showFlash(flash, error.message ?? "Nem sikerült betölteni a képeket.", false);
+  }
+}
+
+function initHeroSettings() {
+  const root = document.querySelector('[data-mm-panel="megjelenes"]');
+  if (!root || root.dataset.bound === "1") return;
+  root.dataset.bound = "1";
+
+  root.addEventListener("click", async (event) => {
+    const pick = event.target.closest("[data-hero-url]");
+    if (!pick) return;
+    const url = pick.getAttribute("data-hero-url");
+    const flash = document.getElementById("hero-settings-flash");
+    try {
+      const data = await heroApi("/api/site-hero", {
+        method: "PUT",
+        body: JSON.stringify({ activeUrl: url }),
+      });
+      renderHeroSettings({
+        ...data,
+        presets: data.presets || heroState?.presets || [],
+        uploads: data.uploads || heroState?.uploads || [],
+      });
+      showFlash(flash, "Háttérkép beállítva — minden látogató ezt látja.", true);
+    } catch (error) {
+      showFlash(flash, error.message ?? "Mentés sikertelen.", false);
+    }
+  });
+
+  document.getElementById("hero-upload-btn")?.addEventListener("click", async () => {
+    const input = document.getElementById("hero-upload-file");
+    const flash = document.getElementById("hero-settings-flash");
+    const file = input?.files?.[0];
+    if (!file) {
+      showFlash(flash, "Válassz ki egy képfájlt.", false);
+      return;
+    }
+    const btn = document.getElementById("hero-upload-btn");
+    if (btn) btn.disabled = true;
+    try {
+      const dataUrl = await fileToDataUrl(file);
+      const data = await heroApi("/api/site-hero/upload", {
+        method: "POST",
+        body: JSON.stringify({ dataUrl, label: file.name.replace(/\.[^.]+$/, "").slice(0, 60) }),
+      });
+      if (input) input.value = "";
+      renderHeroSettings({
+        ...data,
+        presets: data.presets || heroState?.presets || [],
+        uploads: data.uploads || [],
+      });
+      showFlash(flash, "Kép feltöltve és beállítva mindenkinek.", true);
+    } catch (error) {
+      showFlash(flash, error.message ?? "Feltöltés sikertelen.", false);
+    } finally {
+      if (btn) btn.disabled = false;
+    }
+  });
 }
 
 function fmtDate(ts) {
@@ -623,6 +769,10 @@ export async function initSettingsPage() {
   initAccordionExclusive();
   initPostalLookups();
   initAreaForms();
+  initHeroSettings();
+  if (currentSection() === "megjelenes") {
+    loadHeroSettings();
+  }
 
   document.querySelectorAll("[data-mm-nav]").forEach((link) => {
     link.addEventListener("click", (event) => {
@@ -634,6 +784,9 @@ export async function initSettingsPage() {
       }
       if (next === "uzenetek") {
         messagesUi?.refresh?.();
+      }
+      if (next === "megjelenes") {
+        loadHeroSettings();
       }
     });
   });

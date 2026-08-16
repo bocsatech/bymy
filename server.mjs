@@ -21,6 +21,12 @@ import {
 import { isSupabaseBackend } from "./lib/supabase/client.mjs";
 import { getSiteBlocks, saveSiteBlocks } from "./lib/site-blocks.mjs";
 import {
+  getSiteHero,
+  setActiveHeroUrl,
+  uploadHeroImage,
+  resolveHeroUploadFile,
+} from "./lib/site-hero.mjs";
+import {
   deleteQuery,
   listFugvenyLists,
   loadQueries,
@@ -201,6 +207,20 @@ function serveStatic(path, res) {
   // Hirdetésképek: ~/.autosweb/uploads (túléli a frissítést)
   if (rel.startsWith("uploads/listings/")) {
     const uploadFile = resolveListingImageFile(`/${rel}`);
+    if (uploadFile) {
+      const ext = extname(uploadFile);
+      res.writeHead(200, {
+        "Content-Type": MIME[ext] ?? "application/octet-stream",
+        "Cache-Control": "public, max-age=86400",
+      });
+      res.end(readFileSync(uploadFile));
+      return;
+    }
+  }
+
+  // Autó hero feltöltések: ~/.autosweb/uploads/hero
+  if (rel.startsWith("uploads/hero/")) {
+    const uploadFile = resolveHeroUploadFile(`/${rel}`);
     if (uploadFile) {
       const ext = extname(uploadFile);
       res.writeHead(200, {
@@ -1297,6 +1317,64 @@ export async function handleHttpRequest(req, res) {
       return;
     }
     sendJson(res, 200, saveSiteBlocks(body));
+    return;
+  }
+
+  if (pathname === "/api/site-hero" && req.method === "GET") {
+    try {
+      sendJson(res, 200, await getSiteHero());
+    } catch (error) {
+      sendJson(res, 500, { error: error.message ?? "Hero betöltés sikertelen." });
+    }
+    return;
+  }
+
+  if (pathname === "/api/site-hero" && req.method === "PUT") {
+    const token = getSessionTokenFromRequest(req);
+    const currentUser = await getUserBySessionToken(token);
+    if (!currentUser) {
+      sendJson(res, 401, { error: "Nem vagy bejelentkezve." });
+      return;
+    }
+    let body;
+    try {
+      body = await readBody(req);
+    } catch {
+      sendJson(res, 400, { error: "Érvénytelen JSON." });
+      return;
+    }
+    try {
+      const state = await setActiveHeroUrl(body.activeUrl ?? body.url);
+      sendJson(res, 200, { ...state, presets: (await getSiteHero()).presets });
+    } catch (error) {
+      const status = error.code === "INVALID_URL" ? 400 : 500;
+      sendJson(res, status, { error: error.message ?? "Mentés sikertelen." });
+    }
+    return;
+  }
+
+  if (pathname === "/api/site-hero/upload" && req.method === "POST") {
+    const token = getSessionTokenFromRequest(req);
+    const currentUser = await getUserBySessionToken(token);
+    if (!currentUser) {
+      sendJson(res, 401, { error: "Nem vagy bejelentkezve." });
+      return;
+    }
+    let body;
+    try {
+      body = await readBody(req);
+    } catch {
+      sendJson(res, 400, { error: "Érvénytelen JSON." });
+      return;
+    }
+    try {
+      const state = await uploadHeroImage(body.dataUrl ?? body.image, body.label);
+      sendJson(res, 200, { ...state, presets: (await getSiteHero()).presets });
+    } catch (error) {
+      const status =
+        error.code === "INVALID_IMAGE" || error.code === "UPLOAD_FAILED" ? 400 : 500;
+      sendJson(res, status, { error: error.message ?? "Feltöltés sikertelen." });
+    }
     return;
   }
 

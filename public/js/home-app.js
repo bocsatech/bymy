@@ -98,6 +98,8 @@ function hasActiveSidebarFilters(filters) {
       filters.uzemanyag ||
       filters.uzemanyagQuick ||
       filters.allapot ||
+      filters.sebessegvalto ||
+      filters.hajtas ||
       filters.tipus ||
       filters.tipusKatalogus ||
       filters.features?.length ||
@@ -108,6 +110,8 @@ function hasActiveSidebarFilters(filters) {
       filters.ar_ig != null ||
       filters.km_tol != null ||
       filters.km_ig != null ||
+      filters.le_tol != null ||
+      filters.le_ig != null ||
       filters.ccm_tol != null ||
       filters.ccm_ig != null
   );

@@ -1,9 +1,8 @@
 /**
- * Gyorskereső az összesítő sávban.
+ * Gyorskereső az autó hero panelen.
  *
- * 1. sor: Gyártmány, Típus (CSV Modell)
- * 2. sor: Üzemanyag, Évjárat, Vételár
- * 3. sor: Keresés, Részletes keresés, Visszaállítás
+ * Alap: Gyártmány, Típus, Üzemanyag, Évjárat, Vételár
+ * Több szűrő: Futott km, LE, Kivitel, Sebességváltó, Hajtás
  */
 
 import { initVehicleCatalogSelects, fillSelect } from "./vehicle-catalog-client.js";
@@ -11,6 +10,9 @@ import { initVehicleCatalogSelects, fillSelect } from "./vehicle-catalog-client.
 const FIRST_YEAR = 1950;
 const PRICE_STEP = 500_000;
 const PRICE_MAX = 50_000_000;
+const KM_STEP = 10_000;
+const KM_MAX = 500_000;
+const LE_STEPS = [50, 75, 100, 125, 150, 175, 200, 225, 250, 300, 350, 400, 500, 600, 800];
 
 function yearOptions() {
   const current = new Date().getFullYear();
@@ -27,13 +29,19 @@ function priceOptions() {
   return prices;
 }
 
-function fillPriceSelect(select, emptyLabel) {
+function kmOptions() {
+  const values = [];
+  for (let km = 0; km <= KM_MAX; km += KM_STEP) values.push(km);
+  return values;
+}
+
+function fillNumberSelect(select, values, emptyLabel, format = (n) => n.toLocaleString("hu-HU")) {
   if (!select) return;
   select.innerHTML = `<option value="">${emptyLabel}</option>`;
-  for (const price of priceOptions()) {
+  for (const value of values) {
     const opt = document.createElement("option");
-    opt.value = String(price);
-    opt.textContent = price.toLocaleString("hu-HU");
+    opt.value = String(value);
+    opt.textContent = format(value);
     select.appendChild(opt);
   }
 }
@@ -44,23 +52,53 @@ function numOrNull(value) {
   return Number.isFinite(n) ? n : null;
 }
 
+function readQuickSearchValues(form) {
+  return {
+    gyartmany: form.querySelector("#qs-gyartmany")?.value ?? "",
+    modell: form.querySelector("#qs-modell")?.value ?? "",
+    tipusKatalogus: "",
+    uzemanyagQuick: form.querySelector("#qs-uzemanyag")?.value ?? "",
+    ev_tol: numOrNull(form.querySelector("#qs-ev-tol")?.value),
+    ev_ig: numOrNull(form.querySelector("#qs-ev-ig")?.value),
+    ar_tol: numOrNull(form.querySelector("#qs-ar-tol")?.value),
+    ar_ig: numOrNull(form.querySelector("#qs-ar-ig")?.value),
+    km_tol: numOrNull(form.querySelector("#qs-km-tol")?.value),
+    km_ig: numOrNull(form.querySelector("#qs-km-ig")?.value),
+    le_tol: numOrNull(form.querySelector("#qs-le-tol")?.value),
+    le_ig: numOrNull(form.querySelector("#qs-le-ig")?.value),
+    kivitel: form.querySelector("#qs-kivitel")?.value ?? "",
+    sebessegvalto: form.querySelector("#qs-sebessegvalto")?.value ?? "",
+    hajtas: form.querySelector("#qs-hajtas")?.value ?? "",
+  };
+}
+
 export function initHomeQuickSearch({ onSearch = () => {} } = {}) {
   const form = document.getElementById("home-qs-form");
   if (!form) return;
 
+  const hero = document.querySelector("[data-auto-search-hero]");
+  const morePanel = document.getElementById("qs-more");
+  const advancedBtn = document.getElementById("qs-reszletes");
   const brandSelect = document.getElementById("qs-gyartmany");
   const modelSelect = document.getElementById("qs-modell");
-  const fuelSelect = document.getElementById("qs-uzemanyag");
   const yearFrom = document.getElementById("qs-ev-tol");
   const yearTo = document.getElementById("qs-ev-ig");
   const priceFrom = document.getElementById("qs-ar-tol");
   const priceTo = document.getElementById("qs-ar-ig");
+  const kmFrom = document.getElementById("qs-km-tol");
+  const kmTo = document.getElementById("qs-km-ig");
+  const leFrom = document.getElementById("qs-le-tol");
+  const leTo = document.getElementById("qs-le-ig");
 
   const years = yearOptions();
   fillSelect(yearFrom, years, "-tól");
   fillSelect(yearTo, years, "-ig");
-  fillPriceSelect(priceFrom, "-tól");
-  fillPriceSelect(priceTo, "-ig");
+  fillNumberSelect(priceFrom, priceOptions(), "-tól");
+  fillNumberSelect(priceTo, priceOptions(), "-ig");
+  fillNumberSelect(kmFrom, kmOptions(), "-tól", (n) => `${n.toLocaleString("hu-HU")} km`);
+  fillNumberSelect(kmTo, kmOptions(), "-ig", (n) => `${n.toLocaleString("hu-HU")} km`);
+  fillNumberSelect(leFrom, LE_STEPS, "-tól", (n) => `${n} LE`);
+  fillNumberSelect(leTo, LE_STEPS, "-ig", (n) => `${n} LE`);
 
   const statusEl = document.getElementById("home-qs-status");
 
@@ -88,37 +126,33 @@ export function initHomeQuickSearch({ onSearch = () => {} } = {}) {
         statusEl.hidden = false;
         statusEl.textContent =
           error?.message ||
-          "A márka/modell lista nem töltődött be. Indítsd újra a Bymy szervert (frissites.command).";
+          "A gyártmány/típus lista nem töltődött be. Indítsd újra a Bymy szervert (frissites.command).";
       }
     });
 
+  function setMoreOpen(open) {
+    if (!morePanel || !advancedBtn) return;
+    morePanel.hidden = !open;
+    advancedBtn.setAttribute("aria-expanded", open ? "true" : "false");
+    advancedBtn.textContent = open ? "Kevesebb szűrő" : "Több szűrő";
+    hero?.classList.toggle("is-more-open", open);
+  }
+
   form.addEventListener("submit", (event) => {
     event.preventDefault();
-    onSearch({
-      gyartmany: brandSelect?.value ?? "",
-      modell: modelSelect?.value ?? "",
-      tipusKatalogus: "",
-      uzemanyagQuick: fuelSelect?.value ?? "",
-      ev_tol: numOrNull(yearFrom?.value),
-      ev_ig: numOrNull(yearTo?.value),
-      ar_tol: numOrNull(priceFrom?.value),
-      ar_ig: numOrNull(priceTo?.value),
-    });
+    onSearch(readQuickSearchValues(form));
   });
 
-  /*
-   * A reset a böngésző alapértékeit állítja vissza; a Típus listát nekünk
-   * kell frissítenünk, mert a katalógus kötés a Gyártmány `change` eseményére épül.
-   */
   form.addEventListener("reset", () => {
     requestAnimationFrame(() => {
       brandSelect?.dispatchEvent(new Event("change"));
+      setMoreOpen(false);
       onSearch({});
     });
   });
 
-  const advancedBtn = document.getElementById("qs-reszletes");
   advancedBtn?.addEventListener("click", () => {
-    window.location.href = "/listings.html";
+    const open = morePanel?.hidden !== false;
+    setMoreOpen(open);
   });
 }

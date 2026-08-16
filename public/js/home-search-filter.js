@@ -92,6 +92,10 @@ function readFilters(form) {
     tipusKatalogus: data.get("tipus_katalogus")?.toString().trim() ?? "",
     km_tol: numOrNull(data.get("km_tol")),
     km_ig: numOrNull(data.get("km_ig")),
+    le_tol: numOrNull(data.get("le_tol")),
+    le_ig: numOrNull(data.get("le_ig")),
+    sebessegvalto: data.get("sebessegvalto")?.toString() ?? "",
+    hajtas: data.get("hajtas")?.toString() ?? "",
     ccm_tol: numOrNull(data.get("ccm_tol")),
     ccm_ig: numOrNull(data.get("ccm_ig")),
     allapot: data.get("allapot")?.toString() ?? "",
@@ -115,6 +119,17 @@ function inRange(value, min, max) {
   return true;
 }
 
+function matchesSebessegvalto(listingValue, selected) {
+  if (!selected) return true;
+  const got = normalizeForMatch(listingValue);
+  const want = normalizeForMatch(selected);
+  if (!want) return true;
+  if (!got) return false;
+  if (want === "automata") return /automata|fokozatmentes|cvt/.test(got);
+  if (want === "manualis") return /manualis/.test(got) && !/automata|fokozatmentes|cvt/.test(got);
+  return got === want || got.includes(want) || want.includes(got);
+}
+
 export function filterListingsBySidebar(items, filters) {
   return items.filter((item) => {
     const f = item.preview?.filter ?? {};
@@ -123,6 +138,8 @@ export function filterListingsBySidebar(items, filters) {
     if (filters.gyartmany && f.gyartmany !== filters.gyartmany) return false;
     if (filters.modell && f.modell !== filters.modell) return false;
     if (filters.kivitel && f.kivitel !== filters.kivitel) return false;
+    if (filters.hajtas && f.hajtas !== filters.hajtas) return false;
+    if (!matchesSebessegvalto(f.sebessegvalto, filters.sebessegvalto)) return false;
     if (filters.uzemanyagQuick) {
       const rule = FUEL_QUICK_FILTERS.find((entry) => entry.id === filters.uzemanyagQuick);
       if (rule && !rule.match(f.uzemanyag)) return false;
@@ -145,6 +162,7 @@ export function filterListingsBySidebar(items, filters) {
     }
     if (!inRange(preview.priceNum, filters.ar_tol, filters.ar_ig)) return false;
     if (!inRange(preview.kmNum, filters.km_tol, filters.km_ig)) return false;
+    if (!inRange(f.teljesitmeny_le, filters.le_tol, filters.le_ig)) return false;
     if (!inRange(f.hengerurtartalom, filters.ccm_tol, filters.ccm_ig)) return false;
 
     for (const feat of filters?.features ?? []) {
@@ -205,6 +223,10 @@ export function emptyFilters() {
     tipusKatalogus: "",
     km_tol: null,
     km_ig: null,
+    le_tol: null,
+    le_ig: null,
+    sebessegvalto: "",
+    hajtas: "",
     ccm_tol: null,
     ccm_ig: null,
     allapot: "",

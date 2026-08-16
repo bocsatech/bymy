@@ -64,7 +64,7 @@
 
     <link rel="stylesheet" href="/css/site-app.css?v=mobileStable2" />    <link rel="stylesheet" href="/css/site-side.css?v=home20260725unifiedscroll" />
     <link rel="stylesheet" href="/css/home.css?v=autoNoStats1" />
-    <link rel="stylesheet" href="/css/auto-hero.css?v=autoHero5" />
+    <link rel="stylesheet" href="/css/auto-hero.css?v=autoHero6" />
     <style id="home-scroll-fix">
       /* Inline: cache-biztos — a teljes oldal görget, külön görgetősáv nincs sehol. */
       html:has(body.home-page) {
@@ -171,17 +171,6 @@
 
     <main class="home-main">
       <section class="auto-search-hero" data-auto-search-hero aria-labelledby="auto-search-title">
-        <!-- A későbbi képcseréhez csak az src értékét kell módosítani. -->
-        <img
-          class="auto-search-hero__image"
-          data-auto-hero-image
-          src="/images/automax-panel-bg.png?v=autoHero1"
-          alt=""
-          width="1024"
-          height="1536"
-          decoding="async"
-        />
-
         <nav class="auto-search-tabs" aria-label="Járműkategóriák">
           <a class="auto-search-tab is-active" href="/auto.html" aria-current="page">Személyautók</a>
           <a class="auto-search-tab" href="/auto.html?kategoria=berauto">Bérautók</a>
@@ -191,9 +180,21 @@
           <a class="auto-search-tab" href="/auto.html?kategoria=lakoauto-berles">Lakóautó bérlés</a>
         </nav>
 
-        <div class="auto-search-hero__content">
-          <article class="auto-search-panel">
-            <h1 class="auto-search-title" id="auto-search-title">Melyik járművet keresed?</h1>
+        <div class="auto-search-hero__stage">
+          <!-- Háttérkép cseréje: csak az src. -->
+          <img
+            class="auto-search-hero__image"
+            data-auto-hero-image
+            src="/images/automax-panel-bg.png?v=autoHero1"
+            alt=""
+            width="1024"
+            height="1536"
+            decoding="async"
+          />
+
+          <div class="auto-search-hero__content">
+            <article class="auto-search-panel">
+              <h1 class="auto-search-title" id="auto-search-title">Melyik járművet keresed?</h1>
 
             <div class="auto-body-types" role="group" aria-label="Karosszériatípus">
               <button type="button" class="auto-body-type" data-body-type="limuzin" aria-pressed="false">
@@ -303,10 +304,11 @@
                 </div>
               </div>
             </form>
-          </article>
-        </div>
+            </article>
+          </div>
 
-        <img class="auto-search-hero__brand" src="/images/bymy-logo.png?v=autoHero1" alt="Bymy.hu" width="190" height="82" decoding="async" />
+          <img class="auto-search-hero__brand" src="/images/bymy-logo.png?v=autoHero1" alt="Bymy.hu" width="190" height="82" decoding="async" />
+        </div>
       </section>
 
       <div class="site-layout home-layout">

@@ -78,19 +78,17 @@ export function initHomeValuation(rootId = "home-valuation") {
   }
 
   async function loadCatalog() {
-    if (catalogReady || !modelSelect || !yearSelect || !tipusSelect) return;
+    if (catalogReady || !modelSelect || !yearSelect) return;
     setStatus(statusEl, "Katalógus betöltése…", "info");
     try {
       await initVehicleCatalogSelects({
         brandSelect,
         modelSelect,
         yearSelect,
-        tipusSelect,
-        yearFromCatalog: true,
-        brandEmptyLabel: "Válassz márkát",
-        modelEmptyLabel: "Válassz modellt",
+        yearFromCatalog: false,
+        brandEmptyLabel: "Válassz gyártmányt",
+        modelEmptyLabel: "Válassz típust",
         yearEmptyLabel: "Mindegy",
-        tipusEmptyLabel: "Mindegy",
       });
       catalogReady = true;
       setStatus(statusEl, "", "");

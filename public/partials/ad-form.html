@@ -75,14 +75,14 @@
                     </select>
                   </div>
                   <div class="labeled-field">
-                    <label for="modell">Modell: <span class="req">*</span></label>
+                    <label for="modell">Típus: <span class="req">*</span></label>
                     <select id="modell" name="modell" required>
                       <option value="">Először válassz gyártmányt</option>
                     </select>
                   </div>
                 </div>
 
-                <div class="field-row full field-row--tipus">
+                <div class="field-row full field-row--tipus" hidden>
                   <div class="labeled-field">
                     <label for="tipus_katalogus">Típus a katalógusból:</label>
                     <select id="tipus_katalogus">
@@ -91,10 +91,10 @@
                   </div>
                 </div>
 
-                <div class="field-row full field-row--pair field-row--tipus-egyeb">
+                <div class="field-row full field-row--pair field-row--tipus-egyeb" hidden>
                   <div class="labeled-field">
-                    <label for="tipus">Típus: <span class="req">*</span></label>
-                    <input id="tipus" name="tipus" type="text" class="auto-filled" required />
+                    <label for="tipus">Típus szöveg:</label>
+                    <input id="tipus" name="tipus" type="text" class="auto-filled" />
                   </div>
                   <div class="labeled-field">
                     <label for="egyeb_tipus">Egyéb típus:</label>

@@ -1,12 +1,9 @@
 /**
  * Gyorskereső az összesítő sávban.
  *
- * 1. sor: Márka, Modell, Típus
+ * 1. sor: Gyártmány, Típus (CSV Modell)
  * 2. sor: Üzemanyag, Évjárat, Vételár
  * 3. sor: Keresés, Részletes keresés, Visszaállítás
- *
- * A Márka/Modell/Típus a járműkatalógusból töltődik.
- * A Vételár 500 000 Ft-os ugrásokkal (legördülő), nincs szövegmező → nincs telefon-autofill.
  */
 
 import { initVehicleCatalogSelects, fillSelect } from "./vehicle-catalog-client.js";
@@ -53,7 +50,6 @@ export function initHomeQuickSearch({ onSearch = () => {} } = {}) {
 
   const brandSelect = document.getElementById("qs-gyartmany");
   const modelSelect = document.getElementById("qs-modell");
-  const tipusSelect = document.getElementById("qs-tipus");
   const fuelSelect = document.getElementById("qs-uzemanyag");
   const yearFrom = document.getElementById("qs-ev-tol");
   const yearTo = document.getElementById("qs-ev-ig");
@@ -71,11 +67,8 @@ export function initHomeQuickSearch({ onSearch = () => {} } = {}) {
   initVehicleCatalogSelects({
     brandSelect,
     modelSelect,
-    yearSelect: yearFrom,
-    tipusSelect,
     brandEmptyLabel: "Mindegy",
     modelEmptyLabel: "Mindegy",
-    tipusEmptyLabel: "Mindegy",
     yearFromCatalog: false,
   })
     .then((catalog) => {
@@ -104,7 +97,7 @@ export function initHomeQuickSearch({ onSearch = () => {} } = {}) {
     onSearch({
       gyartmany: brandSelect?.value ?? "",
       modell: modelSelect?.value ?? "",
-      tipusKatalogus: tipusSelect?.value ?? "",
+      tipusKatalogus: "",
       uzemanyagQuick: fuelSelect?.value ?? "",
       ev_tol: numOrNull(yearFrom?.value),
       ev_ig: numOrNull(yearTo?.value),
@@ -114,8 +107,8 @@ export function initHomeQuickSearch({ onSearch = () => {} } = {}) {
   });
 
   /*
-   * A reset a böngésző alapértékeit állítja vissza; a Modell/Típus listát nekünk
-   * kell frissítenünk, mert a katalógus kötés a Márka `change` eseményére épül.
+   * A reset a böngésző alapértékeit állítja vissza; a Típus listát nekünk
+   * kell frissítenünk, mert a katalógus kötés a Gyártmány `change` eseményére épül.
    */
   form.addEventListener("reset", () => {
     requestAnimationFrame(() => {

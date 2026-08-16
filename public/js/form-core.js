@@ -324,12 +324,18 @@ function updateLeDisplay() {
 
 function updateTitle() {
   if (!hirdetesCime || hirdetesCime?.dataset.userEdited === "1") return;
-  const parts = [gyartmany.value, modell.value, tipus.value].filter(Boolean);
+  const parts = [gyartmany.value, modell.value].filter(Boolean);
   const year = gyartasiEv.value;
   hirdetesCime.value = parts.length
     ? `Eladó ${parts.join(" ")}${year ? ` (${year})` : ""}`
     : "";
   if (hirdetesCime.type !== "hidden") fitInputWidth(hirdetesCime);
+}
+
+function syncTipusFromModell() {
+  if (!tipus || !modell) return;
+  if (tipus.dataset.userEdited === "1") return;
+  tipus.value = modell.value || "";
 }
 
 function measureTextWidth(text, font) {
@@ -626,7 +632,6 @@ function validateStep(step) {
     "gyartasi_ev",
     "gyartmany",
     "modell",
-    "tipus",
     "kivitel",
     "allapot",
     "okmany_jelleg",
@@ -831,13 +836,11 @@ initVehicleCatalogSelects({
   brandSelect: gyartmany,
   modelSelect: modell,
   yearSelect: gyartasiEv,
-  tipusSelect: tipusKatalogus,
-  // A gyártási év listája marad a teljes évsor — csak a típusokat szűri.
   yearFromCatalog: false,
   brandEmptyLabel: "Válasszon",
   modelEmptyLabel: "Válasszon",
-  tipusEmptyLabel: "Válasszon típust",
   onChange: () => {
+    syncTipusFromModell();
     applyAutoFill();
     updateTitle();
     fitAllFormFields();
@@ -852,6 +855,11 @@ tipusKatalogus?.addEventListener("change", () => {
   updateTitle();
   fitAllFormFields();
   saveDraft();
+});
+
+modell?.addEventListener("change", () => {
+  syncTipusFromModell();
+  updateTitle();
 });
 renderFuelDropdown();
 renderFuelSelector();

@@ -312,13 +312,10 @@ export async function initHomeFilterCatalog(onChange = () => {}) {
   return initVehicleCatalogSelects({
     brandSelect,
     modelSelect,
-    // Az évjárat listája a hirdetésekből jön, a típusokat viszont szűri.
     yearSelect: document.getElementById("filter-ev-jarat"),
-    tipusSelect: document.getElementById("filter-tipus-katalogus"),
     yearFromCatalog: false,
     brandEmptyLabel: "Mindegy",
     modelEmptyLabel: "Mindegy",
-    tipusEmptyLabel: "Mindegy",
     onChange,
   });
 }

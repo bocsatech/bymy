@@ -198,22 +198,15 @@
               <p class="home-qs-status" id="home-qs-status" hidden></p>
               <div class="home-qs-row">
                 <label class="home-qs-field home-qs-field--wide">
-                  <span class="home-qs-label">Márka</span>
+                  <span class="home-qs-label">Gyártmány</span>
                   <select class="home-qs-control" id="qs-gyartmany">
                     <option value="">Mindegy</option>
                   </select>
                 </label>
 
                 <label class="home-qs-field home-qs-field--wide">
-                  <span class="home-qs-label">Modell</span>
-                  <select class="home-qs-control" id="qs-modell">
-                    <option value="">Mindegy</option>
-                  </select>
-                </label>
-
-                <label class="home-qs-field home-qs-field--wide">
                   <span class="home-qs-label">Típus</span>
-                  <select class="home-qs-control" id="qs-tipus">
+                  <select class="home-qs-control" id="qs-modell">
                     <option value="">Mindegy</option>
                   </select>
                 </label>
@@ -335,18 +328,18 @@
               <span class="home-valuation-chevron" aria-hidden="true"></span>
             </button>
             <div class="home-valuation-body" id="home-valuation-body" hidden>
-              <p class="home-valuation-lead">Márka, modell, évjárat és típus a listából — átlagár a mentett hirdetésekből.</p>
+              <p class="home-valuation-lead">Gyártmány és típus a listából — átlagár a mentett hirdetésekből.</p>
               <form id="home-valuation-form" class="home-valuation-form">
                 <label class="home-valuation-field">
-                  <span class="home-valuation-label">Márka</span>
+                  <span class="home-valuation-label">Gyártmány</span>
                   <select id="valuation-gyartmany" name="gyartmany" required>
-                    <option value="">Válassz márkát</option>
+                    <option value="">Válassz gyártmányt</option>
                   </select>
                 </label>
                 <label class="home-valuation-field">
-                  <span class="home-valuation-label">Modell</span>
+                  <span class="home-valuation-label">Típus</span>
                   <select id="valuation-modell" name="modell">
-                    <option value="">Előbb válassz márkát</option>
+                    <option value="">Előbb válassz gyártmányt</option>
                   </select>
                 </label>
                 <label class="home-valuation-field">
@@ -355,8 +348,8 @@
                     <option value="">Mindegy</option>
                   </select>
                 </label>
-                <label class="home-valuation-field">
-                  <span class="home-valuation-label">Típus</span>
+                <label class="home-valuation-field" hidden>
+                  <span class="home-valuation-label">Részletes típus</span>
                   <select id="valuation-tipus" name="tipus">
                     <option value="">Mindegy</option>
                   </select>
@@ -447,8 +440,8 @@
     </footer>
 
     <script src="/js/partner-recommendations-init.js?v=ajanlasMobile1" type="module"></script>
-    <script src="/js/home-valuation-init.js?v=valuation20260728catalog" type="module"></script>
-    <script src="/js/home-app.js?v=autoCat1" type="module"></script>
+    <script src="/js/home-valuation-init.js?v=carCatalog1" type="module"></script>
+    <script src="/js/home-app.js?v=carCatalog1" type="module"></script>
     <script src="/js/auto-hero.js?v=heroSettings1" type="module"></script>
     <script src="/js/site-avatar-menu.js?v=willhabenHdr1" type="module"></script>
 

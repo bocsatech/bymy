@@ -35,7 +35,10 @@ if (hero) {
   };
 
   bodyTypeButtons.forEach((button) => {
-    button.addEventListener("click", () => selectBodyType(button));
+    button.addEventListener("click", (event) => {
+      event.preventDefault();
+      selectBodyType(button);
+    });
   });
 
   hero.querySelector("#home-qs-form")?.addEventListener("reset", () => {

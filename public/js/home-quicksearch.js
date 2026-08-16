@@ -133,6 +133,7 @@ export function initHomeQuickSearch({ onSearch = () => {} } = {}) {
   function setMoreOpen(open) {
     if (!morePanel || !advancedBtn) return;
     morePanel.hidden = !open;
+    morePanel.classList.toggle("is-open", open);
     advancedBtn.setAttribute("aria-expanded", open ? "true" : "false");
     advancedBtn.textContent = open ? "Kevesebb szűrő" : "Több szűrő";
     hero?.classList.toggle("is-more-open", open);
@@ -152,7 +153,8 @@ export function initHomeQuickSearch({ onSearch = () => {} } = {}) {
   });
 
   advancedBtn?.addEventListener("click", () => {
-    const open = morePanel?.hidden !== false;
-    setMoreOpen(open);
+    setMoreOpen(!morePanel.classList.contains("is-open"));
   });
+
+  setMoreOpen(false);
 }

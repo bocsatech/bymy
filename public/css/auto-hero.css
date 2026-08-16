@@ -291,12 +291,16 @@ body.home-page[data-site-page="auto"] .home-ad-strip-inner {
 }
 
 .auto-search-panel .home-qs-more {
-  display: flex;
+  display: none;
   flex-direction: column;
   gap: 0.55rem;
   margin-top: 0.15rem;
   padding-top: 0.55rem;
   border-top: 1px solid rgba(255, 255, 255, 0.28);
+}
+
+.auto-search-panel .home-qs-more.is-open {
+  display: flex;
 }
 
 .auto-search-hero.is-more-open .auto-search-hero__stage {

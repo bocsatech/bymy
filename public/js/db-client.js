@@ -1,4 +1,4 @@
-const LISTING_ID_KEY = "autosweb-listing-id";
+const LISTING_ID_KEY = "bymy-listing-id";
 
 export function getStoredListingId() {
   const raw = sessionStorage.getItem(LISTING_ID_KEY);
@@ -16,7 +16,7 @@ async function parseJson(response) {
   const data = await response.json();
   if (!response.ok) {
     if (response.status === 404 && data.error === "Ismeretlen API.") {
-      throw new Error("Régi Autosweb szerver — futtasd: autosweb/mac/frissites.command, majd indítsd újra.");
+      throw new Error("Régi Bymy szerver — futtasd: bymy/mac/frissites.command, majd indítsd újra.");
     }
     throw new Error(data.error || "Szerver hiba");
   }

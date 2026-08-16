@@ -1,4 +1,4 @@
-const STORAGE_KEY = "autosweb_partner_postal_code";
+const STORAGE_KEY = "bymy_partner_postal_code";
 
 export function loadSavedPostalCode() {
   try {

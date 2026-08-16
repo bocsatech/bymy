@@ -12,9 +12,9 @@ import {
   deleteAllListingsFromDb,
 } from "./db-client.js";
 
-const EMBEDDED_VERSION = document.querySelector('meta[name="autosweb-version"]')?.content ?? "";
+const EMBEDDED_VERSION = document.querySelector('meta[name="bymy-version"]')?.content ?? "";
 const SERVER_RESTART_MSG =
-  "Régi Autosweb szerver fut — állítsd le (Ctrl+C), majd indítsd újra: ~/Desktop/Autosweb-indito.command (vagy autosweb/mac/frissites.command után újraindítás).";
+  "Régi Bymy szerver fut — állítsd le (Ctrl+C), majd indítsd újra: ~/Desktop/Bymy-indito.command (vagy bymy/mac/frissites.command után újraindítás).";
 
 const formSection = document.getElementById("import-form-section");
 const formTitle = document.getElementById("import-form-title");
@@ -93,7 +93,7 @@ function verifyFormLoaded() {
   const ok = Boolean(document.getElementById("gyartasi_ev") && document.getElementById("km"));
   if (!ok) {
     showFormError(
-      "Az űrlap nem töltődött be. Futtasd: autosweb/mac/frissites.command, indítsd újra az Autosweb-et, majd Cmd+Shift+R."
+      "Az űrlap nem töltődött be. Futtasd: bymy/mac/frissites.command, indítsd újra a Bymy-et, majd Cmd+Shift+R."
     );
   } else if (formError) {
     formError.hidden = true;
@@ -134,7 +134,7 @@ async function initPage() {
   const loaded = await loadAdFormPartial();
   if (!loaded) {
     showFormError(
-      "Az űrlap fájl hiányzik. Frissíts (frissites.command), indítsd újra az Autosweb-et. URL: http://127.0.0.1:3456/import.html"
+      "Az űrlap fájl hiányzik. Frissíts (frissites.command), indítsd újra a Bymy-et. URL: https://bymy.vercel.app/import.html"
     );
     return;
   }

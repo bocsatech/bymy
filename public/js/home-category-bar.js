@@ -67,7 +67,7 @@ export function filterByCategory(items, categoryId) {
   return items.filter((item) => matchesCategory(item, categoryId));
 }
 
-export function initHomeCategoryBar({ onChange, getForm }) {
+export function initHomeCategoryBar({ onChange, getForm, initialCategory = null }) {
   const buttons = document.querySelectorAll("[data-category]");
   if (!buttons.length) return null;
 
@@ -79,12 +79,17 @@ export function initHomeCategoryBar({ onChange, getForm }) {
     });
   };
 
-  const setCategory = (categoryId) => {
-    activeCategory = activeCategory === categoryId ? null : categoryId;
+  const applyCategory = (categoryId, { toggle = true } = {}) => {
+    if (toggle && activeCategory === categoryId) {
+      activeCategory = null;
+    } else {
+      activeCategory = categoryId || null;
+    }
     const form = getForm?.();
     if (form && activeCategory) {
       form.reset();
-      form.querySelector("#filter-uzemanyag-quick").value = "";
+      const fuelQuick = form.querySelector("#filter-uzemanyag-quick");
+      if (fuelQuick) fuelQuick.value = "";
       form.querySelectorAll("[data-fuel-quick]").forEach((btn) => btn.classList.remove("is-active"));
     }
     syncButtons();
@@ -92,8 +97,12 @@ export function initHomeCategoryBar({ onChange, getForm }) {
   };
 
   buttons.forEach((button) => {
-    button.addEventListener("click", () => setCategory(button.dataset.category));
+    button.addEventListener("click", () => applyCategory(button.dataset.category));
   });
+
+  if (initialCategory && HOME_CATEGORY_IDS.includes(initialCategory)) {
+    applyCategory(initialCategory, { toggle: false });
+  }
 
   return {
     getCategory: () => activeCategory,
@@ -101,6 +110,7 @@ export function initHomeCategoryBar({ onChange, getForm }) {
       activeCategory = null;
       syncButtons();
     },
+    setCategory: (categoryId) => applyCategory(categoryId, { toggle: false }),
     syncButtons,
   };
 }

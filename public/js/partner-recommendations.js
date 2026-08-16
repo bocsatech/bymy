@@ -1,20 +1,17 @@
-import { PARTNER_CATEGORIES } from "./partner-categories-data.js?v=partners20260726acc4";
+import {
+  PARTNER_CATEGORIES,
+  partnerCategoryImageUrl,
+} from "./partner-categories-data.js?v=ajanlasMobile1";
 
-const STORAGE_KEY = "autosweb_partner_postal_code";
-const PARTNER_UI_VERSION = "partners20260726acc4";
+const STORAGE_KEY = "bymy_partner_postal_code";
+const LEGACY_STORAGE_KEY = "autosweb_partner_postal_code";
+const RADIUS_KEY = "bymy_partner_radius_km";
+const PARTNER_UI_VERSION = "ajanlasMobile1";
 let partnerUiInitialized = false;
-
-function isLocalAutoswebHost() {
-  const host = window.location.hostname;
-  return host === "127.0.0.1" || host === "localhost" || host === "[::1]";
-}
 
 function partnerApiErrorMessage(response, data) {
   if (response.status === 404 && data?.error === "Ismeretlen API.") {
-    return "Régi Autosweb szerver fut — állítsd le, futtasd: autosweb/mac/frissites.command, majd indítsd újra.";
-  }
-  if (!isLocalAutoswebHost()) {
-    return "A szolgáltatók csak a lokális Autosweben működnek: http://127.0.0.1:3456/ (nem a Vercel weboldalon).";
+    return "A partner API nem elérhető ezen a szerveren.";
   }
   return data?.error ?? "Ajánlások betöltése sikertelen.";
 }
@@ -25,14 +22,7 @@ export async function fetchPartnerRecommendations(postalCode) {
   try {
     response = await fetch(`/api/partners/recommendations?${params}`);
   } catch {
-    if (!isLocalAutoswebHost()) {
-      throw new Error(
-        "A szolgáltatók csak a lokális Autosweben működnek: http://127.0.0.1:3456/ (indítsd: Autosweb-indito.command)."
-      );
-    }
-    throw new Error(
-      "Nem érhető el az Autosweb szerver — indítsd: ~/Desktop/Autosweb-indito.command (http://127.0.0.1:3456/)."
-    );
+    throw new Error("Nem érhető el a Bymy szerver.");
   }
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
@@ -43,7 +33,7 @@ export async function fetchPartnerRecommendations(postalCode) {
 
 export function loadSavedPostalCode() {
   try {
-    return localStorage.getItem(STORAGE_KEY) ?? "";
+    return localStorage.getItem(STORAGE_KEY) ?? localStorage.getItem(LEGACY_STORAGE_KEY) ?? "";
   } catch {
     return "";
   }
@@ -136,10 +126,14 @@ function renderCategoryAccordionItem(category) {
   toggle.className = "home-partner-category-toggle";
   toggle.setAttribute("aria-expanded", "false");
   toggle.setAttribute("aria-controls", `home-partner-panel-${category.id}`);
+  const imageUrl = partnerCategoryImageUrl(category.id);
   toggle.innerHTML = `
+    <span class="home-partner-category-photo" aria-hidden="true">
+      <img src="${escapeHtml(imageUrl)}?v=ajanlasMobile1" alt="" width="44" height="44" loading="lazy" decoding="async" />
+    </span>
     <span class="home-partner-category-label">${escapeHtml(category.label)}</span>
     <span class="home-partner-category-meta">
-      <span class="home-partner-category-count">${count > 0 ? count : "—"}</span>
+      <span class="home-partner-category-count">${count > 0 ? count : "0"}</span>
       <span class="home-partner-category-chevron" aria-hidden="true"></span>
     </span>
   `;
@@ -186,15 +180,6 @@ function setStatus(statusEl, message, type = "") {
 }
 
 async function verifyPartnerApi(statusEl) {
-  if (!isLocalAutoswebHost()) {
-    setStatus(
-      statusEl,
-      "A szolgáltatók csak lokálisan működnek: http://127.0.0.1:3456/ (Autosweb-indito.command).",
-      "err"
-    );
-    return false;
-  }
-
   try {
     const response = await fetch("/api/partners/stats");
     const data = await response.json().catch(() => ({}));
@@ -205,18 +190,14 @@ async function verifyPartnerApi(statusEl) {
     if (!data.activePaid) {
       setStatus(
         statusEl,
-        "Nincs fizetős partner az adatbázisban. Futtasd: cd ~/Downloads/autosweb && npm run seed:partners",
+        "Nincs fizetős partner az adatbázisban.",
         "err"
       );
       return false;
     }
     return true;
   } catch {
-    setStatus(
-      statusEl,
-      "Az Autosweb szerver nem fut — indítsd: ~/Desktop/Autosweb-indito.command",
-      "err"
-    );
+    setStatus(statusEl, "Nem érhető el a Bymy szerver.", "err");
     return false;
   }
 }

@@ -1,10 +1,57 @@
 <!DOCTYPE html>
 <html lang="hu">
   <head>
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem("bymy-theme");
+          if (t !== "dark" && t !== "light") {
+            t = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+          }
+          document.documentElement.setAttribute("data-theme", t);
+        } catch (e) {}
+                /* Auth fejléc: ne villanjon vendég gomb → profil a modul / API előtt */
+        try {
+          var raw = sessionStorage.getItem("bymy-auth-user");
+          var user = raw ? JSON.parse(raw) : null;
+          var loggedIn = !!(user && user.email);
+          if (!loggedIn) {
+            try {
+              if (localStorage.getItem("bymy-auth-token")) loggedIn = true;
+            } catch (e2) {}
+          }
+          document.documentElement.setAttribute("data-auth", loggedIn ? "member" : "guest");
+          var first = "";
+          if (user) {
+            first = String((user.profile && user.profile.firstName) || "").trim();
+            if (!first && user.displayName && String(user.displayName).indexOf("@") < 0) {
+              first = String(user.displayName).trim().split(/\s+/)[0] || "";
+            }
+            if (!first && user.email) {
+              var local = String(user.email).split("@")[0] || "";
+              first = local ? local.charAt(0).toUpperCase() + local.slice(1) : "";
+            }
+          }
+          if (first) {
+            document.addEventListener("DOMContentLoaded", function () {
+              document.querySelectorAll("span[data-auth-firstname]").forEach(function (el) {
+                el.textContent = first;
+              });
+              var letter = first.charAt(0).toUpperCase();
+              document.querySelectorAll("[data-avatar-letter]").forEach(function (el) {
+                el.textContent = letter;
+              });
+            });
+          }
+        } catch (e) {
+          document.documentElement.setAttribute("data-auth", "guest");
+        }
+      })();
+    </script>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext x='16' y='22' text-anchor='middle' font-size='14' font-family='system-ui,sans-serif' font-weight='700'%3EB%3C/text%3E%3C/svg%3E" type="image/svg+xml" />
-    <meta name="bymy-version" content="homeRestore1" />
+    <meta name="bymy-version" content="authAcct1" />
     <title>Bymy</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -12,11 +59,25 @@
       href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="/css/site-app.css?v=homeRestore1" />
-    <link rel="stylesheet" href="/css/hub.css?v=homeRestore1" />
-  </head>
+    <link rel="stylesheet" href="/css/hub.css?v=mwAvatarFix1" />
+    <link rel="stylesheet" href="/css/hub-mobile-app.css?v=mwAvatarFix1" />
+    <link rel="stylesheet" href="/css/site-app.css?v=mwAvatarFix1" />  </head>
   <body class="hub-page site-page site-app hub-page--feed" data-site-page="hub">
-    <header class="hub-header home-header">
+    <!-- Mobil-only app héj (asztalon CSS-sel rejtve) -->
+    <header class="mw-app-top" aria-label="Bymy mobil">
+      <a class="mw-app-logo" href="/" aria-label="Bymy">
+        <img class="bymy-logo-img" src="/images/bymy-logo.png?v=logoUpload1" alt="Bymy.hu" width="280" height="130" decoding="async" />
+      </a>
+      <a class="mw-app-login" href="/belepes.html" data-auth-guest aria-label="Belépés" title="Belépés">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" stroke="currentColor" stroke-width="1.7"/><path d="M4.5 20.2c1.7-3.2 4.3-4.8 7.5-4.8s5.8 1.6 7.5 4.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+      </a>
+      <a class="mw-app-avatar" href="/beallitasok.html?szekcio=fiok" data-auth-member hidden aria-label="Fiók" title="Fiók">
+        <span data-avatar-letter>A</span>
+        <img data-avatar-img alt="" hidden width="44" height="44" />
+      </a>
+    </header>
+
+    <header class="hub-header">
       <div class="hub-header-inner">
         <div class="hub-header-top">
         <div class="hub-header-actions site-header-actions">
@@ -60,22 +121,29 @@
 
     <main aria-label="Kezdőlap">
       <div class="hub-intro">
+        <p class="hub-home-logo">
+          <img class="bymy-logo-img bymy-logo-img--home" src="/images/bymy-logo.png?v=logoUpload1" alt="Bymy.hu" width="280" height="130" decoding="async" />
+        </p>
         <section class="hub-verticals" aria-label="Fő kategóriák">
-          <a class="hub-card hub-card--ingatlan" href="/ingatlan.html">
-            <div>
-              <p class="hub-card-kicker">Ingatlan</p>
-              <h2 class="hub-card-title">Találd meg az új otthonod</h2>
-              <p class="hub-card-text">Lakás, ház, telek — vétel és bérlés egy átlátható felületen.</p>
-            </div>
-            <span class="hub-card-cta">Ingatlan keresése →</span>
+          <a class="hub-promo hub-promo--fullimg" href="/ingatlan.html" data-promo="ingatlan">
+            <img
+              class="hub-promo__full"
+              src="/images/hub-ingatlan.png?v=hubPromoFit1"
+              alt="Ingatlan — Házak és lakások"
+              width="2016"
+              height="1210"
+              decoding="async"
+            />
           </a>
-          <a class="hub-card hub-card--auto" href="/auto.html">
-            <div>
-              <p class="hub-card-kicker">Autó &amp; Motor</p>
-              <h2 class="hub-card-title">Autók és motorok</h2>
-              <p class="hub-card-text">Használt és új járművek, szűrés, lista és hirdetésfeladás.</p>
-            </div>
-            <span class="hub-card-cta">Járművek böngészése →</span>
+          <a class="hub-promo hub-promo--fullimg" href="/auto.html" data-promo="auto">
+            <img
+              class="hub-promo__full"
+              src="/images/hub-auto-motor.png?v=hubPromoFit1"
+              alt="Autó és teherautó — Autók és teherautók"
+              width="2016"
+              height="1210"
+              decoding="async"
+            />
           </a>
         </section>
 
@@ -89,6 +157,55 @@
       </div>
 
       <div class="hub-feed">
+      <section class="hf-section" data-hf="auto-kategoriak">
+        <div class="hf-head">
+          <h2 class="hf-title">Autó kategóriák</h2>
+          <a class="hf-all" href="/auto.html">Összes</a>
+        </div>
+        <div class="hf-rail hf-rail--ajanlas hf-rail--kategoriak" role="list">
+          <a class="hf-card hf-card--ajanlas hf-card--kategoria" href="/auto.html?cat=uj" role="listitem">
+            <span class="hf-card-media"><img src="/images/categories/uj.png?v=autoCat1" alt="" width="486" height="236" loading="lazy" decoding="async" /></span>
+            <span class="hf-card-label">Új</span>
+            <span class="hf-card-sub">Friss modell</span>
+          </a>
+          <a class="hf-card hf-card--ajanlas hf-card--kategoria" href="/auto.html?cat=benzin" role="listitem">
+            <span class="hf-card-media"><img src="/images/categories/benzin.png?v=autoCat1" alt="" width="486" height="236" loading="lazy" decoding="async" /></span>
+            <span class="hf-card-label">Benzin</span>
+            <span class="hf-card-sub">Otto motor</span>
+          </a>
+          <a class="hf-card hf-card--ajanlas hf-card--kategoria" href="/auto.html?cat=diesel" role="listitem">
+            <span class="hf-card-media"><img src="/images/categories/diesel.png?v=autoCat1" alt="" width="466" height="242" loading="lazy" decoding="async" /></span>
+            <span class="hf-card-label">Diesel</span>
+            <span class="hf-card-sub">Dízelmotor</span>
+          </a>
+          <a class="hf-card hf-card--ajanlas hf-card--kategoria" href="/auto.html?cat=elektromos" role="listitem">
+            <span class="hf-card-media"><img src="/images/categories/elektromos.png?v=autoCat1" alt="" width="462" height="231" loading="lazy" decoding="async" /></span>
+            <span class="hf-card-label">Elektromos</span>
+            <span class="hf-card-sub">Zöld hajtás</span>
+          </a>
+          <a class="hf-card hf-card--ajanlas hf-card--kategoria" href="/auto.html?cat=hybrid" role="listitem">
+            <span class="hf-card-media"><img src="/images/categories/hybrid.png?v=autoCat1" alt="" width="486" height="247" loading="lazy" decoding="async" /></span>
+            <span class="hf-card-label">Hybrid</span>
+            <span class="hf-card-sub">Kombinált</span>
+          </a>
+          <a class="hf-card hf-card--ajanlas hf-card--kategoria" href="/auto.html?cat=leasing" role="listitem">
+            <span class="hf-card-media"><img src="/images/categories/leasing.png?v=autoCat1" alt="" width="460" height="224" loading="lazy" decoding="async" /></span>
+            <span class="hf-card-label">Leasing</span>
+            <span class="hf-card-sub">Havi díj</span>
+          </a>
+          <a class="hf-card hf-card--ajanlas hf-card--kategoria" href="/auto.html?cat=berelheto" role="listitem">
+            <span class="hf-card-media"><img src="/images/categories/berelheto.png?v=autoCat1" alt="" width="470" height="228" loading="lazy" decoding="async" /></span>
+            <span class="hf-card-label">Bérelhető</span>
+            <span class="hf-card-sub">Rövid táv</span>
+          </a>
+          <a class="hf-card hf-card--ajanlas hf-card--kategoria" href="/auto.html?cat=ot" role="listitem">
+            <span class="hf-card-media"><img src="/images/categories/ot.png?v=autoCat1" alt="" width="480" height="233" loading="lazy" decoding="async" /></span>
+            <span class="hf-card-label">OT</span>
+            <span class="hf-card-sub">Oldtimer</span>
+          </a>
+        </div>
+      </section>
+
       <section class="hf-section" data-hf="kiemelt">
         <div class="hf-head">
           <h2 class="hf-title">Kiemelt hirdetések</h2>
@@ -118,12 +235,12 @@
       <section class="hf-section" data-hf="szolgaltatasok">
         <div class="hf-head">
           <h2 class="hf-title">Szolgáltatások</h2>
-          <a class="hf-all" href="/partners.html">Összes</a>
+          <a class="hf-all" href="/ajanlasok.html">Összes</a>
         </div>
         <div class="hf-rail" role="list">
-          <a class="hf-card" href="/partners.html" role="listitem"><span class="hf-card-media"></span><span class="hf-card-label">Hamarosan</span></a>
-          <a class="hf-card" href="/partners.html" role="listitem"><span class="hf-card-media"></span><span class="hf-card-label">Hamarosan</span></a>
-          <a class="hf-card" href="/partners.html" role="listitem"><span class="hf-card-media"></span><span class="hf-card-label">Hamarosan</span></a>
+          <a class="hf-card" href="/ajanlasok.html" role="listitem"><span class="hf-card-media"></span><span class="hf-card-label">Hamarosan</span></a>
+          <a class="hf-card" href="/ajanlasok.html" role="listitem"><span class="hf-card-media"></span><span class="hf-card-label">Hamarosan</span></a>
+          <a class="hf-card" href="/ajanlasok.html" role="listitem"><span class="hf-card-media"></span><span class="hf-card-label">Hamarosan</span></a>
         </div>
       </section>
 
@@ -142,12 +259,49 @@
       <section class="hf-section" data-hf="ajanlasok">
         <div class="hf-head">
           <h2 class="hf-title">Ajánlások</h2>
-          <a class="hf-all" href="/partners.html">Összes</a>
+          <a class="hf-all" href="/ajanlasok.html">Összes</a>
         </div>
-        <div class="hf-rail" role="list">
-          <a class="hf-card hf-card--wide" href="/partners.html" role="listitem"><span class="hf-card-media"></span><span class="hf-card-label">Hamarosan</span></a>
-          <a class="hf-card hf-card--wide" href="/partners.html" role="listitem"><span class="hf-card-media"></span><span class="hf-card-label">Hamarosan</span></a>
-          <a class="hf-card hf-card--wide" href="/partners.html" role="listitem"><span class="hf-card-media"></span><span class="hf-card-label">Hamarosan</span></a>
+        <div class="hf-rail hf-rail--ajanlas" role="list">
+          <a class="hf-card hf-card--ajanlas" href="/ajanlasok.html?cat=atiras_ugyintezes" role="listitem">
+            <span class="hf-card-media"><img src="/images/ajanlas/ajanlas-atiras.png?v=ajanlasMobile1" alt="" width="512" height="512" loading="lazy" decoding="async" /></span>
+            <span class="hf-card-label">Átírás ügyintézés</span>
+          </a>
+          <a class="hf-card hf-card--ajanlas" href="/ajanlasok.html?cat=eredetvizsga" role="listitem">
+            <span class="hf-card-media"><img src="/images/ajanlas/ajanlas-eredet.png?v=ajanlasMobile1" alt="" width="512" height="512" loading="lazy" decoding="async" /></span>
+            <span class="hf-card-label">Eredetvizsga</span>
+          </a>
+          <a class="hf-card hf-card--ajanlas" href="/ajanlasok.html?cat=muszakivizsga" role="listitem">
+            <span class="hf-card-media"><img src="/images/ajanlas/ajanlas-muszaki.png?v=ajanlasMobile1" alt="" width="512" height="512" loading="lazy" decoding="async" /></span>
+            <span class="hf-card-label">Műszaki vizsga</span>
+          </a>
+          <a class="hf-card hf-card--ajanlas" href="/ajanlasok.html?cat=autoatvizsgalas" role="listitem">
+            <span class="hf-card-media"><img src="/images/ajanlas/ajanlas-atvizsgalas.png?v=ajanlasMobile1" alt="" width="512" height="512" loading="lazy" decoding="async" /></span>
+            <span class="hf-card-label">Autoátvizsgálás</span>
+          </a>
+          <a class="hf-card hf-card--ajanlas" href="/ajanlasok.html?cat=autoszerelo" role="listitem">
+            <span class="hf-card-media"><img src="/images/ajanlas/ajanlas-szerelo.png?v=ajanlasMobile1" alt="" width="512" height="512" loading="lazy" decoding="async" /></span>
+            <span class="hf-card-label">Autószerelő</span>
+          </a>
+          <a class="hf-card hf-card--ajanlas" href="/ajanlasok.html?cat=gumiszerelo" role="listitem">
+            <span class="hf-card-media"><img src="/images/ajanlas/ajanlas-gumi.png?v=ajanlasMobile1" alt="" width="512" height="512" loading="lazy" decoding="async" /></span>
+            <span class="hf-card-label">Gumiszerelő</span>
+          </a>
+          <a class="hf-card hf-card--ajanlas" href="/ajanlasok.html?cat=lakatos" role="listitem">
+            <span class="hf-card-media"><img src="/images/ajanlas/ajanlas-lakatos.png?v=ajanlasMobile1" alt="" width="512" height="512" loading="lazy" decoding="async" /></span>
+            <span class="hf-card-label">Lakatos</span>
+          </a>
+          <a class="hf-card hf-card--ajanlas" href="/ajanlasok.html?cat=klimaszerelo" role="listitem">
+            <span class="hf-card-media"><img src="/images/ajanlas/ajanlas-klima.png?v=ajanlasMobile1" alt="" width="512" height="512" loading="lazy" decoding="async" /></span>
+            <span class="hf-card-label">Klímaszerelő</span>
+          </a>
+          <a class="hf-card hf-card--ajanlas" href="/ajanlasok.html?cat=autokozmetika" role="listitem">
+            <span class="hf-card-media"><img src="/images/ajanlas/ajanlas-kozmetika.png?v=ajanlasMobile1" alt="" width="512" height="512" loading="lazy" decoding="async" /></span>
+            <span class="hf-card-label">Autókozmetika</span>
+          </a>
+          <a class="hf-card hf-card--ajanlas" href="/ajanlasok.html?cat=autovillamossag" role="listitem">
+            <span class="hf-card-media"><img src="/images/ajanlas/ajanlas-villamos.png?v=ajanlasMobile1" alt="" width="512" height="512" loading="lazy" decoding="async" /></span>
+            <span class="hf-card-label">Autóvillamosság</span>
+          </a>
         </div>
       </section>
 
@@ -198,9 +352,43 @@
       </div>
     </main>
 
-    <script src="/js/site-auth.js?v=fiokMenu2" type="module"></script>
-    <script src="/js/site-avatar-menu.js?v=fiokMenu2" type="module"></script>
-      <script src="/js/nav-counts.js?v=willhabenHdr1" type="module"></script>
-      <script src="/js/theme.js?v=willhabenHdr1" type="module"></script>
+    <nav class="mw-app-tabbar" aria-label="Mobil főmenü">
+      <a class="mw-app-tab is-active" href="/" aria-current="page">
+        <span class="mw-app-tab__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M4.5 11.2 12 5l7.5 6.2V19a1 1 0 0 1-1 1h-4v-4.6H9.5V20h-4a1 1 0 0 1-1-1v-7.8Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+        </span>
+        <span>Főoldal</span>
+      </a>
+      <a class="mw-app-tab" href="/auto.html">
+        <span class="mw-app-tab__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="6.2" stroke="currentColor" stroke-width="1.7"/><path d="M16.2 16.2 20 20" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        </span>
+        <span>Keresés</span>
+      </a>
+      <a class="mw-app-tab" href="/hirdetesfeladas.html" data-auth-guard>
+        <span class="mw-app-tab__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M5 19V10.8L12 5l7 5.8V19a1 1 0 0 1-1 1h-4.2v-4.4H10.2V20H6a1 1 0 0 1-1-1Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M12 11v4M10 13h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        </span>
+        <span>Feladás</span>
+      </a>
+      <a class="mw-app-tab" href="/beallitasok.html?szekcio=uzenetek">
+        <span class="mw-app-tab__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M5 7.2h9.2A2 2 0 0 1 16.2 9.2v4.1a2 2 0 0 1-2 2H9.1L6.2 18v-2.7H5A2 2 0 0 1 3 13.3V9.2A2 2 0 0 1 5 7.2Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M16.5 9.1h2.3A2 2 0 0 1 20.8 11v3.3a2 2 0 0 1-2 2h-.6v1.5l-1.9-1.5" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        </span>
+        <span>Üzenetek</span>
+      </a>
+      <a class="mw-app-tab" href="/ajanlasok.html">
+        <span class="mw-app-tab__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M7 4.8h10A1.8 1.8 0 0 1 18.8 6.6v12.1L12 15.7l-6.8 3V6.6A1.8 1.8 0 0 1 7 4.8Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 8.2h6M9 11h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        </span>
+        <span>Hírfolyam</span>
+      </a>
+    </nav>
+
+    <script src="/js/hub-rail-drag.js?v=autoCat1" defer></script>
+    <script src="/js/nav-counts.js?v=willhabenHdr1" type="module"></script>
+    <script src="/js/theme.js?v=willhabenHdr1" type="module"></script>
+    <script src="/js/site-auth.js?v=authAcct1" type="module"></script>
+    <script src="/js/site-avatar-menu.js?v=mwAvatarFix1" type="module"></script>
   </body>
 </html>

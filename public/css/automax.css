@@ -1434,13 +1434,16 @@ body.listings-page .import-cells-step-title {
 }
 
 body.import-page .import-nav-link {
-  color: var(--ax-muted);
+  color: #111;
+  font-weight: 600;
+  opacity: 1;
 }
 
 body.import-page .import-nav-link.active,
 body.import-page .import-nav-link:hover {
-  background: rgba(255, 85, 0, 0.15);
-  color: var(--ax-orange);
+  background: transparent;
+  color: #111;
+  text-decoration: underline;
 }
 
 body.theme-automax .listings-inline-link {

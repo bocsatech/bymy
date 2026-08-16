@@ -1,5 +1,24 @@
-export const IMPORT_LIST_KEY = "autosweb-import-list";
-const EMBEDDED_VERSION = document.querySelector('meta[name="autosweb-version"]')?.content ?? "";
+(function migrateLegacyAutoswebStorage() {
+  try {
+    const keys = [];
+    for (let i = 0; i < localStorage.length; i += 1) {
+      const k = localStorage.key(i);
+      if (k) keys.push(k);
+    }
+    for (const key of keys) {
+      if (!key.startsWith("autosweb")) continue;
+      const next = `bymy${key.slice("autosweb".length)}`;
+      if (localStorage.getItem(next) == null) {
+        localStorage.setItem(next, localStorage.getItem(key));
+      }
+    }
+  } catch {
+    /* ignore */
+  }
+})();
+
+export const IMPORT_LIST_KEY = "bymy-import-list";
+const EMBEDDED_VERSION = document.querySelector('meta[name="bymy-version"]')?.content ?? "";
 
 export function getImportResults() {
   try {
@@ -60,10 +79,10 @@ export function initImportPanel({ onApply, onSelected, alertOnApply = true, onRe
         if (!versionMismatchLogged) {
           versionMismatchLogged = true;
           appendLog(
-            `⚠ Verzió eltérés: böngésző ${EMBEDDED_VERSION}, szerver ${serverVersion} — futtasd: autosweb/mac/frissites.command, indítsd újra, Cmd+Shift+R.`
+            `⚠ Verzió eltérés: böngésző ${EMBEDDED_VERSION}, szerver ${serverVersion} — futtasd: bymy/mac/frissites.command, indítsd újra, Cmd+Shift+R.`
           );
         }
-        const versionMsg = `Verzió eltérés (${EMBEDDED_VERSION} ≠ ${serverVersion}) — frissítsd: frissites.command → Autosweb újraindítás → Cmd+Shift+R.`;
+        const versionMsg = `Verzió eltérés (${EMBEDDED_VERSION} ≠ ${serverVersion}) — frissítsd: frissites.command → Bymy újraindítás → Cmd+Shift+R.`;
         const topAlert = document.getElementById("import-top-alert");
         if (topAlert) {
           topAlert.hidden = false;

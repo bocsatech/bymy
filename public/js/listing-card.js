@@ -153,7 +153,7 @@ export function createListingCard(item, { selected = false, formatDate = (v) => 
       </div>
     </div>
     <footer class="ha-card-foot">
-      <span class="ha-card-foot-left">Autosweb · ${escapeHtml(updated)} · ${item.cell_count ?? 0} cella</span>
+      <span class="ha-card-foot-left">Bymy · ${escapeHtml(updated)} · ${item.cell_count ?? 0} cella</span>
       <span class="ha-card-foot-mark" aria-hidden="true">K</span>
     </footer>
   `;

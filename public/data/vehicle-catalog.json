@@ -1,0 +1,72 @@
+{
+  "source": "/tmp/lista-teszt.csv",
+  "imported_at": "2026-07-27T19:25:54.931Z",
+  "count_rows": 8,
+  "gyartmanyok": [
+    "ABARTH",
+    "AUDI",
+    "CHRYSLER"
+  ],
+  "modellek": {
+    "ABARTH": [
+      "124",
+      "500"
+    ],
+    "AUDI": [
+      "A4"
+    ],
+    "CHRYSLER": [
+      "GRAND"
+    ]
+  },
+  "tipusok": {
+    "ABARTH|124": [
+      {
+        "nev": "124 Spider 1.4 MultiAir T (Automata) [2 ajtós, 170 LE, 2017.03. – 2019.08.]",
+        "evTol": 2016,
+        "evIg": 2020
+      },
+      {
+        "nev": "124 Spider 1.4 MultiAir T Scorpione (Automata) [2 ajtós, 170 LE, 2017.06. – 2018.03.]",
+        "evTol": 2016,
+        "evIg": 2019
+      }
+    ],
+    "ABARTH|500": [
+      {
+        "nev": "500 1.4 [3 ajtós, 135 LE, 2008.07. – 2012.10.]",
+        "evTol": 2007,
+        "evIg": 2013
+      },
+      {
+        "nev": "500 1.4 [3 ajtós, 135 LE, 2012.11. – 2014.03.]",
+        "evTol": 2011,
+        "evIg": 2015
+      },
+      {
+        "nev": "500 Coupe 1.4 TJet 140 [3 ajtós, 140 LE, 2016.04. – 2016.07.]",
+        "evTol": 2015,
+        "evIg": 2017
+      },
+      {
+        "nev": "595 Coupe 1.4 TJet 160 Turismo [3 ajtós, 160 LE, 2016.04. – 2016.07.]",
+        "evTol": 2015,
+        "evIg": 2017
+      }
+    ],
+    "CHRYSLER|GRAND": [
+      {
+        "nev": "Grand Voyager 2.8 CRD Touring Executive (Automata) (7 személyes) [5 ajtós, 163 LE, 2010.05. – 2010.11.]",
+        "evTol": 2009,
+        "evIg": 2011
+      }
+    ],
+    "AUDI|A4": [
+      {
+        "nev": "A4 2.0 TDI [4 ajtós, 150 LE, 2015.09. – 2019.05.]",
+        "evTol": 2015,
+        "evIg": 2019
+      }
+    ]
+  }
+}

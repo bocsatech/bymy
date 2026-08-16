@@ -137,6 +137,10 @@ categoryUi = initHomeCategoryBar({
     applyFilters();
   },
   getForm: () => filterForm,
+  initialCategory:
+    new URLSearchParams(window.location.search).get("cat") ||
+    new URLSearchParams(window.location.search).get("category") ||
+    null,
 });
 
 initHomeQuickSearch({

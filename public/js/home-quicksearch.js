@@ -86,7 +86,7 @@ export function initHomeQuickSearch({ onSearch = () => {} } = {}) {
       if (!catalog?.gyartmanyok?.length && statusEl) {
         statusEl.hidden = false;
         statusEl.textContent =
-          "Nincs járműkatalógus. Import: npm run import:catalog -- ~/Desktop/lista.csv, majd indítsd újra az Autosweb-et.";
+          "Nincs járműkatalógus. Import: npm run import:catalog -- ~/Desktop/lista.csv, majd indítsd újra a Bymy-et.";
       }
     })
     .catch((error) => {
@@ -95,7 +95,7 @@ export function initHomeQuickSearch({ onSearch = () => {} } = {}) {
         statusEl.hidden = false;
         statusEl.textContent =
           error?.message ||
-          "A márka/modell lista nem töltődött be. Indítsd újra az Autosweb szervert (frissites.command).";
+          "A márka/modell lista nem töltődött be. Indítsd újra a Bymy szervert (frissites.command).";
       }
     });
 

@@ -7,10 +7,35 @@
   align-items: start;
 }
 
+/* Ha nincs oldalsáv a statikus HTML-ben, ne szoruljon 200px-be a tartalom */
+.site-layout:not(:has(> [data-site-side])) {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 .site-layout--wide .site-center--automax {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(280px, 36%);
   min-height: calc(100vh - 88px);
+}
+
+body[data-site-page="hirdetesfeladas"] .site-layout--wide .site-center--automax {
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 32%);
+  gap: 1rem;
+  padding: 1rem 1rem 2rem;
+  background: #e8edf3;
+}
+
+body[data-site-page="hirdetesfeladas"] .automax-main {
+  background: transparent !important;
+  padding: 0.25rem 0.25rem 2rem !important;
+  min-width: 0;
+}
+
+body[data-site-page="hirdetesfeladas"] .automax-panel {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  align-self: start;
 }
 
 body.site-page .page-automax.site-page-main {

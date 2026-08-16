@@ -23,16 +23,24 @@ import {
   addSavedSearch,
   removeSavedSearch,
   toggleSavedSearchNotify,
-  ensureDemoMessages,
-  markMessageRead,
-  deleteMessage,
 } from "./fok-data.js?v=auth20260805localdb9";
+import { initMessagesUi } from "./messages-ui.js?v=messagesWh2";
+import { listConversations } from "./messages-api.js?v=messagesWh2";
 
-const PHOTO_KEY = "autosweb-avatar-photos";
-const NOTIFY_KEY = "autosweb-notify-prefs";
+const PHOTO_KEY = "bymy-avatar-photos";
+const NOTIFY_KEY = "bymy-notify-prefs";
+const SEARCH_POSTAL_KEY = "bymy_stats_postal";
+const SEARCH_RADIUS_KEY = "bymy_stats_radius_km";
+const REC_POSTAL_KEY = "bymy_partner_postal_code";
+const REC_RADIUS_KEY = "bymy_partner_radius_km";
 const MAX_BYTES = 2.5 * 1024 * 1024;
 const AVATAR_SIZE = 256;
 const SECTIONS = ["attekintes", "parkolo", "keresesek", "uzenetek", "hirdetes", "fiok"];
+const SEARCH_RADIUS_OPTIONS = [5, 10, 15, 20, 30, 50, 75, 100];
+const REC_RADIUS_OPTIONS = [5, 10, 15, 20, 30];
+
+let lastLookedUpPostal = "";
+let cityLookupBusy = false;
 
 function readPhotos() {
   try {
@@ -50,14 +58,14 @@ function readNotifyPrefs(email) {
   try {
     const all = JSON.parse(localStorage.getItem(NOTIFY_KEY) || "{}");
     return {
-      messages: true,
-      favorites: true,
-      interests: true,
+      messages: false,
+      favorites: false,
+      interests: false,
       newsletter: false,
       ...(all[email] ?? {}),
     };
   } catch {
-    return { messages: true, favorites: true, interests: true, newsletter: false };
+    return { messages: false, favorites: false, interests: false, newsletter: false };
   }
 }
 
@@ -136,6 +144,7 @@ function setSection(section) {
   document.querySelectorAll("[data-mm-nav]").forEach((link) => {
     link.classList.toggle("is-active", link.getAttribute("data-mm-nav") === next);
   });
+  document.body.classList.toggle("mm-messages-open", next === "uzenetek");
   document.title =
     {
       attekintes: "Áttekintés",
@@ -143,7 +152,7 @@ function setSection(section) {
       keresesek: "Mentett kereséseim",
       uzenetek: "Üzenetek",
       hirdetes: "Hirdetésem",
-      fiok: "Fiók szerkesztése",
+      fiok: "Beállítások",
     }[next] + " — Fiókom";
 }
 
@@ -155,11 +164,16 @@ function fmtDate(ts) {
   }
 }
 
-function refreshStats(email) {
+async function refreshStats(email) {
   const park = getParkplatz(email);
   const searches = getSavedSearches(email);
-  const messages = ensureDemoMessages(email);
-  const unread = messages.filter((m) => !m.read).length;
+  let unread = 0;
+  try {
+    const conversations = await listConversations();
+    unread = conversations.reduce((sum, c) => sum + (Number(c.unread) || 0), 0);
+  } catch {
+    unread = 0;
+  }
 
   const parkStat = document.querySelector("[data-mm-stat-park]");
   const searchStat = document.querySelector("[data-mm-stat-search]");
@@ -246,39 +260,7 @@ function renderSearches(email) {
   }
 }
 
-function renderMessages(email) {
-  const list = document.getElementById("mm-msg-list");
-  const empty = document.getElementById("mm-msg-empty");
-  const items = ensureDemoMessages(email);
-  if (!list) return;
-  list.innerHTML = "";
-  if (empty) empty.hidden = items.length > 0;
-  for (const item of items) {
-    const row = document.createElement("article");
-    row.className = `mm-list-item${item.read ? "" : " is-unread"}`;
-    row.innerHTML = `
-      <div class="mm-list-main">
-        <strong>${escapeHtml(item.subject)}</strong>
-        <span class="mm-list-meta">${escapeHtml(item.from)} · ${fmtDate(item.at)}</span>
-        <p class="mm-msg-body">${escapeHtml(item.body)}</p>
-      </div>
-      <div class="mm-list-actions">
-        <button type="button" class="settings-link-btn" data-msg-read>Olvasott</button>
-        <button type="button" class="settings-danger-btn" data-msg-del>Törlés</button>
-      </div>`;
-    row.querySelector("[data-msg-read]")?.addEventListener("click", () => {
-      markMessageRead(email, item.id);
-      renderMessages(email);
-      refreshStats(email);
-    });
-    row.querySelector("[data-msg-del]")?.addEventListener("click", () => {
-      deleteMessage(email, item.id);
-      renderMessages(email);
-      refreshStats(email);
-    });
-    list.appendChild(row);
-  }
-}
+let messagesUi = null;
 
 function escapeHtml(value) {
   return String(value ?? "")
@@ -292,53 +274,229 @@ function escapeAttr(value) {
   return escapeHtml(value).replaceAll("'", "&#39;");
 }
 
-function updateProfileSummary(profile) {
+function updateProfileSummary(profile, user) {
   const el = document.getElementById("settings-profile-summary");
+  const hint = document.getElementById("settings-profile-email-hint");
   if (!el) return;
-  const name = [profile?.firstName, profile?.lastName].filter(Boolean).join(" ").trim();
-  el.textContent = name ? `Mentett név: ${name}` : "Mentett név: még nincs — töltsd ki és mentsd el.";
+  const name = [profile?.lastName, profile?.firstName].filter(Boolean).join(" ").trim();
+  const email = user?.email || profile?.email || "";
+  el.textContent = name || email || "Fiók";
+  if (hint) {
+    if (!profile?.firstName || !profile?.lastName) {
+      hint.textContent = "Töltsd ki a neved a Személyes adatoknál, majd Mentés.";
+    } else {
+      hint.textContent = email || "";
+    }
+  }
+}
+
+async function lookupCityFromPostal(postalInput, cityInput, busyEl) {
+  const digits = String(postalInput?.value ?? "")
+    .replace(/\D/g, "")
+    .slice(0, 4);
+  if (postalInput) postalInput.value = digits;
+  if (digits.length !== 4 || digits === lastLookedUpPostal || cityLookupBusy) return;
+  cityLookupBusy = true;
+  if (busyEl) busyEl.hidden = false;
+  try {
+    const params = new URLSearchParams({ postal_code: digits });
+    const res = await fetch(`/api/postal-codes/lookup?${params}`);
+    const data = await res.json().catch(() => ({}));
+    if (res.ok && data.city) {
+      lastLookedUpPostal = digits;
+      if (cityInput) cityInput.value = data.city;
+      document.querySelectorAll("[data-search-city], [data-rec-city], #mm-profile-form [name=city]").forEach((el) => {
+        if (el !== cityInput) el.value = data.city;
+      });
+      document.querySelectorAll("[data-search-postal], [data-rec-postal], #mm-profile-form [name=postalCode]").forEach((el) => {
+        if (el !== postalInput) el.value = digits;
+      });
+    }
+  } catch {
+    /* ignore */
+  } finally {
+    cityLookupBusy = false;
+    if (busyEl) busyEl.hidden = true;
+  }
+}
+
+function setWheelValue(wheel, km) {
+  if (!wheel) return;
+  const value = Number(km);
+  wheel.querySelectorAll("[data-km]").forEach((btn) => {
+    btn.classList.toggle("is-active", Number(btn.dataset.km) === value);
+  });
+  const active = wheel.querySelector(".is-active");
+  active?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  const hidden = wheel.parentElement?.querySelector('input[type="hidden"]');
+  if (hidden) hidden.value = String(value);
+}
+
+function initWheel(wheel) {
+  if (!wheel || wheel.dataset.bound === "1") return;
+  wheel.dataset.bound = "1";
+  wheel.addEventListener("click", (event) => {
+    const btn = event.target.closest("[data-km]");
+    if (!btn || !wheel.contains(btn)) return;
+    setWheelValue(wheel, btn.dataset.km);
+  });
+}
+
+function accountTypeLabel(type) {
+  if (type === "business") return "Céges fiók";
+  if (type === "dealer") return "Autókereskedő";
+  if (type === "private") return "Privát fiók";
+  return "—";
+}
+
+function syncCompanyWrap(form) {
+  const wrap = document.querySelector("[data-mm-company-wrap]");
+  const label = document.querySelector("[data-mm-company-label]");
+  const type = form?.elements?.namedItem("accountType")?.value || "private";
+  if (wrap) wrap.hidden = type !== "business" && type !== "dealer";
+  if (label) label.textContent = type === "dealer" ? "Kereskedés neve" : "Cégnév";
+  const locked = document.querySelector("[data-account-type-locked]");
+  if (locked) locked.textContent = accountTypeLabel(type);
+}
+
+function initAccordionExclusive() {
+  const root = document.querySelector("[data-settings-accordion]");
+  if (!root || root.dataset.bound === "1") return;
+  root.dataset.bound = "1";
+  root.querySelectorAll("details.settings-acc").forEach((details) => {
+    details.addEventListener("toggle", () => {
+      if (!details.open) return;
+      root.querySelectorAll("details.settings-acc").forEach((other) => {
+        if (other !== details) other.open = false;
+      });
+    });
+  });
+
+  const hash = String(window.location.hash || "").replace(/^#/, "");
+  if (hash) {
+    const target = root.querySelector(`details.settings-acc[data-acc="${hash}"]`);
+    if (target) {
+      target.open = true;
+      target.scrollIntoView({ block: "nearest" });
+    }
+  }
+}
+
+function initPostalLookups(root = document) {
+  root.querySelectorAll("[data-postal-lookup]").forEach((input) => {
+    if (input.dataset.lookupBound === "1") return;
+    input.dataset.lookupBound = "1";
+    const row = input.closest(".settings-postal-row") || input.closest("form");
+    const cityInput = row?.querySelector("[name=city], [data-search-city], [data-rec-city]");
+    const busyEl = row?.querySelector("[data-city-busy]");
+    input.addEventListener("input", () => {
+      input.value = input.value.replace(/\D/g, "").slice(0, 4);
+      lookupCityFromPostal(input, cityInput, busyEl);
+    });
+  });
+}
+
+function fillAreaForms(profile) {
+  const postal =
+    String(profile?.postalCode || localStorage.getItem(SEARCH_POSTAL_KEY) || localStorage.getItem(REC_POSTAL_KEY) || "")
+      .replace(/\D/g, "")
+      .slice(0, 4);
+  const city = profile?.city || "";
+  const searchRadius = Number(localStorage.getItem(SEARCH_RADIUS_KEY) || profile?.searchRadiusKm || 30);
+  const recRadius = Math.min(
+    30,
+    Number(localStorage.getItem(REC_RADIUS_KEY) || profile?.recommendationsRadiusKm || 30)
+  );
+
+  const searchForm = document.getElementById("settings-search-area-form");
+  if (searchForm) {
+    if (searchForm.postalCode) searchForm.postalCode.value = postal;
+    if (searchForm.city) searchForm.city.value = city;
+    const km = SEARCH_RADIUS_OPTIONS.includes(searchRadius) ? searchRadius : 30;
+    searchForm.radiusKm.value = String(km);
+    setWheelValue(searchForm.querySelector("[data-wheel=search]"), km);
+  }
+
+  const recForm = document.getElementById("settings-rec-area-form");
+  if (recForm) {
+    if (recForm.postalCode) recForm.postalCode.value = postal;
+    if (recForm.city) recForm.city.value = city;
+    const km = REC_RADIUS_OPTIONS.includes(recRadius) ? recRadius : 30;
+    recForm.radiusKm.value = String(km);
+    setWheelValue(recForm.querySelector("[data-wheel=rec]"), km);
+  }
+}
+
+function initAreaForms() {
+  document.querySelectorAll("[data-wheel]").forEach(initWheel);
+
+  document.getElementById("settings-search-area-form")?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const flash = document.getElementById("settings-search-area-flash");
+    const postal = String(form.postalCode?.value || "")
+      .replace(/\D/g, "")
+      .slice(0, 4);
+    const city = String(form.city?.value || "").trim();
+    const radiusKm = Number(form.radiusKm?.value || 30);
+    if (postal.length !== 4) {
+      showFlash(flash, "Adj meg egy 4 jegyű irányítószámot.", false);
+      return;
+    }
+    if (!SEARCH_RADIUS_OPTIONS.includes(radiusKm)) {
+      showFlash(flash, "Érvénytelen sugár.", false);
+      return;
+    }
+    try {
+      localStorage.setItem(SEARCH_POSTAL_KEY, postal);
+      localStorage.setItem(SEARCH_RADIUS_KEY, String(radiusKm));
+      const profile = { ...getProfile(), postalCode: postal, city, searchRadiusKm: radiusKm };
+      await saveProfile(profile).catch(() => null);
+      fillAreaForms(profile);
+      showFlash(flash, "Keresési körzet mentve.", true);
+    } catch (error) {
+      showFlash(flash, error.message ?? "Mentés sikertelen.", false);
+    }
+  });
+
+  document.getElementById("settings-rec-area-form")?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const flash = document.getElementById("settings-rec-area-flash");
+    const postal = String(form.postalCode?.value || "")
+      .replace(/\D/g, "")
+      .slice(0, 4);
+    const city = String(form.city?.value || "").trim();
+    let radiusKm = Number(form.radiusKm?.value || 30);
+    if (radiusKm > 30) radiusKm = 30;
+    if (postal.length !== 4) {
+      showFlash(flash, "Adj meg egy 4 jegyű irányítószámot.", false);
+      return;
+    }
+    if (!REC_RADIUS_OPTIONS.includes(radiusKm)) {
+      showFlash(flash, "Érvénytelen sugár (max 30 km).", false);
+      return;
+    }
+    try {
+      localStorage.setItem(REC_POSTAL_KEY, postal);
+      localStorage.setItem(REC_RADIUS_KEY, String(radiusKm));
+      const profile = {
+        ...getProfile(),
+        postalCode: postal,
+        city,
+        recommendationsRadiusKm: radiusKm,
+      };
+      await saveProfile(profile).catch(() => null);
+      fillAreaForms(profile);
+      showFlash(flash, "Ajánlások körzete mentve.", true);
+    } catch (error) {
+      showFlash(flash, error.message ?? "Mentés sikertelen.", false);
+    }
+  });
 }
 
 async function refreshDbInspect() {
-  const el = document.getElementById("settings-db-inspect");
-  if (!el) return;
-  try {
-    const token = localStorage.getItem("autosweb-auth-token") || "";
-    const res = await fetch("/api/auth/db", {
-      credentials: "same-origin",
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-    });
-    const data = await res.json();
-    const lines = [];
-    lines.push(`DB fájl: ${data.dbPath || "?"}`);
-    lines.push(`Profil fájl: ${data.profilesPath || "?"}`);
-    lines.push(`Userek száma: ${data.userCount ?? 0}`);
-    lines.push(`Aktív session: ${data.sessionCount ?? 0}`);
-    lines.push(`Te (bejelentkezve): ${data.currentEmail || "—"}`);
-    lines.push(
-      `Te profil (API): ${
-        data.currentProfile?.firstName
-          ? `${data.currentProfile.firstName} ${data.currentProfile.lastName || ""}`.trim()
-          : "(üres)"
-      }`
-    );
-    lines.push("");
-    if (!data.users?.length) {
-      lines.push("NINCS user a SQLite-ban. Regisztrálj újra ezen a gépen.");
-    } else {
-      for (const u of data.users) {
-        const sqlName = [u.sqliteProfile?.firstName, u.sqliteProfile?.lastName].filter(Boolean).join(" ");
-        const fileName = [u.fileProfile?.firstName, u.fileProfile?.lastName].filter(Boolean).join(" ");
-        lines.push(`#${u.id} ${u.email}`);
-        lines.push(`  SQLite név: ${sqlName || "(üres)"}`);
-        lines.push(`  Fájl név:   ${fileName || "(üres)"}`);
-        lines.push(`  frissítve:  ${u.updatedAt || "?"}`);
-      }
-    }
-    el.textContent = lines.join("\n");
-  } catch (error) {
-    el.textContent = `Adatbázis nem olvasható: ${error.message || error}`;
-  }
+  /* Fejlesztői DB panel eltávolítva a mobil UI-ból. */
 }
 
 function applyProfileToForm(profile) {
@@ -363,7 +521,7 @@ function applyProfileToForm(profile) {
     const value = data[key] ?? "";
     field.value = value;
   }
-  updateProfileSummary(data);
+  updateProfileSummary(data, getAuthUser());
 }
 
 function fillProfileForm(user, profileOverride = null) {
@@ -372,14 +530,25 @@ function fillProfileForm(user, profileOverride = null) {
   const profile = profileOverride || getProfile();
   applyProfileToForm(profile);
   const emailEl = document.getElementById("settings-email");
-  if (emailEl) emailEl.textContent = user?.email || "—";
-  const companyWrap = document.querySelector("[data-mm-company-wrap]");
-  if (companyWrap) companyWrap.hidden = profile.accountType !== "business";
+  if (emailEl) {
+    if ("value" in emailEl) emailEl.value = user?.email || "";
+    else emailEl.textContent = user?.email || "—";
+  }
+  syncCompanyWrap(form);
+  updateProfileSummary(profile, user);
+  fillAreaForms(profile);
 
   const photo = user?.email ? readPhotos()[user.email] : null;
   const letterEl = document.getElementById("settings-avatar-letter");
   const imgEl = document.getElementById("settings-avatar-img");
-  const letter = (user?.email?.charAt(0) || "A").toUpperCase();
+  const removeBtn = document.getElementById("settings-avatar-remove");
+  const uploadBtn = document.getElementById("settings-avatar-upload");
+  const letter = (
+    profile?.lastName?.charAt(0) ||
+    profile?.firstName?.charAt(0) ||
+    user?.email?.charAt(0) ||
+    "A"
+  ).toUpperCase();
   if (letterEl) {
     letterEl.textContent = letter;
     letterEl.hidden = Boolean(photo);
@@ -393,6 +562,8 @@ function fillProfileForm(user, profileOverride = null) {
       imgEl.hidden = true;
     }
   }
+  if (removeBtn) removeBtn.hidden = !photo;
+  if (uploadBtn) uploadBtn.textContent = photo ? "Csere" : "Feltöltés";
 }
 
 function initNotifyForm(email) {
@@ -431,25 +602,38 @@ export async function initSettingsPage() {
   if (hello) hello.textContent = getDisplayName() || user.email.split("@")[0];
 
   setSection(currentSection());
-  refreshStats(user.email);
+  await refreshStats(user.email);
   renderPark(user.email);
   renderSearches(user.email);
-  renderMessages(user.email);
+  messagesUi = initMessagesUi(document.getElementById("mm-msg-root"), {
+    onUnreadChange: (n) => {
+      const badge = document.querySelector("[data-mm-msg-count]");
+      const msgStat = document.querySelector("[data-mm-stat-msg]");
+      if (badge) {
+        badge.hidden = n === 0;
+        badge.textContent = String(n);
+      }
+      if (msgStat) msgStat.textContent = `${n} olvasatlan`;
+    },
+  });
   fillProfileForm(user, loadedProfile);
   // Második kör: ha a panel most vált láthatóra, biztosan kitöltjük.
   requestAnimationFrame(() => fillProfileForm(getAuthUser(), loadedProfile || getProfile()));
   initNotifyForm(user.email);
-  refreshDbInspect();
-  document.getElementById("settings-db-refresh")?.addEventListener("click", () => {
-    refreshDbInspect();
-  });
+  initAccordionExclusive();
+  initPostalLookups();
+  initAreaForms();
 
   document.querySelectorAll("[data-mm-nav]").forEach((link) => {
     link.addEventListener("click", (event) => {
       event.preventDefault();
-      setSection(link.getAttribute("data-mm-nav"));
-      if (link.getAttribute("data-mm-nav") === "fiok") {
+      const next = link.getAttribute("data-mm-nav");
+      setSection(next);
+      if (next === "fiok") {
         fillProfileForm(getAuthUser(), getProfile());
+      }
+      if (next === "uzenetek") {
+        messagesUi?.refresh?.();
       }
     });
   });
@@ -480,10 +664,7 @@ export async function initSettingsPage() {
   });
 
   const profileForm = document.getElementById("mm-profile-form");
-  profileForm?.elements?.namedItem("accountType")?.addEventListener("change", () => {
-    const wrap = document.querySelector("[data-mm-company-wrap]");
-    if (wrap) wrap.hidden = profileForm.accountType.value !== "business";
-  });
+  syncCompanyWrap(profileForm);
 
   // A submit listener korán kötődik (bindProfileFormEarly) — itt csak a hello frissül mentés után.
 
@@ -508,7 +689,7 @@ export async function initSettingsPage() {
     delete map[user.email];
     writePhotos(map);
     fillProfileForm(user);
-    window.dispatchEvent(new CustomEvent("autosweb-auth-changed"));
+    window.dispatchEvent(new CustomEvent("bymy-auth-changed"));
     showFlash(document.getElementById("settings-avatar-flash"), "Profilkép törölve.", true);
   });
   fileInput?.addEventListener("change", async () => {
@@ -522,7 +703,7 @@ export async function initSettingsPage() {
       map[user.email] = dataUrl;
       writePhotos(map);
       fillProfileForm(user);
-      window.dispatchEvent(new CustomEvent("autosweb-auth-changed"));
+      window.dispatchEvent(new CustomEvent("bymy-auth-changed"));
       showFlash(flash, "Profilkép feltöltve.", true);
     } catch (error) {
       showFlash(flash, error.message ?? "Feltöltés sikertelen.", false);
@@ -552,9 +733,11 @@ function bindProfileFormEarly() {
     event.preventDefault();
     event.stopPropagation();
     const flash = document.getElementById("settings-profile-flash");
-    const pathEl = document.getElementById("settings-profile-path");
     const btn = document.getElementById("mm-profile-save");
     const data = Object.fromEntries(new FormData(profileForm).entries());
+    data.postalCode = String(data.postalCode || "")
+      .replace(/\D/g, "")
+      .slice(0, 4);
     if (!String(data.firstName || "").trim() || !String(data.lastName || "").trim()) {
       showFlash(flash, "Keresztnév és vezetéknév kötelező.", false);
       return;
@@ -567,25 +750,16 @@ function bindProfileFormEarly() {
       if (user) fillProfileForm(user, saved);
       const hello = document.querySelector("[data-mm-hello]");
       if (hello) hello.textContent = getDisplayName();
-      window.dispatchEvent(new CustomEvent("autosweb-auth-changed"));
+      window.dispatchEvent(new CustomEvent("bymy-auth-changed"));
       showFlash(
         flash,
-        `Mentve: ${saved.firstName} ${saved.lastName}. Újraindítás után is megmarad.`,
+        `Adatok mentve: ${saved.lastName} ${saved.firstName}.`.trim(),
         true
       );
-      if (pathEl) {
-        pathEl.hidden = false;
-        pathEl.textContent = saved._savedTo
-          ? `Fájl: ${saved._savedTo}`
-          : "Helyi profil fájlba írva (~/.autosweb/profiles.json).";
-      }
-      // Görgetés a visszajelzéshez (a kártya tetején van).
       flash?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-      await refreshDbInspect();
     } catch (error) {
       showFlash(flash, error.message ?? "Mentés sikertelen.", false);
       flash?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-      await refreshDbInspect();
     } finally {
       if (btn) btn.disabled = false;
     }

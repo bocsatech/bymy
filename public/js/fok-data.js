@@ -1,8 +1,8 @@
 /** Fiókom (Mein mobile.de mintára) — helyi adatok parkóóhoz, keresésekhez, üzenetekhez. */
 
-const PARK_KEY = "autosweb-parkplatz";
-const SEARCH_KEY = "autosweb-saved-searches";
-const MSG_KEY = "autosweb-messages";
+const PARK_KEY = "bymy-parkplatz";
+const SEARCH_KEY = "bymy-saved-searches";
+const MSG_KEY = "bymy-messages";
 
 function readMap(key) {
   try {
@@ -118,7 +118,7 @@ export function ensureDemoMessages(email) {
     },
     {
       id: "m2",
-      from: "Add el autod.hu",
+      from: "Bymy",
       subject: "Üdvözlünk a fiókodban",
       body: "Itt kezelheted a parkolót, mentett kereséseket és a fiókadatokat.",
       read: true,

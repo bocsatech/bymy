@@ -1,46 +1,105 @@
 <!DOCTYPE html>
 <html lang="hu">
   <head>
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem("bymy-theme");
+          if (t !== "dark" && t !== "light") {
+            t = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+          }
+          document.documentElement.setAttribute("data-theme", t);
+        } catch (e) {}
+                /* Auth fejléc: ne villanjon vendég gomb → profil a modul / API előtt */
+        try {
+          var raw = sessionStorage.getItem("bymy-auth-user");
+          var user = raw ? JSON.parse(raw) : null;
+          var loggedIn = !!(user && user.email);
+          if (!loggedIn) {
+            try {
+              if (localStorage.getItem("bymy-auth-token")) loggedIn = true;
+            } catch (e2) {}
+          }
+          document.documentElement.setAttribute("data-auth", loggedIn ? "member" : "guest");
+          var first = "";
+          if (user) {
+            first = String((user.profile && user.profile.firstName) || "").trim();
+            if (!first && user.displayName && String(user.displayName).indexOf("@") < 0) {
+              first = String(user.displayName).trim().split(/\s+/)[0] || "";
+            }
+            if (!first && user.email) {
+              var local = String(user.email).split("@")[0] || "";
+              first = local ? local.charAt(0).toUpperCase() + local.slice(1) : "";
+            }
+          }
+          if (first) {
+            document.addEventListener("DOMContentLoaded", function () {
+              document.querySelectorAll("span[data-auth-firstname]").forEach(function (el) {
+                el.textContent = first;
+              });
+              var letter = first.charAt(0).toUpperCase();
+              document.querySelectorAll("[data-avatar-letter]").forEach(function (el) {
+                el.textContent = letter;
+              });
+            });
+          }
+        } catch (e) {
+          document.documentElement.setAttribute("data-auth", "guest");
+        }
+      })();
+    </script>
     <meta charset="utf-8" />
-    <meta name="viewport" content="navInk1" />
+    <meta name="viewport" content="headerRow1" />
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext x='16' y='22' text-anchor='middle' font-size='14' font-family='system-ui,sans-serif' font-weight='700'%3EB%3C/text%3E%3C/svg%3E" type="image/svg+xml" />
-    <meta name="bymy-version" content="navInk1" />
+    <meta name="bymy-version" content="authAcct1" />
     <title>Teherautó — Bymy</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;650;700;800&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap"
       rel="stylesheet"
-    />
-    <link rel="stylesheet" href="/css/site-app.css?v=navInk1" />
-    <link rel="stylesheet" href="/css/hub.css?v=navInk1" />
-  </head>
+    />    <link rel="stylesheet" href="/css/hub.css?v=mobileStable2" />
+
+    <link rel="stylesheet" href="/css/site-app.css?v=mobileStable2" />  </head>
   <body class="hub-page site-page site-app" data-site-page="teherauto">
     <header class="hub-header">
       <div class="hub-header-inner">
-                <a class="hub-logo" href="/">Bymy</a>
+        <div class="hub-header-top">
+        <div class="hub-header-actions site-header-actions">
+          <a class="hub-header-msg" href="/beallitasok.html?szekcio=uzenetek" data-auth-member hidden>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 6.8h9.5a2.2 2.2 0 0 1 2.2 2.2v4.2a2.2 2.2 0 0 1-2.2 2.2H10l-3.2 2.4V15.2H5A2.2 2.2 0 0 1 2.8 13V9a2.2 2.2 0 0 1 2.2-2.2Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M14.2 8.2h4A2.2 2.2 0 0 1 20.4 10.4v3.4a2.2 2.2 0 0 1-2.2 2.2h-.7v1.7l-2.2-1.7" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+            <span>Üzenetek</span>
+          </a>
+          <div class="site-header-auth-row" data-auth-guest>
+            <a class="hub-btn hub-btn--ghost" href="/belepes.html" data-auth-login>Belépés</a>
+            <a class="hub-btn hub-btn--ghost" href="/regisztracio.html" data-auth-register>Regisztráció</a>
+          </div>
+          <div class="site-header-avatar-wrap" data-avatar-menu data-auth-member hidden>
+            <button type="button" class="site-header-profile" data-auth-avatar data-avatar-toggle aria-expanded="false" aria-haspopup="menu" aria-label="Fiók" title="Fiók">
+              <span class="site-header-avatar">
+                <span data-avatar-letter>A</span>
+                <img data-avatar-img alt="" hidden width="44" height="44" />
+              </span>
+              <span class="site-header-firstname" data-auth-firstname></span>
+              <svg class="site-header-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="site-avatar-dropdown site-avatar-dropdown--fiok" data-avatar-dropdown role="menu" hidden></div>
+          </div>
+          <a class="hub-btn hub-btn--post" href="/hirdetesfeladas.html" data-auth-guard>+ Hirdetésfeladás</a>
+          <button type="button" class="hub-theme-toggle" data-theme-toggle aria-label="Színmód" title="Színmód"></button>
+        </div>
+        </div>
+        <div class="hub-nav-band">
+          <a class="hub-logo" href="/" aria-label="Bymy">
+            <img class="bymy-logo-img bymy-logo-img--nav" src="/images/bymy-logo.png?v=logoUpload1" alt="Bymy.hu" width="190" height="48" decoding="async" />
+          </a>
         <nav class="hub-nav" aria-label="Főmenü">
           <a class="hub-nav-link" href="/">Kezdőlap</a>
           <a class="hub-nav-link" href="/auto.html">Autó</a>
           <a class="hub-nav-link active" href="/teherauto.html">Teherautó</a>
           <a class="hub-nav-link" href="/ingatlan.html">Ingatlan</a>
-          <a class="hub-nav-link" href="/partners.html">Ajánlások</a>
-          <a class="hub-nav-link" href="/beallitasok.html?szekcio=uzenetek">Üzenetek</a>
-          <a class="hub-nav-link" href="/beallitasok.html">Beállítások</a>
+          <a class="hub-nav-link" href="/ajanlasok.html">Ajánlások</a>
         </nav>
-        <div class="hub-header-actions site-header-actions">
-          <div class="site-header-auth-row">
-            <a class="hub-btn hub-btn--ghost" href="/belepes.html" data-auth-login>Belépés</a>
-            <a class="hub-btn hub-btn--ghost" href="/regisztracio.html" data-auth-register>Regisztráció</a>
-            <a class="hub-btn hub-btn--primary" href="/hirdetesfeladas.html" data-auth-guard>Hirdetésfeladás</a>
-          </div>
-          <div class="site-header-avatar-wrap" data-avatar-menu>
-            <button type="button" class="site-header-avatar" data-auth-avatar data-avatar-toggle aria-expanded="false" aria-haspopup="menu" aria-label="Fiók" title="Fiók">
-              <span data-avatar-letter>A</span>
-              <img data-avatar-img alt="" hidden width="44" height="44" />
-            </button>
-            <div class="site-avatar-dropdown site-avatar-dropdown--fiok" data-avatar-dropdown role="menu" hidden></div>
-          </div>
         </div>
       </div>
     </header>
@@ -57,7 +116,9 @@
       </section>
     </main>
 
-    <script src="/js/site-auth.js?v=fiokMenu2" type="module"></script>
-    <script src="/js/site-avatar-menu.js?v=fiokMenu2" type="module"></script>
+    <script src="/js/nav-counts.js?v=willhabenHdr1" type="module"></script>
+    <script src="/js/theme.js?v=willhabenHdr1" type="module"></script>
+    <script src="/js/site-auth.js?v=authAcct1" type="module"></script>
+    <script src="/js/site-avatar-menu.js?v=willhabenHdr1" type="module"></script>
   </body>
 </html>

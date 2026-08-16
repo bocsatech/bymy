@@ -6,7 +6,7 @@ let staticCatalogPromise = null;
 const typeCache = new Map();
 
 const OLD_SERVER_HINT =
-  "Régi Autosweb szerver — állítsd le (Ctrl+C), futtasd: autosweb/mac/frissites.command, majd indítsd újra.";
+  "Régi Bymy szerver — állítsd le (Ctrl+C), futtasd: bymy/mac/frissites.command, majd indítsd újra.";
 
 function catalogErrorMessage(data, status) {
   if (status === 404 && data?.error === "Ismeretlen API.") return OLD_SERVER_HINT;

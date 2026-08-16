@@ -1,0 +1,315 @@
+/* Kezdőlap — csak MOBIL webes nézet ≈ natív Bymy app
+   Asztali web: ezek az elemek rejtve / nincs hatás.
+   Natív mobilapp: nem érinti. */
+
+.mw-app-top,
+.mw-app-tabbar {
+  display: none;
+}
+
+@media (max-width: 800px) {
+  body.hub-page--feed {
+    background: #fff;
+    padding-bottom: calc(5.75rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* Asztali fejléc eltüntetése csak a kezdőlapon, csak mobilon */
+  body.hub-page--feed > .hub-header {
+    display: none !important;
+  }
+
+  body.hub-page--feed .hub-home-logo {
+    display: none !important;
+  }
+
+  body.hub-page--feed .hub-sell {
+    display: none;
+  }
+
+  /* —— Felső app sáv: nagy logo + profil —— */
+  body.hub-page--feed .mw-app-top {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: sticky;
+    top: 0;
+    z-index: 80;
+    background: #fff;
+    padding: 0.55rem 1rem 0.35rem;
+    padding-top: max(0.55rem, env(safe-area-inset-top, 0px));
+    padding-right: max(1rem, calc(0.75rem + env(safe-area-inset-right, 0px)));
+    padding-left: max(1rem, calc(0.75rem + env(safe-area-inset-left, 0px)));
+    min-height: 3.5rem;
+    overflow: visible;
+    box-sizing: border-box;
+  }
+
+  body.hub-page--feed .mw-app-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    line-height: 0;
+    /* hely a jobb oldali avatárnak — ne tolja ki a szélen */
+    padding-inline: 3rem;
+  }
+
+  body.hub-page--feed .mw-app-logo img {
+    display: block;
+    height: clamp(52px, 14vw, 68px);
+    width: auto;
+    max-width: min(220px, 58vw);
+    object-fit: contain;
+  }
+
+  body.hub-page--feed .mw-app-avatar {
+    position: absolute;
+    right: max(0.75rem, env(safe-area-inset-right, 0px));
+    top: 50%;
+    transform: translateY(-50%);
+    width: 2.5rem;
+    height: 2.5rem;
+    min-width: 2.5rem;
+    min-height: 2.5rem;
+    border-radius: 999px;
+    overflow: hidden;
+    border: 1.5px solid #e5e7eb;
+    background: #eef2f7;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: #1f2937;
+    font-family: "DM Sans", system-ui, sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    line-height: 1;
+    flex-shrink: 0;
+    z-index: 2;
+    box-sizing: border-box;
+  }
+
+  body.hub-page--feed .mw-app-avatar [data-avatar-letter] {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+  }
+
+  body.hub-page--feed .mw-app-avatar [data-avatar-letter][hidden] {
+    display: none !important;
+  }
+
+  body.hub-page--feed .mw-app-avatar img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: inherit;
+  }
+
+  body.hub-page--feed .mw-app-avatar img[hidden] {
+    display: none !important;
+  }
+
+  body.hub-page--feed .mw-app-avatar[hidden] {
+    display: none !important;
+  }
+
+  /* Guest: belépés ikon a profil helyén */
+  body.hub-page--feed .mw-app-login {
+    position: absolute;
+    right: max(0.75rem, env(safe-area-inset-right, 0px));
+    top: 50%;
+    transform: translateY(-50%);
+    width: 2.5rem;
+    height: 2.5rem;
+    min-width: 2.5rem;
+    min-height: 2.5rem;
+    border-radius: 999px;
+    border: 1.5px solid #e5e7eb;
+    background: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #374151;
+    text-decoration: none;
+    flex-shrink: 0;
+    z-index: 2;
+    box-sizing: border-box;
+  }
+
+  html[data-auth="member"] body.hub-page--feed .mw-app-login {
+    display: none !important;
+  }
+
+  html[data-auth="guest"] body.hub-page--feed .mw-app-avatar {
+    display: none !important;
+  }
+
+  html[data-auth="member"] body.hub-page--feed .mw-app-avatar,
+  html[data-auth="member"] body.hub-page--feed .mw-app-avatar[hidden] {
+    display: inline-flex !important;
+  }
+
+  /* —— Promo kártyák (Ingatlan + Autó) megmaradnak —— */
+  body.hub-page--feed .hub-intro {
+    padding: 0.5rem 0.85rem 0.25rem;
+  }
+
+  body.hub-page--feed .hub-verticals {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  body.hub-page--feed .hub-promo {
+    aspect-ratio: 5 / 3;
+    border-radius: 18px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.07);
+  }
+
+  /* —— Feed: app-szerű vízszintes sorok —— */
+  body.hub-page--feed .hub-feed {
+    padding: 0.5rem 0 1rem;
+  }
+
+  body.hub-page--feed .hf-head {
+    padding: 0 1rem;
+    margin-bottom: 0.55rem;
+  }
+
+  body.hub-page--feed .hf-title {
+    font-size: 1.15rem;
+    font-weight: 800;
+  }
+
+  body.hub-page--feed .hf-all {
+    display: none; /* app képen nincs „Összes” a sorcímek mellett */
+  }
+
+  body.hub-page--feed .hf-rail {
+    padding: 0 1rem 0.4rem;
+    gap: 0.65rem;
+  }
+
+  body.hub-page--feed .hf-card {
+    flex-basis: 7.25rem;
+    border-radius: 16px;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.08);
+    border: 0;
+    background: #fff;
+  }
+
+  body.hub-page--feed .hf-card--kategoria,
+  body.hub-page--feed .hf-card--ajanlas {
+    flex-basis: 7.5rem;
+  }
+
+  body.hub-page--feed .hf-card-media {
+    aspect-ratio: 1;
+    border-radius: 16px 16px 0 0;
+    overflow: hidden;
+    background: #f3f4f6;
+  }
+
+  body.hub-page--feed .hf-card-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  body.hub-page--feed .hf-card-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 0.35rem 0.4rem 0.15rem;
+    text-align: center;
+  }
+
+  body.hub-page--feed .hf-card-sub {
+    display: none;
+  }
+
+  /* —— Lebegő alsó menü (sziget) —— */
+  body.hub-page--feed .mw-app-tabbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    position: fixed;
+    left: 50%;
+    bottom: max(0.75rem, env(safe-area-inset-bottom, 0px));
+    transform: translateX(-50%);
+    z-index: 90;
+    width: min(22.5rem, calc(100% - 1.5rem));
+    height: 3.85rem;
+    padding: 0.35rem 0.45rem;
+    box-sizing: border-box;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.14);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+
+  body.hub-page--feed .mw-app-tab {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.1rem;
+    min-width: 0;
+    text-decoration: none;
+    color: #6b7280;
+    font-family: "DM Sans", system-ui, sans-serif;
+    font-size: 0.62rem;
+    font-weight: 600;
+    line-height: 1.1;
+    padding: 0.2rem;
+    border: 0;
+    background: transparent;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body.hub-page--feed .mw-app-tab__icon {
+    width: 2.15rem;
+    height: 2.15rem;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #4b5563;
+  }
+
+  body.hub-page--feed .mw-app-tab__icon svg {
+    width: 1.35rem;
+    height: 1.35rem;
+    display: block;
+  }
+
+  body.hub-page--feed .mw-app-tab.is-active {
+    color: #1d4ed8;
+  }
+
+  body.hub-page--feed .mw-app-tab.is-active .mw-app-tab__icon {
+    background: #dbeafe;
+    color: #2563eb;
+  }
+
+  body.hub-page--feed .mw-app-tab span {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+/* Asztal: biztosan rejtve, ha valami media query felülírná */
+@media (min-width: 801px) {
+  .mw-app-top,
+  .mw-app-tabbar {
+    display: none !important;
+  }
+}

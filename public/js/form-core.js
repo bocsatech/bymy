@@ -778,6 +778,7 @@ if (mode === "wizard") {
     updateTitle();
     fitAllFormFields();
     showStep(1);
+    options.onNewAd?.();
   });
 
   form.addEventListener("input", saveDraft);

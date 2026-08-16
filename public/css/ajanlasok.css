@@ -1,0 +1,238 @@
+/* Ajánlások oldal — mobil RecommendationsScreen */
+
+.ajanlas-main {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 1rem 1rem 2.5rem;
+}
+
+.ajanlas-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.65rem;
+}
+
+.ajanlas-title {
+  margin: 0;
+  font-family: "DM Sans", system-ui, sans-serif;
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: #111;
+  letter-spacing: -0.02em;
+}
+
+.ajanlas-subtitle {
+  margin: 0.25rem 0 0;
+  font-family: "DM Sans", system-ui, sans-serif;
+  font-size: 0.88rem;
+  color: #5c6b7a;
+}
+
+.ajanlas-refresh {
+  flex: 0 0 auto;
+  font-family: "DM Sans", system-ui, sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #111;
+  background: #fff;
+  border: 1px solid #c8c8c8;
+  border-radius: 10px;
+  padding: 0.45rem 0.75rem;
+  cursor: pointer;
+}
+
+.ajanlas-refresh:hover {
+  background: #f7f7f7;
+}
+
+.ajanlas-note {
+  margin: 0 0 0.85rem;
+  font-family: "DM Sans", system-ui, sans-serif;
+  font-size: 0.78rem;
+  color: #5c6b7a;
+}
+
+.ajanlas-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.ajanlas-category {
+  border: 1px solid rgba(20, 32, 43, 0.12);
+  border-radius: 14px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.ajanlas-category-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem;
+  border: none;
+  background: #fafafa;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ajanlas-category.is-open .ajanlas-category-toggle {
+  background: #f3f4f6;
+}
+
+.ajanlas-category-photo {
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 0.5px solid rgba(20, 32, 43, 0.18);
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+.ajanlas-category-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ajanlas-category-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-family: "DM Sans", system-ui, sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #111;
+}
+
+.ajanlas-category-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+.ajanlas-category-count {
+  font-family: "DM Sans", system-ui, sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #5c6b7a;
+}
+
+.ajanlas-category-chevron {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-right: 2px solid #667085;
+  border-bottom: 2px solid #667085;
+  transform: rotate(45deg);
+  transition: transform 0.15s ease;
+}
+
+.ajanlas-category.is-open .ajanlas-category-chevron {
+  transform: rotate(-135deg);
+  margin-top: 0.15rem;
+}
+
+.ajanlas-category-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  padding: 0.65rem 0.85rem 0.85rem;
+  border-top: 1px solid rgba(20, 32, 43, 0.08);
+  background: #fff;
+}
+
+.ajanlas-category-panel[hidden] {
+  display: none;
+}
+
+.ajanlas-partner-card {
+  padding: 0.85rem;
+  border: 1px solid rgba(20, 32, 43, 0.12);
+  border-radius: 14px;
+  background: #fafafa;
+}
+
+.ajanlas-partner-name {
+  margin: 0;
+  font-family: "DM Sans", system-ui, sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #111;
+}
+
+.ajanlas-partner-loc,
+.ajanlas-partner-hours {
+  margin: 0.35rem 0 0;
+  font-family: "DM Sans", system-ui, sans-serif;
+  font-size: 0.88rem;
+  color: #5c6b7a;
+}
+
+.ajanlas-partner-rating {
+  margin: 0.35rem 0 0;
+  font-family: "DM Sans", system-ui, sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #c45c26;
+}
+
+.ajanlas-partner-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.55rem;
+}
+
+.ajanlas-partner-call,
+.ajanlas-partner-map {
+  font-family: "DM Sans", system-ui, sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #1565c0;
+  text-decoration: none;
+}
+
+.ajanlas-partner-call:hover,
+.ajanlas-partner-map:hover {
+  text-decoration: underline;
+}
+
+.ajanlas-empty {
+  margin: 0;
+  font-family: "DM Sans", system-ui, sans-serif;
+  font-size: 0.88rem;
+  color: #5c6b7a;
+}
+
+.ajanlas-empty--page {
+  padding: 1rem;
+  border: 1px solid rgba(20, 32, 43, 0.12);
+  border-radius: 14px;
+  background: #fff;
+}
+
+.ajanlas-empty a {
+  color: #1565c0;
+  font-weight: 600;
+}
+
+.ajanlas-settings-link {
+  display: inline-block;
+  margin-top: 1rem;
+  font-family: "DM Sans", system-ui, sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #5c6b7a;
+  text-decoration: none;
+}
+
+.ajanlas-settings-link:hover {
+  color: #111;
+  text-decoration: underline;
+}

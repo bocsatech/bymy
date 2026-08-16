@@ -4,8 +4,8 @@ import {
   filterListingsRecentInRadius,
 } from "./listing-radius.js";
 
-const STORAGE_POSTAL = "autosweb_stats_postal";
-const STORAGE_RADIUS = "autosweb_stats_radius_km";
+const STORAGE_POSTAL = "bymy_stats_postal";
+const STORAGE_RADIUS = "bymy_stats_radius_km";
 
 const MODE_ALL = "all";
 const MODE_RECENT24H = "recent24h";

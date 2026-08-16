@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="hu">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="navInk1" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext x='16' y='22' text-anchor='middle' font-size='14' font-family='system-ui,sans-serif' font-weight='700'%3EB%3C/text%3E%3C/svg%3E" type="image/svg+xml" />
+    <meta name="bymy-version" content="navInk1" />
+    <title>Ingatlan — Bymy</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;650;700;800&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/css/site-app.css?v=navInk1" />
+    <link rel="stylesheet" href="/css/hub.css?v=navInk1" />
+    <style>
+      .immo-search {
+        margin-top: 1.25rem;
+        background: #fff;
+        border: 1px solid var(--hub-line);
+        border-radius: 16px;
+        padding: 1.25rem;
+      }
+      .immo-search h1 {
+        font-family: "DM Sans", system-ui, sans-serif;
+        font-size: 1.5rem;
+        margin: 0 0 0.35rem;
+        letter-spacing: -0.03em;
+      }
+      .immo-search > p {
+        margin: 0 0 1rem;
+        color: var(--hub-muted);
+      }
+      .immo-types {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.65rem;
+        margin-bottom: 1rem;
+      }
+      .immo-types a {
+        font-family: "DM Sans", system-ui, sans-serif;
+        text-decoration: none;
+        color: var(--hub-ink);
+        border: 1px solid var(--hub-line);
+        border-radius: 12px;
+        padding: 0.85rem 0.9rem;
+        font-weight: 650;
+        background: #faf8f4;
+      }
+      .immo-types a:hover {
+        border-color: var(--hub-accent);
+      }
+      .immo-types a span {
+        display: block;
+        margin-top: 0.2rem;
+        font-size: 0.78rem;
+        font-weight: 500;
+        color: var(--hub-muted);
+      }
+      .immo-note {
+        font-family: "DM Sans", system-ui, sans-serif;
+        font-size: 0.85rem;
+        color: var(--hub-muted);
+        margin: 0;
+      }
+      @media (max-width: 800px) {
+        .immo-types {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body class="hub-page site-page site-app" data-site-page="ingatlan">
+    <header class="hub-header">
+      <div class="hub-header-inner">
+                <a class="hub-logo" href="/">Bymy</a>
+        <nav class="hub-nav" aria-label="Főmenü">
+          <a class="hub-nav-link" href="/">Kezdőlap</a>
+          <a class="hub-nav-link" href="/auto.html">Autó</a>
+          <a class="hub-nav-link" href="/teherauto.html">Teherautó</a>
+          <a class="hub-nav-link active" href="/ingatlan.html">Ingatlan</a>
+          <a class="hub-nav-link" href="/partners.html">Ajánlások</a>
+          <a class="hub-nav-link" href="/beallitasok.html?szekcio=uzenetek">Üzenetek</a>
+          <a class="hub-nav-link" href="/beallitasok.html">Beállítások</a>
+        </nav>
+        <div class="hub-header-actions site-header-actions">
+          <div class="site-header-auth-row">
+            <a class="hub-btn hub-btn--ghost" href="/belepes.html" data-auth-login>Belépés</a>
+            <a class="hub-btn hub-btn--ghost" href="/regisztracio.html" data-auth-register>Regisztráció</a>
+            <a class="hub-btn hub-btn--primary" href="/hirdetesfeladas.html" data-auth-guard>Hirdetésfeladás</a>
+          </div>
+          <div class="site-header-avatar-wrap" data-avatar-menu>
+            <button type="button" class="site-header-avatar" data-auth-avatar data-avatar-toggle aria-expanded="false" aria-haspopup="menu" aria-label="Fiók" title="Fiók">
+              <span data-avatar-letter>A</span>
+              <img data-avatar-img alt="" hidden width="44" height="44" />
+            </button>
+            <div class="site-avatar-dropdown site-avatar-dropdown--fiok" data-avatar-dropdown role="menu" hidden></div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <section class="hub-hero" aria-label="Ingatlan">
+      <div class="hub-hero-inner">
+        <p class="hub-brand">Ingatlan</p>
+        <p class="hub-lead">Lakás, ház, telek — vétel és bérlés. A részletes lista később bővül; a hirdetésfeladás és a többi Bymy oldal már elérhető.</p>
+      </div>
+    </section>
+
+    <main class="hub-main">
+      <section class="immo-search" aria-label="Ingatlan keresés">
+        <h1>Mit keresel?</h1>
+        <p>Válassz típust — a hirdetések a saját Bymy adatbázisból jönnek majd.</p>
+        <div class="immo-types">
+          <a href="/listings.html?tipus=lakas">Lakás<span>Vétel / bérlés</span></a>
+          <a href="/listings.html?tipus=haz">Ház<span>Családi ház, sorház</span></a>
+          <a href="/listings.html?tipus=telek">Telek<span>Építési telek</span></a>
+          <a href="/listings.html?tipus=iroda">Iroda / üzlet<span>Kereskedelmi</span></a>
+          <a href="/hirdetesfeladas.html" data-auth-guard>Hirdetésfeladás<span>Új ingatlan hirdetés</span></a>
+          <a href="/auto.html">Autó &amp; Motor<span>Vissza a járművekhez</span></a>
+        </div>
+        <p class="immo-note">Az ingatlan függőleges most indul — a meglévő autó-hirdetések az Autó &amp; Motor oldalon vannak.</p>
+      </section>
+
+      <section class="hub-more" aria-label="További oldalak">
+        <h2>További oldalak</h2>
+        <div class="hub-more-grid">
+          <a href="/">Kezdőlap<span>Ingatlan + Autó hub</span></a>
+          <a href="/import.html">Import<span>Használtautó.hu</span></a>
+          <a href="/listings.html">Hirdetések<span>Összes lista</span></a>
+          <a href="/fugveny.html">Függvény<span>Árbecslés</span></a>
+        </div>
+      </section>
+    </main>
+
+    <script src="/js/site-auth.js?v=auth20260805localdb9" type="module"></script>
+      <script src="/js/site-avatar-menu.js?v=fiokMenu2" type="module"></script>
+  </body>
+</html>

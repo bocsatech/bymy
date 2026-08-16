@@ -21,9 +21,7 @@ body.home-page[data-site-page="auto"] .home-ad-strip-inner {
 
 .auto-search-hero {
   margin: 0 0 1rem;
-  border-radius: 4px;
   overflow: hidden;
-  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
 }
 
 /* —— Fülek (willhaben: világos sáv, aktív kiemelés) —— */
@@ -32,9 +30,6 @@ body.home-page[data-site-page="auto"] .home-ad-strip-inner {
   grid-template-columns: repeat(6, minmax(0, 1fr));
   min-height: 56px;
   background: #eceff3;
-  border: 1px solid #d5d9e0;
-  border-bottom: 0;
-  border-radius: 4px 4px 0 0;
 }
 
 .auto-search-tab {
@@ -79,9 +74,6 @@ body.home-page[data-site-page="auto"] .home-ad-strip-inner {
   aspect-ratio: 2.41 / 1;
   min-height: 360px;
   background: #1a1f26;
-  border: 1px solid #d5d9e0;
-  border-top: 0;
-  border-radius: 0 0 4px 4px;
   overflow: hidden;
 }
 

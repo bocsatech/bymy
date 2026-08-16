@@ -181,10 +181,10 @@ body.home-page[data-site-page="auto"] .home-ad-strip-inner {
 }
 
 .auto-body-type svg {
-  width: 48px;
+  width: 56px;
   max-width: 100%;
-  height: 26px;
-  stroke: currentColor;
+  height: 28px;
+  display: block;
 }
 
 /* —— Form: kompakt mezők, átlátszó panel —— */

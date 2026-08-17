@@ -4438,3 +4438,161 @@ html[data-theme="dark"] body.site-app .automax-main {
   border-color: #2a313c;
   color: #e8eaed;
 }
+
+body.site-app .ha-imp-panel {
+  background: #fff;
+  border: 1px solid #dfe3ea;
+  border-radius: 14px;
+  padding: 1.15rem 1.2rem 1.35rem;
+}
+
+body.site-app .ha-imp-modes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.45rem;
+  margin: 0.2rem 0 1rem;
+}
+
+body.site-app .ha-imp-mode {
+  border: 1px solid #d0d5dd;
+  background: #fff;
+  color: #344054;
+  border-radius: 10px;
+  padding: 0.7rem 0.75rem;
+  font: inherit;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+body.site-app .ha-imp-mode.is-active {
+  background: #eb730d;
+  border-color: #eb730d;
+  color: #fff;
+}
+
+body.site-app .ha-imp-steps {
+  margin: 0 0 1rem;
+  color: #667085;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+body.site-app .ha-imp-actions {
+  display: grid;
+  gap: 0.65rem;
+  margin-bottom: 1.1rem;
+}
+
+body.site-app .ha-imp-bookmark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  background: #eb730d;
+  color: #fff;
+  font-weight: 650;
+  text-decoration: none;
+}
+
+body.site-app .ha-imp-bookmark-hint,
+body.site-app .ha-imp-footer {
+  margin: 0;
+  color: #98a2b3;
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+body.site-app .ha-imp-url-row label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #344054;
+}
+
+body.site-app .ha-imp-url-fields {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.5rem;
+}
+
+body.site-app .ha-imp-url-fields input {
+  border: 1px solid #d0d5dd;
+  border-radius: 10px;
+  padding: 0.7rem 0.8rem;
+  font: inherit;
+}
+
+body.site-app .ha-imp-go {
+  border: 0;
+  border-radius: 12px;
+  background: #eb730d;
+  color: #fff;
+  font: inherit;
+  font-weight: 650;
+  padding: 0.7rem 1rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+body.site-app .ha-imp-status {
+  margin: 0.9rem 0 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #eb730d;
+}
+
+body.site-app .ha-imp-status[data-type="err"] {
+  color: #d92d20;
+}
+
+body.site-app .ha-imp-result {
+  margin-top: 0.9rem;
+  padding: 0.85rem 0.95rem;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px solid #e4e7ec;
+}
+
+body.site-app .ha-imp-result p {
+  margin: 0;
+  font-weight: 650;
+}
+
+body.site-app .ha-imp-items {
+  margin: 0.55rem 0 0;
+  padding-left: 1.1rem;
+  color: #475467;
+  font-size: 0.88rem;
+}
+
+body.site-app .ha-imp-errors {
+  margin-top: 0.55rem !important;
+  color: #d92d20;
+  font-weight: 500 !important;
+  font-size: 0.86rem;
+}
+
+body.site-app .ha-imp-footer {
+  margin-top: 1.1rem;
+  text-align: center;
+}
+
+@media (max-width: 720px) {
+  body.site-app .ha-imp-url-fields {
+    grid-template-columns: 1fr;
+  }
+}
+
+html[data-theme="dark"] body.site-app .ha-imp-panel,
+html[data-theme="dark"] body.site-app .ha-imp-result {
+  background: #1a1f26;
+  border-color: #2a313c;
+}
+
+html[data-theme="dark"] body.site-app .ha-imp-mode {
+  background: #11161c;
+  border-color: #2a313c;
+  color: #e8eaed;
+}

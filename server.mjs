@@ -209,6 +209,24 @@ function sendJson(res, status, data, headers = {}) {
   res.end(JSON.stringify(data));
 }
 
+const HA_IMPORT_ORIGINS = new Set([
+  "https://www.hasznaltauto.hu",
+  "https://hasznaltauto.hu",
+  "https://admin.hasznaltauto.hu",
+]);
+
+function haImportCorsHeaders(req) {
+  const origin = String(req.headers.origin ?? "").trim();
+  if (!HA_IMPORT_ORIGINS.has(origin)) return {};
+  return {
+    "Access-Control-Allow-Origin": origin,
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    "Access-Control-Max-Age": "86400",
+    Vary: "Origin",
+  };
+}
+
 function serveStatic(path, res) {
   const rel = path === "/" ? "index.html" : path.replace(/^\//, "");
 
@@ -350,6 +368,63 @@ async function handleImportDiscover(req, res) {
     sendJson(res, 200, { ok: true, ...discovered });
   } catch (error) {
     sendJson(res, 400, { error: error.message ?? String(error) });
+  }
+}
+
+async function handleImportExtracted(req, res) {
+  const cors = haImportCorsHeaders(req);
+  if (req.method === "OPTIONS") {
+    res.writeHead(204, cors);
+    res.end();
+    return;
+  }
+  const user = await requestUser(req);
+  if (!user) {
+    sendJson(res, 401, { error: "Az importhoz be kell jelentkezned a Bymy fiókodba." }, cors);
+    return;
+  }
+  let body;
+  try {
+    body = await readBody(req);
+  } catch {
+    sendJson(res, 400, { error: "Érvénytelen JSON." }, cors);
+    return;
+  }
+
+  try {
+    const { pageFromPublicUrl, saveExtractedPages, MAX_IMPORT_BATCH } = await import("./lib/ha-import-save.mjs");
+    const pages = [];
+    if (Array.isArray(body.pages)) pages.push(...body.pages);
+    if (body.page && typeof body.page === "object") pages.push(body.page);
+
+    const urls = [
+      ...(Array.isArray(body.urls) ? body.urls : []),
+      body.url ? body.url : "",
+    ]
+      .map((item) => String(item ?? "").trim())
+      .filter(Boolean);
+
+    for (const url of urls.slice(0, MAX_IMPORT_BATCH - pages.length)) {
+      pages.push(await pageFromPublicUrl(url));
+    }
+
+    if (!pages.length) {
+      sendJson(res, 400, { error: "Adj meg hirdetés URL-t, vagy importáld a megnyitott oldalt a könyvjelzővel." }, cors);
+      return;
+    }
+
+    const result = await saveExtractedPages({
+      pages,
+      userId: user.id,
+      limit: body.limit ?? MAX_IMPORT_BATCH,
+    });
+    sendJson(res, 200, { ok: true, result }, cors);
+  } catch (error) {
+    if (error.importResult) {
+      sendJson(res, 400, { error: error.message ?? String(error), result: error.importResult }, cors);
+      return;
+    }
+    sendJson(res, 400, { error: error.message ?? String(error) }, cors);
   }
 }
 
@@ -665,6 +740,15 @@ async function handleListingsApi(req, res, pathname) {
         if (user && !canManageListing(existing, user)) {
           sendJson(res, 403, { error: "Ezt a hirdetést nem módosíthatod." });
           return;
+        }
+      } else {
+        const sourceUrl = String(formData.forras_url || "").trim();
+        const hasznaltautoId = String(formData.hasznaltauto_hirdetes_id || "").trim();
+        if (sourceUrl || hasznaltautoId) {
+          if (await listingSourceExists({ sourceUrl, hasznaltautoId })) {
+            sendJson(res, 409, { error: "Ez a hirdetés már bent van." });
+            return;
+          }
         }
       }
       let saved = await saveListing(formData, listingId, {
@@ -1428,6 +1512,11 @@ async function handleAuthApi(req, res, pathname) {
 export async function handleHttpRequest(req, res) {
   const pathname = req.url?.split("?")[0] || "/";
 
+  if (req.method === "OPTIONS" && pathname.startsWith("/api/import")) {
+    await handleImportExtracted(req, res);
+    return;
+  }
+
   if (pathname === "/api/health" && req.method === "GET") {
     let users = 0;
     let dbPath = "";
@@ -1485,6 +1574,11 @@ export async function handleHttpRequest(req, res) {
 
   if (pathname === "/api/import/client" && req.method === "POST") {
     await handleImportClient(req, res);
+    return;
+  }
+
+  if (pathname === "/api/import/extracted" && (req.method === "POST" || req.method === "OPTIONS")) {
+    await handleImportExtracted(req, res);
     return;
   }
 

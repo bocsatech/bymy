@@ -1322,7 +1322,8 @@ export async function handleHttpRequest(req, res) {
 
   if (pathname === "/api/site-hero" && req.method === "GET") {
     try {
-      sendJson(res, 200, await getSiteHero());
+      const url = new URL(req.url ?? "", `http://${HOST}`);
+      sendJson(res, 200, await getSiteHero(url.searchParams.get("kind")));
     } catch (error) {
       sendJson(res, 500, { error: error.message ?? "Hero betöltés sikertelen." });
     }
@@ -1344,8 +1345,8 @@ export async function handleHttpRequest(req, res) {
       return;
     }
     try {
-      const state = await setActiveHeroUrl(body.activeUrl ?? body.url);
-      sendJson(res, 200, { ...state, presets: (await getSiteHero()).presets });
+      const state = await setActiveHeroUrl(body.activeUrl ?? body.url, body.kind);
+      sendJson(res, 200, state);
     } catch (error) {
       const status = error.code === "INVALID_URL" ? 400 : 500;
       sendJson(res, status, { error: error.message ?? "Mentés sikertelen." });
@@ -1368,8 +1369,8 @@ export async function handleHttpRequest(req, res) {
       return;
     }
     try {
-      const state = await uploadHeroImage(body.dataUrl ?? body.image, body.label);
-      sendJson(res, 200, { ...state, presets: (await getSiteHero()).presets });
+      const state = await uploadHeroImage(body.dataUrl ?? body.image, body.label, body.kind);
+      sendJson(res, 200, state);
     } catch (error) {
       const status =
         error.code === "INVALID_IMAGE" || error.code === "UPLOAD_FAILED" ? 400 : 500;

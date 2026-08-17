@@ -204,7 +204,7 @@ function fileToDataUrl(file) {
   });
 }
 
-function renderHeroPickGrid(container, items, activeUrl) {
+function renderHeroPickGrid(container, items, activeUrl, kind) {
   if (!container) return;
   container.innerHTML = "";
   for (const item of items) {
@@ -213,6 +213,7 @@ function renderHeroPickGrid(container, items, activeUrl) {
     btn.className = "hero-pick" + (item.url === activeUrl ? " is-active" : "");
     btn.setAttribute("role", "listitem");
     btn.setAttribute("data-hero-url", item.url);
+    btn.setAttribute("data-hero-kind", kind);
     btn.title = item.label || "Kép";
     btn.innerHTML = `
       <img src="${String(item.url).replace(/"/g, "&quot;")}" alt="" loading="lazy" />
@@ -225,18 +226,35 @@ function renderHeroPickGrid(container, items, activeUrl) {
   }
 }
 
-function renderHeroSettings(state) {
-  heroState = state;
-  const active = state?.activeUrl || "";
-  renderHeroPickGrid(document.getElementById("hero-preset-grid"), state?.presets || [], active);
-  const uploads = state?.uploads || [];
-  renderHeroPickGrid(document.getElementById("hero-upload-grid"), uploads, active);
-  const empty = document.getElementById("hero-upload-empty");
+function renderHeroKindBox(kind, slice) {
+  const box = document.querySelector(`[data-hero-kind="${kind}"]`);
+  if (!box || !slice) return;
+  const active = slice.activeUrl || "";
+  renderHeroPickGrid(box.querySelector("[data-hero-presets]"), slice.presets || [], active, kind);
+  const uploads = slice.uploads || [];
+  renderHeroPickGrid(box.querySelector("[data-hero-uploads]"), uploads, active, kind);
+  const empty = box.querySelector("[data-hero-upload-empty]");
   if (empty) empty.hidden = uploads.length > 0;
 }
 
+function renderHeroSettings(state) {
+  heroState = state;
+  renderHeroKindBox("pkw", state?.pkw);
+  renderHeroKindBox("lkw", state?.lkw);
+}
+
+function mergeHeroKind(kind, slice) {
+  return {
+    ...(heroState || {}),
+    [kind]: {
+      ...(heroState?.[kind] || {}),
+      ...slice,
+    },
+  };
+}
+
 async function loadHeroSettings() {
-  const flash = document.getElementById("hero-settings-flash");
+  const flash = document.querySelector("[data-hero-flash]");
   try {
     const data = await heroApi("/api/site-hero");
     renderHeroSettings(data);
@@ -254,51 +272,52 @@ function initHeroSettings() {
     const pick = event.target.closest("[data-hero-url]");
     if (!pick) return;
     const url = pick.getAttribute("data-hero-url");
-    const flash = document.getElementById("hero-settings-flash");
+    const kind = pick.getAttribute("data-hero-kind") || "pkw";
+    const box = pick.closest(".hero-settings");
+    const flash = box?.querySelector("[data-hero-flash]");
     try {
       const data = await heroApi("/api/site-hero", {
         method: "PUT",
-        body: JSON.stringify({ activeUrl: url }),
+        body: JSON.stringify({ kind, activeUrl: url }),
       });
-      renderHeroSettings({
-        ...data,
-        presets: data.presets || heroState?.presets || [],
-        uploads: data.uploads || heroState?.uploads || [],
-      });
+      renderHeroSettings(mergeHeroKind(kind, data));
       showFlash(flash, "Háttérkép beállítva — minden látogató ezt látja.", true);
     } catch (error) {
       showFlash(flash, error.message ?? "Mentés sikertelen.", false);
     }
   });
 
-  document.getElementById("hero-upload-btn")?.addEventListener("click", async () => {
-    const input = document.getElementById("hero-upload-file");
-    const flash = document.getElementById("hero-settings-flash");
-    const file = input?.files?.[0];
-    if (!file) {
-      showFlash(flash, "Válassz ki egy képfájlt.", false);
-      return;
-    }
-    const btn = document.getElementById("hero-upload-btn");
-    if (btn) btn.disabled = true;
-    try {
-      const dataUrl = await fileToDataUrl(file);
-      const data = await heroApi("/api/site-hero/upload", {
-        method: "POST",
-        body: JSON.stringify({ dataUrl, label: file.name.replace(/\.[^.]+$/, "").slice(0, 60) }),
-      });
-      if (input) input.value = "";
-      renderHeroSettings({
-        ...data,
-        presets: data.presets || heroState?.presets || [],
-        uploads: data.uploads || [],
-      });
-      showFlash(flash, "Kép feltöltve és beállítva mindenkinek.", true);
-    } catch (error) {
-      showFlash(flash, error.message ?? "Feltöltés sikertelen.", false);
-    } finally {
-      if (btn) btn.disabled = false;
-    }
+  root.querySelectorAll("[data-hero-upload]").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const box = btn.closest(".hero-settings");
+      const kind = box?.getAttribute("data-hero-kind") || "pkw";
+      const input = box?.querySelector("[data-hero-file]");
+      const flash = box?.querySelector("[data-hero-flash]");
+      const file = input?.files?.[0];
+      if (!file) {
+        showFlash(flash, "Válassz ki egy képfájlt.", false);
+        return;
+      }
+      btn.disabled = true;
+      try {
+        const dataUrl = await fileToDataUrl(file);
+        const data = await heroApi("/api/site-hero/upload", {
+          method: "POST",
+          body: JSON.stringify({
+            kind,
+            dataUrl,
+            label: file.name.replace(/\.[^.]+$/, "").slice(0, 60),
+          }),
+        });
+        if (input) input.value = "";
+        renderHeroSettings(mergeHeroKind(kind, data));
+        showFlash(flash, "Kép feltöltve és beállítva mindenkinek.", true);
+      } catch (error) {
+        showFlash(flash, error.message ?? "Feltöltés sikertelen.", false);
+      } finally {
+        btn.disabled = false;
+      }
+    });
   });
 }
 

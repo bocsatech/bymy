@@ -1,7 +1,15 @@
 node_modules/
 .import-profile/
 .chrome-import-profile/
-/data/
+/data/*
+!/data/images/
+/data/images/*
+!/data/images/pkw/
+!/data/images/lkw/
+/data/images/pkw/*
+/data/images/lkw/*
+!/data/images/pkw/.gitkeep
+!/data/images/lkw/.gitkeep
 .env
 .env.local
 .env*.local

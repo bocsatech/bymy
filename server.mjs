@@ -25,6 +25,8 @@ import {
   setActiveHeroUrl,
   uploadHeroImage,
   resolveHeroUploadFile,
+  resolveServerImageFile,
+  ensureServerImageDirs,
 } from "./lib/site-hero.mjs";
 import {
   deleteQuery,
@@ -218,7 +220,7 @@ function serveStatic(path, res) {
     }
   }
 
-  // Autó hero feltöltések: ~/.autosweb/uploads/hero
+  // Hero feltöltések: data/images/{pkw,lkw} (régi URL: /uploads/hero/…)
   if (rel.startsWith("uploads/hero/")) {
     const uploadFile = resolveHeroUploadFile(`/${rel}`);
     if (uploadFile) {
@@ -228,6 +230,20 @@ function serveStatic(path, res) {
         "Cache-Control": "public, max-age=86400",
       });
       res.end(readFileSync(uploadFile));
+      return;
+    }
+  }
+
+  // Szerver oldali képkönyvtár: data/images/pkw és data/images/lkw
+  if (rel.startsWith("images/pkw/") || rel.startsWith("images/lkw/")) {
+    const serverFile = resolveServerImageFile(`/${rel}`);
+    if (serverFile) {
+      const ext = extname(serverFile);
+      res.writeHead(200, {
+        "Content-Type": MIME[ext] ?? "application/octet-stream",
+        "Cache-Control": "public, max-age=86400",
+      });
+      res.end(readFileSync(serverFile));
       return;
     }
   }
@@ -505,42 +521,47 @@ async function handleListingsApi(req, res, pathname) {
       return;
     }
 
-    let saved = await saveListing(formData, listingId, { status: body.status });
-    if (!saved) {
-      sendJson(res, 404, { error: "Nincs ilyen hirdetés." });
-      return;
-    }
-
-    const photos = Array.isArray(body.photos) ? body.photos : [];
-    if (photos.length) {
-      try {
-        const urls = await saveListingPhotos(saved.id, photos);
-        if (urls[0]) {
-          const updated = await updateListingFoKep(saved.id, urls[0]);
-          if (updated) saved = updated;
-          else saved = { ...saved, fo_kep: urls[0] };
-          if (urls.length > 1 && saved.preview) {
-            saved = {
-              ...saved,
-              preview: {
-                ...saved.preview,
-                imageUrl: urls[0],
-                imageUrls: urls,
-              },
-            };
-          }
-        }
-      } catch (error) {
-        console.warn("Hirdetéskép mentés:", error.message ?? error);
-        sendJson(res, 500, {
-          error: `A kép mentése sikertelen: ${error.message ?? error}`,
-          listing: saved,
-        });
+    try {
+      let saved = await saveListing(formData, listingId, { status: body.status });
+      if (!saved) {
+        sendJson(res, 404, { error: "Nincs ilyen hirdetés." });
         return;
       }
-    }
 
-    sendJson(res, 200, { listing: saved });
+      const photos = Array.isArray(body.photos) ? body.photos : [];
+      if (photos.length) {
+        try {
+          const urls = await saveListingPhotos(saved.id, photos);
+          if (urls[0]) {
+            const updated = await updateListingFoKep(saved.id, urls[0]);
+            if (updated) saved = updated;
+            else saved = { ...saved, fo_kep: urls[0] };
+            if (urls.length > 1 && saved.preview) {
+              saved = {
+                ...saved,
+                preview: {
+                  ...saved.preview,
+                  imageUrl: urls[0],
+                  imageUrls: urls,
+                },
+              };
+            }
+          }
+        } catch (error) {
+          console.warn("Hirdetéskép mentés:", error.message ?? error);
+          sendJson(res, 500, {
+            error: `A kép mentése sikertelen: ${error.message ?? error}`,
+            listing: saved,
+          });
+          return;
+        }
+      }
+
+      sendJson(res, 200, { listing: saved });
+    } catch (error) {
+      console.warn("Hirdetés mentés:", error.message ?? error);
+      sendJson(res, 500, { error: error.message ?? "A hirdetés mentése sikertelen." });
+    }
     return;
   }
 
@@ -1440,6 +1461,8 @@ server.listen(PORT, HOST, async () => {
     ensureProfilesStore();
     ensureSmtpExample();
     ensureOAuthExample();
+    const imagesRoot = ensureServerImageDirs();
+    console.log(`Képek: ${imagesRoot}/pkw  ${imagesRoot}/lkw`);
     await initMessagingSchema();
     console.log("Üzenetek API: /api/messages/*");
   } catch (error) {

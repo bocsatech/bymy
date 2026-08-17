@@ -3202,6 +3202,35 @@ body.site-app .mm-ad-box {
   padding: 1rem 1.1rem;
 }
 
+body.site-app .mm-ad-list {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0.75rem 0 1rem;
+}
+
+body.site-app .mm-ad-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: baseline;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid #e5e8ee;
+  border-radius: 10px;
+  text-decoration: none;
+  color: inherit;
+  background: #fafbfc;
+}
+
+body.site-app .mm-ad-row strong {
+  font-size: 0.95rem;
+}
+
+body.site-app .mm-ad-row span {
+  color: #c2410c;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
 body.site-app .hero-settings-kind-title {
   margin: 0 0 0.45rem;
   font-size: 1.05rem;

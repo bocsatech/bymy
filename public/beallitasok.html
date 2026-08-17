@@ -57,7 +57,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/css/style.css?v=auth20260725" />
-    <link rel="stylesheet" href="/css/site-app.css?v=pkwLkw1" />
+    <link rel="stylesheet" href="/css/site-app.css?v=adsList1" />
   </head>
   <body class="site-app settings-page mm-page" data-site-page="beallitasok" data-auth-init="manual">
     <div class="local-banner">Bymy — Fiókom · user DB: ~/.bymy/ · v=localdb9</div>
@@ -198,10 +198,11 @@
             <p class="mm-panel-lead">Itt kezelheted az aktív hirdetésedet (szerkesztés, megtekintés, új feladás).</p>
           </header>
           <div class="mm-ad-box">
-            <p id="mm-ad-status">Hirdetéseid a Hirdetések listában és a feladáson keresztül érhetők el.</p>
+            <p id="mm-ad-status">A feladott hirdetéseid. A kártyán a gyártmány és a modell látszik.</p>
+            <div id="mm-ad-list" class="mm-ad-list"></div>
             <div class="mm-ad-actions">
-              <a class="site-header-btn site-header-btn--primary" href="/listings.html">Hirdetéseim megnyitása</a>
-              <a class="site-header-btn site-header-btn--outline" href="/hirdetesfeladas.html" data-auth-guard>Hirdetés szerkesztése / feladás</a>
+              <a class="site-header-btn site-header-btn--primary" href="/listings.html">Összes hirdetés</a>
+              <a class="site-header-btn site-header-btn--outline" href="/hirdetesfeladas.html" data-auth-guard>Új hirdetés feladása</a>
             </div>
           </div>
         </section>
@@ -215,7 +216,7 @@
 
           <div class="mm-ad-box hero-settings" data-hero-kind="pkw">
             <h3 class="hero-settings-kind-title">PKW — Autó oldal</h3>
-            <p class="settings-acc-hint">Válassz egy előre feltöltött képet, vagy tölts fel sajátot (JPEG / PNG / WebP, max. 8 MB). Mappa: <code>/images/pkw</code></p>
+            <p class="settings-acc-hint">Válassz egy előre feltöltött képet, vagy tölts fel sajátot (JPEG / PNG / WebP, max. 8 MB). Szerver mappa: <code>data/images/pkw</code></p>
             <p class="settings-flash" data-hero-flash role="status" hidden></p>
 
             <h3 class="hero-settings-subtitle">Előre feltöltött képek</h3>
@@ -241,7 +242,7 @@
 
           <div class="mm-ad-box hero-settings" data-hero-kind="lkw">
             <h3 class="hero-settings-kind-title">LKW — Teherautó oldal</h3>
-            <p class="settings-acc-hint">Válassz egy előre feltöltött képet, vagy tölts fel sajátot (JPEG / PNG / WebP, max. 8 MB). Mappa: <code>/images/lkw</code></p>
+            <p class="settings-acc-hint">Válassz egy előre feltöltött képet, vagy tölts fel sajátot (JPEG / PNG / WebP, max. 8 MB). Szerver mappa: <code>data/images/lkw</code></p>
             <p class="settings-flash" data-hero-flash role="status" hidden></p>
 
             <h3 class="hero-settings-subtitle">Előre feltöltött képek</h3>
@@ -467,8 +468,8 @@
       </div>
     </main>
 
-    <script src="/js/site-avatar-menu.js?v=megjelenesFix1" type="module"></script>
-    <script src="/js/beallitasok-app.js?v=pkwLkw1" type="module"></script>
+    <script src="/js/site-avatar-menu.js?v=adsList1" type="module"></script>
+    <script src="/js/beallitasok-app.js?v=adsList1" type="module"></script>
   
     <script>
       (function () {

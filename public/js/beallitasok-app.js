@@ -26,6 +26,7 @@ import {
 } from "./fok-data.js?v=auth20260805localdb9";
 import { initMessagesUi } from "./messages-ui.js?v=messagesWh2";
 import { listConversations } from "./messages-api.js?v=messagesWh2";
+import { fetchListings } from "./db-client.js";
 
 const PHOTO_KEY = "bymy-avatar-photos";
 const NOTIFY_KEY = "bymy-notify-prefs";
@@ -751,6 +752,31 @@ function initNotifyForm(email) {
   });
 }
 
+async function loadMyAds() {
+  const root = document.getElementById("mm-ad-list");
+  if (!root) return;
+  try {
+    const items = await fetchListings({ limit: 50, status: "feladott" });
+    if (!items.length) {
+      root.innerHTML = `<p class="mm-empty">Még nincs feladott hirdetés.</p>`;
+      return;
+    }
+    root.innerHTML = items
+      .map((item) => {
+        const preview = item.preview || {};
+        const title = preview.title || item.hirdetes_cime || `Hirdetés #${item.id}`;
+        const price = preview.price || "";
+        return `<a class="mm-ad-row" href="/listings.html?id=${item.id}">
+          <strong>${escapeHtml(title)}</strong>
+          <span>${escapeHtml(price)}</span>
+        </a>`;
+      })
+      .join("");
+  } catch (error) {
+    root.innerHTML = `<p class="mm-empty">${escapeHtml(error.message ?? "Nem sikerült betölteni a hirdetéseket.")}</p>`;
+  }
+}
+
 export async function initSettingsPage() {
   const ok = await requireAuthForPage();
   if (!ok) return;
@@ -782,6 +808,7 @@ export async function initSettingsPage() {
     },
   });
   fillProfileForm(user, loadedProfile);
+  loadMyAds();
   // Második kör: ha a panel most vált láthatóra, biztosan kitöltjük.
   requestAnimationFrame(() => fillProfileForm(getAuthUser(), loadedProfile || getProfile()));
   initNotifyForm(user.email);

@@ -119,12 +119,6 @@
 
     <main class="page page-automax site-page-main">
       <div class="site-layout site-layout--wide">
-        <aside class="site-side site-side--left" data-site-side="left">
-          <div class="site-side-card">
-            <h2 class="site-side-title" data-side-title>Videók</h2>
-            <div class="site-video-list" data-side-videos></div>
-          </div>
-        </aside>
         <div class="site-center site-center--automax">
       <div class="automax-main">
 
@@ -266,7 +260,7 @@
       </div>
 
       <div id="ad-wizard-shell" class="ad-wizard-shell" hidden>
-      <form id="ad-form" novalidate>
+      <form id="ad-form" novalidate autocomplete="off" data-lpignore="true" data-1p-ignore="true">
         <section class="step-panel" data-step="1">
           <h2 class="import-step-label">Alapadatok</h2>
           <div class="card">
@@ -951,10 +945,10 @@
 
           <div class="card hidden" id="success-panel">
             <div class="card-body success-box">
-              <h2>Hirdetés feladva (mentve)</h2>
+              <h2>Hirdetés feladva</h2>
               <p id="summary-text" class="hint"></p>
-              <p class="hint">Az adatok SQLite-ba kerültek „feladott” státusszal — nem kerülnek fel automatikusan a Használtautó.hu-ra.</p>
-              <p class="hint"><a class="listings-inline-link" href="/listings.html">Összes hirdetés megtekintése</a></p>
+              <p class="hint">A hirdetés a Bymy adatbázisban van — megjelenik az Autó oldalon és a Hirdetéseim listában.</p>
+              <p class="hint"><a class="listings-inline-link" href="/listings.html">Hirdetéseim megnyitása</a> · <a class="listings-inline-link" href="/auto.html">Autó oldal</a></p>
               <button type="button" class="btn btn-primary" id="new-ad-btn">Új hirdetés</button>
             </div>
           </div>
@@ -1030,27 +1024,11 @@
         </div>
       </aside>
         </div>
-        <aside class="site-side site-side--right" data-site-side="right">
-          <div class="site-side-card">
-            <h2 class="site-side-title" data-side-title>Videók</h2>
-            <div class="site-video-list" data-side-videos></div>
-          </div>
-        </aside>
       </div>
     </main>
 
-    <footer class="site-content-bar" id="site-content-bar" aria-label="Tartalom szerkesztése">
-      <div class="site-content-bar-inner">
-        <button type="button" class="site-side-edit" id="site-side-edit">Tartalom szerkesztése</button>
-        <div id="site-side-toolbar" class="site-side-toolbar" hidden>
-          <button type="button" class="site-side-btn" id="site-side-save">Tartalom mentése</button>
-          <button type="button" class="site-side-btn site-side-btn--ghost" id="site-side-cancel">Mégse</button>
-        </div>
-      </div>
-    </footer>
-
-    <script src="/js/site-avatar-menu.js?v=megjelenesFix1" type="module"></script>
-    <script src="/js/app.js?v=catPick20260814c" type="module"></script>
+    <script src="/js/site-avatar-menu.js?v=adsList1" type="module"></script>
+    <script src="/js/app.js?v=adsList1" type="module"></script>
       <script src="/js/nav-counts.js?v=willhabenHdr1" type="module"></script>
       <script src="/js/theme.js?v=willhabenHdr1" type="module"></script>
 </body>

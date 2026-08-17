@@ -48,11 +48,11 @@ export async function fetchListing(id) {
   return data.listing ?? null;
 }
 
-export async function saveListingToDb(formData, listingId = null, { status = null } = {}) {
+export async function saveListingToDb(formData, listingId = null, { status = null, photos = [] } = {}) {
   const response = await fetch("/api/listings", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ form: formData, id: listingId, status }),
+    body: JSON.stringify({ form: formData, id: listingId, status, photos }),
   });
   const data = await parseJson(response);
   const saved = data.listing;

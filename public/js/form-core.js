@@ -44,7 +44,17 @@ export function createAdForm(options = {}) {
   const fuelSubpanels = document.getElementById("fuel-subpanels");
   const fuelSelected = document.getElementById("fuel-selected");
 
+  const KEEP_ON_RESET = new Set([
+    "hirdetes_vertical",
+    "hirdetes_alkategoria",
+    "ingatlan_tipus",
+    "ingatlan_kategoria",
+    "csomag",
+  ]);
+
   let currentStep = 1;
+  let userTouchedForm = false;
+  let emptyingForm = false;
 
 const AUTO_FILL_PRESETS = {
   TESLA: { tipus: "Long Range AWD", hengerurtartalom: "", uzemanyag: "Elektromos", sebessegvalto: "Automata", hajtas: "Összkerék", teljesitmeny_kw: "258" },
@@ -65,6 +75,7 @@ function fillYearSelect(select) {
     option.textContent = String(year);
     select.appendChild(option);
   }
+  select.value = "";
 }
 
 function normalizeFuelValue(value) {
@@ -279,6 +290,7 @@ function renderEquipment() {
 }
 
 function applyAutoFill() {
+  if (mode === "wizard") return;
   const preset = AUTO_FILL_PRESETS[gyartmany.value];
   document.querySelectorAll(".auto-filled").forEach((field) => {
     field.classList.remove("auto-filled");
@@ -323,7 +335,8 @@ function updateLeDisplay() {
 }
 
 function updateTitle() {
-  if (!hirdetesCime || hirdetesCime?.dataset.userEdited === "1") return;
+  if (!hirdetesCime) return;
+  if (hirdetesCime.type !== "hidden" && hirdetesCime.dataset.userEdited === "1") return;
   const parts = [gyartmany.value, modell.value].filter(Boolean);
   const year = gyartasiEv.value;
   hirdetesCime.value = parts.length
@@ -493,6 +506,7 @@ function collectFormData() {
 
 function saveDraft() {
   if (mode === "import") return;
+  if (mode === "wizard" && !userTouchedForm) return;
   localStorage.setItem(storageKey, JSON.stringify(collectFormData()));
 }
 
@@ -586,33 +600,60 @@ function applyFormData(data, { fromImport = false } = {}) {
   }
 }
 
-function restoreDraft() {
-  if (mode === "import") return;
-  try {
-    const raw = localStorage.getItem(storageKey);
-    if (!raw) return;
-    applyFormData(JSON.parse(raw));
-  } catch {
-    /* ignore */
-  }
+function clearDraft() {
+  localStorage.removeItem(storageKey);
 }
 
 function showAllSteps() {
   panels.forEach((panel) => panel.classList.remove("hidden"));
 }
 
-function resetForm() {
-  form.reset();
-  form.querySelectorAll('input[name="felszereltseg"]').forEach((box) => {
-    box.checked = false;
+function resetForm({ fresh = false } = {}) {
+  if (fresh) userTouchedForm = false;
+  if (emptyingForm) return;
+  emptyingForm = true;
+  try {
+  clearDraft();
+  form.querySelectorAll("input, select, textarea").forEach((el) => {
+    if (KEEP_ON_RESET.has(el.name) || KEEP_ON_RESET.has(el.id)) return;
+    if (el.type === "hidden") {
+      el.value = "";
+      delete el.dataset.userEdited;
+      return;
+    }
+    if (el.type === "file") {
+      el.value = "";
+      return;
+    }
+    if (el.type === "checkbox") {
+      el.checked = false;
+      return;
+    }
+    if (el.type === "radio") {
+      el.checked = el.defaultChecked;
+      return;
+    }
+    el.value = "";
+    delete el.dataset.userEdited;
+    el.classList.remove("auto-filled");
   });
-  form.querySelectorAll('input[name="egyeb_info"]').forEach((box) => {
-    box.checked = false;
+  form.querySelectorAll("select.phone-country").forEach((el) => {
+    if ([...el.options].some((option) => option.value === "+36")) el.value = "+36";
   });
+  const primaryLang = form.querySelector('select[name="telefon1_nyelv1"]');
+  if (primaryLang && [...primaryLang.options].some((option) => option.value === "Magyar")) {
+    primaryLang.value = "Magyar";
+  }
   if (fuelSelected) fuelSelected.textContent = "";
+  renderPhotoPreview([]);
+  syncPackageSelection();
   syncFuelDependentFields();
+  updateLeDisplay();
   updateTitle();
   fitAllFormFields();
+  } finally {
+    emptyingForm = false;
+  }
 }
 
 function validateFields(names) {
@@ -762,7 +803,7 @@ if (mode === "wizard") {
     });
   });
 
-  nextBtn?.addEventListener("click", () => {
+  nextBtn?.addEventListener("click", async () => {
     if (!validateStep(currentStep)) return;
     saveDraft();
     if (currentStep < TOTAL_STEPS) {
@@ -771,20 +812,38 @@ if (mode === "wizard") {
     }
     buildSummary();
     const formData = collectFormData();
-    options.onWizardComplete?.(formData);
-    showSuccess();
+    nextBtn.disabled = true;
+    try {
+      await options.onWizardComplete?.(formData);
+      showSuccess();
+    } catch (error) {
+      alert(error?.message ?? "A hirdetés mentése nem sikerült.");
+    } finally {
+      nextBtn.disabled = false;
+    }
   });
 
   newAdBtn?.addEventListener("click", () => {
-    form.reset();
-    localStorage.removeItem(storageKey);
-    renderPhotoPreview([]);
+    resetForm({ fresh: true });
     resetSuccess();
-    updateTitle();
-    fitAllFormFields();
     showStep(1);
     options.onNewAd?.();
   });
+
+  form.addEventListener(
+    "pointerdown",
+    () => {
+      userTouchedForm = true;
+    },
+    { capture: true }
+  );
+  form.addEventListener(
+    "keydown",
+    () => {
+      userTouchedForm = true;
+    },
+    { capture: true }
+  );
 
   form.addEventListener("input", saveDraft);
   form.addEventListener("change", saveDraft);
@@ -845,7 +904,11 @@ initVehicleCatalogSelects({
     updateTitle();
     fitAllFormFields();
   },
-}).catch(() => {});
+})
+  .then(() => {
+    if (mode === "wizard" && !userTouchedForm) resetForm();
+  })
+  .catch(() => {});
 
 tipusKatalogus?.addEventListener("change", () => {
   if (!tipusKatalogus.value || !tipus) return;
@@ -878,9 +941,27 @@ uzemanyag?.addEventListener("change", () => {
 });
 
 if (mode === "wizard") {
-  restoreDraft();
-  renderPhotoPreview([]);
+  form.setAttribute("autocomplete", "off");
+  form.querySelectorAll("input, select, textarea").forEach((el) => {
+    el.setAttribute("autocomplete", "off");
+  });
+  userTouchedForm = false;
+  resetForm({ fresh: true });
   showStep(1);
+  const emptyIfPristine = () => {
+    if (!userTouchedForm) resetForm();
+  };
+  form.addEventListener(
+    "input",
+    () => {
+      if (!userTouchedForm) resetForm();
+    },
+    { capture: true }
+  );
+  requestAnimationFrame(emptyIfPristine);
+  window.setTimeout(emptyIfPristine, 80);
+  window.setTimeout(emptyIfPristine, 300);
+  window.addEventListener("pageshow", emptyIfPristine);
 } else {
   showAllSteps();
 }

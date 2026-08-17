@@ -25,6 +25,22 @@ let categoryUi = null;
 let statsUi = null;
 let statsFilter = null;
 
+const PAGE = document.body?.getAttribute("data-site-page") || "";
+
+function listingVertical(item) {
+  return String(item?.preview?.filter?.hirdetes_vertical ?? "").trim().toLowerCase();
+}
+
+function filterBySitePage(items) {
+  if (PAGE === "teherauto") {
+    return items.filter((item) => listingVertical(item) === "teher");
+  }
+  if (PAGE === "auto") {
+    return items.filter((item) => listingVertical(item) !== "teher" && listingVertical(item) !== "ingatlan");
+  }
+  return items;
+}
+
 function sortForHome(items) {
   return [...items].sort((a, b) => {
     const ta = new Date(a.updated_at ?? a.created_at ?? 0).getTime();
@@ -58,7 +74,7 @@ function renderListings(items) {
     }
   } else if (!filtered.length) {
     emptyEl.textContent =
-      "Még nincs hirdetés. Importálj a hasznaltauto.hu listáról (Import oldal) — a mentett autók azonnal itt jelennek meg.";
+      "Még nincs hirdetés. Adj fel egyet a Hirdetésfeladáson, vagy importálj a hasznaltauto.hu listáról.";
   }
 
   for (const item of filtered) {
@@ -68,7 +84,7 @@ function renderListings(items) {
 
 async function loadListings() {
   const all = await fetchListings({ limit: LISTINGS_FETCH_LIMIT });
-  allItems = sortForHome(all);
+  allItems = sortForHome(filterBySitePage(all));
   populateFilterOptions(allItems);
   renderListings(allItems);
   updateFilterResultCount();

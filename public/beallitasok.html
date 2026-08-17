@@ -57,8 +57,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/css/style.css?v=auth20260725" />
-    <link rel="stylesheet" href="/css/site-app.css?v=fiokSplit2" />
-    <link rel="stylesheet" href="/css/category-picker.css?v=fiokSplit2" />
+    <link rel="stylesheet" href="/css/site-app.css?v=autoCats1" />
+    <link rel="stylesheet" href="/css/category-picker.css?v=autoCats1" />
   </head>
   <body class="site-app settings-page mm-page" data-site-page="beallitasok" data-auth-init="manual">
     <div class="local-banner">Bymy — Fiókom · user DB: ~/.bymy/ · v=localdb9</div>
@@ -111,15 +111,51 @@
         <h1 class="mm-side-title">Üdv, <span data-mm-hello>—</span></h1>
         <div id="category-picker" class="category-picker mm-cat-picker" aria-label="Hirdetés kategória">
           <div class="cp-stack" role="list">
-            <section class="cp-group" data-accent="car" data-group="auto" role="listitem">
-              <button type="button" class="cp-group-toggle" data-pick='{"vertical":"auto","subtype":"szemelyauto","label":"Személyautó"}' aria-expanded="false">
+            <section class="cp-group is-open" data-accent="car" data-group="auto" role="listitem">
+              <button type="button" class="cp-group-toggle" data-toggle-group="auto" aria-expanded="true">
                 <img class="cp-group-thumb" src="/images/categories/benzin.jpg" alt="" width="52" height="52" />
                 <span class="cp-group-copy">
                   <strong>Autó hirdetés</strong>
-                  <span>Személyautó</span>
+                  <span>Személyautó és más</span>
                 </span>
-                <svg class="cp-chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <svg class="cp-chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
               </button>
+              <div class="cp-group-body" data-group-body="auto">
+                <button type="button" class="cp-option" data-pick='{"vertical":"auto","subtype":"szemelyauto","label":"Személyautó"}'>
+                  <span class="cp-option-bar" aria-hidden="true"></span>
+                  <span class="cp-option-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none"><path d="M4 14.5h2.2l1.3-2.5h7l1.4 2.5H18a2 2 0 0 1 2 2v2.2a1.3 1.3 0 0 1-1.3 1.3h-.7" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="7.2" cy="18.7" r="1.5" stroke="currentColor" stroke-width="1.5"/><circle cx="15.5" cy="18.7" r="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M5 14.5 6.5 9.8h11L19 14.5" stroke="currentColor" stroke-width="1.5"/></svg>
+                  </span>
+                  <span class="cp-option-copy"><strong>Személyautó</strong></span>
+                  <span class="cp-option-trail" aria-hidden="true">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </span>
+                </button>
+                <button type="button" class="cp-option is-soon" disabled aria-disabled="true">
+                  <span class="cp-option-bar" aria-hidden="true"></span>
+                  <span class="cp-option-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none"><path d="M4 14.5h2.2l1.3-2.5h7l1.4 2.5H18a2 2 0 0 1 2 2v2.2a1.3 1.3 0 0 1-1.3 1.3h-.7" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="7.2" cy="18.7" r="1.5" stroke="currentColor" stroke-width="1.5"/><circle cx="15.5" cy="18.7" r="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M5 14.5 6.5 9.8h11L19 14.5" stroke="currentColor" stroke-width="1.5"/></svg>
+                  </span>
+                  <span class="cp-option-copy"><strong>Leasing hirdetés</strong></span>
+                  <span class="cp-option-trail"><span class="cp-soon">Hamarosan</span></span>
+                </button>
+                <button type="button" class="cp-option is-soon" disabled aria-disabled="true">
+                  <span class="cp-option-bar" aria-hidden="true"></span>
+                  <span class="cp-option-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none"><path d="M4 14.5h2.2l1.3-2.5h7l1.4 2.5H18a2 2 0 0 1 2 2v2.2a1.3 1.3 0 0 1-1.3 1.3h-.7" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="7.2" cy="18.7" r="1.5" stroke="currentColor" stroke-width="1.5"/><circle cx="15.5" cy="18.7" r="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M5 14.5 6.5 9.8h11L19 14.5" stroke="currentColor" stroke-width="1.5"/></svg>
+                  </span>
+                  <span class="cp-option-copy"><strong>Bérautó hirdetés</strong></span>
+                  <span class="cp-option-trail"><span class="cp-soon">Hamarosan</span></span>
+                </button>
+                <button type="button" class="cp-option is-soon" disabled aria-disabled="true">
+                  <span class="cp-option-bar" aria-hidden="true"></span>
+                  <span class="cp-option-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none"><path d="M3.5 15.5V9.2A1.7 1.7 0 0 1 5.2 7.5h8.3L17 11.2h2.3A1.7 1.7 0 0 1 21 12.9v2.6" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="7.2" cy="17.2" r="1.5" stroke="currentColor" stroke-width="1.5"/><circle cx="16.5" cy="17.2" r="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 15.5h17" stroke="currentColor" stroke-width="1.5"/></svg>
+                  </span>
+                  <span class="cp-option-copy"><strong>Bérelhető lakókocsi hirdetés</strong></span>
+                  <span class="cp-option-trail"><span class="cp-soon">Hamarosan</span></span>
+                </button>
+              </div>
             </section>
 
             <section class="cp-group" data-accent="truck" data-group="teher" role="listitem">
@@ -575,9 +611,9 @@
       </div>
     </main>
 
-    <script src="/js/site-avatar-menu.js?v=fiokSplit2" type="module"></script>
-    <script src="/js/ha-import-app.js?v=fiokSplit2" type="module"></script>
-    <script src="/js/beallitasok-app.js?v=fiokSplit2" type="module"></script>
+    <script src="/js/site-avatar-menu.js?v=autoCats1" type="module"></script>
+    <script src="/js/ha-import-app.js?v=autoCats1" type="module"></script>
+    <script src="/js/beallitasok-app.js?v=autoCats1" type="module"></script>
   
     <script>
       (function () {

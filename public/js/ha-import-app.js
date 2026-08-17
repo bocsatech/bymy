@@ -56,7 +56,7 @@ function setMode(mode) {
 
 function bookmarkletHref(mode) {
   const origin = location.origin;
-  const src = `${origin}/js/ha-import-bookmarklet.js?v=haImp3`;
+  const src = `${origin}/js/ha-import-bookmarklet.js?v=haImp5`;
   return `javascript:(function(){var o=${JSON.stringify(origin)};var m=${JSON.stringify(mode)};function go(){window.BymyHaImport.run({origin:o,mode:m});}if(window.BymyHaImport){go();return;}var s=document.createElement('script');s.src=${JSON.stringify(src)};s.onload=go;s.onerror=function(){alert('A hasznaltauto.hu blokkolta a Bymy scriptet. Másold a hirdetés URL-jét a Bymy Autóimport oldalra.');};document.documentElement.appendChild(s);})();`;
 }
 
@@ -220,19 +220,6 @@ async function runUrlImport() {
 }
 
 let importBusy = false;
-const seenImportKeys = new Set();
-
-function importPayloadKey(data) {
-  const pages = Array.isArray(data?.pages) ? data.pages : [];
-  const urls = Array.isArray(data?.urls) ? data.urls : [];
-  const ids = [
-    ...pages.map((page) => page.listingId || page.url || ""),
-    ...urls,
-  ]
-    .map((item) => String(item || "").trim())
-    .filter(Boolean);
-  return ids.sort().join("|");
-}
 
 async function runMessageImport(data) {
   const pages = Array.isArray(data.pages) ? data.pages : [];
@@ -240,9 +227,7 @@ async function runMessageImport(data) {
     setStatus("Üres import — nyisd meg a hirdetést, majd próbáld újra.", "err");
     return;
   }
-  const key = importPayloadKey(data);
-  if (importBusy || seenImportKeys.has(key)) return;
-  seenImportKeys.add(key);
+  if (importBusy) return;
   importBusy = true;
   setStatus(pages.length > 1 ? `Mentés (${pages.length} hirdetés)…` : "Hirdetés feldolgozása…");
   try {
@@ -254,7 +239,6 @@ async function runMessageImport(data) {
     setStatus("");
     renderResult(result);
   } catch (error) {
-    seenImportKeys.delete(key);
     setStatus(error.message ?? "Import sikertelen.", "err");
   } finally {
     importBusy = false;

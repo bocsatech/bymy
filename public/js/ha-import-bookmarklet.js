@@ -72,31 +72,6 @@
     return m ? m[1] : "";
   }
 
-  function pickImageJpeg() {
-    const imgs = [...document.querySelectorAll("img")];
-    imgs.sort((a, b) => (b.naturalWidth * b.naturalHeight) - (a.naturalWidth * a.naturalHeight));
-    for (const img of imgs) {
-      try {
-        if ((img.naturalWidth || img.width || 0) < 120) continue;
-        const src = img.currentSrc || img.src || "";
-        if (/close|logo|icon|sprite|placeholder/i.test(src)) continue;
-        const c = document.createElement("canvas");
-        const w = Math.min(img.naturalWidth || img.width || 800, 1600);
-        const h = Math.round(
-          w * ((img.naturalHeight || img.height || 600) / Math.max(img.naturalWidth || img.width || 1, 1))
-        );
-        c.width = w;
-        c.height = h;
-        c.getContext("2d").drawImage(img, 0, 0, w, h);
-        const data = c.toDataURL("image/jpeg", 0.82);
-        if (data && data.length > 2000) return data;
-      } catch {
-        /* tainted canvas */
-      }
-    }
-    return "";
-  }
-
   function extractPage() {
     const title = pickTitle();
     const parts = title.split(/\s+/).filter(Boolean);
@@ -114,7 +89,6 @@
       fuel: fieldAfter("Üzemanyag") || "",
       brand: parts[0] || "",
       model: parts[1] || "",
-      imageJpegBase64: pickImageJpeg(),
     };
   }
 

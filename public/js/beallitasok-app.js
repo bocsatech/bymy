@@ -1,6 +1,7 @@
 /**
  * Fiókom — mobile.de Mein mobile / Konto bearbeiten mintára.
- * Szekciók: attekintes | parkolo | keresesek | uzenetek | hirdetes | megjelenes | fiok
+ * Szekciók: attekintes | nyomtatasok | ertekelesek | parkolo | keresesek |
+ *           uzenetek | hirdetes | megjelenes | fiok
  */
 
 import {
@@ -37,7 +38,19 @@ const REC_RADIUS_KEY = "bymy_partner_radius_km";
 const MAX_BYTES = 2.5 * 1024 * 1024;
 const HERO_MAX_BYTES = 8 * 1024 * 1024;
 const AVATAR_SIZE = 256;
-const SECTIONS = ["attekintes", "parkolo", "keresesek", "uzenetek", "hirdetes", "megjelenes", "fiok"];
+const SECTIONS = [
+  "attekintes",
+  "nyomtatasok",
+  "ertekelesek",
+  "parkolo",
+  "keresesek",
+  "uzenetek",
+  "hirdetes",
+  "megjelenes",
+  "fiok",
+];
+const CAT_STORAGE_KEY = "bymy-hirdetes-category";
+const CAT_STORAGE_VERSION = 2;
 const SEARCH_RADIUS_OPTIONS = [5, 10, 15, 20, 30, 50, 75, 100];
 const REC_RADIUS_OPTIONS = [5, 10, 15, 20, 30];
 const AUTH_TOKEN_KEY = "bymy-auth-token";
@@ -133,8 +146,8 @@ function resizeImageFile(file) {
 }
 
 function currentSection() {
-  const raw = new URLSearchParams(window.location.search).get("szekcio") || "fiok";
-  return SECTIONS.includes(raw) ? raw : "fiok";
+  const raw = new URLSearchParams(window.location.search).get("szekcio") || "parkolo";
+  return SECTIONS.includes(raw) ? raw : "parkolo";
 }
 
 function setSection(section) {
@@ -152,6 +165,8 @@ function setSection(section) {
   document.title =
     {
       attekintes: "Áttekintés",
+      nyomtatasok: "Nyomtatások",
+      ertekelesek: "Értékelések",
       parkolo: "Parkoló",
       keresesek: "Mentett kereséseim",
       uzenetek: "Üzenetek",
@@ -796,8 +811,9 @@ export async function initSettingsPage() {
 
   document.querySelectorAll("[data-mm-nav]").forEach((link) => {
     link.addEventListener("click", (event) => {
-      event.preventDefault();
       const next = link.getAttribute("data-mm-nav");
+      if (!SECTIONS.includes(next)) return;
+      event.preventDefault();
       setSection(next);
       if (next === "fiok") {
         fillProfileForm(getAuthUser(), getProfile());
@@ -807,6 +823,41 @@ export async function initSettingsPage() {
       }
       if (next === "megjelenes") {
         loadHeroSettings();
+      }
+      if (next === "hirdetes") {
+        initMyAdsPanel(document.getElementById("mm-ad-list")).reload();
+      }
+    });
+  });
+
+  document.querySelectorAll("[data-mm-subtoggle]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const group = btn.closest(".mm-nav-group");
+      const sub = group?.querySelector("[data-mm-sub]");
+      if (!sub) return;
+      const open = sub.hidden;
+      document.querySelectorAll("[data-mm-sub]").forEach((el) => {
+        el.hidden = true;
+      });
+      document.querySelectorAll("[data-mm-subtoggle]").forEach((el) => {
+        el.setAttribute("aria-expanded", "false");
+      });
+      if (open) {
+        sub.hidden = false;
+        btn.setAttribute("aria-expanded", "true");
+      }
+    });
+  });
+
+  document.querySelectorAll("[data-post-ad-category]").forEach((link) => {
+    link.addEventListener("click", () => {
+      try {
+        const raw = link.getAttribute("data-post-ad-category") || "";
+        const parsed = JSON.parse(raw);
+        if (!parsed.v) parsed.v = CAT_STORAGE_VERSION;
+        sessionStorage.setItem(CAT_STORAGE_KEY, JSON.stringify(parsed));
+      } catch {
+        /* ignore */
       }
     });
   });

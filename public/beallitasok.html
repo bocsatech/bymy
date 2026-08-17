@@ -57,7 +57,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/css/style.css?v=auth20260725" />
-    <link rel="stylesheet" href="/css/site-app.css?v=myAds1" />
+    <link rel="stylesheet" href="/css/site-app.css?v=dealerMenu4" />
   </head>
   <body class="site-app settings-page mm-page" data-site-page="beallitasok" data-auth-init="manual">
     <div class="local-banner">Bymy — Fiókom · user DB: ~/.bymy/ · v=localdb9</div>
@@ -109,13 +109,19 @@
         <p class="mm-side-kicker">Fiókom</p>
         <h1 class="mm-side-title">Üdv, <span data-mm-hello>—</span></h1>
         <nav class="mm-nav">
-          <a class="mm-nav-link" href="?szekcio=attekintes" data-mm-nav="attekintes">Áttekintés</a>
+          <a class="mm-nav-link" href="/import.html">Autóimport</a>
+          <a class="mm-nav-link" href="?szekcio=nyomtatasok" data-mm-nav="nyomtatasok">Nyomtatások</a>
+          <a class="mm-nav-link" href="?szekcio=ertekelesek" data-mm-nav="ertekelesek">Értékelések</a>
+          <a class="mm-nav-link" href="/hirdetesfeladas.html?continue=1" data-post-ad-category='{"vertical":"auto","subtype":"szemelyauto","label":"Személyautó","v":2}'>Autó hozzáadása</a>
+          <div class="mm-nav-group">
+            <button type="button" class="mm-nav-link mm-nav-toggle" data-mm-subtoggle aria-expanded="false">Teherautó hozzáadása</button>
+            <div class="mm-nav-sub" data-mm-sub hidden>
+              <a class="mm-nav-sublink" href="/hirdetesfeladas.html?continue=1" data-post-ad-category='{"vertical":"teher","subtype":"kisteher","label":"Kisteher 3,5 t-ig","v":2}'>Teherautó 3,5-ig</a>
+              <a class="mm-nav-sublink" href="/hirdetesfeladas.html?continue=1" data-post-ad-category='{"vertical":"teher","subtype":"teherauto","label":"Teherautó 3,5 t-tól","v":2}'>Teherautó 3,5-tól</a>
+            </div>
+          </div>
+          <p class="mm-nav-plain">Kiemelések</p>
           <a class="mm-nav-link" href="?szekcio=parkolo" data-mm-nav="parkolo">Parkoló</a>
-          <a class="mm-nav-link" href="?szekcio=keresesek" data-mm-nav="keresesek">Mentett kereséseim</a>
-          <a class="mm-nav-link" href="?szekcio=uzenetek" data-mm-nav="uzenetek">Üzenetek <span class="mm-nav-badge" data-mm-msg-count hidden>0</span></a>
-          <a class="mm-nav-link" href="?szekcio=hirdetes" data-mm-nav="hirdetes">Saját hirdetések</a>
-          <a class="mm-nav-link" href="?szekcio=megjelenes" data-mm-nav="megjelenes">Megjelenés</a>
-          <a class="mm-nav-link" href="?szekcio=fiok" data-mm-nav="fiok">Beállítások</a>
         </nav>
         <button type="button" class="mm-side-logout" data-auth-logout>Kijelentkezés</button>
       </aside>
@@ -159,7 +165,7 @@
         <section class="mm-panel" data-mm-panel="parkolo" hidden>
           <header class="mm-panel-head">
             <h2 class="mm-panel-title">Parkoló</h2>
-            <p class="mm-panel-lead">Ide kerülnek a kedvenc / „parkolt” járműveid. Jegyzetet is írhatsz hozzájuk.</p>
+            <p class="mm-panel-lead">Érdekes hirdetések, amelyekkel később foglalkoznál — a kedvenceid.</p>
           </header>
           <form id="mm-park-add" class="mm-inline-form">
             <input type="text" name="title" required placeholder="Pl. BMW 320d 2018" aria-label="Jármű megnevezése" />
@@ -198,6 +204,24 @@
             <p class="mm-panel-lead">Szerkesztés, képkezelés, web- és app-megtekintések.</p>
           </header>
           <div id="mm-ad-list" class="mm-ad-list"></div>
+        </section>
+
+        <!-- Nyomtatások -->
+        <section class="mm-panel" data-mm-panel="nyomtatasok" hidden>
+          <header class="mm-panel-head">
+            <h2 class="mm-panel-title">Nyomtatások</h2>
+            <p class="mm-panel-lead">Ártábla és adásvételi szerződés nyomtatása. A funkció hamarosan elérhető.</p>
+          </header>
+          <p class="mm-empty">Ez a menüpont előkészületben van.</p>
+        </section>
+
+        <!-- Értékelések -->
+        <section class="mm-panel" data-mm-panel="ertekelesek" hidden>
+          <header class="mm-panel-head">
+            <h2 class="mm-panel-title">Értékelések</h2>
+            <p class="mm-panel-lead">Más felhasználók értékelései az autóinkról és a kereskedésről.</p>
+          </header>
+          <p class="mm-empty">Ez a menüpont előkészületben van.</p>
         </section>
 
         <!-- Megjelenés — autó hero háttér (mindenkinek) -->
@@ -461,8 +485,8 @@
       </div>
     </main>
 
-    <script src="/js/site-avatar-menu.js?v=myAds1" type="module"></script>
-    <script src="/js/beallitasok-app.js?v=myAds1" type="module"></script>
+    <script src="/js/site-avatar-menu.js?v=dealerMenu4" type="module"></script>
+    <script src="/js/beallitasok-app.js?v=dealerMenu4" type="module"></script>
   
     <script>
       (function () {

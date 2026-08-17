@@ -10,32 +10,68 @@ const AVATAR_SIZE = 256;
 
 let initialized = false;
 
+const CAT_STORAGE_KEY = "bymy-hirdetes-category";
+const CAT_STORAGE_VERSION = 2;
+
 const ICONS = {
   messages: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 6.8h9.5a2.2 2.2 0 0 1 2.2 2.2v4.2a2.2 2.2 0 0 1-2.2 2.2H10l-3.2 2.4V15.2H5A2.2 2.2 0 0 1 2.8 13V9a2.2 2.2 0 0 1 2.2-2.2Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M14.2 8.2h4A2.2 2.2 0 0 1 20.4 10.4v3.4a2.2 2.2 0 0 1-2.2 2.2h-.7v1.7l-2.2-1.7" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>`,
   star: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m12 3.6 2.1 4.4 4.8.5-3.6 3.1 1.1 4.7L12 14.2 7.6 16.3l1.1-4.7-3.6-3.1 4.8-.5L12 3.6Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>`,
   heart: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 20s-6.8-4.2-9-7.7C1.4 9.7 2.7 6.5 5.7 5.6c1.8-.5 3.6.2 4.6 1.6 1-1.4 2.8-2.1 4.6-1.6 3 .9 4.3 4.1 2.7 6.7C18.8 15.8 12 20 12 20Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>`,
   car: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 14.5h2.2l1.3-2.5h7l1.4 2.5H18a2 2 0 0 1 2 2v2.2a1.3 1.3 0 0 1-1.3 1.3h-.7" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="7.2" cy="18.7" r="1.5" stroke="currentColor" stroke-width="1.5"/><circle cx="15.5" cy="18.7" r="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M5 14.5 6.5 9.8h11L19 14.5" stroke="currentColor" stroke-width="1.5"/></svg>`,
+  truck: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3.5 15.5V9.2A1.7 1.7 0 0 1 5.2 7.5h8.3L17 11.2h2.3A1.7 1.7 0 0 1 21 12.9v2.6" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="7.2" cy="17.2" r="1.5" stroke="currentColor" stroke-width="1.5"/><circle cx="16.5" cy="17.2" r="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 15.5h17" stroke="currentColor" stroke-width="1.5"/></svg>`,
   import: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 15.5h16v3.2a1.8 1.8 0 0 1-1.8 1.8H5.8A1.8 1.8 0 0 1 4 18.7v-3.2Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M7.2 15.2 8.5 10h7l1.3 5.2" stroke="currentColor" stroke-width="1.5"/><path d="M12 3.5v7.2M9.2 8.2 12 11l2.8-2.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
   settings: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3.1" stroke="currentColor" stroke-width="1.6"/><path d="M12 4.5v1.6M12 17.9v1.6M4.5 12h1.6M17.9 12h1.6M6.8 6.8l1.1 1.1M16.1 16.1l1.1 1.1M17.2 6.8l-1.1 1.1M7.9 16.1l-1.1 1.1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>`,
   print: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 8.2V4.8h10v3.4" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M6 14.8h12v5H6v-5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M4.8 9.5h14.4A1.7 1.7 0 0 1 21 11.2v4.2h-3M3 15.4V11.2A1.7 1.7 0 0 1 4.8 9.5" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>`,
   rating: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 6.5h14a1.8 1.8 0 0 1 1.8 1.8v7.2A1.8 1.8 0 0 1 19 17.3h-5.2L9.2 20v-2.7H5A1.8 1.8 0 0 1 3.2 15.5V8.3A1.8 1.8 0 0 1 5 6.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="m12 9.2.7 1.5 1.6.2-1.2 1 .4 1.6-1.5-.8-1.5.8.4-1.6-1.2-1 1.6-.2L12 9.2Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>`,
   photo: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="13" rx="2.2" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="12" r="3.2" stroke="currentColor" stroke-width="1.6"/><path d="M8 5.5 9.2 3.8h5.6L16 5.5" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>`,
   chevron: `<svg class="site-avatar-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  chevronDown: `<svg class="site-avatar-chevron site-avatar-chevron--down" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
 };
 
-function row(href, icon, label, extra = "") {
+function escapeAttr(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;");
+}
+
+function row(href, icon, label, { extra = "", desc = "", chevron = ICONS.chevron } = {}) {
   const tag = href ? "a" : "button";
-  const attrs = href
-    ? `href="${href}"`
-    : `type="button" ${extra}`;
+  const attrs = href ? `href="${href}" ${extra}` : `type="button" ${extra}`;
+  const descHtml = desc
+    ? `<span class="site-avatar-item-desc">${desc}</span>`
+    : "";
   return `<${tag} class="site-avatar-item" ${attrs} role="menuitem">
     <span class="site-avatar-item-icon">${icon}</span>
-    <span class="site-avatar-item-label">${label}</span>
-    ${ICONS.chevron}
+    <span class="site-avatar-item-copy">
+      <span class="site-avatar-item-label">${label}</span>
+      ${descHtml}
+    </span>
+    ${chevron}
   </${tag}>`;
 }
 
+function postAdCategory(selection) {
+  return escapeAttr(JSON.stringify({ ...selection, v: CAT_STORAGE_VERSION }));
+}
+
 function fiokMenuInnerHtml() {
+  const carPick = postAdCategory({
+    vertical: "auto",
+    subtype: "szemelyauto",
+    label: "Személyautó",
+  });
+  const truckLight = postAdCategory({
+    vertical: "teher",
+    subtype: "kisteher",
+    label: "Kisteher 3,5 t-ig",
+  });
+  const truckHeavy = postAdCategory({
+    vertical: "teher",
+    subtype: "teherauto",
+    label: "Teherautó 3,5 t-tól",
+  });
+
   return `
     <div class="site-avatar-sheet-head">
       <button type="button" class="site-avatar-sheet-back" data-avatar-close aria-label="Vissza">
@@ -47,17 +83,45 @@ function fiokMenuInnerHtml() {
     <p class="site-avatar-guest" data-avatar-guest>A menühöz jelentkezz be.</p>
     <div data-avatar-member hidden>
       <div class="site-avatar-card">
-        ${row(null, ICONS.photo, "Profilkép", 'data-avatar-photo-btn')}
+        ${row(null, ICONS.photo, "Profilkép", { extra: "data-avatar-photo-btn" })}
         <input type="file" accept="image/jpeg,image/png,image/webp" data-avatar-file hidden />
-        ${row("/beallitasok.html?szekcio=uzenetek", ICONS.messages, "Üzenetek")}
-        ${row("/beallitasok.html?szekcio=keresesek", ICONS.star, "Mentett kereséseim")}
-        ${row("/beallitasok.html?szekcio=parkolo", ICONS.heart, "Kedvencek")}
+        ${row("/import.html", ICONS.import, "Autóimport", {
+          desc: "Saját hirdetések importja a hasznaltauto.hu-ról (a mobilappban már működik).",
+        })}
+        ${row("/beallitasok.html?szekcio=nyomtatasok", ICONS.print, "Nyomtatások", {
+          desc: "Ártábla és adásvételi szerződés nyomtatása.",
+        })}
+        ${row("/beallitasok.html?szekcio=ertekelesek", ICONS.rating, "Értékelések", {
+          desc: "Más felhasználók értékelései az autóinkról és a kereskedésről.",
+        })}
+        ${row("/hirdetesfeladas.html?continue=1", ICONS.car, "Autó hozzáadása", {
+          desc: "Új személyautó hirdetés feladása.",
+          extra: `data-post-ad-category="${carPick}"`,
+        })}
+        <div class="site-avatar-subwrap">
+          ${row(null, ICONS.truck, "Teherautó hozzáadása", {
+            desc: "Új teherautó hirdetés feladása.",
+            extra: 'data-avatar-subtoggle aria-expanded="false"',
+            chevron: ICONS.chevronDown,
+          })}
+          <div class="site-avatar-sub" data-avatar-sub hidden>
+            <a class="site-avatar-subitem" href="/hirdetesfeladas.html?continue=1" role="menuitem" data-post-ad-category="${truckLight}">Teherautó 3,5-ig</a>
+            <a class="site-avatar-subitem" href="/hirdetesfeladas.html?continue=1" role="menuitem" data-post-ad-category="${truckHeavy}">Teherautó 3,5-tól</a>
+          </div>
+        </div>
+        <div class="site-avatar-item site-avatar-item--plain" role="presentation">
+          <span class="site-avatar-item-icon">${ICONS.star}</span>
+          <span class="site-avatar-item-copy">
+            <span class="site-avatar-item-label">Kiemelések</span>
+            <span class="site-avatar-item-desc">Később a hirdetések kiemelésére — egyelőre csak tájékoztató.</span>
+          </span>
+        </div>
+        ${row("/beallitasok.html?szekcio=parkolo", ICONS.heart, "Parkoló", {
+          desc: "Érdekes hirdetések, amelyekkel később foglalkoznál (kedvencek).",
+        })}
         ${row("/beallitasok.html?szekcio=hirdetes", ICONS.car, "Saját hirdetések")}
-        ${row("/import.html", ICONS.import, "Autóimport")}
-        ${row("/beallitasok.html?szekcio=megjelenes", ICONS.photo, "Megjelenés")}
+        ${row("/beallitasok.html?szekcio=uzenetek", ICONS.messages, "Üzenetek")}
         ${row("/beallitasok.html?szekcio=fiok", ICONS.settings, "Beállítások")}
-        ${row("/beallitasok.html?szekcio=nyomtatasok", ICONS.print, "Nyomtatások")}
-        ${row("/beallitasok.html?szekcio=ertekelesek", ICONS.rating, "Értékelések")}
       </div>
       <div class="site-avatar-footer">
         <p class="site-avatar-logged">Bejelentkezve mint <strong data-avatar-user>—</strong></p>
@@ -197,10 +261,10 @@ function ensureFiokMarkup(wrap) {
     dropdown.hidden = true;
     wrap.appendChild(dropdown);
   }
-  if (dropdown.dataset.fiokMenu === "1") return;
+  if (dropdown.dataset.fiokMenu === "dealerMenu4") return;
   dropdown.classList.add("site-avatar-dropdown--fiok");
   dropdown.innerHTML = fiokMenuInnerHtml();
-  dropdown.dataset.fiokMenu = "1";
+  dropdown.dataset.fiokMenu = "dealerMenu4";
 }
 
 export function refreshAvatarMenuUi(root = document) {
@@ -285,6 +349,39 @@ function bindWrap(wrap) {
       closeMenu(wrap);
       return;
     }
+
+    const subToggle = event.target.closest("[data-avatar-subtoggle]");
+    if (subToggle && wrap.contains(subToggle)) {
+      event.preventDefault();
+      event.stopPropagation();
+      const group = subToggle.closest(".site-avatar-subwrap");
+      const sub = group?.querySelector("[data-avatar-sub]");
+      if (!sub) return;
+      const open = sub.hidden;
+      wrap.querySelectorAll("[data-avatar-sub]").forEach((el) => {
+        el.hidden = true;
+      });
+      wrap.querySelectorAll("[data-avatar-subtoggle]").forEach((el) => {
+        el.setAttribute("aria-expanded", "false");
+      });
+      if (open) {
+        sub.hidden = false;
+        subToggle.setAttribute("aria-expanded", "true");
+      }
+      return;
+    }
+
+    const postAd = event.target.closest("[data-post-ad-category]");
+    if (postAd && wrap.contains(postAd)) {
+      try {
+        const raw = postAd.getAttribute("data-post-ad-category") || "";
+        const parsed = JSON.parse(raw);
+        sessionStorage.setItem(CAT_STORAGE_KEY, JSON.stringify(parsed));
+      } catch {
+        /* ignore */
+      }
+    }
+
     const photoBtn = event.target.closest("[data-avatar-photo-btn]");
     if (!photoBtn || !wrap.contains(photoBtn)) return;
     event.preventDefault();

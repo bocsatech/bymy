@@ -48,6 +48,10 @@ body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-a
   background: #eceff3;
 }
 
+body[data-site-page="auto"] .auto-search-tabs {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
 .auto-search-tab {
   display: flex;
   align-items: center;

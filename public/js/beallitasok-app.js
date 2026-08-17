@@ -909,10 +909,6 @@ export async function initSettingsPage() {
   });
 
   const fileInput = document.getElementById("settings-avatar-file");
-  document.querySelector("[data-mm-photo]")?.addEventListener("click", () => {
-    setSection("fiok");
-    fileInput?.click();
-  });
   document.getElementById("settings-avatar-upload")?.addEventListener("click", () => fileInput?.click());
   document.getElementById("settings-avatar-remove")?.addEventListener("click", () => {
     const map = readPhotos();

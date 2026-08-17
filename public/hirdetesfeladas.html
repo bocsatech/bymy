@@ -21,6 +21,11 @@
             } catch (e2) {}
           }
           document.documentElement.setAttribute("data-auth", loggedIn ? "member" : "guest");
+          if (!loggedIn) {
+            var next = location.pathname + location.search;
+            location.replace("/belepes.html?next=" + encodeURIComponent(next));
+            return;
+          }
           var first = "";
           if (user) {
             first = String((user.profile && user.profile.firstName) || "").trim();
@@ -45,6 +50,7 @@
           }
         } catch (e) {
           document.documentElement.setAttribute("data-auth", "guest");
+          location.replace("/belepes.html?next=" + encodeURIComponent(location.pathname + location.search));
         }
       })();
     </script>
@@ -1030,7 +1036,7 @@
     </main>
 
     <script src="/js/site-avatar-menu.js?v=dealerMenu5" type="module"></script>
-    <script src="/js/app.js?v=priceBox2" type="module"></script>
+    <script src="/js/app.js?v=authPost1" type="module"></script>
       <script src="/js/nav-counts.js?v=willhabenHdr1" type="module"></script>
       <script src="/js/theme.js?v=willhabenHdr1" type="module"></script>
 </body>

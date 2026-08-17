@@ -4,13 +4,15 @@ import { initTireSizes } from "./tire-sizes-ui.js";
 import { initPhoneLanguages } from "./phone-lang-ui.js";
 import { initCategoryPicker } from "./category-picker.js?v=catPick20260817a";
 import {
-  refreshAuthSession,
+  requireAuthForPage,
   getAuthUser,
   loginUrl,
   initSiteAuth,
 } from "./site-auth.js";
 
-await refreshAuthSession();
+if (!(await requireAuthForPage())) {
+  throw new Error("Belépés szükséges");
+}
 initSiteAuth();
 
 const adForm = document.getElementById("ad-form");

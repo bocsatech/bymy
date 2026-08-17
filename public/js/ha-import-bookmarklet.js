@@ -91,12 +91,33 @@
     return "";
   }
 
+  function selectedText(el) {
+    if (!el) return "";
+    const tag = (el.tagName || "").toUpperCase();
+    if (tag === "SELECT") {
+      const opt = el.selectedOptions && el.selectedOptions[0] ? el.selectedOptions[0] : el.querySelector("option[selected]");
+      const t = clean((opt && (opt.textContent || opt.value)) || el.value || "");
+      if (/^v[aá]lasszon|^-$|^nincs/i.test(t)) return "";
+      return t;
+    }
+    if (tag === "INPUT" || tag === "TEXTAREA") return clean(el.value || "");
+    const inner = el.querySelector && el.querySelector("select, input, textarea");
+    if (inner) return selectedText(inner);
+    return textOf(el);
+  }
+
   function addPair(map, rawKey, rawValue) {
     const key = clean(rawKey).replace(/:$/, "");
     const value = clean(rawValue);
-    if (!key || !value || key.length > 80 || value.length > 500) return;
+    if (!key || !value || key.length > 80 || value.length > 200) return;
+    if (/válasszon/i.test(value)) return;
+    if (value.length > 70 && value.split(/\s+/).length > 6) return;
     if (/^(ár|ar|költségek|altalanos adatok|muszaki adatok|felszereltseg|felszereltség|hiba!?)$/i.test(key)) return;
-    if (!map[key] || map[key].length < value.length) map[key] = value;
+    const existing = map[key];
+    const isName = /m[aá]rka|gy[aá]rtm[aá]ny|modell/i.test(key);
+    if (!existing || (isName && existing.length > value.length) || (!isName && existing.length < value.length)) {
+      map[key] = value;
+    }
   }
 
   function extractMap(doc) {
@@ -109,11 +130,11 @@
         if (keyCell) {
           const valueCell = keyCell.nextElementSibling;
           if (valueCell) {
-            addPair(map, textOf(keyCell), textOf(valueCell));
+            addPair(map, textOf(keyCell), selectedText(valueCell));
             continue;
           }
         }
-        addPair(map, textOf(cells[0]), textOf(cells[cells.length - 1]));
+        addPair(map, textOf(cells[0]), selectedText(cells[cells.length - 1]));
       }
     };
     for (const table of doc.querySelectorAll(
@@ -125,13 +146,24 @@
       const keyCell = row.querySelector("td.bal.pontos, td.pontos, th.pontos, .bal.pontos");
       if (!keyCell) continue;
       const valueCell = keyCell.nextElementSibling;
-      if (valueCell) addPair(map, textOf(keyCell), textOf(valueCell));
+      if (valueCell) addPair(map, textOf(keyCell), selectedText(valueCell));
     }
     for (const dl of doc.querySelectorAll("dl")) {
       for (const dt of dl.querySelectorAll("dt")) {
         const dd = dt.nextElementSibling;
-        if (dd && dd.tagName === "DD") addPair(map, textOf(dt), textOf(dd));
+        if (dd && dd.tagName === "DD") addPair(map, textOf(dt), selectedText(dd));
       }
+    }
+    for (const el of doc.querySelectorAll("select, input, textarea")) {
+      const name = clean(el.name || el.id || "");
+      const labelEl = el.labels && el.labels[0];
+      const row = el.closest("tr, .form-group, .form-row, li, .mezo, [class*='field']");
+      const label = textOf(labelEl) || textOf(row && row.querySelector("label, td.bal, td.pontos, th, dt")) || name;
+      const value = selectedText(el);
+      if (!value) continue;
+      addPair(map, label, value);
+      if (/marka|gyartmany|brand/i.test(name)) addPair(map, "Márka", value);
+      if (/^modell|model/i.test(name) && !/tipus/i.test(name)) addPair(map, "Modell", value);
     }
     const body = doc.body?.innerText || doc.body?.textContent || "";
     for (const line of body.split("\n")) {
@@ -169,8 +201,11 @@
   function extractFromDoc(doc, href) {
     const map = extractMap(doc);
     const title = pickTitle(doc) || fieldFromMap(map, ["Cím", "Hirdetés címe"]);
-    const brand = fieldFromMap(map, ["Márka", "Gyártmány"]) || title.split(/\s+/).filter(Boolean)[0] || "";
-    const model = fieldFromMap(map, ["Modell"]) || title.split(/\s+/).filter(Boolean)[1] || "";
+    const brandRaw = fieldFromMap(map, ["Márka", "Gyártmány"]) || "";
+    const modelRaw = fieldFromMap(map, ["Modell"]) || "";
+    const titleParts = title.split(/\s+/).filter(Boolean);
+    const brand = isChromeName(brandRaw) ? (isChromeName(titleParts[0]) ? "" : titleParts[0] || "") : brandRaw;
+    const model = isChromeName(modelRaw) ? "" : modelRaw;
     const price =
       fieldFromMap(map, ["Vételár", "Hirdetési ár", "Ár"]) ||
       ((doc.body?.innerText || doc.body?.textContent || "").match(/(\d[\d\s.]{3,})\s*Ft/i) || [])[1] ||
@@ -192,8 +227,8 @@
       km,
       year,
       fuel,
-      brand: isChromeName(brand) ? "" : brand,
-      model: isChromeName(model) ? "" : model,
+      brand: isChromeName(brand) || /^a$/i.test(brand) ? "" : brand,
+      model: isChromeName(model) || /^a$/i.test(model) ? "" : model,
       map,
       bodyText: String(doc.body?.innerText || doc.body?.textContent || "").slice(0, 20000),
     };

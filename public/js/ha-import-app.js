@@ -56,7 +56,7 @@ function setMode(mode) {
 
 function bookmarkletHref(mode) {
   const origin = location.origin;
-  const src = `${origin}/js/ha-import-bookmarklet.js?v=haImp1`;
+  const src = `${origin}/js/ha-import-bookmarklet.js?v=haImp2`;
   return `javascript:(function(){var o=${JSON.stringify(origin)};var m=${JSON.stringify(mode)};function go(){window.BymyHaImport.run({origin:o,mode:m});}if(window.BymyHaImport){go();return;}var s=document.createElement('script');s.src=${JSON.stringify(src)};s.onload=go;s.onerror=function(){alert('A hasznaltauto.hu blokkolta a Bymy scriptet. Másold a hirdetés URL-jét a Bymy Autóimport oldalra.');};document.documentElement.appendChild(s);})();`;
 }
 
@@ -146,6 +146,34 @@ async function postExtracted(payload) {
   return data.result;
 }
 
+function isHaUrl(value) {
+  try {
+    return new URL(value).hostname.replace(/^www\./, "").toLowerCase().includes("hasznaltauto.hu");
+  } catch {
+    return false;
+  }
+}
+
+function isPublicListingUrl(value) {
+  try {
+    const url = new URL(value);
+    const host = url.hostname.replace(/^www\./, "").toLowerCase();
+    return host === "hasznaltauto.hu" && /\/szemelyauto\/.+-\d{5,}$/i.test(url.pathname);
+  } catch {
+    return false;
+  }
+}
+
+function promptHaBookmark(url) {
+  if (url) window.open(url, "bymy-ha-site");
+  setStatus(
+    currentMode() === "dealer"
+      ? "Az admin / járműlista oldalt a szerver nem látja. A megnyílt hasznaltauto fülön kattints a „Lista importálása” könyvjelzőre."
+      : "A gyorsnézetet a szerver nem látja. A megnyílt hasznaltauto fülön kattints a „Hirdetés importálása” könyvjelzőre.",
+    "err"
+  );
+}
+
 async function runUrlImport() {
   const input = document.getElementById("ha-imp-url");
   const raw = String(input?.value ?? "").trim();
@@ -153,12 +181,17 @@ async function runUrlImport() {
     setStatus("Illeszd be a hasznaltauto.hu hirdetés URL-jét.", "err");
     return;
   }
+  const urls = raw
+    .split(/[\s,;]+/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+  const needsBrowser = urls.find((item) => isHaUrl(item) && !isPublicListingUrl(item));
+  if (needsBrowser) {
+    promptHaBookmark(needsBrowser);
+    return;
+  }
   setStatus("Hirdetés beolvasása…");
   try {
-    const urls = raw
-      .split(/[\s,;]+/)
-      .map((item) => item.trim())
-      .filter(Boolean);
     const result = await postExtracted({
       urls,
       mode: currentMode(),
@@ -167,7 +200,12 @@ async function runUrlImport() {
     setStatus("");
     renderResult(result);
   } catch (error) {
-    setStatus(error.message ?? "Import sikertelen.", "err");
+    const message = error.message ?? "Import sikertelen.";
+    if (/Cloudflare|gyorsnézet|járműlist|admin/i.test(message) && urls[0]) {
+      promptHaBookmark(urls[0]);
+      return;
+    }
+    setStatus(message, "err");
   }
 }
 

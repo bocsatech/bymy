@@ -7,7 +7,6 @@ import {
   initHomeSearchSidebar,
   initHomeFilterCatalog,
 } from "./home-search-filter.js";
-import { filterByQuickPreset, initHomeQuickFilters } from "./home-quick-filters.js";
 import { initHomeQuickSearch } from "./home-quicksearch.js";
 import { filterByCategory, initHomeCategoryBar } from "./home-category-bar.js";
 import { initHomeUnifiedScroll } from "./home-unified-scroll.js";
@@ -21,9 +20,7 @@ const LISTINGS_FETCH_LIMIT = 500;
 
 let allItems = [];
 let sidebarFilters = emptyFilters();
-let quickPreset = null;
 let categoryFilter = null;
-let quickFilterUi = null;
 let categoryUi = null;
 let statsUi = null;
 let statsFilter = null;
@@ -38,7 +35,6 @@ function sortForHome(items) {
 
 function filterItems(items) {
   let result = filterListingsBySidebar(items, sidebarFilters);
-  result = filterByQuickPreset(result, quickPreset);
   result = filterByCategory(result, categoryFilter);
   if (statsFilter) {
     result = result.filter((item) => statsFilter.listingIds.has(item.id));
@@ -119,25 +115,9 @@ function hasActiveSidebarFilters(filters) {
 
 initHomeUnifiedScroll();
 
-quickFilterUi = initHomeQuickFilters({
-  onChange: (preset) => {
-    quickPreset = preset;
-    if (preset) {
-      categoryUi?.clear();
-      categoryFilter = null;
-    }
-    applyFilters();
-  },
-  getForm: () => filterForm,
-});
-
 categoryUi = initHomeCategoryBar({
   onChange: (category) => {
     categoryFilter = category;
-    if (category) {
-      quickPreset = null;
-      quickFilterUi?.clear();
-    }
     applyFilters();
   },
   getForm: () => filterForm,
@@ -150,8 +130,6 @@ categoryUi = initHomeCategoryBar({
 initHomeQuickSearch({
   onSearch: (values) => {
     sidebarFilters = { ...emptyFilters(), ...values };
-    quickPreset = null;
-    quickFilterUi?.clear();
     categoryUi?.clear();
     categoryFilter = null;
     applyFilters();
@@ -169,8 +147,6 @@ statsUi = initHomeStatsBar({
 const readSidebarFilters = initHomeSearchSidebar((filters) => {
   sidebarFilters = filters;
   if (hasActiveSidebarFilters(filters)) {
-    quickPreset = null;
-    quickFilterUi?.clear();
     categoryUi?.clear();
     categoryFilter = null;
   }
@@ -181,8 +157,6 @@ sidebarFilters = readSidebarFilters?.() ?? emptyFilters();
 initHomeFilterCatalog(() => {
   sidebarFilters = readSidebarFilters?.() ?? emptyFilters();
   if (hasActiveSidebarFilters(sidebarFilters)) {
-    quickPreset = null;
-    quickFilterUi?.clear();
     categoryUi?.clear();
     categoryFilter = null;
   }

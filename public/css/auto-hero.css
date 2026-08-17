@@ -10,6 +10,10 @@
  * Háttérkép: auto.html → [data-auto-hero-image] src
  */
 
+body.home-page[data-site-page="auto"] .home-layout.site-layout {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 body.home-page[data-site-page="auto"] .home-main,
 body.home-page[data-site-page="auto"] .home-ad-strip-inner {
   max-width: 1120px;

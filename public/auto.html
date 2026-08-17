@@ -64,7 +64,7 @@
 
     <link rel="stylesheet" href="/css/site-app.css?v=mobileStable2" />    <link rel="stylesheet" href="/css/site-side.css?v=home20260725unifiedscroll" />
     <link rel="stylesheet" href="/css/home.css?v=autoNoStats1" />
-    <link rel="stylesheet" href="/css/auto-hero.css?v=autoHeroMore2" />
+    <link rel="stylesheet" href="/css/auto-hero.css?v=hideSidebar1" />
     <style id="home-scroll-fix">
       /* Inline: cache-biztos — a teljes oldal görget, külön görgetősáv nincs sehol. */
       html:has(body.home-page) {
@@ -341,129 +341,7 @@
       </section>
 
       <div class="site-layout home-layout">
-        <aside class="site-side site-side--left home-info-sidebar" data-site-side="left" aria-label="Hasznos információ">
-          <section
-            class="home-partner-rec is-collapsed"
-            id="home-partner-recommendations"
-            aria-labelledby="home-partner-rec-title"
-          >
-            <button
-              type="button"
-              class="home-partner-rec-toggle"
-              id="home-partner-rec-toggle"
-              aria-expanded="false"
-              aria-controls="home-partner-rec-body"
-            >
-              <span class="home-partner-rec-title" id="home-partner-rec-title">Szolgáltatók a közeledben</span>
-              <span class="home-partner-rec-chevron" aria-hidden="true"></span>
-            </button>
-            <div class="home-partner-rec-body" id="home-partner-rec-body" hidden>
-            <p class="home-partner-rec-lead">Add meg az irányítószámod, és ajánlunk fizetős partnereket 30 km-en belül.</p>
-            <form id="home-partner-postal-form" class="home-partner-postal-form">
-              <label class="home-partner-postal-field">
-                <span class="home-partner-postal-label">Irányítószám</span>
-                <input
-                  id="home-partner-postal-input"
-                  class="home-partner-postal-input"
-                  type="text"
-                  inputmode="numeric"
-                  maxlength="4"
-                  pattern="[0-9]{4}"
-                  placeholder="pl. 8000"
-                  required
-                  autocomplete="postal-code"
-                />
-              </label>
-              <button type="submit" class="home-partner-postal-btn">Ajánlások</button>
-            </form>
-            <p id="home-partner-postal-status" class="home-partner-postal-status" hidden></p>
-            <div id="home-partner-results" class="home-partner-results" hidden></div>
-            </div>
-          </section>
-
-          <section
-            class="home-valuation-rec is-collapsed"
-            id="home-valuation"
-            aria-labelledby="home-valuation-title"
-          >
-            <button
-              type="button"
-              class="home-valuation-toggle"
-              id="home-valuation-toggle"
-              aria-expanded="false"
-              aria-controls="home-valuation-body"
-            >
-              <span class="home-valuation-title" id="home-valuation-title">Értékbecslő</span>
-              <span class="home-valuation-chevron" aria-hidden="true"></span>
-            </button>
-            <div class="home-valuation-body" id="home-valuation-body" hidden>
-              <p class="home-valuation-lead">Gyártmány és típus a listából — átlagár a mentett hirdetésekből.</p>
-              <form id="home-valuation-form" class="home-valuation-form">
-                <label class="home-valuation-field">
-                  <span class="home-valuation-label">Gyártmány</span>
-                  <select id="valuation-gyartmany" name="gyartmany" required>
-                    <option value="">Válassz gyártmányt</option>
-                  </select>
-                </label>
-                <label class="home-valuation-field">
-                  <span class="home-valuation-label">Típus</span>
-                  <select id="valuation-modell" name="modell">
-                    <option value="">Előbb válassz gyártmányt</option>
-                  </select>
-                </label>
-                <label class="home-valuation-field">
-                  <span class="home-valuation-label">Évjárat</span>
-                  <select id="valuation-ev" name="gyartasi_ev">
-                    <option value="">Mindegy</option>
-                  </select>
-                </label>
-                <label class="home-valuation-field" hidden>
-                  <span class="home-valuation-label">Részletes típus</span>
-                  <select id="valuation-tipus" name="tipus">
-                    <option value="">Mindegy</option>
-                  </select>
-                </label>
-                <label class="home-valuation-field">
-                  <span class="home-valuation-label">Futott km</span>
-                  <input
-                    name="km"
-                    type="number"
-                    min="0"
-                    step="1000"
-                    placeholder="120 000"
-                    inputmode="numeric"
-                  />
-                </label>
-                <button type="submit" class="home-valuation-btn">Átlagár</button>
-              </form>
-              <p id="home-valuation-status" class="home-valuation-status" hidden></p>
-              <div id="home-valuation-result" class="home-valuation-result" hidden></div>
-            </div>
-          </section>
-
-          <div class="site-side-card home-info-card">
-            <h2 class="site-side-title" data-side-title>Hasznos információ</h2>
-            <div class="site-video-list" data-side-videos></div>
-            <div class="home-trust-block">
-              <h3 class="home-trust-title">Miért Bymy?</h3>
-              <ul class="home-trust-list">
-                <li>Átlátható árak</li>
-                <li>Friss hirdetések</li>
-                <li>Egyszerű keresés</li>
-              </ul>
-              <a class="home-trust-link" href="/import.html">Vásárlási checklist →</a>
-            </div>
-          </div>
-        </aside>
-
         <section class="site-center home-center" aria-label="Hirdetések">
-          <div class="home-quick-filters" role="group" aria-label="Gyors szűrők">
-            <button type="button" class="home-quick-pill" data-quick-preset="under10m">10 M Ft alatt</button>
-            <button type="button" class="home-quick-pill" data-quick-preset="lowKm">Alacsony km</button>
-            <button type="button" class="home-quick-pill" data-quick-preset="hybridEv">Hibrid &amp; EV</button>
-            <button type="button" class="home-quick-pill" data-quick-preset="fresh">Frissen feladott</button>
-            <button type="button" class="home-quick-pill" data-quick-preset="firstCar">Első autó</button>
-          </div>
           <div class="home-listings-panel">
             <div id="home-grid-track" class="home-grid-track" role="list"></div>
             <p id="home-empty" class="home-empty" hidden>
@@ -508,9 +386,7 @@
       </div>
     </footer>
 
-    <script src="/js/partner-recommendations-init.js?v=ajanlasMobile1" type="module"></script>
-    <script src="/js/home-valuation-init.js?v=carCatalog1" type="module"></script>
-    <script src="/js/home-app.js?v=qsMore1" type="module"></script>
+    <script src="/js/home-app.js?v=hideSidebar1" type="module"></script>
     <script src="/js/auto-hero.js?v=heroSettings1" type="module"></script>
     <script src="/js/site-avatar-menu.js?v=megjelenesFix1" type="module"></script>
 

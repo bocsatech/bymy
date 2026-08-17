@@ -3032,7 +3032,7 @@ body.site-app .mm-shell {
   margin: 0 auto;
   padding: 1.25rem 1rem 3rem;
   display: grid;
-  grid-template-columns: 250px minmax(0, 1fr);
+  grid-template-columns: 300px minmax(0, 1fr);
   gap: 1.1rem;
   align-items: start;
 }
@@ -3044,6 +3044,23 @@ body.site-app .mm-side {
   padding: 1rem 0.85rem 1.1rem;
   position: sticky;
   top: 0.75rem;
+}
+
+body.site-app .mm-side--cats {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  box-shadow: none;
+}
+
+body.site-app .mm-side--cats .category-picker {
+  max-width: none;
+  padding: 0;
+}
+
+body.site-app .mm-side--cats .mm-side-kicker,
+body.site-app .mm-side--cats .mm-side-title {
+  padding: 0 0.15rem;
 }
 
 body.site-app .mm-side-kicker {
@@ -4428,6 +4445,11 @@ html[data-theme="dark"] body.site-app main,
 html[data-theme="dark"] body.site-app .mm-shell,
 html[data-theme="dark"] body.site-app .mm-main {
   color: #e8eaed;
+}
+
+html[data-theme="dark"] body.site-app .mm-side--cats {
+  background: transparent;
+  border: 0;
 }
 
 html[data-theme="dark"] body.site-app .mm-side,

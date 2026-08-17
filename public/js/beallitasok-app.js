@@ -28,6 +28,7 @@ import {
 import { initMessagesUi } from "./messages-ui.js?v=messagesWh2";
 import { listConversations } from "./messages-api.js?v=messagesWh2";
 import { initMyAdsPanel } from "./my-ads.js?v=myAds1";
+import { initCategoryPicker } from "./category-picker.js?v=catPick20260817a";
 
 const PHOTO_KEY = "bymy-avatar-photos";
 const NOTIFY_KEY = "bymy-notify-prefs";
@@ -784,6 +785,14 @@ export async function initSettingsPage() {
   if (hello) hello.textContent = getDisplayName() || user.email.split("@")[0];
 
   setSection(currentSection());
+  initCategoryPicker({
+    onVehicleSelected: () => {
+      window.location.href = "/hirdetesfeladas.html?continue=1";
+    },
+    onIngatlanSelected: () => {
+      window.location.href = "/hirdetesfeladas.html?continue=1";
+    },
+  });
   await refreshStats(user.email);
   renderPark(user.email);
   renderSearches(user.email);

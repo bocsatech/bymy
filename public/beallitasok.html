@@ -57,7 +57,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/css/style.css?v=auth20260725" />
-    <link rel="stylesheet" href="/css/site-app.css?v=fiokSplit1" />
+    <link rel="stylesheet" href="/css/site-app.css?v=fiokSplit2" />
+    <link rel="stylesheet" href="/css/category-picker.css?v=fiokSplit2" />
   </head>
   <body class="site-app settings-page mm-page" data-site-page="beallitasok" data-auth-init="manual">
     <div class="local-banner">Bymy — Fiókom · user DB: ~/.bymy/ · v=localdb9</div>
@@ -105,28 +106,80 @@
     </header>
 
     <main class="mm-shell">
-      <aside class="mm-side" aria-label="Fiók menü">
+      <aside class="mm-side mm-side--cats" aria-label="Hirdetés menü">
         <p class="mm-side-kicker">Fiókom</p>
         <h1 class="mm-side-title">Üdv, <span data-mm-hello>—</span></h1>
-        <nav class="mm-nav">
-          <a class="mm-nav-link" href="?szekcio=import" data-mm-nav="import">Autóimport</a>
-          <a class="mm-nav-link" href="?szekcio=nyomtatasok" data-mm-nav="nyomtatasok">Nyomtatások</a>
-          <a class="mm-nav-link" href="?szekcio=ertekelesek" data-mm-nav="ertekelesek">Értékelések</a>
-          <a class="mm-nav-link" href="/hirdetesfeladas.html?continue=1" data-post-ad-category='{"vertical":"auto","subtype":"szemelyauto","label":"Személyautó","v":2}'>Autó hozzáadása</a>
-          <div class="mm-nav-group">
-            <button type="button" class="mm-nav-link mm-nav-toggle" data-mm-subtoggle aria-expanded="false">Teherautó hozzáadása</button>
-            <div class="mm-nav-sub" data-mm-sub hidden>
-              <a class="mm-nav-sublink" href="/hirdetesfeladas.html?continue=1" data-post-ad-category='{"vertical":"teher","subtype":"kisteher","label":"Kisteher 3,5 t-ig","v":2}'>Teherautó 3,5-ig</a>
-              <a class="mm-nav-sublink" href="/hirdetesfeladas.html?continue=1" data-post-ad-category='{"vertical":"teher","subtype":"teherauto","label":"Teherautó 3,5 t-tól","v":2}'>Teherautó 3,5-tól</a>
-            </div>
+        <div id="category-picker" class="category-picker mm-cat-picker" aria-label="Hirdetés kategória">
+          <div class="cp-stack" role="list">
+            <section class="cp-group" data-accent="car" data-group="auto" role="listitem">
+              <button type="button" class="cp-group-toggle" data-pick='{"vertical":"auto","subtype":"szemelyauto","label":"Személyautó"}' aria-expanded="false">
+                <img class="cp-group-thumb" src="/images/categories/benzin.jpg" alt="" width="52" height="52" />
+                <span class="cp-group-copy">
+                  <strong>Autó hirdetés</strong>
+                  <span>Személyautó</span>
+                </span>
+                <svg class="cp-chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+            </section>
+
+            <section class="cp-group" data-accent="truck" data-group="teher" role="listitem">
+              <button type="button" class="cp-group-toggle" data-toggle-group="teher" aria-expanded="false">
+                <img class="cp-group-thumb" src="/images/categories/diesel.png" alt="" width="52" height="52" />
+                <span class="cp-group-copy">
+                  <strong>Teherautó hirdetés</strong>
+                  <span>Kisteher és teherautó</span>
+                </span>
+                <svg class="cp-chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+              <div class="cp-group-body" data-group-body="teher">
+                <button type="button" class="cp-option" data-pick='{"vertical":"teher","subtype":"kisteher","label":"Kisteher 3,5 t-ig"}'>
+                  <span class="cp-option-bar" aria-hidden="true"></span>
+                  <span class="cp-option-copy">
+                    <strong>Kisteher 3,5 t-ig</strong>
+                    <span>Max. 3,5 tonna</span>
+                  </span>
+                </button>
+                <button type="button" class="cp-option" data-pick='{"vertical":"teher","subtype":"teherauto","label":"Teherautó 3,5 t-tól"}'>
+                  <span class="cp-option-bar" aria-hidden="true"></span>
+                  <span class="cp-option-copy">
+                    <strong>Teherautó 3,5 t-tól</strong>
+                    <span>3,5 tonnától</span>
+                  </span>
+                </button>
+              </div>
+            </section>
+
+            <section class="cp-group" data-accent="immo" data-group="ingatlan" role="listitem">
+              <button type="button" class="cp-group-toggle" data-toggle-group="ingatlan" aria-expanded="false">
+                <span class="cp-group-thumb cp-group-thumb--icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none"><path d="M4.5 11.5 12 5l7.5 6.5" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M7 10.8V19h10v-8.2" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M10 19v-4.5h4V19" stroke="currentColor" stroke-width="1.7"/></svg>
+                </span>
+                <span class="cp-group-copy">
+                  <strong>Ingatlan hirdetések</strong>
+                  <span>Eladó, kiadó, kategóriák</span>
+                </span>
+                <svg class="cp-chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+              <div class="cp-group-body" data-group-body="ingatlan">
+                <div class="cp-immo-rows">
+                  <button type="button" class="cp-immo-row" data-open-sheet="tipus">
+                    <strong>Típus</strong>
+                    <span class="cp-immo-row-value"><span data-immo-tipus-label>Mindegy</span>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </span>
+                  </button>
+                  <button type="button" class="cp-immo-row" data-open-sheet="kategoria">
+                    <strong>Kategória</strong>
+                    <span class="cp-immo-row-value"><span data-immo-kat-label>Mindegy</span>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </span>
+                  </button>
+                </div>
+                <button type="button" class="cp-immo-continue" data-immo-continue>Tovább az ingatlan feladáshoz</button>
+              </div>
+            </section>
           </div>
-          <p class="mm-nav-plain">Kiemelések</p>
-          <a class="mm-nav-link" href="?szekcio=parkolo" data-mm-nav="parkolo">Parkoló</a>
-          <a class="mm-nav-link" href="?szekcio=keresesek" data-mm-nav="keresesek">Mentett kereséseim</a>
-          <a class="mm-nav-link" href="?szekcio=uzenetek" data-mm-nav="uzenetek">Üzenetek <span class="mm-nav-badge" data-mm-msg-count hidden>0</span></a>
-          <a class="mm-nav-link" href="?szekcio=megjelenes" data-mm-nav="megjelenes">Megjelenés</a>
-          <a class="mm-nav-link" href="?szekcio=fiok" data-mm-nav="fiok">Beállítások</a>
-        </nav>
+        </div>
         <button type="button" class="mm-side-logout" data-auth-logout>Kijelentkezés</button>
       </aside>
 
@@ -522,9 +575,9 @@
       </div>
     </main>
 
-    <script src="/js/site-avatar-menu.js?v=fiokSplit1" type="module"></script>
-    <script src="/js/ha-import-app.js?v=fiokSplit1" type="module"></script>
-    <script src="/js/beallitasok-app.js?v=fiokSplit1" type="module"></script>
+    <script src="/js/site-avatar-menu.js?v=fiokSplit2" type="module"></script>
+    <script src="/js/ha-import-app.js?v=fiokSplit2" type="module"></script>
+    <script src="/js/beallitasok-app.js?v=fiokSplit2" type="module"></script>
   
     <script>
       (function () {

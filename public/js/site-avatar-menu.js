@@ -85,7 +85,7 @@ function fiokMenuInnerHtml() {
       <div class="site-avatar-card">
         ${row(null, ICONS.photo, "Profilkép", { extra: "data-avatar-photo-btn" })}
         <input type="file" accept="image/jpeg,image/png,image/webp" data-avatar-file hidden />
-        ${row("/import.html", ICONS.import, "Autóimport", {
+        ${row("/beallitasok.html?szekcio=import", ICONS.import, "Autóimport", {
           desc: "Saját hirdetések importja a hasznaltauto.hu-ról.",
         })}
         ${row("/beallitasok.html?szekcio=nyomtatasok", ICONS.print, "Nyomtatások", {

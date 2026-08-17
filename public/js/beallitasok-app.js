@@ -1,6 +1,6 @@
 /**
  * Fiókom — mobile.de Mein mobile / Konto bearbeiten mintára.
- * Szekciók: attekintes | nyomtatasok | ertekelesek | parkolo | keresesek |
+ * Szekciók: attekintes | import | nyomtatasok | ertekelesek | parkolo | keresesek |
  *           uzenetek | hirdetes | megjelenes | fiok
  */
 
@@ -40,6 +40,7 @@ const HERO_MAX_BYTES = 8 * 1024 * 1024;
 const AVATAR_SIZE = 256;
 const SECTIONS = [
   "attekintes",
+  "import",
   "nyomtatasok",
   "ertekelesek",
   "parkolo",
@@ -146,8 +147,8 @@ function resizeImageFile(file) {
 }
 
 function currentSection() {
-  const raw = new URLSearchParams(window.location.search).get("szekcio") || "parkolo";
-  return SECTIONS.includes(raw) ? raw : "parkolo";
+  const raw = new URLSearchParams(window.location.search).get("szekcio") || "fiok";
+  return SECTIONS.includes(raw) ? raw : "fiok";
 }
 
 function setSection(section) {
@@ -165,6 +166,7 @@ function setSection(section) {
   document.title =
     {
       attekintes: "Áttekintés",
+      import: "Autóimport",
       nyomtatasok: "Nyomtatások",
       ertekelesek: "Értékelések",
       parkolo: "Parkoló",

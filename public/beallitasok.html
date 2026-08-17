@@ -57,7 +57,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/css/style.css?v=auth20260725" />
-    <link rel="stylesheet" href="/css/site-app.css?v=dealerMenu5" />
+    <link rel="stylesheet" href="/css/site-app.css?v=fiokSplit1" />
   </head>
   <body class="site-app settings-page mm-page" data-site-page="beallitasok" data-auth-init="manual">
     <div class="local-banner">Bymy — Fiókom · user DB: ~/.bymy/ · v=localdb9</div>
@@ -109,7 +109,7 @@
         <p class="mm-side-kicker">Fiókom</p>
         <h1 class="mm-side-title">Üdv, <span data-mm-hello>—</span></h1>
         <nav class="mm-nav">
-          <a class="mm-nav-link" href="/import.html">Autóimport</a>
+          <a class="mm-nav-link" href="?szekcio=import" data-mm-nav="import">Autóimport</a>
           <a class="mm-nav-link" href="?szekcio=nyomtatasok" data-mm-nav="nyomtatasok">Nyomtatások</a>
           <a class="mm-nav-link" href="?szekcio=ertekelesek" data-mm-nav="ertekelesek">Értékelések</a>
           <a class="mm-nav-link" href="/hirdetesfeladas.html?continue=1" data-post-ad-category='{"vertical":"auto","subtype":"szemelyauto","label":"Személyautó","v":2}'>Autó hozzáadása</a>
@@ -131,6 +131,39 @@
       </aside>
 
       <div class="mm-main">
+        <!-- Autóimport -->
+        <section class="mm-panel ha-imp-panel" data-mm-panel="import" hidden>
+          <header class="mm-panel-head">
+            <h2 class="mm-panel-title" data-ha-title>Használtautó import</h2>
+            <p class="mm-panel-lead">Hirdetéseid átvétele a hasznaltauto.hu-ról. A hasznaltauto jelszavadat nem tároljuk. Mentéshez Bymy belépés kell.</p>
+          </header>
+
+          <div class="ha-imp-modes" role="tablist">
+            <button type="button" class="ha-imp-mode is-active" data-ha-mode="standard">Használtautó import</button>
+            <button type="button" class="ha-imp-mode" data-ha-mode="dealer">Kereskedői import</button>
+          </div>
+
+          <p class="ha-imp-steps" data-ha-steps>1. Jelentkezz be  ·  2. Nyisd meg EGY autó gyorsnézetét  ·  3. Importálás</p>
+
+          <div class="ha-imp-actions">
+            <button type="button" class="settings-btn-secondary" data-ha-open>hasznaltauto.hu megnyitása</button>
+            <a class="ha-imp-bookmark" id="ha-imp-bookmark" href="#">Hirdetés importálása</a>
+            <p class="ha-imp-bookmark-hint">Húzd ezt a gombot a könyvjelzősávra. A hasznaltauto oldalon (belépés + gyorsnézet) kattints rá.</p>
+          </div>
+
+          <div class="ha-imp-url-row" data-ha-url-row>
+            <label for="ha-imp-url" data-ha-url-label>Vagy illeszd be a nyilvános hirdetés URL-jét</label>
+            <div class="ha-imp-url-fields">
+              <input id="ha-imp-url" type="url" placeholder="https://www.hasznaltauto.hu/szemelyauto/…" autocomplete="off" />
+              <button type="button" class="ha-imp-go" id="ha-imp-start" data-ha-action>Hirdetés importálása</button>
+            </div>
+          </div>
+
+          <p id="ha-imp-status" class="ha-imp-status" hidden></p>
+          <div id="ha-imp-result" class="ha-imp-result" hidden></div>
+          <p class="ha-imp-footer" data-ha-footer>A jelszavadat nem tároljuk — csak a megnyitott oldal adatait olvassuk ki.</p>
+        </section>
+
         <!-- Áttekintés -->
         <section class="mm-panel" data-mm-panel="attekintes" hidden>
           <header class="mm-panel-head">
@@ -479,8 +512,8 @@
               <div class="settings-acc-body">
                 <p class="settings-acc-hint">Hirdetéseid átvétele a hasznaltauto.hu-ról. Jelentkezz be az oldalon, nyisd meg a hirdetést vagy a listát, majd importálj.</p>
                 <div class="settings-import-actions">
-                  <a class="settings-btn-primary" href="/import.html">Használtautó import</a>
-                  <a class="settings-btn-secondary" href="/import.html?mode=dealer">Kereskedői import</a>
+                  <a class="settings-btn-primary" href="?szekcio=import">Használtautó import</a>
+                  <a class="settings-btn-secondary" href="?szekcio=import&amp;mode=dealer">Kereskedői import</a>
                 </div>
               </div>
             </details>
@@ -489,8 +522,9 @@
       </div>
     </main>
 
-    <script src="/js/site-avatar-menu.js?v=dealerMenu5" type="module"></script>
-    <script src="/js/beallitasok-app.js?v=dealerMenu5" type="module"></script>
+    <script src="/js/site-avatar-menu.js?v=fiokSplit1" type="module"></script>
+    <script src="/js/ha-import-app.js?v=fiokSplit1" type="module"></script>
+    <script src="/js/beallitasok-app.js?v=fiokSplit1" type="module"></script>
   
     <script>
       (function () {

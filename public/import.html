@@ -1,172 +1,18 @@
 <!DOCTYPE html>
 <html lang="hu">
   <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Autóimport — Bymy</title>
     <script>
       (function () {
-        try {
-          var t = localStorage.getItem("bymy-theme");
-          if (t !== "dark" && t !== "light") {
-            t = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-          }
-          document.documentElement.setAttribute("data-theme", t);
-        } catch (e) {}
-        try {
-          var raw = sessionStorage.getItem("bymy-auth-user");
-          var user = raw ? JSON.parse(raw) : null;
-          var loggedIn = !!(user && user.email);
-          if (!loggedIn) {
-            try {
-              if (localStorage.getItem("bymy-auth-token")) loggedIn = true;
-            } catch (e2) {}
-          }
-          document.documentElement.setAttribute("data-auth", loggedIn ? "member" : "guest");
-          var first = "";
-          if (user) {
-            first = String((user.profile && user.profile.firstName) || "").trim();
-            if (!first && user.displayName && String(user.displayName).indexOf("@") < 0) {
-              first = String(user.displayName).trim().split(/\s+/)[0] || "";
-            }
-            if (!first && user.email) {
-              var local = String(user.email).split("@")[0] || "";
-              first = local ? local.charAt(0).toUpperCase() + local.slice(1) : "";
-            }
-          }
-          if (first) {
-            document.addEventListener("DOMContentLoaded", function () {
-              document.querySelectorAll("span[data-auth-firstname]").forEach(function (el) {
-                el.textContent = first;
-              });
-              var letter = first.charAt(0).toUpperCase();
-              document.querySelectorAll("[data-avatar-letter]").forEach(function (el) {
-                el.textContent = letter;
-              });
-            });
-          }
-        } catch (e) {
-          document.documentElement.setAttribute("data-auth", "guest");
-        }
+        var q = new URLSearchParams(location.search);
+        q.set("szekcio", "import");
+        location.replace("/beallitasok.html?" + q.toString());
       })();
     </script>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext x='16' y='22' text-anchor='middle' font-size='14' font-family='system-ui,sans-serif' font-weight='700'%3EB%3C/text%3E%3C/svg%3E" type="image/svg+xml" />
-    <meta name="bymy-version" content="haImp1" />
-    <title>Autóimport — Bymy</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="/css/style.css?v=auth20260725" />
-    <link rel="stylesheet" href="/css/site-app.css?v=haImp2" />
   </head>
-  <body class="site-app settings-page mm-page ha-import-page" data-site-page="import" data-auth-init="manual">
-    <div class="local-banner">Bymy — Autóimport a hasznaltauto.hu-ról</div>
-
-    <header class="site-header site-app-header">
-      <div class="site-app-header-inner">
-        <div class="hub-header-top">
-        <div class="hub-header-actions site-header-actions">
-          <a class="hub-header-msg" href="/beallitasok.html?szekcio=uzenetek" data-auth-member hidden>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 6.8h9.5a2.2 2.2 0 0 1 2.2 2.2v4.2a2.2 2.2 0 0 1-2.2 2.2H10l-3.2 2.4V15.2H5A2.2 2.2 0 0 1 2.8 13V9a2.2 2.2 0 0 1 2.2-2.2Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M14.2 8.2h4A2.2 2.2 0 0 1 20.4 10.4v3.4a2.2 2.2 0 0 1-2.2 2.2h-.7v1.7l-2.2-1.7" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
-            <span>Üzenetek</span>
-          </a>
-          <div class="site-header-auth-row" data-auth-guest>
-            <a class="hub-btn hub-btn--ghost" href="/belepes.html" data-auth-login>Belépés</a>
-            <a class="hub-btn hub-btn--ghost" href="/regisztracio.html" data-auth-register>Regisztráció</a>
-          </div>
-          <div class="site-header-avatar-wrap" data-avatar-menu data-auth-member hidden>
-            <button type="button" class="site-header-profile" data-auth-avatar data-avatar-toggle aria-expanded="false" aria-haspopup="menu" aria-label="Fiók" title="Fiók">
-              <span class="site-header-avatar">
-                <span data-avatar-letter>A</span>
-                <img data-avatar-img alt="" hidden width="44" height="44" />
-              </span>
-              <span class="site-header-firstname" data-auth-firstname></span>
-              <svg class="site-header-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </button>
-            <div class="site-avatar-dropdown site-avatar-dropdown--fiok" data-avatar-dropdown role="menu" hidden></div>
-          </div>
-          <a class="hub-btn hub-btn--post" href="/hirdetesfeladas.html" data-auth-guard>+ Hirdetésfeladás</a>
-          <button type="button" class="hub-theme-toggle" data-theme-toggle aria-label="Színmód" title="Színmód"></button>
-        </div>
-        </div>
-        <div class="hub-nav-band">
-          <a class="site-app-logo" href="/" aria-label="Bymy">
-            <img class="bymy-logo-img bymy-logo-img--nav" src="/images/bymy-logo.png?v=logoUpload1" alt="Bymy.hu" width="190" height="48" decoding="async" />
-          </a>
-        <nav class="import-nav site-app-nav" aria-label="Főmenü">
-          <a class="import-nav-link" href="/">Kezdőlap</a>
-          <a class="import-nav-link" href="/auto.html">Autó</a>
-          <a class="import-nav-link" href="/teherauto.html">Teherautó</a>
-          <a class="import-nav-link" href="/ingatlan.html">Ingatlan</a>
-          <a class="import-nav-link" href="/ajanlasok.html">Ajánlások</a>
-        </nav>
-        </div>
-      </div>
-    </header>
-
-    <main class="mm-shell">
-      <aside class="mm-side" aria-label="Fiók menü">
-        <p class="mm-side-kicker">Fiókom</p>
-        <h1 class="mm-side-title">Üdv, <span data-mm-hello>—</span></h1>
-        <nav class="mm-nav">
-          <a class="mm-nav-link is-active" href="/import.html">Autóimport</a>
-          <a class="mm-nav-link" href="/beallitasok.html?szekcio=nyomtatasok">Nyomtatások</a>
-          <a class="mm-nav-link" href="/beallitasok.html?szekcio=ertekelesek">Értékelések</a>
-          <a class="mm-nav-link" href="/hirdetesfeladas.html?continue=1" data-post-ad-category='{"vertical":"auto","subtype":"szemelyauto","label":"Személyautó","v":2}'>Autó hozzáadása</a>
-          <div class="mm-nav-group">
-            <button type="button" class="mm-nav-link mm-nav-toggle" data-mm-subtoggle aria-expanded="false">Teherautó hozzáadása</button>
-            <div class="mm-nav-sub" data-mm-sub hidden>
-              <a class="mm-nav-sublink" href="/hirdetesfeladas.html?continue=1" data-post-ad-category='{"vertical":"teher","subtype":"kisteher","label":"Kisteher 3,5 t-ig","v":2}'>Teherautó 3,5-ig</a>
-              <a class="mm-nav-sublink" href="/hirdetesfeladas.html?continue=1" data-post-ad-category='{"vertical":"teher","subtype":"teherauto","label":"Teherautó 3,5 t-tól","v":2}'>Teherautó 3,5-tól</a>
-            </div>
-          </div>
-          <p class="mm-nav-plain">Kiemelések</p>
-          <a class="mm-nav-link" href="/beallitasok.html?szekcio=parkolo">Parkoló</a>
-          <a class="mm-nav-link" href="/beallitasok.html?szekcio=keresesek">Mentett kereséseim</a>
-          <a class="mm-nav-link" href="/beallitasok.html?szekcio=uzenetek">Üzenetek</a>
-          <a class="mm-nav-link" href="/beallitasok.html?szekcio=megjelenes">Megjelenés</a>
-          <a class="mm-nav-link" href="/beallitasok.html?szekcio=fiok">Beállítások</a>
-        </nav>
-        <button type="button" class="mm-side-logout" data-auth-logout>Kijelentkezés</button>
-      </aside>
-
-      <div class="mm-main">
-        <section class="mm-panel ha-imp-panel">
-          <header class="mm-panel-head">
-            <h2 class="mm-panel-title" data-ha-title>Használtautó import</h2>
-            <p class="mm-panel-lead">Hirdetéseid átvétele a hasznaltauto.hu-ról. A hasznaltauto jelszavadat nem tároljuk. Mentéshez Bymy belépés kell, a fénykép kötelező.</p>
-          </header>
-
-          <div class="ha-imp-modes" role="tablist">
-            <button type="button" class="ha-imp-mode is-active" data-ha-mode="standard">Használtautó import</button>
-            <button type="button" class="ha-imp-mode" data-ha-mode="dealer">Kereskedői import</button>
-          </div>
-
-          <p class="ha-imp-steps" data-ha-steps>1. Jelentkezz be  ·  2. Nyisd meg EGY autó gyorsnézetét  ·  3. Importálás</p>
-
-          <div class="ha-imp-actions">
-            <button type="button" class="settings-btn-secondary" data-ha-open>hasznaltauto.hu megnyitása</button>
-            <a class="ha-imp-bookmark" id="ha-imp-bookmark" href="#">Hirdetés importálása</a>
-            <p class="ha-imp-bookmark-hint">Húzd ezt a gombot a könyvjelzősávra. A hasznaltauto oldalon (belépés + gyorsnézet) kattints rá.</p>
-          </div>
-
-          <div class="ha-imp-url-row" data-ha-url-row>
-            <label for="ha-imp-url" data-ha-url-label>Vagy illeszd be a nyilvános hirdetés URL-jét</label>
-            <div class="ha-imp-url-fields">
-              <input id="ha-imp-url" type="url" placeholder="https://www.hasznaltauto.hu/szemelyauto/…" autocomplete="off" />
-              <button type="button" class="ha-imp-go" id="ha-imp-start" data-ha-action>Hirdetés importálása</button>
-            </div>
-          </div>
-
-          <p id="ha-imp-status" class="ha-imp-status" hidden></p>
-          <div id="ha-imp-result" class="ha-imp-result" hidden></div>
-          <p class="ha-imp-footer" data-ha-footer>A jelszavadat nem tároljuk — csak a megnyitott oldal adatait olvassuk ki.</p>
-        </section>
-      </div>
-    </main>
-
-    <script src="/js/site-avatar-menu.js?v=haImp1" type="module"></script>
-    <script src="/js/ha-import-app.js?v=haImp7" type="module"></script>
-    <script src="/js/nav-counts.js?v=willhabenHdr1" type="module"></script>
-    <script src="/js/theme.js?v=willhabenHdr1" type="module"></script>
+  <body>
+    <p><a href="/beallitasok.html?szekcio=import">Tovább az Autóimporthoz</a></p>
   </body>
 </html>

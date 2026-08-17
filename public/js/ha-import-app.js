@@ -285,7 +285,9 @@ export async function initHaImportPage() {
   const hello = document.querySelector("[data-mm-hello]");
   if (hello) hello.textContent = getDisplayName() || user?.email?.split("@")[0] || "—";
 
-  bindAccountNav();
+  if (document.body.classList.contains("ha-import-page")) {
+    bindAccountNav();
+  }
   renderMode();
 
   document.querySelectorAll("[data-ha-mode]").forEach((btn) => {

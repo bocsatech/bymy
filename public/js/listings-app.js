@@ -1,4 +1,4 @@
-import { fetchListings, fetchListing, deleteListingFromDb, deleteAllListingsFromDb, fetchDbStats, saveListingToDb } from "./db-client.js";
+import { fetchListings, fetchListing, deleteListingFromDb, deleteAllListingsFromDb, fetchDbStats, saveListingToDb, recordListingView } from "./db-client.js?v=myAds1";
 import { renderListingCells } from "./cells-view.js";
 import { createListingCard, formatListingDisplayTitle } from "./listing-card.js";
 
@@ -22,6 +22,7 @@ let currentListing = null;
 const STATUS_LABELS = {
   mentett: "Mentett",
   feladott: "Feladott",
+  inaktiv: "Inaktív",
 };
 
 function formatDate(value) {
@@ -87,6 +88,16 @@ async function selectListing(id) {
     return;
   }
 
+  const viewedKey = `bymy-viewed-${id}`;
+  try {
+    if (!sessionStorage.getItem(viewedKey)) {
+      sessionStorage.setItem(viewedKey, "1");
+      await recordListingView(id, "web");
+    }
+  } catch {
+    /* ignore */
+  }
+
   currentListing = listing;
 
   detailTitle.textContent =
@@ -102,7 +113,7 @@ async function selectListing(id) {
   detailMeta.textContent = parts.join(" · ");
 
   renderListingCells(cellsEl, listing.cells);
-  editBtn.href = `/import.html?listing=${listing.id}`;
+  editBtn.href = `/hirdetesfeladas.html?id=${listing.id}`;
   publishBtn.hidden = listing.status === "feladott";
   deleteBtn.dataset.id = String(listing.id);
 

@@ -151,11 +151,7 @@ export function initCategoryPicker({
     stub?.setAttribute("hidden", "");
     wizardShell?.removeAttribute("hidden");
     stepsBar?.removeAttribute("hidden");
-    if (contextBar && contextLabel) {
-      contextBar.removeAttribute("hidden");
-      const group = selection.vertical === "teher" ? "Teherautó" : "Autó";
-      contextLabel.textContent = `${group} · ${selection.label}`;
-    }
+    contextBar?.setAttribute("hidden", "");
     onVehicleSelected?.(selection);
   }
 

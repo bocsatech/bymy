@@ -628,6 +628,7 @@ textarea {
 }
 
 .photo-slot {
+  position: relative;
   aspect-ratio: 4/3;
   border: none;
   border-radius: var(--radius-md);
@@ -637,6 +638,88 @@ textarea {
   place-items: center;
   color: var(--muted);
   font-size: 12px;
+  overflow: hidden;
+}
+
+.photo-slot img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.photo-slot-badge {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  background: #0b63ce;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 0.12rem 0.35rem;
+  border-radius: 4px;
+}
+
+.photo-slot-state {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(17, 24, 39, 0.45);
+  color: #fff;
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.photo-slot-actions {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  left: 4px;
+  display: flex;
+  gap: 4px;
+}
+
+.photo-slot-actions button {
+  flex: 1;
+  border: 0;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #111;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 0.2rem 0;
+  cursor: pointer;
+}
+
+.photo-slot-actions button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.photo-upload-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin-top: 14px;
+}
+
+.photo-upload-status {
+  flex: 1;
+  min-width: 180px;
+  display: grid;
+  gap: 4px;
+}
+
+.photo-upload-status progress {
+  width: 100%;
+  height: 10px;
+}
+
+.photo-upload-status span {
+  font-size: 13px;
+  color: var(--muted, #667085);
 }
 
 .packages {

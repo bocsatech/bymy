@@ -1,10 +1,12 @@
 import { UZEMANYAG_CATEGORIES, EQUIPMENT_SECTIONS, KLIM_OPTIONS } from "./equipment-data.js";
 import { EGYEB_INFO_OPTIONS } from "./egyeb-info-data.js";
 import { initVehicleCatalogSelects, typeNameForField } from "./vehicle-catalog-client.js";
+import { compressListingPhoto, MAX_LISTING_PHOTOS } from "./listing-photo-compress.js?v=myAds2";
 
 export function createAdForm(options = {}) {
   const mode = options.mode ?? "wizard";
   const storageKey = options.storageKey ?? "hirdetes-local-draft";
+  const editing = Boolean(options.editing);
 
   const form = document.getElementById("ad-form");
   if (!form) return null;
@@ -19,6 +21,9 @@ export function createAdForm(options = {}) {
   const uploadZone = document.getElementById("upload-zone");
   const photoInput = document.getElementById("photo-input");
   const photoGrid = document.getElementById("photo-grid");
+  const photoUploadBtn = document.getElementById("photo-upload-btn");
+  const photoUploadProgress = document.getElementById("photo-upload-progress");
+  const photoUploadLabel = document.getElementById("photo-upload-label");
   const summaryText = document.getElementById("summary-text");
   const newAdBtn = document.getElementById("new-ad-btn");
   const adPanel = document.getElementById("ad-panel");
@@ -55,7 +60,9 @@ export function createAdForm(options = {}) {
   let currentStep = 1;
   let userTouchedForm = false;
   let emptyingForm = false;
-  let selectedPhotoFiles = [];
+  let photoItems = [];
+  let photoBusy = false;
+  let photoSeq = 0;
 
 const AUTO_FILL_PRESETS = {
   TESLA: { tipus: "Long Range AWD", hengerurtartalom: "", uzemanyag: "Elektromos", sebessegvalto: "Automata", hajtas: "Összkerék", teljesitmeny_kw: "258" },
@@ -443,6 +450,11 @@ function resetSuccess() {
 
 function goToStep(step) {
   if (step < 1 || step > TOTAL_STEPS || step === currentStep) return;
+  if (step > 4 && !photosReadyForNext()) {
+    alert(photoBlockMessage());
+    showStep(4);
+    return;
+  }
   saveDraft();
   if (currentStep === TOTAL_STEPS) resetSuccess();
   showStep(step);
@@ -496,6 +508,7 @@ function showStep(step) {
   if (step === 3) nextBtn.textContent = "Tovább a képekhez";
   if (step === 4) nextBtn.textContent = "Tovább a hirdetéshez";
   if (step === 5) nextBtn.textContent = "Mentés / összegzés";
+  syncPhotoNextButton();
 }
 
 function collectFormData() {
@@ -593,6 +606,7 @@ function applyFormData(data, { fromImport = false } = {}) {
   restoreFuelSelection(data.uzemanyag);
   syncFuelDependentFields();
   fitAllFormFields();
+  loadExistingPhotos(data);
   if (mode === "import") {
     options.onApplied?.(data);
   } else {
@@ -647,10 +661,9 @@ function resetForm({ fresh = false } = {}) {
   }
   if (fuelSelected) fuelSelected.textContent = "";
   if (fresh) {
-    selectedPhotoFiles = [];
-    renderPhotoPreview([]);
+    clearPhotoItems();
   } else {
-    renderPhotoPreview(selectedPhotoFiles);
+    renderPhotoPreview();
   }
   syncPackageSelection();
   syncFuelDependentFields();
@@ -711,8 +724,8 @@ function validateStep(step) {
   }
 
   if (step === 4) {
-    if (!selectedPhotoFiles.length) {
-      alert("Legalább egy fénykép kell a hirdetéshez.");
+    if (!photosReadyForNext()) {
+      alert(photoBlockMessage());
       return false;
     }
     return true;
@@ -733,8 +746,8 @@ function validateStep(step) {
       alert("Kérjük, töltsd ki a kötelező (*) mezőket.");
       return false;
     }
-    if (!selectedPhotoFiles.length) {
-      alert("Legalább egy fénykép kell a hirdetéshez.");
+    if (!photosReadyForNext()) {
+      alert(photoBlockMessage());
       goToStep(4);
       return false;
     }
@@ -757,39 +770,217 @@ function syncPackageSelection() {
   });
 }
 
-function setPhotoFiles(files) {
-  selectedPhotoFiles = [...(files ?? [])]
-    .filter((file) => file && (String(file.type || "").startsWith("image/") || /\.(jpe?g|png|webp|heic|heif)$/i.test(file.name || "")))
-    .slice(0, 12);
-  renderPhotoPreview(selectedPhotoFiles);
+function isPhotoFile(file) {
+  return Boolean(
+    file &&
+      (String(file.type || "").startsWith("image/") ||
+        /\.(jpe?g|png|webp|heic|heif)$/i.test(file.name || ""))
+  );
 }
 
-function renderPhotoPreview(files) {
-  photoGrid.innerHTML = "";
-  const list = [...(files ?? [])].slice(0, 12);
-  if (list.length === 0) {
-    for (let i = 1; i <= 6; i += 1) {
-      const slot = document.createElement("div");
-      slot.className = "photo-slot";
-      slot.textContent = i === 1 ? "1. főkép" : `${i}.`;
-      photoGrid.appendChild(slot);
-    }
+function revokePhotoPreview(item) {
+  if (item?.previewUrl?.startsWith("blob:")) URL.revokeObjectURL(item.previewUrl);
+}
+
+function clearPhotoItems() {
+  photoItems.forEach(revokePhotoPreview);
+  photoItems = [];
+  if (photoInput) photoInput.value = "";
+  renderPhotoPreview();
+}
+
+function existingPhotoUrls(data = {}) {
+  const urls = [];
+  const fo = String(data.fo_kep ?? "").trim();
+  if (fo) urls.push(fo);
+  for (const line of String(data.fotok ?? "").split(/\n+/)) {
+    const url = line.trim();
+    if (url && !urls.includes(url)) urls.push(url);
+  }
+  return urls;
+}
+
+function loadExistingPhotos(data) {
+  if (photoItems.length) return;
+  const urls = existingPhotoUrls(data).slice(0, MAX_LISTING_PHOTOS);
+  if (!urls.length) {
+    renderPhotoPreview();
     return;
   }
-  list.forEach((file, index) => {
+  photoItems = urls.map((url) => ({
+    id: `url-${++photoSeq}`,
+    file: null,
+    previewUrl: url,
+    dataUrl: null,
+    url,
+    status: "ready",
+    error: "",
+  }));
+  renderPhotoPreview();
+}
+
+function addPhotoFiles(files) {
+  userTouchedForm = true;
+  const incoming = [...(files ?? [])].filter(isPhotoFile);
+  const room = MAX_LISTING_PHOTOS - photoItems.length;
+  if (room <= 0) {
+    alert("Legfeljebb 12 kép tölthető fel.");
+    return;
+  }
+  for (const file of incoming.slice(0, room)) {
+    photoItems.push({
+      id: `file-${++photoSeq}`,
+      file,
+      previewUrl: URL.createObjectURL(file),
+      dataUrl: null,
+      url: null,
+      status: "pending",
+      error: "",
+    });
+  }
+  if (incoming.length > room) {
+    alert("Legfeljebb 12 kép tölthető fel. A többletet nem vettük fel.");
+  }
+  renderPhotoPreview();
+}
+
+function photosReadyForNext() {
+  if (photoBusy) return false;
+  if (!photoItems.length) return editing;
+  return photoItems.every((item) => item.status === "ready");
+}
+
+function photoBlockMessage() {
+  if (photoBusy) return "Várj, amíg minden kép feltöltődik.";
+  if (!photoItems.length) return "Legalább egy fénykép kell a hirdetéshez.";
+  if (photoItems.some((item) => item.status === "error")) {
+    return "Van hibás kép. Töröld, vagy töltsd fel újra a Feltöltés gombbal.";
+  }
+  return "Először töltsd fel a képeket a Feltöltés gombbal.";
+}
+
+function syncPhotoNextButton() {
+  if (!nextBtn) return;
+  if (currentStep !== 4) {
+    nextBtn.disabled = false;
+    nextBtn.removeAttribute("title");
+    return;
+  }
+  const ready = photosReadyForNext();
+  nextBtn.disabled = !ready;
+  nextBtn.title = ready ? "" : photoBlockMessage();
+}
+
+function updatePhotoStatus() {
+  const total = photoItems.length;
+  const ready = photoItems.filter((item) => item.status === "ready").length;
+  const pending = photoItems.filter((item) => item.status === "pending" || item.status === "error").length;
+  const uploading = photoItems.filter((item) => item.status === "uploading").length;
+  if (photoUploadProgress) {
+    photoUploadProgress.max = Math.max(total, 1);
+    photoUploadProgress.value = ready;
+  }
+  if (photoUploadBtn) {
+    photoUploadBtn.disabled = photoBusy || pending === 0;
+    photoUploadBtn.textContent = photoBusy ? "Feltöltés…" : "Feltöltés";
+  }
+  if (photoUploadLabel) {
+    if (!total) {
+      photoUploadLabel.textContent = editing
+        ? "Ha új képet adsz, a Feltöltés után lehet továbbmenni."
+        : "Válassz képeket, majd kattints a Feltöltésre.";
+    } else if (photoBusy || uploading) {
+      photoUploadLabel.textContent = `Feltöltés: ${ready} / ${total}`;
+    } else if (pending) {
+      photoUploadLabel.textContent = `${pending} kép vár feltöltésre. Kattints a Feltöltésre.`;
+    } else {
+      photoUploadLabel.textContent = `Minden kép kész (${ready} / ${MAX_LISTING_PHOTOS}). Továbbmehetsz.`;
+    }
+  }
+  syncPhotoNextButton();
+}
+
+function renderPhotoPreview() {
+  if (!photoGrid) return;
+  photoGrid.innerHTML = "";
+  if (!photoItems.length) {
     const slot = document.createElement("div");
     slot.className = "photo-slot";
+    slot.textContent = "Még nincs kép";
+    photoGrid.appendChild(slot);
+    updatePhotoStatus();
+    return;
+  }
+  photoItems.forEach((item, index) => {
+    const slot = document.createElement("div");
+    slot.className = "photo-slot";
+    slot.dataset.id = item.id;
     const img = document.createElement("img");
-    img.src = URL.createObjectURL(file);
-    img.alt = file.name;
-    img.style.width = "100%";
-    img.style.height = "100%";
-    img.style.objectFit = "cover";
-    img.style.borderRadius = "6px";
+    img.src = item.previewUrl || item.url || "";
+    img.alt = item.file?.name || `Kép ${index + 1}`;
     slot.appendChild(img);
-    if (index === 0) slot.title = "Főkép";
+    if (index === 0) {
+      const badge = document.createElement("span");
+      badge.className = "photo-slot-badge";
+      badge.textContent = "Főkép";
+      slot.appendChild(badge);
+    }
+    if (item.status === "uploading" || item.status === "pending" || item.status === "error") {
+      const state = document.createElement("span");
+      state.className = "photo-slot-state";
+      state.textContent =
+        item.status === "uploading" ? "Feltöltés…" : item.status === "error" ? "Hiba" : "Várakozik";
+      slot.appendChild(state);
+    }
+    const actions = document.createElement("div");
+    actions.className = "photo-slot-actions";
+    actions.innerHTML = `
+      <button type="button" data-photo-up="${item.id}" ${index === 0 ? "disabled" : ""}>↑</button>
+      <button type="button" data-photo-down="${item.id}" ${index === photoItems.length - 1 ? "disabled" : ""}>↓</button>
+      <button type="button" data-photo-del="${item.id}">×</button>
+    `;
+    slot.appendChild(actions);
     photoGrid.appendChild(slot);
   });
+  updatePhotoStatus();
+}
+
+async function uploadPendingPhotos() {
+  const pending = photoItems.filter((item) => item.status === "pending" || item.status === "error");
+  if (!pending.length || photoBusy) return;
+  photoBusy = true;
+  updatePhotoStatus();
+  for (const item of pending) {
+    if (!item.file) {
+      item.status = "error";
+      item.error = "Hiányzó fájl.";
+      renderPhotoPreview();
+      continue;
+    }
+    item.status = "uploading";
+    item.error = "";
+    renderPhotoPreview();
+    try {
+      item.dataUrl = await compressListingPhoto(item.file);
+      item.status = "ready";
+    } catch (error) {
+      item.status = "error";
+      item.error = error?.message ?? "A feltöltés sikertelen.";
+    }
+    renderPhotoPreview();
+  }
+  photoBusy = false;
+  updatePhotoStatus();
+  if (photoItems.some((item) => item.status === "error")) {
+    alert("Van kép, amit nem sikerült feltölteni. Töröld, vagy próbáld újra.");
+  }
+}
+
+function preparedPhotoItems() {
+  return photoItems
+    .filter((item) => item.status === "ready")
+    .map((item) => (item.url ? { url: item.url } : { data: item.dataUrl }))
+    .filter((item) => item.url || item.data);
 }
 
 form.querySelectorAll(".auto-filled, #tipus, #hengerurtartalom, #sebessegvalto, #hajtas, #teljesitmeny_kw").forEach((field) => {
@@ -873,26 +1064,59 @@ if (mode === "wizard") {
 
   form.addEventListener("input", saveDraft);
   form.addEventListener("change", saveDraft);
-
-  uploadZone?.addEventListener("click", () => photoInput.click());
-  uploadZone?.addEventListener("dragover", (event) => {
-    event.preventDefault();
-    uploadZone.style.borderColor = "#f57c00";
-  });
-  uploadZone?.addEventListener("dragleave", () => {
-    uploadZone.style.borderColor = "";
-  });
-  uploadZone?.addEventListener("drop", (event) => {
-    event.preventDefault();
-    uploadZone.style.borderColor = "";
-    if (event.dataTransfer?.files?.length) {
-      setPhotoFiles(event.dataTransfer.files);
-    }
-  });
-  photoInput?.addEventListener("change", () => {
-    if (photoInput.files) setPhotoFiles(photoInput.files);
-  });
 }
+
+uploadZone?.addEventListener("click", () => photoInput.click());
+uploadZone?.addEventListener("dragover", (event) => {
+  event.preventDefault();
+  uploadZone.style.borderColor = "#f57c00";
+});
+uploadZone?.addEventListener("dragleave", () => {
+  uploadZone.style.borderColor = "";
+});
+uploadZone?.addEventListener("drop", (event) => {
+  event.preventDefault();
+  uploadZone.style.borderColor = "";
+  if (event.dataTransfer?.files?.length) {
+    addPhotoFiles(event.dataTransfer.files);
+  }
+});
+photoInput?.addEventListener("change", () => {
+  if (photoInput.files) addPhotoFiles(photoInput.files);
+  photoInput.value = "";
+});
+photoUploadBtn?.addEventListener("click", () => {
+  uploadPendingPhotos();
+});
+photoGrid?.addEventListener("click", (event) => {
+  const up = event.target.closest("[data-photo-up]");
+  const down = event.target.closest("[data-photo-down]");
+  const del = event.target.closest("[data-photo-del]");
+  if (up) {
+    const i = photoItems.findIndex((item) => item.id === up.dataset.photoUp);
+    if (i > 0) {
+      const [moved] = photoItems.splice(i, 1);
+      photoItems.splice(i - 1, 0, moved);
+      renderPhotoPreview();
+    }
+  }
+  if (down) {
+    const i = photoItems.findIndex((item) => item.id === down.dataset.photoDown);
+    if (i >= 0 && i < photoItems.length - 1) {
+      const [moved] = photoItems.splice(i, 1);
+      photoItems.splice(i + 1, 0, moved);
+      renderPhotoPreview();
+    }
+  }
+  if (del) {
+    const i = photoItems.findIndex((item) => item.id === del.dataset.photoDel);
+    if (i >= 0) {
+      revokePhotoPreview(photoItems[i]);
+      photoItems.splice(i, 1);
+      renderPhotoPreview();
+    }
+  }
+});
 
 form.addEventListener("input", (event) => {
   const target = event.target;
@@ -931,7 +1155,8 @@ initVehicleCatalogSelects({
   },
 })
   .then(() => {
-    if (mode === "wizard" && !userTouchedForm) resetForm();
+    if (mode === "wizard" && !userTouchedForm && !editing) resetForm();
+    options.onCatalogReady?.();
   })
   .catch(() => {});
 
@@ -970,32 +1195,40 @@ if (mode === "wizard") {
   form.querySelectorAll("input, select, textarea").forEach((el) => {
     el.setAttribute("autocomplete", "off");
   });
-  userTouchedForm = false;
-  resetForm({ fresh: true });
-  showStep(1);
-  const emptyIfPristine = () => {
-    if (!userTouchedForm) resetForm();
-  };
-  form.addEventListener(
-    "input",
-    () => {
+  if (editing) {
+    userTouchedForm = true;
+    showStep(1);
+  } else {
+    userTouchedForm = false;
+    resetForm({ fresh: true });
+    showStep(1);
+    const emptyIfPristine = () => {
       if (!userTouchedForm) resetForm();
-    },
-    { capture: true }
-  );
-  requestAnimationFrame(emptyIfPristine);
-  window.setTimeout(emptyIfPristine, 80);
-  window.setTimeout(emptyIfPristine, 300);
-  window.addEventListener("pageshow", emptyIfPristine);
+    };
+    form.addEventListener(
+      "input",
+      () => {
+        if (!userTouchedForm) resetForm();
+      },
+      { capture: true }
+    );
+    requestAnimationFrame(emptyIfPristine);
+    window.setTimeout(emptyIfPristine, 80);
+    window.setTimeout(emptyIfPristine, 300);
+    window.addEventListener("pageshow", emptyIfPristine);
+  }
 } else {
   showAllSteps();
 }
+
+renderPhotoPreview();
 
 return {
   applyFormData,
   collectFormData,
   resetForm,
-  getPhotoFiles: () => selectedPhotoFiles,
+  getPhotoFiles: () => photoItems.map((item) => item.file).filter(Boolean),
+  getPreparedPhotoItems: preparedPhotoItems,
   showAllSteps,
   syncFuelDependentFields,
   fitAllFormFields,

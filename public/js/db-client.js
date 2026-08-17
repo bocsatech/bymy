@@ -1,4 +1,18 @@
 const LISTING_ID_KEY = "bymy-listing-id";
+const AUTH_TOKEN_KEY = "bymy-auth-token";
+
+function authHeaders() {
+  let token = "";
+  try {
+    token = localStorage.getItem(AUTH_TOKEN_KEY) || "";
+  } catch {
+    token = "";
+  }
+  return {
+    "Content-Type": "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+}
 
 export function getStoredListingId() {
   const raw = sessionStorage.getItem(LISTING_ID_KEY);
@@ -51,7 +65,8 @@ export async function fetchListing(id) {
 export async function saveListingToDb(formData, listingId = null, { status = null, photos = [] } = {}) {
   const response = await fetch("/api/listings", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: authHeaders(),
+    credentials: "same-origin",
     body: JSON.stringify({ form: formData, id: listingId, status, photos }),
   });
   const data = await parseJson(response);
@@ -70,12 +85,57 @@ export async function saveListingsBatchToDb(forms, { status = "feladott" } = {})
   return parseJson(response);
 }
 
-export async function deleteListingFromDb(id) {
-  const response = await fetch(`/api/listings/${id}`, { method: "DELETE" });
+export async function deleteAllListingsFromDb() {
+  const response = await fetch("/api/listings/all", { method: "DELETE" });
   return parseJson(response);
 }
 
-export async function deleteAllListingsFromDb() {
-  const response = await fetch("/api/listings/all", { method: "DELETE" });
+export async function fetchMyListings({ limit = 200 } = {}) {
+  const params = new URLSearchParams({ limit: String(limit) });
+  const response = await fetch(`/api/listings/mine?${params}`, {
+    headers: authHeaders(),
+    credentials: "same-origin",
+  });
+  const data = await parseJson(response);
+  return data.listings ?? [];
+}
+
+export async function recordListingView(id, source = "web") {
+  const response = await fetch(`/api/listings/${id}/view`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ source }),
+  });
+  return parseJson(response);
+}
+
+export async function updateListingStatusInDb(id, status) {
+  const response = await fetch(`/api/listings/${id}`, {
+    method: "PATCH",
+    headers: authHeaders(),
+    credentials: "same-origin",
+    body: JSON.stringify({ status }),
+  });
+  const data = await parseJson(response);
+  return data.listing ?? null;
+}
+
+export async function saveListingPhotosOrder(id, items) {
+  const response = await fetch(`/api/listings/${id}/photos`, {
+    method: "POST",
+    headers: authHeaders(),
+    credentials: "same-origin",
+    body: JSON.stringify({ items }),
+  });
+  const data = await parseJson(response);
+  return data.listing ?? null;
+}
+
+export async function deleteListingFromDb(id) {
+  const response = await fetch(`/api/listings/${id}`, {
+    method: "DELETE",
+    headers: authHeaders(),
+    credentials: "same-origin",
+  });
   return parseJson(response);
 }

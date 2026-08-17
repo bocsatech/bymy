@@ -52,7 +52,7 @@ function fiokMenuInnerHtml() {
         ${row("/beallitasok.html?szekcio=uzenetek", ICONS.messages, "Üzenetek")}
         ${row("/beallitasok.html?szekcio=keresesek", ICONS.star, "Mentett kereséseim")}
         ${row("/beallitasok.html?szekcio=parkolo", ICONS.heart, "Kedvencek")}
-        ${row("/beallitasok.html?szekcio=hirdetes", ICONS.car, "Hirdetéseim")}
+        ${row("/beallitasok.html?szekcio=hirdetes", ICONS.car, "Saját hirdetések")}
         ${row("/import.html", ICONS.import, "Autóimport")}
         ${row("/beallitasok.html?szekcio=megjelenes", ICONS.photo, "Megjelenés")}
         ${row("/beallitasok.html?szekcio=fiok", ICONS.settings, "Beállítások")}

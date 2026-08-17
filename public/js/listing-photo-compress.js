@@ -1,6 +1,6 @@
 /** Hirdetéskép: JPEG-re kicsinyítés, hogy a Vercel body limit alá férjen. */
 
-const MAX_PHOTOS = 8;
+export const MAX_LISTING_PHOTOS = 12;
 const MAX_SIDE = 1280;
 const TARGET_BYTES = 280_000;
 
@@ -80,9 +80,11 @@ export async function compressListingPhoto(file) {
   return blobToDataUrl(blob);
 }
 
-export async function compressListingPhotos(files, max = MAX_PHOTOS) {
+export async function compressListingPhotos(files, max = MAX_LISTING_PHOTOS, onProgress) {
   const list = [...(files ?? [])].filter(isProbablyImage).slice(0, max);
   const photos = [];
+  const total = list.length;
+  onProgress?.({ done: 0, total });
   for (const file of list) {
     try {
       const dataUrl = await compressListingPhoto(file);
@@ -90,6 +92,7 @@ export async function compressListingPhotos(files, max = MAX_PHOTOS) {
     } catch (error) {
       throw new Error(error?.message ?? "A kép feltöltése sikertelen. JPG vagy PNG kell.");
     }
+    onProgress?.({ done: photos.length, total });
   }
   return photos;
 }

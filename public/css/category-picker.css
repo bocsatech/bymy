@@ -501,18 +501,9 @@
   outline-offset: 2px;
 }
 
-.wizard-context-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  max-width: 920px;
-  margin: 0 auto 0.85rem;
-  padding: 0.55rem 0.85rem;
-  background: #fff;
-  border: 1px solid var(--cp-line);
-  border-radius: 12px;
-  font-size: 0.9rem;
+.wizard-context-bar,
+.wizard-context-bar[hidden] {
+  display: none !important;
 }
 
 .wizard-context-bar strong {

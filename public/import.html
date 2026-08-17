@@ -56,7 +56,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="/css/style.css?v=automax20260720homelist" />
+    <link rel="stylesheet" href="/css/style.css?v=myAds2" />
     <link rel="stylesheet" href="/css/automax.css?v=automax20260720homelist" />
     <link rel="stylesheet" href="/css/site-app.css?v=mobileStable2" />
   </head>
@@ -555,10 +555,17 @@
             <div class="card-body">
               <div class="upload-zone" id="upload-zone">
                 <strong>Húzd ide a képeket, vagy kattints a tallózáshoz</strong>
-                <span>Legfeljebb 12 kép · JPG, PNG</span>
+                <span>Legfeljebb 12 kép · JPG / PNG — a telefon fotóit automatikusan kicsinyítjük</span>
                 <input id="photo-input" type="file" accept="image/*" multiple hidden />
               </div>
               <div class="photo-grid" id="photo-grid"></div>
+              <div class="photo-upload-bar" id="photo-upload-bar">
+                <button type="button" class="btn primary" id="photo-upload-btn">Feltöltés</button>
+                <div class="photo-upload-status">
+                  <progress id="photo-upload-progress" max="12" value="0"></progress>
+                  <span id="photo-upload-label">Válassz képeket, majd kattints a Feltöltésre.</span>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -767,7 +774,7 @@
       </div>
     </main>
 
-    <script src="/js/import-app.js?v=clearall20260807" type="module"></script>
+    <script src="/js/import-app.js?v=myAds2" type="module"></script>
     <script src="/js/site-avatar-menu.js?v=adsList1" type="module"></script>
 
     <script src="/js/nav-counts.js?v=willhabenHdr1" type="module"></script>

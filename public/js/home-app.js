@@ -1,4 +1,4 @@
-import { fetchListings } from "./db-client.js";
+import { fetchListings } from "./db-client.js?v=myAds1";
 import { createHomeGridCard } from "./home-grid-card.js";
 import {
   emptyFilters,
@@ -84,7 +84,8 @@ function renderListings(items) {
 
 async function loadListings() {
   const all = await fetchListings({ limit: LISTINGS_FETCH_LIMIT });
-  allItems = sortForHome(filterBySitePage(all));
+  const active = all.filter((item) => (item.status || "feladott") === "feladott");
+  allItems = sortForHome(filterBySitePage(active));
   populateFilterOptions(allItems);
   renderListings(allItems);
   updateFilterResultCount();

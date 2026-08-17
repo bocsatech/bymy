@@ -57,7 +57,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/css/style.css?v=auth20260725" />
-    <link rel="stylesheet" href="/css/site-app.css?v=adsList1" />
+    <link rel="stylesheet" href="/css/site-app.css?v=myAds1" />
   </head>
   <body class="site-app settings-page mm-page" data-site-page="beallitasok" data-auth-init="manual">
     <div class="local-banner">Bymy — Fiókom · user DB: ~/.bymy/ · v=localdb9</div>
@@ -113,7 +113,7 @@
           <a class="mm-nav-link" href="?szekcio=parkolo" data-mm-nav="parkolo">Parkoló</a>
           <a class="mm-nav-link" href="?szekcio=keresesek" data-mm-nav="keresesek">Mentett kereséseim</a>
           <a class="mm-nav-link" href="?szekcio=uzenetek" data-mm-nav="uzenetek">Üzenetek <span class="mm-nav-badge" data-mm-msg-count hidden>0</span></a>
-          <a class="mm-nav-link" href="?szekcio=hirdetes" data-mm-nav="hirdetes">Hirdetésem</a>
+          <a class="mm-nav-link" href="?szekcio=hirdetes" data-mm-nav="hirdetes">Saját hirdetések</a>
           <a class="mm-nav-link" href="?szekcio=megjelenes" data-mm-nav="megjelenes">Megjelenés</a>
           <a class="mm-nav-link" href="?szekcio=fiok" data-mm-nav="fiok">Beállítások</a>
         </nav>
@@ -141,8 +141,8 @@
               <span data-mm-stat-msg>0 olvasatlan</span>
             </a>
             <a class="mm-card" href="?szekcio=hirdetes">
-              <strong>Hirdetésem</strong>
-              <span>Hirdetés kezelése</span>
+              <strong>Saját hirdetések</strong>
+              <span>Szerkesztés, képek, megtekintések</span>
             </a>
             <a class="mm-card" href="?szekcio=megjelenes">
               <strong>Megjelenés</strong>
@@ -194,17 +194,10 @@
         <!-- Hirdetésem -->
         <section class="mm-panel" data-mm-panel="hirdetes" hidden>
           <header class="mm-panel-head">
-            <h2 class="mm-panel-title">Hirdetésem</h2>
-            <p class="mm-panel-lead">Itt kezelheted az aktív hirdetésedet (szerkesztés, megtekintés, új feladás).</p>
+            <h2 class="mm-panel-title">Saját hirdetések</h2>
+            <p class="mm-panel-lead">Szerkesztés, képkezelés, web- és app-megtekintések.</p>
           </header>
-          <div class="mm-ad-box">
-            <p id="mm-ad-status">A feladott hirdetéseid. A kártyán a gyártmány és a modell látszik.</p>
-            <div id="mm-ad-list" class="mm-ad-list"></div>
-            <div class="mm-ad-actions">
-              <a class="site-header-btn site-header-btn--primary" href="/listings.html">Összes hirdetés</a>
-              <a class="site-header-btn site-header-btn--outline" href="/hirdetesfeladas.html" data-auth-guard>Új hirdetés feladása</a>
-            </div>
-          </div>
+          <div id="mm-ad-list" class="mm-ad-list"></div>
         </section>
 
         <!-- Megjelenés — autó hero háttér (mindenkinek) -->
@@ -468,8 +461,8 @@
       </div>
     </main>
 
-    <script src="/js/site-avatar-menu.js?v=adsList1" type="module"></script>
-    <script src="/js/beallitasok-app.js?v=adsList1" type="module"></script>
+    <script src="/js/site-avatar-menu.js?v=myAds1" type="module"></script>
+    <script src="/js/beallitasok-app.js?v=myAds1" type="module"></script>
   
     <script>
       (function () {

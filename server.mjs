@@ -16,6 +16,9 @@ import {
   listingSourceExists,
   updateListingFoKep,
   updateListingPhotoUrls,
+  recordListingView,
+  listMyListings,
+  updateListingStatus,
   getDbPath,
   closeDb,
 } from "./lib/db-store.mjs";
@@ -101,6 +104,8 @@ import {
 } from "./lib/oauth.mjs";
 import { listingImageDir, resolveListingImageFile, fetchRemoteListingImage, clearListingImageFiles } from "./lib/listing-image.mjs";
 import { saveListingPhotos } from "./lib/listing-photos.mjs";
+import { canManageListing } from "./lib/listing-meta.mjs";
+import { navCountsFromListings } from "./lib/nav-counts.mjs";
 import { handleMessagesApi, initMessagingSchema } from "./lib/messaging.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -421,6 +426,10 @@ async function handleImport(req, res) {
   }
 }
 
+async function requestUser(req) {
+  return getUserBySessionToken(getSessionTokenFromRequest(req));
+}
+
 async function handleListingsApi(req, res, pathname) {
   const latestMatch = pathname === "/api/listings/latest";
   const listMatch = pathname === "/api/listings";
@@ -442,11 +451,134 @@ async function handleListingsApi(req, res, pathname) {
     return;
   }
 
+  const mineRequested =
+    (pathname === "/api/listings/mine" && req.method === "GET") ||
+    (listMatch && req.method === "GET" && new URL(req.url ?? "", `http://${HOST}`).searchParams.get("mine") === "1");
+  if (mineRequested) {
+    const user = await requestUser(req);
+    if (!user) {
+      sendJson(res, 401, { error: "Nem vagy bejelentkezve." });
+      return;
+    }
+    const url = new URL(req.url ?? "", `http://${HOST}`);
+    const limit = Math.min(Math.max(Number(url.searchParams.get("limit") ?? 200), 1), 500);
+    sendJson(res, 200, { listings: await listMyListings({ userId: user.id, limit }) });
+    return;
+  }
+
   if (listMatch && req.method === "GET") {
     const url = new URL(req.url ?? "", `http://${HOST}`);
     const limit = Math.min(Math.max(Number(url.searchParams.get("limit") ?? 50), 1), 500);
     const status = url.searchParams.get("status");
     sendJson(res, 200, { listings: await listListingsWithPreview({ limit, status }) });
+    return;
+  }
+
+  const viewMatch = pathname.match(/^\/api\/listings\/(\d+)\/view$/);
+  if (viewMatch && req.method === "POST") {
+    let body = {};
+    try {
+      body = await readBody(req);
+    } catch {
+      body = {};
+    }
+    const source = body.source === "app" ? "app" : "web";
+    const listing = await recordListingView(Number(viewMatch[1]), source);
+    if (!listing) {
+      sendJson(res, 404, { error: "Nincs ilyen hirdetés." });
+      return;
+    }
+    sendJson(res, 200, {
+      views: listing.views,
+      views_web: listing.views_web,
+      views_app: listing.views_app,
+    });
+    return;
+  }
+
+  const photosMatch = pathname.match(/^\/api\/listings\/(\d+)\/photos$/);
+  if (photosMatch && req.method === "POST") {
+    const user = await requestUser(req);
+    if (!user) {
+      sendJson(res, 401, { error: "Nem vagy bejelentkezve." });
+      return;
+    }
+    const listing = await getListing(Number(photosMatch[1]));
+    if (!listing) {
+      sendJson(res, 404, { error: "Nincs ilyen hirdetés." });
+      return;
+    }
+    if (!canManageListing(listing, user)) {
+      sendJson(res, 403, { error: "Ezt a hirdetést nem módosíthatod." });
+      return;
+    }
+    if (!listing.form?.owner_user_id && user.id) {
+      await updateListingStatus(listing.id, listing.status, user.id);
+    }
+    let body;
+    try {
+      body = await readBody(req);
+    } catch {
+      sendJson(res, 400, { error: "Érvénytelen JSON." });
+      return;
+    }
+    const items = Array.isArray(body.items) ? body.items : [];
+    if (!items.length) {
+      sendJson(res, 400, { error: "Legalább egy kép kell." });
+      return;
+    }
+    try {
+      const urls = [];
+      for (const item of items) {
+        const existing = String(item?.url ?? "").trim();
+        if (existing) {
+          urls.push(existing);
+          continue;
+        }
+        if (!item?.data) continue;
+        const uploaded = await saveListingPhotos(listing.id, [item.data]);
+        if (uploaded[0]) urls.push(uploaded[0]);
+      }
+      if (!urls.length) {
+        sendJson(res, 400, { error: "A képek mentése sikertelen." });
+        return;
+      }
+      const updated = await updateListingPhotoUrls(listing.id, urls);
+      sendJson(res, 200, { listing: updated });
+    } catch (error) {
+      sendJson(res, 500, { error: error.message ?? "A kép mentése sikertelen." });
+    }
+    return;
+  }
+
+  if (idMatch && req.method === "PATCH") {
+    const user = await requestUser(req);
+    if (!user) {
+      sendJson(res, 401, { error: "Nem vagy bejelentkezve." });
+      return;
+    }
+    const listing = await getListing(Number(idMatch[1]));
+    if (!listing) {
+      sendJson(res, 404, { error: "Nincs ilyen hirdetés." });
+      return;
+    }
+    if (!canManageListing(listing, user)) {
+      sendJson(res, 403, { error: "Ezt a hirdetést nem módosíthatod." });
+      return;
+    }
+    let body;
+    try {
+      body = await readBody(req);
+    } catch {
+      sendJson(res, 400, { error: "Érvénytelen JSON." });
+      return;
+    }
+    if (body.status) {
+      const updated = await updateListingStatus(listing.id, body.status, user.id);
+      sendJson(res, 200, { listing: updated });
+      return;
+    }
+    sendJson(res, 400, { error: "Nincs módosítható mező." });
     return;
   }
 
@@ -523,7 +655,22 @@ async function handleListingsApi(req, res, pathname) {
     }
 
     try {
-      let saved = await saveListing(formData, listingId, { status: body.status });
+      const user = await requestUser(req);
+      if (listingId) {
+        const existing = await getListing(listingId);
+        if (!existing) {
+          sendJson(res, 404, { error: "Nincs ilyen hirdetés." });
+          return;
+        }
+        if (user && !canManageListing(existing, user)) {
+          sendJson(res, 403, { error: "Ezt a hirdetést nem módosíthatod." });
+          return;
+        }
+      }
+      let saved = await saveListing(formData, listingId, {
+        status: body.status,
+        userId: user?.id ?? null,
+      });
       if (!saved) {
         sendJson(res, 404, { error: "Nincs ilyen hirdetés." });
         return;
@@ -577,8 +724,23 @@ async function handleListingsApi(req, res, pathname) {
   }
 
   if (idMatch && req.method === "DELETE") {
-    await deleteListing(Number(idMatch[1]));
-    sendJson(res, 200, { ok: true });
+    try {
+      const user = await requestUser(req);
+      const listing = await getListing(Number(idMatch[1]));
+      if (!listing) {
+        sendJson(res, 404, { error: "Nincs ilyen hirdetés." });
+        return;
+      }
+      if (user && !canManageListing(listing, user)) {
+        sendJson(res, 403, { error: "Ezt a hirdetést nem törölheted." });
+        return;
+      }
+      await deleteListing(listing.id);
+      sendJson(res, 200, { ok: true });
+    } catch (error) {
+      console.warn("Hirdetés törlés:", error.message ?? error);
+      sendJson(res, 500, { error: "A törlés sikertelen. Próbáld újra." });
+    }
     return;
   }
 
@@ -1404,6 +1566,17 @@ export async function handleHttpRequest(req, res) {
     return;
   }
 
+  if (pathname === "/api/nav/counts" && req.method === "GET") {
+    try {
+      const listings = await listListingsWithPreview({ limit: 500, status: "feladott" });
+      sendJson(res, 200, navCountsFromListings(listings));
+    } catch (error) {
+      console.warn("Nav counts:", error.message ?? error);
+      sendJson(res, 500, { error: error.message ?? "Szerver hiba." });
+    }
+    return;
+  }
+
   if (
     pathname === "/api/db/stats" ||
     pathname === "/api/field-defs" ||
@@ -1411,7 +1584,14 @@ export async function handleHttpRequest(req, res) {
     pathname === "/api/listings/latest" ||
     pathname.startsWith("/api/listings/")
   ) {
-    await handleListingsApi(req, res, pathname);
+    try {
+      await handleListingsApi(req, res, pathname);
+    } catch (error) {
+      console.warn("Listings API:", error.message ?? error);
+      if (!res.headersSent) {
+        sendJson(res, 500, { error: error.message ?? "Szerver hiba." });
+      }
+    }
     return;
   }
 

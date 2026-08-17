@@ -120,7 +120,9 @@ function fiokMenuInnerHtml() {
           desc: "Érdekes hirdetések, amelyekkel később foglalkoznál (kedvencek).",
         })}
         ${row("/beallitasok.html?szekcio=hirdetes", ICONS.car, "Saját hirdetések")}
+        ${row("/beallitasok.html?szekcio=keresesek", ICONS.star, "Mentett kereséseim")}
         ${row("/beallitasok.html?szekcio=uzenetek", ICONS.messages, "Üzenetek")}
+        ${row("/beallitasok.html?szekcio=megjelenes", ICONS.photo, "Megjelenés")}
         ${row("/beallitasok.html?szekcio=fiok", ICONS.settings, "Beállítások")}
       </div>
       <div class="site-avatar-footer">
@@ -261,10 +263,10 @@ function ensureFiokMarkup(wrap) {
     dropdown.hidden = true;
     wrap.appendChild(dropdown);
   }
-  if (dropdown.dataset.fiokMenu === "dealerMenu4") return;
+  if (dropdown.dataset.fiokMenu === "dealerMenu5") return;
   dropdown.classList.add("site-avatar-dropdown--fiok");
   dropdown.innerHTML = fiokMenuInnerHtml();
-  dropdown.dataset.fiokMenu = "dealerMenu4";
+  dropdown.dataset.fiokMenu = "dealerMenu5";
 }
 
 export function refreshAvatarMenuUi(root = document) {

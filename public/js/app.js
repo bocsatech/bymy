@@ -1,5 +1,6 @@
 import { saveListingToDb, setStoredListingId } from "./db-client.js";
-import { createAdForm } from "./form-core.js?v=adsList1";
+import { createAdForm } from "./form-core.js?v=adsPhoto1";
+import { compressListingPhotos } from "./listing-photo-compress.js?v=adsPhoto1";
 import { initTireSizes } from "./tire-sizes-ui.js";
 import { initPhoneLanguages } from "./phone-lang-ui.js";
 import { initCategoryPicker } from "./category-picker.js";
@@ -18,26 +19,6 @@ let tireSizes = null;
 let phoneLanguages = null;
 let formApi = null;
 
-function readFileAsDataUrl(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = () => reject(reader.error ?? new Error("Kép olvasása sikertelen."));
-    reader.readAsDataURL(file);
-  });
-}
-
-async function readPhotoDataUrls(input, max = 12) {
-  const files = [...(input?.files ?? [])].slice(0, max);
-  const photos = [];
-  for (const file of files) {
-    if (!file || !String(file.type || "").startsWith("image/")) continue;
-    const dataUrl = await readFileAsDataUrl(file);
-    if (typeof dataUrl === "string") photos.push(dataUrl);
-  }
-  return photos;
-}
-
 function ensureFormReady() {
   if (formApi || !adForm) return formApi;
   setStoredListingId(null);
@@ -46,10 +27,20 @@ function ensureFormReady() {
   formApi = createAdForm({
     mode: "wizard",
     onWizardComplete: async (formData) => {
-      const photos = await readPhotoDataUrls(document.getElementById("photo-input"));
+      const files = formApi?.getPhotoFiles?.() ?? [];
+      if (!files.length) {
+        throw new Error("Legalább egy fénykép kell a hirdetéshez.");
+      }
+      const photos = await compressListingPhotos(files);
+      if (!photos.length) {
+        throw new Error("A képek feltöltése sikertelen. JPG vagy PNG kell.");
+      }
       const saved = await saveListingToDb(formData, null, { status: "feladott", photos });
       if (!saved?.id) {
         throw new Error("A szerver nem mentette a hirdetést.");
+      }
+      if (!saved.fo_kep && !saved.preview?.imageUrl) {
+        throw new Error("A hirdetés mentődött, de a kép nem. Próbáld kisebb JPG-gel.");
       }
       window.location.assign("/auto.html");
       return saved;

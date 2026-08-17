@@ -55,6 +55,7 @@ export function createAdForm(options = {}) {
   let currentStep = 1;
   let userTouchedForm = false;
   let emptyingForm = false;
+  let selectedPhotoFiles = [];
 
 const AUTO_FILL_PRESETS = {
   TESLA: { tipus: "Long Range AWD", hengerurtartalom: "", uzemanyag: "Elektromos", sebessegvalto: "Automata", hajtas: "Összkerék", teljesitmeny_kw: "258" },
@@ -622,7 +623,7 @@ function resetForm({ fresh = false } = {}) {
       return;
     }
     if (el.type === "file") {
-      el.value = "";
+      if (fresh) el.value = "";
       return;
     }
     if (el.type === "checkbox") {
@@ -645,7 +646,12 @@ function resetForm({ fresh = false } = {}) {
     primaryLang.value = "Magyar";
   }
   if (fuelSelected) fuelSelected.textContent = "";
-  renderPhotoPreview([]);
+  if (fresh) {
+    selectedPhotoFiles = [];
+    renderPhotoPreview([]);
+  } else {
+    renderPhotoPreview(selectedPhotoFiles);
+  }
   syncPackageSelection();
   syncFuelDependentFields();
   updateLeDisplay();
@@ -704,6 +710,14 @@ function validateStep(step) {
     return true;
   }
 
+  if (step === 4) {
+    if (!selectedPhotoFiles.length) {
+      alert("Legalább egy fénykép kell a hirdetéshez.");
+      return false;
+    }
+    return true;
+  }
+
   if (step === TOTAL_STEPS) {
     if (!validateFields(basicRequired)) {
       alert("Kérjük, töltsd ki a kötelező (*) mezőket az Alapadatok fülön.");
@@ -717,6 +731,11 @@ function validateStep(step) {
     }
     if (!validateFields(adRequired)) {
       alert("Kérjük, töltsd ki a kötelező (*) mezőket.");
+      return false;
+    }
+    if (!selectedPhotoFiles.length) {
+      alert("Legalább egy fénykép kell a hirdetéshez.");
+      goToStep(4);
       return false;
     }
     return true;
@@ -736,6 +755,13 @@ function syncPackageSelection() {
     const radio = card.querySelector('input[type="radio"]');
     card.classList.toggle("selected", radio?.checked);
   });
+}
+
+function setPhotoFiles(files) {
+  selectedPhotoFiles = [...(files ?? [])]
+    .filter((file) => file && (String(file.type || "").startsWith("image/") || /\.(jpe?g|png|webp|heic|heif)$/i.test(file.name || "")))
+    .slice(0, 12);
+  renderPhotoPreview(selectedPhotoFiles);
 }
 
 function renderPhotoPreview(files) {
@@ -860,12 +886,11 @@ if (mode === "wizard") {
     event.preventDefault();
     uploadZone.style.borderColor = "";
     if (event.dataTransfer?.files?.length) {
-      photoInput.files = event.dataTransfer.files;
-      renderPhotoPreview(event.dataTransfer.files);
+      setPhotoFiles(event.dataTransfer.files);
     }
   });
   photoInput?.addEventListener("change", () => {
-    if (photoInput.files) renderPhotoPreview(photoInput.files);
+    if (photoInput.files) setPhotoFiles(photoInput.files);
   });
 }
 
@@ -970,6 +995,7 @@ return {
   applyFormData,
   collectFormData,
   resetForm,
+  getPhotoFiles: () => selectedPhotoFiles,
   showAllSteps,
   syncFuelDependentFields,
   fitAllFormFields,

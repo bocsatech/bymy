@@ -15,6 +15,7 @@ import {
   listFieldDefs,
   listingSourceExists,
   updateListingFoKep,
+  updateListingPhotoUrls,
   getDbPath,
   closeDb,
 } from "./lib/db-store.mjs";
@@ -532,21 +533,24 @@ async function handleListingsApi(req, res, pathname) {
       if (photos.length) {
         try {
           const urls = await saveListingPhotos(saved.id, photos);
-          if (urls[0]) {
-            const updated = await updateListingFoKep(saved.id, urls[0]);
-            if (updated) saved = updated;
-            else saved = { ...saved, fo_kep: urls[0] };
-            if (urls.length > 1 && saved.preview) {
-              saved = {
-                ...saved,
-                preview: {
-                  ...saved.preview,
-                  imageUrl: urls[0],
-                  imageUrls: urls,
-                },
-              };
-            }
+          if (!urls[0]) {
+            sendJson(res, 400, {
+              error: "A képek mentése sikertelen. JPG, PNG vagy WebP kell, max. 8 MB / kép.",
+              listing: saved,
+            });
+            return;
           }
+          const updated = await updateListingPhotoUrls(saved.id, urls);
+          if (updated) saved = updated;
+          else saved = { ...saved, fo_kep: urls[0] };
+          saved = {
+            ...saved,
+            preview: {
+              ...(saved.preview || {}),
+              imageUrl: urls[0],
+              imageUrls: urls,
+            },
+          };
         } catch (error) {
           console.warn("Hirdetéskép mentés:", error.message ?? error);
           sendJson(res, 500, {

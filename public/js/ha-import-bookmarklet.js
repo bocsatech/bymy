@@ -176,30 +176,29 @@
   }
 
   function deliver(origin, payload) {
-    let delivered = false;
-    if (window.opener && !window.opener.closed) {
+    const sendTo = (target) => {
+      if (!target || target.closed) return;
       try {
-        window.opener.postMessage(payload, origin);
-        delivered = true;
-      } catch {
-        delivered = false;
-      }
-    }
-    const w = window.open(origin + "/import.html?ha=1", "bymy-ha-import");
-    if (!w) {
-      if (!delivered) alert("Engedélyezd a felugró ablakot, vagy illeszd be a hirdetés URL-jét a Bymy Autóimport oldalon.");
-      return;
-    }
-    let n = 0;
-    const timer = setInterval(() => {
-      n += 1;
-      try {
-        w.postMessage(payload, origin);
+        target.postMessage(payload, origin);
       } catch {
         /* ignore */
       }
-      if (n >= 25) clearInterval(timer);
-    }, 350);
+    };
+    sendTo(window.opener);
+    const w = window.open(`${origin}/import.html?ha=1`, "bymy-ha-import");
+    if (!w) {
+      if (!window.opener || window.opener.closed) {
+        alert("Engedélyezd a felugró ablakot, vagy illeszd be a hirdetés URL-jét a Bymy Autóimport oldalon.");
+      }
+      return;
+    }
+    sendTo(w);
+    let n = 0;
+    const timer = setInterval(() => {
+      n += 1;
+      sendTo(w);
+      if (n >= 2) clearInterval(timer);
+    }, 700);
   }
 
   async function run(opts) {

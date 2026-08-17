@@ -56,7 +56,7 @@ function setMode(mode) {
 
 function bookmarkletHref(mode) {
   const origin = location.origin;
-  const src = `${origin}/js/ha-import-bookmarklet.js?v=haImp2`;
+  const src = `${origin}/js/ha-import-bookmarklet.js?v=haImp3`;
   return `javascript:(function(){var o=${JSON.stringify(origin)};var m=${JSON.stringify(mode)};function go(){window.BymyHaImport.run({origin:o,mode:m});}if(window.BymyHaImport){go();return;}var s=document.createElement('script');s.src=${JSON.stringify(src)};s.onload=go;s.onerror=function(){alert('A hasznaltauto.hu blokkolta a Bymy scriptet. Másold a hirdetés URL-jét a Bymy Autóimport oldalra.');};document.documentElement.appendChild(s);})();`;
 }
 
@@ -104,10 +104,20 @@ function renderResult(result) {
   const saved = result?.savedCount ?? 0;
   const skipped = result?.skippedCount ?? 0;
   const errors = result?.errorCount ?? 0;
-  let summary = `${saved} hirdetés importálva.`;
-  if (skipped > 0) summary += ` ${skipped} már bent volt.`;
-  if (errors > 0) summary += ` ${errors} hiba.`;
-  if (currentMode() === "dealer" && (result?.count ?? 0) >= 50) {
+  let summary = "";
+  if (saved === 0 && skipped > 0 && errors === 0) {
+    summary =
+      skipped === 1
+        ? "Ez a hirdetés már bent van — átugrottuk, nem került be újra."
+        : `${skipped} hirdetés már bent volt — mindet átugrottuk.`;
+  } else {
+    summary = `${saved} hirdetés importálva.`;
+    if (skipped > 0) summary += ` ${skipped} már bent volt, ezeket átugrottuk.`;
+    if (errors > 0) summary += ` ${errors} hiba.`;
+  }
+  if (currentMode() === "dealer" && saved === 0 && skipped <= 1) {
+    summary += " Több autóhoz nyisd meg a Hirdetéseim listát, majd futtasd újra a könyvjelzőt.";
+  } else if (currentMode() === "dealer" && (result?.count ?? 0) >= 50) {
     summary += " Ha a listán több autó volt, lapozz, majd importáld újra a többit.";
   }
   box.hidden = false;
@@ -209,12 +219,31 @@ async function runUrlImport() {
   }
 }
 
+let importBusy = false;
+const seenImportKeys = new Set();
+
+function importPayloadKey(data) {
+  const pages = Array.isArray(data?.pages) ? data.pages : [];
+  const urls = Array.isArray(data?.urls) ? data.urls : [];
+  const ids = [
+    ...pages.map((page) => page.listingId || page.url || ""),
+    ...urls,
+  ]
+    .map((item) => String(item || "").trim())
+    .filter(Boolean);
+  return ids.sort().join("|");
+}
+
 async function runMessageImport(data) {
   const pages = Array.isArray(data.pages) ? data.pages : [];
   if (!pages.length) {
     setStatus("Üres import — nyisd meg a hirdetést, majd próbáld újra.", "err");
     return;
   }
+  const key = importPayloadKey(data);
+  if (importBusy || seenImportKeys.has(key)) return;
+  seenImportKeys.add(key);
+  importBusy = true;
   setStatus(pages.length > 1 ? `Mentés (${pages.length} hirdetés)…` : "Hirdetés feldolgozása…");
   try {
     const result = await postExtracted({
@@ -225,7 +254,10 @@ async function runMessageImport(data) {
     setStatus("");
     renderResult(result);
   } catch (error) {
+    seenImportKeys.delete(key);
     setStatus(error.message ?? "Import sikertelen.", "err");
+  } finally {
+    importBusy = false;
   }
 }
 

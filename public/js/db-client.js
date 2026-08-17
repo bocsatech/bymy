@@ -86,7 +86,11 @@ export async function saveListingsBatchToDb(forms, { status = "feladott" } = {})
 }
 
 export async function deleteAllListingsFromDb() {
-  const response = await fetch("/api/listings/all", { method: "DELETE" });
+  const response = await fetch("/api/listings/all", {
+    method: "DELETE",
+    headers: authHeaders(),
+    credentials: "same-origin",
+  });
   return parseJson(response);
 }
 

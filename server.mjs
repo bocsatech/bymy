@@ -10,7 +10,6 @@ import {
   getLatestListing,
   listListingsWithPreview,
   deleteListing,
-  deleteAllListings,
   dbStats,
   listFieldDefs,
   listingSourceExists,
@@ -737,11 +736,19 @@ async function handleListingsApi(req, res, pathname) {
           sendJson(res, 404, { error: "Nincs ilyen hirdetés." });
           return;
         }
-        if (user && !canManageListing(existing, user)) {
+        if (!user) {
+          sendJson(res, 401, { error: "Nem vagy bejelentkezve." });
+          return;
+        }
+        if (!canManageListing(existing, user)) {
           sendJson(res, 403, { error: "Ezt a hirdetést nem módosíthatod." });
           return;
         }
       } else {
+        if (!user) {
+          sendJson(res, 401, { error: "Nem vagy bejelentkezve." });
+          return;
+        }
         const sourceUrl = String(formData.forras_url || "").trim();
         const hasznaltautoId = String(formData.hasznaltauto_hirdetes_id || "").trim();
         if (sourceUrl || hasznaltautoId) {
@@ -801,21 +808,35 @@ async function handleListingsApi(req, res, pathname) {
   }
 
   if (pathname === "/api/listings/all" && req.method === "DELETE") {
-    const result = await deleteAllListings();
-    const images = clearListingImageFiles();
-    sendJson(res, 200, { ok: true, deleted: result.deleted, imagesRemoved: images.removed });
+    const user = await requestUser(req);
+    if (!user) {
+      sendJson(res, 401, { error: "Nem vagy bejelentkezve." });
+      return;
+    }
+    const mine = await listMyListings({ userId: user.id, limit: 500 });
+    let deleted = 0;
+    for (const listing of mine) {
+      if (!canManageListing(listing, user)) continue;
+      await deleteListing(listing.id);
+      deleted += 1;
+    }
+    sendJson(res, 200, { ok: true, deleted, imagesRemoved: 0 });
     return;
   }
 
   if (idMatch && req.method === "DELETE") {
     try {
       const user = await requestUser(req);
+      if (!user) {
+        sendJson(res, 401, { error: "Nem vagy bejelentkezve." });
+        return;
+      }
       const listing = await getListing(Number(idMatch[1]));
       if (!listing) {
         sendJson(res, 404, { error: "Nincs ilyen hirdetés." });
         return;
       }
-      if (user && !canManageListing(listing, user)) {
+      if (!canManageListing(listing, user)) {
         sendJson(res, 403, { error: "Ezt a hirdetést nem törölheted." });
         return;
       }

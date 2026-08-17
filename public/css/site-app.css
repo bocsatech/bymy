@@ -383,8 +383,9 @@ html[data-auth="guest"] body.site-app .hub-header-msg[data-auth-member] {
   display: none !important;
 }
 
-html[data-auth="guest"] body.site-app [data-auth-guest] {
-  display: inline-flex !important;
+html[data-auth="guest"] body.listings-page #listings-clear-all-btn,
+html[data-auth="guest"] body.listings-page [data-owner-actions] {
+  display: none !important;
 }
 
 body.site-app .hub-header-msg,

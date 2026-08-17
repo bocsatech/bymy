@@ -290,7 +290,7 @@ saveBtn?.addEventListener("click", handleSave);
 clearAllBtn?.addEventListener("click", async () => {
   if (
     !confirm(
-      "Törlöd AZ ÖSSZES hirdetést az adatbázisból?\n\nEz a képeket is törli. Utána újra tudsz importálni."
+      "Törlöd a saját importált hirdetéseidet?\n\nMások hirdetései megmaradnak. Ez nem visszavonható."
     )
   ) {
     return;

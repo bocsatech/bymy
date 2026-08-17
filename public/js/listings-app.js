@@ -1,6 +1,7 @@
-import { fetchListings, fetchListing, deleteListingFromDb, deleteAllListingsFromDb, fetchDbStats, saveListingToDb, recordListingView } from "./db-client.js?v=myAds1";
+import { fetchListings, fetchListing, deleteListingFromDb, deleteAllListingsFromDb, fetchDbStats, saveListingToDb, recordListingView } from "./db-client.js?v=ownAds1";
 import { renderListingCells } from "./cells-view.js";
 import { createListingCard, formatListingDisplayTitle } from "./listing-card.js";
+import { getAuthUser } from "./site-auth.js?v=auth20260805localdb9";
 
 const listEl = document.getElementById("listings-list");
 const detailEl = document.getElementById("listings-detail");
@@ -14,6 +15,7 @@ const editBtn = document.getElementById("listings-edit-btn");
 const publishBtn = document.getElementById("listings-publish-btn");
 const deleteBtn = document.getElementById("listings-delete-btn");
 const clearAllBtn = document.getElementById("listings-clear-all-btn");
+const detailActions = document.querySelector("[data-owner-actions]");
 
 let currentFilter = "all";
 let selectedId = null;
@@ -24,6 +26,26 @@ const STATUS_LABELS = {
   feladott: "Feladott",
   inaktiv: "Inaktív",
 };
+
+function currentUserId() {
+  const id = Number(getAuthUser()?.id);
+  return Number.isFinite(id) && id > 0 ? id : null;
+}
+
+function canManageCurrent() {
+  const uid = currentUserId();
+  if (!uid || !currentListing) return false;
+  const owner = Number(currentListing.user_id ?? currentListing.form?.owner_user_id);
+  return owner === uid;
+}
+
+function syncOwnerActions() {
+  const own = canManageCurrent();
+  if (detailActions) detailActions.hidden = !own;
+  if (editBtn) editBtn.hidden = !own;
+  if (deleteBtn) deleteBtn.hidden = !own;
+  if (publishBtn) publishBtn.hidden = !own || currentListing?.status === "feladott";
+}
 
 function formatDate(value) {
   if (!value) return "—";
@@ -113,16 +135,16 @@ async function selectListing(id) {
   detailMeta.textContent = parts.join(" · ");
 
   renderListingCells(cellsEl, listing.cells);
-  editBtn.href = `/hirdetesfeladas.html?id=${listing.id}`;
-  publishBtn.hidden = listing.status === "feladott";
-  deleteBtn.dataset.id = String(listing.id);
+  if (editBtn) editBtn.href = `/hirdetesfeladas.html?id=${listing.id}`;
+  if (deleteBtn) deleteBtn.dataset.id = String(listing.id);
+  syncOwnerActions();
 
   await loadList();
   detailEl.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 async function handlePublish() {
-  if (!currentListing?.form || !selectedId) return;
+  if (!canManageCurrent() || !currentListing?.form || !selectedId) return;
   publishBtn.disabled = true;
   try {
     await saveListingToDb(currentListing.form, selectedId, { status: "feladott" });
@@ -136,7 +158,7 @@ async function handlePublish() {
 }
 
 async function handleDelete() {
-  if (!selectedId) return;
+  if (!canManageCurrent() || !selectedId) return;
   const title = detailTitle.textContent || `#${selectedId}`;
   if (!confirm(`Törlöd ezt a hirdetést?\n\n${title}`)) return;
 
@@ -149,14 +171,14 @@ async function handleDelete() {
 }
 
 async function handleClearAll() {
+  if (!currentUserId()) return;
   if (
     !confirm(
-      "Törlöd AZ ÖSSZES hirdetést az adatbázisból?\n\nEz a képeket is törli. Utána újra tudsz importálni."
+      "Törlöd a saját hirdetéseidet?\n\nMások hirdetései megmaradnak. Ez nem visszavonható."
     )
   ) {
     return;
   }
-  if (!confirm("Biztosan? Ez nem visszavonható.")) return;
 
   clearAllBtn.disabled = true;
   try {

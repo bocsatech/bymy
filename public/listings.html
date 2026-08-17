@@ -58,7 +58,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/css/style.css?v=automax20260720homelist" />
     <link rel="stylesheet" href="/css/automax.css?v=homeimg20260807" />
-    <link rel="stylesheet" href="/css/site-app.css?v=mobileStable2" />
+    <link rel="stylesheet" href="/css/site-app.css?v=ownAds1" />
     <link rel="stylesheet" href="/css/site-side.css?v=automax20260720homelist" />
   </head>
   <body class="site-app import-page listings-page site-page" data-site-page="listings">
@@ -121,7 +121,7 @@
         <button type="button" class="listings-filter-btn active" data-listings-filter="all">Összes</button>
         <button type="button" class="listings-filter-btn" data-listings-filter="mentett">Mentett</button>
         <button type="button" class="listings-filter-btn" data-listings-filter="feladott">Feladott</button>
-        <button type="button" class="btn btn-secondary btn-sm" id="listings-clear-all-btn" style="margin-left:auto">Összes törlése</button>
+        <button type="button" class="btn btn-secondary btn-sm" id="listings-clear-all-btn" data-auth-member hidden style="margin-left:auto">Összes törlése</button>
       </div>
 
       <div class="listings-feed">
@@ -135,7 +135,7 @@
             <h2 id="listings-detail-title" class="listings-detail-title">—</h2>
             <p id="listings-detail-meta" class="listings-detail-meta"></p>
           </div>
-          <div class="listings-detail-actions">
+          <div class="listings-detail-actions" data-owner-actions hidden>
               <a class="btn btn-secondary btn-sm" id="listings-edit-btn" href="/beallitasok.html?szekcio=hirdetes">Szerkesztés</a>
               <button type="button" class="btn btn-secondary btn-sm listings-publish-btn" id="listings-publish-btn" hidden>Közzététel főoldalra</button>
               <button type="button" class="btn btn-secondary btn-sm listings-delete-btn" id="listings-delete-btn">Törlés</button>
@@ -160,7 +160,7 @@
       </div>
     </footer>
 
-    <script src="/js/listings-app.js?v=myAds1" type="module"></script>
+    <script src="/js/listings-app.js?v=ownAds1" type="module"></script>
     <script src="/js/site-avatar-menu.js?v=dealerMenu5" type="module"></script>
 
     <script src="/js/nav-counts.js?v=willhabenHdr1" type="module"></script>

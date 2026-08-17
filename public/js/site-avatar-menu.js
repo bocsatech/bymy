@@ -253,7 +253,12 @@ function openMenu(root) {
   document.body.classList.add("fiok-menu-open");
 }
 
+function isPostAdPage() {
+  return document.body?.getAttribute("data-site-page") === "hirdetesfeladas";
+}
+
 function ensureFiokMarkup(wrap) {
+  if (isPostAdPage()) return;
   let dropdown = wrap.querySelector("[data-avatar-dropdown]");
   if (!dropdown) {
     dropdown = document.createElement("div");
@@ -326,6 +331,15 @@ export function refreshAvatarMenuUi(root = document) {
 }
 
 function bindWrap(wrap) {
+  if (isPostAdPage()) {
+    const toggle = wrap.querySelector("[data-avatar-toggle]");
+    toggle?.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      window.location.href = "/beallitasok.html";
+    });
+    return;
+  }
   ensureFiokMarkup(wrap);
   const toggle = wrap.querySelector("[data-avatar-toggle]");
   const dropdown = wrap.querySelector("[data-avatar-dropdown]");

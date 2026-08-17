@@ -345,7 +345,24 @@ function updateLeDisplay() {
 function updateTitle() {
   if (!hirdetesCime) return;
   if (hirdetesCime.type !== "hidden" && hirdetesCime.dataset.userEdited === "1") return;
-  const parts = [gyartmany.value, modell.value].filter(Boolean);
+  const brand = String(gyartmany?.value ?? "").trim();
+  const model = String(modell?.value ?? "").trim();
+  const type = String(tipus?.value ?? "").trim();
+  const parts = [brand, model].filter(Boolean);
+  const typeLower = type.toLowerCase();
+  if (
+    type &&
+    type !== "—" &&
+    typeLower !== brand.toLowerCase() &&
+    typeLower !== model.toLowerCase() &&
+    !parts.join(" ").toLowerCase().includes(typeLower)
+  ) {
+    if (model && typeLower.startsWith(`${model.toLowerCase()} `)) {
+      parts.splice(1, 1, type);
+    } else {
+      parts.push(type);
+    }
+  }
   const year = gyartasiEv.value;
   hirdetesCime.value = parts.length
     ? `Eladó ${parts.join(" ")}${year ? ` (${year})` : ""}`

@@ -10,12 +10,12 @@
  * Háttérkép: auto.html → [data-auto-hero-image] src
  */
 
-body.home-page[data-site-page="auto"] .home-layout.site-layout {
+body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-layout.site-layout {
   grid-template-columns: minmax(0, 1fr);
 }
 
-body.home-page[data-site-page="auto"] .home-main,
-body.home-page[data-site-page="auto"] .home-ad-strip-inner {
+body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main,
+body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-ad-strip-inner {
   max-width: 1120px;
   width: 100%;
   margin-left: auto;
@@ -24,13 +24,13 @@ body.home-page[data-site-page="auto"] .home-ad-strip-inner {
 }
 
 @media (max-width: 900px) {
-  body.home-page[data-site-page="auto"] .home-main {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main {
     padding-left: 0.55rem;
     padding-right: 0.55rem;
   }
 
   /* Mobilon a nagy üres HIRDETÉS blokkok lejjebb tolják a keresőt. */
-  body.home-page[data-site-page="auto"] .home-ad-strip:not(.home-ad-strip--bottom) {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-ad-strip:not(.home-ad-strip--bottom) {
     display: none;
   }
 }

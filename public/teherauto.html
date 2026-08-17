@@ -49,20 +49,60 @@
       })();
     </script>
     <meta charset="utf-8" />
-    <meta name="viewport" content="headerRow1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext x='16' y='22' text-anchor='middle' font-size='14' font-family='system-ui,sans-serif' font-weight='700'%3EB%3C/text%3E%3C/svg%3E" type="image/svg+xml" />
     <meta name="bymy-version" content="authAcct1" />
     <title>Teherautó — Bymy</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link
-      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;650;700;800&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;600;700;800&display=swap"
       rel="stylesheet"
-    />    <link rel="stylesheet" href="/css/hub.css?v=mobileStable2" />
+    />
+    <link rel="stylesheet" href="/css/style.css?v=automax20260720homelist" />    <link rel="stylesheet" href="/css/hub.css?v=mobileStable2" />
 
-    <link rel="stylesheet" href="/css/site-app.css?v=mobileStable2" />  </head>
-  <body class="hub-page site-page site-app" data-site-page="teherauto">
-    <header class="hub-header">
+    <link rel="stylesheet" href="/css/site-app.css?v=mobileStable2" />    <link rel="stylesheet" href="/css/site-side.css?v=home20260725unifiedscroll" />
+    <link rel="stylesheet" href="/css/home.css?v=truckHero1" />
+    <link rel="stylesheet" href="/css/auto-hero.css?v=truckHero1" />
+    <style id="home-scroll-fix">
+      /* Inline: cache-biztos — a teljes oldal görget, külön görgetősáv nincs sehol. */
+      html:has(body.home-page) {
+        overflow-y: auto !important;
+        height: auto !important;
+      }
+      body.home-page {
+        overflow: visible !important;
+        height: auto !important;
+        max-height: none !important;
+        display: block !important;
+      }
+      body.home-page .home-main {
+        min-height: 0 !important;
+        overflow: visible !important;
+        display: block !important;
+      }
+      body.home-page .home-layout {
+        min-height: 0 !important;
+        overflow: visible !important;
+        align-items: start !important;
+      }
+      body.home-page .home-center {
+        min-height: 0 !important;
+        overflow: visible !important;
+      }
+      /* Sem a hirdetéslistának, sem az oldalsávnak nincs saját görgetője. */
+      body.home-page .home-listings-panel,
+      body.home-page .home-info-sidebar,
+      body.home-page .home-partner-results,
+      body.home-page .site-side-card {
+        overflow: visible !important;
+        max-height: none !important;
+      }
+    </style>
+  </head>
+  <body class="home-page site-page site-app" data-site-page="teherauto">
+    <header class="hub-header home-header">
       <div class="hub-header-inner">
         <div class="hub-header-top">
         <div class="hub-header-actions site-header-actions">
@@ -104,21 +144,265 @@
       </div>
     </header>
 
-    <section class="hub-hero hub-hero--empty" aria-hidden="true"></section>
+    <section class="home-ad-strip" aria-label="Banner hirdetések">
+      <div class="home-ad-strip-inner">
+        <article class="home-ad-slot" data-ad-slot="header-left">
+          <p class="home-ad-slot-label">Hirdetés</p>
+          <div class="home-ad-slot-frame">
+            <a class="home-ad-slot-link" data-ad-link href="#" hidden>
+              <img class="home-ad-slot-image" data-ad-image alt="" width="728" height="90" />
+            </a>
+            <div class="home-ad-slot-placeholder" data-ad-placeholder>Hirdetési hely</div>
+          </div>
+        </article>
+        <article class="home-ad-slot" data-ad-slot="header-right">
+          <p class="home-ad-slot-label">Hirdetés</p>
+          <div class="home-ad-slot-frame">
+            <a class="home-ad-slot-link" data-ad-link href="#" hidden>
+              <img class="home-ad-slot-image" data-ad-image alt="" width="728" height="90" />
+            </a>
+            <div class="home-ad-slot-placeholder" data-ad-placeholder>Hirdetési hely</div>
+          </div>
+        </article>
+      </div>
+    </section>
 
-    <main class="hub-main">
-      <section class="hub-sell" aria-label="Teherautó">
-        <div>
-          <h2>Teherautó</h2>
-          <p>Kisteher és teherautó hirdetések — a lista hamarosan bővül.</p>
+    <main class="home-main">
+      <section class="auto-search-hero" data-auto-search-hero aria-labelledby="auto-search-title">
+        <nav class="auto-search-tabs" aria-label="Járműkategóriák">
+          <a class="auto-search-tab" href="/auto.html">Személyautók</a>
+          <a class="auto-search-tab" href="/auto.html?kategoria=berauto">Bérautók</a>
+          <a class="auto-search-tab" href="/auto.html?kategoria=leasing">Leasingautók</a>
+          <a class="auto-search-tab is-active" href="/teherauto.html?kategoria=35-alatt" data-truck-tab="35-alatt" aria-current="page">Teherautó 3,5-ig</a>
+          <a class="auto-search-tab" href="/teherauto.html?kategoria=35-felett" data-truck-tab="35-felett">Teherautó 3,5-tól</a>
+          <a class="auto-search-tab" href="/auto.html?kategoria=lakoauto-berles">Lakóautó bérlés</a>
+        </nav>
+
+        <div class="auto-search-hero__stage">
+          <!-- Háttérkép cseréje: csak az src. -->
+          <img
+            class="auto-search-hero__image"
+            data-auto-hero-image
+            src="/images/automax-panel-bg.png?v=autoHero1"
+            alt=""
+            width="1024"
+            height="1536"
+            decoding="async"
+          />
+
+          <div class="auto-search-hero__content">
+            <article class="auto-search-panel">
+              <h1 class="auto-search-title" id="auto-search-title">Melyik teherautót keresed?</h1>
+
+            <form class="home-qs-form" id="home-qs-form">
+              <p class="home-qs-status" id="home-qs-status" hidden></p>
+              <div class="home-qs-row">
+                <label class="home-qs-field home-qs-field--wide">
+                  <span class="home-qs-label">Gyártmány</span>
+                  <select class="home-qs-control" id="qs-gyartmany">
+                    <option value="">Mindegy</option>
+                  </select>
+                </label>
+
+                <label class="home-qs-field home-qs-field--wide">
+                  <span class="home-qs-label">Típus</span>
+                  <select class="home-qs-control" id="qs-modell">
+                    <option value="">Mindegy</option>
+                  </select>
+                </label>
+              </div>
+
+              <div class="home-qs-row">
+                <label class="home-qs-field home-qs-field--wide">
+                  <span class="home-qs-label">Üzemanyag</span>
+                  <select class="home-qs-control" id="qs-uzemanyag">
+                    <option value="">Mindegy</option>
+                    <option value="benzin">Benzin</option>
+                    <option value="diesel">Dízel</option>
+                    <option value="hybrid">Hibrid</option>
+                    <option value="benzin-gaz">Benzin/Gáz</option>
+                    <option value="elektromos">Elektromos</option>
+                  </select>
+                </label>
+
+                <div class="home-qs-pair">
+                  <label class="home-qs-field home-qs-field--narrow">
+                    <span class="home-qs-label">Évjárat</span>
+                    <select class="home-qs-control" id="qs-ev-tol" aria-label="Évjárat -tól">
+                      <option value="">-tól</option>
+                    </select>
+                  </label>
+                  <label class="home-qs-field home-qs-field--narrow">
+                    <select class="home-qs-control" id="qs-ev-ig" aria-label="Évjárat -ig">
+                      <option value="">-ig</option>
+                    </select>
+                  </label>
+                </div>
+
+                <div class="home-qs-pair">
+                  <label class="home-qs-field home-qs-field--narrow">
+                    <span class="home-qs-label">Vételár</span>
+                    <select class="home-qs-control" id="qs-ar-tol" aria-label="Vételár -tól">
+                      <option value="">-tól</option>
+                    </select>
+                    <span class="home-qs-suffix" aria-hidden="true">Ft</span>
+                  </label>
+                  <label class="home-qs-field home-qs-field--narrow">
+                    <select class="home-qs-control" id="qs-ar-ig" aria-label="Vételár -ig">
+                      <option value="">-ig</option>
+                    </select>
+                    <span class="home-qs-suffix" aria-hidden="true">Ft</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="home-qs-more" id="qs-more" hidden>
+                <div class="home-qs-row">
+                  <div class="home-qs-pair">
+                    <label class="home-qs-field home-qs-field--narrow">
+                      <span class="home-qs-label">Futott km</span>
+                      <select class="home-qs-control" id="qs-km-tol" aria-label="Futott km -tól">
+                        <option value="">-tól</option>
+                      </select>
+                    </label>
+                    <label class="home-qs-field home-qs-field--narrow">
+                      <select class="home-qs-control" id="qs-km-ig" aria-label="Futott km -ig">
+                        <option value="">-ig</option>
+                      </select>
+                    </label>
+                  </div>
+
+                  <div class="home-qs-pair">
+                    <label class="home-qs-field home-qs-field--narrow">
+                      <span class="home-qs-label">Teljesítmény</span>
+                      <select class="home-qs-control" id="qs-le-tol" aria-label="LE -tól">
+                        <option value="">-tól</option>
+                      </select>
+                      <span class="home-qs-suffix" aria-hidden="true">LE</span>
+                    </label>
+                    <label class="home-qs-field home-qs-field--narrow">
+                      <select class="home-qs-control" id="qs-le-ig" aria-label="LE -ig">
+                        <option value="">-ig</option>
+                      </select>
+                      <span class="home-qs-suffix" aria-hidden="true">LE</span>
+                    </label>
+                  </div>
+
+                  <label class="home-qs-field home-qs-field--wide">
+                    <span class="home-qs-label">Kivitel</span>
+                    <select class="home-qs-control" id="qs-kivitel">
+                      <option value="">Mindegy</option>
+                      <option>Kisteher</option>
+                      <option>Dobozos</option>
+                      <option>Platós</option>
+                      <option>Ponyvás</option>
+                      <option>Hűtős</option>
+                      <option>Billenős</option>
+                      <option>Alváz</option>
+                    </select>
+                  </label>
+                </div>
+
+                <div class="home-qs-row">
+                  <label class="home-qs-field home-qs-field--wide">
+                    <span class="home-qs-label">Sebességváltó</span>
+                    <select class="home-qs-control" id="qs-sebessegvalto">
+                      <option value="">Mindegy</option>
+                      <option value="Manuális">Manuális</option>
+                      <option value="Automata">Automata</option>
+                    </select>
+                  </label>
+
+                  <label class="home-qs-field home-qs-field--wide">
+                    <span class="home-qs-label">Hajtás</span>
+                    <select class="home-qs-control" id="qs-hajtas">
+                      <option value="">Mindegy</option>
+                      <option>Első kerék</option>
+                      <option>Hátsó kerék</option>
+                      <option>Összkerék</option>
+                    </select>
+                  </label>
+                </div>
+              </div>
+
+              <div class="home-qs-row home-qs-row--actions">
+                <button type="submit" class="home-qs-submit">Járművek megjelenítése</button>
+                <div class="home-qs-actions-secondary">
+                  <button type="button" class="home-qs-action home-qs-action--advanced" id="qs-reszletes" aria-expanded="false" aria-controls="qs-more">Több szűrő</button>
+                  <button type="reset" class="home-qs-action">Szűrők törlése</button>
+                </div>
+              </div>
+            </form>
+            </article>
+          </div>
+
+          <img class="auto-search-hero__brand" src="/images/bymy-logo.png?v=autoHero1" alt="Bymy.hu" width="190" height="82" decoding="async" />
         </div>
-        <a class="hub-btn hub-btn--primary" href="/hirdetesfeladas.html" data-auth-guard>Új hirdetés</a>
       </section>
+
+      <div class="site-layout home-layout">
+        <section class="site-center home-center" aria-label="Hirdetések">
+          <div class="home-listings-panel">
+            <div id="home-grid-track" class="home-grid-track" role="list"></div>
+            <p id="home-empty" class="home-empty" hidden>
+              Még nincs teherautó-hirdetés. Importálj, mentsd az adatbázisba, majd frissítsd az oldalt.
+            </p>
+            <section class="home-ad-strip home-ad-strip--bottom" aria-label="Banner hirdetések a listában">
+              <div class="home-ad-strip-inner">
+                <article class="home-ad-slot" data-ad-slot="grid-bottom-left">
+                  <p class="home-ad-slot-label">Hirdetés</p>
+                  <div class="home-ad-slot-frame">
+                    <a class="home-ad-slot-link" data-ad-link href="#" hidden>
+                      <img class="home-ad-slot-image" data-ad-image alt="" width="728" height="90" />
+                    </a>
+                    <div class="home-ad-slot-placeholder" data-ad-placeholder>Hirdetési hely</div>
+                  </div>
+                </article>
+                <article class="home-ad-slot" data-ad-slot="grid-bottom-right">
+                  <p class="home-ad-slot-label">Hirdetés</p>
+                  <div class="home-ad-slot-frame">
+                    <a class="home-ad-slot-link" data-ad-link href="#" hidden>
+                      <img class="home-ad-slot-image" data-ad-image alt="" width="728" height="90" />
+                    </a>
+                    <div class="home-ad-slot-placeholder" data-ad-placeholder>Hirdetési hely</div>
+                  </div>
+                </article>
+              </div>
+            </section>
+            <section class="home-bottom-extra" aria-label="További tartalom"></section>
+          </div>
+        </section>
+
+      </div>
     </main>
+
+    <footer class="site-content-bar" id="site-content-bar" aria-label="Tartalom szerkesztése">
+      <div class="site-content-bar-inner">
+        <button type="button" class="site-side-edit" id="site-side-edit">Tartalom szerkesztése</button>
+        <div id="site-side-toolbar" class="site-side-toolbar" hidden>
+          <button type="button" class="site-side-btn" id="site-side-save">Tartalom mentése</button>
+          <button type="button" class="site-side-btn site-side-btn--ghost" id="site-side-cancel">Mégse</button>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      (function () {
+        var kat = new URLSearchParams(location.search).get("kategoria") || "35-alatt";
+        document.querySelectorAll("[data-truck-tab]").forEach(function (el) {
+          var on = el.getAttribute("data-truck-tab") === kat;
+          el.classList.toggle("is-active", on);
+          if (on) el.setAttribute("aria-current", "page");
+          else el.removeAttribute("aria-current");
+        });
+      })();
+    </script>
+    <script src="/js/home-app.js?v=hideSidebar1" type="module"></script>
+    <script src="/js/auto-hero.js?v=heroSettings1" type="module"></script>
+    <script src="/js/site-avatar-menu.js?v=megjelenesFix1" type="module"></script>
 
     <script src="/js/nav-counts.js?v=willhabenHdr1" type="module"></script>
     <script src="/js/theme.js?v=willhabenHdr1" type="module"></script>
     <script src="/js/site-auth.js?v=authAcct1" type="module"></script>
-    <script src="/js/site-avatar-menu.js?v=megjelenesFix1" type="module"></script>
   </body>
 </html>

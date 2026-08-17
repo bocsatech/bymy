@@ -738,14 +738,14 @@ body.home-page .local-banner {
   border-bottom-color: #9ca3af;
 }
 
-body.home-page[data-site-page="auto"] .hub-header-inner,
-body.home-page[data-site-page="auto"] .home-header-inner {
+body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-header-inner,
+body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-header-inner {
   display: flex;
   flex-direction: column;
 }
 
-body.home-page[data-site-page="auto"] .hub-nav,
-body.home-page[data-site-page="auto"] .home-nav {
+body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav,
+body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-nav {
   justify-content: center;
 }
 

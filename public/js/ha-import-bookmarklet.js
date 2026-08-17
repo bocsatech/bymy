@@ -9,6 +9,16 @@
     return String(t || "").replace(/\s+/g, " ").trim();
   }
 
+  function textOf(el) {
+    if (!el) return "";
+    return clean(el.innerText || el.textContent || "");
+  }
+
+  function isChromeName(t) {
+    const v = clean(t);
+    return !v || /javascript|gyorsnézet|gyorsnezet|hiba!|belépés|haszn[aá]ltaut[oó]\.hu|regisztr/i.test(v);
+  }
+
   function isBadTitle(t) {
     return (
       !t ||
@@ -18,26 +28,40 @@
     );
   }
 
-  function pickTitle() {
-    const og = document.querySelector('meta[property="og:title"]');
+  function pickTitle(doc) {
+    const og = doc.querySelector('meta[property="og:title"]');
     if (og && og.content && !isBadTitle(clean(og.content))) {
       return clean(og.content).replace(/\s*[|–-].*$/, "");
     }
-    const selectors = ["h1", "h2", '[class*="hirdetes"][class*="cim"]', '[class*="title"]', '[class*="cim"]', ".jarmu-adat h1", ".adatlap h1"];
+    const selectors = [
+      "h1",
+      "h2",
+      '[class*="hirdetes"][class*="cim"]',
+      '[class*="title"]',
+      '[class*="cim"]',
+      ".jarmu-adat h1",
+      ".adatlap h1",
+    ];
     for (const sel of selectors) {
-      for (const el of document.querySelectorAll(sel)) {
-        const t = clean(el.innerText || el.textContent || "");
+      for (const el of doc.querySelectorAll(sel)) {
+        const t = textOf(el);
         if (!isBadTitle(t)) return t;
       }
     }
-    const docTitle = clean((document.title || "").replace(/\s*[|–-].*$/, ""));
+    for (const el of doc.querySelectorAll("dt, td.bal.pontos, th, td.pontos")) {
+      const label = textOf(el);
+      if (!/c[ií]m|hirdet[eé]s c[ií]me|m[aá]rka|gy[aá]rtm[aá]ny/i.test(label)) continue;
+      const val = textOf(el.nextElementSibling);
+      if (!isBadTitle(val) && /c[ií]m/i.test(label)) return val;
+    }
+    const docTitle = clean((doc.title || "").replace(/\s*[|–-].*$/, ""));
     return isBadTitle(docTitle) ? "" : docTitle;
   }
 
-  function pickImage() {
-    const og = document.querySelector('meta[property="og:image"]');
+  function pickImage(doc) {
+    const og = doc.querySelector('meta[property="og:image"]');
     if (og && og.content && /^https?:/i.test(og.content)) return og.content;
-    const imgs = [...document.querySelectorAll("img")];
+    const imgs = [...doc.querySelectorAll("img")];
     imgs.sort((a, b) => (b.naturalWidth * b.naturalHeight) - (a.naturalWidth * a.naturalHeight));
     for (const img of imgs) {
       let src = img.currentSrc || img.src || img.getAttribute("data-src") || "";
@@ -49,47 +73,134 @@
     return "";
   }
 
-  function fieldAfter(label) {
-    const rows = document.querySelectorAll("tr, dl > *");
-    for (const row of rows) {
-      const text = clean(row.innerText || "");
-      if (!text) continue;
-      const re = new RegExp("^" + label + "\\s*[:\\n]\\s*(.+)$", "i");
-      const m = text.match(re);
-      if (m) return clean(m[1].split("\n")[0]);
+  function pickDescription(doc) {
+    for (const sel of ["textarea", '[class*="leiras"]', '[class*="description"]', '[id*="leiras"]']) {
+      for (const el of doc.querySelectorAll(sel)) {
+        const t = clean(el.value || el.innerText || el.textContent || "");
+        if (t.length >= 20 && !/^leírás$/i.test(t) && !/megtekinthető telefonon/i.test(t)) return t;
+      }
     }
-    const body = document.body.innerText || "";
-    const re = new RegExp(label + "\\s*[:\\n]\\s*([^\\n]{1,80})", "i");
-    const m = body.match(re);
-    return m ? clean(m[1]) : "";
+    const body = (doc.body?.innerText || doc.body?.textContent || "").replace(/\r\n/g, "\n");
+    const m = body.match(
+      /(?:^|\n)\s*Leírás\s*\n+([\s\S]{8,4000}?)(?=\n\s*(?:Felszereltség|Általános|Műszaki|Megtalálható|Okmányok|Hirdetés)\b|$)/i
+    );
+    if (m) {
+      const t = clean(m[1]);
+      if (t.length >= 20 && !/megtekinthető telefonon/i.test(t)) return t;
+    }
+    return "";
+  }
+
+  function addPair(map, rawKey, rawValue) {
+    const key = clean(rawKey).replace(/:$/, "");
+    const value = clean(rawValue);
+    if (!key || !value || key.length > 80 || value.length > 500) return;
+    if (/^(ár|ar|költségek|altalanos adatok|muszaki adatok|felszereltseg|felszereltség|hiba!?)$/i.test(key)) return;
+    if (!map[key] || map[key].length < value.length) map[key] = value;
+  }
+
+  function extractMap(doc) {
+    const map = {};
+    const parseTable = (table) => {
+      for (const row of table.querySelectorAll("tr")) {
+        const cells = [...row.querySelectorAll("td, th")];
+        if (cells.length < 2) continue;
+        const keyCell = row.querySelector("td.bal.pontos, td.pontos, th.pontos, .bal.pontos");
+        if (keyCell) {
+          const valueCell = keyCell.nextElementSibling;
+          if (valueCell) {
+            addPair(map, textOf(keyCell), textOf(valueCell));
+            continue;
+          }
+        }
+        addPair(map, textOf(cells[0]), textOf(cells[cells.length - 1]));
+      }
+    };
+    for (const table of doc.querySelectorAll(
+      "table.hirdetesadatok, table[class*='hirdetesadatok'], .hirdetesadatok table, table[class*='adat'], table"
+    )) {
+      parseTable(table);
+    }
+    for (const row of doc.querySelectorAll("tr")) {
+      const keyCell = row.querySelector("td.bal.pontos, td.pontos, th.pontos, .bal.pontos");
+      if (!keyCell) continue;
+      const valueCell = keyCell.nextElementSibling;
+      if (valueCell) addPair(map, textOf(keyCell), textOf(valueCell));
+    }
+    for (const dl of doc.querySelectorAll("dl")) {
+      for (const dt of dl.querySelectorAll("dt")) {
+        const dd = dt.nextElementSibling;
+        if (dd && dd.tagName === "DD") addPair(map, textOf(dt), textOf(dd));
+      }
+    }
+    const body = doc.body?.innerText || doc.body?.textContent || "";
+    for (const line of body.split("\n")) {
+      const match = line.match(/^(.{2,50}?):\s*(.{1,200})$/);
+      if (match) addPair(map, match[1], match[2]);
+    }
+    return map;
+  }
+
+  function fieldFromMap(map, labels) {
+    const keys = Object.keys(map);
+    for (const label of labels) {
+      const want = label.toLowerCase();
+      for (const key of keys) {
+        if (key.toLowerCase() === want && map[key]) return map[key];
+      }
+    }
+    for (const label of labels) {
+      const want = label.toLowerCase();
+      for (const key of keys) {
+        if (key.toLowerCase().includes(want) && map[key]) return map[key];
+      }
+    }
+    return "";
   }
 
   function pickListingId(href) {
-    const u = String(href || location.href);
+    const u = String(href || "");
     let m = u.match(/\/gyorsnezet\/[^/]+\/(\d{5,})/i);
     if (m) return m[1];
     m = u.match(/-(\d{5,})(?:\?|$)/);
     return m ? m[1] : "";
   }
 
-  function extractPage() {
-    const title = pickTitle();
-    const parts = title.split(/\s+/).filter(Boolean);
-    const priceMatch = (document.body.innerText || "").match(/(\d[\d\s.]{3,})\s*Ft/i);
+  function extractFromDoc(doc, href) {
+    const map = extractMap(doc);
+    const title = pickTitle(doc) || fieldFromMap(map, ["Cím", "Hirdetés címe"]);
+    const brand = fieldFromMap(map, ["Márka", "Gyártmány"]) || title.split(/\s+/).filter(Boolean)[0] || "";
+    const model = fieldFromMap(map, ["Modell"]) || title.split(/\s+/).filter(Boolean)[1] || "";
+    const price =
+      fieldFromMap(map, ["Vételár", "Hirdetési ár", "Ár"]) ||
+      ((doc.body?.innerText || doc.body?.textContent || "").match(/(\d[\d\s.]{3,})\s*Ft/i) || [])[1] ||
+      "";
+    const km = fieldFromMap(map, ["Futásteljesítmény", "Kilométeróra", "Km. óra állás"]);
+    const yearRaw = fieldFromMap(map, ["Évjárat", "Gyártási év"]);
+    const year = (yearRaw.match(/(19|20)\d{2}/) || [])[0] || "";
+    const fuel = fieldFromMap(map, ["Üzemanyag"]);
+    const rawHtml = doc.documentElement?.outerHTML || "";
+    const html = rawHtml.slice(0, Object.keys(map).length >= 8 ? 80000 : 220000);
     return {
-      url: location.href,
-      html: (document.documentElement.outerHTML || "").slice(0, 180000),
-      listingId: pickListingId(),
-      visibleTitle: title,
-      visibleImage: pickImage(),
-      visibleDescription: "",
-      price: priceMatch ? priceMatch[1] : fieldAfter("Ár") || fieldAfter("Vételár"),
-      km: fieldAfter("Kilométeróra") || fieldAfter("Km") || fieldAfter("Futásteljesítmény"),
-      year: (fieldAfter("Évjárat") || fieldAfter("Gyártási év") || "").match(/(19|20)\d{2}/)?.[0] || "",
-      fuel: fieldAfter("Üzemanyag") || "",
-      brand: parts[0] || "",
-      model: parts[1] || "",
+      url: href,
+      html,
+      listingId: pickListingId(href),
+      visibleTitle: isBadTitle(title) ? [brand, model].filter(Boolean).join(" ") : title,
+      visibleImage: pickImage(doc),
+      visibleDescription: pickDescription(doc),
+      price,
+      km,
+      year,
+      fuel,
+      brand: isChromeName(brand) ? "" : brand,
+      model: isChromeName(model) ? "" : model,
+      map,
+      bodyText: String(doc.body?.innerText || doc.body?.textContent || "").slice(0, 20000),
     };
+  }
+
+  function extractPage() {
+    return extractFromDoc(document, location.href);
   }
 
   function discoverIds(html, pageUrl) {
@@ -115,38 +226,14 @@
     const href = location.href.toLowerCase();
     if (href.includes("/gyorsnezet/")) return true;
     if (/\/szemelyauto\/.+-\d{5,}/i.test(href)) return true;
-    return discoverIds().length <= 1 && Boolean(pickListingId());
+    return discoverIds().length <= 1 && Boolean(pickListingId(location.href));
   }
 
   async function extractFromUrl(url) {
     const res = await fetch(url, { credentials: "include" });
     const html = await res.text();
     const doc = new DOMParser().parseFromString(html, "text/html");
-    const title = clean(
-      doc.querySelector("h1")?.textContent ||
-        doc.querySelector('meta[property="og:title"]')?.content ||
-        ""
-    ).replace(/\s*[|–-].*$/, "");
-    const ogImg = doc.querySelector('meta[property="og:image"]')?.content || "";
-    const text = clean(doc.body?.innerText || doc.body?.textContent || "");
-    const price = (text.match(/(\d[\d\s.]{3,})\s*Ft/i) || [])[1] || "";
-    const km = (text.match(/([\d\s.]+)\s*km/i) || [])[1] || "";
-    const year = (text.match(/\b((?:19|20)\d{2})\b/) || [])[1] || "";
-    const parts = title.split(/\s+/).filter(Boolean);
-    return {
-      url,
-      html: html.slice(0, 180000),
-      listingId: pickListingId(url),
-      visibleTitle: title,
-      visibleImage: /^https?:/i.test(ogImg) ? ogImg : "",
-      visibleDescription: "",
-      price,
-      km,
-      year,
-      fuel: "",
-      brand: parts[0] || "",
-      model: parts[1] || "",
-    };
+    return extractFromDoc(doc, url);
   }
 
   function deliver(origin, payload) {

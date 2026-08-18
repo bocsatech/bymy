@@ -27,7 +27,7 @@ import {
 } from "./fok-data.js?v=auth20260805localdb9";
 import { initMessagesUi } from "./messages-ui.js?v=messagesWh2";
 import { listConversations } from "./messages-api.js?v=messagesWh2";
-import { initMyAdsPanel } from "./my-ads.js?v=myAds1";
+import { initMyAdsPanel } from "./my-ads.js?v=hdView1";
 
 const PHOTO_KEY = "bymy-avatar-photos";
 const NOTIFY_KEY = "bymy-notify-prefs";

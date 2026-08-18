@@ -10,7 +10,6 @@
           }
           document.documentElement.setAttribute("data-theme", t);
         } catch (e) {}
-                /* Auth fejléc: ne villanjon vendég gomb → profil a modul / API előtt */
         try {
           var raw = sessionStorage.getItem("bymy-auth-user");
           var user = raw ? JSON.parse(raw) : null;
@@ -51,19 +50,16 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext x='16' y='22' text-anchor='middle' font-size='14' font-family='system-ui,sans-serif' font-weight='700'%3EB%3C/text%3E%3C/svg%3E" type="image/svg+xml" />
-    <meta name="bymy-version" content="authAcct1" />
-    <title>Hirdetések — Bymy</title>
+    <meta name="bymy-version" content="hdView1" />
+    <title>Hirdetés — Bymy</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/css/style.css?v=automax20260720homelist" />
-    <link rel="stylesheet" href="/css/automax.css?v=homeimg20260807" />
-    <link rel="stylesheet" href="/css/site-app.css?v=ownAds1" />
-    <link rel="stylesheet" href="/css/site-side.css?v=automax20260720homelist" />
+    <link rel="stylesheet" href="/css/site-app.css?v=hdView1" />
+    <link rel="stylesheet" href="/css/hirdetes-detail.css?v=hdView1" />
   </head>
-  <body class="site-app import-page listings-page site-page" data-site-page="listings">
-    <div class="local-banner">Bymy — mentett és feladott hirdetések (SQLite)</div>
-
+  <body class="site-app hd-page site-page" data-site-page="hirdetes">
     <header class="site-header site-app-header">
       <div class="site-app-header-inner">
         <div class="hub-header-top">
@@ -106,49 +102,12 @@
       </div>
     </header>
 
-    <main class="page page-listings">
-      <div class="site-layout">
-        <!-- SITE_SIDE_LEFT -->
-        <div class="site-center">
-      <div class="listings-feed">
-        <div id="listings-list" class="ha-card-feed"></div>
-        <p id="listings-empty" class="listings-empty" hidden>Még nincs mentett hirdetés. Importálj egy autót, majd kattints a „Mentés az adatbázisba” gombra.</p>
-      </div>
-
-      <section class="card listings-detail-card" id="listings-detail" hidden>
-        <div class="card-head listings-detail-head">
-          <div>
-            <h2 id="listings-detail-title" class="listings-detail-title">—</h2>
-            <p id="listings-detail-meta" class="listings-detail-meta"></p>
-          </div>
-          <div class="listings-detail-actions" data-owner-actions hidden>
-              <a class="btn btn-secondary btn-sm" id="listings-edit-btn" href="/beallitasok.html?szekcio=hirdetes">Szerkesztés</a>
-              <button type="button" class="btn btn-secondary btn-sm listings-publish-btn" id="listings-publish-btn" hidden>Közzététel főoldalra</button>
-              <button type="button" class="btn btn-secondary btn-sm listings-delete-btn" id="listings-delete-btn">Törlés</button>
-          </div>
-        </div>
-        <div class="card-body">
-          <div id="listings-cells" class="import-cells-card"></div>
-        </div>
-      </section>
-        </div>
-        <!-- SITE_SIDE_RIGHT -->
-      </div>
+    <main class="hd-wrap" id="hd-root">
+      <p class="hd-empty">Hirdetés betöltése…</p>
     </main>
 
-    <footer class="site-content-bar" id="site-content-bar" aria-label="Tartalom szerkesztése">
-      <div class="site-content-bar-inner">
-        <button type="button" class="site-side-edit" id="site-side-edit">Tartalom szerkesztése</button>
-        <div id="site-side-toolbar" class="site-side-toolbar" hidden>
-          <button type="button" class="site-side-btn" id="site-side-save">Tartalom mentése</button>
-          <button type="button" class="site-side-btn site-side-btn--ghost" id="site-side-cancel">Mégse</button>
-        </div>
-      </div>
-    </footer>
-
-    <script src="/js/listings-app.js?v=hdView1" type="module"></script>
+    <script src="/js/hirdetes-detail.js?v=hdView1" type="module"></script>
     <script src="/js/site-avatar-menu.js?v=fiokPage1" type="module"></script>
-
     <script src="/js/nav-counts.js?v=willhabenHdr1" type="module"></script>
     <script src="/js/theme.js?v=willhabenHdr1" type="module"></script>
     <script src="/js/site-auth.js?v=authAcct1" type="module"></script>

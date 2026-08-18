@@ -57,7 +57,7 @@ export async function fetchLatestListing() {
 }
 
 export async function fetchListing(id) {
-  const response = await fetch(`/api/listings/${id}`);
+  const response = await fetch(`/api/listings/${id}`, { headers: authHeaders() });
   const data = await parseJson(response);
   return data.listing ?? null;
 }

@@ -1,5 +1,5 @@
-import { fetchListings } from "./db-client.js?v=myAds1";
-import { createHomeGridCard } from "./home-grid-card.js";
+import { fetchListings } from "./db-client.js?v=hdView1";
+import { createHomeGridCard } from "./home-grid-card.js?v=hdView1";
 import {
   emptyFilters,
   filterListingsBySidebar,
@@ -11,6 +11,7 @@ import { initHomeQuickSearch } from "./home-quicksearch.js";
 import { filterByCategory, initHomeCategoryBar } from "./home-category-bar.js";
 import { initHomeUnifiedScroll } from "./home-unified-scroll.js";
 import { initHomeStatsBar } from "./home-stats-bar.js";
+import { bindListingOpen, restoreListingReturn } from "./listing-return.js?v=hdView1";
 
 const gridTrack = document.getElementById("home-grid-track");
 const emptyEl = document.getElementById("home-empty");
@@ -26,6 +27,7 @@ let statsUi = null;
 let statsFilter = null;
 
 const PAGE = document.body?.getAttribute("data-site-page") || "";
+if (gridTrack) bindListingOpen(gridTrack);
 
 function listingVertical(item) {
   return String(item?.preview?.filter?.hirdetes_vertical ?? "").trim().toLowerCase();
@@ -80,6 +82,7 @@ function renderListings(items) {
   for (const item of filtered) {
     gridTrack.appendChild(createHomeGridCard(item));
   }
+  restoreListingReturn();
 }
 
 async function loadListings() {

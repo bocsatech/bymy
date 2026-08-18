@@ -1,4 +1,5 @@
 import { escapeHtml, formatListingDisplayTitle } from "./listing-card.js";
+import { listingDetailHref } from "./listing-return.js?v=hdView1";
 
 function buildCardTitle(preview, item) {
   const raw =
@@ -47,7 +48,8 @@ export function createHomeGridCard(item) {
   const preview = item.preview ?? {};
   const card = document.createElement("a");
   card.className = "home-grid-card";
-  card.href = `/listings.html?id=${item.id}`;
+  card.href = listingDetailHref(item.id);
+  card.dataset.listingId = String(item.id);
   card.setAttribute("role", "listitem");
 
   const title = buildDisplayTitle(preview, item);

@@ -5,6 +5,7 @@ import {
   deleteListingFromDb,
 } from "./db-client.js?v=myAds1";
 import { compressListingPhotos } from "./listing-photo-compress.js?v=myAds1";
+import { bindListingOpen, restoreListingReturn } from "./listing-return.js?v=hdView1";
 
 function escapeHtml(value) {
   return String(value ?? "")
@@ -39,6 +40,7 @@ function isActive(item) {
 
 export function initMyAdsPanel(root) {
   if (!root) return { reload() {} };
+  bindListingOpen(root);
 
   let items = [];
   let filter = "all";
@@ -102,6 +104,7 @@ export function initMyAdsPanel(root) {
       ${photoModalHtml()}
     `;
     bind();
+    restoreListingReturn();
   }
 
   function rowHtml(item, index) {
@@ -123,7 +126,7 @@ export function initMyAdsPanel(root) {
           <button type="button" class="myads-link" data-photos="${item.id}">Képkezelés</button>
         </td>
         <td>
-          <a class="myads-title" href="/listings.html?id=${item.id}">${escapeHtml(titleOf(item))}</a>
+          <a class="myads-title" href="/hirdetes.html?id=${item.id}" data-listing-id="${item.id}">${escapeHtml(titleOf(item))}</a>
           <p class="myads-spec">${escapeHtml(specOf(item))}</p>
           <label class="myads-inactive">
             <input type="checkbox" data-inactive="${item.id}" ${active ? "" : "checked"} />
@@ -137,7 +140,7 @@ export function initMyAdsPanel(root) {
         </td>
         <td class="myads-fn">
           <a class="myads-link" href="/hirdetesfeladas.html?id=${item.id}">Módosítás</a>
-          <a class="myads-link" href="/listings.html?id=${item.id}">Megtekintés</a>
+          <a class="myads-link" href="/hirdetes.html?id=${item.id}" data-listing-id="${item.id}">Megtekintés</a>
           <button type="button" class="myads-link myads-link--danger" data-delete="${item.id}">Törlés</button>
         </td>
       </tr>

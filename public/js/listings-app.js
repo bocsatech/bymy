@@ -1,7 +1,8 @@
-import { fetchListings, fetchListing, deleteListingFromDb, deleteAllListingsFromDb, fetchDbStats, saveListingToDb, recordListingView } from "./db-client.js?v=ownAds1";
+import { fetchListings, fetchListing, deleteListingFromDb, deleteAllListingsFromDb, fetchDbStats, saveListingToDb, recordListingView } from "./db-client.js?v=hdView1";
 import { renderListingCells } from "./cells-view.js";
 import { createListingCard, formatListingDisplayTitle } from "./listing-card.js";
 import { getAuthUser } from "./site-auth.js?v=auth20260805localdb9";
+import { listingDetailHref, rememberListingOpen, restoreListingReturn } from "./listing-return.js?v=hdView1";
 
 const listEl = document.getElementById("listings-list");
 const detailEl = document.getElementById("listings-detail");
@@ -82,9 +83,13 @@ function renderList(items) {
       selected: item.id === selectedId,
       formatDate,
     });
-    card.addEventListener("click", () => selectListing(item.id));
+    card.addEventListener("click", () => {
+      rememberListingOpen(item.id, card);
+      window.location.href = listingDetailHref(item.id);
+    });
     listEl.appendChild(card);
   }
+  restoreListingReturn();
 }
 
 async function loadList() {
@@ -210,15 +215,16 @@ clearAllBtn?.addEventListener("click", handleClearAll);
 const params = new URLSearchParams(location.search);
 const openId = Number(params.get("id"));
 if (Number.isFinite(openId) && openId > 0) {
-  selectListing(openId).catch(console.error);
+  rememberListingOpen(openId);
+  window.location.replace(listingDetailHref(openId));
+} else {
+  setActiveFilter("all");
+  import("./site-side-content.js")
+    .then((mod) => mod.initSiteSideContent())
+    .catch((error) => console.error("Oldalsáv betöltés:", error));
+  refreshStats().catch(console.error);
+  loadList().catch((error) => {
+    emptyEl.hidden = false;
+    emptyEl.textContent = error.message ?? "Nem sikerült betölteni a hirdetéseket.";
+  });
 }
-
-setActiveFilter("all");
-import("./site-side-content.js")
-  .then((mod) => mod.initSiteSideContent())
-  .catch((error) => console.error("Oldalsáv betöltés:", error));
-refreshStats().catch(console.error);
-loadList().catch((error) => {
-  emptyEl.hidden = false;
-  emptyEl.textContent = error.message ?? "Nem sikerült betölteni a hirdetéseket.";
-});

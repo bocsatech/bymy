@@ -271,7 +271,7 @@ async function handleSave() {
     currentListingId = saved?.id ?? currentListingId;
     hideTopAlert();
     setSaveStatus(
-      `Mentve (#${saved?.id ?? "?"}, ${saved?.cells?.length ?? 0} cella) — megtekintés: /listings.html?id=${saved?.id ?? ""}`,
+      `Mentve (#${saved?.id ?? "?"}, ${saved?.cells?.length ?? 0} cella) — megtekintés: /hirdetes.html?id=${saved?.id ?? ""}`,
       "ok"
     );
     await checkServerReady();

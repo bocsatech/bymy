@@ -4619,3 +4619,11 @@ html[data-theme="dark"] body.site-app .ha-imp-mode {
   border-color: #2a313c;
   color: #e8eaed;
 }
+
+.home-grid-card.is-return-target,
+.listings-ha-card.is-return-target,
+.myads-title.is-return-target,
+.hd-rel.is-return-target {
+  outline: 3px solid #1565c0;
+  outline-offset: 2px;
+}

@@ -7,6 +7,9 @@ import { listingReturnHref, listingDetailHref, rememberListingOpen } from "./lis
 const root = document.getElementById("hd-root");
 const ICON = {
   back: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M15 6 9 12l6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,
+  prev: `<svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M15 5 8 12l7 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  next: `<svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  close: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,
   star: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="m12 3.6 2.1 4.4 4.8.5-3.6 3.1 1.1 4.7L12 14.2 7.6 16.3l1.1-4.7-3.6-3.1 4.8-.5L12 3.6Z" stroke="currentColor" stroke-width="1.6"/></svg>`,
   share: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M16 8a3 3 0 1 0-2.8-4M8 12a3 3 0 1 0 0 0.01M16 20a3 3 0 1 0-2.8-4M8.7 13.2l6.6 3.6M15.3 7.2l-6.6 3.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>`,
   print: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M7 8V5h10v3M6 14h12v5H6v-5Z" stroke="currentColor" stroke-width="1.6"/><path d="M4.8 9h14.4A1.7 1.7 0 0 1 21 10.7v4.2h-3M3 14.9V10.7A1.7 1.7 0 0 1 4.8 9" stroke="currentColor" stroke-width="1.6"/></svg>`,
@@ -110,14 +113,19 @@ function render(view, listing, related) {
     <div class="hd-hero">
       <div class="hd-gallery">
         <div class="hd-stage">
-          ${first ? `<img data-hd-main src="${escapeHtml(first)}" alt="" />` : ""}
+          ${first ? `<button type="button" class="hd-stage-open" data-hd-open aria-label="Kép nagyítása"><img data-hd-main src="${escapeHtml(first)}" alt="" /></button>` : ""}
+          ${
+            images.length > 1
+              ? `<button type="button" class="hd-stage-nav hd-stage-nav--prev" data-hd-prev aria-label="Előző kép">${ICON.prev}</button>
+                 <button type="button" class="hd-stage-nav hd-stage-nav--next" data-hd-next aria-label="Következő kép">${ICON.next}</button>`
+              : ""
+          }
           <span class="hd-count" data-hd-count>${images.length ? `1 / ${images.length}` : "0 / 0"}</span>
         </div>
         ${
           images.length
             ? `<div class="hd-thumbs">
-          <button type="button" class="hd-nav" data-hd-prev aria-label="Előző">‹</button>
-          <div class="hd-thumbs-track">
+          <div class="hd-thumbs-track" data-hd-thumbs>
             ${images
               .map(
                 (url, i) =>
@@ -125,11 +133,39 @@ function render(view, listing, related) {
               )
               .join("")}
           </div>
-          <button type="button" class="hd-nav" data-hd-next aria-label="Következő">›</button>
         </div>`
             : ""
         }
       </div>
+      ${
+        images.length
+          ? `<dialog class="hd-lb" data-hd-lb>
+        <div class="hd-lb-inner">
+          <button type="button" class="hd-lb-close" data-hd-lb-close aria-label="Bezárás">${ICON.close}</button>
+          <div class="hd-lb-stage">
+            <img data-hd-lb-main src="${escapeHtml(first)}" alt="" />
+            ${
+              images.length > 1
+                ? `<button type="button" class="hd-stage-nav hd-stage-nav--prev" data-hd-lb-prev aria-label="Előző kép">${ICON.prev}</button>
+                   <button type="button" class="hd-stage-nav hd-stage-nav--next" data-hd-lb-next aria-label="Következő kép">${ICON.next}</button>`
+                : ""
+            }
+            <span class="hd-count" data-hd-lb-count>1 / ${images.length}</span>
+          </div>
+          <div class="hd-thumbs hd-lb-thumbs">
+            <div class="hd-thumbs-track" data-hd-lb-thumbs>
+              ${images
+                .map(
+                  (url, i) =>
+                    `<button type="button" class="hd-thumb${i === 0 ? " is-on" : ""}" data-hd-lb-thumb="${i}"><img src="${escapeHtml(url)}" alt="" /></button>`
+                )
+                .join("")}
+            </div>
+          </div>
+        </div>
+      </dialog>`
+          : ""
+      }
       <aside class="hd-side">
         <div>
           <p class="hd-price">${escapeHtml(view.price)}</p>
@@ -258,24 +294,80 @@ function bindUi(view, listing, extrasRest) {
   const images = view.images || [];
   const main = root.querySelector("[data-hd-main]");
   const count = root.querySelector("[data-hd-count]");
+  const lightbox = root.querySelector("[data-hd-lb]");
+  const lbMain = root.querySelector("[data-hd-lb-main]");
+  const lbCount = root.querySelector("[data-hd-lb-count]");
+
+  function markThumbs(selector) {
+    root.querySelectorAll(selector).forEach((btn) => {
+      const on = Number(btn.dataset.hdThumb ?? btn.dataset.hdLbThumb) === index;
+      btn.classList.toggle("is-on", on);
+      if (on && btn.closest("[data-hd-lb]")) {
+        btn.scrollIntoView({ block: "nearest", inline: "center" });
+      }
+    });
+  }
 
   function show(i) {
     if (!images.length) return;
     index = (i + images.length) % images.length;
     if (main) main.src = images[index];
-    if (count) count.textContent = `${index + 1} / ${images.length}`;
-    root.querySelectorAll("[data-hd-thumb]").forEach((btn) => {
-      btn.classList.toggle("is-on", Number(btn.dataset.hdThumb) === index);
-    });
+    if (lbMain) lbMain.src = images[index];
+    const label = `${index + 1} / ${images.length}`;
+    if (count) count.textContent = label;
+    if (lbCount) lbCount.textContent = label;
+    markThumbs("[data-hd-thumb]");
+    markThumbs("[data-hd-lb-thumb]");
+  }
+
+  function openLightbox() {
+    if (!lightbox || !images.length) return;
+    show(index);
+    if (typeof lightbox.showModal === "function") lightbox.showModal();
+    else lightbox.setAttribute("open", "");
+  }
+
+  function closeLightbox() {
+    if (!lightbox) return;
+    if (typeof lightbox.close === "function" && lightbox.open) lightbox.close();
+    else lightbox.removeAttribute("open");
   }
 
   root.querySelector("[data-hd-back]")?.addEventListener("click", () => {
     window.location.href = listingReturnHref(view.categoryHref);
   });
-  root.querySelector("[data-hd-prev]")?.addEventListener("click", () => show(index - 1));
-  root.querySelector("[data-hd-next]")?.addEventListener("click", () => show(index + 1));
+  root.querySelector("[data-hd-prev]")?.addEventListener("click", (event) => {
+    event.stopPropagation();
+    show(index - 1);
+  });
+  root.querySelector("[data-hd-next]")?.addEventListener("click", (event) => {
+    event.stopPropagation();
+    show(index + 1);
+  });
+  root.querySelector("[data-hd-open]")?.addEventListener("click", openLightbox);
   root.querySelectorAll("[data-hd-thumb]").forEach((btn) => {
     btn.addEventListener("click", () => show(Number(btn.dataset.hdThumb)));
+  });
+  root.querySelector("[data-hd-lb-prev]")?.addEventListener("click", () => show(index - 1));
+  root.querySelector("[data-hd-lb-next]")?.addEventListener("click", () => show(index + 1));
+  root.querySelectorAll("[data-hd-lb-thumb]").forEach((btn) => {
+    btn.addEventListener("click", () => show(Number(btn.dataset.hdLbThumb)));
+  });
+  root.querySelector("[data-hd-lb-close]")?.addEventListener("click", closeLightbox);
+  lightbox?.addEventListener("click", (event) => {
+    if (event.target === lightbox) closeLightbox();
+  });
+  lightbox?.addEventListener("cancel", (event) => {
+    event.preventDefault();
+    closeLightbox();
+  });
+  document.addEventListener("keydown", (event) => {
+    if (!images.length) return;
+    const open = lightbox?.open || lightbox?.hasAttribute("open");
+    if (!open && event.target !== document.body && event.target?.tagName !== "BODY") return;
+    if (event.key === "ArrowLeft") show(index - 1);
+    if (event.key === "ArrowRight") show(index + 1);
+    if (event.key === "Escape" && open) closeLightbox();
   });
   root.querySelector("[data-hd-print]")?.addEventListener("click", () => window.print());
   root.querySelector("[data-hd-share]")?.addEventListener("click", async () => {

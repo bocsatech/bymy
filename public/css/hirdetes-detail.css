@@ -117,6 +117,48 @@
   display: block;
 }
 
+.hd-stage-open {
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: zoom-in;
+}
+
+.hd-stage-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  width: 52px;
+  height: 88px;
+  border: 0;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.82);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  filter: drop-shadow(0 1px 6px rgba(0, 0, 0, 0.55));
+}
+
+.hd-stage-nav:hover,
+.hd-stage-nav:focus-visible {
+  color: #fff;
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.hd-stage-nav--prev {
+  left: 0;
+  border-radius: 0 10px 10px 0;
+}
+
+.hd-stage-nav--next {
+  right: 0;
+  border-radius: 10px 0 0 10px;
+}
+
 .hd-count {
   position: absolute;
   top: 0.7rem;
@@ -172,6 +214,87 @@
   border-radius: 999px;
   background: #fff;
   cursor: pointer;
+}
+
+.hd-lb {
+  margin: 0;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  max-width: none;
+  max-height: none;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  overflow: auto;
+}
+
+.hd-lb::backdrop {
+  background: rgba(16, 24, 40, 0.86);
+}
+
+.hd-lb-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.85rem;
+  min-height: 100%;
+  padding: 2.6rem 1rem 1.2rem;
+  box-sizing: border-box;
+}
+
+.hd-lb-close {
+  position: fixed;
+  top: 0.85rem;
+  right: 0.85rem;
+  z-index: 3;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+
+.hd-lb-close:hover,
+.hd-lb-close:focus-visible {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.hd-lb-stage {
+  position: relative;
+  width: min(1600px, 92vw);
+  height: min(72vh, calc(min(1600px, 92vw) * 10 / 16));
+  background: #0f1218;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.hd-lb-stage img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.hd-lb-thumbs {
+  width: min(1600px, 92vw);
+  background: transparent;
+  padding: 0.2rem 0 0;
+}
+
+.hd-lb-thumbs .hd-thumbs-track {
+  justify-content: center;
+}
+
+@media print {
+  .hd-lb {
+    display: none !important;
+  }
 }
 
 .hd-side {

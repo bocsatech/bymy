@@ -82,15 +82,6 @@
                   </div>
                 </div>
 
-                <div class="field-row full field-row--tipus" hidden>
-                  <div class="labeled-field">
-                    <label for="tipus_katalogus">Típus a katalógusból:</label>
-                    <select id="tipus_katalogus">
-                      <option value="">Előbb gyártmány, modell és gyártási év</option>
-                    </select>
-                  </div>
-                </div>
-
                 <div class="field-row full field-row--pair field-row--tipus-egyeb" hidden>
                   <div class="labeled-field">
                     <label for="tipus">Típus szöveg:</label>
@@ -142,14 +133,6 @@
                       <option value="">Válasszon</option>
                       <option>Érvényes magyar okmányokkal</option>
                       <option>Érvényes külföldi okmányokkal</option>
-                    </select>
-                  </div>
-                  <div class="labeled-field">
-                    <label for="okmany_ervenyesseg">Okmányok érvényessége: <span class="req">*</span></label>
-                    <select id="okmany_ervenyesseg" name="okmany_ervenyesseg" required>
-                      <option value="">Válasszon</option>
-                      <option>Érvényes</option>
-                      <option>Lejárt</option>
                     </select>
                   </div>
                 </div>
@@ -206,15 +189,6 @@
                 </div>
               </div>
               <div class="form-grid">
-                <label for="kornyezetvedelmi">Környezetvédelmi oszt.: <a href="#" class="help-link">Segítség</a></label>
-                <input id="kornyezetvedelmi" name="kornyezetvedelmi" type="text" />
-
-                <label for="co2_kibocsatas" class="fuel-combustion-only">CO₂-kibocsátás:</label>
-                <div class="suffix-field fuel-combustion-only">
-                  <input id="co2_kibocsatas" name="co2_kibocsatas" type="number" min="0" step="1" />
-                  <span>g/km</span>
-                </div>
-
                 <label for="fogyasztas_varosi" class="fuel-combustion-only">Városi fogyasztás:</label>
                 <div class="suffix-field fuel-combustion-only">
                   <input id="fogyasztas_varosi" name="fogyasztas_varosi" type="number" min="0" step="0.1" />
@@ -255,15 +229,6 @@
                   <option>Összkerék</option>
                 </select>
 
-                <label for="henger_elrendezes">Henger-elrendezés:</label>
-                <select id="henger_elrendezes" name="henger_elrendezes">
-                  <option value="">—</option>
-                  <option>Sor</option>
-                  <option>V</option>
-                  <option>Boxer</option>
-                  <option>W</option>
-                </select>
-
                 <label for="sajat_tomeg">Saját tömeg:</label>
                 <div class="suffix-field">
                   <input id="sajat_tomeg" name="sajat_tomeg" type="number" />
@@ -296,9 +261,6 @@
                   <input id="csomagtarto" name="csomagtarto" type="number" />
                   <span>liter</span>
                 </div>
-
-                <label for="belso_azonosito">Belső azonosító: <a href="#" class="help-link">Segítség</a></label>
-                <input id="belso_azonosito" name="belso_azonosito" type="text" />
               </div>
             </div>
           </div>
@@ -340,14 +302,6 @@
                 <span>R</span>
                 <input name="nyari_gumi_atmero" type="text" placeholder="átmérő" />
               </div>
-              <label>Hátsó nyári gumi méret:</label>
-              <div class="tire-row">
-                <input name="hatso_nyari_szelesseg" type="text" />
-                <span>/</span>
-                <input name="hatso_nyari_magassag" type="text" />
-                <span>R</span>
-                <input name="hatso_nyari_atmero" type="text" />
-              </div>
               <label>Téli gumi méret:</label>
               <div class="tire-row">
                 <input name="teli_gumi_szelesseg" type="text" />
@@ -355,14 +309,6 @@
                 <input name="teli_gumi_magassag" type="text" />
                 <span>R</span>
                 <input name="teli_gumi_atmero" type="text" />
-              </div>
-              <label>Hátsó téli gumi méret:</label>
-              <div class="tire-row">
-                <input name="hatso_teli_szelesseg" type="text" />
-                <span>/</span>
-                <input name="hatso_teli_magassag" type="text" />
-                <span>R</span>
-                <input name="hatso_teli_atmero" type="text" />
               </div>
             </div>
           </div>

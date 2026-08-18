@@ -56,7 +56,6 @@ function readQuickSearchValues(form) {
   return {
     gyartmany: form.querySelector("#qs-gyartmany")?.value ?? "",
     modell: form.querySelector("#qs-modell")?.value ?? "",
-    tipusKatalogus: "",
     uzemanyagQuick: form.querySelector("#qs-uzemanyag")?.value ?? "",
     ev_tol: numOrNull(form.querySelector("#qs-ev-tol")?.value),
     ev_ig: numOrNull(form.querySelector("#qs-ev-ig")?.value),

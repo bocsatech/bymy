@@ -117,7 +117,6 @@ function hasActiveSidebarFilters(filters) {
       filters.sebessegvalto ||
       filters.hajtas ||
       filters.tipus ||
-      filters.tipusKatalogus ||
       filters.features?.length ||
       filters.ev_jarat != null ||
       filters.ev_tol != null ||

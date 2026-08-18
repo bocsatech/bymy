@@ -1,6 +1,6 @@
 import { UZEMANYAG_CATEGORIES, EQUIPMENT_SECTIONS, KLIM_OPTIONS } from "./equipment-data.js";
 import { EGYEB_INFO_OPTIONS } from "./egyeb-info-data.js";
-import { initVehicleCatalogSelects, typeNameForField } from "./vehicle-catalog-client.js";
+import { initVehicleCatalogSelects } from "./vehicle-catalog-client.js";
 import { compressListingPhoto, MAX_LISTING_PHOTOS } from "./listing-photo-compress.js?v=myAds2";
 
 export function createAdForm(options = {}) {
@@ -36,7 +36,6 @@ export function createAdForm(options = {}) {
   const gyartmany = document.getElementById("gyartmany");
   const modell = document.getElementById("modell");
   const tipus = document.getElementById("tipus");
-  const tipusKatalogus = document.getElementById("tipus_katalogus");
   const hirdetesCime = document.getElementById("hirdetes_cime");
   const teljesitmenyKw = document.getElementById("teljesitmeny_kw");
   const teljesitmenyLe = document.getElementById("teljesitmeny_le");
@@ -697,7 +696,6 @@ function validateStep(step) {
     "kivitel",
     "allapot",
     "okmany_jelleg",
-    "okmany_ervenyesseg",
     "km",
   ];
   const techRequired = ["uzemanyag"];
@@ -1161,16 +1159,6 @@ initVehicleCatalogSelects({
     options.onCatalogReady?.();
   })
   .catch(() => {});
-
-tipusKatalogus?.addEventListener("change", () => {
-  if (!tipusKatalogus.value || !tipus) return;
-  tipus.value = typeNameForField(tipusKatalogus.value, modell?.value);
-  tipus.dataset.userEdited = "1";
-  tipus.classList.remove("auto-filled");
-  updateTitle();
-  fitAllFormFields();
-  saveDraft();
-});
 
 modell?.addEventListener("change", () => {
   syncTipusFromModell();

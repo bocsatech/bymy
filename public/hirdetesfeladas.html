@@ -308,12 +308,6 @@
                       <option value="">Először válassz gyártmányt</option>
                     </select>
                   </div>
-                  <div class="labeled-field" hidden>
-                    <label for="tipus_katalogus">Típus a katalógusból:</label>
-                    <select id="tipus_katalogus">
-                      <option value="">Előbb gyártmány, modell és gyártási év</option>
-                    </select>
-                  </div>
                 </div>
 
                 <div class="field-row full field-row--pair field-row--tipus-egyeb" hidden>
@@ -417,14 +411,6 @@
                       <option value="">Válasszon</option>
                       <option>Érvényes magyar okmányokkal</option>
                       <option>Érvényes külföldi okmányokkal</option>
-                    </select>
-                  </div>
-                  <div class="labeled-field">
-                    <label for="okmany_ervenyesseg">Okmányok érvényessége: <span class="req">*</span></label>
-                    <select id="okmany_ervenyesseg" name="okmany_ervenyesseg" required>
-                      <option value="">Válasszon</option>
-                      <option>Érvényes</option>
-                      <option>Lejárt</option>
                     </select>
                   </div>
                 </div>
@@ -543,18 +529,6 @@
               </div>
               <div class="muszaki-grid">
                 <div class="labeled-field fuel-combustion-only">
-                  <label for="kornyezetvedelmi">Környezetvédelmi oszt.:</label>
-                  <input id="kornyezetvedelmi" name="kornyezetvedelmi" type="text" />
-                </div>
-                <div class="labeled-field fuel-combustion-only">
-                  <label for="co2_kibocsatas">CO₂-kibocsátás:</label>
-                  <div class="suffix-field">
-                    <input id="co2_kibocsatas" name="co2_kibocsatas" type="number" min="0" step="1" />
-                    <span>g/km</span>
-                  </div>
-                </div>
-
-                <div class="labeled-field fuel-combustion-only">
                   <label for="fogyasztas_varosi">Városi fogyasztás:</label>
                   <div class="suffix-field">
                     <input id="fogyasztas_varosi" name="fogyasztas_varosi" type="number" min="0" step="0.1" />
@@ -601,16 +575,6 @@
                     <option>Összkerék</option>
                   </select>
                 </div>
-                <div class="labeled-field fuel-combustion-only">
-                  <label for="henger_elrendezes">Henger-elrendezés:</label>
-                  <select id="henger_elrendezes" name="henger_elrendezes">
-                    <option value="">—</option>
-                    <option>Sor</option>
-                    <option>V</option>
-                    <option>Boxer</option>
-                    <option>W</option>
-                  </select>
-                </div>
 
                 <div class="labeled-field">
                   <label for="sajat_tomeg">Saját tömeg:</label>
@@ -655,10 +619,6 @@
                     <span>liter</span>
                   </div>
                 </div>
-                <div class="labeled-field">
-                  <label for="belso_azonosito">Belső azonosító:</label>
-                  <input id="belso_azonosito" name="belso_azonosito" type="text" />
-                </div>
               </div>
             </div>
           </div>
@@ -676,19 +636,6 @@
                   <select name="nyari_gumi_atmero" aria-label="Nyári gumi átmérő"></select>
                 </div>
               </div>
-              <div class="tire-block tire-block--rear">
-                <label class="check tire-block-label">
-                  <input type="checkbox" name="hatso_nyari_kulon" value="1" />
-                  Hátsó nyári gumi méret:
-                </label>
-                <div class="tire-row">
-                  <select name="hatso_nyari_szelesseg" aria-label="Hátsó nyári gumi szélesség" disabled></select>
-                  <span>/</span>
-                  <select name="hatso_nyari_magassag" aria-label="Hátsó nyári gumi magasság" disabled></select>
-                  <span>R</span>
-                  <select name="hatso_nyari_atmero" aria-label="Hátsó nyári gumi átmérő" disabled></select>
-                </div>
-              </div>
               <div class="tire-block">
                 <span class="tire-block-label">Téli gumi méret:</span>
                 <div class="tire-row">
@@ -697,19 +644,6 @@
                   <select name="teli_gumi_magassag" aria-label="Téli gumi magasság"></select>
                   <span>R</span>
                   <select name="teli_gumi_atmero" aria-label="Téli gumi átmérő"></select>
-                </div>
-              </div>
-              <div class="tire-block tire-block--rear">
-                <label class="check tire-block-label">
-                  <input type="checkbox" name="hatso_teli_kulon" value="1" />
-                  Hátsó téli gumi méret:
-                </label>
-                <div class="tire-row">
-                  <select name="hatso_teli_szelesseg" aria-label="Hátsó téli gumi szélesség" disabled></select>
-                  <span>/</span>
-                  <select name="hatso_teli_magassag" aria-label="Hátsó téli gumi magasság" disabled></select>
-                  <span>R</span>
-                  <select name="hatso_teli_atmero" aria-label="Hátsó téli gumi átmérő" disabled></select>
                 </div>
               </div>
             </div>

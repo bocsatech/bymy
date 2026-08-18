@@ -89,7 +89,6 @@ function readFilters(form) {
     ar_tol: numOrNull(data.get("ar_tol")),
     ar_ig: numOrNull(data.get("ar_ig")),
     tipus: data.get("tipus")?.toString().trim() ?? "",
-    tipusKatalogus: data.get("tipus_katalogus")?.toString().trim() ?? "",
     km_tol: numOrNull(data.get("km_tol")),
     km_ig: numOrNull(data.get("km_ig")),
     le_tol: numOrNull(data.get("le_tol")),
@@ -152,8 +151,6 @@ export function filterListingsBySidebar(items, filters) {
       const hay = [f.tipus, preview.title, preview.specLine].join(" ").toLowerCase();
       if (!hay.includes(filters.tipus.toLowerCase())) return false;
     }
-
-    if (!matchesCatalogTipus(item, filters.tipusKatalogus)) return false;
 
     if (filters.ev_jarat != null) {
       if (f.gyartasi_ev !== filters.ev_jarat) return false;
@@ -219,7 +216,6 @@ export function emptyFilters() {
     ar_tol: null,
     ar_ig: null,
     tipus: "",
-    tipusKatalogus: "",
     km_tol: null,
     km_ig: null,
     le_tol: null,

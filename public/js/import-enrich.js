@@ -3,7 +3,6 @@
 const IMPORT_DEFAULTS = {
   allapot: "Normál",
   okmany_jelleg: "Érvényes magyar okmányokkal",
-  okmany_ervenyesseg: "Érvényes",
 };
 
 function inferKivitel(text) {

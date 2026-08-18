@@ -10,16 +10,7 @@ const TIRE_RIMS = [10, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24];
 
 const EMPTY_LABEL = "—";
 
-const REAR_GROUPS = [
-  {
-    checkboxName: "hatso_nyari_kulon",
-    fields: ["hatso_nyari_szelesseg", "hatso_nyari_magassag", "hatso_nyari_atmero"],
-  },
-  {
-    checkboxName: "hatso_teli_kulon",
-    fields: ["hatso_teli_szelesseg", "hatso_teli_magassag", "hatso_teli_atmero"],
-  },
-];
+const REAR_GROUPS = [];
 
 function fillSelect(select, values) {
   if (!select || select.tagName !== "SELECT") return;

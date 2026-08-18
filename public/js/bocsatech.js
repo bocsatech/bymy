@@ -1,8 +1,11 @@
+import { mountLayoutBoard } from "./bocsatech-layout.js?v=visLayout1";
+
 const app = document.getElementById("app");
 
 let admin = null;
 let tab = "users";
 let lastUsername = "";
+let otpUser = "";
 let err = "";
 let info = "";
 let users = [];
@@ -111,25 +114,16 @@ const actions = {
     await loadTab();
     render();
   },
-  async saveLayout(event) {
+  async saveLayout() {
     err = "";
     info = "";
-    const form = event.target;
-    const cells = [...form.querySelectorAll("[data-field]")].map((row) => ({
-      field_key: row.getAttribute("data-field"),
-      order: Number(row.querySelector("[name=order]").value),
-      colSpan: Number(row.querySelector("[name=colSpan]").value),
-      maxWidthRem: row.querySelector("[name=maxWidthRem]").value
-        ? Number(row.querySelector("[name=maxWidthRem]").value)
-        : null,
-    }));
     try {
       const data = await api("/api/level1/form-layout", {
         method: "PUT",
-        body: JSON.stringify({ layout: { cells } }),
+        body: JSON.stringify({ layout }),
       });
       layout = data.layout;
-      info = "Elrendezés mentve. A hirdetésfeladáson hard refresh után látszik.";
+      info = "Elrendezés mentve. A hirdetésfeladáson hard refresh (Cmd+Shift+R) után látszik.";
       render();
     } catch (error) {
       err = error.message;
@@ -217,43 +211,18 @@ function listingsView() {
 }
 
 function layoutView() {
-  const groups = new Map();
-  for (const cell of layout.cells || []) {
-    const step = cell.step || 1;
-    if (!groups.has(step)) groups.set(step, []);
-    groups.get(step).push(cell);
-  }
-  const blocks = [...groups.entries()]
-    .sort((a, b) => a[0] - b[0])
-    .map(([step, cells]) => {
-      const items = cells
-        .sort((a, b) => a.order - b.order)
-        .map(
-          (cell) => `<div class="layout-card" data-field="${esc(cell.field_key)}">
-            <div><strong>${esc(cell.label)}</strong><br /><small>${esc(cell.field_key)}</small></div>
-            <label>Sorrend<input name="order" type="number" value="${cell.order}" /></label>
-            <label>Oszlop<select name="colSpan"><option value="1" ${cell.colSpan !== 2 ? "selected" : ""}>1</option><option value="2" ${cell.colSpan === 2 ? "selected" : ""}>2 (teljes)</option></select></label>
-            <label>Szélesség (rem)<input name="maxWidthRem" type="number" min="8" max="40" step="0.5" value="${cell.maxWidthRem ?? ""}" placeholder="alap" /></label>
-          </div>`
-        )
-        .join("");
-      return `<h3>Lépés ${step}</h3>${items}`;
-    })
-    .join("");
   return `
-    <p class="hint">A szélesség magát a vezérlőt állítja (év/hó legördülők is). A mező nem lehet szélesebb, mint a rácscella — teljes sorhoz állítsd az oszlopot 2-re. Mentés után a hirdetésfeladáson hard refresh kell.</p>
-    <form data-act="saveLayout">
-      <div class="layout-grid">${blocks}</div>
-      <p class="ok">${info}</p>
-      <p class="err">${err}</p>
-      <div class="row" style="margin-top:1rem"><button class="btn" type="submit">Elrendezés mentése</button></div>
-    </form>`;
+    <p class="hint">Húzd a cellát fel-le / jobbra-balra. A jobb szélén húzva méretezed (1–12 oszlop). Mentés után a hirdetésfeladáson hard refresh kell.</p>
+    <div id="layout-root"></div>
+    <p class="ok">${info}</p>
+    <p class="err">${err}</p>
+    <div class="row" style="margin-top:1rem"><button class="btn" type="button" data-act="saveLayout">Elrendezés mentése</button></div>`;
 }
 
 function shell() {
   const body = tab === "users" ? usersView() : tab === "listings" ? listingsView() : layoutView();
   return `
-    <div class="wrap">
+    <div class="wrap ${tab === "layout" ? "wrap--wide" : ""}">
       <div class="top">
         <div>
           <h1>Bocsatech</h1>
@@ -279,6 +248,13 @@ function esc(value) {
 
 function render() {
   h(admin ? shell() : loginView());
+  if (admin && tab === "layout") {
+    mountLayoutBoard(document.getElementById("layout-root"), layout, {
+      onChange(cells) {
+        layout = { ...layout, cells };
+      },
+    });
+  }
 }
 
 const me = await api("/api/level1/me").catch(() => ({ admin: null }));

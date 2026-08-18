@@ -2234,6 +2234,40 @@ body.site-app .layout-sized .suffix-field > input {
   field-sizing: fixed !important;
 }
 
+body.site-app #ad-form .ad-layout-on {
+  display: grid !important;
+  grid-template-columns: repeat(12, minmax(0, 1fr)) !important;
+  gap: 0.85rem 1rem;
+  align-items: end;
+  width: 100%;
+  max-width: 100%;
+}
+
+body.site-app #ad-form .ad-layout-item {
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  justify-self: stretch;
+}
+
+body.site-app #ad-form .ad-layout-item > .inline-2,
+body.site-app #ad-form .ad-layout-item > .suffix-field,
+body.site-app #ad-form .ad-layout-item > select,
+body.site-app #ad-form .ad-layout-item > input:not([type="checkbox"]):not([type="hidden"]):not([type="file"]) {
+  width: 100% !important;
+  max-width: none !important;
+}
+
+body.site-app #ad-form .ad-layout-item .inline-2 select,
+body.site-app #ad-form .ad-layout-item .inline-2 input,
+body.site-app #ad-form .ad-layout-item .suffix-field > input {
+  width: 100% !important;
+  max-width: none !important;
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  field-sizing: fixed !important;
+}
+
 body.site-app #ad-form .suffix-field,
 body.site-app .form-grid .suffix-field,
 body.site-app .labeled-field > .suffix-field,

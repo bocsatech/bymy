@@ -1,51 +1,50 @@
-/** Adminban mentett cellaszélesség — a selectek field-sizing: content-jét felülírja. */
+/** Mentett 12 oszlopos elrendezés a hirdetésfeladáson. */
 function cssEscape(value) {
   if (window.CSS?.escape) return window.CSS.escape(value);
   return String(value).replace(/"/g, '\\"');
 }
 
-function sizedControls(wrap) {
-  return [
-    ...wrap.querySelectorAll(":scope > .inline-2, :scope > .suffix-field"),
-    ...[...wrap.children].filter((el) =>
-      el.matches("select, textarea, input:not([type=checkbox]):not([type=radio]):not([type=hidden]):not([type=file])")
-    ),
-  ];
+function clamp(value, min, max) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return min;
+  return Math.min(max, Math.max(min, Math.round(n)));
 }
 
-function clearLayoutSize(wrap) {
-  wrap.classList.remove("layout-sized");
-  wrap.style.removeProperty("width");
-  wrap.style.removeProperty("max-width");
-  wrap.style.removeProperty("--layout-control-max");
-  wrap.querySelectorAll("[data-layout-sized]").forEach((el) => {
-    el.style.removeProperty("width");
-    el.style.removeProperty("max-width");
-    el.style.removeProperty("flex");
-    el.style.removeProperty("min-width");
-    el.style.removeProperty("field-sizing");
-    el.removeAttribute("data-layout-sized");
+const SKIP_HOST = ".phone-lang-grid, .equipment-grid, .photo-list, .package-grid";
+
+function wrapFor(form, fieldKey) {
+  const input =
+    document.getElementById(fieldKey) || form.querySelector(`[name="${cssEscape(fieldKey)}"]`);
+  if (!input) return null;
+  if (input.closest(SKIP_HOST)) return null;
+  return input.closest(".labeled-field, .field-stack, .md-outlined");
+}
+
+function hostFor(wrap) {
+  const locked = wrap.closest(".ev-tech-grid, .muszaki-grid, .owner-flags, .phone-lang-grid, .equipment-grid");
+  if (locked) return locked;
+  return wrap.closest(".form-grid, .card-body");
+}
+
+function placeWrap(wrap, cell) {
+  const col = clamp(cell.col, 1, 12);
+  const span = clamp(cell.colSpan || 6, 1, 13 - col);
+  const row = clamp(cell.row || 1, 1, 80);
+  wrap.classList.add("ad-layout-item");
+  wrap.style.setProperty("grid-column", `${col} / span ${span}`, "important");
+  wrap.style.setProperty("grid-row", String(row), "important");
+  wrap.style.setProperty("width", "100%", "important");
+  wrap.style.setProperty("max-width", "none", "important");
+  wrap.querySelectorAll(".inline-2, .suffix-field").forEach((el) => {
+    el.style.setProperty("width", "100%", "important");
+    el.style.setProperty("max-width", "none", "important");
   });
-}
-
-function applyCellWidth(wrap, rem) {
-  wrap.classList.add("layout-sized");
-  wrap.style.setProperty("--layout-control-max", `${rem}rem`);
-  wrap.style.setProperty("width", `${rem}rem`, "important");
-  wrap.style.setProperty("max-width", "100%", "important");
-  for (const el of sizedControls(wrap)) {
-    el.setAttribute("data-layout-sized", "1");
-    el.style.setProperty("width", `${rem}rem`, "important");
-    el.style.setProperty("max-width", "100%", "important");
-    el.querySelectorAll("select, input").forEach((inner) => {
-      inner.setAttribute("data-layout-sized", "1");
-      inner.style.setProperty("width", "100%", "important");
-      inner.style.setProperty("max-width", "none", "important");
-      inner.style.setProperty("flex", "1 1 0%", "important");
-      inner.style.setProperty("min-width", "0", "important");
-      inner.style.setProperty("field-sizing", "fixed", "important");
-    });
-  }
+  wrap.querySelectorAll("select, input:not([type=checkbox]):not([type=hidden]):not([type=file])").forEach((el) => {
+    el.style.setProperty("width", "100%", "important");
+    el.style.setProperty("max-width", "none", "important");
+    el.style.setProperty("field-sizing", "fixed", "important");
+    el.style.setProperty("flex", "1 1 0%", "important");
+  });
 }
 
 async function applyAdFormLayout() {
@@ -55,26 +54,29 @@ async function applyAdFormLayout() {
     const res = await fetch("/api/level1/form-layout", { credentials: "same-origin", cache: "no-store" });
     if (!res.ok) return;
     const data = await res.json();
-    const cells = data.layout?.cells;
-    if (!Array.isArray(cells)) return;
+    const layout = data.layout;
+    if (!layout?.live && Number(layout?.version) < 2) return;
+    const cells = layout?.cells;
+    if (!Array.isArray(cells) || !cells.length) return;
     for (const cell of cells) {
-      const input =
-        document.getElementById(cell.field_key) ||
-        form.querySelector(`[name="${cssEscape(cell.field_key)}"]`);
-      const wrap = input?.closest(".labeled-field, .field-stack, .md-outlined");
+      const wrap = wrapFor(form, cell.field_key);
       if (!wrap) continue;
-      if (Number(cell.colSpan) === 2) wrap.style.gridColumn = "1 / -1";
-      else wrap.style.removeProperty("grid-column");
-      if (Number.isFinite(Number(cell.order))) wrap.style.order = String(cell.order);
-      const rem = Number(cell.maxWidthRem);
-      if (!Number.isFinite(rem) || rem <= 0) {
-        clearLayoutSize(wrap);
-        continue;
+      const host = hostFor(wrap);
+      if (!host) continue;
+      host.classList.add("ad-layout-on");
+      const parent = wrap.parentElement;
+      if (parent && parent !== host && parent.classList.contains("field-row")) {
+        host.appendChild(wrap);
       }
-      applyCellWidth(wrap, rem);
+      placeWrap(wrap, cell);
     }
+    form.querySelectorAll(".field-row").forEach((row) => {
+      if (!row.querySelector(".labeled-field, .field-stack, .md-outlined")) {
+        row.style.display = "none";
+      }
+    });
   } catch {
-    /* az űrlap a kódbeli alapelrendezéssel marad */
+    /* alapelrendezés marad */
   }
 }
 

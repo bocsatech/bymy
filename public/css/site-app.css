@@ -2338,13 +2338,23 @@ body.site-app .field-row.full.field-row--year-km .labeled-field {
   flex: 0 0 auto;
   min-width: 0;
   width: auto !important;
-  max-width: 12.5rem !important;
+  max-width: 18rem !important;
 }
 
 body.site-app .field-row.full.field-row--year-km .labeled-field > .inline-2,
 body.site-app .field-row.full.field-row--year-km .labeled-field > .suffix-field {
   width: 100%;
   max-width: 100%;
+}
+
+body.site-app .field-row.full.field-row--year-km .labeled-field > .inline-2 select:first-child {
+  min-width: 6.5rem;
+  flex: 1 1 auto;
+}
+
+body.site-app .field-row.full.field-row--year-km .labeled-field > .inline-2 select:last-child {
+  min-width: 4.5rem;
+  flex: 0 1 auto;
 }
 
 body.site-app .field-row--vehicle-dates {

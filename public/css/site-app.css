@@ -121,37 +121,55 @@ body.hub-page {
 }
 
 @media (max-width: 800px) {
+  body.site-app .local-banner {
+    display: none;
+  }
+
+  body.site-app .home-header-inner,
+  body.site-app .hub-header-inner,
+  body.site-app .site-app-header-inner,
+  body.site-app .header-top {
+    display: grid;
+    grid-template-areas:
+      "logo"
+      "actions"
+      "nav";
+  }
+
   body.site-app .hub-header-top,
   body.site-app .site-header-top {
-    min-height: 3.5rem;
+    grid-area: actions;
+    min-height: 2.75rem;
     padding: 0.3rem 0.65rem 0.25rem;
     gap: 0.35rem;
+  }
+
+  body.site-app .hub-nav-band,
+  body.site-app .site-nav-band {
+    display: contents;
   }
 
   body.site-app .home-logo,
   body.site-app .hub-logo,
   body.site-app .site-app-logo {
-    left: 0.55rem;
-    bottom: 0.05rem;
-    max-width: min(42vw, 9.5rem);
+    grid-area: logo;
+    position: relative;
+    left: auto;
+    right: auto;
+    top: auto;
+    bottom: auto;
+    justify-self: center;
+    max-width: none;
+    padding: 0.45rem 3.25rem 0.15rem;
+    z-index: 5;
   }
 
   body.site-app .bymy-logo-img--nav,
   body.site-app .home-logo .bymy-logo-img--nav,
   body.site-app .hub-logo .bymy-logo-img--nav,
   body.site-app .site-app-logo .bymy-logo-img--nav {
-    height: clamp(52px, 14vw, 72px);
-    max-width: min(42vw, 9.5rem);
-  }
-
-  body.site-app .hub-nav-band,
-  body.site-app .site-nav-band {
-    height: 2.85rem;
-    min-height: 2.85rem;
-    max-height: 2.85rem;
-    padding: 0.1rem 0.55rem;
-    padding-left: min(9rem, 44vw);
-    overflow: hidden;
+    height: clamp(48px, 13vw, 68px);
+    max-width: min(220px, 70vw);
   }
 
   body.site-app .home-nav,
@@ -163,11 +181,15 @@ body.hub-page {
     right: auto !important;
     top: auto !important;
     bottom: auto !important;
+    grid-area: nav;
     flex: 1 1 auto;
-    width: auto;
+    width: 100%;
     min-width: 0;
     justify-content: flex-start;
-    padding: 0;
+    padding: 0.15rem 0.55rem;
+    height: 2.85rem;
+    box-sizing: border-box;
+    border-top: 1px solid #e5e7eb;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     pointer-events: auto;
@@ -237,7 +259,7 @@ body.hub-page {
 @media (max-width: 480px) {
   body.site-app .hub-header-top,
   body.site-app .site-header-top {
-    min-height: 3.15rem;
+    min-height: 2.5rem;
     padding: 0.25rem 0.5rem 0.2rem;
   }
 
@@ -246,12 +268,7 @@ body.hub-page {
   body.site-app .hub-logo .bymy-logo-img--nav,
   body.site-app .site-app-logo .bymy-logo-img--nav {
     height: 52px;
-    max-width: min(38vw, 8.25rem);
-  }
-
-  body.site-app .hub-nav-band,
-  body.site-app .site-nav-band {
-    padding-left: min(7.5rem, 40vw);
+    max-width: min(70vw, 12rem);
   }
 
   /* Keskeny telefon: Regisztráció elrejtve (Belépés oldalról elérhető) */
@@ -3030,14 +3047,6 @@ body.site-app .package.selected {
 }
 
 @media (max-width: 720px) {
-  body.site-app .home-header-inner,
-  body.site-app .hub-header-inner,
-  body.site-app .site-app-header-inner,
-  body.site-app .header-top {
-    display: flex;
-    flex-direction: column;
-  }
-
   body.site-app .home-nav,
   body.site-app .hub-nav,
   body.site-app .import-nav {

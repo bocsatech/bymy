@@ -776,32 +776,50 @@ body.hub-page:has(.hub-hero--empty) .hub-main {
     gap: 0;
     padding: 0;
     max-width: 100%;
+    display: grid;
+    grid-template-areas:
+      "logo"
+      "actions"
+      "nav";
   }
 
   .hub-header-top {
+    grid-area: actions;
     padding: 0.3rem 0.65rem 0.25rem;
-    min-height: 3.5rem;
+    min-height: 2.75rem;
   }
 
   .hub-nav-band {
-    padding: 0.1rem 0.55rem;
-    padding-left: min(9rem, 44vw);
-    height: 2.85rem;
-    min-height: 2.85rem;
-    max-height: 2.85rem;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
+    display: contents;
   }
 
   .hub-logo {
-    left: 0.55rem;
-    bottom: 0.05rem;
-    max-width: min(42vw, 9.5rem);
+    grid-area: logo;
+    position: relative;
+    left: auto;
+    bottom: auto;
+    justify-self: center;
+    max-width: none;
+    padding: 0.45rem 3.25rem 0.15rem;
   }
 
   .bymy-logo-img--nav {
-    height: clamp(52px, 14vw, 72px);
-    max-width: min(42vw, 9.5rem);
+    height: clamp(48px, 13vw, 68px);
+    max-width: min(220px, 70vw);
+  }
+
+  .hub-nav {
+    grid-area: nav;
+    position: static;
+    left: auto;
+    right: auto;
+    top: auto;
+    bottom: auto;
+    height: 2.85rem;
+    padding: 0.15rem 0.55rem;
+    justify-content: flex-start;
+    pointer-events: auto;
+    border-top: 1px solid #e5e7eb;
   }
 
   .bymy-logo-img--home {
@@ -886,17 +904,13 @@ body.hub-page:has(.hub-hero--empty) .hub-main {
 
 @media (max-width: 480px) {
   .hub-header-top {
-    min-height: 3.15rem;
+    min-height: 2.5rem;
     padding: 0.25rem 0.5rem 0.2rem;
   }
 
   .bymy-logo-img--nav {
     height: 52px;
-    max-width: min(38vw, 8.25rem);
-  }
-
-  .hub-nav-band {
-    padding-left: min(7.5rem, 40vw);
+    max-width: min(70vw, 12rem);
   }
 
   .hub-header-actions a[data-auth-register] {

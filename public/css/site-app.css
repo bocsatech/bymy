@@ -69,6 +69,7 @@ body.site-app .site-header-top {
   z-index: 4;
 }
 
+@media (min-width: 801px) {
 body.site-app .home-logo,
 body.site-app .hub-logo,
 body.site-app .site-app-logo {
@@ -86,6 +87,7 @@ body.site-app .site-app-logo {
   bottom: 0.05rem;
   z-index: 3;
   flex: 0 0 auto;
+}
 }
 
 body.site-app .bymy-logo-img,
@@ -122,7 +124,7 @@ body.hub-page {
 
 @media (max-width: 800px) {
   body.site-app .local-banner {
-    display: none;
+    display: none !important;
   }
 
   body.site-app .home-header-inner,
@@ -146,22 +148,24 @@ body.hub-page {
 
   body.site-app .hub-nav-band,
   body.site-app .site-nav-band {
-    display: contents;
+    display: contents !important;
   }
 
   body.site-app .home-logo,
   body.site-app .hub-logo,
   body.site-app .site-app-logo {
     grid-area: logo;
-    position: relative;
-    left: auto;
-    right: auto;
-    top: auto;
-    bottom: auto;
+    position: relative !important;
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
+    bottom: auto !important;
     justify-self: center;
     max-width: none;
-    padding: 0.45rem 3.25rem 0.15rem;
+    padding: max(0.35rem, env(safe-area-inset-top, 0px)) 3.25rem 0.15rem;
     z-index: 5;
+    display: inline-flex;
+    align-items: center;
   }
 
   body.site-app .bymy-logo-img--nav,
@@ -283,6 +287,7 @@ body.hub-page {
   }
 }
 
+@media (min-width: 801px) {
 body.site-app .hub-nav-band,
 body.site-app .site-nav-band {
   position: relative;
@@ -326,6 +331,7 @@ body.site-app .import-nav {
   top: 0;
   bottom: 0;
   pointer-events: none;
+}
 }
 
 body.site-app .home-nav .home-nav-link,

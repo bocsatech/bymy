@@ -10,8 +10,8 @@ function clamp(value, min, max) {
   return Math.min(max, Math.max(min, Math.round(n)));
 }
 
-const SKIP_HOST = ".phone-lang-grid, .equipment-grid, .photo-list, .package-grid, .packages";
-const KEEP_OUT = "#footer-actions, #success-panel, #next-btn, #back-btn";
+const SKIP_HOST = ".phone-lang-grid, .equipment-grid, .photo-list, .package-grid, .packages, #equipment-sections, #egyeb-info-sections";
+const KEEP_OUT = "#footer-actions, #success-panel, #next-btn, #back-btn, #equipment-sections, #egyeb-info-sections";
 
 function wrapFor(form, fieldKey) {
   const input =
@@ -21,7 +21,7 @@ function wrapFor(form, fieldKey) {
   const existing = input.closest(".labeled-field, .field-stack, .md-outlined");
   if (existing) {
     if (existing.closest(KEEP_OUT) || existing.querySelector(KEEP_OUT)) return null;
-    if (existing.matches("form, .step-panel, #ad-panel, .ad-layout-canvas")) return null;
+    if (existing.matches("form, .step-panel, #ad-panel, .ad-layout-canvas, .card, .card-body")) return null;
     return existing;
   }
   const suffix = input.closest(".suffix-field");
@@ -37,6 +37,26 @@ function wrapFor(form, fieldKey) {
   return wrap;
 }
 
+function pinExtras(form) {
+  const panel = form.querySelector('.step-panel[data-step="3"]');
+  if (!panel) return;
+  const body = panel.querySelector(".card > .card-body");
+  for (const id of ["equipment-sections", "egyeb-info-sections"]) {
+    const el = document.getElementById(id);
+    if (!el || !body) continue;
+    if (el.closest(".ad-layout-canvas, .ad-layout-hidden") || el.parentElement !== body) {
+      if (id === "egyeb-info-sections") {
+        const other = panel.querySelectorAll(".card > .card-body")[1];
+        (other || body).appendChild(el);
+      } else {
+        body.appendChild(el);
+      }
+    }
+    el.hidden = false;
+    el.removeAttribute("hidden");
+    el.style.removeProperty("display");
+  }
+}
 function pinFooter(form) {
   const footer = document.getElementById("footer-actions");
   if (!footer) return;
@@ -113,7 +133,7 @@ function pruneEmptyCards(form) {
   });
   form.querySelectorAll(".step-panel .card").forEach((card) => {
     if (card.id === "success-panel") return;
-    if (card.querySelector(".packages, .phone-lang-grid, .photo-list, .ad-layout-canvas")) return;
+    if (card.querySelector(".packages, .phone-lang-grid, .photo-list, .ad-layout-canvas, #equipment-sections, #egyeb-info-sections")) return;
     if (card.querySelector(".labeled-field, .field-stack, .md-outlined, input:not([type=hidden]), select, textarea")) return;
     card.style.display = "none";
   });
@@ -151,6 +171,7 @@ async function applyAdFormLayout() {
       placeWrap(wrap, cell);
     }
     pruneEmptyCards(form);
+    pinExtras(form);
     pinFooter(form);
   } catch {
     /* alapelrendezés marad */

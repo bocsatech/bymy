@@ -1,4 +1,4 @@
-import { mountLayoutBoard } from "./bocsatech-layout.js?v=visLayout1";
+import { mountLayoutBoard } from "./bocsatech-layout.js?v=visLayout2";
 
 const app = document.getElementById("app");
 
@@ -212,7 +212,7 @@ function listingsView() {
 
 function layoutView() {
   return `
-    <p class="hint">Húzd a cellát fel-le / jobbra-balra. A jobb szélén húzva méretezed (1–12 oszlop). Mentés után a hirdetésfeladáson hard refresh kell.</p>
+    <p class="hint">Húzd a cellát a lapon belül vagy egy másik lépés táblájára. A jobb szélén méretezed, a × törli — a törölt mezők alulról visszaállíthatók. Mentés után a hirdetésfeladáson hard refresh kell.</p>
     <div id="layout-root"></div>
     <p class="ok">${info}</p>
     <p class="err">${err}</p>

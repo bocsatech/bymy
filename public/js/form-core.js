@@ -676,12 +676,25 @@ function resetForm({ fresh = false } = {}) {
   }
 }
 
-function validateFields(names) {
+function isLayoutHidden(field) {
+  const el = field instanceof RadioNodeList ? field[0] : field;
+  return Boolean(el?.closest?.(".ad-layout-hidden"));
+}
+
+function fieldStep(field) {
+  const el = field instanceof RadioNodeList ? field[0] : field;
+  return Number(el?.closest?.(".step-panel")?.dataset.step);
+}
+
+function validateFields(names, onlyStep = null) {
   for (const name of names) {
     const field = form.elements.namedItem(name);
-    const value = field?.value?.trim?.() ?? "";
+    if (isLayoutHidden(field)) continue;
+    if (onlyStep != null && fieldStep(field) !== onlyStep) continue;
+    const el = field instanceof RadioNodeList ? field[0] : field;
+    const value = el?.value?.trim?.() ?? "";
     if (!value) {
-      field?.focus();
+      el?.focus();
       return false;
     }
   }
@@ -708,7 +721,7 @@ function validateStep(step) {
   ];
 
   if (step === 1) {
-    if (!validateFields(basicRequired)) {
+    if (!validateFields(basicRequired, 1) || !validateFields(techRequired, 1) || !validateFields(adRequired, 1)) {
       alert("Kérjük, töltsd ki a kötelező (*) mezőket.");
       return false;
     }
@@ -716,8 +729,16 @@ function validateStep(step) {
   }
 
   if (step === 2) {
-    if (!validateFields(techRequired)) {
-      alert("Kérjük, válassz üzemanyagot a Műszaki adatoknál.");
+    if (!validateFields(basicRequired, 2) || !validateFields(techRequired, 2) || !validateFields(adRequired, 2)) {
+      alert("Kérjük, töltsd ki a kötelező (*) mezőket.");
+      return false;
+    }
+    return true;
+  }
+
+  if (step === 3) {
+    if (!validateFields(basicRequired, 3) || !validateFields(techRequired, 3) || !validateFields(adRequired, 3)) {
+      alert("Kérjük, töltsd ki a kötelező (*) mezőket.");
       return false;
     }
     return true;
@@ -728,18 +749,20 @@ function validateStep(step) {
       alert(photoBlockMessage());
       return false;
     }
+    if (!validateFields(basicRequired, 4) || !validateFields(techRequired, 4) || !validateFields(adRequired, 4)) {
+      alert("Kérjük, töltsd ki a kötelező (*) mezőket.");
+      return false;
+    }
     return true;
   }
 
   if (step === TOTAL_STEPS) {
     if (!validateFields(basicRequired)) {
-      alert("Kérjük, töltsd ki a kötelező (*) mezőket az Alapadatok fülön.");
-      goToStep(1);
+      alert("Kérjük, töltsd ki a kötelező (*) mezőket.");
       return false;
     }
     if (!validateFields(techRequired)) {
-      alert("Kérjük, válassz üzemanyagot a Műszaki adatoknál.");
-      goToStep(2);
+      alert("Kérjük, válassz üzemanyagot.");
       return false;
     }
     if (!validateFields(adRequired)) {

@@ -23,7 +23,33 @@ function wrapFor(form, fieldKey) {
 function hostFor(wrap) {
   const locked = wrap.closest(".ev-tech-grid, .muszaki-grid, .owner-flags, .phone-lang-grid, .equipment-grid");
   if (locked) return locked;
-  return wrap.closest(".form-grid, .card-body");
+  return wrap.closest(".form-grid, .card-body, .ad-layout-canvas");
+}
+
+function canvasForStep(form, step) {
+  const panel = form.querySelector(`.step-panel[data-step="${step}"]`);
+  if (!panel) return null;
+  let canvas = panel.querySelector(".ad-layout-canvas");
+  if (!canvas) {
+    canvas = document.createElement("div");
+    canvas.className = "ad-layout-canvas ad-layout-on";
+    const body = panel.querySelector(".card-body") || panel;
+    body.insertBefore(canvas, body.firstChild);
+  }
+  return canvas;
+}
+
+function setRequired(wrap, on) {
+  wrap.querySelectorAll("input, select, textarea").forEach((el) => {
+    if (on) {
+      if (el.dataset.layoutRequired === "1") el.setAttribute("required", "");
+      return;
+    }
+    if (el.hasAttribute("required")) {
+      el.dataset.layoutRequired = "1";
+      el.removeAttribute("required");
+    }
+  });
 }
 
 function placeWrap(wrap, cell) {
@@ -61,6 +87,24 @@ async function applyAdFormLayout() {
     for (const cell of cells) {
       const wrap = wrapFor(form, cell.field_key);
       if (!wrap) continue;
+      if (cell.hidden) {
+        wrap.classList.add("ad-layout-hidden");
+        wrap.hidden = true;
+        setRequired(wrap, false);
+        continue;
+      }
+      wrap.classList.remove("ad-layout-hidden");
+      wrap.hidden = false;
+      setRequired(wrap, true);
+      const panel = wrap.closest(".step-panel");
+      const currentStep = Number(panel?.dataset.step);
+      const targetStep = clamp(cell.step || currentStep || 1, 1, 5);
+      if (targetStep !== currentStep) {
+        const canvas = canvasForStep(form, targetStep);
+        if (canvas) canvas.appendChild(wrap);
+        placeWrap(wrap, cell);
+        continue;
+      }
       const host = hostFor(wrap);
       if (!host) continue;
       host.classList.add("ad-layout-on");

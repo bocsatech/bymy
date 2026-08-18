@@ -2234,6 +2234,7 @@ body.site-app .layout-sized .suffix-field > input {
   field-sizing: fixed !important;
 }
 
+body.site-app #ad-form .ad-layout-canvas,
 body.site-app #ad-form .ad-layout-on {
   display: grid !important;
   grid-template-columns: repeat(12, minmax(0, 1fr)) !important;
@@ -2241,6 +2242,10 @@ body.site-app #ad-form .ad-layout-on {
   align-items: end;
   width: 100%;
   max-width: 100%;
+}
+
+body.site-app #ad-form .ad-layout-hidden {
+  display: none !important;
 }
 
 body.site-app #ad-form .ad-layout-item {

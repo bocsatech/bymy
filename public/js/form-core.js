@@ -508,7 +508,7 @@ function showStep(step) {
   if (step === 2) nextBtn.textContent = "Tovább az extrákhoz";
   if (step === 3) nextBtn.textContent = "Tovább a képekhez";
   if (step === 4) nextBtn.textContent = "Tovább a hirdetéshez";
-  if (step === 5) nextBtn.textContent = "Mentés / összegzés";
+  if (step === 5) nextBtn.textContent = "Hirdetés feladása";
   syncPhotoNextButton();
 }
 

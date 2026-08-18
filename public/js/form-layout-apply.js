@@ -11,14 +11,19 @@ function clamp(value, min, max) {
 }
 
 const SKIP_HOST = ".phone-lang-grid, .equipment-grid, .photo-list, .package-grid, .packages";
+const KEEP_OUT = "#footer-actions, #success-panel, #next-btn, #back-btn";
 
 function wrapFor(form, fieldKey) {
   const input =
     document.getElementById(fieldKey) || form.querySelector(`[name="${cssEscape(fieldKey)}"]`);
   if (!input) return null;
-  if (input.closest(SKIP_HOST)) return null;
+  if (input.closest(SKIP_HOST) || input.closest(KEEP_OUT)) return null;
   const existing = input.closest(".labeled-field, .field-stack, .md-outlined");
-  if (existing) return existing;
+  if (existing) {
+    if (existing.closest(KEEP_OUT) || existing.querySelector(KEEP_OUT)) return null;
+    if (existing.matches("form, .step-panel, #ad-panel, .ad-layout-canvas")) return null;
+    return existing;
+  }
   const suffix = input.closest(".suffix-field");
   const control = suffix || input;
   const label = input.id ? form.querySelector(`label[for="${cssEscape(input.id)}"]`) : null;
@@ -30,6 +35,19 @@ function wrapFor(form, fieldKey) {
   if (label) wrap.append(label);
   wrap.append(control);
   return wrap;
+}
+
+function pinFooter(form) {
+  const footer = document.getElementById("footer-actions");
+  if (!footer) return;
+  if (footer.closest(".ad-layout-canvas, .ad-layout-hidden") || footer.parentElement !== form) {
+    form.appendChild(footer);
+  }
+  const success = document.getElementById("success-panel");
+  if (success && !success.classList.contains("hidden")) return;
+  footer.classList.remove("hidden");
+  footer.hidden = false;
+  footer.style.removeProperty("display");
 }
 
 function canvasHost(panel) {
@@ -128,10 +146,12 @@ async function applyAdFormLayout() {
       const targetStep = clamp(cell.step || 1, 1, 5);
       const canvas = canvasForStep(form, targetStep);
       if (!canvas) continue;
+      if (wrap.closest(KEEP_OUT) || wrap.querySelector(KEEP_OUT)) continue;
       canvas.appendChild(wrap);
       placeWrap(wrap, cell);
     }
     pruneEmptyCards(form);
+    pinFooter(form);
   } catch {
     /* alapelrendezés marad */
   }

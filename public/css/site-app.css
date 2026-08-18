@@ -2998,6 +2998,21 @@ body.site-app .footer-actions {
   border-top: 1px solid #e3e6ea;
 }
 
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form {
+  padding-bottom: 0.5rem;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] #footer-actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 40;
+  display: flex;
+  margin-top: 1.25rem;
+  padding: 12px 0 16px;
+  background: #fff;
+  box-shadow: 0 -10px 18px rgba(255, 255, 255, 0.92);
+}
+
 body.site-app .upload-zone {
   background: #f8f9fb;
   border: 2px dashed #d5d9e0;

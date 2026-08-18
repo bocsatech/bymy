@@ -311,16 +311,18 @@
           <div class="card">
             <div class="card-head">Felszereltség</div>
             <div class="card-body">
-              <p class="hint">
-                Automatikus extra lista kitöltése: A rendszer automatikusan kitölti az autó felszereltségét a
-                rendelkezésre álló adatok alapján. Hirdetés véglegesítése előtt kérjük, mindig ellenőrizze ezek
-                valódiságát.
-              </p>
               <div class="form-grid compact">
                 <label for="klima">Klíma</label>
                 <select id="klima" name="klima">
                   <option value="">—</option>
                 </select>
+              </div>
+              <div class="form-grid compact owner-flags">
+                <label>Tulajdonos jellemzők:</label>
+                <div class="inline-checks">
+                  <label class="check inline-check"><input type="checkbox" name="nem_dohanyzo" value="1" /> nem dohányzó autó</label>
+                  <label class="check inline-check"><input type="checkbox" name="holgy_tulajdonos" value="1" /> hölgy tulajdonostól</label>
+                </div>
               </div>
               <div id="equipment-sections"></div>
             </div>

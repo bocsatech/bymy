@@ -2252,8 +2252,13 @@ body.site-app #ad-form .ad-layout-item {
   align-self: start;
 }
 
-body.site-app #ad-form .ad-layout-item > label {
-  min-height: 2.4em;
+body.site-app #ad-form .ad-layout-item.md-outlined,
+body.site-app #ad-form .ad-layout-item.labeled-field,
+body.site-app #ad-form .ad-layout-item.field-stack {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 6px;
+  align-content: start;
 }
 
 body.site-app #ad-form .ad-layout-hidden {

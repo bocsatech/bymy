@@ -10,25 +10,43 @@ function clamp(value, min, max) {
   return Math.min(max, Math.max(min, Math.round(n)));
 }
 
-const SKIP_HOST = ".phone-lang-grid, .equipment-grid, .photo-list, .package-grid";
+const SKIP_HOST = ".phone-lang-grid, .equipment-grid, .photo-list, .package-grid, .packages";
 
 function wrapFor(form, fieldKey) {
   const input =
     document.getElementById(fieldKey) || form.querySelector(`[name="${cssEscape(fieldKey)}"]`);
   if (!input) return null;
   if (input.closest(SKIP_HOST)) return null;
-  return input.closest(".labeled-field, .field-stack");
+  const existing = input.closest(".labeled-field, .field-stack, .md-outlined");
+  if (existing) return existing;
+  const suffix = input.closest(".suffix-field");
+  const control = suffix || input;
+  const label = input.id ? form.querySelector(`label[for="${cssEscape(input.id)}"]`) : null;
+  const wrap = document.createElement("div");
+  wrap.className = "labeled-field md-outlined";
+  const parent = control.parentElement;
+  if (!parent) return null;
+  parent.insertBefore(wrap, label && label.parentElement === parent ? label : control);
+  if (label) wrap.append(label);
+  wrap.append(control);
+  return wrap;
+}
+
+function canvasHost(panel) {
+  return panel.querySelector("#ad-panel") || panel.querySelector(".card > .card-body") || panel;
 }
 
 function canvasForStep(form, step) {
   const panel = form.querySelector(`.step-panel[data-step="${step}"]`);
   if (!panel) return null;
-  let canvas = panel.querySelector(":scope .ad-layout-canvas");
+  const host = canvasHost(panel);
+  let canvas = panel.querySelector(".ad-layout-canvas");
   if (!canvas) {
     canvas = document.createElement("div");
     canvas.className = "ad-layout-canvas ad-layout-on";
-    const body = panel.querySelector(".card-body") || panel;
-    body.insertBefore(canvas, body.firstChild);
+  }
+  if (canvas.parentElement !== host) {
+    host.insertBefore(canvas, host.firstChild);
   }
   return canvas;
 }
@@ -69,6 +87,20 @@ function placeWrap(wrap, cell) {
   });
 }
 
+function pruneEmptyCards(form) {
+  form.querySelectorAll(".field-row").forEach((row) => {
+    if (!row.querySelector("input, select, textarea, .labeled-field, .field-stack, .md-outlined")) {
+      row.style.display = "none";
+    }
+  });
+  form.querySelectorAll(".step-panel .card").forEach((card) => {
+    if (card.id === "success-panel") return;
+    if (card.querySelector(".packages, .phone-lang-grid, .photo-list, .ad-layout-canvas")) return;
+    if (card.querySelector(".labeled-field, .field-stack, .md-outlined, input:not([type=hidden]), select, textarea")) return;
+    card.style.display = "none";
+  });
+}
+
 async function applyAdFormLayout() {
   const form = document.getElementById("ad-form");
   if (!form) return;
@@ -99,12 +131,7 @@ async function applyAdFormLayout() {
       canvas.appendChild(wrap);
       placeWrap(wrap, cell);
     }
-    form.querySelectorAll(".field-row, .form-grid, .ev-tech-grid, .muszaki-grid").forEach((row) => {
-      if (row.classList.contains("ad-layout-canvas")) return;
-      if (!row.querySelector(".labeled-field, .field-stack")) {
-        row.style.display = "none";
-      }
-    });
+    pruneEmptyCards(form);
   } catch {
     /* alapelrendezés marad */
   }

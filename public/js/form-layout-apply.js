@@ -1,4 +1,4 @@
-/** Mentett 12 oszlopos elrendezés a hirdetésfeladáson. */
+/** Mentett 12 oszlopos elrendezés — minden mező ugyanazon a lépésrácson. */
 function cssEscape(value) {
   if (window.CSS?.escape) return window.CSS.escape(value);
   return String(value).replace(/"/g, '\\"');
@@ -17,19 +17,13 @@ function wrapFor(form, fieldKey) {
     document.getElementById(fieldKey) || form.querySelector(`[name="${cssEscape(fieldKey)}"]`);
   if (!input) return null;
   if (input.closest(SKIP_HOST)) return null;
-  return input.closest(".labeled-field, .field-stack, .md-outlined");
-}
-
-function hostFor(wrap) {
-  const locked = wrap.closest(".ev-tech-grid, .muszaki-grid, .owner-flags, .phone-lang-grid, .equipment-grid");
-  if (locked) return locked;
-  return wrap.closest(".form-grid, .card-body, .ad-layout-canvas");
+  return input.closest(".labeled-field, .field-stack");
 }
 
 function canvasForStep(form, step) {
   const panel = form.querySelector(`.step-panel[data-step="${step}"]`);
   if (!panel) return null;
-  let canvas = panel.querySelector(".ad-layout-canvas");
+  let canvas = panel.querySelector(":scope .ad-layout-canvas");
   if (!canvas) {
     canvas = document.createElement("div");
     canvas.className = "ad-layout-canvas ad-layout-on";
@@ -57,6 +51,8 @@ function placeWrap(wrap, cell) {
   const span = clamp(cell.colSpan || 6, 1, 13 - col);
   const row = clamp(cell.row || 1, 1, 80);
   wrap.classList.add("ad-layout-item");
+  wrap.hidden = false;
+  wrap.removeAttribute("hidden");
   wrap.style.setProperty("grid-column", `${col} / span ${span}`, "important");
   wrap.style.setProperty("grid-row", String(row), "important");
   wrap.style.setProperty("width", "100%", "important");
@@ -84,9 +80,11 @@ async function applyAdFormLayout() {
     if (!layout?.live && Number(layout?.version) < 2) return;
     const cells = layout?.cells;
     if (!Array.isArray(cells) || !cells.length) return;
+    const placed = new Set();
     for (const cell of cells) {
       const wrap = wrapFor(form, cell.field_key);
-      if (!wrap) continue;
+      if (!wrap || placed.has(wrap)) continue;
+      placed.add(wrap);
       if (cell.hidden) {
         wrap.classList.add("ad-layout-hidden");
         wrap.hidden = true;
@@ -94,28 +92,16 @@ async function applyAdFormLayout() {
         continue;
       }
       wrap.classList.remove("ad-layout-hidden");
-      wrap.hidden = false;
       setRequired(wrap, true);
-      const panel = wrap.closest(".step-panel");
-      const currentStep = Number(panel?.dataset.step);
-      const targetStep = clamp(cell.step || currentStep || 1, 1, 5);
-      if (targetStep !== currentStep) {
-        const canvas = canvasForStep(form, targetStep);
-        if (canvas) canvas.appendChild(wrap);
-        placeWrap(wrap, cell);
-        continue;
-      }
-      const host = hostFor(wrap);
-      if (!host) continue;
-      host.classList.add("ad-layout-on");
-      const parent = wrap.parentElement;
-      if (parent && parent !== host && parent.classList.contains("field-row")) {
-        host.appendChild(wrap);
-      }
+      const targetStep = clamp(cell.step || 1, 1, 5);
+      const canvas = canvasForStep(form, targetStep);
+      if (!canvas) continue;
+      canvas.appendChild(wrap);
       placeWrap(wrap, cell);
     }
-    form.querySelectorAll(".field-row").forEach((row) => {
-      if (!row.querySelector(".labeled-field, .field-stack, .md-outlined")) {
+    form.querySelectorAll(".field-row, .form-grid, .ev-tech-grid, .muszaki-grid").forEach((row) => {
+      if (row.classList.contains("ad-layout-canvas")) return;
+      if (!row.querySelector(".labeled-field, .field-stack")) {
         row.style.display = "none";
       }
     });

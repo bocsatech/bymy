@@ -38,6 +38,7 @@ export function mountLayoutBoard(root, layout, { onChange } = {}) {
     "gyartasi_honap",
     "forgalomba_helyezes_honap",
     "muszaki_honap",
+    "egyeb_modell",
     "video_url",
     "forras_url",
     "hasznaltauto_hirdetes_id",

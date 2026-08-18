@@ -689,6 +689,7 @@ function fieldStep(field) {
 function validateFields(names, onlyStep = null) {
   for (const name of names) {
     const field = form.elements.namedItem(name);
+    if (!field) continue;
     if (isLayoutHidden(field)) continue;
     if (onlyStep != null && fieldStep(field) !== onlyStep) continue;
     const el = field instanceof RadioNodeList ? field[0] : field;

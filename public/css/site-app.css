@@ -2172,6 +2172,19 @@ body.site-app .md-outlined > .inline-2 {
   height: var(--site-field-height);
 }
 
+body.site-app .labeled-field > .inline-2 select,
+body.site-app .labeled-field > .inline-2 input,
+body.site-app .form-grid .inline-2 select,
+body.site-app .form-grid .inline-2 input,
+body.site-app .md-outlined > .inline-2 select,
+body.site-app .md-outlined > .inline-2 input {
+  flex: 1 1 0;
+  min-width: 0;
+  height: 100%;
+  min-height: 0;
+  max-height: none;
+}
+
 body.site-app .form-grid .select-with-check {
   display: flex;
   flex-flow: row nowrap;
@@ -2195,17 +2208,30 @@ body.site-app .form-grid .select-with-check > .inline-check {
   white-space: nowrap;
 }
 
-body.site-app .labeled-field > .inline-2 select,
-body.site-app .labeled-field > .inline-2 input,
-body.site-app .form-grid .inline-2 select,
-body.site-app .form-grid .inline-2 input,
-body.site-app .md-outlined > .inline-2 select,
-body.site-app .md-outlined > .inline-2 input {
-  flex: 1 1 0;
-  min-width: 0;
-  height: 100%;
-  min-height: 0;
-  max-height: none;
+body.site-app .labeled-field.layout-sized,
+body.site-app .md-outlined.layout-sized,
+body.site-app .field-stack.layout-sized {
+  width: var(--layout-control-max, 100%) !important;
+  max-width: 100% !important;
+  justify-self: start;
+}
+
+body.site-app .layout-sized > .inline-2,
+body.site-app .layout-sized > .suffix-field,
+body.site-app .layout-sized > select,
+body.site-app .layout-sized > input:not([type="checkbox"]):not([type="hidden"]) {
+  width: var(--layout-control-max, 100%) !important;
+  max-width: 100% !important;
+}
+
+body.site-app .layout-sized .inline-2 select,
+body.site-app .layout-sized .inline-2 input,
+body.site-app .layout-sized .suffix-field > input {
+  width: 100% !important;
+  max-width: none !important;
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  field-sizing: fixed !important;
 }
 
 body.site-app #ad-form .suffix-field,

@@ -1,5 +1,5 @@
 import { saveListingToDb, setStoredListingId, fetchListing, saveListingPhotosOrder } from "./db-client.js?v=myAds2";
-import { createAdForm } from "./form-core.js?v=year2035";
+import { createAdForm } from "./form-core.js?v=layoutSize2";
 import { initTireSizes } from "./tire-sizes-ui.js";
 import { initPhoneLanguages } from "./phone-lang-ui.js";
 import { initCategoryPicker } from "./category-picker.js?v=catPick20260817a";

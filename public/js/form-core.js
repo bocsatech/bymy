@@ -1157,6 +1157,7 @@ initVehicleCatalogSelects({
   .then(() => {
     if (mode === "wizard" && !userTouchedForm && !editing) resetForm();
     options.onCatalogReady?.();
+    window.dispatchEvent(new Event("ad-form-ready"));
   })
   .catch(() => {});
 
@@ -1212,6 +1213,7 @@ if (mode === "wizard") {
 }
 
 renderPhotoPreview();
+window.dispatchEvent(new Event("ad-form-ready"));
 
 return {
   applyFormData,

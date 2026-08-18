@@ -241,7 +241,7 @@ function layoutView() {
     })
     .join("");
   return `
-    <p class="hint">A szélesség a mezőre vonatkozik, nem a sor rácsára — így a következő sor nem csúszik rá. A sorrend a CSS <code>order</code> érték; cellát másik sorba tenni a következő kör (DOM áthelyezés).</p>
+    <p class="hint">A szélesség magát a vezérlőt állítja (év/hó legördülők is). A mező nem lehet szélesebb, mint a rácscella — teljes sorhoz állítsd az oszlopot 2-re. Mentés után a hirdetésfeladáson hard refresh kell.</p>
     <form data-act="saveLayout">
       <div class="layout-grid">${blocks}</div>
       <p class="ok">${info}</p>

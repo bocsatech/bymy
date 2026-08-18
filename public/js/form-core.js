@@ -70,14 +70,16 @@ const AUTO_FILL_PRESETS = {
   TOYOTA: { tipus: "1.8 Hybrid", hengerurtartalom: "1798", uzemanyag: "Benzin/elektromos", sebessegvalto: "Fokozatmentes automata", hajtas: "Első kerék", teljesitmeny_kw: "72" },
 };
 
-function fillYearSelect(select) {
+const YEAR_SELECT_MIN = 1980;
+const YEAR_SELECT_MAX = 2035;
+
+function fillYearSelect(select, { maxYear = new Date().getFullYear(), minYear = YEAR_SELECT_MIN } = {}) {
   if (!select) return;
-  const now = new Date().getFullYear();
   const empty = document.createElement("option");
   empty.value = "";
   empty.textContent = "év";
   select.appendChild(empty);
-  for (let year = now; year >= 1980; year -= 1) {
+  for (let year = maxYear; year >= minYear; year -= 1) {
     const option = document.createElement("option");
     option.value = String(year);
     option.textContent = String(year);
@@ -1138,7 +1140,7 @@ document.querySelectorAll(".package").forEach((card) => {
 });
 
 fillYearSelect(gyartasiEv);
-fillYearSelect(muszakiEv);
+fillYearSelect(muszakiEv, { maxYear: YEAR_SELECT_MAX });
 fillYearSelect(forgalombaHelyezesEv);
 initVehicleCatalogSelects({
   brandSelect: gyartmany,

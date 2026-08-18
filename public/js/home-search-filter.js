@@ -198,13 +198,12 @@ export function populateFilterOptions(items) {
   fillSelect(document.getElementById("filter-ajtok"), uniqueSorted(filters.map((f) => f.ajtok)));
   fillSelect(document.getElementById("filter-ulesek"), uniqueSorted(filters.map((f) => f.ulesek)));
 
-  const years = [
-    ...new Set(
-      filters.map((f) => f.gyartasi_ev).filter((year) => year && year > 1900)
-    ),
-  ]
-    .sort((a, b) => b - a)
-    .map(String);
+  const listingYears = filters
+    .map((f) => f.gyartasi_ev)
+    .filter((year) => year && year > 1900);
+  const yearSet = new Set(listingYears.map(String));
+  for (let year = 2035; year >= 1990; year -= 1) yearSet.add(String(year));
+  const years = [...yearSet].sort((a, b) => Number(b) - Number(a));
   fillSelect(document.getElementById("filter-ev-jarat"), years);
 }
 

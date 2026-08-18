@@ -8,6 +8,7 @@
 import { initVehicleCatalogSelects, fillSelect } from "./vehicle-catalog-client.js";
 
 const FIRST_YEAR = 1950;
+const LAST_YEAR = 2035;
 const PRICE_STEP = 500_000;
 const PRICE_MAX = 50_000_000;
 const KM_STEP = 10_000;
@@ -15,9 +16,8 @@ const KM_MAX = 500_000;
 const LE_STEPS = [50, 75, 100, 125, 150, 175, 200, 225, 250, 300, 350, 400, 500, 600, 800];
 
 function yearOptions() {
-  const current = new Date().getFullYear();
   const years = [];
-  for (let year = current; year >= FIRST_YEAR; year -= 1) years.push(String(year));
+  for (let year = LAST_YEAR; year >= FIRST_YEAR; year -= 1) years.push(String(year));
   return years;
 }
 

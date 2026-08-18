@@ -2335,10 +2335,10 @@ body.site-app .field-row.full.field-row--year-km {
 }
 
 body.site-app .field-row.full.field-row--year-km .labeled-field {
-  flex: 1 1 0;
+  flex: 0 0 auto;
   min-width: 0;
   width: auto !important;
-  max-width: none;
+  max-width: 12.5rem !important;
 }
 
 body.site-app .field-row.full.field-row--year-km .labeled-field > .inline-2,

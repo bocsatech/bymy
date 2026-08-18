@@ -106,6 +106,7 @@ import { saveListingPhotos } from "./lib/listing-photos.mjs";
 import { canManageListing } from "./lib/listing-meta.mjs";
 import { navCountsFromListings } from "./lib/nav-counts.mjs";
 import { handleMessagesApi, initMessagingSchema } from "./lib/messaging.mjs";
+import { handleLevel1Api } from "./lib/level1-api.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PUBLIC = join(__dirname, "public");
@@ -1565,6 +1566,11 @@ export async function handleHttpRequest(req, res) {
 
   if (pathname === "/api/media/proxy" && req.method === "GET") {
     await handleMediaProxy(req, res);
+    return;
+  }
+
+  if (pathname.startsWith("/api/level1")) {
+    await handleLevel1Api(req, res, pathname);
     return;
   }
 

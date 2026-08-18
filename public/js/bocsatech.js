@@ -2,7 +2,7 @@ const app = document.getElementById("app");
 
 let admin = null;
 let tab = "users";
-let otpUser = "";
+let lastUsername = "";
 let err = "";
 let info = "";
 let users = [];
@@ -40,11 +40,12 @@ const actions = {
     err = "";
     info = "";
     const form = event.target;
+    lastUsername = String(form.username.value || "").trim();
     try {
       const data = await api("/api/level1/login", {
         method: "POST",
         body: JSON.stringify({
-          username: form.username.value,
+          username: lastUsername,
           password: form.password.value,
         }),
       });
@@ -165,7 +166,7 @@ function loginView() {
       <p class="sub">Admin belépés — jelszó + email kód. 3 hiba után a felhasználónév zárolva.</p>
       <form class="card" data-act="login" style="max-width:420px">
         <label>Felhasználónév</label>
-        <input name="username" autocomplete="username" required />
+        <input name="username" autocomplete="username" value="${esc(lastUsername)}" required />
         <label>Jelszó</label>
         <input name="password" type="password" autocomplete="current-password" required />
         <p class="err">${err}</p>

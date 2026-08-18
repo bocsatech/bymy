@@ -108,21 +108,55 @@ export function mountLayoutBoard(root, layout, { onChange } = {}) {
     if (meta) meta.textContent = `${cell.colSpan}/12`;
   }
 
-  function growBoard(board, row) {
-    const need = Math.max(3, row + 2);
-    board.style.gridTemplateRows = `repeat(${need}, ${ROW_PX}px)`;
+  function boardMetrics(board) {
+    const rect = board.getBoundingClientRect();
+    const styles = getComputedStyle(board);
+    const padX = parseFloat(styles.paddingLeft) || 0;
+    const padY = parseFloat(styles.paddingTop) || 0;
+    const gapX = parseFloat(styles.columnGap) || parseFloat(styles.gap) || 0;
+    const gapY = parseFloat(styles.rowGap) || parseFloat(styles.gap) || 0;
+    const innerW = Math.max(0, rect.width - padX - (parseFloat(styles.paddingRight) || 0));
+    const colStride = (innerW - gapX * (COLS - 1)) / COLS + gapX;
+    return { rect, padX, padY, gapX, gapY, colStride, rowStride: ROW_PX + gapY };
   }
 
   function colFromEvent(board, clientX) {
-    const rect = board.getBoundingClientRect();
-    const x = clientX - rect.left;
-    return clamp(Math.floor((x / rect.width) * COLS) + 1, 1, COLS);
+    const m = boardMetrics(board);
+    const x = clientX - m.rect.left - m.padX;
+    return clamp(Math.floor(x / m.colStride) + 1, 1, COLS);
   }
 
   function rowFromEvent(board, clientY) {
-    const rect = board.getBoundingClientRect();
-    const y = clientY - rect.top;
-    return clamp(Math.floor(y / ROW_PX) + 1, 1, 80);
+    const m = boardMetrics(board);
+    const y = clientY - m.rect.top - m.padY;
+    return clamp(Math.floor(y / m.rowStride) + 1, 1, 80);
+  }
+
+  function maxRowOn(step) {
+    const rows = editable()
+      .filter((cell) => !cell.hidden && Number(cell.step) === step)
+      .map((cell) => Number(cell.row) || 1);
+    return Math.max(3, ...rows);
+  }
+
+  function growBoard(board) {
+    const step = Number(board.getAttribute("data-board"));
+    board.style.gridTemplateRows = `repeat(${maxRowOn(step) + 2}, ${ROW_PX}px)`;
+  }
+
+  function placeOnBoard(cell, board, clientX, clientY, grab) {
+    const col = colFromEvent(board, clientX);
+    const row = rowFromEvent(board, clientY);
+    if (grab) {
+      cell.col = clamp(col - (grab.col - grab.startCol), 1, COLS - cell.colSpan + 1);
+      cell.row = clamp(row - (grab.row - grab.startRow), 1, 80);
+    } else {
+      cell.col = clamp(col, 1, COLS - cell.colSpan + 1);
+      cell.row = row;
+    }
+    cell.step = Number(board.getAttribute("data-board"));
+    cell.order = (cell.row - 1) * COLS + cell.col;
+    syncPair(cell);
   }
 
   function bindTiles() {
@@ -142,12 +176,17 @@ export function mountLayoutBoard(root, layout, { onChange } = {}) {
         const cell = byKey.get(tile.getAttribute("data-field"));
         let board = tile.closest(".layout-board");
         if (!cell || !board) return;
+        const originStep = Number(cell.step);
         const resize = event.target.closest("[data-resize]");
         event.preventDefault();
         tile.setPointerCapture(event.pointerId);
         tile.classList.add("dragging");
-        let startCol = cell.col;
-        let grabCol = colFromEvent(board, event.clientX);
+        const grab = {
+          startCol: cell.col,
+          startRow: cell.row,
+          col: colFromEvent(board, event.clientX),
+          row: rowFromEvent(board, event.clientY),
+        };
 
         const move = (ev) => {
           if (!resize) {
@@ -157,26 +196,26 @@ export function mountLayoutBoard(root, layout, { onChange } = {}) {
             const nextBoard = under?.closest?.(".layout-board");
             root.querySelectorAll(".layout-board").forEach((el) => el.classList.toggle("is-drop", el === nextBoard));
             if (nextBoard && nextBoard !== board) {
+              placeOnBoard(cell, nextBoard, ev.clientX, ev.clientY);
+              paint(tile, cell);
               nextBoard.appendChild(tile);
               board = nextBoard;
-              cell.step = Number(board.getAttribute("data-board"));
-              grabCol = colFromEvent(board, ev.clientX);
-              startCol = cell.col;
+              grab.startCol = cell.col;
+              grab.startRow = cell.row;
+              grab.col = colFromEvent(board, ev.clientX);
+              grab.row = rowFromEvent(board, ev.clientY);
             }
           }
           if (!board) return;
           if (resize) {
             const edge = colFromEvent(board, ev.clientX);
             cell.colSpan = clamp(edge - cell.col + 1, 1, COLS - cell.col + 1);
+            cell.order = (cell.row - 1) * COLS + cell.col;
+            syncPair(cell);
           } else {
-            const col = colFromEvent(board, ev.clientX);
-            const row = rowFromEvent(board, ev.clientY);
-            cell.col = clamp(col - (grabCol - startCol), 1, COLS - cell.colSpan + 1);
-            cell.row = row;
-            growBoard(board, row);
+            placeOnBoard(cell, board, ev.clientX, ev.clientY, grab);
           }
-          cell.order = (cell.row - 1) * COLS + cell.col;
-          syncPair(cell);
+          growBoard(board);
           paint(tile, cell);
         };
         const up = () => {
@@ -190,6 +229,7 @@ export function mountLayoutBoard(root, layout, { onChange } = {}) {
           tile.removeEventListener("pointermove", move);
           tile.removeEventListener("pointerup", up);
           notify();
+          if (Number(cell.step) !== originStep) mount();
         };
         tile.addEventListener("pointermove", move);
         tile.addEventListener("pointerup", up);

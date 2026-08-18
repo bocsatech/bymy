@@ -1,4 +1,4 @@
-import { mountLayoutBoard } from "./bocsatech-layout.js?v=visLayout2";
+import { mountLayoutBoard } from "./bocsatech-layout.js?v=visLayout3";
 
 const app = document.getElementById("app");
 

@@ -99,6 +99,8 @@ th { color: var(--muted); font-weight: 600; }
 .layout-board {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-auto-rows: 64px;
+  align-content: start;
   gap: 8px;
   background:
     linear-gradient(to right, rgba(240, 193, 75, 0.08) 0, rgba(240, 193, 75, 0.08) 1px, transparent 1px) 0 0 / calc(100% / 12) 100%,

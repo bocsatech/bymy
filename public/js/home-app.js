@@ -11,6 +11,8 @@ import { initHomeQuickSearch } from "./home-quicksearch.js?v=year2035";
 import { filterByCategory, initHomeCategoryBar, renderHomeCategoryBar } from "./home-category-bar.js";
 import { initHomeUnifiedScroll } from "./home-unified-scroll.js";
 import { initHomeStatsBar } from "./home-stats-bar.js";
+import { buildNearbyFilter, readNearbyPrefs } from "./nearby-search.js?v=nearby1";
+import { getAuthUser } from "./site-auth.js?v=nearby1";
 import { bindListingOpen, restoreListingReturn } from "./listing-return.js?v=hdView1";
 
 const gridTrack = document.getElementById("home-grid-track");
@@ -104,6 +106,35 @@ async function loadListings() {
   updateFilterResultCount();
   statsUi?.refreshActiveCount?.();
   if (categoryFilter) scrollToListings();
+  await applyNearbyFromUrl();
+}
+
+async function applyNearbyFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("nearby") !== "1") return;
+
+  const prefs = readNearbyPrefs(getAuthUser()?.profile ?? null);
+  const postal = (params.get("postal") || prefs.postal).replace(/\D/g, "").slice(0, 4);
+  const radiusKm = Number(params.get("radius") || prefs.radiusKm);
+  if (postal.length !== 4 || !Number.isFinite(radiusKm) || radiusKm <= 0) return;
+
+  try {
+    if (statsUi?.applyNearby) {
+      await statsUi.applyNearby({ postal, radiusKm });
+      return;
+    }
+    statsFilter = await buildNearbyFilter({
+      items: allItems,
+      postal,
+      radiusKm,
+    });
+    categoryUi?.clear();
+    categoryFilter = null;
+    applyFilters();
+    scrollToListings();
+  } catch {
+    /* ignore invalid nearby params */
+  }
 }
 
 function applyFilters() {

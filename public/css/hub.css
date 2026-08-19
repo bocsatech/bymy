@@ -1101,6 +1101,30 @@ body.hub-page--feed {
   margin: -0.15rem 0 0;
 }
 
+.hf-status {
+  margin: 0 0 0.55rem;
+  padding: 0 1.25rem;
+  font-size: 0.82rem;
+  color: #6b7280;
+  line-height: 1.35;
+}
+
+.hf-card--listing .hf-card-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hf-card--prompt .hf-card-media {
+  background: linear-gradient(135deg, #eef2f7 0%, #f8fafc 100%);
+}
+
+.hf-card--prompt .hf-card-label {
+  font-size: 0.82rem;
+  line-height: 1.25;
+  padding-bottom: 0.45rem;
+}
+
 .hf-rail--tiles {
   gap: 0.85rem;
 }

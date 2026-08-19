@@ -1,11 +1,14 @@
 import {
+  buildNearbyFilter,
+  buildNearbyFilterState,
+  STORAGE_POSTAL,
+  STORAGE_RADIUS,
+} from "./nearby-search.js?v=nearby1";
+import {
   buildCityIndex,
   filterListingsInRadius,
   filterListingsRecentInRadius,
 } from "./listing-radius.js";
-
-const STORAGE_POSTAL = "bymy_stats_postal";
-const STORAGE_RADIUS = "bymy_stats_radius_km";
 
 const MODE_ALL = "all";
 const MODE_RECENT24H = "recent24h";
@@ -93,17 +96,6 @@ export function initHomeStatsBar({ onChange, getItems }) {
     return { postal_code, radiusKm };
   }
 
-  function buildActiveFilter(mode, origin, radiusKm, filtered) {
-    return {
-      mode,
-      postal_code: origin.postal_code,
-      radiusKm,
-      origin,
-      listingIds: new Set(filtered.map((item) => item.id)),
-      count: filtered.length,
-    };
-  }
-
   function setSelectedCard(card) {
     for (const entry of filterCards) {
       entry.classList.toggle("is-active", entry === card);
@@ -172,10 +164,12 @@ export function initHomeStatsBar({ onChange, getItems }) {
     }
 
     try {
-      const origin = await fetchPostalLookup(postal_code);
-      const cityIndex = await getCityIndex();
-      const filtered = filterItemsForMode(mode, getItems(), origin, radiusKm, cityIndex);
-      activeFilter = buildActiveFilter(mode, origin, radiusKm, filtered);
+      activeFilter = await buildNearbyFilter({
+        items: getItems(),
+        postal: postal_code,
+        radiusKm,
+        mode,
+      });
       setSelectedCard(card);
       updateCardUi(activeFilter);
       onChange?.(activeFilter);
@@ -209,7 +203,7 @@ export function initHomeStatsBar({ onChange, getItems }) {
         activeFilter.radiusKm,
         cityIndex
       );
-      activeFilter = buildActiveFilter(
+      activeFilter = buildNearbyFilterState(
         activeFilter.mode,
         activeFilter.origin,
         activeFilter.radiusKm,
@@ -275,5 +269,12 @@ export function initHomeStatsBar({ onChange, getItems }) {
       onChange?.(null);
     },
     refreshActiveCount,
+    applyNearby: async ({ postal, radiusKm, mode = MODE_ALL } = {}) => {
+      if (postal) postalInput.value = String(postal).replace(/\D/g, "").slice(0, 4);
+      if (radiusKm != null) radiusInput.value = String(radiusKm);
+      return applyFilter(mode);
+    },
   };
 }
+
+export { buildNearbyFilter };

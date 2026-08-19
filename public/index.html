@@ -54,7 +54,7 @@
       href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="/css/hub.css?v=logoTop2" />
+    <link rel="stylesheet" href="/css/hub.css?v=nearby1" />
     <link rel="stylesheet" href="/css/hub-mobile-app.css?v=authMsg1" />
     <link rel="stylesheet" href="/css/site-app.css?v=authMsg1" />  </head>
   <body class="hub-page site-page site-app hub-page--feed" data-site-page="hub">
@@ -217,14 +217,10 @@
       <section class="hf-section" data-hf="kozelben">
         <div class="hf-head">
           <h2 class="hf-title">Autók a közelben</h2>
-          <a class="hf-all" href="/auto.html">Összes</a>
+          <a class="hf-all" id="hub-nearby-all" href="/auto.html?nearby=1">Összes</a>
         </div>
-        <div class="hf-rail" role="list">
-          <a class="hf-card" href="/auto.html" role="listitem"><span class="hf-card-media"></span><span class="hf-card-label">Hamarosan</span></a>
-          <a class="hf-card" href="/auto.html" role="listitem"><span class="hf-card-media"></span><span class="hf-card-label">Hamarosan</span></a>
-          <a class="hf-card" href="/auto.html" role="listitem"><span class="hf-card-media"></span><span class="hf-card-label">Hamarosan</span></a>
-          <a class="hf-card" href="/auto.html" role="listitem"><span class="hf-card-media"></span><span class="hf-card-label">Hamarosan</span></a>
-        </div>
+        <p class="hf-status" id="hub-nearby-status" hidden></p>
+        <div class="hf-rail" id="hub-nearby-rail" role="list"></div>
       </section>
 
       <section class="hf-section" data-hf="szolgaltatasok">
@@ -382,6 +378,7 @@
 
     <script src="/js/hub-rail-drag.js?v=hubDrag2" defer></script>
     <script src="/js/hub-auto-categories.js?v=autoCat2" type="module"></script>
+    <script src="/js/hub-nearby-cars.js?v=nearby1" type="module"></script>
     <script src="/js/nav-counts.js?v=willhabenHdr1" type="module"></script>
     <script src="/js/theme.js?v=willhabenHdr1" type="module"></script>
     <script src="/js/site-auth.js?v=authMsg1" type="module"></script>

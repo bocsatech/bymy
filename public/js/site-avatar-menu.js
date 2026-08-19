@@ -5,8 +5,6 @@
 
 const AUTH_KEY = "bymy-auth-user";
 const PHOTO_KEY = "bymy-avatar-photos";
-const FIOK_URL = "/beallitasok.html";
-
 let initialized = false;
 
 function getAuthUser() {
@@ -128,22 +126,26 @@ export function refreshAvatarMenuUi(root = document) {
 function bindWrap(wrap) {
   hideDropdown(wrap);
   const toggle = wrap.querySelector("[data-avatar-toggle]");
+  if (!toggle || toggle.dataset.bound === "1") return;
+  toggle.dataset.bound = "1";
   toggle?.addEventListener("click", (event) => {
     event.preventDefault();
     event.stopPropagation();
+    if (toggle.dataset.navigating === "1") return;
     if (!isLoggedIn()) {
+      toggle.dataset.navigating = "1";
       window.location.href = `/belepes.html?next=${encodeURIComponent(
         window.location.pathname + window.location.search
       )}`;
       return;
     }
 
-    // Célozzuk a beállítások oldalsó menüt (ne a fejléc dropdownot).
-    // Ha épp beállítások oldalon vagy, tartsuk meg az aktuális `szekcio`-t és a hash-t.
-    const current = new URL(window.location.href);
-    const section = current.searchParams.get("szekcio") || "fiok";
-    const hash = window.location.hash || "";
-    window.location.href = `/beallitasok.html?szekcio=${encodeURIComponent(section)}${hash}`;
+    // Egyetlen stabil célpont: beállítások oldalsáv (fiok szekció).
+    const target = "/beallitasok.html?szekcio=fiok";
+    const now = `${window.location.pathname}${window.location.search}`;
+    if (now === target) return;
+    toggle.dataset.navigating = "1";
+    window.location.assign(target);
   });
 }
 

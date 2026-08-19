@@ -451,15 +451,47 @@ function resetSuccess() {
 }
 
 function goToStep(step) {
-  if (step < 1 || step > TOTAL_STEPS || step === currentStep) return;
+  if (step < 1 || step > TOTAL_STEPS || step === currentStep) return false;
   if (step > 4 && !photosReadyForNext()) {
     alert(photoBlockMessage());
     showStep(4);
-    return;
+    return false;
+  }
+  if (step > currentStep) {
+    for (let s = currentStep; s < step; s += 1) {
+      if (!validateStep(s)) return false;
+    }
   }
   saveDraft();
   if (currentStep === TOTAL_STEPS) resetSuccess();
   showStep(step);
+  return true;
+}
+
+async function tryGoToStep(step) {
+  if (step < 1 || step > TOTAL_STEPS || step === currentStep) return false;
+  if (step > 4 && !photosReadyForNext()) {
+    alert(photoBlockMessage());
+    showStep(4);
+    return false;
+  }
+  if (step > currentStep) {
+    for (let s = currentStep; s < step; s += 1) {
+      if (!validateStep(s)) return false;
+    }
+  }
+  saveDraft();
+  if (options.onStepPersist) {
+    try {
+      await options.onStepPersist(collectFormData(), { fromStep: currentStep, toStep: step });
+    } catch (error) {
+      alert(error?.message ?? "Az automatikus mentés sikertelen.");
+      return false;
+    }
+  }
+  if (currentStep === TOTAL_STEPS) resetSuccess();
+  showStep(step);
+  return true;
 }
 
 function updateAutomaxStepHeader(step) {
@@ -776,7 +808,7 @@ function validateStep(step) {
     }
     if (!photosReadyForNext()) {
       alert(photoBlockMessage());
-      goToStep(4);
+      showStep(4);
       return false;
     }
     return true;
@@ -844,6 +876,32 @@ function loadExistingPhotos(data) {
     status: "ready",
     error: "",
   }));
+  renderPhotoPreview();
+}
+
+function applyPhotoUrls(urls) {
+  const list = (urls ?? []).map((url) => String(url ?? "").trim()).filter(Boolean).slice(0, MAX_LISTING_PHOTOS);
+  if (!list.length) return;
+  list.forEach((url, index) => {
+    const item = photoItems[index];
+    if (item) {
+      item.url = url;
+      item.previewUrl = url;
+      item.status = "ready";
+      item.dataUrl = null;
+      item.error = "";
+      return;
+    }
+    photoItems.push({
+      id: `url-${++photoSeq}`,
+      file: null,
+      previewUrl: url,
+      dataUrl: null,
+      url,
+      status: "ready",
+      error: "",
+    });
+  });
   renderPhotoPreview();
 }
 
@@ -1031,19 +1089,21 @@ gyartmany?.addEventListener("change", applyAutoFill);
 teljesitmenyKw?.addEventListener("input", updateLeDisplay);
 
 if (mode === "wizard") {
-  backBtn?.addEventListener("click", () => {
-    if (currentStep > 1) goToStep(currentStep - 1);
+  backBtn?.addEventListener("click", async () => {
+    if (currentStep > 1) await tryGoToStep(currentStep - 1);
   });
 
   indicators.forEach((indicator) => {
     const step = Number(indicator.dataset.stepIndicator);
     indicator.setAttribute("role", "tab");
     indicator.setAttribute("tabindex", "0");
-    indicator.addEventListener("click", () => goToStep(step));
+    indicator.addEventListener("click", () => {
+      void tryGoToStep(step);
+    });
     indicator.addEventListener("keydown", (event) => {
       if (event.key === "Enter" || event.key === " ") {
         event.preventDefault();
-        goToStep(step);
+        void tryGoToStep(step);
       }
     });
   });
@@ -1052,7 +1112,7 @@ if (mode === "wizard") {
     if (!validateStep(currentStep)) return;
     saveDraft();
     if (currentStep < TOTAL_STEPS) {
-      goToStep(currentStep + 1);
+      await tryGoToStep(currentStep + 1);
       return;
     }
     buildSummary();
@@ -1247,6 +1307,7 @@ return {
   applyFormData,
   collectFormData,
   resetForm,
+  applyPhotoUrls,
   getPhotoFiles: () => photoItems.map((item) => item.file).filter(Boolean),
   getPreparedPhotoItems: preparedPhotoItems,
   showAllSteps,

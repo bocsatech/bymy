@@ -15,6 +15,7 @@ import {
   listingSourceExists,
   updateListingFoKep,
   updateListingPhotoUrls,
+  clearListingPhotos,
   recordListingView,
   listMyListings,
   updateListingStatus,
@@ -572,6 +573,30 @@ async function handleListingsApi(req, res, pathname) {
   }
 
   const photosMatch = pathname.match(/^\/api\/listings\/(\d+)\/photos$/);
+  if (photosMatch && req.method === "DELETE") {
+    const user = await requestUser(req);
+    if (!user) {
+      sendJson(res, 401, { error: "Nem vagy bejelentkezve." });
+      return;
+    }
+    const listing = await getListing(Number(photosMatch[1]));
+    if (!listing) {
+      sendJson(res, 404, { error: "Nincs ilyen hirdetés." });
+      return;
+    }
+    if (!canManageListing(listing, user)) {
+      sendJson(res, 403, { error: "Ezt a hirdetést nem módosíthatod." });
+      return;
+    }
+    try {
+      const updated = await clearListingPhotos(listing.id);
+      sendJson(res, 200, { listing: updated });
+    } catch (error) {
+      sendJson(res, 500, { error: error.message ?? "A képek törlése sikertelen." });
+    }
+    return;
+  }
+
   if (photosMatch && req.method === "POST") {
     const user = await requestUser(req);
     if (!user) {

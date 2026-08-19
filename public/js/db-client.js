@@ -135,6 +135,15 @@ export async function saveListingPhotosOrder(id, items) {
   return data.listing ?? null;
 }
 
+export async function clearListingPhotosFromDb(id) {
+  const response = await fetch(`/api/listings/${id}/photos`, {
+    method: "DELETE",
+    headers: authHeaders(),
+    credentials: "same-origin",
+  });
+  return parseJson(response);
+}
+
 export async function deleteListingFromDb(id) {
   const response = await fetch(`/api/listings/${id}`, {
     method: "DELETE",

@@ -1,5 +1,11 @@
-import { saveListingToDb, setStoredListingId, fetchListing, saveListingPhotosOrder } from "./db-client.js?v=myAds2";
-import { createAdForm } from "./form-core.js?v=locProf1";
+import {
+  saveListingToDb,
+  setStoredListingId,
+  fetchListing,
+  saveListingPhotosOrder,
+  getStoredListingId,
+} from "./db-client.js?v=wizardSave1";
+import { createAdForm } from "./form-core.js?v=wizardSave1";
 import { initTireSizes } from "./tire-sizes-ui.js";
 import { initPhoneLanguages } from "./phone-lang-ui.js";
 import { initCategoryPicker } from "./category-picker.js?v=catPick20260817a";
@@ -30,6 +36,83 @@ let tireSizes = null;
 let phoneLanguages = null;
 let pendingEditForm = null;
 let formApi = null;
+let wizardSubmitted = false;
+let abandonCleanupBound = false;
+
+function resolveListingId() {
+  if (editing) return editId;
+  return getStoredListingId();
+}
+
+function syncPhotoUrlsFromListing(listing) {
+  const urls = listing?.preview?.imageUrls?.length
+    ? listing.preview.imageUrls
+    : listing?.fo_kep
+      ? [listing.fo_kep]
+      : [];
+  if (!urls.length || !formApi?.applyPhotoUrls) return;
+  formApi.applyPhotoUrls(urls);
+}
+
+async function persistWizardStep(formData, { fromStep } = {}) {
+  if (fromStep >= 5) {
+    applyListingAddressFromProfileSync(adForm);
+    await applyListingAddressFromProfile(adForm);
+  }
+
+  const listingId = resolveListingId();
+  const items = formApi?.getPreparedPhotoItems?.() ?? [];
+  const readyItems = items.filter((item) => item.data || item.url);
+  const photos = readyItems.filter((item) => item.data).map((item) => item.data);
+
+  const saved = await saveListingToDb(formData, listingId, {
+    status: "mentett",
+    photos: fromStep >= 4 ? photos : [],
+  });
+
+  if (!saved?.id) {
+    throw new Error("A piszkozat mentése sikertelen.");
+  }
+
+  setStoredListingId(saved.id);
+
+  if (fromStep >= 4 && readyItems.length) {
+    const withUrls = readyItems.every((item) => item.url || item.data);
+    if (!withUrls || readyItems.some((item) => item.url)) {
+      const updated = await saveListingPhotosOrder(saved.id, readyItems);
+      syncPhotoUrlsFromListing(updated);
+      return updated ?? saved;
+    }
+  }
+
+  syncPhotoUrlsFromListing(saved);
+  return saved;
+}
+
+function registerAbandonPhotoCleanup() {
+  if (abandonCleanupBound || editing) return;
+  abandonCleanupBound = true;
+  window.addEventListener("pagehide", () => {
+    if (wizardSubmitted) return;
+    const id = getStoredListingId();
+    if (!id) return;
+    const token = (() => {
+      try {
+        return localStorage.getItem("bymy-auth-token") || "";
+      } catch {
+        return "";
+      }
+    })();
+    fetch(`/api/listings/${id}/photos`, {
+      method: "DELETE",
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      credentials: "same-origin",
+      keepalive: true,
+    }).catch(() => {});
+  });
+}
 
 function showWizardShell() {
   document.getElementById("category-picker-shell")?.setAttribute("hidden", "");
@@ -41,11 +124,13 @@ function ensureFormReady() {
   if (formApi || !adForm) return formApi;
   if (!editing) setStoredListingId(null);
   initAdLocationProfile(adForm);
+  registerAbandonPhotoCleanup();
   tireSizes = initTireSizes(adForm);
   phoneLanguages = initPhoneLanguages(adForm);
   formApi = createAdForm({
     mode: "wizard",
     editing,
+    onStepPersist: persistWizardStep,
     onWizardComplete: async (formData) => {
       applyListingAddressFromProfileSync(adForm);
       const loc = await applyListingAddressFromProfile(adForm);
@@ -58,9 +143,9 @@ function ensureFormReady() {
       if (!editing && !items.length) {
         throw new Error("Legalább egy fénykép kell a hirdetéshez.");
       }
-      const allData = items.length > 0 && items.every((item) => item.data);
-      const photos = allData ? items.map((item) => item.data) : [];
-      const saved = await saveListingToDb(formData, editing ? editId : null, {
+      const allData = items.length > 0 && items.every((item) => item.data || item.url);
+      const photos = items.filter((item) => item.data).map((item) => item.data);
+      const saved = await saveListingToDb(formData, resolveListingId(), {
         status: "feladott",
         photos,
       });
@@ -73,10 +158,13 @@ function ensureFormReady() {
       if (!editing && !saved.fo_kep && !saved.preview?.imageUrl && !items.length) {
         throw new Error("A hirdetés mentődött, de a kép nem. Próbáld kisebb JPG-gel.");
       }
+      wizardSubmitted = true;
+      setStoredListingId(saved.id);
       window.location.assign("/beallitasok.html?szekcio=hirdetes");
       return saved;
     },
     onNewAd: () => {
+      wizardSubmitted = false;
       setStoredListingId(null);
       categoryPicker?.reset();
     },
@@ -134,6 +222,7 @@ if (editing) {
     phoneLanguages?.syncLanguages?.();
     tireSizes?.syncRearTires?.();
     setStoredListingId(editId);
+    syncPhotoUrlsFromListing(listing);
   } catch (error) {
     alert(error.message ?? "A hirdetés betöltése sikertelen.");
     window.location.assign("/beallitasok.html?szekcio=hirdetes");

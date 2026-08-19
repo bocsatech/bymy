@@ -1501,7 +1501,12 @@ async function handleAuthApi(req, res, pathname) {
       const saved = await saveUserProfile(currentUser.id, body.profile ?? body);
       const { _savedTo, ...profile } = saved;
       const user = await getUserById(currentUser.id);
-      if (!user?.profile?.firstName) {
+      const p = user?.profile;
+      const savedOk =
+        p?.accountType === "business"
+          ? Boolean(String(p?.company || "").trim() || String(p?.companyTaxId || "").trim() || p?.firstName)
+          : Boolean(p?.firstName);
+      if (!savedOk) {
         sendJson(res, 500, { error: "A mentés nem íródott a helyi adatbázisba." });
         return;
       }

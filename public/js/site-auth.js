@@ -324,6 +324,18 @@ export function getProfile() {
   return { ...EMPTY_PROFILE, ...(user.profile || {}) };
 }
 
+function profileSaveLooksOk(profile) {
+  if (!profile) return false;
+  if (profile.accountType === "business") {
+    return Boolean(
+      String(profile.company || "").trim() ||
+        String(profile.companyTaxId || "").trim() ||
+        String(profile.firstName || "").trim()
+    );
+  }
+  return Boolean(String(profile.firstName || "").trim());
+}
+
 export async function saveProfile(profile) {
   const data = await authFetch("/api/auth/profile", {
     method: "PUT",
@@ -334,20 +346,23 @@ export async function saveProfile(profile) {
     const user = getAuthUser();
     if (user) {
       user.profile = data.profile;
-      user.displayName = [data.profile.firstName, data.profile.lastName].filter(Boolean).join(" ");
+      user.displayName =
+        [data.profile.firstName, data.profile.lastName].filter(Boolean).join(" ") ||
+        String(data.profile.company || "").trim() ||
+        user.displayName;
       setCachedUser(user);
     }
   }
-  if (!data.profile?.firstName) {
+  if (!profileSaveLooksOk(data.profile)) {
     throw new Error("A mentés nem sikerült — próbáld újra belépés után.");
   }
   const email = getAuthUser()?.email || data.user?.email;
-  backupProfileLocally(email, data.profile);
+  if (data.profile?.firstName) backupProfileLocally(email, data.profile);
 
   // Újraolvasás — ha a szerver üresen adná vissza, azonnal jelezzük.
   try {
     const verify = await authFetch("/api/auth/profile");
-    if (!verify.profile?.firstName) {
+    if (!profileSaveLooksOk(verify.profile)) {
       throw new Error("A mentés nem került a helyi adatbázisba.");
     }
     if (verify.user) rememberAuth(verify);

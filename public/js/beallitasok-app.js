@@ -547,6 +547,7 @@ function accountTypeSidebarLabel(type) {
 function syncSidebarAccountType(type) {
   const el = document.querySelector("[data-mm-account-type]");
   const nav = document.querySelector("[data-mm-company-nav]");
+  const personalNav = document.querySelector('[data-mm-nav="fiok"]');
   const fromDb = type === "business" || type === "dealer" ? type : "private";
   const companyType = isCompanyAccount(fromDb);
   if (el) {
@@ -554,8 +555,12 @@ function syncSidebarAccountType(type) {
     el.hidden = false;
   }
   if (nav) nav.hidden = !companyType;
+  if (personalNav) personalNav.hidden = companyType;
   if (!companyType && currentSection() === "cegadatok") {
     setSection("fiok");
+  }
+  if (companyType && currentSection() === "fiok") {
+    setSection("cegadatok");
   }
 }
 

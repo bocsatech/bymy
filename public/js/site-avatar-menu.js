@@ -1,5 +1,5 @@
 /**
- * Fejléc profilkép + név: csak a jobb felső "Fiók" menüt nyitja meg.
+ * Fejléc profilkép + név: a Beállítások oldal megfelelő szekciójára navigál.
  * Mobil weben ez nem fut (ott más UI elem van).
  */
 
@@ -18,6 +18,10 @@ function getAuthUser() {
 
 function isLoggedIn() {
   return Boolean(getAuthUser()?.email);
+}
+
+function isCompanyAccount(type) {
+  return type === "business" || type === "dealer";
 }
 
 function readPhotos() {
@@ -140,8 +144,10 @@ function bindWrap(wrap) {
       return;
     }
 
-    // Egyetlen stabil célpont: beállítások oldalsáv (fiok szekció).
-    const target = "/beallitasok.html?szekcio=fiok";
+    // Céges fiók -> közvetlenül Cégadatok (ne villanjon a fiok szekció).
+    const user = getAuthUser();
+    const section = isCompanyAccount(String(user?.profile?.accountType || "").trim()) ? "cegadatok" : "fiok";
+    const target = `/beallitasok.html?szekcio=${encodeURIComponent(section)}`;
     const now = `${window.location.pathname}${window.location.search}`;
     if (now === target) return;
     toggle.dataset.navigating = "1";

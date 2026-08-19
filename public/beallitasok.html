@@ -135,8 +135,22 @@
               <input type="text" name="companyTaxId" autocomplete="off" inputmode="numeric" />
             </label>
             <label class="login-field">
-              <span class="login-label">Cégcím/cím</span>
-              <input type="text" name="companyAddress" autocomplete="street-address" />
+              <span class="login-label">Utca, házszám</span>
+              <input type="text" name="companyStreet" autocomplete="street-address" />
+            </label>
+            <div class="settings-postal-row">
+              <label class="login-field settings-postal-field">
+                <span class="login-label">Irányítószám</span>
+                <input type="text" name="companyPostalCode" inputmode="numeric" maxlength="4" autocomplete="postal-code" data-postal-lookup data-company-postal />
+              </label>
+              <label class="login-field settings-city-field">
+                <span class="login-label">Település <span class="settings-city-busy" data-city-busy hidden>…</span></span>
+                <input type="text" name="companyCity" autocomplete="address-level2" placeholder="automatikus" data-company-city />
+              </label>
+            </div>
+            <label class="login-field">
+              <span class="login-label">Ország</span>
+              <input type="text" name="companyCountry" value="Magyarország" autocomplete="country-name" />
             </label>
             <div class="mm-grid-2">
               <label class="login-field">

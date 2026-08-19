@@ -490,10 +490,10 @@ async function lookupCityFromPostal(postalInput, cityInput, busyEl) {
     if (res.ok && data.city) {
       lastLookedUpPostal = digits;
       if (cityInput) cityInput.value = data.city;
-      document.querySelectorAll("[data-search-city], [data-rec-city], #mm-profile-form [name=city]").forEach((el) => {
+      document.querySelectorAll("[data-search-city], [data-rec-city], #mm-profile-form [name=city], #mm-company-form [name=companyCity]").forEach((el) => {
         if (el !== cityInput) el.value = data.city;
       });
-      document.querySelectorAll("[data-search-postal], [data-rec-postal], #mm-profile-form [name=postalCode]").forEach((el) => {
+      document.querySelectorAll("[data-search-postal], [data-rec-postal], #mm-profile-form [name=postalCode], #mm-company-form [name=companyPostalCode]").forEach((el) => {
         if (el !== postalInput) el.value = digits;
       });
     }
@@ -718,6 +718,9 @@ function applyProfileToForm(profile) {
   const form = document.getElementById("mm-profile-form");
   if (!form) return;
   const data = { ...getProfile(), ...(profile || {}) };
+  if (!data.companyStreet && data.companyAddress) {
+    data.companyStreet = data.companyAddress;
+  }
   const keys = [
     "salutation",
     "firstName",
@@ -729,6 +732,10 @@ function applyProfileToForm(profile) {
     "phone",
     "company",
     "companyTaxId",
+    "companyStreet",
+    "companyPostalCode",
+    "companyCity",
+    "companyCountry",
     "companyAddress",
     "companyPhone",
     "companyPhone2",
@@ -1052,7 +1059,12 @@ function bindCompanyFormEarly() {
         ...getProfile(),
         company: String(data.company || "").trim(),
         companyTaxId: String(data.companyTaxId || "").trim(),
-        companyAddress: String(data.companyAddress || "").trim(),
+        companyStreet: String(data.companyStreet || "").trim(),
+        companyPostalCode: String(data.companyPostalCode || "")
+          .replace(/\D/g, "")
+          .slice(0, 4),
+        companyCity: String(data.companyCity || "").trim(),
+        companyCountry: String(data.companyCountry || "Magyarország").trim() || "Magyarország",
         companyPhone: String(data.companyPhone || "").trim(),
         companyPhone2: String(data.companyPhone2 || "").trim(),
         companyEmail: String(data.companyEmail || "").trim(),

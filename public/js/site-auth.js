@@ -308,6 +308,10 @@ const EMPTY_PROFILE = {
   phone: "",
   company: "",
   companyTaxId: "",
+  companyStreet: "",
+  companyPostalCode: "",
+  companyCity: "",
+  companyCountry: "Magyarország",
   companyAddress: "",
   companyPhone: "",
   companyPhone2: "",
@@ -330,6 +334,8 @@ function profileSaveLooksOk(profile) {
     return Boolean(
       String(profile.company || "").trim() ||
         String(profile.companyTaxId || "").trim() ||
+        String(profile.companyStreet || "").trim() ||
+        String(profile.companyPostalCode || "").trim() ||
         String(profile.firstName || "").trim()
     );
   }

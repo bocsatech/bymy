@@ -1962,8 +1962,7 @@ body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-n
   flex-direction: column;
   min-height: 100%;
   color: inherit;
-  text-decoration: none;
-  cursor: pointer;
+  cursor: default;
   transition: box-shadow 0.15s, transform 0.15s, border-color 0.15s;
 }
 
@@ -1988,11 +1987,99 @@ body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-n
   overflow: hidden;
 }
 
+.home-grid-card-photo-track {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  touch-action: pan-x;
+}
+
+.home-grid-card-photo-track::-webkit-scrollbar {
+  display: none;
+}
+
+.home-grid-card-photo-track.is-dragging {
+  scroll-snap-type: none;
+  cursor: grabbing;
+}
+
+.home-grid-card-photo-slide {
+  flex: 0 0 100%;
+  width: 100%;
+  height: 100%;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+
 .home-grid-card-photo-img {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.home-grid-card-photo-count {
+  position: absolute;
+  left: 0.65rem;
+  bottom: 0.65rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.58);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1.2;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.home-grid-card-photo-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  color: #222;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+  cursor: pointer;
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+@media (hover: none) {
+  .home-grid-card-photo-nav {
+    opacity: 0.92;
+  }
+}
+
+.home-grid-card-media:hover .home-grid-card-photo-nav,
+.home-grid-card-photo-nav:focus-visible {
+  opacity: 1;
+}
+
+.home-grid-card-photo-nav--prev {
+  left: 0.55rem;
+}
+
+.home-grid-card-photo-nav--next {
+  right: 0.55rem;
+}
+
+.home-grid-card-photo-nav[hidden] {
+  display: none;
 }
 
 .home-grid-card-save {
@@ -2019,6 +2106,9 @@ body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-n
   flex-direction: column;
   gap: 0.55rem;
   flex: 1;
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
 }
 
 .home-grid-card-specs {

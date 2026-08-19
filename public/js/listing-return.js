@@ -52,6 +52,7 @@ export function listingReturnHref(fallback = "/auto.html") {
 
 export function bindListingOpen(root = document) {
   root.addEventListener("click", (event) => {
+    if (event.target.closest(".home-grid-card-media")) return;
     const el = event.target.closest("[data-listing-id]");
     if (!el || !root.contains(el)) return;
     const id = el.getAttribute("data-listing-id");

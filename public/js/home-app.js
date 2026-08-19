@@ -1,5 +1,5 @@
 import { fetchListings } from "./db-client.js?v=hdView1";
-import { createHomeGridCard } from "./home-grid-card.js?v=hdView1";
+import { createHomeGridCard, initHomeGridCardPhotos } from "./home-grid-card.js?v=cardPhotos1";
 import {
   emptyFilters,
   filterListingsBySidebar,
@@ -94,6 +94,7 @@ function renderListings(items) {
   for (const item of filtered) {
     gridTrack.appendChild(createHomeGridCard(item));
   }
+  initHomeGridCardPhotos(gridTrack);
   restoreListingReturn();
 }
 

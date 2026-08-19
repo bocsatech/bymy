@@ -2,6 +2,7 @@ import { UZEMANYAG_CATEGORIES, EQUIPMENT_SECTIONS, KLIM_OPTIONS } from "./equipm
 import { EGYEB_INFO_OPTIONS } from "./egyeb-info-data.js";
 import { initVehicleCatalogSelects } from "./vehicle-catalog-client.js";
 import { compressListingPhoto, MAX_LISTING_PHOTOS } from "./listing-photo-compress.js?v=myAds2";
+import { applyListingAddressFromProfileSync } from "./ad-location-profile.js?v=locProf1";
 
 export function createAdForm(options = {}) {
   const mode = options.mode ?? "wizard";
@@ -715,7 +716,8 @@ function validateStep(step) {
   const techRequired = ["uzemanyag"];
   const adRequired = [
     "vetelar",
-    "megye",
+    "megtekintesi_cim",
+    "iranyitoszam",
     "telepules",
     "telefon1_korzet",
     "telefon1_szam",
@@ -758,6 +760,8 @@ function validateStep(step) {
   }
 
   if (step === TOTAL_STEPS) {
+    applyListingAddressFromProfileSync(form);
+    window.dispatchEvent(new Event("ad-form-sync-location"));
     if (!validateFields(basicRequired)) {
       alert("Kérjük, töltsd ki a kötelező (*) mezőket.");
       return false;

@@ -2093,6 +2093,41 @@ body.site-app .form-grid > .field-stack--location .inline-2 input {
   max-width: none;
 }
 
+body.site-app #ad-form .ad-location-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  width: 100%;
+}
+
+body.site-app #ad-form .ad-location-field {
+  margin: 0;
+}
+
+body.site-app #ad-form .ad-location-field .login-label {
+  font-size: 0.8125rem;
+  color: var(--site-text-muted, #64748b);
+}
+
+body.site-app #ad-form .ad-location-fields input[readonly] {
+  background: color-mix(in srgb, var(--site-surface-muted, #f4f4f5) 88%, transparent);
+  cursor: default;
+}
+
+body.site-app #ad-form .ad-location-postal-row {
+  display: grid;
+  grid-template-columns: minmax(7rem, 9rem) 1fr;
+  gap: 0.75rem;
+}
+
+body.site-app #ad-form .ad-location-hint--error {
+  color: #b45309;
+}
+
+body.site-app #ad-form .ad-location-settings-link {
+  margin: 0.1rem 0 0;
+}
+
 /* Telefonszám + beszélt nyelvek */
 body.site-app .form-grid > .phone-lang-grid.full {
   grid-column: 1 / -1;

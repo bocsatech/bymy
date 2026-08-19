@@ -1,5 +1,5 @@
 import { saveListingToDb, setStoredListingId, fetchListing, saveListingPhotosOrder } from "./db-client.js?v=myAds2";
-import { createAdForm } from "./form-core.js?v=visLayout9";
+import { createAdForm } from "./form-core.js?v=locProf1";
 import { initTireSizes } from "./tire-sizes-ui.js";
 import { initPhoneLanguages } from "./phone-lang-ui.js";
 import { initCategoryPicker } from "./category-picker.js?v=catPick20260817a";
@@ -9,6 +9,13 @@ import {
   loginUrl,
   initSiteAuth,
 } from "./site-auth.js";
+import {
+  applyListingAddressFromProfile,
+  applyListingAddressFromProfileSync,
+  initAdLocationProfile,
+  listingAddressComplete,
+  getListingAddressFromProfile,
+} from "./ad-location-profile.js?v=locProf1";
 
 if (!(await requireAuthForPage())) {
   throw new Error("Belépés szükséges");
@@ -33,12 +40,20 @@ function showWizardShell() {
 function ensureFormReady() {
   if (formApi || !adForm) return formApi;
   if (!editing) setStoredListingId(null);
+  initAdLocationProfile(adForm);
   tireSizes = initTireSizes(adForm);
   phoneLanguages = initPhoneLanguages(adForm);
   formApi = createAdForm({
     mode: "wizard",
     editing,
     onWizardComplete: async (formData) => {
+      applyListingAddressFromProfileSync(adForm);
+      const loc = await applyListingAddressFromProfile(adForm);
+      if (!loc.ok || !listingAddressComplete(getListingAddressFromProfile())) {
+        throw new Error(
+          "Add meg a címed a Beállításokban (Személyes adatok vagy Cégadatok), majd próbáld újra."
+        );
+      }
       const items = formApi?.getPreparedPhotoItems?.() ?? [];
       if (!editing && !items.length) {
         throw new Error("Legalább egy fénykép kell a hirdetéshez.");
@@ -68,6 +83,8 @@ function ensureFormReady() {
     onCatalogReady: () => {
       if (pendingEditForm) {
         formApi?.applyFormData?.(pendingEditForm, { fromImport: true });
+        applyListingAddressFromProfileSync(adForm);
+        applyListingAddressFromProfile(adForm).catch(() => {});
         phoneLanguages?.syncLanguages?.();
         tireSizes?.syncRearTires?.();
       }
@@ -112,6 +129,8 @@ if (editing) {
     showWizardShell();
     pendingEditForm = listing.form;
     api?.applyFormData?.(listing.form, { fromImport: true });
+    applyListingAddressFromProfileSync(adForm);
+    await applyListingAddressFromProfile(adForm);
     phoneLanguages?.syncLanguages?.();
     tireSizes?.syncRearTires?.();
     setStoredListingId(editId);

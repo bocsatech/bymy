@@ -420,41 +420,31 @@
                   <p class="hint">A kereső a leírásban szereplő szövegben nem tud keresni!</p>
                 </div>
 
-                <label>Megtalálható: <span class="req">*</span></label>
-                <div class="inline-2">
-                  <select id="megye" name="megye" required>
-                    <option value="">vármegye</option>
-                    <option>Budapest</option>
-                    <option>Pest</option>
-                    <option>Fejér</option>
-                    <option>Győr-Moson-Sopron</option>
-                    <option>Komárom-Esztergom</option>
-                    <option>Veszprém</option>
-                    <option>Baranya</option>
-                    <option>Bács-Kiskun</option>
-                    <option>Békés</option>
-                    <option>Borsod-Abaúj-Zemplén</option>
-                    <option>Csongrád-Csanád</option>
-                    <option>Hajdú-Bihar</option>
-                    <option>Heves</option>
-                    <option>Jász-Nagykun-Szolnok</option>
-                    <option>Nógrád</option>
-                    <option>Somogy</option>
-                    <option>Szabolcs-Szatmár-Bereg</option>
-                    <option>Tolna</option>
-                    <option>Vas</option>
-                    <option>Zala</option>
-                  </select>
-                  <input id="telepules" name="telepules" type="text" placeholder="település" required />
-                </div>
-
-                <label for="iranyitoszam">Irányítószám:</label>
-                <input id="iranyitoszam" name="iranyitoszam" type="text" inputmode="numeric" maxlength="4" placeholder="pl. 1011" />
-
-                <label for="megtekintesi_cim">Megtekintési cím:</label>
-                <div>
-                  <input id="megtekintesi_cim" name="megtekintesi_cim" type="text" />
-                  <p class="hint">Ha üresen hagyja: „Megtekinthető: telefonon egyeztetett helyszínen”.</p>
+                <div class="field-stack full field-stack--location">
+                  <label class="ad-location-label">Megtalálható <span class="req">*</span></label>
+                  <p class="hint ad-location-hint" data-ad-location-hint hidden></p>
+                  <div class="ad-location-fields">
+                    <label class="login-field ad-location-field">
+                      <span class="login-label">Utca, házszám</span>
+                      <input id="megtekintesi_cim" name="megtekintesi_cim" type="text" autocomplete="street-address" readonly tabindex="-1" />
+                    </label>
+                    <div class="settings-postal-row ad-location-postal-row">
+                      <label class="login-field settings-postal-field ad-location-field">
+                        <span class="login-label">Irányítószám</span>
+                        <input id="iranyitoszam" name="iranyitoszam" type="text" inputmode="numeric" maxlength="4" autocomplete="postal-code" readonly tabindex="-1" />
+                      </label>
+                      <label class="login-field settings-city-field ad-location-field">
+                        <span class="login-label">Település</span>
+                        <input id="telepules" name="telepules" type="text" autocomplete="address-level2" readonly tabindex="-1" required />
+                      </label>
+                    </div>
+                    <label class="login-field ad-location-field">
+                      <span class="login-label">Ország</span>
+                      <input id="megtalalhato_orszag" type="text" autocomplete="country-name" readonly tabindex="-1" />
+                    </label>
+                    <input type="hidden" id="megye" name="megye" />
+                    <p class="hint ad-location-settings-link"><a href="/beallitasok.html?szekcio=fiok">Cím módosítása a Beállításokban</a></p>
+                  </div>
                 </div>
 
                 <label>Email megjelenítése:</label>

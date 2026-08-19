@@ -1,5 +1,6 @@
 /**
- * Fejléc profilkép + név: a Fiókom oldalra visz (bal menü + középső panel).
+ * Fejléc profilkép + név: csak a jobb felső "Fiók" menüt nyitja meg.
+ * Mobil weben ez nem fut (ott más UI elem van).
  */
 
 const AUTH_KEY = "bymy-auth-user";
@@ -136,7 +137,51 @@ function bindWrap(wrap) {
       )}`;
       return;
     }
-    window.location.href = FIOK_URL;
+
+    const dropdown = wrap.querySelector("[data-avatar-dropdown]");
+    if (!dropdown) return;
+
+    // Ha már nyitva van, zárjuk.
+    if (!dropdown.hidden) {
+      hideDropdown(wrap);
+      return;
+    }
+
+    // Nyitás → render + megjelenítés
+    const user = getAuthUser();
+    const name = displayName(user);
+
+    const esc = (value) =>
+      String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+
+    dropdown.innerHTML = `
+      <div class="site-avatar-logged">
+        Bejelentkezve mint <strong>${esc(name)}</strong>
+      </div>
+      <div class="site-avatar-card">
+        <a class="site-avatar-item" href="/beallitasok.html?szekcio=fiok">
+          <span class="site-avatar-item-icon" aria-hidden="true">⚙</span>
+          <span class="site-avatar-item-copy">
+            <span class="site-avatar-item-label">Beállítások</span>
+            <span class="site-avatar-item-desc">Profil & beállítások</span>
+          </span>
+          <span class="site-avatar-chevron" aria-hidden="true">›</span>
+        </a>
+      </div>
+      <div class="site-avatar-footer">
+        <button type="button" class="site-avatar-logout" data-auth-logout>
+          Kijelentkezés
+        </button>
+      </div>
+    `;
+
+    dropdown.hidden = false;
+    toggle?.setAttribute("aria-expanded", "true");
   });
 }
 
@@ -150,6 +195,13 @@ export function initAvatarMenu() {
 
   wraps.forEach(bindWrap);
   window.addEventListener("bymy-auth-changed", () => refreshAvatarMenuUi());
+
+  // Oldal kattintásra zárjuk a dropdownot (csak desktop "Fiók" menükre).
+  document.addEventListener("click", (event) => {
+    const wrap = event.target?.closest?.("[data-avatar-menu]");
+    if (wrap) return;
+    document.querySelectorAll("[data-avatar-menu]").forEach(hideDropdown);
+  });
 }
 
 if (document.readyState === "loading") {

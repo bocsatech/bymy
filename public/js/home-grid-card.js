@@ -92,6 +92,8 @@ export function createHomeGridCard(item) {
       ${
         multi
           ? `<span class="home-grid-card-photo-count" aria-live="polite">1 / ${photoUrls.length}</span>
+             <button type="button" class="home-grid-card-photo-hit home-grid-card-photo-hit--prev" aria-label="Előző kép"></button>
+             <button type="button" class="home-grid-card-photo-hit home-grid-card-photo-hit--next" aria-label="Következő kép"></button>
              <button type="button" class="home-grid-card-photo-nav home-grid-card-photo-nav--prev" aria-label="Előző kép">${ICON_CHEVRON_LEFT}</button>
              <button type="button" class="home-grid-card-photo-nav home-grid-card-photo-nav--next" aria-label="Következő kép">${ICON_CHEVRON_RIGHT}</button>`
           : ""
@@ -124,6 +126,8 @@ function bindPhotoTrack(track) {
   const counter = media?.querySelector(".home-grid-card-photo-count");
   const prevBtn = media?.querySelector(".home-grid-card-photo-nav--prev");
   const nextBtn = media?.querySelector(".home-grid-card-photo-nav--next");
+  const prevHit = media?.querySelector(".home-grid-card-photo-hit--prev");
+  const nextHit = media?.querySelector(".home-grid-card-photo-hit--next");
   const slides = [...track.querySelectorAll(".home-grid-card-photo-slide")];
 
   function currentIndex() {
@@ -135,36 +139,38 @@ function bindPhotoTrack(track) {
   function updateUi() {
     const index = currentIndex();
     if (counter) counter.textContent = `${index + 1} / ${slides.length}`;
-    if (prevBtn) prevBtn.hidden = index <= 0;
-    if (nextBtn) nextBtn.hidden = index >= slides.length - 1;
+    const atStart = index <= 0;
+    const atEnd = index >= slides.length - 1;
+    if (prevBtn) prevBtn.hidden = atStart;
+    if (nextBtn) nextBtn.hidden = atEnd;
+    if (prevHit) prevHit.hidden = atStart;
+    if (nextHit) nextHit.hidden = atEnd;
   }
 
-  function scrollToIndex(index) {
+  function scrollToIndex(index, { behavior = "smooth" } = {}) {
     const width = track.clientWidth;
     if (!width) return;
     const next = Math.max(0, Math.min(slides.length - 1, index));
-    track.scrollTo({ left: next * width, behavior: "smooth" });
+    track.scrollTo({ left: next * width, behavior });
+    window.requestAnimationFrame(updateUi);
   }
 
-  track.addEventListener(
-    "scroll",
-    () => {
-      window.requestAnimationFrame(updateUi);
-    },
-    { passive: true }
-  );
-
-  prevBtn?.addEventListener("click", (event) => {
+  function stopCardNav(event) {
     event.preventDefault();
     event.stopPropagation();
-    scrollToIndex(currentIndex() - 1);
-  });
+  }
 
-  nextBtn?.addEventListener("click", (event) => {
-    event.preventDefault();
-    event.stopPropagation();
-    scrollToIndex(currentIndex() + 1);
-  });
+  track.addEventListener("scroll", () => window.requestAnimationFrame(updateUi), { passive: true });
+  track.addEventListener("scrollend", updateUi, { passive: true });
+
+  for (const btn of [prevBtn, nextBtn, prevHit, nextHit]) {
+    btn?.addEventListener("click", stopCardNav);
+  }
+
+  prevBtn?.addEventListener("click", () => scrollToIndex(currentIndex() - 1));
+  prevHit?.addEventListener("click", () => scrollToIndex(currentIndex() - 1));
+  nextBtn?.addEventListener("click", () => scrollToIndex(currentIndex() + 1));
+  nextHit?.addEventListener("click", () => scrollToIndex(currentIndex() + 1));
 
   track.addEventListener("keydown", (event) => {
     if (event.key === "ArrowLeft") {
@@ -182,6 +188,7 @@ function bindPhotoTrack(track) {
   let moved = false;
 
   track.addEventListener("pointerdown", (event) => {
+    if (event.pointerType === "touch") return;
     if (event.button != null && event.button !== 0) return;
     pointerId = event.pointerId;
     startX = event.clientX;
@@ -210,6 +217,7 @@ function bindPhotoTrack(track) {
     pointerId = null;
     track.classList.remove("is-dragging");
     if (moved) {
+      scrollToIndex(currentIndex(), { behavior: "instant" });
       track.dataset.suppressClick = "1";
       window.setTimeout(() => {
         delete track.dataset.suppressClick;
@@ -224,10 +232,7 @@ function bindPhotoTrack(track) {
   track.addEventListener(
     "click",
     (event) => {
-      if (track.dataset.suppressClick === "1") {
-        event.preventDefault();
-        event.stopPropagation();
-      }
+      if (track.dataset.suppressClick === "1") stopCardNav(event);
     },
     true
   );

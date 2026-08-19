@@ -2054,20 +2054,41 @@ body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-n
   justify-content: center;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
   cursor: pointer;
-  z-index: 2;
-  opacity: 0;
-  transition: opacity 0.15s;
+  z-index: 4;
+  opacity: 0.92;
+  transition: opacity 0.15s, transform 0.15s;
 }
 
-@media (hover: none) {
-  .home-grid-card-photo-nav {
-    opacity: 0.92;
-  }
+.home-grid-card-photo-hit {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 32%;
+  border: none;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+  z-index: 3;
+}
+
+.home-grid-card-photo-hit--prev {
+  left: 0;
+}
+
+.home-grid-card-photo-hit--next {
+  right: 0;
+}
+
+.home-grid-card-photo-hit[hidden],
+.home-grid-card-photo-nav[hidden] {
+  display: none;
 }
 
 .home-grid-card-media:hover .home-grid-card-photo-nav,
 .home-grid-card-photo-nav:focus-visible {
   opacity: 1;
+  transform: translateY(-50%) scale(1.04);
 }
 
 .home-grid-card-photo-nav--prev {
@@ -2076,10 +2097,6 @@ body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-n
 
 .home-grid-card-photo-nav--next {
   right: 0.55rem;
-}
-
-.home-grid-card-photo-nav[hidden] {
-  display: none;
 }
 
 .home-grid-card-save {

@@ -1,5 +1,5 @@
 import { fetchListings } from "./db-client.js?v=hdView1";
-import { createHomeGridCard, initHomeGridCardPhotos } from "./home-grid-card.js?v=cardPhotos1";
+import { createHomeGridCard, initHomeGridCardPhotos } from "./home-grid-card.js?v=cardPhotos2";
 import {
   emptyFilters,
   filterListingsBySidebar,

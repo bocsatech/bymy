@@ -1302,8 +1302,15 @@ body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-n
   grid-template-columns: repeat(8, minmax(0, 1fr));
   gap: 0.65rem;
   overflow-x: auto;
-  padding-bottom: 0.15rem;
-  scrollbar-width: thin;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.home-category-track::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  background: transparent;
 }
 
 .home-category-card {

@@ -3232,6 +3232,10 @@ body.site-app .mm-nav-link {
   cursor: pointer;
 }
 
+body.site-app .mm-nav-link[hidden] {
+  display: none !important;
+}
+
 body.site-app .mm-nav-link:hover {
   background: #f2f4f7;
 }

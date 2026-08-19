@@ -547,16 +547,11 @@ function accountTypeSidebarLabel(type) {
 function syncSidebarAccountType(type) {
   const el = document.querySelector("[data-mm-account-type]");
   const nav = document.querySelector("[data-mm-company-nav]");
-  const companyType = isCompanyAccount(type);
+  const fromDb = type === "business" || type === "dealer" ? type : "private";
+  const companyType = isCompanyAccount(fromDb);
   if (el) {
-    const label = accountTypeSidebarLabel(type);
-    if (!label) {
-      el.hidden = true;
-      el.textContent = "";
-    } else {
-      el.textContent = label;
-      el.hidden = false;
-    }
+    el.textContent = accountTypeSidebarLabel(fromDb);
+    el.hidden = false;
   }
   if (nav) nav.hidden = !companyType;
   if (!companyType && currentSection() === "cegadatok") {
@@ -758,7 +753,7 @@ function fillProfileForm(user, profileOverride = null) {
     else emailEl.textContent = user?.email || "—";
   }
   syncCompanyWrap(form);
-  syncSidebarAccountType(profile?.accountType || "private");
+  syncSidebarAccountType(profile?.accountType);
   updateProfileSummary(profile, user);
   fillAreaForms(profile);
 

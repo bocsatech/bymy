@@ -1216,7 +1216,8 @@ async function handleAuthApi(req, res, pathname) {
         ? IOS_OAUTH_CALLBACK
         : urlObj.searchParams.get("next") || "/hirdetesfeladas.html";
       try {
-        const state = createOAuthState(provider, next);
+        const accountType = urlObj.searchParams.get("accountType") || "";
+        const state = createOAuthState(provider, next, undefined, accountType);
         const authorizeUrl = buildAuthorizeUrl(provider, state);
         sendRedirect(res, authorizeUrl);
       } catch (error) {
@@ -1282,7 +1283,10 @@ async function handleAuthApi(req, res, pathname) {
           if (appleName && !identity.name) identity.name = appleName;
         }
 
-        const { user, session } = await findOrCreateOAuthUser(identity);
+        const { user, session } = await findOrCreateOAuthUser({
+          ...identity,
+          accountType: stateInfo.accountType,
+        });
         if (stateInfo.mobile || isMobileOAuthNext(stateInfo.next)) {
           sendRedirect(res, mobileOAuthCompleteUrl({ token: session.token }), {
             "Set-Cookie": sessionCookieHeader(session.token, session.expires),
@@ -1314,7 +1318,12 @@ async function handleAuthApi(req, res, pathname) {
 
     if (pathname === "/api/auth/register" && req.method === "POST") {
       const body = await readBody(req);
-      const registered = await registerUser(body.email, body.password, body.passwordConfirm ?? body.password_confirm);
+      const registered = await registerUser(
+        body.email,
+        body.password,
+        body.passwordConfirm ?? body.password_confirm,
+        body.accountType ?? body.account_type
+      );
       const siteRoot = publicBaseUrl(req);
 
       // Felhő + nincs SMTP: azonnal aktiválás (iOS app token + user mezőt vár).

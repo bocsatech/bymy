@@ -144,13 +144,21 @@ export async function refreshAuthSession() {
   try {
     const data = await authFetch("/api/auth/me");
     if (!data.user?.email) {
-      sessionStorage.removeItem(AUTH_KEY);
-      return null;
+      // Ha van lokális token, ne dobjuk el azonnal a cache-t:
+      // hálózati/edge átmenetben ez okozza a ki-be villogást.
+      if (!getStoredToken()) {
+        sessionStorage.removeItem(AUTH_KEY);
+        return null;
+      }
+      return getAuthUser();
     }
     return rememberAuth(data);
   } catch {
-    sessionStorage.removeItem(AUTH_KEY);
-    return null;
+    if (!getStoredToken()) {
+      sessionStorage.removeItem(AUTH_KEY);
+      return null;
+    }
+    return getAuthUser();
   }
 }
 
@@ -382,7 +390,7 @@ function updateHeaderAuthUi() {
   const memberBlocks = document.querySelectorAll("[data-auth-member], [data-avatar-menu]");
   const firstNameEls = document.querySelectorAll("span[data-auth-firstname]");
   const user = getAuthUser();
-  const loggedIn = Boolean(user?.email);
+  const loggedIn = isLoggedIn();
   const firstName = firstNameFromUser(user);
 
   try {

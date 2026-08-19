@@ -396,13 +396,15 @@ html[data-auth="member"] body.site-app [data-auth-guest] {
 
 html[data-auth="member"] body.site-app [data-auth-member],
 html[data-auth="member"] body.site-app [data-avatar-menu],
-html[data-auth="member"] body.site-app .hub-header-msg[data-auth-member] {
+html[data-auth="member"] body.site-app .hub-header-msg[data-auth-member],
+html[data-auth="member"] body.site-app .mw-app-tab[data-auth-member] {
   display: inline-flex !important;
 }
 
 html[data-auth="guest"] body.site-app [data-auth-member],
 html[data-auth="guest"] body.site-app [data-avatar-menu],
-html[data-auth="guest"] body.site-app .hub-header-msg[data-auth-member] {
+html[data-auth="guest"] body.site-app .hub-header-msg[data-auth-member],
+html[data-auth="guest"] body.site-app .mw-app-tab[data-auth-member] {
   display: none !important;
 }
 

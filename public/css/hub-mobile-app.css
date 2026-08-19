@@ -303,6 +303,14 @@
     text-overflow: ellipsis;
     white-space: nowrap;
   }
+
+  html[data-auth="member"] body.hub-page--feed .mw-app-tab[data-auth-member] {
+    display: flex !important;
+  }
+
+  html[data-auth="guest"] body.hub-page--feed .mw-app-tab[data-auth-member] {
+    display: none !important;
+  }
 }
 
 /* Asztal: biztosan rejtve, ha valami media query felülírná */

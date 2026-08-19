@@ -15,11 +15,6 @@
           var raw = sessionStorage.getItem("bymy-auth-user");
           var user = raw ? JSON.parse(raw) : null;
           var loggedIn = !!(user && user.email);
-          if (!loggedIn) {
-            try {
-              if (localStorage.getItem("bymy-auth-token")) loggedIn = true;
-            } catch (e2) {}
-          }
           document.documentElement.setAttribute("data-auth", loggedIn ? "member" : "guest");
           if (!loggedIn) {
             var next = location.pathname + location.search;

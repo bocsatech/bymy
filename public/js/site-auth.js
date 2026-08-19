@@ -97,9 +97,7 @@ export function getAuthUser() {
 }
 
 export function isLoggedIn() {
-  // Frissítéskor a sessionStorage késhet, de a token még élhet.
-  // Ilyenkor maradjon "member" UI, amíg a /api/auth/me vissza nem igazol.
-  return Boolean(getAuthUser()?.email || getStoredToken());
+  return Boolean(getAuthUser()?.email);
 }
 
 async function authFetch(url, options = {}) {
@@ -144,21 +142,15 @@ export async function refreshAuthSession() {
   try {
     const data = await authFetch("/api/auth/me");
     if (!data.user?.email) {
-      // Ha van lokális token, ne dobjuk el azonnal a cache-t:
-      // hálózati/edge átmenetben ez okozza a ki-be villogást.
-      if (!getStoredToken()) {
-        sessionStorage.removeItem(AUTH_KEY);
-        return null;
-      }
-      return getAuthUser();
-    }
-    return rememberAuth(data);
-  } catch {
-    if (!getStoredToken()) {
+      setStoredToken("");
       sessionStorage.removeItem(AUTH_KEY);
       return null;
     }
-    return getAuthUser();
+    return rememberAuth(data);
+  } catch {
+    const cached = getAuthUser();
+    if (cached?.email) return cached;
+    return null;
   }
 }
 
@@ -390,7 +382,7 @@ function updateHeaderAuthUi() {
   const memberBlocks = document.querySelectorAll("[data-auth-member], [data-avatar-menu]");
   const firstNameEls = document.querySelectorAll("span[data-auth-firstname]");
   const user = getAuthUser();
-  const loggedIn = isLoggedIn();
+  const loggedIn = Boolean(user?.email);
   const firstName = firstNameFromUser(user);
 
   try {

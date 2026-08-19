@@ -1,6 +1,6 @@
 /**
  * Fiókom — mobile.de Mein mobile / Konto bearbeiten mintára.
- * Szekciók: attekintes | import | nyomtatasok | ertekelesek | parkolo | keresesek |
+ * Szekciók: attekintes | cegadatok | import | nyomtatasok | ertekelesek | parkolo | keresesek |
  *           uzenetek | hirdetes | megjelenes | fiok
  */
 
@@ -40,6 +40,7 @@ const HERO_MAX_BYTES = 8 * 1024 * 1024;
 const AVATAR_SIZE = 256;
 const SECTIONS = [
   "attekintes",
+  "cegadatok",
   "import",
   "nyomtatasok",
   "ertekelesek",
@@ -166,6 +167,7 @@ function setSection(section) {
   document.title =
     {
       attekintes: "Áttekintés",
+      cegadatok: "Cégadatok",
       import: "Autóimport",
       nyomtatasok: "Nyomtatások",
       ertekelesek: "Értékelések",
@@ -532,23 +534,34 @@ function accountTypeLabel(type) {
   return "—";
 }
 
+function isCompanyAccount(type) {
+  return type === "business" || type === "dealer";
+}
+
 function accountTypeSidebarLabel(type) {
-  if (type === "business" || type === "dealer") return "céges fiók";
+  if (isCompanyAccount(type)) return "céges fiók";
   if (type === "private") return "magán fiók";
   return "";
 }
 
 function syncSidebarAccountType(type) {
   const el = document.querySelector("[data-mm-account-type]");
-  if (!el) return;
-  const label = accountTypeSidebarLabel(type);
-  if (!label) {
-    el.hidden = true;
-    el.textContent = "";
-    return;
+  const nav = document.querySelector("[data-mm-company-nav]");
+  const companyType = isCompanyAccount(type);
+  if (el) {
+    const label = accountTypeSidebarLabel(type);
+    if (!label) {
+      el.hidden = true;
+      el.textContent = "";
+    } else {
+      el.textContent = label;
+      el.hidden = false;
+    }
   }
-  el.textContent = label;
-  el.hidden = false;
+  if (nav) nav.hidden = !companyType;
+  if (!companyType && currentSection() === "cegadatok") {
+    setSection("fiok");
+  }
 }
 
 function syncCompanyWrap(form) {
@@ -718,10 +731,10 @@ function applyProfileToForm(profile) {
     "accountType",
   ];
   for (const key of keys) {
-    const field = form.querySelector(`[name="${key}"]`);
-    if (!field) continue;
     const value = data[key] ?? "";
-    field.value = value;
+    document.querySelectorAll(`#mm-profile-form [name="${key}"], #mm-company-form [name="${key}"]`).forEach((field) => {
+      field.value = value;
+    });
   }
   updateProfileSummary(data, getAuthUser());
 }
@@ -988,6 +1001,9 @@ function bindProfileFormEarly() {
       showFlash(flash, "Keresztnév és vezetéknév kötelező.", false);
       return;
     }
+    data.company = String(
+      document.querySelector("#mm-company-form [name=company]")?.value ?? data.company ?? ""
+    ).trim();
     if (btn) btn.disabled = true;
     try {
       const saved = await saveProfile(data);
@@ -1012,6 +1028,33 @@ function bindProfileFormEarly() {
   });
 }
 
+function bindCompanyFormEarly() {
+  const form = document.getElementById("mm-company-form");
+  if (!form || form.dataset.bound === "1") return;
+  form.dataset.bound = "1";
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    const flash = document.getElementById("settings-company-flash");
+    const btn = document.getElementById("mm-company-save");
+    const company = String(new FormData(form).get("company") || "").trim();
+    if (btn) btn.disabled = true;
+    try {
+      const saved = await saveProfile({ ...getProfile(), company });
+      applyProfileToForm(saved);
+      const user = getAuthUser();
+      if (user) fillProfileForm(user, saved);
+      window.dispatchEvent(new CustomEvent("bymy-auth-changed"));
+      showFlash(flash, "Cégadatok mentve.", true);
+    } catch (error) {
+      showFlash(flash, error.message ?? "Mentés sikertelen.", false);
+    } finally {
+      if (btn) btn.disabled = false;
+    }
+  });
+}
+
 bindProfileFormEarly();
+bindCompanyFormEarly();
 initSiteAuth({ skipRefresh: true });
 initSettingsPage();

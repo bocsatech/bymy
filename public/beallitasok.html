@@ -109,6 +109,7 @@
         <p class="mm-side-kicker">Fiókom <span class="mm-side-account-type" data-mm-account-type hidden></span></p>
         <h1 class="mm-side-title">Üdv, <span data-mm-hello>—</span></h1>
         <nav class="mm-nav">
+          <a class="mm-nav-link" href="?szekcio=cegadatok" data-mm-nav="cegadatok" data-mm-company-nav hidden>Cégadatok</a>
           <a class="mm-nav-link" href="?szekcio=import" data-mm-nav="import">Autóimport</a>
           <a class="mm-nav-link" href="?szekcio=nyomtatasok" data-mm-nav="nyomtatasok">Nyomtatások</a>
           <a class="mm-nav-link" href="?szekcio=ertekelesek" data-mm-nav="ertekelesek">Értékelések</a>
@@ -132,6 +133,21 @@
       </aside>
 
       <div class="mm-main">
+        <section class="mm-panel" data-mm-panel="cegadatok" hidden>
+          <header class="mm-panel-head">
+            <h2 class="mm-panel-title">Cégadatok</h2>
+            <p class="mm-panel-lead">A céges fiókhoz tartozó adatok. A fióktípus regisztrációkor rögzül.</p>
+          </header>
+          <form id="mm-company-form" class="settings-form" action="#" method="post" onsubmit="return false;">
+            <label class="login-field">
+              <span class="login-label">Cégnév</span>
+              <input type="text" name="company" autocomplete="organization" />
+            </label>
+            <p id="settings-company-flash" class="settings-flash" role="status" hidden></p>
+            <button type="submit" class="settings-btn-primary" id="mm-company-save">Cégadatok mentése</button>
+          </form>
+        </section>
+
         <!-- Autóimport -->
         <section class="mm-panel ha-imp-panel" data-mm-panel="import" hidden>
           <header class="mm-panel-head">
@@ -394,10 +410,7 @@
                     <input type="hidden" name="accountType" value="" />
                     <p class="settings-acc-hint">A fióktípus regisztrációkor rögzül, később nem módosítható.</p>
                   </div>
-                  <label class="login-field" data-mm-company-wrap hidden>
-                    <span class="login-label" data-mm-company-label>Cégnév</span>
-                    <input type="text" name="company" autocomplete="organization" />
-                  </label>
+                  <input type="hidden" name="company" value="" />
                   <button type="submit" class="settings-btn-primary" id="mm-profile-save">Adatok mentése</button>
                   <button type="button" class="settings-danger-btn settings-danger-btn--block" id="settings-delete-account">Fiók törlése</button>
                 </form>
@@ -525,7 +538,7 @@
 
     <script src="/js/site-avatar-menu.js?v=fiokPage1" type="module"></script>
     <script src="/js/ha-import-app.js?v=fiokPage1" type="module"></script>
-    <script src="/js/beallitasok-app.js?v=fiokType1" type="module"></script>
+    <script src="/js/beallitasok-app.js?v=fiokType2" type="module"></script>
   
     <script>
       (function () {

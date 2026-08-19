@@ -14,7 +14,7 @@ import {
   deleteAccount,
   requireAuthForPage,
   initSiteAuth,
-} from "./site-auth.js?v=auth20260805localdb9";
+} from "./site-auth.js?v=cegAdatok1";
 import {
   getParkplatz,
   addParkplatzItem,
@@ -728,6 +728,14 @@ function applyProfileToForm(profile) {
     "country",
     "phone",
     "company",
+    "companyTaxId",
+    "companyAddress",
+    "companyPhone",
+    "companyPhone2",
+    "companyEmail",
+    "companyEmail2",
+    "salespersonName",
+    "salespersonName2",
     "accountType",
   ];
   for (const key of keys) {
@@ -1037,10 +1045,21 @@ function bindCompanyFormEarly() {
     event.stopPropagation();
     const flash = document.getElementById("settings-company-flash");
     const btn = document.getElementById("mm-company-save");
-    const company = String(new FormData(form).get("company") || "").trim();
+    const data = Object.fromEntries(new FormData(form).entries());
     if (btn) btn.disabled = true;
     try {
-      const saved = await saveProfile({ ...getProfile(), company });
+      const saved = await saveProfile({
+        ...getProfile(),
+        company: String(data.company || "").trim(),
+        companyTaxId: String(data.companyTaxId || "").trim(),
+        companyAddress: String(data.companyAddress || "").trim(),
+        companyPhone: String(data.companyPhone || "").trim(),
+        companyPhone2: String(data.companyPhone2 || "").trim(),
+        companyEmail: String(data.companyEmail || "").trim(),
+        companyEmail2: String(data.companyEmail2 || "").trim(),
+        salespersonName: String(data.salespersonName || "").trim(),
+        salespersonName2: String(data.salespersonName2 || "").trim(),
+      });
       applyProfileToForm(saved);
       const user = getAuthUser();
       if (user) fillProfileForm(user, saved);

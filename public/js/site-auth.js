@@ -305,6 +305,14 @@ const EMPTY_PROFILE = {
   country: "Magyarország",
   phone: "",
   company: "",
+  companyTaxId: "",
+  companyAddress: "",
+  companyPhone: "",
+  companyPhone2: "",
+  companyEmail: "",
+  companyEmail2: "",
+  salespersonName: "",
+  salespersonName2: "",
   accountType: "private",
 };
 

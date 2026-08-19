@@ -140,9 +140,47 @@
           </header>
           <form id="mm-company-form" class="settings-form" action="#" method="post" onsubmit="return false;">
             <label class="login-field">
-              <span class="login-label">Cégnév</span>
+              <span class="login-label">Cégnév/név</span>
               <input type="text" name="company" autocomplete="organization" />
             </label>
+            <label class="login-field">
+              <span class="login-label">Cég adószáma</span>
+              <input type="text" name="companyTaxId" autocomplete="off" inputmode="numeric" />
+            </label>
+            <label class="login-field">
+              <span class="login-label">Cégcím/cím</span>
+              <input type="text" name="companyAddress" autocomplete="street-address" />
+            </label>
+            <div class="mm-grid-2">
+              <label class="login-field">
+                <span class="login-label">Telefonszám</span>
+                <input type="tel" name="companyPhone" autocomplete="tel" />
+              </label>
+              <label class="login-field">
+                <span class="login-label">Telefonszám</span>
+                <input type="tel" name="companyPhone2" autocomplete="tel" />
+              </label>
+            </div>
+            <div class="mm-grid-2">
+              <label class="login-field">
+                <span class="login-label">E-mailcím</span>
+                <input type="email" name="companyEmail" autocomplete="email" />
+              </label>
+              <label class="login-field">
+                <span class="login-label">E-mailcím</span>
+                <input type="email" name="companyEmail2" autocomplete="email" />
+              </label>
+            </div>
+            <div class="mm-grid-2">
+              <label class="login-field">
+                <span class="login-label">Értékesítő neve</span>
+                <input type="text" name="salespersonName" autocomplete="name" />
+              </label>
+              <label class="login-field">
+                <span class="login-label">Értékesítő neve</span>
+                <input type="text" name="salespersonName2" autocomplete="name" />
+              </label>
+            </div>
             <p id="settings-company-flash" class="settings-flash" role="status" hidden></p>
             <button type="submit" class="settings-btn-primary" id="mm-company-save">Cégadatok mentése</button>
           </form>
@@ -538,7 +576,7 @@
 
     <script src="/js/site-avatar-menu.js?v=fiokPage1" type="module"></script>
     <script src="/js/ha-import-app.js?v=fiokPage1" type="module"></script>
-    <script src="/js/beallitasok-app.js?v=fiokType2" type="module"></script>
+    <script src="/js/beallitasok-app.js?v=fiokType3" type="module"></script>
   
     <script>
       (function () {

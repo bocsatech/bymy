@@ -109,7 +109,6 @@ const actions = {
     try {
       const data = await api(`/api/level1/users/${id}`);
       editingUser = data.user;
-      editingProfileText = JSON.stringify(editingUser.profileJson ?? {}, null, 2);
       render();
     } catch (error) {
       err = error.message;
@@ -118,7 +117,6 @@ const actions = {
   },
   cancelEditUser() {
     editingUser = null;
-    editingProfileText = "";
     err = "";
     render();
   },
@@ -130,21 +128,16 @@ const actions = {
       const email = String(app.querySelector("#edit-email")?.value ?? "").trim();
       const displayName = String(app.querySelector("#edit-displayName")?.value ?? "").trim();
       const emailVerified = Boolean(app.querySelector("#edit-emailVerified")?.checked);
-      const profileText = String(app.querySelector("#edit-profile-json")?.value ?? "").trim();
-      let profileJson = {};
-      if (profileText) {
-        try {
-          profileJson = JSON.parse(profileText);
-        } catch (e) {
-          throw new Error(`A profile JSON hibás: ${e.message}`);
-        }
-      }
+      const profileJson = { ...(editingUser.profileJson ?? {}) };
+      app.querySelectorAll(".edit-profile-field").forEach((el) => {
+        const key = el.getAttribute("data-key");
+        if (key) profileJson[key] = el.value;
+      });
       const data = await api(`/api/level1/users/${editingUser.id}`, {
         method: "PATCH",
         body: JSON.stringify({ email, displayName, emailVerified, profileJson }),
       });
       editingUser = data.user;
-      editingProfileText = JSON.stringify(editingUser.profileJson ?? {}, null, 2);
       await loadTab();
       info = "User mentve.";
       render();
@@ -255,36 +248,73 @@ function usersView() {
     </div>`;
 }
 
+function profileFields(profile) {
+  const labels = {
+    accountType: "Fiók típus",
+    firstName: "Keresztnév",
+    lastName: "Vezetéknév",
+    street: "Utca, házszám",
+    postalCode: "Irányítószám",
+    city: "Város",
+    country: "Ország",
+    phone: "Telefon",
+    company: "Cégnév",
+    companyTaxId: "Adószám",
+    companyAddress: "Cég cím",
+    companyPhone: "Cég telefon",
+    companyPhone2: "Cég telefon 2",
+    companyEmail: "Cég email",
+    companyEmail2: "Cég email 2",
+    salespersonName: "Kapcsolattartó",
+    salespersonName2: "Kapcsolattartó 2",
+  };
+  const keys = Object.keys(labels);
+  const extra = Object.keys(profile).filter((k) => !keys.includes(k) && k !== "avatarDataUrl" && k !== "pageLayout");
+  return [...keys, ...extra].map((key) => {
+    const label = labels[key] || key;
+    const value = profile[key] ?? "";
+    return { key, label, value };
+  });
+}
+
 function userEditView() {
+  const profile = editingUser.profileJson ?? {};
+  const fields = profileFields(profile);
+  const fieldRows = fields
+    .map(
+      (f) => `
+      <label>
+        <div>${esc(f.label)} <small style="color:var(--muted)">(${esc(f.key)})</small></div>
+        <input class="edit-profile-field" data-key="${esc(f.key)}" type="text" value="${esc(String(f.value))}" />
+      </label>`
+    )
+    .join("");
+
   return `
     <div class="user-edit">
       <h2>User szerkesztés (#${esc(editingUser.id)})</h2>
       <label>
         <div>Email</div>
-        <input id="edit-email" type="email" value="${esc(editingUser.email || "")}" style="width:100%" />
+        <input id="edit-email" type="email" value="${esc(editingUser.email || "")}" />
       </label>
 
-      <form data-act="saveUser" style="display:flex; flex-direction:column; gap:0.75rem">
-        <label>
-          <div>Megjelenített név</div>
-          <input id="edit-displayName" type="text" value="${esc(editingUser.displayName || "")}" style="width:100%" />
-        </label>
+      <label>
+        <div>Megjelenített név</div>
+        <input id="edit-displayName" type="text" value="${esc(editingUser.displayName || "")}" />
+      </label>
 
-        <label style="display:flex; align-items:center; gap:0.5rem">
-          <input id="edit-emailVerified" type="checkbox" ${editingUser.emailVerified ? "checked" : ""} />
-          <span>Email aktivált</span>
-        </label>
+      <label style="display:flex; align-items:center; gap:0.5rem">
+        <input id="edit-emailVerified" type="checkbox" ${editingUser.emailVerified ? "checked" : ""} />
+        <span>Email aktivált</span>
+      </label>
 
-        <label>
-          <div>Profil JSON (minden mező)</div>
-          <textarea id="edit-profile-json" rows="14" style="width:100%; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, \"Liberation Mono\", \"Courier New\", monospace;">${esc(editingProfileText)}</textarea>
-        </label>
+      <h3 style="margin:1.25rem 0 0.5rem; font-size:0.95rem; color:var(--muted)">Profil mezők</h3>
+      ${fieldRows}
 
-        <div class="row" style="display:flex; gap:0.75rem; flex-wrap:wrap">
-          <button class="btn" type="button" data-act="saveUser">Mentés</button>
-          <button class="btn" type="button" data-act="cancelEditUser">Mégse</button>
-        </div>
-      </form>
+      <div class="row" style="display:flex; gap:0.75rem; flex-wrap:wrap; margin-top:1.25rem">
+        <button class="btn" type="button" data-act="saveUser">Mentés</button>
+        <button class="btn" type="button" data-act="cancelEditUser">Mégse</button>
+      </div>
     </div>`;
 }
 

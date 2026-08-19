@@ -34,7 +34,7 @@ input, select, button, textarea {
   font: inherit;
   color: var(--text);
 }
-input, select {
+input, select, textarea {
   width: 100%;
   background: #12171e;
   border: 1px solid var(--line);

@@ -9,6 +9,57 @@ export const HOME_CATEGORY_IDS = [
   "ot",
 ];
 
+export const HOME_CATEGORIES = [
+  { id: "uj", label: "Új", sub: "Friss modell", icon: "✨", image: "uj.png" },
+  { id: "benzin", label: "Benzin", sub: "Otto motor", icon: "⛽", image: "benzin.png" },
+  { id: "diesel", label: "Diesel", sub: "Dízelmotor", icon: "🛢", image: "diesel.png" },
+  { id: "elektromos", label: "Elektromos", sub: "Zöld hajtás", icon: "⚡", image: "elektromos.png" },
+  { id: "hybrid", label: "Hybrid", sub: "Kombinált", icon: "🔋", image: "hybrid.png" },
+  { id: "leasing", label: "Leasing", sub: "Havi díj", icon: "📄", image: "leasing.png" },
+  { id: "berelheto", label: "Bérelhető", sub: "Rövid táv", icon: "🔑", image: "berelheto.png" },
+  { id: "ot", label: "OT", sub: "Oldtimer", icon: "🏛", image: "ot.png" },
+];
+
+export function autoCategoryHref(categoryId) {
+  return `/auto.html?cat=${encodeURIComponent(categoryId)}`;
+}
+
+export function renderHomeCategoryBar(root) {
+  if (!root || root.dataset.rendered === "1") return;
+  root.dataset.rendered = "1";
+
+  const track = document.createElement("div");
+  track.className = "home-category-track";
+  track.setAttribute("role", "group");
+  track.setAttribute("aria-label", "Gyors kategóriák");
+
+  for (const cat of HOME_CATEGORIES) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = `home-category-card home-category-card--${cat.id} home-category-card--has-photo`;
+    button.dataset.category = cat.id;
+    button.innerHTML = `
+      <span class="home-category-visual" aria-hidden="true">
+        <img
+          class="home-category-photo"
+          src="/images/categories/${cat.image}?v=autoCat2"
+          alt=""
+          width="486"
+          height="236"
+          loading="lazy"
+          decoding="async"
+        />
+      </span>
+      <span class="home-category-foot">
+        <span class="home-category-icon" aria-hidden="true">${cat.icon}</span>
+        <span class="home-category-text"><strong>${cat.label}</strong><span>${cat.sub}</span></span>
+      </span>`;
+    track.appendChild(button);
+  }
+
+  root.appendChild(track);
+}
+
 function haystack(item) {
   const preview = item.preview ?? {};
   return [preview.title, preview.leiras, preview.specLine, ...(preview.badges ?? [])]
@@ -79,7 +130,7 @@ export function initHomeCategoryBar({ onChange, getForm, initialCategory = null 
     });
   };
 
-  const applyCategory = (categoryId, { toggle = true } = {}) => {
+  const applyCategory = (categoryId, { toggle = true, syncUrl = true } = {}) => {
     if (toggle && activeCategory === categoryId) {
       activeCategory = null;
     } else {
@@ -93,6 +144,12 @@ export function initHomeCategoryBar({ onChange, getForm, initialCategory = null 
       form.querySelectorAll("[data-fuel-quick]").forEach((btn) => btn.classList.remove("is-active"));
     }
     syncButtons();
+    if (syncUrl) {
+      const url = new URL(window.location.href);
+      if (activeCategory) url.searchParams.set("cat", activeCategory);
+      else url.searchParams.delete("cat");
+      history.replaceState(null, "", url);
+    }
     onChange(activeCategory);
   };
 
@@ -101,7 +158,7 @@ export function initHomeCategoryBar({ onChange, getForm, initialCategory = null 
   });
 
   if (initialCategory && HOME_CATEGORY_IDS.includes(initialCategory)) {
-    applyCategory(initialCategory, { toggle: false });
+    applyCategory(initialCategory, { toggle: false, syncUrl: false });
   }
 
   return {

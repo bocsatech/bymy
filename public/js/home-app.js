@@ -8,7 +8,7 @@ import {
   initHomeFilterCatalog,
 } from "./home-search-filter.js";
 import { initHomeQuickSearch } from "./home-quicksearch.js?v=year2035";
-import { filterByCategory, initHomeCategoryBar } from "./home-category-bar.js";
+import { filterByCategory, initHomeCategoryBar, renderHomeCategoryBar } from "./home-category-bar.js";
 import { initHomeUnifiedScroll } from "./home-unified-scroll.js";
 import { initHomeStatsBar } from "./home-stats-bar.js";
 import { bindListingOpen, restoreListingReturn } from "./listing-return.js?v=hdView1";
@@ -28,6 +28,16 @@ let statsFilter = null;
 
 const PAGE = document.body?.getAttribute("data-site-page") || "";
 if (gridTrack) bindListingOpen(gridTrack);
+
+function initialCategoryFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get("cat") || params.get("category") || null;
+}
+
+function scrollToListings() {
+  const target = document.getElementById("home-category-bar") || gridTrack;
+  target?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
 
 function listingVertical(item) {
   return String(item?.preview?.filter?.hirdetes_vertical ?? "").trim().toLowerCase();
@@ -93,6 +103,7 @@ async function loadListings() {
   renderListings(allItems);
   updateFilterResultCount();
   statsUi?.refreshActiveCount?.();
+  if (categoryFilter) scrollToListings();
 }
 
 function applyFilters() {
@@ -134,16 +145,18 @@ function hasActiveSidebarFilters(filters) {
 
 initHomeUnifiedScroll();
 
+renderHomeCategoryBar(document.getElementById("home-category-bar"));
+
+const initialCategory = initialCategoryFromUrl();
+
 categoryUi = initHomeCategoryBar({
   onChange: (category) => {
     categoryFilter = category;
     applyFilters();
+    if (category) scrollToListings();
   },
   getForm: () => filterForm,
-  initialCategory:
-    new URLSearchParams(window.location.search).get("cat") ||
-    new URLSearchParams(window.location.search).get("category") ||
-    null,
+  initialCategory,
 });
 
 initHomeQuickSearch({

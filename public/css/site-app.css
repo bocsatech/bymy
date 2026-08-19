@@ -3078,10 +3078,21 @@ body.site-app[data-site-page="hirdetesfeladas"] #footer-actions {
   bottom: 0;
   z-index: 40;
   display: flex;
-  margin-top: 1.25rem;
+  margin-top: 0.75rem;
   padding: 12px 0 16px;
   background: #fff;
   box-shadow: 0 -10px 18px rgba(255, 255, 255, 0.92);
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] .step-panel[data-step="5"] .ad-layout-canvas {
+  margin-bottom: 0;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] .step-panel[data-step="5"] #ad-panel > .card[style*="display: none"] {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-height: 0;
 }
 
 body.site-app .upload-zone {

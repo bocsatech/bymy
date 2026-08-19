@@ -111,6 +111,7 @@ function placeWrap(wrap, cell) {
   wrap.removeAttribute("hidden");
   wrap.style.setProperty("grid-column", `${col} / span ${span}`, "important");
   wrap.style.setProperty("grid-row", String(row), "important");
+  wrap.dataset.layoutRow = String(row);
   wrap.style.setProperty("width", "100%", "important");
   wrap.style.setProperty("max-width", "none", "important");
   wrap.querySelectorAll(".inline-2, .suffix-field").forEach((el) => {
@@ -122,6 +123,40 @@ function placeWrap(wrap, cell) {
     el.style.setProperty("max-width", "none", "important");
     el.style.setProperty("field-sizing", "fixed", "important");
     el.style.setProperty("flex", "1 1 0%", "important");
+  });
+}
+
+/** Üres sorok összezárása — pl. törölt videó/ár mezők után ne maradjon lyuk. */
+function compactCanvasRows(form) {
+  form.querySelectorAll(".ad-layout-canvas").forEach((canvas) => {
+    const items = [...canvas.querySelectorAll(".ad-layout-item:not(.ad-layout-hidden)")];
+    if (!items.length) return;
+    const rowGroups = new Map();
+    for (const item of items) {
+      const row = clamp(Number(item.dataset.layoutRow || item.style.getPropertyValue("grid-row") || 1), 1, 80);
+      if (!rowGroups.has(row)) rowGroups.set(row, []);
+      rowGroups.get(row).push(item);
+    }
+    [...rowGroups.keys()]
+      .sort((a, b) => a - b)
+      .forEach((oldRow, index) => {
+        const newRow = index + 1;
+        for (const item of rowGroups.get(oldRow)) {
+          item.dataset.layoutRow = String(newRow);
+          item.style.setProperty("grid-row", String(newRow), "important");
+        }
+      });
+  });
+}
+
+function hideLayoutShellCards(form) {
+  form.querySelectorAll('.step-panel[data-step="5"] #ad-panel').forEach((panel) => {
+    const canvas = panel.querySelector(".ad-layout-canvas");
+    if (!canvas?.querySelector(".ad-layout-item:not(.ad-layout-hidden)")) return;
+    panel.querySelectorAll(":scope > .card").forEach((card) => {
+      if (card.id === "success-panel") return;
+      card.style.display = "none";
+    });
   });
 }
 
@@ -171,6 +206,8 @@ async function applyAdFormLayout() {
       placeWrap(wrap, cell);
     }
     pruneEmptyCards(form);
+    compactCanvasRows(form);
+    hideLayoutShellCards(form);
     pinExtras(form);
     pinFooter(form);
   } catch {

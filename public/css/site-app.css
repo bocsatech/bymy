@@ -3190,6 +3190,17 @@ body.site-app .mm-side-kicker {
   color: #667085;
 }
 
+body.site-app .mm-side-account-type::before {
+  content: "·";
+  margin: 0 0.35em;
+  font-weight: 700;
+}
+
+body.site-app .mm-side-account-type {
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
 body.site-app .mm-side-title {
   margin: 0 0 0.85rem;
   font-size: 1.15rem;

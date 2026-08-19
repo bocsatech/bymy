@@ -532,6 +532,25 @@ function accountTypeLabel(type) {
   return "—";
 }
 
+function accountTypeSidebarLabel(type) {
+  if (type === "business" || type === "dealer") return "céges fiók";
+  if (type === "private") return "magán fiók";
+  return "";
+}
+
+function syncSidebarAccountType(type) {
+  const el = document.querySelector("[data-mm-account-type]");
+  if (!el) return;
+  const label = accountTypeSidebarLabel(type);
+  if (!label) {
+    el.hidden = true;
+    el.textContent = "";
+    return;
+  }
+  el.textContent = label;
+  el.hidden = false;
+}
+
 function syncCompanyWrap(form) {
   const wrap = document.querySelector("[data-mm-company-wrap]");
   const label = document.querySelector("[data-mm-company-label]");
@@ -718,6 +737,7 @@ function fillProfileForm(user, profileOverride = null) {
     else emailEl.textContent = user?.email || "—";
   }
   syncCompanyWrap(form);
+  syncSidebarAccountType(profile?.accountType || "private");
   updateProfileSummary(profile, user);
   fillAreaForms(profile);
 

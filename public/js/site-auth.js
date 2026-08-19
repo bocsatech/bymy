@@ -97,7 +97,9 @@ export function getAuthUser() {
 }
 
 export function isLoggedIn() {
-  return Boolean(getAuthUser()?.email);
+  // Frissítéskor a sessionStorage késhet, de a token még élhet.
+  // Ilyenkor maradjon "member" UI, amíg a /api/auth/me vissza nem igazol.
+  return Boolean(getAuthUser()?.email || getStoredToken());
 }
 
 async function authFetch(url, options = {}) {

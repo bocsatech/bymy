@@ -11,6 +11,8 @@ let info = "";
 let users = [];
 let listings = [];
 let layout = { cells: [] };
+let editingUser = null;
+let editingProfileText = "";
 
 async function api(path, opts = {}) {
   const res = await fetch(path, {
@@ -100,6 +102,57 @@ const actions = {
       render();
     }
   },
+  async editUser(_, el) {
+    err = "";
+    info = "";
+    const id = el.getAttribute("data-id");
+    try {
+      const data = await api(`/api/level1/users/${id}`);
+      editingUser = data.user;
+      editingProfileText = JSON.stringify(editingUser.profileJson ?? {}, null, 2);
+      render();
+    } catch (error) {
+      err = error.message;
+      render();
+    }
+  },
+  cancelEditUser() {
+    editingUser = null;
+    editingProfileText = "";
+    err = "";
+    render();
+  },
+  async saveUser() {
+    err = "";
+    info = "";
+    if (!editingUser?.id) return;
+    try {
+      const email = String(app.querySelector("#edit-email")?.value ?? "").trim();
+      const displayName = String(app.querySelector("#edit-displayName")?.value ?? "").trim();
+      const emailVerified = Boolean(app.querySelector("#edit-emailVerified")?.checked);
+      const profileText = String(app.querySelector("#edit-profile-json")?.value ?? "").trim();
+      let profileJson = {};
+      if (profileText) {
+        try {
+          profileJson = JSON.parse(profileText);
+        } catch (e) {
+          throw new Error(`A profile JSON hibás: ${e.message}`);
+        }
+      }
+      const data = await api(`/api/level1/users/${editingUser.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ email, displayName, emailVerified, profileJson }),
+      });
+      editingUser = data.user;
+      editingProfileText = JSON.stringify(editingUser.profileJson ?? {}, null, 2);
+      await loadTab();
+      info = "User mentve.";
+      render();
+    } catch (error) {
+      err = error.message;
+      render();
+    }
+  },
   async setStatus(_, el) {
     const id = el.getAttribute("data-id");
     await api(`/api/level1/listings/${id}`, {
@@ -180,11 +233,59 @@ function usersView() {
         <td>${esc(u.displayName || "")}</td>
         <td>${u.emailVerified ? "igen" : "nem"}</td>
         <td>${esc(u.createdAt || "")}</td>
-        <td><button class="btn danger" data-act="delUser" data-id="${u.id}">Törlés</button></td>
+        <td>
+          <button class="btn" data-act="editUser" data-id="${u.id}">Szerkesztés</button>
+          <button class="btn danger" data-act="delUser" data-id="${u.id}">Törlés</button>
+        </td>
       </tr>`
     )
     .join("");
-  return `<table><thead><tr><th>#</th><th>Email</th><th>Név</th><th>Aktivált</th><th>Létrehozva</th><th></th></tr></thead><tbody>${rows || `<tr><td colspan="6">Nincs user.</td></tr>`}</tbody></table>`;
+  const editor = editingUser
+    ? userEditView()
+    : "";
+  const messages = `
+    ${info ? `<p class="ok">${esc(info)}</p>` : ""}
+    ${err ? `<p class="err">${esc(err)}</p>` : ""}
+  `;
+  return `
+    <div class="users-edit">
+      ${messages}
+      <table><thead><tr><th>#</th><th>Email</th><th>Név</th><th>Aktivált</th><th>Létrehozva</th><th></th></tr></thead><tbody>${rows || `<tr><td colspan="6">Nincs user.</td></tr>`}</tbody></table>
+      ${editor}
+    </div>`;
+}
+
+function userEditView() {
+  return `
+    <div class="user-edit">
+      <h2>User szerkesztés (#${esc(editingUser.id)})</h2>
+      <label>
+        <div>Email</div>
+        <input id="edit-email" type="email" value="${esc(editingUser.email || "")}" style="width:100%" />
+      </label>
+
+      <form data-act="saveUser" style="display:flex; flex-direction:column; gap:0.75rem">
+        <label>
+          <div>Megjelenített név</div>
+          <input id="edit-displayName" type="text" value="${esc(editingUser.displayName || "")}" style="width:100%" />
+        </label>
+
+        <label style="display:flex; align-items:center; gap:0.5rem">
+          <input id="edit-emailVerified" type="checkbox" ${editingUser.emailVerified ? "checked" : ""} />
+          <span>Email aktivált</span>
+        </label>
+
+        <label>
+          <div>Profil JSON (minden mező)</div>
+          <textarea id="edit-profile-json" rows="14" style="width:100%; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, \"Liberation Mono\", \"Courier New\", monospace;">${esc(editingProfileText)}</textarea>
+        </label>
+
+        <div class="row" style="display:flex; gap:0.75rem; flex-wrap:wrap">
+          <button class="btn" type="button" data-act="saveUser">Mentés</button>
+          <button class="btn" type="button" data-act="cancelEditUser">Mégse</button>
+        </div>
+      </form>
+    </div>`;
 }
 
 function listingsView() {

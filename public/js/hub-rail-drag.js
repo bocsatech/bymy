@@ -16,18 +16,23 @@ function initHubRailDrag(root = document) {
       startX = event.clientX;
       startScroll = rail.scrollLeft;
       moved = false;
-      rail.classList.add("is-dragging");
-      try {
-        rail.setPointerCapture(pointerId);
-      } catch {
-        /* ignore */
-      }
     });
 
     rail.addEventListener("pointermove", (event) => {
       if (pointerId == null || event.pointerId !== pointerId) return;
       const dx = event.clientX - startX;
-      if (Math.abs(dx) > 4) moved = true;
+      if (Math.abs(dx) <= 4) return;
+
+      if (!moved) {
+        moved = true;
+        rail.classList.add("is-dragging");
+        try {
+          rail.setPointerCapture(pointerId);
+        } catch {
+          /* ignore */
+        }
+      }
+
       rail.scrollLeft = startScroll - dx;
     });
 

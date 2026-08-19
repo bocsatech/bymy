@@ -1,6 +1,12 @@
 const STORAGE_KEY = "bymy-hirdetes-category";
 const STORAGE_VERSION = 2;
 
+const VEHICLE_PRESETS = {
+  szemelyauto: { vertical: "auto", subtype: "szemelyauto", label: "Személyautó" },
+  kisteher: { vertical: "teher", subtype: "kisteher", label: "Kisteher 3,5 t-ig" },
+  teherauto: { vertical: "teher", subtype: "teherauto", label: "Teherautó 3,5 t-tól" },
+};
+
 const IMMO_TIPUS = [
   { id: "elado", label: "Eladó" },
   { id: "kiado", label: "Kiadó" },
@@ -42,6 +48,31 @@ function writeStored(value) {
     return;
   }
   sessionStorage.setItem(STORAGE_KEY, JSON.stringify({ ...value, v: STORAGE_VERSION }));
+}
+
+function selectionFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const vertical = String(params.get("vertical") ?? "").trim().toLowerCase();
+  const subtype = String(params.get("subtype") ?? "").trim().toLowerCase();
+  if (vertical === "auto" && subtype === "szemelyauto") return { ...VEHICLE_PRESETS.szemelyauto };
+  if (vertical === "teher" && subtype === "kisteher") return { ...VEHICLE_PRESETS.kisteher };
+  if (vertical === "teher" && subtype === "teherauto") return { ...VEHICLE_PRESETS.teherauto };
+  const kategoria = String(params.get("kategoria") ?? "").trim().toLowerCase();
+  if (vertical === "teher" && kategoria === "35-alatt") return { ...VEHICLE_PRESETS.kisteher };
+  if (vertical === "teher" && kategoria === "35-felett") return { ...VEHICLE_PRESETS.teherauto };
+  return null;
+}
+
+function syncWizardContext(selection) {
+  const contextBar = document.getElementById("wizard-context-bar");
+  const contextLabel = document.getElementById("wizard-context-label");
+  if (!selection?.label) {
+    contextBar?.setAttribute("hidden", "");
+    if (contextLabel) contextLabel.textContent = "";
+    return;
+  }
+  contextBar?.removeAttribute("hidden");
+  if (contextLabel) contextLabel.textContent = selection.label;
 }
 
 export function initCategoryPicker({
@@ -118,6 +149,7 @@ export function initCategoryPicker({
     const map = {
       hirdetes_vertical: selection?.vertical || "",
       hirdetes_alkategoria: selection?.subtype || "",
+      jarmu_kategoria: selection?.subtype || "",
       ingatlan_tipus: (selection?.immoTipus || []).join(","),
       ingatlan_kategoria: (selection?.immoKategoria || []).join(","),
     };
@@ -141,6 +173,7 @@ export function initCategoryPicker({
   async function showVehicleWizard(selection) {
     writeStored(selection);
     setHiddenFields(selection);
+    syncWizardContext(selection);
 
     if (typeof requireLogin === "function") {
       const ok = await requireLogin(selection);
@@ -151,7 +184,6 @@ export function initCategoryPicker({
     stub?.setAttribute("hidden", "");
     wizardShell?.removeAttribute("hidden");
     stepsBar?.removeAttribute("hidden");
-    contextBar?.setAttribute("hidden", "");
     onVehicleSelected?.(selection);
   }
 
@@ -286,20 +318,32 @@ export function initCategoryPicker({
   syncImmoLabels();
 
   const params = new URLSearchParams(window.location.search);
+  const urlSelection = selectionFromUrl();
   const shouldContinue =
     params.get("continue") === "1" &&
     (stored?.vertical === "auto" || stored?.vertical === "teher");
+  const shouldStart = params.get("start") === "1" && urlSelection;
 
-  if (shouldContinue) {
+  if (shouldStart) {
+    void showVehicleWizard(urlSelection);
+  } else if (shouldContinue) {
     void showVehicleWizard(stored);
   } else if (stored?.vertical === "ingatlan" && params.get("continue") === "1") {
     showIngatlanStub(stored);
   } else {
+    if (urlSelection?.vertical === "teher") {
+      state.open = "teher";
+      syncOpenGroups();
+    } else if (urlSelection?.vertical === "auto") {
+      state.open = "auto";
+      syncOpenGroups();
+    }
     showPicker();
   }
 
   return {
     reset: showPicker,
     getSelection: () => readStored(),
+    syncWizardContext,
   };
 }

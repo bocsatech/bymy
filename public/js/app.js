@@ -5,10 +5,10 @@ import {
   saveListingPhotosOrder,
   getStoredListingId,
 } from "./db-client.js?v=wizardSave1";
-import { createAdForm } from "./form-core.js?v=wizardSave1";
+import { createAdForm } from "./form-core.js?v=teherPost1";
 import { initTireSizes } from "./tire-sizes-ui.js";
 import { initPhoneLanguages } from "./phone-lang-ui.js";
-import { initCategoryPicker } from "./category-picker.js?v=catPick20260817a";
+import { initCategoryPicker } from "./category-picker.js?v=teherPost1";
 import {
   requireAuthForPage,
   getAuthUser,
@@ -38,6 +38,23 @@ let pendingEditForm = null;
 let formApi = null;
 let wizardSubmitted = false;
 let abandonCleanupBound = false;
+
+function categorySelectionFromForm(formData) {
+  const vertical = String(formData?.hirdetes_vertical ?? "").trim().toLowerCase();
+  const subtype = String(formData?.hirdetes_alkategoria ?? formData?.jarmu_kategoria ?? "")
+    .trim()
+    .toLowerCase();
+  if (vertical === "teher" && subtype === "kisteher") {
+    return { vertical: "teher", subtype: "kisteher", label: "Kisteher 3,5 t-ig" };
+  }
+  if (vertical === "teher" && subtype === "teherauto") {
+    return { vertical: "teher", subtype: "teherauto", label: "Teherautó 3,5 t-tól" };
+  }
+  if (vertical === "auto" && subtype === "szemelyauto") {
+    return { vertical: "auto", subtype: "szemelyauto", label: "Személyautó" };
+  }
+  return null;
+}
 
 function resolveListingId() {
   if (editing) return editId;
@@ -196,6 +213,8 @@ const categoryPicker = initCategoryPicker({
     try {
       const api = ensureFormReady();
       if (!editing) api?.resetForm?.({ fresh: true });
+      const sel = categoryPicker?.getSelection?.();
+      if (sel) categoryPicker?.syncWizardContext?.(sel);
       phoneLanguages?.syncLanguages?.();
       tireSizes?.syncRearTires?.();
     } catch (error) {
@@ -223,6 +242,8 @@ if (editing) {
     tireSizes?.syncRearTires?.();
     setStoredListingId(editId);
     syncPhotoUrlsFromListing(listing);
+    const catSel = categorySelectionFromForm(listing.form);
+    if (catSel) categoryPicker?.syncWizardContext?.(catSel);
   } catch (error) {
     alert(error.message ?? "A hirdetés betöltése sikertelen.");
     window.location.assign("/beallitasok.html?szekcio=hirdetes");

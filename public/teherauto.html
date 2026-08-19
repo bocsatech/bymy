@@ -120,7 +120,7 @@
             </button>
             <div class="site-avatar-dropdown site-avatar-dropdown--fiok" data-avatar-dropdown role="menu" hidden></div>
           </div>
-          <a class="hub-btn hub-btn--post" href="/hirdetesfeladas.html" data-auth-guard>+ Hirdetésfeladás</a>
+          <a class="hub-btn hub-btn--post" href="/hirdetesfeladas.html?vertical=teher&subtype=kisteher&start=1" data-auth-guard id="teher-post-link">+ Hirdetésfeladás</a>
           <button type="button" class="hub-theme-toggle" data-theme-toggle aria-label="Színmód" title="Színmód"></button>
         </div>
         </div>
@@ -386,9 +386,17 @@
           if (on) el.setAttribute("aria-current", "page");
           else el.removeAttribute("aria-current");
         });
+        var subtype = kat === "35-felett" ? "teherauto" : "kisteher";
+        var post = document.getElementById("teher-post-link");
+        if (post) {
+          post.href =
+            "/hirdetesfeladas.html?vertical=teher&subtype=" +
+            encodeURIComponent(subtype) +
+            "&start=1";
+        }
       })();
     </script>
-    <script src="/js/home-app.js?v=year2035" type="module"></script>
+    <script src="/js/home-app.js?v=teherPost1" type="module"></script>
     <script src="/js/auto-hero.js?v=pkwLkw1" type="module"></script>
     <script src="/js/site-avatar-menu.js?v=fiokPage2" type="module"></script>
 

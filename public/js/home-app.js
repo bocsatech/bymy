@@ -31,6 +31,14 @@ let statsFilter = null;
 const PAGE = document.body?.getAttribute("data-site-page") || "";
 if (gridTrack) bindListingOpen(gridTrack);
 
+function initialTruckSubtypeFromUrl() {
+  if (PAGE !== "teherauto") return null;
+  const kat = new URLSearchParams(window.location.search).get("kategoria") || "35-alatt";
+  return kat === "35-felett" ? "teherauto" : "kisteher";
+}
+
+let truckSubtypeFilter = initialTruckSubtypeFromUrl();
+
 function initialCategoryFromUrl() {
   const params = new URLSearchParams(window.location.search);
   return params.get("cat") || params.get("category") || null;
@@ -63,9 +71,27 @@ function sortForHome(items) {
   });
 }
 
+function listingSubtype(item) {
+  return String(
+    item?.preview?.filter?.hirdetes_alkategoria ?? item?.form?.hirdetes_alkategoria ?? ""
+  )
+    .trim()
+    .toLowerCase();
+}
+
+function filterByTruckSubtype(items) {
+  if (PAGE !== "teherauto" || !truckSubtypeFilter) return items;
+  return items.filter((item) => {
+    const sub = listingSubtype(item);
+    if (!sub) return true;
+    return sub === truckSubtypeFilter;
+  });
+}
+
 function filterItems(items) {
   let result = filterListingsBySidebar(items, sidebarFilters);
   result = filterByCategory(result, categoryFilter);
+  result = filterByTruckSubtype(result);
   if (statsFilter) {
     result = result.filter((item) => statsFilter.listingIds.has(item.id));
   }

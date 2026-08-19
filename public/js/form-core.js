@@ -52,6 +52,7 @@ export function createAdForm(options = {}) {
   const KEEP_ON_RESET = new Set([
     "hirdetes_vertical",
     "hirdetes_alkategoria",
+    "jarmu_kategoria",
     "ingatlan_tipus",
     "ingatlan_kategoria",
     "csomag",
@@ -439,9 +440,28 @@ function wrapMdOutlinedFields() {
 }
 
 function showSuccess() {
+  updatePublishSuccessCopy();
   adPanel?.classList.add("hidden");
   successPanel?.classList.remove("hidden");
   footerActions.classList.add("hidden");
+}
+
+function updatePublishSuccessCopy() {
+  const vertical = String(form.elements.namedItem("hirdetes_vertical")?.value ?? "").trim().toLowerCase();
+  const hint = document.getElementById("success-publish-hint");
+  const listLink = document.getElementById("success-list-link");
+  if (!hint || !listLink) return;
+  if (vertical === "teher") {
+    hint.textContent =
+      "A hirdetés a Bymy adatbázisban van — megjelenik a Teherautó oldalon és a Hirdetéseim listában.";
+    listLink.textContent = "Teherautó oldal";
+    listLink.href = "/teherauto.html";
+    return;
+  }
+  hint.textContent =
+    "A hirdetés a Bymy adatbázisban van — megjelenik az Autó oldalon és a Hirdetéseim listában.";
+  listLink.textContent = "Autó oldal";
+  listLink.href = "/auto.html";
 }
 
 function resetSuccess() {

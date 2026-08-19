@@ -285,7 +285,14 @@ function userEditView() {
       (f) => `
       <label>
         <div>${esc(f.label)} <small style="color:var(--muted)">(${esc(f.key)})</small></div>
-        <input class="edit-profile-field" data-key="${esc(f.key)}" type="text" value="${esc(String(f.value))}" />
+        ${
+          f.key === "accountType"
+            ? `<select class="edit-profile-field" data-key="accountType">
+                <option value="private" ${String(f.value) === "private" ? "selected" : ""}>magán</option>
+                <option value="business" ${String(f.value) === "business" ? "selected" : ""}>céges</option>
+              </select>`
+            : `<input class="edit-profile-field" data-key="${esc(f.key)}" type="text" value="${esc(String(f.value))}" />`
+        }
       </label>`
     )
     .join("");

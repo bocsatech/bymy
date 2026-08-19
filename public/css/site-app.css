@@ -3304,6 +3304,22 @@ body.site-app .mm-nav-sublink:hover {
   color: #1565c0;
 }
 
+body.site-app .mm-nav-sublink.is-active {
+  background: #e8f1fb;
+  color: #1565c0;
+  font-weight: 600;
+}
+
+body.site-app .mm-nav-caret {
+  flex-shrink: 0;
+  color: #98a2b3;
+  transition: transform 0.15s ease;
+}
+
+body.site-app .mm-nav-toggle[aria-expanded="true"] .mm-nav-caret {
+  transform: rotate(180deg);
+}
+
 body.site-app .mm-nav-plain {
   margin: 0.15rem 0;
   padding: 0.55rem 0.7rem;

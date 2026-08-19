@@ -52,7 +52,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/css/style.css?v=auth20260725" />
-    <link rel="stylesheet" href="/css/site-app.css?v=fiokType5" />
+    <link rel="stylesheet" href="/css/site-app.css?v=fiokSubNav1" />
   </head>
   <body class="site-app settings-page mm-page" data-site-page="beallitasok" data-auth-init="manual">
     <div class="local-banner">Bymy — Fiókom · user DB: ~/.bymy/ · v=localdb9</div>
@@ -104,7 +104,17 @@
         <p class="mm-side-kicker">Fiókom <span class="mm-side-account-type" data-mm-account-type hidden></span></p>
         <h1 class="mm-side-title">Üdv, <span data-mm-hello>—</span></h1>
         <nav class="mm-nav">
-          <a class="mm-nav-link" href="?szekcio=cegadatok" data-mm-nav="cegadatok" data-mm-company-nav hidden>Cégadatok</a>
+          <div class="mm-nav-group" data-mm-company-nav-wrap hidden>
+            <button type="button" class="mm-nav-link mm-nav-toggle" data-mm-subtoggle data-mm-nav="cegadatok" aria-expanded="false">
+              <span>Cégadatok</span>
+              <svg class="mm-nav-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="mm-nav-sub" data-mm-sub hidden>
+              <a class="mm-nav-sublink" href="?szekcio=fiok#searchArea" data-mm-settings-acc="searchArea">Keresési körzet</a>
+              <a class="mm-nav-sublink" href="?szekcio=fiok#password" data-mm-settings-acc="password">Jelszó módosítása</a>
+              <a class="mm-nav-sublink" href="?szekcio=fiok#notify" data-mm-settings-acc="notify">Hírlevél és értesítések</a>
+            </div>
+          </div>
           <a class="mm-nav-link" href="?szekcio=import" data-mm-nav="import">Autóimport</a>
           <a class="mm-nav-link" href="?szekcio=nyomtatasok" data-mm-nav="nyomtatasok">Nyomtatások</a>
           <a class="mm-nav-link" href="?szekcio=ertekelesek" data-mm-nav="ertekelesek">Értékelések</a>
@@ -114,7 +124,17 @@
           <a class="mm-nav-link" href="?szekcio=keresesek" data-mm-nav="keresesek">Mentett kereséseim</a>
           <a class="mm-nav-link" href="?szekcio=uzenetek" data-mm-nav="uzenetek">Üzenetek <span class="mm-nav-badge" data-mm-msg-count hidden>0</span></a>
           <a class="mm-nav-link" href="?szekcio=megjelenes" data-mm-nav="megjelenes">Megjelenés</a>
-          <a class="mm-nav-link" href="?szekcio=fiok" data-mm-nav="fiok">Beállítások</a>
+          <div class="mm-nav-group" data-mm-settings-nav>
+            <button type="button" class="mm-nav-link mm-nav-toggle" data-mm-subtoggle data-mm-nav="fiok" aria-expanded="false">
+              <span>Beállítások</span>
+              <svg class="mm-nav-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="mm-nav-sub" data-mm-sub hidden>
+              <a class="mm-nav-sublink" href="?szekcio=fiok#searchArea" data-mm-settings-acc="searchArea">Keresési körzet</a>
+              <a class="mm-nav-sublink" href="?szekcio=fiok#password" data-mm-settings-acc="password">Jelszó módosítása</a>
+              <a class="mm-nav-sublink" href="?szekcio=fiok#notify" data-mm-settings-acc="notify">Hírlevél és értesítések</a>
+            </div>
+          </div>
         </nav>
         <button type="button" class="mm-side-logout" data-auth-logout>Kijelentkezés</button>
       </aside>
@@ -577,7 +597,7 @@
 
     <script src="/js/site-avatar-menu.js?v=fiokPage2" type="module"></script>
     <script src="/js/ha-import-app.js?v=fiokPage1" type="module"></script>
-    <script src="/js/beallitasok-app.js?v=fiokType4" type="module"></script>
+    <script src="/js/beallitasok-app.js?v=fiokSubNav1" type="module"></script>
   
     <script>
       (function () {

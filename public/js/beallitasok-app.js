@@ -56,6 +56,7 @@ const CAT_STORAGE_VERSION = 2;
 const SEARCH_RADIUS_OPTIONS = [5, 10, 15, 20, 30, 50, 75, 100];
 const REC_RADIUS_OPTIONS = [5, 10, 15, 20, 30];
 const AUTH_TOKEN_KEY = "bymy-auth-token";
+const SETTINGS_ACC_IDS = new Set(["searchArea", "password", "notify"]);
 
 let lastLookedUpPostal = "";
 let cityLookupBusy = false;
@@ -152,6 +153,78 @@ function currentSection() {
   return SECTIONS.includes(raw) ? raw : "fiok";
 }
 
+function settingsAccordionHash() {
+  const hash = String(window.location.hash || "").replace(/^#/, "");
+  return SETTINGS_ACC_IDS.has(hash) ? hash : "";
+}
+
+function expandSettingsSubnav(group) {
+  if (!group) return;
+  const sub = group.querySelector("[data-mm-sub]");
+  const btn = group.querySelector("[data-mm-subtoggle]");
+  if (sub) sub.hidden = false;
+  if (btn) btn.setAttribute("aria-expanded", "true");
+}
+
+function collapseSettingsSubnav(group) {
+  if (!group) return;
+  const sub = group.querySelector("[data-mm-sub]");
+  const btn = group.querySelector("[data-mm-subtoggle]");
+  if (sub) sub.hidden = true;
+  if (btn) btn.setAttribute("aria-expanded", "false");
+}
+
+function syncSettingsSublinkActive(accId = "") {
+  document.querySelectorAll("[data-mm-settings-acc]").forEach((link) => {
+    link.classList.toggle("is-active", accId && link.getAttribute("data-mm-settings-acc") === accId);
+  });
+}
+
+function syncSettingsSubnav() {
+  const section = currentSection();
+  const accId = settingsAccordionHash();
+  const openForSettings = section === "fiok" || Boolean(accId);
+  const openForCompany = section === "cegadatok" || openForSettings;
+
+  document.querySelectorAll("[data-mm-settings-nav]").forEach((group) => {
+    if (group.hidden) return;
+    if (openForSettings) expandSettingsSubnav(group);
+    else collapseSettingsSubnav(group);
+  });
+
+  document.querySelectorAll("[data-mm-company-nav-wrap]").forEach((group) => {
+    if (group.hidden) return;
+    if (openForCompany) expandSettingsSubnav(group);
+    else collapseSettingsSubnav(group);
+  });
+
+  syncSettingsSublinkActive(accId);
+}
+
+function openSettingsAccordion(accId) {
+  if (!SETTINGS_ACC_IDS.has(accId)) return;
+  setSection("fiok");
+  fillProfileForm(getAuthUser(), getProfile());
+
+  const root = document.querySelector("[data-settings-accordion]");
+  const target = root?.querySelector(`details.settings-acc[data-acc="${accId}"]`);
+  if (target) {
+    root.querySelectorAll("details.settings-acc").forEach((details) => {
+      if (details !== target) details.open = false;
+    });
+    target.open = true;
+    requestAnimationFrame(() => {
+      target.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    });
+  }
+
+  const url = new URL(window.location.href);
+  url.searchParams.set("szekcio", "fiok");
+  url.hash = accId;
+  window.history.replaceState({}, "", url);
+  syncSettingsSubnav();
+}
+
 function setSection(section) {
   const next = SECTIONS.includes(section) ? section : "fiok";
   const url = new URL(window.location.href);
@@ -178,6 +251,7 @@ function setSection(section) {
       megjelenes: "Megjelenés",
       fiok: "Beállítások",
     }[next] + " — Fiókom";
+  syncSettingsSubnav();
 }
 
 function authHeaders() {
@@ -546,22 +620,23 @@ function accountTypeSidebarLabel(type) {
 
 function syncSidebarAccountType(type) {
   const el = document.querySelector("[data-mm-account-type]");
-  const nav = document.querySelector("[data-mm-company-nav]");
-  const personalNav = document.querySelector('[data-mm-nav="fiok"]');
+  const companyWrap = document.querySelector("[data-mm-company-nav-wrap]");
+  const settingsNav = document.querySelector("[data-mm-settings-nav]");
   const fromDb = type === "business" || type === "dealer" ? type : "private";
   const companyType = isCompanyAccount(fromDb);
   if (el) {
     el.textContent = accountTypeSidebarLabel(fromDb);
     el.hidden = false;
   }
-  if (nav) nav.hidden = !companyType;
-  if (personalNav) personalNav.hidden = companyType;
+  if (companyWrap) companyWrap.hidden = !companyType;
+  if (settingsNav) settingsNav.hidden = companyType;
   if (!companyType && currentSection() === "cegadatok") {
     setSection("fiok");
   }
-  if (companyType && currentSection() === "fiok") {
+  if (companyType && currentSection() === "fiok" && !settingsAccordionHash()) {
     setSection("cegadatok");
   }
+  syncSettingsSubnav();
 }
 
 function syncCompanyWrap(form) {
@@ -588,7 +663,7 @@ function initAccordionExclusive() {
   });
 
   const hash = String(window.location.hash || "").replace(/^#/, "");
-  if (hash) {
+  if (hash && SETTINGS_ACC_IDS.has(hash)) {
     const target = root.querySelector(`details.settings-acc[data-acc="${hash}"]`);
     if (target) {
       target.open = true;
@@ -831,7 +906,12 @@ export async function initSettingsPage() {
   const hello = document.querySelector("[data-mm-hello]");
   if (hello) hello.textContent = getDisplayName() || user.email.split("@")[0];
 
-  setSection(currentSection());
+  const accHash = settingsAccordionHash();
+  if (accHash) {
+    openSettingsAccordion(accHash);
+  } else {
+    setSection(currentSection());
+  }
   await refreshStats(user.email);
   renderPark(user.email);
   renderSearches(user.email);
@@ -867,6 +947,10 @@ export async function initSettingsPage() {
       setSection(next);
       if (next === "fiok") {
         fillProfileForm(getAuthUser(), getProfile());
+        expandSettingsSubnav(link.closest(".mm-nav-group"));
+      }
+      if (next === "cegadatok") {
+        expandSettingsSubnav(link.closest(".mm-nav-group"));
       }
       if (next === "uzenetek") {
         messagesUi?.refresh?.();
@@ -880,7 +964,16 @@ export async function initSettingsPage() {
     });
   });
 
+  document.querySelectorAll("[data-mm-settings-acc]").forEach((link) => {
+    link.addEventListener("click", (event) => {
+      event.preventDefault();
+      const accId = link.getAttribute("data-mm-settings-acc");
+      if (accId) openSettingsAccordion(accId);
+    });
+  });
+
   document.querySelectorAll("[data-mm-subtoggle]").forEach((btn) => {
+    if (btn.hasAttribute("data-mm-nav")) return;
     btn.addEventListener("click", () => {
       const group = btn.closest(".mm-nav-group");
       const sub = group?.querySelector("[data-mm-sub]");

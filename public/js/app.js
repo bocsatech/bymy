@@ -5,7 +5,7 @@ import {
   saveListingPhotosOrder,
   getStoredListingId,
 } from "./db-client.js?v=wizardSave1";
-import { createAdForm } from "./form-core.js?v=locFill1";
+import { createAdForm } from "./form-core.js?v=locFill2";
 import { initTireSizes } from "./tire-sizes-ui.js";
 import { initPhoneLanguages } from "./phone-lang-ui.js";
 import { initCategoryPicker } from "./category-picker.js?v=teherPost1";
@@ -22,7 +22,7 @@ import {
   initAdLocationProfile,
   listingAddressComplete,
   getListingAddressFromProfile,
-} from "./ad-location-profile.js?v=locProf2";
+} from "./ad-location-profile.js?v=locProf3";
 
 if (!(await requireAuthForPage())) {
   throw new Error("Belépés szükséges");
@@ -239,6 +239,7 @@ const categoryPicker = initCategoryPicker({
     try {
       const api = ensureFormReady();
       if (!editing) api?.resetForm?.({ fresh: true });
+      api?.markTouched?.();
       const sel = categoryPicker?.getSelection?.();
       if (sel) categoryPicker?.syncWizardContext?.(sel);
       api?.syncKisteherFields?.();

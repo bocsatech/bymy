@@ -2114,6 +2114,11 @@ body.site-app #ad-form .ad-location-fields input[readonly] {
   cursor: default;
 }
 
+body.site-app #ad-form .ad-location-fields input:not([readonly]) {
+  background: #fff;
+  cursor: text;
+}
+
 body.site-app #ad-form .ad-location-postal-row {
   display: grid;
   grid-template-columns: minmax(7rem, 9rem) 1fr;

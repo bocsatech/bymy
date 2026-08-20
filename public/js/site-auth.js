@@ -167,7 +167,12 @@ export async function loadProfileFromServer() {
     });
   }
   const user = getAuthUser();
-  if (user && !data.profile?.firstName) {
+  const profileReady = Boolean(
+    data.profile?.firstName ||
+      ((data.profile?.accountType === "business" || data.profile?.accountType === "dealer") &&
+        (data.profile?.company || data.profile?.companyStreet || data.profile?.companyTaxId))
+  );
+  if (user && !profileReady) {
     await maybeRestoreProfile(user);
     return getProfile();
   }

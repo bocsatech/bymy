@@ -149,6 +149,27 @@ function compactCanvasRows(form) {
   });
 }
 
+const LOCATION_FIELD_KEYS = new Set(["megtekintesi_cim", "iranyitoszam", "telepules", "megye"]);
+
+function pinLocation(form) {
+  const stack = form.querySelector(".field-stack--location");
+  if (!stack) return;
+  const canvas = canvasForStep(form, 5);
+  if (canvas && stack.parentElement !== canvas) {
+    canvas.appendChild(stack);
+  }
+  stack.classList.remove("ad-layout-hidden");
+  stack.hidden = false;
+  stack.removeAttribute("hidden");
+  stack.style.removeProperty("display");
+  if (!stack.classList.contains("ad-layout-item")) {
+    stack.classList.add("ad-layout-item");
+    stack.style.setProperty("grid-column", "1 / span 12", "important");
+    stack.style.setProperty("grid-row", "90", "important");
+    stack.dataset.layoutRow = "90";
+  }
+}
+
 function hideLayoutShellCards(form) {
   form.querySelectorAll('.step-panel[data-step="5"] #ad-panel').forEach((panel) => {
     const canvas = panel.querySelector(".ad-layout-canvas");
@@ -202,7 +223,8 @@ async function applyAdFormLayout() {
       const wrap = wrapFor(form, cell.field_key);
       if (!wrap || placed.has(wrap)) continue;
       placed.add(wrap);
-      if (cell.hidden) {
+      const isLocation = LOCATION_FIELD_KEYS.has(cell.field_key) || wrap.matches?.(".field-stack--location");
+      if (cell.hidden && !isLocation) {
         wrap.classList.add("ad-layout-hidden");
         wrap.hidden = true;
         setRequired(wrap, false);
@@ -210,7 +232,7 @@ async function applyAdFormLayout() {
       }
       wrap.classList.remove("ad-layout-hidden");
       setRequired(wrap, true);
-      const targetStep = clamp(cell.step || 1, 1, 5);
+      const targetStep = isLocation ? 5 : clamp(cell.step || 1, 1, 5);
       const canvas = canvasForStep(form, targetStep);
       if (!canvas) continue;
       if (wrap.closest(KEEP_OUT) || wrap.querySelector(KEEP_OUT)) continue;
@@ -221,6 +243,7 @@ async function applyAdFormLayout() {
     compactCanvasRows(form);
     hideLayoutShellCards(form);
     pinExtras(form);
+    pinLocation(form);
     pinFooter(form);
     window.dispatchEvent(new Event("ad-form-sync-location"));
   } catch {

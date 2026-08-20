@@ -2,7 +2,7 @@ import { UZEMANYAG_CATEGORIES, EQUIPMENT_SECTIONS, KLIM_OPTIONS, KISTEHER_EQUIPM
 import { EGYEB_INFO_OPTIONS } from "./egyeb-info-data.js";
 import { initVehicleCatalogSelects } from "./vehicle-catalog-client.js";
 import { compressListingPhoto, MAX_LISTING_PHOTOS } from "./listing-photo-compress.js?v=myAds2";
-import { applyListingAddressFromProfileSync } from "./ad-location-profile.js?v=locProf2";
+import { applyListingAddressFromProfileSync } from "./ad-location-profile.js?v=locProf3";
 
 export function createAdForm(options = {}) {
   const mode = options.mode ?? "wizard";
@@ -1369,8 +1369,14 @@ if (mode === "wizard") {
     };
     form.addEventListener(
       "input",
-      () => {
-        if (!userTouchedForm) resetForm();
+      (event) => {
+        if (userTouchedForm) return;
+        // Profilból / kézzel töltött cím ne törlődjön az első billentyűre.
+        if (event.target?.closest?.(".ad-location-fields, .field-stack--location, #email")) {
+          userTouchedForm = true;
+          return;
+        }
+        resetForm();
       },
       { capture: true }
     );
@@ -1390,6 +1396,9 @@ return {
   applyFormData,
   collectFormData,
   resetForm,
+  markTouched: () => {
+    userTouchedForm = true;
+  },
   applyPhotoUrls,
   getPhotoFiles: () => photoItems.map((item) => item.file).filter(Boolean),
   getPreparedPhotoItems: preparedPhotoItems,

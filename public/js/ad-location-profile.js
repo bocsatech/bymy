@@ -65,17 +65,12 @@ function setHint(form, message, { isError = false } = {}) {
   hint.classList.toggle("ad-location-hint--error", isError);
 }
 
-/** Profilból van cím → readonly; hiányzik → szerkeszthető, ne ragadjon be. */
-function setLocationEditable(form, editable) {
+/** Címmezők mindig szerkeszthetők (profilból előtöltve). */
+function unlockLocationFields(form) {
   form.querySelectorAll(".ad-location-fields input").forEach((el) => {
     if (el.type === "hidden") return;
-    if (editable) {
-      el.removeAttribute("readonly");
-      el.removeAttribute("tabindex");
-    } else {
-      el.setAttribute("readonly", "");
-      el.setAttribute("tabindex", "-1");
-    }
+    el.removeAttribute("readonly");
+    el.removeAttribute("tabindex");
   });
 }
 
@@ -86,6 +81,11 @@ function ensureLocationVisible(form) {
   stack.hidden = false;
   stack.removeAttribute("hidden");
   stack.style.removeProperty("display");
+  stack.querySelectorAll(".ad-layout-hidden").forEach((el) => {
+    el.classList.remove("ad-layout-hidden");
+    el.hidden = false;
+    el.removeAttribute("hidden");
+  });
   const card = stack.closest(".card");
   if (card && card.style.display === "none" && !stack.closest(".ad-layout-canvas")) {
     card.style.removeProperty("display");
@@ -120,11 +120,12 @@ export async function applyListingAddressFromProfile(form, profile = null) {
   }
 
   const result = applyListingAddressFromProfileSync(form, resolved);
-  const megye = await lookupMegye(result.address.postalCode, result.address.city);
+  const address = result.address || getListingAddressFromProfile(resolved);
+  const megye = await lookupMegye(address.postalCode, address.city);
   if (megye) setField(form, "megye", megye);
 
-  updateLocationHint(form, result);
-  return { ...result, megye: megye || inferMegyeFromCity(result.address.city, result.address.postalCode) };
+  updateLocationHint(form, { ...result, address });
+  return { ...result, address, megye: megye || inferMegyeFromCity(address.city, address.postalCode) };
 }
 
 function updateLocationHint(form, result) {
@@ -147,7 +148,7 @@ function updateLocationHint(form, result) {
   }
   setHint(
     form,
-    "A Beállításokban megadott cég-/lakcím — módosításhoz: Beállítások → Cégadatok / Személyes adatok.",
+    "A Beállításokból áthozott cím — ide is átírhatod, vagy módosítsd a Cégadatok / Személyes adatoknál.",
     { isError: false }
   );
 }
@@ -169,9 +170,9 @@ export function applyListingAddressFromProfileSync(form, profile = null) {
 
   applyContactFromProfile(form, profile);
   ensureLocationVisible(form);
+  unlockLocationFields(form);
 
   const ok = listingAddressComplete(address);
-  setLocationEditable(form, !ok);
   updateLocationHint(form, { address });
   return { ok, address };
 }

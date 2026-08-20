@@ -64,6 +64,26 @@ input, select, textarea {
   margin-bottom: 1rem;
 }
 .tabs { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 1rem; }
+.tabs--stack { margin-bottom: 0; }
+.nav-section {
+  margin: 0 0 1rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.02);
+}
+.nav-section-label {
+  margin: 0 0 0.55rem;
+  font-size: 0.78rem;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.layout-cat-title {
+  margin: 0 0 0.5rem;
+  font-size: 1.05rem;
+}
 .tab {
   background: transparent;
   border: 1px solid var(--line);
@@ -73,6 +93,7 @@ input, select, textarea {
   cursor: pointer;
 }
 .tab.on { color: #111; background: var(--accent); border-color: var(--accent); }
+.tab--layout { border-radius: 10px; }
 
 table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
 th, td { text-align: left; padding: 0.55rem 0.4rem; border-bottom: 1px solid var(--line); vertical-align: middle; }

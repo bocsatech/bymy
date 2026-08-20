@@ -22,6 +22,7 @@ export function mountLayoutBoard(root, layout, { onChange } = {}) {
     "hirdetes_cime",
     "hirdetes_vertical",
     "hirdetes_alkategoria",
+    "jarmu_kategoria",
     "fotok",
     "owner_user_id",
     "views_web",

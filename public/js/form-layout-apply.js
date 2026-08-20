@@ -178,7 +178,11 @@ async function applyAdFormLayout() {
   const form = document.getElementById("ad-form");
   if (!form) return;
   try {
-    const res = await fetch("/api/level1/form-layout", { credentials: "same-origin", cache: "no-store" });
+    const category = currentLayoutCategory(form);
+    const res = await fetch(`/api/level1/form-layout?category=${encodeURIComponent(category)}`, {
+      credentials: "same-origin",
+      cache: "no-store",
+    });
     if (!res.ok) return;
     const data = await res.json();
     const layout = data.layout;
@@ -215,6 +219,33 @@ async function applyAdFormLayout() {
   }
 }
 
+function currentLayoutCategory(form) {
+  const subtype = String(
+    form.elements.namedItem("hirdetes_alkategoria")?.value ??
+      form.elements.namedItem("jarmu_kategoria")?.value ??
+      ""
+  )
+    .trim()
+    .toLowerCase();
+  if (
+    subtype === "szemelyauto" ||
+    subtype === "leasing" ||
+    subtype === "berauto" ||
+    subtype === "lakokocsi" ||
+    subtype === "kisteher" ||
+    subtype === "teherauto" ||
+    subtype === "ingatlan"
+  ) {
+    return subtype;
+  }
+  const vertical = String(form.elements.namedItem("hirdetes_vertical")?.value ?? "")
+    .trim()
+    .toLowerCase();
+  if (vertical === "ingatlan") return "ingatlan";
+  if (vertical === "teher") return "teherauto";
+  return "szemelyauto";
+}
+
 function scheduleApply() {
   applyAdFormLayout();
   window.setTimeout(applyAdFormLayout, 120);
@@ -228,3 +259,4 @@ if (document.readyState === "loading") {
   scheduleApply();
 }
 window.addEventListener("ad-form-ready", applyAdFormLayout);
+window.addEventListener("ad-form-layout-refresh", applyAdFormLayout);

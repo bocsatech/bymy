@@ -381,6 +381,7 @@ function syncKisteherFields() {
   });
   syncEgyebInfoVisibility();
   renderEquipment();
+  window.dispatchEvent(new Event("ad-form-layout-refresh"));
 }
 
 function syncFuelDependentFields() {

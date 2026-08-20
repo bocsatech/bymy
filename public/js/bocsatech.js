@@ -1,18 +1,37 @@
-import { mountLayoutBoard } from "./bocsatech-layout.js?v=layoutCompact1";
+import { mountLayoutBoard } from "./bocsatech-layout.js?v=layoutCats1";
 
 const app = document.getElementById("app");
 
+const LAYOUT_CATEGORIES = [
+  { id: "szemelyauto", label: "Személyautó" },
+  { id: "leasing", label: "Leasing hirdetés" },
+  { id: "berauto", label: "Bérautó hirdetés" },
+  { id: "lakokocsi", label: "Bérelhető lakókocsi" },
+  { id: "kisteher", label: "Kisteher 3,5 t-ig" },
+  { id: "teherauto", label: "Teherautó 3,5 t-tól" },
+  { id: "ingatlan", label: "Ingatlan" },
+];
+
 let admin = null;
 let tab = "users";
+let layoutCategory = "szemelyauto";
 let lastUsername = "";
 let otpUser = "";
 let err = "";
 let info = "";
 let users = [];
 let listings = [];
-let layout = { cells: [] };
+let layout = { cells: [], category: "szemelyauto" };
 let editingUser = null;
-let editingProfileText = "";
+
+function isLayoutTab(value = tab) {
+  return String(value).startsWith("layout:");
+}
+
+function layoutCategoryFromTab(value = tab) {
+  if (!isLayoutTab(value)) return layoutCategory;
+  return String(value).slice("layout:".length) || "szemelyauto";
+}
 
 async function api(path, opts = {}) {
   const res = await fetch(path, {
@@ -88,6 +107,9 @@ const actions = {
   },
   setTab(_, el) {
     tab = el.getAttribute("data-tab");
+    if (isLayoutTab(tab)) layoutCategory = layoutCategoryFromTab(tab);
+    err = "";
+    info = "";
     loadTab().then(render);
   },
   async delUser(_, el) {
@@ -164,12 +186,14 @@ const actions = {
     err = "";
     info = "";
     try {
+      const cat = layoutCategoryFromTab();
       const data = await api("/api/level1/form-layout", {
         method: "PUT",
-        body: JSON.stringify({ layout }),
+        body: JSON.stringify({ layout, category: cat }),
       });
       layout = data.layout;
-      info = "Elrendezés mentve. A hirdetésfeladáson hard refresh (Cmd+Shift+R) után látszik.";
+      layoutCategory = data.category || cat;
+      info = `Elrendezés mentve (${categoryLabel(layoutCategory)}). A hirdetésfeladáson hard refresh (Cmd+Shift+R) után látszik.`;
       render();
     } catch (error) {
       err = error.message;
@@ -178,11 +202,22 @@ const actions = {
   },
 };
 
+function categoryLabel(id) {
+  return LAYOUT_CATEGORIES.find((c) => c.id === id)?.label || id;
+}
+
 async function loadTab() {
   if (!admin) return;
   if (tab === "users") users = (await api("/api/level1/users")).users;
   if (tab === "listings") listings = (await api("/api/level1/listings")).listings;
-  if (tab === "layout") layout = (await api("/api/level1/form-layout")).layout;
+  if (isLayoutTab()) {
+    layoutCategory = layoutCategoryFromTab();
+    const data = await api(`/api/level1/form-layout?category=${encodeURIComponent(layoutCategory)}`);
+    layout = data.layout;
+    if (Array.isArray(data.categories) && data.categories.length) {
+      /* server list is source of truth for labels if present */
+    }
+  }
 }
 
 function loginView() {
@@ -233,9 +268,7 @@ function usersView() {
       </tr>`
     )
     .join("");
-  const editor = editingUser
-    ? userEditView()
-    : "";
+  const editor = editingUser ? userEditView() : "";
   const messages = `
     ${info ? `<p class="ok">${esc(info)}</p>` : ""}
     ${err ? `<p class="err">${esc(err)}</p>` : ""}
@@ -353,8 +386,10 @@ function listingsView() {
 }
 
 function layoutView() {
+  const label = categoryLabel(layoutCategoryFromTab());
   return `
-    <p class="hint">Húzd a cellát a lapon belül vagy egy másik lépés táblájára. A jobb szélén méretezed, a × törli — a törölt mezők alulról visszaállíthatók. Mentés után a hirdetésfeladáson hard refresh kell.</p>
+    <h2 class="layout-cat-title">${esc(label)} — feladási mezők</h2>
+    <p class="hint">Csak ennek a kategóriának a mezői. Húzd a cellát a lapon belül vagy másik lépésre. Mentés után a hirdetésfeladáson hard refresh kell.</p>
     <div id="layout-root"></div>
     <p class="ok">${info}</p>
     <p class="err">${err}</p>
@@ -363,8 +398,12 @@ function layoutView() {
 
 function shell() {
   const body = tab === "users" ? usersView() : tab === "listings" ? listingsView() : layoutView();
+  const layoutTabs = LAYOUT_CATEGORIES.map(
+    (c) =>
+      `<button class="tab tab--layout ${tab === `layout:${c.id}` ? "on" : ""}" data-act="setTab" data-tab="layout:${c.id}">${esc(c.label)}</button>`
+  ).join("");
   return `
-    <div class="wrap ${tab === "layout" ? "wrap--wide" : ""}">
+    <div class="wrap ${isLayoutTab() ? "wrap--wide" : ""}">
       <div class="top">
         <div>
           <h1>Bocsatech</h1>
@@ -375,7 +414,10 @@ function shell() {
       <div class="tabs">
         <button class="tab ${tab === "users" ? "on" : ""}" data-act="setTab" data-tab="users">Userek</button>
         <button class="tab ${tab === "listings" ? "on" : ""}" data-act="setTab" data-tab="listings">Hirdetések</button>
-        <button class="tab ${tab === "layout" ? "on" : ""}" data-act="setTab" data-tab="layout">Feladási mezők</button>
+      </div>
+      <div class="nav-section">
+        <p class="nav-section-label">Feladási mezők</p>
+        <div class="tabs tabs--stack">${layoutTabs}</div>
       </div>
       <div class="card">${body}</div>
     </div>`;
@@ -390,10 +432,10 @@ function esc(value) {
 
 function render() {
   h(admin ? shell() : loginView());
-  if (admin && tab === "layout") {
+  if (admin && isLayoutTab()) {
     mountLayoutBoard(document.getElementById("layout-root"), layout, {
       onChange(cells) {
-        layout = { ...layout, cells };
+        layout = { ...layout, cells, category: layoutCategoryFromTab() };
       },
     });
   }

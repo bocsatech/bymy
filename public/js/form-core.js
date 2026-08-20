@@ -327,6 +327,25 @@ function isElectricFuel(value) {
   return String(value ?? "").trim().toLowerCase() === "elektromos";
 }
 
+function isKisteherAd() {
+  const subtype = String(
+    form.elements.namedItem("hirdetes_alkategoria")?.value ??
+      form.elements.namedItem("jarmu_kategoria")?.value ??
+      ""
+  )
+    .trim()
+    .toLowerCase();
+  return subtype === "kisteher";
+}
+
+function syncKisteherFields() {
+  const show = isKisteherAd();
+  document.querySelectorAll(".kisteher-only").forEach((el) => {
+    el.hidden = !show;
+    el.classList.toggle("hidden", !show);
+  });
+}
+
 function syncFuelDependentFields() {
   const value = uzemanyag?.value ?? "";
   const electric = isElectricFuel(value);
@@ -336,6 +355,7 @@ function syncFuelDependentFields() {
   document.querySelectorAll(".fuel-combustion-only").forEach((el) => {
     el.classList.toggle("hidden", electric);
   });
+  syncKisteherFields();
 }
 
 function updateLeDisplay() {
@@ -1332,6 +1352,7 @@ return {
   getPreparedPhotoItems: preparedPhotoItems,
   showAllSteps,
   syncFuelDependentFields,
+  syncKisteherFields,
   fitAllFormFields,
 };
 }

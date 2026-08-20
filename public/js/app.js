@@ -5,7 +5,7 @@ import {
   saveListingPhotosOrder,
   getStoredListingId,
 } from "./db-client.js?v=wizardSave1";
-import { createAdForm } from "./form-core.js?v=teherPost1";
+import { createAdForm } from "./form-core.js?v=kisteherFields1";
 import { initTireSizes } from "./tire-sizes-ui.js";
 import { initPhoneLanguages } from "./phone-lang-ui.js";
 import { initCategoryPicker } from "./category-picker.js?v=teherPost1";
@@ -215,6 +215,7 @@ const categoryPicker = initCategoryPicker({
       if (!editing) api?.resetForm?.({ fresh: true });
       const sel = categoryPicker?.getSelection?.();
       if (sel) categoryPicker?.syncWizardContext?.(sel);
+      api?.syncKisteherFields?.();
       phoneLanguages?.syncLanguages?.();
       tireSizes?.syncRearTires?.();
     } catch (error) {

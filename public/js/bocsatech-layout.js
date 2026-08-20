@@ -1,5 +1,6 @@
 const COLS = 12;
 const ROW_PX = 64;
+const DROP_BUFFER = 2;
 const STEP_NAMES = {
   1: "Alapadatok",
   2: "Műszaki adatok",
@@ -98,7 +99,7 @@ export function mountLayoutBoard(root, layout, { onChange } = {}) {
         const tiles = items.map(tileHtml).join("");
         return `<section class="layout-step" data-step="${step}">
           <h3>Lépés ${step} — ${STEP_NAMES[step]}</h3>
-          <div class="layout-board" data-board="${step}" style="grid-template-rows: repeat(${maxRow + 2}, ${ROW_PX}px)">${tiles}</div>
+          <div class="layout-board" data-board="${step}" style="grid-template-rows: repeat(${maxRow}, ${ROW_PX}px)">${tiles}</div>
         </section>`;
       })
       .join("");
@@ -131,19 +132,39 @@ export function mountLayoutBoard(root, layout, { onChange } = {}) {
   function rowFromEvent(board, clientY) {
     const m = boardMetrics(board);
     const y = clientY - m.rect.top - m.padY;
-    return clamp(Math.floor(y / m.rowStride) + 1, 1, 80);
+    const maxAllowed = maxRowOn(Number(board.getAttribute("data-board"))) + DROP_BUFFER;
+    return clamp(Math.floor(y / m.rowStride) + 1, 1, Math.max(1, maxAllowed));
   }
 
   function maxRowOn(step) {
     const rows = editable()
       .filter((cell) => !cell.hidden && Number(cell.step) === step)
       .map((cell) => Number(cell.row) || 1);
-    return Math.max(3, ...rows);
+    return Math.max(1, ...rows, 1);
   }
 
-  function growBoard(board) {
+  /** Üres sorok kiszűrése: a használt sorok egymás alá csúsznak. */
+  function compactStep(step) {
+    const items = editable().filter((cell) => !cell.hidden && Number(cell.step) === step);
+    if (!items.length) return false;
+    const used = [...new Set(items.map((cell) => Number(cell.row) || 1))].sort((a, b) => a - b);
+    const remap = new Map(used.map((row, index) => [row, index + 1]));
+    let changed = false;
+    for (const cell of items) {
+      const next = remap.get(Number(cell.row) || 1);
+      if (next == null || next === cell.row) continue;
+      cell.row = next;
+      cell.order = (cell.row - 1) * COLS + cell.col;
+      syncPair(cell);
+      changed = true;
+    }
+    return changed;
+  }
+
+  function setBoardHeight(board, { buffer = 0 } = {}) {
     const step = Number(board.getAttribute("data-board"));
-    board.style.gridTemplateRows = `repeat(${maxRowOn(step) + 2}, ${ROW_PX}px)`;
+    const rows = Math.max(3, maxRowOn(step) + buffer);
+    board.style.gridTemplateRows = `repeat(${rows}, ${ROW_PX}px)`;
   }
 
   function placeOnBoard(cell, board, clientX, clientY, grab) {
@@ -178,11 +199,11 @@ export function mountLayoutBoard(root, layout, { onChange } = {}) {
         const cell = byKey.get(tile.getAttribute("data-field"));
         let board = tile.closest(".layout-board");
         if (!cell || !board) return;
-        const originStep = Number(cell.step);
         const resize = event.target.closest("[data-resize]");
         event.preventDefault();
         tile.setPointerCapture(event.pointerId);
         tile.classList.add("dragging");
+        setBoardHeight(board, { buffer: DROP_BUFFER });
         const grab = {
           startCol: cell.col,
           startRow: cell.row,
@@ -202,6 +223,7 @@ export function mountLayoutBoard(root, layout, { onChange } = {}) {
               paint(tile, cell);
               nextBoard.appendChild(tile);
               board = nextBoard;
+              setBoardHeight(board, { buffer: DROP_BUFFER });
               grab.startCol = cell.col;
               grab.startRow = cell.row;
               grab.col = colFromEvent(board, ev.clientX);
@@ -217,7 +239,7 @@ export function mountLayoutBoard(root, layout, { onChange } = {}) {
           } else {
             placeOnBoard(cell, board, ev.clientX, ev.clientY, grab);
           }
-          growBoard(board);
+          setBoardHeight(board, { buffer: DROP_BUFFER });
           paint(tile, cell);
         };
         const up = () => {
@@ -230,8 +252,9 @@ export function mountLayoutBoard(root, layout, { onChange } = {}) {
           }
           tile.removeEventListener("pointermove", move);
           tile.removeEventListener("pointerup", up);
+          compactStep(Number(cell.step));
           notify();
-          if (Number(cell.step) !== originStep) mount();
+          mount();
         };
         tile.addEventListener("pointermove", move);
         tile.addEventListener("pointerup", up);
@@ -244,7 +267,11 @@ export function mountLayoutBoard(root, layout, { onChange } = {}) {
         if (!cell) return;
         cell.hidden = false;
         if (![1, 2, 3, 4, 5].includes(Number(cell.step))) cell.step = 1;
+        const step = Number(cell.step);
+        cell.row = maxRowOn(step) + 1;
+        cell.order = (cell.row - 1) * COLS + cell.col;
         syncPair(cell);
+        compactStep(step);
         notify();
         mount();
       });

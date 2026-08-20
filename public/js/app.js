@@ -5,7 +5,7 @@ import {
   saveListingPhotosOrder,
   getStoredListingId,
 } from "./db-client.js?v=wizardSave1";
-import { createAdForm } from "./form-core.js?v=kisteherExtras1";
+import { createAdForm } from "./form-core.js?v=locFill1";
 import { initTireSizes } from "./tire-sizes-ui.js";
 import { initPhoneLanguages } from "./phone-lang-ui.js";
 import { initCategoryPicker } from "./category-picker.js?v=teherPost1";
@@ -14,6 +14,7 @@ import {
   getAuthUser,
   loginUrl,
   initSiteAuth,
+  loadProfileFromServer,
 } from "./site-auth.js";
 import {
   applyListingAddressFromProfile,
@@ -21,7 +22,7 @@ import {
   initAdLocationProfile,
   listingAddressComplete,
   getListingAddressFromProfile,
-} from "./ad-location-profile.js?v=locProf1";
+} from "./ad-location-profile.js?v=locProf2";
 
 if (!(await requireAuthForPage())) {
   throw new Error("Belépés szükséges");
@@ -141,6 +142,12 @@ function ensureFormReady() {
   if (formApi || !adForm) return formApi;
   if (!editing) setStoredListingId(null);
   initAdLocationProfile(adForm);
+  loadProfileFromServer()
+    .then(() => {
+      applyListingAddressFromProfileSync(adForm);
+      applyListingAddressFromProfile(adForm).catch(() => {});
+    })
+    .catch(() => {});
   registerAbandonPhotoCleanup();
   tireSizes = initTireSizes(adForm);
   phoneLanguages = initPhoneLanguages(adForm);
@@ -151,10 +158,29 @@ function ensureFormReady() {
     onWizardComplete: async (formData) => {
       applyListingAddressFromProfileSync(adForm);
       const loc = await applyListingAddressFromProfile(adForm);
-      if (!loc.ok || !listingAddressComplete(getListingAddressFromProfile())) {
+      const fromForm = {
+        street: String(formData.megtekintesi_cim || adForm.elements.namedItem("megtekintesi_cim")?.value || "").trim(),
+        postalCode: String(formData.iranyitoszam || adForm.elements.namedItem("iranyitoszam")?.value || "")
+          .replace(/\D/g, "")
+          .slice(0, 4),
+        city: String(formData.telepules || adForm.elements.namedItem("telepules")?.value || "").trim(),
+      };
+      if (!listingAddressComplete(fromForm) && !(loc.ok && listingAddressComplete(getListingAddressFromProfile()))) {
         throw new Error(
-          "Add meg a címed a Beállításokban (Személyes adatok vagy Cégadatok), majd próbáld újra."
+          "Add meg a címed (utca, irányítószám, település), vagy töltsd ki a Beállítások → Cégadatok / Személyes adatok részt."
         );
+      }
+      // A form mezők legyenek a forrás, ha a felhasználó ide írt be.
+      if (listingAddressComplete(fromForm)) {
+        const streetEl = adForm.elements.namedItem("megtekintesi_cim");
+        const postalEl = adForm.elements.namedItem("iranyitoszam");
+        const cityEl = adForm.elements.namedItem("telepules");
+        if (streetEl && !(streetEl instanceof RadioNodeList)) streetEl.value = fromForm.street;
+        if (postalEl && !(postalEl instanceof RadioNodeList)) postalEl.value = fromForm.postalCode;
+        if (cityEl && !(cityEl instanceof RadioNodeList)) cityEl.value = fromForm.city;
+        formData.megtekintesi_cim = fromForm.street;
+        formData.iranyitoszam = fromForm.postalCode;
+        formData.telepules = fromForm.city;
       }
       const items = formApi?.getPreparedPhotoItems?.() ?? [];
       if (!editing && !items.length) {
@@ -218,6 +244,9 @@ const categoryPicker = initCategoryPicker({
       api?.syncKisteherFields?.();
       phoneLanguages?.syncLanguages?.();
       tireSizes?.syncRearTires?.();
+      applyListingAddressFromProfileSync(adForm);
+      applyListingAddressFromProfile(adForm).catch(() => {});
+      window.dispatchEvent(new Event("ad-form-sync-location"));
     } catch (error) {
       console.error("Űrlap indítás hiba:", error);
     }

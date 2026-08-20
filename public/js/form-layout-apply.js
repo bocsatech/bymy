@@ -155,6 +155,14 @@ function hideLayoutShellCards(form) {
     if (!canvas?.querySelector(".ad-layout-item:not(.ad-layout-hidden)")) return;
     panel.querySelectorAll(":scope > .card").forEach((card) => {
       if (card.id === "success-panel") return;
+      // Ne rejtsük el, ha a címblokk még a kártyában van (nem került a canvasra).
+      if (
+        card.querySelector(
+          ".field-stack--location, .ad-location-fields, #megtekintesi_cim, #telepules, #iranyitoszam"
+        )
+      ) {
+        return;
+      }
       card.style.display = "none";
     });
   });
@@ -214,6 +222,7 @@ async function applyAdFormLayout() {
     hideLayoutShellCards(form);
     pinExtras(form);
     pinFooter(form);
+    window.dispatchEvent(new Event("ad-form-sync-location"));
   } catch {
     /* alapelrendezés marad */
   }

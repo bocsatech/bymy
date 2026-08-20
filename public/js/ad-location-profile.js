@@ -1,17 +1,21 @@
-import { getProfile } from "./site-auth.js";
+import { getAuthUser, getProfile, loadProfileFromServer } from "./site-auth.js";
 import { inferMegyeFromCity } from "./county-infer.js";
+
+function isBusinessProfile(profile) {
+  const type = String(profile?.accountType || "").trim();
+  return type === "business" || type === "dealer";
+}
 
 export function getListingAddressFromProfile(profile = null) {
   const p = profile ?? getProfile();
-  const isBusiness = p.accountType === "business" || p.accountType === "dealer";
-  if (isBusiness) {
+  if (isBusinessProfile(p)) {
     return {
-      street: String(p.companyStreet || "").trim(),
-      postalCode: String(p.companyPostalCode || "")
+      street: String(p.companyStreet || p.companyAddress || p.street || "").trim(),
+      postalCode: String(p.companyPostalCode || p.postalCode || "")
         .replace(/\D/g, "")
         .slice(0, 4),
-      city: String(p.companyCity || "").trim(),
-      country: String(p.companyCountry || "Magyarország").trim() || "Magyarország",
+      city: String(p.companyCity || p.city || "").trim(),
+      country: String(p.companyCountry || p.country || "Magyarország").trim() || "Magyarország",
     };
   }
   return {
@@ -61,10 +65,61 @@ function setHint(form, message, { isError = false } = {}) {
   hint.classList.toggle("ad-location-hint--error", isError);
 }
 
+/** Profilból van cím → readonly; hiányzik → szerkeszthető, ne ragadjon be. */
+function setLocationEditable(form, editable) {
+  form.querySelectorAll(".ad-location-fields input").forEach((el) => {
+    if (el.type === "hidden") return;
+    if (editable) {
+      el.removeAttribute("readonly");
+      el.removeAttribute("tabindex");
+    } else {
+      el.setAttribute("readonly", "");
+      el.setAttribute("tabindex", "-1");
+    }
+  });
+}
+
+function ensureLocationVisible(form) {
+  const stack = form.querySelector(".field-stack--location");
+  if (!stack) return;
+  stack.classList.remove("ad-layout-hidden");
+  stack.hidden = false;
+  stack.removeAttribute("hidden");
+  stack.style.removeProperty("display");
+  const card = stack.closest(".card");
+  if (card && card.style.display === "none" && !stack.closest(".ad-layout-canvas")) {
+    card.style.removeProperty("display");
+  }
+}
+
+/** E-mail a cég / fiók profilból (ha a mező üres vagy még nem szerkesztett). */
+export function applyContactFromProfile(form, profile = null) {
+  if (!form) return;
+  const p = profile ?? getProfile();
+  const emailField = form.elements.namedItem("email");
+  if (!emailField || emailField instanceof RadioNodeList) return;
+  if (emailField.dataset.userEdited === "1" && String(emailField.value || "").trim()) return;
+  const fromCompany = isBusinessProfile(p)
+    ? String(p.companyEmail || p.companyEmail2 || "").trim()
+    : "";
+  const fromUser = String(getAuthUser()?.email || p.email || "").trim();
+  const next = fromCompany || fromUser;
+  if (next) emailField.value = next;
+}
+
 export async function applyListingAddressFromProfile(form, profile = null) {
   if (!form) return { ok: false, reason: "missing-form" };
 
-  const result = applyListingAddressFromProfileSync(form, profile);
+  let resolved = profile;
+  if (!resolved) {
+    try {
+      resolved = (await loadProfileFromServer()) || getProfile();
+    } catch {
+      resolved = getProfile();
+    }
+  }
+
+  const result = applyListingAddressFromProfileSync(form, resolved);
   const megye = await lookupMegye(result.address.postalCode, result.address.city);
   if (megye) setField(form, "megye", megye);
 
@@ -76,7 +131,7 @@ function updateLocationHint(form, result) {
   if (!listingAddressComplete(result.address)) {
     setHint(
       form,
-      "Add meg a címed a Beállításokban (Személyes adatok vagy Cégadatok), majd térj vissza ide.",
+      "A cím nincs kitöltve a Beállításokban — ide is beírhatod, vagy töltsd ki a Cégadatok / Személyes adatoknál.",
       { isError: true }
     );
     return;
@@ -85,14 +140,14 @@ function updateLocationHint(form, result) {
   if (!megye) {
     setHint(
       form,
-      "A vármegye automatikusan kitöltődik, ha az irányítószám és település helyes a Beállításokban.",
+      "A vármegye automatikusan kitöltődik, ha az irányítószám és település helyes.",
       { isError: false }
     );
     return;
   }
   setHint(
     form,
-    "A Beállításokban megadott cím — módosításhoz nyisd meg a Beállítások → Személyes adatok / Cégadatok részt.",
+    "A Beállításokban megadott cég-/lakcím — módosításhoz: Beállítások → Cégadatok / Személyes adatok.",
     { isError: false }
   );
 }
@@ -102,17 +157,21 @@ export function applyListingAddressFromProfileSync(form, profile = null) {
   if (!form) return { ok: false, reason: "missing-form", address: null };
 
   const address = getListingAddressFromProfile(profile);
-  setField(form, "megtekintesi_cim", address.street);
-  setField(form, "iranyitoszam", address.postalCode);
-  setField(form, "telepules", address.city);
+  if (address.street) setField(form, "megtekintesi_cim", address.street);
+  if (address.postalCode) setField(form, "iranyitoszam", address.postalCode);
+  if (address.city) setField(form, "telepules", address.city);
 
   const countryField = form.querySelector("#megtalalhato_orszag");
-  if (countryField) countryField.value = address.country;
+  if (countryField && address.country) countryField.value = address.country;
 
   const megye = inferMegyeFromCity(address.city, address.postalCode);
-  setField(form, "megye", megye);
+  if (megye) setField(form, "megye", megye);
+
+  applyContactFromProfile(form, profile);
+  ensureLocationVisible(form);
 
   const ok = listingAddressComplete(address);
+  setLocationEditable(form, !ok);
   updateLocationHint(form, { address });
   return { ok, address };
 }
@@ -128,6 +187,16 @@ export function initAdLocationProfile(form) {
 
   window.addEventListener("ad-form-ready", sync);
   window.addEventListener("ad-form-sync-location", sync);
+  window.addEventListener("ad-form-layout-refresh", () => {
+    window.setTimeout(sync, 0);
+    window.setTimeout(sync, 200);
+  });
   window.addEventListener("site-auth-ready", sync);
+  window.addEventListener("bymy-auth-changed", sync);
+
+  form.querySelector("#email")?.addEventListener("input", (event) => {
+    event.currentTarget.dataset.userEdited = "1";
+  });
+
   sync();
 }

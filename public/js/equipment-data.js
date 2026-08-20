@@ -160,3 +160,20 @@ export const KLIM_OPTIONS = [
   "digitális többzónás klíma",
   "hőszivattyús klíma",
 ];
+
+/** Kisteher 3,5 t-ig — Extrák lépés (Klíma select + ezek a pipák). */
+export const KISTEHER_EQUIPMENT_ITEMS = [
+  "állítható kormány",
+  "centrálzár",
+  "elektromos ablak",
+  "elektromos tükör",
+  "fedélzeti komputer",
+  "fűthető tükör",
+  "immobiliser",
+  "könnyűfém felni",
+  "riasztó",
+  "szervokormány",
+  "színezett üveg",
+  "tempomat",
+  "vonóhorog",
+];

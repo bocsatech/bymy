@@ -1,4 +1,4 @@
-import { UZEMANYAG_CATEGORIES, EQUIPMENT_SECTIONS, KLIM_OPTIONS } from "./equipment-data.js";
+import { UZEMANYAG_CATEGORIES, EQUIPMENT_SECTIONS, KLIM_OPTIONS, KISTEHER_EQUIPMENT_ITEMS } from "./equipment-data.js";
 import { EGYEB_INFO_OPTIONS } from "./egyeb-info-data.js";
 import { initVehicleCatalogSelects } from "./vehicle-catalog-client.js";
 import { compressListingPhoto, MAX_LISTING_PHOTOS } from "./listing-photo-compress.js?v=myAds2";
@@ -281,7 +281,32 @@ function renderEgyebInfo() {
 }
 
 function renderEquipment() {
+  if (!equipmentRoot) return;
+  const checked = new Set(
+    [...form.querySelectorAll('input[name="felszereltseg"]:checked')].map((el) => el.value)
+  );
   equipmentRoot.innerHTML = "";
+
+  if (isKisteherAd()) {
+    const block = document.createElement("div");
+    block.className = "equipment-block";
+    block.innerHTML = `<h3>Felszereltség</h3>`;
+    const grid = document.createElement("div");
+    grid.className = "equipment-grid";
+    for (const item of KISTEHER_EQUIPMENT_ITEMS) {
+      const id = `kisteher_${item.replace(/[^a-z0-9]+/gi, "_").toLowerCase()}`;
+      const label = document.createElement("label");
+      label.className = "check";
+      label.innerHTML = `<input type="checkbox" name="felszereltseg" value="${item}" id="${id}" ${
+        checked.has(item) ? "checked" : ""
+      } /> ${item}`;
+      grid.appendChild(label);
+    }
+    block.appendChild(grid);
+    equipmentRoot.appendChild(block);
+    return;
+  }
+
   for (const [key, section] of Object.entries(EQUIPMENT_SECTIONS)) {
     const block = document.createElement("div");
     block.className = "equipment-block";
@@ -292,12 +317,22 @@ function renderEquipment() {
       const id = `${key}_${item.replace(/[^a-z0-9]+/gi, "_").toLowerCase()}`;
       const label = document.createElement("label");
       label.className = "check";
-      label.innerHTML = `<input type="checkbox" name="felszereltseg" value="${item}" id="${id}" /> ${item}`;
+      label.innerHTML = `<input type="checkbox" name="felszereltseg" value="${item}" id="${id}" ${
+        checked.has(item) ? "checked" : ""
+      } /> ${item}`;
       grid.appendChild(label);
     }
     block.appendChild(grid);
     equipmentRoot.appendChild(block);
   }
+}
+
+function syncEgyebInfoVisibility() {
+  const card = egyebInfoRoot?.closest(".card");
+  if (!card) return;
+  const show = !isKisteherAd();
+  card.hidden = !show;
+  card.classList.toggle("hidden", !show);
 }
 
 function applyAutoFill() {
@@ -344,6 +379,8 @@ function syncKisteherFields() {
     el.hidden = !show;
     el.classList.toggle("hidden", !show);
   });
+  syncEgyebInfoVisibility();
+  renderEquipment();
 }
 
 function syncFuelDependentFields() {

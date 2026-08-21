@@ -149,6 +149,14 @@ export function syncIngatlanFormVisibility(form) {
 
   if (!isImmo) {
     removeIngatlanFormFields(form);
+    form.querySelectorAll(".ad-immo-orphan, .immo-hide-vehicle").forEach((el) => {
+      el.classList.remove("ad-immo-orphan", "immo-hide-vehicle");
+      if (!el.classList.contains("ad-layout-hidden")) {
+        el.hidden = false;
+        el.removeAttribute("hidden");
+        el.style.removeProperty("display");
+      }
+    });
     form.querySelectorAll(".field-row--vehicle-year, .field-row--vehicle-ident, .field-row--tipus-egyeb").forEach((el) => {
       el.hidden = false;
       el.removeAttribute("hidden");
@@ -173,9 +181,35 @@ export function syncIngatlanFormVisibility(form) {
     root.style.removeProperty("display");
   }
 
-  form.querySelectorAll(".field-row--vehicle-year, .field-row--vehicle-ident, .field-row--tipus-egyeb").forEach((el) => {
-    el.hidden = true;
-  });
+  form
+    .querySelectorAll(
+      ".field-row--vehicle-top, .field-row--vehicle-year, .field-row--vehicle-ident, .field-row--tipus-egyeb, .field-row--km, .field-row--tech-top, #electric-fields-card, .kisteher-only, #equipment-sections, #egyeb-info-sections"
+    )
+    .forEach((el) => {
+      el.hidden = true;
+      el.classList.add("immo-hide-vehicle");
+      el.style.setProperty("display", "none", "important");
+    });
+
+  for (const id of [
+    "uzemanyag",
+    "gyartasi_ev",
+    "gyartmany",
+    "modell",
+    "kivitel",
+    "km",
+    "hengerurtartalom",
+    "nyari_gumi_szelesseg",
+    "klima",
+    "karpit1",
+    "sebessegvalto",
+  ]) {
+    const card = form.querySelector(`#${id}`)?.closest(".card");
+    if (!card || card.querySelector("#ingatlan-fields") || card.querySelector(".ad-layout-canvas")) continue;
+    card.hidden = true;
+    card.classList.add("immo-hide-vehicle");
+    card.style.setProperty("display", "none", "important");
+  }
 
   const allapot = form.querySelector("#allapot");
   if (allapot && allapot.dataset.immoOptions !== "1") {

@@ -1,4 +1,6 @@
 /** Mentett 12 oszlopos elrendezés — minden mező ugyanazon a lépésrácson. */
+import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=immoPost1";
+
 function cssEscape(value) {
   if (window.CSS?.escape) return window.CSS.escape(value);
   return String(value).replace(/"/g, '\\"');
@@ -43,9 +45,16 @@ function pinExtras(form) {
   const panel = form.querySelector('.step-panel[data-step="3"]');
   if (!panel) return;
   const body = panel.querySelector(".card > .card-body");
+  const hideVehicleExtras = currentLayoutCategory(form) === "ingatlan";
   for (const id of ["equipment-sections", "egyeb-info-sections"]) {
     const el = document.getElementById(id);
     if (!el || !body) continue;
+    if (hideVehicleExtras) {
+      el.hidden = true;
+      el.setAttribute("hidden", "");
+      el.style.setProperty("display", "none", "important");
+      continue;
+    }
     if (el.closest(".ad-layout-canvas, .ad-layout-hidden") || el.parentElement !== body) {
       if (id === "egyeb-info-sections") {
         const other = panel.querySelectorAll(".card > .card-body")[1];
@@ -58,6 +67,75 @@ function pinExtras(form) {
     el.removeAttribute("hidden");
     el.style.removeProperty("display");
   }
+}
+
+/** Ingatlan feladáskor az elrendezésbe nem került autó mezők / sorok / kártyák elrejtése. */
+function hideUnplacedVehicleChrome(form, placed) {
+  form.querySelectorAll(".labeled-field, .field-stack, .md-outlined").forEach((el) => {
+    if (placed.has(el)) return;
+    if (el.classList.contains("ad-layout-item") && !el.classList.contains("ad-layout-hidden")) return;
+    if (el.closest(KEEP_OUT)) return;
+    if (el.closest(".packages, .phone-lang-grid, .photo-list, #equipment-sections, #egyeb-info-sections")) return;
+    if (el.closest("#ingatlan-fields") && el.querySelector?.(".labeled-field, .md-outlined")) return;
+    el.classList.add("ad-layout-hidden", "ad-immo-orphan");
+    el.hidden = true;
+    setRequired(el, false);
+  });
+
+  form.querySelectorAll(".field-row").forEach((row) => {
+    if (row.closest(".ad-layout-canvas")) return;
+    if (row.closest(KEEP_OUT)) return;
+    const hasVisible = [...row.querySelectorAll(".labeled-field, .field-stack, .md-outlined")].some(
+      (el) => !el.hidden && !el.classList.contains("ad-layout-hidden")
+    );
+    if (!hasVisible) {
+      row.hidden = true;
+      row.classList.add("ad-immo-orphan");
+      row.style.setProperty("display", "none", "important");
+    }
+  });
+
+  const immoRoot = form.querySelector("#ingatlan-fields");
+  if (immoRoot) {
+    const leftovers = immoRoot.querySelectorAll(
+      ".labeled-field:not(.ad-layout-hidden):not([hidden]), .md-outlined:not(.ad-layout-hidden):not([hidden])"
+    );
+    if (!leftovers.length) {
+      immoRoot.hidden = true;
+      immoRoot.classList.add("ad-immo-orphan");
+      immoRoot.style.setProperty("display", "none", "important");
+    }
+  }
+
+  form.querySelectorAll(".step-panel .card").forEach((card) => {
+    if (card.id === "success-panel") return;
+    if (card.querySelector(".packages, .phone-lang-grid, .photo-list")) return;
+    if (card.querySelector(".ad-layout-canvas .ad-layout-item:not(.ad-layout-hidden)")) return;
+    const visible = [...card.querySelectorAll("input, select, textarea, .labeled-field, .field-stack, .md-outlined")].some(
+      (el) => {
+        if (el.type === "hidden") return false;
+        if (el.hidden || el.classList.contains("ad-layout-hidden")) return false;
+        if (el.closest(".ad-layout-hidden, .ad-immo-orphan, [hidden]")) return false;
+        return true;
+      }
+    );
+    if (!visible) {
+      card.style.setProperty("display", "none", "important");
+      card.classList.add("ad-immo-orphan");
+      card.hidden = true;
+    }
+  });
+}
+
+function clearImmoOrphans(form) {
+  form.querySelectorAll(".ad-immo-orphan").forEach((el) => {
+    el.classList.remove("ad-immo-orphan");
+    if (!el.classList.contains("ad-layout-hidden")) {
+      el.hidden = false;
+      el.removeAttribute("hidden");
+      el.style.removeProperty("display");
+    }
+  });
 }
 function pinFooter(form) {
   const footer = document.getElementById("footer-actions");
@@ -210,9 +288,12 @@ async function applyAdFormLayout() {
   if (!form) return;
   try {
     const category = currentLayoutCategory(form);
-    // Autó/teher layout: ne legyenek a DOM-ban az ingatlan mezők (különben felülírják a megjelenést).
-    if (category !== "ingatlan") {
+    if (category === "ingatlan") {
+      ensureIngatlanFormFields(form);
+    } else {
+      // Autó/teher: ingatlan mezők ne maradjanak a DOM-ban.
       form.querySelector("#ingatlan-fields")?.remove();
+      clearImmoOrphans(form);
     }
     const res = await fetch(`/api/level1/form-layout?category=${encodeURIComponent(category)}`, {
       credentials: "same-origin",
@@ -221,9 +302,15 @@ async function applyAdFormLayout() {
     if (!res.ok) return;
     const data = await res.json();
     const layout = data.layout;
-    if (!layout?.live && Number(layout?.version) < 2) return;
+    if (!layout?.live && Number(layout?.version) < 2) {
+      if (category === "ingatlan") hideVehicleChromeWithoutLayout(form);
+      return;
+    }
     const cells = layout?.cells;
-    if (!Array.isArray(cells) || !cells.length) return;
+    if (!Array.isArray(cells) || !cells.length) {
+      if (category === "ingatlan") hideVehicleChromeWithoutLayout(form);
+      return;
+    }
     const placed = new Set();
     for (const cell of cells) {
       // Autó layoutban ne helyezzünk el ingatlan-only mezőket, ha mégis a listában lennének.
@@ -263,6 +350,61 @@ async function applyAdFormLayout() {
       ) {
         continue;
       }
+      // Ingatlan layout: ne helyezzünk el jármű-only mezőket, ha valahogy a listában vannak.
+      if (
+        category === "ingatlan" &&
+        [
+          "gyartasi_ev",
+          "gyartasi_honap",
+          "forgalomba_helyezes_ev",
+          "forgalomba_helyezes_honap",
+          "muszaki_ev",
+          "muszaki_honap",
+          "gyartmany",
+          "modell",
+          "egyeb_modell",
+          "tipus",
+          "egyeb_tipus",
+          "kivitel",
+          "ajtok",
+          "szemelyek",
+          "okmany_jelleg",
+          "km",
+          "alvazszam",
+          "rendszam",
+          "tulajdonosok_szama",
+          "uzemanyag",
+          "hengerurtartalom",
+          "teljesitmeny_kw",
+          "teljesitmeny_le",
+          "fogyasztas_varosi",
+          "fogyasztas_orszaguti",
+          "fogyasztas_kombinalt",
+          "sebessegvalto",
+          "hajtas",
+          "sajat_tomeg",
+          "ossztomeg",
+          "karpit1",
+          "karpit2",
+          "szin",
+          "tetto",
+          "csomagtarto",
+          "akkumulator_kwh",
+          "hatotav",
+          "tolto_csatlakozas",
+          "nyari_gumi_szelesseg",
+          "nyari_gumi_magassag",
+          "nyari_gumi_atmero",
+          "teli_gumi_szelesseg",
+          "teli_gumi_magassag",
+          "teli_gumi_atmero",
+          "klima",
+          "nem_dohanyzo",
+          "holgy_tulajdonos",
+        ].includes(cell.field_key)
+      ) {
+        continue;
+      }
       const wrap = wrapFor(form, cell.field_key);
       if (!wrap || placed.has(wrap)) continue;
       if (wrap.closest("#ingatlan-fields") && category !== "ingatlan") continue;
@@ -274,7 +416,7 @@ async function applyAdFormLayout() {
         setRequired(wrap, false);
         continue;
       }
-      wrap.classList.remove("ad-layout-hidden");
+      wrap.classList.remove("ad-layout-hidden", "ad-immo-orphan");
       setRequired(wrap, true);
       const targetStep = isLocation ? 5 : clamp(cell.step || 1, 1, 5);
       const canvas = canvasForStep(form, targetStep);
@@ -282,6 +424,9 @@ async function applyAdFormLayout() {
       if (wrap.closest(KEEP_OUT) || wrap.querySelector(KEEP_OUT)) continue;
       canvas.appendChild(wrap);
       placeWrap(wrap, cell);
+    }
+    if (category === "ingatlan") {
+      hideUnplacedVehicleChrome(form, placed);
     }
     pruneEmptyCards(form);
     compactCanvasRows(form);
@@ -292,6 +437,47 @@ async function applyAdFormLayout() {
     window.dispatchEvent(new Event("ad-form-sync-location"));
   } catch (error) {
     console.warn("Ad form layout apply:", error);
+  }
+}
+
+/** Layout nélküli fallback: ingatlan feladáskor rejtsd el a járműblokkot. */
+function hideVehicleChromeWithoutLayout(form) {
+  const selectors = [
+    ".field-row--vehicle-top",
+    ".field-row--vehicle-year",
+    ".field-row--vehicle-ident",
+    ".field-row--tipus-egyeb",
+    ".field-row--km",
+    ".field-row--tech-top",
+    "#electric-fields-card",
+    ".kisteher-only",
+    "#equipment-sections",
+    "#egyeb-info-sections",
+  ];
+  for (const sel of selectors) {
+    form.querySelectorAll(sel).forEach((el) => {
+      el.hidden = true;
+      el.classList.add("ad-immo-orphan");
+      el.style.setProperty("display", "none", "important");
+    });
+  }
+  for (const id of [
+    "uzemanyag",
+    "gyartasi_ev",
+    "gyartmany",
+    "modell",
+    "kivitel",
+    "km",
+    "hengerurtartalom",
+    "nyari_gumi_szelesseg",
+    "klima",
+    "karpit1",
+  ]) {
+    const card = form.querySelector(`#${id}`)?.closest(".card");
+    if (!card || card.querySelector("#ingatlan-fields")) continue;
+    card.hidden = true;
+    card.classList.add("ad-immo-orphan");
+    card.style.setProperty("display", "none", "important");
   }
 }
 

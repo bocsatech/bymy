@@ -111,6 +111,57 @@ body[data-site-page="ingatlan"] .immo-search-panel,
   -webkit-overflow-scrolling: touch;
 }
 
+/* Ár min/max: zárt trigger + lenyíló lista, scrollbar nélkül */
+.immo-wheel-wrap--menu {
+  position: relative;
+}
+
+.immo-wheel-trigger {
+  appearance: none;
+  width: 100%;
+  box-sizing: border-box;
+  text-align: left;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #fff;
+  color: #0f172a;
+  font: inherit;
+  font-size: 0.98rem;
+  padding: 0.7rem 2.1rem 0.7rem 0.85rem;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%2364748b' d='M1.2 1.2L6 6l4.8-4.8'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.85rem center;
+}
+
+.immo-wheel-wrap--menu.is-open .immo-wheel-trigger {
+  border-color: #94a3b8;
+}
+
+.immo-wheel--menu {
+  position: absolute;
+  z-index: 20;
+  left: 0;
+  right: 0;
+  top: calc(100% + 0.25rem);
+  min-height: 0;
+  max-height: 14rem;
+  margin: 0;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12);
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.immo-wheel--menu::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+.immo-wheel--menu[hidden] {
+  display: none !important;
+}
+
 .immo-wheel-opt {
   appearance: none;
   border: 0;
@@ -199,6 +250,13 @@ body[data-site-page="ingatlan"] .immo-search-panel,
   background: #0b1220;
   border-color: #1f2937;
   color: #e5e7eb;
+}
+
+[data-theme="dark"] .immo-wheel-trigger {
+  background-color: #0b1220;
+  border-color: #1f2937;
+  color: #e5e7eb;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%2394a3b8' d='M1.2 1.2L6 6l4.8-4.8'/%3E%3C/svg%3E");
 }
 
 [data-theme="dark"] .immo-wheel-opt.is-active {

@@ -31,7 +31,7 @@ import {
   emeletRank,
   normalizeIngatlanUzletag,
 } from "./ingatlan-fields.js?v=immoWheel1";
-import { fillWheel, initWheel, readWheel, setWheelValue } from "./ingatlan-wheels.js?v=immoWheel1";
+import { fillWheel, initWheel, initMenuWheel, readWheel, setWheelValue } from "./ingatlan-wheels.js?v=immoWheel2";
 import { fetchIngatlanWheelSchema, renderIngatlanSchemaHosts } from "./ingatlan-wheel-schema.js?v=immoWheel1";
 
 const EXACT_KEYS = [
@@ -243,8 +243,10 @@ export async function initIngatlanSearch({ onSearch = () => {} } = {}) {
   );
 
   const millions = priceMillionOptions();
-  fillWheel(form.querySelector('[data-wheel="ar_tol"]'), millions, { emptyLabel: "Min. ár" });
-  fillWheel(form.querySelector('[data-wheel="ar_ig"]'), millions, { emptyLabel: "Max. ár" });
+  const arTol = form.querySelector('[data-wheel="ar_tol"]');
+  const arIg = form.querySelector('[data-wheel="ar_ig"]');
+  fillWheel(arTol, millions, { emptyLabel: "Min. ár" });
+  fillWheel(arIg, millions, { emptyLabel: "Max. ár" });
   fillWheel(form.querySelector('[data-wheel="alapterulet"]'), alapteruletOptions(), { emptyLabel: "Mindegy" });
   fillWheel(form.querySelector('[data-wheel="szobaszam"]'), szobaszamOptions(), { emptyLabel: "Mindegy" });
   fillWheel(form.querySelector('[data-wheel="ingatlan_lakas_tipus"]'), INGATLAN_LAKAS_TIPUS.filter((o) => o.value));
@@ -268,7 +270,12 @@ export async function initIngatlanSearch({ onSearch = () => {} } = {}) {
     fillWheel(form.querySelector(`[data-wheel="${bool.field_key}"]`), IGEN_MINDEGY.filter((o) => o.value));
   }
 
-  form.querySelectorAll("[data-wheel]").forEach(initWheel);
+  initMenuWheel(arTol, { emptyLabel: "Min. ár" });
+  initMenuWheel(arIg, { emptyLabel: "Max. ár" });
+  form.querySelectorAll("[data-wheel]").forEach((wheel) => {
+    if (wheel === arTol || wheel === arIg) return;
+    initWheel(wheel);
+  });
 
   const uzletag = form.querySelector("#immo-uzletag");
   if (uzletag) {

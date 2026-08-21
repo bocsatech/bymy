@@ -27,7 +27,7 @@ import {
   szobaszamOptions,
   normalizeIngatlanUzletag,
 } from "./ingatlan-fields.js?v=immoWheel1";
-import { fillWheel, initWheel, readWheel, setWheelValue } from "./ingatlan-wheels.js?v=immoWheel1";
+import { fillWheel, initWheel, readWheel, setWheelValue } from "./ingatlan-wheels.js?v=immoWheel2";
 import { fetchIngatlanWheelSchema, renderIngatlanSchemaHosts } from "./ingatlan-wheel-schema.js?v=immoWheel1";
 
 function removeIngatlanFormFields(form) {

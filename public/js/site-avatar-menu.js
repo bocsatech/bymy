@@ -20,10 +20,6 @@ function isLoggedIn() {
   return Boolean(getAuthUser()?.email);
 }
 
-function isCompanyAccount(type) {
-  return type === "business" || type === "dealer";
-}
-
 function readPhotos() {
   try {
     const raw = localStorage.getItem(PHOTO_KEY);
@@ -144,12 +140,10 @@ function bindWrap(wrap) {
       return;
     }
 
-    // Céges fiók -> közvetlenül Cégadatok (ne villanjon a fiok szekció).
-    const user = getAuthUser();
-    const section = isCompanyAccount(String(user?.profile?.accountType || "").trim()) ? "cegadatok" : "fiok";
-    const target = `/beallitasok.html?szekcio=${encodeURIComponent(section)}`;
+    // Fiók menü külön oldalon (/fiok.html) — nem Beállítások, nem lenyíló.
+    const target = "/fiok.html";
     const now = `${window.location.pathname}${window.location.search}`;
-    if (now === target) return;
+    if (now === target || window.location.pathname === "/fiok.html") return;
     toggle.dataset.navigating = "1";
     window.location.assign(target);
   });

@@ -113,16 +113,7 @@ export function createHomeGridCard(item) {
       <strong class="home-grid-card-price">${escapeHtml(price)}</strong>
       <h2 class="home-grid-card-title">${escapeHtml(title)}</h2>
     </a>
-    <div class="home-grid-card-actions" data-home-msg-slot hidden>
-      <button type="button" class="home-grid-card-msg" data-home-msg>Üzenet</button>
-    </div>
   `;
-
-  const sellerId = Number(item.user_id ?? item.userId ?? preview.userId ?? 0);
-  card.dataset.sellerId = sellerId > 0 ? String(sellerId) : "";
-  card.dataset.listingTitle = title;
-  card.dataset.listingPrice = String(price);
-  card.dataset.listingMeta = `${year} · ${km} · ${fuel}`;
 
   return card;
 }
@@ -251,38 +242,4 @@ function bindPhotoTrack(track) {
 
 export function initHomeGridCardPhotos(root = document) {
   root.querySelectorAll(".home-grid-card-photo-track.is-multi").forEach(bindPhotoTrack);
-}
-
-export async function initHomeGridCardMessages(root = document) {
-  const { canMessageListing, openListingMessage } = await import("./start-listing-message.js?v=msgLive1");
-  root.querySelectorAll(".home-grid-card").forEach((card) => {
-    const slot = card.querySelector("[data-home-msg-slot]");
-    const btn = card.querySelector("[data-home-msg]");
-    if (!slot || !btn || btn.dataset.bound === "1") return;
-    const sellerId = Number(card.dataset.sellerId || 0);
-    if (!canMessageListing(sellerId)) {
-      slot.hidden = true;
-      return;
-    }
-    slot.hidden = false;
-    btn.dataset.bound = "1";
-    btn.addEventListener("click", async (event) => {
-      event.preventDefault();
-      event.stopPropagation();
-      try {
-        btn.disabled = true;
-        await openListingMessage({
-          listingId: card.dataset.listingId,
-          title: card.dataset.listingTitle,
-          priceLabel: card.dataset.listingPrice,
-          meta: card.dataset.listingMeta,
-          sellerId,
-        });
-      } catch (error) {
-        alert(error.message ?? "Az üzenet indítása sikertelen.");
-      } finally {
-        btn.disabled = false;
-      }
-    });
-  });
 }

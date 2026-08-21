@@ -78,10 +78,10 @@ export function createHomeGridCard(item) {
   card.setAttribute("role", "listitem");
 
   const title = buildDisplayTitle(preview, item);
-  const price = preview.price || "—";
-  const km = preview.km || "—";
+  const price = preview.price || "Ár egyeztetés szerint";
+  const km = preview.km || "Nincs megadva";
   const year = formatSpecYear(preview);
-  const fuel = formatFuelLabel(preview.filter?.uzemanyag);
+  const fuel = formatFuelLabel(preview.filter?.uzemanyag) || "Nincs megadva";
   const photoUrls = collectPhotoUrls(item);
   const multi = photoUrls.length > 1;
   const detailHref = listingDetailHref(item.id);

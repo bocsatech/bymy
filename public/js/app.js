@@ -114,18 +114,8 @@ function registerAbandonPhotoCleanup() {
     if (wizardSubmitted) return;
     const id = getStoredListingId();
     if (!id) return;
-    const token = (() => {
-      try {
-        return localStorage.getItem("bymy-auth-token") || "";
-      } catch {
-        return "";
-      }
-    })();
     fetch(`/api/listings/${id}/photos`, {
       method: "DELETE",
-      headers: {
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      },
       credentials: "same-origin",
       keepalive: true,
     }).catch(() => {});

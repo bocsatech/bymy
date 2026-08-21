@@ -1,17 +1,7 @@
 const LISTING_ID_KEY = "bymy-listing-id";
-const AUTH_TOKEN_KEY = "bymy-auth-token";
 
 function authHeaders() {
-  let token = "";
-  try {
-    token = localStorage.getItem(AUTH_TOKEN_KEY) || "";
-  } catch {
-    token = "";
-  }
-  return {
-    "Content-Type": "application/json",
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-  };
+  return { "Content-Type": "application/json" };
 }
 
 export function getStoredListingId() {
@@ -58,7 +48,7 @@ export async function fetchLatestListing() {
 }
 
 export async function fetchListing(id) {
-  const response = await fetch(`/api/listings/${id}`, { headers: authHeaders() });
+  const response = await fetch(`/api/listings/${id}`, { credentials: "same-origin", headers: authHeaders() });
   const data = await parseJson(response);
   return data.listing ?? null;
 }

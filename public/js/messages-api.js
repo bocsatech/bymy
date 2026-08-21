@@ -3,24 +3,9 @@
  * /api/messages/* (szerver SQLite, később VPS).
  */
 
-const TOKEN_KEY = "bymy-auth-token";
 export const MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024;
 
-function getToken() {
-  try {
-    return localStorage.getItem(TOKEN_KEY) || "";
-  } catch {
-    return "";
-  }
-}
-
 async function messagesFetch(path, { method = "GET", body } = {}) {
-  const token = getToken();
-  if (!token) {
-    const err = new Error("Jelentkezz be az üzenetekhez.");
-    err.code = "not_logged_in";
-    throw err;
-  }
   let response;
   try {
     response = await fetch(path, {
@@ -29,13 +14,17 @@ async function messagesFetch(path, { method = "GET", body } = {}) {
       headers: {
         Accept: "application/json",
         ...(body ? { "Content-Type": "application/json" } : {}),
-        Authorization: `Bearer ${token}`,
       },
       body: body ? JSON.stringify(body) : undefined,
     });
   } catch {
     const err = new Error("A szerver most nem elérhető. Próbáld újra.");
     err.code = "unreachable";
+    throw err;
+  }
+  if (response.status === 401) {
+    const err = new Error("Jelentkezz be az üzenetekhez.");
+    err.code = "not_logged_in";
     throw err;
   }
   const data = await response.json().catch(() => ({}));

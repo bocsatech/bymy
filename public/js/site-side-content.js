@@ -28,9 +28,13 @@ async function fetchPageBlocks(page) {
 async function savePageBlocks(page, payload) {
   const response = await fetch("/api/site-blocks", {
     method: "PUT",
+    credentials: "same-origin",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ page, ...payload }),
   });
+  if (response.status === 401 || response.status === 403) {
+    throw new Error("Csak Bocsatech admin szerkesztheti ezt a tartalmat.");
+  }
   if (!response.ok) throw new Error("Mentés sikertelen.");
   return response.json();
 }
@@ -121,8 +125,26 @@ export async function initSiteSideContent() {
   const saveBtn = document.getElementById("site-side-save");
   const cancelBtn = document.getElementById("site-side-cancel");
   const toolbar = document.getElementById("site-side-toolbar");
+  const bar = document.getElementById("site-content-bar");
 
   if (!document.querySelector("[data-site-side]")) return;
+
+  // Nyilvános szerkesztő csak Bocsatech admin sessionnel
+  let canEdit = false;
+  try {
+    const me = await fetch("/api/level1/me", { credentials: "same-origin" });
+    if (me.ok) {
+      const data = await me.json();
+      canEdit = Boolean(data?.admin);
+    }
+  } catch {
+    canEdit = false;
+  }
+  if (!canEdit) {
+    if (bar) bar.hidden = true;
+    if (editBtn) editBtn.hidden = true;
+    if (toolbar) toolbar.hidden = true;
+  }
 
   let blocks = await fetchPageBlocks(page);
   let editing = false;
@@ -141,10 +163,12 @@ export async function initSiteSideContent() {
       renderCenter(pageData.center, { editing });
     }
     if (toolbar) toolbar.hidden = !editing;
-    if (editBtn) editBtn.hidden = editing;
+    if (editBtn) editBtn.hidden = !canEdit || editing;
   };
 
   renderAll();
+
+  if (!canEdit) return;
 
   editBtn?.addEventListener("click", () => {
     editing = true;

@@ -5,7 +5,6 @@ import {
   initSiteAuth,
 } from "./site-auth.js?v=haImp1";
 
-const TOKEN_KEY = "bymy-auth-token";
 const CAT_STORAGE_KEY = "bymy-hirdetes-category";
 const CAT_STORAGE_VERSION = 2;
 const MODES = {
@@ -28,15 +27,8 @@ const MODES = {
 };
 
 function authHeaders() {
-  let token = "";
-  try {
-    token = localStorage.getItem(TOKEN_KEY) || "";
-  } catch {
-    token = "";
-  }
   return {
     "Content-Type": "application/json",
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
 }
 

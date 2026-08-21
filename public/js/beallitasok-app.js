@@ -55,7 +55,6 @@ const CAT_STORAGE_KEY = "bymy-hirdetes-category";
 const CAT_STORAGE_VERSION = 2;
 const SEARCH_RADIUS_OPTIONS = [5, 10, 15, 20, 30, 50, 75, 100];
 const REC_RADIUS_OPTIONS = [5, 10, 15, 20, 30];
-const AUTH_TOKEN_KEY = "bymy-auth-token";
 const SETTINGS_ACC_IDS = new Set(["searchArea", "password", "notify"]);
 
 let lastLookedUpPostal = "";
@@ -258,15 +257,8 @@ function setSection(section) {
 }
 
 function authHeaders() {
-  let token = "";
-  try {
-    token = localStorage.getItem(AUTH_TOKEN_KEY) || "";
-  } catch {
-    token = "";
-  }
   return {
     "Content-Type": "application/json",
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
 }
 

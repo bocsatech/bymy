@@ -108,11 +108,30 @@ import { saveListingPhotos } from "./lib/listing-photos.mjs";
 import { canManageListing } from "./lib/listing-meta.mjs";
 import { handleMessagesApi, initMessagingSchema } from "./lib/messaging.mjs";
 import { handleLevel1Api } from "./lib/level1-api.mjs";
+import { getLevel1TokenFromRequest, getLevel1AdminBySession } from "./lib/level1.mjs";
+import { safeInternalPath } from "./lib/safe-path.mjs";
+import { rateLimit, clientIp } from "./lib/rate-limit.mjs";
+import { applySecurityHeaders } from "./lib/security-headers.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PUBLIC = join(__dirname, "public");
 const PORT = Number(process.env.PORT ?? 3456);
 const HOST = "127.0.0.1";
+
+function assertAuthRate(req, res, bucket, { limit = 12, windowMs = 15 * 60 * 1000 } = {}) {
+  const ip = clientIp(req);
+  const result = rateLimit(`${bucket}:${ip}`, { limit, windowMs });
+  if (!result.ok) {
+    sendJson(
+      res,
+      429,
+      { error: "Túl sok kísérlet. Próbáld újra később." },
+      { "Retry-After": String(result.retryAfterSec || 60) }
+    );
+    return false;
+  }
+  return true;
+}
 
 function publicBaseUrl(req) {
   const fromEnv = String(process.env.PUBLIC_BASE_URL ?? "").trim().replace(/\/$/, "");
@@ -176,6 +195,7 @@ function parseFormBody(raw) {
 }
 
 function sendRedirect(res, location, headers = {}) {
+  applySecurityHeaders(res);
   res.writeHead(302, { Location: location, ...headers });
   res.end();
 }
@@ -202,6 +222,7 @@ async function handleMediaProxy(req, res) {
 }
 
 function sendJson(res, status, data, headers = {}) {
+  applySecurityHeaders(res);
   res.writeHead(status, {
     "Content-Type": "application/json; charset=utf-8",
     "Cache-Control": "no-store",
@@ -229,6 +250,7 @@ function haImportCorsHeaders(req) {
 }
 
 function serveStatic(path, res) {
+  applySecurityHeaders(res);
   const rel = path === "/" ? "index.html" : path.replace(/^\//, "");
 
   // Hirdetésképek: ~/.autosweb/uploads (túléli a frissítést)
@@ -1214,21 +1236,23 @@ async function handleAuthApi(req, res, pathname) {
     const currentUser = await getUserBySessionToken(token);
 
     if (pathname === "/api/auth/me" && req.method === "GET") {
-      sendJson(res, 200, { user: currentUser, token: currentUser ? token : null });
+      sendJson(res, 200, { user: currentUser });
       return;
     }
 
     if (pathname === "/api/auth/db" && req.method === "GET") {
+      const admin = await getLevel1AdminBySession(getLevel1TokenFromRequest(req));
+      if (!admin) {
+        sendJson(res, 401, { error: "Admin belépés szükséges." });
+        return;
+      }
       sendJson(res, 200, {
         ok: true,
         loggedIn: Boolean(currentUser),
         currentEmail: currentUser?.email || null,
-        currentProfile: currentUser?.profile || null,
         smtpConfigured: isSmtpConfigured(),
-        smtpPath: smtpConfigPath(),
-        oauthPath: oauthConfigPath(),
         oauthProviders: listOAuthProviders(),
-        ...(await inspectWebUsersDb()),
+        backend: isSupabaseBackend() ? "supabase" : "sqlite",
       });
       return;
     }
@@ -1241,20 +1265,20 @@ async function handleAuthApi(req, res, pathname) {
       }
       sendJson(res, 200, {
         providers: listOAuthProviders(),
-        configPath: oauthConfigPath(),
-        publicBaseUrl: loadOAuthConfig()?.publicBaseUrl || `http://${HOST}:${PORT}`,
       });
       return;
     }
 
     const oauthStartMatch = pathname.match(/^\/api\/auth\/oauth\/start\/(google|apple|facebook)$/);
     if (oauthStartMatch && req.method === "GET") {
+      if (!assertAuthRate(req, res, "oauth-start", { limit: 30, windowMs: 15 * 60 * 1000 })) return;
       const provider = oauthStartMatch[1];
       const urlObj = new URL(req.url ?? "", `http://${HOST}:${PORT}`);
       const mobile = urlObj.searchParams.get("mobile") === "1";
+      const rawNext = urlObj.searchParams.get("next") || "/hirdetesfeladas.html";
       const next = mobile
         ? IOS_OAUTH_CALLBACK
-        : urlObj.searchParams.get("next") || "/hirdetesfeladas.html";
+        : safeInternalPath(rawNext, "/hirdetesfeladas.html");
       try {
         const accountType = urlObj.searchParams.get("accountType") || "";
         const state = createOAuthState(provider, next, undefined, accountType);
@@ -1332,7 +1356,7 @@ async function handleAuthApi(req, res, pathname) {
             "Set-Cookie": sessionCookieHeader(session.token, session.expires),
           });
         } else {
-          const nextPath = stateInfo.next.startsWith("/") ? stateInfo.next : "/hirdetesfeladas.html";
+          const nextPath = safeInternalPath(stateInfo.next, "/hirdetesfeladas.html");
           sendRedirect(res, nextPath, {
             "Set-Cookie": sessionCookieHeader(session.token, session.expires),
           });
@@ -1357,6 +1381,7 @@ async function handleAuthApi(req, res, pathname) {
     }
 
     if (pathname === "/api/auth/register" && req.method === "POST") {
+      if (!assertAuthRate(req, res, "register", { limit: 8, windowMs: 60 * 60 * 1000 })) return;
       const body = await readBody(req);
       const registered = await registerUser(
         body.email,
@@ -1424,6 +1449,7 @@ async function handleAuthApi(req, res, pathname) {
     }
 
     if (pathname === "/api/auth/resend-activation" && req.method === "POST") {
+      if (!assertAuthRate(req, res, "resend-activation", { limit: 5, windowMs: 60 * 60 * 1000 })) return;
       const body = await readBody(req);
       const created = await createActivationForEmail(body.email);
       let mail;
@@ -1446,8 +1472,22 @@ async function handleAuthApi(req, res, pathname) {
     }
 
     if (pathname === "/api/auth/login" && req.method === "POST") {
+      if (!assertAuthRate(req, res, "login", { limit: 15, windowMs: 15 * 60 * 1000 })) return;
       const body = await readBody(req);
       try {
+        const emailKey = String(body.email ?? "").trim().toLowerCase();
+        if (emailKey) {
+          const emailRl = rateLimit(`login-email:${emailKey}`, { limit: 10, windowMs: 15 * 60 * 1000 });
+          if (!emailRl.ok) {
+            sendJson(
+              res,
+              429,
+              { error: "Túl sok sikertelen kísérlet. Próbáld újra később." },
+              { "Retry-After": String(emailRl.retryAfterSec || 60) }
+            );
+            return;
+          }
+        }
         const skipActivation = isSupabaseBackend() && !isSmtpConfigured();
         const { user, session } = await loginUser(body.email, body.password, { skipActivationCheck: skipActivation });
         sendJson(
@@ -1497,7 +1537,6 @@ async function handleAuthApi(req, res, pathname) {
         user: currentUser,
         profile: currentUser.profile,
         displayName: currentUser.displayName,
-        token,
       });
       return;
     }
@@ -1510,7 +1549,7 @@ async function handleAuthApi(req, res, pathname) {
       const body = await readBody(req);
       const avatarDataUrl = String(body.avatarDataUrl ?? "").trim();
       const user = await mergeUserProfileJson(currentUser.id, { avatarDataUrl });
-      sendJson(res, 200, { ok: true, user, token });
+      sendJson(res, 200, { ok: true, user });
       return;
     }
 
@@ -1682,6 +1721,11 @@ export async function handleHttpRequest(req, res) {
   }
 
   if (pathname === "/api/site-blocks" && req.method === "PUT") {
+    const admin = await getLevel1AdminBySession(getLevel1TokenFromRequest(req));
+    if (!admin) {
+      sendJson(res, 401, { error: "Admin belépés szükséges (Bocsatech)." });
+      return;
+    }
     let body;
     try {
       body = await readBody(req);
@@ -1704,10 +1748,9 @@ export async function handleHttpRequest(req, res) {
   }
 
   if (pathname === "/api/site-hero" && req.method === "PUT") {
-    const token = getSessionTokenFromRequest(req);
-    const currentUser = await getUserBySessionToken(token);
-    if (!currentUser) {
-      sendJson(res, 401, { error: "Nem vagy bejelentkezve." });
+    const admin = await getLevel1AdminBySession(getLevel1TokenFromRequest(req));
+    if (!admin) {
+      sendJson(res, 401, { error: "Admin belépés szükséges (Bocsatech)." });
       return;
     }
     let body;
@@ -1728,10 +1771,9 @@ export async function handleHttpRequest(req, res) {
   }
 
   if (pathname === "/api/site-hero/upload" && req.method === "POST") {
-    const token = getSessionTokenFromRequest(req);
-    const currentUser = await getUserBySessionToken(token);
-    if (!currentUser) {
-      sendJson(res, 401, { error: "Nem vagy bejelentkezve." });
+    const admin = await getLevel1AdminBySession(getLevel1TokenFromRequest(req));
+    if (!admin) {
+      sendJson(res, 401, { error: "Admin belépés szükséges (Bocsatech)." });
       return;
     }
     let body;

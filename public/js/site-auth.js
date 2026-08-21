@@ -1,4 +1,6 @@
 /** Régi autosweb-* localStorage kulcsok átvezetése bymy-*-ra (adatvesztés nélkül). */
+import { safeInternalPath } from "./safe-path.js?v=sec1";
+
 function migrateLegacyAutoswebStorage() {
   try {
     const keys = [];
@@ -21,49 +23,39 @@ migrateLegacyAutoswebStorage();
 
 const AUTH_KEY = "bymy-auth-user";
 const TOKEN_KEY = "bymy-auth-token";
-const LEGACY_USERS_KEY = "bymy-auth-users";
 const PROFILE_BACKUP_KEY = "bymy-profile-backup";
 
-function getStoredToken() {
+/** Token ne legyen localStorage-ban (XSS). Cookie HttpOnly; Bearer csak memóriában (mobil). */
+let memoryToken = "";
+
+function clearLegacyTokenStorage() {
   try {
-    return localStorage.getItem(TOKEN_KEY) || "";
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem("autosweb-auth-token");
   } catch {
-    return "";
+    /* ignore */
   }
+}
+
+clearLegacyTokenStorage();
+
+function getStoredToken() {
+  return memoryToken || "";
 }
 
 function setStoredToken(token) {
-  try {
-    if (token) localStorage.setItem(TOKEN_KEY, token);
-    else localStorage.removeItem(TOKEN_KEY);
-  } catch {
-    /* ignore */
-  }
+  memoryToken = token ? String(token) : "";
+  clearLegacyTokenStorage();
 }
 
-function backupProfileLocally(email, profile) {
-  if (!email || !profile?.firstName) return;
+function clearSensitiveLocalData() {
+  clearLegacyTokenStorage();
   try {
-    localStorage.setItem(
-      PROFILE_BACKUP_KEY,
-      JSON.stringify({ email, profile, savedAt: Date.now() })
-    );
+    localStorage.removeItem(PROFILE_BACKUP_KEY);
+    localStorage.removeItem("autosweb-profile-backup");
   } catch {
     /* ignore */
   }
-}
-
-function readLocalProfileBackup(email) {
-  if (!email) return null;
-  try {
-    const raw = localStorage.getItem(PROFILE_BACKUP_KEY);
-    if (!raw) return null;
-    const data = JSON.parse(raw);
-    if (data?.email === email && data?.profile?.firstName) return data.profile;
-  } catch {
-    /* ignore */
-  }
-  return null;
 }
 
 function setCachedUser(user) {
@@ -83,6 +75,7 @@ function setCachedUser(user) {
 }
 
 function rememberAuth(data) {
+  // Token csak memóriában (mobil Bearer); web cookie-t használ.
   if (data?.token) setStoredToken(data.token);
   return setCachedUser(data?.user ?? null);
 }
@@ -119,6 +112,14 @@ async function authFetch(url, options = {}) {
   } catch {
     data = {};
   }
+  if (response.status === 401) {
+    setStoredToken("");
+    sessionStorage.removeItem(AUTH_KEY);
+    clearSensitiveLocalData();
+    const err = new Error(data.error || "Nem vagy bejelentkezve.");
+    err.status = 401;
+    throw err;
+  }
   if (!response.ok) {
     const looksLikeAuthJson =
       Object.prototype.hasOwnProperty.call(data, "user") ||
@@ -144,12 +145,18 @@ export async function refreshAuthSession() {
     if (!data.user?.email) {
       setStoredToken("");
       sessionStorage.removeItem(AUTH_KEY);
+      clearSensitiveLocalData();
       return null;
     }
     return rememberAuth(data);
-  } catch {
-    const cached = getAuthUser();
-    if (cached?.email) return cached;
+  } catch (error) {
+    if (error?.status === 401) {
+      setStoredToken("");
+      sessionStorage.removeItem(AUTH_KEY);
+      clearSensitiveLocalData();
+      return null;
+    }
+    // Hálózati hiba: cache csak megjelenítésre, jogosultságot nem ad
     return null;
   }
 }
@@ -167,41 +174,7 @@ export async function loadProfileFromServer() {
     });
   }
   const user = getAuthUser();
-  const profileReady = Boolean(
-    data.profile?.firstName ||
-      ((data.profile?.accountType === "business" || data.profile?.accountType === "dealer") &&
-        (data.profile?.company || data.profile?.companyStreet || data.profile?.companyTaxId))
-  );
-  if (user && !profileReady) {
-    await maybeRestoreProfile(user);
-    return getProfile();
-  }
-  if (data.profile?.firstName && user?.email) {
-    backupProfileLocally(user.email, data.profile);
-  }
   return data.profile ?? getProfile();
-}
-
-async function maybeRestoreProfile(user) {
-  if (!user?.email || user.profile?.firstName) return;
-  const backup = readLocalProfileBackup(user.email);
-  if (backup?.firstName && backup?.lastName) {
-    try {
-      await saveProfile(backup);
-      return;
-    } catch {
-      /* try legacy next */
-    }
-  }
-  try {
-    const legacy = JSON.parse(localStorage.getItem(LEGACY_USERS_KEY) || "{}");
-    const profile = legacy[user.email]?.profile;
-    if (profile?.firstName && profile?.lastName) {
-      await saveProfile(profile);
-    }
-  } catch {
-    /* ignore */
-  }
 }
 
 export async function register(email, password, passwordConfirm, accountType) {
@@ -238,8 +211,8 @@ export async function login(email, password) {
     method: "POST",
     body: JSON.stringify({ email, password }),
   });
-  const user = rememberAuth(data);
-  await maybeRestoreProfile(user);
+  rememberAuth(data);
+  clearSensitiveLocalData();
   return getAuthUser();
 }
 
@@ -251,6 +224,7 @@ export async function logout() {
   }
   sessionStorage.removeItem(AUTH_KEY);
   setStoredToken("");
+  clearSensitiveLocalData();
 }
 
 export async function changePassword(currentPassword, newPassword, newPasswordConfirm) {
@@ -295,11 +269,7 @@ export async function deleteAccount() {
   await authFetch("/api/auth/account", { method: "DELETE" });
   sessionStorage.removeItem(AUTH_KEY);
   setStoredToken("");
-  try {
-    localStorage.removeItem(PROFILE_BACKUP_KEY);
-  } catch {
-    /* ignore */
-  }
+  clearSensitiveLocalData();
 }
 
 const EMPTY_PROFILE = {
@@ -367,8 +337,6 @@ export async function saveProfile(profile) {
   if (!profileSaveLooksOk(data.profile)) {
     throw new Error("A mentés nem sikerült — próbáld újra belépés után.");
   }
-  const email = getAuthUser()?.email || data.user?.email;
-  if (data.profile?.firstName) backupProfileLocally(email, data.profile);
 
   // Újraolvasás — ha a szerver üresen adná vissza, azonnal jelezzük.
   try {
@@ -384,7 +352,8 @@ export async function saveProfile(profile) {
 }
 
 export function loginUrl(nextPath = "/hirdetesfeladas.html") {
-  return `/belepes.html?next=${encodeURIComponent(nextPath)}`;
+  const safe = safeInternalPath(nextPath, "/hirdetesfeladas.html");
+  return `/belepes.html?next=${encodeURIComponent(safe)}`;
 }
 
 function firstNameFromUser(user) {
@@ -626,7 +595,7 @@ export function initLoginPage() {
   if (!form) return;
 
   const params = new URLSearchParams(window.location.search);
-  const next = params.get("next") || "/";
+  const next = safeInternalPath(params.get("next") || "/", "/");
   const oauthError = params.get("oauth_error");
   const okEl = document.getElementById("login-ok");
   if (oauthError && errorEl) {
@@ -639,7 +608,7 @@ export function initLoginPage() {
   }
 
   refreshAuthSession().then((user) => {
-    if (user?.email) window.location.replace(next.startsWith("/") ? next : "/");
+    if (user?.email) window.location.replace(next);
   });
 
   initOAuthButtons({ next });
@@ -656,10 +625,16 @@ export function initLoginPage() {
       errorEl.hidden = false;
       let msg = error.message ?? "Sikertelen belépés.";
       if (String(msg).includes("aktiváld") || String(msg).includes("aktivál")) {
-        msg =
-          `Előbb nyisd meg az aktiváló emailt (a megnyitás aktivál) — nézd a spam mappát is.` +
-          ` — <a href="/aktivalas.html?email=${encodeURIComponent(String(email || ""))}">Aktiváló email újraküldése</a>`;
-        errorEl.innerHTML = msg;
+        errorEl.textContent = "";
+        errorEl.append(
+          document.createTextNode(
+            "Előbb nyisd meg az aktiváló emailt (a megnyitás aktivál) — nézd a spam mappát is. "
+          )
+        );
+        const a = document.createElement("a");
+        a.href = `/aktivalas.html?email=${encodeURIComponent(String(email || ""))}`;
+        a.textContent = "Aktiváló email újraküldése";
+        errorEl.appendChild(a);
       } else {
         errorEl.textContent = msg;
       }
@@ -692,10 +667,11 @@ export async function initOAuthButtons({
     const id = btn.getAttribute("data-oauth-provider");
     const info = byId.get(id);
     const enabled = Boolean(info?.enabled);
+    btn.hidden = !enabled;
     btn.disabled = !enabled;
-    btn.title = enabled ? `Belépés ${info.label}-lal` : `${info?.label || id} jelenleg nem elérhető`;
+    btn.title = enabled ? `Belépés ${info.label}-lal` : "";
+    if (!enabled) continue;
     btn.addEventListener("click", () => {
-      if (!enabled) return;
       let accountType = "";
       if (typeof getAccountType === "function") {
         accountType = String(getAccountType() || "").trim();
@@ -704,7 +680,8 @@ export async function initOAuthButtons({
         if (typeof onMissingAccountType === "function") onMissingAccountType();
         return;
       }
-      const params = new URLSearchParams({ next });
+      const safeNext = safeInternalPath(next, "/hirdetesfeladas.html");
+      const params = new URLSearchParams({ next: safeNext });
       if (accountType === "private" || accountType === "business") {
         params.set("accountType", accountType);
       }
@@ -713,8 +690,9 @@ export async function initOAuthButtons({
   }
 
   if (hint) {
-    hint.hidden = true;
-    hint.textContent = "";
+    const anyEnabled = providers.some((p) => p.enabled);
+    hint.hidden = anyEnabled;
+    hint.textContent = anyEnabled ? "" : "Social belépés jelenleg nem elérhető.";
   }
 }
 
@@ -752,9 +730,28 @@ export function initActivatePage() {
     try {
       const result = await resendActivation(email);
       if (statusEl) {
-        statusEl.innerHTML = result.activationLink
-          ? `${result.message}<br/><a href="${result.activationLink}">Aktiváló link</a>`
-          : result.message || "Elküldve.";
+        statusEl.textContent = "";
+        statusEl.appendChild(document.createTextNode(result.message || "Elküldve."));
+        const link = String(result.activationLink || "").trim();
+        if (link && safeInternalPath(new URL(link, window.location.origin).pathname) !== "/") {
+          // Only show link if same-origin relative activation path
+        }
+        if (link) {
+          try {
+            const u = new URL(link, window.location.origin);
+            const sameOrigin = u.origin === window.location.origin;
+            const pathOk = safeInternalPath(u.pathname + u.search, "") === u.pathname + u.search;
+            if (sameOrigin && pathOk && u.pathname.includes("aktivalas")) {
+              statusEl.appendChild(document.createElement("br"));
+              const a = document.createElement("a");
+              a.href = u.pathname + u.search;
+              a.textContent = "Aktiváló link";
+              statusEl.appendChild(a);
+            }
+          } catch {
+            /* ignore unsafe link */
+          }
+        }
       }
     } catch (error) {
       if (statusEl) statusEl.textContent = error.message ?? "Küldés sikertelen.";

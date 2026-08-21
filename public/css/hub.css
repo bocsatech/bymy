@@ -1109,6 +1109,19 @@ body.hub-page--feed {
   line-height: 1.35;
 }
 
+.hf-empty {
+  margin: 0 0 0.75rem;
+  padding: 0 1.25rem;
+  font-size: 0.92rem;
+  color: #6b7280;
+  line-height: 1.45;
+}
+
+.hf-empty a {
+  color: inherit;
+  font-weight: 650;
+}
+
 .hf-card--listing .hf-card-media img {
   width: 100%;
   height: 100%;

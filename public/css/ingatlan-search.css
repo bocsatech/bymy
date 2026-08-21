@@ -310,3 +310,149 @@ input.immo-wheel-custom.immo-wheel-trigger {
   border-color: #374151;
   color: #e5e7eb;
 }
+
+/* —— Mobil —— */
+@media (max-width: 720px) {
+  body[data-site-page="ingatlan"] .immo-search-hero,
+  .immo-search-hero {
+    padding: 0.2rem 0.65rem 0.85rem;
+    margin-bottom: 0.75rem;
+  }
+
+  body[data-site-page="ingatlan"] .immo-search-panel,
+  .immo-search-panel {
+    padding: 1rem 0.85rem 1.15rem;
+    border-radius: 14px;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05);
+  }
+
+  .immo-search-title {
+    font-size: 1.2rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .immo-search-form {
+    gap: 0.7rem;
+  }
+
+  /* Admin 12-oszlopos spanok helyett 2 oszlop (szűk képernyőn olvasható) */
+  .immo-schema-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-auto-rows: auto !important;
+    gap: 0.65rem 0.5rem;
+  }
+
+  .immo-schema-cell {
+    grid-column: auto !important;
+    grid-row: auto !important;
+  }
+
+  .immo-schema-cell:has(> .immo-field),
+  .immo-schema-cell:has(.immo-control[type="text"]) {
+    grid-column: 1 / -1 !important;
+  }
+
+  .immo-schema-spacer {
+    display: none;
+  }
+
+  .immo-label {
+    font-size: 0.78rem;
+  }
+
+  .immo-control,
+  .immo-wheel-trigger {
+    min-height: 3rem;
+    height: 3rem;
+    font-size: 1rem; /* iOS ne zoomoljon focusra */
+    border-radius: 10px;
+  }
+
+  .immo-wheel--menu {
+    position: fixed;
+    left: 0.65rem;
+    right: 0.65rem;
+    top: auto;
+    bottom: max(0.65rem, env(safe-area-inset-bottom, 0px));
+    max-height: min(55vh, 22rem);
+    min-height: 0;
+    z-index: 220;
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+    background: #fff;
+    box-shadow: 0 -8px 32px rgba(15, 23, 42, 0.18);
+    padding: 0.45rem;
+  }
+
+  .immo-wheel-opt {
+    min-height: 2.85rem;
+    font-size: 1rem;
+    padding: 0.65rem 0.75rem;
+    border-radius: 10px;
+    text-align: left;
+  }
+
+  .immo-wheel-wrap--multi .immo-wheel-opt.is-active {
+    border-radius: 10px;
+  }
+
+  .immo-submit {
+    min-height: 3.1rem;
+    font-size: 1.05rem;
+    border-radius: 12px;
+  }
+
+  .immo-actions-secondary {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .immo-action {
+    width: 100%;
+    text-align: center;
+    min-height: 2.85rem;
+    box-sizing: border-box;
+  }
+
+  .immo-bool-grid {
+    grid-template-columns: 1fr;
+  }
+
+  body.immo-menu-open {
+    overflow: hidden;
+    touch-action: none;
+  }
+
+  .immo-menu-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 210;
+    background: rgba(15, 23, 42, 0.35);
+    border: 0;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+  }
+}
+
+@media (max-width: 420px) {
+  .immo-schema-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  body[data-site-page="ingatlan"] .home-main {
+    padding-left: 0.45rem;
+    padding-right: 0.45rem;
+  }
+}
+
+@media (max-width: 720px) {
+  [data-theme="dark"] .immo-wheel--menu {
+    background: #0b1220;
+    border-color: #1f2937;
+  }
+
+  [data-theme="dark"] .immo-menu-backdrop {
+    background: rgba(0, 0, 0, 0.55);
+  }
+}

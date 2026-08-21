@@ -511,4 +511,17 @@ body[data-site-page="teherauto"] .auto-search-tabs {
   .auto-search-title {
     font-size: 1.05rem;
   }
+
+  .auto-search-panel .home-qs-control,
+  .auto-search-panel .home-qs-field input.home-qs-control,
+  .auto-search-panel .home-qs-field select.home-qs-control {
+    font-size: 1rem;
+  }
+
+  .auto-search-panel .home-qs-submit,
+  .auto-search-panel button[type="submit"] {
+    min-height: 3rem;
+    font-size: 1.02rem;
+    width: 100%;
+  }
 }

@@ -3,7 +3,7 @@
  * Alapértelmezés megegyezik a szerver defaulttal; élő config: GET /api/level1/ingatlan-wheel-schema
  */
 
-import { escapeHtml, escapeAttr, wheelFieldHtml } from "./ingatlan-wheels.js?v=immoWheel7";
+import { escapeHtml, escapeAttr, wheelFieldHtml } from "./ingatlan-wheels.js?v=mobile1";
 
 export const WHEEL_COLS = 12;
 

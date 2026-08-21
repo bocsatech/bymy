@@ -101,6 +101,36 @@
     transform: none !important;
   }
 
+  /* Hello + vezetéknév — balra, közvetlenül a logo alatt */
+  body.hub-page--feed .mw-app-hello {
+    position: absolute;
+    left: max(0.85rem, env(safe-area-inset-left, 0px));
+    right: calc(var(--mw-avatar) + 1.75rem);
+    top: calc(var(--mw-logo-h) + (var(--mw-logo-gap) - 1.35rem) / 2);
+    margin: 0;
+    padding: 0;
+    z-index: 2;
+    font-family: "DM Sans", system-ui, sans-serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+    color: #111;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    pointer-events: none;
+  }
+
+  body.hub-page--feed .mw-app-hello[hidden] {
+    display: none !important;
+  }
+
+  html[data-theme="dark"] body.hub-page--feed .mw-app-hello {
+    color: #e8eaed;
+  }
+
   body.hub-page--feed .mw-app-avatar {
     position: absolute;
     right: max(0.75rem, env(safe-area-inset-right, 0px));

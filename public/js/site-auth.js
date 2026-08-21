@@ -370,15 +370,21 @@ function firstNameFromUser(user) {
   return local ? local.charAt(0).toUpperCase() + local.slice(1) : "";
 }
 
+function lastNameFromUser(user) {
+  return String(user?.profile?.lastName || "").trim();
+}
+
 function updateHeaderAuthUi() {
   const registerBtns = document.querySelectorAll("[data-auth-register]");
   const loginBtns = document.querySelectorAll("[data-auth-login]");
   const guestBlocks = document.querySelectorAll("[data-auth-guest]");
   const memberBlocks = document.querySelectorAll("[data-auth-member], [data-avatar-menu]");
   const firstNameEls = document.querySelectorAll("span[data-auth-firstname]");
+  const lastNameEls = document.querySelectorAll("[data-auth-lastname]");
   const user = getAuthUser();
   const loggedIn = Boolean(user?.email);
   const firstName = firstNameFromUser(user);
+  const lastName = lastNameFromUser(user);
 
   try {
     document.documentElement.setAttribute("data-auth", loggedIn ? "member" : "guest");
@@ -413,6 +419,10 @@ function updateHeaderAuthUi() {
 
   firstNameEls.forEach((el) => {
     el.textContent = firstName || "";
+  });
+
+  lastNameEls.forEach((el) => {
+    el.textContent = lastName || "";
   });
 
   // Az avatar menü külön script (site-avatar-menu.js) — ne importáld újra (különben dupla listener).

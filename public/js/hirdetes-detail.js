@@ -3,7 +3,7 @@ import { getAuthUser, getDisplayName, getProfile } from "./site-auth.js?v=auth20
 import { startConversation, sendMessage } from "./messages-api.js?v=msgLive1";
 import { canMessageListing, openListingMessage } from "./start-listing-message.js?v=msgLive1";
 import { getParkplatz, addParkplatzItem, removeParkplatzItem } from "./fok-data.js?v=auth20260805localdb9";
-import { listingReturnHref, listingDetailHref, rememberListingOpen } from "./listing-return.js?v=hdView1";
+import { listingReturnHref, listingDetailHref, rememberListingOpen } from "./listing-return.js?v=scrollTop1";
 
 const root = document.getElementById("hd-root");
 const ICON = {

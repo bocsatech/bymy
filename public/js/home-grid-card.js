@@ -1,5 +1,5 @@
 import { escapeHtml, formatListingDisplayTitle } from "./listing-card.js";
-import { listingDetailHref } from "./listing-return.js?v=hdView1";
+import { listingDetailHref } from "./listing-return.js?v=scrollTop1";
 
 function buildCardTitle(preview, item) {
   const raw =

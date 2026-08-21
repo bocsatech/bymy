@@ -67,8 +67,27 @@ export function bindListingOpen(root = document) {
 export function restoreListingReturn() {
   const data = readReturn();
   if (!data?.listingId) return;
+
+  // Csak hirdetésről visszaérkezve állítsuk vissza a scrollt — menüből /auto.html nyitásnál maradjon a lap teteje.
+  let fromDetail = false;
+  try {
+    const ref = document.referrer ? new URL(document.referrer) : null;
+    fromDetail = !!(ref && ref.origin === window.location.origin && /\/hirdetes\.html$/i.test(ref.pathname));
+  } catch {
+    fromDetail = false;
+  }
+  if (!fromDetail) {
+    sessionStorage.removeItem(RETURN_KEY);
+    return;
+  }
+
   const here = currentListHref();
-  if (data.href && data.href !== here) return;
+  if (data.href && data.href !== here) {
+    sessionStorage.removeItem(RETURN_KEY);
+    return;
+  }
+
+  sessionStorage.removeItem(RETURN_KEY);
 
   const card = document.querySelector(`[data-listing-id="${CSS.escape(String(data.listingId))}"]`);
   if (card) {

@@ -5,7 +5,7 @@ import {
   deleteListingFromDb,
 } from "./db-client.js?v=myAds1";
 import { compressListingPhotos } from "./listing-photo-compress.js?v=myAds1";
-import { bindListingOpen, restoreListingReturn } from "./listing-return.js?v=hdView1";
+import { bindListingOpen, restoreListingReturn } from "./listing-return.js?v=scrollTop1";
 
 function escapeHtml(value) {
   return String(value ?? "")

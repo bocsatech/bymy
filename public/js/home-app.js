@@ -18,7 +18,7 @@ import { initHomeUnifiedScroll } from "./home-unified-scroll.js";
 import { initHomeStatsBar } from "./home-stats-bar.js";
 import { buildNearbyFilter, readNearbyPrefs } from "./nearby-search.js?v=nearby1";
 import { getAuthUser } from "./site-auth.js?v=nearby1";
-import { bindListingOpen, restoreListingReturn } from "./listing-return.js?v=hdView1";
+import { bindListingOpen, restoreListingReturn } from "./listing-return.js?v=scrollTop1";
 
 const gridTrack = document.getElementById("home-grid-track");
 const emptyEl = document.getElementById("home-empty");
@@ -176,7 +176,7 @@ async function loadListings() {
   renderListings(allItems);
   updateFilterResultCount();
   statsUi?.refreshActiveCount?.();
-  if (categoryFilter) scrollToListings();
+  // Ne görgessünk a listához betöltéskor — a lap a tetején maradjon (menüből nyitás).
   await applyNearbyFromUrl();
 }
 
@@ -247,6 +247,11 @@ function hasActiveSidebarFilters(filters) {
 
 initHomeUnifiedScroll();
 
+if ("scrollRestoration" in history) {
+  history.scrollRestoration = "manual";
+}
+window.scrollTo(0, 0);
+
 if (PAGE !== "ingatlan") {
   renderHomeCategoryBar(document.getElementById("home-category-bar"));
 }
@@ -316,7 +321,20 @@ import("./site-side-content.js")
   .then((mod) => mod.initSiteSideContent())
   .catch((error) => console.error("Oldalsáv betöltés:", error));
 
-loadListings().catch((error) => {
+loadListings()
+  .then(() => {
+    let fromDetail = false;
+    try {
+      const ref = document.referrer ? new URL(document.referrer) : null;
+      fromDetail = !!(ref && ref.origin === window.location.origin && /\/hirdetes\.html$/i.test(ref.pathname));
+    } catch {
+      fromDetail = false;
+    }
+    if (!fromDetail && !new URLSearchParams(window.location.search).has("nearby")) {
+      window.scrollTo(0, 0);
+    }
+  })
+  .catch((error) => {
   emptyEl.hidden = false;
   emptyEl.textContent = error.message ?? "Nem sikerült betölteni a hirdetéseket.";
 });

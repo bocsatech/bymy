@@ -17,12 +17,21 @@ let tab = "users";
 let layoutCategory = "szemelyauto";
 let lastUsername = "";
 let otpUser = "";
+let otpEmailMasked = "";
 let err = "";
 let info = "";
 let users = [];
 let listings = [];
 let layout = { cells: [], category: "szemelyauto" };
 let editingUser = null;
+
+function otpSentMessage(data) {
+  const to = data.emailMasked ? ` (${data.emailMasked})` : "";
+  if (data.devCode) {
+    return `Helyi mód: a kód ${data.devCode} (SMTP nincs beállítva).`;
+  }
+  return `A kódot elküldtük emailben${to}. Nézd a spam mappát is.`;
+}
 
 function isLayoutTab(value = tab) {
   return String(value).startsWith("layout:");
@@ -74,9 +83,24 @@ const actions = {
         }),
       });
       otpUser = data.username;
-      info = data.devCode
-        ? `Helyi mód: a kód ${data.devCode} (SMTP nincs beállítva).`
-        : "A kódot elküldtük emailben.";
+      otpEmailMasked = data.emailMasked || "";
+      info = otpSentMessage(data);
+      render();
+    } catch (error) {
+      err = error.message;
+      render();
+    }
+  },
+  async resendOtp() {
+    err = "";
+    info = "";
+    try {
+      const data = await api("/api/level1/resend-otp", {
+        method: "POST",
+        body: JSON.stringify({ username: otpUser }),
+      });
+      otpEmailMasked = data.emailMasked || otpEmailMasked;
+      info = otpSentMessage(data);
       render();
     } catch (error) {
       err = error.message;
@@ -92,6 +116,7 @@ const actions = {
       });
       admin = data.admin;
       otpUser = "";
+      otpEmailMasked = "";
       await loadTab();
       render();
     } catch (error) {
@@ -103,6 +128,7 @@ const actions = {
     await api("/api/level1/logout", { method: "POST" });
     admin = null;
     otpUser = "";
+    otpEmailMasked = "";
     render();
   },
   setTab(_, el) {
@@ -225,13 +251,16 @@ function loginView() {
     return `
       <div class="wrap">
         <h1>Bocsatech</h1>
-        <p class="sub">Második tényező: email kód</p>
+        <p class="sub">Második tényező: email kód${otpEmailMasked ? ` → ${esc(otpEmailMasked)}` : ""}</p>
         <form class="card" data-act="otp" style="max-width:420px">
           <label>6 jegyű kód</label>
           <input name="code" inputmode="numeric" maxlength="6" autocomplete="one-time-code" required />
-          <p class="ok">${info}</p>
-          <p class="err">${err}</p>
-          <button class="btn" type="submit">Belépés</button>
+          <p class="ok">${esc(info)}</p>
+          <p class="err">${esc(err)}</p>
+          <div class="row" style="margin-top:1rem">
+            <button class="btn" type="submit">Belépés</button>
+            <button class="btn ghost" type="button" data-act="resendOtp">Kód újraküldése</button>
+          </div>
         </form>
       </div>`;
   }
@@ -244,7 +273,7 @@ function loginView() {
         <input name="username" autocomplete="username" value="${esc(lastUsername)}" required />
         <label>Jelszó</label>
         <input name="password" type="password" autocomplete="current-password" required />
-        <p class="err">${err}</p>
+        <p class="err">${esc(err)}</p>
         <div class="row" style="margin-top:1rem">
           <button class="btn" type="submit">Kód kérése</button>
         </div>

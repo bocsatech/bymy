@@ -99,6 +99,7 @@ body[data-site-page="ingatlan"] .immo-search-panel,
   display: grid;
   gap: 0.3rem;
   min-width: 0;
+  max-width: 100%;
 }
 
 .immo-wheel {
@@ -115,27 +116,37 @@ body[data-site-page="ingatlan"] .immo-search-panel,
   -webkit-overflow-scrolling: touch;
 }
 
-/* Ár min/max: zárt trigger + lenyíló lista, scrollbar nélkül */
+/* Zárt trigger + lenyíló lista; cella nem nő, hosszú szöveg eleje + … */
 .immo-wheel-wrap--menu {
   position: relative;
+  max-width: 100%;
 }
 
 .immo-wheel-trigger {
   appearance: none;
+  display: block;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   box-sizing: border-box;
   text-align: left;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
-  background: #fff;
+  background-color: #fff;
   color: #0f172a;
   font: inherit;
   font-size: 0.98rem;
+  line-height: 1.25;
+  height: 2.75rem;
   padding: 0.7rem 2.1rem 0.7rem 0.85rem;
   cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%2364748b' d='M1.2 1.2L6 6l4.8-4.8'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 0.85rem center;
+  background-size: 12px 8px;
 }
 
 input.immo-wheel-custom.immo-wheel-trigger {

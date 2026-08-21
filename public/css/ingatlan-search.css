@@ -376,12 +376,17 @@ input.immo-wheel-custom.immo-wheel-trigger {
     bottom: max(0.65rem, env(safe-area-inset-bottom, 0px));
     max-height: min(55vh, 22rem);
     min-height: 0;
-    z-index: 220;
+    z-index: 230;
     border-radius: 16px;
     border: 1px solid #e2e8f0;
     background: #fff;
     box-shadow: 0 -8px 32px rgba(15, 23, 42, 0.18);
     padding: 0.45rem;
+  }
+
+  /* body-ra portált lista is látszódjon a backdrop fölött */
+  body > .immo-wheel.immo-wheel--menu {
+    z-index: 230;
   }
 
   .immo-wheel-opt {

@@ -42,9 +42,13 @@ export function fillWheel(root, options, { emptyLabel = "Mindegy", includeEmpty 
     .join("");
 }
 
+function menuWrapFor(wheel) {
+  return wheel?.closest?.(".immo-wheel-wrap") || wheel?._immoMenuHome?.parent || null;
+}
+
 function syncHidden(wheel, want) {
   const name = wheel.getAttribute("data-wheel");
-  const host = wheel.closest(".immo-wheel-wrap") || wheel.parentElement;
+  const host = menuWrapFor(wheel) || wheel.parentElement;
   const hidden =
     host?.querySelector(`input[type="hidden"][name="${name}"]`) ||
     host?.querySelector('input[type="hidden"]') ||
@@ -142,7 +146,7 @@ function parseCustomInput(raw, kind) {
 }
 
 function updateTrigger(wheel) {
-  const wrap = wheel.closest(".immo-wheel-wrap");
+  const wrap = menuWrapFor(wheel);
   if (!wrap) return;
   const emptyLabel = wrap.querySelector(".immo-wheel-trigger")?.dataset.emptyLabel || "Mindegy";
   const multiple = wheel.dataset.multiple === "1";
@@ -221,7 +225,7 @@ export function readWheel(wheel) {
     if (active && active.dataset.value === "") return "";
   }
   const name = wheel.getAttribute("data-wheel");
-  const host = wheel.closest(".immo-wheel-wrap") || wheel.parentElement;
+  const host = menuWrapFor(wheel) || wheel.parentElement;
   const hidden =
     host?.querySelector(`input[type="hidden"][name="${name}"]`) ||
     host?.querySelector('input[type="hidden"]') ||
@@ -252,6 +256,36 @@ function isMobileMenuViewport() {
   return typeof window !== "undefined" && window.matchMedia("(max-width: 720px)").matches;
 }
 
+function parkWheelInWrap(wheel) {
+  const home = wheel._immoMenuHome;
+  if (!home?.parent?.isConnected) return;
+  if (wheel.parentElement === home.parent) return;
+  if (home.next && home.next.parentNode === home.parent) {
+    home.parent.insertBefore(wheel, home.next);
+  } else {
+    home.parent.appendChild(wheel);
+  }
+}
+
+function portalWheelToBody(wheel, wrap) {
+  if (wheel.parentElement === document.body) return;
+  wheel._immoMenuHome = { parent: wrap, next: wheel.nextSibling };
+  document.body.appendChild(wheel);
+}
+
+function closeAllMenuWheels() {
+  document.querySelectorAll(".immo-wheel-wrap--menu.is-open").forEach((openWrap) => {
+    openWrap.classList.remove("is-open");
+    openWrap.querySelector(".immo-wheel-trigger")?.setAttribute("aria-expanded", "false");
+  });
+  document.querySelectorAll(".immo-wheel.immo-wheel--menu").forEach((w) => {
+    if (w.hasAttribute("hidden")) return;
+    w.setAttribute("hidden", "");
+    parkWheelInWrap(w);
+  });
+  hideMenuBackdrop();
+}
+
 function ensureMenuBackdrop() {
   let el = document.querySelector(".immo-menu-backdrop");
   if (el) return el;
@@ -260,14 +294,7 @@ function ensureMenuBackdrop() {
   el.className = "immo-menu-backdrop";
   el.setAttribute("aria-label", "Menü bezárása");
   el.hidden = true;
-  el.addEventListener("click", () => {
-    document.querySelectorAll(".immo-wheel-wrap--menu.is-open").forEach((openWrap) => {
-      openWrap.classList.remove("is-open");
-      openWrap.querySelector(".immo-wheel")?.setAttribute("hidden", "");
-      openWrap.querySelector(".immo-wheel-trigger")?.setAttribute("aria-expanded", "false");
-    });
-    hideMenuBackdrop();
-  });
+  el.addEventListener("click", () => closeAllMenuWheels());
   document.body.appendChild(el);
   return el;
 }
@@ -290,13 +317,9 @@ function ensureOutsideClose() {
   document.documentElement.dataset.immoMenuOutside = "1";
   document.addEventListener("click", (event) => {
     if (event.target.closest?.(".immo-menu-backdrop")) return;
-    document.querySelectorAll(".immo-wheel-wrap--menu.is-open").forEach((openWrap) => {
-      if (openWrap.contains(event.target)) return;
-      openWrap.classList.remove("is-open");
-      openWrap.querySelector(".immo-wheel")?.setAttribute("hidden", "");
-      openWrap.querySelector(".immo-wheel-trigger")?.setAttribute("aria-expanded", "false");
-    });
-    if (!document.querySelector(".immo-wheel-wrap--menu.is-open")) hideMenuBackdrop();
+    if (event.target.closest?.(".immo-wheel--menu")) return;
+    if (event.target.closest?.(".immo-wheel-wrap--menu.is-open")) return;
+    closeAllMenuWheels();
   });
 }
 
@@ -365,6 +388,7 @@ export function initMenuWheel(wheel, { emptyLabel = "Mindegy", multiple = false,
     wrap.classList.remove("is-open");
     wheel.setAttribute("hidden", "");
     trigger.setAttribute("aria-expanded", "false");
+    parkWheelInWrap(wheel);
     if (!document.querySelector(".immo-wheel-wrap--menu.is-open")) hideMenuBackdrop();
   }
 
@@ -372,13 +396,25 @@ export function initMenuWheel(wheel, { emptyLabel = "Mindegy", multiple = false,
     document.querySelectorAll(".immo-wheel-wrap--menu.is-open").forEach((other) => {
       if (other === wrap) return;
       other.classList.remove("is-open");
-      other.querySelector(".immo-wheel")?.setAttribute("hidden", "");
       other.querySelector(".immo-wheel-trigger")?.setAttribute("aria-expanded", "false");
+    });
+    document.querySelectorAll(".immo-wheel.immo-wheel--menu").forEach((w) => {
+      if (w === wheel) return;
+      if (!w.hasAttribute("hidden")) {
+        w.setAttribute("hidden", "");
+        parkWheelInWrap(w);
+      }
     });
     wrap.classList.add("is-open");
     wheel.removeAttribute("hidden");
     trigger.setAttribute("aria-expanded", "true");
-    showMenuBackdrop();
+    if (isMobileMenuViewport()) {
+      portalWheelToBody(wheel, wrap);
+      showMenuBackdrop();
+    } else {
+      parkWheelInWrap(wheel);
+      hideMenuBackdrop();
+    }
   }
 
   trigger.addEventListener("click", (event) => {

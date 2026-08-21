@@ -38,7 +38,7 @@ import {
   readWheelList,
   setWheelValue,
   MULTI_WHEEL_KEYS,
-} from "./ingatlan-wheels.js?v=mobile1";
+} from "./ingatlan-wheels.js?v=mobile2";
 import { fetchIngatlanWheelSchema, renderIngatlanSchemaHosts } from "./ingatlan-wheel-schema.js?v=immoWheel4";
 
 const EXACT_KEYS = [

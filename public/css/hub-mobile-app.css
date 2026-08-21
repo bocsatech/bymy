@@ -48,9 +48,8 @@
     display: none;
   }
 
-  /* —— Felső app sáv: logo egyből a képernyő tetejétől (óra/kamera alá) —— */
+  /* —— Felső app sáv: eredeti arány, csak feljebb tolva (nem széthúzva) —— */
   body.hub-page--feed .mw-app-top {
-    --mw-safe-top: env(safe-area-inset-top, 0px);
     --mw-logo-h: calc(100vw * 415 / 958);
     --mw-logo-gap: 1.5cm;
     --mw-avatar: 2.25rem;
@@ -60,7 +59,7 @@
     background: #fff;
     padding: 0;
     margin: 0;
-    /* Húzd fel a safe-area magasságával — a logo a fizikai teteig ér */
+    /* Csak eltolás felfelé — méret / arány változatlan */
     margin-top: calc(-1 * constant(safe-area-inset-top));
     margin-top: calc(-1 * env(safe-area-inset-top, 0px));
     min-height: calc(var(--mw-logo-h) + var(--mw-logo-gap));
@@ -83,12 +82,8 @@
     width: 100%;
     height: auto;
     aspect-ratio: 958 / 415;
-    object-fit: cover;
-    object-position: center top;
+    object-fit: contain;
     max-width: none;
-    /* A wordmark a sáv tetejétől induljon (ne legyen üres sáv felette) */
-    margin: 0;
-    vertical-align: top;
   }
 
   body.hub-page--feed .mw-app-avatar {

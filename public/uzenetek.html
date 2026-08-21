@@ -10,7 +10,6 @@
           }
           document.documentElement.setAttribute("data-theme", t);
         } catch (e) {}
-                /* Auth fejléc: ne villanjon vendég gomb → profil a modul / API előtt */
         try {
           var raw = sessionStorage.getItem("bymy-auth-user");
           var user = raw ? JSON.parse(raw) : null;
@@ -45,20 +44,17 @@
     </script>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext x='16' y='22' text-anchor='middle' font-size='14' font-family='system-ui,sans-serif' font-weight='700'%3EB%3C/text%3E%3C/svg%3E" type="image/svg+xml" />
-    <meta name="bymy-version" content="loginHome1" />
-    <title>Belépés — Bymy</title>
+    <title>Üzenetek — Bymy</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="/css/style.css?v=auth20260725" />
-    <link rel="stylesheet" href="/css/site-app.css?v=logoTop2" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/css/style.css?v=automax20260720homelist" />
+    <link rel="stylesheet" href="/css/site-app.css?v=msgLive1" />
+    <link rel="stylesheet" href="/css/hub.css?v=msgLive1" />
   </head>
-  <body class="site-app login-page" data-site-page="belepes" data-auth-init="manual">
-    <div class="local-banner">Bymy — belépés a hirdetésfeladáshoz</div>
-
-    <header class="site-header site-app-header">
-      <div class="site-app-header-inner">
+  <body class="site-app site-page mm-messages-open" data-site-page="uzenetek">
+    <header class="hub-header home-header">
+      <div class="hub-header-inner">
         <div class="hub-header-top">
         <div class="hub-header-actions site-header-actions">
           <a class="hub-header-msg" href="/uzenetek.html" data-auth-member hidden>
@@ -80,69 +76,32 @@
             </button>
             <div class="site-avatar-dropdown site-avatar-dropdown--fiok" data-avatar-dropdown role="menu" hidden></div>
           </div>
-          <a class="hub-btn hub-btn--post" href="/hirdetesfeladas.html" data-auth-guard>+ Hirdetésfeladás</a>
+          <a class="hub-btn hub-btn--post" href="/hirdetesfeladas.html?vertical=auto&subtype=szemelyauto&start=1" data-auth-guard>+ Hirdetésfeladás</a>
           <button type="button" class="hub-theme-toggle" data-theme-toggle aria-label="Színmód" title="Színmód"></button>
         </div>
         </div>
         <div class="hub-nav-band">
-          <a class="site-app-logo" href="/" aria-label="Bymy">
+          <a class="hub-logo" href="/" aria-label="Bymy">
             <img class="bymy-logo-img bymy-logo-img--nav" src="/images/bymy-logo.png?v=logoUpload1" alt="Bymy.hu" width="190" height="48" decoding="async" />
           </a>
-        <nav class="import-nav site-app-nav" aria-label="Főmenü">
-          <a class="import-nav-link" href="/">Kezdőlap</a>
-          <a class="import-nav-link" href="/auto.html">Autó</a>
-          <a class="import-nav-link" href="/teherauto.html">Teherautó</a>
-          <a class="import-nav-link" href="/ingatlan.html">Ingatlan</a>
-          <a class="import-nav-link" href="/ajanlasok.html">Ajánlások</a>
+        <nav class="hub-nav" aria-label="Főmenü">
+          <a class="hub-nav-link" href="/">Kezdőlap</a>
+          <a class="hub-nav-link active" href="/auto.html">Autó</a>
+          <a class="hub-nav-link" href="/teherauto.html">Teherautó</a>
+          <a class="hub-nav-link" href="/ingatlan.html">Ingatlan</a>
+          <a class="hub-nav-link" href="/ajanlasok.html">Ajánlások</a>
         </nav>
         </div>
       </div>
     </header>
-
-    <main class="login-main">
-      <section class="login-card" aria-labelledby="login-title">
-        <h1 class="login-title" id="login-title">Belépés</h1>
-        <p class="login-lead">A hirdetésfeladáshoz jelentkezz be a fiókodba.</p>
-        <div class="oauth-block" data-oauth-buttons>
-          <button type="button" class="oauth-btn oauth-btn--google" data-oauth-provider="google">
-            <span class="oauth-btn-icon" aria-hidden="true">G</span>
-            Folytatás Google-lal
-          </button>
-          <button type="button" class="oauth-btn oauth-btn--apple" data-oauth-provider="apple">
-            <span class="oauth-btn-icon" aria-hidden="true"></span>
-            Folytatás Apple-lel
-          </button>
-          <button type="button" class="oauth-btn oauth-btn--facebook" data-oauth-provider="facebook">
-            <span class="oauth-btn-icon" aria-hidden="true">f</span>
-            Folytatás Facebookkal
-          </button>
-          <p class="oauth-hint" data-oauth-hint hidden></p>
-        </div>
-        <div class="login-divider" aria-hidden="true"><span>vagy emaillel</span></div>
-        <form id="login-form" class="login-form">
-          <label class="login-field">
-            <span class="login-label">Email</span>
-            <input type="email" name="email" autocomplete="username" required placeholder="pelda@email.hu" />
-          </label>
-          <label class="login-field">
-            <span class="login-label">Jelszó</span>
-            <input type="password" name="password" autocomplete="current-password" required />
-          </label>
-          <p id="login-ok" class="login-ok" role="status" hidden></p>
-          <p id="login-error" class="login-error" role="alert" hidden></p>
-          <button type="submit" class="site-header-btn site-header-btn--primary login-submit">Belépés</button>
-        </form>
-        <p class="login-hint">Nincs még fiókod? <a href="/regisztracio.html">Regisztráció</a> · Localhost demó</p>
-      </section>
+    <main class="site-main msg-page-main">
+      <div class="msg-page-wrap">
+        <div id="msg-page-root" class="msg-root"></div>
+      </div>
     </main>
-
-    <script src="/js/site-avatar-menu.js?v=fiokPage2" type="module"></script>
-    <script type="module">
-      import { initLoginPage, initSiteAuth } from "/js/site-auth.js?v=acctOAuth1";
-      initSiteAuth();
-      initLoginPage();
-    </script>
-      <script src="/js/nav-counts.js?v=willhabenHdr1" type="module"></script>
-      <script src="/js/theme.js?v=willhabenHdr1" type="module"></script>
-</body>
+    <script src="/js/site-avatar-menu.js?v=fiokPage1" type="module"></script>
+    <script src="/js/theme.js?v=willhabenHdr1" type="module"></script>
+    <script src="/js/nav-counts.js?v=willhabenHdr1" type="module"></script>
+    <script src="/js/uzenetek-app.js?v=msgLive1" type="module"></script>
+  </body>
 </html>

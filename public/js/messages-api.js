@@ -62,16 +62,20 @@ export async function startConversation({
   priceLabel = "",
   meta = "",
   code,
+  sellerId,
 }) {
+  const body = {
+    listing_id: listingId,
+    listing_title: title,
+    listing_price_label: priceLabel,
+    listing_meta: meta,
+    listing_code: code || `AEA-${listingId}`,
+  };
+  const sid = Number(sellerId);
+  if (Number.isFinite(sid) && sid > 0) body.seller_id = sid;
   const data = await messagesFetch("/api/messages/conversations", {
     method: "POST",
-    body: {
-      listing_id: listingId,
-      listing_title: title,
-      listing_price_label: priceLabel,
-      listing_meta: meta,
-      listing_code: code || `AEA-${listingId}`,
-    },
+    body,
   });
   return data.conversation;
 }

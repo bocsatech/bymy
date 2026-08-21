@@ -14,7 +14,7 @@ import {
   reportConversation,
   blockUser,
   fileToAttachment,
-} from "./messages-api.js?v=messagesWh2";
+} from "./messages-api.js?v=msgLive1";
 
 const ICONS = {
   unread: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4.8 7.2h11.2A2.4 2.4 0 0 1 18.4 9.6v5.6a2.4 2.4 0 0 1-2.4 2.4H9.2L6 20v-2.4H4.8A2.4 2.4 0 0 1 2.4 15.2V9.6A2.4 2.4 0 0 1 4.8 7.2Z" stroke="currentColor" stroke-width="1.6"/><path d="M7 11.2h7.2M7 14h4.6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>`,
@@ -71,7 +71,7 @@ function peerLetter(name) {
   return String(name || "?").trim().charAt(0).toUpperCase() || "?";
 }
 
-export function initMessagesUi(root, { onUnreadChange } = {}) {
+export function initMessagesUi(root, { onUnreadChange, openConversationId } = {}) {
   if (!root) return { refresh: async () => {} };
 
   let conversations = [];
@@ -79,6 +79,7 @@ export function initMessagesUi(root, { onUnreadChange } = {}) {
   let openConv = null;
   let messages = [];
   let busy = false;
+  const options = { openConversationId };
 
   root.innerHTML = `
     <div class="wh-msg" data-msg-view="inbox">
@@ -464,6 +465,20 @@ export function initMessagesUi(root, { onUnreadChange } = {}) {
   });
 
   showInboxOnly();
-  refresh();
-  return { refresh, showInbox: showInboxOnly };
+  refresh().then(async () => {
+    const openId = Number(options?.openConversationId);
+    if (Number.isFinite(openId) && openId > 0) {
+      const found = conversations.find((c) => Number(c.id) === openId);
+      if (found) openConversation(found);
+    }
+  });
+  return {
+    refresh,
+    showInbox: showInboxOnly,
+    openById: async (id) => {
+      await refresh();
+      const found = conversations.find((c) => Number(c.id) === Number(id));
+      if (found) await openConversation(found);
+    },
+  };
 }

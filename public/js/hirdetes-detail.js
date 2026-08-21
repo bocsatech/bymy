@@ -1,6 +1,7 @@
 import { fetchListing, fetchListings, recordListingView, deleteListingFromDb } from "./db-client.js?v=hdView1";
 import { getAuthUser, getDisplayName, getProfile } from "./site-auth.js?v=auth20260805localdb9";
-import { startConversation, sendMessage } from "./messages-api.js?v=messagesWh2";
+import { startConversation, sendMessage } from "./messages-api.js?v=msgLive1";
+import { canMessageListing, openListingMessage } from "./start-listing-message.js?v=msgLive1";
 import { getParkplatz, addParkplatzItem, removeParkplatzItem } from "./fok-data.js?v=auth20260805localdb9";
 import { listingReturnHref, listingDetailHref, rememberListingOpen } from "./listing-return.js?v=hdView1";
 
@@ -78,11 +79,13 @@ function render(view, listing, related) {
   const extrasShort = extras.slice(0, 6);
   const extrasRest = extras.slice(6);
   const own = currentUserId() && currentUserId() === Number(view.userId);
+  const canMsg = !own && canMessageListing(view.userId);
   const user = getAuthUser();
   const profile = getProfile() || {};
   const loginNext = `/belepes.html?next=${encodeURIComponent(location.pathname + location.search)}`;
 
   document.title = `${view.title} — Bymy`;
+  document.body.classList.toggle("hd-has-msg-bar", canMsg);
 
   root.innerHTML = `
     <p class="hd-crumbs">
@@ -173,7 +176,13 @@ function render(view, listing, related) {
         </div>
         <p class="hd-seller-name">${escapeHtml(view.sellerName)}</p>
         ${view.addressLines.length ? `<p class="hd-seller-addr">${view.addressLines.map(escapeHtml).join("<br>")}</p>` : ""}
-        <button type="button" class="hd-btn hd-btn--primary" data-hd-goto-form>${ICON.mail} Hirdető kapcsolata</button>
+        ${
+          canMsg
+            ? `<button type="button" class="hd-btn hd-btn--primary" data-hd-message>${ICON.mail} Üzenet</button>`
+            : own
+              ? ""
+              : `<button type="button" class="hd-btn hd-btn--primary" data-hd-goto-form>${ICON.mail} Hirdető kapcsolata</button>`
+        }
         ${
           view.phone
             ? `<button type="button" class="hd-btn hd-btn--ghost" data-hd-phone data-full="${escapeHtml(view.phone)}">${ICON.phone} ${escapeHtml(view.phoneMasked)} szám mutatása</button>`
@@ -254,7 +263,7 @@ function render(view, listing, related) {
             ? `<iframe class="hd-map" title="Térkép" src="https://maps.google.com/maps?q=${encodeURIComponent(view.mapQuery)}&output=embed"></iframe>`
             : ""
         }
-        <form class="hd-card" id="hd-contact" style="margin-top:0.9rem">
+        <form class="hd-card" id="hd-contact" style="margin-top:0.9rem" ${canMsg || own ? "hidden" : ""}>
           <h2 class="hd-h2">Hirdető kapcsolata</h2>
           <p class="hd-h3">Amit a járműről tudni szeretnék</p>
           <div class="hd-ask">
@@ -282,8 +291,20 @@ function render(view, listing, related) {
 
     <div class="hd-foot">
       <span>Bymy-kód: ${escapeHtml(view.code || String(view.id))} ${view.updatedAt ? `| Utoljára módosítva: ${escapeHtml(formatDate(view.updatedAt))}` : ""}</span>
-      <a class="hd-report" href="/beallitasok.html?szekcio=uzenetek">! Hirdetés jelentése</a>
+      <a class="hd-report" href="/uzenetek.html">! Hirdetés jelentése</a>
     </div>
+    ${
+      canMsg
+        ? `<div class="hd-msg-bar" role="region" aria-label="Üzenet">
+            ${
+              view.phone
+                ? `<button type="button" class="hd-btn hd-btn--primary" data-hd-phone data-full="${escapeHtml(view.phone)}">${ICON.phone} Hívás</button>`
+                : ""
+            }
+            <button type="button" class="hd-btn hd-btn--primary" data-hd-message>${ICON.mail} Üzenet</button>
+          </div>`
+        : ""
+    }
   `;
 
   bindUi(view, listing, extrasRest);
@@ -418,6 +439,26 @@ function bindUi(view, listing, extrasRest) {
     document.getElementById("hd-contact")?.scrollIntoView({ behavior: "smooth" });
   });
 
+  root.querySelectorAll("[data-hd-message]").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      try {
+        btn.disabled = true;
+        await openListingMessage({
+          listingId: view.id,
+          title: view.title,
+          priceLabel: view.price,
+          meta: view.metaLine,
+          code: view.code,
+          sellerId: view.userId,
+        });
+      } catch (error) {
+        alert(error.message ?? "Az üzenet indítása sikertelen.");
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  });
+
   root.querySelector("[data-hd-desc-more]")?.addEventListener("click", (event) => {
     root.querySelector("[data-hd-desc]")?.classList.remove("is-clip");
     event.currentTarget.hidden = true;
@@ -465,6 +506,7 @@ function bindUi(view, listing, extrasRest) {
         priceLabel: view.price,
         meta: view.metaLine,
         code: view.code,
+        sellerId: view.userId,
       });
       await sendMessage(conv.id, { body: parts.join("\n") });
       if (status) {
@@ -472,6 +514,7 @@ function bindUi(view, listing, extrasRest) {
         status.textContent = "Az érdeklődés elküldve.";
       }
       event.currentTarget.reset();
+      window.location.href = `/uzenetek.html?c=${encodeURIComponent(conv.id)}`;
     } catch (error) {
       if (status) {
         status.hidden = false;

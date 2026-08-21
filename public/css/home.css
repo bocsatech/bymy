@@ -2275,3 +2275,34 @@ body.home-page .home-filter-form {
   position: static !important;
   overflow: visible !important;
 }
+
+.home-grid-card-actions {
+  padding: 0 1rem 0.9rem;
+}
+.home-grid-card-msg {
+  width: 100%;
+  border: 0;
+  border-radius: 10px;
+  padding: 0.65rem 0.85rem;
+  font: inherit;
+  font-weight: 700;
+  color: #fff;
+  background: #c45c26;
+  cursor: pointer;
+}
+.home-grid-card-msg:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+.msg-page-main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1rem 1rem 2rem;
+}
+.msg-page-wrap {
+  min-height: 70vh;
+  background: #fff;
+  border: 1px solid #e8eaef;
+  border-radius: 14px;
+  overflow: hidden;
+}

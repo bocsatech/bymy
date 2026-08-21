@@ -25,8 +25,8 @@ import {
   removeSavedSearch,
   toggleSavedSearchNotify,
 } from "./fok-data.js?v=auth20260805localdb9";
-import { initMessagesUi } from "./messages-ui.js?v=messagesWh2";
-import { listConversations } from "./messages-api.js?v=messagesWh2";
+import { initMessagesUi } from "./messages-ui.js?v=msgLive1";
+import { listConversations } from "./messages-api.js?v=msgLive1";
 import { initMyAdsPanel } from "./my-ads.js?v=hdView1";
 
 const PHOTO_KEY = "bymy-avatar-photos";
@@ -227,6 +227,10 @@ function openSettingsAccordion(accId) {
 
 function setSection(section) {
   const next = SECTIONS.includes(section) ? section : "fiok";
+  if (next === "uzenetek") {
+    window.location.href = "/uzenetek.html";
+    return;
+  }
   const url = new URL(window.location.href);
   url.searchParams.set("szekcio", next);
   window.history.replaceState({}, "", url);
@@ -236,7 +240,7 @@ function setSection(section) {
   document.querySelectorAll("[data-mm-nav]").forEach((link) => {
     link.classList.toggle("is-active", link.getAttribute("data-mm-nav") === next);
   });
-  document.body.classList.toggle("mm-messages-open", next === "uzenetek");
+  document.body.classList.toggle("mm-messages-open", false);
   document.title =
     {
       attekintes: "Áttekintés",
@@ -246,7 +250,6 @@ function setSection(section) {
       ertekelesek: "Értékelések",
       parkolo: "Parkoló",
       keresesek: "Mentett kereséseim",
-      uzenetek: "Üzenetek",
       hirdetes: "Saját hirdetések",
       megjelenes: "Megjelenés",
       fiok: "Beállítások",

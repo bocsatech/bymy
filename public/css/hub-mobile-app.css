@@ -231,6 +231,68 @@
     display: block !important;
   }
 
+  /* Oldalnevek — mint a webes főmenü, vízszintesen görgethető */
+  body.hub-page--feed .mw-app-pages {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    gap: 0.15rem;
+    width: 100%;
+    margin: 0;
+    padding: 0 0.55rem;
+    box-sizing: border-box;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    border-top: 1px solid #e3e6ea;
+    border-bottom: 1px solid #e3e6ea;
+    background: #fff;
+  }
+
+  body.hub-page--feed .mw-app-pages::-webkit-scrollbar {
+    display: none;
+  }
+
+  body.hub-page--feed .mw-app-pages-link {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.65rem;
+    padding: 0.45rem 0.85rem;
+    white-space: nowrap;
+    text-decoration: none;
+    font-family: "DM Sans", system-ui, sans-serif;
+    font-size: 0.92rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: #4b5563;
+    border-bottom: 2px solid transparent;
+    box-sizing: border-box;
+  }
+
+  body.hub-page--feed .mw-app-pages-link.is-active {
+    color: #111;
+    border-bottom-color: #111;
+  }
+
+  html[data-theme="dark"] body.hub-page--feed .mw-app-pages {
+    background: #12161c;
+    border-top-color: #2a313c;
+    border-bottom-color: #2a313c;
+  }
+
+  html[data-theme="dark"] body.hub-page--feed .mw-app-pages-link {
+    color: #9aa3ad;
+  }
+
+  html[data-theme="dark"] body.hub-page--feed .mw-app-pages-link.is-active {
+    color: #e8eaed;
+    border-bottom-color: #e8eaed;
+  }
+
   /* —— Promo kártyák (Ingatlan + Autó) megmaradnak —— */
   body.hub-page--feed .hub-intro {
     padding: 0.5rem 0.85rem 0.25rem;

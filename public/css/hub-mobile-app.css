@@ -8,9 +8,14 @@
 }
 
 @media (max-width: 800px) {
-  /* Státuszsáv mögött is fehér / logo — ne maradjon szürke (#eef0f3) sáv felül */
+  /*
+   * Logo a képernyő tetejétől indul (status bar ALÁ rajzolódik).
+   * TILOS negatív margin: az overflow-x:hidden levágja a tetejét.
+   */
   html:has(body.hub-page--feed) {
     background: #fff;
+    overflow-x: visible;
+    overflow-y: auto;
   }
 
   body.site-app.hub-page--feed,
@@ -18,7 +23,17 @@
     background: #fff !important;
     padding-top: 0 !important;
     margin-top: 0 !important;
+    overflow-x: visible !important;
+    overflow-y: auto !important;
     padding-bottom: calc(5.75rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* Vízszintes túlcsordulás: ne a body vágjon, hanem a tartalom */
+  body.hub-page--feed main,
+  body.hub-page--feed .hub-intro,
+  body.hub-page--feed .hub-feed {
+    max-width: 100%;
+    overflow-x: clip;
   }
 
   html[data-theme="dark"] body.site-app.hub-page--feed,
@@ -48,20 +63,17 @@
     display: none;
   }
 
-  /* —— Felső app sáv: logo arány változatlan, felhúzva a képernyő tetejére —— */
+  /* —— Logo: teljes kép, arányos, a dokumentum tetejétől (nincs levágás) —— */
   body.hub-page--feed .mw-app-top {
     --mw-logo-h: calc(100vw * 415 / 958);
     --mw-logo-gap: 1.5cm;
     --mw-avatar: 2.25rem;
-    /* Felhúzás: karika ne lógjon a Dynamic Islandbe (1.25rem → 0.75rem) */
-    --mw-logo-pull: max(env(safe-area-inset-top, 0px), 0.75rem);
     display: block;
     position: relative;
     z-index: 1;
     background: #fff;
     padding: 0;
     margin: 0;
-    margin-top: calc(-1 * var(--mw-logo-pull)) !important;
     min-height: calc(var(--mw-logo-h) + var(--mw-logo-gap));
     overflow: visible;
     box-sizing: border-box;
@@ -86,7 +98,6 @@
     aspect-ratio: 958 / 415;
     object-fit: contain !important;
     object-position: center top;
-    /* Nincs scale/stretch — csak a szülő margin húz fel */
     transform: none !important;
   }
 

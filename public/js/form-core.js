@@ -3,6 +3,7 @@ import { EGYEB_INFO_OPTIONS } from "./egyeb-info-data.js";
 import { initVehicleCatalogSelects } from "./vehicle-catalog-client.js";
 import { compressListingPhoto, MAX_LISTING_PHOTOS } from "./listing-photo-compress.js?v=myAds2";
 import { applyListingAddressFromProfileSync } from "./ad-location-profile.js?v=locProf3";
+import { syncIngatlanFormVisibility } from "./ingatlan-form-fields.js?v=immo1";
 
 export function createAdForm(options = {}) {
   const mode = options.mode ?? "wizard";
@@ -381,6 +382,7 @@ function syncKisteherFields() {
   });
   syncEgyebInfoVisibility();
   renderEquipment();
+  syncIngatlanFormVisibility(form);
   window.dispatchEvent(new Event("ad-form-layout-refresh"));
 }
 
@@ -819,16 +821,15 @@ function validateFields(names, onlyStep = null) {
 }
 
 function validateStep(step) {
-  const basicRequired = [
-    "gyartasi_ev",
-    "gyartmany",
-    "modell",
-    "kivitel",
-    "allapot",
-    "okmany_jelleg",
-    "km",
-  ];
-  const techRequired = ["uzemanyag"];
+  const isIngatlan =
+    String(form.elements.namedItem("hirdetes_vertical")?.value ?? "")
+      .trim()
+      .toLowerCase() === "ingatlan";
+
+  const basicRequired = isIngatlan
+    ? ["allapot", "ingatlan_uzletag"]
+    : ["gyartasi_ev", "gyartmany", "modell", "kivitel", "allapot", "okmany_jelleg", "km"];
+  const techRequired = isIngatlan ? [] : ["uzemanyag"];
   const adRequired = [
     "vetelar",
     "megtekintesi_cim",

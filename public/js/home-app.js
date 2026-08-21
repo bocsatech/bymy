@@ -8,6 +8,11 @@ import {
   initHomeFilterCatalog,
 } from "./home-search-filter.js";
 import { initHomeQuickSearch } from "./home-quicksearch.js?v=year2035";
+import {
+  emptyIngatlanFilters,
+  filterListingsByIngatlan,
+  initIngatlanSearch,
+} from "./ingatlan-search.js?v=immo1";
 import { filterByCategory, initHomeCategoryBar, renderHomeCategoryBar } from "./home-category-bar.js";
 import { initHomeUnifiedScroll } from "./home-unified-scroll.js";
 import { initHomeStatsBar } from "./home-stats-bar.js";
@@ -23,6 +28,7 @@ const LISTINGS_FETCH_LIMIT = 50;
 
 let allItems = [];
 let sidebarFilters = emptyFilters();
+let ingatlanFilters = emptyIngatlanFilters();
 let categoryFilter = null;
 let categoryUi = null;
 let statsUi = null;
@@ -77,6 +83,9 @@ function filterBySitePage(items) {
   if (PAGE === "auto") {
     return items.filter((item) => listingVertical(item) !== "teher" && listingVertical(item) !== "ingatlan");
   }
+  if (PAGE === "ingatlan") {
+    return items.filter((item) => listingVertical(item) === "ingatlan");
+  }
   return items;
 }
 
@@ -106,9 +115,14 @@ function filterByTruckSubtype(items) {
 }
 
 function filterItems(items) {
-  let result = filterListingsBySidebar(items, sidebarFilters);
-  result = filterByCategory(result, categoryFilter);
-  result = filterByTruckSubtype(result);
+  let result = items;
+  if (PAGE === "ingatlan") {
+    result = filterListingsByIngatlan(result, ingatlanFilters);
+  } else {
+    result = filterListingsBySidebar(result, sidebarFilters);
+    result = filterByCategory(result, categoryFilter);
+    result = filterByTruckSubtype(result);
+  }
   if (statsFilter) {
     result = result.filter((item) => statsFilter.listingIds.has(item.id));
   }
@@ -131,7 +145,9 @@ function renderListings(items) {
     }
   } else if (!filtered.length) {
     emptyEl.textContent =
-      "Még nincs hirdetés. Adj fel egyet a Hirdetésfeladáson, vagy importálj a hasznaltauto.hu listáról.";
+      PAGE === "ingatlan"
+        ? "Nincs találat ezekre a feltételekre. Próbálj kevesebb szűrőt, vagy adj fel ingatlan hirdetést."
+        : "Még nincs hirdetés. Adj fel egyet a Hirdetésfeladáson, vagy importálj a hasznaltauto.hu listáról.";
   }
 
   for (const item of filtered) {
@@ -231,55 +247,70 @@ function hasActiveSidebarFilters(filters) {
 
 initHomeUnifiedScroll();
 
-renderHomeCategoryBar(document.getElementById("home-category-bar"));
+if (PAGE !== "ingatlan") {
+  renderHomeCategoryBar(document.getElementById("home-category-bar"));
+}
 
-const initialCategory = initialCategoryFromUrl();
+const initialCategory = PAGE === "ingatlan" ? null : initialCategoryFromUrl();
 
-categoryUi = initHomeCategoryBar({
-  onChange: (category) => {
-    categoryFilter = category;
+if (PAGE !== "ingatlan") {
+  categoryUi = initHomeCategoryBar({
+    onChange: (category) => {
+      categoryFilter = category;
+      applyFilters();
+      if (category) scrollToListings();
+    },
+    getForm: () => filterForm,
+    initialCategory,
+  });
+}
+
+if (PAGE === "ingatlan") {
+  initIngatlanSearch({
+    onSearch: (values) => {
+      ingatlanFilters = { ...emptyIngatlanFilters(), ...values };
+      applyFilters();
+    },
+  });
+} else {
+  initHomeQuickSearch({
+    onSearch: (values) => {
+      sidebarFilters = { ...emptyFilters(), ...values };
+      categoryUi?.clear();
+      categoryFilter = null;
+      applyFilters();
+    },
+  });
+}
+
+if (PAGE !== "ingatlan") {
+  statsUi = initHomeStatsBar({
+    onChange: (active) => {
+      statsFilter = active;
+      applyFilters();
+    },
+    getItems: () => allItems,
+  });
+
+  const readSidebarFilters = initHomeSearchSidebar((filters) => {
+    sidebarFilters = filters;
+    if (hasActiveSidebarFilters(filters)) {
+      categoryUi?.clear();
+      categoryFilter = null;
+    }
     applyFilters();
-    if (category) scrollToListings();
-  },
-  getForm: () => filterForm,
-  initialCategory,
-});
-
-initHomeQuickSearch({
-  onSearch: (values) => {
-    sidebarFilters = { ...emptyFilters(), ...values };
-    categoryUi?.clear();
-    categoryFilter = null;
-    applyFilters();
-  },
-});
-
-statsUi = initHomeStatsBar({
-  onChange: (active) => {
-    statsFilter = active;
-    applyFilters();
-  },
-  getItems: () => allItems,
-});
-
-const readSidebarFilters = initHomeSearchSidebar((filters) => {
-  sidebarFilters = filters;
-  if (hasActiveSidebarFilters(filters)) {
-    categoryUi?.clear();
-    categoryFilter = null;
-  }
-  applyFilters();
-});
-sidebarFilters = readSidebarFilters?.() ?? emptyFilters();
-
-initHomeFilterCatalog(() => {
+  });
   sidebarFilters = readSidebarFilters?.() ?? emptyFilters();
-  if (hasActiveSidebarFilters(sidebarFilters)) {
-    categoryUi?.clear();
-    categoryFilter = null;
-  }
-  applyFilters();
-}).catch((error) => console.error("Járműkatalógus (szűrő):", error));
+
+  initHomeFilterCatalog(() => {
+    sidebarFilters = readSidebarFilters?.() ?? emptyFilters();
+    if (hasActiveSidebarFilters(sidebarFilters)) {
+      categoryUi?.clear();
+      categoryFilter = null;
+    }
+    applyFilters();
+  }).catch((error) => console.error("Járműkatalógus (szűrő):", error));
+}
 
 import("./site-side-content.js")
   .then((mod) => mod.initSiteSideContent())

@@ -57,6 +57,9 @@ function selectionFromUrl() {
   if (vertical === "auto" && subtype === "szemelyauto") return { ...VEHICLE_PRESETS.szemelyauto };
   if (vertical === "teher" && subtype === "kisteher") return { ...VEHICLE_PRESETS.kisteher };
   if (vertical === "teher" && subtype === "teherauto") return { ...VEHICLE_PRESETS.teherauto };
+  if (vertical === "ingatlan") {
+    return { vertical: "ingatlan", subtype: "ingatlan", label: "Ingatlan", immoTipus: [], immoKategoria: [] };
+  }
   const kategoria = String(params.get("kategoria") ?? "").trim().toLowerCase();
   if (vertical === "teher" && kategoria === "35-alatt") return { ...VEHICLE_PRESETS.kisteher };
   if (vertical === "teher" && kategoria === "35-felett") return { ...VEHICLE_PRESETS.teherauto };
@@ -285,7 +288,7 @@ export function initCategoryPicker({
     }
 
     if (event.target.closest("[data-immo-continue]")) {
-      showIngatlanStub({
+      void showVehicleWizard({
         vertical: "ingatlan",
         subtype: "ingatlan",
         label: "Ingatlan",
@@ -321,21 +324,22 @@ export function initCategoryPicker({
   const urlSelection = selectionFromUrl();
   const shouldContinue =
     params.get("continue") === "1" &&
-    (stored?.vertical === "auto" || stored?.vertical === "teher");
+    (stored?.vertical === "auto" || stored?.vertical === "teher" || stored?.vertical === "ingatlan");
   const shouldStart = params.get("start") === "1" && urlSelection;
 
   if (shouldStart) {
     void showVehicleWizard(urlSelection);
   } else if (shouldContinue) {
     void showVehicleWizard(stored);
-  } else if (stored?.vertical === "ingatlan" && params.get("continue") === "1") {
-    showIngatlanStub(stored);
   } else {
     if (urlSelection?.vertical === "teher") {
       state.open = "teher";
       syncOpenGroups();
     } else if (urlSelection?.vertical === "auto") {
       state.open = "auto";
+      syncOpenGroups();
+    } else if (urlSelection?.vertical === "ingatlan") {
+      state.open = "ingatlan";
       syncOpenGroups();
     }
     showPicker();

@@ -8,7 +8,7 @@ import {
 import { createAdForm } from "./form-core.js?v=locFill2";
 import { initTireSizes } from "./tire-sizes-ui.js";
 import { initPhoneLanguages } from "./phone-lang-ui.js";
-import { initCategoryPicker } from "./category-picker.js?v=teherPost1";
+import { initCategoryPicker } from "./category-picker.js?v=immo1";
 import {
   requireAuthForPage,
   getAuthUser,
@@ -248,6 +248,7 @@ const categoryPicker = initCategoryPicker({
       applyListingAddressFromProfileSync(adForm);
       applyListingAddressFromProfile(adForm).catch(() => {});
       window.dispatchEvent(new Event("ad-form-sync-location"));
+      window.dispatchEvent(new Event("ad-form-layout-refresh"));
     } catch (error) {
       console.error("Űrlap indítás hiba:", error);
     }

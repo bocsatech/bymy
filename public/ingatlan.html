@@ -10,7 +10,6 @@
           }
           document.documentElement.setAttribute("data-theme", t);
         } catch (e) {}
-                /* Auth fejléc: ne villanjon vendég gomb → profil a modul / API előtt */
         try {
           var raw = sessionStorage.getItem("bymy-auth-user");
           var user = raw ? JSON.parse(raw) : null;
@@ -44,76 +43,41 @@
       })();
     </script>
     <meta charset="utf-8" />
-    <meta name="viewport" content="headerRow1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext x='16' y='22' text-anchor='middle' font-size='14' font-family='system-ui,sans-serif' font-weight='700'%3EB%3C/text%3E%3C/svg%3E" type="image/svg+xml" />
-    <meta name="bymy-version" content="authAcct1" />
-    <title>Ingatlan — Bymy</title>
+    <meta name="bymy-version" content="immoSearch1" />
+    <title>Ingatlan bérlés — Bymy</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;650;700;800&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap"
-      rel="stylesheet"
-    />    <link rel="stylesheet" href="/css/hub.css?v=logoTop2" />
-
-    <link rel="stylesheet" href="/css/site-app.css?v=logoTop2" />    <style>
-      .immo-search {
-        margin-top: 1.25rem;
-        background: #fff;
-        border: 1px solid var(--hub-line);
-        border-radius: 16px;
-        padding: 1.25rem;
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/css/style.css?v=automax20260720homelist" />
+    <link rel="stylesheet" href="/css/hub.css?v=logoTop2" />
+    <link rel="stylesheet" href="/css/site-app.css?v=logoTop2" />
+    <link rel="stylesheet" href="/css/site-side.css?v=home20260725unifiedscroll" />
+    <link rel="stylesheet" href="/css/home.css?v=msgLive1" />
+    <link rel="stylesheet" href="/css/ingatlan-search.css?v=immo1" />
+    <style id="home-scroll-fix">
+      html:has(body.home-page) {
+        overflow-y: auto !important;
+        height: auto !important;
       }
-      .immo-search h1 {
-        font-family: "DM Sans", system-ui, sans-serif;
-        font-size: 1.5rem;
-        margin: 0 0 0.35rem;
-        letter-spacing: -0.03em;
+      body.home-page {
+        overflow: visible !important;
+        height: auto !important;
+        min-height: 100%;
       }
-      .immo-search > p {
-        margin: 0 0 1rem;
-        color: var(--hub-muted);
-      }
-      .immo-types {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 0.65rem;
-        margin-bottom: 1rem;
-      }
-      .immo-types a {
-        font-family: "DM Sans", system-ui, sans-serif;
-        text-decoration: none;
-        color: var(--hub-ink);
-        border: 1px solid var(--hub-line);
-        border-radius: 12px;
-        padding: 0.85rem 0.9rem;
-        font-weight: 650;
-        background: #faf8f4;
-      }
-      .immo-types a:hover {
-        border-color: var(--hub-accent);
-      }
-      .immo-types a span {
-        display: block;
-        margin-top: 0.2rem;
-        font-size: 0.78rem;
-        font-weight: 500;
-        color: var(--hub-muted);
-      }
-      .immo-note {
-        font-family: "DM Sans", system-ui, sans-serif;
-        font-size: 0.85rem;
-        color: var(--hub-muted);
-        margin: 0;
-      }
-      @media (max-width: 800px) {
-        .immo-types {
-          grid-template-columns: 1fr;
-        }
+      body.home-page .home-main,
+      body.home-page .site-layout,
+      body.home-page .home-listings-panel,
+      body.home-page #home-grid-track {
+        overflow: visible !important;
+        max-height: none !important;
       }
     </style>
   </head>
-  <body class="hub-page site-page site-app" data-site-page="ingatlan">
-    <header class="hub-header">
+  <body class="home-page site-page site-app" data-site-page="ingatlan">
+    <header class="hub-header home-header">
       <div class="hub-header-inner">
         <div class="hub-header-top">
         <div class="hub-header-actions site-header-actions">
@@ -136,7 +100,7 @@
             </button>
             <div class="site-avatar-dropdown site-avatar-dropdown--fiok" data-avatar-dropdown role="menu" hidden></div>
           </div>
-          <a class="hub-btn hub-btn--post" href="/hirdetesfeladas.html" data-auth-guard>+ Hirdetésfeladás</a>
+          <a class="hub-btn hub-btn--post" href="/hirdetesfeladas.html?vertical=ingatlan&subtype=ingatlan&start=1" data-auth-guard>+ Hirdetésfeladás</a>
           <button type="button" class="hub-theme-toggle" data-theme-toggle aria-label="Színmód" title="Színmód"></button>
         </div>
         </div>
@@ -156,44 +120,195 @@
     </header>
     <div class="hub-promo-band" data-hub-promo-root></div>
 
+    <main class="home-main">
+      <section class="immo-search-hero" aria-labelledby="immo-search-title">
+        <article class="immo-search-panel">
+          <h1 class="immo-search-title" id="immo-search-title">Melyik ingatlant bérelnéd?</h1>
+          <form class="immo-search-form" id="immo-search-form">
+            <label class="immo-field">
+              <span class="immo-label">Ingatlan típus</span>
+              <select class="immo-control" id="immo-uzletag" name="ingatlan_uzletag">
+                <option value="berles" selected>Bérlés</option>
+              </select>
+            </label>
 
-    <section class="hub-hero" aria-label="Ingatlan">
-      <div class="hub-hero-inner">
-        <p class="hub-brand">Ingatlan</p>
-        <p class="hub-lead">Lakás, ház, telek — vétel és bérlés. A részletes lista később bővül; a hirdetésfeladás és a többi Bymy oldal már elérhető.</p>
+            <label class="immo-field">
+              <span class="immo-label">Keresési hely</span>
+              <input class="immo-control" id="immo-hely" name="keresesi_hely" type="text" placeholder="Város vagy falu neve" autocomplete="address-level2" />
+            </label>
+
+            <div class="immo-wheels-row immo-wheels-row--4">
+              <div class="immo-wheel-wrap">
+                <span class="immo-label">Ár min.</span>
+                <div class="immo-wheel" data-wheel="ar_tol" role="listbox" aria-label="Ár minimum"></div>
+                <input type="hidden" name="ar_tol" value="" />
+              </div>
+              <div class="immo-wheel-wrap">
+                <span class="immo-label">Ár max.</span>
+                <div class="immo-wheel" data-wheel="ar_ig" role="listbox" aria-label="Ár maximum"></div>
+                <input type="hidden" name="ar_ig" value="" />
+              </div>
+              <div class="immo-wheel-wrap">
+                <span class="immo-label">Alapterület</span>
+                <div class="immo-wheel" data-wheel="alapterulet" role="listbox" aria-label="Alapterület"></div>
+                <input type="hidden" name="alapterulet" value="" />
+              </div>
+              <div class="immo-wheel-wrap">
+                <span class="immo-label">Szobaszám</span>
+                <div class="immo-wheel" data-wheel="szobaszam" role="listbox" aria-label="Szobaszám"></div>
+                <input type="hidden" name="szobaszam" value="" />
+              </div>
+            </div>
+
+            <div class="immo-more" id="immo-more" hidden>
+              <div class="immo-wheels-row">
+                <div class="immo-wheel-wrap">
+                  <span class="immo-label">Típus</span>
+                  <div class="immo-wheel" data-wheel="ingatlan_lakas_tipus" role="listbox" aria-label="Lakás típus"></div>
+                  <input type="hidden" name="ingatlan_lakas_tipus" value="" />
+                </div>
+                <div class="immo-wheel-wrap">
+                  <span class="immo-label">Állapot</span>
+                  <div class="immo-wheel" data-wheel="allapot" role="listbox" aria-label="Állapot"></div>
+                  <input type="hidden" name="allapot" value="" />
+                </div>
+              </div>
+
+              <div class="immo-wheels-row">
+                <div class="immo-wheel-wrap">
+                  <span class="immo-label">Ingatlan kora</span>
+                  <div class="immo-wheel" data-wheel="ingatlan_kora" role="listbox" aria-label="Ingatlan kora"></div>
+                  <input type="hidden" name="ingatlan_kora" value="" />
+                </div>
+                <div class="immo-wheel-wrap">
+                  <span class="immo-label">Minimum bérleti idő</span>
+                  <div class="immo-wheel" data-wheel="min_berleti_ido" role="listbox" aria-label="Minimum bérleti idő"></div>
+                  <input type="hidden" name="min_berleti_ido" value="" />
+                </div>
+              </div>
+
+              <div class="immo-wheels-row">
+                <div class="immo-wheel-wrap">
+                  <span class="immo-label">Bútorozott</span>
+                  <div class="immo-wheel" data-wheel="butorozott" role="listbox" aria-label="Bútorozott"></div>
+                  <input type="hidden" name="butorozott" value="" />
+                </div>
+                <div class="immo-wheel-wrap">
+                  <span class="immo-label">Kilátás</span>
+                  <div class="immo-wheel" data-wheel="kilatas" role="listbox" aria-label="Kilátás"></div>
+                  <input type="hidden" name="kilatas" value="" />
+                </div>
+              </div>
+
+              <div class="immo-wheels-row">
+                <div class="immo-wheel-wrap">
+                  <span class="immo-label">Tájolás</span>
+                  <div class="immo-wheel" data-wheel="tajolas" role="listbox" aria-label="Tájolás"></div>
+                  <input type="hidden" name="tajolas" value="" />
+                </div>
+                <div class="immo-wheel-wrap">
+                  <span class="immo-label">Fűtés módja</span>
+                  <div class="immo-wheel" data-wheel="futes" role="listbox" aria-label="Fűtés"></div>
+                  <input type="hidden" name="futes" value="" />
+                </div>
+              </div>
+
+              <div class="immo-wheels-row">
+                <div class="immo-wheel-wrap">
+                  <span class="immo-label">Parkolás</span>
+                  <div class="immo-wheel" data-wheel="parkolas" role="listbox" aria-label="Parkolás"></div>
+                  <input type="hidden" name="parkolas" value="" />
+                </div>
+                <div class="immo-wheel-wrap">
+                  <span class="immo-label">Komfort</span>
+                  <div class="immo-wheel" data-wheel="komfort" role="listbox" aria-label="Komfort"></div>
+                  <input type="hidden" name="komfort" value="" />
+                </div>
+              </div>
+
+              <div class="immo-wheels-row">
+                <div class="immo-wheel-wrap">
+                  <span class="immo-label">Tetőtér</span>
+                  <div class="immo-wheel" data-wheel="tetoter" role="listbox" aria-label="Tetőtér"></div>
+                  <input type="hidden" name="tetoter" value="" />
+                </div>
+                <div class="immo-wheel-wrap">
+                  <span class="immo-label">Fürdő és WC</span>
+                  <div class="immo-wheel" data-wheel="furdo_wc" role="listbox" aria-label="Fürdő és WC"></div>
+                  <input type="hidden" name="furdo_wc" value="" />
+                </div>
+              </div>
+
+              <div class="immo-wheels-row">
+                <div class="immo-wheel-wrap">
+                  <span class="immo-label">Emelet min.</span>
+                  <div class="immo-wheel" data-wheel="emelet_tol" role="listbox" aria-label="Emelet minimum"></div>
+                  <input type="hidden" name="emelet_tol" value="" />
+                </div>
+                <div class="immo-wheel-wrap">
+                  <span class="immo-label">Emelet max.</span>
+                  <div class="immo-wheel" data-wheel="emelet_ig" role="listbox" aria-label="Emelet maximum"></div>
+                  <input type="hidden" name="emelet_ig" value="" />
+                </div>
+              </div>
+
+              <div class="immo-wheels-row">
+                <div class="immo-wheel-wrap">
+                  <span class="immo-label">Belmagasság</span>
+                  <div class="immo-wheel" data-wheel="belmagassag" role="listbox" aria-label="Belmagasság"></div>
+                  <input type="hidden" name="belmagassag" value="" />
+                </div>
+                <div class="immo-wheel-wrap">
+                  <span class="immo-label">Mikortól költözhető</span>
+                  <div class="immo-wheel" data-wheel="koltozheto" role="listbox" aria-label="Mikortól költözhető"></div>
+                  <input type="hidden" name="koltozheto" value="" />
+                </div>
+              </div>
+
+              <div class="immo-bool-grid">
+                <div class="immo-wheel-wrap"><span class="immo-label">Lift</span><div class="immo-wheel" data-wheel="lift" role="listbox"></div><input type="hidden" name="lift" value="" /></div>
+                <div class="immo-wheel-wrap"><span class="immo-label">Erkély</span><div class="immo-wheel" data-wheel="erkely" role="listbox"></div><input type="hidden" name="erkely" value="" /></div>
+                <div class="immo-wheel-wrap"><span class="immo-label">Szigetelés</span><div class="immo-wheel" data-wheel="szigeteles" role="listbox"></div><input type="hidden" name="szigeteles" value="" /></div>
+                <div class="immo-wheel-wrap"><span class="immo-label">Energiahatékony</span><div class="immo-wheel" data-wheel="energiahatekonys" role="listbox"></div><input type="hidden" name="energiahatekonys" value="" /></div>
+                <div class="immo-wheel-wrap"><span class="immo-label">Akadálymentesített</span><div class="immo-wheel" data-wheel="akadalymentesitett" role="listbox"></div><input type="hidden" name="akadalymentesitett" value="" /></div>
+                <div class="immo-wheel-wrap"><span class="immo-label">Légkondicionáló</span><div class="immo-wheel" data-wheel="legkondicionalo" role="listbox"></div><input type="hidden" name="legkondicionalo" value="" /></div>
+                <div class="immo-wheel-wrap"><span class="immo-label">Kertkapcsolatos</span><div class="immo-wheel" data-wheel="kertkapcsolatos" role="listbox"></div><input type="hidden" name="kertkapcsolatos" value="" /></div>
+                <div class="immo-wheel-wrap"><span class="immo-label">Panelprogram</span><div class="immo-wheel" data-wheel="panelprogram" role="listbox"></div><input type="hidden" name="panelprogram" value="" /></div>
+                <div class="immo-wheel-wrap"><span class="immo-label">Gépesített</span><div class="immo-wheel" data-wheel="gepesitett" role="listbox"></div><input type="hidden" name="gepesitett" value="" /></div>
+                <div class="immo-wheel-wrap"><span class="immo-label">Kisállat megengedett</span><div class="immo-wheel" data-wheel="kisallat_megengedett" role="listbox"></div><input type="hidden" name="kisallat_megengedett" value="" /></div>
+                <div class="immo-wheel-wrap"><span class="immo-label">Dohányzás megengedett</span><div class="immo-wheel" data-wheel="dohanyzas_megengedett" role="listbox"></div><input type="hidden" name="dohanyzas_megengedett" value="" /></div>
+                <div class="immo-wheel-wrap"><span class="immo-label">Ár Ft min.</span><div class="immo-wheel" data-wheel="ar_ft_min" role="listbox" aria-label="Ár Ft minimum"></div><input type="hidden" name="ar_ft_min" value="" /></div>
+              </div>
+            </div>
+
+            <div class="immo-actions">
+              <button type="submit" class="immo-submit">Ingatlanok megjelenítése</button>
+              <div class="immo-actions-secondary">
+                <button type="button" class="immo-action" id="immo-tovabbi" aria-expanded="false" aria-controls="immo-more">További feltételek</button>
+                <button type="reset" class="immo-action">Szűrők törlése</button>
+              </div>
+            </div>
+          </form>
+        </article>
+      </section>
+
+      <div class="site-layout home-layout">
+        <section class="site-center home-center" aria-label="Hirdetések">
+          <div class="home-listings-panel">
+            <div id="home-grid-track" class="home-grid-track" role="list"></div>
+            <p id="home-empty" class="home-empty" hidden>
+              Még nincs ingatlan hirdetés. Adj fel egyet a Hirdetésfeladáson.
+            </p>
+          </div>
+        </section>
       </div>
-    </section>
-
-    <main class="hub-main">
-      <section class="immo-search" aria-label="Ingatlan keresés">
-        <h1>Mit keresel?</h1>
-        <p>Válassz típust — a hirdetések a saját Bymy adatbázisból jönnek majd.</p>
-        <div class="immo-types">
-          <a href="/listings.html?tipus=lakas">Lakás<span>Vétel / bérlés</span></a>
-          <a href="/listings.html?tipus=haz">Ház<span>Családi ház, sorház</span></a>
-          <a href="/listings.html?tipus=telek">Telek<span>Építési telek</span></a>
-          <a href="/listings.html?tipus=iroda">Iroda / üzlet<span>Kereskedelmi</span></a>
-          <a href="/hirdetesfeladas.html" data-auth-guard>Hirdetésfeladás<span>Új ingatlan hirdetés</span></a>
-          <a href="/auto.html">Autó &amp; Motor<span>Vissza a járművekhez</span></a>
-        </div>
-        <p class="immo-note">Az ingatlan függőleges most indul — a meglévő autó-hirdetések az Autó &amp; Motor oldalon vannak.</p>
-      </section>
-
-      <section class="hub-more" aria-label="További oldalak">
-        <h2>További oldalak</h2>
-        <div class="hub-more-grid">
-          <a href="/">Kezdőlap<span>Ingatlan + Autó hub</span></a>
-          <a href="/import.html">Import<span>Használtautó.hu</span></a>
-          <a href="/listings.html">Hirdetések<span>Összes lista</span></a>
-          <a href="/fugveny.html">Függvény<span>Árbecslés</span></a>
-        </div>
-      </section>
     </main>
 
+    <script src="/js/home-app.js?v=immoSearch1" type="module"></script>
+    <script src="/js/site-avatar-menu.js?v=fiokPage2" type="module"></script>
     <script src="/js/nav-counts.js?v=willhabenHdr1" type="module"></script>
     <script src="/js/theme.js?v=willhabenHdr1" type="module"></script>
     <script src="/js/site-auth.js?v=authAcct1" type="module"></script>
-      <script src="/js/site-avatar-menu.js?v=fiokPage2" type="module"></script>
-      <script src="/js/hub-promo.js?v=hubPromoFast1" type="module"></script>
-</body>
+    <script src="/js/hub-promo.js?v=hubPromoFast1" type="module"></script>
+  </body>
 </html>

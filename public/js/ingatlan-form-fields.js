@@ -146,6 +146,19 @@ function readVertical(form) {
 export function syncIngatlanFormVisibility(form) {
   if (!form) return;
   const isImmo = readVertical(form) === "ingatlan";
+  form.classList.toggle("ad-form--ingatlan", isImmo);
+  document.body.classList.toggle("ad-vertical-ingatlan", isImmo);
+
+  document.querySelectorAll("[data-step-indicator]").forEach((el) => {
+    const n = Number(el.dataset.stepIndicator);
+    const vehicleStep = n === 2 || n === 3;
+    el.classList.toggle("ad-step-skip", isImmo && vehicleStep);
+    if (isImmo && vehicleStep) {
+      el.setAttribute("aria-hidden", "true");
+    } else {
+      el.removeAttribute("aria-hidden");
+    }
+  });
 
   if (!isImmo) {
     removeIngatlanFormFields(form);
@@ -191,25 +204,22 @@ export function syncIngatlanFormVisibility(form) {
       el.style.setProperty("display", "none", "important");
     });
 
-  for (const id of [
-    "uzemanyag",
-    "gyartasi_ev",
-    "gyartmany",
-    "modell",
-    "kivitel",
-    "km",
-    "hengerurtartalom",
-    "nyari_gumi_szelesseg",
-    "klima",
-    "karpit1",
-    "sebessegvalto",
-  ]) {
-    const card = form.querySelector(`#${id}`)?.closest(".card");
-    if (!card || card.querySelector("#ingatlan-fields") || card.querySelector(".ad-layout-canvas")) continue;
-    card.hidden = true;
-    card.classList.add("immo-hide-vehicle");
-    card.style.setProperty("display", "none", "important");
-  }
+  // Minden jármű field-row / labeled-field, ami nem az ingatlan blokk része.
+  form.querySelectorAll(".step-panel[data-step='1'] .form-grid > .field-row").forEach((row) => {
+    if (row.closest("#ingatlan-fields")) return;
+    row.hidden = true;
+    row.classList.add("immo-hide-vehicle");
+    row.style.setProperty("display", "none", "important");
+  });
+
+  form.querySelectorAll(".step-panel[data-step='2'], .step-panel[data-step='3']").forEach((panel) => {
+    panel.querySelectorAll(".card").forEach((card) => {
+      if (card.querySelector(".ad-layout-canvas .ad-layout-item:not(.ad-layout-hidden)")) return;
+      card.hidden = true;
+      card.classList.add("immo-hide-vehicle");
+      card.style.setProperty("display", "none", "important");
+    });
+  });
 
   const allapot = form.querySelector("#allapot");
   if (allapot && allapot.dataset.immoOptions !== "1") {

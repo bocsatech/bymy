@@ -3,7 +3,7 @@ import { EGYEB_INFO_OPTIONS } from "./egyeb-info-data.js";
 import { initVehicleCatalogSelects } from "./vehicle-catalog-client.js";
 import { compressListingPhoto, MAX_LISTING_PHOTOS } from "./listing-photo-compress.js?v=myAds2";
 import { applyListingAddressFromProfileSync } from "./ad-location-profile.js?v=locProf3";
-import { syncIngatlanFormVisibility } from "./ingatlan-form-fields.js?v=immoPost1";
+import { syncIngatlanFormVisibility } from "./ingatlan-form-fields.js?v=immoHide1";
 
 export function createAdForm(options = {}) {
   const mode = options.mode ?? "wizard";
@@ -530,8 +530,38 @@ function resetSuccess() {
   footerActions.classList.remove("hidden");
 }
 
+function isIngatlanAd() {
+  return (
+    String(form.elements.namedItem("hirdetes_vertical")?.value ?? "")
+      .trim()
+      .toLowerCase() === "ingatlan"
+  );
+}
+
+/** Ingatlan: 2–3. (műszaki / felszereltség) lépés kihagyása. */
+function nextWizardStep(from) {
+  if (isIngatlanAd()) {
+    if (from === 1) return 4;
+    if (from === 4) return 5;
+  }
+  return from + 1;
+}
+
+function prevWizardStep(from) {
+  if (isIngatlanAd()) {
+    if (from === 4) return 1;
+    if (from === 5) return 4;
+  }
+  return from - 1;
+}
+
+function shouldSkipWizardStep(step) {
+  return isIngatlanAd() && (step === 2 || step === 3);
+}
+
 function goToStep(step) {
   if (step < 1 || step > TOTAL_STEPS || step === currentStep) return false;
+  if (shouldSkipWizardStep(step)) return false;
   if (step > 4 && !photosReadyForNext()) {
     alert(photoBlockMessage());
     showStep(4);
@@ -539,6 +569,7 @@ function goToStep(step) {
   }
   if (step > currentStep) {
     for (let s = currentStep; s < step; s += 1) {
+      if (shouldSkipWizardStep(s)) continue;
       if (!validateStep(s)) return false;
     }
   }
@@ -550,6 +581,7 @@ function goToStep(step) {
 
 async function tryGoToStep(step) {
   if (step < 1 || step > TOTAL_STEPS || step === currentStep) return false;
+  if (shouldSkipWizardStep(step)) return false;
   if (step > 4 && !photosReadyForNext()) {
     alert(photoBlockMessage());
     showStep(4);
@@ -557,6 +589,7 @@ async function tryGoToStep(step) {
   }
   if (step > currentStep) {
     for (let s = currentStep; s < step; s += 1) {
+      if (shouldSkipWizardStep(s)) continue;
       if (!validateStep(s)) return false;
     }
   }
@@ -821,10 +854,8 @@ function validateFields(names, onlyStep = null) {
 }
 
 function validateStep(step) {
-  const isIngatlan =
-    String(form.elements.namedItem("hirdetes_vertical")?.value ?? "")
-      .trim()
-      .toLowerCase() === "ingatlan";
+  if (shouldSkipWizardStep(step)) return true;
+  const isIngatlan = isIngatlanAd();
 
   const basicRequired = isIngatlan
     ? ["allapot", "ingatlan_uzletag"]
@@ -1174,7 +1205,7 @@ teljesitmenyKw?.addEventListener("input", updateLeDisplay);
 
 if (mode === "wizard") {
   backBtn?.addEventListener("click", async () => {
-    if (currentStep > 1) await tryGoToStep(currentStep - 1);
+    if (currentStep > 1) await tryGoToStep(prevWizardStep(currentStep));
   });
 
   indicators.forEach((indicator) => {
@@ -1182,11 +1213,13 @@ if (mode === "wizard") {
     indicator.setAttribute("role", "tab");
     indicator.setAttribute("tabindex", "0");
     indicator.addEventListener("click", () => {
+      if (shouldSkipWizardStep(step)) return;
       void tryGoToStep(step);
     });
     indicator.addEventListener("keydown", (event) => {
       if (event.key === "Enter" || event.key === " ") {
         event.preventDefault();
+        if (shouldSkipWizardStep(step)) return;
         void tryGoToStep(step);
       }
     });
@@ -1196,7 +1229,7 @@ if (mode === "wizard") {
     if (!validateStep(currentStep)) return;
     saveDraft();
     if (currentStep < TOTAL_STEPS) {
-      await tryGoToStep(currentStep + 1);
+      await tryGoToStep(nextWizardStep(currentStep));
       return;
     }
     buildSummary();

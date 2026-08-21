@@ -1,5 +1,5 @@
 /** Mentett 12 oszlopos elrendezés — minden mező ugyanazon a lépésrácson. */
-import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=immoPost1";
+import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=immoHide1";
 
 function cssEscape(value) {
   if (window.CSS?.escape) return window.CSS.escape(value);
@@ -73,20 +73,20 @@ function pinExtras(form) {
 function hideUnplacedVehicleChrome(form, placed) {
   form.querySelectorAll(".labeled-field, .field-stack, .md-outlined").forEach((el) => {
     if (placed.has(el)) return;
-    if (el.classList.contains("ad-layout-item") && !el.classList.contains("ad-layout-hidden")) return;
     if (el.closest(KEEP_OUT)) return;
     if (el.closest(".packages, .phone-lang-grid, .photo-list, #equipment-sections, #egyeb-info-sections")) return;
-    if (el.closest("#ingatlan-fields") && el.querySelector?.(".labeled-field, .md-outlined")) return;
+    // Üres #ingatlan-fields konténer — a gyerekeket a layout már átvitte.
+    if (el.id === "ingatlan-fields") return;
     el.classList.add("ad-layout-hidden", "ad-immo-orphan");
     el.hidden = true;
     setRequired(el, false);
   });
 
   form.querySelectorAll(".field-row").forEach((row) => {
-    if (row.closest(".ad-layout-canvas")) return;
+    if (row.closest(".ad-layout-canvas") && row.querySelector(".ad-layout-item:not(.ad-layout-hidden)")) return;
     if (row.closest(KEEP_OUT)) return;
     const hasVisible = [...row.querySelectorAll(".labeled-field, .field-stack, .md-outlined")].some(
-      (el) => !el.hidden && !el.classList.contains("ad-layout-hidden")
+      (el) => placed.has(el) || (!el.hidden && !el.classList.contains("ad-layout-hidden"))
     );
     if (!hasVisible) {
       row.hidden = true;
@@ -114,6 +114,7 @@ function hideUnplacedVehicleChrome(form, placed) {
     const visible = [...card.querySelectorAll("input, select, textarea, .labeled-field, .field-stack, .md-outlined")].some(
       (el) => {
         if (el.type === "hidden") return false;
+        if (placed.has(el)) return true;
         if (el.hidden || el.classList.contains("ad-layout-hidden")) return false;
         if (el.closest(".ad-layout-hidden, .ad-immo-orphan, [hidden]")) return false;
         return true;
@@ -127,6 +128,20 @@ function hideUnplacedVehicleChrome(form, placed) {
   });
 }
 
+/** Előző kategória layout elemei (pl. autó → ingatlan) ne maradjanak láthatóak. */
+function resetPlacedLayoutItems(form) {
+  form.querySelectorAll(".ad-layout-item").forEach((el) => {
+    el.classList.add("ad-layout-hidden");
+    el.hidden = true;
+    setRequired(el, false);
+  });
+}
+
+function setIngatlanFormMode(form, on) {
+  form.classList.toggle("ad-form--ingatlan", Boolean(on));
+  document.body.classList.toggle("ad-vertical-ingatlan", Boolean(on));
+}
+
 function clearImmoOrphans(form) {
   form.querySelectorAll(".ad-immo-orphan").forEach((el) => {
     el.classList.remove("ad-immo-orphan");
@@ -137,6 +152,7 @@ function clearImmoOrphans(form) {
     }
   });
 }
+
 function pinFooter(form) {
   const footer = document.getElementById("footer-actions");
   if (!footer) return;
@@ -288,7 +304,9 @@ async function applyAdFormLayout() {
   if (!form) return;
   try {
     const category = currentLayoutCategory(form);
-    if (category === "ingatlan") {
+    const isImmo = category === "ingatlan";
+    setIngatlanFormMode(form, isImmo);
+    if (isImmo) {
       ensureIngatlanFormFields(form);
     } else {
       // Autó/teher: ingatlan mezők ne maradjanak a DOM-ban.
@@ -303,14 +321,16 @@ async function applyAdFormLayout() {
     const data = await res.json();
     const layout = data.layout;
     if (!layout?.live && Number(layout?.version) < 2) {
-      if (category === "ingatlan") hideVehicleChromeWithoutLayout(form);
+      if (isImmo) hideVehicleChromeWithoutLayout(form);
       return;
     }
     const cells = layout?.cells;
     if (!Array.isArray(cells) || !cells.length) {
-      if (category === "ingatlan") hideVehicleChromeWithoutLayout(form);
+      if (isImmo) hideVehicleChromeWithoutLayout(form);
       return;
     }
+    // Előző kategória (autó) canvas elemei ne maradjanak láthatóak.
+    resetPlacedLayoutItems(form);
     const placed = new Set();
     for (const cell of cells) {
       // Autó layoutban ne helyezzünk el ingatlan-only mezőket, ha mégis a listában lennének.
@@ -425,7 +445,7 @@ async function applyAdFormLayout() {
       canvas.appendChild(wrap);
       placeWrap(wrap, cell);
     }
-    if (category === "ingatlan") {
+    if (isImmo) {
       hideUnplacedVehicleChrome(form, placed);
     }
     pruneEmptyCards(form);

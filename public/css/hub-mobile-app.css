@@ -53,8 +53,8 @@
     --mw-logo-h: calc(100vw * 415 / 958);
     --mw-logo-gap: 1.5cm;
     --mw-avatar: 2.25rem;
-    /* Felhúzás: még egy kicsit lejjebb (2rem → 1.25rem) */
-    --mw-logo-pull: max(env(safe-area-inset-top, 0px), 1.25rem);
+    /* Felhúzás: karika ne lógjon a Dynamic Islandbe (1.25rem → 0.75rem) */
+    --mw-logo-pull: max(env(safe-area-inset-top, 0px), 0.75rem);
     display: block;
     position: relative;
     z-index: 1;

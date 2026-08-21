@@ -43,11 +43,15 @@ body[data-site-page="ingatlan"] .immo-search-panel,
 
 .immo-schema-cell {
   min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .immo-schema-cell .immo-field,
 .immo-schema-cell .immo-wheel-wrap {
   width: 100%;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .immo-schema-spacer {

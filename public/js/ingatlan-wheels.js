@@ -162,18 +162,29 @@ function updateTrigger(wheel) {
     if (!values.length) {
       input.value = "";
       input.placeholder = emptyLabel;
+      input.removeAttribute("title");
     } else if (multiple && values.length > 1) {
       input.value = `${values.length} kiválasztva`;
+      input.title = labels.join(", ");
     } else {
       const btn = [...wheel.querySelectorAll(".immo-wheel-opt")].find((b) => b.dataset.value === values[0]);
-      input.value = btn?.textContent?.trim() || formatCustomLabel(values[0], customKind) || values[0];
+      const shown = btn?.textContent?.trim() || formatCustomLabel(values[0], customKind) || values[0];
+      input.value = shown;
+      input.title = shown;
     }
     return;
   }
   if (!trigger) return;
-  if (!labels.length) trigger.textContent = emptyLabel;
-  else if (multiple && values.length > 1) trigger.textContent = `${values.length} kiválasztva`;
-  else trigger.textContent = labels.join(", ");
+  if (!labels.length) {
+    trigger.textContent = emptyLabel;
+    trigger.removeAttribute("title");
+  } else if (multiple && values.length > 1) {
+    trigger.textContent = `${values.length} kiválasztva`;
+    trigger.title = labels.join(", ");
+  } else {
+    trigger.textContent = labels.join(", ");
+    trigger.title = labels.join(", ");
+  }
 }
 
 export function setWheelValue(wheel, value) {

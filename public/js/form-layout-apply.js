@@ -290,8 +290,8 @@ async function applyAdFormLayout() {
     pinLocation(form);
     pinFooter(form);
     window.dispatchEvent(new Event("ad-form-sync-location"));
-  } catch {
-    /* alapelrendezés marad */
+  } catch (error) {
+    console.warn("Ad form layout apply:", error);
   }
 }
 

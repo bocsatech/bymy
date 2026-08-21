@@ -20,9 +20,15 @@ function getPageId() {
 }
 
 async function fetchPageBlocks(page) {
-  const response = await fetch(`/api/site-blocks?page=${encodeURIComponent(page)}`);
-  if (!response.ok) throw new Error("Nem sikerült betölteni az oldalsáv tartalmat.");
-  return response.json();
+  const response = await fetch(`/api/site-blocks?page=${encodeURIComponent(page)}`, {
+    cache: "no-store",
+    credentials: "same-origin",
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(data.error || "Nem sikerült betölteni az oldalsáv tartalmat.");
+  }
+  return data;
 }
 
 async function savePageBlocks(page, payload) {
@@ -32,11 +38,12 @@ async function savePageBlocks(page, payload) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ page, ...payload }),
   });
+  const data = await response.json().catch(() => ({}));
   if (response.status === 401 || response.status === 403) {
-    throw new Error("Csak Bocsatech admin szerkesztheti ezt a tartalmat.");
+    throw new Error(data.error || "Csak Bocsatech admin szerkesztheti ezt a tartalmat.");
   }
-  if (!response.ok) throw new Error("Mentés sikertelen.");
-  return response.json();
+  if (!response.ok) throw new Error(data.error || "Mentés sikertelen.");
+  return data;
 }
 
 function renderVideoSlots(container, videos, { editing = false } = {}) {
@@ -150,8 +157,8 @@ export async function initSiteSideContent() {
   let editing = false;
 
   const pageData = {
-    left: blocks.left,
-    right: blocks.right,
+    left: blocks.left || { title: "", videos: ["", "", ""] },
+    right: blocks.right || { title: "", videos: ["", "", ""] },
     center: blocks.center ?? null,
   };
 

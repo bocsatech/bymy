@@ -1714,9 +1714,13 @@ export async function handleHttpRequest(req, res) {
   }
 
   if (pathname === "/api/site-blocks" && req.method === "GET") {
-    const url = new URL(req.url ?? "", `http://${HOST}`);
-    const page = url.searchParams.get("page");
-    sendJson(res, 200, getSiteBlocks(page));
+    try {
+      const url = new URL(req.url ?? "", `http://${HOST}`);
+      const page = url.searchParams.get("page");
+      sendJson(res, 200, await getSiteBlocks(page));
+    } catch (error) {
+      sendJson(res, 500, { error: error.message ?? "Oldalsáv betöltés sikertelen." });
+    }
     return;
   }
 
@@ -1733,7 +1737,11 @@ export async function handleHttpRequest(req, res) {
       sendJson(res, 400, { error: "Érvénytelen JSON." });
       return;
     }
-    sendJson(res, 200, saveSiteBlocks(body));
+    try {
+      sendJson(res, 200, await saveSiteBlocks(body));
+    } catch (error) {
+      sendJson(res, 500, { error: error.message ?? "Oldalsáv mentés sikertelen." });
+    }
     return;
   }
 

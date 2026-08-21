@@ -1,6 +1,5 @@
-/* Kezdőlap — csak MOBIL webes nézet ≈ natív Bymy app
-   Asztali web: ezek az elemek rejtve / nincs hatás.
-   Natív mobilapp: nem érinti. */
+/* Mobil web felső sáv (logo / Hello / oldalnevek) — minden site-app oldalon
+   Asztali web: rejtve. Alsó tabbar + feed csak hub-page--feed. */
 
 .mw-app-top,
 .mw-app-tabbar {
@@ -45,13 +44,17 @@
     background: #12161c;
   }
 
-  html[data-theme="dark"] body.hub-page--feed .mw-app-top {
+  html[data-theme="dark"] body.site-app .mw-app-top {
     background: #12161c;
     border-bottom-color: #2a313c;
   }
 
-  /* Asztali fejléc eltüntetése csak a kezdőlapon, csak mobilon */
-  body.hub-page--feed > .hub-header {
+  /* Asztali fejléc eltüntetése, ha a mobil felső sáv aktív */
+  body.site-app:has(.mw-app-top) > .hub-header,
+  body.site-app:has(.mw-app-top) > .site-header,
+  body.site-app:has(.mw-app-top) > .home-header,
+  body.site-app:has(.mw-app-top) > header.site-app-header,
+  body.site-app:has(.mw-app-top) > .site-app-header {
     display: none !important;
   }
 
@@ -64,7 +67,7 @@
   }
 
   /* —— Logo: teljes kép, arányos, a dokumentum tetejétől (nincs levágás) —— */
-  body.hub-page--feed .mw-app-top {
+  body.site-app .mw-app-top {
     --mw-logo-h: calc(100vw * 415 / 958);
     --mw-logo-gap: 1.5cm;
     --mw-avatar: 2.25rem;
@@ -80,7 +83,7 @@
     border-bottom: 0;
   }
 
-  body.hub-page--feed .mw-app-logo {
+  body.site-app .mw-app-logo {
     display: block;
     text-decoration: none;
     line-height: 0;
@@ -91,8 +94,8 @@
     margin-bottom: var(--mw-logo-gap);
   }
 
-  body.hub-page--feed .mw-app-logo img,
-  body.hub-page--feed .mw-app-logo .bymy-logo-img {
+  body.site-app .mw-app-logo img,
+  body.site-app .mw-app-logo .bymy-logo-img {
     display: block !important;
     width: 100% !important;
     height: auto !important;
@@ -104,7 +107,7 @@
   }
 
   /* Hello + vezetéknév — balra, közvetlenül a logo alatt */
-  body.hub-page--feed .mw-app-hello {
+  body.site-app .mw-app-hello {
     position: absolute;
     left: max(0.85rem, env(safe-area-inset-left, 0px));
     right: calc(var(--mw-avatar) + 1.75rem);
@@ -125,15 +128,15 @@
     pointer-events: none;
   }
 
-  body.hub-page--feed .mw-app-hello [data-auth-firstname] {
+  body.site-app .mw-app-hello [data-auth-firstname] {
     margin-left: 0.15em;
   }
 
-  html[data-theme="dark"] body.hub-page--feed .mw-app-hello {
+  html[data-theme="dark"] body.site-app .mw-app-hello {
     color: #e8eaed;
   }
 
-  body.hub-page--feed .mw-app-avatar {
+  body.site-app .mw-app-avatar {
     position: absolute;
     right: max(0.75rem, env(safe-area-inset-right, 0px));
     top: calc(var(--mw-logo-h) + (var(--mw-logo-gap) - var(--mw-avatar)) / 2);
@@ -161,7 +164,7 @@
     box-sizing: border-box;
   }
 
-  body.hub-page--feed .mw-app-avatar [data-avatar-letter] {
+  body.site-app .mw-app-avatar [data-avatar-letter] {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -169,11 +172,11 @@
     height: 100%;
   }
 
-  body.hub-page--feed .mw-app-avatar [data-avatar-letter][hidden] {
+  body.site-app .mw-app-avatar [data-avatar-letter][hidden] {
     display: none !important;
   }
 
-  body.hub-page--feed .mw-app-avatar img {
+  body.site-app .mw-app-avatar img {
     position: absolute;
     inset: 0;
     width: 100%;
@@ -182,16 +185,16 @@
     border-radius: inherit;
   }
 
-  body.hub-page--feed .mw-app-avatar img[hidden] {
+  body.site-app .mw-app-avatar img[hidden] {
     display: none !important;
   }
 
-  body.hub-page--feed .mw-app-avatar[hidden] {
+  body.site-app .mw-app-avatar[hidden] {
     display: none !important;
   }
 
   /* Guest: belépés ikon ugyanott, a logo alatti sávban */
-  body.hub-page--feed .mw-app-login {
+  body.site-app .mw-app-login {
     position: absolute;
     right: max(0.75rem, env(safe-area-inset-right, 0px));
     top: calc(var(--mw-logo-h) + (var(--mw-logo-gap) - var(--mw-avatar)) / 2);
@@ -214,27 +217,27 @@
     box-sizing: border-box;
   }
 
-  html[data-auth="member"] body.hub-page--feed .mw-app-login {
+  html[data-auth="member"] body.site-app .mw-app-login {
     display: none !important;
   }
 
-  html[data-auth="guest"] body.hub-page--feed .mw-app-avatar,
-  html[data-auth="guest"] body.hub-page--feed .mw-app-hello {
+  html[data-auth="guest"] body.site-app .mw-app-avatar,
+  html[data-auth="guest"] body.site-app .mw-app-hello {
     display: none !important;
   }
 
-  html[data-auth="member"] body.hub-page--feed .mw-app-avatar,
-  html[data-auth="member"] body.hub-page--feed .mw-app-avatar[hidden] {
+  html[data-auth="member"] body.site-app .mw-app-avatar,
+  html[data-auth="member"] body.site-app .mw-app-avatar[hidden] {
     display: inline-flex !important;
   }
 
-  html[data-auth="member"] body.hub-page--feed .mw-app-hello,
-  html[data-auth="member"] body.hub-page--feed .mw-app-hello[hidden] {
+  html[data-auth="member"] body.site-app .mw-app-hello,
+  html[data-auth="member"] body.site-app .mw-app-hello[hidden] {
     display: block !important;
   }
 
   /* Oldalnevek — mint a webes főmenü, vízszintesen görgethető */
-  body.hub-page--feed .mw-app-pages {
+  body.site-app .mw-app-pages {
     display: flex;
     flex-wrap: nowrap;
     align-items: stretch;
@@ -253,11 +256,11 @@
     background: #fff;
   }
 
-  body.hub-page--feed .mw-app-pages::-webkit-scrollbar {
+  body.site-app .mw-app-pages::-webkit-scrollbar {
     display: none;
   }
 
-  body.hub-page--feed .mw-app-pages-link {
+  body.site-app .mw-app-pages-link {
     flex: 0 0 auto;
     display: inline-flex;
     align-items: center;
@@ -275,22 +278,22 @@
     box-sizing: border-box;
   }
 
-  body.hub-page--feed .mw-app-pages-link.is-active {
+  body.site-app .mw-app-pages-link.is-active {
     color: #111;
     border-bottom-color: #111;
   }
 
-  html[data-theme="dark"] body.hub-page--feed .mw-app-pages {
+  html[data-theme="dark"] body.site-app .mw-app-pages {
     background: #12161c;
     border-top-color: #2a313c;
     border-bottom-color: #2a313c;
   }
 
-  html[data-theme="dark"] body.hub-page--feed .mw-app-pages-link {
+  html[data-theme="dark"] body.site-app .mw-app-pages-link {
     color: #9aa3ad;
   }
 
-  html[data-theme="dark"] body.hub-page--feed .mw-app-pages-link.is-active {
+  html[data-theme="dark"] body.site-app .mw-app-pages-link.is-active {
     color: #e8eaed;
     border-bottom-color: #e8eaed;
   }

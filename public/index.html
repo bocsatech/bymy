@@ -17,10 +17,8 @@
           var loggedIn = !!(user && user.email);
           document.documentElement.setAttribute("data-auth", loggedIn ? "member" : "guest");
           var first = "";
-          var last = "";
           if (user) {
             first = String((user.profile && user.profile.firstName) || "").trim();
-            last = String((user.profile && user.profile.lastName) || "").trim();
             if (!first && user.displayName && String(user.displayName).indexOf("@") < 0) {
               first = String(user.displayName).trim().split(/\s+/)[0] || "";
             }
@@ -29,22 +27,15 @@
               first = local ? local.charAt(0).toUpperCase() + local.slice(1) : "";
             }
           }
-          if (first || last) {
+          if (first) {
             document.addEventListener("DOMContentLoaded", function () {
-              if (first) {
-                document.querySelectorAll("span[data-auth-firstname]").forEach(function (el) {
-                  el.textContent = first;
-                });
-                var letter = first.charAt(0).toUpperCase();
-                document.querySelectorAll("[data-avatar-letter]").forEach(function (el) {
-                  el.textContent = letter;
-                });
-              }
-              if (last) {
-                document.querySelectorAll("[data-auth-lastname]").forEach(function (el) {
-                  el.textContent = last;
-                });
-              }
+              document.querySelectorAll("span[data-auth-firstname]").forEach(function (el) {
+                el.textContent = first;
+              });
+              var letter = first.charAt(0).toUpperCase();
+              document.querySelectorAll("[data-avatar-letter]").forEach(function (el) {
+                el.textContent = letter;
+              });
             });
           }
         } catch (e) {
@@ -78,7 +69,7 @@
         <img class="bymy-logo-img" src="/images/bymy-logo.png?v=logoUpload1" alt="Bymy.hu" width="280" height="130" decoding="async" />
       </a>
       <p class="mw-app-hello" data-auth-member hidden>
-        Hello <span data-auth-lastname></span>
+        Hello <span data-auth-firstname></span>
       </p>
       <a class="mw-app-login" href="/belepes.html" data-auth-guest aria-label="Belépés" title="Belépés">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" stroke="currentColor" stroke-width="1.7"/><path d="M4.5 20.2c1.7-3.2 4.3-4.8 7.5-4.8s5.8 1.6 7.5 4.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>

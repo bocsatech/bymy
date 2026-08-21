@@ -265,11 +265,14 @@ export function ingatlanFormFieldCatalog() {
   return fields;
 }
 
-export function priceMillionOptions({ maxMillions = 20 } = {}) {
+export function priceMillionOptions() {
   const out = [];
-  for (let m = 1; m <= maxMillions; m += 1) {
-    out.push({ value: String(m * 1_000_000), label: `${m} M Ft` });
-  }
+  const pushM = (millions) => {
+    out.push({ value: String(millions * 1_000_000), label: millions >= 1000 ? `${millions / 1000} Mrd Ft` : `${millions} M Ft` });
+  };
+  for (let m = 20; m <= 100; m += 10) pushM(m);
+  for (let m = 150; m <= 500; m += 50) pushM(m);
+  for (let m = 600; m <= 1000; m += 100) pushM(m);
   return out;
 }
 

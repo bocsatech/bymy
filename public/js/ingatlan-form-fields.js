@@ -26,8 +26,8 @@ import {
   alapteruletOptions,
   szobaszamOptions,
   normalizeIngatlanUzletag,
-} from "./ingatlan-fields.js?v=immoWheel1";
-import { fillWheel, initWheel, readWheel, setWheelValue } from "./ingatlan-wheels.js?v=immoWheel2";
+} from "./ingatlan-fields.js?v=immoWheel3";
+import { fillWheel, initMenuWheel, readWheel, setWheelValue } from "./ingatlan-wheels.js?v=immoWheel3";
 import { fetchIngatlanWheelSchema, renderIngatlanSchemaHosts } from "./ingatlan-wheel-schema.js?v=immoWheel1";
 
 function removeIngatlanFormFields(form) {
@@ -36,17 +36,19 @@ function removeIngatlanFormFields(form) {
 
 function syncRovidMenus(root) {
   const tipus = readWheel(root.querySelector('[data-wheel="ingatlan_lakas_tipus"]'));
-  const rovid = tipus === "rovid_berles";
+  const rovid = tipus === "rovid_berles" || String(tipus).split(",").includes("rovid_berles");
   const berleti = root.querySelector('[data-wheel="min_berleti_ido"]');
   const koltoz = root.querySelector('[data-wheel="koltozheto"]');
   const prevBerleti = readWheel(berleti);
   const prevKoltoz = readWheel(koltoz);
-  fillWheel(berleti, (rovid ? MIN_BERLETI_IDO_ROVID : MIN_BERLETI_IDO).filter((o) => o.value));
-  fillWheel(koltoz, (rovid ? KOLTOZHETO_ROVID : KOLTOZHETO).filter((o) => o.value));
-  if (berleti) berleti.dataset.bound = "";
-  if (koltoz) koltoz.dataset.bound = "";
-  initWheel(berleti);
-  initWheel(koltoz);
+  fillWheel(berleti, (rovid ? MIN_BERLETI_IDO_ROVID : MIN_BERLETI_IDO).filter((o) => o.value), {
+    emptyLabel: "Válasszon",
+  });
+  fillWheel(koltoz, (rovid ? KOLTOZHETO_ROVID : KOLTOZHETO).filter((o) => o.value), {
+    emptyLabel: "Válasszon",
+  });
+  initMenuWheel(berleti, { emptyLabel: "Válasszon" });
+  initMenuWheel(koltoz, { emptyLabel: "Válasszon" });
   const berletiOpts = new Set([...(berleti?.querySelectorAll(".immo-wheel-opt") || [])].map((b) => b.dataset.value));
   const koltozOpts = new Set([...(koltoz?.querySelectorAll(".immo-wheel-opt") || [])].map((b) => b.dataset.value));
   setWheelValue(berleti, berletiOpts.has(prevBerleti) ? prevBerleti : "");
@@ -91,8 +93,7 @@ function fillAllWheels(root) {
     });
   }
   root.querySelectorAll("[data-wheel]").forEach((wheel) => {
-    wheel.dataset.bound = "";
-    initWheel(wheel);
+    initMenuWheel(wheel, { emptyLabel: "Válasszon" });
   });
   syncRovidMenus(root);
 }

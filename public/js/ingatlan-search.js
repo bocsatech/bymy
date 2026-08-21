@@ -30,8 +30,15 @@ import {
   arFtMinOptions,
   emeletRank,
   normalizeIngatlanUzletag,
-} from "./ingatlan-fields.js?v=immoWheel1";
-import { fillWheel, initWheel, initMenuWheel, readWheel, setWheelValue } from "./ingatlan-wheels.js?v=immoWheel2";
+} from "./ingatlan-fields.js?v=immoWheel3";
+import {
+  fillWheel,
+  initMenuWheel,
+  readWheel,
+  readWheelList,
+  setWheelValue,
+  MULTI_WHEEL_KEYS,
+} from "./ingatlan-wheels.js?v=immoWheel3";
 import { fetchIngatlanWheelSchema, renderIngatlanSchemaHosts } from "./ingatlan-wheel-schema.js?v=immoWheel1";
 
 const EXACT_KEYS = [
@@ -166,7 +173,12 @@ export function filterListingsByIngatlan(items, filters) {
         continue;
       }
       const got = fieldBag(item, key);
-      if (got && got !== want) return false;
+      if (!got) continue;
+      const wants = String(want)
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+      if (wants.length && !wants.includes(got)) return false;
     }
 
     const floor = fieldBag(item, "emelet");
@@ -181,22 +193,26 @@ export function filterListingsByIngatlan(items, filters) {
 }
 
 function syncRovidMenus(form) {
-  const tipus = readWheel(form.querySelector('[data-wheel="ingatlan_lakas_tipus"]'));
-  const rovid = tipus === "rovid_berles";
+  const tipusList = readWheelList(form.querySelector('[data-wheel="ingatlan_lakas_tipus"]'));
+  const rovid = tipusList.includes("rovid_berles");
   const berleti = form.querySelector('[data-wheel="min_berleti_ido"]');
   const koltoz = form.querySelector('[data-wheel="koltozheto"]');
   const prevBerleti = readWheel(berleti);
   const prevKoltoz = readWheel(koltoz);
-  fillWheel(berleti, rovid ? MIN_BERLETI_IDO_ROVID.filter((o) => o.value) : MIN_BERLETI_IDO.filter((o) => o.value));
-  fillWheel(koltoz, rovid ? KOLTOZHETO_ROVID.filter((o) => o.value) : KOLTOZHETO.filter((o) => o.value));
-  if (berleti) berleti.dataset.bound = "";
-  if (koltoz) koltoz.dataset.bound = "";
-  initWheel(berleti);
-  initWheel(koltoz);
+  fillWheel(berleti, (rovid ? MIN_BERLETI_IDO_ROVID : MIN_BERLETI_IDO).filter((o) => o.value));
+  fillWheel(koltoz, (rovid ? KOLTOZHETO_ROVID : KOLTOZHETO).filter((o) => o.value));
+  initMenuWheel(berleti, { emptyLabel: "Mindegy", multiple: false });
+  initMenuWheel(koltoz, { emptyLabel: "Mindegy", multiple: MULTI_WHEEL_KEYS.has("koltozheto") });
   const berletiOpts = new Set([...(berleti?.querySelectorAll(".immo-wheel-opt") || [])].map((b) => b.dataset.value));
   const koltozOpts = new Set([...(koltoz?.querySelectorAll(".immo-wheel-opt") || [])].map((b) => b.dataset.value));
-  setWheelValue(berleti, berletiOpts.has(prevBerleti) ? prevBerleti : "");
-  setWheelValue(koltoz, koltozOpts.has(prevKoltoz) ? prevKoltoz : "");
+  const berletiKeep = String(prevBerleti)
+    .split(",")
+    .filter((v) => berletiOpts.has(v));
+  const koltozKeep = String(prevKoltoz)
+    .split(",")
+    .filter((v) => koltozOpts.has(v));
+  setWheelValue(berleti, berletiKeep.join(","));
+  setWheelValue(koltoz, koltozKeep.join(","));
 }
 
 function readForm(form) {
@@ -270,11 +286,18 @@ export async function initIngatlanSearch({ onSearch = () => {} } = {}) {
     fillWheel(form.querySelector(`[data-wheel="${bool.field_key}"]`), IGEN_MINDEGY.filter((o) => o.value));
   }
 
-  initMenuWheel(arTol, { emptyLabel: "Min. ár" });
-  initMenuWheel(arIg, { emptyLabel: "Max. ár" });
+  const emptyByName = {
+    ar_tol: "Min. ár",
+    ar_ig: "Max. ár",
+  };
   form.querySelectorAll("[data-wheel]").forEach((wheel) => {
-    if (wheel === arTol || wheel === arIg) return;
-    initWheel(wheel);
+    const name = wheel.getAttribute("data-wheel") || "";
+    const isPrice = name === "ar_tol" || name === "ar_ig";
+    initMenuWheel(wheel, {
+      emptyLabel: emptyByName[name] || "Mindegy",
+      multiple: MULTI_WHEEL_KEYS.has(name),
+      customInput: isPrice,
+    });
   });
 
   const uzletag = form.querySelector("#immo-uzletag");
@@ -303,8 +326,8 @@ export async function initIngatlanSearch({ onSearch = () => {} } = {}) {
     setMoreOpen(!!morePanel?.hidden);
   });
 
-  form.querySelector('[data-wheel="ingatlan_lakas_tipus"]')?.addEventListener("click", () => {
-    requestAnimationFrame(() => syncRovidMenus(form));
+  form.querySelector('[data-wheel="ingatlan_lakas_tipus"]')?.addEventListener("immo-wheel-change", () => {
+    syncRovidMenus(form);
   });
 
   form.addEventListener("submit", (event) => {

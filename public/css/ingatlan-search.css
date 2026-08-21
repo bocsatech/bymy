@@ -134,6 +134,15 @@ body[data-site-page="ingatlan"] .immo-search-panel,
   background-position: right 0.85rem center;
 }
 
+input.immo-wheel-custom.immo-wheel-trigger {
+  cursor: text;
+}
+
+.immo-wheel-wrap--multi .immo-wheel-opt.is-active {
+  background: #0f172a;
+  color: #fff;
+}
+
 .immo-wheel-wrap--menu.is-open .immo-wheel-trigger {
   border-color: #94a3b8;
 }

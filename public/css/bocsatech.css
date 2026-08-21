@@ -210,3 +210,61 @@ th { color: var(--muted); font-weight: 600; }
 @media (max-width: 720px) {
   .layout-card { grid-template-columns: 1fr 1fr; }
 }
+
+.hub-promo-admin {
+  display: grid;
+  gap: 1.5rem;
+}
+.hub-promo-admin__slot h3 {
+  margin: 0 0 0.35rem;
+  font-size: 1.05rem;
+}
+.hub-promo-admin__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 0.75rem;
+  margin: 0.75rem 0 1rem;
+}
+.hub-promo-admin__card {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
+  background: #12171e;
+}
+.hub-promo-admin__card.is-active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+.hub-promo-admin__pick {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+.hub-promo-admin__pick img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 5 / 3;
+  object-fit: cover;
+  background: #0b0e12;
+}
+.hub-promo-admin__pick span {
+  display: block;
+  padding: 0.45rem 0.55rem;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+.hub-promo-admin__del {
+  width: calc(100% - 0.8rem);
+  margin: 0 0.4rem 0.5rem;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.78rem;
+}
+.hub-promo-admin__upload {
+  display: inline-flex;
+  cursor: pointer;
+}

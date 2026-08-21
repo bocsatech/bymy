@@ -23,6 +23,7 @@ let info = "";
 let users = [];
 let listings = [];
 let layout = { cells: [], category: "szemelyauto" };
+let hubPromo = { slots: {} };
 let editingUser = null;
 
 function otpSentMessage(data) {
@@ -60,7 +61,13 @@ async function api(path, opts = {}) {
 function h(html) {
   app.innerHTML = html;
   app.querySelectorAll("[data-act]").forEach((el) => {
-    const evt = el.tagName === "FORM" ? "submit" : el.tagName === "SELECT" ? "change" : "click";
+    const isFile = el.tagName === "INPUT" && el.type === "file";
+    const evt =
+      el.tagName === "FORM"
+        ? "submit"
+        : el.tagName === "SELECT" || isFile
+          ? "change"
+          : "click";
     el.addEventListener(evt, (event) => {
       if (el.tagName === "FORM") event.preventDefault();
       actions[el.getAttribute("data-act")](event, el);
@@ -226,7 +233,71 @@ const actions = {
       render();
     }
   },
+  async hubPromoActivate(_, el) {
+    err = "";
+    info = "";
+    try {
+      const slot = el.getAttribute("data-slot");
+      const imageId = el.getAttribute("data-image-id");
+      hubPromo = await api("/api/level1/hub-promo/active", {
+        method: "PUT",
+        body: JSON.stringify({ slot, imageId }),
+      });
+      info = "Aktív kép beállítva — minden oldalon frissül.";
+      render();
+    } catch (error) {
+      err = error.message;
+      render();
+    }
+  },
+  async hubPromoDelete(_, el) {
+    const slot = el.getAttribute("data-slot");
+    const imageId = el.getAttribute("data-image-id");
+    if (!confirm("Törlöd ezt a feltöltött képet?")) return;
+    err = "";
+    info = "";
+    try {
+      hubPromo = await api("/api/level1/hub-promo/image", {
+        method: "DELETE",
+        body: JSON.stringify({ slot, imageId }),
+      });
+      info = "Kép törölve.";
+      render();
+    } catch (error) {
+      err = error.message;
+      render();
+    }
+  },
+  async hubPromoUpload(_, el) {
+    const slot = el.getAttribute("data-slot");
+    const file = el.files?.[0];
+    if (!file || !slot) return;
+    err = "";
+    info = "";
+    try {
+      const image = await fileToDataUrl(file);
+      hubPromo = await api("/api/level1/hub-promo/upload", {
+        method: "POST",
+        body: JSON.stringify({ slot, image }),
+      });
+      info = "Kép feltöltve és aktívra állítva.";
+      el.value = "";
+      render();
+    } catch (error) {
+      err = error.message;
+      render();
+    }
+  },
 };
+
+function fileToDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ""));
+    reader.onerror = () => reject(new Error("A fájl olvasása sikertelen."));
+    reader.readAsDataURL(file);
+  });
+}
 
 function categoryLabel(id) {
   return LAYOUT_CATEGORIES.find((c) => c.id === id)?.label || id;
@@ -236,6 +307,7 @@ async function loadTab() {
   if (!admin) return;
   if (tab === "users") users = (await api("/api/level1/users")).users;
   if (tab === "listings") listings = (await api("/api/level1/listings")).listings;
+  if (tab === "hubpromo") hubPromo = await api("/api/level1/hub-promo");
   if (isLayoutTab()) {
     layoutCategory = layoutCategoryFromTab();
     const data = await api(`/api/level1/form-layout?category=${encodeURIComponent(layoutCategory)}`);
@@ -414,6 +486,44 @@ function listingsView() {
   return `<table><thead><tr><th></th><th>#</th><th>Cím</th><th>Jármű</th><th>Státusz</th><th></th><th></th></tr></thead><tbody>${rows || `<tr><td colspan="7">Nincs hirdetés.</td></tr>`}</tbody></table>`;
 }
 
+function hubPromoView() {
+  const slots = hubPromo?.slots || {};
+  const blocks = ["ingatlan", "auto"]
+    .map((id) => {
+      const slot = slots[id] || { label: id, images: [], activeId: "stock" };
+      const thumbs = (slot.images || [])
+        .map((img) => {
+          const on = img.id === slot.activeId;
+          return `<div class="hub-promo-admin__card ${on ? "is-active" : ""}">
+            <button type="button" class="hub-promo-admin__pick" data-act="hubPromoActivate" data-slot="${esc(id)}" data-image-id="${esc(img.id)}" title="Aktívra állít">
+              <img src="${esc(img.url)}" alt="" />
+              <span>${img.stock ? "Eredeti" : "Feltöltött"}${on ? " · aktív" : ""}</span>
+            </button>
+            ${
+              img.stock
+                ? ""
+                : `<button type="button" class="btn danger hub-promo-admin__del" data-act="hubPromoDelete" data-slot="${esc(id)}" data-image-id="${esc(img.id)}">Törlés</button>`
+            }
+          </div>`;
+        })
+        .join("");
+      return `<section class="hub-promo-admin__slot">
+        <h3>${esc(slot.label || id)}</h3>
+        <p class="hint">Válassz egy képet (aktív = minden oldalon), vagy tölts fel újat. JPG/PNG/WebP, max 6 MB. A szöveg a képen van.</p>
+        <div class="hub-promo-admin__grid">${thumbs || "<p>Nincs kép.</p>"}</div>
+        <label class="btn ghost hub-promo-admin__upload">Új kép feltöltése
+          <input type="file" accept="image/jpeg,image/png,image/webp" hidden data-act="hubPromoUpload" data-slot="${esc(id)}" />
+        </label>
+      </section>`;
+    })
+    .join("");
+  return `
+    <p class="ok">${esc(info)}</p>
+    <p class="err">${esc(err)}</p>
+    <p class="hint">Kezdőlap két nagy téglalapja — ingatlan és jármű. Ugyanaz a kép jelenik meg minden oldalon.</p>
+    <div class="hub-promo-admin">${blocks}</div>`;
+}
+
 function layoutView() {
   const label = categoryLabel(layoutCategoryFromTab());
   return `
@@ -426,7 +536,14 @@ function layoutView() {
 }
 
 function shell() {
-  const body = tab === "users" ? usersView() : tab === "listings" ? listingsView() : layoutView();
+  const body =
+    tab === "users"
+      ? usersView()
+      : tab === "listings"
+        ? listingsView()
+        : tab === "hubpromo"
+          ? hubPromoView()
+          : layoutView();
   const layoutTabs = LAYOUT_CATEGORIES.map(
     (c) =>
       `<button class="tab tab--layout ${tab === `layout:${c.id}` ? "on" : ""}" data-act="setTab" data-tab="layout:${c.id}">${esc(c.label)}</button>`
@@ -443,6 +560,7 @@ function shell() {
       <div class="tabs">
         <button class="tab ${tab === "users" ? "on" : ""}" data-act="setTab" data-tab="users">Userek</button>
         <button class="tab ${tab === "listings" ? "on" : ""}" data-act="setTab" data-tab="listings">Hirdetések</button>
+        <button class="tab ${tab === "hubpromo" ? "on" : ""}" data-act="setTab" data-tab="hubpromo">Kezdőlap képek</button>
       </div>
       <div class="nav-section">
         <p class="nav-section-label">Feladási mezők</p>

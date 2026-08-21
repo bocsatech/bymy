@@ -32,6 +32,7 @@ import {
   resolveServerImageFile,
   ensureServerImageDirs,
 } from "./lib/site-hero.mjs";
+import { getHubPromoPublic, resolveHubPromoFile } from "./lib/hub-promo.mjs";
 import {
   deleteQuery,
   listFugvenyLists,
@@ -234,6 +235,20 @@ function serveStatic(path, res) {
   // Hirdetésképek: ~/.autosweb/uploads (túléli a frissítést)
   if (rel.startsWith("uploads/listings/")) {
     const uploadFile = resolveListingImageFile(`/${rel}`);
+    if (uploadFile) {
+      const ext = extname(uploadFile);
+      res.writeHead(200, {
+        "Content-Type": MIME[ext] ?? "application/octet-stream",
+        "Cache-Control": "public, max-age=86400",
+      });
+      res.end(readFileSync(uploadFile));
+      return;
+    }
+  }
+
+  // Hub promo (kezdőlap téglalapok)
+  if (rel.startsWith("uploads/hub-promo/")) {
+    const uploadFile = resolveHubPromoFile(`/${rel}`);
     if (uploadFile) {
       const ext = extname(uploadFile);
       res.writeHead(200, {
@@ -1605,6 +1620,15 @@ export async function handleHttpRequest(req, res) {
 
   if (pathname === "/api/media/proxy" && req.method === "GET") {
     await handleMediaProxy(req, res);
+    return;
+  }
+
+  if (pathname === "/api/hub-promo" && req.method === "GET") {
+    try {
+      sendJson(res, 200, await getHubPromoPublic());
+    } catch (error) {
+      sendJson(res, 500, { error: error.message ?? "Hub promo hiba." });
+    }
     return;
   }
 

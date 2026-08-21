@@ -7,6 +7,11 @@ body.site-app {
   color: #202124;
 }
 
+/* Kezdőlap feed: ne a szürke site-app háttér legyen a státuszsáv mögött */
+body.site-app.hub-page--feed {
+  background: #fff;
+}
+
 body.site-app .local-banner {
   background: #1a1a1a;
   color: #ccc;

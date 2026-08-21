@@ -1,5 +1,5 @@
 /** Mentett 12 oszlopos elrendezés — minden mező ugyanazon a lépésrácson. */
-import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=immoHide1";
+import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=immoSync1";
 
 function cssEscape(value) {
   if (window.CSS?.escape) return window.CSS.escape(value);
@@ -20,8 +20,8 @@ function wrapFor(form, fieldKey) {
     document.getElementById(fieldKey) || form.querySelector(`[name="${cssEscape(fieldKey)}"]`);
   if (!input) return null;
   if (input.closest(SKIP_HOST) || input.closest(KEEP_OUT)) return null;
-  // Autó/teher layout: az ingatlan mezőblokk soha ne kerüljön a canvasra.
-  if (input.closest("#ingatlan-fields") && currentLayoutCategory(form) !== "ingatlan") return null;
+  // A kerék-panel (#ingatlan-fields) ne menjen a canvasra — saját UI.
+  if (input.closest("#ingatlan-fields")) return null;
   const existing = input.closest(".labeled-field, .field-stack, .md-outlined");
   if (existing) {
     if (existing.closest(KEEP_OUT) || existing.querySelector(KEEP_OUT)) return null;
@@ -73,10 +73,9 @@ function pinExtras(form) {
 function hideUnplacedVehicleChrome(form, placed) {
   form.querySelectorAll(".labeled-field, .field-stack, .md-outlined").forEach((el) => {
     if (placed.has(el)) return;
+    if (el.closest("#ingatlan-fields")) return;
     if (el.closest(KEEP_OUT)) return;
     if (el.closest(".packages, .phone-lang-grid, .photo-list, #equipment-sections, #egyeb-info-sections")) return;
-    // Üres #ingatlan-fields konténer — a gyerekeket a layout már átvitte.
-    if (el.id === "ingatlan-fields") return;
     el.classList.add("ad-layout-hidden", "ad-immo-orphan");
     el.hidden = true;
     setRequired(el, false);
@@ -446,7 +445,44 @@ async function applyAdFormLayout() {
       placeWrap(wrap, cell);
     }
     if (isImmo) {
-      hideUnplacedVehicleChrome(form, placed);
+      // Kerék UI marad egyben; csak a járműmaradékot rejtjük.
+      hideVehicleChromeWithoutLayout(form);
+      form.querySelectorAll(".step-panel[data-step='1'] .form-grid > .field-row").forEach((row) => {
+        if (row.closest("#ingatlan-fields")) return;
+        row.hidden = true;
+        row.classList.add("ad-immo-orphan");
+        row.style.setProperty("display", "none", "important");
+      });
+      // Canvasra került autó mezők elrejtése
+      form.querySelectorAll(".ad-layout-item").forEach((el) => {
+        if (el.closest("#ingatlan-fields")) return;
+        const id = el.querySelector("input, select, textarea")?.id || el.querySelector("[name]")?.name;
+        const keep = new Set([
+          "vetelar",
+          "akcios_ar",
+          "vetelar_eur",
+          "leiras",
+          "megye",
+          "telepules",
+          "iranyitoszam",
+          "megtekintesi_cim",
+          "email",
+          "email_megjelenik",
+          "hitel",
+          "kezdo_reszlet",
+          "havi_reszlet",
+          "futamido",
+          "berelheto",
+          "alkudhato",
+          "csere",
+          "forgalomba_helyezes_ar",
+        ]);
+        if (id && keep.has(id)) return;
+        if (el.matches?.(".field-stack--location") || el.querySelector?.(".field-stack--location")) return;
+        if (LOCATION_FIELD_KEYS.has(id)) return;
+        el.classList.add("ad-layout-hidden", "ad-immo-orphan");
+        el.hidden = true;
+      });
     }
     pruneEmptyCards(form);
     compactCanvasRows(form);

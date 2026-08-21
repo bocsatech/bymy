@@ -2341,6 +2341,36 @@ body.site-app #ad-form .ad-layout-hidden {
   display: none !important;
 }
 
+/* Ingatlan feladás — keresővel azonos panel */
+body.site-app #ad-form.ad-form--ingatlan #ingatlan-fields {
+  display: block !important;
+  width: 100%;
+  margin: 0 0 1rem;
+}
+
+body.site-app #ad-form.ad-form--ingatlan #ingatlan-fields.form-grid {
+  display: block !important;
+}
+
+body.site-app #ad-form.ad-form--ingatlan .immo-post-panel__card {
+  margin: 0;
+}
+
+body.site-app #ad-form.ad-form--ingatlan .step-panel[data-step="1"] .form-grid:has(#ingatlan-fields) {
+  display: block;
+}
+
+body.site-app #ad-form.ad-form--ingatlan .immo-action {
+  appearance: none;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  border-radius: 999px;
+  padding: 0.55rem 1rem;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
 /* Ingatlan feladás: járműmezők / lépések soha ne látszódjanak (canvasról sem). */
 body.site-app #ad-form.ad-form--ingatlan .ad-layout-item:has(#gyartasi_ev),
 body.site-app #ad-form.ad-form--ingatlan .ad-layout-item:has(#gyartasi_honap),

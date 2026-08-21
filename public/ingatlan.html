@@ -56,7 +56,7 @@
     <link rel="stylesheet" href="/css/site-app.css?v=logoTop2" />
     <link rel="stylesheet" href="/css/site-side.css?v=home20260725unifiedscroll" />
     <link rel="stylesheet" href="/css/home.css?v=msgLive1" />
-    <link rel="stylesheet" href="/css/ingatlan-search.css?v=immoFullW1" />
+    <link rel="stylesheet" href="/css/ingatlan-search.css?v=immoSync1" />
     <style id="home-scroll-fix">
       html:has(body.home-page) {
         overflow-y: auto !important;
@@ -123,12 +123,14 @@
     <main class="home-main">
       <section class="immo-search-hero" aria-labelledby="immo-search-title">
         <article class="immo-search-panel">
-          <h1 class="immo-search-title" id="immo-search-title">Melyik ingatlant bérelnéd?</h1>
+          <h1 class="immo-search-title" id="immo-search-title">Melyik ingatlant keresed?</h1>
           <form class="immo-search-form" id="immo-search-form">
             <label class="immo-field">
-              <span class="immo-label">Ingatlan típus</span>
+              <span class="immo-label">Kategória</span>
               <select class="immo-control" id="immo-uzletag" name="ingatlan_uzletag">
-                <option value="berles" selected>Bérlés</option>
+                <option value="keres">Keres</option>
+                <option value="kinal">Kínál</option>
+                <option value="berbe" selected>Bérbe ad / vesz</option>
               </select>
             </label>
 
@@ -304,7 +306,7 @@
       </div>
     </main>
 
-    <script src="/js/home-app.js?v=immoSearch1" type="module"></script>
+    <script src="/js/home-app.js?v=immoSync1" type="module"></script>
     <script src="/js/site-avatar-menu.js?v=fiokPage2" type="module"></script>
     <script src="/js/nav-counts.js?v=willhabenHdr1" type="module"></script>
     <script src="/js/theme.js?v=willhabenHdr1" type="module"></script>

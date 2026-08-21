@@ -1,6 +1,6 @@
 /**
- * Ingatlan űrlapmezők a hirdetésfeladáson — ugyanazok a kulcsok, mint a keresőben.
- * Csak vertical=ingatlan esetén kerülnek a DOM-ba (autó/teher ne lássa).
+ * Ingatlan feladás — ugyanaz a kerék UI, mint az ingatlan.html keresőn.
+ * Csak vertical=ingatlan esetén kerül a DOM-ba.
  */
 
 import {
@@ -26,37 +26,75 @@ import {
   INGATLAN_BOOL_FIELDS,
   alapteruletOptions,
   szobaszamOptions,
-} from "./ingatlan-fields.js?v=immo2";
-
-function fillSelect(select, options, { keepFirstEmpty = true } = {}) {
-  if (!select) return;
-  const current = select.value;
-  select.innerHTML = "";
-  if (keepFirstEmpty) {
-    const empty = document.createElement("option");
-    empty.value = "";
-    empty.textContent = "Válasszon";
-    select.appendChild(empty);
-  }
-  for (const opt of options) {
-    if (!opt.value && keepFirstEmpty) continue;
-    const el = document.createElement("option");
-    el.value = opt.value;
-    el.textContent = opt.label;
-    select.appendChild(el);
-  }
-  if ([...select.options].some((o) => o.value === current)) select.value = current;
-}
-
-function selectHtml(id, label) {
-  return `<div class="labeled-field md-outlined">
-    <label for="${id}">${label}</label>
-    <select id="${id}" name="${id}"></select>
-  </div>`;
-}
+  normalizeIngatlanUzletag,
+} from "./ingatlan-fields.js?v=immoSync1";
+import { fillWheel, initWheel, readWheel, setWheelValue, wheelFieldHtml } from "./ingatlan-wheels.js?v=immoSync1";
 
 function removeIngatlanFormFields(form) {
   form?.querySelector("#ingatlan-fields")?.remove();
+}
+
+function syncRovidMenus(root) {
+  const tipus = readWheel(root.querySelector('[data-wheel="ingatlan_lakas_tipus"]'));
+  const rovid = tipus === "rovid_berles";
+  const berleti = root.querySelector('[data-wheel="min_berleti_ido"]');
+  const koltoz = root.querySelector('[data-wheel="koltozheto"]');
+  const prevBerleti = readWheel(berleti);
+  const prevKoltoz = readWheel(koltoz);
+  fillWheel(berleti, (rovid ? MIN_BERLETI_IDO_ROVID : MIN_BERLETI_IDO).filter((o) => o.value));
+  fillWheel(koltoz, (rovid ? KOLTOZHETO_ROVID : KOLTOZHETO).filter((o) => o.value));
+  berleti.dataset.bound = "";
+  koltoz.dataset.bound = "";
+  initWheel(berleti);
+  initWheel(koltoz);
+  const berletiOpts = new Set([...(berleti?.querySelectorAll(".immo-wheel-opt") || [])].map((b) => b.dataset.value));
+  const koltozOpts = new Set([...(koltoz?.querySelectorAll(".immo-wheel-opt") || [])].map((b) => b.dataset.value));
+  setWheelValue(berleti, berletiOpts.has(prevBerleti) ? prevBerleti : "");
+  setWheelValue(koltoz, koltozOpts.has(prevKoltoz) ? prevKoltoz : "");
+}
+
+function fillAllWheels(root) {
+  fillWheel(root.querySelector('[data-wheel="alapterulet"]'), alapteruletOptions(), { emptyLabel: "Válasszon" });
+  fillWheel(root.querySelector('[data-wheel="szobaszam"]'), szobaszamOptions(), { emptyLabel: "Válasszon" });
+  fillWheel(root.querySelector('[data-wheel="ingatlan_lakas_tipus"]'), INGATLAN_LAKAS_TIPUS.filter((o) => o.value), {
+    emptyLabel: "Válasszon",
+  });
+  fillWheel(root.querySelector('[data-wheel="allapot"]'), INGATLAN_ALLAPOT.filter((o) => o.value), {
+    emptyLabel: "Válasszon",
+  });
+  fillWheel(root.querySelector('[data-wheel="ingatlan_kora"]'), INGATLAN_KORA.filter((o) => o.value), {
+    emptyLabel: "Válasszon",
+  });
+  fillWheel(root.querySelector('[data-wheel="min_berleti_ido"]'), MIN_BERLETI_IDO.filter((o) => o.value), {
+    emptyLabel: "Válasszon",
+  });
+  fillWheel(root.querySelector('[data-wheel="butorozott"]'), BUTOROZOTT.filter((o) => o.value), {
+    emptyLabel: "Válasszon",
+  });
+  fillWheel(root.querySelector('[data-wheel="kilatas"]'), KILATAS.filter((o) => o.value), { emptyLabel: "Válasszon" });
+  fillWheel(root.querySelector('[data-wheel="tajolas"]'), TAJOLAS.filter((o) => o.value), { emptyLabel: "Válasszon" });
+  fillWheel(root.querySelector('[data-wheel="futes"]'), FUTES.filter((o) => o.value), { emptyLabel: "Válasszon" });
+  fillWheel(root.querySelector('[data-wheel="parkolas"]'), PARKOLAS.filter((o) => o.value), { emptyLabel: "Válasszon" });
+  fillWheel(root.querySelector('[data-wheel="komfort"]'), KOMFORT.filter((o) => o.value), { emptyLabel: "Válasszon" });
+  fillWheel(root.querySelector('[data-wheel="tetoter"]'), TETOTER.filter((o) => o.value), { emptyLabel: "Válasszon" });
+  fillWheel(root.querySelector('[data-wheel="furdo_wc"]'), FURDO_WC.filter((o) => o.value), { emptyLabel: "Válasszon" });
+  fillWheel(root.querySelector('[data-wheel="emelet"]'), EMELET.filter((o) => o.value), { emptyLabel: "Válasszon" });
+  fillWheel(root.querySelector('[data-wheel="belmagassag"]'), BELMAGASSAG.filter((o) => o.value), {
+    emptyLabel: "Válasszon",
+  });
+  fillWheel(root.querySelector('[data-wheel="koltozheto"]'), KOLTOZHETO.filter((o) => o.value), {
+    emptyLabel: "Válasszon",
+  });
+  for (const bool of INGATLAN_BOOL_FIELDS) {
+    fillWheel(root.querySelector(`[data-wheel="${bool.field_key}"]`), IGEN_MINDEGY.filter((o) => o.value), {
+      emptyLabel: "Válasszon",
+    });
+  }
+  root.querySelectorAll("[data-wheel]").forEach((wheel) => {
+    wheel.dataset.bound = "";
+    initWheel(wheel);
+  });
+  syncRovidMenus(root);
 }
 
 export function ensureIngatlanFormFields(form) {
@@ -71,65 +109,92 @@ export function ensureIngatlanFormFields(form) {
 
   const root = document.createElement("div");
   root.id = "ingatlan-fields";
-  root.className = "ingatlan-fields form-grid";
+  root.className = "ingatlan-fields immo-post-panel";
   root.setAttribute("data-ingatlan-only", "1");
 
-  const boolHtml = INGATLAN_BOOL_FIELDS.map((f) => selectHtml(f.field_key, f.label)).join("");
+  const boolHtml = INGATLAN_BOOL_FIELDS.map((f) => wheelFieldHtml(f.field_key, f.label)).join("");
+  const catOpts = INGATLAN_UZLETAG.map(
+    (o) => `<option value="${o.value}">${o.label}</option>`
+  ).join("");
 
   root.innerHTML = `
-    <div class="field-row full">
-      ${selectHtml("ingatlan_uzletag", "Ingatlan típus")}
-      ${selectHtml("ingatlan_lakas_tipus", "Lakás típus")}
-      ${selectHtml("ingatlan_kora", "Ingatlan kora")}
-      ${selectHtml("min_berleti_ido", "Minimum bérleti idő")}
-      ${selectHtml("butorozott", "Bútorozott")}
-      ${selectHtml("kilatas", "Kilátás")}
-      ${selectHtml("tajolas", "Tájolás")}
-      ${selectHtml("futes", "Fűtés módja")}
-      ${selectHtml("parkolas", "Parkolás")}
-      ${selectHtml("komfort", "Komfort")}
-      ${selectHtml("tetoter", "Tetőtér")}
-      ${selectHtml("furdo_wc", "Fürdő és WC")}
-      ${selectHtml("emelet", "Emelet")}
-      ${selectHtml("belmagassag", "Belmagasság")}
-      ${selectHtml("koltozheto", "Mikortól költözhető")}
-      ${selectHtml("alapterulet", "Alapterület (m²)")}
-      ${selectHtml("szobaszam", "Szobaszám")}
-      ${boolHtml}
-    </div>
+    <article class="immo-search-panel immo-post-panel__card">
+      <h2 class="immo-search-title">Ingatlan adatai</h2>
+      <div class="immo-search-form">
+        <label class="immo-field">
+          <span class="immo-label">Kategória</span>
+          <select class="immo-control" id="ingatlan_uzletag" name="ingatlan_uzletag">${catOpts}</select>
+        </label>
+
+        <div class="immo-wheels-row immo-wheels-row--4">
+          ${wheelFieldHtml("alapterulet", "Alapterület")}
+          ${wheelFieldHtml("szobaszam", "Szobaszám")}
+          ${wheelFieldHtml("ingatlan_lakas_tipus", "Típus")}
+          ${wheelFieldHtml("allapot", "Állapot")}
+        </div>
+
+        <div class="immo-more" id="immo-post-more" hidden>
+          <div class="immo-wheels-row">
+            ${wheelFieldHtml("ingatlan_kora", "Ingatlan kora")}
+            ${wheelFieldHtml("min_berleti_ido", "Minimum bérleti idő")}
+          </div>
+          <div class="immo-wheels-row">
+            ${wheelFieldHtml("butorozott", "Bútorozott")}
+            ${wheelFieldHtml("kilatas", "Kilátás")}
+          </div>
+          <div class="immo-wheels-row">
+            ${wheelFieldHtml("tajolas", "Tájolás")}
+            ${wheelFieldHtml("futes", "Fűtés módja")}
+          </div>
+          <div class="immo-wheels-row">
+            ${wheelFieldHtml("parkolas", "Parkolás")}
+            ${wheelFieldHtml("komfort", "Komfort")}
+          </div>
+          <div class="immo-wheels-row">
+            ${wheelFieldHtml("tetoter", "Tetőtér")}
+            ${wheelFieldHtml("furdo_wc", "Fürdő és WC")}
+          </div>
+          <div class="immo-wheels-row">
+            ${wheelFieldHtml("emelet", "Emelet")}
+            ${wheelFieldHtml("belmagassag", "Belmagasság")}
+          </div>
+          <div class="immo-wheels-row">
+            ${wheelFieldHtml("koltozheto", "Mikortól költözhető")}
+          </div>
+          <div class="immo-bool-grid">${boolHtml}</div>
+        </div>
+
+        <div class="immo-actions-secondary" style="margin-top:0.35rem">
+          <button type="button" class="immo-action" id="immo-post-tovabbi" aria-expanded="false" aria-controls="immo-post-more">További feltételek</button>
+        </div>
+      </div>
+    </article>
   `;
 
   host.prepend(root);
 
-  fillSelect(root.querySelector("#ingatlan_uzletag"), INGATLAN_UZLETAG, { keepFirstEmpty: false });
-  fillSelect(root.querySelector("#ingatlan_lakas_tipus"), INGATLAN_LAKAS_TIPUS);
-  fillSelect(root.querySelector("#ingatlan_kora"), INGATLAN_KORA);
-  fillSelect(root.querySelector("#min_berleti_ido"), MIN_BERLETI_IDO);
-  fillSelect(root.querySelector("#butorozott"), BUTOROZOTT);
-  fillSelect(root.querySelector("#kilatas"), KILATAS);
-  fillSelect(root.querySelector("#tajolas"), TAJOLAS);
-  fillSelect(root.querySelector("#futes"), FUTES);
-  fillSelect(root.querySelector("#parkolas"), PARKOLAS);
-  fillSelect(root.querySelector("#komfort"), KOMFORT);
-  fillSelect(root.querySelector("#tetoter"), TETOTER);
-  fillSelect(root.querySelector("#furdo_wc"), FURDO_WC);
-  fillSelect(root.querySelector("#emelet"), EMELET);
-  fillSelect(root.querySelector("#belmagassag"), BELMAGASSAG);
-  fillSelect(root.querySelector("#koltozheto"), KOLTOZHETO);
-  fillSelect(root.querySelector("#alapterulet"), alapteruletOptions());
-  fillSelect(root.querySelector("#szobaszam"), szobaszamOptions());
-  for (const bool of INGATLAN_BOOL_FIELDS) {
-    fillSelect(root.querySelector(`#${bool.field_key}`), IGEN_MINDEGY);
-  }
-
   const uz = root.querySelector("#ingatlan_uzletag");
-  if (uz) uz.value = "berles";
+  if (uz) uz.value = "berbe";
 
-  const lakas = root.querySelector("#ingatlan_lakas_tipus");
-  lakas?.addEventListener("change", () => {
-    const rovid = lakas.value === "rovid_berles";
-    fillSelect(root.querySelector("#min_berleti_ido"), rovid ? MIN_BERLETI_IDO_ROVID : MIN_BERLETI_IDO);
-    fillSelect(root.querySelector("#koltozheto"), rovid ? KOLTOZHETO_ROVID : KOLTOZHETO);
+  fillAllWheels(root);
+
+  root.querySelectorAll("[data-wheel]").forEach((wheel) => {
+    const name = wheel.getAttribute("data-wheel");
+    const hidden = root.querySelector(`input[name="${name}"]`);
+    if (hidden?.value) setWheelValue(wheel, hidden.value);
+  });
+
+  const morePanel = root.querySelector("#immo-post-more");
+  const moreBtn = root.querySelector("#immo-post-tovabbi");
+  moreBtn?.addEventListener("click", () => {
+    const open = !!morePanel?.hidden;
+    if (morePanel) morePanel.hidden = !open;
+    moreBtn.setAttribute("aria-expanded", open ? "true" : "false");
+    moreBtn.textContent = open ? "Kevesebb feltétel" : "További feltételek";
+  });
+
+  root.querySelector('[data-wheel="ingatlan_lakas_tipus"]')?.addEventListener("immo-wheel-change", () => {
+    syncRovidMenus(root);
   });
 
   return root;
@@ -153,11 +218,8 @@ export function syncIngatlanFormVisibility(form) {
     const n = Number(el.dataset.stepIndicator);
     const vehicleStep = n === 2 || n === 3;
     el.classList.toggle("ad-step-skip", isImmo && vehicleStep);
-    if (isImmo && vehicleStep) {
-      el.setAttribute("aria-hidden", "true");
-    } else {
-      el.removeAttribute("aria-hidden");
-    }
+    if (isImmo && vehicleStep) el.setAttribute("aria-hidden", "true");
+    else el.removeAttribute("aria-hidden");
   });
 
   if (!isImmo) {
@@ -169,11 +231,6 @@ export function syncIngatlanFormVisibility(form) {
         el.removeAttribute("hidden");
         el.style.removeProperty("display");
       }
-    });
-    form.querySelectorAll(".field-row--vehicle-year, .field-row--vehicle-ident, .field-row--tipus-egyeb").forEach((el) => {
-      el.hidden = false;
-      el.removeAttribute("hidden");
-      el.style.removeProperty("display");
     });
     for (const name of ["gyartasi_ev", "gyartmany", "modell", "kivitel", "okmany_jelleg", "km", "uzemanyag"]) {
       const el = form.elements.namedItem(name);
@@ -192,6 +249,8 @@ export function syncIngatlanFormVisibility(form) {
     root.hidden = false;
     root.removeAttribute("hidden");
     root.style.removeProperty("display");
+    const uz = root.querySelector("#ingatlan_uzletag");
+    if (uz) uz.value = normalizeIngatlanUzletag(uz.value);
   }
 
   form
@@ -204,18 +263,8 @@ export function syncIngatlanFormVisibility(form) {
       el.style.setProperty("display", "none", "important");
     });
 
-  // Minden jármű field-row, ami nem az ingatlan blokk része (az Állapot sor maradjon).
   form.querySelectorAll(".step-panel[data-step='1'] .form-grid > .field-row").forEach((row) => {
     if (row.closest("#ingatlan-fields")) return;
-    if (row.querySelector("#allapot")) {
-      row.querySelectorAll(".labeled-field, .md-outlined").forEach((lf) => {
-        if (lf.querySelector("#allapot")) return;
-        lf.hidden = true;
-        lf.classList.add("immo-hide-vehicle");
-        lf.style.setProperty("display", "none", "important");
-      });
-      return;
-    }
     row.hidden = true;
     row.classList.add("immo-hide-vehicle");
     row.style.setProperty("display", "none", "important");
@@ -230,11 +279,18 @@ export function syncIngatlanFormVisibility(form) {
     });
   });
 
-  const allapot = form.querySelector("#allapot");
-  if (allapot && allapot.dataset.immoOptions !== "1") {
-    allapot.dataset.immoOptions = "1";
-    fillSelect(allapot, INGATLAN_ALLAPOT);
-  }
+  // Régi #allapot a form-gridben ne ütközzön a kerék hiddennel.
+  form.querySelectorAll('.step-panel[data-step="1"] .form-grid select#allapot, .step-panel[data-step="1"] .form-grid #allapot').forEach((el) => {
+    if (el.closest("#ingatlan-fields")) return;
+    el.removeAttribute("id");
+    el.setAttribute("name", "_vehicle_allapot_unused");
+    const wrap = el.closest(".labeled-field, .field-row");
+    if (wrap) {
+      wrap.hidden = true;
+      wrap.classList.add("immo-hide-vehicle");
+      wrap.style.setProperty("display", "none", "important");
+    }
+  });
 
   for (const name of ["gyartasi_ev", "gyartmany", "modell", "kivitel", "okmany_jelleg", "km", "uzemanyag"]) {
     const el = form.elements.namedItem(name);

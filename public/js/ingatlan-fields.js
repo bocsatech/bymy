@@ -1,6 +1,22 @@
 /** Böngésző + szerver: ingatlan mezőopciók (kereső / űrlap / admin). */
 
-export const INGATLAN_UZLETAG = [{ value: "berles", label: "Bérlés" }];
+export const INGATLAN_UZLETAG = [
+  { value: "keres", label: "Keres" },
+  { value: "kinal", label: "Kínál" },
+  { value: "berbe", label: "Bérbe ad / vesz" },
+];
+
+/** Régi értékek normalizálása. */
+export function normalizeIngatlanUzletag(value) {
+  const v = String(value ?? "")
+    .trim()
+    .toLowerCase();
+  if (v === "berles" || v === "kiado" || v === "berelheto") return "berbe";
+  if (v === "elado" || v === "kinal") return "kinal";
+  if (v === "keres") return "keres";
+  if (v === "berbe") return "berbe";
+  return v || "berbe";
+}
 
 export const INGATLAN_LAKAS_TIPUS = [
   { value: "", label: "Mindegy" },
@@ -200,7 +216,7 @@ export const INGATLAN_BOOL_FIELDS = [
 
 export function ingatlanFormFieldCatalog() {
   const fields = [
-    { field_key: "ingatlan_uzletag", label: "Ingatlan típus (bérlés)", step: 1 },
+    { field_key: "ingatlan_uzletag", label: "Kategória (Keres / Kínál / Bérbe)", step: 1 },
     { field_key: "ingatlan_lakas_tipus", label: "Lakás típus", step: 1 },
     { field_key: "allapot", label: "Állapot", step: 1 },
     { field_key: "ingatlan_kora", label: "Ingatlan kora", step: 1 },

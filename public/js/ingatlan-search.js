@@ -29,7 +29,9 @@ import {
   szobaszamOptions,
   arFtMinOptions,
   emeletRank,
-} from "./ingatlan-fields.js?v=immo1";
+  normalizeIngatlanUzletag,
+} from "./ingatlan-fields.js?v=immoSync1";
+import { fillWheel, initWheel, readWheel, setWheelValue } from "./ingatlan-wheels.js?v=immoSync1";
 
 const EXACT_KEYS = [
   "ingatlan_uzletag",
@@ -52,7 +54,7 @@ const EXACT_KEYS = [
 
 export function emptyIngatlanFilters() {
   return {
-    ingatlan_uzletag: "berles",
+    ingatlan_uzletag: "berbe",
     keresesi_hely: "",
     ar_tol: null,
     ar_ig: null,
@@ -127,8 +129,9 @@ export function filterListingsByIngatlan(items, filters) {
   const f = { ...emptyIngatlanFilters(), ...filters };
   return items.filter((item) => {
     if (f.ingatlan_uzletag) {
-      const uz = fieldBag(item, "ingatlan_uzletag");
-      if (uz && uz !== f.ingatlan_uzletag) return false;
+      const want = normalizeIngatlanUzletag(f.ingatlan_uzletag);
+      const uz = normalizeIngatlanUzletag(fieldBag(item, "ingatlan_uzletag"));
+      if (uz && uz !== want) return false;
     }
 
     if (f.keresesi_hely) {
@@ -176,67 +179,28 @@ export function filterListingsByIngatlan(items, filters) {
   });
 }
 
-function fillWheel(root, options, { emptyLabel = "Mindegy", includeEmpty = true } = {}) {
-  if (!root) return;
-  const list = includeEmpty ? [{ value: "", label: emptyLabel }, ...options.filter((o) => o.value !== "")] : options;
-  root.innerHTML = list
-    .map(
-      (opt) =>
-        `<button type="button" class="immo-wheel-opt" role="option" data-value="${escapeAttr(opt.value)}">${escapeHtml(
-          opt.label
-        )}</button>`
-    )
-    .join("");
-}
-
-function escapeHtml(value) {
-  return String(value ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
-
-function escapeAttr(value) {
-  return escapeHtml(value).replace(/'/g, "&#39;");
-}
-
-function setWheelValue(wheel, value) {
-  if (!wheel) return;
-  const want = value == null ? "" : String(value);
-  wheel.querySelectorAll(".immo-wheel-opt").forEach((btn) => {
-    btn.classList.toggle("is-active", btn.dataset.value === want);
-  });
-  const active = wheel.querySelector(".immo-wheel-opt.is-active");
-  active?.scrollIntoView({ block: "nearest", behavior: "smooth" });
-  const hidden = wheel.parentElement?.querySelector('input[type="hidden"]');
-  if (hidden) hidden.value = want;
-}
-
-function readWheel(wheel) {
-  const active = wheel?.querySelector(".immo-wheel-opt.is-active");
-  if (active) return active.dataset.value ?? "";
-  const hidden = wheel?.parentElement?.querySelector('input[type="hidden"]');
-  return hidden?.value ?? "";
-}
-
-function initWheel(wheel) {
-  if (!wheel || wheel.dataset.bound === "1") return;
-  wheel.dataset.bound = "1";
-  wheel.addEventListener("click", (event) => {
-    const btn = event.target.closest(".immo-wheel-opt");
-    if (!btn || !wheel.contains(btn)) return;
-    setWheelValue(wheel, btn.dataset.value ?? "");
-  });
-  if (!wheel.querySelector(".immo-wheel-opt.is-active")) {
-    const first = wheel.querySelector(".immo-wheel-opt");
-    if (first) setWheelValue(wheel, first.dataset.value ?? "");
-  }
+function syncRovidMenus(form) {
+  const tipus = readWheel(form.querySelector('[data-wheel="ingatlan_lakas_tipus"]'));
+  const rovid = tipus === "rovid_berles";
+  const berleti = form.querySelector('[data-wheel="min_berleti_ido"]');
+  const koltoz = form.querySelector('[data-wheel="koltozheto"]');
+  const prevBerleti = readWheel(berleti);
+  const prevKoltoz = readWheel(koltoz);
+  fillWheel(berleti, rovid ? MIN_BERLETI_IDO_ROVID.filter((o) => o.value) : MIN_BERLETI_IDO.filter((o) => o.value));
+  fillWheel(koltoz, rovid ? KOLTOZHETO_ROVID.filter((o) => o.value) : KOLTOZHETO.filter((o) => o.value));
+  if (berleti) berleti.dataset.bound = "";
+  if (koltoz) koltoz.dataset.bound = "";
+  initWheel(berleti);
+  initWheel(koltoz);
+  const berletiOpts = new Set([...(berleti?.querySelectorAll(".immo-wheel-opt") || [])].map((b) => b.dataset.value));
+  const koltozOpts = new Set([...(koltoz?.querySelectorAll(".immo-wheel-opt") || [])].map((b) => b.dataset.value));
+  setWheelValue(berleti, berletiOpts.has(prevBerleti) ? prevBerleti : "");
+  setWheelValue(koltoz, koltozOpts.has(prevKoltoz) ? prevKoltoz : "");
 }
 
 function readForm(form) {
   const out = emptyIngatlanFilters();
-  out.ingatlan_uzletag = form.querySelector("#immo-uzletag")?.value || "berles";
+  out.ingatlan_uzletag = normalizeIngatlanUzletag(form.querySelector("#immo-uzletag")?.value || "berbe");
   out.keresesi_hely = form.querySelector("#immo-hely")?.value?.trim() || "";
   out.ar_tol = numOrNull(readWheel(form.querySelector('[data-wheel="ar_tol"]')));
   out.ar_ig = numOrNull(readWheel(form.querySelector('[data-wheel="ar_ig"]')));
@@ -263,23 +227,6 @@ function readForm(form) {
     out[bool.field_key] = readWheel(form.querySelector(`[data-wheel="${bool.field_key}"]`));
   }
   return out;
-}
-
-function syncRovidMenus(form) {
-  const tipus = readWheel(form.querySelector('[data-wheel="ingatlan_lakas_tipus"]'));
-  const rovid = tipus === "rovid_berles";
-  const berleti = form.querySelector('[data-wheel="min_berleti_ido"]');
-  const koltoz = form.querySelector('[data-wheel="koltozheto"]');
-  const prevBerleti = readWheel(berleti);
-  const prevKoltoz = readWheel(koltoz);
-  fillWheel(berleti, rovid ? MIN_BERLETI_IDO_ROVID.filter((o) => o.value) : MIN_BERLETI_IDO.filter((o) => o.value));
-  fillWheel(koltoz, rovid ? KOLTOZHETO_ROVID.filter((o) => o.value) : KOLTOZHETO.filter((o) => o.value));
-  initWheel(berleti);
-  initWheel(koltoz);
-  const berletiOpts = new Set([...(berleti?.querySelectorAll(".immo-wheel-opt") || [])].map((b) => b.dataset.value));
-  const koltozOpts = new Set([...(koltoz?.querySelectorAll(".immo-wheel-opt") || [])].map((b) => b.dataset.value));
-  setWheelValue(berleti, berletiOpts.has(prevBerleti) ? prevBerleti : "");
-  setWheelValue(koltoz, koltozOpts.has(prevKoltoz) ? prevKoltoz : "");
 }
 
 export function initIngatlanSearch({ onSearch = () => {} } = {}) {
@@ -315,14 +262,15 @@ export function initIngatlanSearch({ onSearch = () => {} } = {}) {
   form.querySelectorAll("[data-wheel]").forEach(initWheel);
 
   const uzletag = form.querySelector("#immo-uzletag");
-  if (uzletag && !uzletag.options.length) {
+  if (uzletag) {
+    uzletag.innerHTML = "";
     for (const opt of INGATLAN_UZLETAG) {
       const el = document.createElement("option");
       el.value = opt.value;
       el.textContent = opt.label;
       uzletag.appendChild(el);
     }
-    uzletag.value = "berles";
+    uzletag.value = "berbe";
   }
 
   const morePanel = document.getElementById("immo-more");
@@ -352,7 +300,7 @@ export function initIngatlanSearch({ onSearch = () => {} } = {}) {
   form.addEventListener("reset", () => {
     requestAnimationFrame(() => {
       form.querySelectorAll("[data-wheel]").forEach((wheel) => setWheelValue(wheel, ""));
-      if (uzletag) uzletag.value = "berles";
+      if (uzletag) uzletag.value = "berbe";
       syncRovidMenus(form);
       setMoreOpen(false);
       onSearch(emptyIngatlanFilters());

@@ -2,19 +2,42 @@ import { mountLayoutBoard } from "./bocsatech-layout.js?v=layoutCats1";
 
 const app = document.getElementById("app");
 
+const LAYOUT_NAV = [
+  {
+    group: "Autók",
+    items: [
+      { id: "szemelyauto", label: "Személyautó" },
+      { id: "leasing", label: "Leasing autók" },
+      { id: "berauto", label: "Bérautók" },
+      { id: "lakokocsi", label: "Bérelhető lakókocsi" },
+      { id: "kisteher", label: "Teherautó 3,5-ig" },
+      { id: "teherauto", label: "Teherautó 3,5-től" },
+    ],
+  },
+  {
+    group: "Ingatlanok",
+    items: [
+      { id: "ingatlan", label: "Keres", intent: "keres" },
+      { id: "ingatlan", label: "Kínál", intent: "kinal" },
+      { id: "ingatlan", label: "Bérbe ad / vesz", intent: "berbe" },
+    ],
+  },
+];
+
 const LAYOUT_CATEGORIES = [
   { id: "szemelyauto", label: "Személyautó" },
-  { id: "leasing", label: "Leasing hirdetés" },
-  { id: "berauto", label: "Bérautó hirdetés" },
+  { id: "leasing", label: "Leasing autók" },
+  { id: "berauto", label: "Bérautók" },
   { id: "lakokocsi", label: "Bérelhető lakókocsi" },
-  { id: "kisteher", label: "Kisteher 3,5 t-ig" },
-  { id: "teherauto", label: "Teherautó 3,5 t-tól" },
+  { id: "kisteher", label: "Teherautó 3,5-ig" },
+  { id: "teherauto", label: "Teherautó 3,5-től" },
   { id: "ingatlan", label: "Ingatlan" },
 ];
 
 let admin = null;
 let tab = "users";
 let layoutCategory = "szemelyauto";
+let layoutIntent = "";
 let lastUsername = "";
 let otpUser = "";
 let otpEmailMasked = "";
@@ -40,7 +63,28 @@ function isLayoutTab(value = tab) {
 
 function layoutCategoryFromTab(value = tab) {
   if (!isLayoutTab(value)) return layoutCategory;
-  return String(value).slice("layout:".length) || "szemelyauto";
+  const raw = String(value).slice("layout:".length) || "szemelyauto";
+  const [cat] = raw.split(":");
+  return cat || "szemelyauto";
+}
+
+function layoutIntentFromTab(value = tab) {
+  if (!isLayoutTab(value)) return layoutIntent;
+  const raw = String(value).slice("layout:".length) || "";
+  const parts = raw.split(":");
+  return parts[1] || "";
+}
+
+function layoutTabId(item) {
+  return item.intent ? `layout:${item.id}:${item.intent}` : `layout:${item.id}`;
+}
+
+function categoryLabel(id) {
+  for (const group of LAYOUT_NAV) {
+    const hit = group.items.find((c) => c.id === id);
+    if (hit) return hit.label;
+  }
+  return LAYOUT_CATEGORIES.find((c) => c.id === id)?.label || id;
 }
 
 async function api(path, opts = {}) {
@@ -140,7 +184,10 @@ const actions = {
   },
   setTab(_, el) {
     tab = el.getAttribute("data-tab");
-    if (isLayoutTab(tab)) layoutCategory = layoutCategoryFromTab(tab);
+    if (isLayoutTab(tab)) {
+      layoutCategory = layoutCategoryFromTab(tab);
+      layoutIntent = layoutIntentFromTab(tab);
+    }
     err = "";
     info = "";
     loadTab().then(render);
@@ -299,10 +346,6 @@ function fileToDataUrl(file) {
   });
 }
 
-function categoryLabel(id) {
-  return LAYOUT_CATEGORIES.find((c) => c.id === id)?.label || id;
-}
-
 async function loadTab() {
   if (!admin) return;
   if (tab === "users") users = (await api("/api/level1/users")).users;
@@ -310,11 +353,9 @@ async function loadTab() {
   if (tab === "hubpromo") hubPromo = await api("/api/level1/hub-promo");
   if (isLayoutTab()) {
     layoutCategory = layoutCategoryFromTab();
+    layoutIntent = layoutIntentFromTab();
     const data = await api(`/api/level1/form-layout?category=${encodeURIComponent(layoutCategory)}`);
     layout = data.layout;
-    if (Array.isArray(data.categories) && data.categories.length) {
-      /* server list is source of truth for labels if present */
-    }
   }
 }
 
@@ -525,10 +566,22 @@ function hubPromoView() {
 }
 
 function layoutView() {
-  const label = categoryLabel(layoutCategoryFromTab());
+  const intentLabel =
+    layoutIntent === "keres"
+      ? "Keres"
+      : layoutIntent === "kinal"
+        ? "Kínál"
+        : layoutIntent === "berbe"
+          ? "Bérbe ad / vesz"
+          : "";
+  const label = intentLabel || categoryLabel(layoutCategoryFromTab());
+  const sharedHint =
+    layoutCategory === "ingatlan"
+      ? "Az Ingatlanok (Keres / Kínál / Bérbe) közös elrendezést használnak — a feladáson választható a kategória."
+      : "Csak ennek a kategóriának a mezői. Húzd a cellát a lapon belül vagy másik lépésre. Mentés után a hirdetésfeladáson hard refresh kell.";
   return `
     <h2 class="layout-cat-title">${esc(label)} — feladási mezők</h2>
-    <p class="hint">Csak ennek a kategóriának a mezői. Húzd a cellát a lapon belül vagy másik lépésre. Mentés után a hirdetésfeladáson hard refresh kell.</p>
+    <p class="hint">${esc(sharedHint)}</p>
     <div id="layout-root"></div>
     <p class="ok">${info}</p>
     <p class="err">${err}</p>
@@ -544,10 +597,18 @@ function shell() {
         : tab === "hubpromo"
           ? hubPromoView()
           : layoutView();
-  const layoutTabs = LAYOUT_CATEGORIES.map(
-    (c) =>
-      `<button class="tab tab--layout ${tab === `layout:${c.id}` ? "on" : ""}" data-act="setTab" data-tab="layout:${c.id}">${esc(c.label)}</button>`
-  ).join("");
+  const layoutNav = LAYOUT_NAV.map((group) => {
+    const buttons = group.items
+      .map((item) => {
+        const tid = layoutTabId(item);
+        return `<button class="tab tab--layout ${tab === tid ? "on" : ""}" data-act="setTab" data-tab="${esc(tid)}">${esc(item.label)}</button>`;
+      })
+      .join("");
+    return `<div class="nav-section">
+        <p class="nav-section-label">${esc(group.group)}</p>
+        <div class="tabs tabs--stack">${buttons}</div>
+      </div>`;
+  }).join("");
   return `
     <div class="wrap ${isLayoutTab() ? "wrap--wide" : ""}">
       <div class="top">
@@ -562,10 +623,7 @@ function shell() {
         <button class="tab ${tab === "listings" ? "on" : ""}" data-act="setTab" data-tab="listings">Hirdetések</button>
         <button class="tab ${tab === "hubpromo" ? "on" : ""}" data-act="setTab" data-tab="hubpromo">Kezdőlap képek</button>
       </div>
-      <div class="nav-section">
-        <p class="nav-section-label">Feladási mezők</p>
-        <div class="tabs tabs--stack">${layoutTabs}</div>
-      </div>
+      ${layoutNav}
       <div class="card">${body}</div>
     </div>`;
 }

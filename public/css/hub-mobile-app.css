@@ -74,7 +74,7 @@
     background: #fff;
     padding: 0;
     margin: 0;
-    min-height: calc(var(--mw-logo-h) + var(--mw-logo-gap));
+    min-height: 0;
     overflow: visible;
     box-sizing: border-box;
     border-bottom: 0;
@@ -87,6 +87,8 @@
     width: 100%;
     padding: 0;
     margin: 0;
+    /* Hely a Hello + profilkép sávnak — az oldalnevek ez ALATT legyenek */
+    margin-bottom: var(--mw-logo-gap);
   }
 
   body.hub-page--feed .mw-app-logo img,

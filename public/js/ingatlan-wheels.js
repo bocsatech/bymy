@@ -196,14 +196,21 @@ function ensureOutsideClose() {
  */
 export function initMenuWheel(wheel, { emptyLabel = "Mindegy", multiple = false, customInput = false } = {}) {
   if (!wheel) return;
-  const wrap = wheel.closest(".immo-wheel-wrap");
+  let wrap = wheel.closest(".immo-wheel-wrap");
   if (!wrap) {
     initWheel(wheel);
     return;
   }
 
-  // Újratöltéskor (pl. rövid bérlés) engedjük újra kötni a listát.
-  wheel.dataset.bound = "";
+  // Újratöltéskor ne halmozódjanak a listenerok.
+  if (wheel.dataset.menuBound === "1") {
+    const clone = wheel.cloneNode(true);
+    wheel.replaceWith(clone);
+    wheel = clone;
+    wrap = wheel.closest(".immo-wheel-wrap");
+  }
+  wheel.dataset.menuBound = "1";
+
   wrap.classList.add("immo-wheel-wrap--menu");
   if (multiple) wrap.classList.add("immo-wheel-wrap--multi");
   else wrap.classList.remove("immo-wheel-wrap--multi");
@@ -215,7 +222,7 @@ export function initMenuWheel(wheel, { emptyLabel = "Mindegy", multiple = false,
   wheel.dataset.custom = customInput ? "1" : "0";
   wheel.classList.add("immo-wheel--menu");
   wheel.setAttribute("hidden", "");
-  wheel.setAttribute("role", multiple ? "listbox" : "listbox");
+  wheel.setAttribute("role", "listbox");
   if (multiple) wheel.setAttribute("aria-multiselectable", "true");
   else wheel.removeAttribute("aria-multiselectable");
 

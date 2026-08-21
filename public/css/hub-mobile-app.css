@@ -123,8 +123,8 @@
     pointer-events: none;
   }
 
-  body.hub-page--feed .mw-app-hello[hidden] {
-    display: none !important;
+  body.hub-page--feed .mw-app-hello [data-auth-firstname] {
+    margin-left: 0.15em;
   }
 
   html[data-theme="dark"] body.hub-page--feed .mw-app-hello {

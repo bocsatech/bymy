@@ -3326,6 +3326,11 @@ body.site-app .mm-nav-group {
   gap: 0.1rem;
 }
 
+/* display:grid felülírná a natív [hidden]-t — magán fióknál a Cégadatok ne látszódjon */
+body.site-app .mm-nav-group[hidden] {
+  display: none !important;
+}
+
 body.site-app .mm-nav-toggle[aria-expanded="true"] {
   background: #f2f4f7;
 }

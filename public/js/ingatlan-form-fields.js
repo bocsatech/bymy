@@ -27,8 +27,8 @@ import {
   szobaszamOptions,
   normalizeIngatlanUzletag,
 } from "./ingatlan-fields.js?v=immoWheel3";
-import { fillWheel, initMenuWheel, readWheel, setWheelValue } from "./ingatlan-wheels.js?v=immoWheel3";
-import { fetchIngatlanWheelSchema, renderIngatlanSchemaHosts } from "./ingatlan-wheel-schema.js?v=immoWheel1";
+import { fillWheel, initMenuWheel, readWheel, setWheelValue } from "./ingatlan-wheels.js?v=immoWheel4";
+import { fetchIngatlanWheelSchema, renderIngatlanSchemaHosts } from "./ingatlan-wheel-schema.js?v=immoWheel4";
 
 function removeIngatlanFormFields(form) {
   form?.querySelector("#ingatlan-fields")?.remove();

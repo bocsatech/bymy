@@ -68,6 +68,12 @@ function formatPriceLabel(ft) {
   return `${n.toLocaleString("hu-HU")} Ft`;
 }
 
+function formatAreaLabel(m2) {
+  const n = Number(m2);
+  if (!Number.isFinite(n) || n <= 0) return "";
+  return `${n} m²`;
+}
+
 function parsePriceInput(raw) {
   const t = String(raw ?? "")
     .trim()
@@ -84,17 +90,40 @@ function parsePriceInput(raw) {
   return String(Number(digits));
 }
 
+function parseAreaInput(raw) {
+  const t = String(raw ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/\s/g, "")
+    .replace(/m²/g, "")
+    .replace(/m2/g, "");
+  if (!t) return "";
+  const n = Number(t.replace(",", ".").replace(/[^\d.]/g, ""));
+  if (!Number.isFinite(n) || n <= 0) return "";
+  return String(Math.round(n));
+}
+
+function formatCustomLabel(value, kind) {
+  if (kind === "area") return formatAreaLabel(value) || String(value ?? "");
+  return formatPriceLabel(value) || String(value ?? "");
+}
+
+function parseCustomInput(raw, kind) {
+  return kind === "area" ? parseAreaInput(raw) : parsePriceInput(raw);
+}
+
 function updateTrigger(wheel) {
   const wrap = wheel.closest(".immo-wheel-wrap");
   if (!wrap) return;
   const emptyLabel = wrap.querySelector(".immo-wheel-trigger")?.dataset.emptyLabel || "Mindegy";
   const multiple = wheel.dataset.multiple === "1";
   const custom = wheel.dataset.custom === "1";
+  const customKind = wheel.dataset.customKind || "price";
   const values = parseValues(readWheel(wheel));
   const labels = values
     .map((v) => {
       const btn = [...wheel.querySelectorAll(".immo-wheel-opt")].find((b) => b.dataset.value === v);
-      return btn?.textContent?.trim() || (custom ? formatPriceLabel(v) || v : v);
+      return btn?.textContent?.trim() || (custom ? formatCustomLabel(v, customKind) || v : v);
     })
     .filter(Boolean);
 
@@ -103,7 +132,7 @@ function updateTrigger(wheel) {
   if (custom && input) {
     if (values.length === 1) {
       const btn = [...wheel.querySelectorAll(".immo-wheel-opt")].find((b) => b.dataset.value === values[0]);
-      input.value = btn?.textContent?.trim() || formatPriceLabel(values[0]) || values[0];
+      input.value = btn?.textContent?.trim() || formatCustomLabel(values[0], customKind) || values[0];
     } else if (!values.length) {
       input.value = "";
       input.placeholder = emptyLabel;
@@ -194,7 +223,7 @@ function ensureOutsideClose() {
 /**
  * Lenyíló menü. multiple: több érték; customInput: kézi szám (Ár).
  */
-export function initMenuWheel(wheel, { emptyLabel = "Mindegy", multiple = false, customInput = false } = {}) {
+export function initMenuWheel(wheel, { emptyLabel = "Mindegy", multiple = false, customInput = false, customKind = "price" } = {}) {
   if (!wheel) return;
   let wrap = wheel.closest(".immo-wheel-wrap");
   if (!wrap) {
@@ -220,6 +249,7 @@ export function initMenuWheel(wheel, { emptyLabel = "Mindegy", multiple = false,
   wheel.dataset.menu = "1";
   wheel.dataset.multiple = multiple ? "1" : "0";
   wheel.dataset.custom = customInput ? "1" : "0";
+  wheel.dataset.customKind = customKind;
   wheel.classList.add("immo-wheel--menu");
   wheel.setAttribute("hidden", "");
   wheel.setAttribute("role", "listbox");
@@ -282,18 +312,18 @@ export function initMenuWheel(wheel, { emptyLabel = "Mindegy", multiple = false,
   if (customInput) {
     trigger.addEventListener("focus", () => open());
     const commitCustom = () => {
-      const parsed = parsePriceInput(trigger.value);
+      const kind = wheel.dataset.customKind || "price";
+      const parsed = parseCustomInput(trigger.value, kind);
       if (parsed === "" && !String(trigger.value ?? "").trim()) {
         setWheelValue(wheel, "");
       } else if (parsed) {
-        // Ha nincs listában, létrehozunk ideiglenes aktív jelölést a hiddenben.
         let opt = [...wheel.querySelectorAll(".immo-wheel-opt")].find((b) => b.dataset.value === parsed);
         if (!opt) {
           opt = document.createElement("button");
           opt.type = "button";
           opt.className = "immo-wheel-opt immo-wheel-opt--custom";
           opt.dataset.value = parsed;
-          opt.textContent = formatPriceLabel(parsed) || parsed;
+          opt.textContent = formatCustomLabel(parsed, kind) || parsed;
           wheel.appendChild(opt);
         }
         setWheelValue(wheel, parsed);

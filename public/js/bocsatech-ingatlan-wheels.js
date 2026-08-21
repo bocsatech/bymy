@@ -5,7 +5,7 @@ import {
   isSpacer,
   createSpacerCell,
   normalizeIngatlanWheelSchema,
-} from "./ingatlan-wheel-schema.js?v=immoWheel1";
+} from "./ingatlan-wheel-schema.js?v=immoWheel4";
 
 const COLS = WHEEL_COLS;
 const ROW_PX = 56;

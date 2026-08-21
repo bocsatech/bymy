@@ -38,8 +38,8 @@ import {
   readWheelList,
   setWheelValue,
   MULTI_WHEEL_KEYS,
-} from "./ingatlan-wheels.js?v=immoWheel3";
-import { fetchIngatlanWheelSchema, renderIngatlanSchemaHosts } from "./ingatlan-wheel-schema.js?v=immoWheel1";
+} from "./ingatlan-wheels.js?v=immoWheel4";
+import { fetchIngatlanWheelSchema, renderIngatlanSchemaHosts } from "./ingatlan-wheel-schema.js?v=immoWheel4";
 
 const EXACT_KEYS = [
   "ingatlan_uzletag",
@@ -68,6 +68,8 @@ export function emptyIngatlanFilters() {
     ar_ig: null,
     ar_ft_min: null,
     alapterulet: null,
+    alapterulet_tol: null,
+    alapterulet_ig: null,
     szobaszam: null,
     ingatlan_lakas_tipus: "",
     allapot: "",
@@ -155,9 +157,12 @@ export function filterListingsByIngatlan(items, filters) {
     if (minPrice != null && price != null && price < minPrice) return false;
     if (f.ar_ig != null && price != null && price > f.ar_ig) return false;
 
-    if (f.alapterulet != null) {
+    if (f.alapterulet_tol != null || f.alapterulet_ig != null || f.alapterulet != null) {
       const area = numOrNull(fieldBag(item, "alapterulet"));
-      if (area != null && area < f.alapterulet) return false;
+      const minArea = f.alapterulet_tol ?? f.alapterulet;
+      const maxArea = f.alapterulet_ig;
+      if (minArea != null && area != null && area < minArea) return false;
+      if (maxArea != null && area != null && area > maxArea) return false;
     }
 
     if (f.szobaszam != null) {
@@ -221,7 +226,8 @@ function readForm(form) {
   out.keresesi_hely = form.querySelector('[name="keresesi_hely"]')?.value?.trim() || "";
   out.ar_tol = numOrNull(readWheel(form.querySelector('[data-wheel="ar_tol"]')));
   out.ar_ig = numOrNull(readWheel(form.querySelector('[data-wheel="ar_ig"]')));
-  out.alapterulet = numOrNull(readWheel(form.querySelector('[data-wheel="alapterulet"]')));
+  out.alapterulet_tol = numOrNull(readWheel(form.querySelector('[data-wheel="alapterulet_tol"]')));
+  out.alapterulet_ig = numOrNull(readWheel(form.querySelector('[data-wheel="alapterulet_ig"]')));
   out.szobaszam = numOrNull(readWheel(form.querySelector('[data-wheel="szobaszam"]')));
   out.ingatlan_lakas_tipus = readWheel(form.querySelector('[data-wheel="ingatlan_lakas_tipus"]'));
   out.allapot = readWheel(form.querySelector('[data-wheel="allapot"]'));
@@ -263,7 +269,8 @@ export async function initIngatlanSearch({ onSearch = () => {} } = {}) {
   const arIg = form.querySelector('[data-wheel="ar_ig"]');
   fillWheel(arTol, millions, { emptyLabel: "Min. ár" });
   fillWheel(arIg, millions, { emptyLabel: "Max. ár" });
-  fillWheel(form.querySelector('[data-wheel="alapterulet"]'), alapteruletOptions(), { emptyLabel: "Mindegy" });
+  fillWheel(form.querySelector('[data-wheel="alapterulet_tol"]'), alapteruletOptions(), { emptyLabel: "Min. m²" });
+  fillWheel(form.querySelector('[data-wheel="alapterulet_ig"]'), alapteruletOptions(), { emptyLabel: "Max. m²" });
   fillWheel(form.querySelector('[data-wheel="szobaszam"]'), szobaszamOptions(), { emptyLabel: "Mindegy" });
   fillWheel(form.querySelector('[data-wheel="ingatlan_lakas_tipus"]'), INGATLAN_LAKAS_TIPUS.filter((o) => o.value));
   fillWheel(form.querySelector('[data-wheel="allapot"]'), INGATLAN_ALLAPOT.filter((o) => o.value));
@@ -289,14 +296,18 @@ export async function initIngatlanSearch({ onSearch = () => {} } = {}) {
   const emptyByName = {
     ar_tol: "Min. ár",
     ar_ig: "Max. ár",
+    alapterulet_tol: "Min. m²",
+    alapterulet_ig: "Max. m²",
   };
   form.querySelectorAll("[data-wheel]").forEach((wheel) => {
     const name = wheel.getAttribute("data-wheel") || "";
     const isPrice = name === "ar_tol" || name === "ar_ig";
+    const isArea = name === "alapterulet_tol" || name === "alapterulet_ig";
     initMenuWheel(wheel, {
       emptyLabel: emptyByName[name] || "Mindegy",
       multiple: MULTI_WHEEL_KEYS.has(name),
-      customInput: isPrice,
+      customInput: isPrice || isArea,
+      customKind: isArea ? "area" : "price",
     });
   });
 

@@ -26,6 +26,7 @@ export const MULTI_WHEEL_KEYS = new Set([
   "tetoter",
   "furdo_wc",
   "koltozheto",
+  "szobaszam",
 ]);
 
 export function fillWheel(root, options, { emptyLabel = "Mindegy", includeEmpty = true } = {}) {
@@ -103,13 +104,41 @@ function parseAreaInput(raw) {
   return String(Math.round(n));
 }
 
+function formatRoomLabel(value) {
+  const raw = String(value ?? "").trim();
+  if (!raw) return "";
+  if (raw === "6" || raw === "6+") return "6+";
+  const n = Number(String(raw).replace(",", "."));
+  if (!Number.isFinite(n) || n <= 0) return raw;
+  if (Number.isInteger(n)) return String(n);
+  return String(n).replace(".", ",");
+}
+
+function parseRoomInput(raw) {
+  const t = String(raw ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/\s/g, "");
+  if (!t) return "";
+  if (t === "6+" || t === "6plus") return "6";
+  const n = Number(t.replace(",", ".").replace(/[^\d.]/g, ""));
+  if (!Number.isFinite(n) || n <= 0) return "";
+  if (n >= 6) return "6";
+  // 1, 1.5, 2, … fél szobák
+  const rounded = Math.round(n * 2) / 2;
+  return String(rounded);
+}
+
 function formatCustomLabel(value, kind) {
   if (kind === "area") return formatAreaLabel(value) || String(value ?? "");
+  if (kind === "rooms") return formatRoomLabel(value) || String(value ?? "");
   return formatPriceLabel(value) || String(value ?? "");
 }
 
 function parseCustomInput(raw, kind) {
-  return kind === "area" ? parseAreaInput(raw) : parsePriceInput(raw);
+  if (kind === "area") return parseAreaInput(raw);
+  if (kind === "rooms") return parseRoomInput(raw);
+  return parsePriceInput(raw);
 }
 
 function updateTrigger(wheel) {
@@ -130,12 +159,14 @@ function updateTrigger(wheel) {
   const trigger = wrap.querySelector(".immo-wheel-trigger");
   const input = wrap.querySelector(".immo-wheel-custom");
   if (custom && input) {
-    if (values.length === 1) {
-      const btn = [...wheel.querySelectorAll(".immo-wheel-opt")].find((b) => b.dataset.value === values[0]);
-      input.value = btn?.textContent?.trim() || formatCustomLabel(values[0], customKind) || values[0];
-    } else if (!values.length) {
+    if (!values.length) {
       input.value = "";
       input.placeholder = emptyLabel;
+    } else if (multiple) {
+      input.value = labels.length > 3 ? `${labels.length} kiválasztva` : labels.join(", ");
+    } else {
+      const btn = [...wheel.querySelectorAll(".immo-wheel-opt")].find((b) => b.dataset.value === values[0]);
+      input.value = btn?.textContent?.trim() || formatCustomLabel(values[0], customKind) || values[0];
     }
     return;
   }
@@ -310,11 +341,32 @@ export function initMenuWheel(wheel, { emptyLabel = "Mindegy", multiple = false,
   });
 
   if (customInput) {
-    trigger.addEventListener("focus", () => open());
+    trigger.addEventListener("focus", () => {
+      open();
+      if (wheel.dataset.multiple === "1") {
+        // Íráshoz ürítjük a összefoglalót; Enter hozzáad, Escape / üres blur visszaállít.
+        trigger.dataset.wasSummary = trigger.value;
+        trigger.value = "";
+        trigger.placeholder = "Pl. 2,5 — Enter";
+      }
+    });
     const commitCustom = () => {
       const kind = wheel.dataset.customKind || "price";
+      const multiple = wheel.dataset.multiple === "1";
+      const typed = String(trigger.value ?? "").trim();
+      // Többválasztásnál a „3 kiválasztva” / összefűzött címke ne írja felül a választást blur-kor.
+      if (multiple && (/^\d+\s*kiválasztva$/i.test(typed) || typed.includes(","))) {
+        close();
+        updateTrigger(wheel);
+        return;
+      }
+      if (multiple && !typed) {
+        close();
+        updateTrigger(wheel);
+        return;
+      }
       const parsed = parseCustomInput(trigger.value, kind);
-      if (parsed === "" && !String(trigger.value ?? "").trim()) {
+      if (parsed === "" && !typed) {
         setWheelValue(wheel, "");
       } else if (parsed) {
         let opt = [...wheel.querySelectorAll(".immo-wheel-opt")].find((b) => b.dataset.value === parsed);
@@ -326,7 +378,13 @@ export function initMenuWheel(wheel, { emptyLabel = "Mindegy", multiple = false,
           opt.textContent = formatCustomLabel(parsed, kind) || parsed;
           wheel.appendChild(opt);
         }
-        setWheelValue(wheel, parsed);
+        if (multiple) {
+          const cur = new Set(readWheelList(wheel));
+          cur.add(parsed);
+          setWheelValue(wheel, [...cur]);
+        } else {
+          setWheelValue(wheel, parsed);
+        }
       }
       wheel.dispatchEvent(new CustomEvent("immo-wheel-change", { bubbles: true, detail: { value: readWheel(wheel) } }));
       close();

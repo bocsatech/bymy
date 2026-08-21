@@ -38,7 +38,7 @@ import {
   readWheelList,
   setWheelValue,
   MULTI_WHEEL_KEYS,
-} from "./ingatlan-wheels.js?v=immoWheel4";
+} from "./ingatlan-wheels.js?v=immoWheel5";
 import { fetchIngatlanWheelSchema, renderIngatlanSchemaHosts } from "./ingatlan-wheel-schema.js?v=immoWheel4";
 
 const EXACT_KEYS = [
@@ -70,7 +70,7 @@ export function emptyIngatlanFilters() {
     alapterulet: null,
     alapterulet_tol: null,
     alapterulet_ig: null,
-    szobaszam: null,
+    szobaszam: "",
     ingatlan_lakas_tipus: "",
     allapot: "",
     ingatlan_kora: "",
@@ -165,9 +165,23 @@ export function filterListingsByIngatlan(items, filters) {
       if (maxArea != null && area != null && area > maxArea) return false;
     }
 
-    if (f.szobaszam != null) {
-      const rooms = numOrNull(fieldBag(item, "szobaszam"));
-      if (rooms != null && rooms < f.szobaszam) return false;
+    if (f.szobaszam) {
+      const wants = String(f.szobaszam)
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+      if (wants.length) {
+        const gotRaw = fieldBag(item, "szobaszam");
+        const got = numOrNull(gotRaw);
+        const ok = wants.some((want) => {
+          if (want === "6" || want === "6+") return got != null && got >= 6;
+          const w = numOrNull(want);
+          if (got != null && w != null) return got === w;
+          return String(gotRaw) === String(want);
+        });
+        if (gotRaw && !ok) return false;
+        if (!gotRaw) return false;
+      }
     }
 
     for (const key of EXACT_KEYS) {
@@ -228,7 +242,7 @@ function readForm(form) {
   out.ar_ig = numOrNull(readWheel(form.querySelector('[data-wheel="ar_ig"]')));
   out.alapterulet_tol = numOrNull(readWheel(form.querySelector('[data-wheel="alapterulet_tol"]')));
   out.alapterulet_ig = numOrNull(readWheel(form.querySelector('[data-wheel="alapterulet_ig"]')));
-  out.szobaszam = numOrNull(readWheel(form.querySelector('[data-wheel="szobaszam"]')));
+  out.szobaszam = readWheel(form.querySelector('[data-wheel="szobaszam"]'));
   out.ingatlan_lakas_tipus = readWheel(form.querySelector('[data-wheel="ingatlan_lakas_tipus"]'));
   out.allapot = readWheel(form.querySelector('[data-wheel="allapot"]'));
   out.ingatlan_kora = readWheel(form.querySelector('[data-wheel="ingatlan_kora"]'));
@@ -298,16 +312,18 @@ export async function initIngatlanSearch({ onSearch = () => {} } = {}) {
     ar_ig: "Max. ár",
     alapterulet_tol: "Min. m²",
     alapterulet_ig: "Max. m²",
+    szobaszam: "Szobaszám",
   };
   form.querySelectorAll("[data-wheel]").forEach((wheel) => {
     const name = wheel.getAttribute("data-wheel") || "";
     const isPrice = name === "ar_tol" || name === "ar_ig";
     const isArea = name === "alapterulet_tol" || name === "alapterulet_ig";
+    const isRooms = name === "szobaszam";
     initMenuWheel(wheel, {
       emptyLabel: emptyByName[name] || "Mindegy",
       multiple: MULTI_WHEEL_KEYS.has(name),
-      customInput: isPrice || isArea,
-      customKind: isArea ? "area" : "price",
+      customInput: isPrice || isArea || isRooms,
+      customKind: isArea ? "area" : isRooms ? "rooms" : "price",
     });
   });
 

@@ -44,7 +44,14 @@ body[data-site-page="ingatlan"] .immo-search-panel,
 .immo-schema-cell {
   min-width: 0;
   max-width: 100%;
-  overflow: hidden;
+  /* Ne clippelje a lenyíló menüt — a szövegvágás a .immo-wheel-trigger-en van. */
+  overflow: visible;
+  position: relative;
+  z-index: 0;
+}
+
+.immo-schema-cell:has(.immo-wheel-wrap--menu.is-open) {
+  z-index: 40;
 }
 
 .immo-schema-cell .immo-field,
@@ -120,6 +127,11 @@ body[data-site-page="ingatlan"] .immo-search-panel,
 .immo-wheel-wrap--menu {
   position: relative;
   max-width: 100%;
+  z-index: 1;
+}
+
+.immo-wheel-wrap--menu.is-open {
+  z-index: 50;
 }
 
 .immo-wheel-trigger {

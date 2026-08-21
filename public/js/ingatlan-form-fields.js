@@ -204,9 +204,18 @@ export function syncIngatlanFormVisibility(form) {
       el.style.setProperty("display", "none", "important");
     });
 
-  // Minden jármű field-row / labeled-field, ami nem az ingatlan blokk része.
+  // Minden jármű field-row, ami nem az ingatlan blokk része (az Állapot sor maradjon).
   form.querySelectorAll(".step-panel[data-step='1'] .form-grid > .field-row").forEach((row) => {
     if (row.closest("#ingatlan-fields")) return;
+    if (row.querySelector("#allapot")) {
+      row.querySelectorAll(".labeled-field, .md-outlined").forEach((lf) => {
+        if (lf.querySelector("#allapot")) return;
+        lf.hidden = true;
+        lf.classList.add("immo-hide-vehicle");
+        lf.style.setProperty("display", "none", "important");
+      });
+      return;
+    }
     row.hidden = true;
     row.classList.add("immo-hide-vehicle");
     row.style.setProperty("display", "none", "important");

@@ -6,12 +6,14 @@
   var body = document.body;
   if (!body || !body.classList.contains("site-app")) return;
   if (body.classList.contains("fiok-page")) return;
+  /* Kezdőlap: a felső sáv már a HTML-ben van — ne injektáljunk másodikat */
+  if (body.classList.contains("hub-page--feed") || body.getAttribute("data-site-page") === "hub") return;
   if (document.querySelector(".mw-app-top")) return;
 
   if (!document.querySelector('link[href*="hub-mobile-app.css"]')) {
     var link = document.createElement("link");
     link.rel = "stylesheet";
-    link.href = "/css/hub-mobile-app.css?v=mwShellAll1";
+    link.href = "/css/hub-mobile-app.css?v=mwTabDock1";
     document.head.appendChild(link);
   }
 

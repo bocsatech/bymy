@@ -24,7 +24,8 @@
     margin-top: 0 !important;
     overflow-x: visible !important;
     overflow-y: auto !important;
-    padding-bottom: calc(5.75rem + env(safe-area-inset-bottom, 0px));
+    /* Alsó menü magasság + home indicator — nincs fekete rés a böngésző sáv helyén */
+    padding-bottom: calc(3.65rem + env(safe-area-inset-bottom, 0px));
   }
 
   /* Vízszintes túlcsordulás: ne a body vágjon, hanem a tartalom */
@@ -389,26 +390,35 @@
     font-size: 0.76rem;
   }
 
-  /* —— Lebegő alsó menü (sziget) —— */
+  /* —— Alsó menü: képernyő aljához ragadva (böngésző sáv helyett) —— */
   body.hub-page--feed .mw-app-tabbar {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-around;
     position: fixed;
-    left: 50%;
-    bottom: max(0.75rem, env(safe-area-inset-bottom, 0px));
-    transform: translateX(-50%);
+    left: 0;
+    right: 0;
+    bottom: 0;
+    transform: none;
     z-index: 90;
-    width: min(22.5rem, calc(100% - 1.5rem));
-    height: 3.85rem;
-    padding: 0.35rem 0.45rem;
+    width: 100%;
+    height: auto;
+    min-height: calc(3.65rem + env(safe-area-inset-bottom, 0px));
+    padding: 0.35rem 0.25rem calc(0.35rem + env(safe-area-inset-bottom, 0px));
     box-sizing: border-box;
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.92);
-    border: 1px solid rgba(0, 0, 0, 0.06);
-    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.14);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
+    border-radius: 0;
+    background: #fff;
+    border: 0;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 -4px 18px rgba(0, 0, 0, 0.06);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  html[data-theme="dark"] body.hub-page--feed .mw-app-tabbar {
+    background: #12161c;
+    border-top-color: #2a313c;
+    box-shadow: 0 -4px 18px rgba(0, 0, 0, 0.35);
   }
 
   body.hub-page--feed .mw-app-tab {

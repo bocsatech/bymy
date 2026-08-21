@@ -106,7 +106,6 @@ import {
 import { listingImageDir, resolveListingImageFile, fetchRemoteListingImage, clearListingImageFiles } from "./lib/listing-image.mjs";
 import { saveListingPhotos } from "./lib/listing-photos.mjs";
 import { canManageListing } from "./lib/listing-meta.mjs";
-import { navCountsFromListings } from "./lib/nav-counts.mjs";
 import { handleMessagesApi, initMessagingSchema } from "./lib/messaging.mjs";
 import { handleLevel1Api } from "./lib/level1-api.mjs";
 
@@ -559,9 +558,10 @@ async function handleListingsApi(req, res, pathname) {
 
   if (listMatch && req.method === "GET") {
     const url = new URL(req.url ?? "", `http://${HOST}`);
-    const limit = Math.min(Math.max(Number(url.searchParams.get("limit") ?? 50), 1), 500);
+    const limit = Math.min(Math.max(Number(url.searchParams.get("limit") ?? 50), 1), 50);
     const status = url.searchParams.get("status");
-    sendJson(res, 200, { listings: await listListingsWithPreview({ limit, status }) });
+    const vertical = url.searchParams.get("vertical");
+    sendJson(res, 200, { listings: await listListingsWithPreview({ limit, status, vertical }) });
     return;
   }
 
@@ -1754,8 +1754,17 @@ export async function handleHttpRequest(req, res) {
 
   if (pathname === "/api/nav/counts" && req.method === "GET") {
     try {
-      const listings = await listListingsWithPreview({ limit: 500, status: "feladott" });
-      sendJson(res, 200, navCountsFromListings(listings));
+      const [auto, teher, ingatlan] = await Promise.all([
+        listListingsWithPreview({ limit: 50, status: "feladott", vertical: "auto" }),
+        listListingsWithPreview({ limit: 50, status: "feladott", vertical: "teher" }),
+        listListingsWithPreview({ limit: 50, status: "feladott", vertical: "ingatlan" }),
+      ]);
+      sendJson(
+        res,
+        200,
+        { auto: auto.length, teher: teher.length, ingatlan: ingatlan.length },
+        { "Cache-Control": "public, max-age=30, stale-while-revalidate=120" }
+      );
     } catch (error) {
       console.warn("Nav counts:", error.message ?? error);
       sendJson(res, 500, { error: error.message ?? "Szerver hiba." });

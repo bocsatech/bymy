@@ -1,4 +1,4 @@
-import { fetchListings } from "./db-client.js?v=hdView1";
+import { fetchListings } from "./db-client.js?v=teherVert1";
 import { createHomeGridCard, initHomeGridCardPhotos } from "./home-grid-card.js?v=msgDetailOnly1";
 import {
   emptyFilters,
@@ -19,7 +19,7 @@ const gridTrack = document.getElementById("home-grid-track");
 const emptyEl = document.getElementById("home-empty");
 const filterForm = document.getElementById("home-filter-form");
 
-const LISTINGS_FETCH_LIMIT = 180;
+const LISTINGS_FETCH_LIMIT = 50;
 
 let allItems = [];
 let sidebarFilters = emptyFilters();
@@ -50,10 +50,27 @@ function scrollToListings() {
 }
 
 function listingVertical(item) {
-  return String(item?.preview?.filter?.hirdetes_vertical ?? "").trim().toLowerCase();
+  const filter = item?.preview?.filter ?? {};
+  const form = item?.form ?? {};
+  const vertical = String(filter.hirdetes_vertical ?? form.hirdetes_vertical ?? "")
+    .trim()
+    .toLowerCase();
+  const sub = String(filter.hirdetes_alkategoria ?? form.hirdetes_alkategoria ?? "")
+    .trim()
+    .toLowerCase();
+  if (vertical === "teher" || vertical === "ingatlan" || vertical === "auto") {
+    if (vertical === "auto" && (sub === "kisteher" || sub === "teherauto" || sub === "teher")) {
+      return "teher";
+    }
+    return vertical;
+  }
+  if (sub === "kisteher" || sub === "teherauto" || sub === "teher") return "teher";
+  if (sub === "ingatlan" || sub.startsWith("ingatlan")) return "ingatlan";
+  return "auto";
 }
 
 function filterBySitePage(items) {
+  // A szerver már vertical szerint szűr; itt csak biztonsági háló.
   if (PAGE === "teherauto") {
     return items.filter((item) => listingVertical(item) === "teher");
   }
@@ -124,8 +141,19 @@ function renderListings(items) {
   restoreListingReturn();
 }
 
+function pageVerticalParam() {
+  if (PAGE === "teherauto") return "teher";
+  if (PAGE === "auto") return "auto";
+  if (PAGE === "ingatlan") return "ingatlan";
+  return null;
+}
+
 async function loadListings() {
-  const all = await fetchListings({ limit: LISTINGS_FETCH_LIMIT });
+  const all = await fetchListings({
+    limit: LISTINGS_FETCH_LIMIT,
+    status: "feladott",
+    vertical: pageVerticalParam(),
+  });
   const active = all.filter((item) => (item.status || "feladott") === "feladott");
   allItems = sortForHome(filterBySitePage(active));
   populateFilterOptions(allItems);

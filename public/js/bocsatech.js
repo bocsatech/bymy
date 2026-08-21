@@ -32,7 +32,7 @@ const LAYOUT_CATEGORIES = [
 ];
 
 let admin = null;
-let tab = "users";
+let tab = "visitors";
 let layoutCategory = "szemelyauto";
 let layoutIntent = "";
 let lastUsername = "";
@@ -42,6 +42,15 @@ let err = "";
 let info = "";
 let users = [];
 let listings = [];
+let visitors = {
+  online: 0,
+  daily: { hits: 0, unique: 0 },
+  weekly: { hits: 0, unique: 0 },
+  monthly: { hits: 0, unique: 0 },
+  devices: [],
+  onlineWindowMinutes: 5,
+  warning: "",
+};
 let layout = { cells: [], category: "szemelyauto" };
 let wheelSchema = { version: 1, cells: [] };
 let hubPromo = { slots: {} };
@@ -188,7 +197,20 @@ const actions = {
     }
     err = "";
     info = "";
+    editingUser = null;
     loadTab().then(render);
+  },
+  async refreshVisitors() {
+    err = "";
+    info = "";
+    try {
+      visitors = await api("/api/level1/visitors");
+      info = "Látogatóadatok frissítve.";
+      render();
+    } catch (error) {
+      err = error.message;
+      render();
+    }
   },
   async delUser(_, el) {
     const id = el.getAttribute("data-id");
@@ -357,6 +379,7 @@ function fileToDataUrl(file) {
 
 async function loadTab() {
   if (!admin) return;
+  if (tab === "visitors") visitors = await api("/api/level1/visitors");
   if (tab === "users") users = (await api("/api/level1/users")).users;
   if (tab === "listings") listings = (await api("/api/level1/listings")).listings;
   if (tab === "hubpromo") hubPromo = await api("/api/level1/hub-promo");
@@ -408,6 +431,64 @@ function loginView() {
     </div>`;
 }
 
+function fmtWhen(value) {
+  if (!value) return "—";
+  const s = String(value).replace("T", " ").slice(0, 19);
+  return s || "—";
+}
+
+function visitorsView() {
+  const d = visitors?.daily || {};
+  const w = visitors?.weekly || {};
+  const m = visitors?.monthly || {};
+  const devices = visitors?.devices || [];
+  const rows = devices
+    .map(
+      (dev) => `<tr>
+        <td>${esc(dev.ip)}</td>
+        <td>${esc(dev.deviceName)}</td>
+        <td>${esc(dev.deviceType)}</td>
+        <td>${esc(dev.browser)}</td>
+        <td>${esc(dev.os)}</td>
+        <td>${esc(dev.screen)}</td>
+        <td>${esc(dev.language)}</td>
+        <td>${esc(dev.timezone)}</td>
+        <td>${dev.hitCount ?? 0}</td>
+        <td>${esc(fmtWhen(dev.firstSeenAt))}</td>
+        <td>${esc(fmtWhen(dev.lastSeenAt))}</td>
+        <td class="ua-cell" title="${esc(dev.userAgent)}">${esc((dev.userAgent || "").slice(0, 72))}${(dev.userAgent || "").length > 72 ? "…" : ""}</td>
+      </tr>`
+    )
+    .join("");
+  return `
+    <div class="admin-visitors">
+      ${visitors?.warning ? `<p class="err">Figyelem: ${esc(visitors.warning)}</p>` : ""}
+      <p class="hint">„Jelenleg” = az elmúlt ${visitors?.onlineWindowMinutes || 5} percben aktív eszközök. A böngésző nem ad valódi számítógépnevet — a „gép név” a felismerhető eszköz/OS (pl. iPhone, Windows).</p>
+      <div class="stat-grid">
+        <div class="stat-card"><div class="stat-label">Jelenleg</div><div class="stat-value">${visitors?.online ?? 0}</div><div class="stat-sub">aktív eszköz</div></div>
+        <div class="stat-card"><div class="stat-label">Naponta</div><div class="stat-value">${d.unique ?? 0}</div><div class="stat-sub">${d.hits ?? 0} megtekintés</div></div>
+        <div class="stat-card"><div class="stat-label">Hetente</div><div class="stat-value">${w.unique ?? 0}</div><div class="stat-sub">${w.hits ?? 0} megtekintés</div></div>
+        <div class="stat-card"><div class="stat-label">Havonta</div><div class="stat-value">${m.unique ?? 0}</div><div class="stat-sub">${m.hits ?? 0} megtekintés</div></div>
+      </div>
+      <div class="row" style="margin:0.75rem 0 1rem">
+        <button class="btn ghost" type="button" data-act="refreshVisitors">Frissítés</button>
+      </div>
+      <h3 class="admin-section-title">Látogatott gépek / eszközök</h3>
+      <div class="table-scroll">
+        <table class="table-dense">
+          <thead>
+            <tr>
+              <th>IP</th><th>Gép / eszköz</th><th>Típus</th><th>Böngésző</th><th>OS</th>
+              <th>Képernyő</th><th>Nyelv</th><th>Időzóna</th><th>Találatok</th>
+              <th>Első</th><th>Utolsó</th><th>User-Agent</th>
+            </tr>
+          </thead>
+          <tbody>${rows || `<tr><td colspan="12">Még nincs látogatóadat. Nyiss meg egy oldalt a weben, majd frissíts.</td></tr>`}</tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
 function usersView() {
   const rows = users
     .map(
@@ -416,9 +497,11 @@ function usersView() {
         <td>${esc(u.email)}</td>
         <td>${esc(u.displayName || "")}</td>
         <td>${u.emailVerified ? "igen" : "nem"}</td>
-        <td>${esc(u.createdAt || "")}</td>
+        <td>${esc(fmtWhen(u.createdAt))}</td>
+        <td>${esc(fmtWhen(u.lastLoginAt))}</td>
+        <td>${u.listingCount ?? 0}</td>
         <td>
-          <button class="btn" data-act="editUser" data-id="${u.id}">Szerkesztés</button>
+          <button class="btn" data-act="editUser" data-id="${u.id}">Kezelés</button>
           <button class="btn danger" data-act="delUser" data-id="${u.id}">Törlés</button>
         </td>
       </tr>`
@@ -432,7 +515,13 @@ function usersView() {
   return `
     <div class="users-edit">
       ${messages}
-      <table><thead><tr><th>#</th><th>Email</th><th>Név</th><th>Aktivált</th><th>Létrehozva</th><th></th></tr></thead><tbody>${rows || `<tr><td colspan="6">Nincs user.</td></tr>`}</tbody></table>
+      <p class="hint">Regisztrált felhasználók: regisztráció dátuma, utolsó belépés, hirdetések száma. „Kezelés” megnyitja a profilt és a hirdetéslistát.</p>
+      <div class="table-scroll">
+        <table class="table-dense"><thead><tr>
+          <th>#</th><th>Email</th><th>Név</th><th>Aktivált</th>
+          <th>Regisztráció</th><th>Utoljára belépett</th><th>Hirdetések</th><th></th>
+        </tr></thead><tbody>${rows || `<tr><td colspan="8">Nincs user.</td></tr>`}</tbody></table>
+      </div>
       ${editor}
     </div>`;
 }
@@ -492,7 +581,8 @@ function userEditView() {
 
   return `
     <div class="user-edit">
-      <h2>User szerkesztés (#${esc(editingUser.id)})</h2>
+      <h2>Felhasználó kezelése (#${esc(editingUser.id)})</h2>
+      <p class="hint">Regisztráció: ${esc(fmtWhen(editingUser.createdAt))} · Utoljára belépett: ${esc(fmtWhen(editingUser.lastLoginAt))} · Hirdetések: ${editingUser.listingCount ?? (editingUser.listings || []).length}</p>
       <label>
         <div>Email</div>
         <input id="edit-email" type="email" value="${esc(editingUser.email || "")}" />
@@ -510,6 +600,26 @@ function userEditView() {
 
       <h3 style="margin:1.25rem 0 0.5rem; font-size:0.95rem; color:var(--muted)">Profil mezők</h3>
       ${fieldRows}
+
+      <h3 style="margin:1.25rem 0 0.5rem; font-size:0.95rem; color:var(--muted)">Hirdetései</h3>
+      <div class="table-scroll">
+        <table class="table-dense">
+          <thead><tr><th>#</th><th>Cím</th><th>Státusz</th><th>Frissítve</th><th></th></tr></thead>
+          <tbody>
+            ${(editingUser.listings || [])
+              .map(
+                (l) => `<tr>
+                  <td>${l.id}</td>
+                  <td>${esc(l.title || "")}</td>
+                  <td>${esc(l.status || "")}</td>
+                  <td>${esc(fmtWhen(l.updatedAt))}</td>
+                  <td><a href="/hirdetes.html?id=${l.id}" target="_blank" rel="noreferrer">nyit</a></td>
+                </tr>`
+              )
+              .join("") || `<tr><td colspan="5">Nincs hirdetése.</td></tr>`}
+          </tbody>
+        </table>
+      </div>
 
       <div class="row" style="display:flex; gap:0.75rem; flex-wrap:wrap; margin-top:1.25rem">
         <button class="btn" type="button" data-act="saveUser">Mentés</button>
@@ -596,13 +706,15 @@ function layoutView() {
 
 function shell() {
   const body =
-    tab === "users"
-      ? usersView()
-      : tab === "listings"
-        ? listingsView()
-        : tab === "hubpromo"
-          ? hubPromoView()
-          : layoutView();
+    tab === "visitors"
+      ? visitorsView()
+      : tab === "users"
+        ? usersView()
+        : tab === "listings"
+          ? listingsView()
+          : tab === "hubpromo"
+            ? hubPromoView()
+            : layoutView();
   const layoutNav = LAYOUT_NAV.map((group) => {
     const buttons = group.items
       .map((item) => {
@@ -616,7 +728,7 @@ function shell() {
       </div>`;
   }).join("");
   return `
-    <div class="wrap ${isLayoutTab() ? "wrap--wide" : ""}">
+    <div class="wrap ${isLayoutTab() || tab === "visitors" || tab === "users" ? "wrap--wide" : ""}">
       <div class="top">
         <div>
           <h1>Bocsatech</h1>
@@ -625,7 +737,8 @@ function shell() {
         <button class="btn ghost" data-act="logout">Kilépés</button>
       </div>
       <div class="tabs">
-        <button class="tab ${tab === "users" ? "on" : ""}" data-act="setTab" data-tab="users">Userek</button>
+        <button class="tab ${tab === "visitors" ? "on" : ""}" data-act="setTab" data-tab="visitors">Látogatók</button>
+        <button class="tab ${tab === "users" ? "on" : ""}" data-act="setTab" data-tab="users">Felhasználók</button>
         <button class="tab ${tab === "listings" ? "on" : ""}" data-act="setTab" data-tab="listings">Hirdetések</button>
         <button class="tab ${tab === "hubpromo" ? "on" : ""}" data-act="setTab" data-tab="hubpromo">Kezdőlap képek</button>
       </div>

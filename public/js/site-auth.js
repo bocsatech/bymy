@@ -777,4 +777,11 @@ if (typeof document !== "undefined") {
   } else if (document.body?.dataset?.authInit !== "manual") {
     initSiteAuth();
   }
+  if (!window.__bymyVisitBoot) {
+    window.__bymyVisitBoot = true;
+    const s = document.createElement("script");
+    s.src = "/js/site-visit.js?v=visit1";
+    s.defer = true;
+    (document.head || document.documentElement).appendChild(s);
+  }
 }

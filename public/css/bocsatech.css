@@ -282,3 +282,54 @@ th { color: var(--muted); font-weight: 600; }
   display: inline-flex;
   cursor: pointer;
 }
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.75rem;
+  margin: 0.5rem 0 0.25rem;
+}
+.stat-card {
+  background: #12171e;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0.9rem 1rem;
+}
+.stat-label {
+  font-size: 0.75rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.stat-value {
+  font-size: 1.75rem;
+  font-weight: 750;
+  margin: 0.2rem 0;
+  color: var(--accent);
+}
+.stat-sub { font-size: 0.78rem; color: var(--muted); }
+.admin-section-title {
+  margin: 1rem 0 0.55rem;
+  font-size: 1rem;
+}
+.table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 0 -0.25rem;
+}
+.table-dense th,
+.table-dense td {
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+.ua-cell {
+  max-width: 14rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.hint {
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin: 0 0 0.75rem;
+}
+

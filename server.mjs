@@ -112,6 +112,7 @@ import { getLevel1TokenFromRequest, getLevel1AdminBySession } from "./lib/level1
 import { safeInternalPath } from "./lib/safe-path.mjs";
 import { rateLimit, clientIp } from "./lib/rate-limit.mjs";
 import { applySecurityHeaders } from "./lib/security-headers.mjs";
+import { recordPageVisit, visitorCookieHeader } from "./lib/site-visitors.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PUBLIC = join(__dirname, "public");
@@ -1654,6 +1655,20 @@ export async function handleHttpRequest(req, res) {
       service: "bymy-autosweb",
       listingsMine: true,
     });
+    return;
+  }
+
+  if (pathname === "/api/visit" && req.method === "POST") {
+    if (!assertAuthRate(req, res, "visit", { limit: 120, windowMs: 60 * 1000 })) return;
+    try {
+      const body = await readBody(req);
+      const result = await recordPageVisit(req, body);
+      const headers = {};
+      if (result.setCookie) headers["Set-Cookie"] = visitorCookieHeader(result.visitorId);
+      sendJson(res, 200, { ok: true, visitorId: result.visitorId }, headers);
+    } catch (error) {
+      sendJson(res, 200, { ok: false, error: error.message ?? String(error) });
+    }
     return;
   }
 

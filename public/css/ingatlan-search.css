@@ -34,6 +34,27 @@ body[data-site-page="ingatlan"] .immo-search-panel,
   gap: 0.85rem;
 }
 
+.immo-schema-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 0.75rem 0.65rem;
+  align-items: start;
+}
+
+.immo-schema-cell {
+  min-width: 0;
+}
+
+.immo-schema-cell .immo-field,
+.immo-schema-cell .immo-wheel-wrap {
+  width: 100%;
+}
+
+.immo-schema-spacer {
+  min-height: 0.65rem;
+  pointer-events: none;
+}
+
 .immo-field {
   display: grid;
   gap: 0.35rem;

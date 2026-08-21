@@ -1,6 +1,5 @@
 /**
- * Ingatlan feladás — ugyanaz a kerék UI, mint az ingatlan.html keresőn.
- * Csak vertical=ingatlan esetén kerül a DOM-ba.
+ * Ingatlan feladás — közös kerék-séma (ugyanaz, mint a kereső), kategória csak élőn.
  */
 
 import {
@@ -27,8 +26,9 @@ import {
   alapteruletOptions,
   szobaszamOptions,
   normalizeIngatlanUzletag,
-} from "./ingatlan-fields.js?v=immoSync1";
-import { fillWheel, initWheel, readWheel, setWheelValue, wheelFieldHtml } from "./ingatlan-wheels.js?v=immoSync1";
+} from "./ingatlan-fields.js?v=immoWheel1";
+import { fillWheel, initWheel, readWheel, setWheelValue } from "./ingatlan-wheels.js?v=immoWheel1";
+import { fetchIngatlanWheelSchema, renderIngatlanSchemaHosts } from "./ingatlan-wheel-schema.js?v=immoWheel1";
 
 function removeIngatlanFormFields(form) {
   form?.querySelector("#ingatlan-fields")?.remove();
@@ -43,8 +43,8 @@ function syncRovidMenus(root) {
   const prevKoltoz = readWheel(koltoz);
   fillWheel(berleti, (rovid ? MIN_BERLETI_IDO_ROVID : MIN_BERLETI_IDO).filter((o) => o.value));
   fillWheel(koltoz, (rovid ? KOLTOZHETO_ROVID : KOLTOZHETO).filter((o) => o.value));
-  berleti.dataset.bound = "";
-  koltoz.dataset.bound = "";
+  if (berleti) berleti.dataset.bound = "";
+  if (koltoz) koltoz.dataset.bound = "";
   initWheel(berleti);
   initWheel(koltoz);
   const berletiOpts = new Set([...(berleti?.querySelectorAll(".immo-wheel-opt") || [])].map((b) => b.dataset.value));
@@ -97,25 +97,24 @@ function fillAllWheels(root) {
   syncRovidMenus(root);
 }
 
-export function ensureIngatlanFormFields(form) {
+export async function ensureIngatlanFormFields(form) {
   if (!form) return null;
   const existing = form.querySelector("#ingatlan-fields");
-  if (existing) return existing;
+  if (existing?.dataset.schemaReady === "1") return existing;
 
   const host =
     form.querySelector('.step-panel[data-step="1"] .card > .card-body') ||
     form.querySelector('.step-panel[data-step="1"]');
   if (!host) return null;
 
+  existing?.remove();
+
   const root = document.createElement("div");
   root.id = "ingatlan-fields";
   root.className = "ingatlan-fields immo-post-panel";
   root.setAttribute("data-ingatlan-only", "1");
 
-  const boolHtml = INGATLAN_BOOL_FIELDS.map((f) => wheelFieldHtml(f.field_key, f.label)).join("");
-  const catOpts = INGATLAN_UZLETAG.map(
-    (o) => `<option value="${o.value}">${o.label}</option>`
-  ).join("");
+  const catOpts = INGATLAN_UZLETAG.map((o) => `<option value="${o.value}">${o.label}</option>`).join("");
 
   root.innerHTML = `
     <article class="immo-search-panel immo-post-panel__card">
@@ -125,45 +124,10 @@ export function ensureIngatlanFormFields(form) {
           <span class="immo-label">Kategória</span>
           <select class="immo-control" id="ingatlan_uzletag" name="ingatlan_uzletag">${catOpts}</select>
         </label>
-
-        <div class="immo-wheels-row immo-wheels-row--4">
-          ${wheelFieldHtml("alapterulet", "Alapterület")}
-          ${wheelFieldHtml("szobaszam", "Szobaszám")}
-          ${wheelFieldHtml("ingatlan_lakas_tipus", "Típus")}
-          ${wheelFieldHtml("allapot", "Állapot")}
-        </div>
-
+        <div id="immo-post-schema-main" class="immo-schema-grid" aria-label="Fő mezők"></div>
         <div class="immo-more" id="immo-post-more" hidden>
-          <div class="immo-wheels-row">
-            ${wheelFieldHtml("ingatlan_kora", "Ingatlan kora")}
-            ${wheelFieldHtml("min_berleti_ido", "Minimum bérleti idő")}
-          </div>
-          <div class="immo-wheels-row">
-            ${wheelFieldHtml("butorozott", "Bútorozott")}
-            ${wheelFieldHtml("kilatas", "Kilátás")}
-          </div>
-          <div class="immo-wheels-row">
-            ${wheelFieldHtml("tajolas", "Tájolás")}
-            ${wheelFieldHtml("futes", "Fűtés módja")}
-          </div>
-          <div class="immo-wheels-row">
-            ${wheelFieldHtml("parkolas", "Parkolás")}
-            ${wheelFieldHtml("komfort", "Komfort")}
-          </div>
-          <div class="immo-wheels-row">
-            ${wheelFieldHtml("tetoter", "Tetőtér")}
-            ${wheelFieldHtml("furdo_wc", "Fürdő és WC")}
-          </div>
-          <div class="immo-wheels-row">
-            ${wheelFieldHtml("emelet", "Emelet")}
-            ${wheelFieldHtml("belmagassag", "Belmagasság")}
-          </div>
-          <div class="immo-wheels-row">
-            ${wheelFieldHtml("koltozheto", "Mikortól költözhető")}
-          </div>
-          <div class="immo-bool-grid">${boolHtml}</div>
+          <div id="immo-post-schema-more" class="immo-schema-grid" aria-label="További feltételek"></div>
         </div>
-
         <div class="immo-actions-secondary" style="margin-top:0.35rem">
           <button type="button" class="immo-action" id="immo-post-tovabbi" aria-expanded="false" aria-controls="immo-post-more">További feltételek</button>
         </div>
@@ -172,6 +136,15 @@ export function ensureIngatlanFormFields(form) {
   `;
 
   host.prepend(root);
+
+  const schema = await fetchIngatlanWheelSchema();
+  renderIngatlanSchemaHosts(
+    root.querySelector("#immo-post-schema-main"),
+    root.querySelector("#immo-post-schema-more"),
+    schema,
+    "post"
+  );
+  root.dataset.schemaReady = "1";
 
   const uz = root.querySelector("#ingatlan_uzletag");
   if (uz) uz.value = "berbe";
@@ -208,7 +181,7 @@ function readVertical(form) {
     .toLowerCase();
 }
 
-export function syncIngatlanFormVisibility(form) {
+export async function syncIngatlanFormVisibility(form) {
   if (!form) return;
   const isImmo = readVertical(form) === "ingatlan";
   form.classList.toggle("ad-form--ingatlan", isImmo);
@@ -244,7 +217,7 @@ export function syncIngatlanFormVisibility(form) {
     return;
   }
 
-  const root = ensureIngatlanFormFields(form);
+  const root = await ensureIngatlanFormFields(form);
   if (root) {
     root.hidden = false;
     root.removeAttribute("hidden");
@@ -301,4 +274,17 @@ export function syncIngatlanFormVisibility(form) {
     field.required = false;
     field.removeAttribute("required");
   }
+}
+
+export function readIngatlanFormValues(form) {
+  const root = form?.querySelector("#ingatlan-fields");
+  if (!root) return {};
+  const out = {};
+  const uz = root.querySelector("#ingatlan_uzletag");
+  if (uz) out.ingatlan_uzletag = normalizeIngatlanUzletag(uz.value);
+  root.querySelectorAll("[data-wheel]").forEach((wheel) => {
+    const name = wheel.getAttribute("data-wheel");
+    if (name) out[name] = readWheel(wheel);
+  });
+  return out;
 }

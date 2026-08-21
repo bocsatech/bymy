@@ -30,8 +30,9 @@ import {
   arFtMinOptions,
   emeletRank,
   normalizeIngatlanUzletag,
-} from "./ingatlan-fields.js?v=immoSync1";
-import { fillWheel, initWheel, readWheel, setWheelValue } from "./ingatlan-wheels.js?v=immoSync1";
+} from "./ingatlan-fields.js?v=immoWheel1";
+import { fillWheel, initWheel, readWheel, setWheelValue } from "./ingatlan-wheels.js?v=immoWheel1";
+import { fetchIngatlanWheelSchema, renderIngatlanSchemaHosts } from "./ingatlan-wheel-schema.js?v=immoWheel1";
 
 const EXACT_KEYS = [
   "ingatlan_uzletag",
@@ -201,7 +202,7 @@ function syncRovidMenus(form) {
 function readForm(form) {
   const out = emptyIngatlanFilters();
   out.ingatlan_uzletag = normalizeIngatlanUzletag(form.querySelector("#immo-uzletag")?.value || "berbe");
-  out.keresesi_hely = form.querySelector("#immo-hely")?.value?.trim() || "";
+  out.keresesi_hely = form.querySelector('[name="keresesi_hely"]')?.value?.trim() || "";
   out.ar_tol = numOrNull(readWheel(form.querySelector('[data-wheel="ar_tol"]')));
   out.ar_ig = numOrNull(readWheel(form.querySelector('[data-wheel="ar_ig"]')));
   out.alapterulet = numOrNull(readWheel(form.querySelector('[data-wheel="alapterulet"]')));
@@ -229,9 +230,17 @@ function readForm(form) {
   return out;
 }
 
-export function initIngatlanSearch({ onSearch = () => {} } = {}) {
+export async function initIngatlanSearch({ onSearch = () => {} } = {}) {
   const form = document.getElementById("immo-search-form");
   if (!form) return;
+
+  const schema = await fetchIngatlanWheelSchema();
+  renderIngatlanSchemaHosts(
+    document.getElementById("immo-schema-main"),
+    document.getElementById("immo-schema-more"),
+    schema,
+    "search"
+  );
 
   const millions = priceMillionOptions();
   fillWheel(form.querySelector('[data-wheel="ar_tol"]'), millions, { emptyLabel: "Min. ár" });
@@ -300,6 +309,8 @@ export function initIngatlanSearch({ onSearch = () => {} } = {}) {
   form.addEventListener("reset", () => {
     requestAnimationFrame(() => {
       form.querySelectorAll("[data-wheel]").forEach((wheel) => setWheelValue(wheel, ""));
+      const hely = form.querySelector('[name="keresesi_hely"]');
+      if (hely) hely.value = "";
       if (uzletag) uzletag.value = "berbe";
       syncRovidMenus(form);
       setMoreOpen(false);

@@ -1,4 +1,5 @@
 import { mountLayoutBoard } from "./bocsatech-layout.js?v=layoutCats1";
+import { mountIngatlanWheelBoard } from "./bocsatech-ingatlan-wheels.js?v=immoWheel1";
 
 const app = document.getElementById("app");
 
@@ -16,11 +17,7 @@ const LAYOUT_NAV = [
   },
   {
     group: "Ingatlanok",
-    items: [
-      { id: "ingatlan", label: "Keres", intent: "keres" },
-      { id: "ingatlan", label: "Kínál", intent: "kinal" },
-      { id: "ingatlan", label: "Bérbe ad / vesz", intent: "berbe" },
-    ],
+    items: [{ id: "ingatlan", label: "Ingatlan" }],
   },
 ];
 
@@ -46,6 +43,7 @@ let info = "";
 let users = [];
 let listings = [];
 let layout = { cells: [], category: "szemelyauto" };
+let wheelSchema = { version: 1, cells: [] };
 let hubPromo = { slots: {} };
 let editingUser = null;
 
@@ -267,11 +265,22 @@ const actions = {
     info = "";
     try {
       const cat = layoutCategoryFromTab();
+      if (cat === "ingatlan") {
+        const data = await api("/api/level1/ingatlan-wheel-schema", {
+          method: "PUT",
+          body: JSON.stringify({ schema: wheelSchema }),
+        });
+        wheelSchema = data.schema || wheelSchema;
+        info =
+          "Ingatlan kerék-séma mentve. Kereső és feladás hard refresh (Cmd+Shift+R) után frissül. A kategória (Keres/Kínál/Bérbe) csak az élő oldalon jelenik meg.";
+        render();
+        return;
+      }
       const data = await api("/api/level1/form-layout", {
         method: "PUT",
-        body: JSON.stringify({ layout, category: cat }),
+        body: JSON.stringify({ category: cat, layout }),
       });
-      layout = data.layout;
+      layout = data.layout || layout;
       layoutCategory = data.category || cat;
       info = `Elrendezés mentve (${categoryLabel(layoutCategory)}). A hirdetésfeladáson hard refresh (Cmd+Shift+R) után látszik.`;
       render();
@@ -354,8 +363,13 @@ async function loadTab() {
   if (isLayoutTab()) {
     layoutCategory = layoutCategoryFromTab();
     layoutIntent = layoutIntentFromTab();
-    const data = await api(`/api/level1/form-layout?category=${encodeURIComponent(layoutCategory)}`);
-    layout = data.layout;
+    if (layoutCategory === "ingatlan") {
+      const data = await api("/api/level1/ingatlan-wheel-schema");
+      wheelSchema = data.schema || { version: 1, cells: [] };
+    } else {
+      const data = await api(`/api/level1/form-layout?category=${encodeURIComponent(layoutCategory)}`);
+      layout = data.layout;
+    }
   }
 }
 
@@ -566,21 +580,13 @@ function hubPromoView() {
 }
 
 function layoutView() {
-  const intentLabel =
-    layoutIntent === "keres"
-      ? "Keres"
-      : layoutIntent === "kinal"
-        ? "Kínál"
-        : layoutIntent === "berbe"
-          ? "Bérbe ad / vesz"
-          : "";
-  const label = intentLabel || categoryLabel(layoutCategoryFromTab());
-  const sharedHint =
-    layoutCategory === "ingatlan"
-      ? "Az Ingatlanok (Keres / Kínál / Bérbe) közös elrendezést használnak — a feladáson választható a kategória."
-      : "Csak ennek a kategóriának a mezői. Húzd a cellát a lapon belül vagy másik lépésre. Mentés után a hirdetésfeladáson hard refresh kell.";
+  const label = categoryLabel(layoutCategoryFromTab());
+  const isImmo = layoutCategoryFromTab() === "ingatlan";
+  const sharedHint = isImmo
+    ? "Közös kerék-séma a keresőre és a feladásra. Húzd a mezőket, állítsd a szélességet, üres sort is beszúrhatsz. A Keres/Kínál/Bérbe kategória csak az élő oldalon látszik."
+    : "Csak ennek a kategóriának a mezői. Húzd a cellát a lapon belül vagy másik lépésre. Mentés után a hirdetésfeladáson hard refresh kell.";
   return `
-    <h2 class="layout-cat-title">${esc(label)} — feladási mezők</h2>
+    <h2 class="layout-cat-title">${esc(label)} — ${isImmo ? "kerék-séma" : "feladási mezők"}</h2>
     <p class="hint">${esc(sharedHint)}</p>
     <div id="layout-root"></div>
     <p class="ok">${info}</p>
@@ -638,11 +644,20 @@ function esc(value) {
 function render() {
   h(admin ? shell() : loginView());
   if (admin && isLayoutTab()) {
-    mountLayoutBoard(document.getElementById("layout-root"), layout, {
-      onChange(cells) {
-        layout = { ...layout, cells, category: layoutCategoryFromTab() };
-      },
-    });
+    const root = document.getElementById("layout-root");
+    if (layoutCategoryFromTab() === "ingatlan") {
+      mountIngatlanWheelBoard(root, wheelSchema, {
+        onChange(schema) {
+          wheelSchema = schema;
+        },
+      });
+    } else {
+      mountLayoutBoard(root, layout, {
+        onChange(cells) {
+          layout = { ...layout, cells, category: layoutCategoryFromTab() };
+        },
+      });
+    }
   }
 }
 

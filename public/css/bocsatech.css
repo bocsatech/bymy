@@ -116,7 +116,21 @@ th { color: var(--muted); font-weight: 600; }
 .hint { color: var(--muted); font-size: 0.85rem; line-height: 1.45; }
 
 .layout-step { margin: 1.25rem 0 1.75rem; }
+.layout-step-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.55rem;
+}
+.layout-step-head h3 { margin: 0; font-size: 0.95rem; color: var(--muted); font-weight: 600; }
 .layout-step h3 { margin: 0 0 0.55rem; font-size: 0.95rem; color: var(--muted); font-weight: 600; }
+.layout-tile--spacer {
+  background: transparent;
+  border-style: dashed;
+  opacity: 0.85;
+}
 .layout-board {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));

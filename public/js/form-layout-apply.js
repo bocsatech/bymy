@@ -1,5 +1,5 @@
 /** Mentett 12 oszlopos elrendezés — minden mező ugyanazon a lépésrácson. */
-import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=immoSync1";
+import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=immoWheel1";
 
 function cssEscape(value) {
   if (window.CSS?.escape) return window.CSS.escape(value);
@@ -306,7 +306,7 @@ async function applyAdFormLayout() {
     const isImmo = category === "ingatlan";
     setIngatlanFormMode(form, isImmo);
     if (isImmo) {
-      ensureIngatlanFormFields(form);
+      await ensureIngatlanFormFields(form);
     } else {
       // Autó/teher: ingatlan mezők ne maradjanak a DOM-ban.
       form.querySelector("#ingatlan-fields")?.remove();

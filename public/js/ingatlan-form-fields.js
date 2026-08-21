@@ -1,6 +1,6 @@
 /**
  * Ingatlan űrlapmezők a hirdetésfeladáson — ugyanazok a kulcsok, mint a keresőben.
- * Az admin layout ezeket rendezi (Bocsatech → Ingatlan).
+ * Csak vertical=ingatlan esetén kerülnek a DOM-ba (autó/teher ne lássa).
  */
 
 import {
@@ -26,7 +26,7 @@ import {
   INGATLAN_BOOL_FIELDS,
   alapteruletOptions,
   szobaszamOptions,
-} from "./ingatlan-fields.js?v=immo1";
+} from "./ingatlan-fields.js?v=immo2";
 
 function fillSelect(select, options, { keepFirstEmpty = true } = {}) {
   if (!select) return;
@@ -55,8 +55,14 @@ function selectHtml(id, label) {
   </div>`;
 }
 
+function removeIngatlanFormFields(form) {
+  form?.querySelector("#ingatlan-fields")?.remove();
+}
+
 export function ensureIngatlanFormFields(form) {
-  if (!form || form.querySelector("#ingatlan-fields")) return form.querySelector("#ingatlan-fields");
+  if (!form) return null;
+  const existing = form.querySelector("#ingatlan-fields");
+  if (existing) return existing;
 
   const host =
     form.querySelector('.step-panel[data-step="1"] .card > .card-body') ||
@@ -66,7 +72,7 @@ export function ensureIngatlanFormFields(form) {
   const root = document.createElement("div");
   root.id = "ingatlan-fields";
   root.className = "ingatlan-fields form-grid";
-  root.hidden = true;
+  root.setAttribute("data-ingatlan-only", "1");
 
   const boolHtml = INGATLAN_BOOL_FIELDS.map((f) => selectHtml(f.field_key, f.label)).join("");
 
@@ -129,33 +135,61 @@ export function ensureIngatlanFormFields(form) {
   return root;
 }
 
-export function syncIngatlanFormVisibility(form) {
-  const vertical = String(form?.elements?.namedItem("hirdetes_vertical")?.value ?? "")
+function readVertical(form) {
+  const el = form?.elements?.namedItem("hirdetes_vertical");
+  const raw = el instanceof RadioNodeList ? el[0]?.value : el?.value;
+  return String(raw ?? "")
     .trim()
     .toLowerCase();
-  const isImmo = vertical === "ingatlan";
-  const root = ensureIngatlanFormFields(form);
-  if (root) root.hidden = !isImmo;
+}
 
-  form?.querySelectorAll(".field-row--vehicle-year, .field-row--vehicle-ident, .field-row--tipus-egyeb").forEach((el) => {
-    if (isImmo) el.hidden = true;
+export function syncIngatlanFormVisibility(form) {
+  if (!form) return;
+  const isImmo = readVertical(form) === "ingatlan";
+
+  if (!isImmo) {
+    removeIngatlanFormFields(form);
+    form.querySelectorAll(".field-row--vehicle-year, .field-row--vehicle-ident, .field-row--tipus-egyeb").forEach((el) => {
+      el.hidden = false;
+      el.removeAttribute("hidden");
+      el.style.removeProperty("display");
+    });
+    for (const name of ["gyartasi_ev", "gyartmany", "modell", "kivitel", "okmany_jelleg", "km", "uzemanyag"]) {
+      const el = form.elements.namedItem(name);
+      if (!el) continue;
+      const field = el instanceof RadioNodeList ? el[0] : el;
+      if (field?.dataset?.wasRequired === "1") {
+        field.required = true;
+        field.setAttribute("required", "");
+      }
+    }
+    return;
+  }
+
+  const root = ensureIngatlanFormFields(form);
+  if (root) {
+    root.hidden = false;
+    root.removeAttribute("hidden");
+    root.style.removeProperty("display");
+  }
+
+  form.querySelectorAll(".field-row--vehicle-year, .field-row--vehicle-ident, .field-row--tipus-egyeb").forEach((el) => {
+    el.hidden = true;
   });
 
-  const allapot = form?.querySelector("#allapot");
-  if (allapot && isImmo && allapot.dataset.immoOptions !== "1") {
+  const allapot = form.querySelector("#allapot");
+  if (allapot && allapot.dataset.immoOptions !== "1") {
     allapot.dataset.immoOptions = "1";
     fillSelect(allapot, INGATLAN_ALLAPOT);
   }
 
   for (const name of ["gyartasi_ev", "gyartmany", "modell", "kivitel", "okmany_jelleg", "km", "uzemanyag"]) {
-    const el = form?.elements?.namedItem(name);
+    const el = form.elements.namedItem(name);
     if (!el) continue;
-    if (isImmo) {
-      el.dataset.wasRequired = el.required ? "1" : "0";
-      el.required = false;
-      el.removeAttribute("required");
-    } else if (el.dataset.wasRequired === "1") {
-      el.required = true;
-    }
+    const field = el instanceof RadioNodeList ? el[0] : el;
+    if (!field) continue;
+    field.dataset.wasRequired = field.required ? "1" : "0";
+    field.required = false;
+    field.removeAttribute("required");
   }
 }

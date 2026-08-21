@@ -18,6 +18,8 @@ function wrapFor(form, fieldKey) {
     document.getElementById(fieldKey) || form.querySelector(`[name="${cssEscape(fieldKey)}"]`);
   if (!input) return null;
   if (input.closest(SKIP_HOST) || input.closest(KEEP_OUT)) return null;
+  // Autó/teher layout: az ingatlan mezőblokk soha ne kerüljön a canvasra.
+  if (input.closest("#ingatlan-fields") && currentLayoutCategory(form) !== "ingatlan") return null;
   const existing = input.closest(".labeled-field, .field-stack, .md-outlined");
   if (existing) {
     if (existing.closest(KEEP_OUT) || existing.querySelector(KEEP_OUT)) return null;
@@ -208,6 +210,10 @@ async function applyAdFormLayout() {
   if (!form) return;
   try {
     const category = currentLayoutCategory(form);
+    // Autó/teher layout: ne legyenek a DOM-ban az ingatlan mezők (különben felülírják a megjelenést).
+    if (category !== "ingatlan") {
+      form.querySelector("#ingatlan-fields")?.remove();
+    }
     const res = await fetch(`/api/level1/form-layout?category=${encodeURIComponent(category)}`, {
       credentials: "same-origin",
       cache: "no-store",
@@ -220,8 +226,46 @@ async function applyAdFormLayout() {
     if (!Array.isArray(cells) || !cells.length) return;
     const placed = new Set();
     for (const cell of cells) {
+      // Autó layoutban ne helyezzünk el ingatlan-only mezőket, ha mégis a listában lennének.
+      if (category !== "ingatlan" && String(cell.field_key || "").startsWith("ingatlan_")) continue;
+      if (
+        category !== "ingatlan" &&
+        [
+          "ingatlan_uzletag",
+          "ingatlan_lakas_tipus",
+          "ingatlan_kora",
+          "min_berleti_ido",
+          "butorozott",
+          "kilatas",
+          "tajolas",
+          "futes",
+          "parkolas",
+          "komfort",
+          "tetoter",
+          "furdo_wc",
+          "emelet",
+          "belmagassag",
+          "koltozheto",
+          "alapterulet",
+          "szobaszam",
+          "lift",
+          "erkely",
+          "szigeteles",
+          "energiahatekonys",
+          "akadalymentesitett",
+          "legkondicionalo",
+          "kertkapcsolatos",
+          "panelprogram",
+          "gepesitett",
+          "kisallat_megengedett",
+          "dohanyzas_megengedett",
+        ].includes(cell.field_key)
+      ) {
+        continue;
+      }
       const wrap = wrapFor(form, cell.field_key);
       if (!wrap || placed.has(wrap)) continue;
+      if (wrap.closest("#ingatlan-fields") && category !== "ingatlan") continue;
       placed.add(wrap);
       const isLocation = LOCATION_FIELD_KEYS.has(cell.field_key) || wrap.matches?.(".field-stack--location");
       if (cell.hidden && !isLocation) {

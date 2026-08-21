@@ -53,8 +53,8 @@
     --mw-logo-h: calc(100vw * 415 / 958);
     --mw-logo-gap: 1.5cm;
     --mw-avatar: 2.25rem;
-    /* IMG_4865: ~6rem üres a logo felett; safe-area gyakran 0 Safari-ban */
-    --mw-logo-pull: max(env(safe-area-inset-top, 0px), 6rem);
+    /* Felhúzás fele az előzőnek (6rem → 3rem) */
+    --mw-logo-pull: max(env(safe-area-inset-top, 0px), 3rem);
     display: block;
     position: relative;
     z-index: 1;

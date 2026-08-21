@@ -8,8 +8,12 @@
 }
 
 @media (max-width: 800px) {
+  html:has(body.hub-page--feed),
   body.hub-page--feed {
     background: #fff;
+  }
+
+  body.hub-page--feed {
     padding-bottom: calc(5.75rem + env(safe-area-inset-bottom, 0px));
   }
 
@@ -27,15 +31,19 @@
   }
 
   /* —— Felső app sáv: natív app szerinti logo (958×415) + profil —— */
+  /* Státuszsáv (óra / kamera) alá csúszik a logo — nincs külön szürke sáv felül. */
   body.hub-page--feed .mw-app-top {
     --mw-logo-h: calc(100vw * 415 / 958);
     --mw-logo-gap: 1.5cm;
     --mw-avatar: 2.25rem;
+    --mw-top-bleed: env(safe-area-inset-top, 0px);
     display: block;
     position: relative;
     z-index: 1;
     background: #fff;
     padding: 0;
+    margin-top: calc(-1 * var(--mw-top-bleed));
+    padding-top: 0;
     min-height: calc(var(--mw-logo-h) + var(--mw-logo-gap));
     overflow: visible;
     box-sizing: border-box;
@@ -48,6 +56,8 @@
     line-height: 0;
     width: 100%;
     padding: 0;
+    /* A logo teteje a status bar alá megy */
+    margin-top: 0;
   }
 
   body.hub-page--feed .mw-app-logo img {

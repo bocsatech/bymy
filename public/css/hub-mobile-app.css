@@ -77,7 +77,7 @@
     min-height: calc(var(--mw-logo-h) + var(--mw-logo-gap));
     overflow: visible;
     box-sizing: border-box;
-    border-bottom: 1px solid #e3e6ea;
+    border-bottom: 0;
   }
 
   body.hub-page--feed .mw-app-logo {

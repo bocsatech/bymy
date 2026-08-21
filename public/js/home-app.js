@@ -19,7 +19,7 @@ const gridTrack = document.getElementById("home-grid-track");
 const emptyEl = document.getElementById("home-empty");
 const filterForm = document.getElementById("home-filter-form");
 
-const LISTINGS_FETCH_LIMIT = 500;
+const LISTINGS_FETCH_LIMIT = 180;
 
 let allItems = [];
 let sidebarFilters = emptyFilters();

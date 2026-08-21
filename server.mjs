@@ -1625,7 +1625,9 @@ export async function handleHttpRequest(req, res) {
 
   if (pathname === "/api/hub-promo" && req.method === "GET") {
     try {
-      sendJson(res, 200, await getHubPromoPublic());
+      sendJson(res, 200, await getHubPromoPublic(), {
+        "Cache-Control": "public, max-age=60, stale-while-revalidate=300",
+      });
     } catch (error) {
       sendJson(res, 500, { error: error.message ?? "Hub promo hiba." });
     }

@@ -54,6 +54,8 @@
       href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;600;700;800&display=swap"
       rel="stylesheet"
     />
+    <link rel="preload" as="image" href="/images/hub-ingatlan.jpg?v=hubPromoFast1" fetchpriority="high" />
+    <link rel="preload" as="image" href="/images/hub-auto-motor.jpg?v=hubPromoFast1" fetchpriority="high" />
     <link rel="stylesheet" href="/css/hub.css?v=nearby1" />
     <link rel="stylesheet" href="/css/hub-mobile-app.css?v=authMsg1" />
     <link rel="stylesheet" href="/css/site-app.css?v=authMsg1" />  </head>
@@ -124,22 +126,24 @@
             <img
               class="hub-promo__full"
               data-hub-promo-img="ingatlan"
-              src="/images/hub-ingatlan.png?v=hubPromoFit1"
+              src="/images/hub-ingatlan.jpg?v=hubPromoFast1"
               alt="Ingatlan — Házak és lakások"
-              width="2016"
-              height="1210"
+              width="1400"
+              height="840"
               decoding="async"
+              fetchpriority="high"
             />
           </a>
           <a class="hub-promo hub-promo--fullimg" href="/auto.html" data-promo="auto">
             <img
               class="hub-promo__full"
               data-hub-promo-img="auto"
-              src="/images/hub-auto-motor.png?v=hubPromoFit1"
+              src="/images/hub-auto-motor.jpg?v=hubPromoFast1"
               alt="Autó és teherautó — Autók és teherautók"
-              width="2016"
-              height="1210"
+              width="1400"
+              height="840"
               decoding="async"
+              fetchpriority="high"
             />
           </a>
         </section>
@@ -385,6 +389,6 @@
     <script src="/js/theme.js?v=willhabenHdr1" type="module"></script>
     <script src="/js/site-auth.js?v=authMsg1" type="module"></script>
     <script src="/js/site-avatar-menu.js?v=fiokPage2" type="module"></script>
-      <script src="/js/hub-promo.js?v=hubPromoAdmin1" type="module"></script>
+      <script src="/js/hub-promo.js?v=hubPromoFast1" type="module"></script>
 </body>
 </html>

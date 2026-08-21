@@ -48,20 +48,20 @@
     display: none;
   }
 
-  /* —— Felső app sáv: eredeti arány, csak feljebb tolva (nem széthúzva) —— */
+  /* —— Felső app sáv: logo arány változatlan, felhúzva a képernyő tetejére —— */
   body.hub-page--feed .mw-app-top {
     --mw-logo-h: calc(100vw * 415 / 958);
     --mw-logo-gap: 1.5cm;
     --mw-avatar: 2.25rem;
+    /* IMG_4865: ~6rem üres a logo felett; safe-area gyakran 0 Safari-ban */
+    --mw-logo-pull: max(env(safe-area-inset-top, 0px), 6rem);
     display: block;
     position: relative;
     z-index: 1;
     background: #fff;
     padding: 0;
     margin: 0;
-    /* Csak eltolás felfelé — méret / arány változatlan */
-    margin-top: calc(-1 * constant(safe-area-inset-top));
-    margin-top: calc(-1 * env(safe-area-inset-top, 0px));
+    margin-top: calc(-1 * var(--mw-logo-pull)) !important;
     min-height: calc(var(--mw-logo-h) + var(--mw-logo-gap));
     overflow: visible;
     box-sizing: border-box;
@@ -77,13 +77,17 @@
     margin: 0;
   }
 
-  body.hub-page--feed .mw-app-logo img {
-    display: block;
-    width: 100%;
-    height: auto;
+  body.hub-page--feed .mw-app-logo img,
+  body.hub-page--feed .mw-app-logo .bymy-logo-img {
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    max-width: none !important;
     aspect-ratio: 958 / 415;
-    object-fit: contain;
-    max-width: none;
+    object-fit: contain !important;
+    object-position: center top;
+    /* Nincs scale/stretch — csak a szülő margin húz fel */
+    transform: none !important;
   }
 
   body.hub-page--feed .mw-app-avatar {

@@ -162,8 +162,8 @@ function updateTrigger(wheel) {
     if (!values.length) {
       input.value = "";
       input.placeholder = emptyLabel;
-    } else if (multiple) {
-      input.value = labels.length > 3 ? `${labels.length} kiválasztva` : labels.join(", ");
+    } else if (multiple && values.length > 1) {
+      input.value = `${values.length} kiválasztva`;
     } else {
       const btn = [...wheel.querySelectorAll(".immo-wheel-opt")].find((b) => b.dataset.value === values[0]);
       input.value = btn?.textContent?.trim() || formatCustomLabel(values[0], customKind) || values[0];
@@ -172,7 +172,7 @@ function updateTrigger(wheel) {
   }
   if (!trigger) return;
   if (!labels.length) trigger.textContent = emptyLabel;
-  else if (multiple && labels.length > 2) trigger.textContent = `${labels.length} kiválasztva`;
+  else if (multiple && values.length > 1) trigger.textContent = `${values.length} kiválasztva`;
   else trigger.textContent = labels.join(", ");
 }
 

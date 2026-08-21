@@ -57,20 +57,26 @@
     />
     <link rel="stylesheet" href="/css/style.css?v=automax20260720homelist" />    <link rel="stylesheet" href="/css/hub.css?v=logoTop2" />
 
-    <link rel="stylesheet" href="/css/site-app.css?v=logoTop2" />    <link rel="stylesheet" href="/css/site-side.css?v=home20260725unifiedscroll" />
-    <link rel="stylesheet" href="/css/home.css?v=mobile1" />
+    <link rel="stylesheet" href="/css/site-app.css?v=noXScroll1" />    <link rel="stylesheet" href="/css/site-side.css?v=home20260725unifiedscroll" />
+    <link rel="stylesheet" href="/css/home.css?v=noXScroll1" />
     <link rel="stylesheet" href="/css/auto-hero.css?v=mobile1" />
     <style id="home-scroll-fix">
       /* Inline: cache-biztos — a teljes oldal görget, külön görgetősáv nincs sehol. */
       html:has(body.home-page) {
+        overflow-x: hidden !important;
         overflow-y: auto !important;
         height: auto !important;
+        max-width: 100% !important;
+        overscroll-behavior-x: none !important;
       }
       body.home-page {
-        overflow: visible !important;
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
         height: auto !important;
         max-height: none !important;
+        max-width: 100% !important;
         display: block !important;
+        overscroll-behavior-x: none !important;
       }
       body.home-page .home-main {
         min-height: 0 !important;

@@ -17,15 +17,20 @@ body.home-page {
   font-family: Inter, Roboto, system-ui, sans-serif;
   background: #eef0f3;
   color: #202124;
-  overflow: visible;
+  overflow-x: hidden;
+  overflow-y: auto;
   height: auto;
   min-height: 100%;
+  max-width: 100%;
+  overscroll-behavior-x: none;
 }
 
 html:has(body.home-page) {
   overflow-x: hidden;
   overflow-y: auto;
   height: auto;
+  max-width: 100%;
+  overscroll-behavior-x: none;
 }
 
 body.home-page .local-banner {

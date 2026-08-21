@@ -113,13 +113,25 @@ body.site-app .site-app-logo .bymy-logo-img--nav {
 
 /* —— Mobil: ne csússzanak szét a fejléc / kártyák —— */
 html {
-  overflow-x: clip;
+  overflow-x: hidden;
+  max-width: 100%;
+  overscroll-behavior-x: none;
 }
 
 body.site-app,
-body.hub-page {
-  overflow-x: clip;
+body.hub-page,
+body.home-page {
+  overflow-x: hidden;
   max-width: 100%;
+  overscroll-behavior-x: none;
+}
+
+body.site-app .home-main,
+body.site-app .hub-main,
+body.home-page .home-main,
+body.home-page .site-layout {
+  max-width: 100%;
+  overflow-x: clip;
 }
 
 @media (max-width: 800px) {

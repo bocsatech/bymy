@@ -216,13 +216,19 @@
     display: none !important;
   }
 
-  html[data-auth="guest"] body.hub-page--feed .mw-app-avatar {
+  html[data-auth="guest"] body.hub-page--feed .mw-app-avatar,
+  html[data-auth="guest"] body.hub-page--feed .mw-app-hello {
     display: none !important;
   }
 
   html[data-auth="member"] body.hub-page--feed .mw-app-avatar,
   html[data-auth="member"] body.hub-page--feed .mw-app-avatar[hidden] {
     display: inline-flex !important;
+  }
+
+  html[data-auth="member"] body.hub-page--feed .mw-app-hello,
+  html[data-auth="member"] body.hub-page--feed .mw-app-hello[hidden] {
+    display: block !important;
   }
 
   /* —— Promo kártyák (Ingatlan + Autó) megmaradnak —— */

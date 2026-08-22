@@ -12,7 +12,7 @@ import {
   emptyIngatlanFilters,
   filterListingsByIngatlan,
   initIngatlanSearch,
-} from "./ingatlan-search.js?v=priceRow5";
+} from "./ingatlan-search.js?v=priceDrum1";
 import { filterByCategory, initHomeCategoryBar, renderHomeCategoryBar } from "./home-category-bar.js";
 import { initHomeUnifiedScroll } from "./home-unified-scroll.js";
 import { initHomeStatsBar } from "./home-stats-bar.js";

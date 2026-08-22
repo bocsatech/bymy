@@ -38,8 +38,8 @@ import {
   readWheelList,
   setWheelValue,
   MULTI_WHEEL_KEYS,
-  syncCompactPriceMenuWidth,
 } from "./ingatlan-wheels.js?v=mobile4";
+import { initDrumWheel, syncDrumWheelDisplay } from "./immo-drum-picker.js?v=drum1";
 import { fetchIngatlanWheelSchema, renderIngatlanSchemaHosts } from "./ingatlan-wheel-schema.js?v=immoWheel4";
 
 const EXACT_KEYS = [
@@ -131,6 +131,13 @@ function setupMobilePriceRange(mainHost) {
     wrap.appendChild(igCell);
     tolCell.classList.add("immo-price-range__half", "immo-price-range__half--min");
     igCell.classList.add("immo-price-range__half", "immo-price-range__half--max");
+    if (!wrap.querySelector(".immo-price-range__sep")) {
+      const sep = document.createElement("span");
+      sep.className = "immo-price-range__sep";
+      sep.setAttribute("aria-hidden", "true");
+      sep.textContent = "–";
+      igCell.before(sep);
+    }
     const unitEl = document.createElement("span");
     unitEl.className = "immo-price-range__unit";
     unitEl.setAttribute("aria-hidden", "true");
@@ -155,31 +162,30 @@ function fillPriceRangeWheels(form) {
   const uz = normalizeIngatlanUzletag(form.querySelector("#immo-uzletag")?.value || "berbe");
   const isRent = uz === "berbe";
   const opts = isRent ? arFtMinOptions() : priceMillionOptions();
-  const emptyMin = isRent ? "min." : "min.";
-  const emptyMax = isRent ? "max." : "max.";
+  const emptyMin = "min.";
+  const emptyMax = "max.";
   let arTol = form.querySelector('[data-wheel="ar_tol"]');
   let arIg = form.querySelector('[data-wheel="ar_ig"]');
   const prevTol = readWheel(arTol);
   const prevIg = readWheel(arIg);
   fillWheel(arTol, opts, { emptyLabel: emptyMin });
   fillWheel(arIg, opts, { emptyLabel: emptyMax });
-  initMenuWheel(arTol, {
-    emptyLabel: emptyMin,
-    multiple: false,
-    customInput: false,
-  });
-  initMenuWheel(arIg, {
-    emptyLabel: emptyMax,
-    multiple: false,
-    customInput: false,
-  });
+  if (isImmoMobileLayout()) {
+    initDrumWheel(arTol, { emptyLabel: emptyMin });
+    initDrumWheel(arIg, { emptyLabel: emptyMax });
+  } else {
+    initMenuWheel(arTol, { emptyLabel: emptyMin, multiple: false, customInput: false });
+    initMenuWheel(arIg, { emptyLabel: emptyMax, multiple: false, customInput: false });
+  }
   arTol = form.querySelector('[data-wheel="ar_tol"]');
   arIg = form.querySelector('[data-wheel="ar_ig"]');
   setWheelValue(arTol, prevTol);
   setWheelValue(arIg, prevIg);
+  if (isImmoMobileLayout()) {
+    syncDrumWheelDisplay(arTol);
+    syncDrumWheelDisplay(arIg);
+  }
   syncPriceRangeUnit(form);
-  syncCompactPriceMenuWidth(arTol, [emptyMin]);
-  syncCompactPriceMenuWidth(arIg, [emptyMax]);
 }
 
 function fieldBag(item, key) {

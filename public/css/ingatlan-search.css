@@ -362,27 +362,44 @@ input.immo-wheel-custom.immo-wheel-trigger {
   body[data-site-page="ingatlan"] .immo-schema-grid {
     max-width: 100%;
     overflow-x: clip;
+    overflow-y: visible;
   }
 
-  body[data-site-page="ingatlan"] .immo-schema-cell:not(:has(.immo-wheel-wrap--menu.is-open)) {
+  body[data-site-page="ingatlan"] .immo-price-range,
+  body[data-site-page="ingatlan"] .immo-price-range__half {
+    overflow: visible;
+  }
+
+  body[data-site-page="ingatlan"] .immo-schema-cell:not(:has(.immo-wheel-wrap--menu.is-open)):not(:has(.immo-wheel-wrap--drum-inline.is-open)) {
     overflow-x: clip;
   }
 
-  /* Ár min + max: teljes szélesség, egység jobbra (ingatlan.com szerű) */
+  body[data-site-page="ingatlan"] .immo-search-panel {
+    overflow: visible;
+  }
+
+  /* Ár min + max: fix 3rem magasság, kerék kívül görget */
   .immo-price-range {
     grid-column: 1 / -1 !important;
     display: flex;
-    align-items: stretch;
+    align-items: center;
     width: 100%;
     max-width: 100%;
     min-width: 0;
+    height: 3rem;
     min-height: 3rem;
+    max-height: 3rem;
     border: 1px solid #e2e8f0;
     border-radius: 10px;
     background: #fff;
-    overflow: hidden;
+    overflow: visible;
     z-index: 0;
     box-sizing: border-box;
+  }
+
+  .immo-price-range.has-drum-open {
+    z-index: 30;
+    overflow: visible;
   }
 
   .immo-price-range:has(.immo-wheel-wrap--menu.is-open) {
@@ -394,8 +411,10 @@ input.immo-wheel-custom.immo-wheel-trigger {
     width: auto;
     min-width: 0;
     max-width: none;
+    height: 3rem;
     box-sizing: border-box;
-    overflow: hidden;
+    overflow: visible;
+    position: relative;
   }
 
   .immo-price-range__half--min {
@@ -472,104 +491,103 @@ input.immo-wheel-custom.immo-wheel-trigger {
     z-index: 240;
   }
 
-  .immo-price-range__half:has(.immo-wheel-trigger[aria-expanded="true"]) .immo-wheel-trigger {
-    color: #2563eb;
+  .immo-price-range__half .immo-wheel-wrap--drum-inline {
+    position: relative;
+    width: 100%;
+    height: 3rem;
+    overflow: visible;
   }
 
-  /* iOS-szerű ár kerék (drum picker) */
-  .immo-drum-sheet[hidden] {
-    display: none !important;
-  }
-
-  .immo-drum-sheet {
-    position: fixed;
-    inset: 0;
-    z-index: 300;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  .immo-price-range__half .immo-wheel-wrap--drum-inline.is-open .immo-wheel-trigger {
+    visibility: hidden;
     pointer-events: none;
   }
 
-  .immo-drum-backdrop {
+  /* Kerék: csak a középső érték a cellában, szomszédok kívül */
+  .immo-drum-inline {
     position: absolute;
-    inset: 0;
-    border: 0;
-    padding: 0;
-    margin: 0;
-    background: rgba(15, 23, 42, 0.45);
-    pointer-events: auto;
-    cursor: pointer;
-  }
-
-  .immo-drum-panel {
-    position: relative;
-    z-index: 1;
-    width: var(--immo-drum-w, 10rem);
-    max-width: calc(100vw - 2rem);
-    border-radius: 14px;
-    background: #1c1c1e;
-    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45);
-    overflow: hidden;
-    pointer-events: auto;
-  }
-
-  .immo-drum-highlight {
-    position: absolute;
-    left: 0.45rem;
-    right: 0.45rem;
-    top: 50%;
-    transform: translateY(-50%);
-    height: 44px;
-    border-radius: 10px;
-    background: rgba(120, 120, 128, 0.36);
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 3rem;
+    overflow: visible;
     pointer-events: none;
     z-index: 2;
   }
 
-  .immo-drum-scroll {
-    position: relative;
-    z-index: 1;
-    height: 220px;
+  .immo-wheel-wrap--drum-inline.is-open .immo-drum-inline {
+    pointer-events: auto;
+  }
+
+  .immo-drum-inline[hidden] {
+    display: none !important;
+  }
+
+  .immo-drum-inline-highlight {
+    position: absolute;
+    left: 0.25rem;
+    right: 0.25rem;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 2rem;
+    border-radius: 6px;
+    background: rgba(148, 163, 184, 0.2);
+    pointer-events: none;
+    z-index: 3;
+  }
+
+  .immo-drum-inline-scroll {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 7.5rem;
     overflow-x: hidden;
     overflow-y: auto;
     scroll-snap-type: y mandatory;
     -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
     scrollbar-width: none;
-    padding: 88px 0.5rem;
+    padding: calc(3.75rem - 20px) 0.35rem;
     box-sizing: border-box;
+    z-index: 2;
   }
 
-  .immo-drum-scroll::-webkit-scrollbar {
+  .immo-drum-inline-scroll::-webkit-scrollbar {
     display: none;
   }
 
-  .immo-drum-item {
-    appearance: none;
+  .immo-drum-inline-item {
     display: flex;
     align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 44px;
+    justify-content: flex-start;
+    height: 40px;
     margin: 0;
     padding: 0 0.35rem;
-    border: 0;
-    background: transparent;
-    color: #fff;
-    font: 600 1.35rem/1 Inter, system-ui, sans-serif;
+    color: #0f172a;
+    font: 500 1rem/1 Inter, system-ui, sans-serif;
     font-variant-numeric: tabular-nums;
     scroll-snap-align: center;
-    cursor: pointer;
-    transition: opacity 0.12s ease, transform 0.12s ease;
+    scroll-snap-stop: always;
+    white-space: nowrap;
+    opacity: 0.25;
   }
 
-  body.immo-drum-open {
-    overflow: hidden;
-    touch-action: none;
+  .immo-price-range__half:has(.immo-wheel-wrap--drum-inline.is-open) {
+    z-index: 10;
   }
 
   .immo-wheel--drum-source {
     display: none !important;
+  }
+
+  [data-theme="dark"] .immo-drum-inline-item {
+    color: #e5e7eb;
+  }
+
+  [data-theme="dark"] .immo-drum-inline-highlight {
+    background: rgba(148, 163, 184, 0.16);
   }
 
   .immo-label {
@@ -697,6 +715,14 @@ input.immo-wheel-custom.immo-wheel-trigger {
 
   [data-theme="dark"] .immo-price-range__half--min {
     border-right-color: #1f2937;
+  }
+
+  [data-theme="dark"] .immo-drum-inline-item {
+    color: #e5e7eb;
+  }
+
+  [data-theme="dark"] .immo-drum-inline-highlight {
+    background: rgba(148, 163, 184, 0.18);
   }
 
   [data-theme="dark"] .immo-wheel--menu {

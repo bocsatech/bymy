@@ -1,31 +1,12 @@
 /**
- * iOS-szerű függőleges kerék (drum picker) — mobil web ármezőhöz.
+ * Inline drum picker — fix magasságú cella, a szomszéd értékek kívül látszanak.
  */
 
-const DRUM_ITEM_H = 44;
-const DRUM_PAD = DRUM_ITEM_H * 2;
-
-let measureEl;
-let activeSheet = null;
+const ITEM_H = 40;
+let paintFrame = 0;
 
 function isDrumViewport() {
   return typeof window !== "undefined" && window.matchMedia("(max-width: 800px)").matches;
-}
-
-function measureTexts(texts, fontCss) {
-  if (!measureEl) {
-    measureEl = document.createElement("span");
-    measureEl.setAttribute("aria-hidden", "true");
-    document.body.appendChild(measureEl);
-  }
-  measureEl.style.cssText =
-    "position:absolute;left:-9999px;top:0;visibility:hidden;white-space:nowrap;pointer-events:none;" + fontCss;
-  let max = 0;
-  for (const t of texts) {
-    measureEl.textContent = t;
-    max = Math.max(max, measureEl.getBoundingClientRect().width);
-  }
-  return max;
 }
 
 function formatTriggerShort(label, value) {
@@ -35,43 +16,28 @@ function formatTriggerShort(label, value) {
   return t.replace(/\s*Ft\s*$/i, "").replace(/\s*M\s*Ft\s*$/i, " M").trim() || t;
 }
 
-function ensureSheet() {
-  let sheet = document.querySelector(".immo-drum-sheet");
-  if (sheet) return sheet;
-  sheet = document.createElement("div");
-  sheet.className = "immo-drum-sheet";
-  sheet.hidden = true;
-  sheet.innerHTML =
-    '<button type="button" class="immo-drum-backdrop" aria-label="Bezárás"></button>' +
-    '<div class="immo-drum-panel" role="dialog" aria-modal="true">' +
-    '<div class="immo-drum-highlight" aria-hidden="true"></div>' +
-    '<div class="immo-drum-scroll" tabindex="-1"></div>' +
-    "</div>";
-  document.body.appendChild(sheet);
-  sheet.querySelector(".immo-drum-backdrop").addEventListener("click", () => closeDrumSheet(true));
-  return sheet;
+function ensureInlineDrum(wrap) {
+  let drum = wrap.querySelector(".immo-drum-inline");
+  if (drum) return drum;
+  drum = document.createElement("div");
+  drum.className = "immo-drum-inline";
+  drum.hidden = true;
+  drum.innerHTML =
+    '<div class="immo-drum-inline-highlight" aria-hidden="true"></div>' +
+    '<div class="immo-drum-inline-scroll" tabindex="-1"></div>';
+  wrap.appendChild(drum);
+  return drum;
 }
 
-function closeDrumSheet(commit = true) {
-  if (!activeSheet) return;
-  const { sheet, scrollEl, onPick, trigger } = activeSheet;
-  if (commit && scrollEl && onPick) {
-    const item = nearestItem(scrollEl);
-    onPick(item?.dataset.value ?? "");
-  }
-  sheet.hidden = true;
-  document.body.classList.remove("immo-drum-open");
-  trigger?.setAttribute("aria-expanded", "false");
-  activeSheet = null;
-}
-
-function nearestItem(scrollEl) {
-  const center = scrollEl.scrollTop + scrollEl.clientHeight / 2;
+function nearestItem(scrollEl, wrap) {
+  const wrapRect = wrap.getBoundingClientRect();
+  const cellCenterY = wrapRect.top + wrapRect.height / 2;
   let best = null;
   let bestDist = Infinity;
-  scrollEl.querySelectorAll(".immo-drum-item").forEach((item) => {
-    const mid = item.offsetTop + item.offsetHeight / 2;
-    const dist = Math.abs(mid - center);
+  scrollEl.querySelectorAll(".immo-drum-inline-item").forEach((item) => {
+    const r = item.getBoundingClientRect();
+    const mid = r.top + r.height / 2;
+    const dist = Math.abs(mid - cellCenterY);
     if (dist < bestDist) {
       bestDist = dist;
       best = item;
@@ -80,108 +46,130 @@ function nearestItem(scrollEl) {
   return best;
 }
 
-function paintDrum(scrollEl) {
-  const center = scrollEl.scrollTop + scrollEl.clientHeight / 2;
-  scrollEl.querySelectorAll(".immo-drum-item").forEach((item) => {
-    const mid = item.offsetTop + item.offsetHeight / 2;
-    const dist = Math.abs(mid - center);
-    const t = Math.min(dist / (DRUM_ITEM_H * 2.2), 1);
-    const opacity = 1 - t * 0.72;
-    const scale = 1 - t * 0.14;
-    item.style.opacity = String(Math.max(0.22, opacity));
-    item.style.transform = `scale(${scale})`;
+function paintInline(scrollEl, wrap) {
+  cancelAnimationFrame(paintFrame);
+  paintFrame = requestAnimationFrame(() => {
+    const wrapRect = wrap.getBoundingClientRect();
+    const cellCenterY = wrapRect.top + wrapRect.height / 2;
+    scrollEl.querySelectorAll(".immo-drum-inline-item").forEach((item) => {
+      const r = item.getBoundingClientRect();
+      const mid = r.top + r.height / 2;
+      const dist = Math.abs(mid - cellCenterY);
+      const t = Math.min(dist / (ITEM_H * 1.1), 1);
+      const opacity = 1 - t * 0.78;
+      item.style.opacity = String(Math.max(0.12, opacity));
+      item.style.fontWeight = dist < ITEM_H * 0.45 ? "650" : "500";
+    });
   });
 }
 
-function snapDrum(scrollEl) {
-  const item = nearestItem(scrollEl);
-  if (!item) return null;
-  const target =
-    item.offsetTop - (scrollEl.clientHeight - item.offsetHeight) / 2;
-  scrollEl.scrollTo({ top: target, behavior: "smooth" });
-  return item;
+function scrollToItem(scrollEl, wrap, item) {
+  if (!item) return;
+  const wrapRect = wrap.getBoundingClientRect();
+  const cellCenterY = wrapRect.top + wrapRect.height / 2;
+  const itemRect = item.getBoundingClientRect();
+  const itemMid = itemRect.top + itemRect.height / 2;
+  scrollEl.scrollTop += itemMid - cellCenterY;
 }
 
-function openDrumSheet({ wheel, trigger, onPick }) {
-  if (!isDrumViewport()) return false;
-  const sheet = ensureSheet();
-  const panel = sheet.querySelector(".immo-drum-panel");
-  const scrollEl = sheet.querySelector(".immo-drum-scroll");
-  const opts = [...wheel.querySelectorAll(".immo-wheel-opt")];
+function commitWrap(wrap, wheel) {
+  const scrollEl = wrap.querySelector(".immo-drum-inline-scroll");
+  const trigger = wrap.querySelector(".immo-wheel-trigger");
+  const hidden = wrap.querySelector('input[type="hidden"]');
+  if (!scrollEl || !trigger) return;
+  const item = nearestItem(scrollEl, wrap);
+  const value = item?.dataset.value ?? "";
+  wheel.querySelectorAll(".immo-wheel-opt").forEach((btn) => {
+    btn.classList.toggle("is-active", (btn.dataset.value ?? "") === value);
+  });
+  if (hidden) hidden.value = value;
+  if (!value) {
+    trigger.textContent = trigger.dataset.emptyLabel || "Mindegy";
+  } else {
+    trigger.textContent = formatTriggerShort(item?.textContent?.trim(), value);
+  }
+  wheel.dispatchEvent(new CustomEvent("immo-wheel-change", { bubbles: true, detail: { value } }));
+}
 
-  scrollEl.innerHTML = opts
+function closeInlineDrum(wrap, wheel, commit = true) {
+  if (!wrap?.classList.contains("is-open")) return;
+  if (commit) commitWrap(wrap, wheel);
+  wrap.classList.remove("is-open");
+  wrap.querySelector(".immo-drum-inline")?.setAttribute("hidden", "");
+  wrap.querySelector(".immo-wheel-trigger")?.setAttribute("aria-expanded", "false");
+  wrap.closest(".immo-price-range")?.classList.remove("has-drum-open");
+}
+
+function closeAllInlineDrums(commit = true) {
+  document.querySelectorAll(".immo-wheel-wrap--drum-inline.is-open").forEach((wrap) => {
+    const wheel = wrap.querySelector("[data-wheel]");
+    if (wheel) closeInlineDrum(wrap, wheel, commit);
+  });
+}
+
+function populateInlineScroll(scrollEl, wheel) {
+  scrollEl.innerHTML = [...wheel.querySelectorAll(".immo-wheel-opt")]
     .map((btn) => {
       const v = btn.dataset.value ?? "";
       const esc = v.replace(/&/g, "&amp;").replace(/"/g, "&quot;");
-      return `<button type="button" class="immo-drum-item" data-value="${esc}">${btn.textContent}</button>`;
+      return `<div class="immo-drum-inline-item" data-value="${esc}">${btn.textContent}</div>`;
     })
     .join("");
-
-  const texts = opts.map((b) => b.textContent?.trim() || "");
-  const drumW = Math.ceil(
-    measureTexts(texts, "font:600 1.35rem/1 Inter,system-ui,sans-serif;font-variant-numeric:tabular-nums;") + 40
-  );
-  panel.style.setProperty("--immo-drum-w", `${drumW}px`);
-
-  const hidden = wheel.closest(".immo-wheel-wrap")?.querySelector('input[type="hidden"]');
-  const current = hidden?.value ?? "";
-  let start = [...scrollEl.querySelectorAll(".immo-drum-item")].find((el) => el.dataset.value === current);
-  if (!start) start = scrollEl.querySelector(".immo-drum-item");
-
-  let scrollTimer = 0;
-
-  const onScroll = () => {
-    paintDrum(scrollEl);
-    clearTimeout(scrollTimer);
-    scrollTimer = window.setTimeout(() => {
-      snapDrum(scrollEl);
-      paintDrum(scrollEl);
-    }, 100);
-  };
-
-  scrollEl.onscroll = onScroll;
-  scrollEl.onclick = (event) => {
-    const item = event.target.closest(".immo-drum-item");
-    if (!item) return;
-    const target = item.offsetTop - (scrollEl.clientHeight - item.offsetHeight) / 2;
-    scrollEl.scrollTo({ top: target, behavior: "smooth" });
-    window.setTimeout(() => {
-      onPick(item.dataset.value ?? "");
-      closeDrumSheet(false);
-    }, 200);
-  };
-
-  if (start) {
-    scrollEl.scrollTop = start.offsetTop - (scrollEl.clientHeight - start.offsetHeight) / 2;
-  }
-  paintDrum(scrollEl);
-
-  sheet.hidden = false;
-  document.body.classList.add("immo-drum-open");
-  trigger?.setAttribute("aria-expanded", "true");
-  activeSheet = { sheet, scrollEl, onPick, trigger };
-
-  return true;
 }
 
-/**
- * Ármező: mobil drum picker, asztali marad a lenyíló menü.
- */
-export function initDrumWheel(wheel, { emptyLabel = "Mindegy", onChange } = {}) {
+function openInlineDrum(wrap, wheel, trigger) {
+  if (!isDrumViewport()) return;
+  closeAllInlineDrums(true);
+
+  const drum = ensureInlineDrum(wrap);
+  const scrollEl = drum.querySelector(".immo-drum-inline-scroll");
+  populateInlineScroll(scrollEl, wheel);
+
+  const hidden = wrap.querySelector('input[type="hidden"]');
+  const current = hidden?.value ?? "";
+  let start = [...scrollEl.querySelectorAll(".immo-drum-inline-item")].find((el) => el.dataset.value === current);
+  if (!start) start = scrollEl.querySelector(".immo-drum-inline-item");
+
+  scrollEl.onscroll = () => paintInline(scrollEl, wrap);
+
+  drum.hidden = false;
+  wrap.classList.add("is-open");
+  wrap.closest(".immo-price-range")?.classList.add("has-drum-open");
+  trigger.setAttribute("aria-expanded", "true");
+
+  requestAnimationFrame(() => {
+    scrollToItem(scrollEl, wrap, start);
+    paintInline(scrollEl, wrap);
+  });
+}
+
+function ensureOutsideClose() {
+  if (document.documentElement.dataset.immoDrumOutside) return;
+  document.documentElement.dataset.immoDrumOutside = "1";
+  document.addEventListener(
+    "click",
+    (event) => {
+      if (event.target.closest(".immo-wheel-wrap--drum-inline.is-open")) return;
+      closeAllInlineDrums(true);
+    },
+    true
+  );
+}
+
+/** Ármező: fix cella, kerék kívül-felül görgethető. */
+export function initDrumWheel(wheel, { emptyLabel = "Mindegy" } = {}) {
   if (!wheel) return;
   const wrap = wheel.closest(".immo-wheel-wrap");
   if (!wrap) return;
 
-  if (wheel.dataset.drumBound === "1") {
-    wrap.querySelector(".immo-wheel-trigger")?.remove();
-  }
+  wrap.querySelector(".immo-drum-inline")?.remove();
+  wrap.querySelector(".immo-wheel-trigger")?.remove();
+
   wheel.dataset.drumBound = "1";
   wheel.dataset.menu = "1";
   wheel.classList.add("immo-wheel--drum-source");
   wheel.setAttribute("hidden", "");
-
-  wrap.classList.add("immo-wheel-wrap--drum");
-  wrap.querySelector(".immo-wheel-trigger")?.remove();
+  wrap.classList.add("immo-wheel-wrap--drum-inline");
 
   const trigger = document.createElement("button");
   trigger.type = "button";
@@ -194,37 +182,18 @@ export function initDrumWheel(wheel, { emptyLabel = "Mindegy", onChange } = {}) 
   if (labelEl?.nextSibling) wrap.insertBefore(trigger, labelEl.nextSibling);
   else wrap.insertBefore(trigger, wheel);
 
-  function syncTrigger(value) {
-    const btn = [...wheel.querySelectorAll(".immo-wheel-opt")].find((b) => (b.dataset.value ?? "") === String(value ?? ""));
-    if (!btn || !value) {
-      trigger.textContent = emptyLabel;
-      return;
-    }
-    trigger.textContent = formatTriggerShort(btn.textContent?.trim(), value);
-  }
-
   trigger.addEventListener("click", (event) => {
     event.stopPropagation();
     if (!isDrumViewport()) return;
-    const opened = openDrumSheet({
-      wheel,
-      trigger,
-      onPick: (value) => {
-        wheel.querySelectorAll(".immo-wheel-opt").forEach((btn) => {
-          btn.classList.toggle("is-active", (btn.dataset.value ?? "") === value);
-        });
-        const hidden = wrap.querySelector('input[type="hidden"]');
-        if (hidden) hidden.value = value;
-        syncTrigger(value);
-        onChange?.(value);
-        wheel.dispatchEvent(new CustomEvent("immo-wheel-change", { bubbles: true, detail: { value } }));
-      },
-    });
-    if (!opened) return;
+    if (wrap.classList.contains("is-open")) {
+      closeInlineDrum(wrap, wheel, true);
+      return;
+    }
+    openInlineDrum(wrap, wheel, trigger);
   });
 
-  const hidden = wrap.querySelector('input[type="hidden"]');
-  syncTrigger(hidden?.value ?? "");
+  ensureOutsideClose();
+  syncDrumWheelDisplay(wheel);
 }
 
 export function syncDrumWheelDisplay(wheel) {

@@ -39,7 +39,7 @@ import {
   setWheelValue,
   MULTI_WHEEL_KEYS,
 } from "./ingatlan-wheels.js?v=mobile4";
-import { initDrumWheel, syncDrumWheelDisplay } from "./immo-drum-picker.js?v=drum1";
+import { initDrumWheel, syncDrumWheelDisplay } from "./immo-drum-picker.js?v=drum3";
 import { fetchIngatlanWheelSchema, renderIngatlanSchemaHosts } from "./ingatlan-wheel-schema.js?v=immoWheel4";
 
 const EXACT_KEYS = [

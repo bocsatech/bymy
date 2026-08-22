@@ -8,15 +8,30 @@
     /* ignore */
   }
 
+  function connType() {
+    const c = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    if (!c) return "";
+    return c.effectiveType || c.type || "";
+  }
+
   function payload(kind) {
     return {
       kind: kind || "page",
       path: location.pathname + location.search,
       referrer: document.referrer || "",
+      pageTitle: document.title || "",
       language: navigator.language || "",
-      timezone: (Intl.DateTimeFormat().resolvedOptions().timeZone || ""),
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "",
       screenWidth: window.screen && screen.width,
       screenHeight: window.screen && screen.height,
+      viewportWidth: window.innerWidth,
+      viewportHeight: window.innerHeight,
+      pixelRatio: window.devicePixelRatio || 1,
+      platform: navigator.platform || "",
+      connection: connType(),
+      hardwareConcurrency: navigator.hardwareConcurrency || null,
+      deviceMemory: navigator.deviceMemory || null,
+      cookieEnabled: navigator.cookieEnabled,
       userAgent: navigator.userAgent || "",
       visitorId: vid || undefined,
     };

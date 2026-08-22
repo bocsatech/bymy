@@ -169,27 +169,21 @@ function setupMobileDualRange(mainHost, { id, tolKey, igKey, title, ariaLabel, u
     block.className = "immo-dual-range-block";
     block.dataset.range = id;
 
-    const titleEl = document.createElement("span");
-    titleEl.className = "immo-label immo-dual-range__title";
-    titleEl.textContent = title;
-    block.appendChild(titleEl);
-
     wrap = document.createElement("div");
     wrap.className = "immo-dual-range";
     wrap.dataset.range = id;
     wrap.setAttribute("aria-label", ariaLabel);
-    block.appendChild(wrap);
 
+    const titleEl = document.createElement("span");
+    titleEl.className = "immo-label immo-dual-range__title";
+    titleEl.textContent = title;
+    wrap.appendChild(titleEl);
+
+    block.appendChild(wrap);
     tolCell.before(block);
   } else {
     block.classList.add("immo-dual-range-block");
     block.dataset.range = id;
-    if (!block.querySelector(".immo-dual-range__title")) {
-      const titleEl = document.createElement("span");
-      titleEl.className = "immo-label immo-dual-range__title";
-      titleEl.textContent = title;
-      block.insertBefore(titleEl, block.firstChild);
-    }
     if (!wrap) {
       wrap = block.querySelector(".immo-dual-range, .immo-price-range");
     }
@@ -198,6 +192,19 @@ function setupMobileDualRange(mainHost, { id, tolKey, igKey, title, ariaLabel, u
       wrap.classList.add("immo-dual-range");
       wrap.dataset.range = id;
       wrap.setAttribute("aria-label", ariaLabel);
+    }
+    let titleEl =
+      wrap?.querySelector(".immo-dual-range__title") ||
+      block.querySelector(":scope > .immo-dual-range__title");
+    if (!titleEl && wrap) {
+      titleEl = document.createElement("span");
+      titleEl.className = "immo-label immo-dual-range__title";
+      titleEl.textContent = title;
+      wrap.insertBefore(titleEl, wrap.firstChild);
+    } else if (titleEl && wrap && !wrap.contains(titleEl)) {
+      wrap.insertBefore(titleEl, wrap.firstChild);
+    } else if (titleEl) {
+      titleEl.textContent = title;
     }
   }
 

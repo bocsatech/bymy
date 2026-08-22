@@ -55,6 +55,8 @@ let layout = { cells: [], category: "szemelyauto" };
 let wheelSchema = { version: 1, cells: [] };
 let hubPromo = { slots: {} };
 let editingUser = null;
+let selectedVisitorId = "";
+let visitorHits = [];
 
 function otpSentMessage(data) {
   const to = data.emailMasked ? ` (${data.emailMasked})` : "";
@@ -222,6 +224,27 @@ const actions = {
       render();
     } catch (error) {
       err = error.message;
+      render();
+    }
+  },
+  async showVisitorHits(_, el) {
+    const id = el.getAttribute("data-id");
+    err = "";
+    info = "";
+    if (selectedVisitorId === id) {
+      selectedVisitorId = "";
+      visitorHits = [];
+      render();
+      return;
+    }
+    selectedVisitorId = id;
+    try {
+      const data = await api(`/api/level1/visitors/${id}/hits`);
+      visitorHits = data.hits || [];
+      render();
+    } catch (error) {
+      err = error.message;
+      visitorHits = [];
       render();
     }
   },
@@ -457,26 +480,58 @@ function visitorsView() {
   const devices = visitors?.devices || [];
   const rows = devices
     .map(
-      (dev) => `<tr>
+      (dev) => `<tr class="${selectedVisitorId === dev.id ? "row-selected" : ""}">
         <td>${esc(dev.ip)}</td>
         <td>${esc(dev.deviceName)}</td>
         <td>${esc(dev.deviceType)}</td>
         <td>${esc(dev.browser)}</td>
         <td>${esc(dev.os)}</td>
-        <td>${esc(dev.screen)}</td>
+        <td>${esc(dev.screen)}${dev.viewport ? `<br><small>${esc(dev.viewport)}</small>` : ""}</td>
         <td>${esc(dev.language)}</td>
         <td>${esc(dev.timezone)}</td>
+        <td>${dev.userId ? `#${dev.userId}` : "—"}</td>
+        <td title="${esc(dev.lastPath)}">${esc((dev.lastPath || "").slice(0, 40))}${(dev.lastPath || "").length > 40 ? "…" : ""}</td>
         <td>${dev.hitCount ?? 0}</td>
         <td>${esc(fmtWhen(dev.firstSeenAt))}</td>
         <td>${esc(fmtWhen(dev.lastSeenAt))}</td>
-        <td class="ua-cell" title="${esc(dev.userAgent)}">${esc((dev.userAgent || "").slice(0, 72))}${(dev.userAgent || "").length > 72 ? "…" : ""}</td>
+        <td class="ua-cell" title="${esc(dev.userAgent)}">${esc((dev.userAgent || "").slice(0, 48))}${(dev.userAgent || "").length > 48 ? "…" : ""}</td>
+        <td><button class="btn ghost" type="button" data-act="showVisitorHits" data-id="${esc(dev.id)}">${selectedVisitorId === dev.id ? "Bezár" : "Oldalak"}</button></td>
       </tr>`
     )
     .join("");
+  const hitRows = visitorHits
+    .map(
+      (hit) => `<tr>
+        <td>${esc(fmtWhen(hit.createdAt))}</td>
+        <td>${esc(hit.path)}</td>
+        <td>${esc(hit.pageTitle)}</td>
+        <td>${esc(hit.viewport)}</td>
+        <td>${hit.pixelRatio ?? "—"}</td>
+        <td>${esc(hit.platform)}</td>
+        <td>${esc(hit.connectionType)}</td>
+        <td>${hit.userId ? `#${hit.userId}` : "—"}</td>
+        <td title="${esc(hit.referrer)}">${esc((hit.referrer || "").slice(0, 40))}${(hit.referrer || "").length > 40 ? "…" : ""}</td>
+      </tr>`
+    )
+    .join("");
+  const hitsPanel =
+    selectedVisitorId && visitorHits.length
+      ? `<h3 class="admin-section-title" style="margin-top:1.25rem">Oldalmegtekintések — ${esc(selectedVisitorId.slice(0, 8))}…</h3>
+      <div class="table-scroll">
+        <table class="table-dense">
+          <thead><tr>
+            <th>Idő</th><th>Útvonal</th><th>Cím</th><th>Viewport</th><th>DPR</th><th>Platform</th><th>Hálózat</th><th>User</th><th>Honnan</th>
+          </tr></thead>
+          <tbody>${hitRows}</tbody>
+        </table>
+      </div>`
+      : selectedVisitorId
+        ? `<p class="hint" style="margin-top:1rem">Ehhez az eszközhöz még nincs oldalmegtekintés.</p>`
+        : "";
   return `
     <div class="admin-visitors">
       ${visitors?.warning ? `<p class="err">Figyelem: ${esc(visitors.warning)}</p>` : ""}
-      <p class="hint">„Jelenleg” = az elmúlt ${visitors?.onlineWindowMinutes || 5} percben aktív eszközök. A böngésző nem ad valódi számítógépnevet — a „gép név” a felismerhető eszköz/OS (pl. iPhone, Windows).</p>
+      <p class="hint">„Jelenleg” = az elmúlt ${visitors?.onlineWindowMinutes || 5} percben aktív eszközök. Kattints az „Oldalak” gombra az egyes eszközök megtekintési listájához.</p>
       <div class="stat-grid">
         <div class="stat-card"><div class="stat-label">Jelenleg</div><div class="stat-value">${visitors?.online ?? 0}</div><div class="stat-sub">aktív eszköz</div></div>
         <div class="stat-card"><div class="stat-label">Naponta</div><div class="stat-value">${d.unique ?? 0}</div><div class="stat-sub">${d.hits ?? 0} megtekintés</div></div>
@@ -493,13 +548,14 @@ function visitorsView() {
           <thead>
             <tr>
               <th>IP</th><th>Gép / eszköz</th><th>Típus</th><th>Böngésző</th><th>OS</th>
-              <th>Képernyő</th><th>Nyelv</th><th>Időzóna</th><th>Találatok</th>
-              <th>Első</th><th>Utolsó</th><th>User-Agent</th>
+              <th>Képernyő</th><th>Nyelv</th><th>Időzóna</th><th>User</th><th>Utolsó oldal</th><th>Találatok</th>
+              <th>Első</th><th>Utolsó</th><th>User-Agent</th><th></th>
             </tr>
           </thead>
-          <tbody>${rows || `<tr><td colspan="12">Még nincs látogatóadat. Nyiss meg egy oldalt a weben, majd frissíts.</td></tr>`}</tbody>
+          <tbody>${rows || `<tr><td colspan="15">Még nincs látogatóadat. Nyiss meg egy oldalt a weben, majd frissíts.</td></tr>`}</tbody>
         </table>
       </div>
+      ${hitsPanel}
     </div>`;
 }
 

@@ -485,6 +485,19 @@ export async function requireAuthForPage() {
   return false;
 }
 
+function isAuthGatePage() {
+  const p = document.body?.dataset?.sitePage;
+  return p === "belepes" || p === "regisztracio" || p === "aktivalas";
+}
+
+async function enforceClientMembersGate() {
+  if (isAuthGatePage()) return;
+  const user = await refreshAuthSession();
+  if (!user?.email) {
+    window.location.replace(loginUrl(window.location.pathname + window.location.search));
+  }
+}
+
 export function initRegisterPage() {
   const form = document.getElementById("register-form");
   const errorEl = document.getElementById("register-error");
@@ -773,14 +786,16 @@ if (typeof document !== "undefined") {
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", () => {
       if (document.body?.dataset?.authInit !== "manual") initSiteAuth();
+      enforceClientMembersGate();
     });
-  } else if (document.body?.dataset?.authInit !== "manual") {
-    initSiteAuth();
+  } else {
+    if (document.body?.dataset?.authInit !== "manual") initSiteAuth();
+    enforceClientMembersGate();
   }
-  if (!window.__bymyVisitBoot) {
+  if (!window.__bymyVisitBoot && !isAuthGatePage()) {
     window.__bymyVisitBoot = true;
     const s = document.createElement("script");
-    s.src = "/js/site-visit.js?v=visit1";
+    s.src = "/js/site-visit.js?v=visit2";
     s.defer = true;
     (document.head || document.documentElement).appendChild(s);
   }

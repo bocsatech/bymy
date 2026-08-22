@@ -113,6 +113,7 @@ import { safeInternalPath } from "./lib/safe-path.mjs";
 import { rateLimit, clientIp } from "./lib/rate-limit.mjs";
 import { applySecurityHeaders } from "./lib/security-headers.mjs";
 import { recordPageVisit, visitorCookieHeader } from "./lib/site-visitors.mjs";
+import { enforceMembersGate } from "./lib/site-gate.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PUBLIC = join(__dirname, "public");
@@ -1657,6 +1658,14 @@ export async function handleHttpRequest(req, res) {
     });
     return;
   }
+
+  const gate = await enforceMembersGate(req, res, pathname, {
+    getUserBySessionToken,
+    getSessionTokenFromRequest,
+    sendJson,
+    sendRedirect,
+  });
+  if (!gate.allowed) return;
 
   if (pathname === "/api/visit" && req.method === "POST") {
     if (!assertAuthRate(req, res, "visit", { limit: 120, windowMs: 60 * 1000 })) return;

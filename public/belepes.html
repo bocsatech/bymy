@@ -10,103 +10,25 @@
           }
           document.documentElement.setAttribute("data-theme", t);
         } catch (e) {}
-                /* Auth fejléc: ne villanjon vendég gomb → profil a modul / API előtt */
-        try {
-          var raw = sessionStorage.getItem("bymy-auth-user");
-          var user = raw ? JSON.parse(raw) : null;
-          var loggedIn = !!(user && user.email);
-          document.documentElement.setAttribute("data-auth", loggedIn ? "member" : "guest");
-          var first = "";
-          if (user) {
-            first = String((user.profile && user.profile.firstName) || "").trim();
-            if (!first && user.displayName && String(user.displayName).indexOf("@") < 0) {
-              first = String(user.displayName).trim().split(/\s+/)[0] || "";
-            }
-            if (!first && user.email) {
-              var local = String(user.email).split("@")[0] || "";
-              first = local ? local.charAt(0).toUpperCase() + local.slice(1) : "";
-            }
-          }
-          if (first) {
-            document.addEventListener("DOMContentLoaded", function () {
-              document.querySelectorAll("span[data-auth-firstname]").forEach(function (el) {
-                el.textContent = first;
-              });
-              var letter = first.charAt(0).toUpperCase();
-              document.querySelectorAll("[data-avatar-letter]").forEach(function (el) {
-                el.textContent = letter;
-              });
-            });
-          }
-        } catch (e) {
-          document.documentElement.setAttribute("data-auth", "guest");
-        }
       })();
     </script>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext x='16' y='22' text-anchor='middle' font-size='14' font-family='system-ui,sans-serif' font-weight='700'%3EB%3C/text%3E%3C/svg%3E" type="image/svg+xml" />
-    <meta name="bymy-version" content="loginHome1" />
+    <meta name="bymy-version" content="loginGate1" />
     <title>Belépés — Bymy</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="/css/style.css?v=auth20260725" />
-    <link rel="stylesheet" href="/css/site-app.css?v=logoTop2" />
-      <link rel="stylesheet" href="/css/hub.css?v=hubPromoAdmin1" />
-</head>
-  <body class="site-app login-page" data-site-page="belepes" data-auth-init="manual">
-    <script src="/js/mw-app-shell.js?v=mwShellAll1"></script>
-    <div class="local-banner">Bymy — belépés a hirdetésfeladáshoz</div>
-
-    <header class="site-header site-app-header">
-      <div class="site-app-header-inner">
-        <div class="hub-header-top">
-        <div class="hub-header-actions site-header-actions">
-          <a class="hub-header-msg" href="/uzenetek.html" data-auth-member hidden>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 6.8h9.5a2.2 2.2 0 0 1 2.2 2.2v4.2a2.2 2.2 0 0 1-2.2 2.2H10l-3.2 2.4V15.2H5A2.2 2.2 0 0 1 2.8 13V9a2.2 2.2 0 0 1 2.2-2.2Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M14.2 8.2h4A2.2 2.2 0 0 1 20.4 10.4v3.4a2.2 2.2 0 0 1-2.2 2.2h-.7v1.7l-2.2-1.7" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
-            <span>Üzenetek</span>
-          </a>
-          <div class="site-header-auth-row" data-auth-guest>
-            <a class="hub-btn hub-btn--ghost" href="/belepes.html" data-auth-login>Belépés</a>
-            <a class="hub-btn hub-btn--ghost" href="/regisztracio.html" data-auth-register>Regisztráció</a>
-          </div>
-          <div class="site-header-avatar-wrap" data-avatar-menu data-auth-member hidden>
-            <button type="button" class="site-header-profile" data-auth-avatar data-avatar-toggle aria-expanded="false" aria-haspopup="menu" aria-label="Fiók" title="Fiók">
-              <span class="site-header-avatar">
-                <span data-avatar-letter>A</span>
-                <img data-avatar-img alt="" hidden width="44" height="44" />
-              </span>
-              <span class="site-header-firstname" data-auth-firstname></span>
-              <svg class="site-header-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </button>
-            <div class="site-avatar-dropdown site-avatar-dropdown--fiok" data-avatar-dropdown role="menu" hidden></div>
-          </div>
-          <a class="hub-btn hub-btn--post" href="/hirdetesfeladas.html" data-auth-guard>+ Hirdetésfeladás</a>
-          <button type="button" class="hub-theme-toggle" data-theme-toggle aria-label="Színmód" title="Színmód"></button>
-        </div>
-        </div>
-        <div class="hub-nav-band">
-          <a class="site-app-logo" href="/" aria-label="Bymy">
-            <img class="bymy-logo-img bymy-logo-img--nav" src="/images/bymy-logo.png?v=logoUpload1" alt="Bymy.hu" width="190" height="48" decoding="async" />
-          </a>
-        <nav class="import-nav site-app-nav" aria-label="Főmenü">
-          <a class="import-nav-link" href="/">Kezdőlap</a>
-          <a class="import-nav-link" href="/auto.html">Autó</a>
-          <a class="import-nav-link" href="/teherauto.html">Teherautó</a>
-          <a class="import-nav-link" href="/ingatlan.html">Ingatlan</a>
-          <a class="import-nav-link" href="/ajanlasok.html">Ajánlások</a>
-        </nav>
-        </div>
-      </div>
-    </header>
-    <div class="hub-promo-band" data-hub-promo-root></div>
-
-
-    <main class="login-main">
-      <section class="login-card" aria-labelledby="login-title">
-        <h1 class="login-title" id="login-title">Belépés</h1>
-        <p class="login-lead">A hirdetésfeladáshoz jelentkezz be a fiókodba.</p>
+    <link rel="stylesheet" href="/css/style.css?v=authGate1" />
+    <link rel="stylesheet" href="/css/auth-gate.css?v=gate1" />
+  </head>
+  <body class="auth-gate-page login-page" data-site-page="belepes" data-auth-init="manual">
+    <main class="auth-gate-main">
+      <section class="auth-gate-card login-card" aria-labelledby="login-title">
+        <img class="auth-gate-logo" src="/images/bymy-logo.png?v=logoUpload1" alt="Bymy.hu" width="160" height="40" decoding="async" />
+        <h1 class="auth-gate-title login-title" id="login-title">Belépés</h1>
+        <p class="auth-gate-lead login-lead">A Bymy csak regisztrált felhasználóknak érhető el. Jelentkezz be a folytatáshoz.</p>
         <div class="oauth-block" data-oauth-buttons>
           <button type="button" class="oauth-btn oauth-btn--google" data-oauth-provider="google">
             <span class="oauth-btn-icon" aria-hidden="true">G</span>
@@ -136,18 +58,14 @@
           <p id="login-error" class="login-error" role="alert" hidden></p>
           <button type="submit" class="site-header-btn site-header-btn--primary login-submit">Belépés</button>
         </form>
-        <p class="login-hint">Nincs még fiókod? <a href="/regisztracio.html">Regisztráció</a> · Localhost demó</p>
+        <p class="auth-gate-footer login-hint">Nincs még fiókod? <a href="/regisztracio.html">Regisztráció</a></p>
       </section>
     </main>
 
-    <script src="/js/site-avatar-menu.js?v=fiokPage2" type="module"></script>
     <script type="module">
-      import { initLoginPage, initSiteAuth } from "/js/site-auth.js?v=acctOAuth1";
-      initSiteAuth();
+      import { initLoginPage } from "/js/site-auth.js?v=gate1";
       initLoginPage();
     </script>
-      <script src="/js/nav-counts.js?v=willhabenHdr1" type="module"></script>
-      <script src="/js/theme.js?v=willhabenHdr1" type="module"></script>
-    <script src="/js/hub-promo.js?v=hubPromoFast1" type="module"></script>
-</body>
+    <script src="/js/theme.js?v=gate1" type="module"></script>
+  </body>
 </html>

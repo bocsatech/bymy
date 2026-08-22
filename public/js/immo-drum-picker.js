@@ -262,7 +262,10 @@ function ensureOutsideClose() {
   document.addEventListener(
     "click",
     (event) => {
-      if (event.target.closest(".immo-wheel-wrap--drum-inline.is-open")) return;
+      const openWraps = document.querySelectorAll(".immo-wheel-wrap--drum-inline.is-open");
+      if (!openWraps.length) return;
+      // Többválasztásnál: csak a kerék gyűrűn belül marad nyitva; mellette / máshol bezár.
+      if (event.target.closest(".immo-drum-wheel-ring")) return;
       closeAllInlineDrums(true);
     },
     true

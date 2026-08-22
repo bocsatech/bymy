@@ -398,7 +398,26 @@ input.immo-wheel-custom.immo-wheel-trigger {
   }
 
   .immo-price-range.has-drum-open {
-    z-index: 30;
+    z-index: 40;
+    overflow: visible;
+  }
+
+  .immo-price-range__half.is-drum-active {
+    z-index: 41;
+  }
+
+  /* v2: belső keret = aktív cella */
+  body.immo-drum-mode-v2 .immo-price-range__half.is-drum-active {
+    box-shadow: inset 0 0 0 2px #2563eb;
+  }
+
+  /* v2: alatta lévő mezők rejtve nyitáskor */
+  body.immo-drum-mode-v2 .immo-drum-suppressed {
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+
+  body.immo-price-drum-active .immo-search-panel {
     overflow: visible;
   }
 
@@ -503,16 +522,14 @@ input.immo-wheel-custom.immo-wheel-trigger {
     pointer-events: none;
   }
 
-  /* Kerék: csak a középső érték a cellában, szomszédok kívül */
+  /* Kerék gyűrű — számok egymás felett, csak a gyűrűben látszanak */
   .immo-drum-inline {
     position: absolute;
     left: 0;
-    right: 0;
-    top: 0;
-    height: 3rem;
-    overflow: visible;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 5;
     pointer-events: none;
-    z-index: 2;
   }
 
   .immo-wheel-wrap--drum-inline.is-open .immo-drum-inline {
@@ -523,26 +540,46 @@ input.immo-wheel-custom.immo-wheel-trigger {
     display: none !important;
   }
 
+  .immo-drum-wheel-ring {
+    position: relative;
+    width: var(--immo-drum-ring-w, 7.5rem);
+    height: 7.5rem;
+    border-radius: 1rem;
+    border: 1px dashed #94a3b8;
+    background: #fff;
+    box-shadow: 0 8px 28px rgba(15, 23, 42, 0.14);
+    overflow: hidden;
+    box-sizing: border-box;
+  }
+
+  body.immo-drum-mode-legacy .immo-drum-wheel-ring {
+    border: 0;
+    box-shadow: none;
+    background: transparent;
+    border-radius: 0;
+  }
+
   .immo-drum-inline-highlight {
     position: absolute;
-    left: 0.25rem;
-    right: 0.25rem;
+    left: 0.3rem;
+    right: 0.3rem;
     top: 50%;
     transform: translateY(-50%);
     height: 2rem;
+    margin-top: 0;
     border-radius: 6px;
-    background: rgba(148, 163, 184, 0.2);
+    background: rgba(148, 163, 184, 0.22);
     pointer-events: none;
     z-index: 3;
   }
 
+  /* Gyűrű közepe = cella közepe: highlight a ring-en belül, ring center = wrap center */
   .immo-drum-inline-scroll {
     position: absolute;
     left: 0;
     right: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    height: 7.5rem;
+    top: 0;
+    bottom: 0;
     overflow-x: hidden;
     overflow-y: auto;
     scroll-snap-type: y mandatory;
@@ -574,12 +611,14 @@ input.immo-wheel-custom.immo-wheel-trigger {
     opacity: 0.25;
   }
 
-  .immo-price-range__half:has(.immo-wheel-wrap--drum-inline.is-open) {
-    z-index: 10;
+  .immo-drum-inline-item.is-in-cell {
+    color: #0f172a;
   }
 
-  .immo-wheel--drum-source {
-    display: none !important;
+  [data-theme="dark"] .immo-drum-wheel-ring {
+    background: #0b1220;
+    border-color: #475569;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
   }
 
   [data-theme="dark"] .immo-drum-inline-item {
@@ -588,6 +627,15 @@ input.immo-wheel-custom.immo-wheel-trigger {
 
   [data-theme="dark"] .immo-drum-inline-highlight {
     background: rgba(148, 163, 184, 0.16);
+  }
+
+  .immo-price-range__half:has(.immo-wheel-wrap--drum-inline.is-open) {
+    z-index: 10;
+    overflow: visible;
+  }
+
+  .immo-wheel--drum-source {
+    display: none !important;
   }
 
   .immo-label {

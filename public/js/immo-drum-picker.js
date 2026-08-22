@@ -1,9 +1,32 @@
 /**
- * Inline drum picker — fix magasságú cella, a szomszéd értékek kívül látszanak.
+ * Inline drum picker — fix cella + kerék gyűrű (v2).
+ * Visszaállítás: ?immoDrum=legacy vagy localStorage immo-drum-mode=legacy
  */
 
 const ITEM_H = 40;
 let paintFrame = 0;
+
+/** v2 = kerék gyűrű + alatta rejtés | legacy = előző egyszerű inline */
+export function getDrumMode() {
+  try {
+    const q = new URLSearchParams(window.location.search).get("immoDrum");
+    if (q === "legacy" || q === "v2") return q;
+  } catch {
+    /* ignore */
+  }
+  try {
+    const stored = localStorage.getItem("immo-drum-mode");
+    if (stored === "legacy" || stored === "v2") return stored;
+  } catch {
+    /* ignore */
+  }
+  return "v2";
+}
+
+export function applyDrumModeClass() {
+  document.body.classList.remove("immo-drum-mode-v2", "immo-drum-mode-legacy");
+  document.body.classList.add(`immo-drum-mode-${getDrumMode()}`);
+}
 
 function isDrumViewport() {
   return typeof window !== "undefined" && window.matchMedia("(max-width: 800px)").matches;
@@ -23,8 +46,10 @@ function ensureInlineDrum(wrap) {
   drum.className = "immo-drum-inline";
   drum.hidden = true;
   drum.innerHTML =
-    '<div class="immo-drum-inline-highlight" aria-hidden="true"></div>' +
-    '<div class="immo-drum-inline-scroll" tabindex="-1"></div>';
+    '<div class="immo-drum-wheel-ring" aria-hidden="false">' +
+    '<div class="immo-drum-inline-highlight"></div>' +
+    '<div class="immo-drum-inline-scroll" tabindex="-1"></div>' +
+    "</div>";
   wrap.appendChild(drum);
   return drum;
 }
@@ -50,15 +75,20 @@ function paintInline(scrollEl, wrap) {
   cancelAnimationFrame(paintFrame);
   paintFrame = requestAnimationFrame(() => {
     const wrapRect = wrap.getBoundingClientRect();
+    const cellTop = wrapRect.top;
+    const cellBottom = wrapRect.bottom;
     const cellCenterY = wrapRect.top + wrapRect.height / 2;
     scrollEl.querySelectorAll(".immo-drum-inline-item").forEach((item) => {
       const r = item.getBoundingClientRect();
       const mid = r.top + r.height / 2;
+      const inCell = mid >= cellTop && mid <= cellBottom;
       const dist = Math.abs(mid - cellCenterY);
-      const t = Math.min(dist / (ITEM_H * 1.1), 1);
-      const opacity = 1 - t * 0.78;
-      item.style.opacity = String(Math.max(0.12, opacity));
-      item.style.fontWeight = dist < ITEM_H * 0.45 ? "650" : "500";
+      const t = Math.min(dist / (ITEM_H * 1.15), 1);
+      let opacity = 1 - t * 0.72;
+      if (getDrumMode() === "v2" && inCell) opacity = Math.max(opacity, 0.92);
+      item.style.opacity = String(Math.max(0.1, opacity));
+      item.style.fontWeight = dist < ITEM_H * 0.42 ? "650" : "500";
+      item.classList.toggle("is-in-cell", inCell);
     });
   });
 }
@@ -70,6 +100,34 @@ function scrollToItem(scrollEl, wrap, item) {
   const itemRect = item.getBoundingClientRect();
   const itemMid = itemRect.top + itemRect.height / 2;
   scrollEl.scrollTop += itemMid - cellCenterY;
+}
+
+function syncWheelRingWidth(ring, scrollEl) {
+  let max = 0;
+  scrollEl.querySelectorAll(".immo-drum-inline-item").forEach((item) => {
+    max = Math.max(max, item.scrollWidth);
+  });
+  const w = Math.ceil(max + 28);
+  ring.style.setProperty("--immo-drum-ring-w", `${w}px`);
+}
+
+function setDrumFormState(open) {
+  if (getDrumMode() !== "v2") return;
+  const main = document.getElementById("immo-schema-main");
+  const priceRange = main?.querySelector(".immo-price-range");
+  const form = document.getElementById("immo-search-form");
+  if (!main || !priceRange || !form) return;
+
+  let pastPrice = false;
+  for (const el of main.children) {
+    if (el === priceRange) {
+      pastPrice = true;
+      continue;
+    }
+    if (pastPrice) el.classList.toggle("immo-drum-suppressed", open);
+  }
+  form.querySelector(".immo-actions")?.classList.toggle("immo-drum-suppressed", open);
+  document.body.classList.toggle("immo-price-drum-active", open);
 }
 
 function commitWrap(wrap, wheel) {
@@ -97,7 +155,9 @@ function closeInlineDrum(wrap, wheel, commit = true) {
   wrap.classList.remove("is-open");
   wrap.querySelector(".immo-drum-inline")?.setAttribute("hidden", "");
   wrap.querySelector(".immo-wheel-trigger")?.setAttribute("aria-expanded", "false");
+  wrap.closest(".immo-price-range__half")?.classList.remove("is-drum-active");
   wrap.closest(".immo-price-range")?.classList.remove("has-drum-open");
+  setDrumFormState(false);
 }
 
 function closeAllInlineDrums(commit = true) {
@@ -122,6 +182,7 @@ function openInlineDrum(wrap, wheel, trigger) {
   closeAllInlineDrums(true);
 
   const drum = ensureInlineDrum(wrap);
+  const ring = drum.querySelector(".immo-drum-wheel-ring");
   const scrollEl = drum.querySelector(".immo-drum-inline-scroll");
   populateInlineScroll(scrollEl, wheel);
 
@@ -134,10 +195,13 @@ function openInlineDrum(wrap, wheel, trigger) {
 
   drum.hidden = false;
   wrap.classList.add("is-open");
+  wrap.closest(".immo-price-range__half")?.classList.add("is-drum-active");
   wrap.closest(".immo-price-range")?.classList.add("has-drum-open");
   trigger.setAttribute("aria-expanded", "true");
+  setDrumFormState(true);
 
   requestAnimationFrame(() => {
+    syncWheelRingWidth(ring, scrollEl);
     scrollToItem(scrollEl, wrap, start);
     paintInline(scrollEl, wrap);
   });
@@ -156,12 +220,12 @@ function ensureOutsideClose() {
   );
 }
 
-/** Ármező: fix cella, kerék kívül-felül görgethető. */
 export function initDrumWheel(wheel, { emptyLabel = "Mindegy" } = {}) {
   if (!wheel) return;
   const wrap = wheel.closest(".immo-wheel-wrap");
   if (!wrap) return;
 
+  applyDrumModeClass();
   wrap.querySelector(".immo-drum-inline")?.remove();
   wrap.querySelector(".immo-wheel-trigger")?.remove();
 

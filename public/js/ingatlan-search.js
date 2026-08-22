@@ -39,7 +39,7 @@ import {
   setWheelValue,
   MULTI_WHEEL_KEYS,
 } from "./ingatlan-wheels.js?v=mobile4";
-import { initDrumWheel, syncDrumWheelDisplay } from "./immo-drum-picker.js?v=drum3";
+import { initDrumWheel, syncDrumWheelDisplay, applyDrumModeClass } from "./immo-drum-picker.js?v=drum4";
 import { fetchIngatlanWheelSchema, renderIngatlanSchemaHosts } from "./ingatlan-wheel-schema.js?v=immoWheel4";
 
 const EXACT_KEYS = [
@@ -359,6 +359,7 @@ export async function initIngatlanSearch({ onSearch = () => {} } = {}) {
     "search"
   );
   setupMobilePriceRange(document.getElementById("immo-schema-main"));
+  applyDrumModeClass();
 
   fillPriceRangeWheels(form);
   fillWheel(form.querySelector('[data-wheel="alapterulet_tol"]'), alapteruletOptions(), { emptyLabel: "Min. m²" });

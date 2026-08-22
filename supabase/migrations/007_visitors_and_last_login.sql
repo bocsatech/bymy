@@ -39,3 +39,6 @@ CREATE INDEX IF NOT EXISTS idx_site_hits_created ON site_page_hits(created_at DE
 CREATE INDEX IF NOT EXISTS idx_site_hits_visitor ON site_page_hits(visitor_id);
 
 ALTER TABLE web_users ADD COLUMN IF NOT EXISTS last_login_at TIMESTAMPTZ;
+
+-- PostgREST séma cache frissítése (új táblák azonnal látszanak az API-n)
+NOTIFY pgrst, 'reload schema';

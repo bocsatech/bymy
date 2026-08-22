@@ -397,7 +397,8 @@
     justify-content: space-around;
     position: fixed;
     left: 50%;
-    bottom: max(0.65rem, env(safe-area-inset-bottom, 0px));
+    /* Böngészőben: a viewport legalja (a címsor fölött; a címsort nem lehet eltakarni) */
+    bottom: 0.4rem;
     transform: translateX(-50%);
     z-index: 90;
     width: min(22.75rem, calc(100% - 1.35rem));
@@ -504,6 +505,13 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+
+  /* Kezdőképernyőről (PWA standalone): nincs böngésző címsor — sziget a képernyő alján */
+  @media (display-mode: standalone) {
+    body.hub-page--feed .mw-app-tabbar {
+      bottom: max(0.55rem, env(safe-area-inset-bottom, 0px));
+    }
   }
 }
 

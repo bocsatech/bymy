@@ -2,7 +2,8 @@
   "framework": null,
   "buildCommand": "node scripts/embed-ad-form.mjs",
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api" }
+    { "source": "/maintenance.html", "destination": "/maintenance.html" },
+    { "source": "/(.*)", "destination": "/maintenance.html" }
   ],
   "functions": {
     "api/index.mjs": {

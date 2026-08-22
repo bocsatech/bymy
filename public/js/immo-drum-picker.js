@@ -3,6 +3,8 @@
  * Visszaállítás: ?immoDrum=legacy vagy localStorage immo-drum-mode=legacy
  */
 
+import { readWheel, readWheelList, setWheelValue } from "./ingatlan-wheels.js?v=mobile4";
+
 const ITEM_H = 40;
 let paintFrame = 0;
 
@@ -54,9 +56,22 @@ function ensureInlineDrum(wrap) {
   return drum;
 }
 
+function cellAnchor(wrap) {
+  return wrap.querySelector(".immo-wheel-trigger") || wrap;
+}
+
+function drumHostCell(wrap) {
+  return wrap.closest(".immo-price-range__half") || wrap.closest(".immo-schema-cell");
+}
+
+function drumHostRow(wrap) {
+  return wrap.closest(".immo-price-range");
+}
+
 function nearestItem(scrollEl, wrap) {
-  const wrapRect = wrap.getBoundingClientRect();
-  const cellCenterY = wrapRect.top + wrapRect.height / 2;
+  const anchor = cellAnchor(wrap);
+  const anchorRect = anchor.getBoundingClientRect();
+  const cellCenterY = anchorRect.top + anchorRect.height / 2;
   let best = null;
   let bestDist = Infinity;
   scrollEl.querySelectorAll(".immo-drum-inline-item").forEach((item) => {
@@ -74,10 +89,11 @@ function nearestItem(scrollEl, wrap) {
 function paintInline(scrollEl, wrap) {
   cancelAnimationFrame(paintFrame);
   paintFrame = requestAnimationFrame(() => {
-    const wrapRect = wrap.getBoundingClientRect();
-    const cellTop = wrapRect.top;
-    const cellBottom = wrapRect.bottom;
-    const cellCenterY = wrapRect.top + wrapRect.height / 2;
+    const anchor = cellAnchor(wrap);
+    const anchorRect = anchor.getBoundingClientRect();
+    const cellTop = anchorRect.top;
+    const cellBottom = anchorRect.bottom;
+    const cellCenterY = anchorRect.top + anchorRect.height / 2;
     scrollEl.querySelectorAll(".immo-drum-inline-item").forEach((item) => {
       const r = item.getBoundingClientRect();
       const mid = r.top + r.height / 2;
@@ -95,8 +111,9 @@ function paintInline(scrollEl, wrap) {
 
 function scrollToItem(scrollEl, wrap, item) {
   if (!item) return;
-  const wrapRect = wrap.getBoundingClientRect();
-  const cellCenterY = wrapRect.top + wrapRect.height / 2;
+  const anchor = cellAnchor(wrap);
+  const anchorRect = anchor.getBoundingClientRect();
+  const cellCenterY = anchorRect.top + anchorRect.height / 2;
   const itemRect = item.getBoundingClientRect();
   const itemMid = itemRect.top + itemRect.height / 2;
   scrollEl.scrollTop += itemMid - cellCenterY;
@@ -113,6 +130,16 @@ function syncWheelRingWidth(ring, scrollEl) {
 
 function setDrumFormState(open) {
   document.body.classList.toggle("immo-price-drum-active", open);
+  document.body.classList.toggle("immo-drum-active", open);
+}
+
+function refreshDrumItemStates(scrollEl, wheel) {
+  const selected = new Set(readWheelList(wheel));
+  scrollEl.querySelectorAll(".immo-drum-inline-item").forEach((item) => {
+    const v = item.dataset.value ?? "";
+    const on = v === "" ? selected.size === 0 : selected.has(v);
+    item.classList.toggle("is-selected", on);
+  });
 }
 
 function commitWrap(wrap, wheel) {
@@ -120,6 +147,10 @@ function commitWrap(wrap, wheel) {
   const trigger = wrap.querySelector(".immo-wheel-trigger");
   const hidden = wrap.querySelector('input[type="hidden"]');
   if (!scrollEl || !trigger) return;
+  if (wheel.dataset.multiple === "1") {
+    syncDrumWheelDisplay(wheel);
+    return;
+  }
   const item = nearestItem(scrollEl, wrap);
   const value = item?.dataset.value ?? "";
   wheel.querySelectorAll(".immo-wheel-opt").forEach((btn) => {
@@ -140,8 +171,8 @@ function closeInlineDrum(wrap, wheel, commit = true) {
   wrap.classList.remove("is-open");
   wrap.querySelector(".immo-drum-inline")?.setAttribute("hidden", "");
   wrap.querySelector(".immo-wheel-trigger")?.setAttribute("aria-expanded", "false");
-  wrap.closest(".immo-price-range__half")?.classList.remove("is-drum-active");
-  wrap.closest(".immo-price-range")?.classList.remove("has-drum-open");
+  drumHostCell(wrap)?.classList.remove("is-drum-active");
+  drumHostRow(wrap)?.classList.remove("has-drum-open");
   setDrumFormState(false);
 }
 
@@ -171,17 +202,50 @@ function openInlineDrum(wrap, wheel, trigger) {
   const scrollEl = drum.querySelector(".immo-drum-inline-scroll");
   populateInlineScroll(scrollEl, wheel);
 
-  const hidden = wrap.querySelector('input[type="hidden"]');
-  const current = hidden?.value ?? "";
-  let start = [...scrollEl.querySelectorAll(".immo-drum-inline-item")].find((el) => el.dataset.value === current);
+  const values = readWheelList(wheel);
+  let start = null;
+  if (wheel.dataset.multiple === "1" && values.length) {
+    start = [...scrollEl.querySelectorAll(".immo-drum-inline-item")].find((el) => el.dataset.value === values[0]);
+  } else {
+    const current = values[0] ?? "";
+    start = [...scrollEl.querySelectorAll(".immo-drum-inline-item")].find((el) => el.dataset.value === current);
+  }
   if (!start) start = scrollEl.querySelector(".immo-drum-inline-item");
 
   scrollEl.onscroll = () => paintInline(scrollEl, wrap);
 
+  const multiple = wheel.dataset.multiple === "1";
+  scrollEl.querySelectorAll(".immo-drum-inline-item").forEach((item) => {
+    item.onclick = (event) => {
+      event.stopPropagation();
+      const v = item.dataset.value ?? "";
+      if (multiple) {
+        if (v === "") {
+          setWheelValue(wheel, "");
+        } else {
+          const cur = new Set(readWheelList(wheel));
+          if (cur.has(v)) cur.delete(v);
+          else cur.add(v);
+          setWheelValue(wheel, [...cur]);
+        }
+        refreshDrumItemStates(scrollEl, wheel);
+        syncDrumWheelDisplay(wheel);
+        wheel.dispatchEvent(new CustomEvent("immo-wheel-change", { bubbles: true, detail: { value: readWheel(wheel) } }));
+        return;
+      }
+      setWheelValue(wheel, v);
+      refreshDrumItemStates(scrollEl, wheel);
+      syncDrumWheelDisplay(wheel);
+      wheel.dispatchEvent(new CustomEvent("immo-wheel-change", { bubbles: true, detail: { value: readWheel(wheel) } }));
+      closeInlineDrum(wrap, wheel, false);
+    };
+  });
+  refreshDrumItemStates(scrollEl, wheel);
+
   drum.hidden = false;
   wrap.classList.add("is-open");
-  wrap.closest(".immo-price-range__half")?.classList.add("is-drum-active");
-  wrap.closest(".immo-price-range")?.classList.add("has-drum-open");
+  drumHostCell(wrap)?.classList.add("is-drum-active");
+  drumHostRow(wrap)?.classList.add("has-drum-open");
   trigger.setAttribute("aria-expanded", "true");
   setDrumFormState(true);
 
@@ -205,20 +269,34 @@ function ensureOutsideClose() {
   );
 }
 
-export function initDrumWheel(wheel, { emptyLabel = "Mindegy" } = {}) {
+export function initDrumWheel(wheel, { emptyLabel = "Mindegy", multiple = false } = {}) {
   if (!wheel) return;
-  const wrap = wheel.closest(".immo-wheel-wrap");
+  let wrap = wheel.closest(".immo-wheel-wrap");
   if (!wrap) return;
 
+  if (wheel.dataset.drumBound === "1") {
+    const clone = wheel.cloneNode(true);
+    wheel.replaceWith(clone);
+    wheel = clone;
+    wrap = wheel.closest(".immo-wheel-wrap");
+  }
+
   applyDrumModeClass();
+  wrap.classList.remove("immo-wheel-wrap--menu", "immo-wheel-wrap--multi", "immo-wheel-wrap--custom", "is-open");
   wrap.querySelector(".immo-drum-inline")?.remove();
   wrap.querySelector(".immo-wheel-trigger")?.remove();
+  wrap.querySelector(".immo-wheel-custom")?.remove();
 
   wheel.dataset.drumBound = "1";
+  wheel.dataset.menuBound = "";
   wheel.dataset.menu = "1";
+  wheel.dataset.multiple = multiple ? "1" : "0";
+  wheel.classList.remove("immo-wheel--menu");
   wheel.classList.add("immo-wheel--drum-source");
   wheel.setAttribute("hidden", "");
   wrap.classList.add("immo-wheel-wrap--drum-inline");
+  if (multiple) wrap.classList.add("immo-wheel-wrap--multi");
+  else wrap.classList.remove("immo-wheel-wrap--multi");
 
   const trigger = document.createElement("button");
   trigger.type = "button";
@@ -251,17 +329,32 @@ export function syncDrumWheelDisplay(wheel) {
   const trigger = wrap?.querySelector(".immo-wheel-trigger");
   if (!trigger) return;
   const emptyLabel = trigger.dataset.emptyLabel || "Mindegy";
-  const hidden = wrap.querySelector('input[type="hidden"]');
-  const value = hidden?.value ?? "";
+  const multiple = wheel.dataset.multiple === "1";
+  const values = readWheelList(wheel);
   wheel.querySelectorAll(".immo-wheel-opt").forEach((b) => {
-    b.classList.toggle("is-active", (b.dataset.value ?? "") === value);
+    const v = b.dataset.value ?? "";
+    const on = v === "" ? values.length === 0 : values.includes(v);
+    b.classList.toggle("is-active", on);
   });
-  if (!value) {
+  const labels = values
+    .map((v) => {
+      const btn = [...wheel.querySelectorAll(".immo-wheel-opt")].find((b) => (b.dataset.value ?? "") === v);
+      return btn?.textContent?.trim() || v;
+    })
+    .filter(Boolean);
+  if (!labels.length) {
     trigger.textContent = emptyLabel;
+    trigger.removeAttribute("title");
     return;
   }
-  const btn = [...wheel.querySelectorAll(".immo-wheel-opt")].find((b) => (b.dataset.value ?? "") === value);
-  trigger.textContent = btn ? formatTriggerShort(btn.textContent?.trim(), value) : value;
+  if (multiple && values.length > 1) {
+    trigger.textContent = `${values.length} kiválasztva`;
+    trigger.title = labels.join(", ");
+    return;
+  }
+  const shown = labels.map((t) => formatTriggerShort(t, values[0])).join(", ");
+  trigger.textContent = shown;
+  trigger.title = labels.join(", ");
 }
 
 export { isDrumViewport, formatTriggerShort };

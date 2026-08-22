@@ -407,7 +407,9 @@ input.immo-wheel-custom.immo-wheel-trigger {
   }
 
   body.immo-price-drum-active .immo-search-panel,
-  body.immo-price-drum-active .immo-search-form {
+  body.immo-price-drum-active .immo-search-form,
+  body.immo-drum-active .immo-search-panel,
+  body.immo-drum-active .immo-search-form {
     overflow: visible;
   }
 
@@ -416,8 +418,10 @@ input.immo-wheel-custom.immo-wheel-trigger {
   }
 
   /* v2: belső keret = aktív cella */
-  body.immo-drum-mode-v2 .immo-price-range__half.is-drum-active {
+  body.immo-drum-mode-v2 .immo-price-range__half.is-drum-active,
+  body.immo-drum-mode-v2 .immo-schema-cell.is-drum-active {
     box-shadow: inset 0 0 0 2px #2563eb;
+    border-radius: 10px;
   }
 
   .immo-price-range__half.immo-schema-cell {
@@ -517,14 +521,43 @@ input.immo-wheel-custom.immo-wheel-trigger {
     pointer-events: none;
   }
 
+  /* Minden választós mező: inline kerék (nem csak ár) */
+  .immo-schema-cell:has(.immo-wheel-wrap--drum-inline.is-open) {
+    z-index: 50;
+    overflow: visible;
+  }
+
+  .immo-schema-cell .immo-wheel-wrap--drum-inline {
+    position: relative;
+    width: 100%;
+    overflow: visible;
+  }
+
+  .immo-schema-cell .immo-wheel-wrap--drum-inline.is-open .immo-wheel-trigger {
+    visibility: hidden;
+    pointer-events: none;
+  }
+
   /* Kerék gyűrű — számok egymás felett, csak a gyűrűben látszanak */
   .immo-drum-inline {
     position: absolute;
     left: 0;
-    top: 50%;
-    transform: translateY(-50%);
+    right: 0;
+    bottom: 0;
+    top: auto;
+    transform: none;
     z-index: 60;
     pointer-events: none;
+    height: 3rem;
+  }
+
+  .immo-price-range__half .immo-drum-inline {
+    left: 0;
+    right: auto;
+    top: 50%;
+    bottom: auto;
+    transform: translateY(-50%);
+    height: auto;
   }
 
   .immo-wheel-wrap--drum-inline.is-open .immo-drum-inline {
@@ -542,9 +575,10 @@ input.immo-wheel-custom.immo-wheel-trigger {
     border-radius: 1rem;
     border: 1px dashed #94a3b8;
     background: #fff;
-    box-shadow: 0 8px 28px rgba(15, 23, 42, 0.14);
+    box-shadow: 0 8px 28px rgba(15, 23, 42, 0.18);
     overflow: hidden;
     box-sizing: border-box;
+    z-index: 60;
   }
 
   body.immo-drum-mode-legacy .immo-drum-wheel-ring {
@@ -610,6 +644,16 @@ input.immo-wheel-custom.immo-wheel-trigger {
     color: #0f172a;
   }
 
+  .immo-drum-inline-item.is-selected {
+    font-weight: 700;
+  }
+
+  .immo-wheel-wrap--multi .immo-drum-inline-item.is-selected::after {
+    content: " ✓";
+    font-weight: 700;
+    color: #2563eb;
+  }
+
   [data-theme="dark"] .immo-drum-wheel-ring {
     background: #0b1220;
     border-color: #475569;
@@ -624,8 +668,8 @@ input.immo-wheel-custom.immo-wheel-trigger {
     background: rgba(148, 163, 184, 0.16);
   }
 
-  .immo-price-range__half:has(.immo-wheel-wrap--drum-inline.is-open) {
-    z-index: 10;
+  .immo-price-range__half:has(.immo-wheel-wrap--drum-inline.is-open),
+  .immo-schema-cell:has(.immo-wheel-wrap--drum-inline.is-open) {
     overflow: visible;
   }
 

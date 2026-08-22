@@ -39,7 +39,7 @@ import {
   setWheelValue,
   MULTI_WHEEL_KEYS,
 } from "./ingatlan-wheels.js?v=mobile4";
-import { initDrumWheel, syncDrumWheelDisplay, applyDrumModeClass } from "./immo-drum-picker.js?v=drum5";
+import { initDrumWheel, syncDrumWheelDisplay, applyDrumModeClass, getDrumMode } from "./immo-drum-picker.js?v=drum6";
 import { fetchIngatlanWheelSchema, renderIngatlanSchemaHosts } from "./ingatlan-wheel-schema.js?v=immoWheel4";
 
 const EXACT_KEYS = [
@@ -114,6 +114,24 @@ function isImmoMobileLayout() {
   return typeof window !== "undefined" && window.matchMedia(IMMO_MOBILE_MQ).matches;
 }
 
+function useDrumPicker() {
+  return isImmoMobileLayout() && getDrumMode() !== "legacy";
+}
+
+function initImmoSearchWheel(wheel, { emptyLabel = "Mindegy", multiple = false, customInput = false, customKind = "price" } = {}) {
+  if (!wheel) return;
+  if (useDrumPicker()) {
+    initDrumWheel(wheel, { emptyLabel, multiple });
+    return;
+  }
+  initMenuWheel(wheel, { emptyLabel, multiple, customInput, customKind });
+}
+
+function syncImmoSearchWheelDisplay(wheel) {
+  if (!wheel) return;
+  if (wheel.dataset.drumBound === "1") syncDrumWheelDisplay(wheel);
+}
+
 /** Mobil: Ár min + max egy sorban, teljes szélességben (ingatlan.com szerű). */
 function setupMobilePriceRange(mainHost) {
   if (!mainHost || !isImmoMobileLayout()) return;
@@ -170,21 +188,14 @@ function fillPriceRangeWheels(form) {
   const prevIg = readWheel(arIg);
   fillWheel(arTol, opts, { emptyLabel: emptyMin });
   fillWheel(arIg, opts, { emptyLabel: emptyMax });
-  if (isImmoMobileLayout()) {
-    initDrumWheel(arTol, { emptyLabel: emptyMin });
-    initDrumWheel(arIg, { emptyLabel: emptyMax });
-  } else {
-    initMenuWheel(arTol, { emptyLabel: emptyMin, multiple: false, customInput: false });
-    initMenuWheel(arIg, { emptyLabel: emptyMax, multiple: false, customInput: false });
-  }
+  initImmoSearchWheel(arTol, { emptyLabel: emptyMin, multiple: false, customInput: false });
+  initImmoSearchWheel(arIg, { emptyLabel: emptyMax, multiple: false, customInput: false });
   arTol = form.querySelector('[data-wheel="ar_tol"]');
   arIg = form.querySelector('[data-wheel="ar_ig"]');
   setWheelValue(arTol, prevTol);
   setWheelValue(arIg, prevIg);
-  if (isImmoMobileLayout()) {
-    syncDrumWheelDisplay(arTol);
-    syncDrumWheelDisplay(arIg);
-  }
+  syncImmoSearchWheelDisplay(arTol);
+  syncImmoSearchWheelDisplay(arIg);
   syncPriceRangeUnit(form);
 }
 
@@ -301,8 +312,8 @@ function syncRovidMenus(form) {
   const prevKoltoz = readWheel(koltoz);
   fillWheel(berleti, (rovid ? MIN_BERLETI_IDO_ROVID : MIN_BERLETI_IDO).filter((o) => o.value));
   fillWheel(koltoz, (rovid ? KOLTOZHETO_ROVID : KOLTOZHETO).filter((o) => o.value));
-  initMenuWheel(berleti, { emptyLabel: "Mindegy", multiple: false });
-  initMenuWheel(koltoz, { emptyLabel: "Mindegy", multiple: MULTI_WHEEL_KEYS.has("koltozheto") });
+  initImmoSearchWheel(berleti, { emptyLabel: "Mindegy", multiple: false });
+  initImmoSearchWheel(koltoz, { emptyLabel: "Mindegy", multiple: MULTI_WHEEL_KEYS.has("koltozheto") });
   const berletiOpts = new Set([...(berleti?.querySelectorAll(".immo-wheel-opt") || [])].map((b) => b.dataset.value));
   const koltozOpts = new Set([...(koltoz?.querySelectorAll(".immo-wheel-opt") || [])].map((b) => b.dataset.value));
   const berletiKeep = String(prevBerleti)
@@ -396,10 +407,10 @@ export async function initIngatlanSearch({ onSearch = () => {} } = {}) {
     if (name === "ar_tol" || name === "ar_ig") return;
     const isArea = name === "alapterulet_tol" || name === "alapterulet_ig";
     const isRooms = name === "szobaszam";
-    initMenuWheel(wheel, {
+    initImmoSearchWheel(wheel, {
       emptyLabel: emptyByName[name] || "Mindegy",
       multiple: MULTI_WHEEL_KEYS.has(name),
-      customInput: isArea || isRooms,
+      customInput: useDrumPicker() ? false : isArea || isRooms,
       customKind: isArea ? "area" : isRooms ? "rooms" : "price",
     });
   });

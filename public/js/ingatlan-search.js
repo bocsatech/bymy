@@ -38,7 +38,8 @@ import {
   readWheelList,
   setWheelValue,
   MULTI_WHEEL_KEYS,
-} from "./ingatlan-wheels.js?v=mobile3";
+  syncCompactPriceMenuWidth,
+} from "./ingatlan-wheels.js?v=mobile4";
 import { fetchIngatlanWheelSchema, renderIngatlanSchemaHosts } from "./ingatlan-wheel-schema.js?v=immoWheel4";
 
 const EXACT_KEYS = [
@@ -113,7 +114,7 @@ function isImmoMobileLayout() {
   return typeof window !== "undefined" && window.matchMedia(IMMO_MOBILE_MQ).matches;
 }
 
-/** Mobil: Ár min + max egy sorban (ingatlan.com szerű). */
+/** Mobil: Ár min + max egy sorban, teljes szélességben (ingatlan.com szerű). */
 function setupMobilePriceRange(mainHost) {
   if (!mainHost || !isImmoMobileLayout()) return;
   const tolCell = mainHost.querySelector('.immo-schema-cell[data-schema-field="ar_tol"]');
@@ -130,6 +131,10 @@ function setupMobilePriceRange(mainHost) {
     wrap.appendChild(igCell);
     tolCell.classList.add("immo-price-range__half", "immo-price-range__half--min");
     igCell.classList.add("immo-price-range__half", "immo-price-range__half--max");
+    const unitEl = document.createElement("span");
+    unitEl.className = "immo-price-range__unit";
+    unitEl.setAttribute("aria-hidden", "true");
+    wrap.appendChild(unitEl);
   }
 
   for (const cell of [tolCell, igCell]) {
@@ -138,84 +143,20 @@ function setupMobilePriceRange(mainHost) {
   }
 }
 
-let priceRangeMeasureEl;
-
-function measureImmoTextWidth(texts, style) {
-  if (!priceRangeMeasureEl) {
-    priceRangeMeasureEl = document.createElement("span");
-    priceRangeMeasureEl.setAttribute("aria-hidden", "true");
-    document.body.appendChild(priceRangeMeasureEl);
-  }
-  priceRangeMeasureEl.style.cssText =
-    "position:absolute;left:-9999px;top:0;visibility:hidden;white-space:nowrap;pointer-events:none;" +
-    "font-family:Inter,system-ui,sans-serif;" +
-    style;
-  let max = 0;
-  for (const text of texts) {
-    priceRangeMeasureEl.textContent = text;
-    max = Math.max(max, priceRangeMeasureEl.getBoundingClientRect().width);
-  }
-  return max;
-}
-
-/** Mobil: fix dobozszélesség a legszélesebb címke/érték alapján — ne ugráljon választáskor. */
-function syncMobilePriceRangeWidth(form) {
-  if (!form || !isImmoMobileLayout()) return;
-  const wrap = form.querySelector(".immo-price-range");
+function syncPriceRangeUnit(form) {
+  const wrap = form?.querySelector(".immo-price-range");
   if (!wrap) return;
-
-  const sampleLabel = wrap.querySelector(".immo-price-range__half .immo-label");
-  const sampleTrigger = wrap.querySelector(".immo-price-range__half .immo-wheel-trigger");
   const uz = normalizeIngatlanUzletag(form.querySelector("#immo-uzletag")?.value || "berbe");
-  const isRent = uz === "berbe";
-  const opts = isRent ? arFtMinOptions() : priceMillionOptions();
-  const emptyMin = isRent ? "min. Ft" : "min. M Ft";
-  const emptyMax = isRent ? "max. Ft" : "max. M Ft";
-  const texts = ["Ár min.", "Ár max.", emptyMin, emptyMax, ...opts.map((o) => o.label)];
-
-  const labelStyle = sampleLabel ? getComputedStyle(sampleLabel) : null;
-  const triggerStyle = sampleTrigger ? getComputedStyle(sampleTrigger) : null;
-  const labelW = measureImmoTextWidth(
-    ["Ár min.", "Ár max."],
-    labelStyle
-      ? `font:${labelStyle.font};letter-spacing:${labelStyle.letterSpacing};`
-      : "font-size:0.72rem;font-weight:650;"
-  );
-  const valueW = measureImmoTextWidth(
-    texts.slice(2),
-    triggerStyle
-      ? `font:${triggerStyle.font};letter-spacing:${triggerStyle.letterSpacing};font-variant-numeric:${triggerStyle.fontVariantNumeric};`
-      : "font-size:0.95rem;font-weight:400;font-variant-numeric:tabular-nums;"
-  );
-  const halfW = Math.ceil(Math.max(labelW, valueW) + 16);
-  wrap.style.setProperty("--immo-price-half-w", `${halfW}px`);
-  wrap.style.width = `${halfW * 2}px`;
-  wrap.style.maxWidth = "100%";
-}
-
-let priceRangeLayoutBound = false;
-
-function bindMobilePriceRangeLayout(form) {
-  if (!form || priceRangeLayoutBound) return;
-  priceRangeLayoutBound = true;
-  let t = 0;
-  const reflow = () => {
-    setupMobilePriceRange(document.getElementById("immo-schema-main"));
-    syncMobilePriceRangeWidth(form);
-  };
-  window.addEventListener("resize", () => {
-    clearTimeout(t);
-    t = window.setTimeout(reflow, 120);
-  });
-  document.fonts?.ready?.then(reflow).catch(() => {});
+  const unitEl = wrap.querySelector(".immo-price-range__unit");
+  if (unitEl) unitEl.textContent = uz === "berbe" ? "Ft" : "M Ft";
 }
 
 function fillPriceRangeWheels(form) {
   const uz = normalizeIngatlanUzletag(form.querySelector("#immo-uzletag")?.value || "berbe");
   const isRent = uz === "berbe";
   const opts = isRent ? arFtMinOptions() : priceMillionOptions();
-  const emptyMin = isRent ? "min. Ft" : "min. M Ft";
-  const emptyMax = isRent ? "max. Ft" : "max. M Ft";
+  const emptyMin = isRent ? "min." : "min.";
+  const emptyMax = isRent ? "max." : "max.";
   let arTol = form.querySelector('[data-wheel="ar_tol"]');
   let arIg = form.querySelector('[data-wheel="ar_ig"]');
   const prevTol = readWheel(arTol);
@@ -236,7 +177,9 @@ function fillPriceRangeWheels(form) {
   arIg = form.querySelector('[data-wheel="ar_ig"]');
   setWheelValue(arTol, prevTol);
   setWheelValue(arIg, prevIg);
-  syncMobilePriceRangeWidth(form);
+  syncPriceRangeUnit(form);
+  syncCompactPriceMenuWidth(arTol, [emptyMin]);
+  syncCompactPriceMenuWidth(arIg, [emptyMax]);
 }
 
 function fieldBag(item, key) {
@@ -412,8 +355,6 @@ export async function initIngatlanSearch({ onSearch = () => {} } = {}) {
   setupMobilePriceRange(document.getElementById("immo-schema-main"));
 
   fillPriceRangeWheels(form);
-  bindMobilePriceRangeLayout(form);
-  requestAnimationFrame(() => syncMobilePriceRangeWidth(form));
   fillWheel(form.querySelector('[data-wheel="alapterulet_tol"]'), alapteruletOptions(), { emptyLabel: "Min. m²" });
   fillWheel(form.querySelector('[data-wheel="alapterulet_ig"]'), alapteruletOptions(), { emptyLabel: "Max. m²" });
   fillWheel(form.querySelector('[data-wheel="szobaszam"]'), szobaszamOptions(), { emptyLabel: "Mindegy" });

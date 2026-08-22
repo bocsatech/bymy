@@ -256,6 +256,41 @@ function isMobileMenuViewport() {
   return typeof window !== "undefined" && window.matchMedia("(max-width: 800px)").matches;
 }
 
+const PRICE_WHEEL_KEYS = new Set(["ar_tol", "ar_ig"]);
+let menuMeasureEl;
+
+/** Ár kerékmenü: szélesség = legszélesebb opció (nem teljes képernyő). */
+export function syncCompactPriceMenuWidth(wheel, extraLabels = []) {
+  if (!wheel || !PRICE_WHEEL_KEYS.has(wheel.getAttribute("data-wheel") || "")) return;
+  wheel.classList.add("immo-wheel--menu-compact");
+
+  const opt = wheel.querySelector(".immo-wheel-opt");
+  const cs = opt ? getComputedStyle(opt) : null;
+  if (!menuMeasureEl) {
+    menuMeasureEl = document.createElement("span");
+    menuMeasureEl.setAttribute("aria-hidden", "true");
+    document.body.appendChild(menuMeasureEl);
+  }
+  menuMeasureEl.style.cssText =
+    "position:absolute;left:-9999px;top:0;visibility:hidden;white-space:nowrap;pointer-events:none;" +
+    (cs
+      ? `font:${cs.font};letter-spacing:${cs.letterSpacing};font-variant-numeric:${cs.fontVariantNumeric};`
+      : "font-family:Inter,system-ui,sans-serif;font-size:1rem;");
+
+  const texts = [
+    ...extraLabels,
+    ...[...wheel.querySelectorAll(".immo-wheel-opt")].map((b) => b.textContent?.trim() || ""),
+  ].filter(Boolean);
+
+  let max = 0;
+  for (const text of texts) {
+    menuMeasureEl.textContent = text;
+    max = Math.max(max, menuMeasureEl.getBoundingClientRect().width);
+  }
+  const menuW = Math.ceil(max + 28);
+  wheel.style.setProperty("--immo-wheel-menu-w", `${menuW}px`);
+}
+
 function parkWheelInWrap(wheel) {
   const home = wheel._immoMenuHome;
   if (!home?.parent?.isConnected) return;
@@ -409,6 +444,10 @@ export function initMenuWheel(wheel, { emptyLabel = "Mindegy", multiple = false,
     wheel.removeAttribute("hidden");
     trigger.setAttribute("aria-expanded", "true");
     if (isMobileMenuViewport()) {
+      if (PRICE_WHEEL_KEYS.has(wheel.getAttribute("data-wheel") || "")) {
+        const emptyLabel = trigger.dataset.emptyLabel || "";
+        syncCompactPriceMenuWidth(wheel, emptyLabel ? [emptyLabel] : []);
+      }
       portalWheelToBody(wheel, wrap);
       showMenuBackdrop();
     } else {

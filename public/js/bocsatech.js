@@ -212,6 +212,19 @@ const actions = {
       render();
     }
   },
+  async initVisitorSchema() {
+    err = "";
+    info = "";
+    try {
+      const data = await api("/api/level1/visitors/init", { method: "POST" });
+      visitors = data.stats || (await api("/api/level1/visitors"));
+      info = "Látogató táblák létrehozva.";
+      render();
+    } catch (error) {
+      err = error.message;
+      render();
+    }
+  },
   async delUser(_, el) {
     const id = el.getAttribute("data-id");
     if (!confirm(`Törlöd a #${id} usert?`)) return;
@@ -472,6 +485,7 @@ function visitorsView() {
       </div>
       <div class="row" style="margin:0.75rem 0 1rem">
         <button class="btn ghost" type="button" data-act="refreshVisitors">Frissítés</button>
+        ${visitors?.schemaMissing ? `<button class="btn" type="button" data-act="initVisitorSchema">Séma telepítése</button>` : ""}
       </div>
       <h3 class="admin-section-title">Látogatott gépek / eszközök</h3>
       <div class="table-scroll">

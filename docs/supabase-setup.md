@@ -35,8 +35,9 @@ cp .env.example .env.local
 2. Futtasd sorrendben:
    - `supabase/migrations/001_initial_schema.sql`
    - `supabase/migrations/002_seed_baseline.sql` (előbb generáld: `node scripts/generate-supabase-seed-sql.mjs`)
+   - `supabase/migrations/007_visitors_and_last_login.sql` (látogatóstatisztika + utolsó belépés)
 
-3. Ellenőrzés: **Table Editor** — látszanak a táblák (`listings`, `web_users`, `conversations`, stb.), adat csak a seed fájlokból (`field_defs`, `service_categories`).
+3. Ellenőrzés: **Table Editor** — látszanak a táblák (`listings`, `web_users`, `site_page_hits`, stb.), adat csak a seed fájlokból (`field_defs`, `service_categories`).
 
 ## D) Storage (későbbi lépés)
 

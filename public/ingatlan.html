@@ -56,7 +56,8 @@
     <link rel="stylesheet" href="/css/site-app.css?v=noXScroll1" />
     <link rel="stylesheet" href="/css/site-side.css?v=home20260725unifiedscroll" />
     <link rel="stylesheet" href="/css/home.css?v=noXScroll1" />
-    <link rel="stylesheet" href="/css/ingatlan-search.css?v=priceRow2" />
+    <link rel="stylesheet" href="/css/hub-mobile-app.css?v=mwTabDock1" />
+    <link rel="stylesheet" href="/css/ingatlan-search.css?v=priceRow4" />
     <style id="home-scroll-fix">
       html:has(body.home-page) {
         overflow-x: hidden !important;
@@ -79,6 +80,17 @@
         overflow-y: visible !important;
         max-height: none !important;
         max-width: 100% !important;
+      }
+      body[data-site-page="ingatlan"] .immo-search-hero,
+      body[data-site-page="ingatlan"] .immo-search-panel,
+      body[data-site-page="ingatlan"] .immo-schema-grid,
+      body[data-site-page="ingatlan"] .mw-app-top {
+        max-width: 100%;
+        overflow-x: clip;
+      }
+      body[data-site-page="ingatlan"] {
+        touch-action: pan-y;
+        overscroll-behavior-x: none;
       }
     </style>
   </head>
@@ -170,7 +182,7 @@
       </div>
     </main>
 
-    <script src="/js/home-app.js?v=mobile2" type="module"></script>
+    <script src="/js/home-app.js?v=priceRow4" type="module"></script>
     <script src="/js/site-avatar-menu.js?v=fiokPage2" type="module"></script>
     <script src="/js/nav-counts.js?v=willhabenHdr1" type="module"></script>
     <script src="/js/theme.js?v=willhabenHdr1" type="module"></script>

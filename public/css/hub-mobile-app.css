@@ -28,6 +28,19 @@
     padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
   }
 
+  /* Vízszintes túlcsordulás: aloldalakon se csússzon az egész oldal */
+  body.site-app:not(.hub-page--feed) {
+    overflow-x: hidden !important;
+    overscroll-behavior-x: none;
+    touch-action: pan-y;
+  }
+
+  body.site-app:not(.hub-page--feed) .home-main,
+  body.site-app:not(.hub-page--feed) main {
+    max-width: 100%;
+    overflow-x: clip;
+  }
+
   /* Vízszintes túlcsordulás: ne a body vágjon, hanem a tartalom */
   body.hub-page--feed main,
   body.hub-page--feed .hub-intro,

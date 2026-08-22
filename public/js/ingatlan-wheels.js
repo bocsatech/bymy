@@ -253,7 +253,7 @@ export function initWheel(wheel) {
 }
 
 function isMobileMenuViewport() {
-  return typeof window !== "undefined" && window.matchMedia("(max-width: 720px)").matches;
+  return typeof window !== "undefined" && window.matchMedia("(max-width: 800px)").matches;
 }
 
 function parkWheelInWrap(wheel) {

@@ -311,8 +311,8 @@ input.immo-wheel-custom.immo-wheel-trigger {
   color: #e5e7eb;
 }
 
-/* —— Mobil —— */
-@media (max-width: 720px) {
+/* —— Mobil (800px: egyezik a mobil web shell breakpointtal) —— */
+@media (max-width: 800px) {
   body[data-site-page="ingatlan"] .immo-search-hero,
   .immo-search-hero {
     padding: 0.2rem 0.65rem 0.85rem;
@@ -356,18 +356,36 @@ input.immo-wheel-custom.immo-wheel-trigger {
     display: none;
   }
 
-  /* Ár min + max egy sorban */
+  body[data-site-page="ingatlan"] .immo-search-hero,
+  body[data-site-page="ingatlan"] .immo-search-panel,
+  body[data-site-page="ingatlan"] .immo-search-form,
+  body[data-site-page="ingatlan"] .immo-schema-grid {
+    max-width: 100%;
+    overflow-x: clip;
+  }
+
+  body[data-site-page="ingatlan"] .immo-schema-cell:not(:has(.immo-wheel-wrap--menu.is-open)) {
+    overflow-x: clip;
+  }
+
+  /* Ár min + max egy sorban — fix szélesség (JS: --immo-price-half-w + width) */
   .immo-price-range {
     grid-column: 1 / -1 !important;
-    display: flex;
+    justify-self: start;
+    display: inline-flex;
     align-items: stretch;
+    align-self: start;
     position: relative;
+    width: auto;
+    max-width: 100%;
     min-height: 4.35rem;
     border: 1px solid #e2e8f0;
     border-radius: 10px;
     background: #fff;
-    overflow: visible;
+    overflow: hidden;
     z-index: 0;
+    box-sizing: border-box;
+    flex-shrink: 0;
   }
 
   .immo-price-range:has(.immo-wheel-wrap--menu.is-open) {
@@ -375,9 +393,12 @@ input.immo-wheel-custom.immo-wheel-trigger {
   }
 
   .immo-price-range__half.immo-schema-cell {
-    flex: 1 1 0;
-    width: 100%;
+    flex: 0 0 var(--immo-price-half-w, 5.5rem);
+    width: var(--immo-price-half-w, 5.5rem);
     min-width: 0;
+    max-width: var(--immo-price-half-w, 5.5rem);
+    box-sizing: border-box;
+    overflow: hidden;
   }
 
   .immo-price-range__half--min {
@@ -413,8 +434,12 @@ input.immo-wheel-custom.immo-wheel-trigger {
     color: #64748b;
     padding: 0 0.35rem 0.35rem;
     font-size: 0.95rem;
+    font-variant-numeric: tabular-nums;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .immo-price-range__half .immo-wheel-wrap--menu.is-open {
@@ -520,7 +545,7 @@ input.immo-wheel-custom.immo-wheel-trigger {
   }
 }
 
-@media (max-width: 720px) {
+@media (max-width: 800px) {
   [data-theme="dark"] .immo-wheel--menu {
     background: #0b1220;
     border-color: #1f2937;

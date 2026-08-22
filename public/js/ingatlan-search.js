@@ -107,6 +107,51 @@ function numOrNull(value) {
   return Number.isFinite(n) ? n : null;
 }
 
+/** Mobil: Ár min + max egy sorban (ingatlan.com szerű). */
+function setupMobilePriceRange(mainHost) {
+  if (!mainHost || !window.matchMedia("(max-width: 720px)").matches) return;
+  const tolCell = mainHost.querySelector('.immo-schema-cell[data-schema-field="ar_tol"]');
+  const igCell = mainHost.querySelector('.immo-schema-cell[data-schema-field="ar_ig"]');
+  if (!tolCell || !igCell || mainHost.querySelector(".immo-price-range")) return;
+
+  const wrap = document.createElement("div");
+  wrap.className = "immo-price-range";
+  wrap.setAttribute("aria-label", "Ár tartomány");
+  tolCell.before(wrap);
+  wrap.appendChild(tolCell);
+  wrap.appendChild(igCell);
+  tolCell.classList.add("immo-price-range__half", "immo-price-range__half--min");
+  igCell.classList.add("immo-price-range__half", "immo-price-range__half--max");
+}
+
+function fillPriceRangeWheels(form) {
+  const uz = normalizeIngatlanUzletag(form.querySelector("#immo-uzletag")?.value || "berbe");
+  const isRent = uz === "berbe";
+  const opts = isRent ? arFtMinOptions() : priceMillionOptions();
+  const emptyMin = isRent ? "min. Ft" : "min. M Ft";
+  const emptyMax = isRent ? "max. Ft" : "max. M Ft";
+  const arTol = form.querySelector('[data-wheel="ar_tol"]');
+  const arIg = form.querySelector('[data-wheel="ar_ig"]');
+  const prevTol = readWheel(arTol);
+  const prevIg = readWheel(arIg);
+  fillWheel(arTol, opts, { emptyLabel: emptyMin });
+  fillWheel(arIg, opts, { emptyLabel: emptyMax });
+  initMenuWheel(arTol, {
+    emptyLabel: emptyMin,
+    multiple: false,
+    customInput: true,
+    customKind: "price",
+  });
+  initMenuWheel(arIg, {
+    emptyLabel: emptyMax,
+    multiple: false,
+    customInput: true,
+    customKind: "price",
+  });
+  setWheelValue(arTol, prevTol);
+  setWheelValue(arIg, prevIg);
+}
+
 function fieldBag(item, key) {
   const f = item?.preview?.filter ?? {};
   const form = item?.form ?? {};
@@ -277,12 +322,9 @@ export async function initIngatlanSearch({ onSearch = () => {} } = {}) {
     schema,
     "search"
   );
+  setupMobilePriceRange(document.getElementById("immo-schema-main"));
 
-  const millions = priceMillionOptions();
-  const arTol = form.querySelector('[data-wheel="ar_tol"]');
-  const arIg = form.querySelector('[data-wheel="ar_ig"]');
-  fillWheel(arTol, millions, { emptyLabel: "Min. ár" });
-  fillWheel(arIg, millions, { emptyLabel: "Max. ár" });
+  fillPriceRangeWheels(form);
   fillWheel(form.querySelector('[data-wheel="alapterulet_tol"]'), alapteruletOptions(), { emptyLabel: "Min. m²" });
   fillWheel(form.querySelector('[data-wheel="alapterulet_ig"]'), alapteruletOptions(), { emptyLabel: "Max. m²" });
   fillWheel(form.querySelector('[data-wheel="szobaszam"]'), szobaszamOptions(), { emptyLabel: "Mindegy" });
@@ -308,21 +350,19 @@ export async function initIngatlanSearch({ onSearch = () => {} } = {}) {
   }
 
   const emptyByName = {
-    ar_tol: "Min. ár",
-    ar_ig: "Max. ár",
     alapterulet_tol: "Min. m²",
     alapterulet_ig: "Max. m²",
     szobaszam: "Szobaszám",
   };
   form.querySelectorAll("[data-wheel]").forEach((wheel) => {
     const name = wheel.getAttribute("data-wheel") || "";
-    const isPrice = name === "ar_tol" || name === "ar_ig";
+    if (name === "ar_tol" || name === "ar_ig") return;
     const isArea = name === "alapterulet_tol" || name === "alapterulet_ig";
     const isRooms = name === "szobaszam";
     initMenuWheel(wheel, {
       emptyLabel: emptyByName[name] || "Mindegy",
       multiple: MULTI_WHEEL_KEYS.has(name),
-      customInput: isPrice || isArea || isRooms,
+      customInput: isArea || isRooms,
       customKind: isArea ? "area" : isRooms ? "rooms" : "price",
     });
   });
@@ -357,6 +397,10 @@ export async function initIngatlanSearch({ onSearch = () => {} } = {}) {
     syncRovidMenus(form);
   });
 
+  uzletag?.addEventListener("change", () => {
+    fillPriceRangeWheels(form);
+  });
+
   form.addEventListener("submit", (event) => {
     event.preventDefault();
     onSearch(readForm(form));
@@ -369,6 +413,7 @@ export async function initIngatlanSearch({ onSearch = () => {} } = {}) {
       const hely = form.querySelector('[name="keresesi_hely"]');
       if (hely) hely.value = "";
       if (uzletag) uzletag.value = "berbe";
+      fillPriceRangeWheels(form);
       syncRovidMenus(form);
       setMoreOpen(false);
       onSearch(emptyIngatlanFilters());

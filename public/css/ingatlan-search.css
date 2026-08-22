@@ -356,6 +356,73 @@ input.immo-wheel-custom.immo-wheel-trigger {
     display: none;
   }
 
+  /* Ár min + max egy sorban */
+  .immo-price-range {
+    grid-column: 1 / -1 !important;
+    display: flex;
+    align-items: stretch;
+    position: relative;
+    min-height: 3rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    background: #fff;
+    overflow: visible;
+  }
+
+  .immo-price-range__half {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    align-items: stretch;
+  }
+
+  .immo-price-range__half--min {
+    border-right: 1px solid #e2e8f0;
+  }
+
+  .immo-price-range__half .immo-label {
+    display: none !important;
+  }
+
+  .immo-price-range__half .immo-wheel-wrap {
+    flex: 1 1 auto;
+    width: 100%;
+    gap: 0;
+    min-width: 0;
+  }
+
+  .immo-price-range__half .immo-wheel-trigger,
+  .immo-price-range__half input.immo-wheel-custom.immo-wheel-trigger {
+    width: 100%;
+    min-height: 3rem;
+    height: 3rem;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    text-align: center;
+    color: #64748b;
+    padding-left: 0.35rem;
+    padding-right: 0.35rem;
+  }
+
+  .immo-price-range__half .immo-wheel-wrap--menu.is-open {
+    z-index: 240;
+  }
+
+  .immo-price-range::before {
+    content: "–";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    color: #94a3b8;
+    font-size: 1rem;
+    font-weight: 500;
+    pointer-events: none;
+    z-index: 2;
+  }
+
   .immo-label {
     font-size: 0.78rem;
   }

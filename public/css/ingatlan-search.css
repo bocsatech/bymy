@@ -365,8 +365,8 @@ input.immo-wheel-custom.immo-wheel-trigger {
     overflow-y: visible;
   }
 
-  body[data-site-page="ingatlan"] .immo-price-range,
-  body[data-site-page="ingatlan"] .immo-price-range__half {
+  body[data-site-page="ingatlan"] .immo-dual-range,
+  body[data-site-page="ingatlan"] .immo-dual-range__half {
     overflow: visible;
   }
 
@@ -378,8 +378,8 @@ input.immo-wheel-custom.immo-wheel-trigger {
     overflow: visible;
   }
 
-  /* Ár blokk: címke + min–max sor */
-  .immo-price-range-block {
+  /* Min–max blokk (ár, alapterület): címke + sor */
+  .immo-dual-range-block {
     grid-column: 1 / -1 !important;
     display: grid;
     gap: 0.35rem;
@@ -387,12 +387,12 @@ input.immo-wheel-custom.immo-wheel-trigger {
     max-width: 100%;
   }
 
-  .immo-price-range__title {
+  .immo-dual-range__title {
     display: block;
   }
 
-  /* Ár min + max: fix 3rem magasság, kerék kívül görget */
-  .immo-price-range {
+  /* Min–max sor: fix 3rem magasság, kerék kívül görget */
+  .immo-dual-range {
     grid-column: auto;
     display: flex;
     align-items: center;
@@ -410,12 +410,12 @@ input.immo-wheel-custom.immo-wheel-trigger {
     box-sizing: border-box;
   }
 
-  .immo-price-range.has-drum-open {
+  .immo-dual-range.has-drum-open {
     z-index: 50;
     overflow: visible;
   }
 
-  .immo-price-range__half.is-drum-active {
+  .immo-dual-range__half.is-drum-active {
     z-index: 51;
   }
 
@@ -426,18 +426,18 @@ input.immo-wheel-custom.immo-wheel-trigger {
     overflow: visible;
   }
 
-  .immo-price-range:has(.immo-wheel-wrap--menu.is-open) {
+  .immo-dual-range:has(.immo-wheel-wrap--menu.is-open) {
     z-index: 45;
   }
 
   /* v2: belső keret = aktív cella */
-  body.immo-drum-mode-v2 .immo-price-range__half.is-drum-active,
+  body.immo-drum-mode-v2 .immo-dual-range__half.is-drum-active,
   body.immo-drum-mode-v2 .immo-schema-cell.is-drum-active {
     box-shadow: inset 0 0 0 2px #2563eb;
     border-radius: 10px;
   }
 
-  .immo-price-range__half.immo-schema-cell {
+  .immo-dual-range__half.immo-schema-cell {
     flex: 1 1 0;
     width: auto;
     min-width: 0;
@@ -448,12 +448,12 @@ input.immo-wheel-custom.immo-wheel-trigger {
     position: relative;
   }
 
-  .immo-price-range__half--min {
+  .immo-dual-range__half--min {
     flex: 1 1 0;
     min-width: 0;
   }
 
-  .immo-price-range__sep {
+  .immo-dual-range__sep {
     flex: 0 0 auto;
     display: flex;
     align-items: center;
@@ -464,16 +464,16 @@ input.immo-wheel-custom.immo-wheel-trigger {
     pointer-events: none;
   }
 
-  .immo-price-range__half--max {
+  .immo-dual-range__half--max {
     flex: 1 1 0;
     min-width: 0;
   }
 
-  .immo-price-range__half--min {
+  .immo-dual-range__half--min {
     border-right: 0;
   }
 
-  .immo-price-range__unit {
+  .immo-dual-range__unit {
     flex: 0 0 auto;
     display: flex;
     align-items: center;
@@ -486,18 +486,18 @@ input.immo-wheel-custom.immo-wheel-trigger {
     background: #fff;
   }
 
-  .immo-price-range__half .immo-label {
+  .immo-dual-range__half .immo-label {
     display: none !important;
   }
 
-  .immo-price-range__half .immo-wheel-wrap {
+  .immo-dual-range__half .immo-wheel-wrap {
     flex: 1 1 auto;
     width: 100%;
     gap: 0;
     min-width: 0;
   }
 
-  .immo-price-range__half .immo-wheel-trigger {
+  .immo-dual-range__half .immo-wheel-trigger {
     width: 100%;
     min-height: 3rem;
     height: 3rem;
@@ -518,18 +518,18 @@ input.immo-wheel-custom.immo-wheel-trigger {
     background-image: none !important;
   }
 
-  .immo-price-range__half .immo-wheel-wrap--menu.is-open {
+  .immo-dual-range__half .immo-wheel-wrap--menu.is-open {
     z-index: 240;
   }
 
-  .immo-price-range__half .immo-wheel-wrap--drum-inline {
+  .immo-dual-range__half .immo-wheel-wrap--drum-inline {
     position: relative;
     width: 100%;
     height: 3rem;
     overflow: visible;
   }
 
-  .immo-price-range__half .immo-wheel-wrap--drum-inline.is-open .immo-wheel-trigger {
+  .immo-dual-range__half .immo-wheel-wrap--drum-inline.is-open .immo-wheel-trigger {
     visibility: hidden;
     pointer-events: none;
   }
@@ -564,7 +564,7 @@ input.immo-wheel-custom.immo-wheel-trigger {
     height: 3rem;
   }
 
-  .immo-price-range__half .immo-drum-inline {
+  .immo-dual-range__half .immo-drum-inline {
     left: 0;
     right: auto;
     top: 50%;
@@ -681,7 +681,7 @@ input.immo-wheel-custom.immo-wheel-trigger {
     background: rgba(148, 163, 184, 0.16);
   }
 
-  .immo-price-range__half:has(.immo-wheel-wrap--drum-inline.is-open),
+  .immo-dual-range__half:has(.immo-wheel-wrap--drum-inline.is-open),
   .immo-schema-cell:has(.immo-wheel-wrap--drum-inline.is-open) {
     overflow: visible;
   }
@@ -802,18 +802,18 @@ input.immo-wheel-custom.immo-wheel-trigger {
 }
 
 @media (max-width: 800px) {
-  [data-theme="dark"] .immo-price-range__unit {
+  [data-theme="dark"] .immo-dual-range__unit {
     color: #e5e7eb;
     background: #0b1220;
     border-left-color: #1f2937;
   }
 
-  [data-theme="dark"] .immo-price-range {
+  [data-theme="dark"] .immo-dual-range {
     background: #0b1220;
     border-color: #1f2937;
   }
 
-  [data-theme="dark"] .immo-price-range__half--min {
+  [data-theme="dark"] .immo-dual-range__half--min {
     border-right-color: #1f2937;
   }
 

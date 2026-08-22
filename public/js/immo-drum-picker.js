@@ -38,7 +38,7 @@ function formatTriggerShort(label, value) {
   if (!value) return label;
   const t = String(label || "").trim();
   if (!t) return label;
-  return t.replace(/\s*Ft\s*$/i, "").replace(/\s*M\s*Ft\s*$/i, " M").trim() || t;
+  return t.replace(/\s*Ft\s*$/i, "").replace(/\s*M\s*Ft\s*$/i, " M").replace(/\s*m²\s*$/i, "").trim() || t;
 }
 
 function ensureInlineDrum(wrap) {
@@ -61,11 +61,11 @@ function cellAnchor(wrap) {
 }
 
 function drumHostCell(wrap) {
-  return wrap.closest(".immo-price-range__half") || wrap.closest(".immo-schema-cell");
+  return wrap.closest(".immo-dual-range__half") || wrap.closest(".immo-schema-cell");
 }
 
 function drumHostRow(wrap) {
-  return wrap.closest(".immo-price-range");
+  return wrap.closest(".immo-dual-range");
 }
 
 function nearestItem(scrollEl, wrap) {

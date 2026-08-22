@@ -39,7 +39,7 @@ import {
   setWheelValue,
   MULTI_WHEEL_KEYS,
 } from "./ingatlan-wheels.js?v=mobile4";
-import { initDrumWheel, syncDrumWheelDisplay, applyDrumModeClass, getDrumMode } from "./immo-drum-picker.js?v=drum6";
+import { initDrumWheel, syncDrumWheelDisplay, applyDrumModeClass, getDrumMode } from "./immo-drum-picker.js?v=drum7";
 import { fetchIngatlanWheelSchema, renderIngatlanSchemaHosts } from "./ingatlan-wheel-schema.js?v=immoWheel4";
 
 const EXACT_KEYS = [
@@ -132,53 +132,109 @@ function syncImmoSearchWheelDisplay(wheel) {
   if (wheel.dataset.drumBound === "1") syncDrumWheelDisplay(wheel);
 }
 
-/** Mobil: Ár min + max egy sorban, teljes szélességben (ingatlan.com szerű). */
-function setupMobilePriceRange(mainHost) {
+/** Mobil: min + max egy sorban (ár, alapterület). */
+const MOBILE_DUAL_RANGES = [
+  { id: "ar", tolKey: "ar_tol", igKey: "ar_ig", title: "Ár", ariaLabel: "Ár tartomány" },
+  {
+    id: "alapterulet",
+    tolKey: "alapterulet_tol",
+    igKey: "alapterulet_ig",
+    title: "Alapterület",
+    ariaLabel: "Alapterület tartomány",
+    unit: "m²",
+  },
+];
+
+function setupMobileDualRanges(mainHost) {
   if (!mainHost || !isImmoMobileLayout()) return;
-  const tolCell = mainHost.querySelector('.immo-schema-cell[data-schema-field="ar_tol"]');
-  const igCell = mainHost.querySelector('.immo-schema-cell[data-schema-field="ar_ig"]');
+  for (const cfg of MOBILE_DUAL_RANGES) {
+    setupMobileDualRange(mainHost, cfg);
+  }
+}
+
+function setupMobileDualRange(mainHost, { id, tolKey, igKey, title, ariaLabel, unit = "" }) {
+  const tolCell = mainHost.querySelector(`.immo-schema-cell[data-schema-field="${tolKey}"]`);
+  const igCell = mainHost.querySelector(`.immo-schema-cell[data-schema-field="${igKey}"]`);
   if (!tolCell || !igCell) return;
 
-  let wrap = mainHost.querySelector(".immo-price-range");
-  let block = mainHost.querySelector(".immo-price-range-block");
+  let wrap =
+    tolCell.closest(".immo-dual-range") ||
+    tolCell.closest(".immo-price-range");
+  let block =
+    wrap?.closest(".immo-dual-range-block") ||
+    wrap?.closest(".immo-price-range-block");
 
   if (!block) {
     block = document.createElement("div");
-    block.className = "immo-price-range-block";
-    const title = document.createElement("span");
-    title.className = "immo-label immo-price-range__title";
-    title.textContent = "Ár";
-    block.appendChild(title);
+    block.className = "immo-dual-range-block";
+    block.dataset.range = id;
 
+    const titleEl = document.createElement("span");
+    titleEl.className = "immo-label immo-dual-range__title";
+    titleEl.textContent = title;
+    block.appendChild(titleEl);
+
+    wrap = document.createElement("div");
+    wrap.className = "immo-dual-range";
+    wrap.dataset.range = id;
+    wrap.setAttribute("aria-label", ariaLabel);
+    block.appendChild(wrap);
+
+    tolCell.before(block);
+  } else {
+    block.classList.add("immo-dual-range-block");
+    block.dataset.range = id;
+    if (!block.querySelector(".immo-dual-range__title")) {
+      const titleEl = document.createElement("span");
+      titleEl.className = "immo-label immo-dual-range__title";
+      titleEl.textContent = title;
+      block.insertBefore(titleEl, block.firstChild);
+    }
     if (!wrap) {
-      wrap = document.createElement("div");
-      wrap.className = "immo-price-range";
-      wrap.setAttribute("aria-label", "Ár tartomány");
-      tolCell.before(block);
-      block.appendChild(wrap);
-    } else {
-      wrap.parentElement.insertBefore(block, wrap);
-      block.appendChild(wrap);
+      wrap = block.querySelector(".immo-dual-range, .immo-price-range");
     }
-
-    wrap.appendChild(tolCell);
-    wrap.appendChild(igCell);
-    tolCell.classList.add("immo-price-range__half", "immo-price-range__half--min");
-    igCell.classList.add("immo-price-range__half", "immo-price-range__half--max");
-    if (!wrap.querySelector(".immo-price-range__sep")) {
-      const sep = document.createElement("span");
-      sep.className = "immo-price-range__sep";
-      sep.setAttribute("aria-hidden", "true");
-      sep.textContent = "–";
-      igCell.before(sep);
-    }
-    if (!wrap.querySelector(".immo-price-range__unit")) {
-      const unitEl = document.createElement("span");
-      unitEl.className = "immo-price-range__unit";
-      unitEl.setAttribute("aria-hidden", "true");
-      wrap.appendChild(unitEl);
+    if (wrap) {
+      wrap.classList.remove("immo-price-range");
+      wrap.classList.add("immo-dual-range");
+      wrap.dataset.range = id;
+      wrap.setAttribute("aria-label", ariaLabel);
     }
   }
+
+  if (!wrap) {
+    wrap = document.createElement("div");
+    wrap.className = "immo-dual-range";
+    wrap.dataset.range = id;
+    wrap.setAttribute("aria-label", ariaLabel);
+    block.appendChild(wrap);
+  }
+
+  if (!wrap.contains(tolCell)) wrap.appendChild(tolCell);
+  if (!wrap.contains(igCell)) wrap.appendChild(igCell);
+
+  tolCell.classList.add("immo-dual-range__half", "immo-dual-range__half--min");
+  tolCell.classList.remove("immo-price-range__half", "immo-price-range__half--min");
+  igCell.classList.add("immo-dual-range__half", "immo-dual-range__half--max");
+  igCell.classList.remove("immo-price-range__half", "immo-price-range__half--max");
+
+  if (!wrap.querySelector(".immo-dual-range__sep")) {
+    const sep = document.createElement("span");
+    sep.className = "immo-dual-range__sep";
+    sep.setAttribute("aria-hidden", "true");
+    sep.textContent = "–";
+    igCell.before(sep);
+  }
+
+  let unitEl = wrap.querySelector(".immo-dual-range__unit, .immo-price-range__unit");
+  if (!unitEl) {
+    unitEl = document.createElement("span");
+    unitEl.className = "immo-dual-range__unit";
+    unitEl.setAttribute("aria-hidden", "true");
+    wrap.appendChild(unitEl);
+  } else {
+    unitEl.classList.add("immo-dual-range__unit");
+  }
+  if (unit) unitEl.textContent = unit;
 
   for (const cell of [tolCell, igCell]) {
     cell.style.gridColumn = "";
@@ -187,34 +243,44 @@ function setupMobilePriceRange(mainHost) {
 }
 
 function syncPriceRangeUnit(form) {
-  const wrap = form?.querySelector(".immo-price-range");
+  const wrap = form?.querySelector('.immo-dual-range[data-range="ar"]');
   if (!wrap) return;
   const uz = normalizeIngatlanUzletag(form.querySelector("#immo-uzletag")?.value || "berbe");
-  const unitEl = wrap.querySelector(".immo-price-range__unit");
+  const unitEl = wrap.querySelector(".immo-dual-range__unit");
   if (unitEl) unitEl.textContent = uz === "berbe" ? "Ft" : "M Ft";
+}
+
+function fillDualRangeWheels(form, { tolKey, igKey, options, emptyMin = "min.", emptyMax = "max." }) {
+  let tol = form.querySelector(`[data-wheel="${tolKey}"]`);
+  let ig = form.querySelector(`[data-wheel="${igKey}"]`);
+  const prevTol = readWheel(tol);
+  const prevIg = readWheel(ig);
+  fillWheel(tol, options, { emptyLabel: emptyMin });
+  fillWheel(ig, options, { emptyLabel: emptyMax });
+  initImmoSearchWheel(tol, { emptyLabel: emptyMin, multiple: false, customInput: false });
+  initImmoSearchWheel(ig, { emptyLabel: emptyMax, multiple: false, customInput: false });
+  tol = form.querySelector(`[data-wheel="${tolKey}"]`);
+  ig = form.querySelector(`[data-wheel="${igKey}"]`);
+  setWheelValue(tol, prevTol);
+  setWheelValue(ig, prevIg);
+  syncImmoSearchWheelDisplay(tol);
+  syncImmoSearchWheelDisplay(ig);
 }
 
 function fillPriceRangeWheels(form) {
   const uz = normalizeIngatlanUzletag(form.querySelector("#immo-uzletag")?.value || "berbe");
   const isRent = uz === "berbe";
   const opts = isRent ? arFtMinOptions() : priceMillionOptions();
-  const emptyMin = "min.";
-  const emptyMax = "max.";
-  let arTol = form.querySelector('[data-wheel="ar_tol"]');
-  let arIg = form.querySelector('[data-wheel="ar_ig"]');
-  const prevTol = readWheel(arTol);
-  const prevIg = readWheel(arIg);
-  fillWheel(arTol, opts, { emptyLabel: emptyMin });
-  fillWheel(arIg, opts, { emptyLabel: emptyMax });
-  initImmoSearchWheel(arTol, { emptyLabel: emptyMin, multiple: false, customInput: false });
-  initImmoSearchWheel(arIg, { emptyLabel: emptyMax, multiple: false, customInput: false });
-  arTol = form.querySelector('[data-wheel="ar_tol"]');
-  arIg = form.querySelector('[data-wheel="ar_ig"]');
-  setWheelValue(arTol, prevTol);
-  setWheelValue(arIg, prevIg);
-  syncImmoSearchWheelDisplay(arTol);
-  syncImmoSearchWheelDisplay(arIg);
+  fillDualRangeWheels(form, { tolKey: "ar_tol", igKey: "ar_ig", options: opts });
   syncPriceRangeUnit(form);
+}
+
+function fillAreaRangeWheels(form) {
+  fillDualRangeWheels(form, {
+    tolKey: "alapterulet_tol",
+    igKey: "alapterulet_ig",
+    options: alapteruletOptions(),
+  });
 }
 
 function fieldBag(item, key) {
@@ -387,12 +453,11 @@ export async function initIngatlanSearch({ onSearch = () => {} } = {}) {
     schema,
     "search"
   );
-  setupMobilePriceRange(document.getElementById("immo-schema-main"));
+  setupMobileDualRanges(document.getElementById("immo-schema-main"));
   applyDrumModeClass();
 
   fillPriceRangeWheels(form);
-  fillWheel(form.querySelector('[data-wheel="alapterulet_tol"]'), alapteruletOptions(), { emptyLabel: "Min. m²" });
-  fillWheel(form.querySelector('[data-wheel="alapterulet_ig"]'), alapteruletOptions(), { emptyLabel: "Max. m²" });
+  fillAreaRangeWheels(form);
   fillWheel(form.querySelector('[data-wheel="szobaszam"]'), szobaszamOptions(), { emptyLabel: "Mindegy" });
   fillWheel(form.querySelector('[data-wheel="ingatlan_lakas_tipus"]'), INGATLAN_LAKAS_TIPUS.filter((o) => o.value));
   fillWheel(form.querySelector('[data-wheel="allapot"]'), INGATLAN_ALLAPOT.filter((o) => o.value));
@@ -416,20 +481,18 @@ export async function initIngatlanSearch({ onSearch = () => {} } = {}) {
   }
 
   const emptyByName = {
-    alapterulet_tol: "Min. m²",
-    alapterulet_ig: "Max. m²",
     szobaszam: "Szobaszám",
   };
+  const dualRangeKeys = new Set(["ar_tol", "ar_ig", "alapterulet_tol", "alapterulet_ig"]);
   form.querySelectorAll("[data-wheel]").forEach((wheel) => {
     const name = wheel.getAttribute("data-wheel") || "";
-    if (name === "ar_tol" || name === "ar_ig") return;
-    const isArea = name === "alapterulet_tol" || name === "alapterulet_ig";
+    if (dualRangeKeys.has(name)) return;
     const isRooms = name === "szobaszam";
     initImmoSearchWheel(wheel, {
       emptyLabel: emptyByName[name] || "Mindegy",
       multiple: MULTI_WHEEL_KEYS.has(name),
-      customInput: useDrumPicker() ? false : isArea || isRooms,
-      customKind: isArea ? "area" : isRooms ? "rooms" : "price",
+      customInput: useDrumPicker() ? false : isRooms,
+      customKind: isRooms ? "rooms" : "price",
     });
   });
 
@@ -480,6 +543,7 @@ export async function initIngatlanSearch({ onSearch = () => {} } = {}) {
       if (hely) hely.value = "";
       if (uzletag) uzletag.value = "berbe";
       fillPriceRangeWheels(form);
+      fillAreaRangeWheels(form);
       syncRovidMenus(form);
       setMoreOpen(false);
       onSearch(emptyIngatlanFilters());

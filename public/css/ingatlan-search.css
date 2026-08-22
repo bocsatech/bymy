@@ -378,9 +378,22 @@ input.immo-wheel-custom.immo-wheel-trigger {
     overflow: visible;
   }
 
+  /* Ár blokk: címke + min–max sor */
+  .immo-price-range-block {
+    grid-column: 1 / -1 !important;
+    display: grid;
+    gap: 0.35rem;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .immo-price-range__title {
+    display: block;
+  }
+
   /* Ár min + max: fix 3rem magasság, kerék kívül görget */
   .immo-price-range {
-    grid-column: 1 / -1 !important;
+    grid-column: auto;
     display: flex;
     align-items: center;
     width: 100%;

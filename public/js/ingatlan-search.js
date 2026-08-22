@@ -140,11 +140,27 @@ function setupMobilePriceRange(mainHost) {
   if (!tolCell || !igCell) return;
 
   let wrap = mainHost.querySelector(".immo-price-range");
-  if (!wrap) {
-    wrap = document.createElement("div");
-    wrap.className = "immo-price-range";
-    wrap.setAttribute("aria-label", "Ár tartomány");
-    tolCell.before(wrap);
+  let block = mainHost.querySelector(".immo-price-range-block");
+
+  if (!block) {
+    block = document.createElement("div");
+    block.className = "immo-price-range-block";
+    const title = document.createElement("span");
+    title.className = "immo-label immo-price-range__title";
+    title.textContent = "Ár";
+    block.appendChild(title);
+
+    if (!wrap) {
+      wrap = document.createElement("div");
+      wrap.className = "immo-price-range";
+      wrap.setAttribute("aria-label", "Ár tartomány");
+      tolCell.before(block);
+      block.appendChild(wrap);
+    } else {
+      wrap.parentElement.insertBefore(block, wrap);
+      block.appendChild(wrap);
+    }
+
     wrap.appendChild(tolCell);
     wrap.appendChild(igCell);
     tolCell.classList.add("immo-price-range__half", "immo-price-range__half--min");
@@ -156,10 +172,12 @@ function setupMobilePriceRange(mainHost) {
       sep.textContent = "–";
       igCell.before(sep);
     }
-    const unitEl = document.createElement("span");
-    unitEl.className = "immo-price-range__unit";
-    unitEl.setAttribute("aria-hidden", "true");
-    wrap.appendChild(unitEl);
+    if (!wrap.querySelector(".immo-price-range__unit")) {
+      const unitEl = document.createElement("span");
+      unitEl.className = "immo-price-range__unit";
+      unitEl.setAttribute("aria-hidden", "true");
+      wrap.appendChild(unitEl);
+    }
   }
 
   for (const cell of [tolCell, igCell]) {

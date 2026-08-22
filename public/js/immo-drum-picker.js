@@ -112,21 +112,6 @@ function syncWheelRingWidth(ring, scrollEl) {
 }
 
 function setDrumFormState(open) {
-  if (getDrumMode() !== "v2") return;
-  const main = document.getElementById("immo-schema-main");
-  const priceRange = main?.querySelector(".immo-price-range");
-  const form = document.getElementById("immo-search-form");
-  if (!main || !priceRange || !form) return;
-
-  let pastPrice = false;
-  for (const el of main.children) {
-    if (el === priceRange) {
-      pastPrice = true;
-      continue;
-    }
-    if (pastPrice) el.classList.toggle("immo-drum-suppressed", open);
-  }
-  form.querySelector(".immo-actions")?.classList.toggle("immo-drum-suppressed", open);
   document.body.classList.toggle("immo-price-drum-active", open);
 }
 

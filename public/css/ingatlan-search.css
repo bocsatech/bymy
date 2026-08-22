@@ -398,31 +398,26 @@ input.immo-wheel-custom.immo-wheel-trigger {
   }
 
   .immo-price-range.has-drum-open {
-    z-index: 40;
+    z-index: 50;
     overflow: visible;
   }
 
   .immo-price-range__half.is-drum-active {
-    z-index: 41;
+    z-index: 51;
   }
 
-  /* v2: belső keret = aktív cella */
-  body.immo-drum-mode-v2 .immo-price-range__half.is-drum-active {
-    box-shadow: inset 0 0 0 2px #2563eb;
-  }
-
-  /* v2: alatta lévő mezők rejtve nyitáskor */
-  body.immo-drum-mode-v2 .immo-drum-suppressed {
-    visibility: hidden !important;
-    pointer-events: none !important;
-  }
-
-  body.immo-price-drum-active .immo-search-panel {
+  body.immo-price-drum-active .immo-search-panel,
+  body.immo-price-drum-active .immo-search-form {
     overflow: visible;
   }
 
   .immo-price-range:has(.immo-wheel-wrap--menu.is-open) {
     z-index: 45;
+  }
+
+  /* v2: belső keret = aktív cella */
+  body.immo-drum-mode-v2 .immo-price-range__half.is-drum-active {
+    box-shadow: inset 0 0 0 2px #2563eb;
   }
 
   .immo-price-range__half.immo-schema-cell {
@@ -528,7 +523,7 @@ input.immo-wheel-custom.immo-wheel-trigger {
     left: 0;
     top: 50%;
     transform: translateY(-50%);
-    z-index: 5;
+    z-index: 60;
     pointer-events: none;
   }
 

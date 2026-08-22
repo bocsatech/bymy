@@ -24,8 +24,8 @@
     margin-top: 0 !important;
     overflow-x: visible !important;
     overflow-y: auto !important;
-    /* Alsó menü magasság + home indicator — nincs fekete rés a böngésző sáv helyén */
-    padding-bottom: calc(3.65rem + env(safe-area-inset-bottom, 0px));
+    /* Lebegő alsó sziget + kiemelt + gomb */
+    padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
   }
 
   /* Vízszintes túlcsordulás: ne a body vágjon, hanem a tartalom */
@@ -390,35 +390,32 @@
     font-size: 0.76rem;
   }
 
-  /* —— Alsó menü: képernyő aljához ragadva (böngésző sáv helyett) —— */
+  /* —— Lebegő alsó sziget (mint a natív app) —— */
   body.hub-page--feed .mw-app-tabbar {
     display: flex;
-    align-items: flex-start;
+    align-items: flex-end;
     justify-content: space-around;
     position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    transform: none;
+    left: 50%;
+    bottom: max(0.65rem, env(safe-area-inset-bottom, 0px));
+    transform: translateX(-50%);
     z-index: 90;
-    width: 100%;
-    height: auto;
-    min-height: calc(3.65rem + env(safe-area-inset-bottom, 0px));
-    padding: 0.35rem 0.25rem calc(0.35rem + env(safe-area-inset-bottom, 0px));
+    width: min(22.75rem, calc(100% - 1.35rem));
+    min-height: 3.55rem;
+    padding: 0.4rem 0.55rem 0.45rem;
     box-sizing: border-box;
-    border-radius: 0;
-    background: #fff;
-    border: 0;
-    border-top: 1px solid rgba(0, 0, 0, 0.08);
-    box-shadow: 0 -4px 18px rgba(0, 0, 0, 0.06);
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.96);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.12);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
   }
 
   html[data-theme="dark"] body.hub-page--feed .mw-app-tabbar {
-    background: #12161c;
-    border-top-color: #2a313c;
-    box-shadow: 0 -4px 18px rgba(0, 0, 0, 0.35);
+    background: rgba(18, 22, 28, 0.94);
+    border-color: #2a313c;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
   }
 
   body.hub-page--feed .mw-app-tab {
@@ -426,44 +423,80 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    gap: 0.1rem;
+    justify-content: flex-end;
+    gap: 0.12rem;
     min-width: 0;
     text-decoration: none;
-    color: #6b7280;
+    color: #9ca3af;
     font-family: "DM Sans", system-ui, sans-serif;
     font-size: 0.62rem;
     font-weight: 600;
     line-height: 1.1;
-    padding: 0.2rem;
+    padding: 0.15rem 0.1rem 0;
     border: 0;
     background: transparent;
     -webkit-tap-highlight-color: transparent;
   }
 
   body.hub-page--feed .mw-app-tab__icon {
-    width: 2.15rem;
-    height: 2.15rem;
-    border-radius: 999px;
+    width: 1.65rem;
+    height: 1.65rem;
+    border-radius: 0;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    color: #4b5563;
+    color: #9ca3af;
+    background: transparent;
   }
 
   body.hub-page--feed .mw-app-tab__icon svg {
-    width: 1.35rem;
-    height: 1.35rem;
+    width: 1.45rem;
+    height: 1.45rem;
     display: block;
   }
 
   body.hub-page--feed .mw-app-tab.is-active {
-    color: #1d4ed8;
+    color: #2563eb;
   }
 
   body.hub-page--feed .mw-app-tab.is-active .mw-app-tab__icon {
-    background: #dbeafe;
+    background: transparent;
     color: #2563eb;
+  }
+
+  /* Középső + gomb — kiemelt kék sziget */
+  body.hub-page--feed .mw-app-tab--fab {
+    flex: 0 0 auto;
+    align-self: flex-start;
+    justify-content: center;
+    margin-top: -1.45rem;
+    padding: 0;
+    min-width: 3.35rem;
+  }
+
+  body.hub-page--feed .mw-app-tab__fab {
+    width: 3.35rem;
+    height: 3.35rem;
+    border-radius: 1.05rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
+    color: #fff;
+    border: 3px solid #fff;
+    box-shadow: 0 6px 18px rgba(37, 99, 235, 0.42);
+    box-sizing: border-box;
+  }
+
+  body.hub-page--feed .mw-app-tab__fab svg {
+    width: 1.55rem;
+    height: 1.55rem;
+    display: block;
+  }
+
+  html[data-theme="dark"] body.hub-page--feed .mw-app-tab__fab {
+    border-color: #12161c;
+    box-shadow: 0 6px 18px rgba(37, 99, 235, 0.55);
   }
 
   body.hub-page--feed .mw-app-tab span {
@@ -471,14 +504,6 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-  }
-
-  html[data-auth="member"] body.hub-page--feed .mw-app-tab[data-auth-member] {
-    display: flex !important;
-  }
-
-  html[data-auth="guest"] body.hub-page--feed .mw-app-tab[data-auth-member] {
-    display: none !important;
   }
 }
 

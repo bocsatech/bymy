@@ -130,8 +130,8 @@ function fillPriceRangeWheels(form) {
   const opts = isRent ? arFtMinOptions() : priceMillionOptions();
   const emptyMin = isRent ? "min. Ft" : "min. M Ft";
   const emptyMax = isRent ? "max. Ft" : "max. M Ft";
-  const arTol = form.querySelector('[data-wheel="ar_tol"]');
-  const arIg = form.querySelector('[data-wheel="ar_ig"]');
+  let arTol = form.querySelector('[data-wheel="ar_tol"]');
+  let arIg = form.querySelector('[data-wheel="ar_ig"]');
   const prevTol = readWheel(arTol);
   const prevIg = readWheel(arIg);
   fillWheel(arTol, opts, { emptyLabel: emptyMin });
@@ -139,15 +139,15 @@ function fillPriceRangeWheels(form) {
   initMenuWheel(arTol, {
     emptyLabel: emptyMin,
     multiple: false,
-    customInput: true,
-    customKind: "price",
+    customInput: false,
   });
   initMenuWheel(arIg, {
     emptyLabel: emptyMax,
     multiple: false,
-    customInput: true,
-    customKind: "price",
+    customInput: false,
   });
+  arTol = form.querySelector('[data-wheel="ar_tol"]');
+  arIg = form.querySelector('[data-wheel="ar_ig"]');
   setWheelValue(arTol, prevTol);
   setWheelValue(arIg, prevIg);
 }

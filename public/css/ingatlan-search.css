@@ -362,18 +362,22 @@ input.immo-wheel-custom.immo-wheel-trigger {
     display: flex;
     align-items: stretch;
     position: relative;
-    min-height: 3rem;
+    min-height: 4.35rem;
     border: 1px solid #e2e8f0;
     border-radius: 10px;
     background: #fff;
     overflow: visible;
+    z-index: 0;
   }
 
-  .immo-price-range__half {
+  .immo-price-range:has(.immo-wheel-wrap--menu.is-open) {
+    z-index: 45;
+  }
+
+  .immo-price-range__half.immo-schema-cell {
     flex: 1 1 0;
+    width: 100%;
     min-width: 0;
-    display: flex;
-    align-items: stretch;
   }
 
   .immo-price-range__half--min {
@@ -381,46 +385,44 @@ input.immo-wheel-custom.immo-wheel-trigger {
   }
 
   .immo-price-range__half .immo-label {
-    display: none !important;
+    display: block !important;
+    font-size: 0.72rem;
+    font-weight: 650;
+    text-align: center;
+    padding: 0.35rem 0.4rem 0.15rem;
+    color: #64748b;
+    line-height: 1.2;
   }
 
   .immo-price-range__half .immo-wheel-wrap {
     flex: 1 1 auto;
     width: 100%;
-    gap: 0;
+    gap: 0.15rem;
     min-width: 0;
   }
 
-  .immo-price-range__half .immo-wheel-trigger,
-  .immo-price-range__half input.immo-wheel-custom.immo-wheel-trigger {
+  .immo-price-range__half .immo-wheel-trigger {
     width: 100%;
-    min-height: 3rem;
-    height: 3rem;
+    min-height: 2.65rem;
+    height: 2.65rem;
     border: 0 !important;
     border-radius: 0 !important;
     box-shadow: none !important;
     background: transparent !important;
     text-align: center;
     color: #64748b;
-    padding-left: 0.35rem;
-    padding-right: 0.35rem;
+    padding: 0 0.35rem 0.35rem;
+    font-size: 0.95rem;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
   }
 
   .immo-price-range__half .immo-wheel-wrap--menu.is-open {
     z-index: 240;
   }
 
-  .immo-price-range::before {
-    content: "–";
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    color: #94a3b8;
-    font-size: 1rem;
-    font-weight: 500;
-    pointer-events: none;
-    z-index: 2;
+  .immo-price-range__half .immo-wheel-wrap--menu.is-open .immo-wheel-trigger {
+    color: #2563eb;
   }
 
   .immo-label {

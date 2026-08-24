@@ -110,65 +110,6 @@ let visitorHits = [];
 let blockedIps = [];
 
 let devOtpCode = "";
-let loading = false;
-const tabCache = new Map();
-
-function invalidateTabCache(keys = null) {
-  if (!keys) {
-    tabCache.clear();
-    return;
-  }
-  for (const key of keys) tabCache.delete(key);
-}
-
-function cacheKeyForTab(value = tab) {
-  return String(value || "users:private");
-}
-
-function restoreFromCache(key) {
-  const cached = tabCache.get(key);
-  if (!cached) return false;
-  if (cached.users) users = cached.users;
-  if (cached.listings) listings = cached.listings;
-  if (cached.visitors) visitors = cached.visitors;
-  if (cached.blockedIps) blockedIps = cached.blockedIps;
-  if (cached.layout) layout = cached.layout;
-  if (cached.wheelSchema) wheelSchema = cached.wheelSchema;
-  return true;
-}
-
-function storeTabCache(key) {
-  const { section, sub } = parseTab(key);
-  const payload = {};
-  if (section === "users") {
-    if (sub === "visitors") {
-      payload.visitors = visitors;
-      payload.blockedIps = blockedIps;
-    } else {
-      payload.users = users;
-    }
-  }
-  if ((section === "auto" || section === "ingatlan") && sub === "listings") {
-    payload.listings = listings;
-  }
-  if (isLayoutTab(key) || (section === "ingatlan" && sub === "preview")) {
-    payload.wheelSchema = wheelSchema;
-    payload.layout = layout;
-  }
-  tabCache.set(key, payload);
-}
-
-async function reloadTab(force = true) {
-  loading = true;
-  render();
-  try {
-    if (force) invalidateTabCache([cacheKeyForTab()]);
-    await loadTab({ force: true });
-  } finally {
-    loading = false;
-    render();
-  }
-}
 
 function parseTab(value = tab) {
   const raw = String(value || "users:private");
@@ -284,8 +225,7 @@ const actions = {
         otpUser = "";
         otpEmailMasked = "";
         info = "";
-        invalidateTabCache();
-        await loadTab({ force: true });
+        await loadTab();
         render();
         return;
       }
@@ -333,8 +273,7 @@ const actions = {
       otpUser = "";
       otpEmailMasked = "";
       devOtpCode = "";
-      invalidateTabCache();
-      await loadTab({ force: true });
+      await loadTab();
       render();
     } catch (error) {
       err = error.message;
@@ -357,8 +296,7 @@ const actions = {
         const data = await api(`/api/level1/users/${editingUser.id}`);
         editingUser = data.user;
       }
-      invalidateTabCache();
-      await loadTab({ force: true });
+      await loadTab();
       render();
     } catch (error) {
       err = error.message;
@@ -373,8 +311,7 @@ const actions = {
         method: "PATCH",
         body: JSON.stringify({ emailVerified: !active }),
       });
-      invalidateTabCache();
-      await loadTab({ force: true });
+      await loadTab();
       if (editingUser?.id === Number(id)) {
         const data = await api(`/api/level1/users/${id}`);
         editingUser = data.user;
@@ -425,7 +362,7 @@ const actions = {
     err = "";
     info = "";
     editingUser = null;
-    switchTab();
+    loadTab().then(render);
   },
   setTab(_, el) {
     tab = el.getAttribute("data-tab") || tab;
@@ -436,7 +373,7 @@ const actions = {
     err = "";
     info = "";
     editingUser = null;
-    switchTab();
+    loadTab().then(render);
   },
   async refreshVisitors() {
     err = "";
@@ -490,8 +427,7 @@ const actions = {
     if (!confirm(`Törlöd a #${id} usert?`)) return;
     try {
       await api(`/api/level1/users/${id}`, { method: "DELETE" });
-      invalidateTabCache();
-      await loadTab({ force: true });
+      await loadTab();
       render();
     } catch (error) {
       err = error.message;
@@ -534,8 +470,7 @@ const actions = {
         body: JSON.stringify({ email, displayName, emailVerified, profileJson }),
       });
       editingUser = data.user;
-      invalidateTabCache();
-      await loadTab({ force: true });
+      await loadTab();
       info = "User mentve.";
       render();
     } catch (error) {
@@ -565,8 +500,7 @@ const actions = {
     const id = el.getAttribute("data-id");
     if (!confirm(`Törlöd a #${id} hirdetést?`)) return;
     await api(`/api/level1/listings/${id}`, { method: "DELETE" });
-    invalidateTabCache();
-    await loadTab({ force: true });
+    await loadTab();
     render();
   },
   async saveLayout() {
@@ -667,11 +601,8 @@ function fileToDataUrl(file) {
   });
 }
 
-async function loadTab({ force = false } = {}) {
+async function loadTab() {
   if (!admin) return;
-  const key = cacheKeyForTab();
-  if (!force && restoreFromCache(key)) return;
-
   const { section, sub } = parseTab();
   if (section === "users") {
     if (sub === "visitors") {
@@ -682,7 +613,11 @@ async function loadTab({ force = false } = {}) {
     }
   }
   if (section === "auto" && sub === "listings") {
-    listings = (await api("/api/level1/listings?exclude=ingatlan")).listings;
+    const data = await api("/api/level1/listings");
+    listings = (data.listings || []).filter((l) => {
+      const v = String(l.vertical || "").toLowerCase();
+      return v !== "ingatlan";
+    });
   }
   if (section === "ingatlan" && sub === "listings") {
     listings = (await api("/api/level1/listings?vertical=ingatlan")).listings;
@@ -702,22 +637,6 @@ async function loadTab({ force = false } = {}) {
       const data = await api(`/api/level1/form-layout?category=${encodeURIComponent(layoutCategory)}`);
       layout = data.layout;
     }
-  }
-  storeTabCache(key);
-}
-
-async function switchTab() {
-  if (restoreFromCache(cacheKeyForTab())) {
-    render();
-    return;
-  }
-  loading = true;
-  render();
-  try {
-    await loadTab({ force: true });
-  } finally {
-    loading = false;
-    render();
   }
 }
 
@@ -1183,7 +1102,7 @@ function shell() {
       </div>
       <div class="admin-sections">${sectionNav}</div>
       <div class="tabs tabs--sub">${subNav}</div>
-      <div class="card">${loading ? `<p class="hint admin-loading">Betöltés…</p>` : shellBody()}</div>
+      <div class="card">${shellBody()}</div>
     </div>`;
 }
 
@@ -1227,5 +1146,5 @@ function render() {
 
 const me = await api("/api/level1/me").catch(() => ({ admin: null }));
 admin = me.admin;
-if (admin) await loadTab({ force: true });
+if (admin) await loadTab();
 render();

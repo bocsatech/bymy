@@ -12,7 +12,7 @@
   var isFiok = body.classList.contains("fiok-page") || page === "fiok";
   /* Hirdetésfeladás: asztali web chrome (fejléc + űrlap), ne mobil app-shell */
   var isPostAd = page === "hirdetesfeladas";
-  var CSS_HREF = "/css/hub-mobile-app.css?v=mwPostDesk1";
+  var CSS_HREF = "/css/hub-mobile-app.css?v=tabHideScroll1";
 
   function ensureCss() {
     if (document.querySelector('link[href*="hub-mobile-app.css"]')) return;
@@ -25,7 +25,7 @@
   function isActivePage(id) {
     if (page === id) return true;
     if (id === "hub" && (page === "hub" || page === "" || page === "index")) return true;
-    if (id === "search" && (page === "auto" || page === "teherauto" || page === "ingatlan")) return true;
+    if (id === "search" && (page === "kereses" || page === "auto" || page === "teherauto" || page === "ingatlan")) return true;
     if (id === "ajanlasok" && page === "ajanlasok") return true;
     if (id === "fiok" && (page === "fiok" || page === "beallitasok" || page === "uzenetek")) return true;
     if (id === "post" && page === "hirdetesfeladas") return true;
@@ -135,7 +135,9 @@
       "</span><span>Főoldal</span></a>" +
       '<a class="' +
       tabCls("search") +
-      '" href="/auto.html">' +
+      '" href="/kereses.html"' +
+      (isActivePage("search") ? ' aria-current="page"' : "") +
+      ">" +
       '<span class="mw-app-tab__icon" aria-hidden="true">' +
       '<svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="6.2" stroke="currentColor" stroke-width="1.7"/><path d="M16.2 16.2 20 20" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>' +
       "</span><span>Keresés</span></a>" +
@@ -170,6 +172,7 @@
     });
     var map = [
       { sel: 'a[href="/"]', id: "hub" },
+      { sel: 'a[href="/kereses.html"]', id: "search" },
       { sel: 'a[href="/auto.html"]', id: "search" },
       { sel: "a.mw-app-tab--fab", id: "post" },
       { sel: 'a[href="/ajanlasok.html"]', id: "ajanlasok" },
@@ -184,30 +187,59 @@
     });
   }
 
+  /**
+   * Görgetés / húzás közben elrejtjük a szigetet; megálláskor visszajön.
+   */
   function bindScrollHide() {
     var bar = document.querySelector(".mw-app-tabbar");
     if (!bar || bar.dataset.scrollHideBound === "1") return;
     bar.dataset.scrollHideBound = "1";
 
-    var timer = null;
-    var hide = function () {
-      bar.classList.add("is-scroll-hidden");
-      clearTimeout(timer);
-      timer = setTimeout(function () {
-        bar.classList.remove("is-scroll-hidden");
-      }, 220);
-    };
+    var idleTimer = null;
+    var hidden = false;
+    var IDLE_MS = 520;
 
-    window.addEventListener("scroll", hide, { passive: true });
+    function showBar() {
+      if (!hidden) return;
+      hidden = false;
+      bar.classList.remove("is-scroll-hidden");
+    }
+
+    function hideBar() {
+      if (hidden) return;
+      hidden = true;
+      bar.classList.add("is-scroll-hidden");
+    }
+
+    function isTabbarTarget(target) {
+      return target && target.closest && target.closest(".mw-app-tabbar");
+    }
+
+    function onScrollActivity() {
+      hideBar();
+      clearTimeout(idleTimer);
+      idleTimer = setTimeout(showBar, IDLE_MS);
+    }
+
+    window.addEventListener("scroll", onScrollActivity, { passive: true });
+    document.addEventListener("scroll", onScrollActivity, { passive: true, capture: true });
     document.addEventListener(
-      "scroll",
+      "touchmove",
       function (ev) {
-        if (ev.target && ev.target !== document && ev.target !== document.documentElement) {
-          hide();
-        }
+        if (isTabbarTarget(ev.target)) return;
+        onScrollActivity();
       },
       { passive: true, capture: true }
     );
+    document.addEventListener(
+      "wheel",
+      function (ev) {
+        if (isTabbarTarget(ev.target)) return;
+        onScrollActivity();
+      },
+      { passive: true, capture: true }
+    );
+    document.addEventListener("bymy-scroll-activity", onScrollActivity);
   }
 
   ensureCss();

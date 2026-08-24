@@ -1,0 +1,94 @@
+/* Logo fele akkora — minden oldalon */
+
+.bymy-logo-img {
+  height: 18px !important;
+  max-width: min(75px, 14vw) !important;
+}
+
+.bymy-logo-img--nav,
+.home-logo .bymy-logo-img,
+body.site-app .bymy-logo-img--nav,
+body.site-app .home-logo .bymy-logo-img--nav,
+body.site-app .hub-logo .bymy-logo-img--nav,
+body.site-app .site-app-logo .bymy-logo-img--nav {
+  height: 72px !important;
+  max-width: min(260px, 29vw) !important;
+}
+
+.bymy-logo-img--hero {
+  height: clamp(26px, 5vw, 39px) !important;
+  max-width: min(140px, 35vw) !important;
+}
+
+.bymy-logo-img--home,
+body.site-app .bymy-logo-img--home {
+  height: clamp(32px, 6vw, 48px) !important;
+  max-width: min(160px, 35vw) !important;
+}
+
+.auth-gate-logo {
+  height: 1.125rem !important;
+  width: auto !important;
+}
+
+.auto-search-hero__brand {
+  width: min(75px, 8vw) !important;
+}
+
+@media (min-width: 801px) {
+  .hub-header-top,
+  body.site-app .hub-header-top,
+  body.site-app .site-header-top {
+    min-height: 2.875rem !important;
+  }
+}
+
+@media (max-width: 800px) {
+  .bymy-logo-img--nav,
+  body.site-app .bymy-logo-img--nav,
+  body.site-app .home-logo .bymy-logo-img--nav,
+  body.site-app .hub-logo .bymy-logo-img--nav,
+  body.site-app .site-app-logo .bymy-logo-img--nav {
+    height: clamp(24px, 6.5vw, 34px) !important;
+    max-width: min(110px, 35vw) !important;
+  }
+
+  .bymy-logo-img--home,
+  body.site-app .bymy-logo-img--home {
+    height: clamp(24px, 8vw, 36px) !important;
+    max-width: min(120px, 35vw) !important;
+  }
+
+  body.site-app .hub-header-top,
+  body.site-app .site-header-top,
+  .hub-header-top {
+    min-height: 1.375rem !important;
+  }
+
+  body.site-app .mw-app-top {
+    --mw-logo-h: calc(50vw * 415 / 958);
+  }
+
+  body.site-app .mw-app-logo {
+    width: 50%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .bymy-logo-img--nav,
+  body.site-app .bymy-logo-img--nav,
+  body.site-app .home-logo .bymy-logo-img--nav,
+  body.site-app .hub-logo .bymy-logo-img--nav,
+  body.site-app .site-app-logo .bymy-logo-img--nav {
+    height: 26px !important;
+    max-width: min(35vw, 6rem) !important;
+  }
+
+  .hub-header-top,
+  body.site-app .hub-header-top,
+  body.site-app .site-header-top {
+    min-height: 1.25rem !important;
+  }
+}

@@ -12,6 +12,158 @@ export function escapeAttr(value) {
   return escapeHtml(value).replace(/'/g, "&#39;");
 }
 
+/** Oldal görgetés zárolása, amíg a kerek menü / dobkerék nyitva van. */
+let pageScrollLocked = false;
+let scrollLockY = 0;
+let lastTouchY = 0;
+let scrollBlockerEl = null;
+
+function isScrollableWheel(el) {
+  if (!el?.closest) return null;
+  return el.closest(".immo-drum-inline-scroll") || el.closest(".immo-wheel--menu") || null;
+}
+
+function isCylinderSurface(el) {
+  if (!el?.closest) return false;
+  return Boolean(el.closest("[data-cyl-viewport], .cyl-drum, .cyl-face"));
+}
+
+function onLockedTouchStart(event) {
+  if (event.touches?.[0]) lastTouchY = event.touches[0].clientY;
+  /* iOS néha elengedi a zárat — nyitott keréknél újra ráhúzzuk */
+  if (
+    document.querySelector(".immo-wheel-wrap--drum-inline.is-open") ||
+    document.querySelector(".immo-wheel-wrap--menu.is-open") ||
+    document.body.classList.contains("immo-menu-open") ||
+    document.body.classList.contains("immo-cyl-scroll-lock")
+  ) {
+    assertScrollLockStyles();
+  }
+}
+
+function onLockedTouchMove(event) {
+  if (!pageScrollLocked) return;
+  /* Henger: csak húzáskor tiltjuk — koppintás így megy iOS-en is. */
+  if (isCylinderSurface(event.target)) {
+    if (!document.body.hasAttribute("data-cyl-dragging")) return;
+    event.preventDefault();
+    return;
+  }
+  /* Mindig tiltjuk az oldalgörgetést; a kerék scrollTop-ját kézzel állítjuk. */
+  event.preventDefault();
+  const touch = event.touches?.[0];
+  if (!touch) return;
+  const y = touch.clientY;
+  const dy = y - lastTouchY;
+  lastTouchY = y;
+  const scrollEl = isScrollableWheel(event.target);
+  if (!scrollEl || !dy) return;
+  /* Ujj lefelé → tartalom lefelé (természetes iOS picker) */
+  scrollEl.scrollTop -= dy;
+}
+
+function onLockedWheel(event) {
+  if (!pageScrollLocked) return;
+  event.preventDefault();
+  const scrollEl = isScrollableWheel(event.target);
+  if (!scrollEl) return;
+  scrollEl.scrollTop += event.deltaY;
+}
+
+function onLockedScroll() {
+  if (!pageScrollLocked) return;
+  if ((window.scrollY || 0) !== scrollLockY) {
+    window.scrollTo(0, scrollLockY);
+  }
+}
+
+function ensureScrollBlocker() {
+  let el = scrollBlockerEl || document.querySelector(".immo-scroll-blocker");
+  if (el) {
+    scrollBlockerEl = el;
+    return el;
+  }
+  el = document.createElement("div");
+  el.className = "immo-scroll-blocker";
+  el.setAttribute("aria-hidden", "true");
+  el.addEventListener("touchmove", (event) => event.preventDefault(), { passive: false });
+  el.addEventListener("wheel", (event) => event.preventDefault(), { passive: false });
+  document.body.appendChild(el);
+  scrollBlockerEl = el;
+  return el;
+}
+
+function assertScrollLockStyles() {
+  const html = document.documentElement;
+  const body = document.body;
+  html.style.setProperty("overflow", "hidden", "important");
+  html.style.setProperty("overflow-x", "hidden", "important");
+  html.style.setProperty("overflow-y", "hidden", "important");
+  html.style.setProperty("overscroll-behavior", "none", "important");
+  html.style.setProperty("touch-action", "none", "important");
+  body.style.setProperty("overflow", "hidden", "important");
+  body.style.setProperty("overflow-x", "hidden", "important");
+  body.style.setProperty("overflow-y", "hidden", "important");
+  body.style.setProperty("overscroll-behavior", "none", "important");
+  body.style.setProperty("touch-action", "none", "important");
+  /* position:fixed iOS-en pár mp után elengedheti — csak overflow + scrollTo */
+  body.style.setProperty("position", "relative", "important");
+  body.style.removeProperty("top");
+  body.style.removeProperty("left");
+  body.style.removeProperty("right");
+  body.style.removeProperty("width");
+  ensureScrollBlocker().hidden = false;
+  window.scrollTo(0, scrollLockY);
+}
+
+export function lockPageScroll() {
+  if (!pageScrollLocked) {
+    pageScrollLocked = true;
+    scrollLockY = window.scrollY || window.pageYOffset || 0;
+    document.documentElement.classList.add("immo-scroll-locked");
+    document.body.classList.add("immo-scroll-locked");
+    document.addEventListener("touchstart", onLockedTouchStart, { passive: true, capture: true });
+    document.addEventListener("touchmove", onLockedTouchMove, { passive: false, capture: true });
+    document.addEventListener("wheel", onLockedWheel, { passive: false, capture: true });
+    window.addEventListener("scroll", onLockedScroll, { passive: false });
+  }
+  assertScrollLockStyles();
+}
+
+export function unlockPageScroll(force = false) {
+  if (!pageScrollLocked) return;
+  if (
+    !force &&
+    (document.querySelector(".immo-wheel-wrap--drum-inline.is-open") ||
+      document.querySelector(".immo-wheel-wrap--menu.is-open") ||
+      document.body.classList.contains("immo-menu-open") ||
+      document.body.classList.contains("immo-cyl-scroll-lock"))
+  ) {
+    return;
+  }
+  pageScrollLocked = false;
+  document.documentElement.classList.remove("immo-scroll-locked");
+  document.body.classList.remove("immo-scroll-locked");
+
+  const html = document.documentElement;
+  const body = document.body;
+  for (const prop of ["overflow", "overflow-x", "overflow-y", "overscroll-behavior", "touch-action", "position"]) {
+    html.style.removeProperty(prop);
+    body.style.removeProperty(prop);
+  }
+  for (const prop of ["top", "left", "right", "width"]) {
+    body.style.removeProperty(prop);
+  }
+
+  if (scrollBlockerEl) scrollBlockerEl.hidden = true;
+
+  document.removeEventListener("touchstart", onLockedTouchStart, { capture: true });
+  document.removeEventListener("touchmove", onLockedTouchMove, { capture: true });
+  document.removeEventListener("wheel", onLockedWheel, { capture: true });
+  window.removeEventListener("scroll", onLockedScroll);
+  window.scrollTo(0, scrollLockY);
+}
+
 /** Többválasztós mezők (kereső). */
 export const MULTI_WHEEL_KEYS = new Set([
   "ingatlan_lakas_tipus",
@@ -340,12 +492,14 @@ function showMenuBackdrop() {
   const el = ensureMenuBackdrop();
   el.hidden = false;
   document.body.classList.add("immo-menu-open");
+  lockPageScroll();
 }
 
 function hideMenuBackdrop() {
   const el = document.querySelector(".immo-menu-backdrop");
   if (el) el.hidden = true;
   document.body.classList.remove("immo-menu-open");
+  unlockPageScroll(true);
 }
 
 function ensureOutsideClose() {
@@ -547,7 +701,7 @@ export function initMenuWheel(wheel, { emptyLabel = "Mindegy", multiple = false,
         setWheelValue(wheel, [...cur]);
       }
       wheel.dispatchEvent(new CustomEvent("immo-wheel-change", { bubbles: true, detail: { value: readWheel(wheel) } }));
-      // Többválasztásnál nyitva marad.
+      close();
       return;
     }
     setWheelValue(wheel, v);

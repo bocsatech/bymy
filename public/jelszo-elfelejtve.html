@@ -15,32 +15,35 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext x='16' y='22' text-anchor='middle' font-size='14' font-family='system-ui,sans-serif' font-weight='700'%3EB%3C/text%3E%3C/svg%3E" type="image/svg+xml" />
-    <meta name="bymy-version" content="actGate1" />
-    <title>Fiók aktiválása — Bymy</title>
+    <meta name="bymy-version" content="pwdReset1" />
+    <title>Elfelejtett jelszó — Bymy</title>
     <link rel="stylesheet" href="/css/style.css?v=authGate1" />
-    <link rel="stylesheet" href="/css/auth-gate.css?v=gate2" />
+    <link rel="stylesheet" href="/css/auth-gate.css?v=gate3" />
     <link rel="stylesheet" href="/css/bymy-logo-size.css?v=logoHalf1" />
   </head>
-  <body class="auth-gate-page login-page" data-site-page="aktivalas" data-auth-init="manual">
+  <body class="auth-gate-page login-page" data-site-page="jelszo-elfelejtve" data-auth-init="manual">
     <main class="auth-gate-main">
-      <section class="auth-gate-card login-card" aria-labelledby="activate-title">
+      <section class="auth-gate-card login-card" aria-labelledby="forgot-title">
         <img class="auth-gate-logo" src="/images/bymy-logo.png?v=logoUpload1" alt="Bymy.hu" width="160" height="40" decoding="async" />
-        <h1 class="auth-gate-title login-title" id="activate-title">Fiók aktiválása</h1>
-        <p class="auth-gate-lead login-lead">Az új leveleknél elég megnyitni az emailt. Ha nem kaptál levelet, küldd újra.</p>
-        <p id="activate-status" class="login-lead" role="status" hidden></p>
-        <form id="resend-form" class="login-form">
+        <h1 class="auth-gate-title login-title" id="forgot-title">Elfelejtett jelszó</h1>
+        <p class="auth-gate-lead login-lead">
+          Add meg a regisztrált email címedet. Ha van email-jelszavas fiókod, küldünk visszaállító linket.
+        </p>
+        <p id="forgot-status" class="login-lead" role="status" hidden></p>
+        <p id="forgot-error" class="login-error" role="alert" hidden></p>
+        <form id="forgot-form" class="login-form">
           <label class="login-field">
             <span class="login-label">Email</span>
-            <input type="email" name="email" required placeholder="pelda@email.hu" />
+            <input type="email" name="email" required autocomplete="email" placeholder="pelda@email.hu" />
           </label>
-          <button type="submit" class="site-header-btn site-header-btn--primary login-submit">Aktiváló email újraküldése</button>
+          <button type="submit" class="site-header-btn site-header-btn--primary login-submit">Visszaállító link küldése</button>
         </form>
-        <p class="auth-gate-footer login-hint"><a href="/belepes.html">Belépés</a> · <a href="/regisztracio.html">Regisztráció</a></p>
+        <p class="auth-gate-footer login-hint"><a href="/belepes.html">Vissza a belépéshez</a></p>
       </section>
     </main>
     <script type="module">
-      import { initActivatePage } from "/js/site-auth.js?v=gate1";
-      initActivatePage();
+      import { initForgotPasswordPage } from "/js/site-auth.js?v=pwdReset1";
+      initForgotPasswordPage();
     </script>
     <script src="/js/theme.js?v=gate1" type="module"></script>
   </body>

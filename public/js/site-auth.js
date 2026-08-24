@@ -139,26 +139,34 @@ async function authFetch(url, options = {}) {
   return data;
 }
 
+let refreshInflight = null;
+
 export async function refreshAuthSession() {
-  try {
-    const data = await authFetch("/api/auth/me");
-    if (!data.user?.email) {
-      setStoredToken("");
-      sessionStorage.removeItem(AUTH_KEY);
-      clearSensitiveLocalData();
-      return null;
+  if (refreshInflight) return refreshInflight;
+  refreshInflight = (async () => {
+    try {
+      const data = await authFetch("/api/auth/me");
+      if (!data.user?.email) {
+        setStoredToken("");
+        sessionStorage.removeItem(AUTH_KEY);
+        clearSensitiveLocalData();
+        return null;
+      }
+      return rememberAuth(data);
+    } catch (error) {
+      if (error?.status === 401) {
+        setStoredToken("");
+        sessionStorage.removeItem(AUTH_KEY);
+        clearSensitiveLocalData();
+        return null;
+      }
+      /* Hálózati / átmeneti hiba: ne dobjunk loginra, maradjon a cache. */
+      return getAuthUser();
+    } finally {
+      refreshInflight = null;
     }
-    return rememberAuth(data);
-  } catch (error) {
-    if (error?.status === 401) {
-      setStoredToken("");
-      sessionStorage.removeItem(AUTH_KEY);
-      clearSensitiveLocalData();
-      return null;
-    }
-    // Hálózati hiba: cache csak megjelenítésre, jogosultságot nem ad
-    return null;
-  }
+  })();
+  return refreshInflight;
 }
 
 /** Profil mindig a szerverről (SQLite), ne a böngésző cache-ből. */
@@ -203,6 +211,20 @@ export async function resendActivation(email) {
   return authFetch("/api/auth/resend-activation", {
     method: "POST",
     body: JSON.stringify({ email }),
+  });
+}
+
+export async function requestPasswordReset(email) {
+  return authFetch("/api/auth/forgot-password", {
+    method: "POST",
+    body: JSON.stringify({ email }),
+  });
+}
+
+export async function resetPasswordByToken(token, password, passwordConfirm) {
+  return authFetch("/api/auth/reset-password", {
+    method: "POST",
+    body: JSON.stringify({ token, password, passwordConfirm }),
   });
 }
 
@@ -487,15 +509,22 @@ export async function requireAuthForPage() {
 
 function isAuthGatePage() {
   const p = document.body?.dataset?.sitePage;
-  return p === "belepes" || p === "regisztracio" || p === "aktivalas";
+  return (
+    p === "belepes" ||
+    p === "regisztracio" ||
+    p === "aktivalas" ||
+    p === "jelszo-elfelejtve" ||
+    p === "jelszo-visszaallitas"
+  );
 }
 
 async function enforceClientMembersGate() {
   if (isAuthGatePage()) return;
   const user = await refreshAuthSession();
-  if (!user?.email) {
-    window.location.replace(loginUrl(window.location.pathname + window.location.search));
-  }
+  if (user?.email) return;
+  /* Csak tényleges kijelentkezésnél — ne villanjon a login oldal hálózati hibánál. */
+  if (getAuthUser()?.email) return;
+  window.location.replace(loginUrl(window.location.pathname + window.location.search));
 }
 
 export function initRegisterPage() {
@@ -685,16 +714,26 @@ export async function initOAuthButtons({
   }
 
   const byId = new Map(providers.map((p) => [p.id, p]));
+  const enabledCount = providers.filter((p) => p.enabled).length;
 
   for (const btn of buttons) {
     const id = btn.getAttribute("data-oauth-provider");
     const info = byId.get(id);
     const enabled = Boolean(info?.enabled);
-    btn.hidden = !enabled;
+    btn.hidden = false;
     btn.disabled = !enabled;
-    btn.title = enabled ? `Belépés ${info.label}-lal` : "";
-    if (!enabled) continue;
+    btn.title = enabled
+      ? `Belépés ${info?.label}-lal`
+      : `${info?.label || id} még nincs beállítva a szerveren`;
     btn.addEventListener("click", () => {
+      if (!enabled) {
+        if (hint) {
+          hint.hidden = false;
+          hint.textContent =
+            `${info?.label || id} belépés nincs bekapcsolva. Állítsd be a Google OAuth env változókat (mac/vercel-oauth-env.command), vagy használd az email regisztrációt.`;
+        }
+        return;
+      }
       let accountType = "";
       if (typeof getAccountType === "function") {
         accountType = String(getAccountType() || "").trim();
@@ -713,10 +752,116 @@ export async function initOAuthButtons({
   }
 
   if (hint) {
-    const anyEnabled = providers.some((p) => p.enabled);
-    hint.hidden = anyEnabled;
-    hint.textContent = anyEnabled ? "" : "Social belépés jelenleg nem elérhető.";
+    hint.hidden = enabledCount > 0;
+    hint.textContent =
+      enabledCount > 0
+        ? ""
+        : "Social belépés: állítsd be a Google OAuth env változókat (mac/vercel-oauth-env.command). Email regisztráció továbbra is működik.";
   }
+}
+
+export function initForgotPasswordPage() {
+  const form = document.getElementById("forgot-form");
+  const statusEl = document.getElementById("forgot-status");
+  const errorEl = document.getElementById("forgot-error");
+  if (!form) return;
+
+  const params = new URLSearchParams(window.location.search);
+  const emailParam = params.get("email") || "";
+  if (form.email && emailParam) form.email.value = emailParam;
+
+  refreshAuthSession().then((user) => {
+    if (user?.email) window.location.replace("/");
+  });
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (errorEl) errorEl.hidden = true;
+    if (statusEl) {
+      statusEl.hidden = false;
+      statusEl.textContent = "Küldés…";
+    }
+    const email = new FormData(form).get("email");
+    try {
+      const result = await requestPasswordReset(email);
+      if (statusEl) {
+        statusEl.hidden = false;
+        statusEl.textContent = "";
+        statusEl.appendChild(
+          document.createTextNode(
+            result.message ||
+              "Ha van ilyen email-jelszavas fiók, küldtünk visszaállító linket. Nézd a spam mappát is."
+          )
+        );
+        const link = String(result.resetLink || "").trim();
+        if (link) {
+          try {
+            const u = new URL(link, window.location.origin);
+            const sameOrigin = u.origin === window.location.origin;
+            const pathOk = safeInternalPath(u.pathname + u.search, "") === u.pathname + u.search;
+            if (sameOrigin && pathOk && u.pathname.includes("jelszo-visszaallitas")) {
+              statusEl.appendChild(document.createElement("br"));
+              const a = document.createElement("a");
+              a.href = u.pathname + u.search;
+              a.textContent = "Visszaállító link";
+              statusEl.appendChild(a);
+            }
+          } catch {
+            /* ignore unsafe link */
+          }
+        }
+      }
+    } catch (error) {
+      if (statusEl) statusEl.hidden = true;
+      if (errorEl) {
+        errorEl.hidden = false;
+        errorEl.textContent = error.message ?? "Küldés sikertelen.";
+      }
+    }
+  });
+}
+
+export function initResetPasswordPage() {
+  const form = document.getElementById("reset-form");
+  const errorEl = document.getElementById("reset-error");
+  const statusEl = document.getElementById("reset-status");
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get("token") || "";
+
+  if (!token) {
+    if (statusEl) {
+      statusEl.hidden = false;
+      statusEl.textContent =
+        "Hiányzó vagy érvénytelen link. Kérj újat az elfelejtett jelszó oldalon.";
+    }
+    if (form) form.hidden = true;
+    return;
+  }
+
+  form?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (errorEl) errorEl.hidden = true;
+    const data = new FormData(form);
+    try {
+      const result = await resetPasswordByToken(
+        token,
+        data.get("password"),
+        data.get("password_confirm")
+      );
+      if (statusEl) {
+        statusEl.hidden = false;
+        statusEl.textContent = result.message || "Az új jelszó mentve. Átirányítás a belépéshez…";
+      }
+      window.setTimeout(() => {
+        window.location.href = "/belepes.html";
+      }, 1200);
+    } catch (error) {
+      if (errorEl) {
+        errorEl.hidden = false;
+        errorEl.textContent = error.message ?? "Sikertelen visszaállítás.";
+      }
+    }
+  });
 }
 
 export function initActivatePage() {

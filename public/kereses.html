@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="hu">
+  <head>
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem("bymy-theme");
+          if (t !== "dark" && t !== "light") {
+            t = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+          }
+          document.documentElement.setAttribute("data-theme", t);
+        } catch (e) {}
+        try {
+          var raw = sessionStorage.getItem("bymy-auth-user");
+          var user = raw ? JSON.parse(raw) : null;
+          var loggedIn = !!(user && user.email);
+          document.documentElement.setAttribute("data-auth", loggedIn ? "member" : "guest");
+          var first = "";
+          if (user) {
+            first = String((user.profile && user.profile.firstName) || "").trim();
+            if (!first && user.displayName && String(user.displayName).indexOf("@") < 0) {
+              first = String(user.displayName).trim().split(/\s+/)[0] || "";
+            }
+            if (!first && user.email) {
+              var local = String(user.email).split("@")[0] || "";
+              first = local ? local.charAt(0).toUpperCase() + local.slice(1) : "";
+            }
+          }
+          if (first) {
+            document.addEventListener("DOMContentLoaded", function () {
+              document.querySelectorAll("span[data-auth-firstname]").forEach(function (el) {
+                el.textContent = first;
+              });
+              var letter = first.charAt(0).toUpperCase();
+              document.querySelectorAll("[data-avatar-letter]").forEach(function (el) {
+                el.textContent = letter;
+              });
+            });
+          }
+        } catch (e) {
+          document.documentElement.setAttribute("data-auth", "guest");
+        }
+      })();
+    </script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext x='16' y='22' text-anchor='middle' font-size='14' font-family='system-ui,sans-serif' font-weight='700'%3EB%3C/text%3E%3C/svg%3E" type="image/svg+xml" />
+    <title>Keresés — Bymy</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/css/hub.css?v=logoTop2" />
+    <link rel="stylesheet" href="/css/site-app.css?v=mwPostDesk1" />
+    <link rel="stylesheet" href="/css/hub-mobile-app.css?v=tabHideScroll1" />
+    <link rel="stylesheet" href="/css/ingatlan-search.css?v=scrollLock6" />
+    <link rel="stylesheet" href="/css/search-cylinder.css?v=cylActive20" />
+    <link rel="stylesheet" href="/css/bymy-logo-size.css?v=logoHalf1" />
+  </head>
+  <body class="site-app site-page" data-site-page="kereses">
+    <script src="/js/mw-app-shell.js?v=tabHideScroll1"></script>
+
+    <main class="cyl-page" aria-labelledby="cyl-title">
+      <h1 class="cyl-title visually-hidden" id="cyl-title">Keresés</h1>
+
+      <div class="cyl-viewport" data-cyl-viewport role="listbox" aria-label="Kategória henger" aria-roledescription="dobkerék">
+        <div class="cyl-stage">
+          <div class="cyl-drum" data-cyl-drum></div>
+        </div>
+      </div>
+
+    </main>
+
+    <script src="/js/search-cylinder.js?v=cylActive20" type="module"></script>
+    <script src="/js/site-avatar-menu.js?v=fiokPage2" type="module"></script>
+    <script src="/js/theme.js?v=willhabenHdr1" type="module"></script>
+    <script src="/js/site-auth.js?v=authAcct1" type="module"></script>
+  </body>
+</html>

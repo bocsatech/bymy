@@ -8,6 +8,8 @@ const PUBLIC_HTML = new Set([
   "/belepes.html",
   "/regisztracio.html",
   "/aktivalas.html",
+  "/jelszo-elfelejtve.html",
+  "/jelszo-visszaallitas.html",
   "/Bocsatech.html",
 ]);
 

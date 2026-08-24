@@ -1,5 +1,5 @@
 import { mountLayoutBoard } from "./bocsatech-layout.js?v=layoutCats1";
-import { mountIngatlanWheelBoard } from "./bocsatech-ingatlan-wheels.js?v=immoWheel21";
+import { mountIngatlanWheelBoard } from "./bocsatech-ingatlan-wheels.js?v=readOnly1";
 import {
   isIngatlanWheelAdminCategory,
   normalizeIngatlanWheelVariant,
@@ -40,8 +40,49 @@ const LAYOUT_CATEGORIES = [
   { id: "ingatlan", label: "Ingatlan" },
 ];
 
+const AUTO_LAYOUT_ITEMS = LAYOUT_NAV[0].items;
+const IMMO_LAYOUT_ITEMS = LAYOUT_NAV[1].items;
+
+const ADMIN_SECTIONS = [
+  {
+    id: "users",
+    label: "1. Felhasználók",
+    defaultTab: "users:private",
+    tabs: [
+      { id: "users:private", label: "Privát fiókok" },
+      { id: "users:business", label: "Céges fiókok" },
+      { id: "users:visitors", label: "Látogatók" },
+    ],
+  },
+  {
+    id: "auto",
+    label: "2. Autóhirdetések",
+    defaultTab: "auto:listings",
+    tabs: [
+      { id: "auto:listings", label: "Hirdetések" },
+      ...AUTO_LAYOUT_ITEMS.map((item) => ({
+        id: layoutTabId(item).replace(/^layout:/, "auto:layout:"),
+        label: item.label,
+      })),
+    ],
+  },
+  {
+    id: "ingatlan",
+    label: "3. Ingatlanhirdetések",
+    defaultTab: "ingatlan:listings",
+    tabs: [
+      { id: "ingatlan:listings", label: "Hirdetések" },
+      { id: "ingatlan:preview", label: "Megjelenés (nézet)" },
+      ...IMMO_LAYOUT_ITEMS.map((item) => ({
+        id: layoutTabId(item).replace(/^layout:/, "ingatlan:layout:"),
+        label: `${item.label} — szerkesztő`,
+      })),
+    ],
+  },
+];
+
 let admin = null;
-let tab = "visitors";
+let tab = "users:private";
 let layoutCategory = "szemelyauto";
 let layoutIntent = "";
 let lastUsername = "";
@@ -66,29 +107,38 @@ let hubPromo = { slots: {} };
 let editingUser = null;
 let selectedVisitorId = "";
 let visitorHits = [];
+let blockedIps = [];
 
-function otpSentMessage(data) {
-  const to = data.emailMasked ? ` (${data.emailMasked})` : "";
-  if (data.devCode) {
-    return `Helyi mód: a kód ${data.devCode} (SMTP nincs beállítva).`;
-  }
-  return `A kódot elküldtük emailben${to}. Nézd a spam mappát is.`;
+let devOtpCode = "";
+
+function parseTab(value = tab) {
+  const raw = String(value || "users:private");
+  const i = raw.indexOf(":");
+  if (i < 0) return { section: raw, sub: "" };
+  return { section: raw.slice(0, i), sub: raw.slice(i + 1) };
 }
 
 function isLayoutTab(value = tab) {
-  return String(value).startsWith("layout:");
+  const { sub } = parseTab(value);
+  return sub.startsWith("layout:");
+}
+
+function isPreviewTab(value = tab) {
+  return parseTab(value).sub === "preview";
 }
 
 function layoutCategoryFromTab(value = tab) {
   if (!isLayoutTab(value)) return layoutCategory;
-  const raw = String(value).slice("layout:".length) || "szemelyauto";
+  const { sub } = parseTab(value);
+  const raw = sub.slice("layout:".length) || "szemelyauto";
   const [cat] = raw.split(":");
   return cat || "szemelyauto";
 }
 
 function layoutIntentFromTab(value = tab) {
   if (!isLayoutTab(value)) return layoutIntent;
-  const raw = String(value).slice("layout:".length) || "";
+  const { sub } = parseTab(value);
+  const raw = sub.slice("layout:".length) || "";
   const parts = raw.split(":");
   return parts[1] || "";
 }
@@ -108,6 +158,19 @@ function categoryLabel(id) {
     if (hit) return hit.label;
   }
   return LAYOUT_CATEGORIES.find((c) => c.id === id)?.label || id;
+}
+
+function otpSentMessage(data) {
+  const to = data.emailMasked ? ` (${data.emailMasked})` : "";
+  if (data.devCode) {
+    devOtpCode = String(data.devCode).trim();
+    return (
+      `Belépési kód (másold be alább): ${data.devCode}. ` +
+      `Email most nem megy ki — állítsd be a Vercel-en: SMTP_USER, SMTP_PASS.`
+    );
+  }
+  devOtpCode = "";
+  return `A kódot elküldtük emailben${to}. Nézd a spam mappát is.`;
 }
 
 async function api(path, opts = {}) {
@@ -171,7 +234,15 @@ const actions = {
       info = otpSentMessage(data);
       render();
     } catch (error) {
-      err = error.message;
+      if (error.code === "LOCKED") {
+        const user = String(lastUsername || "bocsatechadmin").trim().toLowerCase();
+        err =
+          "Zárolva (3 hibás próbálkozás). Írd be pontosan a Vercel LEVEL1_BOOTSTRAP_PASSWORD jelszót — az feloldja.\n\n" +
+          "Deploy / oldal újratöltés után is feloldódik. Kézi feloldás Supabase SQL:\n" +
+          `UPDATE level1_admins SET locked = false, failed_attempts = 0, updated_at = now() WHERE username = '${user}';`;
+      } else {
+        err = error.message;
+      }
       render();
     }
   },
@@ -201,6 +272,7 @@ const actions = {
       admin = data.admin;
       otpUser = "";
       otpEmailMasked = "";
+      devOtpCode = "";
       await loadTab();
       render();
     } catch (error) {
@@ -215,8 +287,85 @@ const actions = {
     otpEmailMasked = "";
     render();
   },
+  async delUserListing(_, el) {
+    const id = el.getAttribute("data-id");
+    if (!confirm(`Törlöd a #${id} hirdetést?`)) return;
+    try {
+      await api(`/api/level1/listings/${id}`, { method: "DELETE" });
+      if (editingUser?.id) {
+        const data = await api(`/api/level1/users/${editingUser.id}`);
+        editingUser = data.user;
+      }
+      await loadTab();
+      render();
+    } catch (error) {
+      err = error.message;
+      render();
+    }
+  },
+  async toggleUserActive(_, el) {
+    const id = el.getAttribute("data-id");
+    const active = el.getAttribute("data-active") === "1";
+    try {
+      await api(`/api/level1/users/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ emailVerified: !active }),
+      });
+      await loadTab();
+      if (editingUser?.id === Number(id)) {
+        const data = await api(`/api/level1/users/${id}`);
+        editingUser = data.user;
+      }
+      info = active ? "Felhasználó deaktiválva." : "Felhasználó aktiválva.";
+      render();
+    } catch (error) {
+      err = error.message;
+      render();
+    }
+  },
+  async blockVisitorIp(_, el) {
+    const ip = el.getAttribute("data-ip");
+    if (!ip || !confirm(`Blokkolod az IP-t? ${ip}`)) return;
+    err = "";
+    try {
+      const data = await api("/api/level1/visitors/block", {
+        method: "POST",
+        body: JSON.stringify({ ip }),
+      });
+      blockedIps = data.blockedIps || [];
+      info = `Blokkolva: ${ip}`;
+      render();
+    } catch (error) {
+      err = error.message;
+      render();
+    }
+  },
+  async unblockVisitorIp(_, el) {
+    const ip = el.getAttribute("data-ip");
+    if (!ip) return;
+    err = "";
+    try {
+      const data = await api("/api/level1/visitors/unblock", {
+        method: "POST",
+        body: JSON.stringify({ ip }),
+      });
+      blockedIps = data.blockedIps || [];
+      info = `Feloldva: ${ip}`;
+      render();
+    } catch (error) {
+      err = error.message;
+      render();
+    }
+  },
+  setSection(_, el) {
+    tab = el.getAttribute("data-tab") || "users:private";
+    err = "";
+    info = "";
+    editingUser = null;
+    loadTab().then(render);
+  },
   setTab(_, el) {
-    tab = el.getAttribute("data-tab");
+    tab = el.getAttribute("data-tab") || tab;
     if (isLayoutTab(tab)) {
       layoutCategory = layoutCategoryFromTab(tab);
       layoutIntent = layoutIntentFromTab(tab);
@@ -231,6 +380,7 @@ const actions = {
     info = "";
     try {
       visitors = await api("/api/level1/visitors");
+      blockedIps = visitors.blockedIps || blockedIps;
       info = "Látogatóadatok frissítve.";
       render();
     } catch (error) {
@@ -334,6 +484,17 @@ const actions = {
       method: "PATCH",
       body: JSON.stringify({ status: el.value }),
     });
+  },
+  async setUserListingStatus(_, el) {
+    const id = el.getAttribute("data-id");
+    await api(`/api/level1/listings/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify({ status: el.value }),
+    });
+    if (editingUser?.id) {
+      const listing = (editingUser.listings || []).find((l) => String(l.id) === String(id));
+      if (listing) listing.status = el.value;
+    }
   },
   async delListing(_, el) {
     const id = el.getAttribute("data-id");
@@ -442,10 +603,30 @@ function fileToDataUrl(file) {
 
 async function loadTab() {
   if (!admin) return;
-  if (tab === "visitors") visitors = await api("/api/level1/visitors");
-  if (tab === "users") users = (await api("/api/level1/users")).users;
-  if (tab === "listings") listings = (await api("/api/level1/listings")).listings;
-  if (tab === "hubpromo") hubPromo = await api("/api/level1/hub-promo");
+  const { section, sub } = parseTab();
+  if (section === "users") {
+    if (sub === "visitors") {
+      visitors = await api("/api/level1/visitors");
+      blockedIps = visitors.blockedIps || [];
+    } else if (sub === "private" || sub === "business") {
+      users = (await api("/api/level1/users")).users;
+    }
+  }
+  if (section === "auto" && sub === "listings") {
+    const data = await api("/api/level1/listings");
+    listings = (data.listings || []).filter((l) => {
+      const v = String(l.vertical || "").toLowerCase();
+      return v !== "ingatlan";
+    });
+  }
+  if (section === "ingatlan" && sub === "listings") {
+    listings = (await api("/api/level1/listings?vertical=ingatlan")).listings;
+  }
+  if (section === "ingatlan" && sub === "preview") {
+    layoutCategory = "ingatlan";
+    const data = await api(immoWheelApiUrl("ingatlan"));
+    wheelSchema = data.schema || { version: 1, cells: [] };
+  }
   if (isLayoutTab()) {
     layoutCategory = layoutCategoryFromTab();
     layoutIntent = layoutIntentFromTab();
@@ -467,7 +648,7 @@ function loginView() {
         <p class="sub">Második tényező: email kód${otpEmailMasked ? ` → ${esc(otpEmailMasked)}` : ""}</p>
         <form class="card" data-act="otp" style="max-width:420px">
           <label>6 jegyű kód</label>
-          <input name="code" inputmode="numeric" maxlength="6" autocomplete="one-time-code" required />
+          <input name="code" inputmode="numeric" maxlength="6" autocomplete="one-time-code" value="${esc(devOtpCode)}" required autofocus />
           <p class="ok">${esc(info)}</p>
           <p class="err">${esc(err)}</p>
           <div class="row" style="margin-top:1rem">
@@ -505,10 +686,12 @@ function visitorsView() {
   const w = visitors?.weekly || {};
   const m = visitors?.monthly || {};
   const devices = visitors?.devices || [];
+  const blocked = blockedIps || visitors?.blockedIps || [];
+  const blockedSet = new Set(blocked);
   const rows = devices
     .map(
-      (dev) => `<tr class="${selectedVisitorId === dev.id ? "row-selected" : ""}">
-        <td>${esc(dev.ip)}</td>
+      (dev) => `<tr class="${selectedVisitorId === dev.id ? "row-selected" : ""}${blockedSet.has(dev.ip) ? " row-blocked" : ""}">
+        <td>${esc(dev.ip)}${blockedSet.has(dev.ip) ? ' <span class="badge warn">blokk</span>' : ""}</td>
         <td>${esc(dev.deviceName)}</td>
         <td>${esc(dev.deviceType)}</td>
         <td>${esc(dev.browser)}</td>
@@ -522,7 +705,14 @@ function visitorsView() {
         <td>${esc(fmtWhen(dev.firstSeenAt))}</td>
         <td>${esc(fmtWhen(dev.lastSeenAt))}</td>
         <td class="ua-cell" title="${esc(dev.userAgent)}">${esc((dev.userAgent || "").slice(0, 48))}${(dev.userAgent || "").length > 48 ? "…" : ""}</td>
-        <td><button class="btn ghost" type="button" data-act="showVisitorHits" data-id="${esc(dev.id)}">${selectedVisitorId === dev.id ? "Bezár" : "Oldalak"}</button></td>
+        <td class="row-actions">
+          <button class="btn ghost" type="button" data-act="showVisitorHits" data-id="${esc(dev.id)}">${selectedVisitorId === dev.id ? "Bezár" : "Oldalak"}</button>
+          ${
+            blockedSet.has(dev.ip)
+              ? `<button class="btn ghost" type="button" data-act="unblockVisitorIp" data-ip="${esc(dev.ip)}">IP felold</button>`
+              : `<button class="btn danger" type="button" data-act="blockVisitorIp" data-ip="${esc(dev.ip)}">IP blokkol</button>`
+          }
+        </td>
       </tr>`
     )
     .join("");
@@ -583,22 +773,29 @@ function visitorsView() {
         </table>
       </div>
       ${hitsPanel}
+      ${
+        blocked.length
+          ? `<h3 class="admin-section-title" style="margin-top:1.25rem">Blokkolt IP címek</h3><p class="hint">${blocked.map((ip) => esc(ip)).join(", ")}</p>`
+          : ""
+      }
     </div>`;
 }
 
-function usersView() {
-  const rows = users
+function usersView(kind = "private") {
+  const filtered = users.filter((u) => (u.accountType || "private") === kind);
+  const rows = filtered
     .map(
       (u) => `<tr>
         <td>${u.id}</td>
         <td>${esc(u.email)}</td>
         <td>${esc(u.displayName || "")}</td>
-        <td>${u.emailVerified ? "igen" : "nem"}</td>
+        <td>${u.emailVerified ? '<span class="badge ok">aktív</span>' : '<span class="badge warn">inaktív</span>'}</td>
         <td>${esc(fmtWhen(u.createdAt))}</td>
         <td>${esc(fmtWhen(u.lastLoginAt))}</td>
         <td>${u.listingCount ?? 0}</td>
-        <td>
+        <td class="row-actions">
           <button class="btn" data-act="editUser" data-id="${u.id}">Kezelés</button>
+          <button class="btn ghost" type="button" data-act="toggleUserActive" data-id="${u.id}" data-active="${u.emailVerified ? "1" : "0"}">${u.emailVerified ? "Deaktivál" : "Aktivál"}</button>
           <button class="btn danger" data-act="delUser" data-id="${u.id}">Törlés</button>
         </td>
       </tr>`
@@ -609,15 +806,16 @@ function usersView() {
     ${info ? `<p class="ok">${esc(info)}</p>` : ""}
     ${err ? `<p class="err">${esc(err)}</p>` : ""}
   `;
+  const title = kind === "business" ? "Céges fiókok" : "Privát fiókok";
   return `
     <div class="users-edit">
       ${messages}
-      <p class="hint">Regisztrált felhasználók: regisztráció dátuma, utolsó belépés, hirdetések száma. „Kezelés” megnyitja a profilt és a hirdetéslistát.</p>
+      <p class="hint"><strong>${title}</strong> — hirdetések, profil szerkesztés, aktiválás/deaktiválás, törlés.</p>
       <div class="table-scroll">
         <table class="table-dense"><thead><tr>
-          <th>#</th><th>Email</th><th>Név</th><th>Aktivált</th>
+          <th>#</th><th>Email</th><th>Név</th><th>Státusz</th>
           <th>Regisztráció</th><th>Utoljára belépett</th><th>Hirdetések</th><th></th>
-        </tr></thead><tbody>${rows || `<tr><td colspan="8">Nincs user.</td></tr>`}</tbody></table>
+        </tr></thead><tbody>${rows || `<tr><td colspan="8">Nincs ${kind === "business" ? "céges" : "privát"} user.</td></tr>`}</tbody></table>
       </div>
       ${editor}
     </div>`;
@@ -708,9 +906,19 @@ function userEditView() {
                 (l) => `<tr>
                   <td>${l.id}</td>
                   <td>${esc(l.title || "")}</td>
-                  <td>${esc(l.status || "")}</td>
+                  <td>
+                    <select data-act="setUserListingStatus" data-id="${l.id}">
+                      ${["mentett", "feladott", "inaktiv"]
+                        .map((s) => `<option ${s === l.status ? "selected" : ""}>${s}</option>`)
+                        .join("")}
+                    </select>
+                  </td>
                   <td>${esc(fmtWhen(l.updatedAt))}</td>
-                  <td><a href="/hirdetes.html?id=${l.id}" target="_blank" rel="noreferrer">nyit</a></td>
+                  <td class="row-actions">
+                    <a href="/hirdetes.html?id=${l.id}" target="_blank" rel="noreferrer">nyit</a>
+                    <a href="/hirdetesfeladas.html?id=${l.id}" target="_blank" rel="noreferrer">szerk.</a>
+                    <button class="btn danger" type="button" data-act="delUserListing" data-id="${l.id}">Törlés</button>
+                  </td>
                 </tr>`
               )
               .join("") || `<tr><td colspan="5">Nincs hirdetése.</td></tr>`}
@@ -720,19 +928,38 @@ function userEditView() {
 
       <div class="row" style="display:flex; gap:0.75rem; flex-wrap:wrap; margin-top:1.25rem">
         <button class="btn" type="button" data-act="saveUser">Mentés</button>
+        <button class="btn ghost" type="button" data-act="toggleUserActive" data-id="${editingUser.id}" data-active="${editingUser.emailVerified ? "1" : "0"}">${editingUser.emailVerified ? "Deaktivál" : "Aktivál"}</button>
         <button class="btn" type="button" data-act="cancelEditUser">Mégse</button>
       </div>
     </div>`;
 }
 
-function listingsView() {
-  const rows = listings
-    .map(
-      (l) => `<tr>
+function listingCategoryLabel(l) {
+  const sub = String(l.subtype || l.hirdetes_alkategoria || "").toLowerCase();
+  if (sub) return categoryLabel(sub) || sub;
+  const v = String(l.vertical || "").toLowerCase();
+  if (v === "ingatlan") return "Ingatlan";
+  if (v === "teher") return "Teherautó";
+  return "Személyautó";
+}
+
+function listingsView({ title = "Hirdetések", emptyHint = "Nincs hirdetés." } = {}) {
+  const groups = new Map();
+  for (const l of listings) {
+    const key = listingCategoryLabel(l);
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(l);
+  }
+  const sections = [...groups.entries()]
+    .map(([cat, items]) => {
+      const rows = items
+        .map(
+          (l) => `<tr>
         <td>${l.imageUrl ? `<img class="thumb" src="${esc(l.imageUrl)}" alt="" />` : ""}</td>
         <td>${l.id}</td>
         <td>${esc(l.title || "")}</td>
         <td>${esc(l.gyartmany || "")} ${esc(l.tipus || "")}</td>
+        <td>${l.ownerUserId ? `#${l.ownerUserId}` : "—"}</td>
         <td>
           <select data-act="setStatus" data-id="${l.id}">
             ${["mentett", "feladott", "inaktiv"]
@@ -741,11 +968,29 @@ function listingsView() {
           </select>
         </td>
         <td><a href="/hirdetes.html?id=${l.id}" target="_blank" rel="noreferrer">nyit</a></td>
-        <td><button class="btn danger" data-act="delListing" data-id="${l.id}">Törlés</button></td>
+        <td class="row-actions">
+          <a href="/hirdetesfeladas.html?id=${l.id}" target="_blank" rel="noreferrer">szerk.</a>
+          <button class="btn danger" data-act="delListing" data-id="${l.id}">Törlés</button>
+        </td>
       </tr>`
-    )
+        )
+        .join("");
+      return `<section class="admin-list-group"><h3 class="admin-section-title">${esc(cat)} <small>(${items.length})</small></h3>
+        <div class="table-scroll"><table class="table-dense"><thead><tr><th></th><th>#</th><th>Cím</th><th>Részlet</th><th>Tulaj</th><th>Státusz</th><th></th><th></th></tr></thead><tbody>${rows}</tbody></table></div></section>`;
+    })
     .join("");
-  return `<table><thead><tr><th></th><th>#</th><th>Cím</th><th>Jármű</th><th>Státusz</th><th></th><th></th></tr></thead><tbody>${rows || `<tr><td colspan="7">Nincs hirdetés.</td></tr>`}</tbody></table>`;
+  return `
+    ${info ? `<p class="ok">${esc(info)}</p>` : ""}
+    ${err ? `<p class="err">${esc(err)}</p>` : ""}
+    <p class="hint"><strong>${esc(title)}</strong> — kategóriánként, státusz módosítás és törlés.</p>
+    ${sections || `<p class="hint">${esc(emptyHint)}</p>`}`;
+}
+
+function ingatlanPreviewView() {
+  return `
+    <h2 class="layout-cat-title">Ingatlan megjelenés — csak nézet</h2>
+    <p class="hint">Ez a jelenlegi kereső/feladás felület (Kiado ingatlan). Itt nem szerkeszthető — a szerkesztő a „— szerkesztő” füleken van.</p>
+    <div id="layout-root" class="layout-root--readonly"></div>`;
 }
 
 function hubPromoView() {
@@ -808,31 +1053,46 @@ function layoutView() {
     <div class="row" style="margin-top:1rem"><button class="btn" type="button" data-act="saveLayout">Elrendezés mentése</button></div>`;
 }
 
+function shellBody() {
+  const { section, sub } = parseTab();
+  if (section === "users") {
+    if (sub === "visitors") return visitorsView();
+    if (sub === "business") return usersView("business");
+    return usersView("private");
+  }
+  if (section === "auto") {
+    if (sub === "listings") {
+      return listingsView({ title: "Autóhirdetések", emptyHint: "Nincs autó/teher hirdetés." });
+    }
+    return layoutView();
+  }
+  if (section === "ingatlan") {
+    if (sub === "listings") {
+      return listingsView({ title: "Ingatlanhirdetések", emptyHint: "Nincs ingatlan hirdetés." });
+    }
+    if (sub === "preview") return ingatlanPreviewView();
+    return layoutView();
+  }
+  return usersView("private");
+}
+
 function shell() {
-  const body =
-    tab === "visitors"
-      ? visitorsView()
-      : tab === "users"
-        ? usersView()
-        : tab === "listings"
-          ? listingsView()
-          : tab === "hubpromo"
-            ? hubPromoView()
-            : layoutView();
-  const layoutNav = LAYOUT_NAV.map((group) => {
-    const buttons = group.items
-      .map((item) => {
-        const tid = layoutTabId(item);
-        return `<button class="tab tab--layout ${tab === tid ? "on" : ""}" data-act="setTab" data-tab="${esc(tid)}">${esc(item.label)}</button>`;
-      })
-      .join("");
-    return `<div class="nav-section">
-        <p class="nav-section-label">${esc(group.group)}</p>
-        <div class="tabs tabs--stack">${buttons}</div>
-      </div>`;
-  }).join("");
+  const { section } = parseTab();
+  const currentSection = ADMIN_SECTIONS.find((s) => s.id === section) || ADMIN_SECTIONS[0];
+  const sectionNav = ADMIN_SECTIONS.map(
+    (s) =>
+      `<button type="button" class="section-tab ${s.id === currentSection.id ? "on" : ""}" data-act="setSection" data-tab="${esc(s.defaultTab)}">${esc(s.label)}</button>`
+  ).join("");
+  const subNav = currentSection.tabs
+    .map(
+      (t) =>
+        `<button type="button" class="tab ${tab === t.id ? "on" : ""}" data-act="setTab" data-tab="${esc(t.id)}">${esc(t.label)}</button>`
+    )
+    .join("");
+  const wide =
+    section === "users" || isLayoutTab() || isPreviewTab() || tab.endsWith(":listings");
   return `
-    <div class="wrap ${isLayoutTab() || tab === "visitors" || tab === "users" ? "wrap--wide" : ""}">
+    <div class="wrap ${wide ? "wrap--wide" : ""}">
       <div class="top">
         <div>
           <h1>Bocsatech</h1>
@@ -840,14 +1100,9 @@ function shell() {
         </div>
         <button class="btn ghost" data-act="logout">Kilépés</button>
       </div>
-      <div class="tabs">
-        <button class="tab ${tab === "visitors" ? "on" : ""}" data-act="setTab" data-tab="visitors">Látogatók</button>
-        <button class="tab ${tab === "users" ? "on" : ""}" data-act="setTab" data-tab="users">Felhasználók</button>
-        <button class="tab ${tab === "listings" ? "on" : ""}" data-act="setTab" data-tab="listings">Hirdetések</button>
-        <button class="tab ${tab === "hubpromo" ? "on" : ""}" data-act="setTab" data-tab="hubpromo">Kezdőlap képek</button>
-      </div>
-      ${layoutNav}
-      <div class="card">${body}</div>
+      <div class="admin-sections">${sectionNav}</div>
+      <div class="tabs tabs--sub">${subNav}</div>
+      <div class="card">${shellBody()}</div>
     </div>`;
 }
 
@@ -860,7 +1115,8 @@ function esc(value) {
 
 function render() {
   h(admin ? shell() : loginView());
-  if (admin && isLayoutTab()) {
+  if (!admin) return;
+  if (isLayoutTab()) {
     const root = document.getElementById("layout-root");
     if (isIngatlanWheelAdminCategory(layoutCategoryFromTab())) {
       mountIngatlanWheelBoard(root, wheelSchema, {
@@ -873,6 +1129,16 @@ function render() {
         onChange(cells) {
           layout = { ...layout, cells, category: layoutCategoryFromTab() };
         },
+      });
+    }
+    return;
+  }
+  if (isPreviewTab()) {
+    const root = document.getElementById("layout-root");
+    if (root) {
+      mountIngatlanWheelBoard(root, wheelSchema, {
+        readOnly: true,
+        onChange() {},
       });
     }
   }

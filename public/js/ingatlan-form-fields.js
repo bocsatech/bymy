@@ -7,7 +7,7 @@ import { normalizeIngatlanUzletag, INGATLAN_LAKAS_TIPUS, INGATLAN_LAKAS_TIPUS_AI
 import {
   initIngatlanSearch,
   readIngatlanSearchForm,
-} from "./ingatlan-search.js?v=schemaLive14";
+} from "./ingatlan-search.js?v=scrollLock4";
 import { fetchIngatlanWheelSchema } from "./ingatlan-wheel-schema.js?v=immoWheel16";
 
 function removeIngatlanFormFields(form) {

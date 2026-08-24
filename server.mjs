@@ -81,6 +81,8 @@ import {
   registerUser,
   activateUserByToken,
   createActivationForEmail,
+  requestPasswordReset,
+  resetPasswordByToken,
   findOrCreateOAuthUser,
   saveUserProfile,
   mergeUserProfileJson,
@@ -113,6 +115,7 @@ import { safeInternalPath } from "./lib/safe-path.mjs";
 import { rateLimit, clientIp } from "./lib/rate-limit.mjs";
 import { applySecurityHeaders } from "./lib/security-headers.mjs";
 import { recordPageVisit, visitorCookieHeader } from "./lib/site-visitors.mjs";
+import { isIpBlocked } from "./lib/site-ip-blocks.mjs";
 import { enforceMembersGate } from "./lib/site-gate.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -131,6 +134,27 @@ function assertAuthRate(req, res, bucket, { limit = 12, windowMs = 15 * 60 * 100
       { "Retry-After": String(result.retryAfterSec || 60) }
     );
     return false;
+  }
+  return true;
+}
+
+function adminBypassBlockedIp(pathname) {
+  if (pathname.startsWith("/api/level1")) return true;
+  if (pathname === "/Bocsatech.html") return true;
+  if (/^\/(css|js)\/bocsatech/.test(pathname)) return true;
+  if (/^\/js\/(bocsatech|ingatlan-wheel-schema)/.test(pathname)) return true;
+  return false;
+}
+
+async function rejectBlockedIp(req, res, pathname) {
+  if (adminBypassBlockedIp(pathname)) return false;
+  const ip = clientIp(req);
+  if (!(await isIpBlocked(ip))) return false;
+  if (pathname.startsWith("/api/")) {
+    sendJson(res, 403, { error: "Hozzáférés megtagadva." });
+  } else {
+    res.writeHead(403, { "Content-Type": "text/plain; charset=utf-8" });
+    res.end("Hozzáférés megtagadva.");
   }
   return true;
 }
@@ -1232,6 +1256,26 @@ async function sendActivationEmail(email, activationToken, baseUrl) {
   }
 }
 
+async function sendPasswordResetEmail(email, resetToken, baseUrl) {
+  const root = (baseUrl ?? `http://${HOST}:${PORT}`).replace(/\/$/, "");
+  const link = `${root}/jelszo-visszaallitas.html?token=${encodeURIComponent(resetToken)}`;
+  console.log(`Jelszó-visszaállítás → ${email}: ${link}`);
+  try {
+    await sendMail({
+      to: email,
+      subject: "Bymy — jelszó visszaállítása",
+      text: `Szia!\n\nÚj jelszót állíthatsz be ezen a linken (1 óráig érvényes):\n${link}\n\nHa nem te kérted, hagyd figyelmen kívül ezt a levelet.\n`,
+      html: `<p>Szia!</p><p>Új jelszót állíthatsz be (1 óráig érvényes):</p><p><a href="${link}">${link}</a></p><p>Ha nem te kérted, hagyd figyelmen kívül.</p>`,
+    });
+    return { sent: true, link };
+  } catch (error) {
+    if (error.code === "SMTP_NOT_CONFIGURED") {
+      return { sent: false, link, error: error.message };
+    }
+    throw error;
+  }
+}
+
 async function handleAuthApi(req, res, pathname) {
   try {
     const token = getSessionTokenFromRequest(req);
@@ -1473,6 +1517,49 @@ async function handleAuthApi(req, res, pathname) {
       return;
     }
 
+    if (pathname === "/api/auth/forgot-password" && req.method === "POST") {
+      if (!assertAuthRate(req, res, "forgot-password", { limit: 5, windowMs: 60 * 60 * 1000 })) return;
+      const body = await readBody(req);
+      const result = await requestPasswordReset(body.email);
+      const generic =
+        "Ha van ilyen email-jelszavas fiók, küldtünk visszaállító linket. Nézd a spam mappát is.";
+      let mail = { sent: false, link: null, error: null };
+      if (result.resetToken) {
+        try {
+          mail = await sendPasswordResetEmail(result.email, result.resetToken, publicBaseUrl(req));
+        } catch (error) {
+          mail = {
+            sent: false,
+            link: `${publicBaseUrl(req)}/jelszo-visszaallitas.html?token=${encodeURIComponent(result.resetToken)}`,
+            error: error.message,
+          };
+          console.warn("Jelszó-visszaállító email hiba:", error.message ?? error);
+        }
+      }
+      sendJson(res, 200, {
+        ok: true,
+        message: mail.sent ? generic : result.resetToken ? `${generic} (SMTP hiba — link a válaszban.)` : generic,
+        emailSent: mail.sent,
+        resetLink: mail.sent || !result.resetToken ? undefined : mail.link,
+      });
+      return;
+    }
+
+    if (pathname === "/api/auth/reset-password" && req.method === "POST") {
+      if (!assertAuthRate(req, res, "reset-password", { limit: 8, windowMs: 60 * 60 * 1000 })) return;
+      const body = await readBody(req);
+      await resetPasswordByToken(
+        body.token,
+        body.password,
+        body.passwordConfirm ?? body.password_confirm
+      );
+      sendJson(res, 200, {
+        ok: true,
+        message: "Az új jelszó mentve. Most már beléphetsz vele.",
+      });
+      return;
+    }
+
     if (pathname === "/api/auth/login" && req.method === "POST") {
       if (!assertAuthRate(req, res, "login", { limit: 15, windowMs: 15 * 60 * 1000 })) return;
       const body = await readBody(req);
@@ -1659,6 +1746,8 @@ export async function handleHttpRequest(req, res) {
     return;
   }
 
+  if (await rejectBlockedIp(req, res, pathname)) return;
+
   const gate = await enforceMembersGate(req, res, pathname, {
     getUserBySessionToken,
     getSessionTokenFromRequest,
@@ -1672,6 +1761,10 @@ export async function handleHttpRequest(req, res) {
     try {
       const body = await readBody(req);
       const result = await recordPageVisit(req, body);
+      if (result.blocked) {
+        sendJson(res, 403, { ok: false, error: "Hozzáférés megtagadva." });
+        return;
+      }
       const headers = {};
       if (result.setCookie) headers["Set-Cookie"] = visitorCookieHeader(result.visitorId);
       sendJson(res, 200, { ok: true, visitorId: result.visitorId }, headers);

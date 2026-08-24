@@ -1,5 +1,5 @@
-import { initDrumWheel, syncDrumWheelDisplay } from "./immo-drum-picker.js?v=drum11";
-import { setWheelValue, readWheel } from "./ingatlan-wheels.js?v=mobile4";
+import { initDrumWheel, syncDrumWheelDisplay } from "./immo-drum-picker.js?v=scrollLock4";
+import { setWheelValue, readWheel } from "./ingatlan-wheels.js?v=scrollLock4";
 
 const STORAGE_KEY = "bymy-hirdetes-category";
 const STORAGE_VERSION = 4;

@@ -56,8 +56,8 @@
     <link rel="stylesheet" href="/css/site-app.css?v=mwPostDesk1" />
     <link rel="stylesheet" href="/css/site-side.css?v=mwPostDesk1" />
     <link rel="stylesheet" href="/css/home.css?v=noXScroll1" />
-    <link rel="stylesheet" href="/css/hub-mobile-app.css?v=mwPostDesk1" />
-    <link rel="stylesheet" href="/css/ingatlan-search.css?v=schemaLive15" />
+    <link rel="stylesheet" href="/css/hub-mobile-app.css?v=tabHideScroll1" />
+    <link rel="stylesheet" href="/css/ingatlan-search.css?v=scrollLock4" />
     <style id="home-scroll-fix">
       html:has(body.home-page) {
         overflow-x: hidden !important;
@@ -71,6 +71,19 @@
         overflow-y: auto !important;
         height: auto !important;
         min-height: 100%;
+      }
+      /* Kerek menü nyitva: ne legyen oldal-görgetés (felülírja a fenti auto-t) */
+      html.immo-scroll-locked:has(body.home-page),
+      body.home-page.immo-scroll-locked {
+        overflow: hidden !important;
+        overflow-y: hidden !important;
+        overscroll-behavior: none !important;
+        touch-action: none !important;
+      }
+      body.home-page.immo-scroll-locked {
+        position: relative !important;
+        height: auto !important;
+        min-height: 100% !important;
       }
       body.home-page .home-main,
       body.home-page .site-layout,
@@ -99,9 +112,10 @@
         overscroll-behavior-x: none;
       }
     </style>
+    <link rel="stylesheet" href="/css/bymy-logo-size.css?v=logoHalf1" />
   </head>
   <body class="home-page site-page site-app" data-site-page="ingatlan">
-    <script src="/js/mw-app-shell.js?v=mwPostDesk1"></script>
+    <script src="/js/mw-app-shell.js?v=tabHideScroll1"></script>
     <header class="hub-header home-header">
       <div class="hub-header-inner">
         <div class="hub-header-top">
@@ -143,7 +157,6 @@
         </div>
       </div>
     </header>
-    <div class="hub-promo-band" data-hub-promo-root></div>
 
     <main class="home-main">
       <section class="immo-search-hero" aria-labelledby="immo-search-title">
@@ -193,6 +206,5 @@
     <script src="/js/nav-counts.js?v=willhabenHdr1" type="module"></script>
     <script src="/js/theme.js?v=willhabenHdr1" type="module"></script>
     <script src="/js/site-auth.js?v=authAcct1" type="module"></script>
-    <script src="/js/hub-promo.js?v=hubPromoFast1" type="module"></script>
   </body>
 </html>

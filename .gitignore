@@ -25,3 +25,4 @@ ios/build-out.log
 **/xcuserdata/
 *.xcuserstate
 scripts/_apply-all-migrations.sql
+.env*

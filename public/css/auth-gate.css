@@ -227,6 +227,22 @@ body.auth-gate-page .login-field input::-webkit-credentials-auto-fill-button {
   opacity: 0;
 }
 
+body.auth-gate-page .login-forgot {
+  margin: -0.35rem 0 0;
+  text-align: right;
+  font-size: 0.82rem;
+}
+
+body.auth-gate-page .login-forgot a {
+  color: #2563eb;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+body.auth-gate-page .login-forgot a:hover {
+  text-decoration: underline;
+}
+
 body.auth-gate-page .login-error {
   margin: 0;
   font-size: 0.85rem;

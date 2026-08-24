@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="hu">
+  <head>
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem("bymy-theme");
+          if (t !== "dark" && t !== "light") {
+            t = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+          }
+          document.documentElement.setAttribute("data-theme", t);
+        } catch (e) {}
+      })();
+    </script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext x='16' y='22' text-anchor='middle' font-size='14' font-family='system-ui,sans-serif' font-weight='700'%3EB%3C/text%3E%3C/svg%3E" type="image/svg+xml" />
+    <meta name="bymy-version" content="pwdReset1" />
+    <title>Új jelszó — Bymy</title>
+    <link rel="stylesheet" href="/css/style.css?v=authGate1" />
+    <link rel="stylesheet" href="/css/auth-gate.css?v=gate3" />
+    <link rel="stylesheet" href="/css/bymy-logo-size.css?v=logoHalf1" />
+  </head>
+  <body class="auth-gate-page login-page" data-site-page="jelszo-visszaallitas" data-auth-init="manual">
+    <main class="auth-gate-main">
+      <section class="auth-gate-card login-card" aria-labelledby="reset-title">
+        <img class="auth-gate-logo" src="/images/bymy-logo.png?v=logoUpload1" alt="Bymy.hu" width="160" height="40" decoding="async" />
+        <h1 class="auth-gate-title login-title" id="reset-title">Új jelszó</h1>
+        <p class="auth-gate-lead login-lead">Adj meg egy új jelszót (legalább 12 karakter).</p>
+        <p id="reset-status" class="login-lead" role="status" hidden></p>
+        <p id="reset-error" class="login-error" role="alert" hidden></p>
+        <form id="reset-form" class="login-form">
+          <label class="login-field">
+            <span class="login-label">Új jelszó</span>
+            <input type="password" name="password" autocomplete="new-password" required minlength="12" />
+          </label>
+          <label class="login-field">
+            <span class="login-label">Új jelszó még egyszer</span>
+            <input type="password" name="password_confirm" autocomplete="new-password" required minlength="12" />
+          </label>
+          <button type="submit" class="site-header-btn site-header-btn--primary login-submit">Jelszó mentése</button>
+        </form>
+        <p class="auth-gate-footer login-hint">
+          <a href="/jelszo-elfelejtve.html">Új link kérése</a> · <a href="/belepes.html">Belépés</a>
+        </p>
+      </section>
+    </main>
+    <script type="module">
+      import { initResetPasswordPage } from "/js/site-auth.js?v=pwdReset1";
+      initResetPasswordPage();
+    </script>
+    <script src="/js/theme.js?v=gate1" type="module"></script>
+  </body>
+</html>

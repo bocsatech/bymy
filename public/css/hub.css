@@ -1298,7 +1298,7 @@ html[data-theme="dark"] .hf-tile-icon {
   color: #9ca3af;
 }
 
-/* Hub promo sáv — nem csak a kezdőlapon */
+/* Hub promo sáv — csak a kezdőlapon (index) */
 .hub-promo-band {
   max-width: 1120px;
   margin: 0 auto;

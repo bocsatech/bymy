@@ -416,6 +416,11 @@
     padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
   }
 
+  /* Régi tartalom-szerkesztő sáv soha ne takarja a szigetet mobilweben */
+  body.site-app .site-content-bar {
+    display: none !important;
+  }
+
   /* —— Lebegő alsó sziget (mint a natív app) —— minden oldalon —— */
   body.site-app .mw-app-tabbar {
     display: flex;
@@ -425,7 +430,8 @@
     left: 50%;
     bottom: 0.4rem;
     transform: translateX(-50%);
-    z-index: 90;
+    /* Magasabb, mint a régi site-content-bar (9999) és egyéb fixed UI */
+    z-index: 10050;
     width: min(22.75rem, calc(100% - 1.35rem));
     min-height: 3.55rem;
     padding: 0.4rem 0.55rem 0.45rem;
@@ -438,6 +444,7 @@
     -webkit-backdrop-filter: blur(14px);
     transition: transform 0.22s ease, opacity 0.18s ease;
     will-change: transform, opacity;
+    pointer-events: auto;
   }
 
   body.site-app .mw-app-tabbar.is-scroll-hidden {

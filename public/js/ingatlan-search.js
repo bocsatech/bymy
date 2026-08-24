@@ -40,8 +40,8 @@ import {
   setWheelValue,
   MULTI_WHEEL_KEYS,
   wheelFieldHtml,
-} from "./ingatlan-wheels.js?v=mobile5";
-import { initDrumWheel, syncDrumWheelDisplay, applyDrumModeClass, getDrumMode } from "./immo-drum-picker.js?v=drum11";
+} from "./ingatlan-wheels.js?v=scrollLock4";
+import { initDrumWheel, syncDrumWheelDisplay, applyDrumModeClass, getDrumMode } from "./immo-drum-picker.js?v=scrollLock4";
 import { fetchIngatlanWheelSchema, renderIngatlanSchemaHosts, INGATLAN_DUAL_RANGE_GROUPS } from "./ingatlan-wheel-schema.js?v=immoWheel16";
 
 const EXACT_KEYS = [

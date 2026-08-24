@@ -1,3 +1,68 @@
+/* Oldal görgetés tiltva, amíg kerek menü / dobkerék nyitva — üti az inline home-scroll-fix !important szabályokat is */
+html.immo-scroll-locked,
+html.immo-scroll-locked:has(body.home-page),
+html.immo-scroll-locked:has(body.site-app),
+body.immo-scroll-locked,
+body.home-page.immo-scroll-locked,
+body.site-app.immo-scroll-locked,
+body.home-page.site-page.immo-scroll-locked {
+  overflow: hidden !important;
+  overflow-x: hidden !important;
+  overflow-y: hidden !important;
+  overscroll-behavior: none !important;
+  touch-action: none !important;
+  height: 100% !important;
+  max-height: 100% !important;
+}
+
+body.immo-scroll-locked,
+body.home-page.immo-scroll-locked,
+body.site-app.immo-scroll-locked {
+  /* ne position:fixed — iOS pár mp után elengedi */
+  position: relative !important;
+}
+
+body.immo-scroll-locked .immo-drum-inline-scroll,
+body.immo-scroll-locked .immo-wheel--menu,
+body.immo-scroll-locked .immo-drum-wheel-ring {
+  touch-action: pan-y !important;
+  overscroll-behavior: none !important;
+  overscroll-behavior-y: none !important;
+}
+
+body.immo-scroll-locked .cyl-viewport,
+body.immo-scroll-locked [data-cyl-viewport] {
+  touch-action: none !important;
+  overscroll-behavior: none !important;
+}
+
+body.immo-cyl-scroll-lock .immo-scroll-blocker {
+  pointer-events: none;
+}
+
+/* Teljes képernyős érintés-blokkoló a nyitott kerék alatt */
+.immo-scroll-blocker {
+  position: fixed;
+  inset: 0;
+  z-index: 180;
+  background: transparent;
+  touch-action: none;
+  overscroll-behavior: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.immo-scroll-blocker[hidden] {
+  display: none !important;
+}
+
+body.immo-drum-active .immo-wheel-wrap--drum-inline.is-open .immo-drum-inline,
+body.immo-drum-active .immo-schema-cell:has(.immo-wheel-wrap--drum-inline.is-open),
+body.immo-drum-active .immo-dual-range__half:has(.immo-wheel-wrap--drum-inline.is-open) {
+  z-index: 200;
+  position: relative;
+}
+
 /* Ingatlan kereső — mobil-szerű kerék */
 
 body[data-site-page="ingatlan"] .immo-search-hero,
@@ -791,7 +856,8 @@ input.immo-wheel-custom.immo-wheel-trigger {
     overflow-y: auto;
     scroll-snap-type: y mandatory;
     -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain;
+    overscroll-behavior: none;
+    overscroll-behavior-y: none;
     scrollbar-width: none;
     padding: calc(3.75rem - 20px) 0.35rem;
     box-sizing: border-box;
@@ -952,6 +1018,11 @@ input.immo-wheel-custom.immo-wheel-trigger {
   }
 
   body.immo-menu-open {
+    overflow: hidden;
+    touch-action: none;
+  }
+
+  body.immo-drum-active {
     overflow: hidden;
     touch-action: none;
   }
@@ -1257,7 +1328,8 @@ input.immo-wheel-custom.immo-wheel-trigger {
     overflow-y: auto;
     scroll-snap-type: y mandatory;
     -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain;
+    overscroll-behavior: none;
+    overscroll-behavior-y: none;
     scrollbar-width: none;
     padding: calc(3.75rem - 20px) 0.35rem;
     box-sizing: border-box;

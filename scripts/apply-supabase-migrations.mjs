@@ -19,6 +19,7 @@ const FILES = [
   "006_drop_unused_form_fields.sql",
   "007_visitors_and_last_login.sql",
   "008_visitor_monitoring.sql",
+  "009_password_reset.sql",
 ];
 
 function loadEnvLocal() {

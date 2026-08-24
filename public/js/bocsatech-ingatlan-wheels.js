@@ -14,7 +14,7 @@ const COLS = WHEEL_COLS;
 const ROW_PX = 72;
 const DROP_BUFFER = 2;
 
-export function mountIngatlanWheelBoard(root, schema, { onChange } = {}) {
+export function mountIngatlanWheelBoard(root, schema, { onChange, readOnly = false } = {}) {
   if (!root) return { cells: [] };
   let cells = normalizeIngatlanWheelSchema(schema).cells.map((c) => ({ ...c }));
 
@@ -234,45 +234,55 @@ export function mountIngatlanWheelBoard(root, schema, { onChange } = {}) {
     );
   }
 
-  function tileHtml(item) {
-    if (item.kind === "dual") {
-      const { group, tol, ig } = item;
-      const span = dualSpan(tol, ig);
-      return `<div class="layout-tile layout-tile--dual" data-dual="${escapeAttr(group.id)}" data-field="${escapeAttr(group.tolKey)}" style="${dualStyle(tol, ig)}" role="button" tabindex="0">
-      <span class="layout-tile-label">${escapeHtml(group.adminLabel || group.title)}</span>
-      <span class="layout-tile-meta">osztott kerék · ${span}/12 · search</span>
-      <span class="layout-tile-dual-parts"><span>min</span><span aria-hidden="true">–</span><span>max</span></span>
-      <span class="layout-width-btns" data-width-btns="1">
+  function tileEditControls({ dual = false, spacer = false } = {}) {
+    if (readOnly) return "";
+    if (dual) {
+      return `<span class="layout-width-btns" data-width-btns="1">
         <span class="layout-width-btn" data-width-delta="-1" title="Keskenyebb">−</span>
         <span class="layout-width-btn" data-width-delta="1" title="Szélesebb">+</span>
         <span class="layout-width-btn layout-width-btn--full" data-width-full="1" title="Teljes szélesség (12/12)">12</span>
       </span>
       <span class="layout-del" data-del="1" title="Törlés">×</span>
-      <span class="layout-resize" data-resize="1" title="Húzd jobbra/balra · Dupla katt: 12/12"></span>
-    </div>`;
+      <span class="layout-resize" data-resize="1" title="Húzd jobbra/balra · Dupla katt: 12/12"></span>`;
     }
-    const cell = item.cell;
-    const spacer = isSpacer(cell);
-    return `<div class="layout-tile ${spacer ? "layout-tile--spacer" : ""}" data-field="${escapeAttr(cell.field_key)}" style="${tileStyle(cell)}" role="button" tabindex="0">
-      <span class="layout-tile-label">${escapeHtml(cell.label || cell.field_key)}</span>
-      <span class="layout-tile-meta">${spacer ? "üres" : `${cell.colSpan}/12`}${
-      cell.surfaces ? ` · ${cell.surfaces.join("+")}` : ""
-    }</span>
-      ${
-        spacer
-          ? ""
-          : `<span class="layout-width-btns" data-width-btns="1">
+    return `${
+      spacer
+        ? ""
+        : `<span class="layout-width-btns" data-width-btns="1">
         <span class="layout-width-btn" data-width-delta="-1" title="Keskenyebb">−</span>
         <span class="layout-width-btn" data-width-delta="1" title="Szélesebb">+</span>
         <span class="layout-width-btn layout-width-btn--full" data-width-full="1" title="Teljes szélesség (12/12)">12</span>
       </span>`
-      }
+    }
       <span class="layout-del" data-del="1" title="Törlés">×</span>
-      ${spacer ? "" : `<span class="layout-resize" data-resize="1" title="Húzd jobbra/balra · Dupla katt: 12/12"></span>`}
+      ${spacer ? "" : `<span class="layout-resize" data-resize="1" title="Húzd jobbra/balra · Dupla katt: 12/12"></span>`}`;
+  }
+
+  function tileHtml(item) {
+    const ro = readOnly ? " layout-tile--readonly" : "";
+    if (item.kind === "dual") {
+      const { group, tol, ig } = item;
+      const span = dualSpan(tol, ig);
+      return `<div class="layout-tile layout-tile--dual${ro}" data-dual="${escapeAttr(group.id)}" data-field="${escapeAttr(group.tolKey)}" style="${dualStyle(tol, ig)}"${readOnly ? "" : ' role="button" tabindex="0"'}>
+      <span class="layout-tile-label">${escapeHtml(group.adminLabel || group.title)}</span>
+      <span class="layout-tile-meta">osztott kerék · ${span}/12 · search</span>
+      <span class="layout-tile-dual-parts"><span>min</span><span aria-hidden="true">–</span><span>max</span></span>
+      ${tileEditControls({ dual: true })}
+    </div>`;
+    }
+    const cell = item.cell;
+    const spacer = isSpacer(cell);
+    return `<div class="layout-tile ${spacer ? "layout-tile--spacer" : ""}${ro}" data-field="${escapeAttr(cell.field_key)}" style="${tileStyle(cell)}"${readOnly ? "" : ' role="button" tabindex="0"'}>
+      <span class="layout-tile-label">${escapeHtml(cell.label || cell.field_key)}</span>
+      <span class="layout-tile-meta">${spacer ? "üres" : `${cell.colSpan}/12`}${
+      cell.surfaces ? ` · ${cell.surfaces.join("+")}` : ""
+    }</span>
+      ${tileEditControls({ spacer })}
     </div>`;
   }
 
   function trashHtml() {
+    if (readOnly) return "";
     const hidden = cells.filter((c) => c.hidden && !isSpacer(c));
     const skip = new Set();
     const items = [];
@@ -314,7 +324,7 @@ export function mountIngatlanWheelBoard(root, schema, { onChange } = {}) {
     return `<section class="layout-step" data-section="${section}">
       <div class="layout-step-head">
         <h3>${escapeHtml(title)}</h3>
-        <button type="button" class="btn ghost" data-insert-row="${section}">Üres sor beszúrása</button>
+        ${readOnly ? "" : `<button type="button" class="btn ghost" data-insert-row="${section}">Üres sor beszúrása</button>`}
       </div>
       <div class="layout-board" data-board="${section}" style="grid-template-rows: repeat(${rows}, ${ROW_PX}px)">${items
       .map(tileHtml)
@@ -659,7 +669,8 @@ export function mountIngatlanWheelBoard(root, schema, { onChange } = {}) {
       "more",
       "További feltételek"
     )}${trashHtml()}`;
-    bind();
+    root.classList.toggle("layout-root--readonly", readOnly);
+    if (!readOnly) bind();
   }
 
   mount();

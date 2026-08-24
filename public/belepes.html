@@ -21,7 +21,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/css/style.css?v=authGate1" />
-    <link rel="stylesheet" href="/css/auth-gate.css?v=gate2" />
+    <link rel="stylesheet" href="/css/auth-gate.css?v=gate3" />
+    <link rel="stylesheet" href="/css/bymy-logo-size.css?v=logoHalf1" />
   </head>
   <body class="auth-gate-page login-page" data-site-page="belepes" data-auth-init="manual">
     <main class="auth-gate-main">
@@ -47,13 +48,14 @@
         <div class="login-divider" aria-hidden="true"><span>vagy emaillel</span></div>
         <form id="login-form" class="login-form">
           <label class="login-field">
-            <span class="login-label">Email</span>
-            <input type="email" name="email" autocomplete="username" required placeholder="pelda@email.hu" />
+            <span class="login-label">Email vagy felhasználónév</span>
+            <input type="text" name="email" autocomplete="username" required placeholder="pelda@email.hu vagy felhasználónév" />
           </label>
           <label class="login-field">
             <span class="login-label">Jelszó</span>
             <input type="password" name="password" autocomplete="current-password" required />
           </label>
+          <p class="login-forgot"><a href="/jelszo-elfelejtve.html">Elfelejtett jelszó?</a></p>
           <p id="login-ok" class="login-ok" role="status" hidden></p>
           <p id="login-error" class="login-error" role="alert" hidden></p>
           <button type="submit" class="site-header-btn site-header-btn--primary login-submit">Belépés</button>
@@ -63,7 +65,7 @@
     </main>
 
     <script type="module">
-      import { initLoginPage } from "/js/site-auth.js?v=gate1";
+      import { initLoginPage } from "/js/site-auth.js?v=pwdReset1";
       initLoginPage();
     </script>
     <script src="/js/theme.js?v=gate1" type="module"></script>

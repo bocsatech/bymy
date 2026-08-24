@@ -3,7 +3,7 @@
  * Visszaállítás: ?immoDrum=legacy vagy localStorage immo-drum-mode=legacy
  */
 
-import { readWheel, readWheelList, setWheelValue } from "./ingatlan-wheels.js?v=mobile4";
+import { readWheel, readWheelList, setWheelValue, lockPageScroll, unlockPageScroll } from "./ingatlan-wheels.js?v=scrollLock4";
 
 const ITEM_H = 40;
 let paintFrame = 0;
@@ -144,6 +144,8 @@ function syncWheelRingWidth(ring, scrollEl) {
 function setDrumFormState(open) {
   document.body.classList.toggle("immo-price-drum-active", open);
   document.body.classList.toggle("immo-drum-active", open);
+  if (open) lockPageScroll();
+  else unlockPageScroll(true);
 }
 
 function refreshDrumItemStates(scrollEl, wheel) {
@@ -180,7 +182,8 @@ function closeInlineDrum(wrap, wheel, commit = true) {
   wrap.querySelector(".immo-wheel-trigger")?.setAttribute("aria-expanded", "false");
   drumHostCell(wrap)?.classList.remove("is-drum-active");
   setDrumOpen(wrap, false);
-  setDrumFormState(false);
+  const anyOpen = document.querySelector(".immo-wheel-wrap--drum-inline.is-open");
+  setDrumFormState(Boolean(anyOpen));
 }
 
 function closeAllInlineDrums(commit = true) {
@@ -249,6 +252,7 @@ function openInlineDrum(wrap, wheel, trigger) {
         refreshDrumItemStates(scrollEl, wheel);
         syncDrumWheelDisplay(wheel);
         wheel.dispatchEvent(new CustomEvent("immo-wheel-change", { bubbles: true, detail: { value: readWheel(wheel) } }));
+        closeInlineDrum(wrap, wheel, false);
         return;
       }
       setWheelValue(wheel, v);

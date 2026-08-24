@@ -77,6 +77,18 @@ function applySlots(root, slots) {
   }
 }
 
+function isHomePromoPage() {
+  if (typeof window === "undefined") return false;
+  const path = window.location.pathname.replace(/\/$/, "") || "/";
+  return path === "/" || path === "/index.html" || document.body?.classList?.contains("hub-page--feed");
+}
+
+function clearPromoMounts(target = document) {
+  for (const mount of target.querySelectorAll("[data-hub-promo-root]")) {
+    mount.remove();
+  }
+}
+
 function paintStockFirst(target) {
   const mounts = [...target.querySelectorAll("[data-hub-promo-root]")];
   for (const mount of mounts) {
@@ -86,6 +98,10 @@ function paintStockFirst(target) {
 }
 
 export async function mountHubPromos(target = document) {
+  if (!isHomePromoPage()) {
+    clearPromoMounts(target);
+    return;
+  }
   paintStockFirst(target);
 
   const mounts = [...target.querySelectorAll("[data-hub-promo-root]")];
@@ -113,12 +129,16 @@ export async function mountHubPromos(target = document) {
 }
 
 if (typeof document !== "undefined") {
-  paintStockFirst(document);
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", () => {
+  if (isHomePromoPage()) {
+    paintStockFirst(document);
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", () => {
+        void mountHubPromos();
+      });
+    } else {
       void mountHubPromos();
-    });
+    }
   } else {
-    void mountHubPromos();
+    clearPromoMounts(document);
   }
 }

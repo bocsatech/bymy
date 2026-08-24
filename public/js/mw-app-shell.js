@@ -13,7 +13,7 @@
   if (!document.querySelector('link[href*="hub-mobile-app.css"]')) {
     var link = document.createElement("link");
     link.rel = "stylesheet";
-    link.href = "/css/hub-mobile-app.css?v=mwTabDock1";
+    link.href = "/css/hub-mobile-app.css?v=mwPostAd1";
     document.head.appendChild(link);
   }
 
@@ -24,6 +24,12 @@
     { id: "teherauto", href: "/teherauto.html", label: "Teherautó" },
     { id: "ingatlan", href: "/ingatlan.html", label: "Ingatlan" },
     { id: "ajanlasok", href: "/ajanlasok.html", label: "Ajánlások" },
+    {
+      id: "hirdetesfeladas",
+      href: "/hirdetesfeladas.html",
+      label: "Hirdetés feladás",
+      authGuard: true,
+    },
   ];
 
   function isActive(id) {
@@ -34,8 +40,22 @@
 
   var nav = pages
     .map(function (p) {
-      var cls = "mw-app-pages-link" + (isActive(p.id) ? " is-active" : "");
-      return '<a class="' + cls + '" href="' + p.href + '">' + p.label + "</a>";
+      var cls =
+        "mw-app-pages-link" +
+        (isActive(p.id) ? " is-active" : "") +
+        (p.id === "hirdetesfeladas" ? " mw-app-pages-link--post" : "");
+      var attrs = p.authGuard ? ' data-auth-guard' : "";
+      return (
+        '<a class="' +
+        cls +
+        '" href="' +
+        p.href +
+        '"' +
+        attrs +
+        ">" +
+        p.label +
+        "</a>"
+      );
     })
     .join("");
 

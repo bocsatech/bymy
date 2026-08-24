@@ -280,3 +280,14 @@ body.home-page .site-side-card {
     grid-template-columns: 1fr;
   }
 }
+
+/* Hirdetésfeladás tipp-panel: csak asztali / széles nézet */
+@media (max-width: 900px) {
+  body[data-site-page="hirdetesfeladas"] .automax-panel {
+    display: none !important;
+  }
+
+  body[data-site-page="hirdetesfeladas"] .site-layout--wide .site-center--automax {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

@@ -1,5 +1,5 @@
-/* Mobil web felső sáv (logo / Hello / oldalnevek) — minden site-app oldalon
-   Asztali web: rejtve. Alsó tabbar + feed csak hub-page--feed. */
+/* Mobil web felső sáv (logo / Hello / oldalnevek) + alsó sziget — minden site-app oldalon.
+   Asztali web: rejtve. */
 
 .mw-app-top,
 .mw-app-tabbar {
@@ -24,8 +24,6 @@
     margin-top: 0 !important;
     overflow-x: visible !important;
     overflow-y: auto !important;
-    /* Lebegő alsó sziget + kiemelt + gomb */
-    padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
   }
 
   /* Vízszintes túlcsordulás: aloldalakon se csússzon az egész oldal */
@@ -413,14 +411,18 @@
     font-size: 0.76rem;
   }
 
-  /* —— Lebegő alsó sziget (mint a natív app) —— */
-  body.hub-page--feed .mw-app-tabbar {
+  /* Lebegő alsó sziget helye — minden site-app oldalon */
+  body.site-app {
+    padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* —— Lebegő alsó sziget (mint a natív app) —— minden oldalon —— */
+  body.site-app .mw-app-tabbar {
     display: flex;
     align-items: flex-end;
     justify-content: space-around;
     position: fixed;
     left: 50%;
-    /* Böngészőben: a viewport legalja (a címsor fölött; a címsort nem lehet eltakarni) */
     bottom: 0.4rem;
     transform: translateX(-50%);
     z-index: 90;
@@ -434,15 +436,23 @@
     box-shadow: 0 8px 28px rgba(0, 0, 0, 0.12);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
+    transition: transform 0.22s ease, opacity 0.18s ease;
+    will-change: transform, opacity;
   }
 
-  html[data-theme="dark"] body.hub-page--feed .mw-app-tabbar {
+  body.site-app .mw-app-tabbar.is-scroll-hidden {
+    transform: translateX(-50%) translateY(calc(100% + 1.25rem));
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  html[data-theme="dark"] body.site-app .mw-app-tabbar {
     background: rgba(18, 22, 28, 0.94);
     border-color: #2a313c;
     box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
   }
 
-  body.hub-page--feed .mw-app-tab {
+  body.site-app .mw-app-tab {
     flex: 1 1 0;
     display: flex;
     flex-direction: column;
@@ -462,7 +472,7 @@
     -webkit-tap-highlight-color: transparent;
   }
 
-  body.hub-page--feed .mw-app-tab__icon {
+  body.site-app .mw-app-tab__icon {
     width: 1.65rem;
     height: 1.65rem;
     border-radius: 0;
@@ -473,23 +483,22 @@
     background: transparent;
   }
 
-  body.hub-page--feed .mw-app-tab__icon svg {
+  body.site-app .mw-app-tab__icon svg {
     width: 1.45rem;
     height: 1.45rem;
     display: block;
   }
 
-  body.hub-page--feed .mw-app-tab.is-active {
+  body.site-app .mw-app-tab.is-active {
     color: #2563eb;
   }
 
-  body.hub-page--feed .mw-app-tab.is-active .mw-app-tab__icon {
+  body.site-app .mw-app-tab.is-active .mw-app-tab__icon {
     background: transparent;
     color: #2563eb;
   }
 
-  /* Középső + gomb — kiemelt kék sziget */
-  body.hub-page--feed .mw-app-tab--fab {
+  body.site-app .mw-app-tab--fab {
     flex: 0 0 auto;
     align-self: flex-start;
     justify-content: center;
@@ -499,7 +508,7 @@
     gap: 0.2rem;
   }
 
-  body.hub-page--feed .mw-app-tab__fab {
+  body.site-app .mw-app-tab__fab {
     width: 3.35rem;
     height: 3.35rem;
     border-radius: 1.05rem;
@@ -513,13 +522,13 @@
     box-sizing: border-box;
   }
 
-  body.hub-page--feed .mw-app-tab__fab svg {
+  body.site-app .mw-app-tab__fab svg {
     width: 1.55rem;
     height: 1.55rem;
     display: block;
   }
 
-  body.hub-page--feed .mw-app-tab__fab-label {
+  body.site-app .mw-app-tab__fab-label {
     font-size: 0.62rem;
     font-weight: 700;
     color: #2563eb;
@@ -527,21 +536,20 @@
     max-width: 4.2rem;
   }
 
-  html[data-theme="dark"] body.hub-page--feed .mw-app-tab__fab {
+  html[data-theme="dark"] body.site-app .mw-app-tab__fab {
     border-color: #12161c;
     box-shadow: 0 6px 18px rgba(37, 99, 235, 0.55);
   }
 
-  body.hub-page--feed .mw-app-tab span {
+  body.site-app .mw-app-tab span {
     max-width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
-  /* Kezdőképernyőről (PWA standalone): nincs böngésző címsor — sziget a képernyő alján */
   @media (display-mode: standalone) {
-    body.hub-page--feed .mw-app-tabbar {
+    body.site-app .mw-app-tabbar {
       bottom: max(0.55rem, env(safe-area-inset-bottom, 0px));
     }
   }

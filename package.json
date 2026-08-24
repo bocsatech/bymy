@@ -17,7 +17,7 @@
     "prestart": "node scripts/embed-ad-form.mjs"
   },
   "engines": {
-    "node": "20.x"
+    "node": "24.x"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.112.3",

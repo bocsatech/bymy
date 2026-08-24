@@ -1,0 +1,19 @@
+# Ne kerüljön fel a Vercel deployba
+ios/
+mac/
+.cursor/
+scripts/_apply-all-migrations.sql
+*.db
+*.db-wal
+*.db-shm
+.env
+.env.local
+.env*.local
+node_modules/
+.git/
+ios/build/
+ios/dist/
+.import-profile/
+.chrome-import-profile/
+data/
+public/uploads/

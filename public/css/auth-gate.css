@@ -76,4 +76,285 @@ body.auth-gate-page {
 .auth-gate-footer a {
   color: #2563eb;
   font-weight: 600;
+  text-decoration: none;
+}
+
+.auth-gate-footer a:hover {
+  text-decoration: underline;
+}
+
+/* Form / OAuth — korábban csak body.site-app alatt voltak, ezért csúszott szét */
+body.auth-gate-page .oauth-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  margin-bottom: 1rem;
+}
+
+body.auth-gate-page .oauth-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  width: 100%;
+  font: inherit;
+  font-size: 0.92rem;
+  font-weight: 600;
+  border-radius: 10px;
+  border: 1px solid #d5d9e0;
+  background: #fff;
+  color: #111;
+  padding: 0.62rem 0.75rem;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+body.auth-gate-page .oauth-btn:hover:not(:disabled) {
+  background: #f7f8fa;
+  border-color: #c5cad3;
+}
+
+body.auth-gate-page .oauth-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+body.auth-gate-page .oauth-btn-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+body.auth-gate-page .oauth-btn--google .oauth-btn-icon {
+  background: #fff;
+  border: 1px solid #dadce0;
+  color: #4285f4;
+}
+
+body.auth-gate-page .oauth-btn--apple .oauth-btn-icon {
+  background: #111;
+  color: #fff;
+}
+
+body.auth-gate-page .oauth-btn--apple .oauth-btn-icon::before {
+  content: "";
+  width: 0.55rem;
+  height: 0.7rem;
+  border-radius: 40% 40% 35% 35%;
+  background: currentColor;
+  display: block;
+}
+
+body.auth-gate-page .oauth-btn--facebook .oauth-btn-icon {
+  background: #1877f2;
+  color: #fff;
+}
+
+body.auth-gate-page .oauth-hint {
+  margin: 0.15rem 0 0;
+  font-size: 0.8rem;
+  color: #666;
+  line-height: 1.4;
+  text-align: center;
+}
+
+body.auth-gate-page .login-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0 0 1rem;
+  color: #999;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+body.auth-gate-page .login-divider::before,
+body.auth-gate-page .login-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #e3e6ea;
+}
+
+body.auth-gate-page .login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+body.auth-gate-page .login-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  width: 100%;
+  margin: 0;
+}
+
+body.auth-gate-page .login-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #444;
+}
+
+body.auth-gate-page .login-field input {
+  display: block;
+  width: 100%;
+  font: inherit;
+  font-size: 0.92rem;
+  border: 1px solid #d5d9e0;
+  border-radius: 10px;
+  padding: 0.55rem 0.7rem;
+  background: #fff;
+  color: #111;
+  box-sizing: border-box;
+}
+
+body.auth-gate-page .login-field input::-webkit-contacts-auto-fill-button,
+body.auth-gate-page .login-field input::-webkit-credentials-auto-fill-button {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  width: 0;
+  height: 0;
+  margin: 0;
+  opacity: 0;
+}
+
+body.auth-gate-page .login-error {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #c62828;
+  line-height: 1.4;
+}
+
+body.auth-gate-page .login-ok {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #2e7d32;
+  line-height: 1.4;
+}
+
+body.auth-gate-page .login-submit,
+body.auth-gate-page .site-header-btn--primary {
+  display: block;
+  width: 100%;
+  margin-top: 0.25rem;
+  box-sizing: border-box;
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  padding: 0.7rem 1rem;
+  background: #2563eb;
+  color: #fff;
+  cursor: pointer;
+}
+
+body.auth-gate-page .login-submit:hover,
+body.auth-gate-page .site-header-btn--primary:hover {
+  background: #1d4ed8;
+}
+
+body.auth-gate-page .login-submit:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+body.auth-gate-page .account-type-pick {
+  margin: 0 0 0.35rem;
+  padding: 0;
+  border: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+body.auth-gate-page .account-type-pick__legend {
+  padding: 0;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #111;
+}
+
+body.auth-gate-page .account-type-pick__hint {
+  margin: -0.15rem 0 0.1rem;
+  font-size: 0.78rem;
+  color: #666;
+  line-height: 1.35;
+}
+
+body.auth-gate-page .account-type-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  margin: 0;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid #d5d9e0;
+  border-radius: 12px;
+  background: #fff;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+body.auth-gate-page .account-type-option:hover,
+body.auth-gate-page .account-type-option.is-selected {
+  border-color: #111;
+}
+
+body.auth-gate-page .account-type-option.is-selected {
+  box-shadow: 0 0 0 1px #111;
+}
+
+body.auth-gate-page .account-type-option input {
+  margin-top: 0.2rem;
+  flex: 0 0 auto;
+}
+
+body.auth-gate-page .account-type-option__text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+body.auth-gate-page .account-type-option__text strong {
+  font-size: 0.92rem;
+  color: #111;
+}
+
+body.auth-gate-page .account-type-option__text small {
+  font-size: 0.78rem;
+  color: #666;
+  line-height: 1.35;
+}
+
+[data-theme="dark"] body.auth-gate-page .oauth-btn,
+[data-theme="dark"] body.auth-gate-page .login-field input,
+[data-theme="dark"] body.auth-gate-page .account-type-option {
+  background: #0f172a;
+  border-color: #374151;
+  color: #e5e7eb;
+}
+
+[data-theme="dark"] body.auth-gate-page .oauth-btn:hover:not(:disabled) {
+  background: #1e293b;
+}
+
+[data-theme="dark"] body.auth-gate-page .login-label,
+[data-theme="dark"] body.auth-gate-page .oauth-hint,
+[data-theme="dark"] body.auth-gate-page .login-divider {
+  color: #94a3b8;
+}
+
+[data-theme="dark"] body.auth-gate-page .login-divider::before,
+[data-theme="dark"] body.auth-gate-page .login-divider::after {
+  background: #374151;
 }

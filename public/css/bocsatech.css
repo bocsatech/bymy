@@ -141,9 +141,7 @@ input, select, textarea {
   cursor: default;
   pointer-events: none;
 }
-.layout-root--readonly .layout-tile--readonly {
-  opacity: 0.95;
-}
+.admin-loading { margin: 0.5rem 0 0.25rem; }
 
 table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
 th, td { text-align: left; padding: 0.55rem 0.4rem; border-bottom: 1px solid var(--line); vertical-align: middle; }

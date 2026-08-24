@@ -30,8 +30,9 @@ export function applyDrumModeClass() {
   document.body.classList.add(`immo-drum-mode-${getDrumMode()}`);
 }
 
+/** Asztali + mobil: a kerék az ingatlan oldalon mindkét nézetben nyitható. */
 function isDrumViewport() {
-  return typeof window !== "undefined" && window.matchMedia("(max-width: 800px)").matches;
+  return true;
 }
 
 function formatTriggerShort(label, value) {
@@ -68,6 +69,12 @@ function drumHostRow(wrap) {
   return wrap.closest(".immo-dual-range");
 }
 
+function setDrumOpen(wrap, open) {
+  const row = drumHostRow(wrap);
+  if (row) row.classList.toggle("has-drum-open", open);
+  else wrap.classList.toggle("has-drum-open", open);
+}
+
 function nearestItem(scrollEl, wrap) {
   const anchor = cellAnchor(wrap);
   const anchorRect = anchor.getBoundingClientRect();
@@ -86,6 +93,11 @@ function nearestItem(scrollEl, wrap) {
   return best;
 }
 
+function itemHeight(scrollEl) {
+  const n = Number(scrollEl?.dataset?.itemH);
+  return Number.isFinite(n) && n > 0 ? n : ITEM_H;
+}
+
 function paintInline(scrollEl, wrap) {
   cancelAnimationFrame(paintFrame);
   paintFrame = requestAnimationFrame(() => {
@@ -94,16 +106,17 @@ function paintInline(scrollEl, wrap) {
     const cellTop = anchorRect.top;
     const cellBottom = anchorRect.bottom;
     const cellCenterY = anchorRect.top + anchorRect.height / 2;
+    const itemH = itemHeight(scrollEl);
     scrollEl.querySelectorAll(".immo-drum-inline-item").forEach((item) => {
       const r = item.getBoundingClientRect();
       const mid = r.top + r.height / 2;
       const inCell = mid >= cellTop && mid <= cellBottom;
       const dist = Math.abs(mid - cellCenterY);
-      const t = Math.min(dist / (ITEM_H * 1.15), 1);
+      const t = Math.min(dist / (itemH * 1.15), 1);
       let opacity = 1 - t * 0.72;
       if (getDrumMode() === "v2" && inCell) opacity = Math.max(opacity, 0.92);
       item.style.opacity = String(Math.max(0.1, opacity));
-      item.style.fontWeight = dist < ITEM_H * 0.42 ? "650" : "500";
+      item.style.fontWeight = dist < itemH * 0.42 ? "650" : "500";
       item.classList.toggle("is-in-cell", inCell);
     });
   });
@@ -153,15 +166,9 @@ function commitWrap(wrap, wheel) {
   }
   const item = nearestItem(scrollEl, wrap);
   const value = item?.dataset.value ?? "";
-  wheel.querySelectorAll(".immo-wheel-opt").forEach((btn) => {
-    btn.classList.toggle("is-active", (btn.dataset.value ?? "") === value);
-  });
+  setWheelValue(wheel, value);
+  syncDrumWheelDisplay(wheel);
   if (hidden) hidden.value = value;
-  if (!value) {
-    trigger.textContent = trigger.dataset.emptyLabel || "Mindegy";
-  } else {
-    trigger.textContent = formatTriggerShort(item?.textContent?.trim(), value);
-  }
   wheel.dispatchEvent(new CustomEvent("immo-wheel-change", { bubbles: true, detail: { value } }));
 }
 
@@ -172,7 +179,7 @@ function closeInlineDrum(wrap, wheel, commit = true) {
   wrap.querySelector(".immo-drum-inline")?.setAttribute("hidden", "");
   wrap.querySelector(".immo-wheel-trigger")?.setAttribute("aria-expanded", "false");
   drumHostCell(wrap)?.classList.remove("is-drum-active");
-  drumHostRow(wrap)?.classList.remove("has-drum-open");
+  setDrumOpen(wrap, false);
   setDrumFormState(false);
 }
 
@@ -184,11 +191,22 @@ function closeAllInlineDrums(commit = true) {
 }
 
 function populateInlineScroll(scrollEl, wheel) {
-  scrollEl.innerHTML = [...wheel.querySelectorAll(".immo-wheel-opt")]
+  const opts = [...wheel.querySelectorAll(".immo-wheel-opt")];
+  const withPhoto = opts.some((btn) => Boolean(btn.dataset.image));
+  scrollEl.dataset.itemH = withPhoto ? "48" : String(ITEM_H);
+  scrollEl.innerHTML = opts
     .map((btn) => {
       const v = btn.dataset.value ?? "";
       const esc = v.replace(/&/g, "&amp;").replace(/"/g, "&quot;");
-      return `<div class="immo-drum-inline-item" data-value="${esc}">${btn.textContent}</div>`;
+      const label = (btn.textContent || "").trim();
+      const imgSrc = String(btn.dataset.image || "").trim();
+      const img = imgSrc
+        ? `<img class="immo-drum-inline-thumb" src="${imgSrc.replace(/"/g, "&quot;")}" alt="" width="32" height="32" decoding="async" />`
+        : "";
+      const cls = img ? "immo-drum-inline-item immo-drum-inline-item--photo" : "immo-drum-inline-item";
+      return `<div class="${cls}" data-value="${esc}">${img}<span class="immo-drum-inline-text">${label
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")}</span></div>`;
     })
     .join("");
 }
@@ -245,7 +263,7 @@ function openInlineDrum(wrap, wheel, trigger) {
   drum.hidden = false;
   wrap.classList.add("is-open");
   drumHostCell(wrap)?.classList.add("is-drum-active");
-  drumHostRow(wrap)?.classList.add("has-drum-open");
+  setDrumOpen(wrap, true);
   trigger.setAttribute("aria-expanded", "true");
   setDrumFormState(true);
 
@@ -285,7 +303,7 @@ export function initDrumWheel(wheel, { emptyLabel = "Mindegy", multiple = false 
   }
 
   applyDrumModeClass();
-  wrap.classList.remove("immo-wheel-wrap--menu", "immo-wheel-wrap--multi", "immo-wheel-wrap--custom", "is-open");
+  wrap.classList.remove("immo-wheel-wrap--menu", "immo-wheel-wrap--multi", "immo-wheel-wrap--custom", "is-open", "has-drum-open");
   wrap.querySelector(".immo-drum-inline")?.remove();
   wrap.querySelector(".immo-wheel-trigger")?.remove();
   wrap.querySelector(".immo-wheel-custom")?.remove();

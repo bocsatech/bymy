@@ -48,10 +48,8 @@ function isStaticAsset(pathname) {
 function isPublicApi(pathname, method) {
   if (pathname.startsWith("/api/auth/")) return true;
   if (pathname === "/api/health" && method === "GET") return true;
-  if (pathname === "/api/level1/login" && method === "POST") return true;
-  if (pathname === "/api/level1/resend-otp" && method === "POST") return true;
-  if (pathname === "/api/level1/otp" && method === "POST") return true;
-  if (pathname === "/api/level1/me" && method === "GET") return true;
+  // Bocsatech admin saját auth — ne a members gate zárja ki
+  if (pathname.startsWith("/api/level1/")) return true;
   return false;
 }
 

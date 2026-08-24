@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>A Bymy a közelben lévő szolgáltatásokat használja.</string>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_http._tcp</string>
+		<string>_autosweb._tcp</string>
+	</array>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>hu.bymy.app.oauth</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>bymy</string>
+			</array>
+		</dict>
+	</array>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Profilkép és hirdetés fényképek feltöltéséhez szükséges a fotókönyvtár hozzáférés.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Hirdetés fényképek készítéséhez szükséges a kamera hozzáférés.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>A bymy fiókod Face ID-val oldható fel, ha már be vagy jelentkezve.</string>
+</dict>
+</plist>

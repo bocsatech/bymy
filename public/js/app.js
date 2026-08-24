@@ -5,10 +5,10 @@ import {
   saveListingPhotosOrder,
   getStoredListingId,
 } from "./db-client.js?v=wizardSave1";
-import { createAdForm } from "./form-core.js?v=immoSync1";
+import { createAdForm } from "./form-core.js?v=immoSync6";
 import { initTireSizes } from "./tire-sizes-ui.js";
 import { initPhoneLanguages } from "./phone-lang-ui.js";
-import { initCategoryPicker } from "./category-picker.js?v=immo1";
+import { initCategoryPicker } from "./category-picker.js?v=immo6";
 import {
   requireAuthForPage,
   getAuthUser,
@@ -45,11 +45,39 @@ function categorySelectionFromForm(formData) {
   const subtype = String(formData?.hirdetes_alkategoria ?? formData?.jarmu_kategoria ?? "")
     .trim()
     .toLowerCase();
+  const immoTipus = String(formData?.ingatlan_tipus ?? "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  if (vertical === "ingatlan") {
+    const id = immoTipus[0] || "";
+    const labels = {
+      elado: "Eladó Ingatlanok",
+      kiado: "Kiadó Ingatlanok",
+      airbnb: "Airbnb Ingatlanok",
+    };
+    return {
+      vertical: "ingatlan",
+      subtype: "ingatlan",
+      label: labels[id] || "Ingatlan",
+      immoTipus: id ? [id] : [],
+      immoKategoria: [],
+    };
+  }
   if (vertical === "teher" && subtype === "kisteher") {
-    return { vertical: "teher", subtype: "kisteher", label: "Kisteher 3,5 t-ig" };
+    return { vertical: "teher", subtype: "kisteher", label: "Kisteherautó" };
   }
   if (vertical === "teher" && subtype === "teherauto") {
-    return { vertical: "teher", subtype: "teherauto", label: "Teherautó 3,5 t-tól" };
+    return { vertical: "teher", subtype: "teherauto", label: "Teherautó" };
+  }
+  if (vertical === "auto" && subtype === "leasing") {
+    return { vertical: "auto", subtype: "leasing", label: "Leasingautó" };
+  }
+  if (vertical === "auto" && subtype === "berauto") {
+    return { vertical: "auto", subtype: "berauto", label: "Bérautó" };
+  }
+  if (vertical === "auto" && subtype === "lakokocsi") {
+    return { vertical: "auto", subtype: "lakokocsi", label: "Bérelhető Lakókocsi" };
   }
   if (vertical === "auto" && subtype === "szemelyauto") {
     return { vertical: "auto", subtype: "szemelyauto", label: "Személyautó" };

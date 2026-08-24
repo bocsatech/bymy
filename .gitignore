@@ -19,3 +19,9 @@ node_modules/
 public/uploads/listings/
 .DS_Store
 .vercel
+ios/build/
+ios/dist/
+ios/build-out.log
+**/xcuserdata/
+*.xcuserstate
+scripts/_apply-all-migrations.sql

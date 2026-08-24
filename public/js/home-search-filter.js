@@ -162,6 +162,48 @@ export function filterListingsBySidebar(items, filters) {
     if (!inRange(f.teljesitmeny_le, filters.le_tol, filters.le_ig)) return false;
     if (!inRange(f.hengerurtartalom, filters.ccm_tol, filters.ccm_ig)) return false;
 
+    for (const [key, value] of Object.entries(filters)) {
+      if (value == null || value === "") continue;
+      if (
+        [
+          "gyartmany",
+          "modell",
+          "kivitel",
+          "hajtas",
+          "sebessegvalto",
+          "uzemanyag",
+          "uzemanyagQuick",
+          "allapot",
+          "ajtok",
+          "ulesek",
+          "tipus",
+          "ev_jarat",
+          "ev_tol",
+          "ev_ig",
+          "ar_tol",
+          "ar_ig",
+          "km_tol",
+          "km_ig",
+          "le_tol",
+          "le_ig",
+          "ccm_tol",
+          "ccm_ig",
+          "features",
+        ].includes(key)
+      ) {
+        continue;
+      }
+      if (key.endsWith("_tol") || key.endsWith("_ig")) {
+        const base = key.replace(/_(tol|ig)$/, "");
+        const listingVal = Number(f[base] ?? preview[base]);
+        if (!inRange(listingVal, filters[`${base}_tol`], filters[`${base}_ig`])) return false;
+        continue;
+      }
+      const listingVal = f[key];
+      if (listingVal == null || listingVal === "") return false;
+      if (normalizeForMatch(listingVal) !== normalizeForMatch(value)) return false;
+    }
+
     for (const feat of filters?.features ?? []) {
       const rule = FEATURE_CHECKS.find((entry) => entry.id === feat);
       if (rule && !rule.match(item)) return false;

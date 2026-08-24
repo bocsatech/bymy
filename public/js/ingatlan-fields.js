@@ -18,13 +18,144 @@ export function normalizeIngatlanUzletag(value) {
   return v || "berbe";
 }
 
+/** Kereső + Eladó/Kiadó feladás — ingatlan típus. */
 export const INGATLAN_LAKAS_TIPUS = [
+  { value: "", label: "Mindegy" },
+  { value: "lakas", label: "Lakás" },
+  { value: "haz", label: "Ház" },
+  { value: "telek", label: "Telek" },
+  { value: "nyaralo", label: "Nyaraló" },
+  { value: "iroda", label: "Iroda" },
+  { value: "uzlethelyiseg", label: "Üzlethelyiség" },
+  { value: "ipari", label: "Ipari" },
+  { value: "mezogazdasagi", label: "Mezőgazdasági" },
+  { value: "vendeglatas", label: "Vendéglátás" },
+  { value: "garazs", label: "Garázs" },
+  { value: "fejlesztesi_terulet", label: "Fejlesztési terület" },
+  { value: "intezmeny", label: "Intézmény" },
+  { value: "raktar", label: "Raktár" },
+  { value: "egyeb", label: "Egyéb" },
+];
+
+/** Airbnb feladás — rövid távú / lakás típusok. */
+export const INGATLAN_LAKAS_TIPUS_AIRBNB = [
   { value: "", label: "Mindegy" },
   { value: "teglalakas", label: "Téglalakás" },
   { value: "panellakas", label: "Panellakás" },
   { value: "szoba", label: "Szoba" },
   { value: "rovid_berles", label: "Rövid bérlés" },
 ];
+
+/**
+ * Típus 2 almenük (szülő Tipus value → opciók).
+ * Az value-k szülővel prefixelve, hogy az „Egyéb” stb. ne ütközzön.
+ */
+export const INGATLAN_TIPUS_2_BY_PARENT = {
+  lakas: [
+    { value: "lakas_tegla", label: "Tégla" },
+    { value: "lakas_panel", label: "Panel" },
+    { value: "lakas_lakopark", label: "Lakópark" },
+    { value: "lakas_egyeb", label: "Egyéb" },
+  ],
+  haz: [
+    { value: "haz_csaladi_haz", label: "Családi ház" },
+    { value: "haz_ikerhaz", label: "Ikerház" },
+    { value: "haz_sorhaz", label: "Sorház" },
+    { value: "haz_hazresz", label: "Házrész" },
+    { value: "haz_konnyuszerkezetes", label: "Könnyűszerkezetes" },
+    { value: "haz_kastely", label: "Kastély" },
+    { value: "haz_tanya", label: "Tanya" },
+    { value: "haz_egyeb", label: "Egyéb" },
+  ],
+  telek: [
+    { value: "telek_lakoovezeti", label: "Lakóövezeti" },
+    { value: "telek_uduloovezeti", label: "Üdülőövezeti" },
+    { value: "telek_kulteruleti", label: "Külterületi" },
+    { value: "telek_egyeb", label: "Egyéb" },
+  ],
+  nyaralo: [
+    { value: "nyaralo_nyaralo", label: "Nyaraló" },
+    { value: "nyaralo_hetvegi_hazas", label: "Hétvégi házas" },
+    { value: "nyaralo_udulo_hazas", label: "Üdülő házas" },
+    { value: "nyaralo_egyeb", label: "Egyéb" },
+  ],
+  iroda: [
+    { value: "iroda_irodahazban", label: "Irodaházban" },
+    { value: "iroda_csaladihazban", label: "Családi házban" },
+    { value: "iroda_lakasban", label: "Lakásban" },
+    { value: "iroda_egyeb", label: "Egyéb" },
+  ],
+  uzlethelyiseg: [
+    { value: "uzlethelyiseg_uzlethazban", label: "Üzletházban" },
+    { value: "uzlethelyiseg_utcai_bejarattal", label: "Utcai bejárattal" },
+    { value: "uzlethelyiseg_udvarban", label: "Udvarban" },
+    { value: "uzlethelyiseg_egyeb", label: "Egyéb" },
+  ],
+  ipari: [
+    { value: "ipari_muhely", label: "Műhely" },
+    { value: "ipari_telephely", label: "Telephely" },
+    { value: "ipari_raktar", label: "Raktár" },
+    { value: "ipari_telek_ipari_hasznalatra", label: "Telek ipari használatra" },
+    { value: "ipari_egyeb", label: "Egyéb" },
+  ],
+  mezogazdasagi: [
+    { value: "mezogazdasagi_tanya", label: "Tanya" },
+    { value: "mezogazdasagi_altalanos", label: "Általános mezőgazdasági" },
+    { value: "mezogazdasagi_termofold_szanto", label: "Termőföld–szántó" },
+    { value: "mezogazdasagi_erdo", label: "Erdő" },
+    { value: "mezogazdasagi_preshaz_pince", label: "Présház–pince" },
+    { value: "mezogazdasagi_egyeb", label: "Egyéb" },
+  ],
+  vendeglatas: [
+    { value: "vendeglatas_szalloda_hotel_panzio", label: "Szálloda–hotel–panzió" },
+    { value: "vendeglatas_etterem_vendeglo", label: "Étterem–vendéglő" },
+    { value: "vendeglatas_egyeb", label: "Egyéb" },
+  ],
+  garazs: [
+    { value: "garazs_onallo", label: "Önálló" },
+    { value: "garazs_terem", label: "Terem" },
+    { value: "garazs_beallo", label: "Beálló" },
+    { value: "garazs_egyeb", label: "Egyéb" },
+  ],
+  fejlesztesi_terulet: [
+    { value: "fejlesztesi_terulet_lakoterulet", label: "Lakóterület" },
+    { value: "fejlesztesi_terulet_kereskedelmi_szolgaltatoi", label: "Kereskedelmi–szolgáltatói" },
+    { value: "fejlesztesi_terulet_vegyes", label: "Vegyes (lakó és kereskedelmi)" },
+    { value: "fejlesztesi_terulet_ipari", label: "Ipari" },
+    { value: "fejlesztesi_terulet_udulo", label: "Üdülő" },
+    { value: "fejlesztesi_terulet_egyeb", label: "Egyéb" },
+  ],
+  intezmeny: [
+    { value: "intezmeny_egeszsegugyi", label: "Egészségügyi" },
+    { value: "intezmeny_iskola", label: "Iskola" },
+    { value: "intezmeny_muzeum", label: "Múzeum" },
+    { value: "intezmeny_ovoda", label: "Óvoda" },
+    { value: "intezmeny_egyeb", label: "Egyéb" },
+  ],
+  raktar: [
+    { value: "raktar_raktarhelyiseg", label: "Raktárhelyiség" },
+    { value: "raktar_egyeb", label: "Egyéb" },
+  ],
+  egyeb: [{ value: "egyeb_egyeb", label: "Egyéb" }],
+};
+
+/** Tipus 1 érték(ek) → Tipus 2 opciólista (üres szülőnél csak Mindegy). */
+export function tipus2OptionsForParents(parentValues) {
+  const parents = (Array.isArray(parentValues) ? parentValues : String(parentValues ?? "").split(","))
+    .map((v) => String(v || "").trim())
+    .filter(Boolean);
+  const out = [{ value: "", label: "Mindegy" }];
+  if (!parents.length) return out;
+  const seen = new Set();
+  for (const p of parents) {
+    for (const opt of INGATLAN_TIPUS_2_BY_PARENT[p] || []) {
+      if (!opt.value || seen.has(opt.value)) continue;
+      seen.add(opt.value);
+      out.push(opt);
+    }
+  }
+  return out;
+}
 
 export const INGATLAN_ALLAPOT = [
   { value: "", label: "Mindegy" },

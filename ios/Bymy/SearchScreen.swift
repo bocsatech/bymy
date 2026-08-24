@@ -200,9 +200,10 @@ struct SearchScreen: View {
         }
     }
 
-    /// Főoldal: fejléc a képernyő tetejétől, logo vágás nélkül.
+    /// Főoldal: logo a státuszsáv / Dynamic Island alá csúszik (óra–kamera kitakarhat belőle).
     private var searchLanding: some View {
-        ScrollView {
+        let topInset = statusBarHeight
+        return ScrollView {
             VStack(spacing: 0) {
                 homeHeader
 
@@ -215,14 +216,16 @@ struct SearchScreen: View {
                 .padding(.bottom, 28)
             }
             .frame(maxWidth: .infinity, alignment: .top)
+            /// ScrollView safe-area insetjét ellensúlyozza — nincs sáv az óra alatt, a logo felcsúszik.
+            .padding(.top, -topInset)
         }
         .contentMargins(.top, 0, for: .scrollContent)
-        .ignoresSafeArea(edges: .top)
+        .scrollContentBackground(.hidden)
         .background(Color.white.ignoresSafeArea())
+        .ignoresSafeArea(edges: .top)
     }
 
-    /// Fejléc: logo az óra / Dynamic Island mögé nyúlik (scaledToFit, nincs levágás).
-    /// Logo alatt 1,5 cm hely, utána a választóvonal. Profilkép az üres sávban jobbra.
+    /// Fejléc: logo az óra / Dynamic Island mögé nyúlik; alatta 1,5 cm, majd választóvonal.
     private var homeHeader: some View {
         /// BymyLogo.png 958×415 — arány megmarad.
         let logoHeight = UIScreen.main.bounds.width * (415.0 / 958.0)

@@ -66,6 +66,118 @@ body[data-site-page="ingatlan"] .immo-search-panel,
   pointer-events: none;
 }
 
+/* Egységes cellafelirás a vonalon — kereső űrlap, dual-range minta minden mezőn */
+.immo-search-form .immo-field,
+.immo-search-form .immo-schema-cell:not(.immo-dual-range__half) > .immo-wheel-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 3rem;
+  height: 3rem;
+  max-height: 3rem;
+  padding: 0;
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+  background: #f8fafc;
+  gap: 0;
+  box-sizing: border-box;
+  overflow: visible;
+  z-index: 0;
+}
+
+.immo-search-form .immo-field {
+  height: auto;
+  max-height: none;
+  padding: 0 0.75rem;
+}
+
+.immo-search-form .immo-schema-cell:not(.immo-dual-range__half) {
+  padding-top: 0.42rem;
+}
+
+/* Aktív állapot = Ár / Alapterület dual-range minta */
+.immo-search-form .immo-field:focus-within,
+.immo-search-form .immo-schema-cell:not(.immo-dual-range__half) > .immo-wheel-wrap.has-drum-open,
+.immo-search-form .immo-schema-cell:not(.immo-dual-range__half) > .immo-wheel-wrap:focus-within,
+.immo-search-form .immo-schema-cell:not(.immo-dual-range__half) > .immo-wheel-wrap.is-open,
+.immo-search-form .immo-schema-cell:not(.immo-dual-range__half) > .immo-wheel-wrap:has(.immo-wheel-trigger:focus) {
+  border-color: #111;
+  box-shadow: 0 0 0 2px rgba(17, 24, 39, 0.08);
+  background: #fff;
+}
+
+.immo-search-form .immo-schema-cell:not(.immo-dual-range__half) > .immo-wheel-wrap.has-drum-open {
+  z-index: 50;
+}
+
+.immo-search-form .immo-field .immo-label,
+.immo-search-form .immo-schema-cell:not(.immo-dual-range__half) > .immo-wheel-wrap > .immo-label {
+  position: absolute;
+  top: -0.52rem;
+  left: 0.6rem;
+  padding: 0 0.28rem;
+  background: var(--hub-card, #fff);
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #667085;
+  white-space: nowrap;
+  z-index: 2;
+}
+
+.immo-search-form .immo-field:focus-within .immo-label,
+.immo-search-form .immo-schema-cell:not(.immo-dual-range__half) > .immo-wheel-wrap.has-drum-open > .immo-label,
+.immo-search-form .immo-schema-cell:not(.immo-dual-range__half) > .immo-wheel-wrap:focus-within > .immo-label,
+.immo-search-form .immo-schema-cell:not(.immo-dual-range__half) > .immo-wheel-wrap.is-open > .immo-label,
+.immo-search-form .immo-schema-cell:not(.immo-dual-range__half) > .immo-wheel-wrap:has(.immo-wheel-trigger:focus) > .immo-label {
+  color: #111;
+}
+
+/* Dobkerék nyitva: címke marad (mint Alapterület) */
+.immo-search-form .immo-schema-cell:not(.immo-dual-range__half) .immo-wheel-wrap--drum-inline.is-open .immo-label {
+  display: block;
+}
+
+.immo-search-form .immo-field .immo-control {
+  width: 100%;
+  min-height: 2.4rem;
+  height: auto;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  padding: 0;
+  box-shadow: none !important;
+}
+
+.immo-search-form .immo-schema-cell:not(.immo-dual-range__half) > .immo-wheel-wrap {
+  width: 100%;
+  gap: 0;
+}
+
+.immo-search-form .immo-schema-cell:not(.immo-dual-range__half) .immo-wheel-trigger {
+  width: 100%;
+  min-height: 3rem;
+  height: 3rem;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background-color: transparent !important;
+  text-align: left;
+  color: #64748b;
+  padding: 0 0.75rem;
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  background-image: none !important;
+}
+
+.immo-search-form .immo-wheel-wrap--menu.is-open .immo-wheel-trigger {
+  border-color: transparent !important;
+}
+
 .immo-field {
   display: grid;
   gap: 0.35rem;
@@ -311,6 +423,30 @@ input.immo-wheel-custom.immo-wheel-trigger {
   color: #e5e7eb;
 }
 
+[data-theme="dark"] .immo-search-form .immo-field .immo-label,
+[data-theme="dark"] .immo-search-form .immo-schema-cell:not(.immo-dual-range__half) > .immo-wheel-wrap > .immo-label,
+[data-theme="dark"] .immo-search-form .immo-dual-range__title {
+  background: var(--hub-card, #0b1220);
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .immo-search-form .immo-field,
+[data-theme="dark"] .immo-search-form .immo-schema-cell:not(.immo-dual-range__half) > .immo-wheel-wrap {
+  background: #0b1220;
+  border-color: #374151;
+}
+
+[data-theme="dark"] .immo-search-form .immo-field:focus-within,
+[data-theme="dark"] .immo-search-form .immo-schema-cell:not(.immo-dual-range__half) > .immo-wheel-wrap.has-drum-open,
+[data-theme="dark"] .immo-search-form .immo-schema-cell:not(.immo-dual-range__half) > .immo-wheel-wrap:focus-within,
+[data-theme="dark"] .immo-search-form .immo-schema-cell:not(.immo-dual-range__half) > .immo-wheel-wrap.is-open,
+[data-theme="dark"] .immo-search-form .immo-schema-cell:not(.immo-dual-range__half) > .immo-wheel-wrap:has(.immo-wheel-trigger:focus),
+[data-theme="dark"] .immo-search-form .immo-dual-range.has-drum-open,
+[data-theme="dark"] .immo-search-form .immo-dual-range:focus-within {
+  background: #111827;
+  border-color: #6b7280;
+}
+
 /* —— Mobil (800px: egyezik a mobil web shell breakpointtal) —— */
 @media (max-width: 800px) {
   body[data-site-page="ingatlan"] .immo-search-hero,
@@ -335,75 +471,22 @@ input.immo-wheel-custom.immo-wheel-trigger {
     gap: 0.7rem;
   }
 
-  /* Admin 12-oszlopos spanok helyett 2 oszlop (szűk képernyőn olvasható) */
+  /* Szűk képernyő: 1 oszlop, de az admin SORSZEND (grid-row) megmarad */
   .immo-schema-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-template-columns: minmax(0, 1fr) !important;
     grid-auto-rows: auto !important;
     gap: 0.65rem 0.5rem;
   }
 
   .immo-schema-cell {
-    grid-column: auto !important;
-    grid-row: auto !important;
+    grid-column: 1 / -1 !important;
+    /* grid-row: NEM írjuk felül — az admin séma sorrendje érvényesül */
+  }
+
+  .immo-dual-range-block {
+    /* 1 oszlopos mobilon: admin col 5+ implicit keskeny oszlopokat hozna létre */
+    grid-column: 1 / -1 !important;
     padding-top: 0.42rem;
-  }
-
-  /* Szegélyes címke — autós kereső mintájára (home-qs-label) */
-  .immo-field,
-  .immo-schema-cell .immo-wheel-wrap {
-    position: relative;
-    display: flex;
-    align-items: center;
-    min-height: 3rem;
-    padding: 0 0.75rem;
-    border: 1px solid #d0d5dd;
-    border-radius: 8px;
-    background: #f8fafc;
-    gap: 0;
-    box-sizing: border-box;
-  }
-
-  .immo-field:focus-within,
-  .immo-schema-cell .immo-wheel-wrap.is-open,
-  .immo-schema-cell .immo-wheel-wrap:has(.immo-wheel-trigger:focus) {
-    border-color: #111;
-    box-shadow: 0 0 0 2px rgba(17, 24, 39, 0.08);
-    background: #fff;
-  }
-
-  .immo-field .immo-label,
-  .immo-schema-cell .immo-wheel-wrap > .immo-label {
-    position: absolute;
-    top: -0.52rem;
-    left: 0.6rem;
-    padding: 0 0.28rem;
-    background: var(--hub-card, #fff);
-    font-size: 0.68rem;
-    font-weight: 600;
-    color: #667085;
-    white-space: nowrap;
-    z-index: 1;
-  }
-
-  .immo-field:focus-within .immo-label,
-  .immo-schema-cell .immo-wheel-wrap.is-open > .immo-label,
-  .immo-schema-cell .immo-wheel-wrap:has(.immo-wheel-trigger:focus) > .immo-label {
-    color: #111;
-  }
-
-  .immo-field .immo-control {
-    width: 100%;
-    min-height: 2.4rem;
-    height: auto;
-    border: 0 !important;
-    border-radius: 0 !important;
-    background: transparent !important;
-    padding: 0;
-    box-shadow: none !important;
-  }
-
-  .immo-schema-cell .immo-wheel-wrap {
-    width: 100%;
   }
 
   .immo-schema-cell:has(> .immo-field),
@@ -439,10 +522,12 @@ input.immo-wheel-custom.immo-wheel-trigger {
 
   /* Min–max blokk (ár, alapterület): szegélyes címke + osztott sor */
   .immo-dual-range-block {
-    grid-column: 1 / -1 !important;
     min-width: 0;
     max-width: 100%;
+    width: auto;
+    box-sizing: border-box;
     padding-top: 0.42rem;
+    position: relative;
   }
 
   .immo-dual-range__title {
@@ -510,11 +595,11 @@ input.immo-wheel-custom.immo-wheel-trigger {
     z-index: 45;
   }
 
-  /* v2: belső keret = aktív cella */
+  /* v2: nincs kék belső keret — külső doboz jelzi az aktív állapotot */
   body.immo-drum-mode-v2 .immo-dual-range__half.is-drum-active,
   body.immo-drum-mode-v2 .immo-schema-cell.is-drum-active {
-    box-shadow: inset 0 0 0 2px #2563eb;
-    border-radius: 10px;
+    box-shadow: none;
+    border-radius: 0;
   }
 
   .immo-dual-range__half.immo-schema-cell {
@@ -733,6 +818,27 @@ input.immo-wheel-custom.immo-wheel-trigger {
     opacity: 0.25;
   }
 
+  .immo-drum-inline-item--photo {
+    height: 48px;
+    gap: 0.55rem;
+    padding-left: 0.2rem;
+  }
+
+  .immo-drum-inline-thumb {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    object-fit: cover;
+    flex-shrink: 0;
+    background: #e2e8f0;
+  }
+
+  .immo-drum-inline-text {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
   .immo-drum-inline-item.is-in-cell {
     color: #0f172a;
   }
@@ -744,7 +850,7 @@ input.immo-wheel-custom.immo-wheel-trigger {
   .immo-wheel-wrap--multi .immo-drum-inline-item.is-selected::after {
     content: " ✓";
     font-weight: 700;
-    color: #2563eb;
+    color: #111;
   }
 
   [data-theme="dark"] .immo-drum-wheel-ring {
@@ -768,25 +874,6 @@ input.immo-wheel-custom.immo-wheel-trigger {
 
   .immo-wheel--drum-source {
     display: none !important;
-  }
-
-  .immo-schema-cell .immo-wheel-trigger {
-    width: 100%;
-    min-height: 2.4rem;
-    height: auto;
-    border: 0 !important;
-    border-radius: 0 !important;
-    box-shadow: none !important;
-    background: transparent !important;
-    text-align: left;
-    color: #101828;
-    padding: 0;
-    font-size: 1rem;
-    cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
   }
 
   .immo-control {
@@ -904,26 +991,6 @@ input.immo-wheel-custom.immo-wheel-trigger {
     border-color: #374151;
   }
 
-  [data-theme="dark"] .immo-dual-range__title,
-  [data-theme="dark"] .immo-field .immo-label,
-  [data-theme="dark"] .immo-schema-cell .immo-wheel-wrap > .immo-label {
-    background: var(--hub-card, #0b1220);
-    color: #94a3b8;
-  }
-
-  [data-theme="dark"] .immo-field,
-  [data-theme="dark"] .immo-schema-cell .immo-wheel-wrap {
-    background: #0b1220;
-    border-color: #374151;
-  }
-
-  [data-theme="dark"] .immo-field:focus-within,
-  [data-theme="dark"] .immo-schema-cell .immo-wheel-wrap.is-open,
-  [data-theme="dark"] .immo-dual-range.has-drum-open {
-    background: #111827;
-    border-color: #6b7280;
-  }
-
   [data-theme="dark"] .immo-dual-range__half--min {
     border-right-color: #1f2937;
   }
@@ -944,4 +1011,371 @@ input.immo-wheel-custom.immo-wheel-trigger {
   [data-theme="dark"] .immo-menu-backdrop {
     background: rgba(0, 0, 0, 0.55);
   }
+}
+
+/* —— Asztali: ugyanaz a dobkerék, mint mobilon —— */
+@media (min-width: 801px) {
+  body.immo-price-drum-active .immo-search-panel,
+  body.immo-price-drum-active .immo-search-form,
+  body.immo-drum-active .immo-search-panel,
+  body.immo-drum-active .immo-search-form {
+    overflow: visible;
+  }
+
+  .immo-dual-range-block {
+    min-width: 0;
+    max-width: 100%;
+    width: auto;
+    box-sizing: border-box;
+    padding-top: 0.42rem;
+    position: relative;
+  }
+
+  .immo-dual-range__title {
+    position: absolute;
+    top: -0.52rem;
+    left: 0.6rem;
+    padding: 0 0.28rem;
+    background: var(--hub-card, #fff);
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: #667085;
+    white-space: nowrap;
+    z-index: 2;
+  }
+
+  .immo-dual-range.has-drum-open .immo-dual-range__title,
+  .immo-dual-range:focus-within .immo-dual-range__title {
+    color: #111;
+  }
+
+  .immo-dual-range {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    height: 3rem;
+    min-height: 3rem;
+    max-height: 3rem;
+    border: 1px solid #d0d5dd;
+    border-radius: 8px;
+    background: #f8fafc;
+    overflow: visible;
+    z-index: 0;
+    box-sizing: border-box;
+  }
+
+  .immo-dual-range.has-drum-open,
+  .immo-dual-range:focus-within {
+    border-color: #111;
+    box-shadow: 0 0 0 2px rgba(17, 24, 39, 0.08);
+    background: #fff;
+  }
+
+  .immo-dual-range.has-drum-open {
+    z-index: 50;
+    overflow: visible;
+  }
+
+  .immo-dual-range__half.is-drum-active {
+    z-index: 51;
+  }
+
+  /* v2: nincs kék belső keret — külső doboz jelzi az aktív állapotot */
+  body.immo-drum-mode-v2 .immo-dual-range__half.is-drum-active,
+  body.immo-drum-mode-v2 .immo-schema-cell.is-drum-active {
+    box-shadow: none;
+    border-radius: 0;
+  }
+
+  .immo-dual-range__half.immo-schema-cell {
+    flex: 1 1 0;
+    width: auto;
+    min-width: 0;
+    max-width: none;
+    height: 3rem;
+    box-sizing: border-box;
+    overflow: visible;
+    position: relative;
+  }
+
+  .immo-dual-range__sep {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    padding: 0 0.15rem;
+    color: #94a3b8;
+    font-size: 1rem;
+    user-select: none;
+    pointer-events: none;
+  }
+
+  .immo-dual-range__unit {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    padding: 0 0.85rem;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #0f172a;
+    border-left: 1px solid #e2e8f0;
+    white-space: nowrap;
+    background: #fff;
+  }
+
+  .immo-dual-range__half .immo-label {
+    display: none !important;
+  }
+
+  .immo-dual-range__half .immo-wheel-wrap {
+    flex: 1 1 auto;
+    width: 100%;
+    gap: 0;
+    min-width: 0;
+  }
+
+  .immo-dual-range__half .immo-wheel-trigger {
+    width: 100%;
+    min-height: 3rem;
+    height: 3rem;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    text-align: left;
+    color: #64748b;
+    padding: 0 0.75rem;
+    font-size: 1rem;
+    font-variant-numeric: tabular-nums;
+    cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    background-image: none !important;
+  }
+
+  .immo-dual-range__half .immo-wheel-wrap--drum-inline {
+    position: relative;
+    width: 100%;
+    height: 3rem;
+    overflow: visible;
+  }
+
+  .immo-dual-range__half .immo-wheel-wrap--drum-inline.is-open .immo-wheel-trigger {
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .immo-schema-cell:has(.immo-wheel-wrap--drum-inline.is-open) {
+    z-index: 50;
+    overflow: visible;
+  }
+
+  .immo-schema-cell .immo-wheel-wrap--drum-inline {
+    position: relative;
+    width: 100%;
+    overflow: visible;
+  }
+
+  .immo-schema-cell .immo-wheel-wrap--drum-inline.is-open {
+    height: 3rem;
+    min-height: 3rem;
+    gap: 0;
+  }
+
+  .immo-schema-cell .immo-wheel-wrap--drum-inline.is-open .immo-label {
+    display: none;
+  }
+
+  .immo-schema-cell .immo-wheel-wrap--drum-inline.is-open .immo-wheel-trigger {
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .immo-drum-inline {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    bottom: auto;
+    transform: translateY(-50%);
+    z-index: 60;
+    pointer-events: none;
+    height: auto;
+  }
+
+  .immo-wheel-wrap--drum-inline.is-open .immo-drum-inline {
+    pointer-events: auto;
+  }
+
+  .immo-drum-inline[hidden] {
+    display: none !important;
+  }
+
+  .immo-drum-wheel-ring {
+    position: relative;
+    width: var(--immo-drum-ring-w, 7.5rem);
+    height: 7.5rem;
+    border-radius: 1rem;
+    border: 1px dashed #94a3b8;
+    background: #fff;
+    box-shadow: 0 8px 28px rgba(15, 23, 42, 0.18);
+    overflow: hidden;
+    box-sizing: border-box;
+    z-index: 60;
+  }
+
+  body.immo-drum-mode-legacy .immo-drum-wheel-ring {
+    border: 0;
+    box-shadow: none;
+    background: transparent;
+    border-radius: 0;
+  }
+
+  .immo-drum-inline-highlight {
+    position: absolute;
+    left: 0.3rem;
+    right: 0.3rem;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 2rem;
+    margin-top: 0;
+    border-radius: 6px;
+    background: rgba(148, 163, 184, 0.22);
+    pointer-events: none;
+    z-index: 3;
+  }
+
+  .immo-drum-inline-scroll {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    scroll-snap-type: y mandatory;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+    padding: calc(3.75rem - 20px) 0.35rem;
+    box-sizing: border-box;
+    z-index: 2;
+  }
+
+  .immo-drum-inline-scroll::-webkit-scrollbar {
+    display: none;
+  }
+
+  .immo-drum-inline-item {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    height: 40px;
+    margin: 0;
+    padding: 0 0.35rem;
+    color: #0f172a;
+    font: 500 1rem/1 Inter, system-ui, sans-serif;
+    font-variant-numeric: tabular-nums;
+    scroll-snap-align: center;
+    scroll-snap-stop: always;
+    white-space: nowrap;
+    opacity: 0.25;
+  }
+
+  .immo-drum-inline-item--photo {
+    height: 48px;
+    gap: 0.55rem;
+    padding-left: 0.2rem;
+  }
+
+  .immo-drum-inline-thumb {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    object-fit: cover;
+    flex-shrink: 0;
+    background: #e2e8f0;
+  }
+
+  .immo-drum-inline-text {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .immo-drum-inline-item.is-in-cell {
+    color: #0f172a;
+  }
+
+  .immo-drum-inline-item.is-selected {
+    font-weight: 700;
+  }
+
+  .immo-wheel-wrap--multi .immo-drum-inline-item.is-selected::after {
+    content: " ✓";
+    font-weight: 700;
+    color: #111;
+  }
+
+  .immo-dual-range__half:has(.immo-wheel-wrap--drum-inline.is-open),
+  .immo-schema-cell:has(.immo-wheel-wrap--drum-inline.is-open) {
+    overflow: visible;
+  }
+
+  .immo-wheel--drum-source {
+    display: none !important;
+  }
+
+  [data-theme="dark"] .immo-dual-range__unit {
+    color: #e5e7eb;
+    background: #0b1220;
+    border-left-color: #1f2937;
+  }
+
+  [data-theme="dark"] .immo-dual-range {
+    background: #0b1220;
+    border-color: #374151;
+  }
+
+  [data-theme="dark"] .immo-dual-range__title {
+    background: var(--hub-card, #0b1220);
+    color: #94a3b8;
+  }
+
+  [data-theme="dark"] .immo-dual-range.has-drum-open {
+    background: #111827;
+    border-color: #6b7280;
+  }
+
+  [data-theme="dark"] .immo-drum-wheel-ring {
+    background: #0b1220;
+    border-color: #475569;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
+  }
+
+  [data-theme="dark"] .immo-drum-inline-item {
+    color: #e5e7eb;
+  }
+
+  [data-theme="dark"] .immo-drum-inline-highlight {
+    background: rgba(148, 163, 184, 0.16);
+  }
+}
+
+/* Kék fókuszkeret / outline kikapcsolva az ingatlan keresőben */
+body[data-site-page="ingatlan"] .immo-search-form .immo-wheel-trigger:focus,
+body[data-site-page="ingatlan"] .immo-search-form .immo-wheel-trigger:focus-visible,
+body[data-site-page="ingatlan"] .immo-search-form .immo-control:focus,
+body[data-site-page="ingatlan"] .immo-search-form .immo-control:focus-visible,
+body[data-site-page="ingatlan"] .immo-search-form select:focus,
+body[data-site-page="ingatlan"] .immo-search-form select:focus-visible {
+  outline: none !important;
+}
+
+.immo-wheel-wrap.is-disabled,
+.immo-schema-cell:has(.immo-wheel-wrap.is-disabled) {
+  opacity: 0.55;
+  pointer-events: none;
 }

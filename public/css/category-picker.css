@@ -201,6 +201,26 @@
   height: 22px;
 }
 
+.cp-option-icon--photo {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #f3f4f6;
+}
+
+.cp-option-icon--photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.cp-group[data-accent="immo"] .cp-option {
+  grid-template-columns: 4px 36px 1fr auto;
+  align-items: center;
+}
+
 .cp-option-copy strong {
   display: block;
   font-size: 0.95rem;
@@ -504,36 +524,91 @@
 .wizard-context-bar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: stretch;
   gap: 0.75rem;
-  max-width: 960px;
-  margin: 0 auto 0.75rem;
-  padding: 0.65rem 1rem;
-  background: var(--cp-card);
-  border: 1px solid rgba(15, 23, 42, 0.06);
+  width: 50%;
+  max-width: 480px;
+  margin: 1cm auto 0.75rem;
+  padding: 0;
+  background: transparent;
+  border: 0;
   border-radius: 12px;
-  box-shadow: var(--cp-shadow);
+  box-shadow: none;
   color: var(--cp-muted);
   font-size: 0.92rem;
+  position: relative;
+  z-index: 30;
+  overflow: visible;
 }
 
 .wizard-context-bar[hidden] {
   display: none !important;
 }
 
-.wizard-context-bar strong {
+.wizard-context-bar .wizard-category-wheel {
+  width: 100%;
+  position: relative;
+  overflow: visible;
+}
+
+.wizard-context-bar .wizard-category-wheel > .immo-label {
+  position: absolute;
+  top: -0.52rem;
+  left: 0.75rem;
+  z-index: 2;
+  padding: 0 0.28rem;
+  background: var(--cp-card, #fff);
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #667085;
+  line-height: 1;
+}
+
+.wizard-context-bar .wizard-category-wheel .immo-wheel-trigger {
+  border: 1px solid #d0d5dd;
+  border-radius: 12px;
+  background: var(--cp-card, #fff);
+  box-shadow: var(--cp-shadow);
+  height: auto;
+  min-height: 2.75rem;
+  padding: 0.85rem 2.1rem 0.7rem 0.95rem;
   font-weight: 650;
   color: var(--cp-ink);
 }
 
-.wizard-context-bar button {
-  border: 0;
-  background: transparent;
-  color: var(--cp-car);
-  font: inherit;
-  font-weight: 650;
-  cursor: pointer;
-  padding: 0.2rem 0.1rem;
+.wizard-context-bar .wizard-category-wheel .immo-wheel-trigger:hover,
+.wizard-context-bar .wizard-category-wheel .immo-wheel-trigger:focus-visible {
+  border-color: #111;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(17, 24, 39, 0.08);
+}
+
+.wizard-context-bar .wizard-category-wheel.has-drum-open,
+.wizard-context-bar .wizard-category-wheel.is-open {
+  overflow: visible;
+  z-index: 40;
+}
+
+.wizard-context-bar .wizard-category-wheel.is-open .immo-label {
+  display: none;
+}
+
+.wizard-context-bar .wizard-category-wheel.is-open .immo-wheel-trigger {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.wizard-context-bar .wizard-category-wheel .immo-drum-wheel-ring {
+  width: min(var(--immo-drum-ring-w, 16rem), calc(100vw - 2.5rem));
+  height: 11.5rem;
+}
+
+.wizard-context-bar .wizard-category-wheel .immo-drum-inline-highlight {
+  height: 2.75rem;
+}
+
+.cp-sheet-bar-spacer {
+  width: 4.5rem;
 }
 
 .ingatlan-stub {

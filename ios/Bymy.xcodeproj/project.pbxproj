@@ -1,0 +1,547 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		054C268AE8BC4CC2835B3718 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71858E9000D643608B066981 /* Theme.swift */; };
+		15A85E1C57CF456ABB5A6253 /* Catalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3F296DCB3794961AC2CF694 /* Catalog.swift */; };
+		286A2879D6E349EAA0E94039 /* SearchStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B377CA5C6924D49B93F24BD /* SearchStore.swift */; };
+		4E4A054B6A794CAAB12CA9AB /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10B4A4D1FF4749A3869C8AD7 /* ContentView.swift */; };
+		507BBB86C4C74A5C966F91C2 /* AutoswebCategoryPhoto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A5F8B9EA24E418F9797981A /* AutoswebCategoryPhoto.swift */; };
+		5234A81B4BE444FAABBEBF1F /* ProfileStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35870FE7B2E24EA4A78B9D05 /* ProfileStore.swift */; };
+		6851CEF42EBD48A98A7E0783 /* QuickCategory.swift in Sources */ = {isa = PBXBuildFile; fileRef = E04F260009AB4D16A23FB255 /* QuickCategory.swift */; };
+		6DCD44F9A505405E8B30405F /* CategoryResultsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE63FA243C6D4C498FA5FBCE /* CategoryResultsScreen.swift */; };
+		7669DAAB7CD44197B5DB9569 /* BymyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1398B4CEB8BE4DDCAF96D11D /* BymyApp.swift */; };
+		82161CE429B74D729B6A5C3A /* SearchScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = F05479F640874E71B65C7956 /* SearchScreen.swift */; };
+		98A1EE78BB5B468485E26671 /* Components.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05B502AF79024F4B83D46A10 /* Components.swift */; };
+		9D806392D1924CCFB5E2A93B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D5E540509006439B81E2A510 /* Assets.xcassets */; };
+		B7E41C2A9F0D4A11B3C5D6E8 /* AutoswebBaseURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7E41C2A9F0D4A11B3C5D6E7 /* AutoswebBaseURL.swift */; };
+		A1HIMP002B /* ImportAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1HIMP001B /* ImportAPI.swift */; };
+		A1HPAR002B /* HaListingHtmlParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1HPAR001B /* HaListingHtmlParser.swift */; };
+		A1HISC002B /* HasznaltautoImportScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1HISC001B /* HasznaltautoImportScreen.swift */; };
+		C8F52D3B0E1E5B22C4D6E7F9 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C8F52D3B0E1E5B22C4D6E7F8 /* WebKit.framework */; };
+		C8F52D3B0E1E5B22C4D6E801 /* Network.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C8F52D3B0E1E5B22C4D6E800 /* Network.framework */; };
+		A1AMEN002B /* AccountMenuScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1AMEN001B /* AccountMenuScreen.swift */; };
+		A1AUTH002B /* AuthAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1AUTH001B /* AuthAPI.swift */; };
+		A1AVAT002B /* ProfileAvatarViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1AVAT001B /* ProfileAvatarViews.swift */; };
+		A1DEMO002B /* DemoPageIcons.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1DEMO001B /* DemoPageIcons.swift */; };
+		A1DETL002B /* DetailedSearchCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1DETL001B /* DetailedSearchCatalog.swift */; };
+		A1FILR002B /* FilterResultsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1FILR001B /* FilterResultsScreen.swift */; };
+		A1LDET002B /* ListingDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1LDET001B /* ListingDetail.swift */; };
+		A1LDSC002B /* ListingDetailScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1LDSC001B /* ListingDetailScreen.swift */; };
+		A1LIST002B /* ListingsAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1LIST001B /* ListingsAPI.swift */; };
+		A1LISTQ002B /* ListingQuery.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1LISTQ001B /* ListingQuery.swift */; };
+		A1LOGI002B /* LoginScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1LOGI001B /* LoginScreen.swift */; };
+		A1MAPI002B /* MessagesAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1MAPI001B /* MessagesAPI.swift */; };
+		A1MSG002B /* MessagesScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1MSG001B /* MessagesScreen.swift */; };
+		A1PAD002B /* PostAdScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1PAD001B /* PostAdScreen.swift */; };
+		A1PCAR002B /* PostAdCarScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1PCAR001B /* PostAdCarScreen.swift */; };
+		A1PCAT002B /* PostAdCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1PCAT001B /* PostAdCatalog.swift */; };
+		A1PIMG01R /* PartnerPhotos/ajanlas-atiras.png in Resources */ = {isa = PBXBuildFile; fileRef = A1PIMG01F /* PartnerPhotos/ajanlas-atiras.png */; };
+		A1PIMG02R /* PartnerPhotos/ajanlas-eredet.png in Resources */ = {isa = PBXBuildFile; fileRef = A1PIMG02F /* PartnerPhotos/ajanlas-eredet.png */; };
+		A1PIMG03R /* PartnerPhotos/ajanlas-muszaki.png in Resources */ = {isa = PBXBuildFile; fileRef = A1PIMG03F /* PartnerPhotos/ajanlas-muszaki.png */; };
+		A1PIMG04R /* PartnerPhotos/ajanlas-atvizsgalas.png in Resources */ = {isa = PBXBuildFile; fileRef = A1PIMG04F /* PartnerPhotos/ajanlas-atvizsgalas.png */; };
+		A1PIMG05R /* PartnerPhotos/ajanlas-szerelo.png in Resources */ = {isa = PBXBuildFile; fileRef = A1PIMG05F /* PartnerPhotos/ajanlas-szerelo.png */; };
+		A1PIMG06R /* PartnerPhotos/ajanlas-gumi.png in Resources */ = {isa = PBXBuildFile; fileRef = A1PIMG06F /* PartnerPhotos/ajanlas-gumi.png */; };
+		A1PIMG07R /* PartnerPhotos/ajanlas-lakatos.png in Resources */ = {isa = PBXBuildFile; fileRef = A1PIMG07F /* PartnerPhotos/ajanlas-lakatos.png */; };
+		A1PIMG08R /* PartnerPhotos/ajanlas-klima.png in Resources */ = {isa = PBXBuildFile; fileRef = A1PIMG08F /* PartnerPhotos/ajanlas-klima.png */; };
+		A1PIMG09R /* PartnerPhotos/ajanlas-kozmetika.png in Resources */ = {isa = PBXBuildFile; fileRef = A1PIMG09F /* PartnerPhotos/ajanlas-kozmetika.png */; };
+		A1PIMG10R /* PartnerPhotos/ajanlas-villamos.png in Resources */ = {isa = PBXBuildFile; fileRef = A1PIMG10F /* PartnerPhotos/ajanlas-villamos.png */; };
+		A1PLAY002B /* PageLayoutStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1PLAY001B /* PageLayoutStore.swift */; };
+		A1PMAP002B /* PostAdListingMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1PMAP001B /* PostAdListingMapper.swift */; };
+		A1PPHO002B /* PostAdPhotos.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1PPHO001B /* PostAdPhotos.swift */; };
+		A1PPHOT02B /* PartnerPhotos in Resources */ = {isa = PBXBuildFile; fileRef = A1PPHOT01B /* PartnerPhotos */; };
+		A1PREO002B /* PartnerRecommendations.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1PREO001B /* PartnerRecommendations.swift */; };
+		A1PTRK002B /* PostAdTruckScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1PTRK001B /* PostAdTruckScreen.swift */; };
+		A1PUSH002B /* PushNotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1PUSH001B /* PushNotificationService.swift */; };
+		A1RECO002B /* RecommendationsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1RECO001B /* RecommendationsScreen.swift */; };
+		A1REGI002B /* RegisterScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1REGI001B /* RegisterScreen.swift */; };
+		A1SAUTH002B /* SiteAuthBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1SAUTH001B /* SiteAuthBar.swift */; };
+		A1SAVL002B /* SavedListingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1SAVL001B /* SavedListingsStore.swift */; };
+		A1SOCL002B /* SocialWebScreens.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1SOCL001B /* SocialWebScreens.swift */; };
+		A1STRK002B /* SearchTruckScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1STRK001B /* SearchTruckScreen.swift */; };
+		A1VCAT002B /* VehicleCatalog.json in Resources */ = {isa = PBXBuildFile; fileRef = A1VCAT001B /* VehicleCatalog.json */; };
+		A1OAUT002B /* OAuthSignIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1OAUT001B /* OAuthSignIn.swift */; };
+		A1AUTHSVC2B /* AuthenticationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A1AUTHSVC1B /* AuthenticationServices.framework */; };
+		A1FACE002B /* BiometricLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1FACE001B /* BiometricLock.swift */; };
+		A1LACL002B /* LocalAuthentication.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A1LACL001B /* LocalAuthentication.framework */; };
+		B674E1A81A9946258753FA6A /* SettingsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06D03F70F75E4340965F21D0 /* SettingsScreen.swift */; };
+		B8C221795D9B4B66B8B5B267 /* CategoryIconButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFB84F97E8F542859F95EA52 /* CategoryIconButton.swift */; };
+		C520885EA02E42088BD39FDB /* SavedSearchesScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5994CEB2B17435F94B75D4B /* SavedSearchesScreen.swift */; };
+		C54E8CFDBF884BAEB98F7664 /* FeedFeaturedScreens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28B784D70F74423CA2713653 /* FeedFeaturedScreens.swift */; };
+		C7005C38556740C7AC8AAC9B /* AuthLandingScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42A8EA4835534A6A815C9EEA /* AuthLandingScreen.swift */; };
+		DF2B1A37C381486F8EDD4D2A /* HomeIconButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EA38AC378A84D3A91E2BD2B /* HomeIconButton.swift */; };
+		E25DB785583C4E20AF784C2A /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DED661A8646464A8691D774 /* Models.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		05B502AF79024F4B83D46A10 /* Components.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Components.swift; sourceTree = "<group>"; };
+		06D03F70F75E4340965F21D0 /* SettingsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsScreen.swift; sourceTree = "<group>"; };
+		0995C5D541194E8CAF8D2D63 /* bymy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = bymy.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		10B4A4D1FF4749A3869C8AD7 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		1398B4CEB8BE4DDCAF96D11D /* BymyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BymyApp.swift; sourceTree = "<group>"; };
+		28B784D70F74423CA2713653 /* FeedFeaturedScreens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedFeaturedScreens.swift; sourceTree = "<group>"; };
+		2DED661A8646464A8691D774 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		35870FE7B2E24EA4A78B9D05 /* ProfileStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileStore.swift; sourceTree = "<group>"; };
+		42A8EA4835534A6A815C9EEA /* AuthLandingScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthLandingScreen.swift; sourceTree = "<group>"; };
+		4EA38AC378A84D3A91E2BD2B /* HomeIconButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeIconButton.swift; sourceTree = "<group>"; };
+		71858E9000D643608B066981 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		8A5F8B9EA24E418F9797981A /* AutoswebCategoryPhoto.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoswebCategoryPhoto.swift; sourceTree = "<group>"; };
+		9B377CA5C6924D49B93F24BD /* SearchStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchStore.swift; sourceTree = "<group>"; };
+		B7E41C2A9F0D4A11B3C5D6E7 /* AutoswebBaseURL.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoswebBaseURL.swift; sourceTree = "<group>"; };
+		C8F52D3B0E1E5B22C4D6E7F8 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
+		C8F52D3B0E1E5B22C4D6E800 /* Network.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Network.framework; path = System/Library/Frameworks/Network.framework; sourceTree = SDKROOT; };
+		A1HIMP001B /* ImportAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportAPI.swift; sourceTree = "<group>"; };
+		A1HPAR001B /* HaListingHtmlParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HaListingHtmlParser.swift; sourceTree = "<group>"; };
+		A1HISC001B /* HasznaltautoImportScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HasznaltautoImportScreen.swift; sourceTree = "<group>"; };
+		A1AMEN001B /* AccountMenuScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountMenuScreen.swift; sourceTree = "<group>"; };
+		A1AUTH001B /* AuthAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthAPI.swift; sourceTree = "<group>"; };
+		A1AVAT001B /* ProfileAvatarViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileAvatarViews.swift; sourceTree = "<group>"; };
+		A1DEMO001B /* DemoPageIcons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoPageIcons.swift; sourceTree = "<group>"; };
+		A1DETL001B /* DetailedSearchCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailedSearchCatalog.swift; sourceTree = "<group>"; };
+		A1FILR001B /* FilterResultsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilterResultsScreen.swift; sourceTree = "<group>"; };
+		A1INFO001B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A1LDET001B /* ListingDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListingDetail.swift; sourceTree = "<group>"; };
+		A1LDSC001B /* ListingDetailScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListingDetailScreen.swift; sourceTree = "<group>"; };
+		A1LIST001B /* ListingsAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListingsAPI.swift; sourceTree = "<group>"; };
+		A1LISTQ001B /* ListingQuery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListingQuery.swift; sourceTree = "<group>"; };
+		A1LOGI001B /* LoginScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginScreen.swift; sourceTree = "<group>"; };
+		A1MAPI001B /* MessagesAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessagesAPI.swift; sourceTree = "<group>"; };
+		A1MSG001B /* MessagesScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessagesScreen.swift; sourceTree = "<group>"; };
+		A1PAD001B /* PostAdScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostAdScreen.swift; sourceTree = "<group>"; };
+		A1PCAR001B /* PostAdCarScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostAdCarScreen.swift; sourceTree = "<group>"; };
+		A1PCAT001B /* PostAdCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostAdCatalog.swift; sourceTree = "<group>"; };
+		A1PIMG01F /* PartnerPhotos/ajanlas-atiras.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "PartnerPhotos/ajanlas-atiras.png"; sourceTree = "<group>"; };
+		A1PIMG02F /* PartnerPhotos/ajanlas-eredet.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "PartnerPhotos/ajanlas-eredet.png"; sourceTree = "<group>"; };
+		A1PIMG03F /* PartnerPhotos/ajanlas-muszaki.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "PartnerPhotos/ajanlas-muszaki.png"; sourceTree = "<group>"; };
+		A1PIMG04F /* PartnerPhotos/ajanlas-atvizsgalas.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "PartnerPhotos/ajanlas-atvizsgalas.png"; sourceTree = "<group>"; };
+		A1PIMG05F /* PartnerPhotos/ajanlas-szerelo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "PartnerPhotos/ajanlas-szerelo.png"; sourceTree = "<group>"; };
+		A1PIMG06F /* PartnerPhotos/ajanlas-gumi.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "PartnerPhotos/ajanlas-gumi.png"; sourceTree = "<group>"; };
+		A1PIMG07F /* PartnerPhotos/ajanlas-lakatos.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "PartnerPhotos/ajanlas-lakatos.png"; sourceTree = "<group>"; };
+		A1PIMG08F /* PartnerPhotos/ajanlas-klima.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "PartnerPhotos/ajanlas-klima.png"; sourceTree = "<group>"; };
+		A1PIMG09F /* PartnerPhotos/ajanlas-kozmetika.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "PartnerPhotos/ajanlas-kozmetika.png"; sourceTree = "<group>"; };
+		A1PIMG10F /* PartnerPhotos/ajanlas-villamos.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "PartnerPhotos/ajanlas-villamos.png"; sourceTree = "<group>"; };
+		A1PLAY001B /* PageLayoutStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PageLayoutStore.swift; sourceTree = "<group>"; };
+		A1PMAP001B /* PostAdListingMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostAdListingMapper.swift; sourceTree = "<group>"; };
+		A1PPHO001B /* PostAdPhotos.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostAdPhotos.swift; sourceTree = "<group>"; };
+		A1PPHOT01B /* PartnerPhotos */ = {isa = PBXFileReference; lastKnownFileType = folder; path = PartnerPhotos; sourceTree = "<group>"; };
+		A1PREO001B /* PartnerRecommendations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PartnerRecommendations.swift; sourceTree = "<group>"; };
+		A1PTRK001B /* PostAdTruckScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostAdTruckScreen.swift; sourceTree = "<group>"; };
+		A1PUSH001B /* PushNotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushNotificationService.swift; sourceTree = "<group>"; };
+		A1RECO001B /* RecommendationsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecommendationsScreen.swift; sourceTree = "<group>"; };
+		A1REGI001B /* RegisterScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterScreen.swift; sourceTree = "<group>"; };
+		A1SAUTH001B /* SiteAuthBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SiteAuthBar.swift; sourceTree = "<group>"; };
+		A1SAVL001B /* SavedListingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedListingsStore.swift; sourceTree = "<group>"; };
+		A1SOCL001B /* SocialWebScreens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocialWebScreens.swift; sourceTree = "<group>"; };
+		A1STRK001B /* SearchTruckScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchTruckScreen.swift; sourceTree = "<group>"; };
+		A1VCAT001B /* VehicleCatalog.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = VehicleCatalog.json; sourceTree = "<group>"; };
+		A1OAUT001B /* OAuthSignIn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAuthSignIn.swift; sourceTree = "<group>"; };
+		A1FACE001B /* BiometricLock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiometricLock.swift; sourceTree = "<group>"; };
+		A1ENTL001B /* Bymy.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Bymy.entitlements; sourceTree = "<group>"; };
+		A1AUTHSVC1B /* AuthenticationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AuthenticationServices.framework; path = System/Library/Frameworks/AuthenticationServices.framework; sourceTree = SDKROOT; };
+		A1LACL001B /* LocalAuthentication.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = LocalAuthentication.framework; path = System/Library/Frameworks/LocalAuthentication.framework; sourceTree = SDKROOT; };
+		B3F296DCB3794961AC2CF694 /* Catalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Catalog.swift; sourceTree = "<group>"; };
+		D5E540509006439B81E2A510 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		E04F260009AB4D16A23FB255 /* QuickCategory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickCategory.swift; sourceTree = "<group>"; };
+		EE63FA243C6D4C498FA5FBCE /* CategoryResultsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryResultsScreen.swift; sourceTree = "<group>"; };
+		F05479F640874E71B65C7956 /* SearchScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchScreen.swift; sourceTree = "<group>"; };
+		F5994CEB2B17435F94B75D4B /* SavedSearchesScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedSearchesScreen.swift; sourceTree = "<group>"; };
+		FFB84F97E8F542859F95EA52 /* CategoryIconButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryIconButton.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		B74E46F82BC24775B085B28E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C8F52D3B0E1E5B22C4D6E7F9 /* WebKit.framework in Frameworks */,
+				C8F52D3B0E1E5B22C4D6E801 /* Network.framework in Frameworks */,
+				A1AUTHSVC2B /* AuthenticationServices.framework in Frameworks */,
+				A1LACL002B /* LocalAuthentication.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		7841E83F558145C1917511DE /* Bymy */ = {
+			isa = PBXGroup;
+			children = (
+				1398B4CEB8BE4DDCAF96D11D /* BymyApp.swift */,
+				10B4A4D1FF4749A3869C8AD7 /* ContentView.swift */,
+				71858E9000D643608B066981 /* Theme.swift */,
+				2DED661A8646464A8691D774 /* Models.swift */,
+				B3F296DCB3794961AC2CF694 /* Catalog.swift */,
+				9B377CA5C6924D49B93F24BD /* SearchStore.swift */,
+				05B502AF79024F4B83D46A10 /* Components.swift */,
+				28B784D70F74423CA2713653 /* FeedFeaturedScreens.swift */,
+				F05479F640874E71B65C7956 /* SearchScreen.swift */,
+				F5994CEB2B17435F94B75D4B /* SavedSearchesScreen.swift */,
+				35870FE7B2E24EA4A78B9D05 /* ProfileStore.swift */,
+				06D03F70F75E4340965F21D0 /* SettingsScreen.swift */,
+				A1HIMP001B /* ImportAPI.swift */,
+				A1HPAR001B /* HaListingHtmlParser.swift */,
+				A1HISC001B /* HasznaltautoImportScreen.swift */,
+				4EA38AC378A84D3A91E2BD2B /* HomeIconButton.swift */,
+				E04F260009AB4D16A23FB255 /* QuickCategory.swift */,
+				8A5F8B9EA24E418F9797981A /* AutoswebCategoryPhoto.swift */,
+				FFB84F97E8F542859F95EA52 /* CategoryIconButton.swift */,
+				EE63FA243C6D4C498FA5FBCE /* CategoryResultsScreen.swift */,
+				A1LISTQ001B /* ListingQuery.swift */,
+				A1DETL001B /* DetailedSearchCatalog.swift */,
+				A1FILR001B /* FilterResultsScreen.swift */,
+				A1RECO001B /* RecommendationsScreen.swift */,
+				A1PREO001B /* PartnerRecommendations.swift */,
+				A1AUTH001B /* AuthAPI.swift */,
+				A1LOGI001B /* LoginScreen.swift */,
+				42A8EA4835534A6A815C9EEA /* AuthLandingScreen.swift */,
+				A1REGI001B /* RegisterScreen.swift */,
+				A1OAUT001B /* OAuthSignIn.swift */,
+				A1FACE001B /* BiometricLock.swift */,
+				A1ENTL001B /* Bymy.entitlements */,
+				A1SAUTH001B /* SiteAuthBar.swift */,
+				A1SOCL001B /* SocialWebScreens.swift */,
+				A1AVAT001B /* ProfileAvatarViews.swift */,
+				A1MSG001B /* MessagesScreen.swift */,
+				A1MAPI001B /* MessagesAPI.swift */,
+				A1PUSH001B /* PushNotificationService.swift */,
+				A1LIST001B /* ListingsAPI.swift */,
+				A1LDET001B /* ListingDetail.swift */,
+				A1LDSC001B /* ListingDetailScreen.swift */,
+				A1DEMO001B /* DemoPageIcons.swift */,
+				A1PLAY001B /* PageLayoutStore.swift */,
+				A1PAD001B /* PostAdScreen.swift */,
+				A1PCAT001B /* PostAdCatalog.swift */,
+				A1PCAR001B /* PostAdCarScreen.swift */,
+				A1PTRK001B /* PostAdTruckScreen.swift */,
+				A1STRK001B /* SearchTruckScreen.swift */,
+				A1AMEN001B /* AccountMenuScreen.swift */,
+				A1PMAP001B /* PostAdListingMapper.swift */,
+				A1PPHO001B /* PostAdPhotos.swift */,
+				B7E41C2A9F0D4A11B3C5D6E7 /* AutoswebBaseURL.swift */,
+				A1SAVL001B /* SavedListingsStore.swift */,
+				A1VCAT001B /* VehicleCatalog.json */,
+				A1PPHOT01B /* PartnerPhotos */,
+				A1PIMG01F /* PartnerPhotos/ajanlas-atiras.png */,
+				A1PIMG02F /* PartnerPhotos/ajanlas-eredet.png */,
+				A1PIMG03F /* PartnerPhotos/ajanlas-muszaki.png */,
+				A1PIMG04F /* PartnerPhotos/ajanlas-atvizsgalas.png */,
+				A1PIMG05F /* PartnerPhotos/ajanlas-szerelo.png */,
+				A1PIMG06F /* PartnerPhotos/ajanlas-gumi.png */,
+				A1PIMG07F /* PartnerPhotos/ajanlas-lakatos.png */,
+				A1PIMG08F /* PartnerPhotos/ajanlas-klima.png */,
+				A1PIMG09F /* PartnerPhotos/ajanlas-kozmetika.png */,
+				A1PIMG10F /* PartnerPhotos/ajanlas-villamos.png */,
+				A1INFO001B /* Info.plist */,
+				D5E540509006439B81E2A510 /* Assets.xcassets */,
+			);
+			path = Bymy;
+			sourceTree = "<group>";
+		};
+		9D01449131BA40429D4CE85A = {
+			isa = PBXGroup;
+			children = (
+				7841E83F558145C1917511DE /* Bymy */,
+				A1FWKS001B /* Frameworks */,
+				B375C6FD4244436DB7DF56E6 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		A1FWKS001B /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				C8F52D3B0E1E5B22C4D6E7F8 /* WebKit.framework */,
+				C8F52D3B0E1E5B22C4D6E800 /* Network.framework */,
+				A1AUTHSVC1B /* AuthenticationServices.framework */,
+				A1LACL001B /* LocalAuthentication.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		B375C6FD4244436DB7DF56E6 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				0995C5D541194E8CAF8D2D63 /* bymy.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		3C6945F6817943F6B0FEF8A2 /* bymy */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0A2CCFEBC5CC4A51B56B4CF6 /* Build configuration list for PBXNativeTarget "bymy" */;
+			buildPhases = (
+				C222DBD4E9554789AEA4AC80 /* Sources */,
+				B74E46F82BC24775B085B28E /* Frameworks */,
+				47FA0483A6294C3FBF8C6F93 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = bymy;
+			productName = bymy;
+			productReference = 0995C5D541194E8CAF8D2D63 /* bymy.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		16381CA3574B42FFBE8059FF /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1600;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+					3C6945F6817943F6B0FEF8A2 = {
+						CreatedOnToolsVersion = 16.0;
+					};
+				};
+			};
+			buildConfigurationList = 3A1E22AE119C45F086D7DFDB /* Build configuration list for PBXProject "Bymy" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = hu;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+				hu,
+			);
+			mainGroup = 9D01449131BA40429D4CE85A;
+			productRefGroup = B375C6FD4244436DB7DF56E6 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				3C6945F6817943F6B0FEF8A2 /* bymy */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		47FA0483A6294C3FBF8C6F93 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9D806392D1924CCFB5E2A93B /* Assets.xcassets in Resources */,
+				A1VCAT002B /* VehicleCatalog.json in Resources */,
+				A1PPHOT02B /* PartnerPhotos in Resources */,
+				A1PIMG01R /* PartnerPhotos/ajanlas-atiras.png in Resources */,
+				A1PIMG02R /* PartnerPhotos/ajanlas-eredet.png in Resources */,
+				A1PIMG03R /* PartnerPhotos/ajanlas-muszaki.png in Resources */,
+				A1PIMG04R /* PartnerPhotos/ajanlas-atvizsgalas.png in Resources */,
+				A1PIMG05R /* PartnerPhotos/ajanlas-szerelo.png in Resources */,
+				A1PIMG06R /* PartnerPhotos/ajanlas-gumi.png in Resources */,
+				A1PIMG07R /* PartnerPhotos/ajanlas-lakatos.png in Resources */,
+				A1PIMG08R /* PartnerPhotos/ajanlas-klima.png in Resources */,
+				A1PIMG09R /* PartnerPhotos/ajanlas-kozmetika.png in Resources */,
+				A1PIMG10R /* PartnerPhotos/ajanlas-villamos.png in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		C222DBD4E9554789AEA4AC80 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7669DAAB7CD44197B5DB9569 /* BymyApp.swift in Sources */,
+				4E4A054B6A794CAAB12CA9AB /* ContentView.swift in Sources */,
+				054C268AE8BC4CC2835B3718 /* Theme.swift in Sources */,
+				E25DB785583C4E20AF784C2A /* Models.swift in Sources */,
+				15A85E1C57CF456ABB5A6253 /* Catalog.swift in Sources */,
+				286A2879D6E349EAA0E94039 /* SearchStore.swift in Sources */,
+				98A1EE78BB5B468485E26671 /* Components.swift in Sources */,
+				C54E8CFDBF884BAEB98F7664 /* FeedFeaturedScreens.swift in Sources */,
+				82161CE429B74D729B6A5C3A /* SearchScreen.swift in Sources */,
+				C520885EA02E42088BD39FDB /* SavedSearchesScreen.swift in Sources */,
+				6DCD44F9A505405E8B30405F /* CategoryResultsScreen.swift in Sources */,
+				A1LISTQ002B /* ListingQuery.swift in Sources */,
+				A1DETL002B /* DetailedSearchCatalog.swift in Sources */,
+				A1FILR002B /* FilterResultsScreen.swift in Sources */,
+				A1RECO002B /* RecommendationsScreen.swift in Sources */,
+				A1PREO002B /* PartnerRecommendations.swift in Sources */,
+				A1AUTH002B /* AuthAPI.swift in Sources */,
+				A1LOGI002B /* LoginScreen.swift in Sources */,
+				C7005C38556740C7AC8AAC9B /* AuthLandingScreen.swift in Sources */,
+				A1REGI002B /* RegisterScreen.swift in Sources */,
+				A1OAUT002B /* OAuthSignIn.swift in Sources */,
+				A1FACE002B /* BiometricLock.swift in Sources */,
+				A1SAUTH002B /* SiteAuthBar.swift in Sources */,
+				A1SOCL002B /* SocialWebScreens.swift in Sources */,
+				A1AVAT002B /* ProfileAvatarViews.swift in Sources */,
+				A1MSG002B /* MessagesScreen.swift in Sources */,
+				A1MAPI002B /* MessagesAPI.swift in Sources */,
+				A1PUSH002B /* PushNotificationService.swift in Sources */,
+				A1LIST002B /* ListingsAPI.swift in Sources */,
+				A1LDET002B /* ListingDetail.swift in Sources */,
+				A1LDSC002B /* ListingDetailScreen.swift in Sources */,
+				A1DEMO002B /* DemoPageIcons.swift in Sources */,
+				A1PLAY002B /* PageLayoutStore.swift in Sources */,
+				A1PAD002B /* PostAdScreen.swift in Sources */,
+				A1PCAT002B /* PostAdCatalog.swift in Sources */,
+				A1PCAR002B /* PostAdCarScreen.swift in Sources */,
+				A1PTRK002B /* PostAdTruckScreen.swift in Sources */,
+				A1STRK002B /* SearchTruckScreen.swift in Sources */,
+				A1AMEN002B /* AccountMenuScreen.swift in Sources */,
+				A1PMAP002B /* PostAdListingMapper.swift in Sources */,
+				A1PPHO002B /* PostAdPhotos.swift in Sources */,
+				B7E41C2A9F0D4A11B3C5D6E8 /* AutoswebBaseURL.swift in Sources */,
+				A1HIMP002B /* ImportAPI.swift in Sources */,
+				A1HPAR002B /* HaListingHtmlParser.swift in Sources */,
+				A1HISC002B /* HasznaltautoImportScreen.swift in Sources */,
+				A1SAVL002B /* SavedListingsStore.swift in Sources */,
+				B8C221795D9B4B66B8B5B267 /* CategoryIconButton.swift in Sources */,
+				507BBB86C4C74A5C966F91C2 /* AutoswebCategoryPhoto.swift in Sources */,
+				6851CEF42EBD48A98A7E0783 /* QuickCategory.swift in Sources */,
+				DF2B1A37C381486F8EDD4D2A /* HomeIconButton.swift in Sources */,
+				B674E1A81A9946258753FA6A /* SettingsScreen.swift in Sources */,
+				5234A81B4BE444FAABBEBF1F /* ProfileStore.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		2DCDEBE147A440BC84B5DE1F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = "";
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
+				CODE_SIGNING_ALLOWED = YES;
+				CODE_SIGNING_REQUIRED = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 30;
+				DEVELOPMENT_TEAM = 5TJ2PV4PC7;
+				ENABLE_PREVIEWS = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Bymy/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = bymy;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Hirdetés fényképek készítéséhez szükséges a kamera hozzáférés.";
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "A bymy fiókod Face ID-val oldható fel, ha már be vagy jelentkezve.";
+				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "A Bymy a közelben lévő szolgáltatásokat használja.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Profilkép és hirdetés fényképek feltöltéséhez szükséges a fotókönyvtár hozzáférés.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0.10;
+				PRODUCT_BUNDLE_IDENTIFIER = hu.bymy.app;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		31B04A645908412DB194C755 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_TESTABILITY = YES;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		E32AA2FDC632415ABC39012C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = "";
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
+				CODE_SIGNING_ALLOWED = YES;
+				CODE_SIGNING_REQUIRED = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 30;
+				DEVELOPMENT_TEAM = 5TJ2PV4PC7;
+				ENABLE_PREVIEWS = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Bymy/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = bymy;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Hirdetés fényképek készítéséhez szükséges a kamera hozzáférés.";
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "A bymy fiókod Face ID-val oldható fel, ha már be vagy jelentkezve.";
+				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "A Bymy a közelben lévő szolgáltatásokat használja.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Profilkép és hirdetés fényképek feltöltéséhez szükséges a fotókönyvtár hozzáférés.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0.10;
+				PRODUCT_BUNDLE_IDENTIFIER = hu.bymy.app;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		FF73B066FF4B443995E5FED4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		0A2CCFEBC5CC4A51B56B4CF6 /* Build configuration list for PBXNativeTarget "bymy" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E32AA2FDC632415ABC39012C /* Debug */,
+				2DCDEBE147A440BC84B5DE1F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		3A1E22AE119C45F086D7DFDB /* Build configuration list for PBXProject "Bymy" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				31B04A645908412DB194C755 /* Debug */,
+				FF73B066FF4B443995E5FED4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 16381CA3574B42FFBE8059FF /* Project object */;
+}

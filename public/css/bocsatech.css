@@ -134,7 +134,7 @@ th { color: var(--muted); font-weight: 600; }
 .layout-board {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
-  grid-auto-rows: 64px;
+  grid-auto-rows: 72px;
   align-content: start;
   gap: 8px;
   background:
@@ -144,6 +144,7 @@ th { color: var(--muted); font-weight: 600; }
   border-radius: 10px;
   padding: 8px;
   min-height: 140px;
+  overflow: visible;
 }
 .layout-board.is-drop {
   border-color: var(--accent);
@@ -184,12 +185,13 @@ th { color: var(--muted); font-weight: 600; }
 .layout-del:hover { color: var(--danger); background: rgba(226, 92, 92, 0.15); }
 .layout-resize {
   position: absolute;
-  top: 6px;
-  right: 0;
-  bottom: 6px;
-  width: 12px;
+  top: 4px;
+  right: -2px;
+  bottom: 4px;
+  width: 18px;
   cursor: ew-resize;
   border-radius: 0 7px 7px 0;
+  z-index: 3;
 }
 .layout-resize::after {
   content: "";
@@ -333,3 +335,72 @@ th { color: var(--muted); font-weight: 600; }
   margin: 0 0 0.75rem;
 }
 
+.layout-tile--dual {
+  background: linear-gradient(135deg, #243041 0%, #1a3348 100%);
+  border-color: #4a7aa8;
+  box-shadow: inset 0 0 0 1px rgba(96, 165, 250, 0.25);
+}
+.layout-tile-dual-parts {
+  display: flex;
+  gap: 0.35rem;
+  align-items: center;
+  font-size: 0.7rem;
+  color: #9ec5e8;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+.layout-width-btns {
+  display: flex;
+  gap: 0.28rem;
+  margin-top: 0.15rem;
+  position: relative;
+  z-index: 5;
+  pointer-events: auto;
+}
+.layout-width-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.7rem;
+  height: 1.55rem;
+  padding: 0 0.4rem;
+  border-radius: 5px;
+  border: 1px solid #5b8fbf;
+  background: #0b1220;
+  color: #f2f7fc;
+  font-size: 0.82rem;
+  font-weight: 750;
+  line-height: 1;
+  cursor: pointer;
+  user-select: none;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.35);
+}
+.layout-width-btn:hover {
+  background: #1e3a55;
+  border-color: var(--accent);
+  color: #fff;
+}
+.layout-width-btn--full {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #111;
+  min-width: 2rem;
+}
+.layout-width-btn--full:hover {
+  filter: brightness(1.08);
+  color: #111;
+}
+.layout-tile {
+  overflow: visible;
+}
+.layout-tile--dual {
+  min-height: 64px;
+}
+.layout-step-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.55rem;
+}

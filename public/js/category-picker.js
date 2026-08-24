@@ -1,5 +1,8 @@
+import { initDrumWheel, syncDrumWheelDisplay } from "./immo-drum-picker.js?v=drum11";
+import { setWheelValue, readWheel } from "./ingatlan-wheels.js?v=mobile4";
+
 const STORAGE_KEY = "bymy-hirdetes-category";
-const STORAGE_VERSION = 2;
+const STORAGE_VERSION = 4;
 
 const VEHICLE_PRESETS = {
   szemelyauto: { vertical: "auto", subtype: "szemelyauto", label: "Személyautó" },
@@ -8,9 +11,79 @@ const VEHICLE_PRESETS = {
 };
 
 const IMMO_TIPUS = [
-  { id: "elado", label: "Eladó" },
-  { id: "kiado", label: "Kiadó" },
-  { id: "berelheto", label: "Bérelhető" },
+  { id: "elado", label: "Eladó Ingatlanok", image: "/images/hub-ingatlan-01-hazak.png" },
+  { id: "kiado", label: "Kiadó Ingatlanok", image: "/images/hub-ingatlan-02-lakasok.png" },
+  { id: "airbnb", label: "Airbnb Ingatlanok", image: "/images/hub-ingatlan-photo.jpg" },
+];
+
+/** Wizard „Kategória” kerék — egy választás, kis képekkel. */
+const WIZARD_CATEGORY_OPTIONS = [
+  {
+    id: "szemelyauto",
+    label: "Személyautó",
+    image: "/images/categories/benzin.png",
+    vertical: "auto",
+    subtype: "szemelyauto",
+  },
+  {
+    id: "leasing",
+    label: "Leasingautó",
+    image: "/images/categories/leasing.png",
+    vertical: "auto",
+    subtype: "leasing",
+  },
+  {
+    id: "berauto",
+    label: "Bérautó",
+    image: "/images/categories/berelheto.png",
+    vertical: "auto",
+    subtype: "berauto",
+  },
+  {
+    id: "lakokocsi",
+    label: "Bérelhető Lakókocsi",
+    image: "/images/categories/lakokocsi.png",
+    vertical: "auto",
+    subtype: "lakokocsi",
+  },
+  {
+    id: "kisteher",
+    label: "Kisteherautó",
+    image: "/images/categories/kisteher.png",
+    vertical: "teher",
+    subtype: "kisteher",
+  },
+  {
+    id: "teherauto",
+    label: "Teherautó",
+    image: "/images/categories/teherauto.png",
+    vertical: "teher",
+    subtype: "teherauto",
+  },
+  {
+    id: "elado",
+    label: "Eladó Ingatlanok",
+    image: "/images/hub-ingatlan-01-hazak.png",
+    vertical: "ingatlan",
+    subtype: "ingatlan",
+    immoTipus: ["elado"],
+  },
+  {
+    id: "kiado",
+    label: "Kiadó Ingatlanok",
+    image: "/images/hub-ingatlan-02-lakasok.png",
+    vertical: "ingatlan",
+    subtype: "ingatlan",
+    immoTipus: ["kiado"],
+  },
+  {
+    id: "airbnb",
+    label: "Airbnb Ingatlanok",
+    image: "/images/hub-ingatlan-photo.jpg",
+    vertical: "ingatlan",
+    subtype: "ingatlan",
+    immoTipus: ["airbnb"],
+  },
 ];
 
 const IMMO_KATEGORIA = [
@@ -58,7 +131,15 @@ function selectionFromUrl() {
   if (vertical === "teher" && subtype === "kisteher") return { ...VEHICLE_PRESETS.kisteher };
   if (vertical === "teher" && subtype === "teherauto") return { ...VEHICLE_PRESETS.teherauto };
   if (vertical === "ingatlan") {
-    return { vertical: "ingatlan", subtype: "ingatlan", label: "Ingatlan", immoTipus: [], immoKategoria: [] };
+    const tipus = String(params.get("tipus") ?? "").trim().toLowerCase();
+    const hit = IMMO_TIPUS.find((x) => x.id === tipus);
+    return {
+      vertical: "ingatlan",
+      subtype: "ingatlan",
+      label: hit ? hit.label : "Ingatlan",
+      immoTipus: hit ? [hit.id] : [],
+      immoKategoria: [],
+    };
   }
   const kategoria = String(params.get("kategoria") ?? "").trim().toLowerCase();
   if (vertical === "teher" && kategoria === "35-alatt") return { ...VEHICLE_PRESETS.kisteher };
@@ -66,16 +147,45 @@ function selectionFromUrl() {
   return null;
 }
 
+function selectionFromOption(opt) {
+  if (!opt) return null;
+  if (opt.vertical === "ingatlan") {
+    return {
+      vertical: "ingatlan",
+      subtype: "ingatlan",
+      label: opt.label,
+      immoTipus: [...(opt.immoTipus || [opt.id])],
+      immoKategoria: [],
+    };
+  }
+  return {
+    vertical: opt.vertical,
+    subtype: opt.subtype,
+    label: opt.label,
+  };
+}
+
+function currentWizardCategoryId(selection = readStored()) {
+  if (!selection) return "";
+  if (selection.vertical === "ingatlan") {
+    return String(selection.immoTipus?.[0] || "").trim();
+  }
+  return String(selection.subtype || "").trim();
+}
+
 function syncWizardContext(selection) {
   const contextBar = document.getElementById("wizard-context-bar");
-  const contextLabel = document.getElementById("wizard-context-label");
+  const wheel = document.getElementById("wizard-category-wheel");
   if (!selection?.label) {
     contextBar?.setAttribute("hidden", "");
-    if (contextLabel) contextLabel.textContent = "";
     return;
   }
   contextBar?.removeAttribute("hidden");
-  if (contextLabel) contextLabel.textContent = selection.label;
+  const catId = currentWizardCategoryId(selection);
+  if (wheel?.dataset.drumBound === "1" && catId) {
+    setWheelValue(wheel, catId);
+    syncDrumWheelDisplay(wheel);
+  }
 }
 
 export function initCategoryPicker({
@@ -91,8 +201,6 @@ export function initCategoryPicker({
   const wizardShell = document.getElementById("ad-wizard-shell");
   const stepsBar = document.getElementById("wizard-steps-bar");
   const contextBar = document.getElementById("wizard-context-bar");
-  const contextLabel = document.getElementById("wizard-context-label");
-  const changeBtn = document.getElementById("wizard-change-category");
   const stub = document.getElementById("ingatlan-stub");
   const stubSummary = document.getElementById("ingatlan-stub-summary");
   const stubBack = document.getElementById("ingatlan-stub-back");
@@ -130,6 +238,31 @@ export function initCategoryPicker({
     </div>
   `;
   document.body.append(backdrop, sheet);
+
+  function ensureCategoryDrum() {
+    const wrap = document.getElementById("wizard-category-wheel-wrap");
+    const wheel = document.getElementById("wizard-category-wheel");
+    if (!wrap || !wheel) return null;
+    if (wheel.dataset.drumBound === "1") return wheel;
+    wheel.innerHTML = WIZARD_CATEGORY_OPTIONS.map(
+      (opt) =>
+        `<button type="button" class="immo-wheel-opt" data-value="${opt.id}" data-image="${opt.image}?v=immoCat4">${opt.label}</button>`
+    ).join("");
+    initDrumWheel(wheel, { emptyLabel: "Válassz kategóriát" });
+    wheel.addEventListener("immo-wheel-change", () => {
+      const id = readWheel(wheel);
+      if (!id || id === currentWizardCategoryId()) return;
+      void applyCatWheelChoice(id);
+    });
+    return wheel;
+  }
+
+  async function applyCatWheelChoice(catId) {
+    const opt = WIZARD_CATEGORY_OPTIONS.find((x) => x.id === catId);
+    const selection = selectionFromOption(opt);
+    if (!selection) return;
+    await showVehicleWizard(selection);
+  }
 
   function syncOpenGroups() {
     root.querySelectorAll(".cp-group").forEach((group) => {
@@ -176,6 +309,7 @@ export function initCategoryPicker({
   async function showVehicleWizard(selection) {
     writeStored(selection);
     setHiddenFields(selection);
+    ensureCategoryDrum();
     syncWizardContext(selection);
 
     if (typeof requireLogin === "function") {
@@ -287,6 +421,23 @@ export function initCategoryPicker({
       return;
     }
 
+    const immoPick = event.target.closest("[data-pick-immo]");
+    if (immoPick) {
+      const tipusId = String(immoPick.getAttribute("data-pick-immo") || "").trim().toLowerCase();
+      const hit = IMMO_TIPUS.find((x) => x.id === tipusId);
+      if (!hit) return;
+      root.querySelectorAll(".cp-option.is-active").forEach((el) => el.classList.remove("is-active"));
+      immoPick.classList.add("is-active");
+      void showVehicleWizard({
+        vertical: "ingatlan",
+        subtype: "ingatlan",
+        label: hit.label,
+        immoTipus: [hit.id],
+        immoKategoria: [],
+      });
+      return;
+    }
+
     if (event.target.closest("[data-immo-continue]")) {
       void showVehicleWizard({
         vertical: "ingatlan",
@@ -307,16 +458,13 @@ export function initCategoryPicker({
   });
   backdrop.addEventListener("click", closeSheet);
 
-  changeBtn?.addEventListener("click", () => {
-    showPicker();
-    syncOpenGroups();
-  });
   stubBack?.addEventListener("click", () => {
     showPicker();
     state.open = "ingatlan";
     syncOpenGroups();
   });
 
+  ensureCategoryDrum();
   syncOpenGroups();
   syncImmoLabels();
 

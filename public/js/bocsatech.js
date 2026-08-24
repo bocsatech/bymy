@@ -1,5 +1,9 @@
 import { mountLayoutBoard } from "./bocsatech-layout.js?v=layoutCats1";
-import { mountIngatlanWheelBoard } from "./bocsatech-ingatlan-wheels.js?v=immoWheel1";
+import { mountIngatlanWheelBoard } from "./bocsatech-ingatlan-wheels.js?v=immoWheel21";
+import {
+  isIngatlanWheelAdminCategory,
+  normalizeIngatlanWheelVariant,
+} from "./ingatlan-wheel-schema.js?v=immoWheel21";
 
 const app = document.getElementById("app");
 
@@ -7,7 +11,8 @@ const LAYOUT_NAV = [
   {
     group: "Autók",
     items: [
-      { id: "szemelyauto", label: "Személyautó" },
+      { id: "szemelyauto", label: "Személyautó feladás" },
+      { id: "szemelyauto-search", label: "Személyautó kereső" },
       { id: "leasing", label: "Leasing autók" },
       { id: "berauto", label: "Bérautók" },
       { id: "lakokocsi", label: "Bérelhető lakókocsi" },
@@ -17,7 +22,11 @@ const LAYOUT_NAV = [
   },
   {
     group: "Ingatlanok",
-    items: [{ id: "ingatlan", label: "Ingatlan" }],
+    items: [
+      { id: "ingatlan", label: "Kiado ingatlan" },
+      { id: "elado-ingatlan", label: "elado ingatlan" },
+      { id: "airbnb", label: "Airbnb" },
+    ],
   },
 ];
 
@@ -88,6 +97,11 @@ function layoutTabId(item) {
   return item.intent ? `layout:${item.id}:${item.intent}` : `layout:${item.id}`;
 }
 
+function immoWheelApiUrl(variant) {
+  const v = encodeURIComponent(normalizeIngatlanWheelVariant(variant));
+  return `/api/level1/ingatlan-wheel-schema?variant=${v}`;
+}
+
 function categoryLabel(id) {
   for (const group of LAYOUT_NAV) {
     const hit = group.items.find((c) => c.id === id);
@@ -142,6 +156,16 @@ const actions = {
           password: form.password.value,
         }),
       });
+      // IDEIGLENES localhost: localadmin 2FA nélkül
+      if (data.skipOtp && data.admin) {
+        admin = data.admin;
+        otpUser = "";
+        otpEmailMasked = "";
+        info = "";
+        await loadTab();
+        render();
+        return;
+      }
       otpUser = data.username;
       otpEmailMasked = data.emailMasked || "";
       info = otpSentMessage(data);
@@ -323,14 +347,14 @@ const actions = {
     info = "";
     try {
       const cat = layoutCategoryFromTab();
-      if (cat === "ingatlan") {
+      if (isIngatlanWheelAdminCategory(cat)) {
         const data = await api("/api/level1/ingatlan-wheel-schema", {
           method: "PUT",
-          body: JSON.stringify({ schema: wheelSchema }),
+          body: JSON.stringify({ schema: wheelSchema, variant: cat }),
         });
         wheelSchema = data.schema || wheelSchema;
         info =
-          "Ingatlan kerék-séma mentve. Kereső és feladás hard refresh (Cmd+Shift+R) után frissül. A kategória (Keres/Kínál/Bérbe) csak az élő oldalon jelenik meg.";
+          `${categoryLabel(cat)} kerék-séma mentve. Kereső és feladás hard refresh (Cmd+Shift+R) után frissül. A Kiado ingatlan elrendezése csak a saját gombjánál változik.`;
         render();
         return;
       }
@@ -340,7 +364,10 @@ const actions = {
       });
       layout = data.layout || layout;
       layoutCategory = data.category || cat;
-      info = `Elrendezés mentve (${categoryLabel(layoutCategory)}). A hirdetésfeladáson hard refresh (Cmd+Shift+R) után látszik.`;
+      const isSearch = cat === "szemelyauto-search";
+      info = isSearch
+          ? `${categoryLabel(cat)} kereső elrendezés mentve. Az autó oldalon hard refresh (Cmd+Shift+R) után frissül.`
+          : `Elrendezés mentve (${categoryLabel(layoutCategory)}). A hirdetésfeladáson hard refresh (Cmd+Shift+R) után látszik.`;
       render();
     } catch (error) {
       err = error.message;
@@ -422,8 +449,8 @@ async function loadTab() {
   if (isLayoutTab()) {
     layoutCategory = layoutCategoryFromTab();
     layoutIntent = layoutIntentFromTab();
-    if (layoutCategory === "ingatlan") {
-      const data = await api("/api/level1/ingatlan-wheel-schema");
+    if (isIngatlanWheelAdminCategory(layoutCategory)) {
+      const data = await api(immoWheelApiUrl(layoutCategory));
       wheelSchema = data.schema || { version: 1, cells: [] };
     } else {
       const data = await api(`/api/level1/form-layout?category=${encodeURIComponent(layoutCategory)}`);
@@ -453,7 +480,7 @@ function loginView() {
   return `
     <div class="wrap">
       <h1>Bocsatech</h1>
-      <p class="sub">Admin belépés — jelszó + email kód. 3 hiba után a felhasználónév zárolva.</p>
+      <p class="sub">Admin belépés — jelszó + email kód. 3 hiba után a felhasználónév zárolva.<br><small>Localhost (IDEIGLENES): <code>localadmin</code> / <code>localadmin</code> — 2FA nélkül.</small></p>
       <form class="card" data-act="login" style="max-width:420px">
         <label>Felhasználónév</label>
         <input name="username" autocomplete="username" value="${esc(lastUsername)}" required />
@@ -461,7 +488,7 @@ function loginView() {
         <input name="password" type="password" autocomplete="current-password" required />
         <p class="err">${esc(err)}</p>
         <div class="row" style="margin-top:1rem">
-          <button class="btn" type="submit">Kód kérése</button>
+          <button class="btn" type="submit">Belépés</button>
         </div>
       </form>
     </div>`;
@@ -760,13 +787,20 @@ function hubPromoView() {
 }
 
 function layoutView() {
-  const label = categoryLabel(layoutCategoryFromTab());
-  const isImmo = layoutCategoryFromTab() === "ingatlan";
+  const cat = layoutCategoryFromTab();
+  const label = categoryLabel(cat);
+  const isImmo = isIngatlanWheelAdminCategory(cat);
+  const isSearch = cat === "szemelyauto-search";
   const sharedHint = isImmo
-    ? "Közös kerék-séma a keresőre és a feladásra. Húzd a mezőket, állítsd a szélességet, üres sort is beszúrhatsz. A Keres/Kínál/Bérbe kategória csak az élő oldalon látszik."
-    : "Csak ennek a kategóriának a mezői. Húzd a cellát a lapon belül vagy másik lépésre. Mentés után a hirdetésfeladáson hard refresh kell.";
+    ? cat === "ingatlan"
+      ? "Közös kerék-séma a keresőre és a feladásra (Kiado ingatlan — master). Ár / Alapterület / Emelet: osztott min–max csempe. Mentés csak ezt a gombot érinti."
+      : "Ugyanaz a kerék-séma, mint a Kiado ingatlannál (első betöltéskor másolat). Szerkesztés és mentés csak erre a gombra vonatkozik — a Kiado ingatlan elrendezése nem változik."
+    : isSearch
+      ? "Személyautó gyorskereső + Több szűrő mezői. 1. lépés = hero gyorskereső, 2–5. lépés = bővített szűrők. Ugyanaz a mezőkatalógus, mint a feladásnál. Mentés után az autó oldalon hard refresh kell."
+      : "Csak ennek a kategóriának a mezői. Húzd a cellát a lapon belül vagy másik lépésre. Mentés után a hirdetésfeladáson hard refresh kell.";
+  const titleSuffix = isImmo ? "kerék-séma" : isSearch ? "kereső mezők" : "feladási mezők";
   return `
-    <h2 class="layout-cat-title">${esc(label)} — ${isImmo ? "kerék-séma" : "feladási mezők"}</h2>
+    <h2 class="layout-cat-title">${esc(label)} — ${titleSuffix}</h2>
     <p class="hint">${esc(sharedHint)}</p>
     <div id="layout-root"></div>
     <p class="ok">${info}</p>
@@ -828,7 +862,7 @@ function render() {
   h(admin ? shell() : loginView());
   if (admin && isLayoutTab()) {
     const root = document.getElementById("layout-root");
-    if (layoutCategoryFromTab() === "ingatlan") {
+    if (isIngatlanWheelAdminCategory(layoutCategoryFromTab())) {
       mountIngatlanWheelBoard(root, wheelSchema, {
         onChange(schema) {
           wheelSchema = schema;

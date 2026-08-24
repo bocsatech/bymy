@@ -30,7 +30,8 @@ import {
   arFtMinOptions,
   emeletRank,
   normalizeIngatlanUzletag,
-} from "./ingatlan-fields.js?v=immoWheel3";
+  tipus2OptionsForParents,
+} from "./ingatlan-fields.js?v=immoWheel5";
 import {
   fillWheel,
   initMenuWheel,
@@ -38,13 +39,15 @@ import {
   readWheelList,
   setWheelValue,
   MULTI_WHEEL_KEYS,
-} from "./ingatlan-wheels.js?v=mobile4";
-import { initDrumWheel, syncDrumWheelDisplay, applyDrumModeClass, getDrumMode } from "./immo-drum-picker.js?v=drum8";
-import { fetchIngatlanWheelSchema, renderIngatlanSchemaHosts } from "./ingatlan-wheel-schema.js?v=immoWheel4";
+  wheelFieldHtml,
+} from "./ingatlan-wheels.js?v=mobile5";
+import { initDrumWheel, syncDrumWheelDisplay, applyDrumModeClass, getDrumMode } from "./immo-drum-picker.js?v=drum11";
+import { fetchIngatlanWheelSchema, renderIngatlanSchemaHosts, INGATLAN_DUAL_RANGE_GROUPS } from "./ingatlan-wheel-schema.js?v=immoWheel16";
 
 const EXACT_KEYS = [
   "ingatlan_uzletag",
   "ingatlan_lakas_tipus",
+  "ingatlan_tipus_2",
   "allapot",
   "ingatlan_kora",
   "min_berleti_ido",
@@ -73,6 +76,7 @@ export function emptyIngatlanFilters() {
     alapterulet_ig: null,
     szobaszam: "",
     ingatlan_lakas_tipus: "",
+    ingatlan_tipus_2: "",
     allapot: "",
     ingatlan_kora: "",
     min_berleti_ido: "",
@@ -115,7 +119,8 @@ function isImmoMobileLayout() {
 }
 
 function useDrumPicker() {
-  return isImmoMobileLayout() && getDrumMode() !== "legacy";
+  // Ingatlan kereső: dobkerék asztali + mobil weben is (kikapcsolás: legacy mód).
+  return getDrumMode() !== "legacy";
 }
 
 function initImmoSearchWheel(wheel, { emptyLabel = "Mindegy", multiple = false, customInput = false, customKind = "price" } = {}) {
@@ -133,20 +138,10 @@ function syncImmoSearchWheelDisplay(wheel) {
 }
 
 /** Mobil: min + max egy sorban (ár, alapterület). */
-const MOBILE_DUAL_RANGES = [
-  { id: "ar", tolKey: "ar_tol", igKey: "ar_ig", title: "Ár", ariaLabel: "Ár tartomány" },
-  {
-    id: "alapterulet",
-    tolKey: "alapterulet_tol",
-    igKey: "alapterulet_ig",
-    title: "Alapterület",
-    ariaLabel: "Alapterület tartomány",
-    unit: "m²",
-  },
-];
+const MOBILE_DUAL_RANGES = INGATLAN_DUAL_RANGE_GROUPS;
 
 function setupMobileDualRanges(mainHost) {
-  if (!mainHost || !isImmoMobileLayout()) return;
+  if (!mainHost) return;
   for (const cfg of MOBILE_DUAL_RANGES) {
     setupMobileDualRange(mainHost, cfg);
   }
@@ -156,6 +151,26 @@ function setupMobileDualRange(mainHost, { id, tolKey, igKey, title, ariaLabel, u
   const tolCell = mainHost.querySelector(`.immo-schema-cell[data-schema-field="${tolKey}"]`);
   const igCell = mainHost.querySelector(`.immo-schema-cell[data-schema-field="${igKey}"]`);
   if (!tolCell || !igCell) return;
+
+  const existingBlock = tolCell.closest(".immo-dual-range-block");
+  if (existingBlock?.dataset.range === id) {
+    const wrap = existingBlock.querySelector(".immo-dual-range");
+    if (wrap) {
+      const titleEl = wrap.querySelector(".immo-dual-range__title");
+      if (titleEl) titleEl.textContent = title;
+      if (unit) {
+        let unitEl = wrap.querySelector(".immo-dual-range__unit");
+        if (!unitEl) {
+          unitEl = document.createElement("span");
+          unitEl.className = "immo-dual-range__unit";
+          unitEl.setAttribute("aria-hidden", "true");
+          wrap.appendChild(unitEl);
+        }
+        unitEl.textContent = unit;
+      }
+    }
+    return;
+  }
 
   let wrap =
     tolCell.closest(".immo-dual-range") ||
@@ -215,6 +230,56 @@ function setupMobileDualRange(mainHost, { id, tolKey, igKey, title, ariaLabel, u
     wrap.setAttribute("aria-label", ariaLabel);
     block.appendChild(wrap);
   }
+
+  // Admin rácspozíció: data-attribútum (megbízható), CSS parse csak fallback.
+  const parsePlacement = (el) => {
+    const dataCol = Number(el.getAttribute("data-grid-col"));
+    const dataSpan = Number(el.getAttribute("data-grid-span"));
+    const dataRow = Number(el.getAttribute("data-grid-row"));
+    if (dataCol >= 1 && dataSpan >= 1) {
+      return {
+        col: dataCol,
+        span: dataSpan,
+        row: dataRow >= 1 ? dataRow : 1,
+      };
+    }
+    const raw = String(el.style.gridColumn || "");
+    const spanMatch = raw.match(/(\d+)\s*\/\s*span\s*(\d+)/i);
+    const lineMatch = !spanMatch && raw.match(/(\d+)\s*\/\s*(\d+)/);
+    const rowMatch = String(el.style.gridRow || "").match(/(\d+)/);
+    if (spanMatch) {
+      return {
+        col: Number(spanMatch[1]),
+        span: Number(spanMatch[2]),
+        row: rowMatch ? Number(rowMatch[1]) : 1,
+      };
+    }
+    if (lineMatch) {
+      const col = Number(lineMatch[1]);
+      const end = Number(lineMatch[2]);
+      return {
+        col,
+        span: Math.max(1, end - col),
+        row: rowMatch ? Number(rowMatch[1]) : 1,
+      };
+    }
+    return { col: 1, span: 1, row: 1 };
+  };
+  const tolPlace = parsePlacement(tolCell);
+  const igPlace = parsePlacement(igCell);
+  const startCol = Math.min(tolPlace.col, igPlace.col);
+  const endCol = Math.max(tolPlace.col + tolPlace.span - 1, igPlace.col + igPlace.span - 1);
+  const row = tolPlace.row || igPlace.row || 1;
+  const span = Math.max(1, endCol - startCol + 1);
+  block.dataset.gridCol = String(startCol);
+  block.dataset.gridSpan = String(span);
+  block.dataset.gridRow = String(row);
+  block.style.setProperty("grid-column", `${startCol} / span ${span}`, "important");
+  block.style.setProperty("grid-row", String(row), "important");
+  block.style.setProperty("width", "auto", "important");
+  block.style.setProperty("max-width", "100%", "important");
+  block.style.removeProperty("grid-column-start");
+  block.style.removeProperty("grid-column-end");
 
   if (!wrap.contains(tolCell)) wrap.appendChild(tolCell);
   if (!wrap.contains(igCell)) wrap.appendChild(igCell);
@@ -287,6 +352,14 @@ function fillAreaRangeWheels(form) {
     tolKey: "alapterulet_tol",
     igKey: "alapterulet_ig",
     options: alapteruletOptions(),
+  });
+}
+
+function fillEmeletRangeWheels(form) {
+  fillDualRangeWheels(form, {
+    tolKey: "emelet_tol",
+    igKey: "emelet_ig",
+    options: EMELET.filter((o) => o.value),
   });
 }
 
@@ -394,6 +467,54 @@ export function filterListingsByIngatlan(items, filters) {
   });
 }
 
+function syncTipus2Menu(form) {
+  const parents = readWheelList(form.querySelector('[data-wheel="ingatlan_lakas_tipus"]'));
+  const wheel = form.querySelector('[data-wheel="ingatlan_tipus_2"]');
+  if (!wheel) return;
+  const prev = readWheel(wheel);
+  const opts = tipus2OptionsForParents(parents);
+  fillWheel(wheel, opts.filter((o) => o.value), { emptyLabel: "Mindegy" });
+  initImmoSearchWheel(wheel, {
+    emptyLabel: "Mindegy",
+    multiple: MULTI_WHEEL_KEYS.has("ingatlan_tipus_2"),
+  });
+  const allowed = new Set(opts.map((o) => o.value).filter(Boolean));
+  const keep = String(prev)
+    .split(",")
+    .map((v) => v.trim())
+    .filter((v) => allowed.has(v));
+  setWheelValue(wheel, keep.join(","));
+  const wrap = wheel.closest(".immo-wheel-wrap");
+  const disabled = parents.length === 0;
+  if (wrap) wrap.classList.toggle("is-disabled", disabled);
+  wheel.setAttribute("aria-disabled", disabled ? "true" : "false");
+}
+
+/** Élő kereső/feladás: Tipus 2 a Tipus mellett (adminban törölt szekcióban marad a default). */
+function ensureTipus2Field(root, { enable }) {
+  const existing = root.querySelector('[data-schema-field="ingatlan_tipus_2"]');
+  if (!enable) {
+    existing?.remove();
+    return;
+  }
+  if (existing) return;
+  const tipusCell = root.querySelector('[data-schema-field="ingatlan_lakas_tipus"]');
+  const host = tipusCell?.parentElement || root.querySelector("#immo-schema-more");
+  if (!host) return;
+  const rows = [...host.querySelectorAll("[data-grid-row]")].map((el) => Number(el.dataset.gridRow) || 1);
+  const row = Math.max(0, ...rows) + 1;
+  const cell = document.createElement("div");
+  cell.className = "immo-schema-cell";
+  cell.dataset.schemaField = "ingatlan_tipus_2";
+  cell.dataset.gridCol = "1";
+  cell.dataset.gridSpan = "6";
+  cell.dataset.gridRow = String(row);
+  cell.style.cssText = `grid-column:1 / span 6;grid-row:${row}`;
+  cell.innerHTML = wheelFieldHtml("ingatlan_tipus_2", "Típus 2");
+  host.appendChild(cell);
+  host.style.gridTemplateRows = `repeat(${row}, auto)`;
+}
+
 function syncRovidMenus(form) {
   const tipusList = readWheelList(form.querySelector('[data-wheel="ingatlan_lakas_tipus"]'));
   const rovid = tipusList.includes("rovid_berles");
@@ -427,6 +548,7 @@ function readForm(form) {
   out.alapterulet_ig = numOrNull(readWheel(form.querySelector('[data-wheel="alapterulet_ig"]')));
   out.szobaszam = readWheel(form.querySelector('[data-wheel="szobaszam"]'));
   out.ingatlan_lakas_tipus = readWheel(form.querySelector('[data-wheel="ingatlan_lakas_tipus"]'));
+  out.ingatlan_tipus_2 = readWheel(form.querySelector('[data-wheel="ingatlan_tipus_2"]'));
   out.allapot = readWheel(form.querySelector('[data-wheel="allapot"]'));
   out.ingatlan_kora = readWheel(form.querySelector('[data-wheel="ingatlan_kora"]'));
   out.min_berleti_ido = readWheel(form.querySelector('[data-wheel="min_berleti_ido"]'));
@@ -449,49 +571,60 @@ function readForm(form) {
   return out;
 }
 
-export async function initIngatlanSearch({ onSearch = () => {} } = {}) {
-  const form = document.getElementById("immo-search-form");
-  if (!form) return;
+export async function initIngatlanSearch({
+  onSearch = () => {},
+  form = null,
+  schema = null,
+  defaultUzletag = "berbe",
+  lakasTipusOptions = null,
+  enableTipus2 = true,
+} = {}) {
+  const root = form || document.getElementById("immo-search-form");
+  if (!root) return;
 
-  const schema = await fetchIngatlanWheelSchema();
-  renderIngatlanSchemaHosts(
-    document.getElementById("immo-schema-main"),
-    document.getElementById("immo-schema-more"),
-    schema,
-    "search"
-  );
-  setupMobileDualRanges(document.getElementById("immo-schema-main"));
+  const resolvedSchema = schema || (await fetchIngatlanWheelSchema());
+  const tipusOpts = Array.isArray(lakasTipusOptions) && lakasTipusOptions.length
+    ? lakasTipusOptions
+    : INGATLAN_LAKAS_TIPUS;
+  const mainHost = root.querySelector("#immo-schema-main") || document.getElementById("immo-schema-main");
+  const moreHost = root.querySelector("#immo-schema-more") || document.getElementById("immo-schema-more");
+  const morePanel = root.querySelector("#immo-more") || document.getElementById("immo-more");
+  const moreBtn = root.querySelector("#immo-tovabbi") || document.getElementById("immo-tovabbi");
+
+  renderIngatlanSchemaHosts(mainHost, moreHost, resolvedSchema, "search");
+  ensureTipus2Field(root, { enable: enableTipus2 });
+  setupMobileDualRanges(mainHost);
+  setupMobileDualRanges(moreHost);
   applyDrumModeClass();
 
-  fillPriceRangeWheels(form);
-  fillAreaRangeWheels(form);
-  fillWheel(form.querySelector('[data-wheel="szobaszam"]'), szobaszamOptions(), { emptyLabel: "Mindegy" });
-  fillWheel(form.querySelector('[data-wheel="ingatlan_lakas_tipus"]'), INGATLAN_LAKAS_TIPUS.filter((o) => o.value));
-  fillWheel(form.querySelector('[data-wheel="allapot"]'), INGATLAN_ALLAPOT.filter((o) => o.value));
-  fillWheel(form.querySelector('[data-wheel="ingatlan_kora"]'), INGATLAN_KORA.filter((o) => o.value));
-  fillWheel(form.querySelector('[data-wheel="min_berleti_ido"]'), MIN_BERLETI_IDO.filter((o) => o.value));
-  fillWheel(form.querySelector('[data-wheel="butorozott"]'), BUTOROZOTT.filter((o) => o.value));
-  fillWheel(form.querySelector('[data-wheel="kilatas"]'), KILATAS.filter((o) => o.value));
-  fillWheel(form.querySelector('[data-wheel="tajolas"]'), TAJOLAS.filter((o) => o.value));
-  fillWheel(form.querySelector('[data-wheel="futes"]'), FUTES.filter((o) => o.value));
-  fillWheel(form.querySelector('[data-wheel="parkolas"]'), PARKOLAS.filter((o) => o.value));
-  fillWheel(form.querySelector('[data-wheel="komfort"]'), KOMFORT.filter((o) => o.value));
-  fillWheel(form.querySelector('[data-wheel="tetoter"]'), TETOTER.filter((o) => o.value));
-  fillWheel(form.querySelector('[data-wheel="furdo_wc"]'), FURDO_WC.filter((o) => o.value));
-  fillWheel(form.querySelector('[data-wheel="emelet_tol"]'), EMELET.filter((o) => o.value));
-  fillWheel(form.querySelector('[data-wheel="emelet_ig"]'), EMELET.filter((o) => o.value));
-  fillWheel(form.querySelector('[data-wheel="belmagassag"]'), BELMAGASSAG.filter((o) => o.value));
-  fillWheel(form.querySelector('[data-wheel="koltozheto"]'), KOLTOZHETO.filter((o) => o.value));
-  fillWheel(form.querySelector('[data-wheel="ar_ft_min"]'), arFtMinOptions(), { emptyLabel: "Mindegy" });
+  fillPriceRangeWheels(root);
+  fillAreaRangeWheels(root);
+  fillEmeletRangeWheels(root);
+  fillWheel(root.querySelector('[data-wheel="szobaszam"]'), szobaszamOptions(), { emptyLabel: "Mindegy" });
+  fillWheel(root.querySelector('[data-wheel="ingatlan_lakas_tipus"]'), tipusOpts.filter((o) => o.value));
+  fillWheel(root.querySelector('[data-wheel="allapot"]'), INGATLAN_ALLAPOT.filter((o) => o.value));
+  fillWheel(root.querySelector('[data-wheel="ingatlan_kora"]'), INGATLAN_KORA.filter((o) => o.value));
+  fillWheel(root.querySelector('[data-wheel="min_berleti_ido"]'), MIN_BERLETI_IDO.filter((o) => o.value));
+  fillWheel(root.querySelector('[data-wheel="butorozott"]'), BUTOROZOTT.filter((o) => o.value));
+  fillWheel(root.querySelector('[data-wheel="kilatas"]'), KILATAS.filter((o) => o.value));
+  fillWheel(root.querySelector('[data-wheel="tajolas"]'), TAJOLAS.filter((o) => o.value));
+  fillWheel(root.querySelector('[data-wheel="futes"]'), FUTES.filter((o) => o.value));
+  fillWheel(root.querySelector('[data-wheel="parkolas"]'), PARKOLAS.filter((o) => o.value));
+  fillWheel(root.querySelector('[data-wheel="komfort"]'), KOMFORT.filter((o) => o.value));
+  fillWheel(root.querySelector('[data-wheel="tetoter"]'), TETOTER.filter((o) => o.value));
+  fillWheel(root.querySelector('[data-wheel="furdo_wc"]'), FURDO_WC.filter((o) => o.value));
+  fillWheel(root.querySelector('[data-wheel="belmagassag"]'), BELMAGASSAG.filter((o) => o.value));
+  fillWheel(root.querySelector('[data-wheel="koltozheto"]'), KOLTOZHETO.filter((o) => o.value));
+  fillWheel(root.querySelector('[data-wheel="ar_ft_min"]'), arFtMinOptions(), { emptyLabel: "Mindegy" });
   for (const bool of INGATLAN_BOOL_FIELDS) {
-    fillWheel(form.querySelector(`[data-wheel="${bool.field_key}"]`), IGEN_MINDEGY.filter((o) => o.value));
+    fillWheel(root.querySelector(`[data-wheel="${bool.field_key}"]`), IGEN_MINDEGY.filter((o) => o.value));
   }
 
   const emptyByName = {
     szobaszam: "Szobaszám",
   };
-  const dualRangeKeys = new Set(["ar_tol", "ar_ig", "alapterulet_tol", "alapterulet_ig"]);
-  form.querySelectorAll("[data-wheel]").forEach((wheel) => {
+  const dualRangeKeys = new Set(["ar_tol", "ar_ig", "alapterulet_tol", "alapterulet_ig", "emelet_tol", "emelet_ig"]);
+  root.querySelectorAll("[data-wheel]").forEach((wheel) => {
     const name = wheel.getAttribute("data-wheel") || "";
     if (dualRangeKeys.has(name)) return;
     const isRooms = name === "szobaszam";
@@ -503,20 +636,19 @@ export async function initIngatlanSearch({ onSearch = () => {} } = {}) {
     });
   });
 
-  const uzletag = form.querySelector("#immo-uzletag");
+  const uzletag = root.querySelector("#immo-uzletag");
   if (uzletag) {
-    uzletag.innerHTML = "";
-    for (const opt of INGATLAN_UZLETAG) {
-      const el = document.createElement("option");
-      el.value = opt.value;
-      el.textContent = opt.label;
-      uzletag.appendChild(el);
+    if (uzletag.tagName === "SELECT") {
+      uzletag.innerHTML = "";
+      for (const opt of INGATLAN_UZLETAG) {
+        const el = document.createElement("option");
+        el.value = opt.value;
+        el.textContent = opt.label;
+        uzletag.appendChild(el);
+      }
     }
-    uzletag.value = "berbe";
+    uzletag.value = defaultUzletag;
   }
-
-  const morePanel = document.getElementById("immo-more");
-  const moreBtn = document.getElementById("immo-tovabbi");
 
   function setMoreOpen(open) {
     if (!morePanel || !moreBtn) return;
@@ -525,38 +657,73 @@ export async function initIngatlanSearch({ onSearch = () => {} } = {}) {
     moreBtn.textContent = open ? "Kevesebb feltétel" : "További feltételek";
   }
 
-  moreBtn?.addEventListener("click", () => {
-    setMoreOpen(!!morePanel?.hidden);
-  });
-
-  form.querySelector('[data-wheel="ingatlan_lakas_tipus"]')?.addEventListener("immo-wheel-change", () => {
-    syncRovidMenus(form);
-  });
-
-  uzletag?.addEventListener("change", () => {
-    fillPriceRangeWheels(form);
-  });
-
-  form.addEventListener("submit", (event) => {
-    event.preventDefault();
-    onSearch(readForm(form));
-    document.getElementById("home-grid-track")?.scrollIntoView({ behavior: "smooth", block: "start" });
-  });
-
-  form.addEventListener("reset", () => {
-    requestAnimationFrame(() => {
-      form.querySelectorAll("[data-wheel]").forEach((wheel) => setWheelValue(wheel, ""));
-      const hely = form.querySelector('[name="keresesi_hely"]');
-      if (hely) hely.value = "";
-      if (uzletag) uzletag.value = "berbe";
-      fillPriceRangeWheels(form);
-      fillAreaRangeWheels(form);
-      syncRovidMenus(form);
-      setMoreOpen(false);
-      onSearch(emptyIngatlanFilters());
+  if (!root.dataset.immoSearchBound) {
+    root.dataset.immoSearchBound = "1";
+    moreBtn?.addEventListener("click", () => {
+      setMoreOpen(!!morePanel?.hidden);
     });
-  });
+
+    root.querySelector('[data-wheel="ingatlan_lakas_tipus"]')?.addEventListener("immo-wheel-change", () => {
+      syncRovidMenus(root);
+      if (enableTipus2) syncTipus2Menu(root);
+    });
+
+    uzletag?.addEventListener("change", () => {
+      fillPriceRangeWheels(root);
+    });
+
+    root.addEventListener("submit", (event) => {
+      event.preventDefault();
+      if (typeof onSearch === "function") {
+        onSearch(readForm(root));
+        document.getElementById("home-grid-track")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    });
+
+    root.querySelector(".immo-submit")?.addEventListener("click", (event) => {
+      if (root.tagName === "FORM") return;
+      event.preventDefault();
+      if (typeof onSearch === "function") onSearch(readForm(root));
+    });
+
+    root.addEventListener("reset", () => {
+      requestAnimationFrame(() => {
+        root.querySelectorAll("[data-wheel]").forEach((wheel) => setWheelValue(wheel, ""));
+        const hely = root.querySelector('[name="keresesi_hely"]');
+        if (hely) hely.value = "";
+        if (uzletag) uzletag.value = defaultUzletag;
+        fillPriceRangeWheels(root);
+        fillAreaRangeWheels(root);
+        fillEmeletRangeWheels(root);
+        syncRovidMenus(root);
+        if (enableTipus2) syncTipus2Menu(root);
+        setMoreOpen(false);
+        if (typeof onSearch === "function") onSearch(emptyIngatlanFilters());
+      });
+    });
+
+    root.querySelectorAll('button[type="reset"], [data-immo-reset]').forEach((btn) => {
+      btn.addEventListener("click", (event) => {
+        if (root.tagName === "FORM" && btn.getAttribute("type") === "reset") return;
+        event.preventDefault();
+        root.querySelectorAll("[data-wheel]").forEach((wheel) => setWheelValue(wheel, ""));
+        const hely = root.querySelector('[name="keresesi_hely"]');
+        if (hely) hely.value = "";
+        if (uzletag) uzletag.value = defaultUzletag;
+        fillPriceRangeWheels(root);
+        fillAreaRangeWheels(root);
+        fillEmeletRangeWheels(root);
+        syncRovidMenus(root);
+        if (enableTipus2) syncTipus2Menu(root);
+        setMoreOpen(false);
+        if (typeof onSearch === "function") onSearch(emptyIngatlanFilters());
+      });
+    });
+  }
 
   setMoreOpen(false);
-  syncRovidMenus(form);
+  syncRovidMenus(root);
+  if (enableTipus2) syncTipus2Menu(root);
 }
+
+export { readForm as readIngatlanSearchForm };

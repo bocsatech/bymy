@@ -59,11 +59,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/css/style.css?v=myAds2" />
     <link rel="stylesheet" href="/css/automax.css?v=automax20260720homelist" />
-    <link rel="stylesheet" href="/css/site-app.css?v=immoSync1" />
+    <link rel="stylesheet" href="/css/site-app.css?v=immoSync2" />
     <link rel="stylesheet" href="/css/site-side.css?v=autoCats1" />
-    <link rel="stylesheet" href="/css/category-picker.css?v=teherPost1" />
+    <link rel="stylesheet" href="/css/category-picker.css?v=immoCat7" />
       <link rel="stylesheet" href="/css/hub.css?v=hubPromoAdmin1" />
-    <link rel="stylesheet" href="/css/ingatlan-search.css?v=mobile2" />
+    <link rel="stylesheet" href="/css/ingatlan-search.css?v=schemaLive15" />
 </head>
   <body class="site-app site-page" data-site-page="hirdetesfeladas">
     <script src="/js/mw-app-shell.js?v=mwShellAll1"></script>
@@ -124,8 +124,10 @@
     </div>
 
     <div class="wizard-context-bar" id="wizard-context-bar" hidden>
-      <p>Kategória: <strong id="wizard-context-label"></strong></p>
-      <button type="button" id="wizard-change-category">Kategória módosítása</button>
+      <div class="immo-wheel-wrap wizard-category-wheel" id="wizard-category-wheel-wrap">
+        <span class="immo-label">Kategória</span>
+        <div class="immo-wheel" data-wheel="wizard_category" id="wizard-category-wheel" hidden></div>
+      </div>
     </div>
 
     <main class="page page-automax site-page-main">
@@ -222,31 +224,46 @@
 
             <section class="cp-group" data-accent="immo" data-group="ingatlan" role="listitem">
               <button type="button" class="cp-group-toggle" data-toggle-group="ingatlan" aria-expanded="false">
-                <span class="cp-group-thumb cp-group-thumb--icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" fill="none"><path d="M4.5 11.5 12 5l7.5 6.5" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M7 10.8V19h10v-8.2" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M10 19v-4.5h4V19" stroke="currentColor" stroke-width="1.7"/></svg>
-                </span>
+                <img class="cp-group-thumb" src="/images/hub-ingatlan.jpg?v=immoCat1" alt="" width="52" height="52" />
                 <span class="cp-group-copy">
                   <strong>Ingatlan hirdetések</strong>
-                  <span>Eladó, kiadó, kategóriák</span>
+                  <span>Eladó, kiadó, Airbnb</span>
                 </span>
                 <svg class="cp-chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
               </button>
               <div class="cp-group-body" data-group-body="ingatlan">
-                <div class="cp-immo-rows">
-                  <button type="button" class="cp-immo-row" data-open-sheet="tipus">
-                    <strong>Típus</strong>
-                    <span class="cp-immo-row-value"><span data-immo-tipus-label>Mindegy</span>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <div class="cp-options" role="group" aria-label="Ingatlan kategóriák">
+                  <button type="button" class="cp-option" data-pick-immo="elado">
+                    <span class="cp-option-bar" aria-hidden="true"></span>
+                    <span class="cp-option-icon cp-option-icon--photo" aria-hidden="true">
+                      <img src="/images/hub-ingatlan-01-hazak.png?v=immoCat2" alt="" width="36" height="36" loading="lazy" decoding="async" />
+                    </span>
+                    <span class="cp-option-copy"><strong>Eladó Ingatlanok</strong></span>
+                    <span class="cp-option-trail" aria-hidden="true">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     </span>
                   </button>
-                  <button type="button" class="cp-immo-row" data-open-sheet="kategoria">
-                    <strong>Kategória</strong>
-                    <span class="cp-immo-row-value"><span data-immo-kat-label>Mindegy</span>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  <button type="button" class="cp-option" data-pick-immo="kiado">
+                    <span class="cp-option-bar" aria-hidden="true"></span>
+                    <span class="cp-option-icon cp-option-icon--photo" aria-hidden="true">
+                      <img src="/images/hub-ingatlan-02-lakasok.png?v=immoCat2" alt="" width="36" height="36" loading="lazy" decoding="async" />
+                    </span>
+                    <span class="cp-option-copy"><strong>Kiadó Ingatlanok</strong></span>
+                    <span class="cp-option-trail" aria-hidden="true">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </span>
+                  </button>
+                  <button type="button" class="cp-option" data-pick-immo="airbnb">
+                    <span class="cp-option-bar" aria-hidden="true"></span>
+                    <span class="cp-option-icon cp-option-icon--photo" aria-hidden="true">
+                      <img src="/images/hub-ingatlan-photo.jpg?v=immoCat2" alt="" width="36" height="36" loading="lazy" decoding="async" />
+                    </span>
+                    <span class="cp-option-copy"><strong>Airbnb Ingatlanok</strong></span>
+                    <span class="cp-option-trail" aria-hidden="true">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     </span>
                   </button>
                 </div>
-                <button type="button" class="cp-immo-continue" data-immo-continue>Tovább az ingatlan feladáshoz</button>
               </div>
             </section>
           </div>
@@ -909,10 +926,10 @@
     </main>
 
     <script src="/js/site-avatar-menu.js?v=fiokPage2" type="module"></script>
-    <script src="/js/app.js?v=immoSync1" type="module"></script>
+    <script src="/js/app.js?v=immoSync11" type="module"></script>
       <script src="/js/nav-counts.js?v=willhabenHdr1" type="module"></script>
       <script src="/js/theme.js?v=willhabenHdr1" type="module"></script>
-    <script src="/js/form-layout-apply.js?v=immoWheel3" type="module"></script>
+    <script src="/js/form-layout-apply.js?v=immoWheel8" type="module"></script>
     <script src="/js/hub-promo.js?v=hubPromoFast1" type="module"></script>
 </body>
 </html>

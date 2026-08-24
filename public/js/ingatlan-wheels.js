@@ -15,6 +15,7 @@ export function escapeAttr(value) {
 /** Többválasztós mezők (kereső). */
 export const MULTI_WHEEL_KEYS = new Set([
   "ingatlan_lakas_tipus",
+  "ingatlan_tipus_2",
   "allapot",
   "ingatlan_kora",
   "kilatas",

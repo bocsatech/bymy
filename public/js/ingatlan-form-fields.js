@@ -1,107 +1,50 @@
 /**
- * Ingatlan feladás — közös kerék-séma (ugyanaz, mint a kereső), kategória csak élőn.
+ * Ingatlan feladás — ugyanaz a kereső UI, mint /ingatlan.html (kinézet + működés).
+ * Séma: eladó / kiadó / airbnb külön variant.
  */
 
+import { normalizeIngatlanUzletag, INGATLAN_LAKAS_TIPUS, INGATLAN_LAKAS_TIPUS_AIRBNB } from "./ingatlan-fields.js?v=immoWheel5";
 import {
-  INGATLAN_UZLETAG,
-  INGATLAN_LAKAS_TIPUS,
-  INGATLAN_ALLAPOT,
-  INGATLAN_KORA,
-  MIN_BERLETI_IDO,
-  MIN_BERLETI_IDO_ROVID,
-  BUTOROZOTT,
-  KILATAS,
-  TAJOLAS,
-  FUTES,
-  PARKOLAS,
-  KOMFORT,
-  TETOTER,
-  FURDO_WC,
-  EMELET,
-  BELMAGASSAG,
-  KOLTOZHETO,
-  KOLTOZHETO_ROVID,
-  IGEN_MINDEGY,
-  INGATLAN_BOOL_FIELDS,
-  alapteruletOptions,
-  szobaszamOptions,
-  normalizeIngatlanUzletag,
-} from "./ingatlan-fields.js?v=immoWheel3";
-import { fillWheel, initMenuWheel, readWheel, setWheelValue } from "./ingatlan-wheels.js?v=mobile2";
-import { fetchIngatlanWheelSchema, renderIngatlanSchemaHosts } from "./ingatlan-wheel-schema.js?v=immoWheel4";
+  initIngatlanSearch,
+  readIngatlanSearchForm,
+} from "./ingatlan-search.js?v=schemaLive14";
+import { fetchIngatlanWheelSchema } from "./ingatlan-wheel-schema.js?v=immoWheel16";
 
 function removeIngatlanFormFields(form) {
   form?.querySelector("#ingatlan-fields")?.remove();
 }
 
-function syncRovidMenus(root) {
-  const tipus = readWheel(root.querySelector('[data-wheel="ingatlan_lakas_tipus"]'));
-  const rovid = tipus === "rovid_berles" || String(tipus).split(",").includes("rovid_berles");
-  const berleti = root.querySelector('[data-wheel="min_berleti_ido"]');
-  const koltoz = root.querySelector('[data-wheel="koltozheto"]');
-  const prevBerleti = readWheel(berleti);
-  const prevKoltoz = readWheel(koltoz);
-  fillWheel(berleti, (rovid ? MIN_BERLETI_IDO_ROVID : MIN_BERLETI_IDO).filter((o) => o.value), {
-    emptyLabel: "Válasszon",
-  });
-  fillWheel(koltoz, (rovid ? KOLTOZHETO_ROVID : KOLTOZHETO).filter((o) => o.value), {
-    emptyLabel: "Válasszon",
-  });
-  initMenuWheel(berleti, { emptyLabel: "Válasszon" });
-  initMenuWheel(koltoz, { emptyLabel: "Válasszon" });
-  const berletiOpts = new Set([...(berleti?.querySelectorAll(".immo-wheel-opt") || [])].map((b) => b.dataset.value));
-  const koltozOpts = new Set([...(koltoz?.querySelectorAll(".immo-wheel-opt") || [])].map((b) => b.dataset.value));
-  setWheelValue(berleti, berletiOpts.has(prevBerleti) ? prevBerleti : "");
-  setWheelValue(koltoz, koltozOpts.has(prevKoltoz) ? prevKoltoz : "");
+function readPickerTip(form) {
+  const el = form?.elements?.namedItem("ingatlan_tipus");
+  const raw = el instanceof RadioNodeList ? el[0]?.value : el?.value;
+  return String(raw ?? "")
+    .split(",")[0]
+    .trim()
+    .toLowerCase();
 }
 
-function fillAllWheels(root) {
-  fillWheel(root.querySelector('[data-wheel="alapterulet"]'), alapteruletOptions(), { emptyLabel: "Válasszon" });
-  fillWheel(root.querySelector('[data-wheel="szobaszam"]'), szobaszamOptions(), { emptyLabel: "Válasszon" });
-  fillWheel(root.querySelector('[data-wheel="ingatlan_lakas_tipus"]'), INGATLAN_LAKAS_TIPUS.filter((o) => o.value), {
-    emptyLabel: "Válasszon",
-  });
-  fillWheel(root.querySelector('[data-wheel="allapot"]'), INGATLAN_ALLAPOT.filter((o) => o.value), {
-    emptyLabel: "Válasszon",
-  });
-  fillWheel(root.querySelector('[data-wheel="ingatlan_kora"]'), INGATLAN_KORA.filter((o) => o.value), {
-    emptyLabel: "Válasszon",
-  });
-  fillWheel(root.querySelector('[data-wheel="min_berleti_ido"]'), MIN_BERLETI_IDO.filter((o) => o.value), {
-    emptyLabel: "Válasszon",
-  });
-  fillWheel(root.querySelector('[data-wheel="butorozott"]'), BUTOROZOTT.filter((o) => o.value), {
-    emptyLabel: "Válasszon",
-  });
-  fillWheel(root.querySelector('[data-wheel="kilatas"]'), KILATAS.filter((o) => o.value), { emptyLabel: "Válasszon" });
-  fillWheel(root.querySelector('[data-wheel="tajolas"]'), TAJOLAS.filter((o) => o.value), { emptyLabel: "Válasszon" });
-  fillWheel(root.querySelector('[data-wheel="futes"]'), FUTES.filter((o) => o.value), { emptyLabel: "Válasszon" });
-  fillWheel(root.querySelector('[data-wheel="parkolas"]'), PARKOLAS.filter((o) => o.value), { emptyLabel: "Válasszon" });
-  fillWheel(root.querySelector('[data-wheel="komfort"]'), KOMFORT.filter((o) => o.value), { emptyLabel: "Válasszon" });
-  fillWheel(root.querySelector('[data-wheel="tetoter"]'), TETOTER.filter((o) => o.value), { emptyLabel: "Válasszon" });
-  fillWheel(root.querySelector('[data-wheel="furdo_wc"]'), FURDO_WC.filter((o) => o.value), { emptyLabel: "Válasszon" });
-  fillWheel(root.querySelector('[data-wheel="emelet"]'), EMELET.filter((o) => o.value), { emptyLabel: "Válasszon" });
-  fillWheel(root.querySelector('[data-wheel="belmagassag"]'), BELMAGASSAG.filter((o) => o.value), {
-    emptyLabel: "Válasszon",
-  });
-  fillWheel(root.querySelector('[data-wheel="koltozheto"]'), KOLTOZHETO.filter((o) => o.value), {
-    emptyLabel: "Válasszon",
-  });
-  for (const bool of INGATLAN_BOOL_FIELDS) {
-    fillWheel(root.querySelector(`[data-wheel="${bool.field_key}"]`), IGEN_MINDEGY.filter((o) => o.value), {
-      emptyLabel: "Válasszon",
-    });
-  }
-  root.querySelectorAll("[data-wheel]").forEach((wheel) => {
-    initMenuWheel(wheel, { emptyLabel: "Válasszon" });
-  });
-  syncRovidMenus(root);
+/** Picker tip → admin kerék-séma variant. */
+export function schemaVariantFromImmoTip(tip) {
+  const t = String(tip || "").trim().toLowerCase();
+  if (t === "elado") return "elado-ingatlan";
+  if (t === "airbnb") return "airbnb";
+  return "ingatlan"; // kiado (master)
+}
+
+function defaultUzletagFromTip(tip) {
+  const t = String(tip || "").trim().toLowerCase();
+  if (t === "elado") return "kinal";
+  return "berbe";
 }
 
 export async function ensureIngatlanFormFields(form) {
   if (!form) return null;
+  const tip = readPickerTip(form);
+  const variant = schemaVariantFromImmoTip(tip);
   const existing = form.querySelector("#ingatlan-fields");
-  if (existing?.dataset.schemaReady === "1") return existing;
+  if (existing?.dataset.schemaReady === "1" && existing.dataset.schemaVariant === variant) {
+    return existing;
+  }
 
   const host =
     form.querySelector('.step-panel[data-step="1"] .card > .card-body') ||
@@ -112,25 +55,27 @@ export async function ensureIngatlanFormFields(form) {
 
   const root = document.createElement("div");
   root.id = "ingatlan-fields";
-  root.className = "ingatlan-fields immo-post-panel";
+  root.className = "ingatlan-fields";
   root.setAttribute("data-ingatlan-only", "1");
+  root.dataset.schemaVariant = variant;
 
-  const catOpts = INGATLAN_UZLETAG.map((o) => `<option value="${o.value}">${o.label}</option>`).join("");
-
+  /* Kereső UI mezők — cím + Kategória (Keres/Kínál) csak az ingatlan keresőn kell. */
+  const uz = defaultUzletagFromTip(tip);
   root.innerHTML = `
-    <article class="immo-search-panel immo-post-panel__card">
-      <h2 class="immo-search-title">Ingatlan adatai</h2>
-      <div class="immo-search-form">
-        <label class="immo-field">
-          <span class="immo-label">Kategória</span>
-          <select class="immo-control" id="ingatlan_uzletag" name="ingatlan_uzletag">${catOpts}</select>
-        </label>
-        <div id="immo-post-schema-main" class="immo-schema-grid" aria-label="Fő mezők"></div>
-        <div class="immo-more" id="immo-post-more" hidden>
-          <div id="immo-post-schema-more" class="immo-schema-grid" aria-label="További feltételek"></div>
+    <article class="immo-search-panel immo-search-panel--post">
+      <div class="immo-search-form" id="immo-search-form">
+        <input type="hidden" id="immo-uzletag" name="ingatlan_uzletag" value="${uz}" />
+
+        <div id="immo-schema-main" class="immo-schema-grid" aria-label="Fő mezők"></div>
+
+        <div class="immo-more" id="immo-more" hidden>
+          <div id="immo-schema-more" class="immo-schema-grid" aria-label="További feltételek"></div>
         </div>
-        <div class="immo-actions-secondary" style="margin-top:0.35rem">
-          <button type="button" class="immo-action" id="immo-post-tovabbi" aria-expanded="false" aria-controls="immo-post-more">További feltételek</button>
+
+        <div class="immo-actions immo-actions--post">
+          <div class="immo-actions-secondary">
+            <button type="button" class="immo-action" id="immo-tovabbi" aria-expanded="false" aria-controls="immo-more">További feltételek</button>
+          </div>
         </div>
       </div>
     </article>
@@ -138,39 +83,28 @@ export async function ensureIngatlanFormFields(form) {
 
   host.prepend(root);
 
-  const schema = await fetchIngatlanWheelSchema();
-  renderIngatlanSchemaHosts(
-    root.querySelector("#immo-post-schema-main"),
-    root.querySelector("#immo-post-schema-more"),
+  const searchRoot = root.querySelector("#immo-search-form");
+  const schema = await fetchIngatlanWheelSchema(variant);
+  await initIngatlanSearch({
+    form: searchRoot,
     schema,
-    "post"
-  );
+    defaultUzletag: defaultUzletagFromTip(tip),
+    lakasTipusOptions: tip === "airbnb" ? INGATLAN_LAKAS_TIPUS_AIRBNB : INGATLAN_LAKAS_TIPUS,
+    enableTipus2: tip !== "airbnb",
+    onSearch: () => {},
+  });
+
+  /* Feladáskor: „Keresési hely” → „Település” (kereső oldalon változatlan). */
+  root.querySelectorAll('[data-schema-field="keresesi_hely"] .immo-label, label[data-schema-field="keresesi_hely"] .immo-label').forEach((el) => {
+    el.textContent = "Település";
+  });
+  const helyInput = root.querySelector('#immo-keresesi_hely, [name="keresesi_hely"]');
+  if (helyInput) {
+    helyInput.setAttribute("placeholder", "Település neve");
+    helyInput.setAttribute("aria-label", "Település");
+  }
+
   root.dataset.schemaReady = "1";
-
-  const uz = root.querySelector("#ingatlan_uzletag");
-  if (uz) uz.value = "berbe";
-
-  fillAllWheels(root);
-
-  root.querySelectorAll("[data-wheel]").forEach((wheel) => {
-    const name = wheel.getAttribute("data-wheel");
-    const hidden = root.querySelector(`input[name="${name}"]`);
-    if (hidden?.value) setWheelValue(wheel, hidden.value);
-  });
-
-  const morePanel = root.querySelector("#immo-post-more");
-  const moreBtn = root.querySelector("#immo-post-tovabbi");
-  moreBtn?.addEventListener("click", () => {
-    const open = !!morePanel?.hidden;
-    if (morePanel) morePanel.hidden = !open;
-    moreBtn.setAttribute("aria-expanded", open ? "true" : "false");
-    moreBtn.textContent = open ? "Kevesebb feltétel" : "További feltételek";
-  });
-
-  root.querySelector('[data-wheel="ingatlan_lakas_tipus"]')?.addEventListener("immo-wheel-change", () => {
-    syncRovidMenus(root);
-  });
-
   return root;
 }
 
@@ -223,7 +157,7 @@ export async function syncIngatlanFormVisibility(form) {
     root.hidden = false;
     root.removeAttribute("hidden");
     root.style.removeProperty("display");
-    const uz = root.querySelector("#ingatlan_uzletag");
+    const uz = root.querySelector("#immo-uzletag");
     if (uz) uz.value = normalizeIngatlanUzletag(uz.value);
   }
 
@@ -253,7 +187,6 @@ export async function syncIngatlanFormVisibility(form) {
     });
   });
 
-  // Régi #allapot a form-gridben ne ütközzön a kerék hiddennel.
   form.querySelectorAll('.step-panel[data-step="1"] .form-grid select#allapot, .step-panel[data-step="1"] .form-grid #allapot').forEach((el) => {
     if (el.closest("#ingatlan-fields")) return;
     el.removeAttribute("id");
@@ -278,14 +211,7 @@ export async function syncIngatlanFormVisibility(form) {
 }
 
 export function readIngatlanFormValues(form) {
-  const root = form?.querySelector("#ingatlan-fields");
-  if (!root) return {};
-  const out = {};
-  const uz = root.querySelector("#ingatlan_uzletag");
-  if (uz) out.ingatlan_uzletag = normalizeIngatlanUzletag(uz.value);
-  root.querySelectorAll("[data-wheel]").forEach((wheel) => {
-    const name = wheel.getAttribute("data-wheel");
-    if (name) out[name] = readWheel(wheel);
-  });
-  return out;
+  const searchRoot = form?.querySelector("#ingatlan-fields #immo-search-form");
+  if (!searchRoot) return {};
+  return readIngatlanSearchForm(searchRoot);
 }

@@ -3,19 +3,74 @@
  * Alapértelmezés megegyezik a szerver defaulttal; élő config: GET /api/level1/ingatlan-wheel-schema
  */
 
-import { escapeHtml, escapeAttr, wheelFieldHtml } from "./ingatlan-wheels.js?v=mobile2";
+import { escapeHtml, escapeAttr, wheelFieldHtml } from "./ingatlan-wheels.js?v=mobile5";
 
 export const WHEEL_COLS = 12;
 
+/** Admin: Kiado (master) + eladó + Airbnb */
+export const INGATLAN_WHEEL_ADMIN_CATEGORIES = ["ingatlan", "elado-ingatlan", "airbnb"];
+
+export function normalizeIngatlanWheelVariant(value) {
+  const v = String(value ?? "")
+    .trim()
+    .toLowerCase();
+  if (v === "elado-ingatlan" || v === "elado_ingatlan" || v === "eladoingatlan") return "elado-ingatlan";
+  if (v === "airbnb") return "airbnb";
+  return "ingatlan";
+}
+
+export function isIngatlanWheelAdminCategory(category) {
+  const v = String(category ?? "")
+    .trim()
+    .toLowerCase();
+  if (v === "elado-ingatlan" || v === "elado_ingatlan" || v === "eladoingatlan") return true;
+  if (v === "airbnb") return true;
+  if (v === "ingatlan") return true;
+  return false;
+}
+
+/** Élő keresőn osztott (min–max) kerék — adminban egy csempe. */
+export const INGATLAN_DUAL_RANGE_GROUPS = [
+  {
+    id: "ar",
+    title: "Ár",
+    adminLabel: "Ár (osztott kerék · min–max)",
+    tolKey: "ar_tol",
+    igKey: "ar_ig",
+    unit: "",
+    ariaLabel: "Ár tartomány",
+  },
+  {
+    id: "alapterulet",
+    title: "Alapterület",
+    adminLabel: "Alapterület (osztott kerék · min–max)",
+    tolKey: "alapterulet_tol",
+    igKey: "alapterulet_ig",
+    unit: "m²",
+    ariaLabel: "Alapterület tartomány",
+  },
+  {
+    id: "emelet",
+    title: "Emelet",
+    adminLabel: "Emelet (osztott kerék · min–max)",
+    tolKey: "emelet_tol",
+    igKey: "emelet_ig",
+    unit: "",
+    ariaLabel: "Emelet tartomány",
+  },
+];
+
+
 const FIELD_DEFS = [
   { field_key: "keresesi_hely", label: "Keresési hely", kind: "text", surfaces: ["search"] },
-  { field_key: "ar_tol", label: "Ár min.", kind: "wheel", surfaces: ["search"] },
-  { field_key: "ar_ig", label: "Ár max.", kind: "wheel", surfaces: ["search"] },
-  { field_key: "alapterulet_tol", label: "Alapterület min.", kind: "wheel", surfaces: ["search"] },
-  { field_key: "alapterulet_ig", label: "Alapterület max.", kind: "wheel", surfaces: ["search"] },
-  { field_key: "alapterulet", label: "Alapterület", kind: "wheel", surfaces: ["post"] },
+  { field_key: "ar_tol", label: "Ár · min", kind: "wheel", surfaces: ["search"] },
+  { field_key: "ar_ig", label: "Ár · max", kind: "wheel", surfaces: ["search"] },
+  { field_key: "alapterulet_tol", label: "Alapterület · min", kind: "wheel", surfaces: ["search"] },
+  { field_key: "alapterulet_ig", label: "Alapterület · max", kind: "wheel", surfaces: ["search"] },
+  { field_key: "alapterulet", label: "Alapterület (feladás)", kind: "wheel", surfaces: ["post"] },
   { field_key: "szobaszam", label: "Szobaszám", kind: "wheel", surfaces: ["search", "post"] },
   { field_key: "ingatlan_lakas_tipus", label: "Típus", kind: "wheel", surfaces: ["search", "post"] },
+  { field_key: "ingatlan_tipus_2", label: "Típus 2", kind: "wheel", surfaces: ["search", "post"] },
   { field_key: "allapot", label: "Állapot", kind: "wheel", surfaces: ["search", "post"] },
   { field_key: "ingatlan_kora", label: "Ingatlan kora", kind: "wheel", surfaces: ["search", "post"] },
   { field_key: "min_berleti_ido", label: "Minimum bérleti idő", kind: "wheel", surfaces: ["search", "post"] },
@@ -27,9 +82,9 @@ const FIELD_DEFS = [
   { field_key: "komfort", label: "Komfort", kind: "wheel", surfaces: ["search", "post"] },
   { field_key: "tetoter", label: "Tetőtér", kind: "wheel", surfaces: ["search", "post"] },
   { field_key: "furdo_wc", label: "Fürdő és WC", kind: "wheel", surfaces: ["search", "post"] },
-  { field_key: "emelet", label: "Emelet", kind: "wheel", surfaces: ["post"] },
-  { field_key: "emelet_tol", label: "Emelet min.", kind: "wheel", surfaces: ["search"] },
-  { field_key: "emelet_ig", label: "Emelet max.", kind: "wheel", surfaces: ["search"] },
+  { field_key: "emelet", label: "Emelet (feladás)", kind: "wheel", surfaces: ["post"] },
+  { field_key: "emelet_tol", label: "Emelet · min", kind: "wheel", surfaces: ["search"] },
+  { field_key: "emelet_ig", label: "Emelet · max", kind: "wheel", surfaces: ["search"] },
   { field_key: "belmagassag", label: "Belmagasság", kind: "wheel", surfaces: ["search", "post"] },
   { field_key: "koltozheto", label: "Mikortól költözhető", kind: "wheel", surfaces: ["search", "post"] },
   { field_key: "lift", label: "Lift", kind: "wheel", surfaces: ["search", "post"] },
@@ -43,7 +98,7 @@ const FIELD_DEFS = [
   { field_key: "gepesitett", label: "Gépesített", kind: "wheel", surfaces: ["search", "post"] },
   { field_key: "kisallat_megengedett", label: "Kisállat megengedett", kind: "wheel", surfaces: ["search", "post"] },
   { field_key: "dohanyzas_megengedett", label: "Dohányzás megengedett", kind: "wheel", surfaces: ["search", "post"] },
-  { field_key: "ar_ft_min", label: "Ár Ft min.", kind: "wheel", surfaces: ["search"] },
+  { field_key: "ar_ft_min", label: "Ár Ft min. (régi)", kind: "wheel", surfaces: ["search"] },
 ];
 
 const DEF_BY_KEY = new Map(FIELD_DEFS.map((d) => [d.field_key, d]));
@@ -61,12 +116,14 @@ export function isSpacer(cell) {
 function defaultRaw() {
   return [
     { field_key: "keresesi_hely", section: "main", row: 1, col: 1, colSpan: 12, hidden: false },
-    { field_key: "ar_tol", section: "main", row: 2, col: 1, colSpan: 3, hidden: false },
-    { field_key: "ar_ig", section: "main", row: 2, col: 4, colSpan: 3, hidden: false },
-    { field_key: "alapterulet_tol", section: "main", row: 2, col: 7, colSpan: 3, hidden: false },
-    { field_key: "alapterulet_ig", section: "main", row: 2, col: 10, colSpan: 3, hidden: false },
-    { field_key: "szobaszam", section: "main", row: 3, col: 1, colSpan: 3, hidden: false },
-    { field_key: "alapterulet", section: "main", row: 2, col: 7, colSpan: 3, hidden: false },
+    { field_key: "ar_tol", section: "main", row: 2, col: 1, colSpan: 6, hidden: false },
+    { field_key: "ar_ig", section: "main", row: 2, col: 7, colSpan: 6, hidden: false },
+    { field_key: "alapterulet_tol", section: "main", row: 3, col: 1, colSpan: 6, hidden: false },
+    { field_key: "alapterulet_ig", section: "main", row: 3, col: 7, colSpan: 6, hidden: false },
+    { field_key: "szobaszam", section: "main", row: 4, col: 1, colSpan: 3, hidden: false },
+    /* Fő szűrők legalja — meglévő sorok (1–4) érintetlenek. */
+    { field_key: "ingatlan_tipus_2", section: "main", row: 5, col: 1, colSpan: 6, hidden: false },
+    { field_key: "alapterulet", section: "more", row: 12, col: 1, colSpan: 6, hidden: false },
     { field_key: "ingatlan_lakas_tipus", section: "more", row: 1, col: 1, colSpan: 6, hidden: false },
     { field_key: "allapot", section: "more", row: 1, col: 7, colSpan: 6, hidden: false },
     { field_key: "ingatlan_kora", section: "more", row: 2, col: 1, colSpan: 6, hidden: false },
@@ -81,7 +138,7 @@ function defaultRaw() {
     { field_key: "furdo_wc", section: "more", row: 6, col: 7, colSpan: 6, hidden: false },
     { field_key: "emelet_tol", section: "more", row: 7, col: 1, colSpan: 6, hidden: false },
     { field_key: "emelet_ig", section: "more", row: 7, col: 7, colSpan: 6, hidden: false },
-    { field_key: "emelet", section: "more", row: 7, col: 1, colSpan: 6, hidden: false },
+    { field_key: "emelet", section: "more", row: 12, col: 7, colSpan: 6, hidden: false },
     { field_key: "belmagassag", section: "more", row: 8, col: 1, colSpan: 6, hidden: false },
     { field_key: "koltozheto", section: "more", row: 8, col: 7, colSpan: 6, hidden: false },
     { field_key: "lift", section: "more", row: 9, col: 1, colSpan: 3, hidden: false },
@@ -95,11 +152,52 @@ function defaultRaw() {
     { field_key: "gepesitett", section: "more", row: 11, col: 1, colSpan: 3, hidden: false },
     { field_key: "kisallat_megengedett", section: "more", row: 11, col: 4, colSpan: 3, hidden: false },
     { field_key: "dohanyzas_megengedett", section: "more", row: 11, col: 7, colSpan: 3, hidden: false },
-    { field_key: "ar_ft_min", section: "more", row: 11, col: 10, colSpan: 3, hidden: false },
+    { field_key: "ar_ft_min", section: "more", row: 11, col: 10, colSpan: 3, hidden: true },
   ];
 }
 
 const FALLBACK = new Map(defaultRaw().map((c) => [c.field_key, c]));
+
+
+export function syncDualRangeCells(cells) {
+  const map = new Map(cells.filter((c) => !isSpacer(c)).map((c) => [c.field_key, c]));
+  for (const g of INGATLAN_DUAL_RANGE_GROUPS) {
+    const tol = map.get(g.tolKey);
+    const ig = map.get(g.igKey);
+    if (!tol || !ig) continue;
+    if (tol.hidden !== ig.hidden) {
+      const show = !tol.hidden || !ig.hidden;
+      tol.hidden = !show;
+      ig.hidden = !show;
+    }
+    const section = tol.section === "more" || ig.section === "more" ? "more" : "main";
+    tol.section = section;
+    ig.section = section;
+    ig.row = tol.row;
+
+    const totalSpan = clamp(Number(tol.colSpan) + Number(ig.colSpan), 2, WHEEL_COLS);
+    let startCol = clamp(Math.min(Number(tol.col) || 1, Number(ig.col) || 1), 1, WHEEL_COLS);
+    if (startCol + totalSpan - 1 > WHEEL_COLS) {
+      startCol = Math.max(1, WHEEL_COLS - totalSpan + 1);
+    }
+
+    let leftSpan = clamp(Number(tol.colSpan) || 1, 1, totalSpan - 1);
+    let rightSpan = totalSpan - leftSpan;
+    if (rightSpan < 1) {
+      leftSpan = Math.max(1, Math.floor(totalSpan / 2));
+      rightSpan = totalSpan - leftSpan;
+    }
+
+    tol.col = startCol;
+    tol.colSpan = leftSpan;
+    ig.col = startCol + leftSpan;
+    ig.colSpan = rightSpan;
+  }
+}
+
+export function dualGroupForField(fieldKey) {
+  return INGATLAN_DUAL_RANGE_GROUPS.find((g) => g.tolKey === fieldKey || g.igKey === fieldKey) || null;
+}
 
 export function normalizeIngatlanWheelSchema(raw) {
   const incoming = raw && typeof raw === "object" ? raw : {};
@@ -158,6 +256,25 @@ export function normalizeIngatlanWheelSchema(raw) {
     });
   }
   for (const sp of spacers) cells.push(sp);
+  syncDualRangeCells(cells);
+
+  /* Típus 2 csak akkor kap alap pozíciót, ha még soha nem volt a sémában.
+     Mentett elrendezést (main/more/hidden) soha ne írjuk felül. */
+  const tip2 = cells.find((c) => c.field_key === "ingatlan_tipus_2");
+  if (tip2 && !byKey.has("ingatlan_tipus_2")) {
+    const maxMain = Math.max(
+      0,
+      ...cells
+        .filter((c) => c.section === "main" && c.field_key !== "ingatlan_tipus_2" && !isSpacer(c))
+        .map((c) => Number(c.row) || 0)
+    );
+    tip2.section = "main";
+    tip2.row = Math.max(5, maxMain + 1);
+    tip2.col = 1;
+    tip2.colSpan = 6;
+    tip2.hidden = false;
+  }
+
   cells.sort((a, b) => {
     const sa = a.section === "more" ? 1 : 0;
     const sb = b.section === "more" ? 1 : 0;
@@ -195,25 +312,31 @@ export function createSpacerCell(section = "main", row = 1) {
   };
 }
 
-let cachedSchema = null;
+let cachedSchemaByVariant = new Map();
 
-export async function fetchIngatlanWheelSchema() {
+export async function fetchIngatlanWheelSchema(variant = "ingatlan") {
+  const key = String(variant || "ingatlan").trim() || "ingatlan";
+  if (cachedSchemaByVariant.has(key)) return cachedSchemaByVariant.get(key);
   try {
-    const res = await fetch("/api/level1/ingatlan-wheel-schema", { credentials: "same-origin" });
+    const q = key === "ingatlan" ? "" : `?variant=${encodeURIComponent(key)}`;
+    const res = await fetch(`/api/level1/ingatlan-wheel-schema${q}`, { credentials: "same-origin" });
     const data = await res.json().catch(() => ({}));
     if (res.ok && data.schema) {
-      cachedSchema = normalizeIngatlanWheelSchema(data.schema);
-      return cachedSchema;
+      const normalized = normalizeIngatlanWheelSchema(data.schema);
+      cachedSchemaByVariant.set(key, normalized);
+      return normalized;
     }
   } catch {
     /* offline / default */
   }
-  cachedSchema = defaultIngatlanWheelSchema();
-  return cachedSchema;
+  const fallback = defaultIngatlanWheelSchema();
+  cachedSchemaByVariant.set(key, fallback);
+  return fallback;
 }
 
-export function getCachedIngatlanWheelSchema() {
-  return cachedSchema || defaultIngatlanWheelSchema();
+export function getCachedIngatlanWheelSchema(variant = "ingatlan") {
+  const key = String(variant || "ingatlan").trim() || "ingatlan";
+  return cachedSchemaByVariant.get(key) || defaultIngatlanWheelSchema();
 }
 
 function cellStyle(cell) {
@@ -232,14 +355,76 @@ function textFieldHtml(name, label) {
 
 function cellHtml(cell) {
   if (isSpacer(cell)) {
-    return `<div class="immo-schema-spacer" style="${cellStyle(cell)}" aria-hidden="true"></div>`;
+    const col = clamp(cell.col, 1, WHEEL_COLS);
+    const span = clamp(cell.colSpan, 1, WHEEL_COLS - col + 1);
+    const row = clamp(cell.row, 1, 40);
+    return `<div class="immo-schema-spacer" data-grid-col="${col}" data-grid-span="${span}" data-grid-row="${row}" style="${cellStyle(cell)}" aria-hidden="true"></div>`;
   }
   const def = DEF_BY_KEY.get(cell.field_key);
   const label = cell.label || def?.label || cell.field_key;
   const kind = cell.kind || def?.kind || "wheel";
   const inner =
     kind === "text" ? textFieldHtml(cell.field_key, label) : wheelFieldHtml(cell.field_key, label);
-  return `<div class="immo-schema-cell" data-schema-field="${escapeAttr(cell.field_key)}" style="${cellStyle(cell)}">${inner}</div>`;
+  const col = clamp(cell.col, 1, WHEEL_COLS);
+  const span = clamp(cell.colSpan, 1, WHEEL_COLS - col + 1);
+  const row = clamp(cell.row, 1, 40);
+  return `<div class="immo-schema-cell" data-schema-field="${escapeAttr(cell.field_key)}" data-grid-col="${col}" data-grid-span="${span}" data-grid-row="${row}" style="${cellStyle(cell)}">${inner}</div>`;
+}
+
+function dualPlacement(tol, ig) {
+  const startCol = Math.min(tol.col, ig.col);
+  const endCol = Math.max(tol.col + tol.colSpan - 1, ig.col + ig.colSpan - 1);
+  const span = Math.max(1, endCol - startCol + 1);
+  const row = tol.row || ig.row || 1;
+  return { startCol, span, row };
+}
+
+function dualHalfHtml(fieldKey, halfClass) {
+  const def = DEF_BY_KEY.get(fieldKey);
+  const label = def?.label || fieldKey;
+  const kind = def?.kind || "wheel";
+  const inner =
+    kind === "text" ? textFieldHtml(fieldKey, label) : wheelFieldHtml(fieldKey, label);
+  return `<div class="immo-schema-cell immo-dual-range__half immo-dual-range__half--${halfClass}" data-schema-field="${escapeAttr(fieldKey)}">${inner}</div>`;
+}
+
+function dualRangeBlockHtml(group, tol, ig) {
+  const { startCol, span, row } = dualPlacement(tol, ig);
+  const style = `grid-column:${startCol} / span ${span};grid-row:${row}`;
+  const unitHtml = group.unit
+    ? `<span class="immo-dual-range__unit" aria-hidden="true">${escapeHtml(group.unit)}</span>`
+    : "";
+  return `<div class="immo-dual-range-block" data-range="${escapeAttr(group.id)}" data-grid-col="${startCol}" data-grid-span="${span}" data-grid-row="${row}" style="${style}">
+  <div class="immo-dual-range" data-range="${escapeAttr(group.id)}" aria-label="${escapeAttr(group.ariaLabel || group.title)}">
+    <span class="immo-label immo-dual-range__title">${escapeHtml(group.title)}</span>
+    ${dualHalfHtml(group.tolKey, "min")}
+    <span class="immo-dual-range__sep" aria-hidden="true">–</span>
+    ${dualHalfHtml(group.igKey, "max")}
+    ${unitHtml}
+  </div>
+</div>`;
+}
+
+function sectionItemsHtml(cells) {
+  const byKey = new Map(cells.map((c) => [c.field_key, c]));
+  const skip = new Set();
+  const out = [];
+  for (const cell of cells) {
+    if (skip.has(cell.field_key)) continue;
+    const group = dualGroupForField(cell.field_key);
+    if (group) {
+      const tol = byKey.get(group.tolKey);
+      const ig = byKey.get(group.igKey);
+      if (tol && ig && !tol.hidden && !ig.hidden) {
+        skip.add(group.tolKey);
+        skip.add(group.igKey);
+        out.push(dualRangeBlockHtml(group, tol, ig));
+        continue;
+      }
+    }
+    out.push(cellHtml(cell));
+  }
+  return out.join("");
 }
 
 /** Kitölti a main/more hostokat a sémából (kategória nélkül). */
@@ -252,12 +437,12 @@ export function renderIngatlanSchemaHosts(mainHost, moreHost, schema, surface) {
   if (mainHost) {
     mainHost.className = "immo-schema-grid";
     mainHost.style.gridTemplateRows = `repeat(${maxMain}, auto)`;
-    mainHost.innerHTML = main.map(cellHtml).join("");
+    mainHost.innerHTML = sectionItemsHtml(main);
   }
   if (moreHost) {
     moreHost.className = "immo-schema-grid";
     moreHost.style.gridTemplateRows = `repeat(${maxMore}, auto)`;
-    moreHost.innerHTML = more.map(cellHtml).join("");
+    moreHost.innerHTML = sectionItemsHtml(more);
   }
 }
 

@@ -2369,8 +2369,16 @@ body.site-app #ad-form.ad-form--ingatlan #ingatlan-fields.form-grid {
   display: block !important;
 }
 
-body.site-app #ad-form.ad-form--ingatlan .immo-post-panel__card {
+body.site-app #ad-form.ad-form--ingatlan .immo-search-panel {
   margin: 0;
+}
+
+body.site-app #ad-form.ad-form--ingatlan .step-panel[data-step="1"] .card:has(#ingatlan-fields),
+body.site-app #ad-form.ad-form--ingatlan .step-panel[data-step="1"] .card-body:has(#ingatlan-fields) {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  padding: 0;
 }
 
 body.site-app #ad-form.ad-form--ingatlan .step-panel[data-step="1"] .form-grid:has(#ingatlan-fields) {

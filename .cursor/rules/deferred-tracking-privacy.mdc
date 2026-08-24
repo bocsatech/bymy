@@ -1,0 +1,27 @@
+---
+description: Elhalasztott téma — tracking, adatvédelem, marketing adatpiac (később folytatni)
+alwaysApply: true
+---
+
+# Elhalasztott: tracking / adatvédelem / marketing
+
+A felhasználó **később** akar ezzel foglalkozni. Ne kezdd el magadtól implementálni; ha előjön, emlékeztesd és folytasd a korábbi beszélgetésből.
+
+## Miről volt szó
+
+1. **Saját oldal (bymy):** mit tárolunk (fiók, visit log, IP, path) — nincs GPS, nincs klasszikus fingerprint, nincs külső böngésző-előzmény.
+2. **Általános piac:** hogyan trackingelnek más oldalak (cookie, pixel, fingerprint, CAPI, first-party).
+3. **Törvény (EU/HU):** GDPR, ePrivacy, consent vs szükséges cookie; fingerprint ≈ azonosító.
+4. **Valóság vs marketing:** platformok (Google/Meta) a központ; cookie banner gyakran formális.
+5. **Technika / erőforrás / vevők:** mire használják az adatot, kik veszik (hirdetők, DSP, broker).
+
+## Folytatás tippek
+
+- EU-kompatibilis stack autó–ingatlan piactérhez
+- IP hash / visit retenció
+- Adatvédelmi tájékoztató vázlat
+- First-party marketing (consent + hírlevél szerverre)
+
+## Beszélgetés
+
+Agent transcript: [Tracking és adatvédelem](b3c9fd75-1459-4417-ba6c-186520b91c80)

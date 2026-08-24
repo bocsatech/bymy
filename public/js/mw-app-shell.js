@@ -10,7 +10,9 @@
   var page = body.getAttribute("data-site-page") || "";
   var isHub = body.classList.contains("hub-page--feed") || page === "hub";
   var isFiok = body.classList.contains("fiok-page") || page === "fiok";
-  var CSS_HREF = "/css/hub-mobile-app.css?v=mwTabAll1";
+  /* Hirdetésfeladás: asztali web chrome (fejléc + űrlap), ne mobil app-shell */
+  var isPostAd = page === "hirdetesfeladas";
+  var CSS_HREF = "/css/hub-mobile-app.css?v=mwPostDesk1";
 
   function ensureCss() {
     if (document.querySelector('link[href*="hub-mobile-app.css"]')) return;
@@ -31,7 +33,7 @@
   }
 
   function injectTop() {
-    if (isHub || isFiok) return;
+    if (isHub || isFiok || isPostAd) return;
     if (document.querySelector(".mw-app-top")) return;
 
     var pages = [
@@ -110,6 +112,12 @@
   }
 
   function injectTabbar() {
+    if (isPostAd) {
+      document.querySelectorAll(".mw-app-tabbar").forEach(function (el) {
+        el.remove();
+      });
+      return;
+    }
     if (document.querySelector(".mw-app-tabbar")) {
       markActiveTabs(document.querySelector(".mw-app-tabbar"));
       return;
@@ -205,5 +213,5 @@
   ensureCss();
   injectTop();
   injectTabbar();
-  bindScrollHide();
+  if (!isPostAd) bindScrollHide();
 })();

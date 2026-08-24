@@ -281,13 +281,26 @@ body.home-page .site-side-card {
   }
 }
 
-/* Hirdetésfeladás tipp-panel: csak asztali / széles nézet */
+/* Hirdetésfeladás: mobilon is asztali webes elrendezés / tipp panel */
 @media (max-width: 900px) {
-  body[data-site-page="hirdetesfeladas"] .automax-panel {
-    display: none !important;
-  }
-
   body[data-site-page="hirdetesfeladas"] .site-layout--wide .site-center--automax {
     grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+  }
+
+  body[data-site-page="hirdetesfeladas"] .automax-panel {
+    display: block !important;
+    order: 2;
+    border-left: 0;
+    border-top: 0;
+    margin-top: 0.25rem;
+  }
+
+  body[data-site-page="hirdetesfeladas"] .automax-main {
+    order: 1;
+  }
+
+  body[data-site-page="hirdetesfeladas"] .automax-panel-content {
+    padding: 1rem 1.1rem 1.15rem;
   }
 }

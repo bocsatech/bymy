@@ -9,9 +9,25 @@
     return String(t || "").replace(/\s+/g, " ").trim();
   }
 
+  /** Cím: sortörések megmaradnak (1. sor márka/modell/típus, 2. sor → típus). */
+  function cleanTitleMultiline(t) {
+    return String(t || "")
+      .replace(/\r\n/g, "\n")
+      .replace(/\u00a0/g, " ")
+      .split("\n")
+      .map((line) => line.replace(/\s+/g, " ").trim())
+      .filter(Boolean)
+      .join("\n");
+  }
+
   function textOf(el) {
     if (!el) return "";
     return clean(el.innerText || el.textContent || "");
+  }
+
+  function titleOf(el) {
+    if (!el) return "";
+    return cleanTitleMultiline(el.innerText || el.textContent || "");
   }
 
   function isChromeName(t) {
@@ -20,11 +36,12 @@
   }
 
   function isBadTitle(t) {
+    const v = clean(t);
     return (
-      !t ||
-      t.length < 4 ||
-      t.length > 140 ||
-      /javascript|gyorsnézet|gyorsnezet|hiba!|belépés|haszn[aá]ltaut[oó]\.hu|regisztr/i.test(t)
+      !v ||
+      v.length < 4 ||
+      v.length > 240 ||
+      /javascript|gyorsnézet|gyorsnezet|hiba!|belépés|haszn[aá]ltaut[oó]\.hu|regisztr/i.test(v)
     );
   }
 
@@ -44,14 +61,14 @@
     ];
     for (const sel of selectors) {
       for (const el of doc.querySelectorAll(sel)) {
-        const t = textOf(el);
+        const t = titleOf(el);
         if (!isBadTitle(t)) return t;
       }
     }
     for (const el of doc.querySelectorAll("dt, td.bal.pontos, th, td.pontos")) {
       const label = textOf(el);
       if (!/c[ií]m|hirdet[eé]s c[ií]me|m[aá]rka|gy[aá]rtm[aá]ny/i.test(label)) continue;
-      const val = textOf(el.nextElementSibling);
+      const val = titleOf(el.nextElementSibling);
       if (!isBadTitle(val) && /c[ií]m/i.test(label)) return val;
     }
     const docTitle = clean((doc.title || "").replace(/\s*[|–-].*$/, ""));

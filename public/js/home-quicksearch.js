@@ -2,7 +2,8 @@
  * Gyorskereső az autó hero panelen — elrendezés: GET /api/level1/form-layout?category=szemelyauto-search
  */
 
-import { applyAutoSearchLayout, readLayoutFilterValues } from "./auto-search-layout.js?v=searchLayout3";
+import { applyAutoSearchLayout, readLayoutFilterValues } from "./auto-search-layout.js?v=autoDrums1";
+import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums } from "./auto-search-drums.js?v=autoDrums1";
 
 export function initHomeQuickSearch({ onSearch = () => {} } = {}) {
   const form = document.getElementById("home-qs-form");
@@ -14,6 +15,7 @@ export function initHomeQuickSearch({ onSearch = () => {} } = {}) {
   const statusEl = document.getElementById("home-qs-status");
 
   function readQuickSearchValues() {
+    if (form.dataset.drumsMounted === "1") return readAutoDrumFilterValues(form);
     return readLayoutFilterValues(form);
   }
 
@@ -33,7 +35,11 @@ export function initHomeQuickSearch({ onSearch = () => {} } = {}) {
 
   form.addEventListener("reset", () => {
     requestAnimationFrame(() => {
-      form.querySelector("#qs-gyartmany")?.dispatchEvent(new Event("change"));
+      if (form.dataset.drumsMounted === "1") {
+        resetAutoSearchDrums(form);
+      } else {
+        form.querySelector("#qs-gyartmany")?.dispatchEvent(new Event("change"));
+      }
       setMoreOpen(false);
       onSearch({});
     });
@@ -46,7 +52,8 @@ export function initHomeQuickSearch({ onSearch = () => {} } = {}) {
   setMoreOpen(false);
 
   applyAutoSearchLayout(form)
-    .then(() => {
+    .then(async () => {
+      await mountAutoSearchDrums(form);
       if (statusEl) {
         statusEl.hidden = true;
         statusEl.textContent = "";

@@ -297,10 +297,17 @@ export function readLayoutFilterValues(form) {
     const n = Number(String(value).replace(/\D/g, ""));
     return Number.isFinite(n) ? n : null;
   };
+  const seen = new Set();
   form.querySelectorAll("[data-filter-key]").forEach((el) => {
     const key = el.getAttribute("data-filter-key");
-    if (!key) return;
-    const raw = el.value?.trim() ?? "";
+    if (!key || seen.has(key)) return;
+    // Dobkerék: a hidden input a forrás (select már nincs / mellőzve)
+    if (el.tagName === "SELECT" && form.querySelector(`input[type="hidden"][data-filter-key="${key}"]`)) {
+      return;
+    }
+    if (el.matches?.("[data-wheel]")) return;
+    seen.add(key);
+    const raw = String(el.value ?? "").trim();
     if (!raw) return;
     if (key.endsWith("_tol") || key.endsWith("_ig")) {
       out[key] = numOrNull(raw);

@@ -591,3 +591,101 @@ body[data-site-page="teherauto"] .auto-search-tabs {
     width: 100%;
   }
 }
+
+/* Mobil dobkerék kereső — ingatlan stílus a fehér panelben */
+@media (max-width: 900px) {
+  body.immo-drum-active .auto-search-panel,
+  body.immo-drum-active .auto-qs-drums {
+    overflow: visible;
+  }
+
+  .auto-search-panel .auto-qs-drums.immo-search-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+  }
+
+  .auto-search-panel .auto-qs-drums .home-qs-layout-main,
+  .auto-search-panel .auto-qs-drums .home-qs-more-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+  }
+
+  .auto-search-panel .auto-qs-drums .home-qs-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+  }
+
+  .auto-search-panel .auto-qs-drums .immo-schema-cell,
+  .auto-search-panel .auto-qs-drums .immo-dual-range-block {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .auto-search-panel .auto-qs-drums .immo-dual-range-block {
+    padding-top: 0.42rem;
+    position: relative;
+    box-sizing: border-box;
+  }
+
+  .auto-search-panel .auto-qs-drums .immo-wheel-wrap {
+    width: 100%;
+  }
+
+  .auto-search-panel .auto-qs-drums .immo-dual-range {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 3rem;
+    min-height: 3rem;
+    border: 1px solid #d0d5dd;
+    border-radius: 8px;
+    background: #f8fafc;
+    overflow: visible;
+    box-sizing: border-box;
+  }
+
+  .auto-search-panel .auto-qs-drums .immo-dual-range__title {
+    position: absolute;
+    top: -0.52rem;
+    left: 0.6rem;
+    padding: 0 0.28rem;
+    background: #fff;
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: #667085;
+    z-index: 2;
+  }
+
+  .auto-search-panel .auto-qs-drums .immo-dual-range__half {
+    flex: 1 1 0;
+    min-width: 0;
+    height: 3rem;
+  }
+
+  .auto-search-panel .auto-qs-drums .immo-dual-range__half .immo-label {
+    display: none !important;
+  }
+
+  .auto-search-panel .auto-qs-drums .immo-dual-range__sep {
+    flex: 0 0 auto;
+    padding: 0 0.15rem;
+    color: #94a3b8;
+    pointer-events: none;
+  }
+
+  .auto-search-panel .auto-qs-drums .immo-dual-range__unit {
+    flex: 0 0 auto;
+    padding: 0 0.85rem;
+    font-weight: 700;
+    border-left: 1px solid #e2e8f0;
+    background: #fff;
+  }
+
+  .auto-search-panel .auto-qs-drums .home-qs-row--actions {
+    margin-top: 0.35rem;
+  }
+}

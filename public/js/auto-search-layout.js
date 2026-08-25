@@ -13,6 +13,7 @@ const PRICE_MAX = 50_000_000;
 const KM_STEP = 10_000;
 const KM_MAX = 500_000;
 const LE_STEPS = [50, 75, 100, 125, 150, 175, 200, 225, 250, 300, 350, 400, 500, 600, 800];
+const CCM_STEPS = [600, 800, 1000, 1200, 1400, 1600, 1800, 2000, 2200, 2500, 3000, 3500, 4000, 5000, 6000];
 
 /** Keresőben soha ne jelenjen meg (év elég, hónap nem kell). */
 const SEARCH_OMIT_FIELDS = new Set([
@@ -27,7 +28,7 @@ const RANGE_SPECS = {
   vetelar: { tol: "ar_tol", ig: "ar_ig", kind: "price" },
   km: { tol: "km_tol", ig: "km_ig", kind: "km" },
   teljesitmeny_le: { tol: "le_tol", ig: "le_ig", kind: "le" },
-  hengerurtartalom: { tol: "ccm_tol", ig: "ccm_ig", kind: "number" },
+  hengerurtartalom: { tol: "ccm_tol", ig: "ccm_ig", kind: "ccm" },
   sajat_tomeg: { tol: "sajat_tomeg_tol", ig: "sajat_tomeg_ig", kind: "number" },
   ossztomeg: { tol: "ossztomeg_tol", ig: "ossztomeg_ig", kind: "number" },
   nyomatek_nm: { tol: "nyomatek_nm_tol", ig: "nyomatek_nm_ig", kind: "number" },
@@ -147,6 +148,9 @@ export function optionsForAutoFilterKey(filterKey, emptyLabel = "Mindegy") {
   }
   if (key === "le_tol" || key === "le_ig") {
     return withEmpty(LE_STEPS.map((n) => ({ value: String(n), label: `${n} LE` })));
+  }
+  if (key === "ccm_tol" || key === "ccm_ig") {
+    return withEmpty(CCM_STEPS.map((n) => ({ value: String(n), label: `${n.toLocaleString("hu-HU")} cm³` })));
   }
   if (key === "uzemanyagQuick" || key === "uzemanyag") {
     return withEmpty(
@@ -272,6 +276,9 @@ function wireRangeSelects(root) {
     } else if (spec.kind === "le") {
       fillNumberSelect(tol, LE_STEPS, "-tól", (n) => `${n} LE`);
       fillNumberSelect(ig, LE_STEPS, "-ig", (n) => `${n} LE`);
+    } else if (spec.kind === "ccm") {
+      fillNumberSelect(tol, CCM_STEPS, "-tól", (n) => `${n.toLocaleString("hu-HU")} cm³`);
+      fillNumberSelect(ig, CCM_STEPS, "-ig", (n) => `${n.toLocaleString("hu-HU")} cm³`);
     }
   }
 }

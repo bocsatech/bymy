@@ -1,13 +1,13 @@
 /**
  * Mobil autó kereső — ingatlan-stílusú dobkerék.
- * Összevont: gyártási év, vételár. Többi: sima dob.
+ * Összevont: gyártási év, vételár, km, teljesítmény, hengerűrtartalom.
  * Asztali: változatlan (select).
  */
 
 import { fillWheel, setWheelValue, readWheel } from "./ingatlan-wheels.js?v=scrollLock4";
 import { initDrumWheel, applyDrumModeClass } from "./immo-drum-picker.js?v=scrollLock4";
 import { fetchVehicleCatalog } from "./vehicle-catalog-client.js";
-import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=autoDrums3";
+import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=autoDrums4";
 
 const MOBILE_MQ = "(max-width: 900px)";
 
@@ -29,6 +29,33 @@ const DUAL_RANGES = [
     tol: "ar_tol",
     ig: "ar_ig",
     unit: "Ft",
+  },
+  {
+    fieldKey: "km",
+    id: "km",
+    title: "Km óra állás",
+    ariaLabel: "Km óra állás tartomány",
+    tol: "km_tol",
+    ig: "km_ig",
+    unit: "km",
+  },
+  {
+    fieldKey: "teljesitmeny_le",
+    id: "teljesitmeny_le",
+    title: "Teljesítmény",
+    ariaLabel: "Teljesítmény tartomány",
+    tol: "le_tol",
+    ig: "le_ig",
+    unit: "LE",
+  },
+  {
+    fieldKey: "hengerurtartalom",
+    id: "hengerurtartalom",
+    title: "Hengerűrtartalom",
+    ariaLabel: "Hengerűrtartalom tartomány",
+    tol: "ccm_tol",
+    ig: "ccm_ig",
+    unit: "cm³",
   },
 ];
 

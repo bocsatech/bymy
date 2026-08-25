@@ -7,7 +7,7 @@
 import { fillWheel, setWheelValue, readWheel } from "./ingatlan-wheels.js?v=drumScroll5";
 import { initDrumWheel, applyDrumModeClass, syncDrumWheelDisplay } from "./immo-drum-picker.js?v=drumScroll5";
 import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=drumScroll5";
-import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=autoDrums10";
+import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=autoDrums11";
 
 const MOBILE_MQ = "(max-width: 900px)";
 
@@ -183,17 +183,17 @@ function convertRangePairToDual(wrap, cfg) {
   const minCell = buildWheelCell({
     filterKey: cfg.tol,
     wheelName: cfg.tol,
-    label: "Tól",
+    label: "",
     options: tolOpts,
-    emptyLabel: "Tól",
+    emptyLabel: "Mindegy",
     halfClass: "immo-dual-range__half immo-dual-range__half--min",
   });
   const maxCell = buildWheelCell({
     filterKey: cfg.ig,
     wheelName: cfg.ig,
-    label: "Ig",
+    label: "",
     options: igOpts,
-    emptyLabel: "Ig",
+    emptyLabel: "Mindegy",
     halfClass: "immo-dual-range__half immo-dual-range__half--max",
   });
 

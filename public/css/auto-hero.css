@@ -849,26 +849,21 @@ body[data-site-page="teherauto"] .auto-search-tabs {
   align-items: center;
   gap: 0.55rem;
   transform: translate(-50%, -50%);
-  pointer-events: none;
-}
-
-.auto-drum-portal__ring,
-.auto-drum-portal__done {
   pointer-events: auto;
 }
 
 .auto-drum-portal .immo-drum-wheel-ring,
 .auto-drum-portal__ring {
   position: relative;
-  width: var(--immo-drum-ring-w, 8.5rem);
-  height: 8.5rem;
+  width: var(--immo-drum-ring-w, 9rem);
+  height: 9rem;
   border-radius: 1rem;
   border: 1px dashed #94a3b8;
   background: #fff;
   box-shadow: 0 10px 32px rgba(15, 23, 42, 0.22);
   overflow: hidden;
   box-sizing: border-box;
-  touch-action: none;
+  touch-action: pan-y;
 }
 
 .auto-drum-portal .immo-drum-inline-highlight {
@@ -888,13 +883,13 @@ body[data-site-page="teherauto"] .auto-search-tabs {
   position: absolute;
   inset: 0;
   overflow-x: hidden;
-  overflow-y: auto;
+  overflow-y: scroll;
   scroll-snap-type: y mandatory;
   -webkit-overflow-scrolling: touch;
-  touch-action: none;
+  touch-action: pan-y;
   overscroll-behavior: contain;
   scrollbar-width: none;
-  padding: calc(4.25rem - 20px) 0.45rem;
+  padding: calc(4.5rem - 20px) 0.5rem;
   box-sizing: border-box;
   z-index: 2;
 }

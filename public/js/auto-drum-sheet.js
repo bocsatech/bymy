@@ -3,8 +3,8 @@
  * Ugyanaz a gyűrűs kinézet, mint az ingatlan dob; a hero stacking contexten kívül.
  */
 
-import { readWheel, setWheelValue } from "./ingatlan-wheels.js?v=drumScroll4";
-import { syncDrumWheelDisplay } from "./immo-drum-picker.js?v=drumScroll4";
+import { readWheel, setWheelValue } from "./ingatlan-wheels.js?v=drumScroll5";
+import { syncDrumWheelDisplay } from "./immo-drum-picker.js?v=drumScroll5";
 
 const ITEM_H = 40;
 let activePortal = null;
@@ -93,63 +93,49 @@ function syncRingWidth(ring, scrollEl) {
   ring.style.setProperty("--immo-drum-ring-w", `${Math.max(7.5 * 16, Math.ceil(max + 28))}px`);
 }
 
-function bindPortalPan(scrollEl, ring) {
-  let lastY = 0;
-  let active = false;
+function bindPortalNativeScroll(scrollEl, ring) {
+  let startY = 0;
   let moved = false;
 
-  ring.addEventListener(
+  /* Natív overflow görgetés (ugyanaz, ami a sheetnél ment) — nincs preventDefault. */
+  scrollEl.addEventListener(
     "touchstart",
     (event) => {
-      if (!event.touches?.[0]) return;
-      lastY = event.touches[0].clientY;
-      active = true;
+      startY = event.touches?.[0]?.clientY ?? 0;
       moved = false;
     },
     { passive: true }
   );
 
-  ring.addEventListener(
+  scrollEl.addEventListener(
     "touchmove",
     (event) => {
-      if (!active || !event.touches?.[0]) return;
-      const y = event.touches[0].clientY;
-      const dy = y - lastY;
-      lastY = y;
-      if (!dy) return;
-      if (Math.abs(dy) > 1.5) moved = true;
-      event.preventDefault();
-      scrollEl.scrollTop -= dy;
-      paintPortal(scrollEl, ring);
-      ring.dataset.drumDragged = moved ? "1" : "";
+      const y = event.touches?.[0]?.clientY ?? startY;
+      if (Math.abs(y - startY) > 4) moved = true;
     },
-    { passive: false }
+    { passive: true }
   );
 
-  const end = () => {
-    active = false;
-    if (moved) {
-      const snap = nearestPortalItem(scrollEl, ring);
-      if (snap) scrollToPortalItem(scrollEl, ring, snap);
-      paintPortal(scrollEl, ring);
-      ring.dataset.drumDragged = "1";
-      window.setTimeout(() => {
-        delete ring.dataset.drumDragged;
-      }, 80);
-    }
+  const snapEnd = () => {
+    if (!moved) return;
+    const snap = nearestPortalItem(scrollEl, ring);
+    if (snap) scrollToPortalItem(scrollEl, ring, snap);
+    paintPortal(scrollEl, ring);
+    ring.dataset.drumDragged = "1";
+    window.setTimeout(() => {
+      delete ring.dataset.drumDragged;
+    }, 80);
   };
-  ring.addEventListener("touchend", end);
-  ring.addEventListener("touchcancel", end);
+  scrollEl.addEventListener("touchend", snapEnd);
+  scrollEl.addEventListener("touchcancel", snapEnd);
 
-  /* Asztali / egér */
-  ring.addEventListener(
+  scrollEl.addEventListener(
     "wheel",
     (event) => {
-      event.preventDefault();
-      scrollEl.scrollTop += event.deltaY;
-      paintPortal(scrollEl, ring);
+      /* hagyjuk a natív wheel scrollt; csak festünk */
+      requestAnimationFrame(() => paintPortal(scrollEl, ring));
     },
-    { passive: false }
+    { passive: true }
   );
 }
 
@@ -222,7 +208,7 @@ export function openAutoDrumSheet(wheel, trigger) {
   });
 
   scrollEl.addEventListener("scroll", () => paintPortal(scrollEl, ring), { passive: true });
-  bindPortalPan(scrollEl, ring);
+  bindPortalNativeScroll(scrollEl, ring);
 
   document.body.appendChild(root);
   document.body.classList.add("auto-drum-portal-open");

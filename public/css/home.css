@@ -2063,6 +2063,8 @@ body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-n
 }
 
 .home-grid-card-photo-track {
+  position: absolute;
+  inset: 0;
   display: flex;
   width: 100%;
   height: 100%;
@@ -2085,11 +2087,13 @@ body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-n
 }
 
 .home-grid-card-photo-slide {
+  position: relative;
   flex: 0 0 100%;
   width: 100%;
   height: 100%;
   scroll-snap-align: start;
   scroll-snap-stop: always;
+  overflow: hidden;
 }
 
 .home-grid-card-photo-img {
@@ -2098,6 +2102,8 @@ body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-n
   height: 100%;
   object-fit: cover;
   object-position: center center;
+  transform: scale(1.18);
+  transform-origin: center center;
 }
 
 .home-grid-card-photo-count {

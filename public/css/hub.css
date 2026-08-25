@@ -1130,13 +1130,19 @@ body.hub-page--feed {
   font-weight: 650;
 }
 
+.hf-card--listing .hf-card-media {
+  background-color: #dfe3e8;
+}
+
 .hf-card--listing .hf-card-media img {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
   object-position: center center;
-  /* HA / stúdió fotók gyakran fehér keretet tartalmaznak — enyhe nagyítás levágja */
-  transform: scale(1.06);
+  /* HA thumbok gyakran fehér keretesek — erősebb crop */
+  transform: scale(1.24);
   transform-origin: center center;
 }
 

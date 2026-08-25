@@ -432,8 +432,12 @@
     object-position: center center;
   }
 
+  body.hub-page--feed .hf-card--listing .hf-card-media {
+    background-color: #dfe3e8;
+  }
+
   body.hub-page--feed .hf-card--listing .hf-card-media img {
-    transform: scale(1.06);
+    transform: scale(1.24);
     transform-origin: center center;
   }
 

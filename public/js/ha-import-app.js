@@ -48,7 +48,7 @@ function setMode(mode) {
 
 function bookmarkletHref(mode) {
   const origin = location.origin;
-  const src = `${origin}/js/ha-import-bookmarklet.js?v=haImp8`;
+  const src = `${origin}/js/ha-import-bookmarklet.js?v=haImp9`;
   return `javascript:(function(){var o=${JSON.stringify(origin)};var m=${JSON.stringify(mode)};function go(){window.BymyHaImport.run({origin:o,mode:m});}if(window.BymyHaImport){go();return;}var s=document.createElement('script');s.src=${JSON.stringify(src)};s.onload=go;s.onerror=function(){alert('A hasznaltauto.hu blokkolta a Bymy scriptet. Másold a hirdetés URL-jét a Bymy Autóimport oldalra.');};document.documentElement.appendChild(s);})();`;
 }
 
@@ -160,7 +160,7 @@ function isPublicListingUrl(value) {
   try {
     const url = new URL(value);
     const host = url.hostname.replace(/^www\./, "").toLowerCase();
-    return host === "hasznaltauto.hu" && /\/szemelyauto\/.+-\d{5,}$/i.test(url.pathname);
+    return host === "hasznaltauto.hu" && /\/[^/?#]+\/.+-\d{5,}\/?$/i.test(url.pathname);
   } catch {
     return false;
   }
@@ -212,6 +212,32 @@ async function runUrlImport() {
 }
 
 let importBusy = false;
+const pendingHaImports = [];
+let haImportReady = false;
+
+function acceptHaImportMessage(event) {
+  const data = event.data;
+  if (!data || data.type !== "bymy-ha-import") return null;
+  const origin = String(event.origin || "");
+  if (!origin.includes("hasznaltauto.hu") && origin !== location.origin) return null;
+  return data;
+}
+
+/** Listener azonnal — ne vesszen el a postMessage, amíg a belépés fut. */
+window.addEventListener("message", (event) => {
+  const data = acceptHaImportMessage(event);
+  if (!data) return;
+  try {
+    sessionStorage.setItem("bymy-ha-import-pending", JSON.stringify(data));
+  } catch {
+    /* ignore quota / private mode */
+  }
+  if (!haImportReady) {
+    pendingHaImports.push(data);
+    return;
+  }
+  runMessageImport(data);
+});
 
 async function runMessageImport(data) {
   const pages = Array.isArray(data.pages) ? data.pages : [];
@@ -219,7 +245,10 @@ async function runMessageImport(data) {
     setStatus("Üres import — nyisd meg a hirdetést, majd próbáld újra.", "err");
     return;
   }
-  if (importBusy) return;
+  if (importBusy) {
+    pendingHaImports.push(data);
+    return;
+  }
   importBusy = true;
   setStatus(pages.length > 1 ? `Mentés (${pages.length} hirdetés)…` : "Hirdetés feldolgozása…");
   try {
@@ -234,6 +263,10 @@ async function runMessageImport(data) {
     setStatus(error.message ?? "Import sikertelen.", "err");
   } finally {
     importBusy = false;
+    if (pendingHaImports.length) {
+      const next = pendingHaImports.shift();
+      queueMicrotask(() => runMessageImport(next));
+    }
   }
 }
 
@@ -303,15 +336,22 @@ export async function initHaImportPage() {
     }
   });
 
-  window.addEventListener("message", (event) => {
-    const data = event.data;
-    if (!data || data.type !== "bymy-ha-import") return;
-    const origin = String(event.origin || "");
-    if (!origin.includes("hasznaltauto.hu") && origin !== location.origin) return;
-    runMessageImport(data);
-  });
-
-  if (new URLSearchParams(location.search).has("ha")) {
+  haImportReady = true;
+  try {
+    const raw = sessionStorage.getItem("bymy-ha-import-pending");
+    if (raw) {
+      sessionStorage.removeItem("bymy-ha-import-pending");
+      pendingHaImports.push(JSON.parse(raw));
+    }
+  } catch {
+    /* ignore */
+  }
+  if (pendingHaImports.length) {
+    const queued = pendingHaImports.splice(0);
+    for (const data of queued) {
+      await runMessageImport(data);
+    }
+  } else if (new URLSearchParams(location.search).has("ha")) {
     setStatus("Várom a hasznaltauto.hu oldal adatait…");
   }
 }

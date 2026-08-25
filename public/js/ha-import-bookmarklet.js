@@ -220,7 +220,10 @@
     const title = pickTitle(doc) || fieldFromMap(map, ["Cím", "Hirdetés címe"]);
     const brandRaw = fieldFromMap(map, ["Márka", "Gyártmány"]) || "";
     const modelRaw = fieldFromMap(map, ["Modell"]) || "";
-    const titleParts = title.split(/\s+/).filter(Boolean);
+    const titleParts = String(title || "")
+      .split(/\n+/)[0]
+      .split(/\s+/)
+      .filter(Boolean);
     const brand = isChromeName(brandRaw) ? (isChromeName(titleParts[0]) ? "" : titleParts[0] || "") : brandRaw;
     const model = isChromeName(modelRaw) ? "" : modelRaw;
     const price =
@@ -267,17 +270,28 @@
       };
     };
     for (const m of source.matchAll(/\/gyorsnezet\/[^/"'\s]+\/(\d{5,})/gi)) add(m[1]);
-    for (const m of source.matchAll(/\/szemelyauto\/[^"'?\s]+-(\d{5,})/gi)) add(m[1]);
+    for (const m of source.matchAll(/\/(?:szemelyauto|kishaszonjarmu|haszonjarmu|motorker[^/"'\s]*|agro|lakokocsi)\/[^"'?\s]+-(\d{5,})/gi))
+      add(m[1]);
+    for (const m of source.matchAll(/\/[a-z0-9_-]+\/[^"'?\s/]+\/[^"'?\s]+-(\d{5,})/gi)) add(m[1]);
     for (const m of source.matchAll(/data-(?:id|hirdetesid|adid)=["'](\d{5,})["']/gi)) add(m[1]);
     const self = pickListingId(pageUrl || location.href);
     if (self) add(self);
     return Object.values(byId);
   }
 
+  function isPublicListingPage() {
+    const href = location.href;
+    if (/\/gyorsnezet\//i.test(href)) return true;
+    try {
+      const path = new URL(href).pathname;
+      return /\/[^/?#]+\/.+-\d{5,}\/?$/i.test(path);
+    } catch {
+      return /-\d{5,}(?:[/?#]|$)/.test(href);
+    }
+  }
+
   function isSingleListing() {
-    const href = location.href.toLowerCase();
-    if (href.includes("/gyorsnezet/")) return true;
-    if (/\/szemelyauto\/.+-\d{5,}/i.test(href)) return true;
+    if (isPublicListingPage()) return true;
     return discoverIds().length <= 1 && Boolean(pickListingId(location.href));
   }
 
@@ -298,7 +312,8 @@
       }
     };
     sendTo(window.opener);
-    const w = window.open(`${origin}/import.html?ha=1`, "bymy-ha-import");
+    const targetUrl = `${origin}/beallitasok.html?szekcio=import&ha=1`;
+    const w = window.open(targetUrl, "bymy-ha-import");
     if (!w) {
       if (!window.opener || window.opener.closed) {
         alert("Engedélyezd a felugró ablakot, vagy illeszd be a hirdetés URL-jét a Bymy Autóimport oldalon.");
@@ -310,8 +325,9 @@
     const timer = setInterval(() => {
       n += 1;
       sendTo(w);
-      if (n >= 2) clearInterval(timer);
-    }, 700);
+      sendTo(window.opener);
+      if (n >= 40) clearInterval(timer);
+    }, 500);
   }
 
   async function run(opts) {
@@ -331,7 +347,7 @@
     }
 
     const pages = [];
-    if (mode === "standard" && isSingleListing()) {
+    if (mode === "standard" && (isSingleListing() || isPublicListingPage())) {
       pages.push(extractPage());
     } else {
       const refs = discoverIds().slice(0, MAX_DEALER);

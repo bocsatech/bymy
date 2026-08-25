@@ -616,6 +616,22 @@ body[data-site-page="teherauto"] .auto-search-tabs {
 
 /* Mobil dobkerék kereső — ingatlan stílus a fehér panelben */
 @media (max-width: 900px) {
+  /* Hero stacking context ne nyelje el a dobkerék érintéseit */
+  body[data-site-page="auto"].immo-scroll-locked .auto-search-hero,
+  body[data-site-page="auto"].immo-drum-active .auto-search-hero,
+  body[data-site-page="auto"].immo-scroll-locked .auto-search-hero__stage,
+  body[data-site-page="auto"].immo-drum-active .auto-search-hero__stage {
+    overflow: visible;
+    isolation: auto;
+  }
+
+  body[data-site-page="auto"].immo-scroll-locked .auto-search-panel,
+  body[data-site-page="auto"].immo-drum-active .auto-search-panel {
+    position: relative;
+    z-index: 190;
+    overflow: visible;
+  }
+
   body.immo-drum-active .auto-search-panel,
   body.immo-drum-active .auto-qs-drums,
   .auto-search-panel .auto-qs-drums {
@@ -634,6 +650,15 @@ body[data-site-page="teherauto"] .auto-search-tabs {
 
   .auto-search-panel .auto-qs-drums .immo-wheel-wrap--drum-inline.is-open .immo-drum-inline {
     pointer-events: auto;
+    z-index: 200;
+  }
+
+  .auto-search-panel .auto-qs-drums .immo-schema-cell:has(.immo-wheel-wrap--drum-inline.is-open),
+  .auto-search-panel .auto-qs-drums .immo-dual-range__half:has(.immo-wheel-wrap--drum-inline.is-open),
+  .auto-search-panel .auto-qs-drums .immo-dual-range.has-drum-open {
+    z-index: 200;
+    position: relative;
+    overflow: visible;
   }
 
   .auto-search-panel .auto-qs-drums .immo-drum-inline[hidden] {
@@ -650,6 +675,7 @@ body[data-site-page="teherauto"] .auto-search-tabs {
     box-shadow: 0 8px 28px rgba(15, 23, 42, 0.18);
     overflow: hidden;
     box-sizing: border-box;
+    touch-action: pan-y;
   }
 
   .auto-search-panel .auto-qs-drums .immo-drum-inline-highlight {
@@ -672,6 +698,7 @@ body[data-site-page="teherauto"] .auto-search-tabs {
     overflow-y: auto;
     scroll-snap-type: y mandatory;
     -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
     scrollbar-width: none;
     padding: calc(3.75rem - 20px) 0.35rem;
     box-sizing: border-box;

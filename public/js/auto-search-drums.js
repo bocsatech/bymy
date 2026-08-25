@@ -4,10 +4,10 @@
  * Asztali: változatlan (select).
  */
 
-import { fillWheel, setWheelValue, readWheel } from "./ingatlan-wheels.js?v=scrollLock4";
-import { initDrumWheel, applyDrumModeClass } from "./immo-drum-picker.js?v=scrollLock4";
+import { fillWheel, setWheelValue, readWheel } from "./ingatlan-wheels.js?v=drumScroll1";
+import { initDrumWheel, applyDrumModeClass } from "./immo-drum-picker.js?v=drumScroll1";
 import { fetchVehicleCatalog } from "./vehicle-catalog-client.js";
-import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=autoDrums4";
+import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=autoDrums5";
 
 const MOBILE_MQ = "(max-width: 900px)";
 
@@ -282,8 +282,7 @@ export async function mountAutoSearchDrums(form = document.getElementById("home-
 
   applyDrumModeClass();
   form.classList.add("immo-search-form", "auto-qs-drums");
-  document.body.classList.add("immo-drum-active");
-
+  // Ne zárold az oldalt állandóan — immo-drum-active csak nyitott dobkeréknél kell.
   form.querySelectorAll("[data-qs-field]").forEach((wrap) => {
     const key = wrap.getAttribute("data-qs-field");
     if (SEARCH_OMIT_FIELDS.has(key)) wrap.remove();

@@ -40,6 +40,13 @@ body.immo-cyl-scroll-lock .immo-scroll-blocker {
   pointer-events: none;
 }
 
+/* Auto hero isolation:isolate alatt a dobkerék z-indexe nem üti a fix blockert —
+   nyitott dobnál a blocker ne fogja el az érintést (a document listener így is zár). */
+body.immo-scroll-locked:has(.immo-wheel-wrap--drum-inline.is-open) .immo-scroll-blocker,
+body.immo-drum-active:has(.immo-wheel-wrap--drum-inline.is-open) .immo-scroll-blocker {
+  pointer-events: none !important;
+}
+
 /* Teljes képernyős érintés-blokkoló a nyitott kerék alatt */
 .immo-scroll-blocker {
   position: fixed;

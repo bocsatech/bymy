@@ -20,7 +20,12 @@ let scrollBlockerEl = null;
 
 function isScrollableWheel(el) {
   if (!el?.closest) return null;
-  return el.closest(".immo-drum-inline-scroll") || el.closest(".immo-wheel--menu") || null;
+  return (
+    el.closest(".immo-drum-inline-scroll") ||
+    el.closest(".immo-drum-wheel-ring")?.querySelector(".immo-drum-inline-scroll") ||
+    el.closest(".immo-wheel--menu") ||
+    null
+  );
 }
 
 function isCylinderSurface(el) {

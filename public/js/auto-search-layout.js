@@ -319,7 +319,10 @@ export async function applyAutoSearchLayout(form = document.getElementById("home
   const moreHost = document.getElementById("qs-more-layout");
   const visible = (layout.cells || []).filter((c) => isSearchCellVisible(c));
 
-  if (!visible.length) return layout;
+  if (!visible.length) {
+    hideLegacy(form);
+    return layout;
+  }
 
   hideLegacy(form);
   renderStep(mainHost, layout, 1);

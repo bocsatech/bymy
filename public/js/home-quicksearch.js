@@ -2,8 +2,10 @@
  * Gyorskereső az autó hero panelen — elrendezés: GET /api/level1/form-layout?category=szemelyauto-search
  */
 
-import { applyAutoSearchLayout, readLayoutFilterValues } from "./auto-search-layout.js?v=autoDrums2";
-import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums } from "./auto-search-drums.js?v=autoDrums2";
+import { applyAutoSearchLayout, readLayoutFilterValues } from "./auto-search-layout.js?v=autoDrums3";
+import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums } from "./auto-search-drums.js?v=autoDrums3";
+
+const MOBILE_MQ = "(max-width: 900px)";
 
 export function initHomeQuickSearch({ onSearch = () => {} } = {}) {
   const form = document.getElementById("home-qs-form");
@@ -13,6 +15,7 @@ export function initHomeQuickSearch({ onSearch = () => {} } = {}) {
   const morePanel = document.getElementById("qs-more");
   const advancedBtn = document.getElementById("qs-reszletes");
   const statusEl = document.getElementById("home-qs-status");
+  const mobile = () => window.matchMedia(MOBILE_MQ).matches;
 
   function readQuickSearchValues() {
     if (form.dataset.drumsMounted === "1") return readAutoDrumFilterValues(form);
@@ -26,6 +29,11 @@ export function initHomeQuickSearch({ onSearch = () => {} } = {}) {
     advancedBtn.setAttribute("aria-expanded", open ? "true" : "false");
     advancedBtn.textContent = open ? "Kevesebb szűrő" : "Több szűrő";
     hero?.classList.toggle("is-more-open", open);
+  }
+
+  function setQsReady(ready) {
+    form.classList.toggle("auto-qs-booting", !ready && mobile());
+    form.classList.toggle("is-qs-ready", ready);
   }
 
   form.addEventListener("submit", (event) => {
@@ -50,10 +58,12 @@ export function initHomeQuickSearch({ onSearch = () => {} } = {}) {
   });
 
   setMoreOpen(false);
+  setQsReady(false);
 
   applyAutoSearchLayout(form)
     .then(async () => {
       await mountAutoSearchDrums(form);
+      setQsReady(true);
       if (statusEl) {
         statusEl.hidden = true;
         statusEl.textContent = "";
@@ -61,6 +71,11 @@ export function initHomeQuickSearch({ onSearch = () => {} } = {}) {
     })
     .catch((error) => {
       console.warn("Kereső elrendezés:", error);
+      form.querySelectorAll(".home-qs-static-legacy").forEach((el) => {
+        el.hidden = false;
+        el.style.display = "";
+      });
+      setQsReady(true);
       if (statusEl) {
         statusEl.hidden = false;
         statusEl.textContent = "A kereső elrendezés nem töltődött be. Hard refresh, majd szerver újraindítás.";

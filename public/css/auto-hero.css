@@ -592,6 +592,28 @@ body[data-site-page="teherauto"] .auto-search-tabs {
   }
 }
 
+.auto-search-panel .home-qs-static-legacy[hidden] {
+  display: none !important;
+}
+
+/* Mobil: ne villanjon a select UI a dobkerék előtt */
+@media (max-width: 900px) {
+  .auto-search-panel .home-qs-static-legacy {
+    display: none !important;
+  }
+
+  .auto-search-panel .home-qs-form.auto-qs-booting .home-qs-layout-main,
+  .auto-search-panel .home-qs-form.auto-qs-booting .home-qs-more-layout {
+    visibility: hidden;
+    min-height: 6rem;
+  }
+
+  .auto-search-panel .home-qs-form.auto-qs-booting .home-qs-row--actions {
+    opacity: 0.45;
+    pointer-events: none;
+  }
+}
+
 /* Mobil dobkerék kereső — ingatlan stílus a fehér panelben */
 @media (max-width: 900px) {
   body.immo-drum-active .auto-search-panel,

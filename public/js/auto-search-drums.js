@@ -7,7 +7,7 @@
 import { fillWheel, setWheelValue, readWheel } from "./ingatlan-wheels.js?v=scrollLock4";
 import { initDrumWheel, applyDrumModeClass } from "./immo-drum-picker.js?v=scrollLock4";
 import { fetchVehicleCatalog } from "./vehicle-catalog-client.js";
-import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=autoDrums2";
+import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=autoDrums3";
 
 const MOBILE_MQ = "(max-width: 900px)";
 

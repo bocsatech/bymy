@@ -1,0 +1,14 @@
+---
+description: Kész javítás / feature után mindig commitolj (ne kérdezz)
+alwaysApply: true
+---
+
+# Commit kész munka után
+
+Ha egy feladat (bugfix, feature, perf) **kész** és vannak commitolható változások:
+
+1. **Azonnal commitolj** — ne kérdezz rá („Ha szeretnéd, commitolom”).
+2. Kövesd a szokásos git commit protokollt (status, diff, log, HEREDOC üzenet).
+3. **Ne pusholj**, amíg a felhasználó nem kéri.
+
+Kivétel: félkész / WIP munka, vagy ha a felhasználó kifejezetten azt mondja, hogy ne commitolj.

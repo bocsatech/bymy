@@ -11,9 +11,9 @@ const MODES = {
   standard: {
     title: "Használtautó import",
     startURL: "https://www.hasznaltauto.hu/",
-    steps: "1. Jelentkezz be  ·  2. Nyisd meg EGY autó gyorsnézetét  ·  3. Importálás",
-    action: "Hirdetés importálása",
-    footer: "A jelszavadat nem tároljuk — csak a megnyitott oldal adatait olvassuk ki.",
+    steps: "1. Jelentkezz be  ·  2. Nyisd meg a listát vagy egy hirdetést  ·  3. Importálás",
+    action: "Hirdetés / lista importálása",
+    footer: "Listánál a háttérben végigmegyünk a hirdetéseken (max. 50). A jelszavadat nem tároljuk.",
     openLabel: "hasznaltauto.hu megnyitása",
   },
   dealer: {
@@ -48,7 +48,7 @@ function setMode(mode) {
 
 function bookmarkletHref(mode) {
   const origin = location.origin;
-  const src = `${origin}/js/ha-import-bookmarklet.js?v=haImp11`;
+  const src = `${origin}/js/ha-import-bookmarklet.js?v=haImp12`;
   return `javascript:(function(){var o=${JSON.stringify(origin)};var m=${JSON.stringify(mode)};function go(){window.BymyHaImport.run({origin:o,mode:m});}if(window.BymyHaImport){go();return;}var s=document.createElement('script');s.src=${JSON.stringify(src)};s.onload=go;s.onerror=function(){alert('A hasznaltauto.hu blokkolta a Bymy scriptet. Másold a hirdetés URL-jét a Bymy Autóimport oldalra.');};document.documentElement.appendChild(s);})();`;
 }
 

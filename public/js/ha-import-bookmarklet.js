@@ -293,25 +293,119 @@
     return extractFromDoc(document, location.href);
   }
 
-  function discoverIds(html, pageUrl) {
+  function discoverRefs() {
     const byId = {};
-    const source = String(html || document.documentElement.outerHTML || "");
-    const add = (id) => {
+    const add = (id, extra = {}) => {
       const n = String(id || "").replace(/\D/g, "");
       if (n.length < 5) return;
+      const prev = byId[n] || { id: n };
       byId[n] = {
         id: n,
-        adminUrl: "https://admin.hasznaltauto.hu/gyorsnezet/szemelyauto/" + n,
+        adminUrl:
+          extra.adminUrl ||
+          prev.adminUrl ||
+          "https://admin.hasznaltauto.hu/gyorsnezet/szemelyauto/" + n,
+        publicUrl: extra.publicUrl || prev.publicUrl || "",
       };
     };
-    for (const m of source.matchAll(/\/gyorsnezet\/[^/"'\s]+\/(\d{5,})/gi)) add(m[1]);
-    for (const m of source.matchAll(/\/(?:szemelyauto|kishaszonjarmu|haszonjarmu|motorker[^/"'\s]*|agro|lakokocsi)\/[^"'?\s]+-(\d{5,})/gi))
+
+    for (const a of document.querySelectorAll("a[href]")) {
+      const href = String(a.href || "");
+      const id = pickListingId(href);
+      if (!id) continue;
+      try {
+        const u = new URL(href);
+        const host = u.hostname.replace(/^www\./, "").toLowerCase();
+        if (!host.endsWith("hasznaltauto.hu")) continue;
+        if (/\/gyorsnezet\//i.test(u.pathname)) {
+          add(id, { adminUrl: `${u.origin}${u.pathname}` });
+        } else if (/\/[^/?#]+\/.+-\d{5,}\/?$/i.test(u.pathname)) {
+          add(id, { publicUrl: `${u.origin}${u.pathname}` });
+        }
+      } catch {
+        /* skip */
+      }
+    }
+
+    const source = String(document.documentElement?.outerHTML || "");
+    for (const m of source.matchAll(/\/gyorsnezet\/[^/"'\s]+\/(\d{5,})/gi)) {
       add(m[1]);
-    for (const m of source.matchAll(/\/[a-z0-9_-]+\/[^"'?\s/]+\/[^"'?\s]+-(\d{5,})/gi)) add(m[1]);
-    for (const m of source.matchAll(/data-(?:id|hirdetesid|adid)=["'](\d{5,})["']/gi)) add(m[1]);
-    const self = pickListingId(pageUrl || location.href);
-    if (self) add(self);
+    }
+    for (const m of source.matchAll(
+      /https?:\/\/(?:www\.)?hasznaltauto\.hu\/([^"'?\s]+-\d{5,})/gi
+    )) {
+      const id = pickListingId(m[0]);
+      if (id) add(id, { publicUrl: "https://www.hasznaltauto.hu/" + m[1] });
+    }
+    for (const m of source.matchAll(/data-(?:id|hirdetesid|adid)=["'](\d{5,})["']/gi)) {
+      add(m[1]);
+    }
+    const self = pickListingId(location.href);
+    if (self) {
+      if (/\/gyorsnezet\//i.test(location.href)) add(self, { adminUrl: location.href.split("?")[0] });
+      else if (isPublicListingPage()) add(self, { publicUrl: location.href.split("?")[0] });
+      else add(self);
+    }
     return Object.values(byId);
+  }
+
+  function discoverIds(html, pageUrl) {
+    return discoverRefs().map((ref) => ({ id: ref.id, adminUrl: ref.adminUrl }));
+  }
+
+  function extractListCardFallback(ref) {
+    const id = ref.id;
+    const anchors = [...document.querySelectorAll("a[href]")].filter((a) =>
+      String(a.href || "").includes(id)
+    );
+    let row = null;
+    for (const a of anchors) {
+      row = a.closest(".talalati-sor, .row, tr, article, li, .hirdetes, [class*='hirdetes']");
+      if (row) break;
+    }
+    const text = clean((row || document.body)?.innerText || "").slice(0, 2000);
+    const title = clean(anchors[0]?.innerText || text.split("\n")[0] || "");
+    const price = ((text.match(/(\d[\d\s.]{3,})\s*Ft/i) || [])[1] || "").replace(/\s/g, "");
+    const km = ((text.match(/(\d[\d\s.]*)\s*km/i) || [])[0] || "");
+    const year = ((text.match(/\b((?:19|20)\d{2})(?:\/\d{1,2})?\b/) || [])[1] || "");
+    let imageUrl = "";
+    const img = row?.querySelector("img[src], img[data-src]");
+    const raw = img?.currentSrc || img?.src || img?.getAttribute("data-src") || "";
+    if (/^https?:\/\//i.test(raw) && !/logo|icon|sprite/i.test(raw)) imageUrl = raw;
+    return {
+      url: ref.publicUrl || ref.adminUrl || location.href,
+      listingId: id,
+      visibleTitle: isBadTitle(title) ? title : title,
+      visibleImage: imageUrl,
+      price,
+      km,
+      year,
+      map: {},
+      bodyText: text,
+      felszereltseg: [],
+      html: "",
+      fromListCard: true,
+    };
+  }
+
+  async function extractRefPage(ref) {
+    const onAdmin = /admin\.hasznaltauto\.hu$/i.test(location.hostname.replace(/^www\./, ""));
+    const candidates = onAdmin
+      ? [ref.adminUrl, ref.publicUrl]
+      : [ref.publicUrl, ref.adminUrl];
+    for (const url of candidates.filter(Boolean)) {
+      try {
+        const page = await extractFromUrl(url);
+        const mapCount = page?.map ? Object.keys(page.map).length : 0;
+        if (page && (mapCount >= 3 || (page.visibleTitle && !isBadTitle(page.visibleTitle)))) {
+          page.listingId = page.listingId || ref.id;
+          return page;
+        }
+      } catch {
+        /* try next */
+      }
+    }
+    return extractListCardFallback(ref);
   }
 
   function isPublicListingPage() {
@@ -327,7 +421,7 @@
 
   function isSingleListing() {
     if (isPublicListingPage()) return true;
-    return discoverIds().length <= 1 && Boolean(pickListingId(location.href));
+    return discoverRefs().length <= 1 && Boolean(pickListingId(location.href));
   }
 
   async function extractFromUrl(url) {
@@ -382,24 +476,25 @@
     }
 
     const pages = [];
-    if (mode === "standard" && (isSingleListing() || isPublicListingPage())) {
+    if (mode === "standard" && isSingleListing()) {
       pages.push(extractPage());
     } else {
-      const refs = discoverIds().slice(0, MAX_DEALER);
+      const refs = discoverRefs().slice(0, MAX_DEALER);
       if (!refs.length) {
         alert(
           mode === "dealer"
             ? "Nem találtunk autót a listán. Görgess le a táblázatig, vagy lapozz, majd próbáld újra."
-            : "Nyisd meg egy autó gyorsnézetét / hirdetés oldalát, majd kattints újra."
+            : "Nyisd meg a járműlistát (vagy egy hirdetést), görgess le, majd kattints újra."
         );
         return;
       }
-      if (mode === "standard" && refs.length === 1) {
+      if (mode === "standard" && refs.length === 1 && isPublicListingPage()) {
         pages.push(extractPage());
       } else {
         for (let i = 0; i < refs.length; i += 1) {
           try {
-            pages.push(await extractFromUrl(refs[i].adminUrl));
+            const page = await extractRefPage(refs[i]);
+            if (page) pages.push(page);
           } catch {
             /* skip one */
           }
@@ -408,7 +503,7 @@
     }
 
     if (!pages.length) {
-      alert("Nem sikerült kiolvasni a hirdetést.");
+      alert("Nem sikerült kiolvasni a hirdetést a listából.");
       return;
     }
 
@@ -421,5 +516,5 @@
     });
   }
 
-  root.BymyHaImport = { run, extractPage, discoverIds };
+  root.BymyHaImport = { run, extractPage, discoverIds, discoverRefs };
 })(window);

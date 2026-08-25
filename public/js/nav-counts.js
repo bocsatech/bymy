@@ -44,4 +44,9 @@ export async function initNavCounts() {
   });
 }
 
-initNavCounts();
+// Ne azonnal — a hirdetés / lista API-nak elsőbbsége legyen.
+if (typeof requestIdleCallback === "function") {
+  requestIdleCallback(() => initNavCounts(), { timeout: 4000 });
+} else {
+  setTimeout(initNavCounts, 2000);
+}

@@ -1,4 +1,4 @@
-import { fetchListing, fetchListings, recordListingView, deleteListingFromDb } from "./db-client.js?v=openFast2";
+import { fetchListing, fetchListings, recordListingView, deleteListingFromDb } from "./db-client.js?v=openFast3";
 import { getAuthUser, getDisplayName, getProfile } from "./site-auth.js?v=auth20260805localdb9";
 import { startConversation, sendMessage } from "./messages-api.js?v=msgLive1";
 import { canMessageListing, openListingMessage } from "./start-listing-message.js?v=msgLive1";

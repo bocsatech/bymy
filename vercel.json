@@ -1,6 +1,7 @@
 {
   "framework": null,
   "buildCommand": "node scripts/embed-ad-form.mjs",
+  "regions": ["fra1"],
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api" }
   ],

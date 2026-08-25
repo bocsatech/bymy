@@ -1282,12 +1282,15 @@ async function sendPasswordResetEmail(email, resetToken, baseUrl) {
 async function handleAuthApi(req, res, pathname) {
   try {
     const token = getSessionTokenFromRequest(req);
-    const currentUser = await getUserBySessionToken(token);
 
     if (pathname === "/api/auth/me" && req.method === "GET") {
-      sendJson(res, 200, { user: currentUser });
+      // Könnyű session — ne húzzuk a profile_json / avatar base64-et minden oldalon.
+      const me = token ? await getUserBySessionToken(token, { light: true }) : null;
+      sendJson(res, 200, { user: me });
       return;
     }
+
+    const currentUser = token ? await getUserBySessionToken(token) : null;
 
     if (pathname === "/api/auth/db" && req.method === "GET") {
       const admin = await getLevel1AdminBySession(getLevel1TokenFromRequest(req));

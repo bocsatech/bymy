@@ -88,9 +88,14 @@ const SELECT_OPTIONS = {
 const SEARCH_LABEL_SHORT = {
   szemelyek: "Személyek",
   megye: "Megye",
+  telepules: "Település",
+  iranyitoszam: "Irányítószám",
 };
 
-const NARROW_FIELD_KEYS = new Set(["szemelyek", "megye", "ajtok", "telepules", "iranyitoszam"]);
+const NARROW_FIELD_KEYS = new Set(["szemelyek", "megye", "ajtok", "iranyitoszam"]);
+
+/** Szabad szöveges keresőmezők — ne legyenek dobkerék. */
+const TEXT_FIELD_KEYS = new Set(["telepules", "iranyitoszam"]);
 
 let cachedLayout = null;
 
@@ -268,9 +273,15 @@ function fieldHtml(cell) {
       <select class="home-qs-control" data-filter-key="${key}"></select>
     </label>`;
   }
-  return `<label class="home-qs-field ${width}" data-qs-field="${key}">
+  const attrs =
+    key === "iranyitoszam"
+      ? 'inputmode="numeric" maxlength="4" autocomplete="postal-code"'
+      : key === "telepules"
+        ? 'autocomplete="address-level2"'
+        : 'autocomplete="off"';
+  return `<label class="home-qs-field home-qs-field--text ${width}" data-qs-field="${key}">
     <span class="home-qs-label">${label}</span>
-    <input class="home-qs-control" type="text" data-filter-key="${key}" placeholder="Mindegy" autocomplete="off" />
+    <input class="home-qs-control" type="text" data-filter-key="${key}" placeholder="Mindegy" ${attrs} />
   </label>`;
 }
 

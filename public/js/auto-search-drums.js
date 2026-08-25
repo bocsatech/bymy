@@ -7,7 +7,7 @@
 import { fillWheel, setWheelValue, readWheel } from "./ingatlan-wheels.js?v=drumScroll6";
 import { initDrumWheel, applyDrumModeClass, syncDrumWheelDisplay } from "./immo-drum-picker.js?v=drumScroll6";
 import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=drumScroll6";
-import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=autoDrums12";
+import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=autoDrums13";
 
 const MOBILE_MQ = "(max-width: 900px)";
 
@@ -321,6 +321,7 @@ export async function mountAutoSearchDrums(form = document.getElementById("home-
     if (wrap.closest(".immo-dual-range-block")) return;
     const key = wrap.getAttribute("data-qs-field");
     if (dualKeys.has(key) || SEARCH_OMIT_FIELDS.has(key)) return;
+    if (wrap.querySelector("input.home-qs-control[type='text']")) return;
     if (wrap.querySelectorAll("select.home-qs-control").length >= 2) {
       convertRangePairToTwoDrums(wrap);
       return;
@@ -336,6 +337,9 @@ export async function mountAutoSearchDrums(form = document.getElementById("home-
 export function resetAutoSearchDrums(form = document.getElementById("home-qs-form")) {
   if (!form || form.dataset.drumsMounted !== "1") return;
   form.querySelectorAll("[data-wheel]").forEach((wheel) => setWheelValue(wheel, ""));
+  form.querySelectorAll('input.home-qs-control[data-filter-key]').forEach((el) => {
+    el.value = "";
+  });
   form
     .querySelector('[data-wheel="gyartmany"]')
     ?.dispatchEvent(new CustomEvent("immo-wheel-change", { bubbles: true, detail: { value: "" } }));
@@ -348,10 +352,17 @@ export function readAutoDrumFilterValues(form) {
     const n = Number(String(value).replace(/\D/g, ""));
     return Number.isFinite(n) ? n : null;
   };
+  const seen = new Set();
 
-  form.querySelectorAll('input[type="hidden"][data-filter-key]').forEach((el) => {
+  /* Dob: hidden; Település / irányítószám: megmaradt text input */
+  form.querySelectorAll("[data-filter-key]").forEach((el) => {
     const key = el.getAttribute("data-filter-key");
-    if (!key) return;
+    if (!key || seen.has(key)) return;
+    if (el.matches?.("[data-wheel]")) return;
+    if (el.tagName === "SELECT" && form.querySelector(`input[type="hidden"][data-filter-key="${key}"]`)) {
+      return;
+    }
+    seen.add(key);
     const raw = String(el.value ?? "").trim();
     if (!raw) return;
     if (key.endsWith("_tol") || key.endsWith("_ig")) {

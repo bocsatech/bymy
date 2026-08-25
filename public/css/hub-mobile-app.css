@@ -320,20 +320,46 @@
     border-bottom-color: #e8eaed;
   }
 
-  /* —— Promo kártyák (Ingatlan + Autó) megmaradnak —— */
+  /* —— Promo kártyák: egymás mellett, vízszintes görgetés (több kép is jön) —— */
   body.hub-page--feed .hub-intro {
-    padding: 0.5rem 0.85rem 0.25rem;
+    padding: 0.5rem 0 0.25rem;
+  }
+
+  body.hub-page--feed .hub-intro > .hub-sell {
+    margin-left: 0.85rem;
+    margin-right: 0.85rem;
   }
 
   body.hub-page--feed .hub-verticals {
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: stretch;
     gap: 0.75rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 0 0.85rem 0.35rem;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    touch-action: pan-x;
+  }
+
+  body.hub-page--feed .hub-verticals::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    background: transparent;
   }
 
   body.hub-page--feed .hub-promo {
+    flex: 0 0 calc(100vw - 1.7rem);
+    width: calc(100vw - 1.7rem);
+    max-width: none;
     aspect-ratio: 5 / 3;
     border-radius: 18px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.07);
+    scroll-snap-align: start;
   }
 
   /* —— Feed: app-szerű vízszintes sorok —— */

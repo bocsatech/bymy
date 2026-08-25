@@ -31,7 +31,7 @@ import { initMyAdsPanel } from "./my-ads.js?v=hdView1";
 import {
   consumeSettingsReturn,
   hasSettingsReturn,
-} from "./site-avatar-menu.js?v=settingsNav1";
+} from "./site-avatar-menu.js?v=settingsNav2";
 
 const PHOTO_KEY = "bymy-avatar-photos";
 const NOTIFY_KEY = "bymy-notify-prefs";
@@ -71,6 +71,7 @@ const SETTINGS_SECTIONS = new Set([
   "ajanlasok-korzet",
   "jelszo",
   "notify",
+  "megjelenes",
 ]);
 const LEGACY_ACC_TO_SECTION = {
   personal: "szemelyes",

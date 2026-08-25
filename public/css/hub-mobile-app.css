@@ -400,6 +400,7 @@
     box-shadow: 0 1px 6px rgba(0, 0, 0, 0.08);
     border: 0;
     background: #fff;
+    overflow: hidden;
   }
 
   body.hub-page--feed .hf-card--kategoria,
@@ -409,21 +410,37 @@
 
   body.hub-page--feed .hf-card-media {
     aspect-ratio: 1;
-    border-radius: 16px 16px 0 0;
+    border-radius: 16px;
     overflow: hidden;
     background: #f3f4f6;
   }
 
+  body.hub-page--feed .hf-card--kategoria .hf-card-media,
+  body.hub-page--feed .hf-card--ajanlas .hf-card-media {
+    border-radius: 16px;
+    background: #fff;
+  }
+
   body.hub-page--feed .hf-card-media img {
+    display: block;
     width: 100%;
     height: 100%;
     object-fit: cover;
+    object-position: center center;
+  }
+
+  /* Autókategóriák: széles PNG-k — ne vágódjanak / csússzanak el */
+  body.hub-page--feed .hf-card--kategoria .hf-card-media img {
+    object-fit: contain;
+    object-position: center center;
+    padding: 0.35rem;
+    box-sizing: border-box;
   }
 
   body.hub-page--feed .hf-card-label {
     font-size: 0.78rem;
     font-weight: 600;
-    padding: 0.35rem 0.4rem 0.15rem;
+    padding: 0.35rem 0.4rem 0.45rem;
     text-align: center;
   }
 

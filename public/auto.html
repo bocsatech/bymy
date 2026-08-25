@@ -61,7 +61,7 @@
     <link rel="stylesheet" href="/css/site-side.css?v=mwPostDesk1" />
     <link rel="stylesheet" href="/css/hub-mobile-app.css?v=tabHideScroll1" />
     <link rel="stylesheet" href="/css/home.css?v=noXScroll1" />
-    <link rel="stylesheet" href="/css/auto-hero.css?v=mobile1" />
+    <link rel="stylesheet" href="/css/auto-hero.css?v=searchCollapse1" />
     <style id="home-scroll-fix">
       /* Inline: cache-biztos — a teljes oldal görget, külön görgetősáv nincs sehol. */
       html:has(body.home-page) {
@@ -191,9 +191,19 @@
           />
 
           <div class="auto-search-hero__content">
-            <article class="auto-search-panel">
-              <h1 class="auto-search-title" id="auto-search-title">Melyik járművet keresed?</h1>
+            <article class="auto-search-panel" data-auto-search-panel>
+              <button
+                type="button"
+                class="auto-search-toggle"
+                id="auto-search-toggle"
+                aria-expanded="false"
+                aria-controls="auto-search-body"
+              >
+                <span class="auto-search-title" id="auto-search-title">Melyik járművet keresed?</span>
+                <span class="auto-search-toggle__chevron" aria-hidden="true"></span>
+              </button>
 
+            <div class="auto-search-body" id="auto-search-body">
             <form class="home-qs-form" id="home-qs-form">
               <p class="home-qs-status" id="home-qs-status" hidden></p>
               <div id="qs-layout-main" class="home-qs-layout-main"></div>
@@ -340,6 +350,7 @@
                 </div>
               </div>
             </form>
+            </div>
             </article>
           </div>
 
@@ -385,7 +396,7 @@
     </main>
 
     <script src="/js/home-app.js?v=searchLayout3" type="module"></script>
-    <script src="/js/auto-hero.js?v=pkwLkw1" type="module"></script>
+    <script src="/js/auto-hero.js?v=searchCollapse1" type="module"></script>
     <script src="/js/site-avatar-menu.js?v=fiokPage2" type="module"></script>
 
     <script src="/js/nav-counts.js?v=willhabenHdr1" type="module"></script>

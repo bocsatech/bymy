@@ -161,12 +161,46 @@ body[data-site-page="teherauto"] .auto-search-tabs {
 }
 
 .auto-search-title {
-  margin: 0 0 0.7rem;
+  margin: 0;
   color: #fff;
   font-size: 1.05rem;
   font-weight: 700;
   line-height: 1.25;
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
+}
+
+.auto-search-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  width: 100%;
+  margin: 0 0 0.7rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: default;
+}
+
+.auto-search-toggle__chevron {
+  display: none;
+  flex: 0 0 auto;
+  width: 0.65rem;
+  height: 0.65rem;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
+  transition: transform 0.18s ease;
+  opacity: 0.9;
+}
+
+.auto-search-body {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
 }
 
 /* —— Form: kompakt mezők, átlátszó panel —— */
@@ -391,8 +425,40 @@ body[data-site-page="teherauto"] .auto-search-tabs {
     box-shadow: 0 1px 2px rgba(16, 24, 40, 0.06);
   }
 
+  .auto-search-toggle {
+    margin: 0;
+    padding: 0.15rem 0;
+    cursor: pointer;
+    color: #111;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .auto-search-toggle__chevron {
+    display: block;
+    margin-right: 0.25rem;
+    border-color: #111;
+  }
+
+  .auto-search-panel.is-open .auto-search-toggle__chevron {
+    transform: rotate(225deg);
+    margin-top: 0.2rem;
+  }
+
+  .auto-search-panel:not(.is-open) .auto-search-body {
+    display: none;
+  }
+
+  .auto-search-panel.is-open .auto-search-body {
+    display: flex;
+    margin-top: 0.75rem;
+  }
+
+  .auto-search-panel.is-open .auto-search-toggle {
+    margin-bottom: 0;
+  }
+
   .auto-search-title {
-    margin: 0 0 0.85rem;
+    margin: 0;
     color: #111;
     font-size: 1.12rem;
     text-shadow: none;

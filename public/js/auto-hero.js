@@ -35,3 +35,28 @@ const hero = document.querySelector("[data-auto-search-hero]");
 if (hero) {
   loadActiveHeroImage();
 }
+
+const MOBILE_MQ = "(max-width: 900px)";
+
+function initAutoSearchCollapse() {
+  const panel = document.querySelector("[data-auto-search-panel]");
+  const toggle = document.getElementById("auto-search-toggle");
+  if (!panel || !toggle) return;
+
+  function syncDesktop() {
+    if (window.matchMedia(MOBILE_MQ).matches) return;
+    panel.classList.add("is-open");
+    toggle.setAttribute("aria-expanded", "true");
+  }
+
+  toggle.addEventListener("click", () => {
+    if (!window.matchMedia(MOBILE_MQ).matches) return;
+    const open = panel.classList.toggle("is-open");
+    toggle.setAttribute("aria-expanded", open ? "true" : "false");
+  });
+
+  syncDesktop();
+  window.matchMedia(MOBILE_MQ).addEventListener("change", syncDesktop);
+}
+
+initAutoSearchCollapse();

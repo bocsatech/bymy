@@ -3,8 +3,8 @@
  * Ugyanaz a gyűrűs kinézet, mint az ingatlan dob; a hero stacking contexten kívül.
  */
 
-import { readWheel, setWheelValue } from "./ingatlan-wheels.js?v=drumScroll5";
-import { syncDrumWheelDisplay } from "./immo-drum-picker.js?v=drumScroll5";
+import { readWheel, setWheelValue } from "./ingatlan-wheels.js?v=drumScroll6";
+import { syncDrumWheelDisplay } from "./immo-drum-picker.js?v=drumScroll6";
 
 const ITEM_H = 40;
 let activePortal = null;
@@ -90,7 +90,8 @@ function syncRingWidth(ring, scrollEl) {
   scrollEl.querySelectorAll(".immo-drum-inline-item").forEach((item) => {
     max = Math.max(max, item.scrollWidth);
   });
-  ring.style.setProperty("--immo-drum-ring-w", `${Math.max(7.5 * 16, Math.ceil(max + 28))}px`);
+  const capped = Math.min(Math.max(7.5 * 16, Math.ceil(max + 28)), Math.min(200, Math.floor(window.innerWidth * 0.7)));
+  ring.style.setProperty("--immo-drum-ring-w", `${capped}px`);
 }
 
 function bindPortalNativeScroll(scrollEl, ring) {

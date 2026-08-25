@@ -39,6 +39,7 @@ const SELECT_OPTIONS = {
   allapot: ["Normál", "Újszerű", "Sérülésmentes", "Sérült"],
   kivitel: ["Szedán", "Ferdehátú", "Kombi", "SUV / Crossover", "Egyterű", "Kupé", "Cabrio"],
   ajtok: ["2", "3", "4", "5"],
+  szemelyek: ["1", "2", "3", "4", "5", "6", "7", "8", "9"],
   sebessegvalto: ["Manuális", "Automata"],
   hajtas: ["Első kerék", "Hátsó kerék", "Összkerék"],
   uzemanyag: [
@@ -59,7 +60,37 @@ const SELECT_OPTIONS = {
   holgy_tulajdonos: ["Igen", "Nem"],
   alkudhato: ["Igen", "Nem"],
   csere: ["Igen", "Nem"],
+  megye: [
+    "Budapest",
+    "Baranya",
+    "Bács-Kiskun",
+    "Békés",
+    "Borsod-Abaúj-Zemplén",
+    "Csongrád-Csanád",
+    "Fejér",
+    "Győr-Moson-Sopron",
+    "Hajdú-Bihar",
+    "Heves",
+    "Jász-Nagykun-Szolnok",
+    "Komárom-Esztergom",
+    "Nógrád",
+    "Pest",
+    "Somogy",
+    "Szabolcs-Szatmár-Bereg",
+    "Tolna",
+    "Vas",
+    "Veszprém",
+    "Zala",
+  ],
 };
+
+/** Rövid megjelenő címke a keresőben (a hosszú admin-címke helyett). */
+const SEARCH_LABEL_SHORT = {
+  szemelyek: "Személyek",
+  megye: "Megye",
+};
+
+const NARROW_FIELD_KEYS = new Set(["szemelyek", "megye", "ajtok", "telepules", "iranyitoszam"]);
 
 let cachedLayout = null;
 
@@ -181,6 +212,7 @@ function groupByRow(cells) {
 }
 
 function fieldWidthClass(cell) {
+  if (NARROW_FIELD_KEYS.has(cell.field_key)) return "home-qs-field--narrow";
   const span = Number(cell.colSpan) || 6;
   if (span >= 10) return "home-qs-field--wide";
   if (span <= 3) return "home-qs-field--narrow";
@@ -208,7 +240,7 @@ function rangeHtml(cell, spec) {
 
 function fieldHtml(cell) {
   const key = cell.field_key;
-  const label = cell.label || key;
+  const label = SEARCH_LABEL_SHORT[key] || cell.label || key;
   const width = fieldWidthClass(cell);
   const spec = RANGE_SPECS[key];
   if (spec) return rangeHtml(cell, spec);

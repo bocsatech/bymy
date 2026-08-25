@@ -4,10 +4,10 @@
  * Asztali: változatlan (select).
  */
 
-import { fillWheel, setWheelValue, readWheel } from "./ingatlan-wheels.js?v=drumScroll5";
-import { initDrumWheel, applyDrumModeClass, syncDrumWheelDisplay } from "./immo-drum-picker.js?v=drumScroll5";
-import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=drumScroll5";
-import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=autoDrums11";
+import { fillWheel, setWheelValue, readWheel } from "./ingatlan-wheels.js?v=drumScroll6";
+import { initDrumWheel, applyDrumModeClass, syncDrumWheelDisplay } from "./immo-drum-picker.js?v=drumScroll6";
+import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=drumScroll6";
+import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=autoDrums12";
 
 const MOBILE_MQ = "(max-width: 900px)";
 

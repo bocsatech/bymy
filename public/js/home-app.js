@@ -7,7 +7,7 @@ import {
   initHomeSearchSidebar,
   initHomeFilterCatalog,
 } from "./home-search-filter.js";
-import { initHomeQuickSearch } from "./home-quicksearch.js?v=autoDrums11";
+import { initHomeQuickSearch } from "./home-quicksearch.js?v=autoDrums12";
 import {
   emptyIngatlanFilters,
   filterListingsByIngatlan,

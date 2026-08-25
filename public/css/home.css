@@ -2048,9 +2048,12 @@ body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-n
   position: relative;
   aspect-ratio: 16 / 10;
   background: #e9edf2;
+  overflow: hidden;
 }
 
 .home-grid-card-photo {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   background:
@@ -2094,6 +2097,7 @@ body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-n
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center center;
 }
 
 .home-grid-card-photo-count {

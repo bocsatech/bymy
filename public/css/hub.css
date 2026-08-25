@@ -1026,19 +1026,23 @@ body.hub-page--feed {
 
 .hf-card-media {
   display: block;
+  position: relative;
   aspect-ratio: 1;
   width: 100%;
-  background: #fff;
+  background: #e8ebef;
   border: 1px solid #c8c8c8;
   border-radius: 12px;
   overflow: hidden;
 }
 
 .hf-card-media img {
+  position: absolute;
+  inset: 0;
   display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center center;
 }
 
 .hf-card-label {
@@ -1130,6 +1134,10 @@ body.hub-page--feed {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center center;
+  /* HA / stúdió fotók gyakran fehér keretet tartalmaznak — enyhe nagyítás levágja */
+  transform: scale(1.06);
+  transform-origin: center center;
 }
 
 .hf-card--prompt .hf-card-media {

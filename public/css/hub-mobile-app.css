@@ -409,10 +409,11 @@
   }
 
   body.hub-page--feed .hf-card-media {
+    position: relative;
     aspect-ratio: 1;
     border-radius: 16px;
     overflow: hidden;
-    background: #f3f4f6;
+    background: #e8ebef;
   }
 
   body.hub-page--feed .hf-card--kategoria .hf-card-media,
@@ -422,6 +423,8 @@
   }
 
   body.hub-page--feed .hf-card-media img {
+    position: absolute;
+    inset: 0;
     display: block;
     width: 100%;
     height: 100%;
@@ -429,12 +432,20 @@
     object-position: center center;
   }
 
+  body.hub-page--feed .hf-card--listing .hf-card-media img {
+    transform: scale(1.06);
+    transform-origin: center center;
+  }
+
   /* Autókategóriák: széles PNG-k — ne vágódjanak / csússzanak el */
   body.hub-page--feed .hf-card--kategoria .hf-card-media img {
+    position: absolute;
+    inset: 0;
     object-fit: contain;
     object-position: center center;
     padding: 0.35rem;
     box-sizing: border-box;
+    transform: none;
   }
 
   body.hub-page--feed .hf-card-label {

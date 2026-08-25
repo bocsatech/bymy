@@ -1,4 +1,4 @@
-import { fetchListing, fetchListings, recordListingView, deleteListingFromDb } from "./db-client.js?v=openFast1";
+import { fetchListing, fetchListings, recordListingView, deleteListingFromDb } from "./db-client.js?v=openFast2";
 import { getAuthUser, getDisplayName, getProfile } from "./site-auth.js?v=auth20260805localdb9";
 import { startConversation, sendMessage } from "./messages-api.js?v=msgLive1";
 import { canMessageListing, openListingMessage } from "./start-listing-message.js?v=msgLive1";
@@ -109,6 +109,8 @@ function applyRelated(view, related) {
 
 async function loadRelatedInBackground(listingId, view) {
   if (!view?.userId) return;
+  // Ne versenyezzen a detail API-val — késleltetve, idle-ben.
+  await new Promise((resolve) => setTimeout(resolve, 2500));
   try {
     const all = await fetchListings({ limit: 50 });
     const related = all
@@ -583,7 +585,7 @@ async function init() {
     return;
   }
   try {
-    const listing = await fetchListing(id);
+    const listing = await fetchListing(id, { view: "detail" });
     if (!listing) throw new Error("Nincs ilyen hirdetés.");
     const view = listing.detail;
     if (!view) throw new Error("A hirdetés adatai hiányosak.");

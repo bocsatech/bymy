@@ -9,6 +9,7 @@ import {
   getListing,
   getLatestListing,
   listListingsWithPreview,
+  countNavListings,
   deleteListing,
   dbStats,
   listFieldDefs,
@@ -746,7 +747,9 @@ async function handleListingsApi(req, res, pathname) {
   }
 
   if (idMatch && req.method === "GET") {
-    const listing = await getListing(Number(idMatch[1]));
+    const url = new URL(req.url ?? "", `http://${HOST}`);
+    const mode = url.searchParams.get("view") === "detail" ? "detail" : "full";
+    const listing = await getListing(Number(idMatch[1]), { mode });
     if (!listing) {
       sendJson(res, 404, { error: "Nincs ilyen hirdetés." });
       return;
@@ -1921,17 +1924,9 @@ export async function handleHttpRequest(req, res) {
 
   if (pathname === "/api/nav/counts" && req.method === "GET") {
     try {
-      const [auto, teher, ingatlan] = await Promise.all([
-        listListingsWithPreview({ limit: 50, status: "feladott", vertical: "auto" }),
-        listListingsWithPreview({ limit: 50, status: "feladott", vertical: "teher" }),
-        listListingsWithPreview({ limit: 50, status: "feladott", vertical: "ingatlan" }),
-      ]);
-      sendJson(
-        res,
-        200,
-        { auto: auto.length, teher: teher.length, ingatlan: ingatlan.length },
-        { "Cache-Control": "public, max-age=30, stale-while-revalidate=120" }
-      );
+      sendJson(res, 200, await countNavListings({ status: "feladott" }), {
+        "Cache-Control": "public, max-age=30, stale-while-revalidate=120",
+      });
     } catch (error) {
       console.warn("Nav counts:", error.message ?? error);
       sendJson(res, 500, { error: error.message ?? "Szerver hiba." });

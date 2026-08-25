@@ -47,8 +47,12 @@ export async function fetchLatestListing() {
   return data.listing ?? null;
 }
 
-export async function fetchListing(id) {
-  const response = await fetch(`/api/listings/${id}`, { credentials: "same-origin", headers: authHeaders() });
+export async function fetchListing(id, { view } = {}) {
+  const params = view ? `?view=${encodeURIComponent(view)}` : "";
+  const response = await fetch(`/api/listings/${id}${params}`, {
+    credentials: "same-origin",
+    headers: authHeaders(),
+  });
   const data = await parseJson(response);
   return data.listing ?? null;
 }

@@ -1,4 +1,4 @@
-import { fetchListing, fetchListings, recordListingView, deleteListingFromDb } from "./db-client.js?v=hdView1";
+import { fetchListing, fetchListings, recordListingView, deleteListingFromDb } from "./db-client.js?v=openFast1";
 import { getAuthUser, getDisplayName, getProfile } from "./site-auth.js?v=auth20260805localdb9";
 import { startConversation, sendMessage } from "./messages-api.js?v=msgLive1";
 import { canMessageListing, openListingMessage } from "./start-listing-message.js?v=msgLive1";
@@ -65,11 +65,59 @@ function relatedCard(item) {
   const spec = [year, km, le].filter(Boolean).join(", ");
   const img = p.imageUrl || item.fo_kep || "";
   return `<a class="hd-rel" data-listing-id="${item.id}" href="${listingDetailHref(item.id)}">
-    ${img ? `<img src="${escapeHtml(img)}" alt="" />` : `<div class="hd-rel-empty"></div>`}
+    ${img ? `<img src="${escapeHtml(img)}" alt="" loading="lazy" decoding="async" />` : `<div class="hd-rel-empty"></div>`}
     <strong>${escapeHtml(title)}</strong>
     <span>${escapeHtml(spec)}</span>
     <b>${escapeHtml(p.price || "—")}</b>
   </a>`;
+}
+
+function applyRelated(view, related) {
+  if (!related.length || !root) return;
+
+  const aside = root.querySelector(".hd-side") || root.querySelector("aside");
+  if (aside && !aside.querySelector('a[href="#hd-related"]')) {
+    const link = document.createElement("a");
+    link.className = "hd-btn hd-btn--ghost";
+    link.href = "#hd-related";
+    link.textContent = `Több ettől a hirdetőtől ${related.length}`;
+    const owner = aside.querySelector(".hd-owner");
+    if (owner) aside.insertBefore(link, owner);
+    else aside.appendChild(link);
+  }
+
+  if (document.getElementById("hd-related")) return;
+
+  const section = document.createElement("section");
+  section.className = "hd-section";
+  section.id = "hd-related";
+  section.innerHTML = `
+    <div class="hd-related-head">
+      <h2 class="hd-h2">Több ettől a hirdetőtől</h2>
+      <a class="hd-more" href="${escapeHtml(view.categoryHref)}">Több megjelenítése</a>
+    </div>
+    <div class="hd-related">${related.map(relatedCard).join("")}</div>
+  `;
+  const dealer = root.querySelector(".hd-dealer");
+  if (dealer) root.insertBefore(section, dealer);
+  else root.appendChild(section);
+
+  section.querySelectorAll("a[data-listing-id]").forEach((a) => {
+    a.addEventListener("click", () => rememberListingOpen(a.dataset.listingId, a));
+  });
+}
+
+async function loadRelatedInBackground(listingId, view) {
+  if (!view?.userId) return;
+  try {
+    const all = await fetchListings({ limit: 50 });
+    const related = all
+      .filter((item) => Number(item.user_id) === Number(view.userId) && Number(item.id) !== Number(listingId))
+      .slice(0, 5);
+    applyRelated(view, related);
+  } catch {
+    /* ignore — a fő tartalom már látszik */
+  }
 }
 
 function render(view, listing, related) {
@@ -539,19 +587,10 @@ async function init() {
     if (!listing) throw new Error("Nincs ilyen hirdetés.");
     const view = listing.detail;
     if (!view) throw new Error("A hirdetés adatai hiányosak.");
-    try {
-      await recordListingView(id, "web");
-    } catch {
-      /* ignore */
-    }
-    let related = [];
-    if (view.userId) {
-      const all = await fetchListings({ limit: 200 });
-      related = all
-        .filter((item) => Number(item.user_id) === Number(view.userId) && Number(item.id) !== Number(id))
-        .slice(0, 5);
-    }
-    render(view, listing, related);
+    // Először rajzolunk — view számláló és „több ettől” ne blokkolja a megnyitást.
+    render(view, listing, []);
+    recordListingView(id, "web").catch(() => {});
+    loadRelatedInBackground(id, view);
   } catch (error) {
     root.innerHTML = `<p class="hd-empty">${escapeHtml(error.message ?? "A hirdetés nem tölthető be.")}</p>`;
   }

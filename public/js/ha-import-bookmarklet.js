@@ -431,6 +431,47 @@
     return extractFromDoc(doc, url);
   }
 
+  function showProgress(current, total, phase) {
+    let el = document.getElementById("bymy-ha-progress");
+    if (!el) {
+      el = document.createElement("div");
+      el.id = "bymy-ha-progress";
+      el.setAttribute("role", "status");
+      el.style.cssText =
+        "position:fixed;right:16px;bottom:16px;z-index:2147483647;background:#111;color:#fff;" +
+        "padding:12px 16px;border-radius:10px;font:600 14px/1.45 system-ui,-apple-system,sans-serif;" +
+        "box-shadow:0 8px 28px rgba(0,0,0,.4);max-width:min(320px,92vw);";
+      (document.body || document.documentElement).appendChild(el);
+    }
+    const pct = total > 0 ? Math.round((current / total) * 100) : 0;
+    el.textContent =
+      total > 1
+        ? `Bymy import — ${phase}: ${current} / ${total} (${pct}%)`
+        : `Bymy import — ${phase}`;
+    el.hidden = false;
+  }
+
+  function hideProgress(finalMsg) {
+    const el = document.getElementById("bymy-ha-progress");
+    if (!el) return;
+    if (finalMsg) {
+      el.textContent = finalMsg;
+      setTimeout(() => {
+        try {
+          el.remove();
+        } catch {
+          /* ignore */
+        }
+      }, 4500);
+      return;
+    }
+    try {
+      el.remove();
+    } catch {
+      /* ignore */
+    }
+  }
+
   function deliver(origin, payload) {
     const sendTo = (target) => {
       if (!target || target.closed) return false;
@@ -503,10 +544,12 @@
 
     const pages = [];
     if (mode === "standard" && isSingleListing()) {
+      showProgress(1, 1, "beolvasás");
       pages.push(extractPage());
     } else {
       const refs = discoverRefs().slice(0, MAX_DEALER);
       if (!refs.length) {
+        hideProgress();
         alert(
           mode === "dealer"
             ? "Nem találtunk autót a listán. Görgess le a táblázatig, vagy lapozz, majd próbáld újra."
@@ -515,9 +558,12 @@
         return;
       }
       if (mode === "standard" && refs.length === 1 && isPublicListingPage()) {
+        showProgress(1, 1, "beolvasás");
         pages.push(extractPage());
       } else {
+        showProgress(0, refs.length, "lista beolvasása");
         for (let i = 0; i < refs.length; i += 1) {
+          showProgress(i + 1, refs.length, "beolvasás");
           try {
             const page = await extractRefPage(refs[i]);
             if (page) pages.push(page);
@@ -529,10 +575,12 @@
     }
 
     if (!pages.length) {
+      hideProgress();
       alert("Nem sikerült kiolvasni a hirdetést a listából.");
       return;
     }
 
+    showProgress(pages.length, pages.length, "küldés a Bymy-ra");
     deliver(origin, {
       type: "bymy-ha-import",
       v: 1,
@@ -540,6 +588,7 @@
       listUrl: location.href,
       pages,
     });
+    hideProgress(`Kész: ${pages.length} hirdetés átadva a Bymy-nak`);
   }
 
   root.BymyHaImport = { run, extractPage, discoverIds, discoverRefs };

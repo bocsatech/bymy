@@ -48,7 +48,7 @@ function setMode(mode) {
 
 function bookmarkletHref(mode) {
   const origin = location.origin;
-  const src = `${origin}/js/ha-import-bookmarklet.js?v=haImp13`;
+  const src = `${origin}/js/ha-import-bookmarklet.js?v=haImp14`;
   // void(...): a visszatérési érték ne cserélje le a hasznaltauto oldalt
   return `javascript:void(function(){var o=${JSON.stringify(origin)};var m=${JSON.stringify(mode)};function go(){try{window.BymyHaImport.run({origin:o,mode:m});}catch(e){alert((e&&e.message)||e);}}if(window.BymyHaImport){go();return;}var s=document.createElement("script");s.src=${JSON.stringify(src)};s.onload=go;s.onerror=function(){alert("A hasznaltauto.hu blokkolta a Bymy scriptet. Másold a hirdetés URL-jét a Bymy Autóimport oldalra.");};(document.documentElement||document.body).appendChild(s);})();`;
 }
@@ -255,15 +255,59 @@ async function runMessageImport(data) {
     return;
   }
   importBusy = true;
-  setStatus(pages.length > 1 ? `Mentés (${pages.length} hirdetés)…` : "Hirdetés feldolgozása…");
+  const total = pages.length;
+  setStatus(total > 1 ? `Mentés: 0 / ${total}…` : "Hirdetés feldolgozása…");
   try {
-    const result = await postExtracted({
-      pages,
-      listUrl: data.listUrl,
-      mode: data.mode || currentMode(),
-    });
-    setStatus("");
-    renderResult(result);
+    if (total === 1) {
+      const result = await postExtracted({
+        pages,
+        listUrl: data.listUrl,
+        mode: data.mode || currentMode(),
+      });
+      setStatus("");
+      renderResult(result);
+    } else {
+      let savedCount = 0;
+      let skippedCount = 0;
+      let errorCount = 0;
+      const items = [];
+      const errors = [];
+      for (let i = 0; i < pages.length; i += 1) {
+        setStatus(`Mentés: ${i + 1} / ${total}…`);
+        try {
+          const result = await postExtracted({
+            pages: [pages[i]],
+            listUrl: data.listUrl,
+            mode: data.mode || currentMode(),
+          });
+          savedCount += result?.savedCount ?? 0;
+          skippedCount += result?.skippedCount ?? 0;
+          errorCount += result?.errorCount ?? 0;
+          if (Array.isArray(result?.items)) items.push(...result.items);
+          if (Array.isArray(result?.errors)) errors.push(...result.errors);
+        } catch (error) {
+          errorCount += 1;
+          errors.push({
+            url: pages[i]?.url || "",
+            message: error.message ?? "Import sikertelen.",
+          });
+        }
+      }
+      setStatus("");
+      renderResult({
+        savedCount,
+        skippedCount,
+        errorCount,
+        count: items.length,
+        items,
+        errors,
+      });
+    }
+    try {
+      sessionStorage.removeItem("bymy-ha-import-pending");
+    } catch {
+      /* ignore */
+    }
   } catch (error) {
     setStatus(error.message ?? "Import sikertelen.", "err");
   } finally {

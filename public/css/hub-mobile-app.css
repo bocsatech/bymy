@@ -362,6 +362,14 @@
     scroll-snap-align: start;
   }
 
+  /* Főoldal: semmi ne zárja a fel-le görgetést (vízszintes sávok is engedik) */
+  body.hub-page--feed .hub-verticals,
+  body.hub-page--feed .hf-rail,
+  body.hub-page--feed .hub-promo,
+  body.hub-page--feed .hf-card {
+    touch-action: pan-x pan-y;
+  }
+
   /* —— Feed: app-szerű vízszintes sorok —— */
   body.hub-page--feed .hub-feed {
     padding: 0.5rem 0 1rem;

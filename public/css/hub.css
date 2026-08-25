@@ -990,7 +990,7 @@ body.hub-page--feed {
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* legacy Edge */
   cursor: grab;
-  touch-action: pan-x;
+  touch-action: pan-x pan-y;
 }
 
 /* Csík nélkül — height:0, ne display:none (az törheti a görgetést) */

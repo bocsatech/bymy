@@ -235,7 +235,7 @@
     const year = (yearRaw.match(/(19|20)\d{2}/) || [])[0] || "";
     const fuel = fieldFromMap(map, ["Üzemanyag"]);
     const rawHtml = doc.documentElement?.outerHTML || "";
-    const html = rawHtml.slice(0, Object.keys(map).length >= 8 ? 80000 : 220000);
+    const html = rawHtml.slice(0, Object.keys(map).length >= 8 ? 40000 : 120000);
     return {
       url: href,
       html,

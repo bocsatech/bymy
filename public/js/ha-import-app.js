@@ -48,7 +48,7 @@ function setMode(mode) {
 
 function bookmarkletHref(mode) {
   const origin = location.origin;
-  const src = `${origin}/js/ha-import-bookmarklet.js?v=haImp9`;
+  const src = `${origin}/js/ha-import-bookmarklet.js?v=haImp10`;
   return `javascript:(function(){var o=${JSON.stringify(origin)};var m=${JSON.stringify(mode)};function go(){window.BymyHaImport.run({origin:o,mode:m});}if(window.BymyHaImport){go();return;}var s=document.createElement('script');s.src=${JSON.stringify(src)};s.onload=go;s.onerror=function(){alert('A hasznaltauto.hu blokkolta a Bymy scriptet. Másold a hirdetés URL-jét a Bymy Autóimport oldalra.');};document.documentElement.appendChild(s);})();`;
 }
 
@@ -143,8 +143,27 @@ async function postExtracted(payload) {
     credentials: "same-origin",
     body: JSON.stringify(payload),
   });
-  const data = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(data.error || "Import sikertelen.");
+  const raw = await response.text();
+  let data = {};
+  try {
+    data = raw ? JSON.parse(raw) : {};
+  } catch {
+    data = {};
+  }
+  if (!response.ok) {
+    const detail =
+      (typeof data.error === "string" && data.error) ||
+      (typeof data.message === "string" && data.message) ||
+      (data.error && typeof data.error.message === "string" && data.error.message) ||
+      "";
+    if (response.status === 401) {
+      throw new Error(detail || "Az importhoz be kell jelentkezned a Bymy fiókodba.");
+    }
+    if (response.status === 413) {
+      throw new Error("Túl nagy az import csomag. Nyisd meg egyetlen autó gyorsnézetét, majd próbáld újra.");
+    }
+    throw new Error(detail || `Import sikertelen (${response.status}).`);
+  }
   return data.result;
 }
 
@@ -187,28 +206,13 @@ async function runUrlImport() {
     .split(/[\s,;]+/)
     .map((item) => item.trim())
     .filter(Boolean);
-  const needsBrowser = urls.find((item) => isHaUrl(item) && !isPublicListingUrl(item));
-  if (needsBrowser) {
-    promptHaBookmark(needsBrowser);
+  const bad = urls.find((item) => !isHaUrl(item));
+  if (bad) {
+    setStatus("Csak hasznaltauto.hu linket lehet importálni.", "err");
     return;
   }
-  setStatus("Hirdetés beolvasása…");
-  try {
-    const result = await postExtracted({
-      urls,
-      mode: currentMode(),
-      listUrl: urls[0],
-    });
-    setStatus("");
-    renderResult(result);
-  } catch (error) {
-    const message = error.message ?? "Import sikertelen.";
-    if (/Cloudflare|gyorsnézet|járműlist|admin/i.test(message) && urls[0]) {
-      promptHaBookmark(urls[0]);
-      return;
-    }
-    setStatus(message, "err");
-  }
+  // A szerver fetch-et a Cloudflare mindig blokkolja — könyvjelző kell.
+  promptHaBookmark(urls[0]);
 }
 
 let importBusy = false;

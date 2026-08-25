@@ -15,5 +15,5 @@ ios/build/
 ios/dist/
 .import-profile/
 .chrome-import-profile/
-data/
+/data/
 public/uploads/

@@ -7,7 +7,7 @@
 import { fillWheel, setWheelValue, readWheel } from "./ingatlan-wheels.js?v=drumScroll5";
 import { initDrumWheel, applyDrumModeClass, syncDrumWheelDisplay } from "./immo-drum-picker.js?v=drumScroll5";
 import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=drumScroll5";
-import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=autoDrums9";
+import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=autoDrums10";
 
 const MOBILE_MQ = "(max-width: 900px)";
 
@@ -114,8 +114,8 @@ function finishWheel(cell, emptyLabel) {
   return live;
 }
 
-function buildWheelCell({ filterKey, wheelName, label, options, halfClass = "" }) {
-  const emptyLabel = emptyLabelFromOptions(options);
+function buildWheelCell({ filterKey, wheelName, label, options, halfClass = "", emptyLabel: emptyOverride } = {}) {
+  const emptyLabel = emptyOverride || emptyLabelFromOptions(options);
   const opts = options.filter((o) => o.value !== "");
   const cell = document.createElement("div");
   cell.className = `immo-schema-cell home-qs-drum-cell${halfClass ? ` ${halfClass}` : ""}`;
@@ -183,15 +183,17 @@ function convertRangePairToDual(wrap, cfg) {
   const minCell = buildWheelCell({
     filterKey: cfg.tol,
     wheelName: cfg.tol,
-    label: "tól",
+    label: "Tól",
     options: tolOpts,
+    emptyLabel: "Tól",
     halfClass: "immo-dual-range__half immo-dual-range__half--min",
   });
   const maxCell = buildWheelCell({
     filterKey: cfg.ig,
     wheelName: cfg.ig,
-    label: "ig",
+    label: "Ig",
     options: igOpts,
+    emptyLabel: "Ig",
     halfClass: "immo-dual-range__half immo-dual-range__half--max",
   });
 

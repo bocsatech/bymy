@@ -800,8 +800,33 @@ body[data-site-page="teherauto"] .auto-search-tabs {
     height: 3rem;
   }
 
+  /* Tól / Ig felirat a dual mezőkön (év, ár, km…) */
   .auto-search-panel .auto-qs-drums .immo-dual-range__half .immo-label {
-    display: none !important;
+    display: block !important;
+    position: absolute;
+    top: -0.45rem;
+    left: 0.45rem;
+    z-index: 2;
+    padding: 0 0.2rem;
+    background: #fff;
+    font-size: 0.62rem;
+    font-weight: 650;
+    color: #667085;
+    line-height: 1;
+    pointer-events: none;
+  }
+
+  .auto-search-panel .auto-qs-drums .immo-dual-range__half--max .immo-label {
+    left: auto;
+    right: 0.45rem;
+  }
+
+  .auto-search-panel .auto-qs-drums .immo-dual-range__half .immo-wheel-wrap {
+    position: relative;
+  }
+
+  .auto-search-panel .auto-qs-drums .immo-dual-range__half .immo-wheel-trigger {
+    padding-top: 0.35rem;
   }
 
   .auto-search-panel .auto-qs-drums .immo-dual-range__sep {

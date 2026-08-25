@@ -3,7 +3,7 @@
  * Visszaállítás: ?immoDrum=legacy vagy localStorage immo-drum-mode=legacy
  */
 
-import { readWheel, readWheelList, setWheelValue, lockPageScroll, unlockPageScroll } from "./ingatlan-wheels.js?v=drumScroll1";
+import { readWheel, readWheelList, setWheelValue, lockPageScroll, unlockPageScroll } from "./ingatlan-wheels.js?v=drumScroll2";
 
 const ITEM_H = 40;
 let paintFrame = 0;
@@ -144,8 +144,68 @@ function syncWheelRingWidth(ring, scrollEl) {
 function setDrumFormState(open) {
   document.body.classList.toggle("immo-price-drum-active", open);
   document.body.classList.toggle("immo-drum-active", open);
+
+  const page = document.body.getAttribute("data-site-page") || "";
+  const useNativeDrumScroll = page === "auto" || page === "teherauto";
+
+  if (useNativeDrumScroll) {
+    document.body.classList.toggle("auto-drum-open", open);
+    /* Autó hero isolation/overflow alatt a full-page touch lock eltöri a dobot —
+       natív pan-y + helyi húzás kell, nem immo-scroll-blocker. */
+    if (!open) unlockPageScroll(true);
+    return;
+  }
+
   if (open) lockPageScroll();
   else unlockPageScroll(true);
+}
+
+function bindDrumTouchPan(scrollEl, ring) {
+  if (!scrollEl || !ring || ring.dataset.panBound === "1") return;
+  ring.dataset.panBound = "1";
+
+  let lastY = 0;
+  let active = false;
+  let moved = false;
+
+  ring.addEventListener(
+    "touchstart",
+    (event) => {
+      if (!event.touches?.[0]) return;
+      lastY = event.touches[0].clientY;
+      active = true;
+      moved = false;
+    },
+    { passive: true }
+  );
+
+  ring.addEventListener(
+    "touchmove",
+    (event) => {
+      if (!active || !event.touches?.[0]) return;
+      const y = event.touches[0].clientY;
+      const dy = y - lastY;
+      lastY = y;
+      if (!dy) return;
+      if (Math.abs(dy) > 1.5) moved = true;
+      event.preventDefault();
+      scrollEl.scrollTop -= dy;
+      ring.dataset.drumDragged = moved ? "1" : "";
+    },
+    { passive: false }
+  );
+
+  const end = () => {
+    active = false;
+    if (moved) {
+      ring.dataset.drumDragged = "1";
+      window.setTimeout(() => {
+        delete ring.dataset.drumDragged;
+      }, 80);
+    }
+  };
+  ring.addEventListener("touchend", end);
+  ring.addEventListener("touchcancel", end);
 }
 
 function refreshDrumItemStates(scrollEl, wheel) {
@@ -235,10 +295,13 @@ function openInlineDrum(wrap, wheel, trigger) {
 
   scrollEl.onscroll = () => paintInline(scrollEl, wrap);
 
+  bindDrumTouchPan(scrollEl, ring);
+
   const multiple = wheel.dataset.multiple === "1";
   scrollEl.querySelectorAll(".immo-drum-inline-item").forEach((item) => {
     item.onclick = (event) => {
       event.stopPropagation();
+      if (ring.dataset.drumDragged === "1") return;
       const v = item.dataset.value ?? "";
       if (multiple) {
         if (v === "") {

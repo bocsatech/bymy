@@ -61,7 +61,14 @@ function onLockedTouchMove(event) {
   const y = touch.clientY;
   const dy = y - lastTouchY;
   lastTouchY = y;
-  const scrollEl = isScrollableWheel(event.target);
+  let scrollEl = isScrollableWheel(event.target);
+  if (!scrollEl) {
+    const under = document.elementFromPoint(touch.clientX, touch.clientY);
+    scrollEl = isScrollableWheel(under);
+  }
+  if (!scrollEl) {
+    scrollEl = document.querySelector(".immo-wheel-wrap--drum-inline.is-open .immo-drum-inline-scroll");
+  }
   if (!scrollEl || !dy) return;
   /* Ujj lefelé → tartalom lefelé (természetes iOS picker) */
   scrollEl.scrollTop -= dy;
@@ -118,6 +125,8 @@ function assertScrollLockStyles() {
   body.style.removeProperty("right");
   body.style.removeProperty("width");
   ensureScrollBlocker().hidden = false;
+  const drumOpen = Boolean(document.querySelector(".immo-wheel-wrap--drum-inline.is-open"));
+  ensureScrollBlocker().style.pointerEvents = drumOpen ? "none" : "";
   window.scrollTo(0, scrollLockY);
 }
 
@@ -160,7 +169,10 @@ export function unlockPageScroll(force = false) {
     body.style.removeProperty(prop);
   }
 
-  if (scrollBlockerEl) scrollBlockerEl.hidden = true;
+  if (scrollBlockerEl) {
+    scrollBlockerEl.hidden = true;
+    scrollBlockerEl.style.pointerEvents = "";
+  }
 
   document.removeEventListener("touchstart", onLockedTouchStart, { capture: true });
   document.removeEventListener("touchmove", onLockedTouchMove, { capture: true });

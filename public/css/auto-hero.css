@@ -619,17 +619,30 @@ body[data-site-page="teherauto"] .auto-search-tabs {
   /* Hero stacking context ne nyelje el a dobkerék érintéseit */
   body[data-site-page="auto"].immo-scroll-locked .auto-search-hero,
   body[data-site-page="auto"].immo-drum-active .auto-search-hero,
+  body[data-site-page="auto"].auto-drum-open .auto-search-hero,
   body[data-site-page="auto"].immo-scroll-locked .auto-search-hero__stage,
-  body[data-site-page="auto"].immo-drum-active .auto-search-hero__stage {
-    overflow: visible;
+  body[data-site-page="auto"].immo-drum-active .auto-search-hero__stage,
+  body[data-site-page="auto"].auto-drum-open .auto-search-hero__stage {
+    overflow: visible !important;
     isolation: auto;
   }
 
   body[data-site-page="auto"].immo-scroll-locked .auto-search-panel,
-  body[data-site-page="auto"].immo-drum-active .auto-search-panel {
+  body[data-site-page="auto"].immo-drum-active .auto-search-panel,
+  body[data-site-page="auto"].auto-drum-open .auto-search-panel {
     position: relative;
     z-index: 190;
     overflow: visible;
+  }
+
+  body.auto-drum-open {
+    overscroll-behavior: none;
+  }
+
+  body.auto-drum-open .immo-drum-wheel-ring,
+  body.auto-drum-open .immo-drum-inline-scroll {
+    touch-action: none;
+    -webkit-overflow-scrolling: touch;
   }
 
   body.immo-drum-active .auto-search-panel,

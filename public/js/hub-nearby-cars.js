@@ -34,17 +34,17 @@ function createListingCard(item) {
   link.href = listingDetailHref(item.id);
   link.setAttribute("role", "listitem");
 
-  const imageUrl = preview.imageUrl || item.fo_kep || "";
+  const imageUrl = String(preview.imageUrl || item.fo_kep || "").trim();
   const media = document.createElement("span");
   media.className = "hf-card-media";
   if (imageUrl) {
-    const img = document.createElement("img");
-    img.src = imageUrl;
-    img.alt = "";
-    img.loading = "lazy";
-    img.decoding = "async";
-    img.referrerPolicy = "no-referrer";
-    media.appendChild(img);
+    // Inline háttér — nem függ object-fit / img globális szabályoktól; 140% levágja a HA fehér keretet.
+    media.style.backgroundImage = `url(${JSON.stringify(imageUrl)})`;
+    media.style.backgroundSize = "140%";
+    media.style.backgroundPosition = "center center";
+    media.style.backgroundRepeat = "no-repeat";
+    media.setAttribute("role", "img");
+    media.setAttribute("aria-label", cardTitle(item));
   }
 
   const label = document.createElement("span");

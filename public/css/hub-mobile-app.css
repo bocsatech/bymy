@@ -395,12 +395,12 @@
   }
 
   body.hub-page--feed .hf-card {
-    flex-basis: 7.25rem;
+    flex-basis: 8.75rem;
     border-radius: 16px;
     box-shadow: 0 1px 6px rgba(0, 0, 0, 0.08);
     border: 0;
     background: #fff;
-    overflow: hidden;
+    overflow: visible;
   }
 
   body.hub-page--feed .hf-card--kategoria,
@@ -433,12 +433,14 @@
   }
 
   body.hub-page--feed .hf-card--listing .hf-card-media {
-    background-color: #dfe3e8;
+    background-color: #dfe3e8 !important;
+    background-size: 140%;
+    background-position: center center;
+    background-repeat: no-repeat;
   }
 
   body.hub-page--feed .hf-card--listing .hf-card-media img {
-    transform: scale(1.24);
-    transform-origin: center center;
+    display: none !important;
   }
 
   /* Autókategóriák: széles PNG-k — ne vágódjanak / csússzanak el */

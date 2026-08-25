@@ -1011,7 +1011,7 @@ body.hub-page--feed {
 }
 
 .hf-card {
-  flex: 0 0 148px;
+  flex: 0 0 168px;
   scroll-snap-align: start;
   text-decoration: none;
   color: #111;
@@ -1131,19 +1131,15 @@ body.hub-page--feed {
 }
 
 .hf-card--listing .hf-card-media {
-  background-color: #dfe3e8;
+  background-color: #dfe3e8 !important;
+  /* A JS inline background-size: 140% a mérvadó; ez csak fallback */
+  background-size: 140%;
+  background-position: center center;
+  background-repeat: no-repeat;
 }
 
 .hf-card--listing .hf-card-media img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center center;
-  /* HA thumbok gyakran fehér keretesek — erősebb crop */
-  transform: scale(1.24);
-  transform-origin: center center;
+  display: none !important;
 }
 
 .hf-card--prompt .hf-card-media {

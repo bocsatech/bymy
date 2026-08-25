@@ -12,7 +12,7 @@
   var isFiok = body.classList.contains("fiok-page") || page === "fiok";
   /* Hirdetésfeladás: asztali web chrome (fejléc + űrlap), ne mobil app-shell */
   var isPostAd = page === "hirdetesfeladas";
-  var CSS_HREF = "/css/hub-mobile-app.css?v=tabHideScroll1";
+  var CSS_HREF = "/css/hub-mobile-app.css?v=tileFill3";
 
   function ensureCss() {
     if (document.querySelector('link[href*="hub-mobile-app.css"]')) return;

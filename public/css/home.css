@@ -1301,61 +1301,6 @@ body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-n
     grid-template-columns: 1fr;
   }
 
-  .home-category-track {
-    display: flex;
-    grid-template-columns: none;
-    gap: 0.65rem;
-    padding: 0 0.15rem 0.25rem;
-    touch-action: pan-x pan-y;
-  }
-
-  .home-category-card {
-    flex: 0 0 7.25rem;
-    width: 7.25rem;
-  }
-
-  .home-category-card--has-photo .home-category-visual {
-    aspect-ratio: 1;
-    min-height: 0;
-    height: auto;
-    padding: 0.35rem;
-    align-items: center;
-    justify-content: center;
-    background: #fff;
-  }
-
-  .home-category-photo {
-    width: 100%;
-    height: 100%;
-    max-width: none;
-    max-height: none;
-    object-fit: contain;
-    object-position: center center;
-  }
-
-  .home-category-foot {
-    gap: 0.35rem;
-    padding: 0.4rem 0.45rem 0.55rem;
-  }
-
-  .home-category-icon {
-    display: none;
-  }
-
-  .home-category-text {
-    width: 100%;
-    text-align: center;
-    align-items: center;
-  }
-
-  .home-category-text strong {
-    font-size: 0.78rem;
-  }
-
-  .home-category-text span {
-    font-size: 0.65rem;
-  }
-
   .home-grid-track {
     gap: 0.75rem;
   }
@@ -1539,9 +1484,76 @@ body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-n
   }
 }
 
-@media (max-width: 620px) {
+/* Mobil: vízszintes görgetősáv — mint a főoldal Autókategóriák (hf-rail) */
+@media (max-width: 800px) {
+  .home-category-bar {
+    margin-bottom: 0.75rem;
+  }
+
   .home-category-track {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    gap: 0.65rem;
     grid-template-columns: none;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 0 0.15rem 0.35rem;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    touch-action: pan-x pan-y;
+  }
+
+  .home-category-card {
+    flex: 0 0 7.5rem;
+    width: 7.5rem;
+    min-width: 7.5rem;
+    scroll-snap-align: start;
+  }
+
+  .home-category-card--has-photo .home-category-visual {
+    aspect-ratio: 1;
+    min-height: 0;
+    height: auto;
+    padding: 0.35rem;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+  }
+
+  .home-category-photo {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+    object-fit: contain;
+    object-position: center center;
+  }
+
+  .home-category-foot {
+    gap: 0.3rem;
+    padding: 0.35rem 0.4rem 0.5rem;
+    justify-content: center;
+  }
+
+  .home-category-icon {
+    display: none;
+  }
+
+  .home-category-text {
+    width: 100%;
+    text-align: center;
+    align-items: center;
+  }
+
+  .home-category-text strong {
+    font-size: 0.78rem;
+  }
+
+  .home-category-text span {
+    display: none;
   }
 }
 

@@ -823,3 +823,97 @@ body[data-site-page="teherauto"] .auto-search-tabs {
     margin-top: 0.35rem;
   }
 }
+
+/* Alsó lap választó — natív görgetés, a hero felett */
+.auto-drum-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.auto-drum-sheet__backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  background: rgba(15, 23, 42, 0.45);
+  cursor: pointer;
+}
+
+.auto-drum-sheet__panel {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  max-height: min(62vh, 28rem);
+  background: #fff;
+  border-radius: 16px 16px 0 0;
+  box-shadow: 0 -8px 28px rgba(15, 23, 42, 0.18);
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+.auto-drum-sheet__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem 0.65rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.auto-drum-sheet__title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #111;
+}
+
+.auto-drum-sheet__close {
+  border: 0;
+  background: transparent;
+  color: #2563eb;
+  font: inherit;
+  font-weight: 650;
+  font-size: 0.95rem;
+  padding: 0.25rem 0.15rem;
+  cursor: pointer;
+}
+
+.auto-drum-sheet__list {
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  overscroll-behavior: contain;
+  max-height: min(52vh, 24rem);
+}
+
+.auto-drum-sheet__opt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  border-bottom: 1px solid #f1f5f9;
+  background: #fff;
+  color: #0f172a;
+  font: inherit;
+  font-size: 1.05rem;
+  padding: 0.95rem 1.1rem;
+  cursor: pointer;
+}
+
+.auto-drum-sheet__opt.is-selected {
+  background: #f1f5f9;
+  font-weight: 650;
+}
+
+.auto-drum-sheet__opt:active {
+  background: #e2e8f0;
+}
+
+body.auto-drum-sheet-open {
+  overflow: hidden;
+}

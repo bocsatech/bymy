@@ -1,13 +1,13 @@
 /**
- * Mobil autó kereső — ingatlan-stílusú dobkerék.
+ * Mobil autó kereső — mezők + alsó lap (sheet) választó.
  * Összevont: gyártási év, vételár, km, teljesítmény, hengerűrtartalom.
  * Asztali: változatlan (select).
  */
 
-import { fillWheel, setWheelValue, readWheel } from "./ingatlan-wheels.js?v=drumScroll2";
-import { initDrumWheel, applyDrumModeClass } from "./immo-drum-picker.js?v=drumScroll2";
-import { fetchVehicleCatalog } from "./vehicle-catalog-client.js";
-import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=autoDrums6";
+import { fillWheel, setWheelValue, readWheel } from "./ingatlan-wheels.js?v=drumScroll3";
+import { initDrumWheel, applyDrumModeClass, syncDrumWheelDisplay } from "./immo-drum-picker.js?v=drumScroll3";
+import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=drumScroll3";
+import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=autoDrums7";
 
 const MOBILE_MQ = "(max-width: 900px)";
 
@@ -104,6 +104,16 @@ function emptyLabelFromOptions(options) {
   return empty?.label || "Mindegy";
 }
 
+function finishWheel(cell, emptyLabel) {
+  const wheel = cell.querySelector("[data-wheel]");
+  initDrumWheel(wheel, { emptyLabel });
+  const live = cell.querySelector("[data-wheel]");
+  setWheelValue(live, "");
+  syncDrumWheelDisplay(live);
+  bindAutoDrumSheet(live);
+  return live;
+}
+
 function buildWheelCell({ filterKey, wheelName, label, options, halfClass = "" }) {
   const emptyLabel = emptyLabelFromOptions(options);
   const opts = options.filter((o) => o.value !== "");
@@ -117,8 +127,7 @@ function buildWheelCell({ filterKey, wheelName, label, options, halfClass = "" }
   </div>`;
   const wheel = cell.querySelector("[data-wheel]");
   fillWheel(wheel, opts, { emptyLabel });
-  initDrumWheel(wheel, { emptyLabel });
-  setWheelValue(wheel, "");
+  finishWheel(cell, emptyLabel);
   return cell;
 }
 
@@ -144,10 +153,7 @@ function convertSimpleField(wrap) {
     options,
   });
   wrap.replaceWith(cell);
-  if (current) {
-    const wheel = cell.querySelector("[data-wheel]");
-    setWheelValue(wheel, current);
-  }
+  if (current) setWheelValue(cell.querySelector("[data-wheel]"), current);
 }
 
 function convertRangePairToDual(wrap, cfg) {
@@ -235,46 +241,60 @@ function convertRangePairToTwoDrums(wrap) {
   wrap.replaceWith(frag);
 }
 
+async function fetchCatalogQuick() {
+  try {
+    const res = await fetch("/data/vehicle-catalog.json", { cache: "force-cache" });
+    const data = await res.json();
+    if (data?.gyartmanyok?.length) return data;
+  } catch {
+    /* fallback below */
+  }
+  const { fetchVehicleCatalog } = await import("./vehicle-catalog-client.js");
+  return fetchVehicleCatalog();
+}
+
+function rebindWheel(form, wheelName, options, emptyLabel = "Mindegy") {
+  const wheel = form.querySelector(`[data-wheel="${wheelName}"]`);
+  if (!wheel) return null;
+  fillWheel(wheel, options, { emptyLabel });
+  initDrumWheel(wheel, { emptyLabel });
+  const live = form.querySelector(`[data-wheel="${wheelName}"]`);
+  setWheelValue(live, "");
+  syncDrumWheelDisplay(live);
+  bindAutoDrumSheet(live);
+  return live;
+}
+
 async function wireCatalogDrums(form) {
-  const getBrand = () => form.querySelector('[data-wheel="gyartmany"]');
-  const getModel = () => form.querySelector('[data-wheel="modell"]');
-  if (!getBrand() || !getModel()) return;
+  if (!form.querySelector('[data-wheel="gyartmany"]') || !form.querySelector('[data-wheel="modell"]')) return;
 
   let catalog;
   try {
-    catalog = await fetchVehicleCatalog();
+    catalog = await fetchCatalogQuick();
   } catch (error) {
     console.warn("Dobkerék katalógus:", error);
     return;
   }
 
   const brands = (catalog.gyartmanyok || []).map((b) => ({ value: b, label: b }));
-  let brandWheel = getBrand();
-  fillWheel(brandWheel, brands, { emptyLabel: "Mindegy" });
-  initDrumWheel(brandWheel, { emptyLabel: "Mindegy" });
-  brandWheel = getBrand();
-  setWheelValue(brandWheel, "");
+  const brandWheel = rebindWheel(form, "gyartmany", brands);
+  if (!brandWheel) return;
 
   const fillModels = (brand) => {
-    let modelWheel = getModel();
-    if (!modelWheel) return;
     const list = brand ? catalog.modellek?.[brand] ?? [] : [];
     const models = list.map((m) => ({ value: m, label: m }));
-    fillWheel(modelWheel, models, { emptyLabel: "Mindegy" });
-    initDrumWheel(modelWheel, { emptyLabel: "Mindegy" });
-    modelWheel = getModel();
-    setWheelValue(modelWheel, "");
+    rebindWheel(form, "modell", models);
   };
 
   fillModels("");
-  brandWheel?.addEventListener("immo-wheel-change", () => {
-    fillModels(readWheel(getBrand()) || "");
+  brandWheel.addEventListener("immo-wheel-change", () => {
+    fillModels(readWheel(form.querySelector('[data-wheel="gyartmany"]')) || "");
   });
 }
 
 /**
- * Select mezők → dobkerék (csak mobil).
- * @returns {Promise<boolean>} true ha dobkerék mód aktív
+ * Select mezők → sheet választó (csak mobil). Gyors: katalógus háttérben.
+ * @returns {Promise<boolean>}
  */
 export async function mountAutoSearchDrums(form = document.getElementById("home-qs-form")) {
   if (!form || form.dataset.drumsMounted === "1") return form.dataset.drumsMounted === "1";
@@ -282,7 +302,7 @@ export async function mountAutoSearchDrums(form = document.getElementById("home-
 
   applyDrumModeClass();
   form.classList.add("immo-search-form", "auto-qs-drums");
-  // Ne zárold az oldalt állandóan — immo-drum-active csak nyitott dobkeréknél kell.
+
   form.querySelectorAll("[data-qs-field]").forEach((wrap) => {
     const key = wrap.getAttribute("data-qs-field");
     if (SEARCH_OMIT_FIELDS.has(key)) wrap.remove();
@@ -306,8 +326,8 @@ export async function mountAutoSearchDrums(form = document.getElementById("home-
     if (wrap.querySelector("select.home-qs-control")) convertSimpleField(wrap);
   });
 
-  await wireCatalogDrums(form);
   form.dataset.drumsMounted = "1";
+  wireCatalogDrums(form).catch((error) => console.warn("Dobkerék katalógus:", error));
   return true;
 }
 

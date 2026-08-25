@@ -352,6 +352,10 @@ export async function applyAutoSearchLayout(form = document.getElementById("home
 
   wireRangeSelects(form);
   wireSelectOptions(form);
+  /* Mobil: katalógus a dob/sheet háttérben tölt — ne várakoztassa a keresőt */
+  if (typeof window !== "undefined" && window.matchMedia("(max-width: 900px)").matches) {
+    return layout;
+  }
   await wireCatalog(form);
   return layout;
 }

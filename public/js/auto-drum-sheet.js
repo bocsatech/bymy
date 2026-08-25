@@ -1,12 +1,14 @@
 /**
- * Autó mobil kereső — alsó lap (sheet) a dobkerék helyett.
- * Natív overflow görgetés, kilép a hero stacking contextből.
+ * Autó mobil kereső — dobkerék portál a body-n.
+ * Ugyanaz a gyűrűs kinézet, mint az ingatlan dob; a hero stacking contexten kívül.
  */
 
-import { readWheel, setWheelValue } from "./ingatlan-wheels.js?v=drumScroll3";
-import { syncDrumWheelDisplay } from "./immo-drum-picker.js?v=drumScroll3";
+import { readWheel, setWheelValue } from "./ingatlan-wheels.js?v=drumScroll4";
+import { syncDrumWheelDisplay } from "./immo-drum-picker.js?v=drumScroll4";
 
-let activeSheet = null;
+const ITEM_H = 40;
+let activePortal = null;
+let paintFrame = 0;
 
 function escapeHtml(value) {
   return String(value ?? "")
@@ -16,79 +18,234 @@ function escapeHtml(value) {
     .replace(/"/g, "&quot;");
 }
 
-export function closeAutoDrumSheet() {
-  if (!activeSheet) return;
-  activeSheet.remove();
-  activeSheet = null;
-  document.body.classList.remove("auto-drum-sheet-open");
+export function closeAutoDrumSheet(commit = false) {
+  if (!activePortal) return;
+  const { root, wheel, scrollEl, ring, wrap, trigger } = activePortal;
+  if (commit && scrollEl && ring && wheel) {
+    const item = nearestPortalItem(scrollEl, ring);
+    const value = item?.dataset.value ?? "";
+    setWheelValue(wheel, value);
+    syncDrumWheelDisplay(wheel);
+    wheel.dispatchEvent(new CustomEvent("immo-wheel-change", { bubbles: true, detail: { value } }));
+  }
+  wrap?.classList.remove("is-open", "has-drum-open");
+  wrap?.closest(".immo-dual-range")?.classList.remove("has-drum-open");
+  wrap?.closest(".immo-schema-cell")?.classList.remove("is-drum-active");
+  wrap?.closest(".immo-dual-range__half")?.classList.remove("is-drum-active");
+  trigger?.setAttribute("aria-expanded", "false");
+  root.remove();
+  activePortal = null;
+  document.body.classList.remove("auto-drum-portal-open", "auto-drum-sheet-open");
 }
 
+function nearestPortalItem(scrollEl, ring) {
+  const ringRect = ring.getBoundingClientRect();
+  const centerY = ringRect.top + ringRect.height / 2;
+  let best = null;
+  let bestDist = Infinity;
+  scrollEl.querySelectorAll(".immo-drum-inline-item").forEach((item) => {
+    const r = item.getBoundingClientRect();
+    const mid = r.top + r.height / 2;
+    const dist = Math.abs(mid - centerY);
+    if (dist < bestDist) {
+      bestDist = dist;
+      best = item;
+    }
+  });
+  return best;
+}
+
+function paintPortal(scrollEl, ring) {
+  cancelAnimationFrame(paintFrame);
+  paintFrame = requestAnimationFrame(() => {
+    const ringRect = ring.getBoundingClientRect();
+    const centerY = ringRect.top + ringRect.height / 2;
+    const cellTop = ringRect.top + ringRect.height * 0.28;
+    const cellBottom = ringRect.bottom - ringRect.height * 0.28;
+    scrollEl.querySelectorAll(".immo-drum-inline-item").forEach((item) => {
+      const r = item.getBoundingClientRect();
+      const mid = r.top + r.height / 2;
+      const inCell = mid >= cellTop && mid <= cellBottom;
+      const dist = Math.abs(mid - centerY);
+      const t = Math.min(dist / (ITEM_H * 1.15), 1);
+      item.style.opacity = String(Math.max(0.15, 1 - t * 0.72));
+      item.style.fontWeight = dist < ITEM_H * 0.42 ? "650" : "500";
+      item.classList.toggle("is-in-cell", inCell);
+      item.classList.toggle("is-selected", inCell);
+    });
+  });
+}
+
+function scrollToPortalItem(scrollEl, ring, item) {
+  if (!item) return;
+  const ringRect = ring.getBoundingClientRect();
+  const centerY = ringRect.top + ringRect.height / 2;
+  const itemRect = item.getBoundingClientRect();
+  const itemMid = itemRect.top + itemRect.height / 2;
+  scrollEl.scrollTop += itemMid - centerY;
+}
+
+function syncRingWidth(ring, scrollEl) {
+  let max = 0;
+  scrollEl.querySelectorAll(".immo-drum-inline-item").forEach((item) => {
+    max = Math.max(max, item.scrollWidth);
+  });
+  ring.style.setProperty("--immo-drum-ring-w", `${Math.max(7.5 * 16, Math.ceil(max + 28))}px`);
+}
+
+function bindPortalPan(scrollEl, ring) {
+  let lastY = 0;
+  let active = false;
+  let moved = false;
+
+  ring.addEventListener(
+    "touchstart",
+    (event) => {
+      if (!event.touches?.[0]) return;
+      lastY = event.touches[0].clientY;
+      active = true;
+      moved = false;
+    },
+    { passive: true }
+  );
+
+  ring.addEventListener(
+    "touchmove",
+    (event) => {
+      if (!active || !event.touches?.[0]) return;
+      const y = event.touches[0].clientY;
+      const dy = y - lastY;
+      lastY = y;
+      if (!dy) return;
+      if (Math.abs(dy) > 1.5) moved = true;
+      event.preventDefault();
+      scrollEl.scrollTop -= dy;
+      paintPortal(scrollEl, ring);
+      ring.dataset.drumDragged = moved ? "1" : "";
+    },
+    { passive: false }
+  );
+
+  const end = () => {
+    active = false;
+    if (moved) {
+      const snap = nearestPortalItem(scrollEl, ring);
+      if (snap) scrollToPortalItem(scrollEl, ring, snap);
+      paintPortal(scrollEl, ring);
+      ring.dataset.drumDragged = "1";
+      window.setTimeout(() => {
+        delete ring.dataset.drumDragged;
+      }, 80);
+    }
+  };
+  ring.addEventListener("touchend", end);
+  ring.addEventListener("touchcancel", end);
+
+  /* Asztali / egér */
+  ring.addEventListener(
+    "wheel",
+    (event) => {
+      event.preventDefault();
+      scrollEl.scrollTop += event.deltaY;
+      paintPortal(scrollEl, ring);
+    },
+    { passive: false }
+  );
+}
+
+function positionPortal(stage, trigger) {
+  const rect = trigger.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top + rect.height / 2;
+  const pad = 12;
+  const approxW = 140;
+  const approxH = 160;
+  let left = cx;
+  let top = cy;
+  left = Math.min(Math.max(left, pad + approxW / 2), window.innerWidth - pad - approxW / 2);
+  top = Math.min(Math.max(top, pad + approxH / 2), window.innerHeight - pad - approxH / 2);
+  stage.style.left = `${left}px`;
+  stage.style.top = `${top}px`;
+}
+
+/** Dobkerék gyűrű a mező felett (body portál). */
 export function openAutoDrumSheet(wheel, trigger) {
   if (!wheel || !trigger) return;
-  closeAutoDrumSheet();
+  closeAutoDrumSheet(false);
 
   const wrap = wheel.closest(".immo-wheel-wrap");
-  const fieldLabel =
-    wrap?.closest(".immo-dual-range")?.querySelector(".immo-dual-range__title")?.textContent?.trim() ||
-    wrap?.querySelector(".immo-label")?.textContent?.trim() ||
-    trigger.dataset.emptyLabel ||
-    "Válassz";
   const emptyLabel = trigger.dataset.emptyLabel || "Mindegy";
   const current = String(readWheel(wheel) ?? "");
   const opts = [...wheel.querySelectorAll(".immo-wheel-opt")];
 
   const root = document.createElement("div");
-  root.className = "auto-drum-sheet";
+  root.className = "auto-drum-portal";
   root.setAttribute("role", "dialog");
   root.setAttribute("aria-modal", "true");
-  root.setAttribute("aria-label", fieldLabel);
+  root.setAttribute("aria-label", emptyLabel);
 
-  const listHtml = opts
+  root.innerHTML = `
+    <button type="button" class="auto-drum-portal__backdrop" aria-label="Bezárás"></button>
+    <div class="auto-drum-portal__stage">
+      <div class="immo-drum-wheel-ring auto-drum-portal__ring">
+        <div class="immo-drum-inline-highlight" aria-hidden="true"></div>
+        <div class="auto-drum-portal__scroll immo-drum-inline-scroll" tabindex="-1"></div>
+      </div>
+      <button type="button" class="auto-drum-portal__done">Kész</button>
+    </div>`;
+
+  const stage = root.querySelector(".auto-drum-portal__stage");
+  const ring = root.querySelector(".auto-drum-portal__ring");
+  const scrollEl = root.querySelector(".auto-drum-portal__scroll");
+
+  scrollEl.innerHTML = opts
     .map((btn) => {
       const value = btn.dataset.value ?? "";
       const label = (btn.textContent || "").trim() || emptyLabel;
-      const selected = value === current || (value === "" && current === "");
-      return `<button type="button" class="auto-drum-sheet__opt${selected ? " is-selected" : ""}" data-value="${escapeHtml(value)}">${escapeHtml(label)}</button>`;
+      return `<div class="immo-drum-inline-item" data-value="${escapeHtml(value)}"><span class="immo-drum-inline-text">${escapeHtml(label)}</span></div>`;
     })
     .join("");
 
-  root.innerHTML = `
-    <button type="button" class="auto-drum-sheet__backdrop" aria-label="Bezárás"></button>
-    <div class="auto-drum-sheet__panel">
-      <div class="auto-drum-sheet__head">
-        <span class="auto-drum-sheet__title">${escapeHtml(fieldLabel)}</span>
-        <button type="button" class="auto-drum-sheet__close" aria-label="Bezárás">Kész</button>
-      </div>
-      <div class="auto-drum-sheet__list">${listHtml}</div>
-    </div>`;
+  root.querySelector(".auto-drum-portal__backdrop")?.addEventListener("click", () => closeAutoDrumSheet(true));
+  root.querySelector(".auto-drum-portal__done")?.addEventListener("click", () => closeAutoDrumSheet(true));
 
-  const list = root.querySelector(".auto-drum-sheet__list");
-  root.querySelector(".auto-drum-sheet__backdrop")?.addEventListener("click", () => closeAutoDrumSheet());
-  root.querySelector(".auto-drum-sheet__close")?.addEventListener("click", () => closeAutoDrumSheet());
-
-  list?.querySelectorAll(".auto-drum-sheet__opt").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const value = btn.getAttribute("data-value") ?? "";
+  scrollEl.querySelectorAll(".immo-drum-inline-item").forEach((item) => {
+    item.addEventListener("click", (event) => {
+      event.stopPropagation();
+      if (ring.dataset.drumDragged === "1") return;
+      const value = item.dataset.value ?? "";
       setWheelValue(wheel, value);
       syncDrumWheelDisplay(wheel);
       wheel.dispatchEvent(new CustomEvent("immo-wheel-change", { bubbles: true, detail: { value } }));
-      closeAutoDrumSheet();
+      closeAutoDrumSheet(false);
     });
   });
 
-  document.body.appendChild(root);
-  document.body.classList.add("auto-drum-sheet-open");
-  activeSheet = root;
+  scrollEl.addEventListener("scroll", () => paintPortal(scrollEl, ring), { passive: true });
+  bindPortalPan(scrollEl, ring);
 
-  const selected = list?.querySelector(".auto-drum-sheet__opt.is-selected");
-  if (selected) {
-    requestAnimationFrame(() => {
-      selected.scrollIntoView({ block: "center", behavior: "auto" });
-    });
-  }
+  document.body.appendChild(root);
+  document.body.classList.add("auto-drum-portal-open");
+  wrap?.classList.add("is-open", "has-drum-open");
+  wrap?.closest(".immo-dual-range")?.classList.add("has-drum-open");
+  (wrap?.closest(".immo-dual-range__half") || wrap?.closest(".immo-schema-cell"))?.classList.add("is-drum-active");
+  trigger.setAttribute("aria-expanded", "true");
+
+  positionPortal(stage, trigger);
+  activePortal = { root, wheel, scrollEl, ring, wrap, trigger };
+
+  const start =
+    [...scrollEl.querySelectorAll(".immo-drum-inline-item")].find((el) => (el.dataset.value ?? "") === current) ||
+    scrollEl.querySelector(".immo-drum-inline-item");
+
+  requestAnimationFrame(() => {
+    syncRingWidth(ring, scrollEl);
+    scrollToPortalItem(scrollEl, ring, start);
+    paintPortal(scrollEl, ring);
+  });
 }
 
-/** Inline dobkerék helyett sheet — a trigger click listener cseréje. */
+/** Trigger → portált dobkerék. */
 export function bindAutoDrumSheet(wheel) {
   const wrap = wheel?.closest?.(".immo-wheel-wrap");
   const trigger = wrap?.querySelector(".immo-wheel-trigger");
@@ -102,6 +259,10 @@ export function bindAutoDrumSheet(wheel) {
   next.addEventListener("click", (event) => {
     event.preventDefault();
     event.stopPropagation();
+    if (activePortal) {
+      closeAutoDrumSheet(true);
+      return;
+    }
     const form = next.closest("form");
     const live =
       (wheelName && form?.querySelector(`[data-wheel="${wheelName}"]`)) ||

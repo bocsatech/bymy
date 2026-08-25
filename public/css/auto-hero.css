@@ -824,96 +824,114 @@ body[data-site-page="teherauto"] .auto-search-tabs {
   }
 }
 
-/* Alsó lap választó — natív görgetés, a hero felett */
-.auto-drum-sheet {
+/* Portált dobkerék — ingatlan gyűrű a body-n (hero stacking felett) */
+.auto-drum-portal {
   position: fixed;
   inset: 0;
   z-index: 10000;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
 }
 
-.auto-drum-sheet__backdrop {
+.auto-drum-portal__backdrop {
   position: absolute;
   inset: 0;
   border: 0;
   padding: 0;
   margin: 0;
-  background: rgba(15, 23, 42, 0.45);
+  background: rgba(15, 23, 42, 0.28);
   cursor: pointer;
 }
 
-.auto-drum-sheet__panel {
-  position: relative;
+.auto-drum-portal__stage {
+  position: fixed;
   z-index: 1;
   display: flex;
   flex-direction: column;
-  max-height: min(62vh, 28rem);
-  background: #fff;
-  border-radius: 16px 16px 0 0;
-  box-shadow: 0 -8px 28px rgba(15, 23, 42, 0.18);
-  padding-bottom: env(safe-area-inset-bottom, 0);
-}
-
-.auto-drum-sheet__head {
-  display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  padding: 0.85rem 1rem 0.65rem;
-  border-bottom: 1px solid #e5e7eb;
+  gap: 0.55rem;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
 }
 
-.auto-drum-sheet__title {
-  font-size: 1rem;
-  font-weight: 700;
-  color: #111;
+.auto-drum-portal__ring,
+.auto-drum-portal__done {
+  pointer-events: auto;
 }
 
-.auto-drum-sheet__close {
-  border: 0;
-  background: transparent;
-  color: #2563eb;
-  font: inherit;
-  font-weight: 650;
-  font-size: 0.95rem;
-  padding: 0.25rem 0.15rem;
-  cursor: pointer;
+.auto-drum-portal .immo-drum-wheel-ring,
+.auto-drum-portal__ring {
+  position: relative;
+  width: var(--immo-drum-ring-w, 8.5rem);
+  height: 8.5rem;
+  border-radius: 1rem;
+  border: 1px dashed #94a3b8;
+  background: #fff;
+  box-shadow: 0 10px 32px rgba(15, 23, 42, 0.22);
+  overflow: hidden;
+  box-sizing: border-box;
+  touch-action: none;
 }
 
-.auto-drum-sheet__list {
+.auto-drum-portal .immo-drum-inline-highlight {
+  position: absolute;
+  left: 0.3rem;
+  right: 0.3rem;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 2rem;
+  border-radius: 6px;
+  background: rgba(148, 163, 184, 0.22);
+  pointer-events: none;
+  z-index: 3;
+}
+
+.auto-drum-portal__scroll {
+  position: absolute;
+  inset: 0;
   overflow-x: hidden;
   overflow-y: auto;
+  scroll-snap-type: y mandatory;
   -webkit-overflow-scrolling: touch;
-  touch-action: pan-y;
+  touch-action: none;
   overscroll-behavior: contain;
-  max-height: min(52vh, 24rem);
+  scrollbar-width: none;
+  padding: calc(4.25rem - 20px) 0.45rem;
+  box-sizing: border-box;
+  z-index: 2;
 }
 
-.auto-drum-sheet__opt {
-  display: block;
-  width: 100%;
-  text-align: left;
-  border: 0;
-  border-bottom: 1px solid #f1f5f9;
-  background: #fff;
+.auto-drum-portal__scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.auto-drum-portal .immo-drum-inline-item {
+  display: flex;
+  align-items: center;
+  height: 40px;
+  padding: 0 0.35rem;
   color: #0f172a;
+  font: 500 1.05rem/1 system-ui, sans-serif;
+  scroll-snap-align: center;
+  white-space: nowrap;
+}
+
+.auto-drum-portal__done {
+  border: 0;
+  border-radius: 999px;
+  background: #111;
+  color: #fff;
   font: inherit;
-  font-size: 1.05rem;
-  padding: 0.95rem 1.1rem;
+  font-weight: 650;
+  font-size: 0.92rem;
+  padding: 0.45rem 1.1rem;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.2);
   cursor: pointer;
 }
 
-.auto-drum-sheet__opt.is-selected {
-  background: #f1f5f9;
-  font-weight: 650;
-}
-
-.auto-drum-sheet__opt:active {
-  background: #e2e8f0;
-}
-
-body.auto-drum-sheet-open {
+body.auto-drum-portal-open {
   overflow: hidden;
+}
+
+/* régi sheet osztályok ne zavarjanak */
+.auto-drum-sheet {
+  display: none !important;
 }

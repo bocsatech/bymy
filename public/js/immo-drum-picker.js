@@ -3,7 +3,7 @@
  * Visszaállítás: ?immoDrum=legacy vagy localStorage immo-drum-mode=legacy
  */
 
-import { readWheel, readWheelList, setWheelValue, lockPageScroll, unlockPageScroll } from "./ingatlan-wheels.js?v=drumScroll3";
+import { readWheel, readWheelList, setWheelValue, lockPageScroll, unlockPageScroll } from "./ingatlan-wheels.js?v=drumScroll4";
 
 const ITEM_H = 40;
 let paintFrame = 0;

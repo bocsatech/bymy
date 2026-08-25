@@ -85,6 +85,12 @@ const ADMIN_SECTIONS = [
     defaultTab: "home:promo",
     tabs: [{ id: "home:promo", label: "Promo képek" }],
   },
+  {
+    id: "mobilweb",
+    label: "5. Mobilweb",
+    defaultTab: "mobilweb:menu",
+    tabs: [{ id: "mobilweb:menu", label: "Menü elrendezés" }],
+  },
 ];
 
 let admin = null;
@@ -110,6 +116,8 @@ let visitors = {
 let layout = { cells: [], category: "szemelyauto" };
 let wheelSchema = { version: 1, cells: [] };
 let hubPromo = { images: [], max: 8, size: { width: 1400, height: 840 }, count: 0 };
+let searchCylinderMenu = { version: 1, items: [] };
+let searchCylinderImagePresets = [];
 let editingUser = null;
 let selectedVisitorId = "";
 let visitorHits = [];
@@ -201,7 +209,7 @@ function h(html) {
     const evt =
       el.tagName === "FORM"
         ? "submit"
-        : el.tagName === "SELECT" || isFile
+        : el.tagName === "SELECT" || isFile || (el.tagName === "INPUT" && el.type === "checkbox")
           ? "change"
           : "click";
     el.addEventListener(evt, (event) => {
@@ -602,6 +610,77 @@ const actions = {
       render();
     }
   },
+  cylMenuMove(_, el) {
+    const items = actions.readCylinderMenuFromDom();
+    const id = el.getAttribute("data-id");
+    const dir = Number(el.getAttribute("data-dir") || 0);
+    const idx = items.findIndex((item) => item.id === id);
+    if (idx < 0) return;
+    const next = idx + dir;
+    if (next < 0 || next >= items.length) return;
+    const tmp = items[idx];
+    items[idx] = items[next];
+    items[next] = tmp;
+    searchCylinderMenu = { ...searchCylinderMenu, items };
+    render();
+  },
+  cylMenuToggle() {
+    const items = actions.readCylinderMenuFromDom();
+    searchCylinderMenu = { ...searchCylinderMenu, items };
+    render();
+  },
+  readCylinderMenuFromDom() {
+    const items = [];
+    app.querySelectorAll(".cyl-admin-card[data-id]").forEach((card) => {
+      const id = card.getAttribute("data-id");
+      const prev = (searchCylinderMenu.items || []).find((item) => item.id === id) || {};
+      items.push({
+        id,
+        label: String(card.querySelector("[data-field=label]")?.value ?? prev.label ?? "").trim(),
+        group: String(card.querySelector("[data-field=group]")?.value ?? prev.group ?? "").trim(),
+        href: String(card.querySelector("[data-field=href]")?.value ?? prev.href ?? "").trim(),
+        image: String(card.querySelector("[data-field=image]")?.value ?? prev.image ?? "").trim(),
+        enabled: Boolean(card.querySelector("[data-field=enabled]")?.checked),
+      });
+    });
+    return items.length ? items : [...(searchCylinderMenu.items || [])];
+  },
+  async saveCylinderMenu() {
+    err = "";
+    info = "";
+    try {
+      const items = actions.readCylinderMenuFromDom();
+      const data = await api("/api/level1/search-cylinder", {
+        method: "PUT",
+        body: JSON.stringify({ menu: { version: 1, items } }),
+      });
+      searchCylinderMenu = data.menu || { version: 1, items: data.items || items };
+      searchCylinderImagePresets = data.imagePresets || searchCylinderImagePresets;
+      info = "Menü elrendezés mentve. A Keresés oldalon hard refresh kell.";
+      render();
+    } catch (error) {
+      err = error.message;
+      render();
+    }
+  },
+  async resetCylinderMenu() {
+    if (!confirm("Visszaállítod az alapértelmezett menüsorrendet és címkéket?")) return;
+    err = "";
+    info = "";
+    try {
+      const data = await api("/api/level1/search-cylinder", {
+        method: "PUT",
+        body: JSON.stringify({ menu: { version: 1, items: [] } }),
+      });
+      searchCylinderMenu = data.menu || { version: 1, items: data.items || [] };
+      searchCylinderImagePresets = data.imagePresets || searchCylinderImagePresets;
+      info = "Alapértelmezett menü visszaállítva.";
+      render();
+    } catch (error) {
+      err = error.message;
+      render();
+    }
+  },
 };
 
 function fileToDataUrl(file) {
@@ -668,6 +747,11 @@ async function loadTab() {
   }
   if (section === "home" && sub === "promo") {
     hubPromo = await api("/api/level1/hub-promo");
+  }
+  if (section === "mobilweb" && sub === "menu") {
+    const data = await api("/api/level1/search-cylinder/admin");
+    searchCylinderMenu = data.menu || { version: 1, items: data.items || [] };
+    searchCylinderImagePresets = data.imagePresets || [];
   }
   if (isLayoutTab()) {
     layoutCategory = layoutCategoryFromTab();
@@ -1088,6 +1172,73 @@ function hubPromoView() {
     }`;
 }
 
+function imagePresetOptions(current) {
+  const cur = String(current || "").split("?")[0];
+  const presets = searchCylinderImagePresets.length
+    ? searchCylinderImagePresets
+    : [cur].filter(Boolean);
+  const opts = presets.map((src) => {
+    const value = src.includes("?") ? src : `${src}?v=cyl1`;
+    const selected = cur && src.split("?")[0] === cur ? " selected" : "";
+    return `<option value="${esc(value)}"${selected}>${esc(src.split("/").pop() || src)}</option>`;
+  });
+  if (current && !presets.some((src) => src.split("?")[0] === cur)) {
+    opts.unshift(`<option value="${esc(current)}" selected>${esc(current)}</option>`);
+  }
+  return opts.join("");
+}
+
+function searchCylinderMenuView() {
+  const items = searchCylinderMenu?.items || [];
+  const cards = items
+    .map((item, index) => {
+      return `<article class="cyl-admin-card ${item.enabled === false ? "is-off" : ""}" data-id="${esc(item.id)}">
+        <div class="cyl-admin-card__order">
+          <span class="cyl-admin-card__idx">${index + 1}</span>
+          <button type="button" class="btn ghost" data-act="cylMenuMove" data-id="${esc(item.id)}" data-dir="-1" ${index === 0 ? "disabled" : ""}>↑</button>
+          <button type="button" class="btn ghost" data-act="cylMenuMove" data-id="${esc(item.id)}" data-dir="1" ${index === items.length - 1 ? "disabled" : ""}>↓</button>
+        </div>
+        <div class="cyl-admin-card__thumb">
+          <img src="${esc(item.image)}" alt="" />
+        </div>
+        <div class="cyl-admin-card__fields">
+          <label>
+            <div>Címke</div>
+            <input type="text" data-field="label" value="${esc(item.label || "")}" maxlength="80" />
+          </label>
+          <label>
+            <div>Csoport</div>
+            <input type="text" data-field="group" value="${esc(item.group || "")}" maxlength="40" />
+          </label>
+          <label>
+            <div>Link</div>
+            <input type="text" data-field="href" value="${esc(item.href || "")}" />
+          </label>
+          <label>
+            <div>Kép</div>
+            <select data-field="image">${imagePresetOptions(item.image)}</select>
+          </label>
+          <label class="cyl-admin-card__toggle">
+            <input type="checkbox" data-field="enabled" data-act="cylMenuToggle" data-id="${esc(item.id)}" ${item.enabled === false ? "" : "checked"} />
+            Látható a keresés hengeren
+          </label>
+        </div>
+      </article>`;
+    })
+    .join("");
+
+  return `
+    <h2 class="layout-cat-title">Keresés — menü elrendezés</h2>
+    <p class="hint">A mobil <strong>Keresés</strong> oldal hengerének sorrendje, címkéi, képei és linkjei. A ↑↓ gombokkal rendezd. Kikapcsolt elem nem jelenik meg a hengeren.</p>
+    <p class="ok">${esc(info)}</p>
+    <p class="err">${esc(err)}</p>
+    <div class="cyl-admin-list">${cards || '<p class="hint">Nincs menüelem.</p>'}</div>
+    <div class="row" style="margin-top:1rem;gap:0.65rem;flex-wrap:wrap">
+      <button class="btn" type="button" data-act="saveCylinderMenu">Menü mentése</button>
+      <button class="btn ghost" type="button" data-act="resetCylinderMenu">Alapértelmezés</button>
+    </div>`;
+}
+
 function layoutView() {
   const cat = layoutCategoryFromTab();
   const label = categoryLabel(cat);
@@ -1131,6 +1282,7 @@ function shellBody() {
     return layoutView();
   }
   if (section === "home") return hubPromoView();
+  if (section === "mobilweb") return searchCylinderMenuView();
   return usersView("private");
 }
 
@@ -1150,6 +1302,7 @@ function shell() {
   const wide =
     section === "users" ||
     section === "home" ||
+    section === "mobilweb" ||
     isLayoutTab() ||
     isPreviewTab() ||
     tab.endsWith(":listings");

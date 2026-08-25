@@ -3591,6 +3591,39 @@ body.site-app .mm-main {
   gap: 1rem;
 }
 
+body.site-app .mm-return-bar {
+  display: flex;
+  justify-content: flex-end;
+  margin: 0 0 0.15rem;
+}
+
+body.site-app .mm-return-bar[hidden] {
+  display: none !important;
+}
+
+body.site-app .mm-shell-close {
+  border: 1px solid #d0d5dd;
+  background: #fff;
+  color: #101828;
+  border-radius: 999px;
+  padding: 0.45rem 1rem;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+body.site-app .mm-shell-close:hover {
+  border-color: #98a2b3;
+  background: #f8fafc;
+}
+
+@media (max-width: 800px) {
+  body.site-app .mm-return-bar {
+    display: none !important;
+  }
+}
+
 body.site-app .mm-panel-head {
   margin-bottom: 0.85rem;
 }
@@ -4844,6 +4877,17 @@ html[data-theme="dark"] body.site-app main,
 html[data-theme="dark"] body.site-app .mm-shell,
 html[data-theme="dark"] body.site-app .mm-main {
   color: #e8eaed;
+}
+
+html[data-theme="dark"] body.site-app .mm-shell-close {
+  background: #1a1f26;
+  border-color: #2a313c;
+  color: #e8eaed;
+}
+
+html[data-theme="dark"] body.site-app .mm-shell-close:hover {
+  background: #242b34;
+  border-color: #3b4450;
 }
 
 html[data-theme="dark"] body.site-app .mm-side--cats {

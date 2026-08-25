@@ -1,10 +1,14 @@
 /**
- * Fejléc profilkép + név: a Beállítások oldal megfelelő szekciójára navigál.
- * Mobil weben ez nem fut (ott más UI elem van).
+ * Fejléc profilkép + név (asztali):
+ * — Beállítások oldal megnyitása (/beallitasok.html)
+ * — Bezáráskor visszatérés az előző oldalra
+ * Mobil weben: Fiókom menü (/fiok.html)
  */
 
 const AUTH_KEY = "bymy-auth-user";
 const PHOTO_KEY = "bymy-avatar-photos";
+const RETURN_KEY = "bymy-settings-return";
+const DESKTOP_MQ = "(min-width: 801px)";
 let initialized = false;
 
 function getAuthUser() {
@@ -18,6 +22,10 @@ function getAuthUser() {
 
 function isLoggedIn() {
   return Boolean(getAuthUser()?.email);
+}
+
+function isDesktop() {
+  return typeof window !== "undefined" && window.matchMedia(DESKTOP_MQ).matches;
 }
 
 function readPhotos() {
@@ -75,6 +83,68 @@ function hideDropdown(wrap) {
   wrap.querySelector("[data-avatar-toggle]")?.setAttribute("aria-expanded", "false");
 }
 
+function currentPath() {
+  return `${window.location.pathname}${window.location.search}${window.location.hash}`;
+}
+
+function isSettingsPath(path = window.location.pathname) {
+  return path === "/beallitasok.html" || path.endsWith("/beallitasok.html");
+}
+
+function isFiokPath(path = window.location.pathname) {
+  return path === "/fiok.html" || path.endsWith("/fiok.html");
+}
+
+/** Csak same-origin relatív útvonal; ne loopoljon vissza a Beállításokra. */
+export function safeSettingsReturnUrl(raw) {
+  const s = String(raw || "").trim();
+  if (!s.startsWith("/") || s.startsWith("//")) return "/";
+  const path = s.split(/[?#]/)[0] || "/";
+  if (path === "/beallitasok.html" || path.endsWith("/beallitasok.html")) return "/";
+  if (path === "/fiok.html" || path.endsWith("/fiok.html")) return "/";
+  if (path === "/belepes.html" || path.endsWith("/belepes.html")) return "/";
+  if (path === "/regisztracio.html" || path.endsWith("/regisztracio.html")) return "/";
+  return s;
+}
+
+export function rememberSettingsReturn(url = currentPath()) {
+  try {
+    sessionStorage.setItem(RETURN_KEY, safeSettingsReturnUrl(url));
+  } catch {
+    /* ignore */
+  }
+}
+
+export function consumeSettingsReturn() {
+  try {
+    const raw = sessionStorage.getItem(RETURN_KEY);
+    sessionStorage.removeItem(RETURN_KEY);
+    return safeSettingsReturnUrl(raw);
+  } catch {
+    return "/";
+  }
+}
+
+export function peekSettingsReturn() {
+  try {
+    return safeSettingsReturnUrl(sessionStorage.getItem(RETURN_KEY));
+  } catch {
+    return "";
+  }
+}
+
+export function hasSettingsReturn() {
+  try {
+    return Boolean(sessionStorage.getItem(RETURN_KEY));
+  } catch {
+    return false;
+  }
+}
+
+function settingsTargetHref() {
+  return "/beallitasok.html?szekcio=fiok";
+}
+
 export function refreshAvatarMenuUi(root = document) {
   const wraps = root.querySelectorAll("[data-avatar-menu]");
   const user = getAuthUser();
@@ -86,6 +156,7 @@ export function refreshAvatarMenuUi(root = document) {
     const letterEl = wrap.querySelector("[data-avatar-letter]");
     const imgEl = wrap.querySelector("[data-avatar-img]");
     const firstNameEl = wrap.querySelector("[data-auth-firstname]");
+    const toggle = wrap.querySelector("[data-avatar-toggle]");
     if (letterEl) letterEl.textContent = letterFromUser(user);
     if (firstNameEl) firstNameEl.textContent = firstName(user);
 
@@ -99,6 +170,12 @@ export function refreshAvatarMenuUi(root = document) {
         imgEl.hidden = true;
         if (letterEl) letterEl.hidden = false;
       }
+    }
+
+    if (toggle) {
+      toggle.setAttribute("aria-haspopup", "false");
+      toggle.setAttribute("aria-label", "Beállítások");
+      toggle.setAttribute("title", "Beállítások");
     }
 
     wrap.dataset.loggedIn = loggedIn ? "1" : "0";
@@ -128,24 +205,28 @@ function bindWrap(wrap) {
   const toggle = wrap.querySelector("[data-avatar-toggle]");
   if (!toggle || toggle.dataset.bound === "1") return;
   toggle.dataset.bound = "1";
-  toggle?.addEventListener("click", (event) => {
+  toggle.addEventListener("click", (event) => {
     event.preventDefault();
     event.stopPropagation();
     if (toggle.dataset.navigating === "1") return;
     if (!isLoggedIn()) {
       toggle.dataset.navigating = "1";
-      window.location.href = `/belepes.html?next=${encodeURIComponent(
-        window.location.pathname + window.location.search
-      )}`;
+      window.location.href = `/belepes.html?next=${encodeURIComponent(currentPath())}`;
       return;
     }
 
-    // Fiók menü külön oldalon (/fiok.html) — nem Beállítások, nem lenyíló.
-    const target = "/fiok.html";
-    const now = `${window.location.pathname}${window.location.search}`;
-    if (now === target || window.location.pathname === "/fiok.html") return;
+    if (isDesktop()) {
+      if (isSettingsPath()) return;
+      rememberSettingsReturn(currentPath());
+      toggle.dataset.navigating = "1";
+      window.location.assign(settingsTargetHref());
+      return;
+    }
+
+    /* Mobil: Fiókom menü */
+    if (isFiokPath()) return;
     toggle.dataset.navigating = "1";
-    window.location.assign(target);
+    window.location.assign("/fiok.html");
   });
 }
 
@@ -160,7 +241,6 @@ export function initAvatarMenu() {
   wraps.forEach(bindWrap);
   window.addEventListener("bymy-auth-changed", () => refreshAvatarMenuUi());
 
-  // Oldal kattintásra zárjuk a dropdownot (csak desktop "Fiók" menükre).
   document.addEventListener("click", (event) => {
     const wrap = event.target?.closest?.("[data-avatar-menu]");
     if (wrap) return;

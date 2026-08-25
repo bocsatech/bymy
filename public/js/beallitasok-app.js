@@ -28,6 +28,10 @@ import {
 import { initMessagesUi } from "./messages-ui.js?v=msgLive1";
 import { listConversations } from "./messages-api.js?v=msgLive1";
 import { initMyAdsPanel } from "./my-ads.js?v=hdView1";
+import {
+  consumeSettingsReturn,
+  hasSettingsReturn,
+} from "./site-avatar-menu.js?v=settingsOpen1";
 
 const PHOTO_KEY = "bymy-avatar-photos";
 const NOTIFY_KEY = "bymy-notify-prefs";
@@ -1082,7 +1086,25 @@ export async function initSettingsPage() {
     }
   });
 
+  initSettingsReturnClose();
   window.addEventListener("popstate", () => setSection(currentSection()));
+}
+
+function initSettingsReturnClose() {
+  const bar = document.querySelector("[data-mm-return-bar]");
+  const btn = document.querySelector("[data-mm-close]");
+  if (!bar || !btn) return;
+  const desktop = window.matchMedia("(min-width: 801px)").matches;
+  if (!desktop || !hasSettingsReturn()) {
+    bar.hidden = true;
+    return;
+  }
+  bar.hidden = false;
+  if (btn.dataset.bound === "1") return;
+  btn.dataset.bound = "1";
+  btn.addEventListener("click", () => {
+    window.location.assign(consumeSettingsReturn() || "/");
+  });
 }
 
 /** Mentés listener AZONNAL — ne várjon az auth hálózatra (különben natív submit = nincs mentés). */

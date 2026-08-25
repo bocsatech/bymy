@@ -2,11 +2,12 @@
  * Keresés oldal — közös 3D henger-dobkerék (autó / teher / ingatlan almenük).
  * Snap + haptic; kattintásra megnyílik a kiválasztott kereső.
  * Folytonos forgás max 20 teljes körig, utána megáll (nincs végtelen wrap-ugrás).
+ * Menüelemek: GET /api/level1/search-cylinder (admin szerkeszthető).
  */
 
 import { lockPageScroll, unlockPageScroll } from "./ingatlan-wheels.js?v=scrollLock7";
 
-const ITEMS = [
+const FALLBACK_ITEMS = [
   {
     id: "szemelyauto",
     label: "Személyautó",
@@ -101,19 +102,43 @@ function snapAngleNear(angleDeg) {
 function hapticCenterLock() {
   try {
     if (!navigator.vibrate) return;
-    /* Rövid „beugrás” — rezgőmotor-szerű, ahol a böngésző engedi (legtöbb Android). */
     navigator.vibrate([14, 24, 10]);
   } catch {
     /* ignore */
   }
 }
 
-export function initSearchCylinder(root = document) {
+function escapeAttr(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;");
+}
+
+async function loadCylinderItems() {
+  try {
+    const res = await fetch("/api/level1/search-cylinder", {
+      credentials: "same-origin",
+      cache: "no-store",
+    });
+    const data = await res.json().catch(() => ({}));
+    const items = Array.isArray(data.items) ? data.items.filter((item) => item?.id && item?.href) : [];
+    if (items.length) return items;
+  } catch (error) {
+    console.warn("Keresés henger menü:", error);
+  }
+  return FALLBACK_ITEMS;
+}
+
+export async function initSearchCylinder(root = document) {
   const viewport = root.querySelector("[data-cyl-viewport]");
   const drum = root.querySelector("[data-cyl-drum]");
   if (!viewport || !drum) return;
 
+  const ITEMS = await loadCylinderItems();
   const n = ITEMS.length;
+  if (!n) return;
+
   const radius = (() => {
     const h = Math.max(120, Math.min(window.innerWidth * 0.42, 168));
     return h / (2 * Math.tan(((STEP_DEG / 2) * Math.PI) / 180));
@@ -124,14 +149,14 @@ export function initSearchCylinder(root = document) {
 
   drum.innerHTML = ITEMS.map(
     (item, i) => `
-    <a class="cyl-face" href="${item.href}" data-cyl-index="${i}" data-cyl-id="${item.id}"
-      style="--i:${n - 1 - i}" aria-label="${item.label}" draggable="false">
+    <a class="cyl-face" href="${escapeAttr(item.href)}" data-cyl-index="${i}" data-cyl-id="${escapeAttr(item.id)}"
+      style="--i:${n - 1 - i}" aria-label="${escapeAttr(item.label)}" draggable="false">
       <span class="cyl-face__media">
-        <img src="${item.image}" alt="" width="640" height="360" decoding="async" draggable="false" />
+        <img src="${escapeAttr(item.image)}" alt="" width="640" height="360" decoding="async" draggable="false" />
       </span>
       <span class="cyl-face__copy">
-        <span class="cyl-face__group">${item.group}</span>
-        <strong class="cyl-face__label">${item.label}</strong>
+        <span class="cyl-face__group">${escapeAttr(item.group || "")}</span>
+        <strong class="cyl-face__label">${escapeAttr(item.label)}</strong>
       </span>
     </a>`
   ).join("");
@@ -401,7 +426,9 @@ export function initSearchCylinder(root = document) {
 }
 
 if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", () => initSearchCylinder());
+  document.addEventListener("DOMContentLoaded", () => {
+    initSearchCylinder().catch((error) => console.warn("Keresés henger:", error));
+  });
 } else {
-  initSearchCylinder();
+  initSearchCylinder().catch((error) => console.warn("Keresés henger:", error));
 }

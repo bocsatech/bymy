@@ -595,8 +595,80 @@ body[data-site-page="teherauto"] .auto-search-tabs {
 /* Mobil dobkerék kereső — ingatlan stílus a fehér panelben */
 @media (max-width: 900px) {
   body.immo-drum-active .auto-search-panel,
-  body.immo-drum-active .auto-qs-drums {
+  body.immo-drum-active .auto-qs-drums,
+  .auto-search-panel .auto-qs-drums {
     overflow: visible;
+  }
+
+  /* Dobkerék gyűrű — 900px-ig (ingatlan CSS csak 800px alatt) */
+  .auto-search-panel .auto-qs-drums .immo-drum-inline {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 60;
+    pointer-events: none;
+  }
+
+  .auto-search-panel .auto-qs-drums .immo-wheel-wrap--drum-inline.is-open .immo-drum-inline {
+    pointer-events: auto;
+  }
+
+  .auto-search-panel .auto-qs-drums .immo-drum-inline[hidden] {
+    display: none !important;
+  }
+
+  .auto-search-panel .auto-qs-drums .immo-drum-wheel-ring {
+    position: relative;
+    width: var(--immo-drum-ring-w, 7.5rem);
+    height: 7.5rem;
+    border-radius: 1rem;
+    border: 1px dashed #94a3b8;
+    background: #fff;
+    box-shadow: 0 8px 28px rgba(15, 23, 42, 0.18);
+    overflow: hidden;
+    box-sizing: border-box;
+  }
+
+  .auto-search-panel .auto-qs-drums .immo-drum-inline-highlight {
+    position: absolute;
+    left: 0.3rem;
+    right: 0.3rem;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 2rem;
+    border-radius: 6px;
+    background: rgba(148, 163, 184, 0.22);
+    pointer-events: none;
+    z-index: 3;
+  }
+
+  .auto-search-panel .auto-qs-drums .immo-drum-inline-scroll {
+    position: absolute;
+    inset: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    scroll-snap-type: y mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding: calc(3.75rem - 20px) 0.35rem;
+    box-sizing: border-box;
+    z-index: 2;
+  }
+
+  .auto-search-panel .auto-qs-drums .immo-drum-inline-scroll::-webkit-scrollbar {
+    display: none;
+  }
+
+  .auto-search-panel .auto-qs-drums .immo-drum-inline-item {
+    display: flex;
+    align-items: center;
+    height: 40px;
+    padding: 0 0.35rem;
+    color: #0f172a;
+    font: 500 1rem/1 system-ui, sans-serif;
+    scroll-snap-align: center;
+    white-space: nowrap;
   }
 
   .auto-search-panel .auto-qs-drums.immo-search-form {

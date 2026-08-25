@@ -2,8 +2,8 @@
  * Gyorskereső az autó hero panelen — elrendezés: GET /api/level1/form-layout?category=szemelyauto-search
  */
 
-import { applyAutoSearchLayout, readLayoutFilterValues } from "./auto-search-layout.js?v=autoDrums1";
-import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums } from "./auto-search-drums.js?v=autoDrums1";
+import { applyAutoSearchLayout, readLayoutFilterValues } from "./auto-search-layout.js?v=autoDrums2";
+import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums } from "./auto-search-drums.js?v=autoDrums2";
 
 export function initHomeQuickSearch({ onSearch = () => {} } = {}) {
   const form = document.getElementById("home-qs-form");

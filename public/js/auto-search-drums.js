@@ -4,9 +4,10 @@
  * Asztali: változatlan (select).
  */
 
-import { fillWheel, setWheelValue, readWheel } from "./ingatlan-wheels.js?v=scrollLock7";
+import { fillWheel, setWheelValue, readWheel } from "./ingatlan-wheels.js?v=scrollLock4";
 import { initDrumWheel, applyDrumModeClass } from "./immo-drum-picker.js?v=scrollLock4";
 import { fetchVehicleCatalog } from "./vehicle-catalog-client.js";
+import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=autoDrums2";
 
 const MOBILE_MQ = "(max-width: 900px)";
 
@@ -30,6 +31,12 @@ const DUAL_RANGES = [
     unit: "Ft",
   },
 ];
+
+const SEARCH_OMIT_FIELDS = new Set([
+  "gyartasi_honap",
+  "forgalomba_helyezes_honap",
+  "muszaki_honap",
+]);
 
 function isMobile() {
   return typeof window !== "undefined" && window.matchMedia(MOBILE_MQ).matches;
@@ -55,6 +62,16 @@ function optionsFromSelect(select) {
   }));
 }
 
+function resolveOptions(filterKey, select, emptyLabel = "Mindegy") {
+  const fromSelect = optionsFromSelect(select);
+  const filled = fromSelect.filter((o) => o.value !== "");
+  if (filled.length) {
+    const empty = fromSelect.find((o) => o.value === "");
+    return empty ? fromSelect : [{ value: "", label: emptyLabel }, ...filled];
+  }
+  return optionsForAutoFilterKey(filterKey, emptyLabel);
+}
+
 function emptyLabelFromOptions(options) {
   const empty = options.find((o) => o.value === "");
   return empty?.label || "Mindegy";
@@ -74,6 +91,7 @@ function buildWheelCell({ filterKey, wheelName, label, options, halfClass = "" }
   const wheel = cell.querySelector("[data-wheel]");
   fillWheel(wheel, opts, { emptyLabel });
   initDrumWheel(wheel, { emptyLabel });
+  setWheelValue(wheel, "");
   return cell;
 }
 
@@ -81,12 +99,16 @@ function convertSimpleField(wrap) {
   const select = wrap.querySelector("select.home-qs-control");
   if (!select) return;
   const filterKey = select.getAttribute("data-filter-key") || wrap.getAttribute("data-qs-field") || "";
-  if (!filterKey) return;
+  if (!filterKey || SEARCH_OMIT_FIELDS.has(filterKey) || SEARCH_OMIT_FIELDS.has(wrap.getAttribute("data-qs-field"))) {
+    wrap.remove();
+    return;
+  }
   const label =
     wrap.querySelector(".home-qs-label")?.textContent?.trim() ||
     select.getAttribute("aria-label") ||
     filterKey;
-  const options = optionsFromSelect(select);
+  const emptyLabel = filterKey.endsWith("_tol") ? "-tól" : filterKey.endsWith("_ig") ? "-ig" : "Mindegy";
+  const options = resolveOptions(filterKey, select, emptyLabel);
   const current = select.value;
   const cell = buildWheelCell({
     filterKey,
@@ -106,8 +128,8 @@ function convertRangePairToDual(wrap, cfg) {
   const igSelect = wrap.querySelector(`[data-filter-key="${cfg.ig}"]`);
   if (!tolSelect || !igSelect) return;
 
-  const tolOpts = optionsFromSelect(tolSelect);
-  const igOpts = optionsFromSelect(igSelect);
+  const tolOpts = resolveOptions(cfg.tol, tolSelect, "-tól");
+  const igOpts = resolveOptions(cfg.ig, igSelect, "-ig");
   const tolVal = tolSelect.value;
   const igVal = igSelect.value;
 
@@ -175,8 +197,9 @@ function convertRangePairToTwoDrums(wrap) {
   for (const select of selects) {
     const filterKey = select.getAttribute("data-filter-key");
     const aria = select.getAttribute("aria-label") || "";
+    const emptyLabel = filterKey.endsWith("_tol") ? "-tól" : "-ig";
     const label = aria || `${baseLabel} ${filterKey.endsWith("_tol") ? "tól" : "ig"}`.trim();
-    const options = optionsFromSelect(select);
+    const options = resolveOptions(filterKey, select, emptyLabel);
     const current = select.value;
     const cell = buildWheelCell({ filterKey, wheelName: filterKey, label, options });
     frag.appendChild(cell);
@@ -186,9 +209,9 @@ function convertRangePairToTwoDrums(wrap) {
 }
 
 async function wireCatalogDrums(form) {
-  const brandWheel = form.querySelector('[data-wheel="gyartmany"]');
-  const modelWheel = form.querySelector('[data-wheel="modell"]');
-  if (!brandWheel || !modelWheel) return;
+  const getBrand = () => form.querySelector('[data-wheel="gyartmany"]');
+  const getModel = () => form.querySelector('[data-wheel="modell"]');
+  if (!getBrand() || !getModel()) return;
 
   let catalog;
   try {
@@ -199,20 +222,26 @@ async function wireCatalogDrums(form) {
   }
 
   const brands = (catalog.gyartmanyok || []).map((b) => ({ value: b, label: b }));
+  let brandWheel = getBrand();
   fillWheel(brandWheel, brands, { emptyLabel: "Mindegy" });
   initDrumWheel(brandWheel, { emptyLabel: "Mindegy" });
+  brandWheel = getBrand();
+  setWheelValue(brandWheel, "");
 
   const fillModels = (brand) => {
+    let modelWheel = getModel();
+    if (!modelWheel) return;
     const list = brand ? catalog.modellek?.[brand] ?? [] : [];
     const models = list.map((m) => ({ value: m, label: m }));
     fillWheel(modelWheel, models, { emptyLabel: "Mindegy" });
     initDrumWheel(modelWheel, { emptyLabel: "Mindegy" });
+    modelWheel = getModel();
     setWheelValue(modelWheel, "");
   };
 
-  fillModels(readWheel(brandWheel) || "");
-  brandWheel.addEventListener("immo-wheel-change", () => {
-    fillModels(readWheel(brandWheel) || "");
+  fillModels("");
+  brandWheel?.addEventListener("immo-wheel-change", () => {
+    fillModels(readWheel(getBrand()) || "");
   });
 }
 
@@ -228,6 +257,11 @@ export async function mountAutoSearchDrums(form = document.getElementById("home-
   form.classList.add("immo-search-form", "auto-qs-drums");
   document.body.classList.add("immo-drum-active");
 
+  form.querySelectorAll("[data-qs-field]").forEach((wrap) => {
+    const key = wrap.getAttribute("data-qs-field");
+    if (SEARCH_OMIT_FIELDS.has(key)) wrap.remove();
+  });
+
   const dualKeys = new Set(DUAL_RANGES.map((d) => d.fieldKey));
 
   for (const cfg of DUAL_RANGES) {
@@ -238,7 +272,7 @@ export async function mountAutoSearchDrums(form = document.getElementById("home-
   form.querySelectorAll("[data-qs-field]").forEach((wrap) => {
     if (wrap.closest(".immo-dual-range-block")) return;
     const key = wrap.getAttribute("data-qs-field");
-    if (dualKeys.has(key)) return;
+    if (dualKeys.has(key) || SEARCH_OMIT_FIELDS.has(key)) return;
     if (wrap.querySelectorAll("select.home-qs-control").length >= 2) {
       convertRangePairToTwoDrums(wrap);
       return;

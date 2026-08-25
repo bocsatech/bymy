@@ -14,6 +14,13 @@ const KM_STEP = 10_000;
 const KM_MAX = 500_000;
 const LE_STEPS = [50, 75, 100, 125, 150, 175, 200, 225, 250, 300, 350, 400, 500, 600, 800];
 
+/** Keresőben soha ne jelenjen meg (év elég, hónap nem kell). */
+const SEARCH_OMIT_FIELDS = new Set([
+  "gyartasi_honap",
+  "forgalomba_helyezes_honap",
+  "muszaki_honap",
+]);
+
 /** Admin mező → kereső filter kulcs / widget. */
 const RANGE_SPECS = {
   gyartasi_ev: { tol: "ev_tol", ig: "ev_ig", kind: "year" },
@@ -108,10 +115,55 @@ function fillOptionsSelect(select, options) {
   }
 }
 
+function isSearchCellVisible(cell) {
+  if (!cell || cell.hidden) return false;
+  if (SEARCH_OMIT_FIELDS.has(cell.field_key)) return false;
+  return true;
+}
+
 function cellsForStep(layout, step) {
   return (layout.cells || [])
-    .filter((c) => !c.hidden && Number(c.step) === step)
+    .filter((c) => isSearchCellVisible(c) && Number(c.step) === step)
     .sort((a, b) => (a.row - b.row) || (a.col - b.col));
+}
+
+/** Dobkerék / select közös opciólista egy filter kulcshoz. */
+export function optionsForAutoFilterKey(filterKey, emptyLabel = "Mindegy") {
+  const key = String(filterKey || "");
+  const withEmpty = (list) => [{ value: "", label: emptyLabel }, ...list];
+
+  if (key === "ev_tol" || key === "ev_ig") {
+    return withEmpty(yearOptions().map((y) => ({ value: y, label: y })));
+  }
+  if (key === "ar_tol" || key === "ar_ig") {
+    return withEmpty(
+      priceOptions().map((n) => ({ value: String(n), label: n.toLocaleString("hu-HU") }))
+    );
+  }
+  if (key === "km_tol" || key === "km_ig") {
+    return withEmpty(
+      kmOptions().map((n) => ({ value: String(n), label: `${n.toLocaleString("hu-HU")} km` }))
+    );
+  }
+  if (key === "le_tol" || key === "le_ig") {
+    return withEmpty(LE_STEPS.map((n) => ({ value: String(n), label: `${n} LE` })));
+  }
+  if (key === "uzemanyagQuick" || key === "uzemanyag") {
+    return withEmpty(
+      SELECT_OPTIONS.uzemanyag.map((opt) =>
+        typeof opt === "string" ? { value: opt, label: opt } : { value: opt.value, label: opt.label }
+      )
+    );
+  }
+  const selectOpts = SELECT_OPTIONS[key];
+  if (selectOpts) {
+    return withEmpty(
+      selectOpts.map((opt) =>
+        typeof opt === "string" ? { value: opt, label: opt } : { value: opt.value, label: opt.label }
+      )
+    );
+  }
+  return [{ value: "", label: emptyLabel }];
 }
 
 function groupByRow(cells) {
@@ -226,7 +278,11 @@ function wireRangeSelects(root) {
 
 function wireSelectOptions(root) {
   for (const [key, options] of Object.entries(SELECT_OPTIONS)) {
-    root.querySelectorAll(`[data-filter-key="${key}"]`).forEach((select) => {
+    const selectors =
+      key === "uzemanyag"
+        ? '[data-filter-key="uzemanyag"], [data-filter-key="uzemanyagQuick"]'
+        : `[data-filter-key="${key}"]`;
+    root.querySelectorAll(selectors).forEach((select) => {
       fillOptionsSelect(select, options);
     });
   }
@@ -261,7 +317,7 @@ export async function applyAutoSearchLayout(form = document.getElementById("home
   const layout = await fetchAutoSearchLayout();
   const mainHost = document.getElementById("qs-layout-main");
   const moreHost = document.getElementById("qs-more-layout");
-  const visible = (layout.cells || []).filter((c) => !c.hidden);
+  const visible = (layout.cells || []).filter((c) => isSearchCellVisible(c));
 
   if (!visible.length) return layout;
 
@@ -270,7 +326,7 @@ export async function applyAutoSearchLayout(form = document.getElementById("home
 
   if (moreHost) {
     const moreCells = (layout.cells || [])
-      .filter((c) => !c.hidden && Number(c.step) >= 2 && Number(c.step) <= 5)
+      .filter((c) => isSearchCellVisible(c) && Number(c.step) >= 2 && Number(c.step) <= 5)
       .sort((a, b) => (a.step - b.step) || (a.row - b.row) || (a.col - b.col));
     if (!moreCells.length) {
       moreHost.innerHTML = "";

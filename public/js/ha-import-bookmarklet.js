@@ -268,7 +268,7 @@
     const year = (yearRaw.match(/(19|20)\d{2}/) || [])[0] || "";
     const fuel = fieldFromMap(map, ["Üzemanyag"]);
     const rawHtml = doc.documentElement?.outerHTML || "";
-    const html = rawHtml.slice(0, Object.keys(map).length >= 8 ? 60000 : 160000);
+    const html = rawHtml.slice(0, Object.keys(map).length >= 8 ? 25000 : 80000);
     const felszereltseg = extractEquipment(doc);
     return {
       url: href,
@@ -285,7 +285,7 @@
       model: isChromeName(model) || /^a$/i.test(model) ? "" : model,
       map,
       felszereltseg,
-      bodyText: String(doc.body?.innerText || doc.body?.textContent || "").slice(0, 40000),
+      bodyText: String(doc.body?.innerText || doc.body?.textContent || "").slice(0, 16000),
     };
   }
 
@@ -390,6 +390,7 @@
 
   async function extractRefPage(ref) {
     const onAdmin = /admin\.hasznaltauto\.hu$/i.test(location.hostname.replace(/^www\./, ""));
+    // Adminon elég a gyorsnézet; nyilvános oldal csak tartaléknak (lassítaná a dupla fetch).
     const candidates = onAdmin
       ? [ref.adminUrl, ref.publicUrl]
       : [ref.publicUrl, ref.adminUrl];
@@ -404,6 +405,8 @@
       } catch {
         /* try next */
       }
+      // Admin gyorsnézet után ne várjunk a nyilvános oldalra — kártya gyorsabb.
+      if (onAdmin) break;
     }
     return extractListCardFallback(ref);
   }
@@ -425,11 +428,36 @@
   }
 
   async function extractFromUrl(url) {
-    const res = await fetch(url, { credentials: "include" });
+    const res = await fetch(url, { credentials: "include", cache: "force-cache" });
     const html = await res.text();
     const doc = new DOMParser().parseFromString(html, "text/html");
     return extractFromDoc(doc, url);
   }
+
+  /** Párhuzamos beolvasás — ne egyesével várjon. */
+  async function mapPool(items, concurrency, worker, onProgress) {
+    const out = new Array(items.length);
+    let next = 0;
+    let done = 0;
+    const limit = Math.max(1, Math.min(concurrency, items.length));
+    async function workerSlot() {
+      while (next < items.length) {
+        const index = next;
+        next += 1;
+        try {
+          out[index] = await worker(items[index], index);
+        } catch {
+          out[index] = null;
+        }
+        done += 1;
+        if (onProgress) onProgress(done, items.length);
+      }
+    }
+    await Promise.all(Array.from({ length: limit }, () => workerSlot()));
+    return out;
+  }
+
+  const FETCH_CONCURRENCY = 8;
 
   function showProgress(current, total, phase) {
     let el = document.getElementById("bymy-ha-progress");
@@ -562,14 +590,14 @@
         pages.push(extractPage());
       } else {
         showProgress(0, refs.length, "lista beolvasása");
-        for (let i = 0; i < refs.length; i += 1) {
-          showProgress(i + 1, refs.length, "beolvasás");
-          try {
-            const page = await extractRefPage(refs[i]);
-            if (page) pages.push(page);
-          } catch {
-            /* skip one */
-          }
+        const extracted = await mapPool(
+          refs,
+          FETCH_CONCURRENCY,
+          (ref) => extractRefPage(ref),
+          (done, total) => showProgress(done, total, "beolvasás")
+        );
+        for (const page of extracted) {
+          if (page) pages.push(page);
         }
       }
     }

@@ -1,80 +1,63 @@
 /**
- * Hub promo téglalapok — azonnal stock kép, majd API felülírás (cache-barát).
+ * Kezdőlap promo képsáv — API lista, opcionális link.
  */
-const ASSET_V = "hubPromoFast1";
+const ASSET_V = "hubPromoRail2";
 
-const DEFAULTS = {
-  ingatlan: {
+const DEFAULT_IMAGES = [
+  {
+    id: "stock-ingatlan",
     href: "/ingatlan.html",
     alt: "Ingatlan — Házak és lakások",
     url: `/images/hub-ingatlan.jpg?v=${ASSET_V}`,
   },
-  auto: {
+  {
+    id: "stock-auto",
     href: "/auto.html",
     alt: "Autó és teherautó — Autók és teherautók",
     url: `/images/hub-auto-motor.jpg?v=${ASSET_V}`,
   },
-};
+];
 
 function withAssetV(url) {
   const raw = String(url || "").trim();
   if (!raw) return raw;
   if (/[?&]v=/.test(raw)) return raw;
-  // Feltöltött / API URL: aktív id nélküli stabil verziójel
   return `${raw}${raw.includes("?") ? "&" : "?"}v=${ASSET_V}`;
 }
 
-function pathOnly(url) {
-  return String(url || "").split("?")[0];
+function escAttr(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;");
 }
 
-function markup(slots) {
-  const ingatlan = { ...DEFAULTS.ingatlan, ...(slots?.ingatlan || {}) };
-  const auto = { ...DEFAULTS.auto, ...(slots?.auto || {}) };
-  return `
-    <section class="hub-verticals" aria-label="Fő kategóriák" data-hub-verticals>
-      <a class="hub-promo hub-promo--fullimg" href="${ingatlan.href}" data-promo="ingatlan">
-        <img
+function cardHtml(item, index) {
+  const url = withAssetV(item.url);
+  const alt = escAttr(item.alt || "Promo");
+  const href = String(item.href || "").trim();
+  const priority = index === 0 ? ' fetchpriority="high"' : ' loading="lazy"';
+  const img = `<img
           class="hub-promo__full"
-          data-hub-promo-img="ingatlan"
-          src="${withAssetV(ingatlan.url)}"
-          alt="${ingatlan.alt}"
+          data-hub-promo-img="${escAttr(item.id)}"
+          src="${escAttr(url)}"
+          alt="${alt}"
           width="1400"
           height="840"
-          decoding="async"
-          fetchpriority="high"
-        />
-      </a>
-      <a class="hub-promo hub-promo--fullimg" href="${auto.href}" data-promo="auto">
-        <img
-          class="hub-promo__full"
-          data-hub-promo-img="auto"
-          src="${withAssetV(auto.url)}"
-          alt="${auto.alt}"
-          width="1400"
-          height="840"
-          decoding="async"
-          fetchpriority="high"
-        />
-      </a>
-    </section>`;
-}
-
-function applySlots(root, slots) {
-  if (!root || !slots) return;
-  for (const id of ["ingatlan", "auto"]) {
-    const conf = { ...DEFAULTS[id], ...(slots[id] || {}) };
-    const img = root.querySelector(`[data-hub-promo-img="${id}"]`);
-    const link = root.querySelector(`[data-promo="${id}"]`);
-    if (link && conf.href) link.setAttribute("href", conf.href);
-    if (img && conf.url) {
-      const next = withAssetV(conf.url);
-      if (pathOnly(img.getAttribute("src")) !== pathOnly(next)) {
-        img.src = next;
-      }
-      if (conf.alt) img.alt = conf.alt;
-    }
+          decoding="async"${priority}
+        />`;
+  if (href) {
+    return `<a class="hub-promo hub-promo--fullimg" href="${escAttr(href)}" data-promo="${escAttr(item.id)}">${img}</a>`;
   }
+  return `<div class="hub-promo hub-promo--fullimg hub-promo--nolink" data-promo="${escAttr(item.id)}" role="img" aria-label="${alt}">${img}</div>`;
+}
+
+function markup(images) {
+  const list = Array.isArray(images) && images.length ? images : DEFAULT_IMAGES;
+  return `
+    <section class="hub-verticals" aria-label="Főoldal ajánlók" data-hub-verticals>
+      ${list.map((item, i) => cardHtml(item, i)).join("")}
+    </section>`;
 }
 
 function isHomePromoPage() {
@@ -89,12 +72,20 @@ function clearPromoMounts(target = document) {
   }
 }
 
-function paintStockFirst(target) {
+function paint(target, images) {
   const mounts = [...target.querySelectorAll("[data-hub-promo-root]")];
   for (const mount of mounts) {
-    if (mount.querySelector("[data-hub-verticals]")) continue;
-    mount.innerHTML = markup(null);
+    mount.innerHTML = markup(images);
   }
+  const existing = [...target.querySelectorAll("[data-hub-verticals]")];
+  for (const section of existing) {
+    if (section.closest("[data-hub-promo-root]")) continue;
+    section.outerHTML = markup(images);
+  }
+}
+
+function paintStockFirst(target) {
+  paint(target, DEFAULT_IMAGES);
 }
 
 export async function mountHubPromos(target = document) {
@@ -104,28 +95,18 @@ export async function mountHubPromos(target = document) {
   }
   paintStockFirst(target);
 
-  const mounts = [...target.querySelectorAll("[data-hub-promo-root]")];
-  const existing = [...target.querySelectorAll("[data-hub-verticals]")];
-
-  let slots = null;
+  let images = null;
   try {
     const res = await fetch("/api/hub-promo", { headers: { Accept: "application/json" } });
     if (res.ok) {
       const data = await res.json();
-      slots = data.slots || null;
+      if (Array.isArray(data.images)) images = data.images;
     }
   } catch {
     /* stock marad */
   }
 
-  if (!slots) return;
-
-  for (const section of [
-    ...existing,
-    ...mounts.map((m) => m.querySelector("[data-hub-verticals]")).filter(Boolean),
-  ]) {
-    applySlots(section, slots);
-  }
+  if (images) paint(target, images);
 }
 
 if (typeof document !== "undefined") {

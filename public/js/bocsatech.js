@@ -79,6 +79,12 @@ const ADMIN_SECTIONS = [
       })),
     ],
   },
+  {
+    id: "home",
+    label: "4. Főoldal",
+    defaultTab: "home:promo",
+    tabs: [{ id: "home:promo", label: "Promo képek" }],
+  },
 ];
 
 let admin = null;
@@ -103,7 +109,7 @@ let visitors = {
 };
 let layout = { cells: [], category: "szemelyauto" };
 let wheelSchema = { version: 1, cells: [] };
-let hubPromo = { slots: {} };
+let hubPromo = { images: [], max: 8, size: { width: 1400, height: 840 }, count: 0 };
 let editingUser = null;
 let selectedVisitorId = "";
 let visitorHits = [];
@@ -535,33 +541,15 @@ const actions = {
       render();
     }
   },
-  async hubPromoActivate(_, el) {
-    err = "";
-    info = "";
-    try {
-      const slot = el.getAttribute("data-slot");
-      const imageId = el.getAttribute("data-image-id");
-      hubPromo = await api("/api/level1/hub-promo/active", {
-        method: "PUT",
-        body: JSON.stringify({ slot, imageId }),
-      });
-      info = "Aktív kép beállítva — minden oldalon frissül.";
-      render();
-    } catch (error) {
-      err = error.message;
-      render();
-    }
-  },
   async hubPromoDelete(_, el) {
-    const slot = el.getAttribute("data-slot");
     const imageId = el.getAttribute("data-image-id");
-    if (!confirm("Törlöd ezt a feltöltött képet?")) return;
+    if (!confirm("Törlöd ezt a képet a főoldalról?")) return;
     err = "";
     info = "";
     try {
       hubPromo = await api("/api/level1/hub-promo/image", {
         method: "DELETE",
-        body: JSON.stringify({ slot, imageId }),
+        body: JSON.stringify({ id: imageId }),
       });
       info = "Kép törölve.";
       render();
@@ -570,20 +558,44 @@ const actions = {
       render();
     }
   },
-  async hubPromoUpload(_, el) {
-    const slot = el.getAttribute("data-slot");
-    const file = el.files?.[0];
-    if (!file || !slot) return;
+  async hubPromoSaveLink(_, el) {
+    const imageId = el.getAttribute("data-image-id");
+    const card = el.closest(".hub-promo-admin__card");
+    const href = String(card?.querySelector("[data-href]")?.value ?? "").trim();
+    const alt = String(card?.querySelector("[data-alt]")?.value ?? "").trim();
     err = "";
     info = "";
     try {
-      const image = await fileToDataUrl(file);
+      hubPromo = await api("/api/level1/hub-promo/image", {
+        method: "PATCH",
+        body: JSON.stringify({ id: imageId, href, alt }),
+      });
+      info = "Link mentve.";
+      render();
+    } catch (error) {
+      err = error.message;
+      render();
+    }
+  },
+  async hubPromoUpload(_, el) {
+    const file = el.files?.[0];
+    if (!file) return;
+    err = "";
+    info = "";
+    try {
+      const href = String(app.querySelector("#hub-promo-new-href")?.value ?? "").trim();
+      const alt = String(app.querySelector("#hub-promo-new-alt")?.value ?? "").trim();
+      const image = await resizePromoToTarget(file);
       hubPromo = await api("/api/level1/hub-promo/upload", {
         method: "POST",
-        body: JSON.stringify({ slot, image }),
+        body: JSON.stringify({ image, href, alt }),
       });
-      info = "Kép feltöltve és aktívra állítva.";
+      info = "Kép feltöltve (1400×840-re igazítva).";
       el.value = "";
+      const hrefInput = app.querySelector("#hub-promo-new-href");
+      const altInput = app.querySelector("#hub-promo-new-alt");
+      if (hrefInput) hrefInput.value = "";
+      if (altInput) altInput.value = "";
       render();
     } catch (error) {
       err = error.message;
@@ -599,6 +611,33 @@ function fileToDataUrl(file) {
     reader.onerror = () => reject(new Error("A fájl olvasása sikertelen."));
     reader.readAsDataURL(file);
   });
+}
+
+const PROMO_W = 1400;
+const PROMO_H = 840;
+
+/** Cover crop → 1400×840 JPEG (rossz méretű képet is igazít). */
+async function resizePromoToTarget(file) {
+  if (typeof createImageBitmap !== "function") {
+    return fileToDataUrl(file);
+  }
+  const bitmap = await createImageBitmap(file);
+  try {
+    const canvas = document.createElement("canvas");
+    canvas.width = PROMO_W;
+    canvas.height = PROMO_H;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return fileToDataUrl(file);
+    const scale = Math.max(PROMO_W / bitmap.width, PROMO_H / bitmap.height);
+    const w = bitmap.width * scale;
+    const h = bitmap.height * scale;
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(0, 0, PROMO_W, PROMO_H);
+    ctx.drawImage(bitmap, (PROMO_W - w) / 2, (PROMO_H - h) / 2, w, h);
+    return canvas.toDataURL("image/jpeg", 0.82);
+  } finally {
+    bitmap.close?.();
+  }
 }
 
 async function loadTab() {
@@ -626,6 +665,9 @@ async function loadTab() {
     layoutCategory = "ingatlan";
     const data = await api(immoWheelApiUrl("ingatlan"));
     wheelSchema = data.schema || { version: 1, cells: [] };
+  }
+  if (section === "home" && sub === "promo") {
+    hubPromo = await api("/api/level1/hub-promo");
   }
   if (isLayoutTab()) {
     layoutCategory = layoutCategoryFromTab();
@@ -994,41 +1036,56 @@ function ingatlanPreviewView() {
 }
 
 function hubPromoView() {
-  const slots = hubPromo?.slots || {};
-  const blocks = ["ingatlan", "auto"]
-    .map((id) => {
-      const slot = slots[id] || { label: id, images: [], activeId: "stock" };
-      const thumbs = (slot.images || [])
-        .map((img) => {
-          const on = img.id === slot.activeId;
-          return `<div class="hub-promo-admin__card ${on ? "is-active" : ""}">
-            <button type="button" class="hub-promo-admin__pick" data-act="hubPromoActivate" data-slot="${esc(id)}" data-image-id="${esc(img.id)}" title="Aktívra állít">
-              <img src="${esc(img.url)}" alt="" />
-              <span>${img.stock ? "Eredeti" : "Feltöltött"}${on ? " · aktív" : ""}</span>
-            </button>
-            ${
-              img.stock
-                ? ""
-                : `<button type="button" class="btn danger hub-promo-admin__del" data-act="hubPromoDelete" data-slot="${esc(id)}" data-image-id="${esc(img.id)}">Törlés</button>`
-            }
-          </div>`;
-        })
-        .join("");
-      return `<section class="hub-promo-admin__slot">
-        <h3>${esc(slot.label || id)}</h3>
-        <p class="hint">Válassz egy képet (aktív = minden oldalon), vagy tölts fel újat. JPG/PNG/WebP, max 6 MB. A szöveg a képen van.</p>
-        <div class="hub-promo-admin__grid">${thumbs || "<p>Nincs kép.</p>"}</div>
-        <label class="btn ghost hub-promo-admin__upload">Új kép feltöltése
-          <input type="file" accept="image/jpeg,image/png,image/webp" hidden data-act="hubPromoUpload" data-slot="${esc(id)}" />
+  const images = hubPromo?.images || [];
+  const max = hubPromo?.max || 8;
+  const count = images.length;
+  const canAdd = count < max;
+  const cards = images
+    .map((img) => {
+      return `<div class="hub-promo-admin__card">
+        <div class="hub-promo-admin__thumb">
+          <img src="${esc(img.url)}" alt="" />
+          ${img.stock ? '<span class="badge">alap</span>' : ""}
+        </div>
+        <label>
+          <div>Link (üres = csak reklám)</div>
+          <input type="text" data-href placeholder="/ingatlan.html vagy https://…" value="${esc(img.href || "")}" />
         </label>
-      </section>`;
+        <label>
+          <div>Alt szöveg</div>
+          <input type="text" data-alt value="${esc(img.alt || "")}" />
+        </label>
+        <div class="row-actions">
+          <button type="button" class="btn ghost" data-act="hubPromoSaveLink" data-image-id="${esc(img.id)}">Link mentése</button>
+          <button type="button" class="btn danger" data-act="hubPromoDelete" data-image-id="${esc(img.id)}">Törlés</button>
+        </div>
+      </div>`;
     })
     .join("");
+
   return `
     <p class="ok">${esc(info)}</p>
     <p class="err">${esc(err)}</p>
-    <p class="hint">Kezdőlap két nagy téglalapja — ingatlan és jármű. Ugyanaz a kép jelenik meg minden oldalon.</p>
-    <div class="hub-promo-admin">${blocks}</div>`;
+    <p class="hint"><strong>Főoldal promo sáv</strong> — max ${max} kép (${count}/${max}). Méret: <strong>1400×840</strong> (5∶3). Rossz méretű feltöltés automatikusan igazítódik. Link opcionális.</p>
+    <div class="hub-promo-admin__grid">${cards || "<p class=\"hint\">Nincs kép — tölts fel egyet.</p>"}</div>
+    ${
+      canAdd
+        ? `<section class="hub-promo-admin__upload-box">
+      <h3 class="admin-section-title">Új kép hozzáadása</h3>
+      <label>
+        <div>Link (opcionális)</div>
+        <input id="hub-promo-new-href" type="text" placeholder="üres = csak reklám" />
+      </label>
+      <label>
+        <div>Alt szöveg (opcionális)</div>
+        <input id="hub-promo-new-alt" type="text" placeholder="Promo" />
+      </label>
+      <label class="btn ghost hub-promo-admin__upload">Kép kiválasztása (JPG/PNG/WebP)
+        <input type="file" accept="image/jpeg,image/png,image/webp" hidden data-act="hubPromoUpload" />
+      </label>
+    </section>`
+        : `<p class="hint">Elérted a maximumot (${max}). Törölj egy képet, ha újat akarsz feltölteni.</p>`
+    }`;
 }
 
 function layoutView() {
@@ -1073,6 +1130,7 @@ function shellBody() {
     if (sub === "preview") return ingatlanPreviewView();
     return layoutView();
   }
+  if (section === "home") return hubPromoView();
   return usersView("private");
 }
 
@@ -1090,7 +1148,11 @@ function shell() {
     )
     .join("");
   const wide =
-    section === "users" || isLayoutTab() || isPreviewTab() || tab.endsWith(":listings");
+    section === "users" ||
+    section === "home" ||
+    isLayoutTab() ||
+    isPreviewTab() ||
+    tab.endsWith(":listings");
   return `
     <div class="wrap ${wide ? "wrap--wide" : ""}">
       <div class="top">

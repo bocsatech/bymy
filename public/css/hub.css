@@ -502,6 +502,10 @@ body.hub-page:has(.hub-hero--empty) .hub-main {
   background: #fff;
 }
 
+.hub-promo--nolink {
+  cursor: default;
+}
+
 .hub-promo--fullimg .hub-promo__full {
   position: absolute;
   inset: 0;

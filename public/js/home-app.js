@@ -19,6 +19,7 @@ import { initHomeStatsBar } from "./home-stats-bar.js";
 import { buildNearbyFilter, readNearbyPrefs } from "./nearby-search.js?v=nearby1";
 import { getAuthUser } from "./site-auth.js?v=nearby1";
 import { bindListingOpen, restoreListingReturn } from "./listing-return.js?v=scrollTop1";
+import { applyNavCounts } from "./nav-counts.js?v=navCount2";
 
 const gridTrack = document.getElementById("home-grid-track");
 const emptyEl = document.getElementById("home-empty");
@@ -172,6 +173,11 @@ async function loadListings() {
   });
   const active = all.filter((item) => (item.status || "feladott") === "feladott");
   allItems = sortForHome(filterBySitePage(active));
+  const vert = pageVerticalParam();
+  if (vert === "auto" || vert === "teher" || vert === "ingatlan") {
+    // Ha a /api/nav/counts elbukik vagy 0-t cache-el, a lista a forrás.
+    applyNavCounts({ [vert]: active.length });
+  }
   populateFilterOptions(allItems);
   renderListings(allItems);
   updateFilterResultCount();

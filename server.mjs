@@ -1928,7 +1928,8 @@ export async function handleHttpRequest(req, res) {
   if (pathname === "/api/nav/counts" && req.method === "GET") {
     try {
       sendJson(res, 200, await countNavListings({ status: "feladott" }), {
-        "Cache-Control": "public, max-age=30, stale-while-revalidate=120",
+        // Auth-kötött válasz — ne a CDN cache-eljen 0-t / régi számot.
+        "Cache-Control": "private, max-age=15, stale-while-revalidate=30",
       });
     } catch (error) {
       console.warn("Nav counts:", error.message ?? error);

@@ -126,15 +126,48 @@
   function addPair(map, rawKey, rawValue) {
     const key = clean(rawKey).replace(/:$/, "");
     const value = clean(rawValue);
-    if (!key || !value || key.length > 80 || value.length > 200) return;
+    if (!key || !value || key.length > 80 || value.length > 220) return;
     if (/válasszon/i.test(value)) return;
-    if (value.length > 70 && value.split(/\s+/).length > 6) return;
-    if (/^(ár|ar|költségek|altalanos adatok|muszaki adatok|felszereltseg|felszereltség|hiba!?)$/i.test(key)) return;
+    if (value.length > 100 && value.split(/\s+/).length > 10) return;
+    if (/^(ár|ar|költségek|altalanos adatok|muszaki adatok|felszereltseg|felszereltség|beltér|belter|műszaki|muszaki|kültér|kulter|egyéb|egyeb|hiba!?)$/i.test(key))
+      return;
     const existing = map[key];
     const isName = /m[aá]rka|gy[aá]rtm[aá]ny|modell/i.test(key);
     if (!existing || (isName && existing.length > value.length) || (!isName && existing.length < value.length)) {
       map[key] = value;
     }
+  }
+
+  function extractEquipment(doc) {
+    const items = [];
+    const push = (raw) => {
+      const t = clean(raw);
+      if (!t || t.length < 2 || t.length > 60) return;
+      if (/^(beltér|belter|műszaki|muszaki|kültér|kulter|multimédia|multimedia|egyéb|egyeb|felszereltség|leírás)$/i.test(t))
+        return;
+      if (!items.includes(t)) items.push(t);
+    };
+    for (const sel of [
+      ".hirdetes-felszereltseg li",
+      ".felszereltseg-list li",
+      "[class*='felszer'] li",
+      "[class*='extra'] li",
+      ".extranev",
+      ".extra-badge",
+      ".tooltip-badge",
+    ]) {
+      for (const node of doc.querySelectorAll(sel)) push(node.innerText || node.textContent);
+    }
+    const body = String(doc.body?.innerText || "").replace(/\r\n/g, "\n");
+    const sectionRe =
+      /(?:^|\n)\s*(Beltér|Műszaki|Kültér|Multimédia\s*\/\s*Navigáció|Egyéb információ)\s*\n([\s\S]*?)(?=\n\s*(?:Beltér|Műszaki|Kültér|Multimédia|Egyéb információ|Leírás|Általános|Hirdetés)\b|$)/gi;
+    for (const match of body.matchAll(sectionRe)) {
+      for (const line of String(match[2] || "").split("\n")) {
+        const t = clean(line);
+        if (t && !/:$/.test(t) && t.split(/\s+/).length <= 8) push(t);
+      }
+    }
+    return items.slice(0, 200);
   }
 
   function extractMap(doc) {
@@ -184,7 +217,7 @@
     }
     const body = doc.body?.innerText || doc.body?.textContent || "";
     for (const line of body.split("\n")) {
-      const match = line.match(/^(.{2,50}?):\s*(.{1,200})$/);
+      const match = line.match(/^(.{2,55}?)\s*:\s*(.{1,200})$/);
       if (match) addPair(map, match[1], match[2]);
     }
     return map;
@@ -235,7 +268,8 @@
     const year = (yearRaw.match(/(19|20)\d{2}/) || [])[0] || "";
     const fuel = fieldFromMap(map, ["Üzemanyag"]);
     const rawHtml = doc.documentElement?.outerHTML || "";
-    const html = rawHtml.slice(0, Object.keys(map).length >= 8 ? 40000 : 120000);
+    const html = rawHtml.slice(0, Object.keys(map).length >= 8 ? 60000 : 160000);
+    const felszereltseg = extractEquipment(doc);
     return {
       url: href,
       html,
@@ -250,7 +284,8 @@
       brand: isChromeName(brand) || /^a$/i.test(brand) ? "" : brand,
       model: isChromeName(model) || /^a$/i.test(model) ? "" : model,
       map,
-      bodyText: String(doc.body?.innerText || doc.body?.textContent || "").slice(0, 20000),
+      felszereltseg,
+      bodyText: String(doc.body?.innerText || doc.body?.textContent || "").slice(0, 40000),
     };
   }
 

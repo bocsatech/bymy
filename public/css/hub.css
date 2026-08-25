@@ -1145,6 +1145,15 @@ body.hub-page--feed {
   background: linear-gradient(135deg, #eef2f7 0%, #f8fafc 100%);
 }
 
+.hf-card--prompt-all .hf-card-media {
+  background: linear-gradient(145deg, #1565c0 0%, #0d47a1 100%);
+}
+
+.hf-card--prompt-all .hf-card-label {
+  font-weight: 700;
+  color: #1565c0;
+}
+
 .hf-card--prompt .hf-card-label {
   font-size: 0.82rem;
   line-height: 1.25;

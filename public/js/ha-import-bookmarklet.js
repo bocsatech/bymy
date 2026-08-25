@@ -268,7 +268,7 @@
     const year = (yearRaw.match(/(19|20)\d{2}/) || [])[0] || "";
     const fuel = fieldFromMap(map, ["Üzemanyag"]);
     const rawHtml = doc.documentElement?.outerHTML || "";
-    const html = rawHtml.slice(0, Object.keys(map).length >= 8 ? 25000 : 80000);
+    const html = rawHtml.slice(0, Object.keys(map).length >= 6 ? 8000 : 40000);
     const felszereltseg = extractEquipment(doc);
     return {
       url: href,
@@ -285,7 +285,33 @@
       model: isChromeName(model) || /^a$/i.test(model) ? "" : model,
       map,
       felszereltseg,
-      bodyText: String(doc.body?.innerText || doc.body?.textContent || "").slice(0, 16000),
+      bodyText: String(doc.body?.innerText || doc.body?.textContent || "").slice(0, 12000),
+    };
+  }
+
+  /** Könnyű payload a Bymy felé — a nagy HTML 504-et okozott. */
+  function slimPageForDelivery(page) {
+    if (!page || typeof page !== "object") return page;
+    const mapCount = page.map && typeof page.map === "object" ? Object.keys(page.map).length : 0;
+    const hasBody = String(page.bodyText || "").length >= 400;
+    const html = mapCount >= 5 || hasBody ? "" : String(page.html || "").slice(0, 20000);
+    return {
+      url: page.url || "",
+      listingId: page.listingId || "",
+      visibleTitle: page.visibleTitle || page.title || "",
+      visibleImage: page.visibleImage || "",
+      visibleDescription: page.visibleDescription || page.description || "",
+      price: page.price || "",
+      km: page.km || "",
+      year: page.year || "",
+      fuel: page.fuel || "",
+      brand: page.brand || "",
+      model: page.model || "",
+      map: page.map && typeof page.map === "object" ? page.map : {},
+      felszereltseg: Array.isArray(page.felszereltseg) ? page.felszereltseg.slice(0, 120) : [],
+      bodyText: String(page.bodyText || "").slice(0, 12000),
+      html,
+      fromListCard: Boolean(page.fromListCard),
     };
   }
 
@@ -614,7 +640,7 @@
       v: 1,
       mode,
       listUrl: location.href,
-      pages,
+      pages: pages.map(slimPageForDelivery),
     });
     hideProgress(`Kész: ${pages.length} hirdetés átadva a Bymy-nak`);
   }

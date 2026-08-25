@@ -48,7 +48,7 @@ function setMode(mode) {
 
 function bookmarkletHref(mode) {
   const origin = location.origin;
-  const src = `${origin}/js/ha-import-bookmarklet.js?v=haImp15`;
+  const src = `${origin}/js/ha-import-bookmarklet.js?v=haImp16`;
   // void(...): a visszatérési érték ne cserélje le a hasznaltauto oldalt
   return `javascript:void(function(){var o=${JSON.stringify(origin)};var m=${JSON.stringify(mode)};function go(){try{window.BymyHaImport.run({origin:o,mode:m});}catch(e){alert((e&&e.message)||e);}}if(window.BymyHaImport){go();return;}var s=document.createElement("script");s.src=${JSON.stringify(src)};s.onload=go;s.onerror=function(){alert("A hasznaltauto.hu blokkolta a Bymy scriptet. Másold a hirdetés URL-jét a Bymy Autóimport oldalra.");};(document.documentElement||document.body).appendChild(s);})();`;
 }
@@ -157,15 +157,56 @@ async function postExtracted(payload) {
       (typeof data.message === "string" && data.message) ||
       (data.error && typeof data.error.message === "string" && data.error.message) ||
       "";
-    if (response.status === 401) {
-      throw new Error(detail || "Az importhoz be kell jelentkezned a Bymy fiókodba.");
-    }
-    if (response.status === 413) {
-      throw new Error("Túl nagy az import csomag. Nyisd meg egyetlen autó gyorsnézetét, majd próbáld újra.");
-    }
-    throw new Error(detail || `Import sikertelen (${response.status}).`);
+    const err = new Error(
+      response.status === 401
+        ? detail || "Az importhoz be kell jelentkezned a Bymy fiókodba."
+        : response.status === 413
+          ? "Túl nagy az import csomag. Próbáld kisebb listával."
+          : response.status === 504 || response.status === 502
+            ? detail || "Időtúllépés (504) — újrapróbáljuk kisebb csomaggal."
+            : detail || `Import sikertelen (${response.status}).`
+    );
+    err.status = response.status;
+    throw err;
   }
   return data.result;
+}
+
+async function postExtractedResilient(pages, meta = {}) {
+  const list = Array.isArray(pages) ? pages : [];
+  if (!list.length) return { savedCount: 0, skippedCount: 0, errorCount: 0, items: [], errors: [] };
+  try {
+    return await postExtracted({
+      pages: list,
+      listUrl: meta.listUrl,
+      mode: meta.mode,
+    });
+  } catch (error) {
+    if (list.length === 1 || ![502, 504, 413].includes(Number(error.status))) throw error;
+    let savedCount = 0;
+    let skippedCount = 0;
+    let errorCount = 0;
+    const items = [];
+    const errors = [];
+    for (const page of list) {
+      try {
+        const result = await postExtracted({
+          pages: [page],
+          listUrl: meta.listUrl,
+          mode: meta.mode,
+        });
+        savedCount += result?.savedCount ?? 0;
+        skippedCount += result?.skippedCount ?? 0;
+        errorCount += result?.errorCount ?? 0;
+        if (Array.isArray(result?.items)) items.push(...result.items);
+        if (Array.isArray(result?.errors)) errors.push(...result.errors);
+      } catch (inner) {
+        errorCount += 1;
+        errors.push({ url: page?.url || "", message: inner.message ?? "Import sikertelen." });
+      }
+    }
+    return { savedCount, skippedCount, errorCount, items, errors, count: items.length };
+  }
 }
 
 function isHaUrl(value) {
@@ -256,7 +297,7 @@ async function runMessageImport(data) {
   }
   importBusy = true;
   const total = pages.length;
-  const SAVE_BATCH = 10;
+  const SAVE_BATCH = 2;
   setStatus(total > 1 ? `Mentés: 0 / ${total}…` : "Hirdetés feldolgozása…");
   try {
     let savedCount = 0;
@@ -268,8 +309,7 @@ async function runMessageImport(data) {
       const chunk = pages.slice(offset, offset + SAVE_BATCH);
       setStatus(`Mentés: ${Math.min(offset + chunk.length, total)} / ${total}…`);
       try {
-        const result = await postExtracted({
-          pages: chunk,
+        const result = await postExtractedResilient(chunk, {
           listUrl: data.listUrl,
           mode: data.mode || currentMode(),
         });

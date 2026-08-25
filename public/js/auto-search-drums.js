@@ -4,10 +4,10 @@
  * Asztali: változatlan (select).
  */
 
-import { fillWheel, setWheelValue, readWheel } from "./ingatlan-wheels.js?v=drumScroll6";
-import { initDrumWheel, applyDrumModeClass, syncDrumWheelDisplay } from "./immo-drum-picker.js?v=drumScroll6";
-import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=drumScroll6";
-import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=autoDrums13";
+import { fillWheel, setWheelValue, readWheel } from "./ingatlan-wheels.js?v=drumScroll7";
+import { initDrumWheel, applyDrumModeClass, syncDrumWheelDisplay } from "./immo-drum-picker.js?v=drumScroll7";
+import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=drumScroll7";
+import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=autoDrums15";
 
 const MOBILE_MQ = "(max-width: 900px)";
 
@@ -321,7 +321,7 @@ export async function mountAutoSearchDrums(form = document.getElementById("home-
     if (wrap.closest(".immo-dual-range-block")) return;
     const key = wrap.getAttribute("data-qs-field");
     if (dualKeys.has(key) || SEARCH_OMIT_FIELDS.has(key)) return;
-    if (wrap.querySelector("input.home-qs-control[type='text']")) return;
+    if (wrap.querySelector("input.home-qs-control[type='text'], input.immo-control[type='text']")) return;
     if (wrap.querySelectorAll("select.home-qs-control").length >= 2) {
       convertRangePairToTwoDrums(wrap);
       return;

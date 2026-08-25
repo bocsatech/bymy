@@ -3,8 +3,8 @@
  * Ugyanaz a gyűrűs kinézet, mint az ingatlan dob; a hero stacking contexten kívül.
  */
 
-import { readWheel, setWheelValue } from "./ingatlan-wheels.js?v=drumScroll6";
-import { syncDrumWheelDisplay } from "./immo-drum-picker.js?v=drumScroll6";
+import { readWheel, setWheelValue } from "./ingatlan-wheels.js?v=drumScroll7";
+import { syncDrumWheelDisplay } from "./immo-drum-picker.js?v=drumScroll7";
 
 const ITEM_H = 40;
 let activePortal = null;

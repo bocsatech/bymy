@@ -48,8 +48,9 @@ function setMode(mode) {
 
 function bookmarkletHref(mode) {
   const origin = location.origin;
-  const src = `${origin}/js/ha-import-bookmarklet.js?v=haImp12`;
-  return `javascript:(function(){var o=${JSON.stringify(origin)};var m=${JSON.stringify(mode)};function go(){window.BymyHaImport.run({origin:o,mode:m});}if(window.BymyHaImport){go();return;}var s=document.createElement('script');s.src=${JSON.stringify(src)};s.onload=go;s.onerror=function(){alert('A hasznaltauto.hu blokkolta a Bymy scriptet. Másold a hirdetés URL-jét a Bymy Autóimport oldalra.');};document.documentElement.appendChild(s);})();`;
+  const src = `${origin}/js/ha-import-bookmarklet.js?v=haImp13`;
+  // void(...): a visszatérési érték ne cserélje le a hasznaltauto oldalt
+  return `javascript:void(function(){var o=${JSON.stringify(origin)};var m=${JSON.stringify(mode)};function go(){try{window.BymyHaImport.run({origin:o,mode:m});}catch(e){alert((e&&e.message)||e);}}if(window.BymyHaImport){go();return;}var s=document.createElement("script");s.src=${JSON.stringify(src)};s.onload=go;s.onerror=function(){alert("A hasznaltauto.hu blokkolta a Bymy scriptet. Másold a hirdetés URL-jét a Bymy Autóimport oldalra.");};(document.documentElement||document.body).appendChild(s);})();`;
 }
 
 function renderMode() {

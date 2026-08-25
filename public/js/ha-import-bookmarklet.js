@@ -433,30 +433,56 @@
 
   function deliver(origin, payload) {
     const sendTo = (target) => {
-      if (!target || target.closed) return;
+      if (!target || target.closed) return false;
       try {
         target.postMessage(payload, origin);
+        return true;
       } catch {
-        /* ignore */
+        return false;
       }
     };
-    sendTo(window.opener);
-    const targetUrl = `${origin}/beallitasok.html?szekcio=import&ha=1`;
-    const w = window.open(targetUrl, "bymy-ha-import");
-    if (!w) {
-      if (!window.opener || window.opener.closed) {
-        alert("Engedélyezd a felugró ablakot, vagy illeszd be a hirdetés URL-jét a Bymy Autóimport oldalon.");
-      }
+
+    const retrySend = (target) => {
+      let n = 0;
+      const timer = setInterval(() => {
+        n += 1;
+        sendTo(target);
+        if (n >= 40) clearInterval(timer);
+      }, 500);
+    };
+
+    // Ha a Bymy Autóimport nyitotta a hasznaltautót: ne nyissunk új lapot, ne navigáljunk.
+    if (window.opener && !window.opener.closed && sendTo(window.opener)) {
+      retrySend(window.opener);
       return;
     }
+
+    const targetUrl = `${origin}/beallitasok.html?szekcio=import&ha=1`;
+    // about:blank először — ha a böngésző a jelenlegi lapot cserélné, azonnal kiszállunk.
+    let w = null;
+    try {
+      w = window.open("about:blank", "bymy-ha-import");
+    } catch {
+      w = null;
+    }
+    if (!w || w === window) {
+      alert(
+        "Nem sikerült új Bymy lapot nyitni (a hasznaltauto oldal így nyitva marad). Nyisd meg külön lapon a Bymy Autóimportot, majd futtasd újra a könyvjelzőt — vagy engedélyezd a felugró ablakot."
+      );
+      return;
+    }
+    try {
+      w.location.href = targetUrl;
+    } catch {
+      try {
+        w.location.replace(targetUrl);
+      } catch {
+        alert("A Bymy lapot nem sikerült megnyitni. A hasznaltauto oldal nyitva maradt.");
+        return;
+      }
+    }
     sendTo(w);
-    let n = 0;
-    const timer = setInterval(() => {
-      n += 1;
-      sendTo(w);
-      sendTo(window.opener);
-      if (n >= 40) clearInterval(timer);
-    }, 500);
+    retrySend(w);
   }
 
   async function run(opts) {

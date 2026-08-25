@@ -112,9 +112,9 @@
               <svg class="mm-nav-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </button>
             <div class="mm-nav-sub" data-mm-sub hidden>
-              <a class="mm-nav-sublink" href="?szekcio=fiok#searchArea" data-mm-settings-acc="searchArea">Keresési körzet</a>
-              <a class="mm-nav-sublink" href="?szekcio=fiok#password" data-mm-settings-acc="password">Jelszó módosítása</a>
-              <a class="mm-nav-sublink" href="?szekcio=fiok#notify" data-mm-settings-acc="notify">Hírlevél és értesítések</a>
+              <a class="mm-nav-sublink" href="?szekcio=keresesi-korzet" data-mm-nav="keresesi-korzet">Keresési körzet</a>
+              <a class="mm-nav-sublink" href="?szekcio=jelszo" data-mm-nav="jelszo">Jelszó módosítása</a>
+              <a class="mm-nav-sublink" href="?szekcio=notify" data-mm-nav="notify">Hírlevél és értesítések</a>
             </div>
           </div>
           <a class="mm-nav-link" href="?szekcio=import" data-mm-nav="import">Autóimport</a>
@@ -127,14 +127,16 @@
           <a class="mm-nav-link" href="/uzenetek.html" data-mm-nav="uzenetek">Üzenetek <span class="mm-nav-badge" data-mm-msg-count hidden>0</span></a>
           <a class="mm-nav-link" href="?szekcio=megjelenes" data-mm-nav="megjelenes">Megjelenés</a>
           <div class="mm-nav-group" data-mm-settings-nav>
-            <button type="button" class="mm-nav-link mm-nav-toggle" data-mm-subtoggle data-mm-nav="fiok" aria-expanded="false">
+            <button type="button" class="mm-nav-link mm-nav-toggle" data-mm-subtoggle aria-expanded="false">
               <span>Beállítások</span>
               <svg class="mm-nav-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </button>
             <div class="mm-nav-sub" data-mm-sub hidden>
-              <a class="mm-nav-sublink" href="?szekcio=fiok#searchArea" data-mm-settings-acc="searchArea">Keresési körzet</a>
-              <a class="mm-nav-sublink" href="?szekcio=fiok#password" data-mm-settings-acc="password">Jelszó módosítása</a>
-              <a class="mm-nav-sublink" href="?szekcio=fiok#notify" data-mm-settings-acc="notify">Hírlevél és értesítések</a>
+              <a class="mm-nav-sublink" href="?szekcio=szemelyes" data-mm-nav="szemelyes">Személyes adatok</a>
+              <a class="mm-nav-sublink" href="?szekcio=keresesi-korzet" data-mm-nav="keresesi-korzet">Keresési körzet</a>
+              <a class="mm-nav-sublink" href="?szekcio=ajanlasok-korzet" data-mm-nav="ajanlasok-korzet">Ajánlások körzete</a>
+              <a class="mm-nav-sublink" href="?szekcio=jelszo" data-mm-nav="jelszo">Jelszó módosítása</a>
+              <a class="mm-nav-sublink" href="?szekcio=notify" data-mm-nav="notify">Hírlevél és értesítések</a>
             </div>
           </div>
         </nav>
@@ -272,7 +274,7 @@
               <strong>Megjelenés</strong>
               <span>Autó oldal háttérkép</span>
             </a>
-            <a class="mm-card" href="?szekcio=fiok">
+            <a class="mm-card" href="?szekcio=szemelyes">
               <strong>Beállítások</strong>
               <span>Személyes adatok, körzet, jelszó</span>
             </a>
@@ -402,10 +404,10 @@
           </div>
         </section>
 
-        <!-- Beállítások = iOS SettingsScreen accordion -->
-        <section class="mm-panel" data-mm-panel="fiok" hidden>
+        <!-- Beállítások almenük (korábban accordion) -->
+        <section class="mm-panel" data-mm-panel="szemelyes" hidden>
           <header class="mm-panel-head">
-            <h2 class="mm-panel-title">Beállítások</h2>
+            <h2 class="mm-panel-title">Személyes adatok</h2>
             <p class="mm-panel-lead">Fiók szerkesztése — ugyanaz, mint a mobilappban.</p>
           </header>
 
@@ -416,7 +418,7 @@
             </div>
             <div class="settings-profile-header-meta">
               <strong id="settings-profile-summary">Fiók</strong>
-              <p id="settings-profile-email-hint" class="mm-panel-lead">Töltsd ki a neved a Személyes adatoknál, majd Mentés.</p>
+              <p id="settings-profile-email-hint" class="mm-panel-lead">Töltsd ki a neved, majd Mentés.</p>
               <div class="settings-avatar-actions">
                 <button type="button" class="settings-btn-accent" id="settings-avatar-upload">Feltöltés</button>
                 <button type="button" class="settings-link-btn settings-link-btn--danger" id="settings-avatar-remove" hidden>Törlés</button>
@@ -426,172 +428,170 @@
             </div>
           </div>
 
-          <div class="settings-accordion" data-settings-accordion>
-            <details class="settings-acc" data-acc="personal">
-              <summary class="settings-acc-summary">Személyes adatok</summary>
-              <div class="settings-acc-body">
-                <p id="settings-profile-flash" class="settings-flash" role="status" hidden></p>
-                <form id="mm-profile-form" class="settings-form" action="#" method="post" onsubmit="return false;">
-                  <div class="mm-grid-2">
-                    <label class="login-field">
-                      <span class="login-label">Vezetéknév</span>
-                      <input type="text" name="lastName" required autocomplete="family-name" />
-                    </label>
-                    <label class="login-field">
-                      <span class="login-label">Keresztnév</span>
-                      <input type="text" name="firstName" required autocomplete="given-name" />
-                    </label>
-                  </div>
-                  <label class="login-field">
-                    <span class="login-label">Utca, házszám</span>
-                    <input type="text" name="street" autocomplete="street-address" />
-                  </label>
-                  <div class="settings-postal-row">
-                    <label class="login-field settings-postal-field">
-                      <span class="login-label">Irányítószám</span>
-                      <input type="text" name="postalCode" inputmode="numeric" maxlength="4" autocomplete="postal-code" data-postal-lookup />
-                    </label>
-                    <label class="login-field settings-city-field">
-                      <span class="login-label">Település <span class="settings-city-busy" data-city-busy hidden>…</span></span>
-                      <input type="text" name="city" autocomplete="address-level2" placeholder="automatikus" />
-                    </label>
-                  </div>
-                  <label class="login-field">
-                    <span class="login-label">Ország</span>
-                    <input type="text" name="country" value="Magyarország" autocomplete="country-name" />
-                  </label>
-                  <label class="login-field">
-                    <span class="login-label">Telefon</span>
-                    <input type="tel" name="phone" autocomplete="tel" placeholder="+36 …" />
-                  </label>
-                  <label class="login-field">
-                    <span class="login-label">Email</span>
-                    <input type="email" id="settings-email" value="" readonly tabindex="-1" />
-                  </label>
-                  <div class="login-field">
-                    <span class="login-label">Fióktípus</span>
-                    <p class="settings-account-type-locked" data-account-type-locked>—</p>
-                    <input type="hidden" name="accountType" value="" />
-                    <p class="settings-acc-hint">A fióktípus regisztrációkor rögzül, később nem módosítható.</p>
-                  </div>
-                  <input type="hidden" name="company" value="" />
-                  <button type="submit" class="settings-btn-primary" id="mm-profile-save">Adatok mentése</button>
-                  <button type="button" class="settings-danger-btn settings-danger-btn--block" id="settings-delete-account">Fiók törlése</button>
-                </form>
-              </div>
-            </details>
-
-            <details class="settings-acc" data-acc="searchArea">
-              <summary class="settings-acc-summary">Keresési körzet</summary>
-              <div class="settings-acc-body">
-                <p class="settings-acc-hint">A gyorsikonok (Diesel, Benzin…) ezzel az irányítószámmal és km-sugárral szűrnek.</p>
-                <form id="settings-search-area-form" class="settings-form" action="#" method="post" onsubmit="return false;">
-                  <div class="settings-postal-row">
-                    <label class="login-field settings-postal-field">
-                      <span class="login-label">Irányítószám</span>
-                      <input type="text" name="postalCode" inputmode="numeric" maxlength="4" data-postal-lookup data-search-postal />
-                    </label>
-                    <label class="login-field settings-city-field">
-                      <span class="login-label">Település <span class="settings-city-busy" data-city-busy hidden>…</span></span>
-                      <input type="text" name="city" placeholder="automatikus" data-search-city />
-                    </label>
-                  </div>
-                  <div class="login-field">
-                    <span class="login-label">Sugár (km)</span>
-                    <div class="settings-wheel" role="listbox" aria-label="Sugár (km)" data-wheel="search" data-values="5,10,15,20,30,50,75,100">
-                      <button type="button" class="settings-wheel-opt" data-km="5">5 km</button>
-                      <button type="button" class="settings-wheel-opt" data-km="10">10 km</button>
-                      <button type="button" class="settings-wheel-opt" data-km="15">15 km</button>
-                      <button type="button" class="settings-wheel-opt" data-km="20">20 km</button>
-                      <button type="button" class="settings-wheel-opt is-active" data-km="30">30 km</button>
-                      <button type="button" class="settings-wheel-opt" data-km="50">50 km</button>
-                      <button type="button" class="settings-wheel-opt" data-km="75">75 km</button>
-                      <button type="button" class="settings-wheel-opt" data-km="100">100 km</button>
-                    </div>
-                    <input type="hidden" name="radiusKm" value="30" data-search-radius />
-                  </div>
-                  <p id="settings-search-area-flash" class="settings-flash" role="status" hidden></p>
-                  <button type="submit" class="settings-btn-primary">Körzet mentése</button>
-                </form>
-              </div>
-            </details>
-
-            <details class="settings-acc" data-acc="recommendationsArea">
-              <summary class="settings-acc-summary">Ajánlások körzete</summary>
-              <div class="settings-acc-body">
-                <p class="settings-acc-hint">Az Ajánlások oldal ezzel az irányítószámmal és km-sugárral listázza a szolgáltatókat.</p>
-                <form id="settings-rec-area-form" class="settings-form" action="#" method="post" onsubmit="return false;">
-                  <div class="settings-postal-row">
-                    <label class="login-field settings-postal-field">
-                      <span class="login-label">Irányítószám</span>
-                      <input type="text" name="postalCode" inputmode="numeric" maxlength="4" data-postal-lookup data-rec-postal />
-                    </label>
-                    <label class="login-field settings-city-field">
-                      <span class="login-label">Település <span class="settings-city-busy" data-city-busy hidden>…</span></span>
-                      <input type="text" name="city" placeholder="automatikus" data-rec-city />
-                    </label>
-                  </div>
-                  <div class="login-field">
-                    <span class="login-label">Sugár (km)</span>
-                    <div class="settings-wheel" role="listbox" aria-label="Sugár (km)" data-wheel="rec" data-values="5,10,15,20,30">
-                      <button type="button" class="settings-wheel-opt" data-km="5">5 km</button>
-                      <button type="button" class="settings-wheel-opt" data-km="10">10 km</button>
-                      <button type="button" class="settings-wheel-opt" data-km="15">15 km</button>
-                      <button type="button" class="settings-wheel-opt" data-km="20">20 km</button>
-                      <button type="button" class="settings-wheel-opt is-active" data-km="30">30 km</button>
-                    </div>
-                    <input type="hidden" name="radiusKm" value="30" data-rec-radius />
-                    <p class="settings-acc-caption">Maximum 30 km (Autosweb).</p>
-                  </div>
-                  <p id="settings-rec-area-flash" class="settings-flash" role="status" hidden></p>
-                  <button type="submit" class="settings-btn-primary">Körzet mentése</button>
-                </form>
-              </div>
-            </details>
-
-            <details class="settings-acc" data-acc="password">
-              <summary class="settings-acc-summary">Jelszó módosítása</summary>
-              <div class="settings-acc-body">
-                <form id="settings-password-form" class="settings-form">
-                  <label class="login-field">
-                    <span class="login-label">Jelenlegi jelszó</span>
-                    <input type="password" name="current_password" autocomplete="current-password" placeholder="Jelenlegi jelszó" required />
-                  </label>
-                  <label class="login-field">
-                    <span class="login-label">Új jelszó</span>
-                    <input type="password" name="new_password" autocomplete="new-password" placeholder="Új jelszó" required minlength="12" />
-                  </label>
-                  <label class="login-field">
-                    <span class="login-label">Új jelszó mégegyszer</span>
-                    <input type="password" name="new_password_confirm" autocomplete="new-password" placeholder="Új jelszó mégegyszer" required minlength="12" />
-                  </label>
-                  <p id="settings-password-flash" class="settings-flash" role="status" hidden></p>
-                  <button type="submit" class="settings-btn-primary">Jelszó mentése</button>
-                </form>
-              </div>
-            </details>
-
-            <details class="settings-acc" data-acc="notify">
-              <summary class="settings-acc-summary">Hírlevél és értesítések</summary>
-              <div class="settings-acc-body">
-                <form id="settings-notify-form" class="settings-form">
-                  <label class="settings-switch"><span>Üzenetek e-mailben</span><input type="checkbox" name="messages" /><span class="settings-switch-ui" aria-hidden="true"></span></label>
-                  <label class="settings-switch"><span>Parkoló: árváltozás</span><input type="checkbox" name="favorites" /><span class="settings-switch-ui" aria-hidden="true"></span></label>
-                  <label class="settings-switch"><span>Érdeklődések</span><input type="checkbox" name="interests" /><span class="settings-switch-ui" aria-hidden="true"></span></label>
-                  <label class="settings-switch"><span>Hírlevél / tippek (marketing)</span><input type="checkbox" name="newsletter" /><span class="settings-switch-ui" aria-hidden="true"></span></label>
-                  <p id="settings-notify-flash" class="settings-flash" role="status" hidden></p>
-                  <button type="submit" class="settings-btn-primary">Értesítések mentése</button>
-                </form>
-              </div>
-            </details>
-          </div>
+          <p id="settings-profile-flash" class="settings-flash" role="status" hidden></p>
+          <form id="mm-profile-form" class="settings-form" action="#" method="post" onsubmit="return false;">
+            <div class="mm-grid-2">
+              <label class="login-field">
+                <span class="login-label">Vezetéknév</span>
+                <input type="text" name="lastName" required autocomplete="family-name" />
+              </label>
+              <label class="login-field">
+                <span class="login-label">Keresztnév</span>
+                <input type="text" name="firstName" required autocomplete="given-name" />
+              </label>
+            </div>
+            <label class="login-field">
+              <span class="login-label">Utca, házszám</span>
+              <input type="text" name="street" autocomplete="street-address" />
+            </label>
+            <div class="settings-postal-row">
+              <label class="login-field settings-postal-field">
+                <span class="login-label">Irányítószám</span>
+                <input type="text" name="postalCode" inputmode="numeric" maxlength="4" autocomplete="postal-code" data-postal-lookup />
+              </label>
+              <label class="login-field settings-city-field">
+                <span class="login-label">Település <span class="settings-city-busy" data-city-busy hidden>…</span></span>
+                <input type="text" name="city" autocomplete="address-level2" placeholder="automatikus" />
+              </label>
+            </div>
+            <label class="login-field">
+              <span class="login-label">Ország</span>
+              <input type="text" name="country" value="Magyarország" autocomplete="country-name" />
+            </label>
+            <label class="login-field">
+              <span class="login-label">Telefon</span>
+              <input type="tel" name="phone" autocomplete="tel" placeholder="+36 …" />
+            </label>
+            <label class="login-field">
+              <span class="login-label">Email</span>
+              <input type="email" id="settings-email" value="" readonly tabindex="-1" />
+            </label>
+            <div class="login-field">
+              <span class="login-label">Fióktípus</span>
+              <p class="settings-account-type-locked" data-account-type-locked>—</p>
+              <input type="hidden" name="accountType" value="" />
+              <p class="settings-acc-hint">A fióktípus regisztrációkor rögzül, később nem módosítható.</p>
+            </div>
+            <input type="hidden" name="company" value="" />
+            <button type="submit" class="settings-btn-primary" id="mm-profile-save">Adatok mentése</button>
+            <button type="button" class="settings-danger-btn settings-danger-btn--block" id="settings-delete-account">Fiók törlése</button>
+          </form>
         </section>
+
+        <section class="mm-panel" data-mm-panel="keresesi-korzet" hidden>
+          <header class="mm-panel-head">
+            <h2 class="mm-panel-title">Keresési körzet</h2>
+            <p class="mm-panel-lead">A gyorsikonok (Diesel, Benzin…) ezzel az irányítószámmal és km-sugárral szűrnek.</p>
+          </header>
+          <form id="settings-search-area-form" class="settings-form" action="#" method="post" onsubmit="return false;">
+            <div class="settings-postal-row">
+              <label class="login-field settings-postal-field">
+                <span class="login-label">Irányítószám</span>
+                <input type="text" name="postalCode" inputmode="numeric" maxlength="4" data-postal-lookup data-search-postal />
+              </label>
+              <label class="login-field settings-city-field">
+                <span class="login-label">Település <span class="settings-city-busy" data-city-busy hidden>…</span></span>
+                <input type="text" name="city" placeholder="automatikus" data-search-city />
+              </label>
+            </div>
+            <div class="login-field">
+              <span class="login-label">Sugár (km)</span>
+              <div class="settings-wheel" role="listbox" aria-label="Sugár (km)" data-wheel="search" data-values="5,10,15,20,30,50,75,100">
+                <button type="button" class="settings-wheel-opt" data-km="5">5 km</button>
+                <button type="button" class="settings-wheel-opt" data-km="10">10 km</button>
+                <button type="button" class="settings-wheel-opt" data-km="15">15 km</button>
+                <button type="button" class="settings-wheel-opt" data-km="20">20 km</button>
+                <button type="button" class="settings-wheel-opt is-active" data-km="30">30 km</button>
+                <button type="button" class="settings-wheel-opt" data-km="50">50 km</button>
+                <button type="button" class="settings-wheel-opt" data-km="75">75 km</button>
+                <button type="button" class="settings-wheel-opt" data-km="100">100 km</button>
+              </div>
+              <input type="hidden" name="radiusKm" value="30" data-search-radius />
+            </div>
+            <p id="settings-search-area-flash" class="settings-flash" role="status" hidden></p>
+            <button type="submit" class="settings-btn-primary">Körzet mentése</button>
+          </form>
+        </section>
+
+        <section class="mm-panel" data-mm-panel="ajanlasok-korzet" hidden>
+          <header class="mm-panel-head">
+            <h2 class="mm-panel-title">Ajánlások körzete</h2>
+            <p class="mm-panel-lead">Az Ajánlások oldal ezzel az irányítószámmal és km-sugárral listázza a szolgáltatókat.</p>
+          </header>
+          <form id="settings-rec-area-form" class="settings-form" action="#" method="post" onsubmit="return false;">
+            <div class="settings-postal-row">
+              <label class="login-field settings-postal-field">
+                <span class="login-label">Irányítószám</span>
+                <input type="text" name="postalCode" inputmode="numeric" maxlength="4" data-postal-lookup data-rec-postal />
+              </label>
+              <label class="login-field settings-city-field">
+                <span class="login-label">Település <span class="settings-city-busy" data-city-busy hidden>…</span></span>
+                <input type="text" name="city" placeholder="automatikus" data-rec-city />
+              </label>
+            </div>
+            <div class="login-field">
+              <span class="login-label">Sugár (km)</span>
+              <div class="settings-wheel" role="listbox" aria-label="Sugár (km)" data-wheel="rec" data-values="5,10,15,20,30">
+                <button type="button" class="settings-wheel-opt" data-km="5">5 km</button>
+                <button type="button" class="settings-wheel-opt" data-km="10">10 km</button>
+                <button type="button" class="settings-wheel-opt" data-km="15">15 km</button>
+                <button type="button" class="settings-wheel-opt" data-km="20">20 km</button>
+                <button type="button" class="settings-wheel-opt is-active" data-km="30">30 km</button>
+              </div>
+              <input type="hidden" name="radiusKm" value="30" data-rec-radius />
+              <p class="settings-acc-caption">Maximum 30 km (Autosweb).</p>
+            </div>
+            <p id="settings-rec-area-flash" class="settings-flash" role="status" hidden></p>
+            <button type="submit" class="settings-btn-primary">Körzet mentése</button>
+          </form>
+        </section>
+
+        <section class="mm-panel" data-mm-panel="jelszo" hidden>
+          <header class="mm-panel-head">
+            <h2 class="mm-panel-title">Jelszó módosítása</h2>
+            <p class="mm-panel-lead">Új jelszó beállítása a fiókodhoz.</p>
+          </header>
+          <form id="settings-password-form" class="settings-form">
+            <label class="login-field">
+              <span class="login-label">Jelenlegi jelszó</span>
+              <input type="password" name="current_password" autocomplete="current-password" placeholder="Jelenlegi jelszó" required />
+            </label>
+            <label class="login-field">
+              <span class="login-label">Új jelszó</span>
+              <input type="password" name="new_password" autocomplete="new-password" placeholder="Új jelszó" required minlength="12" />
+            </label>
+            <label class="login-field">
+              <span class="login-label">Új jelszó mégegyszer</span>
+              <input type="password" name="new_password_confirm" autocomplete="new-password" placeholder="Új jelszó mégegyszer" required minlength="12" />
+            </label>
+            <p id="settings-password-flash" class="settings-flash" role="status" hidden></p>
+            <button type="submit" class="settings-btn-primary">Jelszó mentése</button>
+          </form>
+        </section>
+
+        <section class="mm-panel" data-mm-panel="notify" hidden>
+          <header class="mm-panel-head">
+            <h2 class="mm-panel-title">Hírlevél és értesítések</h2>
+            <p class="mm-panel-lead">Milyen emaileket és értesítéseket szeretnél kapni.</p>
+          </header>
+          <form id="settings-notify-form" class="settings-form">
+            <label class="settings-switch"><span>Üzenetek e-mailben</span><input type="checkbox" name="messages" /><span class="settings-switch-ui" aria-hidden="true"></span></label>
+            <label class="settings-switch"><span>Parkoló: árváltozás</span><input type="checkbox" name="favorites" /><span class="settings-switch-ui" aria-hidden="true"></span></label>
+            <label class="settings-switch"><span>Érdeklődések</span><input type="checkbox" name="interests" /><span class="settings-switch-ui" aria-hidden="true"></span></label>
+            <label class="settings-switch"><span>Hírlevél / tippek (marketing)</span><input type="checkbox" name="newsletter" /><span class="settings-switch-ui" aria-hidden="true"></span></label>
+            <p id="settings-notify-flash" class="settings-flash" role="status" hidden></p>
+            <button type="submit" class="settings-btn-primary">Értesítések mentése</button>
+          </form>
+        </section>
+
+        <!-- legacy alias: fiok → személyes (üres, JS átirányít) -->
+        <section class="mm-panel" data-mm-panel="fiok" hidden></section>
       </div>
     </main>
 
-    <script src="/js/site-avatar-menu.js?v=settingsOpen2" type="module"></script>
+    <script src="/js/site-avatar-menu.js?v=settingsNav1" type="module"></script>
     <script src="/js/ha-import-app.js?v=fiokPage1" type="module"></script>
-    <script src="/js/beallitasok-app.js?v=settingsOpen2" type="module"></script>
+    <script src="/js/beallitasok-app.js?v=settingsNav1" type="module"></script>
   
     <script>
       (function () {

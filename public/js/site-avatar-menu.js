@@ -142,7 +142,7 @@ export function hasSettingsReturn() {
 }
 
 function settingsTargetHref() {
-  return "/beallitasok.html?szekcio=fiok";
+  return "/beallitasok.html?szekcio=szemelyes";
 }
 
 export function refreshAvatarMenuUi(root = document) {

@@ -315,7 +315,7 @@ export function initAjanlasokPage() {
       const empty = document.createElement("p");
       empty.className = "ajanlas-empty ajanlas-empty--page";
         empty.innerHTML =
-        'Nincs irányítószám. <a href="/beallitasok.html?szekcio=fiok#recommendationsArea">Beállítások → Ajánlások körzete</a>';
+        'Nincs irányítószám. <a href="/beallitasok.html?szekcio=ajanlasok-korzet">Beállítások → Ajánlások körzete</a>';
       listEl.append(empty);
       return;
     }

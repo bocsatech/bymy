@@ -97,7 +97,7 @@ async function initHubNearbyCars() {
   if (postal.length !== 4) {
     renderRail([]);
     RAIL.appendChild(
-      createPromptCard("Keresési körzet beállítása", "/beallitasok.html?szekcio=fiok")
+      createPromptCard("Keresési körzet beállítása", "/beallitasok.html?szekcio=keresesi-korzet")
     );
     setStatus("Add meg az irányítószámot a Beállításokban a közeli autók megjelenítéséhez.");
     return;
@@ -124,7 +124,7 @@ async function initHubNearbyCars() {
     setStatus(`${nearby.length} autó ${filter.origin.city} ${radiusKm} km-en belül.`, { hidden: true });
   } catch (error) {
     renderRail([]);
-    RAIL.appendChild(createPromptCard("Újrapróbálás", "/beallitasok.html?szekcio=fiok"));
+    RAIL.appendChild(createPromptCard("Újrapróbálás", "/beallitasok.html?szekcio=keresesi-korzet"));
     setStatus(error.message ?? "Nem sikerült betölteni a közeli autókat.");
   }
 }

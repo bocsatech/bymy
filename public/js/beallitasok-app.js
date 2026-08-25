@@ -31,7 +31,7 @@ import { initMyAdsPanel } from "./my-ads.js?v=hdView1";
 import {
   consumeSettingsReturn,
   hasSettingsReturn,
-} from "./site-avatar-menu.js?v=settingsOpen1";
+} from "./site-avatar-menu.js?v=settingsNav1";
 
 const PHOTO_KEY = "bymy-avatar-photos";
 const NOTIFY_KEY = "bymy-notify-prefs";
@@ -54,12 +54,31 @@ const SECTIONS = [
   "hirdetes",
   "megjelenes",
   "fiok",
+  "szemelyes",
+  "keresesi-korzet",
+  "ajanlasok-korzet",
+  "jelszo",
+  "notify",
 ];
 const CAT_STORAGE_KEY = "bymy-hirdetes-category";
 const CAT_STORAGE_VERSION = 2;
 const SEARCH_RADIUS_OPTIONS = [5, 10, 15, 20, 30, 50, 75, 100];
 const REC_RADIUS_OPTIONS = [5, 10, 15, 20, 30];
-const SETTINGS_ACC_IDS = new Set(["searchArea", "password", "notify"]);
+const SETTINGS_SECTIONS = new Set([
+  "fiok",
+  "szemelyes",
+  "keresesi-korzet",
+  "ajanlasok-korzet",
+  "jelszo",
+  "notify",
+]);
+const LEGACY_ACC_TO_SECTION = {
+  personal: "szemelyes",
+  searchArea: "keresesi-korzet",
+  recommendationsArea: "ajanlasok-korzet",
+  password: "jelszo",
+  notify: "notify",
+};
 
 let lastLookedUpPostal = "";
 let cityLookupBusy = false;
@@ -152,13 +171,15 @@ function resizeImageFile(file) {
 }
 
 function currentSection() {
-  const raw = new URLSearchParams(window.location.search).get("szekcio") || "fiok";
-  return SECTIONS.includes(raw) ? raw : "fiok";
+  const raw = new URLSearchParams(window.location.search).get("szekcio") || "szemelyes";
+  if (raw === "fiok") return "szemelyes";
+  const hash = String(window.location.hash || "").replace(/^#/, "");
+  if (LEGACY_ACC_TO_SECTION[hash]) return LEGACY_ACC_TO_SECTION[hash];
+  return SECTIONS.includes(raw) ? raw : "szemelyes";
 }
 
 function settingsAccordionHash() {
-  const hash = String(window.location.hash || "").replace(/^#/, "");
-  return SETTINGS_ACC_IDS.has(hash) ? hash : "";
+  return "";
 }
 
 function expandSettingsSubnav(group) {
@@ -177,16 +198,18 @@ function collapseSettingsSubnav(group) {
   if (btn) btn.setAttribute("aria-expanded", "false");
 }
 
-function syncSettingsSublinkActive(accId = "") {
-  document.querySelectorAll("[data-mm-settings-acc]").forEach((link) => {
-    link.classList.toggle("is-active", accId && link.getAttribute("data-mm-settings-acc") === accId);
+function syncSettingsSublinkActive() {
+  const section = currentSection();
+  document.querySelectorAll("[data-mm-settings-nav] [data-mm-nav], [data-mm-company-nav-wrap] [data-mm-nav]").forEach((link) => {
+    const nav = link.getAttribute("data-mm-nav");
+    if (!SETTINGS_SECTIONS.has(nav) && nav !== "cegadatok") return;
+    link.classList.toggle("is-active", nav === section);
   });
 }
 
 function syncSettingsSubnav() {
   const section = currentSection();
-  const accId = settingsAccordionHash();
-  const openForSettings = section === "fiok" || Boolean(accId);
+  const openForSettings = SETTINGS_SECTIONS.has(section);
   const openForCompany = section === "cegadatok" || openForSettings;
 
   document.querySelectorAll("[data-mm-settings-nav]").forEach((group) => {
@@ -201,41 +224,26 @@ function syncSettingsSubnav() {
     else collapseSettingsSubnav(group);
   });
 
-  syncSettingsSublinkActive(accId);
+  syncSettingsSublinkActive();
 }
 
 function openSettingsAccordion(accId) {
-  if (!SETTINGS_ACC_IDS.has(accId)) return;
-  setSection("fiok");
-  fillProfileForm(getAuthUser(), getProfile());
-
-  const root = document.querySelector("[data-settings-accordion]");
-  const target = root?.querySelector(`details.settings-acc[data-acc="${accId}"]`);
-  if (target) {
-    root.querySelectorAll("details.settings-acc").forEach((details) => {
-      if (details !== target) details.open = false;
-    });
-    target.open = true;
-    requestAnimationFrame(() => {
-      target.scrollIntoView({ behavior: "smooth", block: "nearest" });
-    });
+  const next = LEGACY_ACC_TO_SECTION[accId] || accId;
+  if (SETTINGS_SECTIONS.has(next) || SECTIONS.includes(next)) {
+    setSection(next);
   }
-
-  const url = new URL(window.location.href);
-  url.searchParams.set("szekcio", "fiok");
-  url.hash = accId;
-  window.history.replaceState({}, "", url);
-  syncSettingsSubnav();
 }
 
 function setSection(section) {
-  const next = SECTIONS.includes(section) ? section : "fiok";
+  let next = SECTIONS.includes(section) ? section : "szemelyes";
+  if (next === "fiok") next = "szemelyes";
   if (next === "uzenetek") {
     window.location.href = "/uzenetek.html";
     return;
   }
   const url = new URL(window.location.href);
   url.searchParams.set("szekcio", next);
+  url.hash = "";
   window.history.replaceState({}, "", url);
   document.querySelectorAll("[data-mm-panel]").forEach((panel) => {
     panel.hidden = panel.getAttribute("data-mm-panel") !== next;
@@ -255,7 +263,12 @@ function setSection(section) {
       keresesek: "Mentett kereséseim",
       hirdetes: "Saját hirdetések",
       megjelenes: "Megjelenés",
-      fiok: "Beállítások",
+      fiok: "Személyes adatok",
+      szemelyes: "Személyes adatok",
+      "keresesi-korzet": "Keresési körzet",
+      "ajanlasok-korzet": "Ajánlások körzete",
+      jelszo: "Jelszó módosítása",
+      notify: "Hírlevél és értesítések",
     }[next] + " — Fiókom";
   syncSettingsSubnav();
 }
@@ -630,9 +643,9 @@ function syncSidebarAccountType(type) {
   if (companyWrap) companyWrap.hidden = !companyType;
   if (settingsNav) settingsNav.hidden = companyType;
   if (!companyType && currentSection() === "cegadatok") {
-    setSection("fiok");
+    setSection("szemelyes");
   }
-  if (companyType && currentSection() === "fiok" && !settingsAccordionHash()) {
+  if (companyType && (currentSection() === "fiok" || currentSection() === "szemelyes")) {
     setSection("cegadatok");
   }
   syncSettingsSubnav();
@@ -649,26 +662,7 @@ function syncCompanyWrap(form) {
 }
 
 function initAccordionExclusive() {
-  const root = document.querySelector("[data-settings-accordion]");
-  if (!root || root.dataset.bound === "1") return;
-  root.dataset.bound = "1";
-  root.querySelectorAll("details.settings-acc").forEach((details) => {
-    details.addEventListener("toggle", () => {
-      if (!details.open) return;
-      root.querySelectorAll("details.settings-acc").forEach((other) => {
-        if (other !== details) other.open = false;
-      });
-    });
-  });
-
-  const hash = String(window.location.hash || "").replace(/^#/, "");
-  if (hash && SETTINGS_ACC_IDS.has(hash)) {
-    const target = root.querySelector(`details.settings-acc[data-acc="${hash}"]`);
-    if (target) {
-      target.open = true;
-      target.scrollIntoView({ block: "nearest" });
-    }
-  }
+  /* Accordion megszűnt — a beállítások külön oldalmenü-panelek. */
 }
 
 function initPostalLookups(root = document) {
@@ -944,11 +938,10 @@ export async function initSettingsPage() {
       if (!SECTIONS.includes(next)) return;
       event.preventDefault();
       setSection(next);
-      if (next === "fiok") {
+      if (next === "szemelyes" || next === "fiok") {
         fillProfileForm(getAuthUser(), getProfile());
-        expandSettingsSubnav(link.closest(".mm-nav-group"));
       }
-      if (next === "cegadatok") {
+      if (SETTINGS_SECTIONS.has(next) || next === "cegadatok") {
         expandSettingsSubnav(link.closest(".mm-nav-group"));
       }
       if (next === "uzenetek") {
@@ -960,14 +953,6 @@ export async function initSettingsPage() {
       if (next === "hirdetes") {
         initMyAdsPanel(document.getElementById("mm-ad-list")).reload();
       }
-    });
-  });
-
-  document.querySelectorAll("[data-mm-settings-acc]").forEach((link) => {
-    link.addEventListener("click", (event) => {
-      event.preventDefault();
-      const accId = link.getAttribute("data-mm-settings-acc");
-      if (accId) openSettingsAccordion(accId);
     });
   });
 

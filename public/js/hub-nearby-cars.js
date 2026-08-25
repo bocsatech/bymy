@@ -38,9 +38,9 @@ function createListingCard(item) {
   const media = document.createElement("span");
   media.className = "hf-card-media";
   if (imageUrl) {
-    // Inline háttér — nem függ object-fit / img globális szabályoktól; 140% levágja a HA fehér keretet.
+    // Mindkét tengely 145% — a sima "140%" magassága auto maradna, és fehér sávot hagyna a négyzetben.
     media.style.backgroundImage = `url(${JSON.stringify(imageUrl)})`;
-    media.style.backgroundSize = "140%";
+    media.style.backgroundSize = "145% 145%";
     media.style.backgroundPosition = "center center";
     media.style.backgroundRepeat = "no-repeat";
     media.setAttribute("role", "img");

@@ -434,9 +434,9 @@
 
   body.hub-page--feed .hf-card--listing .hf-card-media {
     background-color: #dfe3e8 !important;
-    background-size: 140%;
-    background-position: center center;
-    background-repeat: no-repeat;
+    background-size: 145% 145% !important;
+    background-position: center center !important;
+    background-repeat: no-repeat !important;
   }
 
   body.hub-page--feed .hf-card--listing .hf-card-media img {

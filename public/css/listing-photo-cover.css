@@ -1,0 +1,22 @@
+/**
+ * Minden autóhirdetés-kép: képközepe a keret közepén, a kilógó rész levágva.
+ * Lightbox (teljes képnézet) kivétel — ott contain marad.
+ */
+
+.hf-card--listing .hf-card-media {
+  background-size: cover !important;
+  background-position: center center !important;
+  background-repeat: no-repeat !important;
+}
+
+.home-grid-card-photo-img,
+.home-grid-card-photo-slide img,
+body.listings-page .ha-card-photo-img,
+.hd-stage img,
+.hd-thumb img,
+.hd-rel img,
+body.site-app .myads-thumb img,
+body.site-app .myads-photo-item img {
+  object-fit: cover !important;
+  object-position: center center !important;
+}

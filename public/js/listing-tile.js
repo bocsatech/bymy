@@ -96,7 +96,8 @@ export function createListingTileCard(item, { className = "hf-card hf-card--list
   const meta = listingTileMeta(item);
   const imageUrl = String(preview.imageUrl || item.fo_kep || "").trim();
 
-  // Háttérkép + contain: nem ütközik a feed `img { object-fit: cover }` szabályával.
+  // Háttérkép + cover: képközepe a csempe közepén, kilógó rész levágva.
+  // Nem <img>, hogy a feed cover/contain ütközés ne rontsa el.
   const media = document.createElement("span");
   media.className = "hf-card-media";
   if (imageUrl) {

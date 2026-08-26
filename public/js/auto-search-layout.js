@@ -34,6 +34,8 @@ const SEARCH_OMIT_FIELDS = new Set([
   "tipus",
   "egyeb_tipus",
   "egyeb_modell",
+  // Helyszín: irányítószám → település; megye nem kell a keresőben.
+  "megye",
 ]);
 
 /** Admin mező → kereső filter kulcs / widget. */
@@ -421,6 +423,53 @@ function hideLegacy(form) {
   });
 }
 
+/**
+ * 4 jegyű irányítószám → település kitöltés (/api/postal-codes/lookup).
+ */
+function wirePostalCityAutofill(form) {
+  if (!form || form.dataset.postalCityBound === "1") return;
+  const postalInput = form.querySelector('[data-filter-key="iranyitoszam"]');
+  const cityInput = form.querySelector('[data-filter-key="telepules"]');
+  if (!postalInput || postalInput.tagName !== "INPUT") return;
+
+  form.dataset.postalCityBound = "1";
+  let lastLookedUp = "";
+  let busy = false;
+
+  async function lookup() {
+    const digits = String(postalInput.value ?? "")
+      .replace(/\D/g, "")
+      .slice(0, 4);
+    if (postalInput.value !== digits) postalInput.value = digits;
+    if (digits.length !== 4 || digits === lastLookedUp || busy) return;
+    busy = true;
+    try {
+      const params = new URLSearchParams({ postal_code: digits });
+      const res = await fetch(`/api/postal-codes/lookup?${params}`, { credentials: "same-origin" });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.city) return;
+      lastLookedUp = digits;
+      if (cityInput && "value" in cityInput) {
+        cityInput.value = data.city;
+        cityInput.dispatchEvent(new Event("input", { bubbles: true }));
+        cityInput.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+    } catch {
+      /* ignore offline / unknown */
+    } finally {
+      busy = false;
+    }
+  }
+
+  postalInput.addEventListener("input", () => {
+    const digits = String(postalInput.value ?? "").replace(/\D/g, "").slice(0, 4);
+    if (digits.length < 4) lastLookedUp = "";
+    lookup();
+  });
+  postalInput.addEventListener("change", lookup);
+  postalInput.addEventListener("blur", lookup);
+}
+
 export async function applyAutoSearchLayout(form = document.getElementById("home-qs-form")) {
   if (!form) return null;
   const layout = await fetchAutoSearchLayout();
@@ -459,6 +508,7 @@ export async function applyAutoSearchLayout(form = document.getElementById("home
 
   wireRangeSelects(form);
   wireSelectOptions(form);
+  wirePostalCityAutofill(form);
   /* Mobil: katalógus a dob/sheet háttérben tölt — ne várakoztassa a keresőt */
   if (typeof window !== "undefined" && window.matchMedia("(max-width: 900px)").matches) {
     return layout;

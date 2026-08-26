@@ -1150,8 +1150,24 @@ body.auto-drum-portal-open {
   display: none !important;
 }
 
-/* —— Asztali inline dobkerék (átlátszó, fehér szöveg) —— */
+/* —— Asztali inline dobkerék (átlátszó háttér kötelező, fehér szöveg) —— */
 @media (min-width: 901px) {
+  body:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .auto-qs-drums--desktop,
+  body:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .auto-qs-drums--desktop .immo-schema-cell,
+  body:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .auto-qs-drums--desktop .immo-dual-range-block,
+  body:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .auto-qs-drums--desktop .immo-dual-range,
+  body:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .auto-qs-drums--desktop .immo-wheel-wrap,
+  body:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .auto-qs-drums--desktop .immo-wheel-wrap.is-open,
+  body:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .auto-qs-drums--desktop .immo-wheel-wrap.has-drum-open,
+  body:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .auto-qs-drums--desktop .immo-wheel-wrap:focus-within,
+  body:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .auto-qs-drums--desktop .immo-schema-cell.is-drum-active,
+  body:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .auto-qs-drums--desktop .immo-dual-range__half.is-drum-active,
+  body:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .auto-qs-drums--desktop .immo-dual-range.has-drum-open {
+    background: transparent !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+  }
+
   .auto-search-panel .auto-qs-drums--desktop {
     display: grid;
     gap: 0.55rem;
@@ -1197,22 +1213,26 @@ body.auto-drum-portal-open {
   }
 
   .auto-search-panel .auto-qs-drums--desktop .immo-wheel-trigger,
-  .auto-search-panel .auto-qs-drums--desktop .auto-drum-typed {
+  .auto-search-panel .auto-qs-drums--desktop .auto-drum-typed,
+  .auto-search-panel .auto-qs-drums--desktop .immo-wheel-wrap.is-open .immo-wheel-trigger,
+  .auto-search-panel .auto-qs-drums--desktop .immo-wheel-wrap.has-drum-open .immo-wheel-trigger,
+  .auto-search-panel .auto-qs-drums--desktop .immo-wheel-wrap:focus-within .immo-wheel-trigger {
     display: flex;
     align-items: center;
     width: 100%;
     min-height: 2.4rem;
     padding: 0.45rem 0.7rem;
-    border: 1px solid rgba(255, 255, 255, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.65) !important;
     border-radius: 4px;
     background: transparent !important;
+    background-color: transparent !important;
     color: #fff !important;
     font: inherit;
     font-size: 0.9rem;
     font-weight: 500;
     text-align: left;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
-    box-shadow: none;
+    box-shadow: none !important;
     cursor: pointer;
   }
 
@@ -1224,8 +1244,8 @@ body.auto-drum-portal-open {
   .auto-search-panel .auto-qs-drums--desktop .immo-wheel-wrap.is-open .immo-wheel-trigger,
   .auto-search-panel .auto-qs-drums--desktop .immo-wheel-wrap.is-typing .auto-drum-typed,
   .auto-search-panel .auto-qs-drums--desktop .immo-wheel-trigger:focus-visible {
-    border-color: #fff;
-    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.16);
+    border-color: #fff !important;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.16) !important;
   }
 
   .auto-search-panel .auto-qs-drums--desktop .immo-dual-range {
@@ -1243,9 +1263,11 @@ body.auto-drum-portal-open {
     color: #f3f4f6;
     font-size: 0.82rem;
     padding-bottom: 0.65rem;
+    background: transparent !important;
   }
 
-  .auto-search-panel .auto-qs-drums--desktop .immo-drum-inline {
+  .auto-search-panel .auto-qs-drums--desktop .immo-drum-inline,
+  .auto-search-panel .auto-qs-drums--desktop .immo-wheel-wrap--drum-inline.is-open .immo-drum-inline {
     position: absolute;
     left: 0;
     right: 0;
@@ -1255,9 +1277,10 @@ body.auto-drum-portal-open {
     padding: 0.25rem 0;
     border: 1px solid rgba(255, 255, 255, 0.35);
     border-radius: 4px;
-    background: rgba(15, 23, 42, 0.28);
-    backdrop-filter: blur(2px);
-    box-shadow: none;
+    background: transparent !important;
+    background-color: transparent !important;
+    backdrop-filter: none;
+    box-shadow: none !important;
   }
 
   .auto-search-panel .auto-qs-drums--desktop .immo-drum-wheel-ring {
@@ -1267,6 +1290,9 @@ body.auto-drum-portal-open {
     height: 7.5rem;
     margin: 0 auto;
     overflow: hidden;
+    background: transparent !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
   }
 
   .auto-search-panel .auto-qs-drums--desktop .immo-drum-inline-highlight {
@@ -1278,7 +1304,8 @@ body.auto-drum-portal-open {
     transform: translateY(-50%);
     border: 1px solid rgba(255, 255, 255, 0.45);
     border-radius: 4px;
-    background: rgba(255, 255, 255, 0.06);
+    background: transparent !important;
+    background-color: transparent !important;
     pointer-events: none;
     z-index: 1;
   }
@@ -1291,26 +1318,30 @@ body.auto-drum-portal-open {
     padding: 2.55rem 0;
     position: relative;
     z-index: 2;
+    background: transparent !important;
   }
 
   .auto-search-panel .auto-qs-drums--desktop .immo-drum-inline-scroll::-webkit-scrollbar {
     display: none;
   }
 
-  .auto-search-panel .auto-qs-drums--desktop .immo-drum-inline-item {
+  .auto-search-panel .auto-qs-drums--desktop .immo-drum-inline-item,
+  .auto-search-panel .auto-qs-drums--desktop .immo-drum-inline-text {
     display: flex;
     align-items: center;
     justify-content: center;
     min-height: 2.35rem;
     padding: 0 0.6rem;
-    color: #fff;
+    color: #fff !important;
     font-size: 0.9rem;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+    background: transparent !important;
     cursor: pointer;
   }
 
   .auto-search-panel .auto-qs-drums--desktop .immo-drum-inline-item.is-in-cell,
   .auto-search-panel .auto-qs-drums--desktop .immo-drum-inline-item.is-selected {
     font-weight: 650;
+    background: transparent !important;
   }
 }

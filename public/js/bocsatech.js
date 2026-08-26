@@ -13,12 +13,12 @@ const LAYOUT_NAV = [
     items: [
       { id: "szemelyauto", label: "Személyautó feladás" },
       { id: "szemelyauto-search", label: "Személyautó kereső" },
+      { id: "teherauto-search", label: "Teherautó kereső" },
       { id: "leasing", label: "Leasing autók" },
       { id: "berauto", label: "Bérautók" },
       { id: "lakokocsi", label: "Bérelhető lakókocsi" },
       { id: "kisteher", label: "Teherautó 3,5-ig" },
       { id: "teherauto", label: "Teherautó 3,5-től" },
-      { id: "teherauto-search", label: "Teherautó kereső" },
     ],
   },
   {

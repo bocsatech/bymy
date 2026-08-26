@@ -3,7 +3,7 @@
  */
 
 import { applyAutoSearchLayout, readLayoutFilterValues } from "./auto-search-layout.js?v=korzet1";
-import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums } from "./auto-search-drums.js?v=cellDrum3";
+import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums } from "./auto-search-drums.js?v=korzet1";
 
 const MOBILE_MQ = "(max-width: 900px)";
 

@@ -2,7 +2,7 @@
  * Gyorskereső az autó hero panelen — elrendezés: GET /api/level1/form-layout?category=szemelyauto-search
  */
 
-import { applyAutoSearchLayout, readLayoutFilterValues } from "./auto-search-layout.js?v=autoDrums15";
+import { applyAutoSearchLayout, readLayoutFilterValues } from "./auto-search-layout.js?v=omitTipus1";
 import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums } from "./auto-search-drums.js?v=autoDrums15";
 
 const MOBILE_MQ = "(max-width: 900px)";

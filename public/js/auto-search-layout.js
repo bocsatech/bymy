@@ -15,11 +15,15 @@ const KM_MAX = 500_000;
 const LE_STEPS = [50, 75, 100, 125, 150, 175, 200, 225, 250, 300, 350, 400, 500, 600, 800];
 const CCM_STEPS = [600, 800, 1000, 1200, 1400, 1600, 1800, 2000, 2200, 2500, 3000, 3500, 4000, 5000, 6000];
 
-/** Keresőben soha ne jelenjen meg (év elég, hónap nem kell). */
+/** Keresőben soha ne jelenjen meg (feladás-specifikus / felesleges). */
 const SEARCH_OMIT_FIELDS = new Set([
   "gyartasi_honap",
   "forgalomba_helyezes_honap",
   "muszaki_honap",
+  // Szabad szöveg a feladáson — a keresőben a „Típus” = modell lista.
+  "tipus",
+  "egyeb_tipus",
+  "egyeb_modell",
 ]);
 
 /** Admin mező → kereső filter kulcs / widget. */

@@ -7,7 +7,7 @@
 import { fillWheel, setWheelValue, readWheel } from "./ingatlan-wheels.js?v=drumScroll7";
 import { initDrumWheel, applyDrumModeClass, syncDrumWheelDisplay } from "./immo-drum-picker.js?v=drumScroll7";
 import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=drumScroll7";
-import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=autoDrums15";
+import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=omitTipus1";
 
 const MOBILE_MQ = "(max-width: 900px)";
 

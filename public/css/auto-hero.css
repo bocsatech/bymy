@@ -5,7 +5,7 @@
  *
  * Szerkezet:
  * 1) felső fül sáv
- * 2) stage: fotó jobbra + fehér keresőpanel balra (~65%)
+ * 2) stage: fotó + keresőpanel a teljes szélességen
  *
  * Háttérkép: auto.html → [data-auto-hero-image] src
  */
@@ -111,13 +111,19 @@ body[data-site-page="teherauto"] .auto-search-tabs {
   object-position: 62% 48%;
 }
 
-/* Enyhe bal oldali sötétítés az átlátszó panel olvashatóságához. */
+/* Bal→jobb sötétítés: a mezők olvashatók a teljes szélességen. */
 .auto-search-hero__stage::before {
   content: "";
   position: absolute;
   inset: 0;
   z-index: 1;
-  background: linear-gradient(90deg, rgba(0, 0, 0, 0.38) 0%, rgba(0, 0, 0, 0.12) 55%, rgba(0, 0, 0, 0.04) 100%);
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.52) 0%,
+    rgba(0, 0, 0, 0.28) 42%,
+    rgba(0, 0, 0, 0.14) 72%,
+    rgba(0, 0, 0, 0.08) 100%
+  );
   pointer-events: none;
 }
 
@@ -145,8 +151,8 @@ body[data-site-page="teherauto"] .auto-search-tabs {
 }
 
 .auto-search-panel {
-  width: min(65%, 720px);
-  max-width: 100%;
+  width: 100%;
+  max-width: none;
   padding: 1rem 1.1rem 0.9rem;
   border: 0;
   border-radius: 0;

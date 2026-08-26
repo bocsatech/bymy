@@ -5,7 +5,7 @@
 import {
   DETAILED_SEARCH_SECTIONS,
   AKKU_SEARCH_SECTION_FALLBACK,
-} from "./auto-detailed-search-catalog.js?v=detailedSearch6";
+} from "./auto-detailed-search-catalog.js?v=detailedSearch7";
 
 const FORM_FLAG_KEYS = new Set(["villamtoltes", "zold_rendszam"]);
 
@@ -215,11 +215,17 @@ function renderSection(section, openByDefault) {
 
 function bindExclusiveAccordions(host) {
   host.querySelectorAll(".qs-detailed-acc").forEach((acc) => {
-    acc.addEventListener("toggle", () => {
-      if (!acc.open) return;
-      host.querySelectorAll(".qs-detailed-acc").forEach((other) => {
-        if (other !== acc) other.open = false;
-      });
+    const summary = acc.querySelector(".qs-detailed-acc__summary");
+    if (!summary) return;
+    summary.addEventListener("click", (event) => {
+      event.preventDefault();
+      const willOpen = !acc.open;
+      if (willOpen) {
+        host.querySelectorAll(".qs-detailed-acc").forEach((other) => {
+          if (other !== acc) other.open = false;
+        });
+      }
+      acc.open = willOpen;
     });
   });
 }

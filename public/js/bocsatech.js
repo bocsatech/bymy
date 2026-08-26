@@ -633,10 +633,10 @@ const actions = {
     searchCylinderMenu = { ...searchCylinderMenu, items };
     render();
   },
-  cylMenuToggle() {
-    const items = actions.readCylinderMenuFromDom();
-    searchCylinderMenu = { ...searchCylinderMenu, items };
-    render();
+  cylMenuToggle(_event, el) {
+    const card = el?.closest(".cyl-admin-card");
+    if (card) card.classList.toggle("is-off", !el.checked);
+    searchCylinderMenu = { ...searchCylinderMenu, items: actions.readCylinderMenuFromDom() };
   },
   readCylinderMenuFromDom() {
     const items = [];
@@ -704,10 +704,10 @@ const actions = {
     kivitelMenu = { ...kivitelMenu, items };
     render();
   },
-  kivitelMenuToggle() {
-    const items = actions.readKivitelMenuFromDom();
-    kivitelMenu = { ...kivitelMenu, items };
-    render();
+  kivitelMenuToggle(_event, el) {
+    const card = el?.closest(".kivitel-admin-card");
+    if (card) card.classList.toggle("is-off", !el.checked);
+    kivitelMenu = { ...kivitelMenu, items: actions.readKivitelMenuFromDom() };
   },
   readKivitelMenuFromDom() {
     const items = [];
@@ -775,10 +775,10 @@ const actions = {
     akkuSearchMenu = { ...akkuSearchMenu, items };
     render();
   },
-  akkuMenuToggle() {
-    const items = actions.readAkkuMenuFromDom();
-    akkuSearchMenu = { ...akkuSearchMenu, items };
-    render();
+  akkuMenuToggle(_event, el) {
+    const card = el?.closest(".akku-admin-card");
+    if (card) card.classList.toggle("is-off", !el.checked);
+    akkuSearchMenu = { ...akkuSearchMenu, items: actions.readAkkuMenuFromDom() };
   },
   readAkkuMenuFromDom() {
     const items = [];

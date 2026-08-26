@@ -90,13 +90,13 @@ body[data-site-page="teherauto"] .auto-search-tabs {
   color: #fff;
 }
 
-/* —— Stage: fotó + panel (willhaben kék keret helyett sötét sáv) —— */
+/* —— Stage: fotó + panel — alap: kompakt (~fél magasság); bővítve: teljes —— */
 .auto-search-hero__stage {
   position: relative;
   isolation: isolate;
-  /* willhaben fotósáv ~938×389 → arány ≈ 2.41 */
-  aspect-ratio: 2.41 / 1;
-  min-height: 360px;
+  /* Összecsukva: fele a willhaben ~2.41 aránynak */
+  aspect-ratio: 4.82 / 1;
+  min-height: 180px;
   background: #1a1f26;
   overflow: hidden;
 }
@@ -350,6 +350,7 @@ body[data-site-page="teherauto"] .auto-search-tabs {
 }
 
 .auto-search-hero.is-more-open .auto-search-hero__stage {
+  /* Több szűrő: eredeti / tartalom magasság */
   aspect-ratio: auto;
   min-height: 360px;
   height: auto;
@@ -357,10 +358,29 @@ body[data-site-page="teherauto"] .auto-search-tabs {
 
 .auto-search-hero.is-more-open .auto-search-hero__content {
   height: auto;
+  align-items: flex-start;
 }
 
 .auto-search-hero.is-more-open .auto-search-hero__image {
   min-height: 100%;
+}
+
+/* Összecsukva: sűrűbb panel, hogy beleférjen a fele magasságba */
+.auto-search-hero:not(.is-more-open) .auto-search-hero__content {
+  padding: 0.65rem 1rem;
+  align-items: center;
+}
+
+.auto-search-hero:not(.is-more-open) .auto-search-panel {
+  padding: 0.55rem 0.9rem 0.5rem;
+}
+
+.auto-search-hero:not(.is-more-open) .auto-search-panel .home-qs-form {
+  gap: 0.4rem;
+}
+
+.auto-search-hero:not(.is-more-open) .auto-search-toggle {
+  margin-bottom: 0.45rem;
 }
 
 @media (max-width: 900px) {

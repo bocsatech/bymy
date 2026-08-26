@@ -7,7 +7,7 @@ import {
   initHomeSearchSidebar,
   initHomeFilterCatalog,
 } from "./home-search-filter.js";
-import { initHomeQuickSearch } from "./home-quicksearch.js?v=postalCity2";
+import { initHomeQuickSearch } from "./home-quicksearch.js?v=korzet1";
 import {
   emptyIngatlanFilters,
   filterListingsByIngatlan,
@@ -35,6 +35,8 @@ let categoryFilter = null;
 let categoryUi = null;
 let statsUi = null;
 let statsFilter = null;
+/** Gyorskeresőből jövő körzet-szűrő (ne ütközzön a stats sáv / ?nearby= URL-lel). */
+let quickRadiusFilter = null;
 
 const PAGE = document.body?.getAttribute("data-site-page") || "";
 if (gridTrack) bindListingOpen(gridTrack);
@@ -127,6 +129,8 @@ function filterItems(items) {
   }
   if (statsFilter) {
     result = result.filter((item) => statsFilter.listingIds.has(item.id));
+  } else if (quickRadiusFilter) {
+    result = result.filter((item) => quickRadiusFilter.listingIds.has(item.id));
   }
   return result;
 }
@@ -138,12 +142,13 @@ function renderListings(items) {
 
   const filtered = filterItems(items);
   emptyEl.hidden = filtered.length > 0;
-  if (!filtered.length && statsFilter) {
+  if (!filtered.length && (statsFilter || quickRadiusFilter)) {
     emptyEl.hidden = false;
-    if (statsFilter.mode === "recent24h") {
-      emptyEl.textContent = `Nincs új hirdetés ${statsFilter.origin.city} ${statsFilter.radiusKm} km-es körzetében az elmúlt 24 órában.`;
+    const radiusMeta = statsFilter || quickRadiusFilter;
+    if (statsFilter?.mode === "recent24h") {
+      emptyEl.textContent = `Nincs új hirdetés ${radiusMeta.origin.city} ${radiusMeta.radiusKm} km-es körzetében az elmúlt 24 órában.`;
     } else {
-      emptyEl.textContent = `Nincs hirdetés ${statsFilter.origin.city} ${statsFilter.radiusKm} km-es körzetében.`;
+      emptyEl.textContent = `Nincs hirdetés ${radiusMeta.origin?.city || ""} ${radiusMeta.radiusKm} km-es körzetében.`;
     }
   } else if (!filtered.length) {
     emptyEl.textContent =
@@ -286,11 +291,31 @@ if (PAGE === "ingatlan") {
   });
 } else {
   initHomeQuickSearch({
-    onSearch: (values) => {
+    onSearch: async (values) => {
       sidebarFilters = { ...emptyFilters(), ...values };
       categoryUi?.clear();
       categoryFilter = null;
+
+      const postal = String(values.iranyitoszam || "")
+        .replace(/\D/g, "")
+        .slice(0, 4);
+      const radiusKm = Number(values.keresesi_korzet);
+      if (postal.length === 4 && Number.isFinite(radiusKm) && radiusKm > 0) {
+        try {
+          quickRadiusFilter = await buildNearbyFilter({
+            items: allItems,
+            postal,
+            radiusKm,
+          });
+        } catch {
+          quickRadiusFilter = null;
+        }
+      } else {
+        quickRadiusFilter = null;
+      }
+
       applyFilters();
+      if (postal.length === 4 && radiusKm > 0) scrollToListings();
     },
   });
 }

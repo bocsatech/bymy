@@ -2,7 +2,7 @@
  * Részletes keresés — hero panel mount, olvasás, szűrés.
  */
 
-import { DETAILED_SEARCH_SECTIONS } from "./auto-detailed-search-catalog.js?v=detailedSearch2";
+import { DETAILED_SEARCH_SECTIONS } from "./auto-detailed-search-catalog.js?v=detailedSearch3";
 
 const FORM_FLAG_KEYS = new Set(["villamtoltes", "zold_rendszam"]);
 
@@ -210,10 +210,22 @@ function renderSection(section, openByDefault) {
     </details>`;
 }
 
+function bindExclusiveAccordions(host) {
+  host.querySelectorAll(".qs-detailed-acc").forEach((acc) => {
+    acc.addEventListener("toggle", () => {
+      if (!acc.open) return;
+      host.querySelectorAll(".qs-detailed-acc").forEach((other) => {
+        if (other !== acc) other.open = false;
+      });
+    });
+  });
+}
+
 export function mountDetailedSearch(form = document.getElementById("home-qs-form")) {
   const host = form?.querySelector("#qs-detailed-panel");
   if (!host || host.dataset.detailedMounted === "1") return host;
   host.innerHTML = DETAILED_SEARCH_SECTIONS.map((section, index) => renderSection(section, index === 0)).join("");
+  bindExclusiveAccordions(host);
   host.dataset.detailedMounted = "1";
   return host;
 }

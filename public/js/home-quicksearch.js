@@ -2,7 +2,7 @@
  * Gyorskereső az autó hero panelen — elrendezés: GET /api/level1/form-layout?category=szemelyauto-search
  */
 
-import { applyAutoSearchLayout, readLayoutFilterValues } from "./auto-search-layout.js?v=cellDrum1";
+import { applyAutoSearchLayout, readLayoutFilterValues } from "./auto-search-layout.js?v=cellDrum3";
 import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums } from "./auto-search-drums.js?v=cellDrum3";
 
 const MOBILE_MQ = "(max-width: 900px)";
@@ -62,7 +62,11 @@ export function initHomeQuickSearch({ onSearch = () => {} } = {}) {
 
   applyAutoSearchLayout(form)
     .then(async () => {
-      await mountAutoSearchDrums(form);
+      try {
+        await mountAutoSearchDrums(form);
+      } catch (drumError) {
+        console.warn("Kereső dobkerék:", drumError);
+      }
       const urlKivitel = new URLSearchParams(window.location.search).get("kivitel");
       if (urlKivitel) {
         const el =

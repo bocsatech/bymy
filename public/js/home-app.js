@@ -6,7 +6,7 @@ import {
   populateFilterOptions,
   initHomeSearchSidebar,
   initHomeFilterCatalog,
-} from "./home-search-filter.js";
+} from "./home-search-filter.js?v=korzetFix1";
 import { initHomeQuickSearch } from "./home-quicksearch.js?v=korzet1";
 import {
   emptyIngatlanFilters,
@@ -16,7 +16,7 @@ import {
 import { filterByCategory, initHomeCategoryBar, renderHomeCategoryBar } from "./home-category-bar.js";
 import { initHomeUnifiedScroll } from "./home-unified-scroll.js";
 import { initHomeStatsBar } from "./home-stats-bar.js";
-import { buildNearbyFilter, readNearbyPrefs } from "./nearby-search.js?v=nearby1";
+import { buildNearbyFilter, readNearbyPrefs } from "./nearby-search.js?v=korzetFix1";
 import { getAuthUser } from "./site-auth.js?v=nearby1";
 import { bindListingOpen, restoreListingReturn } from "./listing-return.js?v=scrollTop1";
 import { applyNavCounts } from "./nav-counts.js?v=navCount2";
@@ -307,6 +307,8 @@ if (PAGE === "ingatlan") {
             postal,
             radiusKm,
           });
+          // Körzet aktív: ne követeljen pontos település/IRSZ egyezést a hirdetésmezőkön.
+          sidebarFilters = { ...sidebarFilters, _locationByRadius: true };
         } catch {
           quickRadiusFilter = null;
         }

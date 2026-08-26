@@ -48,13 +48,19 @@ export function resolveListingCoords(item, cityIndex) {
   return null;
 }
 
-export function filterListingsInRadius(items, originLat, originLon, radiusKm, cityIndex) {
+export function filterListingsInRadius(items, originLat, originLon, radiusKm, cityIndex, originCity = "") {
   const radius = Number(radiusKm);
   if (!Number.isFinite(radius) || radius <= 0) return [];
+  const originNorm = normalizePlace(originCity);
   return (items ?? []).filter((item) => {
     const coords = resolveListingCoords(item, cityIndex);
-    if (!coords) return false;
-    return haversineKm(originLat, originLon, coords.lat, coords.lon) <= radius;
+    if (coords) {
+      return haversineKm(originLat, originLon, coords.lat, coords.lon) <= radius;
+    }
+    // Nincs koordináta: az origin településnév egyezés még bent tartja (0 km mag).
+    if (!originNorm) return false;
+    const name = normalizePlace(listingCityName(item));
+    return Boolean(name && (name === originNorm || name.includes(originNorm) || originNorm.includes(name)));
   });
 }
 
@@ -82,8 +88,9 @@ export function filterListingsRecentInRadius(
   originLon,
   radiusKm,
   cityIndex,
-  hours = 24
+  hours = 24,
+  originCity = ""
 ) {
-  const inRadius = filterListingsInRadius(items, originLat, originLon, radiusKm, cityIndex);
+  const inRadius = filterListingsInRadius(items, originLat, originLon, radiusKm, cityIndex, originCity);
   return inRadius.filter((item) => isListingWithinHours(item, hours));
 }

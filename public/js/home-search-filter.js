@@ -163,6 +163,22 @@ export function filterListingsBySidebar(items, filters) {
     if (!inRange(f.teljesitmeny_le, filters.le_tol, filters.le_ig)) return false;
     if (!inRange(f.hengerurtartalom, filters.ccm_tol, filters.ccm_ig)) return false;
 
+    // Helyszín: pontos település / irányítószám (körzet nélkül).
+    // Körzet aktív esetén ezeket a radius-szűrő kezeli — ne essen el a találat.
+    if (!filters._locationByRadius) {
+      if (filters.telepules) {
+        const got = normalizeForMatch(f.telepules || preview.location || "");
+        const want = normalizeForMatch(filters.telepules);
+        if (!got || !got.includes(want) && !want.includes(got)) return false;
+      }
+      if (filters.iranyitoszam) {
+        const want = String(filters.iranyitoszam).replace(/\D/g, "").slice(0, 4);
+        const got = String(f.iranyitoszam || "").replace(/\D/g, "").slice(0, 4);
+        if (want && got && got !== want) return false;
+        // Ha a hirdetésen nincs irányítószám, a település-egyezés elég.
+      }
+    }
+
     for (const [key, value] of Object.entries(filters)) {
       if (value == null || value === "") continue;
       if (
@@ -190,6 +206,12 @@ export function filterListingsBySidebar(items, filters) {
           "ccm_tol",
           "ccm_ig",
           "features",
+          // Nem hirdetésmező / helyszín (fent kezelve)
+          "keresesi_korzet",
+          "telepules",
+          "iranyitoszam",
+          "megye",
+          "_locationByRadius",
         ].includes(key)
       ) {
         continue;

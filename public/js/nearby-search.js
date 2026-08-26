@@ -50,10 +50,11 @@ export function readNearbyPrefs(profile = null) {
 }
 
 function filterItemsForMode(mode, items, origin, radiusKm, cityIndex) {
+  const originCity = origin?.city || "";
   if (mode === MODE_RECENT24H) {
-    return filterListingsRecentInRadius(items, origin.lat, origin.lon, radiusKm, cityIndex, 24);
+    return filterListingsRecentInRadius(items, origin.lat, origin.lon, radiusKm, cityIndex, 24, originCity);
   }
-  return filterListingsInRadius(items, origin.lat, origin.lon, radiusKm, cityIndex);
+  return filterListingsInRadius(items, origin.lat, origin.lon, radiusKm, cityIndex, originCity);
 }
 
 export function buildNearbyFilterState(mode, origin, radiusKm, filtered) {

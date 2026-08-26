@@ -2,7 +2,10 @@
  * Részletes keresés — hero panel mount, olvasás, szűrés.
  */
 
-import { DETAILED_SEARCH_SECTIONS } from "./auto-detailed-search-catalog.js?v=detailedSearch3";
+import {
+  DETAILED_SEARCH_SECTIONS,
+  AKKU_SEARCH_SECTION_FALLBACK,
+} from "./auto-detailed-search-catalog.js?v=detailedSearch4";
 
 const FORM_FLAG_KEYS = new Set(["villamtoltes", "zold_rendszam"]);
 
@@ -221,10 +224,32 @@ function bindExclusiveAccordions(host) {
   });
 }
 
-export function mountDetailedSearch(form = document.getElementById("home-qs-form")) {
+async function loadAkkuSearchSection() {
+  try {
+    const res = await fetch("/api/level1/akku-search-menu", { credentials: "same-origin", cache: "no-store" });
+    if (!res.ok) throw new Error(String(res.status));
+    const data = await res.json();
+    if (data?.section?.id) return data.section;
+  } catch (error) {
+    console.warn("Akkumulátor menü:", error);
+  }
+  return { ...AKKU_SEARCH_SECTION_FALLBACK };
+}
+
+function buildDetailedSections(akkuSection) {
+  const akku = akkuSection?.ranges?.length || akkuSection?.selects?.length || akkuSection?.toggles?.length
+    ? akkuSection
+    : AKKU_SEARCH_SECTION_FALLBACK;
+  return [akku, ...DETAILED_SEARCH_SECTIONS];
+}
+
+export async function mountDetailedSearch(form = document.getElementById("home-qs-form")) {
   const host = form?.querySelector("#qs-detailed-panel");
   if (!host || host.dataset.detailedMounted === "1") return host;
-  host.innerHTML = DETAILED_SEARCH_SECTIONS.map((section, index) => renderSection(section, index === 0)).join("");
+
+  const akkuSection = await loadAkkuSearchSection();
+  const sections = buildDetailedSections(akkuSection);
+  host.innerHTML = sections.map((section, index) => renderSection(section, index === 0)).join("");
   bindExclusiveAccordions(host);
   host.dataset.detailedMounted = "1";
   return host;

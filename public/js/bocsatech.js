@@ -62,6 +62,7 @@ const ADMIN_SECTIONS = [
     tabs: [
       { id: "auto:listings", label: "Hirdetések" },
       { id: "auto:kivitel", label: "Kivitel menü" },
+      { id: "auto:akku", label: "Akkumulátor menü" },
       ...AUTO_LAYOUT_ITEMS.map((item) => ({
         id: layoutTabId(item).replace(/^layout:/, "auto:layout:"),
         label: item.label,
@@ -121,6 +122,7 @@ let hubPromo = { images: [], max: 8, size: { width: 1400, height: 840 }, count: 
 let searchCylinderMenu = { version: 1, items: [] };
 let searchCylinderImagePresets = [];
 let kivitelMenu = { version: 1, items: [] };
+let akkuSearchMenu = { version: 1, title: "Akkumulátor és hatótáv adatok", items: [] };
 let editingUser = null;
 let selectedVisitorId = "";
 let visitorHits = [];
@@ -754,6 +756,80 @@ const actions = {
       render();
     }
   },
+  akkuKindLabel(kind) {
+    if (kind === "range") return "Tól–ig";
+    if (kind === "select") return "Választó";
+    if (kind === "toggle") return "Kapcsoló";
+    return kind || "—";
+  },
+  akkuMenuMove(_, el) {
+    const id = el.getAttribute("data-id");
+    const dir = Number(el.getAttribute("data-dir"));
+    const items = [...(akkuSearchMenu.items || [])];
+    const idx = items.findIndex((item) => item.id === id);
+    const next = idx + dir;
+    if (idx < 0 || next < 0 || next >= items.length) return;
+    const tmp = items[idx];
+    items[idx] = items[next];
+    items[next] = tmp;
+    akkuSearchMenu = { ...akkuSearchMenu, items };
+    render();
+  },
+  akkuMenuToggle() {
+    const items = actions.readAkkuMenuFromDom();
+    akkuSearchMenu = { ...akkuSearchMenu, items };
+    render();
+  },
+  readAkkuMenuFromDom() {
+    const items = [];
+    app.querySelectorAll(".kivitel-admin-card[data-id]").forEach((card) => {
+      const id = card.getAttribute("data-id");
+      const prev = (akkuSearchMenu.items || []).find((item) => item.id === id) || {};
+      items.push({
+        ...prev,
+        id,
+        kind: prev.kind,
+        label: String(card.querySelector("[data-field=label]")?.value ?? prev.label ?? "").trim(),
+        enabled: Boolean(card.querySelector("[data-field=enabled]")?.checked),
+      });
+    });
+    return items.length ? items : [...(akkuSearchMenu.items || [])];
+  },
+  async saveAkkuSearchMenu() {
+    err = "";
+    info = "";
+    try {
+      const items = actions.readAkkuMenuFromDom();
+      const title = String(app.querySelector("[data-field=akku-title]")?.value ?? akkuSearchMenu.title ?? "").trim();
+      const data = await api("/api/level1/akku-search-menu", {
+        method: "PUT",
+        body: JSON.stringify({ menu: { version: 1, title, items } }),
+      });
+      akkuSearchMenu = data.menu || { version: 1, title, items: data.items || items };
+      info = "Akkumulátor menü mentve. Az autó oldalon hard refresh kell.";
+      render();
+    } catch (error) {
+      err = error.message;
+      render();
+    }
+  },
+  async resetAkkuSearchMenu() {
+    if (!confirm("Visszaállítod az alapértelmezett Akkumulátor menüt?")) return;
+    err = "";
+    info = "";
+    try {
+      const data = await api("/api/level1/akku-search-menu", {
+        method: "PUT",
+        body: JSON.stringify({ menu: { version: 1, items: [] } }),
+      });
+      akkuSearchMenu = data.menu || { version: 1, items: data.items || [] };
+      info = "Alapértelmezett Akkumulátor menü visszaállítva.";
+      render();
+    } catch (error) {
+      err = error.message;
+      render();
+    }
+  },
 };
 
 function fileToDataUrl(file) {
@@ -813,6 +889,10 @@ async function loadTab() {
   if (section === "auto" && sub === "kivitel") {
     const data = await api("/api/level1/kivitel-menu/admin");
     kivitelMenu = data.menu || { version: 1, items: data.items || [] };
+  }
+  if (section === "auto" && sub === "akku") {
+    const data = await api("/api/level1/akku-search-menu/admin");
+    akkuSearchMenu = data.menu || { version: 1, items: data.items || [] };
   }
   if (section === "ingatlan" && sub === "listings") {
     listings = (await api("/api/level1/listings?vertical=ingatlan")).listings;
@@ -1316,6 +1396,50 @@ function searchCylinderMenuView() {
     </div>`;
 }
 
+function akkuSearchMenuView() {
+  const items = akkuSearchMenu?.items || [];
+  const cards = items
+    .map((item, index) => {
+      return `<article class="kivitel-admin-card ${item.enabled === false ? "is-off" : ""}" data-id="${esc(item.id)}">
+        <div class="kivitel-admin-card__order">
+          <span class="kivitel-admin-card__idx">${index + 1}</span>
+          <button type="button" class="btn ghost" data-act="akkuMenuMove" data-id="${esc(item.id)}" data-dir="-1" ${index === 0 ? "disabled" : ""}>↑</button>
+          <button type="button" class="btn ghost" data-act="akkuMenuMove" data-id="${esc(item.id)}" data-dir="1" ${index === items.length - 1 ? "disabled" : ""}>↓</button>
+        </div>
+        <div class="kivitel-admin-card__fields">
+          <label>
+            <div>Típus</div>
+            <input type="text" value="${esc(actions.akkuKindLabel(item.kind))}" readonly />
+          </label>
+          <label>
+            <div>Címke</div>
+            <input type="text" data-field="label" value="${esc(item.label || "")}" maxlength="80" />
+          </label>
+          <label class="kivitel-admin-card__toggle">
+            <input type="checkbox" data-field="enabled" data-act="akkuMenuToggle" data-id="${esc(item.id)}" ${item.enabled === false ? "" : "checked"} />
+            Látható a részletes keresés Akkumulátor menüjében
+          </label>
+        </div>
+      </article>`;
+    })
+    .join("");
+
+  return `
+    <h2 class="layout-cat-title">Akkumulátor és hatótáv menü</h2>
+    <p class="hint">A webes <strong>Részletes keresés → Akkumulátor és hatótáv adatok</strong> szekció mezői. Sorrend, címke és láthatóság. Kikapcsolt mező nem jelenik meg a keresőben.</p>
+    <label class="kivitel-admin-card__fields" style="display:block;margin-bottom:0.75rem;max-width:28rem">
+      <div>Szekció címe</div>
+      <input type="text" data-field="akku-title" value="${esc(akkuSearchMenu?.title || "Akkumulátor és hatótáv adatok")}" maxlength="80" />
+    </label>
+    <p class="ok">${esc(info)}</p>
+    <p class="err">${esc(err)}</p>
+    <div class="kivitel-admin-list">${cards || '<p class="hint">Nincs menüelem.</p>'}</div>
+    <div class="row" style="margin-top:1rem;gap:0.65rem;flex-wrap:wrap">
+      <button class="btn" type="button" data-act="saveAkkuSearchMenu">Menü mentése</button>
+      <button class="btn ghost" type="button" data-act="resetAkkuSearchMenu">Alapértelmezés</button>
+    </div>`;
+}
+
 function kivitelMenuView() {
   const items = kivitelMenu?.items || [];
   const cards = items
@@ -1388,6 +1512,7 @@ function shellBody() {
       return listingsView({ title: "Autóhirdetések", emptyHint: "Nincs autó/teher hirdetés." });
     }
     if (sub === "kivitel") return kivitelMenuView();
+    if (sub === "akku") return akkuSearchMenuView();
     return layoutView();
   }
   if (section === "ingatlan") {

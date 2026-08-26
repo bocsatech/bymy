@@ -1,5 +1,36 @@
 /** Részletes keresés — szekciók és mezők (hasznaltauto.hu felszereltség címkék). */
 
+/** Fallback, ha az admin API nem elérhető — lib/akku-search-menu.mjs-ben is szerepel. */
+export const AKKU_SEARCH_SECTION_FALLBACK = {
+  id: "akku",
+  title: "Akkumulátor és hatótáv adatok",
+  ranges: [
+    { id: "akkumulator_kwh", label: "Akkukapacitás", unit: "kWh", step: "0.1" },
+    { id: "jelenlegi_akkukapacitas", label: "Jelenlegi akkukapacitás", unit: "%", step: "1" },
+    { id: "ac_toltesi_teljesitmeny", label: "AC töltési teljesítmény", unit: "kW", step: "0.1" },
+    { id: "dc_toltesi_teljesitmeny", label: "DC töltési teljesítmény", unit: "kW", step: "0.1" },
+    { id: "hatotav", label: "WLTP hatótáv", unit: "km", step: "1" },
+    { id: "autopalya_hatotav", label: "Autópálya hatótáv", unit: "km", step: "1" },
+    { id: "teli_hatotav", label: "Téli hatótáv", unit: "km", step: "1" },
+  ],
+  selects: [
+    {
+      id: "ac_tolto_csatlakozas",
+      label: "AC töltőcsatlakozó típusa",
+      options: ["", "Type 2", "CCS", "CHAdeMO", "Egyéb"],
+    },
+    {
+      id: "dc_tolto_csatlakozas",
+      label: "DC töltőcsatlakozó típusa",
+      options: ["", "CCS", "CHAdeMO", "Type 2", "Egyéb"],
+    },
+  ],
+  toggles: [
+    { id: "villamtoltes", label: "Villámtöltés" },
+    { id: "zold_rendszam", label: "Zöld rendszám" },
+  ],
+};
+
 function toggles(labels) {
   return labels.map((label) => ({ id: slugId(label), label }));
 }
@@ -15,35 +46,6 @@ function slugId(label) {
 }
 
 export const DETAILED_SEARCH_SECTIONS = [
-  {
-    id: "akku",
-    title: "Akkumulátor és hatótáv adatok",
-    ranges: [
-      { id: "akkumulator_kwh", label: "Akkukapacitás", unit: "kWh", step: "0.1" },
-      { id: "jelenlegi_akkukapacitas", label: "Jelenlegi akkukapacitás", unit: "%", step: "1" },
-      { id: "ac_toltesi_teljesitmeny", label: "AC töltési teljesítmény", unit: "kW", step: "0.1" },
-      { id: "dc_toltesi_teljesitmeny", label: "DC töltési teljesítmény", unit: "kW", step: "0.1" },
-      { id: "hatotav", label: "WLTP hatótáv", unit: "km", step: "1" },
-      { id: "autopalya_hatotav", label: "Autópálya hatótáv", unit: "km", step: "1" },
-      { id: "teli_hatotav", label: "Téli hatótáv", unit: "km", step: "1" },
-    ],
-    selects: [
-      {
-        id: "ac_tolto_csatlakozas",
-        label: "AC töltőcsatlakozó típusa",
-        options: ["", "Type 2", "CCS", "CHAdeMO", "Egyéb"],
-      },
-      {
-        id: "dc_tolto_csatlakozas",
-        label: "DC töltőcsatlakozó típusa",
-        options: ["", "CCS", "CHAdeMO", "Type 2", "Egyéb"],
-      },
-    ],
-    toggles: [
-      { id: "villamtoltes", label: "Villámtöltés" },
-      { id: "zold_rendszam", label: "Zöld rendszám" },
-    ],
-  },
   {
     id: "muszaki",
     title: "Műszaki extrák",

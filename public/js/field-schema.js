@@ -48,6 +48,8 @@ export const HASZNALTAUTO_FIELD_GROUPS = {
     "dc_tolto_csatlakozas",
     "dc_toltesi_teljesitmeny",
     "hatotav",
+    "autopalya_hatotav",
+    "teli_hatotav",
     "tolto_csatlakozas",
     "villamtoltes",
     "zold_rendszam",

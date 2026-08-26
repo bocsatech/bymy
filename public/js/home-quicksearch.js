@@ -88,7 +88,7 @@ export function initHomeQuickSearch({ onSearch = () => {} } = {}) {
   setMoreOpen(false);
   setDetailedOpen(false);
   setQsReady(false);
-  mountDetailedSearch(form);
+  if (detailedPanel) mountDetailedSearch(form);
 
   applyAutoSearchLayout(form)
     .then(async () => {

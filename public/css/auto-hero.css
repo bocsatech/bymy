@@ -1273,13 +1273,18 @@ body.auto-drum-portal-open {
     z-index: 3;
     padding: 0 0.35rem;
     border-radius: 2px;
-    background: #1a1f26;
-    color: #f9fafb;
+    background: #fff !important;
+    color: #667085 !important;
     font-size: 0.68rem;
-    font-weight: 650;
+    font-weight: 600;
     line-height: 1.2;
     white-space: nowrap;
     pointer-events: none;
+  }
+
+  .auto-search-panel .auto-qs-drums--desktop .immo-wheel-wrap:focus-within > .immo-label,
+  .auto-search-panel .auto-qs-drums--desktop .immo-dual-range:focus-within > .immo-dual-range__title {
+    color: #111 !important;
   }
 
   .auto-search-panel .auto-qs-drums--desktop .auto-cell-drum__viewport,

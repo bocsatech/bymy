@@ -238,19 +238,6 @@ export function mountLayoutBoard(root, layout, { onChange } = {}) {
     syncPair(cell);
   }
 
-  function clearFloat(tile) {
-    tile.classList.remove("dragging", "is-floating");
-    tile.style.position = "";
-    tile.style.left = "";
-    tile.style.top = "";
-    tile.style.width = "";
-    tile.style.height = "";
-    tile.style.zIndex = "";
-    tile.style.margin = "";
-    tile.style.transform = "";
-    tile.style.pointerEvents = "";
-  }
-
   function bindTiles() {
     root.querySelectorAll(".layout-tile").forEach((tile) => {
       tile.addEventListener("pointerdown", (event) => {
@@ -285,121 +272,111 @@ export function mountLayoutBoard(root, layout, { onChange } = {}) {
           mount();
           return;
         }
+
         const cell = byKey.get(tile.getAttribute("data-field"));
         let board = tile.closest(".layout-board");
         if (!cell || !board) return;
-        const resize = event.target.closest("[data-resize]");
+        const resize = Boolean(event.target.closest("[data-resize]"));
         const fromStep = Number(cell.step);
         event.preventDefault();
         tile.setPointerCapture(event.pointerId);
         tile.classList.add("dragging");
         root.querySelectorAll(".layout-board").forEach((b) => setBoardHeight(b, { buffer: DROP_BUFFER }));
 
-        const startRect = tile.getBoundingClientRect();
-        const offsetX = event.clientX - startRect.left;
-        const offsetY = event.clientY - startRect.top;
-        let floating = false;
-
         const grab = {
           startCol: cell.col,
           startRow: cell.row,
           col: colFromEvent(board, event.clientX),
           row: rowFromEvent(board, event.clientY),
+          // Resize: pixel-delta, hogy visszafele is lehessen keskenyíteni/szélesíteni
+          resizeOriginCol: cell.col,
+          resizeOriginSpan: cell.colSpan,
+          resizeOriginX: event.clientX,
         };
 
-        const startFloat = () => {
-          if (floating || resize) return;
-          floating = true;
-          tile.classList.add("is-floating");
-          tile.style.position = "fixed";
-          tile.style.left = `${startRect.left}px`;
-          tile.style.top = `${startRect.top}px`;
-          tile.style.width = `${startRect.width}px`;
-          tile.style.height = `${startRect.height}px`;
-          tile.style.zIndex = "10050";
-          tile.style.margin = "0";
-          tile.style.pointerEvents = "none";
-          document.body.appendChild(tile);
-        };
+        let lastX = event.clientX;
+        let lastY = event.clientY;
+        let ended = false;
 
         const move = (ev) => {
+          if (ended) return;
+          lastX = ev.clientX;
+          lastY = ev.clientY;
+
           if (resize) {
+            const m = boardMetrics(board);
+            const deltaCols = Math.round((ev.clientX - grab.resizeOriginX) / m.colStride);
+            let span = clamp(grab.resizeOriginSpan + deltaCols, 1, COLS);
+            let col = grab.resizeOriginCol;
             const edge = colFromEvent(board, ev.clientX);
-            cell.colSpan = clamp(edge - cell.col + 1, 1, COLS - cell.col + 1);
+            if (deltaCols > 0 && edge >= COLS) {
+              span = COLS;
+              col = 1;
+            } else if (col + span - 1 > COLS) {
+              col = Math.max(1, COLS - span + 1);
+            }
+            cell.col = col;
+            cell.colSpan = span;
             cell.order = (cell.row - 1) * COLS + cell.col;
             syncPair(cell);
             paint(tile, cell);
-            setBoardHeight(board, { buffer: DROP_BUFFER });
             return;
-          }
-
-          const dx = ev.clientX - event.clientX;
-          const dy = ev.clientY - event.clientY;
-          if (!floating && (Math.abs(dx) > 4 || Math.abs(dy) > 4)) startFloat();
-
-          if (floating) {
-            tile.style.left = `${ev.clientX - offsetX}px`;
-            tile.style.top = `${ev.clientY - offsetY}px`;
           }
 
           const nextBoard = boardAtPoint(ev.clientX, ev.clientY, board);
           root.querySelectorAll(".layout-board").forEach((el) => el.classList.toggle("is-drop", el === nextBoard));
           if (!nextBoard) return;
 
-          const crossed = nextBoard !== board;
-          if (crossed) {
+          if (nextBoard !== board) {
             assignToBoard(cell, nextBoard, ev.clientX, ev.clientY, { crossed: true });
+            paint(tile, cell);
+            nextBoard.appendChild(tile);
             board = nextBoard;
             setBoardHeight(board, { buffer: DROP_BUFFER });
             grab.startCol = cell.col;
             grab.startRow = cell.row;
             grab.col = colFromEvent(board, ev.clientX);
             grab.row = rowFromEvent(board, ev.clientY);
-          } else if (!floating) {
-            assignToBoard(cell, board, ev.clientX, ev.clientY, { grab });
-            paint(tile, cell);
-            setBoardHeight(board, { buffer: DROP_BUFFER });
-          } else {
-            assignToBoard(cell, board, ev.clientX, ev.clientY, { grab });
+            return;
           }
+
+          assignToBoard(cell, board, ev.clientX, ev.clientY, { grab });
+          paint(tile, cell);
+          setBoardHeight(board, { buffer: DROP_BUFFER });
         };
 
-        let lastX = event.clientX;
-        let lastY = event.clientY;
-        const moveTracked = (ev) => {
-          lastX = ev.clientX;
-          lastY = ev.clientY;
-          move(ev);
-        };
-        const upTracked = () => {
+        const up = () => {
+          if (ended) return;
+          ended = true;
+          tile.classList.remove("dragging");
+          root.querySelectorAll(".layout-board").forEach((el) => el.classList.remove("is-drop"));
           try {
             tile.releasePointerCapture(event.pointerId);
           } catch {
             /* */
           }
-          tile.removeEventListener("pointermove", moveTracked);
-          tile.removeEventListener("pointerup", upTracked);
-          tile.removeEventListener("pointercancel", upTracked);
+          tile.removeEventListener("pointermove", move);
+          tile.removeEventListener("pointerup", up);
+          tile.removeEventListener("pointercancel", up);
 
-          const dropBoard = boardAtPoint(lastX, lastY, board) || board;
-          if (dropBoard) {
-            assignToBoard(cell, dropBoard, lastX, lastY, {
-              crossed: Number(dropBoard.getAttribute("data-board")) !== fromStep,
-              grab: Number(dropBoard.getAttribute("data-board")) === fromStep ? grab : null,
-            });
+          if (!resize) {
+            const dropBoard = boardAtPoint(lastX, lastY, board) || board;
+            if (dropBoard !== board) {
+              assignToBoard(cell, dropBoard, lastX, lastY, { crossed: true });
+            } else {
+              assignToBoard(cell, dropBoard, lastX, lastY, { grab });
+            }
           }
 
-          clearFloat(tile);
-          root.querySelectorAll(".layout-board").forEach((el) => el.classList.remove("is-drop"));
           compactStep(fromStep);
           compactStep(Number(cell.step));
           notify();
           mount();
         };
 
-        tile.addEventListener("pointermove", moveTracked);
-        tile.addEventListener("pointerup", upTracked);
-        tile.addEventListener("pointercancel", upTracked);
+        tile.addEventListener("pointermove", move);
+        tile.addEventListener("pointerup", up);
+        tile.addEventListener("pointercancel", up);
       });
     });
 

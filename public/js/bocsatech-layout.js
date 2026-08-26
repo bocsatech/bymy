@@ -144,6 +144,44 @@ export function mountLayoutBoard(root, layout, { onChange } = {}) {
     return Math.max(1, ...rows, 1);
   }
 
+  /** Lépés-táblák: fejléc / rés / másik csempe felett is a cél boardra essen a drop. */
+  function boardAtPoint(clientX, clientY, ignoreEl, preferBoard) {
+    const prev = ignoreEl?.style?.pointerEvents;
+    if (ignoreEl) ignoreEl.style.pointerEvents = "none";
+    const under = document.elementFromPoint(clientX, clientY);
+    if (ignoreEl) ignoreEl.style.pointerEvents = prev || "";
+
+    const hitBoard = under?.closest?.(".layout-board");
+    if (hitBoard && root.contains(hitBoard)) return hitBoard;
+
+    const hitStep = under?.closest?.(".layout-step");
+    const stepBoard = hitStep?.querySelector?.(".layout-board");
+    if (stepBoard && root.contains(stepBoard)) return stepBoard;
+
+    const boards = [...root.querySelectorAll(".layout-board")];
+    for (const board of boards) {
+      const step = board.closest(".layout-step");
+      const r = (step || board).getBoundingClientRect();
+      if (clientX >= r.left && clientX <= r.right && clientY >= r.top && clientY <= r.bottom) {
+        return board;
+      }
+    }
+
+    let best = null;
+    let bestDist = Infinity;
+    for (const board of boards) {
+      const r = board.getBoundingClientRect();
+      if (clientX < r.left - 8 || clientX > r.right + 8) continue;
+      const dist = clientY < r.top ? r.top - clientY : clientY > r.bottom ? clientY - r.bottom : 0;
+      if (dist < bestDist) {
+        bestDist = dist;
+        best = board;
+      }
+    }
+    if (best && bestDist < 96) return best;
+    return preferBoard || null;
+  }
+
   /** Üres sorok kiszűrése: a használt sorok egymás alá csúsznak. */
   function compactStep(step) {
     const items = editable().filter((cell) => !cell.hidden && Number(cell.step) === step);
@@ -201,10 +239,12 @@ export function mountLayoutBoard(root, layout, { onChange } = {}) {
         let board = tile.closest(".layout-board");
         if (!cell || !board) return;
         const resize = event.target.closest("[data-resize]");
+        const fromStep = Number(cell.step);
         event.preventDefault();
         tile.setPointerCapture(event.pointerId);
         tile.classList.add("dragging");
-        setBoardHeight(board, { buffer: DROP_BUFFER });
+        /* Minden lépés-tábla nőjön, hogy a lépések közti húzás ne akadjon el. */
+        root.querySelectorAll(".layout-board").forEach((b) => setBoardHeight(b, { buffer: DROP_BUFFER }));
         const grab = {
           startCol: cell.col,
           startRow: cell.row,
@@ -213,11 +253,9 @@ export function mountLayoutBoard(root, layout, { onChange } = {}) {
         };
 
         const move = (ev) => {
+          let justCrossed = false;
           if (!resize) {
-            tile.style.pointerEvents = "none";
-            const under = document.elementFromPoint(ev.clientX, ev.clientY);
-            tile.style.pointerEvents = "";
-            const nextBoard = under?.closest?.(".layout-board");
+            const nextBoard = boardAtPoint(ev.clientX, ev.clientY, tile, board);
             root.querySelectorAll(".layout-board").forEach((el) => el.classList.toggle("is-drop", el === nextBoard));
             if (nextBoard && nextBoard !== board) {
               placeOnBoard(cell, nextBoard, ev.clientX, ev.clientY);
@@ -229,6 +267,7 @@ export function mountLayoutBoard(root, layout, { onChange } = {}) {
               grab.startRow = cell.row;
               grab.col = colFromEvent(board, ev.clientX);
               grab.row = rowFromEvent(board, ev.clientY);
+              justCrossed = true;
             }
           }
           if (!board) return;
@@ -237,7 +276,7 @@ export function mountLayoutBoard(root, layout, { onChange } = {}) {
             cell.colSpan = clamp(edge - cell.col + 1, 1, COLS - cell.col + 1);
             cell.order = (cell.row - 1) * COLS + cell.col;
             syncPair(cell);
-          } else {
+          } else if (!justCrossed) {
             placeOnBoard(cell, board, ev.clientX, ev.clientY, grab);
           }
           setBoardHeight(board, { buffer: DROP_BUFFER });
@@ -253,12 +292,15 @@ export function mountLayoutBoard(root, layout, { onChange } = {}) {
           }
           tile.removeEventListener("pointermove", move);
           tile.removeEventListener("pointerup", up);
+          tile.removeEventListener("pointercancel", up);
+          compactStep(fromStep);
           compactStep(Number(cell.step));
           notify();
           mount();
         };
         tile.addEventListener("pointermove", move);
         tile.addEventListener("pointerup", up);
+        tile.addEventListener("pointercancel", up);
       });
     });
 

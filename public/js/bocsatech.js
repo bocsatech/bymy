@@ -18,6 +18,7 @@ const LAYOUT_NAV = [
       { id: "lakokocsi", label: "Bérelhető lakókocsi" },
       { id: "kisteher", label: "Teherautó 3,5-ig" },
       { id: "teherauto", label: "Teherautó 3,5-től" },
+      { id: "teherauto-search", label: "Teherautó kereső" },
     ],
   },
   {
@@ -172,6 +173,10 @@ function categoryLabel(id) {
     if (hit) return hit.label;
   }
   return LAYOUT_CATEGORIES.find((c) => c.id === id)?.label || id;
+}
+
+function isSearchLayoutCat(id) {
+  return id === "szemelyauto-search" || id === "teherauto-search";
 }
 
 function otpSentMessage(data) {
@@ -539,9 +544,9 @@ const actions = {
       });
       layout = data.layout || layout;
       layoutCategory = data.category || cat;
-      const isSearch = cat === "szemelyauto-search";
+      const isSearch = isSearchLayoutCat(cat);
       info = isSearch
-          ? `${categoryLabel(cat)} kereső elrendezés mentve. Az autó oldalon hard refresh (Cmd+Shift+R) után frissül.`
+          ? `${categoryLabel(cat)} elrendezés mentve. A kereső oldalon hard refresh (Cmd+Shift+R) után frissül.`
           : `Elrendezés mentve (${categoryLabel(layoutCategory)}). A hirdetésfeladáson hard refresh (Cmd+Shift+R) után látszik.`;
       render();
     } catch (error) {
@@ -1243,13 +1248,15 @@ function layoutView() {
   const cat = layoutCategoryFromTab();
   const label = categoryLabel(cat);
   const isImmo = isIngatlanWheelAdminCategory(cat);
-  const isSearch = cat === "szemelyauto-search";
+  const isSearch = isSearchLayoutCat(cat);
   const sharedHint = isImmo
     ? cat === "ingatlan"
       ? "Közös kerék-séma a keresőre és a feladásra (Kiado ingatlan — master). Ár / Alapterület / Emelet: osztott min–max csempe. Mentés csak ezt a gombot érinti."
       : "Ugyanaz a kerék-séma, mint a Kiado ingatlannál (első betöltéskor másolat). Szerkesztés és mentés csak erre a gombra vonatkozik — a Kiado ingatlan elrendezése nem változik."
     : isSearch
-      ? "Személyautó gyorskereső + Több szűrő mezői. 1. lépés = hero gyorskereső, 2–5. lépés = bővített szűrők. Ugyanaz a mezőkatalógus, mint a feladásnál. Mentés után az autó oldalon hard refresh kell."
+      ? cat === "teherauto-search"
+        ? "Teherautó gyorskereső + Több szűrő mezői (3,5 t-ig és 3,5 t-tól közös nézet). 1. lépés = hero gyorskereső, 2–5. lépés = bővített szűrők. Mentés után a teherautó oldalon hard refresh kell."
+        : "Személyautó gyorskereső + Több szűrő mezői. 1. lépés = hero gyorskereső, 2–5. lépés = bővített szűrők. Ugyanaz a mezőkatalógus, mint a feladásnál. Mentés után az autó oldalon hard refresh kell."
       : "Csak ennek a kategóriának a mezői. Húzd a cellát a lapon belül vagy másik lépésre. Mentés után a hirdetésfeladáson hard refresh kell.";
   const titleSuffix = isImmo ? "kerék-séma" : isSearch ? "kereső mezők" : "feladási mezők";
   return `

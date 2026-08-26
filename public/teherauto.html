@@ -190,11 +190,13 @@
           />
 
           <div class="auto-search-hero__content">
-            <article class="auto-search-panel">
+            <article class="auto-search-panel" data-auto-search-panel>
               <h1 class="auto-search-title" id="auto-search-title">Melyik teherautót keresed?</h1>
 
-            <form class="home-qs-form" id="home-qs-form">
+            <form class="home-qs-form auto-qs-booting" id="home-qs-form">
               <p class="home-qs-status" id="home-qs-status" hidden></p>
+              <div id="qs-layout-main" class="home-qs-layout-main"></div>
+              <div class="home-qs-static-legacy" hidden>
               <div class="home-qs-row">
                 <label class="home-qs-field home-qs-field--wide">
                   <span class="home-qs-label">Gyártmány</span>
@@ -254,8 +256,11 @@
                   </label>
                 </div>
               </div>
+              </div>
 
               <div class="home-qs-more" id="qs-more" hidden>
+                <div id="qs-more-layout" class="home-qs-more-layout"></div>
+                <div class="home-qs-static-legacy" hidden>
                 <div class="home-qs-row">
                   <div class="home-qs-pair">
                     <label class="home-qs-field home-qs-field--narrow">
@@ -321,6 +326,7 @@
                       <option>Összkerék</option>
                     </select>
                   </label>
+                </div>
                 </div>
               </div>
 
@@ -394,7 +400,7 @@
         }
       })();
     </script>
-    <script src="/js/home-app.js?v=coverAll1" type="module"></script>
+    <script src="/js/home-app.js?v=teherSearch1" type="module"></script>
     <script src="/js/auto-hero.js?v=pkwLkw1" type="module"></script>
     <script src="/js/site-avatar-menu.js?v=settingsOpen1" type="module"></script>
 

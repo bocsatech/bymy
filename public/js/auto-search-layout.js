@@ -1,10 +1,20 @@
 /**
- * Személyautó kereső — mentett admin-elrendezés (form-layout szemelyauto-search).
+ * Autó / teherautó kereső — mentett admin-elrendezés
+ * (szemelyauto-search | teherauto-search).
  */
 
 import { initVehicleCatalogSelects, fillSelect } from "./vehicle-catalog-client.js";
+import { KIVITEL_OPTIONS } from "./kivitel-options.js?v=kivitel1";
 
-const LAYOUT_URL = "/api/level1/form-layout?category=szemelyauto-search";
+function searchLayoutCategory() {
+  return document.body?.getAttribute("data-site-page") === "teherauto"
+    ? "teherauto-search"
+    : "szemelyauto-search";
+}
+
+function layoutUrl() {
+  return `/api/level1/form-layout?category=${encodeURIComponent(searchLayoutCategory())}`;
+}
 
 const FIRST_YEAR = 1950;
 const LAST_YEAR = 2035;
@@ -39,26 +49,11 @@ const RANGE_SPECS = {
   hatotav: { tol: "hatotav_tol", ig: "hatotav_ig", kind: "number" },
 };
 
+const TEHER_KIVITEL = ["Kisteher", "Dobozos", "Platós", "Ponyvás", "Hűtős", "Billenős", "Alváz"];
+
 const SELECT_OPTIONS = {
   allapot: ["Normál", "Újszerű", "Sérülésmentes", "Sérült"],
-  kivitel: [
-    "Pickup",
-    "Terepjáró",
-    "Buggy",
-    "Cabrio",
-    "Coupe",
-    "Egyterű",
-    "Ferdehátú",
-    "Hot rod",
-    "Kisbusz",
-    "Kombi",
-    "Lépcsőshátú",
-    "Mopedautó",
-    "Sedan",
-    "Sport",
-    "Városi terepjáró (crossover)",
-    "Egyéb",
-  ],
+  kivitel: [...KIVITEL_OPTIONS],
   ajtok: ["2", "3", "4", "5"],
   szemelyek: ["1", "2", "3", "4", "5", "6", "7", "8", "9"],
   sebessegvalto: ["Manuális", "Automata"],
@@ -105,6 +100,13 @@ const SELECT_OPTIONS = {
   ],
 };
 
+function selectOptionsFor(key) {
+  if (key === "kivitel" && searchLayoutCategory() === "teherauto-search") {
+    return TEHER_KIVITEL;
+  }
+  return SELECT_OPTIONS[key];
+}
+
 /** Rövid megjelenő címke a keresőben (a hosszú admin-címke helyett). */
 const SEARCH_LABEL_SHORT = {
   szemelyek: "Személyek",
@@ -144,12 +146,15 @@ function wrapGridCell(cell, innerHtml, rowOverride = null) {
   return `<div class="home-qs-grid-cell" data-grid-col="${col}" data-grid-span="${span}" data-grid-row="${r}" style="${cellGridStyle(cell, r)}">${innerHtml}</div>`;
 }
 let cachedLayout = null;
+let cachedLayoutCategory = "";
 
 export async function fetchAutoSearchLayout({ force = false } = {}) {
-  if (cachedLayout && !force) return cachedLayout;
-  const res = await fetch(LAYOUT_URL, { credentials: "same-origin", cache: "no-store" });
+  const category = searchLayoutCategory();
+  if (cachedLayout && !force && cachedLayoutCategory === category) return cachedLayout;
+  const res = await fetch(layoutUrl(), { credentials: "same-origin", cache: "no-store" });
   const data = await res.json().catch(() => ({}));
-  cachedLayout = data.layout || { version: 2, category: "szemelyauto-search", cells: [] };
+  cachedLayout = data.layout || { version: 2, category, cells: [] };
+  cachedLayoutCategory = category;
   return cachedLayout;
 }
 
@@ -241,7 +246,7 @@ export function optionsForAutoFilterKey(filterKey, emptyLabel = "Mindegy") {
       )
     );
   }
-  const selectOpts = SELECT_OPTIONS[key];
+  const selectOpts = selectOptionsFor(key);
   if (selectOpts) {
     return withEmpty(
       selectOpts.map((opt) =>
@@ -309,7 +314,7 @@ function fieldHtml(cell) {
       <select class="home-qs-control" data-filter-key="uzemanyagQuick"></select>
     </label>`;
   }
-  if (SELECT_OPTIONS[key]) {
+  if (selectOptionsFor(key)) {
     return `<label class="home-qs-field" data-qs-field="${key}">
       <span class="home-qs-label">${label}</span>
       <select class="home-qs-control" data-filter-key="${key}"></select>
@@ -378,7 +383,10 @@ function wireRangeSelects(root) {
 }
 
 function wireSelectOptions(root) {
-  for (const [key, options] of Object.entries(SELECT_OPTIONS)) {
+  const keys = new Set([...Object.keys(SELECT_OPTIONS), "kivitel"]);
+  for (const key of keys) {
+    const options = selectOptionsFor(key);
+    if (!options) continue;
     const selectors =
       key === "uzemanyag"
         ? '[data-filter-key="uzemanyag"], [data-filter-key="uzemanyagQuick"]'

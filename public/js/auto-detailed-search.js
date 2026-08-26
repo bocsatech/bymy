@@ -2,7 +2,7 @@
  * Részletes keresés — hero panel mount, olvasás, szűrés.
  */
 
-import { DETAILED_SEARCH_SECTIONS } from "./auto-detailed-search-catalog.js?v=detailedSearch1";
+import { DETAILED_SEARCH_SECTIONS } from "./auto-detailed-search-catalog.js?v=detailedSearch2";
 
 const FORM_FLAG_KEYS = new Set(["villamtoltes", "zold_rendszam"]);
 

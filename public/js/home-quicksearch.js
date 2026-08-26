@@ -8,7 +8,7 @@ import {
   mountDetailedSearch,
   readDetailedSearchValues,
   resetDetailedSearch,
-} from "./auto-detailed-search.js?v=detailedSearch1";
+} from "./auto-detailed-search.js?v=detailedSearch2";
 
 const MOBILE_MQ = "(max-width: 900px)";
 
@@ -31,6 +31,11 @@ export function initHomeQuickSearch({ onSearch = () => {} } = {}) {
     return { ...base, detailed };
   }
 
+  function syncDetailedButton(moreOpen) {
+    if (!detailedBtn) return;
+    detailedBtn.hidden = !moreOpen;
+  }
+
   function setMoreOpen(open) {
     if (!morePanel || !advancedBtn) return;
     morePanel.hidden = !open;
@@ -38,6 +43,8 @@ export function initHomeQuickSearch({ onSearch = () => {} } = {}) {
     advancedBtn.setAttribute("aria-expanded", open ? "true" : "false");
     advancedBtn.textContent = open ? "Kevesebb szűrő" : "Több szűrő";
     hero?.classList.toggle("is-more-open", open);
+    syncDetailedButton(open);
+    if (!open) setDetailedOpen(false);
   }
 
   function setDetailedOpen(open) {
@@ -75,13 +82,11 @@ export function initHomeQuickSearch({ onSearch = () => {} } = {}) {
 
   advancedBtn?.addEventListener("click", () => {
     const willOpen = !morePanel.classList.contains("is-open");
-    if (willOpen) setDetailedOpen(false);
     setMoreOpen(willOpen);
   });
 
   detailedBtn?.addEventListener("click", () => {
     const willOpen = !detailedPanel.classList.contains("is-open");
-    if (willOpen) setMoreOpen(false);
     setDetailedOpen(willOpen);
   });
 
@@ -125,4 +130,4 @@ export function initHomeQuickSearch({ onSearch = () => {} } = {}) {
     });
 }
 
-export { readDetailedSearchValues } from "./auto-detailed-search.js?v=detailedSearch1";
+export { readDetailedSearchValues } from "./auto-detailed-search.js?v=detailedSearch2";

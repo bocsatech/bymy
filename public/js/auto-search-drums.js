@@ -13,7 +13,7 @@ import {
 import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=cellDrum1";
 import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=cellDrum1";
 
-const MOBILE_MQ = "(max-width: 900px)";
+const TYPEAHEAD_CLEAR_MS = 2500;
 
 const DUAL_RANGES = [
   {
@@ -306,7 +306,7 @@ function mountDesktopCellDrum(wrap, wheel, emptyLabel = "Mindegy") {
       typeTimer = window.setTimeout(() => {
         typeBuffer = "";
         renderItems("");
-      }, 1200);
+      }, TYPEAHEAD_CLEAR_MS);
       applyTypeBuffer();
       return;
     }
@@ -323,7 +323,7 @@ function mountDesktopCellDrum(wrap, wheel, emptyLabel = "Mindegy") {
       typeTimer = window.setTimeout(() => {
         typeBuffer = "";
         renderItems("");
-      }, 1200);
+      }, TYPEAHEAD_CLEAR_MS);
       applyTypeBuffer();
     }
   });

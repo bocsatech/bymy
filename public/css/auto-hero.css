@@ -1150,19 +1150,17 @@ body.auto-drum-portal-open {
   display: none !important;
 }
 
-/* —— Asztali inline dobkerék (átlátszó háttér kötelező, fehér szöveg) —— */
+/* —— Asztali: cellán belüli görgethető lista (nincs lenyíló menü) —— */
 @media (min-width: 901px) {
   body:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .auto-qs-drums--desktop,
   body:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .auto-qs-drums--desktop .immo-schema-cell,
   body:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .auto-qs-drums--desktop .immo-dual-range-block,
   body:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .auto-qs-drums--desktop .immo-dual-range,
   body:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .auto-qs-drums--desktop .immo-wheel-wrap,
-  body:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .auto-qs-drums--desktop .immo-wheel-wrap.is-open,
-  body:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .auto-qs-drums--desktop .immo-wheel-wrap.has-drum-open,
-  body:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .auto-qs-drums--desktop .immo-wheel-wrap:focus-within,
-  body:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .auto-qs-drums--desktop .immo-schema-cell.is-drum-active,
-  body:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .auto-qs-drums--desktop .immo-dual-range__half.is-drum-active,
-  body:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .auto-qs-drums--desktop .immo-dual-range.has-drum-open {
+  body:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .auto-qs-drums--desktop .auto-cell-drum,
+  body:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .auto-qs-drums--desktop .auto-cell-drum__viewport,
+  body:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .auto-qs-drums--desktop .auto-cell-drum__scroll,
+  body:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .auto-qs-drums--desktop .auto-cell-drum__item {
     background: transparent !important;
     background-color: transparent !important;
     box-shadow: none !important;
@@ -1191,7 +1189,7 @@ body.auto-drum-portal-open {
     min-width: 0;
   }
 
-  .auto-search-panel .auto-qs-drums--desktop .immo-wheel-wrap {
+  .auto-search-panel .auto-qs-drums--desktop .immo-wheel-wrap.auto-cell-drum {
     position: relative;
     width: 100%;
   }
@@ -1212,40 +1210,83 @@ body.auto-drum-portal-open {
     pointer-events: none;
   }
 
-  .auto-search-panel .auto-qs-drums--desktop .immo-wheel-trigger,
-  .auto-search-panel .auto-qs-drums--desktop .auto-drum-typed,
-  .auto-search-panel .auto-qs-drums--desktop .immo-wheel-wrap.is-open .immo-wheel-trigger,
-  .auto-search-panel .auto-qs-drums--desktop .immo-wheel-wrap.has-drum-open .immo-wheel-trigger,
-  .auto-search-panel .auto-qs-drums--desktop .immo-wheel-wrap:focus-within .immo-wheel-trigger {
-    display: flex;
-    align-items: center;
+  .auto-search-panel .auto-qs-drums--desktop .auto-cell-drum__viewport {
     width: 100%;
+    height: 2.4rem;
     min-height: 2.4rem;
-    padding: 0.45rem 0.7rem;
+    overflow: hidden;
     border: 1px solid rgba(255, 255, 255, 0.65) !important;
     border-radius: 4px;
-    background: transparent !important;
-    background-color: transparent !important;
-    color: #fff !important;
-    font: inherit;
-    font-size: 0.9rem;
-    font-weight: 500;
-    text-align: left;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
-    box-shadow: none !important;
-    cursor: pointer;
-  }
-
-  .auto-search-panel .auto-qs-drums--desktop .auto-drum-typed {
-    cursor: text;
     outline: none;
   }
 
-  .auto-search-panel .auto-qs-drums--desktop .immo-wheel-wrap.is-open .immo-wheel-trigger,
-  .auto-search-panel .auto-qs-drums--desktop .immo-wheel-wrap.is-typing .auto-drum-typed,
-  .auto-search-panel .auto-qs-drums--desktop .immo-wheel-trigger:focus-visible {
+  .auto-search-panel .auto-qs-drums--desktop .auto-cell-drum__viewport:focus,
+  .auto-search-panel .auto-qs-drums--desktop .auto-cell-drum__viewport:focus-visible {
     border-color: #fff !important;
     box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.16) !important;
+  }
+
+  .auto-search-panel .auto-qs-drums--desktop .auto-cell-drum__scroll {
+    height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scroll-snap-type: y mandatory;
+    scrollbar-width: none;
+  }
+
+  .auto-search-panel .auto-qs-drums--desktop .auto-cell-drum__scroll::-webkit-scrollbar {
+    display: none;
+  }
+
+  .auto-search-panel .auto-qs-drums--desktop .auto-cell-drum__item {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    height: 2.4rem;
+    min-height: 2.4rem;
+    padding: 0 0.7rem;
+    scroll-snap-align: center;
+    color: #fff;
+    font-size: 0.9rem;
+    line-height: 1.2;
+    cursor: default;
+    user-select: none;
+  }
+
+  .auto-search-panel .auto-qs-drums--desktop .auto-cell-drum__text {
+    display: inline;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  }
+
+  .auto-search-panel .auto-qs-drums--desktop .auto-cell-drum__match {
+    color: #fff !important;
+    opacity: 1;
+    font-weight: 700;
+  }
+
+  .auto-search-panel .auto-qs-drums--desktop .auto-cell-drum__rest {
+    color: #fff !important;
+    opacity: 0.42;
+    font-weight: 500;
+  }
+
+  .auto-search-panel .auto-qs-drums--desktop .auto-cell-drum__item.is-selected .auto-cell-drum__rest {
+    opacity: 0.55;
+  }
+
+  .auto-search-panel .auto-qs-drums--desktop .auto-cell-drum__item.is-selected .auto-cell-drum__match {
+    opacity: 1;
+  }
+
+  /* Ne jelenjen meg a régi lenyíló dob UI asztalin */
+  .auto-search-panel .auto-qs-drums--desktop .immo-wheel-trigger,
+  .auto-search-panel .auto-qs-drums--desktop .immo-drum-inline {
+    display: none !important;
   }
 
   .auto-search-panel .auto-qs-drums--desktop .immo-dual-range {
@@ -1263,85 +1304,6 @@ body.auto-drum-portal-open {
     color: #f3f4f6;
     font-size: 0.82rem;
     padding-bottom: 0.65rem;
-    background: transparent !important;
-  }
-
-  .auto-search-panel .auto-qs-drums--desktop .immo-drum-inline,
-  .auto-search-panel .auto-qs-drums--desktop .immo-wheel-wrap--drum-inline.is-open .immo-drum-inline {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 100%;
-    z-index: 40;
-    margin-top: 0.2rem;
-    padding: 0.25rem 0;
-    border: 1px solid rgba(255, 255, 255, 0.35);
-    border-radius: 4px;
-    background: transparent !important;
-    background-color: transparent !important;
-    backdrop-filter: none;
-    box-shadow: none !important;
-  }
-
-  .auto-search-panel .auto-qs-drums--desktop .immo-drum-wheel-ring {
-    position: relative;
-    width: 100%;
-    max-width: none;
-    height: 7.5rem;
-    margin: 0 auto;
-    overflow: hidden;
-    background: transparent !important;
-    background-color: transparent !important;
-    box-shadow: none !important;
-  }
-
-  .auto-search-panel .auto-qs-drums--desktop .immo-drum-inline-highlight {
-    position: absolute;
-    left: 0.35rem;
-    right: 0.35rem;
-    top: 50%;
-    height: 2.35rem;
-    transform: translateY(-50%);
-    border: 1px solid rgba(255, 255, 255, 0.45);
-    border-radius: 4px;
-    background: transparent !important;
-    background-color: transparent !important;
-    pointer-events: none;
-    z-index: 1;
-  }
-
-  .auto-search-panel .auto-qs-drums--desktop .immo-drum-inline-scroll {
-    height: 100%;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    scrollbar-width: none;
-    padding: 2.55rem 0;
-    position: relative;
-    z-index: 2;
-    background: transparent !important;
-  }
-
-  .auto-search-panel .auto-qs-drums--desktop .immo-drum-inline-scroll::-webkit-scrollbar {
-    display: none;
-  }
-
-  .auto-search-panel .auto-qs-drums--desktop .immo-drum-inline-item,
-  .auto-search-panel .auto-qs-drums--desktop .immo-drum-inline-text {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 2.35rem;
-    padding: 0 0.6rem;
-    color: #fff !important;
-    font-size: 0.9rem;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
-    background: transparent !important;
-    cursor: pointer;
-  }
-
-  .auto-search-panel .auto-qs-drums--desktop .immo-drum-inline-item.is-in-cell,
-  .auto-search-panel .auto-qs-drums--desktop .immo-drum-inline-item.is-selected {
-    font-weight: 650;
     background: transparent !important;
   }
 }

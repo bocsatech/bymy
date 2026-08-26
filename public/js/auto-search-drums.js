@@ -3,15 +3,15 @@
  * Mobil: portált gyűrű. Asztali: helyben görgethető inline dob + dupla kattintás = kézi érték.
  */
 
-import { fillWheel, setWheelValue, readWheel } from "./ingatlan-wheels.js?v=deskDrum1";
+import { fillWheel, setWheelValue, readWheel } from "./ingatlan-wheels.js?v=cellDrum1";
 import {
   initDrumWheel,
   applyDrumModeClass,
   syncDrumWheelDisplay,
   closeAllInlineDrums,
-} from "./immo-drum-picker.js?v=deskDrum1";
-import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=deskDrum1";
-import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=deskDrum1";
+} from "./immo-drum-picker.js?v=cellDrum1";
+import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=cellDrum1";
+import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=cellDrum1";
 
 const MOBILE_MQ = "(max-width: 900px)";
 
@@ -110,124 +110,245 @@ function emptyLabelFromOptions(options) {
 
 function finishWheel(cell, emptyLabel) {
   const wheel = cell.querySelector("[data-wheel]");
-  initDrumWheel(wheel, { emptyLabel });
-  const live = cell.querySelector("[data-wheel]");
-  setWheelValue(live, "");
-  syncDrumWheelDisplay(live);
-  if (isMobile()) bindAutoDrumSheet(live);
-  else bindDesktopAutoDrum(live);
-  return live;
+  if (isMobile()) {
+    initDrumWheel(wheel, { emptyLabel });
+    const live = cell.querySelector("[data-wheel]");
+    setWheelValue(live, "");
+    syncDrumWheelDisplay(live);
+    bindAutoDrumSheet(live);
+    return live;
+  }
+  setWheelValue(wheel, "");
+  mountDesktopCellDrum(cell.querySelector(".immo-wheel-wrap"), wheel, emptyLabel);
+  return wheel;
 }
 
-/** Asztali: egérgörgő a mezőn + dupla kattintás = szabad szöveg. */
-function bindDesktopAutoDrum(wheel) {
-  const wrap = wheel?.closest?.(".immo-wheel-wrap");
-  const trigger = wrap?.querySelector(".immo-wheel-trigger");
-  if (!trigger || trigger.dataset.desktopDrumBound === "1") return;
-  trigger.dataset.desktopDrumBound = "1";
+/**
+ * Asztali: a mező cellájában görgethető lista (nincs lenyíló menü).
+ * Gépelés: prefixre ugrik; a beírt rész éles, a többi halvány.
+ */
+function mountDesktopCellDrum(wrap, wheel, emptyLabel = "Mindegy") {
+  if (!wrap || !wheel) return;
+  closeAllInlineDrums(false);
+  wrap.classList.add("auto-cell-drum");
+  wrap.classList.remove("immo-wheel-wrap--drum-inline", "is-open", "has-drum-open", "is-typing");
+  wrap.querySelector(".immo-wheel-trigger")?.remove();
+  wrap.querySelector(".immo-drum-inline")?.remove();
+  wrap.querySelector(".auto-cell-drum__viewport")?.remove();
+  wrap.querySelector(".auto-drum-typed")?.remove();
 
-  trigger.addEventListener(
+  wheel.setAttribute("hidden", "");
+  wheel.classList.add("immo-wheel--drum-source");
+
+  const viewport = document.createElement("div");
+  viewport.className = "auto-cell-drum__viewport";
+  viewport.tabIndex = 0;
+  viewport.setAttribute("role", "listbox");
+  viewport.setAttribute("aria-label", emptyLabel);
+
+  const scroll = document.createElement("div");
+  scroll.className = "auto-cell-drum__scroll";
+  viewport.appendChild(scroll);
+
+  const labelEl = wrap.querySelector(".immo-label");
+  if (labelEl?.nextSibling) wrap.insertBefore(viewport, labelEl.nextSibling);
+  else wrap.insertBefore(viewport, wheel);
+
+  let typeBuffer = "";
+  let typeTimer = 0;
+  let scrollSettle = 0;
+
+  function optionRows() {
+    return [...wheel.querySelectorAll(".immo-wheel-opt")].map((opt) => ({
+      value: opt.dataset.value ?? "",
+      label: (opt.textContent || "").trim() || emptyLabel,
+    }));
+  }
+
+  function renderItems(prefix = "") {
+    const rows = optionRows();
+    const cur = String(readWheel(wheel) ?? "");
+    scroll.innerHTML = rows
+      .map((row) => {
+        const label = row.label || emptyLabel;
+        const selected = (row.value ?? "") === cur;
+        let html;
+        if (prefix) html = prefixHighlightHtml(label, prefix);
+        else if (selected) html = `<span class="auto-cell-drum__match">${escapeHtml(label)}</span>`;
+        else html = `<span class="auto-cell-drum__rest">${escapeHtml(label)}</span>`;
+        return `<div class="auto-cell-drum__item" role="option" data-value="${escapeAttr(row.value)}" data-label="${escapeAttr(label)}"><span class="auto-cell-drum__text">${html}</span></div>`;
+      })
+      .join("");
+    syncSelectedClass();
+  }
+
+  function syncSelectedClass() {
+    const cur = String(readWheel(wheel) ?? "");
+    scroll.querySelectorAll(".auto-cell-drum__item").forEach((item) => {
+      item.classList.toggle("is-selected", (item.dataset.value ?? "") === cur);
+    });
+  }
+
+  function scrollToValue(value, smooth = true) {
+    const item =
+      [...scroll.querySelectorAll(".auto-cell-drum__item")].find((el) => (el.dataset.value ?? "") === value) ||
+      scroll.querySelector(".auto-cell-drum__item");
+    if (!item) return;
+    const top = item.offsetTop - (scroll.clientHeight - item.clientHeight) / 2;
+    scroll.scrollTo({ top: Math.max(0, top), behavior: smooth ? "smooth" : "auto" });
+  }
+
+  function selectValue(value, { smooth = true, silent = false, prefix = null } = {}) {
+    setWheelValue(wheel, value);
+    if (prefix != null) renderItems(prefix);
+    else if (!typeBuffer) renderItems("");
+    else syncSelectedClass();
+    scrollToValue(value, smooth);
+    if (!silent) {
+      wheel.dispatchEvent(new CustomEvent("immo-wheel-change", { bubbles: true, detail: { value } }));
+    }
+  }
+
+  function nearestItem() {
+    const mid = scroll.scrollTop + scroll.clientHeight / 2;
+    let best = null;
+    let bestDist = Infinity;
+    scroll.querySelectorAll(".auto-cell-drum__item").forEach((item) => {
+      const center = item.offsetTop + item.offsetHeight / 2;
+      const dist = Math.abs(center - mid);
+      if (dist < bestDist) {
+        bestDist = dist;
+        best = item;
+      }
+    });
+    return best;
+  }
+
+  function commitNearest() {
+    const item = nearestItem();
+    if (!item) return;
+    const value = item.dataset.value ?? "";
+    if (value === String(readWheel(wheel) ?? "")) {
+      syncSelectedClass();
+      return;
+    }
+    selectValue(value, { smooth: false });
+  }
+
+  function applyTypeBuffer() {
+    const q = typeBuffer.trim().toLowerCase();
+    if (!q) {
+      renderItems("");
+      scrollToValue(String(readWheel(wheel) ?? ""), false);
+      return;
+    }
+    const rows = optionRows();
+    const hit = rows.find((row) => row.label.toLowerCase().startsWith(q) && row.value !== "");
+    const emptyHit = !hit && emptyLabel.toLowerCase().startsWith(q) ? rows.find((r) => r.value === "") : null;
+    const match = hit || emptyHit;
+    if (match) selectValue(match.value, { smooth: true, prefix: typeBuffer });
+    else renderItems(typeBuffer);
+  }
+
+  renderItems("");
+  selectValue("", { smooth: false, silent: true });
+
+  scroll.addEventListener(
+    "scroll",
+    () => {
+      window.clearTimeout(scrollSettle);
+      scrollSettle = window.setTimeout(commitNearest, 80);
+    },
+    { passive: true }
+  );
+
+  scroll.addEventListener(
     "wheel",
     (event) => {
-      if (wrap.classList.contains("is-open") || wrap.classList.contains("is-typing")) return;
-      event.preventDefault();
-      const opts = [...wheel.querySelectorAll(".immo-wheel-opt")];
-      if (!opts.length) return;
-      const cur = String(readWheel(wheel) ?? "");
-      let idx = opts.findIndex((o) => (o.dataset.value ?? "") === cur);
-      if (idx < 0) idx = 0;
-      const nextIdx =
-        event.deltaY > 0 ? Math.min(opts.length - 1, idx + 1) : Math.max(0, idx - 1);
-      const value = opts[nextIdx].dataset.value ?? "";
-      setWheelValue(wheel, value);
-      syncDrumWheelDisplay(wheel);
-      wheel.dispatchEvent(new CustomEvent("immo-wheel-change", { bubbles: true, detail: { value } }));
+      /* maradjon a cellában — ne görgessen az oldal */
+      event.stopPropagation();
     },
-    { passive: false }
+    { passive: true }
   );
 
-  trigger.addEventListener("dblclick", (event) => {
-    event.preventDefault();
-    event.stopPropagation();
-    closeAllInlineDrums(false);
-    startDesktopTypedEdit(wrap, wheel, trigger);
+  scroll.addEventListener("click", (event) => {
+    const item = event.target.closest(".auto-cell-drum__item");
+    if (!item) return;
+    typeBuffer = "";
+    window.clearTimeout(typeTimer);
+    selectValue(item.dataset.value ?? "", { smooth: true });
+    renderItems("");
+    viewport.focus();
   });
-}
 
-function startDesktopTypedEdit(wrap, wheel, trigger) {
-  if (!wrap || !wheel || !trigger) return;
-  if (wrap.classList.contains("is-typing")) return;
+  viewport.addEventListener("click", () => {
+    viewport.focus();
+  });
 
-  const emptyLabel = trigger.dataset.emptyLabel || "Mindegy";
-  const current = String(readWheel(wheel) ?? "");
-  wrap.classList.add("is-typing");
-  trigger.hidden = true;
+  viewport.addEventListener("keydown", (event) => {
+    if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+      event.preventDefault();
+      const items = [...scroll.querySelectorAll(".auto-cell-drum__item")];
+      const cur = String(readWheel(wheel) ?? "");
+      let idx = items.findIndex((el) => (el.dataset.value ?? "") === cur);
+      if (idx < 0) idx = 0;
+      const next = event.key === "ArrowDown" ? Math.min(items.length - 1, idx + 1) : Math.max(0, idx - 1);
+      typeBuffer = "";
+      window.clearTimeout(typeTimer);
+      selectValue(items[next].dataset.value ?? "", { smooth: true });
+      renderItems("");
+      return;
+    }
+    if (event.key === "Backspace") {
+      event.preventDefault();
+      typeBuffer = typeBuffer.slice(0, -1);
+      window.clearTimeout(typeTimer);
+      typeTimer = window.setTimeout(() => {
+        typeBuffer = "";
+        renderItems("");
+      }, 1200);
+      applyTypeBuffer();
+      return;
+    }
+    if (event.key === "Escape") {
+      typeBuffer = "";
+      window.clearTimeout(typeTimer);
+      renderItems("");
+      return;
+    }
+    if (event.key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey) {
+      event.preventDefault();
+      typeBuffer += event.key;
+      window.clearTimeout(typeTimer);
+      typeTimer = window.setTimeout(() => {
+        typeBuffer = "";
+        renderItems("");
+      }, 1200);
+      applyTypeBuffer();
+    }
+  });
 
-  const input = document.createElement("input");
-  input.type = "text";
-  input.className = "auto-drum-typed home-qs-control";
-  input.setAttribute("aria-label", emptyLabel);
-  input.placeholder = emptyLabel;
-  input.value = current;
-  input.autocomplete = "off";
-  trigger.insertAdjacentElement("afterend", input);
-  input.focus();
-  input.select();
-
-  const finish = (commit) => {
-    if (!wrap.classList.contains("is-typing")) return;
-    wrap.classList.remove("is-typing");
-    const raw = commit ? String(input.value ?? "").trim() : current;
-    input.remove();
-    trigger.hidden = false;
-    applyTypedDrumValue(wheel, raw, emptyLabel);
+  wrap._desktopCellDrum = {
+    refresh(prefix = "") {
+      renderItems(prefix);
+      scrollToValue(String(readWheel(wheel) ?? ""), false);
+    },
   };
-
-  input.addEventListener("keydown", (event) => {
-    if (event.key === "Enter") {
-      event.preventDefault();
-      finish(true);
-    } else if (event.key === "Escape") {
-      event.preventDefault();
-      finish(false);
-    }
-  });
-  input.addEventListener("blur", () => finish(true));
 }
 
-function applyTypedDrumValue(wheel, raw, emptyLabel) {
-  const value = String(raw ?? "").trim();
-  if (!value || value === emptyLabel) {
-    setWheelValue(wheel, "");
-    syncDrumWheelDisplay(wheel);
-    wheel.dispatchEvent(new CustomEvent("immo-wheel-change", { bubbles: true, detail: { value: "" } }));
-    return;
+function prefixHighlightHtml(label, typedPrefix) {
+  const raw = String(label ?? "");
+  const prefix = String(typedPrefix ?? "");
+  if (!prefix) {
+    return `<span class="auto-cell-drum__rest">${escapeHtml(raw)}</span>`;
   }
-
-  const opts = [...wheel.querySelectorAll(".immo-wheel-opt")];
-  const match = opts.find(
-    (o) =>
-      (o.dataset.value ?? "") === value ||
-      (o.textContent || "").trim().toLowerCase() === value.toLowerCase()
-  );
-  if (match) {
-    setWheelValue(wheel, match.dataset.value ?? "");
-  } else {
-    let typed = wheel.querySelector(".immo-wheel-opt--typed");
-    if (!typed) {
-      typed = document.createElement("button");
-      typed.type = "button";
-      typed.className = "immo-wheel-opt immo-wheel-opt--typed";
-      wheel.appendChild(typed);
-    }
-    typed.dataset.value = value;
-    typed.textContent = value;
-    setWheelValue(wheel, value);
+  if (!raw.toLowerCase().startsWith(prefix.toLowerCase())) {
+    return `<span class="auto-cell-drum__rest">${escapeHtml(raw)}</span>`;
   }
-  syncDrumWheelDisplay(wheel);
-  wheel.dispatchEvent(
-    new CustomEvent("immo-wheel-change", { bubbles: true, detail: { value: readWheel(wheel) } })
-  );
+  const n = prefix.length;
+  return `<span class="auto-cell-drum__match">${escapeHtml(raw.slice(0, n))}</span><span class="auto-cell-drum__rest">${escapeHtml(
+    raw.slice(n)
+  )}</span>`;
 }
 
 function buildWheelCell({ filterKey, wheelName, label, options, halfClass = "", emptyLabel: emptyOverride } = {}) {
@@ -375,12 +496,17 @@ function rebindWheel(form, wheelName, options, emptyLabel = "Mindegy") {
   const wheel = form.querySelector(`[data-wheel="${wheelName}"]`);
   if (!wheel) return null;
   fillWheel(wheel, options, { emptyLabel });
-  initDrumWheel(wheel, { emptyLabel });
+  if (isMobile()) {
+    initDrumWheel(wheel, { emptyLabel });
+    const live = form.querySelector(`[data-wheel="${wheelName}"]`);
+    setWheelValue(live, "");
+    syncDrumWheelDisplay(live);
+    bindAutoDrumSheet(live);
+    return live;
+  }
   const live = form.querySelector(`[data-wheel="${wheelName}"]`);
   setWheelValue(live, "");
-  syncDrumWheelDisplay(live);
-  if (isMobile()) bindAutoDrumSheet(live);
-  else bindDesktopAutoDrum(live);
+  mountDesktopCellDrum(live.closest(".immo-wheel-wrap"), live, emptyLabel);
   return live;
 }
 
@@ -459,6 +585,9 @@ export function resetAutoSearchDrums(form = document.getElementById("home-qs-for
   form.querySelectorAll("[data-wheel]").forEach((wheel) => setWheelValue(wheel, ""));
   form.querySelectorAll('input.home-qs-control[data-filter-key]').forEach((el) => {
     el.value = "";
+  });
+  form.querySelectorAll(".auto-cell-drum").forEach((wrap) => {
+    wrap._desktopCellDrum?.refresh("");
   });
   form
     .querySelector('[data-wheel="gyartmany"]')

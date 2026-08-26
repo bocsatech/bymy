@@ -458,8 +458,8 @@ body[data-site-page="teherauto"] .auto-search-tabs {
   display: none;
   flex-direction: column;
   gap: 0.55rem;
-  margin-top: 0.15rem;
-  padding-top: 0.55rem;
+  margin-top: 0;
+  padding-top: 0.35rem;
   border-top: 1px solid rgba(255, 255, 255, 0.28);
 }
 
@@ -1155,14 +1155,19 @@ body.auto-drum-portal-open {
   }
 
   .auto-search-panel .auto-qs-drums--desktop {
-    display: grid;
+    display: flex;
+    flex-direction: column;
     gap: 0.55rem;
     width: 100%;
   }
 
   .auto-search-panel .auto-qs-drums--desktop .home-qs-layout-main,
   .auto-search-panel .auto-qs-drums--desktop .home-qs-more-layout {
-    display: contents;
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 0.55rem;
+    width: 100%;
+    align-items: end;
   }
 
   .auto-search-panel .auto-qs-drums--desktop .home-qs-grid {

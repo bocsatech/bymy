@@ -440,11 +440,20 @@ export async function applyAutoSearchLayout(form = document.getElementById("home
     const moreCells = (layout.cells || [])
       .filter((c) => isSearchCellVisible(c) && Number(c.step) >= 2 && Number(c.step) <= 5)
       .sort((a, b) => (a.step - b.step) || (a.row - b.row) || (a.col - b.col));
-    // Lépésenként eltoljuk a sort, hogy ne ütközzenek az admin row számok.
-    const withRows = moreCells.map((c) => ({
-      ...c,
-      row: (Number(c.step) - 1) * 40 + (Number(c.row) || 1),
-    }));
+    // Saját grid: lépésenként folyamatos sorok (ne *40 eltolás — az üres grid-sorokat hagyott).
+    let rowOffset = 0;
+    const withRows = [];
+    for (let step = 2; step <= 5; step += 1) {
+      const stepCells = moreCells.filter((c) => Number(c.step) === step);
+      if (!stepCells.length) continue;
+      let maxRow = 1;
+      for (const c of stepCells) {
+        const r = Math.max(1, Number(c.row) || 1);
+        maxRow = Math.max(maxRow, r);
+        withRows.push({ ...c, row: rowOffset + r });
+      }
+      rowOffset += maxRow;
+    }
     renderGrid(moreHost, withRows);
   }
 

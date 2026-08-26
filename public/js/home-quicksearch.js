@@ -4,6 +4,11 @@
 
 import { applyAutoSearchLayout, readLayoutFilterValues } from "./auto-search-layout.js?v=cityPostal1";
 import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums } from "./auto-search-drums.js?v=korzet1";
+import {
+  mountDetailedSearch,
+  readDetailedSearchValues,
+  resetDetailedSearch,
+} from "./auto-detailed-search.js?v=detailedSearch1";
 
 const MOBILE_MQ = "(max-width: 900px)";
 
@@ -14,12 +19,16 @@ export function initHomeQuickSearch({ onSearch = () => {} } = {}) {
   const hero = document.querySelector("[data-auto-search-hero]");
   const morePanel = document.getElementById("qs-more");
   const advancedBtn = document.getElementById("qs-reszletes");
+  const detailedPanel = document.getElementById("qs-detailed-panel");
+  const detailedBtn = document.getElementById("qs-detailed");
   const statusEl = document.getElementById("home-qs-status");
   const mobile = () => window.matchMedia(MOBILE_MQ).matches;
 
   function readQuickSearchValues() {
-    if (form.dataset.drumsMounted === "1") return readAutoDrumFilterValues(form);
-    return readLayoutFilterValues(form);
+    const base =
+      form.dataset.drumsMounted === "1" ? readAutoDrumFilterValues(form) : readLayoutFilterValues(form);
+    const detailed = readDetailedSearchValues(form);
+    return { ...base, detailed };
   }
 
   function setMoreOpen(open) {
@@ -29,6 +38,15 @@ export function initHomeQuickSearch({ onSearch = () => {} } = {}) {
     advancedBtn.setAttribute("aria-expanded", open ? "true" : "false");
     advancedBtn.textContent = open ? "Kevesebb szűrő" : "Több szűrő";
     hero?.classList.toggle("is-more-open", open);
+  }
+
+  function setDetailedOpen(open) {
+    if (!detailedPanel || !detailedBtn) return;
+    detailedPanel.hidden = !open;
+    detailedPanel.classList.toggle("is-open", open);
+    detailedBtn.setAttribute("aria-expanded", open ? "true" : "false");
+    detailedBtn.textContent = open ? "Kevesebb részletes" : "Részletes keresés";
+    hero?.classList.toggle("is-detailed-open", open);
   }
 
   function setQsReady(ready) {
@@ -48,17 +66,29 @@ export function initHomeQuickSearch({ onSearch = () => {} } = {}) {
       } else {
         form.querySelector("#qs-gyartmany")?.dispatchEvent(new Event("change"));
       }
+      resetDetailedSearch(form);
       setMoreOpen(false);
+      setDetailedOpen(false);
       onSearch({});
     });
   });
 
   advancedBtn?.addEventListener("click", () => {
-    setMoreOpen(!morePanel.classList.contains("is-open"));
+    const willOpen = !morePanel.classList.contains("is-open");
+    if (willOpen) setDetailedOpen(false);
+    setMoreOpen(willOpen);
+  });
+
+  detailedBtn?.addEventListener("click", () => {
+    const willOpen = !detailedPanel.classList.contains("is-open");
+    if (willOpen) setMoreOpen(false);
+    setDetailedOpen(willOpen);
   });
 
   setMoreOpen(false);
+  setDetailedOpen(false);
   setQsReady(false);
+  mountDetailedSearch(form);
 
   applyAutoSearchLayout(form)
     .then(async () => {
@@ -94,3 +124,5 @@ export function initHomeQuickSearch({ onSearch = () => {} } = {}) {
       }
     });
 }
+
+export { readDetailedSearchValues } from "./auto-detailed-search.js?v=detailedSearch1";

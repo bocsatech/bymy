@@ -7,7 +7,8 @@ import {
   initHomeSearchSidebar,
   initHomeFilterCatalog,
 } from "./home-search-filter.js?v=korzetFix1";
-import { initHomeQuickSearch } from "./home-quicksearch.js?v=cityPostal1";
+import { initHomeQuickSearch } from "./home-quicksearch.js?v=detailedSearch1";
+import { matchDetailedSearch, hasActiveDetailedSearch } from "./auto-detailed-search.js?v=detailedSearch1";
 import {
   emptyIngatlanFilters,
   filterListingsByIngatlan,
@@ -37,6 +38,7 @@ let statsUi = null;
 let statsFilter = null;
 /** Gyorskeresőből jövő körzet-szűrő (ne ütközzön a stats sáv / ?nearby= URL-lel). */
 let quickRadiusFilter = null;
+let detailedFilters = null;
 
 const PAGE = document.body?.getAttribute("data-site-page") || "";
 if (gridTrack) bindListingOpen(gridTrack);
@@ -124,6 +126,9 @@ function filterItems(items) {
     result = filterListingsByIngatlan(result, ingatlanFilters);
   } else {
     result = filterListingsBySidebar(result, sidebarFilters);
+    if (detailedFilters && hasActiveDetailedSearch(detailedFilters)) {
+      result = result.filter((item) => matchDetailedSearch(item, detailedFilters));
+    }
     result = filterByCategory(result, categoryFilter);
     result = filterByTruckSubtype(result);
   }
@@ -292,7 +297,9 @@ if (PAGE === "ingatlan") {
 } else {
   initHomeQuickSearch({
     onSearch: async (values) => {
-      sidebarFilters = { ...emptyFilters(), ...values };
+      const { detailed, ...sidebarValues } = values ?? {};
+      sidebarFilters = { ...emptyFilters(), ...sidebarValues };
+      detailedFilters = detailed ?? null;
       categoryUi?.clear();
       categoryFilter = null;
 

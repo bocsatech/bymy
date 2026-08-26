@@ -217,6 +217,36 @@ th { color: var(--muted); font-weight: 600; }
   touch-action: none;
 }
 .layout-tile.dragging { cursor: grabbing; opacity: 0.92; z-index: 2; }
+.layout-tile.is-floating {
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
+  opacity: 0.96;
+  cursor: grabbing;
+}
+.layout-tile-steps {
+  position: absolute;
+  left: 0.35rem;
+  bottom: 0.25rem;
+  display: flex;
+  gap: 0.15rem;
+  z-index: 4;
+}
+.layout-step-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.15rem;
+  height: 1.15rem;
+  border-radius: 3px;
+  background: #2a3441;
+  color: #f0c14b;
+  font-size: 0.7rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.layout-step-btn:hover {
+  background: #3a4656;
+  color: #fff;
+}
 .layout-tile-label { font-size: 0.82rem; font-weight: 600; line-height: 1.25; }
 .layout-tile-meta { font-size: 0.72rem; color: var(--muted); }
 .layout-del {

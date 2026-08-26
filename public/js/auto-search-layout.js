@@ -436,62 +436,109 @@ function hideLegacy(form) {
   });
 }
 
-function setCityInputValue(cityInput, city) {
-  if (!cityInput || !("value" in cityInput)) return;
-  cityInput.value = city;
-  cityInput.dispatchEvent(new Event("input", { bubbles: true }));
-  cityInput.dispatchEvent(new Event("change", { bubbles: true }));
+function setFieldValue(input, value) {
+  if (!input || !("value" in input)) return;
+  input.value = value;
+  input.dispatchEvent(new Event("input", { bubbles: true }));
+  input.dispatchEvent(new Event("change", { bubbles: true }));
 }
 
 /**
- * 4 jegyű irányítószám → település kitöltés (/api/postal-codes/lookup).
- * Új kód / ismeretlen: a régi település ne maradjon bent.
+ * Irányítószám ↔ település autofill (/api/postal-codes/lookup).
  */
 function wirePostalCityAutofill(form) {
   if (!form || form.dataset.postalCityBound === "1") return;
   const postalInput = form.querySelector('[data-filter-key="iranyitoszam"]');
   const cityInput = form.querySelector('[data-filter-key="telepules"]');
   if (!postalInput || postalInput.tagName !== "INPUT") return;
+  if (!cityInput || cityInput.tagName !== "INPUT") {
+    // Csak IRSZ → település, ha nincs szöveges településmező
+  }
 
   form.dataset.postalCityBound = "1";
-  let lastLookedUp = "";
+  let lastPostalLookedUp = "";
+  let lastCityLookedUp = "";
   let busy = false;
+  /** 'postal' | 'city' — ne írjuk felül egymást visszacsatoláskor */
+  let fillSource = "";
 
-  async function lookup() {
+  async function lookupFromPostal() {
     const digits = String(postalInput.value ?? "")
       .replace(/\D/g, "")
       .slice(0, 4);
     if (postalInput.value !== digits) postalInput.value = digits;
     if (digits.length !== 4) return;
-    if (digits === lastLookedUp || busy) return;
+    if (digits === lastPostalLookedUp || busy) return;
+    if (fillSource === "city") return;
     busy = true;
+    fillSource = "postal";
     try {
       const params = new URLSearchParams({ postal_code: digits });
       const res = await fetch(`/api/postal-codes/lookup?${params}`, { credentials: "same-origin" });
       const data = await res.json().catch(() => ({}));
-      lastLookedUp = digits;
+      lastPostalLookedUp = digits;
       if (res.ok && data.city) {
-        setCityInputValue(cityInput, data.city);
-      } else {
-        setCityInputValue(cityInput, "");
+        lastCityLookedUp = String(data.city).trim();
+        setFieldValue(cityInput, data.city);
+      } else if (cityInput) {
+        lastCityLookedUp = "";
+        setFieldValue(cityInput, "");
       }
     } catch {
-      lastLookedUp = digits;
-      setCityInputValue(cityInput, "");
+      lastPostalLookedUp = digits;
     } finally {
       busy = false;
+      fillSource = "";
+    }
+  }
+
+  async function lookupFromCity() {
+    if (!cityInput) return;
+    const city = String(cityInput.value ?? "").trim();
+    if (city.length < 2) return;
+    if (city === lastCityLookedUp || busy) return;
+    if (fillSource === "postal") return;
+    busy = true;
+    fillSource = "city";
+    try {
+      const params = new URLSearchParams({ city });
+      const res = await fetch(`/api/postal-codes/lookup?${params}`, { credentials: "same-origin" });
+      const data = await res.json().catch(() => ({}));
+      lastCityLookedUp = city;
+      if (res.ok && data.postal_code) {
+        lastPostalLookedUp = String(data.postal_code);
+        setFieldValue(postalInput, data.postal_code);
+        if (data.city && data.city !== city) {
+          lastCityLookedUp = String(data.city).trim();
+          setFieldValue(cityInput, data.city);
+        }
+      }
+    } catch {
+      lastCityLookedUp = city;
+    } finally {
+      busy = false;
+      fillSource = "";
     }
   }
 
   postalInput.addEventListener("input", () => {
     const digits = String(postalInput.value ?? "").replace(/\D/g, "").slice(0, 4);
-    if (digits.length < 4) {
-      lastLookedUp = "";
-    }
-    lookup();
+    if (digits.length < 4) lastPostalLookedUp = "";
+    lookupFromPostal();
   });
-  postalInput.addEventListener("change", lookup);
-  postalInput.addEventListener("blur", lookup);
+  postalInput.addEventListener("change", lookupFromPostal);
+  postalInput.addEventListener("blur", lookupFromPostal);
+
+  if (cityInput) {
+    let cityTimer = 0;
+    cityInput.addEventListener("input", () => {
+      lastCityLookedUp = "";
+      window.clearTimeout(cityTimer);
+      cityTimer = window.setTimeout(() => lookupFromCity(), 350);
+    });
+    cityInput.addEventListener("change", lookupFromCity);
+    cityInput.addEventListener("blur", lookupFromCity);
+  }
 }
 
 export async function applyAutoSearchLayout(form = document.getElementById("home-qs-form")) {

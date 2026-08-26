@@ -49,6 +49,7 @@ import {
   getPartner,
   getPartnerRecommendations,
   getPostalCode,
+  getPostalCodeByCity,
   importPartners,
   listPartners,
   listPostalCities,
@@ -1162,9 +1163,22 @@ async function handlePartnersApi(req, res, pathname) {
     if (pathname === "/api/postal-codes/lookup" && req.method === "GET") {
       const url = new URL(req.url ?? "", `http://${HOST}`);
       const postalCode = url.searchParams.get("postal_code") ?? url.searchParams.get("iranyitoszam");
-      const origin = getPostalCode(postalCode);
+      const cityName =
+        url.searchParams.get("city") ??
+        url.searchParams.get("telepules") ??
+        url.searchParams.get("settlement");
+      const origin = postalCode
+        ? getPostalCode(postalCode)
+        : cityName
+          ? getPostalCodeByCity(cityName)
+          : null;
       if (!origin) {
-        sendJson(res, 404, { error: `Ismeretlen irányítószám: ${postalCode ?? ""}`.trim() });
+        const hint = postalCode
+          ? `Ismeretlen irányítószám: ${postalCode}`
+          : cityName
+            ? `Ismeretlen település: ${cityName}`
+            : "Hiányzó irányítószám vagy település.";
+        sendJson(res, 404, { error: hint.trim() });
         return;
       }
       sendJson(res, 200, origin);

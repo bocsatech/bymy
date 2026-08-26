@@ -1198,6 +1198,7 @@ body.auto-drum-portal-open {
     display: flex;
     align-items: stretch;
     box-sizing: border-box;
+    overflow: visible;
   }
 
   .auto-search-panel .auto-qs-drums--desktop .immo-wheel-wrap.auto-cell-drum,
@@ -1215,6 +1216,7 @@ body.auto-drum-portal-open {
     background-color: transparent !important;
     box-shadow: none !important;
     box-sizing: border-box;
+    overflow: visible;
   }
 
   .auto-search-panel .auto-qs-drums--desktop .immo-schema-cell:not(.immo-dual-range__half) > .immo-wheel-wrap.auto-cell-drum:focus-within {
@@ -1241,7 +1243,8 @@ body.auto-drum-portal-open {
     background: transparent !important;
     background-color: transparent !important;
     box-shadow: none !important;
-    overflow: hidden;
+    /* visible: a lebegő cellafelirat (top negatív) ne vágódjon le */
+    overflow: visible;
     box-sizing: border-box;
   }
 
@@ -1267,7 +1270,7 @@ body.auto-drum-portal-open {
     position: absolute;
     top: -0.55rem;
     left: 0.55rem;
-    z-index: 2;
+    z-index: 3;
     padding: 0 0.35rem;
     border-radius: 2px;
     background: #1a1f26;
@@ -1275,6 +1278,7 @@ body.auto-drum-portal-open {
     font-size: 0.68rem;
     font-weight: 650;
     line-height: 1.2;
+    white-space: nowrap;
     pointer-events: none;
   }
 

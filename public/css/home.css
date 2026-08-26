@@ -2101,10 +2101,11 @@ body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-n
   inset: 0;
   width: 100%;
   height: 100%;
-  padding: 4%;
   box-sizing: border-box;
-  object-fit: contain;
+  padding: 0;
+  object-fit: contain !important;
   object-position: center center;
+  background: #f1f3f5;
 }
 
 .home-grid-card-photo-count {

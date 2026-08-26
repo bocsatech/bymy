@@ -96,16 +96,11 @@ export function createListingTileCard(item, { className = "hf-card hf-card--list
   const meta = listingTileMeta(item);
   const imageUrl = String(preview.imageUrl || item.fo_kep || "").trim();
 
+  // Háttérkép + contain: nem ütközik a feed `img { object-fit: cover }` szabályával.
   const media = document.createElement("span");
   media.className = "hf-card-media";
   if (imageUrl) {
-    const img = document.createElement("img");
-    img.src = imageUrl;
-    img.alt = "";
-    img.loading = "lazy";
-    img.decoding = "async";
-    img.referrerPolicy = "no-referrer";
-    media.appendChild(img);
+    media.style.backgroundImage = `url(${JSON.stringify(imageUrl)})`;
     media.setAttribute("role", "img");
     media.setAttribute("aria-label", title);
   }

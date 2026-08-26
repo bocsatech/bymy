@@ -8,7 +8,7 @@ import {
   createListingTileCard,
   formatListingCountBadge,
   slimListingTile,
-} from "./listing-tile.js?v=tileFit1";
+} from "./listing-tile.js?v=tileBg1";
 import {
   autoNearbyHref,
   buildNearbyFilter,
@@ -21,7 +21,7 @@ const STATUS = document.getElementById("hub-nearby-status");
 const ALL_LINK = document.getElementById("hub-nearby-all");
 const COUNT_EL = document.getElementById("hub-nearby-count");
 
-const CACHE_KEY = "bymy-hub-nearby-v3";
+const CACHE_KEY = "bymy-hub-nearby-v4";
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const INITIAL_COUNT = 9;
 const SCROLL_BATCH = 5;

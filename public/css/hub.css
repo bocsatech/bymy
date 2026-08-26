@@ -1160,22 +1160,17 @@ body.hub-page--feed {
   aspect-ratio: 16 / 10;
   width: 100%;
   background-color: #f1f3f5;
+  background-size: contain;
+  background-position: center center;
+  background-repeat: no-repeat;
   border-radius: 12px;
   overflow: hidden;
   border-color: #d7dbe0;
 }
 
-/* Doboz kitöltése + contain: a kép mérete OK, a CSS arány a lényeg. */
+/* Listing csempe: nincs <img> — a feed cover szabály ne nyúljon hozzá. */
 .hf-card--listing .hf-card-media img {
-  position: absolute;
-  inset: 0;
-  display: block;
-  width: 100%;
-  height: 100%;
-  padding: 6%;
-  box-sizing: border-box;
-  object-fit: contain;
-  object-position: center center;
+  display: none !important;
 }
 
 .hf-card--listing .hf-card-label {

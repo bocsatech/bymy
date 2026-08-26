@@ -8,7 +8,7 @@ import {
   mountDetailedSearch,
   readDetailedSearchValues,
   resetDetailedSearch,
-} from "./auto-detailed-search.js?v=detailedSearch5";
+} from "./auto-detailed-search.js?v=detailedSearch6";
 
 const MOBILE_MQ = "(max-width: 900px)";
 
@@ -136,4 +136,4 @@ export function initHomeQuickSearch({ onSearch = () => {} } = {}) {
     });
 }
 
-export { readDetailedSearchValues } from "./auto-detailed-search.js?v=detailedSearch5";
+export { readDetailedSearchValues } from "./auto-detailed-search.js?v=detailedSearch6";

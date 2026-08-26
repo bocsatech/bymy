@@ -5,7 +5,7 @@
 import {
   DETAILED_SEARCH_SECTIONS,
   AKKU_SEARCH_SECTION_FALLBACK,
-} from "./auto-detailed-search-catalog.js?v=detailedSearch5";
+} from "./auto-detailed-search-catalog.js?v=detailedSearch6";
 
 const FORM_FLAG_KEYS = new Set(["villamtoltes", "zold_rendszam"]);
 
@@ -232,18 +232,19 @@ async function loadAkkuSearchSection() {
     });
     if (!res.ok) throw new Error(String(res.status));
     const data = await res.json();
-    if (data?.section?.id) return data.section;
+    if (data?.section?.id) {
+      return { section: data.section, live: data.live === true };
+    }
   } catch (error) {
     console.warn("Akkumulátor menü:", error);
   }
-  return { ...AKKU_SEARCH_SECTION_FALLBACK };
+  return { section: { ...AKKU_SEARCH_SECTION_FALLBACK }, live: false };
 }
 
-function buildDetailedSections(akkuSection) {
-  const akku = akkuSection?.ranges?.length || akkuSection?.selects?.length || akkuSection?.toggles?.length
-    ? akkuSection
-    : AKKU_SEARCH_SECTION_FALLBACK;
-  return [akku, ...DETAILED_SEARCH_SECTIONS];
+function buildDetailedSections(akkuLoad) {
+  const { section, live } = akkuLoad;
+  if (live && section?.id) return [section, ...DETAILED_SEARCH_SECTIONS];
+  return [{ ...AKKU_SEARCH_SECTION_FALLBACK }, ...DETAILED_SEARCH_SECTIONS];
 }
 
 export async function mountDetailedSearch(form = document.getElementById("home-qs-form"), { force = false } = {}) {
@@ -251,11 +252,12 @@ export async function mountDetailedSearch(form = document.getElementById("home-q
   if (!host) return null;
   if (!force && host.dataset.detailedMounted === "1") return host;
 
-  const akkuSection = await loadAkkuSearchSection();
-  const sections = buildDetailedSections(akkuSection);
-  host.innerHTML = sections.map((section, index) => renderSection(section, index === 0)).join("");
+  const akkuLoad = await loadAkkuSearchSection();
+  const sections = buildDetailedSections(akkuLoad);
+  host.innerHTML = sections.map((s, index) => renderSection(s, index === 0)).join("");
   bindExclusiveAccordions(host);
   host.dataset.detailedMounted = "1";
+  host.dataset.detailedLive = akkuLoad.live ? "1" : "0";
   return host;
 }
 

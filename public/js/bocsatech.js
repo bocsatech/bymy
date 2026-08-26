@@ -122,7 +122,7 @@ let hubPromo = { images: [], max: 8, size: { width: 1400, height: 840 }, count: 
 let searchCylinderMenu = { version: 1, items: [] };
 let searchCylinderImagePresets = [];
 let kivitelMenu = { version: 1, items: [] };
-let akkuSearchMenu = { version: 1, title: "Akkumulátor és hatótáv adatok", items: [] };
+let akkuSearchMenu = { version: 1, title: "Akkumulátor és hatótáv adatok", items: [], live: false };
 let editingUser = null;
 let selectedVisitorId = "";
 let visitorHits = [];
@@ -786,11 +786,13 @@ const actions = {
       const id = card.getAttribute("data-id");
       const prev = (akkuSearchMenu.items || []).find((item) => item.id === id) || {};
       items.push({
-        ...prev,
         id,
         kind: prev.kind,
         label: String(card.querySelector("[data-field=label]")?.value ?? prev.label ?? "").trim(),
         enabled: Boolean(card.querySelector("[data-field=enabled]")?.checked),
+        ...(prev.unit != null ? { unit: prev.unit } : {}),
+        ...(prev.step != null ? { step: prev.step } : {}),
+        ...(prev.options ? { options: prev.options } : {}),
       });
     });
     return items.length ? items : [...(akkuSearchMenu.items || [])];
@@ -805,8 +807,10 @@ const actions = {
         method: "PUT",
         body: JSON.stringify({ menu: { version: 1, title, items } }),
       });
-      akkuSearchMenu = data.menu || { version: 1, title, items: data.items || items };
-      info = "Akkumulátor menü mentve. Az autó oldalon hard refresh kell.";
+      akkuSearchMenu = data.menu || { version: 1, title, items: data.items || items, live: data.live === true };
+      info = data.live
+        ? "Akkumulátor menü mentve és ellenőrizve. Az autó oldalon: Több szűrő → Részletes keresés."
+        : "Mentés visszajelzés érkezett, de az élő tároló még üres — próbáld újra.";
       render();
     } catch (error) {
       err = error.message;
@@ -892,7 +896,7 @@ async function loadTab() {
   }
   if (section === "auto" && sub === "akku") {
     const data = await api("/api/level1/akku-search-menu/admin");
-    akkuSearchMenu = data.menu || { version: 1, items: data.items || [] };
+    akkuSearchMenu = data.menu || { version: 1, items: data.items || [], live: data.live === true };
   }
   if (section === "ingatlan" && sub === "listings") {
     listings = (await api("/api/level1/listings?vertical=ingatlan")).listings;
@@ -1426,7 +1430,7 @@ function akkuSearchMenuView() {
 
   return `
     <h2 class="layout-cat-title">Akkumulátor és hatótáv menü</h2>
-    <p class="hint">A webes <strong>Részletes keresés → Akkumulátor és hatótáv adatok</strong> szekció mezői. Sorrend, címke és láthatóság. Kikapcsolt mező nem jelenik meg a keresőben.</p>
+    <p class="hint">A webes <strong>Részletes keresés → Akkumulátor és hatótáv adatok</strong> szekció mezői. Sorrend, címke és láthatóság. Kikapcsolt mező nem jelenik meg a keresőben.${akkuSearchMenu?.live ? " <strong>Élő mentés aktív.</strong>" : " <strong>Még nincs élő mentés</strong> — mentsd el a menüt."}</p>
     <label class="kivitel-admin-card__fields" style="display:block;margin-bottom:0.75rem;max-width:28rem">
       <div>Szekció címe</div>
       <input type="text" data-field="akku-title" value="${esc(akkuSearchMenu?.title || "Akkumulátor és hatótáv adatok")}" maxlength="80" />

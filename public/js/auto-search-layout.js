@@ -423,8 +423,16 @@ function hideLegacy(form) {
   });
 }
 
+function setCityInputValue(cityInput, city) {
+  if (!cityInput || !("value" in cityInput)) return;
+  cityInput.value = city;
+  cityInput.dispatchEvent(new Event("input", { bubbles: true }));
+  cityInput.dispatchEvent(new Event("change", { bubbles: true }));
+}
+
 /**
  * 4 jegyű irányítószám → település kitöltés (/api/postal-codes/lookup).
+ * Új kód / ismeretlen: a régi település ne maradjon bent.
  */
 function wirePostalCityAutofill(form) {
   if (!form || form.dataset.postalCityBound === "1") return;
@@ -441,21 +449,22 @@ function wirePostalCityAutofill(form) {
       .replace(/\D/g, "")
       .slice(0, 4);
     if (postalInput.value !== digits) postalInput.value = digits;
-    if (digits.length !== 4 || digits === lastLookedUp || busy) return;
+    if (digits.length !== 4) return;
+    if (digits === lastLookedUp || busy) return;
     busy = true;
     try {
       const params = new URLSearchParams({ postal_code: digits });
       const res = await fetch(`/api/postal-codes/lookup?${params}`, { credentials: "same-origin" });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok || !data.city) return;
       lastLookedUp = digits;
-      if (cityInput && "value" in cityInput) {
-        cityInput.value = data.city;
-        cityInput.dispatchEvent(new Event("input", { bubbles: true }));
-        cityInput.dispatchEvent(new Event("change", { bubbles: true }));
+      if (res.ok && data.city) {
+        setCityInputValue(cityInput, data.city);
+      } else {
+        setCityInputValue(cityInput, "");
       }
     } catch {
-      /* ignore offline / unknown */
+      lastLookedUp = digits;
+      setCityInputValue(cityInput, "");
     } finally {
       busy = false;
     }
@@ -463,7 +472,9 @@ function wirePostalCityAutofill(form) {
 
   postalInput.addEventListener("input", () => {
     const digits = String(postalInput.value ?? "").replace(/\D/g, "").slice(0, 4);
-    if (digits.length < 4) lastLookedUp = "";
+    if (digits.length < 4) {
+      lastLookedUp = "";
+    }
     lookup();
   });
   postalInput.addEventListener("change", lookup);

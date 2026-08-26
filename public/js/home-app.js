@@ -7,7 +7,7 @@ import {
   initHomeSearchSidebar,
   initHomeFilterCatalog,
 } from "./home-search-filter.js";
-import { initHomeQuickSearch } from "./home-quicksearch.js?v=postalCity1";
+import { initHomeQuickSearch } from "./home-quicksearch.js?v=postalCity2";
 import {
   emptyIngatlanFilters,
   filterListingsByIngatlan,

@@ -2047,7 +2047,7 @@ body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-n
 .home-grid-card-media {
   position: relative;
   aspect-ratio: 16 / 10;
-  background: #f1f3f5;
+  background: #e8ebef;
   overflow: hidden;
 }
 
@@ -2103,9 +2103,8 @@ body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-n
   height: 100%;
   box-sizing: border-box;
   padding: 0;
-  object-fit: contain !important;
+  object-fit: cover;
   object-position: center center;
-  background: #f1f3f5;
 }
 
 .home-grid-card-photo-count {

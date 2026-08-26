@@ -450,8 +450,8 @@
   body.hub-page--feed .hf-card--listing .hf-card-media {
     position: relative;
     aspect-ratio: 16 / 10;
-    background-color: #f1f3f5;
-    background-size: contain;
+    background-color: #e8ebef;
+    background-size: cover;
     background-position: center center;
     background-repeat: no-repeat;
     border-radius: 12px;

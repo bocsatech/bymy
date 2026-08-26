@@ -1,13 +1,17 @@
 /**
- * Mobil autó kereső — mezők + alsó lap (sheet) választó.
- * Összevont: gyártási év, vételár, km, teljesítmény, hengerűrtartalom.
- * Asztali: változatlan (select).
+ * Autó / teherautó kereső dobkerék.
+ * Mobil: portált gyűrű. Asztali: helyben görgethető inline dob + dupla kattintás = kézi érték.
  */
 
-import { fillWheel, setWheelValue, readWheel } from "./ingatlan-wheels.js?v=drumScroll7";
-import { initDrumWheel, applyDrumModeClass, syncDrumWheelDisplay } from "./immo-drum-picker.js?v=drumScroll7";
-import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=drumScroll7";
-import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=teherSearch1";
+import { fillWheel, setWheelValue, readWheel } from "./ingatlan-wheels.js?v=deskDrum1";
+import {
+  initDrumWheel,
+  applyDrumModeClass,
+  syncDrumWheelDisplay,
+  closeAllInlineDrums,
+} from "./immo-drum-picker.js?v=deskDrum1";
+import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=deskDrum1";
+import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=deskDrum1";
 
 const MOBILE_MQ = "(max-width: 900px)";
 
@@ -110,8 +114,120 @@ function finishWheel(cell, emptyLabel) {
   const live = cell.querySelector("[data-wheel]");
   setWheelValue(live, "");
   syncDrumWheelDisplay(live);
-  bindAutoDrumSheet(live);
+  if (isMobile()) bindAutoDrumSheet(live);
+  else bindDesktopAutoDrum(live);
   return live;
+}
+
+/** Asztali: egérgörgő a mezőn + dupla kattintás = szabad szöveg. */
+function bindDesktopAutoDrum(wheel) {
+  const wrap = wheel?.closest?.(".immo-wheel-wrap");
+  const trigger = wrap?.querySelector(".immo-wheel-trigger");
+  if (!trigger || trigger.dataset.desktopDrumBound === "1") return;
+  trigger.dataset.desktopDrumBound = "1";
+
+  trigger.addEventListener(
+    "wheel",
+    (event) => {
+      if (wrap.classList.contains("is-open") || wrap.classList.contains("is-typing")) return;
+      event.preventDefault();
+      const opts = [...wheel.querySelectorAll(".immo-wheel-opt")];
+      if (!opts.length) return;
+      const cur = String(readWheel(wheel) ?? "");
+      let idx = opts.findIndex((o) => (o.dataset.value ?? "") === cur);
+      if (idx < 0) idx = 0;
+      const nextIdx =
+        event.deltaY > 0 ? Math.min(opts.length - 1, idx + 1) : Math.max(0, idx - 1);
+      const value = opts[nextIdx].dataset.value ?? "";
+      setWheelValue(wheel, value);
+      syncDrumWheelDisplay(wheel);
+      wheel.dispatchEvent(new CustomEvent("immo-wheel-change", { bubbles: true, detail: { value } }));
+    },
+    { passive: false }
+  );
+
+  trigger.addEventListener("dblclick", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    closeAllInlineDrums(false);
+    startDesktopTypedEdit(wrap, wheel, trigger);
+  });
+}
+
+function startDesktopTypedEdit(wrap, wheel, trigger) {
+  if (!wrap || !wheel || !trigger) return;
+  if (wrap.classList.contains("is-typing")) return;
+
+  const emptyLabel = trigger.dataset.emptyLabel || "Mindegy";
+  const current = String(readWheel(wheel) ?? "");
+  wrap.classList.add("is-typing");
+  trigger.hidden = true;
+
+  const input = document.createElement("input");
+  input.type = "text";
+  input.className = "auto-drum-typed home-qs-control";
+  input.setAttribute("aria-label", emptyLabel);
+  input.placeholder = emptyLabel;
+  input.value = current;
+  input.autocomplete = "off";
+  trigger.insertAdjacentElement("afterend", input);
+  input.focus();
+  input.select();
+
+  const finish = (commit) => {
+    if (!wrap.classList.contains("is-typing")) return;
+    wrap.classList.remove("is-typing");
+    const raw = commit ? String(input.value ?? "").trim() : current;
+    input.remove();
+    trigger.hidden = false;
+    applyTypedDrumValue(wheel, raw, emptyLabel);
+  };
+
+  input.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      finish(true);
+    } else if (event.key === "Escape") {
+      event.preventDefault();
+      finish(false);
+    }
+  });
+  input.addEventListener("blur", () => finish(true));
+}
+
+function applyTypedDrumValue(wheel, raw, emptyLabel) {
+  const value = String(raw ?? "").trim();
+  if (!value || value === emptyLabel) {
+    setWheelValue(wheel, "");
+    syncDrumWheelDisplay(wheel);
+    wheel.dispatchEvent(new CustomEvent("immo-wheel-change", { bubbles: true, detail: { value: "" } }));
+    return;
+  }
+
+  const opts = [...wheel.querySelectorAll(".immo-wheel-opt")];
+  const match = opts.find(
+    (o) =>
+      (o.dataset.value ?? "") === value ||
+      (o.textContent || "").trim().toLowerCase() === value.toLowerCase()
+  );
+  if (match) {
+    setWheelValue(wheel, match.dataset.value ?? "");
+  } else {
+    let typed = wheel.querySelector(".immo-wheel-opt--typed");
+    if (!typed) {
+      typed = document.createElement("button");
+      typed.type = "button";
+      typed.className = "immo-wheel-opt immo-wheel-opt--typed";
+      wheel.appendChild(typed);
+    }
+    typed.dataset.value = value;
+    typed.textContent = value;
+    setWheelValue(wheel, value);
+  }
+  syncDrumWheelDisplay(wheel);
+  wheel.dispatchEvent(
+    new CustomEvent("immo-wheel-change", { bubbles: true, detail: { value: readWheel(wheel) } })
+  );
 }
 
 function buildWheelCell({ filterKey, wheelName, label, options, halfClass = "", emptyLabel: emptyOverride } = {}) {
@@ -263,7 +379,8 @@ function rebindWheel(form, wheelName, options, emptyLabel = "Mindegy") {
   const live = form.querySelector(`[data-wheel="${wheelName}"]`);
   setWheelValue(live, "");
   syncDrumWheelDisplay(live);
-  bindAutoDrumSheet(live);
+  if (isMobile()) bindAutoDrumSheet(live);
+  else bindDesktopAutoDrum(live);
   return live;
 }
 
@@ -295,15 +412,18 @@ async function wireCatalogDrums(form) {
 }
 
 /**
- * Select mezők → sheet választó (csak mobil). Gyors: katalógus háttérben.
+ * Select mezők → dobkerék (mobil: portál, asztali: inline + kézi szerkesztés).
  * @returns {Promise<boolean>}
  */
 export async function mountAutoSearchDrums(form = document.getElementById("home-qs-form")) {
   if (!form || form.dataset.drumsMounted === "1") return form.dataset.drumsMounted === "1";
-  if (!isMobile()) return false;
+  const page = document.body?.getAttribute("data-site-page") || "";
+  if (page !== "auto" && page !== "teherauto") return false;
 
   applyDrumModeClass();
   form.classList.add("immo-search-form", "auto-qs-drums");
+  form.classList.toggle("auto-qs-drums--desktop", !isMobile());
+  form.classList.toggle("auto-qs-drums--mobile", isMobile());
 
   form.querySelectorAll("[data-qs-field]").forEach((wrap) => {
     const key = wrap.getAttribute("data-qs-field");

@@ -445,4 +445,4 @@ export function syncDrumWheelDisplay(wheel) {
   trigger.title = labels.join(", ");
 }
 
-export { isDrumViewport, formatTriggerShort };
+export { isDrumViewport, formatTriggerShort, closeAllInlineDrums };

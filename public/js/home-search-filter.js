@@ -1,4 +1,5 @@
 import { initVehicleCatalogSelects, shortTypeName } from "./vehicle-catalog-client.js";
+import { kivitelMatches } from "./kivitel-options.js?v=kivitel1";
 
 const FUEL_QUICK_FILTERS = [
   { id: "benzin", label: "Benzin", match: (value) => value === "Benzin" },
@@ -136,7 +137,7 @@ export function filterListingsBySidebar(items, filters) {
 
     if (filters.gyartmany && f.gyartmany !== filters.gyartmany) return false;
     if (filters.modell && f.modell !== filters.modell) return false;
-    if (filters.kivitel && f.kivitel !== filters.kivitel) return false;
+    if (filters.kivitel && !kivitelMatches(f.kivitel, filters.kivitel)) return false;
     if (filters.hajtas && f.hajtas !== filters.hajtas) return false;
     if (!matchesSebessegvalto(f.sebessegvalto, filters.sebessegvalto)) return false;
     if (filters.uzemanyagQuick) {

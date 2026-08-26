@@ -9,11 +9,16 @@ function inferKivitel(text) {
   const v = String(text ?? "").toLowerCase();
   if (!v) return "";
   if (/\bsuv\b|\bcrossover\b|\bglc\b|\bgle\b|\bgls\b|\bx\d|\bq\d|\btucson\b|\bkuga\b|\brav4\b/.test(v)) {
-    return "SUV / Crossover";
+    return "Városi terepjáró (crossover)";
   }
   if (/\bkombi\b|\bestate\b|\bwagon\b/.test(v)) return "Kombi";
   if (/\bferde\b|\bhatchback\b/.test(v)) return "Ferdehátú";
-  if (/\bszedan\b|\bsedan\b/.test(v)) return "Szedán";
+  if (/\bszedan\b|\bsedan\b|\blépcső|\blepcso/.test(v)) return "Sedan";
+  if (/\bpick.?up\b/.test(v)) return "Pickup";
+  if (/\bterepjár|\bterepjar/.test(v)) return "Terepjáró";
+  if (/\bcabrio|\bconvertible/.test(v)) return "Cabrio";
+  if (/\bcoupe|\bkupé|\bkupe/.test(v)) return "Coupe";
+  if (/\begyterű|\begyteru|\bmpv\b/.test(v)) return "Egyterű";
   return "";
 }
 

@@ -7,7 +7,7 @@ import {
   initHomeSearchSidebar,
   initHomeFilterCatalog,
 } from "./home-search-filter.js";
-import { initHomeQuickSearch } from "./home-quicksearch.js?v=colSpan1";
+import { initHomeQuickSearch } from "./home-quicksearch.js?v=kivitel1";
 import {
   emptyIngatlanFilters,
   filterListingsByIngatlan,
@@ -20,6 +20,7 @@ import { buildNearbyFilter, readNearbyPrefs } from "./nearby-search.js?v=nearby1
 import { getAuthUser } from "./site-auth.js?v=nearby1";
 import { bindListingOpen, restoreListingReturn } from "./listing-return.js?v=scrollTop1";
 import { applyNavCounts } from "./nav-counts.js?v=navCount2";
+import { normalizeKivitel } from "./kivitel-options.js?v=kivitel1";
 
 const gridTrack = document.getElementById("home-grid-track");
 const emptyEl = document.getElementById("home-empty");
@@ -312,6 +313,22 @@ if (PAGE !== "ingatlan") {
     applyFilters();
   });
   sidebarFilters = readSidebarFilters?.() ?? emptyFilters();
+
+  if (PAGE === "auto") {
+    const urlKivitel = normalizeKivitel(new URLSearchParams(window.location.search).get("kivitel") || "");
+    if (urlKivitel) {
+      sidebarFilters = { ...sidebarFilters, kivitel: urlKivitel };
+      const qsKivitel = document.getElementById("qs-kivitel");
+      if (qsKivitel) qsKivitel.value = urlKivitel;
+      const filterKivitel = document.getElementById("filter-kivitel");
+      if (filterKivitel) {
+        if (![...filterKivitel.options].some((o) => o.value === urlKivitel)) {
+          filterKivitel.appendChild(new Option(urlKivitel, urlKivitel));
+        }
+        filterKivitel.value = urlKivitel;
+      }
+    }
+  }
 
   initHomeFilterCatalog(() => {
     sidebarFilters = readSidebarFilters?.() ?? emptyFilters();

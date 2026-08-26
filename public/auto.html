@@ -62,7 +62,7 @@
     <link rel="stylesheet" href="/css/hub-mobile-app.css?v=tileFill3" />
     <link rel="stylesheet" href="/css/home.css?v=coverAll1" />
     <link rel="stylesheet" href="/css/listing-photo-cover.css?v=coverAll1" />
-    <link rel="stylesheet" href="/css/auto-hero.css?v=colSpan1" />
+    <link rel="stylesheet" href="/css/auto-hero.css?v=kivitel1" />
     <link rel="stylesheet" href="/css/ingatlan-search.css?v=autoDrums15" />
     <style id="home-scroll-fix">
       /* Inline: cache-biztos — a teljes oldal görget, külön görgetősáv nincs sehol. */
@@ -174,10 +174,25 @@
     <main class="home-main">
       <section class="auto-search-hero" data-auto-search-hero aria-labelledby="auto-search-title">
         <nav class="auto-search-tabs" aria-label="Járműkategóriák">
-          <a class="auto-search-tab is-active" href="/auto.html" aria-current="page">Személyautók</a>
-          <a class="auto-search-tab" href="/auto.html?kategoria=berauto">Bérautók</a>
-          <a class="auto-search-tab" href="/auto.html?kategoria=leasing">Leasingautók</a>
-          <a class="auto-search-tab" href="/auto.html?kategoria=lakoauto-berles">Lakóautó bérlés</a>
+          <a class="auto-search-tab is-active" href="/auto.html" data-auto-kat="" aria-current="page">Személyautók</a>
+          <a class="auto-search-tab" href="/auto.html?kategoria=berauto" data-auto-kat="berauto">Bérautók</a>
+          <a class="auto-search-tab" href="/auto.html?kategoria=leasing" data-auto-kat="leasing">Leasingautók</a>
+          <a class="auto-search-tab" href="/auto.html?kategoria=lakoauto-berles" data-auto-kat="lakoauto-berles">Lakóautó bérlés</a>
+        </nav>
+
+        <nav class="auto-kivitel-nav" data-auto-kivitel-nav aria-label="Kivitel">
+          <button
+            type="button"
+            class="auto-kivitel-toggle"
+            data-kivitel-toggle
+            aria-expanded="false"
+            aria-controls="auto-kivitel-panel"
+          >
+            Kivitel
+          </button>
+          <div class="auto-kivitel-panel" id="auto-kivitel-panel" data-kivitel-panel hidden>
+            <ul class="auto-kivitel-list" data-kivitel-list></ul>
+          </div>
         </nav>
 
         <div class="auto-search-hero__stage">
@@ -309,13 +324,22 @@
                     <span class="home-qs-label">Kivitel</span>
                     <select class="home-qs-control" id="qs-kivitel">
                       <option value="">Mindegy</option>
-                      <option>Szedán</option>
-                      <option>Ferdehátú</option>
-                      <option>Kombi</option>
-                      <option>SUV / Crossover</option>
-                      <option>Egyterű</option>
-                      <option>Kupé</option>
+                      <option>Pickup</option>
+                      <option>Terepjáró</option>
+                      <option>Buggy</option>
                       <option>Cabrio</option>
+                      <option>Coupe</option>
+                      <option>Egyterű</option>
+                      <option>Ferdehátú</option>
+                      <option>Hot rod</option>
+                      <option>Kisbusz</option>
+                      <option>Kombi</option>
+                      <option>Lépcsőshátú</option>
+                      <option>Mopedautó</option>
+                      <option>Sedan</option>
+                      <option>Sport</option>
+                      <option>Városi terepjáró (crossover)</option>
+                      <option>Egyéb</option>
                     </select>
                   </label>
                 </div>
@@ -397,8 +421,9 @@
       </div>
     </main>
 
-    <script src="/js/home-app.js?v=colSpan1" type="module"></script>
+    <script src="/js/home-app.js?v=kivitel1" type="module"></script>
     <script src="/js/auto-hero.js?v=searchCollapse1" type="module"></script>
+    <script src="/js/auto-kivitel-menu.js?v=kivitel1" type="module"></script>
     <script src="/js/site-avatar-menu.js?v=settingsOpen1" type="module"></script>
 
     <script src="/js/nav-counts.js?v=navCount2" type="module"></script>

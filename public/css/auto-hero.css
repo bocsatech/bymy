@@ -90,6 +90,99 @@ body[data-site-page="teherauto"] .auto-search-tabs {
   color: #fff;
 }
 
+/* —— Kivitel menü (minden járműkategóriában) —— */
+.auto-kivitel-nav {
+  position: relative;
+  z-index: 5;
+  width: 100%;
+  background: #f7f8fa;
+  border-bottom: 1px solid #d5d9e0;
+}
+
+.auto-kivitel-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  width: 100%;
+  min-height: 44px;
+  padding: 0.55rem 1rem;
+  border: 0;
+  background: transparent;
+  color: #1f2937;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 650;
+  text-align: left;
+  cursor: pointer;
+}
+
+.auto-kivitel-toggle::after {
+  content: "";
+  width: 0.45rem;
+  height: 0.45rem;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
+  transition: transform 0.15s ease;
+  flex-shrink: 0;
+}
+
+.auto-kivitel-nav.is-open .auto-kivitel-toggle::after {
+  transform: rotate(-135deg);
+  margin-top: 0.25rem;
+}
+
+.auto-kivitel-toggle.has-value {
+  color: #1565c0;
+}
+
+.auto-kivitel-panel {
+  width: 100%;
+  max-height: min(70vh, 28rem);
+  overflow: auto;
+  background: #fff;
+  border-top: 1px solid #e5e7eb;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+}
+
+.auto-kivitel-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(11.5rem, 1fr));
+  gap: 0;
+  margin: 0;
+  padding: 0.35rem 0.5rem 0.6rem;
+  list-style: none;
+}
+
+.auto-kivitel-link {
+  display: block;
+  padding: 0.55rem 0.7rem;
+  color: #374151;
+  font-size: 0.88rem;
+  font-weight: 500;
+  text-decoration: none;
+  border-radius: 8px;
+}
+
+.auto-kivitel-link:hover,
+.auto-kivitel-link:focus-visible {
+  background: #f2f4f7;
+  color: #111;
+}
+
+.auto-kivitel-link.is-active {
+  background: #e8f1fb;
+  color: #1565c0;
+  font-weight: 650;
+}
+
+@media (max-width: 600px) {
+  .auto-kivitel-list {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* —— Stage: fotó + panel — magasság a tartalomtól (nem vágja le a mezőket) —— */
 .auto-search-hero__stage {
   position: relative;

@@ -2,8 +2,8 @@
  * Gyorskereső az autó hero panelen — elrendezés: GET /api/level1/form-layout?category=szemelyauto-search
  */
 
-import { applyAutoSearchLayout, readLayoutFilterValues } from "./auto-search-layout.js?v=colSpan1";
-import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums } from "./auto-search-drums.js?v=autoDrums15";
+import { applyAutoSearchLayout, readLayoutFilterValues } from "./auto-search-layout.js?v=kivitel1";
+import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums } from "./auto-search-drums.js?v=kivitel1";
 
 const MOBILE_MQ = "(max-width: 900px)";
 
@@ -63,6 +63,14 @@ export function initHomeQuickSearch({ onSearch = () => {} } = {}) {
   applyAutoSearchLayout(form)
     .then(async () => {
       await mountAutoSearchDrums(form);
+      const urlKivitel = new URLSearchParams(window.location.search).get("kivitel");
+      if (urlKivitel) {
+        const el =
+          form.querySelector("#qs-kivitel") ||
+          form.querySelector('[name="kivitel"]') ||
+          form.querySelector('[data-filter-key="kivitel"]');
+        if (el && "value" in el) el.value = urlKivitel;
+      }
       setQsReady(true);
       if (statusEl) {
         statusEl.hidden = true;

@@ -5,7 +5,9 @@ enum DetailedSearchCatalog {
     static let allapotok = ["Normál", "Újszerű", "Sérülésmentes", "Sérült"]
 
     static let kiviteles = [
-        "Szedán", "Ferdehátú", "Kombi", "SUV / Crossover", "Egyterű", "Kupé", "Cabrio",
+        "Pickup", "Terepjáró", "Buggy", "Cabrio", "Coupe", "Egyterű", "Ferdehátú",
+        "Hot rod", "Kisbusz", "Kombi", "Lépcsőshátú", "Mopedautó", "Sedan", "Sport",
+        "Városi terepjáró (crossover)", "Egyéb",
     ]
 
     static let ajtok = ["2", "3", "4", "5"]

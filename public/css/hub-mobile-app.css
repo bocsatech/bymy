@@ -389,6 +389,12 @@
     display: none; /* app képen nincs „Összes” a sorcímek mellett */
   }
 
+  body.hub-page--feed .hf-section[data-hf="kozelben"] .hf-all {
+    display: inline;
+    color: #0084ff;
+    font-weight: 600;
+  }
+
   body.hub-page--feed .hf-rail {
     padding: 0 1rem 0.4rem;
     gap: 0.65rem;
@@ -432,15 +438,22 @@
     object-position: center center;
   }
 
+  body.hub-page--feed .hf-card--listing {
+    background: transparent;
+    box-shadow: none;
+    border: 0;
+    overflow: visible;
+  }
+
   body.hub-page--feed .hf-card--listing .hf-card-media {
-    background-color: #dfe3e8 !important;
-    background-size: 145% 145% !important;
-    background-position: center center !important;
-    background-repeat: no-repeat !important;
+    background-color: #dfe3e8;
+    border-radius: 12px;
   }
 
   body.hub-page--feed .hf-card--listing .hf-card-media img {
-    display: none !important;
+    display: block;
+    object-fit: cover;
+    object-position: center center;
   }
 
   /* Autókategóriák: széles PNG-k — ne vágódjanak / csússzanak el */
@@ -465,13 +478,31 @@
     display: none;
   }
 
-  body.hub-page--feed .hf-card--listing .hf-card-sub {
+  body.hub-page--feed .hf-card--listing .hf-card-label {
+    text-align: left;
+    padding: 0.2rem 0 0;
+    font-size: 0.8rem;
+    font-weight: 500;
+  }
+
+  body.hub-page--feed .hf-card--listing .hf-card-price {
     display: block;
-    font-size: 0.68rem;
-    font-weight: 600;
-    color: #1565c0;
-    padding: 0 0.4rem 0.35rem;
-    margin: 0;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #0084ff;
+    padding: 0;
+  }
+
+  body.hub-page--feed .hf-card--listing .hf-card-meta {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: #6b7280;
+    padding: 0 0 0.15rem;
+  }
+
+  body.hub-page--feed .hf-card--listing .hf-card-sub {
+    display: none;
   }
 
   body.hub-page--feed .hf-status {

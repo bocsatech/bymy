@@ -964,12 +964,31 @@ body.hub-page--feed {
   font-weight: 800;
   letter-spacing: -0.02em;
   color: #111;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.hf-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.6rem;
+  padding: 0.12rem 0.48rem;
+  border-radius: 999px;
+  background: #0d9488;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1.2;
 }
 
 .hf-all {
   font-size: 0.9rem;
   font-weight: 600;
-  color: #1565c0;
+  color: #0084ff;
   text-decoration: none;
   white-space: nowrap;
 }
@@ -1130,15 +1149,62 @@ body.hub-page--feed {
   font-weight: 650;
 }
 
+.hf-card--listing {
+  gap: 0.28rem;
+}
+
 .hf-card--listing .hf-card-media {
-  background-color: #dfe3e8 !important;
-  background-size: 145% 145% !important;
-  background-position: center center !important;
-  background-repeat: no-repeat !important;
+  background-color: #dfe3e8;
+  border-radius: 12px;
 }
 
 .hf-card--listing .hf-card-media img {
-  display: none !important;
+  display: block;
+  object-fit: cover;
+  object-position: center center;
+}
+
+.hf-card--listing .hf-card-label {
+  margin: 0.15rem 0 0;
+  padding: 0;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: #1f2937;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.25;
+}
+
+.hf-card--listing .hf-card-price {
+  display: block;
+  margin: 0;
+  padding: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #0084ff;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hf-card--listing .hf-card-meta {
+  display: block;
+  margin: 0;
+  padding: 0;
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: #6b7280;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hf-card--listing .hf-card-sub {
+  display: none;
 }
 
 .hf-card--prompt .hf-card-media {

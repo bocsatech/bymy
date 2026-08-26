@@ -1,11 +1,14 @@
 import { fetchListings } from "./db-client.js?v=nearby1";
 import { getAuthUser } from "./site-auth.js?v=nearby1";
 import {
-  listingDetailHref,
   bindListingOpen,
   restoreListingReturn,
 } from "./listing-return.js?v=scrollTop1";
-import { formatListingDisplayTitle } from "./listing-card.js";
+import {
+  createListingTileCard,
+  formatListingCountBadge,
+  slimListingTile,
+} from "./listing-tile.js?v=tileCard1";
 import {
   autoNearbyHref,
   buildNearbyFilter,
@@ -16,8 +19,9 @@ import {
 const RAIL = document.getElementById("hub-nearby-rail");
 const STATUS = document.getElementById("hub-nearby-status");
 const ALL_LINK = document.getElementById("hub-nearby-all");
+const COUNT_EL = document.getElementById("hub-nearby-count");
 
-const CACHE_KEY = "bymy-hub-nearby-v2";
+const CACHE_KEY = "bymy-hub-nearby-v3";
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const INITIAL_COUNT = 9;
 const SCROLL_BATCH = 5;
@@ -40,87 +44,11 @@ function sortByDate(items) {
   });
 }
 
-function cardTitle(item) {
-  const preview = item.preview ?? {};
-  const raw = preview.title || item.hirdetes_cime || `Hirdetés #${item.id}`;
-  return formatListingDisplayTitle(raw) || `Hirdetés #${item.id}`;
-}
-
-function slimItem(item) {
-  const preview = item.preview ?? {};
-  return {
-    id: item.id,
-    hirdetes_cime: item.hirdetes_cime,
-    fo_kep: item.fo_kep,
-    updated_at: item.updated_at,
-    created_at: item.created_at,
-    preview: {
-      title: preview.title,
-      price: preview.price,
-      imageUrl: preview.imageUrl || item.fo_kep || "",
-    },
-  };
-}
-
-function readCache(postal, radiusKm) {
-  try {
-    const data = JSON.parse(sessionStorage.getItem(CACHE_KEY) || "null");
-    if (!data || !Array.isArray(data.items)) return null;
-    if (data.postal !== postal || Number(data.radiusKm) !== Number(radiusKm)) return null;
-    if (Date.now() - Number(data.at || 0) > CACHE_TTL_MS) return null;
-    return data;
-  } catch {
-    return null;
-  }
-}
-
-function writeCache(postal, radiusKm, items, meta = {}) {
-  try {
-    sessionStorage.setItem(
-      CACHE_KEY,
-      JSON.stringify({
-        postal,
-        radiusKm,
-        at: Date.now(),
-        city: meta.city || "",
-        items: items.map(slimItem),
-      })
-    );
-  } catch {
-    /* quota */
-  }
-}
-
-function createListingCard(item) {
-  const preview = item.preview ?? {};
-  const link = document.createElement("a");
-  link.className = "hf-card hf-card--listing";
-  link.href = listingDetailHref(item.id);
-  link.dataset.listingId = String(item.id);
-  link.setAttribute("role", "listitem");
-
-  const imageUrl = String(preview.imageUrl || item.fo_kep || "").trim();
-  const media = document.createElement("span");
-  media.className = "hf-card-media";
-  if (imageUrl) {
-    media.style.backgroundImage = `url(${JSON.stringify(imageUrl)})`;
-    media.style.backgroundSize = "145% 145%";
-    media.style.backgroundPosition = "center center";
-    media.style.backgroundRepeat = "no-repeat";
-    media.setAttribute("role", "img");
-    media.setAttribute("aria-label", cardTitle(item));
-  }
-
-  const label = document.createElement("span");
-  label.className = "hf-card-label";
-  label.textContent = cardTitle(item);
-
-  const sub = document.createElement("span");
-  sub.className = "hf-card-sub";
-  sub.textContent = preview.price || "—";
-
-  link.append(media, label, sub);
-  return link;
+function setCountBadge(n) {
+  if (!COUNT_EL) return;
+  const label = formatListingCountBadge(n);
+  COUNT_EL.textContent = label;
+  COUNT_EL.hidden = !label;
 }
 
 function createPromptCard(label, href) {
@@ -167,7 +95,7 @@ function appendNext(count) {
   const slice = nearbyItems.slice(renderedCount, renderedCount + take);
   removeAllPrompt();
   for (const item of slice) {
-    RAIL.appendChild(createListingCard(item));
+    RAIL.appendChild(createListingTileCard(item));
   }
   renderedCount += slice.length;
   ensureAllPrompt();
@@ -180,6 +108,7 @@ function renderInitial(items) {
   renderedCount = 0;
   hasAllPrompt = false;
   RAIL.innerHTML = "";
+  setCountBadge(items.length);
   appendNext(INITIAL_COUNT);
 }
 
@@ -197,7 +126,6 @@ function bindRailLazy() {
   if (!RAIL || RAIL.dataset.nearbyLazyBound === "1") return;
   RAIL.dataset.nearbyLazyBound = "1";
   RAIL.addEventListener("scroll", onRailScroll, { passive: true });
-  // Asztali: ha a 9 kártya elfér a viewportban, görgetés nélkül is töltsük a következőt.
   const io = new IntersectionObserver(
     (entries) => {
       for (const entry of entries) {
@@ -215,11 +143,40 @@ function bindRailLazy() {
   mo.observe(RAIL, { childList: true });
 }
 
+function readCache(postal, radiusKm) {
+  try {
+    const data = JSON.parse(sessionStorage.getItem(CACHE_KEY) || "null");
+    if (!data || !Array.isArray(data.items)) return null;
+    if (data.postal !== postal || Number(data.radiusKm) !== Number(radiusKm)) return null;
+    if (Date.now() - Number(data.at || 0) > CACHE_TTL_MS) return null;
+    return data;
+  } catch {
+    return null;
+  }
+}
+
+function writeCache(postal, radiusKm, items, meta = {}) {
+  try {
+    sessionStorage.setItem(
+      CACHE_KEY,
+      JSON.stringify({
+        postal,
+        radiusKm,
+        at: Date.now(),
+        city: meta.city || "",
+        items: items.map(slimListingTile),
+      })
+    );
+  } catch {
+    /* quota */
+  }
+}
+
 async function loadNearbyFresh(postal, radiusKm) {
   const all = await fetchListings({ limit: 500 });
   const autos = sortByDate(filterAutoListings(all));
   const filter = await buildNearbyFilter({ items: autos, postal, radiusKm });
-  const nearby = autos.filter((item) => filter.listingIds.has(item.id)).map(slimItem);
+  const nearby = autos.filter((item) => filter.listingIds.has(item.id)).map(slimListingTile);
   writeCache(postal, radiusKm, nearby, { city: filter.origin?.city || "" });
   return {
     nearby,
@@ -264,7 +221,6 @@ async function initHubNearbyCars() {
       { hidden: true }
     );
     restoreListingReturn();
-    // Háttérben frissítünk — a sáv már látszik.
     loadNearbyFresh(postal, radiusKm)
       .then((fresh) => {
         if (!fresh.nearby.length) return;

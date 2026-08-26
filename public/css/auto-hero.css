@@ -1152,6 +1152,10 @@ body.auto-drum-portal-open {
 
 /* —— Asztali: cellán belüli görgethető lista (nincs lenyíló menü) —— */
 @media (min-width: 901px) {
+  .auto-search-panel .auto-qs-drums--desktop {
+    --auto-qs-field-h: 2.4rem;
+  }
+
   body:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .auto-qs-drums--desktop,
   body:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .auto-qs-drums--desktop .immo-schema-cell,
   body:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .auto-qs-drums--desktop .immo-dual-range-block,
@@ -1182,27 +1186,35 @@ body.auto-drum-portal-open {
     grid-template-columns: repeat(12, minmax(0, 1fr));
     gap: 0.55rem;
     width: 100%;
+    align-items: end;
   }
 
   .auto-search-panel .auto-qs-drums--desktop .immo-schema-cell,
   .auto-search-panel .auto-qs-drums--desktop .immo-dual-range-block {
     min-width: 0;
+    height: var(--auto-qs-field-h);
+    min-height: var(--auto-qs-field-h);
+    padding-top: 0 !important;
+    display: flex;
+    align-items: stretch;
+    box-sizing: border-box;
   }
 
   .auto-search-panel .auto-qs-drums--desktop .immo-wheel-wrap.auto-cell-drum,
   .auto-search-panel .auto-qs-drums--desktop .immo-schema-cell:not(.immo-dual-range__half) > .immo-wheel-wrap.auto-cell-drum {
     position: relative;
     width: 100%;
-    min-height: 2.4rem !important;
-    height: auto !important;
-    max-height: none !important;
+    flex: 1 1 auto;
+    height: var(--auto-qs-field-h) !important;
+    min-height: var(--auto-qs-field-h) !important;
+    max-height: var(--auto-qs-field-h) !important;
     padding: 0 !important;
-    /* Csak a külső lekerekített szegély */
     border: 1px solid rgba(255, 255, 255, 0.65) !important;
     border-radius: 4px !important;
     background: transparent !important;
     background-color: transparent !important;
     box-shadow: none !important;
+    box-sizing: border-box;
   }
 
   .auto-search-panel .auto-qs-drums--desktop .immo-schema-cell:not(.immo-dual-range__half) > .immo-wheel-wrap.auto-cell-drum:focus-within {
@@ -1210,7 +1222,6 @@ body.auto-drum-portal-open {
     box-shadow: none !important;
   }
 
-  /* Dual tartomány: egy külső keret, a felek belül keret nélkül */
   .auto-search-panel .auto-qs-drums--desktop .immo-dual-range,
   .auto-search-panel .auto-qs-drums--desktop .immo-dual-range.has-drum-open,
   .auto-search-panel .auto-qs-drums--desktop .immo-dual-range:focus-within {
@@ -1219,16 +1230,19 @@ body.auto-drum-portal-open {
     gap: 0.35rem;
     align-items: center;
     width: 100%;
+    flex: 1 1 auto;
     position: relative;
     padding: 0 0.35rem 0 0 !important;
-    min-height: 2.4rem !important;
-    height: auto !important;
-    max-height: none !important;
+    height: var(--auto-qs-field-h) !important;
+    min-height: var(--auto-qs-field-h) !important;
+    max-height: var(--auto-qs-field-h) !important;
     border: 1px solid rgba(255, 255, 255, 0.65) !important;
     border-radius: 4px !important;
     background: transparent !important;
     background-color: transparent !important;
     box-shadow: none !important;
+    overflow: hidden;
+    box-sizing: border-box;
   }
 
   .auto-search-panel .auto-qs-drums--desktop .immo-dual-range:focus-within {
@@ -1236,11 +1250,16 @@ body.auto-drum-portal-open {
   }
 
   .auto-search-panel .auto-qs-drums--desktop .immo-dual-range .immo-wheel-wrap.auto-cell-drum,
-  .auto-search-panel .auto-qs-drums--desktop .immo-dual-range__half > .immo-wheel-wrap.auto-cell-drum {
+  .auto-search-panel .auto-qs-drums--desktop .immo-dual-range__half > .immo-wheel-wrap.auto-cell-drum,
+  .auto-search-panel .auto-qs-drums--desktop .immo-dual-range__half {
     border: 0 !important;
     border-radius: 0 !important;
     box-shadow: none !important;
-    min-height: 2.4rem !important;
+    height: var(--auto-qs-field-h) !important;
+    min-height: var(--auto-qs-field-h) !important;
+    max-height: var(--auto-qs-field-h) !important;
+    padding: 0 !important;
+    overflow: hidden;
   }
 
   .auto-search-panel .auto-qs-drums--desktop .immo-label,
@@ -1259,14 +1278,14 @@ body.auto-drum-portal-open {
     pointer-events: none;
   }
 
-  /* Belső viewport: soha ne legyen kerete */
   .auto-search-panel .auto-qs-drums--desktop .auto-cell-drum__viewport,
   .auto-search-panel .auto-qs-drums--desktop .auto-cell-drum__viewport:focus,
   .auto-search-panel .auto-qs-drums--desktop .auto-cell-drum__viewport:focus-visible,
   .auto-search-panel .auto-qs-drums--desktop .immo-dual-range .auto-cell-drum__viewport {
     width: 100%;
-    height: 2.4rem;
-    min-height: 2.4rem;
+    height: var(--auto-qs-field-h) !important;
+    min-height: var(--auto-qs-field-h) !important;
+    max-height: var(--auto-qs-field-h) !important;
     overflow: hidden;
     border: 0 !important;
     border-radius: 0 !important;
@@ -1292,8 +1311,9 @@ body.auto-drum-portal-open {
     display: flex;
     align-items: center;
     justify-content: flex-start;
-    height: 2.4rem;
-    min-height: 2.4rem;
+    height: var(--auto-qs-field-h) !important;
+    min-height: var(--auto-qs-field-h) !important;
+    max-height: var(--auto-qs-field-h) !important;
     padding: 0 0.7rem;
     scroll-snap-align: center;
     color: #fff;
@@ -1301,6 +1321,7 @@ body.auto-drum-portal-open {
     line-height: 1.2;
     cursor: default;
     user-select: none;
+    box-sizing: border-box;
   }
 
   .auto-search-panel .auto-qs-drums--desktop .auto-cell-drum__text {
@@ -1332,7 +1353,6 @@ body.auto-drum-portal-open {
     opacity: 1;
   }
 
-  /* Ne jelenjen meg a régi lenyíló dob UI asztalin */
   .auto-search-panel .auto-qs-drums--desktop .immo-wheel-trigger,
   .auto-search-panel .auto-qs-drums--desktop .immo-drum-inline {
     display: none !important;
@@ -1342,8 +1362,11 @@ body.auto-drum-portal-open {
   .auto-search-panel .auto-qs-drums--desktop .immo-dual-range__unit {
     color: #f3f4f6;
     font-size: 0.82rem;
-    padding-bottom: 0;
+    padding: 0 !important;
     background: transparent !important;
     border: 0 !important;
+    height: var(--auto-qs-field-h);
+    display: flex;
+    align-items: center;
   }
 }

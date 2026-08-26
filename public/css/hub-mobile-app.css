@@ -439,20 +439,27 @@
   }
 
   body.hub-page--feed .hf-card--listing {
+    flex-basis: 10.25rem;
     background: transparent;
     box-shadow: none;
     border: 0;
     overflow: visible;
+    align-self: flex-start;
   }
 
   body.hub-page--feed .hf-card--listing .hf-card-media {
-    background-color: #dfe3e8;
+    aspect-ratio: 4 / 3;
+    background-color: #e8ebef;
     border-radius: 12px;
   }
 
   body.hub-page--feed .hf-card--listing .hf-card-media img {
+    position: absolute;
+    inset: 0;
     display: block;
-    object-fit: cover;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
     object-position: center center;
   }
 

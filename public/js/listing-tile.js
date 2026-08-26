@@ -11,7 +11,21 @@ export function listingTileTitle(item) {
   let title = formatListingDisplayTitle(raw) || `Hirdetés #${item?.id ?? "?"}`;
   // Év a meta sorban van — a címből levesszük.
   title = title.replace(/\s*\(\d{4}(?:\/\d{1,2})?\)\s*$/u, "").trim();
+  title = softTitleCase(title);
   return title || `Hirdetés #${item?.id ?? "?"}`;
+}
+
+/** Ha a forrás FULL CAPS, olvasható címformára. */
+function softTitleCase(value) {
+  const s = String(value ?? "").trim();
+  if (!s) return s;
+  const letters = [...s].filter((ch) => /\p{L}/u.test(ch));
+  if (!letters.length) return s;
+  const upper = letters.filter((ch) => ch === ch.toLocaleUpperCase("hu-HU") && ch !== ch.toLocaleLowerCase("hu-HU")).length;
+  if (upper / letters.length < 0.7) return s;
+  return s
+    .toLocaleLowerCase("hu-HU")
+    .replace(/(^|[\s\-_/])(\p{L})/gu, (_, sep, ch) => `${sep}${ch.toLocaleUpperCase("hu-HU")}`);
 }
 
 export function listingTilePrice(item) {

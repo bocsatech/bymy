@@ -4,7 +4,7 @@ import {
   listingTileMeta,
   listingTilePrice,
   listingTileTitle,
-} from "./listing-tile.js?v=tileCard1";
+} from "./listing-tile.js?v=tileFit1";
 
 function collectPhotoUrls(item) {
   const preview = item.preview || {};

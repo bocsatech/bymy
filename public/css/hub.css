@@ -1150,17 +1150,26 @@ body.hub-page--feed {
 }
 
 .hf-card--listing {
+  flex: 0 0 188px;
   gap: 0.28rem;
+  align-self: flex-start;
 }
 
 .hf-card--listing .hf-card-media {
-  background-color: #dfe3e8;
+  aspect-ratio: 4 / 3;
+  width: 100%;
+  background-color: #e8ebef;
   border-radius: 12px;
+  overflow: hidden;
 }
 
 .hf-card--listing .hf-card-media img {
+  position: absolute;
+  inset: 0;
   display: block;
-  object-fit: cover;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
   object-position: center center;
 }
 
@@ -1263,6 +1272,10 @@ body.hub-page--feed {
 
   .hf-card {
     flex-basis: 132px;
+  }
+
+  .hf-card--listing {
+    flex-basis: 156px;
   }
 }
 

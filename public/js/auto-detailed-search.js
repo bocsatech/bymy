@@ -5,7 +5,7 @@
 import {
   DETAILED_SEARCH_SECTIONS,
   AKKU_SEARCH_SECTION_FALLBACK,
-} from "./auto-detailed-search-catalog.js?v=detailedSearch4";
+} from "./auto-detailed-search-catalog.js?v=detailedSearch5";
 
 const FORM_FLAG_KEYS = new Set(["villamtoltes", "zold_rendszam"]);
 
@@ -226,7 +226,10 @@ function bindExclusiveAccordions(host) {
 
 async function loadAkkuSearchSection() {
   try {
-    const res = await fetch("/api/level1/akku-search-menu", { credentials: "same-origin", cache: "no-store" });
+    const res = await fetch(`/api/level1/akku-search-menu?t=${Date.now()}`, {
+      credentials: "same-origin",
+      cache: "no-store",
+    });
     if (!res.ok) throw new Error(String(res.status));
     const data = await res.json();
     if (data?.section?.id) return data.section;
@@ -243,9 +246,10 @@ function buildDetailedSections(akkuSection) {
   return [akku, ...DETAILED_SEARCH_SECTIONS];
 }
 
-export async function mountDetailedSearch(form = document.getElementById("home-qs-form")) {
+export async function mountDetailedSearch(form = document.getElementById("home-qs-form"), { force = false } = {}) {
   const host = form?.querySelector("#qs-detailed-panel");
-  if (!host || host.dataset.detailedMounted === "1") return host;
+  if (!host) return null;
+  if (!force && host.dataset.detailedMounted === "1") return host;
 
   const akkuSection = await loadAkkuSearchSection();
   const sections = buildDetailedSections(akkuSection);

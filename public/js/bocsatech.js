@@ -782,7 +782,7 @@ const actions = {
   },
   readAkkuMenuFromDom() {
     const items = [];
-    app.querySelectorAll(".kivitel-admin-card[data-id]").forEach((card) => {
+    app.querySelectorAll(".akku-admin-card[data-id]").forEach((card) => {
       const id = card.getAttribute("data-id");
       const prev = (akkuSearchMenu.items || []).find((item) => item.id === id) || {};
       items.push({
@@ -1400,7 +1400,7 @@ function akkuSearchMenuView() {
   const items = akkuSearchMenu?.items || [];
   const cards = items
     .map((item, index) => {
-      return `<article class="kivitel-admin-card ${item.enabled === false ? "is-off" : ""}" data-id="${esc(item.id)}">
+      return `<article class="kivitel-admin-card akku-admin-card ${item.enabled === false ? "is-off" : ""}" data-id="${esc(item.id)}">
         <div class="kivitel-admin-card__order">
           <span class="kivitel-admin-card__idx">${index + 1}</span>
           <button type="button" class="btn ghost" data-act="akkuMenuMove" data-id="${esc(item.id)}" data-dir="-1" ${index === 0 ? "disabled" : ""}>↑</button>

@@ -8,7 +8,7 @@ import {
   mountDetailedSearch,
   readDetailedSearchValues,
   resetDetailedSearch,
-} from "./auto-detailed-search.js?v=detailedSearch4";
+} from "./auto-detailed-search.js?v=detailedSearch5";
 
 const MOBILE_MQ = "(max-width: 900px)";
 
@@ -85,15 +85,21 @@ export function initHomeQuickSearch({ onSearch = () => {} } = {}) {
     setMoreOpen(willOpen);
   });
 
-  detailedBtn?.addEventListener("click", () => {
+  detailedBtn?.addEventListener("click", async () => {
     const willOpen = !detailedPanel.classList.contains("is-open");
+    if (willOpen) {
+      try {
+        await mountDetailedSearch(form, { force: true });
+      } catch (error) {
+        console.warn("Részletes keresés panel:", error);
+      }
+    }
     setDetailedOpen(willOpen);
   });
 
   setMoreOpen(false);
   setDetailedOpen(false);
   setQsReady(false);
-  if (detailedPanel) mountDetailedSearch(form);
 
   applyAutoSearchLayout(form)
     .then(async () => {
@@ -130,4 +136,4 @@ export function initHomeQuickSearch({ onSearch = () => {} } = {}) {
     });
 }
 
-export { readDetailedSearchValues } from "./auto-detailed-search.js?v=detailedSearch4";
+export { readDetailedSearchValues } from "./auto-detailed-search.js?v=detailedSearch5";

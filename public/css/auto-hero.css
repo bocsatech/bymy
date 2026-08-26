@@ -1189,6 +1189,22 @@ body.auto-drum-portal-open {
     min-width: 0;
   }
 
+  .auto-search-panel .auto-qs-drums--desktop .immo-wheel-wrap.auto-cell-drum,
+  .auto-search-panel .auto-qs-drums--desktop .immo-schema-cell:not(.immo-dual-range__half) > .immo-wheel-wrap.auto-cell-drum,
+  .auto-search-panel .auto-qs-drums--desktop .immo-dual-range,
+  .auto-search-panel .auto-qs-drums--desktop .immo-dual-range.has-drum-open,
+  .auto-search-panel .auto-qs-drums--desktop .immo-dual-range:focus-within {
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    min-height: 0 !important;
+    height: auto !important;
+    max-height: none !important;
+    padding: 0 !important;
+  }
+
   .auto-search-panel .auto-qs-drums--desktop .immo-wheel-wrap.auto-cell-drum {
     position: relative;
     width: 100%;
@@ -1210,6 +1226,7 @@ body.auto-drum-portal-open {
     pointer-events: none;
   }
 
+  /* Egyetlen keret: a viewport — ne legyen külső + belső dupla keret */
   .auto-search-panel .auto-qs-drums--desktop .auto-cell-drum__viewport {
     width: 100%;
     height: 2.4rem;

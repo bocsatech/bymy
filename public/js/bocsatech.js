@@ -61,6 +61,7 @@ const ADMIN_SECTIONS = [
     defaultTab: "auto:listings",
     tabs: [
       { id: "auto:listings", label: "Hirdetések" },
+      { id: "auto:kivitel", label: "Kivitel menü" },
       ...AUTO_LAYOUT_ITEMS.map((item) => ({
         id: layoutTabId(item).replace(/^layout:/, "auto:layout:"),
         label: item.label,
@@ -119,6 +120,7 @@ let wheelSchema = { version: 1, cells: [] };
 let hubPromo = { images: [], max: 8, size: { width: 1400, height: 840 }, count: 0 };
 let searchCylinderMenu = { version: 1, items: [] };
 let searchCylinderImagePresets = [];
+let kivitelMenu = { version: 1, items: [] };
 let editingUser = null;
 let selectedVisitorId = "";
 let visitorHits = [];
@@ -686,6 +688,72 @@ const actions = {
       render();
     }
   },
+  kivitelMenuMove(_, el) {
+    const items = actions.readKivitelMenuFromDom();
+    const id = el.getAttribute("data-id");
+    const dir = Number(el.getAttribute("data-dir") || 0);
+    const idx = items.findIndex((item) => item.id === id);
+    if (idx < 0) return;
+    const next = idx + dir;
+    if (next < 0 || next >= items.length) return;
+    const tmp = items[idx];
+    items[idx] = items[next];
+    items[next] = tmp;
+    kivitelMenu = { ...kivitelMenu, items };
+    render();
+  },
+  kivitelMenuToggle() {
+    const items = actions.readKivitelMenuFromDom();
+    kivitelMenu = { ...kivitelMenu, items };
+    render();
+  },
+  readKivitelMenuFromDom() {
+    const items = [];
+    app.querySelectorAll(".kivitel-admin-card[data-id]").forEach((card) => {
+      const id = card.getAttribute("data-id");
+      const prev = (kivitelMenu.items || []).find((item) => item.id === id) || {};
+      items.push({
+        id,
+        label: String(card.querySelector("[data-field=label]")?.value ?? prev.label ?? "").trim(),
+        enabled: Boolean(card.querySelector("[data-field=enabled]")?.checked),
+      });
+    });
+    return items.length ? items : [...(kivitelMenu.items || [])];
+  },
+  async saveKivitelMenu() {
+    err = "";
+    info = "";
+    try {
+      const items = actions.readKivitelMenuFromDom();
+      const data = await api("/api/level1/kivitel-menu", {
+        method: "PUT",
+        body: JSON.stringify({ menu: { version: 1, items } }),
+      });
+      kivitelMenu = data.menu || { version: 1, items: data.items || items };
+      info = "Kivitel menü mentve. Az autó oldalon hard refresh kell.";
+      render();
+    } catch (error) {
+      err = error.message;
+      render();
+    }
+  },
+  async resetKivitelMenu() {
+    if (!confirm("Visszaállítod az alapértelmezett Kivitel listát?")) return;
+    err = "";
+    info = "";
+    try {
+      const data = await api("/api/level1/kivitel-menu", {
+        method: "PUT",
+        body: JSON.stringify({ menu: { version: 1, items: [] } }),
+      });
+      kivitelMenu = data.menu || { version: 1, items: data.items || [] };
+      info = "Alapértelmezett Kivitel lista visszaállítva.";
+      render();
+    } catch (error) {
+      err = error.message;
+      render();
+    }
+  },
 };
 
 function fileToDataUrl(file) {
@@ -741,6 +809,10 @@ async function loadTab() {
       const v = String(l.vertical || "").toLowerCase();
       return v !== "ingatlan";
     });
+  }
+  if (section === "auto" && sub === "kivitel") {
+    const data = await api("/api/level1/kivitel-menu/admin");
+    kivitelMenu = data.menu || { version: 1, items: data.items || [] };
   }
   if (section === "ingatlan" && sub === "listings") {
     listings = (await api("/api/level1/listings?vertical=ingatlan")).listings;
@@ -1244,6 +1316,42 @@ function searchCylinderMenuView() {
     </div>`;
 }
 
+function kivitelMenuView() {
+  const items = kivitelMenu?.items || [];
+  const cards = items
+    .map((item, index) => {
+      return `<article class="kivitel-admin-card ${item.enabled === false ? "is-off" : ""}" data-id="${esc(item.id)}">
+        <div class="kivitel-admin-card__order">
+          <span class="kivitel-admin-card__idx">${index + 1}</span>
+          <button type="button" class="btn ghost" data-act="kivitelMenuMove" data-id="${esc(item.id)}" data-dir="-1" ${index === 0 ? "disabled" : ""}>↑</button>
+          <button type="button" class="btn ghost" data-act="kivitelMenuMove" data-id="${esc(item.id)}" data-dir="1" ${index === items.length - 1 ? "disabled" : ""}>↓</button>
+        </div>
+        <div class="kivitel-admin-card__fields">
+          <label>
+            <div>Címke</div>
+            <input type="text" data-field="label" value="${esc(item.label || "")}" maxlength="80" />
+          </label>
+          <label class="kivitel-admin-card__toggle">
+            <input type="checkbox" data-field="enabled" data-act="kivitelMenuToggle" data-id="${esc(item.id)}" ${item.enabled === false ? "" : "checked"} />
+            Látható az autó oldal Kivitel menüjében
+          </label>
+        </div>
+      </article>`;
+    })
+    .join("");
+
+  return `
+    <h2 class="layout-cat-title">Kivitel menü</h2>
+    <p class="hint">Az autó oldal <strong>Kivitel</strong> almenüje (minden járműkategóriában). Sorrend, címke és láthatóság. Kikapcsolt elem nem jelenik meg a menüben.</p>
+    <p class="ok">${esc(info)}</p>
+    <p class="err">${esc(err)}</p>
+    <div class="kivitel-admin-list">${cards || '<p class="hint">Nincs menüelem.</p>'}</div>
+    <div class="row" style="margin-top:1rem;gap:0.65rem;flex-wrap:wrap">
+      <button class="btn" type="button" data-act="saveKivitelMenu">Menü mentése</button>
+      <button class="btn ghost" type="button" data-act="resetKivitelMenu">Alapértelmezés</button>
+    </div>`;
+}
+
 function layoutView() {
   const cat = layoutCategoryFromTab();
   const label = categoryLabel(cat);
@@ -1279,6 +1387,7 @@ function shellBody() {
     if (sub === "listings") {
       return listingsView({ title: "Autóhirdetések", emptyHint: "Nincs autó/teher hirdetés." });
     }
+    if (sub === "kivitel") return kivitelMenuView();
     return layoutView();
   }
   if (section === "ingatlan") {
@@ -1312,7 +1421,8 @@ function shell() {
     section === "mobilweb" ||
     isLayoutTab() ||
     isPreviewTab() ||
-    tab.endsWith(":listings");
+    tab.endsWith(":listings") ||
+    tab === "auto:kivitel";
   return `
     <div class="wrap ${wide ? "wrap--wide" : ""}">
       <div class="top">

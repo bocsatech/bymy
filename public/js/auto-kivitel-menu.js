@@ -1,5 +1,6 @@
 /**
  * Autó oldal — Kivitel menü (minden kategóriában), URL ?kivitel=…
+ * Opciók: /api/level1/kivitel-menu (admin), fallback: KIVITEL_OPTIONS.
  */
 
 import { KIVITEL_OPTIONS, kivitelMenuHref, normalizeKivitel } from "./kivitel-options.js?v=kivitel1";
@@ -10,6 +11,8 @@ const CATEGORY_TABS = [
   { key: "leasing", label: "Leasingautók", match: (k) => k === "leasing" },
   { key: "lakoauto-berles", label: "Lakóautó bérlés", match: (k) => k === "lakoauto-berles" },
 ];
+
+let kivitelLabels = [...KIVITEL_OPTIONS];
 
 function currentKategoria() {
   return String(new URLSearchParams(window.location.search).get("kategoria") || "")
@@ -25,7 +28,6 @@ function categoryHref(kategoriaKey) {
   const params = new URLSearchParams(window.location.search);
   if (kategoriaKey) params.set("kategoria", kategoriaKey);
   else params.delete("kategoria");
-  // Keep kivitel when switching category tabs
   const q = params.toString();
   return q ? `/auto.html?${q}` : "/auto.html";
 }
@@ -59,7 +61,7 @@ function renderKivitelMenu(nav) {
   allLi.appendChild(allLink);
   list.appendChild(allLi);
 
-  for (const opt of KIVITEL_OPTIONS) {
+  for (const opt of kivitelLabels) {
     const li = document.createElement("li");
     const a = document.createElement("a");
     a.href = kivitelMenuHref(opt, { searchParams: window.location.search });
@@ -108,7 +110,21 @@ function initKivitelToggle(nav) {
   });
 }
 
-export function initAutoKivitelMenu() {
+async function loadKivitelLabels() {
+  try {
+    const res = await fetch("/api/level1/kivitel-menu", { credentials: "same-origin" });
+    if (!res.ok) return;
+    const data = await res.json();
+    const labels = Array.isArray(data.labels)
+      ? data.labels.map((v) => String(v || "").trim()).filter(Boolean)
+      : [];
+    if (labels.length) kivitelLabels = labels;
+  } catch {
+    /* fallback: KIVITEL_OPTIONS */
+  }
+}
+
+export async function initAutoKivitelMenu() {
   if (document.body?.getAttribute("data-site-page") !== "auto") return;
 
   const tabs = document.querySelector(".auto-search-tabs");
@@ -116,6 +132,8 @@ export function initAutoKivitelMenu() {
 
   const nav = document.querySelector("[data-auto-kivitel-nav]");
   if (!nav) return;
+
+  await loadKivitelLabels();
   renderKivitelMenu(nav);
   initKivitelToggle(nav);
 }

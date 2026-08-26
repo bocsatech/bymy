@@ -402,14 +402,16 @@ body[data-site-page="teherauto"] .auto-search-tabs {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 0.55rem;
   margin-top: 0.15rem;
   grid-column: 1 / -1;
   width: 100%;
 }
 
-.auto-search-panel .home-qs-submit {
+.auto-search-panel .home-qs-submit,
+.auto-search-panel .home-qs-action,
+.auto-search-panel .home-qs-action--advanced {
   min-width: 0;
   flex: 0 1 auto;
   min-height: 2.85rem;
@@ -420,11 +422,17 @@ body[data-site-page="teherauto"] .auto-search-tabs {
   border-radius: 4px;
   background: transparent !important;
   color: #fff !important;
+  text-decoration: none;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  box-sizing: border-box;
 }
 
 .auto-search-panel .home-qs-submit:hover,
-.auto-search-panel .home-qs-submit:focus-visible {
+.auto-search-panel .home-qs-submit:focus-visible,
+.auto-search-panel .home-qs-action:hover,
+.auto-search-panel .home-qs-action:focus-visible,
+.auto-search-panel .home-qs-action--advanced:hover {
   background: rgba(255, 255, 255, 0.12) !important;
   color: #fff !important;
 }
@@ -432,27 +440,8 @@ body[data-site-page="teherauto"] .auto-search-tabs {
 .auto-search-panel .home-qs-actions-secondary {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.35rem 0.75rem;
+  gap: 0.55rem;
   align-items: center;
-}
-
-.auto-search-panel .home-qs-action,
-.auto-search-panel .home-qs-action--advanced {
-  min-height: 0;
-  padding: 0.2rem 0;
-  font-size: 0.82rem;
-  border: 0 !important;
-  background: transparent !important;
-  color: #f3f4f6 !important;
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-
-.auto-search-panel .home-qs-action:hover,
-.auto-search-panel .home-qs-action:focus-visible,
-.auto-search-panel .home-qs-action--advanced:hover {
-  background: transparent !important;
-  color: #fff !important;
 }
 
 .auto-search-hero__brand {
@@ -653,11 +642,13 @@ body[data-site-page="teherauto"] .auto-search-tabs {
   .auto-search-panel .home-qs-row--actions {
     flex-direction: column;
     align-items: stretch;
-    gap: 0.65rem;
+    gap: 0.55rem;
     margin-top: 0.35rem;
   }
 
-  .auto-search-panel .home-qs-submit {
+  .auto-search-panel .home-qs-submit,
+  .auto-search-panel .home-qs-action,
+  .auto-search-panel .home-qs-action--advanced {
     width: 100%;
     min-height: 3rem;
     border: 0 !important;
@@ -665,30 +656,23 @@ body[data-site-page="teherauto"] .auto-search-tabs {
     background: #ff6a00 !important;
     color: #fff !important;
     text-shadow: none;
+    text-decoration: none;
   }
 
   .auto-search-panel .home-qs-submit:hover,
-  .auto-search-panel .home-qs-submit:focus-visible {
+  .auto-search-panel .home-qs-submit:focus-visible,
+  .auto-search-panel .home-qs-action:hover,
+  .auto-search-panel .home-qs-action:focus-visible,
+  .auto-search-panel .home-qs-action--advanced:hover {
     background: #e85f00 !important;
     color: #fff !important;
   }
 
   .auto-search-panel .home-qs-actions-secondary {
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.55rem;
     width: 100%;
-  }
-
-  .auto-search-panel .home-qs-action,
-  .auto-search-panel .home-qs-action--advanced {
-    color: #344054 !important;
-    text-decoration: none;
-    font-weight: 600;
-  }
-
-  .auto-search-panel .home-qs-action:hover,
-  .auto-search-panel .home-qs-action:focus-visible,
-  .auto-search-panel .home-qs-action--advanced:hover {
-    color: #111 !important;
   }
 
   .auto-search-panel .home-qs-more {

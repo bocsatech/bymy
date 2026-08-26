@@ -211,12 +211,37 @@ body[data-site-page="teherauto"] .auto-search-tabs {
 /* —— Form: kompakt mezők, átlátszó panel —— */
 .auto-search-panel .home-qs-form {
   gap: 0.75rem;
+  width: 100%;
+}
+
+.auto-search-panel .home-qs-layout-main,
+.auto-search-panel .home-qs-more-layout,
+.auto-search-panel .home-qs-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 0.65rem 0.5rem;
+  width: 100%;
+}
+
+.auto-search-panel .home-qs-grid-cell {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.auto-search-panel .home-qs-grid-cell > .home-qs-field,
+.auto-search-panel .home-qs-grid-cell > .home-qs-pair,
+.auto-search-panel .home-qs-grid-cell > .immo-field {
+  width: 100%;
+  flex: 1 1 auto;
+  box-sizing: border-box;
 }
 
 .auto-search-panel .home-qs-row {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(12, minmax(0, 1fr));
   gap: 0.55rem;
+  width: 100%;
 }
 
 .auto-search-panel .home-qs-pair {
@@ -224,6 +249,7 @@ body[data-site-page="teherauto"] .auto-search-tabs {
   grid-template-columns: 1fr 1fr;
   gap: 0.35rem;
   min-width: 0;
+  width: 100%;
 }
 
 .auto-search-panel .home-qs-label {
@@ -236,6 +262,8 @@ body[data-site-page="teherauto"] .auto-search-tabs {
 
 .auto-search-panel .home-qs-field {
   min-height: 2.4rem;
+  width: 100%;
+  flex: 1 1 auto;
   background: transparent !important;
   border: 1px solid rgba(255, 255, 255, 0.65);
   border-radius: 4px;
@@ -284,6 +312,8 @@ body[data-site-page="teherauto"] .auto-search-tabs {
   justify-content: space-between;
   gap: 0.55rem;
   margin-top: 0.15rem;
+  grid-column: 1 / -1;
+  width: 100%;
 }
 
 .auto-search-panel .home-qs-submit {
@@ -469,6 +499,17 @@ body[data-site-page="teherauto"] .auto-search-tabs {
     color: #111;
     font-size: 1.12rem;
     text-shadow: none;
+  }
+
+  .auto-search-panel .home-qs-layout-main,
+  .auto-search-panel .home-qs-more-layout,
+  .auto-search-panel .home-qs-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .auto-search-panel .home-qs-grid-cell {
+    grid-column: 1 / -1 !important;
+    grid-row: auto !important;
   }
 
   .auto-search-panel .home-qs-row {

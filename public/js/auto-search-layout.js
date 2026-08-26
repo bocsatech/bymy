@@ -101,6 +101,31 @@ const NARROW_FIELD_KEYS = new Set(["szemelyek", "megye", "ajtok", "telepules", "
 /** Szabad szöveges keresőmezők — ne legyenek dobkerék. */
 const TEXT_FIELD_KEYS = new Set(["telepules", "iranyitoszam"]);
 
+const LAYOUT_COLS = 12;
+
+function clamp(n, min, max) {
+  return Math.max(min, Math.min(max, n));
+}
+
+function cellGridMeta(cell) {
+  const col = clamp(Number(cell.col) || 1, 1, LAYOUT_COLS);
+  let span = clamp(Number(cell.colSpan) || 6, 1, LAYOUT_COLS);
+  if (col + span - 1 > LAYOUT_COLS) span = LAYOUT_COLS - col + 1;
+  const row = Math.max(1, Number(cell.row) || 1);
+  return { col, span, row };
+}
+
+function cellGridStyle(cell, rowOverride = null) {
+  const { col, span, row } = cellGridMeta(cell);
+  const r = rowOverride ?? row;
+  return `grid-column:${col} / span ${span};grid-row:${r}`;
+}
+
+function wrapGridCell(cell, innerHtml, rowOverride = null) {
+  const { col, span, row } = cellGridMeta(cell);
+  const r = rowOverride ?? row;
+  return `<div class="home-qs-grid-cell" data-grid-col="${col}" data-grid-span="${span}" data-grid-row="${r}" style="${cellGridStyle(cell, r)}">${innerHtml}</div>`;
+}
 let cachedLayout = null;
 
 export async function fetchAutoSearchLayout({ force = false } = {}) {
@@ -220,12 +245,9 @@ function groupByRow(cells) {
   return [...rows.entries()].sort((a, b) => a[0] - b[0]).map(([, items]) => items);
 }
 
-function fieldWidthClass(cell) {
-  if (NARROW_FIELD_KEYS.has(cell.field_key)) return "home-qs-field--narrow";
-  const span = Number(cell.colSpan) || 6;
-  if (span >= 10) return "home-qs-field--wide";
-  if (span <= 3) return "home-qs-field--narrow";
-  return "home-qs-field--wide";
+function fieldWidthClass(_cell) {
+  /* Szélességet a 12 oszlopos grid (colSpan) adja — ne flex wide/narrow. */
+  return "";
 }
 
 function rangeHtml(cell, spec) {
@@ -235,12 +257,12 @@ function rangeHtml(cell, spec) {
     spec.kind === "le" ? '<span class="home-qs-suffix" aria-hidden="true">LE</span>' :
     spec.kind === "km" ? "" : "";
   return `<div class="home-qs-pair" data-qs-field="${cell.field_key}">
-    <label class="home-qs-field home-qs-field--narrow">
+    <label class="home-qs-field">
       <span class="home-qs-label">${label}</span>
       <select class="home-qs-control" data-filter-key="${spec.tol}" aria-label="${label} -tól"></select>
       ${suffix}
     </label>
-    <label class="home-qs-field home-qs-field--narrow">
+    <label class="home-qs-field">
       <select class="home-qs-control" data-filter-key="${spec.ig}" aria-label="${label} -ig"></select>
       ${suffix}
     </label>
@@ -250,29 +272,28 @@ function rangeHtml(cell, spec) {
 function fieldHtml(cell) {
   const key = cell.field_key;
   const label = SEARCH_LABEL_SHORT[key] || cell.label || key;
-  const width = fieldWidthClass(cell);
   const spec = RANGE_SPECS[key];
   if (spec) return rangeHtml(cell, spec);
   if (key === "gyartmany") {
-    return `<label class="home-qs-field ${width}" data-qs-field="${key}">
+    return `<label class="home-qs-field" data-qs-field="${key}">
       <span class="home-qs-label">${label}</span>
       <select class="home-qs-control" id="qs-gyartmany" data-filter-key="gyartmany"></select>
     </label>`;
   }
   if (key === "modell") {
-    return `<label class="home-qs-field ${width}" data-qs-field="${key}">
+    return `<label class="home-qs-field" data-qs-field="${key}">
       <span class="home-qs-label">Típus</span>
       <select class="home-qs-control" id="qs-modell" data-filter-key="modell"></select>
     </label>`;
   }
   if (key === "uzemanyag") {
-    return `<label class="home-qs-field ${width}" data-qs-field="${key}">
+    return `<label class="home-qs-field" data-qs-field="${key}">
       <span class="home-qs-label">${label}</span>
       <select class="home-qs-control" data-filter-key="uzemanyagQuick"></select>
     </label>`;
   }
   if (SELECT_OPTIONS[key]) {
-    return `<label class="home-qs-field ${width}" data-qs-field="${key}">
+    return `<label class="home-qs-field" data-qs-field="${key}">
       <span class="home-qs-label">${label}</span>
       <select class="home-qs-control" data-filter-key="${key}"></select>
     </label>`;
@@ -284,25 +305,33 @@ function fieldHtml(cell) {
       : key === "telepules"
         ? 'autocomplete="address-level2"'
         : 'autocomplete="off"';
-  return `<label class="immo-field home-qs-field--text home-qs-field--narrow" data-qs-field="${key}">
+  return `<label class="immo-field home-qs-field--text" data-qs-field="${key}">
     <span class="immo-label">${label}</span>
     <input class="immo-control home-qs-control" type="text" data-filter-key="${key}" placeholder="Mindegy" ${attrs} />
   </label>`;
 }
 
-function renderStep(host, layout, step) {
+function renderGrid(host, cells, { rowOffset = 0 } = {}) {
   if (!host) return;
-  const cells = cellsForStep(layout, step);
   if (!cells.length) {
     host.innerHTML = "";
     host.hidden = true;
+    host.classList.remove("home-qs-grid");
     return;
   }
-  const rows = groupByRow(cells)
-    .map((items) => `<div class="home-qs-row">${items.map(fieldHtml).join("")}</div>`)
+  host.classList.add("home-qs-grid");
+  host.innerHTML = cells
+    .map((cell) => {
+      const baseRow = Math.max(1, Number(cell.row) || 1);
+      const row = rowOffset + baseRow;
+      return wrapGridCell(cell, fieldHtml(cell), row);
+    })
     .join("");
-  host.innerHTML = rows;
   host.hidden = false;
+}
+
+function renderStep(host, layout, step) {
+  renderGrid(host, cellsForStep(layout, step));
 }
 
 function wireRangeSelects(root) {
@@ -386,16 +415,12 @@ export async function applyAutoSearchLayout(form = document.getElementById("home
     const moreCells = (layout.cells || [])
       .filter((c) => isSearchCellVisible(c) && Number(c.step) >= 2 && Number(c.step) <= 5)
       .sort((a, b) => (a.step - b.step) || (a.row - b.row) || (a.col - b.col));
-    if (!moreCells.length) {
-      moreHost.innerHTML = "";
-      moreHost.hidden = true;
-    } else {
-      const rows = groupByRow(moreCells)
-        .map((items) => `<div class="home-qs-row">${items.map(fieldHtml).join("")}</div>`)
-        .join("");
-      moreHost.innerHTML = rows;
-      moreHost.hidden = false;
-    }
+    // Lépésenként eltoljuk a sort, hogy ne ütközzenek az admin row számok.
+    const withRows = moreCells.map((c) => ({
+      ...c,
+      row: (Number(c.step) - 1) * 40 + (Number(c.row) || 1),
+    }));
+    renderGrid(moreHost, withRows);
   }
 
   wireRangeSelects(form);

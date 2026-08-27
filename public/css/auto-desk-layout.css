@@ -132,20 +132,45 @@
     opacity: 0.85;
   }
 
-  /* —— Fő rács —— */
+  /* —— Fő rács: kereső BAL, találatok JOBB —— */
   body.home-page[data-site-page="auto"] .home-main.auto-desk-main {
     display: grid !important;
-    grid-template-columns: var(--ad-filter-w) minmax(0, 1fr);
-    gap: 20px 28px;
-    align-items: start;
-    max-width: 1440px;
-    width: 100%;
-    margin: 0 auto;
-    padding: 18px 24px 48px;
-    box-sizing: border-box;
+    grid-template-columns: 320px minmax(0, 1fr) !important;
+    grid-template-rows: auto !important;
+    gap: 20px 28px !important;
+    align-items: start !important;
+    max-width: 1440px !important;
+    width: 100% !important;
+    margin: 0 auto !important;
+    padding: 18px 24px 48px !important;
+    box-sizing: border-box !important;
     background: var(--ad-bg) !important;
     color: var(--ad-text);
     min-height: calc(100vh - 56px);
+  }
+
+  body.home-page[data-site-page="auto"] .home-main.auto-desk-main > .auto-search-hero {
+    grid-column: 1 / 2 !important;
+    grid-row: 1 / 2 !important;
+    width: 320px !important;
+    max-width: 320px !important;
+    margin: 0 !important;
+    position: sticky !important;
+    top: 12px !important;
+    z-index: 2 !important;
+    justify-self: start !important;
+    align-self: start !important;
+  }
+
+  body.home-page[data-site-page="auto"] .home-main.auto-desk-main > .home-layout.site-layout,
+  body.home-page[data-site-page="auto"] .home-main.auto-desk-main > .site-layout {
+    grid-column: 2 / 3 !important;
+    grid-row: 1 / 2 !important;
+    width: auto !important;
+    max-width: none !important;
+    margin: 0 !important;
+    display: block !important;
+    justify-self: stretch !important;
   }
 
   body.home-page[data-site-page="auto"] .home-layout,
@@ -161,24 +186,6 @@
     box-shadow: none !important;
     border: 0 !important;
     color: var(--ad-text);
-  }
-
-  body.home-page[data-site-page="auto"] .auto-search-hero {
-    grid-column: 1;
-    grid-row: 1;
-    margin: 0;
-    position: sticky;
-    top: 12px;
-    z-index: 2;
-  }
-
-  body.home-page[data-site-page="auto"] .home-layout.site-layout {
-    grid-column: 2;
-    grid-row: 1;
-    display: block;
-    margin: 0;
-    max-width: none;
-    width: 100%;
   }
 
   body.home-page[data-site-page="auto"] .auto-search-hero__image,

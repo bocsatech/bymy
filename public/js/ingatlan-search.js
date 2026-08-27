@@ -42,7 +42,8 @@ import {
   wheelFieldHtml,
 } from "./ingatlan-wheels.js?v=scrollLock4";
 import { initDrumWheel, syncDrumWheelDisplay, applyDrumModeClass, getDrumMode } from "./immo-drum-picker.js?v=scrollLock4";
-import { fetchIngatlanWheelSchema, renderIngatlanSchemaHosts, INGATLAN_DUAL_RANGE_GROUPS } from "./ingatlan-wheel-schema.js?v=immoWheel16";
+import { fetchIngatlanWheelSchema, renderIngatlanSchemaHosts, INGATLAN_DUAL_RANGE_GROUPS } from "./ingatlan-wheel-schema.js?v=telepSuggest1";
+import { wireTelepulesSuggestIn } from "./telepules-suggest.js?v=telepSuggest1";
 
 const EXACT_KEYS = [
   "ingatlan_uzletag",
@@ -596,6 +597,7 @@ export async function initIngatlanSearch({
   setupMobileDualRanges(mainHost);
   setupMobileDualRanges(moreHost);
   applyDrumModeClass();
+  wireTelepulesSuggestIn(root);
 
   fillPriceRangeWheels(root);
   fillAreaRangeWheels(root);

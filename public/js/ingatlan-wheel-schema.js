@@ -62,7 +62,7 @@ export const INGATLAN_DUAL_RANGE_GROUPS = [
 
 
 const FIELD_DEFS = [
-  { field_key: "keresesi_hely", label: "Keresési hely", kind: "text", surfaces: ["search"] },
+  { field_key: "keresesi_hely", label: "Település", kind: "text", surfaces: ["search"] },
   { field_key: "ar_tol", label: "Ár · min", kind: "wheel", surfaces: ["search"] },
   { field_key: "ar_ig", label: "Ár · max", kind: "wheel", surfaces: ["search"] },
   { field_key: "alapterulet_tol", label: "Alapterület · min", kind: "wheel", surfaces: ["search"] },
@@ -347,9 +347,12 @@ function cellStyle(cell) {
 }
 
 function textFieldHtml(name, label) {
+  const isHely = name === "keresesi_hely";
+  const ph = isHely ? "Település neve" : "Város vagy falu neve";
+  const ac = isHely ? "off" : "address-level2";
   return `<label class="immo-field" data-schema-field="${escapeAttr(name)}">
     <span class="immo-label">${escapeHtml(label)}</span>
-    <input class="immo-control" id="immo-${escapeAttr(name)}" name="${escapeAttr(name)}" type="text" placeholder="Város vagy falu neve" autocomplete="address-level2" />
+    <input class="immo-control" id="immo-${escapeAttr(name)}" name="${escapeAttr(name)}" type="text" placeholder="${escapeAttr(ph)}" autocomplete="${ac}" ${isHely ? 'aria-label="Település"' : ""} />
   </label>`;
 }
 

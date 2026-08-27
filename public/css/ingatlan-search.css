@@ -1458,3 +1458,53 @@ body[data-site-page="ingatlan"] .immo-search-form select:focus-visible {
   opacity: 0.55;
   pointer-events: none;
 }
+
+/* Település typeahead */
+.immo-field {
+  position: relative;
+}
+
+.telepules-suggest {
+  position: absolute;
+  z-index: 40;
+  left: 0;
+  right: 0;
+  top: calc(100% + 0.2rem);
+  margin: 0;
+  padding: 0.35rem 0;
+  list-style: none;
+  max-height: 14rem;
+  overflow-y: auto;
+  border: 1px solid #d7dbe1;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.14);
+}
+
+.telepules-suggest__item {
+  padding: 0.55rem 0.85rem;
+  font-size: 0.95rem;
+  color: #111;
+  cursor: pointer;
+}
+
+.telepules-suggest__item:hover,
+.telepules-suggest__item.is-active {
+  background: #f3f4f6;
+}
+
+[data-theme="dark"] .telepules-suggest {
+  background: #1a212b;
+  border-color: #2a3340;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
+}
+
+[data-theme="dark"] .telepules-suggest__item {
+  color: #eef2f6;
+}
+
+[data-theme="dark"] .telepules-suggest__item:hover,
+[data-theme="dark"] .telepules-suggest__item.is-active {
+  background: #243041;
+}
+

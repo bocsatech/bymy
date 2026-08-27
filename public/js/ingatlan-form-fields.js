@@ -7,8 +7,9 @@ import { normalizeIngatlanUzletag, INGATLAN_LAKAS_TIPUS, INGATLAN_LAKAS_TIPUS_AI
 import {
   initIngatlanSearch,
   readIngatlanSearchForm,
-} from "./ingatlan-search.js?v=scrollLock4";
-import { fetchIngatlanWheelSchema } from "./ingatlan-wheel-schema.js?v=immoWheel16";
+} from "./ingatlan-search.js?v=telepSuggest1";
+import { fetchIngatlanWheelSchema } from "./ingatlan-wheel-schema.js?v=telepSuggest1";
+import { wireTelepulesSuggestIn } from "./telepules-suggest.js?v=telepSuggest1";
 
 function removeIngatlanFormFields(form) {
   form?.querySelector("#ingatlan-fields")?.remove();
@@ -94,7 +95,7 @@ export async function ensureIngatlanFormFields(form) {
     onSearch: () => {},
   });
 
-  /* Feladáskor: „Keresési hely” → „Település” (kereső oldalon változatlan). */
+  /* Település mező: címke + ajánló (keresővel megegyező). */
   root.querySelectorAll('[data-schema-field="keresesi_hely"] .immo-label, label[data-schema-field="keresesi_hely"] .immo-label').forEach((el) => {
     el.textContent = "Település";
   });
@@ -103,6 +104,7 @@ export async function ensureIngatlanFormFields(form) {
     helyInput.setAttribute("placeholder", "Település neve");
     helyInput.setAttribute("aria-label", "Település");
   }
+  wireTelepulesSuggestIn(root);
 
   root.dataset.schemaReady = "1";
   return root;

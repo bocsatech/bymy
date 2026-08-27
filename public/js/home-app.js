@@ -1,5 +1,5 @@
 import { fetchListings } from "./db-client.js?v=teherVert1";
-import { createHomeGridCard, initHomeGridCardPhotos } from "./home-grid-card.js?v=autoDesk16";
+import { createHomeGridCard, initHomeGridCardPhotos } from "./home-grid-card.js?v=teherDesk1";
 import {
   emptyFilters,
   filterListingsBySidebar,
@@ -7,9 +7,9 @@ import {
   initHomeSearchSidebar,
   initHomeFilterCatalog,
 } from "./home-search-filter.js?v=korzetFix1";
-import { initHomeQuickSearch } from "./home-quicksearch.js?v=autoDesk21";
+import { initHomeQuickSearch } from "./home-quicksearch.js?v=teherDesk1";
 import { matchDetailedSearch, hasActiveDetailedSearch } from "./auto-detailed-search.js?v=autoDesk16";
-import { updateAutoDeskResultCount } from "./auto-desk-search.js?v=autoDesk21";
+import { updateAutoDeskResultCount } from "./auto-desk-search.js?v=teherDesk1";
 import {
   emptyIngatlanFilters,
   filterListingsByIngatlan,
@@ -174,7 +174,9 @@ function renderListings(items) {
   gridTrack.innerHTML = "";
 
   const filtered =
-    PAGE === "auto" ? sortDeskListings(filterItems(items)) : filterItems(items);
+    PAGE === "auto" || PAGE === "teherauto"
+      ? sortDeskListings(filterItems(items))
+      : filterItems(items);
   emptyEl.hidden = filtered.length > 0;
   if (!filtered.length && (statsFilter || quickRadiusFilter)) {
     emptyEl.hidden = false;
@@ -191,7 +193,7 @@ function renderListings(items) {
         : "Nincs találat ezekre a feltételekre. Próbálj kevesebb szűrőt, vagy adj fel hirdetést.";
   }
 
-  if (PAGE === "auto") updateAutoDeskResultCount(filtered.length);
+  if (PAGE === "auto" || PAGE === "teherauto") updateAutoDeskResultCount(filtered.length);
 
   for (const item of filtered) {
     gridTrack.appendChild(createHomeGridCard(item));

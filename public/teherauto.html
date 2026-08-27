@@ -46,7 +46,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext x='16' y='22' text-anchor='middle' font-size='14' font-family='system-ui,sans-serif' font-weight='700'%3EB%3C/text%3E%3C/svg%3E" type="image/svg+xml" />
-    <meta name="bymy-version" content="authAcct1" />
+    <meta name="bymy-version" content="teherDesk1" />
     <title>Teherautó — Bymy</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -62,7 +62,9 @@
     <link rel="stylesheet" href="/css/hub-mobile-app.css?v=tileFill3" />
     <link rel="stylesheet" href="/css/home.css?v=coverAll1" />
     <link rel="stylesheet" href="/css/listing-photo-cover.css?v=coverAll1" />
-    <link rel="stylesheet" href="/css/auto-hero.css?v=detailedSearch11" />
+    <link rel="stylesheet" href="/css/auto-hero.css?v=autoDesk15" />
+    <link rel="stylesheet" href="/css/auto-desk-layout.css?v=teherDesk1" />
+    <link rel="stylesheet" href="/css/ingatlan-search.css?v=autoDrums15" />
     <style id="home-scroll-fix">
       /* Inline: cache-biztos — a teljes oldal görget, külön görgetősáv nincs sehol. */
       html:has(body.home-page) {
@@ -100,6 +102,114 @@
         max-width: 100% !important;
         display: block !important;
       }
+      /* Autó asztali fejléc: logó | menü KÖZÉPEN | akciók — inline, cascade-biztos */
+      @media (min-width: 901px) {
+        body.home-page.site-app:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-header-inner,
+        body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-header-inner {
+          display: grid !important;
+          grid-template-columns: 1fr auto 1fr !important;
+          grid-template-areas: "logo nav actions" !important;
+          align-items: center !important;
+          column-gap: 20px !important;
+          max-width: 1440px !important;
+          margin: 0 auto !important;
+          padding: 0 24px !important;
+          min-height: 64px !important;
+          flex-direction: row !important;
+        }
+        body.home-page.site-app:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-logo,
+        body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-logo {
+          grid-area: logo !important;
+          justify-self: start !important;
+          position: relative !important;
+          left: auto !important;
+          right: auto !important;
+          top: auto !important;
+          bottom: auto !important;
+          transform: none !important;
+          z-index: 2 !important;
+        }
+        body.home-page.site-app:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-logo .bymy-logo-img--nav,
+        body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-logo .bymy-logo-img--nav {
+          height: 40px !important;
+          max-width: 140px !important;
+          width: auto !important;
+        }
+        body.home-page.site-app:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav,
+        body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav {
+          grid-area: nav !important;
+          justify-self: center !important;
+          position: static !important;
+          left: auto !important;
+          right: auto !important;
+          top: auto !important;
+          bottom: auto !important;
+          transform: none !important;
+          display: flex !important;
+          align-items: center !important;
+          gap: 22px !important;
+          width: max-content !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          pointer-events: auto !important;
+        }
+        body.home-page.site-app:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-header-top,
+        body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-header-top {
+          grid-area: actions !important;
+          justify-self: end !important;
+          width: auto !important;
+          min-height: 0 !important;
+          padding: 0 !important;
+          display: flex !important;
+          align-items: center !important;
+        }
+      }
+      /* Autó asztali: kereső BALRA, találatok JOBBRA — felülírja a display:block-ot */
+      @media (min-width: 901px) {
+        body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main {
+          display: grid !important;
+          grid-template-columns: 320px minmax(0, 1fr) !important;
+          grid-template-rows: auto auto !important;
+          gap: 12px 28px !important;
+          align-items: start !important;
+          max-width: 1440px !important;
+          width: 100% !important;
+          margin-left: auto !important;
+          margin-right: auto !important;
+          padding: 18px 24px 48px !important;
+          box-sizing: border-box !important;
+        }
+        body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main > .auto-search-tabs {
+          display: grid !important;
+          grid-column: 1 / -1 !important;
+          grid-row: 1 / 2 !important;
+          grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+          width: 100% !important;
+          margin: 0 !important;
+          border-radius: 8px;
+          overflow: hidden;
+        }
+        body.home-page[data-site-page="teherauto"] .home-main.auto-desk-main > .auto-search-tabs {
+          grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        }
+        body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main > .auto-search-hero {
+          grid-column: 1 / 2 !important;
+          grid-row: 2 / 3 !important;
+          width: 320px !important;
+          max-width: 320px !important;
+          margin: 0 !important;
+          justify-self: start !important;
+        }
+        body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main > .home-layout.site-layout,
+        body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main > .site-layout {
+          grid-column: 2 / 3 !important;
+          grid-row: 2 / 3 !important;
+          width: auto !important;
+          max-width: none !important;
+          margin: 0 !important;
+          display: block !important;
+        }
+      }
       body.home-page .home-layout {
         min-height: 0 !important;
         overflow-x: hidden !important;
@@ -126,39 +236,13 @@
     </style>
     <link rel="stylesheet" href="/css/bymy-logo-size.css?v=logoHalf1" />
   </head>
-  <body class="home-page site-page site-app" data-site-page="teherauto">
+  <body class="home-page site-page site-app auto-desk-gyors" data-site-page="teherauto">
     <script src="/js/mw-app-shell.js?v=tileFill3"></script>
     <header class="hub-header home-header">
       <div class="hub-header-inner">
-        <div class="hub-header-top">
-        <div class="hub-header-actions site-header-actions">
-          <a class="hub-header-msg" href="/uzenetek.html" data-auth-member hidden>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 6.8h9.5a2.2 2.2 0 0 1 2.2 2.2v4.2a2.2 2.2 0 0 1-2.2 2.2H10l-3.2 2.4V15.2H5A2.2 2.2 0 0 1 2.8 13V9a2.2 2.2 0 0 1 2.2-2.2Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M14.2 8.2h4A2.2 2.2 0 0 1 20.4 10.4v3.4a2.2 2.2 0 0 1-2.2 2.2h-.7v1.7l-2.2-1.7" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
-            <span>Üzenetek</span>
-          </a>
-          <div class="site-header-auth-row" data-auth-guest>
-            <a class="hub-btn hub-btn--ghost" href="/belepes.html" data-auth-login>Belépés</a>
-            <a class="hub-btn hub-btn--ghost" href="/regisztracio.html" data-auth-register>Regisztráció</a>
-          </div>
-          <div class="site-header-avatar-wrap" data-avatar-menu data-auth-member hidden>
-            <button type="button" class="site-header-profile" data-auth-avatar data-avatar-toggle aria-expanded="false" aria-haspopup="menu" aria-label="Fiók" title="Fiók">
-              <span class="site-header-avatar">
-                <span data-avatar-letter>A</span>
-                <img data-avatar-img alt="" hidden width="44" height="44" />
-              </span>
-              <span class="site-header-firstname" data-auth-firstname></span>
-              <svg class="site-header-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </button>
-            <div class="site-avatar-dropdown site-avatar-dropdown--fiok" data-avatar-dropdown role="menu" hidden></div>
-          </div>
-          <a class="hub-btn hub-btn--post" href="/hirdetesfeladas.html?vertical=teher&subtype=kisteher&start=1" data-auth-guard id="teher-post-link">+ Hirdetésfeladás</a>
-          <button type="button" class="hub-theme-toggle" data-theme-toggle aria-label="Színmód" title="Színmód"></button>
-        </div>
-        </div>
-        <div class="hub-nav-band">
-          <a class="hub-logo" href="/" aria-label="Bymy">
-            <img class="bymy-logo-img bymy-logo-img--nav" src="/images/bymy-logo.png?v=logoUpload1" alt="Bymy.hu" width="190" height="48" decoding="async" />
-          </a>
+        <a class="hub-logo" href="/" aria-label="Bymy">
+          <img class="bymy-logo-img bymy-logo-img--nav" src="/images/bymy-logo.png?v=logoUpload1" alt="Bymy.hu" width="190" height="48" decoding="async" />
+        </a>
         <nav class="hub-nav" aria-label="Főmenü">
           <a class="hub-nav-link" href="/">Kezdőlap</a>
           <a class="hub-nav-link" href="/auto.html">Autó</a>
@@ -166,19 +250,44 @@
           <a class="hub-nav-link" href="/ingatlan.html">Ingatlan</a>
           <a class="hub-nav-link" href="/ajanlasok.html">Ajánlások</a>
         </nav>
+        <div class="hub-header-top">
+          <div class="hub-header-actions site-header-actions">
+            <a class="hub-header-msg" href="/uzenetek.html" data-auth-member hidden>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 6.8h9.5a2.2 2.2 0 0 1 2.2 2.2v4.2a2.2 2.2 0 0 1-2.2 2.2H10l-3.2 2.4V15.2H5A2.2 2.2 0 0 1 2.8 13V9a2.2 2.2 0 0 1 2.2-2.2Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M14.2 8.2h4A2.2 2.2 0 0 1 20.4 10.4v3.4a2.2 2.2 0 0 1-2.2 2.2h-.7v1.7l-2.2-1.7" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+              <span>Üzenetek</span>
+            </a>
+            <div class="site-header-auth-row" data-auth-guest>
+              <a class="hub-btn hub-btn--ghost" href="/belepes.html" data-auth-login>Belépés</a>
+              <a class="hub-btn hub-btn--ghost" href="/regisztracio.html" data-auth-register>Regisztráció</a>
+            </div>
+            <div class="site-header-avatar-wrap" data-avatar-menu data-auth-member hidden>
+              <button type="button" class="site-header-profile" data-auth-avatar data-avatar-toggle aria-expanded="false" aria-haspopup="menu" aria-label="Fiók" title="Fiók">
+                <span class="site-header-avatar">
+                  <span data-avatar-letter>A</span>
+                  <img data-avatar-img alt="" hidden width="44" height="44" />
+                </span>
+                <span class="site-header-firstname" data-auth-firstname></span>
+                <svg class="site-header-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+              <div class="site-avatar-dropdown site-avatar-dropdown--fiok" data-avatar-dropdown role="menu" hidden></div>
+            </div>
+            <a class="hub-btn hub-btn--post" href="/hirdetesfeladas.html?vertical=teher&subtype=kisteher&start=1" data-auth-guard id="teher-post-link">+ Hirdetésfeladás</a>
+            <button type="button" class="hub-theme-toggle" data-theme-toggle aria-label="Színmód" title="Színmód"></button>
+          </div>
         </div>
       </div>
     </header>
 
-    <main class="home-main">
+    <main class="home-main auto-desk-main">
+      <nav class="auto-search-tabs" aria-label="Járműkategóriák">
+        <a class="auto-search-tab is-active" href="/teherauto.html?kategoria=35-alatt" data-truck-tab="35-alatt" aria-current="page">Teherautó 3,5-ig</a>
+        <a class="auto-search-tab" href="/teherauto.html?kategoria=35-felett" data-truck-tab="35-felett">Teherautó 3,5-tól</a>
+      </nav>
+
       <section class="auto-search-hero" data-auto-search-hero aria-labelledby="auto-search-title">
-        <nav class="auto-search-tabs" aria-label="Járműkategóriák">
-          <a class="auto-search-tab is-active" href="/teherauto.html?kategoria=35-alatt" data-truck-tab="35-alatt" aria-current="page">Teherautó 3,5-ig</a>
-          <a class="auto-search-tab" href="/teherauto.html?kategoria=35-felett" data-truck-tab="35-felett">Teherautó 3,5-tól</a>
-        </nav>
 
         <div class="auto-search-hero__stage">
-          <!-- Háttérkép cseréje: csak az src. -->
+          <!-- Háttérkép cseréje: csak az src. (asztali layout elrejti) -->
           <img
             class="auto-search-hero__image"
             data-auto-hero-image
@@ -191,10 +300,33 @@
 
           <div class="auto-search-hero__content">
             <article class="auto-search-panel" data-auto-search-panel>
-              <h1 class="auto-search-title" id="auto-search-title">Melyik teherautót keresed?</h1>
+              <button
+                type="button"
+                class="auto-search-toggle"
+                id="auto-search-toggle"
+                aria-expanded="false"
+                aria-controls="auto-search-body"
+              >
+                <span class="auto-search-title" id="auto-search-title">Melyik teherautót keresed?</span>
+                <span class="auto-search-toggle__chevron" aria-hidden="true"></span>
+              </button>
 
+            <div class="auto-search-body" id="auto-search-body">
             <form class="home-qs-form auto-qs-booting" id="home-qs-form">
               <p class="home-qs-status" id="home-qs-status" hidden></p>
+
+              <div class="auto-desk-mode" role="tablist" aria-label="Kereső mód">
+                <button type="button" class="auto-desk-mode__btn is-active" role="tab" data-desk-mode="gyors" aria-selected="true">Gyors</button>
+                <button type="button" class="auto-desk-mode__btn" role="tab" data-desk-mode="reszletes" aria-selected="false">Részletes</button>
+              </div>
+
+              <div class="auto-desk-acc is-open" data-desk-acc="alap">
+                <button type="button" class="auto-desk-acc__head" data-desk-acc-toggle aria-expanded="true">
+                  <span>Alap adatok</span>
+                  <span class="auto-desk-acc__sum" data-desk-acc-sum></span>
+                  <span class="auto-desk-acc__chev" aria-hidden="true">▼</span>
+                </button>
+                <div class="auto-desk-acc__body">
               <div id="qs-layout-main" class="home-qs-layout-main"></div>
               <div class="home-qs-static-legacy" hidden>
               <div class="home-qs-row">
@@ -257,7 +389,16 @@
                 </div>
               </div>
               </div>
+                </div>
+              </div>
 
+              <div class="auto-desk-acc" data-desk-acc="muszaki">
+                <button type="button" class="auto-desk-acc__head" data-desk-acc-toggle aria-expanded="false">
+                  <span>Műszaki adatok</span>
+                  <span class="auto-desk-acc__sum" data-desk-acc-sum></span>
+                  <span class="auto-desk-acc__chev" aria-hidden="true">▼</span>
+                </button>
+                <div class="auto-desk-acc__body">
               <div class="home-qs-more" id="qs-more" hidden>
                 <div id="qs-more-layout" class="home-qs-more-layout"></div>
                 <div class="home-qs-static-legacy" hidden>
@@ -327,20 +468,34 @@
                     </select>
                   </label>
                 </div>
+                <div id="qs-more-extra" class="home-qs-more-extra" hidden></div>
+                </div>
+              </div>
                 </div>
               </div>
 
+              <div class="auto-desk-acc" data-desk-acc="extrak">
+                <button type="button" class="auto-desk-acc__head" data-desk-acc-toggle aria-expanded="false">
+                  <span>Extrák</span>
+                  <span class="auto-desk-acc__sum" data-desk-acc-sum></span>
+                  <span class="auto-desk-acc__chev" aria-hidden="true">▼</span>
+                </button>
+                <div class="auto-desk-acc__body">
               <div class="home-qs-detailed" id="qs-detailed-panel" hidden></div>
+                </div>
+              </div>
 
               <div class="home-qs-row home-qs-row--actions">
-                <button type="submit" class="home-qs-submit">Járművek megjelenítése</button>
+                <button type="button" class="auto-desk-reset" data-desk-reset>Alaphelyzet</button>
+                <button type="submit" class="home-qs-submit">Találatok mutatása</button>
                 <div class="home-qs-actions-secondary">
                   <button type="button" class="home-qs-action home-qs-action--advanced" id="qs-reszletes" aria-expanded="false" aria-controls="qs-more">Több szűrő</button>
                   <button type="button" class="home-qs-action" id="qs-detailed" hidden aria-expanded="false" aria-controls="qs-detailed-panel">Részletes keresés</button>
-                  <button type="reset" class="home-qs-action">Szűrők törlése</button>
+                  <button type="reset" class="home-qs-action" id="qs-reset-filters">Szűrők törlése</button>
                 </div>
               </div>
             </form>
+            </div>
             </article>
           </div>
 
@@ -350,11 +505,32 @@
 
       <div class="site-layout home-layout">
         <section class="site-center home-center" aria-label="Hirdetések">
+          <div class="auto-desk-results-bar">
+            <p class="auto-desk-results-bar__count" data-desk-result-count>0 találat</p>
+            <div class="auto-desk-results-bar__tools">
+              <label class="auto-desk-sort">
+                <span class="auto-desk-sort__label">Rendezés</span>
+                <select data-desk-sort aria-label="Rendezés">
+                  <option value="newest" selected>Rendezés: Legfrissebbek elöl</option>
+                  <option value="price-asc">Rendezés: Ár szerint növekvő</option>
+                  <option value="price-desc">Rendezés: Ár szerint csökkenő</option>
+                  <option value="km-asc">Rendezés: Km szerint növekvő</option>
+                </select>
+              </label>
+              <div class="auto-desk-view" role="group" aria-label="Nézet">
+                <button type="button" class="auto-desk-view__btn is-active" data-desk-view="grid" aria-label="Rácsnézet" title="Rács">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
+                </button>
+                <button type="button" class="auto-desk-view__btn" data-desk-view="list" aria-label="Listanézet" title="Lista">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="1" y="2" width="3" height="3" rx="0.5"/><rect x="6" y="2.5" width="9" height="2" rx="0.5"/><rect x="1" y="6.5" width="3" height="3" rx="0.5"/><rect x="6" y="7" width="9" height="2" rx="0.5"/><rect x="1" y="11" width="3" height="3" rx="0.5"/><rect x="6" y="11.5" width="9" height="2" rx="0.5"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+          <section class="home-category-bar" id="home-category-bar" aria-label="Autó kategóriák"></section>
           <div class="home-listings-panel">
             <div id="home-grid-track" class="home-grid-track" role="list"></div>
-            <p id="home-empty" class="home-empty" hidden>
-              Még nincs teherautó-hirdetés. Importálj, mentsd az adatbázisba, majd frissítsd az oldalt.
-            </p>
+            <p id="home-empty" class="home-empty" hidden>Még nincs teherautó-hirdetés. Importálj, mentsd az adatbázisba, majd frissítsd az oldalt.</p>
             <section class="home-ad-strip home-ad-strip--bottom" aria-label="Banner hirdetések a listában">
               <div class="home-ad-strip-inner">
                 <article class="home-ad-slot" data-ad-slot="grid-bottom-left">
@@ -384,6 +560,14 @@
       </div>
     </main>
 
+    <script src="/js/home-app.js?v=teherDesk1" type="module"></script>
+    <script src="/js/auto-hero.js?v=searchCollapse1" type="module"></script>
+    <script src="/js/site-avatar-menu.js?v=settingsOpen1" type="module"></script>
+
+    <script src="/js/nav-counts.js?v=navCount2" type="module"></script>
+    <script src="/js/theme.js?v=teherDesk1" type="module"></script>
+    <script src="/js/site-auth.js?v=authAcct1" type="module"></script>
+
     <script>
       (function () {
         var kat = new URLSearchParams(location.search).get("kategoria") || "35-alatt";
@@ -397,18 +581,9 @@
         var post = document.getElementById("teher-post-link");
         if (post) {
           post.href =
-            "/hirdetesfeladas.html?vertical=teher&subtype=" +
-            encodeURIComponent(subtype) +
-            "&start=1";
+            "/hirdetesfeladas.html?vertical=teher&subtype=" + subtype + "&start=1";
         }
       })();
     </script>
-    <script src="/js/home-app.js?v=autoDesk14" type="module"></script>
-    <script src="/js/auto-hero.js?v=pkwLkw1" type="module"></script>
-    <script src="/js/site-avatar-menu.js?v=settingsOpen1" type="module"></script>
-
-    <script src="/js/nav-counts.js?v=navCount2" type="module"></script>
-    <script src="/js/theme.js?v=willhabenHdr1" type="module"></script>
-    <script src="/js/site-auth.js?v=authGateFix1" type="module"></script>
 </body>
 </html>

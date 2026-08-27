@@ -1,17 +1,17 @@
 /**
  * Autó asztali — 2-es demó elrendezés.
  * Világos / sötét a html[data-theme] + fejléc kapcsoló szerint.
- * Csak ≥901px + data-site-page=auto.
+ * Csak ≥901px + data-site-page=auto|teherauto.
  */
 
 @media (min-width: 901px) {
   /* —— Világos (alap + light) —— */
-  html:not([data-theme="dark"]) body.home-page[data-site-page="auto"],
-  html[data-theme="light"] body.home-page[data-site-page="auto"],
-  html:not([data-theme="dark"]) body.home-page[data-site-page="auto"].site-app,
-  html[data-theme="light"] body.home-page[data-site-page="auto"].site-app,
-  html:not([data-theme="dark"]) body.home-page[data-site-page="auto"].site-page,
-  html[data-theme="light"] body.home-page[data-site-page="auto"].site-page {
+  html:not([data-theme="dark"]) body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]),
+  html[data-theme="light"] body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]),
+  html:not([data-theme="dark"]) body.home-page.site-app:is([data-site-page="auto"], [data-site-page="teherauto"]),
+  html[data-theme="light"] body.home-page.site-app:is([data-site-page="auto"], [data-site-page="teherauto"]),
+  html:not([data-theme="dark"]) body.home-page.site-page:is([data-site-page="auto"], [data-site-page="teherauto"]),
+  html[data-theme="light"] body.home-page.site-page:is([data-site-page="auto"], [data-site-page="teherauto"]) {
     --ad-bg: #f3f3f3;
     --ad-header: #ffffff;
     --ad-panel: #ffffff;
@@ -32,9 +32,9 @@
   }
 
   /* —— Sötét (kapcsoló) —— */
-  html[data-theme="dark"] body.home-page[data-site-page="auto"],
-  html[data-theme="dark"] body.home-page[data-site-page="auto"].site-app,
-  html[data-theme="dark"] body.home-page[data-site-page="auto"].site-page {
+  html[data-theme="dark"] body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]),
+  html[data-theme="dark"] body.home-page.site-app:is([data-site-page="auto"], [data-site-page="teherauto"]),
+  html[data-theme="dark"] body.home-page.site-page:is([data-site-page="auto"], [data-site-page="teherauto"]) {
     --ad-bg: #1f1f1f;
     --ad-header: #161615;
     --ad-panel: #1d1d1d;
@@ -55,8 +55,8 @@
   }
 
   /* —— Fejléc —— */
-  body.home-page[data-site-page="auto"] .hub-header,
-  body.home-page[data-site-page="auto"] .home-header {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-header,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-header {
     background: var(--ad-header) !important;
     border: 0 !important;
     border-bottom: 1px solid var(--ad-line) !important;
@@ -64,7 +64,7 @@
   }
 
   /* Egy sor: logó | középre menü | jobb akciók (grid-area, nem abszolút) */
-  body.home-page[data-site-page="auto"] .hub-header-inner {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-header-inner {
     max-width: 1440px;
     margin: 0 auto;
     padding: 0 24px;
@@ -79,7 +79,7 @@
     flex-direction: unset !important;
   }
 
-  body.home-page[data-site-page="auto"] .hub-nav-band {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-band {
     display: contents !important;
     height: auto !important;
     min-height: 0 !important;
@@ -88,7 +88,7 @@
     padding: 0 !important;
   }
 
-  body.home-page[data-site-page="auto"] .hub-logo {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-logo {
     grid-area: logo;
     justify-self: start;
     align-self: center;
@@ -102,15 +102,15 @@
     pointer-events: auto;
   }
 
-  body.home-page[data-site-page="auto"] .bymy-logo-img--nav,
-  body.home-page[data-site-page="auto"] .hub-logo .bymy-logo-img--nav,
-  body.home-page[data-site-page="auto"].site-app .hub-logo .bymy-logo-img--nav {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .bymy-logo-img--nav,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-logo .bymy-logo-img--nav,
+  body.home-page.site-app:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-logo .bymy-logo-img--nav {
     height: 40px !important;
     max-width: 140px !important;
     width: auto !important;
   }
 
-  body.home-page[data-site-page="auto"] .hub-nav {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav {
     grid-area: nav;
     justify-self: center;
     align-self: center;
@@ -132,7 +132,7 @@
     overflow: visible;
   }
 
-  body.home-page[data-site-page="auto"] .hub-header-top {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-header-top {
     grid-area: actions;
     justify-self: end;
     align-self: center;
@@ -146,7 +146,7 @@
     justify-content: flex-end;
   }
 
-  body.home-page[data-site-page="auto"] .hub-nav-link {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link {
     color: var(--ad-text) !important;
     font-size: 14px !important;
     font-weight: 500 !important;
@@ -157,30 +157,30 @@
     white-space: nowrap;
   }
 
-  body.home-page[data-site-page="auto"] .hub-nav-link.active {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link.active {
     color: var(--ad-text) !important;
     border-bottom: 2px solid var(--ad-yellow) !important;
     padding-bottom: 2px !important;
   }
 
-  body.home-page[data-site-page="auto"] .hub-nav-link .nav-count {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link .nav-count {
     color: var(--ad-muted) !important;
   }
 
-  body.home-page[data-site-page="auto"] .hub-header-msg,
-  body.home-page[data-site-page="auto"] .hub-btn--ghost,
-  body.home-page[data-site-page="auto"] .site-header-firstname,
-  body.home-page[data-site-page="auto"] .hub-header .site-header-profile {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-header-msg,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-btn--ghost,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .site-header-firstname,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-header .site-header-profile {
     color: var(--ad-text) !important;
   }
 
-  body.home-page[data-site-page="auto"] .hub-btn--ghost {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-btn--ghost {
     background: transparent !important;
     border-color: transparent !important;
     font-weight: 500;
   }
 
-  body.home-page[data-site-page="auto"] .hub-btn--post {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-btn--post {
     background: var(--ad-yellow) !important;
     border-color: var(--ad-yellow) !important;
     color: var(--ad-yellow-ink) !important;
@@ -190,7 +190,7 @@
     min-height: 0 !important;
   }
 
-  body.home-page[data-site-page="auto"] .hub-theme-toggle {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-theme-toggle {
     border-color: var(--ad-line) !important;
     opacity: 1;
     z-index: 5;
@@ -199,12 +199,12 @@
     background: linear-gradient(90deg, #fff 50%, #4b5563 50%) !important;
   }
 
-  html[data-theme="dark"] body.home-page[data-site-page="auto"] .hub-theme-toggle {
+  html[data-theme="dark"] body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-theme-toggle {
     background: linear-gradient(90deg, #e5e7eb 50%, #111827 50%) !important;
   }
 
   /* —— Fő rács: fülek felül (teherautó nélkül), kereső BAL, találatok JOBB —— */
-  body.home-page[data-site-page="auto"] .home-main.auto-desk-main {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main {
     display: grid !important;
     grid-template-columns: 320px minmax(0, 1fr) !important;
     grid-template-rows: auto auto !important;
@@ -220,7 +220,7 @@
     min-height: calc(100vh - 56px);
   }
 
-  body.home-page[data-site-page="auto"] .home-main.auto-desk-main > .auto-search-tabs {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main > .auto-search-tabs {
     display: grid !important;
     grid-column: 1 / -1 !important;
     grid-row: 1 / 2 !important;
@@ -234,7 +234,11 @@
     border: 1px solid var(--ad-line);
   }
 
-  body.home-page[data-site-page="auto"] .home-main.auto-desk-main > .auto-search-tabs .auto-search-tab {
+  body.home-page[data-site-page="teherauto"] .home-main.auto-desk-main > .auto-search-tabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main > .auto-search-tabs .auto-search-tab {
     color: var(--ad-muted) !important;
     background: transparent !important;
     border-right: 1px solid var(--ad-line) !important;
@@ -243,16 +247,16 @@
     min-height: 48px;
   }
 
-  body.home-page[data-site-page="auto"] .home-main.auto-desk-main > .auto-search-tabs .auto-search-tab:last-child {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main > .auto-search-tabs .auto-search-tab:last-child {
     border-right: 0 !important;
   }
 
-  body.home-page[data-site-page="auto"] .home-main.auto-desk-main > .auto-search-tabs .auto-search-tab.is-active {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main > .auto-search-tabs .auto-search-tab.is-active {
     color: var(--ad-text) !important;
     background: var(--ad-panel) !important;
   }
 
-  body.home-page[data-site-page="auto"] .home-main.auto-desk-main > .auto-search-hero {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main > .auto-search-hero {
     grid-column: 1 / 2 !important;
     grid-row: 2 / 3 !important;
     width: 320px !important;
@@ -265,20 +269,20 @@
     align-self: start !important;
   }
 
-  body.home-page[data-site-page="auto"] .auto-search-hero {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-hero {
     position: sticky;
   }
 
   /* abszolút panel a bal oszlopban */
-  body.home-page[data-site-page="auto"] .auto-search-hero,
-  body.home-page[data-site-page="auto"] .auto-search-hero__stage,
-  body.home-page[data-site-page="auto"] .auto-search-hero__content,
-  body.home-page[data-site-page="auto"] .auto-search-panel {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-hero,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-hero__stage,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-hero__content,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel {
     position: relative;
   }
 
-  body.home-page[data-site-page="auto"] .home-main.auto-desk-main > .home-layout.site-layout,
-  body.home-page[data-site-page="auto"] .home-main.auto-desk-main > .site-layout {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main > .home-layout.site-layout,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main > .site-layout {
     grid-column: 2 / 3 !important;
     grid-row: 2 / 3 !important;
     width: auto !important;
@@ -288,42 +292,42 @@
     justify-self: stretch !important;
   }
 
-  body.home-page[data-site-page="auto"] .home-layout,
-  body.home-page[data-site-page="auto"] .site-layout,
-  body.home-page[data-site-page="auto"] .home-center,
-  body.home-page[data-site-page="auto"] .site-center,
-  body.home-page[data-site-page="auto"] .home-listings-panel,
-  body.home-page[data-site-page="auto"] .auto-search-hero,
-  body.home-page[data-site-page="auto"] .auto-search-hero__stage,
-  body.home-page[data-site-page="auto"] .auto-search-panel,
-  body.home-page[data-site-page="auto"] .auto-search-body {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-layout,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .site-layout,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-center,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .site-center,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-listings-panel,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-hero,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-hero__stage,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-body {
     background: transparent !important;
     box-shadow: none !important;
     border: 0 !important;
     color: var(--ad-text);
   }
 
-  body.home-page[data-site-page="auto"] .auto-search-hero__image,
-  body.home-page[data-site-page="auto"] .auto-search-hero__brand,
-  body.home-page[data-site-page="auto"] .auto-search-hero__stage::before,
-  body.home-page[data-site-page="auto"] .auto-search-hero__stage::after,
-  body.home-page[data-site-page="auto"] .auto-search-toggle,
-  body.home-page[data-site-page="auto"] .auto-kivitel-nav,
-  body.home-page[data-site-page="auto"] .home-category-bar,
-  body.home-page[data-site-page="auto"] .home-ad-strip,
-  body.home-page[data-site-page="auto"] .home-bottom-extra,
-  body.home-page[data-site-page="auto"] .home-qs-actions-secondary,
-  body.home-page[data-site-page="auto"] .home-qs-status {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-hero__image,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-hero__brand,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-hero__stage::before,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-hero__stage::after,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-toggle,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-kivitel-nav,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-category-bar,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-ad-strip,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-bottom-extra,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-qs-actions-secondary,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-qs-status {
     display: none !important;
   }
 
-  body.home-page[data-site-page="auto"] .auto-search-hero__stage {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-hero__stage {
     min-height: 0 !important;
     height: auto !important;
     overflow: visible !important;
   }
 
-  body.home-page[data-site-page="auto"] .auto-search-hero__content {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-hero__content {
     position: static !important;
     inset: auto !important;
     transform: none !important;
@@ -332,8 +336,8 @@
     padding: 0 !important;
   }
 
-  body.home-page[data-site-page="auto"] .auto-search-panel,
-  body.home-page[data-site-page="auto"] .auto-search-body {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-body {
     display: block !important;
     width: 100%;
     max-width: none;
@@ -343,7 +347,7 @@
   }
 
   /* —— Gyors / Részletes —— */
-  body.home-page[data-site-page="auto"] .auto-desk-mode {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-mode {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 0;
@@ -355,7 +359,7 @@
     background: var(--ad-elev);
   }
 
-  body.home-page[data-site-page="auto"] .auto-desk-mode__btn {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-mode__btn {
     appearance: none;
     border: 0;
     border-radius: 0;
@@ -368,13 +372,13 @@
     background: transparent;
   }
 
-  body.home-page[data-site-page="auto"] .auto-desk-mode__btn.is-active {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-mode__btn.is-active {
     background: var(--ad-yellow);
     color: var(--ad-yellow-ink);
   }
 
   /* —— Accordion panelek —— */
-  body.home-page[data-site-page="auto"] .auto-desk-acc {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-acc {
     border: 1px solid var(--ad-line);
     border-radius: 8px;
     background: var(--ad-panel);
@@ -382,7 +386,7 @@
     overflow: hidden;
   }
 
-  body.home-page[data-site-page="auto"] .auto-desk-acc__head {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-acc__head {
     display: none;
     width: 100%;
     appearance: none;
@@ -401,88 +405,88 @@
     gap: 8px;
   }
 
-  body.home-page[data-site-page="auto"].auto-desk-reszletes .auto-desk-acc__head {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-reszletes .auto-desk-acc__head {
     display: flex;
   }
 
-  body.home-page[data-site-page="auto"].auto-desk-reszletes .auto-desk-acc.is-open .auto-desk-acc__head {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-reszletes .auto-desk-acc.is-open .auto-desk-acc__head {
     border-bottom-color: var(--ad-line);
   }
 
-  body.home-page[data-site-page="auto"] .auto-desk-acc__sum {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-acc__sum {
     margin-left: auto;
     font-weight: 500;
     font-size: 13px;
     color: var(--ad-muted);
   }
 
-  body.home-page[data-site-page="auto"] .auto-desk-acc__chev {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-acc__chev {
     color: var(--ad-muted);
     font-size: 10px;
     line-height: 1;
   }
 
-  body.home-page[data-site-page="auto"].auto-desk-gyors .auto-desk-fields[data-desk-alap] .auto-desk-field[data-desk-quick="0"] {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-gyors .auto-desk-fields[data-desk-alap] .auto-desk-field[data-desk-quick="0"] {
     display: none !important;
   }
 
-  body.home-page[data-site-page="auto"].auto-desk-gyors .auto-desk-acc__head {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-gyors .auto-desk-acc__head {
     display: none !important;
   }
 
-  body.home-page[data-site-page="auto"].auto-desk-gyors .auto-desk-acc__body {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-gyors .auto-desk-acc__body {
     display: block !important;
     padding: 12px 12px 14px;
   }
 
-  body.home-page[data-site-page="auto"].auto-desk-gyors [data-desk-acc="muszaki"],
-  body.home-page[data-site-page="auto"].auto-desk-gyors [data-desk-acc="extrak"] {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-gyors [data-desk-acc="muszaki"],
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-gyors [data-desk-acc="extrak"] {
     display: none !important;
   }
 
-  body.home-page[data-site-page="auto"].auto-desk-gyors [data-desk-acc="alap"] {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-gyors [data-desk-acc="alap"] {
     border: 1px solid var(--ad-line);
     background: var(--ad-panel);
   }
 
-  body.home-page[data-site-page="auto"].auto-desk-reszletes .auto-desk-acc__body {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-reszletes .auto-desk-acc__body {
     display: none;
     padding: 12px 12px 14px;
   }
 
-  body.home-page[data-site-page="auto"].auto-desk-reszletes .auto-desk-acc.is-open .auto-desk-acc__body {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-reszletes .auto-desk-acc.is-open .auto-desk-acc__body {
     display: block;
   }
 
-  body.home-page[data-site-page="auto"].auto-desk-reszletes .auto-desk-acc.is-open .auto-desk-acc__chev {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-reszletes .auto-desk-acc.is-open .auto-desk-acc__chev {
     transform: rotate(180deg);
   }
 
-  body.home-page[data-site-page="auto"].auto-desk-reszletes #qs-more,
-  body.home-page[data-site-page="auto"].auto-desk-reszletes #qs-detailed-panel {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-reszletes #qs-more,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-reszletes #qs-detailed-panel {
     display: block !important;
   }
 
   /* —— Natív select mezők (dob nélkül) —— */
-  body.home-page[data-site-page="auto"] .auto-desk-fields {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-fields {
     display: flex;
     flex-direction: column;
     gap: 12px;
   }
 
-  body.home-page[data-site-page="auto"] .auto-desk-field {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-field {
     display: flex;
     flex-direction: column;
     gap: 6px;
     min-width: 0;
   }
 
-  body.home-page[data-site-page="auto"] .auto-desk-field__label,
-  body.home-page[data-site-page="auto"] .auto-search-panel .home-qs-label,
-  body.home-page[data-site-page="auto"] .auto-search-panel .immo-schema-label,
-  body.home-page[data-site-page="auto"] .auto-search-panel .immo-label,
-  body.home-page[data-site-page="auto"] .auto-search-panel .qs-detailed-range__label,
-  body.home-page[data-site-page="auto"] .auto-search-panel .qs-detailed-select__label {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-field__label,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .home-qs-label,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .immo-schema-label,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .immo-label,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .qs-detailed-range__label,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .qs-detailed-select__label {
     color: var(--ad-text) !important;
     font-size: 13px !important;
     font-weight: 600 !important;
@@ -492,55 +496,55 @@
     padding: 0 !important;
   }
 
-  body.home-page[data-site-page="auto"] .auto-desk-range {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-range {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 8px;
   }
 
-  body.home-page[data-site-page="auto"] .auto-search-panel .home-qs-field,
-  body.home-page[data-site-page="auto"] .auto-search-panel .home-qs-pair,
-  body.home-page[data-site-page="auto"] .auto-search-panel .home-qs-grid,
-  body.home-page[data-site-page="auto"] .auto-search-panel .home-qs-layout-main,
-  body.home-page[data-site-page="auto"] .auto-search-panel .home-qs-more-layout,
-  body.home-page[data-site-page="auto"] .auto-search-panel .home-qs-grid-cell {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .home-qs-field,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .home-qs-pair,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .home-qs-grid,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .home-qs-layout-main,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .home-qs-more-layout,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .home-qs-grid-cell {
     display: contents;
   }
 
   /* Muszaki maradék mezők: ne contents, hanem oszlop */
-  body.home-page[data-site-page="auto"] .auto-desk-fields[data-desk-more-rest] .home-qs-field,
-  body.home-page[data-site-page="auto"] .auto-desk-fields[data-desk-more-rest] .home-qs-pair,
-  body.home-page[data-site-page="auto"] .auto-desk-fields[data-desk-more-rest] .home-qs-grid-cell,
-  body.home-page[data-site-page="auto"] .auto-desk-fields[data-desk-more-rest] [data-qs-field] {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-fields[data-desk-more-rest] .home-qs-field,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-fields[data-desk-more-rest] .home-qs-pair,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-fields[data-desk-more-rest] .home-qs-grid-cell,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-fields[data-desk-more-rest] [data-qs-field] {
     display: flex !important;
     flex-direction: column;
     gap: 6px;
     min-width: 0;
   }
 
-  body.home-page[data-site-page="auto"] .auto-desk-fields[data-desk-more-rest] .home-qs-pair {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-fields[data-desk-more-rest] .home-qs-pair {
     display: grid !important;
     grid-template-columns: 1fr 1fr;
     gap: 8px;
   }
 
-  body.home-page[data-site-page="auto"] .auto-desk-fields[data-desk-more-rest] .home-qs-label {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-fields[data-desk-more-rest] .home-qs-label {
     display: block !important;
   }
 
-  body.home-page[data-site-page="auto"] .auto-search-panel .home-qs-more,
-  body.home-page[data-site-page="auto"] .auto-search-panel .home-qs-detailed {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .home-qs-more,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .home-qs-detailed {
     background: transparent !important;
     border: 0 !important;
     padding: 0 !important;
     margin: 0 !important;
   }
 
-  body.home-page[data-site-page="auto"] .auto-search-panel select.home-qs-control,
-  body.home-page[data-site-page="auto"] .auto-search-panel select,
-  body.home-page[data-site-page="auto"] .auto-search-panel input.home-qs-control,
-  body.home-page[data-site-page="auto"] .auto-search-panel input.immo-control,
-  body.home-page[data-site-page="auto"] .auto-desk-sort select {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel select.home-qs-control,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel select,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel input.home-qs-control,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel input.immo-control,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-sort select {
     appearance: none;
     -webkit-appearance: none;
     width: 100%;
@@ -560,7 +564,7 @@
     color-scheme: inherit;
   }
 
-  body.home-page[data-site-page="auto"] .auto-desk-sort select {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-sort select {
     width: auto;
     min-width: 220px;
     min-height: 0;
@@ -569,33 +573,33 @@
   }
 
   /* Legördülő lista (option) — fekete, mint a gyártmány menü */
-  body.home-page[data-site-page="auto"] select option,
-  body.home-page[data-site-page="auto"] select optgroup {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) select option,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) select optgroup {
     background-color: var(--ad-dropdown) !important;
     background: var(--ad-dropdown) !important;
     color: var(--ad-text) !important;
   }
 
-  body.home-page[data-site-page="auto"] .auto-search-panel .home-qs-suffix {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .home-qs-suffix {
     display: none !important;
   }
 
-  body.home-page[data-site-page="auto"] .auto-search-panel .qs-detailed-acc {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .qs-detailed-acc {
     border-color: var(--ad-line) !important;
     background: var(--ad-panel) !important;
     color: var(--ad-text) !important;
   }
 
-  body.home-page[data-site-page="auto"] .auto-search-panel .qs-detailed-acc__summary,
-  body.home-page[data-site-page="auto"] .auto-search-panel .qs-detailed-toggles label,
-  body.home-page[data-site-page="auto"] .auto-search-panel .qs-detailed-range,
-  body.home-page[data-site-page="auto"] .auto-search-panel .qs-detailed-select {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .qs-detailed-acc__summary,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .qs-detailed-toggles label,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .qs-detailed-range,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .qs-detailed-select {
     color: var(--ad-text) !important;
   }
 
-  body.home-page[data-site-page="auto"] .auto-search-panel .qs-detailed-select select,
-  body.home-page[data-site-page="auto"] .auto-search-panel .qs-detailed-range select,
-  body.home-page[data-site-page="auto"] .auto-search-panel .qs-detailed-range input {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .qs-detailed-select select,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .qs-detailed-range select,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .qs-detailed-range input {
     background-color: var(--ad-dropdown) !important;
     color: var(--ad-text) !important;
     border-color: var(--ad-line) !important;
@@ -603,7 +607,7 @@
   }
 
   /* —— CTA —— */
-  body.home-page[data-site-page="auto"] .home-qs-row--actions {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-qs-row--actions {
     display: grid;
     grid-template-columns: 0.9fr 1.4fr;
     gap: 10px;
@@ -611,7 +615,7 @@
     align-items: stretch;
   }
 
-  body.home-page[data-site-page="auto"] .auto-desk-reset {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-reset {
     appearance: none;
     display: block;
     width: 100%;
@@ -627,7 +631,7 @@
     color: var(--ad-text);
   }
 
-  body.home-page[data-site-page="auto"] .home-qs-submit {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-qs-submit {
     width: 100%;
     border-radius: 6px;
     padding: 12px 10px;
@@ -642,7 +646,7 @@
     gap: 8px;
   }
 
-  body.home-page[data-site-page="auto"] .home-qs-submit::before {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-qs-submit::before {
     content: "";
     width: 14px;
     height: 14px;
@@ -654,7 +658,7 @@
   }
 
   /* —— Találati sáv —— */
-  body.home-page[data-site-page="auto"] .auto-desk-results-bar {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-results-bar {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -665,21 +669,21 @@
     border-bottom: 1px solid var(--ad-line);
   }
 
-  body.home-page[data-site-page="auto"] .auto-desk-results-bar__count {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-results-bar__count {
     margin: 0;
     font-weight: 600;
     font-size: 18px;
     color: var(--ad-text);
   }
 
-  body.home-page[data-site-page="auto"] .auto-desk-results-bar__tools {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-results-bar__tools {
     display: flex;
     align-items: center;
     gap: 10px;
     flex-wrap: wrap;
   }
 
-  body.home-page[data-site-page="auto"] .auto-desk-sort {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-sort {
     display: flex;
     align-items: center;
     gap: 0;
@@ -687,7 +691,7 @@
     color: var(--ad-muted);
   }
 
-  body.home-page[data-site-page="auto"] .auto-desk-sort__label {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-sort__label {
     position: absolute;
     width: 1px;
     height: 1px;
@@ -695,7 +699,7 @@
     clip: rect(0 0 0 0);
   }
 
-  body.home-page[data-site-page="auto"] .auto-desk-view {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-view {
     display: inline-flex;
     gap: 0;
     padding: 0;
@@ -705,7 +709,7 @@
     overflow: hidden;
   }
 
-  body.home-page[data-site-page="auto"] .auto-desk-view__btn {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-view__btn {
     appearance: none;
     border: 0;
     width: 38px;
@@ -719,39 +723,39 @@
     border-right: 1px solid var(--ad-line);
   }
 
-  body.home-page[data-site-page="auto"] .auto-desk-view__btn:last-child {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-view__btn:last-child {
     border-right: 0;
   }
 
-  body.home-page[data-site-page="auto"] .auto-desk-view__btn.is-active {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-view__btn.is-active {
     color: var(--ad-yellow);
     background: var(--ad-surface-2);
   }
 
-  body.home-page[data-site-page="auto"] .home-empty {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-empty {
     color: var(--ad-muted) !important;
     background: transparent !important;
   }
 
   /* —— Kártyarács —— */
-  body.home-page[data-site-page="auto"] #home-grid-track,
-  body.home-page[data-site-page="auto"] .home-grid-track {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) #home-grid-track,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-grid-track {
     display: grid !important;
     grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
     gap: 18px !important;
     background: transparent !important;
   }
 
-  body.home-page[data-site-page="auto"] #home-grid-track.is-list-view {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) #home-grid-track.is-list-view {
     grid-template-columns: 1fr !important;
   }
 
-  body.home-page[data-site-page="auto"] #home-grid-track.is-list-view .home-grid-card {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) #home-grid-track.is-list-view .home-grid-card {
     display: grid;
     grid-template-columns: 280px minmax(0, 1fr);
   }
 
-  body.home-page[data-site-page="auto"] .home-grid-card {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-grid-card {
     background: var(--ad-panel) !important;
     border: 1px solid var(--ad-line) !important;
     border-radius: 8px !important;
@@ -760,18 +764,18 @@
     color: var(--ad-text) !important;
   }
 
-  body.home-page[data-site-page="auto"] .home-grid-card:hover {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-grid-card:hover {
     transform: none !important;
     box-shadow: none !important;
     border-color: #3f3f3f !important;
   }
 
-  body.home-page[data-site-page="auto"] .home-grid-card-media {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-grid-card-media {
     aspect-ratio: 16 / 10;
     background: var(--ad-surface-3) !important;
   }
 
-  body.home-page[data-site-page="auto"] .home-grid-card-save {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-grid-card-save {
     top: 10px !important;
     right: 10px !important;
     width: 34px !important;
@@ -784,15 +788,15 @@
     filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.7));
   }
 
-  body.home-page[data-site-page="auto"] .home-grid-card-save.is-on {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-grid-card-save.is-on {
     color: #f43f5e !important;
   }
 
-  body.home-page[data-site-page="auto"] .home-grid-card-save.is-on path {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-grid-card-save.is-on path {
     fill: currentColor;
   }
 
-  body.home-page[data-site-page="auto"] .home-grid-card-body {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-grid-card-body {
     padding: 14px 14px 16px !important;
     gap: 8px !important;
     color: var(--ad-text) !important;
@@ -800,7 +804,7 @@
     text-decoration: none !important;
   }
 
-  body.home-page[data-site-page="auto"] .home-grid-card-title {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-grid-card-title {
     margin: 0 !important;
     font-size: 18px !important;
     font-weight: 800 !important;
@@ -811,7 +815,7 @@
     -webkit-line-clamp: 1;
   }
 
-  body.home-page[data-site-page="auto"] .home-grid-card-sub {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-grid-card-sub {
     margin: 0 !important;
     font-size: 14px !important;
     font-weight: 400 !important;
@@ -823,14 +827,14 @@
     overflow: hidden;
   }
 
-  body.home-page[data-site-page="auto"] .home-grid-card-specs {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-grid-card-specs {
     display: flex !important;
     flex-wrap: wrap;
     gap: 10px 16px;
     margin: 2px 0 4px !important;
   }
 
-  body.home-page[data-site-page="auto"] .home-grid-card-spec {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-grid-card-spec {
     display: inline-flex !important;
     align-items: center;
     gap: 7px;
@@ -839,19 +843,19 @@
     color: var(--ad-text) !important;
   }
 
-  body.home-page[data-site-page="auto"] .home-grid-card-spec svg {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-grid-card-spec svg {
     width: 14px;
     height: 14px;
     flex: 0 0 auto;
     opacity: 0.95;
   }
 
-  body.home-page[data-site-page="auto"] .home-grid-card-spec::before {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-grid-card-spec::before {
     content: none !important;
     display: none !important;
   }
 
-  body.home-page[data-site-page="auto"] .home-grid-card-price {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-grid-card-price {
     margin: 6px 0 2px !important;
     font-size: 22px !important;
     font-weight: 800 !important;
@@ -859,7 +863,7 @@
     letter-spacing: -0.01em;
   }
 
-  body.home-page[data-site-page="auto"] .home-grid-card-loc {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-grid-card-loc {
     margin: 0 !important;
     display: inline-flex !important;
     align-items: center;
@@ -868,18 +872,18 @@
     color: #cfcfcf !important;
   }
 
-  body.home-page[data-site-page="auto"] .home-grid-card-loc svg {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-grid-card-loc svg {
     width: 12px;
     height: 14px;
     flex: 0 0 auto;
   }
 
-  body.home-page[data-site-page="auto"] .home-grid-card-loc::before {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-grid-card-loc::before {
     content: none !important;
     display: none !important;
   }
 
-  body.home-page[data-site-page="auto"] .home-grid-card-meta {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-grid-card-meta {
     display: none !important;
   }
 }
@@ -908,22 +912,22 @@
 }
 
 @media (min-width: 901px) and (max-width: 1100px) {
-  body.home-page[data-site-page="auto"] .home-main.auto-desk-main {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main {
     grid-template-columns: 300px minmax(0, 1fr);
   }
 
-  body.home-page[data-site-page="auto"] #home-grid-track:not(.is-list-view) {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) #home-grid-track:not(.is-list-view) {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   }
 }
 
 /* —— Gyártmány/Típus multi panel (app-szerű) —— */
 @media (min-width: 901px) {
-  body.home-page[data-site-page="auto"] .auto-search-hero {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-hero {
     position: sticky;
   }
 
-  body.home-page[data-site-page="auto"] .auto-bm-trigger {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-trigger {
     appearance: none;
     display: flex;
     align-items: center;
@@ -942,13 +946,13 @@
     cursor: pointer;
   }
 
-  body.home-page[data-site-page="auto"] .auto-bm-trigger__chev {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-trigger__chev {
     color: var(--ad-muted);
     font-size: 18px;
     line-height: 1;
   }
 
-  body.home-page[data-site-page="auto"] .auto-bm-panel {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-panel {
     position: absolute;
     inset: 0;
     z-index: 20;
@@ -962,11 +966,11 @@
     max-height: calc(100vh - 100px);
   }
 
-  body.home-page[data-site-page="auto"] .auto-bm-panel[hidden] {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-panel[hidden] {
     display: none !important;
   }
 
-  body.home-page[data-site-page="auto"] .auto-bm-panel__chrome {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-panel__chrome {
     display: grid;
     grid-template-columns: 40px 1fr auto;
     align-items: center;
@@ -976,8 +980,8 @@
     background: var(--ad-surface-2);
   }
 
-  body.home-page[data-site-page="auto"] .auto-bm-panel__back,
-  body.home-page[data-site-page="auto"] .auto-bm-panel__done {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-panel__back,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-panel__done {
     appearance: none;
     border: 0;
     background: transparent;
@@ -989,29 +993,29 @@
     padding: 6px 4px;
   }
 
-  body.home-page[data-site-page="auto"] .auto-bm-panel__back {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-panel__back {
     font-size: 22px;
     line-height: 1;
   }
 
-  body.home-page[data-site-page="auto"] .auto-bm-panel__title {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-panel__title {
     margin: 0;
     font-size: 16px;
     font-weight: 800;
     color: var(--ad-text);
   }
 
-  body.home-page[data-site-page="auto"] .auto-bm-panel__sub {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-panel__sub {
     margin: 2px 0 0;
     font-size: 12px;
     color: var(--ad-muted);
   }
 
-  body.home-page[data-site-page="auto"] .auto-bm-panel__search {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-panel__search {
     padding: 10px 12px 0;
   }
 
-  body.home-page[data-site-page="auto"] .auto-bm-panel__search-input {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-panel__search-input {
     width: 100%;
     box-sizing: border-box;
     min-height: 38px;
@@ -1026,25 +1030,25 @@
     cursor: pointer;
   }
 
-  body.home-page[data-site-page="auto"] .auto-bm-panel__search-input:focus,
-  body.home-page[data-site-page="auto"] .auto-bm-panel__search-input:focus-visible {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-panel__search-input:focus,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-panel__search-input:focus-visible {
     outline: 2px solid var(--ad-yellow);
     outline-offset: 1px;
     border-color: var(--ad-yellow);
   }
 
-  body.home-page[data-site-page="auto"] .auto-bm-panel.is-closed,
-  body.home-page[data-site-page="auto"] .auto-bm-panel[hidden] {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-panel.is-closed,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-panel[hidden] {
     display: none !important;
   }
 
-  body.home-page[data-site-page="auto"] .auto-bm-panel__body {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-panel__body {
     flex: 1 1 auto;
     overflow: auto;
     padding: 12px;
   }
 
-  body.home-page[data-site-page="auto"] .auto-bm-hint {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-hint {
     margin: 0 0 6px;
     font-size: 11px;
     font-weight: 700;
@@ -1053,7 +1057,7 @@
     color: var(--ad-muted);
   }
 
-  body.home-page[data-site-page="auto"] .auto-bm-clear {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-clear {
     appearance: none;
     border: 0;
     background: transparent;
@@ -1065,18 +1069,18 @@
     padding: 0 0 10px;
   }
 
-  body.home-page[data-site-page="auto"] .auto-bm-group {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-group {
     border: 1px solid var(--ad-line);
     border-radius: 10px;
     background: var(--ad-panel);
     overflow: hidden;
   }
 
-  body.home-page[data-site-page="auto"] .auto-bm-row + .auto-bm-row {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-row + .auto-bm-row {
     border-top: 1px solid var(--ad-line);
   }
 
-  body.home-page[data-site-page="auto"] .auto-bm-toggle {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-toggle {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -1088,13 +1092,13 @@
     cursor: pointer;
   }
 
-  body.home-page[data-site-page="auto"] .auto-bm-toggle input {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-toggle input {
     position: absolute;
     opacity: 0;
     pointer-events: none;
   }
 
-  body.home-page[data-site-page="auto"] .auto-bm-switch {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-switch {
     width: 46px;
     height: 28px;
     border-radius: 999px;
@@ -1104,7 +1108,7 @@
     transition: background 0.15s;
   }
 
-  body.home-page[data-site-page="auto"] .auto-bm-switch::after {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-switch::after {
     content: "";
     position: absolute;
     top: 3px;
@@ -1116,15 +1120,15 @@
     transition: transform 0.15s;
   }
 
-  body.home-page[data-site-page="auto"] .auto-bm-toggle input:checked + .auto-bm-switch {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-toggle input:checked + .auto-bm-switch {
     background: #34c759;
   }
 
-  body.home-page[data-site-page="auto"] .auto-bm-toggle input:checked + .auto-bm-switch::after {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-toggle input:checked + .auto-bm-switch::after {
     transform: translateX(18px);
   }
 
-  body.home-page[data-site-page="auto"] .auto-bm-subrow {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-subrow {
     appearance: none;
     display: flex;
     align-items: center;
@@ -1142,7 +1146,7 @@
     cursor: pointer;
   }
 
-  body.home-page[data-site-page="auto"] .auto-bm-subrow__val {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-subrow__val {
     color: var(--ad-muted);
     flex: 0 1 auto;
     max-width: 45%;
@@ -1151,7 +1155,7 @@
     white-space: nowrap;
   }
 
-  body.home-page[data-site-page="auto"] .auto-bm-empty {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-empty {
     margin: 0;
     padding: 20px 14px;
     color: var(--ad-muted);

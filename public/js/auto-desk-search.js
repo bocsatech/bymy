@@ -1,9 +1,14 @@
 /**
  * Autó oldal — asztali kereső: Gyors / Részletes + demó mezősorrend.
- * Csak desktop (min-width 901px), data-site-page=auto.
+ * Csak desktop (min-width 901px), data-site-page=auto|teherauto.
  */
 
 const DESK_MQ = "(min-width: 901px)";
+
+function isVehicleDeskPage() {
+  const page = document.body?.getAttribute("data-site-page");
+  return page === "auto" || page === "teherauto";
+}
 
 /** Demó Alap adatok sorrend (2-es kép). */
 const DESK_ALAP_ORDER = [
@@ -18,10 +23,7 @@ const DESK_ALAP_ORDER = [
 ];
 
 function isAutoDesk() {
-  return (
-    document.body?.getAttribute("data-site-page") === "auto" &&
-    window.matchMedia(DESK_MQ).matches
-  );
+  return isVehicleDeskPage() && window.matchMedia(DESK_MQ).matches;
 }
 
 function setMode(mode) {
@@ -257,7 +259,7 @@ export function arrangeAutoDeskDemoFields(form = document.getElementById("home-q
   syncGyorsFieldVisibility(form);
 
   // App-szerű gyártmány/típus multi (asztali)
-  void import("./auto-brand-model-picker.js?v=autoDesk16")
+  void import("./auto-brand-model-picker.js?v=teherDesk1")
     .then((mod) => mod.mountAutoBrandModelPicker(form))
     .catch((error) => console.warn("Gyártmány picker:", error));
 }
@@ -307,7 +309,7 @@ export function initAutoDeskSearch({
   onSortChange,
   onViewChange,
 } = {}) {
-  if (document.body?.getAttribute("data-site-page") !== "auto") return;
+  if (!isVehicleDeskPage()) return;
 
   const form = document.getElementById("home-qs-form");
   const morePanel = document.getElementById("qs-more");

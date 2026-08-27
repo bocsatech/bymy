@@ -13,8 +13,8 @@ import {
   initAutoDeskSearch,
   updateAutoDeskAccSummaries,
   arrangeAutoDeskDemoFields,
-} from "./auto-desk-search.js?v=autoDesk21";
-import { readBrandModelFilterValues } from "./auto-brand-model-picker.js?v=autoDesk16";
+} from "./auto-desk-search.js?v=teherDesk1";
+import { readBrandModelFilterValues } from "./auto-brand-model-picker.js?v=teherDesk1";
 
 const MOBILE_MQ = "(max-width: 900px)";
 const DESK_MQ = "(min-width: 901px)";
@@ -126,8 +126,9 @@ export function initHomeQuickSearch({ onSearch = () => {}, onDeskSortChange } = 
 
   applyAutoSearchLayout(form)
     .then(async () => {
+      const page = document.body?.getAttribute("data-site-page");
       const deskAuto =
-        document.body?.getAttribute("data-site-page") === "auto" &&
+        (page === "auto" || page === "teherauto") &&
         window.matchMedia(DESK_MQ).matches;
       // Asztali auto: natív select = demó dropdown (dob nélkül). Mobil / teher: dobok.
       if (!deskAuto) {

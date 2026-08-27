@@ -50,7 +50,8 @@ export function createHomeGridCard(item) {
   const photoUrls = collectPhotoUrls(item);
   const multi = photoUrls.length > 1;
   const detailHref = listingDetailHref(item.id);
-  const desk = document.body?.getAttribute("data-site-page") === "auto";
+  const page = document.body?.getAttribute("data-site-page");
+  const desk = page === "auto" || page === "teherauto";
   const preview = item?.preview || {};
   const form = item?.form || {};
   const yearNum = Number(preview.filter?.gyartasi_ev);

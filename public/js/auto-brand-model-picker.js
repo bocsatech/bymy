@@ -34,7 +34,8 @@ function writeJsonList(input, list) {
 
 function isAutoDesk() {
   return (
-    document.body?.getAttribute("data-site-page") === "auto" &&
+    (document.body?.getAttribute("data-site-page") === "auto" ||
+      document.body?.getAttribute("data-site-page") === "teherauto") &&
     window.matchMedia("(min-width: 901px)").matches
   );
 }

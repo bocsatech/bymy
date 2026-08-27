@@ -1,13 +1,17 @@
 /**
- * Autó asztali — 2-es demó elrendezés, inverz (világos) megjelenés.
- * Csak ≥901px + data-site-page=auto. Mobil / teherautó érintetlen.
+ * Autó asztali — 2-es demó elrendezés.
+ * Világos / sötét a html[data-theme] + fejléc kapcsoló szerint.
+ * Csak ≥901px + data-site-page=auto.
  */
 
 @media (min-width: 901px) {
-  html:has(body.home-page[data-site-page="auto"]),
-  body.home-page[data-site-page="auto"],
-  body.home-page[data-site-page="auto"].site-app,
-  body.home-page[data-site-page="auto"].site-page {
+  /* —— Világos (alap + light) —— */
+  html:not([data-theme="dark"]) body.home-page[data-site-page="auto"],
+  html[data-theme="light"] body.home-page[data-site-page="auto"],
+  html:not([data-theme="dark"]) body.home-page[data-site-page="auto"].site-app,
+  html[data-theme="light"] body.home-page[data-site-page="auto"].site-app,
+  html:not([data-theme="dark"]) body.home-page[data-site-page="auto"].site-page,
+  html[data-theme="light"] body.home-page[data-site-page="auto"].site-page {
     --ad-bg: #f3f3f3;
     --ad-header: #ffffff;
     --ad-panel: #ffffff;
@@ -25,6 +29,29 @@
     background-color: var(--ad-bg) !important;
     color: var(--ad-text);
     color-scheme: light;
+  }
+
+  /* —— Sötét (kapcsoló) —— */
+  html[data-theme="dark"] body.home-page[data-site-page="auto"],
+  html[data-theme="dark"] body.home-page[data-site-page="auto"].site-app,
+  html[data-theme="dark"] body.home-page[data-site-page="auto"].site-page {
+    --ad-bg: #1f1f1f;
+    --ad-header: #161615;
+    --ad-panel: #1d1d1d;
+    --ad-elev: #111111;
+    --ad-dropdown: #111111;
+    --ad-line: #3a3a3a;
+    --ad-text: #ffffff;
+    --ad-muted: #9a9a9c;
+    --ad-yellow: #f0c52c;
+    --ad-yellow-ink: #111111;
+    --ad-filter-w: 320px;
+    --ad-surface-2: #242424;
+    --ad-surface-3: #2a2a2a;
+    background: var(--ad-bg) !important;
+    background-color: var(--ad-bg) !important;
+    color: var(--ad-text);
+    color-scheme: dark;
   }
 
   /* —— Fejléc —— */
@@ -131,8 +158,16 @@
   }
 
   body.home-page[data-site-page="auto"] .hub-theme-toggle {
-    border-color: #444 !important;
-    opacity: 0.85;
+    border-color: var(--ad-line) !important;
+    opacity: 1;
+    z-index: 5;
+    pointer-events: auto;
+    cursor: pointer;
+    background: linear-gradient(90deg, #fff 50%, #4b5563 50%) !important;
+  }
+
+  html[data-theme="dark"] body.home-page[data-site-page="auto"] .hub-theme-toggle {
+    background: linear-gradient(90deg, #e5e7eb 50%, #111827 50%) !important;
   }
 
   /* —— Fő rács: kereső BAL, találatok JOBB —— */
@@ -458,7 +493,7 @@
     font: inherit;
     font-size: 14px !important;
     box-shadow: none !important;
-    color-scheme: light;
+    color-scheme: inherit;
   }
 
   body.home-page[data-site-page="auto"] .auto-desk-sort select {
@@ -500,7 +535,7 @@
     background-color: var(--ad-dropdown) !important;
     color: var(--ad-text) !important;
     border-color: var(--ad-line) !important;
-    color-scheme: light;
+    color-scheme: inherit;
   }
 
   /* —— CTA —— */

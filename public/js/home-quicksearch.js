@@ -2,19 +2,19 @@
  * Gyorskereső az autó hero panelen — elrendezés: GET /api/level1/form-layout?category=szemelyauto-search
  */
 
-import { applyAutoSearchLayout, readLayoutFilterValues } from "./auto-search-layout.js?v=autoDesk14";
-import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums } from "./auto-search-drums.js?v=autoDesk14";
+import { applyAutoSearchLayout, readLayoutFilterValues } from "./auto-search-layout.js?v=autoDesk16";
+import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums } from "./auto-search-drums.js?v=autoDesk16";
 import {
   mountDetailedSearch,
   readDetailedSearchValues,
   resetDetailedSearch,
-} from "./auto-detailed-search.js?v=autoDesk14";
+} from "./auto-detailed-search.js?v=autoDesk16";
 import {
   initAutoDeskSearch,
   updateAutoDeskAccSummaries,
   arrangeAutoDeskDemoFields,
-} from "./auto-desk-search.js?v=autoDesk14";
-import { readBrandModelFilterValues } from "./auto-brand-model-picker.js?v=autoDesk14";
+} from "./auto-desk-search.js?v=autoDesk16";
+import { readBrandModelFilterValues } from "./auto-brand-model-picker.js?v=autoDesk16";
 
 const MOBILE_MQ = "(max-width: 900px)";
 const DESK_MQ = "(min-width: 901px)";
@@ -168,4 +168,4 @@ export function initHomeQuickSearch({ onSearch = () => {}, onDeskSortChange } = 
     });
 }
 
-export { readDetailedSearchValues } from "./auto-detailed-search.js?v=autoDesk14";
+export { readDetailedSearchValues } from "./auto-detailed-search.js?v=autoDesk16";

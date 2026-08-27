@@ -42,7 +42,7 @@ import {
   tipus2OptionsForParents,
   applyIngatlanTipusFieldsConfig,
   resolveTipusFieldParent,
-} from "./ingatlan-fields.js?v=immoAreaMatrix1";
+} from "./ingatlan-fields.js?v=immoMenus1";
 import {
   fillWheel,
   readWheel,
@@ -54,7 +54,7 @@ import {
 } from "./ingatlan-wheels.js?v=immoClearAll1";
 import { initDrumWheel, syncDrumWheelDisplay, applyDrumModeClass } from "./immo-drum-picker.js?v=immoClearAll1";
 import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=immoClearAll1";
-import { fetchIngatlanWheelSchema, renderIngatlanSchemaHosts, INGATLAN_DUAL_RANGE_GROUPS } from "./ingatlan-wheel-schema.js?v=immoAreaMatrix1";
+import { fetchIngatlanWheelSchema, renderIngatlanSchemaHosts, INGATLAN_DUAL_RANGE_GROUPS } from "./ingatlan-wheel-schema.js?v=immoMenus1";
 import { wireTelepulesSuggestIn } from "./telepules-suggest.js?v=telepClose1";
 
 const EXACT_KEYS = [
@@ -1066,6 +1066,22 @@ export async function initIngatlanSearch({
     moreBtn.textContent = open ? "Kevesebb feltétel" : "További feltételek";
   }
 
+  /** Típus választásakor a típusmenük (Állapot, Fűtés, …) a „további” panelben vannak — nyisd ki. */
+  function syncMorePanelForTipus() {
+    const parents = readWheelList(root.querySelector('[data-wheel="ingatlan_lakas_tipus"]'));
+    if (!parents.length) {
+      setMoreOpen(false);
+      return;
+    }
+    const moreHostEl = root.querySelector("#immo-schema-more");
+    const hasVisibleTipusMenus = Boolean(
+      moreHostEl?.querySelector(
+        ".immo-schema-cell:not(.is-tipus-hidden), .immo-dual-range-block:not(.is-tipus-hidden)"
+      )
+    );
+    setMoreOpen(hasVisibleTipusMenus);
+  }
+
   if (!root.dataset.immoSearchBound) {
     root.dataset.immoSearchBound = "1";
     moreBtn?.addEventListener("click", () => {
@@ -1076,6 +1092,7 @@ export async function initIngatlanSearch({
       syncRovidMenus(root);
       if (tipus2Enabled) syncTipus2Menu(root);
       syncTipusFieldVisibility(root);
+      syncMorePanelForTipus();
     });
 
     root.querySelector('[data-wheel="ingatlan_uzletag"]')?.addEventListener("immo-wheel-change", () => {
@@ -1096,6 +1113,7 @@ export async function initIngatlanSearch({
       syncRovidMenus(root);
       if (tipus2Enabled) syncTipus2Menu(root);
       syncTipusFieldVisibility(root);
+      syncMorePanelForTipus();
     });
 
     root.addEventListener("submit", (event) => {
@@ -1129,7 +1147,7 @@ export async function initIngatlanSearch({
         syncRovidMenus(root);
         if (tipus2Enabled) syncTipus2Menu(root);
         syncTipusFieldVisibility(root);
-        setMoreOpen(false);
+        syncMorePanelForTipus();
         if (typeof onSearch === "function") onSearch(emptyIngatlanFilters());
       });
     });
@@ -1153,16 +1171,16 @@ export async function initIngatlanSearch({
         syncRovidMenus(root);
         if (tipus2Enabled) syncTipus2Menu(root);
         syncTipusFieldVisibility(root);
-        setMoreOpen(false);
+        syncMorePanelForTipus();
         if (typeof onSearch === "function") onSearch(emptyIngatlanFilters());
       });
     });
   }
 
-  setMoreOpen(false);
   syncRovidMenus(root);
   if (tipus2Enabled) syncTipus2Menu(root);
   syncTipusFieldVisibility(root);
+  syncMorePanelForTipus();
 }
 
 export { readForm as readIngatlanSearchForm };

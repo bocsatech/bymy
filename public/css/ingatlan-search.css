@@ -429,6 +429,9 @@ body[data-site-page="ingatlan"] .immo-search-tabs {
 .immo-dual-range-block.is-tipus-hidden {
   display: none !important;
 }
+
+.immo-field.has-wheel-clear,
+.immo-dual-range__half.has-wheel-clear {
   position: relative;
 }
 

@@ -7,8 +7,8 @@ import { normalizeIngatlanUzletag, INGATLAN_LAKAS_TIPUS, INGATLAN_LAKAS_TIPUS_AI
 import {
   initIngatlanSearch,
   readIngatlanSearchForm,
-} from "./ingatlan-search.js?v=immoAreaMatrix1";
-import { fetchIngatlanWheelSchema } from "./ingatlan-wheel-schema.js?v=immoAreaMatrix1";
+} from "./ingatlan-search.js?v=immoMenus1";
+import { fetchIngatlanWheelSchema } from "./ingatlan-wheel-schema.js?v=immoMenus1";
 import { wireTelepulesSuggestIn } from "./telepules-suggest.js?v=telepClose1";
 
 function removeIngatlanFormFields(form) {

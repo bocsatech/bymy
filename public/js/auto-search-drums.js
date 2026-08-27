@@ -11,7 +11,7 @@ import {
   closeAllInlineDrums,
 } from "./immo-drum-picker.js?v=cellDrum1";
 import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=cellDrum1";
-import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=autoDesk11";
+import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=autoDesk12";
 
 const MOBILE_MQ = "(max-width: 900px)";
 const TYPEAHEAD_CLEAR_MS = 2500;

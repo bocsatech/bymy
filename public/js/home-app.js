@@ -1,5 +1,5 @@
 import { fetchListings } from "./db-client.js?v=teherVert1";
-import { createHomeGridCard, initHomeGridCardPhotos } from "./home-grid-card.js?v=autoDesk11";
+import { createHomeGridCard, initHomeGridCardPhotos } from "./home-grid-card.js?v=autoDesk12";
 import {
   emptyFilters,
   filterListingsBySidebar,
@@ -7,9 +7,9 @@ import {
   initHomeSearchSidebar,
   initHomeFilterCatalog,
 } from "./home-search-filter.js?v=korzetFix1";
-import { initHomeQuickSearch } from "./home-quicksearch.js?v=autoDesk11";
-import { matchDetailedSearch, hasActiveDetailedSearch } from "./auto-detailed-search.js?v=autoDesk11";
-import { updateAutoDeskResultCount } from "./auto-desk-search.js?v=autoDesk11";
+import { initHomeQuickSearch } from "./home-quicksearch.js?v=autoDesk12";
+import { matchDetailedSearch, hasActiveDetailedSearch } from "./auto-detailed-search.js?v=autoDesk12";
+import { updateAutoDeskResultCount } from "./auto-desk-search.js?v=autoDesk12";
 import {
   emptyIngatlanFilters,
   filterListingsByIngatlan,

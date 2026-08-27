@@ -1848,8 +1848,9 @@ function tipusFieldsView() {
 
   return `
     <h2 class="layout-cat-title">Típus → mezők</h2>
-    <p class="hint">Válaszd a típust, pipáld a megjelenő mezőket. A közös mezők (hely, ár, alapterület, szoba, típus, típus 2) mindig látszanak. Mentés után hard refresh az ingatlan oldalon.</p>
+    <p class="hint">Válaszd a típust, pipáld a megjelenő mezőket. A közös mezők (hely, ár, szoba, típus, típus 2) mindig látszanak; a területmezők típus szerint. Mentés után hard refresh az ingatlan oldalon.</p>
     <p class="hint">Mindig látszik: ${coreHint || "—"}</p>
+    <p class="hint"><a class="btn ghost" href="/data/ingatlan-tipus-menuk.csv" download="ingatlan-tipus-menuk.csv">Összes típus → menü CSV letöltése</a></p>
     <p class="ok">${esc(info)}</p>
     <p class="err">${esc(err)}</p>
     <div class="tipus-fields-parents">${parentBtns}</div>

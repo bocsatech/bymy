@@ -1,0 +1,171 @@
+tipus_value,tipus_label,mezo_key,mezo_label,csoport
+*,MINDEN (CORE),keresesi_hely,Település,core
+*,MINDEN (CORE),ar_tol,Ár · min,core
+*,MINDEN (CORE),ar_ig,Ár · max,core
+*,MINDEN (CORE),szobaszam,Szobaszám,core
+*,MINDEN (CORE),ingatlan_lakas_tipus,Típus,core
+*,MINDEN (CORE),ingatlan_tipus_2,Típus 2,core
+lakas,Lakás,alapterulet_tol,Alapterület · min,terulet
+lakas,Lakás,alapterulet_ig,Alapterület · max,terulet
+lakas,Lakás,lift,Lift,igen_van
+lakas,Lakás,erkely,Erkély,igen_van
+lakas,Lakás,szigeteles,Szigetelés,igen_van
+lakas,Lakás,energiahatekonys,Energiahatékony,igen_van
+lakas,Lakás,akadalymentesitett,Akadálymentesített,igen_van
+lakas,Lakás,legkondicionalo,Légkondicionáló,igen_van
+lakas,Lakás,kertkapcsolatos,Kertkapcsolatos,igen_van
+lakas,Lakás,panelprogram,Panelprogram,igen_van
+lakas,Lakás,gepesitett,Gépesített,igen_van
+lakas,Lakás,kisallat_megengedett,Kisállat hozható,igen_van
+lakas,Lakás,dohanyzas_megengedett,Dohányzás megengedett,igen_van
+haz,Ház,alapterulet_tol,Alapterület · min,terulet
+haz,Ház,alapterulet_ig,Alapterület · max,terulet
+haz,Ház,telekterulet_tol,Telekterület · min,terulet
+haz,Ház,telekterulet_ig,Telekterület · max,terulet
+haz,Ház,allapot,Állapot,lista
+haz,Ház,ingatlan_kora,Építés éve,lista
+haz,Ház,kilatas,Kilátás,lista
+haz,Ház,futes,Fűtés,lista
+haz,Ház,parkolas,Parkolás,lista
+haz,Ház,komfort,Komfort,lista
+haz,Ház,tetoter,Tetőtér,lista
+haz,Ház,furdo_wc,Fürdő és WC,lista
+haz,Ház,telekterulet_tol,Telekterület · min,tartomany
+haz,Ház,telekterulet_ig,Telekterület · max,tartomany
+haz,Ház,szintek_tol,Szintek · min,tartomany
+haz,Ház,szintek_ig,Szintek · max,tartomany
+haz,Ház,pince,Pince,igen_van
+haz,Ház,napelem,Napelem,igen_van
+haz,Ház,szigeteles,Szigetelés,igen_van
+haz,Ház,energiahatekonys,Energiahatékony,igen_van
+haz,Ház,akadalymentesitett,Akadálymentesített,igen_van
+haz,Ház,legkondicionalo,Légkondicionáló,igen_van
+telek,Telek,telekterulet_tol,Telekterület · min,terulet
+telek,Telek,telekterulet_ig,Telekterület · max,terulet
+telek,Telek,ingatlan_kora,Építés éve,lista
+telek,Telek,villany,Villany,lista
+telek,Telek,viz,Víz,lista
+telek,Telek,gaz,Gáz,lista
+telek,Telek,csatorna,Csatorna,lista
+telek,Telek,telekterulet_tol,Telekterület · min,tartomany
+telek,Telek,telekterulet_ig,Telekterület · max,tartomany
+telek,Telek,uj_parcellazasu,Csak új parcellázású,igen_van
+nyaralo,Nyaraló,alapterulet_tol,Alapterület · min,terulet
+nyaralo,Nyaraló,alapterulet_ig,Alapterület · max,terulet
+nyaralo,Nyaraló,telekterulet_tol,Telekterület · min,terulet
+nyaralo,Nyaraló,telekterulet_ig,Telekterület · max,terulet
+nyaralo,Nyaraló,allapot,Állapot,lista
+nyaralo,Nyaraló,ingatlan_kora,Építés éve,lista
+nyaralo,Nyaraló,kilatas,Kilátás,lista
+nyaralo,Nyaraló,futes,Fűtés,lista
+nyaralo,Nyaraló,tetoter,Tetőtér,lista
+nyaralo,Nyaraló,villany,Villany,lista
+nyaralo,Nyaraló,viz,Víz,lista
+nyaralo,Nyaraló,gaz,Gáz,lista
+nyaralo,Nyaraló,csatorna,Csatorna,lista
+nyaralo,Nyaraló,telekterulet_tol,Telekterület · min,tartomany
+nyaralo,Nyaraló,telekterulet_ig,Telekterület · max,tartomany
+nyaralo,Nyaraló,napelem,Napelem,igen_van
+nyaralo,Nyaraló,szigeteles,Szigetelés,igen_van
+nyaralo,Nyaraló,energiahatekonys,Energiahatékony,igen_van
+nyaralo,Nyaraló,akadalymentesitett,Akadálymentesített,igen_van
+nyaralo,Nyaraló,legkondicionalo,Légkondicionáló,igen_van
+iroda,Iroda,alapterulet_tol,Alapterület · min,terulet
+iroda,Iroda,alapterulet_ig,Alapterület · max,terulet
+iroda,Iroda,allapot,Állapot,lista
+iroda,Iroda,ingatlan_kora,Építés éve,lista
+iroda,Iroda,min_berleti_ido,Minimum bérleti idő,lista
+iroda,Iroda,butorozott,Bútorozott,lista
+iroda,Iroda,irodahaz_kategoria,Irodaház kategóriája,lista
+iroda,Iroda,tetoter,Tetőtér,lista
+iroda,Iroda,koltozheto,Mikortól költözhető,lista
+iroda,Iroda,emelet_tol,Emelet · min,tartomany
+iroda,Iroda,emelet_ig,Emelet · max,tartomany
+iroda,Iroda,emelet,Emelet (feladás),tartomany
+iroda,Iroda,uzemeltetesi_dij_tol,Üzemeltetési díj · min,tartomany
+iroda,Iroda,uzemeltetesi_dij_ig,Üzemeltetési díj · max,tartomany
+iroda,Iroda,kaucio_max,Kaució mértéke,tartomany
+iroda,Iroda,energiahatekonys,Energiahatékony,igen_van
+iroda,Iroda,akadalymentesitett,Akadálymentesített,igen_van
+iroda,Iroda,legkondicionalo,Légkondicionáló,igen_van
+uzlethelyiseg,Üzlethelyiség,alapterulet_tol,Alapterület · min,terulet
+uzlethelyiseg,Üzlethelyiség,alapterulet_ig,Alapterület · max,terulet
+uzlethelyiseg,Üzlethelyiség,allapot,Állapot,lista
+uzlethelyiseg,Üzlethelyiség,ingatlan_kora,Építés éve,lista
+uzlethelyiseg,Üzlethelyiség,min_berleti_ido,Minimum bérleti idő,lista
+uzlethelyiseg,Üzlethelyiség,koltozheto,Mikortól költözhető,lista
+uzlethelyiseg,Üzlethelyiség,energiahatekonys,Energiahatékony,igen_van
+uzlethelyiseg,Üzlethelyiség,akadalymentesitett,Akadálymentesített,igen_van
+uzlethelyiseg,Üzlethelyiség,legkondicionalo,Légkondicionáló,igen_van
+ipari,Ipari,telekterulet_tol,Telekterület · min,terulet
+ipari,Ipari,telekterulet_ig,Telekterület · max,terulet
+ipari,Ipari,ingatlan_kora,Építés éve,lista
+ipari,Ipari,min_berleti_ido,Minimum bérleti idő,lista
+ipari,Ipari,koltozheto,Mikortól költözhető,lista
+ipari,Ipari,telekterulet_tol,Telekterület · min,tartomany
+ipari,Ipari,telekterulet_ig,Telekterület · max,tartomany
+ipari,Ipari,energiahatekonys,Energiahatékony,igen_van
+mezogazdasagi,Mezőgazdasági,telekterulet_tol,Telekterület · min,terulet
+mezogazdasagi,Mezőgazdasági,telekterulet_ig,Telekterület · max,terulet
+mezogazdasagi,Mezőgazdasági,epitmeny_terulet_tol,Építmény terület · min,terulet
+mezogazdasagi,Mezőgazdasági,epitmeny_terulet_ig,Építmény terület · max,terulet
+mezogazdasagi,Mezőgazdasági,ingatlan_kora,Építés éve,lista
+mezogazdasagi,Mezőgazdasági,min_berleti_ido,Minimum bérleti idő,lista
+mezogazdasagi,Mezőgazdasági,koltozheto,Mikortól költözhető,lista
+mezogazdasagi,Mezőgazdasági,telekterulet_tol,Telekterület · min,tartomany
+mezogazdasagi,Mezőgazdasági,telekterulet_ig,Telekterület · max,tartomany
+mezogazdasagi,Mezőgazdasági,epitmeny_terulet_tol,Építmény terület · min,tartomany
+mezogazdasagi,Mezőgazdasági,epitmeny_terulet_ig,Építmény terület · max,tartomany
+vendeglatas,Vendéglátás,alapterulet_tol,Alapterület · min,terulet
+vendeglatas,Vendéglátás,alapterulet_ig,Alapterület · max,terulet
+vendeglatas,Vendéglátás,allapot,Állapot,lista
+vendeglatas,Vendéglátás,ingatlan_kora,Építés éve,lista
+vendeglatas,Vendéglátás,min_berleti_ido,Minimum bérleti idő,lista
+vendeglatas,Vendéglátás,koltozheto,Mikortól költözhető,lista
+vendeglatas,Vendéglátás,energiahatekonys,Energiahatékony,igen_van
+vendeglatas,Vendéglátás,akadalymentesitett,Akadálymentesített,igen_van
+vendeglatas,Vendéglátás,legkondicionalo,Légkondicionáló,igen_van
+garazs,Garázs,allapot,Állapot,lista
+garazs,Garázs,ingatlan_kora,Építés éve,lista
+fejlesztesi_terulet,Fejlesztési terület,telekterulet_tol,Telekterület · min,terulet
+fejlesztesi_terulet,Fejlesztési terület,telekterulet_ig,Telekterület · max,terulet
+fejlesztesi_terulet,Fejlesztési terület,ingatlan_kora,Építés éve,lista
+fejlesztesi_terulet,Fejlesztési terület,min_berleti_ido,Minimum bérleti idő,lista
+fejlesztesi_terulet,Fejlesztési terület,koltozheto,Mikortól költözhető,lista
+fejlesztesi_terulet,Fejlesztési terület,telekterulet_tol,Telekterület · min,tartomany
+fejlesztesi_terulet,Fejlesztési terület,telekterulet_ig,Telekterület · max,tartomany
+intezmeny,Intézmény,alapterulet_tol,Alapterület · min,terulet
+intezmeny,Intézmény,alapterulet_ig,Alapterület · max,terulet
+intezmeny,Intézmény,telekterulet_tol,Telekterület · min,terulet
+intezmeny,Intézmény,telekterulet_ig,Telekterület · max,terulet
+intezmeny,Intézmény,allapot,Állapot,lista
+intezmeny,Intézmény,ingatlan_kora,Építés éve,lista
+intezmeny,Intézmény,min_berleti_ido,Minimum bérleti idő,lista
+intezmeny,Intézmény,butorozott,Bútorozott,lista
+intezmeny,Intézmény,kilatas,Kilátás,lista
+intezmeny,Intézmény,futes,Fűtés,lista
+intezmeny,Intézmény,parkolas,Parkolás,lista
+intezmeny,Intézmény,komfort,Komfort,lista
+intezmeny,Intézmény,tetoter,Tetőtér,lista
+intezmeny,Intézmény,koltozheto,Mikortól költözhető,lista
+intezmeny,Intézmény,telekterulet_tol,Telekterület · min,tartomany
+intezmeny,Intézmény,telekterulet_ig,Telekterület · max,tartomany
+intezmeny,Intézmény,napelem,Napelem,igen_van
+intezmeny,Intézmény,szigeteles,Szigetelés,igen_van
+intezmeny,Intézmény,energiahatekonys,Energiahatékony,igen_van
+intezmeny,Intézmény,akadalymentesitett,Akadálymentesített,igen_van
+intezmeny,Intézmény,legkondicionalo,Légkondicionáló,igen_van
+raktar,Raktár,telekterulet_tol,Telekterület · min,terulet
+raktar,Raktár,telekterulet_ig,Telekterület · max,terulet
+raktar,Raktár,allapot,Állapot,lista
+raktar,Raktár,ingatlan_kora,Építés éve,lista
+raktar,Raktár,min_berleti_ido,Minimum bérleti idő,lista
+raktar,Raktár,koltozheto,Mikortól költözhető,lista
+raktar,Raktár,telekterulet_tol,Telekterület · min,tartomany
+raktar,Raktár,telekterulet_ig,Telekterület · max,tartomany
+raktar,Raktár,energiahatekonys,Energiahatékony,igen_van
+egyeb,Egyéb,alapterulet_tol,Alapterület · min,terulet
+egyeb,Egyéb,alapterulet_ig,Alapterület · max,terulet
+egyeb,Egyéb,telekterulet_tol,Telekterület · min,terulet
+egyeb,Egyéb,telekterulet_ig,Telekterület · max,terulet
+egyeb,Egyéb,*,MINDEN TÍPUSMEZŐ (unió),tipus

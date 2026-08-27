@@ -40,7 +40,8 @@ import {
   isIngatlanRentUzletag,
   tipus2OptionsForParents,
   applyIngatlanTipusFieldsConfig,
-} from "./ingatlan-fields.js?v=immoTipusAdmin1";
+  resolveTipusFieldParent,
+} from "./ingatlan-fields.js?v=immoTelekArea1";
 import {
   fillWheel,
   readWheel,
@@ -716,11 +717,25 @@ function syncTipus2Menu(form) {
   wheel.setAttribute("aria-disabled", disabled ? "true" : "false");
 }
 
+/** Ezeknél a fő területmező = Telekterület (nem Alapterület). */
+const TIPUS_MAIN_AREA_AS_TELEK = new Set([
+  "telek",
+  "ipari",
+  "mezogazdasagi",
+  "fejlesztesi_terulet",
+]);
+
+function isMainAreaTelekMode(parents) {
+  const list = (parents || []).map((p) => resolveTipusFieldParent(p)).filter(Boolean);
+  return list.length > 0 && list.every((p) => TIPUS_MAIN_AREA_AS_TELEK.has(p));
+}
+
 /** Tipus szerint mutatja/rejti a típusfüggő mezőket. */
 function syncTipusFieldVisibility(form) {
   if (!form) return;
   const parents = readWheelList(form.querySelector('[data-wheel="ingatlan_lakas_tipus"]'));
   const visible = fieldKeysVisibleForTipus(parents);
+  const telekMain = isMainAreaTelekMode(parents);
   const dualSeen = new Set();
 
   form.querySelectorAll("[data-schema-field]").forEach((cell) => {
@@ -728,13 +743,17 @@ function syncTipusFieldVisibility(form) {
     if (!key || key.startsWith("__spacer")) return;
     const dual = cell.closest(".immo-dual-range-block");
     if (dual) {
-      const rangeId = dual.querySelector(".immo-dual-range")?.dataset?.range || "";
+      const rangeId =
+        dual.dataset.range || dual.querySelector(".immo-dual-range")?.dataset?.range || "";
       if (rangeId && dualSeen.has(rangeId)) return;
       if (rangeId) dualSeen.add(rangeId);
       const group = INGATLAN_DUAL_RANGE_GROUPS.find((g) => g.id === rangeId);
-      const show = group
+      let show = group
         ? visible.has(group.tolKey) || visible.has(group.igKey)
         : visible.has(key);
+      /* Telek főmező: az alapterület blokk marad, a külön telekterület dual rejtve (duplikáció elkerülése). */
+      if (telekMain && rangeId === "alapterulet") show = true;
+      if (telekMain && rangeId === "telekterulet") show = false;
       dual.classList.toggle("is-tipus-hidden", !show);
       if (!show && group) {
         setWheelValue(form.querySelector(`[data-wheel="${group.tolKey}"]`), "");
@@ -754,6 +773,30 @@ function syncTipusFieldVisibility(form) {
       }
     }
   });
+
+  syncMainAreaDualForTipus(form, parents);
+}
+
+function syncMainAreaDualForTipus(form, parents) {
+  const telekMain = isMainAreaTelekMode(parents);
+  const block = form.querySelector('.immo-dual-range-block[data-range="alapterulet"]');
+  if (!block) return;
+  const prevMode = block.dataset.areaMode || "alap";
+  const nextMode = telekMain ? "telek" : "alap";
+  block.dataset.areaMode = nextMode;
+  const title = block.querySelector(".immo-dual-range__title");
+  const dual = block.querySelector(".immo-dual-range");
+  if (title) title.textContent = telekMain ? "Telekterület" : "Alapterület";
+  if (dual) {
+    dual.setAttribute("aria-label", telekMain ? "Telekterület tartomány" : "Alapterület tartomány");
+  }
+  if (prevMode !== nextMode) {
+    fillDualRangeWheels(form, {
+      tolKey: "alapterulet_tol",
+      igKey: "alapterulet_ig",
+      options: telekMain ? telekteruletOptions() : alapteruletOptions(),
+    });
+  }
 }
 
 /** Élő kereső/feladás: Tipus 2 a Tipus mellett (adminban törölt szekcióban marad a default). */
@@ -811,8 +854,21 @@ function readForm(form) {
   out.keresesi_hely = form.querySelector('[name="keresesi_hely"]')?.value?.trim() || "";
   out.ar_tol = readPriceInputFt(form.querySelector('[name="ar_tol"], #immo-ar_tol'));
   out.ar_ig = readPriceInputFt(form.querySelector('[name="ar_ig"], #immo-ar_ig'));
-  out.alapterulet_tol = numOrNull(readWheel(form.querySelector('[data-wheel="alapterulet_tol"]')));
-  out.alapterulet_ig = numOrNull(readWheel(form.querySelector('[data-wheel="alapterulet_ig"]')));
+  const areaTol = numOrNull(readWheel(form.querySelector('[data-wheel="alapterulet_tol"]')));
+  const areaIg = numOrNull(readWheel(form.querySelector('[data-wheel="alapterulet_ig"]')));
+  const areaMode =
+    form.querySelector('.immo-dual-range-block[data-range="alapterulet"]')?.dataset.areaMode || "alap";
+  if (areaMode === "telek") {
+    out.alapterulet_tol = null;
+    out.alapterulet_ig = null;
+    out.telekterulet_tol = areaTol;
+    out.telekterulet_ig = areaIg;
+  } else {
+    out.alapterulet_tol = areaTol;
+    out.alapterulet_ig = areaIg;
+    out.telekterulet_tol = numOrNull(readWheel(form.querySelector('[data-wheel="telekterulet_tol"]')));
+    out.telekterulet_ig = numOrNull(readWheel(form.querySelector('[data-wheel="telekterulet_ig"]')));
+  }
   out.szobaszam = readWheel(form.querySelector('[data-wheel="szobaszam"]'));
   out.ingatlan_lakas_tipus = readWheel(form.querySelector('[data-wheel="ingatlan_lakas_tipus"]'));
   out.ingatlan_tipus_2 = readWheel(form.querySelector('[data-wheel="ingatlan_tipus_2"]'));
@@ -836,8 +892,6 @@ function readForm(form) {
   out.gaz = readWheel(form.querySelector('[data-wheel="gaz"]'));
   out.csatorna = readWheel(form.querySelector('[data-wheel="csatorna"]'));
   out.irodahaz_kategoria = readWheel(form.querySelector('[data-wheel="irodahaz_kategoria"]'));
-  out.telekterulet_tol = numOrNull(readWheel(form.querySelector('[data-wheel="telekterulet_tol"]')));
-  out.telekterulet_ig = numOrNull(readWheel(form.querySelector('[data-wheel="telekterulet_ig"]')));
   out.szintek_tol = readWheel(form.querySelector('[data-wheel="szintek_tol"]'));
   out.szintek_ig = readWheel(form.querySelector('[data-wheel="szintek_ig"]'));
   out.uzemeltetesi_dij_tol = numOrNull(readWheel(form.querySelector('[data-wheel="uzemeltetesi_dij_tol"]')));

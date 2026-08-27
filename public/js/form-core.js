@@ -3,7 +3,7 @@ import { EGYEB_INFO_OPTIONS } from "./egyeb-info-data.js";
 import { initVehicleCatalogSelects } from "./vehicle-catalog-client.js";
 import { compressListingPhoto, MAX_LISTING_PHOTOS } from "./listing-photo-compress.js?v=myAds2";
 import { applyListingAddressFromProfileSync } from "./ad-location-profile.js?v=locProf3";
-import { syncIngatlanFormVisibility } from "./ingatlan-form-fields.js?v=immoTipusAdmin1";
+import { syncIngatlanFormVisibility } from "./ingatlan-form-fields.js?v=immoTelekArea1";
 
 export function createAdForm(options = {}) {
   const mode = options.mode ?? "wizard";

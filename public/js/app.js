@@ -5,7 +5,7 @@ import {
   saveListingPhotosOrder,
   getStoredListingId,
 } from "./db-client.js?v=wizardSave1";
-import { createAdForm } from "./form-core.js?v=immoTipus2";
+import { createAdForm } from "./form-core.js?v=immoClearAll1";
 import { initTireSizes } from "./tire-sizes-ui.js";
 import { initPhoneLanguages } from "./phone-lang-ui.js";
 import { initCategoryPicker } from "./category-picker.js?v=immoPortalPage1";

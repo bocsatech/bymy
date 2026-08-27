@@ -4,7 +4,7 @@
  */
 
 import { readWheel, setWheelValue } from "./ingatlan-wheels.js?v=drumScroll7";
-import { syncDrumWheelDisplay } from "./immo-drum-picker.js?v=drumCellCenter1";
+import { syncDrumWheelDisplay } from "./immo-drum-picker.js?v=drumPanFix1";
 
 const ITEM_H = 40;
 let activePortal = null;

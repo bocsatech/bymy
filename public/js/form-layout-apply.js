@@ -1,5 +1,5 @@
 /** Mentett 12 oszlopos elrendezés — minden mező ugyanazon a lépésrácson. */
-import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=drumCellCenter1";
+import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=drumPanFix1";
 
 function cssEscape(value) {
   if (window.CSS?.escape) return window.CSS.escape(value);

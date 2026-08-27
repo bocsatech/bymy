@@ -70,15 +70,19 @@ function onLockedTouchMove(event) {
     scrollEl = document.querySelector(".immo-wheel-wrap--drum-inline.is-open .immo-drum-inline-scroll");
   }
   if (!scrollEl || !dy) return;
-  /* Dobkerék: a pointer-pan görget — ne duplázzuk a dy-t. */
-  if (
-    scrollEl.classList?.contains("immo-drum-inline-scroll") ||
-    scrollEl.closest?.(".immo-drum-wheel-ring")
-  ) {
-    return;
-  }
   /* Ujj lefelé → tartalom lefelé (természetes iOS picker) */
   scrollEl.scrollTop -= dy;
+  const ring = scrollEl.closest?.(".immo-drum-wheel-ring") || scrollEl.querySelector?.(".immo-drum-wheel-ring");
+  const ringEl = scrollEl.classList?.contains("immo-drum-inline-scroll")
+    ? scrollEl.closest(".immo-drum-wheel-ring")
+    : ring;
+  if (ringEl && Math.abs(dy) > 2) {
+    ringEl.dataset.drumDragged = "1";
+    window.clearTimeout(ringEl._drumDragClear);
+    ringEl._drumDragClear = window.setTimeout(() => {
+      delete ringEl.dataset.drumDragged;
+    }, 220);
+  }
 }
 
 function onLockedWheel(event) {
@@ -93,6 +97,14 @@ function onLockedWheel(event) {
   }
   if (!scrollEl) return;
   scrollEl.scrollTop += event.deltaY;
+  const ring = scrollEl.closest?.(".immo-drum-wheel-ring");
+  if (ring) {
+    ring.dataset.drumDragged = "1";
+    window.clearTimeout(ring._wheelDragClear);
+    ring._wheelDragClear = window.setTimeout(() => {
+      delete ring.dataset.drumDragged;
+    }, 200);
+  }
 }
 
 function onLockedScroll() {

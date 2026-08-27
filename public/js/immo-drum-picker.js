@@ -6,7 +6,7 @@
  * Cellába kattintás: érték (többesnél toggle) + bezárás.
  */
 
-import { readWheel, readWheelList, setWheelValue, lockPageScroll, unlockPageScroll } from "./ingatlan-wheels.js?v=drumCellCenter1";
+import { readWheel, readWheelList, setWheelValue, lockPageScroll, unlockPageScroll } from "./ingatlan-wheels.js?v=drumPanFix1";
 
 const ITEM_H = 40;
 /** Pontosan 3 sor: fent / közép / lent */
@@ -189,8 +189,7 @@ function setDrumFormState(open) {
 }
 
 /**
- * Húzás (egér + touch) — a page scroll lock mellett is görgethető.
- * Touch-nál a lock handler csak preventDefault-ol, a dy itt megy.
+ * Asztali egérhúzás + görgő. Touch: `onLockedTouchMove` görget (ne duplázzuk).
  */
 function bindDrumPan(scrollEl, ring, wrap) {
   if (!scrollEl || !ring || ring.dataset.panBound === "1") return;
@@ -203,6 +202,7 @@ function bindDrumPan(scrollEl, ring, wrap) {
   let pointerId = null;
 
   ring.addEventListener("pointerdown", (event) => {
+    if (event.pointerType && event.pointerType !== "mouse") return;
     if (event.button != null && event.button !== 0) return;
     dragging = true;
     moved = false;
@@ -216,7 +216,7 @@ function bindDrumPan(scrollEl, ring, wrap) {
     if (!dragging || event.pointerId !== pointerId) return;
     const dy = event.clientY - lastY;
     lastY = event.clientY;
-    if (Math.abs(event.clientY - startY) > 8) {
+    if (Math.abs(event.clientY - startY) > 6) {
       moved = true;
       ring.dataset.drumDragged = "1";
       try {
@@ -245,11 +245,13 @@ function bindDrumPan(scrollEl, ring, wrap) {
       scheduleSnap(scrollEl, wrap);
       window.setTimeout(() => {
         delete ring.dataset.drumDragged;
-      }, 180);
+      }, 200);
     }
   };
   ring.addEventListener("pointerup", endDrag);
   ring.addEventListener("pointercancel", endDrag);
+
+  /* Egérgörgő: a page-lock onLockedWheel intézi — itt ne duplázzuk. */
 }
 
 function refreshDrumItemStates(scrollEl, wheel) {

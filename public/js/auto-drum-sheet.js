@@ -1,10 +1,10 @@
 /**
- * Autó mobil kereső — dobkerék portál a body-n.
- * Ugyanaz a gyűrűs kinézet, mint az ingatlan dob; a hero stacking contexten kívül.
+ * Dobkerék portál a body-n — natív overflow görgetés (autó + ingatlan).
+ * Nincs page-scroll lock / preventDefault a touchmove-on.
  */
 
-import { readWheel, setWheelValue } from "./ingatlan-wheels.js?v=drumScroll7";
-import { syncDrumWheelDisplay } from "./immo-drum-picker.js?v=drumPanFix1";
+import { readWheel, readWheelList, setWheelValue } from "./ingatlan-wheels.js?v=immoAutoPortal1";
+import { syncDrumWheelDisplay } from "./immo-drum-picker.js?v=immoAutoPortal1";
 
 const ITEM_H = 40;
 let activePortal = null;
@@ -21,12 +21,15 @@ function escapeHtml(value) {
 export function closeAutoDrumSheet(commit = false) {
   if (!activePortal) return;
   const { root, wheel, scrollEl, ring, wrap, trigger } = activePortal;
-  if (commit && scrollEl && ring && wheel) {
+  const multiple = wheel?.dataset?.multiple === "1";
+  if (commit && scrollEl && ring && wheel && !multiple) {
     const item = nearestPortalItem(scrollEl, ring);
     const value = item?.dataset.value ?? "";
     setWheelValue(wheel, value);
     syncDrumWheelDisplay(wheel);
     wheel.dispatchEvent(new CustomEvent("immo-wheel-change", { bubbles: true, detail: { value } }));
+  } else if (commit && multiple && wheel) {
+    syncDrumWheelDisplay(wheel);
   }
   wrap?.classList.remove("is-open", "has-drum-open");
   wrap?.closest(".immo-dual-range")?.classList.remove("has-drum-open");
@@ -55,23 +58,27 @@ function nearestPortalItem(scrollEl, ring) {
   return best;
 }
 
-function paintPortal(scrollEl, ring) {
+function paintPortal(scrollEl, ring, wheel) {
   cancelAnimationFrame(paintFrame);
   paintFrame = requestAnimationFrame(() => {
     const ringRect = ring.getBoundingClientRect();
     const centerY = ringRect.top + ringRect.height / 2;
     const cellTop = ringRect.top + ringRect.height * 0.28;
     const cellBottom = ringRect.bottom - ringRect.height * 0.28;
+    const selected = new Set(wheel ? readWheelList(wheel) : []);
+    const multiple = wheel?.dataset?.multiple === "1";
     scrollEl.querySelectorAll(".immo-drum-inline-item").forEach((item) => {
       const r = item.getBoundingClientRect();
       const mid = r.top + r.height / 2;
       const inCell = mid >= cellTop && mid <= cellBottom;
       const dist = Math.abs(mid - centerY);
       const t = Math.min(dist / (ITEM_H * 1.15), 1);
+      const v = item.dataset.value ?? "";
+      const isSel = multiple ? (v === "" ? selected.size === 0 : selected.has(v)) : inCell;
       item.style.opacity = String(Math.max(0.15, 1 - t * 0.72));
-      item.style.fontWeight = dist < ITEM_H * 0.42 ? "650" : "500";
+      item.style.fontWeight = dist < ITEM_H * 0.42 || isSel ? "650" : "500";
       item.classList.toggle("is-in-cell", inCell);
-      item.classList.toggle("is-selected", inCell);
+      item.classList.toggle("is-selected", isSel);
     });
   });
 }
@@ -94,11 +101,11 @@ function syncRingWidth(ring, scrollEl) {
   ring.style.setProperty("--immo-drum-ring-w", `${capped}px`);
 }
 
-function bindPortalNativeScroll(scrollEl, ring) {
+function bindPortalNativeScroll(scrollEl, ring, wheel) {
   let startY = 0;
   let moved = false;
 
-  /* Natív overflow görgetés (ugyanaz, ami a sheetnél ment) — nincs preventDefault. */
+  /* Natív overflow görgetés — nincs preventDefault. */
   scrollEl.addEventListener(
     "touchstart",
     (event) => {
@@ -121,7 +128,7 @@ function bindPortalNativeScroll(scrollEl, ring) {
     if (!moved) return;
     const snap = nearestPortalItem(scrollEl, ring);
     if (snap) scrollToPortalItem(scrollEl, ring, snap);
-    paintPortal(scrollEl, ring);
+    paintPortal(scrollEl, ring, wheel);
     ring.dataset.drumDragged = "1";
     window.setTimeout(() => {
       delete ring.dataset.drumDragged;
@@ -132,9 +139,8 @@ function bindPortalNativeScroll(scrollEl, ring) {
 
   scrollEl.addEventListener(
     "wheel",
-    (event) => {
-      /* hagyjuk a natív wheel scrollt; csak festünk */
-      requestAnimationFrame(() => paintPortal(scrollEl, ring));
+    () => {
+      requestAnimationFrame(() => paintPortal(scrollEl, ring, wheel));
     },
     { passive: true }
   );
@@ -162,7 +168,9 @@ export function openAutoDrumSheet(wheel, trigger) {
 
   const wrap = wheel.closest(".immo-wheel-wrap");
   const emptyLabel = trigger.dataset.emptyLabel || "Mindegy";
+  const multiple = wheel.dataset.multiple === "1";
   const current = String(readWheel(wheel) ?? "");
+  const selected = readWheelList(wheel);
   const opts = [...wheel.querySelectorAll(".immo-wheel-opt")];
 
   const root = document.createElement("div");
@@ -201,6 +209,20 @@ export function openAutoDrumSheet(wheel, trigger) {
       event.stopPropagation();
       if (ring.dataset.drumDragged === "1") return;
       const value = item.dataset.value ?? "";
+      if (multiple) {
+        if (value === "") {
+          setWheelValue(wheel, "");
+        } else {
+          const cur = new Set(readWheelList(wheel));
+          if (cur.has(value)) cur.delete(value);
+          else cur.add(value);
+          setWheelValue(wheel, [...cur]);
+        }
+        syncDrumWheelDisplay(wheel);
+        wheel.dispatchEvent(new CustomEvent("immo-wheel-change", { bubbles: true, detail: { value: readWheel(wheel) } }));
+        closeAutoDrumSheet(false);
+        return;
+      }
       setWheelValue(wheel, value);
       syncDrumWheelDisplay(wheel);
       wheel.dispatchEvent(new CustomEvent("immo-wheel-change", { bubbles: true, detail: { value } }));
@@ -208,8 +230,8 @@ export function openAutoDrumSheet(wheel, trigger) {
     });
   });
 
-  scrollEl.addEventListener("scroll", () => paintPortal(scrollEl, ring), { passive: true });
-  bindPortalNativeScroll(scrollEl, ring);
+  scrollEl.addEventListener("scroll", () => paintPortal(scrollEl, ring, wheel), { passive: true });
+  bindPortalNativeScroll(scrollEl, ring, wheel);
 
   document.body.appendChild(root);
   document.body.classList.add("auto-drum-portal-open");
@@ -222,17 +244,20 @@ export function openAutoDrumSheet(wheel, trigger) {
   activePortal = { root, wheel, scrollEl, ring, wrap, trigger };
 
   const start =
+    (multiple && selected.length
+      ? [...scrollEl.querySelectorAll(".immo-drum-inline-item")].find((el) => selected.includes(el.dataset.value ?? ""))
+      : null) ||
     [...scrollEl.querySelectorAll(".immo-drum-inline-item")].find((el) => (el.dataset.value ?? "") === current) ||
     scrollEl.querySelector(".immo-drum-inline-item");
 
   requestAnimationFrame(() => {
     syncRingWidth(ring, scrollEl);
     scrollToPortalItem(scrollEl, ring, start);
-    paintPortal(scrollEl, ring);
+    paintPortal(scrollEl, ring, wheel);
   });
 }
 
-/** Trigger → portált dobkerék. */
+/** Trigger → portált dobkerék (felülírja az inline nyitást). */
 export function bindAutoDrumSheet(wheel) {
   const wrap = wheel?.closest?.(".immo-wheel-wrap");
   const trigger = wrap?.querySelector(".immo-wheel-trigger");

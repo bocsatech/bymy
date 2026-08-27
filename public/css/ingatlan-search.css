@@ -1565,3 +1565,114 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   background: #243041;
 }
 
+/* Portált dobkerék (autó oldal megoldása) — natív görgetés */
+.auto-drum-portal {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+}
+
+.auto-drum-portal__backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  background: rgba(15, 23, 42, 0.28);
+  cursor: pointer;
+}
+
+.auto-drum-portal__stage {
+  position: fixed;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.55rem;
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
+}
+
+.auto-drum-portal .immo-drum-wheel-ring,
+.auto-drum-portal__ring {
+  position: relative;
+  width: var(--immo-drum-ring-w, 9rem);
+  max-width: min(12.5rem, 70vw);
+  height: 9rem;
+  border-radius: 1rem;
+  border: 1px dashed #94a3b8;
+  background: #fff;
+  box-shadow: 0 10px 32px rgba(15, 23, 42, 0.22);
+  overflow: hidden;
+  box-sizing: border-box;
+  touch-action: pan-y;
+}
+
+.auto-drum-portal .immo-drum-inline-item {
+  display: flex;
+  align-items: center;
+  height: 40px;
+  padding: 0 0.35rem;
+  color: #0f172a;
+  font: 500 1.05rem/1 system-ui, sans-serif;
+  scroll-snap-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  cursor: pointer;
+}
+
+.auto-drum-portal .immo-drum-inline-highlight {
+  position: absolute;
+  left: 0.3rem;
+  right: 0.3rem;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 2rem;
+  border-radius: 6px;
+  background: rgba(148, 163, 184, 0.22);
+  pointer-events: none;
+  z-index: 3;
+}
+
+.auto-drum-portal__scroll {
+  position: absolute;
+  inset: 0;
+  overflow-x: hidden;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+  padding: calc(4.5rem - 20px) 0.5rem;
+  box-sizing: border-box;
+  z-index: 2;
+}
+
+.auto-drum-portal__scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.auto-drum-portal__done {
+  border: 0;
+  border-radius: 999px;
+  background: #111;
+  color: #fff;
+  font: inherit;
+  font-weight: 650;
+  font-size: 0.92rem;
+  padding: 0.45rem 1.1rem;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.2);
+  cursor: pointer;
+}
+
+body.auto-drum-portal-open {
+  overflow: hidden;
+}
+
+.auto-drum-sheet {
+  display: none !important;
+}
+

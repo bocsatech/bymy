@@ -40,8 +40,9 @@ import {
   setWheelValue,
   MULTI_WHEEL_KEYS,
   wheelFieldHtml,
-} from "./ingatlan-wheels.js?v=drumPanFix1";
-import { initDrumWheel, syncDrumWheelDisplay, applyDrumModeClass, getDrumMode } from "./immo-drum-picker.js?v=drumPanFix1";
+} from "./ingatlan-wheels.js?v=immoAutoPortal1";
+import { initDrumWheel, syncDrumWheelDisplay, applyDrumModeClass, getDrumMode } from "./immo-drum-picker.js?v=immoAutoPortal1";
+import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=immoAutoPortal1";
 import { fetchIngatlanWheelSchema, renderIngatlanSchemaHosts, INGATLAN_DUAL_RANGE_GROUPS } from "./ingatlan-wheel-schema.js?v=telepSuggest1";
 import { wireTelepulesSuggestIn } from "./telepules-suggest.js?v=telepClose1";
 
@@ -128,6 +129,9 @@ function initImmoSearchWheel(wheel, { emptyLabel = "Mindegy", multiple = false, 
   if (!wheel) return;
   if (useDrumPicker()) {
     initDrumWheel(wheel, { emptyLabel, multiple });
+    /* Autó oldal: natív görgetésű body-portál — ugyanaz az Ár / mezőknél is. */
+    const live = wheel.closest(".immo-wheel-wrap")?.querySelector("[data-wheel]") || wheel;
+    bindAutoDrumSheet(live);
     return;
   }
   initMenuWheel(wheel, { emptyLabel, multiple, customInput, customKind });

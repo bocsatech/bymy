@@ -9,6 +9,10 @@ export const WHEEL_COLS = 12;
 
 /** Admin: Kiadó (master) + Eladó + Airbnb */
 export const INGATLAN_WHEEL_ADMIN_CATEGORIES = ["ingatlan", "elado-ingatlan", "airbnb"];
+export const INGATLAN_TIPUS_LAYOUTS = [
+  "lakas", "haz", "telek", "garazs", "nyaralo", "iroda", "uzlethelyiseg",
+  "vendeglatas", "raktar", "ipari", "mezogazdasagi", "fejlesztesi_terulet", "intezmeny", "egyeb",
+];
 
 export function normalizeIngatlanWheelVariant(value) {
   const v = String(value ?? "")
@@ -16,6 +20,7 @@ export function normalizeIngatlanWheelVariant(value) {
     .toLowerCase();
   if (v === "elado-ingatlan" || v === "elado_ingatlan" || v === "eladoingatlan") return "elado-ingatlan";
   if (v === "airbnb") return "airbnb";
+  if (INGATLAN_TIPUS_LAYOUTS.includes(v)) return v;
   return "ingatlan";
 }
 
@@ -26,6 +31,7 @@ export function isIngatlanWheelAdminCategory(category) {
   if (v === "elado-ingatlan" || v === "elado_ingatlan" || v === "eladoingatlan") return true;
   if (v === "airbnb") return true;
   if (v === "ingatlan") return true;
+  if (INGATLAN_TIPUS_LAYOUTS.includes(v)) return true;
   return false;
 }
 

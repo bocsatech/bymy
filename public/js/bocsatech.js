@@ -3,7 +3,9 @@ import { mountIngatlanWheelBoard } from "./bocsatech-ingatlan-wheels.js?v=immoEd
 import {
   isIngatlanWheelAdminCategory,
   normalizeIngatlanWheelVariant,
+  INGATLAN_TIPUS_LAYOUTS,
 } from "./ingatlan-wheel-schema.js?v=immoWheel21";
+import { INGATLAN_LAKAS_TIPUS, fieldKeysVisibleForTipus } from "./ingatlan-fields.js?v=immoMenus1";
 
 const app = document.getElementById("app");
 
@@ -75,6 +77,10 @@ const ADMIN_SECTIONS = [
     defaultTab: "ingatlan:layout:ingatlan",
     tabs: [
       { id: "ingatlan:layout:elado-ingatlan", label: "Eladó — szerkesztő" },
+      ...INGATLAN_TIPUS_LAYOUTS.map((type) => ({
+        id: `ingatlan:layout:${type}`,
+        label: `${INGATLAN_LAKAS_TIPUS.find((item) => item.value === type)?.label || type} — szerkesztő`,
+      })),
       { id: "ingatlan:layout:ingatlan", label: "Kiadó — szerkesztő" },
       { id: "ingatlan:layout:airbnb", label: "Airbnb — szerkesztő" },
       { id: "ingatlan:tipus-mezok", label: "Típus → mezők" },
@@ -310,6 +316,8 @@ function categoryLabel(id) {
     const hit = group.items.find((c) => c.id === id);
     if (hit) return hit.label;
   }
+  const type = INGATLAN_LAKAS_TIPUS.find((item) => item.value === id);
+  if (type) return `Ingatlan · ${type.label}`;
   return LAYOUT_CATEGORIES.find((c) => c.id === id)?.label || id;
 }
 
@@ -2039,8 +2047,13 @@ function render() {
     root.classList.remove("layout-root--readonly");
     if (isIngatlanWheelAdminCategory(layoutCategoryFromTab())) {
       try {
+        const category = layoutCategoryFromTab();
+        const allowedFields = INGATLAN_TIPUS_LAYOUTS.includes(category)
+          ? fieldKeysVisibleForTipus([category])
+          : null;
         mountIngatlanWheelBoard(root, wheelSchema, {
           readOnly: false,
+          allowedFields,
           onChange(schema) {
             wheelSchema = schema;
           },

@@ -14,7 +14,7 @@ const COLS = WHEEL_COLS;
 const ROW_PX = 72;
 const DROP_BUFFER = 2;
 
-export function mountIngatlanWheelBoard(root, schema, { onChange, readOnly = false } = {}) {
+export function mountIngatlanWheelBoard(root, schema, { onChange, readOnly = false, allowedFields = null } = {}) {
   if (!root) return { cells: [] };
   let cells = normalizeIngatlanWheelSchema(schema).cells.map((c) => ({ ...c }));
 
@@ -25,7 +25,10 @@ export function mountIngatlanWheelBoard(root, schema, { onChange, readOnly = fal
 
   function visible(section) {
     return cells.filter(
-      (c) => !c.hidden && (section === "more" ? c.section === "more" : c.section !== "more")
+      (c) =>
+        !c.hidden &&
+        (isSpacer(c) || !allowedFields || allowedFields.has(c.field_key)) &&
+        (section === "more" ? c.section === "more" : c.section !== "more")
     );
   }
 
@@ -291,7 +294,9 @@ export function mountIngatlanWheelBoard(root, schema, { onChange, readOnly = fal
 
   function trashHtml() {
     if (readOnly) return "";
-    const hidden = cells.filter((c) => c.hidden && !isSpacer(c));
+    const hidden = cells.filter(
+      (c) => c.hidden && !isSpacer(c) && (!allowedFields || allowedFields.has(c.field_key))
+    );
     const skip = new Set();
     const items = [];
     for (const c of hidden) {

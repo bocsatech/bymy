@@ -41,7 +41,7 @@ import {
   MULTI_WHEEL_KEYS,
   wheelFieldHtml,
 } from "./ingatlan-wheels.js?v=scrollLock4";
-import { initDrumWheel, syncDrumWheelDisplay, applyDrumModeClass, getDrumMode } from "./immo-drum-picker.js?v=drumSingle1";
+import { initDrumWheel, syncDrumWheelDisplay, applyDrumModeClass, getDrumMode } from "./immo-drum-picker.js?v=drumFix2";
 import { fetchIngatlanWheelSchema, renderIngatlanSchemaHosts, INGATLAN_DUAL_RANGE_GROUPS } from "./ingatlan-wheel-schema.js?v=telepSuggest1";
 import { wireTelepulesSuggestIn } from "./telepules-suggest.js?v=telepClose1";
 

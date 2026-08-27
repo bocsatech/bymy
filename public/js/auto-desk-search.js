@@ -103,9 +103,29 @@ export function initAutoDeskSearch({
   const advancedBtn = document.getElementById("qs-reszletes");
   const detailedBtn = document.getElementById("qs-detailed");
 
-  setMode("gyors");
+  setMode("reszletes");
   openAccordion("alap");
   updateAutoDeskAccSummaries(form);
+
+  // Demó kinézet: Részletes nyitva indul asztalon
+  if (isAutoDesk()) {
+    if (morePanel) {
+      morePanel.hidden = false;
+      morePanel.classList.add("is-open");
+    }
+    void (async () => {
+      try {
+        await mountDetailed?.(form);
+        if (detailedPanel) {
+          detailedPanel.hidden = false;
+          detailedPanel.classList.add("is-open");
+        }
+      } catch (error) {
+        console.warn("Részletes panel:", error);
+      }
+      updateAutoDeskAccSummaries(form);
+    })();
+  }
 
   document.querySelectorAll("[data-desk-mode]").forEach((btn) => {
     btn.addEventListener("click", async () => {

@@ -702,21 +702,24 @@ input.immo-wheel-custom.immo-wheel-trigger {
     gap: 0.7rem;
   }
 
-  /* Szűk képernyő: 1 oszlop, de az admin SORSZEND (grid-row) megmarad */
+  /* Szűk képernyő: az admin rácspozíciói ne hagyjanak üres sorokat. */
   .immo-schema-grid {
     grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: none !important;
     grid-auto-rows: auto !important;
+    grid-auto-flow: row;
     gap: 0.65rem 0.5rem;
   }
 
   .immo-schema-cell {
     grid-column: 1 / -1 !important;
-    /* grid-row: NEM írjuk felül — az admin séma sorrendje érvényesül */
+    grid-row: auto !important;
   }
 
   .immo-dual-range-block {
     /* 1 oszlopos mobilon: admin col 5+ implicit keskeny oszlopokat hozna létre */
     grid-column: 1 / -1 !important;
+    grid-row: auto !important;
     padding-top: 0.42rem;
   }
 

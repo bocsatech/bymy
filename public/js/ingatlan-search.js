@@ -1069,17 +1069,13 @@ export async function initIngatlanSearch({
   /** Típus választásakor a típusmenük (Állapot, Fűtés, …) a „további” panelben vannak — nyisd ki. */
   function syncMorePanelForTipus() {
     const parents = readWheelList(root.querySelector('[data-wheel="ingatlan_lakas_tipus"]'));
-    if (!parents.length) {
-      setMoreOpen(false);
-      return;
-    }
     const moreHostEl = root.querySelector("#immo-schema-more");
     const hasVisibleTipusMenus = Boolean(
       moreHostEl?.querySelector(
         ".immo-schema-cell:not(.is-tipus-hidden), .immo-dual-range-block:not(.is-tipus-hidden)"
       )
     );
-    setMoreOpen(hasVisibleTipusMenus);
+    setMoreOpen(hasVisibleTipusMenus || !parents.length);
   }
 
   if (!root.dataset.immoSearchBound) {

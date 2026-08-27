@@ -440,7 +440,9 @@ export function areaFieldKeysForTipus(parentValues) {
     .filter(Boolean);
   const out = new Set();
   if (!parents.length) {
-    for (const k of AREA_FIELD_KEYS.alapterulet) out.add(k);
+    for (const keys of Object.values(AREA_FIELD_KEYS)) {
+      for (const k of keys) out.add(k);
+    }
     return out;
   }
   const kinds = new Set();
@@ -694,7 +696,6 @@ export function fieldKeysVisibleForTipus(parentValues) {
     .filter(Boolean);
   const out = new Set(INGATLAN_CORE_FIELD_KEYS);
   for (const k of areaFieldKeysForTipus(parents)) out.add(k);
-  if (!parents.length) return out;
 
   const allTypeKeys = () => {
     const s = new Set();
@@ -704,6 +705,11 @@ export function fieldKeysVisibleForTipus(parentValues) {
     }
     return s;
   };
+
+  if (!parents.length) {
+    for (const f of allTypeKeys()) out.add(f);
+    return out;
+  }
 
   for (const p of parents) {
     const list = map[p];

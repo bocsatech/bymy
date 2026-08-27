@@ -1,4 +1,4 @@
-import { mountLayoutBoard } from "./bocsatech-layout.js?v=stepDrag4";
+import { mountLayoutBoard } from "./bocsatech-layout.js?v=akkuBoard1";
 import { mountIngatlanWheelBoard } from "./bocsatech-ingatlan-wheels.js?v=readOnly1";
 import {
   isIngatlanWheelAdminCategory,
@@ -62,7 +62,6 @@ const ADMIN_SECTIONS = [
     tabs: [
       { id: "auto:listings", label: "Hirdetések" },
       { id: "auto:kivitel", label: "Kivitel menü" },
-      { id: "auto:akku", label: "Akkumulátor és hatótáv" },
       ...AUTO_LAYOUT_ITEMS.map((item) => ({
         id: layoutTabId(item).replace(/^layout:/, "auto:layout:"),
         label: item.label,
@@ -926,15 +925,6 @@ async function loadTab() {
     const data = await api("/api/level1/kivitel-menu/admin");
     kivitelMenu = data.menu || { version: 1, items: data.items || [] };
   }
-  if (section === "auto" && sub === "akku") {
-    const data = await api("/api/level1/akku-search-menu/admin");
-    akkuSearchMenu = {
-      ...(data.menu || { version: 1, items: data.items || [] }),
-      live: data.live === true,
-      source: data.source || null,
-      updatedAt: data.menu?.updatedAt || null,
-    };
-  }
   if (section === "ingatlan" && sub === "listings") {
     listings = (await api("/api/level1/listings?vertical=ingatlan")).listings;
   }
@@ -1528,8 +1518,8 @@ function layoutView() {
       : "Ugyanaz a kerék-séma, mint a Kiado ingatlannál (első betöltéskor másolat). Szerkesztés és mentés csak erre a gombra vonatkozik — a Kiado ingatlan elrendezése nem változik."
     : isSearch
       ? cat === "teherauto-search"
-        ? "Teherautó gyorskereső + Több szűrő mezői (3,5 t-ig és 3,5 t-tól közös nézet). 1. lépés = hero gyorskereső, 2–5. lépés = bővített szűrők. Mentés után a teherautó oldalon hard refresh kell."
-        : "Személyautó gyorskereső + Több szűrő mezői. 1. lépés = hero gyorskereső, 2–5. lépés = bővített szűrők. Ugyanaz a mezőkatalógus, mint a feladásnál. Mentés után az autó oldalon hard refresh kell."
+        ? "Teherautó gyorskereső + Több szűrő mezői (3,5 t-ig és 3,5 t-tól közös nézet). 1. lépés = hero, 2 = műszaki, 3 = Akkumulátor és hatótáv (Extrák felett), 4 = Extrák, 5 = helyszín. Mentés után hard refresh."
+        : "Személyautó gyorskereső + Több szűrő. 1 = gyorskereső, 2 = műszaki, 3 = Akkumulátor és hatótáv adatok (Extrák felett — üres rács, Törölt mezőkből rakd vissza), 4 = Extrák, 5 = helyszín. Szélesség / pozíció mint a többi. Mentés után az autó oldalon hard refresh."
       : "Csak ennek a kategóriának a mezői. Húzd a cellát a lapon belül vagy másik lépésre. Mentés után a hirdetésfeladáson hard refresh kell.";
   const titleSuffix = isImmo ? "kerék-séma" : isSearch ? "kereső mezők" : "feladási mezők";
   return `
@@ -1553,7 +1543,6 @@ function shellBody() {
       return listingsView({ title: "Autóhirdetések", emptyHint: "Nincs autó/teher hirdetés." });
     }
     if (sub === "kivitel") return kivitelMenuView();
-    if (sub === "akku") return akkuSearchMenuView();
     return layoutView();
   }
   if (section === "ingatlan") {
@@ -1624,6 +1613,15 @@ function render() {
       });
     } else {
       mountLayoutBoard(root, layout, {
+        stepNames: isSearchLayoutCat(layoutCategoryFromTab())
+          ? {
+              1: "Gyorskereső",
+              2: "Műszaki adatok",
+              3: "Akkumulátor és hatótáv adatok",
+              4: "Extrák",
+              5: "Helyszín",
+            }
+          : undefined,
         onChange(cells) {
           layout = { ...layout, cells, category: layoutCategoryFromTab() };
         },

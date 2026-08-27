@@ -3,7 +3,7 @@ const ROW_PX = 64;
 const DROP_BUFFER = 2;
 /** Ennyi pixel alatt kattintásnak számít (nem mozgatás). */
 const DRAG_THRESHOLD_PX = 8;
-const STEP_NAMES = {
+const DEFAULT_STEP_NAMES = {
   1: "Alapadatok",
   2: "Műszaki adatok",
   3: "Extrák",
@@ -16,8 +16,9 @@ const PAIR_OF = {
   muszaki_ev: "muszaki_honap",
 };
 
-export function mountLayoutBoard(root, layout, { onChange } = {}) {
+export function mountLayoutBoard(root, layout, { onChange, stepNames } = {}) {
   if (!root) return { cells: layout?.cells || [] };
+  const STEP_NAMES = { ...DEFAULT_STEP_NAMES, ...(stepNames || {}) };
   const cells = Array.isArray(layout?.cells) ? layout.cells : [];
   const byKey = new Map(cells.map((cell) => [cell.field_key, cell]));
   const skip = new Set([

@@ -1,4 +1,4 @@
-import { mountLayoutBoard } from "./bocsatech-layout.js?v=stepDrag3";
+import { mountLayoutBoard } from "./bocsatech-layout.js?v=stepDrag4";
 import { mountIngatlanWheelBoard } from "./bocsatech-ingatlan-wheels.js?v=readOnly1";
 import {
   isIngatlanWheelAdminCategory,

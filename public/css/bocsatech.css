@@ -265,10 +265,10 @@ th { color: var(--muted); font-weight: 600; }
 .layout-del:hover { color: var(--danger); background: rgba(226, 92, 92, 0.15); }
 .layout-resize {
   position: absolute;
-  top: 4px;
-  right: -2px;
-  bottom: 4px;
-  width: 18px;
+  top: 2px;
+  right: -4px;
+  bottom: 2px;
+  width: 22px;
   cursor: ew-resize;
   border-radius: 0 7px 7px 0;
   z-index: 3;

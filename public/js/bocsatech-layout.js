@@ -1,6 +1,8 @@
 const COLS = 12;
 const ROW_PX = 64;
 const DROP_BUFFER = 2;
+/** Ennyi pixel alatt kattintásnak számít (nem mozgatás). */
+const DRAG_THRESHOLD_PX = 8;
 const STEP_NAMES = {
   1: "Alapadatok",
   2: "Műszaki adatok",
@@ -278,10 +280,14 @@ export function mountLayoutBoard(root, layout, { onChange } = {}) {
         if (!cell || !board) return;
         const resize = Boolean(event.target.closest("[data-resize]"));
         const fromStep = Number(cell.step);
+        const originCol = cell.col;
+        const originRow = cell.row;
+        const originSpan = cell.colSpan;
+        const originStep = cell.step;
+        const originOrder = cell.order;
         event.preventDefault();
         tile.setPointerCapture(event.pointerId);
         tile.classList.add("dragging");
-        root.querySelectorAll(".layout-board").forEach((b) => setBoardHeight(b, { buffer: DROP_BUFFER }));
 
         const grab = {
           startCol: cell.col,
@@ -297,11 +303,28 @@ export function mountLayoutBoard(root, layout, { onChange } = {}) {
         let lastX = event.clientX;
         let lastY = event.clientY;
         let ended = false;
+        let dragArmed = resize; // szélesség húzásnál azonnal aktív
+        let boardsExpanded = false;
+
+        const armDrag = () => {
+          if (dragArmed) return;
+          dragArmed = true;
+          if (!boardsExpanded) {
+            root.querySelectorAll(".layout-board").forEach((b) => setBoardHeight(b, { buffer: DROP_BUFFER }));
+            boardsExpanded = true;
+          }
+        };
 
         const move = (ev) => {
           if (ended) return;
           lastX = ev.clientX;
           lastY = ev.clientY;
+
+          if (!dragArmed) {
+            const dist = Math.hypot(ev.clientX - event.clientX, ev.clientY - event.clientY);
+            if (dist < DRAG_THRESHOLD_PX) return;
+            armDrag();
+          }
 
           if (resize) {
             const m = boardMetrics(board);
@@ -358,6 +381,19 @@ export function mountLayoutBoard(root, layout, { onChange } = {}) {
           tile.removeEventListener("pointermove", move);
           tile.removeEventListener("pointerup", up);
           tile.removeEventListener("pointercancel", up);
+
+          // Puszta kattintás: ne mozduljon el a cella (ne jöjjön plusz sor)
+          if (!dragArmed) {
+            cell.col = originCol;
+            cell.row = originRow;
+            cell.colSpan = originSpan;
+            cell.step = originStep;
+            cell.order = originOrder;
+            syncPair(cell);
+            notify();
+            mount();
+            return;
+          }
 
           if (!resize) {
             const dropBoard = boardAtPoint(lastX, lastY, board) || board;

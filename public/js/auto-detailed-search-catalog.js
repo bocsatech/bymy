@@ -1,6 +1,15 @@
 /** Részletes keresés — szekciók és mezők (hasznaltauto.hu felszereltség címkék). */
 
-/** Fallback, ha az admin API nem elérhető — lib/akku-search-menu.mjs-ben is szerepel. */
+/** Üres sablon — a mezők csak az admin Akkumulátor menüből jönnek. */
+export const AKKU_SEARCH_SECTION_EMPTY = {
+  id: "akku",
+  title: "Akkumulátor és hatótáv adatok",
+  ranges: [],
+  selects: [],
+  toggles: [],
+};
+
+/** Mezőkatalógus (admin + layout bridge). */
 export const AKKU_SEARCH_SECTION_FALLBACK = {
   id: "akku",
   title: "Akkumulátor és hatótáv adatok",

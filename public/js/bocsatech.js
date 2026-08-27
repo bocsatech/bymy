@@ -62,7 +62,7 @@ const ADMIN_SECTIONS = [
     tabs: [
       { id: "auto:listings", label: "Hirdetések" },
       { id: "auto:kivitel", label: "Kivitel menü" },
-      { id: "auto:akku", label: "Akkumulátor menü" },
+      { id: "auto:akku", label: "Akkumulátor és hatótáv" },
       ...AUTO_LAYOUT_ITEMS.map((item) => ({
         id: layoutTabId(item).replace(/^layout:/, "auto:layout:"),
         label: item.label,
@@ -836,7 +836,7 @@ const actions = {
       if (!live) {
         throw new Error("Mentés után az élő API még mindig üres. Próbáld újra, vagy nézd a hálózati hibát.");
       }
-      info = `Mentve az élő oldalra. Cím: „${akkuSearchMenu.title}”. Engedélyezett mezők: ${(check.section?.ranges?.length || 0) + (check.section?.selects?.length || 0) + (check.section?.toggles?.length || 0)}. Autó oldal: Több szűrő → Részletes keresés.`;
+      info = `Mentve. Cím: „${akkuSearchMenu.title}”. Bekapcsolt mezők a keresőn: ${(check.section?.ranges?.length || 0) + (check.section?.selects?.length || 0) + (check.section?.toggles?.length || 0)}. Autó oldal: Több szűrő → Részletes keresés.`;
       if (!silent) render();
       else {
         const hint = app.querySelector(".layout-cat-title")?.closest("div,section") || app;
@@ -850,7 +850,7 @@ const actions = {
     }
   },
   async resetAkkuSearchMenu() {
-    if (!confirm("Visszaállítod az alapértelmezett Akkumulátor menüt?")) return;
+    if (!confirm("Minden mezőt kikapcsolsz? A keresőn eltűnik az Akkumulátor szekció.")) return;
     err = "";
     info = "";
     try {
@@ -859,7 +859,7 @@ const actions = {
         body: JSON.stringify({ menu: { version: 1, items: [] } }),
       });
       akkuSearchMenu = { ...(data.menu || { version: 1, items: data.items || [] }), live: data.live === true };
-      info = "Alapértelmezett Akkumulátor menü visszaállítva.";
+      info = "Minden mező kikapcsolva — a keresőn nincs Akkumulátor szekció.";
       render();
     } catch (error) {
       err = error.message;
@@ -1441,7 +1441,7 @@ function akkuSearchMenuView() {
   const items = akkuSearchMenu?.items || [];
   const cards = items
     .map((item, index) => {
-      return `<article class="kivitel-admin-card akku-admin-card ${item.enabled === false ? "is-off" : ""}" data-id="${esc(item.id)}">
+      return `<article class="kivitel-admin-card akku-admin-card ${item.enabled === true ? "" : "is-off"}" data-id="${esc(item.id)}">
         <div class="kivitel-admin-card__order">
           <span class="kivitel-admin-card__idx">${index + 1}</span>
           <button type="button" class="btn ghost" data-act="akkuMenuMove" data-id="${esc(item.id)}" data-dir="-1" ${index === 0 ? "disabled" : ""}>↑</button>
@@ -1457,8 +1457,8 @@ function akkuSearchMenuView() {
             <input type="text" data-field="label" data-act="akkuLabelSave" value="${esc(item.label || "")}" maxlength="80" />
           </label>
           <label class="kivitel-admin-card__toggle">
-            <input type="checkbox" data-field="enabled" data-act="akkuMenuToggle" data-id="${esc(item.id)}" ${item.enabled === false ? "" : "checked"} />
-            Látható a részletes keresés Akkumulátor menüjében
+            <input type="checkbox" data-field="enabled" data-act="akkuMenuToggle" data-id="${esc(item.id)}" ${item.enabled === true ? "checked" : ""} />
+            Látható a Részletes keresés „Akkumulátor és hatótáv adatok” szekciójában
           </label>
         </div>
       </article>`;
@@ -1466,8 +1466,8 @@ function akkuSearchMenuView() {
     .join("");
 
   return `
-    <h2 class="layout-cat-title">Akkumulátor és hatótáv menü</h2>
-    <p class="hint">A webes <strong>Részletes keresés → Akkumulátor</strong> mezői. Kapcsoló / sorrend / címke azonnal mentődik, és szinkronban van a <strong>Személyautó kereső</strong> elrendezéssel (Több szűrő).${akkuSearchMenu?.live ? ` <strong>Élő (${esc(akkuSearchMenu.source || "kv")}${akkuSearchMenu.updatedAt ? ` · ${esc(akkuSearchMenu.updatedAt)}` : ""}).</strong>` : " <strong class=\"err\">Még nincs élő adat</strong>."}</p>
+    <h2 class="layout-cat-title">Akkumulátor és hatótáv adatok</h2>
+    <p class="hint"><strong>Csak itt</strong> állítható a webes <strong>Részletes keresés → Akkumulátor és hatótáv adatok</strong> szekció. A Személyautó kereső elrendezés ezt <strong>nem</strong> módosítja. Kapcsold be a mezőket, amiket látni szeretnél; alapból minden ki van kapcsolva (a keresőn üres / nem jelenik meg).${akkuSearchMenu?.live ? ` <strong>Élő mentés${akkuSearchMenu.updatedAt ? ` · ${esc(akkuSearchMenu.updatedAt)}` : ""}.</strong>` : " <strong class=\"err\">Még nincs mentés — a keresőn nincs akku szekció.</strong>"}</p>
     <label class="kivitel-admin-card__fields" style="display:block;margin-bottom:0.75rem;max-width:28rem">
       <div>Szekció címe</div>
       <input type="text" data-field="akku-title" data-act="akkuTitleSave" value="${esc(akkuSearchMenu?.title || "Akkumulátor és hatótáv adatok")}" maxlength="80" />
@@ -1477,7 +1477,7 @@ function akkuSearchMenuView() {
     <div class="kivitel-admin-list">${cards || '<p class="hint">Nincs menüelem.</p>'}</div>
     <div class="row" style="margin-top:1rem;gap:0.65rem;flex-wrap:wrap">
       <button class="btn" type="button" data-act="saveAkkuSearchMenu">Menü mentése</button>
-      <button class="btn ghost" type="button" data-act="resetAkkuSearchMenu">Alapértelmezés</button>
+      <button class="btn ghost" type="button" data-act="resetAkkuSearchMenu">Minden kikapcsolva (alap)</button>
     </div>`;
 }
 

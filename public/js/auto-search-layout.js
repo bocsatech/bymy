@@ -5,7 +5,6 @@
 
 import { initVehicleCatalogSelects, fillSelect } from "./vehicle-catalog-client.js";
 import { KIVITEL_OPTIONS } from "./kivitel-options.js?v=kivitel1";
-import { buildAkkuSectionFromLayoutCells } from "./auto-detailed-search-catalog.js?v=detailedSearch10";
 
 function searchLayoutCategory() {
   return document.body?.getAttribute("data-site-page") === "teherauto"
@@ -557,14 +556,6 @@ export async function applyAutoSearchLayout(form = document.getElementById("home
   const layout = await fetchAutoSearchLayout({ force: true });
   const mainHost = document.getElementById("qs-layout-main");
   const moreHost = document.getElementById("qs-more-layout");
-
-  // Részletes keresés Akkumulátor szekció — ugyanabból a mentett layoutból
-  form._akkuDetailedSection =
-    buildAkkuSectionFromLayoutCells(layout?.cells || []) || null;
-  if (form._akkuDetailedSection) {
-    const panel = form.querySelector("#qs-detailed-panel");
-    if (panel) delete panel.dataset.detailedMounted;
-  }
 
   // Élő layout: új keresőmezők (pl. körzet) mindig látszanak.
   for (const cell of layout.cells || []) {

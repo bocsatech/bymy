@@ -4,9 +4,8 @@
 
 import {
   DETAILED_SEARCH_SECTIONS,
-  AKKU_SEARCH_SECTION_FALLBACK,
-  buildAkkuSectionFromLayoutCells,
-} from "./auto-detailed-search-catalog.js?v=detailedSearch10";
+  AKKU_SEARCH_SECTION_EMPTY,
+} from "./auto-detailed-search-catalog.js?v=detailedSearch11";
 
 const FORM_FLAG_KEYS = new Set(["villamtoltes", "zold_rendszam"]);
 
@@ -231,13 +230,7 @@ function bindExclusiveAccordions(host) {
   });
 }
 
-async function loadAkkuSearchSection(form) {
-  // 1) A kereső layoutból (amit az admin Személyautó keresőben ment) — ez a fő forrás
-  const fromLayout = form?._akkuDetailedSection;
-  if (fromLayout?.id) {
-    return { section: fromLayout, live: true, source: "layout-cache" };
-  }
-
+async function loadAkkuSearchSection() {
   try {
     const res = await fetch(`/api/level1/akku-search-menu?t=${Date.now()}`, {
       credentials: "same-origin",
@@ -251,13 +244,19 @@ async function loadAkkuSearchSection(form) {
   } catch (error) {
     console.warn("Akkumulátor menü:", error);
   }
-  return { section: { ...AKKU_SEARCH_SECTION_FALLBACK }, live: false, source: "fallback" };
+  return { section: { ...AKKU_SEARCH_SECTION_EMPTY }, live: false, source: "empty" };
+}
+
+function sectionFieldCount(section) {
+  if (!section) return 0;
+  return (section.ranges?.length || 0) + (section.selects?.length || 0) + (section.toggles?.length || 0);
 }
 
 function buildDetailedSections(akkuLoad) {
   const section = akkuLoad?.section;
-  if (section?.id) return [section, ...DETAILED_SEARCH_SECTIONS];
-  return [{ ...AKKU_SEARCH_SECTION_FALLBACK }, ...DETAILED_SEARCH_SECTIONS];
+  // Üres akku szekció ne jelenjen meg a keresőn (admin még nem kapcsolt be mezőt).
+  if (section?.id && sectionFieldCount(section) > 0) return [section, ...DETAILED_SEARCH_SECTIONS];
+  return [...DETAILED_SEARCH_SECTIONS];
 }
 
 export async function mountDetailedSearch(form = document.getElementById("home-qs-form"), { force = false } = {}) {
@@ -265,7 +264,7 @@ export async function mountDetailedSearch(form = document.getElementById("home-q
   if (!host) return null;
   if (!force && host.dataset.detailedMounted === "1") return host;
 
-  const akkuLoad = await loadAkkuSearchSection(form);
+  const akkuLoad = await loadAkkuSearchSection();
   const sections = buildDetailedSections(akkuLoad);
   host.innerHTML = sections.map((s, index) => renderSection(s, index === 0)).join("");
   bindExclusiveAccordions(host);
@@ -274,8 +273,6 @@ export async function mountDetailedSearch(form = document.getElementById("home-q
   host.dataset.detailedSource = akkuLoad.source || "";
   return host;
 }
-
-export { buildAkkuSectionFromLayoutCells };
 
 export function readDetailedSearchValues(form = document.getElementById("home-qs-form")) {
   const panel = form?.querySelector("#qs-detailed-panel");

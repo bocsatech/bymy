@@ -62,6 +62,7 @@ const ADMIN_SECTIONS = [
     tabs: [
       { id: "auto:listings", label: "Hirdetések" },
       { id: "auto:kivitel", label: "Kivitel menü" },
+      { id: "auto:akku", label: "Akkumulátor kereső" },
       ...AUTO_LAYOUT_ITEMS.map((item) => ({
         id: layoutTabId(item).replace(/^layout:/, "auto:layout:"),
         label: item.label,
@@ -93,7 +94,113 @@ const ADMIN_SECTIONS = [
     defaultTab: "mobilweb:menu",
     tabs: [{ id: "mobilweb:menu", label: "Menü elrendezés" }],
   },
+  {
+    id: "pages",
+    label: "6. Oldalak",
+    defaultTab: "pages:hub",
+    tabs: [
+      { id: "pages:hub", label: "Kezdőlap" },
+      { id: "pages:auto", label: "Autó" },
+      { id: "pages:teherauto", label: "Teherautó" },
+      { id: "pages:ingatlan", label: "Ingatlan" },
+      { id: "pages:ajanlasok", label: "Ajánlások" },
+      { id: "pages:kereses", label: "Keresés" },
+      { id: "pages:hirdetesfeladas", label: "Hirdetésfeladás" },
+      { id: "pages:uzenetek", label: "Üzenetek" },
+      { id: "pages:fiok", label: "Fiók / Beállítások" },
+      { id: "pages:listings", label: "Listings" },
+    ],
+  },
 ];
+
+const PAGE_ADMIN_GUIDES = {
+  hub: {
+    title: "Kezdőlap",
+    href: "/",
+    blurb: "Főoldal feed, promo képek, oldalsáv blokkok.",
+    jumps: [
+      { tab: "home:promo", label: "Promo képek szerkesztése" },
+    ],
+  },
+  auto: {
+    title: "Autó oldal",
+    href: "/auto.html",
+    blurb: "Asztali kereső, feladási elrendezések, Kivitel, Akkumulátor.",
+    jumps: [
+      { tab: "auto:layout:szemelyauto-search", label: "Személyautó kereső" },
+      { tab: "auto:kivitel", label: "Kivitel menü" },
+      { tab: "auto:akku", label: "Akkumulátor kereső" },
+      { tab: "auto:listings", label: "Autóhirdetések" },
+    ],
+  },
+  teherauto: {
+    title: "Teherautó oldal",
+    href: "/teherauto.html",
+    blurb: "Asztali kereső (3,5-ig / 3,5-tól), teher feladási elrendezések.",
+    jumps: [
+      { tab: "auto:layout:teherauto-search", label: "Teherautó kereső" },
+      { tab: "auto:layout:kisteher", label: "Feladás · 3,5-ig" },
+      { tab: "auto:layout:teherauto", label: "Feladás · 3,5-től" },
+      { tab: "auto:listings", label: "Autó/teher hirdetések" },
+    ],
+  },
+  ingatlan: {
+    title: "Ingatlan oldal",
+    href: "/ingatlan.html",
+    blurb: "Kereső kerekek (Kiadó / Eladó / Airbnb) — a meglévő menük maradnak.",
+    jumps: [
+      { tab: "ingatlan:layout:ingatlan", label: "Kiadó szerkesztő" },
+      { tab: "ingatlan:layout:elado-ingatlan", label: "Eladó szerkesztő" },
+      { tab: "ingatlan:layout:airbnb", label: "Airbnb szerkesztő" },
+      { tab: "ingatlan:listings", label: "Ingatlanhirdetések" },
+    ],
+  },
+  ajanlasok: {
+    title: "Ajánlások",
+    href: "/ajanlasok.html",
+    blurb: "Ajánló lista és körzet. Oldalsáv blokkok a live oldalon szerkeszthetők (admin bejelentkezéssel).",
+    jumps: [],
+  },
+  kereses: {
+    title: "Keresés (mobil cylinder)",
+    href: "/kereses.html",
+    blurb: "Mobilweb kereső menü ikonjai és sorrendje.",
+    jumps: [{ tab: "mobilweb:menu", label: "Menü elrendezés" }],
+  },
+  hirdetesfeladas: {
+    title: "Hirdetésfeladás",
+    href: "/hirdetesfeladas.html",
+    blurb: "Kategóriaválasztó + űrlap elrendezések (autó / teher / ingatlan).",
+    jumps: [
+      { tab: "auto:layout:szemelyauto", label: "Személyautó feladás" },
+      { tab: "ingatlan:layout:ingatlan", label: "Ingatlan kerék (kiadó)" },
+    ],
+  },
+  uzenetek: {
+    title: "Üzenetek",
+    href: "/uzenetek.html",
+    blurb: "Felhasználói üzenetváltás. Nincs külön layout-szerkesztő.",
+    jumps: [],
+  },
+  fiok: {
+    title: "Fiók / Beállítások",
+    href: "/beallitasok.html",
+    blurb: "Parkoló (kedvencek), mentett keresések, profil. Felhasználók a 1. szekcióban.",
+    jumps: [
+      { tab: "users:private", label: "Privát fiókok" },
+      { tab: "users:business", label: "Céges fiókok" },
+    ],
+  },
+  listings: {
+    title: "Listings",
+    href: "/listings.html",
+    blurb: "Általános hirdetéslista nézet.",
+    jumps: [
+      { tab: "auto:listings", label: "Autóhirdetések" },
+      { tab: "ingatlan:listings", label: "Ingatlanhirdetések" },
+    ],
+  },
+};
 
 let admin = null;
 let tab = "users:private";
@@ -925,6 +1032,14 @@ async function loadTab() {
     const data = await api("/api/level1/kivitel-menu/admin");
     kivitelMenu = data.menu || { version: 1, items: data.items || [] };
   }
+  if (section === "auto" && sub === "akku") {
+    const data = await api("/api/level1/akku-search-menu");
+    akkuSearchMenu = {
+      ...(data.menu || { version: 1, items: data.items || [] }),
+      live: data.live === true,
+      updatedAt: data.updatedAt || data.menu?.updatedAt,
+    };
+  }
   if (section === "ingatlan" && sub === "listings") {
     listings = (await api("/api/level1/listings?vertical=ingatlan")).listings;
   }
@@ -1543,6 +1658,7 @@ function shellBody() {
       return listingsView({ title: "Autóhirdetések", emptyHint: "Nincs autó/teher hirdetés." });
     }
     if (sub === "kivitel") return kivitelMenuView();
+    if (sub === "akku") return akkuSearchMenuView();
     return layoutView();
   }
   if (section === "ingatlan") {
@@ -1554,7 +1670,28 @@ function shellBody() {
   }
   if (section === "home") return hubPromoView();
   if (section === "mobilweb") return searchCylinderMenuView();
+  if (section === "pages") return pagesAdminView(sub);
   return usersView("private");
+}
+
+function pagesAdminView(pageKey) {
+  const guide = PAGE_ADMIN_GUIDES[pageKey] || PAGE_ADMIN_GUIDES.hub;
+  const jumps = (guide.jumps || [])
+    .map(
+      (j) =>
+        `<button type="button" class="btn" data-act="setTab" data-tab="${esc(j.tab)}">${esc(j.label)}</button>`
+    )
+    .join("");
+  return `
+    <h2 class="layout-cat-title">${esc(guide.title)}</h2>
+    <p class="hint">${esc(guide.blurb)}</p>
+    <p class="hint">Élő oldal: <a href="${esc(guide.href)}" target="_blank" rel="noopener">${esc(guide.href)}</a></p>
+    <div class="row" style="margin-top:1rem;gap:0.65rem;flex-wrap:wrap">
+      ${jumps || '<span class="hint">Nincs külön szerkesztő fül — a funkció a live oldalon / felhasználói fiókban él.</span>'}
+      <a class="btn ghost" href="${esc(guide.href)}" target="_blank" rel="noopener">Megnyitás</a>
+    </div>
+    <p class="ok">${esc(info)}</p>
+    <p class="err">${esc(err)}</p>`;
 }
 
 function shell() {
@@ -1574,10 +1711,12 @@ function shell() {
     section === "users" ||
     section === "home" ||
     section === "mobilweb" ||
+    section === "pages" ||
     isLayoutTab() ||
     isPreviewTab() ||
     tab.endsWith(":listings") ||
-    tab === "auto:kivitel";
+    tab === "auto:kivitel" ||
+    tab === "auto:akku";
   return `
     <div class="wrap ${wide ? "wrap--wide" : ""}">
       <div class="top">

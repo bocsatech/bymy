@@ -194,6 +194,10 @@ function renderListings(items) {
   }
 
   if (PAGE === "auto" || PAGE === "teherauto") updateAutoDeskResultCount(filtered.length);
+  if (PAGE === "ingatlan") {
+    const el = document.querySelector("[data-immo-result-count]");
+    if (el) el.textContent = `${filtered.length} találat`;
+  }
 
   for (const item of filtered) {
     gridTrack.appendChild(createHomeGridCard(item));

@@ -46,7 +46,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext x='16' y='22' text-anchor='middle' font-size='14' font-family='system-ui,sans-serif' font-weight='700'%3EB%3C/text%3E%3C/svg%3E" type="image/svg+xml" />
-    <meta name="bymy-version" content="autoDesk19" />
+    <meta name="bymy-version" content="autoDesk20" />
     <title>Autó &amp; Motor — Bymy</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -101,6 +101,68 @@
         overflow-y: visible !important;
         max-width: 100% !important;
         display: block !important;
+      }
+      /* Autó asztali fejléc: logó | menü KÖZÉPEN | akciók — inline, cascade-biztos */
+      @media (min-width: 901px) {
+        body.home-page.site-app[data-site-page="auto"] .hub-header-inner,
+        body.home-page[data-site-page="auto"] .hub-header-inner {
+          display: grid !important;
+          grid-template-columns: 1fr auto 1fr !important;
+          grid-template-areas: "logo nav actions" !important;
+          align-items: center !important;
+          column-gap: 20px !important;
+          max-width: 1440px !important;
+          margin: 0 auto !important;
+          padding: 0 24px !important;
+          min-height: 64px !important;
+          flex-direction: row !important;
+        }
+        body.home-page.site-app[data-site-page="auto"] .hub-logo,
+        body.home-page[data-site-page="auto"] .hub-logo {
+          grid-area: logo !important;
+          justify-self: start !important;
+          position: relative !important;
+          left: auto !important;
+          right: auto !important;
+          top: auto !important;
+          bottom: auto !important;
+          transform: none !important;
+          z-index: 2 !important;
+        }
+        body.home-page.site-app[data-site-page="auto"] .hub-logo .bymy-logo-img--nav,
+        body.home-page[data-site-page="auto"] .hub-logo .bymy-logo-img--nav {
+          height: 40px !important;
+          max-width: 140px !important;
+          width: auto !important;
+        }
+        body.home-page.site-app[data-site-page="auto"] .hub-nav,
+        body.home-page[data-site-page="auto"] .hub-nav {
+          grid-area: nav !important;
+          justify-self: center !important;
+          position: static !important;
+          left: auto !important;
+          right: auto !important;
+          top: auto !important;
+          bottom: auto !important;
+          transform: none !important;
+          display: flex !important;
+          align-items: center !important;
+          gap: 22px !important;
+          width: max-content !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          pointer-events: auto !important;
+        }
+        body.home-page.site-app[data-site-page="auto"] .hub-header-top,
+        body.home-page[data-site-page="auto"] .hub-header-top {
+          grid-area: actions !important;
+          justify-self: end !important;
+          width: auto !important;
+          min-height: 0 !important;
+          padding: 0 !important;
+          display: flex !important;
+          align-items: center !important;
+        }
       }
       /* Autó asztali: kereső BALRA, találatok JOBBRA — felülírja a display:block-ot */
       @media (min-width: 901px) {
@@ -165,18 +227,16 @@
     <script src="/js/mw-app-shell.js?v=tileFill3"></script>
     <header class="hub-header home-header">
       <div class="hub-header-inner">
-        <div class="hub-nav-band">
-          <a class="hub-logo" href="/" aria-label="Bymy">
-            <img class="bymy-logo-img bymy-logo-img--nav" src="/images/bymy-logo.png?v=logoUpload1" alt="Bymy.hu" width="190" height="48" decoding="async" />
-          </a>
-          <nav class="hub-nav" aria-label="Főmenü">
-            <a class="hub-nav-link" href="/">Kezdőlap</a>
-            <a class="hub-nav-link active" href="/auto.html">Autó</a>
-            <a class="hub-nav-link" href="/teherauto.html">Teherautó</a>
-            <a class="hub-nav-link" href="/ingatlan.html">Ingatlan</a>
-            <a class="hub-nav-link" href="/ajanlasok.html">Ajánlások</a>
-          </nav>
-        </div>
+        <a class="hub-logo" href="/" aria-label="Bymy">
+          <img class="bymy-logo-img bymy-logo-img--nav" src="/images/bymy-logo.png?v=logoUpload1" alt="Bymy.hu" width="190" height="48" decoding="async" />
+        </a>
+        <nav class="hub-nav" aria-label="Főmenü">
+          <a class="hub-nav-link" href="/">Kezdőlap</a>
+          <a class="hub-nav-link active" href="/auto.html">Autó</a>
+          <a class="hub-nav-link" href="/teherauto.html">Teherautó</a>
+          <a class="hub-nav-link" href="/ingatlan.html">Ingatlan</a>
+          <a class="hub-nav-link" href="/ajanlasok.html">Ajánlások</a>
+        </nav>
         <div class="hub-header-top">
           <div class="hub-header-actions site-header-actions">
             <a class="hub-header-msg" href="/uzenetek.html" data-auth-member hidden>

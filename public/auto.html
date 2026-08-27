@@ -62,7 +62,8 @@
     <link rel="stylesheet" href="/css/hub-mobile-app.css?v=tileFill3" />
     <link rel="stylesheet" href="/css/home.css?v=coverAll1" />
     <link rel="stylesheet" href="/css/listing-photo-cover.css?v=coverAll1" />
-    <link rel="stylesheet" href="/css/auto-hero.css?v=detailedSearch11" />
+    <link rel="stylesheet" href="/css/auto-hero.css?v=autoDesk1" />
+    <link rel="stylesheet" href="/css/auto-desk-layout.css?v=autoDesk1" />
     <link rel="stylesheet" href="/css/ingatlan-search.css?v=autoDrums15" />
     <style id="home-scroll-fix">
       /* Inline: cache-biztos — a teljes oldal görget, külön görgetősáv nincs sehol. */
@@ -171,7 +172,7 @@
       </div>
     </header>
 
-    <main class="home-main">
+    <main class="home-main auto-desk-main">
       <section class="auto-search-hero" data-auto-search-hero aria-labelledby="auto-search-title">
         <nav class="auto-search-tabs" aria-label="Járműkategóriák">
           <a class="auto-search-tab is-active" href="/auto.html" data-auto-kat="" aria-current="page">Személyautók</a>
@@ -196,7 +197,7 @@
         </nav>
 
         <div class="auto-search-hero__stage">
-          <!-- Háttérkép cseréje: csak az src. -->
+          <!-- Háttérkép cseréje: csak az src. (asztali layout elrejti) -->
           <img
             class="auto-search-hero__image"
             data-auto-hero-image
@@ -223,6 +224,19 @@
             <div class="auto-search-body" id="auto-search-body">
             <form class="home-qs-form auto-qs-booting" id="home-qs-form">
               <p class="home-qs-status" id="home-qs-status" hidden></p>
+
+              <div class="auto-desk-mode" role="tablist" aria-label="Kereső mód">
+                <button type="button" class="auto-desk-mode__btn is-active" role="tab" data-desk-mode="gyors" aria-selected="true">Gyors</button>
+                <button type="button" class="auto-desk-mode__btn" role="tab" data-desk-mode="reszletes" aria-selected="false">Részletes</button>
+              </div>
+
+              <div class="auto-desk-acc is-open" data-desk-acc="alap">
+                <button type="button" class="auto-desk-acc__head" data-desk-acc-toggle aria-expanded="true">
+                  <span>Alap adatok</span>
+                  <span class="auto-desk-acc__sum" data-desk-acc-sum></span>
+                  <span class="auto-desk-acc__chev" aria-hidden="true">▼</span>
+                </button>
+                <div class="auto-desk-acc__body">
               <div id="qs-layout-main" class="home-qs-layout-main"></div>
               <div class="home-qs-static-legacy" hidden>
               <div class="home-qs-row">
@@ -285,7 +299,16 @@
                 </div>
               </div>
               </div>
+                </div>
+              </div>
 
+              <div class="auto-desk-acc" data-desk-acc="muszaki">
+                <button type="button" class="auto-desk-acc__head" data-desk-acc-toggle aria-expanded="false">
+                  <span>Műszaki adatok</span>
+                  <span class="auto-desk-acc__sum" data-desk-acc-sum></span>
+                  <span class="auto-desk-acc__chev" aria-hidden="true">▼</span>
+                </button>
+                <div class="auto-desk-acc__body">
               <div class="home-qs-more" id="qs-more" hidden>
                 <div id="qs-more-layout" class="home-qs-more-layout"></div>
                 <div class="home-qs-static-legacy" hidden>
@@ -367,15 +390,27 @@
                 <div id="qs-more-extra" class="home-qs-more-extra" hidden></div>
                 </div>
               </div>
+                </div>
+              </div>
 
+              <div class="auto-desk-acc" data-desk-acc="extrak">
+                <button type="button" class="auto-desk-acc__head" data-desk-acc-toggle aria-expanded="false">
+                  <span>Extrák</span>
+                  <span class="auto-desk-acc__sum" data-desk-acc-sum></span>
+                  <span class="auto-desk-acc__chev" aria-hidden="true">▼</span>
+                </button>
+                <div class="auto-desk-acc__body">
               <div class="home-qs-detailed" id="qs-detailed-panel" hidden></div>
+                </div>
+              </div>
 
               <div class="home-qs-row home-qs-row--actions">
-                <button type="submit" class="home-qs-submit">Járművek megjelenítése</button>
+                <button type="button" class="auto-desk-reset" data-desk-reset>Alaphelyzet</button>
+                <button type="submit" class="home-qs-submit">Találatok mutatása</button>
                 <div class="home-qs-actions-secondary">
                   <button type="button" class="home-qs-action home-qs-action--advanced" id="qs-reszletes" aria-expanded="false" aria-controls="qs-more">Több szűrő</button>
                   <button type="button" class="home-qs-action" id="qs-detailed" hidden aria-expanded="false" aria-controls="qs-detailed-panel">Részletes keresés</button>
-                  <button type="reset" class="home-qs-action">Szűrők törlése</button>
+                  <button type="reset" class="home-qs-action" id="qs-reset-filters">Szűrők törlése</button>
                 </div>
               </div>
             </form>
@@ -389,11 +424,14 @@
 
       <div class="site-layout home-layout">
         <section class="site-center home-center" aria-label="Hirdetések">
+          <div class="auto-desk-results-bar">
+            <p class="auto-desk-results-bar__count" data-desk-result-count>0 találat</p>
+          </div>
           <section class="home-category-bar" id="home-category-bar" aria-label="Autó kategóriák"></section>
           <div class="home-listings-panel">
             <div id="home-grid-track" class="home-grid-track" role="list"></div>
             <p id="home-empty" class="home-empty" hidden>
-              Még nincs hirdetés. Importálj, mentsd az adatbázisba (Import oldal), majd frissítsd az Autó & Motor oldalt — a legfrissebb mentések itt jelennek meg.
+              Még nincs hirdetés. Importálj, mentsd az adatbázisba (Import oldal), majd frissítsd az Autó oldalt — a legfrissebb mentések itt jelennek meg.
             </p>
             <section class="home-ad-strip home-ad-strip--bottom" aria-label="Banner hirdetések a listában">
               <div class="home-ad-strip-inner">
@@ -424,7 +462,7 @@
       </div>
     </main>
 
-    <script src="/js/home-app.js?v=detailedSearch11" type="module"></script>
+    <script src="/js/home-app.js?v=autoDesk1" type="module"></script>
     <script src="/js/auto-hero.js?v=searchCollapse1" type="module"></script>
     <script src="/js/auto-kivitel-menu.js?v=kivitelAdmin1" type="module"></script>
     <script src="/js/site-avatar-menu.js?v=settingsOpen1" type="module"></script>

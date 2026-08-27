@@ -1,4 +1,4 @@
-/** Részletes keresés — szekciók és mezők (hasznaltauto.hu felszereltség címkék). */
+/** Részletes keresés — szekciók és mezők (felszereltség címkék). */
 
 /** Üres sablon — a mezők csak az admin Akkumulátor menüből jönnek. */
 export const AKKU_SEARCH_SECTION_EMPTY = {

@@ -2,13 +2,14 @@
  * Gyorskereső az autó hero panelen — elrendezés: GET /api/level1/form-layout?category=szemelyauto-search
  */
 
-import { applyAutoSearchLayout, readLayoutFilterValues } from "./auto-search-layout.js?v=detailedSearch11";
-import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums } from "./auto-search-drums.js?v=detailedSearch11";
+import { applyAutoSearchLayout, readLayoutFilterValues } from "./auto-search-layout.js?v=autoDesk1";
+import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums } from "./auto-search-drums.js?v=autoDesk1";
 import {
   mountDetailedSearch,
   readDetailedSearchValues,
   resetDetailedSearch,
-} from "./auto-detailed-search.js?v=detailedSearch11";
+} from "./auto-detailed-search.js?v=autoDesk1";
+import { initAutoDeskSearch } from "./auto-desk-search.js?v=autoDesk1";
 
 const MOBILE_MQ = "(max-width: 900px)";
 
@@ -101,6 +102,14 @@ export function initHomeQuickSearch({ onSearch = () => {} } = {}) {
   setDetailedOpen(false);
   setQsReady(false);
 
+  initAutoDeskSearch({
+    mountDetailed: (f) => mountDetailedSearch(f, { force: true }),
+  });
+
+  form.querySelector("[data-desk-reset]")?.addEventListener("click", () => {
+    form.reset();
+  });
+
   applyAutoSearchLayout(form)
     .then(async () => {
       try {
@@ -136,4 +145,4 @@ export function initHomeQuickSearch({ onSearch = () => {} } = {}) {
     });
 }
 
-export { readDetailedSearchValues } from "./auto-detailed-search.js?v=detailedSearch11";
+export { readDetailedSearchValues } from "./auto-detailed-search.js?v=autoDesk1";

@@ -7,8 +7,9 @@ import {
   initHomeSearchSidebar,
   initHomeFilterCatalog,
 } from "./home-search-filter.js?v=korzetFix1";
-import { initHomeQuickSearch } from "./home-quicksearch.js?v=detailedSearch11";
-import { matchDetailedSearch, hasActiveDetailedSearch } from "./auto-detailed-search.js?v=detailedSearch11";
+import { initHomeQuickSearch } from "./home-quicksearch.js?v=autoDesk1";
+import { matchDetailedSearch, hasActiveDetailedSearch } from "./auto-detailed-search.js?v=autoDesk1";
+import { updateAutoDeskResultCount } from "./auto-desk-search.js?v=autoDesk1";
 import {
   emptyIngatlanFilters,
   filterListingsByIngatlan,
@@ -159,8 +160,10 @@ function renderListings(items) {
     emptyEl.textContent =
       PAGE === "ingatlan"
         ? "Nincs találat ezekre a feltételekre. Próbálj kevesebb szűrőt, vagy adj fel ingatlan hirdetést."
-        : "Még nincs hirdetés. Adj fel egyet a Hirdetésfeladáson, vagy importálj a hasznaltauto.hu listáról.";
+        : "Nincs találat ezekre a feltételekre. Próbálj kevesebb szűrőt, vagy adj fel hirdetést.";
   }
+
+  if (PAGE === "auto") updateAutoDeskResultCount(filtered.length);
 
   for (const item of filtered) {
     gridTrack.appendChild(createHomeGridCard(item));

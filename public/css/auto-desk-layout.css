@@ -63,83 +63,87 @@
     color: var(--ad-text) !important;
   }
 
+  /* Egy sor: logó | középre menü | jobb akciók (grid-area, nem abszolút) */
   body.home-page[data-site-page="auto"] .hub-header-inner {
     max-width: 1440px;
     margin: 0 auto;
     padding: 0 24px;
     min-height: 64px;
-    display: block;
+    display: grid !important;
+    grid-template-columns: minmax(140px, 1fr) auto minmax(140px, 1fr);
+    grid-template-areas: "logo nav actions";
+    align-items: center;
+    column-gap: 16px;
     position: relative;
     overflow: visible;
+    flex-direction: unset !important;
   }
 
-  /* Jobb oldali akciók tartják a fejléc magasságát */
-  body.home-page[data-site-page="auto"] .hub-header-top {
-    position: relative;
-    z-index: 3;
-    min-height: 64px;
-    padding: 0;
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-  }
-
-  /* Teljes szélességű sáv: a menü left:50%-a a fejléc közepe */
   body.home-page[data-site-page="auto"] .hub-nav-band {
-    position: absolute !important;
-    inset: 0;
+    display: contents !important;
     height: auto !important;
     min-height: 0 !important;
     max-height: none !important;
-    display: block !important;
     border: 0 !important;
     padding: 0 !important;
-    padding-left: 0 !important;
-    width: auto !important;
-    z-index: 1;
-    pointer-events: none;
   }
 
   body.home-page[data-site-page="auto"] .hub-logo {
-    position: absolute !important;
-    left: 0 !important;
-    top: 50% !important;
+    grid-area: logo;
+    justify-self: start;
+    align-self: center;
+    position: relative !important;
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
     bottom: auto !important;
-    transform: translateY(-50%);
+    transform: none !important;
     z-index: 2;
     pointer-events: auto;
   }
 
   body.home-page[data-site-page="auto"] .bymy-logo-img--nav,
-  body.home-page[data-site-page="auto"] .hub-logo .bymy-logo-img--nav {
+  body.home-page[data-site-page="auto"] .hub-logo .bymy-logo-img--nav,
+  body.home-page[data-site-page="auto"].site-app .hub-logo .bymy-logo-img--nav {
     height: 40px !important;
     max-width: 140px !important;
     width: auto !important;
   }
 
   body.home-page[data-site-page="auto"] .hub-nav {
+    grid-area: nav;
+    justify-self: center;
+    align-self: center;
     display: flex !important;
     align-items: center;
     justify-content: center;
     gap: 22px;
-    position: absolute !important;
-    left: 50% !important;
-    top: 50% !important;
+    position: static !important;
+    left: auto !important;
     right: auto !important;
+    top: auto !important;
     bottom: auto !important;
-    transform: translate(-50%, -50%);
+    transform: none !important;
     width: max-content;
-    max-width: min(48vw, 520px);
+    max-width: none;
     margin: 0 !important;
     padding: 0 !important;
-    z-index: 1;
-    pointer-events: none;
+    pointer-events: auto;
     overflow: visible;
   }
 
-  body.home-page[data-site-page="auto"] .hub-nav .hub-nav-link {
-    pointer-events: auto;
+  body.home-page[data-site-page="auto"] .hub-header-top {
+    grid-area: actions;
+    justify-self: end;
+    align-self: center;
+    position: relative;
+    z-index: 3;
+    min-height: 0;
+    padding: 0;
+    width: auto;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
   }
 
   body.home-page[data-site-page="auto"] .hub-nav-link {

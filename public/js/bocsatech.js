@@ -24,8 +24,8 @@ const LAYOUT_NAV = [
   {
     group: "Ingatlanok",
     items: [
-      { id: "ingatlan", label: "Kiado ingatlan" },
-      { id: "elado-ingatlan", label: "elado ingatlan" },
+      { id: "ingatlan", label: "Kiadó" },
+      { id: "elado-ingatlan", label: "Eladó" },
       { id: "airbnb", label: "Airbnb" },
     ],
   },
@@ -680,7 +680,7 @@ const actions = {
         });
         wheelSchema = data.schema || wheelSchema;
         info =
-          `${categoryLabel(cat)} kerék-séma mentve. Kereső és feladás hard refresh (Cmd+Shift+R) után frissül. A Kiado ingatlan elrendezése csak a saját gombjánál változik.`;
+          `${categoryLabel(cat)} kerék-séma mentve. Kereső és feladás hard refresh (Cmd+Shift+R) után frissül. A Kiadó elrendezése csak a saját gombjánál változik.`;
         render();
         return;
       }

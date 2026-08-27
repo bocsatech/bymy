@@ -3,11 +3,11 @@
  * Séma: eladó / kiadó / airbnb külön variant.
  */
 
-import { normalizeIngatlanUzletag, INGATLAN_LAKAS_TIPUS, INGATLAN_LAKAS_TIPUS_AIRBNB } from "./ingatlan-fields.js?v=immoWheel5";
+import { normalizeIngatlanUzletag, INGATLAN_LAKAS_TIPUS, INGATLAN_LAKAS_TIPUS_AIRBNB } from "./ingatlan-fields.js?v=immoCat3";
 import {
   initIngatlanSearch,
   readIngatlanSearchForm,
-} from "./ingatlan-search.js?v=immoPortalPage1";
+} from "./ingatlan-search.js?v=immoCat3";
 import { fetchIngatlanWheelSchema } from "./ingatlan-wheel-schema.js?v=telepSuggest1";
 import { wireTelepulesSuggestIn } from "./telepules-suggest.js?v=telepClose1";
 
@@ -34,8 +34,9 @@ export function schemaVariantFromImmoTip(tip) {
 
 function defaultUzletagFromTip(tip) {
   const t = String(tip || "").trim().toLowerCase();
-  if (t === "elado") return "kinal";
-  return "berbe";
+  if (t === "elado") return "elado";
+  if (t === "airbnb") return "airbnb";
+  return "kiado";
 }
 
 export async function ensureIngatlanFormFields(form) {
@@ -60,7 +61,7 @@ export async function ensureIngatlanFormFields(form) {
   root.setAttribute("data-ingatlan-only", "1");
   root.dataset.schemaVariant = variant;
 
-  /* Kereső UI mezők — cím + Kategória (Keres/Kínál) csak az ingatlan keresőn kell. */
+  /* Kereső UI mezők — Kategória kerék csak az élő keresőn; feladáson hidden a tipből. */
   const uz = defaultUzletagFromTip(tip);
   root.innerHTML = `
     <article class="immo-search-panel immo-search-panel--post">

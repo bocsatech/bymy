@@ -7,7 +7,7 @@ import { escapeHtml, escapeAttr, wheelFieldHtml } from "./ingatlan-wheels.js?v=s
 
 export const WHEEL_COLS = 12;
 
-/** Admin: Kiado (master) + eladó + Airbnb */
+/** Admin: Kiadó (master) + Eladó + Airbnb */
 export const INGATLAN_WHEEL_ADMIN_CATEGORIES = ["ingatlan", "elado-ingatlan", "airbnb"];
 
 export function normalizeIngatlanWheelVariant(value) {

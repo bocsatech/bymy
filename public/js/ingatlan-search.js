@@ -6,6 +6,7 @@
 import {
   INGATLAN_UZLETAG,
   INGATLAN_LAKAS_TIPUS,
+  INGATLAN_LAKAS_TIPUS_AIRBNB,
   INGATLAN_ALLAPOT,
   INGATLAN_KORA,
   MIN_BERLETI_IDO,
@@ -30,8 +31,10 @@ import {
   arFtMinOptions,
   emeletRank,
   normalizeIngatlanUzletag,
+  schemaVariantFromUzletag,
+  isIngatlanRentUzletag,
   tipus2OptionsForParents,
-} from "./ingatlan-fields.js?v=immoWheel5";
+} from "./ingatlan-fields.js?v=immoCat3";
 import {
   fillWheel,
   initMenuWheel,
@@ -68,7 +71,7 @@ const EXACT_KEYS = [
 
 export function emptyIngatlanFilters() {
   return {
-    ingatlan_uzletag: "berbe",
+    ingatlan_uzletag: "kiado",
     keresesi_hely: "",
     ar_tol: null,
     ar_ig: null,
@@ -325,12 +328,12 @@ function setupMobileDualRange(mainHost, { id, tolKey, igKey, title, ariaLabel, u
 
 function readUzletag(form) {
   const wheel = form?.querySelector?.('[data-wheel="ingatlan_uzletag"]');
-  if (wheel) return normalizeIngatlanUzletag(readWheel(wheel) || "berbe");
-  return normalizeIngatlanUzletag(form?.querySelector?.("#immo-uzletag")?.value || "berbe");
+  if (wheel) return normalizeIngatlanUzletag(readWheel(wheel) || "kiado");
+  return normalizeIngatlanUzletag(form?.querySelector?.("#immo-uzletag")?.value || "kiado");
 }
 
 function setUzletag(form, value) {
-  const next = normalizeIngatlanUzletag(value || "berbe");
+  const next = normalizeIngatlanUzletag(value || "kiado");
   const wheel = form?.querySelector?.('[data-wheel="ingatlan_uzletag"]');
   if (wheel) {
     setWheelValue(wheel, next);
@@ -348,7 +351,7 @@ function syncPriceRangeUnit(form) {
   if (!wrap) return;
   const uz = readUzletag(form);
   const unitEl = wrap.querySelector(".immo-dual-range__unit");
-  if (unitEl) unitEl.textContent = uz === "berbe" ? "Ft" : "M Ft";
+  if (unitEl) unitEl.textContent = isIngatlanRentUzletag(uz) ? "Ft" : "M Ft";
 }
 
 function fillDualRangeWheels(form, { tolKey, igKey, options, emptyMin = "min.", emptyMax = "max." }) {
@@ -379,7 +382,7 @@ function fillDualRangeWheels(form, { tolKey, igKey, options, emptyMin = "min.", 
 
 function fillPriceRangeWheels(form) {
   const uz = readUzletag(form);
-  const isRent = uz === "berbe";
+  const isRent = isIngatlanRentUzletag(uz);
   const opts = isRent ? arFtMinOptions() : priceMillionOptions();
   fillDualRangeWheels(form, { tolKey: "ar_tol", igKey: "ar_ig", options: opts });
   syncPriceRangeUnit(form);
@@ -554,8 +557,9 @@ function ensureTipus2Field(root, { enable }) {
 }
 
 function syncRovidMenus(form) {
+  const uz = readUzletag(form);
   const tipusList = readWheelList(form.querySelector('[data-wheel="ingatlan_lakas_tipus"]'));
-  const rovid = tipusList.includes("rovid_berles");
+  const rovid = uz === "airbnb" || tipusList.includes("rovid_berles");
   const berleti = form.querySelector('[data-wheel="min_berleti_ido"]');
   const koltoz = form.querySelector('[data-wheel="koltozheto"]');
   const prevBerleti = readWheel(berleti);
@@ -613,24 +617,29 @@ export async function initIngatlanSearch({
   onSearch = () => {},
   form = null,
   schema = null,
-  defaultUzletag = "berbe",
+  defaultUzletag = "kiado",
   lakasTipusOptions = null,
   enableTipus2 = true,
 } = {}) {
   const root = form || document.getElementById("immo-search-form");
   if (!root) return;
 
-  const resolvedSchema = schema || (await fetchIngatlanWheelSchema());
+  const initialUz = normalizeIngatlanUzletag(defaultUzletag);
+  const resolvedSchema =
+    schema || (await fetchIngatlanWheelSchema(schemaVariantFromUzletag(initialUz)));
   const tipusOpts = Array.isArray(lakasTipusOptions) && lakasTipusOptions.length
     ? lakasTipusOptions
-    : INGATLAN_LAKAS_TIPUS;
+    : initialUz === "airbnb"
+      ? INGATLAN_LAKAS_TIPUS_AIRBNB
+      : INGATLAN_LAKAS_TIPUS;
+  const tipus2Enabled = enableTipus2 && initialUz !== "airbnb";
   const mainHost = root.querySelector("#immo-schema-main") || document.getElementById("immo-schema-main");
   const moreHost = root.querySelector("#immo-schema-more") || document.getElementById("immo-schema-more");
   const morePanel = root.querySelector("#immo-more") || document.getElementById("immo-more");
   const moreBtn = root.querySelector("#immo-tovabbi") || document.getElementById("immo-tovabbi");
 
   renderIngatlanSchemaHosts(mainHost, moreHost, resolvedSchema, "search");
-  ensureTipus2Field(root, { enable: enableTipus2 });
+  ensureTipus2Field(root, { enable: tipus2Enabled });
   setupMobileDualRanges(mainHost);
   setupMobileDualRanges(moreHost);
   applyDrumModeClass();
@@ -679,7 +688,7 @@ export async function initIngatlanSearch({
       customKind: isRooms ? "rooms" : "price",
     });
   });
-  setUzletag(root, defaultUzletag);
+  setUzletag(root, initialUz);
 
   function setMoreOpen(open) {
     if (!morePanel || !moreBtn) return;
@@ -696,11 +705,26 @@ export async function initIngatlanSearch({
 
     root.querySelector('[data-wheel="ingatlan_lakas_tipus"]')?.addEventListener("immo-wheel-change", () => {
       syncRovidMenus(root);
-      if (enableTipus2) syncTipus2Menu(root);
+      if (tipus2Enabled) syncTipus2Menu(root);
     });
 
     root.querySelector('[data-wheel="ingatlan_uzletag"]')?.addEventListener("immo-wheel-change", () => {
       fillPriceRangeWheels(root);
+      const uz = readUzletag(root);
+      const opts = uz === "airbnb" ? INGATLAN_LAKAS_TIPUS_AIRBNB : INGATLAN_LAKAS_TIPUS;
+      const tipusWheel = root.querySelector('[data-wheel="ingatlan_lakas_tipus"]');
+      const prevTipus = readWheel(tipusWheel);
+      fillWheel(tipusWheel, opts.filter((o) => o.value));
+      initImmoSearchWheel(tipusWheel, {
+        emptyLabel: "Mindegy",
+        multiple: MULTI_WHEEL_KEYS.has("ingatlan_lakas_tipus"),
+      });
+      const keep = String(prevTipus)
+        .split(",")
+        .filter((v) => opts.some((o) => o.value === v));
+      setWheelValue(tipusWheel, keep.join(","));
+      syncRovidMenus(root);
+      if (tipus2Enabled) syncTipus2Menu(root);
     });
 
     root.addEventListener("submit", (event) => {
@@ -730,7 +754,7 @@ export async function initIngatlanSearch({
         fillAreaRangeWheels(root);
         fillEmeletRangeWheels(root);
         syncRovidMenus(root);
-        if (enableTipus2) syncTipus2Menu(root);
+        if (tipus2Enabled) syncTipus2Menu(root);
         setMoreOpen(false);
         if (typeof onSearch === "function") onSearch(emptyIngatlanFilters());
       });
@@ -751,7 +775,7 @@ export async function initIngatlanSearch({
         fillAreaRangeWheels(root);
         fillEmeletRangeWheels(root);
         syncRovidMenus(root);
-        if (enableTipus2) syncTipus2Menu(root);
+        if (tipus2Enabled) syncTipus2Menu(root);
         setMoreOpen(false);
         if (typeof onSearch === "function") onSearch(emptyIngatlanFilters());
       });
@@ -760,7 +784,7 @@ export async function initIngatlanSearch({
 
   setMoreOpen(false);
   syncRovidMenus(root);
-  if (enableTipus2) syncTipus2Menu(root);
+  if (tipus2Enabled) syncTipus2Menu(root);
 }
 
 export { readForm as readIngatlanSearchForm };

@@ -14,7 +14,8 @@ import {
   emptyIngatlanFilters,
   filterListingsByIngatlan,
   initIngatlanSearch,
-} from "./ingatlan-search.js?v=immoPortalPage1";
+} from "./ingatlan-search.js?v=immoCat3";
+import { normalizeIngatlanUzletag } from "./ingatlan-fields.js?v=immoCat3";
 import { filterByCategory, initHomeCategoryBar, renderHomeCategoryBar } from "./home-category-bar.js";
 import { initHomeUnifiedScroll } from "./home-unified-scroll.js";
 import { initHomeStatsBar } from "./home-stats-bar.js";
@@ -327,7 +328,12 @@ if (PAGE !== "ingatlan") {
 }
 
 if (PAGE === "ingatlan") {
+  const tipParam = new URLSearchParams(location.search).get("tipus") || "";
+  const defaultUzletag = normalizeIngatlanUzletag(
+    tipParam === "elado" || tipParam === "airbnb" || tipParam === "kiado" ? tipParam : "kiado"
+  );
   initIngatlanSearch({
+    defaultUzletag,
     onSearch: (values) => {
       ingatlanFilters = { ...emptyIngatlanFilters(), ...values };
       applyFilters();

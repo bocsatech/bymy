@@ -1,21 +1,43 @@
 /** Böngésző + szerver: ingatlan mezőopciók (kereső / űrlap / admin). */
 
 export const INGATLAN_UZLETAG = [
-  { value: "keres", label: "Keres" },
-  { value: "kinal", label: "Kínál" },
-  { value: "berbe", label: "Bérbe ad / vesz" },
+  { value: "elado", label: "Eladó" },
+  { value: "kiado", label: "Kiadó" },
+  { value: "airbnb", label: "Airbnb" },
 ];
 
-/** Régi értékek normalizálása. */
+/** Régi értékek → Eladó / Kiadó / Airbnb. */
 export function normalizeIngatlanUzletag(value) {
   const v = String(value ?? "")
     .trim()
     .toLowerCase();
-  if (v === "berles" || v === "kiado" || v === "berelheto") return "berbe";
-  if (v === "elado" || v === "kinal") return "kinal";
-  if (v === "keres") return "keres";
-  if (v === "berbe") return "berbe";
-  return v || "berbe";
+  if (v === "elado" || v === "kinal" || v === "eladó") return "elado";
+  if (v === "airbnb" || v === "rovid" || v === "rövid") return "airbnb";
+  if (
+    v === "kiado" ||
+    v === "kiadó" ||
+    v === "berbe" ||
+    v === "berles" ||
+    v === "berelheto" ||
+    v === "keres"
+  ) {
+    return "kiado";
+  }
+  return v || "kiado";
+}
+
+/** Admin kerék-séma variant a kategóriából. */
+export function schemaVariantFromUzletag(uz) {
+  const v = normalizeIngatlanUzletag(uz);
+  if (v === "elado") return "elado-ingatlan";
+  if (v === "airbnb") return "airbnb";
+  return "ingatlan";
+}
+
+/** Ft (bérlés) vs M Ft (eladó). */
+export function isIngatlanRentUzletag(uz) {
+  const v = normalizeIngatlanUzletag(uz);
+  return v === "kiado" || v === "airbnb";
 }
 
 /** Kereső + Eladó/Kiadó feladás — ingatlan típus. */
@@ -347,7 +369,7 @@ export const INGATLAN_BOOL_FIELDS = [
 
 export function ingatlanFormFieldCatalog() {
   const fields = [
-    { field_key: "ingatlan_uzletag", label: "Kategória (Keres / Kínál / Bérbe)", step: 1 },
+    { field_key: "ingatlan_uzletag", label: "Kategória (Eladó / Kiadó / Airbnb)", step: 1 },
     { field_key: "ingatlan_lakas_tipus", label: "Lakás típus", step: 1 },
     { field_key: "allapot", label: "Állapot", step: 1 },
     { field_key: "ingatlan_kora", label: "Ingatlan kora", step: 1 },

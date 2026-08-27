@@ -2,16 +2,21 @@
  * Gyorskereső az autó hero panelen — elrendezés: GET /api/level1/form-layout?category=szemelyauto-search
  */
 
-import { applyAutoSearchLayout, readLayoutFilterValues } from "./auto-search-layout.js?v=autoDesk4";
-import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums } from "./auto-search-drums.js?v=autoDesk4";
+import { applyAutoSearchLayout, readLayoutFilterValues } from "./auto-search-layout.js?v=autoDesk5";
+import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums } from "./auto-search-drums.js?v=autoDesk5";
 import {
   mountDetailedSearch,
   readDetailedSearchValues,
   resetDetailedSearch,
-} from "./auto-detailed-search.js?v=autoDesk4";
-import { initAutoDeskSearch, updateAutoDeskAccSummaries } from "./auto-desk-search.js?v=autoDesk4";
+} from "./auto-detailed-search.js?v=autoDesk5";
+import {
+  initAutoDeskSearch,
+  updateAutoDeskAccSummaries,
+  arrangeAutoDeskDemoFields,
+} from "./auto-desk-search.js?v=autoDesk5";
 
 const MOBILE_MQ = "(max-width: 900px)";
+const DESK_MQ = "(min-width: 901px)";
 
 export function initHomeQuickSearch({ onSearch = () => {}, onDeskSortChange } = {}) {
   const form = document.getElementById("home-qs-form");
@@ -113,10 +118,18 @@ export function initHomeQuickSearch({ onSearch = () => {}, onDeskSortChange } = 
 
   applyAutoSearchLayout(form)
     .then(async () => {
-      try {
-        await mountAutoSearchDrums(form);
-      } catch (drumError) {
-        console.warn("Kereső dobkerék:", drumError);
+      const deskAuto =
+        document.body?.getAttribute("data-site-page") === "auto" &&
+        window.matchMedia(DESK_MQ).matches;
+      // Asztali auto: natív select = demó dropdown (dob nélkül). Mobil / teher: dobok.
+      if (!deskAuto) {
+        try {
+          await mountAutoSearchDrums(form);
+        } catch (drumError) {
+          console.warn("Kereső dobkerék:", drumError);
+        }
+      } else {
+        arrangeAutoDeskDemoFields(form);
       }
       const urlKivitel = new URLSearchParams(window.location.search).get("kivitel");
       if (urlKivitel) {
@@ -147,4 +160,4 @@ export function initHomeQuickSearch({ onSearch = () => {}, onDeskSortChange } = 
     });
 }
 
-export { readDetailedSearchValues } from "./auto-detailed-search.js?v=autoDesk4";
+export { readDetailedSearchValues } from "./auto-detailed-search.js?v=autoDesk5";

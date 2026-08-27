@@ -14,6 +14,11 @@ function collectPhotoUrls(item) {
   return urls.filter(Boolean);
 }
 
+const ICON_YEAR = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M3 10h18M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>`;
+const ICON_KM = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 18 12 6l8 12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M7.5 18h9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>`;
+const ICON_FUEL = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 20V7a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v13" stroke="currentColor" stroke-width="1.6"/><path d="M4 20h13M15 10h2.5A2.5 2.5 0 0 1 20 12.5V17a2 2 0 0 0 2 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M7 10h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>`;
+const ICON_PIN = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 21s7-5.2 7-11a7 7 0 1 0-14 0c0 5.8 7 11 7 11Z" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="10" r="2.2" stroke="currentColor" stroke-width="1.6"/></svg>`;
+const ICON_HEART = `<svg width="18" height="16" viewBox="0 0 18 16" fill="none" aria-hidden="true"><path d="M9 14.5 1.8 8.2a4.2 4.2 0 0 1 0-5.9 4 4 0 0 1 5.7 0L9 3.3l1.5-1.5a4 4 0 0 1 5.7 5.9L9 14.5Z" stroke="currentColor" stroke-width="1.4"/></svg>`;
 const ICON_CHEVRON_LEFT = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M11.2 4.2 6.4 9l4.8 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 const ICON_CHEVRON_RIGHT = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M6.8 4.2 11.6 9l-4.8 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 
@@ -65,9 +70,9 @@ export function createHomeGridCard(item) {
 
   const specsHtml = desk
     ? `<p class="home-grid-card-specs">
-        ${year ? `<span class="home-grid-card-spec" data-spec="year">${escapeHtml(year)}</span>` : ""}
-        ${km ? `<span class="home-grid-card-spec" data-spec="km">${escapeHtml(km)}</span>` : ""}
-        ${fuel ? `<span class="home-grid-card-spec" data-spec="fuel">${escapeHtml(fuel)}</span>` : ""}
+        ${year ? `<span class="home-grid-card-spec" data-spec="year">${ICON_YEAR}<span>${escapeHtml(year)}</span></span>` : ""}
+        ${km ? `<span class="home-grid-card-spec" data-spec="km">${ICON_KM}<span>${escapeHtml(km)}</span></span>` : ""}
+        ${fuel ? `<span class="home-grid-card-spec" data-spec="fuel">${ICON_FUEL}<span>${escapeHtml(fuel)}</span></span>` : ""}
       </p>`
     : "";
 
@@ -84,9 +89,7 @@ export function createHomeGridCard(item) {
           : ""
       }
       <button type="button" class="home-grid-card-save" aria-label="Kedvenc" data-desk-fav>
-        <svg width="18" height="16" viewBox="0 0 18 16" fill="none" aria-hidden="true">
-          <path d="M9 14.5 1.8 8.2a4.2 4.2 0 0 1 0-5.9 4 4 0 0 1 5.7 0L9 3.3l1.5-1.5a4 4 0 0 1 5.7 5.9L9 14.5Z" stroke="currentColor" stroke-width="1.4"/>
-        </svg>
+        ${ICON_HEART}
       </button>
     </div>
     <a class="home-grid-card-body" href="${escapeHtml(detailHref)}">
@@ -94,7 +97,7 @@ export function createHomeGridCard(item) {
       ${desk && subtitle && subtitle !== title ? `<p class="home-grid-card-sub">${escapeHtml(subtitle)}</p>` : ""}
       ${specsHtml}
       <strong class="home-grid-card-price">${escapeHtml(price)}</strong>
-      ${desk && city ? `<p class="home-grid-card-loc">${escapeHtml(city)}</p>` : ""}
+      ${desk && city ? `<p class="home-grid-card-loc">${ICON_PIN}<span>${escapeHtml(city)}</span></p>` : ""}
       ${!desk && meta ? `<p class="home-grid-card-meta">${escapeHtml(meta)}</p>` : ""}
     </a>
   `;

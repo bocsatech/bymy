@@ -62,8 +62,8 @@
     <link rel="stylesheet" href="/css/hub-mobile-app.css?v=tileFill3" />
     <link rel="stylesheet" href="/css/home.css?v=coverAll1" />
     <link rel="stylesheet" href="/css/listing-photo-cover.css?v=coverAll1" />
-    <link rel="stylesheet" href="/css/auto-hero.css?v=autoDesk4" />
-    <link rel="stylesheet" href="/css/auto-desk-layout.css?v=autoDesk4" />
+    <link rel="stylesheet" href="/css/auto-hero.css?v=autoDesk5" />
+    <link rel="stylesheet" href="/css/auto-desk-layout.css?v=autoDesk5" />
     <link rel="stylesheet" href="/css/ingatlan-search.css?v=autoDrums15" />
     <style id="home-scroll-fix">
       /* Inline: cache-biztos — a teljes oldal görget, külön görgetősáv nincs sehol. */
@@ -430,15 +430,19 @@
               <label class="auto-desk-sort">
                 <span class="auto-desk-sort__label">Rendezés</span>
                 <select data-desk-sort aria-label="Rendezés">
-                  <option value="newest" selected>Legfrissebbek elöl</option>
-                  <option value="price-asc">Ár szerint növekvő</option>
-                  <option value="price-desc">Ár szerint csökkenő</option>
-                  <option value="km-asc">Km szerint növekvő</option>
+                  <option value="newest" selected>Rendezés: Legfrissebbek elöl</option>
+                  <option value="price-asc">Rendezés: Ár szerint növekvő</option>
+                  <option value="price-desc">Rendezés: Ár szerint csökkenő</option>
+                  <option value="km-asc">Rendezés: Km szerint növekvő</option>
                 </select>
               </label>
               <div class="auto-desk-view" role="group" aria-label="Nézet">
-                <button type="button" class="auto-desk-view__btn is-active" data-desk-view="grid" aria-label="Rácsnézet" title="Rács">▦</button>
-                <button type="button" class="auto-desk-view__btn" data-desk-view="list" aria-label="Listanézet" title="Lista">☰</button>
+                <button type="button" class="auto-desk-view__btn is-active" data-desk-view="grid" aria-label="Rácsnézet" title="Rács">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
+                </button>
+                <button type="button" class="auto-desk-view__btn" data-desk-view="list" aria-label="Listanézet" title="Lista">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="1" y="2" width="3" height="3" rx="0.5"/><rect x="6" y="2.5" width="9" height="2" rx="0.5"/><rect x="1" y="6.5" width="3" height="3" rx="0.5"/><rect x="6" y="7" width="9" height="2" rx="0.5"/><rect x="1" y="11" width="3" height="3" rx="0.5"/><rect x="6" y="11.5" width="9" height="2" rx="0.5"/></svg>
+                </button>
               </div>
             </div>
           </div>
@@ -477,7 +481,7 @@
       </div>
     </main>
 
-    <script src="/js/home-app.js?v=autoDesk4" type="module"></script>
+    <script src="/js/home-app.js?v=autoDesk5" type="module"></script>
     <script src="/js/auto-hero.js?v=searchCollapse1" type="module"></script>
     <script src="/js/auto-kivitel-menu.js?v=kivitelAdmin1" type="module"></script>
     <script src="/js/site-avatar-menu.js?v=settingsOpen1" type="module"></script>

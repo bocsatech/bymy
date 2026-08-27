@@ -1,9 +1,21 @@
 /**
- * Autó oldal — asztali kereső: Gyors / Részletes + találati sáv.
+ * Autó oldal — asztali kereső: Gyors / Részletes + demó mezősorrend.
  * Csak desktop (min-width 901px), data-site-page=auto.
  */
 
 const DESK_MQ = "(min-width: 901px)";
+
+/** Demó Alap adatok sorrend (2-es kép). */
+const DESK_ALAP_ORDER = [
+  { field: "gyartmany", label: "Gyártmány/Típus" },
+  { field: "modell", label: "Típus" },
+  { field: "gyartasi_ev", label: "Évjárat", range: true },
+  { field: "km", label: "Futott km", range: true },
+  { field: "vetelar", label: "Vételár", range: true },
+  { field: "uzemanyag", label: "Üzemanyag" },
+  { field: "allapot", label: "Állapot" },
+  { field: "kivitel", label: "Kivitel" },
+];
 
 function isAutoDesk() {
   return (
@@ -59,6 +71,134 @@ function countFilled(root) {
   return n;
 }
 
+function findFieldWrap(form, fieldKey) {
+  return (
+    form.querySelector(`[data-qs-field="${fieldKey}"]`) ||
+    form
+      .querySelector(`[data-filter-key="${fieldKey}"]`)
+      ?.closest("[data-qs-field], .home-qs-field, .home-qs-pair, label") ||
+    null
+  );
+}
+
+function ensureDeskSelectPlaceholders(wrap, range) {
+  if (!wrap) return;
+  const selects = [...wrap.querySelectorAll("select")];
+  selects.forEach((sel, i) => {
+    const first = sel.querySelector("option");
+    if (!first) return;
+    if (range) {
+      if (!first.value) first.textContent = i === 0 ? "-tól" : "-ig";
+    } else if (!first.value) {
+      first.textContent = "Mindegy";
+    }
+  });
+}
+
+/**
+ * Demó Alap sorrend: meglévő layout mezőket átrendezi natív selectként.
+ */
+export function arrangeAutoDeskDemoFields(form = document.getElementById("home-qs-form")) {
+  if (!form || !isAutoDesk()) return;
+  const alapBody = form.querySelector('[data-desk-acc="alap"] .auto-desk-acc__body');
+  const muszakiBody = form.querySelector('[data-desk-acc="muszaki"] .auto-desk-acc__body');
+  if (!alapBody) return;
+
+  let host = alapBody.querySelector(".auto-desk-fields");
+  if (!host) {
+    host = document.createElement("div");
+    host.className = "auto-desk-fields";
+    host.dataset.deskAlap = "1";
+    alapBody.insertBefore(host, alapBody.firstChild);
+  }
+  host.innerHTML = "";
+
+  const used = new Set();
+
+  for (const item of DESK_ALAP_ORDER) {
+    const wrap = findFieldWrap(form, item.field);
+    if (!wrap || host.contains(wrap)) continue;
+    used.add(item.field);
+
+    const field = document.createElement("div");
+    field.className = "auto-desk-field";
+    field.dataset.deskField = item.field;
+
+    const label = document.createElement("span");
+    label.className = "auto-desk-field__label";
+    label.textContent = item.label;
+    field.appendChild(label);
+
+    wrap.querySelectorAll(".home-qs-label, .immo-label").forEach((el) => {
+      el.style.display = "none";
+    });
+
+    ensureDeskSelectPlaceholders(wrap, item.range);
+
+    if (item.range) {
+      const range = document.createElement("div");
+      range.className = "auto-desk-range";
+      const selects = [...wrap.querySelectorAll("select")];
+      if (selects.length >= 2) {
+        selects.slice(0, 2).forEach((sel) => range.appendChild(sel));
+        field.appendChild(range);
+        wrap.remove();
+      } else {
+        field.appendChild(wrap);
+      }
+    } else {
+      const sel = wrap.querySelector("select, input");
+      if (sel && wrap.matches("label, .home-qs-field, .home-qs-pair")) {
+        field.appendChild(sel);
+        wrap.remove();
+      } else {
+        field.appendChild(wrap);
+      }
+    }
+
+    host.appendChild(field);
+  }
+
+  const mainHost = document.getElementById("qs-layout-main");
+  const moreHost = document.getElementById("qs-more-layout");
+  const leftovers = [];
+  [mainHost, moreHost].forEach((root) => {
+    if (!root) return;
+    root.querySelectorAll("[data-qs-field]").forEach((el) => {
+      const key = el.getAttribute("data-qs-field");
+      if (!key || used.has(key)) return;
+      if (host.contains(el) || el.closest(".auto-desk-fields")) return;
+      leftovers.push(el);
+    });
+  });
+
+  if (muszakiBody && leftovers.length) {
+    let moreWrap = muszakiBody.querySelector("#qs-more");
+    if (!moreWrap) {
+      moreWrap = document.createElement("div");
+      moreWrap.id = "qs-more";
+      moreWrap.className = "home-qs-more";
+      muszakiBody.appendChild(moreWrap);
+    }
+    moreWrap.hidden = false;
+    let catcher = moreWrap.querySelector("[data-desk-more-rest]");
+    if (!catcher) {
+      catcher = document.createElement("div");
+      catcher.className = "auto-desk-fields";
+      catcher.dataset.deskMoreRest = "1";
+      moreWrap.appendChild(catcher);
+    }
+    leftovers.forEach((el) => catcher.appendChild(el));
+  }
+
+  if (mainHost) {
+    mainHost.innerHTML = "";
+    mainHost.hidden = true;
+  }
+
+  form.classList.add("auto-desk-native");
+}
+
 export function updateAutoDeskAccSummaries(form = document.getElementById("home-qs-form")) {
   if (!form) return;
   const map = {
@@ -107,7 +247,6 @@ export function initAutoDeskSearch({
   openAccordion("alap");
   updateAutoDeskAccSummaries(form);
 
-  // Demó kinézet: Részletes nyitva indul asztalon
   if (isAutoDesk()) {
     if (morePanel) {
       morePanel.hidden = false;

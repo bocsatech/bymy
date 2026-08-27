@@ -31,6 +31,45 @@ export const AKKU_SEARCH_SECTION_FALLBACK = {
   ],
 };
 
+const AKKU_DEF_BY_ID = new Map([
+  ...AKKU_SEARCH_SECTION_FALLBACK.ranges.map((item) => [item.id, { ...item, kind: "range" }]),
+  ...AKKU_SEARCH_SECTION_FALLBACK.selects.map((item) => [item.id, { ...item, kind: "select" }]),
+  ...AKKU_SEARCH_SECTION_FALLBACK.toggles.map((item) => [item.id, { ...item, kind: "toggle" }]),
+]);
+
+/**
+ * Személyautó kereső form-layout celláiból Részletes keresés akku szekció.
+ * Rejtett cella → nem jelenik meg; címke/sorrend a layoutból jön.
+ */
+export function buildAkkuSectionFromLayoutCells(cells, title = "Akkumulátor és hatótáv adatok") {
+  const list = Array.isArray(cells) ? cells : [];
+  const matched = list
+    .filter((cell) => AKKU_DEF_BY_ID.has(String(cell?.field_key || "")))
+    .sort((a, b) => (Number(a.row) || 0) - (Number(b.row) || 0) || (Number(a.col) || 0) - (Number(b.col) || 0));
+
+  if (!matched.length) return null;
+
+  const ranges = [];
+  const selects = [];
+  const toggles = [];
+
+  for (const cell of matched) {
+    if (cell.hidden) continue;
+    const def = AKKU_DEF_BY_ID.get(cell.field_key);
+    if (!def) continue;
+    const label = String(cell.label || def.label || cell.field_key).trim();
+    if (def.kind === "range") {
+      ranges.push({ id: def.id, label, unit: def.unit || "", step: def.step || "1" });
+    } else if (def.kind === "select") {
+      selects.push({ id: def.id, label, options: def.options || [""] });
+    } else if (def.kind === "toggle") {
+      toggles.push({ id: def.id, label });
+    }
+  }
+
+  return { id: "akku", title, ranges, selects, toggles };
+}
+
 function toggles(labels) {
   return labels.map((label) => ({ id: slugId(label), label }));
 }

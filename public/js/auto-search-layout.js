@@ -5,6 +5,7 @@
 
 import { initVehicleCatalogSelects, fillSelect } from "./vehicle-catalog-client.js";
 import { KIVITEL_OPTIONS } from "./kivitel-options.js?v=kivitel1";
+import { buildAkkuSectionFromLayoutCells } from "./auto-detailed-search-catalog.js?v=detailedSearch10";
 
 function searchLayoutCategory() {
   return document.body?.getAttribute("data-site-page") === "teherauto"
@@ -52,6 +53,12 @@ const RANGE_SPECS = {
   ossztomeg: { tol: "ossztomeg_tol", ig: "ossztomeg_ig", kind: "number" },
   nyomatek_nm: { tol: "nyomatek_nm_tol", ig: "nyomatek_nm_ig", kind: "number" },
   hatotav: { tol: "hatotav_tol", ig: "hatotav_ig", kind: "number" },
+  akkumulator_kwh: { tol: "akkumulator_kwh_tol", ig: "akkumulator_kwh_ig", kind: "number" },
+  jelenlegi_akkukapacitas: { tol: "jelenlegi_akkukapacitas_tol", ig: "jelenlegi_akkukapacitas_ig", kind: "number" },
+  ac_toltesi_teljesitmeny: { tol: "ac_toltesi_teljesitmeny_tol", ig: "ac_toltesi_teljesitmeny_ig", kind: "number" },
+  dc_toltesi_teljesitmeny: { tol: "dc_toltesi_teljesitmeny_tol", ig: "dc_toltesi_teljesitmeny_ig", kind: "number" },
+  autopalya_hatotav: { tol: "autopalya_hatotav_tol", ig: "autopalya_hatotav_ig", kind: "number" },
+  teli_hatotav: { tol: "teli_hatotav_tol", ig: "teli_hatotav_ig", kind: "number" },
 };
 
 const TEHER_KIVITEL = ["Kisteher", "Dobozos", "Platós", "Ponyvás", "Hűtős", "Billenős", "Alváz"];
@@ -82,6 +89,10 @@ const SELECT_OPTIONS = {
   teto: ["Normál", "Nyitható", "Panoráma", "Hardtop"],
   csomagtarto: ["Normál", "Nagy"],
   tolto_csatlakozas: ["Type 2", "CCS", "CHAdeMO"],
+  ac_tolto_csatlakozas: ["Type 2", "CCS", "CHAdeMO", "Egyéb"],
+  dc_tolto_csatlakozas: ["CCS", "CHAdeMO", "Type 2", "Egyéb"],
+  villamtoltes: ["Igen", "Nem"],
+  zold_rendszam: ["Igen", "Nem"],
   okmany_jelleg: ["Érvényes magyar okmányokkal", "Érvényes külföldi okmányokkal"],
   tulajdonosok_szama: ["1", "2", "3", "4+"],
   nem_dohanyzo: ["Igen", "Nem"],
@@ -543,9 +554,17 @@ function wirePostalCityAutofill(form) {
 
 export async function applyAutoSearchLayout(form = document.getElementById("home-qs-form")) {
   if (!form) return null;
-  const layout = await fetchAutoSearchLayout();
+  const layout = await fetchAutoSearchLayout({ force: true });
   const mainHost = document.getElementById("qs-layout-main");
   const moreHost = document.getElementById("qs-more-layout");
+
+  // Részletes keresés Akkumulátor szekció — ugyanabból a mentett layoutból
+  form._akkuDetailedSection =
+    buildAkkuSectionFromLayoutCells(layout?.cells || []) || null;
+  if (form._akkuDetailedSection) {
+    const panel = form.querySelector("#qs-detailed-panel");
+    if (panel) delete panel.dataset.detailedMounted;
+  }
 
   // Élő layout: új keresőmezők (pl. körzet) mindig látszanak.
   for (const cell of layout.cells || []) {

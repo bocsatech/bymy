@@ -5,7 +5,8 @@
 import {
   DETAILED_SEARCH_SECTIONS,
   AKKU_SEARCH_SECTION_FALLBACK,
-} from "./auto-detailed-search-catalog.js?v=detailedSearch9";
+  buildAkkuSectionFromLayoutCells,
+} from "./auto-detailed-search-catalog.js?v=detailedSearch10";
 
 const FORM_FLAG_KEYS = new Set(["villamtoltes", "zold_rendszam"]);
 
@@ -230,7 +231,13 @@ function bindExclusiveAccordions(host) {
   });
 }
 
-async function loadAkkuSearchSection() {
+async function loadAkkuSearchSection(form) {
+  // 1) A kereső layoutból (amit az admin Személyautó keresőben ment) — ez a fő forrás
+  const fromLayout = form?._akkuDetailedSection;
+  if (fromLayout?.id) {
+    return { section: fromLayout, live: true, source: "layout-cache" };
+  }
+
   try {
     const res = await fetch(`/api/level1/akku-search-menu?t=${Date.now()}`, {
       credentials: "same-origin",
@@ -239,12 +246,12 @@ async function loadAkkuSearchSection() {
     if (!res.ok) throw new Error(String(res.status));
     const data = await res.json();
     if (data?.section?.id) {
-      return { section: data.section, live: data.live === true };
+      return { section: data.section, live: data.live === true, source: data.source || "api" };
     }
   } catch (error) {
     console.warn("Akkumulátor menü:", error);
   }
-  return { section: { ...AKKU_SEARCH_SECTION_FALLBACK }, live: false };
+  return { section: { ...AKKU_SEARCH_SECTION_FALLBACK }, live: false, source: "fallback" };
 }
 
 function buildDetailedSections(akkuLoad) {
@@ -258,14 +265,17 @@ export async function mountDetailedSearch(form = document.getElementById("home-q
   if (!host) return null;
   if (!force && host.dataset.detailedMounted === "1") return host;
 
-  const akkuLoad = await loadAkkuSearchSection();
+  const akkuLoad = await loadAkkuSearchSection(form);
   const sections = buildDetailedSections(akkuLoad);
   host.innerHTML = sections.map((s, index) => renderSection(s, index === 0)).join("");
   bindExclusiveAccordions(host);
   host.dataset.detailedMounted = "1";
   host.dataset.detailedLive = akkuLoad.live ? "1" : "0";
+  host.dataset.detailedSource = akkuLoad.source || "";
   return host;
 }
+
+export { buildAkkuSectionFromLayoutCells };
 
 export function readDetailedSearchValues(form = document.getElementById("home-qs-form")) {
   const panel = form?.querySelector("#qs-detailed-panel");

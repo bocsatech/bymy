@@ -7,8 +7,8 @@ import {
   initHomeSearchSidebar,
   initHomeFilterCatalog,
 } from "./home-search-filter.js?v=korzetFix1";
-import { initHomeQuickSearch } from "./home-quicksearch.js?v=detailedSearch9";
-import { matchDetailedSearch, hasActiveDetailedSearch } from "./auto-detailed-search.js?v=detailedSearch9";
+import { initHomeQuickSearch } from "./home-quicksearch.js?v=detailedSearch10";
+import { matchDetailedSearch, hasActiveDetailedSearch } from "./auto-detailed-search.js?v=detailedSearch10";
 import {
   emptyIngatlanFilters,
   filterListingsByIngatlan,

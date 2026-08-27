@@ -2,13 +2,13 @@
  * Gyorskereső az autó hero panelen — elrendezés: GET /api/level1/form-layout?category=szemelyauto-search
  */
 
-import { applyAutoSearchLayout, readLayoutFilterValues } from "./auto-search-layout.js?v=cityPostal1";
-import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums } from "./auto-search-drums.js?v=korzet1";
+import { applyAutoSearchLayout, readLayoutFilterValues } from "./auto-search-layout.js?v=detailedSearch10";
+import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums } from "./auto-search-drums.js?v=detailedSearch10";
 import {
   mountDetailedSearch,
   readDetailedSearchValues,
   resetDetailedSearch,
-} from "./auto-detailed-search.js?v=detailedSearch9";
+} from "./auto-detailed-search.js?v=detailedSearch10";
 
 const MOBILE_MQ = "(max-width: 900px)";
 
@@ -136,4 +136,4 @@ export function initHomeQuickSearch({ onSearch = () => {} } = {}) {
     });
 }
 
-export { readDetailedSearchValues } from "./auto-detailed-search.js?v=detailedSearch9";
+export { readDetailedSearchValues } from "./auto-detailed-search.js?v=detailedSearch10";

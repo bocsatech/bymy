@@ -5,7 +5,7 @@
 import {
   DETAILED_SEARCH_SECTIONS,
   AKKU_SEARCH_SECTION_FALLBACK,
-} from "./auto-detailed-search-catalog.js?v=detailedSearch7";
+} from "./auto-detailed-search-catalog.js?v=detailedSearch8";
 
 const FORM_FLAG_KEYS = new Set(["villamtoltes", "zold_rendszam"]);
 
@@ -248,8 +248,8 @@ async function loadAkkuSearchSection() {
 }
 
 function buildDetailedSections(akkuLoad) {
-  const { section, live } = akkuLoad;
-  if (live && section?.id) return [section, ...DETAILED_SEARCH_SECTIONS];
+  const section = akkuLoad?.section;
+  if (section?.id) return [section, ...DETAILED_SEARCH_SECTIONS];
   return [{ ...AKKU_SEARCH_SECTION_FALLBACK }, ...DETAILED_SEARCH_SECTIONS];
 }
 

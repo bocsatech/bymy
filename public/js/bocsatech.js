@@ -215,15 +215,20 @@ function h(html) {
   app.innerHTML = html;
   app.querySelectorAll("[data-act]").forEach((el) => {
     const isFile = el.tagName === "INPUT" && el.type === "file";
+    const isText =
+      el.tagName === "INPUT" && (el.type === "text" || el.type === "" || !el.type);
     const evt =
       el.tagName === "FORM"
         ? "submit"
         : el.tagName === "SELECT" || isFile || (el.tagName === "INPUT" && el.type === "checkbox")
           ? "change"
-          : "click";
+          : isText
+            ? "change"
+            : "click";
     el.addEventListener(evt, (event) => {
       if (el.tagName === "FORM") event.preventDefault();
-      actions[el.getAttribute("data-act")](event, el);
+      const act = el.getAttribute("data-act");
+      if (typeof actions[act] === "function") actions[act](event, el);
     });
   });
 }
@@ -763,22 +768,33 @@ const actions = {
     return kind || "—";
   },
   akkuMenuMove(_, el) {
+    const items = actions.readAkkuMenuFromDom();
     const id = el.getAttribute("data-id");
     const dir = Number(el.getAttribute("data-dir"));
-    const items = [...(akkuSearchMenu.items || [])];
     const idx = items.findIndex((item) => item.id === id);
     const next = idx + dir;
     if (idx < 0 || next < 0 || next >= items.length) return;
     const tmp = items[idx];
     items[idx] = items[next];
     items[next] = tmp;
-    akkuSearchMenu = { ...akkuSearchMenu, items };
+    const title = String(app.querySelector("[data-field=akku-title]")?.value ?? akkuSearchMenu.title ?? "").trim();
+    akkuSearchMenu = { ...akkuSearchMenu, title, items };
     render();
+    void actions.saveAkkuSearchMenu({ silent: true });
   },
   akkuMenuToggle(_event, el) {
     const card = el?.closest(".akku-admin-card");
     if (card) card.classList.toggle("is-off", !el.checked);
-    akkuSearchMenu = { ...akkuSearchMenu, items: actions.readAkkuMenuFromDom() };
+    const items = actions.readAkkuMenuFromDom();
+    const title = String(app.querySelector("[data-field=akku-title]")?.value ?? akkuSearchMenu.title ?? "").trim();
+    akkuSearchMenu = { ...akkuSearchMenu, title, items };
+    void actions.saveAkkuSearchMenu({ silent: true });
+  },
+  akkuTitleSave() {
+    void actions.saveAkkuSearchMenu({ silent: true });
+  },
+  akkuLabelSave() {
+    void actions.saveAkkuSearchMenu({ silent: true });
   },
   readAkkuMenuFromDom() {
     const items = [];
@@ -797,9 +813,10 @@ const actions = {
     });
     return items.length ? items : [...(akkuSearchMenu.items || [])];
   },
-  async saveAkkuSearchMenu() {
+  async saveAkkuSearchMenu(opts = {}) {
+    const silent = opts?.silent === true;
     err = "";
-    info = "";
+    if (!silent) info = "Mentés…";
     try {
       const items = actions.readAkkuMenuFromDom();
       const title = String(app.querySelector("[data-field=akku-title]")?.value ?? akkuSearchMenu.title ?? "").trim();
@@ -807,13 +824,28 @@ const actions = {
         method: "PUT",
         body: JSON.stringify({ menu: { version: 1, title, items } }),
       });
-      akkuSearchMenu = data.menu || { version: 1, title, items: data.items || items, live: data.live === true };
-      info = data.live
-        ? "Akkumulátor menü mentve és ellenőrizve. Az autó oldalon: Több szűrő → Részletes keresés."
-        : "Mentés visszajelzés érkezett, de az élő tároló még üres — próbáld újra.";
-      render();
+      const check = await fetch(`/api/level1/akku-search-menu?t=${Date.now()}`, {
+        credentials: "same-origin",
+        cache: "no-store",
+      }).then((r) => r.json());
+      const live = data.live === true || check.live === true;
+      akkuSearchMenu = {
+        ...(data.menu || { version: 1, title, items: data.items || items }),
+        live,
+      };
+      if (!live) {
+        throw new Error("Mentés után az élő API még mindig üres. Próbáld újra, vagy nézd a hálózati hibát.");
+      }
+      info = `Mentve az élő oldalra. Cím: „${akkuSearchMenu.title}”. Engedélyezett mezők: ${(check.section?.ranges?.length || 0) + (check.section?.selects?.length || 0) + (check.section?.toggles?.length || 0)}. Autó oldal: Több szűrő → Részletes keresés.`;
+      if (!silent) render();
+      else {
+        const hint = app.querySelector(".layout-cat-title")?.closest("div,section") || app;
+        const ok = app.querySelector("p.ok");
+        if (ok) ok.textContent = info;
+      }
     } catch (error) {
       err = error.message;
+      info = "";
       render();
     }
   },
@@ -826,7 +858,7 @@ const actions = {
         method: "PUT",
         body: JSON.stringify({ menu: { version: 1, items: [] } }),
       });
-      akkuSearchMenu = data.menu || { version: 1, items: data.items || [] };
+      akkuSearchMenu = { ...(data.menu || { version: 1, items: data.items || [] }), live: data.live === true };
       info = "Alapértelmezett Akkumulátor menü visszaállítva.";
       render();
     } catch (error) {
@@ -896,7 +928,10 @@ async function loadTab() {
   }
   if (section === "auto" && sub === "akku") {
     const data = await api("/api/level1/akku-search-menu/admin");
-    akkuSearchMenu = data.menu || { version: 1, items: data.items || [], live: data.live === true };
+    akkuSearchMenu = {
+      ...(data.menu || { version: 1, items: data.items || [] }),
+      live: data.live === true,
+    };
   }
   if (section === "ingatlan" && sub === "listings") {
     listings = (await api("/api/level1/listings?vertical=ingatlan")).listings;
@@ -1417,7 +1452,7 @@ function akkuSearchMenuView() {
           </label>
           <label>
             <div>Címke</div>
-            <input type="text" data-field="label" value="${esc(item.label || "")}" maxlength="80" />
+            <input type="text" data-field="label" data-act="akkuLabelSave" value="${esc(item.label || "")}" maxlength="80" />
           </label>
           <label class="kivitel-admin-card__toggle">
             <input type="checkbox" data-field="enabled" data-act="akkuMenuToggle" data-id="${esc(item.id)}" ${item.enabled === false ? "" : "checked"} />
@@ -1430,10 +1465,10 @@ function akkuSearchMenuView() {
 
   return `
     <h2 class="layout-cat-title">Akkumulátor és hatótáv menü</h2>
-    <p class="hint">A webes <strong>Részletes keresés → Akkumulátor és hatótáv adatok</strong> szekció mezői. Sorrend, címke és láthatóság. Kikapcsolt mező nem jelenik meg a keresőben.${akkuSearchMenu?.live ? " <strong>Élő mentés aktív.</strong>" : " <strong>Még nincs élő mentés</strong> — mentsd el a menüt."}</p>
+    <p class="hint">A webes <strong>Részletes keresés → Akkumulátor és hatótáv adatok</strong> szekció mezői. Kapcsoló / sorrend / címke változtatás <strong>azonnal mentődik</strong> az élő oldalra.${akkuSearchMenu?.live ? ` <strong>Élő mentés aktív${akkuSearchMenu.updatedAt ? ` (${esc(akkuSearchMenu.updatedAt)})` : ""}.</strong>` : " <strong class=\"err\">Még nincs élő mentés</strong> — kapcsold ki-be egy sort, vagy nyomd a Mentés gombot."}</p>
     <label class="kivitel-admin-card__fields" style="display:block;margin-bottom:0.75rem;max-width:28rem">
       <div>Szekció címe</div>
-      <input type="text" data-field="akku-title" value="${esc(akkuSearchMenu?.title || "Akkumulátor és hatótáv adatok")}" maxlength="80" />
+      <input type="text" data-field="akku-title" data-act="akkuTitleSave" value="${esc(akkuSearchMenu?.title || "Akkumulátor és hatótáv adatok")}" maxlength="80" />
     </label>
     <p class="ok">${esc(info)}</p>
     <p class="err">${esc(err)}</p>

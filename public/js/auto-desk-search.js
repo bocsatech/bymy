@@ -97,6 +97,7 @@ function ensureDeskSelectPlaceholders(wrap, range) {
 
 /**
  * Demó Alap sorrend: meglévő layout mezőket átrendezi natív selectként.
+ * Gyors mód: csak az 1. lépés (admin gyorskereső) mezői látszanak.
  */
 export function arrangeAutoDeskDemoFields(form = document.getElementById("home-qs-form")) {
   if (!form || !isAutoDesk()) return;
@@ -104,7 +105,27 @@ export function arrangeAutoDeskDemoFields(form = document.getElementById("home-q
   const muszakiBody = form.querySelector('[data-desk-acc="muszaki"] .auto-desk-acc__body');
   if (!alapBody) return;
 
-  let host = alapBody.querySelector(".auto-desk-fields");
+  const mainHost = document.getElementById("qs-layout-main");
+  const moreHost = document.getElementById("qs-more-layout");
+
+  // Admin / layout 1. lépés = eddigi gyorskereső mezők
+  let quickKeys = new Set();
+  if (form.dataset.deskQuickKeys) {
+    form.dataset.deskQuickKeys.split(",").filter(Boolean).forEach((k) => quickKeys.add(k));
+  } else if (mainHost) {
+    mainHost.querySelectorAll("[data-qs-field]").forEach((el) => {
+      const key = el.getAttribute("data-qs-field");
+      if (key) quickKeys.add(key);
+    });
+    form.dataset.deskQuickKeys = [...quickKeys].join(",");
+  }
+  if (!quickKeys.size) {
+    // Fallback: alapértelmezett gyorskereső
+    ["gyartmany", "modell", "uzemanyag", "gyartasi_ev", "vetelar"].forEach((k) => quickKeys.add(k));
+    form.dataset.deskQuickKeys = [...quickKeys].join(",");
+  }
+
+  let host = alapBody.querySelector(".auto-desk-fields[data-desk-alap]");
   if (!host) {
     host = document.createElement("div");
     host.className = "auto-desk-fields";
@@ -123,6 +144,7 @@ export function arrangeAutoDeskDemoFields(form = document.getElementById("home-q
     const field = document.createElement("div");
     field.className = "auto-desk-field";
     field.dataset.deskField = item.field;
+    field.dataset.deskQuick = quickKeys.has(item.field) ? "1" : "0";
 
     const label = document.createElement("span");
     label.className = "auto-desk-field__label";
@@ -159,8 +181,43 @@ export function arrangeAutoDeskDemoFields(form = document.getElementById("home-q
     host.appendChild(field);
   }
 
-  const mainHost = document.getElementById("qs-layout-main");
-  const moreHost = document.getElementById("qs-more-layout");
+  // Gyorsban nem szereplő, de Alapba rakott mezők mellett: step1 mezők amik nincsenek a demó listában
+  quickKeys.forEach((key) => {
+    if (used.has(key)) return;
+    const wrap = findFieldWrap(form, key);
+    if (!wrap || host.contains(wrap)) return;
+    used.add(key);
+    const field = document.createElement("div");
+    field.className = "auto-desk-field";
+    field.dataset.deskField = key;
+    field.dataset.deskQuick = "1";
+    const label = document.createElement("span");
+    label.className = "auto-desk-field__label";
+    label.textContent =
+      wrap.querySelector(".home-qs-label, .immo-label")?.textContent?.trim() || key;
+    field.appendChild(label);
+    wrap.querySelectorAll(".home-qs-label, .immo-label").forEach((el) => {
+      el.style.display = "none";
+    });
+    const selects = [...wrap.querySelectorAll("select")];
+    if (selects.length >= 2) {
+      const range = document.createElement("div");
+      range.className = "auto-desk-range";
+      selects.slice(0, 2).forEach((sel) => range.appendChild(sel));
+      field.appendChild(range);
+      wrap.remove();
+    } else {
+      const sel = wrap.querySelector("select, input");
+      if (sel && wrap.matches("label, .home-qs-field, .home-qs-pair")) {
+        field.appendChild(sel);
+        wrap.remove();
+      } else {
+        field.appendChild(wrap);
+      }
+    }
+    host.appendChild(field);
+  });
+
   const leftovers = [];
   [mainHost, moreHost].forEach((root) => {
     if (!root) return;
@@ -197,6 +254,16 @@ export function arrangeAutoDeskDemoFields(form = document.getElementById("home-q
   }
 
   form.classList.add("auto-desk-native");
+  syncGyorsFieldVisibility(form);
+}
+
+function syncGyorsFieldVisibility(form = document.getElementById("home-qs-form")) {
+  if (!form) return;
+  const gyors = document.body.classList.contains("auto-desk-gyors");
+  form.querySelectorAll(".auto-desk-fields[data-desk-alap] .auto-desk-field").forEach((el) => {
+    const isQuick = el.getAttribute("data-desk-quick") === "1";
+    el.hidden = gyors && !isQuick;
+  });
 }
 
 export function updateAutoDeskAccSummaries(form = document.getElementById("home-qs-form")) {
@@ -271,6 +338,7 @@ export function initAutoDeskSearch({
       if (!isAutoDesk()) return;
       const mode = btn.getAttribute("data-desk-mode");
       const gyors = setMode(mode);
+      syncGyorsFieldVisibility(form);
       if (gyors) {
         if (morePanel) {
           morePanel.hidden = true;

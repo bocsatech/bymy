@@ -2,18 +2,18 @@
  * Gyorskereső az autó hero panelen — elrendezés: GET /api/level1/form-layout?category=szemelyauto-search
  */
 
-import { applyAutoSearchLayout, readLayoutFilterValues } from "./auto-search-layout.js?v=autoDesk6";
-import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums } from "./auto-search-drums.js?v=autoDesk6";
+import { applyAutoSearchLayout, readLayoutFilterValues } from "./auto-search-layout.js?v=autoDesk7";
+import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums } from "./auto-search-drums.js?v=autoDesk7";
 import {
   mountDetailedSearch,
   readDetailedSearchValues,
   resetDetailedSearch,
-} from "./auto-detailed-search.js?v=autoDesk6";
+} from "./auto-detailed-search.js?v=autoDesk7";
 import {
   initAutoDeskSearch,
   updateAutoDeskAccSummaries,
   arrangeAutoDeskDemoFields,
-} from "./auto-desk-search.js?v=autoDesk6";
+} from "./auto-desk-search.js?v=autoDesk7";
 
 const MOBILE_MQ = "(max-width: 900px)";
 const DESK_MQ = "(min-width: 901px)";
@@ -160,4 +160,4 @@ export function initHomeQuickSearch({ onSearch = () => {}, onDeskSortChange } = 
     });
 }
 
-export { readDetailedSearchValues } from "./auto-detailed-search.js?v=autoDesk6";
+export { readDetailedSearchValues } from "./auto-detailed-search.js?v=autoDesk7";

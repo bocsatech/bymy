@@ -308,6 +308,10 @@
     line-height: 1;
   }
 
+  body.home-page[data-site-page="auto"].auto-desk-gyors .auto-desk-fields[data-desk-alap] .auto-desk-field[data-desk-quick="0"] {
+    display: none !important;
+  }
+
   body.home-page[data-site-page="auto"].auto-desk-gyors .auto-desk-acc__head {
     display: none !important;
   }

@@ -1,0 +1,131 @@
+{
+  "version": 1,
+  "status": "ready",
+  "note": "Típus 2 katalógus — felhasználói listák. Hiányzik: raktár, egyéb (nem jött lista). Régi beépített forrás: public/js/ingatlan-fields.js → INGATLAN_TIPUS_2_BY_PARENT.",
+  "updatedAt": "2026-08-27T18:20:00+02:00",
+  "parents": {
+    "lakas": {
+      "label": "Lakás",
+      "options": [
+        { "value": "", "label": "mindegy" },
+        { "value": "lakas_tegla_lakas", "label": "tégla lakás" },
+        { "value": "lakas_panel_lakas", "label": "panel lakás" },
+        { "value": "lakas_csusztatott_zsalus", "label": "csúsztatott zsalus" }
+      ]
+    },
+    "haz": {
+      "label": "Ház",
+      "options": [
+        { "value": "", "label": "mindegy" },
+        { "value": "haz_csaladi_haz", "label": "családi ház" },
+        { "value": "haz_ikerhaz", "label": "ikerház" },
+        { "value": "haz_sorhaz", "label": "sorház" },
+        { "value": "haz_hazresz", "label": "házrész" },
+        { "value": "haz_kastely", "label": "kastély" },
+        { "value": "haz_tanya", "label": "tanya" },
+        { "value": "haz_konnyuszerkezetes_haz", "label": "könnyűszerkezetes ház" },
+        { "value": "haz_valyoghaz", "label": "vályogház" }
+      ]
+    },
+    "telek": {
+      "label": "Telek",
+      "options": [
+        { "value": "", "label": "mindegy" },
+        { "value": "telek_lakoovezeti_telek", "label": "lakóövezeti telek" },
+        { "value": "telek_uduloovezeti_telek", "label": "üdülőövezeti telek" },
+        { "value": "telek_kulteruleti_telek", "label": "külterületi telek" },
+        { "value": "telek_egyeb_telek", "label": "egyéb telek" }
+      ]
+    },
+    "garazs": {
+      "label": "Garázs",
+      "options": [
+        { "value": "", "label": "mindegy" },
+        { "value": "garazs_onallo_garazs", "label": "önálló garázs" },
+        { "value": "garazs_teremgarazs_hely", "label": "teremgarázs hely" },
+        { "value": "garazs_beallo", "label": "beálló" }
+      ]
+    },
+    "nyaralo": {
+      "label": "Nyaraló",
+      "options": [
+        { "value": "", "label": "mindegy" },
+        { "value": "nyaralo_nyaralotelek", "label": "nyaralótelek" },
+        { "value": "nyaralo_hetvegi_hazas_nyaralo", "label": "hétvégi házas nyaraló" },
+        { "value": "nyaralo_udulohazas_nyaralo", "label": "üdülőházas nyaraló" }
+      ]
+    },
+    "iroda": {
+      "label": "Iroda",
+      "options": [
+        { "value": "", "label": "mindegy" },
+        { "value": "iroda_irodahelyiseg_irodahazban", "label": "irodahelyiség irodaházban" },
+        { "value": "iroda_csaladi_hazban_iroda", "label": "családi házban iroda" },
+        { "value": "iroda_lakasban_iroda", "label": "lakásban iroda" },
+        { "value": "iroda_egyeb_iroda", "label": "egyéb iroda" }
+      ]
+    },
+    "uzlethelyiseg": {
+      "label": "Üzlethelyiség",
+      "options": [
+        { "value": "", "label": "mindegy" },
+        { "value": "uzlethelyiseg_uzlethazban_uzlethelyiseg", "label": "üzletházban üzlethelyiség" },
+        { "value": "uzlethelyiseg_utcai_bejaratos_uzlethelyiseg", "label": "utcai bejáratos üzlethelyiség" },
+        { "value": "uzlethelyiseg_udvarban_uzlethelyiseg", "label": "udvarban üzlethelyiség" },
+        { "value": "uzlethelyiseg_egyeb_uzlethelyiseg", "label": "egyéb üzlethelyiség" }
+      ]
+    },
+    "vendeglatas": {
+      "label": "Vendéglátás",
+      "options": [
+        { "value": "", "label": "mindegy" },
+        { "value": "vendeglatas_szalloda_hotel_panzio", "label": "szálloda, hotel, panzió" },
+        { "value": "vendeglatas_etterem_vendeglo", "label": "étterem, vendéglő" },
+        { "value": "vendeglatas_egyeb_vendeglato_egyseg", "label": "egyéb vendéglátó egység" }
+      ]
+    },
+    "ipari": {
+      "label": "Ipari",
+      "options": [
+        { "value": "", "label": "mindegy" },
+        { "value": "ipari_muhely", "label": "műhely" },
+        { "value": "ipari_telephely", "label": "telephely" },
+        { "value": "ipari_egyeb_ipari_ingatlan", "label": "egyéb ipari ingatlan" },
+        { "value": "ipari_telek_ipari_hasznositasra", "label": "telek ipari hasznosításra" }
+      ]
+    },
+    "mezogazdasagi": {
+      "label": "Mezőgazdasági",
+      "options": [
+        { "value": "", "label": "mindegy" },
+        { "value": "mezogazdasagi_tanya", "label": "tanya" },
+        { "value": "mezogazdasagi_altalanos_mezogazdasagi_ingatlan", "label": "általános mezőgazdasági ingatlan" },
+        { "value": "mezogazdasagi_termofold_szanto", "label": "termőföld, szántó" },
+        { "value": "mezogazdasagi_erdo", "label": "erdő" },
+        { "value": "mezogazdasagi_pince_preshaz", "label": "pince, présház" }
+      ]
+    },
+    "fejlesztesi_terulet": {
+      "label": "Fejlesztési terület",
+      "options": [
+        { "value": "", "label": "mindegy" },
+        { "value": "fejlesztesi_terulet_lakoterulet", "label": "lakóterület" },
+        { "value": "fejlesztesi_terulet_kereskedelmi_szolgaltato_terulet", "label": "kereskedelmi, szolgáltató terület" },
+        { "value": "fejlesztesi_terulet_vegyes_lako_es_kereskedelmi_terulet", "label": "vegyes (lakó- és kereskedelmi) terület" },
+        { "value": "fejlesztesi_terulet_ipari_terulet", "label": "ipari terület" },
+        { "value": "fejlesztesi_terulet_uduloterulet", "label": "üdülőterület" },
+        { "value": "fejlesztesi_terulet_kulonleges_terulet", "label": "különleges terület" }
+      ]
+    },
+    "intezmeny": {
+      "label": "Intézmény",
+      "options": [
+        { "value": "", "label": "mindegy" },
+        { "value": "intezmeny_egeszsegugyi_intezmeny", "label": "egészségügyi intézmény" },
+        { "value": "intezmeny_iskola", "label": "iskola" },
+        { "value": "intezmeny_muzeum", "label": "múzeum" },
+        { "value": "intezmeny_ovoda", "label": "óvoda" }
+      ]
+    }
+  }
+}

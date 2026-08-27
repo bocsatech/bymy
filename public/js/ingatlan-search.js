@@ -33,7 +33,7 @@ import {
   schemaVariantFromUzletag,
   isIngatlanRentUzletag,
   tipus2OptionsForParents,
-} from "./ingatlan-fields.js?v=immoCatTabs1";
+} from "./ingatlan-fields.js?v=immoTipus2";
 import {
   fillWheel,
   initMenuWheel,

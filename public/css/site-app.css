@@ -37,6 +37,141 @@ body.site-app .hub-header {
   overflow: visible;
 }
 
+/* —— Asztali fix fejléc minden oldalon (≥901px) —— */
+@media (min-width: 901px) {
+  body.site-app {
+    --site-fixed-header-h: 64px;
+    padding-top: var(--site-fixed-header-h);
+  }
+
+  body.site-app > .hub-header,
+  body.site-app > .home-header,
+  body.site-app > .site-header,
+  body.site-app > header.site-app-header,
+  body.site-app > .site-app-header {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    z-index: 400 !important;
+    margin: 0 !important;
+    box-sizing: border-box;
+  }
+
+  body.site-app .hub-header-inner,
+  body.site-app .home-header-inner,
+  body.site-app .site-app-header-inner {
+    display: grid !important;
+    grid-template-columns: 1fr auto 1fr !important;
+    grid-template-areas: "logo nav actions" !important;
+    align-items: center !important;
+    column-gap: 16px !important;
+    max-width: 1440px !important;
+    margin: 0 auto !important;
+    padding: 0 24px !important;
+    min-height: var(--site-fixed-header-h) !important;
+    flex-direction: row !important;
+    gap: 0 !important;
+  }
+
+  body.site-app .hub-nav-band,
+  body.site-app .site-nav-band {
+    display: contents !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    border: 0 !important;
+    padding: 0 !important;
+  }
+
+  body.site-app .hub-logo,
+  body.site-app .home-logo,
+  body.site-app .site-app-logo {
+    grid-area: logo !important;
+    justify-self: start !important;
+    align-self: center !important;
+    position: relative !important;
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
+    bottom: auto !important;
+    transform: none !important;
+    padding: 0 !important;
+    z-index: 2;
+  }
+
+  body.site-app .hub-logo .bymy-logo-img--nav,
+  body.site-app .home-logo .bymy-logo-img--nav,
+  body.site-app .site-app-logo .bymy-logo-img--nav,
+  body.site-app .bymy-logo-img--nav {
+    height: 40px !important;
+    max-width: 140px !important;
+    width: auto !important;
+  }
+
+  body.site-app .hub-nav,
+  body.site-app .home-nav,
+  body.site-app .site-app-nav,
+  body.site-app .import-nav {
+    grid-area: nav !important;
+    justify-self: center !important;
+    align-self: center !important;
+    position: static !important;
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
+    bottom: auto !important;
+    transform: none !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 22px !important;
+    width: max-content !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    height: auto !important;
+    pointer-events: auto !important;
+    overflow: visible !important;
+    border: 0 !important;
+    background: transparent !important;
+  }
+
+  body.site-app .hub-nav-link,
+  body.site-app .home-nav-link,
+  body.site-app .site-app-nav-link,
+  body.site-app .import-nav-link {
+    white-space: nowrap;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    padding: 0 0 2px !important;
+    border: 0 !important;
+    border-bottom: 2px solid transparent !important;
+    box-shadow: none !important;
+    background: transparent !important;
+  }
+
+  body.site-app .hub-nav-link.active,
+  body.site-app .home-nav-link.active,
+  body.site-app .site-app-nav-link.active,
+  body.site-app .import-nav-link.active {
+    border-bottom-color: #f0c52c !important;
+  }
+
+  body.site-app .hub-header-top,
+  body.site-app .site-header-top {
+    grid-area: actions !important;
+    justify-self: end !important;
+    align-self: center !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    width: auto !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+  }
+}
+
 html[data-theme="dark"] body.site-app .site-header,
 html[data-theme="dark"] body.site-app .home-header,
 html[data-theme="dark"] body.site-app .site-app-header,

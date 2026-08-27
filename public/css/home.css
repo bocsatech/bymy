@@ -2196,8 +2196,17 @@ body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-n
   align-items: center;
   justify-content: center;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
-  cursor: default;
-  opacity: 0.85;
+  cursor: pointer;
+  opacity: 0.95;
+  z-index: 2;
+}
+
+.home-grid-card-save.is-on {
+  color: #e11d48;
+}
+
+.home-grid-card-save.is-on path {
+  fill: currentColor;
 }
 
 .home-grid-card-body {

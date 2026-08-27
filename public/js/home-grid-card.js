@@ -5,6 +5,12 @@ import {
   listingTilePrice,
   listingTileTitle,
 } from "./listing-tile.js?v=coverAll1";
+import { getAuthUser } from "./site-auth.js?v=cegAdatok1";
+import {
+  getParkplatz,
+  addParkplatzItem,
+  removeParkplatzItem,
+} from "./fok-data.js?v=auth20260805localdb9";
 
 function collectPhotoUrls(item) {
   const preview = item.preview || {};
@@ -68,6 +74,10 @@ export function createHomeGridCard(item) {
   const subtitle = String(preview.specLine || form.modell || form.tipus || "")
     .trim()
     .replace(/\s*\(\d{4}(?:\/\d{1,2})?\)\s*$/u, "");
+  const email = getAuthUser()?.email;
+  const favOn = Boolean(
+    email && getParkplatz(email).some((row) => String(row.id) === String(item.id))
+  );
 
   const specsHtml = desk
     ? `<p class="home-grid-card-specs">
@@ -89,7 +99,7 @@ export function createHomeGridCard(item) {
              <button type="button" class="home-grid-card-photo-nav home-grid-card-photo-nav--next" aria-label="Következő kép">${ICON_CHEVRON_RIGHT}</button>`
           : ""
       }
-      <button type="button" class="home-grid-card-save" aria-label="Kedvenc" data-desk-fav>
+      <button type="button" class="home-grid-card-save${favOn ? " is-on" : ""}" aria-label="${favOn ? "Eltávolítás a kedvencekből" : "Kedvencekhez adás"}" aria-pressed="${favOn ? "true" : "false"}" data-desk-fav>
         ${ICON_HEART}
       </button>
     </div>
@@ -106,7 +116,31 @@ export function createHomeGridCard(item) {
   card.querySelector("[data-desk-fav]")?.addEventListener("click", (event) => {
     event.preventDefault();
     event.stopPropagation();
-    event.currentTarget.classList.toggle("is-on");
+    const btn = event.currentTarget;
+    const email = getAuthUser()?.email;
+    if (!email) {
+      const next = `${location.pathname}${location.search}`;
+      window.location.href = `/belepes.html?next=${encodeURIComponent(next)}`;
+      return;
+    }
+    const listingId = String(item.id);
+    const on = btn.classList.contains("is-on");
+    if (on) {
+      removeParkplatzItem(email, listingId);
+      btn.classList.remove("is-on");
+      btn.setAttribute("aria-pressed", "false");
+      btn.setAttribute("aria-label", "Kedvencekhez adás");
+    } else {
+      addParkplatzItem(email, {
+        id: listingId,
+        title,
+        price,
+        url: detailHref,
+      });
+      btn.classList.add("is-on");
+      btn.setAttribute("aria-pressed", "true");
+      btn.setAttribute("aria-label", "Eltávolítás a kedvencekből");
+    }
   });
 
   return card;

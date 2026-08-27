@@ -1,5 +1,5 @@
 import { fetchListings } from "./db-client.js?v=teherVert1";
-import { createHomeGridCard, initHomeGridCardPhotos } from "./home-grid-card.js?v=autoDesk7";
+import { createHomeGridCard, initHomeGridCardPhotos } from "./home-grid-card.js?v=autoDesk8";
 import {
   emptyFilters,
   filterListingsBySidebar,
@@ -7,9 +7,9 @@ import {
   initHomeSearchSidebar,
   initHomeFilterCatalog,
 } from "./home-search-filter.js?v=korzetFix1";
-import { initHomeQuickSearch } from "./home-quicksearch.js?v=autoDesk7";
-import { matchDetailedSearch, hasActiveDetailedSearch } from "./auto-detailed-search.js?v=autoDesk7";
-import { updateAutoDeskResultCount } from "./auto-desk-search.js?v=autoDesk7";
+import { initHomeQuickSearch } from "./home-quicksearch.js?v=autoDesk8";
+import { matchDetailedSearch, hasActiveDetailedSearch } from "./auto-detailed-search.js?v=autoDesk8";
+import { updateAutoDeskResultCount } from "./auto-desk-search.js?v=autoDesk8";
 import {
   emptyIngatlanFilters,
   filterListingsByIngatlan,
@@ -270,7 +270,9 @@ function updateFilterResultCount() {
 function hasActiveSidebarFilters(filters) {
   return Boolean(
     filters.gyartmany ||
+      filters.gyartmanyok?.length ||
       filters.modell ||
+      filters.modellek?.length ||
       filters.kivitel ||
       filters.uzemanyag ||
       filters.uzemanyagQuick ||

@@ -255,6 +255,11 @@ export function arrangeAutoDeskDemoFields(form = document.getElementById("home-q
 
   form.classList.add("auto-desk-native");
   syncGyorsFieldVisibility(form);
+
+  // App-szerű gyártmány/típus multi (asztali)
+  void import("./auto-brand-model-picker.js?v=autoDesk8")
+    .then((mod) => mod.mountAutoBrandModelPicker(form))
+    .catch((error) => console.warn("Gyártmány picker:", error));
 }
 
 function syncGyorsFieldVisibility(form = document.getElementById("home-qs-form")) {

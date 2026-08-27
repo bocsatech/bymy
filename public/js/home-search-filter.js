@@ -135,8 +135,22 @@ export function filterListingsBySidebar(items, filters) {
     const f = item.preview?.filter ?? {};
     const preview = item.preview ?? {};
 
-    if (filters.gyartmany && f.gyartmany !== filters.gyartmany) return false;
-    if (filters.modell && f.modell !== filters.modell) return false;
+    if (filters.gyartmanyok?.length) {
+      const brands = filters.gyartmanyok.map((b) => normalizeForMatch(b)).filter(Boolean);
+      const got = normalizeForMatch(f.gyartmany || "");
+      const title = normalizeForMatch(preview.title || "");
+      if (!brands.some((b) => got.includes(b) || title.includes(b) || b.includes(got))) return false;
+    } else if (filters.gyartmany && f.gyartmany !== filters.gyartmany) {
+      return false;
+    }
+    if (filters.modellek?.length) {
+      const models = filters.modellek.map((m) => normalizeForMatch(m)).filter(Boolean);
+      const got = normalizeForMatch(f.modell || "");
+      const title = normalizeForMatch(preview.title || preview.specLine || "");
+      if (!models.some((m) => got.includes(m) || title.includes(m) || m.includes(got))) return false;
+    } else if (filters.modell && f.modell !== filters.modell) {
+      return false;
+    }
     if (filters.kivitel && !kivitelMatches(f.kivitel, filters.kivitel)) return false;
     if (filters.hajtas && f.hajtas !== filters.hajtas) return false;
     if (!matchesSebessegvalto(f.sebessegvalto, filters.sebessegvalto)) return false;
@@ -184,7 +198,9 @@ export function filterListingsBySidebar(items, filters) {
       if (
         [
           "gyartmany",
+          "gyartmanyok",
           "modell",
+          "modellek",
           "kivitel",
           "hajtas",
           "sebessegvalto",

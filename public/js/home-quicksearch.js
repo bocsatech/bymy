@@ -2,18 +2,19 @@
  * Gyorskereső az autó hero panelen — elrendezés: GET /api/level1/form-layout?category=szemelyauto-search
  */
 
-import { applyAutoSearchLayout, readLayoutFilterValues } from "./auto-search-layout.js?v=autoDesk7";
-import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums } from "./auto-search-drums.js?v=autoDesk7";
+import { applyAutoSearchLayout, readLayoutFilterValues } from "./auto-search-layout.js?v=autoDesk8";
+import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums } from "./auto-search-drums.js?v=autoDesk8";
 import {
   mountDetailedSearch,
   readDetailedSearchValues,
   resetDetailedSearch,
-} from "./auto-detailed-search.js?v=autoDesk7";
+} from "./auto-detailed-search.js?v=autoDesk8";
 import {
   initAutoDeskSearch,
   updateAutoDeskAccSummaries,
   arrangeAutoDeskDemoFields,
-} from "./auto-desk-search.js?v=autoDesk7";
+} from "./auto-desk-search.js?v=autoDesk8";
+import { readBrandModelFilterValues } from "./auto-brand-model-picker.js?v=autoDesk8";
 
 const MOBILE_MQ = "(max-width: 900px)";
 const DESK_MQ = "(min-width: 901px)";
@@ -33,8 +34,15 @@ export function initHomeQuickSearch({ onSearch = () => {}, onDeskSortChange } = 
   function readQuickSearchValues() {
     const base =
       form.dataset.drumsMounted === "1" ? readAutoDrumFilterValues(form) : readLayoutFilterValues(form);
+    const brandModel = readBrandModelFilterValues(form);
+    if (form.dataset.brandModelPicker === "1") {
+      delete base.gyartmany;
+      delete base.modell;
+      delete base.gyartmanyok;
+      delete base.modellek;
+    }
     const detailed = readDetailedSearchValues(form);
-    return { ...base, detailed };
+    return { ...base, ...brandModel, detailed };
   }
 
   function syncDetailedButton(moreOpen) {
@@ -160,4 +168,4 @@ export function initHomeQuickSearch({ onSearch = () => {}, onDeskSortChange } = 
     });
 }
 
-export { readDetailedSearchValues } from "./auto-detailed-search.js?v=autoDesk7";
+export { readDetailedSearchValues } from "./auto-detailed-search.js?v=autoDesk8";

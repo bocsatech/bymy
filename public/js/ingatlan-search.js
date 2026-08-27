@@ -28,6 +28,7 @@ import {
   INGATLAN_BOOL_FIELDS,
   boolOptionsForField,
   fieldKeysVisibleForTipus,
+  areaFieldKeysForTipus,
   alapteruletOptions,
   telekteruletOptions,
   szintekOptions,
@@ -41,7 +42,7 @@ import {
   tipus2OptionsForParents,
   applyIngatlanTipusFieldsConfig,
   resolveTipusFieldParent,
-} from "./ingatlan-fields.js?v=immoTelekArea1";
+} from "./ingatlan-fields.js?v=immoAreaMatrix1";
 import {
   fillWheel,
   readWheel,
@@ -53,7 +54,7 @@ import {
 } from "./ingatlan-wheels.js?v=immoClearAll1";
 import { initDrumWheel, syncDrumWheelDisplay, applyDrumModeClass } from "./immo-drum-picker.js?v=immoClearAll1";
 import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=immoClearAll1";
-import { fetchIngatlanWheelSchema, renderIngatlanSchemaHosts, INGATLAN_DUAL_RANGE_GROUPS } from "./ingatlan-wheel-schema.js?v=immoHazArea2";
+import { fetchIngatlanWheelSchema, renderIngatlanSchemaHosts, INGATLAN_DUAL_RANGE_GROUPS } from "./ingatlan-wheel-schema.js?v=immoAreaMatrix1";
 import { wireTelepulesSuggestIn } from "./telepules-suggest.js?v=telepClose1";
 
 const EXACT_KEYS = [
@@ -717,25 +718,14 @@ function syncTipus2Menu(form) {
   wheel.setAttribute("aria-disabled", disabled ? "true" : "false");
 }
 
-/** Ezeknél a fő területmező = Telekterület (nem Alapterület). */
-const TIPUS_MAIN_AREA_AS_TELEK = new Set([
-  "telek",
-  "ipari",
-  "mezogazdasagi",
-  "fejlesztesi_terulet",
-]);
-
-function isMainAreaTelekMode(parents) {
-  const list = (parents || []).map((p) => resolveTipusFieldParent(p)).filter(Boolean);
-  return list.length > 0 && list.every((p) => TIPUS_MAIN_AREA_AS_TELEK.has(p));
-}
-
-/** Tipus szerint mutatja/rejti a típusfüggő mezőket. */
+/** Tipus szerint mutatja/rejti a típusfüggő mezőket + területmátrix. */
 function syncTipusFieldVisibility(form) {
   if (!form) return;
   const parents = readWheelList(form.querySelector('[data-wheel="ingatlan_lakas_tipus"]'));
   const visible = fieldKeysVisibleForTipus(parents);
-  const telekMain = isMainAreaTelekMode(parents);
+  const areaKeys = areaFieldKeysForTipus(parents);
+  const showAlap = areaKeys.has("alapterulet_tol") || areaKeys.has("alapterulet_ig");
+  const showTelek = areaKeys.has("telekterulet_tol") || areaKeys.has("telekterulet_ig");
   const dualSeen = new Set();
 
   form.querySelectorAll("[data-schema-field]").forEach((cell) => {
@@ -751,9 +741,8 @@ function syncTipusFieldVisibility(form) {
       let show = group
         ? visible.has(group.tolKey) || visible.has(group.igKey)
         : visible.has(key);
-      /* Telek főmező: az alapterület blokk marad, a külön telekterület dual rejtve (duplikáció elkerülése). */
-      if (telekMain && rangeId === "alapterulet") show = true;
-      if (telekMain && rangeId === "telekterulet") show = false;
+      if (rangeId === "alapterulet") show = showAlap;
+      if (rangeId === "telekterulet") show = showTelek;
       dual.classList.toggle("is-tipus-hidden", !show);
       if (!show && group) {
         setWheelValue(form.querySelector(`[data-wheel="${group.tolKey}"]`), "");
@@ -774,51 +763,97 @@ function syncTipusFieldVisibility(form) {
     }
   });
 
-  syncMainAreaDualForTipus(form, parents);
-  placeTelekteruletNextToAlapterulet(form, telekMain);
+  layoutAreaDuals(form, { showAlap, showTelek });
 }
 
 /**
- * Ház / nyaraló stb.: két terület kell — Alapterület (ház) + Telekterület (telek).
- * A Telekterület a fő mezők közé kerül, az Alapterület alá (ne a „továbbiakban” maradjon).
+ * Területmezők elrendezése a fő sávon:
+ * - csak alapterület
+ * - csak telekterület
+ * - mindkettő (ház / nyaraló): Alapterület + Telekterület egymás alatt
  */
-function placeTelekteruletNextToAlapterulet(form, telekMain) {
+function layoutAreaDuals(form, { showAlap, showTelek }) {
   const main = form.querySelector("#immo-schema-main");
   const alap = form.querySelector('.immo-dual-range-block[data-range="alapterulet"]');
   const telek = form.querySelector('.immo-dual-range-block[data-range="telekterulet"]');
-  if (!main || !alap || !telek) return;
+  if (!main) return;
 
-  if (telekMain || telek.classList.contains("is-tipus-hidden") || alap.classList.contains("is-tipus-hidden")) {
-    return;
+  if (alap) {
+    const title = alap.querySelector(".immo-dual-range__title");
+    if (title) title.textContent = "Alapterület";
+    alap.querySelector(".immo-dual-range")?.setAttribute("aria-label", "Alapterület tartomány");
+    alap.dataset.areaMode = "alap";
+  }
+  if (telek) {
+    const title = telek.querySelector(".immo-dual-range__title");
+    if (title) title.textContent = "Telekterület";
+    telek.querySelector(".immo-dual-range")?.setAttribute("aria-label", "Telekterület tartomány");
   }
 
-  const alapRow = Number(alap.dataset.gridRow) || 1;
-  const wantRow = alapRow + 1;
-  const already =
-    telek.parentElement === main &&
-    Number(telek.dataset.gridRow) === wantRow &&
-    telek.previousElementSibling === alap;
+  if (showAlap && alap) {
+    fillDualRangeWheels(form, {
+      tolKey: "alapterulet_tol",
+      igKey: "alapterulet_ig",
+      options: alapteruletOptions(),
+    });
+  }
+  if (showTelek && telek) {
+    fillDualRangeWheels(form, {
+      tolKey: "telekterulet_tol",
+      igKey: "telekterulet_ig",
+      options: telekteruletOptions(),
+    });
+  }
 
-  if (!already) {
-    if (telek.parentElement !== main || Number(telek.dataset.gridRow) !== wantRow) {
-      [...main.children].forEach((el) => {
-        if (el === telek || el === alap) return;
-        const r = Number(el.dataset.gridRow) || 0;
-        if (r >= wantRow) {
-          const next = r + 1;
-          el.dataset.gridRow = String(next);
-          el.style.gridRow = String(next);
-        }
-      });
+  if (!showAlap && !showTelek) return;
+
+  const anchor = showAlap ? alap : telek;
+  if (!anchor) return;
+  const anchorRow = Number(anchor.dataset.gridRow) || 3;
+
+  if (showAlap && showTelek && alap && telek) {
+    const wantRow = anchorRow + 1;
+    const already =
+      telek.parentElement === main &&
+      Number(telek.dataset.gridRow) === wantRow &&
+      telek.previousElementSibling === alap;
+    if (!already) {
+      if (telek.parentElement !== main || Number(telek.dataset.gridRow) !== wantRow) {
+        [...main.children].forEach((el) => {
+          if (el === telek || el === alap) return;
+          const r = Number(el.dataset.gridRow) || 0;
+          if (r >= wantRow) {
+            const next = r + 1;
+            el.dataset.gridRow = String(next);
+            el.style.gridRow = String(next);
+          }
+        });
+      }
+      const col = alap.dataset.gridCol || "1";
+      const span = alap.dataset.gridSpan || "12";
+      telek.dataset.gridCol = col;
+      telek.dataset.gridSpan = span;
+      telek.dataset.gridRow = String(wantRow);
+      telek.style.gridColumn = `${col} / span ${span}`;
+      telek.style.gridRow = String(wantRow);
+      if (alap.parentElement === main) alap.after(telek);
+      else main.appendChild(telek);
     }
+  } else if (!showAlap && showTelek && telek && alap) {
+    /* Csak telek: a telekterület az alapterület helyére a fő sávban */
     const col = alap.dataset.gridCol || "1";
     const span = alap.dataset.gridSpan || "12";
+    const row = Number(alap.dataset.gridRow) || 3;
     telek.dataset.gridCol = col;
     telek.dataset.gridSpan = span;
-    telek.dataset.gridRow = String(wantRow);
+    telek.dataset.gridRow = String(row);
     telek.style.gridColumn = `${col} / span ${span}`;
-    telek.style.gridRow = String(wantRow);
-    alap.after(telek);
+    telek.style.gridRow = String(row);
+    if (alap.parentElement === main) {
+      alap.before(telek);
+    } else if (telek.parentElement !== main) {
+      main.appendChild(telek);
+    }
   }
 
   const maxRow = Math.max(
@@ -826,35 +861,6 @@ function placeTelekteruletNextToAlapterulet(form, telekMain) {
     ...[...main.querySelectorAll("[data-grid-row]")].map((el) => Number(el.dataset.gridRow) || 1)
   );
   main.style.gridTemplateRows = `repeat(${maxRow}, auto)`;
-
-  const alapTitle = alap.querySelector(".immo-dual-range__title");
-  const telekTitle = telek.querySelector(".immo-dual-range__title");
-  if (alapTitle) alapTitle.textContent = "Alapterület";
-  if (telekTitle) telekTitle.textContent = "Telekterület";
-  alap.querySelector(".immo-dual-range")?.setAttribute("aria-label", "Alapterület tartomány");
-  telek.querySelector(".immo-dual-range")?.setAttribute("aria-label", "Telekterület tartomány");
-}
-
-function syncMainAreaDualForTipus(form, parents) {
-  const telekMain = isMainAreaTelekMode(parents);
-  const block = form.querySelector('.immo-dual-range-block[data-range="alapterulet"]');
-  if (!block) return;
-  const prevMode = block.dataset.areaMode || "alap";
-  const nextMode = telekMain ? "telek" : "alap";
-  block.dataset.areaMode = nextMode;
-  const title = block.querySelector(".immo-dual-range__title");
-  const dual = block.querySelector(".immo-dual-range");
-  if (title) title.textContent = telekMain ? "Telekterület" : "Alapterület";
-  if (dual) {
-    dual.setAttribute("aria-label", telekMain ? "Telekterület tartomány" : "Alapterület tartomány");
-  }
-  if (prevMode !== nextMode) {
-    fillDualRangeWheels(form, {
-      tolKey: "alapterulet_tol",
-      igKey: "alapterulet_ig",
-      options: telekMain ? telekteruletOptions() : alapteruletOptions(),
-    });
-  }
 }
 
 /** Élő kereső/feladás: Tipus 2 a Tipus mellett (adminban törölt szekcióban marad a default). */
@@ -912,21 +918,10 @@ function readForm(form) {
   out.keresesi_hely = form.querySelector('[name="keresesi_hely"]')?.value?.trim() || "";
   out.ar_tol = readPriceInputFt(form.querySelector('[name="ar_tol"], #immo-ar_tol'));
   out.ar_ig = readPriceInputFt(form.querySelector('[name="ar_ig"], #immo-ar_ig'));
-  const areaTol = numOrNull(readWheel(form.querySelector('[data-wheel="alapterulet_tol"]')));
-  const areaIg = numOrNull(readWheel(form.querySelector('[data-wheel="alapterulet_ig"]')));
-  const areaMode =
-    form.querySelector('.immo-dual-range-block[data-range="alapterulet"]')?.dataset.areaMode || "alap";
-  if (areaMode === "telek") {
-    out.alapterulet_tol = null;
-    out.alapterulet_ig = null;
-    out.telekterulet_tol = areaTol;
-    out.telekterulet_ig = areaIg;
-  } else {
-    out.alapterulet_tol = areaTol;
-    out.alapterulet_ig = areaIg;
-    out.telekterulet_tol = numOrNull(readWheel(form.querySelector('[data-wheel="telekterulet_tol"]')));
-    out.telekterulet_ig = numOrNull(readWheel(form.querySelector('[data-wheel="telekterulet_ig"]')));
-  }
+  out.alapterulet_tol = numOrNull(readWheel(form.querySelector('[data-wheel="alapterulet_tol"]')));
+  out.alapterulet_ig = numOrNull(readWheel(form.querySelector('[data-wheel="alapterulet_ig"]')));
+  out.telekterulet_tol = numOrNull(readWheel(form.querySelector('[data-wheel="telekterulet_tol"]')));
+  out.telekterulet_ig = numOrNull(readWheel(form.querySelector('[data-wheel="telekterulet_ig"]')));
   out.szobaszam = readWheel(form.querySelector('[data-wheel="szobaszam"]'));
   out.ingatlan_lakas_tipus = readWheel(form.querySelector('[data-wheel="ingatlan_lakas_tipus"]'));
   out.ingatlan_tipus_2 = readWheel(form.querySelector('[data-wheel="ingatlan_tipus_2"]'));

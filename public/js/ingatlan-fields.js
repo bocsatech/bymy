@@ -395,22 +395,73 @@ export function boolOptionsForField(fieldOrKey) {
   ];
 }
 
-/** Mindig látszik (típus független). */
+/** Mindig látszik (típus független). Területmezők NEM itt — típus szerint. */
 export const INGATLAN_CORE_FIELD_KEYS = [
   "keresesi_hely",
   "ar_tol",
   "ar_ig",
-  "alapterulet_tol",
-  "alapterulet_ig",
-  "alapterulet",
   "szobaszam",
   "ingatlan_lakas_tipus",
   "ingatlan_tipus_2",
 ];
 
 /**
+ * Típus → területmezők (a küldött listákból).
+ * alapterulet = épület / ház területe
+ * telekterulet = telek, amin áll / önálló telek
+ */
+export const INGATLAN_AREA_BY_TIPUS = {
+  lakas: ["alapterulet"],
+  haz: ["alapterulet", "telekterulet"],
+  telek: ["telekterulet"],
+  garazs: [],
+  nyaralo: ["alapterulet", "telekterulet"],
+  iroda: ["alapterulet"],
+  uzlethelyiseg: ["alapterulet"],
+  vendeglatas: ["alapterulet"],
+  raktar: ["telekterulet"],
+  ipari: ["telekterulet"],
+  mezogazdasagi: ["telekterulet", "epitmeny_terulet"],
+  fejlesztesi_terulet: ["telekterulet"],
+  intezmeny: ["alapterulet", "telekterulet"],
+  egyeb: ["alapterulet", "telekterulet"],
+};
+
+const AREA_FIELD_KEYS = {
+  alapterulet: ["alapterulet_tol", "alapterulet_ig", "alapterulet"],
+  telekterulet: ["telekterulet_tol", "telekterulet_ig", "telekterulet"],
+  epitmeny_terulet: ["epitmeny_terulet_tol", "epitmeny_terulet_ig", "epitmeny_terulet"],
+};
+
+/** Tipus(ok) → terület kulcsok (tol/ig/post). Üres típusnál csak alapterület (általános kereső). */
+export function areaFieldKeysForTipus(parentValues) {
+  const parents = (Array.isArray(parentValues) ? parentValues : String(parentValues ?? "").split(","))
+    .map((v) => resolveTipusFieldParent(v))
+    .filter(Boolean);
+  const out = new Set();
+  if (!parents.length) {
+    for (const k of AREA_FIELD_KEYS.alapterulet) out.add(k);
+    return out;
+  }
+  const kinds = new Set();
+  for (const p of parents) {
+    const list = INGATLAN_AREA_BY_TIPUS[p];
+    if (list == null && p === "egyeb") {
+      kinds.add("alapterulet");
+      kinds.add("telekterulet");
+      continue;
+    }
+    for (const kind of list || []) kinds.add(kind);
+  }
+  for (const kind of kinds) {
+    for (const k of AREA_FIELD_KEYS[kind] || []) out.add(k);
+  }
+  return out;
+}
+
+/**
  * Típus 1 → megjelenő mezőkulcsok (a screenshot listák alapján).
- * Üres típusnál csak a CORE mezők látszanak.
+ * Üres típusnál csak a CORE mezők látszanak (+ alap alapterület).
  */
 export const INGATLAN_FIELDS_BY_TIPUS = {
   lakas: [
@@ -635,13 +686,14 @@ export function effectiveIngatlanFieldsByTipus() {
   return liveFieldsByTipus || INGATLAN_FIELDS_BY_TIPUS;
 }
 
-/** Kiválasztott típus(ok) → látható mezőkulcsok (CORE + unió). */
+/** Kiválasztott típus(ok) → látható mezőkulcsok (CORE + terület + típusmezők). */
 export function fieldKeysVisibleForTipus(parentValues) {
   const map = effectiveIngatlanFieldsByTipus();
   const parents = (Array.isArray(parentValues) ? parentValues : String(parentValues ?? "").split(","))
     .map((v) => resolveTipusFieldParent(v))
     .filter(Boolean);
   const out = new Set(INGATLAN_CORE_FIELD_KEYS);
+  for (const k of areaFieldKeysForTipus(parents)) out.add(k);
   if (!parents.length) return out;
 
   const allTypeKeys = () => {

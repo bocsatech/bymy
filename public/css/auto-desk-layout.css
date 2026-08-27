@@ -1,7 +1,6 @@
 /**
- * Autó asztali — pixelmásolat a 2-es demóról.
+ * Autó asztali — 2-es demó elrendezés, inverz (világos) megjelenés.
  * Csak ≥901px + data-site-page=auto. Mobil / teherautó érintetlen.
- * Nincs hasznaltauto felirat — bymy logó + meglévő linkek, demó chrome.
  */
 
 @media (min-width: 901px) {
@@ -9,29 +8,31 @@
   body.home-page[data-site-page="auto"],
   body.home-page[data-site-page="auto"].site-app,
   body.home-page[data-site-page="auto"].site-page {
-    --ad-bg: #1f1f1f;
-    --ad-header: #161615;
-    --ad-panel: #1d1d1d;
-    --ad-elev: #111111;
-    --ad-dropdown: #111111;
-    --ad-line: #3a3a3a;
-    --ad-text: #ffffff;
-    --ad-muted: #9a9a9c;
+    --ad-bg: #f3f3f3;
+    --ad-header: #ffffff;
+    --ad-panel: #ffffff;
+    --ad-elev: #ffffff;
+    --ad-dropdown: #ffffff;
+    --ad-line: #d4d4d4;
+    --ad-text: #111111;
+    --ad-muted: #6b6b6b;
     --ad-yellow: #f0c52c;
     --ad-yellow-ink: #111111;
     --ad-filter-w: 320px;
+    --ad-surface-2: #f0f0f0;
+    --ad-surface-3: #e8e8e8;
     background: var(--ad-bg) !important;
     background-color: var(--ad-bg) !important;
     color: var(--ad-text);
-    color-scheme: dark;
+    color-scheme: light;
   }
 
-  /* —— Fejléc: demó sötét sáv, bymy logó —— */
+  /* —— Fejléc —— */
   body.home-page[data-site-page="auto"] .hub-header,
   body.home-page[data-site-page="auto"] .home-header {
     background: var(--ad-header) !important;
     border: 0 !important;
-    border-bottom: 1px solid #2a2a2a !important;
+    border-bottom: 1px solid var(--ad-line) !important;
     color: var(--ad-text) !important;
   }
 
@@ -87,7 +88,7 @@
   }
 
   body.home-page[data-site-page="auto"] .hub-nav-link {
-    color: #fff !important;
+    color: var(--ad-text) !important;
     font-size: 14px !important;
     font-weight: 500 !important;
     border: 0 !important;
@@ -97,7 +98,7 @@
   }
 
   body.home-page[data-site-page="auto"] .hub-nav-link.active {
-    color: #fff !important;
+    color: var(--ad-text) !important;
     border-bottom: 2px solid var(--ad-yellow) !important;
     padding-bottom: 2px !important;
   }
@@ -110,7 +111,7 @@
   body.home-page[data-site-page="auto"] .hub-btn--ghost,
   body.home-page[data-site-page="auto"] .site-header-firstname,
   body.home-page[data-site-page="auto"] .hub-header .site-header-profile {
-    color: #fff !important;
+    color: var(--ad-text) !important;
   }
 
   body.home-page[data-site-page="auto"] .hub-btn--ghost {
@@ -453,11 +454,11 @@
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%239a9a9c' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") !important;
     background-repeat: no-repeat !important;
     background-position: right 12px center !important;
-    color: #fff !important;
+    color: var(--ad-text) !important;
     font: inherit;
     font-size: 14px !important;
     box-shadow: none !important;
-    color-scheme: dark;
+    color-scheme: light;
   }
 
   body.home-page[data-site-page="auto"] .auto-desk-sort select {
@@ -471,9 +472,9 @@
   /* Legördülő lista (option) — fekete, mint a gyártmány menü */
   body.home-page[data-site-page="auto"] select option,
   body.home-page[data-site-page="auto"] select optgroup {
-    background-color: #111111 !important;
-    background: #111111 !important;
-    color: #ffffff !important;
+    background-color: var(--ad-dropdown) !important;
+    background: var(--ad-dropdown) !important;
+    color: var(--ad-text) !important;
   }
 
   body.home-page[data-site-page="auto"] .auto-search-panel .home-qs-suffix {
@@ -482,7 +483,7 @@
 
   body.home-page[data-site-page="auto"] .auto-search-panel .qs-detailed-acc {
     border-color: var(--ad-line) !important;
-    background: #1a1a1a !important;
+    background: var(--ad-panel) !important;
     color: var(--ad-text) !important;
   }
 
@@ -496,10 +497,10 @@
   body.home-page[data-site-page="auto"] .auto-search-panel .qs-detailed-select select,
   body.home-page[data-site-page="auto"] .auto-search-panel .qs-detailed-range select,
   body.home-page[data-site-page="auto"] .auto-search-panel .qs-detailed-range input {
-    background-color: #111111 !important;
-    color: #fff !important;
+    background-color: var(--ad-dropdown) !important;
+    color: var(--ad-text) !important;
     border-color: var(--ad-line) !important;
-    color-scheme: dark;
+    color-scheme: light;
   }
 
   /* —— CTA —— */
@@ -524,7 +525,7 @@
     cursor: pointer;
     border: 1px solid #5a5a5a;
     background: transparent;
-    color: #fff;
+    color: var(--ad-text);
   }
 
   body.home-page[data-site-page="auto"] .home-qs-submit {
@@ -562,14 +563,14 @@
     flex-wrap: wrap;
     margin: 0 0 16px;
     padding: 0 0 14px;
-    border-bottom: 1px solid #2e2e2e;
+    border-bottom: 1px solid var(--ad-line);
   }
 
   body.home-page[data-site-page="auto"] .auto-desk-results-bar__count {
     margin: 0;
     font-weight: 600;
     font-size: 18px;
-    color: #fff;
+    color: var(--ad-text);
   }
 
   body.home-page[data-site-page="auto"] .auto-desk-results-bar__tools {
@@ -625,7 +626,7 @@
 
   body.home-page[data-site-page="auto"] .auto-desk-view__btn.is-active {
     color: var(--ad-yellow);
-    background: #242424;
+    background: var(--ad-surface-2);
   }
 
   body.home-page[data-site-page="auto"] .home-empty {
@@ -653,11 +654,11 @@
 
   body.home-page[data-site-page="auto"] .home-grid-card {
     background: var(--ad-panel) !important;
-    border: 1px solid #2a2a2a !important;
+    border: 1px solid var(--ad-line) !important;
     border-radius: 8px !important;
     overflow: hidden;
     box-shadow: none !important;
-    color: #fff !important;
+    color: var(--ad-text) !important;
   }
 
   body.home-page[data-site-page="auto"] .home-grid-card:hover {
@@ -668,7 +669,7 @@
 
   body.home-page[data-site-page="auto"] .home-grid-card-media {
     aspect-ratio: 16 / 10;
-    background: #2a2a2a !important;
+    background: var(--ad-surface-3) !important;
   }
 
   body.home-page[data-site-page="auto"] .home-grid-card-save {
@@ -679,7 +680,7 @@
     border: 0 !important;
     border-radius: 0 !important;
     background: transparent !important;
-    color: #fff !important;
+    color: var(--ad-text) !important;
     box-shadow: none !important;
     filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.7));
   }
@@ -695,7 +696,7 @@
   body.home-page[data-site-page="auto"] .home-grid-card-body {
     padding: 14px 14px 16px !important;
     gap: 8px !important;
-    color: #fff !important;
+    color: var(--ad-text) !important;
     background: transparent !important;
     text-decoration: none !important;
   }
@@ -705,7 +706,7 @@
     font-size: 18px !important;
     font-weight: 800 !important;
     line-height: 1.15 !important;
-    color: #fff !important;
+    color: var(--ad-text) !important;
     letter-spacing: 0.01em;
     text-transform: uppercase;
     -webkit-line-clamp: 1;
@@ -736,7 +737,7 @@
     gap: 7px;
     font-size: 13px !important;
     font-weight: 500 !important;
-    color: #fff !important;
+    color: var(--ad-text) !important;
   }
 
   body.home-page[data-site-page="auto"] .home-grid-card-spec svg {
@@ -755,7 +756,7 @@
     margin: 6px 0 2px !important;
     font-size: 22px !important;
     font-weight: 800 !important;
-    color: #fff !important;
+    color: var(--ad-text) !important;
     letter-spacing: -0.01em;
   }
 
@@ -835,7 +836,7 @@
     border: 1px solid var(--ad-line);
     border-radius: 6px;
     background: var(--ad-elev);
-    color: #fff;
+    color: var(--ad-text);
     font: inherit;
     font-size: 14px;
     text-align: left;
@@ -854,7 +855,7 @@
     z-index: 20;
     display: flex;
     flex-direction: column;
-    background: #1a1a1a;
+    background: var(--ad-panel);
     border: 1px solid var(--ad-line);
     border-radius: 8px;
     overflow: hidden;
@@ -873,7 +874,7 @@
     gap: 8px;
     padding: 10px 12px;
     border-bottom: 1px solid var(--ad-line);
-    background: #141414;
+    background: var(--ad-surface-2);
   }
 
   body.home-page[data-site-page="auto"] .auto-bm-panel__back,
@@ -898,7 +899,7 @@
     margin: 0;
     font-size: 16px;
     font-weight: 800;
-    color: #fff;
+    color: var(--ad-text);
   }
 
   body.home-page[data-site-page="auto"] .auto-bm-panel__sub {
@@ -918,7 +919,7 @@
     padding: 0 12px;
     border-radius: 8px;
     border: 1px solid var(--ad-line);
-    background: #111;
+    background: var(--ad-dropdown);
     color: var(--ad-muted);
     font: inherit;
     font-size: 14px;
@@ -968,12 +969,12 @@
   body.home-page[data-site-page="auto"] .auto-bm-group {
     border: 1px solid var(--ad-line);
     border-radius: 10px;
-    background: #222;
+    background: var(--ad-panel);
     overflow: hidden;
   }
 
   body.home-page[data-site-page="auto"] .auto-bm-row + .auto-bm-row {
-    border-top: 1px solid #333;
+    border-top: 1px solid var(--ad-line);
   }
 
   body.home-page[data-site-page="auto"] .auto-bm-toggle {
@@ -983,7 +984,7 @@
     gap: 12px;
     min-height: 52px;
     padding: 0 14px;
-    color: #fff;
+    color: var(--ad-text);
     font-size: 15px;
     cursor: pointer;
   }
@@ -998,7 +999,7 @@
     width: 46px;
     height: 28px;
     border-radius: 999px;
-    background: #555;
+    background: #c6c6c6;
     position: relative;
     flex: 0 0 auto;
     transition: background 0.15s;
@@ -1032,9 +1033,9 @@
     gap: 8px;
     width: 100%;
     border: 0;
-    border-top: 1px solid #333;
-    background: #1c1c1c;
-    color: #fff;
+    border-top: 1px solid var(--ad-line);
+    background: var(--ad-surface-2);
+    color: var(--ad-text);
     font: inherit;
     font-size: 14px;
     text-align: left;

@@ -3,12 +3,18 @@
  * Nincs page-scroll lock / preventDefault a touchmove-on.
  */
 
-import { readWheel, readWheelList, setWheelValue } from "./ingatlan-wheels.js?v=immoAutoPortal1";
-import { syncDrumWheelDisplay } from "./immo-drum-picker.js?v=immoAutoPortal1";
+import { readWheel, readWheelList, setWheelValue } from "./ingatlan-wheels.js?v=immoClear1";
+import { syncDrumWheelDisplay } from "./immo-drum-picker.js?v=immoClear1";
 
 const ITEM_H = 60;
 let activePortal = null;
 let paintFrame = 0;
+
+document.addEventListener("immo-wheel-clear", (event) => {
+  if (activePortal?.wheel && event.target === activePortal.wheel) {
+    closeAutoDrumSheet(false);
+  }
+});
 
 function escapeHtml(value) {
   return String(value ?? "")

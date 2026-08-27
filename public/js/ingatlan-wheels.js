@@ -371,6 +371,7 @@ function updateTrigger(wheel) {
       input.value = shown;
       input.title = shown;
     }
+    syncWheelClearButton(wrap, wheel, values.length > 0);
     return;
   }
   if (!trigger) return;
@@ -384,6 +385,36 @@ function updateTrigger(wheel) {
     trigger.textContent = labels.join(", ");
     trigger.title = labels.join(", ");
   }
+  syncWheelClearButton(wrap, wheel, values.length > 0);
+}
+
+/** Mező jobb szélén × — törli a kiválasztást. */
+export function syncWheelClearButton(wrap, wheel, hasValue) {
+  if (!wrap || !wheel) return;
+  let clear = wrap.querySelector(":scope > .immo-wheel-clear");
+  if (!hasValue) {
+    clear?.remove();
+    wrap.classList.remove("has-wheel-clear");
+    return;
+  }
+  if (!clear) {
+    clear = document.createElement("button");
+    clear.type = "button";
+    clear.className = "immo-wheel-clear";
+    clear.setAttribute("aria-label", "Kiválasztás törlése");
+    clear.textContent = "×";
+    clear.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      setWheelValue(wheel, "");
+      if (wheel.dataset.drumBound === "1") {
+        wheel.dispatchEvent(new CustomEvent("immo-wheel-clear", { bubbles: true }));
+      }
+      wheel.dispatchEvent(new CustomEvent("immo-wheel-change", { bubbles: true, detail: { value: "" } }));
+    });
+    wrap.appendChild(clear);
+  }
+  wrap.classList.add("has-wheel-clear");
 }
 
 export function setWheelValue(wheel, value) {
@@ -592,7 +623,9 @@ export function initMenuWheel(wheel, { emptyLabel = "Mindegy", multiple = false,
   else wheel.removeAttribute("aria-multiselectable");
 
   wrap.querySelector(".immo-wheel-trigger")?.remove();
+  wrap.querySelector(".immo-wheel-clear")?.remove();
   wrap.querySelector(".immo-wheel-custom")?.remove();
+  wrap.classList.remove("has-wheel-clear");
 
   let trigger;
   if (customInput) {

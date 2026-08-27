@@ -6,7 +6,7 @@
  * Cellába kattintás: érték (többesnél toggle) + bezárás.
  */
 
-import { readWheel, readWheelList, setWheelValue, lockPageScroll, unlockPageScroll } from "./ingatlan-wheels.js?v=immoPortalPage1";
+import { readWheel, readWheelList, setWheelValue, lockPageScroll, unlockPageScroll, syncWheelClearButton } from "./ingatlan-wheels.js?v=immoClear1";
 
 const ITEM_H = 40;
 /** Pontosan 3 sor: fent / közép / lent */
@@ -453,7 +453,9 @@ export function initDrumWheel(wheel, { emptyLabel = "Mindegy", multiple = false,
   wrap.classList.remove("immo-wheel-wrap--menu", "immo-wheel-wrap--multi", "immo-wheel-wrap--custom", "is-open", "has-drum-open");
   wrap.querySelector(".immo-drum-inline")?.remove();
   wrap.querySelector(".immo-wheel-trigger")?.remove();
+  wrap.querySelector(".immo-wheel-clear")?.remove();
   wrap.querySelector(".immo-wheel-custom")?.remove();
+  wrap.classList.remove("has-wheel-clear");
 
   wheel.dataset.drumBound = "1";
   wheel.dataset.menuBound = "";
@@ -518,16 +520,19 @@ export function syncDrumWheelDisplay(wheel) {
   if (!labels.length) {
     trigger.textContent = emptyLabel;
     trigger.removeAttribute("title");
+    syncWheelClearButton(wrap, wheel, false);
     return;
   }
   if (multiple && values.length > 1) {
     trigger.textContent = `${values.length} kiválasztva`;
     trigger.title = labels.join(", ");
+    syncWheelClearButton(wrap, wheel, true);
     return;
   }
   const shown = labels.map((t) => formatTriggerShort(t, values[0])).join(", ");
   trigger.textContent = shown;
   trigger.title = labels.join(", ");
+  syncWheelClearButton(wrap, wheel, true);
 }
 
 export { isDrumViewport, formatTriggerShort, closeAllInlineDrums };

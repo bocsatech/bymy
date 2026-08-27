@@ -3,14 +3,14 @@
  * Mobil: portált gyűrű. Asztali: helyben görgethető inline dob + dupla kattintás = kézi érték.
  */
 
-import { fillWheel, setWheelValue, readWheel } from "./ingatlan-wheels.js?v=cellDrum1";
+import { fillWheel, setWheelValue, readWheel } from "./ingatlan-wheels.js?v=immoClear1";
 import {
   initDrumWheel,
   applyDrumModeClass,
   syncDrumWheelDisplay,
   closeAllInlineDrums,
-} from "./immo-drum-picker.js?v=immoPortalPage1";
-import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=immoPortalCheck1";
+} from "./immo-drum-picker.js?v=immoClear1";
+import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=immoClear1";
 import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=autoDesk16";
 
 const MOBILE_MQ = "(max-width: 900px)";

@@ -42,9 +42,9 @@ import {
   setWheelValue,
   MULTI_WHEEL_KEYS,
   wheelFieldHtml,
-} from "./ingatlan-wheels.js?v=immoPortalPage1";
-import { initDrumWheel, syncDrumWheelDisplay, applyDrumModeClass, getDrumMode } from "./immo-drum-picker.js?v=immoPortalPage1";
-import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=immoPortalCheck1";
+} from "./ingatlan-wheels.js?v=immoClear1";
+import { initDrumWheel, syncDrumWheelDisplay, applyDrumModeClass, getDrumMode } from "./immo-drum-picker.js?v=immoClear1";
+import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=immoClear1";
 import { fetchIngatlanWheelSchema, renderIngatlanSchemaHosts, INGATLAN_DUAL_RANGE_GROUPS } from "./ingatlan-wheel-schema.js?v=telepSuggest1";
 import { wireTelepulesSuggestIn } from "./telepules-suggest.js?v=telepClose1";
 

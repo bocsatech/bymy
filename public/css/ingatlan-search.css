@@ -425,6 +425,60 @@ body[data-site-page="ingatlan"] .immo-search-tabs {
   background-size: 12px 8px;
 }
 
+/* Kiválasztás törlése (×) a mező jobb szélén */
+.immo-wheel-wrap.has-wheel-clear {
+  position: relative;
+}
+
+.immo-wheel-clear {
+  position: absolute;
+  right: 0.35rem;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #64748b;
+  font: 600 1.25rem/1 system-ui, sans-serif;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.immo-wheel-clear:hover,
+.immo-wheel-clear:focus-visible {
+  color: #0f172a;
+  background: rgba(15, 23, 42, 0.06);
+  outline: none;
+}
+
+.immo-wheel-wrap.has-wheel-clear > .immo-wheel-trigger,
+.immo-wheel-wrap.has-wheel-clear > .immo-wheel-custom {
+  padding-right: 2.2rem !important;
+  background-image: none !important;
+}
+
+.immo-search-form .immo-schema-cell:not(.immo-dual-range__half) > .immo-wheel-wrap.has-wheel-clear > .immo-wheel-trigger {
+  padding-right: 2.2rem !important;
+}
+
+[data-theme="dark"] .immo-wheel-clear {
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .immo-wheel-clear:hover,
+[data-theme="dark"] .immo-wheel-clear:focus-visible {
+  color: #f8fafc;
+  background: rgba(248, 250, 252, 0.08);
+}
+
 input.immo-wheel-custom.immo-wheel-trigger {
   cursor: text;
 }

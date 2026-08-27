@@ -106,6 +106,42 @@ body[data-site-page="ingatlan"] .immo-search-panel,
   gap: 0.85rem;
 }
 
+/* Ár: kézi min–max — millió Ft (eladó) / Ft (bérlés) */
+.immo-dual-range__unit strong {
+  font-weight: 800;
+}
+
+.immo-dual-range__half .immo-price-input {
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  border: 0;
+  background: transparent;
+  padding: 0 0.75rem;
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: #0f172a;
+  outline: none;
+}
+
+.immo-dual-range__half .immo-price-input::placeholder {
+  color: #94a3b8;
+  font-weight: 400;
+}
+
+[data-theme="dark"] .immo-dual-range__half .immo-price-input {
+  color: #f1f5f9;
+}
+
+.immo-dual-range[data-range="ar"]:focus-within {
+  border-color: #111;
+  box-shadow: 0 0 0 2px rgba(17, 24, 39, 0.08);
+  background: #fff;
+}
+
 /* Fülek: Eladó / Kiadó / Airbnb (autó kereső tab stílus) */
 .immo-search-tabs {
   display: grid;

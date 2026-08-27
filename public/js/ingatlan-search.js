@@ -25,7 +25,6 @@ import {
   KOLTOZHETO_ROVID,
   IGEN_MINDEGY,
   INGATLAN_BOOL_FIELDS,
-  priceMillionOptions,
   alapteruletOptions,
   szobaszamOptions,
   arFtMinOptions,
@@ -349,9 +348,63 @@ function setUzletag(form, value) {
 function syncPriceRangeUnit(form) {
   const wrap = form?.querySelector('.immo-dual-range[data-range="ar"]');
   if (!wrap) return;
-  const uz = readUzletag(form);
-  const unitEl = wrap.querySelector(".immo-dual-range__unit");
-  if (unitEl) unitEl.textContent = isIngatlanRentUzletag(uz) ? "Ft" : "M Ft";
+  const isRent = isIngatlanRentUzletag(readUzletag(form));
+  let unitEl = wrap.querySelector(".immo-dual-range__unit");
+  if (!unitEl) {
+    unitEl = document.createElement("span");
+    unitEl.className = "immo-dual-range__unit";
+    unitEl.setAttribute("aria-hidden", "true");
+    wrap.appendChild(unitEl);
+  }
+  unitEl.innerHTML = isRent ? "Ft" : 'millió <strong>Ft</strong>';
+  wrap.querySelectorAll(".immo-price-input").forEach((input) => {
+    const nextMode = isRent ? "ft" : "million";
+    if (input.dataset.priceMode && input.dataset.priceMode !== nextMode) input.value = "";
+    input.dataset.priceMode = nextMode;
+  });
+}
+
+function readPriceInputFt(input) {
+  if (!input) return null;
+  const raw = String(input.value ?? "").trim();
+  if (!raw) return null;
+  const n = numOrNull(raw);
+  if (n == null || n <= 0) return null;
+  return input.dataset.priceMode === "ft" ? n : n * 1_000_000;
+}
+
+function clearPriceInputs(form) {
+  form?.querySelectorAll(".immo-price-input").forEach((input) => {
+    input.value = "";
+  });
+}
+
+/** Ár: kézi min–max mezők (millió Ft eladónál, Ft bérlésnél) — nem dobkerék. */
+function setupPriceManualInputs(form) {
+  const wrap = form?.querySelector('.immo-dual-range[data-range="ar"]');
+  if (!wrap) return;
+  const halves = [
+    { key: "ar_tol", half: "min", label: "Ár minimum" },
+    { key: "ar_ig", half: "max", label: "Ár maximum" },
+  ];
+  for (const { key, half, label } of halves) {
+    const cell = wrap.querySelector(`.immo-dual-range__half--${half}`);
+    if (!cell) continue;
+    let input = cell.querySelector(".immo-price-input");
+    if (!input) {
+      cell.innerHTML = "";
+      input = document.createElement("input");
+      input.type = "text";
+      input.inputMode = "decimal";
+      input.className = "immo-price-input";
+      input.name = key;
+      input.id = `immo-${key}`;
+      input.autocomplete = "off";
+      input.setAttribute("aria-label", label);
+      cell.appendChild(input);
+    }
+  }
+  syncPriceRangeUnit(form);
 }
 
 function fillDualRangeWheels(form, { tolKey, igKey, options, emptyMin = "min.", emptyMax = "max." }) {
@@ -381,11 +434,7 @@ function fillDualRangeWheels(form, { tolKey, igKey, options, emptyMin = "min.", 
 }
 
 function fillPriceRangeWheels(form) {
-  const uz = readUzletag(form);
-  const isRent = isIngatlanRentUzletag(uz);
-  const opts = isRent ? arFtMinOptions() : priceMillionOptions();
-  fillDualRangeWheels(form, { tolKey: "ar_tol", igKey: "ar_ig", options: opts });
-  syncPriceRangeUnit(form);
+  setupPriceManualInputs(form);
 }
 
 function fillAreaRangeWheels(form) {
@@ -584,8 +633,8 @@ function readForm(form) {
   const out = emptyIngatlanFilters();
   out.ingatlan_uzletag = readUzletag(form);
   out.keresesi_hely = form.querySelector('[name="keresesi_hely"]')?.value?.trim() || "";
-  out.ar_tol = numOrNull(readWheel(form.querySelector('[data-wheel="ar_tol"]')));
-  out.ar_ig = numOrNull(readWheel(form.querySelector('[data-wheel="ar_ig"]')));
+  out.ar_tol = readPriceInputFt(form.querySelector('[name="ar_tol"], #immo-ar_tol'));
+  out.ar_ig = readPriceInputFt(form.querySelector('[name="ar_ig"], #immo-ar_ig'));
   out.alapterulet_tol = numOrNull(readWheel(form.querySelector('[data-wheel="alapterulet_tol"]')));
   out.alapterulet_ig = numOrNull(readWheel(form.querySelector('[data-wheel="alapterulet_ig"]')));
   out.szobaszam = readWheel(form.querySelector('[data-wheel="szobaszam"]'));
@@ -749,6 +798,7 @@ export async function initIngatlanSearch({
         });
         const hely = root.querySelector('[name="keresesi_hely"]');
         if (hely) hely.value = "";
+        clearPriceInputs(root);
         setUzletag(root, defaultUzletag);
         fillPriceRangeWheels(root);
         fillAreaRangeWheels(root);
@@ -770,6 +820,7 @@ export async function initIngatlanSearch({
         });
         const hely = root.querySelector('[name="keresesi_hely"]');
         if (hely) hely.value = "";
+        clearPriceInputs(root);
         setUzletag(root, defaultUzletag);
         fillPriceRangeWheels(root);
         fillAreaRangeWheels(root);

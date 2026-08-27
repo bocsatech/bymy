@@ -34,7 +34,7 @@ export const INGATLAN_DUAL_RANGE_GROUPS = [
   {
     id: "ar",
     title: "Ár",
-    adminLabel: "Ár (osztott kerék · min–max)",
+    adminLabel: "Ár (min–max beírás · millió Ft / Ft)",
     tolKey: "ar_tol",
     igKey: "ar_ig",
     unit: "",

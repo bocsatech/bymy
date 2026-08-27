@@ -14,7 +14,7 @@ import {
   emptyIngatlanFilters,
   filterListingsByIngatlan,
   initIngatlanSearch,
-} from "./ingatlan-search.js?v=immoTelekArea1";
+} from "./ingatlan-search.js?v=immoHazArea2";
 import { normalizeIngatlanUzletag } from "./ingatlan-fields.js?v=immoTelekArea1";
 import { filterByCategory, initHomeCategoryBar, renderHomeCategoryBar } from "./home-category-bar.js";
 import { initHomeUnifiedScroll } from "./home-unified-scroll.js";

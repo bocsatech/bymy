@@ -173,9 +173,11 @@ function defaultRaw() {
     { field_key: "ar_ig", section: "main", row: 2, col: 7, colSpan: 6, hidden: false },
     { field_key: "alapterulet_tol", section: "main", row: 3, col: 1, colSpan: 6, hidden: false },
     { field_key: "alapterulet_ig", section: "main", row: 3, col: 7, colSpan: 6, hidden: false },
-    { field_key: "szobaszam", section: "main", row: 4, col: 1, colSpan: 3, hidden: false },
-    /* Fő szűrők legalja — meglévő sorok (1–4) érintetlenek. */
-    { field_key: "ingatlan_tipus_2", section: "main", row: 5, col: 1, colSpan: 6, hidden: false },
+    { field_key: "telekterulet_tol", section: "main", row: 4, col: 1, colSpan: 6, hidden: false },
+    { field_key: "telekterulet_ig", section: "main", row: 4, col: 7, colSpan: 6, hidden: false },
+    { field_key: "szobaszam", section: "main", row: 5, col: 1, colSpan: 3, hidden: false },
+    /* Fő szűrők legalja — meglévő sorok (1–5) érintetlenek. */
+    { field_key: "ingatlan_tipus_2", section: "main", row: 6, col: 1, colSpan: 6, hidden: false },
     { field_key: "alapterulet", section: "more", row: 12, col: 1, colSpan: 6, hidden: false },
     { field_key: "ingatlan_lakas_tipus", section: "more", row: 1, col: 1, colSpan: 6, hidden: false },
     { field_key: "allapot", section: "more", row: 1, col: 7, colSpan: 6, hidden: false },
@@ -214,8 +216,6 @@ function defaultRaw() {
     { field_key: "csatorna", section: "more", row: 14, col: 10, colSpan: 3, hidden: false },
     { field_key: "irodahaz_kategoria", section: "more", row: 15, col: 1, colSpan: 6, hidden: false },
     { field_key: "kaucio_max", section: "more", row: 15, col: 7, colSpan: 6, hidden: false },
-    { field_key: "telekterulet_tol", section: "more", row: 16, col: 1, colSpan: 6, hidden: false },
-    { field_key: "telekterulet_ig", section: "more", row: 16, col: 7, colSpan: 6, hidden: false },
     { field_key: "szintek_tol", section: "more", row: 17, col: 1, colSpan: 6, hidden: false },
     { field_key: "szintek_ig", section: "more", row: 17, col: 7, colSpan: 6, hidden: false },
     { field_key: "uzemeltetesi_dij_tol", section: "more", row: 18, col: 1, colSpan: 6, hidden: false },

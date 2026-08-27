@@ -508,26 +508,8 @@ function sectionItemsHtml(cells) {
 /** Kitölti a main/more hostokat a sémából (kategória nélkül). */
 export function renderIngatlanSchemaHosts(mainHost, moreHost, schema, surface) {
   const cells = cellsForSurface(schema, surface);
-  let main = cells.filter((c) => c.section !== "more");
-  let more = cells.filter((c) => c.section === "more");
-  if (surface === "search") {
-    const mainOrder = [
-      "keresesi_hely",
-      "ingatlan_lakas_tipus",
-      "ar_tol",
-      "ar_ig",
-      "alapterulet_tol",
-      "alapterulet_ig",
-      "szobaszam",
-      "ingatlan_tipus_2",
-    ];
-    const order = new Map(mainOrder.map((key, index) => [key, index]));
-    const keepInMain = new Set(mainOrder);
-    more = [...main.filter((cell) => !keepInMain.has(cell.field_key)), ...more];
-    main = main
-      .filter((cell) => keepInMain.has(cell.field_key))
-      .sort((a, b) => (order.get(a.field_key) ?? 99) - (order.get(b.field_key) ?? 99));
-  }
+  const main = cells.filter((c) => c.section !== "more");
+  const more = cells.filter((c) => c.section === "more");
   const maxMain = Math.max(1, ...main.map((c) => Number(c.row) || 1));
   const maxMore = Math.max(1, ...more.map((c) => Number(c.row) || 1));
   if (mainHost) {

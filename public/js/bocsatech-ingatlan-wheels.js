@@ -427,32 +427,33 @@ export function mountIngatlanWheelBoard(root, schema, { onChange, readOnly = fal
       cell.hidden = true;
     }
 
-    function moveItem(item, direction) {
-      const section = item.kind === "dual" ? item.tol.section : item.cell.section;
-      const items = displayItems(section);
-      const index = items.findIndex((entry) =>
-        item.kind === "dual"
-          ? entry.kind === "dual" && entry.group.id === item.group.id
-          : entry.kind === "cell" && entry.cell.field_key === item.cell.field_key
-      );
-      const target = index + direction;
-      if (index < 0 || target < 0 || target >= items.length) return false;
-      const rowOf = (entry) => Number(entry.kind === "dual" ? entry.tol.row : entry.cell.row) || 1;
-      const currentRow = rowOf(item);
-      const targetRow = rowOf(items[target]);
-      const setRow = (entry, row) => {
-        if (entry.kind === "dual") {
-          entry.tol.row = row;
-          entry.ig.row = row;
-        } else {
-          entry.cell.row = row;
-        }
-      };
-      setRow(item, targetRow);
-      setRow(items[target], currentRow);
-      compactSection(section);
-      return true;
-    }
+  }
+
+  function moveItem(item, direction) {
+    const section = item.kind === "dual" ? item.tol.section : item.cell.section;
+    const items = displayItems(section);
+    const index = items.findIndex((entry) =>
+      item.kind === "dual"
+        ? entry.kind === "dual" && entry.group.id === item.group.id
+        : entry.kind === "cell" && entry.cell.field_key === item.cell.field_key
+    );
+    const target = index + direction;
+    if (index < 0 || target < 0 || target >= items.length) return false;
+    const rowOf = (entry) => Number(entry.kind === "dual" ? entry.tol.row : entry.cell.row) || 1;
+    const currentRow = rowOf(item);
+    const targetRow = rowOf(items[target]);
+    const setRow = (entry, row) => {
+      if (entry.kind === "dual") {
+        entry.tol.row = row;
+        entry.ig.row = row;
+      } else {
+        entry.cell.row = row;
+      }
+    };
+    setRow(item, targetRow);
+    setRow(items[target], currentRow);
+    compactSection(section);
+    return true;
   }
 
   function bind() {
@@ -462,6 +463,9 @@ export function mountIngatlanWheelBoard(root, schema, { onChange, readOnly = fal
 
     root.querySelectorAll(".layout-tile").forEach((tile) => {
       tile.addEventListener("pointerdown", (event) => {
+        if (event.target.closest("button, [data-width-btns], [data-order-btns], [data-del], [data-resize]")) {
+          return;
+        }
         const dualId = tile.getAttribute("data-dual");
         const group = dualId ? INGATLAN_DUAL_RANGE_GROUPS.find((g) => g.id === dualId) : null;
         const tol = group ? byKey(group.tolKey) : null;
@@ -636,10 +640,22 @@ export function mountIngatlanWheelBoard(root, schema, { onChange, readOnly = fal
       });
 
       // − / + / 12 szélesség gombok
-      tile.querySelectorAll("[data-width-delta], [data-width-full]").forEach((btn) => {
+      tile.querySelectorAll("[data-width-delta], [data-width-full], [data-order-delta]").forEach((btn) => {
         btn.addEventListener("click", (event) => {
           event.preventDefault();
           event.stopPropagation();
+          if (btn.hasAttribute("data-order-delta")) {
+            const dualId = tile.getAttribute("data-dual");
+            const group = dualId ? INGATLAN_DUAL_RANGE_GROUPS.find((g) => g.id === dualId) : null;
+            const item = group
+              ? { kind: "dual", group, tol: byKey(group.tolKey), ig: byKey(group.igKey) }
+              : { kind: "cell", cell: byKey(tile.getAttribute("data-field")) };
+            if (moveItem(item, Number(btn.getAttribute("data-order-delta")) || 0)) {
+              notify();
+              mount();
+            }
+            return;
+          }
           const dualId = tile.getAttribute("data-dual");
           const group = dualId ? INGATLAN_DUAL_RANGE_GROUPS.find((g) => g.id === dualId) : null;
           const tol = group ? byKey(group.tolKey) : null;

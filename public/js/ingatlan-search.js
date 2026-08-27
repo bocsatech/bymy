@@ -724,7 +724,10 @@ function syncTipusFieldVisibility(form) {
   const parents = readWheelList(form.querySelector('[data-wheel="ingatlan_lakas_tipus"]'));
   const visible = fieldKeysVisibleForTipus(parents);
   const areaKeys = areaFieldKeysForTipus(parents);
-  const showAlap = areaKeys.has("alapterulet_tol") || areaKeys.has("alapterulet_ig");
+  const showAlap =
+    parents.includes("haz") ||
+    areaKeys.has("alapterulet_tol") ||
+    areaKeys.has("alapterulet_ig");
   const showTelek = areaKeys.has("telekterulet_tol") || areaKeys.has("telekterulet_ig");
   const dualSeen = new Set();
 

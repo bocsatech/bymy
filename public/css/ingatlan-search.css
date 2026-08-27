@@ -980,7 +980,8 @@ input.immo-wheel-custom.immo-wheel-trigger {
   .immo-drum-inline-item {
     display: flex;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: space-between;
+    gap: 0.35rem;
     height: 40px;
     margin: 0;
     padding: 0 0.35rem;
@@ -1021,9 +1022,12 @@ input.immo-wheel-custom.immo-wheel-trigger {
     font-weight: 700;
   }
 
+  .immo-drum-inline-item.is-selected::after,
   .immo-wheel-wrap--multi .immo-drum-inline-item.is-selected::after {
-    content: " ✓";
-    font-weight: 700;
+    content: "✓";
+    flex: 0 0 auto;
+    margin-left: 0.35rem;
+    font-weight: 800;
     color: #111;
   }
 
@@ -1473,7 +1477,8 @@ input.immo-wheel-custom.immo-wheel-trigger {
   .immo-drum-inline-item {
     display: flex;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: space-between;
+    gap: 0.35rem;
     height: 40px;
     margin: 0;
     padding: 0 0.35rem;
@@ -1514,9 +1519,12 @@ input.immo-wheel-custom.immo-wheel-trigger {
     font-weight: 700;
   }
 
+  .immo-drum-inline-item.is-selected::after,
   .immo-wheel-wrap--multi .immo-drum-inline-item.is-selected::after {
-    content: " ✓";
-    font-weight: 700;
+    content: "✓";
+    flex: 0 0 auto;
+    margin-left: 0.35rem;
+    font-weight: 800;
     color: #111;
   }
 
@@ -1692,6 +1700,8 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
 .auto-drum-portal .immo-drum-inline-item {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  gap: 0.45rem;
   height: 60px;
   padding: 0 0.55rem;
   color: #0f172a;
@@ -1702,6 +1712,30 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   text-overflow: ellipsis;
   max-width: 100%;
   cursor: pointer;
+}
+
+.auto-drum-portal .immo-drum-inline-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.auto-drum-portal .immo-drum-inline-item.is-selected {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.auto-drum-portal .immo-drum-inline-item.is-selected::after {
+  content: "✓";
+  flex: 0 0 auto;
+  font-weight: 800;
+  font-size: 1.15rem;
+  color: #111;
+  line-height: 1;
+}
+
+[data-theme="dark"] .auto-drum-portal .immo-drum-inline-item.is-selected::after {
+  color: #f8fafc;
 }
 
 .auto-drum-portal .immo-drum-inline-highlight {

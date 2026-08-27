@@ -66,7 +66,6 @@ function paintPortal(scrollEl, ring, wheel) {
     const cellTop = ringRect.top + ringRect.height * 0.28;
     const cellBottom = ringRect.bottom - ringRect.height * 0.28;
     const selected = new Set(wheel ? readWheelList(wheel) : []);
-    const multiple = wheel?.dataset?.multiple === "1";
     scrollEl.querySelectorAll(".immo-drum-inline-item").forEach((item) => {
       const r = item.getBoundingClientRect();
       const mid = r.top + r.height / 2;
@@ -74,11 +73,12 @@ function paintPortal(scrollEl, ring, wheel) {
       const dist = Math.abs(mid - centerY);
       const t = Math.min(dist / (ITEM_H * 1.15), 1);
       const v = item.dataset.value ?? "";
-      const isSel = multiple ? (v === "" ? selected.size === 0 : selected.has(v)) : inCell;
+      const isSel = v === "" ? selected.size === 0 : selected.has(v);
       item.style.opacity = String(Math.max(0.15, 1 - t * 0.72));
       item.style.fontWeight = dist < ITEM_H * 0.42 || isSel ? "650" : "500";
       item.classList.toggle("is-in-cell", inCell);
       item.classList.toggle("is-selected", isSel);
+      item.setAttribute("aria-selected", isSel ? "true" : "false");
     });
   });
 }

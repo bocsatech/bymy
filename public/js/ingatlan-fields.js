@@ -349,26 +349,292 @@ export const IGEN_MINDEGY = [
   { value: "igen", label: "Igen" },
 ];
 
-export const INGATLAN_BOOL_FIELDS = [
-  { field_key: "lift", label: "Lift" },
-  { field_key: "erkely", label: "Erkély" },
-  { field_key: "szigeteles", label: "Szigetelés" },
-  { field_key: "energiahatekonys", label: "Energiahatékony" },
-  { field_key: "akadalymentesitett", label: "Akadálymentesített" },
-  { field_key: "legkondicionalo", label: "Légkondicionáló" },
-  { field_key: "kertkapcsolatos", label: "Kertkapcsolatos" },
-  { field_key: "panelprogram", label: "Panelprogram" },
-  { field_key: "gepesitett", label: "Gépesített" },
-  { field_key: "kisallat_megengedett", label: "Kisállat megengedett" },
-  { field_key: "dohanyzas_megengedett", label: "Dohányzás megengedett" },
+/** Közmű mezők — opciólista később pontosítható adminból. */
+export const KOZMU_OPTIONS = [
+  { value: "", label: "Mindegy" },
+  { value: "van", label: "Van" },
+  { value: "nincs", label: "Nincs" },
+  { value: "kozmuvesitheto", label: "Közművesíthető" },
 ];
+
+/** Irodaház kategória — placeholder, amíg nincs végleges lista. */
+export const IRODAHAZ_KATEGORIA = [
+  { value: "", label: "Mindegy" },
+  { value: "a", label: "A" },
+  { value: "b", label: "B" },
+  { value: "c", label: "C" },
+];
+
+/**
+ * Bool / igen-van mezők. value mindig "igen" (szűrés), a yesLabel a UI szöveg.
+ */
+export const INGATLAN_BOOL_FIELDS = [
+  { field_key: "lift", label: "Lift", yesLabel: "Van" },
+  { field_key: "erkely", label: "Erkély", yesLabel: "Van" },
+  { field_key: "szigeteles", label: "Szigetelés", yesLabel: "Van" },
+  { field_key: "energiahatekonys", label: "Energiahatékony", yesLabel: "Igen" },
+  { field_key: "akadalymentesitett", label: "Akadálymentesített", yesLabel: "Igen" },
+  { field_key: "legkondicionalo", label: "Légkondicionáló", yesLabel: "Van" },
+  { field_key: "kertkapcsolatos", label: "Kertkapcsolatos", yesLabel: "Igen" },
+  { field_key: "panelprogram", label: "Panelprogram", yesLabel: "Részt vett" },
+  { field_key: "gepesitett", label: "Gépesített", yesLabel: "Igen" },
+  { field_key: "kisallat_megengedett", label: "Kisállat hozható", yesLabel: "Igen" },
+  { field_key: "dohanyzas_megengedett", label: "Dohányzás megengedett", yesLabel: "Megengedett" },
+  { field_key: "pince", label: "Pince", yesLabel: "Van" },
+  { field_key: "napelem", label: "Napelem", yesLabel: "Van" },
+  { field_key: "uj_parcellazasu", label: "Csak új parcellázású", yesLabel: "Igen" },
+];
+
+export function boolOptionsForField(fieldOrKey) {
+  const key = typeof fieldOrKey === "string" ? fieldOrKey : fieldOrKey?.field_key;
+  const def = INGATLAN_BOOL_FIELDS.find((f) => f.field_key === key);
+  const yes = def?.yesLabel || "Igen";
+  return [
+    { value: "", label: "Mindegy" },
+    { value: "igen", label: yes },
+  ];
+}
+
+/** Mindig látszik (típus független). */
+export const INGATLAN_CORE_FIELD_KEYS = [
+  "keresesi_hely",
+  "ar_tol",
+  "ar_ig",
+  "alapterulet_tol",
+  "alapterulet_ig",
+  "alapterulet",
+  "szobaszam",
+  "ingatlan_lakas_tipus",
+  "ingatlan_tipus_2",
+];
+
+/**
+ * Típus 1 → megjelenő mezőkulcsok (a screenshot listák alapján).
+ * Üres típusnál csak a CORE mezők látszanak.
+ */
+export const INGATLAN_FIELDS_BY_TIPUS = {
+  lakas: [
+    "lift",
+    "erkely",
+    "szigeteles",
+    "energiahatekonys",
+    "akadalymentesitett",
+    "legkondicionalo",
+    "kertkapcsolatos",
+    "panelprogram",
+    "gepesitett",
+    "kisallat_megengedett",
+    "dohanyzas_megengedett",
+  ],
+  haz: [
+    "allapot",
+    "ingatlan_kora",
+    "kilatas",
+    "futes",
+    "parkolas",
+    "komfort",
+    "tetoter",
+    "furdo_wc",
+    "telekterulet_tol",
+    "telekterulet_ig",
+    "szintek_tol",
+    "szintek_ig",
+    "pince",
+    "napelem",
+    "szigeteles",
+    "energiahatekonys",
+    "akadalymentesitett",
+    "legkondicionalo",
+  ],
+  telek: [
+    "ingatlan_kora",
+    "villany",
+    "viz",
+    "gaz",
+    "csatorna",
+    "telekterulet_tol",
+    "telekterulet_ig",
+    "uj_parcellazasu",
+  ],
+  garazs: ["allapot", "ingatlan_kora"],
+  nyaralo: [
+    "allapot",
+    "ingatlan_kora",
+    "kilatas",
+    "futes",
+    "tetoter",
+    "villany",
+    "viz",
+    "gaz",
+    "csatorna",
+    "telekterulet_tol",
+    "telekterulet_ig",
+    "napelem",
+    "szigeteles",
+    "energiahatekonys",
+    "akadalymentesitett",
+    "legkondicionalo",
+  ],
+  iroda: [
+    "allapot",
+    "ingatlan_kora",
+    "min_berleti_ido",
+    "butorozott",
+    "irodahaz_kategoria",
+    "tetoter",
+    "koltozheto",
+    "emelet_tol",
+    "emelet_ig",
+    "emelet",
+    "uzemeltetesi_dij_tol",
+    "uzemeltetesi_dij_ig",
+    "kaucio_max",
+    "energiahatekonys",
+    "akadalymentesitett",
+    "legkondicionalo",
+  ],
+  uzlethelyiseg: [
+    "allapot",
+    "ingatlan_kora",
+    "min_berleti_ido",
+    "koltozheto",
+    "energiahatekonys",
+    "akadalymentesitett",
+    "legkondicionalo",
+  ],
+  vendeglatas: [
+    "allapot",
+    "ingatlan_kora",
+    "min_berleti_ido",
+    "koltozheto",
+    "energiahatekonys",
+    "akadalymentesitett",
+    "legkondicionalo",
+  ],
+  raktar: [
+    "allapot",
+    "ingatlan_kora",
+    "min_berleti_ido",
+    "koltozheto",
+    "telekterulet_tol",
+    "telekterulet_ig",
+    "energiahatekonys",
+  ],
+  ipari: [
+    "ingatlan_kora",
+    "min_berleti_ido",
+    "koltozheto",
+    "telekterulet_tol",
+    "telekterulet_ig",
+    "energiahatekonys",
+  ],
+  mezogazdasagi: [
+    "ingatlan_kora",
+    "min_berleti_ido",
+    "koltozheto",
+    "telekterulet_tol",
+    "telekterulet_ig",
+    "epitmeny_terulet_tol",
+    "epitmeny_terulet_ig",
+  ],
+  fejlesztesi_terulet: [
+    "ingatlan_kora",
+    "min_berleti_ido",
+    "koltozheto",
+    "telekterulet_tol",
+    "telekterulet_ig",
+  ],
+  intezmeny: [
+    "allapot",
+    "ingatlan_kora",
+    "min_berleti_ido",
+    "butorozott",
+    "kilatas",
+    "futes",
+    "parkolas",
+    "komfort",
+    "tetoter",
+    "koltozheto",
+    "telekterulet_tol",
+    "telekterulet_ig",
+    "napelem",
+    "szigeteles",
+    "energiahatekonys",
+    "akadalymentesitett",
+    "legkondicionalo",
+  ],
+  /* Nincs külön lista — minden típusmező uniója */
+  egyeb: null,
+};
+
+/** Airbnb / rövid típusok → lakás mezőkészlet. */
+export const INGATLAN_TIPUS_FIELD_ALIAS = {
+  teglalakas: "lakas",
+  panellakas: "lakas",
+  szoba: "lakas",
+  rovid_berles: "lakas",
+};
+
+export function resolveTipusFieldParent(tipusValue) {
+  const v = String(tipusValue || "").trim();
+  if (!v) return "";
+  return INGATLAN_TIPUS_FIELD_ALIAS[v] || v;
+}
+
+/** Kiválasztott típus(ok) → látható mezőkulcsok (CORE + unió). */
+export function fieldKeysVisibleForTipus(parentValues) {
+  const parents = (Array.isArray(parentValues) ? parentValues : String(parentValues ?? "").split(","))
+    .map((v) => resolveTipusFieldParent(v))
+    .filter(Boolean);
+  const out = new Set(INGATLAN_CORE_FIELD_KEYS);
+  if (!parents.length) return out;
+
+  const allTypeKeys = () => {
+    const s = new Set();
+    for (const [k, list] of Object.entries(INGATLAN_FIELDS_BY_TIPUS)) {
+      if (k === "egyeb" || !list) continue;
+      for (const f of list) s.add(f);
+    }
+    return s;
+  };
+
+  for (const p of parents) {
+    const list = INGATLAN_FIELDS_BY_TIPUS[p];
+    if (list == null && p === "egyeb") {
+      for (const f of allTypeKeys()) out.add(f);
+      continue;
+    }
+    if (!list) continue;
+    for (const f of list) out.add(f);
+  }
+  return out;
+}
+
+export function telekteruletOptions() {
+  const out = [];
+  for (const n of [100, 200, 300, 400, 500, 600, 800, 1000, 1500, 2000, 3000, 5000, 10000]) {
+    out.push({ value: String(n), label: `${n.toLocaleString("hu-HU")} m²` });
+  }
+  return out;
+}
+
+export function szintekOptions() {
+  const out = [];
+  for (let n = 1; n <= 10; n += 1) out.push({ value: String(n), label: String(n) });
+  out.push({ value: "10+", label: "10+" });
+  return out;
+}
+
+export function epitmenyTeruletOptions() {
+  return alapteruletOptions();
+}
 
 export function ingatlanFormFieldCatalog() {
   const fields = [
     { field_key: "ingatlan_uzletag", label: "Kategória (Eladó / Kiadó / Airbnb)", step: 1 },
     { field_key: "ingatlan_lakas_tipus", label: "Lakás típus", step: 1 },
     { field_key: "allapot", label: "Állapot", step: 1 },
-    { field_key: "ingatlan_kora", label: "Ingatlan kora", step: 1 },
+    { field_key: "ingatlan_kora", label: "Építés éve", step: 1 },
     { field_key: "min_berleti_ido", label: "Minimum bérleti idő", step: 1 },
     { field_key: "butorozott", label: "Bútorozott", step: 1 },
     { field_key: "kilatas", label: "Kilátás", step: 1 },
@@ -381,6 +647,16 @@ export function ingatlanFormFieldCatalog() {
     { field_key: "emelet", label: "Emelet", step: 2 },
     { field_key: "belmagassag", label: "Belmagasság", step: 2 },
     { field_key: "koltozheto", label: "Mikortól költözhető", step: 2 },
+    { field_key: "villany", label: "Villany", step: 2 },
+    { field_key: "viz", label: "Víz", step: 2 },
+    { field_key: "gaz", label: "Gáz", step: 2 },
+    { field_key: "csatorna", label: "Csatorna", step: 2 },
+    { field_key: "irodahaz_kategoria", label: "Irodaház kategóriája", step: 2 },
+    { field_key: "telekterulet", label: "Telekterület (m²)", step: 2 },
+    { field_key: "szintek", label: "Szintek száma", step: 2 },
+    { field_key: "uzemeltetesi_dij", label: "Üzemeltetési díj", step: 2 },
+    { field_key: "kaucio_max", label: "Kaució mértéke", step: 2 },
+    { field_key: "epitmeny_terulet", label: "Esetleges építmény területe (m²)", step: 2 },
     { field_key: "alapterulet", label: "Alapterület (m²)", step: 1 },
     { field_key: "szobaszam", label: "Szobaszám", step: 1 },
     { field_key: "vetelar", label: "Ár (Ft)", step: 5 },

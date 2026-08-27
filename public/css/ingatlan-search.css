@@ -425,8 +425,10 @@ body[data-site-page="ingatlan"] .immo-search-tabs {
   background-size: 12px 8px;
 }
 
-/* Kiválasztás törlése (×) a mező jobb szélén */
-.immo-wheel-wrap.has-wheel-clear {
+.immo-schema-cell.is-tipus-hidden,
+.immo-dual-range-block.is-tipus-hidden {
+  display: none !important;
+}
   position: relative;
 }
 

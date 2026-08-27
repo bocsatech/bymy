@@ -23,9 +23,15 @@ import {
   BELMAGASSAG,
   KOLTOZHETO,
   KOLTOZHETO_ROVID,
-  IGEN_MINDEGY,
+  KOZMU_OPTIONS,
+  IRODAHAZ_KATEGORIA,
   INGATLAN_BOOL_FIELDS,
+  boolOptionsForField,
+  fieldKeysVisibleForTipus,
   alapteruletOptions,
+  telekteruletOptions,
+  szintekOptions,
+  epitmenyTeruletOptions,
   szobaszamOptions,
   arFtMinOptions,
   emeletRank,
@@ -33,7 +39,7 @@ import {
   schemaVariantFromUzletag,
   isIngatlanRentUzletag,
   tipus2OptionsForParents,
-} from "./ingatlan-fields.js?v=immoTipus2";
+} from "./ingatlan-fields.js?v=immoTipusFields1";
 import {
   fillWheel,
   readWheel,
@@ -45,7 +51,7 @@ import {
 } from "./ingatlan-wheels.js?v=immoClearAll1";
 import { initDrumWheel, syncDrumWheelDisplay, applyDrumModeClass } from "./immo-drum-picker.js?v=immoClearAll1";
 import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=immoClearAll1";
-import { fetchIngatlanWheelSchema, renderIngatlanSchemaHosts, INGATLAN_DUAL_RANGE_GROUPS } from "./ingatlan-wheel-schema.js?v=telepSuggest1";
+import { fetchIngatlanWheelSchema, renderIngatlanSchemaHosts, INGATLAN_DUAL_RANGE_GROUPS } from "./ingatlan-wheel-schema.js?v=immoTipusFields1";
 import { wireTelepulesSuggestIn } from "./telepules-suggest.js?v=telepClose1";
 
 const EXACT_KEYS = [
@@ -65,6 +71,11 @@ const EXACT_KEYS = [
   "furdo_wc",
   "belmagassag",
   "koltozheto",
+  "villany",
+  "viz",
+  "gaz",
+  "csatorna",
+  "irodahaz_kategoria",
   ...INGATLAN_BOOL_FIELDS.map((f) => f.field_key),
 ];
 
@@ -107,6 +118,23 @@ export function emptyIngatlanFilters() {
     gepesitett: "",
     kisallat_megengedett: "",
     dohanyzas_megengedett: "",
+    pince: "",
+    napelem: "",
+    uj_parcellazasu: "",
+    villany: "",
+    viz: "",
+    gaz: "",
+    csatorna: "",
+    irodahaz_kategoria: "",
+    telekterulet_tol: null,
+    telekterulet_ig: null,
+    szintek_tol: "",
+    szintek_ig: "",
+    uzemeltetesi_dij_tol: null,
+    uzemeltetesi_dij_ig: null,
+    kaucio_max: null,
+    epitmeny_terulet_tol: null,
+    epitmeny_terulet_ig: null,
   };
 }
 
@@ -488,6 +516,45 @@ function fillEmeletRangeWheels(form) {
   });
 }
 
+function fillTelekteruletRangeWheels(form) {
+  fillDualRangeWheels(form, {
+    tolKey: "telekterulet_tol",
+    igKey: "telekterulet_ig",
+    options: telekteruletOptions(),
+  });
+}
+
+function fillSzintekRangeWheels(form) {
+  fillDualRangeWheels(form, {
+    tolKey: "szintek_tol",
+    igKey: "szintek_ig",
+    options: szintekOptions(),
+  });
+}
+
+function fillUzemeltetesiDijRangeWheels(form) {
+  fillDualRangeWheels(form, {
+    tolKey: "uzemeltetesi_dij_tol",
+    igKey: "uzemeltetesi_dij_ig",
+    options: arFtMinOptions(),
+  });
+}
+
+function fillEpitmenyTeruletRangeWheels(form) {
+  fillDualRangeWheels(form, {
+    tolKey: "epitmeny_terulet_tol",
+    igKey: "epitmeny_terulet_ig",
+    options: epitmenyTeruletOptions(),
+  });
+}
+
+function fillTipusDependentRanges(form) {
+  fillTelekteruletRangeWheels(form);
+  fillSzintekRangeWheels(form);
+  fillUzemeltetesiDijRangeWheels(form);
+  fillEpitmenyTeruletRangeWheels(form);
+}
+
 function fieldBag(item, key) {
   const f = item?.preview?.filter ?? {};
   const form = item?.form ?? {};
@@ -546,6 +613,29 @@ export function filterListingsByIngatlan(items, filters) {
       if (maxArea != null && area != null && area > maxArea) return false;
     }
 
+    if (f.telekterulet_tol != null || f.telekterulet_ig != null) {
+      const area = numOrNull(fieldBag(item, "telekterulet"));
+      if (f.telekterulet_tol != null && area != null && area < f.telekterulet_tol) return false;
+      if (f.telekterulet_ig != null && area != null && area > f.telekterulet_ig) return false;
+    }
+
+    if (f.epitmeny_terulet_tol != null || f.epitmeny_terulet_ig != null) {
+      const area = numOrNull(fieldBag(item, "epitmeny_terulet"));
+      if (f.epitmeny_terulet_tol != null && area != null && area < f.epitmeny_terulet_tol) return false;
+      if (f.epitmeny_terulet_ig != null && area != null && area > f.epitmeny_terulet_ig) return false;
+    }
+
+    if (f.uzemeltetesi_dij_tol != null || f.uzemeltetesi_dij_ig != null) {
+      const fee = numOrNull(fieldBag(item, "uzemeltetesi_dij"));
+      if (f.uzemeltetesi_dij_tol != null && fee != null && fee < f.uzemeltetesi_dij_tol) return false;
+      if (f.uzemeltetesi_dij_ig != null && fee != null && fee > f.uzemeltetesi_dij_ig) return false;
+    }
+
+    if (f.kaucio_max != null) {
+      const kaucio = numOrNull(fieldBag(item, "kaucio_max") || fieldBag(item, "kaucio"));
+      if (kaucio != null && kaucio > f.kaucio_max) return false;
+    }
+
     if (f.szobaszam) {
       const wants = String(f.szobaszam)
         .split(",")
@@ -588,6 +678,16 @@ export function filterListingsByIngatlan(items, filters) {
     if (fromRank != null && floorRank != null && floorRank < fromRank) return false;
     if (toRank != null && floorRank != null && floorRank > toRank) return false;
 
+    if (f.szintek_tol || f.szintek_ig) {
+      const levels = numOrNull(fieldBag(item, "szintek"));
+      const minL = numOrNull(String(f.szintek_tol || "").replace("+", ""));
+      const maxRaw = String(f.szintek_ig || "");
+      const maxL = maxRaw === "10+" ? 10 : numOrNull(maxRaw);
+      if (minL != null && levels != null && levels < minL) return false;
+      if (maxRaw === "10+" && levels != null && levels < 10) return false;
+      if (maxRaw !== "10+" && maxL != null && levels != null && levels > maxL) return false;
+    }
+
     return true;
   });
 }
@@ -613,6 +713,46 @@ function syncTipus2Menu(form) {
   const disabled = parents.length === 0;
   if (wrap) wrap.classList.toggle("is-disabled", disabled);
   wheel.setAttribute("aria-disabled", disabled ? "true" : "false");
+}
+
+/** Tipus szerint mutatja/rejti a típusfüggő mezőket. */
+function syncTipusFieldVisibility(form) {
+  if (!form) return;
+  const parents = readWheelList(form.querySelector('[data-wheel="ingatlan_lakas_tipus"]'));
+  const visible = fieldKeysVisibleForTipus(parents);
+  const dualSeen = new Set();
+
+  form.querySelectorAll("[data-schema-field]").forEach((cell) => {
+    const key = cell.dataset.schemaField || "";
+    if (!key || key.startsWith("__spacer")) return;
+    const dual = cell.closest(".immo-dual-range-block");
+    if (dual) {
+      const rangeId = dual.querySelector(".immo-dual-range")?.dataset?.range || "";
+      if (rangeId && dualSeen.has(rangeId)) return;
+      if (rangeId) dualSeen.add(rangeId);
+      const group = INGATLAN_DUAL_RANGE_GROUPS.find((g) => g.id === rangeId);
+      const show = group
+        ? visible.has(group.tolKey) || visible.has(group.igKey)
+        : visible.has(key);
+      dual.classList.toggle("is-tipus-hidden", !show);
+      if (!show && group) {
+        setWheelValue(form.querySelector(`[data-wheel="${group.tolKey}"]`), "");
+        setWheelValue(form.querySelector(`[data-wheel="${group.igKey}"]`), "");
+      }
+      return;
+    }
+    const show = visible.has(key);
+    cell.classList.toggle("is-tipus-hidden", !show);
+    if (!show) {
+      const wheel = cell.querySelector("[data-wheel]");
+      if (wheel) setWheelValue(wheel, "");
+      const input = cell.querySelector('input.immo-control, input.immo-price-input, input[name]');
+      if (input && input.name && !input.closest("[data-wheel]")) {
+        if (input.type === "checkbox") input.checked = false;
+        else input.value = "";
+      }
+    }
+  });
 }
 
 /** Élő kereső/feladás: Tipus 2 a Tipus mellett (adminban törölt szekcióban marad a default). */
@@ -690,6 +830,20 @@ function readForm(form) {
   out.emelet_ig = readWheel(form.querySelector('[data-wheel="emelet_ig"]'));
   out.belmagassag = readWheel(form.querySelector('[data-wheel="belmagassag"]'));
   out.koltozheto = readWheel(form.querySelector('[data-wheel="koltozheto"]'));
+  out.villany = readWheel(form.querySelector('[data-wheel="villany"]'));
+  out.viz = readWheel(form.querySelector('[data-wheel="viz"]'));
+  out.gaz = readWheel(form.querySelector('[data-wheel="gaz"]'));
+  out.csatorna = readWheel(form.querySelector('[data-wheel="csatorna"]'));
+  out.irodahaz_kategoria = readWheel(form.querySelector('[data-wheel="irodahaz_kategoria"]'));
+  out.telekterulet_tol = numOrNull(readWheel(form.querySelector('[data-wheel="telekterulet_tol"]')));
+  out.telekterulet_ig = numOrNull(readWheel(form.querySelector('[data-wheel="telekterulet_ig"]')));
+  out.szintek_tol = readWheel(form.querySelector('[data-wheel="szintek_tol"]'));
+  out.szintek_ig = readWheel(form.querySelector('[data-wheel="szintek_ig"]'));
+  out.uzemeltetesi_dij_tol = numOrNull(readWheel(form.querySelector('[data-wheel="uzemeltetesi_dij_tol"]')));
+  out.uzemeltetesi_dij_ig = numOrNull(readWheel(form.querySelector('[data-wheel="uzemeltetesi_dij_ig"]')));
+  out.kaucio_max = numOrNull(readWheel(form.querySelector('[data-wheel="kaucio_max"]')));
+  out.epitmeny_terulet_tol = numOrNull(readWheel(form.querySelector('[data-wheel="epitmeny_terulet_tol"]')));
+  out.epitmeny_terulet_ig = numOrNull(readWheel(form.querySelector('[data-wheel="epitmeny_terulet_ig"]')));
   out.ar_ft_min = numOrNull(readWheel(form.querySelector('[data-wheel="ar_ft_min"]')));
   for (const bool of INGATLAN_BOOL_FIELDS) {
     out[bool.field_key] = readWheel(form.querySelector(`[data-wheel="${bool.field_key}"]`));
@@ -733,6 +887,7 @@ export async function initIngatlanSearch({
   fillPriceRangeWheels(root);
   fillAreaRangeWheels(root);
   fillEmeletRangeWheels(root);
+  fillTipusDependentRanges(root);
   fillWheel(root.querySelector('[data-wheel="ingatlan_uzletag"]'), INGATLAN_UZLETAG, {
     emptyLabel: "Kategória",
     includeEmpty: false,
@@ -752,16 +907,27 @@ export async function initIngatlanSearch({
   fillWheel(root.querySelector('[data-wheel="furdo_wc"]'), FURDO_WC.filter((o) => o.value));
   fillWheel(root.querySelector('[data-wheel="belmagassag"]'), BELMAGASSAG.filter((o) => o.value));
   fillWheel(root.querySelector('[data-wheel="koltozheto"]'), KOLTOZHETO.filter((o) => o.value));
+  fillWheel(root.querySelector('[data-wheel="villany"]'), KOZMU_OPTIONS.filter((o) => o.value));
+  fillWheel(root.querySelector('[data-wheel="viz"]'), KOZMU_OPTIONS.filter((o) => o.value));
+  fillWheel(root.querySelector('[data-wheel="gaz"]'), KOZMU_OPTIONS.filter((o) => o.value));
+  fillWheel(root.querySelector('[data-wheel="csatorna"]'), KOZMU_OPTIONS.filter((o) => o.value));
+  fillWheel(root.querySelector('[data-wheel="irodahaz_kategoria"]'), IRODAHAZ_KATEGORIA.filter((o) => o.value));
+  fillWheel(root.querySelector('[data-wheel="kaucio_max"]'), arFtMinOptions(), { emptyLabel: "max." });
   fillWheel(root.querySelector('[data-wheel="ar_ft_min"]'), arFtMinOptions(), { emptyLabel: "Mindegy" });
   for (const bool of INGATLAN_BOOL_FIELDS) {
-    fillWheel(root.querySelector(`[data-wheel="${bool.field_key}"]`), IGEN_MINDEGY.filter((o) => o.value));
+    fillWheel(
+      root.querySelector(`[data-wheel="${bool.field_key}"]`),
+      boolOptionsForField(bool).filter((o) => o.value)
+    );
   }
 
   const emptyByName = {
     szobaszam: "Szobaszám",
     ingatlan_uzletag: "Kategória",
   };
-  const dualRangeKeys = new Set(["ar_tol", "ar_ig", "alapterulet_tol", "alapterulet_ig", "emelet_tol", "emelet_ig"]);
+  const dualRangeKeys = new Set(
+    INGATLAN_DUAL_RANGE_GROUPS.flatMap((g) => [g.tolKey, g.igKey])
+  );
   root.querySelectorAll("[data-wheel]").forEach((wheel) => {
     const name = wheel.getAttribute("data-wheel") || "";
     if (dualRangeKeys.has(name)) return;
@@ -791,6 +957,7 @@ export async function initIngatlanSearch({
     root.querySelector('[data-wheel="ingatlan_lakas_tipus"]')?.addEventListener("immo-wheel-change", () => {
       syncRovidMenus(root);
       if (tipus2Enabled) syncTipus2Menu(root);
+      syncTipusFieldVisibility(root);
     });
 
     root.querySelector('[data-wheel="ingatlan_uzletag"]')?.addEventListener("immo-wheel-change", () => {
@@ -810,6 +977,7 @@ export async function initIngatlanSearch({
       setWheelValue(tipusWheel, keep.join(","));
       syncRovidMenus(root);
       if (tipus2Enabled) syncTipus2Menu(root);
+      syncTipusFieldVisibility(root);
     });
 
     root.addEventListener("submit", (event) => {
@@ -839,8 +1007,10 @@ export async function initIngatlanSearch({
         fillPriceRangeWheels(root);
         fillAreaRangeWheels(root);
         fillEmeletRangeWheels(root);
+        fillTipusDependentRanges(root);
         syncRovidMenus(root);
         if (tipus2Enabled) syncTipus2Menu(root);
+        syncTipusFieldVisibility(root);
         setMoreOpen(false);
         if (typeof onSearch === "function") onSearch(emptyIngatlanFilters());
       });
@@ -861,8 +1031,10 @@ export async function initIngatlanSearch({
         fillPriceRangeWheels(root);
         fillAreaRangeWheels(root);
         fillEmeletRangeWheels(root);
+        fillTipusDependentRanges(root);
         syncRovidMenus(root);
         if (tipus2Enabled) syncTipus2Menu(root);
+        syncTipusFieldVisibility(root);
         setMoreOpen(false);
         if (typeof onSearch === "function") onSearch(emptyIngatlanFilters());
       });
@@ -872,6 +1044,7 @@ export async function initIngatlanSearch({
   setMoreOpen(false);
   syncRovidMenus(root);
   if (tipus2Enabled) syncTipus2Menu(root);
+  syncTipusFieldVisibility(root);
 }
 
 export { readForm as readIngatlanSearchForm };

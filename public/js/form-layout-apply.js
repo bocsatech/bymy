@@ -1,5 +1,5 @@
 /** Mentett 12 oszlopos elrendezés — minden mező ugyanazon a lépésrácson. */
-import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=immoClearAll1";
+import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=immoTipusFields1";
 
 function cssEscape(value) {
   if (window.CSS?.escape) return window.CSS.escape(value);
@@ -365,6 +365,19 @@ async function applyAdFormLayout() {
           "gepesitett",
           "kisallat_megengedett",
           "dohanyzas_megengedett",
+          "pince",
+          "napelem",
+          "uj_parcellazasu",
+          "villany",
+          "viz",
+          "gaz",
+          "csatorna",
+          "irodahaz_kategoria",
+          "telekterulet",
+          "szintek",
+          "uzemeltetesi_dij",
+          "kaucio_max",
+          "epitmeny_terulet",
         ].includes(cell.field_key)
       ) {
         continue;

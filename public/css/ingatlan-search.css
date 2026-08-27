@@ -776,6 +776,20 @@ input.immo-wheel-custom.immo-wheel-trigger {
     pointer-events: none;
   }
 
+  /* Ár / alapterület fél: dobkerék középre a cellában (3 sor, single) */
+  .immo-dual-range__half .immo-drum-inline {
+    left: 50%;
+    right: auto;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 70;
+  }
+
+  .immo-dual-range__half .immo-drum-wheel-ring {
+    height: var(--immo-drum-ring-h, 7.5rem);
+    min-width: 4.5rem;
+  }
+
   /* Minden választós mező: inline kerék (nem csak ár) */
   .immo-schema-cell:has(.immo-wheel-wrap--drum-inline.is-open) {
     z-index: 50;
@@ -1249,6 +1263,20 @@ input.immo-wheel-custom.immo-wheel-trigger {
   .immo-dual-range__half .immo-wheel-wrap--drum-inline.is-open .immo-wheel-trigger {
     visibility: hidden;
     pointer-events: none;
+  }
+
+  /* Ár / alapterület fél: dobkerék középre a cellában (3 sor, single) */
+  .immo-dual-range__half .immo-drum-inline {
+    left: 50%;
+    right: auto;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 70;
+  }
+
+  .immo-dual-range__half .immo-drum-wheel-ring {
+    height: var(--immo-drum-ring-h, 7.5rem);
+    min-width: 4.5rem;
   }
 
   .immo-schema-cell:has(.immo-wheel-wrap--drum-inline.is-open) {

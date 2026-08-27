@@ -409,6 +409,17 @@ export function initDrumWheel(wheel, { emptyLabel = "Mindegy", multiple = false 
   let wrap = wheel.closest(".immo-wheel-wrap");
   if (!wrap) return;
 
+  const key = String(wheel.getAttribute("data-wheel") || "");
+  const SINGLE_RANGE_KEYS = new Set([
+    "ar_tol",
+    "ar_ig",
+    "alapterulet_tol",
+    "alapterulet_ig",
+    "emelet_tol",
+    "emelet_ig",
+  ]);
+  if (SINGLE_RANGE_KEYS.has(key)) multiple = false;
+
   if (wheel.dataset.drumBound === "1") {
     const clone = wheel.cloneNode(true);
     wheel.replaceWith(clone);

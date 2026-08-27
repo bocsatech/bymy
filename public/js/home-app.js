@@ -14,7 +14,7 @@ import {
   emptyIngatlanFilters,
   filterListingsByIngatlan,
   initIngatlanSearch,
-} from "./ingatlan-search.js?v=drumCenter1";
+} from "./ingatlan-search.js?v=drumSingle1";
 import { filterByCategory, initHomeCategoryBar, renderHomeCategoryBar } from "./home-category-bar.js";
 import { initHomeUnifiedScroll } from "./home-unified-scroll.js";
 import { initHomeStatsBar } from "./home-stats-bar.js";

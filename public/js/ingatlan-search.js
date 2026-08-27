@@ -41,7 +41,7 @@ import {
   MULTI_WHEEL_KEYS,
   wheelFieldHtml,
 } from "./ingatlan-wheels.js?v=scrollLock4";
-import { initDrumWheel, syncDrumWheelDisplay, applyDrumModeClass, getDrumMode } from "./immo-drum-picker.js?v=drumCenter1";
+import { initDrumWheel, syncDrumWheelDisplay, applyDrumModeClass, getDrumMode } from "./immo-drum-picker.js?v=drumSingle1";
 import { fetchIngatlanWheelSchema, renderIngatlanSchemaHosts, INGATLAN_DUAL_RANGE_GROUPS } from "./ingatlan-wheel-schema.js?v=telepSuggest1";
 import { wireTelepulesSuggestIn } from "./telepules-suggest.js?v=telepClose1";
 
@@ -330,10 +330,19 @@ function fillDualRangeWheels(form, { tolKey, igKey, options, emptyMin = "min.", 
   const prevIg = readWheel(ig);
   fillWheel(tol, options, { emptyLabel: emptyMin });
   fillWheel(ig, options, { emptyLabel: emptyMax });
+  /* Ár / alapterület / emelet: ugyanaz a 3-soros dobkerék, de mindig egyetlen érték. */
   initImmoSearchWheel(tol, { emptyLabel: emptyMin, multiple: false, customInput: false });
   initImmoSearchWheel(ig, { emptyLabel: emptyMax, multiple: false, customInput: false });
   tol = form.querySelector(`[data-wheel="${tolKey}"]`);
   ig = form.querySelector(`[data-wheel="${igKey}"]`);
+  if (tol) {
+    tol.dataset.multiple = "0";
+    tol.closest(".immo-wheel-wrap")?.classList.remove("immo-wheel-wrap--multi");
+  }
+  if (ig) {
+    ig.dataset.multiple = "0";
+    ig.closest(".immo-wheel-wrap")?.classList.remove("immo-wheel-wrap--multi");
+  }
   setWheelValue(tol, prevTol);
   setWheelValue(ig, prevIg);
   syncImmoSearchWheelDisplay(tol);

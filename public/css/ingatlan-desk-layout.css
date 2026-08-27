@@ -137,7 +137,7 @@
 
   /* Desktop oldalsáv: minden ingatlanmező egy jól olvasható oszlopban. */
   body.home-page[data-site-page="ingatlan"] .immo-search-form .immo-schema-grid {
-    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-columns: repeat(12, minmax(0, 1fr)) !important;
     grid-template-rows: none !important;
     grid-auto-flow: row;
     gap: 12px !important;
@@ -146,7 +146,7 @@
   body.home-page[data-site-page="ingatlan"] .immo-search-form #immo-schema-main,
   body.home-page[data-site-page="ingatlan"] .immo-search-form #immo-schema-more {
     display: grid !important;
-    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-columns: repeat(12, minmax(0, 1fr)) !important;
     grid-template-rows: none !important;
     grid-auto-flow: row !important;
     width: 100% !important;
@@ -155,7 +155,6 @@
 
   body.home-page[data-site-page="ingatlan"] .immo-search-form .immo-schema-cell,
   body.home-page[data-site-page="ingatlan"] .immo-search-form .immo-dual-range-block {
-    grid-column: 1 / -1 !important;
     grid-row: auto !important;
     width: 100% !important;
     min-width: 0 !important;

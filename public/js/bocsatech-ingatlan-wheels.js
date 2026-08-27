@@ -437,10 +437,38 @@ export function mountIngatlanWheelBoard(root, schema, { onChange, readOnly = fal
           return;
         }
 
-        // Szélesség gombok: ne indítson draget
-        if (event.target.closest("[data-width-btns]")) {
+        // Szélesség gombok: azonnal alkalmaz (ne preventDefault + külön click, touchön elhal)
+        const widthBtn = event.target.closest("[data-width-delta], [data-width-full]");
+        if (widthBtn || event.target.closest("[data-width-btns]")) {
           event.preventDefault();
           event.stopPropagation();
+          if (!widthBtn) return;
+          if (group && tol && ig) {
+            const start = Math.min(tol.col, ig.col);
+            const current = dualSpan(tol, ig);
+            if (widthBtn.hasAttribute("data-width-full")) {
+              applyDualWidth(tol, ig, 1, COLS);
+            } else {
+              const delta = Number(widthBtn.getAttribute("data-width-delta")) || 0;
+              applyDualWidth(tol, ig, start, current + delta);
+            }
+          } else {
+            const cell = byKey(tile.getAttribute("data-field"));
+            if (!cell || isSpacer(cell)) return;
+            if (widthBtn.hasAttribute("data-width-full")) {
+              cell.col = 1;
+              cell.colSpan = COLS;
+            } else {
+              const delta = Number(widthBtn.getAttribute("data-width-delta")) || 0;
+              let span = clamp(cell.colSpan + delta, 1, COLS);
+              let col = cell.col;
+              if (col + span - 1 > COLS) col = Math.max(1, COLS - span + 1);
+              cell.col = col;
+              cell.colSpan = span;
+            }
+          }
+          notify();
+          mount();
           return;
         }
 
@@ -669,7 +697,7 @@ export function mountIngatlanWheelBoard(root, schema, { onChange, readOnly = fal
       "more",
       "További feltételek"
     )}${trashHtml()}`;
-    root.classList.toggle("layout-root--readonly", readOnly);
+    root.classList.toggle("layout-root--readonly", Boolean(readOnly));
     if (!readOnly) bind();
   }
 

@@ -1,5 +1,5 @@
 import { mountLayoutBoard } from "./bocsatech-layout.js?v=akkuBoard1";
-import { mountIngatlanWheelBoard } from "./bocsatech-ingatlan-wheels.js?v=readOnly1";
+import { mountIngatlanWheelBoard } from "./bocsatech-ingatlan-wheels.js?v=immoEdit1";
 import {
   isIngatlanWheelAdminCategory,
   normalizeIngatlanWheelVariant,
@@ -72,14 +72,12 @@ const ADMIN_SECTIONS = [
   {
     id: "ingatlan",
     label: "3. Ingatlanhirdetések",
-    defaultTab: "ingatlan:listings",
+    defaultTab: "ingatlan:layout:ingatlan",
     tabs: [
+      { id: "ingatlan:layout:ingatlan", label: "Kiadó — szerkesztő" },
+      { id: "ingatlan:layout:elado-ingatlan", label: "Eladó — szerkesztő" },
+      { id: "ingatlan:layout:airbnb", label: "Airbnb — szerkesztő" },
       { id: "ingatlan:listings", label: "Hirdetések" },
-      { id: "ingatlan:preview", label: "Megjelenés (nézet)" },
-      ...IMMO_LAYOUT_ITEMS.map((item) => ({
-        id: layoutTabId(item).replace(/^layout:/, "ingatlan:layout:"),
-        label: `${item.label} — szerkesztő`,
-      })),
     ],
   },
   {
@@ -1504,9 +1502,13 @@ function listingsView({ title = "Hirdetések", emptyHint = "Nincs hirdetés." } 
 
 function ingatlanPreviewView() {
   return `
-    <h2 class="layout-cat-title">Ingatlan megjelenés — csak nézet</h2>
-    <p class="hint">Ez a jelenlegi kereső/feladás felület (Kiado ingatlan). Itt nem szerkeszthető — a szerkesztő a „— szerkesztő” füleken van.</p>
-    <div id="layout-root" class="layout-root--readonly"></div>`;
+    <h2 class="layout-cat-title">Ingatlan megjelenés</h2>
+    <p class="hint">A mezők elrendezését a <strong>szerkesztő</strong> füleken lehet húzni és menteni.</p>
+    <div class="row" style="gap:0.65rem;flex-wrap:wrap;margin-top:0.75rem">
+      <button type="button" class="btn" data-act="setTab" data-tab="ingatlan:layout:ingatlan">Kiadó szerkesztő</button>
+      <button type="button" class="btn ghost" data-act="setTab" data-tab="ingatlan:layout:elado-ingatlan">Eladó szerkesztő</button>
+      <button type="button" class="btn ghost" data-act="setTab" data-tab="ingatlan:layout:airbnb">Airbnb szerkesztő</button>
+    </div>`;
 }
 
 function hubPromoView() {
@@ -1716,8 +1718,8 @@ function layoutView() {
   const isSearch = isSearchLayoutCat(cat);
   const sharedHint = isImmo
     ? cat === "ingatlan"
-      ? "Közös kerék-séma a keresőre és a feladásra (Kiado ingatlan — master). Ár / Alapterület / Emelet: osztott min–max csempe. Mentés csak ezt a gombot érinti."
-      : "Ugyanaz a kerék-séma, mint a Kiado ingatlannál (első betöltéskor másolat). Szerkesztés és mentés csak erre a gombra vonatkozik — a Kiado ingatlan elrendezése nem változik."
+      ? "Húzd a mezőket; −/+ szélesség; × törlés. Mentés: „Elrendezés mentése”. Közös séma a keresőre és feladásra (Kiadó — master)."
+      : "Húzd a mezőket; −/+ szélesség; × törlés. Mentés csak erre a gombra — a Kiadó elrendezése nem változik."
     : isSearch
       ? cat === "teherauto-search"
         ? "Teherautó gyorskereső + Több szűrő mezői (3,5 t-ig és 3,5 t-tól közös nézet). 1. lépés = hero, 2 = műszaki, 3 = Akkumulátor és hatótáv (Extrák felett), 4 = Extrák, 5 = helyszín. Mentés után hard refresh."
@@ -1877,12 +1879,23 @@ function render() {
   if (!admin) return;
   if (isLayoutTab()) {
     const root = document.getElementById("layout-root");
+    if (!root) {
+      err = "Hiányzik a szerkesztő felület (layout-root).";
+      return;
+    }
+    root.classList.remove("layout-root--readonly");
     if (isIngatlanWheelAdminCategory(layoutCategoryFromTab())) {
-      mountIngatlanWheelBoard(root, wheelSchema, {
-        onChange(schema) {
-          wheelSchema = schema;
-        },
-      });
+      try {
+        mountIngatlanWheelBoard(root, wheelSchema, {
+          readOnly: false,
+          onChange(schema) {
+            wheelSchema = schema;
+          },
+        });
+      } catch (error) {
+        err = error?.message || "Ingatlan kerék-szerkesztő hiba.";
+        root.innerHTML = `<p class="err">${esc(err)}</p>`;
+      }
     } else {
       mountLayoutBoard(root, layout, {
         stepNames: isSearchLayoutCat(layoutCategoryFromTab())
@@ -1902,13 +1915,7 @@ function render() {
     return;
   }
   if (isPreviewTab()) {
-    const root = document.getElementById("layout-root");
-    if (root) {
-      mountIngatlanWheelBoard(root, wheelSchema, {
-        readOnly: true,
-        onChange() {},
-      });
-    }
+    /* Csak ugrógombok — nincs read-only tábla. */
   }
 }
 

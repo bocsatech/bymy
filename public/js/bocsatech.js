@@ -77,6 +77,7 @@ const ADMIN_SECTIONS = [
       { id: "ingatlan:layout:elado-ingatlan", label: "Eladó — szerkesztő" },
       { id: "ingatlan:layout:ingatlan", label: "Kiadó — szerkesztő" },
       { id: "ingatlan:layout:airbnb", label: "Airbnb — szerkesztő" },
+      { id: "ingatlan:tipus-mezok", label: "Típus → mezők" },
       { id: "ingatlan:listings", label: "Hirdetések" },
     ],
   },
@@ -152,6 +153,7 @@ const PAGE_ADMIN_GUIDES = {
       { tab: "ingatlan:layout:elado-ingatlan", label: "Eladó szerkesztő" },
       { tab: "ingatlan:layout:ingatlan", label: "Kiadó szerkesztő" },
       { tab: "ingatlan:layout:airbnb", label: "Airbnb szerkesztő" },
+      { tab: "ingatlan:tipus-mezok", label: "Típus → mezők" },
       { tab: "ingatlan:listings", label: "Ingatlanhirdetések" },
     ],
   },
@@ -179,6 +181,7 @@ const PAGE_ADMIN_GUIDES = {
       { tab: "ingatlan:layout:elado-ingatlan", label: "Ingatlan kerék (eladó)" },
       { tab: "ingatlan:layout:ingatlan", label: "Ingatlan kerék (kiadó)" },
       { tab: "ingatlan:layout:airbnb", label: "Ingatlan kerék (Airbnb)" },
+      { tab: "ingatlan:tipus-mezok", label: "Típus → mezők" },
     ],
   },
   uzenetek: {
@@ -236,6 +239,8 @@ let hubPromo = { images: [], max: 8, size: { width: 1400, height: 840 }, count: 
 let searchCylinderMenu = { version: 1, items: [] };
 let searchCylinderImagePresets = [];
 let kivitelMenu = { version: 1, items: [] };
+let tipusFieldsConfig = { version: 1, by_tipus: {}, catalog: [], parents: [], core: [] };
+let tipusFieldsActive = "lakas";
 let akkuSearchMenu = { version: 1, title: "Akkumulátor és hatótáv adatok", items: [], live: false };
 let sitePageBlocks = {
   page: "hub",
@@ -900,6 +905,72 @@ const actions = {
       render();
     }
   },
+  tipusFieldsSelect(_, el) {
+    actions.readTipusFieldsFromDom();
+    tipusFieldsActive = el.getAttribute("data-tipus") || tipusFieldsActive;
+    render();
+  },
+  readTipusFieldsFromDom() {
+    const active = tipusFieldsActive;
+    if (!active) return;
+    const egyebAll = Boolean(app.querySelector("[data-field=egyeb-all]")?.checked);
+    if (active === "egyeb" && egyebAll) {
+      tipusFieldsConfig = {
+        ...tipusFieldsConfig,
+        by_tipus: { ...(tipusFieldsConfig.by_tipus || {}), egyeb: null },
+      };
+      return;
+    }
+    const keys = [];
+    app.querySelectorAll("[data-tipus-field]:checked").forEach((input) => {
+      const key = input.getAttribute("data-tipus-field");
+      if (key) keys.push(key);
+    });
+    tipusFieldsConfig = {
+      ...tipusFieldsConfig,
+      by_tipus: { ...(tipusFieldsConfig.by_tipus || {}), [active]: keys },
+    };
+  },
+  async saveTipusFields() {
+    err = "";
+    info = "";
+    try {
+      actions.readTipusFieldsFromDom();
+      const data = await api("/api/level1/ingatlan-tipus-fields", {
+        method: "PUT",
+        body: JSON.stringify({
+          config: {
+            version: 1,
+            by_tipus: tipusFieldsConfig.by_tipus || {},
+          },
+        }),
+      });
+      tipusFieldsConfig = data.config || tipusFieldsConfig;
+      info = "Típus → mezők mentve. Az ingatlan oldalon hard refresh kell.";
+      render();
+    } catch (error) {
+      err = error.message;
+      render();
+    }
+  },
+  async resetTipusFields() {
+    if (!confirm("Visszaállítod a kódbeli alapértelmezett típus→mező listákat?")) return;
+    err = "";
+    info = "";
+    try {
+      const data = await api("/api/level1/ingatlan-tipus-fields", {
+        method: "PUT",
+        body: JSON.stringify({ config: { version: 1, by_tipus: {} } }),
+      });
+      tipusFieldsConfig = data.config || tipusFieldsConfig;
+      tipusFieldsActive = tipusFieldsConfig.parents?.[0]?.value || "lakas";
+      info = "Alapértelmezett típus→mező listák visszaállítva.";
+      render();
+    } catch (error) {
+      err = error.message;
+      render();
+    }
+  },
   akkuKindLabel(kind) {
     if (kind === "range") return "Tól–ig";
     if (kind === "select") return "Választó";
@@ -1119,6 +1190,14 @@ async function loadTab() {
   }
   if (section === "ingatlan" && sub === "listings") {
     listings = (await api("/api/level1/listings?vertical=ingatlan")).listings;
+  }
+  if (section === "ingatlan" && sub === "tipus-mezok") {
+    const data = await api("/api/level1/ingatlan-tipus-fields/admin");
+    tipusFieldsConfig = data.config || { version: 1, by_tipus: {}, catalog: [], parents: [], core: [] };
+    const parents = tipusFieldsConfig.parents || [];
+    if (!parents.some((p) => p.value === tipusFieldsActive)) {
+      tipusFieldsActive = parents[0]?.value || "lakas";
+    }
   }
   if (section === "ingatlan" && sub === "preview") {
     layoutCategory = "ingatlan";
@@ -1713,6 +1792,75 @@ function kivitelMenuView() {
     </div>`;
 }
 
+function tipusFieldsView() {
+  const parents = tipusFieldsConfig.parents || [];
+  const catalog = tipusFieldsConfig.catalog || [];
+  const active = tipusFieldsActive || parents[0]?.value || "lakas";
+  const selected = tipusFieldsConfig.by_tipus?.[active];
+  const egyebAll = active === "egyeb" && selected == null;
+  const selectedSet = new Set(Array.isArray(selected) ? selected : []);
+
+  const parentBtns = parents
+    .map(
+      (p) =>
+        `<button type="button" class="tipus-fields-parent ${p.value === active ? "on" : ""}" data-act="tipusFieldsSelect" data-tipus="${esc(p.value)}">${esc(p.label)}</button>`
+    )
+    .join("");
+
+  const groups = [
+    { id: "lista", title: "Listák / választók" },
+    { id: "tartomany", title: "Tartományok" },
+    { id: "igen_van", title: "Igen / van szűrők" },
+  ];
+
+  const grids = groups
+    .map((g) => {
+      const items = catalog.filter((c) => c.group === g.id);
+      if (!items.length) return "";
+      const checks = items
+        .map((c) => {
+          const on = !egyebAll && selectedSet.has(c.field_key);
+          return `<label class="tipus-fields-check ${on ? "is-on" : ""}">
+            <input type="checkbox" data-tipus-field="${esc(c.field_key)}" ${on ? "checked" : ""} ${egyebAll ? "disabled" : ""} />
+            <span>${esc(c.label)}</span>
+            <code>${esc(c.field_key)}</code>
+          </label>`;
+        })
+        .join("");
+      return `<section class="tipus-fields-group">
+        <h3>${esc(g.title)}</h3>
+        <div class="tipus-fields-grid">${checks}</div>
+      </section>`;
+    })
+    .join("");
+
+  const egyebRow =
+    active === "egyeb"
+      ? `<label class="tipus-fields-egyeb">
+          <input type="checkbox" data-field="egyeb-all" data-act="tipusFieldsSelect" data-tipus="egyeb" ${egyebAll ? "checked" : ""} />
+          Összes típusmező (unió) — ha be van pipálva, a lista alább nem számít
+        </label>`
+      : "";
+
+  const coreHint = (tipusFieldsConfig.core || [])
+    .map((k) => `<code>${esc(k)}</code>`)
+    .join(" ");
+
+  return `
+    <h2 class="layout-cat-title">Típus → mezők</h2>
+    <p class="hint">Válaszd a típust, pipáld a megjelenő mezőket. A közös mezők (hely, ár, alapterület, szoba, típus, típus 2) mindig látszanak. Mentés után hard refresh az ingatlan oldalon.</p>
+    <p class="hint">Mindig látszik: ${coreHint || "—"}</p>
+    <p class="ok">${esc(info)}</p>
+    <p class="err">${esc(err)}</p>
+    <div class="tipus-fields-parents">${parentBtns}</div>
+    ${egyebRow}
+    <div class="tipus-fields-body">${grids}</div>
+    <div class="row" style="margin-top:1rem;gap:0.65rem;flex-wrap:wrap">
+      <button class="btn" type="button" data-act="saveTipusFields">Mentés</button>
+      <button class="btn ghost" type="button" data-act="resetTipusFields">Alapértelmezés</button>
+    </div>`;
+}
+
 function layoutView() {
   const cat = layoutCategoryFromTab();
   const label = categoryLabel(cat);
@@ -1756,6 +1904,7 @@ function shellBody() {
     if (sub === "listings") {
       return listingsView({ title: "Ingatlanhirdetések", emptyHint: "Nincs ingatlan hirdetés." });
     }
+    if (sub === "tipus-mezok") return tipusFieldsView();
     if (sub === "preview") return ingatlanPreviewView();
     return layoutView();
   }
@@ -1853,7 +2002,8 @@ function shell() {
     isPreviewTab() ||
     tab.endsWith(":listings") ||
     tab === "auto:kivitel" ||
-    tab === "auto:akku";
+    tab === "auto:akku" ||
+    tab === "ingatlan:tipus-mezok";
   return `
     <div class="wrap ${wide ? "wrap--wide" : ""}">
       <div class="top">

@@ -581,8 +581,63 @@ export function resolveTipusFieldParent(tipusValue) {
   return INGATLAN_TIPUS_FIELD_ALIAS[v] || v;
 }
 
+/** Adminban pipálható mezők (típus → mezők oldal). CORE mezők nem ide tartoznak. */
+export const INGATLAN_ASSIGNABLE_FIELD_DEFS = [
+  { field_key: "allapot", label: "Állapot", group: "lista" },
+  { field_key: "ingatlan_kora", label: "Építés éve", group: "lista" },
+  { field_key: "min_berleti_ido", label: "Minimum bérleti idő", group: "lista" },
+  { field_key: "butorozott", label: "Bútorozott", group: "lista" },
+  { field_key: "kilatas", label: "Kilátás", group: "lista" },
+  { field_key: "tajolas", label: "Tájolás", group: "lista" },
+  { field_key: "futes", label: "Fűtés", group: "lista" },
+  { field_key: "parkolas", label: "Parkolás", group: "lista" },
+  { field_key: "komfort", label: "Komfort", group: "lista" },
+  { field_key: "tetoter", label: "Tetőtér", group: "lista" },
+  { field_key: "furdo_wc", label: "Fürdő és WC", group: "lista" },
+  { field_key: "belmagassag", label: "Belmagasság", group: "lista" },
+  { field_key: "koltozheto", label: "Mikortól költözhető", group: "lista" },
+  { field_key: "villany", label: "Villany", group: "lista" },
+  { field_key: "viz", label: "Víz", group: "lista" },
+  { field_key: "gaz", label: "Gáz", group: "lista" },
+  { field_key: "csatorna", label: "Csatorna", group: "lista" },
+  { field_key: "irodahaz_kategoria", label: "Irodaház kategóriája", group: "lista" },
+  { field_key: "emelet_tol", label: "Emelet · min", group: "tartomany" },
+  { field_key: "emelet_ig", label: "Emelet · max", group: "tartomany" },
+  { field_key: "emelet", label: "Emelet (feladás)", group: "tartomany" },
+  { field_key: "telekterulet_tol", label: "Telekterület · min", group: "tartomany" },
+  { field_key: "telekterulet_ig", label: "Telekterület · max", group: "tartomany" },
+  { field_key: "szintek_tol", label: "Szintek · min", group: "tartomany" },
+  { field_key: "szintek_ig", label: "Szintek · max", group: "tartomany" },
+  { field_key: "uzemeltetesi_dij_tol", label: "Üzemeltetési díj · min", group: "tartomany" },
+  { field_key: "uzemeltetesi_dij_ig", label: "Üzemeltetési díj · max", group: "tartomany" },
+  { field_key: "kaucio_max", label: "Kaució mértéke", group: "tartomany" },
+  { field_key: "epitmeny_terulet_tol", label: "Építmény terület · min", group: "tartomany" },
+  { field_key: "epitmeny_terulet_ig", label: "Építmény terület · max", group: "tartomany" },
+  ...INGATLAN_BOOL_FIELDS.map((f) => ({
+    field_key: f.field_key,
+    label: f.label,
+    group: "igen_van",
+  })),
+];
+
+/** Élő admin config (null = kód alapértelmezés). */
+let liveFieldsByTipus = null;
+
+export function applyIngatlanTipusFieldsConfig(config) {
+  if (!config?.by_tipus || typeof config.by_tipus !== "object") {
+    liveFieldsByTipus = null;
+    return;
+  }
+  liveFieldsByTipus = { ...config.by_tipus };
+}
+
+export function effectiveIngatlanFieldsByTipus() {
+  return liveFieldsByTipus || INGATLAN_FIELDS_BY_TIPUS;
+}
+
 /** Kiválasztott típus(ok) → látható mezőkulcsok (CORE + unió). */
 export function fieldKeysVisibleForTipus(parentValues) {
+  const map = effectiveIngatlanFieldsByTipus();
   const parents = (Array.isArray(parentValues) ? parentValues : String(parentValues ?? "").split(","))
     .map((v) => resolveTipusFieldParent(v))
     .filter(Boolean);
@@ -591,7 +646,7 @@ export function fieldKeysVisibleForTipus(parentValues) {
 
   const allTypeKeys = () => {
     const s = new Set();
-    for (const [k, list] of Object.entries(INGATLAN_FIELDS_BY_TIPUS)) {
+    for (const [k, list] of Object.entries(map)) {
       if (k === "egyeb" || !list) continue;
       for (const f of list) s.add(f);
     }
@@ -599,12 +654,12 @@ export function fieldKeysVisibleForTipus(parentValues) {
   };
 
   for (const p of parents) {
-    const list = INGATLAN_FIELDS_BY_TIPUS[p];
+    const list = map[p];
     if (list == null && p === "egyeb") {
       for (const f of allTypeKeys()) out.add(f);
       continue;
     }
-    if (!list) continue;
+    if (!Array.isArray(list)) continue;
     for (const f of list) out.add(f);
   }
   return out;

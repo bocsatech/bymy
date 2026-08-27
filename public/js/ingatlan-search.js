@@ -39,7 +39,8 @@ import {
   schemaVariantFromUzletag,
   isIngatlanRentUzletag,
   tipus2OptionsForParents,
-} from "./ingatlan-fields.js?v=immoTipusFields1";
+  applyIngatlanTipusFieldsConfig,
+} from "./ingatlan-fields.js?v=immoTipusAdmin1";
 import {
   fillWheel,
   readWheel,
@@ -861,6 +862,16 @@ export async function initIngatlanSearch({
 } = {}) {
   const root = form || document.getElementById("immo-search-form");
   if (!root) return;
+
+  try {
+    const res = await fetch("/api/level1/ingatlan-tipus-fields", { credentials: "same-origin" });
+    if (res.ok) {
+      const data = await res.json();
+      applyIngatlanTipusFieldsConfig(data);
+    }
+  } catch {
+    /* kód alapértelmezés */
+  }
 
   const initialUz = normalizeIngatlanUzletag(defaultUzletag);
   const resolvedSchema =

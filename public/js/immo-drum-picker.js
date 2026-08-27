@@ -1,12 +1,18 @@
 /**
  * Inline drum picker — fix cella + kerék gyűrű (v2).
  * Visszaállítás: ?immoDrum=legacy vagy localStorage immo-drum-mode=legacy
+ *
+ * Látható sorok: 1 fent + középső (kijelölt) + 1 lent.
+ * Cellába kattintás: érték (többesnél toggle) + bezárás.
  */
 
 import { readWheel, readWheelList, setWheelValue, lockPageScroll, unlockPageScroll } from "./ingatlan-wheels.js?v=drumScroll7";
 
 const ITEM_H = 40;
+/** Pontosan 3 sor: fent / közép / lent */
+const VISIBLE_ROWS = 3;
 let paintFrame = 0;
+let snapTimer = 0;
 
 /** v2 = kerék gyűrű + alatta rejtés | legacy = előző egyszerű inline */
 export function getDrumMode() {
@@ -75,16 +81,26 @@ function setDrumOpen(wrap, open) {
   else wrap.classList.toggle("has-drum-open", open);
 }
 
-function nearestItem(scrollEl, wrap) {
+/** Gyűrű közepe — a kijelölt sor mindig ide igazodik. */
+function centerY(wrap) {
+  const ring = wrap.querySelector(".immo-drum-wheel-ring");
+  if (ring && !wrap.querySelector(".immo-drum-inline")?.hidden) {
+    const r = ring.getBoundingClientRect();
+    if (r.height > 0) return r.top + r.height / 2;
+  }
   const anchor = cellAnchor(wrap);
-  const anchorRect = anchor.getBoundingClientRect();
-  const cellCenterY = anchorRect.top + anchorRect.height / 2;
+  const a = anchor.getBoundingClientRect();
+  return a.top + a.height / 2;
+}
+
+function nearestItem(scrollEl, wrap) {
+  const midY = centerY(wrap);
   let best = null;
   let bestDist = Infinity;
   scrollEl.querySelectorAll(".immo-drum-inline-item").forEach((item) => {
     const r = item.getBoundingClientRect();
     const mid = r.top + r.height / 2;
-    const dist = Math.abs(mid - cellCenterY);
+    const dist = Math.abs(mid - midY);
     if (dist < bestDist) {
       bestDist = dist;
       best = item;
@@ -101,35 +117,44 @@ function itemHeight(scrollEl) {
 function paintInline(scrollEl, wrap) {
   cancelAnimationFrame(paintFrame);
   paintFrame = requestAnimationFrame(() => {
-    const anchor = cellAnchor(wrap);
-    const anchorRect = anchor.getBoundingClientRect();
-    const cellTop = anchorRect.top;
-    const cellBottom = anchorRect.bottom;
-    const cellCenterY = anchorRect.top + anchorRect.height / 2;
+    const midY = centerY(wrap);
     const itemH = itemHeight(scrollEl);
+    const band = itemH * 0.55;
     scrollEl.querySelectorAll(".immo-drum-inline-item").forEach((item) => {
       const r = item.getBoundingClientRect();
       const mid = r.top + r.height / 2;
-      const inCell = mid >= cellTop && mid <= cellBottom;
-      const dist = Math.abs(mid - cellCenterY);
+      const dist = Math.abs(mid - midY);
+      const inCenter = dist <= band;
       const t = Math.min(dist / (itemH * 1.15), 1);
-      let opacity = 1 - t * 0.72;
-      if (getDrumMode() === "v2" && inCell) opacity = Math.max(opacity, 0.92);
-      item.style.opacity = String(Math.max(0.1, opacity));
-      item.style.fontWeight = dist < itemH * 0.42 ? "650" : "500";
-      item.classList.toggle("is-in-cell", inCell);
+      let opacity = 1 - t * 0.55;
+      if (inCenter) opacity = 1;
+      item.style.opacity = String(Math.max(0.22, opacity));
+      item.style.fontWeight = inCenter ? "700" : "500";
+      item.classList.toggle("is-in-cell", inCenter);
     });
   });
 }
 
 function scrollToItem(scrollEl, wrap, item) {
-  if (!item) return;
-  const anchor = cellAnchor(wrap);
-  const anchorRect = anchor.getBoundingClientRect();
-  const cellCenterY = anchorRect.top + anchorRect.height / 2;
+  if (!item || !scrollEl) return;
+  const midY = centerY(wrap);
   const itemRect = item.getBoundingClientRect();
   const itemMid = itemRect.top + itemRect.height / 2;
-  scrollEl.scrollTop += itemMid - cellCenterY;
+  scrollEl.scrollTop += itemMid - midY;
+}
+
+function snapToNearest(scrollEl, wrap) {
+  const item = nearestItem(scrollEl, wrap);
+  if (!item) return;
+  scrollToItem(scrollEl, wrap, item);
+  paintInline(scrollEl, wrap);
+}
+
+function scheduleSnap(scrollEl, wrap) {
+  window.clearTimeout(snapTimer);
+  snapTimer = window.setTimeout(() => {
+    snapToNearest(scrollEl, wrap);
+  }, 80);
 }
 
 function syncWheelRingWidth(ring, scrollEl) {
@@ -139,6 +164,12 @@ function syncWheelRingWidth(ring, scrollEl) {
   });
   const w = Math.ceil(max + 28);
   ring.style.setProperty("--immo-drum-ring-w", `${w}px`);
+  const itemH = itemHeight(scrollEl);
+  const ringH = itemH * VISIBLE_ROWS;
+  ring.style.setProperty("--immo-drum-ring-h", `${ringH}px`);
+  ring.style.setProperty("--immo-drum-item-h", `${itemH}px`);
+  scrollEl.style.paddingTop = `${itemH}px`;
+  scrollEl.style.paddingBottom = `${itemH}px`;
 }
 
 function setDrumFormState(open) {
@@ -160,7 +191,7 @@ function setDrumFormState(open) {
   else unlockPageScroll(true);
 }
 
-function bindDrumTouchPan(scrollEl, ring) {
+function bindDrumTouchPan(scrollEl, ring, wrap) {
   if (!scrollEl || !ring || ring.dataset.panBound === "1") return;
   ring.dataset.panBound = "1";
 
@@ -191,6 +222,7 @@ function bindDrumTouchPan(scrollEl, ring) {
       event.preventDefault();
       scrollEl.scrollTop -= dy;
       ring.dataset.drumDragged = moved ? "1" : "";
+      paintInline(scrollEl, wrap);
     },
     { passive: false }
   );
@@ -199,6 +231,7 @@ function bindDrumTouchPan(scrollEl, ring) {
     active = false;
     if (moved) {
       ring.dataset.drumDragged = "1";
+      scheduleSnap(scrollEl, wrap);
       window.setTimeout(() => {
         delete ring.dataset.drumDragged;
       }, 80);
@@ -267,11 +300,22 @@ function populateInlineScroll(scrollEl, wheel) {
         ? `<img class="immo-drum-inline-thumb" src="${imgSrc.replace(/"/g, "&quot;")}" alt="" width="32" height="32" decoding="async" />`
         : "";
       const cls = img ? "immo-drum-inline-item immo-drum-inline-item--photo" : "immo-drum-inline-item";
-      return `<div class="${cls}" data-value="${esc}">${img}<span class="immo-drum-inline-text">${label
+      return `<div class="${cls}" data-value="${esc}" role="option">${img}<span class="immo-drum-inline-text">${label
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")}</span></div>`;
     })
     .join("");
+}
+
+function findStartItem(scrollEl, wheel) {
+  const values = readWheelList(wheel);
+  const items = [...scrollEl.querySelectorAll(".immo-drum-inline-item")];
+  if (wheel.dataset.multiple === "1" && values.length) {
+    const last = values[values.length - 1];
+    return items.find((el) => el.dataset.value === last) || items.find((el) => values.includes(el.dataset.value ?? ""));
+  }
+  const current = values[0] ?? "";
+  return items.find((el) => el.dataset.value === current) || items[0] || null;
 }
 
 function openInlineDrum(wrap, wheel, trigger) {
@@ -283,26 +327,25 @@ function openInlineDrum(wrap, wheel, trigger) {
   const scrollEl = drum.querySelector(".immo-drum-inline-scroll");
   populateInlineScroll(scrollEl, wheel);
 
-  const values = readWheelList(wheel);
-  let start = null;
-  if (wheel.dataset.multiple === "1" && values.length) {
-    start = [...scrollEl.querySelectorAll(".immo-drum-inline-item")].find((el) => el.dataset.value === values[0]);
-  } else {
-    const current = values[0] ?? "";
-    start = [...scrollEl.querySelectorAll(".immo-drum-inline-item")].find((el) => el.dataset.value === current);
-  }
-  if (!start) start = scrollEl.querySelector(".immo-drum-inline-item");
+  const start = findStartItem(scrollEl, wheel);
 
-  scrollEl.onscroll = () => paintInline(scrollEl, wrap);
+  scrollEl.onscroll = () => {
+    paintInline(scrollEl, wrap);
+    scheduleSnap(scrollEl, wrap);
+  };
 
-  bindDrumTouchPan(scrollEl, ring);
+  bindDrumTouchPan(scrollEl, ring, wrap);
 
   const multiple = wheel.dataset.multiple === "1";
   scrollEl.querySelectorAll(".immo-drum-inline-item").forEach((item) => {
     item.onclick = (event) => {
+      event.preventDefault();
       event.stopPropagation();
       if (ring.dataset.drumDragged === "1") return;
       const v = item.dataset.value ?? "";
+      /* Kattintott sor középre, majd bezárás */
+      scrollToItem(scrollEl, wrap, item);
+      paintInline(scrollEl, wrap);
       if (multiple) {
         if (v === "") {
           setWheelValue(wheel, "");
@@ -334,10 +377,14 @@ function openInlineDrum(wrap, wheel, trigger) {
   trigger.setAttribute("aria-expanded", "true");
   setDrumFormState(true);
 
-  requestAnimationFrame(() => {
+  const centerStart = () => {
     syncWheelRingWidth(ring, scrollEl);
     scrollToItem(scrollEl, wrap, start);
     paintInline(scrollEl, wrap);
+  };
+  requestAnimationFrame(() => {
+    centerStart();
+    requestAnimationFrame(centerStart);
   });
 }
 

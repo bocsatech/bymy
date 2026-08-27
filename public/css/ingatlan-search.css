@@ -826,7 +826,7 @@ input.immo-wheel-custom.immo-wheel-trigger {
   .immo-drum-wheel-ring {
     position: relative;
     width: var(--immo-drum-ring-w, 7.5rem);
-    height: 7.5rem;
+    height: var(--immo-drum-ring-h, 7.5rem);
     border-radius: 1rem;
     border: 1px dashed #94a3b8;
     background: #fff;
@@ -849,7 +849,7 @@ input.immo-wheel-custom.immo-wheel-trigger {
     right: 0.3rem;
     top: 50%;
     transform: translateY(-50%);
-    height: 2rem;
+    height: var(--immo-drum-item-h, 2.5rem);
     margin-top: 0;
     border-radius: 6px;
     background: rgba(148, 163, 184, 0.22);
@@ -857,7 +857,7 @@ input.immo-wheel-custom.immo-wheel-trigger {
     z-index: 3;
   }
 
-  /* Gyűrű közepe = cella közepe: highlight a ring-en belül, ring center = wrap center */
+  /* Gyűrű: pontosan 3 sor (1 fent + közép + 1 lent); padding = 1 sor */
   .immo-drum-inline-scroll {
     position: absolute;
     left: 0;
@@ -871,7 +871,7 @@ input.immo-wheel-custom.immo-wheel-trigger {
     overscroll-behavior: none;
     overscroll-behavior-y: none;
     scrollbar-width: none;
-    padding: calc(3.75rem - 20px) 0.35rem;
+    padding: var(--immo-drum-item-h, 2.5rem) 0.35rem;
     box-sizing: border-box;
     z-index: 2;
   }
@@ -1299,7 +1299,7 @@ input.immo-wheel-custom.immo-wheel-trigger {
   .immo-drum-wheel-ring {
     position: relative;
     width: var(--immo-drum-ring-w, 7.5rem);
-    height: 7.5rem;
+    height: var(--immo-drum-ring-h, 7.5rem);
     border-radius: 1rem;
     border: 1px dashed #94a3b8;
     background: #fff;
@@ -1322,7 +1322,7 @@ input.immo-wheel-custom.immo-wheel-trigger {
     right: 0.3rem;
     top: 50%;
     transform: translateY(-50%);
-    height: 2rem;
+    height: var(--immo-drum-item-h, 2.5rem);
     margin-top: 0;
     border-radius: 6px;
     background: rgba(148, 163, 184, 0.22);
@@ -1343,7 +1343,7 @@ input.immo-wheel-custom.immo-wheel-trigger {
     overscroll-behavior: none;
     overscroll-behavior-y: none;
     scrollbar-width: none;
-    padding: calc(3.75rem - 20px) 0.35rem;
+    padding: var(--immo-drum-item-h, 2.5rem) 0.35rem;
     box-sizing: border-box;
     z-index: 2;
   }

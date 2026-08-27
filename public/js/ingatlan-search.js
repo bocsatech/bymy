@@ -43,7 +43,7 @@ import {
 } from "./ingatlan-wheels.js?v=scrollLock4";
 import { initDrumWheel, syncDrumWheelDisplay, applyDrumModeClass, getDrumMode } from "./immo-drum-picker.js?v=scrollLock4";
 import { fetchIngatlanWheelSchema, renderIngatlanSchemaHosts, INGATLAN_DUAL_RANGE_GROUPS } from "./ingatlan-wheel-schema.js?v=telepSuggest1";
-import { wireTelepulesSuggestIn } from "./telepules-suggest.js?v=telepSuggest1";
+import { wireTelepulesSuggestIn } from "./telepules-suggest.js?v=telepClose1";
 
 const EXACT_KEYS = [
   "ingatlan_uzletag",

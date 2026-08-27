@@ -150,20 +150,26 @@ export function wireTelepulesSuggest(input, opts = {}) {
   let active = -1;
   let items = [];
   let allNames = [];
+  /** Kiválasztás után ne nyíljon újra az input/focus eseménytől. */
+  let suppressOpen = false;
+  let timer = 0;
 
   void loadCityNames().then((names) => {
     allNames = names;
   });
 
   function close() {
+    window.clearTimeout(timer);
     list.hidden = true;
     list.innerHTML = "";
     active = -1;
     items = [];
     input.setAttribute("aria-expanded", "false");
+    input.removeAttribute("aria-activedescendant");
   }
 
   function open(matches) {
+    if (suppressOpen) return;
     items = matches;
     active = -1;
     if (!matches.length) {
@@ -193,15 +199,22 @@ export function wireTelepulesSuggest(input, opts = {}) {
   }
 
   function pick(name) {
+    suppressOpen = true;
+    window.clearTimeout(timer);
     input.value = name;
-    input.dispatchEvent(new Event("input", { bubbles: true }));
-    input.dispatchEvent(new Event("change", { bubbles: true }));
     close();
+    input.dispatchEvent(new Event("change", { bubbles: true }));
     opts?.onPick?.(name);
+    input.blur();
+    window.setTimeout(() => {
+      suppressOpen = false;
+    }, 200);
   }
 
   async function refresh() {
+    if (suppressOpen) return;
     if (!allNames.length) allNames = await loadCityNames();
+    if (suppressOpen) return;
     const q = String(input.value || "").trim();
     if (q.length < 1) {
       close();
@@ -210,8 +223,8 @@ export function wireTelepulesSuggest(input, opts = {}) {
     open(suggestNames(allNames, q));
   }
 
-  let timer = 0;
   input.addEventListener("input", () => {
+    if (suppressOpen) return;
     window.clearTimeout(timer);
     timer = window.setTimeout(() => {
       void refresh();
@@ -219,6 +232,7 @@ export function wireTelepulesSuggest(input, opts = {}) {
   });
 
   input.addEventListener("focus", () => {
+    if (suppressOpen) return;
     void refresh();
   });
 
@@ -242,15 +256,16 @@ export function wireTelepulesSuggest(input, opts = {}) {
     }
   });
 
-  list.addEventListener("mousedown", (event) => {
+  list.addEventListener("pointerdown", (event) => {
     const li = event.target?.closest?.("[data-index]");
     if (!li) return;
     event.preventDefault();
+    event.stopPropagation();
     const idx = Number(li.getAttribute("data-index"));
     if (Number.isFinite(idx) && items[idx]) pick(items[idx]);
   });
 
-  document.addEventListener("click", (event) => {
+  document.addEventListener("pointerdown", (event) => {
     if (event.target === input || list.contains(event.target)) return;
     close();
   });

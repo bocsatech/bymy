@@ -117,15 +117,15 @@ const PAGE_ADMIN_GUIDES = {
   hub: {
     title: "Kezdőlap",
     href: "/",
-    blurb: "Főoldal feed, promo képek, oldalsáv blokkok.",
-    jumps: [
-      { tab: "home:promo", label: "Promo képek szerkesztése" },
-    ],
+    blocksPage: "hub",
+    blurb: "Oldalsáv videók + középső HTML. Promo képek külön fülön.",
+    jumps: [{ tab: "home:promo", label: "Promo képek szerkesztése" }],
   },
   auto: {
     title: "Autó oldal",
     href: "/auto.html",
-    blurb: "Asztali kereső, feladási elrendezések, Kivitel, Akkumulátor.",
+    blocksPage: "auto",
+    blurb: "Oldalsáv tartalom. Kereső / Kivitel / Akkumulátor a 2. szekcióban.",
     jumps: [
       { tab: "auto:layout:szemelyauto-search", label: "Személyautó kereső" },
       { tab: "auto:kivitel", label: "Kivitel menü" },
@@ -136,7 +136,8 @@ const PAGE_ADMIN_GUIDES = {
   teherauto: {
     title: "Teherautó oldal",
     href: "/teherauto.html",
-    blurb: "Asztali kereső (3,5-ig / 3,5-tól), teher feladási elrendezések.",
+    blocksPage: "teherauto",
+    blurb: "Oldalsáv tartalom. Kereső / feladás elrendezések a 2. szekcióban.",
     jumps: [
       { tab: "auto:layout:teherauto-search", label: "Teherautó kereső" },
       { tab: "auto:layout:kisteher", label: "Feladás · 3,5-ig" },
@@ -147,7 +148,8 @@ const PAGE_ADMIN_GUIDES = {
   ingatlan: {
     title: "Ingatlan oldal",
     href: "/ingatlan.html",
-    blurb: "Kereső kerekek (Kiadó / Eladó / Airbnb) — a meglévő menük maradnak.",
+    blocksPage: "ingatlan",
+    blurb: "Oldalsáv tartalom. Kerék-sémák a 3. szekcióban.",
     jumps: [
       { tab: "ingatlan:layout:ingatlan", label: "Kiadó szerkesztő" },
       { tab: "ingatlan:layout:elado-ingatlan", label: "Eladó szerkesztő" },
@@ -158,19 +160,22 @@ const PAGE_ADMIN_GUIDES = {
   ajanlasok: {
     title: "Ajánlások",
     href: "/ajanlasok.html",
-    blurb: "Ajánló lista és körzet. Oldalsáv blokkok a live oldalon szerkeszthetők (admin bejelentkezéssel).",
+    blocksPage: "ajanlasok",
+    blurb: "Oldalsáv tartalom az ajánló oldalon.",
     jumps: [],
   },
   kereses: {
     title: "Keresés (mobil cylinder)",
     href: "/kereses.html",
-    blurb: "Mobilweb kereső menü ikonjai és sorrendje.",
+    blocksPage: "kereses",
+    blurb: "Oldalsáv + mobil cylinder menü.",
     jumps: [{ tab: "mobilweb:menu", label: "Menü elrendezés" }],
   },
   hirdetesfeladas: {
     title: "Hirdetésfeladás",
     href: "/hirdetesfeladas.html",
-    blurb: "Kategóriaválasztó + űrlap elrendezések (autó / teher / ingatlan).",
+    blocksPage: "hirdetesfeladas",
+    blurb: "Oldalsáv tippek. Űrlap-elrendezések a 2–3. szekcióban.",
     jumps: [
       { tab: "auto:layout:szemelyauto", label: "Személyautó feladás" },
       { tab: "ingatlan:layout:ingatlan", label: "Ingatlan kerék (kiadó)" },
@@ -179,13 +184,15 @@ const PAGE_ADMIN_GUIDES = {
   uzenetek: {
     title: "Üzenetek",
     href: "/uzenetek.html",
-    blurb: "Felhasználói üzenetváltás. Nincs külön layout-szerkesztő.",
+    blocksPage: "uzenetek",
+    blurb: "Oldalsáv tartalom. Nincs külön layout-szerkesztő.",
     jumps: [],
   },
   fiok: {
     title: "Fiók / Beállítások",
     href: "/beallitasok.html",
-    blurb: "Parkoló (kedvencek), mentett keresések, profil. Felhasználók a 1. szekcióban.",
+    blocksPage: "beallitasok",
+    blurb: "Oldalsáv a Beállítások oldalon. Felhasználók a 1. szekcióban.",
     jumps: [
       { tab: "users:private", label: "Privát fiókok" },
       { tab: "users:business", label: "Céges fiókok" },
@@ -194,7 +201,8 @@ const PAGE_ADMIN_GUIDES = {
   listings: {
     title: "Listings",
     href: "/listings.html",
-    blurb: "Általános hirdetéslista nézet.",
+    blocksPage: "listings",
+    blurb: "Oldalsáv a listázó oldalon.",
     jumps: [
       { tab: "auto:listings", label: "Autóhirdetések" },
       { tab: "ingatlan:listings", label: "Ingatlanhirdetések" },
@@ -229,12 +237,27 @@ let searchCylinderMenu = { version: 1, items: [] };
 let searchCylinderImagePresets = [];
 let kivitelMenu = { version: 1, items: [] };
 let akkuSearchMenu = { version: 1, title: "Akkumulátor és hatótáv adatok", items: [], live: false };
+let sitePageBlocks = {
+  page: "hub",
+  left: { title: "", videos: ["", "", ""] },
+  right: { title: "", videos: ["", "", ""] },
+  center: null,
+};
 let editingUser = null;
 let selectedVisitorId = "";
 let visitorHits = [];
 let blockedIps = [];
 
 let devOtpCode = "";
+
+function pageBlocksKey(pageKey) {
+  const guide = PAGE_ADMIN_GUIDES[pageKey] || PAGE_ADMIN_GUIDES.hub;
+  return guide.blocksPage || pageKey || "hub";
+}
+
+function emptySideBlocks(title = "Videók") {
+  return { title, videos: ["", "", ""] };
+}
 
 function parseTab(value = tab) {
   const raw = String(value || "users:private");
@@ -496,7 +519,12 @@ const actions = {
     err = "";
     info = "";
     editingUser = null;
-    loadTab().then(render);
+    loadTab()
+      .then(render)
+      .catch((error) => {
+        err = error.message || "Betöltés sikertelen.";
+        render();
+      });
   },
   setTab(_, el) {
     tab = el.getAttribute("data-tab") || tab;
@@ -507,7 +535,12 @@ const actions = {
     err = "";
     info = "";
     editingUser = null;
-    loadTab().then(render);
+    loadTab()
+      .then(render)
+      .catch((error) => {
+        err = error.message || "Betöltés sikertelen.";
+        render();
+      });
   },
   async refreshVisitors() {
     err = "";
@@ -972,6 +1005,50 @@ const actions = {
       render();
     }
   },
+  readSitePageBlocksFromDom() {
+    const leftVideos = [0, 1, 2].map((i) =>
+      String(app.querySelector(`[data-side=left][data-video-index="${i}"]`)?.value ?? "").trim()
+    );
+    const rightVideos = [0, 1, 2].map((i) =>
+      String(app.querySelector(`[data-side=right][data-video-index="${i}"]`)?.value ?? "").trim()
+    );
+    const left = {
+      title: String(app.querySelector("[data-side-title=left]")?.value ?? sitePageBlocks.left?.title ?? "").trim(),
+      videos: leftVideos,
+    };
+    const right = {
+      title: String(app.querySelector("[data-side-title=right]")?.value ?? sitePageBlocks.right?.title ?? "").trim(),
+      videos: rightVideos,
+    };
+    const payload = { left, right };
+    if (sitePageBlocks.center || app.querySelector("[data-center-title]")) {
+      payload.center = {
+        title: String(app.querySelector("[data-center-title]")?.value ?? sitePageBlocks.center?.title ?? "").trim(),
+        html: String(app.querySelector("[data-center-html]")?.value ?? sitePageBlocks.center?.html ?? "").trim(),
+      };
+    }
+    return payload;
+  },
+  async saveSitePageBlocks() {
+    err = "";
+    info = "";
+    try {
+      const { sub } = parseTab();
+      const page = pageBlocksKey(sub);
+      const payload = actions.readSitePageBlocksFromDom();
+      const data = await api("/api/site-blocks", {
+        method: "PUT",
+        body: JSON.stringify({ page, ...payload }),
+      });
+      const saved = data.pages?.[page] || payload;
+      sitePageBlocks = { page, ...saved };
+      info = `Oldalsáv mentve (${page}). Az élő oldalon hard refresh (Cmd+Shift+R) után látszik.`;
+      render();
+    } catch (error) {
+      err = error.message;
+      render();
+    }
+  },
 };
 
 function fileToDataUrl(file) {
@@ -1033,7 +1110,7 @@ async function loadTab() {
     kivitelMenu = data.menu || { version: 1, items: data.items || [] };
   }
   if (section === "auto" && sub === "akku") {
-    const data = await api("/api/level1/akku-search-menu");
+    const data = await api("/api/level1/akku-search-menu/admin");
     akkuSearchMenu = {
       ...(data.menu || { version: 1, items: data.items || [] }),
       live: data.live === true,
@@ -1055,6 +1132,16 @@ async function loadTab() {
     const data = await api("/api/level1/search-cylinder/admin");
     searchCylinderMenu = data.menu || { version: 1, items: data.items || [] };
     searchCylinderImagePresets = data.imagePresets || [];
+  }
+  if (section === "pages") {
+    const page = pageBlocksKey(sub);
+    const data = await api(`/api/site-blocks?page=${encodeURIComponent(page)}`);
+    sitePageBlocks = {
+      page: data.page || page,
+      left: data.left || emptySideBlocks(),
+      right: data.right || emptySideBlocks(),
+      center: data.center ?? null,
+    };
   }
   if (isLayoutTab()) {
     layoutCategory = layoutCategoryFromTab();
@@ -1676,22 +1763,68 @@ function shellBody() {
 
 function pagesAdminView(pageKey) {
   const guide = PAGE_ADMIN_GUIDES[pageKey] || PAGE_ADMIN_GUIDES.hub;
+  const blocksPage = pageBlocksKey(pageKey);
+  const left = sitePageBlocks.left || emptySideBlocks();
+  const right = sitePageBlocks.right || emptySideBlocks();
+  const center = sitePageBlocks.center;
   const jumps = (guide.jumps || [])
     .map(
       (j) =>
-        `<button type="button" class="btn" data-act="setTab" data-tab="${esc(j.tab)}">${esc(j.label)}</button>`
+        `<button type="button" class="btn ghost" data-act="setTab" data-tab="${esc(j.tab)}">${esc(j.label)}</button>`
     )
     .join("");
+
+  const videoInputs = (side, videos) =>
+    [0, 1, 2]
+      .map(
+        (i) => `<label>YouTube link ${i + 1}
+          <input type="url" data-side="${side}" data-video-index="${i}" value="${esc(videos[i] || "")}" placeholder="https://www.youtube.com/watch?v=…" />
+        </label>`
+      )
+      .join("");
+
+  const centerHtml = center
+    ? `<div class="admin-list-group" style="margin-top:1.25rem">
+        <h3 class="admin-section-title">Középső tartalom</h3>
+        <label>Cím
+          <input type="text" data-center-title value="${esc(center.title || "")}" maxlength="120" />
+        </label>
+        <label>HTML
+          <textarea data-center-html rows="8" style="width:100%;min-height:9rem;resize:vertical">${esc(center.html || "")}</textarea>
+        </label>
+      </div>`
+    : "";
+
   return `
-    <h2 class="layout-cat-title">${esc(guide.title)}</h2>
+    <h2 class="layout-cat-title">${esc(guide.title)} — tartalom</h2>
     <p class="hint">${esc(guide.blurb)}</p>
-    <p class="hint">Élő oldal: <a href="${esc(guide.href)}" target="_blank" rel="noopener">${esc(guide.href)}</a></p>
-    <div class="row" style="margin-top:1rem;gap:0.65rem;flex-wrap:wrap">
-      ${jumps || '<span class="hint">Nincs külön szerkesztő fül — a funkció a live oldalon / felhasználói fiókban él.</span>'}
+    <p class="hint">Élő oldal: <a href="${esc(guide.href)}" target="_blank" rel="noopener">${esc(guide.href)}</a> · blokk kulcs: <code>${esc(blocksPage)}</code></p>
+    <div class="row" style="margin-top:0.75rem;gap:0.65rem;flex-wrap:wrap">
+      ${jumps}
       <a class="btn ghost" href="${esc(guide.href)}" target="_blank" rel="noopener">Megnyitás</a>
     </div>
+    <div class="row" style="align-items:stretch;gap:1rem;margin-top:1.25rem;flex-wrap:wrap">
+      <div class="admin-list-group" style="flex:1;min-width:min(100%,280px)">
+        <h3 class="admin-section-title">Bal oldalsáv</h3>
+        <label>Cím
+          <input type="text" data-side-title="left" value="${esc(left.title || "")}" maxlength="120" />
+        </label>
+        ${videoInputs("left", left.videos || [])}
+      </div>
+      <div class="admin-list-group" style="flex:1;min-width:min(100%,280px)">
+        <h3 class="admin-section-title">Jobb oldalsáv</h3>
+        <label>Cím
+          <input type="text" data-side-title="right" value="${esc(right.title || "")}" maxlength="120" />
+        </label>
+        ${videoInputs("right", right.videos || [])}
+      </div>
+    </div>
+    ${centerHtml}
     <p class="ok">${esc(info)}</p>
-    <p class="err">${esc(err)}</p>`;
+    <p class="err">${esc(err)}</p>
+    <div class="row" style="margin-top:1rem">
+      <button class="btn" type="button" data-act="saveSitePageBlocks">Tartalom mentése</button>
+    </div>`;
 }
 
 function shell() {

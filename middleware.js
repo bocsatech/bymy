@@ -52,6 +52,8 @@ function isPublicApi(pathname, method) {
   if (pathname === "/api/health" && method === "GET") return true;
   // Bocsatech admin saját auth — ne a members gate zárja ki
   if (pathname.startsWith("/api/level1/")) return true;
+  // Oldalsáv tartalom: GET nyilvános; PUT a szerveren level1 admint ellenőriz
+  if (pathname === "/api/site-blocks") return true;
   return false;
 }
 

@@ -9,8 +9,8 @@ import {
   applyDrumModeClass,
   syncDrumWheelDisplay,
   closeAllInlineDrums,
-} from "./immo-drum-picker.js?v=immoAutoPortal2";
-import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=immoAutoPortal2";
+} from "./immo-drum-picker.js?v=immoPortalPage1";
+import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=immoPortalPage1";
 import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=autoDesk16";
 
 const MOBILE_MQ = "(max-width: 900px)";

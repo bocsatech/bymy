@@ -40,9 +40,9 @@ import {
   setWheelValue,
   MULTI_WHEEL_KEYS,
   wheelFieldHtml,
-} from "./ingatlan-wheels.js?v=immoAutoPortal2";
-import { initDrumWheel, syncDrumWheelDisplay, applyDrumModeClass, getDrumMode } from "./immo-drum-picker.js?v=immoAutoPortal2";
-import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=immoAutoPortal2";
+} from "./ingatlan-wheels.js?v=immoPortalPage1";
+import { initDrumWheel, syncDrumWheelDisplay, applyDrumModeClass, getDrumMode } from "./immo-drum-picker.js?v=immoPortalPage1";
+import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=immoPortalPage1";
 import { fetchIngatlanWheelSchema, renderIngatlanSchemaHosts, INGATLAN_DUAL_RANGE_GROUPS } from "./ingatlan-wheel-schema.js?v=telepSuggest1";
 import { wireTelepulesSuggestIn } from "./telepules-suggest.js?v=telepClose1";
 
@@ -323,10 +323,30 @@ function setupMobileDualRange(mainHost, { id, tolKey, igKey, title, ariaLabel, u
   }
 }
 
+function readUzletag(form) {
+  const wheel = form?.querySelector?.('[data-wheel="ingatlan_uzletag"]');
+  if (wheel) return normalizeIngatlanUzletag(readWheel(wheel) || "berbe");
+  return normalizeIngatlanUzletag(form?.querySelector?.("#immo-uzletag")?.value || "berbe");
+}
+
+function setUzletag(form, value) {
+  const next = normalizeIngatlanUzletag(value || "berbe");
+  const wheel = form?.querySelector?.('[data-wheel="ingatlan_uzletag"]');
+  if (wheel) {
+    setWheelValue(wheel, next);
+    syncImmoSearchWheelDisplay(wheel);
+    const hidden = form.querySelector("#immo-uzletag");
+    if (hidden) hidden.value = next;
+    return;
+  }
+  const el = form?.querySelector?.("#immo-uzletag");
+  if (el) el.value = next;
+}
+
 function syncPriceRangeUnit(form) {
   const wrap = form?.querySelector('.immo-dual-range[data-range="ar"]');
   if (!wrap) return;
-  const uz = normalizeIngatlanUzletag(form.querySelector("#immo-uzletag")?.value || "berbe");
+  const uz = readUzletag(form);
   const unitEl = wrap.querySelector(".immo-dual-range__unit");
   if (unitEl) unitEl.textContent = uz === "berbe" ? "Ft" : "M Ft";
 }
@@ -358,7 +378,7 @@ function fillDualRangeWheels(form, { tolKey, igKey, options, emptyMin = "min.", 
 }
 
 function fillPriceRangeWheels(form) {
-  const uz = normalizeIngatlanUzletag(form.querySelector("#immo-uzletag")?.value || "berbe");
+  const uz = readUzletag(form);
   const isRent = uz === "berbe";
   const opts = isRent ? arFtMinOptions() : priceMillionOptions();
   fillDualRangeWheels(form, { tolKey: "ar_tol", igKey: "ar_ig", options: opts });
@@ -558,7 +578,7 @@ function syncRovidMenus(form) {
 
 function readForm(form) {
   const out = emptyIngatlanFilters();
-  out.ingatlan_uzletag = normalizeIngatlanUzletag(form.querySelector("#immo-uzletag")?.value || "berbe");
+  out.ingatlan_uzletag = readUzletag(form);
   out.keresesi_hely = form.querySelector('[name="keresesi_hely"]')?.value?.trim() || "";
   out.ar_tol = numOrNull(readWheel(form.querySelector('[data-wheel="ar_tol"]')));
   out.ar_ig = numOrNull(readWheel(form.querySelector('[data-wheel="ar_ig"]')));
@@ -619,6 +639,10 @@ export async function initIngatlanSearch({
   fillPriceRangeWheels(root);
   fillAreaRangeWheels(root);
   fillEmeletRangeWheels(root);
+  fillWheel(root.querySelector('[data-wheel="ingatlan_uzletag"]'), INGATLAN_UZLETAG, {
+    emptyLabel: "Kategória",
+    includeEmpty: false,
+  });
   fillWheel(root.querySelector('[data-wheel="szobaszam"]'), szobaszamOptions(), { emptyLabel: "Mindegy" });
   fillWheel(root.querySelector('[data-wheel="ingatlan_lakas_tipus"]'), tipusOpts.filter((o) => o.value));
   fillWheel(root.querySelector('[data-wheel="allapot"]'), INGATLAN_ALLAPOT.filter((o) => o.value));
@@ -641,6 +665,7 @@ export async function initIngatlanSearch({
 
   const emptyByName = {
     szobaszam: "Szobaszám",
+    ingatlan_uzletag: "Kategória",
   };
   const dualRangeKeys = new Set(["ar_tol", "ar_ig", "alapterulet_tol", "alapterulet_ig", "emelet_tol", "emelet_ig"]);
   root.querySelectorAll("[data-wheel]").forEach((wheel) => {
@@ -654,20 +679,7 @@ export async function initIngatlanSearch({
       customKind: isRooms ? "rooms" : "price",
     });
   });
-
-  const uzletag = root.querySelector("#immo-uzletag");
-  if (uzletag) {
-    if (uzletag.tagName === "SELECT") {
-      uzletag.innerHTML = "";
-      for (const opt of INGATLAN_UZLETAG) {
-        const el = document.createElement("option");
-        el.value = opt.value;
-        el.textContent = opt.label;
-        uzletag.appendChild(el);
-      }
-    }
-    uzletag.value = defaultUzletag;
-  }
+  setUzletag(root, defaultUzletag);
 
   function setMoreOpen(open) {
     if (!morePanel || !moreBtn) return;
@@ -687,7 +699,7 @@ export async function initIngatlanSearch({
       if (enableTipus2) syncTipus2Menu(root);
     });
 
-    uzletag?.addEventListener("change", () => {
+    root.querySelector('[data-wheel="ingatlan_uzletag"]')?.addEventListener("immo-wheel-change", () => {
       fillPriceRangeWheels(root);
     });
 
@@ -707,10 +719,13 @@ export async function initIngatlanSearch({
 
     root.addEventListener("reset", () => {
       requestAnimationFrame(() => {
-        root.querySelectorAll("[data-wheel]").forEach((wheel) => setWheelValue(wheel, ""));
+        root.querySelectorAll("[data-wheel]").forEach((wheel) => {
+          if ((wheel.getAttribute("data-wheel") || "") === "ingatlan_uzletag") return;
+          setWheelValue(wheel, "");
+        });
         const hely = root.querySelector('[name="keresesi_hely"]');
         if (hely) hely.value = "";
-        if (uzletag) uzletag.value = defaultUzletag;
+        setUzletag(root, defaultUzletag);
         fillPriceRangeWheels(root);
         fillAreaRangeWheels(root);
         fillEmeletRangeWheels(root);
@@ -725,10 +740,13 @@ export async function initIngatlanSearch({
       btn.addEventListener("click", (event) => {
         if (root.tagName === "FORM" && btn.getAttribute("type") === "reset") return;
         event.preventDefault();
-        root.querySelectorAll("[data-wheel]").forEach((wheel) => setWheelValue(wheel, ""));
+        root.querySelectorAll("[data-wheel]").forEach((wheel) => {
+          if ((wheel.getAttribute("data-wheel") || "") === "ingatlan_uzletag") return;
+          setWheelValue(wheel, "");
+        });
         const hely = root.querySelector('[name="keresesi_hely"]');
         if (hely) hely.value = "";
-        if (uzletag) uzletag.value = defaultUzletag;
+        setUzletag(root, defaultUzletag);
         fillPriceRangeWheels(root);
         fillAreaRangeWheels(root);
         fillEmeletRangeWheels(root);

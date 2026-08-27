@@ -1,5 +1,6 @@
-import { initDrumWheel, syncDrumWheelDisplay } from "./immo-drum-picker.js?v=scrollLock4";
-import { setWheelValue, readWheel } from "./ingatlan-wheels.js?v=scrollLock4";
+import { initDrumWheel, syncDrumWheelDisplay } from "./immo-drum-picker.js?v=immoPortalPage1";
+import { setWheelValue, readWheel } from "./ingatlan-wheels.js?v=immoPortalPage1";
+import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=immoPortalPage1";
 
 const STORAGE_KEY = "bymy-hirdetes-category";
 const STORAGE_VERSION = 4;
@@ -248,7 +249,8 @@ export function initCategoryPicker({
       (opt) =>
         `<button type="button" class="immo-wheel-opt" data-value="${opt.id}" data-image="${opt.image}?v=immoCat4">${opt.label}</button>`
     ).join("");
-    initDrumWheel(wheel, { emptyLabel: "Válassz kategóriát" });
+    initDrumWheel(wheel, { emptyLabel: "Válassz kategóriát", openMode: "portal" });
+    bindAutoDrumSheet(wheel);
     wheel.addEventListener("immo-wheel-change", () => {
       const id = readWheel(wheel);
       if (!id || id === currentWizardCategoryId()) return;

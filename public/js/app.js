@@ -8,7 +8,7 @@ import {
 import { createAdForm } from "./form-core.js?v=immoSync6";
 import { initTireSizes } from "./tire-sizes-ui.js";
 import { initPhoneLanguages } from "./phone-lang-ui.js";
-import { initCategoryPicker } from "./category-picker.js?v=immo6";
+import { initCategoryPicker } from "./category-picker.js?v=immoPortalPage1";
 import {
   requireAuthForPage,
   getAuthUser,

@@ -925,7 +925,7 @@ input.immo-wheel-custom.immo-wheel-trigger {
     width: var(--immo-drum-ring-w, 7.5rem);
     height: var(--immo-drum-ring-h, 7.5rem);
     border-radius: 1rem;
-    border: 1px dashed #94a3b8;
+    border: 1.5px solid #64748b;
     background: #fff;
     box-shadow: 0 8px 28px rgba(15, 23, 42, 0.18);
     overflow: hidden;
@@ -1419,7 +1419,7 @@ input.immo-wheel-custom.immo-wheel-trigger {
     width: var(--immo-drum-ring-w, 7.5rem);
     height: var(--immo-drum-ring-h, 7.5rem);
     border-radius: 1rem;
-    border: 1px dashed #94a3b8;
+    border: 1.5px solid #64748b;
     background: #fff;
     box-shadow: 0 8px 28px rgba(15, 23, 42, 0.18);
     overflow: hidden;
@@ -1677,11 +1677,11 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
 .auto-drum-portal .immo-drum-wheel-ring,
 .auto-drum-portal__ring {
   position: relative;
-  width: var(--immo-drum-ring-w, 9rem);
-  max-width: min(12.5rem, 70vw);
-  height: 9rem;
-  border-radius: 1rem;
-  border: 1px dashed #94a3b8;
+  width: var(--immo-drum-ring-w, 13.5rem);
+  max-width: min(18.75rem, 85vw);
+  height: 13.5rem;
+  border-radius: 1.15rem;
+  border: 1.5px solid #64748b;
   background: #fff;
   box-shadow: 0 10px 32px rgba(15, 23, 42, 0.22);
   overflow: hidden;
@@ -1692,10 +1692,10 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
 .auto-drum-portal .immo-drum-inline-item {
   display: flex;
   align-items: center;
-  height: 40px;
-  padding: 0 0.35rem;
+  height: 60px;
+  padding: 0 0.55rem;
   color: #0f172a;
-  font: 500 1.05rem/1 system-ui, sans-serif;
+  font: 500 1.55rem/1 system-ui, sans-serif;
   scroll-snap-align: center;
   white-space: nowrap;
   overflow: hidden;
@@ -1706,12 +1706,12 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
 
 .auto-drum-portal .immo-drum-inline-highlight {
   position: absolute;
-  left: 0.3rem;
-  right: 0.3rem;
+  left: 0.4rem;
+  right: 0.4rem;
   top: 50%;
   transform: translateY(-50%);
-  height: 2rem;
-  border-radius: 6px;
+  height: 3rem;
+  border-radius: 8px;
   background: rgba(148, 163, 184, 0.22);
   pointer-events: none;
   z-index: 3;
@@ -1727,7 +1727,7 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   touch-action: pan-y;
   overscroll-behavior: contain;
   scrollbar-width: none;
-  padding: calc(4.5rem - 20px) 0.5rem;
+  padding: calc(6.75rem - 30px) 0.65rem;
   box-sizing: border-box;
   z-index: 2;
 }
@@ -1743,8 +1743,8 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   color: #fff;
   font: inherit;
   font-weight: 650;
-  font-size: 0.92rem;
-  padding: 0.45rem 1.1rem;
+  font-size: 1.1rem;
+  padding: 0.55rem 1.35rem;
   box-shadow: 0 4px 14px rgba(15, 23, 42, 0.2);
   cursor: pointer;
 }

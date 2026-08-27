@@ -6,7 +6,7 @@
 import { readWheel, readWheelList, setWheelValue } from "./ingatlan-wheels.js?v=immoAutoPortal1";
 import { syncDrumWheelDisplay } from "./immo-drum-picker.js?v=immoAutoPortal1";
 
-const ITEM_H = 40;
+const ITEM_H = 60;
 let activePortal = null;
 let paintFrame = 0;
 
@@ -97,7 +97,7 @@ function syncRingWidth(ring, scrollEl) {
   scrollEl.querySelectorAll(".immo-drum-inline-item").forEach((item) => {
     max = Math.max(max, item.scrollWidth);
   });
-  const capped = Math.min(Math.max(7.5 * 16, Math.ceil(max + 28)), Math.min(200, Math.floor(window.innerWidth * 0.7)));
+  const capped = Math.min(Math.max(11.25 * 16, Math.ceil(max + 42)), Math.min(300, Math.floor(window.innerWidth * 0.85)));
   ring.style.setProperty("--immo-drum-ring-w", `${capped}px`);
 }
 
@@ -151,8 +151,8 @@ function positionPortal(stage, trigger) {
   const cx = rect.left + rect.width / 2;
   const cy = rect.top + rect.height / 2;
   const pad = 12;
-  const approxW = 140;
-  const approxH = 160;
+  const approxW = 210;
+  const approxH = 240;
   let left = cx;
   let top = cy;
   left = Math.min(Math.max(left, pad + approxW / 2), window.innerWidth - pad - approxW / 2);

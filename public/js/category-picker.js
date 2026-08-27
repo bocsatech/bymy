@@ -1,6 +1,6 @@
 import { initDrumWheel, syncDrumWheelDisplay } from "./immo-drum-picker.js?v=immoPortalPage1";
 import { setWheelValue, readWheel } from "./ingatlan-wheels.js?v=immoPortalPage1";
-import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=immoPortalPage1";
+import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=immoPortalBig1";
 
 const STORAGE_KEY = "bymy-hirdetes-category";
 const STORAGE_VERSION = 4;

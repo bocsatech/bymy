@@ -931,6 +931,8 @@ async function loadTab() {
     akkuSearchMenu = {
       ...(data.menu || { version: 1, items: data.items || [] }),
       live: data.live === true,
+      source: data.source || null,
+      updatedAt: data.menu?.updatedAt || null,
     };
   }
   if (section === "ingatlan" && sub === "listings") {
@@ -1465,7 +1467,7 @@ function akkuSearchMenuView() {
 
   return `
     <h2 class="layout-cat-title">Akkumulátor és hatótáv menü</h2>
-    <p class="hint">A webes <strong>Részletes keresés → Akkumulátor és hatótáv adatok</strong> szekció mezői. Kapcsoló / sorrend / címke változtatás <strong>azonnal mentődik</strong> az élő oldalra.${akkuSearchMenu?.live ? ` <strong>Élő mentés aktív${akkuSearchMenu.updatedAt ? ` (${esc(akkuSearchMenu.updatedAt)})` : ""}.</strong>` : " <strong class=\"err\">Még nincs élő mentés</strong> — kapcsold ki-be egy sort, vagy nyomd a Mentés gombot."}</p>
+    <p class="hint">A webes <strong>Részletes keresés → Akkumulátor</strong> mezői. Kapcsoló / sorrend / címke azonnal mentődik, és szinkronban van a <strong>Személyautó kereső</strong> elrendezéssel (Több szűrő).${akkuSearchMenu?.live ? ` <strong>Élő (${esc(akkuSearchMenu.source || "kv")}${akkuSearchMenu.updatedAt ? ` · ${esc(akkuSearchMenu.updatedAt)}` : ""}).</strong>` : " <strong class=\"err\">Még nincs élő adat</strong>."}</p>
     <label class="kivitel-admin-card__fields" style="display:block;margin-bottom:0.75rem;max-width:28rem">
       <div>Szekció címe</div>
       <input type="text" data-field="akku-title" data-act="akkuTitleSave" value="${esc(akkuSearchMenu?.title || "Akkumulátor és hatótáv adatok")}" maxlength="80" />

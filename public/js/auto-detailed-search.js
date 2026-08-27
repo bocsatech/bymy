@@ -5,7 +5,7 @@
 import {
   DETAILED_SEARCH_SECTIONS,
   AKKU_SEARCH_SECTION_FALLBACK,
-} from "./auto-detailed-search-catalog.js?v=detailedSearch8";
+} from "./auto-detailed-search-catalog.js?v=detailedSearch9";
 
 const FORM_FLAG_KEYS = new Set(["villamtoltes", "zold_rendszam"]);
 

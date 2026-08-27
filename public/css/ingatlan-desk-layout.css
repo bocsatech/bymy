@@ -148,9 +148,17 @@
   body.home-page[data-site-page="ingatlan"] .immo-control,
   body.home-page[data-site-page="ingatlan"] .immo-search-panel select,
   body.home-page[data-site-page="ingatlan"] .immo-search-panel input {
-    background: var(--ad-elev) !important;
     color: var(--ad-text) !important;
     border-color: var(--ad-line) !important;
+  }
+
+  /* Belső inputok: ne fehér kocka — csak a külső mezőkeret látszik */
+  body.home-page[data-site-page="ingatlan"] .immo-search-form .immo-field .immo-control,
+  body.home-page[data-site-page="ingatlan"] .immo-search-form .immo-dual-range input,
+  body.home-page[data-site-page="ingatlan"] .immo-search-form .immo-price-input {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
   }
 
   body.home-page[data-site-page="ingatlan"] .immo-submit {

@@ -142,6 +142,26 @@ body[data-site-page="ingatlan"] .immo-search-panel,
   background: #fff;
 }
 
+/* Ne legyen belső fehér kocka (Ft / szeparátor / input) — csak a külső keret */
+.immo-dual-range__unit,
+.immo-dual-range__sep,
+.immo-dual-range__half,
+.immo-dual-range__half .immo-wheel-wrap,
+.immo-dual-range__half .immo-price-input {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.immo-dual-range__unit {
+  border-left: 0 !important;
+}
+
+.immo-search-form .immo-field .immo-control {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
 /* Fülek: Eladó / Kiadó / Airbnb (autó kereső tab stílus) */
 .immo-search-tabs {
   display: grid;
@@ -759,11 +779,13 @@ input.immo-wheel-custom.immo-wheel-trigger {
     flex: 0 0 auto;
     display: flex;
     align-items: center;
+    align-self: center;
     padding: 0 0.15rem;
     color: #94a3b8;
     font-size: 1rem;
     user-select: none;
     pointer-events: none;
+    background: transparent;
   }
 
   .immo-dual-range__half--max {
@@ -779,13 +801,14 @@ input.immo-wheel-custom.immo-wheel-trigger {
     flex: 0 0 auto;
     display: flex;
     align-items: center;
+    align-self: stretch;
     padding: 0 0.85rem;
     font-size: 0.95rem;
     font-weight: 700;
     color: #0f172a;
-    border-left: 1px solid #e2e8f0;
+    border-left: 0;
     white-space: nowrap;
-    background: #fff;
+    background: transparent;
   }
 
   .immo-dual-range__half .immo-label {
@@ -1138,8 +1161,8 @@ input.immo-wheel-custom.immo-wheel-trigger {
 @media (max-width: 800px) {
   [data-theme="dark"] .immo-dual-range__unit {
     color: #e5e7eb;
-    background: #0b1220;
-    border-left-color: #1f2937;
+    background: transparent;
+    border-left: 0;
   }
 
   [data-theme="dark"] .immo-dual-range {
@@ -1266,24 +1289,27 @@ input.immo-wheel-custom.immo-wheel-trigger {
     flex: 0 0 auto;
     display: flex;
     align-items: center;
+    align-self: center;
     padding: 0 0.15rem;
     color: #94a3b8;
     font-size: 1rem;
     user-select: none;
     pointer-events: none;
+    background: transparent;
   }
 
   .immo-dual-range__unit {
     flex: 0 0 auto;
     display: flex;
     align-items: center;
+    align-self: stretch;
     padding: 0 0.85rem;
     font-size: 0.95rem;
     font-weight: 700;
     color: #0f172a;
-    border-left: 1px solid #e2e8f0;
+    border-left: 0;
     white-space: nowrap;
-    background: #fff;
+    background: transparent;
   }
 
   .immo-dual-range__half .immo-label {
@@ -1505,8 +1531,8 @@ input.immo-wheel-custom.immo-wheel-trigger {
 
   [data-theme="dark"] .immo-dual-range__unit {
     color: #e5e7eb;
-    background: #0b1220;
-    border-left-color: #1f2937;
+    background: transparent;
+    border-left: 0;
   }
 
   [data-theme="dark"] .immo-dual-range {

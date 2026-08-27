@@ -259,11 +259,18 @@ export function openAutoDrumSheet(wheel, trigger) {
 
 /** Trigger → portált dobkerék (felülírja az inline nyitást). */
 export function bindAutoDrumSheet(wheel) {
-  const wrap = wheel?.closest?.(".immo-wheel-wrap");
+  if (!wheel) return;
+  const name = wheel.getAttribute?.("data-wheel") || "";
+  const form = wheel.closest?.("form") || document.getElementById("immo-search-form");
+  const live =
+    (name && form?.querySelector(`[data-wheel="${name}"]`)) ||
+    (wheel.isConnected ? wheel : null) ||
+    wheel;
+  const wrap = live?.closest?.(".immo-wheel-wrap");
   const trigger = wrap?.querySelector(".immo-wheel-trigger");
-  if (!trigger || trigger.dataset.sheetBound === "1") return;
+  if (!trigger) return;
 
-  const wheelName = wheel.getAttribute("data-wheel") || "";
+  /* Újrainításkor a trigger cserélődik — mindig kössük újra. */
   const next = trigger.cloneNode(true);
   next.dataset.sheetBound = "1";
   trigger.replaceWith(next);
@@ -275,10 +282,10 @@ export function bindAutoDrumSheet(wheel) {
       closeAutoDrumSheet(true);
       return;
     }
-    const form = next.closest("form");
-    const live =
-      (wheelName && form?.querySelector(`[data-wheel="${wheelName}"]`)) ||
+    const host = next.closest("form") || document;
+    const current =
+      (name && host.querySelector?.(`[data-wheel="${name}"]`)) ||
       next.closest(".immo-wheel-wrap")?.querySelector("[data-wheel]");
-    if (live) openAutoDrumSheet(live, next);
+    if (current) openAutoDrumSheet(current, next);
   });
 }

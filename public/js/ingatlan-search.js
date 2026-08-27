@@ -40,9 +40,9 @@ import {
   setWheelValue,
   MULTI_WHEEL_KEYS,
   wheelFieldHtml,
-} from "./ingatlan-wheels.js?v=immoAutoPortal1";
-import { initDrumWheel, syncDrumWheelDisplay, applyDrumModeClass, getDrumMode } from "./immo-drum-picker.js?v=immoAutoPortal1";
-import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=immoAutoPortal1";
+} from "./ingatlan-wheels.js?v=immoAutoPortal2";
+import { initDrumWheel, syncDrumWheelDisplay, applyDrumModeClass, getDrumMode } from "./immo-drum-picker.js?v=immoAutoPortal2";
+import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=immoAutoPortal2";
 import { fetchIngatlanWheelSchema, renderIngatlanSchemaHosts, INGATLAN_DUAL_RANGE_GROUPS } from "./ingatlan-wheel-schema.js?v=telepSuggest1";
 import { wireTelepulesSuggestIn } from "./telepules-suggest.js?v=telepClose1";
 
@@ -128,10 +128,14 @@ function useDrumPicker() {
 function initImmoSearchWheel(wheel, { emptyLabel = "Mindegy", multiple = false, customInput = false, customKind = "price" } = {}) {
   if (!wheel) return;
   if (useDrumPicker()) {
-    initDrumWheel(wheel, { emptyLabel, multiple });
-    /* Autó oldal: natív görgetésű body-portál — ugyanaz az Ár / mezőknél is. */
-    const live = wheel.closest(".immo-wheel-wrap")?.querySelector("[data-wheel]") || wheel;
-    bindAutoDrumSheet(live);
+    const name = wheel.getAttribute("data-wheel") || "";
+    const live = initDrumWheel(wheel, { emptyLabel, multiple, openMode: "portal" });
+    const form = live?.closest("form") || wheel.closest?.("form") || document.getElementById("immo-search-form");
+    const bound =
+      (name && form?.querySelector(`[data-wheel="${name}"]`)) ||
+      live ||
+      form?.querySelector(`[data-wheel="${name}"]`);
+    if (bound) bindAutoDrumSheet(bound);
     return;
   }
   initMenuWheel(wheel, { emptyLabel, multiple, customInput, customKind });

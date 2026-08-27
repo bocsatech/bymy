@@ -9,8 +9,8 @@ import {
   applyDrumModeClass,
   syncDrumWheelDisplay,
   closeAllInlineDrums,
-} from "./immo-drum-picker.js?v=immoAutoPortal1";
-import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=immoAutoPortal1";
+} from "./immo-drum-picker.js?v=immoAutoPortal2";
+import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=immoAutoPortal2";
 import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=autoDesk16";
 
 const MOBILE_MQ = "(max-width: 900px)";
@@ -112,7 +112,7 @@ function emptyLabelFromOptions(options) {
 function finishWheel(cell, emptyLabel) {
   const wheel = cell.querySelector("[data-wheel]");
   if (isMobile()) {
-    initDrumWheel(wheel, { emptyLabel });
+    initDrumWheel(wheel, { emptyLabel, openMode: "portal" });
     const live = cell.querySelector("[data-wheel]");
     setWheelValue(live, "");
     syncDrumWheelDisplay(live);

@@ -1,5 +1,5 @@
 /** Mentett 12 oszlopos elrendezés — minden mező ugyanazon a lépésrácson. */
-import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=immoAutoPortal1";
+import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=immoAutoPortal2";
 
 function cssEscape(value) {
   if (window.CSS?.escape) return window.CSS.escape(value);

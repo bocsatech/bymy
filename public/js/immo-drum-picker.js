@@ -6,7 +6,7 @@
  * Cellába kattintás: érték (többesnél toggle) + bezárás.
  */
 
-import { readWheel, readWheelList, setWheelValue, lockPageScroll, unlockPageScroll } from "./ingatlan-wheels.js?v=immoAutoPortal1";
+import { readWheel, readWheelList, setWheelValue, lockPageScroll, unlockPageScroll } from "./ingatlan-wheels.js?v=immoAutoPortal2";
 
 const ITEM_H = 40;
 /** Pontosan 3 sor: fent / közép / lent */
@@ -426,10 +426,10 @@ function ensureOutsideClose() {
   );
 }
 
-export function initDrumWheel(wheel, { emptyLabel = "Mindegy", multiple = false } = {}) {
-  if (!wheel) return;
+export function initDrumWheel(wheel, { emptyLabel = "Mindegy", multiple = false, openMode = "inline" } = {}) {
+  if (!wheel) return null;
   let wrap = wheel.closest(".immo-wheel-wrap");
-  if (!wrap) return;
+  if (!wrap) return null;
 
   const key = String(wheel.getAttribute("data-wheel") || "");
   const SINGLE_RANGE_KEYS = new Set([
@@ -459,6 +459,7 @@ export function initDrumWheel(wheel, { emptyLabel = "Mindegy", multiple = false 
   wheel.dataset.menuBound = "";
   wheel.dataset.menu = "1";
   wheel.dataset.multiple = multiple ? "1" : "0";
+  wheel.dataset.drumOpenMode = openMode === "portal" ? "portal" : "inline";
   wheel.classList.remove("immo-wheel--menu");
   wheel.classList.add("immo-wheel--drum-source");
   wheel.setAttribute("hidden", "");
@@ -477,18 +478,22 @@ export function initDrumWheel(wheel, { emptyLabel = "Mindegy", multiple = false 
   if (labelEl?.nextSibling) wrap.insertBefore(trigger, labelEl.nextSibling);
   else wrap.insertBefore(trigger, wheel);
 
-  trigger.addEventListener("click", (event) => {
-    event.stopPropagation();
-    if (!isDrumViewport()) return;
-    if (wrap.classList.contains("is-open")) {
-      closeInlineDrum(wrap, wheel, true);
-      return;
-    }
-    openInlineDrum(wrap, wheel, trigger);
-  });
+  /* portal: a bindAutoDrumSheet köti a kattintást (natív görgetés). */
+  if (openMode !== "portal") {
+    trigger.addEventListener("click", (event) => {
+      event.stopPropagation();
+      if (!isDrumViewport()) return;
+      if (wrap.classList.contains("is-open")) {
+        closeInlineDrum(wrap, wheel, true);
+        return;
+      }
+      openInlineDrum(wrap, wheel, trigger);
+    });
+    ensureOutsideClose();
+  }
 
-  ensureOutsideClose();
   syncDrumWheelDisplay(wheel);
+  return wheel;
 }
 
 export function syncDrumWheelDisplay(wheel) {

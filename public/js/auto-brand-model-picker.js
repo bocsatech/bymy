@@ -3,7 +3,7 @@
  * Csak desktop auto: nested Márka → Típus panelek, kapcsolók, Kész.
  */
 
-import { fetchVehicleCatalog } from "./vehicle-catalog-client.js?v=autoDesk8";
+import { fetchVehicleCatalog } from "./vehicle-catalog-client.js?v=autoDesk9";
 
 function labelList(items, unit) {
   if (!items.length) return "Mindegy";

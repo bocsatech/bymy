@@ -12,7 +12,8 @@
     --ad-bg: #1f1f1f;
     --ad-header: #161615;
     --ad-panel: #1d1d1d;
-    --ad-elev: #292929;
+    --ad-elev: #111111;
+    --ad-dropdown: #111111;
     --ad-line: #3a3a3a;
     --ad-text: #ffffff;
     --ad-muted: #9a9a9c;
@@ -22,6 +23,7 @@
     background: var(--ad-bg) !important;
     background-color: var(--ad-bg) !important;
     color: var(--ad-text);
+    color-scheme: dark;
   }
 
   /* —— Fejléc: demó sötét sáv, bymy logó —— */
@@ -437,7 +439,8 @@
   body.home-page[data-site-page="auto"] .auto-search-panel select.home-qs-control,
   body.home-page[data-site-page="auto"] .auto-search-panel select,
   body.home-page[data-site-page="auto"] .auto-search-panel input.home-qs-control,
-  body.home-page[data-site-page="auto"] .auto-search-panel input.immo-control {
+  body.home-page[data-site-page="auto"] .auto-search-panel input.immo-control,
+  body.home-page[data-site-page="auto"] .auto-desk-sort select {
     appearance: none;
     -webkit-appearance: none;
     width: 100%;
@@ -446,14 +449,31 @@
     padding: 0 36px 0 12px !important;
     border: 1px solid var(--ad-line) !important;
     border-radius: 6px !important;
-    background-color: var(--ad-elev) !important;
+    background-color: var(--ad-dropdown) !important;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%239a9a9c' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") !important;
     background-repeat: no-repeat !important;
     background-position: right 12px center !important;
-    color: var(--ad-text) !important;
+    color: #fff !important;
     font: inherit;
     font-size: 14px !important;
     box-shadow: none !important;
+    color-scheme: dark;
+  }
+
+  body.home-page[data-site-page="auto"] .auto-desk-sort select {
+    width: auto;
+    min-width: 220px;
+    min-height: 0;
+    padding: 8px 32px 8px 12px !important;
+    font-size: 13px !important;
+  }
+
+  /* Legördülő lista (option) — fekete, mint a gyártmány menü */
+  body.home-page[data-site-page="auto"] select option,
+  body.home-page[data-site-page="auto"] select optgroup {
+    background-color: #111111 !important;
+    background: #111111 !important;
+    color: #ffffff !important;
   }
 
   body.home-page[data-site-page="auto"] .auto-search-panel .home-qs-suffix {
@@ -462,7 +482,7 @@
 
   body.home-page[data-site-page="auto"] .auto-search-panel .qs-detailed-acc {
     border-color: var(--ad-line) !important;
-    background: var(--ad-elev) !important;
+    background: #1a1a1a !important;
     color: var(--ad-text) !important;
   }
 
@@ -471,6 +491,15 @@
   body.home-page[data-site-page="auto"] .auto-search-panel .qs-detailed-range,
   body.home-page[data-site-page="auto"] .auto-search-panel .qs-detailed-select {
     color: var(--ad-text) !important;
+  }
+
+  body.home-page[data-site-page="auto"] .auto-search-panel .qs-detailed-select select,
+  body.home-page[data-site-page="auto"] .auto-search-panel .qs-detailed-range select,
+  body.home-page[data-site-page="auto"] .auto-search-panel .qs-detailed-range input {
+    background-color: #111111 !important;
+    color: #fff !important;
+    border-color: var(--ad-line) !important;
+    color-scheme: dark;
   }
 
   /* —— CTA —— */
@@ -564,21 +593,6 @@
     height: 1px;
     overflow: hidden;
     clip: rect(0 0 0 0);
-  }
-
-  body.home-page[data-site-page="auto"] .auto-desk-sort select {
-    appearance: none;
-    -webkit-appearance: none;
-    font: inherit;
-    font-size: 13px;
-    border-radius: 6px;
-    border: 1px solid var(--ad-line);
-    background: var(--ad-panel)
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%239a9a9c' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
-      no-repeat right 10px center;
-    color: #fff;
-    padding: 8px 32px 8px 12px;
-    min-width: 220px;
   }
 
   body.home-page[data-site-page="auto"] .auto-desk-view {

@@ -257,7 +257,7 @@ export function arrangeAutoDeskDemoFields(form = document.getElementById("home-q
   syncGyorsFieldVisibility(form);
 
   // App-szerű gyártmány/típus multi (asztali)
-  void import("./auto-brand-model-picker.js?v=autoDesk8")
+  void import("./auto-brand-model-picker.js?v=autoDesk9")
     .then((mod) => mod.mountAutoBrandModelPicker(form))
     .catch((error) => console.warn("Gyártmány picker:", error));
 }

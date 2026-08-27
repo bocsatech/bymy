@@ -3,7 +3,7 @@
  * Csak desktop auto: nested Márka → Típus panelek, kapcsolók, Kész.
  */
 
-import { fetchVehicleCatalog } from "./vehicle-catalog-client.js?v=autoDesk12";
+import { fetchVehicleCatalog } from "./vehicle-catalog-client.js?v=autoDesk13";
 
 function labelList(items, unit) {
   if (!items.length) return "Mindegy";
@@ -118,7 +118,9 @@ export async function mountAutoBrandModelPicker(form) {
       <button type="button" class="auto-bm-panel__done" data-auto-bm-done>Kész</button>
     </div>
     <div class="auto-bm-panel__search" data-auto-bm-search-wrap>
-      <input type="search" class="auto-bm-panel__search-input" data-auto-bm-search placeholder="Keresés…" autocomplete="off" />
+      <button type="button" class="auto-bm-panel__search-input" data-auto-bm-search-close>
+        Keresés…
+      </button>
     </div>
     <div class="auto-bm-panel__body" data-auto-bm-body></div>
   `;
@@ -130,7 +132,7 @@ export async function mountAutoBrandModelPicker(form) {
   const subEl = panel.querySelector("[data-auto-bm-sub]");
   const bodyEl = panel.querySelector("[data-auto-bm-body]");
   const searchWrap = panel.querySelector("[data-auto-bm-search-wrap]");
-  const searchInput = panel.querySelector("[data-auto-bm-search]");
+  const searchCloseBtn = panel.querySelector("[data-auto-bm-search-close]");
 
   function pruneModels() {
     const allowed = new Set();
@@ -226,21 +228,27 @@ export async function mountAutoBrandModelPicker(form) {
 
   function openPanel() {
     panel.hidden = false;
+    panel.style.removeProperty("display");
+    panel.classList.remove("is-closed");
     document.body.classList.add("auto-bm-open");
     brandQuery = "";
-    if (searchInput) searchInput.value = "";
     renderBrandList();
   }
 
   function closePanel() {
     panel.hidden = true;
+    panel.style.setProperty("display", "none", "important");
+    panel.classList.add("is-closed");
     document.body.classList.remove("auto-bm-open");
     modelBrand = null;
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
     syncHidden();
   }
 
   openBtn?.addEventListener("click", () => {
-    if (!panel.hidden) {
+    if (!panel.hidden && !panel.classList.contains("is-closed")) {
       closePanel();
       return;
     }
@@ -258,15 +266,14 @@ export async function mountAutoBrandModelPicker(form) {
     else closePanel();
   });
 
-  searchInput?.addEventListener("pointerdown", (event) => {
+  // Keresés mező = bezárás (kiválasztástól függetlenül)
+  const closeFromSearch = (event) => {
     event.preventDefault();
+    event.stopPropagation();
     closePanel();
-  });
-
-  searchInput?.addEventListener("input", () => {
-    brandQuery = searchInput.value || "";
-    if (!modelBrand) renderBrandList();
-  });
+  };
+  searchCloseBtn?.addEventListener("click", closeFromSearch);
+  searchWrap?.addEventListener("click", closeFromSearch);
 
   bodyEl.addEventListener("change", (event) => {
     const brandEl = event.target.closest("[data-auto-bm-brand]");

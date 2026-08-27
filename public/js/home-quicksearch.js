@@ -13,7 +13,7 @@ import {
   initAutoDeskSearch,
   updateAutoDeskAccSummaries,
   arrangeAutoDeskDemoFields,
-} from "./auto-desk-search.js?v=autoDesk16";
+} from "./auto-desk-search.js?v=autoDesk21";
 import { readBrandModelFilterValues } from "./auto-brand-model-picker.js?v=autoDesk16";
 
 const MOBILE_MQ = "(max-width: 900px)";

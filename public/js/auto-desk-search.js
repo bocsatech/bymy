@@ -315,27 +315,20 @@ export function initAutoDeskSearch({
   const advancedBtn = document.getElementById("qs-reszletes");
   const detailedBtn = document.getElementById("qs-detailed");
 
-  setMode("reszletes");
+  setMode("gyors");
   openAccordion("alap");
   updateAutoDeskAccSummaries(form);
 
   if (isAutoDesk()) {
     if (morePanel) {
-      morePanel.hidden = false;
-      morePanel.classList.add("is-open");
+      morePanel.hidden = true;
+      morePanel.classList.remove("is-open");
     }
-    void (async () => {
-      try {
-        await mountDetailed?.(form);
-        if (detailedPanel) {
-          detailedPanel.hidden = false;
-          detailedPanel.classList.add("is-open");
-        }
-      } catch (error) {
-        console.warn("Részletes panel:", error);
-      }
-      updateAutoDeskAccSummaries(form);
-    })();
+    if (detailedPanel) {
+      detailedPanel.hidden = true;
+      detailedPanel.classList.remove("is-open");
+    }
+    syncGyorsFieldVisibility(form);
   }
 
   document.querySelectorAll("[data-desk-mode]").forEach((btn) => {

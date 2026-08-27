@@ -1,10 +1,15 @@
 /**
  * Autó asztali — PIXEL másolat a 2-es demóról (sötét + sárga).
- * Fejléc (.hub-header) NEM változik. Csak min-width 901px + data-site-page=auto.
+ * TELJES oldal (háttér + kereső + találatok + kártyák), nem csak a kereső.
+ * Fejléc (.hub-header) = meglévő bymy fehér fejléc — NEM cseréljük demó fejlécére.
+ * Csak min-width 901px + data-site-page=auto.
  */
 
 @media (min-width: 901px) {
-  body.home-page[data-site-page="auto"] {
+  html:has(body.home-page[data-site-page="auto"]),
+  body.home-page[data-site-page="auto"],
+  body.home-page[data-site-page="auto"].site-app,
+  body.home-page[data-site-page="auto"].site-page {
     --auto-desk-bg: #0b0b0b;
     --auto-desk-panel: #1a1d24;
     --auto-desk-panel-2: #22262f;
@@ -14,6 +19,26 @@
     --auto-desk-yellow: #fccd2a;
     --auto-desk-yellow-text: #111111;
     background: var(--auto-desk-bg) !important;
+    background-color: var(--auto-desk-bg) !important;
+    color: var(--auto-desk-text);
+  }
+
+  /* Teljes tartalomterület sötét — ne maradjon világos home.css / site-app sáv */
+  body.home-page[data-site-page="auto"] .home-main.auto-desk-main,
+  body.home-page[data-site-page="auto"] .home-layout,
+  body.home-page[data-site-page="auto"] .site-layout,
+  body.home-page[data-site-page="auto"] .home-center,
+  body.home-page[data-site-page="auto"] .site-center,
+  body.home-page[data-site-page="auto"] .home-listings-panel,
+  body.home-page[data-site-page="auto"] .auto-search-hero,
+  body.home-page[data-site-page="auto"] .auto-search-hero__stage,
+  body.home-page[data-site-page="auto"] .auto-search-panel,
+  body.home-page[data-site-page="auto"] .auto-search-body {
+    background: var(--auto-desk-bg) !important;
+    background-color: var(--auto-desk-bg) !important;
+    color: var(--auto-desk-text);
+    box-shadow: none !important;
+    border-color: transparent !important;
   }
 
   body.home-page[data-site-page="auto"] .home-main.auto-desk-main {
@@ -22,11 +47,10 @@
     gap: 20px 24px;
     align-items: start;
     max-width: 1440px;
+    width: 100%;
     margin: 0 auto;
-    padding: 20px 24px 40px;
+    padding: 20px 24px 48px;
     box-sizing: border-box;
-    background: var(--auto-desk-bg);
-    color: var(--auto-desk-text);
     min-height: calc(100vh - 120px);
   }
 
@@ -46,7 +70,14 @@
     margin: 0;
     max-width: none;
     width: 100%;
-    background: transparent;
+  }
+
+  /* Fejléc: bymy fehér marad (a felhasználói screenshot) */
+  body.home-page[data-site-page="auto"] .hub-header,
+  body.home-page[data-site-page="auto"] .home-header {
+    background: #fff !important;
+    border-color: #c8c8c8 !important;
+    color: #111 !important;
   }
 
   body.home-page[data-site-page="auto"] .auto-search-hero__image,
@@ -366,25 +397,27 @@
   body.home-page[data-site-page="auto"] .home-listings-panel,
   body.home-page[data-site-page="auto"] .home-center,
   body.home-page[data-site-page="auto"] .site-center {
-    background: transparent !important;
     padding: 0 !important;
     border: 0 !important;
     box-shadow: none !important;
   }
 
   body.home-page[data-site-page="auto"] .home-empty {
-    color: var(--auto-desk-muted);
+    color: var(--auto-desk-muted) !important;
+    background: transparent !important;
   }
 
-  /* —— Kártyarács —— */
-  body.home-page[data-site-page="auto"] #home-grid-track {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 20px;
+  /* —— Kártyarács (teljes találati terület = demó) —— */
+  body.home-page[data-site-page="auto"] #home-grid-track,
+  body.home-page[data-site-page="auto"] .home-grid-track {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 20px !important;
+    background: transparent !important;
   }
 
   body.home-page[data-site-page="auto"] #home-grid-track.is-list-view {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
   }
 
   body.home-page[data-site-page="auto"] #home-grid-track.is-list-view .home-grid-card {
@@ -394,33 +427,42 @@
 
   body.home-page[data-site-page="auto"] .home-grid-card {
     background: var(--auto-desk-panel) !important;
+    background-color: var(--auto-desk-panel) !important;
     border: 1px solid var(--auto-desk-border) !important;
     border-radius: 10px !important;
     overflow: hidden;
     box-shadow: none !important;
-    color: var(--auto-desk-text);
+    color: var(--auto-desk-text) !important;
   }
 
   body.home-page[data-site-page="auto"] .home-grid-card:hover {
-    transform: none;
+    transform: none !important;
     box-shadow: none !important;
     border-color: #3a4150 !important;
   }
 
   body.home-page[data-site-page="auto"] .home-grid-card-media {
     aspect-ratio: 16 / 10;
-    background: #2a2f38;
+    background: #2a2f38 !important;
   }
 
   body.home-page[data-site-page="auto"] .home-grid-card-save {
     cursor: pointer;
     z-index: 2;
-    background: rgba(255, 255, 255, 0.92);
-    color: #333;
+    top: 10px;
+    right: 10px;
+    width: 36px;
+    height: 36px;
+    border-radius: 999px;
+    border: 0;
+    background: transparent !important;
+    color: #fff !important;
+    box-shadow: none !important;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.65));
   }
 
   body.home-page[data-site-page="auto"] .home-grid-card-save.is-on {
-    color: #e11d48;
+    color: #f43f5e !important;
   }
 
   body.home-page[data-site-page="auto"] .home-grid-card-save.is-on path {
@@ -430,7 +472,8 @@
   body.home-page[data-site-page="auto"] .home-grid-card-body {
     padding: 14px 14px 16px;
     gap: 6px;
-    color: var(--auto-desk-text);
+    color: var(--auto-desk-text) !important;
+    background: transparent !important;
   }
 
   body.home-page[data-site-page="auto"] .home-grid-card-title {

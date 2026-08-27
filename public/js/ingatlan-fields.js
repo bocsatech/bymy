@@ -688,6 +688,7 @@ export function ingatlanFormFieldCatalog() {
   const fields = [
     { field_key: "ingatlan_uzletag", label: "Kategória (Eladó / Kiadó / Airbnb)", step: 1 },
     { field_key: "ingatlan_lakas_tipus", label: "Lakás típus", step: 1 },
+    { field_key: "ingatlan_tipus_2", label: "Típus 2", step: 1 },
     { field_key: "allapot", label: "Állapot", step: 1 },
     { field_key: "ingatlan_kora", label: "Építés éve", step: 1 },
     { field_key: "min_berleti_ido", label: "Minimum bérleti idő", step: 1 },

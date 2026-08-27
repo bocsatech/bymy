@@ -67,51 +67,83 @@
     max-width: 1440px;
     margin: 0 auto;
     padding: 0 24px;
-    min-height: 56px;
+    min-height: 64px;
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    gap: 16px;
+    gap: 12px;
+    position: relative;
+    overflow: visible;
   }
 
   body.home-page[data-site-page="auto"] .hub-header-top {
-    order: 2;
+    order: 3;
     min-height: 0;
     padding: 0;
     width: auto;
     flex: 0 0 auto;
     justify-content: flex-end;
+    position: relative;
+    z-index: 3;
+    margin-left: auto;
   }
 
   body.home-page[data-site-page="auto"] .hub-nav-band {
     order: 1;
-    height: auto;
-    min-height: 0;
-    max-height: none;
-    flex: 1 1 auto;
-    display: flex;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    flex: 0 0 auto;
+    display: flex !important;
     align-items: center;
-    gap: 28px;
+    gap: 0;
     border: 0 !important;
+    padding: 0 !important;
+    padding-left: 0 !important;
+    width: auto !important;
+    position: relative;
+    z-index: 3;
   }
 
   body.home-page[data-site-page="auto"] .hub-logo {
-    position: static !important;
+    position: relative !important;
     left: auto !important;
     bottom: auto !important;
     flex: 0 0 auto;
+    z-index: 3;
   }
 
-  body.home-page[data-site-page="auto"] .bymy-logo-img--nav {
-    height: 36px !important;
-    max-width: 160px !important;
+  body.home-page[data-site-page="auto"] .bymy-logo-img--nav,
+  body.home-page[data-site-page="auto"] .hub-logo .bymy-logo-img--nav {
+    height: 40px !important;
+    max-width: 140px !important;
+    width: auto !important;
   }
 
+  /* Menü: fejléc közepére, logótól függetlenül */
   body.home-page[data-site-page="auto"] .hub-nav {
-    display: flex;
+    display: flex !important;
     align-items: center;
-    gap: 18px;
+    justify-content: center;
+    gap: 22px;
+    position: absolute !important;
+    left: 50% !important;
+    top: 50% !important;
+    right: auto !important;
+    bottom: auto !important;
+    transform: translate(-50%, -50%);
+    width: max-content;
+    max-width: min(52vw, 560px);
+    margin: 0 !important;
+    padding: 0 !important;
+    z-index: 1;
+    pointer-events: none;
+    overflow: visible;
+  }
+
+  body.home-page[data-site-page="auto"] .hub-nav .hub-nav-link {
+    pointer-events: auto;
   }
 
   body.home-page[data-site-page="auto"] .hub-nav-link {
@@ -122,6 +154,7 @@
     box-shadow: none !important;
     padding: 0 !important;
     background: transparent !important;
+    white-space: nowrap;
   }
 
   body.home-page[data-site-page="auto"] .hub-nav-link.active {

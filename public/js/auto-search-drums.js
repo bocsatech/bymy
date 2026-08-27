@@ -498,7 +498,7 @@ function rebindWheel(form, wheelName, options, emptyLabel = "Mindegy") {
   if (!wheel) return null;
   fillWheel(wheel, options, { emptyLabel });
   if (isMobile()) {
-    initDrumWheel(wheel, { emptyLabel });
+    initDrumWheel(wheel, { emptyLabel, openMode: "portal" });
     const live = form.querySelector(`[data-wheel="${wheelName}"]`);
     setWheelValue(live, "");
     syncDrumWheelDisplay(live);

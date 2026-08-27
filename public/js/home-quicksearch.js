@@ -2,18 +2,18 @@
  * Gyorskereső az autó hero panelen — elrendezés: GET /api/level1/form-layout?category=szemelyauto-search
  */
 
-import { applyAutoSearchLayout, readLayoutFilterValues } from "./auto-search-layout.js?v=autoDesk1";
-import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums } from "./auto-search-drums.js?v=autoDesk1";
+import { applyAutoSearchLayout, readLayoutFilterValues } from "./auto-search-layout.js?v=autoDesk2";
+import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums } from "./auto-search-drums.js?v=autoDesk2";
 import {
   mountDetailedSearch,
   readDetailedSearchValues,
   resetDetailedSearch,
-} from "./auto-detailed-search.js?v=autoDesk1";
-import { initAutoDeskSearch } from "./auto-desk-search.js?v=autoDesk1";
+} from "./auto-detailed-search.js?v=autoDesk2";
+import { initAutoDeskSearch, updateAutoDeskAccSummaries } from "./auto-desk-search.js?v=autoDesk2";
 
 const MOBILE_MQ = "(max-width: 900px)";
 
-export function initHomeQuickSearch({ onSearch = () => {} } = {}) {
+export function initHomeQuickSearch({ onSearch = () => {}, onDeskSortChange } = {}) {
   const form = document.getElementById("home-qs-form");
   if (!form) return;
 
@@ -104,6 +104,7 @@ export function initHomeQuickSearch({ onSearch = () => {} } = {}) {
 
   initAutoDeskSearch({
     mountDetailed: (f) => mountDetailedSearch(f, { force: true }),
+    onSortChange: (sort) => onDeskSortChange?.(sort),
   });
 
   form.querySelector("[data-desk-reset]")?.addEventListener("click", () => {
@@ -126,6 +127,7 @@ export function initHomeQuickSearch({ onSearch = () => {} } = {}) {
         if (el && "value" in el) el.value = urlKivitel;
       }
       setQsReady(true);
+      updateAutoDeskAccSummaries(form);
       if (statusEl) {
         statusEl.hidden = true;
         statusEl.textContent = "";
@@ -145,4 +147,4 @@ export function initHomeQuickSearch({ onSearch = () => {} } = {}) {
     });
 }
 
-export { readDetailedSearchValues } from "./auto-detailed-search.js?v=autoDesk1";
+export { readDetailedSearchValues } from "./auto-detailed-search.js?v=autoDesk2";

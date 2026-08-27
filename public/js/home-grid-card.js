@@ -45,6 +45,31 @@ export function createHomeGridCard(item) {
   const photoUrls = collectPhotoUrls(item);
   const multi = photoUrls.length > 1;
   const detailHref = listingDetailHref(item.id);
+  const desk = document.body?.getAttribute("data-site-page") === "auto";
+  const preview = item?.preview || {};
+  const form = item?.form || {};
+  const yearNum = Number(preview.filter?.gyartasi_ev);
+  const year =
+    Number.isFinite(yearNum) && yearNum > 1900
+      ? String(yearNum)
+      : (() => {
+          const m = String(preview.specLine || "").match(/\b((?:19|20)\d{2})\b/);
+          return m ? m[1] : "";
+        })();
+  const km = String(preview.km || "").trim();
+  const fuel = String(preview.filter?.uzemanyag || form.uzemanyag || "").trim();
+  const city = String(preview.telepules || form.telepules || preview.city || "").trim();
+  const subtitle = String(preview.specLine || form.modell || form.tipus || "")
+    .trim()
+    .replace(/\s*\(\d{4}(?:\/\d{1,2})?\)\s*$/u, "");
+
+  const specsHtml = desk
+    ? `<p class="home-grid-card-specs">
+        ${year ? `<span class="home-grid-card-spec" data-spec="year">${escapeHtml(year)}</span>` : ""}
+        ${km ? `<span class="home-grid-card-spec" data-spec="km">${escapeHtml(km)}</span>` : ""}
+        ${fuel ? `<span class="home-grid-card-spec" data-spec="fuel">${escapeHtml(fuel)}</span>` : ""}
+      </p>`
+    : "";
 
   card.innerHTML = `
     <div class="home-grid-card-media">
@@ -58,18 +83,27 @@ export function createHomeGridCard(item) {
              <button type="button" class="home-grid-card-photo-nav home-grid-card-photo-nav--next" aria-label="Következő kép">${ICON_CHEVRON_RIGHT}</button>`
           : ""
       }
-      <span class="home-grid-card-save" aria-hidden="true">
+      <button type="button" class="home-grid-card-save" aria-label="Kedvenc" data-desk-fav>
         <svg width="18" height="16" viewBox="0 0 18 16" fill="none" aria-hidden="true">
           <path d="M9 14.5 1.8 8.2a4.2 4.2 0 0 1 0-5.9 4 4 0 0 1 5.7 0L9 3.3l1.5-1.5a4 4 0 0 1 5.7 5.9L9 14.5Z" stroke="currentColor" stroke-width="1.4"/>
         </svg>
-      </span>
+      </button>
     </div>
     <a class="home-grid-card-body" href="${escapeHtml(detailHref)}">
       <h2 class="home-grid-card-title">${escapeHtml(title)}</h2>
+      ${desk && subtitle && subtitle !== title ? `<p class="home-grid-card-sub">${escapeHtml(subtitle)}</p>` : ""}
+      ${specsHtml}
       <strong class="home-grid-card-price">${escapeHtml(price)}</strong>
-      ${meta ? `<p class="home-grid-card-meta">${escapeHtml(meta)}</p>` : ""}
+      ${desk && city ? `<p class="home-grid-card-loc">${escapeHtml(city)}</p>` : ""}
+      ${!desk && meta ? `<p class="home-grid-card-meta">${escapeHtml(meta)}</p>` : ""}
     </a>
   `;
+
+  card.querySelector("[data-desk-fav]")?.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    event.currentTarget.classList.toggle("is-on");
+  });
 
   return card;
 }

@@ -262,6 +262,197 @@
   body.home-page[data-site-page="auto"] .auto-search-panel .auto-qs-drums--desktop .home-qs-grid {
     grid-template-columns: repeat(12, minmax(0, 1fr));
   }
+
+  /* Demó-közeli: aktív mód + CTA kiemelés (bymy accent, nem idegen brand) */
+  body.home-page[data-site-page="auto"] .auto-desk-mode__btn.is-active {
+    background: #f5c518;
+    color: #111;
+    box-shadow: none;
+  }
+
+  body.home-page[data-site-page="auto"] .home-qs-submit {
+    background: #f5c518;
+    color: #111;
+    border: 0;
+  }
+
+  body.home-page[data-site-page="auto"] .auto-search-tabs,
+  body.home-page[data-site-page="auto"] .auto-kivitel-nav {
+    display: none;
+  }
+
+  body.home-page[data-site-page="auto"] .auto-desk-results-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin: 0 0 0.85rem;
+  }
+
+  body.home-page[data-site-page="auto"] .auto-desk-results-bar__tools {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  body.home-page[data-site-page="auto"] .auto-desk-sort {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.88rem;
+  }
+
+  body.home-page[data-site-page="auto"] .auto-desk-sort__label {
+    color: color-mix(in srgb, CanvasText 55%, transparent);
+    white-space: nowrap;
+  }
+
+  body.home-page[data-site-page="auto"] .auto-desk-sort select {
+    font: inherit;
+    border-radius: 8px;
+    border: 1px solid color-mix(in srgb, CanvasText 16%, transparent);
+    background: Canvas;
+    color: CanvasText;
+    padding: 0.4rem 0.55rem;
+  }
+
+  body.home-page[data-site-page="auto"] .auto-desk-view {
+    display: inline-flex;
+    gap: 0.25rem;
+    padding: 0.2rem;
+    border-radius: 8px;
+    background: color-mix(in srgb, CanvasText 6%, Canvas);
+  }
+
+  body.home-page[data-site-page="auto"] .auto-desk-view__btn {
+    appearance: none;
+    border: 0;
+    width: 2.1rem;
+    height: 2.1rem;
+    border-radius: 6px;
+    background: transparent;
+    color: color-mix(in srgb, CanvasText 65%, transparent);
+    cursor: pointer;
+    font-size: 1rem;
+    line-height: 1;
+  }
+
+  body.home-page[data-site-page="auto"] .auto-desk-view__btn.is-active {
+    background: Canvas;
+    color: CanvasText;
+    box-shadow: 0 0 0 1px color-mix(in srgb, CanvasText 12%, transparent);
+  }
+
+  body.home-page[data-site-page="auto"] #home-grid-track {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  body.home-page[data-site-page="auto"] #home-grid-track.is-list-view {
+    grid-template-columns: 1fr;
+  }
+
+  body.home-page[data-site-page="auto"] #home-grid-track.is-list-view .home-grid-card {
+    display: grid;
+    grid-template-columns: 220px minmax(0, 1fr);
+    align-items: stretch;
+  }
+
+  body.home-page[data-site-page="auto"] #home-grid-track.is-list-view .home-grid-card-media {
+    min-height: 160px;
+    aspect-ratio: auto;
+  }
+
+  body.home-page[data-site-page="auto"] .home-grid-card-save {
+    cursor: pointer;
+    z-index: 2;
+  }
+
+  body.home-page[data-site-page="auto"] .home-grid-card-save.is-on {
+    color: #e11d48;
+  }
+
+  body.home-page[data-site-page="auto"] .home-grid-card-save.is-on path {
+    fill: currentColor;
+  }
+
+  body.home-page[data-site-page="auto"] .home-grid-card-title {
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    font-size: 0.98rem;
+  }
+
+  body.home-page[data-site-page="auto"] .home-grid-card-sub {
+    margin: 0;
+    font-size: 0.82rem;
+    color: color-mix(in srgb, CanvasText 55%, transparent);
+    line-height: 1.25;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  body.home-page[data-site-page="auto"] .home-grid-card-specs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem 0.75rem;
+    margin: 0.15rem 0 0.1rem;
+  }
+
+  body.home-page[data-site-page="auto"] .home-grid-card-spec {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.28rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: color-mix(in srgb, CanvasText 62%, transparent);
+  }
+
+  body.home-page[data-site-page="auto"] .home-grid-card-spec::before {
+    content: "";
+    width: 0.7rem;
+    height: 0.7rem;
+    border-radius: 2px;
+    background: color-mix(in srgb, CanvasText 35%, transparent);
+    flex: 0 0 auto;
+  }
+
+  body.home-page[data-site-page="auto"] .home-grid-card-spec[data-spec="year"]::before {
+    clip-path: polygon(20% 15%, 80% 15%, 80% 30%, 90% 30%, 90% 85%, 10% 85%, 10% 30%, 20% 30%);
+  }
+
+  body.home-page[data-site-page="auto"] .home-grid-card-price {
+    color: #111;
+    font-size: 1.2rem;
+    margin-top: 0.2rem;
+  }
+
+  html[data-theme="dark"] body.home-page[data-site-page="auto"] .home-grid-card-price {
+    color: #f5c518;
+  }
+
+  body.home-page[data-site-page="auto"] .home-grid-card-loc {
+    margin: 0;
+    font-size: 0.8rem;
+    color: color-mix(in srgb, CanvasText 50%, transparent);
+  }
+
+  body.home-page[data-site-page="auto"] .home-grid-card-loc::before {
+    content: "";
+    display: inline-block;
+    width: 0.55rem;
+    height: 0.55rem;
+    margin-right: 0.35rem;
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+    background: color-mix(in srgb, CanvasText 45%, transparent);
+    vertical-align: middle;
+  }
 }
 
 /* Mobil: desk UI elemek elrejtve */
@@ -281,5 +472,11 @@
     border: 0;
     background: transparent;
     margin: 0;
+  }
+}
+
+@media (min-width: 901px) and (max-width: 1100px) {
+  body.home-page[data-site-page="auto"] #home-grid-track:not(.is-list-view) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

@@ -1,5 +1,5 @@
 import { fetchListings } from "./db-client.js?v=teherVert1";
-import { createHomeGridCard, initHomeGridCardPhotos } from "./home-grid-card.js?v=coverAll1";
+import { createHomeGridCard, initHomeGridCardPhotos } from "./home-grid-card.js?v=autoDesk2";
 import {
   emptyFilters,
   filterListingsBySidebar,
@@ -7,9 +7,9 @@ import {
   initHomeSearchSidebar,
   initHomeFilterCatalog,
 } from "./home-search-filter.js?v=korzetFix1";
-import { initHomeQuickSearch } from "./home-quicksearch.js?v=autoDesk1";
-import { matchDetailedSearch, hasActiveDetailedSearch } from "./auto-detailed-search.js?v=autoDesk1";
-import { updateAutoDeskResultCount } from "./auto-desk-search.js?v=autoDesk1";
+import { initHomeQuickSearch } from "./home-quicksearch.js?v=autoDesk2";
+import { matchDetailedSearch, hasActiveDetailedSearch } from "./auto-detailed-search.js?v=autoDesk2";
+import { updateAutoDeskResultCount } from "./auto-desk-search.js?v=autoDesk2";
 import {
   emptyIngatlanFilters,
   filterListingsByIngatlan,
@@ -40,6 +40,7 @@ let statsFilter = null;
 /** Gyorskeresőből jövő körzet-szűrő (ne ütközzön a stats sáv / ?nearby= URL-lel). */
 let quickRadiusFilter = null;
 let detailedFilters = null;
+let deskSort = "newest";
 
 const PAGE = document.body?.getAttribute("data-site-page") || "";
 if (gridTrack) bindListingOpen(gridTrack);
@@ -104,6 +105,32 @@ function sortForHome(items) {
   });
 }
 
+function listingPriceNum(item) {
+  const raw = String(item?.preview?.price ?? item?.form?.vetelar ?? "").replace(/\D/g, "");
+  const n = Number(raw);
+  return Number.isFinite(n) ? n : null;
+}
+
+function listingKmNum(item) {
+  const raw = String(item?.preview?.km ?? item?.form?.km ?? "").replace(/\D/g, "");
+  const n = Number(raw);
+  return Number.isFinite(n) ? n : null;
+}
+
+function sortDeskListings(items) {
+  const list = [...items];
+  if (deskSort === "price-asc") {
+    return list.sort((a, b) => (listingPriceNum(a) ?? Infinity) - (listingPriceNum(b) ?? Infinity));
+  }
+  if (deskSort === "price-desc") {
+    return list.sort((a, b) => (listingPriceNum(b) ?? -1) - (listingPriceNum(a) ?? -1));
+  }
+  if (deskSort === "km-asc") {
+    return list.sort((a, b) => (listingKmNum(a) ?? Infinity) - (listingKmNum(b) ?? Infinity));
+  }
+  return sortForHome(list);
+}
+
 function listingSubtype(item) {
   return String(
     item?.preview?.filter?.hirdetes_alkategoria ?? item?.form?.hirdetes_alkategoria ?? ""
@@ -146,7 +173,8 @@ function renderListings(items) {
 
   gridTrack.innerHTML = "";
 
-  const filtered = filterItems(items);
+  const filtered =
+    PAGE === "auto" ? sortDeskListings(filterItems(items)) : filterItems(items);
   emptyEl.hidden = filtered.length > 0;
   if (!filtered.length && (statsFilter || quickRadiusFilter)) {
     emptyEl.hidden = false;
@@ -328,6 +356,10 @@ if (PAGE === "ingatlan") {
 
       applyFilters();
       if (postal.length === 4 && radiusKm > 0) scrollToListings();
+    },
+    onDeskSortChange: (sort) => {
+      deskSort = sort || "newest";
+      applyFilters();
     },
   });
 }

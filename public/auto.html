@@ -62,8 +62,8 @@
     <link rel="stylesheet" href="/css/hub-mobile-app.css?v=tileFill3" />
     <link rel="stylesheet" href="/css/home.css?v=coverAll1" />
     <link rel="stylesheet" href="/css/listing-photo-cover.css?v=coverAll1" />
-    <link rel="stylesheet" href="/css/auto-hero.css?v=autoDesk1" />
-    <link rel="stylesheet" href="/css/auto-desk-layout.css?v=autoDesk1" />
+    <link rel="stylesheet" href="/css/auto-hero.css?v=autoDesk2" />
+    <link rel="stylesheet" href="/css/auto-desk-layout.css?v=autoDesk2" />
     <link rel="stylesheet" href="/css/ingatlan-search.css?v=autoDrums15" />
     <style id="home-scroll-fix">
       /* Inline: cache-biztos — a teljes oldal görget, külön görgetősáv nincs sehol. */
@@ -426,6 +426,21 @@
         <section class="site-center home-center" aria-label="Hirdetések">
           <div class="auto-desk-results-bar">
             <p class="auto-desk-results-bar__count" data-desk-result-count>0 találat</p>
+            <div class="auto-desk-results-bar__tools">
+              <label class="auto-desk-sort">
+                <span class="auto-desk-sort__label">Rendezés</span>
+                <select data-desk-sort aria-label="Rendezés">
+                  <option value="newest" selected>Legfrissebbek elöl</option>
+                  <option value="price-asc">Ár szerint növekvő</option>
+                  <option value="price-desc">Ár szerint csökkenő</option>
+                  <option value="km-asc">Km szerint növekvő</option>
+                </select>
+              </label>
+              <div class="auto-desk-view" role="group" aria-label="Nézet">
+                <button type="button" class="auto-desk-view__btn is-active" data-desk-view="grid" aria-label="Rácsnézet" title="Rács">▦</button>
+                <button type="button" class="auto-desk-view__btn" data-desk-view="list" aria-label="Listanézet" title="Lista">☰</button>
+              </div>
+            </div>
           </div>
           <section class="home-category-bar" id="home-category-bar" aria-label="Autó kategóriák"></section>
           <div class="home-listings-panel">
@@ -462,7 +477,7 @@
       </div>
     </main>
 
-    <script src="/js/home-app.js?v=autoDesk1" type="module"></script>
+    <script src="/js/home-app.js?v=autoDesk2" type="module"></script>
     <script src="/js/auto-hero.js?v=searchCollapse1" type="module"></script>
     <script src="/js/auto-kivitel-menu.js?v=kivitelAdmin1" type="module"></script>
     <script src="/js/site-avatar-menu.js?v=settingsOpen1" type="module"></script>

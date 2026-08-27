@@ -425,7 +425,11 @@ export function mountIngatlanWheelBoard(root, schema, { onChange, readOnly = fal
     function moveItem(item, direction) {
       const section = item.kind === "dual" ? item.tol.section : item.cell.section;
       const items = displayItems(section);
-      const index = items.indexOf(item);
+      const index = items.findIndex((entry) =>
+        item.kind === "dual"
+          ? entry.kind === "dual" && entry.group.id === item.group.id
+          : entry.kind === "cell" && entry.cell.field_key === item.cell.field_key
+      );
       const target = index + direction;
       if (index < 0 || target < 0 || target >= items.length) return false;
       const rowOf = (entry) => Number(entry.kind === "dual" ? entry.tol.row : entry.cell.row) || 1;

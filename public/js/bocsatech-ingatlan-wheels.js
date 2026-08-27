@@ -242,6 +242,10 @@ export function mountIngatlanWheelBoard(root, schema, { onChange, readOnly = fal
         <span class="layout-width-btn" data-width-delta="1" title="Szélesebb">+</span>
         <span class="layout-width-btn layout-width-btn--full" data-width-full="1" title="Teljes szélesség (12/12)">12</span>
       </span>
+      <span class="layout-order-btns" data-order-btns="1">
+        <button type="button" class="layout-width-btn" data-order-delta="-1" title="Fel" aria-label="Mező feljebb">↑</button>
+        <button type="button" class="layout-width-btn" data-order-delta="1" title="Le" aria-label="Mező lejjebb">↓</button>
+      </span>
       <span class="layout-del" data-del="1" title="Törlés">×</span>
       <span class="layout-resize" data-resize="1" title="Húzd jobbra/balra · Dupla katt: 12/12"></span>`;
     }
@@ -254,6 +258,10 @@ export function mountIngatlanWheelBoard(root, schema, { onChange, readOnly = fal
         <span class="layout-width-btn layout-width-btn--full" data-width-full="1" title="Teljes szélesség (12/12)">12</span>
       </span>`
     }
+      <span class="layout-order-btns" data-order-btns="1">
+        <button type="button" class="layout-width-btn" data-order-delta="-1" title="Fel" aria-label="Mező feljebb">↑</button>
+        <button type="button" class="layout-width-btn" data-order-delta="1" title="Le" aria-label="Mező lejjebb">↓</button>
+      </span>
       <span class="layout-del" data-del="1" title="Törlés">×</span>
       ${spacer ? "" : `<span class="layout-resize" data-resize="1" title="Húzd jobbra/balra · Dupla katt: 12/12"></span>`}`;
   }
@@ -413,6 +421,29 @@ export function mountIngatlanWheelBoard(root, schema, { onChange, readOnly = fal
     } else {
       cell.hidden = true;
     }
+
+    function moveItem(item, direction) {
+      const section = item.kind === "dual" ? item.tol.section : item.cell.section;
+      const items = displayItems(section);
+      const index = items.indexOf(item);
+      const target = index + direction;
+      if (index < 0 || target < 0 || target >= items.length) return false;
+      const rowOf = (entry) => Number(entry.kind === "dual" ? entry.tol.row : entry.cell.row) || 1;
+      const currentRow = rowOf(item);
+      const targetRow = rowOf(items[target]);
+      const setRow = (entry, row) => {
+        if (entry.kind === "dual") {
+          entry.tol.row = row;
+          entry.ig.row = row;
+        } else {
+          entry.cell.row = row;
+        }
+      };
+      setRow(item, targetRow);
+      setRow(items[target], currentRow);
+      compactSection(section);
+      return true;
+    }
   }
 
   function bind() {
@@ -426,6 +457,20 @@ export function mountIngatlanWheelBoard(root, schema, { onChange, readOnly = fal
         const group = dualId ? INGATLAN_DUAL_RANGE_GROUPS.find((g) => g.id === dualId) : null;
         const tol = group ? byKey(group.tolKey) : null;
         const ig = group ? byKey(group.igKey) : null;
+
+        const orderBtn = event.target.closest("[data-order-delta]");
+        if (orderBtn) {
+          event.preventDefault();
+          event.stopPropagation();
+          const item = group
+            ? { kind: "dual", group, tol, ig }
+            : { kind: "cell", cell: byKey(tile.getAttribute("data-field")) };
+          if (moveItem(item, Number(orderBtn.getAttribute("data-order-delta")) || 0)) {
+            notify();
+            mount();
+          }
+          return;
+        }
 
         if (event.target.closest("[data-del]")) {
           event.preventDefault();

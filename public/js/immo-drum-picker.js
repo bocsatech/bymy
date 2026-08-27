@@ -6,7 +6,7 @@
  * Cellába kattintás: érték (többesnél toggle) + bezárás.
  */
 
-import { readWheel, readWheelList, setWheelValue, lockPageScroll, unlockPageScroll } from "./ingatlan-wheels.js?v=drumScroll7";
+import { readWheel, readWheelList, setWheelValue, lockPageScroll, unlockPageScroll } from "./ingatlan-wheels.js?v=drumScrollFix1";
 
 const ITEM_H = 40;
 /** Pontosan 3 sor: fent / közép / lent */
@@ -81,51 +81,44 @@ function setDrumOpen(wrap, open) {
   else wrap.classList.toggle("has-drum-open", open);
 }
 
-/** Gyűrű közepe — a kijelölt sor mindig ide igazodik. */
-function centerY(wrap) {
-  const ring = wrap.querySelector(".immo-drum-wheel-ring");
-  if (ring && !wrap.querySelector(".immo-drum-inline")?.hidden) {
-    const r = ring.getBoundingClientRect();
-    if (r.height > 0) return r.top + r.height / 2;
-  }
-  const anchor = cellAnchor(wrap);
-  const a = anchor.getBoundingClientRect();
-  return a.top + a.height / 2;
-}
-
-function nearestItem(scrollEl, wrap) {
-  const midY = centerY(wrap);
-  let best = null;
-  let bestDist = Infinity;
-  scrollEl.querySelectorAll(".immo-drum-inline-item").forEach((item) => {
-    const r = item.getBoundingClientRect();
-    const mid = r.top + r.height / 2;
-    const dist = Math.abs(mid - midY);
-    if (dist < bestDist) {
-      bestDist = dist;
-      best = item;
-    }
-  });
-  return best;
-}
-
 function itemHeight(scrollEl) {
   const n = Number(scrollEl?.dataset?.itemH);
   return Number.isFinite(n) && n > 0 ? n : ITEM_H;
 }
 
-function paintInline(scrollEl, wrap) {
+function itemsOf(scrollEl) {
+  return [...scrollEl.querySelectorAll(".immo-drum-inline-item")];
+}
+
+/** padding-top = itemH mellett: scrollTop = index * itemH → a sor a gyűrű közepén. */
+function scrollToIndex(scrollEl, index) {
+  const items = itemsOf(scrollEl);
+  if (!items.length) return;
+  const itemH = itemHeight(scrollEl);
+  const i = Math.max(0, Math.min(items.length - 1, Number(index) || 0));
+  scrollEl.scrollTop = i * itemH;
+}
+
+function nearestIndex(scrollEl) {
+  const items = itemsOf(scrollEl);
+  if (!items.length) return 0;
+  const itemH = itemHeight(scrollEl);
+  return Math.max(0, Math.min(items.length - 1, Math.round(scrollEl.scrollTop / itemH)));
+}
+
+function nearestItem(scrollEl) {
+  return itemsOf(scrollEl)[nearestIndex(scrollEl)] || null;
+}
+
+function paintInline(scrollEl) {
   cancelAnimationFrame(paintFrame);
   paintFrame = requestAnimationFrame(() => {
-    const midY = centerY(wrap);
     const itemH = itemHeight(scrollEl);
-    const band = itemH * 0.55;
-    scrollEl.querySelectorAll(".immo-drum-inline-item").forEach((item) => {
-      const r = item.getBoundingClientRect();
-      const mid = r.top + r.height / 2;
-      const dist = Math.abs(mid - midY);
-      const inCenter = dist <= band;
-      const t = Math.min(dist / (itemH * 1.15), 1);
+    const centerIdx = itemH > 0 ? scrollEl.scrollTop / itemH : 0;
+    itemsOf(scrollEl).forEach((item, i) => {
+      const dist = Math.abs(i - centerIdx);
+      const inCenter = dist <= 0.45;
+      const t = Math.min(dist / 1.15, 1);
       let opacity = 1 - t * 0.55;
       if (inCenter) opacity = 1;
       item.style.opacity = String(Math.max(0.22, opacity));
@@ -135,37 +128,35 @@ function paintInline(scrollEl, wrap) {
   });
 }
 
-function scrollToItem(scrollEl, wrap, item) {
+function scrollToItem(scrollEl, item) {
   if (!item || !scrollEl) return;
-  const midY = centerY(wrap);
-  const itemRect = item.getBoundingClientRect();
-  const itemMid = itemRect.top + itemRect.height / 2;
-  scrollEl.scrollTop += itemMid - midY;
+  const idx = itemsOf(scrollEl).indexOf(item);
+  if (idx < 0) return;
+  scrollToIndex(scrollEl, idx);
 }
 
-function snapToNearest(scrollEl, wrap) {
-  const item = nearestItem(scrollEl, wrap);
-  if (!item) return;
-  scrollToItem(scrollEl, wrap, item);
-  paintInline(scrollEl, wrap);
+function snapToNearest(scrollEl) {
+  scrollToIndex(scrollEl, nearestIndex(scrollEl));
+  paintInline(scrollEl);
 }
 
 function scheduleSnap(scrollEl, wrap) {
   window.clearTimeout(snapTimer);
   snapTimer = window.setTimeout(() => {
     if (!wrap.classList.contains("is-open")) return;
-    snapToNearest(scrollEl, wrap);
-  }, 140);
+    snapToNearest(scrollEl);
+  }, 120);
 }
 
 function syncWheelRingWidth(ring, scrollEl) {
   let max = 0;
-  scrollEl.querySelectorAll(".immo-drum-inline-item").forEach((item) => {
+  const itemH = itemHeight(scrollEl);
+  itemsOf(scrollEl).forEach((item) => {
+    item.style.height = `${itemH}px`;
     max = Math.max(max, item.scrollWidth);
   });
-  const w = Math.ceil(max + 28);
+  const w = Math.max(72, Math.ceil(max + 28));
   ring.style.setProperty("--immo-drum-ring-w", `${w}px`);
-  const itemH = itemHeight(scrollEl);
   const ringH = itemH * VISIBLE_ROWS;
   ring.style.setProperty("--immo-drum-ring-h", `${ringH}px`);
   ring.style.setProperty("--immo-drum-item-h", `${itemH}px`);
@@ -192,58 +183,69 @@ function setDrumFormState(open) {
   else unlockPageScroll(true);
 }
 
-function bindDrumTouchPan(scrollEl, ring, wrap) {
+/**
+ * Asztali egérhúzás. Touch: a page-scroll lock `onLockedTouchMove` görgeti
+ * (ne kétszer alkalmazzuk a dy-t).
+ */
+function bindDrumPan(scrollEl, ring, wrap) {
   if (!scrollEl || !ring || ring.dataset.panBound === "1") return;
   ring.dataset.panBound = "1";
 
-  let lastY = 0;
-  let active = false;
+  let dragging = false;
   let moved = false;
-  let totalDy = 0;
+  let lastY = 0;
+  let startY = 0;
+  let pointerId = null;
 
-  ring.addEventListener(
-    "touchstart",
-    (event) => {
-      if (!event.touches?.[0]) return;
-      lastY = event.touches[0].clientY;
-      active = true;
-      moved = false;
-      totalDy = 0;
-      delete ring.dataset.drumDragged;
-    },
-    { passive: true }
-  );
+  ring.addEventListener("pointerdown", (event) => {
+    if (event.pointerType !== "mouse") return;
+    if (event.button != null && event.button !== 0) return;
+    dragging = true;
+    moved = false;
+    lastY = event.clientY;
+    startY = event.clientY;
+    pointerId = event.pointerId;
+    delete ring.dataset.drumDragged;
+  });
 
-  ring.addEventListener(
-    "touchmove",
-    (event) => {
-      if (!active || !event.touches?.[0]) return;
-      const y = event.touches[0].clientY;
-      const dy = y - lastY;
-      lastY = y;
-      if (!dy) return;
-      totalDy += Math.abs(dy);
-      if (totalDy > 10) moved = true;
-      event.preventDefault();
-      scrollEl.scrollTop -= dy;
-      ring.dataset.drumDragged = moved ? "1" : "";
-      paintInline(scrollEl, wrap);
-    },
-    { passive: false }
-  );
+  ring.addEventListener("pointermove", (event) => {
+    if (!dragging || event.pointerId !== pointerId) return;
+    const dy = event.clientY - lastY;
+    lastY = event.clientY;
+    if (Math.abs(event.clientY - startY) > 8) {
+      moved = true;
+      ring.dataset.drumDragged = "1";
+      try {
+        ring.setPointerCapture(event.pointerId);
+      } catch {
+        /* ignore */
+      }
+    }
+    if (!moved || !dy) return;
+    event.preventDefault();
+    scrollEl.scrollTop -= dy;
+    paintInline(scrollEl);
+  });
 
-  const end = () => {
-    active = false;
+  const endDrag = (event) => {
+    if (!dragging || (pointerId != null && event.pointerId !== pointerId)) return;
+    dragging = false;
+    pointerId = null;
+    try {
+      ring.releasePointerCapture(event.pointerId);
+    } catch {
+      /* ignore */
+    }
     if (moved) {
       ring.dataset.drumDragged = "1";
       scheduleSnap(scrollEl, wrap);
       window.setTimeout(() => {
         delete ring.dataset.drumDragged;
-      }, 200);
+      }, 180);
     }
   };
-  ring.addEventListener("touchend", end);
-  ring.addEventListener("touchcancel", end);
+  ring.addEventListener("pointerup", endDrag);
+  ring.addEventListener("pointercancel", endDrag);
 }
 
 function refreshDrumItemStates(scrollEl, wheel) {
@@ -264,7 +266,7 @@ function commitWrap(wrap, wheel) {
     syncDrumWheelDisplay(wheel);
     return;
   }
-  const item = nearestItem(scrollEl, wrap);
+  const item = nearestItem(scrollEl);
   const value = item?.dataset.value ?? "";
   setWheelValue(wheel, value);
   syncDrumWheelDisplay(wheel);
@@ -335,20 +337,19 @@ function openInlineDrum(wrap, wheel, trigger) {
   const start = findStartItem(scrollEl, wheel);
 
   scrollEl.onscroll = () => {
-    paintInline(scrollEl, wrap);
-    /* Ne snap-eljen görgetés közben — csak megállás után. */
+    paintInline(scrollEl);
     scheduleSnap(scrollEl, wrap);
   };
 
-  bindDrumTouchPan(scrollEl, ring, wrap);
+  bindDrumPan(scrollEl, ring, wrap);
 
   const multiple = wheel.dataset.multiple === "1";
 
   function selectItem(item) {
     if (!item || ring.dataset.drumDragged === "1") return;
     const v = item.dataset.value ?? "";
-    scrollToItem(scrollEl, wrap, item);
-    paintInline(scrollEl, wrap);
+    scrollToItem(scrollEl, item);
+    paintInline(scrollEl);
     if (multiple) {
       if (v === "") {
         setWheelValue(wheel, "");
@@ -372,8 +373,7 @@ function openInlineDrum(wrap, wheel, trigger) {
   }
 
   scrollEl.querySelectorAll(".immo-drum-inline-item").forEach((item) => {
-    item.addEventListener("pointerup", (event) => {
-      if (event.button != null && event.button !== 0) return;
+    item.addEventListener("click", (event) => {
       event.preventDefault();
       event.stopPropagation();
       selectItem(item);
@@ -390,8 +390,8 @@ function openInlineDrum(wrap, wheel, trigger) {
 
   const centerStart = () => {
     syncWheelRingWidth(ring, scrollEl);
-    scrollToItem(scrollEl, wrap, start);
-    paintInline(scrollEl, wrap);
+    scrollToItem(scrollEl, start);
+    paintInline(scrollEl);
   };
   requestAnimationFrame(() => {
     centerStart();

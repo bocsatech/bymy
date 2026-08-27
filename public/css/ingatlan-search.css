@@ -880,14 +880,14 @@ input.immo-wheel-custom.immo-wheel-trigger {
     bottom: 0;
     overflow-x: hidden;
     overflow-y: auto;
-    scroll-snap-type: y mandatory;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: none;
     overscroll-behavior-y: none;
     scrollbar-width: none;
-    padding: var(--immo-drum-item-h, 2.5rem) 0.35rem;
+    padding: var(--immo-drum-item-h, 40px) 0.35rem;
     box-sizing: border-box;
     z-index: 2;
+    touch-action: pan-y;
   }
 
   .immo-drum-inline-scroll::-webkit-scrollbar {
@@ -904,10 +904,9 @@ input.immo-wheel-custom.immo-wheel-trigger {
     color: #0f172a;
     font: 500 1rem/1 Inter, system-ui, sans-serif;
     font-variant-numeric: tabular-nums;
-    scroll-snap-align: center;
-    scroll-snap-stop: always;
     white-space: nowrap;
     opacity: 0.25;
+    cursor: pointer;
   }
 
   .immo-drum-inline-item--photo {
@@ -1366,14 +1365,14 @@ input.immo-wheel-custom.immo-wheel-trigger {
     bottom: 0;
     overflow-x: hidden;
     overflow-y: auto;
-    scroll-snap-type: y mandatory;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: none;
     overscroll-behavior-y: none;
     scrollbar-width: none;
-    padding: var(--immo-drum-item-h, 2.5rem) 0.35rem;
+    padding: var(--immo-drum-item-h, 40px) 0.35rem;
     box-sizing: border-box;
     z-index: 2;
+    touch-action: pan-y;
   }
 
   .immo-drum-inline-scroll::-webkit-scrollbar {
@@ -1390,10 +1389,9 @@ input.immo-wheel-custom.immo-wheel-trigger {
     color: #0f172a;
     font: 500 1rem/1 Inter, system-ui, sans-serif;
     font-variant-numeric: tabular-nums;
-    scroll-snap-align: center;
-    scroll-snap-stop: always;
     white-space: nowrap;
     opacity: 0.25;
+    cursor: pointer;
   }
 
   .immo-drum-inline-item--photo {

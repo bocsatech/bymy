@@ -72,12 +72,26 @@ function onLockedTouchMove(event) {
   if (!scrollEl || !dy) return;
   /* Ujj lefelé → tartalom lefelé (természetes iOS picker) */
   scrollEl.scrollTop -= dy;
+  const ring = scrollEl.closest(".immo-drum-wheel-ring");
+  if (ring && Math.abs(dy) > 0) {
+    ring.dataset.drumDragged = "1";
+    window.clearTimeout(ring._drumDragClear);
+    ring._drumDragClear = window.setTimeout(() => {
+      delete ring.dataset.drumDragged;
+    }, 200);
+  }
 }
 
 function onLockedWheel(event) {
   if (!pageScrollLocked) return;
   event.preventDefault();
-  const scrollEl = isScrollableWheel(event.target);
+  let scrollEl = isScrollableWheel(event.target);
+  if (!scrollEl) {
+    scrollEl = document.querySelector(".immo-wheel-wrap--drum-inline.is-open .immo-drum-inline-scroll");
+  }
+  if (!scrollEl) {
+    scrollEl = document.querySelector(".immo-wheel-wrap--menu.is-open .immo-wheel--menu");
+  }
   if (!scrollEl) return;
   scrollEl.scrollTop += event.deltaY;
 }

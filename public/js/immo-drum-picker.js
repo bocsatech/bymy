@@ -6,7 +6,7 @@
  * Cellába kattintás: érték (többesnél toggle) + bezárás.
  */
 
-import { readWheel, readWheelList, setWheelValue, lockPageScroll, unlockPageScroll } from "./ingatlan-wheels.js?v=drumScrollFix1";
+import { readWheel, readWheelList, setWheelValue, lockPageScroll, unlockPageScroll } from "./ingatlan-wheels.js?v=drumCellCenter1";
 
 const ITEM_H = 40;
 /** Pontosan 3 sor: fent / közép / lent */
@@ -151,17 +151,22 @@ function scheduleSnap(scrollEl, wrap) {
 function syncWheelRingWidth(ring, scrollEl) {
   let max = 0;
   const itemH = itemHeight(scrollEl);
+  const ringH = itemH * VISIBLE_ROWS;
   itemsOf(scrollEl).forEach((item) => {
     item.style.height = `${itemH}px`;
+    item.style.minHeight = `${itemH}px`;
+    item.style.boxSizing = "border-box";
     max = Math.max(max, item.scrollWidth);
   });
   const w = Math.max(72, Math.ceil(max + 28));
   ring.style.setProperty("--immo-drum-ring-w", `${w}px`);
-  const ringH = itemH * VISIBLE_ROWS;
   ring.style.setProperty("--immo-drum-ring-h", `${ringH}px`);
   ring.style.setProperty("--immo-drum-item-h", `${itemH}px`);
+  ring.style.width = `${w}px`;
+  ring.style.height = `${ringH}px`;
   scrollEl.style.paddingTop = `${itemH}px`;
   scrollEl.style.paddingBottom = `${itemH}px`;
+  scrollEl.style.height = `${ringH}px`;
 }
 
 function setDrumFormState(open) {
@@ -184,8 +189,8 @@ function setDrumFormState(open) {
 }
 
 /**
- * Asztali egérhúzás. Touch: a page-scroll lock `onLockedTouchMove` görgeti
- * (ne kétszer alkalmazzuk a dy-t).
+ * Húzás (egér + touch) — a page scroll lock mellett is görgethető.
+ * Touch-nál a lock handler csak preventDefault-ol, a dy itt megy.
  */
 function bindDrumPan(scrollEl, ring, wrap) {
   if (!scrollEl || !ring || ring.dataset.panBound === "1") return;
@@ -198,7 +203,6 @@ function bindDrumPan(scrollEl, ring, wrap) {
   let pointerId = null;
 
   ring.addEventListener("pointerdown", (event) => {
-    if (event.pointerType !== "mouse") return;
     if (event.button != null && event.button !== 0) return;
     dragging = true;
     moved = false;
@@ -293,10 +297,14 @@ function closeAllInlineDrums(commit = true) {
   });
 }
 
-function populateInlineScroll(scrollEl, wheel) {
+function populateInlineScroll(scrollEl, wheel, wrap) {
   const opts = [...wheel.querySelectorAll(".immo-wheel-opt")];
   const withPhoto = opts.some((btn) => Boolean(btn.dataset.image));
-  scrollEl.dataset.itemH = withPhoto ? "48" : String(ITEM_H);
+  /* Sor magasság = cella magasság → a kijelölt érték pontosan a cellában van. */
+  const cellH = Math.round(
+    wrap?.querySelector(".immo-wheel-trigger")?.getBoundingClientRect().height || ITEM_H
+  );
+  scrollEl.dataset.itemH = String(withPhoto ? Math.max(48, cellH) : Math.max(ITEM_H, cellH));
   scrollEl.innerHTML = opts
     .map((btn) => {
       const v = btn.dataset.value ?? "";
@@ -332,12 +340,13 @@ function openInlineDrum(wrap, wheel, trigger) {
   const drum = ensureInlineDrum(wrap);
   const ring = drum.querySelector(".immo-drum-wheel-ring");
   const scrollEl = drum.querySelector(".immo-drum-inline-scroll");
-  populateInlineScroll(scrollEl, wheel);
+  populateInlineScroll(scrollEl, wheel, wrap);
 
   const start = findStartItem(scrollEl, wheel);
 
   scrollEl.onscroll = () => {
     paintInline(scrollEl);
+    if (ring.dataset.drumDragged === "1") return;
     scheduleSnap(scrollEl, wrap);
   };
 

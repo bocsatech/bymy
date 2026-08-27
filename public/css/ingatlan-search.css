@@ -668,6 +668,11 @@ input.immo-wheel-custom.immo-wheel-trigger {
     overflow: visible;
   }
 
+  body.immo-drum-active .immo-schema-grid,
+  body.immo-price-drum-active .immo-schema-grid {
+    overflow: visible !important;
+  }
+
   .immo-dual-range:has(.immo-wheel-wrap--menu.is-open) {
     z-index: 45;
   }
@@ -776,12 +781,12 @@ input.immo-wheel-custom.immo-wheel-trigger {
     pointer-events: none;
   }
 
-  /* Ár / alapterület fél: dobkerék középre a cellában (3 sor, single) */
+  /* Ár / alapterület: a cella = kerék közepe (számok egymás felett, nem lebegő ablak) */
   .immo-dual-range__half .immo-drum-inline {
-    left: 50%;
+    left: 0.75rem;
     right: auto;
     top: 50%;
-    transform: translate(-50%, -50%);
+    transform: translateY(-50%);
     z-index: 70;
   }
 
@@ -817,10 +822,10 @@ input.immo-wheel-custom.immo-wheel-trigger {
     pointer-events: none;
   }
 
-  /* Kerék gyűrű — számok egymás felett, csak a gyűrűben látszanak */
+  /* Kerék gyűrű — számok egymás felett; a közép sor = a cella */
   .immo-drum-inline {
     position: absolute;
-    left: 0;
+    left: 0.75rem;
     top: 50%;
     bottom: auto;
     transform: translateY(-50%);
@@ -1118,6 +1123,11 @@ input.immo-wheel-custom.immo-wheel-trigger {
     overflow: visible;
   }
 
+  body.immo-drum-active .immo-schema-grid,
+  body.immo-price-drum-active .immo-schema-grid {
+    overflow: visible !important;
+  }
+
   .immo-dual-range-block {
     min-width: 0;
     max-width: 100%;
@@ -1264,12 +1274,12 @@ input.immo-wheel-custom.immo-wheel-trigger {
     pointer-events: none;
   }
 
-  /* Ár / alapterület fél: dobkerék középre a cellában (3 sor, single) */
+  /* Ár / alapterület: a cella = kerék közepe (számok egymás felett, nem lebegő ablak) */
   .immo-dual-range__half .immo-drum-inline {
-    left: 50%;
+    left: 0.75rem;
     right: auto;
     top: 50%;
-    transform: translate(-50%, -50%);
+    transform: translateY(-50%);
     z-index: 70;
   }
 
@@ -1306,7 +1316,7 @@ input.immo-wheel-custom.immo-wheel-trigger {
 
   .immo-drum-inline {
     position: absolute;
-    left: 0;
+    left: 0.75rem;
     top: 50%;
     bottom: auto;
     transform: translateY(-50%);

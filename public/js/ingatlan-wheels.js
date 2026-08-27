@@ -70,16 +70,15 @@ function onLockedTouchMove(event) {
     scrollEl = document.querySelector(".immo-wheel-wrap--drum-inline.is-open .immo-drum-inline-scroll");
   }
   if (!scrollEl || !dy) return;
+  /* Dobkerék: a pointer-pan görget — ne duplázzuk a dy-t. */
+  if (
+    scrollEl.classList?.contains("immo-drum-inline-scroll") ||
+    scrollEl.closest?.(".immo-drum-wheel-ring")
+  ) {
+    return;
+  }
   /* Ujj lefelé → tartalom lefelé (természetes iOS picker) */
   scrollEl.scrollTop -= dy;
-  const ring = scrollEl.closest(".immo-drum-wheel-ring");
-  if (ring && Math.abs(dy) > 0) {
-    ring.dataset.drumDragged = "1";
-    window.clearTimeout(ring._drumDragClear);
-    ring._drumDragClear = window.setTimeout(() => {
-      delete ring.dataset.drumDragged;
-    }, 200);
-  }
 }
 
 function onLockedWheel(event) {

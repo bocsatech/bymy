@@ -58,8 +58,9 @@
     <link rel="stylesheet" href="/css/home.css?v=favPark1" />
     <link rel="stylesheet" href="/css/listing-photo-cover.css?v=coverAll1" />
     <link rel="stylesheet" href="/css/hub-mobile-app.css?v=tileFill3" />
-    <link rel="stylesheet" href="/css/ingatlan-search.css?v=immoPortalPage1" />
-    <link rel="stylesheet" href="/css/ingatlan-desk-layout.css?v=immoDesk1" />
+    <link rel="stylesheet" href="/css/ingatlan-search.css?v=immoCatTabs1" />
+    <link rel="stylesheet" href="/css/ingatlan-desk-layout.css?v=immoCatTabs1" />
+    <link rel="stylesheet" href="/css/auto-hero.css?v=immoCatTabs1" />
     <style id="home-scroll-fix">
       html:has(body.home-page) {
         overflow-x: hidden !important;
@@ -159,17 +160,29 @@
     </header>
 
     <main class="home-main immo-desk-main">
+      <nav class="auto-search-tabs immo-search-tabs" aria-label="Ingatlan kategóriák">
+        <a class="auto-search-tab" href="/ingatlan.html?tipus=elado" data-immo-tip="elado">Eladó</a>
+        <a class="auto-search-tab" href="/ingatlan.html?tipus=kiado" data-immo-tip="kiado">Kiadó</a>
+        <a class="auto-search-tab" href="/ingatlan.html?tipus=airbnb" data-immo-tip="airbnb">Airbnb</a>
+      </nav>
+      <script>
+        (function () {
+          var tip = new URLSearchParams(location.search).get("tipus") || "kiado";
+          if (tip !== "elado" && tip !== "kiado" && tip !== "airbnb") tip = "kiado";
+          document.querySelectorAll("[data-immo-tip]").forEach(function (el) {
+            var on = el.getAttribute("data-immo-tip") === tip;
+            el.classList.toggle("is-active", on);
+            if (on) el.setAttribute("aria-current", "page");
+            else el.removeAttribute("aria-current");
+          });
+        })();
+      </script>
+
       <section class="immo-search-hero" aria-labelledby="immo-search-title">
         <article class="immo-search-panel">
           <h1 class="immo-search-title" id="immo-search-title">Melyik ingatlant keresed?</h1>
           <form class="immo-search-form" id="immo-search-form">
-            <div class="immo-schema-cell immo-schema-cell--uzletag" data-schema-field="ingatlan_uzletag">
-              <div class="immo-wheel-wrap">
-                <span class="immo-label">Kategória</span>
-                <div class="immo-wheel" data-wheel="ingatlan_uzletag" role="listbox" aria-label="Kategória"></div>
-                <input type="hidden" id="immo-uzletag" name="ingatlan_uzletag" value="kiado" />
-              </div>
-            </div>
+            <input type="hidden" id="immo-uzletag" name="ingatlan_uzletag" value="kiado" />
 
             <div id="immo-schema-main" class="immo-schema-grid" aria-label="Fő szűrők"></div>
 
@@ -203,7 +216,7 @@
       </div>
     </main>
 
-    <script src="/js/home-app.js?v=immoCat3" type="module"></script>
+    <script src="/js/home-app.js?v=immoCatTabs1" type="module"></script>
     <script src="/js/site-avatar-menu.js?v=settingsOpen1" type="module"></script>
     <script src="/js/nav-counts.js?v=navCount2" type="module"></script>
     <script src="/js/theme.js?v=willhabenHdr1" type="module"></script>

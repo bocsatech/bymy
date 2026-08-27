@@ -46,8 +46,8 @@
   body.home-page[data-site-page="ingatlan"] .home-main.immo-desk-main {
     display: grid !important;
     grid-template-columns: 360px minmax(0, 1fr) !important;
-    grid-template-rows: auto !important;
-    gap: 20px 28px !important;
+    grid-template-rows: auto auto !important;
+    gap: 12px 28px !important;
     align-items: start !important;
     max-width: 1440px !important;
     width: 100% !important;
@@ -59,9 +59,41 @@
     min-height: calc(100vh - var(--site-fixed-header-h, 64px));
   }
 
+  body.home-page[data-site-page="ingatlan"] .home-main.immo-desk-main > .immo-search-tabs {
+    display: grid !important;
+    grid-column: 1 / -1 !important;
+    grid-row: 1 / 2 !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    width: 100% !important;
+    margin: 0 !important;
+    min-height: 48px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--ad-surface-2) !important;
+    border: 1px solid var(--ad-line);
+  }
+
+  body.home-page[data-site-page="ingatlan"] .home-main.immo-desk-main > .immo-search-tabs .auto-search-tab {
+    color: var(--ad-muted) !important;
+    background: transparent !important;
+    border-right: 1px solid var(--ad-line) !important;
+    font-size: 13px !important;
+    font-weight: 650 !important;
+    min-height: 48px;
+  }
+
+  body.home-page[data-site-page="ingatlan"] .home-main.immo-desk-main > .immo-search-tabs .auto-search-tab:last-child {
+    border-right: 0 !important;
+  }
+
+  body.home-page[data-site-page="ingatlan"] .home-main.immo-desk-main > .immo-search-tabs .auto-search-tab.is-active {
+    background: var(--ad-panel) !important;
+    color: var(--ad-text) !important;
+  }
+
   body.home-page[data-site-page="ingatlan"] .home-main.immo-desk-main > .immo-search-hero {
     grid-column: 1 / 2 !important;
-    grid-row: 1 / 2 !important;
+    grid-row: 2 / 3 !important;
     width: 360px !important;
     max-width: 360px !important;
     margin: 0 !important;
@@ -75,7 +107,7 @@
   body.home-page[data-site-page="ingatlan"] .home-main.immo-desk-main > .home-layout.site-layout,
   body.home-page[data-site-page="ingatlan"] .home-main.immo-desk-main > .site-layout {
     grid-column: 2 / 3 !important;
-    grid-row: 1 / 2 !important;
+    grid-row: 2 / 3 !important;
     width: auto !important;
     max-width: none !important;
     margin: 0 !important;

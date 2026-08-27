@@ -106,9 +106,23 @@ body[data-site-page="ingatlan"] .immo-search-panel,
   gap: 0.85rem;
 }
 
+/* Fülek: Eladó / Kiadó / Airbnb (autó kereső tab stílus) */
+.immo-search-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  min-height: 48px;
+  margin: 0 0 0.85rem;
+  background: #eceff3;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+body[data-site-page="ingatlan"] .immo-search-tabs {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .immo-search-form > .immo-schema-cell--uzletag {
-  width: 100%;
-  min-width: 0;
+  display: none;
 }
 
 .immo-schema-grid {

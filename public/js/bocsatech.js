@@ -24,8 +24,8 @@ const LAYOUT_NAV = [
   {
     group: "Ingatlanok",
     items: [
-      { id: "ingatlan", label: "Kiadó" },
       { id: "elado-ingatlan", label: "Eladó" },
+      { id: "ingatlan", label: "Kiadó" },
       { id: "airbnb", label: "Airbnb" },
     ],
   },
@@ -74,8 +74,8 @@ const ADMIN_SECTIONS = [
     label: "3. Ingatlanhirdetések",
     defaultTab: "ingatlan:layout:ingatlan",
     tabs: [
-      { id: "ingatlan:layout:ingatlan", label: "Kiadó — szerkesztő" },
       { id: "ingatlan:layout:elado-ingatlan", label: "Eladó — szerkesztő" },
+      { id: "ingatlan:layout:ingatlan", label: "Kiadó — szerkesztő" },
       { id: "ingatlan:layout:airbnb", label: "Airbnb — szerkesztő" },
       { id: "ingatlan:listings", label: "Hirdetések" },
     ],
@@ -149,8 +149,8 @@ const PAGE_ADMIN_GUIDES = {
     blocksPage: "ingatlan",
     blurb: "Oldalsáv tartalom. Kerék-sémák a 3. szekcióban.",
     jumps: [
-      { tab: "ingatlan:layout:ingatlan", label: "Kiadó szerkesztő" },
       { tab: "ingatlan:layout:elado-ingatlan", label: "Eladó szerkesztő" },
+      { tab: "ingatlan:layout:ingatlan", label: "Kiadó szerkesztő" },
       { tab: "ingatlan:layout:airbnb", label: "Airbnb szerkesztő" },
       { tab: "ingatlan:listings", label: "Ingatlanhirdetések" },
     ],
@@ -176,7 +176,9 @@ const PAGE_ADMIN_GUIDES = {
     blurb: "Oldalsáv tippek. Űrlap-elrendezések a 2–3. szekcióban.",
     jumps: [
       { tab: "auto:layout:szemelyauto", label: "Személyautó feladás" },
+      { tab: "ingatlan:layout:elado-ingatlan", label: "Ingatlan kerék (eladó)" },
       { tab: "ingatlan:layout:ingatlan", label: "Ingatlan kerék (kiadó)" },
+      { tab: "ingatlan:layout:airbnb", label: "Ingatlan kerék (Airbnb)" },
     ],
   },
   uzenetek: {
@@ -1505,8 +1507,8 @@ function ingatlanPreviewView() {
     <h2 class="layout-cat-title">Ingatlan megjelenés</h2>
     <p class="hint">A mezők elrendezését a <strong>szerkesztő</strong> füleken lehet húzni és menteni.</p>
     <div class="row" style="gap:0.65rem;flex-wrap:wrap;margin-top:0.75rem">
-      <button type="button" class="btn" data-act="setTab" data-tab="ingatlan:layout:ingatlan">Kiadó szerkesztő</button>
-      <button type="button" class="btn ghost" data-act="setTab" data-tab="ingatlan:layout:elado-ingatlan">Eladó szerkesztő</button>
+      <button type="button" class="btn" data-act="setTab" data-tab="ingatlan:layout:elado-ingatlan">Eladó szerkesztő</button>
+      <button type="button" class="btn ghost" data-act="setTab" data-tab="ingatlan:layout:ingatlan">Kiadó szerkesztő</button>
       <button type="button" class="btn ghost" data-act="setTab" data-tab="ingatlan:layout:airbnb">Airbnb szerkesztő</button>
     </div>`;
 }

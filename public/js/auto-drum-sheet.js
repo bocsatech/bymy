@@ -3,8 +3,8 @@
  * Nincs page-scroll lock / preventDefault a touchmove-on.
  */
 
-import { readWheel, readWheelList, setWheelValue } from "./ingatlan-wheels.js?v=immoClear1";
-import { syncDrumWheelDisplay } from "./immo-drum-picker.js?v=immoClear1";
+import { readWheel, readWheelList, setWheelValue } from "./ingatlan-wheels.js?v=immoClearAll1";
+import { syncDrumWheelDisplay } from "./immo-drum-picker.js?v=immoClearAll1";
 
 const ITEM_H = 60;
 let activePortal = null;

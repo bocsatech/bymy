@@ -469,6 +469,26 @@ body[data-site-page="ingatlan"] .immo-search-tabs {
   padding-right: 2.2rem !important;
 }
 
+.immo-field.has-wheel-clear,
+.immo-dual-range__half.has-wheel-clear {
+  position: relative;
+}
+
+.immo-field.has-wheel-clear > .immo-control,
+.immo-dual-range__half.has-wheel-clear > .immo-price-input {
+  padding-right: 2.2rem !important;
+}
+
+.immo-dual-range__half .immo-wheel-wrap {
+  position: relative;
+  height: 100%;
+}
+
+.immo-dual-range__half .immo-wheel-clear,
+.immo-field > .immo-wheel-clear {
+  right: 0.2rem;
+}
+
 [data-theme="dark"] .immo-wheel-clear {
   color: #94a3b8;
 }

@@ -388,13 +388,13 @@ function updateTrigger(wheel) {
   syncWheelClearButton(wrap, wheel, values.length > 0);
 }
 
-/** Mező jobb szélén × — törli a kiválasztást. */
-export function syncWheelClearButton(wrap, wheel, hasValue) {
-  if (!wrap || !wheel) return;
-  let clear = wrap.querySelector(":scope > .immo-wheel-clear");
+/** Mező jobb szélén × — törli a kiválasztást / szöveget. */
+export function syncHostClearButton(host, { hasValue, onClear } = {}) {
+  if (!host || typeof onClear !== "function") return;
+  let clear = host.querySelector(":scope > .immo-wheel-clear");
   if (!hasValue) {
     clear?.remove();
-    wrap.classList.remove("has-wheel-clear");
+    host.classList.remove("has-wheel-clear");
     return;
   }
   if (!clear) {
@@ -406,15 +406,26 @@ export function syncWheelClearButton(wrap, wheel, hasValue) {
     clear.addEventListener("click", (event) => {
       event.preventDefault();
       event.stopPropagation();
+      onClear();
+    });
+    host.appendChild(clear);
+  }
+  host.classList.add("has-wheel-clear");
+}
+
+/** Kerék mező jobb szélén × — törli a kiválasztást. */
+export function syncWheelClearButton(wrap, wheel, hasValue) {
+  if (!wrap || !wheel) return;
+  syncHostClearButton(wrap, {
+    hasValue,
+    onClear: () => {
       setWheelValue(wheel, "");
       if (wheel.dataset.drumBound === "1") {
         wheel.dispatchEvent(new CustomEvent("immo-wheel-clear", { bubbles: true }));
       }
       wheel.dispatchEvent(new CustomEvent("immo-wheel-change", { bubbles: true, detail: { value: "" } }));
-    });
-    wrap.appendChild(clear);
-  }
-  wrap.classList.add("has-wheel-clear");
+    },
+  });
 }
 
 export function setWheelValue(wheel, value) {

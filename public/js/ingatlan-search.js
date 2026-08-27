@@ -36,15 +36,15 @@ import {
 } from "./ingatlan-fields.js?v=immoTipus2";
 import {
   fillWheel,
-  initMenuWheel,
   readWheel,
   readWheelList,
   setWheelValue,
   MULTI_WHEEL_KEYS,
   wheelFieldHtml,
-} from "./ingatlan-wheels.js?v=immoClear1";
-import { initDrumWheel, syncDrumWheelDisplay, applyDrumModeClass, getDrumMode } from "./immo-drum-picker.js?v=immoClear1";
-import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=immoClear1";
+  syncHostClearButton,
+} from "./ingatlan-wheels.js?v=immoClearAll1";
+import { initDrumWheel, syncDrumWheelDisplay, applyDrumModeClass } from "./immo-drum-picker.js?v=immoClearAll1";
+import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=immoClearAll1";
 import { fetchIngatlanWheelSchema, renderIngatlanSchemaHosts, INGATLAN_DUAL_RANGE_GROUPS } from "./ingatlan-wheel-schema.js?v=telepSuggest1";
 import { wireTelepulesSuggestIn } from "./telepules-suggest.js?v=telepClose1";
 
@@ -123,24 +123,23 @@ function isImmoMobileLayout() {
 }
 
 function useDrumPicker() {
-  // Ingatlan kereső: dobkerék asztali + mobil weben is (kikapcsolás: legacy mód).
-  return getDrumMode() !== "legacy";
+  // Ingatlan kereső: mindig portál dobkerék (egységes megjelenés / × / pipa).
+  return true;
 }
 
 function initImmoSearchWheel(wheel, { emptyLabel = "Mindegy", multiple = false, customInput = false, customKind = "price" } = {}) {
   if (!wheel) return;
-  if (useDrumPicker()) {
-    const name = wheel.getAttribute("data-wheel") || "";
-    const live = initDrumWheel(wheel, { emptyLabel, multiple, openMode: "portal" });
-    const form = live?.closest("form") || wheel.closest?.("form") || document.getElementById("immo-search-form");
-    const bound =
-      (name && form?.querySelector(`[data-wheel="${name}"]`)) ||
-      live ||
-      form?.querySelector(`[data-wheel="${name}"]`);
-    if (bound) bindAutoDrumSheet(bound);
-    return;
+  const name = wheel.getAttribute("data-wheel") || "";
+  const live = initDrumWheel(wheel, { emptyLabel, multiple, openMode: "portal" });
+  const form = live?.closest("form") || wheel.closest?.("form") || document.getElementById("immo-search-form");
+  const bound =
+    (name && form?.querySelector(`[data-wheel="${name}"]`)) ||
+    live ||
+    form?.querySelector(`[data-wheel="${name}"]`);
+  if (bound) {
+    bindAutoDrumSheet(bound);
+    syncDrumWheelDisplay(bound);
   }
-  initMenuWheel(wheel, { emptyLabel, multiple, customInput, customKind });
 }
 
 function syncImmoSearchWheelDisplay(wheel) {
@@ -403,8 +402,44 @@ function setupPriceManualInputs(form) {
       input.setAttribute("aria-label", label);
       cell.appendChild(input);
     }
+    if (input.dataset.clearBound !== "1") {
+      input.dataset.clearBound = "1";
+      const syncClear = () => {
+        syncHostClearButton(cell, {
+          hasValue: Boolean(String(input.value || "").trim()),
+          onClear: () => {
+            input.value = "";
+            input.dispatchEvent(new Event("input", { bubbles: true }));
+            syncClear();
+          },
+        });
+      };
+      input.addEventListener("input", syncClear);
+      syncClear();
+    }
   }
   syncPriceRangeUnit(form);
+}
+
+function wireTelepulesClear(form) {
+  form?.querySelectorAll('#immo-keresesi_hely, [name="keresesi_hely"]').forEach((input) => {
+    if (!(input instanceof HTMLInputElement) || input.dataset.clearBound === "1") return;
+    input.dataset.clearBound = "1";
+    const host = input.closest(".immo-field") || input.parentElement;
+    if (!host) return;
+    const syncClear = () => {
+      syncHostClearButton(host, {
+        hasValue: Boolean(String(input.value || "").trim()),
+        onClear: () => {
+          input.value = "";
+          input.dispatchEvent(new Event("input", { bubbles: true }));
+          syncClear();
+        },
+      });
+    };
+    input.addEventListener("input", syncClear);
+    syncClear();
+  });
 }
 
 function fillDualRangeWheels(form, { tolKey, igKey, options, emptyMin = "min.", emptyMax = "max." }) {
@@ -693,6 +728,7 @@ export async function initIngatlanSearch({
   setupMobileDualRanges(moreHost);
   applyDrumModeClass();
   wireTelepulesSuggestIn(root);
+  wireTelepulesClear(root);
 
   fillPriceRangeWheels(root);
   fillAreaRangeWheels(root);

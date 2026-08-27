@@ -6,7 +6,7 @@
  * Cellába kattintás: érték (többesnél toggle) + bezárás.
  */
 
-import { readWheel, readWheelList, setWheelValue, lockPageScroll, unlockPageScroll, syncWheelClearButton } from "./ingatlan-wheels.js?v=immoClear1";
+import { readWheel, readWheelList, setWheelValue, lockPageScroll, unlockPageScroll, syncWheelClearButton } from "./ingatlan-wheels.js?v=immoClearAll1";
 
 const ITEM_H = 40;
 /** Pontosan 3 sor: fent / közép / lent */

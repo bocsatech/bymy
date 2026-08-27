@@ -5,7 +5,7 @@
 import {
   DETAILED_SEARCH_SECTIONS,
   AKKU_SEARCH_SECTION_EMPTY,
-} from "./auto-detailed-search-catalog.js?v=autoDesk9";
+} from "./auto-detailed-search-catalog.js?v=autoDesk10";
 
 const FORM_FLAG_KEYS = new Set(["villamtoltes", "zold_rendszam"]);
 

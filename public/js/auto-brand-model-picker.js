@@ -3,7 +3,7 @@
  * Csak desktop auto: nested Márka → Típus panelek, kapcsolók, Kész.
  */
 
-import { fetchVehicleCatalog } from "./vehicle-catalog-client.js?v=autoDesk9";
+import { fetchVehicleCatalog } from "./vehicle-catalog-client.js?v=autoDesk10";
 
 function labelList(items, unit) {
   if (!items.length) return "Mindegy";
@@ -239,13 +239,20 @@ export async function mountAutoBrandModelPicker(form) {
     syncHidden();
   }
 
-  openBtn?.addEventListener("click", openPanel);
-
-  panel.querySelector("[data-auto-bm-back]")?.addEventListener("click", () => {
-    if (modelBrand) renderBrandList();
-    else closePanel();
+  openBtn?.addEventListener("click", () => {
+    if (!panel.hidden) {
+      closePanel();
+      return;
+    }
+    openPanel();
   });
 
+  // Vissza: mindig zárja a márka menüt (kiválasztás megmarad)
+  panel.querySelector("[data-auto-bm-back]")?.addEventListener("click", () => {
+    closePanel();
+  });
+
+  // Kész: típus panelről vissza a márkalistára; márkánál bezár
   panel.querySelector("[data-auto-bm-done]")?.addEventListener("click", () => {
     if (modelBrand) renderBrandList();
     else closePanel();

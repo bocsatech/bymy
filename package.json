@@ -15,6 +15,7 @@
     "import:catalog": "node scripts/import-vehicle-catalog.mjs",
     "build:html": "node scripts/embed-ad-form.mjs",
     "import:hasznaltauto": "node scripts/import-hasznaltauto-catalog.mjs",
+    "login:hasznaltauto": "node scripts/save-hasznaltauto-session.mjs",
     "prestart": "node scripts/embed-ad-form.mjs"
   },
   "engines": {

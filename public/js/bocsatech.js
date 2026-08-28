@@ -9,6 +9,28 @@ import { INGATLAN_LAKAS_TIPUS, fieldKeysVisibleForTipus } from "./ingatlan-field
 
 const app = document.getElementById("app");
 
+function showBootPlaceholder(message = "Betöltés…") {
+  if (!app) return;
+  app.innerHTML = `<div class="wrap"><h1>Bocsatech</h1><p class="hint">${esc(message)}</p></div>`;
+}
+
+if (!app) {
+  throw new Error("Hiányzik a #app elem a Bocsatech.html-ben.");
+}
+
+showBootPlaceholder();
+
+async function fetchJsonWithTimeout(url, ms = 15000) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), ms);
+  try {
+    const res = await fetch(url, { credentials: "same-origin", cache: "no-store", signal: ctrl.signal });
+    return { res, data: await res.json().catch(() => ({})) };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 const LAYOUT_NAV = [
   {
     group: "Autók",
@@ -2088,20 +2110,25 @@ function render() {
         root.innerHTML = `<p class="err">${esc(err)}</p>`;
       }
     } else {
-      mountLayoutBoard(root, layout, {
-        stepNames: isSearchLayoutCat(layoutCategoryFromTab())
-          ? {
-              1: "Gyorskereső",
-              2: "Műszaki adatok",
-              3: "Akkumulátor és hatótáv adatok",
-              4: "Extrák",
-              5: "Helyszín",
-            }
-          : undefined,
-        onChange(cells) {
-          layout = { ...layout, cells, category: layoutCategoryFromTab() };
-        },
-      });
+      try {
+        mountLayoutBoard(root, layout, {
+          stepNames: isSearchLayoutCat(layoutCategoryFromTab())
+            ? {
+                1: "Gyorskereső",
+                2: "Műszaki adatok",
+                3: "Akkumulátor és hatótáv adatok",
+                4: "Extrák",
+                5: "Helyszín",
+              }
+            : undefined,
+          onChange(cells) {
+            layout = { ...layout, cells, category: layoutCategoryFromTab() };
+          },
+        });
+      } catch (error) {
+        err = error?.message || "Elrendezés-szerkesztő hiba.";
+        root.innerHTML = `<p class="err">${esc(err)}</p>`;
+      }
     }
     return;
   }
@@ -2112,11 +2139,23 @@ function render() {
 
 async function bootBocsatech() {
   try {
-    const me = await api("/api/level1/me").catch(() => ({ admin: null }));
-    admin = me.admin;
-    deployBackend = await fetch("/api/health", { cache: "no-store" })
-      .then((res) => (res.ok ? res.json() : null))
-      .catch(() => null);
+    let me = { admin: null };
+    try {
+      const { res, data } = await fetchJsonWithTimeout("/api/level1/me");
+      if (res.ok) me = data;
+    } catch (meError) {
+      console.warn("Bocsatech /me:", meError);
+    }
+
+    admin = me.admin || null;
+
+    try {
+      const { res, data } = await fetchJsonWithTimeout("/api/health");
+      deployBackend = res.ok ? data : null;
+    } catch {
+      deployBackend = null;
+    }
+
     if (admin) {
       try {
         await loadTab();
@@ -2125,12 +2164,27 @@ async function bootBocsatech() {
         console.error("Bocsatech loadTab:", loadError);
       }
     }
-    render();
+
+    try {
+      render();
+    } catch (renderError) {
+      console.error("Bocsatech render:", renderError);
+      showBootPlaceholder("Megjelenítési hiba.");
+      const errEl = app.querySelector(".hint");
+      if (errEl) {
+        errEl.insertAdjacentHTML(
+          "afterend",
+          `<p class="err">${esc(renderError?.message || "Megjelenítési hiba.")}</p>`
+        );
+      }
+    }
   } catch (bootError) {
     console.error("Bocsatech boot:", bootError);
-    app.innerHTML = `<div class="wrap"><h1>Bocsatech</h1><p class="err">${esc(
-      bootError?.message || "Indítási hiba."
-    )}</p><p class="hint">Hard refresh (Cmd+Shift+R), majd próbáld újra.</p></div>`;
+    showBootPlaceholder("");
+    app.querySelector(".hint")?.insertAdjacentHTML(
+      "afterend",
+      `<p class="err">${esc(bootError?.message || "Indítási hiba.")}</p><p class="hint">Hard refresh (Cmd+Shift+R), majd próbáld újra.</p>`
+    );
   }
 }
 

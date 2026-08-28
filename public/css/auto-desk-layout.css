@@ -486,7 +486,8 @@
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .immo-schema-label,
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .immo-label,
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .qs-detailed-range__label,
-  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .qs-detailed-select__label {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .qs-detailed-select__label,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .qs-ios-toggle__text {
     color: var(--ad-text) !important;
     font-size: 13px !important;
     font-weight: 600 !important;
@@ -494,6 +495,7 @@
     position: static !important;
     background: transparent !important;
     padding: 0 !important;
+    text-shadow: none !important;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-range {
@@ -595,6 +597,18 @@
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .qs-detailed-range,
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .qs-detailed-select {
     color: var(--ad-text) !important;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .qs-ios-toggle__text {
+    font-weight: 500 !important;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .qs-ios-toggle__track {
+    background: rgba(0, 0, 0, 0.14) !important;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .qs-ios-toggle input:checked + .qs-ios-toggle__track {
+    background: #34c759 !important;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .qs-detailed-select select,

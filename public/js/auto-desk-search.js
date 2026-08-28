@@ -106,6 +106,64 @@ function findFieldWrap(form, fieldKey) {
   );
 }
 
+function ensureDeskFieldsHost(parent, selector, datasetKey) {
+  let host = parent.querySelector(selector);
+  if (!host) {
+    host = document.createElement("div");
+    host.className = "auto-desk-fields";
+    host.dataset[datasetKey] = "1";
+    parent.appendChild(host);
+  }
+  host.innerHTML = "";
+  return host;
+}
+
+function mountDeskField(host, item, form, { quickKeys, used }) {
+  const wrap = findFieldWrap(form, item.field);
+  if (!wrap || host.contains(wrap)) return false;
+  used.add(item.field);
+
+  const field = document.createElement("div");
+  field.className = "auto-desk-field";
+  field.dataset.deskField = item.field;
+  field.dataset.deskQuick = quickKeys.has(item.field) ? "1" : "0";
+
+  const label = document.createElement("span");
+  label.className = "auto-desk-field__label";
+  label.textContent = item.label;
+  field.appendChild(label);
+
+  wrap.querySelectorAll(".home-qs-label, .immo-label").forEach((el) => {
+    el.style.display = "none";
+  });
+
+  ensureDeskSelectPlaceholders(wrap, item.range);
+
+  if (item.range) {
+    const range = document.createElement("div");
+    range.className = "auto-desk-range";
+    const selects = [...wrap.querySelectorAll("select")];
+    if (selects.length >= 2) {
+      selects.slice(0, 2).forEach((sel) => range.appendChild(sel));
+      field.appendChild(range);
+      wrap.remove();
+    } else {
+      field.appendChild(wrap);
+    }
+  } else {
+    const sel = wrap.querySelector("select, input");
+    if (sel && wrap.matches("label, .home-qs-field, .home-qs-pair")) {
+      field.appendChild(sel);
+      wrap.remove();
+    } else {
+      field.appendChild(wrap);
+    }
+  }
+
+  host.appendChild(field);
+  return true;
+}
+
 function ensureDeskSelectPlaceholders(wrap, range) {
   if (!wrap) return;
   const selects = [...wrap.querySelectorAll("select")];
@@ -160,87 +218,39 @@ export function arrangeAutoDeskDemoFields(form = document.getElementById("home-q
   host.innerHTML = "";
 
   const used = new Set();
+  const mountOpts = { quickKeys, used };
   const order = deskOrderFromAdminLayout(mainHost);
   const fieldOrder = order.length ? order : DESK_ALAP_FALLBACK;
 
   for (const item of fieldOrder) {
-    const wrap = findFieldWrap(form, item.field);
-    if (!wrap || host.contains(wrap)) continue;
-    used.add(item.field);
-
-    const field = document.createElement("div");
-    field.className = "auto-desk-field";
-    field.dataset.deskField = item.field;
-    field.dataset.deskQuick = quickKeys.has(item.field) ? "1" : "0";
-
-    const label = document.createElement("span");
-    label.className = "auto-desk-field__label";
-    label.textContent = item.label;
-    field.appendChild(label);
-
-    wrap.querySelectorAll(".home-qs-label, .immo-label").forEach((el) => {
-      el.style.display = "none";
-    });
-
-    ensureDeskSelectPlaceholders(wrap, item.range);
-
-    if (item.range) {
-      const range = document.createElement("div");
-      range.className = "auto-desk-range";
-      const selects = [...wrap.querySelectorAll("select")];
-      if (selects.length >= 2) {
-        selects.slice(0, 2).forEach((sel) => range.appendChild(sel));
-        field.appendChild(range);
-        wrap.remove();
-      } else {
-        field.appendChild(wrap);
-      }
-    } else {
-      const sel = wrap.querySelector("select, input");
-      if (sel && wrap.matches("label, .home-qs-field, .home-qs-pair")) {
-        field.appendChild(sel);
-        wrap.remove();
-      } else {
-        field.appendChild(wrap);
-      }
-    }
-
-    host.appendChild(field);
+    mountDeskField(host, item, form, mountOpts);
   }
 
-  const leftovers = [];
-  [mainHost, moreHost].forEach((root) => {
-    if (!root) return;
-    root.querySelectorAll("[data-qs-field]").forEach((el) => {
-      const key = el.getAttribute("data-qs-field");
-      if (!key || used.has(key)) return;
-      if (host.contains(el) || el.closest(".auto-desk-fields")) return;
-      leftovers.push(el);
-    });
-  });
-
-  if (muszakiBody && leftovers.length) {
-    let moreWrap = muszakiBody.querySelector("#qs-more");
-    if (!moreWrap) {
-      moreWrap = document.createElement("div");
-      moreWrap.id = "qs-more";
-      moreWrap.className = "home-qs-more";
-      muszakiBody.appendChild(moreWrap);
+  if (muszakiBody && moreHost) {
+    const moreOrder = deskOrderFromAdminLayout(moreHost);
+    if (moreOrder.length) {
+      let moreWrap = muszakiBody.querySelector("#qs-more");
+      if (!moreWrap) {
+        moreWrap = document.createElement("div");
+        moreWrap.id = "qs-more";
+        moreWrap.className = "home-qs-more";
+        muszakiBody.appendChild(moreWrap);
+      }
+      moreWrap.hidden = false;
+      const muszakiHost = ensureDeskFieldsHost(moreWrap, "[data-desk-muszaki]", "deskMuszaki");
+      for (const item of moreOrder) {
+        mountDeskField(muszakiHost, item, form, mountOpts);
+      }
     }
-    moreWrap.hidden = false;
-    let catcher = moreWrap.querySelector("[data-desk-more-rest]");
-    if (!catcher) {
-      catcher = document.createElement("div");
-      catcher.className = "auto-desk-fields";
-      catcher.dataset.deskMoreRest = "1";
-      moreWrap.appendChild(catcher);
-    }
-    leftovers.forEach((el) => catcher.appendChild(el));
   }
 
   if (mainHost) {
     mainHost.innerHTML = "";
     mainHost.hidden = true;
+  }
+  if (moreHost) {
+    moreHost.innerHTML = "";
+    moreHost.hidden = true;
   }
 
   form.classList.add("auto-desk-native");

@@ -514,6 +514,17 @@
   }
 
   /* Muszaki maradék mezők: ne contents, hanem oszlop */
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active .auto-search-panel #qs-more-layout {
+    display: none !important;
+  }
+
+  /* Muszaki mezők: ugyanaz a kompakt oszlop, mint Alap adatoknál */
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-fields[data-desk-muszaki] .auto-desk-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-fields[data-desk-more-rest] .home-qs-field,
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-fields[data-desk-more-rest] .home-qs-pair,
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-fields[data-desk-more-rest] .home-qs-grid-cell,

@@ -98,6 +98,38 @@ function normalizeFuelValue(value) {
   return aliases[value] ?? value;
 }
 
+function applyCatalogTypeData(entry) {
+  const doors = document.getElementById("ajtok");
+  const fuel = document.getElementById("uzemanyag");
+  if (doors && Array.isArray(entry?.ajtok) && entry.ajtok.length) {
+    const current = doors.value;
+    const values = [...new Set(entry.ajtok.map((value) => String(value).match(/\d+/)?.[0]).filter(Boolean))];
+    doors.innerHTML = '<option value="">—</option>';
+    for (const value of values) {
+      const option = document.createElement("option");
+      option.value = value;
+      option.textContent = value;
+      doors.appendChild(option);
+    }
+    doors.value = values.includes(current) ? current : values.length === 1 ? values[0] : "";
+  }
+  if (fuel && Array.isArray(entry?.uzemanyag) && entry.uzemanyag.length) {
+    const current = fuel.value;
+    const values = [...new Set(entry.uzemanyag.map(normalizeFuelValue).filter(Boolean))];
+    renderFuelDropdown();
+    for (const value of values) {
+      if (![...fuel.options].some((option) => option.value === value)) {
+        const option = document.createElement("option");
+        option.value = value;
+        option.textContent = value;
+        fuel.appendChild(option);
+      }
+    }
+    fuel.value = values.includes(current) ? current : values.length === 1 ? values[0] : "";
+    syncFuelDependentFields();
+  }
+}
+
 function renderFuelDropdown() {
   if (!uzemanyag || uzemanyag.tagName !== "SELECT") return;
 
@@ -1358,6 +1390,7 @@ initVehicleCatalogSelects({
     updateTitle();
     fitAllFormFields();
   },
+  onTypeDataChange: (entry) => applyCatalogTypeData(entry),
 })
   .then(() => {
     if (mode === "wizard" && !userTouchedForm && !editing) resetForm();

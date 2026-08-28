@@ -188,6 +188,7 @@ export function bindCatalogSelects({
   modelEmptyLabel = "Válasszon",
   yearEmptyLabel = "Mindegy",
   tipusEmptyLabel = "Válasszon",
+  onTypeDataChange = () => {},
   onChange = () => {},
 }) {
   if (!brandSelect || !modelSelect || !catalog) return;
@@ -204,6 +205,7 @@ export function bindCatalogSelects({
       types.map((entry) => entry.nev),
       tipusEmptyLabel
     );
+    onTypeDataChange(types.find((entry) => entry.nev === tipusSelect.value) || null, types);
   }
 
   async function loadTypes() {
@@ -243,6 +245,12 @@ export function bindCatalogSelects({
 
   modelSelect.addEventListener("change", async () => {
     await loadTypes();
+    onChange();
+  });
+
+  tipusSelect?.addEventListener("change", () => {
+    const types = typesForYear(currentTypes, yearSelect?.value);
+    onTypeDataChange(types.find((entry) => entry.nev === tipusSelect.value) || null, types);
     onChange();
   });
 

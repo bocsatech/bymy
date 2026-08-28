@@ -14,6 +14,7 @@
     "seed:partners": "node scripts/seed-partners.mjs",
     "import:catalog": "node scripts/import-vehicle-catalog.mjs",
     "build:html": "node scripts/embed-ad-form.mjs",
+    "import:hasznaltauto": "node scripts/import-hasznaltauto-catalog.mjs",
     "prestart": "node scripts/embed-ad-form.mjs"
   },
   "engines": {

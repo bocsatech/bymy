@@ -400,7 +400,6 @@ export const INGATLAN_CORE_FIELD_KEYS = [
   "keresesi_hely",
   "ar_tol",
   "ar_ig",
-  "szobaszam",
   "ingatlan_lakas_tipus",
   "ingatlan_tipus_2",
 ];
@@ -467,6 +466,7 @@ export function areaFieldKeysForTipus(parentValues) {
  */
 export const INGATLAN_FIELDS_BY_TIPUS = {
   lakas: [
+    "szobaszam",
     "lift",
     "erkely",
     "szigeteles",
@@ -480,6 +480,7 @@ export const INGATLAN_FIELDS_BY_TIPUS = {
     "dohanyzas_megengedett",
   ],
   haz: [
+    "szobaszam",
     "allapot",
     "ingatlan_kora",
     "kilatas",
@@ -511,6 +512,7 @@ export const INGATLAN_FIELDS_BY_TIPUS = {
   ],
   garazs: ["allapot", "ingatlan_kora"],
   nyaralo: [
+    "szobaszam",
     "allapot",
     "ingatlan_kora",
     "kilatas",

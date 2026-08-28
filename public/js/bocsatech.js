@@ -5,7 +5,7 @@ import {
   normalizeIngatlanWheelVariant,
   INGATLAN_TIPUS_LAYOUTS,
 } from "./ingatlan-wheel-schema.js?v=immoWheel21";
-import { INGATLAN_LAKAS_TIPUS, fieldKeysVisibleForTipus } from "./ingatlan-fields.js?v=immoMenus1";
+import { INGATLAN_LAKAS_TIPUS, fieldKeysVisibleForTipus } from "./ingatlan-fields.js?v=immoMenus2";
 
 const app = document.getElementById("app");
 

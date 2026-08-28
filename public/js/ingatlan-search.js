@@ -42,7 +42,7 @@ import {
   tipus2OptionsForParents,
   applyIngatlanTipusFieldsConfig,
   resolveTipusFieldParent,
-} from "./ingatlan-fields.js?v=immoMenus1";
+} from "./ingatlan-fields.js?v=immoMenus2";
 import {
   fillWheel,
   readWheel,

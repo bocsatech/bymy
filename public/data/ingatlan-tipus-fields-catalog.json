@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "note": "Típus → mezők. Élő forrás: public/js/ingatlan-fields.js (INGATLAN_FIELDS_BY_TIPUS). Dropdown opciólisták később pontosíthatók.",
+  "note": "Típus → mezők. A Szobaszám csak Lakás, Ház és Nyaraló mezője. Élő forrás: public/js/ingatlan-fields.js (INGATLAN_FIELDS_BY_TIPUS). Dropdown opciólisták később pontosíthatók.",
   "core_always": [
     "keresesi_hely",
     "ar_tol",
@@ -8,7 +8,6 @@
     "alapterulet_tol",
     "alapterulet_ig",
     "alapterulet",
-    "szobaszam",
     "ingatlan_lakas_tipus",
     "ingatlan_tipus_2"
   ],

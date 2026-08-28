@@ -2009,7 +2009,7 @@ function backendBannerHtml() {
   const detail = live
     ? "A mentés azonnal az élő oldalon is látszik (hard refresh)."
     : "A mentés NEM kerül az éles oldalra — használd a bymy.vercel.app/Bocsatech.html admin felületet.";
-  return `<p class="hint ${live ? "ok" : "err"}" style="margin:0 0 0.75rem"><strong>${esc(label)}.</strong> ${esc(detail)}</p>`;
+  return `<p class="hint ${live ? "ok" : "warn"}" style="margin:0 0 0.75rem"><strong>${esc(label)}.</strong> ${esc(detail)}</p>`;
 }
 
 function shell() {
@@ -2065,7 +2065,8 @@ function render() {
   if (isLayoutTab()) {
     const root = document.getElementById("layout-root");
     if (!root) {
-      err = "Hiányzik a szerkesztő felület (layout-root).";
+      err = err || "Hiányzik a szerkesztő felület (layout-root).";
+      h(admin ? shell() : loginView());
       return;
     }
     root.classList.remove("layout-root--readonly");
@@ -2109,10 +2110,28 @@ function render() {
   }
 }
 
-const me = await api("/api/level1/me").catch(() => ({ admin: null }));
-admin = me.admin;
-deployBackend = await fetch("/api/health", { cache: "no-store" })
-  .then((res) => (res.ok ? res.json() : null))
-  .catch(() => null);
-if (admin) await loadTab();
-render();
+async function bootBocsatech() {
+  try {
+    const me = await api("/api/level1/me").catch(() => ({ admin: null }));
+    admin = me.admin;
+    deployBackend = await fetch("/api/health", { cache: "no-store" })
+      .then((res) => (res.ok ? res.json() : null))
+      .catch(() => null);
+    if (admin) {
+      try {
+        await loadTab();
+      } catch (loadError) {
+        err = loadError?.message || "Betöltés sikertelen.";
+        console.error("Bocsatech loadTab:", loadError);
+      }
+    }
+    render();
+  } catch (bootError) {
+    console.error("Bocsatech boot:", bootError);
+    app.innerHTML = `<div class="wrap"><h1>Bocsatech</h1><p class="err">${esc(
+      bootError?.message || "Indítási hiba."
+    )}</p><p class="hint">Hard refresh (Cmd+Shift+R), majd próbáld újra.</p></div>`;
+  }
+}
+
+bootBocsatech();

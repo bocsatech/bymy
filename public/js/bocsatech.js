@@ -260,6 +260,8 @@ let visitorHits = [];
 let blockedIps = [];
 
 let devOtpCode = "";
+/** @type {{ backend?: string, dbPath?: string } | null} */
+let deployBackend = null;
 
 function pageBlocksKey(pageKey) {
   const guide = PAGE_ADMIN_GUIDES[pageKey] || PAGE_ADMIN_GUIDES.hub;
@@ -695,7 +697,10 @@ const actions = {
         });
         wheelSchema = data.schema || wheelSchema;
         info =
-          `${categoryLabel(cat)} kerék-séma mentve. Kereső és feladás hard refresh (Cmd+Shift+R) után frissül. A Kiadó elrendezése csak a saját gombjánál változik.`;
+          `${categoryLabel(cat)} kerék-séma mentve. Hard refresh (Cmd+Shift+R) az élő oldalon. ` +
+          (deployBackend?.backend === "supabase"
+            ? "Ez az éles adatbázis — a változás minden látogatónál megjelenik."
+            : "FIGYELEM: lokális SQLite — az éles oldalra csak a bymy.vercel.app/Bocsatech.html mentése kerül.");
         render();
         return;
       }
@@ -707,8 +712,16 @@ const actions = {
       layoutCategory = data.category || cat;
       const isSearch = isSearchLayoutCat(cat);
       info = isSearch
-          ? `${categoryLabel(cat)} elrendezés mentve. A kereső oldalon hard refresh (Cmd+Shift+R) után frissül.`
-          : `Elrendezés mentve (${categoryLabel(layoutCategory)}). A hirdetésfeladáson hard refresh (Cmd+Shift+R) után látszik.`;
+          ? `${categoryLabel(cat)} elrendezés mentve. Hard refresh (Cmd+Shift+R) az élő oldalon. ${
+              deployBackend?.backend === "supabase"
+                ? "Éles adatbázis."
+                : "Lokális mentés — nem kerül az éles oldalra."
+            }`
+          : `Elrendezés mentve (${categoryLabel(layoutCategory)}). Hard refresh a hirdetésfeladáson. ${
+              deployBackend?.backend === "supabase"
+                ? "Éles adatbázis."
+                : "Lokális mentés — nem kerül az éles oldalra."
+            }`;
       render();
     } catch (error) {
       err = error.message;
@@ -1989,6 +2002,16 @@ function pagesAdminView(pageKey) {
     </div>`;
 }
 
+function backendBannerHtml() {
+  if (!deployBackend) return "";
+  const live = deployBackend.backend === "supabase";
+  const label = live ? "Éles adatbázis (Supabase)" : "Lokális SQLite";
+  const detail = live
+    ? "A mentés azonnal az élő oldalon is látszik (hard refresh)."
+    : "A mentés NEM kerül az éles oldalra — használd a bymy.vercel.app/Bocsatech.html admin felületet.";
+  return `<p class="hint ${live ? "ok" : "err"}" style="margin:0 0 0.75rem"><strong>${esc(label)}.</strong> ${esc(detail)}</p>`;
+}
+
 function shell() {
   const { section } = parseTab();
   const currentSection = ADMIN_SECTIONS.find((s) => s.id === section) || ADMIN_SECTIONS[0];
@@ -2024,6 +2047,7 @@ function shell() {
       </div>
       <div class="admin-sections">${sectionNav}</div>
       <div class="tabs tabs--sub">${subNav}</div>
+      ${backendBannerHtml()}
       <div class="card">${shellBody()}</div>
     </div>`;
 }
@@ -2087,5 +2111,8 @@ function render() {
 
 const me = await api("/api/level1/me").catch(() => ({ admin: null }));
 admin = me.admin;
+deployBackend = await fetch("/api/health", { cache: "no-store" })
+  .then((res) => (res.ok ? res.json() : null))
+  .catch(() => null);
 if (admin) await loadTab();
 render();

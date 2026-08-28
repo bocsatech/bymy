@@ -389,12 +389,37 @@ export function createSpacerCell(section = "main", row = 1) {
 
 let cachedSchemaByVariant = new Map();
 
-export async function fetchIngatlanWheelSchema(variant = "ingatlan") {
+/** Admin típus-szerkesztő (lakas, haz, …) vs üzletág (ingatlan, elado-ingatlan, airbnb). */
+export function resolveIngatlanSchemaVariant(uzletag, tipusList = []) {
+  const tips = (Array.isArray(tipusList) ? tipusList : String(tipusList || "").split(","))
+    .map((v) => String(v || "").trim().toLowerCase())
+    .filter(Boolean);
+  if (tips.length === 1 && INGATLAN_TIPUS_LAYOUTS.includes(tips[0])) return tips[0];
+  const uz = String(uzletag || "")
+    .trim()
+    .toLowerCase();
+  if (uz === "elado") return "elado-ingatlan";
+  if (uz === "airbnb") return "airbnb";
+  return "ingatlan";
+}
+
+export function clearIngatlanWheelSchemaCache(variant = null) {
+  if (variant == null || variant === "") {
+    cachedSchemaByVariant.clear();
+    return;
+  }
+  cachedSchemaByVariant.delete(String(variant).trim());
+}
+
+export async function fetchIngatlanWheelSchema(variant = "ingatlan", { force = false } = {}) {
   const key = String(variant || "ingatlan").trim() || "ingatlan";
-  if (cachedSchemaByVariant.has(key)) return cachedSchemaByVariant.get(key);
+  if (!force && cachedSchemaByVariant.has(key)) return cachedSchemaByVariant.get(key);
   try {
     const q = key === "ingatlan" ? "" : `?variant=${encodeURIComponent(key)}`;
-    const res = await fetch(`/api/level1/ingatlan-wheel-schema${q}`, { credentials: "same-origin" });
+    const res = await fetch(`/api/level1/ingatlan-wheel-schema${q}`, {
+      credentials: "same-origin",
+      cache: "no-store",
+    });
     const data = await res.json().catch(() => ({}));
     if (res.ok && data.schema) {
       const normalized = normalizeIngatlanWheelSchema(data.schema);

@@ -7,8 +7,8 @@ import { normalizeIngatlanUzletag, INGATLAN_LAKAS_TIPUS, INGATLAN_LAKAS_TIPUS_AI
 import {
   initIngatlanSearch,
   readIngatlanSearchForm,
-} from "./ingatlan-search.js?v=immoMenus1";
-import { fetchIngatlanWheelSchema } from "./ingatlan-wheel-schema.js?v=immoMenus1";
+} from "./ingatlan-search.js?v=immoAdminLive1";
+import { fetchIngatlanWheelSchema } from "./ingatlan-wheel-schema.js?v=immoAdminLive1";
 import { wireTelepulesSuggestIn } from "./telepules-suggest.js?v=telepClose1";
 
 function removeIngatlanFormFields(form) {
@@ -86,7 +86,8 @@ export async function ensureIngatlanFormFields(form) {
   host.prepend(root);
 
   const searchRoot = root.querySelector("#immo-search-form");
-  const schema = await fetchIngatlanWheelSchema(variant);
+  const schema = await fetchIngatlanWheelSchema(variant, { force: true });
+  searchRoot.dataset.activeSchemaVariant = variant;
   await initIngatlanSearch({
     form: searchRoot,
     schema,

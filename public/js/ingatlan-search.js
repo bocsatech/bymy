@@ -54,7 +54,13 @@ import {
 } from "./ingatlan-wheels.js?v=immoClearAll1";
 import { initDrumWheel, syncDrumWheelDisplay, applyDrumModeClass } from "./immo-drum-picker.js?v=immoClearAll1";
 import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=immoClearAll1";
-import { fetchIngatlanWheelSchema, renderIngatlanSchemaHosts, INGATLAN_DUAL_RANGE_GROUPS } from "./ingatlan-wheel-schema.js?v=immoMenus1";
+import {
+  fetchIngatlanWheelSchema,
+  renderIngatlanSchemaHosts,
+  INGATLAN_DUAL_RANGE_GROUPS,
+  resolveIngatlanSchemaVariant,
+  clearIngatlanWheelSchemaCache,
+} from "./ingatlan-wheel-schema.js?v=immoAdminLive1";
 import { wireTelepulesSuggestIn } from "./telepules-suggest.js?v=telepClose1";
 
 const EXACT_KEYS = [
@@ -962,49 +968,24 @@ function readForm(form) {
   return out;
 }
 
-export async function initIngatlanSearch({
-  onSearch = () => {},
-  form = null,
-  schema = null,
-  defaultUzletag = "kiado",
-  lakasTipusOptions = null,
-  enableTipus2 = true,
-} = {}) {
-  const root = form || document.getElementById("immo-search-form");
-  if (!root) return;
-
-  try {
-    const res = await fetch("/api/level1/ingatlan-tipus-fields", { credentials: "same-origin" });
-    if (res.ok) {
-      const data = await res.json();
-      applyIngatlanTipusFieldsConfig(data);
+function restoreIngatlanSearchValues(root, values) {
+  if (!root || !values) return;
+  const hely = root.querySelector('[name="keresesi_hely"]');
+  if (hely && values.keresesi_hely) hely.value = values.keresesi_hely;
+  for (const key of ["ar_tol", "ar_ig"]) {
+    const input = root.querySelector(`[name="${key}"], #immo-${key}`);
+    if (input && values[key] != null && values[key] !== "") {
+      input.value = String(values[key]);
     }
-  } catch {
-    /* kód alapértelmezés */
   }
+  for (const [key, val] of Object.entries(values)) {
+    if (val == null || val === "") continue;
+    const wheel = root.querySelector(`[data-wheel="${key}"]`);
+    if (wheel) setWheelValue(wheel, String(val));
+  }
+}
 
-  const initialUz = normalizeIngatlanUzletag(defaultUzletag);
-  const resolvedSchema =
-    schema || (await fetchIngatlanWheelSchema(schemaVariantFromUzletag(initialUz)));
-  const tipusOpts = Array.isArray(lakasTipusOptions) && lakasTipusOptions.length
-    ? lakasTipusOptions
-    : initialUz === "airbnb"
-      ? INGATLAN_LAKAS_TIPUS_AIRBNB
-      : INGATLAN_LAKAS_TIPUS;
-  const tipus2Enabled = enableTipus2 && initialUz !== "airbnb";
-  const mainHost = root.querySelector("#immo-schema-main") || document.getElementById("immo-schema-main");
-  const moreHost = root.querySelector("#immo-schema-more") || document.getElementById("immo-schema-more");
-  const morePanel = root.querySelector("#immo-more") || document.getElementById("immo-more");
-  const moreBtn = root.querySelector("#immo-tovabbi") || document.getElementById("immo-tovabbi");
-
-  renderIngatlanSchemaHosts(mainHost, moreHost, resolvedSchema, "search");
-  ensureTipus2Field(root, { enable: tipus2Enabled });
-  setupMobileDualRanges(mainHost);
-  setupMobileDualRanges(moreHost);
-  applyDrumModeClass();
-  wireTelepulesSuggestIn(root);
-  wireTelepulesClear(root);
-
+function setupIngatlanSearchWheels(root, { tipusOpts, tipus2Enabled, defaultUzletag }) {
   fillPriceRangeWheels(root);
   fillAreaRangeWheels(root);
   fillEmeletRangeWheels(root);
@@ -1060,7 +1041,86 @@ export async function initIngatlanSearch({
       customKind: isRooms ? "rooms" : "price",
     });
   });
-  setUzletag(root, initialUz);
+  setUzletag(root, defaultUzletag);
+}
+
+async function reloadIngatlanSchemaLayout(root, opts) {
+  const {
+    tipusOpts,
+    tipus2Enabled,
+    defaultUzletag,
+    uzletag = readUzletag(root),
+    tipusList = readWheelList(root.querySelector('[data-wheel="ingatlan_lakas_tipus"]')),
+  } = opts;
+  const nextVariant = resolveIngatlanSchemaVariant(uzletag, tipusList);
+  const prevVariant = root.dataset.activeSchemaVariant || "";
+  if (prevVariant === nextVariant) return null;
+
+  const saved = readForm(root);
+  clearIngatlanWheelSchemaCache();
+  const schema = await fetchIngatlanWheelSchema(nextVariant, { force: true });
+  root.dataset.activeSchemaVariant = nextVariant;
+
+  const mainHost = root.querySelector("#immo-schema-main") || document.getElementById("immo-schema-main");
+  const moreHost = root.querySelector("#immo-schema-more") || document.getElementById("immo-schema-more");
+  renderIngatlanSchemaHosts(mainHost, moreHost, schema, "search");
+  ensureTipus2Field(root, { enable: tipus2Enabled });
+  setupMobileDualRanges(mainHost);
+  setupMobileDualRanges(moreHost);
+  wireTelepulesSuggestIn(root);
+  wireTelepulesClear(root);
+  setupIngatlanSearchWheels(root, { tipusOpts, tipus2Enabled, defaultUzletag });
+  restoreIngatlanSearchValues(root, saved);
+  return schema;
+}
+
+export async function initIngatlanSearch({
+  onSearch = () => {},
+  form = null,
+  schema = null,
+  defaultUzletag = "kiado",
+  lakasTipusOptions = null,
+  enableTipus2 = true,
+} = {}) {
+  const root = form || document.getElementById("immo-search-form");
+  if (!root) return;
+
+  try {
+    const res = await fetch("/api/level1/ingatlan-tipus-fields", { credentials: "same-origin", cache: "no-store" });
+    if (res.ok) {
+      const data = await res.json();
+      applyIngatlanTipusFieldsConfig(data);
+    }
+  } catch {
+    /* kód alapértelmezés */
+  }
+
+  const initialUz = normalizeIngatlanUzletag(defaultUzletag);
+  const tipusOpts = Array.isArray(lakasTipusOptions) && lakasTipusOptions.length
+    ? lakasTipusOptions
+    : initialUz === "airbnb"
+      ? INGATLAN_LAKAS_TIPUS_AIRBNB
+      : INGATLAN_LAKAS_TIPUS;
+  const tipus2Enabled = enableTipus2 && initialUz !== "airbnb";
+  const initVariant = schema
+    ? root.dataset.activeSchemaVariant || schemaVariantFromUzletag(initialUz)
+    : resolveIngatlanSchemaVariant(initialUz, []);
+  const resolvedSchema = schema || (await fetchIngatlanWheelSchema(initVariant, { force: true }));
+  root.dataset.activeSchemaVariant = initVariant;
+  const mainHost = root.querySelector("#immo-schema-main") || document.getElementById("immo-schema-main");
+  const moreHost = root.querySelector("#immo-schema-more") || document.getElementById("immo-schema-more");
+  const morePanel = root.querySelector("#immo-more") || document.getElementById("immo-more");
+  const moreBtn = root.querySelector("#immo-tovabbi") || document.getElementById("immo-tovabbi");
+
+  renderIngatlanSchemaHosts(mainHost, moreHost, resolvedSchema, "search");
+  ensureTipus2Field(root, { enable: tipus2Enabled });
+  setupMobileDualRanges(mainHost);
+  setupMobileDualRanges(moreHost);
+  applyDrumModeClass();
+  wireTelepulesSuggestIn(root);
+  wireTelepulesClear(root);
+
+  setupIngatlanSearchWheels(root, { tipusOpts, tipus2Enabled, defaultUzletag: initialUz });
 
   function setMoreOpen(open) {
     if (!morePanel || !moreBtn) return;
@@ -1091,7 +1151,16 @@ export async function initIngatlanSearch({
       setMoreOpen(!!morePanel?.hidden);
     });
 
-    root.querySelector('[data-wheel="ingatlan_lakas_tipus"]')?.addEventListener("immo-wheel-change", () => {
+    root.querySelector('[data-wheel="ingatlan_lakas_tipus"]')?.addEventListener("immo-wheel-change", async () => {
+      try {
+        await reloadIngatlanSchemaLayout(root, {
+          tipusOpts,
+          tipus2Enabled,
+          defaultUzletag: initialUz,
+        });
+      } catch (error) {
+        console.warn("Ingatlan séma frissítés:", error);
+      }
       syncRovidMenus(root);
       if (tipus2Enabled) syncTipus2Menu(root);
       syncTipusFieldVisibility(root);

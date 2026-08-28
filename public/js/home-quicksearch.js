@@ -2,7 +2,7 @@
  * Gyorskereső az autó hero panelen — elrendezés: GET /api/level1/form-layout?category=szemelyauto-search
  */
 
-import { applyAutoSearchLayout, readLayoutFilterValues } from "./auto-search-layout.js?v=deskLayout1";
+import { applyAutoSearchLayout, readLayoutFilterValues } from "./auto-search-layout.js?v=deskLayout3";
 import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums } from "./auto-search-drums.js?v=immoClear1";
 import {
   mountDetailedSearch,
@@ -13,7 +13,7 @@ import {
   initAutoDeskSearch,
   updateAutoDeskAccSummaries,
   arrangeAutoDeskDemoFields,
-} from "./auto-desk-search.js?v=deskLayout2";
+} from "./auto-desk-search.js?v=deskLayout3";
 import { readBrandModelFilterValues } from "./auto-brand-model-picker.js?v=teherDesk1";
 
 const MOBILE_MQ = "(max-width: 900px)";

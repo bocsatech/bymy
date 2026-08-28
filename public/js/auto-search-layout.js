@@ -228,6 +228,11 @@ function cellsForStep(layout, step) {
     .sort((a, b) => (a.row - b.row) || (a.col - b.col));
 }
 
+/** Admin Gyorskereső (1. lépés) mezőkulcsok — csak ezek jelenjenek meg a gyorskeresőben. */
+export function quickSearchFieldKeysFromLayout(layout) {
+  return cellsForStep(layout, 1).map((c) => c.field_key).filter(Boolean);
+}
+
 /** Dobkerék / select közös opciólista egy filter kulcshoz. */
 export function optionsForAutoFilterKey(filterKey, emptyLabel = "Mindegy") {
   const key = String(filterKey || "");
@@ -550,14 +555,7 @@ function wirePostalCityAutofill(form) {
 export async function applyAutoSearchLayout(form = document.getElementById("home-qs-form")) {
   if (!form) return null;
   const layout = await fetchAutoSearchLayout({ force: true });
-  const dependencyOrder = ["gyartmany", "modell", "tipus"];
-  const dependencyCells = dependencyOrder
-    .map((key) => layout.cells?.find((cell) => cell.field_key === key))
-    .filter(Boolean);
-  dependencyCells.forEach((cell) => {
-    cell.hidden = false;
-    cell.step = 1;
-  });
+  form.dataset.deskQuickKeys = quickSearchFieldKeysFromLayout(layout).join(",");
   const mainHost = document.getElementById("qs-layout-main");
   const moreHost = document.getElementById("qs-more-layout");
 

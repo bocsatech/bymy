@@ -191,19 +191,9 @@ export function arrangeAutoDeskDemoFields(form = document.getElementById("home-q
   const mainHost = document.getElementById("qs-layout-main");
   const moreHost = document.getElementById("qs-more-layout");
 
-  // Admin / layout 1. lépés = eddigi gyorskereső mezők
-  let quickKeys = new Set();
-  if (form.dataset.deskQuickKeys) {
-    form.dataset.deskQuickKeys.split(",").filter(Boolean).forEach((k) => quickKeys.add(k));
-  } else if (mainHost) {
-    mainHost.querySelectorAll("[data-qs-field]").forEach((el) => {
-      const key = el.getAttribute("data-qs-field");
-      if (key) quickKeys.add(key);
-    });
-    form.dataset.deskQuickKeys = [...quickKeys].join(",");
-  }
+  // Admin Gyorskereső (1. lépés) — applyAutoSearchLayout tölti (dataset.deskQuickKeys)
+  const quickKeys = new Set((form.dataset.deskQuickKeys || "").split(",").filter(Boolean));
   if (!quickKeys.size) {
-    // Fallback: alapértelmezett gyorskereső
     ["gyartmany", "modell", "uzemanyag", "gyartasi_ev", "vetelar"].forEach((k) => quickKeys.add(k));
     form.dataset.deskQuickKeys = [...quickKeys].join(",");
   }
@@ -219,8 +209,8 @@ export function arrangeAutoDeskDemoFields(form = document.getElementById("home-q
 
   const used = new Set();
   const mountOpts = { quickKeys, used };
-  const order = deskOrderFromAdminLayout(mainHost);
-  const fieldOrder = order.length ? order : DESK_ALAP_FALLBACK;
+  const order = deskOrderFromAdminLayout(mainHost).filter((item) => quickKeys.has(item.field));
+  const fieldOrder = order.length ? order : DESK_ALAP_FALLBACK.filter((item) => quickKeys.has(item.field));
 
   for (const item of fieldOrder) {
     mountDeskField(host, item, form, mountOpts);

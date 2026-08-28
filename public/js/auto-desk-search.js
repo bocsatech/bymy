@@ -10,17 +10,40 @@ function isVehicleDeskPage() {
   return page === "auto" || page === "teherauto";
 }
 
-/** Demó Alap adatok sorrend (2-es kép). */
-const DESK_ALAP_ORDER = [
+/** Fallback sorrend, ha nincs admin layout. */
+const DESK_ALAP_FALLBACK = [
   { field: "gyartmany", label: "Gyártmány" },
-  { field: "modell", label: "Típus" },
+  { field: "modell", label: "Modell" },
   { field: "gyartasi_ev", label: "Évjárat", range: true },
-  { field: "km", label: "Futott km", range: true },
   { field: "vetelar", label: "Vételár", range: true },
   { field: "uzemanyag", label: "Üzemanyag" },
-  { field: "allapot", label: "Állapot" },
   { field: "kivitel", label: "Kivitel" },
 ];
+
+function deskOrderFromAdminLayout(mainHost) {
+  if (!mainHost) return [];
+  const gridCells = [...mainHost.querySelectorAll(".home-qs-grid-cell")];
+  gridCells.sort((a, b) => {
+    const ra = Number(a.dataset.gridRow) || 0;
+    const rb = Number(b.dataset.gridRow) || 0;
+    if (ra !== rb) return ra - rb;
+    return (Number(a.dataset.gridCol) || 0) - (Number(b.dataset.gridCol) || 0);
+  });
+  const order = [];
+  for (const gridCell of gridCells) {
+    const wrap = gridCell.querySelector("[data-qs-field]");
+    if (!wrap) continue;
+    const field = wrap.getAttribute("data-qs-field");
+    if (!field) continue;
+    const label = wrap.querySelector(".home-qs-label, .immo-label")?.textContent?.trim() || field;
+    const range =
+      wrap.classList.contains("home-qs-pair") ||
+      Boolean(wrap.querySelector(".home-qs-pair")) ||
+      wrap.querySelectorAll("select.home-qs-control").length >= 2;
+    order.push({ field, label, range });
+  }
+  return order;
+}
 
 function isAutoDesk() {
   return isVehicleDeskPage() && window.matchMedia(DESK_MQ).matches;
@@ -137,8 +160,10 @@ export function arrangeAutoDeskDemoFields(form = document.getElementById("home-q
   host.innerHTML = "";
 
   const used = new Set();
+  const order = deskOrderFromAdminLayout(mainHost);
+  const fieldOrder = order.length ? order : DESK_ALAP_FALLBACK;
 
-  for (const item of DESK_ALAP_ORDER) {
+  for (const item of fieldOrder) {
     const wrap = findFieldWrap(form, item.field);
     if (!wrap || host.contains(wrap)) continue;
     used.add(item.field);
@@ -182,43 +207,6 @@ export function arrangeAutoDeskDemoFields(form = document.getElementById("home-q
 
     host.appendChild(field);
   }
-
-  // Gyorsban nem szereplő, de Alapba rakott mezők mellett: step1 mezők amik nincsenek a demó listában
-  quickKeys.forEach((key) => {
-    if (used.has(key)) return;
-    const wrap = findFieldWrap(form, key);
-    if (!wrap || host.contains(wrap)) return;
-    used.add(key);
-    const field = document.createElement("div");
-    field.className = "auto-desk-field";
-    field.dataset.deskField = key;
-    field.dataset.deskQuick = "1";
-    const label = document.createElement("span");
-    label.className = "auto-desk-field__label";
-    label.textContent =
-      wrap.querySelector(".home-qs-label, .immo-label")?.textContent?.trim() || key;
-    field.appendChild(label);
-    wrap.querySelectorAll(".home-qs-label, .immo-label").forEach((el) => {
-      el.style.display = "none";
-    });
-    const selects = [...wrap.querySelectorAll("select")];
-    if (selects.length >= 2) {
-      const range = document.createElement("div");
-      range.className = "auto-desk-range";
-      selects.slice(0, 2).forEach((sel) => range.appendChild(sel));
-      field.appendChild(range);
-      wrap.remove();
-    } else {
-      const sel = wrap.querySelector("select, input");
-      if (sel && wrap.matches("label, .home-qs-field, .home-qs-pair")) {
-        field.appendChild(sel);
-        wrap.remove();
-      } else {
-        field.appendChild(wrap);
-      }
-    }
-    host.appendChild(field);
-  });
 
   const leftovers = [];
   [mainHost, moreHost].forEach((root) => {

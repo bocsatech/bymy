@@ -554,10 +554,9 @@ export async function applyAutoSearchLayout(form = document.getElementById("home
   const dependencyCells = dependencyOrder
     .map((key) => layout.cells?.find((cell) => cell.field_key === key))
     .filter(Boolean);
-  dependencyCells.forEach((cell, index) => {
+  dependencyCells.forEach((cell) => {
     cell.hidden = false;
     cell.step = 1;
-    cell.row = index + 1;
   });
   const mainHost = document.getElementById("qs-layout-main");
   const moreHost = document.getElementById("qs-more-layout");

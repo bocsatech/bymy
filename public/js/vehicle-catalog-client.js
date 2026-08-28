@@ -69,7 +69,13 @@ function typesFromStaticCatalog(catalog, gyartmany, modell) {
   const entries = catalog?.tipusok?.[key] ?? catalog?.tipusok?.[altKey] ?? [];
   return entries.map((entry) => {
     if (typeof entry === "string") return { nev: entry, evTol: null, evIg: null };
-    return { nev: entry.nev, evTol: entry.evTol ?? null, evIg: entry.evIg ?? null };
+    return {
+      nev: entry.nev,
+      evTol: entry.evTol ?? null,
+      evIg: entry.evIg ?? null,
+      ajtok: Array.isArray(entry.ajtok) ? entry.ajtok : [],
+      uzemanyag: Array.isArray(entry.uzemanyag) ? entry.uzemanyag : [],
+    };
   }).filter((entry) => entry.nev);
 
 }

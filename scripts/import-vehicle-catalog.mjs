@@ -1,18 +1,20 @@
 #!/usr/bin/env node
 import { importVehicleCatalogFromCsv, resolveDefaultCsvPath, getVehicleCatalogPath } from "../lib/vehicle-catalog.mjs";
 
-const csvArg = process.argv[2];
-const csvPath = csvArg ? csvArg.replace(/^~/, process.env.HOME ?? "") : resolveDefaultCsvPath();
+const csvArgs = process.argv.slice(2);
+const csvPaths = csvArgs.length
+  ? csvArgs.map((arg) => arg.replace(/^~/, process.env.HOME ?? ""))
+  : [resolveDefaultCsvPath()];
 
-if (!csvPath) {
-  console.error("Használat: npm run import:catalog -- ~/Desktop/lista.csv");
-  console.error("Vagy helyezd a lista.csv fájlt az Asztalra.");
+if (csvPaths.some((path) => !path)) {
+  console.error("Használat: npm run import:catalog -- ~/Desktop/lista.csv ~/Desktop/lista-old.csv");
+  console.error("Adj meg egy vagy több CSV-forrást.");
   process.exit(1);
 }
 
 try {
-  const catalog = importVehicleCatalogFromCsv(csvPath);
-  console.log(`✓ Importálva: ${csvPath}`);
+  const catalog = importVehicleCatalogFromCsv(csvPaths);
+  console.log(`✓ Importálva: ${csvPaths.join(", ")}`);
   console.log(`  Cél: ${getVehicleCatalogPath()}`);
   console.log(`  Gyártmányok: ${catalog.gyartmanyok.length}`);
   console.log(

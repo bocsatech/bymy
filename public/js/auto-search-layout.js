@@ -33,12 +33,10 @@ const SEARCH_OMIT_FIELDS = new Set([
   // Egyéb típus csak a feladáson használható.
   "egyeb_tipus",
   "egyeb_modell",
-  // Helyszín: irányítószám → település; megye nem kell a keresőben.
+  // Helyszín: irányítószám → település; megye és körzet nem kell a keresőben.
   "megye",
+  "keresesi_korzet",
 ]);
-
-/** Új keresőmezők: élő layoutban is jelenjenek meg (ne maradjanak rejtve). */
-const SEARCH_FORCE_VISIBLE = new Set(["keresesi_korzet"]);
 
 /** Admin mező → kereső filter kulcs / widget. */
 const RANGE_SPECS = {
@@ -61,16 +59,9 @@ const RANGE_SPECS = {
 
 const TEHER_KIVITEL = ["Kisteher", "Dobozos", "Platós", "Ponyvás", "Hűtős", "Billenős", "Alváz"];
 
-/** Keresési körzet: 10 km-es lépés, 200 km-ig. */
-export const KERESESI_KORZET_OPTIONS = Array.from({ length: 20 }, (_, i) => {
-  const km = (i + 1) * 10;
-  return { value: String(km), label: `${km} km` };
-});
-
 const SELECT_OPTIONS = {
   allapot: ["Normál", "Újszerű", "Sérülésmentes", "Sérült"],
   kivitel: [...KIVITEL_OPTIONS],
-  keresesi_korzet: KERESESI_KORZET_OPTIONS,
   ajtok: ["2", "3", "4", "5"],
   szemelyek: ["1", "2", "3", "4", "5", "6", "7", "8", "9"],
   sebessegvalto: ["Manuális", "Automata"],
@@ -134,10 +125,9 @@ const SEARCH_LABEL_SHORT = {
   megye: "Megye",
   telepules: "Település",
   iranyitoszam: "Irányítószám",
-  keresesi_korzet: "Keresési körzet",
 };
 
-const NARROW_FIELD_KEYS = new Set(["szemelyek", "megye", "ajtok", "telepules", "iranyitoszam", "keresesi_korzet"]);
+const NARROW_FIELD_KEYS = new Set(["szemelyek", "megye", "ajtok", "telepules", "iranyitoszam"]);
 
 /** Szabad szöveges keresőmezők — ne legyenek dobkerék. */
 const TEXT_FIELD_KEYS = new Set(["telepules", "iranyitoszam"]);
@@ -228,7 +218,6 @@ function fillOptionsSelect(select, options) {
 function isSearchCellVisible(cell) {
   if (!cell) return false;
   if (SEARCH_OMIT_FIELDS.has(cell.field_key)) return false;
-  if (SEARCH_FORCE_VISIBLE.has(cell.field_key)) return true;
   if (cell.hidden) return false;
   return true;
 }
@@ -572,13 +561,6 @@ export async function applyAutoSearchLayout(form = document.getElementById("home
   });
   const mainHost = document.getElementById("qs-layout-main");
   const moreHost = document.getElementById("qs-more-layout");
-
-  // Élő layout: új keresőmezők (pl. körzet) mindig látszanak.
-  for (const cell of layout.cells || []) {
-    if (!SEARCH_FORCE_VISIBLE.has(cell.field_key)) continue;
-    cell.hidden = false;
-    if (Number(cell.step) < 2) cell.step = 5;
-  }
 
   const visible = (layout.cells || []).filter((c) => isSearchCellVisible(c));
 

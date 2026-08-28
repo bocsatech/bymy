@@ -22,7 +22,7 @@ import { initHomeStatsBar } from "./home-stats-bar.js";
 import { buildNearbyFilter, readNearbyPrefs } from "./nearby-search.js?v=korzetFix1";
 import { getAuthUser } from "./site-auth.js?v=nearby1";
 import { bindListingOpen, restoreListingReturn } from "./listing-return.js?v=scrollTop1";
-import { applyNavCounts } from "./nav-counts.js?v=navCount2";
+import { applyNavCounts } from "./nav-counts.js?v=navCount3";
 import { normalizeKivitel } from "./kivitel-options.js?v=kivitel1";
 
 const gridTrack = document.getElementById("home-grid-track");
@@ -201,7 +201,9 @@ function renderListings(items) {
   }
 
   for (const item of filtered) {
-    gridTrack.appendChild(createHomeGridCard(item));
+    const card = createHomeGridCard(item);
+    card.__bymyListing = item;
+    gridTrack.appendChild(card);
   }
   initHomeGridCardPhotos(gridTrack);
   restoreListingReturn();

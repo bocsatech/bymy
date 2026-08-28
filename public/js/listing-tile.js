@@ -102,6 +102,9 @@ export function createListingTileCard(item, { className = "hf-card hf-card--list
   media.className = "hf-card-media";
   if (imageUrl) {
     media.style.backgroundImage = `url(${JSON.stringify(imageUrl)})`;
+    media.style.backgroundSize = "cover";
+    media.style.backgroundPosition = "center center";
+    media.style.backgroundRepeat = "no-repeat";
     media.setAttribute("role", "img");
     media.setAttribute("aria-label", title);
   }

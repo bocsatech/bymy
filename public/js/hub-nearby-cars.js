@@ -1,4 +1,4 @@
-import { fetchListings } from "./db-client.js?v=nearby1";
+import { fetchListings } from "./db-client.js?v=nearby2";
 import { getAuthUser } from "./site-auth.js?v=nearby1";
 import {
   bindListingOpen,
@@ -22,7 +22,7 @@ const ALL_LINK = document.getElementById("hub-nearby-all");
 const COUNT_EL = document.getElementById("hub-nearby-count");
 
 const CACHE_KEY = "bymy-hub-nearby-v4";
-const CACHE_TTL_MS = 5 * 60 * 1000;
+const CACHE_TTL_MS = 15 * 60 * 1000;
 const INITIAL_COUNT = 9;
 const SCROLL_BATCH = 5;
 const RAIL_CAP = 13;
@@ -173,7 +173,7 @@ function writeCache(postal, radiusKm, items, meta = {}) {
 }
 
 async function loadNearbyFresh(postal, radiusKm) {
-  const all = await fetchListings({ limit: 500 });
+  const all = await fetchListings({ limit: 50, status: "feladott" });
   const autos = sortByDate(filterAutoListings(all));
   const filter = await buildNearbyFilter({ items: autos, postal, radiusKm });
   const nearby = autos.filter((item) => filter.listingIds.has(item.id)).map(slimListingTile);

@@ -41,12 +41,15 @@
     const body = JSON.stringify(payload(kind));
     const headers = { "Content-Type": "application/json" };
     if (vid) headers["X-Bymy-Vid"] = vid;
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 1500);
     fetch("/api/visit", {
       method: "POST",
       headers,
       body,
       credentials: "same-origin",
       keepalive: true,
+      signal: controller.signal,
     })
       .then((r) => r.json().catch(() => ({})))
       .then((data) => {
@@ -59,7 +62,8 @@
           }
         }
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => window.clearTimeout(timeout));
   }
 
   send("page");

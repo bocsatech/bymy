@@ -33,12 +33,12 @@ function buildPhotoMarkup(urls) {
     return `<div class="home-grid-card-photo" aria-hidden="true"></div>`;
   }
   if (urls.length === 1) {
-    return `<div class="home-grid-card-photo" aria-hidden="true"><img class="home-grid-card-photo-img" src="${escapeHtml(urls[0])}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" /></div>`;
+    return `<div class="home-grid-card-photo" aria-hidden="true"><img class="home-grid-card-photo-img" src="${escapeHtml(urls[0])}" alt="" width="640" height="400" loading="lazy" decoding="async" referrerpolicy="no-referrer" /></div>`;
   }
   const slides = urls
     .map(
       (url) =>
-        `<div class="home-grid-card-photo-slide"><img class="home-grid-card-photo-img" src="${escapeHtml(url)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" /></div>`
+        `<div class="home-grid-card-photo-slide"><img class="home-grid-card-photo-img" src="${escapeHtml(url)}" alt="" width="640" height="400" loading="lazy" decoding="async" referrerpolicy="no-referrer" /></div>`
     )
     .join("");
   return `<div class="home-grid-card-photo-track is-multi" tabindex="0" role="group" aria-label="Hirdetés képei">${slides}</div>`;

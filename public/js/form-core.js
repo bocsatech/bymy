@@ -450,6 +450,7 @@ function updateTitle() {
 
 function syncTipusFromModell() {
   if (!tipus || !modell) return;
+  if (tipus.tagName === "SELECT") return;
   if (tipus.dataset.userEdited === "1") return;
   tipus.value = modell.value || "";
 }
@@ -1380,6 +1381,7 @@ fillYearSelect(forgalombaHelyezesEv);
 initVehicleCatalogSelects({
   brandSelect: gyartmany,
   modelSelect: modell,
+  tipusSelect: tipus,
   yearSelect: gyartasiEv,
   yearFromCatalog: false,
   brandEmptyLabel: "Válasszon",

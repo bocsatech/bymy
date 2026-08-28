@@ -30,8 +30,7 @@ const SEARCH_OMIT_FIELDS = new Set([
   "gyartasi_honap",
   "forgalomba_helyezes_honap",
   "muszaki_honap",
-  // Szabad szöveg a feladáson — a keresőben a „Típus” = modell lista.
-  "tipus",
+  // Egyéb típus csak a feladáson használható.
   "egyeb_tipus",
   "egyeb_modell",
   // Helyszín: irányítószám → település; megye nem kell a keresőben.
@@ -329,8 +328,14 @@ function fieldHtml(cell) {
   }
   if (key === "modell") {
     return `<label class="home-qs-field" data-qs-field="${key}">
-      <span class="home-qs-label">Típus</span>
+      <span class="home-qs-label">Modell</span>
       <select class="home-qs-control" id="qs-modell" data-filter-key="modell"></select>
+    </label>`;
+  }
+  if (key === "tipus") {
+    return `<label class="home-qs-field" data-qs-field="${key}">
+      <span class="home-qs-label">Típus</span>
+      <select class="home-qs-control" id="qs-tipus" data-filter-key="tipus"></select>
     </label>`;
   }
   if (key === "uzemanyag") {
@@ -425,11 +430,13 @@ function wireSelectOptions(root) {
 async function wireCatalog(form) {
   const brandSelect = form.querySelector("#qs-gyartmany");
   const modelSelect = form.querySelector("#qs-modell");
+  const typeSelect = form.querySelector("#qs-tipus");
   if (!brandSelect || !modelSelect) return;
   try {
     await initVehicleCatalogSelects({
       brandSelect,
       modelSelect,
+      tipusSelect: typeSelect,
       brandEmptyLabel: "Mindegy",
       modelEmptyLabel: "Mindegy",
       yearFromCatalog: false,

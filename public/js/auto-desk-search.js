@@ -12,7 +12,7 @@ function isVehicleDeskPage() {
 
 /** Demó Alap adatok sorrend (2-es kép). */
 const DESK_ALAP_ORDER = [
-  { field: "gyartmany", label: "Gyártmány/Típus" },
+  { field: "gyartmany", label: "Gyártmány" },
   { field: "modell", label: "Típus" },
   { field: "gyartasi_ev", label: "Évjárat", range: true },
   { field: "km", label: "Futott km", range: true },

@@ -407,6 +407,12 @@ const actions = {
     err = "";
     info = "";
     const form = event.target;
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const prevLabel = submitBtn?.textContent || "Belépés";
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Belépés…";
+    }
     lastUsername = String(form.username.value || "").trim();
     try {
       const data = await api("/api/level1/login", {
@@ -415,6 +421,7 @@ const actions = {
           username: lastUsername,
           password: form.password.value,
         }),
+        signal: AbortSignal.timeout(25_000),
       });
       // IDEIGLENES localhost: localadmin 2FA nélkül
       if (data.skipOtp && data.admin) {
@@ -437,10 +444,17 @@ const actions = {
           "Zárolva (3 hibás próbálkozás). Írd be pontosan a Vercel LEVEL1_BOOTSTRAP_PASSWORD jelszót — az feloldja.\n\n" +
           "Deploy / oldal újratöltés után is feloldódik. Kézi feloldás Supabase SQL:\n" +
           `UPDATE level1_admins SET locked = false, failed_attempts = 0, updated_at = now() WHERE username = '${user}';`;
+      } else if (error.name === "TimeoutError" || error.name === "AbortError") {
+        err = "A szerver nem válaszolt időben. Hard refresh (Cmd+Shift+R), majd próbáld újra.";
       } else {
         err = error.message;
       }
       render();
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = prevLabel;
+      }
     }
   },
   async resendOtp() {

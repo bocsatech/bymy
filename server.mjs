@@ -119,6 +119,7 @@ import { applySecurityHeaders } from "./lib/security-headers.mjs";
 import { recordPageVisit, visitorCookieHeader } from "./lib/site-visitors.mjs";
 import { isIpBlocked } from "./lib/site-ip-blocks.mjs";
 import { enforceMembersGate } from "./lib/site-gate.mjs";
+import { readJsonBody } from "./lib/read-json-body.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PUBLIC = join(__dirname, "public");
@@ -191,19 +192,7 @@ const MIME = {
 let importRunning = false;
 
 function readBody(req) {
-  return new Promise((resolve, reject) => {
-    const chunks = [];
-    req.on("data", (chunk) => chunks.push(chunk));
-    req.on("end", () => {
-      try {
-        const raw = Buffer.concat(chunks).toString("utf8");
-        resolve(raw ? JSON.parse(raw) : {});
-      } catch (error) {
-        reject(error);
-      }
-    });
-    req.on("error", reject);
-  });
+  return readJsonBody(req);
 }
 
 function readRawBody(req) {

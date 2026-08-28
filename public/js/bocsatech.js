@@ -9,6 +9,11 @@ import { INGATLAN_LAKAS_TIPUS, fieldKeysVisibleForTipus } from "./ingatlan-field
 
 const app = document.getElementById("app");
 
+function isLiveAdminHost() {
+  const h = String(location.hostname || "").toLowerCase();
+  return h.includes("vercel.app") || h === "bymy.hu" || h.endsWith(".bymy.hu");
+}
+
 function showBootPlaceholder(message = "Betöltés…") {
   if (!app) return;
   app.innerHTML = `<div class="wrap"><h1>Bocsatech</h1><p class="hint">${esc(message)}</p></div>`;
@@ -17,8 +22,6 @@ function showBootPlaceholder(message = "Betöltés…") {
 if (!app) {
   throw new Error("Hiányzik a #app elem a Bocsatech.html-ben.");
 }
-
-showBootPlaceholder();
 
 async function fetchJsonWithTimeout(url, ms = 15000) {
   const ctrl = new AbortController();
@@ -720,9 +723,9 @@ const actions = {
         wheelSchema = data.schema || wheelSchema;
         info =
           `${categoryLabel(cat)} kerék-séma mentve. Hard refresh (Cmd+Shift+R) az élő oldalon. ` +
-          (deployBackend?.backend === "supabase"
-            ? "Ez az éles adatbázis — a változás minden látogatónál megjelenik."
-            : "FIGYELEM: lokális SQLite — az éles oldalra csak a bymy.vercel.app/Bocsatech.html mentése kerül.");
+          (isLiveAdminHost() || deployBackend?.backend === "supabase"
+            ? "Éles mentés — minden látogatónál megjelenik."
+            : "Lokális mentés — csak ezen a gépen.");
         render();
         return;
       }
@@ -735,14 +738,10 @@ const actions = {
       const isSearch = isSearchLayoutCat(cat);
       info = isSearch
           ? `${categoryLabel(cat)} elrendezés mentve. Hard refresh (Cmd+Shift+R) az élő oldalon. ${
-              deployBackend?.backend === "supabase"
-                ? "Éles adatbázis."
-                : "Lokális mentés — nem kerül az éles oldalra."
+              isLiveAdminHost() || deployBackend?.backend === "supabase" ? "Éles mentés." : "Lokális mentés."
             }`
           : `Elrendezés mentve (${categoryLabel(layoutCategory)}). Hard refresh a hirdetésfeladáson. ${
-              deployBackend?.backend === "supabase"
-                ? "Éles adatbázis."
-                : "Lokális mentés — nem kerül az éles oldalra."
+              isLiveAdminHost() || deployBackend?.backend === "supabase" ? "Éles mentés." : "Lokális mentés."
             }`;
       render();
     } catch (error) {
@@ -1296,10 +1295,15 @@ function loginView() {
         </form>
       </div>`;
   }
+  const liveHost = isLiveAdminHost();
   return `
     <div class="wrap">
       <h1>Bocsatech</h1>
-      <p class="sub">Admin belépés — jelszó + email kód. 3 hiba után a felhasználónév zárolva.<br><small>Localhost (IDEIGLENES): <code>localadmin</code> / <code>localadmin</code> — 2FA nélkül.</small></p>
+      <p class="sub">Admin belépés — jelszó + email kód. 3 hiba után a felhasználónév zárolva.${
+        liveHost
+          ? ""
+          : `<br><small>Localhost (IDEIGLENES): <code>localadmin</code> / <code>localadmin</code> — 2FA nélkül.</small>`
+      }</p>
       <form class="card" data-act="login" style="max-width:420px">
         <label>Felhasználónév</label>
         <input name="username" autocomplete="username" value="${esc(lastUsername)}" required />
@@ -2025,12 +2029,13 @@ function pagesAdminView(pageKey) {
 }
 
 function backendBannerHtml() {
-  if (!deployBackend) return "";
-  const live = deployBackend.backend === "supabase";
-  const label = live ? "Éles adatbázis (Supabase)" : "Lokális SQLite";
+  if (!admin) return "";
+  const live = isLiveAdminHost() || deployBackend?.backend === "supabase";
+  if (!deployBackend && !live) return "";
+  const label = live ? "Éles admin (Supabase)" : "Lokális SQLite";
   const detail = live
-    ? "A mentés azonnal az élő oldalon is látszik (hard refresh)."
-    : "A mentés NEM kerül az éles oldalra — használd a bymy.vercel.app/Bocsatech.html admin felületet.";
+    ? "A mentés az élő oldalon is látszik (hard refresh)."
+    : "Lokális mentés — nem kerül az éles oldalra.";
   return `<p class="hint ${live ? "ok" : "warn"}" style="margin:0 0 0.75rem"><strong>${esc(label)}.</strong> ${esc(detail)}</p>`;
 }
 
@@ -2139,21 +2144,19 @@ function render() {
 
 async function bootBocsatech() {
   try {
-    let me = { admin: null };
-    try {
-      const { res, data } = await fetchJsonWithTimeout("/api/level1/me");
-      if (res.ok) me = data;
-    } catch (meError) {
-      console.warn("Bocsatech /me:", meError);
+    const [meResult, healthResult] = await Promise.allSettled([
+      fetchJsonWithTimeout("/api/level1/me", 8000),
+      fetchJsonWithTimeout("/api/health", 8000),
+    ]);
+
+    if (meResult.status === "fulfilled" && meResult.value.res.ok) {
+      admin = meResult.value.data.admin || null;
+    } else if (meResult.status === "rejected") {
+      console.warn("Bocsatech /me:", meResult.reason);
     }
 
-    admin = me.admin || null;
-
-    try {
-      const { res, data } = await fetchJsonWithTimeout("/api/health");
-      deployBackend = res.ok ? data : null;
-    } catch {
-      deployBackend = null;
+    if (healthResult.status === "fulfilled" && healthResult.value.res.ok) {
+      deployBackend = healthResult.value.data;
     }
 
     if (admin) {
@@ -2165,21 +2168,14 @@ async function bootBocsatech() {
       }
     }
 
-    try {
-      render();
-    } catch (renderError) {
-      console.error("Bocsatech render:", renderError);
-      showBootPlaceholder("Megjelenítési hiba.");
-      const errEl = app.querySelector(".hint");
-      if (errEl) {
-        errEl.insertAdjacentHTML(
-          "afterend",
-          `<p class="err">${esc(renderError?.message || "Megjelenítési hiba.")}</p>`
-        );
-      }
-    }
+    render();
   } catch (bootError) {
     console.error("Bocsatech boot:", bootError);
+    if (!admin) {
+      err = bootError?.message || "Indítási hiba.";
+      render();
+      return;
+    }
     showBootPlaceholder("");
     app.querySelector(".hint")?.insertAdjacentHTML(
       "afterend",
@@ -2188,4 +2184,5 @@ async function bootBocsatech() {
   }
 }
 
+render();
 bootBocsatech();

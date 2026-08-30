@@ -273,7 +273,11 @@ function render(view, listing, related) {
         </div>
         <div class="hd-seller-card">
           <span class="hd-seller-avatar" aria-hidden="true">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8.2" r="3.4" stroke="currentColor" stroke-width="1.5"/><path d="M5.2 19.2c.8-3.2 3.1-4.8 6.8-4.8s6 1.6 6.8 4.8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <svg class="hd-seller-avatar-icon" width="48" height="48" viewBox="0 0 48 48" focusable="false">
+              <circle cx="24" cy="24" r="24" fill="#c5d0dc"/>
+              <circle cx="24" cy="18" r="8" fill="#fff"/>
+              <path fill="#fff" d="M8.5 42.5c1.6-8.2 7.4-12.2 15.5-12.2s13.9 4 15.5 12.2C35.2 45.2 29.9 47 24 47s-11.2-1.8-15.5-4.5z"/>
+            </svg>
           </span>
           <div class="hd-seller-meta">
             <p class="hd-seller-name">${escapeHtml(view.sellerName)}</p>

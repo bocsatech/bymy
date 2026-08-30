@@ -264,11 +264,22 @@ function render(view, listing, related) {
           : ""
       }
       <aside class="hd-side">
-        <div>
-          <p class="hd-price">${escapeHtml(view.price)}</p>
-          <p class="hd-price-sub">Eladási ár${view.salePrice ? ` · korábbi: ${escapeHtml(view.salePrice)}` : ""}</p>
+        <div class="hd-price-box">
+          <div class="hd-price-row">
+            <p class="hd-price">${escapeHtml(view.price)}</p>
+            <p class="hd-price-sub">Eladási ár</p>
+          </div>
+          ${view.salePrice ? `<p class="hd-price-old">Korábbi ár: ${escapeHtml(view.salePrice)}</p>` : ""}
         </div>
-        <p class="hd-seller-name">${escapeHtml(view.sellerName)}</p>
+        <div class="hd-seller-card">
+          <span class="hd-seller-avatar" aria-hidden="true">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8.2" r="3.4" stroke="currentColor" stroke-width="1.5"/><path d="M5.2 19.2c.8-3.2 3.1-4.8 6.8-4.8s6 1.6 6.8 4.8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </span>
+          <div class="hd-seller-meta">
+            <p class="hd-seller-name">${escapeHtml(view.sellerName)}</p>
+            ${view.sellerSince ? `<p class="hd-seller-since">Felhasználó ezóta: ${escapeHtml(view.sellerSince)}</p>` : ""}
+          </div>
+        </div>
         ${view.addressLines.length ? `<p class="hd-seller-addr">${view.addressLines.map(escapeHtml).join("<br>")}</p>` : ""}
         ${
           canMsg

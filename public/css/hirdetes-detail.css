@@ -400,18 +400,59 @@
   gap: 0.85rem;
 }
 
+.hd-price-box {
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid #eef0f3;
+}
+
+.hd-price-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.45rem 0.65rem;
+}
+
 .hd-price {
   margin: 0;
   font-size: 1.7rem;
   font-weight: 800;
   color: #1565c0;
   letter-spacing: -0.02em;
+  line-height: 1.1;
 }
 
 .hd-price-sub {
-  margin: 0.15rem 0 0;
+  margin: 0;
   font-size: 0.82rem;
-  color: #667085;
+  color: #98a2b3;
+  font-weight: 500;
+}
+
+.hd-price-old {
+  margin: 0.35rem 0 0;
+  font-size: 0.8rem;
+  color: #98a2b3;
+}
+
+.hd-seller-card {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.hd-seller-avatar {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #eef4ff;
+  color: #98a2b3;
+}
+
+.hd-seller-meta {
+  min-width: 0;
 }
 
 .hd-seller-name {
@@ -419,6 +460,12 @@
   font-size: 1.02rem;
   font-weight: 800;
   color: #101828;
+}
+
+.hd-seller-since {
+  margin: 0.15rem 0 0;
+  font-size: 0.8rem;
+  color: #98a2b3;
 }
 
 .hd-seller-addr {

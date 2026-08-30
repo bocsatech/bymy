@@ -21,7 +21,7 @@ import { initHomeUnifiedScroll } from "./home-unified-scroll.js";
 import { initHomeStatsBar } from "./home-stats-bar.js";
 import { buildNearbyFilter, readNearbyPrefs } from "./nearby-search.js?v=korzetFix1";
 import { getAuthUser } from "./site-auth.js?v=nearby1";
-import { bindListingOpen, restoreListingReturn } from "./listing-return.js?v=scrollTop1";
+import { bindListingOpen, restoreListingReturn } from "./listing-return.js?v=searchNav1";
 import { applyNavCounts } from "./nav-counts.js?v=navCount3";
 import { normalizeKivitel } from "./kivitel-options.js?v=kivitel1";
 

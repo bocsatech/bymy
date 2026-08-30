@@ -3,7 +3,7 @@ import { getAuthUser, getDisplayName, getProfile } from "./site-auth.js?v=auth20
 import { startConversation, sendMessage } from "./messages-api.js?v=msgLive1";
 import { canMessageListing, openListingMessage } from "./start-listing-message.js?v=msgLive1";
 import { getParkplatz, addParkplatzItem, removeParkplatzItem } from "./fok-data.js?v=auth20260805localdb9";
-import { listingReturnHref, listingDetailHref, rememberListingOpen } from "./listing-return.js?v=scrollTop1";
+import { listingReturnHref, listingDetailHref, rememberListingOpen, getListingSearchNav, touchListingReturnId } from "./listing-return.js?v=searchNav1";
 
 const root = document.getElementById("hd-root");
 const ICON = {
@@ -149,12 +149,37 @@ function render(view, listing, related) {
   const profile = getProfile() || {};
   const loginNext = `/belepes.html?next=${encodeURIComponent(location.pathname + location.search)}`;
 
+  const searchNav = getListingSearchNav(view.id, view.categoryHref);
+  const hasPrevNext = Boolean(searchNav.prevId || searchNav.nextId);
+
   document.title = `${view.title} — Bymy`;
   document.body.classList.toggle("hd-has-msg-bar", canMsg);
 
   root.innerHTML = `
+    <div class="hd-search-nav">
+      <a class="hd-search-back" href="${escapeHtml(searchNav.returnHref)}">
+        <span aria-hidden="true">◀</span> vissza a keresési eredményekhez
+      </a>
+      ${
+        hasPrevNext
+          ? `<nav class="hd-search-siblings" aria-label="Szomszédos hirdetések">
+        ${
+          searchNav.prevId
+            ? `<a class="hd-search-prev" href="${escapeHtml(listingDetailHref(searchNav.prevId))}"><span aria-hidden="true">◀</span> előző</a>`
+            : `<span class="hd-search-prev is-disabled"><span aria-hidden="true">◀</span> előző</span>`
+        }
+        <span class="hd-search-sep" aria-hidden="true">|</span>
+        ${
+          searchNav.nextId
+            ? `<a class="hd-search-next" href="${escapeHtml(listingDetailHref(searchNav.nextId))}">következő <span aria-hidden="true">▶</span></a>`
+            : `<span class="hd-search-next is-disabled">következő <span aria-hidden="true">▶</span></span>`
+        }
+      </nav>`
+          : ""
+      }
+    </div>
+
     <nav class="hd-crumbs" aria-label="Navigáció">
-      <button type="button" class="hd-back" data-hd-back>${ICON.back} Vissza</button>
       <ol class="hd-crumb-list">
         <li><a href="/">Kezdőlap</a></li>
         <li><a href="${escapeHtml(view.categoryHref)}">${escapeHtml(view.categoryLabel)}</a></li>
@@ -420,8 +445,15 @@ function bindUi(view, listing, extrasRest) {
     else lightbox.removeAttribute("open");
   }
 
-  root.querySelector("[data-hd-back]")?.addEventListener("click", () => {
-    window.location.href = listingReturnHref(view.categoryHref);
+  root.querySelectorAll("a.hd-search-prev, a.hd-search-next").forEach((link) => {
+    link.addEventListener("click", () => {
+      try {
+        const id = new URL(link.href, location.origin).searchParams.get("id");
+        if (id) touchListingReturnId(id);
+      } catch {
+        /* ignore */
+      }
+    });
   });
   root.querySelector("[data-hd-prev]")?.addEventListener("click", (event) => {
     event.stopPropagation();

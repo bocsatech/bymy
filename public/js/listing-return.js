@@ -22,13 +22,28 @@ export function currentListHref() {
   return `${url.pathname}${url.search}${url.hash}`;
 }
 
-export function rememberListingOpen(listingId, cardEl) {
+function collectListingIds(root) {
+  if (!root?.querySelectorAll) return [];
+  const ids = [];
+  const seen = new Set();
+  root.querySelectorAll("[data-listing-id]").forEach((el) => {
+    const id = String(el.getAttribute("data-listing-id") || "").trim();
+    if (!id || seen.has(id)) return;
+    seen.add(id);
+    ids.push(id);
+  });
+  return ids;
+}
+
+export function rememberListingOpen(listingId, cardEl, root = document) {
   const id = String(listingId ?? "").trim();
   if (!id) return;
   const rect = cardEl?.getBoundingClientRect?.();
+  const scope = root?.querySelectorAll ? root : document;
   writeReturn({
     href: currentListHref(),
     listingId: id,
+    listingIds: collectListingIds(scope),
     scrollY: window.scrollY,
     cardTop: rect ? rect.top + window.scrollY : null,
   });
@@ -50,6 +65,42 @@ export function listingReturnHref(fallback = "/auto.html") {
   return fallback;
 }
 
+/**
+ * Előző / következő hirdetés a keresési listából.
+ * @returns {{ returnHref: string, prevId: string|null, nextId: string|null, index: number, total: number }}
+ */
+export function getListingSearchNav(currentId, fallbackHref = "/auto.html") {
+  const data = readReturn();
+  const returnHref = listingReturnHref(fallbackHref);
+  const ids = Array.isArray(data?.listingIds)
+    ? data.listingIds.map((id) => String(id)).filter(Boolean)
+    : [];
+  const current = String(currentId ?? "").trim();
+  const index = current ? ids.indexOf(current) : -1;
+  if (index < 0 || ids.length < 2) {
+    return { returnHref, prevId: null, nextId: null, index: Math.max(0, index), total: ids.length };
+  }
+  return {
+    returnHref,
+    prevId: index > 0 ? ids[index - 1] : null,
+    nextId: index < ids.length - 1 ? ids[index + 1] : null,
+    index,
+    total: ids.length,
+  };
+}
+
+/** Előző/következő hirdetésre lépéskor a lista-kontextus megmaradjon. */
+export function touchListingReturnId(listingId) {
+  const id = String(listingId ?? "").trim();
+  if (!id) return;
+  const data = readReturn();
+  if (!data) {
+    writeReturn({ href: listingReturnHref(), listingId: id, listingIds: [id] });
+    return;
+  }
+  writeReturn({ ...data, listingId: id });
+}
+
 export function bindListingOpen(root = document) {
   root.addEventListener("click", (event) => {
     if (event.target.closest(".home-grid-card-media")) return;
@@ -57,7 +108,7 @@ export function bindListingOpen(root = document) {
     if (!el || !root.contains(el)) return;
     const id = el.getAttribute("data-listing-id");
     if (!id) return;
-    rememberListingOpen(id, el);
+    rememberListingOpen(id, el, root);
     if (el.tagName === "A" && el.getAttribute("href")) return;
     event.preventDefault();
     window.location.href = listingDetailHref(id);

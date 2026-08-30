@@ -79,6 +79,9 @@ export function initMessagesUi(root, { onUnreadChange, openConversationId } = {}
   let openConv = null;
   let messages = [];
   let busy = false;
+  let query = "";
+  /** true = felhasználó visszalépett a listára; ne nyissuk újra automatikusan */
+  let stayOnInbox = false;
   const options = { openConversationId };
 
   root.innerHTML = `
@@ -88,6 +91,9 @@ export function initMessagesUi(root, { onUnreadChange, openConversationId } = {}
           <h1 class="wh-msg__title">Üzenetek</h1>
           <button type="button" class="wh-msg__edit" data-msg-edit>Szerkesztés</button>
         </header>
+        <div class="wh-msg__filters">
+          <input type="search" data-msg-search placeholder="Keresés név vagy hirdetés szerint" autocomplete="off" />
+        </div>
         <div class="wh-msg__state" data-msg-state hidden></div>
         <div class="wh-msg__rows" data-msg-list></div>
         <div class="wh-msg__empty" data-msg-empty hidden>
@@ -134,6 +140,7 @@ export function initMessagesUi(root, { onUnreadChange, openConversationId } = {}
           <div class="wh-msg__ad" data-msg-listing></div>
           <div class="wh-msg__stream" data-msg-bubbles></div>
           <p class="wh-msg__error" data-msg-thread-error hidden></p>
+          <p class="wh-msg__send-status" data-msg-send-status role="status" hidden></p>
 
           <form class="wh-msg__composer" data-msg-composer>
             <label class="wh-msg__attach" title="Csatolmány">
@@ -165,6 +172,8 @@ export function initMessagesUi(root, { onUnreadChange, openConversationId } = {}
     file: root.querySelector("[data-msg-file]"),
     menuBtn: root.querySelector("[data-msg-menu]"),
     actions: root.querySelector("[data-msg-actions]"),
+    search: root.querySelector("[data-msg-search]"),
+    sendStatus: root.querySelector("[data-msg-send-status]"),
   };
 
   function setUnreadBadge() {
@@ -191,6 +200,7 @@ export function initMessagesUi(root, { onUnreadChange, openConversationId } = {}
 
   function showInboxOnly() {
     openConv = null;
+    stayOnInbox = true;
     els.shell?.setAttribute("data-msg-view", "inbox");
     if (els.placeholder) els.placeholder.hidden = false;
     if (els.threadMain) els.threadMain.hidden = true;
@@ -199,20 +209,52 @@ export function initMessagesUi(root, { onUnreadChange, openConversationId } = {}
   }
 
   function showThreadPane() {
+    stayOnInbox = false;
     els.shell?.setAttribute("data-msg-view", "thread");
     if (els.placeholder) els.placeholder.hidden = true;
     if (els.threadMain) els.threadMain.hidden = false;
   }
 
+  function pickLatestConversation(list) {
+    if (!Array.isArray(list) || !list.length) return null;
+    return [...list].sort((a, b) => {
+      const ta = Date.parse(a?.lastMessage?.createdAt || a?.updatedAt || 0) || 0;
+      const tb = Date.parse(b?.lastMessage?.createdAt || b?.updatedAt || 0) || 0;
+      if (tb !== ta) return tb - ta;
+      return Number(b?.id || 0) - Number(a?.id || 0);
+    })[0];
+  }
+
+  function scrollBubblesToLatest() {
+    if (!els.bubbles) return;
+    const go = () => {
+      els.bubbles.scrollTop = els.bubbles.scrollHeight;
+    };
+    go();
+    requestAnimationFrame(() => {
+      go();
+      requestAnimationFrame(go);
+    });
+  }
+
   function renderList() {
     if (!els.list) return;
     els.list.innerHTML = "";
-    const has = conversations.length > 0;
+    const needle = query.trim().toLocaleLowerCase("hu-HU");
+    const visible = conversations.filter((conv) => {
+      if (!needle) return true;
+      const haystack = [conv.peer?.displayName, conv.listing?.title, conv.listing?.code, conv.lastMessage?.body]
+        .filter(Boolean)
+        .join(" ")
+        .toLocaleLowerCase("hu-HU");
+      return haystack.includes(needle);
+    });
+    const has = visible.length > 0;
     if (els.empty) els.empty.hidden = has;
     els.list.hidden = !has;
     setUnreadBadge();
 
-    for (const conv of conversations) {
+    for (const conv of visible) {
       const active = openConv && Number(openConv.id) === Number(conv.id);
       const row = document.createElement("button");
       row.type = "button";
@@ -222,7 +264,7 @@ export function initMessagesUi(root, { onUnreadChange, openConversationId } = {}
       const preview = conv.lastMessage?.body || "Új beszélgetés";
       row.innerHTML = `
         <span class="wh-msg__thumb" aria-hidden="true">
-          <span class="wh-msg__thumb-img">${ICONS.car}</span>
+          ${conv.listing?.imageUrl ? `<img class="wh-msg__thumb-img" src="${escapeHtml(conv.listing.imageUrl)}" alt="" />` : `<span class="wh-msg__thumb-img">${ICONS.car}</span>`}
           <span class="wh-msg__thumb-avatar">${escapeHtml(letter)}</span>
         </span>
         <span class="wh-msg__row-body">
@@ -300,22 +342,32 @@ export function initMessagesUi(root, { onUnreadChange, openConversationId } = {}
       }
     }
     els.bubbles.innerHTML = parts.join("");
-    els.bubbles.scrollTop = els.bubbles.scrollHeight;
+    scrollBubblesToLatest();
   }
 
   function renderListingBar() {
     if (!els.listing || !openConv) return;
     els.listing.innerHTML = `
-      <div class="wh-msg__ad-img" aria-hidden="true">${ICONS.car}</div>
+      <div class="wh-msg__ad-img" aria-hidden="true">${openConv.listing?.imageUrl ? `<img src="${escapeHtml(openConv.listing.imageUrl)}" alt="" />` : ICONS.car}</div>
       <div class="wh-msg__ad-text">
         <strong>${escapeHtml(openConv.listing?.title || "")}</strong>
         <span class="wh-msg__ad-price">${escapeHtml(openConv.listing?.priceLabel || "")}</span>
         <span class="wh-msg__ad-code">Bymy kód: ${escapeHtml(openConv.listing?.code || "")}</span>
       </div>
+      <a class="wh-msg__ad-open" href="/hirdetes.html?id=${encodeURIComponent(openConv.listing?.id || "")}">Hirdetés megnyitása</a>
     `;
   }
 
+  function setSendStatus(text, isError = false) {
+    if (!els.sendStatus) return;
+    els.sendStatus.hidden = !text;
+    els.sendStatus.textContent = text || "";
+    els.sendStatus.classList.toggle("is-error", isError);
+  }
+
   async function openConversation(conv) {
+    if (!conv) return;
+    stayOnInbox = false;
     openConv = conv;
     if (els.peer) els.peer.textContent = conv.peer?.displayName || "—";
     if (els.peerStatus) els.peerStatus.textContent = "Bymy üzenet";
@@ -353,9 +405,40 @@ export function initMessagesUi(root, { onUnreadChange, openConversationId } = {}
       conversations = await listConversations();
       showState("");
       renderList();
+
+      const requested = Number(options.openConversationId);
+      const deepLink =
+        Number.isFinite(requested) && requested > 0
+          ? conversations.find((conversation) => Number(conversation.id) === requested)
+          : null;
+
+      if (deepLink) {
+        options.openConversationId = undefined;
+        await openConversation(deepLink);
+        return;
+      }
+
       if (openConv) {
         const still = conversations.find((c) => Number(c.id) === Number(openConv.id));
-        if (!still) showInboxOnly();
+        if (!still) {
+          showInboxOnly();
+          return;
+        }
+        openConv = still;
+        renderList();
+        try {
+          const data = await listMessages(still.id);
+          openConv = data.conversation || still;
+          messages = data.messages;
+          renderBubbles();
+        } catch {
+          /* lista frissült, a szál később újrapróbálható */
+        }
+        return;
+      }
+
+      if (conversations.length && !stayOnInbox) {
+        await openConversation(pickLatestConversation(conversations));
       }
     } catch (error) {
       conversations = [];
@@ -426,6 +509,9 @@ export function initMessagesUi(root, { onUnreadChange, openConversationId } = {}
     const text = String(els.draft?.value || "").trim();
     if (!text) return;
     busy = true;
+    const sendButton = root.querySelector("[data-msg-send]");
+    if (sendButton) sendButton.disabled = true;
+    setSendStatus("Üzenet küldése…");
     try {
       await sendMessage(openConv.id, { body: text });
       if (els.draft) els.draft.value = "";
@@ -435,10 +521,13 @@ export function initMessagesUi(root, { onUnreadChange, openConversationId } = {}
       renderBubbles();
       await markRead(openConv.id);
       await refresh();
+      setSendStatus("Elküldve.");
     } catch (error) {
       showThreadError(error.message || "Küldés sikertelen.");
+      setSendStatus("Az üzenet nem ment el.", true);
     } finally {
       busy = false;
+      if (sendButton) sendButton.disabled = false;
     }
   });
 
@@ -447,6 +536,7 @@ export function initMessagesUi(root, { onUnreadChange, openConversationId } = {}
     els.file.value = "";
     if (!file || !openConv || busy) return;
     busy = true;
+    setSendStatus("Csatolmány feltöltése…");
     try {
       const attachment = await fileToAttachment(file);
       const text = String(els.draft?.value || "").trim();
@@ -457,21 +547,27 @@ export function initMessagesUi(root, { onUnreadChange, openConversationId } = {}
       messages = data.messages;
       renderBubbles();
       await markRead(openConv.id);
+      await refresh();
+      setSendStatus("Csatolmány elküldve.");
     } catch (error) {
       showThreadError(error.message || "Csatolmány küldése sikertelen.");
+      setSendStatus("A csatolmány nem ment el.", true);
     } finally {
       busy = false;
     }
   });
 
-  showInboxOnly();
-  refresh().then(async () => {
-    const openId = Number(options?.openConversationId);
-    if (Number.isFinite(openId) && openId > 0) {
-      const found = conversations.find((c) => Number(c.id) === openId);
-      if (found) openConversation(found);
-    }
+  els.search?.addEventListener("input", () => {
+    query = els.search.value;
+    renderList();
   });
+
+  stayOnInbox = false;
+  refresh();
+  const refreshTimer = window.setInterval(() => {
+    if (document.visibilityState === "visible" && !busy) refresh();
+  }, 30_000);
+  window.addEventListener("pagehide", () => window.clearInterval(refreshTimer), { once: true });
   return {
     refresh,
     showInbox: showInboxOnly,

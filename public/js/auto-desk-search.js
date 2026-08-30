@@ -218,19 +218,32 @@ export function arrangeAutoDeskDemoFields(form = document.getElementById("home-q
 
   if (muszakiBody && moreHost) {
     const moreOrder = deskOrderFromAdminLayout(moreHost);
+    let moreWrap = muszakiBody.querySelector("#qs-more");
+    if (!moreWrap) {
+      moreWrap = document.createElement("div");
+      moreWrap.id = "qs-more";
+      moreWrap.className = "home-qs-more";
+      muszakiBody.appendChild(moreWrap);
+    }
+    moreWrap.hidden = false;
+    const muszakiHost = ensureDeskFieldsHost(moreWrap, "[data-desk-muszaki]", "deskMuszaki");
+
     if (moreOrder.length) {
-      let moreWrap = muszakiBody.querySelector("#qs-more");
-      if (!moreWrap) {
-        moreWrap = document.createElement("div");
-        moreWrap.id = "qs-more";
-        moreWrap.className = "home-qs-more";
-        muszakiBody.appendChild(moreWrap);
-      }
-      moreWrap.hidden = false;
-      const muszakiHost = ensureDeskFieldsHost(moreWrap, "[data-desk-muszaki]", "deskMuszaki");
       for (const item of moreOrder) {
         mountDeskField(muszakiHost, item, form, mountOpts);
       }
+    } else {
+      // Fallback: sparsa grid mezők átemelése kompakt oszlopba
+      moreHost.querySelectorAll("[data-qs-field]").forEach((el) => {
+        const key = el.getAttribute("data-qs-field");
+        if (!key || used.has(key)) return;
+        const label =
+          el.querySelector(".home-qs-label, .immo-label")?.textContent?.trim() || key;
+        const range =
+          el.classList.contains("home-qs-pair") ||
+          el.querySelectorAll("select.home-qs-control").length >= 2;
+        mountDeskField(muszakiHost, { field: key, label, range }, form, mountOpts);
+      });
     }
   }
 
@@ -241,6 +254,7 @@ export function arrangeAutoDeskDemoFields(form = document.getElementById("home-q
   if (moreHost) {
     moreHost.innerHTML = "";
     moreHost.hidden = true;
+    moreHost.removeAttribute("style");
   }
 
   form.classList.add("auto-desk-native");

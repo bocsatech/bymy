@@ -514,15 +514,31 @@
   }
 
   /* Muszaki maradék mezők: ne contents, hanem oszlop */
-  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active .auto-search-panel #qs-more-layout {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active .auto-search-panel #qs-more-layout,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active .auto-search-panel #qs-layout-main {
     display: none !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
-  /* Muszaki mezők: ugyanaz a kompakt oszlop, mint Alap adatoknál */
-  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-fields[data-desk-muszaki] .auto-desk-field {
+  /* Muszaki / Alap: kompakt oszlop, ne 12 oszlopos grid ritka soraival */
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-fields[data-desk-muszaki],
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-fields[data-desk-more-rest],
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-fields[data-desk-alap] {
+    display: flex !important;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-fields[data-desk-muszaki] .auto-desk-field,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-fields[data-desk-more-rest] .auto-desk-field {
     display: flex;
     flex-direction: column;
     gap: 6px;
+    margin: 0;
+    min-height: 0;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-fields[data-desk-more-rest] .home-qs-field,
@@ -533,12 +549,23 @@
     flex-direction: column;
     gap: 6px;
     min-width: 0;
+    min-height: 0 !important;
+    margin: 0 !important;
+    grid-row: auto !important;
+    grid-column: auto !important;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-fields[data-desk-more-rest] .home-qs-pair {
     display: grid !important;
     grid-template-columns: 1fr 1fr;
     gap: 8px;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-fields[data-desk-more-rest] .home-qs-pair > .home-qs-field {
+    min-height: 0 !important;
+    background: transparent !important;
+    border: 0 !important;
+    padding: 0 !important;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-fields[data-desk-more-rest] .home-qs-label {
@@ -822,11 +849,14 @@
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-grid-card-body {
+    min-height: 216px;
     padding: 14px 14px 16px !important;
     gap: 8px !important;
     color: var(--ad-text) !important;
     background: transparent !important;
     text-decoration: none !important;
+    display: flex !important;
+    flex-direction: column;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-grid-card-title {
@@ -844,7 +874,7 @@
     margin: 0 !important;
     font-size: 14px !important;
     font-weight: 400 !important;
-    color: #e8e8e8 !important;
+    color: #4b5563 !important;
     line-height: 1.25;
     display: -webkit-box;
     -webkit-line-clamp: 1;
@@ -881,7 +911,7 @@
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-grid-card-price {
-    margin: 6px 0 2px !important;
+    margin: auto 0 2px !important;
     font-size: 22px !important;
     font-weight: 800 !important;
     color: var(--ad-text) !important;

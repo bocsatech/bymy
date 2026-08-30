@@ -33,10 +33,12 @@ const SEARCH_OMIT_FIELDS = new Set([
   // Egyéb típus csak a feladáson használható.
   "egyeb_tipus",
   "egyeb_modell",
-  // Helyszín: irányítószám → település; megye és körzet nem kell a keresőben.
+  // Helyszín: irányítószám → település; megye nem kell a keresőben.
   "megye",
-  "keresesi_korzet",
 ]);
+
+/** Új keresőmezők: élő layoutban is jelenjenek meg (ne maradjanak rejtve). */
+const SEARCH_FORCE_VISIBLE = new Set(["keresesi_korzet"]);
 
 /** Admin mező → kereső filter kulcs / widget. */
 const RANGE_SPECS = {
@@ -59,9 +61,16 @@ const RANGE_SPECS = {
 
 const TEHER_KIVITEL = ["Kisteher", "Dobozos", "Platós", "Ponyvás", "Hűtős", "Billenős", "Alváz"];
 
+/** Keresési körzet: 10 km-es lépés, 200 km-ig. */
+export const KERESESI_KORZET_OPTIONS = Array.from({ length: 20 }, (_, i) => {
+  const km = (i + 1) * 10;
+  return { value: String(km), label: `${km} km` };
+});
+
 const SELECT_OPTIONS = {
   allapot: ["Normál", "Újszerű", "Sérülésmentes", "Sérült"],
   kivitel: [...KIVITEL_OPTIONS],
+  keresesi_korzet: KERESESI_KORZET_OPTIONS,
   ajtok: ["2", "3", "4", "5"],
   szemelyek: ["1", "2", "3", "4", "5", "6", "7", "8", "9"],
   sebessegvalto: ["Manuális", "Automata"],
@@ -125,9 +134,10 @@ const SEARCH_LABEL_SHORT = {
   megye: "Megye",
   telepules: "Település",
   iranyitoszam: "Irányítószám",
+  keresesi_korzet: "Keresési körzet",
 };
 
-const NARROW_FIELD_KEYS = new Set(["szemelyek", "megye", "ajtok", "telepules", "iranyitoszam"]);
+const NARROW_FIELD_KEYS = new Set(["szemelyek", "megye", "ajtok", "telepules", "iranyitoszam", "keresesi_korzet"]);
 
 /** Szabad szöveges keresőmezők — ne legyenek dobkerék. */
 const TEXT_FIELD_KEYS = new Set(["telepules", "iranyitoszam"]);
@@ -218,6 +228,7 @@ function fillOptionsSelect(select, options) {
 function isSearchCellVisible(cell) {
   if (!cell) return false;
   if (SEARCH_OMIT_FIELDS.has(cell.field_key)) return false;
+  if (SEARCH_FORCE_VISIBLE.has(cell.field_key)) return true;
   if (cell.hidden) return false;
   return true;
 }
@@ -228,7 +239,7 @@ function cellsForStep(layout, step) {
     .sort((a, b) => (a.row - b.row) || (a.col - b.col));
 }
 
-/** Admin Gyorskereső (1. lépés) mezőkulcsok — csak ezek jelenjenek meg a gyorskeresőben. */
+/** Admin Gyorskereső (1. lépés) mezőkulcsok. */
 export function quickSearchFieldKeysFromLayout(layout) {
   return cellsForStep(layout, 1).map((c) => c.field_key).filter(Boolean);
 }
@@ -559,6 +570,13 @@ export async function applyAutoSearchLayout(form = document.getElementById("home
   const mainHost = document.getElementById("qs-layout-main");
   const moreHost = document.getElementById("qs-more-layout");
 
+  // Élő layout: új keresőmezők (pl. körzet) mindig látszanak.
+  for (const cell of layout.cells || []) {
+    if (!SEARCH_FORCE_VISIBLE.has(cell.field_key)) continue;
+    cell.hidden = false;
+    if (Number(cell.step) < 2) cell.step = 5;
+  }
+
   const visible = (layout.cells || []).filter((c) => isSearchCellVisible(c));
 
   if (!visible.length) {
@@ -567,26 +585,26 @@ export async function applyAutoSearchLayout(form = document.getElementById("home
   }
 
   hideLegacy(form);
-  renderStep(mainHost, layout, 1);
+  // 1. lépés: sűrű sorok (admin ritka row → ne legyen üres térköz)
+  const step1 = cellsForStep(layout, 1).map((cell, index) => ({
+    ...cell,
+    row: index + 1,
+    col: 1,
+    colSpan: 12,
+  }));
+  renderGrid(mainHost, step1);
 
   if (moreHost) {
     const moreCells = (layout.cells || [])
       .filter((c) => isSearchCellVisible(c) && Number(c.step) >= 2 && Number(c.step) <= 5)
       .sort((a, b) => (a.step - b.step) || (a.row - b.row) || (a.col - b.col));
-    // Saját grid: lépésenként folyamatos sorok (ne *40 eltolás — az üres grid-sorokat hagyott).
-    let rowOffset = 0;
-    const withRows = [];
-    for (let step = 2; step <= 5; step += 1) {
-      const stepCells = moreCells.filter((c) => Number(c.step) === step);
-      if (!stepCells.length) continue;
-      let maxRow = 1;
-      for (const c of stepCells) {
-        const r = Math.max(1, Number(c.row) || 1);
-        maxRow = Math.max(maxRow, r);
-        withRows.push({ ...c, row: rowOffset + r });
-      }
-      rowOffset += maxRow;
-    }
+    // Sűrű 1..n sorok — az admin board ritka row számai (15, 30…) üres grid-sávot hagytak.
+    const withRows = moreCells.map((cell, index) => ({
+      ...cell,
+      row: index + 1,
+      col: 1,
+      colSpan: 12,
+    }));
     renderGrid(moreHost, withRows);
   }
 

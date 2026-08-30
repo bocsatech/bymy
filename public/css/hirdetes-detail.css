@@ -447,10 +447,9 @@
   border-radius: 50%;
   overflow: hidden;
   display: block;
-  background: #c5d0dc;
+  background: #e4eaf4;
 }
 
-.hd-seller-avatar-icon,
 .hd-seller-avatar img {
   display: block;
   width: 100%;

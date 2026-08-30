@@ -3,6 +3,7 @@ import { readFileSync, existsSync } from "fs";
 import { join, extname } from "path";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
+import { loadEnvFiles } from "./lib/load-env.mjs";
 import { findChromeExecutable } from "./lib/chrome-launcher.mjs";
 import {
   saveListing,
@@ -91,6 +92,7 @@ import {
   sessionCookieHeader,
   setUserDisplayName,
 } from "./lib/web-users-store.mjs";
+import { isSupabaseSchemaMissingError } from "./lib/supabase/users.mjs";
 import { ensureSmtpExample, isSmtpConfigured, sendMail, smtpConfigPath } from "./lib/mail.mjs";
 import {
   appleNameFromForm,
@@ -108,7 +110,15 @@ import {
   verifyAppleIdentityToken,
 } from "./lib/oauth.mjs";
 import { listingImageDir, resolveListingImageFile, fetchRemoteListingImage, clearListingImageFiles } from "./lib/listing-image.mjs";
+import { attachSellerProfile } from "./lib/listing-detail-seller.mjs";
 import { saveListingPhotos } from "./lib/listing-photos.mjs";
+import {
+  dataUrlToBuffer,
+  normalizeImageBucket,
+  saveImageAssetMetadata,
+  uploadOptimizedImage,
+  validateImageBuffer,
+} from "./lib/supabase/image-storage.mjs";
 import { canManageListing } from "./lib/listing-meta.mjs";
 import { handleMessagesApi, initMessagingSchema } from "./lib/messaging.mjs";
 import { handleLevel1Api } from "./lib/level1-api.mjs";
@@ -122,6 +132,7 @@ import { enforceMembersGate } from "./lib/site-gate.mjs";
 import { readJsonBody } from "./lib/read-json-body.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+loadEnvFiles(__dirname);
 const PUBLIC = join(__dirname, "public");
 const PORT = Number(process.env.PORT ?? 3456);
 const HOST = "127.0.0.1";
@@ -377,6 +388,95 @@ function serveStatic(path, res) {
     "Cache-Control": "no-store, no-cache, must-revalidate",
   });
   res.end(readFileSync(filePath));
+}
+
+async function handleImageUploadApi(req, res) {
+  if (!isSupabaseBackend()) {
+    sendJson(res, 400, { error: "A Supabase Storage csak beállított SUPABASE_* környezettel működik." });
+    return;
+  }
+
+  const user = await requestUser(req);
+  if (!user) {
+    sendJson(res, 401, { error: "Nem vagy bejelentkezve." });
+    return;
+  }
+
+  let body;
+  try {
+    body = await readBody(req);
+  } catch {
+    sendJson(res, 400, { error: "Érvénytelen JSON." });
+    return;
+  }
+
+  const dataUrl = String(body.dataUrl ?? body.image ?? body.file ?? "").trim();
+  if (!dataUrl) {
+    sendJson(res, 400, { error: "Hiányzó képadat (dataUrl / image / file)." });
+    return;
+  }
+
+  const fileBuffer = dataUrlToBuffer(dataUrl);
+  if (!fileBuffer) {
+    sendJson(res, 400, { error: "Érvénytelen data URL formátum." });
+    return;
+  }
+
+  const validation = await validateImageBuffer(fileBuffer, {
+    maxBytes: 12 * 1024 * 1024,
+    minWidth: 640,
+    minHeight: 480,
+  });
+  if (!validation.ok) {
+    sendJson(res, 400, { error: validation.error });
+    return;
+  }
+
+  const bucket = normalizeImageBucket(body.bucket ?? body.kind ?? "listing");
+  const entityType = String(body.entityType ?? body.entity_type ?? "listing").trim() || "listing";
+  const entityId = body.entityId ?? body.entity_id ?? null;
+  const folder = String(body.folder ?? "").trim();
+  const fileName = String(body.fileName ?? body.name ?? `upload-${Date.now()}`).trim() || `upload-${Date.now()}`;
+
+  try {
+    const uploaded = await uploadOptimizedImage({
+      fileBuffer,
+      bucket,
+      folder: folder || entityType,
+      fileName,
+      options: {
+        maxWidth: 1600,
+        jpegQuality: 85,
+        webpQuality: 78,
+        avifQuality: 68,
+      },
+    });
+
+    const asset = await saveImageAssetMetadata({
+      bucket,
+      path: uploaded.path,
+      publicUrl: uploaded.publicUrl,
+      entityType,
+      entityId,
+      uploadedByUserId: user.id,
+      originalName: fileName,
+      contentType: uploaded.format ? `image/${uploaded.format}` : 'image/webp',
+      width: uploaded.width,
+      height: uploaded.height,
+      fileSize: uploaded.size,
+      processingStatus: 'ready',
+    });
+
+    sendJson(res, 200, {
+      ok: true,
+      bucket,
+      url: uploaded.publicUrl,
+      path: uploaded.path,
+      asset,
+    });
+  } catch (error) {
+    sendJson(res, 500, { error: error.message ?? "A kép feltöltése sikertelen." });
+  }
 }
 
 async function handleOpenChrome(req, res) {
@@ -743,6 +843,9 @@ async function handleListingsApi(req, res, pathname) {
     if (!listing) {
       sendJson(res, 404, { error: "Nincs ilyen hirdetés." });
       return;
+    }
+    if (listing.detail) {
+      listing.detail = await attachSellerProfile(listing.detail, listing.user_id);
     }
     sendJson(res, 200, { listing });
     return;
@@ -1288,12 +1391,30 @@ async function handleAuthApi(req, res, pathname) {
 
     if (pathname === "/api/auth/me" && req.method === "GET") {
       // Könnyű session — ne húzzuk a profile_json / avatar base64-et minden oldalon.
-      const me = token ? await getUserBySessionToken(token, { light: true }) : null;
+      let me = null;
+      try {
+        me = token ? await getUserBySessionToken(token, { light: true }) : null;
+      } catch (error) {
+        if (isSupabaseSchemaMissingError(error)) {
+          sendJson(res, 200, { user: null });
+          return;
+        }
+        throw error;
+      }
       sendJson(res, 200, { user: me });
       return;
     }
 
-    const currentUser = token ? await getUserBySessionToken(token) : null;
+    let currentUser = null;
+    try {
+      currentUser = token ? await getUserBySessionToken(token) : null;
+    } catch (error) {
+      if (isSupabaseSchemaMissingError(error)) {
+        currentUser = null;
+      } else {
+        throw error;
+      }
+    }
 
     if (pathname === "/api/auth/db" && req.method === "GET") {
       const admin = await getLevel1AdminBySession(getLevel1TokenFromRequest(req));
@@ -1712,6 +1833,12 @@ async function handleAuthApi(req, res, pathname) {
     sendJson(res, 404, { error: "Ismeretlen auth API." });
   } catch (error) {
     const message = error.message ?? String(error);
+    if (isSupabaseSchemaMissingError(error)) {
+      if (!res.headersSent) {
+        sendJson(res, 200, { user: null, providers: [] });
+      }
+      return;
+    }
     const status =
       message.includes("bejelentkezve") || message.includes("Hibás")
         ? 401
@@ -1811,6 +1938,11 @@ export async function handleHttpRequest(req, res) {
 
   if (pathname.startsWith("/api/messages")) {
     await handleMessagesApi(req, res, pathname);
+    return;
+  }
+
+  if (pathname === "/api/uploads" && req.method === "POST") {
+    await handleImageUploadApi(req, res);
     return;
   }
 

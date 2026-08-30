@@ -26,6 +26,21 @@ function escapeHtml(value) {
     .replace(/"/g, "&quot;");
 }
 
+const SELLER_AVATAR_PLACEHOLDER =
+  "data:image/svg+xml," +
+  encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">` +
+      `<circle cx="24" cy="24" r="24" fill="#e4eaf4"/>` +
+      `<circle cx="24" cy="17.5" r="7.5" fill="#8e9aaf"/>` +
+      `<path fill="#8e9aaf" d="M7.2 42.8C9.2 33.8 15.2 29.5 24 29.5s14.8 4.3 16.8 13.3C36.2 45.6 30.4 47.5 24 47.5S11.8 45.6 7.2 42.8z"/>` +
+      `</svg>`
+  );
+
+function sellerAvatarHtml(view) {
+  const src = String(view.sellerAvatarUrl || "").trim() || SELLER_AVATAR_PLACEHOLDER;
+  return `<span class="hd-seller-avatar" aria-hidden="true"><img src="${escapeHtml(src)}" alt="" width="48" height="48" decoding="async" /></span>`;
+}
+
 function formatDate(value) {
   if (!value) return "";
   try {
@@ -272,13 +287,7 @@ function render(view, listing, related) {
           ${view.salePrice ? `<p class="hd-price-old">Korábbi ár: ${escapeHtml(view.salePrice)}</p>` : ""}
         </div>
         <div class="hd-seller-card">
-          <span class="hd-seller-avatar" aria-hidden="true">
-            <svg class="hd-seller-avatar-icon" width="48" height="48" viewBox="0 0 48 48" focusable="false">
-              <circle cx="24" cy="24" r="24" fill="#c5d0dc"/>
-              <circle cx="24" cy="18" r="8" fill="#fff"/>
-              <path fill="#fff" d="M8.5 42.5c1.6-8.2 7.4-12.2 15.5-12.2s13.9 4 15.5 12.2C35.2 45.2 29.9 47 24 47s-11.2-1.8-15.5-4.5z"/>
-            </svg>
-          </span>
+          ${sellerAvatarHtml(view)}
           <div class="hd-seller-meta">
             <p class="hd-seller-name">${escapeHtml(view.sellerName)}</p>
             ${view.sellerSince ? `<p class="hd-seller-since">Felhasználó ezóta: ${escapeHtml(view.sellerSince)}</p>` : ""}

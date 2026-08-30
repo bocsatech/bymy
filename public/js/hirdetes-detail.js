@@ -156,35 +156,39 @@ function render(view, listing, related) {
   document.body.classList.toggle("hd-has-msg-bar", canMsg);
 
   root.innerHTML = `
-    <div class="hd-search-nav">
-      <a class="hd-search-back" href="${escapeHtml(searchNav.returnHref)}">
-        <span aria-hidden="true">◀</span> vissza a keresési eredményekhez
-      </a>
-      ${
-        hasPrevNext
-          ? `<nav class="hd-search-siblings" aria-label="Szomszédos hirdetések">
-        ${
-          searchNav.prevId
-            ? `<a class="hd-search-prev" href="${escapeHtml(listingDetailHref(searchNav.prevId))}"><span aria-hidden="true">◀</span> előző</a>`
-            : `<span class="hd-search-prev is-disabled"><span aria-hidden="true">◀</span> előző</span>`
-        }
-        <span class="hd-search-sep" aria-hidden="true">|</span>
-        ${
-          searchNav.nextId
-            ? `<a class="hd-search-next" href="${escapeHtml(listingDetailHref(searchNav.nextId))}">következő <span aria-hidden="true">▶</span></a>`
-            : `<span class="hd-search-next is-disabled">következő <span aria-hidden="true">▶</span></span>`
-        }
-      </nav>`
-          : ""
-      }
-    </div>
-
-    <nav class="hd-crumbs" aria-label="Navigáció">
+    <nav class="hd-topnav" aria-label="Navigáció">
       <ol class="hd-crumb-list">
         <li><a href="/">Kezdőlap</a></li>
         <li><a href="${escapeHtml(view.categoryHref)}">${escapeHtml(view.categoryLabel)}</a></li>
-        ${view.brand ? `<li aria-current="page">${escapeHtml(formatCrumbLabel(view.brand))}</li>` : ""}
+        ${
+          view.brand
+            ? `<li${view.typeName ? "" : ' aria-current="page"'}>${escapeHtml(formatCrumbLabel(view.brand))}</li>`
+            : ""
+        }
+        ${view.typeName ? `<li aria-current="page">${escapeHtml(formatCrumbLabel(view.typeName))}</li>` : ""}
       </ol>
+      <div class="hd-topnav-actions">
+        <a class="hd-search-back" href="${escapeHtml(searchNav.returnHref)}">
+          <span aria-hidden="true">◂</span> vissza a keresési eredményekhez
+        </a>
+        ${
+          hasPrevNext
+            ? `<span class="hd-search-siblings">
+          ${
+            searchNav.prevId
+              ? `<a class="hd-search-prev" href="${escapeHtml(listingDetailHref(searchNav.prevId))}"><span aria-hidden="true">◂</span> előző</a>`
+              : `<span class="hd-search-prev is-disabled"><span aria-hidden="true">◂</span> előző</span>`
+          }
+          <span class="hd-search-sep" aria-hidden="true">|</span>
+          ${
+            searchNav.nextId
+              ? `<a class="hd-search-next" href="${escapeHtml(listingDetailHref(searchNav.nextId))}">következő <span aria-hidden="true">▸</span></a>`
+              : `<span class="hd-search-next is-disabled">következő <span aria-hidden="true">▸</span></span>`
+          }
+        </span>`
+            : ""
+        }
+      </div>
     </nav>
 
     <div class="hd-head">

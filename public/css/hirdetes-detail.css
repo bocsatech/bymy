@@ -13,10 +13,52 @@
 .hd-crumbs {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.35rem;
+  align-items: center;
+  gap: 0.75rem 1rem;
   font-size: 0.84rem;
   color: #667085;
   margin: 0 0 0.85rem;
+}
+
+.hd-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #1565c0;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.hd-back:hover {
+  text-decoration: underline;
+}
+
+.hd-crumb-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.hd-crumb-list li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: #475467;
+}
+
+.hd-crumb-list li + li::before {
+  content: "›";
+  color: #98a2b3;
+  font-weight: 600;
 }
 
 .hd-crumbs a {
@@ -26,11 +68,6 @@
 
 .hd-crumbs a:hover {
   text-decoration: underline;
-}
-
-.hd-crumbs__sep {
-  color: #98a2b3;
-  user-select: none;
 }
 
 .hd-head {

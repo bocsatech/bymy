@@ -46,6 +46,34 @@ function currentUserId() {
   return Number.isFinite(id) && id > 0 ? id : null;
 }
 
+/** ALFA ROMEO → Alfa Romeo (breadcrumb) */
+function formatBrandDisplayName(value) {
+  const raw = String(value ?? "").trim();
+  if (!raw) return "";
+  if (/[a-záéíóöőúüű]/.test(raw) && /[A-ZÁÉÍÓÖŐÚÜŰ]/.test(raw)) return raw;
+  return raw
+    .toLocaleLowerCase("hu-HU")
+    .split(/([\s/-]+)/)
+    .map((part) => {
+      if (/^[\s/-]+$/.test(part)) return part;
+      return part.charAt(0).toLocaleUpperCase("hu-HU") + part.slice(1);
+    })
+    .join("");
+}
+
+/** Autó → Autók, Teherautó → Teherautók, Ingatlan → Ingatlanok */
+function crumbCategoryLabel(view) {
+  const href = String(view?.categoryHref || "");
+  if (href.includes("ingatlan")) return "Ingatlanok";
+  if (href.includes("teher")) return "Teherautók";
+  const raw = String(view?.categoryLabel || "").trim();
+  if (/^autó$/i.test(raw)) return "Autók";
+  if (/^teherautó$/i.test(raw)) return "Teherautók";
+  if (/^ingatlan$/i.test(raw)) return "Ingatlanok";
+  if (raw) return raw;
+  return "Autók";
+}
+
 function kvHtml(rows) {
   if (!rows?.length) return "";
   return `<dl class="hd-grid">${rows
@@ -137,12 +165,15 @@ function render(view, listing, related) {
   document.title = `${view.title} — Bymy`;
   document.body.classList.toggle("hd-has-msg-bar", canMsg);
 
+  const categoryLabel = crumbCategoryLabel(view);
+  const brandLabel = formatBrandDisplayName(view.brand);
+
   root.innerHTML = `
     <p class="hd-crumbs">
       <button type="button" class="hd-more" data-hd-back>${ICON.back} Vissza</button>
       <span>·</span>
-      <a href="${escapeHtml(view.categoryHref)}">${escapeHtml(view.categoryLabel)}</a>
-      ${view.brand ? `<span>›</span><span>${escapeHtml(view.brand)}</span>` : ""}
+      <a href="${escapeHtml(view.categoryHref)}">${escapeHtml(categoryLabel)}</a>
+      ${brandLabel ? `<span>›</span><span>${escapeHtml(brandLabel)}</span>` : ""}
     </p>
 
     <div class="hd-head">

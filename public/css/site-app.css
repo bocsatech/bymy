@@ -23,6 +23,39 @@ body.site-app .local-banner {
   letter-spacing: normal;
 }
 
+body.site-app .hub-header-msg {
+  position: relative;
+}
+
+body.site-app .site-message-badge {
+  position: absolute;
+  top: -0.42rem;
+  right: -0.55rem;
+  min-width: 1.15rem;
+  height: 1.15rem;
+  padding: 0 0.28rem;
+  border: 2px solid #fff;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: #c84339;
+  color: #fff;
+  font: 800 0.61rem/1 Inter, Roboto, system-ui, sans-serif;
+}
+
+html[data-mm-account-kind="company"] body.settings-page [data-mm-company-nav-wrap] {
+  display: block !important;
+}
+
+html[data-mm-account-kind="company"] body.settings-page [data-mm-settings-nav] {
+  display: none !important;
+}
+
+html[data-mm-account-pending] body.settings-page .mm-side,
+html[data-mm-account-pending] body.settings-page .mm-main {
+  visibility: hidden;
+}
+
 /* Fejléc + navigáció (home + aloldalak) — willhaben-szerű */
 body.site-app .site-header,
 body.site-app .home-header,
@@ -4391,6 +4424,21 @@ body.site-app .wh-msg {
   border-top: 1px solid #e9ebef;
 }
 
+/* Lista: ne legyen üres jobb/felső „Válassz egy beszélgetést” sáv */
+body.site-app .wh-msg[data-msg-view="inbox"] {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+body.site-app .wh-msg[data-msg-view="inbox"] .wh-msg__chat {
+  display: none !important;
+}
+
+body.site-app .wh-msg[data-msg-view="inbox"] .wh-msg__list {
+  border-right: 0;
+  max-width: 560px;
+  width: 100%;
+}
+
 body.site-app .wh-msg__list {
   display: flex;
   flex-direction: column;
@@ -4613,6 +4661,11 @@ body.site-app .wh-msg__idle {
   place-items: center;
   color: #9aa0a6;
   font-size: 15px;
+}
+
+body.site-app .wh-msg__idle[hidden],
+body.site-app .wh-msg__active[hidden] {
+  display: none !important;
 }
 
 body.site-app .wh-msg__active {
@@ -4928,10 +4981,6 @@ body.site-app .wh-msg__error {
 @media (max-width: 900px) {
   body.site-app .wh-msg {
     grid-template-columns: 1fr;
-  }
-
-  body.site-app .wh-msg[data-msg-view="inbox"] .wh-msg__chat {
-    display: none;
   }
 
   body.site-app .wh-msg[data-msg-view="thread"] .wh-msg__list {

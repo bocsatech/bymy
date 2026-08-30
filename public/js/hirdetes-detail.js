@@ -141,8 +141,6 @@ function render(view, listing, related) {
     <p class="hd-crumbs">
       <button type="button" class="hd-more" data-hd-back>${ICON.back} Vissza</button>
       <span>·</span>
-      <a href="/">Kezdőlap</a>
-      <span>›</span>
       <a href="${escapeHtml(view.categoryHref)}">${escapeHtml(view.categoryLabel)}</a>
       ${view.brand ? `<span>›</span><span>${escapeHtml(view.brand)}</span>` : ""}
     </p>
@@ -238,6 +236,7 @@ function render(view, listing, related) {
             ? `<button type="button" class="hd-btn hd-btn--ghost" data-hd-phone data-full="${escapeHtml(view.phone)}">${ICON.phone} ${escapeHtml(view.phoneMasked)} szám mutatása</button>`
             : ""
         }
+        <a class="hd-btn hd-btn--ghost" href="/adasveteli-szerzodes.html?id=${encodeURIComponent(view.id)}">Adásvételi szerződés</a>
         ${
           related.length
             ? `<a class="hd-btn hd-btn--ghost" href="#hd-related">Több ettől a hirdetőtől ${related.length}</a>`

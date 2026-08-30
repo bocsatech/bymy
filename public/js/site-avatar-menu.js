@@ -45,6 +45,46 @@ function getAvatarPhoto(email) {
   return user?.profile?.avatarDataUrl || null;
 }
 
+/** Egyszeri: helyi profilkép feltöltése a szerverre, ha még nincs ott. */
+async function syncLocalAvatarOnce() {
+  if (sessionStorage.getItem("bymy-avatar-server-sync") === "1") return;
+  const user = getAuthUser();
+  const email = user?.email;
+  if (!email) return;
+  const local = readPhotos()[email];
+  if (!local || user?.profile?.avatarDataUrl) {
+    sessionStorage.setItem("bymy-avatar-server-sync", "1");
+    return;
+  }
+  sessionStorage.setItem("bymy-avatar-server-sync", "1");
+  try {
+    const response = await fetch("/api/auth/avatar", {
+      method: "PUT",
+      credentials: "same-origin",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ avatarDataUrl: local }),
+    });
+    if (!response.ok) return;
+    const data = await response.json().catch(() => ({}));
+    if (data.user) {
+      try {
+        sessionStorage.setItem(AUTH_KEY, JSON.stringify({
+          id: data.user.id,
+          email: data.user.email,
+          displayName: data.user.displayName || null,
+          profile: data.user.profile || null,
+          loggedInAt: Date.now(),
+        }));
+      } catch {
+        /* ignore */
+      }
+      window.dispatchEvent(new CustomEvent("bymy-auth-changed"));
+    }
+  } catch {
+    /* ignore */
+  }
+}
+
 function displayName(user) {
   const email = String(user?.email ?? "").trim();
   if (!email) return "vendég";
@@ -235,6 +275,7 @@ export function initAvatarMenu() {
   if (!wraps.length) return;
 
   refreshAvatarMenuUi();
+  void syncLocalAvatarOnce();
   if (initialized) return;
   initialized = true;
 

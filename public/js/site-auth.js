@@ -287,6 +287,16 @@ export async function setDisplayName(name) {
   return data.displayName;
 }
 
+/** Profilkép mentése a szerverre (hirdetés oldalon is látszódjon). */
+export async function saveAvatarPhoto(avatarDataUrl) {
+  const data = await authFetch("/api/auth/avatar", {
+    method: "PUT",
+    body: JSON.stringify({ avatarDataUrl: String(avatarDataUrl ?? "") }),
+  });
+  if (data.user) rememberAuth(data);
+  return data.user;
+}
+
 export async function deleteAccount() {
   await authFetch("/api/auth/account", { method: "DELETE" });
   sessionStorage.removeItem(AUTH_KEY);
@@ -451,6 +461,46 @@ function updateHeaderAuthUi() {
   window.dispatchEvent(new CustomEvent("bymy-auth-changed"));
 }
 
+function paintUnreadMessageCount(count) {
+  const unread = Math.max(0, Number(count) || 0);
+  document.querySelectorAll("[data-mm-msg-count], [data-nav-msg-count]").forEach((el) => {
+    el.hidden = unread <= 0;
+    el.textContent = String(unread);
+  });
+
+  document.querySelectorAll(".hub-header-msg").forEach((link) => {
+    let badge = link.querySelector("[data-nav-msg-count]");
+    if (!badge) {
+      badge = document.createElement("span");
+      badge.className = "site-message-badge";
+      badge.setAttribute("data-nav-msg-count", "");
+      badge.setAttribute("aria-label", "Olvasatlan üzenetek");
+      link.appendChild(badge);
+    }
+    badge.hidden = unread <= 0;
+    badge.textContent = String(unread);
+  });
+}
+
+async function refreshUnreadMessageCount() {
+  if (!isLoggedIn()) {
+    paintUnreadMessageCount(0);
+    return;
+  }
+  try {
+    const response = await fetch("/api/messages/conversations", {
+      credentials: "same-origin",
+      cache: "no-store",
+    });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const data = await response.json();
+    const unread = (data.conversations || []).reduce((total, conversation) => total + (Number(conversation.unread) || 0), 0);
+    paintUnreadMessageCount(unread);
+  } catch {
+    /* Az üzenetoldal hibája ne akadályozza a globális fejlécet. */
+  }
+}
+
 export function initSiteAuth(options = {}) {
   // Azonnali UI a session cache-ből — ne várjuk meg a hálózatot (FOUC / Belépés-villanás).
   updateHeaderAuthUi();
@@ -466,6 +516,7 @@ export function initSiteAuth(options = {}) {
   if (!options.skipRefresh) {
     refreshAuthSession().finally(() => {
       updateHeaderAuthUi();
+      refreshUnreadMessageCount();
       try {
         document.documentElement.setAttribute(
           "data-auth",
@@ -494,6 +545,8 @@ export function initSiteAuth(options = {}) {
     updateHeaderAuthUi();
     window.location.href = "/";
   });
+
+  window.addEventListener("bymy-auth-changed", refreshUnreadMessageCount);
 }
 
 export async function requireAuthForPage() {

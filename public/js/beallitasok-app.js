@@ -10,11 +10,12 @@ import {
   getProfile,
   loadProfileFromServer,
   saveProfile,
+  saveAvatarPhoto,
   changePassword,
   deleteAccount,
   requireAuthForPage,
   initSiteAuth,
-} from "./site-auth.js?v=cegAdatok1";
+} from "./site-auth.js?v=avatarSync1";
 import {
   getParkplatz,
   addParkplatzItem,
@@ -39,7 +40,7 @@ const SEARCH_POSTAL_KEY = "bymy_stats_postal";
 const SEARCH_RADIUS_KEY = "bymy_stats_radius_km";
 const REC_POSTAL_KEY = "bymy_partner_postal_code";
 const REC_RADIUS_KEY = "bymy_partner_radius_km";
-const MAX_BYTES = 2.5 * 1024 * 1024;
+const AVATAR_SOURCE_MAX_BYTES = 20 * 1024 * 1024;
 const HERO_MAX_BYTES = 8 * 1024 * 1024;
 const AVATAR_SIZE = 256;
 const SECTIONS = [
@@ -137,8 +138,8 @@ function resizeImageFile(file) {
       reject(new Error("Csak JPG, PNG vagy WebP tölthető fel."));
       return;
     }
-    if (file.size > MAX_BYTES) {
-      reject(new Error("A kép maximum 2,5 MB lehet."));
+    if (file.size > AVATAR_SOURCE_MAX_BYTES) {
+      reject(new Error("A kép maximum 20 MB lehet."));
       return;
     }
     const url = URL.createObjectURL(file);
@@ -642,6 +643,7 @@ function syncSidebarAccountType(type) {
   const settingsNav = document.querySelector("[data-mm-settings-nav]");
   const fromDb = type === "business" || type === "dealer" ? type : "private";
   const companyType = isCompanyAccount(fromDb);
+  document.documentElement.setAttribute("data-mm-account-kind", companyType ? "company" : "private");
   if (el) {
     el.textContent = accountTypeSidebarLabel(fromDb);
     el.hidden = false;
@@ -843,7 +845,10 @@ function fillProfileForm(user, profileOverride = null) {
   updateProfileSummary(profile, user);
   fillAreaForms(profile);
 
-  const photo = user?.email ? readPhotos()[user.email] : null;
+  const photo =
+    String(getProfile()?.avatarDataUrl || "").trim() ||
+    (user?.email ? readPhotos()[user.email] : null) ||
+    null;
   const letterEl = document.getElementById("settings-avatar-letter");
   const imgEl = document.getElementById("settings-avatar-img");
   const removeBtn = document.getElementById("settings-avatar-remove");
@@ -902,6 +907,9 @@ export async function initSettingsPage() {
   const user = getAuthUser();
   if (!user?.email) return;
 
+  syncSidebarAccountType((loadedProfile || getProfile())?.accountType);
+  document.documentElement.removeAttribute("data-mm-account-pending");
+
   const hello = document.querySelector("[data-mm-hello]");
   if (hello) hello.textContent = getDisplayName() || user.email.split("@")[0];
 
@@ -929,6 +937,25 @@ export async function initSettingsPage() {
   initMyAdsPanel(document.getElementById("mm-ad-list")).reload();
   // Második kör: ha a panel most vált láthatóra, biztosan kitöltjük.
   requestAnimationFrame(() => fillProfileForm(getAuthUser(), loadedProfile || getProfile()));
+
+  // Régi helyi profilkép → szerver (hirdetés oldalon is megjelenjen)
+  try {
+    const localPhoto = readPhotos()[user.email];
+    const serverPhoto = String((loadedProfile || getProfile())?.avatarDataUrl || "").trim();
+    if (localPhoto && !serverPhoto) {
+      await saveAvatarPhoto(localPhoto);
+      fillProfileForm(getAuthUser(), getProfile());
+    } else if (serverPhoto && user.email) {
+      const map = readPhotos();
+      if (map[user.email] !== serverPhoto) {
+        map[user.email] = serverPhoto;
+        writePhotos(map);
+      }
+    }
+  } catch {
+    /* ne blokkolja a Beállításokat */
+  }
+
   initNotifyForm(user.email);
   initAccordionExclusive();
   initPostalLookups();
@@ -1045,9 +1072,20 @@ export async function initSettingsPage() {
     const map = readPhotos();
     delete map[user.email];
     writePhotos(map);
-    fillProfileForm(user);
-    window.dispatchEvent(new CustomEvent("bymy-auth-changed"));
-    showFlash(document.getElementById("settings-avatar-flash"), "Profilkép törölve.", true);
+    saveAvatarPhoto("")
+      .then(() => {
+        fillProfileForm(getAuthUser());
+        window.dispatchEvent(new CustomEvent("bymy-auth-changed"));
+        showFlash(document.getElementById("settings-avatar-flash"), "Profilkép törölve.", true);
+      })
+      .catch((error) => {
+        fillProfileForm(user);
+        showFlash(
+          document.getElementById("settings-avatar-flash"),
+          error.message ?? "Törlés sikertelen.",
+          false
+        );
+      });
   });
   fileInput?.addEventListener("change", async () => {
     const file = fileInput.files?.[0];
@@ -1059,7 +1097,8 @@ export async function initSettingsPage() {
       const map = readPhotos();
       map[user.email] = dataUrl;
       writePhotos(map);
-      fillProfileForm(user);
+      await saveAvatarPhoto(dataUrl);
+      fillProfileForm(getAuthUser());
       window.dispatchEvent(new CustomEvent("bymy-auth-changed"));
       showFlash(flash, "Profilkép feltöltve.", true);
     } catch (error) {
@@ -1077,25 +1116,7 @@ export async function initSettingsPage() {
     }
   });
 
-  initSettingsReturnClose();
   window.addEventListener("popstate", () => setSection(currentSection()));
-}
-
-function initSettingsReturnClose() {
-  const bar = document.querySelector("[data-mm-return-bar]");
-  const btn = document.querySelector("[data-mm-close]");
-  if (!bar || !btn) return;
-  const desktop = window.matchMedia("(min-width: 801px)").matches;
-  if (!desktop || !hasSettingsReturn()) {
-    bar.hidden = true;
-    return;
-  }
-  bar.hidden = false;
-  if (btn.dataset.bound === "1") return;
-  btn.dataset.bound = "1";
-  btn.addEventListener("click", () => {
-    window.location.assign(consumeSettingsReturn() || "/");
-  });
 }
 
 /** Mentés listener AZONNAL — ne várjon az auth hálózatra (különben natív submit = nincs mentés). */

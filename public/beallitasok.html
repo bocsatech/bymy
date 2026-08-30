@@ -16,6 +16,12 @@
           var user = raw ? JSON.parse(raw) : null;
           var loggedIn = !!(user && user.email);
           document.documentElement.setAttribute("data-auth", loggedIn ? "member" : "guest");
+          document.documentElement.setAttribute("data-mm-account-pending", "");
+          var accountType = String((user && user.profile && user.profile.accountType) || "private");
+          document.documentElement.setAttribute(
+            "data-mm-account-kind",
+            accountType === "business" || accountType === "dealer" ? "company" : "private"
+          );
           var first = "";
           if (user) {
             first = String((user.profile && user.profile.firstName) || "").trim();
@@ -144,9 +150,6 @@
       </aside>
 
       <div class="mm-main">
-        <div class="mm-return-bar" data-mm-return-bar hidden>
-          <button type="button" class="mm-shell-close" data-mm-close>Bezárás</button>
-        </div>
         <section class="mm-panel" data-mm-panel="cegadatok" hidden>
           <header class="mm-panel-head">
             <h2 class="mm-panel-title">Cégadatok</h2>
@@ -408,7 +411,6 @@
         <section class="mm-panel" data-mm-panel="szemelyes" hidden>
           <header class="mm-panel-head">
             <h2 class="mm-panel-title">Személyes adatok</h2>
-            <p class="mm-panel-lead">Fiók szerkesztése — ugyanaz, mint a mobilappban.</p>
           </header>
 
           <div class="settings-profile-header">
@@ -589,9 +591,9 @@
       </div>
     </main>
 
-    <script src="/js/site-avatar-menu.js?v=settingsNav2" type="module"></script>
+    <script src="/js/site-avatar-menu.js?v=avatarSync1" type="module"></script>
     <script src="/js/ha-import-app.js?v=fiokPage11" type="module"></script>
-    <script src="/js/beallitasok-app.js?v=favPark1" type="module"></script>
+    <script src="/js/beallitasok-app.js?v=avatarSync1" type="module"></script>
   
     <script>
       (function () {

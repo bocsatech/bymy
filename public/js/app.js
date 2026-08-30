@@ -23,6 +23,7 @@ import {
   listingAddressComplete,
   getListingAddressFromProfile,
 } from "./ad-location-profile.js?v=locProf3";
+import { initImproveDescription } from "./improve-description.js?v=descAi1";
 
 if (!(await requireAuthForPage())) {
   throw new Error("Belépés szükséges");
@@ -30,6 +31,7 @@ if (!(await requireAuthForPage())) {
 initSiteAuth();
 
 const adForm = document.getElementById("ad-form");
+initImproveDescription(adForm);
 const editId = Number(new URLSearchParams(window.location.search).get("id"));
 const editing = Number.isFinite(editId) && editId > 0;
 

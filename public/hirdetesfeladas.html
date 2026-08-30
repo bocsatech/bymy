@@ -59,7 +59,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/css/style.css?v=myAds2" />
     <link rel="stylesheet" href="/css/automax.css?v=automax20260720homelist" />
-    <link rel="stylesheet" href="/css/site-app.css?v=fixedHdr1" />
+    <link rel="stylesheet" href="/css/site-app.css?v=descAi1" />
     <link rel="stylesheet" href="/css/site-side.css?v=mwPostDesk1" />
     <link rel="stylesheet" href="/css/category-picker.css?v=immoCat7" />
       <link rel="stylesheet" href="/css/hub.css?v=hubPromoAdmin1" />
@@ -807,8 +807,14 @@
               <div class="card-head">Leírás és elérhetőség</div>
               <div class="card-body form-grid">
                 <div class="field-stack full field-stack--leiras">
-                  <label for="leiras">Leírás:</label>
-                  <textarea id="leiras" name="leiras" rows="6"></textarea>
+                  <div class="leiras-head">
+                    <label for="leiras">Leírás:</label>
+                    <button type="button" class="leiras-ai-btn" data-improve-description>
+                      Szöveg javítása
+                    </button>
+                  </div>
+                  <textarea id="leiras" name="leiras" rows="6" placeholder="Írj pár mondatot az autóról — a gomb emberszerű hirdetésszöveget készít belőle."></textarea>
+                  <p class="hint leiras-ai-status" data-improve-description-status hidden></p>
                   <p class="hint">A kereső a leírásban szereplő szövegben nem tud keresni!</p>
                 </div>
 
@@ -935,7 +941,7 @@
     </main>
 
     <script src="/js/site-avatar-menu.js?v=avatarSync1" type="module"></script>
-    <script src="/js/app.js?v=immoTelekArea1" type="module"></script>
+    <script src="/js/app.js?v=descAi1" type="module"></script>
       <script src="/js/nav-counts.js?v=navCount2" type="module"></script>
       <script src="/js/theme.js?v=willhabenHdr1" type="module"></script>
     <script src="/js/form-layout-apply.js?v=immoTelekArea1" type="module"></script>

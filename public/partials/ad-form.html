@@ -419,9 +419,15 @@
             <div class="card">
               <div class="card-head">Leírás és elérhetőség</div>
               <div class="card-body form-grid">
-                <label for="leiras">Leírás:</label>
-                <div>
-                  <textarea id="leiras" name="leiras" rows="6"></textarea>
+                <div class="field-stack full field-stack--leiras">
+                  <div class="leiras-head">
+                    <label for="leiras">Leírás:</label>
+                    <button type="button" class="leiras-ai-btn" data-improve-description>
+                      Szöveg javítása
+                    </button>
+                  </div>
+                  <textarea id="leiras" name="leiras" rows="6" placeholder="Írj pár mondatot az autóról — a gomb emberszerű hirdetésszöveget készít belőle."></textarea>
+                  <p class="hint leiras-ai-status" data-improve-description-status hidden></p>
                   <p class="hint">A kereső a leírásban szereplő szövegben nem tud keresni!</p>
                 </div>
 

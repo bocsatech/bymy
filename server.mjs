@@ -121,6 +121,7 @@ import {
   validateImageBuffer,
 } from "./lib/supabase/image-storage.mjs";
 import { canManageListing } from "./lib/listing-meta.mjs";
+import { improveListingDescription } from "./lib/improve-listing-description.mjs";
 import { handleMessagesApi, initMessagingSchema } from "./lib/messaging.mjs";
 import { handleLevel1Api } from "./lib/level1-api.mjs";
 import { getLevel1TokenFromRequest, getLevel1AdminBySession } from "./lib/level1.mjs";
@@ -665,6 +666,40 @@ async function handleListingsApi(req, res, pathname) {
   const listMatch = pathname === "/api/listings";
   const batchMatch = pathname === "/api/listings/batch";
   const idMatch = pathname.match(/^\/api\/listings\/(\d+)$/);
+
+  if (pathname === "/api/listings/improve-description" && req.method === "POST") {
+    const user = await requestUser(req);
+    if (!user) {
+      sendJson(res, 401, { error: "Nem vagy bejelentkezve." });
+      return;
+    }
+    const rl = rateLimit(`improve-desc:${user.id}`, { limit: 20, windowMs: 60 * 60 * 1000 });
+    if (!rl.ok) {
+      sendJson(res, 429, {
+        error: `Túl sok AI kérés. Próbáld újra ${rl.retryAfterSec} mp múlva.`,
+        code: "RATE_LIMIT",
+      });
+      return;
+    }
+    let body;
+    try {
+      body = await readBody(req);
+    } catch {
+      sendJson(res, 400, { error: "Érvénytelen JSON." });
+      return;
+    }
+    const result = await improveListingDescription({
+      draft: body.draft ?? body.leiras ?? "",
+      form: body.form ?? body.fields ?? {},
+    });
+    if (!result.ok) {
+      const status = result.code === "NOT_CONFIGURED" ? 503 : result.code === "TOO_SHORT" ? 400 : 502;
+      sendJson(res, status, { error: result.error, code: result.code });
+      return;
+    }
+    sendJson(res, 200, { text: result.text });
+    return;
+  }
 
   if (pathname === "/api/db/stats" && req.method === "GET") {
     sendJson(res, 200, await dbStats());

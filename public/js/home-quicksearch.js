@@ -2,8 +2,8 @@
  * Gyorskereső az autó hero panelen — elrendezés: GET /api/level1/form-layout?category=szemelyauto-search
  */
 
-import { applyAutoSearchLayout, readLayoutFilterValues } from "./auto-search-layout.js?v=deskGap1";
-import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums } from "./auto-search-drums.js?v=immoClear1";
+import { applyAutoSearchLayout, readLayoutFilterValues } from "./auto-search-layout.js?v=deskGap2";
+import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums } from "./auto-search-drums.js?v=deskGap2";
 import {
   mountDetailedSearch,
   readDetailedSearchValues,

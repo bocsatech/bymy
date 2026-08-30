@@ -11,7 +11,7 @@ import {
   closeAllInlineDrums,
 } from "./immo-drum-picker.js?v=immoClear1";
 import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=immoClear1";
-import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=deskGap1";
+import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=deskGap2";
 
 const MOBILE_MQ = "(max-width: 900px)";
 const TYPEAHEAD_CLEAR_MS = 2500;
@@ -68,6 +68,7 @@ const SEARCH_OMIT_FIELDS = new Set([
   "gyartasi_honap",
   "forgalomba_helyezes_honap",
   "muszaki_honap",
+  "keresesi_korzet",
 ]);
 
 function isMobile() {

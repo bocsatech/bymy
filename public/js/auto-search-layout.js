@@ -33,12 +33,10 @@ const SEARCH_OMIT_FIELDS = new Set([
   // Egyéb típus csak a feladáson használható.
   "egyeb_tipus",
   "egyeb_modell",
-  // Helyszín: irányítószám → település; megye nem kell a keresőben.
+  // Helyszín: irányítószám → település; megye és körzet nem kell a keresőben.
   "megye",
+  "keresesi_korzet",
 ]);
-
-/** Új keresőmezők: élő layoutban is jelenjenek meg (ne maradjanak rejtve). */
-const SEARCH_FORCE_VISIBLE = new Set(["keresesi_korzet"]);
 
 /** Admin mező → kereső filter kulcs / widget. */
 const RANGE_SPECS = {
@@ -228,7 +226,6 @@ function fillOptionsSelect(select, options) {
 function isSearchCellVisible(cell) {
   if (!cell) return false;
   if (SEARCH_OMIT_FIELDS.has(cell.field_key)) return false;
-  if (SEARCH_FORCE_VISIBLE.has(cell.field_key)) return true;
   if (cell.hidden) return false;
   return true;
 }
@@ -569,13 +566,6 @@ export async function applyAutoSearchLayout(form = document.getElementById("home
   form.dataset.deskQuickKeys = quickSearchFieldKeysFromLayout(layout).join(",");
   const mainHost = document.getElementById("qs-layout-main");
   const moreHost = document.getElementById("qs-more-layout");
-
-  // Élő layout: új keresőmezők (pl. körzet) mindig látszanak.
-  for (const cell of layout.cells || []) {
-    if (!SEARCH_FORCE_VISIBLE.has(cell.field_key)) continue;
-    cell.hidden = false;
-    if (Number(cell.step) < 2) cell.step = 5;
-  }
 
   const visible = (layout.cells || []).filter((c) => isSearchCellVisible(c));
 

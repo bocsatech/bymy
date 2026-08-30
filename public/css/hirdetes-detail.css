@@ -28,6 +28,11 @@
   text-decoration: underline;
 }
 
+.hd-crumbs__sep {
+  color: #98a2b3;
+  user-select: none;
+}
+
 .hd-head {
   display: flex;
   align-items: flex-start;

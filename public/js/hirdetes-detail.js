@@ -46,19 +46,36 @@ function currentUserId() {
   return Number.isFinite(id) && id > 0 ? id : null;
 }
 
-/** ALFA ROMEO → Alfa Romeo (breadcrumb) */
+/** ALFA ROMEO → Alfa Romeo; BMW/VW marad nagybetűs */
 function formatBrandDisplayName(value) {
   const raw = String(value ?? "").trim();
   if (!raw) return "";
   if (/[a-záéíóöőúüű]/.test(raw) && /[A-ZÁÉÍÓÖŐÚÜŰ]/.test(raw)) return raw;
+  const acronyms = new Set(["BMW", "VW", "MG", "DS", "BYD", "GMC", "RAM"]);
   return raw
     .toLocaleLowerCase("hu-HU")
     .split(/([\s/-]+)/)
     .map((part) => {
       if (/^[\s/-]+$/.test(part)) return part;
+      const upper = part.toLocaleUpperCase("hu-HU");
+      if (acronyms.has(upper)) return upper;
       return part.charAt(0).toLocaleUpperCase("hu-HU") + part.slice(1);
     })
     .join("");
+}
+
+/** Cím: LEXUS NX (2018) → Lexus NX (2018) */
+function formatListingTitleDisplay(title) {
+  const text = String(title ?? "").trim();
+  if (!text) return "";
+  const letters = text.replace(/[^a-záéíóöőúüűA-ZÁÉÍÓÖŐÚÜŰ]/gi, "");
+  if (!letters) return text;
+  const upperCount = [...letters].filter((c) => c === c.toLocaleUpperCase("hu-HU") && c !== c.toLocaleLowerCase("hu-HU")).length;
+  if (upperCount / letters.length < 0.8) return text;
+  return text.replace(/[A-ZÁÉÍÓÖŐÚÜŰ][A-ZÁÉÍÓÖŐÚÜŰ0-9-]*/g, (word) => {
+    if (word.length <= 3 || /\d/.test(word)) return word;
+    return formatBrandDisplayName(word);
+  });
 }
 
 /** Autó → Autók, Teherautó → Teherautók, Ingatlan → Ingatlanok */
@@ -167,17 +184,21 @@ function render(view, listing, related) {
 
   const categoryLabel = crumbCategoryLabel(view);
   const brandLabel = formatBrandDisplayName(view.brand);
+  const titleLabel = formatListingTitleDisplay(view.title);
+
+  document.title = `${titleLabel} — Bymy`;
+  document.body.classList.toggle("hd-has-msg-bar", canMsg);
 
   root.innerHTML = `
     <p class="hd-crumbs">
       <button type="button" class="hd-more" data-hd-back>${ICON.back} Vissza</button>
-      <span>·</span>
+      <span class="hd-crumbs__sep">·</span>
       <a href="${escapeHtml(view.categoryHref)}">${escapeHtml(categoryLabel)}</a>
-      ${brandLabel ? `<span>›</span><span>${escapeHtml(brandLabel)}</span>` : ""}
+      ${brandLabel ? `<span class="hd-crumbs__sep">›</span><span>${escapeHtml(brandLabel)}</span>` : ""}
     </p>
 
     <div class="hd-head">
-      <h1 class="hd-title">${escapeHtml(view.title)}</h1>
+      <h1 class="hd-title">${escapeHtml(titleLabel)}</h1>
       <div class="hd-tools">
         <button type="button" class="hd-tool" data-hd-star aria-label="Mentés">${ICON.star}</button>
         <button type="button" class="hd-tool" data-hd-share aria-label="Megosztás">${ICON.share}</button>

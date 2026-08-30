@@ -32,10 +32,18 @@ export async function fetchDbStats() {
   return parseJson(response);
 }
 
-export async function fetchListings({ limit = 50, status = null, vertical = null } = {}) {
+export async function fetchListings({
+  limit = 50,
+  status = null,
+  vertical = null,
+  owner = null,
+  excludeId = null,
+} = {}) {
   const params = new URLSearchParams({ limit: String(limit) });
   if (status) params.set("status", status);
   if (vertical) params.set("vertical", String(vertical));
+  if (owner != null && owner !== "") params.set("owner", String(owner));
+  if (excludeId != null && excludeId !== "") params.set("exclude", String(excludeId));
   const response = await fetch(`/api/listings?${params}`);
   const data = await parseJson(response);
   return data.listings ?? [];

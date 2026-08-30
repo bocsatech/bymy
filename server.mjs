@@ -20,6 +20,7 @@ import {
   clearListingPhotos,
   recordListingView,
   listMyListings,
+  listListingsByOwner,
   updateListingStatus,
   getDbPath,
   closeDb,
@@ -697,9 +698,23 @@ async function handleListingsApi(req, res, pathname) {
 
   if (listMatch && req.method === "GET") {
     const url = new URL(req.url ?? "", `http://${HOST}`);
-    const limit = Math.min(Math.max(Number(url.searchParams.get("limit") ?? 50), 1), 50);
     const status = url.searchParams.get("status");
     const vertical = url.searchParams.get("vertical");
+    const owner = url.searchParams.get("owner") || url.searchParams.get("userId");
+    if (owner) {
+      const limit = Math.min(Math.max(Number(url.searchParams.get("limit") ?? 200), 1), 500);
+      const excludeId = url.searchParams.get("exclude");
+      sendJson(res, 200, {
+        listings: await listListingsByOwner({
+          userId: owner,
+          limit,
+          excludeId,
+          status: status || "feladott",
+        }),
+      });
+      return;
+    }
+    const limit = Math.min(Math.max(Number(url.searchParams.get("limit") ?? 50), 1), 50);
     sendJson(res, 200, { listings: await listListingsWithPreview({ limit, status, vertical }) });
     return;
   }

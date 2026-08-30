@@ -1,4 +1,4 @@
-import { fetchListing, fetchListings, recordListingView, deleteListingFromDb } from "./db-client.js?v=openFast3";
+import { fetchListing, fetchListings, recordListingView, deleteListingFromDb } from "./db-client.js?v=relatedAll1";
 import { getAuthUser, getDisplayName, getProfile } from "./site-auth.js?v=auth20260805localdb9";
 import { startConversation, sendMessage } from "./messages-api.js?v=msgLive1";
 import { canMessageListing, openListingMessage } from "./start-listing-message.js?v=msgLive1";
@@ -124,7 +124,6 @@ function applyRelated(view, related) {
   section.innerHTML = `
     <div class="hd-related-head">
       <h2 class="hd-h2">Több ettől a hirdetőtől</h2>
-      <a class="hd-more" href="${escapeHtml(view.categoryHref)}">Több megjelenítése</a>
     </div>
     <div class="hd-related">${related.map(relatedCard).join("")}</div>
   `;
@@ -142,10 +141,12 @@ async function loadRelatedInBackground(listingId, view) {
   // Ne versenyezzen a detail API-val — késleltetve, idle-ben.
   await new Promise((resolve) => setTimeout(resolve, 2500));
   try {
-    const all = await fetchListings({ limit: 50 });
-    const related = all
-      .filter((item) => Number(item.user_id) === Number(view.userId) && Number(item.id) !== Number(listingId))
-      .slice(0, 5);
+    const related = await fetchListings({
+      owner: view.userId,
+      excludeId: listingId,
+      limit: 500,
+      status: "feladott",
+    });
     applyRelated(view, related);
   } catch {
     /* ignore — a fő tartalom már látszik */
@@ -357,7 +358,6 @@ function render(view, listing, related) {
         ? `<section class="hd-section" id="hd-related">
         <div class="hd-related-head">
           <h2 class="hd-h2">Több ettől a hirdetőtől</h2>
-          <a class="hd-more" href="${escapeHtml(view.categoryHref)}">Több megjelenítése</a>
         </div>
         <div class="hd-related">${related.map(relatedCard).join("")}</div>
       </section>`

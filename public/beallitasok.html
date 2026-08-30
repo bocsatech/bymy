@@ -155,6 +155,24 @@
             <h2 class="mm-panel-title">Cégadatok</h2>
             <p class="mm-panel-lead">A céges fiókhoz tartozó adatok. A fióktípus regisztrációkor rögzül.</p>
           </header>
+
+          <div class="settings-profile-header">
+            <div class="settings-avatar" aria-hidden="true">
+              <span id="settings-company-avatar-letter">C</span>
+              <img id="settings-company-avatar-img" alt="" hidden width="72" height="72" />
+            </div>
+            <div class="settings-profile-header-meta">
+              <strong id="settings-company-avatar-summary">Cég profilkép</strong>
+              <p class="mm-panel-lead">Ez a kép jelenik meg a hirdetéseidnél az eladó dobozban.</p>
+              <div class="settings-avatar-actions">
+                <button type="button" class="settings-btn-accent" id="settings-company-avatar-upload">Feltöltés</button>
+                <button type="button" class="settings-link-btn settings-link-btn--danger" id="settings-company-avatar-remove" hidden>Törlés</button>
+                <input type="file" id="settings-company-avatar-file" accept="image/jpeg,image/png,image/webp" hidden />
+              </div>
+              <p id="settings-company-avatar-flash" class="settings-flash" role="status" hidden></p>
+            </div>
+          </div>
+
           <form id="mm-company-form" class="settings-form" action="#" method="post" onsubmit="return false;">
             <label class="login-field">
               <span class="login-label">Cégnév/név</span>
@@ -593,7 +611,7 @@
 
     <script src="/js/site-avatar-menu.js?v=avatarSync1" type="module"></script>
     <script src="/js/ha-import-app.js?v=fiokPage11" type="module"></script>
-    <script src="/js/beallitasok-app.js?v=avatarSync1" type="module"></script>
+    <script src="/js/beallitasok-app.js?v=companyAvatar1" type="module"></script>
   
     <script>
       (function () {

@@ -32,7 +32,7 @@ import { initMyAdsPanel } from "./my-ads.js?v=hdView1";
 import {
   consumeSettingsReturn,
   hasSettingsReturn,
-} from "./site-avatar-menu.js?v=settingsNav2";
+} from "./site-avatar-menu.js?v=avatarSync1";
 
 const PHOTO_KEY = "bymy-avatar-photos";
 const NOTIFY_KEY = "bymy-notify-prefs";
@@ -849,18 +849,25 @@ function fillProfileForm(user, profileOverride = null) {
     String(getProfile()?.avatarDataUrl || "").trim() ||
     (user?.email ? readPhotos()[user.email] : null) ||
     null;
-  const letterEl = document.getElementById("settings-avatar-letter");
-  const imgEl = document.getElementById("settings-avatar-img");
-  const removeBtn = document.getElementById("settings-avatar-remove");
-  const uploadBtn = document.getElementById("settings-avatar-upload");
-  const letter = (
-    profile?.lastName?.charAt(0) ||
-    profile?.firstName?.charAt(0) ||
-    user?.email?.charAt(0) ||
-    "A"
-  ).toUpperCase();
+  applyAvatarUi({
+    photo,
+    letter:
+      profile?.lastName?.charAt(0) ||
+      profile?.firstName?.charAt(0) ||
+      user?.email?.charAt(0) ||
+      "A",
+    letterEl: document.getElementById("settings-avatar-letter"),
+    imgEl: document.getElementById("settings-avatar-img"),
+    removeBtn: document.getElementById("settings-avatar-remove"),
+    uploadBtn: document.getElementById("settings-avatar-upload"),
+  });
+  fillCompanyAvatarUi(user, profile);
+}
+
+function applyAvatarUi({ photo, letter, letterEl, imgEl, removeBtn, uploadBtn }) {
+  const initial = String(letter || "A").charAt(0).toUpperCase();
   if (letterEl) {
-    letterEl.textContent = letter;
+    letterEl.textContent = initial;
     letterEl.hidden = Boolean(photo);
   }
   if (imgEl) {
@@ -874,6 +881,58 @@ function fillProfileForm(user, profileOverride = null) {
   }
   if (removeBtn) removeBtn.hidden = !photo;
   if (uploadBtn) uploadBtn.textContent = photo ? "Csere" : "Feltöltés";
+}
+
+function fillCompanyAvatarUi(user, profileOverride = null) {
+  const profile = profileOverride || getProfile();
+  const photo =
+    String(profile?.avatarDataUrl || "").trim() ||
+    (user?.email ? readPhotos()[user.email] : null) ||
+    null;
+  const companyName = String(profile?.company || "").trim();
+  const summary = document.getElementById("settings-company-avatar-summary");
+  if (summary) summary.textContent = companyName || "Cég profilkép";
+  applyAvatarUi({
+    photo,
+    letter: companyName?.charAt(0) || user?.email?.charAt(0) || "C",
+    letterEl: document.getElementById("settings-company-avatar-letter"),
+    imgEl: document.getElementById("settings-company-avatar-img"),
+    removeBtn: document.getElementById("settings-company-avatar-remove"),
+    uploadBtn: document.getElementById("settings-company-avatar-upload"),
+  });
+}
+
+async function removeAvatarPhoto(user, flashEl) {
+  const map = readPhotos();
+  if (user?.email) delete map[user.email];
+  writePhotos(map);
+  try {
+    await saveAvatarPhoto("");
+    fillProfileForm(getAuthUser());
+    window.dispatchEvent(new CustomEvent("bymy-auth-changed"));
+    showFlash(flashEl, "Profilkép törölve.", true);
+  } catch (error) {
+    fillProfileForm(user);
+    showFlash(flashEl, error.message ?? "Törlés sikertelen.", false);
+  }
+}
+
+async function uploadAvatarFromInput(fileInput, user, flashEl) {
+  const file = fileInput?.files?.[0];
+  if (fileInput) fileInput.value = "";
+  if (!file) return;
+  try {
+    const dataUrl = await resizeImageFile(file);
+    const map = readPhotos();
+    if (user?.email) map[user.email] = dataUrl;
+    writePhotos(map);
+    await saveAvatarPhoto(dataUrl);
+    fillProfileForm(getAuthUser());
+    window.dispatchEvent(new CustomEvent("bymy-auth-changed"));
+    showFlash(flashEl, "Profilkép feltöltve.", true);
+  } catch (error) {
+    showFlash(flashEl, error.message ?? "Feltöltés sikertelen.", false);
+  }
 }
 
 function initNotifyForm(email) {
@@ -1069,41 +1128,19 @@ export async function initSettingsPage() {
   const fileInput = document.getElementById("settings-avatar-file");
   document.getElementById("settings-avatar-upload")?.addEventListener("click", () => fileInput?.click());
   document.getElementById("settings-avatar-remove")?.addEventListener("click", () => {
-    const map = readPhotos();
-    delete map[user.email];
-    writePhotos(map);
-    saveAvatarPhoto("")
-      .then(() => {
-        fillProfileForm(getAuthUser());
-        window.dispatchEvent(new CustomEvent("bymy-auth-changed"));
-        showFlash(document.getElementById("settings-avatar-flash"), "Profilkép törölve.", true);
-      })
-      .catch((error) => {
-        fillProfileForm(user);
-        showFlash(
-          document.getElementById("settings-avatar-flash"),
-          error.message ?? "Törlés sikertelen.",
-          false
-        );
-      });
+    void removeAvatarPhoto(user, document.getElementById("settings-avatar-flash"));
   });
   fileInput?.addEventListener("change", async () => {
-    const file = fileInput.files?.[0];
-    fileInput.value = "";
-    if (!file) return;
-    const flash = document.getElementById("settings-avatar-flash");
-    try {
-      const dataUrl = await resizeImageFile(file);
-      const map = readPhotos();
-      map[user.email] = dataUrl;
-      writePhotos(map);
-      await saveAvatarPhoto(dataUrl);
-      fillProfileForm(getAuthUser());
-      window.dispatchEvent(new CustomEvent("bymy-auth-changed"));
-      showFlash(flash, "Profilkép feltöltve.", true);
-    } catch (error) {
-      showFlash(flash, error.message ?? "Feltöltés sikertelen.", false);
-    }
+    await uploadAvatarFromInput(fileInput, user, document.getElementById("settings-avatar-flash"));
+  });
+
+  const companyFileInput = document.getElementById("settings-company-avatar-file");
+  document.getElementById("settings-company-avatar-upload")?.addEventListener("click", () => companyFileInput?.click());
+  document.getElementById("settings-company-avatar-remove")?.addEventListener("click", () => {
+    void removeAvatarPhoto(user, document.getElementById("settings-company-avatar-flash"));
+  });
+  companyFileInput?.addEventListener("change", async () => {
+    await uploadAvatarFromInput(companyFileInput, user, document.getElementById("settings-company-avatar-flash"));
   });
 
   document.getElementById("settings-delete-account")?.addEventListener("click", async () => {

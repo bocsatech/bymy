@@ -1,4 +1,4 @@
-import { fetchListing, fetchListings, recordListingView, deleteListingFromDb } from "./db-client.js?v=relatedAll1";
+import { fetchListing, fetchListings, recordListingView, deleteListingFromDb } from "./db-client.js?v=relatedAll2";
 import { getAuthUser, getDisplayName, getProfile } from "./site-auth.js?v=auth20260805localdb9";
 import { startConversation, sendMessage } from "./messages-api.js?v=msgLive1";
 import { canMessageListing, openListingMessage } from "./start-listing-message.js?v=msgLive1";
@@ -103,43 +103,53 @@ function relatedCard(item) {
 }
 
 function applyRelated(view, related) {
-  if (!related.length || !root) return;
-
+  if (!root) return;
+  const items = Array.isArray(related) ? related : [];
+  const label = items.length ? `Több ettől a hirdetőtől ${items.length}` : "Több ettől a hirdetőtől";
   const aside = root.querySelector(".hd-side") || root.querySelector("aside");
-  if (aside && !aside.querySelector('a[href="#hd-related"]')) {
-    const link = document.createElement("a");
+  let link =
+    aside?.querySelector("[data-hd-related-link]") ||
+    aside?.querySelector('a[href="#hd-related"]');
+  if (aside && !link && items.length) {
+    link = document.createElement("a");
     link.className = "hd-btn hd-btn--ghost";
     link.href = "#hd-related";
-    link.textContent = `Több ettől a hirdetőtől ${related.length}`;
+    link.dataset.hdRelatedLink = "";
     const owner = aside.querySelector(".hd-owner");
     if (owner) aside.insertBefore(link, owner);
     else aside.appendChild(link);
   }
+  if (link) {
+    link.textContent = label;
+    link.hidden = items.length === 0;
+  }
+  if (!items.length) {
+    document.getElementById("hd-related")?.remove();
+    return;
+  }
 
-  if (document.getElementById("hd-related")) return;
-
-  const section = document.createElement("section");
-  section.className = "hd-section";
-  section.id = "hd-related";
+  let section = document.getElementById("hd-related");
+  if (!section) {
+    section = document.createElement("section");
+    section.className = "hd-section";
+    section.id = "hd-related";
+    const dealer = root.querySelector(".hd-dealer");
+    if (dealer) root.insertBefore(section, dealer);
+    else root.appendChild(section);
+  }
   section.innerHTML = `
     <div class="hd-related-head">
       <h2 class="hd-h2">Több ettől a hirdetőtől</h2>
     </div>
-    <div class="hd-related">${related.map(relatedCard).join("")}</div>
+    <div class="hd-related">${items.map(relatedCard).join("")}</div>
   `;
-  const dealer = root.querySelector(".hd-dealer");
-  if (dealer) root.insertBefore(section, dealer);
-  else root.appendChild(section);
-
   section.querySelectorAll("a[data-listing-id]").forEach((a) => {
     a.addEventListener("click", () => rememberListingOpen(a.dataset.listingId, a));
   });
 }
 
-async function loadRelatedInBackground(listingId, view) {
+async function loadRelatedListings(listingId, view) {
   if (!view?.userId) return;
-  // Ne versenyezzen a detail API-val — késleltetve, idle-ben.
-  await new Promise((resolve) => setTimeout(resolve, 2500));
   try {
     const related = await fetchListings({
       owner: view.userId,
@@ -310,8 +320,10 @@ function render(view, listing, related) {
         <a class="hd-btn hd-btn--ghost" href="/adasveteli-szerzodes.html?id=${encodeURIComponent(view.id)}">Adásvételi szerződés</a>
         ${
           related.length
-            ? `<a class="hd-btn hd-btn--ghost" href="#hd-related">Több ettől a hirdetőtől ${related.length}</a>`
-            : ""
+            ? `<a class="hd-btn hd-btn--ghost" href="#hd-related" data-hd-related-link>Több ettől a hirdetőtől ${related.length}</a>`
+            : view.userId
+              ? `<a class="hd-btn hd-btn--ghost" href="#hd-related" data-hd-related-link>Több ettől a hirdetőtől …</a>`
+              : ""
         }
         ${view.website ? `<a class="hd-web" href="${escapeHtml(view.website)}" target="_blank" rel="noopener">Céges weboldal</a>` : ""}
         ${
@@ -668,7 +680,7 @@ async function init() {
     // Először rajzolunk — view számláló és „több ettől” ne blokkolja a megnyitást.
     render(view, listing, []);
     recordListingView(id, "web").catch(() => {});
-    loadRelatedInBackground(id, view);
+    void loadRelatedListings(id, view);
   } catch (error) {
     root.innerHTML = `<p class="hd-empty">${escapeHtml(error.message ?? "A hirdetés nem tölthető be.")}</p>`;
   }

@@ -1,11 +1,11 @@
 import { initVehicleCatalogSelects, shortTypeName } from "./vehicle-catalog-client.js";
 import { kivitelMatches } from "./kivitel-options.js?v=kivitel1";
-import { fuelValueMatches } from "./auto-fuel-picker.js?v=toltoPick1";
-import { kivitelListMatches } from "./auto-kivitel-picker.js?v=toltoPick1";
-import { allapotValueMatches } from "./auto-allapot-picker.js?v=toltoPick1";
-import { sebessegvaltoListMatches } from "./auto-sebessegvalto-picker.js?v=toltoPick1";
-import { okmanyListMatches } from "./auto-okmany-picker.js?v=toltoPick1";
-import { toltoListMatches } from "./auto-tolto-picker.js?v=toltoPick1";
+import { fuelValueMatches } from "./auto-fuel-picker.js?v=fogyNum1";
+import { kivitelListMatches } from "./auto-kivitel-picker.js?v=fogyNum1";
+import { allapotValueMatches } from "./auto-allapot-picker.js?v=fogyNum1";
+import { sebessegvaltoListMatches } from "./auto-sebessegvalto-picker.js?v=fogyNum1";
+import { okmanyListMatches } from "./auto-okmany-picker.js?v=fogyNum1";
+import { toltoListMatches } from "./auto-tolto-picker.js?v=fogyNum1";
 
 const FUEL_QUICK_FILTERS = [
   { id: "benzin", label: "Benzin", match: (value) => value === "Benzin" },
@@ -190,6 +190,14 @@ export function filterListingsBySidebar(items, filters) {
     if (filters.ajtok && f.ajtok !== filters.ajtok) return false;
     if (filters.ulesek && f.ulesek !== filters.ulesek) return false;
 
+    for (const key of ["fogyasztas_varosi", "fogyasztas_orszaguti", "fogyasztas_kombinalt", "co2_kibocsatas"]) {
+      if (filters[key] == null || filters[key] === "") continue;
+      const max = Number(filters[key]);
+      if (!Number.isFinite(max)) continue;
+      const got = Number(String(f[key] ?? "").replace(",", ".").replace(/[^\d.-]/g, ""));
+      if (!Number.isFinite(got) || got > max) return false;
+    }
+
     if (filters.tipus) {
       const hay = [f.tipus, preview.title, preview.specLine].join(" ").toLowerCase();
       if (!hay.includes(filters.tipus.toLowerCase())) return false;
@@ -243,6 +251,10 @@ export function filterListingsBySidebar(items, filters) {
           "ac_tolto_csatlakozasok",
           "tolto_csatlakozas",
           "tolto_csatlakozasok",
+          "fogyasztas_varosi",
+          "fogyasztas_orszaguti",
+          "fogyasztas_kombinalt",
+          "co2_kibocsatas",
           "ajtok",
           "ulesek",
           "tipus",

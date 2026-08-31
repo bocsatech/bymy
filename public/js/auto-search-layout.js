@@ -25,19 +25,20 @@ const KM_MAX = 500_000;
 const LE_STEPS = [50, 75, 100, 125, 150, 175, 200, 225, 250, 300, 350, 400, 500, 600, 800];
 const CCM_STEPS = [600, 800, 1000, 1200, 1400, 1600, 1800, 2000, 2200, 2500, 3000, 3500, 4000, 5000, 6000];
 
-/** Keresőben soha ne jelenjen meg (feladás-specifikus / felesleges). */
-const SEARCH_OMIT_FIELDS = new Set([
-  "gyartasi_honap",
-  "forgalomba_helyezes_ev",
-  "forgalomba_helyezes_honap",
-  "muszaki_honap",
-  // Egyéb típus csak a feladáson használható.
-  "egyeb_tipus",
-  "egyeb_modell",
-  // Helyszín: irányítószám → település; megye és körzet nem kell a keresőben.
-  "megye",
-  "keresesi_korzet",
+/** Keresőben egyetlen szabad számmező (nem legördülő, nem -tól/-ig). */
+const FREE_NUMBER_FIELDS = new Set([
+  "fogyasztas_varosi",
+  "fogyasztas_orszaguti",
+  "fogyasztas_kombinalt",
+  "co2_kibocsatas",
 ]);
+
+const FREE_NUMBER_SUFFIX = {
+  fogyasztas_varosi: "l/100 km",
+  fogyasztas_orszaguti: "l/100 km",
+  fogyasztas_kombinalt: "l/100 km",
+  co2_kibocsatas: "g/km",
+};
 
 /** Admin mező → kereső filter kulcs / widget. */
 const RANGE_SPECS = {
@@ -386,6 +387,15 @@ function fieldHtml(cell) {
       <select class="home-qs-control" data-filter-key="${key}"></select>
     </label>`;
   }
+  if (FREE_NUMBER_FIELDS.has(key)) {
+    const unit = FREE_NUMBER_SUFFIX[key] || "";
+    const suffix = unit ? `<span class="home-qs-suffix" aria-hidden="true">${unit}</span>` : "";
+    return `<label class="home-qs-field home-qs-field--number" data-qs-field="${key}">
+      <span class="home-qs-label">${label}</span>
+      <input class="home-qs-control home-qs-control--number" type="number" inputmode="decimal" min="0" step="0.1" placeholder="" data-filter-key="${key}" aria-label="${label}" />
+      ${suffix}
+    </label>`;
+  }
   /* Település / irányítószám: szövegmező (ingatlan immo-field kinézet), nem dobkerék */
   const attrs =
     key === "iranyitoszam"
@@ -650,6 +660,11 @@ export function readLayoutFilterValues(form) {
     const n = Number(String(value).replace(/\D/g, ""));
     return Number.isFinite(n) ? n : null;
   };
+  const floatOrNull = (value) => {
+    if (value == null || value === "") return null;
+    const n = Number(String(value).replace(",", ".").replace(/[^\d.-]/g, ""));
+    return Number.isFinite(n) ? n : null;
+  };
   const seen = new Set();
   form.querySelectorAll("[data-filter-key]").forEach((el) => {
     const key = el.getAttribute("data-filter-key");
@@ -664,6 +679,8 @@ export function readLayoutFilterValues(form) {
     if (!raw) return;
     if (key.endsWith("_tol") || key.endsWith("_ig")) {
       out[key] = numOrNull(raw);
+    } else if (FREE_NUMBER_FIELDS.has(key)) {
+      out[key] = floatOrNull(raw);
     } else {
       out[key] = raw;
     }

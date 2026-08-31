@@ -4,6 +4,7 @@
  */
 
 import { fetchVehicleCatalog } from "./vehicle-catalog-client.js?v=autoDesk16";
+import { bindAutoBmDismiss, autoBmPanelIsOpen } from "./auto-bm-dismiss.js?v=bmDismiss1";
 
 function labelList(items, unit) {
   if (!items.length) return "Mindegy";
@@ -310,6 +311,13 @@ export async function mountAutoBrandModelPicker(form) {
 
   openBrandBtn?.addEventListener("click", () => toggleOpen("brand"));
   openModelBtn?.addEventListener("click", () => toggleOpen("model"));
+
+  bindAutoBmDismiss({
+    panel,
+    roots: [wrap],
+    isOpen: () => autoBmPanelIsOpen(panel),
+    close: closePanel,
+  });
 
   panel.querySelector("[data-auto-bm-back]")?.addEventListener("click", () => {
     if (modelBrand) {

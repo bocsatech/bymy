@@ -6,8 +6,8 @@ import {
   populateFilterOptions,
   initHomeSearchSidebar,
   initHomeFilterCatalog,
-} from "./home-search-filter.js?v=kivitelPick1";
-import { initHomeQuickSearch } from "./home-quicksearch.js?v=kivitelPick1";
+} from "./home-search-filter.js?v=bmDismiss1";
+import { initHomeQuickSearch } from "./home-quicksearch.js?v=bmDismiss1";
 import { matchDetailedSearch, hasActiveDetailedSearch } from "./auto-detailed-search.js?v=autoDesk16";
 import { updateAutoDeskResultCount } from "./auto-desk-search.js?v=teherDesk1";
 import {

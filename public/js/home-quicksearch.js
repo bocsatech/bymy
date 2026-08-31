@@ -9,14 +9,14 @@ import {
   readDetailedSearchValues,
   resetDetailedSearch,
 } from "./auto-detailed-search.js?v=autoDesk16";
-import { readBrandModelFilterValues, mountAutoBrandModelPicker } from "./auto-brand-model-picker.js?v=kivitelPick1";
-import { readFuelFilterValues, mountAutoFuelPicker } from "./auto-fuel-picker.js?v=kivitelPick1";
-import { readKivitelFilterValues, mountAutoKivitelPicker } from "./auto-kivitel-picker.js?v=kivitelPick1";
+import { readBrandModelFilterValues, mountAutoBrandModelPicker } from "./auto-brand-model-picker.js?v=bmDismiss1";
+import { readFuelFilterValues, mountAutoFuelPicker } from "./auto-fuel-picker.js?v=bmDismiss1";
+import { readKivitelFilterValues, mountAutoKivitelPicker } from "./auto-kivitel-picker.js?v=bmDismiss1";
 import {
   initAutoDeskSearch,
   updateAutoDeskAccSummaries,
   arrangeAutoDeskDemoFields,
-} from "./auto-desk-search.js?v=kivitelPick1";
+} from "./auto-desk-search.js?v=bmDismiss1";
 
 const MOBILE_MQ = "(max-width: 900px)";
 const DESK_MQ = "(min-width: 901px)";

@@ -3,6 +3,7 @@
  */
 
 import { KIVITEL_OPTIONS, normalizeKivitel } from "./kivitel-options.js?v=kivitel1";
+import { bindAutoBmDismiss, autoBmPanelIsOpen } from "./auto-bm-dismiss.js?v=bmDismiss1";
 
 const TEHER_KIVITEL = ["Kisteher", "Dobozos", "Platós", "Ponyvás", "Hűtős", "Billenős", "Alváz"];
 
@@ -173,6 +174,14 @@ export async function mountAutoKivitelPicker(form) {
     if (!panel.hidden && !panel.classList.contains("is-closed")) closePanel();
     else openPanel();
   });
+
+  bindAutoBmDismiss({
+    panel,
+    roots: [wrap],
+    isOpen: () => autoBmPanelIsOpen(panel),
+    close: closePanel,
+  });
+
   panel.querySelector("[data-auto-kivitel-back]")?.addEventListener("click", closePanel);
   panel.querySelector("[data-auto-kivitel-done]")?.addEventListener("click", closePanel);
 

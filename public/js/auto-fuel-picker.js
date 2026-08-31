@@ -4,6 +4,7 @@
  */
 
 import { UZEMANYAG_CATEGORIES } from "./equipment-data.js";
+import { bindAutoBmDismiss, autoBmPanelIsOpen } from "./auto-bm-dismiss.js?v=bmDismiss1";
 
 function labelList(items) {
   if (!items.length) return "Mindegy";
@@ -232,6 +233,13 @@ export async function mountAutoFuelPicker(form) {
   openBtn?.addEventListener("click", () => {
     if (!panel.hidden && !panel.classList.contains("is-closed")) closePanel();
     else openPanel();
+  });
+
+  bindAutoBmDismiss({
+    panel,
+    roots: [wrap],
+    isOpen: () => autoBmPanelIsOpen(panel),
+    close: closePanel,
   });
 
   panel.querySelector("[data-auto-fuel-back]")?.addEventListener("click", closePanel);

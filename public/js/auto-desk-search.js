@@ -375,7 +375,23 @@ export function initAutoDeskSearch({
       const id = acc?.getAttribute("data-desk-acc");
       if (!id) return;
       const wasOpen = acc.classList.contains("is-open");
+      const scrollY = window.scrollY;
       openAccordion(wasOpen ? "" : id);
+      // Ne ugorjon az oldal közepe felé a sticky panel növekedésekor.
+      window.scrollTo(0, scrollY);
+      requestAnimationFrame(() => {
+        window.scrollTo(0, scrollY);
+        if (wasOpen || !acc) return;
+        const panel =
+          document.querySelector(".home-main.auto-desk-main > .auto-search-hero") ||
+          document.querySelector(".auto-search-hero");
+        const head = acc.querySelector(".auto-desk-acc__head");
+        if (!panel || !head) return;
+        const panelRect = panel.getBoundingClientRect();
+        const headRect = head.getBoundingClientRect();
+        const delta = headRect.top - panelRect.top - 8;
+        if (Math.abs(delta) > 2) panel.scrollTop += delta;
+      });
     });
   });
 

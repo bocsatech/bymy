@@ -7,7 +7,7 @@ import {
   initHomeSearchSidebar,
   initHomeFilterCatalog,
 } from "./home-search-filter.js?v=korzetFix1";
-import { initHomeQuickSearch } from "./home-quicksearch.js?v=deskGap2";
+import { initHomeQuickSearch } from "./home-quicksearch.js?v=deskSticky1";
 import { matchDetailedSearch, hasActiveDetailedSearch } from "./auto-detailed-search.js?v=autoDesk16";
 import { updateAutoDeskResultCount } from "./auto-desk-search.js?v=teherDesk1";
 import {

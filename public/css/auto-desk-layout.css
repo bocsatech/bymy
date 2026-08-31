@@ -1104,16 +1104,20 @@
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-panel__search-input {
     width: 100%;
     box-sizing: border-box;
-    min-height: 38px;
+    min-height: 40px;
     padding: 0 12px;
-    border-radius: 8px;
-    border: 1px solid var(--ad-line);
-    background: var(--ad-dropdown);
-    color: var(--ad-muted);
+    border-radius: 10px;
+    border: 1px solid #d0d5dd;
+    background: #fff;
+    color: #000;
     font: inherit;
-    font-size: 14px;
+    font-size: 15px;
     text-align: left;
-    cursor: pointer;
+    cursor: text;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-panel__search-input::placeholder {
+    color: #98a2b3;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-panel__search-input:focus,

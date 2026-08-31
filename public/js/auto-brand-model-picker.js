@@ -128,9 +128,15 @@ export async function mountAutoBrandModelPicker(form) {
       <button type="button" class="auto-bm-panel__done" data-auto-bm-done>Kész</button>
     </div>
     <div class="auto-bm-panel__search" data-auto-bm-search-wrap>
-      <button type="button" class="auto-bm-panel__search-input" data-auto-bm-search-close>
-        Keresés…
-      </button>
+      <input
+        type="search"
+        class="auto-bm-panel__search-input"
+        data-auto-bm-search
+        placeholder="Keresés…"
+        autocomplete="off"
+        spellcheck="false"
+        enterkeyhint="search"
+      />
     </div>
     <div class="auto-bm-panel__body" data-auto-bm-body></div>
   `;
@@ -141,7 +147,7 @@ export async function mountAutoBrandModelPicker(form) {
   const subEl = panel.querySelector("[data-auto-bm-sub]");
   const bodyEl = panel.querySelector("[data-auto-bm-body]");
   const searchWrap = panel.querySelector("[data-auto-bm-search-wrap]");
-  const searchCloseBtn = panel.querySelector("[data-auto-bm-search-close]");
+  const searchInput = panel.querySelector("[data-auto-bm-search]");
 
   function pruneModels() {
     const allowed = new Set();
@@ -164,15 +170,22 @@ export async function mountAutoBrandModelPicker(form) {
     return labelList(list, "modell");
   }
 
+  function brandsMatchingQuery(query) {
+    const q = String(query ?? "")
+      .trim()
+      .toLocaleLowerCase("hu");
+    if (!q) return brands;
+    // Csak a márkanév elején egyező betűk (pl. CH → CHERY, CHEVROLET)
+    return brands.filter((b) => b.toLocaleLowerCase("hu").startsWith(q));
+  }
+
   function renderBrandList() {
     modelBrand = null;
     titleEl.textContent = "Gyártmány";
     subEl.hidden = true;
     searchWrap.hidden = false;
-    const q = brandQuery.trim().toLowerCase();
-    const filtered = q
-      ? brands.filter((b) => b.toLowerCase().includes(q))
-      : brands;
+    if (searchInput) searchInput.value = brandQuery;
+    const filtered = brandsMatchingQuery(brandQuery);
 
     const rows = filtered
       .map((brand) => {
@@ -183,7 +196,7 @@ export async function mountAutoBrandModelPicker(form) {
               <span class="auto-bm-subrow__val">${escapeHtml(modelLabelFor(brand))}</span>
             </button>`
           : "";
-        return `<div class="auto-bm-row">
+        return `<div class="auto-bm-row" data-auto-bm-brand-row="${escapeAttr(brand)}">
           <label class="auto-bm-toggle">
             <span>${escapeHtml(brand)}</span>
             <input type="checkbox" data-auto-bm-brand="${escapeAttr(brand)}" ${on ? "checked" : ""} />
@@ -199,6 +212,7 @@ export async function mountAutoBrandModelPicker(form) {
       <button type="button" class="auto-bm-clear" data-auto-bm-clear-brands>Összes kikapcsolása</button>
       <div class="auto-bm-group">${rows || `<p class="auto-bm-empty">Nincs találat.</p>`}</div>
     `;
+    bodyEl.scrollTop = 0;
   }
 
   function renderModelList(brand) {
@@ -238,6 +252,7 @@ export async function mountAutoBrandModelPicker(form) {
     panel.classList.remove("is-closed");
     document.body.classList.add("auto-bm-open");
     brandQuery = "";
+    if (searchInput) searchInput.value = "";
     if (mode === "model") {
       if (selectedBrands.length === 1) {
         renderModelList(selectedBrands[0]);
@@ -249,6 +264,9 @@ export async function mountAutoBrandModelPicker(form) {
     } else {
       renderBrandList();
     }
+    if (!modelBrand) {
+      requestAnimationFrame(() => searchInput?.focus());
+    }
   }
 
   function closePanel() {
@@ -257,6 +275,8 @@ export async function mountAutoBrandModelPicker(form) {
     panel.classList.add("is-closed");
     document.body.classList.remove("auto-bm-open");
     modelBrand = null;
+    brandQuery = "";
+    if (searchInput) searchInput.value = "";
     if (document.activeElement instanceof HTMLElement) {
       document.activeElement.blur();
     }
@@ -276,22 +296,45 @@ export async function mountAutoBrandModelPicker(form) {
   openModelBtn?.addEventListener("click", () => toggleOpen("model"));
 
   panel.querySelector("[data-auto-bm-back]")?.addEventListener("click", () => {
-    if (modelBrand) renderBrandList();
-    else closePanel();
+    if (modelBrand) {
+      renderBrandList();
+      requestAnimationFrame(() => searchInput?.focus());
+    } else closePanel();
   });
 
   panel.querySelector("[data-auto-bm-done]")?.addEventListener("click", () => {
-    if (modelBrand) renderBrandList();
-    else closePanel();
+    if (modelBrand) {
+      renderBrandList();
+      requestAnimationFrame(() => searchInput?.focus());
+    } else closePanel();
   });
 
-  const closeFromSearch = (event) => {
-    event.preventDefault();
-    event.stopPropagation();
-    closePanel();
-  };
-  searchCloseBtn?.addEventListener("click", closeFromSearch);
-  searchWrap?.addEventListener("click", closeFromSearch);
+  searchInput?.addEventListener("input", () => {
+    brandQuery = searchInput.value || "";
+    if (modelBrand) return;
+    renderBrandList();
+    // Kurzor a mező végén maradjon újrarajzolás után
+    const pos = searchInput.value.length;
+    searchInput.focus();
+    try {
+      searchInput.setSelectionRange(pos, pos);
+    } catch {
+      /* ignore */
+    }
+  });
+
+  searchInput?.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      if (brandQuery) {
+        brandQuery = "";
+        searchInput.value = "";
+        renderBrandList();
+      } else {
+        closePanel();
+      }
+    }
+  });
 
   bodyEl.addEventListener("change", (event) => {
     const brandEl = event.target.closest("[data-auto-bm-brand]");

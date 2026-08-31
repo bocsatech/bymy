@@ -14,7 +14,7 @@ import {
   updateAutoDeskAccSummaries,
   arrangeAutoDeskDemoFields,
 } from "./auto-desk-search.js?v=bmPair1";
-import { readBrandModelFilterValues, mountAutoBrandModelPicker } from "./auto-brand-model-picker.js?v=bmPair1";
+import { readBrandModelFilterValues, mountAutoBrandModelPicker } from "./auto-brand-model-picker.js?v=bmSearch1";
 
 const MOBILE_MQ = "(max-width: 900px)";
 const DESK_MQ = "(min-width: 901px)";

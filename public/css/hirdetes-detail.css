@@ -551,6 +551,28 @@
   margin-bottom: 0.35rem;
 }
 
+.hd-section--extras .hd-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  column-gap: 1.5rem;
+  row-gap: 0.35rem;
+  margin: 0;
+  padding-left: 1.1rem;
+  list-style: disc;
+}
+
+.hd-section--extras .hd-list li {
+  margin: 0;
+  min-width: 0;
+  break-inside: avoid;
+}
+
+@media (max-width: 900px) {
+  .hd-section--extras .hd-list {
+    grid-template-columns: 1fr;
+  }
+}
+
 .hd-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;

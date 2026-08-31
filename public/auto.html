@@ -63,7 +63,7 @@
     <link rel="stylesheet" href="/css/home.css?v=favPark1" />
     <link rel="stylesheet" href="/css/listing-photo-cover.css?v=coverAll1" />
     <link rel="stylesheet" href="/css/auto-hero.css?v=fogyNum1" />
-    <link rel="stylesheet" href="/css/auto-desk-layout.css?v=muszakiFix1" />
+    <link rel="stylesheet" href="/css/auto-desk-layout.css?v=deskRestore1" />
     <link rel="stylesheet" href="/css/ingatlan-search.css?v=autoDrums15" />
     <style id="home-scroll-fix">
       /* Inline: cache-biztos — a teljes oldal görget, külön görgetősáv nincs sehol. */
@@ -341,66 +341,21 @@
                 </button>
                 <div class="auto-desk-acc__body">
               <div id="qs-layout-main" class="home-qs-layout-main"></div>
-              <div class="home-qs-static-legacy" hidden>
-              <div class="home-qs-row">
-                <label class="home-qs-field home-qs-field--wide">
-                  <span class="home-qs-label">Gyártmány</span>
-                  <select class="home-qs-control" id="qs-gyartmany">
-                    <option value="">Mindegy</option>
-                  </select>
-                </label>
-
-                <label class="home-qs-field home-qs-field--wide">
-                  <span class="home-qs-label">Típus</span>
-                  <select class="home-qs-control" id="qs-modell">
-                    <option value="">Mindegy</option>
-                  </select>
-                </label>
-              </div>
-
-              <div class="home-qs-row">
-                <label class="home-qs-field home-qs-field--wide">
-                  <span class="home-qs-label">Üzemanyag</span>
-                  <select class="home-qs-control" id="qs-uzemanyag">
-                    <option value="">Mindegy</option>
+              <!-- Rejtett forrás-selectek (nincs home-qs-row — ne törje szét a desk layoutot) -->
+              <div class="home-qs-static-legacy" hidden aria-hidden="true">
+                  <select class="home-qs-control" id="qs-gyartmany" data-filter-key="gyartmany"><option value="">Mindegy</option></select>
+                  <select class="home-qs-control" id="qs-modell" data-filter-key="modell"><option value="">Mindegy</option></select>
+                  <select class="home-qs-control" id="qs-uzemanyag" data-filter-key="uzemanyag"><option value="">Mindegy</option>
                     <option value="benzin">Benzin</option>
                     <option value="diesel">Dízel</option>
                     <option value="hybrid">Hibrid</option>
                     <option value="benzin-gaz">Benzin/Gáz</option>
                     <option value="elektromos">Elektromos</option>
                   </select>
-                </label>
-
-                <div class="home-qs-pair">
-                  <label class="home-qs-field home-qs-field--narrow">
-                    <span class="home-qs-label">Évjárat</span>
-                    <select class="home-qs-control" id="qs-ev-tol" aria-label="Évjárat -tól">
-                      <option value="">-tól</option>
-                    </select>
-                  </label>
-                  <label class="home-qs-field home-qs-field--narrow">
-                    <select class="home-qs-control" id="qs-ev-ig" aria-label="Évjárat -ig">
-                      <option value="">-ig</option>
-                    </select>
-                  </label>
-                </div>
-
-                <div class="home-qs-pair">
-                  <label class="home-qs-field home-qs-field--narrow">
-                    <span class="home-qs-label">Vételár</span>
-                    <select class="home-qs-control" id="qs-ar-tol" aria-label="Vételár -tól">
-                      <option value="">-tól</option>
-                    </select>
-                    <span class="home-qs-suffix" aria-hidden="true">Ft</span>
-                  </label>
-                  <label class="home-qs-field home-qs-field--narrow">
-                    <select class="home-qs-control" id="qs-ar-ig" aria-label="Vételár -ig">
-                      <option value="">-ig</option>
-                    </select>
-                    <span class="home-qs-suffix" aria-hidden="true">Ft</span>
-                  </label>
-                </div>
-              </div>
+                  <select class="home-qs-control" id="qs-ev-tol" data-filter-key="ev_tol" aria-label="Évjárat -tól"><option value="">-tól</option></select>
+                  <select class="home-qs-control" id="qs-ev-ig" data-filter-key="ev_ig" aria-label="Évjárat -ig"><option value="">-ig</option></select>
+                  <select class="home-qs-control" id="qs-ar-tol" data-filter-key="ar_tol" aria-label="Vételár -tól"><option value="">-tól</option></select>
+                  <select class="home-qs-control" id="qs-ar-ig" data-filter-key="ar_ig" aria-label="Vételár -ig"><option value="">-ig</option></select>
               </div>
                 </div>
               </div>
@@ -414,42 +369,12 @@
                 <div class="auto-desk-acc__body">
               <div class="home-qs-more" id="qs-more" hidden>
                 <div id="qs-more-layout" class="home-qs-more-layout"></div>
-                <div class="home-qs-static-legacy" hidden>
-                <div class="home-qs-row">
-                  <div class="home-qs-pair">
-                    <label class="home-qs-field home-qs-field--narrow">
-                      <span class="home-qs-label">Futott km</span>
-                      <select class="home-qs-control" id="qs-km-tol" aria-label="Futott km -tól">
-                        <option value="">-tól</option>
-                      </select>
-                    </label>
-                    <label class="home-qs-field home-qs-field--narrow">
-                      <select class="home-qs-control" id="qs-km-ig" aria-label="Futott km -ig">
-                        <option value="">-ig</option>
-                      </select>
-                    </label>
-                  </div>
-
-                  <div class="home-qs-pair">
-                    <label class="home-qs-field home-qs-field--narrow">
-                      <span class="home-qs-label">Teljesítmény</span>
-                      <select class="home-qs-control" id="qs-le-tol" aria-label="LE -tól">
-                        <option value="">-tól</option>
-                      </select>
-                      <span class="home-qs-suffix" aria-hidden="true">LE</span>
-                    </label>
-                    <label class="home-qs-field home-qs-field--narrow">
-                      <select class="home-qs-control" id="qs-le-ig" aria-label="LE -ig">
-                        <option value="">-ig</option>
-                      </select>
-                      <span class="home-qs-suffix" aria-hidden="true">LE</span>
-                    </label>
-                  </div>
-
-                  <label class="home-qs-field home-qs-field--wide">
-                    <span class="home-qs-label">Kivitel</span>
-                    <select class="home-qs-control" id="qs-kivitel">
-                      <option value="">Mindegy</option>
+                <div class="home-qs-static-legacy" hidden aria-hidden="true">
+                  <select class="home-qs-control" id="qs-km-tol" data-filter-key="km_tol" aria-label="Futott km -tól"><option value="">-tól</option></select>
+                  <select class="home-qs-control" id="qs-km-ig" data-filter-key="km_ig" aria-label="Futott km -ig"><option value="">-ig</option></select>
+                  <select class="home-qs-control" id="qs-le-tol" data-filter-key="le_tol" aria-label="LE -tól"><option value="">-tól</option></select>
+                  <select class="home-qs-control" id="qs-le-ig" data-filter-key="le_ig" aria-label="LE -ig"><option value="">-ig</option></select>
+                  <select class="home-qs-control" id="qs-kivitel" data-filter-key="kivitel"><option value="">Mindegy</option>
                       <option>Pickup</option>
                       <option>Terepjáró</option>
                       <option>Buggy</option>
@@ -466,30 +391,16 @@
                       <option>Sport</option>
                       <option>Városi terepjáró (crossover)</option>
                       <option>Egyéb</option>
-                    </select>
-                  </label>
-                </div>
-
-                <div class="home-qs-row">
-                  <label class="home-qs-field home-qs-field--wide">
-                    <span class="home-qs-label">Sebességváltó</span>
-                    <select class="home-qs-control" id="qs-sebessegvalto">
-                      <option value="">Mindegy</option>
+                  </select>
+                  <select class="home-qs-control" id="qs-sebessegvalto" data-filter-key="sebessegvalto"><option value="">Mindegy</option>
                       <option value="Manuális">Manuális</option>
                       <option value="Automata">Automata</option>
-                    </select>
-                  </label>
-
-                  <label class="home-qs-field home-qs-field--wide">
-                    <span class="home-qs-label">Hajtás</span>
-                    <select class="home-qs-control" id="qs-hajtas">
-                      <option value="">Mindegy</option>
+                  </select>
+                  <select class="home-qs-control" id="qs-hajtas" data-filter-key="hajtas"><option value="">Mindegy</option>
                       <option>Első kerék</option>
                       <option>Hátsó kerék</option>
                       <option>Összkerék</option>
-                    </select>
-                  </label>
-                </div>
+                  </select>
                 <div id="qs-more-extra" class="home-qs-more-extra" hidden></div>
                 </div>
               </div>
@@ -584,7 +495,7 @@
       </div>
     </main>
 
-    <script src="/js/home-app.js?v=muszakiFix1" type="module"></script>
+    <script src="/js/home-app.js?v=deskRestore1" type="module"></script>
     <script src="/js/auto-hero.js?v=searchCollapse1" type="module"></script>
     <script src="/js/auto-kivitel-menu.js?v=kivitelAdmin1" type="module"></script>
     <script src="/js/site-avatar-menu.js?v=avatarSync1" type="module"></script>

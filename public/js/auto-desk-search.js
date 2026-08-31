@@ -137,25 +137,26 @@ function findFieldWrap(form, fieldKey) {
   const legacyId = LEGACY_FIELD_IDS[fieldKey];
   if (!legacyId) return null;
   const legacyEl = form.querySelector(`#${legacyId}`);
-  return legacyEl?.closest(".home-qs-pair, .home-qs-field, label") || null;
+  if (!legacyEl) return null;
+  return legacyEl.closest(".home-qs-pair, .home-qs-field, label") || legacyEl;
 }
 
-function ensureDeskFieldsHost(parent, selector, datasetKey) {
-  let host = parent.querySelector(selector);
-  if (!host) {
-    host = document.createElement("div");
-    host.className = "auto-desk-fields";
-    host.dataset[datasetKey] = "1";
-    parent.appendChild(host);
-  }
-  host.innerHTML = "";
-  return host;
+const LEGACY_RANGE_IDS = {
+  gyartasi_ev: ["qs-ev-tol", "qs-ev-ig"],
+  vetelar: ["qs-ar-tol", "qs-ar-ig"],
+  km: ["qs-km-tol", "qs-km-ig"],
+  teljesitmeny_le: ["qs-le-tol", "qs-le-ig"],
+};
+
+function findLegacyRangeSelects(form, fieldKey) {
+  const ids = LEGACY_RANGE_IDS[fieldKey];
+  if (!ids) return null;
+  const els = ids.map((id) => form.querySelector(`#${id}`)).filter(Boolean);
+  return els.length >= 2 ? els : null;
 }
 
 function mountDeskField(host, item, form, { quickKeys, used }) {
-  const wrap = findFieldWrap(form, item.field);
-  if (!wrap || host.contains(wrap)) return false;
-  used.add(item.field);
+  if (used.has(item.field)) return false;
 
   const field = document.createElement("div");
   field.className = "auto-desk-field";
@@ -167,33 +168,54 @@ function mountDeskField(host, item, form, { quickKeys, used }) {
   label.textContent = item.label;
   field.appendChild(label);
 
-  wrap.querySelectorAll(".home-qs-label, .immo-label").forEach((el) => {
+  if (item.range) {
+    const range = document.createElement("div");
+    range.className = "auto-desk-range";
+    const legacyPair = findLegacyRangeSelects(form, item.field);
+    const wrap = findFieldWrap(form, item.field);
+    let pair = legacyPair;
+    if (!pair && wrap) {
+      ensureDeskSelectPlaceholders(wrap, true);
+      const selects = [...wrap.querySelectorAll("select")];
+      const inputs = [...wrap.querySelectorAll("input.home-qs-control, input[type='number']")];
+      pair = selects.length >= 2 ? selects.slice(0, 2) : inputs.length >= 2 ? inputs.slice(0, 2) : null;
+    }
+    if (pair?.length >= 2) {
+      pair.forEach((el) => {
+        if (!el.querySelector("option")) {
+          const opt = document.createElement("option");
+          opt.value = "";
+          el.appendChild(opt);
+        }
+        range.appendChild(el);
+      });
+      field.appendChild(range);
+      wrap?.remove?.();
+      used.add(item.field);
+      host.appendChild(field);
+      return true;
+    }
+  }
+
+  const wrap = findFieldWrap(form, item.field);
+  if (!wrap) return false;
+  used.add(item.field);
+
+  wrap.querySelectorAll?.(".home-qs-label, .immo-label")?.forEach((el) => {
     el.style.display = "none";
   });
 
   ensureDeskSelectPlaceholders(wrap, item.range);
 
-  if (item.range) {
-    const range = document.createElement("div");
-    range.className = "auto-desk-range";
-    const selects = [...wrap.querySelectorAll("select")];
-    const inputs = [...wrap.querySelectorAll("input.home-qs-control, input[type='number']")];
-    const pair = selects.length >= 2 ? selects.slice(0, 2) : inputs.length >= 2 ? inputs.slice(0, 2) : [];
-    if (pair.length >= 2) {
-      pair.forEach((el) => range.appendChild(el));
-      field.appendChild(range);
+  const sel =
+    wrap.matches?.("select, input") ? wrap : wrap.querySelector?.("select, input");
+  if (sel) {
+    field.appendChild(sel);
+    if (wrap !== sel && wrap.matches?.("label, .home-qs-field, .home-qs-pair")) {
       wrap.remove();
-    } else {
-      field.appendChild(wrap);
     }
   } else {
-    const sel = wrap.querySelector("select, input");
-    if (sel && wrap.matches("label, .home-qs-field, .home-qs-pair")) {
-      field.appendChild(sel);
-      wrap.remove();
-    } else {
-      field.appendChild(wrap);
-    }
+    field.appendChild(wrap);
   }
 
   host.appendChild(field);
@@ -202,7 +224,9 @@ function mountDeskField(host, item, form, { quickKeys, used }) {
 
 function ensureDeskSelectPlaceholders(wrap, range) {
   if (!wrap) return;
-  const selects = [...wrap.querySelectorAll("select")];
+  const selects = wrap.matches?.("select")
+    ? [wrap]
+    : [...wrap.querySelectorAll("select")];
   selects.forEach((sel, i) => {
     const first = sel.querySelector("option");
     if (!first) return;
@@ -251,10 +275,16 @@ export function arrangeAutoDeskDemoFields(form = document.getElementById("home-q
   const used = new Set();
   const mountOpts = { quickKeys, used };
   const order = deskOrderFromAdminLayout(mainHost).filter((item) => quickKeys.has(item.field));
-  const fieldOrder = order.length ? order : DESK_ALAP_FALLBACK.filter((item) => quickKeys.has(item.field));
+  const fieldOrder = order.length ? order : DESK_ALAP_FALLBACK;
 
   for (const item of fieldOrder) {
     mountDeskField(host, item, form, mountOpts);
+  }
+  // Ha a layout mezők nem voltak átvihetők — teljes alap fallback
+  if (!host.children.length) {
+    for (const item of DESK_ALAP_FALLBACK) {
+      mountDeskField(host, item, form, mountOpts);
+    }
   }
 
   if (muszakiBody) {

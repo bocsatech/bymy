@@ -533,9 +533,21 @@
     min-width: 0;
   }
 
+  /* Alap / Műszaki: CSAK a desk oszlop — legacy/layout soha ne látszódjon */
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    [data-desk-acc="alap"] .auto-desk-acc__body > :not(.auto-desk-fields),
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    [data-desk-acc="muszaki"] .auto-desk-acc__body > :not(.auto-desk-fields) {
+    display: none !important;
+  }
+
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .home-qs-static-legacy,
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active .auto-search-panel .home-qs-static-legacy {
     display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    pointer-events: none !important;
   }
 
   /* Ha mégis látszana a legacy sor: ne 12 oszlopos gridbe préselődjön */

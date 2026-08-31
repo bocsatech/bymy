@@ -528,41 +528,43 @@
   margin: 0 0 0.85rem;
   font-size: 1.35rem;
   font-weight: 800;
-  color: #101828;
+  color: #000;
 }
 
 .hd-h3 {
-  margin: 0 0 0.55rem;
-  font-size: 1.02rem;
+  margin: 0 0 0.65rem;
+  font-size: 1.05rem;
   font-weight: 800;
-  color: #101828;
+  color: #000;
 }
 
 .hd-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.35rem 2rem;
+  column-gap: 2rem;
+  row-gap: 0.75rem;
 }
 
 .hd-kv {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 0.75rem;
-  padding: 0.38rem 0;
-  border-bottom: 1px solid #eef1f5;
-  font-size: 0.92rem;
+  display: block;
+  margin: 0;
+  padding: 0;
+  border: 0;
 }
 
 .hd-kv dt {
-  margin: 0;
-  color: #667085;
+  margin: 0 0 0.1rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #000;
 }
 
 .hd-kv dd {
   margin: 0;
-  font-weight: 700;
-  color: #101828;
-  text-align: right;
+  font-size: 1rem;
+  font-weight: 800;
+  color: #000;
+  text-align: left;
 }
 
 .hd-check {

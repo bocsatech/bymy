@@ -21,6 +21,29 @@ const DESK_ALAP_FALLBACK = [
   { field: "allapot", label: "Állapot" },
 ];
 
+/** Műszaki accordion — legacy / layout nélküli sorrend. */
+const DESK_MUSZAKI_FALLBACK = [
+  { field: "km", label: "Futott km", range: true },
+  { field: "teljesitmeny_le", label: "Teljesítmény", range: true },
+  { field: "kivitel", label: "Kivitel" },
+  { field: "sebessegvalto", label: "Sebességváltó" },
+  { field: "hajtas", label: "Hajtás" },
+];
+
+const LEGACY_FIELD_IDS = {
+  gyartmany: "qs-gyartmany",
+  modell: "qs-modell",
+  uzemanyag: "qs-uzemanyag",
+  gyartasi_ev: "qs-ev-tol",
+  vetelar: "qs-ar-tol",
+  kivitel: "qs-kivitel",
+  allapot: "qs-allapot",
+  km: "qs-km-tol",
+  teljesitmeny_le: "qs-le-tol",
+  sebessegvalto: "qs-sebessegvalto",
+  hajtas: "qs-hajtas",
+};
+
 function deskOrderFromAdminLayout(mainHost) {
   if (!mainHost) return [];
   const gridCells = [...mainHost.querySelectorAll(".home-qs-grid-cell")];
@@ -97,16 +120,6 @@ function countFilled(root) {
   });
   return n;
 }
-
-const LEGACY_FIELD_IDS = {
-  gyartmany: "qs-gyartmany",
-  modell: "qs-modell",
-  uzemanyag: "qs-uzemanyag",
-  gyartasi_ev: "qs-ev-tol",
-  vetelar: "qs-ar-tol",
-  kivitel: "qs-kivitel",
-  allapot: "qs-allapot",
-};
 
 function findFieldWrap(form, fieldKey) {
   const fromLayout =
@@ -244,24 +257,26 @@ export function arrangeAutoDeskDemoFields(form = document.getElementById("home-q
     mountDeskField(host, item, form, mountOpts);
   }
 
-  if (muszakiBody && moreHost) {
-    const moreOrder = deskOrderFromAdminLayout(moreHost);
-    let moreWrap = muszakiBody.querySelector("#qs-more");
-    if (!moreWrap) {
-      moreWrap = document.createElement("div");
-      moreWrap.id = "qs-more";
-      moreWrap.className = "home-qs-more";
-      muszakiBody.appendChild(moreWrap);
+  if (muszakiBody) {
+    let muszakiHost = muszakiBody.querySelector(".auto-desk-fields[data-desk-muszaki]");
+    if (!muszakiHost) {
+      muszakiHost = document.createElement("div");
+      muszakiHost.className = "auto-desk-fields";
+      muszakiHost.dataset.deskMuszaki = "1";
+      muszakiBody.insertBefore(muszakiHost, muszakiBody.firstChild);
     }
-    moreWrap.hidden = false;
-    const muszakiHost = ensureDeskFieldsHost(moreWrap, "[data-desk-muszaki]", "deskMuszaki");
+    muszakiHost.innerHTML = "";
 
-    if (moreOrder.length) {
-      for (const item of moreOrder) {
-        mountDeskField(muszakiHost, item, form, mountOpts);
-      }
-    } else {
-      // Fallback: sparsa grid mezők átemelése kompakt oszlopba
+    const moreOrder = deskOrderFromAdminLayout(moreHost);
+    const muszakiOrder = moreOrder.length ? moreOrder : DESK_MUSZAKI_FALLBACK;
+
+    for (const item of muszakiOrder) {
+      if (used.has(item.field)) continue;
+      mountDeskField(muszakiHost, item, form, mountOpts);
+    }
+
+    // Ha a layout üres volt, a fallback sem talált mindent — maradék [data-qs-field]
+    if (moreHost) {
       moreHost.querySelectorAll("[data-qs-field]").forEach((el) => {
         const key = el.getAttribute("data-qs-field");
         if (!key || used.has(key)) return;
@@ -271,6 +286,17 @@ export function arrangeAutoDeskDemoFields(form = document.getElementById("home-q
           el.classList.contains("home-qs-pair") ||
           el.querySelectorAll("select.home-qs-control").length >= 2;
         mountDeskField(muszakiHost, { field: key, label, range }, form, mountOpts);
+      });
+    }
+
+    let moreWrap = muszakiBody.querySelector("#qs-more");
+    if (moreWrap) {
+      moreWrap.hidden = true;
+      moreWrap.classList.remove("is-open");
+      moreWrap.querySelectorAll(".home-qs-static-legacy, #qs-more-layout").forEach((el) => {
+        el.hidden = true;
+        el.style.setProperty("display", "none", "important");
+        if (el.id === "qs-more-layout") el.innerHTML = "";
       });
     }
   }
@@ -376,9 +402,10 @@ export function initAutoDeskSearch({
         }
         openAccordion("alap");
       } else {
+        // Desk: a műszaki mezők az accordion body-ban vannak, #qs-more legacy husk
         if (morePanel) {
-          morePanel.hidden = false;
-          morePanel.classList.add("is-open");
+          morePanel.hidden = true;
+          morePanel.classList.remove("is-open");
         }
         openAccordion("alap");
         try {

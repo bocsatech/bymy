@@ -20,7 +20,7 @@ import {
   initAutoDeskSearch,
   updateAutoDeskAccSummaries,
   arrangeAutoDeskDemoFields,
-} from "./auto-desk-search.js?v=alapFix1";
+} from "./auto-desk-search.js?v=muszakiFix1";
 
 const MOBILE_MQ = "(max-width: 900px)";
 const DESK_MQ = "(min-width: 901px)";

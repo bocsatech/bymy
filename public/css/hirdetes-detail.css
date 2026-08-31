@@ -629,6 +629,10 @@
   gap: 1rem;
 }
 
+#hd-related[hidden] {
+  display: none !important;
+}
+
 .hd-related .home-grid-card {
   min-width: 0;
 }

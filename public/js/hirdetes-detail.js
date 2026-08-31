@@ -111,9 +111,9 @@ function applyRelated(view, related) {
     aside?.querySelector("[data-hd-related-link]") ||
     aside?.querySelector('a[href="#hd-related"]');
   if (aside && !link && items.length) {
-    link = document.createElement("a");
+    link = document.createElement("button");
+    link.type = "button";
     link.className = "hd-btn hd-btn--ghost";
-    link.href = "#hd-related";
     link.dataset.hdRelatedLink = "";
     const owner = aside.querySelector(".hd-owner");
     if (owner) aside.insertBefore(link, owner);
@@ -122,6 +122,8 @@ function applyRelated(view, related) {
   if (link) {
     link.textContent = label;
     link.hidden = items.length === 0;
+    link.setAttribute("aria-expanded", "false");
+    link.setAttribute("aria-controls", "hd-related");
   }
   if (!items.length) {
     document.getElementById("hd-related")?.remove();
@@ -129,6 +131,7 @@ function applyRelated(view, related) {
   }
 
   let section = document.getElementById("hd-related");
+  const wasOpen = Boolean(section && !section.hidden);
   if (!section) {
     section = document.createElement("section");
     section.className = "hd-section";
@@ -137,15 +140,28 @@ function applyRelated(view, related) {
     if (dealer) root.insertBefore(section, dealer);
     else root.appendChild(section);
   }
+  section.hidden = !wasOpen;
   section.innerHTML = `
     <div class="hd-related-head">
       <h2 class="hd-h2">Több ettől a hirdetőtől</h2>
     </div>
     <div class="hd-related">${items.map(relatedCard).join("")}</div>
   `;
+  if (link) link.setAttribute("aria-expanded", wasOpen ? "true" : "false");
   section.querySelectorAll("a[data-listing-id]").forEach((a) => {
     a.addEventListener("click", () => rememberListingOpen(a.dataset.listingId, a));
   });
+}
+
+function revealRelatedListings(event) {
+  const trigger = event?.target?.closest?.("[data-hd-related-link]");
+  if (!trigger || !root?.contains(trigger)) return;
+  event.preventDefault();
+  const section = document.getElementById("hd-related");
+  if (!section) return;
+  section.hidden = false;
+  trigger.setAttribute("aria-expanded", "true");
+  section.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 async function loadRelatedListings(listingId, view) {
@@ -320,9 +336,9 @@ function render(view, listing, related) {
         <a class="hd-btn hd-btn--ghost" href="/adasveteli-szerzodes.html?id=${encodeURIComponent(view.id)}">Adásvételi szerződés</a>
         ${
           related.length
-            ? `<a class="hd-btn hd-btn--ghost" href="#hd-related" data-hd-related-link>Több ettől a hirdetőtől ${related.length}</a>`
+            ? `<button type="button" class="hd-btn hd-btn--ghost" data-hd-related-link aria-expanded="false" aria-controls="hd-related">Több ettől a hirdetőtől ${related.length}</button>`
             : view.userId
-              ? `<a class="hd-btn hd-btn--ghost" href="#hd-related" data-hd-related-link>Több ettől a hirdetőtől …</a>`
+              ? `<button type="button" class="hd-btn hd-btn--ghost" data-hd-related-link aria-expanded="false" aria-controls="hd-related">Több ettől a hirdetőtől …</button>`
               : ""
         }
         ${view.website ? `<a class="hd-web" href="${escapeHtml(view.website)}" target="_blank" rel="noopener">Céges weboldal</a>` : ""}
@@ -367,7 +383,7 @@ function render(view, listing, related) {
 
     ${
       related.length
-        ? `<section class="hd-section" id="hd-related">
+        ? `<section class="hd-section" id="hd-related" hidden>
         <div class="hd-related-head">
           <h2 class="hd-h2">Több ettől a hirdetőtől</h2>
         </div>
@@ -664,6 +680,8 @@ function bindUi(view, listing, extrasRest) {
   root.querySelectorAll("a[data-listing-id]").forEach((a) => {
     a.addEventListener("click", () => rememberListingOpen(a.dataset.listingId, a));
   });
+
+  root.addEventListener("click", revealRelatedListings);
 }
 
 async function init() {

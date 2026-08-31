@@ -5,7 +5,7 @@
 
 import { initVehicleCatalogSelects, fillSelect } from "./vehicle-catalog-client.js";
 import { KIVITEL_OPTIONS } from "./kivitel-options.js?v=kivitel1";
-import { flattenAllapotOptions, flattenSebessegvaltoOptions } from "./equipment-data.js";
+import { flattenAllapotOptions, flattenSebessegvaltoOptions, OKMANY_JELLEG_OPTIONS } from "./equipment-data.js";
 
 function searchLayoutCategory() {
   return document.body?.getAttribute("data-site-page") === "teherauto"
@@ -94,7 +94,7 @@ const SELECT_OPTIONS = {
   dc_tolto_csatlakozas: ["CCS", "CHAdeMO", "Type 2", "Egyéb"],
   villamtoltes: ["Igen", "Nem"],
   zold_rendszam: ["Igen", "Nem"],
-  okmany_jelleg: ["Érvényes magyar okmányokkal", "Érvényes külföldi okmányokkal"],
+  okmany_jelleg: [...OKMANY_JELLEG_OPTIONS],
   tulajdonosok_szama: ["1", "2", "3", "4+"],
   nem_dohanyzo: ["Igen", "Nem"],
   holgy_tulajdonos: ["Igen", "Nem"],

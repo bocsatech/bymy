@@ -156,6 +156,29 @@ export function flattenSebessegvaltoOptions() {
   return out;
 }
 
+/** Autó / teher — okmányok jellege (kereső + feladás). */
+export const OKMANY_JELLEG_OPTIONS = [
+  "Külföldi okmányokkal",
+  "Magyar okmányokkal",
+  "Okmányok nélkül",
+];
+
+export function normalizeOkmanyJelleg(value) {
+  const raw = String(value ?? "").trim();
+  if (!raw) return "";
+  if (OKMANY_JELLEG_OPTIONS.includes(raw)) return raw;
+  const key = raw
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (key.includes("nelkul") || key.includes("nincs okmany")) return "Okmányok nélkül";
+  if (key.includes("kulfold")) return "Külföldi okmányokkal";
+  if (key.includes("magyar") || key.includes("forgalmi")) return "Magyar okmányokkal";
+  return raw;
+}
+
 export const EQUIPMENT_SECTIONS = {
   muszaki: {
     title: "Műszaki felszereltség",

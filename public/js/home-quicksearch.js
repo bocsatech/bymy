@@ -2,23 +2,24 @@
  * Gyorskereső az autó hero panelen — elrendezés: GET /api/level1/form-layout?category=szemelyauto-search
  */
 
-import { applyAutoSearchLayout, readLayoutFilterValues } from "./auto-search-layout.js?v=omitForg1";
-import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums } from "./auto-search-drums.js?v=omitForg1";
+import { applyAutoSearchLayout, readLayoutFilterValues } from "./auto-search-layout.js?v=okmanyPick1";
+import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums } from "./auto-search-drums.js?v=okmanyPick1";
 import {
   mountDetailedSearch,
   readDetailedSearchValues,
   resetDetailedSearch,
 } from "./auto-detailed-search.js?v=autoDesk16";
-import { readBrandModelFilterValues, mountAutoBrandModelPicker } from "./auto-brand-model-picker.js?v=omitForg1";
-import { readFuelFilterValues, mountAutoFuelPicker } from "./auto-fuel-picker.js?v=omitForg1";
-import { readKivitelFilterValues, mountAutoKivitelPicker } from "./auto-kivitel-picker.js?v=omitForg1";
-import { readAllapotFilterValues, mountAutoAllapotPicker } from "./auto-allapot-picker.js?v=omitForg1";
-import { readSebessegvaltoFilterValues, mountAutoSebessegvaltoPicker } from "./auto-sebessegvalto-picker.js?v=omitForg1";
+import { readBrandModelFilterValues, mountAutoBrandModelPicker } from "./auto-brand-model-picker.js?v=okmanyPick1";
+import { readFuelFilterValues, mountAutoFuelPicker } from "./auto-fuel-picker.js?v=okmanyPick1";
+import { readKivitelFilterValues, mountAutoKivitelPicker } from "./auto-kivitel-picker.js?v=okmanyPick1";
+import { readAllapotFilterValues, mountAutoAllapotPicker } from "./auto-allapot-picker.js?v=okmanyPick1";
+import { readSebessegvaltoFilterValues, mountAutoSebessegvaltoPicker } from "./auto-sebessegvalto-picker.js?v=okmanyPick1";
+import { readOkmanyFilterValues, mountAutoOkmanyPicker } from "./auto-okmany-picker.js?v=okmanyPick1";
 import {
   initAutoDeskSearch,
   updateAutoDeskAccSummaries,
   arrangeAutoDeskDemoFields,
-} from "./auto-desk-search.js?v=omitForg1";
+} from "./auto-desk-search.js?v=okmanyPick1";
 
 const MOBILE_MQ = "(max-width: 900px)";
 const DESK_MQ = "(min-width: 901px)";
@@ -43,6 +44,7 @@ export function initHomeQuickSearch({ onSearch = () => {}, onDeskSortChange } = 
     const kivitel = readKivitelFilterValues(form);
     const allapot = readAllapotFilterValues(form);
     const sebessegvalto = readSebessegvaltoFilterValues(form);
+    const okmany = readOkmanyFilterValues(form);
     if (form.dataset.brandModelPicker === "1") {
       delete base.gyartmany;
       delete base.modell;
@@ -62,8 +64,11 @@ export function initHomeQuickSearch({ onSearch = () => {}, onDeskSortChange } = 
     if (form.dataset.sebessegvaltoPicker === "1") {
       delete base.sebessegvalto;
     }
+    if (form.dataset.okmanyPicker === "1") {
+      delete base.okmany_jelleg;
+    }
     const detailed = readDetailedSearchValues(form);
-    return { ...base, ...brandModel, ...fuel, ...kivitel, ...allapot, ...sebessegvalto, detailed };
+    return { ...base, ...brandModel, ...fuel, ...kivitel, ...allapot, ...sebessegvalto, ...okmany, detailed };
   }
 
   function syncDetailedButton(moreOpen) {
@@ -184,6 +189,11 @@ export function initHomeQuickSearch({ onSearch = () => {}, onDeskSortChange } = 
           await mountAutoSebessegvaltoPicker(form);
         } catch (valtoError) {
           console.warn("Sebességváltó picker:", valtoError);
+        }
+        try {
+          await mountAutoOkmanyPicker(form);
+        } catch (okmanyError) {
+          console.warn("Okmány picker:", okmanyError);
         }
       }
       const urlKivitel = new URLSearchParams(window.location.search).get("kivitel");

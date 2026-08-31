@@ -1,9 +1,10 @@
 import { initVehicleCatalogSelects, shortTypeName } from "./vehicle-catalog-client.js";
 import { kivitelMatches } from "./kivitel-options.js?v=kivitel1";
-import { fuelValueMatches } from "./auto-fuel-picker.js?v=omitForg1";
-import { kivitelListMatches } from "./auto-kivitel-picker.js?v=omitForg1";
-import { allapotValueMatches } from "./auto-allapot-picker.js?v=omitForg1";
-import { sebessegvaltoListMatches } from "./auto-sebessegvalto-picker.js?v=omitForg1";
+import { fuelValueMatches } from "./auto-fuel-picker.js?v=okmanyPick1";
+import { kivitelListMatches } from "./auto-kivitel-picker.js?v=okmanyPick1";
+import { allapotValueMatches } from "./auto-allapot-picker.js?v=okmanyPick1";
+import { sebessegvaltoListMatches } from "./auto-sebessegvalto-picker.js?v=okmanyPick1";
+import { okmanyListMatches } from "./auto-okmany-picker.js?v=okmanyPick1";
 
 const FUEL_QUICK_FILTERS = [
   { id: "benzin", label: "Benzin", match: (value) => value === "Benzin" },
@@ -171,6 +172,11 @@ export function filterListingsBySidebar(items, filters) {
     if (filters.allapotok?.length) {
       if (!allapotValueMatches(f.allapot, filters.allapotok)) return false;
     } else if (filters.allapot && f.allapot !== filters.allapot) return false;
+    if (filters.okmany_jellegek?.length) {
+      if (!okmanyListMatches(f.okmany_jelleg, filters.okmany_jellegek)) return false;
+    } else if (filters.okmany_jelleg && !okmanyListMatches(f.okmany_jelleg, [filters.okmany_jelleg])) {
+      return false;
+    }
     if (filters.ajtok && f.ajtok !== filters.ajtok) return false;
     if (filters.ulesek && f.ulesek !== filters.ulesek) return false;
 
@@ -221,6 +227,8 @@ export function filterListingsBySidebar(items, filters) {
           "uzemanyagQuick",
           "allapot",
           "allapotok",
+          "okmany_jelleg",
+          "okmany_jellegek",
           "ajtok",
           "ulesek",
           "tipus",

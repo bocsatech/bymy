@@ -6,8 +6,8 @@ import {
   populateFilterOptions,
   initHomeSearchSidebar,
   initHomeFilterCatalog,
-} from "./home-search-filter.js?v=omitForg1";
-import { initHomeQuickSearch } from "./home-quicksearch.js?v=omitForg1";
+} from "./home-search-filter.js?v=okmanyPick1";
+import { initHomeQuickSearch } from "./home-quicksearch.js?v=okmanyPick1";
 import { matchDetailedSearch, hasActiveDetailedSearch } from "./auto-detailed-search.js?v=autoDesk16";
 import { updateAutoDeskResultCount } from "./auto-desk-search.js?v=teherDesk1";
 import {
@@ -291,6 +291,8 @@ function hasActiveSidebarFilters(filters) {
       filters.allapotok?.length ||
       filters.sebessegvalto ||
       filters.sebessegvaltok?.length ||
+      filters.okmany_jelleg ||
+      filters.okmany_jellegek?.length ||
       filters.hajtas ||
       filters.tipus ||
       filters.features?.length ||

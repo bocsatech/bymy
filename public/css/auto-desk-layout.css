@@ -605,7 +605,11 @@
     color: var(--ad-text) !important;
     font: inherit;
     font-size: 14px !important;
+    font-weight: 400 !important;
     box-shadow: none !important;
+    text-shadow: none !important;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     color-scheme: inherit;
   }
 

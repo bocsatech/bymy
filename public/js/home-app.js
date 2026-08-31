@@ -6,8 +6,8 @@ import {
   populateFilterOptions,
   initHomeSearchSidebar,
   initHomeFilterCatalog,
-} from "./home-search-filter.js?v=fuelPick1";
-import { initHomeQuickSearch } from "./home-quicksearch.js?v=fuelPick1";
+} from "./home-search-filter.js?v=kivitelPick1";
+import { initHomeQuickSearch } from "./home-quicksearch.js?v=kivitelPick1";
 import { matchDetailedSearch, hasActiveDetailedSearch } from "./auto-detailed-search.js?v=autoDesk16";
 import { updateAutoDeskResultCount } from "./auto-desk-search.js?v=teherDesk1";
 import {
@@ -283,6 +283,7 @@ function hasActiveSidebarFilters(filters) {
       filters.modell ||
       filters.modellek?.length ||
       filters.kivitel ||
+      filters.kivitelek?.length ||
       filters.uzemanyag ||
       filters.uzemanyagQuick ||
       filters.uzemanyagok?.length ||

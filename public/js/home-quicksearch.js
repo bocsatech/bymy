@@ -13,8 +13,8 @@ import {
   initAutoDeskSearch,
   updateAutoDeskAccSummaries,
   arrangeAutoDeskDemoFields,
-} from "./auto-desk-search.js?v=deskSticky1";
-import { readBrandModelFilterValues } from "./auto-brand-model-picker.js?v=teherDesk1";
+} from "./auto-desk-search.js?v=bmPair1";
+import { readBrandModelFilterValues, mountAutoBrandModelPicker } from "./auto-brand-model-picker.js?v=bmPair1";
 
 const MOBILE_MQ = "(max-width: 900px)";
 const DESK_MQ = "(min-width: 901px)";
@@ -139,6 +139,11 @@ export function initHomeQuickSearch({ onSearch = () => {}, onDeskSortChange } = 
         }
       } else {
         arrangeAutoDeskDemoFields(form);
+        try {
+          await mountAutoBrandModelPicker(form);
+        } catch (pickerError) {
+          console.warn("Gyártmány/Modell picker:", pickerError);
+        }
       }
       const urlKivitel = new URLSearchParams(window.location.search).get("kivitel");
       if (urlKivitel) {

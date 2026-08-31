@@ -987,6 +987,25 @@
     position: sticky;
   }
 
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-pair {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-field .auto-desk-field__label {
+    font-size: 14px !important;
+    font-weight: 800 !important;
+    color: #000 !important;
+  }
+
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-trigger {
     appearance: none;
     display: flex;
@@ -994,22 +1013,29 @@
     justify-content: space-between;
     gap: 10px;
     width: 100%;
-    min-height: 40px;
-    padding: 0 12px;
-    border: 1px solid var(--ad-line);
-    border-radius: 6px;
-    background: var(--ad-elev);
-    color: var(--ad-text);
+    min-height: 44px;
+    padding: 0 14px;
+    border: 1px solid #d0d5dd;
+    border-radius: 10px;
+    background: #fff;
+    color: #000;
     font: inherit;
-    font-size: 14px;
+    font-size: 15px;
+    font-weight: 500;
     text-align: left;
     cursor: pointer;
+    box-shadow: none;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-trigger:hover {
+    border-color: #98a2b3;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-trigger__chev {
-    color: var(--ad-muted);
+    color: #98a2b3;
     font-size: 18px;
     line-height: 1;
+    flex: 0 0 auto;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-panel {

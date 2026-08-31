@@ -1,6 +1,6 @@
 /**
- * Autó asztali — Gyártmány/Típus multi-select (iOS SearchScreen mintájára).
- * Csak desktop auto: nested Márka → Típus panelek, kapcsolók, Kész.
+ * Autó asztali — Gyártmány + Modell (mobil app kinézet).
+ * Két külön sor: címke fölött, kerekített gomb ⌄-vel; panel a márka/típus választáshoz.
  */
 
 import { fetchVehicleCatalog } from "./vehicle-catalog-client.js?v=autoDesk16";
@@ -66,7 +66,6 @@ export async function mountAutoBrandModelPicker(form) {
   );
   const modelsByBrand = catalog.modellek || {};
 
-  // Előző selectek eltávolítása — multi hidden mezők
   brandField?.remove();
   modelField?.remove();
 
@@ -80,23 +79,33 @@ export async function mountAutoBrandModelPicker(form) {
   modelsInput.dataset.filterKey = "modellek";
   modelsInput.setAttribute("data-filter-key", "modellek");
 
-  const trigger = document.createElement("div");
-  trigger.className = "auto-desk-field auto-bm-trigger-wrap";
-  trigger.dataset.deskField = "gyartmany";
-  trigger.dataset.deskQuick = "1";
-  trigger.innerHTML = `
-    <span class="auto-desk-field__label">Gyártmány/Típus</span>
-    <button type="button" class="auto-bm-trigger" data-auto-bm-open>
-      <span data-auto-bm-summary>Mindegy</span>
-      <span class="auto-bm-trigger__chev" aria-hidden="true">›</span>
-    </button>
+  const wrap = document.createElement("div");
+  wrap.className = "auto-bm-pair";
+  wrap.dataset.deskQuick = "1";
+  wrap.innerHTML = `
+    <div class="auto-desk-field auto-bm-field" data-desk-field="gyartmany" data-desk-quick="1">
+      <span class="auto-desk-field__label">Gyártmány</span>
+      <button type="button" class="auto-bm-trigger" data-auto-bm-open="brand">
+        <span data-auto-bm-brand-summary>Mindegy</span>
+        <span class="auto-bm-trigger__chev" aria-hidden="true">⌄</span>
+      </button>
+    </div>
+    <div class="auto-desk-field auto-bm-field" data-desk-field="modell" data-desk-quick="1">
+      <span class="auto-desk-field__label">Modell</span>
+      <button type="button" class="auto-bm-trigger" data-auto-bm-open="model">
+        <span data-auto-bm-model-summary>Mindegy</span>
+        <span class="auto-bm-trigger__chev" aria-hidden="true">⌄</span>
+      </button>
+    </div>
   `;
-  trigger.appendChild(brandsInput);
-  trigger.appendChild(modelsInput);
-  alapHost.insertBefore(trigger, alapHost.firstChild);
+  wrap.appendChild(brandsInput);
+  wrap.appendChild(modelsInput);
+  alapHost.insertBefore(wrap, alapHost.firstChild);
 
-  const summaryEl = trigger.querySelector("[data-auto-bm-summary]");
-  const openBtn = trigger.querySelector("[data-auto-bm-open]");
+  const brandSummaryEl = wrap.querySelector("[data-auto-bm-brand-summary]");
+  const modelSummaryEl = wrap.querySelector("[data-auto-bm-model-summary]");
+  const openBrandBtn = wrap.querySelector('[data-auto-bm-open="brand"]');
+  const openModelBtn = wrap.querySelector('[data-auto-bm-open="model"]');
 
   /** @type {string[]} */
   let selectedBrands = [];
@@ -113,7 +122,7 @@ export async function mountAutoBrandModelPicker(form) {
     <div class="auto-bm-panel__chrome">
       <button type="button" class="auto-bm-panel__back" data-auto-bm-back aria-label="Vissza">‹</button>
       <div class="auto-bm-panel__titles">
-        <p class="auto-bm-panel__title" data-auto-bm-title>Márka</p>
+        <p class="auto-bm-panel__title" data-auto-bm-title>Gyártmány</p>
         <p class="auto-bm-panel__sub" data-auto-bm-sub hidden></p>
       </div>
       <button type="button" class="auto-bm-panel__done" data-auto-bm-done>Kész</button>
@@ -125,7 +134,6 @@ export async function mountAutoBrandModelPicker(form) {
     </div>
     <div class="auto-bm-panel__body" data-auto-bm-body></div>
   `;
-  // Sticky a bal szűrőoszlopban
   const hero = document.querySelector(".auto-search-hero") || form.closest(".auto-search-hero") || form;
   hero.appendChild(panel);
 
@@ -146,11 +154,8 @@ export async function mountAutoBrandModelPicker(form) {
   function syncHidden() {
     writeJsonList(brandsInput, selectedBrands);
     writeJsonList(modelsInput, selectedModels);
-    const brandLbl = labelList(selectedBrands, "márka");
-    const modelLbl = labelList(selectedModels, "modell");
-    if (!selectedBrands.length) summaryEl.textContent = "Mindegy";
-    else if (!selectedModels.length) summaryEl.textContent = brandLbl;
-    else summaryEl.textContent = `${brandLbl} · ${modelLbl}`;
+    if (brandSummaryEl) brandSummaryEl.textContent = labelList(selectedBrands, "márka");
+    if (modelSummaryEl) modelSummaryEl.textContent = labelList(selectedModels, "modell");
   }
 
   function modelLabelFor(brand) {
@@ -161,7 +166,7 @@ export async function mountAutoBrandModelPicker(form) {
 
   function renderBrandList() {
     modelBrand = null;
-    titleEl.textContent = "Márka";
+    titleEl.textContent = "Gyártmány";
     subEl.hidden = true;
     searchWrap.hidden = false;
     const q = brandQuery.trim().toLowerCase();
@@ -174,7 +179,7 @@ export async function mountAutoBrandModelPicker(form) {
         const on = selectedBrands.includes(brand);
         const modelRow = on
           ? `<button type="button" class="auto-bm-subrow" data-auto-bm-open-models="${escapeAttr(brand)}">
-              <span>${escapeHtml(brand)} típus választása</span>
+              <span>${escapeHtml(brand)} — modell</span>
               <span class="auto-bm-subrow__val">${escapeHtml(modelLabelFor(brand))}</span>
             </button>`
           : "";
@@ -190,7 +195,7 @@ export async function mountAutoBrandModelPicker(form) {
       .join("");
 
     bodyEl.innerHTML = `
-      <p class="auto-bm-hint">Kapcsolók — több márka is</p>
+      <p class="auto-bm-hint">Kapcsolók — több gyártmány is</p>
       <button type="button" class="auto-bm-clear" data-auto-bm-clear-brands>Összes kikapcsolása</button>
       <div class="auto-bm-group">${rows || `<p class="auto-bm-empty">Nincs találat.</p>`}</div>
     `;
@@ -198,9 +203,9 @@ export async function mountAutoBrandModelPicker(form) {
 
   function renderModelList(brand) {
     modelBrand = brand;
-    titleEl.textContent = brand;
+    titleEl.textContent = "Modell";
     subEl.hidden = false;
-    subEl.textContent = "Típus — több is bekapcsolható";
+    subEl.textContent = brand;
     searchWrap.hidden = true;
     const models = [...(modelsByBrand[brand] || [])].sort((a, b) =>
       a.localeCompare(b, "hu", { sensitivity: "base" })
@@ -219,21 +224,31 @@ export async function mountAutoBrandModelPicker(form) {
       .join("");
 
     bodyEl.innerHTML = `
-      <p class="auto-bm-hint">Kapcsolók — több típus is</p>
+      <p class="auto-bm-hint">Kapcsolók — több modell is</p>
       <button type="button" class="auto-bm-clear" data-auto-bm-clear-models>Összes kikapcsolása</button>
       <div class="auto-bm-group">${
-        rows || `<p class="auto-bm-empty">Nincs típus ehhez a gyártmányhoz.</p>`
+        rows || `<p class="auto-bm-empty">Nincs modell ehhez a gyártmányhoz.</p>`
       }</div>
     `;
   }
 
-  function openPanel() {
+  function openPanel(mode = "brand") {
     panel.hidden = false;
     panel.style.removeProperty("display");
     panel.classList.remove("is-closed");
     document.body.classList.add("auto-bm-open");
     brandQuery = "";
-    renderBrandList();
+    if (mode === "model") {
+      if (selectedBrands.length === 1) {
+        renderModelList(selectedBrands[0]);
+      } else if (selectedBrands.length > 1) {
+        renderBrandList();
+      } else {
+        renderBrandList();
+      }
+    } else {
+      renderBrandList();
+    }
   }
 
   function closePanel() {
@@ -248,26 +263,28 @@ export async function mountAutoBrandModelPicker(form) {
     syncHidden();
   }
 
-  openBtn?.addEventListener("click", () => {
-    if (!panel.hidden && !panel.classList.contains("is-closed")) {
+  function toggleOpen(mode) {
+    const open = !panel.hidden && !panel.classList.contains("is-closed");
+    if (open) {
       closePanel();
       return;
     }
-    openPanel();
-  });
+    openPanel(mode);
+  }
 
-  // Vissza: mindig zárja a márka menüt (kiválasztás megmarad)
+  openBrandBtn?.addEventListener("click", () => toggleOpen("brand"));
+  openModelBtn?.addEventListener("click", () => toggleOpen("model"));
+
   panel.querySelector("[data-auto-bm-back]")?.addEventListener("click", () => {
-    closePanel();
+    if (modelBrand) renderBrandList();
+    else closePanel();
   });
 
-  // Kész: típus panelről vissza a márkalistára; márkánál bezár
   panel.querySelector("[data-auto-bm-done]")?.addEventListener("click", () => {
     if (modelBrand) renderBrandList();
     else closePanel();
   });
 
-  // Keresés mező = bezárás (kiválasztástól függetlenül)
   const closeFromSearch = (event) => {
     event.preventDefault();
     event.stopPropagation();

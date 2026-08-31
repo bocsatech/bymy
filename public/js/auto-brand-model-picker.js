@@ -129,12 +129,15 @@ export async function mountAutoBrandModelPicker(form) {
     </div>
     <div class="auto-bm-panel__search" data-auto-bm-search-wrap>
       <input
-        type="search"
+        type="text"
         class="auto-bm-panel__search-input"
         data-auto-bm-search
         placeholder="Keresés…"
         autocomplete="off"
+        autocorrect="off"
+        autocapitalize="off"
         spellcheck="false"
+        inputmode="search"
         enterkeyhint="search"
       />
     </div>
@@ -179,14 +182,9 @@ export async function mountAutoBrandModelPicker(form) {
     return brands.filter((b) => b.toLocaleLowerCase("hu").startsWith(q));
   }
 
-  function renderBrandList() {
-    modelBrand = null;
-    titleEl.textContent = "Gyártmány";
-    subEl.hidden = true;
-    searchWrap.hidden = false;
-    if (searchInput) searchInput.value = brandQuery;
+  function renderBrandRowsOnly() {
     const filtered = brandsMatchingQuery(brandQuery);
-
+    const group = bodyEl.querySelector(".auto-bm-group");
     const rows = filtered
       .map((brand) => {
         const on = selectedBrands.includes(brand);
@@ -206,13 +204,31 @@ export async function mountAutoBrandModelPicker(form) {
         </div>`;
       })
       .join("");
+    const html = rows || `<p class="auto-bm-empty">Nincs találat.</p>`;
+    if (group) {
+      group.innerHTML = html;
+    } else {
+      bodyEl.innerHTML = `
+        <p class="auto-bm-hint">Kapcsolók — több gyártmány is</p>
+        <button type="button" class="auto-bm-clear" data-auto-bm-clear-brands>Összes kikapcsolása</button>
+        <div class="auto-bm-group">${html}</div>
+      `;
+    }
+    bodyEl.scrollTop = 0;
+  }
 
+  function renderBrandList() {
+    modelBrand = null;
+    titleEl.textContent = "Gyártmány";
+    subEl.hidden = true;
+    searchWrap.hidden = false;
+    if (searchInput && searchInput.value !== brandQuery) searchInput.value = brandQuery;
     bodyEl.innerHTML = `
       <p class="auto-bm-hint">Kapcsolók — több gyártmány is</p>
       <button type="button" class="auto-bm-clear" data-auto-bm-clear-brands>Összes kikapcsolása</button>
-      <div class="auto-bm-group">${rows || `<p class="auto-bm-empty">Nincs találat.</p>`}</div>
+      <div class="auto-bm-group"></div>
     `;
-    bodyEl.scrollTop = 0;
+    renderBrandRowsOnly();
   }
 
   function renderModelList(brand) {
@@ -309,31 +325,35 @@ export async function mountAutoBrandModelPicker(form) {
     } else closePanel();
   });
 
-  searchInput?.addEventListener("input", () => {
-    brandQuery = searchInput.value || "";
-    if (modelBrand) return;
-    renderBrandList();
-    // Kurzor a mező végén maradjon újrarajzolás után
-    const pos = searchInput.value.length;
-    searchInput.focus();
-    try {
-      searchInput.setSelectionRange(pos, pos);
-    } catch {
-      /* ignore */
-    }
+  searchInput?.addEventListener("mousedown", (event) => {
+    event.stopPropagation();
   });
-
+  searchInput?.addEventListener("click", (event) => {
+    event.stopPropagation();
+    searchInput.focus();
+  });
   searchInput?.addEventListener("keydown", (event) => {
+    event.stopPropagation();
     if (event.key === "Escape") {
       event.preventDefault();
       if (brandQuery) {
         brandQuery = "";
         searchInput.value = "";
-        renderBrandList();
+        renderBrandRowsOnly();
       } else {
         closePanel();
       }
+      return;
     }
+    // Enter ne küldje el a kereső formot
+    if (event.key === "Enter") {
+      event.preventDefault();
+    }
+  });
+  searchInput?.addEventListener("input", () => {
+    brandQuery = searchInput.value || "";
+    if (modelBrand) return;
+    renderBrandRowsOnly();
   });
 
   bodyEl.addEventListener("change", (event) => {

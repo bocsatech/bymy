@@ -1099,6 +1099,8 @@
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-panel__search {
     padding: 10px 12px 0;
+    position: relative;
+    z-index: 5;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-panel__search-input {
@@ -1114,6 +1116,9 @@
     font-size: 15px;
     text-align: left;
     cursor: text;
+    pointer-events: auto !important;
+    -webkit-user-select: text;
+    user-select: text;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-panel__search-input::placeholder {

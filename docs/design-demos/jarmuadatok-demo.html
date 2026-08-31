@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bymy — Járműadatok megjelenítés (demó)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #000;
+    --muted: #444;
+    --line: #e4e8ee;
+    --bg: #eef1f5;
+    --paper: #fff;
+    --gold: #f0c52c;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: Manrope, system-ui, sans-serif;
+  }
+  .top {
+    height: 56px;
+    background: #172a3a;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 max(16px, 4vw);
+  }
+  .logo { font-weight: 800; letter-spacing: 1.6px; color: var(--gold); }
+  .top span { font-size: 13px; color: #c9d4de; }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 28px 18px 48px; }
+  h1 { margin: 0 0 6px; font-size: 1.45rem; }
+  .lead { margin: 0 0 22px; color: #445; font-size: 0.92rem; line-height: 1.45; max-width: 62ch; }
+  .grid { display: grid; gap: 18px; }
+  @media (min-width: 900px) {
+    .grid { grid-template-columns: 1fr 1fr; }
+  }
+  .card {
+    background: var(--paper);
+    border: 1px solid #d8dee6;
+    border-radius: 10px;
+    padding: 1rem 1.1rem 1.15rem;
+    box-shadow: 0 6px 18px #20304010;
+  }
+  .card.bad { border-color: #e8b4b0; background: #fffaf9; }
+  .tag {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 0.22rem 0.5rem;
+    border-radius: 4px;
+    margin-bottom: 0.65rem;
+  }
+  .tag.bad { background: #fde8e6; color: #8a1f18; }
+  .tag.ok { background: #e8f6ec; color: #166534; }
+  .card h2 { margin: 0 0 0.85rem; font-size: 1.05rem; }
+  .note { margin: 0.85rem 0 0; font-size: 0.8rem; color: #556; line-height: 1.4; }
+
+  /* —— A: jelenlegi (problémás) —— */
+  .a-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.35rem 2rem;
+  }
+  .a-kv {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.75rem;
+    padding: 0.38rem 0;
+    border-bottom: 1px solid #eef1f5;
+    font-size: 0.92rem;
+  }
+  .a-kv dt { margin: 0; color: #667085; }
+  .a-kv dd { margin: 0; font-weight: 700; color: #1565c0; text-align: right; }
+  .a-h3 { margin: 1rem 0 0.55rem; font-size: 1.02rem; font-weight: 800; color: #101828; }
+
+  /* —— B: címke fölött, érték alatt (Willhaben-szerű kompakt) —— */
+  .b-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.85rem 1.5rem;
+  }
+  .b-kv { margin: 0; padding: 0; border: 0; }
+  .b-kv dt {
+    margin: 0 0 0.12rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #000;
+    opacity: 0.55;
+  }
+  .b-kv dd {
+    margin: 0;
+    font-size: 0.98rem;
+    font-weight: 800;
+    color: #000;
+    text-align: left;
+  }
+  .b-h3 {
+    grid-column: 1 / -1;
+    margin: 0.35rem 0 0;
+    padding-top: 0.65rem;
+    border-top: 1px solid var(--line);
+    font-size: 1.02rem;
+    font-weight: 800;
+  }
+
+  /* —— C: egy sor, kettőspont, balra zárt —— */
+  .c-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.45rem 1.75rem;
+  }
+  .c-kv {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.35rem;
+    margin: 0;
+    padding: 0.32rem 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 0.92rem;
+  }
+  .c-kv dt {
+    margin: 0;
+    color: #000;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .c-kv dt::after { content: ":"; }
+  .c-kv dd {
+    margin: 0;
+    font-weight: 800;
+    color: #000;
+  }
+  .c-h3 {
+    grid-column: 1 / -1;
+    margin: 0.5rem 0 0.15rem;
+    font-size: 1.02rem;
+    font-weight: 800;
+  }
+
+  /* —— D: egy oszlop, logikai sorrend —— */
+  .d-list { margin: 0; padding: 0; list-style: none; }
+  .d-list li {
+    display: grid;
+    grid-template-columns: minmax(9.5rem, 38%) 1fr;
+    gap: 0.75rem;
+    padding: 0.42rem 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 0.92rem;
+  }
+  .d-list .lab { color: #000; font-weight: 600; }
+  .d-list .val { color: #000; font-weight: 800; }
+  .d-h3 { margin: 1rem 0 0.35rem; font-size: 1.02rem; font-weight: 800; }
+
+  /* —— E: ajánlott — 2 oszlop, stack, fekete, szoros —— */
+  .e-block + .e-block { margin-top: 1rem; }
+  .e-h3 { margin: 0 0 0.65rem; font-size: 1.05rem; font-weight: 800; }
+  .e-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 2rem;
+    row-gap: 0.7rem;
+  }
+  .e-kv { margin: 0; }
+  .e-kv dt {
+    margin: 0 0 0.1rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #000;
+  }
+  .e-kv dd {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 800;
+    color: #000;
+    text-align: left;
+  }
+  .pick {
+    margin-top: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: var(--gold);
+    color: #000;
+    border: 0;
+    border-radius: 8px;
+    font: 800 0.85rem Manrope, sans-serif;
+    padding: 0.45rem 0.75rem;
+  }
+  @media (max-width: 560px) {
+    .a-grid, .b-grid, .c-grid, .e-grid { grid-template-columns: 1fr; }
+    .d-list li { grid-template-columns: 1fr; gap: 0.15rem; }
+  }
+</style>
+</head>
+<body>
+<header class="top">
+  <b class="logo">BYMY</b>
+  <span>Járműadatok — elrendezési demók</span>
+</header>
+<main class="wrap">
+  <h1>Járműadatok megjelenítés</h1>
+  <p class="lead">
+    Csak a képen szereplő adatok. A jelenlegi nézetben a címke és az érték szétcsúszik
+    (nagy üres rés), és a 2 oszlopos rács olvasási sorrendje is zavaros.
+    Alább a hibás állapot + 3 javított változat.
+  </p>
+
+  <div class="grid">
+    <!-- A: current broken -->
+    <article class="card bad">
+      <span class="tag bad">A — jelenlegi (hiba)</span>
+      <h2>Szétcsúszott + kék értékek</h2>
+      <div class="a-grid">
+        <div class="a-kv"><dt>Sebességváltó</dt><dd>Manuális (6 seb.)</dd></div>
+        <div class="a-kv"><dt>Futásteljesítmény</dt><dd>167 543 km</dd></div>
+        <div class="a-kv"><dt>Üzemanyag</dt><dd>Benzin</dd></div>
+        <div class="a-kv"><dt>Hajtás</dt><dd>Első kerék</dd></div>
+      </div>
+      <h3 class="a-h3">Karosszéria és technika</h3>
+      <div class="a-grid">
+        <div class="a-kv"><dt>Állapot</dt><dd>Normál</dd></div>
+        <div class="a-kv"><dt>Jármű típusa</dt><dd>Egyterű</dd></div>
+        <div class="a-kv"><dt>Hengerűrtartalom</dt><dd>1400 cm³</dd></div>
+        <div class="a-kv"><dt>Ajtók száma</dt><dd>5</dd></div>
+        <div class="a-kv"><dt>Műszaki érvényesség</dt><dd>08.2027</dd></div>
+      </div>
+      <p class="note">Címke balra, érték jobbra a széles oszlopban → nagy rés. Értékek kékek.</p>
+    </article>
+
+    <!-- E: recommended -->
+    <article class="card">
+      <span class="tag ok">E — ajánlott</span>
+      <h2>Címke fölött, érték alatt, fekete</h2>
+      <div class="e-block">
+        <h3 class="e-h3">Alapadatok</h3>
+        <div class="e-grid">
+          <div class="e-kv"><dt>Sebességváltó</dt><dd>Manuális (6 seb.)</dd></div>
+          <div class="e-kv"><dt>Futásteljesítmény</dt><dd>167 543 km</dd></div>
+          <div class="e-kv"><dt>Üzemanyag</dt><dd>Benzin</dd></div>
+          <div class="e-kv"><dt>Hajtás</dt><dd>Első kerék</dd></div>
+        </div>
+      </div>
+      <div class="e-block">
+        <h3 class="e-h3">Karosszéria és technika</h3>
+        <div class="e-grid">
+          <div class="e-kv"><dt>Állapot</dt><dd>Normál</dd></div>
+          <div class="e-kv"><dt>Jármű típusa</dt><dd>Egyterű</dd></div>
+          <div class="e-kv"><dt>Hengerűrtartalom</dt><dd>1400 cm³</dd></div>
+          <div class="e-kv"><dt>Ajtók száma</dt><dd>5</dd></div>
+          <div class="e-kv"><dt>Műszaki érvényesség</dt><dd>08.2027</dd></div>
+        </div>
+      </div>
+      <p class="note">Nincs szétcsúszás: az érték mindig a címke alatt, balra zárt. Sorrend: soronként bal→jobb.</p>
+      <span class="pick">★ Ajánlott választás</span>
+    </article>
+
+    <!-- C: inline colon -->
+    <article class="card">
+      <span class="tag ok">C — egy sorban</span>
+      <h2>Címke: érték, balra zárt</h2>
+      <div class="c-grid">
+        <div class="c-kv"><dt>Sebességváltó</dt><dd>Manuális (6 seb.)</dd></div>
+        <div class="c-kv"><dt>Futásteljesítmény</dt><dd>167 543 km</dd></div>
+        <div class="c-kv"><dt>Üzemanyag</dt><dd>Benzin</dd></div>
+        <div class="c-kv"><dt>Hajtás</dt><dd>Első kerék</dd></div>
+        <h3 class="c-h3">Karosszéria és technika</h3>
+        <div class="c-kv"><dt>Állapot</dt><dd>Normál</dd></div>
+        <div class="c-kv"><dt>Jármű típusa</dt><dd>Egyterű</dd></div>
+        <div class="c-kv"><dt>Hengerűrtartalom</dt><dd>1400 cm³</dd></div>
+        <div class="c-kv"><dt>Ajtók száma</dt><dd>5</dd></div>
+        <div class="c-kv"><dt>Műszaki érvényesség</dt><dd>08.2027</dd></div>
+      </div>
+      <p class="note">Közel marad a páros; nincs üres rés a sor közepén.</p>
+    </article>
+
+    <!-- D: single column logical order -->
+    <article class="card">
+      <span class="tag ok">D — egy oszlop</span>
+      <h2>Fix címkeszélesség, felülről lefelé</h2>
+      <h3 class="d-h3">Alapadatok</h3>
+      <ul class="d-list">
+        <li><span class="lab">Sebességváltó</span><span class="val">Manuális (6 seb.)</span></li>
+        <li><span class="lab">Futásteljesítmény</span><span class="val">167 543 km</span></li>
+        <li><span class="lab">Üzemanyag</span><span class="val">Benzin</span></li>
+        <li><span class="lab">Hajtás</span><span class="val">Első kerék</span></li>
+      </ul>
+      <h3 class="d-h3">Karosszéria és technika</h3>
+      <ul class="d-list">
+        <li><span class="lab">Állapot</span><span class="val">Normál</span></li>
+        <li><span class="lab">Jármű típusa</span><span class="val">Egyterű</span></li>
+        <li><span class="lab">Hengerűrtartalom</span><span class="val">1400 cm³</span></li>
+        <li><span class="lab">Ajtók száma</span><span class="val">5</span></li>
+        <li><span class="lab">Műszaki érvényesség</span><span class="val">08.2027</span></li>
+      </ul>
+      <p class="note">Egyértelmű olvasási sorrend; mobilon is stabil.</p>
+    </article>
+  </div>
+</main>
+</body>
+</html>

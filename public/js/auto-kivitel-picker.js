@@ -63,15 +63,15 @@ function escapeAttr(value) {
 export async function mountAutoKivitelPicker(form) {
   if (!form || !isAutoDesk() || form.dataset.kivitelPicker === "1") return;
 
-  const host =
-    form.querySelector(".auto-desk-fields[data-desk-alap]") ||
-    form.querySelector(".auto-desk-fields[data-desk-muszaki]");
-  if (!host) return;
-
-  const field = host.querySelector('[data-desk-field="kivitel"]');
+  const field = form.querySelector('[data-desk-field="kivitel"]');
   if (!field) return;
 
-  // Ha már más hostban is van (alap vs műszaki), az elsőt cseréljük
+  const host =
+    field.closest(".auto-desk-fields") ||
+    form.querySelector(".auto-desk-fields[data-desk-alap]");
+  if (!host) return;
+
+  const deskQuick = field.dataset.deskQuick || "0";
   field.remove();
 
   const options = optionsForPage();
@@ -86,7 +86,7 @@ export async function mountAutoKivitelPicker(form) {
   const wrap = document.createElement("div");
   wrap.className = "auto-desk-field auto-kivitel-field";
   wrap.dataset.deskField = "kivitel";
-  wrap.dataset.deskQuick = field.dataset.deskQuick || "0";
+  wrap.dataset.deskQuick = deskQuick;
   wrap.innerHTML = `
     <span class="auto-desk-field__label">Kivitel</span>
     <button type="button" class="auto-bm-trigger" data-auto-kivitel-open>

@@ -6,8 +6,8 @@ import {
   populateFilterOptions,
   initHomeSearchSidebar,
   initHomeFilterCatalog,
-} from "./home-search-filter.js?v=yearMax1";
-import { initHomeQuickSearch } from "./home-quicksearch.js?v=yearMax1";
+} from "./home-search-filter.js?v=allapotPick1";
+import { initHomeQuickSearch } from "./home-quicksearch.js?v=allapotPick1";
 import { matchDetailedSearch, hasActiveDetailedSearch } from "./auto-detailed-search.js?v=autoDesk16";
 import { updateAutoDeskResultCount } from "./auto-desk-search.js?v=teherDesk1";
 import {
@@ -288,6 +288,7 @@ function hasActiveSidebarFilters(filters) {
       filters.uzemanyagQuick ||
       filters.uzemanyagok?.length ||
       filters.allapot ||
+      filters.allapotok?.length ||
       filters.sebessegvalto ||
       filters.hajtas ||
       filters.tipus ||

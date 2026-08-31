@@ -2,21 +2,22 @@
  * Gyorskereső az autó hero panelen — elrendezés: GET /api/level1/form-layout?category=szemelyauto-search
  */
 
-import { applyAutoSearchLayout, readLayoutFilterValues } from "./auto-search-layout.js?v=yearMax1";
+import { applyAutoSearchLayout, readLayoutFilterValues } from "./auto-search-layout.js?v=allapotPick1";
 import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums } from "./auto-search-drums.js?v=deskGap2";
 import {
   mountDetailedSearch,
   readDetailedSearchValues,
   resetDetailedSearch,
 } from "./auto-detailed-search.js?v=autoDesk16";
-import { readBrandModelFilterValues, mountAutoBrandModelPicker } from "./auto-brand-model-picker.js?v=yearMax1";
-import { readFuelFilterValues, mountAutoFuelPicker } from "./auto-fuel-picker.js?v=yearMax1";
-import { readKivitelFilterValues, mountAutoKivitelPicker } from "./auto-kivitel-picker.js?v=yearMax1";
+import { readBrandModelFilterValues, mountAutoBrandModelPicker } from "./auto-brand-model-picker.js?v=allapotPick1";
+import { readFuelFilterValues, mountAutoFuelPicker } from "./auto-fuel-picker.js?v=allapotPick1";
+import { readKivitelFilterValues, mountAutoKivitelPicker } from "./auto-kivitel-picker.js?v=allapotPick1";
+import { readAllapotFilterValues, mountAutoAllapotPicker } from "./auto-allapot-picker.js?v=allapotPick1";
 import {
   initAutoDeskSearch,
   updateAutoDeskAccSummaries,
   arrangeAutoDeskDemoFields,
-} from "./auto-desk-search.js?v=yearMax1";
+} from "./auto-desk-search.js?v=allapotPick1";
 
 const MOBILE_MQ = "(max-width: 900px)";
 const DESK_MQ = "(min-width: 901px)";
@@ -39,6 +40,7 @@ export function initHomeQuickSearch({ onSearch = () => {}, onDeskSortChange } = 
     const brandModel = readBrandModelFilterValues(form);
     const fuel = readFuelFilterValues(form);
     const kivitel = readKivitelFilterValues(form);
+    const allapot = readAllapotFilterValues(form);
     if (form.dataset.brandModelPicker === "1") {
       delete base.gyartmany;
       delete base.modell;
@@ -52,8 +54,11 @@ export function initHomeQuickSearch({ onSearch = () => {}, onDeskSortChange } = 
     if (form.dataset.kivitelPicker === "1") {
       delete base.kivitel;
     }
+    if (form.dataset.allapotPicker === "1") {
+      delete base.allapot;
+    }
     const detailed = readDetailedSearchValues(form);
-    return { ...base, ...brandModel, ...fuel, ...kivitel, detailed };
+    return { ...base, ...brandModel, ...fuel, ...kivitel, ...allapot, detailed };
   }
 
   function syncDetailedButton(moreOpen) {
@@ -164,6 +169,11 @@ export function initHomeQuickSearch({ onSearch = () => {}, onDeskSortChange } = 
           await mountAutoKivitelPicker(form);
         } catch (kivitelError) {
           console.warn("Kivitel picker:", kivitelError);
+        }
+        try {
+          await mountAutoAllapotPicker(form);
+        } catch (allapotError) {
+          console.warn("Állapot picker:", allapotError);
         }
       }
       const urlKivitel = new URLSearchParams(window.location.search).get("kivitel");

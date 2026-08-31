@@ -1,7 +1,8 @@
-import { UZEMANYAG_CATEGORIES, EQUIPMENT_SECTIONS, KLIM_OPTIONS, KISTEHER_EQUIPMENT_ITEMS } from "./equipment-data.js";
+import { UZEMANYAG_CATEGORIES, ALLAPOT_CATEGORIES, EQUIPMENT_SECTIONS, KLIM_OPTIONS, KISTEHER_EQUIPMENT_ITEMS } from "./equipment-data.js";
 import { EGYEB_INFO_OPTIONS } from "./egyeb-info-data.js";
 import { initVehicleCatalogSelects } from "./vehicle-catalog-client.js";
 import { compressListingPhoto, MAX_LISTING_PHOTOS } from "./listing-photo-compress.js?v=myAds2";
+import { uploadImage } from "./upload-image.js?v=supabaseUpload1";
 import { applyListingAddressFromProfileSync } from "./ad-location-profile.js?v=locProf3";
 import { syncIngatlanFormVisibility } from "./ingatlan-form-fields.js?v=immoTelekArea1";
 
@@ -46,6 +47,7 @@ export function createAdForm(options = {}) {
   const equipmentRoot = document.getElementById("equipment-sections");
   const egyebInfoRoot = document.getElementById("egyeb-info-sections");
   const uzemanyag = document.getElementById("uzemanyag");
+  const allapot = document.getElementById("allapot");
   const fuelMain = document.getElementById("fuel-main");
   const fuelSubpanels = document.getElementById("fuel-subpanels");
   const fuelSelected = document.getElementById("fuel-selected");
@@ -166,6 +168,40 @@ function renderFuelDropdown() {
   }
 
   if (current) uzemanyag.value = current;
+}
+
+function renderAllapotDropdown() {
+  if (!allapot || allapot.tagName !== "SELECT") return;
+
+  const current = String(allapot.value || "").trim();
+  allapot.innerHTML = "";
+
+  const empty = document.createElement("option");
+  empty.value = "";
+  empty.textContent = "Válasszon";
+  allapot.appendChild(empty);
+
+  for (const category of ALLAPOT_CATEGORIES) {
+    if (category.children?.length) {
+      const group = document.createElement("optgroup");
+      group.label = category.label;
+      for (const child of category.children) {
+        const option = document.createElement("option");
+        option.value = child.value;
+        option.textContent = child.label;
+        group.appendChild(option);
+      }
+      allapot.appendChild(group);
+      continue;
+    }
+    if (!category.value) continue;
+    const option = document.createElement("option");
+    option.value = category.value;
+    option.textContent = category.label;
+    allapot.appendChild(option);
+  }
+
+  if (current) allapot.value = current;
 }
 
 function renderFuelSelector() {
@@ -631,8 +667,7 @@ async function tryGoToStep(step) {
     try {
       await options.onStepPersist(collectFormData(), { fromStep: currentStep, toStep: step });
     } catch (error) {
-      alert(error?.message ?? "Az automatikus mentés sikertelen.");
-      return false;
+      console.warn("Lépés mentése sikertelen, a navigáció továbbra is engedélyezett:", error);
     }
   }
   if (currentStep === TOTAL_STEPS) resetSuccess();
@@ -1195,8 +1230,27 @@ async function uploadPendingPhotos() {
     item.error = "";
     renderPhotoPreview();
     try {
-      item.dataUrl = await compressListingPhoto(item.file);
-      item.status = "ready";
+      try {
+        const uploaded = await uploadImage({
+          file: item.file,
+          kind: "listing",
+          entityType: "listing",
+          folder: "listings",
+          fileName: item.file.name,
+          onProgress: () => {},
+        });
+        item.url = uploaded?.url || uploaded?.publicUrl || null;
+        item.dataUrl = null;
+        item.status = item.url ? "ready" : "error";
+        item.error = item.url ? "" : "A feltöltés sikertelen.";
+      } catch (uploadError) {
+        const localDataUrl = await compressListingPhoto(item.file);
+        item.dataUrl = localDataUrl;
+        item.url = null;
+        item.status = "ready";
+        item.error = "";
+        console.warn("Supabase upload fallback (local compression):", uploadError?.message ?? uploadError);
+      }
     } catch (error) {
       item.status = "error";
       item.error = error?.message ?? "A feltöltés sikertelen.";
@@ -1406,6 +1460,7 @@ modell?.addEventListener("change", () => {
   updateTitle();
 });
 renderFuelDropdown();
+renderAllapotDropdown();
 renderFuelSelector();
 renderKlimaOptions();
 renderEquipment();

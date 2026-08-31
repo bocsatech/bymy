@@ -5,6 +5,7 @@
 
 import { initVehicleCatalogSelects, fillSelect } from "./vehicle-catalog-client.js";
 import { KIVITEL_OPTIONS } from "./kivitel-options.js?v=kivitel1";
+import { flattenAllapotOptions } from "./equipment-data.js";
 
 function searchLayoutCategory() {
   return document.body?.getAttribute("data-site-page") === "teherauto"
@@ -65,7 +66,7 @@ export const KERESESI_KORZET_OPTIONS = Array.from({ length: 20 }, (_, i) => {
 });
 
 const SELECT_OPTIONS = {
-  allapot: ["Normál", "Újszerű", "Sérülésmentes", "Sérült"],
+  allapot: flattenAllapotOptions(),
   kivitel: [...KIVITEL_OPTIONS],
   keresesi_korzet: KERESESI_KORZET_OPTIONS,
   ajtok: ["2", "3", "4", "5"],

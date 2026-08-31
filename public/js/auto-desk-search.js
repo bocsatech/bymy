@@ -18,6 +18,7 @@ const DESK_ALAP_FALLBACK = [
   { field: "vetelar", label: "Vételár", range: true },
   { field: "uzemanyag", label: "Üzemanyag" },
   { field: "kivitel", label: "Kivitel" },
+  { field: "allapot", label: "Állapot" },
 ];
 
 function deskOrderFromAdminLayout(mainHost) {
@@ -194,7 +195,7 @@ export function arrangeAutoDeskDemoFields(form = document.getElementById("home-q
   // Admin Gyorskereső (1. lépés) — applyAutoSearchLayout tölti (dataset.deskQuickKeys)
   const quickKeys = new Set((form.dataset.deskQuickKeys || "").split(",").filter(Boolean));
   if (!quickKeys.size) {
-    ["gyartmany", "modell", "uzemanyag", "gyartasi_ev", "vetelar"].forEach((k) => quickKeys.add(k));
+    ["gyartmany", "modell", "uzemanyag", "gyartasi_ev", "vetelar", "kivitel", "allapot"].forEach((k) => quickKeys.add(k));
     form.dataset.deskQuickKeys = [...quickKeys].join(",");
   }
 

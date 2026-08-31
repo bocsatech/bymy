@@ -34,6 +34,58 @@ export const UZEMANYAG_CATEGORIES = [
   { id: "gaz", label: "Gáz", value: "Gáz" },
 ];
 
+/** Autó / teher — állapot (kereső + feladás). */
+export const ALLAPOT_CATEGORIES = [
+  {
+    id: "normal",
+    label: "Normál",
+    children: [
+      { label: "Normál", value: "Normál" },
+      { label: "Kitűnő", value: "Kitűnő" },
+      { label: "Megkímélt", value: "Megkímélt" },
+      { label: "Újszerű", value: "Újszerű" },
+      { label: "Sérülésmentes", value: "Sérülésmentes" },
+    ],
+  },
+  {
+    id: "serult",
+    label: "Sérült",
+    children: [
+      { label: "Sérült", value: "Sérült" },
+      { label: "Enyhén sérült", value: "Enyhén sérült" },
+      { label: "Eleje sérült", value: "Eleje sérült" },
+      { label: "Hátulja sérült", value: "Hátulja sérült" },
+      { label: "Baloldala sérült", value: "Baloldala sérült" },
+      { label: "Jobboldala sérült", value: "Jobboldala sérült" },
+    ],
+  },
+  { id: "hianyos", label: "Hiányos", value: "Hiányos" },
+  {
+    id: "fodarab",
+    label: "Fődarab hibás",
+    children: [
+      { label: "Fődarab hibás", value: "Fődarab hibás" },
+      { label: "Motorhibás", value: "Motorhibás" },
+      { label: "Váltóhibás", value: "Váltóhibás" },
+      { label: "Elektronika hibás", value: "Elektronika hibás" },
+      { label: "Fékhibás", value: "Fékhibás" },
+      { label: "Futómű hibás", value: "Futómű hibás" },
+    ],
+  },
+];
+
+export function flattenAllapotOptions() {
+  const out = [];
+  for (const cat of ALLAPOT_CATEGORIES) {
+    if (cat.children?.length) {
+      for (const child of cat.children) out.push(child.value);
+    } else if (cat.value) {
+      out.push(cat.value);
+    }
+  }
+  return out;
+}
+
 export const EQUIPMENT_SECTIONS = {
   muszaki: {
     title: "Műszaki felszereltség",

@@ -503,9 +503,14 @@
 }
 
 .hd-btn--ghost {
-  background: #fff;
+  background: #f0c52c;
   color: #000;
-  border: 1.5px solid #1565c0;
+  border: 1.5px solid #f0c52c;
+}
+
+.hd-btn--ghost:hover {
+  background: #e8bb20;
+  border-color: #e8bb20;
 }
 
 .hd-web {

@@ -171,15 +171,18 @@ function mountDeskField(host, item, form, { quickKeys, used }) {
   if (item.range) {
     const range = document.createElement("div");
     range.className = "auto-desk-range";
-    const legacyPair = findLegacyRangeSelects(form, item.field);
     const wrap = findFieldWrap(form, item.field);
-    let pair = legacyPair;
-    if (!pair && wrap) {
+    let pair = null;
+    if (wrap) {
       ensureDeskSelectPlaceholders(wrap, true);
-      const selects = [...wrap.querySelectorAll("select")];
+      const selects = wrap.matches?.("select")
+        ? [wrap]
+        : [...wrap.querySelectorAll("select")];
       const inputs = [...wrap.querySelectorAll("input.home-qs-control, input[type='number']")];
-      pair = selects.length >= 2 ? selects.slice(0, 2) : inputs.length >= 2 ? inputs.slice(0, 2) : null;
+      if (selects.length >= 2) pair = selects.slice(0, 2);
+      else if (inputs.length >= 2) pair = inputs.slice(0, 2);
     }
+    if (!pair) pair = findLegacyRangeSelects(form, item.field);
     if (pair?.length >= 2) {
       pair.forEach((el) => {
         if (!el.querySelector("option")) {
@@ -187,10 +190,15 @@ function mountDeskField(host, item, form, { quickKeys, used }) {
           opt.value = "";
           el.appendChild(opt);
         }
+        const first = el.querySelector("option");
+        if (first && !first.value) {
+          first.textContent = pair.indexOf(el) === 0 ? "-tól" : "-ig";
+        }
         range.appendChild(el);
       });
       field.appendChild(range);
-      wrap?.remove?.();
+      // Ne töröljük a wrap-et, ha az maga az egyik select (különben eltűnik a -tól)
+      if (wrap && !pair.includes(wrap)) wrap.remove();
       used.add(item.field);
       host.appendChild(field);
       return true;

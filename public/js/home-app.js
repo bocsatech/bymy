@@ -7,9 +7,9 @@ import {
   initHomeSearchSidebar,
   initHomeFilterCatalog,
 } from "./home-search-filter.js?v=fogyNum1";
-import { initHomeQuickSearch } from "./home-quicksearch.js?v=deskRestore1";
+import { initHomeQuickSearch } from "./home-quicksearch.js?v=deskRestore2";
 import { matchDetailedSearch, hasActiveDetailedSearch } from "./auto-detailed-search.js?v=autoDesk16";
-import { updateAutoDeskResultCount } from "./auto-desk-search.js?v=deskRestore1";
+import { updateAutoDeskResultCount } from "./auto-desk-search.js?v=deskRestore2";
 import {
   emptyIngatlanFilters,
   filterListingsByIngatlan,

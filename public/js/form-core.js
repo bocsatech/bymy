@@ -6,6 +6,10 @@ import { compressListingPhoto, MAX_LISTING_PHOTOS } from "./listing-photo-compre
 import { uploadImage } from "./upload-image.js?v=supabaseUpload1";
 import { applyListingAddressFromProfileSync } from "./ad-location-profile.js?v=locProf3";
 import { syncIngatlanFormVisibility } from "./ingatlan-form-fields.js?v=immoTelekArea1";
+import {
+  DEFAULT_PHOTO_OVERLAY_ID,
+  renderListingPhotoOverlay,
+} from "./listing-photo-overlay.js?v=photoOverlay1";
 
 export function createAdForm(options = {}) {
   const mode = options.mode ?? "wizard";
@@ -28,6 +32,9 @@ export function createAdForm(options = {}) {
   const photoUploadBtn = document.getElementById("photo-upload-btn");
   const photoUploadProgress = document.getElementById("photo-upload-progress");
   const photoUploadLabel = document.getElementById("photo-upload-label");
+  const photoOverlayApplyBtn = document.getElementById("photo-overlay-apply");
+  const photoOverlayClearBtn = document.getElementById("photo-overlay-clear");
+  const photoOverlayHint = document.getElementById("photo-overlay-hint");
   const summaryText = document.getElementById("summary-text");
   const newAdBtn = document.getElementById("new-ad-btn");
   const adPanel = document.getElementById("ad-panel");
@@ -1118,10 +1125,13 @@ function loadExistingPhotos(data) {
     id: `url-${++photoSeq}`,
     file: null,
     previewUrl: url,
+    basePreviewUrl: url,
     dataUrl: null,
     url,
     status: "ready",
     error: "",
+    overlayTemplateId: null,
+    overlayDataUrl: null,
   }));
   renderPhotoPreview();
 }
@@ -1143,10 +1153,13 @@ function applyPhotoUrls(urls) {
       id: `url-${++photoSeq}`,
       file: null,
       previewUrl: url,
+      basePreviewUrl: url,
       dataUrl: null,
       url,
       status: "ready",
       error: "",
+      overlayTemplateId: null,
+      overlayDataUrl: null,
     });
   });
   renderPhotoPreview();
@@ -1165,11 +1178,16 @@ function addPhotoFiles(files) {
       id: `file-${++photoSeq}`,
       file,
       previewUrl: URL.createObjectURL(file),
+      basePreviewUrl: null,
       dataUrl: null,
       url: null,
       status: "pending",
       error: "",
+      overlayTemplateId: null,
+      overlayDataUrl: null,
     });
+    const last = photoItems[photoItems.length - 1];
+    last.basePreviewUrl = last.previewUrl;
   }
   if (incoming.length > room) {
     alert("Legfeljebb 12 kép tölthető fel. A többletet nem vettük fel.");
@@ -1209,6 +1227,8 @@ function updatePhotoStatus() {
   const ready = photoItems.filter((item) => item.status === "ready").length;
   const pending = photoItems.filter((item) => item.status === "pending" || item.status === "error").length;
   const uploading = photoItems.filter((item) => item.status === "uploading").length;
+  const first = photoItems[0];
+  const hasOverlay = Boolean(first?.overlayTemplateId);
   if (photoUploadProgress) {
     photoUploadProgress.max = Math.max(total, 1);
     photoUploadProgress.value = ready;
@@ -1216,6 +1236,17 @@ function updatePhotoStatus() {
   if (photoUploadBtn) {
     photoUploadBtn.disabled = photoBusy || pending === 0;
     photoUploadBtn.textContent = photoBusy ? "Feltöltés…" : "Feltöltés";
+  }
+  if (photoOverlayApplyBtn) {
+    photoOverlayApplyBtn.disabled = photoBusy || !first || first.status === "uploading";
+  }
+  if (photoOverlayClearBtn) {
+    photoOverlayClearBtn.disabled = photoBusy || !hasOverlay;
+  }
+  if (photoOverlayHint) {
+    photoOverlayHint.textContent = hasOverlay
+      ? "Sablon aktív a főképen. „Sablon törlése” visszaállítja az eredeti fotót."
+      : "Sablon: az első képre (főkép) kerül. Később több sablon közül lehet választani.";
   }
   if (photoUploadLabel) {
     if (!total) {
@@ -1257,6 +1288,12 @@ function renderPhotoPreview() {
       badge.className = "photo-slot-badge";
       badge.textContent = "Főkép";
       slot.appendChild(badge);
+      if (item.overlayTemplateId) {
+        const overlayBadge = document.createElement("span");
+        overlayBadge.className = "photo-slot-badge photo-slot-badge--overlay";
+        overlayBadge.textContent = "Sablon";
+        slot.appendChild(overlayBadge);
+      }
     }
     if (item.status === "uploading" || item.status === "pending" || item.status === "error") {
       const state = document.createElement("span");
@@ -1331,8 +1368,79 @@ async function uploadPendingPhotos() {
 function preparedPhotoItems() {
   return photoItems
     .filter((item) => item.status === "ready")
-    .map((item) => (item.url ? { url: item.url } : { data: item.dataUrl }))
+    .map((item) => {
+      if (item.overlayDataUrl) return { data: item.overlayDataUrl };
+      return item.url ? { url: item.url } : { data: item.dataUrl };
+    })
     .filter((item) => item.url || item.data);
+}
+
+function overlayInfoFromForm() {
+  const le = String(teljesitmenyLe?.value ?? "").trim();
+  const kw = String(teljesitmenyKw?.value ?? "").trim();
+  const power = le ? `${le} LE` : kw ? `${kw} kW` : "";
+  const fuel = String(uzemanyag?.value ?? "").trim();
+  return {
+    templateId: DEFAULT_PHOTO_OVERLAY_ID,
+    brand: String(gyartmany?.value ?? "").trim(),
+    model: String(modell?.value ?? "").trim(),
+    year: String(gyartasiEv?.value ?? "").trim(),
+    km: String(document.getElementById("km")?.value ?? "").trim(),
+    power,
+    fuel,
+    price: String(document.getElementById("vetelar")?.value ?? "").trim(),
+    place: String(document.getElementById("telepules")?.value ?? "").trim() || "bymy",
+  };
+}
+
+function clearPhotoOverlay(item) {
+  if (!item?.overlayTemplateId && !item?.overlayDataUrl) return;
+  item.previewUrl = item.basePreviewUrl || item.url || item.previewUrl;
+  item.overlayTemplateId = null;
+  item.overlayDataUrl = null;
+}
+
+async function applyPhotoOverlayToFirst() {
+  const item = photoItems[0];
+  if (!item) {
+    alert("Előbb adj hozzá legalább egy képet.");
+    return;
+  }
+  const src = item.basePreviewUrl || item.url || item.previewUrl;
+  if (!src) {
+    alert("A főkép még nem elérhető.");
+    return;
+  }
+  if (!item.basePreviewUrl) item.basePreviewUrl = src;
+
+  photoItems.forEach((other, index) => {
+    if (index !== 0) clearPhotoOverlay(other);
+  });
+
+  if (photoOverlayApplyBtn) {
+    photoOverlayApplyBtn.disabled = true;
+    photoOverlayApplyBtn.textContent = "Sablon…";
+  }
+  try {
+    const dataUrl = await renderListingPhotoOverlay(src, overlayInfoFromForm());
+    item.overlayTemplateId = DEFAULT_PHOTO_OVERLAY_ID;
+    item.overlayDataUrl = dataUrl;
+    item.previewUrl = dataUrl;
+    renderPhotoPreview();
+  } catch (error) {
+    alert(error?.message || "A sablon nem alkalmazható erre a képre.");
+    updatePhotoStatus();
+  } finally {
+    if (photoOverlayApplyBtn) photoOverlayApplyBtn.textContent = "Sablon használata";
+    updatePhotoStatus();
+  }
+}
+
+function removePhotoOverlayFromFirst() {
+  const item = photoItems[0];
+  if (!item) return;
+  clearPhotoOverlay(item);
+  renderPhotoPreview();
 }
 
 form.querySelectorAll(".auto-filled, #tipus, #hengerurtartalom, #sebessegvalto, #hajtas, #teljesitmeny_kw").forEach((field) => {
@@ -1444,6 +1552,12 @@ photoInput?.addEventListener("change", () => {
 photoUploadBtn?.addEventListener("click", () => {
   uploadPendingPhotos();
 });
+photoOverlayApplyBtn?.addEventListener("click", () => {
+  applyPhotoOverlayToFirst();
+});
+photoOverlayClearBtn?.addEventListener("click", () => {
+  removePhotoOverlayFromFirst();
+});
 photoGrid?.addEventListener("click", (event) => {
   const up = event.target.closest("[data-photo-up]");
   const down = event.target.closest("[data-photo-down]");
@@ -1453,6 +1567,9 @@ photoGrid?.addEventListener("click", (event) => {
     if (i > 0) {
       const [moved] = photoItems.splice(i, 1);
       photoItems.splice(i - 1, 0, moved);
+      photoItems.forEach((item, index) => {
+        if (index !== 0) clearPhotoOverlay(item);
+      });
       renderPhotoPreview();
     }
   }
@@ -1461,6 +1578,9 @@ photoGrid?.addEventListener("click", (event) => {
     if (i >= 0 && i < photoItems.length - 1) {
       const [moved] = photoItems.splice(i, 1);
       photoItems.splice(i + 1, 0, moved);
+      photoItems.forEach((item, index) => {
+        if (index !== 0) clearPhotoOverlay(item);
+      });
       renderPhotoPreview();
     }
   }
@@ -1469,6 +1589,9 @@ photoGrid?.addEventListener("click", (event) => {
     if (i >= 0) {
       revokePhotoPreview(photoItems[i]);
       photoItems.splice(i, 1);
+      photoItems.forEach((item, index) => {
+        if (index !== 0) clearPhotoOverlay(item);
+      });
       renderPhotoPreview();
     }
   }

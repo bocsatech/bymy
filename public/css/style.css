@@ -705,6 +705,24 @@ textarea {
   margin-top: 14px;
 }
 
+.photo-upload-bar .btn.ghost {
+  background: #fff;
+  border: 1px solid #d0d5dd;
+  color: #111;
+}
+
+.photo-upload-bar .btn.ghost:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.photo-slot-badge--overlay {
+  left: auto;
+  right: 6px;
+  background: #f0c52c;
+  color: #111;
+}
+
 .photo-upload-status {
   flex: 1;
   min-width: 180px;

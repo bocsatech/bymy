@@ -57,7 +57,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="/css/style.css?v=myAds2" />
+    <link rel="stylesheet" href="/css/style.css?v=photoOverlay1" />
     <link rel="stylesheet" href="/css/automax.css?v=automax20260720homelist" />
     <link rel="stylesheet" href="/css/site-app.css?v=postYellow1" />
     <link rel="stylesheet" href="/css/site-side.css?v=mwPostDesk1" />
@@ -738,11 +738,14 @@
               <div class="photo-grid" id="photo-grid"></div>
               <div class="photo-upload-bar" id="photo-upload-bar">
                 <button type="button" class="btn primary" id="photo-upload-btn">Feltöltés</button>
+                <button type="button" class="btn ghost" id="photo-overlay-apply" disabled>Sablon használata</button>
+                <button type="button" class="btn ghost" id="photo-overlay-clear" disabled>Sablon törlése</button>
                 <div class="photo-upload-status">
                   <progress id="photo-upload-progress" max="12" value="0"></progress>
                   <span id="photo-upload-label">Válassz képeket, majd kattints a Feltöltésre.</span>
                 </div>
               </div>
+              <p class="hint" id="photo-overlay-hint">Sablon: az első képre (főkép) kerül. Később több sablon közül lehet választani.</p>
             </div>
           </div>
         </section>
@@ -942,7 +945,7 @@
     </main>
 
     <script src="/js/site-avatar-menu.js?v=avatarSync1" type="module"></script>
-    <script src="/js/app.js?v=descAi1" type="module"></script>
+    <script src="/js/app.js?v=photoOverlay1" type="module"></script>
       <script src="/js/nav-counts.js?v=navCount2" type="module"></script>
       <script src="/js/theme.js?v=willhabenHdr1" type="module"></script>
     <script src="/js/form-layout-apply.js?v=immoTelekArea1" type="module"></script>

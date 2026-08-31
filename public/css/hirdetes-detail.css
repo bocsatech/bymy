@@ -497,9 +497,14 @@
 }
 
 .hd-btn--primary {
-  background: #1565c0;
-  color: #fff;
-  border: 0;
+  background: #f0c52c;
+  color: #111;
+  border: 1.5px solid #f0c52c;
+}
+
+.hd-btn--primary:hover {
+  background: #e8bb20;
+  border-color: #e8bb20;
 }
 
 .hd-btn--ghost {

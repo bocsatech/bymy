@@ -98,14 +98,33 @@ function countFilled(root) {
   return n;
 }
 
+const LEGACY_FIELD_IDS = {
+  gyartmany: "qs-gyartmany",
+  modell: "qs-modell",
+  uzemanyag: "qs-uzemanyag",
+  gyartasi_ev: "qs-ev-tol",
+  vetelar: "qs-ar-tol",
+  kivitel: "qs-kivitel",
+  allapot: "qs-allapot",
+};
+
 function findFieldWrap(form, fieldKey) {
-  return (
-    form.querySelector(`[data-qs-field="${fieldKey}"]`) ||
-    form
-      .querySelector(`[data-filter-key="${fieldKey}"]`)
-      ?.closest("[data-qs-field], .home-qs-field, .home-qs-pair, label") ||
-    null
-  );
+  const fromLayout =
+    form.querySelector(`.auto-desk-fields [data-qs-field="${fieldKey}"]`) ||
+    form.querySelector(`#qs-layout-main [data-qs-field="${fieldKey}"]`) ||
+    form.querySelector(`#qs-more-layout [data-qs-field="${fieldKey}"]`) ||
+    form.querySelector(`[data-qs-field="${fieldKey}"]`);
+  if (fromLayout) return fromLayout;
+
+  const fromFilter = form
+    .querySelector(`[data-filter-key="${fieldKey}"]`)
+    ?.closest("[data-qs-field], .home-qs-field, .home-qs-pair, label");
+  if (fromFilter) return fromFilter;
+
+  const legacyId = LEGACY_FIELD_IDS[fieldKey];
+  if (!legacyId) return null;
+  const legacyEl = form.querySelector(`#${legacyId}`);
+  return legacyEl?.closest(".home-qs-pair, .home-qs-field, label") || null;
 }
 
 function ensureDeskFieldsHost(parent, selector, datasetKey) {
@@ -210,6 +229,11 @@ export function arrangeAutoDeskDemoFields(form = document.getElementById("home-q
     alapBody.insertBefore(host, alapBody.firstChild);
   }
   host.innerHTML = "";
+
+  form.querySelectorAll(".home-qs-static-legacy").forEach((el) => {
+    el.hidden = true;
+    el.style.setProperty("display", "none", "important");
+  });
 
   const used = new Set();
   const mountOpts = { quickKeys, used };

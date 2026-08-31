@@ -20,7 +20,7 @@ import {
   initAutoDeskSearch,
   updateAutoDeskAccSummaries,
   arrangeAutoDeskDemoFields,
-} from "./auto-desk-search.js?v=fogyNum1";
+} from "./auto-desk-search.js?v=alapFix1";
 
 const MOBILE_MQ = "(max-width: 900px)";
 const DESK_MQ = "(min-width: 901px)";
@@ -224,12 +224,35 @@ export function initHomeQuickSearch({ onSearch = () => {}, onDeskSortChange } = 
         statusEl.textContent = "";
       }
     })
-    .catch((error) => {
+    .catch(async (error) => {
       console.warn("Kereső elrendezés:", error);
+      const page = document.body?.getAttribute("data-site-page");
+      const deskAuto =
+        (page === "auto" || page === "teherauto") &&
+        window.matchMedia(DESK_MQ).matches;
       form.querySelectorAll(".home-qs-static-legacy").forEach((el) => {
-        el.hidden = false;
-        el.style.display = "";
+        if (deskAuto) {
+          el.hidden = true;
+          el.style.setProperty("display", "none", "important");
+        } else {
+          el.hidden = false;
+          el.style.display = "";
+        }
       });
+      if (deskAuto) {
+        try {
+          arrangeAutoDeskDemoFields(form);
+          await mountAutoBrandModelPicker(form);
+          await mountAutoFuelPicker(form);
+          await mountAutoKivitelPicker(form);
+          await mountAutoAllapotPicker(form);
+          await mountAutoSebessegvaltoPicker(form);
+          await mountAutoOkmanyPicker(form);
+          await mountAutoToltoPickers(form);
+        } catch (deskError) {
+          console.warn("Desk fallback kereső:", deskError);
+        }
+      }
       setQsReady(true);
       if (statusEl) {
         statusEl.hidden = false;

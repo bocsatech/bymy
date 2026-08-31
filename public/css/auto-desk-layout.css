@@ -509,13 +509,29 @@
     gap: 8px;
   }
 
-  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .home-qs-field,
-  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .home-qs-pair,
+  /* Csak a layout-hostokat flatteneljük — NE a .home-qs-field/.home-qs-pair-t,
+     különben a 12 oszlopos .home-qs-row-ban a címke és a select külön cellába kerül → összecsúszás. */
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .home-qs-grid,
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .home-qs-layout-main,
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .home-qs-more-layout,
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .home-qs-grid-cell {
     display: contents;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-fields .home-qs-field,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-fields .home-qs-pair,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-fields .home-qs-grid-cell,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-fields [data-qs-field] {
+    display: flex !important;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+    min-width: 0;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .home-qs-static-legacy,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active .auto-search-panel .home-qs-static-legacy {
+    display: none !important;
   }
 
   /* Muszaki maradék mezők: ne contents, hanem oszlop */
@@ -533,17 +549,24 @@
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-fields[data-desk-more-rest],
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-fields[data-desk-alap] {
     display: flex !important;
-    flex-direction: column;
+    flex-direction: column !important;
+    flex-wrap: nowrap !important;
     gap: 12px;
+    width: 100%;
   }
 
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-fields[data-desk-alap] > .auto-desk-field,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-fields[data-desk-alap] > .auto-bm-pair,
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-fields[data-desk-muszaki] .auto-desk-field,
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-fields[data-desk-more-rest] .auto-desk-field {
-    display: flex;
-    flex-direction: column;
+    display: flex !important;
+    flex-direction: column !important;
     gap: 6px;
     margin: 0;
     min-height: 0;
+    width: 100% !important;
+    max-width: 100%;
+    flex: 0 0 auto;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-fields[data-desk-more-rest] .home-qs-field,
@@ -1007,9 +1030,10 @@
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-pair {
-    display: flex;
-    flex-direction: column;
+    display: flex !important;
+    flex-direction: column !important;
     gap: 14px;
+    width: 100%;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-field {

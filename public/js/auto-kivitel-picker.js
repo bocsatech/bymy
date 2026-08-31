@@ -9,7 +9,7 @@ import {
   TEHER_KISTEHER_KIVITEL,
   TEHER_35_KIVITEL_CATEGORIES,
   flattenTeher35KivitelOptions,
-} from "./equipment-data.js?v=teherKivitel35c";
+} from "./equipment-data.js?v=teherKivitel35d";
 import { bindAutoBmDismiss, autoBmPanelIsOpen } from "./auto-bm-dismiss.js?v=bmDismiss1";
 
 function labelList(items) {
@@ -49,6 +49,11 @@ function isAutoDesk() {
 }
 
 function truckKategoria() {
+  const fromBody = document.body?.dataset?.truckKategoria;
+  if (fromBody === "35-felett" || fromBody === "35-alatt") return fromBody;
+  const activeTab = document.querySelector("[data-truck-tab].is-active");
+  const fromTab = activeTab?.getAttribute("data-truck-tab");
+  if (fromTab === "35-felett" || fromTab === "35-alatt") return fromTab;
   return new URLSearchParams(window.location.search).get("kategoria") || "35-alatt";
 }
 
@@ -213,38 +218,22 @@ export async function mountAutoKivitelPicker(form) {
   hero.appendChild(panel);
   const bodyEl = panel.querySelector("[data-auto-kivitel-body]");
 
+  function effectiveSelectedValues() {
+    if (!hierarchical) return [...selected];
+    return [...selected];
+  }
+
   function selectedLabelsHierarchical() {
     const labels = [];
     for (const cat of categories) {
-      if (!openMains.has(cat.id)) continue;
       if (cat.children?.length) {
         const kids = cat.children.filter((c) => selected.has(c.value));
         if (kids.length) labels.push(...kids.map((c) => c.label));
-        else labels.push(cat.label);
       } else if (cat.value && selected.has(cat.value)) {
         labels.push(cat.label);
       }
     }
     return labels;
-  }
-
-  function effectiveSelectedValues() {
-    if (!hierarchical) return [...selected];
-    const values = new Set();
-    for (const cat of categories) {
-      if (!openMains.has(cat.id)) continue;
-      if (cat.children?.length) {
-        const kids = cat.children.filter((c) => selected.has(c.value));
-        if (kids.length) kids.forEach((c) => values.add(c.value));
-        else {
-          cat.children.forEach((c) => values.add(c.value));
-          values.add(cat.label);
-        }
-      } else if (cat.value && selected.has(cat.value)) {
-        values.add(cat.value);
-      }
-    }
-    return [...values];
   }
 
   function syncHidden() {
@@ -257,7 +246,8 @@ export async function mountAutoKivitelPicker(form) {
 
   function turnMainOn(cat) {
     openMains.add(cat.id);
-    if (!cat.children?.length && cat.value) selected.add(cat.value);
+    if (cat.children?.length) cat.children.forEach((c) => selected.add(c.value));
+    else if (cat.value) selected.add(cat.value);
   }
 
   function turnMainOff(cat) {
@@ -266,12 +256,18 @@ export async function mountAutoKivitelPicker(form) {
   }
 
   function renderHierarchical() {
+    // Mindig látszanak a részletek (képernyőképek szerinti hierarchia), kapcsolókkal
     const rows = categories
       .map((cat) => {
-        const on = openMains.has(cat.id);
         const hasKids = Boolean(cat.children?.length);
+        const childValues = hasKids ? cat.children.map((c) => c.value) : [];
+        const selectedKids = hasKids ? childValues.filter((v) => selected.has(v)) : [];
+        const on = hasKids
+          ? selectedKids.length > 0 || openMains.has(cat.id)
+          : Boolean(cat.value && selected.has(cat.value));
+
         let kidsHtml = "";
-        if (hasKids && on) {
+        if (hasKids) {
           kidsHtml = `<div class="auto-fuel-children">
             ${cat.children
               .map((child) => {
@@ -385,6 +381,7 @@ export async function mountAutoKivitelPicker(form) {
       } else {
         selected.delete(value);
       }
+      renderList();
       syncHidden();
       return;
     }

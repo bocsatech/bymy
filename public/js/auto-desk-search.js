@@ -294,10 +294,14 @@ export function arrangeAutoDeskDemoFields(form = document.getElementById("home-q
       mountDeskField(host, item, form, mountOpts);
     }
   }
-  // Teher / autó: Kivitel mindig legyen az Alap mezők között (pickerhez kell)
+
+  // Kivitel: adminban step 2 — előre az Alap gyors mezőkhöz, mielőtt a Műszaki megkapná
   if (!used.has("kivitel")) {
     mountDeskField(host, { field: "kivitel", label: "Kivitel" }, form, mountOpts);
   }
+  host.querySelector('[data-desk-field="kivitel"]')?.setAttribute("data-desk-quick", "1");
+  used.add("kivitel");
+  form.dataset.deskQuickKeys = [...new Set([...(form.dataset.deskQuickKeys || "").split(",").filter(Boolean), "kivitel"])].join(",");
 
   if (muszakiBody) {
     let muszakiHost = muszakiBody.querySelector(".auto-desk-fields[data-desk-muszaki]");
@@ -330,6 +334,12 @@ export function arrangeAutoDeskDemoFields(form = document.getElementById("home-q
         mountDeskField(muszakiHost, { field: key, label, range }, form, mountOpts);
       });
     }
+
+    // Bármilyen maradék Kivitel a Műszakiból → Alap
+    muszakiHost.querySelectorAll('[data-desk-field="kivitel"]').forEach((el) => {
+      el.dataset.deskQuick = "1";
+      host.appendChild(el);
+    });
 
     let moreWrap = muszakiBody.querySelector("#qs-more");
     if (moreWrap) {

@@ -12,7 +12,7 @@ import {
   AC_TOLTO_CSATLAKOZAS_OPTIONS,
   TEHER_KISTEHER_KIVITEL,
   flattenTeher35KivitelOptions,
-} from "./equipment-data.js?v=teherKivitel35c";
+} from "./equipment-data.js?v=teherKivitel35d";
 
 function searchLayoutCategory() {
   return document.body?.getAttribute("data-site-page") === "teherauto"
@@ -622,7 +622,12 @@ function wirePostalCityAutofill(form) {
 export async function applyAutoSearchLayout(form = document.getElementById("home-qs-form")) {
   if (!form) return null;
   const layout = await fetchAutoSearchLayout({ force: true });
-  form.dataset.deskQuickKeys = quickSearchFieldKeysFromLayout(layout).join(",");
+  let quickKeys = quickSearchFieldKeysFromLayout(layout);
+  // Teher kereső: Kivitel legyen a gyors mezők között (adminban gyakran step 2)
+  if (searchLayoutCategory() === "teherauto-search" && !quickKeys.includes("kivitel")) {
+    quickKeys = [...quickKeys, "kivitel"];
+  }
+  form.dataset.deskQuickKeys = quickKeys.join(",");
   const mainHost = document.getElementById("qs-layout-main");
   const moreHost = document.getElementById("qs-more-layout");
 

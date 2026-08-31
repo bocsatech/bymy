@@ -1,5 +1,5 @@
 import { loadAdFormPartial } from "./load-ad-form.js";
-import { createAdForm } from "./form-core.js?v=autoTipus1";
+import { createAdForm } from "./form-core.js?v=teherKivitel35d";
 import { initImportPanel, getImportResults, setImportResults } from "./import.js";
 import { enrichFormFromImportItem } from "./import-enrich.js";
 import {

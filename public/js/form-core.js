@@ -1,4 +1,5 @@
-import { UZEMANYAG_CATEGORIES, ALLAPOT_CATEGORIES, EQUIPMENT_SECTIONS, KLIM_OPTIONS, KISTEHER_EQUIPMENT_ITEMS } from "./equipment-data.js";
+import { UZEMANYAG_CATEGORIES, ALLAPOT_CATEGORIES, EQUIPMENT_SECTIONS, KLIM_OPTIONS, KISTEHER_EQUIPMENT_ITEMS, TEHER_KISTEHER_KIVITEL, TEHER_35_KIVITEL_CATEGORIES } from "./equipment-data.js?v=teherKivitel35d";
+import { KIVITEL_OPTIONS } from "./kivitel-options.js?v=kivitel1";
 import { EGYEB_INFO_OPTIONS } from "./egyeb-info-data.js";
 import { initVehicleCatalogSelects } from "./vehicle-catalog-client.js";
 import { compressListingPhoto, MAX_LISTING_PHOTOS } from "./listing-photo-compress.js?v=myAds2";
@@ -442,6 +443,68 @@ function isKisteherAd() {
   return subtype === "kisteher";
 }
 
+function isTeher35Ad() {
+  const subtype = String(
+    form.elements.namedItem("hirdetes_alkategoria")?.value ??
+      form.elements.namedItem("jarmu_kategoria")?.value ??
+      ""
+  )
+    .trim()
+    .toLowerCase();
+  return subtype === "teherauto";
+}
+
+function renderKivitelDropdown() {
+  const kivitel = document.getElementById("kivitel");
+  if (!kivitel || kivitel.tagName !== "SELECT") return;
+
+  const current = String(kivitel.value || "").trim();
+  kivitel.innerHTML = "";
+
+  const empty = document.createElement("option");
+  empty.value = "";
+  empty.textContent = "Válasszon";
+  kivitel.appendChild(empty);
+
+  if (isTeher35Ad()) {
+    for (const category of TEHER_35_KIVITEL_CATEGORIES) {
+      if (category.children?.length) {
+        const group = document.createElement("optgroup");
+        group.label = category.label;
+        for (const child of category.children) {
+          const option = document.createElement("option");
+          option.value = child.value;
+          option.textContent = child.label;
+          group.appendChild(option);
+        }
+        kivitel.appendChild(group);
+        continue;
+      }
+      if (!category.value) continue;
+      const option = document.createElement("option");
+      option.value = category.value;
+      option.textContent = category.label;
+      kivitel.appendChild(option);
+    }
+  } else if (isKisteherAd()) {
+    for (const label of TEHER_KISTEHER_KIVITEL) {
+      const option = document.createElement("option");
+      option.value = label;
+      option.textContent = label;
+      kivitel.appendChild(option);
+    }
+  } else {
+    for (const label of KIVITEL_OPTIONS) {
+      const option = document.createElement("option");
+      option.value = label;
+      option.textContent = label;
+      kivitel.appendChild(option);
+    }
+  }
+
+  if (current) kivitel.value = current;
+}
+
 function syncKisteherFields() {
   const show = isKisteherAd();
   document.querySelectorAll(".kisteher-only").forEach((el) => {
@@ -450,6 +513,7 @@ function syncKisteherFields() {
   });
   syncEgyebInfoVisibility();
   renderEquipment();
+  renderKivitelDropdown();
   void syncIngatlanFormVisibility(form);
   window.dispatchEvent(new Event("ad-form-layout-refresh"));
 }
@@ -1461,6 +1525,7 @@ modell?.addEventListener("change", () => {
 });
 renderFuelDropdown();
 renderAllapotDropdown();
+renderKivitelDropdown();
 renderFuelSelector();
 renderKlimaOptions();
 renderEquipment();

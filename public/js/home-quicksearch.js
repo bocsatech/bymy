@@ -2,23 +2,23 @@
  * Gyorskereső az autó hero panelen — elrendezés: GET /api/level1/form-layout?category=szemelyauto-search
  */
 
-import { applyAutoSearchLayout, readLayoutFilterValues } from "./auto-search-layout.js?v=valtoPick2";
+import { applyAutoSearchLayout, readLayoutFilterValues } from "./auto-search-layout.js?v=weightNum1";
 import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums } from "./auto-search-drums.js?v=deskGap2";
 import {
   mountDetailedSearch,
   readDetailedSearchValues,
   resetDetailedSearch,
 } from "./auto-detailed-search.js?v=autoDesk16";
-import { readBrandModelFilterValues, mountAutoBrandModelPicker } from "./auto-brand-model-picker.js?v=valtoPick2";
-import { readFuelFilterValues, mountAutoFuelPicker } from "./auto-fuel-picker.js?v=valtoPick2";
-import { readKivitelFilterValues, mountAutoKivitelPicker } from "./auto-kivitel-picker.js?v=valtoPick2";
-import { readAllapotFilterValues, mountAutoAllapotPicker } from "./auto-allapot-picker.js?v=valtoPick2";
-import { readSebessegvaltoFilterValues, mountAutoSebessegvaltoPicker } from "./auto-sebessegvalto-picker.js?v=valtoPick2";
+import { readBrandModelFilterValues, mountAutoBrandModelPicker } from "./auto-brand-model-picker.js?v=weightNum1";
+import { readFuelFilterValues, mountAutoFuelPicker } from "./auto-fuel-picker.js?v=weightNum1";
+import { readKivitelFilterValues, mountAutoKivitelPicker } from "./auto-kivitel-picker.js?v=weightNum1";
+import { readAllapotFilterValues, mountAutoAllapotPicker } from "./auto-allapot-picker.js?v=weightNum1";
+import { readSebessegvaltoFilterValues, mountAutoSebessegvaltoPicker } from "./auto-sebessegvalto-picker.js?v=weightNum1";
 import {
   initAutoDeskSearch,
   updateAutoDeskAccSummaries,
   arrangeAutoDeskDemoFields,
-} from "./auto-desk-search.js?v=valtoPick2";
+} from "./auto-desk-search.js?v=weightNum1";
 
 const MOBILE_MQ = "(max-width: 900px)";
 const DESK_MQ = "(min-width: 901px)";

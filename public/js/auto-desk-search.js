@@ -40,7 +40,8 @@ function deskOrderFromAdminLayout(mainHost) {
     const range =
       wrap.classList.contains("home-qs-pair") ||
       Boolean(wrap.querySelector(".home-qs-pair")) ||
-      wrap.querySelectorAll("select.home-qs-control").length >= 2;
+      wrap.querySelectorAll("select.home-qs-control").length >= 2 ||
+      wrap.querySelectorAll("input.home-qs-control").length >= 2;
     order.push({ field, label, range });
   }
   return order;
@@ -144,8 +145,10 @@ function mountDeskField(host, item, form, { quickKeys, used }) {
     const range = document.createElement("div");
     range.className = "auto-desk-range";
     const selects = [...wrap.querySelectorAll("select")];
-    if (selects.length >= 2) {
-      selects.slice(0, 2).forEach((sel) => range.appendChild(sel));
+    const inputs = [...wrap.querySelectorAll("input.home-qs-control, input[type='number']")];
+    const pair = selects.length >= 2 ? selects.slice(0, 2) : inputs.length >= 2 ? inputs.slice(0, 2) : [];
+    if (pair.length >= 2) {
+      pair.forEach((el) => range.appendChild(el));
       field.appendChild(range);
       wrap.remove();
     } else {

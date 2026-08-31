@@ -304,11 +304,39 @@ function fieldWidthClass(_cell) {
 }
 
 function rangeHtml(cell, spec) {
-  const label = cell.label || cell.field_key;
-  const suffix =
-    spec.kind === "price" ? '<span class="home-qs-suffix" aria-hidden="true">Ft</span>' :
-    spec.kind === "le" ? '<span class="home-qs-suffix" aria-hidden="true">LE</span>' :
-    spec.kind === "km" ? "" : "";
+  const label = SEARCH_LABEL_SHORT[cell.field_key] || cell.label || cell.field_key;
+  const freeNumber = spec.kind === "number";
+  const NUMBER_SUFFIX = {
+    sajat_tomeg: "kg",
+    ossztomeg: "kg",
+    nyomatek_nm: "Nm",
+    hatotav: "km",
+    autopalya_hatotav: "km",
+    teli_hatotav: "km",
+    akkumulator_kwh: "kWh",
+    jelenlegi_akkukapacitas: "%",
+    ac_toltesi_teljesitmeny: "kW",
+    dc_toltesi_teljesitmeny: "kW",
+  };
+  const unit =
+    NUMBER_SUFFIX[cell.field_key] ||
+    (spec.kind === "price" ? "Ft" : spec.kind === "le" ? "LE" : "");
+  const suffix = unit ? `<span class="home-qs-suffix" aria-hidden="true">${unit}</span>` : "";
+
+  if (freeNumber) {
+    return `<div class="home-qs-pair home-qs-pair--number" data-qs-field="${cell.field_key}">
+    <label class="home-qs-field">
+      <span class="home-qs-label">${label}</span>
+      <input class="home-qs-control home-qs-control--number" type="number" inputmode="numeric" min="0" step="1" placeholder="-tól" data-filter-key="${spec.tol}" aria-label="${label} -tól" />
+      ${suffix}
+    </label>
+    <label class="home-qs-field">
+      <input class="home-qs-control home-qs-control--number" type="number" inputmode="numeric" min="0" step="1" placeholder="-ig" data-filter-key="${spec.ig}" aria-label="${label} -ig" />
+      ${suffix}
+    </label>
+  </div>`;
+  }
+
   return `<div class="home-qs-pair" data-qs-field="${cell.field_key}">
     <label class="home-qs-field">
       <span class="home-qs-label">${label}</span>

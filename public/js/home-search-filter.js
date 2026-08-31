@@ -1,7 +1,7 @@
 import { initVehicleCatalogSelects, shortTypeName } from "./vehicle-catalog-client.js";
 import { kivitelMatches } from "./kivitel-options.js?v=kivitel1";
-import { fuelValueMatches } from "./auto-fuel-picker.js?v=bmDismiss1";
-import { kivitelListMatches } from "./auto-kivitel-picker.js?v=bmDismiss1";
+import { fuelValueMatches } from "./auto-fuel-picker.js?v=yearMax1";
+import { kivitelListMatches } from "./auto-kivitel-picker.js?v=yearMax1";
 
 const FUEL_QUICK_FILTERS = [
   { id: "benzin", label: "Benzin", match: (value) => value === "Benzin" },
@@ -286,7 +286,8 @@ export function populateFilterOptions(items) {
     .map((f) => f.gyartasi_ev)
     .filter((year) => year && year > 1900);
   const yearSet = new Set(listingYears.map(String));
-  for (let year = 2035; year >= 1990; year -= 1) yearSet.add(String(year));
+  const lastYear = new Date().getFullYear();
+  for (let year = lastYear; year >= 1990; year -= 1) yearSet.add(String(year));
   const years = [...yearSet].sort((a, b) => Number(b) - Number(a));
   fillSelect(document.getElementById("filter-ev-jarat"), years);
 }

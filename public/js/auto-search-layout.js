@@ -17,7 +17,6 @@ function layoutUrl() {
 }
 
 const FIRST_YEAR = 1950;
-const LAST_YEAR = 2035;
 const PRICE_STEP = 500_000;
 const PRICE_MAX = 50_000_000;
 const KM_STEP = 10_000;
@@ -183,8 +182,9 @@ export async function fetchAutoSearchLayout({ force = false } = {}) {
 }
 
 function yearOptions() {
+  const lastYear = new Date().getFullYear();
   const years = [];
-  for (let year = LAST_YEAR; year >= FIRST_YEAR; year -= 1) years.push(String(year));
+  for (let year = lastYear; year >= FIRST_YEAR; year -= 1) years.push(String(year));
   return years;
 }
 

@@ -179,6 +179,19 @@ export function normalizeOkmanyJelleg(value) {
   return raw;
 }
 
+/** AC töltőcsatlakozó (kereső + feladás). */
+export const AC_TOLTO_CSATLAKOZAS_OPTIONS = ["Type 1", "Type 2"];
+
+export function normalizeAcToltoCsatlakozas(value) {
+  const raw = String(value ?? "").trim();
+  if (!raw) return "";
+  if (AC_TOLTO_CSATLAKOZAS_OPTIONS.includes(raw)) return raw;
+  const key = raw.toLowerCase().replace(/\s+/g, "");
+  if (key.includes("type1") || key === "t1" || key.includes("j1772")) return "Type 1";
+  if (key.includes("type2") || key === "t2" || key.includes("mennekes")) return "Type 2";
+  return raw;
+}
+
 export const EQUIPMENT_SECTIONS = {
   muszaki: {
     title: "Műszaki felszereltség",

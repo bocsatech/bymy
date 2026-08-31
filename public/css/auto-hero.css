@@ -610,6 +610,11 @@ body[data-site-page="teherauto"] .auto-search-tabs {
   gap: 0.35rem;
 }
 
+.qs-detailed-select--multi .qs-detailed-toggles--inline {
+  margin-top: 0;
+  grid-template-columns: 1fr;
+}
+
 .qs-detailed-input.home-qs-control {
   width: 100%;
   min-height: 2.35rem;

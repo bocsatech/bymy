@@ -26,12 +26,12 @@ export const AKKU_SEARCH_SECTION_FALLBACK = {
     {
       id: "ac_tolto_csatlakozas",
       label: "AC töltőcsatlakozó típusa",
-      options: ["", "Type 2", "CCS", "CHAdeMO", "Egyéb"],
+      options: ["", "Type 1", "Type 2"],
     },
     {
       id: "dc_tolto_csatlakozas",
       label: "DC töltőcsatlakozó típusa",
-      options: ["", "CCS", "CHAdeMO", "Type 2", "Egyéb"],
+      options: ["", "CCS", "CHAdeMO", "Egyéb"],
     },
   ],
   toggles: [

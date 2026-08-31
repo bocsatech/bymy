@@ -2,24 +2,25 @@
  * Gyorskereső az autó hero panelen — elrendezés: GET /api/level1/form-layout?category=szemelyauto-search
  */
 
-import { applyAutoSearchLayout, readLayoutFilterValues } from "./auto-search-layout.js?v=okmanyPick1";
-import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums } from "./auto-search-drums.js?v=okmanyPick1";
+import { applyAutoSearchLayout, readLayoutFilterValues } from "./auto-search-layout.js?v=toltoPick1";
+import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums } from "./auto-search-drums.js?v=toltoPick1";
 import {
   mountDetailedSearch,
   readDetailedSearchValues,
   resetDetailedSearch,
-} from "./auto-detailed-search.js?v=autoDesk16";
-import { readBrandModelFilterValues, mountAutoBrandModelPicker } from "./auto-brand-model-picker.js?v=okmanyPick1";
-import { readFuelFilterValues, mountAutoFuelPicker } from "./auto-fuel-picker.js?v=okmanyPick1";
-import { readKivitelFilterValues, mountAutoKivitelPicker } from "./auto-kivitel-picker.js?v=okmanyPick1";
-import { readAllapotFilterValues, mountAutoAllapotPicker } from "./auto-allapot-picker.js?v=okmanyPick1";
-import { readSebessegvaltoFilterValues, mountAutoSebessegvaltoPicker } from "./auto-sebessegvalto-picker.js?v=okmanyPick1";
-import { readOkmanyFilterValues, mountAutoOkmanyPicker } from "./auto-okmany-picker.js?v=okmanyPick1";
+} from "./auto-detailed-search.js?v=toltoPick1";
+import { readBrandModelFilterValues, mountAutoBrandModelPicker } from "./auto-brand-model-picker.js?v=toltoPick1";
+import { readFuelFilterValues, mountAutoFuelPicker } from "./auto-fuel-picker.js?v=toltoPick1";
+import { readKivitelFilterValues, mountAutoKivitelPicker } from "./auto-kivitel-picker.js?v=toltoPick1";
+import { readAllapotFilterValues, mountAutoAllapotPicker } from "./auto-allapot-picker.js?v=toltoPick1";
+import { readSebessegvaltoFilterValues, mountAutoSebessegvaltoPicker } from "./auto-sebessegvalto-picker.js?v=toltoPick1";
+import { readOkmanyFilterValues, mountAutoOkmanyPicker } from "./auto-okmany-picker.js?v=toltoPick1";
+import { readToltoFilterValues, mountAutoToltoPickers } from "./auto-tolto-picker.js?v=toltoPick1";
 import {
   initAutoDeskSearch,
   updateAutoDeskAccSummaries,
   arrangeAutoDeskDemoFields,
-} from "./auto-desk-search.js?v=okmanyPick1";
+} from "./auto-desk-search.js?v=toltoPick1";
 
 const MOBILE_MQ = "(max-width: 900px)";
 const DESK_MQ = "(min-width: 901px)";
@@ -45,6 +46,7 @@ export function initHomeQuickSearch({ onSearch = () => {}, onDeskSortChange } = 
     const allapot = readAllapotFilterValues(form);
     const sebessegvalto = readSebessegvaltoFilterValues(form);
     const okmany = readOkmanyFilterValues(form);
+    const tolto = readToltoFilterValues(form);
     if (form.dataset.brandModelPicker === "1") {
       delete base.gyartmany;
       delete base.modell;
@@ -67,8 +69,14 @@ export function initHomeQuickSearch({ onSearch = () => {}, onDeskSortChange } = 
     if (form.dataset.okmanyPicker === "1") {
       delete base.okmany_jelleg;
     }
+    if (form.dataset.acToltoPicker === "1") {
+      delete base.ac_tolto_csatlakozas;
+    }
+    if (form.dataset.toltoPicker === "1") {
+      delete base.tolto_csatlakozas;
+    }
     const detailed = readDetailedSearchValues(form);
-    return { ...base, ...brandModel, ...fuel, ...kivitel, ...allapot, ...sebessegvalto, ...okmany, detailed };
+    return { ...base, ...brandModel, ...fuel, ...kivitel, ...allapot, ...sebessegvalto, ...okmany, ...tolto, detailed };
   }
 
   function syncDetailedButton(moreOpen) {
@@ -194,6 +202,11 @@ export function initHomeQuickSearch({ onSearch = () => {}, onDeskSortChange } = 
           await mountAutoOkmanyPicker(form);
         } catch (okmanyError) {
           console.warn("Okmány picker:", okmanyError);
+        }
+        try {
+          await mountAutoToltoPickers(form);
+        } catch (toltoError) {
+          console.warn("Töltőcsatlakozó picker:", toltoError);
         }
       }
       const urlKivitel = new URLSearchParams(window.location.search).get("kivitel");

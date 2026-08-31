@@ -47,9 +47,8 @@ enum DetailedSearchCatalog {
         "hőszivattyús klíma",
     ]
 
-    static let toltoCsatlakozok = ["Type 2", "CCS", "CHAdeMO", "Schuko / hálózati"]
-
-    static let acToltoCsatlakozok = ["Type 2", "Schuko / hálózati", "Egyéb AC"]
+    static let toltoCsatlakozok = ["Type 1", "Type 2"]
+    static let acToltoCsatlakozok = ["Type 1", "Type 2"]
     static let dcToltoCsatlakozok = ["CCS", "CHAdeMO", "Egyéb DC"]
 
     /// Okmányok jellege (külön az érvényességtől)

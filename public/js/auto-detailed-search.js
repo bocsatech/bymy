@@ -5,7 +5,7 @@
 import {
   DETAILED_SEARCH_SECTIONS,
   AKKU_SEARCH_SECTION_EMPTY,
-} from "./auto-detailed-search-catalog.js?v=autoDesk16";
+} from "./auto-detailed-search-catalog.js?v=toltoPick1";
 
 const FORM_FLAG_KEYS = new Set(["villamtoltes", "zold_rendszam"]);
 
@@ -132,6 +132,10 @@ function matchesFormFlag(item, key, label) {
 }
 
 function matchesSelect(item, key, value) {
+  if (Array.isArray(value)) {
+    if (!value.length) return true;
+    return value.some((v) => matchesSelect(item, key, v));
+  }
   const raw = listingField(item, key);
   if (raw == null || raw === "") {
     const hay = listingHaystack(item);
@@ -141,7 +145,8 @@ function matchesSelect(item, key, value) {
   const got = normalizeForMatch(raw);
   const want = normalizeForMatch(value);
   if (got === want) return true;
-  if (want.includes("type 2") && got.includes("type 2")) return true;
+  if (want.includes("type 1") && (got.includes("type 1") || got.includes("j1772"))) return true;
+  if (want.includes("type 2") && (got.includes("type 2") || got.includes("mennekes"))) return true;
   if (want === "egyeb" || want === "egyéb") return got.includes("egyeb") || got.includes("egyéb");
   return got.includes(want) || want.includes(got);
 }
@@ -169,6 +174,27 @@ function renderRange(sectionId, range) {
 }
 
 function renderSelect(select) {
+  const multiToggleIds = new Set(["ac_tolto_csatlakozas", "tolto_csatlakozas"]);
+  if (multiToggleIds.has(select.id)) {
+    const opts = (select.options || []).filter((opt) => opt !== "");
+    const rows = opts
+      .map(
+        (opt) => `
+      <label class="qs-ios-toggle qs-detailed-multi-toggle">
+        <span class="qs-ios-toggle__text">${escapeHtml(opt)}</span>
+        <input type="checkbox" data-multi-filter-key="${escapeHtml(select.id)}" value="${escapeHtml(opt)}" />
+        <span class="qs-ios-toggle__track" aria-hidden="true"></span>
+      </label>`
+      )
+      .join("");
+    return `
+    <div class="qs-detailed-select qs-detailed-select--multi" data-multi-select="${escapeHtml(select.id)}">
+      <span class="qs-detailed-select__label">${escapeHtml(select.label)}</span>
+      <input type="hidden" data-filter-key="${escapeHtml(select.id)}" value="" />
+      <div class="qs-detailed-toggles qs-detailed-toggles--inline">${rows}</div>
+    </div>`;
+  }
+
   const options = select.options
     .map((opt) => {
       const label = opt === "" ? "Mindegy" : opt;
@@ -285,9 +311,22 @@ export function readDetailedSearchValues(form = document.getElementById("home-qs
   const flags = {};
   const extras = [];
 
+  // Multi kapcsoló selectek (AC töltő Type 1/2): checkbox → tömb
+  panel.querySelectorAll("[data-multi-select]").forEach((wrap) => {
+    const key = wrap.getAttribute("data-multi-select");
+    if (!key) return;
+    const values = [...wrap.querySelectorAll(`input[type="checkbox"][data-multi-filter-key="${key}"]:checked`)].map(
+      (el) => String(el.value || "").trim()
+    ).filter(Boolean);
+    const hidden = wrap.querySelector(`input[type="hidden"][data-filter-key="${key}"]`);
+    if (hidden) hidden.value = values.length ? JSON.stringify(values) : "";
+    if (values.length) selects[key] = values;
+  });
+
   panel.querySelectorAll("[data-filter-key]").forEach((el) => {
     const key = el.getAttribute("data-filter-key");
     if (!key) return;
+    if (selects[key] != null) return; // multi már feldolgozva
     if (el.type === "checkbox") {
       if (!el.checked) return;
       flags[key] = true;
@@ -325,7 +364,10 @@ export function hasActiveDetailedSearch(detailed) {
   const { ranges = {}, selects = {}, extras = [], flags = {} } = detailed;
   if (extras.length) return true;
   if (Object.keys(flags).length) return true;
-  if (Object.values(selects).some((v) => v != null && v !== "")) return true;
+  if (Object.values(selects).some((v) => {
+    if (Array.isArray(v)) return v.length > 0;
+    return v != null && v !== "";
+  })) return true;
   return Object.values(ranges).some((v) => v != null);
 }
 

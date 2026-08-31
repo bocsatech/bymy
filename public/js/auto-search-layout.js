@@ -5,7 +5,7 @@
 
 import { initVehicleCatalogSelects, fillSelect } from "./vehicle-catalog-client.js";
 import { KIVITEL_OPTIONS } from "./kivitel-options.js?v=kivitel1";
-import { flattenAllapotOptions, flattenSebessegvaltoOptions, OKMANY_JELLEG_OPTIONS } from "./equipment-data.js";
+import { flattenAllapotOptions, flattenSebessegvaltoOptions, OKMANY_JELLEG_OPTIONS, AC_TOLTO_CSATLAKOZAS_OPTIONS } from "./equipment-data.js";
 
 function searchLayoutCategory() {
   return document.body?.getAttribute("data-site-page") === "teherauto"
@@ -89,9 +89,9 @@ const SELECT_OPTIONS = {
   szin: ["Fehér", "Fekete", "Szürke", "Ezüst", "Kék", "Piros", "Zöld", "Barna", "Sárga", "Narancs", "Bézs"],
   teto: ["Normál", "Nyitható", "Panoráma", "Hardtop"],
   csomagtarto: ["Normál", "Nagy"],
-  tolto_csatlakozas: ["Type 2", "CCS", "CHAdeMO"],
-  ac_tolto_csatlakozas: ["Type 2", "CCS", "CHAdeMO", "Egyéb"],
-  dc_tolto_csatlakozas: ["CCS", "CHAdeMO", "Type 2", "Egyéb"],
+  tolto_csatlakozas: [...AC_TOLTO_CSATLAKOZAS_OPTIONS],
+  ac_tolto_csatlakozas: [...AC_TOLTO_CSATLAKOZAS_OPTIONS],
+  dc_tolto_csatlakozas: ["CCS", "CHAdeMO", "Egyéb"],
   villamtoltes: ["Igen", "Nem"],
   zold_rendszam: ["Igen", "Nem"],
   okmany_jelleg: [...OKMANY_JELLEG_OPTIONS],

@@ -86,6 +86,38 @@ export function flattenAllapotOptions() {
   return out;
 }
 
+/** Autó / teher — sebességváltó (kereső). */
+export const SEBESSEGVALTO_CATEGORIES = [
+  {
+    id: "manualis",
+    label: "Manuális",
+    children: [
+      { label: "Manuális (5 seb.)", value: "Manuális (5 seb.)" },
+      { label: "Manuális (6 seb.)", value: "Manuális (6 seb.)" },
+    ],
+  },
+  {
+    id: "automata",
+    label: "Automata",
+    children: [
+      { label: "Automata", value: "Automata" },
+      { label: "Fokozatmentes automata", value: "Fokozatmentes automata" },
+    ],
+  },
+];
+
+export function flattenSebessegvaltoOptions() {
+  const out = [];
+  for (const cat of SEBESSEGVALTO_CATEGORIES) {
+    if (cat.children?.length) {
+      for (const child of cat.children) out.push(child.value);
+    } else if (cat.value) {
+      out.push(cat.value);
+    }
+  }
+  return out;
+}
+
 export const EQUIPMENT_SECTIONS = {
   muszaki: {
     title: "Műszaki felszereltség",

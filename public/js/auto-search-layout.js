@@ -5,7 +5,7 @@
 
 import { initVehicleCatalogSelects, fillSelect } from "./vehicle-catalog-client.js";
 import { KIVITEL_OPTIONS } from "./kivitel-options.js?v=kivitel1";
-import { flattenAllapotOptions } from "./equipment-data.js";
+import { flattenAllapotOptions, flattenSebessegvaltoOptions } from "./equipment-data.js";
 
 function searchLayoutCategory() {
   return document.body?.getAttribute("data-site-page") === "teherauto"
@@ -71,7 +71,7 @@ const SELECT_OPTIONS = {
   keresesi_korzet: KERESESI_KORZET_OPTIONS,
   ajtok: ["2", "3", "4", "5"],
   szemelyek: ["1", "2", "3", "4", "5", "6", "7", "8", "9"],
-  sebessegvalto: ["Manuális", "Automata"],
+  sebessegvalto: flattenSebessegvaltoOptions(),
   hajtas: ["Első kerék", "Hátsó kerék", "Összkerék"],
   uzemanyag: [
     { value: "Benzin", label: "Benzin" },

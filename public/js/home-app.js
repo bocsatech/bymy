@@ -6,8 +6,8 @@ import {
   populateFilterOptions,
   initHomeSearchSidebar,
   initHomeFilterCatalog,
-} from "./home-search-filter.js?v=allapotPick1";
-import { initHomeQuickSearch } from "./home-quicksearch.js?v=allapotPick1";
+} from "./home-search-filter.js?v=valtoPick1";
+import { initHomeQuickSearch } from "./home-quicksearch.js?v=valtoPick1";
 import { matchDetailedSearch, hasActiveDetailedSearch } from "./auto-detailed-search.js?v=autoDesk16";
 import { updateAutoDeskResultCount } from "./auto-desk-search.js?v=teherDesk1";
 import {
@@ -290,6 +290,7 @@ function hasActiveSidebarFilters(filters) {
       filters.allapot ||
       filters.allapotok?.length ||
       filters.sebessegvalto ||
+      filters.sebessegvaltok?.length ||
       filters.hajtas ||
       filters.tipus ||
       filters.features?.length ||

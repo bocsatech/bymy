@@ -20,7 +20,7 @@ import {
   initAutoDeskSearch,
   updateAutoDeskAccSummaries,
   arrangeAutoDeskDemoFields,
-} from "./auto-desk-search.js?v=deskRestore2";
+} from "./auto-desk-search.js?v=teherKivitel35b";
 
 const MOBILE_MQ = "(max-width: 900px)";
 const DESK_MQ = "(min-width: 901px)";

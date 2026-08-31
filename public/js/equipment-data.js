@@ -34,6 +34,108 @@ export const UZEMANYAG_CATEGORIES = [
   { id: "gaz", label: "Gáz", value: "Gáz" },
 ];
 
+/** Kisteher 3,5 t-ig — Kivitel (lapos lista). */
+export const TEHER_KISTEHER_KIVITEL = [
+  "Kisteher",
+  "Dobozos",
+  "Platós",
+  "Ponyvás",
+  "Hűtős",
+  "Billenős",
+  "Alváz",
+];
+
+/**
+ * Teherautó 3,5 t-tól — Kivitel (hierarchikus, kapcsolós menü).
+ * Szülő bekapcsolásakor nyílnak a részletek (állapot / üzemanyag stílus).
+ */
+export const TEHER_35_KIVITEL_CATEGORIES = [
+  {
+    id: "pickup",
+    label: "Pickup",
+    children: [
+      { label: "Pickup", value: "Pickup" },
+      { label: "Duplakabinos pickup", value: "Duplakabinos pickup" },
+      { label: "Szimplakabinos pickup", value: "Szimplakabinos pickup" },
+    ],
+  },
+  { id: "terepjaro", label: "Terepjáró", value: "Terepjáró" },
+  {
+    id: "zart",
+    label: "Zárt",
+    children: [
+      { label: "Zárt", value: "Zárt" },
+      { label: "Cargo", value: "Cargo" },
+      { label: "Félig ablakos", value: "Félig ablakos" },
+      { label: "Furgon", value: "Furgon" },
+      { label: "Hűtős (zárt)", value: "Hűtős (zárt)" },
+      { label: "Körbeüvegezett", value: "Körbeüvegezett" },
+      { label: "Van", value: "Van" },
+    ],
+  },
+  { id: "atv-utv", label: "ATV/UTV", value: "ATV/UTV" },
+  { id: "darus-billeno", label: "Darus billenőplatós", value: "Darus billenőplatós" },
+  {
+    id: "duplakabinos-alvaz",
+    label: "Duplakabinos alváz",
+    children: [
+      { label: "Duplakabinos alváz", value: "Duplakabinos alváz" },
+      { label: "Duplakabinos autómentő", value: "Duplakabinos autómentő" },
+      { label: "Duplakabinos billenőplatós", value: "Duplakabinos billenőplatós" },
+      { label: "Duplakabinos darus", value: "Duplakabinos darus" },
+      { label: "Duplakabinos dobozos (koffer)", value: "Duplakabinos dobozos (koffer)" },
+      { label: "Duplakabinos dobozos-emelőhátfalas", value: "Duplakabinos dobozos-emelőhátfalas" },
+      { label: "Duplakabinos élőállat-szállító", value: "Duplakabinos élőállat-szállító" },
+      { label: "Duplakabinos emelőkosaras", value: "Duplakabinos emelőkosaras" },
+      { label: "Duplakabinos létrás", value: "Duplakabinos létrás" },
+      { label: "Duplakabinos platós", value: "Duplakabinos platós" },
+      { label: "Duplakabinos ponyvás", value: "Duplakabinos ponyvás" },
+      { label: "Duplakabinos ponyvás-emelőhátfalas", value: "Duplakabinos ponyvás-emelőhátfalas" },
+    ],
+  },
+  { id: "eloallat", label: "Élőállat-szállító", value: "Élőállat-szállító" },
+  { id: "halottas", label: "Halottas", value: "Halottas" },
+  { id: "konteneres", label: "Konténeres", value: "Konténeres" },
+  { id: "mento", label: "Mentő", value: "Mentő" },
+  { id: "mini-nyerges", label: "Mini - nyerges", value: "Mini - nyerges" },
+  { id: "pancelozott", label: "Páncélozott", value: "Páncélozott" },
+  { id: "platos-emelo", label: "Platós - emelőhátfalas", value: "Platós - emelőhátfalas" },
+  {
+    id: "szimplakabinos-alvaz",
+    label: "Szimplakabinos alváz",
+    children: [
+      { label: "Szimplakabinos alváz", value: "Szimplakabinos alváz" },
+      { label: "Autómentő", value: "Autómentő" },
+      { label: "Billenőplatós", value: "Billenőplatós" },
+      { label: "Darus", value: "Darus" },
+      { label: "Dobozos (emelőhátfalas)", value: "Dobozos (emelőhátfalas)" },
+      { label: "Dobozos (koffer)", value: "Dobozos (koffer)" },
+      { label: "Emelőkosaras", value: "Emelőkosaras" },
+      { label: "Hűtős alváz", value: "Hűtős alváz" },
+      { label: "Létrás", value: "Létrás" },
+      { label: "Mozgóbolt, büfékocsi", value: "Mozgóbolt, büfékocsi" },
+      { label: "Platós", value: "Platós" },
+      { label: "Ponyvás", value: "Ponyvás" },
+      { label: "Ponyvás (emelőhátfalas)", value: "Ponyvás (emelőhátfalas)" },
+    ],
+  },
+  { id: "tuzolto", label: "Tűzoltó", value: "Tűzoltó" },
+  { id: "zart-emelo", label: "Zárt - emelőhátfalas", value: "Zárt - emelőhátfalas" },
+  { id: "egyeb", label: "Egyéb", value: "Egyéb" },
+];
+
+export function flattenTeher35KivitelOptions() {
+  const out = [];
+  for (const cat of TEHER_35_KIVITEL_CATEGORIES) {
+    if (cat.children?.length) {
+      for (const child of cat.children) out.push(child.value);
+    } else if (cat.value) {
+      out.push(cat.value);
+    }
+  }
+  return out;
+}
+
 /** Autó / teher — állapot (kereső + feladás). */
 export const ALLAPOT_CATEGORIES = [
   {

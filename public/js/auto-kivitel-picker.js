@@ -1,11 +1,16 @@
 /**
- * Autó asztali — Kivitel kapcsolós multi-select (üzemanyag / gyártmány stílus).
+ * Asztali Kivitel kapcsolós multi-select.
+ * Autó / kisteher: lapos lista.
+ * Teherautó 3,5-tól: hierarchikus (állapot / üzemanyag stílus).
  */
 
 import { KIVITEL_OPTIONS, normalizeKivitel } from "./kivitel-options.js?v=kivitel1";
+import {
+  TEHER_KISTEHER_KIVITEL,
+  TEHER_35_KIVITEL_CATEGORIES,
+  flattenTeher35KivitelOptions,
+} from "./equipment-data.js?v=teherKivitel35";
 import { bindAutoBmDismiss, autoBmPanelIsOpen } from "./auto-bm-dismiss.js?v=bmDismiss1";
-
-const TEHER_KIVITEL = ["Kisteher", "Dobozos", "Platós", "Ponyvás", "Hűtős", "Billenős", "Alváz"];
 
 function labelList(items) {
   if (!items.length) return "Mindegy";
@@ -42,8 +47,23 @@ function isAutoDesk() {
   );
 }
 
-function optionsForPage() {
-  return document.body?.getAttribute("data-site-page") === "teherauto" ? TEHER_KIVITEL : KIVITEL_OPTIONS;
+function truckKategoria() {
+  return new URLSearchParams(window.location.search).get("kategoria") || "35-alatt";
+}
+
+function useTeher35Categories() {
+  return document.body?.getAttribute("data-site-page") === "teherauto" && truckKategoria() === "35-felett";
+}
+
+function flatOptionsForPage() {
+  if (document.body?.getAttribute("data-site-page") !== "teherauto") return KIVITEL_OPTIONS;
+  if (useTeher35Categories()) return flattenTeher35KivitelOptions();
+  return TEHER_KISTEHER_KIVITEL;
+}
+
+function categoryValues(cat) {
+  if (cat.children?.length) return cat.children.map((c) => c.value);
+  return cat.value ? [cat.value] : [];
 }
 
 function escapeHtml(value) {
@@ -58,6 +78,14 @@ function escapeAttr(value) {
   return escapeHtml(value).replace(/'/g, "&#39;");
 }
 
+function normKey(value) {
+  return String(value ?? "")
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
+
 /**
  * @param {HTMLFormElement} form
  */
@@ -69,13 +97,19 @@ export async function mountAutoKivitelPicker(form) {
 
   const host =
     field.closest(".auto-desk-fields") ||
-    form.querySelector(".auto-desk-fields[data-desk-alap]");
+    form.querySelector(".auto-desk-fields[data-desk-alap]") ||
+    form.querySelector(".auto-desk-fields[data-desk-muszaki]");
   if (!host) return;
 
   const deskQuick = field.dataset.deskQuick || "0";
   field.remove();
 
-  const options = optionsForPage();
+  const hierarchical = useTeher35Categories();
+  const categories = hierarchical ? TEHER_35_KIVITEL_CATEGORIES : null;
+  const flatOptions = hierarchical ? null : flatOptionsForPage();
+
+  /** @type {Set<string>} */
+  const openMains = new Set();
   /** @type {Set<string>} */
   const selected = new Set();
 
@@ -97,15 +131,36 @@ export async function mountAutoKivitelPicker(form) {
   `;
   wrap.appendChild(hidden);
 
-  // Üzemanyag után, vagy a host végére
   const fuelField = host.querySelector(".auto-fuel-field, [data-desk-field='uzemanyag']");
   if (fuelField?.nextSibling) host.insertBefore(wrap, fuelField.nextSibling);
   else if (fuelField) host.appendChild(wrap);
   else host.appendChild(wrap);
 
-  // URL ?kivitel= előtöltés
-  const urlKivitel = normalizeKivitel(new URLSearchParams(window.location.search).get("kivitel") || "");
-  if (urlKivitel) selected.add(urlKivitel);
+  const urlKivitel = String(new URLSearchParams(window.location.search).get("kivitel") || "").trim();
+  if (urlKivitel) {
+    if (hierarchical && categories) {
+      const cat = categories.find(
+        (c) =>
+          c.value === urlKivitel ||
+          c.label === urlKivitel ||
+          c.children?.some((ch) => ch.value === urlKivitel)
+      );
+      if (cat) {
+        openMains.add(cat.id);
+        if (cat.children?.length) {
+          const child = cat.children.find((ch) => ch.value === urlKivitel);
+          if (child) selected.add(child.value);
+          else cat.children.forEach((ch) => selected.add(ch.value));
+        } else if (cat.value) {
+          selected.add(cat.value);
+        }
+      } else {
+        selected.add(urlKivitel);
+      }
+    } else {
+      selected.add(normalizeKivitel(urlKivitel) || urlKivitel);
+    }
+  }
 
   const summaryEl = wrap.querySelector("[data-auto-kivitel-summary]");
   const openBtn = wrap.querySelector("[data-auto-kivitel-open]");
@@ -127,14 +182,100 @@ export async function mountAutoKivitelPicker(form) {
   hero.appendChild(panel);
   const bodyEl = panel.querySelector("[data-auto-kivitel-body]");
 
-  function syncHidden() {
-    const list = [...selected];
-    writeJsonList(hidden, list);
-    if (summaryEl) summaryEl.textContent = labelList(list);
+  function selectedLabelsHierarchical() {
+    const labels = [];
+    for (const cat of categories) {
+      if (!openMains.has(cat.id)) continue;
+      if (cat.children?.length) {
+        const kids = cat.children.filter((c) => selected.has(c.value));
+        if (kids.length) labels.push(...kids.map((c) => c.label));
+        else labels.push(cat.label);
+      } else if (cat.value && selected.has(cat.value)) {
+        labels.push(cat.label);
+      }
+    }
+    return labels;
   }
 
-  function renderList() {
-    const rows = options
+  function effectiveSelectedValues() {
+    if (!hierarchical) return [...selected];
+    const values = new Set();
+    for (const cat of categories) {
+      if (!openMains.has(cat.id)) continue;
+      if (cat.children?.length) {
+        const kids = cat.children.filter((c) => selected.has(c.value));
+        if (kids.length) kids.forEach((c) => values.add(c.value));
+        else {
+          cat.children.forEach((c) => values.add(c.value));
+          values.add(cat.label);
+        }
+      } else if (cat.value && selected.has(cat.value)) {
+        values.add(cat.value);
+      }
+    }
+    return [...values];
+  }
+
+  function syncHidden() {
+    const list = hierarchical ? effectiveSelectedValues() : [...selected];
+    writeJsonList(hidden, list);
+    if (summaryEl) {
+      summaryEl.textContent = labelList(hierarchical ? selectedLabelsHierarchical() : list);
+    }
+  }
+
+  function turnMainOn(cat) {
+    openMains.add(cat.id);
+    if (!cat.children?.length && cat.value) selected.add(cat.value);
+  }
+
+  function turnMainOff(cat) {
+    openMains.delete(cat.id);
+    for (const v of categoryValues(cat)) selected.delete(v);
+  }
+
+  function renderHierarchical() {
+    const rows = categories
+      .map((cat) => {
+        const on = openMains.has(cat.id);
+        const hasKids = Boolean(cat.children?.length);
+        let kidsHtml = "";
+        if (hasKids && on) {
+          kidsHtml = `<div class="auto-fuel-children">
+            ${cat.children
+              .map((child) => {
+                const childOn = selected.has(child.value);
+                return `<div class="auto-bm-row auto-fuel-child-row">
+                  <label class="auto-bm-toggle">
+                    <span>${escapeHtml(child.label)}</span>
+                    <input type="checkbox" data-auto-kivitel-child="${escapeAttr(child.value)}" data-auto-kivitel-parent="${escapeAttr(cat.id)}" ${childOn ? "checked" : ""} />
+                    <span class="auto-bm-switch" aria-hidden="true"></span>
+                  </label>
+                </div>`;
+              })
+              .join("")}
+          </div>`;
+        }
+        return `<div class="auto-bm-row auto-fuel-main-row" data-auto-kivitel-main="${escapeAttr(cat.id)}">
+          <label class="auto-bm-toggle auto-fuel-main-toggle">
+            <span class="auto-fuel-main-label">${escapeHtml(cat.label)}</span>
+            <input type="checkbox" data-auto-kivitel-main-toggle="${escapeAttr(cat.id)}" ${on ? "checked" : ""} />
+            <span class="auto-bm-switch" aria-hidden="true"></span>
+          </label>
+          ${kidsHtml}
+        </div>`;
+      })
+      .join("");
+
+    bodyEl.innerHTML = `
+      <p class="auto-bm-hint">Kapcsolók — több kivitel is</p>
+      <button type="button" class="auto-bm-clear" data-auto-kivitel-clear>Összes kikapcsolása</button>
+      <div class="auto-bm-group">${rows}</div>
+    `;
+  }
+
+  function renderFlat() {
+    const rows = flatOptions
       .map((opt) => {
         const on = selected.has(opt);
         return `<div class="auto-bm-row">
@@ -151,6 +292,11 @@ export async function mountAutoKivitelPicker(form) {
       <button type="button" class="auto-bm-clear" data-auto-kivitel-clear>Összes kikapcsolása</button>
       <div class="auto-bm-group">${rows}</div>
     `;
+  }
+
+  function renderList() {
+    if (hierarchical) renderHierarchical();
+    else renderFlat();
   }
 
   function openPanel() {
@@ -186,17 +332,44 @@ export async function mountAutoKivitelPicker(form) {
   panel.querySelector("[data-auto-kivitel-done]")?.addEventListener("click", closePanel);
 
   bodyEl.addEventListener("change", (event) => {
-    const el = event.target.closest("[data-auto-kivitel-opt]");
-    if (!el) return;
-    const opt = el.getAttribute("data-auto-kivitel-opt");
-    if (el.checked) selected.add(opt);
-    else selected.delete(opt);
+    const mainToggle = event.target.closest("[data-auto-kivitel-main-toggle]");
+    if (mainToggle && hierarchical) {
+      const id = mainToggle.getAttribute("data-auto-kivitel-main-toggle");
+      const cat = categories.find((c) => c.id === id);
+      if (!cat) return;
+      if (mainToggle.checked) turnMainOn(cat);
+      else turnMainOff(cat);
+      renderList();
+      syncHidden();
+      return;
+    }
+
+    const child = event.target.closest("[data-auto-kivitel-child]");
+    if (child && hierarchical) {
+      const value = child.getAttribute("data-auto-kivitel-child");
+      const parentId = child.getAttribute("data-auto-kivitel-parent");
+      if (child.checked) {
+        selected.add(value);
+        if (parentId) openMains.add(parentId);
+      } else {
+        selected.delete(value);
+      }
+      syncHidden();
+      return;
+    }
+
+    const opt = event.target.closest("[data-auto-kivitel-opt]");
+    if (!opt) return;
+    const value = opt.getAttribute("data-auto-kivitel-opt");
+    if (opt.checked) selected.add(value);
+    else selected.delete(value);
     syncHidden();
   });
 
   bodyEl.addEventListener("click", (event) => {
     if (!event.target.closest("[data-auto-kivitel-clear]")) return;
     selected.clear();
+    openMains.clear();
     renderList();
     syncHidden();
   });
@@ -204,6 +377,7 @@ export async function mountAutoKivitelPicker(form) {
   form.addEventListener("reset", () => {
     requestAnimationFrame(() => {
       selected.clear();
+      openMains.clear();
       syncHidden();
       if (!panel.hidden) renderList();
     });
@@ -217,13 +391,23 @@ export function readKivitelFilterValues(form) {
   if (!form) return {};
   const el = form.querySelector('[data-filter-key="kivitelek"]');
   if (!el) return {};
-  const kivitelek = parseJsonList(el.value).map(normalizeKivitel).filter(Boolean);
+  const kivitelek = parseJsonList(el.value)
+    .map((x) => String(x).trim())
+    .filter(Boolean);
   return kivitelek.length ? { kivitelek } : {};
 }
 
 export function kivitelListMatches(listingValue, selectedValues) {
   if (!selectedValues?.length) return true;
-  const got = normalizeKivitel(listingValue);
+  const got = String(listingValue ?? "").trim();
   if (!got) return false;
-  return selectedValues.some((want) => normalizeKivitel(want) === got);
+  const gotN = normKey(got);
+  const gotCar = normalizeKivitel(got);
+  return selectedValues.some((raw) => {
+    const want = String(raw ?? "").trim();
+    if (!want) return false;
+    if (gotCar && normalizeKivitel(want) === gotCar) return true;
+    const wantN = normKey(want);
+    return gotN === wantN || gotN.includes(wantN) || wantN.includes(gotN);
+  });
 }

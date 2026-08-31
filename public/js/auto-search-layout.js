@@ -5,12 +5,29 @@
 
 import { initVehicleCatalogSelects, fillSelect } from "./vehicle-catalog-client.js";
 import { KIVITEL_OPTIONS } from "./kivitel-options.js?v=kivitel1";
-import { flattenAllapotOptions, flattenSebessegvaltoOptions, OKMANY_JELLEG_OPTIONS, AC_TOLTO_CSATLAKOZAS_OPTIONS } from "./equipment-data.js";
+import {
+  flattenAllapotOptions,
+  flattenSebessegvaltoOptions,
+  OKMANY_JELLEG_OPTIONS,
+  AC_TOLTO_CSATLAKOZAS_OPTIONS,
+  TEHER_KISTEHER_KIVITEL,
+  flattenTeher35KivitelOptions,
+} from "./equipment-data.js?v=teherKivitel35";
 
 function searchLayoutCategory() {
   return document.body?.getAttribute("data-site-page") === "teherauto"
     ? "teherauto-search"
     : "szemelyauto-search";
+}
+
+function teherKategoria() {
+  return new URLSearchParams(window.location.search).get("kategoria") || "35-alatt";
+}
+
+function teherKivitelOptions() {
+  return teherKategoria() === "35-felett"
+    ? flattenTeher35KivitelOptions()
+    : TEHER_KISTEHER_KIVITEL;
 }
 
 function layoutUrl() {
@@ -58,8 +75,6 @@ const RANGE_SPECS = {
   autopalya_hatotav: { tol: "autopalya_hatotav_tol", ig: "autopalya_hatotav_ig", kind: "number" },
   teli_hatotav: { tol: "teli_hatotav_tol", ig: "teli_hatotav_ig", kind: "number" },
 };
-
-const TEHER_KIVITEL = ["Kisteher", "Dobozos", "Platós", "Ponyvás", "Hűtős", "Billenős", "Alváz"];
 
 /** Keresési körzet: 10 km-es lépés, 200 km-ig. */
 export const KERESESI_KORZET_OPTIONS = Array.from({ length: 20 }, (_, i) => {
@@ -127,7 +142,7 @@ const SELECT_OPTIONS = {
 
 function selectOptionsFor(key) {
   if (key === "kivitel" && searchLayoutCategory() === "teherauto-search") {
-    return TEHER_KIVITEL;
+    return teherKivitelOptions();
   }
   return SELECT_OPTIONS[key];
 }

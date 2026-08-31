@@ -9,7 +9,7 @@ import {
   TEHER_KISTEHER_KIVITEL,
   TEHER_35_KIVITEL_CATEGORIES,
   flattenTeher35KivitelOptions,
-} from "./equipment-data.js?v=teherKivitel35b";
+} from "./equipment-data.js?v=teherKivitel35c";
 import { bindAutoBmDismiss, autoBmPanelIsOpen } from "./auto-bm-dismiss.js?v=bmDismiss1";
 
 function labelList(items) {
@@ -39,12 +39,13 @@ function writeJsonList(input, list) {
   input.dispatchEvent(new Event("change", { bubbles: true }));
 }
 
+function isVehicleSearchPage() {
+  const page = document.body?.getAttribute("data-site-page");
+  return page === "auto" || page === "teherauto";
+}
+
 function isAutoDesk() {
-  return (
-    (document.body?.getAttribute("data-site-page") === "auto" ||
-      document.body?.getAttribute("data-site-page") === "teherauto") &&
-    window.matchMedia("(min-width: 901px)").matches
-  );
+  return isVehicleSearchPage() && window.matchMedia("(min-width: 901px)").matches;
 }
 
 function truckKategoria() {
@@ -53,6 +54,13 @@ function truckKategoria() {
 
 function useTeher35Categories() {
   return document.body?.getAttribute("data-site-page") === "teherauto" && truckKategoria() === "35-felett";
+}
+
+/** Teher 3,5-tól: mindig kapcsolós hierarchia (asztal + mobil). Egyébként csak asztali desk. */
+function shouldMountKivitelPicker() {
+  if (!isVehicleSearchPage()) return false;
+  if (useTeher35Categories()) return true;
+  return isAutoDesk();
 }
 
 function flatOptionsForPage() {
@@ -90,18 +98,32 @@ function normKey(value) {
  * @param {HTMLFormElement} form
  */
 export async function mountAutoKivitelPicker(form) {
-  if (!form || !isAutoDesk() || form.dataset.kivitelPicker === "1") return;
+  if (!form || !shouldMountKivitelPicker() || form.dataset.kivitelPicker === "1") return;
 
-  const alapHost = form.querySelector(".auto-desk-fields[data-desk-alap]");
+  let alapHost = form.querySelector(".auto-desk-fields[data-desk-alap]");
   const muszakiHost = form.querySelector(".auto-desk-fields[data-desk-muszaki]");
-  const host = alapHost || muszakiHost;
+
+  // Mobil / layout nélkül: cseréljük a meglévő kivitel mezőt, vagy hozzunk létre hostot
+  const legacyKivitel =
+    form.querySelector('[data-qs-field="kivitel"]') ||
+    form.querySelector("#qs-kivitel")?.closest(".home-qs-field, .immo-schema-cell, [data-qs-field], label") ||
+    form.querySelector('[data-desk-field="kivitel"]');
+
+  if (!alapHost && !muszakiHost && !legacyKivitel) {
+    const accBody = form.querySelector('[data-desk-acc="alap"] .auto-desk-acc__body') || form;
+    alapHost = document.createElement("div");
+    alapHost.className = "auto-desk-fields";
+    alapHost.dataset.deskAlap = "1";
+    accBody.insertBefore(alapHost, accBody.firstChild);
+  }
+
+  const host = alapHost || muszakiHost || legacyKivitel?.parentElement || form;
   if (!host) return;
 
-  const existing = form.querySelector('[data-desk-field="kivitel"]');
-  const deskQuick = existing?.dataset.deskQuick || "1";
   form.querySelectorAll('[data-desk-field="kivitel"]').forEach((el) => el.remove());
-  // Régi natív select forrás — ne maradjon szűrési zaj
+  form.querySelectorAll('[data-qs-field="kivitel"]').forEach((el) => el.remove());
   form.querySelector("#qs-kivitel")?.remove();
+  form.querySelector('[data-wheel="kivitel"]')?.closest(".immo-schema-cell, .home-qs-drum-cell, .auto-cell-drum")?.remove();
 
   const hierarchical = useTeher35Categories();
   const categories = hierarchical ? TEHER_35_KIVITEL_CATEGORIES : null;
@@ -120,7 +142,8 @@ export async function mountAutoKivitelPicker(form) {
   const wrap = document.createElement("div");
   wrap.className = "auto-desk-field auto-kivitel-field";
   wrap.dataset.deskField = "kivitel";
-  wrap.dataset.deskQuick = deskQuick;
+  wrap.dataset.deskQuick = "1";
+  wrap.hidden = false;
   wrap.innerHTML = `
     <span class="auto-desk-field__label">Kivitel</span>
     <button type="button" class="auto-bm-trigger" data-auto-kivitel-open>
@@ -131,10 +154,18 @@ export async function mountAutoKivitelPicker(form) {
   wrap.appendChild(hidden);
 
   const insertHost = alapHost || host;
-  const fuelField = insertHost.querySelector(".auto-fuel-field, [data-desk-field='uzemanyag']");
-  if (fuelField?.nextSibling) insertHost.insertBefore(wrap, fuelField.nextSibling);
-  else if (fuelField) insertHost.appendChild(wrap);
-  else insertHost.appendChild(wrap);
+  const fuelField =
+    insertHost.querySelector?.(".auto-fuel-field, [data-desk-field='uzemanyag'], [data-qs-field='uzemanyag']") ||
+    form.querySelector(".auto-fuel-field, [data-desk-field='uzemanyag'], [data-qs-field='uzemanyag']");
+  if (fuelField?.parentElement === insertHost && fuelField.nextSibling) {
+    insertHost.insertBefore(wrap, fuelField.nextSibling);
+  } else if (fuelField?.parentElement === insertHost) {
+    insertHost.appendChild(wrap);
+  } else if (legacyKivitel?.parentElement) {
+    legacyKivitel.replaceWith(wrap);
+  } else {
+    insertHost.appendChild(wrap);
+  }
 
   const urlKivitel = String(new URLSearchParams(window.location.search).get("kivitel") || "").trim();
   if (urlKivitel) {

@@ -6,10 +6,10 @@ import {
   populateFilterOptions,
   initHomeSearchSidebar,
   initHomeFilterCatalog,
-} from "./home-search-filter.js?v=teherKivitel35b";
-import { initHomeQuickSearch } from "./home-quicksearch.js?v=teherKivitel35b";
+} from "./home-search-filter.js?v=teherKivitel35c";
+import { initHomeQuickSearch } from "./home-quicksearch.js?v=teherKivitel35c";
 import { matchDetailedSearch, hasActiveDetailedSearch } from "./auto-detailed-search.js?v=autoDesk16";
-import { updateAutoDeskResultCount } from "./auto-desk-search.js?v=teherKivitel35b";
+import { updateAutoDeskResultCount } from "./auto-desk-search.js?v=teherKivitel35c";
 import {
   emptyIngatlanFilters,
   filterListingsByIngatlan,

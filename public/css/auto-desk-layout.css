@@ -1358,3 +1358,169 @@
     font-size: 14px;
   }
 }
+
+/* Teher 3,5-tól Kivitel: kapcsolók mobilon is (desk media query-n kívül) */
+@media (max-width: 900px) {
+  body.home-page[data-site-page="teherauto"] {
+    --ad-panel: #fff;
+    --ad-line: #d4d4d4;
+    --ad-text: #111;
+    --ad-muted: #6b6b6b;
+    --ad-yellow: #f0c52c;
+    --ad-surface-2: #f0f0f0;
+  }
+
+  body.home-page[data-site-page="teherauto"] .auto-kivitel-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 0.5rem 0;
+  }
+
+  body.home-page[data-site-page="teherauto"] .auto-kivitel-field .auto-bm-trigger {
+    appearance: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    width: 100%;
+    min-height: 44px;
+    padding: 0 14px;
+    border: 1px solid #d0d5dd;
+    border-radius: 10px;
+    background: #fff;
+    color: #000;
+    font: inherit;
+    font-size: 15px;
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  body.home-page[data-site-page="teherauto"] .auto-kivitel-panel {
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    display: flex;
+    flex-direction: column;
+    background: var(--ad-panel);
+    overflow: hidden;
+  }
+
+  body.home-page[data-site-page="teherauto"] .auto-kivitel-panel[hidden],
+  body.home-page[data-site-page="teherauto"] .auto-kivitel-panel.is-closed {
+    display: none !important;
+  }
+
+  body.home-page[data-site-page="teherauto"] .auto-kivitel-panel .auto-bm-panel__chrome {
+    display: grid;
+    grid-template-columns: 40px 1fr auto;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--ad-line);
+    background: var(--ad-surface-2);
+  }
+
+  body.home-page[data-site-page="teherauto"] .auto-kivitel-panel .auto-bm-panel__back,
+  body.home-page[data-site-page="teherauto"] .auto-kivitel-panel .auto-bm-panel__done {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    color: var(--ad-yellow);
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  body.home-page[data-site-page="teherauto"] .auto-kivitel-panel .auto-bm-panel__title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 800;
+  }
+
+  body.home-page[data-site-page="teherauto"] .auto-kivitel-panel .auto-bm-panel__body {
+    flex: 1;
+    overflow: auto;
+    padding: 10px 12px 24px;
+  }
+
+  body.home-page[data-site-page="teherauto"] .auto-kivitel-panel .auto-bm-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 52px;
+    padding: 0 14px;
+    cursor: pointer;
+  }
+
+  body.home-page[data-site-page="teherauto"] .auto-kivitel-panel .auto-bm-toggle input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  body.home-page[data-site-page="teherauto"] .auto-kivitel-panel .auto-bm-switch {
+    width: 46px;
+    height: 28px;
+    border-radius: 999px;
+    background: #c6c6c6;
+    position: relative;
+    flex: 0 0 auto;
+  }
+
+  body.home-page[data-site-page="teherauto"] .auto-kivitel-panel .auto-bm-switch::after {
+    content: "";
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #fff;
+  }
+
+  body.home-page[data-site-page="teherauto"] .auto-kivitel-panel .auto-bm-toggle input:checked + .auto-bm-switch {
+    background: #34c759;
+  }
+
+  body.home-page[data-site-page="teherauto"] .auto-kivitel-panel .auto-bm-toggle input:checked + .auto-bm-switch::after {
+    transform: translateX(18px);
+  }
+
+  body.home-page[data-site-page="teherauto"] .auto-kivitel-panel .auto-bm-group {
+    border: 1px solid var(--ad-line);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  body.home-page[data-site-page="teherauto"] .auto-kivitel-panel .auto-bm-row + .auto-bm-row {
+    border-top: 1px solid var(--ad-line);
+  }
+
+  body.home-page[data-site-page="teherauto"] .auto-kivitel-panel .auto-fuel-children {
+    border-top: 1px solid var(--ad-line);
+    margin-left: 12px;
+  }
+
+  body.home-page[data-site-page="teherauto"] .auto-kivitel-panel .auto-bm-clear {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    color: var(--ad-yellow);
+    font: inherit;
+    font-weight: 700;
+    margin: 0 0 10px;
+    padding: 0;
+    cursor: pointer;
+  }
+
+  body.home-page[data-site-page="teherauto"] .auto-kivitel-panel .auto-bm-hint {
+    margin: 0 0 6px;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ad-muted);
+  }
+}

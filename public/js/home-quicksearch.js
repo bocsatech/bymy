@@ -2,7 +2,7 @@
  * Gyorskereső az autó hero panelen — elrendezés: GET /api/level1/form-layout?category=szemelyauto-search
  */
 
-import { applyAutoSearchLayout, readLayoutFilterValues } from "./auto-search-layout.js?v=teherKivitel35b";
+import { applyAutoSearchLayout, readLayoutFilterValues } from "./auto-search-layout.js?v=teherKivitel35c";
 import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums } from "./auto-search-drums.js?v=fogyNum1";
 import {
   mountDetailedSearch,
@@ -11,7 +11,7 @@ import {
 } from "./auto-detailed-search.js?v=fogyNum1";
 import { readBrandModelFilterValues, mountAutoBrandModelPicker } from "./auto-brand-model-picker.js?v=fogyNum1";
 import { readFuelFilterValues, mountAutoFuelPicker } from "./auto-fuel-picker.js?v=fogyNum1";
-import { readKivitelFilterValues, mountAutoKivitelPicker } from "./auto-kivitel-picker.js?v=teherKivitel35b";
+import { readKivitelFilterValues, mountAutoKivitelPicker } from "./auto-kivitel-picker.js?v=teherKivitel35c";
 import { readAllapotFilterValues, mountAutoAllapotPicker } from "./auto-allapot-picker.js?v=fogyNum1";
 import { readSebessegvaltoFilterValues, mountAutoSebessegvaltoPicker } from "./auto-sebessegvalto-picker.js?v=fogyNum1";
 import { readOkmanyFilterValues, mountAutoOkmanyPicker } from "./auto-okmany-picker.js?v=fogyNum1";
@@ -20,7 +20,7 @@ import {
   initAutoDeskSearch,
   updateAutoDeskAccSummaries,
   arrangeAutoDeskDemoFields,
-} from "./auto-desk-search.js?v=teherKivitel35b";
+} from "./auto-desk-search.js?v=teherKivitel35c";
 
 const MOBILE_MQ = "(max-width: 900px)";
 const DESK_MQ = "(min-width: 901px)";
@@ -171,6 +171,14 @@ export function initHomeQuickSearch({ onSearch = () => {}, onDeskSortChange } = 
         } catch (drumError) {
           console.warn("Kereső dobkerék:", drumError);
         }
+        // Teher 3,5-tól: dob helyett kapcsolós hierarchikus Kivitel
+        if (page === "teherauto") {
+          try {
+            await mountAutoKivitelPicker(form);
+          } catch (kivitelError) {
+            console.warn("Kivitel picker:", kivitelError);
+          }
+        }
       } else {
         arrangeAutoDeskDemoFields(form);
         try {
@@ -251,6 +259,12 @@ export function initHomeQuickSearch({ onSearch = () => {}, onDeskSortChange } = 
           await mountAutoToltoPickers(form);
         } catch (deskError) {
           console.warn("Desk fallback kereső:", deskError);
+        }
+      } else if (page === "teherauto") {
+        try {
+          await mountAutoKivitelPicker(form);
+        } catch (kivitelError) {
+          console.warn("Kivitel picker fallback:", kivitelError);
         }
       }
       setQsReady(true);

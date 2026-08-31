@@ -1,5 +1,6 @@
 import { initVehicleCatalogSelects, shortTypeName } from "./vehicle-catalog-client.js";
 import { kivitelMatches } from "./kivitel-options.js?v=kivitel1";
+import { fuelValueMatches } from "./auto-fuel-picker.js?v=fuelPick1";
 
 const FUEL_QUICK_FILTERS = [
   { id: "benzin", label: "Benzin", match: (value) => value === "Benzin" },
@@ -154,7 +155,9 @@ export function filterListingsBySidebar(items, filters) {
     if (filters.kivitel && !kivitelMatches(f.kivitel, filters.kivitel)) return false;
     if (filters.hajtas && f.hajtas !== filters.hajtas) return false;
     if (!matchesSebessegvalto(f.sebessegvalto, filters.sebessegvalto)) return false;
-    if (filters.uzemanyagQuick) {
+    if (filters.uzemanyagok?.length) {
+      if (!fuelValueMatches(f.uzemanyag, filters.uzemanyagok)) return false;
+    } else if (filters.uzemanyagQuick) {
       const rule = FUEL_QUICK_FILTERS.find((entry) => entry.id === filters.uzemanyagQuick);
       if (rule && !rule.match(f.uzemanyag)) return false;
     } else if (filters.uzemanyag && f.uzemanyag !== filters.uzemanyag) return false;

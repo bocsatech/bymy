@@ -1250,6 +1250,31 @@
     white-space: nowrap;
   }
 
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-fuel-field .auto-desk-field__label {
+    font-size: 14px !important;
+    font-weight: 800 !important;
+    color: #000 !important;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-fuel-main-label {
+    font-weight: 800;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-fuel-children {
+    border-top: 1px solid var(--ad-line);
+    margin-left: 12px;
+    padding-left: 4px;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-fuel-child-row .auto-bm-toggle span:first-child {
+    font-weight: 500;
+    padding-left: 8px;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-fuel-main-row + .auto-fuel-main-row {
+    border-top: 1px solid var(--ad-line);
+  }
+
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-empty {
     margin: 0;
     padding: 20px 14px;

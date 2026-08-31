@@ -6,8 +6,8 @@ import {
   populateFilterOptions,
   initHomeSearchSidebar,
   initHomeFilterCatalog,
-} from "./home-search-filter.js?v=korzetFix1";
-import { initHomeQuickSearch } from "./home-quicksearch.js?v=bmSearch2";
+} from "./home-search-filter.js?v=fuelPick1";
+import { initHomeQuickSearch } from "./home-quicksearch.js?v=fuelPick1";
 import { matchDetailedSearch, hasActiveDetailedSearch } from "./auto-detailed-search.js?v=autoDesk16";
 import { updateAutoDeskResultCount } from "./auto-desk-search.js?v=teherDesk1";
 import {
@@ -285,6 +285,7 @@ function hasActiveSidebarFilters(filters) {
       filters.kivitel ||
       filters.uzemanyag ||
       filters.uzemanyagQuick ||
+      filters.uzemanyagok?.length ||
       filters.allapot ||
       filters.sebessegvalto ||
       filters.hajtas ||

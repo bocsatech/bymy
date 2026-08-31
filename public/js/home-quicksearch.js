@@ -9,12 +9,13 @@ import {
   readDetailedSearchValues,
   resetDetailedSearch,
 } from "./auto-detailed-search.js?v=autoDesk16";
+import { readBrandModelFilterValues, mountAutoBrandModelPicker } from "./auto-brand-model-picker.js?v=fuelPick1";
+import { readFuelFilterValues, mountAutoFuelPicker } from "./auto-fuel-picker.js?v=fuelPick1";
 import {
   initAutoDeskSearch,
   updateAutoDeskAccSummaries,
   arrangeAutoDeskDemoFields,
-} from "./auto-desk-search.js?v=bmSearch2";
-import { readBrandModelFilterValues, mountAutoBrandModelPicker } from "./auto-brand-model-picker.js?v=bmSearch2";
+} from "./auto-desk-search.js?v=fuelPick1";
 
 const MOBILE_MQ = "(max-width: 900px)";
 const DESK_MQ = "(min-width: 901px)";
@@ -35,14 +36,19 @@ export function initHomeQuickSearch({ onSearch = () => {}, onDeskSortChange } = 
     const base =
       form.dataset.drumsMounted === "1" ? readAutoDrumFilterValues(form) : readLayoutFilterValues(form);
     const brandModel = readBrandModelFilterValues(form);
+    const fuel = readFuelFilterValues(form);
     if (form.dataset.brandModelPicker === "1") {
       delete base.gyartmany;
       delete base.modell;
       delete base.gyartmanyok;
       delete base.modellek;
     }
+    if (form.dataset.fuelPicker === "1") {
+      delete base.uzemanyag;
+      delete base.uzemanyagQuick;
+    }
     const detailed = readDetailedSearchValues(form);
-    return { ...base, ...brandModel, detailed };
+    return { ...base, ...brandModel, ...fuel, detailed };
   }
 
   function syncDetailedButton(moreOpen) {
@@ -143,6 +149,11 @@ export function initHomeQuickSearch({ onSearch = () => {}, onDeskSortChange } = 
           await mountAutoBrandModelPicker(form);
         } catch (pickerError) {
           console.warn("Gyártmány/Modell picker:", pickerError);
+        }
+        try {
+          await mountAutoFuelPicker(form);
+        } catch (fuelError) {
+          console.warn("Üzemanyag picker:", fuelError);
         }
       }
       const urlKivitel = new URLSearchParams(window.location.search).get("kivitel");

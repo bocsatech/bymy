@@ -2,33 +2,36 @@ export const UZEMANYAG_CATEGORIES = [
   { id: "benzin", label: "Benzin", value: "Benzin" },
   { id: "dizel", label: "Dízel", value: "Dízel" },
   {
-    id: "hibrid",
-    label: "Hibrid",
-    children: [
-      { label: "Benzin/elektromos", value: "Benzin/elektromos" },
-      { label: "Dízel/elektromos", value: "Dízel/elektromos" },
-    ],
-  },
-  {
     id: "benzin-gaz",
     label: "Benzin/Gáz",
     children: [
-      { label: "LPG/benzin", value: "LPG/benzin" },
-      { label: "CNG/benzin", value: "CNG/benzin" },
+      { label: "Benzin/Gáz", value: "Benzin/Gáz" },
+      { label: "LPG", value: "LPG" },
+      { label: "CNG", value: "CNG" },
     ],
   },
   {
     id: "dizel-gaz",
     label: "Dízel/Gáz",
     children: [
+      { label: "Dízel/Gáz", value: "Dízel/Gáz" },
       { label: "LPG/dízel", value: "LPG/dízel" },
       { label: "CNG/dízel", value: "CNG/dízel" },
+    ],
+  },
+  {
+    id: "hibrid",
+    label: "Hibrid",
+    children: [
+      { label: "Hibrid", value: "Hibrid" },
+      { label: "Hibrid (Benzin)", value: "Hibrid (Benzin)" },
+      { label: "Hibrid (Dízel)", value: "Hibrid (Dízel)" },
     ],
   },
   { id: "elektromos", label: "Elektromos", value: "Elektromos" },
   { id: "etanol", label: "Etanol", value: "Etanol" },
   { id: "biodizel", label: "Biodízel", value: "Biodízel" },
-  { id: "hidrogen", label: "Hidrogén/elektromos", value: "Hidrogén/elektromos" },
+  { id: "gaz", label: "Gáz", value: "Gáz" },
 ];
 
 export const EQUIPMENT_SECTIONS = {

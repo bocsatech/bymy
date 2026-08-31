@@ -1,9 +1,9 @@
 import { initVehicleCatalogSelects, shortTypeName } from "./vehicle-catalog-client.js";
 import { kivitelMatches } from "./kivitel-options.js?v=kivitel1";
-import { fuelValueMatches } from "./auto-fuel-picker.js?v=valtoPick1";
-import { kivitelListMatches } from "./auto-kivitel-picker.js?v=valtoPick1";
-import { allapotValueMatches } from "./auto-allapot-picker.js?v=valtoPick1";
-import { sebessegvaltoListMatches } from "./auto-sebessegvalto-picker.js?v=valtoPick1";
+import { fuelValueMatches } from "./auto-fuel-picker.js?v=valtoPick2";
+import { kivitelListMatches } from "./auto-kivitel-picker.js?v=valtoPick2";
+import { allapotValueMatches } from "./auto-allapot-picker.js?v=valtoPick2";
+import { sebessegvaltoListMatches } from "./auto-sebessegvalto-picker.js?v=valtoPick2";
 
 const FUEL_QUICK_FILTERS = [
   { id: "benzin", label: "Benzin", match: (value) => value === "Benzin" },

@@ -92,8 +92,12 @@ export const SEBESSEGVALTO_CATEGORIES = [
     id: "manualis",
     label: "Manuális",
     children: [
-      { label: "Manuális (5 seb.)", value: "Manuális (5 seb.)" },
-      { label: "Manuális (6 seb.)", value: "Manuális (6 seb.)" },
+      { label: "Manuális", value: "Manuális" },
+      { label: "Manuális (3 fokozatú)", value: "Manuális (3 fokozatú)" },
+      { label: "Manuális (4 fokozatú)", value: "Manuális (4 fokozatú)" },
+      { label: "Manuális (5 fokozatú)", value: "Manuális (5 fokozatú)" },
+      { label: "Manuális (6 fokozatú)", value: "Manuális (6 fokozatú)" },
+      { label: "Manuális (7 fokozatú)", value: "Manuális (7 fokozatú)" },
     ],
   },
   {
@@ -101,9 +105,43 @@ export const SEBESSEGVALTO_CATEGORIES = [
     label: "Automata",
     children: [
       { label: "Automata", value: "Automata" },
-      { label: "Fokozatmentes automata", value: "Fokozatmentes automata" },
+      { label: "Automata (3 fokozatú)", value: "Automata (3 fokozatú)" },
+      { label: "Automata (4 fokozatú)", value: "Automata (4 fokozatú)" },
+      { label: "Automata (5 fokozatú)", value: "Automata (5 fokozatú)" },
+      { label: "Automata (6 fokozatú)", value: "Automata (6 fokozatú)" },
+      { label: "Automata (7 fokozatú)", value: "Automata (7 fokozatú)" },
+      { label: "Automata (8 fokozatú)", value: "Automata (8 fokozatú)" },
+      { label: "Automata (9 fokozatú)", value: "Automata (9 fokozatú)" },
+      { label: "Automata (10 fokozatú)", value: "Automata (10 fokozatú)" },
     ],
   },
+  {
+    id: "szekvencialis",
+    label: "Szekvenciális",
+    children: [
+      { label: "Szekvenciális", value: "Szekvenciális" },
+      { label: "Szekvenciális (4 fokozatú)", value: "Szekvenciális (4 fokozatú)" },
+      { label: "Szekvenciális (5 fokozatú)", value: "Szekvenciális (5 fokozatú)" },
+      { label: "Szekvenciális (6 fokozatú)", value: "Szekvenciális (6 fokozatú)" },
+      { label: "Szekvenciális (7 fokozatú)", value: "Szekvenciális (7 fokozatú)" },
+      { label: "Szekvenciális (8 fokozatú)", value: "Szekvenciális (8 fokozatú)" },
+    ],
+  },
+  { id: "fokozatmentes", label: "Fokozatmentes automata", value: "Fokozatmentes automata" },
+  {
+    id: "tiptronic",
+    label: "Tiptronic",
+    children: [
+      { label: "Tiptronic", value: "Tiptronic" },
+      { label: "Automata (4 fokozatú tiptronic)", value: "Automata (4 fokozatú tiptronic)" },
+      { label: "Automata (5 fokozatú tiptronic)", value: "Automata (5 fokozatú tiptronic)" },
+      { label: "Automata (6 fokozatú tiptronic)", value: "Automata (6 fokozatú tiptronic)" },
+      { label: "Automata (7 fokozatú tiptronic)", value: "Automata (7 fokozatú tiptronic)" },
+      { label: "Automata (8 fokozatú tiptronic)", value: "Automata (8 fokozatú tiptronic)" },
+      { label: "Automata (9 fokozatú tiptronic)", value: "Automata (9 fokozatú tiptronic)" },
+    ],
+  },
+  { id: "felautomata", label: "Félautomata", value: "Félautomata" },
 ];
 
 export function flattenSebessegvaltoOptions() {

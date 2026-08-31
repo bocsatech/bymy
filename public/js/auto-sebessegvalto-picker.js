@@ -301,27 +301,65 @@ function normalizeSebessegvalto(value) {
     .trim();
 }
 
+function extractGearCount(text) {
+  const m = String(text).match(/(\d+)\s*(?:fokozatu|f\.|seb\.)/i);
+  return m ? Number(m[1]) : null;
+}
+
+function transmissionKind(text) {
+  if (/szekvencialis/.test(text)) return "szekvencialis";
+  if (/tiptronic/.test(text)) return "tiptronic";
+  if (/felautomata/.test(text)) return "felautomata";
+  if (/fokozatmentes|cvt|e-cvt/.test(text)) return "fokozatmentes";
+  if (/manualis/.test(text)) return "manualis";
+  if (/automata/.test(text)) return "automata";
+  return "";
+}
+
 function sebessegvaltoCompatible(got, want) {
   if (!want) return true;
   if (!got) return false;
   if (got === want) return true;
   if (got.includes(want) || want.includes(got)) return true;
 
+  const gotKind = transmissionKind(got);
+  const wantKind = transmissionKind(want);
+  const gotGear = extractGearCount(got);
+  const wantGear = extractGearCount(want);
+
+  if (gotGear && wantGear && gotGear === wantGear && gotKind && wantKind && gotKind === wantKind) {
+    return true;
+  }
+
   if (want === "manualis") {
-    return /manualis/.test(got) && !/automata|fokozatmentes|cvt/.test(got);
+    return gotKind === "manualis";
   }
   if (want === "automata") {
-    return /automata|fokozatmentes|cvt/.test(got);
+    return gotKind === "automata";
+  }
+  if (want === "szekvencialis") {
+    return gotKind === "szekvencialis";
+  }
+  if (want === "tiptronic") {
+    return gotKind === "tiptronic";
+  }
+  if (want === "felautomata") {
+    return gotKind === "felautomata";
   }
   if (want.includes("fokozatmentes")) {
-    return /fokozatmentes|cvt|e-cvt/.test(got);
+    return gotKind === "fokozatmentes";
   }
-  if (want.includes("manualis") && want.includes("5")) {
-    return /manualis/.test(got) && /5/.test(got);
+
+  if (wantKind === "manualis" && wantGear != null) {
+    return gotKind === "manualis" && gotGear === wantGear;
   }
-  if (want.includes("manualis") && want.includes("6")) {
-    return /manualis/.test(got) && (/6/.test(got) || (!/5/.test(got) && !/automata/.test(got)));
+  if (wantKind === "automata" && wantGear != null && !want.includes("tiptronic")) {
+    return gotKind === "automata" && gotGear === wantGear;
   }
+  if (wantKind === "szekvencialis" && wantGear != null) {
+    return gotKind === "szekvencialis" && gotGear === wantGear;
+  }
+
   return false;
 }
 

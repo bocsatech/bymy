@@ -1055,9 +1055,9 @@ body.site-app .hub-btn--primary:hover {
 
 body.site-app .site-header-btn--post,
 body.site-app .hub-btn--post {
-  background: #e3a861;
-  color: #fff;
-  border-color: #e3a861;
+  background: #f0c52c;
+  color: #000;
+  border-color: #f0c52c;
   border-radius: 16px;
   font-weight: 700;
   box-shadow: none;
@@ -1069,9 +1069,9 @@ body.site-app .hub-btn--post {
 body.site-app .site-header-btn--post:hover,
 body.site-app .hub-btn--post:hover {
   filter: brightness(1.04);
-  background: #e3a861;
-  border-color: #e3a861;
-  color: #fff;
+  background: #e8bb20;
+  border-color: #e8bb20;
+  color: #000;
   text-decoration: none;
 }
 

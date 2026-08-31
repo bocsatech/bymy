@@ -416,7 +416,7 @@
   margin: 0;
   font-size: 1.7rem;
   font-weight: 800;
-  color: #1565c0;
+  color: #000;
   letter-spacing: -0.02em;
   line-height: 1.1;
 }
@@ -424,14 +424,14 @@
 .hd-price-sub {
   margin: 0;
   font-size: 0.82rem;
-  color: #98a2b3;
+  color: #000;
   font-weight: 500;
 }
 
 .hd-price-old {
   margin: 0.35rem 0 0;
   font-size: 0.8rem;
-  color: #98a2b3;
+  color: #000;
 }
 
 .hd-seller-card {
@@ -465,19 +465,19 @@
   margin: 0;
   font-size: 1.02rem;
   font-weight: 800;
-  color: #101828;
+  color: #000;
 }
 
 .hd-seller-since {
   margin: 0.15rem 0 0;
   font-size: 0.8rem;
-  color: #98a2b3;
+  color: #000;
 }
 
 .hd-seller-addr {
   margin: 0;
   font-size: 0.88rem;
-  color: #475467;
+  color: #000;
   line-height: 1.45;
 }
 
@@ -504,7 +504,7 @@
 
 .hd-btn--ghost {
   background: #fff;
-  color: #1565c0;
+  color: #000;
   border: 1.5px solid #1565c0;
 }
 

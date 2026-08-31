@@ -538,6 +538,19 @@
   color: #000;
 }
 
+.hd-h3--extra {
+  margin-top: 1rem;
+  font-size: 0.98rem;
+}
+
+.hd-extra-group + .hd-extra-group {
+  margin-top: 0.35rem;
+}
+
+.hd-section--extras .hd-h2 {
+  margin-bottom: 0.35rem;
+}
+
 .hd-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;

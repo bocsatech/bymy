@@ -86,6 +86,19 @@ function kvHtml(rows) {
     .join("")}</dl>`;
 }
 
+function equipmentGroupsHtml(groups) {
+  if (!groups?.length) return "";
+  return `<h2 class="hd-h2">Extrák</h2>${groups
+    .map(
+      (group) =>
+        `<div class="hd-extra-group">
+          <h3 class="hd-h3 hd-h3--extra">${escapeHtml(group.title)}</h3>
+          <ul class="hd-list">${group.items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
+        </div>`
+    )
+    .join("")}`;
+}
+
 function relatedCard(item) {
   const p = item.preview || {};
   const title = p.title || item.hirdetes_cime || `Hirdetés #${item.id}`;
@@ -182,9 +195,7 @@ async function loadRelatedListings(listingId, view) {
 function render(view, listing, related) {
   const images = view.images?.length ? view.images : [];
   const first = images[0] || "";
-  const extras = view.equipment || [];
-  const extrasShort = extras.slice(0, 6);
-  const extrasRest = extras.slice(6);
+  const equipmentGroups = Array.isArray(view.equipmentGroups) ? view.equipmentGroups : [];
   const own = currentUserId() && currentUserId() === Number(view.userId);
   const canMsg = !own && canMessageListing(view.userId);
   const user = getAuthUser();
@@ -354,11 +365,9 @@ function render(view, listing, related) {
     </div>
 
     <section class="hd-section">
-      <h2 class="hd-h2">Járműadatok</h2>
-      <h3 class="hd-h3">Alapadatok</h3>
-      ${kvHtml(view.basics)}
-      <h3 class="hd-h3" style="margin-top:1.1rem">Karosszéria és technika</h3>
-      ${kvHtml(view.bodyTech)}
+      ${view.vehicleSpecs?.length ? `<h2 class="hd-h2">Jármű adatok</h2>${kvHtml(view.vehicleSpecs)}` : ""}
+      ${view.motorSpecs?.length ? `<h2 class="hd-h2"${view.vehicleSpecs?.length ? ' style="margin-top:1.35rem"' : ""}>Motor adatok</h2>${kvHtml(view.motorSpecs)}` : ""}
+      ${view.documentSpecs?.length ? `<h2 class="hd-h2"${view.vehicleSpecs?.length || view.motorSpecs?.length ? ' style="margin-top:1.35rem"' : ""}>Okmányok</h2>${kvHtml(view.documentSpecs)}` : ""}
       ${
         view.perks.length
           ? `<h3 class="hd-h3" style="margin-top:1.1rem">További előnyök</h3>${view.perks.map((p) => `<span class="hd-check">${escapeHtml(p)}</span>`).join("")}`
@@ -370,16 +379,13 @@ function render(view, listing, related) {
       <h2 class="hd-h2">Leírás</h2>
       ${view.description ? `<p class="hd-desc is-clip" data-hd-desc>${escapeHtml(view.description)}</p>` : "<p class=\"hd-desc\">Nincs leírás.</p>"}
       ${view.description ? `<button type="button" class="hd-more" data-hd-desc-more>Több megjelenítése +</button>` : ""}
-      ${
-        extras.length
-          ? `<h3 class="hd-h3" style="margin-top:1.1rem">Beépített opciók</h3>
-             <p class="hd-desc">${escapeHtml(extras.join(", "))}</p>
-             <h3 class="hd-h3" style="margin-top:1.1rem">Extrák</h3>
-             <ul class="hd-list" data-hd-extras>${extrasShort.map((x) => `<li>${escapeHtml(x)}</li>`).join("")}</ul>
-             ${extrasRest.length ? `<button type="button" class="hd-more" data-hd-extras-more>Több megjelenítése +</button>` : ""}`
-          : ""
-      }
     </section>
+
+    ${
+      equipmentGroups.length
+        ? `<section class="hd-section hd-section--extras">${equipmentGroupsHtml(equipmentGroups)}</section>`
+        : ""
+    }
 
     ${
       related.length
@@ -454,10 +460,10 @@ function render(view, listing, related) {
     }
   `;
 
-  bindUi(view, listing, extrasRest);
+  bindUi(view, listing);
 }
 
-function bindUi(view, listing, extrasRest) {
+function bindUi(view, listing) {
   let index = 0;
   const images = view.images || [];
   const main = root.querySelector("[data-hd-main]");
@@ -615,16 +621,6 @@ function bindUi(view, listing, extrasRest) {
 
   root.querySelector("[data-hd-desc-more]")?.addEventListener("click", (event) => {
     root.querySelector("[data-hd-desc]")?.classList.remove("is-clip");
-    event.currentTarget.hidden = true;
-  });
-
-  root.querySelector("[data-hd-extras-more]")?.addEventListener("click", (event) => {
-    const list = root.querySelector("[data-hd-extras]");
-    extrasRest.forEach((item) => {
-      const li = document.createElement("li");
-      li.textContent = item;
-      list?.appendChild(li);
-    });
     event.currentTarget.hidden = true;
   });
 

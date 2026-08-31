@@ -28,6 +28,7 @@ const CCM_STEPS = [600, 800, 1000, 1200, 1400, 1600, 1800, 2000, 2200, 2500, 300
 /** Keresőben soha ne jelenjen meg (feladás-specifikus / felesleges). */
 const SEARCH_OMIT_FIELDS = new Set([
   "gyartasi_honap",
+  "forgalomba_helyezes_ev",
   "forgalomba_helyezes_honap",
   "muszaki_honap",
   // Egyéb típus csak a feladáson használható.

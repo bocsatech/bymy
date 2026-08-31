@@ -66,6 +66,7 @@ const DUAL_RANGES = [
 
 const SEARCH_OMIT_FIELDS = new Set([
   "gyartasi_honap",
+  "forgalomba_helyezes_ev",
   "forgalomba_helyezes_honap",
   "muszaki_honap",
   "keresesi_korzet",

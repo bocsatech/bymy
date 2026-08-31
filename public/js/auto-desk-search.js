@@ -294,6 +294,10 @@ export function arrangeAutoDeskDemoFields(form = document.getElementById("home-q
       mountDeskField(host, item, form, mountOpts);
     }
   }
+  // Teher / autó: Kivitel mindig legyen az Alap mezők között (pickerhez kell)
+  if (!used.has("kivitel")) {
+    mountDeskField(host, { field: "kivitel", label: "Kivitel" }, form, mountOpts);
+  }
 
   if (muszakiBody) {
     let muszakiHost = muszakiBody.querySelector(".auto-desk-fields[data-desk-muszaki]");

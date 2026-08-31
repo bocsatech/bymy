@@ -9,7 +9,7 @@ import {
   TEHER_KISTEHER_KIVITEL,
   TEHER_35_KIVITEL_CATEGORIES,
   flattenTeher35KivitelOptions,
-} from "./equipment-data.js?v=teherKivitel35";
+} from "./equipment-data.js?v=teherKivitel35b";
 import { bindAutoBmDismiss, autoBmPanelIsOpen } from "./auto-bm-dismiss.js?v=bmDismiss1";
 
 function labelList(items) {
@@ -92,17 +92,16 @@ function normKey(value) {
 export async function mountAutoKivitelPicker(form) {
   if (!form || !isAutoDesk() || form.dataset.kivitelPicker === "1") return;
 
-  const field = form.querySelector('[data-desk-field="kivitel"]');
-  if (!field) return;
-
-  const host =
-    field.closest(".auto-desk-fields") ||
-    form.querySelector(".auto-desk-fields[data-desk-alap]") ||
-    form.querySelector(".auto-desk-fields[data-desk-muszaki]");
+  const alapHost = form.querySelector(".auto-desk-fields[data-desk-alap]");
+  const muszakiHost = form.querySelector(".auto-desk-fields[data-desk-muszaki]");
+  const host = alapHost || muszakiHost;
   if (!host) return;
 
-  const deskQuick = field.dataset.deskQuick || "0";
-  field.remove();
+  const existing = form.querySelector('[data-desk-field="kivitel"]');
+  const deskQuick = existing?.dataset.deskQuick || "1";
+  form.querySelectorAll('[data-desk-field="kivitel"]').forEach((el) => el.remove());
+  // Régi natív select forrás — ne maradjon szűrési zaj
+  form.querySelector("#qs-kivitel")?.remove();
 
   const hierarchical = useTeher35Categories();
   const categories = hierarchical ? TEHER_35_KIVITEL_CATEGORIES : null;
@@ -131,10 +130,11 @@ export async function mountAutoKivitelPicker(form) {
   `;
   wrap.appendChild(hidden);
 
-  const fuelField = host.querySelector(".auto-fuel-field, [data-desk-field='uzemanyag']");
-  if (fuelField?.nextSibling) host.insertBefore(wrap, fuelField.nextSibling);
-  else if (fuelField) host.appendChild(wrap);
-  else host.appendChild(wrap);
+  const insertHost = alapHost || host;
+  const fuelField = insertHost.querySelector(".auto-fuel-field, [data-desk-field='uzemanyag']");
+  if (fuelField?.nextSibling) insertHost.insertBefore(wrap, fuelField.nextSibling);
+  else if (fuelField) insertHost.appendChild(wrap);
+  else insertHost.appendChild(wrap);
 
   const urlKivitel = String(new URLSearchParams(window.location.search).get("kivitel") || "").trim();
   if (urlKivitel) {

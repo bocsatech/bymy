@@ -1,4 +1,4 @@
-import { UZEMANYAG_CATEGORIES, ALLAPOT_CATEGORIES, EQUIPMENT_SECTIONS, KLIM_OPTIONS, KISTEHER_EQUIPMENT_ITEMS, TEHER_KISTEHER_KIVITEL, TEHER_35_KIVITEL_CATEGORIES } from "./equipment-data.js?v=teherKivitel35d";
+import { UZEMANYAG_CATEGORIES, ALLAPOT_CATEGORIES, EQUIPMENT_SECTIONS, KLIM_OPTIONS, KISTEHER_EQUIPMENT_ITEMS, TEHER_KISTEHER_KIVITEL, TEHER_35_KIVITEL_CATEGORIES } from "./equipment-data.js?v=teherKivitel35e";
 import { KIVITEL_OPTIONS } from "./kivitel-options.js?v=kivitel1";
 import { EGYEB_INFO_OPTIONS } from "./egyeb-info-data.js";
 import { initVehicleCatalogSelects } from "./vehicle-catalog-client.js";

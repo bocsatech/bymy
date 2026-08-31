@@ -2,7 +2,7 @@
  * Gyorskereső az autó hero panelen — elrendezés: GET /api/level1/form-layout?category=szemelyauto-search
  */
 
-import { applyAutoSearchLayout, readLayoutFilterValues } from "./auto-search-layout.js?v=teherKivitel35d";
+import { applyAutoSearchLayout, readLayoutFilterValues } from "./auto-search-layout.js?v=teherKivitel35e";
 import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums } from "./auto-search-drums.js?v=fogyNum1";
 import {
   mountDetailedSearch,
@@ -11,7 +11,7 @@ import {
 } from "./auto-detailed-search.js?v=fogyNum1";
 import { readBrandModelFilterValues, mountAutoBrandModelPicker } from "./auto-brand-model-picker.js?v=fogyNum1";
 import { readFuelFilterValues, mountAutoFuelPicker } from "./auto-fuel-picker.js?v=fogyNum1";
-import { readKivitelFilterValues, mountAutoKivitelPicker } from "./auto-kivitel-picker.js?v=teherKivitel35d";
+import { readKivitelFilterValues, mountAutoKivitelPicker } from "./auto-kivitel-picker.js?v=teherKivitel35e";
 import { readAllapotFilterValues, mountAutoAllapotPicker } from "./auto-allapot-picker.js?v=fogyNum1";
 import { readSebessegvaltoFilterValues, mountAutoSebessegvaltoPicker } from "./auto-sebessegvalto-picker.js?v=fogyNum1";
 import { readOkmanyFilterValues, mountAutoOkmanyPicker } from "./auto-okmany-picker.js?v=fogyNum1";
@@ -20,7 +20,7 @@ import {
   initAutoDeskSearch,
   updateAutoDeskAccSummaries,
   arrangeAutoDeskDemoFields,
-} from "./auto-desk-search.js?v=teherKivitel35d";
+} from "./auto-desk-search.js?v=teherKivitel35e";
 
 const MOBILE_MQ = "(max-width: 900px)";
 const DESK_MQ = "(min-width: 901px)";

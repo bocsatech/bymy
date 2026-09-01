@@ -10,7 +10,7 @@ import {
   DEFAULT_PHOTO_OVERLAY_ID,
   renderListingPhotoOverlay,
 } from "./listing-photo-overlay.js?v=photoOverlay1";
-import { refreshAdFormBmPickers, applyAdFormBmFieldValues } from "./ad-form-bm-pickers.js?v=adBmPickers19";
+import { refreshAdFormBmPickers, applyAdFormBmFieldValues } from "./ad-form-bm-pickers.js?v=adBmPickers20";
 
 export function createAdForm(options = {}) {
   const mode = options.mode ?? "wizard";
@@ -1699,6 +1699,14 @@ if (mode === "wizard") {
         if (userTouchedForm) return;
         // Profilból / kézzel töltött cím ne törlődjön az első billentyűre.
         if (event.target?.closest?.(".ad-location-fields, .field-stack--location, #email")) {
+          userTouchedForm = true;
+          return;
+        }
+        // Kapcsolós pickerek hidden mezői ne indítsanak teljes űrlap-resetet.
+        if (
+          event.target?.classList?.contains("ad-form-bm-hidden") ||
+          event.target?.closest?.(".ad-form-bm-field")
+        ) {
           userTouchedForm = true;
           return;
         }

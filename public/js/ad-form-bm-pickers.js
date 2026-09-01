@@ -581,12 +581,12 @@ function mountSearchDropdownPicker(select, opts) {
     scrollTop = 0;
     lastWindowStart = -1;
     renderList(true);
+    attachDropdownPortal();
     field.classList.add("is-open");
     wrap.classList.add("is-open");
+    dropdown.classList.remove("is-closed");
     dropdown.hidden = false;
     dropdown.style.removeProperty("display");
-    dropdown.classList.remove("is-closed");
-    attachDropdownPortal();
     window.addEventListener("scroll", onViewportChange, true);
     window.addEventListener("resize", onViewportChange);
   }
@@ -875,12 +875,12 @@ function mountSingleSelectDropdown(select, { title, panelClass, placeholder = PL
     scrollTop = 0;
     lastWindowStart = -1;
     renderList(true);
+    attachDropdownPortal();
     field.classList.add("is-open");
     wrap.classList.add("is-open");
+    dropdown.classList.remove("is-closed");
     dropdown.hidden = false;
     dropdown.style.removeProperty("display");
-    dropdown.classList.remove("is-closed");
-    attachDropdownPortal();
     window.addEventListener("scroll", onViewportChange, true);
     window.addEventListener("resize", onViewportChange);
   }
@@ -1008,6 +1008,13 @@ function renderWindowedToggleRows(bodyEl, items, scrollTop, rowKey, rowLabel, se
   bodyEl.style.setProperty("--ad-form-bm-list-height", `${items.length * rowH}px`);
 }
 
+function enforceSingleToggleChecks(bodyEl, attrName, selectedValue) {
+  bodyEl.querySelectorAll(`[${attrName}]`).forEach((input) => {
+    if (!(input instanceof HTMLInputElement)) return;
+    input.checked = input.getAttribute(attrName) === selectedValue;
+  });
+}
+
 function mountSearchFlatPicker(select, title, options, panelClass, unit = "db") {
   let selected = "";
 
@@ -1053,6 +1060,7 @@ function mountSearchFlatPicker(select, title, options, panelClass, unit = "db") 
         if (el.checked) selected = opt;
         else if (selected === opt) selected = "";
         writePlainValue(select, selected);
+        enforceSingleToggleChecks(bodyEl, "data-ad-bm-flat", selected);
         updateBmSearchTrigger(select, selected, Boolean(selected));
         select._adBmRefreshDropdown?.();
       };
@@ -1073,7 +1081,7 @@ function mountFlatPicker(select, title, options, panelClass, openAttr) {
   let selected = "";
 
   const wrap = document.createElement("div");
-  wrap.className = "ad-form-bm-field ad-form-bm-field--dropdown ad-form-bm-field--flat auto-bm-field";
+  wrap.className = "ad-form-bm-field ad-form-bm-field--flat auto-bm-field";
   wrap.dataset.adBmFor = select.id;
   wrap.innerHTML = `
     <button type="button" class="auto-bm-trigger" ${openAttr}>
@@ -1135,6 +1143,7 @@ function mountFlatPicker(select, title, options, panelClass, openAttr) {
       else if (selected === opt) selected = "";
       writePlainValue(select, selected);
       renderBody();
+      bindBody();
       refreshSummary();
     };
   }
@@ -1196,12 +1205,12 @@ function mountFlatPicker(select, title, options, panelClass, openAttr) {
     syncFromHidden();
     renderBody();
     bindBody();
+    attachDropdownPortal();
     field.classList.add("is-open");
     wrap.classList.add("is-open");
+    dropdown.classList.remove("is-closed");
     dropdown.hidden = false;
     dropdown.style.removeProperty("display");
-    dropdown.classList.remove("is-closed");
-    attachDropdownPortal();
     window.addEventListener("scroll", onViewportChange, true);
     window.addEventListener("resize", onViewportChange);
   }
@@ -1420,6 +1429,7 @@ function mountBrandPicker(select, catalog) {
         if (el.checked) selected = brand;
         else if (selected === brand) selected = "";
         writePlainValue(select, selected);
+        enforceSingleToggleChecks(bodyEl, "data-ad-bm-brand", selected);
         updateBmSearchTrigger(select, selected, Boolean(selected));
         select._adBmRefreshDropdown?.();
         document.getElementById("modell")?._adBmOnBrandChange?.();
@@ -1499,6 +1509,7 @@ function mountModelPicker(select, catalog) {
         if (el.checked) selected = model;
         else if (selected === model) selected = "";
         writePlainValue(select, selected);
+        enforceSingleToggleChecks(bodyEl, "data-ad-bm-model", selected);
         updateBmSearchTrigger(select, selected, Boolean(selected));
         select._adBmRefreshDropdown?.();
       };
@@ -1640,6 +1651,8 @@ export async function mountAdFormBmPickers(form, catalog = null) {
     return;
   }
 
+  unmountAdFormBmPickers(form);
+
   const allapot = document.getElementById("allapot");
   const kivitel = document.getElementById("kivitel");
   const okmany = document.getElementById("okmany_jelleg");
@@ -1647,13 +1660,13 @@ export async function mountAdFormBmPickers(form, catalog = null) {
   const gyartmany = document.getElementById("gyartmany");
   const modell = document.getElementById("modell");
 
-  if (allapot?.tagName === "SELECT" && allapot.dataset.adBmPicker !== "1") {
+  if (allapot?.tagName === "SELECT") {
     mountFlatPicker(allapot, "Állapot", flattenAllapotOptions(), "ad-form-allapot-panel", "data-ad-bm-allapot-open");
   }
-  if (kivitel?.tagName === "SELECT" && kivitel.dataset.adBmPicker !== "1") {
+  if (kivitel?.tagName === "SELECT") {
     mountFlatPicker(kivitel, "Kivitel", optionsFromSelect(kivitel), "ad-form-kivitel-panel", "data-ad-bm-kivitel-open");
   }
-  if (okmany?.tagName === "SELECT" && okmany.dataset.adBmPicker !== "1") {
+  if (okmany?.tagName === "SELECT") {
     mountSearchFlatPicker(
       okmany,
       "Okmányok jellege",
@@ -1662,7 +1675,7 @@ export async function mountAdFormBmPickers(form, catalog = null) {
       "db"
     );
   }
-  if (uzemanyag?.tagName === "SELECT" && uzemanyag.dataset.adBmPicker !== "1") {
+  if (uzemanyag?.tagName === "SELECT") {
     mountSearchFlatPicker(
       uzemanyag,
       "Üzemanyag",
@@ -1674,14 +1687,14 @@ export async function mountAdFormBmPickers(form, catalog = null) {
 
   const forgalombaEv = document.getElementById("forgalomba_helyezes_ev");
   const forgalombaHonap = document.getElementById("forgalomba_helyezes_honap");
-  if (forgalombaEv?.tagName === "SELECT" && forgalombaEv.dataset.adBmPicker !== "1") {
+  if (forgalombaEv?.tagName === "SELECT") {
     mountSingleSelectDropdown(forgalombaEv, {
       title: "Forgalomba helyezés éve",
       panelClass: "ad-form-year-panel",
       placeholder: "év",
     });
   }
-  if (forgalombaHonap?.tagName === "SELECT" && forgalombaHonap.dataset.adBmPicker !== "1") {
+  if (forgalombaHonap?.tagName === "SELECT") {
     mountSingleSelectDropdown(forgalombaHonap, {
       title: "Forgalomba helyezés hónapja",
       panelClass: "ad-form-month-panel",
@@ -1691,8 +1704,8 @@ export async function mountAdFormBmPickers(form, catalog = null) {
 
   try {
     const cat = catalog || (await fetchVehicleCatalog());
-    if (gyartmany?.tagName === "SELECT" && gyartmany.dataset.adBmPicker !== "1") mountBrandPicker(gyartmany, cat);
-    if (modell?.tagName === "SELECT" && modell.dataset.adBmPicker !== "1") mountModelPicker(modell, cat);
+    if (gyartmany?.tagName === "SELECT") mountBrandPicker(gyartmany, cat);
+    if (modell?.tagName === "SELECT") mountModelPicker(modell, cat);
   } catch (error) {
     console.warn("Gyártmány/modell kapcsolós panel:", error);
   }

@@ -10,7 +10,7 @@ import {
   DEFAULT_PHOTO_OVERLAY_ID,
   renderListingPhotoOverlay,
 } from "./listing-photo-overlay.js?v=photoOverlay1";
-import { refreshAdFormBmPickers, applyAdFormBmFieldValues } from "./ad-form-bm-pickers.js?v=adBmPickers14";
+import { refreshAdFormBmPickers, applyAdFormBmFieldValues } from "./ad-form-bm-pickers.js?v=adBmPickers15";
 
 export function createAdForm(options = {}) {
   const mode = options.mode ?? "wizard";
@@ -593,6 +593,7 @@ function shouldUseFluidFieldWidths() {
 
 function fitSelectWidth(select) {
   if (!select || select.tagName !== "SELECT") return;
+  if (select.classList.contains("ad-form-bm-native")) return;
   if (shouldUseFluidFieldWidths()) return;
   const style = getComputedStyle(select);
   const option = select.options[select.selectedIndex];
@@ -602,6 +603,7 @@ function fitSelectWidth(select) {
 
 function fitInputWidth(input) {
   if (!input || input.tagName !== "INPUT") return;
+  if (input.classList.contains("ad-form-bm-search-trigger")) return;
   if (shouldUseFluidFieldWidths()) return;
   if (input.type === "checkbox" || input.type === "radio" || input.type === "file") return;
   const style = getComputedStyle(input);

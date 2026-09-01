@@ -1045,51 +1045,171 @@ function mountSearchFlatPicker(select, title, options, panelClass, unit = "db") 
 }
 
 function mountFlatPicker(select, title, options, panelClass, openAttr) {
-  let selected = "";
+  if (!select || select.tagName !== "SELECT" || select.dataset.adBmPicker === "1") return;
 
-  mountBmPicker({
-    select,
-    title,
-    panelClass,
-    openAttr,
-    singleSelect: true,
-    syncFromHidden() {
-      selected = readSingleStoredValue(select._adBmHidden?.value);
-    },
-    syncSummary(summaryEl) {
-      if (summaryEl) summaryEl.textContent = selected || PLACEHOLDER;
-    },
-    syncHidden() {
-      writePlainValue(select, selected);
-    },
-    renderBody(bodyEl) {
-      const rows = options
-        .map((opt) => {
-          const on = selected === opt;
-          return `<div class="auto-bm-row">
+  const field = anchorField(select);
+  if (!field) return;
+
+  unmountPicker(select);
+  hideNativeSelect(select);
+  const hidden = ensurePlainHiddenInput(select);
+
+  let selected = "";
+  const radioName = `ad-bm-flat-${select.id}`;
+
+  const wrap = document.createElement("div");
+  wrap.className = "ad-form-bm-field ad-form-bm-field--dropdown ad-form-bm-field--flat auto-bm-field";
+  wrap.dataset.adBmFor = select.id;
+  wrap.innerHTML = `
+    <button type="button" class="auto-bm-trigger" ${openAttr}>
+      <span data-ad-bm-summary>${escapeHtml(PLACEHOLDER)}</span>
+      <span class="auto-bm-trigger__chev" aria-hidden="true">⌄</span>
+    </button>
+  `;
+  select.insertAdjacentElement("beforebegin", wrap);
+  stashNativeSelect(select, wrap);
+
+  const summaryEl = wrap.querySelector("[data-ad-bm-summary]");
+  const openBtn = wrap.querySelector(`[${openAttr}]`);
+
+  const dropdown = document.createElement("div");
+  dropdown.className = `auto-bm-panel ad-form-bm-panel ad-form-bm-dropdown ${panelClass}`;
+  dropdown.hidden = true;
+  dropdown.setAttribute("role", "listbox");
+  dropdown.setAttribute("aria-label", title);
+  dropdown.innerHTML = `<div class="ad-form-bm-dropdown__body auto-bm-panel__body" data-ad-bm-body></div>`;
+  wrap.appendChild(dropdown);
+  select._adBmPanel = dropdown;
+  const bodyEl = dropdown.querySelector("[data-ad-bm-body]");
+
+  function syncFromHidden() {
+    const raw = select._adBmHidden?.value ?? "";
+    selected = readSingleStoredValue(raw);
+    if (raw.trim().startsWith("[")) writePlainValue(select, selected);
+  }
+
+  function refreshSummary() {
+    if (summaryEl) summaryEl.textContent = selected || PLACEHOLDER;
+    wrap.classList.toggle("has-value", Boolean(selected));
+  }
+
+  function renderBody() {
+    const rows = options
+      .map((opt) => {
+        const on = selected === opt;
+        return `<div class="auto-bm-row">
             <label class="auto-bm-toggle">
               <span>${escapeHtml(opt)}</span>
-              <input type="checkbox" data-ad-bm-flat="${escapeAttr(opt)}" ${on ? "checked" : ""} />
+              <input type="radio" name="${escapeAttr(radioName)}" data-ad-bm-flat="${escapeAttr(opt)}" ${on ? "checked" : ""} />
               <span class="auto-bm-switch" aria-hidden="true"></span>
             </label>
           </div>`;
-        })
-        .join("");
-      bodyEl.innerHTML = `<div class="auto-bm-group">${rows}</div>`;
-    },
-    bindBody(bodyEl) {
-      bodyEl.onchange = (event) => {
-        const el = event.target.closest("[data-ad-bm-flat]");
-        if (!el) return;
-        const opt = el.getAttribute("data-ad-bm-flat") ?? "";
-        if (el.checked) selected = opt;
-        else if (selected === opt) selected = "";
-        writePlainValue(select, selected);
-        renderBody(bodyEl);
-        updateBmSummary(select, selected || PLACEHOLDER, Boolean(selected));
-      };
-    },
+      })
+      .join("");
+    bodyEl.innerHTML = rows
+      ? `<div class="auto-bm-group">${rows}</div>`
+      : `<p class="ad-form-bm-empty">Nincs találat</p>`;
+  }
+
+  function bindBody() {
+    bodyEl.onchange = (event) => {
+      const el = event.target.closest("[data-ad-bm-flat]");
+      if (!el || !el.checked) return;
+      selected = el.getAttribute("data-ad-bm-flat") ?? "";
+      writePlainValue(select, selected);
+      refreshSummary();
+    };
+  }
+
+  function positionDropdown() {
+    const rect = wrap.getBoundingClientRect();
+    dropdown.classList.add("ad-form-bm-dropdown--portaled");
+    dropdown.style.position = "fixed";
+    dropdown.style.top = `${Math.round(rect.bottom + 4)}px`;
+    dropdown.style.left = `${Math.round(rect.left)}px`;
+    dropdown.style.width = `${Math.round(rect.width)}px`;
+    dropdown.style.right = "auto";
+    dropdown.style.bottom = "auto";
+  }
+
+  function attachDropdownPortal() {
+    if (dropdown.parentElement !== document.body) document.body.appendChild(dropdown);
+    positionDropdown();
+  }
+
+  function detachDropdownPortal() {
+    dropdown.classList.remove("ad-form-bm-dropdown--portaled");
+    dropdown.style.removeProperty("position");
+    dropdown.style.removeProperty("top");
+    dropdown.style.removeProperty("left");
+    dropdown.style.removeProperty("width");
+    dropdown.style.removeProperty("right");
+    dropdown.style.removeProperty("bottom");
+    if (dropdown.parentElement !== wrap) wrap.appendChild(dropdown);
+  }
+
+  function onViewportChange() {
+    if (dropdown.hidden || dropdown.classList.contains("is-closed")) return;
+    positionDropdown();
+  }
+
+  function closeDropdown() {
+    field.classList.remove("is-open");
+    wrap.classList.remove("is-open");
+    dropdown.hidden = true;
+    dropdown.style.setProperty("display", "none", "important");
+    dropdown.classList.add("is-closed");
+    detachDropdownPortal();
+    window.removeEventListener("scroll", onViewportChange, true);
+    window.removeEventListener("resize", onViewportChange);
+    unregisterOpenPanel(closeDropdown);
+    syncFromHidden();
+    writePlainValue(select, selected);
+    refreshSummary();
+  }
+
+  function openDropdown() {
+    ["gyartmany", "modell", "uzemanyag", "okmany_jelleg", "allapot", "kivitel", "forgalomba_helyezes_ev", "forgalomba_helyezes_honap"].forEach((id) => {
+      const other = document.getElementById(id);
+      if (!other || other === select) return;
+      if (autoBmPanelIsOpen(other._adBmPanel) && typeof other._adBmClose === "function") other._adBmClose();
+    });
+    registerOpenPanel(closeDropdown);
+    syncFromHidden();
+    renderBody();
+    bindBody();
+    field.classList.add("is-open");
+    wrap.classList.add("is-open");
+    dropdown.hidden = false;
+    dropdown.style.removeProperty("display");
+    dropdown.classList.remove("is-closed");
+    attachDropdownPortal();
+    window.addEventListener("scroll", onViewportChange, true);
+    window.addEventListener("resize", onViewportChange);
+  }
+
+  openBtn?.addEventListener("click", () => {
+    if (!dropdown.hidden && !dropdown.classList.contains("is-closed")) closeDropdown();
+    else openDropdown();
   });
+
+  dropdown.addEventListener("mousedown", (event) => {
+    event.preventDefault();
+  });
+
+  bindAutoBmDismiss({
+    panel: dropdown,
+    roots: [wrap, openBtn],
+    isOpen: () => autoBmPanelIsOpen(dropdown),
+    close: closeDropdown,
+  });
+
+  hidden.addEventListener("change", refreshSummary);
+  syncFromHidden();
+  refreshSummary();
+
+  select.dataset.adBmPicker = "1";
+  select._adBmClose = closeDropdown;
 }
 
 function mountHierarchicalPicker(select, { title, panelClass, openAttr, categories, attrMain, attrChild, attrParent, unit }) {

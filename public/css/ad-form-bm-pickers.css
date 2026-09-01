@@ -117,25 +117,45 @@ body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-input-wrap .auto-bm-
   cursor: pointer;
 }
 
+body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field--dropdown .ad-form-bm-dropdown,
+body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-dropdown.ad-form-bm-dropdown--portaled {
+  min-height: 0 !important;
+  max-height: calc(var(--ad-form-bm-row-h) * var(--ad-form-bm-dropdown-rows)) !important;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  background: #fff !important;
+  background-color: #fff !important;
+  opacity: 1 !important;
+  border: 1px solid var(--ad-form-bm-line);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.22);
+  box-sizing: border-box;
+  pointer-events: auto;
+  isolation: isolate;
+}
+
 body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field--dropdown .ad-form-bm-dropdown {
   position: absolute !important;
   top: calc(100% + 4px) !important;
   left: 0 !important;
   right: 0 !important;
   width: 100% !important;
-  min-height: 0 !important;
-  max-height: calc(var(--ad-form-bm-row-h) * var(--ad-form-bm-dropdown-rows)) !important;
-  margin: 0;
   z-index: 202;
-  display: flex;
-  flex-direction: column;
-  background: var(--ad-form-bm-panel);
-  border: 1px solid var(--ad-form-bm-line);
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
-  box-sizing: border-box;
-  pointer-events: auto;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-dropdown.ad-form-bm-dropdown--portaled {
+  position: fixed !important;
+  right: auto !important;
+  bottom: auto !important;
+  z-index: 10000 !important;
+}
+
+html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field--dropdown .ad-form-bm-dropdown,
+html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-dropdown.ad-form-bm-dropdown--portaled {
+  background: #1d1d1d !important;
+  background-color: #1d1d1d !important;
 }
 
 body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-dropdown .ad-form-bm-dropdown__body {
@@ -144,24 +164,45 @@ body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-dropdown .ad-form-bm
   overscroll-behavior: contain;
   padding: 0;
   max-height: calc(var(--ad-form-bm-row-h) * var(--ad-form-bm-dropdown-rows));
+  background: #fff;
+}
+
+html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-dropdown .ad-form-bm-dropdown__body {
+  background: #1d1d1d;
 }
 
 body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-dropdown .auto-bm-group {
   border: 0;
   border-radius: 0;
+  background: #fff;
+}
+
+html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-dropdown .auto-bm-group {
+  background: #1d1d1d;
 }
 
 body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-dropdown .auto-bm-row {
   min-height: var(--ad-form-bm-row-h);
+  background: #fff;
+}
+
+html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-dropdown .auto-bm-row {
+  background: #1d1d1d;
 }
 
 body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-dropdown .auto-bm-toggle {
   min-height: var(--ad-form-bm-row-h);
+  background: inherit;
 }
 
 body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-dropdown .ad-form-bm-dropdown__spacer {
   width: 100%;
   pointer-events: none;
+  background: #fff;
+}
+
+html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-dropdown .ad-form-bm-dropdown__spacer {
+  background: #1d1d1d;
 }
 
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .field-row,
@@ -171,33 +212,53 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .labeled-field.ad-form-
   overflow: visible !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-dropdown.ad-form-bm-dropdown--portaled {
-  z-index: 10000 !important;
-}
-
 body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-anchor .ad-form-bm-panel[hidden],
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-anchor .ad-form-bm-panel.is-closed {
+body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-anchor .ad-form-bm-panel.is-closed,
+body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-dropdown.ad-form-bm-dropdown--portaled[hidden],
+body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-dropdown.ad-form-bm-dropdown--portaled.is-closed {
   display: none !important;
 }
 
+/* Rejtett natív select — ne legyen szürke vonal a trigger alatt */
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .labeled-field > select.ad-form-bm-native,
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form select.ad-form-bm-native,
-body.site-app[data-site-page="hirdetesfeladas"] .labeled-field > select.ad-form-bm-native {
+body.site-app[data-site-page="hirdetesfeladas"] .labeled-field > select.ad-form-bm-native,
+body.site-app[data-site-page="hirdetesfeladas"] .ad-layout-item > select.ad-form-bm-native {
   position: absolute !important;
-  width: 1px !important;
-  height: 1px !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 0 !important;
+  height: 0 !important;
   min-height: 0 !important;
   max-height: 0 !important;
+  min-width: 0 !important;
+  max-width: 0 !important;
   padding: 0 !important;
-  margin: -1px !important;
+  margin: 0 !important;
   overflow: hidden !important;
   clip: rect(0, 0, 0, 0) !important;
   clip-path: inset(50%) !important;
   white-space: nowrap !important;
   border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
   opacity: 0 !important;
+  visibility: hidden !important;
   pointer-events: none !important;
   appearance: none !important;
+  -webkit-appearance: none !important;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-anchor,
+body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field--dropdown,
+body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-input-wrap {
+  border-bottom: 0 !important;
+  box-shadow: none;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field--dropdown .ad-form-bm-search-trigger {
+  box-shadow: none;
 }
 
 body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field {

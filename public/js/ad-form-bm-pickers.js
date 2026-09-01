@@ -9,7 +9,7 @@ import { fetchVehicleCatalog } from "./vehicle-catalog-client.js?v=adBmCatalog1"
 import { bindAutoBmDismiss, autoBmPanelIsOpen } from "./auto-bm-dismiss.js?v=bmDismiss1";
 
 const PLACEHOLDER = "Válasszon";
-const DROPDOWN_VISIBLE_ROWS = 15;
+const DROPDOWN_VISIBLE_ROWS = 7;
 const DROPDOWN_ROW_PX = 44;
 
 function escapeHtml(value) {
@@ -118,6 +118,7 @@ export function isBmPickerAdForm(form) {
 
 /** @type {(() => void) | null} */
 let closeOpenPanel = null;
+let suppressBmFocusOpen = false;
 
 function registerOpenPanel(close) {
   if (closeOpenPanel && closeOpenPanel !== close) closeOpenPanel();
@@ -225,6 +226,8 @@ function unmountPicker(select) {
   select._adBmPanel?.remove();
   delete select._adBmPanel;
   delete select._adBmClose;
+  delete select._adBmRefreshDropdown;
+  delete select._adBmOnBrandChange;
   delete select.dataset.adBmPicker;
 }
 
@@ -436,6 +439,12 @@ function mountSearchDropdownPicker(select, opts) {
   }
 
   function openDropdown() {
+    ["gyartmany", "modell", "uzemanyag", "okmany_jelleg", "allapot", "kivitel"].forEach((id) => {
+      const other = document.getElementById(id);
+      if (!other || other === select) return;
+      if (autoBmPanelIsOpen(other._adBmPanel) && typeof other._adBmClose === "function") other._adBmClose();
+    });
+    suppressBmFocusOpen = false;
     registerOpenPanel(closeDropdown);
     syncFromHidden();
     scrollTop = 0;
@@ -452,6 +461,7 @@ function mountSearchDropdownPicker(select, opts) {
   }
 
   function closeDropdown() {
+    const wasOpen = autoBmPanelIsOpen(dropdown);
     field.classList.remove("is-open");
     wrap.classList.remove("is-open");
     dropdown.hidden = true;
@@ -461,9 +471,15 @@ function mountSearchDropdownPicker(select, opts) {
     window.removeEventListener("scroll", onViewportChange, true);
     window.removeEventListener("resize", onViewportChange);
     unregisterOpenPanel(closeDropdown);
+    if (wasOpen) {
+      suppressBmFocusOpen = true;
+      window.setTimeout(() => {
+        suppressBmFocusOpen = false;
+      }, 50);
+    }
     if (input) {
       input.dataset.adBmEditing = "0";
-      input.blur();
+      if (wasOpen) input.blur();
     }
     query = "";
     onQueryChange?.(query);
@@ -508,6 +524,10 @@ function mountSearchDropdownPicker(select, opts) {
   }
 
   input?.addEventListener("focus", () => {
+    if (suppressBmFocusOpen) {
+      input.blur();
+      return;
+    }
     if (isDisabled()) {
       input.blur();
       return;
@@ -553,7 +573,7 @@ function mountSearchDropdownPicker(select, opts) {
 
   bindAutoBmDismiss({
     panel: dropdown,
-    roots: [field, wrap],
+    roots: [wrap, inputWrap],
     isOpen: () => autoBmPanelIsOpen(dropdown),
     close: closeDropdown,
   });
@@ -1179,7 +1199,8 @@ function mountBrandPicker(select, catalog) {
         else selected.delete(brand);
         writePickerList(select, [...selected]);
         updateBmSearchTrigger(select, labelList([...selected], "márka"), selected.size > 0);
-        document.getElementById("modell")?._adBmHidden?.dispatchEvent(new Event("change", { bubbles: true }));
+        const modell = document.getElementById("modell");
+        modell?._adBmOnBrandChange?.();
       };
     },
     onQueryChange(next) {
@@ -1263,12 +1284,15 @@ function mountModelPicker(select, catalog) {
     },
   });
 
-  document.getElementById("gyartmany")?._adBmHidden?.addEventListener("change", () => {
+  function onBrandChange() {
     pruneSelected();
     writePickerList(select, [...selected]);
     updateBmSearchTrigger(select, labelList([...selected], "modell"), selected.size > 0);
-    select._adBmRefreshDropdown?.();
-  });
+    if (autoBmPanelIsOpen(select._adBmPanel)) select._adBmRefreshDropdown?.();
+  }
+
+  select._adBmOnBrandChange = onBrandChange;
+  document.getElementById("gyartmany")?._adBmHidden?.addEventListener("change", onBrandChange);
 }
 
 export function applyAdFormBmFieldValues(data) {

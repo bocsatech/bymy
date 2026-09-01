@@ -10,7 +10,7 @@ body.site-app[data-site-page="hirdetesfeladas"] {
   --ad-form-bm-yellow: #f0c52c;
   --ad-form-bm-surface: #f0f0f0;
   --ad-form-bm-row-h: 44px;
-  --ad-form-bm-dropdown-rows: 15;
+  --ad-form-bm-dropdown-rows: 7;
 }
 
 html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] {

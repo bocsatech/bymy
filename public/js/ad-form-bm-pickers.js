@@ -1008,11 +1008,14 @@ function renderWindowedToggleRows(bodyEl, items, scrollTop, rowKey, rowLabel, se
   bodyEl.style.setProperty("--ad-form-bm-list-height", `${items.length * rowH}px`);
 }
 
-function enforceSingleToggleChecks(bodyEl, attrName, selectedValue) {
-  bodyEl.querySelectorAll(`[${attrName}]`).forEach((input) => {
-    if (!(input instanceof HTMLInputElement)) return;
-    input.checked = input.getAttribute(attrName) === selectedValue;
-  });
+function bindSingleToggleGroup(bodyEl, attrName, onPick) {
+  bodyEl.onmousedown = (event) => {
+    const el = event.target.closest(`[${attrName}]`);
+    if (!el || el.type !== "checkbox") return;
+    event.preventDefault();
+    const value = el.getAttribute(attrName) ?? "";
+    onPick(value);
+  };
 }
 
 function mountSearchFlatPicker(select, title, options, panelClass, unit = "db") {
@@ -1053,17 +1056,12 @@ function mountSearchFlatPicker(select, title, options, panelClass, unit = "db") 
       );
     },
     bindBody(bodyEl) {
-      bodyEl.onchange = (event) => {
-        const el = event.target.closest("[data-ad-bm-flat]");
-        if (!el) return;
-        const opt = el.getAttribute("data-ad-bm-flat") ?? "";
-        if (el.checked) selected = opt;
-        else if (selected === opt) selected = "";
+      bindSingleToggleGroup(bodyEl, "data-ad-bm-flat", (value) => {
+        selected = selected === value ? "" : value;
         writePlainValue(select, selected);
-        enforceSingleToggleChecks(bodyEl, "data-ad-bm-flat", selected);
         updateBmSearchTrigger(select, selected, Boolean(selected));
         select._adBmRefreshDropdown?.();
-      };
+      });
     },
   });
 }
@@ -1135,17 +1133,13 @@ function mountFlatPicker(select, title, options, panelClass, openAttr) {
   }
 
   function bindBody() {
-    bodyEl.onchange = (event) => {
-      const el = event.target.closest("[data-ad-bm-flat]");
-      if (!el) return;
-      const opt = el.getAttribute("data-ad-bm-flat") ?? "";
-      if (el.checked) selected = opt;
-      else if (selected === opt) selected = "";
+    bindSingleToggleGroup(bodyEl, "data-ad-bm-flat", (value) => {
+      selected = selected === value ? "" : value;
       writePlainValue(select, selected);
       renderBody();
       bindBody();
       refreshSummary();
-    };
+    });
   }
 
   function positionDropdown() {
@@ -1422,18 +1416,13 @@ function mountBrandPicker(select, catalog) {
       );
     },
     bindBody(bodyEl) {
-      bodyEl.onchange = (event) => {
-        const el = event.target.closest("[data-ad-bm-brand]");
-        if (!el) return;
-        const brand = el.getAttribute("data-ad-bm-brand") ?? "";
-        if (el.checked) selected = brand;
-        else if (selected === brand) selected = "";
+      bindSingleToggleGroup(bodyEl, "data-ad-bm-brand", (value) => {
+        selected = selected === value ? "" : value;
         writePlainValue(select, selected);
-        enforceSingleToggleChecks(bodyEl, "data-ad-bm-brand", selected);
         updateBmSearchTrigger(select, selected, Boolean(selected));
         select._adBmRefreshDropdown?.();
         document.getElementById("modell")?._adBmOnBrandChange?.();
-      };
+      });
     },
     onQueryChange(next) {
       query = next;
@@ -1502,17 +1491,12 @@ function mountModelPicker(select, catalog) {
       );
     },
     bindBody(bodyEl) {
-      bodyEl.onchange = (event) => {
-        const el = event.target.closest("[data-ad-bm-model]");
-        if (!el) return;
-        const model = el.getAttribute("data-ad-bm-model") ?? "";
-        if (el.checked) selected = model;
-        else if (selected === model) selected = "";
+      bindSingleToggleGroup(bodyEl, "data-ad-bm-model", (value) => {
+        selected = selected === value ? "" : value;
         writePlainValue(select, selected);
-        enforceSingleToggleChecks(bodyEl, "data-ad-bm-model", selected);
         updateBmSearchTrigger(select, selected, Boolean(selected));
         select._adBmRefreshDropdown?.();
-      };
+      });
     },
     onQueryChange(next) {
       query = next;

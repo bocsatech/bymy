@@ -400,6 +400,76 @@ function mountSearchDropdownPicker(select, opts) {
   wrap.appendChild(dropdown);
   select._adBmPanel = dropdown;
   const bodyEl = dropdown.querySelector("[data-ad-bm-body]");
+  const inputWrap = wrap.querySelector(".ad-form-bm-input-wrap");
+
+  function positionDropdown() {
+    const anchor = inputWrap || wrap;
+    const rect = anchor.getBoundingClientRect();
+    dropdown.classList.add("ad-form-bm-dropdown--portaled");
+    dropdown.style.position = "fixed";
+    dropdown.style.top = `${Math.round(rect.bottom + 4)}px`;
+    dropdown.style.left = `${Math.round(rect.left)}px`;
+    dropdown.style.width = `${Math.round(rect.width)}px`;
+    dropdown.style.right = "auto";
+    dropdown.style.bottom = "auto";
+  }
+
+  function attachDropdownPortal() {
+    if (dropdown.parentElement !== document.body) document.body.appendChild(dropdown);
+    positionDropdown();
+  }
+
+  function detachDropdownPortal() {
+    dropdown.classList.remove("ad-form-bm-dropdown--portaled");
+    dropdown.style.removeProperty("position");
+    dropdown.style.removeProperty("top");
+    dropdown.style.removeProperty("left");
+    dropdown.style.removeProperty("width");
+    dropdown.style.removeProperty("right");
+    dropdown.style.removeProperty("bottom");
+    if (dropdown.parentElement !== wrap) wrap.appendChild(dropdown);
+  }
+
+  function onViewportChange() {
+    if (dropdown.hidden || dropdown.classList.contains("is-closed")) return;
+    positionDropdown();
+  }
+
+  function openDropdown() {
+    registerOpenPanel(closeDropdown);
+    syncFromHidden();
+    scrollTop = 0;
+    lastWindowStart = -1;
+    renderList(true);
+    field.classList.add("is-open");
+    wrap.classList.add("is-open");
+    dropdown.hidden = false;
+    dropdown.style.removeProperty("display");
+    dropdown.classList.remove("is-closed");
+    attachDropdownPortal();
+    window.addEventListener("scroll", onViewportChange, true);
+    window.addEventListener("resize", onViewportChange);
+  }
+
+  function closeDropdown() {
+    field.classList.remove("is-open");
+    wrap.classList.remove("is-open");
+    dropdown.hidden = true;
+    dropdown.style.setProperty("display", "none", "important");
+    dropdown.classList.add("is-closed");
+    detachDropdownPortal();
+    window.removeEventListener("scroll", onViewportChange, true);
+    window.removeEventListener("resize", onViewportChange);
+    unregisterOpenPanel(closeDropdown);
+    if (input) {
+      input.dataset.adBmEditing = "0";
+      input.blur();
+    }
+    query = "";
+    onQueryChange?.(query);
+    syncHidden();
+    refreshTrigger();
+  }
 
   function refreshTrigger() {
     const hasValue = parseJsonList(hidden.value).length > 0;
@@ -424,36 +494,6 @@ function mountSearchDropdownPicker(select, opts) {
     lastWindowStart = nextStart;
     renderRows(bodyEl, items, scrollTop);
     bindBody(bodyEl);
-  }
-
-  function openDropdown() {
-    registerOpenPanel(closeDropdown);
-    syncFromHidden();
-    scrollTop = 0;
-    lastWindowStart = -1;
-    renderList(true);
-    field.classList.add("is-open");
-    wrap.classList.add("is-open");
-    dropdown.hidden = false;
-    dropdown.style.removeProperty("display");
-    dropdown.classList.remove("is-closed");
-  }
-
-  function closeDropdown() {
-    field.classList.remove("is-open");
-    wrap.classList.remove("is-open");
-    dropdown.hidden = true;
-    dropdown.style.setProperty("display", "none", "important");
-    dropdown.classList.add("is-closed");
-    unregisterOpenPanel(closeDropdown);
-    if (input) {
-      input.dataset.adBmEditing = "0";
-      input.blur();
-    }
-    query = "";
-    onQueryChange?.(query);
-    syncHidden();
-    refreshTrigger();
   }
 
   function beginSearch() {

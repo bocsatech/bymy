@@ -219,6 +219,25 @@ body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-dropdown.ad-form-bm-
   display: none !important;
 }
 
+body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-native-host,
+body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-native-host select,
+body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-native-host input {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  max-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  overflow: hidden !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+}
+
 /* Rejtett natív select — ne legyen szürke vonal a trigger alatt */
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .labeled-field > select.ad-form-bm-native,
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form select.ad-form-bm-native,
@@ -252,11 +271,17 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-layout-item select.
   -webkit-appearance: none !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-anchor,
 body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field--dropdown,
+body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field,
 body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-input-wrap {
   border-bottom: 0 !important;
   box-shadow: none;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] .labeled-field.ad-form-bm-anchor > select,
+body.site-app[data-site-page="hirdetesfeladas"] .md-outlined.ad-form-bm-anchor > select,
+body.site-app[data-site-page="hirdetesfeladas"] .ad-layout-item.ad-form-bm-anchor > select {
+  display: none !important;
 }
 
 body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-input-wrap,

@@ -171,26 +171,53 @@ function hideNativeSelect(select) {
   select.classList.add("ad-form-bm-native");
   select.tabIndex = -1;
   select.setAttribute("aria-hidden", "true");
-  select.setAttribute("size", "1");
-  select.style.setProperty("display", "none", "important");
-  select.style.setProperty("width", "0", "important");
-  select.style.setProperty("height", "0", "important");
-  select.style.setProperty("min-height", "0", "important");
-  select.style.setProperty("overflow", "hidden", "important");
-  select.style.setProperty("border", "0", "important");
+  select.setAttribute("hidden", "");
 }
 
 function showNativeSelect(select) {
   select.classList.remove("ad-form-bm-native");
   select.removeAttribute("tabindex");
   select.removeAttribute("aria-hidden");
-  select.removeAttribute("size");
+  select.removeAttribute("hidden");
   select.style.removeProperty("display");
   select.style.removeProperty("width");
   select.style.removeProperty("height");
   select.style.removeProperty("min-height");
   select.style.removeProperty("overflow");
   select.style.removeProperty("border");
+}
+
+function stashNativeSelect(select, wrap) {
+  if (!select || !wrap) return;
+  let host = select._adBmNativeHost;
+  if (!host) {
+    host = document.createElement("div");
+    host.className = "ad-form-bm-native-host";
+    host.hidden = true;
+    select._adBmNativeHost = host;
+  }
+  host.appendChild(select);
+  if (select._adBmHidden) host.appendChild(select._adBmHidden);
+  if (host.parentElement !== wrap) wrap.appendChild(host);
+}
+
+function releaseNativeSelect(select, field) {
+  const host = select._adBmNativeHost;
+  const wrap = bmWrap(select);
+  if (!field) return;
+  if (host) {
+    if (wrap?.parentElement === field) {
+      field.insertBefore(select, wrap.nextSibling);
+    } else {
+      field.appendChild(select);
+    }
+    if (select._adBmHidden) field.insertBefore(select._adBmHidden, select.nextSibling);
+    host.remove();
+    delete select._adBmNativeHost;
+  } else if (wrap?.parentElement === field) {
+    field.insertBefore(select, wrap.nextSibling);
+    if (select._adBmHidden) field.insertBefore(select._adBmHidden, select.nextSibling);
+  }
 }
 
 function ensureHiddenInput(select) {
@@ -232,9 +259,10 @@ function restoreHiddenInput(select) {
 
 function unmountPicker(select) {
   if (!select) return;
+  const field = fieldHost(select);
+  releaseNativeSelect(select, field);
   showNativeSelect(select);
   restoreHiddenInput(select);
-  const field = fieldHost(select);
   field?.classList.remove("ad-form-bm-anchor", "is-open");
   field?.querySelector(`.ad-form-bm-field[data-ad-bm-for="${select.id}"]`)?.remove();
   select._adBmPanel?.remove();
@@ -280,6 +308,7 @@ function mountBmPicker(opts) {
     </button>
   `;
   select.insertAdjacentElement("beforebegin", wrap);
+  stashNativeSelect(select, wrap);
 
   const summaryEl = wrap.querySelector("[data-ad-bm-summary]");
   const openBtn = wrap.querySelector(`[${openAttr}]`);
@@ -404,6 +433,7 @@ function mountSearchDropdownPicker(select, opts) {
     </div>
   `;
   select.insertAdjacentElement("beforebegin", wrap);
+  stashNativeSelect(select, wrap);
 
   const input = wrap.querySelector("[data-ad-bm-search-trigger]");
   const chev = wrap.querySelector(".auto-bm-trigger__chev");

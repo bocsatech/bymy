@@ -1,6 +1,6 @@
 /**
- * Hirdetésfeladás — Állapot / Kivitel / Okmány kapcsolós panel (mint az autó kereső).
- * Több érték is választható; a rejtett mező JSON listát tárol, a select csak opciókat tart.
+ * Hirdetésfeladás — kapcsolós panel pickerek (személyautó / teherautó).
+ * Egy mező = egy választás; a lista fixed overlay-ként nyílik.
  */
 
 import { ALLAPOT_CATEGORIES, OKMANY_JELLEG_OPTIONS, UZEMANYAG_CATEGORIES } from "./equipment-data.js?v=teherKivitel35e";
@@ -35,6 +35,11 @@ function parseJsonList(raw) {
       .map((s) => s.trim())
       .filter(Boolean);
   }
+}
+
+function readSingleStoredValue(raw) {
+  if (raw == null || raw === "") return "";
+  return parseJsonList(String(raw))[0] ?? String(raw).trim();
 }
 
 function writeJsonList(input, list) {
@@ -327,11 +332,22 @@ function unmountPicker(select) {
  *   syncFromHidden: () => void,
  *   syncSummary: (summaryEl: HTMLElement | null, hidden: HTMLInputElement) => void,
  *   syncHidden: () => void,
+ *   singleSelect?: boolean,
  * }} opts
  */
 function mountBmPicker(opts) {
-  const { select, title, panelClass, openAttr, renderBody, bindBody, syncFromHidden, syncSummary, syncHidden } =
-    opts;
+  const {
+    select,
+    title,
+    panelClass,
+    openAttr,
+    renderBody,
+    bindBody,
+    syncFromHidden,
+    syncSummary,
+    syncHidden,
+    singleSelect = false,
+  } = opts;
   if (!select || select.tagName !== "SELECT" || select.dataset.adBmPicker === "1") return;
 
   const field = anchorField(select);
@@ -339,7 +355,7 @@ function mountBmPicker(opts) {
 
   unmountPicker(select);
   hideNativeSelect(select);
-  const hidden = ensureHiddenInput(select);
+  const hidden = singleSelect ? ensurePlainHiddenInput(select) : ensureHiddenInput(select);
 
   const wrap = document.createElement("div");
   wrap.className = "ad-form-bm-field auto-bm-field";
@@ -368,7 +384,10 @@ function mountBmPicker(opts) {
 
   function refreshSummary() {
     syncSummary(summaryEl, hidden);
-    wrap.classList.toggle("has-value", parseJsonList(hidden.value).length > 0);
+    wrap.classList.toggle(
+      "has-value",
+      singleSelect ? Boolean(readSingleStoredValue(hidden.value)) : parseJsonList(hidden.value).length > 0
+    );
   }
 
   function openPanel() {
@@ -428,6 +447,7 @@ function mountBmPicker(opts) {
  *   renderRows: (bodyEl: HTMLElement, items: unknown[], scrollTop: number) => void,
  *   bindBody: (bodyEl: HTMLElement) => void,
  *   onQueryChange?: (query: string) => void,
+ *   singleSelect?: boolean,
  * }} opts
  */
 function mountSearchDropdownPicker(select, opts) {
@@ -444,6 +464,7 @@ function mountSearchDropdownPicker(select, opts) {
     renderRows,
     bindBody,
     onQueryChange,
+    singleSelect = false,
   } = opts;
   if (!select || select.tagName !== "SELECT" || select.dataset.adBmPicker === "1") return;
 
@@ -452,7 +473,7 @@ function mountSearchDropdownPicker(select, opts) {
 
   unmountPicker(select);
   hideNativeSelect(select);
-  const hidden = ensureHiddenInput(select);
+  const hidden = singleSelect ? ensurePlainHiddenInput(select) : ensureHiddenInput(select);
 
   let query = "";
   let scrollTop = 0;
@@ -575,7 +596,9 @@ function mountSearchDropdownPicker(select, opts) {
   }
 
   function refreshTrigger() {
-    const hasValue = parseJsonList(hidden.value).length > 0;
+    const hasValue = singleSelect
+      ? Boolean(readSingleStoredValue(hidden.value))
+      : parseJsonList(hidden.value).length > 0;
     const summary = getSummary();
     updateBmSearchTrigger(select, summary === PLACEHOLDER ? "" : summary, hasValue);
   }
@@ -591,7 +614,11 @@ function mountSearchDropdownPicker(select, opts) {
       return;
     }
     const nextStart = Math.max(0, Math.floor(scrollTop / DROPDOWN_ROW_PX) - 1);
-    if (!force && nextStart === lastWindowStart && bodyEl.querySelector("[data-ad-bm-flat], [data-ad-bm-brand], [data-ad-bm-model]")) {
+    if (
+      !force &&
+      nextStart === lastWindowStart &&
+      bodyEl.querySelector("[data-ad-bm-flat], [data-ad-bm-brand], [data-ad-bm-model], [data-ad-bm-fuel-child]")
+    ) {
       return;
     }
     lastWindowStart = nextStart;
@@ -960,23 +987,32 @@ function renderWindowedToggleRows(bodyEl, items, scrollTop, rowKey, rowLabel, se
   bodyEl.style.setProperty("--ad-form-bm-list-height", `${items.length * rowH}px`);
 }
 
+function enforceSingleToggleChecks(bodyEl, attrName, selectedValue) {
+  bodyEl.querySelectorAll(`[${attrName}]`).forEach((input) => {
+    if (!(input instanceof HTMLInputElement)) return;
+    input.checked = input.getAttribute(attrName) === selectedValue;
+  });
+}
+
 function mountSearchFlatPicker(select, title, options, panelClass, unit = "db") {
-  /** @type {Set<string>} */
-  let selected = new Set();
+  let selected = "";
 
   mountSearchDropdownPicker(select, {
     title,
     panelClass,
     unit,
+    singleSelect: true,
     disabledMessage: "Nincs találat",
     syncFromHidden() {
-      selected = new Set(parseJsonList(select._adBmHidden?.value));
+      const raw = select._adBmHidden?.value ?? "";
+      selected = readSingleStoredValue(raw);
+      if (raw.trim().startsWith("[")) writePlainValue(select, selected);
     },
     syncHidden() {
-      writePickerList(select, [...selected]);
+      writePlainValue(select, selected);
     },
     getSummary() {
-      return labelList([...selected], unit);
+      return selected || PLACEHOLDER;
     },
     getFilteredItems(query) {
       const q = query.trim().toLocaleLowerCase("hu");
@@ -984,13 +1020,14 @@ function mountSearchFlatPicker(select, title, options, panelClass, unit = "db") 
       return options.filter((opt) => opt.toLocaleLowerCase("hu").includes(q));
     },
     renderRows(bodyEl, items, scrollTop) {
+      const selectedSet = new Set(selected ? [selected] : []);
       renderWindowedToggleRows(
         bodyEl,
         items,
         scrollTop,
         (item) => String(item),
         (item) => String(item),
-        selected,
+        selectedSet,
         "data-ad-bm-flat"
       );
     },
@@ -999,37 +1036,41 @@ function mountSearchFlatPicker(select, title, options, panelClass, unit = "db") 
         const el = event.target.closest("[data-ad-bm-flat]");
         if (!el) return;
         const opt = el.getAttribute("data-ad-bm-flat") ?? "";
-        if (el.checked) selected.add(opt);
-        else selected.delete(opt);
-        writePickerList(select, [...selected]);
-        updateBmSearchTrigger(select, labelList([...selected], unit), selected.size > 0);
+        if (el.checked) selected = opt;
+        else if (selected === opt) selected = "";
+        writePlainValue(select, selected);
+        enforceSingleToggleChecks(bodyEl, "data-ad-bm-flat", selected);
+        updateBmSearchTrigger(select, selected || PLACEHOLDER, Boolean(selected));
+        select._adBmRefreshDropdown?.();
       };
     },
   });
 }
 
 function mountFlatPicker(select, title, options, panelClass, openAttr) {
-  /** @type {Set<string>} */
-  let selected = new Set();
+  let selected = "";
 
   mountBmPicker({
     select,
     title,
     panelClass,
     openAttr,
+    singleSelect: true,
     syncFromHidden() {
-      selected = new Set(parseJsonList(select._adBmHidden?.value));
+      const raw = select._adBmHidden?.value ?? "";
+      selected = readSingleStoredValue(raw);
+      if (raw.trim().startsWith("[")) writePlainValue(select, selected);
     },
     syncSummary(summaryEl) {
-      if (summaryEl) summaryEl.textContent = labelList([...selected]);
+      if (summaryEl) summaryEl.textContent = selected || PLACEHOLDER;
     },
     syncHidden() {
-      writeJsonList(select._adBmHidden, [...selected]);
+      writePlainValue(select, selected);
     },
     renderBody(bodyEl) {
       const rows = options
         .map((opt) => {
-          const on = selected.has(opt);
+          const on = selected === opt;
           return `<div class="auto-bm-row">
             <label class="auto-bm-toggle">
               <span>${escapeHtml(opt)}</span>
@@ -1046,73 +1087,51 @@ function mountFlatPicker(select, title, options, panelClass, openAttr) {
         const el = event.target.closest("[data-ad-bm-flat]");
         if (!el) return;
         const opt = el.getAttribute("data-ad-bm-flat") ?? "";
-        if (el.checked) selected.add(opt);
-        else selected.delete(opt);
-        writePickerList(select, [...selected]);
-        updateBmSummary(select, labelList([...selected]), selected.size > 0);
+        if (el.checked) selected = opt;
+        else if (selected === opt) selected = "";
+        writePlainValue(select, selected);
+        enforceSingleToggleChecks(bodyEl, "data-ad-bm-flat", selected);
+        updateBmSummary(select, selected || PLACEHOLDER, Boolean(selected));
       };
     },
   });
 }
 
 function mountAllapotPicker(select) {
-  /** @type {Set<string>} */
   let openMains = new Set();
-  /** @type {Set<string>} */
-  let selected = new Set();
+  let selected = "";
 
-  function selectedLabels() {
-    const labels = [];
+  function labelForValue(value) {
+    if (!value) return "";
     for (const cat of ALLAPOT_CATEGORIES) {
-      if (!openMains.has(cat.id)) continue;
-      if (cat.children?.length) {
-        const kids = cat.children.filter((c) => selected.has(c.value));
-        if (kids.length) labels.push(...kids.map((c) => c.label));
-        else labels.push(cat.label);
-      } else if (cat.value && selected.has(cat.value)) {
-        labels.push(cat.label);
-      }
+      if (cat.value === value) return cat.label;
+      const child = cat.children?.find((c) => c.value === value);
+      if (child) return child.label;
     }
-    return labels;
-  }
-
-  function effectiveSelectedValues() {
-    const values = new Set();
-    for (const cat of ALLAPOT_CATEGORIES) {
-      if (!openMains.has(cat.id)) continue;
-      if (cat.children?.length) {
-        const kids = cat.children.filter((c) => selected.has(c.value));
-        if (kids.length) kids.forEach((c) => values.add(c.value));
-        else {
-          cat.children.forEach((c) => values.add(c.value));
-          values.add(cat.label);
-        }
-      } else if (cat.value && selected.has(cat.value)) {
-        values.add(cat.value);
-      }
-    }
-    return [...values];
+    return value;
   }
 
   function syncOpenFromValues() {
     openMains.clear();
-    for (const value of selected) {
-      for (const cat of ALLAPOT_CATEGORIES) {
-        if (cat.value === value || cat.children?.some((c) => c.value === value)) {
-          openMains.add(cat.id);
-        }
+    if (!selected) return;
+    for (const cat of ALLAPOT_CATEGORIES) {
+      if (cat.value === selected || cat.children?.some((c) => c.value === selected)) {
+        openMains.add(cat.id);
       }
     }
   }
 
   function turnMainOn(cat) {
+    openMains.clear();
     openMains.add(cat.id);
-    if (!cat.children?.length && cat.value) selected.add(cat.value);
+    selected = !cat.children?.length && cat.value ? cat.value : "";
   }
 
   function turnMainOff(cat) {
     openMains.delete(cat.id);
-    for (const v of categoryValues(cat)) selected.delete(v);
+    if (cat.value === selected || cat.children?.some((c) => c.value === selected)) {
+      selected = "";
+    }
   }
 
   function renderAllapotBody(bodyEl) {
@@ -1124,7 +1143,7 @@ function mountAllapotPicker(select) {
         kidsHtml = `<div class="auto-fuel-children">
           ${cat.children
             .map((child) => {
-              const childOn = selected.has(child.value);
+              const childOn = selected === child.value;
               return `<div class="auto-bm-row auto-fuel-child-row">
                 <label class="auto-bm-toggle">
                   <span>${escapeHtml(child.label)}</span>
@@ -1136,10 +1155,11 @@ function mountAllapotPicker(select) {
             .join("")}
         </div>`;
       }
+      const mainOn = !hasKids ? selected === cat.value : on;
       return `<div class="auto-bm-row auto-fuel-main-row" data-ad-bm-allapot-main="${escapeAttr(cat.id)}">
         <label class="auto-bm-toggle auto-fuel-main-toggle">
           <span class="auto-fuel-main-label">${escapeHtml(cat.label)}</span>
-          <input type="checkbox" data-ad-bm-allapot-main-toggle="${escapeAttr(cat.id)}" ${on ? "checked" : ""} />
+          <input type="checkbox" data-ad-bm-allapot-main-toggle="${escapeAttr(cat.id)}" ${mainOn ? "checked" : ""} />
           <span class="auto-bm-switch" aria-hidden="true"></span>
         </label>
         ${kidsHtml}
@@ -1154,15 +1174,18 @@ function mountAllapotPicker(select) {
     title: "Állapot",
     panelClass: "ad-form-allapot-panel",
     openAttr: "data-ad-bm-allapot-open",
+    singleSelect: true,
     syncFromHidden() {
-      selected = new Set(parseJsonList(select._adBmHidden?.value));
+      const raw = select._adBmHidden?.value ?? "";
+      selected = readSingleStoredValue(raw);
+      if (raw.trim().startsWith("[")) writePlainValue(select, selected);
       syncOpenFromValues();
     },
     syncSummary(summaryEl) {
-      if (summaryEl) summaryEl.textContent = labelList(selectedLabels());
+      if (summaryEl) summaryEl.textContent = labelForValue(selected) || PLACEHOLDER;
     },
     syncHidden() {
-      writeJsonList(select._adBmHidden, effectiveSelectedValues());
+      writePlainValue(select, selected);
     },
     renderBody: renderAllapotBody,
     bindBody(bodyEl) {
@@ -1175,8 +1198,8 @@ function mountAllapotPicker(select) {
           if (mainEl.checked) turnMainOn(cat);
           else turnMainOff(cat);
           renderAllapotBody(bodyEl);
-          writePickerList(select, effectiveSelectedValues());
-          updateBmSummary(select, labelList(selectedLabels()), effectiveSelectedValues().length > 0);
+          writePlainValue(select, selected);
+          updateBmSummary(select, labelForValue(selected) || PLACEHOLDER, Boolean(selected));
           return;
         }
 
@@ -1185,13 +1208,15 @@ function mountAllapotPicker(select) {
         const value = childEl.getAttribute("data-ad-bm-allapot-child") ?? "";
         const parentId = childEl.getAttribute("data-ad-bm-allapot-parent") ?? "";
         if (childEl.checked) {
+          selected = value;
+          openMains.clear();
           if (parentId) openMains.add(parentId);
-          selected.add(value);
-        } else {
-          selected.delete(value);
+        } else if (selected === value) {
+          selected = "";
         }
-        writePickerList(select, effectiveSelectedValues());
-        updateBmSummary(select, labelList(selectedLabels()), effectiveSelectedValues().length > 0);
+        renderAllapotBody(bodyEl);
+        writePlainValue(select, selected);
+        updateBmSummary(select, labelForValue(selected) || PLACEHOLDER, Boolean(selected));
       };
     },
   });
@@ -1339,64 +1364,41 @@ function mountHierarchicalPicker(select, { title, panelClass, openAttr, categori
 }
 
 function mountFuelPicker(select) {
-  /** @type {Set<string>} */
   let openMains = new Set();
-  /** @type {Set<string>} */
-  let selected = new Set();
+  let selected = "";
   let query = "";
 
-  function selectedLabels() {
-    const labels = [];
+  function labelForValue(value) {
+    if (!value) return "";
     for (const cat of UZEMANYAG_CATEGORIES) {
-      if (!openMains.has(cat.id)) continue;
-      if (cat.children?.length) {
-        const kids = cat.children.filter((c) => selected.has(c.value));
-        if (kids.length) labels.push(...kids.map((c) => c.label));
-        else labels.push(cat.label);
-      } else if (cat.value && selected.has(cat.value)) {
-        labels.push(cat.label);
-      }
+      if (cat.value === value) return cat.label;
+      const child = cat.children?.find((c) => c.value === value);
+      if (child) return child.label;
     }
-    return labels;
-  }
-
-  function effectiveSelectedValues() {
-    const values = new Set();
-    for (const cat of UZEMANYAG_CATEGORIES) {
-      if (!openMains.has(cat.id)) continue;
-      if (cat.children?.length) {
-        const kids = cat.children.filter((c) => selected.has(c.value));
-        if (kids.length) kids.forEach((c) => values.add(c.value));
-        else {
-          cat.children.forEach((c) => values.add(c.value));
-          values.add(cat.label);
-        }
-      } else if (cat.value && selected.has(cat.value)) {
-        values.add(cat.value);
-      }
-    }
-    return [...values];
+    return value;
   }
 
   function syncOpenFromValues() {
     openMains.clear();
-    for (const value of selected) {
-      for (const cat of UZEMANYAG_CATEGORIES) {
-        if (cat.value === value || cat.children?.some((c) => c.value === value)) {
-          openMains.add(cat.id);
-        }
+    if (!selected) return;
+    for (const cat of UZEMANYAG_CATEGORIES) {
+      if (cat.value === selected || cat.children?.some((c) => c.value === selected)) {
+        openMains.add(cat.id);
       }
     }
   }
 
   function turnMainOn(cat) {
+    openMains.clear();
     openMains.add(cat.id);
-    if (!cat.children?.length && cat.value) selected.add(cat.value);
+    selected = !cat.children?.length && cat.value ? cat.value : "";
   }
 
   function turnMainOff(cat) {
     openMains.delete(cat.id);
-    for (const v of categoryValues(cat)) selected.delete(v);
+    if (cat.value === selected || cat.children?.some((c) => c.value === selected)) {
+      selected = "";
+    }
   }
 
   function fuelMatchesQuery(cat, q) {
@@ -1417,7 +1419,7 @@ function mountFuelPicker(select) {
             ${cat.children
               .filter((child) => !q || child.label.toLocaleLowerCase("hu").includes(q))
               .map((child) => {
-                const childOn = selected.has(child.value);
+                const childOn = selected === child.value;
                 return `<div class="auto-bm-row auto-fuel-child-row">
                   <label class="auto-bm-toggle">
                     <span>${escapeHtml(child.label)}</span>
@@ -1429,10 +1431,11 @@ function mountFuelPicker(select) {
               .join("")}
           </div>`;
         }
+        const mainOn = !hasKids ? selected === cat.value : on;
         return `<div class="auto-bm-row auto-fuel-main-row">
           <label class="auto-bm-toggle auto-fuel-main-toggle">
             <span class="auto-fuel-main-label">${escapeHtml(cat.label)}</span>
-            <input type="checkbox" data-ad-bm-fuel-main-toggle="${escapeAttr(cat.id)}" ${on ? "checked" : ""} />
+            <input type="checkbox" data-ad-bm-fuel-main-toggle="${escapeAttr(cat.id)}" ${mainOn ? "checked" : ""} />
             <span class="auto-bm-switch" aria-hidden="true"></span>
           </label>
           ${kidsHtml}
@@ -1448,16 +1451,19 @@ function mountFuelPicker(select) {
     title: "Üzemanyag",
     panelClass: "ad-form-fuel-panel",
     unit: "üzemanyag",
+    singleSelect: true,
     disabledMessage: "Nincs találat",
     syncFromHidden() {
-      selected = new Set(parseJsonList(select._adBmHidden?.value));
+      const raw = select._adBmHidden?.value ?? "";
+      selected = normalizePrimaryValue(select, readSingleStoredValue(raw));
+      if (raw.trim().startsWith("[")) writePlainValue(select, selected);
       syncOpenFromValues();
     },
     syncHidden() {
-      writePickerList(select, effectiveSelectedValues());
+      writePlainValue(select, selected);
     },
     getSummary() {
-      return labelList(selectedLabels(), "üzemanyag");
+      return labelForValue(selected) || PLACEHOLDER;
     },
     getFilteredItems() {
       return UZEMANYAG_CATEGORIES;
@@ -1475,8 +1481,8 @@ function mountFuelPicker(select) {
           if (mainEl.checked) turnMainOn(cat);
           else turnMainOff(cat);
           renderFuelBody(bodyEl);
-          writePickerList(select, effectiveSelectedValues());
-          updateBmSearchTrigger(select, labelList(selectedLabels(), "üzemanyag"), effectiveSelectedValues().length > 0);
+          writePlainValue(select, selected);
+          updateBmSearchTrigger(select, labelForValue(selected) || PLACEHOLDER, Boolean(selected));
           return;
         }
 
@@ -1485,13 +1491,15 @@ function mountFuelPicker(select) {
         const value = childEl.getAttribute("data-ad-bm-fuel-child") ?? "";
         const parentId = childEl.getAttribute("data-ad-bm-fuel-parent") ?? "";
         if (childEl.checked) {
+          selected = value;
+          openMains.clear();
           if (parentId) openMains.add(parentId);
-          selected.add(value);
-        } else {
-          selected.delete(value);
+        } else if (selected === value) {
+          selected = "";
         }
-        writePickerList(select, effectiveSelectedValues());
-        updateBmSearchTrigger(select, labelList(selectedLabels(), "üzemanyag"), effectiveSelectedValues().length > 0);
+        renderFuelBody(bodyEl);
+        writePlainValue(select, selected);
+        updateBmSearchTrigger(select, labelForValue(selected) || PLACEHOLDER, Boolean(selected));
       };
     },
     onQueryChange(next) {
@@ -1502,8 +1510,7 @@ function mountFuelPicker(select) {
 
 function mountBrandPicker(select, catalog) {
   const brands = [...(catalog?.gyartmanyok || [])].sort((a, b) => a.localeCompare(b, "hu", { sensitivity: "base" }));
-  /** @type {Set<string>} */
-  let selected = new Set();
+  let selected = "";
   let query = "";
 
   function matchingBrands() {
@@ -1516,25 +1523,29 @@ function mountBrandPicker(select, catalog) {
     title: "Gyártmány",
     panelClass: "ad-form-brand-panel",
     unit: "márka",
+    singleSelect: true,
     disabledMessage: "Nincs találat",
     syncFromHidden() {
-      selected = new Set(parseJsonList(select._adBmHidden?.value).map((v) => v.toUpperCase()));
+      const raw = select._adBmHidden?.value ?? "";
+      selected = readSingleStoredValue(raw).toUpperCase();
+      if (raw.trim().startsWith("[")) writePlainValue(select, selected);
     },
     syncHidden() {
-      writePickerList(select, [...selected]);
+      writePlainValue(select, selected);
     },
     getSummary() {
-      return labelList([...selected], "márka");
+      return selected || PLACEHOLDER;
     },
     getFilteredItems: matchingBrands,
     renderRows(bodyEl, items, scrollTop) {
+      const selectedSet = new Set(selected ? [selected] : []);
       renderWindowedToggleRows(
         bodyEl,
         items,
         scrollTop,
         (item) => String(item),
         (item) => String(item),
-        selected,
+        selectedSet,
         "data-ad-bm-brand"
       );
     },
@@ -1543,10 +1554,11 @@ function mountBrandPicker(select, catalog) {
         const el = event.target.closest("[data-ad-bm-brand]");
         if (!el) return;
         const brand = el.getAttribute("data-ad-bm-brand") ?? "";
-        if (el.checked) selected.add(brand);
-        else selected.delete(brand);
-        writePickerList(select, [...selected]);
-        updateBmSearchTrigger(select, labelList([...selected], "márka"), selected.size > 0);
+        if (el.checked) selected = brand;
+        else if (selected === brand) selected = "";
+        writePlainValue(select, selected);
+        enforceSingleToggleChecks(bodyEl, "data-ad-bm-brand", selected);
+        updateBmSearchTrigger(select, selected || PLACEHOLDER, Boolean(selected));
         const modell = document.getElementById("modell");
         modell?._adBmOnBrandChange?.();
       };
@@ -1558,22 +1570,21 @@ function mountBrandPicker(select, catalog) {
 }
 
 function mountModelPicker(select, catalog) {
-  /** @type {Set<string>} */
-  let selected = new Set();
+  let selected = "";
   let query = "";
 
-  function selectedBrands() {
+  function selectedBrand() {
     const gyartmany = document.getElementById("gyartmany");
-    return parseJsonList(gyartmany?._adBmHidden?.value).map((v) => v.toUpperCase());
+    const raw = gyartmany?._adBmHidden?.value ?? "";
+    return readSingleStoredValue(raw).toUpperCase();
   }
 
   function modelOptions() {
-    const brands = selectedBrands();
-    const models = new Set();
-    for (const brand of brands) {
-      for (const model of catalog?.modellek?.[brand] || []) models.add(model);
-    }
-    return [...models].sort((a, b) => a.localeCompare(b, "hu", { sensitivity: "base" }));
+    const brand = selectedBrand();
+    if (!brand) return [];
+    return [...(catalog?.modellek?.[brand] || [])].sort((a, b) =>
+      a.localeCompare(b, "hu", { sensitivity: "base" })
+    );
   }
 
   function matchingModels() {
@@ -1585,34 +1596,38 @@ function mountModelPicker(select, catalog) {
 
   function pruneSelected() {
     const allowed = new Set(modelOptions());
-    selected = new Set([...selected].filter((model) => allowed.has(model)));
+    if (selected && !allowed.has(selected)) selected = "";
   }
 
   mountSearchDropdownPicker(select, {
     title: "Modell",
     panelClass: "ad-form-model-panel",
     unit: "modell",
+    singleSelect: true,
     disabledMessage: "Először válassz gyártmányt",
-    isDisabled: () => selectedBrands().length === 0,
+    isDisabled: () => !selectedBrand(),
     syncFromHidden() {
-      selected = new Set(parseJsonList(select._adBmHidden?.value));
+      const raw = select._adBmHidden?.value ?? "";
+      selected = readSingleStoredValue(raw);
+      if (raw.trim().startsWith("[")) writePlainValue(select, selected);
       pruneSelected();
     },
     syncHidden() {
-      writePickerList(select, [...selected]);
+      writePlainValue(select, selected);
     },
     getSummary() {
-      return labelList([...selected], "modell");
+      return selected || PLACEHOLDER;
     },
     getFilteredItems: matchingModels,
     renderRows(bodyEl, items, scrollTop) {
+      const selectedSet = new Set(selected ? [selected] : []);
       renderWindowedToggleRows(
         bodyEl,
         items,
         scrollTop,
         (item) => String(item),
         (item) => String(item),
-        selected,
+        selectedSet,
         "data-ad-bm-model"
       );
     },
@@ -1621,10 +1636,11 @@ function mountModelPicker(select, catalog) {
         const el = event.target.closest("[data-ad-bm-model]");
         if (!el) return;
         const model = el.getAttribute("data-ad-bm-model") ?? "";
-        if (el.checked) selected.add(model);
-        else selected.delete(model);
-        writePickerList(select, [...selected]);
-        updateBmSearchTrigger(select, labelList([...selected], "modell"), selected.size > 0);
+        if (el.checked) selected = model;
+        else if (selected === model) selected = "";
+        writePlainValue(select, selected);
+        enforceSingleToggleChecks(bodyEl, "data-ad-bm-model", selected);
+        updateBmSearchTrigger(select, selected || PLACEHOLDER, Boolean(selected));
       };
     },
     onQueryChange(next) {
@@ -1634,8 +1650,8 @@ function mountModelPicker(select, catalog) {
 
   function onBrandChange() {
     pruneSelected();
-    writePickerList(select, [...selected]);
-    updateBmSearchTrigger(select, labelList([...selected], "modell"), selected.size > 0);
+    writePlainValue(select, selected);
+    updateBmSearchTrigger(select, selected || PLACEHOLDER, Boolean(selected));
     if (autoBmPanelIsOpen(select._adBmPanel)) select._adBmRefreshDropdown?.();
   }
 
@@ -1670,9 +1686,18 @@ export function applyAdFormBmFieldValues(data) {
     if (id === "uzemanyag") list = list.map((v) => normalizePrimaryValue(select, v)).filter(Boolean);
 
     if (select._adBmHidden?.dataset.adBmSingle === "1") {
-      const value = list[0] || (raw != null && !Array.isArray(raw) ? String(raw) : "");
-      writePlainValue(select, value);
-      updateBmSearchTrigger(select, value, Boolean(value));
+      const value =
+        list[0] ||
+        (raw != null && !Array.isArray(raw) ? readSingleStoredValue(String(raw)) : "");
+      const normalized =
+        id === "gyartmany" ? value.toUpperCase() : id === "uzemanyag" ? normalizePrimaryValue(select, value) : value;
+      writePlainValue(select, normalized);
+      const summary = normalized || PLACEHOLDER;
+      if (select._adBmPanel?.classList.contains("ad-form-bm-dropdown")) {
+        updateBmSearchTrigger(select, summary === PLACEHOLDER ? "" : summary, Boolean(normalized));
+      } else {
+        updateBmSummary(select, summary, Boolean(normalized));
+      }
     } else if (select._adBmHidden) {
       writePickerList(select, list);
       const unit =

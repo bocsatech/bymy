@@ -346,6 +346,16 @@ body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field {
   width: 100%;
 }
 
+body.site-app[data-site-page="hirdetesfeladas"] .inline-2 > .ad-form-bm-field {
+  flex: 1 1 0;
+  min-width: 0;
+  width: auto;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] .inline-2 {
+  overflow: visible !important;
+}
+
 body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field .auto-bm-trigger {
   appearance: none;
   display: flex;

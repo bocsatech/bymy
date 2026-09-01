@@ -311,8 +311,12 @@ export function initCategoryPicker({
   async function showVehicleWizard(selection) {
     writeStored(selection);
     setHiddenFields(selection);
-    ensureCategoryDrum();
-    syncWizardContext(selection);
+    try {
+      ensureCategoryDrum();
+      syncWizardContext(selection);
+    } catch (error) {
+      console.warn("Kategória kerék:", error);
+    }
 
     if (typeof requireLogin === "function") {
       const ok = await requireLogin(selection);
@@ -323,7 +327,12 @@ export function initCategoryPicker({
     stub?.setAttribute("hidden", "");
     wizardShell?.removeAttribute("hidden");
     stepsBar?.removeAttribute("hidden");
-    onVehicleSelected?.(selection);
+
+    try {
+      onVehicleSelected?.(selection);
+    } catch (error) {
+      console.error("Űrlap indítás hiba:", error);
+    }
   }
 
   function showIngatlanStub(selection) {

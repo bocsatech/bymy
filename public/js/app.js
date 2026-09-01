@@ -5,10 +5,10 @@ import {
   saveListingPhotosOrder,
   getStoredListingId,
 } from "./db-client.js?v=wizardSave1";
-import { createAdForm } from "./form-core.js?v=adStep1Toggle2";
+import { createAdForm } from "./form-core.js?v=postWizardFix1";
 import { initTireSizes } from "./tire-sizes-ui.js";
 import { initPhoneLanguages } from "./phone-lang-ui.js";
-import { initCategoryPicker } from "./category-picker.js?v=immoPortalPage1";
+import { initCategoryPicker } from "./category-picker.js?v=postWizardFix1";
 import {
   requireAuthForPage,
   getAuthUser,
@@ -25,10 +25,8 @@ import {
 } from "./ad-location-profile.js?v=locProf3";
 import { initImproveDescription } from "./improve-description.js?v=descAi1";
 
-if (!(await requireAuthForPage())) {
-  throw new Error("Belépés szükséges");
-}
-initSiteAuth();
+const authed = await requireAuthForPage();
+if (authed) initSiteAuth();
 
 const adForm = document.getElementById("ad-form");
 initImproveDescription(adForm);
@@ -255,23 +253,24 @@ const categoryPicker = initCategoryPicker({
     );
     return false;
   },
-  onVehicleSelected: () => {
-    try {
-      const sel = categoryPicker?.getSelection?.();
-      if (sel) categoryPicker?.syncWizardContext?.(sel);
-      const api = ensureFormReady();
-      if (!editing) api?.resetForm?.({ fresh: true });
-      api?.markTouched?.();
-      api?.syncKisteherFields?.();
-      phoneLanguages?.syncLanguages?.();
-      tireSizes?.syncRearTires?.();
-      applyListingAddressFromProfileSync(adForm);
-      applyListingAddressFromProfile(adForm).catch(() => {});
-      window.dispatchEvent(new Event("ad-form-sync-location"));
-      window.dispatchEvent(new Event("ad-form-layout-refresh"));
-    } catch (error) {
-      console.error("Űrlap indítás hiba:", error);
-    }
+  onVehicleSelected: (selection) => {
+    window.setTimeout(() => {
+      try {
+        if (selection) categoryPicker?.syncWizardContext?.(selection);
+        const api = ensureFormReady();
+        if (!editing) api?.resetForm?.({ fresh: true });
+        api?.markTouched?.();
+        api?.syncKisteherFields?.();
+        phoneLanguages?.syncLanguages?.();
+        tireSizes?.syncRearTires?.();
+        applyListingAddressFromProfileSync(adForm);
+        applyListingAddressFromProfile(adForm).catch(() => {});
+        window.dispatchEvent(new Event("ad-form-sync-location"));
+        window.dispatchEvent(new Event("ad-form-layout-refresh"));
+      } catch (error) {
+        console.error("Űrlap indítás hiba:", error);
+      }
+    }, 0);
   },
   onReset: () => {
     // picker visible again

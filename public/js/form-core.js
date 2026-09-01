@@ -13,7 +13,7 @@ import {
 import {
   mountAdFormStep1Toggles,
   refreshAdFormStep1Toggles,
-} from "./ad-form-step1-toggles.js?v=adStep1Toggle2";
+} from "./ad-form-step1-toggles.js?v=postWizardFix1";
 
 export function createAdForm(options = {}) {
   const mode = options.mode ?? "wizard";
@@ -1655,7 +1655,11 @@ modell?.addEventListener("change", () => {
 renderFuelDropdown();
 renderAllapotDropdown();
 renderKivitelDropdown();
-mountAdFormStep1Toggles(form);
+try {
+  mountAdFormStep1Toggles(form);
+} catch (error) {
+  console.warn("Alapadatok kapcsolók:", error);
+}
 renderFuelSelector();
 renderKlimaOptions();
 renderEquipment();

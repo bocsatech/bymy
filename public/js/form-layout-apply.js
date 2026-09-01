@@ -1,6 +1,6 @@
 /** Mentett 12 oszlopos elrendezés — minden mező ugyanazon a lépésrácson. */
 import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=immoTelekArea1";
-import { refreshAdFormStep1Toggles } from "./ad-form-step1-toggles.js?v=adStep1Toggle2";
+import { refreshAdFormStep1Toggles } from "./ad-form-step1-toggles.js?v=postWizardFix1";
 
 function cssEscape(value) {
   if (window.CSS?.escape) return window.CSS.escape(value);

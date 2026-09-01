@@ -249,7 +249,11 @@ export function unmountAdFormStep1Toggles(form) {
 }
 
 export function refreshAdFormStep1Toggles(form) {
-  mountAdFormStep1Toggles(form);
+  try {
+    mountAdFormStep1Toggles(form);
+  } catch (error) {
+    console.warn("Alapadatok kapcsolók frissítés:", error);
+  }
 }
 
 export function mountAdFormStep1Toggles(form) {
@@ -271,14 +275,7 @@ export function mountAdFormStep1Toggles(form) {
 }
 
 if (typeof window !== "undefined") {
-  const scheduleRefresh = () => {
-    const form = document.getElementById("ad-form");
-    refreshAdFormStep1Toggles(form);
-  };
-  window.addEventListener("ad-form-layout-refresh", scheduleRefresh);
-  window.addEventListener("ad-form-ready", () => {
-    window.setTimeout(scheduleRefresh, 0);
-    window.setTimeout(scheduleRefresh, 150);
-    window.setTimeout(scheduleRefresh, 500);
+  window.addEventListener("ad-form-layout-refresh", () => {
+    refreshAdFormStep1Toggles(document.getElementById("ad-form"));
   });
 }

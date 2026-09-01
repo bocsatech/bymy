@@ -87,11 +87,29 @@ function fieldHost(select) {
   return select?.closest(".labeled-field, .md-outlined, .ad-layout-item");
 }
 
+function bmWrap(select) {
+  const byId = document.querySelector(`.ad-form-bm-field[data-ad-bm-for="${select.id}"]`);
+  if (byId) return byId;
+  const prev = select.previousElementSibling;
+  return prev instanceof HTMLElement && prev.matches(".ad-form-bm-field") ? prev : null;
+}
+
+function bmSummaryEl(select) {
+  return bmWrap(select)?.querySelector("[data-ad-bm-summary]") ?? null;
+}
+
 function anchorField(select) {
   const field = fieldHost(select);
   if (!field) return null;
   field.classList.add("ad-form-bm-anchor");
   return field;
+}
+
+function updateBmSummary(select, text, hasValue) {
+  const wrap = bmWrap(select);
+  const summaryEl = bmSummaryEl(select);
+  if (summaryEl) summaryEl.textContent = text;
+  wrap?.classList.toggle("has-value", hasValue);
 }
 
 function hideNativeSelect(select) {
@@ -165,7 +183,7 @@ function unmountPicker(select) {
  *   renderBody: (bodyEl: HTMLElement) => void,
  *   bindBody: (bodyEl: HTMLElement) => void,
  *   syncFromHidden: () => void,
- *   syncSummary: () => void,
+ *   syncSummary: (summaryEl: HTMLElement | null, hidden: HTMLInputElement) => void,
  *   syncHidden: () => void,
  * }} opts
  */
@@ -206,7 +224,7 @@ function mountBmPicker(opts) {
   const bodyEl = panel.querySelector("[data-ad-bm-body]");
 
   function refreshSummary() {
-    syncSummary();
+    syncSummary(summaryEl, hidden);
     wrap.classList.toggle("has-value", parseJsonList(hidden.value).length > 0);
   }
 
@@ -263,10 +281,7 @@ function mountFlatPicker(select, title, options, panelClass, openAttr) {
     syncFromHidden() {
       selected = new Set(parseJsonList(select._adBmHidden?.value));
     },
-    syncSummary() {
-      const summaryEl = select
-        .closest(".ad-form-bm-field")
-        ?.querySelector("[data-ad-bm-summary]");
+    syncSummary(summaryEl) {
       if (summaryEl) summaryEl.textContent = labelList([...selected]);
     },
     syncHidden() {
@@ -295,9 +310,7 @@ function mountFlatPicker(select, title, options, panelClass, openAttr) {
         if (el.checked) selected.add(opt);
         else selected.delete(opt);
         writeJsonList(select._adBmHidden, [...selected]);
-        const summaryEl = select.closest(".ad-form-bm-field")?.querySelector("[data-ad-bm-summary]");
-        if (summaryEl) summaryEl.textContent = labelList([...selected]);
-        select.closest(".ad-form-bm-field")?.classList.toggle("has-value", selected.size > 0);
+        updateBmSummary(select, labelList([...selected]), selected.size > 0);
       };
     },
   });
@@ -406,8 +419,7 @@ function mountAllapotPicker(select) {
       selected = new Set(parseJsonList(select._adBmHidden?.value));
       syncOpenFromValues();
     },
-    syncSummary() {
-      const summaryEl = select.closest(".ad-form-bm-field")?.querySelector("[data-ad-bm-summary]");
+    syncSummary(summaryEl) {
       if (summaryEl) summaryEl.textContent = labelList(selectedLabels());
     },
     syncHidden() {
@@ -425,9 +437,7 @@ function mountAllapotPicker(select) {
           else turnMainOff(cat);
           renderAllapotBody(bodyEl);
           writeJsonList(select._adBmHidden, effectiveSelectedValues());
-          const summaryEl = select.closest(".ad-form-bm-field")?.querySelector("[data-ad-bm-summary]");
-          if (summaryEl) summaryEl.textContent = labelList(selectedLabels());
-          select.closest(".ad-form-bm-field")?.classList.toggle("has-value", effectiveSelectedValues().length > 0);
+          updateBmSummary(select, labelList(selectedLabels()), effectiveSelectedValues().length > 0);
           return;
         }
 
@@ -442,9 +452,7 @@ function mountAllapotPicker(select) {
           selected.delete(value);
         }
         writeJsonList(select._adBmHidden, effectiveSelectedValues());
-        const summaryEl = select.closest(".ad-form-bm-field")?.querySelector("[data-ad-bm-summary]");
-        if (summaryEl) summaryEl.textContent = labelList(selectedLabels());
-        select.closest(".ad-form-bm-field")?.classList.toggle("has-value", effectiveSelectedValues().length > 0);
+        updateBmSummary(select, labelList(selectedLabels()), effectiveSelectedValues().length > 0);
       };
     },
   });

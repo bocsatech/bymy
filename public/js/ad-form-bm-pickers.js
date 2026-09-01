@@ -120,7 +120,7 @@ function unmountPicker(select) {
  *   panelClass: string,
  *   openAttr: string,
  *   renderBody: (bodyEl: HTMLElement) => void,
- *   bindBody: (bodyEl: HTMLElement) => void,
+ *   bindBody: (bodyEl: HTMLElement, closePanel: () => void) => void,
  *   syncSummary: (summaryEl: HTMLElement) => void,
  *   syncFromSelect: () => void,
  * }} opts
@@ -152,16 +152,9 @@ function mountBmPicker(opts) {
   const panel = document.createElement("div");
   panel.className = `auto-bm-panel ad-form-bm-panel ${panelClass}`;
   panel.hidden = true;
-  panel.innerHTML = `
-    <div class="auto-bm-panel__chrome">
-      <button type="button" class="auto-bm-panel__back" data-ad-bm-back aria-label="Vissza">‹</button>
-      <div class="auto-bm-panel__titles">
-        <p class="auto-bm-panel__title">${escapeHtml(title)}</p>
-      </div>
-      <button type="button" class="auto-bm-panel__done" data-ad-bm-done>Kész</button>
-    </div>
-    <div class="auto-bm-panel__body" data-ad-bm-body></div>
-  `;
+  panel.setAttribute("role", "dialog");
+  panel.setAttribute("aria-label", title);
+  panel.innerHTML = `<div class="auto-bm-panel__body" data-ad-bm-body></div>`;
   field.appendChild(panel);
   select._adBmPanel = panel;
   const bodyEl = panel.querySelector("[data-ad-bm-body]");
@@ -175,7 +168,7 @@ function mountBmPicker(opts) {
     registerOpenPanel(closePanel);
     syncFromSelect();
     renderBody(bodyEl);
-    bindBody(bodyEl);
+    bindBody(bodyEl, closePanel);
     field.classList.add("is-open");
     panel.hidden = false;
     panel.style.removeProperty("display");
@@ -204,9 +197,6 @@ function mountBmPicker(opts) {
     close: closePanel,
   });
 
-  panel.querySelector("[data-ad-bm-back]")?.addEventListener("click", closePanel);
-  panel.querySelector("[data-ad-bm-done]")?.addEventListener("click", closePanel);
-
   select.addEventListener("change", refreshSummary);
   refreshSummary();
 
@@ -227,11 +217,7 @@ function renderFlatBody(bodyEl, options, current) {
       </div>`;
     })
     .join("");
-  bodyEl.innerHTML = `
-    <p class="auto-bm-hint">Kapcsolók — válasszon egyet</p>
-    <button type="button" class="auto-bm-clear" data-ad-bm-clear>Törlés</button>
-    <div class="auto-bm-group">${rows}</div>
-  `;
+  bodyEl.innerHTML = `<div class="auto-bm-group">${rows}</div>`;
 }
 
 function mountFlatPicker(select, title, options, panelClass, openAttr) {
@@ -244,19 +230,18 @@ function mountFlatPicker(select, title, options, panelClass, openAttr) {
     renderBody(bodyEl) {
       renderFlatBody(bodyEl, options, String(select.value || "").trim());
     },
-    bindBody(bodyEl) {
+    bindBody(bodyEl, closePanel) {
       bodyEl.onchange = (event) => {
         const el = event.target.closest("[data-ad-bm-flat]");
         if (!el) return;
         const opt = el.getAttribute("data-ad-bm-flat") ?? "";
-        if (el.checked) setSelectValue(select, opt);
-        else if (select.value === opt) setSelectValue(select, "");
+        if (el.checked) {
+          setSelectValue(select, opt);
+          closePanel();
+          return;
+        }
+        if (select.value === opt) setSelectValue(select, "");
         renderFlatBody(bodyEl, options, String(select.value || "").trim());
-      };
-      bodyEl.onclick = (event) => {
-        if (!event.target.closest("[data-ad-bm-clear]")) return;
-        setSelectValue(select, "");
-        renderFlatBody(bodyEl, options, "");
       };
     },
     syncSummary(summaryEl) {
@@ -308,11 +293,7 @@ function mountAllapotPicker(select) {
       </div>`;
     }).join("");
 
-    bodyEl.innerHTML = `
-      <p class="auto-bm-hint">Kapcsolók — válasszon egyet</p>
-      <button type="button" class="auto-bm-clear" data-ad-bm-clear>Törlés</button>
-      <div class="auto-bm-group">${rows}</div>
-    `;
+    bodyEl.innerHTML = `<div class="auto-bm-group">${rows}</div>`;
   }
 
   mountBmPicker({
@@ -322,7 +303,7 @@ function mountAllapotPicker(select) {
     openAttr: "data-ad-bm-allapot-open",
     syncFromSelect: syncOpenFromValue,
     renderBody: renderAllapotBody,
-    bindBody(bodyEl) {
+    bindBody(bodyEl, closePanel) {
       bodyEl.onchange = (event) => {
         const mainEl = event.target.closest("[data-ad-bm-allapot-main]");
         if (mainEl) {
@@ -338,8 +319,12 @@ function mountAllapotPicker(select) {
             renderAllapotBody(bodyEl);
             return;
           }
-          if (mainEl.checked) setSelectValue(select, cat.value ?? "");
-          else if (select.value === cat.value) setSelectValue(select, "");
+          if (mainEl.checked) {
+            setSelectValue(select, cat.value ?? "");
+            closePanel();
+            return;
+          }
+          if (select.value === cat.value) setSelectValue(select, "");
           renderAllapotBody(bodyEl);
           return;
         }
@@ -351,16 +336,10 @@ function mountAllapotPicker(select) {
         if (childEl.checked) {
           if (parentId) openMains.add(parentId);
           setSelectValue(select, value);
-        } else if (select.value === value) {
-          setSelectValue(select, "");
+          closePanel();
+          return;
         }
-        renderAllapotBody(bodyEl);
-      };
-
-      bodyEl.onclick = (event) => {
-        if (!event.target.closest("[data-ad-bm-clear]")) return;
-        openMains.clear();
-        setSelectValue(select, "");
+        if (select.value === value) setSelectValue(select, "");
         renderAllapotBody(bodyEl);
       };
     },

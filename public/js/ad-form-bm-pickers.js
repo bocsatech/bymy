@@ -1023,9 +1023,49 @@ function mountSearchFlatPicker(select, title, options, panelClass, unit = "db") 
   });
 }
 
-function mountFlatPicker(select, title, options, panelClass, openAttr) {
+function mountFlatPicker(select, title, options, panelClass, openAttr, { singleSelect = false } = {}) {
   /** @type {Set<string>} */
   let selected = new Set();
+
+  function renderBody(bodyEl) {
+    const rows = options
+      .map((opt) => {
+        const on = selected.has(opt);
+        return `<div class="auto-bm-row">
+            <label class="auto-bm-toggle">
+              <span>${escapeHtml(opt)}</span>
+              <input type="checkbox" data-ad-bm-flat="${escapeAttr(opt)}" ${on ? "checked" : ""} />
+              <span class="auto-bm-switch" aria-hidden="true"></span>
+            </label>
+          </div>`;
+      })
+      .join("");
+    bodyEl.innerHTML = `<div class="auto-bm-group">${rows}</div>`;
+  }
+
+  function bindBody(bodyEl) {
+    bodyEl.onchange = (event) => {
+      const el = event.target.closest("[data-ad-bm-flat]");
+      if (!el) return;
+      const opt = el.getAttribute("data-ad-bm-flat") ?? "";
+      if (singleSelect) {
+        if (el.checked) {
+          selected.clear();
+          selected.add(opt);
+        } else {
+          selected.delete(opt);
+        }
+        renderBody(bodyEl);
+        bindBody(bodyEl);
+      } else if (el.checked) {
+        selected.add(opt);
+      } else {
+        selected.delete(opt);
+      }
+      writePickerList(select, [...selected]);
+      updateBmSummary(select, labelList([...selected]), selected.size > 0);
+    };
+  }
 
   mountBmPicker({
     select,
@@ -1034,6 +1074,10 @@ function mountFlatPicker(select, title, options, panelClass, openAttr) {
     openAttr,
     syncFromHidden() {
       selected = new Set(parseJsonList(select._adBmHidden?.value));
+      if (singleSelect && selected.size > 1) {
+        const first = [...selected][0];
+        selected = first ? new Set([first]) : new Set();
+      }
     },
     syncSummary(summaryEl) {
       if (summaryEl) summaryEl.textContent = labelList([...selected]);
@@ -1041,32 +1085,8 @@ function mountFlatPicker(select, title, options, panelClass, openAttr) {
     syncHidden() {
       writeJsonList(select._adBmHidden, [...selected]);
     },
-    renderBody(bodyEl) {
-      const rows = options
-        .map((opt) => {
-          const on = selected.has(opt);
-          return `<div class="auto-bm-row">
-            <label class="auto-bm-toggle">
-              <span>${escapeHtml(opt)}</span>
-              <input type="checkbox" data-ad-bm-flat="${escapeAttr(opt)}" ${on ? "checked" : ""} />
-              <span class="auto-bm-switch" aria-hidden="true"></span>
-            </label>
-          </div>`;
-        })
-        .join("");
-      bodyEl.innerHTML = `<div class="auto-bm-group">${rows}</div>`;
-    },
-    bindBody(bodyEl) {
-      bodyEl.onchange = (event) => {
-        const el = event.target.closest("[data-ad-bm-flat]");
-        if (!el) return;
-        const opt = el.getAttribute("data-ad-bm-flat") ?? "";
-        if (el.checked) selected.add(opt);
-        else selected.delete(opt);
-        writePickerList(select, [...selected]);
-        updateBmSummary(select, labelList([...selected]), selected.size > 0);
-      };
-    },
+    renderBody,
+    bindBody,
   });
 }
 
@@ -1655,10 +1675,14 @@ export async function mountAdFormBmPickers(form, catalog = null) {
   const modell = document.getElementById("modell");
 
   if (allapot?.tagName === "SELECT" && allapot.dataset.adBmPicker !== "1") {
-    mountFlatPicker(allapot, "Állapot", flattenAllapotOptions(), "ad-form-allapot-panel", "data-ad-bm-allapot-open");
+    mountFlatPicker(allapot, "Állapot", flattenAllapotOptions(), "ad-form-allapot-panel", "data-ad-bm-allapot-open", {
+      singleSelect: true,
+    });
   }
   if (kivitel?.tagName === "SELECT" && kivitel.dataset.adBmPicker !== "1") {
-    mountFlatPicker(kivitel, "Kivitel", KIVITEL_OPTIONS, "ad-form-kivitel-panel", "data-ad-bm-kivitel-open");
+    mountFlatPicker(kivitel, "Kivitel", KIVITEL_OPTIONS, "ad-form-kivitel-panel", "data-ad-bm-kivitel-open", {
+      singleSelect: true,
+    });
   }
   if (okmany?.tagName === "SELECT" && okmany.dataset.adBmPicker !== "1") {
     mountSearchFlatPicker(

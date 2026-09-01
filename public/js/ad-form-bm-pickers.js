@@ -1,10 +1,13 @@
 /**
- * Hirdetésfeladás — Állapot / Kivitel / Okmány kapcsolós panel (mint az autó kereső).
- * Több érték is választható; a rejtett mező JSON listát tárol, a select csak opciókat tart.
+ * Hirdetésfeladás — kapcsolós panel pickerek (személyautó / teherautó).
+ * Egy mező = egy választás; a lista fixed overlay-ként nyílik.
  */
 
-import { flattenAllapotOptions, OKMANY_JELLEG_OPTIONS, UZEMANYAG_CATEGORIES } from "./equipment-data.js?v=teherKivitel35e";
-import { KIVITEL_OPTIONS } from "./kivitel-options.js?v=kivitel1";
+import {
+  flattenAllapotOptions,
+  flattenUzemanyagOptions,
+  OKMANY_JELLEG_OPTIONS,
+} from "./equipment-data.js?v=teherKivitel35e";
 import { fetchVehicleCatalog } from "./vehicle-catalog-client.js?v=adBmCatalog1";
 import { bindAutoBmDismiss, autoBmPanelIsOpen } from "./auto-bm-dismiss.js?v=bmDismiss1";
 
@@ -467,6 +470,7 @@ function mountBmPicker(opts) {
  *   renderRows: (bodyEl: HTMLElement, items: unknown[], scrollTop: number) => void,
  *   bindBody: (bodyEl: HTMLElement) => void,
  *   onQueryChange?: (query: string) => void,
+ *   singleSelect?: boolean,
  * }} opts
  */
 function mountSearchDropdownPicker(select, opts) {
@@ -483,6 +487,7 @@ function mountSearchDropdownPicker(select, opts) {
     renderRows,
     bindBody,
     onQueryChange,
+    singleSelect = false,
   } = opts;
   if (!select || select.tagName !== "SELECT" || select.dataset.adBmPicker === "1") return;
 
@@ -491,7 +496,7 @@ function mountSearchDropdownPicker(select, opts) {
 
   unmountPicker(select);
   hideNativeSelect(select);
-  const hidden = ensureHiddenInput(select);
+  const hidden = singleSelect ? ensurePlainHiddenInput(select) : ensureHiddenInput(select);
 
   let query = "";
   let scrollTop = 0;
@@ -615,7 +620,9 @@ function mountSearchDropdownPicker(select, opts) {
   }
 
   function refreshTrigger() {
-    const hasValue = parseJsonList(hidden.value).length > 0;
+    const hasValue = singleSelect
+      ? Boolean(readSingleStoredValue(hidden.value))
+      : parseJsonList(hidden.value).length > 0;
     const summary = getSummary();
     updateBmSearchTrigger(select, summary === PLACEHOLDER ? "" : summary, hasValue);
   }
@@ -1001,23 +1008,32 @@ function renderWindowedToggleRows(bodyEl, items, scrollTop, rowKey, rowLabel, se
   bodyEl.style.setProperty("--ad-form-bm-list-height", `${items.length * rowH}px`);
 }
 
+function enforceSingleToggleChecks(bodyEl, attrName, selectedValue) {
+  bodyEl.querySelectorAll(`[${attrName}]`).forEach((input) => {
+    if (!(input instanceof HTMLInputElement)) return;
+    input.checked = input.getAttribute(attrName) === selectedValue;
+  });
+}
+
 function mountSearchFlatPicker(select, title, options, panelClass, unit = "db") {
-  /** @type {Set<string>} */
-  let selected = new Set();
+  let selected = "";
 
   mountSearchDropdownPicker(select, {
     title,
     panelClass,
     unit,
+    singleSelect: true,
     disabledMessage: "Nincs találat",
     syncFromHidden() {
-      selected = new Set(parseJsonList(select._adBmHidden?.value));
+      const raw = select._adBmHidden?.value ?? "";
+      selected = readSingleStoredValue(raw);
+      if (raw.trim().startsWith("[")) writePlainValue(select, selected);
     },
     syncHidden() {
-      writePickerList(select, [...selected]);
+      writePlainValue(select, selected);
     },
     getSummary() {
-      return labelList([...selected], unit);
+      return selected || PLACEHOLDER;
     },
     getFilteredItems(query) {
       const q = query.trim().toLocaleLowerCase("hu");
@@ -1025,13 +1041,14 @@ function mountSearchFlatPicker(select, title, options, panelClass, unit = "db") 
       return options.filter((opt) => opt.toLocaleLowerCase("hu").includes(q));
     },
     renderRows(bodyEl, items, scrollTop) {
+      const selectedSet = new Set(selected ? [selected] : []);
       renderWindowedToggleRows(
         bodyEl,
         items,
         scrollTop,
         (item) => String(item),
         (item) => String(item),
-        selected,
+        selectedSet,
         "data-ad-bm-flat"
       );
     },
@@ -1040,10 +1057,12 @@ function mountSearchFlatPicker(select, title, options, panelClass, unit = "db") 
         const el = event.target.closest("[data-ad-bm-flat]");
         if (!el) return;
         const opt = el.getAttribute("data-ad-bm-flat") ?? "";
-        if (el.checked) selected.add(opt);
-        else selected.delete(opt);
-        writePickerList(select, [...selected]);
-        updateBmSearchTrigger(select, labelList([...selected], unit), selected.size > 0);
+        if (el.checked) selected = opt;
+        else if (selected === opt) selected = "";
+        writePlainValue(select, selected);
+        enforceSingleToggleChecks(bodyEl, "data-ad-bm-flat", selected);
+        updateBmSearchTrigger(select, selected, Boolean(selected));
+        select._adBmRefreshDropdown?.();
       };
     },
   });
@@ -1361,172 +1380,9 @@ function mountHierarchicalPicker(select, { title, panelClass, openAttr, categori
   });
 }
 
-function mountFuelPicker(select) {
-  /** @type {Set<string>} */
-  let openMains = new Set();
-  /** @type {Set<string>} */
-  let selected = new Set();
-  let query = "";
-
-  function selectedLabels() {
-    const labels = [];
-    for (const cat of UZEMANYAG_CATEGORIES) {
-      if (!openMains.has(cat.id)) continue;
-      if (cat.children?.length) {
-        const kids = cat.children.filter((c) => selected.has(c.value));
-        if (kids.length) labels.push(...kids.map((c) => c.label));
-        else labels.push(cat.label);
-      } else if (cat.value && selected.has(cat.value)) {
-        labels.push(cat.label);
-      }
-    }
-    return labels;
-  }
-
-  function effectiveSelectedValues() {
-    const values = new Set();
-    for (const cat of UZEMANYAG_CATEGORIES) {
-      if (!openMains.has(cat.id)) continue;
-      if (cat.children?.length) {
-        const kids = cat.children.filter((c) => selected.has(c.value));
-        if (kids.length) kids.forEach((c) => values.add(c.value));
-        else {
-          cat.children.forEach((c) => values.add(c.value));
-          values.add(cat.label);
-        }
-      } else if (cat.value && selected.has(cat.value)) {
-        values.add(cat.value);
-      }
-    }
-    return [...values];
-  }
-
-  function syncOpenFromValues() {
-    openMains.clear();
-    for (const value of selected) {
-      for (const cat of UZEMANYAG_CATEGORIES) {
-        if (cat.value === value || cat.children?.some((c) => c.value === value)) {
-          openMains.add(cat.id);
-        }
-      }
-    }
-  }
-
-  function turnMainOn(cat) {
-    openMains.add(cat.id);
-    if (!cat.children?.length && cat.value) selected.add(cat.value);
-  }
-
-  function turnMainOff(cat) {
-    openMains.delete(cat.id);
-    for (const v of categoryValues(cat)) selected.delete(v);
-  }
-
-  function fuelMatchesQuery(cat, q) {
-    if (!q) return true;
-    if (cat.label.toLocaleLowerCase("hu").includes(q)) return true;
-    return cat.children?.some((child) => child.label.toLocaleLowerCase("hu").includes(q)) ?? false;
-  }
-
-  function renderFuelBody(bodyEl) {
-    const q = query.trim().toLocaleLowerCase("hu");
-    const rows = UZEMANYAG_CATEGORIES.filter((cat) => fuelMatchesQuery(cat, q))
-      .map((cat) => {
-        const on = openMains.has(cat.id);
-        const hasKids = Boolean(cat.children?.length);
-        let kidsHtml = "";
-        if (hasKids && on) {
-          kidsHtml = `<div class="auto-fuel-children">
-            ${cat.children
-              .filter((child) => !q || child.label.toLocaleLowerCase("hu").includes(q))
-              .map((child) => {
-                const childOn = selected.has(child.value);
-                return `<div class="auto-bm-row auto-fuel-child-row">
-                  <label class="auto-bm-toggle">
-                    <span>${escapeHtml(child.label)}</span>
-                    <input type="checkbox" data-ad-bm-fuel-child="${escapeAttr(child.value)}" data-ad-bm-fuel-parent="${escapeAttr(cat.id)}" ${childOn ? "checked" : ""} />
-                    <span class="auto-bm-switch" aria-hidden="true"></span>
-                  </label>
-                </div>`;
-              })
-              .join("")}
-          </div>`;
-        }
-        return `<div class="auto-bm-row auto-fuel-main-row">
-          <label class="auto-bm-toggle auto-fuel-main-toggle">
-            <span class="auto-fuel-main-label">${escapeHtml(cat.label)}</span>
-            <input type="checkbox" data-ad-bm-fuel-main-toggle="${escapeAttr(cat.id)}" ${on ? "checked" : ""} />
-            <span class="auto-bm-switch" aria-hidden="true"></span>
-          </label>
-          ${kidsHtml}
-        </div>`;
-      })
-      .join("");
-    bodyEl.innerHTML = rows
-      ? `<div class="auto-bm-group">${rows}</div>`
-      : `<p class="ad-form-bm-empty">Nincs találat</p>`;
-  }
-
-  mountSearchDropdownPicker(select, {
-    title: "Üzemanyag",
-    panelClass: "ad-form-fuel-panel",
-    unit: "üzemanyag",
-    disabledMessage: "Nincs találat",
-    syncFromHidden() {
-      selected = new Set(parseJsonList(select._adBmHidden?.value));
-      syncOpenFromValues();
-    },
-    syncHidden() {
-      writePickerList(select, effectiveSelectedValues());
-    },
-    getSummary() {
-      return labelList(selectedLabels(), "üzemanyag");
-    },
-    getFilteredItems() {
-      return UZEMANYAG_CATEGORIES;
-    },
-    renderRows(bodyEl) {
-      renderFuelBody(bodyEl);
-    },
-    bindBody(bodyEl) {
-      bodyEl.onchange = (event) => {
-        const mainEl = event.target.closest("[data-ad-bm-fuel-main-toggle]");
-        if (mainEl) {
-          const id = mainEl.getAttribute("data-ad-bm-fuel-main-toggle");
-          const cat = UZEMANYAG_CATEGORIES.find((c) => c.id === id);
-          if (!cat) return;
-          if (mainEl.checked) turnMainOn(cat);
-          else turnMainOff(cat);
-          renderFuelBody(bodyEl);
-          writePickerList(select, effectiveSelectedValues());
-          updateBmSearchTrigger(select, labelList(selectedLabels(), "üzemanyag"), effectiveSelectedValues().length > 0);
-          return;
-        }
-
-        const childEl = event.target.closest("[data-ad-bm-fuel-child]");
-        if (!childEl) return;
-        const value = childEl.getAttribute("data-ad-bm-fuel-child") ?? "";
-        const parentId = childEl.getAttribute("data-ad-bm-fuel-parent") ?? "";
-        if (childEl.checked) {
-          if (parentId) openMains.add(parentId);
-          selected.add(value);
-        } else {
-          selected.delete(value);
-        }
-        writePickerList(select, effectiveSelectedValues());
-        updateBmSearchTrigger(select, labelList(selectedLabels(), "üzemanyag"), effectiveSelectedValues().length > 0);
-      };
-    },
-    onQueryChange(next) {
-      query = next;
-    },
-  });
-}
-
 function mountBrandPicker(select, catalog) {
   const brands = [...(catalog?.gyartmanyok || [])].sort((a, b) => a.localeCompare(b, "hu", { sensitivity: "base" }));
-  /** @type {Set<string>} */
-  let selected = new Set();
+  let selected = "";
   let query = "";
 
   function matchingBrands() {
@@ -1539,25 +1395,29 @@ function mountBrandPicker(select, catalog) {
     title: "Gyártmány",
     panelClass: "ad-form-brand-panel",
     unit: "márka",
+    singleSelect: true,
     disabledMessage: "Nincs találat",
     syncFromHidden() {
-      selected = new Set(parseJsonList(select._adBmHidden?.value).map((v) => v.toUpperCase()));
+      const raw = select._adBmHidden?.value ?? "";
+      selected = readSingleStoredValue(raw).toUpperCase();
+      if (raw.trim().startsWith("[")) writePlainValue(select, selected);
     },
     syncHidden() {
-      writePickerList(select, [...selected]);
+      writePlainValue(select, selected);
     },
     getSummary() {
-      return labelList([...selected], "márka");
+      return selected || PLACEHOLDER;
     },
     getFilteredItems: matchingBrands,
     renderRows(bodyEl, items, scrollTop) {
+      const selectedSet = new Set(selected ? [selected] : []);
       renderWindowedToggleRows(
         bodyEl,
         items,
         scrollTop,
         (item) => String(item),
         (item) => String(item),
-        selected,
+        selectedSet,
         "data-ad-bm-brand"
       );
     },
@@ -1566,12 +1426,13 @@ function mountBrandPicker(select, catalog) {
         const el = event.target.closest("[data-ad-bm-brand]");
         if (!el) return;
         const brand = el.getAttribute("data-ad-bm-brand") ?? "";
-        if (el.checked) selected.add(brand);
-        else selected.delete(brand);
-        writePickerList(select, [...selected]);
-        updateBmSearchTrigger(select, labelList([...selected], "márka"), selected.size > 0);
-        const modell = document.getElementById("modell");
-        modell?._adBmOnBrandChange?.();
+        if (el.checked) selected = brand;
+        else if (selected === brand) selected = "";
+        writePlainValue(select, selected);
+        enforceSingleToggleChecks(bodyEl, "data-ad-bm-brand", selected);
+        updateBmSearchTrigger(select, selected, Boolean(selected));
+        select._adBmRefreshDropdown?.();
+        document.getElementById("modell")?._adBmOnBrandChange?.();
       };
     },
     onQueryChange(next) {
@@ -1581,22 +1442,19 @@ function mountBrandPicker(select, catalog) {
 }
 
 function mountModelPicker(select, catalog) {
-  /** @type {Set<string>} */
-  let selected = new Set();
+  let selected = "";
   let query = "";
 
-  function selectedBrands() {
+  function selectedBrand() {
     const gyartmany = document.getElementById("gyartmany");
-    return parseJsonList(gyartmany?._adBmHidden?.value).map((v) => v.toUpperCase());
+    const raw = gyartmany?._adBmHidden?.value ?? gyartmany?.value ?? "";
+    return readSingleStoredValue(raw).toUpperCase();
   }
 
   function modelOptions() {
-    const brands = selectedBrands();
-    const models = new Set();
-    for (const brand of brands) {
-      for (const model of catalog?.modellek?.[brand] || []) models.add(model);
-    }
-    return [...models].sort((a, b) => a.localeCompare(b, "hu", { sensitivity: "base" }));
+    const brand = selectedBrand();
+    if (!brand) return [];
+    return [...(catalog?.modellek?.[brand] || [])].sort((a, b) => a.localeCompare(b, "hu", { sensitivity: "base" }));
   }
 
   function matchingModels() {
@@ -1608,34 +1466,38 @@ function mountModelPicker(select, catalog) {
 
   function pruneSelected() {
     const allowed = new Set(modelOptions());
-    selected = new Set([...selected].filter((model) => allowed.has(model)));
+    if (selected && !allowed.has(selected)) selected = "";
   }
 
   mountSearchDropdownPicker(select, {
     title: "Modell",
     panelClass: "ad-form-model-panel",
     unit: "modell",
+    singleSelect: true,
     disabledMessage: "Először válassz gyártmányt",
-    isDisabled: () => selectedBrands().length === 0,
+    isDisabled: () => !selectedBrand(),
     syncFromHidden() {
-      selected = new Set(parseJsonList(select._adBmHidden?.value));
+      const raw = select._adBmHidden?.value ?? "";
+      selected = readSingleStoredValue(raw);
+      if (raw.trim().startsWith("[")) writePlainValue(select, selected);
       pruneSelected();
     },
     syncHidden() {
-      writePickerList(select, [...selected]);
+      writePlainValue(select, selected);
     },
     getSummary() {
-      return labelList([...selected], "modell");
+      return selected || PLACEHOLDER;
     },
     getFilteredItems: matchingModels,
     renderRows(bodyEl, items, scrollTop) {
+      const selectedSet = new Set(selected ? [selected] : []);
       renderWindowedToggleRows(
         bodyEl,
         items,
         scrollTop,
         (item) => String(item),
         (item) => String(item),
-        selected,
+        selectedSet,
         "data-ad-bm-model"
       );
     },
@@ -1644,10 +1506,12 @@ function mountModelPicker(select, catalog) {
         const el = event.target.closest("[data-ad-bm-model]");
         if (!el) return;
         const model = el.getAttribute("data-ad-bm-model") ?? "";
-        if (el.checked) selected.add(model);
-        else selected.delete(model);
-        writePickerList(select, [...selected]);
-        updateBmSearchTrigger(select, labelList([...selected], "modell"), selected.size > 0);
+        if (el.checked) selected = model;
+        else if (selected === model) selected = "";
+        writePlainValue(select, selected);
+        enforceSingleToggleChecks(bodyEl, "data-ad-bm-model", selected);
+        updateBmSearchTrigger(select, selected, Boolean(selected));
+        select._adBmRefreshDropdown?.();
       };
     },
     onQueryChange(next) {
@@ -1657,8 +1521,8 @@ function mountModelPicker(select, catalog) {
 
   function onBrandChange() {
     pruneSelected();
-    writePickerList(select, [...selected]);
-    updateBmSearchTrigger(select, labelList([...selected], "modell"), selected.size > 0);
+    writePlainValue(select, selected);
+    updateBmSearchTrigger(select, selected, Boolean(selected));
     if (autoBmPanelIsOpen(select._adBmPanel)) select._adBmRefreshDropdown?.();
   }
 
@@ -1691,35 +1555,24 @@ export function applyAdFormBmFieldValues(data) {
     }
     if (id === "gyartmany") list = list.map((v) => v.toUpperCase());
     if (id === "uzemanyag") list = list.map((v) => normalizePrimaryValue(select, v)).filter(Boolean);
+    const value =
+      list[0] ?? (raw != null && !Array.isArray(raw) ? readSingleStoredValue(String(raw)) : "");
 
-    if (select._adBmHidden?.dataset.adBmSingle === "1") {
-      const value =
-        list[0] ||
-        (raw != null && !Array.isArray(raw) ? readSingleStoredValue(String(raw)) : "");
+    if (select._adBmHidden) {
       writePlainValue(select, value);
-      updateBmSearchTrigger(select, value, Boolean(value));
-      if (select._adBmPanel && !select._adBmPanel.classList.contains("ad-form-bm-dropdown")) {
+      if (select._adBmPanel?.classList.contains("ad-form-bm-dropdown")) {
+        updateBmSearchTrigger(select, value, Boolean(value));
+      } else {
         updateBmSummary(select, value || PLACEHOLDER, Boolean(value));
       }
-    } else if (select._adBmHidden) {
-      writePickerList(select, list);
-      const unit =
-        id === "gyartmany" ? "márka" : id === "modell" ? "modell" : id === "uzemanyag" ? "üzemanyag" : "db";
-      const summary = labelList(list, unit);
-      if (select._adBmPanel?.classList.contains("ad-form-bm-dropdown")) {
-        updateBmSearchTrigger(select, summary, list.length > 0);
-      } else {
-        updateBmSummary(select, summary, list.length > 0);
-      }
-    } else if (select.tagName === "SELECT" && list.length) {
-      const first = list[0];
-      if (![...select.options].some((option) => option.value === first)) {
+    } else if (select.tagName === "SELECT" && value) {
+      if (![...select.options].some((option) => option.value === value)) {
         const option = document.createElement("option");
-        option.value = first;
-        option.textContent = first;
+        option.value = value;
+        option.textContent = value;
         select.appendChild(option);
       }
-      select.value = first;
+      select.value = value;
       select.dispatchEvent(new Event("change", { bubbles: true }));
     }
   }
@@ -1747,18 +1600,14 @@ function snapshotBmPickerValues(form) {
     const select = document.getElementById(id);
     if (!select) continue;
     const hidden = select._adBmHidden;
-    if (hidden?.dataset.adBmSingle === "1") {
-      if (hidden.value) snap[id] = readSingleStoredValue(hidden.value);
-      continue;
-    }
     if (hidden?.value) {
-      snap[id] = parseJsonList(hidden.value);
+      snap[id] = readSingleStoredValue(hidden.value);
       continue;
     }
     if (select.dataset.adBmRestoreList) {
-      snap[id] = parseJsonList(select.dataset.adBmRestoreList);
+      snap[id] = readSingleStoredValue(select.dataset.adBmRestoreList);
     } else if (select.value) {
-      snap[id] = select.value;
+      snap[id] = readSingleStoredValue(select.value);
     }
   }
   return snap;
@@ -1826,7 +1675,15 @@ export async function mountAdFormBmPickers(form, catalog = null) {
       "db"
     );
   }
-  if (uzemanyag?.tagName === "SELECT") mountFuelPicker(uzemanyag);
+  if (uzemanyag?.tagName === "SELECT") {
+    mountSearchFlatPicker(
+      uzemanyag,
+      "Üzemanyag",
+      flattenUzemanyagOptions(),
+      "ad-form-fuel-panel",
+      "üzemanyag"
+    );
+  }
 
   const forgalombaEv = document.getElementById("forgalomba_helyezes_ev");
   const forgalombaHonap = document.getElementById("forgalomba_helyezes_honap");

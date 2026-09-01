@@ -1,5 +1,5 @@
 import { loadAdFormPartial } from "./load-ad-form.js";
-import { createAdForm } from "./form-core.js?v=adBmPickers26";
+import { createAdForm } from "./form-core.js?v=adBmPickers27";
 import { initImportPanel, getImportResults, setImportResults } from "./import.js";
 import { enrichFormFromImportItem } from "./import-enrich.js";
 import {

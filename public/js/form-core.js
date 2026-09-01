@@ -10,7 +10,7 @@ import {
   DEFAULT_PHOTO_OVERLAY_ID,
   renderListingPhotoOverlay,
 } from "./listing-photo-overlay.js?v=photoOverlay1";
-import { mountAdFormBmPickers, refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=adBmPickers6";
+import { refreshAdFormBmPickers, applyAdFormBmFieldValues } from "./ad-form-bm-pickers.js?v=adBmPickers7";
 
 export function createAdForm(options = {}) {
   const mode = options.mode ?? "wizard";
@@ -310,29 +310,38 @@ function selectFuel(value, categoryId, subLabel = null) {
 function restoreFuelSelection(value) {
   if (!value) return;
 
+  if (uzemanyag?._adBmHidden) {
+    applyAdFormBmFieldValues({ uzemanyag: value });
+    syncFuelDependentFields();
+    return;
+  }
+
+  const primary = Array.isArray(value) ? value[0] : value;
+  if (!primary) return;
+
   if (uzemanyag?.tagName === "SELECT") {
-    uzemanyag.value = normalizeFuelValue(value);
+    uzemanyag.value = normalizeFuelValue(primary);
     syncFuelDependentFields();
     return;
   }
 
   for (const category of UZEMANYAG_CATEGORIES) {
-    if (category.value === value) {
-      selectFuel(value, category.id);
+    if (category.value === primary) {
+      selectFuel(primary, category.id);
       return;
     }
     if (category.children) {
-      const child = category.children.find((item) => item.value === value);
+      const child = category.children.find((item) => item.value === primary);
       if (child) {
-        selectFuel(value, category.id, child.label);
+        selectFuel(primary, category.id, child.label);
         return;
       }
     }
   }
 
   if (uzemanyag && !uzemanyag.value) {
-    uzemanyag.value = value;
-    if (fuelSelected) fuelSelected.textContent = `Kiválasztva: ${value}`;
+    uzemanyag.value = primary;
+    if (fuelSelected) fuelSelected.textContent = `Kiválasztva: ${primary}`;
     syncFuelDependentFields();
   }
 }
@@ -897,6 +906,7 @@ function applyFormData(data, { fromImport = false } = {}) {
   }
   updateLeDisplay();
   restoreFuelSelection(data.uzemanyag);
+  applyAdFormBmFieldValues(data);
   syncFuelDependentFields();
   fitAllFormFields();
   loadExistingPhotos(data);
@@ -1638,8 +1648,9 @@ initVehicleCatalogSelects({
   },
   onTypeDataChange: (entry) => applyCatalogTypeData(entry),
 })
-  .then(() => {
+  .then((catalog) => {
     if (mode === "wizard" && !userTouchedForm && !editing) resetForm();
+    refreshAdFormBmPickers(form, catalog);
     options.onCatalogReady?.();
     window.dispatchEvent(new Event("ad-form-ready"));
   })
@@ -1658,7 +1669,6 @@ renderEgyebInfo();
 wrapMdOutlinedFields();
 syncFuelDependentFields();
 fitAllFormFields();
-mountAdFormBmPickers(form);
 
 uzemanyag?.addEventListener("change", () => {
   if (uzemanyag.tagName !== "SELECT") return;

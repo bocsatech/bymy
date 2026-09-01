@@ -3,7 +3,7 @@
  * Több érték is választható; a rejtett mező JSON listát tárol, a select csak opciókat tart.
  */
 
-import { ALLAPOT_CATEGORIES, OKMANY_JELLEG_OPTIONS, UZEMANYAG_CATEGORIES } from "./equipment-data.js?v=teherKivitel35e";
+import { flattenAllapotOptions, OKMANY_JELLEG_OPTIONS, UZEMANYAG_CATEGORIES } from "./equipment-data.js?v=teherKivitel35e";
 import { KIVITEL_OPTIONS } from "./kivitel-options.js?v=kivitel1";
 import { fetchVehicleCatalog } from "./vehicle-catalog-client.js?v=adBmCatalog1";
 import { bindAutoBmDismiss, autoBmPanelIsOpen } from "./auto-bm-dismiss.js?v=bmDismiss1";
@@ -1070,148 +1070,6 @@ function mountFlatPicker(select, title, options, panelClass, openAttr) {
   });
 }
 
-function mountAllapotPicker(select) {
-  /** @type {Set<string>} */
-  let openMains = new Set();
-  /** @type {Set<string>} */
-  let selected = new Set();
-
-  function selectedLabels() {
-    const labels = [];
-    for (const cat of ALLAPOT_CATEGORIES) {
-      if (!openMains.has(cat.id)) continue;
-      if (cat.children?.length) {
-        const kids = cat.children.filter((c) => selected.has(c.value));
-        if (kids.length) labels.push(...kids.map((c) => c.label));
-        else labels.push(cat.label);
-      } else if (cat.value && selected.has(cat.value)) {
-        labels.push(cat.label);
-      }
-    }
-    return labels;
-  }
-
-  function effectiveSelectedValues() {
-    const values = new Set();
-    for (const cat of ALLAPOT_CATEGORIES) {
-      if (!openMains.has(cat.id)) continue;
-      if (cat.children?.length) {
-        const kids = cat.children.filter((c) => selected.has(c.value));
-        if (kids.length) kids.forEach((c) => values.add(c.value));
-        else {
-          cat.children.forEach((c) => values.add(c.value));
-          values.add(cat.label);
-        }
-      } else if (cat.value && selected.has(cat.value)) {
-        values.add(cat.value);
-      }
-    }
-    return [...values];
-  }
-
-  function syncOpenFromValues() {
-    openMains.clear();
-    for (const value of selected) {
-      for (const cat of ALLAPOT_CATEGORIES) {
-        if (cat.value === value || cat.children?.some((c) => c.value === value)) {
-          openMains.add(cat.id);
-        }
-      }
-    }
-  }
-
-  function turnMainOn(cat) {
-    openMains.add(cat.id);
-    if (!cat.children?.length && cat.value) selected.add(cat.value);
-  }
-
-  function turnMainOff(cat) {
-    openMains.delete(cat.id);
-    for (const v of categoryValues(cat)) selected.delete(v);
-  }
-
-  function renderAllapotBody(bodyEl) {
-    const rows = ALLAPOT_CATEGORIES.map((cat) => {
-      const on = openMains.has(cat.id);
-      const hasKids = Boolean(cat.children?.length);
-      let kidsHtml = "";
-      if (hasKids && on) {
-        kidsHtml = `<div class="auto-fuel-children">
-          ${cat.children
-            .map((child) => {
-              const childOn = selected.has(child.value);
-              return `<div class="auto-bm-row auto-fuel-child-row">
-                <label class="auto-bm-toggle">
-                  <span>${escapeHtml(child.label)}</span>
-                  <input type="checkbox" data-ad-bm-allapot-child="${escapeAttr(child.value)}" data-ad-bm-allapot-parent="${escapeAttr(cat.id)}" ${childOn ? "checked" : ""} />
-                  <span class="auto-bm-switch" aria-hidden="true"></span>
-                </label>
-              </div>`;
-            })
-            .join("")}
-        </div>`;
-      }
-      return `<div class="auto-bm-row auto-fuel-main-row" data-ad-bm-allapot-main="${escapeAttr(cat.id)}">
-        <label class="auto-bm-toggle auto-fuel-main-toggle">
-          <span class="auto-fuel-main-label">${escapeHtml(cat.label)}</span>
-          <input type="checkbox" data-ad-bm-allapot-main-toggle="${escapeAttr(cat.id)}" ${on ? "checked" : ""} />
-          <span class="auto-bm-switch" aria-hidden="true"></span>
-        </label>
-        ${kidsHtml}
-      </div>`;
-    }).join("");
-
-    bodyEl.innerHTML = `<div class="auto-bm-group">${rows}</div>`;
-  }
-
-  mountBmPicker({
-    select,
-    title: "Állapot",
-    panelClass: "ad-form-allapot-panel",
-    openAttr: "data-ad-bm-allapot-open",
-    syncFromHidden() {
-      selected = new Set(parseJsonList(select._adBmHidden?.value));
-      syncOpenFromValues();
-    },
-    syncSummary(summaryEl) {
-      if (summaryEl) summaryEl.textContent = labelList(selectedLabels());
-    },
-    syncHidden() {
-      writeJsonList(select._adBmHidden, effectiveSelectedValues());
-    },
-    renderBody: renderAllapotBody,
-    bindBody(bodyEl) {
-      bodyEl.onchange = (event) => {
-        const mainEl = event.target.closest("[data-ad-bm-allapot-main-toggle]");
-        if (mainEl) {
-          const id = mainEl.getAttribute("data-ad-bm-allapot-main-toggle");
-          const cat = ALLAPOT_CATEGORIES.find((c) => c.id === id);
-          if (!cat) return;
-          if (mainEl.checked) turnMainOn(cat);
-          else turnMainOff(cat);
-          renderAllapotBody(bodyEl);
-          writePickerList(select, effectiveSelectedValues());
-          updateBmSummary(select, labelList(selectedLabels()), effectiveSelectedValues().length > 0);
-          return;
-        }
-
-        const childEl = event.target.closest("[data-ad-bm-allapot-child]");
-        if (!childEl) return;
-        const value = childEl.getAttribute("data-ad-bm-allapot-child") ?? "";
-        const parentId = childEl.getAttribute("data-ad-bm-allapot-parent") ?? "";
-        if (childEl.checked) {
-          if (parentId) openMains.add(parentId);
-          selected.add(value);
-        } else {
-          selected.delete(value);
-        }
-        writePickerList(select, effectiveSelectedValues());
-        updateBmSummary(select, labelList(selectedLabels()), effectiveSelectedValues().length > 0);
-      };
-    },
-  });
-}
-
 function mountHierarchicalPicker(select, { title, panelClass, openAttr, categories, attrMain, attrChild, attrParent, unit }) {
   /** @type {Set<string>} */
   let openMains = new Set();
@@ -1796,7 +1654,9 @@ export async function mountAdFormBmPickers(form, catalog = null) {
   const gyartmany = document.getElementById("gyartmany");
   const modell = document.getElementById("modell");
 
-  if (allapot?.tagName === "SELECT" && allapot.dataset.adBmPicker !== "1") mountAllapotPicker(allapot);
+  if (allapot?.tagName === "SELECT" && allapot.dataset.adBmPicker !== "1") {
+    mountFlatPicker(allapot, "Állapot", flattenAllapotOptions(), "ad-form-allapot-panel", "data-ad-bm-allapot-open");
+  }
   if (kivitel?.tagName === "SELECT" && kivitel.dataset.adBmPicker !== "1") {
     mountFlatPicker(kivitel, "Kivitel", KIVITEL_OPTIONS, "ad-form-kivitel-panel", "data-ad-bm-kivitel-open");
   }

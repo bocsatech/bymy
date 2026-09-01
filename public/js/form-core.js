@@ -10,6 +10,10 @@ import {
   DEFAULT_PHOTO_OVERLAY_ID,
   renderListingPhotoOverlay,
 } from "./listing-photo-overlay.js?v=photoOverlay1";
+import {
+  mountAdFormStep1Toggles,
+  refreshAdFormStep1Toggles,
+} from "./ad-form-step1-toggles.js?v=adStep1Toggle2";
 
 export function createAdForm(options = {}) {
   const mode = options.mode ?? "wizard";
@@ -897,6 +901,7 @@ function applyFormData(data, { fromImport = false } = {}) {
   syncFuelDependentFields();
   fitAllFormFields();
   loadExistingPhotos(data);
+  refreshAdFormStep1Toggles(form);
   if (mode === "import") {
     options.onApplied?.(data);
   } else {
@@ -960,6 +965,7 @@ function resetForm({ fresh = false } = {}) {
   updateLeDisplay();
   updateTitle();
   fitAllFormFields();
+  refreshAdFormStep1Toggles(form);
   window.dispatchEvent(new Event("ad-form-sync-location"));
   } finally {
     emptyingForm = false;
@@ -1649,6 +1655,7 @@ modell?.addEventListener("change", () => {
 renderFuelDropdown();
 renderAllapotDropdown();
 renderKivitelDropdown();
+mountAdFormStep1Toggles(form);
 renderFuelSelector();
 renderKlimaOptions();
 renderEquipment();

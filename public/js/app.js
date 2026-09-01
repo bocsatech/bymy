@@ -5,7 +5,7 @@ import {
   saveListingPhotosOrder,
   getStoredListingId,
 } from "./db-client.js?v=wizardSave1";
-import { createAdForm } from "./form-core.js?v=photoOverlay1";
+import { createAdForm } from "./form-core.js?v=adStep1Toggle2";
 import { initTireSizes } from "./tire-sizes-ui.js";
 import { initPhoneLanguages } from "./phone-lang-ui.js";
 import { initCategoryPicker } from "./category-picker.js?v=immoPortalPage1";
@@ -257,11 +257,11 @@ const categoryPicker = initCategoryPicker({
   },
   onVehicleSelected: () => {
     try {
+      const sel = categoryPicker?.getSelection?.();
+      if (sel) categoryPicker?.syncWizardContext?.(sel);
       const api = ensureFormReady();
       if (!editing) api?.resetForm?.({ fresh: true });
       api?.markTouched?.();
-      const sel = categoryPicker?.getSelection?.();
-      if (sel) categoryPicker?.syncWizardContext?.(sel);
       api?.syncKisteherFields?.();
       phoneLanguages?.syncLanguages?.();
       tireSizes?.syncRearTires?.();

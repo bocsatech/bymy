@@ -1,5 +1,6 @@
 /** Mentett 12 oszlopos elrendezés — minden mező ugyanazon a lépésrácson. */
 import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=immoTelekArea1";
+import { refreshAdFormStep1Toggles } from "./ad-form-step1-toggles.js?v=adStep1Toggle2";
 
 function cssEscape(value) {
   if (window.CSS?.escape) return window.CSS.escape(value);
@@ -214,6 +215,7 @@ function placeWrap(wrap, cell) {
     el.style.setProperty("max-width", "none", "important");
   });
   wrap.querySelectorAll("select, input:not([type=checkbox]):not([type=hidden]):not([type=file])").forEach((el) => {
+    if (el.classList.contains("ad-form-toggle-native")) return;
     el.style.setProperty("width", "100%", "important");
     el.style.setProperty("max-width", "none", "important");
     el.style.setProperty("field-sizing", "fixed", "important");
@@ -503,7 +505,9 @@ async function applyAdFormLayout() {
     pinExtras(form);
     pinLocation(form);
     pinFooter(form);
+    refreshAdFormStep1Toggles(form);
     window.dispatchEvent(new Event("ad-form-sync-location"));
+    window.dispatchEvent(new Event("ad-form-layout-refresh"));
   } catch (error) {
     console.warn("Ad form layout apply:", error);
   }

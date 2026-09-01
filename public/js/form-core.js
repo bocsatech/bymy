@@ -10,7 +10,7 @@ import {
   DEFAULT_PHOTO_OVERLAY_ID,
   renderListingPhotoOverlay,
 } from "./listing-photo-overlay.js?v=photoOverlay1";
-import { mountAdFormBmPickers, refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=adBmPickers2";
+import { mountAdFormBmPickers, refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=adBmPickers3";
 
 export function createAdForm(options = {}) {
   const mode = options.mode ?? "wizard";

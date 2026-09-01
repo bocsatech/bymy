@@ -66,16 +66,6 @@ export function isSzemelyautoAdForm(form) {
   return true;
 }
 
-function ensurePanelRoot() {
-  let root = document.getElementById("ad-bm-panel-root");
-  if (!root) {
-    root = document.createElement("div");
-    root.id = "ad-bm-panel-root";
-    document.body.appendChild(root);
-  }
-  return root;
-}
-
 /** @type {(() => void) | null} */
 let closeOpenPanel = null;
 
@@ -90,6 +80,13 @@ function unregisterOpenPanel(close) {
 
 function fieldHost(select) {
   return select?.closest(".labeled-field, .md-outlined, .ad-layout-item");
+}
+
+function anchorField(select) {
+  const field = fieldHost(select);
+  if (!field) return null;
+  field.classList.add("ad-form-bm-anchor");
+  return field;
 }
 
 function hideNativeSelect(select) {
@@ -108,6 +105,7 @@ function unmountPicker(select) {
   if (!select) return;
   showNativeSelect(select);
   const field = fieldHost(select);
+  field?.classList.remove("ad-form-bm-anchor", "is-open");
   field?.querySelector(`.ad-form-bm-field[data-ad-bm-for="${select.id}"]`)?.remove();
   select._adBmPanel?.remove();
   delete select._adBmPanel;
@@ -131,7 +129,7 @@ function mountBmPicker(opts) {
   const { select, title, panelClass, openAttr, renderBody, bindBody, syncSummary, syncFromSelect } = opts;
   if (!select || select.tagName !== "SELECT" || select.dataset.adBmPicker === "1") return;
 
-  const field = fieldHost(select);
+  const field = anchorField(select);
   if (!field) return;
 
   unmountPicker(select);
@@ -164,7 +162,7 @@ function mountBmPicker(opts) {
     </div>
     <div class="auto-bm-panel__body" data-ad-bm-body></div>
   `;
-  ensurePanelRoot().appendChild(panel);
+  field.appendChild(panel);
   select._adBmPanel = panel;
   const bodyEl = panel.querySelector("[data-ad-bm-body]");
 
@@ -178,17 +176,17 @@ function mountBmPicker(opts) {
     syncFromSelect();
     renderBody(bodyEl);
     bindBody(bodyEl);
+    field.classList.add("is-open");
     panel.hidden = false;
     panel.style.removeProperty("display");
     panel.classList.remove("is-closed");
-    document.body.classList.add("ad-form-bm-open");
   }
 
   function closePanel() {
+    field.classList.remove("is-open");
     panel.hidden = true;
     panel.style.setProperty("display", "none", "important");
     panel.classList.add("is-closed");
-    document.body.classList.remove("ad-form-bm-open");
     unregisterOpenPanel(closePanel);
     if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
     refreshSummary();
@@ -201,7 +199,7 @@ function mountBmPicker(opts) {
 
   bindAutoBmDismiss({
     panel,
-    roots: [wrap],
+    roots: [field, wrap],
     isOpen: () => autoBmPanelIsOpen(panel),
     close: closePanel,
   });

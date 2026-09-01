@@ -66,6 +66,16 @@ body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field--dropdown.is-o
   z-index: 201;
 }
 
+body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field--flat {
+  position: relative;
+  z-index: 1;
+  overflow: visible;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field--flat.is-open {
+  z-index: 201;
+}
+
 body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-input-wrap {
   position: relative;
   display: flex;
@@ -168,7 +178,8 @@ body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-panel.is-closed {
 }
 
 body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field--dropdown > *:not(.ad-form-bm-input-wrap),
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field:not(.ad-form-bm-field--dropdown) > *:not(.auto-bm-trigger) {
+body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field--flat > *:not(.auto-bm-trigger),
+body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field:not(.ad-form-bm-field--dropdown):not(.ad-form-bm-field--flat) > *:not(.auto-bm-trigger) {
   position: absolute !important;
   width: 0 !important;
   height: 0 !important;

@@ -358,7 +358,7 @@ function mountBmPicker(opts) {
   const hidden = singleSelect ? ensurePlainHiddenInput(select) : ensureHiddenInput(select);
 
   const wrap = document.createElement("div");
-  wrap.className = "ad-form-bm-field auto-bm-field";
+  wrap.className = "ad-form-bm-field ad-form-bm-field--flat auto-bm-field";
   wrap.dataset.adBmFor = select.id;
   wrap.innerHTML = `
     <button type="button" class="auto-bm-trigger" ${openAttr}>
@@ -373,12 +373,12 @@ function mountBmPicker(opts) {
   const openBtn = wrap.querySelector(`[${openAttr}]`);
 
   const panel = document.createElement("div");
-  panel.className = `auto-bm-panel ad-form-bm-panel ${panelClass}`;
+  panel.className = `auto-bm-panel ad-form-bm-panel ad-form-bm-dropdown ${panelClass}`;
   panel.hidden = true;
-  panel.setAttribute("role", "dialog");
+  panel.setAttribute("role", "listbox");
   panel.setAttribute("aria-label", title);
-  panel.innerHTML = `<div class="auto-bm-panel__body" data-ad-bm-body></div>`;
-  field.appendChild(panel);
+  panel.innerHTML = `<div class="ad-form-bm-dropdown__body auto-bm-panel__body" data-ad-bm-body></div>`;
+  wrap.appendChild(panel);
   select._adBmPanel = panel;
   const bodyEl = panel.querySelector("[data-ad-bm-body]");
 
@@ -390,26 +390,71 @@ function mountBmPicker(opts) {
     );
   }
 
-  function openPanel() {
-    registerOpenPanel(closePanel);
-    syncFromHidden();
-    renderBody(bodyEl);
-    bindBody(bodyEl);
-    field.classList.add("is-open");
-    panel.hidden = false;
-    panel.style.removeProperty("display");
-    panel.classList.remove("is-closed");
+  function positionPanel() {
+    const rect = wrap.getBoundingClientRect();
+    panel.classList.add("ad-form-bm-dropdown--portaled");
+    panel.style.position = "fixed";
+    panel.style.top = `${Math.round(rect.bottom + 4)}px`;
+    panel.style.left = `${Math.round(rect.left)}px`;
+    panel.style.width = `${Math.round(rect.width)}px`;
+    panel.style.right = "auto";
+    panel.style.bottom = "auto";
+  }
+
+  function attachPanelPortal() {
+    if (panel.parentElement !== document.body) document.body.appendChild(panel);
+    positionPanel();
+  }
+
+  function detachPanelPortal() {
+    panel.classList.remove("ad-form-bm-dropdown--portaled");
+    panel.style.removeProperty("position");
+    panel.style.removeProperty("top");
+    panel.style.removeProperty("left");
+    panel.style.removeProperty("width");
+    panel.style.removeProperty("right");
+    panel.style.removeProperty("bottom");
+    if (panel.parentElement !== wrap) wrap.appendChild(panel);
+  }
+
+  function onViewportChange() {
+    if (panel.hidden || panel.classList.contains("is-closed")) return;
+    positionPanel();
   }
 
   function closePanel() {
     field.classList.remove("is-open");
+    wrap.classList.remove("is-open");
     panel.hidden = true;
     panel.style.setProperty("display", "none", "important");
     panel.classList.add("is-closed");
+    detachPanelPortal();
+    window.removeEventListener("scroll", onViewportChange, true);
+    window.removeEventListener("resize", onViewportChange);
     unregisterOpenPanel(closePanel);
     if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
     syncHidden();
     refreshSummary();
+  }
+
+  function openPanel() {
+    ["gyartmany", "modell", "uzemanyag", "okmany_jelleg", "allapot", "kivitel", "forgalomba_helyezes_ev", "forgalomba_helyezes_honap"].forEach((id) => {
+      const other = document.getElementById(id);
+      if (!other || other === select) return;
+      if (autoBmPanelIsOpen(other._adBmPanel) && typeof other._adBmClose === "function") other._adBmClose();
+    });
+    registerOpenPanel(closePanel);
+    syncFromHidden();
+    renderBody(bodyEl);
+    bindBody(bodyEl);
+    attachPanelPortal();
+    field.classList.add("is-open");
+    wrap.classList.add("is-open");
+    panel.classList.remove("is-closed");
+    panel.hidden = false;
+    panel.style.removeProperty("display");
+    window.addEventListener("scroll", onViewportChange, true);
+    window.addEventListener("resize", onViewportChange);
   }
 
   openBtn?.addEventListener("click", () => {
@@ -417,14 +462,19 @@ function mountBmPicker(opts) {
     else openPanel();
   });
 
+  panel.addEventListener("mousedown", (event) => {
+    event.preventDefault();
+  });
+
   bindAutoBmDismiss({
     panel,
-    roots: [field, wrap],
+    roots: [wrap, openBtn],
     isOpen: () => autoBmPanelIsOpen(panel),
     close: closePanel,
   });
 
   hidden.addEventListener("change", refreshSummary);
+  syncFromHidden();
   refreshSummary();
 
   select.dataset.adBmPicker = "1";

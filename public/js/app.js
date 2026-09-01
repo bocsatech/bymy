@@ -5,7 +5,8 @@ import {
   saveListingPhotosOrder,
   getStoredListingId,
 } from "./db-client.js?v=wizardSave1";
-import { createAdForm } from "./form-core.js?v=revertAdToggles1";
+import { createAdForm } from "./form-core.js?v=adBmPickers2";
+import { refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=adBmPickers2";
 import { initTireSizes } from "./tire-sizes-ui.js";
 import { initPhoneLanguages } from "./phone-lang-ui.js";
 import { initCategoryPicker } from "./category-picker.js?v=postWizardFix1";
@@ -267,6 +268,7 @@ const categoryPicker = initCategoryPicker({
         applyListingAddressFromProfile(adForm).catch(() => {});
         window.dispatchEvent(new Event("ad-form-sync-location"));
         window.dispatchEvent(new Event("ad-form-layout-refresh"));
+        window.setTimeout(() => refreshAdFormBmPickers(adForm), 150);
       } catch (error) {
         console.error("Űrlap indítás hiba:", error);
       }

@@ -10,6 +10,7 @@ import {
   DEFAULT_PHOTO_OVERLAY_ID,
   renderListingPhotoOverlay,
 } from "./listing-photo-overlay.js?v=photoOverlay1";
+import { mountAdFormBmPickers, refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=adBmPickers2";
 
 export function createAdForm(options = {}) {
   const mode = options.mode ?? "wizard";
@@ -1648,7 +1649,6 @@ modell?.addEventListener("change", () => {
 });
 renderFuelDropdown();
 renderAllapotDropdown();
-renderKivitelDropdown();
 renderFuelSelector();
 renderKlimaOptions();
 renderEquipment();
@@ -1656,6 +1656,7 @@ renderEgyebInfo();
 wrapMdOutlinedFields();
 syncFuelDependentFields();
 fitAllFormFields();
+mountAdFormBmPickers(form);
 
 uzemanyag?.addEventListener("change", () => {
   if (uzemanyag.tagName !== "SELECT") return;

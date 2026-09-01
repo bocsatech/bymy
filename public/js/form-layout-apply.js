@@ -1,6 +1,6 @@
 /** Mentett 12 oszlopos elrendezés — minden mező ugyanazon a lépésrácson. */
 import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=immoTelekArea1";
-import { refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=adBmPickers21";
+import { refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=adBmPickers19";
 
 function cssEscape(value) {
   if (window.CSS?.escape) return window.CSS.escape(value);

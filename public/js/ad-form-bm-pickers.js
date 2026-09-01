@@ -37,6 +37,12 @@ function parseJsonList(raw) {
   }
 }
 
+/** Egy választós mező: JSON tömb vagy sima string → első érték. */
+function readSingleStoredValue(raw) {
+  if (raw == null || raw === "") return "";
+  return parseJsonList(String(raw))[0] ?? String(raw).trim();
+}
+
 function writeJsonList(input, list) {
   if (!input) return;
   input.value = list.length ? JSON.stringify(list) : "";
@@ -265,7 +271,8 @@ function ensurePlainHiddenInput(select) {
     select.removeAttribute("required");
   }
 
-  hidden.value = String(select.value ?? "");
+  hidden.value = readSingleStoredValue(restored ?? select.value ?? "");
+  if (restored) delete select.dataset.adBmRestoreList;
   select.insertAdjacentElement("afterend", hidden);
   select._adBmHidden = hidden;
   return hidden;
@@ -338,11 +345,22 @@ function unmountPicker(select) {
  *   syncFromHidden: () => void,
  *   syncSummary: (summaryEl: HTMLElement | null, hidden: HTMLInputElement) => void,
  *   syncHidden: () => void,
+ *   singleSelect?: boolean,
  * }} opts
  */
 function mountBmPicker(opts) {
-  const { select, title, panelClass, openAttr, renderBody, bindBody, syncFromHidden, syncSummary, syncHidden } =
-    opts;
+  const {
+    select,
+    title,
+    panelClass,
+    openAttr,
+    renderBody,
+    bindBody,
+    syncFromHidden,
+    syncSummary,
+    syncHidden,
+    singleSelect = false,
+  } = opts;
   if (!select || select.tagName !== "SELECT" || select.dataset.adBmPicker === "1") return;
 
   const field = anchorField(select);
@@ -350,7 +368,7 @@ function mountBmPicker(opts) {
 
   unmountPicker(select);
   hideNativeSelect(select);
-  const hidden = ensureHiddenInput(select);
+  const hidden = singleSelect ? ensurePlainHiddenInput(select) : ensureHiddenInput(select);
 
   const wrap = document.createElement("div");
   wrap.className = "ad-form-bm-field auto-bm-field";
@@ -379,7 +397,10 @@ function mountBmPicker(opts) {
 
   function refreshSummary() {
     syncSummary(summaryEl, hidden);
-    wrap.classList.toggle("has-value", parseJsonList(hidden.value).length > 0);
+    const hasValue = singleSelect
+      ? Boolean(readSingleStoredValue(hidden.value))
+      : parseJsonList(hidden.value).length > 0;
+    wrap.classList.toggle("has-value", hasValue);
   }
 
   function openPanel() {
@@ -1023,70 +1044,51 @@ function mountSearchFlatPicker(select, title, options, panelClass, unit = "db") 
   });
 }
 
-function mountFlatPicker(select, title, options, panelClass, openAttr, { singleSelect = false } = {}) {
-  /** @type {Set<string>} */
-  let selected = new Set();
-
-  function renderBody(bodyEl) {
-    const rows = options
-      .map((opt) => {
-        const on = selected.has(opt);
-        return `<div class="auto-bm-row">
-            <label class="auto-bm-toggle">
-              <span>${escapeHtml(opt)}</span>
-              <input type="checkbox" data-ad-bm-flat="${escapeAttr(opt)}" ${on ? "checked" : ""} />
-              <span class="auto-bm-switch" aria-hidden="true"></span>
-            </label>
-          </div>`;
-      })
-      .join("");
-    bodyEl.innerHTML = `<div class="auto-bm-group">${rows}</div>`;
-  }
-
-  function bindBody(bodyEl) {
-    bodyEl.onchange = (event) => {
-      const el = event.target.closest("[data-ad-bm-flat]");
-      if (!el) return;
-      const opt = el.getAttribute("data-ad-bm-flat") ?? "";
-      if (singleSelect) {
-        if (el.checked) {
-          selected.clear();
-          selected.add(opt);
-        } else {
-          selected.delete(opt);
-        }
-        renderBody(bodyEl);
-        bindBody(bodyEl);
-      } else if (el.checked) {
-        selected.add(opt);
-      } else {
-        selected.delete(opt);
-      }
-      writePickerList(select, [...selected]);
-      updateBmSummary(select, labelList([...selected]), selected.size > 0);
-    };
-  }
+function mountFlatPicker(select, title, options, panelClass, openAttr) {
+  let selected = "";
 
   mountBmPicker({
     select,
     title,
     panelClass,
     openAttr,
+    singleSelect: true,
     syncFromHidden() {
-      selected = new Set(parseJsonList(select._adBmHidden?.value));
-      if (singleSelect && selected.size > 1) {
-        const first = [...selected][0];
-        selected = first ? new Set([first]) : new Set();
-      }
+      selected = readSingleStoredValue(select._adBmHidden?.value);
     },
     syncSummary(summaryEl) {
-      if (summaryEl) summaryEl.textContent = labelList([...selected]);
+      if (summaryEl) summaryEl.textContent = selected || PLACEHOLDER;
     },
     syncHidden() {
-      writeJsonList(select._adBmHidden, [...selected]);
+      writePlainValue(select, selected);
     },
-    renderBody,
-    bindBody,
+    renderBody(bodyEl) {
+      const rows = options
+        .map((opt) => {
+          const on = selected === opt;
+          return `<div class="auto-bm-row">
+            <label class="auto-bm-toggle">
+              <span>${escapeHtml(opt)}</span>
+              <input type="checkbox" data-ad-bm-flat="${escapeAttr(opt)}" ${on ? "checked" : ""} />
+              <span class="auto-bm-switch" aria-hidden="true"></span>
+            </label>
+          </div>`;
+        })
+        .join("");
+      bodyEl.innerHTML = `<div class="auto-bm-group">${rows}</div>`;
+    },
+    bindBody(bodyEl) {
+      bodyEl.onchange = (event) => {
+        const el = event.target.closest("[data-ad-bm-flat]");
+        if (!el) return;
+        const opt = el.getAttribute("data-ad-bm-flat") ?? "";
+        if (el.checked) selected = opt;
+        else if (selected === opt) selected = "";
+        writePlainValue(select, selected);
+        renderBody(bodyEl);
+        updateBmSummary(select, selected || PLACEHOLDER, Boolean(selected));
+      };
+    },
   });
 }
 
@@ -1563,9 +1565,14 @@ export function applyAdFormBmFieldValues(data) {
     if (id === "uzemanyag") list = list.map((v) => normalizePrimaryValue(select, v)).filter(Boolean);
 
     if (select._adBmHidden?.dataset.adBmSingle === "1") {
-      const value = list[0] || (raw != null && !Array.isArray(raw) ? String(raw) : "");
+      const value =
+        list[0] ||
+        (raw != null && !Array.isArray(raw) ? readSingleStoredValue(String(raw)) : "");
       writePlainValue(select, value);
       updateBmSearchTrigger(select, value, Boolean(value));
+      if (select._adBmPanel && !select._adBmPanel.classList.contains("ad-form-bm-dropdown")) {
+        updateBmSummary(select, value || PLACEHOLDER, Boolean(value));
+      }
     } else if (select._adBmHidden) {
       writePickerList(select, list);
       const unit =
@@ -1613,7 +1620,7 @@ function snapshotBmPickerValues(form) {
     if (!select) continue;
     const hidden = select._adBmHidden;
     if (hidden?.dataset.adBmSingle === "1") {
-      if (hidden.value) snap[id] = hidden.value;
+      if (hidden.value) snap[id] = readSingleStoredValue(hidden.value);
       continue;
     }
     if (hidden?.value) {
@@ -1675,14 +1682,10 @@ export async function mountAdFormBmPickers(form, catalog = null) {
   const modell = document.getElementById("modell");
 
   if (allapot?.tagName === "SELECT" && allapot.dataset.adBmPicker !== "1") {
-    mountFlatPicker(allapot, "Állapot", flattenAllapotOptions(), "ad-form-allapot-panel", "data-ad-bm-allapot-open", {
-      singleSelect: true,
-    });
+    mountFlatPicker(allapot, "Állapot", flattenAllapotOptions(), "ad-form-allapot-panel", "data-ad-bm-allapot-open");
   }
   if (kivitel?.tagName === "SELECT" && kivitel.dataset.adBmPicker !== "1") {
-    mountFlatPicker(kivitel, "Kivitel", KIVITEL_OPTIONS, "ad-form-kivitel-panel", "data-ad-bm-kivitel-open", {
-      singleSelect: true,
-    });
+    mountFlatPicker(kivitel, "Kivitel", KIVITEL_OPTIONS, "ad-form-kivitel-panel", "data-ad-bm-kivitel-open");
   }
   if (okmany?.tagName === "SELECT" && okmany.dataset.adBmPicker !== "1") {
     mountSearchFlatPicker(

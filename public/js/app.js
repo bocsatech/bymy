@@ -5,8 +5,8 @@ import {
   saveListingPhotosOrder,
   getStoredListingId,
 } from "./db-client.js?v=wizardSave1";
-import { createAdForm } from "./form-core.js?v=adBmPickers17";
-import { refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=adBmPickers17";
+import { createAdForm } from "./form-core.js?v=adBmPickers18";
+import { refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=adBmPickers18";
 import { initTireSizes } from "./tire-sizes-ui.js";
 import { initPhoneLanguages } from "./phone-lang-ui.js";
 import { initCategoryPicker } from "./category-picker.js?v=postWizardFix1";

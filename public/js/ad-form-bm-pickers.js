@@ -235,8 +235,14 @@ function ensureHiddenInput(select) {
     select.removeAttribute("required");
   }
 
-  const initial = parseJsonList(select.value);
-  writeJsonList(hidden, initial);
+  const restored = select.dataset.adBmRestoreList;
+  if (restored) {
+    writeJsonList(hidden, parseJsonList(restored));
+    delete select.dataset.adBmRestoreList;
+  } else {
+    const initial = parseJsonList(select.value);
+    writeJsonList(hidden, initial);
+  }
   select.insertAdjacentElement("afterend", hidden);
   select._adBmHidden = hidden;
   return hidden;
@@ -295,6 +301,11 @@ function restoreHiddenInput(select) {
   }
   if (hidden.required) {
     select.required = true;
+  }
+  if (hidden.dataset.adBmMulti === "1" && hidden.value) {
+    select.dataset.adBmRestoreList = hidden.value;
+  } else if (hidden.dataset.adBmSingle === "1") {
+    select.value = hidden.value;
   }
   hidden.remove();
   delete select._adBmHidden;
@@ -389,6 +400,7 @@ function mountBmPicker(opts) {
     panel.classList.add("is-closed");
     unregisterOpenPanel(closePanel);
     if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+    syncFromHidden();
     syncHidden();
     refreshSummary();
   }
@@ -406,6 +418,7 @@ function mountBmPicker(opts) {
   });
 
   hidden.addEventListener("change", refreshSummary);
+  syncFromHidden();
   refreshSummary();
 
   select.dataset.adBmPicker = "1";
@@ -570,6 +583,7 @@ function mountSearchDropdownPicker(select, opts) {
     }
     query = "";
     onQueryChange?.(query);
+    syncFromHidden();
     syncHidden();
     refreshTrigger();
   }
@@ -666,6 +680,7 @@ function mountSearchDropdownPicker(select, opts) {
   });
 
   hidden.addEventListener("change", refreshTrigger);
+  syncFromHidden();
   refreshTrigger();
 
   select.dataset.adBmPicker = "1";
@@ -1700,6 +1715,42 @@ export function applyAdFormBmFieldValues(data) {
 /** @type {object | null} */
 let cachedVehicleCatalog = null;
 
+const BM_PICKER_FIELD_IDS = [
+  "allapot",
+  "kivitel",
+  "okmany_jelleg",
+  "gyartmany",
+  "modell",
+  "uzemanyag",
+  "forgalomba_helyezes_ev",
+  "forgalomba_helyezes_honap",
+];
+
+function snapshotBmPickerValues(form) {
+  /** @type {Record<string, unknown>} */
+  const snap = {};
+  if (!form) return snap;
+  for (const id of BM_PICKER_FIELD_IDS) {
+    const select = document.getElementById(id);
+    if (!select) continue;
+    const hidden = select._adBmHidden;
+    if (hidden?.dataset.adBmSingle === "1") {
+      if (hidden.value) snap[id] = hidden.value;
+      continue;
+    }
+    if (hidden?.value) {
+      snap[id] = parseJsonList(hidden.value);
+      continue;
+    }
+    if (select.dataset.adBmRestoreList) {
+      snap[id] = parseJsonList(select.dataset.adBmRestoreList);
+    } else if (select.value) {
+      snap[id] = select.value;
+    }
+  }
+  return snap;
+}
+
 export function unmountAdFormBmPickers(form) {
   if (!form) return;
   [
@@ -1722,8 +1773,10 @@ export function unmountAdFormBmPickers(form) {
 export async function refreshAdFormBmPickers(form, catalog = null) {
   try {
     if (catalog) cachedVehicleCatalog = catalog;
+    const snap = snapshotBmPickerValues(form);
     unmountAdFormBmPickers(form);
     await mountAdFormBmPickers(form, catalog || cachedVehicleCatalog);
+    applyAdFormBmFieldValues(snap);
   } catch (error) {
     console.warn("Alapadatok kapcsolós panel frissítés:", error);
   }

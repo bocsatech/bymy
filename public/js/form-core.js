@@ -10,7 +10,7 @@ import {
   DEFAULT_PHOTO_OVERLAY_ID,
   renderListingPhotoOverlay,
 } from "./listing-photo-overlay.js?v=photoOverlay1";
-import { refreshAdFormBmPickers, applyAdFormBmFieldValues } from "./ad-form-bm-pickers.js?v=adBmPickers17";
+import { refreshAdFormBmPickers, applyAdFormBmFieldValues } from "./ad-form-bm-pickers.js?v=adBmPickers18";
 
 export function createAdForm(options = {}) {
   const mode = options.mode ?? "wizard";
@@ -544,7 +544,6 @@ function syncFuelDependentFields() {
   document.querySelectorAll(".fuel-combustion-only").forEach((el) => {
     el.classList.toggle("hidden", electric);
   });
-  syncKisteherFields();
 }
 
 function updateLeDisplay() {

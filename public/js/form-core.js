@@ -10,7 +10,7 @@ import {
   DEFAULT_PHOTO_OVERLAY_ID,
   renderListingPhotoOverlay,
 } from "./listing-photo-overlay.js?v=photoOverlay1";
-import { mountAdFormBmPickers, refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=adBmPickers4";
+import { mountAdFormBmPickers, refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=adBmPickers5";
 
 export function createAdForm(options = {}) {
   const mode = options.mode ?? "wizard";
@@ -849,7 +849,9 @@ function applyFormData(data, { fromImport = false } = {}) {
     } else if (field.type === "checkbox") {
       field.checked = appliedValue === "1" || appliedValue === true || appliedValue === "on";
     } else if (field.tagName === "SELECT") {
-      ensureSelectOption(field, appliedValue);
+      ensureSelectOption(field, Array.isArray(appliedValue) ? appliedValue[0] : appliedValue);
+    } else if (Array.isArray(appliedValue)) {
+      field.value = JSON.stringify(appliedValue);
     } else {
       field.value = appliedValue;
     }

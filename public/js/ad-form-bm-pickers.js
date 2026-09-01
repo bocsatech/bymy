@@ -171,12 +171,26 @@ function hideNativeSelect(select) {
   select.classList.add("ad-form-bm-native");
   select.tabIndex = -1;
   select.setAttribute("aria-hidden", "true");
+  select.setAttribute("size", "1");
+  select.style.setProperty("display", "none", "important");
+  select.style.setProperty("width", "0", "important");
+  select.style.setProperty("height", "0", "important");
+  select.style.setProperty("min-height", "0", "important");
+  select.style.setProperty("overflow", "hidden", "important");
+  select.style.setProperty("border", "0", "important");
 }
 
 function showNativeSelect(select) {
   select.classList.remove("ad-form-bm-native");
   select.removeAttribute("tabindex");
   select.removeAttribute("aria-hidden");
+  select.removeAttribute("size");
+  select.style.removeProperty("display");
+  select.style.removeProperty("width");
+  select.style.removeProperty("height");
+  select.style.removeProperty("min-height");
+  select.style.removeProperty("overflow");
+  select.style.removeProperty("border");
 }
 
 function ensureHiddenInput(select) {
@@ -378,7 +392,7 @@ function mountSearchDropdownPicker(select, opts) {
   wrap.innerHTML = `
     <div class="ad-form-bm-input-wrap">
       <input
-        type="search"
+        type="text"
         class="ad-form-bm-search-trigger"
         data-ad-bm-search-trigger
         placeholder="${escapeAttr(PLACEHOLDER)}"

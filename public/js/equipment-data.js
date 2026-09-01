@@ -188,6 +188,18 @@ export function flattenAllapotOptions() {
   return out;
 }
 
+export function flattenUzemanyagOptions() {
+  const out = [];
+  for (const cat of UZEMANYAG_CATEGORIES) {
+    if (cat.children?.length) {
+      for (const child of cat.children) out.push(child.value);
+    } else if (cat.value) {
+      out.push(cat.value);
+    }
+  }
+  return out;
+}
+
 /** Autó / teher — sebességváltó (kereső). */
 export const SEBESSEGVALTO_CATEGORIES = [
   {

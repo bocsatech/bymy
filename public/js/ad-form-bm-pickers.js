@@ -93,12 +93,11 @@ function categoryValues(cat) {
   return cat.value ? [cat.value] : [];
 }
 
-export function isSzemelyautoAdForm(form) {
+const BM_PICKER_SUBTYPES = new Set(["szemelyauto", "teherauto"]);
+
+/** Személyautó és teherautó (3,5 t-tól) feladás — kapcsolós panel pickerek. */
+export function isBmPickerAdForm(form) {
   if (!form) return false;
-  const vertical = String(form.elements.namedItem("hirdetes_vertical")?.value ?? "")
-    .trim()
-    .toLowerCase();
-  if (vertical === "ingatlan") return false;
   const subtype = String(
     form.elements.namedItem("hirdetes_alkategoria")?.value ??
       form.elements.namedItem("jarmu_kategoria")?.value ??
@@ -106,9 +105,13 @@ export function isSzemelyautoAdForm(form) {
   )
     .trim()
     .toLowerCase();
-  if (subtype === "teherauto" || subtype === "kisteher" || subtype === "ingatlan") return false;
-  if (vertical === "teher") return false;
-  return true;
+  if (subtype) return BM_PICKER_SUBTYPES.has(subtype);
+
+  const vertical = String(form.elements.namedItem("hirdetes_vertical")?.value ?? "")
+    .trim()
+    .toLowerCase();
+  if (vertical === "ingatlan" || vertical === "teher") return false;
+  return vertical === "auto" || vertical === "";
 }
 
 /** @type {(() => void) | null} */
@@ -882,7 +885,7 @@ export async function refreshAdFormBmPickers(form, catalog = null) {
 
 export async function mountAdFormBmPickers(form, catalog = null) {
   if (!form) return;
-  if (!isSzemelyautoAdForm(form)) {
+  if (!isBmPickerAdForm(form)) {
     unmountAdFormBmPickers(form);
     return;
   }

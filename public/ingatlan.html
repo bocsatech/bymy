@@ -60,6 +60,7 @@
     <link rel="stylesheet" href="/css/hub-mobile-app.css?v=tileFill3" />
     <link rel="stylesheet" href="/css/ingatlan-search.css?v=immoMenus1" />
     <link rel="stylesheet" href="/css/ingatlan-desk-layout.css?v=immoBorder1" />
+    <link rel="stylesheet" href="/css/ingatlan-partnerek.css?v=partnerDirectory2" />
     <link rel="stylesheet" href="/css/auto-hero.css?v=immoPortalCheck1" />
     <style id="home-scroll-fix">
       html:has(body.home-page) {
@@ -201,6 +202,27 @@
         </article>
       </section>
 
+      <section class="immo-partners" aria-labelledby="immo-partners-title">
+        <div class="immo-partners-head">
+          <div>
+            <p class="immo-partners-kicker">BYMY PARTNEREK</p>
+            <h2 id="immo-partners-title">Találj ingatlanos szakértőt</h2>
+            <p class="immo-partners-lead">Keress név vagy szolgáltatási terület alapján ellenőrzött partnereink között.</p>
+          </div>
+          <a class="immo-partners-join" href="/partner-profil-kezelese.html">Partnerként csatlakozom</a>
+        </div>
+        <form class="immo-partners-search" id="immo-partners-search" role="search">
+          <label>
+            <span class="sr-only">Partner keresése</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m20 20-4.4-4.4m2.4-4.6a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"/></svg>
+            <input id="immo-partners-query" type="search" placeholder="Név, iroda vagy szolgáltatási terület" autocomplete="off" />
+          </label>
+          <button type="submit">Keresés</button>
+        </form>
+        <p class="immo-partners-count" id="immo-partners-count" aria-live="polite"></p>
+        <div id="immo-partners-list" class="immo-partners-list"></div>
+      </section>
+
       <div class="site-layout home-layout">
         <section class="site-center home-center" aria-label="Hirdetések">
           <div class="immo-desk-results-bar">
@@ -217,6 +239,7 @@
     </main>
 
     <script src="/js/home-app.js?v=immoAdminLive1" type="module"></script>
+    <script src="/js/ingatlan-partnerek.js?v=partnerDirectory2" type="module"></script>
     <script src="/js/site-avatar-menu.js?v=avatarSync1" type="module"></script>
     <script src="/js/nav-counts.js?v=navCount2" type="module"></script>
     <script src="/js/theme.js?v=willhabenHdr1" type="module"></script>

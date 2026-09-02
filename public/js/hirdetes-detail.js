@@ -200,6 +200,10 @@ function render(view, listing, related) {
   const canMsg = !own && canMessageListing(view.userId);
   const user = getAuthUser();
   const profile = getProfile() || {};
+  const partner = listing?.partner;
+  const partnerHref = partner?.slug
+    ? `/partner/${encodeURIComponent(partner.slug)}`
+    : "";
   const loginNext = `/belepes.html?next=${encodeURIComponent(location.pathname + location.search)}`;
 
   const searchNav = getListingSearchNav(view.id, view.categoryHref);
@@ -331,6 +335,14 @@ function render(view, listing, related) {
             ${view.sellerSince ? `<p class="hd-seller-since">Felhasználó ezóta: ${escapeHtml(view.sellerSince)}</p>` : ""}
           </div>
         </div>
+        ${
+          partnerHref
+            ? `<a class="hd-partner-badge" href="${partnerHref}">
+                <span class="hd-partner-badge__mark">✓</span>
+                <span><strong>Ellenőrzött Bymy partner</strong><small>${escapeHtml(partner.display_name)}</small></span>
+              </a>`
+            : ""
+        }
         ${view.addressLines.length ? `<p class="hd-seller-addr">${view.addressLines.map(escapeHtml).join("<br>")}</p>` : ""}
         ${
           canMsg
@@ -401,6 +413,14 @@ function render(view, listing, related) {
     <section class="hd-dealer">
       <div class="hd-card">
         <p class="hd-seller-name">${escapeHtml(view.sellerName)}</p>
+        ${
+          partnerHref
+            ? `<a class="hd-partner-profile-link" href="${partnerHref}">
+                ${partner.logo_url ? `<img src="${escapeHtml(partner.logo_url)}" alt="" />` : `<span>${escapeHtml(String(partner.display_name || "P").slice(0, 1))}</span>`}
+                <span><small>Ellenőrzött ingatlanos partner</small><strong>${escapeHtml(partner.display_name)}</strong><em>Partnerprofil megnyitása →</em></span>
+              </a>`
+            : ""
+        }
         ${view.addressLines.length ? `<p class="hd-seller-addr">${view.addressLines.map(escapeHtml).join("<br>")}</p>` : ""}
         <p class="hd-seller-addr">Hivatkozási szám: ${escapeHtml(view.code || String(view.id))}</p>
         ${view.website ? `<p><a class="hd-web" href="${escapeHtml(view.website)}" target="_blank" rel="noopener">Weboldal</a></p>` : ""}

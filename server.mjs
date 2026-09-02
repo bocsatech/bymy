@@ -122,6 +122,13 @@ import {
 } from "./lib/supabase/image-storage.mjs";
 import { canManageListing } from "./lib/listing-meta.mjs";
 import { improveListingDescription } from "./lib/improve-listing-description.mjs";
+import {
+  getOwnPartnerProfile,
+  getPublicPartnerProfile,
+  getPublicPartnerProfileByUserId,
+  listPublicPartnerProfiles,
+  saveOwnPartnerProfile,
+} from "./lib/partner-profiles.mjs";
 import { handleMessagesApi, initMessagingSchema } from "./lib/messaging.mjs";
 import { handleLevel1Api } from "./lib/level1-api.mjs";
 import { getLevel1TokenFromRequest, getLevel1AdminBySession } from "./lib/level1.mjs";
@@ -897,6 +904,13 @@ async function handleListingsApi(req, res, pathname) {
     if (listing.detail) {
       listing.detail = await attachSellerProfile(listing.detail, listing.user_id);
     }
+    if (listing.user_id) {
+      try {
+        listing.partner = await getPublicPartnerProfileByUserId(listing.user_id);
+      } catch {
+        listing.partner = null;
+      }
+    }
     sendJson(res, 200, { listing });
     return;
   }
@@ -1257,6 +1271,45 @@ async function handleValuationApi(req, res, pathname) {
 
 async function handlePartnersApi(req, res, pathname) {
   try {
+    if (pathname === "/api/partner-profiles" && req.method === "GET") {
+      const url = new URL(req.url ?? "", `http://${HOST}`);
+      sendJson(res, 200, {
+        partners: await listPublicPartnerProfiles({
+          query: url.searchParams.get("q") || "",
+          limit: url.searchParams.get("limit") || 60,
+        }),
+      });
+      return;
+    }
+
+    const publicProfileMatch = pathname.match(/^\/api\/partner-profiles\/([a-z0-9-]+)$/);
+    if (publicProfileMatch && publicProfileMatch[1] !== "mine" && req.method === "GET") {
+      const result = await getPublicPartnerProfile(publicProfileMatch[1]);
+      if (!result) {
+        sendJson(res, 404, { error: "Nincs ilyen partnerprofil." });
+        return;
+      }
+      sendJson(res, 200, result);
+      return;
+    }
+
+    if (pathname === "/api/partner-profiles/mine") {
+      const user = await requestUser(req);
+      if (!user) {
+        sendJson(res, 401, { error: "Nem vagy bejelentkezve." });
+        return;
+      }
+      if (req.method === "GET") {
+        sendJson(res, 200, { profile: await getOwnPartnerProfile(user) });
+        return;
+      }
+      if (req.method === "PUT") {
+        const body = await readBody(req);
+        sendJson(res, 200, { profile: await saveOwnPartnerProfile(user, body) });
+        return;
+      }
+    }
+
     const recommendMatch = pathname === "/api/partners/recommendations";
 
     if (recommendMatch && req.method === "GET") {
@@ -2156,13 +2209,18 @@ export async function handleHttpRequest(req, res) {
     return;
   }
 
-  if (pathname.startsWith("/api/partners") || pathname.startsWith("/api/postal-codes")) {
+  if (pathname.startsWith("/api/partners") || pathname.startsWith("/api/partner-profiles") || pathname.startsWith("/api/postal-codes")) {
     await handlePartnersApi(req, res, pathname);
     return;
   }
 
   if (pathname.startsWith("/api/")) {
     sendJson(res, 404, { error: "Ismeretlen API." });
+    return;
+  }
+
+  if (/^\/partner\/[a-z0-9-]+\/?$/.test(pathname)) {
+    serveStatic("/partner-profil.html", res);
     return;
   }
 

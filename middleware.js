@@ -10,6 +10,7 @@ const PUBLIC_HTML = new Set([
   "/aktivalas.html",
   "/jelszo-elfelejtve.html",
   "/jelszo-visszaallitas.html",
+  "/partner-profil.html",
   "/Bocsatech.html",
 ]);
 
@@ -50,6 +51,8 @@ function isStaticAsset(pathname) {
 function isPublicApi(pathname, method) {
   if (pathname.startsWith("/api/auth/")) return true;
   if (pathname === "/api/health" && method === "GET") return true;
+  if (pathname === "/api/partner-profiles" && method === "GET") return true;
+  if (pathname.startsWith("/api/partner-profiles/") && pathname !== "/api/partner-profiles/mine" && method === "GET") return true;
   // Bocsatech admin saját auth — ne a members gate zárja ki
   if (pathname.startsWith("/api/level1/")) return true;
   // Oldalsáv tartalom: GET nyilvános; PUT a szerveren level1 admint ellenőriz
@@ -59,6 +62,7 @@ function isPublicApi(pathname, method) {
 
 function isPublic(pathname, method) {
   if (PUBLIC_HTML.has(pathname)) return true;
+  if (/^\/partner\/[a-z0-9-]+\/?$/.test(pathname)) return true;
   if (isStaticAsset(pathname)) return true;
   if (pathname.startsWith("/api/") && isPublicApi(pathname, method)) return true;
   return false;

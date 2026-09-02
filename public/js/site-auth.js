@@ -571,8 +571,13 @@ function isAuthGatePage() {
   );
 }
 
+function isPublicClientPage() {
+  const path = window.location.pathname;
+  return path === "/partner-profil.html" || /^\/partner\/[a-z0-9-]+\/?$/.test(path);
+}
+
 async function enforceClientMembersGate() {
-  if (isAuthGatePage()) return;
+  if (isAuthGatePage() || isPublicClientPage()) return;
   const user = await refreshAuthSession();
   if (user?.email) return;
   /* Csak tényleges kijelentkezésnél — ne villanjon a login oldal hálózati hibánál. */

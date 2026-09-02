@@ -850,3 +850,91 @@
 body.hd-has-msg-bar #hd-root {
   padding-bottom: 0.25rem;
 }
+
+.hd-partner-badge {
+  display: flex;
+  align-items: center;
+  gap: .55rem;
+  margin: .1rem 0 .75rem;
+  border: 1px solid #a8d9ce;
+  border-radius: .45rem;
+  background: #ebf8f5;
+  color: #156957;
+  padding: .65rem .75rem;
+  text-decoration: none;
+}
+
+.hd-partner-badge__mark {
+  display: grid;
+  width: 1.45rem;
+  height: 1.45rem;
+  flex: 0 0 1.45rem;
+  place-items: center;
+  border-radius: 50%;
+  background: #16735f;
+  color: #fff;
+  font-weight: 800;
+}
+
+.hd-partner-badge > span:last-child {
+  display: grid;
+  gap: .12rem;
+}
+
+.hd-partner-badge strong {
+  font-size: .75rem;
+}
+
+.hd-partner-badge small {
+  color: #456d64;
+  font-size: .68rem;
+}
+
+.hd-partner-profile-link {
+  display: grid;
+  grid-template-columns: 3.2rem minmax(0, 1fr);
+  gap: .75rem;
+  align-items: center;
+  margin: .7rem 0 1rem;
+  border: 1px solid #d3e2e6;
+  border-radius: .5rem;
+  padding: .75rem;
+  color: inherit;
+  text-decoration: none;
+}
+
+.hd-partner-profile-link > img,
+.hd-partner-profile-link > span:first-child {
+  display: grid;
+  width: 3.2rem;
+  height: 3.2rem;
+  place-items: center;
+  border-radius: .35rem;
+  background: #dcedf1;
+  color: #126d8b;
+  object-fit: contain;
+  font-size: 1.3rem;
+  font-weight: 800;
+}
+
+.hd-partner-profile-link > span:last-child {
+  display: grid;
+  gap: .15rem;
+}
+
+.hd-partner-profile-link small {
+  color: #16735f;
+  font-size: .68rem;
+  font-weight: 800;
+}
+
+.hd-partner-profile-link strong {
+  font-size: .84rem;
+}
+
+.hd-partner-profile-link em {
+  color: #126d8b;
+  font-size: .7rem;
+  font-style: normal;
+  font-weight: 700;
+}

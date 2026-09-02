@@ -1,4 +1,4 @@
-import { mountLayoutBoard } from "./bocsatech-layout.js?v=akkuBoard1";
+import { mountLayoutBoard } from "./bocsatech-layout.js?v=layoutSpacer1";
 import { mountIngatlanWheelBoard } from "./bocsatech-ingatlan-wheels.js?v=immoEdit2";
 import {
   isIngatlanWheelAdminCategory,
@@ -109,6 +109,7 @@ const ADMIN_SECTIONS = [
       { id: "ingatlan:layout:ingatlan", label: "Kiadó — szerkesztő" },
       { id: "ingatlan:layout:airbnb", label: "Airbnb — szerkesztő" },
       { id: "ingatlan:tipus-mezok", label: "Típus → mezők" },
+      { id: "ingatlan:partnerek", label: "Ingatlanos partnerek" },
       { id: "ingatlan:listings", label: "Hirdetések" },
     ],
   },
@@ -280,6 +281,7 @@ let sitePageBlocks = {
   center: null,
 };
 let editingUser = null;
+let partnerProfiles = [];
 let selectedVisitorId = "";
 let visitorHits = [];
 let blockedIps = [];
@@ -533,6 +535,25 @@ const actions = {
       err = error.message;
       render();
     }
+  },
+  async reviewPartner(_, el) {
+    const id = el.getAttribute("data-id");
+    const status = el.getAttribute("data-status");
+    const labels = { approved: "jóváhagyod", rejected: "elutasítod", pending: "visszateszed függőbe" };
+    if (!id || !status || !confirm(`Biztosan ${labels[status] || "módosítod"} ezt a partnerprofilt?`)) return;
+    err = "";
+    info = "";
+    try {
+      await api(`/api/level1/partner-profiles/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ status }),
+      });
+      partnerProfiles = (await api("/api/level1/partner-profiles")).partners || [];
+      info = status === "approved" ? "Partner jóváhagyva és ellenőrzöttként megjelölve." : status === "rejected" ? "Partnerkérelem elutasítva." : "Partnerprofil függő állapotba került.";
+    } catch (error) {
+      err = error.message;
+    }
+    render();
   },
   async blockVisitorIp(_, el) {
     const ip = el.getAttribute("data-ip");
@@ -1255,6 +1276,9 @@ async function loadTab() {
       tipusFieldsActive = parents[0]?.value || "lakas";
     }
   }
+  if (section === "ingatlan" && sub === "partnerek") {
+    partnerProfiles = (await api("/api/level1/partner-profiles")).partners || [];
+  }
   if (section === "ingatlan" && sub === "preview") {
     layoutCategory = "ingatlan";
     const data = await api(immoWheelApiUrl("ingatlan"));
@@ -1947,6 +1971,43 @@ function layoutView() {
     <div class="row" style="margin-top:1rem"><button class="btn" type="button" data-act="saveLayout">Elrendezés mentése</button></div>`;
 }
 
+function partnerProfilesView() {
+  const statusLabel = {
+    pending: '<span class="badge warn">jóváhagyásra vár</span>',
+    approved: '<span class="badge ok">jóváhagyva</span>',
+    rejected: '<span class="badge">elutasítva</span>',
+  };
+  const rows = partnerProfiles
+    .map((partner) => {
+      const status = partner.application_status || "pending";
+      const profileHref = `/partner/${encodeURIComponent(partner.slug || "")}`;
+      return `<tr>
+        <td>#${partner.user_id}</td>
+        <td><strong>${esc(partner.display_name)}</strong><br><small>${esc(partner.slug)}</small></td>
+        <td>${esc(partner.contact_person || "—")}<br><small>${esc(partner.email || "")}</small></td>
+        <td>${esc(partner.service_areas || "—")}</td>
+        <td>${statusLabel[status] || esc(status)}</td>
+        <td>${esc(fmtWhen(partner.created_at))}</td>
+        <td class="row-actions">
+          ${status === "approved" ? `<a href="${profileHref}" target="_blank" rel="noopener">profil</a>` : ""}
+          ${status !== "approved" ? `<button class="btn" type="button" data-act="reviewPartner" data-id="${partner.user_id}" data-status="approved">Jóváhagyás</button>` : `<button class="btn ghost" type="button" data-act="reviewPartner" data-id="${partner.user_id}" data-status="pending">Visszavonás</button>`}
+          ${status !== "rejected" ? `<button class="btn danger" type="button" data-act="reviewPartner" data-id="${partner.user_id}" data-status="rejected">Elutasítás</button>` : ""}
+        </td>
+      </tr>`;
+    })
+    .join("");
+  return `
+    ${info ? `<p class="ok">${esc(info)}</p>` : ""}
+    ${err ? `<p class="err">${esc(err)}</p>` : ""}
+    <p class="hint"><strong>Ingatlanos partnerek</strong> — a jelentkezők ellenőrzése és publikus partnerjelvény kezelése.</p>
+    <div class="table-scroll">
+      <table class="table-dense">
+        <thead><tr><th>Felhasználó</th><th>Partner</th><th>Kapcsolat</th><th>Terület</th><th>Státusz</th><th>Jelentkezés</th><th></th></tr></thead>
+        <tbody>${rows || '<tr><td colspan="7">Még nincs partnerjelentkezés.</td></tr>'}</tbody>
+      </table>
+    </div>`;
+}
+
 function shellBody() {
   const { section, sub } = parseTab();
   if (section === "users") {
@@ -1967,6 +2028,7 @@ function shellBody() {
       return listingsView({ title: "Ingatlanhirdetések", emptyHint: "Nincs ingatlan hirdetés." });
     }
     if (sub === "tipus-mezok") return tipusFieldsView();
+    if (sub === "partnerek") return partnerProfilesView();
     if (sub === "preview") return ingatlanPreviewView();
     return layoutView();
   }
@@ -2076,7 +2138,8 @@ function shell() {
     tab.endsWith(":listings") ||
     tab === "auto:kivitel" ||
     tab === "auto:akku" ||
-    tab === "ingatlan:tipus-mezok";
+    tab === "ingatlan:tipus-mezok" ||
+    tab === "ingatlan:partnerek";
   return `
     <div class="wrap ${wide ? "wrap--wide" : ""}">
       <div class="top">

@@ -3,7 +3,8 @@
   "buildCommand": "node scripts/embed-ad-form.mjs",
   "regions": ["fra1"],
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api" }
+    { "source": "/api/(.*)", "destination": "/api" },
+    { "source": "/partner/:slug", "destination": "/partner-profil.html?slug=:slug" }
   ],
   "functions": {
     "api/index.mjs": {

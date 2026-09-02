@@ -16,12 +16,25 @@
     "build:html": "node scripts/embed-ad-form.mjs",
     "import:hasznaltauto": "node scripts/import-hasznaltauto-catalog.mjs",
     "login:hasznaltauto": "node scripts/save-hasznaltauto-session.mjs",
-    "prestart": "node scripts/embed-ad-form.mjs"
+    "prestart": "node scripts/embed-ad-form.mjs",
+    "cap:sync": "npx cap sync android",
+    "cap:open": "npx cap open android",
+    "android": "npx cap sync android && npx cap open android",
+    "scrape:ha-dealers": "node scripts/scrape-hasznaltauto-dealers.mjs",
+    "scrape:ha-dealers:chrome": "bash mac/chrome-debug-hasznaltauto.command",
+    "scrape:ingatlan-partners": "node scripts/scrape-ingatlan-partners.mjs",
+    "scrape:ingatlan-partners:chrome": "bash mac/chrome-debug-ingatlan-partners.command"
   },
   "engines": {
     "node": "24.x"
   },
   "dependencies": {
+    "@capacitor/android": "^8.5.1",
+    "@capacitor/app": "^8.1.1",
+    "@capacitor/cli": "^8.5.1",
+    "@capacitor/core": "^8.5.1",
+    "@capacitor/splash-screen": "^8.0.2",
+    "@capacitor/status-bar": "^8.0.3",
     "@supabase/supabase-js": "^2.112.3",
     "nodemailer": "^6.10.1",
     "pg": "^8.23.0",
@@ -29,6 +42,7 @@
     "ws": "^8.18.3"
   },
   "devDependencies": {
+    "exceljs": "^4.4.0",
     "playwright": "^1.52.0"
   }
 }

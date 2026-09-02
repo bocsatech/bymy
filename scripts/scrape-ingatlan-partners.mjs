@@ -9,15 +9,16 @@
  *      https://partner.ingatlan.com/
  *    Várd meg, amíg betölt (nem „Csak egy gyors ellenőrzés!”).
  *
- * 3) Futtasd:
+ * 3) Futtasd (teljes telefonszám felfedéssel):
  *      npm run scrape:ingatlan-partners
- *      LIMIT=20 npm run scrape:ingatlan-partners   # próba
- *      REFRESH_URLS=1 npm run scrape:ingatlan-partners
+ *      LIMIT=5 npm run scrape:ingatlan-partners   # próba
  *
- * Mezők: nev, cegnev (ha van), telefonszam (látható / részleges), mail (ha van)
+ * A script megnyomja a „Felfedés”-t. Ha Cloudflare Turnstile captcha jön,
+ * OLD MEG A CHROME ABLAKBAN — a script megvárja (CAPTCHA_WAIT mp).
+ * Gyakran egy sikeres captcha után a következő profilok auto-reveal-elnek.
  *
- * Megjegyzés: a teljes telefonszám sok profilon CAPTCHA után („Felfedés”) jelenik meg.
- * Alapból a látható (gyakran csonka) számot mentjük.
+ * Maszkolt / csonka számok újra:
+ *      RETRY_MASKED=1 npm run scrape:ingatlan-partners
  *
  * Kimenet: data/ingatlan-partners/ingatlan-partners.xlsx
  */
@@ -35,7 +36,19 @@ const LOG_FILE = path.join(ROOT, "scrape.log");
 
 const CDP_URL = process.env.CDP_URL || "http://127.0.0.1:9223";
 const LIMIT = Number(process.env.LIMIT || 0) || Infinity;
+const CAPTCHA_WAIT = Math.max(30, Number(process.env.CAPTCHA_WAIT || 180));
+const RETRY_MASKED = process.env.RETRY_MASKED === "1";
 const BASE = "https://partner.ingatlan.com";
+
+function phoneDigits(s) {
+  return String(s || "").replace(/\D/g, "");
+}
+
+/** HU mobil/vezetékes: országkóddal tipikusan 11+ számjegy */
+function isFullPhone(s) {
+  const d = phoneDigits(s);
+  return d.length >= 10;
+}
 
 const SKIP_SLUGS = new Set([
   "",
@@ -233,19 +246,205 @@ function loadDone() {
     if (!line.trim()) continue;
     try {
       const row = JSON.parse(line);
-      if (row?.url && !row.error) done.set(row.url, row);
+      if (!row?.url || row.error) continue;
+      // későbbi sor felülírja
+      done.set(row.url, row);
     } catch {
       /* skip */
     }
   }
+  if (RETRY_MASKED) {
+    for (const [url, row] of [...done.entries()]) {
+      if (row.telefon_maszkolt || !isFullPhone(row.telefonszam)) {
+        done.delete(url);
+      }
+    }
+  }
   return done;
+}
+
+async function extractProfileFields(page, pageUrl) {
+  return page.evaluate(
+    ({ pageUrl: url, footerMails }) => {
+      const FOOTER = new Set(footerMails);
+      const text = (el) => (el?.textContent || "").replace(/\s+/g, " ").trim();
+
+      const card =
+        document.querySelector(".profile-basic-details-card") ||
+        document.querySelector("[data-controller*='profile-page']") ||
+        document.body;
+
+      const nev =
+        text(card.querySelector("h1")) ||
+        text(document.querySelector("h1")) ||
+        "";
+
+      let cegnev = text(
+        card.querySelector(
+          ".fw-700.font-family-secondary.fs-7, .fw-700.font-family-secondary"
+        )
+      );
+      if (!cegnev) {
+        const officeBlock = card.querySelector(
+          'a[href*="iroda.ingatlan.com"]'
+        )?.parentElement;
+        if (officeBlock) {
+          const cand = [...officeBlock.querySelectorAll("div, span, a")]
+            .map((el) => text(el))
+            .find(
+              (t) =>
+                t &&
+                t.length >= 3 &&
+                t.length < 80 &&
+                !/felfed|visszahív|megoszt|partner|phone/i.test(t)
+            );
+          if (cand) cegnev = cand;
+        }
+      }
+
+      // Teljes szám: revealed blokk / tel: link; különben chunked
+      let telefonszam = "";
+      const revealed = card.querySelector("#revealed-phone-numbers");
+      if (revealed && !revealed.classList.contains("d-none")) {
+        const tels = [...revealed.querySelectorAll('a[href^="tel:"], a, span')]
+          .map((el) => {
+            const href = el.getAttribute?.("href") || "";
+            if (href.startsWith("tel:")) {
+              return decodeURIComponent(href.replace(/^tel:/i, ""));
+            }
+            return text(el);
+          })
+          .map((t) => t.replace(/\bphone\b/gi, "").trim())
+          .filter((t) => /\d{6,}/.test(t.replace(/\D/g, "")));
+        if (tels.length) telefonszam = tels[0];
+      }
+
+      if (!telefonszam) {
+        const telLink = [...card.querySelectorAll('a[href^="tel:"]')].find(
+          (a) => !a.classList.contains("pe-none")
+        );
+        if (telLink) {
+          telefonszam =
+            text(telLink) ||
+            decodeURIComponent(
+              (telLink.getAttribute("href") || "").replace(/^tel:/i, "")
+            );
+        }
+      }
+
+      const chunk = card.querySelector("#chunked-phone-number");
+      const chunkText = text(chunk)
+        .replace(/\bphone\b/gi, "")
+        .replace(/\bFelfedés\b/gi, "")
+        .replace(/\s+/g, " ")
+        .trim();
+
+      if (!telefonszam) telefonszam = chunkText;
+
+      let mail = "";
+      for (const a of card.querySelectorAll('a[href^="mailto:"]')) {
+        const href = a.getAttribute("href") || "";
+        const addr = href
+          .replace(/^mailto:/i, "")
+          .split("?")[0]
+          .trim()
+          .toLowerCase();
+        if (!addr || !addr.includes("@")) continue;
+        if (FOOTER.has(addr)) continue;
+        mail = addr;
+        break;
+      }
+
+      const revealBtn = card.querySelector("#reveal-phone-number-button");
+      const captchaEl = document.querySelector("#phoneRevealCaptchaCollapse");
+      const captchaOpen =
+        !!captchaEl?.classList.contains("show") ||
+        !!document.querySelector(
+          'iframe[src*="challenges.cloudflare"], iframe[src*="turnstile"]'
+        );
+
+      const revealedVisible =
+        !!revealed && !revealed.classList.contains("d-none");
+
+      return {
+        url,
+        nev,
+        cegnev: cegnev || "",
+        telefonszam: (telefonszam || "").replace(/\s+/g, " ").trim(),
+        chunkText,
+        mail,
+        hasRevealButton:
+          !!revealBtn &&
+          getComputedStyle(revealBtn).display !== "none" &&
+          !revealBtn.classList.contains("d-none"),
+        captchaOpen,
+        revealedVisible,
+        scrapedAt: new Date().toISOString(),
+      };
+    },
+    { pageUrl, footerMails: [...FOOTER_MAILS] }
+  );
+}
+
+async function tryRevealPhone(page) {
+  const btn = page.locator("#reveal-phone-number-button");
+  if ((await btn.count()) === 0) return;
+  try {
+    await btn.first().click({ timeout: 5000 });
+  } catch {
+    /* already gone / not clickable */
+  }
+  await sleep(800);
+}
+
+async function waitForFullPhone(page, url) {
+  let notifiedCaptcha = false;
+  const deadline = Date.now() + CAPTCHA_WAIT * 1000;
+
+  while (Date.now() < deadline) {
+    const fields = await extractProfileFields(page, url);
+    const full = isFullPhone(fields.telefonszam);
+    const revealed =
+      fields.revealedVisible ||
+      (full && phoneDigits(fields.telefonszam).length > phoneDigits(fields.chunkText).length);
+
+    if (full && (revealed || !fields.hasRevealButton)) {
+      return { ...fields, telefon_maszkolt: false };
+    }
+
+    if (fields.captchaOpen || fields.hasRevealButton) {
+      if (!notifiedCaptcha) {
+        log(
+          `  ⏳ CAPTCHA / Felfedés — oldd meg a Chrome ablakban (${CAPTCHA_WAIT}s timeout): ${url}`
+        );
+        notifiedCaptcha = true;
+        writeProgress({
+          phase: "captcha_wait",
+          url,
+          message: "Oldd meg a Turnstile captchát a Chrome-ban",
+        });
+      }
+      if (fields.hasRevealButton && !fields.captchaOpen) {
+        await tryRevealPhone(page);
+      }
+    }
+
+    await sleep(1000);
+  }
+
+  const last = await extractProfileFields(page, url);
+  return {
+    ...last,
+    telefon_maszkolt: !isFullPhone(last.telefonszam),
+    captcha_timeout: !isFullPhone(last.telefonszam),
+  };
 }
 
 async function scrapeProfile(page, url) {
   for (let attempt = 1; attempt <= 2; attempt++) {
     try {
       await page.goto(url, { waitUntil: "domcontentloaded", timeout: 90000 });
-      await sleep(350);
+      await sleep(500);
 
       const title = await page.title();
       if (/gyors ellenőrzés|Egy pillanat|Just a moment/i.test(title)) {
@@ -256,97 +455,18 @@ async function scrapeProfile(page, url) {
         };
       }
 
-      return await page.evaluate(
-        ({ pageUrl, footerMails }) => {
-          const FOOTER = new Set(footerMails);
-          const text = (el) =>
-            (el?.textContent || "").replace(/\s+/g, " ").trim();
+      // auto-reveal néha azonnal ad teljes számot
+      let fields = await extractProfileFields(page, url);
+      if (isFullPhone(fields.telefonszam) && !fields.hasRevealButton) {
+        return { ...fields, telefon_maszkolt: false };
+      }
 
-          const card =
-            document.querySelector(".profile-basic-details-card") ||
-            document.querySelector("[data-controller*='profile-page']") ||
-            document.body;
+      if (fields.hasRevealButton) {
+        await tryRevealPhone(page);
+      }
 
-          const nev =
-            text(card.querySelector("h1")) ||
-            text(document.querySelector("h1")) ||
-            "";
-
-          let cegnev = text(
-            card.querySelector(
-              ".fw-700.font-family-secondary.fs-7, .fw-700.font-family-secondary"
-            )
-          );
-          if (!cegnev) {
-            const officeBlock = card.querySelector(
-              'a[href*="iroda.ingatlan.com"]'
-            )?.parentElement;
-            if (officeBlock) {
-              const cand = [...officeBlock.querySelectorAll("div, span, a")]
-                .map((el) => text(el))
-                .find(
-                  (t) =>
-                    t &&
-                    t.length >= 3 &&
-                    t.length < 80 &&
-                    !/felfed|visszahív|megoszt|partner|phone/i.test(t)
-                );
-              if (cand) cegnev = cand;
-            }
-          }
-
-          let telefonszam = "";
-          const chunk = card.querySelector("#chunked-phone-number");
-          if (chunk) {
-            telefonszam = text(chunk)
-              .replace(/\bphone\b/gi, "")
-              .replace(/\bFelfedés\b/gi, "")
-              .replace(/\s+/g, " ")
-              .trim();
-          }
-          if (!telefonszam) {
-            const telLink = card.querySelector('a[href^="tel:"]');
-            if (telLink) {
-              telefonszam =
-                text(telLink) ||
-                decodeURIComponent(
-                  (telLink.getAttribute("href") || "").replace(/^tel:/i, "")
-                );
-            }
-          }
-
-          let mail = "";
-          for (const a of card.querySelectorAll('a[href^="mailto:"]')) {
-            const href = a.getAttribute("href") || "";
-            const addr = href
-              .replace(/^mailto:/i, "")
-              .split("?")[0]
-              .trim()
-              .toLowerCase();
-            if (!addr || !addr.includes("@")) continue;
-            if (FOOTER.has(addr)) continue;
-            mail = addr;
-            break;
-          }
-
-          const phoneMasked =
-            /felfed/i.test(text(chunk) || "") ||
-            !!card.querySelector(
-              '[data-controller*="phone-reveal"], [data-action*="phone-reveal"]'
-            );
-
-          return {
-            url: pageUrl,
-            nev,
-            cegnev: cegnev || "",
-            telefonszam,
-            mail,
-            telefon_maszkolt: phoneMasked,
-            scrapedAt: new Date().toISOString(),
-          };
-        },
-        { pageUrl: url, footerMails: [...FOOTER_MAILS] }
-      );
+      fields = await waitForFullPhone(page, url);
+      return fields;
     } catch (err) {
       const msg = String(err?.message || err);
       if (attempt < 2 && /closed|Target page|browser has been/i.test(msg)) {
@@ -390,15 +510,20 @@ async function writeExcel(rows) {
 }
 
 async function main() {
-  log(`CDP=${CDP_URL}, LIMIT=${LIMIT === Infinity ? "∞" : LIMIT}`);
-  const { browser, context } = await connectChrome();
+  log(
+    `CDP=${CDP_URL}, LIMIT=${LIMIT === Infinity ? "∞" : LIMIT}, CAPTCHA_WAIT=${CAPTCHA_WAIT}s, RETRY_MASKED=${RETRY_MASKED}`
+  );
+  const { context } = await connectChrome();
   log("Csatlakozva a Chrome-hoz.");
 
   let page = await ensurePartnerPage(context);
   const urls = (await collectPartnerUrls(page)).slice(0, LIMIT);
   const done = loadDone();
   const queue = urls.filter((u) => !done.has(u));
-  log(`Összesen: ${urls.length}, kész: ${done.size}, hátra: ${queue.length}`);
+  log(`Összesen: ${urls.length}, kész (teljes tel.): ${done.size}, hátra: ${queue.length}`);
+  log(
+    "Teljes telefonszámhoz: ha captcha jön, oldd meg a debug Chrome ablakban."
+  );
   writeProgress({
     total: urls.length,
     done: done.size,
@@ -407,24 +532,42 @@ async function main() {
   });
 
   let fail = 0;
+  let masked = 0;
   let i = 0;
   for (const url of queue) {
     i += 1;
-    // ha a lap bezáródott, újra csatlakozás / új lap
     if (page.isClosed()) {
       log("Lap bezáródott — újracsatlakozás…");
       const again = await connectChrome();
       page = await ensurePartnerPage(again.context);
     }
     const row = await scrapeProfile(page, url);
-    fs.appendFileSync(RESULTS_FILE, `${JSON.stringify(row)}\n`);
-    if (row.error) {
+    // ne mentsük a belső helper mezőket
+    const out = {
+      url: row.url,
+      nev: row.nev || "",
+      cegnev: row.cegnev || "",
+      telefonszam: row.telefonszam || "",
+      mail: row.mail || "",
+      telefon_maszkolt: !!row.telefon_maszkolt,
+      captcha_timeout: !!row.captcha_timeout,
+      error: row.error,
+      scrapedAt: row.scrapedAt || new Date().toISOString(),
+    };
+    fs.appendFileSync(RESULTS_FILE, `${JSON.stringify(out)}\n`);
+    if (out.error) {
       fail += 1;
-      log(`  HIBA ${url}: ${row.error}`);
-    } else {
-      done.set(url, row);
+      log(`  HIBA ${url}: ${out.error}`);
+    } else if (out.telefon_maszkolt || !isFullPhone(out.telefonszam)) {
+      masked += 1;
+      // ne tegye a done-ba → RETRY_MASKED / újraindítás újra próbálja
       log(
-        `  OK ${done.size}/${urls.length}: ${row.nev || "?"} | ${row.cegnev || "—"} | ${row.telefonszam || "—"}`
+        `  RÉSZLEGES ${out.nev || "?"} | ${out.telefonszam || "—"} (captcha timeout? ${out.captcha_timeout})`
+      );
+    } else {
+      done.set(url, out);
+      log(
+        `  OK ${done.size}/${urls.length}: ${out.nev || "?"} | ${out.cegnev || "—"} | ${out.telefonszam}`
       );
     }
     writeProgress({
@@ -432,20 +575,22 @@ async function main() {
       done: done.size,
       remaining: queue.length - i,
       failBatch: fail,
+      maskedBatch: masked,
       phase: "scrape",
-      lastNev: row.nev || "",
+      lastNev: out.nev || "",
     });
     if (done.size % 25 === 0 || i === queue.length) {
       await writeExcel([...done.values()]);
     }
-    await sleep(200);
+    await sleep(250);
   }
 
   await writeExcel([...done.values()]);
   writeProgress({ total: urls.length, done: done.size, remaining: 0, phase: "done" });
-  log(`KÉSZ. Sikeres: ${done.size}, hiba ebben a futásban: ${fail}`);
+  log(
+    `KÉSZ. Teljes tel.: ${done.size}, részleges/captcha: ${masked}, hiba: ${fail}`
+  );
   log(`Excel: ${XLSX_FILE}`);
-  // connectOverCDP: ne zárd be a felhasználó Chrome-ját
 }
 
 main().catch((err) => {

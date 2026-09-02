@@ -13,25 +13,33 @@ bash mac/chrome-debug-ingatlan-partners.command
 
 Megnyílik egy külön Chrome profil (port **9223**), a partnerlistával.
 
-Várd meg, amíg **nem** „Csak egy gyors ellenőrzés!”, és látszanak a partnerek (~1009).
+Várd meg, amíg **nem** „Csak egy gyors ellenőrzés!”, és látszanak a partnerek.
 
-### 2. Scrape indítás (másik terminál)
+### 2. Scrape (teljes telefonszám)
 
 ```bash
 cd /Users/rbocsa/bymy
 npm run scrape:ingatlan-partners
 ```
 
-Próba (csak 20 db):
+Próba:
 
 ```bash
-LIMIT=20 npm run scrape:ingatlan-partners
+LIMIT=5 npm run scrape:ingatlan-partners
 ```
 
-URL lista újraggyűjtése:
+A script megnyomja a **Felfedés** gombot. Ha **Cloudflare Turnstile** captcha jön:
+
+1. Nézd a debug Chrome ablakot
+2. Pipáld / oldd meg a captchát
+3. A script megvárja (alapból **180 mp**, állítható: `CAPTCHA_WAIT=300`)
+
+Gyakran **egy sikeres captcha után** a következő profilok automatikusan felfedik a számot (`auto-reveal`).
+
+Csonka / maszkolt sorok újra:
 
 ```bash
-REFRESH_URLS=1 npm run scrape:ingatlan-partners
+RETRY_MASKED=1 npm run scrape:ingatlan-partners
 ```
 
 ### 3. Hol van a fájl?
@@ -41,19 +49,15 @@ REFRESH_URLS=1 npm run scrape:ingatlan-partners
 - Log: `data/ingatlan-partners/scrape.log`
 - Nyers sorok: `data/ingatlan-partners/results.jsonl`
 
-Megszakítás után újraindításkor **folytatja** (`results.jsonl` alapján).
+Az Excelbe **csak a teljes telefonszámú** sorok kerülnek. A részlegesek a `results.jsonl`-ben maradnak, és `RETRY_MASKED=1`-gyel újrapróbálhatók.
 
 ## Oszlopok
 
 | Oszlop | Megjegyzés |
 |--------|------------|
 | Név | Profil `h1` |
-| Cégnév | Ha van (iroda neve a kártyán) |
-| Telefonszám | Látható szám — gyakran **csonka** (`+36 20 242`), mert a teljeshez „Felfedés” + CAPTCHA kell |
-| E-mail | Ritka; a legtöbb profilon csak kapcsolatfelvételi űrlap van |
-| Tel. maszkolt? | `igen`, ha még van Felfedés gomb |
+| Cégnév | Ha van |
+| Telefonszám | Teljes szám a Felfedés után |
+| E-mail | Ritka |
+| Tel. maszkolt? | `nem` a siker esetén |
 | URL | Profil link |
-
-## Fontos limit
-
-A teljes telefonszám CAPTCHA mögött van profilonként. A scrape **nem oldja meg** a captchát automatikusan — a nyilvános / részleges számot menti.

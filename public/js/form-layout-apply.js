@@ -1,5 +1,5 @@
 /** Mentett 12 oszlopos elrendezés — minden mező ugyanazon a lépésrácson. */
-import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=immoPostSurface1";
+import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=immoPostSidebar1";
 import { refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=autoRestore20";
 
 function cssEscape(value) {

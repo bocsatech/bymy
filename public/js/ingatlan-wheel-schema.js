@@ -530,9 +530,17 @@ function sectionItemsHtml(cells) {
   return out.join("");
 }
 
+const POST_FIELD_LABELS = {
+  alapterulet: "Alapterület",
+  emelet: "Emelet",
+};
+
 /** Kitölti a main/more hostokat a sémából (kategória nélkül). */
 export function renderIngatlanSchemaHosts(mainHost, moreHost, schema, surface) {
-  const cells = cellsForSurface(schema, surface);
+  const cells = cellsForSurface(schema, surface).map((cell) => {
+    const label = surface === "post" ? POST_FIELD_LABELS[cell.field_key] : "";
+    return label ? { ...cell, label } : cell;
+  });
   const main = cells.filter((c) => c.section !== "more");
   const more = cells.filter((c) => c.section === "more");
   const maxMain = Math.max(1, ...main.map((c) => Number(c.row) || 1));

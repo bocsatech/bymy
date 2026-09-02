@@ -60,7 +60,7 @@ import {
   INGATLAN_DUAL_RANGE_GROUPS,
   resolveIngatlanSchemaVariant,
   clearIngatlanWheelSchemaCache,
-} from "./ingatlan-wheel-schema.js?v=immoAdminLive1";
+} from "./ingatlan-wheel-schema.js?v=immoPostSidebar1";
 import { wireTelepulesSuggestIn } from "./telepules-suggest.js?v=telepClose1";
 
 const EXACT_KEYS = [

@@ -2608,6 +2608,37 @@ body.site-app #ad-form.ad-form--ingatlan #ingatlan-fields.form-grid {
 
 body.site-app #ad-form.ad-form--ingatlan .immo-search-panel {
   margin: 0;
+  width: 100%;
+  max-width: none;
+  padding: 0.65rem;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+body.site-app #ad-form.ad-form--ingatlan .immo-search-panel--post .immo-schema-grid {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  grid-template-rows: none !important;
+  grid-auto-flow: row !important;
+  grid-auto-rows: auto !important;
+  gap: 0.55rem !important;
+}
+
+body.site-app #ad-form.ad-form--ingatlan .immo-search-panel--post .immo-schema-cell,
+body.site-app #ad-form.ad-form--ingatlan .immo-search-panel--post .immo-dual-range-block {
+  grid-column: 1 / -1 !important;
+  grid-row: auto !important;
+  width: 100% !important;
+  max-width: none !important;
+}
+
+body.site-app #ad-form.ad-form--ingatlan .immo-search-panel--post .immo-schema-spacer {
+  display: none !important;
+}
+
+body.site-app #ad-form.ad-form--ingatlan .immo-search-panel--post .immo-actions {
+  margin-top: 0.25rem;
 }
 
 body.site-app #ad-form.ad-form--ingatlan .step-panel[data-step="1"] .card:has(#ingatlan-fields),
@@ -2632,6 +2663,33 @@ body.site-app #ad-form.ad-form--ingatlan .immo-action {
   font-weight: 600;
   cursor: pointer;
 }
+@media (min-width: 901px) {
+  body.site-app.ad-vertical-ingatlan[data-site-page="hirdetesfeladas"] .site-layout--wide .site-center--automax {
+    grid-template-columns: 360px minmax(0, 1fr) !important;
+    gap: 28px;
+    background: #f3f3f3;
+  }
+
+  body.site-app.ad-vertical-ingatlan[data-site-page="hirdetesfeladas"] .automax-main {
+    width: 360px;
+    max-width: 360px;
+    padding: 0 !important;
+    background: transparent !important;
+  }
+
+  body.site-app.ad-vertical-ingatlan[data-site-page="hirdetesfeladas"] .immo-search-panel--post {
+    padding: 16px 14px 18px;
+    border: 1px solid #d4d4d4;
+    border-radius: 10px;
+    background: #fff;
+  }
+
+  body.site-app.ad-vertical-ingatlan[data-site-page="hirdetesfeladas"] .automax-panel {
+    width: auto;
+    min-width: 0;
+  }
+}
+
 
 /* Ingatlan feladás: járműmezők / lépések soha ne látszódjanak (canvasról sem). */
 body.site-app #ad-form.ad-form--ingatlan .ad-layout-item:has(#gyartasi_ev),

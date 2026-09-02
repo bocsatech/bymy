@@ -467,8 +467,8 @@ function mountBmPicker(opts) {
     else openPanel();
   });
 
-  panel.addEventListener("mousedown", (event) => {
-    event.preventDefault();
+  bodyEl?.addEventListener("mousedown", (event) => {
+    if (event.target.closest(".auto-bm-toggle, input")) event.preventDefault();
   });
 
   bindAutoBmDismiss({

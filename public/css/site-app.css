@@ -2618,23 +2618,11 @@ body.site-app #ad-form.ad-form--ingatlan .immo-search-panel {
 
 body.site-app #ad-form.ad-form--ingatlan .immo-search-panel--post .immo-schema-grid {
   display: grid !important;
-  grid-template-columns: minmax(0, 1fr) !important;
+  grid-template-columns: repeat(12, minmax(0, 1fr)) !important;
   grid-template-rows: none !important;
   grid-auto-flow: row !important;
   grid-auto-rows: auto !important;
   gap: 0.55rem !important;
-}
-
-body.site-app #ad-form.ad-form--ingatlan .immo-search-panel--post .immo-schema-cell,
-body.site-app #ad-form.ad-form--ingatlan .immo-search-panel--post .immo-dual-range-block {
-  grid-column: 1 / -1 !important;
-  grid-row: auto !important;
-  width: 100% !important;
-  max-width: none !important;
-}
-
-body.site-app #ad-form.ad-form--ingatlan .immo-search-panel--post .immo-schema-spacer {
-  display: none !important;
 }
 
 body.site-app #ad-form.ad-form--ingatlan .immo-search-panel--post .immo-actions {

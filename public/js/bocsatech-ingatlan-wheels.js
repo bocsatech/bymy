@@ -8,7 +8,7 @@ import {
   INGATLAN_DUAL_RANGE_GROUPS,
   syncDualRangeCells,
   dualGroupForField,
-} from "./ingatlan-wheel-schema.js?v=immoWheel21";
+} from "./ingatlan-wheel-schema.js?v=immoPostAdmin1";
 
 const COLS = WHEEL_COLS;
 const ROW_PX = 72;
@@ -463,9 +463,10 @@ export function mountIngatlanWheelBoard(root, schema, { onChange, readOnly = fal
 
     root.querySelectorAll(".layout-tile").forEach((tile) => {
       tile.addEventListener("pointerdown", (event) => {
-        if (event.target.closest("button, [data-width-btns], [data-order-btns], [data-del], [data-resize]")) {
-          return;
-        }
+        const editorControl = event.target.closest(
+          "[data-width-delta], [data-width-full], [data-width-btns], [data-order-delta], [data-order-btns], [data-del], [data-resize]"
+        );
+        if (event.target.closest("button") && !editorControl) return;
         const dualId = tile.getAttribute("data-dual");
         const group = dualId ? INGATLAN_DUAL_RANGE_GROUPS.find((g) => g.id === dualId) : null;
         const tol = group ? byKey(group.tolKey) : null;

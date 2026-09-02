@@ -535,9 +535,23 @@ const POST_FIELD_LABELS = {
   emelet: "Emelet",
 };
 
+function compactPostRows(cells) {
+  const compacted = cells.map((cell) => ({ ...cell }));
+  for (const section of ["main", "more"]) {
+    const inSection = compacted.filter((cell) =>
+      section === "more" ? cell.section === "more" : cell.section !== "more"
+    );
+    const rows = [...new Set(inSection.map((cell) => Number(cell.row) || 1))].sort((a, b) => a - b);
+    const rowMap = new Map(rows.map((row, index) => [row, index + 1]));
+    for (const cell of inSection) cell.row = rowMap.get(Number(cell.row) || 1) || 1;
+  }
+  return compacted;
+}
+
 /** Kitölti a main/more hostokat a sémából (kategória nélkül). */
 export function renderIngatlanSchemaHosts(mainHost, moreHost, schema, surface) {
-  const cells = cellsForSurface(schema, surface).map((cell) => {
+  const surfaceCells = cellsForSurface(schema, surface);
+  const cells = (surface === "post" ? compactPostRows(surfaceCells) : surfaceCells).map((cell) => {
     const label = surface === "post" ? POST_FIELD_LABELS[cell.field_key] : "";
     return label ? { ...cell, label } : cell;
   });

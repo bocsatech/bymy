@@ -1,5 +1,5 @@
 import { mountLayoutBoard } from "./bocsatech-layout.js?v=layoutSpacer1";
-import { mountIngatlanWheelBoard } from "./bocsatech-ingatlan-wheels.js?v=immoEdit2";
+import { mountIngatlanWheelBoard } from "./bocsatech-ingatlan-wheels.js?v=immoPostAdmin1";
 import {
   isIngatlanWheelAdminCategory,
   normalizeIngatlanWheelVariant,

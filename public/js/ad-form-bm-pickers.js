@@ -3,7 +3,7 @@
  * Egy mező = egy választás; a lista fixed overlay-ként nyílik.
  */
 
-import { flattenAllapotOptions, OKMANY_JELLEG_OPTIONS, UZEMANYAG_CATEGORIES } from "./equipment-data.js?v=teherKivitel35e";
+import { ALLAPOT_CATEGORIES, OKMANY_JELLEG_OPTIONS, UZEMANYAG_CATEGORIES } from "./equipment-data.js?v=teherKivitel35e";
 import { KIVITEL_OPTIONS } from "./kivitel-options.js?v=kivitel1";
 import { fetchVehicleCatalog } from "./vehicle-catalog-client.js?v=adBmCatalog1";
 import { bindAutoBmDismiss, autoBmPanelIsOpen } from "./auto-bm-dismiss.js?v=bmDismiss1";
@@ -135,7 +135,11 @@ function unregisterOpenPanel(close) {
 }
 
 function fieldHost(select) {
-  return select?.closest(".labeled-field, .md-outlined, .ad-layout-item");
+  return (
+    select?.closest(".labeled-field, .md-outlined, .ad-layout-item, .suffix-field, .inline-2") ??
+    select?.parentElement ??
+    null
+  );
 }
 
 function bmWrap(select) {
@@ -378,7 +382,7 @@ function mountBmPicker(opts) {
   panel.setAttribute("role", "listbox");
   panel.setAttribute("aria-label", title);
   panel.innerHTML = `<div class="ad-form-bm-dropdown__body auto-bm-panel__body" data-ad-bm-body></div>`;
-  wrap.appendChild(panel);
+  document.body.appendChild(panel);
   select._adBmPanel = panel;
   const bodyEl = panel.querySelector("[data-ad-bm-body]");
 
@@ -396,7 +400,8 @@ function mountBmPicker(opts) {
     panel.style.position = "fixed";
     panel.style.top = `${Math.round(rect.bottom + 4)}px`;
     panel.style.left = `${Math.round(rect.left)}px`;
-    panel.style.width = `${Math.round(rect.width)}px`;
+    panel.style.width = `${Math.round(Math.max(rect.width, 240))}px`;
+    panel.style.minWidth = "240px";
     panel.style.right = "auto";
     panel.style.bottom = "auto";
   }
@@ -412,9 +417,9 @@ function mountBmPicker(opts) {
     panel.style.removeProperty("top");
     panel.style.removeProperty("left");
     panel.style.removeProperty("width");
+    panel.style.removeProperty("min-width");
     panel.style.removeProperty("right");
     panel.style.removeProperty("bottom");
-    if (panel.parentElement !== wrap) wrap.appendChild(panel);
   }
 
   function onViewportChange() {
@@ -1147,6 +1152,75 @@ function mountFlatPicker(select, title, options, panelClass, openAttr) {
   });
 }
 
+function mountAllapotGroupedFlatPicker(select) {
+  let selected = "";
+
+  mountBmPicker({
+    select,
+    title: "Állapot",
+    panelClass: "ad-form-allapot-panel",
+    openAttr: "data-ad-bm-allapot-open",
+    singleSelect: true,
+    syncFromHidden() {
+      const raw = select._adBmHidden?.value ?? "";
+      selected = readSingleStoredValue(raw);
+      if (raw.trim().startsWith("[")) writePlainValue(select, selected);
+    },
+    syncSummary(summaryEl) {
+      if (summaryEl) summaryEl.textContent = selected || PLACEHOLDER;
+    },
+    syncHidden() {
+      writePlainValue(select, selected);
+    },
+    renderBody(bodyEl) {
+      const sections = ALLAPOT_CATEGORIES.map((cat) => {
+        const items = cat.children?.length
+          ? cat.children.map((child) => child.value)
+          : cat.value
+            ? [cat.value]
+            : [];
+        if (!items.length) return "";
+        const header = `<div class="ad-form-allapot-section" aria-hidden="true">${escapeHtml(cat.label)}</div>`;
+        const rows = items
+          .map((opt) => {
+            const on = selected === opt;
+            return `<div class="auto-bm-row">
+              <label class="auto-bm-toggle">
+                <span>${escapeHtml(opt)}</span>
+                <input type="checkbox" data-ad-bm-flat="${escapeAttr(opt)}" ${on ? "checked" : ""} />
+                <span class="auto-bm-switch" aria-hidden="true"></span>
+              </label>
+            </div>`;
+          })
+          .join("");
+        return `${header}${rows}`;
+      }).join("");
+      bodyEl.innerHTML = `<div class="auto-bm-group">${sections}</div>`;
+    },
+    bindBody(bodyEl) {
+      bodyEl.onchange = (event) => {
+        const el = event.target.closest("[data-ad-bm-flat]");
+        if (!el) return;
+        const opt = el.getAttribute("data-ad-bm-flat") ?? "";
+        if (el.checked) selected = opt;
+        else if (selected === opt) selected = "";
+        writePlainValue(select, selected);
+        enforceSingleToggleChecks(bodyEl, "data-ad-bm-flat", selected);
+        updateBmSummary(select, selected || PLACEHOLDER, Boolean(selected));
+      };
+    },
+  });
+}
+
+function resolveAllapotSelect(form) {
+  let select = document.getElementById("allapot");
+  if (select?.tagName === "SELECT") return select;
+  const root = form || document;
+  select = root.querySelector('select[name="allapot"], select[name="_vehicle_allapot_unused"]');
+  if (select?.tagName === "SELECT" && !select.id) select.id = "allapot";
+  return select?.tagName === "SELECT" ? select : null;
+}
+
 function mountHierarchicalPicker(select, { title, panelClass, openAttr, categories, attrMain, attrChild, attrParent, unit }) {
   /** @type {Set<string>} */
   let openMains = new Set();
@@ -1673,6 +1747,7 @@ export async function refreshAdFormBmPickers(form, catalog = null) {
   try {
     if (catalog) cachedVehicleCatalog = catalog;
     unmountAdFormBmPickers(form);
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
     await mountAdFormBmPickers(form, catalog || cachedVehicleCatalog);
   } catch (error) {
     console.warn("Alapadatok kapcsolós panel frissítés:", error);
@@ -1686,7 +1761,7 @@ export async function mountAdFormBmPickers(form, catalog = null) {
     return;
   }
 
-  const allapot = document.getElementById("allapot");
+  const allapot = resolveAllapotSelect(form);
   const kivitel = document.getElementById("kivitel");
   const okmany = document.getElementById("okmany_jelleg");
   const uzemanyag = document.getElementById("uzemanyag");
@@ -1694,7 +1769,7 @@ export async function mountAdFormBmPickers(form, catalog = null) {
   const modell = document.getElementById("modell");
 
   if (allapot?.tagName === "SELECT" && allapot.dataset.adBmPicker !== "1") {
-    mountFlatPicker(allapot, "Állapot", flattenAllapotOptions(), "ad-form-allapot-panel", "data-ad-bm-allapot-open");
+    mountAllapotGroupedFlatPicker(allapot);
   }
   if (kivitel?.tagName === "SELECT" && kivitel.dataset.adBmPicker !== "1") {
     mountFlatPicker(kivitel, "Kivitel", KIVITEL_OPTIONS, "ad-form-kivitel-panel", "data-ad-bm-kivitel-open");

@@ -7,7 +7,7 @@ import { normalizeIngatlanUzletag, INGATLAN_LAKAS_TIPUS, INGATLAN_LAKAS_TIPUS_AI
 import {
   initIngatlanSearch,
   readIngatlanSearchForm,
-} from "./ingatlan-search.js?v=immoAdminLive1";
+} from "./ingatlan-search.js?v=immoPostSurface1";
 import { fetchIngatlanWheelSchema } from "./ingatlan-wheel-schema.js?v=immoAdminLive1";
 import { wireTelepulesSuggestIn } from "./telepules-suggest.js?v=telepClose1";
 
@@ -91,6 +91,7 @@ export async function ensureIngatlanFormFields(form) {
   await initIngatlanSearch({
     form: searchRoot,
     schema,
+    surface: "post",
     defaultUzletag: defaultUzletagFromTip(tip),
     lakasTipusOptions: tip === "airbnb" ? INGATLAN_LAKAS_TIPUS_AIRBNB : INGATLAN_LAKAS_TIPUS,
     enableTipus2: tip !== "airbnb",

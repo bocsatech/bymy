@@ -5,7 +5,7 @@ import { initVehicleCatalogSelects } from "./vehicle-catalog-client.js";
 import { compressListingPhoto, MAX_LISTING_PHOTOS } from "./listing-photo-compress.js?v=myAds2";
 import { uploadImage } from "./upload-image.js?v=supabaseUpload1";
 import { applyListingAddressFromProfileSync } from "./ad-location-profile.js?v=locProf3";
-import { syncIngatlanFormVisibility } from "./ingatlan-form-fields.js?v=immoTelekArea1";
+import { syncIngatlanFormVisibility } from "./ingatlan-form-fields.js?v=immoPostSurface1";
 import {
   DEFAULT_PHOTO_OVERLAY_ID,
   renderListingPhotoOverlay,

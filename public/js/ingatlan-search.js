@@ -1049,6 +1049,7 @@ async function reloadIngatlanSchemaLayout(root, opts) {
     tipusOpts,
     tipus2Enabled,
     defaultUzletag,
+    surface = "search",
     uzletag = readUzletag(root),
     tipusList = readWheelList(root.querySelector('[data-wheel="ingatlan_lakas_tipus"]')),
   } = opts;
@@ -1063,7 +1064,7 @@ async function reloadIngatlanSchemaLayout(root, opts) {
 
   const mainHost = root.querySelector("#immo-schema-main") || document.getElementById("immo-schema-main");
   const moreHost = root.querySelector("#immo-schema-more") || document.getElementById("immo-schema-more");
-  renderIngatlanSchemaHosts(mainHost, moreHost, schema, "search");
+  renderIngatlanSchemaHosts(mainHost, moreHost, schema, surface);
   ensureTipus2Field(root, { enable: tipus2Enabled });
   setupMobileDualRanges(mainHost);
   setupMobileDualRanges(moreHost);
@@ -1078,6 +1079,7 @@ export async function initIngatlanSearch({
   onSearch = () => {},
   form = null,
   schema = null,
+  surface = "search",
   defaultUzletag = "kiado",
   lakasTipusOptions = null,
   enableTipus2 = true,
@@ -1112,7 +1114,7 @@ export async function initIngatlanSearch({
   const morePanel = root.querySelector("#immo-more") || document.getElementById("immo-more");
   const moreBtn = root.querySelector("#immo-tovabbi") || document.getElementById("immo-tovabbi");
 
-  renderIngatlanSchemaHosts(mainHost, moreHost, resolvedSchema, "search");
+  renderIngatlanSchemaHosts(mainHost, moreHost, resolvedSchema, surface);
   ensureTipus2Field(root, { enable: tipus2Enabled });
   setupMobileDualRanges(mainHost);
   setupMobileDualRanges(moreHost);
@@ -1151,41 +1153,48 @@ export async function initIngatlanSearch({
       setMoreOpen(!!morePanel?.hidden);
     });
 
-    root.querySelector('[data-wheel="ingatlan_lakas_tipus"]')?.addEventListener("immo-wheel-change", async () => {
-      try {
-        await reloadIngatlanSchemaLayout(root, {
-          tipusOpts,
-          tipus2Enabled,
-          defaultUzletag: initialUz,
-        });
-      } catch (error) {
-        console.warn("Ingatlan séma frissítés:", error);
-      }
-      syncRovidMenus(root);
-      if (tipus2Enabled) syncTipus2Menu(root);
-      syncTipusFieldVisibility(root);
-      syncMorePanelForTipus();
-    });
+    root.addEventListener("immo-wheel-change", async (event) => {
+      const wheel = event.target?.closest?.("[data-wheel]");
+      const field = wheel?.getAttribute("data-wheel") || "";
 
-    root.querySelector('[data-wheel="ingatlan_uzletag"]')?.addEventListener("immo-wheel-change", () => {
-      fillPriceRangeWheels(root);
-      const uz = readUzletag(root);
-      const opts = uz === "airbnb" ? INGATLAN_LAKAS_TIPUS_AIRBNB : INGATLAN_LAKAS_TIPUS;
-      const tipusWheel = root.querySelector('[data-wheel="ingatlan_lakas_tipus"]');
-      const prevTipus = readWheel(tipusWheel);
-      fillWheel(tipusWheel, opts.filter((o) => o.value));
-      initImmoSearchWheel(tipusWheel, {
-        emptyLabel: "Mindegy",
-        multiple: MULTI_WHEEL_KEYS.has("ingatlan_lakas_tipus"),
-      });
-      const keep = String(prevTipus)
-        .split(",")
-        .filter((v) => opts.some((o) => o.value === v));
-      setWheelValue(tipusWheel, keep.join(","));
-      syncRovidMenus(root);
-      if (tipus2Enabled) syncTipus2Menu(root);
-      syncTipusFieldVisibility(root);
-      syncMorePanelForTipus();
+      if (field === "ingatlan_lakas_tipus") {
+        try {
+          await reloadIngatlanSchemaLayout(root, {
+            tipusOpts,
+            tipus2Enabled,
+            defaultUzletag: initialUz,
+            surface,
+          });
+        } catch (error) {
+          console.warn("Ingatlan séma frissítés:", error);
+        }
+        syncRovidMenus(root);
+        if (tipus2Enabled) syncTipus2Menu(root);
+        syncTipusFieldVisibility(root);
+        syncMorePanelForTipus();
+        return;
+      }
+
+      if (field === "ingatlan_uzletag") {
+        fillPriceRangeWheels(root);
+        const uz = readUzletag(root);
+        const opts = uz === "airbnb" ? INGATLAN_LAKAS_TIPUS_AIRBNB : INGATLAN_LAKAS_TIPUS;
+        const tipusWheel = root.querySelector('[data-wheel="ingatlan_lakas_tipus"]');
+        const prevTipus = readWheel(tipusWheel);
+        fillWheel(tipusWheel, opts.filter((o) => o.value));
+        initImmoSearchWheel(tipusWheel, {
+          emptyLabel: "Mindegy",
+          multiple: MULTI_WHEEL_KEYS.has("ingatlan_lakas_tipus"),
+        });
+        const keep = String(prevTipus)
+          .split(",")
+          .filter((v) => opts.some((o) => o.value === v));
+        setWheelValue(tipusWheel, keep.join(","));
+        syncRovidMenus(root);
+        if (tipus2Enabled) syncTipus2Menu(root);
+        syncTipusFieldVisibility(root);
+        syncMorePanelForTipus();
+      }
     });
 
     root.addEventListener("submit", (event) => {

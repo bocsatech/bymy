@@ -108,6 +108,7 @@ const ADMIN_SECTIONS = [
       })),
       { id: "ingatlan:layout:ingatlan", label: "Kiadó — szerkesztő" },
       { id: "ingatlan:layout:airbnb", label: "Airbnb — szerkesztő" },
+      { id: "ingatlan:layout:ingatlan:wizard", label: "Feladási lépések — szerkesztő" },
       { id: "ingatlan:tipus-mezok", label: "Típus → mezők" },
       { id: "ingatlan:partnerek", label: "Ingatlanos partnerek" },
       { id: "ingatlan:listings", label: "Hirdetések" },
@@ -213,6 +214,7 @@ const PAGE_ADMIN_GUIDES = {
       { tab: "ingatlan:layout:elado-ingatlan", label: "Ingatlan kerék (eladó)" },
       { tab: "ingatlan:layout:ingatlan", label: "Ingatlan kerék (kiadó)" },
       { tab: "ingatlan:layout:airbnb", label: "Ingatlan kerék (Airbnb)" },
+      { tab: "ingatlan:layout:ingatlan:wizard", label: "Ingatlan feladási lépések" },
       { tab: "ingatlan:tipus-mezok", label: "Típus → mezők" },
     ],
   },
@@ -329,6 +331,21 @@ function layoutIntentFromTab(value = tab) {
   const raw = sub.slice("layout:".length) || "";
   const parts = raw.split(":");
   return parts[1] || "";
+}
+
+function isIngatlanWizardLayoutTab(value = tab) {
+  return (
+    layoutCategoryFromTab(value) === "ingatlan" &&
+    layoutIntentFromTab(value) === "wizard"
+  );
+}
+
+function isIngatlanWheelLayoutTab(value = tab) {
+  return (
+    isLayoutTab(value) &&
+    isIngatlanWheelAdminCategory(layoutCategoryFromTab(value)) &&
+    !isIngatlanWizardLayoutTab(value)
+  );
 }
 
 function layoutTabId(item) {
@@ -750,7 +767,7 @@ const actions = {
     info = "";
     try {
       const cat = layoutCategoryFromTab();
-      if (isIngatlanWheelAdminCategory(cat)) {
+      if (isIngatlanWheelLayoutTab()) {
         const data = await api("/api/level1/ingatlan-wheel-schema", {
           method: "PUT",
           body: JSON.stringify({ schema: wheelSchema, variant: cat }),
@@ -1305,7 +1322,7 @@ async function loadTab() {
   if (isLayoutTab()) {
     layoutCategory = layoutCategoryFromTab();
     layoutIntent = layoutIntentFromTab();
-    if (isIngatlanWheelAdminCategory(layoutCategory)) {
+    if (isIngatlanWheelLayoutTab()) {
       const data = await api(immoWheelApiUrl(layoutCategory));
       wheelSchema = data.schema || { version: 1, cells: [] };
     } else {
@@ -1949,8 +1966,9 @@ function tipusFieldsView() {
 
 function layoutView() {
   const cat = layoutCategoryFromTab();
-  const label = categoryLabel(cat);
-  const isImmo = isIngatlanWheelAdminCategory(cat);
+  const isImmoWizard = isIngatlanWizardLayoutTab();
+  const label = isImmoWizard ? "Ingatlan feladás" : categoryLabel(cat);
+  const isImmo = isIngatlanWheelLayoutTab();
   const isSearch = isSearchLayoutCat(cat);
   const sharedHint = isImmo
     ? cat === "ingatlan"
@@ -1960,8 +1978,14 @@ function layoutView() {
       ? cat === "teherauto-search"
         ? "Teherautó gyorskereső + Több szűrő mezői (3,5 t-ig és 3,5 t-tól közös nézet). 1. lépés = hero, 2 = műszaki, 3 = Akkumulátor és hatótáv (Extrák felett), 4 = Extrák, 5 = helyszín. Mentés után hard refresh."
         : "Személyautó gyorskereső + Több szűrő. 1 = gyorskereső, 2 = műszaki, 3 = Akkumulátor és hatótáv adatok (Extrák felett — üres rács, Törölt mezőkből rakd vissza), 4 = Extrák, 5 = helyszín. Szélesség / pozíció mint a többi. Mentés után az autó oldalon hard refresh."
-      : "Csak ennek a kategóriának a mezői. Húzd a cellát a lapon belül vagy másik lépésre. Mentés után a hirdetésfeladáson hard refresh kell.";
-  const titleSuffix = isImmo ? "kerék-séma" : isSearch ? "kereső mezők" : "feladási mezők";
+      : isImmoWizard
+        ? "Az ingatlanfeladás kerék-panelen kívüli mezői. Húzd a cellát a lapon belül vagy másik lépésre; az ár, leírás, képek és helyszín elrendezése itt kezelhető."
+        : "Csak ennek a kategóriának a mezői. Húzd a cellát a lapon belül vagy másik lépésre. Mentés után a hirdetésfeladáson hard refresh kell.";
+  const titleSuffix = isImmo
+    ? "kerék-séma"
+    : isSearch
+      ? "kereső mezők"
+      : "feladási mezők";
   return `
     <h2 class="layout-cat-title">${esc(label)} — ${titleSuffix}</h2>
     <p class="hint">${esc(sharedHint)}</p>
@@ -2174,7 +2198,7 @@ function render() {
       return;
     }
     root.classList.remove("layout-root--readonly");
-    if (isIngatlanWheelAdminCategory(layoutCategoryFromTab())) {
+    if (isIngatlanWheelLayoutTab()) {
       try {
         const category = layoutCategoryFromTab();
         const allowedFields = INGATLAN_TIPUS_LAYOUTS.includes(category)
@@ -2193,8 +2217,17 @@ function render() {
       }
     } else {
       try {
+        const isImmoWizard = isIngatlanWizardLayoutTab();
         mountLayoutBoard(root, layout, {
-          stepNames: isSearchLayoutCat(layoutCategoryFromTab())
+          stepNames: isImmoWizard
+            ? {
+                1: "Ingatlan alapadatok",
+                2: "Részletek",
+                3: "Felszereltség",
+                4: "Képek",
+                5: "Ár, leírás és helyszín",
+              }
+            : isSearchLayoutCat(layoutCategoryFromTab())
             ? {
                 1: "Gyorskereső",
                 2: "Műszaki adatok",

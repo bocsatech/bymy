@@ -5,7 +5,7 @@ import {
   saveListingPhotosOrder,
   getStoredListingId,
 } from "./db-client.js?v=wizardSave1";
-import { createAdForm } from "./form-core.js?v=autoRestore20";
+import { createAdForm } from "./form-core.js?v=immoPostSurface1";
 import { refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=autoRestore20";
 import { initTireSizes } from "./tire-sizes-ui.js";
 import { initPhoneLanguages } from "./phone-lang-ui.js";

@@ -505,56 +505,6 @@ body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-panel .auto-bm-toggl
   transform: translateX(18px);
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-dropdown.ad-form-bm-panel .auto-bm-toggle {
-  min-height: var(--ad-form-bm-row-h) !important;
-}
-
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-dropdown.ad-form-bm-panel .auto-bm-group {
-  overflow: visible !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-}
-
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-allapot-panel.ad-form-bm-dropdown--portaled {
-  max-height: min(calc(var(--ad-form-bm-row-h) * 18 + 96px), 75vh) !important;
-}
-
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-allapot-panel .ad-form-bm-dropdown__body {
-  max-height: min(calc(var(--ad-form-bm-row-h) * 18 + 96px), 75vh) !important;
-  overflow-y: auto !important;
-  -webkit-overflow-scrolling: touch;
-  touch-action: pan-y;
-  scrollbar-width: thin;
-}
-
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-allapot-panel .ad-form-bm-dropdown__body::-webkit-scrollbar {
-  display: block;
-  width: 8px;
-}
-
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-allapot-panel .ad-form-bm-dropdown__body::-webkit-scrollbar-thumb {
-  background: #c6c6c6;
-  border-radius: 999px;
-}
-
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-allapot-panel.ad-form-bm-dropdown--portaled {
-  z-index: 10001 !important;
-}
-
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-allapot-panel .ad-form-allapot-section {
-  padding: 8px 14px 4px;
-  font-weight: 800;
-  font-size: 13px;
-  color: var(--ad-form-bm-muted);
-  background: var(--ad-form-bm-surface);
-  border-top: 1px solid var(--ad-form-bm-line);
-  pointer-events: none;
-}
-
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-allapot-panel .auto-bm-group > .ad-form-allapot-section:first-child {
-  border-top: 0;
-}
-
 body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-panel .auto-fuel-main-label {
   font-weight: 800;
 }

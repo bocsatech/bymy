@@ -135,11 +135,7 @@ function unregisterOpenPanel(close) {
 }
 
 function fieldHost(select) {
-  return (
-    select?.closest(".labeled-field, .md-outlined, .ad-layout-item, .suffix-field, .inline-2") ??
-    select?.parentElement ??
-    null
-  );
+  return select?.closest(".labeled-field, .md-outlined, .ad-layout-item");
 }
 
 function bmWrap(select) {
@@ -382,7 +378,7 @@ function mountBmPicker(opts) {
   panel.setAttribute("role", "listbox");
   panel.setAttribute("aria-label", title);
   panel.innerHTML = `<div class="ad-form-bm-dropdown__body auto-bm-panel__body" data-ad-bm-body></div>`;
-  document.body.appendChild(panel);
+  wrap.appendChild(panel);
   select._adBmPanel = panel;
   const bodyEl = panel.querySelector("[data-ad-bm-body]");
 
@@ -400,8 +396,7 @@ function mountBmPicker(opts) {
     panel.style.position = "fixed";
     panel.style.top = `${Math.round(rect.bottom + 4)}px`;
     panel.style.left = `${Math.round(rect.left)}px`;
-    panel.style.width = `${Math.round(Math.max(rect.width, 240))}px`;
-    panel.style.minWidth = "240px";
+    panel.style.width = `${Math.round(rect.width)}px`;
     panel.style.right = "auto";
     panel.style.bottom = "auto";
   }
@@ -417,9 +412,9 @@ function mountBmPicker(opts) {
     panel.style.removeProperty("top");
     panel.style.removeProperty("left");
     panel.style.removeProperty("width");
-    panel.style.removeProperty("min-width");
     panel.style.removeProperty("right");
     panel.style.removeProperty("bottom");
+    if (panel.parentElement !== wrap) wrap.appendChild(panel);
   }
 
   function onViewportChange() {
@@ -467,8 +462,8 @@ function mountBmPicker(opts) {
     else openPanel();
   });
 
-  bodyEl?.addEventListener("mousedown", (event) => {
-    if (event.target.closest(".auto-bm-toggle, input")) event.preventDefault();
+  panel.addEventListener("mousedown", (event) => {
+    event.preventDefault();
   });
 
   bindAutoBmDismiss({
@@ -1152,8 +1147,77 @@ function mountFlatPicker(select, title, options, panelClass, openAttr) {
   });
 }
 
-function mountAllapotGroupedFlatPicker(select) {
+function mountAllapotPicker(select) {
+  let openMains = new Set();
   let selected = "";
+
+  function labelForValue(value) {
+    if (!value) return "";
+    for (const cat of ALLAPOT_CATEGORIES) {
+      if (cat.value === value) return cat.label;
+      const child = cat.children?.find((c) => c.value === value);
+      if (child) return child.label;
+    }
+    return value;
+  }
+
+  function syncOpenFromValues() {
+    openMains.clear();
+    if (!selected) return;
+    for (const cat of ALLAPOT_CATEGORIES) {
+      if (cat.value === selected || cat.children?.some((c) => c.value === selected)) {
+        openMains.add(cat.id);
+      }
+    }
+  }
+
+  function turnMainOn(cat) {
+    openMains.clear();
+    openMains.add(cat.id);
+    selected = !cat.children?.length && cat.value ? cat.value : "";
+  }
+
+  function turnMainOff(cat) {
+    openMains.delete(cat.id);
+    if (cat.value === selected || cat.children?.some((c) => c.value === selected)) {
+      selected = "";
+    }
+  }
+
+  function renderAllapotBody(bodyEl) {
+    const rows = ALLAPOT_CATEGORIES.map((cat) => {
+      const on = openMains.has(cat.id);
+      const hasKids = Boolean(cat.children?.length);
+      let kidsHtml = "";
+      if (hasKids) {
+        kidsHtml = `<div class="auto-fuel-children">
+          ${cat.children
+            .map((child) => {
+              const childOn = selected === child.value;
+              return `<div class="auto-bm-row auto-fuel-child-row">
+                <label class="auto-bm-toggle">
+                  <span>${escapeHtml(child.label)}</span>
+                  <input type="checkbox" data-ad-bm-allapot-child="${escapeAttr(child.value)}" data-ad-bm-allapot-parent="${escapeAttr(cat.id)}" ${childOn ? "checked" : ""} />
+                  <span class="auto-bm-switch" aria-hidden="true"></span>
+                </label>
+              </div>`;
+            })
+            .join("")}
+        </div>`;
+      }
+      const mainOn = !hasKids ? selected === cat.value : on;
+      return `<div class="auto-bm-row auto-fuel-main-row" data-ad-bm-allapot-main="${escapeAttr(cat.id)}">
+        <label class="auto-bm-toggle auto-fuel-main-toggle">
+          <span class="auto-fuel-main-label">${escapeHtml(cat.label)}</span>
+          <input type="checkbox" data-ad-bm-allapot-main-toggle="${escapeAttr(cat.id)}" ${mainOn ? "checked" : ""} />
+          <span class="auto-bm-switch" aria-hidden="true"></span>
+        </label>
+        ${kidsHtml}
+      </div>`;
+    }).join("");
+
+    bodyEl.innerHTML = `<div class="auto-bm-group">${rows}</div>`;
+  }
 
   mountBmPicker({
     select,
@@ -1165,60 +1229,50 @@ function mountAllapotGroupedFlatPicker(select) {
       const raw = select._adBmHidden?.value ?? "";
       selected = readSingleStoredValue(raw);
       if (raw.trim().startsWith("[")) writePlainValue(select, selected);
+      syncOpenFromValues();
+      for (const cat of ALLAPOT_CATEGORIES) {
+        if (cat.children?.length) openMains.add(cat.id);
+      }
     },
     syncSummary(summaryEl) {
-      if (summaryEl) summaryEl.textContent = selected || PLACEHOLDER;
+      if (summaryEl) summaryEl.textContent = labelForValue(selected) || PLACEHOLDER;
     },
     syncHidden() {
       writePlainValue(select, selected);
     },
-    renderBody(bodyEl) {
-      const sections = ALLAPOT_CATEGORIES.map((cat) => {
-        const items = cat.children?.length
-          ? cat.children.map((child) => child.value)
-          : cat.value
-            ? [cat.value]
-            : [];
-        if (!items.length) return "";
-        const header = `<div class="ad-form-allapot-section" aria-hidden="true">${escapeHtml(cat.label)}</div>`;
-        const rows = items
-          .map((opt) => {
-            const on = selected === opt;
-            return `<div class="auto-bm-row">
-              <label class="auto-bm-toggle">
-                <span>${escapeHtml(opt)}</span>
-                <input type="checkbox" data-ad-bm-flat="${escapeAttr(opt)}" ${on ? "checked" : ""} />
-                <span class="auto-bm-switch" aria-hidden="true"></span>
-              </label>
-            </div>`;
-          })
-          .join("");
-        return `${header}${rows}`;
-      }).join("");
-      bodyEl.innerHTML = `<div class="auto-bm-group">${sections}</div>`;
-    },
+    renderBody: renderAllapotBody,
     bindBody(bodyEl) {
       bodyEl.onchange = (event) => {
-        const el = event.target.closest("[data-ad-bm-flat]");
-        if (!el) return;
-        const opt = el.getAttribute("data-ad-bm-flat") ?? "";
-        if (el.checked) selected = opt;
-        else if (selected === opt) selected = "";
+        const mainEl = event.target.closest("[data-ad-bm-allapot-main-toggle]");
+        if (mainEl) {
+          const id = mainEl.getAttribute("data-ad-bm-allapot-main-toggle");
+          const cat = ALLAPOT_CATEGORIES.find((c) => c.id === id);
+          if (!cat) return;
+          if (mainEl.checked) turnMainOn(cat);
+          else turnMainOff(cat);
+          renderAllapotBody(bodyEl);
+          writePlainValue(select, selected);
+          updateBmSummary(select, labelForValue(selected) || PLACEHOLDER, Boolean(selected));
+          return;
+        }
+
+        const childEl = event.target.closest("[data-ad-bm-allapot-child]");
+        if (!childEl) return;
+        const value = childEl.getAttribute("data-ad-bm-allapot-child") ?? "";
+        const parentId = childEl.getAttribute("data-ad-bm-allapot-parent") ?? "";
+        if (childEl.checked) {
+          selected = value;
+          openMains.clear();
+          if (parentId) openMains.add(parentId);
+        } else if (selected === value) {
+          selected = "";
+        }
+        renderAllapotBody(bodyEl);
         writePlainValue(select, selected);
-        enforceSingleToggleChecks(bodyEl, "data-ad-bm-flat", selected);
-        updateBmSummary(select, selected || PLACEHOLDER, Boolean(selected));
+        updateBmSummary(select, labelForValue(selected) || PLACEHOLDER, Boolean(selected));
       };
     },
   });
-}
-
-function resolveAllapotSelect(form) {
-  let select = document.getElementById("allapot");
-  if (select?.tagName === "SELECT") return select;
-  const root = form || document;
-  select = root.querySelector('select[name="allapot"], select[name="_vehicle_allapot_unused"]');
-  if (select?.tagName === "SELECT" && !select.id) select.id = "allapot";
-  return select?.tagName === "SELECT" ? select : null;
 }
 
 function mountHierarchicalPicker(select, { title, panelClass, openAttr, categories, attrMain, attrChild, attrParent, unit }) {
@@ -1747,7 +1801,6 @@ export async function refreshAdFormBmPickers(form, catalog = null) {
   try {
     if (catalog) cachedVehicleCatalog = catalog;
     unmountAdFormBmPickers(form);
-    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
     await mountAdFormBmPickers(form, catalog || cachedVehicleCatalog);
   } catch (error) {
     console.warn("Alapadatok kapcsolós panel frissítés:", error);
@@ -1761,7 +1814,7 @@ export async function mountAdFormBmPickers(form, catalog = null) {
     return;
   }
 
-  const allapot = resolveAllapotSelect(form);
+  const allapot = document.getElementById("allapot");
   const kivitel = document.getElementById("kivitel");
   const okmany = document.getElementById("okmany_jelleg");
   const uzemanyag = document.getElementById("uzemanyag");
@@ -1769,7 +1822,7 @@ export async function mountAdFormBmPickers(form, catalog = null) {
   const modell = document.getElementById("modell");
 
   if (allapot?.tagName === "SELECT" && allapot.dataset.adBmPicker !== "1") {
-    mountAllapotGroupedFlatPicker(allapot);
+    mountAllapotPicker(allapot);
   }
   if (kivitel?.tagName === "SELECT" && kivitel.dataset.adBmPicker !== "1") {
     mountFlatPicker(kivitel, "Kivitel", KIVITEL_OPTIONS, "ad-form-kivitel-panel", "data-ad-bm-kivitel-open");

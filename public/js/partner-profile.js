@@ -20,11 +20,6 @@ function safeUrl(value) {
   }
 }
 
-function telHref(value) {
-  const phone = String(value || "").replace(/[^\d+]/g, "");
-  return phone ? `tel:${phone}` : "";
-}
-
 function listingCard(listing) {
   const preview = listing.preview || {};
   const image = safeUrl(preview.imageUrl || listing.fo_kep);
@@ -87,7 +82,6 @@ async function manage() {
         <label>Publikus profilcím *<span class="partner-slug"><span>bymy.hu/partner/</span><input name="slug" value="${esc(profile.slug)}" maxlength="100" required /></span></label>
         <label>Kapcsolattartó neve<input name="contactPerson" value="${esc(profile.contact_person)}" maxlength="160" /></label>
         <label>E-mail cím<input name="email" type="email" value="${esc(profile.email)}" maxlength="320" /></label>
-        <label>Telefonszám<input name="phone" type="tel" value="${esc(profile.phone)}" maxlength="80" /></label>
         <label>Weboldal<input name="website" type="url" value="${esc(profile.website)}" placeholder="https://…" maxlength="300" /></label>
         <label>Logó URL<input name="logoUrl" type="url" value="${esc(profile.logo_url)}" placeholder="https://…" /></label>
         <label>Borítókép URL<input name="coverUrl" type="url" value="${esc(profile.cover_url)}" placeholder="https://…" /></label>
@@ -141,7 +135,6 @@ async function view() {
   const logo = safeUrl(profile.logo_url);
   const cover = safeUrl(profile.cover_url);
   const website = safeUrl(profile.website);
-  const phone = telHref(profile.phone);
   document.title = `${profile.display_name} — Bymy ingatlanos partner`;
   root.innerHTML = `
     <nav class="partner-breadcrumb"><a href="/ingatlan.html">Ingatlan</a><span>›</span><a href="/ingatlan.html#immo-partners-title">Ingatlanos partnerek</a><span>›</span><span>${esc(profile.display_name)}</span></nav>
@@ -172,7 +165,6 @@ async function view() {
         <h2>Kapcsolat</h2>
         ${profile.contact_person ? `<div><span>Kapcsolattartó</span><strong>${esc(profile.contact_person)}</strong></div>` : ""}
         ${profile.email ? `<a href="mailto:${encodeURIComponent(profile.email)}"><span>E-mail</span><strong>${esc(profile.email)}</strong></a>` : ""}
-        ${phone ? `<a href="${esc(phone)}"><span>Telefonszám</span><strong>${esc(profile.phone)}</strong></a>` : ""}
         ${website ? `<a href="${esc(website)}" target="_blank" rel="noopener"><span>Weboldal</span><strong>Weboldal megnyitása ↗</strong></a>` : ""}
         <a class="partner-contact-cta" href="#partner-listings">Hirdetések megtekintése</a>
       </aside>

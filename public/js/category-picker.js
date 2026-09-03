@@ -259,7 +259,18 @@ export function initCategoryPicker({
     return wheel;
   }
 
+  let categoryLocked = false;
+
+  function lockCategoryChange(locked = true) {
+    categoryLocked = Boolean(locked);
+    const wheel = document.getElementById("wizard-category-wheel");
+    const wrap = wheel?.closest(".immo-wheel-wrap");
+    if (wrap) wrap.classList.toggle("is-disabled", categoryLocked);
+    wheel?.setAttribute("aria-disabled", categoryLocked ? "true" : "false");
+  }
+
   async function applyCatWheelChoice(catId) {
+    if (categoryLocked) return;
     const opt = WIZARD_CATEGORY_OPTIONS.find((x) => x.id === catId);
     const selection = selectionFromOption(opt);
     if (!selection) return;
@@ -508,5 +519,6 @@ export function initCategoryPicker({
     reset: showPicker,
     getSelection: () => readStored(),
     syncWizardContext,
+    lockCategoryChange,
   };
 }

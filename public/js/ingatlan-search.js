@@ -706,7 +706,7 @@ function syncTipus2Menu(form) {
   const wheel = form.querySelector('[data-wheel="ingatlan_tipus_2"]');
   if (!wheel) return;
   const prev = readWheel(wheel);
-  const opts = tipus2OptionsForParents(parents);
+  const opts = tipus2OptionsForParents(parents, { uzletag: readUzletag(form) });
   fillWheel(wheel, opts.filter((o) => o.value), { emptyLabel: "Mindegy" });
   initImmoSearchWheel(wheel, {
     emptyLabel: "Mindegy",
@@ -719,7 +719,7 @@ function syncTipus2Menu(form) {
     .filter((v) => allowed.has(v));
   setWheelValue(wheel, keep.join(","));
   const wrap = wheel.closest(".immo-wheel-wrap");
-  const disabled = parents.length === 0;
+  const disabled = parents.length === 0 || form.closest("[data-ingatlan-type-locked=\"1\"]");
   if (wrap) wrap.classList.toggle("is-disabled", disabled);
   wheel.setAttribute("aria-disabled", disabled ? "true" : "false");
 }
@@ -728,7 +728,7 @@ function syncTipus2Menu(form) {
 function syncTipusFieldVisibility(form) {
   if (!form) return;
   const parents = readWheelList(form.querySelector('[data-wheel="ingatlan_lakas_tipus"]'));
-  const visible = fieldKeysVisibleForTipus(parents);
+  const visible = fieldKeysVisibleForTipus(parents, { uzletag: readUzletag(form) });
   const areaKeys = areaFieldKeysForTipus(parents);
   const showAlap =
     parents.includes("haz") ||
@@ -736,10 +736,16 @@ function syncTipusFieldVisibility(form) {
     areaKeys.has("alapterulet_ig");
   const showTelek = areaKeys.has("telekterulet_tol") || areaKeys.has("telekterulet_ig");
   const dualSeen = new Set();
+  const typeLocked = form.closest('[data-ingatlan-type-locked="1"]');
 
   form.querySelectorAll("[data-schema-field]").forEach((cell) => {
     const key = cell.dataset.schemaField || "";
     if (!key || key.startsWith("__spacer")) return;
+    if (typeLocked && (key === "ingatlan_lakas_tipus" || key === "ingatlan_tipus_2")) {
+      const wrap = cell.querySelector(".immo-wheel-wrap");
+      if (wrap) wrap.classList.add("is-disabled");
+      cell.querySelector("[data-wheel]")?.setAttribute("aria-disabled", "true");
+    }
     const dual = cell.closest(".immo-dual-range-block");
     if (dual) {
       const rangeId =

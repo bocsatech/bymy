@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "note": "Típus → mezők. A Szobaszám csak Lakás, Ház és Nyaraló mezője. Élő forrás: public/js/ingatlan-fields.js (INGATLAN_FIELDS_BY_TIPUS). Dropdown opciólisták később pontosíthatók.",
+  "note": "Típus → mezők. Élő forrás: public/js/ingatlan-fields.js (INGATLAN_FIELDS_BY_TIPUS). Mátrix: docs/ingatlan-com-hirdetesfeladas-matrix.md. Kiadó-only mezőket az üzletág szűri.",
   "core_always": [
     "keresesi_hely",
     "ar_tol",
@@ -13,6 +13,19 @@
   ],
   "by_tipus": {
     "lakas": [
+      "szobaszam",
+      "allapot",
+      "ingatlan_kora",
+      "kilatas",
+      "tajolas",
+      "futes",
+      "parkolas",
+      "komfort",
+      "furdo_wc",
+      "emelet",
+      "belmagassag",
+      "szintek_tol",
+      "szintek_ig",
       "lift",
       "erkely",
       "szigeteles",
@@ -21,6 +34,9 @@
       "legkondicionalo",
       "kertkapcsolatos",
       "panelprogram",
+      "butorozott",
+      "koltozheto",
+      "min_berleti_ido",
       "gepesitett",
       "kisallat_megengedett",
       "dohanyzas_megengedett"

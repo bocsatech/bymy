@@ -5,11 +5,10 @@ import {
   saveListingPhotosOrder,
   getStoredListingId,
 } from "./db-client.js?v=wizardSave1";
-import { createAdForm } from "./form-core.js?v=immoPostAdmin1";
-import { refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=autoRestore20";
+import { createAdForm } from "./form-core.js?v=autoTipus1";
 import { initTireSizes } from "./tire-sizes-ui.js";
 import { initPhoneLanguages } from "./phone-lang-ui.js";
-import { initCategoryPicker } from "./category-picker.js?v=postWizardFix1";
+import { initCategoryPicker } from "./category-picker.js?v=immoPortalPage1";
 import {
   requireAuthForPage,
   getAuthUser,
@@ -24,13 +23,13 @@ import {
   listingAddressComplete,
   getListingAddressFromProfile,
 } from "./ad-location-profile.js?v=locProf3";
-import { initImproveDescription } from "./improve-description.js?v=descAi1";
 
-const authed = await requireAuthForPage();
-if (authed) initSiteAuth();
+if (!(await requireAuthForPage())) {
+  throw new Error("Belépés szükséges");
+}
+initSiteAuth();
 
 const adForm = document.getElementById("ad-form");
-initImproveDescription(adForm);
 const editId = Number(new URLSearchParams(window.location.search).get("id"));
 const editing = Number.isFinite(editId) && editId > 0;
 
@@ -112,28 +111,33 @@ async function persistWizardStep(formData, { fromStep } = {}) {
   const readyItems = items.filter((item) => item.data || item.url);
   const photos = readyItems.filter((item) => item.data).map((item) => item.data);
 
-  const saved = await saveListingToDb(formData, listingId, {
-    status: "mentett",
-    photos: fromStep >= 4 ? photos : [],
-  });
+  try {
+    const saved = await saveListingToDb(formData, listingId, {
+      status: "mentett",
+      photos: fromStep >= 4 ? photos : [],
+    });
 
-  if (!saved?.id) {
-    throw new Error("A piszkozat mentése sikertelen.");
-  }
-
-  setStoredListingId(saved.id);
-
-  if (fromStep >= 4 && readyItems.length) {
-    const withUrls = readyItems.every((item) => item.url || item.data);
-    if (!withUrls || readyItems.some((item) => item.url)) {
-      const updated = await saveListingPhotosOrder(saved.id, readyItems);
-      syncPhotoUrlsFromListing(updated);
-      return updated ?? saved;
+    if (!saved?.id) {
+      throw new Error("A piszkozat mentése sikertelen.");
     }
-  }
 
-  syncPhotoUrlsFromListing(saved);
-  return saved;
+    setStoredListingId(saved.id);
+
+    if (fromStep >= 4 && readyItems.length) {
+      const withUrls = readyItems.every((item) => item.url || item.data);
+      if (!withUrls || readyItems.some((item) => item.url)) {
+        const updated = await saveListingPhotosOrder(saved.id, readyItems);
+        syncPhotoUrlsFromListing(updated);
+        return updated ?? saved;
+      }
+    }
+
+    syncPhotoUrlsFromListing(saved);
+    return saved;
+  } catch (error) {
+    console.warn("Piszkozat mentése sikertelen, de a lépkedés folytatódik:", error);
+    return null;
+  }
 }
 
 function registerAbandonPhotoCleanup() {
@@ -254,25 +258,23 @@ const categoryPicker = initCategoryPicker({
     );
     return false;
   },
-  onVehicleSelected: (selection) => {
-    window.setTimeout(() => {
-      try {
-        if (selection) categoryPicker?.syncWizardContext?.(selection);
-        const api = ensureFormReady();
-        if (!editing) api?.resetForm?.({ fresh: true });
-        api?.markTouched?.();
-        api?.syncKisteherFields?.();
-        phoneLanguages?.syncLanguages?.();
-        tireSizes?.syncRearTires?.();
-        applyListingAddressFromProfileSync(adForm);
-        applyListingAddressFromProfile(adForm).catch(() => {});
-        window.dispatchEvent(new Event("ad-form-sync-location"));
-        window.dispatchEvent(new Event("ad-form-layout-refresh"));
-        window.setTimeout(() => refreshAdFormBmPickers(adForm), 150);
-      } catch (error) {
-        console.error("Űrlap indítás hiba:", error);
-      }
-    }, 0);
+  onVehicleSelected: () => {
+    try {
+      const api = ensureFormReady();
+      if (!editing) api?.resetForm?.({ fresh: true });
+      api?.markTouched?.();
+      const sel = categoryPicker?.getSelection?.();
+      if (sel) categoryPicker?.syncWizardContext?.(sel);
+      api?.syncKisteherFields?.();
+      phoneLanguages?.syncLanguages?.();
+      tireSizes?.syncRearTires?.();
+      applyListingAddressFromProfileSync(adForm);
+      applyListingAddressFromProfile(adForm).catch(() => {});
+      window.dispatchEvent(new Event("ad-form-sync-location"));
+      window.dispatchEvent(new Event("ad-form-layout-refresh"));
+    } catch (error) {
+      console.error("Űrlap indítás hiba:", error);
+    }
   },
   onReset: () => {
     // picker visible again
@@ -297,6 +299,14 @@ if (editing) {
     syncPhotoUrlsFromListing(listing);
     const catSel = categorySelectionFromForm(listing.form);
     if (catSel) categoryPicker?.syncWizardContext?.(catSel);
+    /* Publikált ingatlan: üzletág + típus zárolva (ingatlan.com viselkedés). */
+    const published = String(listing.status || "") === "feladott";
+    const isImmo = String(listing.form?.hirdetes_vertical || "").toLowerCase() === "ingatlan";
+    if (published && isImmo) {
+      categoryPicker?.lockCategoryChange?.(true);
+      adForm?.setAttribute("data-ingatlan-type-locked", "1");
+      window.dispatchEvent(new Event("ad-form-layout-refresh"));
+    }
   } catch (error) {
     alert(error.message ?? "A hirdetés betöltése sikertelen.");
     window.location.assign("/beallitasok.html?szekcio=hirdetes");

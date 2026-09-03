@@ -78,6 +78,8 @@ export const INGATLAN_TIPUS_2_BY_PARENT = {
     { value: "lakas_tegla_lakas", label: "Tégla lakás" },
     { value: "lakas_panel_lakas", label: "Panel lakás" },
     { value: "lakas_csusztatott_zsalus", label: "Csúsztatott zsalus" },
+    /* Kiadó-only — tipus2OptionsForParents szűri eladó esetén */
+    { value: "lakas_szoba", label: "Szoba", kiadoOnly: true },
   ],
   haz: [
     { value: "haz_csaladi_haz", label: "Családi ház" },
@@ -157,8 +159,14 @@ export const INGATLAN_TIPUS_2_BY_PARENT = {
   egyeb: [{ value: "egyeb_egyeb", label: "Egyéb" }],
 };
 
-/** Tipus 1 érték(ek) → Tipus 2 opciólista (üres szülőnél csak Mindegy). */
-export function tipus2OptionsForParents(parentValues) {
+/**
+ * Tipus 1 érték(ek) → Tipus 2 opciólista (üres szülőnél csak Mindegy).
+ * @param {string|string[]} parentValues
+ * @param {{ uzletag?: string }} [opts] — eladónál kihagyja a `kiadoOnly` altípusokat (pl. Szoba).
+ */
+export function tipus2OptionsForParents(parentValues, opts = {}) {
+  const uz = normalizeIngatlanUzletag(opts.uzletag || "");
+  const hideKiadoOnly = uz === "elado";
   const parents = (Array.isArray(parentValues) ? parentValues : String(parentValues ?? "").split(","))
     .map((v) => String(v || "").trim())
     .filter(Boolean);
@@ -168,6 +176,7 @@ export function tipus2OptionsForParents(parentValues) {
   for (const p of parents) {
     for (const opt of INGATLAN_TIPUS_2_BY_PARENT[p] || []) {
       if (!opt.value || seen.has(opt.value)) continue;
+      if (hideKiadoOnly && opt.kiadoOnly) continue;
       seen.add(opt.value);
       out.push(opt);
     }
@@ -409,17 +418,18 @@ export const INGATLAN_CORE_FIELD_KEYS = [
  * alapterulet = épület / ház területe
  * telekterulet = telek, amin áll / önálló telek
  */
+/** Típus → területmezők. Forrás: ingatlan.com adform_v2 area_size / lot_size. */
 export const INGATLAN_AREA_BY_TIPUS = {
   lakas: ["alapterulet"],
   haz: ["alapterulet", "telekterulet"],
   telek: ["telekterulet"],
-  garazs: [],
+  garazs: ["alapterulet"],
   nyaralo: ["alapterulet", "telekterulet"],
   iroda: ["alapterulet"],
   uzlethelyiseg: ["alapterulet"],
   vendeglatas: ["alapterulet"],
-  raktar: ["telekterulet"],
-  ipari: ["telekterulet"],
+  raktar: ["alapterulet", "telekterulet"],
+  ipari: ["alapterulet", "telekterulet"],
   mezogazdasagi: ["telekterulet", "epitmeny_terulet"],
   fejlesztesi_terulet: ["telekterulet"],
   intezmeny: ["alapterulet", "telekterulet"],
@@ -461,12 +471,25 @@ export function areaFieldKeysForTipus(parentValues) {
 }
 
 /**
- * Típus 1 → megjelenő mezőkulcsok (a screenshot listák alapján).
- * Üres típusnál csak a CORE mezők látszanak (+ alap alapterület).
+ * Típus 1 → megjelenő mezőkulcsok.
+ * Forrás: docs/ingatlan-com-hirdetesfeladas-matrix.md (ingatlan.com adform_v2).
+ * Kiadó-only mezők: lásd INGATLAN_KIADO_ONLY_FIELDS (üzletág szűri).
  */
 export const INGATLAN_FIELDS_BY_TIPUS = {
   lakas: [
     "szobaszam",
+    "allapot",
+    "ingatlan_kora",
+    "kilatas",
+    "tajolas",
+    "futes",
+    "parkolas",
+    "komfort",
+    "furdo_wc",
+    "emelet",
+    "belmagassag",
+    "szintek_tol",
+    "szintek_ig",
     "lift",
     "erkely",
     "szigeteles",
@@ -475,6 +498,9 @@ export const INGATLAN_FIELDS_BY_TIPUS = {
     "legkondicionalo",
     "kertkapcsolatos",
     "panelprogram",
+    "butorozott",
+    "koltozheto",
+    "min_berleti_ido",
     "gepesitett",
     "kisallat_megengedett",
     "dohanyzas_megengedett",
@@ -499,9 +525,14 @@ export const INGATLAN_FIELDS_BY_TIPUS = {
     "energiahatekonys",
     "akadalymentesitett",
     "legkondicionalo",
+    "butorozott",
+    "koltozheto",
+    "min_berleti_ido",
+    "kisallat_megengedett",
+    "dohanyzas_megengedett",
   ],
   telek: [
-    "ingatlan_kora",
+    "kilatas",
     "villany",
     "viz",
     "gaz",
@@ -524,11 +555,18 @@ export const INGATLAN_FIELDS_BY_TIPUS = {
     "csatorna",
     "telekterulet_tol",
     "telekterulet_ig",
+    "szintek_tol",
+    "szintek_ig",
     "napelem",
     "szigeteles",
     "energiahatekonys",
     "akadalymentesitett",
     "legkondicionalo",
+    "butorozott",
+    "koltozheto",
+    "min_berleti_ido",
+    "kisallat_megengedett",
+    "dohanyzas_megengedett",
   ],
   iroda: [
     "allapot",
@@ -536,11 +574,13 @@ export const INGATLAN_FIELDS_BY_TIPUS = {
     "min_berleti_ido",
     "butorozott",
     "irodahaz_kategoria",
-    "tetoter",
     "koltozheto",
     "emelet_tol",
     "emelet_ig",
     "emelet",
+    "szintek_tol",
+    "szintek_ig",
+    "parkolas",
     "uzemeltetesi_dij_tol",
     "uzemeltetesi_dij_ig",
     "kaucio_max",
@@ -553,6 +593,9 @@ export const INGATLAN_FIELDS_BY_TIPUS = {
     "ingatlan_kora",
     "min_berleti_ido",
     "koltozheto",
+    "emelet",
+    "szintek_tol",
+    "szintek_ig",
     "energiahatekonys",
     "akadalymentesitett",
     "legkondicionalo",
@@ -562,6 +605,9 @@ export const INGATLAN_FIELDS_BY_TIPUS = {
     "ingatlan_kora",
     "min_berleti_ido",
     "koltozheto",
+    "emelet",
+    "szintek_tol",
+    "szintek_ig",
     "energiahatekonys",
     "akadalymentesitett",
     "legkondicionalo",
@@ -571,20 +617,26 @@ export const INGATLAN_FIELDS_BY_TIPUS = {
     "ingatlan_kora",
     "min_berleti_ido",
     "koltozheto",
+    "emelet",
     "telekterulet_tol",
     "telekterulet_ig",
     "energiahatekonys",
   ],
   ipari: [
+    "allapot",
     "ingatlan_kora",
     "min_berleti_ido",
     "koltozheto",
+    "emelet",
+    "szintek_tol",
+    "szintek_ig",
     "telekterulet_tol",
     "telekterulet_ig",
     "energiahatekonys",
+    "akadalymentesitett",
+    "legkondicionalo",
   ],
   mezogazdasagi: [
-    "ingatlan_kora",
     "min_berleti_ido",
     "koltozheto",
     "telekterulet_tol",
@@ -593,13 +645,18 @@ export const INGATLAN_FIELDS_BY_TIPUS = {
     "epitmeny_terulet_ig",
   ],
   fejlesztesi_terulet: [
-    "ingatlan_kora",
+    "kilatas",
     "min_berleti_ido",
     "koltozheto",
+    "villany",
+    "viz",
+    "gaz",
+    "csatorna",
     "telekterulet_tol",
     "telekterulet_ig",
   ],
   intezmeny: [
+    "szobaszam",
     "allapot",
     "ingatlan_kora",
     "min_berleti_ido",
@@ -609,18 +666,37 @@ export const INGATLAN_FIELDS_BY_TIPUS = {
     "parkolas",
     "komfort",
     "tetoter",
+    "furdo_wc",
     "koltozheto",
     "telekterulet_tol",
     "telekterulet_ig",
+    "szintek_tol",
+    "szintek_ig",
+    "pince",
     "napelem",
     "szigeteles",
     "energiahatekonys",
     "akadalymentesitett",
     "legkondicionalo",
+    "kisallat_megengedett",
+    "dohanyzas_megengedett",
   ],
   /* Nincs külön lista — minden típusmező uniója */
   egyeb: null,
 };
+
+/** Csak kiadó / Airbnb üzletágnál látszanak (ingatlan.com listing_type === 2). */
+export const INGATLAN_KIADO_ONLY_FIELDS = [
+  "min_berleti_ido",
+  "butorozott",
+  "koltozheto",
+  "gepesitett",
+  "kisallat_megengedett",
+  "dohanyzas_megengedett",
+  "uzemeltetesi_dij_tol",
+  "uzemeltetesi_dij_ig",
+  "kaucio_max",
+];
 
 /** Airbnb / rövid típusok → lakás mezőkészlet. */
 export const INGATLAN_TIPUS_FIELD_ALIAS = {
@@ -691,7 +767,7 @@ export function effectiveIngatlanFieldsByTipus() {
 }
 
 /** Kiválasztott típus(ok) → látható mezőkulcsok (CORE + terület + típusmezők). */
-export function fieldKeysVisibleForTipus(parentValues) {
+export function fieldKeysVisibleForTipus(parentValues, opts = {}) {
   const map = effectiveIngatlanFieldsByTipus();
   const parents = (Array.isArray(parentValues) ? parentValues : String(parentValues ?? "").split(","))
     .map((v) => resolveTipusFieldParent(v))
@@ -710,17 +786,21 @@ export function fieldKeysVisibleForTipus(parentValues) {
 
   if (!parents.length) {
     for (const f of allTypeKeys()) out.add(f);
-    return out;
+  } else {
+    for (const p of parents) {
+      const list = map[p];
+      if (list == null && p === "egyeb") {
+        for (const f of allTypeKeys()) out.add(f);
+        continue;
+      }
+      if (!Array.isArray(list)) continue;
+      for (const f of list) out.add(f);
+    }
   }
 
-  for (const p of parents) {
-    const list = map[p];
-    if (list == null && p === "egyeb") {
-      for (const f of allTypeKeys()) out.add(f);
-      continue;
-    }
-    if (!Array.isArray(list)) continue;
-    for (const f of list) out.add(f);
+  const uz = normalizeIngatlanUzletag(opts.uzletag || "");
+  if (uz === "elado") {
+    for (const key of INGATLAN_KIADO_ONLY_FIELDS) out.delete(key);
   }
   return out;
 }

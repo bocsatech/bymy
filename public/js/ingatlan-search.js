@@ -18,6 +18,7 @@ import {
   PARKOLAS,
   KOMFORT,
   TETOTER,
+  TETOTER_HAZ,
   FURDO_WC,
   EMELET,
   BELMAGASSAG,
@@ -25,8 +26,12 @@ import {
   KOLTOZHETO_ROVID,
   KOZMU_OPTIONS,
   IRODAHAZ_KATEGORIA,
+  ENERGETIKAI_TANUSITVANY,
+  VAN_NINCS,
+  IGEN_NEM,
   INGATLAN_BOOL_FIELDS,
   boolOptionsForField,
+  isVanLike,
   fieldKeysVisibleForTipus,
   areaFieldKeysForTipus,
   alapteruletOptions,
@@ -42,7 +47,7 @@ import {
   tipus2OptionsForParents,
   applyIngatlanTipusFieldsConfig,
   resolveTipusFieldParent,
-} from "./ingatlan-fields.js?v=immoMenus2";
+} from "./ingatlan-fields.js?v=immoComParity1";
 import {
   fillWheel,
   readWheel,
@@ -85,6 +90,9 @@ const EXACT_KEYS = [
   "gaz",
   "csatorna",
   "irodahaz_kategoria",
+  "napelem",
+  "szigeteles",
+  "energiahatekonys",
   ...INGATLAN_BOOL_FIELDS.map((f) => f.field_key),
 ];
 
@@ -148,6 +156,9 @@ export function emptyIngatlanFilters() {
     kozos_koltseg: null,
     atlagos_aram_fogyasztas: null,
     atlagos_gaz_fogyasztas: null,
+    nincs_gaz_bekotve: "",
+    napelem_kw: null,
+    szigeteles_cm: null,
   };
 }
 
@@ -590,10 +601,22 @@ function normalizePlace(value) {
 }
 
 function isTruthyIgen(value) {
-  const v = String(value ?? "")
+  return isVanLike(value);
+}
+
+function matchesVanNincsFilter(want, got) {
+  const w = String(want ?? "")
     .trim()
     .toLowerCase();
-  return v === "igen" || v === "1" || v === "true" || v === "yes";
+  if (!w) return true;
+  if (w === "van" || w === "igen") return isVanLike(got);
+  if (w === "nincs" || w === "nem") {
+    const g = String(got ?? "")
+      .trim()
+      .toLowerCase();
+    return g === "nincs" || g === "nem" || g === "0" || g === "false";
+  }
+  return String(got ?? "").trim().toLowerCase() === w;
 }
 
 export function filterListingsByIngatlan(items, filters) {
@@ -673,6 +696,10 @@ export function filterListingsByIngatlan(items, filters) {
       if (!want) continue;
       if (INGATLAN_BOOL_FIELDS.some((b) => b.field_key === key)) {
         if (!isTruthyIgen(fieldBag(item, key))) return false;
+        continue;
+      }
+      if (key === "napelem" || key === "szigeteles") {
+        if (!matchesVanNincsFilter(want, fieldBag(item, key))) return false;
         continue;
       }
       const got = fieldBag(item, key);
@@ -783,6 +810,48 @@ function syncTipusFieldVisibility(form) {
   });
 
   layoutAreaDuals(form, { showAlap, showTelek });
+  syncDetailConditionals(form);
+}
+
+/** ingatlan.com-szerű feltételes mezők: gáz / napelem kW / szigetelés cm. */
+function syncDetailConditionals(form) {
+  if (!form) return;
+  const parents = readWheelList(form.querySelector('[data-wheel="ingatlan_lakas_tipus"]'));
+  const tipusVisible = fieldKeysVisibleForTipus(parents, { uzletag: readUzletag(form) });
+  const noGas = isVanLike(readWheel(form.querySelector('[data-wheel="nincs_gaz_bekotve"]')));
+  const solarOn = isVanLike(readWheel(form.querySelector('[data-wheel="napelem"]')));
+  const insOn = isVanLike(readWheel(form.querySelector('[data-wheel="szigeteles"]')));
+
+  const setHidden = (key, show) => {
+    const cell = form.querySelector(`[data-schema-field="${key}"]`);
+    if (!cell) return;
+    const allow = tipusVisible.has(key) && show;
+    cell.classList.toggle("is-tipus-hidden", !allow);
+    if (!allow) {
+      const wheel = cell.querySelector("[data-wheel]");
+      if (wheel) setWheelValue(wheel, "");
+      const input = cell.querySelector('input.immo-control, input[name]');
+      if (input && input.name && !input.closest("[data-wheel]")) input.value = "";
+    }
+  };
+
+  if (tipusVisible.has("atlagos_gaz_fogyasztas")) {
+    setHidden("atlagos_gaz_fogyasztas", !noGas);
+  }
+  setHidden("napelem_kw", solarOn);
+  setHidden("szigeteles_cm", insOn);
+
+  /* Ház/nyaraló/intézmény: tetőtér = beépített…; lakás: tetőtéri… */
+  const tetoter = form.querySelector('[data-wheel="tetoter"]');
+  if (tetoter && tipusVisible.has("tetoter")) {
+    const hazLike = parents.some((p) => ["haz", "nyaralo", "intezmeny"].includes(p));
+    const prev = readWheel(tetoter);
+    const opts = (hazLike ? TETOTER_HAZ : TETOTER).filter((o) => o.value);
+    fillWheel(tetoter, opts, { emptyLabel: "Mindegy" });
+    initImmoSearchWheel(tetoter, { emptyLabel: "Mindegy", multiple: false });
+    const allowed = new Set(opts.map((o) => o.value));
+    setWheelValue(tetoter, allowed.has(prev) ? prev : "");
+  }
 }
 
 /**
@@ -976,6 +1045,12 @@ function readForm(form) {
   out.kozos_koltseg = numOrNull(form.querySelector('[name="kozos_koltseg"]')?.value);
   out.atlagos_aram_fogyasztas = numOrNull(form.querySelector('[name="atlagos_aram_fogyasztas"]')?.value);
   out.atlagos_gaz_fogyasztas = numOrNull(form.querySelector('[name="atlagos_gaz_fogyasztas"]')?.value);
+  out.napelem = readWheel(form.querySelector('[data-wheel="napelem"]'));
+  out.szigeteles = readWheel(form.querySelector('[data-wheel="szigeteles"]'));
+  out.energiahatekonys = readWheel(form.querySelector('[data-wheel="energiahatekonys"]'));
+  out.nincs_gaz_bekotve = readWheel(form.querySelector('[data-wheel="nincs_gaz_bekotve"]'));
+  out.napelem_kw = numOrNull(form.querySelector('[name="napelem_kw"]')?.value);
+  out.szigeteles_cm = numOrNull(form.querySelector('[name="szigeteles_cm"]')?.value);
   for (const bool of INGATLAN_BOOL_FIELDS) {
     out[bool.field_key] = readWheel(form.querySelector(`[data-wheel="${bool.field_key}"]`));
   }
@@ -997,6 +1072,8 @@ function restoreIngatlanSearchValues(root, values) {
     "kozos_koltseg",
     "atlagos_aram_fogyasztas",
     "atlagos_gaz_fogyasztas",
+    "napelem_kw",
+    "szigeteles_cm",
   ]) {
     const input = root.querySelector(`[name="${key}"], #immo-${key}`);
     if (input && values[key] != null && values[key] !== "") {
@@ -1039,6 +1116,10 @@ function setupIngatlanSearchWheels(root, { tipusOpts, tipus2Enabled, defaultUzle
   fillWheel(root.querySelector('[data-wheel="gaz"]'), KOZMU_OPTIONS.filter((o) => o.value));
   fillWheel(root.querySelector('[data-wheel="csatorna"]'), KOZMU_OPTIONS.filter((o) => o.value));
   fillWheel(root.querySelector('[data-wheel="irodahaz_kategoria"]'), IRODAHAZ_KATEGORIA.filter((o) => o.value));
+  fillWheel(root.querySelector('[data-wheel="energiahatekonys"]'), ENERGETIKAI_TANUSITVANY.filter((o) => o.value));
+  fillWheel(root.querySelector('[data-wheel="napelem"]'), VAN_NINCS.filter((o) => o.value));
+  fillWheel(root.querySelector('[data-wheel="szigeteles"]'), VAN_NINCS.filter((o) => o.value));
+  fillWheel(root.querySelector('[data-wheel="nincs_gaz_bekotve"]'), IGEN_NEM.filter((o) => o.value));
   fillWheel(root.querySelector('[data-wheel="kaucio_max"]'), arFtMinOptions(), { emptyLabel: "max." });
   fillWheel(root.querySelector('[data-wheel="ar_ft_min"]'), arFtMinOptions(), { emptyLabel: "Mindegy" });
   for (const bool of INGATLAN_BOOL_FIELDS) {
@@ -1219,6 +1300,11 @@ export async function initIngatlanSearch({
         if (tipus2Enabled) syncTipus2Menu(root);
         syncTipusFieldVisibility(root);
         syncMorePanelForTipus();
+        return;
+      }
+
+      if (field === "napelem" || field === "szigeteles" || field === "nincs_gaz_bekotve") {
+        syncDetailConditionals(root);
       }
     });
 

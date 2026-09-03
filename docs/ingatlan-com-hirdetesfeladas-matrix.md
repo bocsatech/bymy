@@ -76,11 +76,12 @@ Jelölés: szám = `property_type_id`. Kiadó-only: csak `listing_type_id === 2`
 | condition | `allapot` | 1,2,4,5,6,7,8,13,14 |
 | year_built | `ingatlan_kora` | 1,2,4,5,6,7,8,13,14 |
 | heating ×3 | `futes` | 1,2,5,13 |
-| energy cert | `energiahatekonys` | 1,2,5,6,7,8,9,13,14 |
+| energy cert | `energiahatekonys` (A+++…I) | 1,2,5,6,7,8,9,13,14 |
 | utility_costs / common_charges | `rezsikoltseg` / `kozos_koltseg` | 1,2,5,7,13 / 1,2,5,13 + eladó\|kiadó |
 | average_electric / average_gas | `atlagos_aram_fogyasztas` / `atlagos_gaz_fogyasztas` | 1,2,5,13 |
-| solar_panel | `napelem` | **2,5,13** (nem lakás!) |
-| insulation | `szigeteles` | 1,2,5,13 |
+| without_gas_connection | `nincs_gaz_bekotve` | 1,2,5,13 |
+| solar_panel (+ kW) | `napelem` / `napelem_kw` | **2,5,13** (nem lakás!); kW ha van |
+| insulation (+ cm) | `szigeteles` / `szigeteles_cm` | 1,2,5,13; cm ha van |
 | building_floor_count | `szintek_*` | 1,2,5,6,7,8,9,13,14 |
 | floor_id | `emelet` | 1,6,7,8,9,14 |
 | is_attic | (~tetőtéri) | 1,6 |

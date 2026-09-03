@@ -186,12 +186,43 @@ export function tipus2OptionsForParents(parentValues, opts = {}) {
 
 export const INGATLAN_ALLAPOT = [
   { value: "", label: "Mindegy" },
-  { value: "uj_epitesu", label: "Új építésű" },
+  { value: "ujszeru", label: "Újszerű" },
   { value: "felujitott", label: "Felújított" },
   { value: "jo_allapotu", label: "Jó állapotú" },
   { value: "kozepes_allapotu", label: "Közepes állapotú" },
   { value: "felujitando", label: "Felújítandó" },
   { value: "befejezetlen", label: "Befejezetlen" },
+  { value: "uj_epitesu", label: "Új építésű" },
+];
+
+/** Energetikai tanúsítvány — ingatlan.com A+++ … I. */
+export const ENERGETIKAI_TANUSITVANY = [
+  { value: "", label: "Mindegy" },
+  { value: "a+++", label: "A+++" },
+  { value: "a++", label: "A++" },
+  { value: "a+", label: "A+" },
+  { value: "a", label: "A" },
+  { value: "b", label: "B" },
+  { value: "c", label: "C" },
+  { value: "d", label: "D" },
+  { value: "e", label: "E" },
+  { value: "f", label: "F" },
+  { value: "g", label: "G" },
+  { value: "h", label: "H" },
+  { value: "i", label: "I" },
+];
+
+/** Van / nincs (feladás + kereső), kompatibilis a régi „igen” értékkel. */
+export const VAN_NINCS = [
+  { value: "", label: "Mindegy" },
+  { value: "van", label: "Van" },
+  { value: "nincs", label: "Nincs" },
+];
+
+export const IGEN_NEM = [
+  { value: "", label: "Mindegy" },
+  { value: "igen", label: "Igen" },
+  { value: "nem", label: "Nem" },
 ];
 
 export const INGATLAN_KORA = [
@@ -289,8 +320,17 @@ export const KOMFORT = [
   { value: "luxus", label: "Luxus" },
   { value: "duplakomfortos", label: "Duplakomfortos" },
   { value: "osszkomfortos", label: "Összkomfortos" },
+  { value: "komfortos", label: "Komfortos" },
   { value: "felkomfortos", label: "Félkomfortos" },
   { value: "komfort_nelkuli", label: "Komfort nélküli" },
+];
+
+/** Ház / nyaraló tetőtér (ingatlan.com attic_type). */
+export const TETOTER_HAZ = [
+  { value: "", label: "Mindegy" },
+  { value: "beepitett", label: "Beépített" },
+  { value: "beepitheto", label: "Beépíthető" },
+  { value: "nem_beepitheto", label: "Nem beépíthető" },
 ];
 
 export const TETOTER = [
@@ -304,9 +344,11 @@ export const TETOTER = [
 
 export const FURDO_WC = [
   { value: "", label: "Mindegy" },
+  { value: "kulon", label: "Külön" },
+  { value: "egyben", label: "Egyben" },
+  { value: "kulon_es_egyben", label: "Külön és egyben is" },
   { value: "kulon_helyisegben", label: "Külön helyiségben" },
   { value: "egy_helyisegben", label: "Egy helyiségben" },
-  { value: "kulon_es_egyben", label: "Külön és egyben is" },
   { value: "kozos_hasznalat", label: "Közös használat" },
 ];
 
@@ -376,12 +418,11 @@ export const IRODAHAZ_KATEGORIA = [
 
 /**
  * Bool / igen-van mezők. value mindig "igen" (szűrés), a yesLabel a UI szöveg.
+ * Napelem / szigetelés / energia: külön van–nincs / tanúsítvány listák.
  */
 export const INGATLAN_BOOL_FIELDS = [
   { field_key: "lift", label: "Lift", yesLabel: "Van" },
   { field_key: "erkely", label: "Erkély", yesLabel: "Van" },
-  { field_key: "szigeteles", label: "Szigetelés", yesLabel: "Van" },
-  { field_key: "energiahatekonys", label: "Energiahatékony", yesLabel: "Igen" },
   { field_key: "akadalymentesitett", label: "Akadálymentesített", yesLabel: "Igen" },
   { field_key: "legkondicionalo", label: "Légkondicionáló", yesLabel: "Van" },
   { field_key: "kertkapcsolatos", label: "Kertkapcsolatos", yesLabel: "Igen" },
@@ -390,9 +431,21 @@ export const INGATLAN_BOOL_FIELDS = [
   { field_key: "kisallat_megengedett", label: "Kisállat hozható", yesLabel: "Igen" },
   { field_key: "dohanyzas_megengedett", label: "Dohányzás megengedett", yesLabel: "Megengedett" },
   { field_key: "pince", label: "Pince", yesLabel: "Van" },
-  { field_key: "napelem", label: "Napelem", yesLabel: "Van" },
   { field_key: "uj_parcellazasu", label: "Csak új parcellázású", yesLabel: "Igen" },
 ];
+
+/** Van/nincs listás mezők (nem a bool „igen” szűrő). */
+export const INGATLAN_VAN_NINCS_FIELDS = [
+  { field_key: "napelem", label: "Napelem" },
+  { field_key: "szigeteles", label: "Szigetelés" },
+];
+
+export function isVanLike(value) {
+  const v = String(value ?? "")
+    .trim()
+    .toLowerCase();
+  return v === "van" || v === "igen" || v === "1" || v === "true" || v === "yes";
+}
 
 export function boolOptionsForField(fieldOrKey) {
   const key = typeof fieldOrKey === "string" ? fieldOrKey : fieldOrKey?.field_key;
@@ -494,9 +547,11 @@ export const INGATLAN_FIELDS_BY_TIPUS = {
     "kozos_koltseg",
     "atlagos_aram_fogyasztas",
     "atlagos_gaz_fogyasztas",
+    "nincs_gaz_bekotve",
     "lift",
     "erkely",
     "szigeteles",
+    "szigeteles_cm",
     "energiahatekonys",
     "akadalymentesitett",
     "legkondicionalo",
@@ -527,9 +582,12 @@ export const INGATLAN_FIELDS_BY_TIPUS = {
     "kozos_koltseg",
     "atlagos_aram_fogyasztas",
     "atlagos_gaz_fogyasztas",
+    "nincs_gaz_bekotve",
     "pince",
     "napelem",
+    "napelem_kw",
     "szigeteles",
+    "szigeteles_cm",
     "energiahatekonys",
     "akadalymentesitett",
     "legkondicionalo",
@@ -569,8 +627,11 @@ export const INGATLAN_FIELDS_BY_TIPUS = {
     "kozos_koltseg",
     "atlagos_aram_fogyasztas",
     "atlagos_gaz_fogyasztas",
+    "nincs_gaz_bekotve",
     "napelem",
+    "napelem_kw",
     "szigeteles",
+    "szigeteles_cm",
     "energiahatekonys",
     "akadalymentesitett",
     "legkondicionalo",
@@ -687,7 +748,9 @@ export const INGATLAN_FIELDS_BY_TIPUS = {
     "szintek_ig",
     "pince",
     "napelem",
+    "napelem_kw",
     "szigeteles",
+    "szigeteles_cm",
     "energiahatekonys",
     "akadalymentesitett",
     "legkondicionalo",
@@ -695,6 +758,7 @@ export const INGATLAN_FIELDS_BY_TIPUS = {
     "kozos_koltseg",
     "atlagos_aram_fogyasztas",
     "atlagos_gaz_fogyasztas",
+    "nincs_gaz_bekotve",
     "kisallat_megengedett",
     "dohanyzas_megengedett",
   ],
@@ -765,6 +829,12 @@ export const INGATLAN_ASSIGNABLE_FIELD_DEFS = [
   { field_key: "kozos_koltseg", label: "Közös költség", group: "tartomany" },
   { field_key: "atlagos_aram_fogyasztas", label: "Átlagos áramfogyasztás", group: "tartomany" },
   { field_key: "atlagos_gaz_fogyasztas", label: "Átlagos gázfogyasztás", group: "tartomany" },
+  { field_key: "napelem", label: "Napelem", group: "lista" },
+  { field_key: "szigeteles", label: "Szigetelés", group: "lista" },
+  { field_key: "energiahatekonys", label: "Energetikai tanúsítvány", group: "lista" },
+  { field_key: "napelem_kw", label: "Napelem teljesítmény (kW)", group: "tartomany" },
+  { field_key: "szigeteles_cm", label: "Szigetelés vastagság (cm)", group: "tartomany" },
+  { field_key: "nincs_gaz_bekotve", label: "Nincs gáz bekötve", group: "lista" },
   ...INGATLAN_BOOL_FIELDS.map((f) => ({
     field_key: f.field_key,
     label: f.label,
@@ -878,6 +948,8 @@ export function ingatlanFormFieldCatalog() {
     { field_key: "kozos_koltseg", label: "Közös költség (Ft/hó)", step: 2 },
     { field_key: "atlagos_aram_fogyasztas", label: "Átlagos áramfogyasztás (kWh/hó)", step: 2 },
     { field_key: "atlagos_gaz_fogyasztas", label: "Átlagos gázfogyasztás (m³/hó)", step: 2 },
+    { field_key: "napelem_kw", label: "Napelem teljesítmény (kW)", step: 2 },
+    { field_key: "szigeteles_cm", label: "Szigetelés vastagság (cm)", step: 2 },
     { field_key: "alapterulet", label: "Alapterület (m²)", step: 1 },
     { field_key: "szobaszam", label: "Szobaszám", step: 1 },
     { field_key: "vetelar", label: "Ár (Ft)", step: 5 },

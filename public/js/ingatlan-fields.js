@@ -889,6 +889,22 @@ export function fieldKeysVisibleForTipus(parentValues, opts = {}) {
     }
   }
 
+  /* Kereső min–max párok ↔ feladás egyszeres mezők (ugyanaz a láthatóság). */
+  for (const [tol, ig, single] of [
+    ["alapterulet_tol", "alapterulet_ig", "alapterulet"],
+    ["telekterulet_tol", "telekterulet_ig", "telekterulet"],
+    ["epitmeny_terulet_tol", "epitmeny_terulet_ig", "epitmeny_terulet"],
+    ["szintek_tol", "szintek_ig", "szintek"],
+    ["uzemeltetesi_dij_tol", "uzemeltetesi_dij_ig", "uzemeltetesi_dij"],
+    ["emelet_tol", "emelet_ig", "emelet"],
+  ]) {
+    if (out.has(tol) || out.has(ig) || out.has(single)) {
+      out.add(tol);
+      out.add(ig);
+      out.add(single);
+    }
+  }
+
   const uz = normalizeIngatlanUzletag(opts.uzletag || "");
   if (uz === "elado") {
     for (const key of INGATLAN_KIADO_ONLY_FIELDS) out.delete(key);

@@ -2616,6 +2616,7 @@ body.site-app #ad-form.ad-form--ingatlan .immo-search-panel {
   box-shadow: none;
 }
 
+/* Feladás: ugyanaz a 12-oszlopos rács, mint a kereső (ingatlan.html desk). */
 body.site-app #ad-form.ad-form--ingatlan .immo-search-panel--post .immo-schema-grid {
   display: grid !important;
   grid-template-columns: repeat(12, minmax(0, 1fr)) !important;
@@ -2651,6 +2652,7 @@ body.site-app #ad-form.ad-form--ingatlan .immo-action {
   font-weight: 600;
   cursor: pointer;
 }
+/* Asztali: bal oldalsáv mint az /ingatlan.html kereső (360px panel). */
 @media (min-width: 901px) {
   body.site-app.ad-vertical-ingatlan[data-site-page="hirdetesfeladas"] .site-layout--wide .site-center--automax {
     grid-template-columns: 360px minmax(0, 1fr) !important;

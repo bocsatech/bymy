@@ -47,7 +47,7 @@ import {
   tipus2OptionsForParents,
   applyIngatlanTipusFieldsConfig,
   resolveTipusFieldParent,
-} from "./ingatlan-fields.js?v=immoComParity1";
+} from "./ingatlan-fields.js?v=immoUiParity1";
 import {
   fillWheel,
   readWheel,
@@ -65,7 +65,7 @@ import {
   INGATLAN_DUAL_RANGE_GROUPS,
   resolveIngatlanSchemaVariant,
   clearIngatlanWheelSchemaCache,
-} from "./ingatlan-wheel-schema.js?v=immoPostAdmin1";
+} from "./ingatlan-wheel-schema.js?v=immoUiParity1";
 import { wireTelepulesSuggestIn } from "./telepules-suggest.js?v=telepClose1";
 
 const EXACT_KEYS = [
@@ -122,6 +122,7 @@ export function emptyIngatlanFilters() {
     furdo_wc: "",
     emelet_tol: "",
     emelet_ig: "",
+    emelet: "",
     belmagassag: "",
     koltozheto: "",
     lift: "",
@@ -143,13 +144,17 @@ export function emptyIngatlanFilters() {
     gaz: "",
     csatorna: "",
     irodahaz_kategoria: "",
+    telekterulet: null,
     telekterulet_tol: null,
     telekterulet_ig: null,
+    szintek: "",
     szintek_tol: "",
     szintek_ig: "",
+    uzemeltetesi_dij: null,
     uzemeltetesi_dij_tol: null,
     uzemeltetesi_dij_ig: null,
     kaucio_max: null,
+    epitmeny_terulet: null,
     epitmeny_terulet_tol: null,
     epitmeny_terulet_ig: null,
     rezsikoltseg: null,
@@ -572,11 +577,37 @@ function fillEpitmenyTeruletRangeWheels(form) {
   });
 }
 
+function fillPostSingleWheels(form) {
+  const singles = [
+    { key: "alapterulet", options: alapteruletOptions(), emptyLabel: "Válassz" },
+    { key: "telekterulet", options: telekteruletOptions(), emptyLabel: "Válassz" },
+    { key: "epitmeny_terulet", options: epitmenyTeruletOptions(), emptyLabel: "Válassz" },
+    { key: "emelet", options: EMELET.filter((o) => o.value), emptyLabel: "Válassz" },
+    { key: "szintek", options: szintekOptions(), emptyLabel: "Válassz" },
+    { key: "uzemeltetesi_dij", options: arFtMinOptions(), emptyLabel: "Válassz" },
+  ];
+  for (const { key, options, emptyLabel } of singles) {
+    const wheel = form.querySelector(`[data-wheel="${key}"]`);
+    if (!wheel) continue;
+    const prev = readWheel(wheel);
+    fillWheel(wheel, options, { emptyLabel });
+    initImmoSearchWheel(wheel, { emptyLabel, multiple: false, customInput: false });
+    const next = form.querySelector(`[data-wheel="${key}"]`);
+    if (next) {
+      next.dataset.multiple = "0";
+      next.closest(".immo-wheel-wrap")?.classList.remove("immo-wheel-wrap--multi");
+      setWheelValue(next, prev);
+      syncImmoSearchWheelDisplay(next);
+    }
+  }
+}
+
 function fillTipusDependentRanges(form) {
   fillTelekteruletRangeWheels(form);
   fillSzintekRangeWheels(form);
   fillUzemeltetesiDijRangeWheels(form);
   fillEpitmenyTeruletRangeWheels(form);
+  fillPostSingleWheels(form);
 }
 
 function fieldBag(item, key) {
@@ -762,10 +793,13 @@ function syncTipusFieldVisibility(form) {
   const visible = fieldKeysVisibleForTipus(parents, { uzletag: readUzletag(form) });
   const areaKeys = areaFieldKeysForTipus(parents);
   const showAlap =
-    parents.includes("haz") ||
+    areaKeys.has("alapterulet") ||
     areaKeys.has("alapterulet_tol") ||
     areaKeys.has("alapterulet_ig");
-  const showTelek = areaKeys.has("telekterulet_tol") || areaKeys.has("telekterulet_ig");
+  const showTelek =
+    areaKeys.has("telekterulet") ||
+    areaKeys.has("telekterulet_tol") ||
+    areaKeys.has("telekterulet_ig");
   const dualSeen = new Set();
   const typeLocked = form.closest('[data-ingatlan-type-locked="1"]');
 
@@ -785,7 +819,7 @@ function syncTipusFieldVisibility(form) {
       if (rangeId) dualSeen.add(rangeId);
       const group = INGATLAN_DUAL_RANGE_GROUPS.find((g) => g.id === rangeId);
       let show = group
-        ? visible.has(group.tolKey) || visible.has(group.igKey)
+        ? visible.has(group.tolKey) || visible.has(group.igKey) || visible.has(group.id)
         : visible.has(key);
       if (rangeId === "alapterulet") show = showAlap;
       if (rangeId === "telekterulet") show = showTelek;
@@ -1008,8 +1042,10 @@ function readForm(form) {
   out.ar_ig = readPriceInputFt(form.querySelector('[name="ar_ig"], #immo-ar_ig'));
   out.alapterulet_tol = numOrNull(readWheel(form.querySelector('[data-wheel="alapterulet_tol"]')));
   out.alapterulet_ig = numOrNull(readWheel(form.querySelector('[data-wheel="alapterulet_ig"]')));
+  out.alapterulet = numOrNull(readWheel(form.querySelector('[data-wheel="alapterulet"]')));
   out.telekterulet_tol = numOrNull(readWheel(form.querySelector('[data-wheel="telekterulet_tol"]')));
   out.telekterulet_ig = numOrNull(readWheel(form.querySelector('[data-wheel="telekterulet_ig"]')));
+  out.telekterulet = numOrNull(readWheel(form.querySelector('[data-wheel="telekterulet"]')));
   out.szobaszam = readWheel(form.querySelector('[data-wheel="szobaszam"]'));
   out.ingatlan_lakas_tipus = readWheel(form.querySelector('[data-wheel="ingatlan_lakas_tipus"]'));
   out.ingatlan_tipus_2 = readWheel(form.querySelector('[data-wheel="ingatlan_tipus_2"]'));
@@ -1026,6 +1062,7 @@ function readForm(form) {
   out.furdo_wc = readWheel(form.querySelector('[data-wheel="furdo_wc"]'));
   out.emelet_tol = readWheel(form.querySelector('[data-wheel="emelet_tol"]'));
   out.emelet_ig = readWheel(form.querySelector('[data-wheel="emelet_ig"]'));
+  out.emelet = readWheel(form.querySelector('[data-wheel="emelet"]'));
   out.belmagassag = readWheel(form.querySelector('[data-wheel="belmagassag"]'));
   out.koltozheto = readWheel(form.querySelector('[data-wheel="koltozheto"]'));
   out.villany = readWheel(form.querySelector('[data-wheel="villany"]'));
@@ -1035,11 +1072,14 @@ function readForm(form) {
   out.irodahaz_kategoria = readWheel(form.querySelector('[data-wheel="irodahaz_kategoria"]'));
   out.szintek_tol = readWheel(form.querySelector('[data-wheel="szintek_tol"]'));
   out.szintek_ig = readWheel(form.querySelector('[data-wheel="szintek_ig"]'));
+  out.szintek = readWheel(form.querySelector('[data-wheel="szintek"]'));
   out.uzemeltetesi_dij_tol = numOrNull(readWheel(form.querySelector('[data-wheel="uzemeltetesi_dij_tol"]')));
   out.uzemeltetesi_dij_ig = numOrNull(readWheel(form.querySelector('[data-wheel="uzemeltetesi_dij_ig"]')));
+  out.uzemeltetesi_dij = numOrNull(readWheel(form.querySelector('[data-wheel="uzemeltetesi_dij"]')));
   out.kaucio_max = numOrNull(readWheel(form.querySelector('[data-wheel="kaucio_max"]')));
   out.epitmeny_terulet_tol = numOrNull(readWheel(form.querySelector('[data-wheel="epitmeny_terulet_tol"]')));
   out.epitmeny_terulet_ig = numOrNull(readWheel(form.querySelector('[data-wheel="epitmeny_terulet_ig"]')));
+  out.epitmeny_terulet = numOrNull(readWheel(form.querySelector('[data-wheel="epitmeny_terulet"]')));
   out.ar_ft_min = numOrNull(readWheel(form.querySelector('[data-wheel="ar_ft_min"]')));
   out.rezsikoltseg = numOrNull(form.querySelector('[name="rezsikoltseg"]')?.value);
   out.kozos_koltseg = numOrNull(form.querySelector('[name="kozos_koltseg"]')?.value);

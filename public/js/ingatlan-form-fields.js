@@ -3,12 +3,12 @@
  * Séma: eladó / kiadó / airbnb külön variant.
  */
 
-import { normalizeIngatlanUzletag, INGATLAN_LAKAS_TIPUS, INGATLAN_LAKAS_TIPUS_AIRBNB } from "./ingatlan-fields.js?v=immoAreaMatrix1";
+import { normalizeIngatlanUzletag, INGATLAN_LAKAS_TIPUS, INGATLAN_LAKAS_TIPUS_AIRBNB } from "./ingatlan-fields.js?v=immoUiParity1";
 import {
   initIngatlanSearch,
   readIngatlanSearchForm,
-} from "./ingatlan-search.js?v=immoPostAdmin1";
-import { fetchIngatlanWheelSchema } from "./ingatlan-wheel-schema.js?v=immoPostAdmin1";
+} from "./ingatlan-search.js?v=immoUiParity1";
+import { fetchIngatlanWheelSchema } from "./ingatlan-wheel-schema.js?v=immoUiParity1";
 import { wireTelepulesSuggestIn } from "./telepules-suggest.js?v=telepClose1";
 
 function removeIngatlanFormFields(form) {

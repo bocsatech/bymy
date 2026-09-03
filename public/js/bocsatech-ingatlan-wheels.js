@@ -8,7 +8,7 @@ import {
   INGATLAN_DUAL_RANGE_GROUPS,
   syncDualRangeCells,
   dualGroupForField,
-} from "./ingatlan-wheel-schema.js?v=immoPostAdmin1";
+} from "./ingatlan-wheel-schema.js?v=immoUiParity1";
 
 const COLS = WHEEL_COLS;
 const ROW_PX = 72;

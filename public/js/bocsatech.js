@@ -1,11 +1,11 @@
 import { mountLayoutBoard } from "./bocsatech-layout.js?v=layoutSpacer1";
-import { mountIngatlanWheelBoard } from "./bocsatech-ingatlan-wheels.js?v=immoPostAdmin1";
+import { mountIngatlanWheelBoard } from "./bocsatech-ingatlan-wheels.js?v=immoUiParity1";
 import {
   isIngatlanWheelAdminCategory,
   normalizeIngatlanWheelVariant,
   INGATLAN_TIPUS_LAYOUTS,
-} from "./ingatlan-wheel-schema.js?v=immoWheel21";
-import { INGATLAN_LAKAS_TIPUS, fieldKeysVisibleForTipus } from "./ingatlan-fields.js?v=immoMenus2";
+} from "./ingatlan-wheel-schema.js?v=immoUiParity1";
+import { INGATLAN_LAKAS_TIPUS, fieldKeysVisibleForTipus } from "./ingatlan-fields.js?v=immoUiParity1";
 
 const app = document.getElementById("app");
 

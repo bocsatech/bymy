@@ -104,3 +104,80 @@ export function filterAutoListings(items) {
     return vertical !== "teher" && vertical !== "ingatlan";
   });
 }
+
+function listingField(item, key) {
+  const f = item?.preview?.filter ?? {};
+  const form = item?.form ?? {};
+  const v = f[key] ?? form[key];
+  return v == null ? "" : String(v).trim();
+}
+
+function listingVertical(item) {
+  const vertical = listingField(item, "hirdetes_vertical").toLowerCase();
+  const sub = listingField(item, "hirdetes_alkategoria").toLowerCase();
+  if (vertical === "ingatlan" || sub === "ingatlan" || sub.startsWith("ingatlan")) return "ingatlan";
+  return vertical || "auto";
+}
+
+function normalizeUzletag(value) {
+  const v = String(value ?? "")
+    .trim()
+    .toLowerCase();
+  if (v === "elado" || v === "kinal" || v === "eladó") return "elado";
+  if (v === "airbnb" || v === "rovid" || v === "rövid") return "airbnb";
+  if (v === "kiado" || v === "kiadó" || v === "berbe" || v === "berles" || v === "berelheto" || v === "keres") {
+    return "kiado";
+  }
+  return v;
+}
+
+function tipustTokens(item) {
+  const raw = listingField(item, "ingatlan_lakas_tipus");
+  return raw
+    .split(",")
+    .map((s) => s.trim().toLowerCase())
+    .filter(Boolean);
+}
+
+/**
+ * @param {object[]} items
+ * @param {{ uzletag?: string, tipus?: string }} [opts]
+ *        tipus: "lakas" | "haz" | "" (összes)
+ */
+export function filterIngatlanListings(items, { uzletag = "", tipus = "" } = {}) {
+  const wantUz = uzletag ? normalizeUzletag(uzletag) : "";
+  const wantTipus = String(tipus || "")
+    .trim()
+    .toLowerCase();
+  return (items ?? []).filter((item) => {
+    if ((item.status || "feladott") !== "feladott") return false;
+    if (listingVertical(item) !== "ingatlan") return false;
+    if (wantUz) {
+      const got = normalizeUzletag(listingField(item, "ingatlan_uzletag"));
+      if (got && got !== wantUz) return false;
+      if (!got && wantUz === "elado") return false;
+    }
+    if (wantTipus) {
+      const tokens = tipustTokens(item);
+      if (!tokens.length) return false;
+      if (!tokens.includes(wantTipus)) return false;
+    }
+    return true;
+  });
+}
+
+/**
+ * @param {string} postal
+ * @param {number} radiusKm
+ * @param {{ uzletag?: string, tipus?: string }} [opts]
+ */
+export function ingatlanNearbyHref(postal, radiusKm, { uzletag = "", tipus = "" } = {}) {
+  const params = new URLSearchParams({
+    nearby: "1",
+    postal: String(postal ?? "").replace(/\D/g, "").slice(0, 4),
+    radius: String(radiusKm ?? 30),
+  });
+  if (uzletag) params.set("uzletag", normalizeUzletag(uzletag));
+  if (tipus) params.set("kat", String(tipus).trim().toLowerCase());
+  return `/ingatlan.html?${params}`;
+}

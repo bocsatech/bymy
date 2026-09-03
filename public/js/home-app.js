@@ -338,16 +338,38 @@ if (PAGE !== "ingatlan") {
 }
 
 if (PAGE === "ingatlan") {
-  const tipParam = new URLSearchParams(location.search).get("tipus") || "";
+  const params = new URLSearchParams(location.search);
+  const tipParam = params.get("tipus") || "";
+  const uzParam = params.get("uzletag") || "";
+  const katParam = ["lakas", "haz"].includes(String(params.get("kat") || "").toLowerCase())
+    ? String(params.get("kat")).toLowerCase()
+    : "";
   const defaultUzletag = normalizeIngatlanUzletag(
-    tipParam === "elado" || tipParam === "airbnb" || tipParam === "kiado" ? tipParam : "kiado"
+    uzParam ||
+      (tipParam === "elado" || tipParam === "airbnb" || tipParam === "kiado" ? tipParam : "kiado")
   );
+  ingatlanFilters = {
+    ...emptyIngatlanFilters(),
+    ingatlan_uzletag: defaultUzletag,
+    ...(katParam ? { ingatlan_lakas_tipus: katParam } : {}),
+  };
   initIngatlanSearch({
     defaultUzletag,
     onSearch: (values) => {
       ingatlanFilters = { ...emptyIngatlanFilters(), ...values };
       applyFilters();
     },
+  }).then(() => {
+    if (!katParam) return;
+    const form = document.getElementById("immo-search-form");
+    const wheel = form?.querySelector?.('[data-wheel="ingatlan_lakas_tipus"]');
+    if (!wheel) return;
+    import("./ingatlan-wheels.js?v=immoClearAll1")
+      .then(({ setWheelValue }) => {
+        setWheelValue(wheel, katParam);
+        wheel.dispatchEvent(new CustomEvent("immo-wheel-change", { bubbles: true }));
+      })
+      .catch(() => {});
   });
 } else {
   initHomeQuickSearch({

@@ -430,6 +430,25 @@ body[data-site-page="ingatlan"] .immo-search-tabs {
   display: none !important;
 }
 
+.immo-field--number .immo-number-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
+.immo-field--number .immo-number-wrap .immo-control {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.immo-field-unit {
+  flex: 0 0 auto;
+  font-size: 0.82rem;
+  color: var(--immo-muted, #64748b);
+  white-space: nowrap;
+}
+
 .immo-field.has-wheel-clear,
 .immo-dual-range__half.has-wheel-clear {
   position: relative;

@@ -77,7 +77,8 @@ Jelölés: szám = `property_type_id`. Kiadó-only: csak `listing_type_id === 2`
 | year_built | `ingatlan_kora` | 1,2,4,5,6,7,8,13,14 |
 | heating ×3 | `futes` | 1,2,5,13 |
 | energy cert | `energiahatekonys` | 1,2,5,6,7,8,9,13,14 |
-| utility_costs / common_charges | (még nincs külön) | 1,2,5,7,13 / 1,2,5,13 + eladó\|kiadó |
+| utility_costs / common_charges | `rezsikoltseg` / `kozos_koltseg` | 1,2,5,7,13 / 1,2,5,13 + eladó\|kiadó |
+| average_electric / average_gas | `atlagos_aram_fogyasztas` / `atlagos_gaz_fogyasztas` | 1,2,5,13 |
 | solar_panel | `napelem` | **2,5,13** (nem lakás!) |
 | insulation | `szigeteles` | 1,2,5,13 |
 | building_floor_count | `szintek_*` | 1,2,5,6,7,8,9,13,14 |

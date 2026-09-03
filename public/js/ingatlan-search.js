@@ -144,6 +144,10 @@ export function emptyIngatlanFilters() {
     kaucio_max: null,
     epitmeny_terulet_tol: null,
     epitmeny_terulet_ig: null,
+    rezsikoltseg: null,
+    kozos_koltseg: null,
+    atlagos_aram_fogyasztas: null,
+    atlagos_gaz_fogyasztas: null,
   };
 }
 
@@ -968,6 +972,10 @@ function readForm(form) {
   out.epitmeny_terulet_tol = numOrNull(readWheel(form.querySelector('[data-wheel="epitmeny_terulet_tol"]')));
   out.epitmeny_terulet_ig = numOrNull(readWheel(form.querySelector('[data-wheel="epitmeny_terulet_ig"]')));
   out.ar_ft_min = numOrNull(readWheel(form.querySelector('[data-wheel="ar_ft_min"]')));
+  out.rezsikoltseg = numOrNull(form.querySelector('[name="rezsikoltseg"]')?.value);
+  out.kozos_koltseg = numOrNull(form.querySelector('[name="kozos_koltseg"]')?.value);
+  out.atlagos_aram_fogyasztas = numOrNull(form.querySelector('[name="atlagos_aram_fogyasztas"]')?.value);
+  out.atlagos_gaz_fogyasztas = numOrNull(form.querySelector('[name="atlagos_gaz_fogyasztas"]')?.value);
   for (const bool of INGATLAN_BOOL_FIELDS) {
     out[bool.field_key] = readWheel(form.querySelector(`[data-wheel="${bool.field_key}"]`));
   }
@@ -979,6 +987,17 @@ function restoreIngatlanSearchValues(root, values) {
   const hely = root.querySelector('[name="keresesi_hely"]');
   if (hely && values.keresesi_hely) hely.value = values.keresesi_hely;
   for (const key of ["ar_tol", "ar_ig"]) {
+    const input = root.querySelector(`[name="${key}"], #immo-${key}`);
+    if (input && values[key] != null && values[key] !== "") {
+      input.value = String(values[key]);
+    }
+  }
+  for (const key of [
+    "rezsikoltseg",
+    "kozos_koltseg",
+    "atlagos_aram_fogyasztas",
+    "atlagos_gaz_fogyasztas",
+  ]) {
     const input = root.querySelector(`[name="${key}"], #immo-${key}`);
     if (input && values[key] != null && values[key] !== "") {
       input.value = String(values[key]);

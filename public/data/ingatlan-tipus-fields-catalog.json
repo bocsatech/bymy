@@ -26,6 +26,10 @@
       "belmagassag",
       "szintek_tol",
       "szintek_ig",
+      "rezsikoltseg",
+      "kozos_koltseg",
+      "atlagos_aram_fogyasztas",
+      "atlagos_gaz_fogyasztas",
       "lift",
       "erkely",
       "szigeteles",
@@ -54,6 +58,10 @@
       "telekterulet_ig",
       "szintek_tol",
       "szintek_ig",
+      "rezsikoltseg",
+      "kozos_koltseg",
+      "atlagos_aram_fogyasztas",
+      "atlagos_gaz_fogyasztas",
       "pince",
       "napelem",
       "szigeteles",
@@ -84,6 +92,10 @@
       "csatorna",
       "telekterulet_tol",
       "telekterulet_ig",
+      "rezsikoltseg",
+      "kozos_koltseg",
+      "atlagos_aram_fogyasztas",
+      "atlagos_gaz_fogyasztas",
       "napelem",
       "szigeteles",
       "energiahatekonys",
@@ -113,6 +125,7 @@
       "ingatlan_kora",
       "min_berleti_ido",
       "koltozheto",
+      "rezsikoltseg",
       "energiahatekonys",
       "akadalymentesitett",
       "legkondicionalo"
@@ -176,7 +189,11 @@
       "szigeteles",
       "energiahatekonys",
       "akadalymentesitett",
-      "legkondicionalo"
+      "legkondicionalo",
+      "rezsikoltseg",
+      "kozos_koltseg",
+      "atlagos_aram_fogyasztas",
+      "atlagos_gaz_fogyasztas"
     ],
     "egyeb": null
   }

@@ -157,6 +157,10 @@ const FIELD_DEFS = [
   { field_key: "pince", label: "Pince", kind: "wheel", surfaces: ["search", "post"] },
   { field_key: "napelem", label: "Napelem", kind: "wheel", surfaces: ["search", "post"] },
   { field_key: "uj_parcellazasu", label: "Csak új parcellázású", kind: "wheel", surfaces: ["search", "post"] },
+  { field_key: "rezsikoltseg", label: "Rezsiköltség", kind: "number", unit: "Ft/hó", surfaces: ["post"] },
+  { field_key: "kozos_koltseg", label: "Közös költség", kind: "number", unit: "Ft/hó", surfaces: ["post"] },
+  { field_key: "atlagos_aram_fogyasztas", label: "Átlagos áramfogyasztás", kind: "number", unit: "kWh/hó", surfaces: ["post"], step: "0.1" },
+  { field_key: "atlagos_gaz_fogyasztas", label: "Átlagos gázfogyasztás", kind: "number", unit: "m³/hó", surfaces: ["post"], step: "0.1" },
   { field_key: "ar_ft_min", label: "Ár Ft min. (régi)", kind: "wheel", surfaces: ["search"] },
 ];
 
@@ -227,6 +231,10 @@ function defaultRaw() {
     { field_key: "uzemeltetesi_dij_ig", section: "more", row: 18, col: 7, colSpan: 6, hidden: false },
     { field_key: "epitmeny_terulet_tol", section: "more", row: 19, col: 1, colSpan: 6, hidden: false },
     { field_key: "epitmeny_terulet_ig", section: "more", row: 19, col: 7, colSpan: 6, hidden: false },
+    { field_key: "atlagos_aram_fogyasztas", section: "more", row: 20, col: 1, colSpan: 6, hidden: false },
+    { field_key: "atlagos_gaz_fogyasztas", section: "more", row: 20, col: 7, colSpan: 6, hidden: false },
+    { field_key: "rezsikoltseg", section: "more", row: 21, col: 1, colSpan: 6, hidden: false },
+    { field_key: "kozos_koltseg", section: "more", row: 21, col: 7, colSpan: 6, hidden: false },
     { field_key: "ar_ft_min", section: "more", row: 11, col: 10, colSpan: 3, hidden: true },
   ];
 }
@@ -272,6 +280,66 @@ export function syncDualRangeCells(cells) {
 
 export function dualGroupForField(fieldKey) {
   return INGATLAN_DUAL_RANGE_GROUPS.find((g) => g.tolKey === fieldKey || g.igKey === fieldKey) || null;
+}
+
+function sectionUnitsForRowResolve(cells, section) {
+  const inSection = (c) =>
+    !c.hidden && (section === "more" ? c.section === "more" : c.section !== "more");
+  const skip = new Set();
+  const units = [];
+  for (const cell of cells) {
+    if (!inSection(cell) || skip.has(cell.field_key)) continue;
+    const group = dualGroupForField(cell.field_key);
+    if (group && !isSpacer(cell)) {
+      const tol = cells.find((c) => c.field_key === group.tolKey);
+      const ig = cells.find((c) => c.field_key === group.igKey);
+      if (tol && ig && !tol.hidden && !ig.hidden && inSection(tol) && inSection(ig)) {
+        skip.add(group.tolKey);
+        skip.add(group.igKey);
+        units.push({
+          kind: "dual",
+          tol,
+          ig,
+          sortRow: Number(tol.row) || 1,
+          sortCol: Math.min(Number(tol.col) || 1, Number(ig.col) || 1),
+        });
+        continue;
+      }
+    }
+    units.push({
+      kind: "cell",
+      cell,
+      sortRow: Number(cell.row) || 1,
+      sortCol: Number(cell.col) || 1,
+    });
+  }
+  return units;
+}
+
+/** Egy szekción belül minden látható egység kap külön sort — nincs rácssor-ütközés. */
+export function resolveIngatlanWheelSectionRows(cells) {
+  if (!Array.isArray(cells)) return;
+  syncDualRangeCells(cells);
+  for (const section of ["main", "more"]) {
+    const units = sectionUnitsForRowResolve(cells, section);
+    units.sort((a, b) => {
+      if (a.sortRow !== b.sortRow) return a.sortRow - b.sortRow;
+      return a.sortCol - b.sortCol;
+    });
+    units.forEach((unit, index) => {
+      const row = index + 1;
+      if (unit.kind === "dual") {
+        unit.tol.row = row;
+        unit.ig.row = row;
+      } else {
+        unit.cell.row = row;
+        if (isSpacer(unit.cell)) {
+          unit.cell.col = 1;
+          unit.cell.colSpan = WHEEL_COLS;
+        }
+      }
+    });
+  }
 }
 
 export function normalizeIngatlanWheelSchema(raw) {
@@ -349,6 +417,8 @@ export function normalizeIngatlanWheelSchema(raw) {
     tip2.colSpan = 6;
     tip2.hidden = false;
   }
+
+  resolveIngatlanWheelSectionRows(cells);
 
   cells.sort((a, b) => {
     const sa = a.section === "more" ? 1 : 0;
@@ -456,6 +526,22 @@ function textFieldHtml(name, label) {
   </label>`;
 }
 
+function numberFieldHtml(name, label, def = {}) {
+  const unit = def.unit || "";
+  const step = def.step || "1";
+  const ph = unit ? `pl. érték (${unit})` : "pl. érték";
+  const unitHtml = unit
+    ? `<span class="immo-field-unit" aria-hidden="true">${escapeHtml(unit)}</span>`
+    : "";
+  return `<label class="immo-field immo-field--number" data-schema-field="${escapeAttr(name)}">
+    <span class="immo-label">${escapeHtml(label)}</span>
+    <span class="immo-number-wrap">
+      <input class="immo-control" id="immo-${escapeAttr(name)}" name="${escapeAttr(name)}" type="number" min="0" step="${escapeAttr(String(step))}" inputmode="decimal" placeholder="${escapeAttr(ph)}" />
+      ${unitHtml}
+    </span>
+  </label>`;
+}
+
 function cellHtml(cell) {
   if (isSpacer(cell)) {
     const col = clamp(cell.col, 1, WHEEL_COLS);
@@ -466,8 +552,10 @@ function cellHtml(cell) {
   const def = DEF_BY_KEY.get(cell.field_key);
   const label = cell.label || def?.label || cell.field_key;
   const kind = cell.kind || def?.kind || "wheel";
-  const inner =
-    kind === "text" ? textFieldHtml(cell.field_key, label) : wheelFieldHtml(cell.field_key, label);
+  let inner;
+  if (kind === "text") inner = textFieldHtml(cell.field_key, label);
+  else if (kind === "number") inner = numberFieldHtml(cell.field_key, label, def || {});
+  else inner = wheelFieldHtml(cell.field_key, label);
   const col = clamp(cell.col, 1, WHEEL_COLS);
   const span = clamp(cell.colSpan, 1, WHEEL_COLS - col + 1);
   const row = clamp(cell.row, 1, 40);

@@ -2,15 +2,15 @@ import {
   categoriesForVertical,
   normalizePartnerVertical,
   partnerCategoryImageUrl,
-} from "./partner-categories-data.js?v=ingatlanAjanlas3";
+} from "./partner-categories-data.js?v=ingatlanDemoImg1";
 import {
   fetchPartnerRecommendations,
   loadSavedPostalCode,
   savePostalCode,
-} from "./partner-recommendations.js?v=ingatlanAjanlas3";
+} from "./partner-recommendations.js?v=ingatlanDemoImg1";
 
 const RADIUS_KEY = "bymy_partner_radius_km";
-const UI_V = "ingatlanAjanlas3";
+const UI_V = "ingatlanDemoImg1";
 
 function queryVertical() {
   try {

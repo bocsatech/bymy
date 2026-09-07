@@ -2,15 +2,15 @@ import {
   categoriesForVertical,
   normalizePartnerVertical,
   partnerCategoryImageUrl,
-} from "./partner-categories-data.js?v=ingatlanAjanlas1";
+} from "./partner-categories-data.js?v=ingatlanAjanlas2";
 import {
   fetchPartnerRecommendations,
   loadSavedPostalCode,
   savePostalCode,
-} from "./partner-recommendations.js?v=ingatlanAjanlas1";
+} from "./partner-recommendations.js?v=ingatlanAjanlas2";
 
 const RADIUS_KEY = "bymy_partner_radius_km";
-const UI_V = "ingatlanAjanlas1";
+const UI_V = "ingatlanAjanlas2";
 
 function queryVertical() {
   try {
@@ -372,9 +372,8 @@ export function initAjanlasokPage() {
 
   function render(categories, openPreferred) {
     const radiusKm = loadRadiusKm();
-    let filtered = filterByRadius(ensureCategoryShell(categories), radiusKm);
-    const withPartners = filtered.filter((c) => c.partners.length > 0);
-    if (withPartners.length) filtered = withPartners;
+    // Teljes kategórialista (mint a főoldali sín) — üres kategóriák is látszanak.
+    const filtered = filterByRadius(ensureCategoryShell(categories), radiusKm);
 
     listEl.innerHTML = "";
     const openId =

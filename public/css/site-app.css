@@ -25,22 +25,32 @@ body.site-app .local-banner {
 
 body.site-app .hub-header-msg {
   position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
 }
 
 body.site-app .site-message-badge {
-  position: absolute;
-  top: -0.42rem;
-  right: -0.55rem;
+  position: static;
+  top: auto;
+  right: auto;
   min-width: 1.15rem;
   height: 1.15rem;
   padding: 0 0.28rem;
   border: 2px solid #fff;
   border-radius: 999px;
-  display: grid;
+  display: inline-grid;
   place-items: center;
+  flex: 0 0 auto;
+  margin-left: 0.15rem;
   background: #c84339;
   color: #fff;
   font: 800 0.61rem/1 Inter, Roboto, system-ui, sans-serif;
+  box-sizing: border-box;
+}
+
+body.site-app .site-message-badge[hidden] {
+  display: none !important;
 }
 
 html[data-mm-account-kind="company"] body.settings-page [data-mm-company-nav-wrap] {
@@ -429,6 +439,16 @@ body.home-page .site-layout {
   body.site-app .hub-header-msg span,
   body.site-app .site-header-msg span {
     display: none;
+  }
+
+  /* Ikon-only: badge az ikon sarkában, ne a szöveg helyén */
+  body.site-app .hub-header-msg .site-message-badge,
+  body.site-app .site-header-msg .site-message-badge {
+    position: absolute;
+    top: -0.35rem;
+    left: 0.95rem;
+    right: auto;
+    margin-left: 0;
   }
 
   body.site-app .home-nav .home-nav-link,

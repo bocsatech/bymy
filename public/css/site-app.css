@@ -6232,7 +6232,7 @@ html[data-theme="dark"] body.site-app.fiok-page {
   color: #fff !important;
 }
 
-html[data-theme="dark"] body.site-app.settings-page :is(a, strong, b, p, span, label, li, h1, h2, h3, h4, h5, td, th, small, em, div, button),
+html[data-theme="dark"] body.site-app.settings-page :is(a, strong, b, p, span, label, li, h1, h2, h3, h4, h5, td, th, small, em, div),
 html[data-theme="dark"] body.site-app[data-site-page="uzenetek"] :is(a, strong, b, p, span, label, li, h1, h2, h3, h4, small, em),
 html[data-theme="dark"] body.site-app.mm-messages-open :is(a, strong, b, p, span, label, li, h1, h2, h3, h4, small, em),
 html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] :is(a, strong, b, p, span, label, li, h1, h2, h3, h4, small, em) {
@@ -6299,5 +6299,64 @@ html[data-theme="dark"] body.site-app.settings-page .settings-link-btn {
 }
 
 html[data-theme="dark"] body.site-app .site-message-badge {
+  color: #fff !important;
+}
+
+/* Világos gomb / select / wheel: soha ne legyen fehér-a-fehéren */
+html[data-theme="dark"] body.site-app :is(
+  .settings-btn-secondary,
+  .btn-secondary,
+  .site-header-btn--outline,
+  .settings-wheel-opt.is-active,
+  .hub-btn--ghost,
+  .site-header-btn--ghost,
+  .mm-side-logout,
+  .ha-imp-mode:not(.is-active)
+) {
+  color: #111 !important;
+}
+
+html[data-theme="dark"] body.site-app.settings-page :is(
+  .settings-btn-secondary,
+  .btn-secondary,
+  .site-header-btn--outline,
+  .mm-side-logout,
+  .ha-imp-mode:not(.is-active),
+  .settings-wheel-opt.is-active,
+  .myads-photo-item-actions button
+) {
+  background: #243044 !important;
+  border-color: #3b4450 !important;
+  color: #fff !important;
+}
+
+html[data-theme="dark"] body.site-app.settings-page :is(
+  .settings-btn-primary,
+  .settings-btn-accent
+) {
+  background: #2563eb !important;
+  border-color: #2563eb !important;
+  color: #fff !important;
+}
+
+html[data-theme="dark"] body.site-app.settings-page :is(
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="password"],
+  input[type="number"],
+  input[type="search"],
+  input[type="url"],
+  select,
+  textarea,
+  .settings-readonly,
+  .settings-account-type-locked
+) {
+  background: #12161c !important;
+  color: #fff !important;
+  border-color: #3b4450 !important;
+}
+
+html[data-theme="dark"] body.site-app.settings-page .settings-switch > span:first-child {
   color: #fff !important;
 }

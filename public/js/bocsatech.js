@@ -781,12 +781,18 @@ const actions = {
     err = "";
     render();
   },
-  backupFilterChange() {
+  readBackupFilters() {
     const root = app;
     backupCategory = String(root.querySelector("[data-backup-category]")?.value || "all");
     backupUserId = String(root.querySelector("[data-backup-user-id]")?.value || "").trim();
     backupListingId = String(root.querySelector("[data-backup-listing-id-filter]")?.value || "").trim();
+  },
+  backupFilterChange() {
+    actions.readBackupFilters();
     backupPreview = null;
+    info = "";
+    err = "";
+    render();
   },
   async backupReload() {
     err = "";
@@ -821,7 +827,7 @@ const actions = {
   async backupPreview() {
     err = "";
     info = "";
-    actions.backupFilterChange();
+    actions.readBackupFilters();
     if (!backupSelectedId) {
       err = "Válassz mentést.";
       render();
@@ -850,15 +856,15 @@ const actions = {
   async backupRestore() {
     err = "";
     info = "";
-    actions.backupFilterChange();
+    actions.readBackupFilters();
     if (!backupSelectedId) {
       err = "Válassz mentést.";
       render();
       return;
     }
-    const checked = [...app.querySelectorAll("[data-backup-listing-id]:checked")].map((el) =>
-      Number(el.getAttribute("data-backup-listing-id"))
-    );
+    const checked = [...app.querySelectorAll("[data-backup-listing-id]:checked")]
+      .map((el) => Number(el.getAttribute("data-backup-listing-id")))
+      .filter((n) => Number.isFinite(n) && n > 0);
     if (!checked.length) {
       err = "Jelölj ki legalább egy hirdetést.";
       render();
@@ -868,16 +874,24 @@ const actions = {
     backupBusy = true;
     render();
     try {
+      // listingIds a kijelölés — szűrőket nem küldjük, hogy ne akadályozzák a visszaállítást
       const data = await api(`/api/level1/backups/${encodeURIComponent(backupSelectedId)}/restore`, {
         method: "POST",
-        body: JSON.stringify({
-          category: backupCategory,
-          userId: backupUserId || null,
-          listingId: backupListingId || null,
-          listingIds: checked,
-        }),
+        body: JSON.stringify({ listingIds: checked }),
       });
       info = `Visszaállítva: ${data.restoredCount} hirdetés (ID: ${(data.restoredIds || []).join(", ")}).`;
+      try {
+        backupPreview = await api(`/api/level1/backups/${encodeURIComponent(backupSelectedId)}/preview`, {
+          method: "POST",
+          body: JSON.stringify({
+            category: backupCategory,
+            userId: backupUserId || null,
+            listingId: backupListingId || null,
+          }),
+        });
+      } catch {
+        /* az előnézet frissítése másodlagos */
+      }
     } catch (error) {
       err = error.message;
     } finally {
@@ -2244,6 +2258,8 @@ function backupView() {
   return `
     <h2 class="layout-cat-title">Mentés / visszaállítás</h2>
     <p class="hint">Teljes hirdetés-pillanatkép készítése, majd kategória / user / ID szerinti részleges visszatöltés. A napi szerveres DB+kép mentés ettől függetlenül fut.</p>
+    ${info ? `<p class="ok" style="margin-top:0.75rem">${esc(info)}</p>` : ""}
+    ${err ? `<p class="err" style="margin-top:0.75rem">${esc(err)}</p>` : ""}
     <div class="row" style="gap:0.75rem;flex-wrap:wrap;margin-top:0.85rem">
       <button class="btn" type="button" data-act="backupCreate" ${backupBusy ? "disabled" : ""}>Mentés most</button>
       <button class="btn ghost" type="button" data-act="backupReload" ${backupBusy ? "disabled" : ""}>Lista frissítése</button>
@@ -2279,9 +2295,7 @@ function backupView() {
         </table>
       </div>`
         : `<p class="hint" style="margin-top:1rem">Válassz mentést, majd kattints az Előnézetre.</p>`
-    }
-    <p class="ok">${esc(info)}</p>
-    <p class="err">${esc(err)}</p>`;
+    }`;
 }
 
 function pagesAdminView(pageKey) {

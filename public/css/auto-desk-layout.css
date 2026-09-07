@@ -271,7 +271,6 @@
     overflow-x: hidden;
     overflow-y: auto;
     overscroll-behavior: contain;
-    scrollbar-gutter: stable;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-hero {

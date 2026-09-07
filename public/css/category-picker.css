@@ -663,3 +663,44 @@
 body.cp-sheet-open {
   overflow: hidden;
 }
+
+/* —— Sötét mód —— */
+html[data-theme="dark"] {
+  --cp-bg: #12161c;
+  --cp-card: #1a1f26;
+  --cp-ink: #f3f4f6;
+  --cp-muted: #9ca3af;
+  --cp-line: #2a313c;
+  --cp-car-soft: #1e3a5f;
+  --cp-truck-soft: #3b2415;
+  --cp-immo-soft: #14352a;
+  --cp-soon: #8b949e;
+  --cp-shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 8px 24px rgba(0, 0, 0, 0.28);
+}
+
+html[data-theme="dark"] .cp-group {
+  border-color: #2a313c;
+}
+
+html[data-theme="dark"] .cp-option:not(.is-soon):hover {
+  background: #222831;
+}
+
+html[data-theme="dark"] .cp-soon {
+  color: #9ca3af;
+  background: #243044;
+}
+
+html[data-theme="dark"] .cp-sheet {
+  background: #1a1f26;
+  color: #e8eaed;
+}
+
+html[data-theme="dark"] .cp-sheet-bar {
+  background: #1a1f26;
+  border-bottom-color: #2a313c;
+}
+
+html[data-theme="dark"] .cp-toggle-row {
+  border-bottom-color: #2a313c;
+}

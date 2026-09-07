@@ -6026,10 +6026,11 @@ html[data-theme="dark"] body.site-app.settings-page .ha-imp-mode.is-active {
   color: #111 !important;
 }
 
-html[data-theme="dark"] body.site-app.settings-page .ha-imp-bookmark {
-  background: #12161c !important;
-  border-color: #3b4450 !important;
-  color: #7dd3fc !important;
+html[data-theme="dark"] body.site-app.settings-page .ha-imp-bookmark,
+html[data-theme="dark"] body.site-app.settings-page .ha-imp-go {
+  background: #f0c52c !important;
+  border-color: #f0c52c !important;
+  color: #111 !important;
 }
 
 html[data-theme="dark"] body.site-app.settings-page .ha-imp-url-fields input,

@@ -71,9 +71,6 @@ export function createHomeGridCard(item) {
   const km = String(preview.km || "").trim();
   const fuel = String(preview.filter?.uzemanyag || form.uzemanyag || "").trim();
   const city = String(preview.telepules || form.telepules || preview.city || "").trim();
-  const subtitle = String(preview.specLine || form.modell || form.tipus || "")
-    .trim()
-    .replace(/\s*\(\d{4}(?:\/\d{1,2})?\)\s*$/u, "");
   const email = getAuthUser()?.email;
   const favOn = Boolean(
     email && getParkplatz(email).some((row) => String(row.id) === String(item.id))
@@ -105,7 +102,6 @@ export function createHomeGridCard(item) {
     </div>
     <a class="home-grid-card-body" href="${escapeHtml(detailHref)}">
       <h2 class="home-grid-card-title">${escapeHtml(title)}</h2>
-      ${desk && subtitle && subtitle !== title ? `<p class="home-grid-card-sub">${escapeHtml(subtitle)}</p>` : ""}
       ${specsHtml}
       <strong class="home-grid-card-price">${escapeHtml(price)}</strong>
       ${desk && city ? `<p class="home-grid-card-loc">${ICON_PIN}<span>${escapeHtml(city)}</span></p>` : ""}

@@ -300,6 +300,7 @@ let backupUserId = "";
 let backupListingId = "";
 let backupPreview = null;
 let backupBusy = false;
+let backupForceFeladott = true;
 let devOtpCode = "";
 /** @type {{ backend?: string, dbPath?: string } | null} */
 let deployBackend = null;
@@ -863,10 +864,14 @@ const actions = {
       el.checked = false;
     });
   },
+  backupForceFeladottChange(_, el) {
+    backupForceFeladott = Boolean(el?.checked);
+  },
   async backupRestore() {
     err = "";
     info = "";
     actions.readBackupFilters();
+    backupForceFeladott = Boolean(app.querySelector("[data-backup-force-feladott]")?.checked);
     if (!backupSelectedId) {
       err = "Válassz mentést.";
       render();
@@ -880,16 +885,22 @@ const actions = {
       render();
       return;
     }
-    if (!confirm(`Visszaállítasz ${checked.length} hirdetést a mentésből?`)) return;
+    const asPublic = backupForceFeladott ? " feladott (nyilvános) státusszal" : "";
+    if (!confirm(`Visszaállítasz ${checked.length} hirdetést a mentésből${asPublic}?`)) return;
     backupBusy = true;
     render();
     try {
-      // listingIds a kijelölés — szűrőket nem küldjük, hogy ne akadályozzák a visszaállítást
       const data = await api(`/api/level1/backups/${encodeURIComponent(backupSelectedId)}/restore`, {
         method: "POST",
-        body: JSON.stringify({ listingIds: checked }),
+        body: JSON.stringify({
+          listingIds: checked,
+          forceStatus: backupForceFeladott ? "feladott" : null,
+        }),
       });
-      info = `Visszaállítva: ${data.restoredCount} hirdetés (ID: ${(data.restoredIds || []).join(", ")}).`;
+      const statusBits = Object.entries(data.statuses || {})
+        .map(([k, n]) => `${n} ${k}`)
+        .join(", ");
+      info = `Visszaállítva: ${data.restoredCount} hirdetés (${statusBits || "ok"}) · ID: ${(data.restoredIds || []).join(", ")}.`;
       try {
         backupPreview = await api(`/api/level1/backups/${encodeURIComponent(backupSelectedId)}/preview`, {
           method: "POST",
@@ -2268,6 +2279,7 @@ function backupView() {
   return `
     <h2 class="layout-cat-title">Mentés / visszaállítás</h2>
     <p class="hint">Teljes hirdetés-pillanatkép készítése, majd kategória / user / ID szerinti részleges visszatöltés. A napi szerveres DB+kép mentés ettől függetlenül fut.</p>
+    <p class="hint"><strong>Fontos:</strong> a kereső csak a <em>feladott</em> hirdetéseket mutatja. A mentett státuszúak visszaállításkor is rejtve maradnak, hacsak be nem kapcsolod a nyilvános visszaállítást.</p>
     ${info ? `<p class="ok" style="margin-top:0.75rem">${esc(info)}</p>` : ""}
     ${err ? `<p class="err" style="margin-top:0.75rem">${esc(err)}</p>` : ""}
     <div class="row" style="gap:0.75rem;flex-wrap:wrap;margin-top:0.85rem">
@@ -2290,9 +2302,13 @@ function backupView() {
           <input type="number" min="1" data-act="backupFilterChange" data-backup-listing-id-filter value="${esc(backupListingId)}" placeholder="pl. 118" />
         </label>
       </div>
-      <div class="row" style="gap:0.75rem;flex-wrap:wrap;margin-top:0.85rem">
+      <div class="row" style="gap:0.75rem;flex-wrap:wrap;margin-top:0.85rem;align-items:center">
         <button class="btn" type="button" data-act="backupPreview" ${backupBusy || !backupSelectedId ? "disabled" : ""}>Előnézet</button>
         <button class="btn danger" type="button" data-act="backupRestore" ${backupBusy || !backupPreview?.listings?.length ? "disabled" : ""}>Kijelöltek visszaállítása</button>
+        <label style="display:inline-flex;align-items:center;gap:0.4rem;margin:0">
+          <input type="checkbox" data-act="backupForceFeladottChange" data-backup-force-feladott ${backupForceFeladott ? "checked" : ""} />
+          Feladottként (nyilvános keresőben látszódjon)
+        </label>
       </div>
     </div>
     ${

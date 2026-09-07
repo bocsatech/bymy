@@ -866,8 +866,12 @@ function applyFormData(data, { fromImport = false } = {}) {
       field.value = appliedValue;
     }
     if (fromImport) {
-      field.dataset.userEdited = "1";
-      field.classList.remove("auto-filled");
+      const nodes = field instanceof RadioNodeList ? [...field] : [field];
+      for (const node of nodes) {
+        if (!node?.dataset) continue;
+        node.dataset.userEdited = "1";
+        node.classList?.remove("auto-filled");
+      }
     }
   }
 

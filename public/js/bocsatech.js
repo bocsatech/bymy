@@ -296,7 +296,7 @@ let blockedIps = [];
 let backupList = { backups: [], categories: [], dir: "", keepDays: 30 };
 let backupSelectedId = "";
 let backupCategory = "all";
-let backupUserId = "";
+let backupUserEmail = "";
 let backupListingId = "";
 let backupPreview = null;
 let backupBusy = false;
@@ -785,7 +785,7 @@ const actions = {
   readBackupFilters() {
     const root = app;
     backupCategory = String(root.querySelector("[data-backup-category]")?.value || "all");
-    backupUserId = String(root.querySelector("[data-backup-user-id]")?.value || "").trim();
+    backupUserEmail = String(root.querySelector("[data-backup-user-email]")?.value || "").trim();
     backupListingId = String(root.querySelector("[data-backup-listing-id-filter]")?.value || "").trim();
   },
   backupFilterChange() {
@@ -841,7 +841,7 @@ const actions = {
         method: "POST",
         body: JSON.stringify({
           category: backupCategory,
-          userId: backupUserId || null,
+          userEmail: backupUserEmail || null,
           listingId: backupListingId || null,
         }),
       });
@@ -906,7 +906,7 @@ const actions = {
           method: "POST",
           body: JSON.stringify({
             category: backupCategory,
-            userId: backupUserId || null,
+            userEmail: backupUserEmail || null,
             listingId: backupListingId || null,
           }),
         });
@@ -1824,7 +1824,7 @@ function listingsView({ title = "Hirdetések", emptyHint = "Nincs hirdetés." } 
         <td>${l.id}</td>
         <td>${esc(l.title || "")}</td>
         <td>${esc(l.gyartmany || "")} ${esc(l.tipus || "")}</td>
-        <td>${l.ownerUserId ? `#${l.ownerUserId}` : "—"}</td>
+        <td>${esc(l.ownerEmail || (l.ownerUserId ? `#${l.ownerUserId}` : "—"))}</td>
         <td>
           <select data-act="setStatus" data-id="${l.id}">
             ${["mentett", "feladott", "inaktiv"]
@@ -2271,7 +2271,7 @@ function backupView() {
       <td>${esc(row.title)}</td>
       <td>${esc(row.status)}</td>
       <td>${esc(row.vertical || "")}${row.subtype ? " / " + esc(row.subtype) : ""}</td>
-      <td>${esc(row.ownerUserId || "—")}</td>
+      <td>${esc(row.ownerEmail || "—")}</td>
     </tr>`
     )
     .join("");
@@ -2295,8 +2295,8 @@ function backupView() {
         <label>Kategória
           <select data-act="backupFilterChange" data-backup-category>${catOptions}</select>
         </label>
-        <label>User ID
-          <input type="number" min="1" data-act="backupFilterChange" data-backup-user-id value="${esc(backupUserId)}" placeholder="pl. 10" />
+        <label>Felhasználó (email)
+          <input type="email" data-act="backupFilterChange" data-backup-user-email value="${esc(backupUserEmail)}" placeholder="pl. user@pelda.hu" />
         </label>
         <label>Hirdetés ID
           <input type="number" min="1" data-act="backupFilterChange" data-backup-listing-id-filter value="${esc(backupListingId)}" placeholder="pl. 118" />
@@ -2320,7 +2320,7 @@ function backupView() {
       </div>
       <div class="table-scroll" style="margin-top:0.65rem">
         <table class="table-dense">
-          <thead><tr><th></th><th>ID</th><th>Cím</th><th>Státusz</th><th>Kategória</th><th>User</th></tr></thead>
+          <thead><tr><th></th><th>ID</th><th>Cím</th><th>Státusz</th><th>Kategória</th><th>Email</th></tr></thead>
           <tbody>${rows || '<tr><td colspan="6">Nincs találat.</td></tr>'}</tbody>
         </table>
       </div>`

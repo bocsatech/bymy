@@ -986,7 +986,7 @@
     margin: 2px 0 4px !important;
     font-size: 22px !important;
     font-weight: 800 !important;
-    color: #0084ff !important;
+    color: var(--ad-text) !important;
     letter-spacing: -0.01em;
     line-height: 1.15;
   }

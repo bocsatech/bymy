@@ -464,16 +464,15 @@
     transform-origin: center center;
   }
 
-  /* Autókategóriák: széles PNG-k — kitöltik a keretet */
+  /* Autókategóriák: teljes autó látszódjon a keretben */
   body.hub-page--feed .hf-card--kategoria .hf-card-media img {
     position: absolute;
     inset: 0;
-    object-fit: cover;
+    object-fit: contain;
     object-position: center center;
-    padding: 0;
+    padding: 0.35rem;
     box-sizing: border-box;
-    transform: scale(1.08);
-    transform-origin: center center;
+    transform: none;
   }
 
   body.hub-page--feed .hf-card-label {

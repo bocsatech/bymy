@@ -1114,12 +1114,11 @@ body.hub-page--feed {
 }
 
 .hf-card--kategoria .hf-card-media img {
-  object-fit: cover;
+  object-fit: contain;
   object-position: center center;
-  padding: 0;
+  padding: 0.35rem;
   box-sizing: border-box;
-  transform: scale(1.08);
-  transform-origin: center center;
+  transform: none;
 }
 
 .hf-card--kategoria .hf-card-label {

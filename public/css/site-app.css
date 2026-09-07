@@ -5187,14 +5187,15 @@ body.site-app .wh-msg__error {
 }
 
 /* —— Színmód (világos / sötét) —— */
-/* Böngésző / feed: sötét oldalháttér. App-felületek (fiók, üzenetek, feladás…): világos vászon. */
+/* Böngésző / feed: sötét oldalháttér. App-felületek (fiók, feladás…): világos vászon.
+   Üzenetek: saját sötét felület (lásd lent). */
 html[data-theme="dark"] body.site-app.hub-page--feed,
 html[data-theme="dark"] body.site-app.home-page {
   background: #12161c;
   color: #e8eaed;
 }
 
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page) {
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open) {
   background: #eef0f3 !important;
   color: #111 !important;
 }
@@ -5265,11 +5266,11 @@ html[data-theme="dark"] body.site-app.home-page main {
   color: #e8eaed;
 }
 
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page) .page,
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page) .home-main,
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page) main,
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page) .mm-shell,
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page) .mm-main {
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open) .page,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open) .home-main,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open) main,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open) .mm-shell,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open) .mm-main {
   background: transparent !important;
   color: #111 !important;
 }
@@ -5582,8 +5583,6 @@ html[data-theme="dark"] body.site-app .hf-card,
 html[data-theme="dark"] body.site-app .hf-card--listing,
 html[data-theme="dark"] body.site-app .hub-promo,
 html[data-theme="dark"] body.site-app .hub-sell,
-html[data-theme="dark"] body.site-app .wh-msg__row,
-html[data-theme="dark"] body.site-app .wh-msg__composer,
 html[data-theme="dark"] body.site-app .site-avatar-dropdown {
   background: #fff;
   color: #111;
@@ -5646,52 +5645,202 @@ html[data-theme="dark"] body.site-app .settings-form .login-label {
   color: #9ca3af;
 }
 
-/* —— Egységes világos app-vászon (fiók / üzenetek / feladás / stb.) sötét fejléc mellett —— */
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page) h1,
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page) h2,
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page) h3,
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page) .mm-panel-title,
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page) .settings-title,
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page) .wh-msg__title,
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page) .fiok-title {
+/* —— Egységes világos app-vászon (fiók / feladás / stb.) sötét fejléc mellett —— */
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open) h1,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open) h2,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open) h3,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open) .mm-panel-title,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open) .settings-title,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open) .fiok-title {
   color: #101828 !important;
 }
 
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page) .login-label,
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page) .mm-panel-lead,
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page) .settings-lead,
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page) .mm-nav-plain {
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open) .login-label,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open) .mm-panel-lead,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open) .settings-lead,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open) .mm-nav-plain {
   color: #667085 !important;
 }
 
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page) .mm-nav-link,
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page) .mm-nav-sublink,
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page) .mm-nav-toggle {
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open) .mm-nav-link,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open) .mm-nav-sublink,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open) .mm-nav-toggle {
   color: #344054 !important;
   background: transparent !important;
 }
 
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page) .mm-nav-link:hover,
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page) .mm-nav-sublink:hover,
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page) .mm-nav-toggle:hover,
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page) .mm-nav-toggle[aria-expanded="true"] {
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open) .mm-nav-link:hover,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open) .mm-nav-sublink:hover,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open) .mm-nav-toggle:hover,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open) .mm-nav-toggle[aria-expanded="true"] {
   background: #f2f4f7 !important;
   color: #101828 !important;
 }
 
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page) .mm-nav-link.is-active,
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page) .mm-nav-sublink.is-active {
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open) .mm-nav-link.is-active,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open) .mm-nav-sublink.is-active {
   background: #e8f1fb !important;
   color: #1565c0 !important;
 }
 
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page) .mm-page,
-html[data-theme="dark"] body.site-app.mm-page {
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open) .mm-page,
+html[data-theme="dark"] body.site-app.mm-page:not([data-site-page="uzenetek"]):not(.mm-messages-open) {
   background: #eef1f4 !important;
 }
 
-html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"],
-html[data-theme="dark"] body.site-app[data-site-page="uzenetek"] {
+html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] {
   background: #eef0f3 !important;
   color: #111 !important;
+}
+
+/* —— Üzenetek: valódi sötét mód —— */
+html[data-theme="dark"] body.site-app[data-site-page="uzenetek"],
+html[data-theme="dark"] body.site-app.mm-messages-open {
+  background: #12161c !important;
+  color: #e8eaed !important;
+}
+
+html[data-theme="dark"] body.site-app[data-site-page="uzenetek"] .msg-page-wrap,
+html[data-theme="dark"] body.site-app.mm-messages-open .msg-page-wrap {
+  background: #1a1f26;
+  border-color: #2a313c;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+}
+
+html[data-theme="dark"] body.site-app .wh-msg,
+html[data-theme="dark"] body.site-app .wh-msg__list,
+html[data-theme="dark"] body.site-app .wh-msg__chat,
+html[data-theme="dark"] body.site-app .wh-msg__stream,
+html[data-theme="dark"] body.site-app .wh-msg__composer {
+  background: #1a1f26;
+  color: #e8eaed;
+  border-color: #2a313c;
+}
+
+html[data-theme="dark"] body.site-app .wh-msg__list {
+  border-right-color: #2a313c;
+}
+
+html[data-theme="dark"] body.site-app .wh-msg__list-head,
+html[data-theme="dark"] body.site-app .wh-msg__chat-head,
+html[data-theme="dark"] body.site-app .wh-msg__ad,
+html[data-theme="dark"] body.site-app .wh-msg__filters {
+  border-bottom-color: #2a313c;
+  background: #1a1f26;
+}
+
+html[data-theme="dark"] body.site-app .wh-msg__title,
+html[data-theme="dark"] body.site-app .wh-msg__peer strong,
+html[data-theme="dark"] body.site-app .wh-msg__row-name,
+html[data-theme="dark"] body.site-app .wh-msg__ad-text strong {
+  color: #f3f4f6 !important;
+}
+
+html[data-theme="dark"] body.site-app .wh-msg__edit {
+  color: #7dd3fc;
+}
+
+html[data-theme="dark"] body.site-app .wh-msg__peer span,
+html[data-theme="dark"] body.site-app .wh-msg__row-date,
+html[data-theme="dark"] body.site-app .wh-msg__row-ad,
+html[data-theme="dark"] body.site-app .wh-msg__row-preview,
+html[data-theme="dark"] body.site-app .wh-msg__ad-code,
+html[data-theme="dark"] body.site-app .wh-msg__idle,
+html[data-theme="dark"] body.site-app .wh-msg__empty,
+html[data-theme="dark"] body.site-app .wh-msg__meta {
+  color: #9ca3af;
+}
+
+html[data-theme="dark"] body.site-app .wh-msg__row {
+  background: #1a1f26;
+  color: #e8eaed;
+  border-bottom-color: #2a313c;
+}
+
+html[data-theme="dark"] body.site-app .wh-msg__row:hover {
+  background: #222831;
+}
+
+html[data-theme="dark"] body.site-app .wh-msg__row.is-active {
+  background: #243044;
+}
+
+html[data-theme="dark"] body.site-app .wh-msg__row.is-unread {
+  background: #1e2a36;
+}
+
+html[data-theme="dark"] body.site-app .wh-msg__filters input[type="search"],
+html[data-theme="dark"] body.site-app .wh-msg__input {
+  background: #12161c !important;
+  color: #f3f4f6 !important;
+  border-color: #3b4450 !important;
+}
+
+html[data-theme="dark"] body.site-app .wh-msg__filters input[type="search"]::placeholder,
+html[data-theme="dark"] body.site-app .wh-msg__input::placeholder {
+  color: #8b949e;
+}
+
+html[data-theme="dark"] body.site-app .wh-msg__state {
+  background: #243044;
+  color: #d1d5db;
+}
+
+html[data-theme="dark"] body.site-app .wh-msg__icon-btn {
+  color: #d1d5db;
+}
+
+html[data-theme="dark"] body.site-app .wh-msg__icon-btn:hover,
+html[data-theme="dark"] body.site-app .wh-msg__attach:hover {
+  background: #243044;
+}
+
+html[data-theme="dark"] body.site-app .wh-msg__attach {
+  color: #7dd3fc;
+}
+
+html[data-theme="dark"] body.site-app .wh-msg__menu {
+  background: #222831;
+  border-color: #3b4450;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
+}
+
+html[data-theme="dark"] body.site-app .wh-msg__menu button {
+  color: #e8eaed;
+}
+
+html[data-theme="dark"] body.site-app .wh-msg__menu button:hover {
+  background: #2a313c;
+}
+
+html[data-theme="dark"] body.site-app .wh-msg__ad-price,
+html[data-theme="dark"] body.site-app .wh-msg__ad-open {
+  color: #7dd3fc;
+}
+
+html[data-theme="dark"] body.site-app .wh-msg__day span {
+  background: #243044;
+  color: #9ca3af;
+}
+
+html[data-theme="dark"] body.site-app .wh-msg__bubble-row.is-in .wh-msg__bubble {
+  background: #2a313c;
+  color: #f3f4f6;
+}
+
+html[data-theme="dark"] body.site-app .wh-msg__bubble-row.is-out .wh-msg__bubble {
+  background: #2563eb;
+  color: #fff;
+}
+
+html[data-theme="dark"] body.site-app .wh-msg__composer {
+  border-top-color: #2a313c;
+}
+
+html[data-theme="dark"] body.site-app .wh-msg__send {
+  background: #2563eb;
+}
+
+html[data-theme="dark"] body.site-app .wh-msg__send:hover {
+  background: #1d4ed8;
 }

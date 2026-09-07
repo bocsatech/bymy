@@ -4533,9 +4533,10 @@ body.site-app .settings-db-inspect {
 }
 
 
-/* ——— Üzenetek = willhaben Nachrichten (fehér) ——— */
-body.site-app.mm-messages-open {
-  background: #fff;
+/* ——— Üzenetek: app-vászon + keretes shell (nem full-bleed fehér) ——— */
+body.site-app.mm-messages-open,
+body.site-app[data-site-page="uzenetek"] {
+  background: #eef0f3;
 }
 
 body.site-app.mm-messages-open .local-banner {
@@ -4549,29 +4550,43 @@ body.site-app.mm-messages-open .mm-shell {
   padding: 0;
   gap: 0;
   grid-template-columns: 1fr;
-  min-height: calc(100vh - 3.75rem);
 }
 
 body.site-app.mm-messages-open .mm-side {
   display: none;
 }
 
-body.site-app.mm-messages-open .mm-main {
-  min-height: calc(100vh - 3.75rem);
+body.site-app[data-site-page="uzenetek"] .msg-page-main,
+body.site-app.mm-messages-open .msg-page-main {
+  max-width: 1220px;
+  margin: 0 auto;
+  padding: 20px 20px 28px;
+  box-sizing: border-box;
+}
+
+body.site-app[data-site-page="uzenetek"] .msg-page-wrap,
+body.site-app.mm-messages-open .msg-page-wrap {
+  height: calc(100dvh - var(--site-fixed-header-h, 64px) - 48px);
+  min-height: 520px;
+  background: #fff;
+  border: 1px solid #d9e1e7;
+  border-radius: 8px;
+  box-shadow: 0 8px 28px rgba(32, 48, 64, 0.07);
+  overflow: hidden;
 }
 
 body.site-app .mm-panel--messages,
 body.site-app .msg-root,
 body.site-app .wh-msg {
-  height: calc(100vh - 3.75rem);
-  min-height: 520px;
+  height: 100%;
+  min-height: 0;
 }
 
 body.site-app .wh-msg {
   display: grid;
   grid-template-columns: 380px minmax(0, 1fr);
   background: #fff;
-  border-top: 1px solid #e9ebef;
+  border: 0;
 }
 
 /* Lista: ne legyen üres jobb/felső „Válassz egy beszélgetést” sáv */
@@ -4819,9 +4834,23 @@ body.site-app .wh-msg__active[hidden] {
 }
 
 body.site-app .wh-msg__active {
-  display: grid;
-  grid-template-rows: auto auto minmax(0, 1fr) auto auto;
+  display: flex;
+  flex-direction: column;
   flex: 1;
+  min-height: 0;
+  height: 100%;
+}
+
+body.site-app .wh-msg__active > .wh-msg__chat-head,
+body.site-app .wh-msg__active > .wh-msg__ad,
+body.site-app .wh-msg__active > .wh-msg__error,
+body.site-app .wh-msg__active > .wh-msg__send-status,
+body.site-app .wh-msg__active > .wh-msg__composer {
+  flex: 0 0 auto;
+}
+
+body.site-app .wh-msg__active > .wh-msg__stream {
+  flex: 1 1 auto;
   min-height: 0;
 }
 
@@ -5129,6 +5158,21 @@ body.site-app .wh-msg__error {
 }
 
 @media (max-width: 900px) {
+  body.site-app[data-site-page="uzenetek"] .msg-page-main,
+  body.site-app.mm-messages-open .msg-page-main {
+    padding: 0;
+    max-width: none;
+  }
+
+  body.site-app[data-site-page="uzenetek"] .msg-page-wrap,
+  body.site-app.mm-messages-open .msg-page-wrap {
+    height: calc(100dvh - var(--site-fixed-header-h, 64px));
+    min-height: 0;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
   body.site-app .wh-msg {
     grid-template-columns: 1fr;
   }

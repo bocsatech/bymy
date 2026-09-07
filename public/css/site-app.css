@@ -1061,16 +1061,19 @@ body.site-app [data-auth-register][hidden] {
 
 body.site-app .site-header-btn--primary,
 body.site-app .hub-btn--primary {
-  background: #c45c26;
-  color: #fff;
-  border-color: #c45c26;
+  background: #f0c52c;
+  color: #111;
+  border-color: #f0c52c;
   box-shadow: none;
+  font-weight: 700;
 }
 
 body.site-app .site-header-btn--primary:hover,
 body.site-app .hub-btn--primary:hover {
-  filter: brightness(1.05);
-  color: #fff;
+  filter: brightness(1.04);
+  background: #e8bb20;
+  border-color: #e8bb20;
+  color: #111;
 }
 
 body.site-app .site-header-btn--post,

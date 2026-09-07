@@ -5241,7 +5241,7 @@ body.site-app .wh-msg__error {
 
 /* —— Színmód (világos / sötét) —— */
 /* Böngésző / feed: sötét oldalháttér.
-   Üzenetek + beállítások/fiók + hirdetésfeladás: saját sötét felület.
+   Üzenetek + beállítások/fiók + hirdetésfeladás + hirdetés részlet: saját sötét felület.
    Egyéb app-oldalak: világos vászon. */
 html[data-theme="dark"] body.site-app.hub-page--feed,
 html[data-theme="dark"] body.site-app.home-page {
@@ -5249,7 +5249,7 @@ html[data-theme="dark"] body.site-app.home-page {
   color: #e8eaed;
 }
 
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]) {
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]):not([data-site-page="hirdetes"]):not(.hd-page) {
   background: #eef0f3 !important;
   color: #111 !important;
 }
@@ -5320,11 +5320,11 @@ html[data-theme="dark"] body.site-app.home-page main {
   color: #e8eaed;
 }
 
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]) .page,
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]) .home-main,
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]) main,
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]) .mm-shell,
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]) .mm-main {
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]):not([data-site-page="hirdetes"]):not(.hd-page) .page,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]):not([data-site-page="hirdetes"]):not(.hd-page) .home-main,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]):not([data-site-page="hirdetes"]):not(.hd-page) main,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]):not([data-site-page="hirdetes"]):not(.hd-page) .mm-shell,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]):not([data-site-page="hirdetes"]):not(.hd-page) .mm-main {
   background: transparent !important;
   color: #111 !important;
 }
@@ -5346,10 +5346,10 @@ html[data-theme="dark"] body.site-app.hub-page--feed .mm-side--cats {
   border: 0;
 }
 
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]) .mm-side,
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]) .login-card,
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]) .site-side-card,
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]) .automax-main {
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]):not([data-site-page="hirdetes"]):not(.hd-page) .mm-side,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]):not([data-site-page="hirdetes"]):not(.hd-page) .login-card,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]):not([data-site-page="hirdetes"]):not(.hd-page) .site-side-card,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]):not([data-site-page="hirdetes"]):not(.hd-page) .automax-main {
   background: #fff !important;
   border-color: #dfe3ea !important;
   color: #111 !important;
@@ -5668,18 +5668,18 @@ html[data-theme="dark"] body.site-app .hub-promo__text {
   color: #6b7280 !important;
 }
 
-html[data-theme="dark"] body.site-app:not(.settings-page):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not([data-site-page="hirdetesfeladas"]) .login-field input,
-html[data-theme="dark"] body.site-app:not(.settings-page):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not([data-site-page="hirdetesfeladas"]) .settings-form input,
-html[data-theme="dark"] body.site-app:not(.settings-page):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not([data-site-page="hirdetesfeladas"]) .settings-form select,
-html[data-theme="dark"] body.site-app:not(.settings-page):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not([data-site-page="hirdetesfeladas"]) .settings-form textarea,
-html[data-theme="dark"] body.site-app:not(.settings-page):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not([data-site-page="uzenetek"]):not([data-site-page="hirdetesfeladas"]) textarea,
-html[data-theme="dark"] body.site-app:not(.settings-page):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not([data-site-page="uzenetek"]):not([data-site-page="hirdetesfeladas"]) input[type="text"],
-html[data-theme="dark"] body.site-app:not(.settings-page):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not([data-site-page="uzenetek"]):not([data-site-page="hirdetesfeladas"]) input[type="email"],
-html[data-theme="dark"] body.site-app:not(.settings-page):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not([data-site-page="uzenetek"]):not([data-site-page="hirdetesfeladas"]) input[type="tel"],
-html[data-theme="dark"] body.site-app:not(.settings-page):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not([data-site-page="uzenetek"]):not([data-site-page="hirdetesfeladas"]) input[type="password"],
-html[data-theme="dark"] body.site-app:not(.settings-page):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not([data-site-page="uzenetek"]):not([data-site-page="hirdetesfeladas"]) input[type="number"],
-html[data-theme="dark"] body.site-app:not(.settings-page):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not([data-site-page="uzenetek"]):not([data-site-page="hirdetesfeladas"]) input[type="search"],
-html[data-theme="dark"] body.site-app:not(.settings-page):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not([data-site-page="uzenetek"]):not([data-site-page="hirdetesfeladas"]) select {
+html[data-theme="dark"] body.site-app:not(.settings-page):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not([data-site-page="hirdetesfeladas"]):not([data-site-page="hirdetes"]):not(.hd-page) .login-field input,
+html[data-theme="dark"] body.site-app:not(.settings-page):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not([data-site-page="hirdetesfeladas"]):not([data-site-page="hirdetes"]):not(.hd-page) .settings-form input,
+html[data-theme="dark"] body.site-app:not(.settings-page):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not([data-site-page="hirdetesfeladas"]):not([data-site-page="hirdetes"]):not(.hd-page) .settings-form select,
+html[data-theme="dark"] body.site-app:not(.settings-page):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not([data-site-page="hirdetesfeladas"]):not([data-site-page="hirdetes"]):not(.hd-page) .settings-form textarea,
+html[data-theme="dark"] body.site-app:not(.settings-page):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not([data-site-page="uzenetek"]):not([data-site-page="hirdetesfeladas"]):not([data-site-page="hirdetes"]):not(.hd-page) textarea,
+html[data-theme="dark"] body.site-app:not(.settings-page):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not([data-site-page="uzenetek"]):not([data-site-page="hirdetesfeladas"]):not([data-site-page="hirdetes"]):not(.hd-page) input[type="text"],
+html[data-theme="dark"] body.site-app:not(.settings-page):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not([data-site-page="uzenetek"]):not([data-site-page="hirdetesfeladas"]):not([data-site-page="hirdetes"]):not(.hd-page) input[type="email"],
+html[data-theme="dark"] body.site-app:not(.settings-page):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not([data-site-page="uzenetek"]):not([data-site-page="hirdetesfeladas"]):not([data-site-page="hirdetes"]):not(.hd-page) input[type="tel"],
+html[data-theme="dark"] body.site-app:not(.settings-page):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not([data-site-page="uzenetek"]):not([data-site-page="hirdetesfeladas"]):not([data-site-page="hirdetes"]):not(.hd-page) input[type="password"],
+html[data-theme="dark"] body.site-app:not(.settings-page):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not([data-site-page="uzenetek"]):not([data-site-page="hirdetesfeladas"]):not([data-site-page="hirdetes"]):not(.hd-page) input[type="number"],
+html[data-theme="dark"] body.site-app:not(.settings-page):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not([data-site-page="uzenetek"]):not([data-site-page="hirdetesfeladas"]):not([data-site-page="hirdetes"]):not(.hd-page) input[type="search"],
+html[data-theme="dark"] body.site-app:not(.settings-page):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not([data-site-page="uzenetek"]):not([data-site-page="hirdetesfeladas"]):not([data-site-page="hirdetes"]):not(.hd-page) select {
   background: #fff;
   color: #111;
   border-color: #d0d5dd;
@@ -5690,45 +5690,45 @@ html[data-theme="dark"] body.site-app .settings-form .login-label {
 }
 
 /* —— Egységes világos app-vászon (fiók / feladás / stb.) sötét fejléc mellett —— */
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]) h1,
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]) h2,
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]) h3,
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]) .mm-panel-title,
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]) .settings-title,
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]) .fiok-title {
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]):not([data-site-page="hirdetes"]):not(.hd-page) h1,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]):not([data-site-page="hirdetes"]):not(.hd-page) h2,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]):not([data-site-page="hirdetes"]):not(.hd-page) h3,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]):not([data-site-page="hirdetes"]):not(.hd-page) .mm-panel-title,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]):not([data-site-page="hirdetes"]):not(.hd-page) .settings-title,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]):not([data-site-page="hirdetes"]):not(.hd-page) .fiok-title {
   color: #101828 !important;
 }
 
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]) .login-label,
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]) .mm-panel-lead,
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]) .settings-lead,
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]) .mm-nav-plain {
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]):not([data-site-page="hirdetes"]):not(.hd-page) .login-label,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]):not([data-site-page="hirdetes"]):not(.hd-page) .mm-panel-lead,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]):not([data-site-page="hirdetes"]):not(.hd-page) .settings-lead,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]):not([data-site-page="hirdetes"]):not(.hd-page) .mm-nav-plain {
   color: #667085 !important;
 }
 
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]) .mm-nav-link,
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]) .mm-nav-sublink,
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]) .mm-nav-toggle {
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]):not([data-site-page="hirdetes"]):not(.hd-page) .mm-nav-link,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]):not([data-site-page="hirdetes"]):not(.hd-page) .mm-nav-sublink,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]):not([data-site-page="hirdetes"]):not(.hd-page) .mm-nav-toggle {
   color: #344054 !important;
   background: transparent !important;
 }
 
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]) .mm-nav-link:hover,
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]) .mm-nav-sublink:hover,
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]) .mm-nav-toggle:hover,
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]) .mm-nav-toggle[aria-expanded="true"] {
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]):not([data-site-page="hirdetes"]):not(.hd-page) .mm-nav-link:hover,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]):not([data-site-page="hirdetes"]):not(.hd-page) .mm-nav-sublink:hover,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]):not([data-site-page="hirdetes"]):not(.hd-page) .mm-nav-toggle:hover,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]):not([data-site-page="hirdetes"]):not(.hd-page) .mm-nav-toggle[aria-expanded="true"] {
   background: #f2f4f7 !important;
   color: #101828 !important;
 }
 
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]) .mm-nav-link.is-active,
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]) .mm-nav-sublink.is-active {
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]):not([data-site-page="hirdetes"]):not(.hd-page) .mm-nav-link.is-active,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]):not([data-site-page="hirdetes"]):not(.hd-page) .mm-nav-sublink.is-active {
   background: #e8f1fb !important;
   color: #1565c0 !important;
 }
 
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]) .mm-page,
-html[data-theme="dark"] body.site-app.mm-page:not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]) {
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]):not([data-site-page="hirdetes"]):not(.hd-page) .mm-page,
+html[data-theme="dark"] body.site-app.mm-page:not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]):not([data-site-page="hirdetes"]):not(.hd-page) {
   background: #eef1f4 !important;
 }
 

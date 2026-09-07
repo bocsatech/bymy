@@ -1155,6 +1155,12 @@ body.hub-page--feed {
   flex: 0 0 200px;
   gap: 0.2rem;
   align-self: flex-start;
+  box-sizing: border-box;
+  background: #fff;
+  border: 1px solid #d4d4d4;
+  border-radius: 8px;
+  overflow: hidden;
+  padding: 0 0 0.55rem;
 }
 
 .hf-card--listing .hf-card-media {
@@ -1166,14 +1172,23 @@ body.hub-page--feed {
   background-size: cover;
   background-position: center center;
   background-repeat: no-repeat;
-  border-radius: 12px;
+  border: 0;
+  border-radius: 0;
   overflow: hidden;
-  border-color: #d7dbe0;
 }
 
 /* Listing csempe: nincs <img> — a feed cover szabály ne nyúljon hozzá. */
 .hf-card--listing .hf-card-media img {
   display: none !important;
+}
+
+.hf-card--listing .hf-card-label,
+.hf-card--listing .hf-card-sub,
+.hf-card--listing .hf-card-price,
+.hf-card--listing .hf-card-specs {
+  padding-left: 0.55rem;
+  padding-right: 0.55rem;
+  box-sizing: border-box;
 }
 
 .hf-card--listing .hf-card-label {

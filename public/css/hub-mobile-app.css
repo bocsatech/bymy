@@ -440,11 +440,13 @@
 
   body.hub-page--feed .hf-card--listing {
     flex-basis: 11rem;
-    background: transparent;
+    background: #fff;
     box-shadow: none;
-    border: 0;
-    overflow: visible;
+    border: 1px solid #d4d4d4;
+    border-radius: 8px;
+    overflow: hidden;
     align-self: flex-start;
+    padding: 0 0 0.5rem;
   }
 
   body.hub-page--feed .hf-card--listing .hf-card-media {
@@ -454,7 +456,8 @@
     background-size: cover;
     background-position: center center;
     background-repeat: no-repeat;
-    border-radius: 12px;
+    border: 0;
+    border-radius: 0;
   }
 
   body.hub-page--feed .hf-card--listing .hf-card-media img {

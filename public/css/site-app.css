@@ -5573,8 +5573,6 @@ html[data-theme="dark"] body.site-app .mm-nav-sublink.is-active {
 
 /* Fehér felületek: mindig sötét szöveg (böngésző csempék / promo) */
 html[data-theme="dark"] body.site-app .login-card,
-html[data-theme="dark"] body.site-app .ha-imp-panel,
-html[data-theme="dark"] body.site-app .ha-imp-result,
 html[data-theme="dark"] body.site-app .home-grid-card,
 html[data-theme="dark"] body.site-app .hf-card,
 html[data-theme="dark"] body.site-app .hf-card--listing,
@@ -5590,8 +5588,6 @@ html[data-theme="dark"] body.site-app .login-card,
 html[data-theme="dark"] body.site-app .login-card h1,
 html[data-theme="dark"] body.site-app .login-card h2,
 html[data-theme="dark"] body.site-app .login-card .login-label,
-html[data-theme="dark"] body.site-app .ha-imp-panel,
-html[data-theme="dark"] body.site-app .ha-imp-panel .login-label,
 html[data-theme="dark"] body.site-app .home-grid-card,
 html[data-theme="dark"] body.site-app .home-grid-card-title,
 html[data-theme="dark"] body.site-app .home-grid-card-sub,
@@ -5971,6 +5967,133 @@ html[data-theme="dark"] body.site-app.settings-page .settings-wheel-opt {
 html[data-theme="dark"] body.site-app.settings-page .settings-wheel-opt.is-active {
   background: #243044;
   color: #f3f4f6;
+}
+
+/* Fiók / beállítások: minden panel, lista, tábla, űrlap sötét */
+html[data-theme="dark"] body.site-app.settings-page .mm-panel,
+html[data-theme="dark"] body.site-app.settings-page .ha-imp-panel,
+html[data-theme="dark"] body.site-app.settings-page .ha-imp-result,
+html[data-theme="dark"] body.site-app.settings-page .mm-ad-box,
+html[data-theme="dark"] body.site-app.settings-page .hero-settings,
+html[data-theme="dark"] body.site-app.settings-page .mm-list-item,
+html[data-theme="dark"] body.site-app.settings-page .mm-ad-row,
+html[data-theme="dark"] body.site-app.settings-page .myads-table-wrap,
+html[data-theme="dark"] body.site-app.settings-page .myads-modal-card {
+  background: #1a1f26 !important;
+  border-color: #2a313c !important;
+  color: #e8eaed !important;
+}
+
+html[data-theme="dark"] body.site-app.settings-page .mm-panel-title,
+html[data-theme="dark"] body.site-app.settings-page .hero-settings-kind-title,
+html[data-theme="dark"] body.site-app.settings-page .mm-card strong,
+html[data-theme="dark"] body.site-app.settings-page .mm-list-main strong,
+html[data-theme="dark"] body.site-app.settings-page .myads-title,
+html[data-theme="dark"] body.site-app.settings-page .settings-switch,
+html[data-theme="dark"] body.site-app.settings-page .settings-switch > span,
+html[data-theme="dark"] body.site-app.settings-page .mm-check-inline,
+html[data-theme="dark"] body.site-app.settings-page label {
+  color: #f3f4f6 !important;
+}
+
+html[data-theme="dark"] body.site-app.settings-page .mm-panel-lead,
+html[data-theme="dark"] body.site-app.settings-page .hero-settings-subtitle,
+html[data-theme="dark"] body.site-app.settings-page .mm-card span,
+html[data-theme="dark"] body.site-app.settings-page .mm-list-meta,
+html[data-theme="dark"] body.site-app.settings-page .mm-msg-body,
+html[data-theme="dark"] body.site-app.settings-page .mm-empty,
+html[data-theme="dark"] body.site-app.settings-page .mm-note-field,
+html[data-theme="dark"] body.site-app.settings-page .ha-imp-steps,
+html[data-theme="dark"] body.site-app.settings-page .ha-imp-bookmark-hint,
+html[data-theme="dark"] body.site-app.settings-page .ha-imp-footer,
+html[data-theme="dark"] body.site-app.settings-page .ha-imp-url-row label,
+html[data-theme="dark"] body.site-app.settings-page .myads-count,
+html[data-theme="dark"] body.site-app.settings-page .myads-spec,
+html[data-theme="dark"] body.site-app.settings-page .myads-views,
+html[data-theme="dark"] body.site-app.settings-page .myads-ssz {
+  color: #9ca3af !important;
+}
+
+html[data-theme="dark"] body.site-app.settings-page .ha-imp-mode {
+  background: #12161c !important;
+  border-color: #3b4450 !important;
+  color: #e8eaed !important;
+}
+
+html[data-theme="dark"] body.site-app.settings-page .ha-imp-mode.is-active {
+  background: #eb730d !important;
+  border-color: #eb730d !important;
+  color: #fff !important;
+}
+
+html[data-theme="dark"] body.site-app.settings-page .ha-imp-bookmark {
+  background: #12161c !important;
+  border-color: #3b4450 !important;
+  color: #7dd3fc !important;
+}
+
+html[data-theme="dark"] body.site-app.settings-page .ha-imp-url-fields input,
+html[data-theme="dark"] body.site-app.settings-page .mm-inline-form input,
+html[data-theme="dark"] body.site-app.settings-page .mm-note-field input,
+html[data-theme="dark"] body.site-app.settings-page .myads-search input,
+html[data-theme="dark"] body.site-app.settings-page input[type="url"],
+html[data-theme="dark"] body.site-app.settings-page input[type="file"] {
+  background: #12161c !important;
+  color: #f3f4f6 !important;
+  border-color: #3b4450 !important;
+}
+
+html[data-theme="dark"] body.site-app.settings-page .mm-list-item.is-unread {
+  background: #1e2a36 !important;
+  border-color: #3b82f6 !important;
+}
+
+html[data-theme="dark"] body.site-app.settings-page .myads-table th,
+html[data-theme="dark"] body.site-app.settings-page .myads-table td {
+  background: #1a1f26 !important;
+  color: #e8eaed !important;
+  border-bottom-color: #2a313c !important;
+}
+
+html[data-theme="dark"] body.site-app.settings-page .myads-table th {
+  background: #222831 !important;
+  color: #9ca3af !important;
+}
+
+html[data-theme="dark"] body.site-app.settings-page .myads-link {
+  color: #7dd3fc !important;
+}
+
+html[data-theme="dark"] body.site-app.settings-page .myads-link--danger,
+html[data-theme="dark"] body.site-app.settings-page .settings-danger-btn {
+  color: #f87171 !important;
+  border-color: #7f1d1d !important;
+}
+
+html[data-theme="dark"] body.site-app.settings-page .myads-price,
+html[data-theme="dark"] body.site-app.settings-page .mm-ad-row span {
+  color: #fb923c !important;
+}
+
+html[data-theme="dark"] body.site-app.settings-page .myads-radio,
+html[data-theme="dark"] body.site-app.settings-page .myads-toolbar {
+  color: #d1d5db !important;
+}
+
+html[data-theme="dark"] body.site-app.settings-page .settings-btn-secondary,
+html[data-theme="dark"] body.site-app.settings-page .mm-list-actions .settings-btn-secondary {
+  background: #243044 !important;
+  border-color: #3b4450 !important;
+  color: #e8eaed !important;
+}
+
+html[data-theme="dark"] body.site-app.settings-page .myads-modal {
+  background: rgba(0, 0, 0, 0.65);
+}
+
+html[data-theme="dark"] body.site-app.settings-page .hero-settings-upload,
+html[data-theme="dark"] body.site-app.settings-page .login-field {
+  color: #d1d5db !important;
 }
 
 /* —— Hirdetésfeladás: valódi sötét mód —— */

@@ -5894,6 +5894,14 @@ html[data-theme="dark"] body.site-app.settings-page .mm-nav-plain span {
   background: #243044 !important;
 }
 
+html[data-theme="dark"] body.site-app.settings-page .mm-panel-lead,
+html[data-theme="dark"] body.site-app.settings-page .settings-lead,
+html[data-theme="dark"] body.site-app.settings-page .settings-kicker,
+html[data-theme="dark"] body.site-app.settings-page .login-label,
+html[data-theme="dark"] body.site-app.settings-page .settings-form .login-label {
+  color: #9ca3af !important;
+}
+
 html[data-theme="dark"] body.site-app.settings-page .mm-side-title,
 html[data-theme="dark"] body.site-app.settings-page .mm-panel-title,
 html[data-theme="dark"] body.site-app.settings-page .settings-title,

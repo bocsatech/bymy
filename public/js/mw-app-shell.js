@@ -246,4 +246,11 @@
   injectTop();
   injectTabbar();
   if (!isPostAd) bindScrollHide();
+
+  /* Hero promo sáv a fő navigációs oldalakon */
+  import("/js/hub-promo.js?v=hubHeroDemo1")
+    .then(function (mod) {
+      if (mod && typeof mod.mountHubPromos === "function") return mod.mountHubPromos();
+    })
+    .catch(function () {});
 })();

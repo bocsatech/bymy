@@ -356,10 +356,11 @@
     flex: 0 0 calc(100vw - 1.7rem);
     width: calc(100vw - 1.7rem);
     max-width: none;
-    aspect-ratio: 5 / 3;
-    border-radius: 18px;
+    aspect-ratio: 16 / 10;
+    border-radius: 16px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.07);
     scroll-snap-align: start;
+    border: 1px solid #d4d4d4;
   }
 
   /* Főoldal: semmi ne zárja a fel-le görgetést (vízszintes sávok is engedik) */

@@ -6186,3 +6186,91 @@ html[data-theme="dark"] body.site-app.ad-vertical-ingatlan[data-site-page="hirde
   border-color: #2a313c !important;
   color: #e8eaed !important;
 }
+
+/* ============================================================
+ * Sötét háttéren: fehér szöveg az egész weben.
+ * Kivétel: fehér listing/promo kártyák + citromsárga CTA-k.
+ * ============================================================ */
+html[data-theme="dark"] body.site-app {
+  color: #fff;
+}
+
+html[data-theme="dark"] body.site-app.settings-page,
+html[data-theme="dark"] body.site-app[data-site-page="uzenetek"],
+html[data-theme="dark"] body.site-app.mm-messages-open,
+html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"],
+html[data-theme="dark"] body.site-app.hub-page--feed,
+html[data-theme="dark"] body.site-app.home-page,
+html[data-theme="dark"] body.site-app.fiok-page {
+  color: #fff !important;
+}
+
+html[data-theme="dark"] body.site-app.settings-page :is(a, strong, b, p, span, label, li, h1, h2, h3, h4, h5, td, th, small, em, div, button),
+html[data-theme="dark"] body.site-app[data-site-page="uzenetek"] :is(a, strong, b, p, span, label, li, h1, h2, h3, h4, small, em),
+html[data-theme="dark"] body.site-app.mm-messages-open :is(a, strong, b, p, span, label, li, h1, h2, h3, h4, small, em),
+html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] :is(a, strong, b, p, span, label, li, h1, h2, h3, h4, small, em) {
+  color: #fff !important;
+}
+
+/* Fehér kártyákon maradjon fekete a szöveg */
+html[data-theme="dark"] body.site-app :is(
+  .hf-card,
+  .hf-card--listing,
+  .home-grid-card,
+  .hub-promo,
+  .hub-sell,
+  .login-card,
+  .site-avatar-dropdown
+) :is(a, strong, b, p, span, label, li, h1, h2, h3, h4, small, em, div),
+html[data-theme="dark"] body.site-app :is(
+  .hf-card,
+  .hf-card--listing,
+  .home-grid-card,
+  .hub-promo,
+  .hub-sell,
+  .login-card,
+  .site-avatar-dropdown
+) {
+  color: #111 !important;
+}
+
+/* Citromsárga CTA: fekete szöveg */
+html[data-theme="dark"] body.site-app :is(
+  .hub-btn--post,
+  .hub-btn--primary,
+  .site-header-btn--primary,
+  .ha-imp-go,
+  .ha-imp-bookmark,
+  .ha-imp-mode.is-active,
+  .settings-btn-accent,
+  #next-btn.btn-primary,
+  #new-ad-btn.btn-primary
+) {
+  color: #111 !important;
+}
+
+/* Veszély / kiemelés színek megmaradnak */
+html[data-theme="dark"] body.site-app.settings-page :is(
+  .myads-link--danger,
+  .settings-danger-btn,
+  .settings-link-btn--danger,
+  .wh-msg__menu button.is-danger
+) {
+  color: #f87171 !important;
+}
+
+html[data-theme="dark"] body.site-app.settings-page :is(
+  .myads-price,
+  .mm-ad-row span
+) {
+  color: #fb923c !important;
+}
+
+html[data-theme="dark"] body.site-app.settings-page .myads-link:not(.myads-link--danger),
+html[data-theme="dark"] body.site-app.settings-page .settings-link-btn {
+  color: #7dd3fc !important;
+}
+
+html[data-theme="dark"] body.site-app .site-message-badge {
+  color: #fff !important;
+}

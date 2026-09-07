@@ -3909,12 +3909,21 @@ body.site-app .mm-nav-plain {
   color: #98a2b3;
   font-size: 0.9rem;
   font-weight: 600;
+  cursor: default;
+  user-select: none;
+  opacity: 0.72;
 }
 
 body.site-app .mm-nav-plain span {
-  font-weight: 500;
-  font-size: 0.78rem;
-  color: #b0b8c4;
+  margin-left: 0.35rem;
+  font-weight: 650;
+  font-size: 0.68rem;
+  letter-spacing: 0.02em;
+  color: #9ca3af;
+  background: #f3f4f6;
+  border-radius: 999px;
+  padding: 0.15rem 0.45rem;
+  vertical-align: middle;
 }
 
 body.site-app .mm-side-logout {
@@ -5875,13 +5884,14 @@ html[data-theme="dark"] body.site-app.settings-page .mm-side {
 }
 
 html[data-theme="dark"] body.site-app.settings-page .mm-side-kicker,
-html[data-theme="dark"] body.site-app.settings-page .mm-nav-plain,
-html[data-theme="dark"] body.site-app.settings-page .mm-panel-lead,
-html[data-theme="dark"] body.site-app.settings-page .settings-lead,
-html[data-theme="dark"] body.site-app.settings-page .settings-kicker,
-html[data-theme="dark"] body.site-app.settings-page .login-label,
-html[data-theme="dark"] body.site-app.settings-page .settings-form .login-label {
+html[data-theme="dark"] body.site-app.settings-page .mm-nav-plain {
   color: #9ca3af !important;
+  background: transparent !important;
+}
+
+html[data-theme="dark"] body.site-app.settings-page .mm-nav-plain span {
+  color: #9ca3af !important;
+  background: #243044 !important;
 }
 
 html[data-theme="dark"] body.site-app.settings-page .mm-side-title,

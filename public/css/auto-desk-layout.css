@@ -888,23 +888,23 @@
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-grid-card {
-    background: var(--ad-panel) !important;
-    border: 1px solid var(--ad-line) !important;
-    border-radius: 8px !important;
+    background: #fff !important;
+    border: 1px solid #d4d4d4 !important;
+    border-radius: 9px !important;
     overflow: hidden;
     box-shadow: none !important;
-    color: var(--ad-text) !important;
+    color: #111 !important;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-grid-card:hover {
     transform: none !important;
     box-shadow: none !important;
-    border-color: #3f3f3f !important;
+    border-color: #bdbdbd !important;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-grid-card-media {
     aspect-ratio: 16 / 10;
-    background: var(--ad-surface-3) !important;
+    background: #e8ebef !important;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-grid-card-save {

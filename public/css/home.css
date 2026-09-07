@@ -2033,7 +2033,7 @@ body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-n
   display: flex;
   flex-direction: column;
   min-height: 100%;
-  color: inherit;
+  color: #111;
   cursor: default;
   transition: box-shadow 0.15s, transform 0.15s, border-color 0.15s;
 }

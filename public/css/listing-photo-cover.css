@@ -1,7 +1,45 @@
 /**
- * Minden autóhirdetés-kép: képközepe a keret közepén, a kilógó rész levágva.
- * Lightbox (teljes képnézet) kivétel — ott contain marad.
+ * Hirdetés-csempék minden oldalon / témában:
+ * fehér kártya, fekete szöveg, kép cover (lightbox kivétel).
  */
+
+.hf-card--listing,
+.home-grid-card,
+body.listings-page .ha-card,
+.hd-related .home-grid-card {
+  background: #fff !important;
+  color: #111 !important;
+  border-color: #d4d4d4 !important;
+}
+
+.hf-card--listing .hf-card-label,
+.hf-card--listing .hf-card-price,
+.hf-card--listing .hf-card-spec,
+.home-grid-card-title,
+.home-grid-card-sub,
+.home-grid-card-price,
+.home-grid-card-spec,
+.home-grid-card-loc,
+.home-grid-card-meta,
+.home-grid-card-body,
+body.listings-page .ha-card-title,
+body.listings-page .ha-card-price,
+body.listings-page .ha-card-spec,
+body.listings-page .ha-card-km,
+body.listings-page .ha-card-desc,
+body.listings-page .ha-card-location {
+  color: #111 !important;
+}
+
+.hf-card--listing .hf-card-sub {
+  color: #6b7280 !important;
+}
+
+.hf-card--listing .hf-card-media,
+.home-grid-card-media {
+  background: #e8ebef !important;
+  border: 0 !important;
+}
 
 .hf-card--listing .hf-card-media {
   overflow: hidden !important;
@@ -33,4 +71,31 @@ body.site-app .myads-thumb img,
 body.site-app .myads-photo-item img {
   object-fit: cover !important;
   object-position: center center !important;
+}
+
+/* Sötét oldalchrome mellett is marad a fehér csempe */
+html[data-theme="dark"] .hf-card--listing,
+html[data-theme="dark"] .home-grid-card,
+html[data-theme="dark"] body.listings-page .ha-card,
+html[data-theme="dark"] .hd-related .home-grid-card {
+  background: #fff !important;
+  color: #111 !important;
+  border-color: #d4d4d4 !important;
+}
+
+html[data-theme="dark"] .home-grid-card-title,
+html[data-theme="dark"] .home-grid-card-sub,
+html[data-theme="dark"] .home-grid-card-price,
+html[data-theme="dark"] .home-grid-card-spec,
+html[data-theme="dark"] .home-grid-card-loc,
+html[data-theme="dark"] .home-grid-card-body,
+html[data-theme="dark"] .hf-card--listing .hf-card-label,
+html[data-theme="dark"] .hf-card--listing .hf-card-price,
+html[data-theme="dark"] .hf-card--listing .hf-card-spec {
+  color: #111 !important;
+}
+
+html[data-theme="dark"] .hf-card--listing .hf-card-sub,
+html[data-theme="dark"] .home-grid-card-sub {
+  color: #6b7280 !important;
 }

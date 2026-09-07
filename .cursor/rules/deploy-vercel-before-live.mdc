@@ -5,22 +5,23 @@ alwaysApply: true
 
 # Deploy: előbb Vercel, csak utána éles
 
-**Éles (S1 / bymy.hu / `bymy-app` / `scp` a VPS-re) TILOS**, amíg a változtatás nincs ellenőrizve a Vercelen.
+**Éles (S1 / bymy.hu / `bymy-app` / `scp` a VPS-re) TILOS**, amíg a változtatás nincs ellenőrizve a Vercelen, **és** a felhasználó nem mondja ki.
 
 ## Kötelező sorrend
 
 1. **Lokális** fejlesztés / javítás.
-2. **Commit** (ha kész).
-3. **Vercel** — `bymy.vercel.app` (push / `vercel deploy` / meglévő preview, ahogy a projekt szokása).
+2. **Commit**.
+3. **Push → GitHub → Vercel** (`https://bymy.vercel.app`) — ez a teszt.
 4. **Felhasználó megnézi** a Vercelen.
-5. **Éles (S1)** csak ha a felhasználó **explicit** kéri („mehet élesre”, „deploy S1”, „vidd live-ra”).
+5. **Éles (S1)** **csak** ha explicit kéri („mehet élesre”, „deploy S1”, „vidd live-ra”).
 
 ## Tilos
 
 - Félkész / kísérleti UI azonnali S1 deployja
-- „Gyors javítás” élesen iterálva (órákig patch-patch productionön)
+- „Gyors javítás” élesen iterálva
 - Vercel kihagyása „csak CSS” miatt is
+- Magadtól S1-re scp / rsync / pm2 deploy
 
 ## Kivétel
 
-Csak ha a felhasználó **ugyanabban az üzenetben** kifejezetten éles visszaállítást / S1 deployt kér (pl. production regresszió rollback).
+Csak ha a felhasználó **ugyanabban az üzenetben** kifejezetten éles visszaállítást / S1 deployt kér.

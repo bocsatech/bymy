@@ -5121,9 +5121,16 @@ body.site-app .wh-msg__error {
 }
 
 /* —— Színmód (világos / sötét) —— */
-html[data-theme="dark"] body.site-app {
+/* Böngésző / feed: sötét oldalháttér. App-felületek (fiók, üzenetek, feladás…): világos vászon. */
+html[data-theme="dark"] body.site-app.hub-page--feed,
+html[data-theme="dark"] body.site-app.home-page {
   background: #12161c;
   color: #e8eaed;
+}
+
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page) {
+  background: #eef0f3 !important;
+  color: #111 !important;
 }
 
 html[data-theme="dark"] body.site-app .site-header,
@@ -5183,12 +5190,22 @@ html[data-theme="dark"] body.site-app .site-theme-toggle {
   background: linear-gradient(90deg, #e5e7eb 50%, #111827 50%);
 }
 
-html[data-theme="dark"] body.site-app .page,
-html[data-theme="dark"] body.site-app .home-main,
-html[data-theme="dark"] body.site-app main,
-html[data-theme="dark"] body.site-app .mm-shell,
-html[data-theme="dark"] body.site-app .mm-main {
+html[data-theme="dark"] body.site-app.hub-page--feed .page,
+html[data-theme="dark"] body.site-app.hub-page--feed .home-main,
+html[data-theme="dark"] body.site-app.hub-page--feed main,
+html[data-theme="dark"] body.site-app.home-page .page,
+html[data-theme="dark"] body.site-app.home-page .home-main,
+html[data-theme="dark"] body.site-app.home-page main {
   color: #e8eaed;
+}
+
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page) .page,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page) .home-main,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page) main,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page) .mm-shell,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page) .mm-main {
+  background: transparent !important;
+  color: #111 !important;
 }
 
 html[data-theme="dark"] body.site-app .mm-shell-close {
@@ -5202,15 +5219,27 @@ html[data-theme="dark"] body.site-app .mm-shell-close:hover {
   border-color: #3b4450;
 }
 
-html[data-theme="dark"] body.site-app .mm-side--cats {
+html[data-theme="dark"] body.site-app.home-page .mm-side--cats,
+html[data-theme="dark"] body.site-app.hub-page--feed .mm-side--cats {
   background: transparent;
   border: 0;
 }
 
-html[data-theme="dark"] body.site-app .mm-side,
-html[data-theme="dark"] body.site-app .login-card,
-html[data-theme="dark"] body.site-app .site-side-card,
-html[data-theme="dark"] body.site-app .automax-main {
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page) .mm-side,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page) .login-card,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page) .site-side-card,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page) .automax-main {
+  background: #fff !important;
+  border-color: #dfe3ea !important;
+  color: #111 !important;
+}
+
+html[data-theme="dark"] body.site-app.home-page .mm-side,
+html[data-theme="dark"] body.site-app.home-page .login-card,
+html[data-theme="dark"] body.site-app.home-page .site-side-card,
+html[data-theme="dark"] body.site-app.home-page .automax-main,
+html[data-theme="dark"] body.site-app.hub-page--feed .login-card,
+html[data-theme="dark"] body.site-app.hub-page--feed .site-side-card {
   background: #1a1f26;
   border-color: #2a313c;
   color: #e8eaed;
@@ -5549,4 +5578,54 @@ html[data-theme="dark"] body.site-app select {
 
 html[data-theme="dark"] body.site-app .settings-form .login-label {
   color: #9ca3af;
+}
+
+/* —— Egységes világos app-vászon (fiók / üzenetek / feladás / stb.) sötét fejléc mellett —— */
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page) h1,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page) h2,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page) h3,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page) .mm-panel-title,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page) .settings-title,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page) .wh-msg__title,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page) .fiok-title {
+  color: #101828 !important;
+}
+
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page) .login-label,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page) .mm-panel-lead,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page) .settings-lead,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page) .mm-nav-plain {
+  color: #667085 !important;
+}
+
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page) .mm-nav-link,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page) .mm-nav-sublink,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page) .mm-nav-toggle {
+  color: #344054 !important;
+  background: transparent !important;
+}
+
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page) .mm-nav-link:hover,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page) .mm-nav-sublink:hover,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page) .mm-nav-toggle:hover,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page) .mm-nav-toggle[aria-expanded="true"] {
+  background: #f2f4f7 !important;
+  color: #101828 !important;
+}
+
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page) .mm-nav-link.is-active,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page) .mm-nav-sublink.is-active {
+  background: #e8f1fb !important;
+  color: #1565c0 !important;
+}
+
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page) .mm-page,
+html[data-theme="dark"] body.site-app.mm-page {
+  background: #eef1f4 !important;
+}
+
+html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"],
+html[data-theme="dark"] body.site-app[data-site-page="uzenetek"] {
+  background: #eef0f3 !important;
+  color: #111 !important;
 }

@@ -5412,3 +5412,141 @@ body.site-app[data-site-page="hirdetesfeladas"] #new-ad-btn.btn-primary:hover {
   border-color: #e0b628 !important;
   color: #111 !important;
 }
+
+/* ============================================================
+ * Globális sötét mód olvashatóság — minden site-app oldal.
+ * Sötét chrome: világos szöveg. Fehér kártya/input: sötét szöveg.
+ * ============================================================ */
+html[data-theme="dark"] body.site-app {
+  color: #e8eaed;
+}
+
+html[data-theme="dark"] body.site-app h1,
+html[data-theme="dark"] body.site-app h2,
+html[data-theme="dark"] body.site-app h3,
+html[data-theme="dark"] body.site-app h4,
+html[data-theme="dark"] body.site-app .mm-panel-title,
+html[data-theme="dark"] body.site-app .settings-title,
+html[data-theme="dark"] body.site-app .settings-kicker,
+html[data-theme="dark"] body.site-app .settings-card-title,
+html[data-theme="dark"] body.site-app .settings-lead,
+html[data-theme="dark"] body.site-app .mm-panel-lead,
+html[data-theme="dark"] body.site-app .login-label,
+html[data-theme="dark"] body.site-app .settings-acc-summary,
+html[data-theme="dark"] body.site-app .settings-acc-hint,
+html[data-theme="dark"] body.site-app .settings-acc-caption,
+html[data-theme="dark"] body.site-app .mm-nav-plain,
+html[data-theme="dark"] body.site-app .fiok-title,
+html[data-theme="dark"] body.site-app .wh-msg__title,
+html[data-theme="dark"] body.site-app .hero-settings-kind-title,
+html[data-theme="dark"] body.site-app .hero-settings-subtitle {
+  color: #e8eaed;
+}
+
+html[data-theme="dark"] body.site-app .login-label,
+html[data-theme="dark"] body.site-app .mm-panel-lead,
+html[data-theme="dark"] body.site-app .settings-lead,
+html[data-theme="dark"] body.site-app .settings-acc-hint,
+html[data-theme="dark"] body.site-app .settings-acc-caption,
+html[data-theme="dark"] body.site-app .mm-nav-plain,
+html[data-theme="dark"] body.site-app .hero-settings-subtitle {
+  color: #9ca3af;
+}
+
+html[data-theme="dark"] body.site-app .mm-nav-link,
+html[data-theme="dark"] body.site-app .mm-nav-sublink,
+html[data-theme="dark"] body.site-app .mm-nav-toggle {
+  color: #d1d5db;
+  background: transparent;
+}
+
+html[data-theme="dark"] body.site-app .mm-nav-link:hover,
+html[data-theme="dark"] body.site-app .mm-nav-sublink:hover,
+html[data-theme="dark"] body.site-app .mm-nav-toggle:hover,
+html[data-theme="dark"] body.site-app .mm-nav-toggle[aria-expanded="true"] {
+  background: #242b34;
+  color: #f3f4f6;
+}
+
+html[data-theme="dark"] body.site-app .mm-nav-link.is-active,
+html[data-theme="dark"] body.site-app .mm-nav-sublink.is-active {
+  background: #1e3a5f;
+  color: #93c5fd;
+}
+
+/* Fehér felületek: mindig sötét szöveg (űrlap, kártya, csempe) */
+html[data-theme="dark"] body.site-app .settings-profile-header,
+html[data-theme="dark"] body.site-app .settings-card,
+html[data-theme="dark"] body.site-app .mm-card,
+html[data-theme="dark"] body.site-app .mm-inline-form,
+html[data-theme="dark"] body.site-app .login-card,
+html[data-theme="dark"] body.site-app .ha-imp-panel,
+html[data-theme="dark"] body.site-app .ha-imp-result,
+html[data-theme="dark"] body.site-app .home-grid-card,
+html[data-theme="dark"] body.site-app .hf-card,
+html[data-theme="dark"] body.site-app .hf-card--listing,
+html[data-theme="dark"] body.site-app .hub-promo,
+html[data-theme="dark"] body.site-app .hub-sell,
+html[data-theme="dark"] body.site-app .wh-msg__row,
+html[data-theme="dark"] body.site-app .wh-msg__composer,
+html[data-theme="dark"] body.site-app .site-avatar-dropdown {
+  background: #fff;
+  color: #111;
+  border-color: #d4d4d4;
+}
+
+html[data-theme="dark"] body.site-app .settings-profile-header strong,
+html[data-theme="dark"] body.site-app .settings-profile-header .mm-panel-lead,
+html[data-theme="dark"] body.site-app .settings-card,
+html[data-theme="dark"] body.site-app .settings-card-title,
+html[data-theme="dark"] body.site-app .mm-card strong,
+html[data-theme="dark"] body.site-app .mm-card span,
+html[data-theme="dark"] body.site-app .login-card,
+html[data-theme="dark"] body.site-app .login-card h1,
+html[data-theme="dark"] body.site-app .login-card h2,
+html[data-theme="dark"] body.site-app .login-card .login-label,
+html[data-theme="dark"] body.site-app .ha-imp-panel,
+html[data-theme="dark"] body.site-app .ha-imp-panel .login-label,
+html[data-theme="dark"] body.site-app .home-grid-card,
+html[data-theme="dark"] body.site-app .home-grid-card-title,
+html[data-theme="dark"] body.site-app .home-grid-card-sub,
+html[data-theme="dark"] body.site-app .home-grid-card-price,
+html[data-theme="dark"] body.site-app .home-grid-card-spec,
+html[data-theme="dark"] body.site-app .home-grid-card-body,
+html[data-theme="dark"] body.site-app .hf-card-label,
+html[data-theme="dark"] body.site-app .hf-card-price,
+html[data-theme="dark"] body.site-app .hub-sell h2,
+html[data-theme="dark"] body.site-app .hub-promo__title,
+html[data-theme="dark"] body.site-app .hub-promo__kicker {
+  color: #111 !important;
+}
+
+html[data-theme="dark"] body.site-app .settings-profile-header .mm-panel-lead,
+html[data-theme="dark"] body.site-app .mm-card span,
+html[data-theme="dark"] body.site-app .home-grid-card-sub,
+html[data-theme="dark"] body.site-app .hf-card-sub,
+html[data-theme="dark"] body.site-app .hub-sell p,
+html[data-theme="dark"] body.site-app .hub-promo__text {
+  color: #6b7280 !important;
+}
+
+html[data-theme="dark"] body.site-app .login-field input,
+html[data-theme="dark"] body.site-app .settings-form input,
+html[data-theme="dark"] body.site-app .settings-form select,
+html[data-theme="dark"] body.site-app .settings-form textarea,
+html[data-theme="dark"] body.site-app textarea,
+html[data-theme="dark"] body.site-app input[type="text"],
+html[data-theme="dark"] body.site-app input[type="email"],
+html[data-theme="dark"] body.site-app input[type="tel"],
+html[data-theme="dark"] body.site-app input[type="password"],
+html[data-theme="dark"] body.site-app input[type="number"],
+html[data-theme="dark"] body.site-app input[type="search"],
+html[data-theme="dark"] body.site-app select {
+  background: #fff;
+  color: #111;
+  border-color: #d0d5dd;
+}
+
+html[data-theme="dark"] body.site-app .settings-form .login-label {
+  color: #9ca3af;
+}

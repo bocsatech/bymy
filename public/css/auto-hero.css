@@ -663,17 +663,20 @@ body[data-site-page="teherauto"] .auto-search-tabs {
   width: 2.65rem;
   height: 1.55rem;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.28);
-  transition: background 0.18s ease;
+  background: rgba(0, 0, 0, 0.22);
+  border: 2px solid #fff;
+  box-sizing: border-box;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2);
+  transition: background 0.18s ease, border-color 0.18s ease;
 }
 
 .qs-ios-toggle__track::after {
   content: "";
   position: absolute;
-  top: 0.14rem;
-  left: 0.14rem;
-  width: 1.27rem;
-  height: 1.27rem;
+  top: 0.08rem;
+  left: 0.08rem;
+  width: 1.15rem;
+  height: 1.15rem;
   border-radius: 50%;
   background: #fff;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.28);
@@ -682,10 +685,12 @@ body[data-site-page="teherauto"] .auto-search-tabs {
 
 .qs-ios-toggle input:checked + .qs-ios-toggle__track {
   background: #34c759;
+  border-color: #34c759;
+  box-shadow: none;
 }
 
 .qs-ios-toggle input:checked + .qs-ios-toggle__track::after {
-  transform: translateX(1.1rem);
+  transform: translateX(1.05rem);
 }
 
 .qs-ios-toggle input:focus-visible + .qs-ios-toggle__track {

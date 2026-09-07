@@ -1666,17 +1666,20 @@ body.site-app .settings-switch-ui {
   height: 1.75rem;
   flex-shrink: 0;
   border-radius: 999px;
-  background: #d1d5db;
-  transition: background 0.15s ease;
+  background: #9ca3af;
+  border: 2px solid #fff;
+  box-sizing: border-box;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.12);
+  transition: background 0.15s ease, border-color 0.15s ease;
 }
 
 body.site-app .settings-switch-ui::after {
   content: "";
   position: absolute;
-  top: 0.15rem;
-  left: 0.15rem;
-  width: 1.45rem;
-  height: 1.45rem;
+  top: 0.1rem;
+  left: 0.1rem;
+  width: 1.3rem;
+  height: 1.3rem;
   border-radius: 999px;
   background: #fff;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
@@ -1685,10 +1688,12 @@ body.site-app .settings-switch-ui::after {
 
 body.site-app .settings-switch input:checked + .settings-switch-ui {
   background: #22c55e;
+  border-color: #22c55e;
+  box-shadow: none;
 }
 
 body.site-app .settings-switch input:checked + .settings-switch-ui::after {
-  transform: translateX(1.25rem);
+  transform: translateX(1.2rem);
 }
 
 body.site-app .settings-link-btn--danger {

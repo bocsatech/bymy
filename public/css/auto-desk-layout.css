@@ -722,11 +722,15 @@
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .qs-ios-toggle__track {
-    background: rgba(0, 0, 0, 0.14) !important;
+    background: rgba(0, 0, 0, 0.35) !important;
+    border: 2px solid #fff !important;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.25) !important;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .qs-ios-toggle input:checked + .qs-ios-toggle__track {
     background: #34c759 !important;
+    border-color: #34c759 !important;
+    box-shadow: none !important;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .qs-detailed-select select,
@@ -1303,30 +1307,36 @@
     width: 46px;
     height: 28px;
     border-radius: 999px;
-    background: #c6c6c6;
+    background: #6b7280;
+    border: 2px solid #fff;
+    box-sizing: border-box;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2);
     position: relative;
     flex: 0 0 auto;
-    transition: background 0.15s;
+    transition: background 0.15s, border-color 0.15s;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-switch::after {
     content: "";
     position: absolute;
-    top: 3px;
-    left: 3px;
-    width: 22px;
-    height: 22px;
+    top: 2px;
+    left: 2px;
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
     background: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
     transition: transform 0.15s;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-toggle input:checked + .auto-bm-switch {
     background: #34c759;
+    border-color: #34c759;
+    box-shadow: none;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-toggle input:checked + .auto-bm-switch::after {
-    transform: translateX(18px);
+    transform: translateX(16px);
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-subrow {

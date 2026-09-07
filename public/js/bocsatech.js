@@ -853,6 +853,16 @@ const actions = {
       render();
     }
   },
+  backupSelectAll() {
+    app.querySelectorAll("input[data-backup-listing-id]").forEach((el) => {
+      el.checked = true;
+    });
+  },
+  backupSelectNone() {
+    app.querySelectorAll("input[data-backup-listing-id]").forEach((el) => {
+      el.checked = false;
+    });
+  },
   async backupRestore() {
     err = "";
     info = "";
@@ -2245,7 +2255,7 @@ function backupView() {
   const rows = (backupPreview?.listings || [])
     .map(
       (row) => `<tr>
-      <td><input type="checkbox" data-backup-listing-id="${esc(row.id)}" checked /></td>
+      <td><input type="checkbox" data-backup-listing-id="${esc(row.id)}" /></td>
       <td>${esc(row.id)}</td>
       <td>${esc(row.title)}</td>
       <td>${esc(row.status)}</td>
@@ -2288,6 +2298,10 @@ function backupView() {
     ${
       backupPreview
         ? `<p class="hint" style="margin-top:1rem">Találat: <strong>${esc(backupPreview.matchCount)}</strong> hirdetés · mentés: ${esc(backupPreview.createdAt || backupPreview.id)}</p>
+      <div class="row" style="gap:0.65rem;flex-wrap:wrap;margin-top:0.65rem">
+        <button class="btn ghost" type="button" data-act="backupSelectAll" ${backupBusy ? "disabled" : ""}>Összes kijelölése</button>
+        <button class="btn ghost" type="button" data-act="backupSelectNone" ${backupBusy ? "disabled" : ""}>Összes kijelölés törlése</button>
+      </div>
       <div class="table-scroll" style="margin-top:0.65rem">
         <table class="table-dense">
           <thead><tr><th></th><th>ID</th><th>Cím</th><th>Státusz</th><th>Kategória</th><th>User</th></tr></thead>

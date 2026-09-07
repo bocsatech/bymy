@@ -952,7 +952,7 @@
     min-height: 0;
     padding: 12px 14px 14px !important;
     gap: 6px !important;
-    color: var(--ad-text) !important;
+    color: #111 !important;
     background: transparent !important;
     text-decoration: none !important;
     display: flex !important;
@@ -964,7 +964,7 @@
     font-size: 20px !important;
     font-weight: 800 !important;
     line-height: 1.2 !important;
-    color: var(--ad-text) !important;
+    color: #111 !important;
     letter-spacing: 0;
     text-transform: none;
     -webkit-line-clamp: 1;
@@ -974,7 +974,7 @@
     margin: 0 !important;
     font-size: 14px !important;
     font-weight: 400 !important;
-    color: var(--ad-muted, #6b7280) !important;
+    color: #111 !important;
     line-height: 1.25;
     display: -webkit-box;
     -webkit-line-clamp: 1;
@@ -986,7 +986,7 @@
     margin: 2px 0 4px !important;
     font-size: 22px !important;
     font-weight: 800 !important;
-    color: var(--ad-text) !important;
+    color: #111 !important;
     letter-spacing: -0.01em;
     line-height: 1.15;
   }
@@ -1010,14 +1010,14 @@
     gap: 7px;
     font-size: 13px !important;
     font-weight: 500 !important;
-    color: var(--ad-muted, #4b5563) !important;
+    color: #111 !important;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-grid-card-spec svg {
     width: 14px;
     height: 14px;
     flex: 0 0 auto;
-    opacity: 0.9;
+    opacity: 1;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-grid-card-spec::before {
@@ -1031,7 +1031,7 @@
     align-items: center;
     gap: 6px;
     font-size: 12px !important;
-    color: #9ca3af !important;
+    color: #111 !important;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-grid-card-loc svg {

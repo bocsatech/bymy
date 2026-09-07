@@ -2,15 +2,15 @@ import {
   categoriesForVertical,
   normalizePartnerVertical,
   partnerCategoryImageUrl,
-} from "./partner-categories-data.js?v=ingatlanAjanlas2";
+} from "./partner-categories-data.js?v=ingatlanAjanlas3";
 import {
   fetchPartnerRecommendations,
   loadSavedPostalCode,
   savePostalCode,
-} from "./partner-recommendations.js?v=ingatlanAjanlas2";
+} from "./partner-recommendations.js?v=ingatlanAjanlas3";
 
 const RADIUS_KEY = "bymy_partner_radius_km";
-const UI_V = "ingatlanAjanlas2";
+const UI_V = "ingatlanAjanlas3";
 
 function queryVertical() {
   try {
@@ -307,7 +307,8 @@ function renderCategory(category, openId) {
     const empty = document.createElement("p");
     empty.className = "ajanlas-empty";
     empty.textContent =
-      category.empty_message ?? "Ebben a kategóriában nincs ajánlott partner a közelben.";
+      category.empty_message ??
+      "Ebben a kategóriában nincs partner, ez a te hirdetésed helye.";
     panel.append(empty);
   } else {
     for (const partner of category.partners) {

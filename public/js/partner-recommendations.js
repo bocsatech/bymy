@@ -109,7 +109,9 @@ function renderCategoryPanel(category) {
   } else {
     const empty = document.createElement("p");
     empty.className = "home-partner-empty";
-    empty.textContent = category.empty_message ?? "Hamarosan a környékeden is";
+    empty.textContent =
+      category.empty_message ??
+      "Ebben a kategóriában nincs partner, ez a te hirdetésed helye.";
     list.append(empty);
   }
 

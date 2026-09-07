@@ -7,9 +7,9 @@ import {
   initHomeSearchSidebar,
   initHomeFilterCatalog,
 } from "./home-search-filter.js?v=teherKivitel35e";
-import { initHomeQuickSearch } from "./home-quicksearch.js?v=menuAll1";
+import { initHomeQuickSearch } from "./home-quicksearch.js?v=teherKivitel35e";
 import { matchDetailedSearch, hasActiveDetailedSearch } from "./auto-detailed-search.js?v=autoDesk16";
-import { updateAutoDeskResultCount } from "./auto-desk-search.js?v=menuAll1";
+import { updateAutoDeskResultCount } from "./auto-desk-search.js?v=teherKivitel35e";
 import {
   emptyIngatlanFilters,
   filterListingsByIngatlan,

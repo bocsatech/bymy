@@ -4529,6 +4529,23 @@ body.site-app .settings-form input[type="password"] {
   caret-color: #111;
 }
 
+html[data-theme="dark"] body.site-app.settings-page .settings-form input[type="text"],
+html[data-theme="dark"] body.site-app.settings-page .settings-form input[type="tel"],
+html[data-theme="dark"] body.site-app.settings-page .settings-form input[type="email"],
+html[data-theme="dark"] body.site-app.settings-page .settings-form input[type="password"],
+html[data-theme="dark"] body.site-app.settings-page .settings-form input[type="url"],
+html[data-theme="dark"] body.site-app.settings-page .settings-form input[type="number"],
+html[data-theme="dark"] body.site-app.settings-page .settings-form input[type="search"],
+html[data-theme="dark"] body.site-app.settings-page .settings-form select,
+html[data-theme="dark"] body.site-app.settings-page .settings-form textarea {
+  color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
+  background: #12161c !important;
+  caret-color: #fff !important;
+  border-color: #3b4450 !important;
+  color-scheme: dark;
+}
+
 body.site-app #settings-profile-summary {
   margin: 0 0 0.75rem;
   font-weight: 600;
@@ -5613,11 +5630,17 @@ html[data-theme="dark"] body.site-app .home-grid-card,
 html[data-theme="dark"] body.site-app .hf-card,
 html[data-theme="dark"] body.site-app .hf-card--listing,
 html[data-theme="dark"] body.site-app .hub-promo,
-html[data-theme="dark"] body.site-app .hub-sell,
-html[data-theme="dark"] body.site-app .site-avatar-dropdown {
+html[data-theme="dark"] body.site-app .hub-sell {
   background: #fff;
   color: #111;
   border-color: #d4d4d4;
+}
+
+/* Eldobható menü: sötét háttér + fehér szöveg */
+html[data-theme="dark"] body.site-app .site-avatar-dropdown {
+  background: #1a1f26 !important;
+  color: #fff !important;
+  border-color: #2a313c !important;
 }
 
 html[data-theme="dark"] body.site-app .login-card,
@@ -5663,7 +5686,7 @@ html[data-theme="dark"] body.site-app:not(.settings-page):not([data-site-page="b
 }
 
 html[data-theme="dark"] body.site-app .settings-form .login-label {
-  color: #9ca3af;
+  color: #fff;
 }
 
 /* —— Egységes világos app-vászon (fiók / feladás / stb.) sötét fejléc mellett —— */
@@ -5899,7 +5922,7 @@ html[data-theme="dark"] body.site-app.settings-page .settings-lead,
 html[data-theme="dark"] body.site-app.settings-page .settings-kicker,
 html[data-theme="dark"] body.site-app.settings-page .login-label,
 html[data-theme="dark"] body.site-app.settings-page .settings-form .login-label {
-  color: #9ca3af !important;
+  color: #fff !important;
 }
 
 html[data-theme="dark"] body.site-app.settings-page .mm-side-title,
@@ -6056,7 +6079,7 @@ html[data-theme="dark"] body.site-app.settings-page .myads-count,
 html[data-theme="dark"] body.site-app.settings-page .myads-spec,
 html[data-theme="dark"] body.site-app.settings-page .myads-views,
 html[data-theme="dark"] body.site-app.settings-page .myads-ssz {
-  color: #9ca3af !important;
+  color: #fff !important;
 }
 
 html[data-theme="dark"] body.site-app.settings-page .ha-imp-mode {
@@ -6236,6 +6259,10 @@ html[data-theme="dark"] body.site-app.ad-vertical-ingatlan[data-site-page="hirde
  * Sötét háttéren: fehér szöveg az egész weben.
  * Kivétel: fehér listing/promo kártyák + citromsárga CTA-k.
  * ============================================================ */
+html[data-theme="dark"] {
+  color-scheme: dark;
+}
+
 html[data-theme="dark"] body.site-app {
   color: #fff;
 }
@@ -6250,11 +6277,91 @@ html[data-theme="dark"] body.site-app.fiok-page {
   color: #fff !important;
 }
 
-html[data-theme="dark"] body.site-app.settings-page :is(a, strong, b, p, span, label, li, h1, h2, h3, h4, h5, td, th, small, em, div),
-html[data-theme="dark"] body.site-app[data-site-page="uzenetek"] :is(a, strong, b, p, span, label, li, h1, h2, h3, h4, small, em),
-html[data-theme="dark"] body.site-app.mm-messages-open :is(a, strong, b, p, span, label, li, h1, h2, h3, h4, small, em),
-html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] :is(a, strong, b, p, span, label, li, h1, h2, h3, h4, small, em) {
+html[data-theme="dark"] body.site-app.settings-page :is(a, strong, b, p, span, label, li, h1, h2, h3, h4, h5, td, th, small, em, div, button),
+html[data-theme="dark"] body.site-app[data-site-page="uzenetek"] :is(a, strong, b, p, span, label, li, h1, h2, h3, h4, small, em, button),
+html[data-theme="dark"] body.site-app.mm-messages-open :is(a, strong, b, p, span, label, li, h1, h2, h3, h4, small, em, button),
+html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] :is(a, strong, b, p, span, label, li, h1, h2, h3, h4, small, em, button),
+html[data-theme="dark"] body.site-app.hub-page--feed :is(h1, h2, h3, h4, p, span, a, label, li, small, em),
+html[data-theme="dark"] body.site-app.home-page :is(h1, h2, h3, h4, .hf-title, .hf-all, .hub-nav-link, .ajanlas-title, .ajanlas-subtitle, .ajanlas-note),
+html[data-theme="dark"] body.site-app .site-avatar-dropdown :is(a, strong, b, p, span, label, li, button, small, em, div) {
   color: #fff !important;
+}
+
+/* Input / select / textarea: fehér betű sötét mezőn (webkit fill is) */
+html[data-theme="dark"] body.site-app :is(
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="password"],
+  input[type="number"],
+  input[type="search"],
+  input[type="url"],
+  input:not([type]),
+  select,
+  textarea
+) {
+  color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
+  caret-color: #fff !important;
+  color-scheme: dark;
+}
+
+html[data-theme="dark"] body.site-app :is(
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="password"],
+  input[type="number"],
+  input[type="search"],
+  input[type="url"],
+  input:not([type]),
+  select,
+  textarea
+)::placeholder {
+  color: rgba(255, 255, 255, 0.55) !important;
+  -webkit-text-fill-color: rgba(255, 255, 255, 0.55) !important;
+}
+
+html[data-theme="dark"] body.site-app :is(
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="password"],
+  input[type="number"],
+  input[type="search"],
+  input[type="url"],
+  input:not([type]),
+  select,
+  textarea
+):-webkit-autofill,
+html[data-theme="dark"] body.site-app :is(
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="password"],
+  input[type="number"],
+  input[type="search"],
+  input[type="url"],
+  input:not([type]),
+  select,
+  textarea
+):-webkit-autofill:hover,
+html[data-theme="dark"] body.site-app :is(
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="password"],
+  input[type="number"],
+  input[type="search"],
+  input[type="url"],
+  input:not([type]),
+  select,
+  textarea
+):-webkit-autofill:focus {
+  -webkit-text-fill-color: #fff !important;
+  caret-color: #fff !important;
+  box-shadow: 0 0 0 1000px #12161c inset !important;
+  transition: background-color 99999s ease-out;
 }
 
 /* Fehér kártyákon maradjon fekete a szöveg */
@@ -6264,19 +6371,31 @@ html[data-theme="dark"] body.site-app :is(
   .home-grid-card,
   .hub-promo,
   .hub-sell,
-  .login-card,
-  .site-avatar-dropdown
-) :is(a, strong, b, p, span, label, li, h1, h2, h3, h4, small, em, div),
+  .login-card
+) :is(a, strong, b, p, span, label, li, h1, h2, h3, h4, small, em, div, button),
 html[data-theme="dark"] body.site-app :is(
   .hf-card,
   .hf-card--listing,
   .home-grid-card,
   .hub-promo,
   .hub-sell,
-  .login-card,
-  .site-avatar-dropdown
+  .login-card
 ) {
   color: #111 !important;
+}
+
+html[data-theme="dark"] body.site-app :is(
+  .hf-card,
+  .hf-card--listing,
+  .home-grid-card,
+  .hub-promo,
+  .hub-sell,
+  .login-card
+) :is(input, select, textarea) {
+  color: #111 !important;
+  -webkit-text-fill-color: #111 !important;
+  caret-color: #111 !important;
+  color-scheme: light;
 }
 
 /* Citromsárga CTA: fekete szöveg */
@@ -6372,9 +6491,26 @@ html[data-theme="dark"] body.site-app.settings-page :is(
 ) {
   background: #12161c !important;
   color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
+  caret-color: #fff !important;
   border-color: #3b4450 !important;
 }
 
-html[data-theme="dark"] body.site-app.settings-page .settings-switch > span:first-child {
+html[data-theme="dark"] body.site-app.settings-page .settings-switch > span:first-child,
+html[data-theme="dark"] body.site-app.settings-page .login-label,
+html[data-theme="dark"] body.site-app.settings-page .settings-form .login-label,
+html[data-theme="dark"] body.site-app.settings-page .mm-panel-lead,
+html[data-theme="dark"] body.site-app.settings-page .settings-lead,
+html[data-theme="dark"] body.site-app.settings-page .settings-kicker {
+  color: #fff !important;
+}
+
+/* Avatar / fiók dropdown menü elemei */
+html[data-theme="dark"] body.site-app .site-avatar-dropdown a,
+html[data-theme="dark"] body.site-app .site-avatar-dropdown button,
+html[data-theme="dark"] body.site-app .site-avatar-dropdown span,
+html[data-theme="dark"] body.site-app .site-avatar-dropdown strong,
+html[data-theme="dark"] body.site-app .site-avatar-dropdown .site-avatar-dropdown-label,
+html[data-theme="dark"] body.site-app .site-avatar-dropdown .site-avatar-menu-item {
   color: #fff !important;
 }

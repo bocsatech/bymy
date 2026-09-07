@@ -143,6 +143,12 @@ const ADMIN_SECTIONS = [
       { id: "pages:listings", label: "Listings" },
     ],
   },
+  {
+    id: "backup",
+    label: "7. Mentés",
+    defaultTab: "backup:restore",
+    tabs: [{ id: "backup:restore", label: "Visszaállítás" }],
+  },
 ];
 
 const PAGE_ADMIN_GUIDES = {
@@ -287,7 +293,13 @@ let partnerProfiles = [];
 let selectedVisitorId = "";
 let visitorHits = [];
 let blockedIps = [];
-
+let backupList = { backups: [], categories: [], dir: "", keepDays: 30 };
+let backupSelectedId = "";
+let backupCategory = "all";
+let backupUserId = "";
+let backupListingId = "";
+let backupPreview = null;
+let backupBusy = false;
 let devOtpCode = "";
 /** @type {{ backend?: string, dbPath?: string } | null} */
 let deployBackend = null;
@@ -404,7 +416,7 @@ function h(html) {
   app.querySelectorAll("[data-act]").forEach((el) => {
     const isFile = el.tagName === "INPUT" && el.type === "file";
     const isText =
-      el.tagName === "INPUT" && (el.type === "text" || el.type === "" || !el.type);
+      el.tagName === "INPUT" && (el.type === "text" || el.type === "number" || el.type === "" || !el.type);
     const evt =
       el.tagName === "FORM"
         ? "submit"
@@ -761,6 +773,117 @@ const actions = {
     await api(`/api/level1/listings/${id}`, { method: "DELETE" });
     await loadTab();
     render();
+  },
+  backupSelect(_, el) {
+    backupSelectedId = String(el.value || "");
+    backupPreview = null;
+    info = "";
+    err = "";
+    render();
+  },
+  backupFilterChange() {
+    const root = app;
+    backupCategory = String(root.querySelector("[data-backup-category]")?.value || "all");
+    backupUserId = String(root.querySelector("[data-backup-user-id]")?.value || "").trim();
+    backupListingId = String(root.querySelector("[data-backup-listing-id-filter]")?.value || "").trim();
+    backupPreview = null;
+  },
+  async backupReload() {
+    err = "";
+    info = "";
+    try {
+      await loadTab();
+      info = "Mentéslista frissítve.";
+      render();
+    } catch (error) {
+      err = error.message;
+      render();
+    }
+  },
+  async backupCreate() {
+    err = "";
+    info = "";
+    backupBusy = true;
+    render();
+    try {
+      const data = await api("/api/level1/backups", { method: "POST", body: "{}" });
+      backupSelectedId = data.backup?.id || backupSelectedId;
+      backupPreview = null;
+      await loadTab();
+      info = `Mentés kész: ${data.backup?.id || "ok"} (${data.backup?.counts?.listings ?? "?"} hirdetés).`;
+    } catch (error) {
+      err = error.message;
+    } finally {
+      backupBusy = false;
+      render();
+    }
+  },
+  async backupPreview() {
+    err = "";
+    info = "";
+    actions.backupFilterChange();
+    if (!backupSelectedId) {
+      err = "Válassz mentést.";
+      render();
+      return;
+    }
+    backupBusy = true;
+    render();
+    try {
+      backupPreview = await api(`/api/level1/backups/${encodeURIComponent(backupSelectedId)}/preview`, {
+        method: "POST",
+        body: JSON.stringify({
+          category: backupCategory,
+          userId: backupUserId || null,
+          listingId: backupListingId || null,
+        }),
+      });
+      info = `${backupPreview.matchCount} hirdetés az előnézetben.`;
+    } catch (error) {
+      err = error.message;
+      backupPreview = null;
+    } finally {
+      backupBusy = false;
+      render();
+    }
+  },
+  async backupRestore() {
+    err = "";
+    info = "";
+    actions.backupFilterChange();
+    if (!backupSelectedId) {
+      err = "Válassz mentést.";
+      render();
+      return;
+    }
+    const checked = [...app.querySelectorAll("[data-backup-listing-id]:checked")].map((el) =>
+      Number(el.getAttribute("data-backup-listing-id"))
+    );
+    if (!checked.length) {
+      err = "Jelölj ki legalább egy hirdetést.";
+      render();
+      return;
+    }
+    if (!confirm(`Visszaállítasz ${checked.length} hirdetést a mentésből?`)) return;
+    backupBusy = true;
+    render();
+    try {
+      const data = await api(`/api/level1/backups/${encodeURIComponent(backupSelectedId)}/restore`, {
+        method: "POST",
+        body: JSON.stringify({
+          category: backupCategory,
+          userId: backupUserId || null,
+          listingId: backupListingId || null,
+          listingIds: checked,
+        }),
+      });
+      info = `Visszaállítva: ${data.restoredCount} hirdetés (ID: ${(data.restoredIds || []).join(", ")}).`;
+    } catch (error) {
+      err = error.message;
+    } finally {
+      backupBusy = false;
+      render();
+    }
   },
   async saveLayout() {
     err = "";
@@ -1318,6 +1441,16 @@ async function loadTab() {
       right: data.right || emptySideBlocks(),
       center: data.center ?? null,
     };
+  }
+  if (section === "backup") {
+    backupList = await api("/api/level1/backups");
+    if (!backupSelectedId && backupList.backups?.[0]?.id) {
+      backupSelectedId = backupList.backups[0].id;
+    }
+    if (backupSelectedId && !backupList.backups?.some((b) => b.id === backupSelectedId)) {
+      backupSelectedId = backupList.backups?.[0]?.id || "";
+      backupPreview = null;
+    }
   }
   if (isLayoutTab()) {
     layoutCategory = layoutCategoryFromTab();
@@ -2059,7 +2192,96 @@ function shellBody() {
   if (section === "home") return hubPromoView();
   if (section === "mobilweb") return searchCylinderMenuView();
   if (section === "pages") return pagesAdminView(sub);
+  if (section === "backup") return backupView();
   return usersView("private");
+}
+
+function formatBytes(n) {
+  const v = Number(n) || 0;
+  if (v < 1024) return `${v} B`;
+  if (v < 1024 * 1024) return `${(v / 1024).toFixed(1)} KB`;
+  return `${(v / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function backupView() {
+  const cats = backupList.categories?.length
+    ? backupList.categories
+    : [
+        { id: "all", label: "Összes" },
+        { id: "szemelyauto", label: "Személyautók" },
+        { id: "leasing", label: "Leasing" },
+        { id: "teherauto", label: "Teherautók" },
+        { id: "ingatlan", label: "Ingatlanok" },
+      ];
+  const backups = backupList.backups || [];
+  const options = backups
+    .map(
+      (b) =>
+        `<option value="${esc(b.id)}" ${b.id === backupSelectedId ? "selected" : ""}>${esc(
+          b.mtime || b.id
+        )} · ${esc(formatBytes(b.sizeBytes))}</option>`
+    )
+    .join("");
+  const catOptions = cats
+    .map(
+      (c) =>
+        `<option value="${esc(c.id)}" ${c.id === backupCategory ? "selected" : ""}>${esc(c.label)}</option>`
+    )
+    .join("");
+  const rows = (backupPreview?.listings || [])
+    .map(
+      (row) => `<tr>
+      <td><input type="checkbox" data-backup-listing-id="${esc(row.id)}" checked /></td>
+      <td>${esc(row.id)}</td>
+      <td>${esc(row.title)}</td>
+      <td>${esc(row.status)}</td>
+      <td>${esc(row.vertical || "")}${row.subtype ? " / " + esc(row.subtype) : ""}</td>
+      <td>${esc(row.ownerUserId || "—")}</td>
+    </tr>`
+    )
+    .join("");
+
+  return `
+    <h2 class="layout-cat-title">Mentés / visszaállítás</h2>
+    <p class="hint">Teljes hirdetés-pillanatkép készítése, majd kategória / user / ID szerinti részleges visszatöltés. A napi szerveres DB+kép mentés ettől függetlenül fut.</p>
+    <div class="row" style="gap:0.75rem;flex-wrap:wrap;margin-top:0.85rem">
+      <button class="btn" type="button" data-act="backupCreate" ${backupBusy ? "disabled" : ""}>Mentés most</button>
+      <button class="btn ghost" type="button" data-act="backupReload" ${backupBusy ? "disabled" : ""}>Lista frissítése</button>
+    </div>
+    <div class="admin-list-group" style="margin-top:1.25rem">
+      <h3 class="admin-section-title">Mentés kiválasztása</h3>
+      <label>Pillanatkép
+        <select data-act="backupSelect" data-backup-id>${options || '<option value="">— nincs mentés —</option>'}</select>
+      </label>
+      <div class="row" style="gap:0.75rem;flex-wrap:wrap;margin-top:0.75rem">
+        <label>Kategória
+          <select data-act="backupFilterChange" data-backup-category>${catOptions}</select>
+        </label>
+        <label>User ID
+          <input type="number" min="1" data-act="backupFilterChange" data-backup-user-id value="${esc(backupUserId)}" placeholder="pl. 10" />
+        </label>
+        <label>Hirdetés ID
+          <input type="number" min="1" data-act="backupFilterChange" data-backup-listing-id-filter value="${esc(backupListingId)}" placeholder="pl. 118" />
+        </label>
+      </div>
+      <div class="row" style="gap:0.75rem;flex-wrap:wrap;margin-top:0.85rem">
+        <button class="btn" type="button" data-act="backupPreview" ${backupBusy || !backupSelectedId ? "disabled" : ""}>Előnézet</button>
+        <button class="btn danger" type="button" data-act="backupRestore" ${backupBusy || !backupPreview?.listings?.length ? "disabled" : ""}>Kijelöltek visszaállítása</button>
+      </div>
+    </div>
+    ${
+      backupPreview
+        ? `<p class="hint" style="margin-top:1rem">Találat: <strong>${esc(backupPreview.matchCount)}</strong> hirdetés · mentés: ${esc(backupPreview.createdAt || backupPreview.id)}</p>
+      <div class="table-scroll" style="margin-top:0.65rem">
+        <table class="table-dense">
+          <thead><tr><th></th><th>ID</th><th>Cím</th><th>Státusz</th><th>Kategória</th><th>User</th></tr></thead>
+          <tbody>${rows || '<tr><td colspan="6">Nincs találat.</td></tr>'}</tbody>
+        </table>
+      </div>`
+        : `<p class="hint" style="margin-top:1rem">Válassz mentést, majd kattints az Előnézetre.</p>`
+    }
+    <p class="ok">${esc(info)}</p>
+    <p class="err">${esc(err)}</p>`;
 }
 
 function pagesAdminView(pageKey) {

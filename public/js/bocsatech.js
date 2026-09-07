@@ -417,7 +417,8 @@ function h(html) {
   app.querySelectorAll("[data-act]").forEach((el) => {
     const isFile = el.tagName === "INPUT" && el.type === "file";
     const isText =
-      el.tagName === "INPUT" && (el.type === "text" || el.type === "number" || el.type === "" || !el.type);
+      el.tagName === "INPUT" &&
+      (el.type === "text" || el.type === "email" || el.type === "number" || el.type === "" || !el.type);
     const evt =
       el.tagName === "FORM"
         ? "submit"
@@ -863,6 +864,21 @@ const actions = {
     app.querySelectorAll("input[data-backup-listing-id]").forEach((el) => {
       el.checked = false;
     });
+  },
+  backupListingCheck(_, el) {
+    if (!el?.checked) return;
+    const id = String(el.getAttribute("data-backup-listing-id") || "").trim();
+    const email = String(el.getAttribute("data-backup-owner-email") || "").trim();
+    const category = String(el.getAttribute("data-backup-category") || "all").trim() || "all";
+    backupListingId = id;
+    backupUserEmail = email;
+    backupCategory = category;
+    const catEl = app.querySelector("[data-backup-category]");
+    const emailEl = app.querySelector("[data-backup-user-email]");
+    const idEl = app.querySelector("[data-backup-listing-id-filter]");
+    if (catEl) catEl.value = backupCategory;
+    if (emailEl) emailEl.value = backupUserEmail;
+    if (idEl) idEl.value = backupListingId;
   },
   backupForceFeladottChange(_, el) {
     backupForceFeladott = Boolean(el?.checked);
@@ -2238,6 +2254,16 @@ function formatBytes(n) {
   return `${(v / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+function backupCategoryFromListing(row) {
+  const vertical = String(row?.vertical || "").trim().toLowerCase();
+  const subtype = String(row?.subtype || "").trim().toLowerCase();
+  if (vertical === "ingatlan") return "ingatlan";
+  if (vertical === "teher" || subtype === "teherauto" || subtype === "kisteher") return "teherauto";
+  if (subtype === "leasing") return "leasing";
+  if (vertical === "auto" || subtype === "szemelyauto" || !subtype) return "szemelyauto";
+  return "all";
+}
+
 function backupView() {
   const cats = backupList.categories?.length
     ? backupList.categories
@@ -2264,16 +2290,17 @@ function backupView() {
     )
     .join("");
   const rows = (backupPreview?.listings || [])
-    .map(
-      (row) => `<tr>
-      <td><input type="checkbox" data-backup-listing-id="${esc(row.id)}" /></td>
+    .map((row) => {
+      const cat = backupCategoryFromListing(row);
+      return `<tr>
+      <td><input type="checkbox" data-act="backupListingCheck" data-backup-listing-id="${esc(row.id)}" data-backup-owner-email="${esc(row.ownerEmail || "")}" data-backup-category="${esc(cat)}" /></td>
       <td>${esc(row.id)}</td>
       <td>${esc(row.title)}</td>
       <td>${esc(row.status)}</td>
       <td>${esc(row.vertical || "")}${row.subtype ? " / " + esc(row.subtype) : ""}</td>
       <td>${esc(row.ownerEmail || "—")}</td>
-    </tr>`
-    )
+    </tr>`;
+    })
     .join("");
 
   return `

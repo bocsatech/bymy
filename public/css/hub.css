@@ -990,7 +990,7 @@ body.hub-page--feed {
 .hf-all {
   font-size: 0.9rem;
   font-weight: 600;
-  color: #0084ff;
+  color: #111;
   text-decoration: none;
   white-space: nowrap;
 }
@@ -1179,9 +1179,9 @@ body.hub-page--feed {
 .hf-card--listing .hf-card-label {
   margin: 0.15rem 0 0;
   padding: 0;
-  font-size: 0.82rem;
-  font-weight: 500;
-  color: #1f2937;
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: #111;
   text-align: left;
   white-space: normal;
   display: -webkit-box;
@@ -1195,11 +1195,11 @@ body.hub-page--feed {
 
 .hf-card--listing .hf-card-price {
   display: block;
-  margin: 0;
+  margin: 0.1rem 0 0;
   padding: 0;
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: #0084ff;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #111;
   line-height: 1.2;
   white-space: nowrap;
   overflow: hidden;
@@ -1208,11 +1208,11 @@ body.hub-page--feed {
 
 .hf-card--listing .hf-card-meta {
   display: block;
-  margin: 0;
+  margin: 0.1rem 0 0;
   padding: 0;
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   font-weight: 500;
-  color: #6b7280;
+  color: #111;
   line-height: 1.25;
   white-space: nowrap;
   overflow: hidden;
@@ -1233,7 +1233,7 @@ body.hub-page--feed {
 
 .hf-card--prompt-all .hf-card-label {
   font-weight: 700;
-  color: #1565c0;
+  color: #111;
 }
 
 .hf-card--prompt .hf-card-label {

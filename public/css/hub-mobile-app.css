@@ -391,7 +391,7 @@
 
   body.hub-page--feed .hf-section[data-hf="kozelben"] .hf-all {
     display: inline;
-    color: #0084ff;
+    color: #111;
     font-weight: 600;
   }
 
@@ -486,8 +486,9 @@
   body.hub-page--feed .hf-card--listing .hf-card-label {
     text-align: left;
     padding: 0.2rem 0 0;
-    font-size: 0.8rem;
-    font-weight: 500;
+    font-size: 0.88rem;
+    font-weight: 800;
+    color: #111;
     white-space: normal;
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -497,17 +498,17 @@
 
   body.hub-page--feed .hf-card--listing .hf-card-price {
     display: block;
-    font-size: 0.9rem;
-    font-weight: 700;
-    color: #0084ff;
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: #111;
     padding: 0;
   }
 
   body.hub-page--feed .hf-card--listing .hf-card-meta {
     display: block;
-    font-size: 0.7rem;
+    font-size: 0.72rem;
     font-weight: 500;
-    color: #6b7280;
+    color: #111;
     padding: 0 0 0.15rem;
   }
 

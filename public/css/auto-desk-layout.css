@@ -993,15 +993,18 @@
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-grid-card-specs {
     display: flex !important;
-    flex-direction: column;
-    gap: 6px;
+    flex-direction: row;
+    gap: 0;
     margin: 2px 0 0 !important;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-grid-card-specs-row {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    align-items: center;
     gap: 10px 18px;
+    min-width: 0;
+    width: 100%;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-grid-card-spec {

@@ -102,12 +102,8 @@ export function createHomeGridCard(item) {
         <div class="home-grid-card-specs-row">
           ${year ? `<span class="home-grid-card-spec" data-spec="year">${ICON_YEAR}<span>${escapeHtml(year)}</span></span>` : ""}
           ${km ? `<span class="home-grid-card-spec" data-spec="km">${ICON_KM}<span>${escapeHtml(km)}</span></span>` : ""}
+          ${power ? `<span class="home-grid-card-spec" data-spec="power">${ICON_POWER}<span>${escapeHtml(power)}</span></span>` : ""}
         </div>
-        ${
-          power
-            ? `<div class="home-grid-card-specs-row"><span class="home-grid-card-spec" data-spec="power">${ICON_POWER}<span>${escapeHtml(power)}</span></span></div>`
-            : ""
-        }
       </div>`
     : "";
 

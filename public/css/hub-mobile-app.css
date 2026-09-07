@@ -400,44 +400,9 @@
     gap: 0.65rem;
   }
 
-  body.hub-page--feed .hf-card {
-    flex-basis: 8.75rem;
-    border-radius: 16px;
-    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.08);
-    border: 0;
-    background: #fff;
-    overflow: visible;
-  }
-
+  body.hub-page--feed .hf-card,
   body.hub-page--feed .hf-card--kategoria,
-  body.hub-page--feed .hf-card--ajanlas {
-    flex-basis: 7.5rem;
-  }
-
-  body.hub-page--feed .hf-card-media {
-    position: relative;
-    aspect-ratio: 1;
-    border-radius: 16px;
-    overflow: hidden;
-    background: #e8ebef;
-  }
-
-  body.hub-page--feed .hf-card--kategoria .hf-card-media,
-  body.hub-page--feed .hf-card--ajanlas .hf-card-media {
-    border-radius: 16px;
-    background: #fff;
-  }
-
-  body.hub-page--feed .hf-card-media img {
-    position: absolute;
-    inset: 0;
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center center;
-  }
-
+  body.hub-page--feed .hf-card--ajanlas,
   body.hub-page--feed .hf-card--listing {
     flex-basis: 12.1rem;
     background: #fff;
@@ -450,6 +415,31 @@
     display: flex;
     flex-direction: column;
     gap: 0;
+  }
+
+  body.hub-page--feed .hf-card-media {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    border-radius: 0;
+    overflow: hidden;
+    background: #e8ebef;
+    border: 0;
+  }
+
+  body.hub-page--feed .hf-card--kategoria .hf-card-media,
+  body.hub-page--feed .hf-card--ajanlas .hf-card-media {
+    border-radius: 0;
+    background: #fff;
+  }
+
+  body.hub-page--feed .hf-card-media img {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center center;
   }
 
   body.hub-page--feed .hf-card--listing .hf-card-media {
@@ -474,26 +464,35 @@
     transform-origin: center center;
   }
 
-  /* Autókategóriák: széles PNG-k — ne vágódjanak / csússzanak el */
+  /* Autókategóriák: széles PNG-k — kitöltik a keretet */
   body.hub-page--feed .hf-card--kategoria .hf-card-media img {
     position: absolute;
     inset: 0;
-    object-fit: contain;
+    object-fit: cover;
     object-position: center center;
-    padding: 0.35rem;
+    padding: 0;
     box-sizing: border-box;
-    transform: none;
+    transform: scale(1.08);
+    transform-origin: center center;
   }
 
   body.hub-page--feed .hf-card-label {
-    font-size: 0.78rem;
-    font-weight: 600;
-    padding: 0.35rem 0.4rem 0.45rem;
-    text-align: center;
+    font-size: 0.94rem;
+    font-weight: 800;
+    margin: 0.55rem 0.61rem 0;
+    padding: 0;
+    text-align: left;
+    color: #111;
   }
 
   body.hub-page--feed .hf-card-sub {
-    display: none;
+    display: block;
+    margin: 0.11rem 0.61rem 0;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #6b7280;
+    text-align: left;
+    line-height: 1.25;
   }
 
   body.hub-page--feed .hf-card--listing .hf-card-label {

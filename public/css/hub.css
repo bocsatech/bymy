@@ -1032,27 +1032,34 @@ body.hub-page--feed {
 }
 
 .hf-card {
-  flex: 0 0 168px;
+  flex: 0 0 220px;
   scroll-snap-align: start;
   text-decoration: none;
   color: #111;
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: 0;
+  box-sizing: border-box;
+  background: #fff;
+  border: 1px solid #d4d4d4;
+  border-radius: 9px;
+  overflow: hidden;
+  padding: 0 0 0.72rem;
 }
 
 .hf-card--wide {
-  flex-basis: 200px;
+  flex-basis: 220px;
 }
 
 .hf-card-media {
   display: block;
   position: relative;
-  aspect-ratio: 1;
+  aspect-ratio: 16 / 10;
   width: 100%;
+  flex: 0 0 auto;
   background: #e8ebef;
-  border: 1px solid #c8c8c8;
-  border-radius: 12px;
+  border: 0;
+  border-radius: 0;
   overflow: hidden;
 }
 
@@ -1067,67 +1074,70 @@ body.hub-page--feed {
 }
 
 .hf-card-label {
-  font-size: 0.88rem;
-  font-weight: 500;
-  color: #333;
+  font-size: 0.99rem;
+  font-weight: 800;
+  color: #111;
   line-height: 1.25;
+  margin: 0.6rem 0.72rem 0;
+  text-align: left;
 }
 
 .hf-rail--ajanlas {
-  gap: 0.9rem;
+  gap: 0.85rem;
 }
 
 .hf-card--ajanlas {
-  /* ugyanakkora, mint a többi hf-card (üres kockák) */
-  gap: 0.5rem;
+  gap: 0;
 }
 
 .hf-card--ajanlas .hf-card-media {
-  border-radius: 16px;
-  border-color: rgba(20, 32, 43, 0.18);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  background: #e8ebef;
+  box-shadow: none;
 }
 
 .hf-card--ajanlas .hf-card-label {
-  font-size: 0.75rem;
-  font-weight: 500;
-  text-align: center;
-  line-height: 1.2;
+  font-size: 0.99rem;
+  font-weight: 800;
+  text-align: left;
+  line-height: 1.25;
   color: #111;
+  margin: 0.6rem 0.72rem 0;
 }
 
 .hf-card--kategoria {
-  /* ugyanakkora ikonméret, mint az Ajánlások */
-  gap: 0.5rem;
+  gap: 0;
 }
 
 .hf-card--kategoria .hf-card-media {
-  aspect-ratio: 1;
+  aspect-ratio: 16 / 10;
   background: #fff;
 }
 
 .hf-card--kategoria .hf-card-media img {
-  object-fit: contain;
-  object-position: center;
-  padding: 0.4rem;
+  object-fit: cover;
+  object-position: center center;
+  padding: 0;
   box-sizing: border-box;
+  transform: scale(1.08);
+  transform-origin: center center;
 }
 
 .hf-card--kategoria .hf-card-label {
-  font-size: 0.75rem;
-  font-weight: 500;
-  text-align: center;
-  margin: 0;
+  font-size: 0.99rem;
+  font-weight: 800;
+  text-align: left;
+  margin: 0.6rem 0.72rem 0;
 }
 
 .hf-card-sub {
   display: block;
-  font-size: 0.7rem;
+  font-size: 0.78rem;
   font-weight: 500;
   color: #6b7280;
-  line-height: 1.2;
-  text-align: center;
-  margin: -0.15rem 0 0;
+  line-height: 1.25;
+  text-align: left;
+  margin: 0.2rem 0.72rem 0;
+  min-height: 1.25em;
 }
 
 .hf-status {
@@ -1329,11 +1339,11 @@ body.hub-page--feed {
     font-size: 1.1rem;
   }
 
-  .hf-card {
-    flex-basis: 132px;
-  }
-
-  .hf-card--listing {
+  .hf-card,
+  .hf-card--wide,
+  .hf-card--listing,
+  .hf-card--kategoria,
+  .hf-card--ajanlas {
     flex-basis: 194px;
   }
 }

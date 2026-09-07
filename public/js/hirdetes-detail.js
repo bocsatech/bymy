@@ -76,6 +76,22 @@ function currentUserId() {
   return Number.isFinite(id) && id > 0 ? id : null;
 }
 
+function isOwnListing(view, listing = null) {
+  const uid = currentUserId();
+  if (!uid) return false;
+  const candidates = [view?.userId, listing?.user_id, listing?.detail?.userId];
+  return candidates.some((value) => {
+    const n = Number(value);
+    return Number.isFinite(n) && n > 0 && n === uid;
+  });
+}
+
+function clearRelatedUi() {
+  if (!root) return;
+  document.getElementById("hd-related")?.remove();
+  root.querySelectorAll("[data-hd-related-link], a[href='#hd-related']").forEach((el) => el.remove());
+}
+
 function kvHtml(rows) {
   if (!rows?.length) return "";
   return `<dl class="hd-grid">${rows
@@ -117,10 +133,9 @@ function relatedCard(item) {
 
 function applyRelated(view, related) {
   if (!root) return;
-  const own = currentUserId() && currentUserId() === Number(view.userId);
-  if (own) {
-    document.getElementById("hd-related")?.remove();
-    root.querySelector("[data-hd-related-link]")?.remove();
+  // Saját hirdetésnél soha (hd-owner = Szerkesztés/Törlés már a DOM-ban).
+  if (root.dataset.ownListing === "1" || root.querySelector(".hd-owner") || isOwnListing(view)) {
+    clearRelatedUi();
     return;
   }
   const items = Array.isArray(related) ? related : [];
@@ -175,6 +190,10 @@ function applyRelated(view, related) {
 function revealRelatedListings(event) {
   const trigger = event?.target?.closest?.("[data-hd-related-link]");
   if (!trigger || !root?.contains(trigger)) return;
+  if (root.dataset.ownListing === "1" || root.querySelector(".hd-owner")) {
+    clearRelatedUi();
+    return;
+  }
   event.preventDefault();
   const section = document.getElementById("hd-related");
   if (!section) return;
@@ -185,8 +204,7 @@ function revealRelatedListings(event) {
 
 async function loadRelatedListings(listingId, view) {
   if (!view?.userId) return;
-  const own = currentUserId() && currentUserId() === Number(view.userId);
-  if (own) return;
+  if (root?.dataset.ownListing === "1" || isOwnListing(view)) return;
   try {
     const related = await fetchListings({
       owner: view.userId,
@@ -204,7 +222,7 @@ function render(view, listing, related) {
   const images = view.images?.length ? view.images : [];
   const first = images[0] || "";
   const equipmentGroups = Array.isArray(view.equipmentGroups) ? view.equipmentGroups : [];
-  const own = currentUserId() && currentUserId() === Number(view.userId);
+  const own = isOwnListing(view, listing);
   const canMsg = !own && canMessageListing(view.userId);
   const user = getAuthUser();
   const profile = getProfile() || {};
@@ -219,6 +237,8 @@ function render(view, listing, related) {
 
   document.title = `${view.title} — Bymy`;
   document.body.classList.toggle("hd-has-msg-bar", canMsg);
+  if (root) root.dataset.ownListing = own ? "1" : "0";
+  if (own) clearRelatedUi();
 
   root.innerHTML = `
     <nav class="hd-topnav" aria-label="Navigáció">
@@ -259,7 +279,11 @@ function render(view, listing, related) {
     <div class="hd-head">
       <h1 class="hd-title">${escapeHtml(view.title)}</h1>
       <div class="hd-tools">
-        <button type="button" class="hd-tool" data-hd-star aria-label="Mentés">${ICON.star}</button>
+        ${
+          own
+            ? ""
+            : `<button type="button" class="hd-tool" data-hd-star aria-label="Mentés">${ICON.star}</button>`
+        }
         <button type="button" class="hd-tool" data-hd-share aria-label="Megosztás">${ICON.share}</button>
         <button type="button" class="hd-tool" data-hd-print aria-label="Nyomtatás">${ICON.print}</button>
       </div>
@@ -597,6 +621,10 @@ function bindUi(view, listing) {
   const saved = email && getParkplatz(email).some((row) => String(row.id) === String(view.id));
   if (star && saved) star.classList.add("is-on");
   star?.addEventListener("click", () => {
+    if (root.dataset.ownListing === "1" || isOwnListing(view, listing)) {
+      clearRelatedUi();
+      return;
+    }
     if (!email) {
       window.location.href = `/belepes.html?next=${encodeURIComponent(location.pathname + location.search)}`;
       return;

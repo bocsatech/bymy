@@ -106,21 +106,9 @@ function markupFromImages(images) {
 function isPromoPage() {
   if (typeof window === "undefined" || !document.body) return false;
   if (document.body.classList.contains("auth-gate-page")) return false;
-  const page = document.body.getAttribute("data-site-page") || "";
   const path = window.location.pathname.replace(/\/$/, "") || "/";
   if (path === "/" || path === "/index.html") return true;
-  if (document.body.classList.contains("hub-page--feed")) return true;
-  const allow = new Set([
-    "hub",
-    "auto",
-    "teherauto",
-    "ingatlan",
-    "ajanlasok",
-    "kereses",
-    "listings",
-    "partners",
-  ]);
-  return allow.has(page);
+  return document.body.classList.contains("hub-page--feed");
 }
 
 function ensurePromoRoot(target = document) {

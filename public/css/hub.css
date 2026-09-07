@@ -1115,21 +1115,26 @@ body.hub-page--feed {
 .hf-card--kategoria .hf-card-media {
   aspect-ratio: 16 / 10;
   background: #fff;
+  border: 0;
 }
 
 .hf-card--kategoria .hf-card-media img {
   object-fit: contain;
   object-position: center center;
-  padding: 0.35rem;
+  padding: 0.55rem 0.45rem;
   box-sizing: border-box;
   transform: none;
+  border: 0;
+  outline: 0;
+  box-shadow: none;
 }
 
 .hf-card--kategoria .hf-card-label {
   font-size: 0.99rem;
   font-weight: 800;
   text-align: left;
-  margin: 0.6rem 0.72rem 0;
+  margin: 0.55rem 0.72rem 0;
+  color: #111;
 }
 
 .hf-card-sub {
@@ -1445,20 +1450,42 @@ html[data-theme="dark"] .hf-all {
   color: #9ca3af;
 }
 
+/* Fehér csempék: sötét módban is demó-szerűen sötét szöveg, fehér média */
+html[data-theme="dark"] .hf-card,
+html[data-theme="dark"] .hf-card--listing,
+html[data-theme="dark"] .hf-card--kategoria,
+html[data-theme="dark"] .hf-card--ajanlas {
+  background: #fff;
+  border-color: #d4d4d4;
+  color: #111;
+}
+
 html[data-theme="dark"] .hf-card-label,
 html[data-theme="dark"] .hf-card--ajanlas .hf-card-label,
 html[data-theme="dark"] .hf-card--kategoria .hf-card-label,
+html[data-theme="dark"] .hf-card--listing .hf-card-label,
+html[data-theme="dark"] .hf-card--listing .hf-card-price,
+html[data-theme="dark"] .hf-card--listing .hf-card-spec,
 html[data-theme="dark"] .hf-tile-label {
-  color: #e8eaed;
+  color: #111;
 }
 
-html[data-theme="dark"] .hf-card-sub {
-  color: #9ca3af;
+html[data-theme="dark"] .hf-card-sub,
+html[data-theme="dark"] .hf-card--listing .hf-card-sub {
+  color: #6b7280;
 }
 
-html[data-theme="dark"] .hf-card-media {
-  background: #1a1f26;
-  border-color: #3b4450;
+html[data-theme="dark"] .hf-card-media,
+html[data-theme="dark"] .hf-card--kategoria .hf-card-media,
+html[data-theme="dark"] .hf-card--ajanlas .hf-card-media,
+html[data-theme="dark"] .hf-card--listing .hf-card-media {
+  background: #fff;
+  border: 0;
+  border-color: transparent;
+}
+
+html[data-theme="dark"] .hf-card--listing .hf-card-media {
+  background: #e8ebef;
 }
 
 html[data-theme="dark"] .hf-tile {
@@ -1469,6 +1496,30 @@ html[data-theme="dark"] .hf-tile {
 
 html[data-theme="dark"] .hf-tile-icon {
   color: #9ca3af;
+}
+
+html[data-theme="dark"] .hub-promo,
+html[data-theme="dark"] .hub-sell {
+  background: #fff;
+  border-color: #d4d4d4;
+  color: #111;
+}
+
+html[data-theme="dark"] .hub-sell h2 {
+  color: #111;
+}
+
+html[data-theme="dark"] .hub-sell p {
+  color: #6b7280;
+}
+
+html[data-theme="dark"] .hub-promo__kicker,
+html[data-theme="dark"] .hub-promo__title {
+  color: #111;
+}
+
+html[data-theme="dark"] .hub-promo__text {
+  color: #6b7280;
 }
 
 /* Hub promo sáv — fő navigációs oldalakon */

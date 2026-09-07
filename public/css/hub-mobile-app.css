@@ -427,12 +427,6 @@
     border: 0;
   }
 
-  body.hub-page--feed .hf-card--kategoria .hf-card-media,
-  body.hub-page--feed .hf-card--ajanlas .hf-card-media {
-    border-radius: 0;
-    background: #fff;
-  }
-
   body.hub-page--feed .hf-card-media img {
     position: absolute;
     inset: 0;
@@ -441,6 +435,13 @@
     height: 100%;
     object-fit: cover;
     object-position: center center;
+  }
+
+  body.hub-page--feed .hf-card--kategoria .hf-card-media,
+  body.hub-page--feed .hf-card--ajanlas .hf-card-media {
+    border-radius: 0;
+    background: #fff;
+    border: 0;
   }
 
   body.hub-page--feed .hf-card--listing .hf-card-media {
@@ -465,15 +466,17 @@
     transform-origin: center center;
   }
 
-  /* Autókategóriák: teljes autó látszódjon a keretben */
+  /* Autókategóriák: demó — fehér háttér, teljes autó, sötét cím */
   body.hub-page--feed .hf-card--kategoria .hf-card-media img {
     position: absolute;
     inset: 0;
     object-fit: contain;
     object-position: center center;
-    padding: 0.35rem;
+    padding: 0.55rem 0.45rem;
     box-sizing: border-box;
     transform: none;
+    border: 0;
+    box-shadow: none;
   }
 
   body.hub-page--feed .hf-card-label {

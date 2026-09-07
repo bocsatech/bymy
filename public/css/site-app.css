@@ -5187,15 +5187,16 @@ body.site-app .wh-msg__error {
 }
 
 /* —— Színmód (világos / sötét) —— */
-/* Böngésző / feed: sötét oldalháttér. App-felületek (fiók, feladás…): világos vászon.
-   Üzenetek: saját sötét felület (lásd lent). */
+/* Böngésző / feed: sötét oldalháttér.
+   Üzenetek + beállítások/fiók: saját sötét felület.
+   Egyéb app-oldalak (pl. feladás): világos vászon. */
 html[data-theme="dark"] body.site-app.hub-page--feed,
 html[data-theme="dark"] body.site-app.home-page {
   background: #12161c;
   color: #e8eaed;
 }
 
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open) {
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page) {
   background: #eef0f3 !important;
   color: #111 !important;
 }
@@ -5266,11 +5267,11 @@ html[data-theme="dark"] body.site-app.home-page main {
   color: #e8eaed;
 }
 
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open) .page,
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open) .home-main,
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open) main,
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open) .mm-shell,
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open) .mm-main {
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page) .page,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page) .home-main,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page) main,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page) .mm-shell,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page) .mm-main {
   background: transparent !important;
   color: #111 !important;
 }
@@ -5292,10 +5293,10 @@ html[data-theme="dark"] body.site-app.hub-page--feed .mm-side--cats {
   border: 0;
 }
 
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page) .mm-side,
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page) .login-card,
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page) .site-side-card,
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page) .automax-main {
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page) .mm-side,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page) .login-card,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page) .site-side-card,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page) .automax-main {
   background: #fff !important;
   border-color: #dfe3ea !important;
   color: #111 !important;
@@ -5570,11 +5571,7 @@ html[data-theme="dark"] body.site-app .mm-nav-sublink.is-active {
   color: #93c5fd;
 }
 
-/* Fehér felületek: mindig sötét szöveg (űrlap, kártya, csempe) */
-html[data-theme="dark"] body.site-app .settings-profile-header,
-html[data-theme="dark"] body.site-app .settings-card,
-html[data-theme="dark"] body.site-app .mm-card,
-html[data-theme="dark"] body.site-app .mm-inline-form,
+/* Fehér felületek: mindig sötét szöveg (böngésző csempék / promo) */
 html[data-theme="dark"] body.site-app .login-card,
 html[data-theme="dark"] body.site-app .ha-imp-panel,
 html[data-theme="dark"] body.site-app .ha-imp-result,
@@ -5589,12 +5586,6 @@ html[data-theme="dark"] body.site-app .site-avatar-dropdown {
   border-color: #d4d4d4;
 }
 
-html[data-theme="dark"] body.site-app .settings-profile-header strong,
-html[data-theme="dark"] body.site-app .settings-profile-header .mm-panel-lead,
-html[data-theme="dark"] body.site-app .settings-card,
-html[data-theme="dark"] body.site-app .settings-card-title,
-html[data-theme="dark"] body.site-app .mm-card strong,
-html[data-theme="dark"] body.site-app .mm-card span,
 html[data-theme="dark"] body.site-app .login-card,
 html[data-theme="dark"] body.site-app .login-card h1,
 html[data-theme="dark"] body.site-app .login-card h2,
@@ -5615,8 +5606,6 @@ html[data-theme="dark"] body.site-app .hub-promo__kicker {
   color: #111 !important;
 }
 
-html[data-theme="dark"] body.site-app .settings-profile-header .mm-panel-lead,
-html[data-theme="dark"] body.site-app .mm-card span,
 html[data-theme="dark"] body.site-app .home-grid-card-sub,
 html[data-theme="dark"] body.site-app .hf-card-sub,
 html[data-theme="dark"] body.site-app .hub-sell p,
@@ -5624,18 +5613,18 @@ html[data-theme="dark"] body.site-app .hub-promo__text {
   color: #6b7280 !important;
 }
 
-html[data-theme="dark"] body.site-app .login-field input,
-html[data-theme="dark"] body.site-app .settings-form input,
-html[data-theme="dark"] body.site-app .settings-form select,
-html[data-theme="dark"] body.site-app .settings-form textarea,
-html[data-theme="dark"] body.site-app textarea,
-html[data-theme="dark"] body.site-app input[type="text"],
-html[data-theme="dark"] body.site-app input[type="email"],
-html[data-theme="dark"] body.site-app input[type="tel"],
-html[data-theme="dark"] body.site-app input[type="password"],
-html[data-theme="dark"] body.site-app input[type="number"],
-html[data-theme="dark"] body.site-app input[type="search"],
-html[data-theme="dark"] body.site-app select {
+html[data-theme="dark"] body.site-app:not(.settings-page):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]) .login-field input,
+html[data-theme="dark"] body.site-app:not(.settings-page):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]) .settings-form input,
+html[data-theme="dark"] body.site-app:not(.settings-page):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]) .settings-form select,
+html[data-theme="dark"] body.site-app:not(.settings-page):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]) .settings-form textarea,
+html[data-theme="dark"] body.site-app:not(.settings-page):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not([data-site-page="uzenetek"]) textarea,
+html[data-theme="dark"] body.site-app:not(.settings-page):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not([data-site-page="uzenetek"]) input[type="text"],
+html[data-theme="dark"] body.site-app:not(.settings-page):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not([data-site-page="uzenetek"]) input[type="email"],
+html[data-theme="dark"] body.site-app:not(.settings-page):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not([data-site-page="uzenetek"]) input[type="tel"],
+html[data-theme="dark"] body.site-app:not(.settings-page):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not([data-site-page="uzenetek"]) input[type="password"],
+html[data-theme="dark"] body.site-app:not(.settings-page):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not([data-site-page="uzenetek"]) input[type="number"],
+html[data-theme="dark"] body.site-app:not(.settings-page):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not([data-site-page="uzenetek"]) input[type="search"],
+html[data-theme="dark"] body.site-app:not(.settings-page):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not([data-site-page="uzenetek"]) select {
   background: #fff;
   color: #111;
   border-color: #d0d5dd;
@@ -5646,45 +5635,45 @@ html[data-theme="dark"] body.site-app .settings-form .login-label {
 }
 
 /* —— Egységes világos app-vászon (fiók / feladás / stb.) sötét fejléc mellett —— */
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open) h1,
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open) h2,
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open) h3,
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open) .mm-panel-title,
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open) .settings-title,
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open) .fiok-title {
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page) h1,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page) h2,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page) h3,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page) .mm-panel-title,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page) .settings-title,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page) .fiok-title {
   color: #101828 !important;
 }
 
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open) .login-label,
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open) .mm-panel-lead,
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open) .settings-lead,
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open) .mm-nav-plain {
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page) .login-label,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page) .mm-panel-lead,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page) .settings-lead,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page) .mm-nav-plain {
   color: #667085 !important;
 }
 
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open) .mm-nav-link,
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open) .mm-nav-sublink,
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open) .mm-nav-toggle {
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page) .mm-nav-link,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page) .mm-nav-sublink,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page) .mm-nav-toggle {
   color: #344054 !important;
   background: transparent !important;
 }
 
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open) .mm-nav-link:hover,
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open) .mm-nav-sublink:hover,
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open) .mm-nav-toggle:hover,
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open) .mm-nav-toggle[aria-expanded="true"] {
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page) .mm-nav-link:hover,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page) .mm-nav-sublink:hover,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page) .mm-nav-toggle:hover,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page) .mm-nav-toggle[aria-expanded="true"] {
   background: #f2f4f7 !important;
   color: #101828 !important;
 }
 
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open) .mm-nav-link.is-active,
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open) .mm-nav-sublink.is-active {
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page) .mm-nav-link.is-active,
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page) .mm-nav-sublink.is-active {
   background: #e8f1fb !important;
   color: #1565c0 !important;
 }
 
-html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open) .mm-page,
-html[data-theme="dark"] body.site-app.mm-page:not([data-site-page="uzenetek"]):not(.mm-messages-open) {
+html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page) .mm-page,
+html[data-theme="dark"] body.site-app.mm-page:not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page) {
   background: #eef1f4 !important;
 }
 
@@ -5843,4 +5832,148 @@ html[data-theme="dark"] body.site-app .wh-msg__send {
 
 html[data-theme="dark"] body.site-app .wh-msg__send:hover {
   background: #1d4ed8;
+}
+
+/* —— Beállítások / fiók: valódi sötét mód —— */
+html[data-theme="dark"] body.site-app.settings-page,
+html[data-theme="dark"] body.site-app[data-site-page="beallitasok"],
+html[data-theme="dark"] body.site-app[data-site-page="fiok"],
+html[data-theme="dark"] body.site-app.mm-page.settings-page {
+  background: #12161c !important;
+  color: #e8eaed !important;
+}
+
+html[data-theme="dark"] body.site-app.settings-page .mm-shell,
+html[data-theme="dark"] body.site-app.settings-page .mm-main,
+html[data-theme="dark"] body.site-app.settings-page main {
+  background: transparent !important;
+  color: #e8eaed !important;
+}
+
+html[data-theme="dark"] body.site-app.settings-page .mm-side {
+  background: #1a1f26 !important;
+  border-color: #2a313c !important;
+  color: #e8eaed !important;
+}
+
+html[data-theme="dark"] body.site-app.settings-page .mm-side-kicker,
+html[data-theme="dark"] body.site-app.settings-page .mm-nav-plain,
+html[data-theme="dark"] body.site-app.settings-page .mm-panel-lead,
+html[data-theme="dark"] body.site-app.settings-page .settings-lead,
+html[data-theme="dark"] body.site-app.settings-page .settings-kicker,
+html[data-theme="dark"] body.site-app.settings-page .login-label,
+html[data-theme="dark"] body.site-app.settings-page .settings-form .login-label {
+  color: #9ca3af !important;
+}
+
+html[data-theme="dark"] body.site-app.settings-page .mm-side-title,
+html[data-theme="dark"] body.site-app.settings-page .mm-panel-title,
+html[data-theme="dark"] body.site-app.settings-page .settings-title,
+html[data-theme="dark"] body.site-app.settings-page .settings-card-title,
+html[data-theme="dark"] body.site-app.settings-page .settings-profile-header-meta > strong {
+  color: #f3f4f6 !important;
+}
+
+html[data-theme="dark"] body.site-app.settings-page .mm-nav-link,
+html[data-theme="dark"] body.site-app.settings-page .mm-nav-sublink,
+html[data-theme="dark"] body.site-app.settings-page .mm-nav-toggle {
+  color: #d1d5db !important;
+  background: transparent !important;
+}
+
+html[data-theme="dark"] body.site-app.settings-page .mm-nav-link:hover,
+html[data-theme="dark"] body.site-app.settings-page .mm-nav-sublink:hover,
+html[data-theme="dark"] body.site-app.settings-page .mm-nav-toggle:hover,
+html[data-theme="dark"] body.site-app.settings-page .mm-nav-toggle[aria-expanded="true"] {
+  background: #243044 !important;
+  color: #f3f4f6 !important;
+}
+
+html[data-theme="dark"] body.site-app.settings-page .mm-nav-link.is-active,
+html[data-theme="dark"] body.site-app.settings-page .mm-nav-sublink.is-active {
+  background: #1e3a5f !important;
+  color: #93c5fd !important;
+}
+
+html[data-theme="dark"] body.site-app.settings-page .mm-side-logout {
+  background: #12161c;
+  border-color: #3b4450;
+  color: #e8eaed;
+}
+
+html[data-theme="dark"] body.site-app.settings-page .mm-side-logout:hover {
+  background: #243044;
+  border-color: #4b5563;
+}
+
+html[data-theme="dark"] body.site-app.settings-page .settings-card,
+html[data-theme="dark"] body.site-app.settings-page .settings-profile-header,
+html[data-theme="dark"] body.site-app.settings-page .settings-acc,
+html[data-theme="dark"] body.site-app.settings-page .mm-card,
+html[data-theme="dark"] body.site-app.settings-page .mm-inline-form {
+  background: #1a1f26 !important;
+  border-color: #2a313c !important;
+  color: #e8eaed !important;
+}
+
+html[data-theme="dark"] body.site-app.settings-page .settings-acc-summary,
+html[data-theme="dark"] body.site-app.settings-page .settings-acc-hint,
+html[data-theme="dark"] body.site-app.settings-page .settings-acc-caption {
+  color: #d1d5db !important;
+}
+
+html[data-theme="dark"] body.site-app.settings-page .settings-acc-body {
+  border-top-color: #2a313c;
+}
+
+html[data-theme="dark"] body.site-app.settings-page .settings-form input,
+html[data-theme="dark"] body.site-app.settings-page .settings-form select,
+html[data-theme="dark"] body.site-app.settings-page .settings-form textarea,
+html[data-theme="dark"] body.site-app.settings-page input[type="text"],
+html[data-theme="dark"] body.site-app.settings-page input[type="email"],
+html[data-theme="dark"] body.site-app.settings-page input[type="tel"],
+html[data-theme="dark"] body.site-app.settings-page input[type="password"],
+html[data-theme="dark"] body.site-app.settings-page input[type="number"],
+html[data-theme="dark"] body.site-app.settings-page input[type="search"],
+html[data-theme="dark"] body.site-app.settings-page select,
+html[data-theme="dark"] body.site-app.settings-page textarea,
+html[data-theme="dark"] body.site-app.settings-page .settings-readonly {
+  background: #12161c !important;
+  color: #f3f4f6 !important;
+  border-color: #3b4450 !important;
+}
+
+html[data-theme="dark"] body.site-app.settings-page .settings-btn-secondary,
+html[data-theme="dark"] body.site-app.settings-page .settings-link-btn {
+  color: #7dd3fc;
+}
+
+html[data-theme="dark"] body.site-app.settings-page .settings-btn-primary {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #fff;
+}
+
+html[data-theme="dark"] body.site-app.settings-page .settings-switch-ui {
+  background: #3b4450;
+  border-color: #fff;
+}
+
+html[data-theme="dark"] body.site-app.settings-page .settings-switch input:checked + .settings-switch-ui {
+  background: #22c55e;
+  border-color: #22c55e;
+}
+
+html[data-theme="dark"] body.site-app.settings-page .settings-wheel {
+  border-color: #2a313c;
+  background: #12161c;
+}
+
+html[data-theme="dark"] body.site-app.settings-page .settings-wheel-opt {
+  color: #d1d5db;
+}
+
+html[data-theme="dark"] body.site-app.settings-page .settings-wheel-opt.is-active {
+  background: #243044;
+  color: #f3f4f6;
 }

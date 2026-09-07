@@ -961,8 +961,8 @@
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-grid-card-title {
     margin: 0 !important;
-    font-size: 17px !important;
-    font-weight: 700 !important;
+    font-size: 20px !important;
+    font-weight: 800 !important;
     line-height: 1.2 !important;
     color: var(--ad-text) !important;
     letter-spacing: 0;

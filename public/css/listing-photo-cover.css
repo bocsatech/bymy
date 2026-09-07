@@ -4,9 +4,23 @@
  */
 
 .hf-card--listing .hf-card-media {
+  overflow: hidden !important;
   background-size: cover !important;
   background-position: center center !important;
   background-repeat: no-repeat !important;
+}
+
+.hf-card--listing .hf-card-media img,
+.hf-card--listing .hf-card-media-img {
+  display: block !important;
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: center center !important;
+  transform: scale(1.14);
+  transform-origin: center center;
 }
 
 .home-grid-card-photo-img,

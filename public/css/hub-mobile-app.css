@@ -485,15 +485,25 @@
 
   body.hub-page--feed .hf-card--listing .hf-card-label {
     text-align: left;
-    padding: 0.2rem 0 0;
+    padding: 0.12rem 0 0;
     font-size: 0.88rem;
     font-weight: 800;
     color: #111;
     white-space: normal;
     display: -webkit-box;
-    -webkit-line-clamp: 2;
+    -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;
-    min-height: 2.4em;
+    min-height: 0;
+  }
+
+  body.hub-page--feed .hf-card--listing .hf-card-sub {
+    display: -webkit-box;
+    font-size: 0.72rem;
+    font-weight: 400;
+    color: #111;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 
   body.hub-page--feed .hf-card--listing .hf-card-price {
@@ -505,15 +515,22 @@
   }
 
   body.hub-page--feed .hf-card--listing .hf-card-meta {
-    display: block;
-    font-size: 0.72rem;
-    font-weight: 500;
-    color: #111;
-    padding: 0 0 0.15rem;
+    display: none;
   }
 
-  body.hub-page--feed .hf-card--listing .hf-card-sub {
-    display: none;
+  body.hub-page--feed .hf-card--listing .hf-card-specs {
+    display: block;
+  }
+
+  body.hub-page--feed .hf-card--listing .hf-card-specs-row {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 0.35rem 0.55rem;
+  }
+
+  body.hub-page--feed .hf-card--listing .hf-card-spec {
+    color: #111;
+    font-size: 0.68rem;
   }
 
   body.hub-page--feed .hf-status {

@@ -9,7 +9,7 @@ import {
   createListingTileCard,
   formatListingCountBadge,
   slimListingTile,
-} from "./listing-tile.js?v=coverAll1";
+} from "./listing-tile.js?v=tileAuto1";
 import { restoreListingReturn, bindListingOpen } from "./listing-return.js?v=scrollTop1";
 import {
   buildNearbyFilter,

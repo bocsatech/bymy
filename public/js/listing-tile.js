@@ -46,7 +46,11 @@ export function listingTileSubtitle(item) {
   const form = item?.form ?? {};
   const fuel = pickFilter(preview, form, "uzemanyag");
   const gear = pickFilter(preview, form, "sebessegvalto");
-  return [fuel, gear].filter(Boolean).join(", ");
+  // Kompakt csempén rövidebb váltófelirat — ne törje szét a sort.
+  const gearShort = gear
+    .replace(/^Fokozatmentes\s+automata$/iu, "Automata")
+    .replace(/^Fokozatmentes$/iu, "Automata");
+  return [fuel, gearShort].filter(Boolean).join(", ");
 }
 
 export function listingTileYear(item) {
@@ -163,26 +167,24 @@ export function createListingTileCard(item, { className = "hf-card hf-card--list
 
   link.append(media, label);
 
-  if (subtitle) {
-    const sub = document.createElement("span");
-    sub.className = "hf-card-sub";
-    sub.textContent = subtitle;
-    link.appendChild(sub);
-  }
+  const sub = document.createElement("span");
+  sub.className = "hf-card-sub";
+  sub.textContent = subtitle || "\u00a0";
+  link.appendChild(sub);
 
   const priceEl = document.createElement("span");
   priceEl.className = "hf-card-price";
   priceEl.textContent = price;
   link.appendChild(priceEl);
 
-  if (year || km || power) {
-    const specs = document.createElement("span");
-    specs.className = "hf-card-specs";
-    const row = document.createElement("span");
-    row.className = "hf-card-specs-row";
-    appendSpec(row, ICON_YEAR, year, "year");
-    appendSpec(row, ICON_KM, km, "km");
-    appendSpec(row, ICON_POWER, power, "power");
+  const specs = document.createElement("span");
+  specs.className = "hf-card-specs";
+  const row = document.createElement("span");
+  row.className = "hf-card-specs-row";
+  appendSpec(row, ICON_YEAR, year, "year");
+  appendSpec(row, ICON_KM, km, "km");
+  appendSpec(row, ICON_POWER, power, "power");
+  if (row.childElementCount) {
     specs.appendChild(row);
     link.appendChild(specs);
   }

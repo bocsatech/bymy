@@ -445,8 +445,11 @@
     border: 1px solid #d4d4d4;
     border-radius: 8px;
     overflow: hidden;
-    align-self: flex-start;
-    padding: 0 0 0.5rem;
+    align-self: stretch;
+    padding: 0 0 0.55rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
   }
 
   body.hub-page--feed .hf-card--listing .hf-card-media {
@@ -488,29 +491,35 @@
 
   body.hub-page--feed .hf-card--listing .hf-card-label {
     text-align: left;
-    padding: 0.12rem 0 0;
-    font-size: 0.88rem;
+    margin: 0.5rem 0.55rem 0;
+    padding: 0;
+    font-size: 0.85rem;
     font-weight: 800;
     color: #111;
-    white-space: normal;
-    display: -webkit-box;
-    -webkit-line-clamp: 1;
-    -webkit-box-orient: vertical;
-    min-height: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-height: 1.25em;
+    display: block;
+    -webkit-line-clamp: unset;
   }
 
   body.hub-page--feed .hf-card--listing .hf-card-sub {
-    display: -webkit-box;
-    font-size: 0.72rem;
+    display: block;
+    margin: 0.1rem 0.55rem 0;
+    font-size: 0.68rem;
     font-weight: 400;
     color: #111;
-    -webkit-line-clamp: 1;
-    -webkit-box-orient: vertical;
+    min-height: 1.2em;
+    white-space: nowrap;
     overflow: hidden;
+    text-overflow: ellipsis;
+    -webkit-line-clamp: unset;
   }
 
   body.hub-page--feed .hf-card--listing .hf-card-price {
     display: block;
+    margin: 0.35rem 0.55rem 0;
     font-size: 0.95rem;
     font-weight: 800;
     color: #111;
@@ -523,17 +532,18 @@
 
   body.hub-page--feed .hf-card--listing .hf-card-specs {
     display: block;
+    margin: 0.35rem 0.55rem 0;
   }
 
   body.hub-page--feed .hf-card--listing .hf-card-specs-row {
     display: flex;
     flex-wrap: nowrap;
-    gap: 0.35rem 0.55rem;
+    gap: 0.55rem;
   }
 
   body.hub-page--feed .hf-card--listing .hf-card-spec {
     color: #111;
-    font-size: 0.68rem;
+    font-size: 0.65rem;
   }
 
   body.hub-page--feed .hf-status {

@@ -1,9 +1,9 @@
-import { fetchListing, fetchListings, recordListingView, deleteListingFromDb } from "./db-client.js?v=openFast3";
+import { fetchListing, fetchListings, recordListingView, deleteListingFromDb } from "./db-client.js?v=relatedAll2";
 import { getAuthUser, getDisplayName, getProfile } from "./site-auth.js?v=auth20260805localdb9";
 import { startConversation, sendMessage } from "./messages-api.js?v=msgLive1";
 import { canMessageListing, openListingMessage } from "./start-listing-message.js?v=msgLive1";
 import { getParkplatz, addParkplatzItem, removeParkplatzItem } from "./fok-data.js?v=auth20260805localdb9";
-import { listingReturnHref, listingDetailHref, rememberListingOpen } from "./listing-return.js?v=scrollTop1";
+import { listingReturnHref, listingDetailHref, rememberListingOpen, getListingSearchNav, touchListingReturnId } from "./listing-return.js?v=searchNav1";
 
 const root = document.getElementById("hd-root");
 const ICON = {
@@ -26,6 +26,21 @@ function escapeHtml(value) {
     .replace(/"/g, "&quot;");
 }
 
+const SELLER_AVATAR_PLACEHOLDER =
+  "data:image/svg+xml," +
+  encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">` +
+      `<circle cx="24" cy="24" r="24" fill="#e4eaf4"/>` +
+      `<circle cx="24" cy="17.5" r="7.5" fill="#8e9aaf"/>` +
+      `<path fill="#8e9aaf" d="M7.2 42.8C9.2 33.8 15.2 29.5 24 29.5s14.8 4.3 16.8 13.3C36.2 45.6 30.4 47.5 24 47.5S11.8 45.6 7.2 42.8z"/>` +
+      `</svg>`
+  );
+
+function sellerAvatarHtml(view) {
+  const src = String(view.sellerAvatarUrl || "").trim() || SELLER_AVATAR_PLACEHOLDER;
+  return `<span class="hd-seller-avatar" aria-hidden="true"><img src="${escapeHtml(src)}" alt="" width="48" height="48" decoding="async" /></span>`;
+}
+
 function formatDate(value) {
   if (!value) return "";
   try {
@@ -41,6 +56,21 @@ function formatDate(value) {
   }
 }
 
+/** Breadcrumb címke: ne legyen végig nagybetűs márkanév. */
+function formatCrumbLabel(value) {
+  const raw = String(value ?? "").trim();
+  if (!raw) return "";
+  if (raw !== raw.toLocaleUpperCase("hu-HU")) return raw;
+  return raw
+    .toLocaleLowerCase("hu-HU")
+    .split(/([\s/-]+)/)
+    .map((part) => {
+      if (/^[\s/-]+$/.test(part) || !part) return part;
+      return part.charAt(0).toLocaleUpperCase("hu-HU") + part.slice(1);
+    })
+    .join("");
+}
+
 function currentUserId() {
   const id = Number(getAuthUser()?.id);
   return Number.isFinite(id) && id > 0 ? id : null;
@@ -54,6 +84,19 @@ function kvHtml(rows) {
         `<div class="hd-kv"><dt>${escapeHtml(row.label)}</dt><dd>${escapeHtml(row.value)}</dd></div>`
     )
     .join("")}</dl>`;
+}
+
+function equipmentGroupsHtml(groups) {
+  if (!groups?.length) return "";
+  return `<h2 class="hd-h2">Extrák</h2>${groups
+    .map(
+      (group) =>
+        `<div class="hd-extra-group">
+          <h3 class="hd-h3 hd-h3--extra">${escapeHtml(group.title)}</h3>
+          <ul class="hd-list">${group.items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
+        </div>`
+    )
+    .join("")}`;
 }
 
 function relatedCard(item) {
@@ -73,49 +116,84 @@ function relatedCard(item) {
 }
 
 function applyRelated(view, related) {
-  if (!related.length || !root) return;
-
+  if (!root) return;
+  const own = currentUserId() && currentUserId() === Number(view.userId);
+  if (own) {
+    document.getElementById("hd-related")?.remove();
+    root.querySelector("[data-hd-related-link]")?.remove();
+    return;
+  }
+  const items = Array.isArray(related) ? related : [];
+  const label = items.length ? `Több ettől a hirdetőtől ${items.length}` : "Több ettől a hirdetőtől";
   const aside = root.querySelector(".hd-side") || root.querySelector("aside");
-  if (aside && !aside.querySelector('a[href="#hd-related"]')) {
-    const link = document.createElement("a");
+  let link =
+    aside?.querySelector("[data-hd-related-link]") ||
+    aside?.querySelector('a[href="#hd-related"]');
+  if (aside && !link && items.length) {
+    link = document.createElement("button");
+    link.type = "button";
     link.className = "hd-btn hd-btn--ghost";
-    link.href = "#hd-related";
-    link.textContent = `Több ettől a hirdetőtől ${related.length}`;
+    link.dataset.hdRelatedLink = "";
     const owner = aside.querySelector(".hd-owner");
     if (owner) aside.insertBefore(link, owner);
     else aside.appendChild(link);
   }
+  if (link) {
+    link.textContent = label;
+    link.hidden = items.length === 0;
+    link.setAttribute("aria-expanded", "false");
+    link.setAttribute("aria-controls", "hd-related");
+  }
+  if (!items.length) {
+    document.getElementById("hd-related")?.remove();
+    return;
+  }
 
-  if (document.getElementById("hd-related")) return;
-
-  const section = document.createElement("section");
-  section.className = "hd-section";
-  section.id = "hd-related";
+  let section = document.getElementById("hd-related");
+  const wasOpen = Boolean(section && !section.hidden);
+  if (!section) {
+    section = document.createElement("section");
+    section.className = "hd-section";
+    section.id = "hd-related";
+    const dealer = root.querySelector(".hd-dealer");
+    if (dealer) root.insertBefore(section, dealer);
+    else root.appendChild(section);
+  }
+  section.hidden = !wasOpen;
   section.innerHTML = `
     <div class="hd-related-head">
       <h2 class="hd-h2">Több ettől a hirdetőtől</h2>
-      <a class="hd-more" href="${escapeHtml(view.categoryHref)}">Több megjelenítése</a>
     </div>
-    <div class="hd-related">${related.map(relatedCard).join("")}</div>
+    <div class="hd-related">${items.map(relatedCard).join("")}</div>
   `;
-  const dealer = root.querySelector(".hd-dealer");
-  if (dealer) root.insertBefore(section, dealer);
-  else root.appendChild(section);
-
+  if (link) link.setAttribute("aria-expanded", wasOpen ? "true" : "false");
   section.querySelectorAll("a[data-listing-id]").forEach((a) => {
     a.addEventListener("click", () => rememberListingOpen(a.dataset.listingId, a));
   });
 }
 
-async function loadRelatedInBackground(listingId, view) {
+function revealRelatedListings(event) {
+  const trigger = event?.target?.closest?.("[data-hd-related-link]");
+  if (!trigger || !root?.contains(trigger)) return;
+  event.preventDefault();
+  const section = document.getElementById("hd-related");
+  if (!section) return;
+  section.hidden = false;
+  trigger.setAttribute("aria-expanded", "true");
+  section.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+async function loadRelatedListings(listingId, view) {
   if (!view?.userId) return;
-  // Ne versenyezzen a detail API-val — késleltetve, idle-ben.
-  await new Promise((resolve) => setTimeout(resolve, 2500));
+  const own = currentUserId() && currentUserId() === Number(view.userId);
+  if (own) return;
   try {
-    const all = await fetchListings({ limit: 50 });
-    const related = all
-      .filter((item) => Number(item.user_id) === Number(view.userId) && Number(item.id) !== Number(listingId))
-      .slice(0, 5);
+    const related = await fetchListings({
+      owner: view.userId,
+      excludeId: listingId,
+      limit: 500,
+      status: "feladott",
+    });
     applyRelated(view, related);
   } catch {
     /* ignore — a fő tartalom már látszik */
@@ -125,9 +203,7 @@ async function loadRelatedInBackground(listingId, view) {
 function render(view, listing, related) {
   const images = view.images?.length ? view.images : [];
   const first = images[0] || "";
-  const extras = view.equipment || [];
-  const extrasShort = extras.slice(0, 6);
-  const extrasRest = extras.slice(6);
+  const equipmentGroups = Array.isArray(view.equipmentGroups) ? view.equipmentGroups : [];
   const own = currentUserId() && currentUserId() === Number(view.userId);
   const canMsg = !own && canMessageListing(view.userId);
   const user = getAuthUser();
@@ -138,18 +214,47 @@ function render(view, listing, related) {
     : "";
   const loginNext = `/belepes.html?next=${encodeURIComponent(location.pathname + location.search)}`;
 
+  const searchNav = getListingSearchNav(view.id, view.categoryHref);
+  const hasPrevNext = Boolean(searchNav.prevId || searchNav.nextId);
+
   document.title = `${view.title} — Bymy`;
   document.body.classList.toggle("hd-has-msg-bar", canMsg);
 
   root.innerHTML = `
-    <p class="hd-crumbs">
-      <button type="button" class="hd-more" data-hd-back>${ICON.back} Vissza</button>
-      <span>·</span>
-      <a href="/">Kezdőlap</a>
-      <span>›</span>
-      <a href="${escapeHtml(view.categoryHref)}">${escapeHtml(view.categoryLabel)}</a>
-      ${view.brand ? `<span>›</span><span>${escapeHtml(view.brand)}</span>` : ""}
-    </p>
+    <nav class="hd-topnav" aria-label="Navigáció">
+      <ol class="hd-crumb-list">
+        <li><a href="/">Kezdőlap</a></li>
+        <li><a href="${escapeHtml(view.categoryHref)}">${escapeHtml(view.categoryLabel)}</a></li>
+        ${
+          view.brand
+            ? `<li${view.typeName ? "" : ' aria-current="page"'}>${escapeHtml(formatCrumbLabel(view.brand))}</li>`
+            : ""
+        }
+        ${view.typeName ? `<li aria-current="page">${escapeHtml(formatCrumbLabel(view.typeName))}</li>` : ""}
+      </ol>
+      <div class="hd-topnav-actions">
+        <a class="hd-search-back" href="${escapeHtml(searchNav.returnHref)}">
+          <span aria-hidden="true">◂</span> vissza a keresési eredményekhez
+        </a>
+        ${
+          hasPrevNext
+            ? `<span class="hd-search-siblings">
+          ${
+            searchNav.prevId
+              ? `<a class="hd-search-prev" href="${escapeHtml(listingDetailHref(searchNav.prevId))}"><span aria-hidden="true">◂</span> előző</a>`
+              : `<span class="hd-search-prev is-disabled"><span aria-hidden="true">◂</span> előző</span>`
+          }
+          <span class="hd-search-sep" aria-hidden="true">|</span>
+          ${
+            searchNav.nextId
+              ? `<a class="hd-search-next" href="${escapeHtml(listingDetailHref(searchNav.nextId))}">következő <span aria-hidden="true">▸</span></a>`
+              : `<span class="hd-search-next is-disabled">következő <span aria-hidden="true">▸</span></span>`
+          }
+        </span>`
+            : ""
+        }
+      </div>
+    </nav>
 
     <div class="hd-head">
       <h1 class="hd-title">${escapeHtml(view.title)}</h1>
@@ -224,11 +329,20 @@ function render(view, listing, related) {
           : ""
       }
       <aside class="hd-side">
-        <div>
-          <p class="hd-price">${escapeHtml(view.price)}</p>
-          <p class="hd-price-sub">Eladási ár${view.salePrice ? ` · korábbi: ${escapeHtml(view.salePrice)}` : ""}</p>
+        <div class="hd-price-box">
+          <div class="hd-price-row">
+            <p class="hd-price">${escapeHtml(view.price)}</p>
+            <p class="hd-price-sub">Eladási ár</p>
+          </div>
+          ${view.salePrice ? `<p class="hd-price-old">Korábbi ár: ${escapeHtml(view.salePrice)}</p>` : ""}
         </div>
-        <p class="hd-seller-name">${escapeHtml(view.sellerName)}</p>
+        <div class="hd-seller-card">
+          ${sellerAvatarHtml(view)}
+          <div class="hd-seller-meta">
+            <p class="hd-seller-name">${escapeHtml(view.sellerName)}</p>
+            ${view.sellerSince ? `<p class="hd-seller-since">Felhasználó ezóta: ${escapeHtml(view.sellerSince)}</p>` : ""}
+          </div>
+        </div>
         ${
           partnerHref
             ? `<a class="hd-partner-badge" href="${partnerHref}">
@@ -253,8 +367,10 @@ function render(view, listing, related) {
         <a class="hd-btn hd-btn--ghost" href="/adasveteli-szerzodes.html?id=${encodeURIComponent(view.id)}">Adásvételi szerződés</a>
         ${
           !own && related.length
-            ? `<a class="hd-btn hd-btn--ghost" href="#hd-related">Több ettől a hirdetőtől ${related.length}</a>`
-            : ""
+            ? `<button type="button" class="hd-btn hd-btn--ghost" data-hd-related-link aria-expanded="false" aria-controls="hd-related">Több ettől a hirdetőtől ${related.length}</button>`
+            : !own && view.userId
+              ? `<button type="button" class="hd-btn hd-btn--ghost" data-hd-related-link aria-expanded="false" aria-controls="hd-related">Több ettől a hirdetőtől …</button>`
+              : ""
         }
         ${view.website ? `<a class="hd-web" href="${escapeHtml(view.website)}" target="_blank" rel="noopener">Céges weboldal</a>` : ""}
         ${
@@ -269,11 +385,9 @@ function render(view, listing, related) {
     </div>
 
     <section class="hd-section">
-      <h2 class="hd-h2">Járműadatok</h2>
-      <h3 class="hd-h3">Alapadatok</h3>
-      ${kvHtml(view.basics)}
-      <h3 class="hd-h3" style="margin-top:1.1rem">Karosszéria és technika</h3>
-      ${kvHtml(view.bodyTech)}
+      ${view.vehicleSpecs?.length ? `<h2 class="hd-h2">Jármű adatok</h2>${kvHtml(view.vehicleSpecs)}` : ""}
+      ${view.motorSpecs?.length ? `<h2 class="hd-h2"${view.vehicleSpecs?.length ? ' style="margin-top:1.35rem"' : ""}>Motor adatok</h2>${kvHtml(view.motorSpecs)}` : ""}
+      ${view.documentSpecs?.length ? `<h2 class="hd-h2"${view.vehicleSpecs?.length || view.motorSpecs?.length ? ' style="margin-top:1.35rem"' : ""}>Okmányok</h2>${kvHtml(view.documentSpecs)}` : ""}
       ${
         view.perks.length
           ? `<h3 class="hd-h3" style="margin-top:1.1rem">További előnyök</h3>${view.perks.map((p) => `<span class="hd-check">${escapeHtml(p)}</span>`).join("")}`
@@ -285,23 +399,19 @@ function render(view, listing, related) {
       <h2 class="hd-h2">Leírás</h2>
       ${view.description ? `<p class="hd-desc is-clip" data-hd-desc>${escapeHtml(view.description)}</p>` : "<p class=\"hd-desc\">Nincs leírás.</p>"}
       ${view.description ? `<button type="button" class="hd-more" data-hd-desc-more>Több megjelenítése +</button>` : ""}
-      ${
-        extras.length
-          ? `<h3 class="hd-h3" style="margin-top:1.1rem">Beépített opciók</h3>
-             <p class="hd-desc">${escapeHtml(extras.join(", "))}</p>
-             <h3 class="hd-h3" style="margin-top:1.1rem">Extrák</h3>
-             <ul class="hd-list" data-hd-extras>${extrasShort.map((x) => `<li>${escapeHtml(x)}</li>`).join("")}</ul>
-             ${extrasRest.length ? `<button type="button" class="hd-more" data-hd-extras-more>Több megjelenítése +</button>` : ""}`
-          : ""
-      }
     </section>
 
     ${
+      equipmentGroups.length
+        ? `<section class="hd-section hd-section--extras">${equipmentGroupsHtml(equipmentGroups)}</section>`
+        : ""
+    }
+
+    ${
       !own && related.length
-        ? `<section class="hd-section" id="hd-related">
+        ? `<section class="hd-section" id="hd-related" hidden>
         <div class="hd-related-head">
           <h2 class="hd-h2">Több ettől a hirdetőtől</h2>
-          <a class="hd-more" href="${escapeHtml(view.categoryHref)}">Több megjelenítése</a>
         </div>
         <div class="hd-related">${related.map(relatedCard).join("")}</div>
       </section>`
@@ -378,10 +488,10 @@ function render(view, listing, related) {
     }
   `;
 
-  bindUi(view, listing, extrasRest);
+  bindUi(view, listing);
 }
 
-function bindUi(view, listing, extrasRest) {
+function bindUi(view, listing) {
   let index = 0;
   const images = view.images || [];
   const main = root.querySelector("[data-hd-main]");
@@ -425,8 +535,15 @@ function bindUi(view, listing, extrasRest) {
     else lightbox.removeAttribute("open");
   }
 
-  root.querySelector("[data-hd-back]")?.addEventListener("click", () => {
-    window.location.href = listingReturnHref(view.categoryHref);
+  root.querySelectorAll("a.hd-search-prev, a.hd-search-next").forEach((link) => {
+    link.addEventListener("click", () => {
+      try {
+        const id = new URL(link.href, location.origin).searchParams.get("id");
+        if (id) touchListingReturnId(id);
+      } catch {
+        /* ignore */
+      }
+    });
   });
   root.querySelector("[data-hd-prev]")?.addEventListener("click", (event) => {
     event.stopPropagation();
@@ -535,16 +652,6 @@ function bindUi(view, listing, extrasRest) {
     event.currentTarget.hidden = true;
   });
 
-  root.querySelector("[data-hd-extras-more]")?.addEventListener("click", (event) => {
-    const list = root.querySelector("[data-hd-extras]");
-    extrasRest.forEach((item) => {
-      const li = document.createElement("li");
-      li.textContent = item;
-      list?.appendChild(li);
-    });
-    event.currentTarget.hidden = true;
-  });
-
   root.querySelector("[data-hd-delete]")?.addEventListener("click", async () => {
     if (!confirm(`Törlöd ezt a hirdetést?\n\n${view.title}`)) return;
     await deleteListingFromDb(view.id);
@@ -597,6 +704,8 @@ function bindUi(view, listing, extrasRest) {
   root.querySelectorAll("a[data-listing-id]").forEach((a) => {
     a.addEventListener("click", () => rememberListingOpen(a.dataset.listingId, a));
   });
+
+  root.addEventListener("click", revealRelatedListings);
 }
 
 async function init() {
@@ -613,7 +722,7 @@ async function init() {
     // Először rajzolunk — view számláló és „több ettől” ne blokkolja a megnyitást.
     render(view, listing, []);
     recordListingView(id, "web").catch(() => {});
-    loadRelatedInBackground(id, view);
+    void loadRelatedListings(id, view);
   } catch (error) {
     root.innerHTML = `<p class="hd-empty">${escapeHtml(error.message ?? "A hirdetés nem tölthető be.")}</p>`;
   }

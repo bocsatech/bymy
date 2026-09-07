@@ -851,7 +851,7 @@ body[data-site-page="teherauto"] .auto-search-tabs {
   }
 
   .auto-search-panel .home-qs-label {
-    color: #667085;
+    color: #111;
     text-shadow: none;
   }
 
@@ -883,7 +883,7 @@ body[data-site-page="teherauto"] .auto-search-tabs {
   }
 
   .auto-search-panel .home-qs-suffix {
-    color: #667085;
+    color: #111;
   }
 
   .auto-search-panel .home-qs-row--actions {
@@ -1181,7 +1181,7 @@ body[data-site-page="teherauto"] .auto-search-tabs {
     background: #fff;
     font-size: 0.68rem;
     font-weight: 600;
-    color: #667085;
+    color: #111;
     white-space: nowrap;
   }
 
@@ -1236,7 +1236,7 @@ body[data-site-page="teherauto"] .auto-search-tabs {
     background: #fff;
     font-size: 0.68rem;
     font-weight: 600;
-    color: #667085;
+    color: #111;
     z-index: 2;
   }
 

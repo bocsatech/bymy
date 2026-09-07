@@ -11,7 +11,7 @@ import {
   closeAllInlineDrums,
 } from "./immo-drum-picker.js?v=immoClear1";
 import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=immoClear1";
-import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=deskGap2";
+import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=autoDesk18";
 
 const MOBILE_MQ = "(max-width: 900px)";
 const TYPEAHEAD_CLEAR_MS = 2500;
@@ -66,13 +66,14 @@ const DUAL_RANGES = [
 
 const SEARCH_OMIT_FIELDS = new Set([
   "gyartasi_honap",
-  "forgalomba_helyezes_ev",
   "forgalomba_helyezes_honap",
   "muszaki_honap",
-  "keresesi_korzet",
 ]);
 
 function isMobile() {
+  // Autó/teher kereső: mindig a mobil menü (portál dob) — asztali bal oszlopban is.
+  const page = document.body?.getAttribute("data-site-page") || "";
+  if (page === "auto" || page === "teherauto") return true;
   return typeof window !== "undefined" && window.matchMedia(MOBILE_MQ).matches;
 }
 

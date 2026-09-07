@@ -1,12 +1,12 @@
 import {
   PARTNER_CATEGORIES,
   partnerCategoryImageUrl,
-} from "./partner-categories-data.js?v=ajanlasMobile1";
+} from "./partner-categories-data.js?v=ingatlanAjanlas1";
 
 const STORAGE_KEY = "bymy_partner_postal_code";
 const LEGACY_STORAGE_KEY = "autosweb_partner_postal_code";
 const RADIUS_KEY = "bymy_partner_radius_km";
-const PARTNER_UI_VERSION = "ajanlasMobile1";
+const PARTNER_UI_VERSION = "ingatlanAjanlas1";
 let partnerUiInitialized = false;
 
 function partnerApiErrorMessage(response, data) {
@@ -16,8 +16,10 @@ function partnerApiErrorMessage(response, data) {
   return data?.error ?? "Ajánlások betöltése sikertelen.";
 }
 
-export async function fetchPartnerRecommendations(postalCode) {
+export async function fetchPartnerRecommendations(postalCode, options = {}) {
   const params = new URLSearchParams({ postal_code: String(postalCode).trim() });
+  const vertical = options.vertical;
+  if (vertical) params.set("vertical", String(vertical));
   let response;
   try {
     response = await fetch(`/api/partners/recommendations?${params}`);

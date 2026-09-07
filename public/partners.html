@@ -209,12 +209,13 @@
     </main>
 
     <script type="module">
-      import { PARTNER_CATEGORIES } from "/js/partner-categories-data.js?v=ajanlasMobile1";
+      import { PARTNER_CATEGORIES } from "/js/partner-categories-data.js?v=ingatlanAjanlas1";
       const grid = document.getElementById("partner-services-grid");
       for (const cat of PARTNER_CATEGORIES) {
         const label = document.createElement("label");
         label.className = "partners-service-check";
-        label.innerHTML = `<input type="checkbox" name="services" value="${cat.id}" /> ${cat.label}`;
+        const group = cat.vertical === "ingatlan" ? "Ingatlan" : "Autó";
+        label.innerHTML = `<input type="checkbox" name="services" value="${cat.id}" /> ${group}: ${cat.label}`;
         grid.append(label);
       }
     </script>

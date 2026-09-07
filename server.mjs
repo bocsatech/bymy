@@ -59,7 +59,11 @@ import {
   savePartner,
   upsertPostalCodes,
 } from "./lib/partners.mjs";
-import { PARTNER_CATEGORIES } from "./lib/partner-categories.mjs";
+import {
+  PARTNER_CATEGORIES,
+  categoriesForVertical,
+  normalizePartnerVertical,
+} from "./lib/partner-categories.mjs";
 import { estimateValuation, valuationOptions } from "./lib/valuation.mjs";
 import {
   ensureVehicleCatalog,
@@ -1319,12 +1323,25 @@ async function handlePartnersApi(req, res, pathname) {
         sendJson(res, 400, { error: "Hiányzó irányítószám." });
         return;
       }
-      sendJson(res, 200, getPartnerRecommendations(postalCode));
+      const vertical =
+        url.searchParams.get("vertical") ??
+        url.searchParams.get("uzletag") ??
+        url.searchParams.get("vertical_id");
+      sendJson(res, 200, getPartnerRecommendations(postalCode, { vertical }));
       return;
     }
 
     if (pathname === "/api/partners/categories" && req.method === "GET") {
-      sendJson(res, 200, { categories: PARTNER_CATEGORIES });
+      const url = new URL(req.url ?? "", `http://${HOST}`);
+      const vertical =
+        url.searchParams.get("vertical") ??
+        url.searchParams.get("uzletag") ??
+        url.searchParams.get("vertical_id");
+      const normalized = normalizePartnerVertical(vertical);
+      sendJson(res, 200, {
+        vertical: normalized,
+        categories: normalized ? categoriesForVertical(normalized) : PARTNER_CATEGORIES,
+      });
       return;
     }
 

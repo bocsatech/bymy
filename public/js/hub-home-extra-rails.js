@@ -1,5 +1,6 @@
 /**
- * Főoldal: Eladó lakások / házak a közelben, Ajánlások ingatlan, Kedvenc hirdetések.
+ * Főoldal: Eladó lakások / házak a közelben, Kedvenc hirdetések.
+ * (Az „Ajánlások ingatlan” sín statikus kategóriakártyák az index.html-ben.)
  * Működés: Autók a közelben sín mintájára.
  */
 import { fetchListings, fetchListing } from "./db-client.js?v=nearby2";
@@ -198,23 +199,9 @@ async function init() {
     defaultHref: "/ingatlan.html?uzletag=elado&kat=haz",
   });
 
-  const ajanlas = initNearbyIngatlanRail({
-    railId: "hub-ajanlas-ingatlan-rail",
-    statusId: "hub-ajanlas-ingatlan-status",
-    countId: "hub-ajanlas-ingatlan-count",
-    allId: "hub-ajanlas-ingatlan-all",
-    cacheKey: "bymy-hub-ajanlas-ingatlan-v1",
-    uzletag: "elado",
-    tipus: "",
-    noun: "ingatlan",
-    nounPlural: "ingatlan",
-    defaultHref: "/ingatlan.html?uzletag=elado",
-  });
-
   await Promise.all([
     lakas?.start({ postal, radiusKm }),
     haz?.start({ postal, radiusKm }),
-    ajanlas?.start({ postal, radiusKm }),
     initFavoritesRail({ postal, radiusKm }),
   ]);
 }

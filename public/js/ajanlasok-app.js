@@ -1,18 +1,31 @@
 import {
-  PARTNER_CATEGORIES,
+  categoriesForVertical,
+  normalizePartnerVertical,
   partnerCategoryImageUrl,
-} from "./partner-categories-data.js?v=ajanlasMobile1";
+} from "./partner-categories-data.js?v=ingatlanAjanlas1";
 import {
   fetchPartnerRecommendations,
   loadSavedPostalCode,
   savePostalCode,
-} from "./partner-recommendations.js?v=ajanlasMobile1";
+} from "./partner-recommendations.js?v=ingatlanAjanlas1";
 
 const RADIUS_KEY = "bymy_partner_radius_km";
-const UI_V = "ajanlasMobile1";
+const UI_V = "ingatlanAjanlas1";
+
+function queryVertical() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    return normalizePartnerVertical(params.get("vertical") || params.get("uzletag")) ?? "auto";
+  } catch {
+    return "auto";
+  }
+}
+
+const PAGE_VERTICAL = queryVertical();
+const PAGE_CATEGORIES = categoriesForVertical(PAGE_VERTICAL);
 
 /** Mobil PartnerRecommendationsDemo — API hiba esetén. */
-const DEMO_CATEGORIES = [
+const DEMO_CATEGORIES_AUTO = [
   {
     id: "atiras_ugyintezes",
     label: "Átírás ügyintézés",
@@ -110,6 +123,69 @@ const DEMO_CATEGORIES = [
   },
 ];
 
+const DEMO_CATEGORIES_INGATLAN = [
+  {
+    id: "ertekesites",
+    label: "Értékesítés",
+    partners: [
+      {
+        id: "i1",
+        name: "Fejér Ingatlan Értékesítés",
+        address: "Fő utca 20.",
+        postal_code: "8000",
+        phone: "+36 22 111 2233",
+        opening_hours: "H–P 9–17",
+        google_rating: 4.7,
+        google_review_count: 52,
+        distance_km: 1.8,
+        google_maps_url:
+          "https://www.google.com/maps/search/?api=1&query=Fej%C3%A9r%20Ingatlan%20%C3%89rt%C3%A9kes%C3%ADt%C3%A9s",
+      },
+    ],
+  },
+  {
+    id: "ertekbecsles",
+    label: "Értékbecslés",
+    partners: [
+      {
+        id: "i2",
+        name: "Értékbecslő Iroda Fejér",
+        address: "Kossuth u. 8.",
+        postal_code: "8000",
+        phone: "+36 22 222 3344",
+        opening_hours: "H–P 8–16",
+        google_rating: 4.5,
+        google_review_count: 28,
+        distance_km: 2.4,
+        google_maps_url:
+          "https://www.google.com/maps/search/?api=1&query=%C3%89rt%C3%A9kbecsl%C5%91%20Fej%C3%A9r",
+      },
+    ],
+  },
+  {
+    id: "ugyvedek",
+    label: "Ügyvédek",
+    partners: [
+      {
+        id: "i3",
+        name: "Ingatlanjogi Ügyvédi Iroda",
+        address: "Ady Endre u. 3.",
+        postal_code: "8000",
+        phone: "+36 22 333 4455",
+        opening_hours: "H–P 9–17",
+        google_rating: 4.9,
+        google_review_count: 41,
+        distance_km: 1.1,
+        google_maps_url:
+          "https://www.google.com/maps/search/?api=1&query=Ingatlanjogi%20%C3%9Cgyv%C3%A9di%20Iroda%20Sz%C3%A9kesfeh%C3%A9rv%C3%A1r",
+      },
+    ],
+  },
+];
+
+const DEMO_CATEGORIES =
+  PAGE_VERTICAL === "ingatlan" ? DEMO_CATEGORIES_INGATLAN : DEMO_CATEGORIES_AUTO;
+
 function escapeHtml(value) {
   return String(value ?? "")
     .replace(/&/g, "&amp;")
@@ -160,7 +236,7 @@ function queryCategoryId() {
 
 function ensureCategoryShell(categories) {
   const byId = new Map((categories ?? []).map((c) => [c.id, c]));
-  return PARTNER_CATEGORIES.map((meta) => {
+  return PAGE_CATEGORIES.map((meta) => {
     const found = byId.get(meta.id);
     return {
       id: meta.id,
@@ -274,8 +350,15 @@ export function initAjanlasokPage() {
   const listEl = document.getElementById("ajanlas-list");
   const noteEl = document.getElementById("ajanlas-note");
   const subtitleEl = document.getElementById("ajanlas-subtitle");
+  const titleEl = document.querySelector(".ajanlas-title");
   const refreshBtn = document.getElementById("ajanlas-refresh");
   if (!listEl) return;
+
+  if (titleEl) {
+    titleEl.textContent = PAGE_VERTICAL === "ingatlan" ? "Ajánlások · Ingatlan" : "Ajánlások · Autó";
+  }
+  document.title =
+    PAGE_VERTICAL === "ingatlan" ? "Ajánlások · Ingatlan — Bymy" : "Ajánlások · Autó — Bymy";
 
   const preferredCat = queryCategoryId();
 
@@ -325,7 +408,7 @@ export function initAjanlasokPage() {
     listEl.setAttribute("aria-busy", "true");
 
     try {
-      const data = await fetchPartnerRecommendations(postalCode);
+      const data = await fetchPartnerRecommendations(postalCode, { vertical: PAGE_VERTICAL });
       savePostalCode(postalCode);
       if (data.city) setSubtitle(`${data.city} · szolgáltatók ${radiusKm} km-en belül`);
       setNote(`Élő · ${postalCode} · ${radiusKm} km`);

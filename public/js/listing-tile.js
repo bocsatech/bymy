@@ -5,20 +5,41 @@ const ICON_YEAR = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect
 const ICON_KM = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 18 12 6l8 12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M7.5 18h9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>`;
 const ICON_POWER = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="13" r="7" stroke="currentColor" stroke-width="1.6"/><path d="M12 13 16 9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M12 6v1.5M5.5 10.5 6.6 11.2M18.5 10.5 17.4 11.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>`;
 
+function looksLikeListMetaTitle(value) {
+  const n = String(value ?? "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/\p{M}/gu, "");
+  if (!n) return true;
+  if (/\bkepkezeles\b/.test(n)) return true;
+  if (/^(19|20)\d{2}\/\d{1,2}\b/.test(n)) return true;
+  if (/\(\d{5,}\)\s*$/.test(n) && /^(19|20)\d{2}/.test(n)) return true;
+  if (/^(benzin|dizel|elektromos|hibrid)(\/|\s|,|$)/.test(n) && n.length <= 40) return true;
+  return false;
+}
+
 export function listingTileTitle(item) {
   const preview = item?.preview ?? {};
   const filter = preview.filter ?? {};
-  const fromBrand = [filter.gyartmany, filter.modell].filter(Boolean).join(" ");
+  const brand = String(filter.gyartmany || "").trim();
+  const model = String(filter.modell || "").trim();
+  const fromBrand = [brand, model]
+    .filter((part) => part && !looksLikeListMetaTitle(part))
+    .join(" ");
   const candidates = [
+    fromBrand,
     preview.title,
     item?.hirdetes_cime,
-    fromBrand,
     `Hirdetés #${item?.id ?? "?"}`,
   ];
   let title = "";
   for (const raw of candidates) {
+    if (looksLikeListMetaTitle(raw)) continue;
     title = formatListingDisplayTitle(raw);
-    if (title) break;
+    if (title && !looksLikeListMetaTitle(title)) break;
+    title = "";
   }
   title = title.replace(/\s*\(\d{4}(?:\/\d{1,2})?\)\s*$/u, "").trim();
   title = softTitleCase(title);

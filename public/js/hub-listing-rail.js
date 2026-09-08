@@ -2,7 +2,7 @@ import {
   createListingTileCard,
   formatListingCountBadge,
   slimListingTile,
-} from "./listing-tile.js?v=titleChrome1";
+} from "./listing-tile.js?v=titleNoise1";
 import { bindListingOpen, restoreListingReturn } from "./listing-return.js?v=scrollTop1";
 
 const INITIAL_COUNT = 9;

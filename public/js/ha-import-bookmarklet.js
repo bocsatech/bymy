@@ -46,6 +46,8 @@
         v
       ) ||
       /^(19|20)\d{2}(\/\d{1,2})?$/.test(v) ||
+      /^(19|20)\d{2}\/\d{1,2}\b/.test(v) ||
+      /\(\d{5,}\)\s*$/.test(v) && /^(19|20)\d{2}/.test(v) ||
       /^(módosítás|törlés|képek|felszereltség|leírás)$/i.test(v)
     );
   }

@@ -460,6 +460,7 @@ private func isListingSiteChromeLine(_ line: String) -> Bool {
   if folded.isEmpty { return true }
   if folded.contains("kepkezeles") { return true }
   if folded.range(of: #"^(19|20)\d{2}(/\d{1,2})?$"#, options: .regularExpression) != nil { return true }
+  if folded.range(of: #"^(19|20)\d{2}/\d{1,2}\b"#, options: .regularExpression) != nil { return true }
   var onlyChrome = folded
   onlyChrome = onlyChrome.replacingOccurrences(of: #"hasznaltauto(\.hu)?"#, with: " ", options: .regularExpression)
   onlyChrome = onlyChrome.replacingOccurrences(of: #"\bbelepes\b"#, with: " ", options: .regularExpression)

@@ -387,6 +387,8 @@ struct HasznaltautoImportScreen: View {
     return !t || t.length < 4 || t.length > 140
       || /javascript|gyorsnézet|gyorsnezet|hiba!|belépés|haszn[aá]ltaut[oó]\\.hu|regisztr|képkezelés|kepkezeles/i.test(t)
       || /^(19|20)\\d{2}(\\/\\d{1,2})?$/.test(t)
+      || /^(19|20)\\d{2}\\/\\d{1,2}\\b/.test(t)
+      || (/\\(\\d{5,}\\)\\s*$/.test(t) && /^(19|20)\\d{2}/.test(t))
       || /^(módosítás|törlés|képek|felszereltség|leírás)$/i.test(t);
   }
   function pickTitle() {

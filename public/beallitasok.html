@@ -57,7 +57,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/css/style.css?v=noScroll1" />
-    <link rel="stylesheet" href="/css/site-app.css?v=settingsFailOpen1" />
+    <link rel="stylesheet" href="/css/site-app.css?v=haBookmarkCopy1" />
       <link rel="stylesheet" href="/css/hub.css?v=hubHeroDemo1" />
 </head>
   <body class="site-app settings-page mm-page" data-site-page="beallitasok" data-auth-init="manual">
@@ -236,8 +236,14 @@
 
           <div class="ha-imp-actions">
             <button type="button" class="settings-btn-secondary" data-ha-open>hasznaltauto.hu megnyitása</button>
-            <a class="ha-imp-bookmark" id="ha-imp-bookmark" href="#">Hirdetés importálása</a>
-            <p class="ha-imp-bookmark-hint">Húzd ezt a gombot a könyvjelzősávra. A hasznaltauto oldalon (belépés + gyorsnézet) kattints rá.</p>
+            <div class="ha-imp-bookmark-row">
+              <a class="ha-imp-bookmark" id="ha-imp-bookmark" href="#">Hirdetés importálása</a>
+              <button type="button" class="settings-btn-secondary" id="ha-imp-bookmark-copy">Könyvjelző másolása</button>
+            </div>
+            <p class="ha-imp-bookmark-hint">
+              Húzd a sárga gombot a könyvjelzősávra, <strong>vagy</strong> másold a könyvjelzőt, majd a böngészőben: Új könyvjelző → illeszd be a cím mezőbe.
+              A hasznaltauto oldalon (belépés + lista / gyorsnézet) kattints a könyvjelzőre.
+            </p>
           </div>
 
           <div class="ha-imp-url-row" data-ha-url-row>
@@ -595,7 +601,7 @@
     </main>
 
     <script src="/js/site-avatar-menu.js?v=settingsNav2" type="module"></script>
-    <script src="/js/ha-import-app.js?v=haImp21" type="module"></script>
+    <script src="/js/ha-import-app.js?v=haBookmarkCopy1" type="module"></script>
     <script src="/js/beallitasok-app.js?v=settingsFailOpen1" type="module"></script>
     <script>
       /* Modulhiba esetén se maradjon örökre rejtett / csendes a Fiókom. */

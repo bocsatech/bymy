@@ -5464,6 +5464,13 @@ body.site-app .ha-imp-actions {
   margin-bottom: 1.1rem;
 }
 
+body.site-app .ha-imp-bookmark-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.55rem;
+  align-items: stretch;
+}
+
 body.site-app .ha-imp-bookmark {
   display: flex;
   align-items: center;
@@ -5474,6 +5481,12 @@ body.site-app .ha-imp-bookmark {
   color: #111;
   font-weight: 650;
   text-decoration: none;
+}
+
+@media (max-width: 640px) {
+  body.site-app .ha-imp-bookmark-row {
+    grid-template-columns: 1fr;
+  }
 }
 
 body.site-app .ha-imp-bookmark-hint,

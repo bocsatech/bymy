@@ -48,10 +48,38 @@ function setMode(mode) {
 
 function bookmarkletHref(mode) {
   const origin = location.origin;
-  const src = `${origin}/js/ha-import-bookmarklet.js?v=haImp21`;
+  const src = `${origin}/js/ha-import-bookmarklet.js?v=haImp22`;
   // Mindig újra betöltjük a scriptet — a régi BymyHaImport a fülön beragadhat.
   // void(...): a visszatérési érték ne cserélje le a hasznaltauto oldalt
   return `javascript:void(function(){var o=${JSON.stringify(origin)};var m=${JSON.stringify(mode)};var src=${JSON.stringify(src)}+"&t="+Date.now();function go(){try{window.BymyHaImport.run({origin:o,mode:m});}catch(e){alert((e&&e.message)||e);}}try{delete window.BymyHaImport;}catch(e){window.BymyHaImport=undefined;}var s=document.createElement("script");s.src=src;s.onload=go;s.onerror=function(){alert("A hasznaltauto.hu blokkolta a Bymy scriptet. Másold a hirdetés URL-jét a Bymy Autóimport oldalra.");};(document.documentElement||document.body).appendChild(s);})();`;
+}
+
+async function copyBookmarkletLink() {
+  const bookmark = document.getElementById("ha-imp-bookmark");
+  const href = bookmark?.getAttribute("href") || bookmarkletHref(currentMode());
+  if (!href || href === "#") {
+    setStatus("A könyvjelző link most nem elérhető.", "err");
+    return;
+  }
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(href);
+    } else {
+      const ta = document.createElement("textarea");
+      ta.value = href;
+      ta.setAttribute("readonly", "");
+      ta.style.cssText = "position:fixed;left:-9999px;top:0";
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      ta.remove();
+    }
+    setStatus(
+      "Könyvjelző a vágólapon. Böngésző: Új könyvjelző → a cím/URL mezőbe illeszd be (Cmd/Ctrl+V), mentés."
+    );
+  } catch {
+    setStatus("Nem sikerült a másolás. Próbáld a sárga gomb húzását a könyvjelzősávra.", "err");
+  }
 }
 
 function renderMode() {
@@ -458,7 +486,13 @@ export async function initHaImportPage() {
 
   document.getElementById("ha-imp-bookmark")?.addEventListener("click", (event) => {
     event.preventDefault();
-    setStatus("Húzd a narancssárga gombot a könyvjelzősávra, majd a hasznaltauto oldalon kattints rá.");
+    setStatus(
+      "Húzd a sárga gombot a könyvjelzősávra, vagy kattints a „Könyvjelző másolása” gombra."
+    );
+  });
+
+  document.getElementById("ha-imp-bookmark-copy")?.addEventListener("click", () => {
+    void copyBookmarkletLink();
   });
 
   document.getElementById("ha-imp-start")?.addEventListener("click", runUrlImport);

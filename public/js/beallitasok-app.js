@@ -15,7 +15,7 @@ import {
   deleteAccount,
   requireAuthForPage,
   initSiteAuth,
-} from "./site-auth.js?v=avatarSync1";
+} from "./site-auth.js?v=settingsFix1";
 import {
   getParkplatz,
   addParkplatzItem,
@@ -999,7 +999,10 @@ function initNotifyForm(email) {
 }
 export async function initSettingsPage() {
   const ok = await requireAuthForPage();
-  if (!ok) return;
+  if (!ok) {
+    document.documentElement.removeAttribute("data-mm-account-pending");
+    return;
+  }
   let loadedProfile = null;
   try {
     loadedProfile = await loadProfileFromServer();
@@ -1007,7 +1010,10 @@ export async function initSettingsPage() {
     /* session már ellenőrizve */
   }
   const user = getAuthUser();
-  if (!user?.email) return;
+  if (!user?.email) {
+    document.documentElement.removeAttribute("data-mm-account-pending");
+    return;
+  }
 
   syncSidebarAccountType((loadedProfile || getProfile())?.accountType);
   document.documentElement.removeAttribute("data-mm-account-pending");

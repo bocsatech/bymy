@@ -1,6 +1,7 @@
 import { fetchListing } from "./db-client.js?v=contract1";
-import { getAuthUser, getProfile, requireAuthForPage } from "./site-auth.js?v=contract1";
-import { emptyPerson, personFromProfile, vehicleFromListing } from "./adasveteli-data.js?v=contract1";
+import { getAuthUser, getProfile, requireAuthForPage } from "./site-auth.js?v=privateStreet1";
+import { emptyPerson, isBusinessProfile, personFromProfile, vehicleFromListing } from "./adasveteli-data.js?v=contract1";
+import { getPrivateStreet } from "./private-local-street.js?v=privateStreet1";
 
 const root = document.getElementById("contract-root");
 const state = { role: "seller", listing: null, vehicle: null, own: null, other: emptyPerson("person") };
@@ -87,7 +88,13 @@ async function init() {
   try {
     state.listing = await fetchListing(listingId);
     state.vehicle = vehicleFromListing(state.listing);
-    state.own = personFromProfile(getProfile(), getAuthUser());
+    const profile = getProfile();
+    const user = getAuthUser();
+    state.own = personFromProfile(profile, user);
+    if (!isBusinessProfile(profile)) {
+      const localStreet = await getPrivateStreet(user?.email);
+      if (localStreet) state.own.street = localStreet;
+    }
     document.querySelector("[data-contract-back]").href = `/hirdetes.html?id=${listingId}`;
     render();
   } catch (error) { root.innerHTML = `<p class="contract-loading">${escapeHtml(error.message || "A szerződés nem tölthető be.")}</p>`; }

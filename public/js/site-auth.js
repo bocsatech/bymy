@@ -341,9 +341,13 @@ function profileSaveLooksOk(profile) {
 }
 
 export async function saveProfile(profile) {
+  const incoming = { ...(profile || {}) };
+  if (String(incoming.accountType || getProfile().accountType || "private") !== "business") {
+    incoming.street = "";
+  }
   const data = await authFetch("/api/auth/profile", {
     method: "PUT",
-    body: JSON.stringify({ profile }),
+    body: JSON.stringify({ profile: incoming }),
   });
   if (data.user) rememberAuth(data);
   else {

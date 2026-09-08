@@ -452,6 +452,9 @@
             <label class="login-field">
               <span class="login-label">Utca, házszám</span>
               <input type="text" name="street" autocomplete="street-address" />
+              <p class="settings-acc-hint" data-private-street-hint hidden>
+                Magánfióknál az utca és házszám csak a mobilalkalmazásban tárolódik, a Bymy szerverre nem kerül.
+              </p>
             </label>
             <div class="settings-postal-row">
               <label class="login-field settings-postal-field">
@@ -625,7 +628,7 @@
 
     <script src="/js/site-avatar-menu.js?v=settingsNav2" type="module"></script>
     <script src="/js/ha-import-app.js?v=haBookmarkCopy1" type="module"></script>
-    <script src="/js/beallitasok-app.js?v=settingsPhone1" type="module"></script>
+    <script src="/js/beallitasok-app.js?v=privateStreet1" type="module"></script>
     <script>
       
       setTimeout(function () {

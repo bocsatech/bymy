@@ -10,7 +10,7 @@ import {
   deleteAccount,
   requireAuthForPage,
   initSiteAuth,
-} from "./site-auth.js?v=settingsFix1";
+} from "./site-auth.js?v=privateStreet1";
 import {
   getParkplatz,
   addParkplatzItem,
@@ -31,6 +31,11 @@ import {
 } from "./site-avatar-menu.js?v=avatarSync1";
 import { fetchListing } from "./db-client.js?v=parkThumb1";
 import { fillCountrySelect, PHONE_COUNTRIES } from "./phone-lang-ui.js?v=settingsPhone1";
+import {
+  getPrivateStreet,
+  isNativeApp,
+  setPrivateStreet,
+} from "./private-local-street.js?v=privateStreet1";
 
 const PHOTO_KEY = "bymy-avatar-photos";
 const NOTIFY_KEY = "bymy-notify-prefs";
@@ -949,6 +954,35 @@ function applyProfileToForm(profile) {
   initSettingsPhoneRow(form);
   applyPhonePartsToForm(form, data.phone);
   updateProfileSummary(data, getAuthUser());
+  void hydratePrivateStreetField(form, data, getAuthUser());
+}
+
+async function hydratePrivateStreetField(form, profile, user) {
+  if (!form) return;
+  const streetInput = form.elements.namedItem("street");
+  const hint = document.querySelector("[data-private-street-hint]");
+  if (!(streetInput instanceof HTMLInputElement)) return;
+
+  const isBusiness = String(profile?.accountType || "").toLowerCase() === "business";
+  if (isBusiness) {
+    if (hint) hint.hidden = true;
+    streetInput.readOnly = false;
+    streetInput.placeholder = "";
+    return;
+  }
+
+  if (hint) hint.hidden = false;
+  const userKey = user?.email || "";
+  if (isNativeApp()) {
+    streetInput.readOnly = false;
+    streetInput.placeholder = "";
+    const local = await getPrivateStreet(userKey);
+    streetInput.value = local;
+  } else {
+    streetInput.value = "";
+    streetInput.readOnly = true;
+    streetInput.placeholder = "Csak a mobilalkalmazásban";
+  }
 }
 
 function fillProfileForm(user, profileOverride = null) {
@@ -1301,8 +1335,23 @@ function bindProfileFormEarly() {
     data.company = String(
       document.querySelector("#mm-company-form [name=company]")?.value ?? data.company ?? ""
     ).trim();
+    const accountType = String(data.accountType || getProfile().accountType || "private").toLowerCase();
+    const streetLocal = String(data.street || "").trim();
+    if (accountType !== "business") {
+      data.street = "";
+    }
     if (btn) btn.disabled = true;
     try {
+      let streetNote = "";
+      if (accountType !== "business") {
+        const userForStreet = getAuthUser();
+        if (isNativeApp() && userForStreet?.email) {
+          await setPrivateStreet(userForStreet.email, streetLocal);
+          streetNote = " Utca a telefonon mentve.";
+        } else if (streetLocal) {
+          streetNote = " Az utca/házszám csak a mobilalkalmazásban menthető.";
+        }
+      }
       const saved = await saveProfile(data);
       applyProfileToForm(saved);
       const user = getAuthUser();
@@ -1312,7 +1361,7 @@ function bindProfileFormEarly() {
       window.dispatchEvent(new CustomEvent("bymy-auth-changed"));
       showFlash(
         flash,
-        `Adatok mentve: ${saved.lastName} ${saved.firstName}.`.trim(),
+        `Adatok mentve: ${saved.lastName} ${saved.firstName}.${streetNote}`.trim(),
         true
       );
       flash?.scrollIntoView({ behavior: "smooth", block: "nearest" });

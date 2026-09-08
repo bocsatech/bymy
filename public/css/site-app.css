@@ -1266,6 +1266,11 @@ body.site-app .settings-form {
   gap: 0.85rem;
 }
 
+body.site-app [data-mm-panel="szemelyes"] .settings-profile-header,
+body.site-app [data-mm-panel="szemelyes"] .settings-form {
+  max-width: 28rem;
+}
+
 body.site-app .settings-profile-header {
   display: flex;
   align-items: center;

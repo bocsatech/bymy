@@ -1,34 +1,40 @@
-# iOS mobil app — bymy cloud
+# iOS mobil app — éles web (Capacitor)
 
-Az iOS app forrása: `ios/Bymy/` (SwiftUI, natív).
+Az **aktuális iOS app** a Capacitor héj: `ios/App/App.xcodeproj`.  
+Betölti az éles weboldalt: **`https://bymy.hu`** (ugyanaz, mint a böngésző).
 
-**Android:** Capacitor héj — lásd [`docs/android-app.md`](android-app.md) (`npm run android`).
+A korábbi natív SwiftUI forrás megmaradt: `ios-native/` (archivált / referencia).
 
-## Production backend
+**Android:** ugyanígy Capacitor — [`docs/android-app.md`](android-app.md).
 
-- **API:** `https://bymy.hu` (`AutoswebBaseURL.defaultProduction`)
-- **Adatbázis:** Supabase (Postgres)
-- Alapértelmezett URL az appban: éles `bymy.hu` (a régi `bymy.vercel.app` mentés automatikusan átíródik)
+## Első indítás
 
-## Lokális Mac / Vercel teszt (opcionális)
+```bash
+cd /Users/rbocsa/bymy
+npm install
+npm run ios
+```
 
-Fogaskerék a belépő képernyőn → API cím:
-- Vercel teszt: `https://bymy.vercel.app`
-- Lokális: `http://127.0.0.1:3456` vagy Mac Wi‑Fi IP
+Ez syncel, majd megnyitja az Xcode-ot. Utána: telefon / szimulátor → **Run** (⌘R).
 
-## Profil és adatvédelem
+## Parancsok
 
-| Adat | Hol |
-|------|-----|
-| Név, irányítószám, város, telefon, cégnév | Szerver (`PUT /api/auth/profile`) |
-| Magán utca / lakcím, születési / okmány adatok, cég székhely + cégjegyzék + képviselő | **Csak telefon** (`DeviceContractIdentityStore`) |
+| Parancs | Mit csinál |
+|---------|------------|
+| `npm run ios` | Sync + Xcode |
+| `npm run cap:sync` | Android + iOS sync |
+| `npm run cap:open:ios` | Csak Xcode |
 
-## Xcode
+## API / web
 
-1. Nyisd meg: `ios/Bymy.xcodeproj`
-2. Clean Build Folder (⇧⌘K), majd Run (⌘R)
-3. Simulator vagy iPhone — első indítás: cloud szerver
+- Éles: `https://bymy.hu` (`capacitor.config.json` → `server.url`)
+- Vercel teszt: állítsd ideiglenesen `https://bymy.vercel.app`-ra, majd `npm run cap:sync`
+- Lokális: lásd `capacitor.config.local.example.json`
 
-## Megjegyzés
+## OAuth
 
-Push értesítés: outbox + poll (nem APNs). Üzenet-csatolmány Vercelen `/tmp`-ben (nem tartós cold start után).
+Deep link: `bymy://oauth` (Info.plist `CFBundleURLSchemes`).
+
+## Bundle ID
+
+`hu.bymy.app` — megegyezik az Androiddal és a régi natív appal.

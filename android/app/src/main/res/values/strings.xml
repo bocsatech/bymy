@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Bymy</string>
+    <string name="title_activity_main">Bymy</string>
+    <string name="package_name">hu.bymy.app</string>
+    <string name="custom_url_scheme">hu.bymy.app</string>
+</resources>

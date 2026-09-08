@@ -1,0 +1,1277 @@
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild -scheme bymy -destination "generic/platform=iOS Simulator" -derivedDataPath /Users/rbocsa/bymy/ios/build/DerivedData build
+
+2026-08-14 11:59:02.484 xcodebuild[11426:148532] [MT] IDERunDestination: Supported platforms for the buildables in the current scheme is empty.
+ComputePackagePrebuildTargetDependencyGraph
+
+Prepare packages
+
+CreateBuildRequest
+
+SendProjectDescription
+
+CreateBuildOperation
+
+ComputeTargetDependencyGraph
+note: Building targets in dependency order
+note: Target dependency graph (1 target)
+    Target 'bymy' in project 'Bymy' (no dependencies)
+
+GatherProvisioningInputs
+
+CreateBuildDescription
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -v -E -dM -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.5.sdk -x c -c /dev/null
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/usr/bin/actool --print-asset-tag-combinations --output-format xml1 /Users/rbocsa/bymy/ios/Bymy/Assets.xcassets
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/usr/bin/actool --version --output-format xml1
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc --version
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld -version_details
+
+Build description signature: ec92de7bd73cb9ee4913f28bd3cc88fa
+Build description path: /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/XCBuildData/ec92de7bd73cb9ee4913f28bd3cc88fa.xcbuilddata
+ClangStatCache /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.5.sdk /Users/rbocsa/bymy/ios/build/DerivedData/SDKStatCaches.noindex/iphonesimulator26.5-23F81a-6cfe768891a92b912361537c460fe42b.sdkstatcache
+    cd /Users/rbocsa/bymy/ios/Bymy.xcodeproj
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.5.sdk -o /Users/rbocsa/bymy/ios/build/DerivedData/SDKStatCaches.noindex/iphonesimulator26.5-23F81a-6cfe768891a92b912361537c460fe42b.sdkstatcache
+
+CreateBuildDirectory /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products
+    cd /Users/rbocsa/bymy/ios/Bymy.xcodeproj
+    builtin-create-build-directory /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products
+
+CreateBuildDirectory /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex
+    cd /Users/rbocsa/bymy/ios/Bymy.xcodeproj
+    builtin-create-build-directory /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex
+
+CreateBuildDirectory /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator
+    cd /Users/rbocsa/bymy/ios/Bymy.xcodeproj
+    builtin-create-build-directory /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator
+
+CreateBuildDirectory /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules
+    cd /Users/rbocsa/bymy/ios/Bymy.xcodeproj
+    builtin-create-build-directory /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules
+
+CreateBuildDirectory /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/ExplicitPrecompiledModules
+    cd /Users/rbocsa/bymy/ios/Bymy.xcodeproj
+    builtin-create-build-directory /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/ExplicitPrecompiledModules
+
+CreateBuildDirectory /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/EagerLinkingTBDs/Debug-iphonesimulator
+    cd /Users/rbocsa/bymy/ios/Bymy.xcodeproj
+    builtin-create-build-directory /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/EagerLinkingTBDs/Debug-iphonesimulator
+
+WriteAuxiliaryFile /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/Bymy-8cb0c793291f799c30d298ce1f745953-VFS-iphonesimulator/all-product-headers.yaml
+    cd /Users/rbocsa/bymy/ios/Bymy.xcodeproj
+    write-file /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/Bymy-8cb0c793291f799c30d298ce1f745953-VFS-iphonesimulator/all-product-headers.yaml
+
+WriteAuxiliaryFile /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy-own-target-headers.hmap (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    write-file /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy-own-target-headers.hmap
+
+WriteAuxiliaryFile /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy-DebugDylibPath-normal-x86_64.txt (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    write-file /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy-DebugDylibPath-normal-x86_64.txt
+
+WriteAuxiliaryFile /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy-project-headers.hmap (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    write-file /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy-project-headers.hmap
+
+WriteAuxiliaryFile /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy-generated-files.hmap (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    write-file /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy-generated-files.hmap
+
+WriteAuxiliaryFile /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy-DebugDylibInstallName-normal-x86_64.txt (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    write-file /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy-DebugDylibInstallName-normal-x86_64.txt
+
+WriteAuxiliaryFile /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy-all-non-framework-target-headers.hmap (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    write-file /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy-all-non-framework-target-headers.hmap
+
+WriteAuxiliaryFile /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy-DebugDylibPath-normal-arm64.txt (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    write-file /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy-DebugDylibPath-normal-arm64.txt
+
+WriteAuxiliaryFile /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy-all-target-headers.hmap (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    write-file /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy-all-target-headers.hmap
+
+WriteAuxiliaryFile /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy.hmap (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    write-file /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy.hmap
+
+WriteAuxiliaryFile /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy-DebugDylibInstallName-normal-arm64.txt (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    write-file /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy-DebugDylibInstallName-normal-arm64.txt
+
+WriteAuxiliaryFile /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/x86_64/bymy_const_extract_protocols.json (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    write-file /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/x86_64/bymy_const_extract_protocols.json
+
+WriteAuxiliaryFile /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/x86_64/bymy-OutputFileMap.json (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    write-file /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/x86_64/bymy-OutputFileMap.json
+
+WriteAuxiliaryFile /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/x86_64/bymy.LinkFileList (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    write-file /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/x86_64/bymy.LinkFileList
+
+WriteAuxiliaryFile /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/arm64/bymy_const_extract_protocols.json (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    write-file /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/arm64/bymy_const_extract_protocols.json
+
+WriteAuxiliaryFile /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy.DependencyStaticMetadataFileList (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    write-file /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy.DependencyStaticMetadataFileList
+
+WriteAuxiliaryFile /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/x86_64/bymy.SwiftFileList (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    write-file /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/x86_64/bymy.SwiftFileList
+
+WriteAuxiliaryFile /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy.DependencyMetadataFileList (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    write-file /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy.DependencyMetadataFileList
+
+WriteAuxiliaryFile /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/x86_64/bymy.SwiftConstValuesFileList (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    write-file /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/x86_64/bymy.SwiftConstValuesFileList
+
+WriteAuxiliaryFile /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/arm64/bymy.SwiftFileList (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    write-file /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/arm64/bymy.SwiftFileList
+
+WriteAuxiliaryFile /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/arm64/bymy.SwiftConstValuesFileList (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    write-file /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/arm64/bymy.SwiftConstValuesFileList
+
+WriteAuxiliaryFile /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/arm64/bymy.LinkFileList (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    write-file /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/arm64/bymy.LinkFileList
+
+WriteAuxiliaryFile /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/arm64/bymy-OutputFileMap.json (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    write-file /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/arm64/bymy-OutputFileMap.json
+
+MkDir /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.app (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    /bin/mkdir -p /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.app
+
+WriteAuxiliaryFile /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/DerivedSources/Entitlements-Simulated.plist (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    write-file /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/DerivedSources/Entitlements-Simulated.plist
+
+ProcessProductPackaging "" /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy.app-Simulated.xcent (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+    Entitlements:
+    
+    {
+    "application-identifier" = "5TJ2PV4PC7.hu.bymy.app";
+}
+    
+    builtin-productPackagingUtility -entitlements -format xml -o /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy.app-Simulated.xcent
+
+ProcessProductPackagingDER /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy.app-Simulated.xcent /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy.app-Simulated.xcent.der (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    /usr/bin/derq query -f xml -i /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy.app-Simulated.xcent -o /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy.app-Simulated.xcent.der --raw
+
+MkDir /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/assetcatalog_output/unthinned (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    /bin/mkdir -p /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/assetcatalog_output/unthinned
+
+MkDir /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/assetcatalog_output/thinned (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    /bin/mkdir -p /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/assetcatalog_output/thinned
+
+Ld /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/x86_64/Binary/__preview.dylib normal x86_64 (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -Xlinker -reproducible -target x86_64-apple-ios17.0-simulator -dynamiclib -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.5.sdk -O0 -L/Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator -F/Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator -install_name @rpath/bymy.debug.dylib -Xlinker -dead_strip -rdynamic -Xlinker -no_deduplicate -Xlinker -objc_abi_version -Xlinker 2 -Xlinker -dependency_info -Xlinker /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/x86_64/bymy_dependency_info.dat -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __entitlements -Xlinker /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy.app-Simulated.xcent -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __ents_der -Xlinker /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy.app-Simulated.xcent.der -Xlinker -no_adhoc_codesign -o /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/x86_64/Binary/__preview.dylib
+
+CpResource /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.app/VehicleCatalog.json /Users/rbocsa/bymy/ios/Bymy/VehicleCatalog.json (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/rbocsa/bymy/ios/Bymy/VehicleCatalog.json /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.app
+
+GenerateAssetSymbols /Users/rbocsa/bymy/ios/Bymy/Assets.xcassets (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    /Applications/Xcode.app/Contents/Developer/usr/bin/actool /Users/rbocsa/bymy/ios/Bymy/Assets.xcassets --compile /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.app --output-format human-readable-text --notices --warnings --export-dependency-info /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/assetcatalog_dependencies --output-partial-info-plist /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/assetcatalog_generated_info.plist --accent-color AccentColor --compress-pngs --enable-on-demand-resources YES --development-region hu --target-device iphone --minimum-deployment-target 17.0 --platform iphonesimulator --bundle-identifier hu.bymy.app --generate-swift-asset-symbol-extensions NO --generate-swift-asset-symbols /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/DerivedSources/GeneratedAssetSymbols.swift --generate-objc-asset-symbols /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/DerivedSources/GeneratedAssetSymbols.h --generate-asset-symbol-index /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/DerivedSources/GeneratedAssetSymbols-Index.plist
+/* com.apple.actool.compilation-results */
+/Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/DerivedSources/GeneratedAssetSymbols-Index.plist
+/Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/DerivedSources/GeneratedAssetSymbols.h
+/Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/DerivedSources/GeneratedAssetSymbols.swift
+
+
+CopyPNGFile /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.app/ajanlas-lakatos.png /Users/rbocsa/bymy/ios/Bymy/PartnerPhotos/ajanlas-lakatos.png (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    /Applications/Xcode.app/Contents/Developer/usr/bin/copypng -compress -strip-PNG-text /Users/rbocsa/bymy/ios/Bymy/PartnerPhotos/ajanlas-lakatos.png /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.app/ajanlas-lakatos.png
+
+CopyPNGFile /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.app/ajanlas-szerelo.png /Users/rbocsa/bymy/ios/Bymy/PartnerPhotos/ajanlas-szerelo.png (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    /Applications/Xcode.app/Contents/Developer/usr/bin/copypng -compress -strip-PNG-text /Users/rbocsa/bymy/ios/Bymy/PartnerPhotos/ajanlas-szerelo.png /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.app/ajanlas-szerelo.png
+
+CopyPNGFile /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.app/ajanlas-muszaki.png /Users/rbocsa/bymy/ios/Bymy/PartnerPhotos/ajanlas-muszaki.png (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    /Applications/Xcode.app/Contents/Developer/usr/bin/copypng -compress -strip-PNG-text /Users/rbocsa/bymy/ios/Bymy/PartnerPhotos/ajanlas-muszaki.png /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.app/ajanlas-muszaki.png
+
+CopyPNGFile /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.app/ajanlas-kozmetika.png /Users/rbocsa/bymy/ios/Bymy/PartnerPhotos/ajanlas-kozmetika.png (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    /Applications/Xcode.app/Contents/Developer/usr/bin/copypng -compress -strip-PNG-text /Users/rbocsa/bymy/ios/Bymy/PartnerPhotos/ajanlas-kozmetika.png /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.app/ajanlas-kozmetika.png
+
+CopyPNGFile /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.app/ajanlas-villamos.png /Users/rbocsa/bymy/ios/Bymy/PartnerPhotos/ajanlas-villamos.png (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    /Applications/Xcode.app/Contents/Developer/usr/bin/copypng -compress -strip-PNG-text /Users/rbocsa/bymy/ios/Bymy/PartnerPhotos/ajanlas-villamos.png /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.app/ajanlas-villamos.png
+
+CpResource /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.app/PartnerPhotos /Users/rbocsa/bymy/ios/Bymy/PartnerPhotos (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/rbocsa/bymy/ios/Bymy/PartnerPhotos /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.app
+
+CopyPNGFile /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.app/ajanlas-klima.png /Users/rbocsa/bymy/ios/Bymy/PartnerPhotos/ajanlas-klima.png (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    /Applications/Xcode.app/Contents/Developer/usr/bin/copypng -compress -strip-PNG-text /Users/rbocsa/bymy/ios/Bymy/PartnerPhotos/ajanlas-klima.png /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.app/ajanlas-klima.png
+
+Ld /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/arm64/Binary/__preview.dylib normal arm64 (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -Xlinker -reproducible -target arm64-apple-ios17.0-simulator -dynamiclib -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.5.sdk -O0 -L/Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator -F/Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator -install_name @rpath/bymy.debug.dylib -Xlinker -dead_strip -rdynamic -Xlinker -no_deduplicate -Xlinker -objc_abi_version -Xlinker 2 -Xlinker -dependency_info -Xlinker /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/arm64/bymy_dependency_info.dat -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __entitlements -Xlinker /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy.app-Simulated.xcent -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __ents_der -Xlinker /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy.app-Simulated.xcent.der -Xlinker -no_adhoc_codesign -o /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/arm64/Binary/__preview.dylib
+
+CopyPNGFile /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.app/ajanlas-gumi.png /Users/rbocsa/bymy/ios/Bymy/PartnerPhotos/ajanlas-gumi.png (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    /Applications/Xcode.app/Contents/Developer/usr/bin/copypng -compress -strip-PNG-text /Users/rbocsa/bymy/ios/Bymy/PartnerPhotos/ajanlas-gumi.png /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.app/ajanlas-gumi.png
+
+CopyPNGFile /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.app/ajanlas-eredet.png /Users/rbocsa/bymy/ios/Bymy/PartnerPhotos/ajanlas-eredet.png (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    /Applications/Xcode.app/Contents/Developer/usr/bin/copypng -compress -strip-PNG-text /Users/rbocsa/bymy/ios/Bymy/PartnerPhotos/ajanlas-eredet.png /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.app/ajanlas-eredet.png
+
+CopyPNGFile /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.app/ajanlas-atvizsgalas.png /Users/rbocsa/bymy/ios/Bymy/PartnerPhotos/ajanlas-atvizsgalas.png (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    /Applications/Xcode.app/Contents/Developer/usr/bin/copypng -compress -strip-PNG-text /Users/rbocsa/bymy/ios/Bymy/PartnerPhotos/ajanlas-atvizsgalas.png /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.app/ajanlas-atvizsgalas.png
+
+CopyPNGFile /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.app/ajanlas-atiras.png /Users/rbocsa/bymy/ios/Bymy/PartnerPhotos/ajanlas-atiras.png (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    /Applications/Xcode.app/Contents/Developer/usr/bin/copypng -compress -strip-PNG-text /Users/rbocsa/bymy/ios/Bymy/PartnerPhotos/ajanlas-atiras.png /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.app/ajanlas-atiras.png
+
+CompileAssetCatalogVariant thinned /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.app /Users/rbocsa/bymy/ios/Bymy/Assets.xcassets (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    /Applications/Xcode.app/Contents/Developer/usr/bin/actool /Users/rbocsa/bymy/ios/Bymy/Assets.xcassets --compile /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/assetcatalog_output/thinned --output-format human-readable-text --notices --warnings --export-dependency-info /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/assetcatalog_dependencies_thinned --output-partial-info-plist /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/assetcatalog_generated_info.plist_thinned --accent-color AccentColor --compress-pngs --enable-on-demand-resources YES --development-region hu --target-device iphone --minimum-deployment-target 17.0 --platform iphonesimulator
+/* com.apple.actool.compilation-results */
+/Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/assetcatalog_generated_info.plist_thinned
+/Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/assetcatalog_output/thinned/Assets.car
+
+
+CreateUniversalBinary /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.app/__preview.dylib normal arm64\ x86_64 (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/lipo -create /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/arm64/Binary/__preview.dylib /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/x86_64/Binary/__preview.dylib -output /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.app/__preview.dylib
+
+SwiftDriver bymy normal x86_64 com.apple.xcode.tools.swift.compiler (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    builtin-SwiftDriver -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name bymy -Onone @/Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/x86_64/bymy.SwiftFileList -DDEBUG -enable-bare-slash-regex -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.5.sdk -target x86_64-apple-ios17.0-simulator -g -module-cache-path /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex -Xfrontend -serialize-debugging-options -enable-testing -index-store-path /Users/rbocsa/bymy/ios/build/DerivedData/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator -F /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator -emit-localized-strings -emit-localized-strings-path /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/x86_64 -c -j15 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /Users/rbocsa/bymy/ios/build/DerivedData/SDKStatCaches.noindex/iphonesimulator26.5-23F81a-6cfe768891a92b912361537c460fe42b.sdkstatcache -output-file-map /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/x86_64/bymy-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex -sdk-module-cache-path /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/x86_64/bymy.swiftmodule -validate-clang-modules-once -clang-build-session-file /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/Session.modulevalidation -Xcc -I/Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/x86_64/bymy_const_extract_protocols.json -Xcc -iquote -Xcc /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy-generated-files.hmap -Xcc -I/Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy-own-target-headers.hmap -Xcc -I/Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy-all-target-headers.hmap -Xcc -iquote -Xcc /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy-project-headers.hmap -Xcc -I/Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/include -Xcc -I/Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/DerivedSources-normal/x86_64 -Xcc -I/Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/DerivedSources/x86_64 -Xcc -I/Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/DerivedSources -emit-objc-header -emit-objc-header-path /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/x86_64/bymy-Swift.h -working-directory /Users/rbocsa/bymy/ios -experimental-emit-module-separately -disable-cmo
+
+SwiftDriver bymy normal arm64 com.apple.xcode.tools.swift.compiler (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    builtin-SwiftDriver -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name bymy -Onone @/Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/arm64/bymy.SwiftFileList -DDEBUG -enable-bare-slash-regex -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.5.sdk -target arm64-apple-ios17.0-simulator -g -module-cache-path /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex -Xfrontend -serialize-debugging-options -enable-testing -index-store-path /Users/rbocsa/bymy/ios/build/DerivedData/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator -F /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator -emit-localized-strings -emit-localized-strings-path /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/arm64 -c -j15 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /Users/rbocsa/bymy/ios/build/DerivedData/SDKStatCaches.noindex/iphonesimulator26.5-23F81a-6cfe768891a92b912361537c460fe42b.sdkstatcache -output-file-map /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/arm64/bymy-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex -sdk-module-cache-path /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/arm64/bymy.swiftmodule -validate-clang-modules-once -clang-build-session-file /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/Session.modulevalidation -Xcc -I/Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/arm64/bymy_const_extract_protocols.json -Xcc -iquote -Xcc /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy-generated-files.hmap -Xcc -I/Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy-own-target-headers.hmap -Xcc -I/Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy-all-target-headers.hmap -Xcc -iquote -Xcc /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy-project-headers.hmap -Xcc -I/Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/include -Xcc -I/Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/DerivedSources-normal/arm64 -Xcc -I/Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/DerivedSources/arm64 -Xcc -I/Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/DerivedSources -emit-objc-header -emit-objc-header-path /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/arm64/bymy-Swift.h -working-directory /Users/rbocsa/bymy/ios -experimental-emit-module-separately -disable-cmo
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/_AvailabilityInternal-CRYI56T39WQOP2U0WOQCHIZRK.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/DeveloperToolsSupport-3E99OB57XQ5SYUKNFGSTCP2OF.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/_Builtin_stdarg-EUZ084QHD4A13V4TT0UKMGNJB.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/_Builtin_float-72HTJAZA195QVYG2U936EE7KB.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/ptrcheck-9QVHNKIXFTZDRJSGKBTV5LJF0.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/_Builtin_stdbool-4W8Q9675YW0PLO6KBXGSCJWMP.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/_Builtin_stddef-AH5GISMP8X0TD4J0IR7Y5UUIV.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/SwiftShims-9BDRQ51VB650EUO5X7STGV1LK.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/_SwiftConcurrencyShims-1VON77LP0Q990F92A5IZRPA3W.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/ptrauth-301IEYQA04U769GDX32URD448.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/SwiftShims-3G4YDN3CKIVNFD8VLALLGWZHX.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/_SwiftConcurrencyShims-5C1AE3MSUQZ6VKZ3KJ8R9P4MO.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/DeveloperToolsSupport-8GSCQMYP3QZF7G1L1OKUWW4IH.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/_AvailabilityInternal-8PJNOJFY7UHTRB293EH8HL5BZ.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/ptrauth-3ROUA9KSED2DNKMEMOIBVIWK8.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/_Builtin_stdbool-5F4T5MBM8U0DTRFSHM603GAG0.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/_Builtin_stdarg-6V1A3HTN2347IKU8A96N07X64.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/_Builtin_float-3LPJJ7MIS2MQ4KZSZ5UOWUKOL.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/ptrcheck-15QLZ8C9KZUAMQQSE5UL7I71Z.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/_Builtin_stddef-DVLQE4X7WOP01TP7H2GR80JBV.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/_DarwinFoundation1-4EHM52GGTYTO68Y9UBN6D0VD0.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/_DarwinFoundation1-E3CUK089DKXV30EXO374KEZQW.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/_DarwinFoundation2-4IROTQDQPUSURK2QKQUZF72WH.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/ExtensionFoundation-DCVNW6MU65QG1LUBL5S3M3GPZ.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/_Builtin_limits-ARIG4PFOEFMPELKSC8GZVWMAN.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/ExtensionFoundation-B3Q9KNJFIXNIDILQHG3GEZ6Y7.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/_DarwinFoundation2-9XRQXMI8PS15PYHFFNZX5XB66.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/_Builtin_limits-1K7P8GJL2KJ0BMXVF7EBIT1D9.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/_Builtin_tgmath-DLIE1O1QH5LXSRSU20U0GRO3T.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/sys_types-6PSMIWNHEYSNGWPJ6MB15ZVFF.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/_Builtin_stdint-AG295IYI660J34P9VCGQHP3YU.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/_Builtin_tgmath-6VBLW63LTQMURBBMXIM325J1S.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/_Builtin_stdint-2Y1XI0EC3S5Y0FUHNLEP0S6BS.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/sys_types-6SXTETRCOP71NSPGA6WZUNR7E.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/_Builtin_stdatomic-1HQD7WTSXG9PGPH2FSUBKMPWX.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/_DarwinFoundation3-CGPJ382IG5BS78TC0E0MIRAH5.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/_DarwinFoundation3-B54SLJ2KKJPF3J5FGAAFATUT5.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/_Builtin_intrinsics-1MLYETA9PUPJWG2MIT00S82XJ.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/_Builtin_stdatomic-AJMI34RM3J68BD1BTYPAW734F.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/_Builtin_inttypes-27PAYMZSU4779WMRHBKTTROUV.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/_Builtin_intrinsics-52FL5CR37CGK7FNHS2YLXCGDN.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/_Builtin_inttypes-66JG40XA810K5XTDIF95CNL3B.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/Darwin-9RRO89JHY1AAEKWO3YFFIFD8M.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/Darwin-7ZUJTLZWHHTHEQX7OCDFIUFPS.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/simd-C8P0M2WCGG6VESHVNIO541PVX.pcm
+
+LinkAssetCatalog /Users/rbocsa/bymy/ios/Bymy/Assets.xcassets (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    builtin-linkAssetCatalog --thinned /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/assetcatalog_output/thinned --thinned-dependencies /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/assetcatalog_dependencies_thinned --thinned-info-plist-content /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/assetcatalog_generated_info.plist_thinned --unthinned /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/assetcatalog_output/unthinned --unthinned-dependencies /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/assetcatalog_dependencies_unthinned --unthinned-info-plist-content /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/assetcatalog_generated_info.plist_unthinned --output /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.app --plist-output /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/assetcatalog_generated_info.plist
+note: Emplaced /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.app/Assets.car (in target 'bymy' from project 'Bymy')
+
+ProcessInfoPlistFile /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.app/Info.plist /Users/rbocsa/bymy/ios/Bymy/Info.plist (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    builtin-infoPlistUtility /Users/rbocsa/bymy/ios/Bymy/Info.plist -producttype com.apple.product-type.application -genpkginfo /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.app/PkgInfo -expandbuildsettings -format binary -platform iphonesimulator -additionalcontentfile /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/assetcatalog_generated_info.plist -o /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.app/Info.plist
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/ObjectiveC-3O9DPM293DZYJ8PS91KQIYE4N.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/MachO-5QIUM6RBC24MRWOTCWE71E3RB.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/simd-2TZ48141KR6GLSG4KDTBSVD1R.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/ObjectiveC-26B9RZZVBS8NWJR3XI1DX5G1H.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/MachO-61CTKHDGJYWY5KGHR1TZ1WGQK.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/os_object-91GLSHFEIFUM9EUSFBH3X7QG6.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/os_object-99SVKVZYUUOWEEPO9JDHWZ7Y7.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/os_workgroup-YA2TFQ2QQ6YJDPMBIZFAR011.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/os_workgroup-9AEZP8T8U9ZEHPZNXMN6LYF0G.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/Dispatch-7IMMSY2QM8CW4OCZ7ZTRNX5CK.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/Spatial-CJDI1O0IFKVRRIGH2VFTLYSAO.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/Dispatch-2D12KGA2A1SVBAHZ8DB1CUTHH.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/dnssd-14IJRGH345FCL6UBT4HJ67G53.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/XPC-8XMEG405PQ6734S2Z1DL9C1ER.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/CoreFoundation-7EDRZRX3HATNKUHTHS8P0ILLY.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/XPC-8OH7JPYDQ61XMVO1PX10NGGVY.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/dnssd-CIIWVE0OU3D6GKQRJ8SOI5ZGJ.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/CoreFoundation-BBMF23LF71JWREKCSFFICF4KT.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/os-AAFD0TQSXWTIDB10Y4U2Y3FHE.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/Spatial-2B62YHOAIVK188PQMNUWO8N4.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/CoreGraphics-2TW5XUE8SBTJC348NUT80S1B9.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/CFNetwork-9BXJAVYXJ9RD7ZML24OEK2U94.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/Security-9RSXE8P01SRID2MTVLHL4TTX0.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/CoreAudioTypes-41Q9LYDURJ7UKDNDVRDEBRNXN.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/os-6DW5JJJX5QRCUOR9B4DHEJQ1L.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/CoreAudio-6ZHOSAWOEGSQULRQ3ZMBGRK1H.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/CoreAudioTypes-7SJ7LGLD4TWEK0EKJ1PCBSJU5.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/Security-9XZGEP9PDLJQD40TO0EKKCXJW.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/CFNetwork-EOVMPRO0ZJG2KMH6619K1R3S5.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/CoreGraphics-E5YK1L0MXMHIM5O4936T4LV0K.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/Foundation-7B39KWJD1XURLALCSFC20RDSG.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/ImageIO-AY9C3AO0L4QM243EZ6JGXC4LB.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/CoreText-CKZ53N6YCOPM9ZPI6DSJZM9UX.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/CoreAudio-8KZ6LBQX64PXGRRZ5XCP59XOG.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/Foundation-4IS6ZMVBT96TVJ92HOJ96GLAL.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/CoreText-4EUGY11T1Y2988N3B3303IQ2K.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/ImageIO-3V1ZTSBUGNKZ8QB8XZCHVAI60.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/LocalAuthentication-1XYO1V3KZ9W6X83DBDW6IST64.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/Network-1K0AMQXM0DPTUUH7ZJTHFXJCK.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/Accessibility-MKF40P4Q3VCKC50FB0SQ3QIB.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/CoreData-5SO1EA7IN7RKJGXSL26SEVGKB.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/UIUtilities-B85OB0PGHS7B8KE9YOEMQFDYP.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/DataDetection-612RX9502UE77NLLG583H6EG6.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/UserNotifications-1EZ4KUX029VOS95JPTMCN9OH1.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/CoreMIDI-B2I7RO5Y7GZTPCH4V2TYM3KO7.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/FileProvider-9XLUCPNZPO7DXMWCH8TP3JSIY.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/UniformTypeIdentifiers-3DM2YWTGU9KJST38LO2SI5C90.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/IOSurface-EASJP8IZZ5FNZIPRNF77X011.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/_LocationEssentials-AT8T77FU6IW69PX8FB5DFFQQ6.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/Symbols-BWJ6I29ROW4KODP0J7KDVHU9D.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/OSLog-1QWXA4YFD3CBFUCJ4VI16S3PA.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/CoreTransferable-90OZKAUQX2LXYE28MAS85EWU.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/UniformTypeIdentifiers-2DGOQS4GFU5MX4K8959CIUCMF.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/FileProvider-BVXMV2NS1YJZJZ27VS0EN9VHT.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/UserNotifications-52P30USW3XFCFB8VYYQU6OKTV.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/CoreTransferable-15Q0GOCGHK6RJUYALF8JYZD07.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/CoreData-EJ9B6RO4ESR1N74VD2RVJ6Z6H.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/Accessibility-4QJJX26J8KKZLMUFCV35X83PY.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/LocalAuthentication-27EA920DC5ZDKVAUH27PVUDJZ.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/UIUtilities-2UC8639B8YM5MDM4IDFCSFFL8.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/_LocationEssentials-1372PY27KJX25IQ2XT2BWQN73.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/Symbols-9RB02NJV9FIQCN1NQRW9RVHBJ.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/CoreMIDI-C8291MU3BO7C9OEN2W8XFQ42D.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/CoreLocation-1CLMA290G05XDQCZ79RH98FTM.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/AVRouting-ALZJG4IZR9JS4GFZDK6BZP7LS.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/DataDetection-60YQG2VU4W2O2JPUB5M8WDFO4.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/IOSurface-A4N5GQOACOSL6W187U3TM4DR4.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/OSLog-1RK8MYY5NADNGZCW8OTH1U7UW.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/AudioToolbox-DSKSG8XJNL8N4DB6ZXWXJYW78.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/Network-3JL1EC95MU5ZUFIZKF8JKKSRS.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/OpenGLES-EIXQVMAKV5600VYJPKGFEGURV.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/CoreLocation-4ZJYZ2LSHN96J1U3GWT27HV5B.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/OpenGLES-21C6NDIYYNMZXDWP7RQ60NNSF.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/Metal-1CBW7Q34UKWQCKBXOTID6P9PF.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/Metal-DG6E7NJPDFV517V1BDKPAV6WN.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/AudioToolbox-4735V2H8OC6PSLY5VA2JOFQI5.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/AVRouting-BDR5MLP4QTTGLLWJGZMR1BRSK.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/CoreVideo-8HOI4LJX9V0FJDFJDGDDER19W.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/CoreVideo-8ZB0260YU6TVNH5KHXDOR4HT1.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/CoreImage-4K2A2TS0HXVYJ1UFZK946RZSU.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/CoreMedia-60QB2129EHGADILZ2NL2ZWHJK.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/QuartzCore-CCQIUK6I5JOSJ2989JTQXDEGC.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/QuartzCore-E7Y2Z0DHNUZJAGJ9PASK8TLKY.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/CoreImage-BPLNQ3HU0C8A02M7GCDLS2FV7.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/CoreMedia-8SO36HBBF210LCSVD1T6G297G.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/SwiftUICore-4YSEF8C70XI4NCQ1ZQYA3HG2N.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/MediaToolbox-2JP57YF9O4XA98LU3H0SFZ1QY.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/AVFAudio-B6SMZB7098XC2I2U2YCPUG9K4.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/UIKit-DCOSOX0H55RFFWP5W2EEKFKHL.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/SwiftUICore-EMCW77NYJLYQ2IBWZDUGDHE0C.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/MediaToolbox-9RDHCPV8TCIQOSIVPSKPAX1NW.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/AVFAudio-64WILP5YXVVIO681OMBN5Z0D0.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/UIKit-EM1KH5MLBEM7061LV52VJM2UZ.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/AVFoundation-9LL896BFOFN5KGIH4ZIHD0UDO.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/AVFoundation-83R71HUZFQTIBK262NECHXQYD.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/Photos-BTR38TR7K3AOUZOZCQX6DJA1D.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/Photos-6OLOWBT3XVERB6H6S9W96JG2D.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/PhotosUI-218QPR6VJPRFX1875IGOMTXXG.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/MapKit-BKBXKK6UVCN4J6MDG6ZUU3PQ2.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/WebKit-CF8H3K4JEH0MEIS3A9A9W7E20.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/AuthenticationServices-7S9AK62WBDXI7V5302PI1B34P.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/SwiftUI-2P6LF0LKZEREM6WZAQ9ZZZ1I6.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/MapKit-COI6QXCZPTJDJ1WWVVV2KZ6QY.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/AuthenticationServices-40HBRWT2BHLFF8ZFW4BLK3XQ6.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/SwiftUI-AAQBSFPCUUAWTUPAAWABI4MOT.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/WebKit-CGB8VB854MGJYMCVSR79VYSS.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/PhotosUI-898FDZ16DMWIRDHO3H2SCG2HB.pcm
+
+SwiftEmitModule normal x86_64 Emitting\ module\ for\ bymy (in target 'bymy' from project 'Bymy')
+EmitSwiftModule normal x86_64 (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal x86_64 Compiling\ PostAdPhotos.swift,\ AutoswebBaseURL.swift,\ ImportAPI.swift /Users/rbocsa/bymy/ios/Bymy/PostAdPhotos.swift /Users/rbocsa/bymy/ios/Bymy/AutoswebBaseURL.swift /Users/rbocsa/bymy/ios/Bymy/ImportAPI.swift (in target 'bymy' from project 'Bymy')
+SwiftCompile normal x86_64 /Users/rbocsa/bymy/ios/Bymy/PostAdPhotos.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal x86_64 /Users/rbocsa/bymy/ios/Bymy/AutoswebBaseURL.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal x86_64 /Users/rbocsa/bymy/ios/Bymy/ImportAPI.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal x86_64 Compiling\ ListingsAPI.swift,\ ListingDetail.swift,\ ListingDetailScreen.swift /Users/rbocsa/bymy/ios/Bymy/ListingsAPI.swift /Users/rbocsa/bymy/ios/Bymy/ListingDetail.swift /Users/rbocsa/bymy/ios/Bymy/ListingDetailScreen.swift (in target 'bymy' from project 'Bymy')
+
+SwiftCompile normal x86_64 /Users/rbocsa/bymy/ios/Bymy/ListingsAPI.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal x86_64 /Users/rbocsa/bymy/ios/Bymy/ListingDetail.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal x86_64 /Users/rbocsa/bymy/ios/Bymy/ListingDetailScreen.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal x86_64 Compiling\ PostAdCatalog.swift,\ PostAdCarScreen.swift,\ PostAdTruckScreen.swift /Users/rbocsa/bymy/ios/Bymy/PostAdCatalog.swift /Users/rbocsa/bymy/ios/Bymy/PostAdCarScreen.swift /Users/rbocsa/bymy/ios/Bymy/PostAdTruckScreen.swift (in target 'bymy' from project 'Bymy')
+SwiftCompile normal x86_64 /Users/rbocsa/bymy/ios/Bymy/PostAdCatalog.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal x86_64 /Users/rbocsa/bymy/ios/Bymy/PostAdCarScreen.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal x86_64 /Users/rbocsa/bymy/ios/Bymy/PostAdTruckScreen.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal x86_64 Compiling\ HasznaltautoImportScreen.swift,\ SavedListingsStore.swift,\ CategoryIconButton.swift /Users/rbocsa/bymy/ios/Bymy/HasznaltautoImportScreen.swift /Users/rbocsa/bymy/ios/Bymy/SavedListingsStore.swift /Users/rbocsa/bymy/ios/Bymy/CategoryIconButton.swift (in target 'bymy' from project 'Bymy')
+
+SwiftCompile normal x86_64 /Users/rbocsa/bymy/ios/Bymy/HasznaltautoImportScreen.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal x86_64 /Users/rbocsa/bymy/ios/Bymy/SavedListingsStore.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal x86_64 /Users/rbocsa/bymy/ios/Bymy/CategoryIconButton.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal x86_64 Compiling\ SettingsScreen.swift,\ ProfileStore.swift,\ GeneratedAssetSymbols.swift /Users/rbocsa/bymy/ios/Bymy/SettingsScreen.swift /Users/rbocsa/bymy/ios/Bymy/ProfileStore.swift /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/DerivedSources/GeneratedAssetSymbols.swift (in target 'bymy' from project 'Bymy')
+
+SwiftCompile normal x86_64 /Users/rbocsa/bymy/ios/Bymy/SettingsScreen.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal x86_64 /Users/rbocsa/bymy/ios/Bymy/ProfileStore.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/DerivedSources/GeneratedAssetSymbols.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal x86_64 Compiling\ BymyApp.swift,\ ContentView.swift,\ Theme.swift,\ Models.swift /Users/rbocsa/bymy/ios/Bymy/BymyApp.swift /Users/rbocsa/bymy/ios/Bymy/ContentView.swift /Users/rbocsa/bymy/ios/Bymy/Theme.swift /Users/rbocsa/bymy/ios/Bymy/Models.swift (in target 'bymy' from project 'Bymy')
+
+SwiftCompile normal x86_64 /Users/rbocsa/bymy/ios/Bymy/BymyApp.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal x86_64 /Users/rbocsa/bymy/ios/Bymy/ContentView.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal x86_64 /Users/rbocsa/bymy/ios/Bymy/Theme.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal x86_64 /Users/rbocsa/bymy/ios/Bymy/Models.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal x86_64 Compiling\ ProfileAvatarViews.swift,\ MessagesScreen.swift,\ MessagesAPI.swift,\ PushNotificationService.swift /Users/rbocsa/bymy/ios/Bymy/ProfileAvatarViews.swift /Users/rbocsa/bymy/ios/Bymy/MessagesScreen.swift /Users/rbocsa/bymy/ios/Bymy/MessagesAPI.swift /Users/rbocsa/bymy/ios/Bymy/PushNotificationService.swift (in target 'bymy' from project 'Bymy')
+
+SwiftCompile normal x86_64 /Users/rbocsa/bymy/ios/Bymy/ProfileAvatarViews.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal x86_64 /Users/rbocsa/bymy/ios/Bymy/MessagesScreen.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal x86_64 /Users/rbocsa/bymy/ios/Bymy/MessagesAPI.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal x86_64 /Users/rbocsa/bymy/ios/Bymy/PushNotificationService.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal x86_64 Compiling\ DemoPageIcons.swift,\ PageLayoutStore.swift,\ PostAdScreen.swift /Users/rbocsa/bymy/ios/Bymy/DemoPageIcons.swift /Users/rbocsa/bymy/ios/Bymy/PageLayoutStore.swift /Users/rbocsa/bymy/ios/Bymy/PostAdScreen.swift (in target 'bymy' from project 'Bymy')
+
+SwiftCompile normal x86_64 /Users/rbocsa/bymy/ios/Bymy/DemoPageIcons.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal x86_64 /Users/rbocsa/bymy/ios/Bymy/PageLayoutStore.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal x86_64 /Users/rbocsa/bymy/ios/Bymy/PostAdScreen.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal x86_64 Compiling\ SearchTruckScreen.swift,\ AccountMenuScreen.swift,\ PostAdListingMapper.swift /Users/rbocsa/bymy/ios/Bymy/SearchTruckScreen.swift /Users/rbocsa/bymy/ios/Bymy/AccountMenuScreen.swift /Users/rbocsa/bymy/ios/Bymy/PostAdListingMapper.swift (in target 'bymy' from project 'Bymy')
+
+SwiftCompile normal x86_64 /Users/rbocsa/bymy/ios/Bymy/SearchTruckScreen.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal x86_64 /Users/rbocsa/bymy/ios/Bymy/AccountMenuScreen.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal x86_64 /Users/rbocsa/bymy/ios/Bymy/PostAdListingMapper.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+/Users/rbocsa/bymy/ios/Bymy/PostAdListingMapper.swift:199:13: warning: variable 'orszag' was never mutated; consider changing to 'let' constant
+        var orszag = "+36"
+        ~~~ ^
+        let
+
+SwiftCompile normal x86_64 Compiling\ DetailedSearchCatalog.swift,\ FilterResultsScreen.swift,\ RecommendationsScreen.swift,\ PartnerRecommendations.swift /Users/rbocsa/bymy/ios/Bymy/DetailedSearchCatalog.swift /Users/rbocsa/bymy/ios/Bymy/FilterResultsScreen.swift /Users/rbocsa/bymy/ios/Bymy/RecommendationsScreen.swift /Users/rbocsa/bymy/ios/Bymy/PartnerRecommendations.swift (in target 'bymy' from project 'Bymy')
+
+SwiftCompile normal x86_64 /Users/rbocsa/bymy/ios/Bymy/DetailedSearchCatalog.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal x86_64 /Users/rbocsa/bymy/ios/Bymy/FilterResultsScreen.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal x86_64 /Users/rbocsa/bymy/ios/Bymy/RecommendationsScreen.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal x86_64 /Users/rbocsa/bymy/ios/Bymy/PartnerRecommendations.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal x86_64 Compiling\ Catalog.swift,\ SearchStore.swift,\ Components.swift,\ FeedFeaturedScreens.swift /Users/rbocsa/bymy/ios/Bymy/Catalog.swift /Users/rbocsa/bymy/ios/Bymy/SearchStore.swift /Users/rbocsa/bymy/ios/Bymy/Components.swift /Users/rbocsa/bymy/ios/Bymy/FeedFeaturedScreens.swift (in target 'bymy' from project 'Bymy')
+
+SwiftCompile normal x86_64 /Users/rbocsa/bymy/ios/Bymy/Catalog.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal x86_64 /Users/rbocsa/bymy/ios/Bymy/SearchStore.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal x86_64 /Users/rbocsa/bymy/ios/Bymy/Components.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal x86_64 /Users/rbocsa/bymy/ios/Bymy/FeedFeaturedScreens.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal x86_64 Compiling\ OAuthSignIn.swift,\ BiometricLock.swift,\ SiteAuthBar.swift,\ SocialWebScreens.swift /Users/rbocsa/bymy/ios/Bymy/OAuthSignIn.swift /Users/rbocsa/bymy/ios/Bymy/BiometricLock.swift /Users/rbocsa/bymy/ios/Bymy/SiteAuthBar.swift /Users/rbocsa/bymy/ios/Bymy/SocialWebScreens.swift (in target 'bymy' from project 'Bymy')
+
+SwiftCompile normal x86_64 /Users/rbocsa/bymy/ios/Bymy/OAuthSignIn.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal x86_64 /Users/rbocsa/bymy/ios/Bymy/BiometricLock.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal x86_64 /Users/rbocsa/bymy/ios/Bymy/SiteAuthBar.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal x86_64 /Users/rbocsa/bymy/ios/Bymy/SocialWebScreens.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal x86_64 Compiling\ SearchScreen.swift,\ SavedSearchesScreen.swift,\ CategoryResultsScreen.swift,\ ListingQuery.swift /Users/rbocsa/bymy/ios/Bymy/SearchScreen.swift /Users/rbocsa/bymy/ios/Bymy/SavedSearchesScreen.swift /Users/rbocsa/bymy/ios/Bymy/CategoryResultsScreen.swift /Users/rbocsa/bymy/ios/Bymy/ListingQuery.swift (in target 'bymy' from project 'Bymy')
+
+SwiftCompile normal x86_64 /Users/rbocsa/bymy/ios/Bymy/SearchScreen.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal x86_64 /Users/rbocsa/bymy/ios/Bymy/SavedSearchesScreen.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal x86_64 /Users/rbocsa/bymy/ios/Bymy/CategoryResultsScreen.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal x86_64 /Users/rbocsa/bymy/ios/Bymy/ListingQuery.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal x86_64 Compiling\ AutoswebCategoryPhoto.swift,\ QuickCategory.swift,\ HomeIconButton.swift /Users/rbocsa/bymy/ios/Bymy/AutoswebCategoryPhoto.swift /Users/rbocsa/bymy/ios/Bymy/QuickCategory.swift /Users/rbocsa/bymy/ios/Bymy/HomeIconButton.swift (in target 'bymy' from project 'Bymy')
+
+SwiftCompile normal x86_64 /Users/rbocsa/bymy/ios/Bymy/AutoswebCategoryPhoto.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal x86_64 /Users/rbocsa/bymy/ios/Bymy/QuickCategory.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal x86_64 /Users/rbocsa/bymy/ios/Bymy/HomeIconButton.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftEmitModule normal arm64 Emitting\ module\ for\ bymy (in target 'bymy' from project 'Bymy')
+
+EmitSwiftModule normal arm64 (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftDriverJobDiscovery normal x86_64 Emitting module for bymy (in target 'bymy' from project 'Bymy')
+
+SwiftDriver\ Compilation\ Requirements bymy normal x86_64 com.apple.xcode.tools.swift.compiler (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    builtin-Swift-Compilation-Requirements -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name bymy -Onone @/Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/x86_64/bymy.SwiftFileList -DDEBUG -enable-bare-slash-regex -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.5.sdk -target x86_64-apple-ios17.0-simulator -g -module-cache-path /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex -Xfrontend -serialize-debugging-options -enable-testing -index-store-path /Users/rbocsa/bymy/ios/build/DerivedData/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator -F /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator -emit-localized-strings -emit-localized-strings-path /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/x86_64 -c -j15 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /Users/rbocsa/bymy/ios/build/DerivedData/SDKStatCaches.noindex/iphonesimulator26.5-23F81a-6cfe768891a92b912361537c460fe42b.sdkstatcache -output-file-map /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/x86_64/bymy-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex -sdk-module-cache-path /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/x86_64/bymy.swiftmodule -validate-clang-modules-once -clang-build-session-file /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/Session.modulevalidation -Xcc -I/Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/x86_64/bymy_const_extract_protocols.json -Xcc -iquote -Xcc /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy-generated-files.hmap -Xcc -I/Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy-own-target-headers.hmap -Xcc -I/Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy-all-target-headers.hmap -Xcc -iquote -Xcc /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy-project-headers.hmap -Xcc -I/Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/include -Xcc -I/Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/DerivedSources-normal/x86_64 -Xcc -I/Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/DerivedSources/x86_64 -Xcc -I/Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/DerivedSources -emit-objc-header -emit-objc-header-path /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/x86_64/bymy-Swift.h -working-directory /Users/rbocsa/bymy/ios -experimental-emit-module-separately -disable-cmo
+
+SwiftDriverJobDiscovery normal arm64 Emitting module for bymy (in target 'bymy' from project 'Bymy')
+
+SwiftDriver\ Compilation\ Requirements bymy normal arm64 com.apple.xcode.tools.swift.compiler (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    builtin-Swift-Compilation-Requirements -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name bymy -Onone @/Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/arm64/bymy.SwiftFileList -DDEBUG -enable-bare-slash-regex -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.5.sdk -target arm64-apple-ios17.0-simulator -g -module-cache-path /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex -Xfrontend -serialize-debugging-options -enable-testing -index-store-path /Users/rbocsa/bymy/ios/build/DerivedData/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator -F /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator -emit-localized-strings -emit-localized-strings-path /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/arm64 -c -j15 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /Users/rbocsa/bymy/ios/build/DerivedData/SDKStatCaches.noindex/iphonesimulator26.5-23F81a-6cfe768891a92b912361537c460fe42b.sdkstatcache -output-file-map /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/arm64/bymy-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex -sdk-module-cache-path /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/arm64/bymy.swiftmodule -validate-clang-modules-once -clang-build-session-file /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/Session.modulevalidation -Xcc -I/Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/arm64/bymy_const_extract_protocols.json -Xcc -iquote -Xcc /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy-generated-files.hmap -Xcc -I/Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy-own-target-headers.hmap -Xcc -I/Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy-all-target-headers.hmap -Xcc -iquote -Xcc /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy-project-headers.hmap -Xcc -I/Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/include -Xcc -I/Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/DerivedSources-normal/arm64 -Xcc -I/Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/DerivedSources/arm64 -Xcc -I/Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/DerivedSources -emit-objc-header -emit-objc-header-path /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/arm64/bymy-Swift.h -working-directory /Users/rbocsa/bymy/ios -experimental-emit-module-separately -disable-cmo
+
+SwiftCompile normal arm64 Compiling\ ListingsAPI.swift,\ ListingDetail.swift,\ ListingDetailScreen.swift /Users/rbocsa/bymy/ios/Bymy/ListingsAPI.swift /Users/rbocsa/bymy/ios/Bymy/ListingDetail.swift /Users/rbocsa/bymy/ios/Bymy/ListingDetailScreen.swift (in target 'bymy' from project 'Bymy')
+
+SwiftCompile normal arm64 /Users/rbocsa/bymy/ios/Bymy/ListingsAPI.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal arm64 /Users/rbocsa/bymy/ios/Bymy/ListingDetail.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal arm64 /Users/rbocsa/bymy/ios/Bymy/ListingDetailScreen.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftMergeGeneratedHeaders /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/DerivedSources/bymy-Swift.h /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/arm64/bymy-Swift.h /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/x86_64/bymy-Swift.h (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    builtin-swiftHeaderTool -arch arm64 /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/arm64/bymy-Swift.h -arch x86_64 /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/x86_64/bymy-Swift.h -o /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/DerivedSources/bymy-Swift.h
+
+SwiftDriverJobDiscovery normal x86_64 Compiling AutoswebCategoryPhoto.swift, QuickCategory.swift, HomeIconButton.swift (in target 'bymy' from project 'Bymy')
+
+Copy /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.swiftmodule/x86_64-apple-ios-simulator.swiftmodule /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/x86_64/bymy.swiftmodule (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/x86_64/bymy.swiftmodule /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.swiftmodule/x86_64-apple-ios-simulator.swiftmodule
+
+Copy /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.swiftmodule/x86_64-apple-ios-simulator.swiftdoc /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/x86_64/bymy.swiftdoc (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/x86_64/bymy.swiftdoc /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.swiftmodule/x86_64-apple-ios-simulator.swiftdoc
+
+SwiftDriverJobDiscovery normal x86_64 Compiling SearchTruckScreen.swift, AccountMenuScreen.swift, PostAdListingMapper.swift (in target 'bymy' from project 'Bymy')
+
+Copy /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.swiftmodule/x86_64-apple-ios-simulator.abi.json /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/x86_64/bymy.abi.json (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/x86_64/bymy.abi.json /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.swiftmodule/x86_64-apple-ios-simulator.abi.json
+
+Copy /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.swiftmodule/arm64-apple-ios-simulator.swiftmodule /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/arm64/bymy.swiftmodule (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/arm64/bymy.swiftmodule /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.swiftmodule/arm64-apple-ios-simulator.swiftmodule
+
+Copy /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.swiftmodule/arm64-apple-ios-simulator.swiftdoc /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/arm64/bymy.swiftdoc (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/arm64/bymy.swiftdoc /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.swiftmodule/arm64-apple-ios-simulator.swiftdoc
+
+Copy /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.swiftmodule/arm64-apple-ios-simulator.abi.json /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/arm64/bymy.abi.json (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/arm64/bymy.abi.json /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.swiftmodule/arm64-apple-ios-simulator.abi.json
+
+Copy /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.swiftmodule/Project/x86_64-apple-ios-simulator.swiftsourceinfo /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/x86_64/bymy.swiftsourceinfo (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/x86_64/bymy.swiftsourceinfo /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.swiftmodule/Project/x86_64-apple-ios-simulator.swiftsourceinfo
+
+Copy /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.swiftmodule/Project/arm64-apple-ios-simulator.swiftsourceinfo /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/arm64/bymy.swiftsourceinfo (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/arm64/bymy.swiftsourceinfo /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.swiftmodule/Project/arm64-apple-ios-simulator.swiftsourceinfo
+
+SwiftCompile normal arm64 Compiling\ AuthAPI.swift,\ LoginScreen.swift,\ AuthLandingScreen.swift,\ RegisterScreen.swift /Users/rbocsa/bymy/ios/Bymy/AuthAPI.swift /Users/rbocsa/bymy/ios/Bymy/LoginScreen.swift /Users/rbocsa/bymy/ios/Bymy/AuthLandingScreen.swift /Users/rbocsa/bymy/ios/Bymy/RegisterScreen.swift (in target 'bymy' from project 'Bymy')
+
+SwiftCompile normal arm64 /Users/rbocsa/bymy/ios/Bymy/AuthAPI.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal arm64 /Users/rbocsa/bymy/ios/Bymy/LoginScreen.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal arm64 /Users/rbocsa/bymy/ios/Bymy/AuthLandingScreen.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal arm64 /Users/rbocsa/bymy/ios/Bymy/RegisterScreen.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal arm64 Compiling\ Catalog.swift,\ SearchStore.swift,\ Components.swift,\ FeedFeaturedScreens.swift /Users/rbocsa/bymy/ios/Bymy/Catalog.swift /Users/rbocsa/bymy/ios/Bymy/SearchStore.swift /Users/rbocsa/bymy/ios/Bymy/Components.swift /Users/rbocsa/bymy/ios/Bymy/FeedFeaturedScreens.swift (in target 'bymy' from project 'Bymy')
+
+SwiftCompile normal arm64 /Users/rbocsa/bymy/ios/Bymy/Catalog.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal arm64 /Users/rbocsa/bymy/ios/Bymy/SearchStore.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal arm64 /Users/rbocsa/bymy/ios/Bymy/Components.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal arm64 /Users/rbocsa/bymy/ios/Bymy/FeedFeaturedScreens.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal arm64 Compiling\ DetailedSearchCatalog.swift,\ FilterResultsScreen.swift,\ RecommendationsScreen.swift,\ PartnerRecommendations.swift /Users/rbocsa/bymy/ios/Bymy/DetailedSearchCatalog.swift /Users/rbocsa/bymy/ios/Bymy/FilterResultsScreen.swift /Users/rbocsa/bymy/ios/Bymy/RecommendationsScreen.swift /Users/rbocsa/bymy/ios/Bymy/PartnerRecommendations.swift (in target 'bymy' from project 'Bymy')
+
+SwiftCompile normal arm64 /Users/rbocsa/bymy/ios/Bymy/DetailedSearchCatalog.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal arm64 /Users/rbocsa/bymy/ios/Bymy/FilterResultsScreen.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal arm64 /Users/rbocsa/bymy/ios/Bymy/RecommendationsScreen.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal arm64 /Users/rbocsa/bymy/ios/Bymy/PartnerRecommendations.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal arm64 Compiling\ SearchScreen.swift,\ SavedSearchesScreen.swift,\ CategoryResultsScreen.swift,\ ListingQuery.swift /Users/rbocsa/bymy/ios/Bymy/SearchScreen.swift /Users/rbocsa/bymy/ios/Bymy/SavedSearchesScreen.swift /Users/rbocsa/bymy/ios/Bymy/CategoryResultsScreen.swift /Users/rbocsa/bymy/ios/Bymy/ListingQuery.swift (in target 'bymy' from project 'Bymy')
+SwiftCompile normal arm64 /Users/rbocsa/bymy/ios/Bymy/SearchScreen.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal arm64 /Users/rbocsa/bymy/ios/Bymy/SavedSearchesScreen.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal arm64 /Users/rbocsa/bymy/ios/Bymy/CategoryResultsScreen.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal arm64 /Users/rbocsa/bymy/ios/Bymy/ListingQuery.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal arm64 Compiling\ ProfileAvatarViews.swift,\ MessagesScreen.swift,\ MessagesAPI.swift,\ PushNotificationService.swift /Users/rbocsa/bymy/ios/Bymy/ProfileAvatarViews.swift /Users/rbocsa/bymy/ios/Bymy/MessagesScreen.swift /Users/rbocsa/bymy/ios/Bymy/MessagesAPI.swift /Users/rbocsa/bymy/ios/Bymy/PushNotificationService.swift (in target 'bymy' from project 'Bymy')
+
+SwiftCompile normal arm64 /Users/rbocsa/bymy/ios/Bymy/ProfileAvatarViews.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal arm64 /Users/rbocsa/bymy/ios/Bymy/MessagesScreen.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal arm64 /Users/rbocsa/bymy/ios/Bymy/MessagesAPI.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal arm64 /Users/rbocsa/bymy/ios/Bymy/PushNotificationService.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftDriverJobDiscovery normal x86_64 Compiling DemoPageIcons.swift, PageLayoutStore.swift, PostAdScreen.swift (in target 'bymy' from project 'Bymy')
+
+SwiftDriverJobDiscovery normal x86_64 Compiling Catalog.swift, SearchStore.swift, Components.swift, FeedFeaturedScreens.swift (in target 'bymy' from project 'Bymy')
+
+SwiftDriverJobDiscovery normal x86_64 Compiling DetailedSearchCatalog.swift, FilterResultsScreen.swift, RecommendationsScreen.swift, PartnerRecommendations.swift (in target 'bymy' from project 'Bymy')
+
+SwiftDriverJobDiscovery normal x86_64 Compiling BymyApp.swift, ContentView.swift, Theme.swift, Models.swift (in target 'bymy' from project 'Bymy')
+
+SwiftCompile normal arm64 Compiling\ SettingsScreen.swift,\ ProfileStore.swift,\ GeneratedAssetSymbols.swift /Users/rbocsa/bymy/ios/Bymy/SettingsScreen.swift /Users/rbocsa/bymy/ios/Bymy/ProfileStore.swift /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/DerivedSources/GeneratedAssetSymbols.swift (in target 'bymy' from project 'Bymy')
+
+SwiftCompile normal arm64 /Users/rbocsa/bymy/ios/Bymy/SettingsScreen.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal arm64 /Users/rbocsa/bymy/ios/Bymy/ProfileStore.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal arm64 /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/DerivedSources/GeneratedAssetSymbols.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal arm64 Compiling\ PostAdPhotos.swift,\ AutoswebBaseURL.swift,\ ImportAPI.swift /Users/rbocsa/bymy/ios/Bymy/PostAdPhotos.swift /Users/rbocsa/bymy/ios/Bymy/AutoswebBaseURL.swift /Users/rbocsa/bymy/ios/Bymy/ImportAPI.swift (in target 'bymy' from project 'Bymy')
+
+SwiftCompile normal arm64 /Users/rbocsa/bymy/ios/Bymy/PostAdPhotos.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal arm64 /Users/rbocsa/bymy/ios/Bymy/AutoswebBaseURL.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal arm64 /Users/rbocsa/bymy/ios/Bymy/ImportAPI.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftDriverJobDiscovery normal x86_64 Compiling ListingsAPI.swift, ListingDetail.swift, ListingDetailScreen.swift (in target 'bymy' from project 'Bymy')
+
+SwiftCompile normal arm64 Compiling\ AutoswebCategoryPhoto.swift,\ QuickCategory.swift,\ HomeIconButton.swift /Users/rbocsa/bymy/ios/Bymy/AutoswebCategoryPhoto.swift /Users/rbocsa/bymy/ios/Bymy/QuickCategory.swift /Users/rbocsa/bymy/ios/Bymy/HomeIconButton.swift (in target 'bymy' from project 'Bymy')
+
+SwiftCompile normal arm64 /Users/rbocsa/bymy/ios/Bymy/AutoswebCategoryPhoto.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal arm64 /Users/rbocsa/bymy/ios/Bymy/QuickCategory.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal arm64 /Users/rbocsa/bymy/ios/Bymy/HomeIconButton.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftDriverJobDiscovery normal x86_64 Compiling HasznaltautoImportScreen.swift, SavedListingsStore.swift, CategoryIconButton.swift (in target 'bymy' from project 'Bymy')
+
+SwiftCompile normal arm64 Compiling\ PostAdCatalog.swift,\ PostAdCarScreen.swift,\ PostAdTruckScreen.swift /Users/rbocsa/bymy/ios/Bymy/PostAdCatalog.swift /Users/rbocsa/bymy/ios/Bymy/PostAdCarScreen.swift /Users/rbocsa/bymy/ios/Bymy/PostAdTruckScreen.swift (in target 'bymy' from project 'Bymy')
+SwiftCompile normal arm64 /Users/rbocsa/bymy/ios/Bymy/PostAdCatalog.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal arm64 /Users/rbocsa/bymy/ios/Bymy/PostAdCarScreen.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal arm64 /Users/rbocsa/bymy/ios/Bymy/PostAdTruckScreen.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftDriverJobDiscovery normal x86_64 Compiling OAuthSignIn.swift, BiometricLock.swift, SiteAuthBar.swift, SocialWebScreens.swift (in target 'bymy' from project 'Bymy')
+
+SwiftCompile normal arm64 Compiling\ SearchTruckScreen.swift,\ AccountMenuScreen.swift,\ PostAdListingMapper.swift /Users/rbocsa/bymy/ios/Bymy/SearchTruckScreen.swift /Users/rbocsa/bymy/ios/Bymy/AccountMenuScreen.swift /Users/rbocsa/bymy/ios/Bymy/PostAdListingMapper.swift (in target 'bymy' from project 'Bymy')
+
+SwiftCompile normal arm64 /Users/rbocsa/bymy/ios/Bymy/SearchTruckScreen.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal arm64 /Users/rbocsa/bymy/ios/Bymy/AccountMenuScreen.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal arm64 /Users/rbocsa/bymy/ios/Bymy/PostAdListingMapper.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+/Users/rbocsa/bymy/ios/Bymy/PostAdListingMapper.swift:199:13: warning: variable 'orszag' was never mutated; consider changing to 'let' constant
+        var orszag = "+36"
+        ~~~ ^
+        let
+
+SwiftDriverJobDiscovery normal x86_64 Compiling SettingsScreen.swift, ProfileStore.swift, GeneratedAssetSymbols.swift (in target 'bymy' from project 'Bymy')
+
+SwiftCompile normal arm64 Compiling\ HasznaltautoImportScreen.swift,\ SavedListingsStore.swift,\ CategoryIconButton.swift /Users/rbocsa/bymy/ios/Bymy/HasznaltautoImportScreen.swift /Users/rbocsa/bymy/ios/Bymy/SavedListingsStore.swift /Users/rbocsa/bymy/ios/Bymy/CategoryIconButton.swift (in target 'bymy' from project 'Bymy')
+
+SwiftCompile normal arm64 /Users/rbocsa/bymy/ios/Bymy/HasznaltautoImportScreen.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal arm64 /Users/rbocsa/bymy/ios/Bymy/SavedListingsStore.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal arm64 /Users/rbocsa/bymy/ios/Bymy/CategoryIconButton.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftDriverJobDiscovery normal x86_64 Compiling PostAdPhotos.swift, AutoswebBaseURL.swift, ImportAPI.swift (in target 'bymy' from project 'Bymy')
+
+SwiftCompile normal arm64 Compiling\ BymyApp.swift,\ ContentView.swift,\ Theme.swift,\ Models.swift /Users/rbocsa/bymy/ios/Bymy/BymyApp.swift /Users/rbocsa/bymy/ios/Bymy/ContentView.swift /Users/rbocsa/bymy/ios/Bymy/Theme.swift /Users/rbocsa/bymy/ios/Bymy/Models.swift (in target 'bymy' from project 'Bymy')
+
+SwiftCompile normal arm64 /Users/rbocsa/bymy/ios/Bymy/BymyApp.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal arm64 /Users/rbocsa/bymy/ios/Bymy/ContentView.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal arm64 /Users/rbocsa/bymy/ios/Bymy/Theme.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal arm64 /Users/rbocsa/bymy/ios/Bymy/Models.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftDriverJobDiscovery normal x86_64 Compiling ProfileAvatarViews.swift, MessagesScreen.swift, MessagesAPI.swift, PushNotificationService.swift (in target 'bymy' from project 'Bymy')
+
+SwiftCompile normal arm64 Compiling\ OAuthSignIn.swift,\ BiometricLock.swift,\ SiteAuthBar.swift,\ SocialWebScreens.swift /Users/rbocsa/bymy/ios/Bymy/OAuthSignIn.swift /Users/rbocsa/bymy/ios/Bymy/BiometricLock.swift /Users/rbocsa/bymy/ios/Bymy/SiteAuthBar.swift /Users/rbocsa/bymy/ios/Bymy/SocialWebScreens.swift (in target 'bymy' from project 'Bymy')
+
+SwiftCompile normal arm64 /Users/rbocsa/bymy/ios/Bymy/OAuthSignIn.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal arm64 /Users/rbocsa/bymy/ios/Bymy/BiometricLock.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal arm64 /Users/rbocsa/bymy/ios/Bymy/SiteAuthBar.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal arm64 /Users/rbocsa/bymy/ios/Bymy/SocialWebScreens.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftDriverJobDiscovery normal arm64 Compiling AutoswebCategoryPhoto.swift, QuickCategory.swift, HomeIconButton.swift (in target 'bymy' from project 'Bymy')
+
+SwiftCompile normal arm64 Compiling\ DemoPageIcons.swift,\ PageLayoutStore.swift,\ PostAdScreen.swift /Users/rbocsa/bymy/ios/Bymy/DemoPageIcons.swift /Users/rbocsa/bymy/ios/Bymy/PageLayoutStore.swift /Users/rbocsa/bymy/ios/Bymy/PostAdScreen.swift (in target 'bymy' from project 'Bymy')
+
+SwiftCompile normal arm64 /Users/rbocsa/bymy/ios/Bymy/DemoPageIcons.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal arm64 /Users/rbocsa/bymy/ios/Bymy/PageLayoutStore.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal arm64 /Users/rbocsa/bymy/ios/Bymy/PostAdScreen.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftDriverJobDiscovery normal arm64 Compiling BymyApp.swift, ContentView.swift, Theme.swift, Models.swift (in target 'bymy' from project 'Bymy')
+
+SwiftCompile normal x86_64 Compiling\ AuthAPI.swift,\ LoginScreen.swift,\ AuthLandingScreen.swift,\ RegisterScreen.swift /Users/rbocsa/bymy/ios/Bymy/AuthAPI.swift /Users/rbocsa/bymy/ios/Bymy/LoginScreen.swift /Users/rbocsa/bymy/ios/Bymy/AuthLandingScreen.swift /Users/rbocsa/bymy/ios/Bymy/RegisterScreen.swift (in target 'bymy' from project 'Bymy')
+
+SwiftCompile normal x86_64 /Users/rbocsa/bymy/ios/Bymy/AuthAPI.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal x86_64 /Users/rbocsa/bymy/ios/Bymy/LoginScreen.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal x86_64 /Users/rbocsa/bymy/ios/Bymy/AuthLandingScreen.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftCompile normal x86_64 /Users/rbocsa/bymy/ios/Bymy/RegisterScreen.swift (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+
+SwiftDriverJobDiscovery normal arm64 Compiling Catalog.swift, SearchStore.swift, Components.swift, FeedFeaturedScreens.swift (in target 'bymy' from project 'Bymy')
+
+SwiftDriverJobDiscovery normal arm64 Compiling DetailedSearchCatalog.swift, FilterResultsScreen.swift, RecommendationsScreen.swift, PartnerRecommendations.swift (in target 'bymy' from project 'Bymy')
+
+SwiftDriverJobDiscovery normal arm64 Compiling AuthAPI.swift, LoginScreen.swift, AuthLandingScreen.swift, RegisterScreen.swift (in target 'bymy' from project 'Bymy')
+
+SwiftDriverJobDiscovery normal arm64 Compiling ListingsAPI.swift, ListingDetail.swift, ListingDetailScreen.swift (in target 'bymy' from project 'Bymy')
+
+SwiftDriverJobDiscovery normal arm64 Compiling HasznaltautoImportScreen.swift, SavedListingsStore.swift, CategoryIconButton.swift (in target 'bymy' from project 'Bymy')
+
+SwiftDriverJobDiscovery normal arm64 Compiling PostAdPhotos.swift, AutoswebBaseURL.swift, ImportAPI.swift (in target 'bymy' from project 'Bymy')
+
+SwiftDriverJobDiscovery normal arm64 Compiling ProfileAvatarViews.swift, MessagesScreen.swift, MessagesAPI.swift, PushNotificationService.swift (in target 'bymy' from project 'Bymy')
+
+SwiftDriverJobDiscovery normal arm64 Compiling SettingsScreen.swift, ProfileStore.swift, GeneratedAssetSymbols.swift (in target 'bymy' from project 'Bymy')
+
+SwiftDriverJobDiscovery normal arm64 Compiling SearchTruckScreen.swift, AccountMenuScreen.swift, PostAdListingMapper.swift (in target 'bymy' from project 'Bymy')
+
+SwiftDriverJobDiscovery normal x86_64 Compiling SearchScreen.swift, SavedSearchesScreen.swift, CategoryResultsScreen.swift, ListingQuery.swift (in target 'bymy' from project 'Bymy')
+
+SwiftDriverJobDiscovery normal arm64 Compiling DemoPageIcons.swift, PageLayoutStore.swift, PostAdScreen.swift (in target 'bymy' from project 'Bymy')
+
+SwiftDriverJobDiscovery normal arm64 Compiling OAuthSignIn.swift, BiometricLock.swift, SiteAuthBar.swift, SocialWebScreens.swift (in target 'bymy' from project 'Bymy')
+
+SwiftDriverJobDiscovery normal x86_64 Compiling PostAdCatalog.swift, PostAdCarScreen.swift, PostAdTruckScreen.swift (in target 'bymy' from project 'Bymy')
+
+SwiftDriverJobDiscovery normal x86_64 Compiling AuthAPI.swift, LoginScreen.swift, AuthLandingScreen.swift, RegisterScreen.swift (in target 'bymy' from project 'Bymy')
+
+SwiftDriver\ Compilation bymy normal x86_64 com.apple.xcode.tools.swift.compiler (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    builtin-Swift-Compilation -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name bymy -Onone @/Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/x86_64/bymy.SwiftFileList -DDEBUG -enable-bare-slash-regex -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.5.sdk -target x86_64-apple-ios17.0-simulator -g -module-cache-path /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex -Xfrontend -serialize-debugging-options -enable-testing -index-store-path /Users/rbocsa/bymy/ios/build/DerivedData/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator -F /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator -emit-localized-strings -emit-localized-strings-path /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/x86_64 -c -j15 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /Users/rbocsa/bymy/ios/build/DerivedData/SDKStatCaches.noindex/iphonesimulator26.5-23F81a-6cfe768891a92b912361537c460fe42b.sdkstatcache -output-file-map /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/x86_64/bymy-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex -sdk-module-cache-path /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/x86_64/bymy.swiftmodule -validate-clang-modules-once -clang-build-session-file /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/Session.modulevalidation -Xcc -I/Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/x86_64/bymy_const_extract_protocols.json -Xcc -iquote -Xcc /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy-generated-files.hmap -Xcc -I/Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy-own-target-headers.hmap -Xcc -I/Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy-all-target-headers.hmap -Xcc -iquote -Xcc /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy-project-headers.hmap -Xcc -I/Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/include -Xcc -I/Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/DerivedSources-normal/x86_64 -Xcc -I/Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/DerivedSources/x86_64 -Xcc -I/Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/DerivedSources -emit-objc-header -emit-objc-header-path /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/x86_64/bymy-Swift.h -working-directory /Users/rbocsa/bymy/ios -experimental-emit-module-separately -disable-cmo
+
+Ld /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/x86_64/Binary/bymy.debug.dylib normal x86_64 (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -Xlinker -reproducible -target x86_64-apple-ios17.0-simulator -dynamiclib -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.5.sdk -O0 -L/Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/EagerLinkingTBDs/Debug-iphonesimulator -L/Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator -F/Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/EagerLinkingTBDs/Debug-iphonesimulator -F/Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator -filelist /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/x86_64/bymy.LinkFileList -install_name @rpath/bymy.debug.dylib -Xlinker -rpath -Xlinker /usr/lib/swift -Xlinker -rpath -Xlinker @executable_path/Frameworks -Xlinker -dead_strip -Xlinker -object_path_lto -Xlinker /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/x86_64/bymy_lto.o -rdynamic -Xlinker -no_deduplicate -Xlinker -objc_abi_version -Xlinker 2 -Xlinker -dependency_info -Xlinker /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/x86_64/bymy_dependency_info.dat -fobjc-link-runtime -L/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator -L/usr/lib/swift -Xlinker -add_ast_path -Xlinker /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/x86_64/bymy.swiftmodule @/Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/x86_64/bymy-linker-args.resp -Xlinker -alias -Xlinker _main -Xlinker ___debug_main_executable_dylib_entry_point -framework WebKit -framework Network -framework AuthenticationServices -framework LocalAuthentication -Xlinker -no_adhoc_codesign -o /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/x86_64/Binary/bymy.debug.dylib
+
+ConstructStubExecutorLinkFileList /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy-ExecutorLinkFileList-normal-x86_64.txt (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    construct-stub-executor-link-file-list /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/x86_64/Binary/bymy.debug.dylib /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/lib/libPreviewsJITStubExecutor_no_swift_entry_point.a /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/lib/libPreviewsJITStubExecutor.a --output /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy-ExecutorLinkFileList-normal-x86_64.txt
+note: Using stub executor library with Swift entry point. (in target 'bymy' from project 'Bymy')
+
+Ld /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/x86_64/Binary/bymy normal x86_64 (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -Xlinker -reproducible -target x86_64-apple-ios17.0-simulator -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.5.sdk -O0 -L/Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator -F/Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator -Xlinker -rpath -Xlinker @executable_path -Xlinker -rpath -Xlinker @executable_path/Frameworks -rdynamic -Xlinker -no_deduplicate -Xlinker -objc_abi_version -Xlinker 2 -e ___debug_blank_executor_main -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __debug_dylib -Xlinker /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy-DebugDylibPath-normal-x86_64.txt -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __debug_instlnm -Xlinker /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy-DebugDylibInstallName-normal-x86_64.txt -Xlinker -filelist -Xlinker /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy-ExecutorLinkFileList-normal-x86_64.txt -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __entitlements -Xlinker /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy.app-Simulated.xcent -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __ents_der -Xlinker /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy.app-Simulated.xcent.der /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/x86_64/Binary/bymy.debug.dylib -Xlinker -no_adhoc_codesign -o /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/x86_64/Binary/bymy
+
+SwiftDriverJobDiscovery normal arm64 Compiling SearchScreen.swift, SavedSearchesScreen.swift, CategoryResultsScreen.swift, ListingQuery.swift (in target 'bymy' from project 'Bymy')
+
+SwiftDriverJobDiscovery normal arm64 Compiling PostAdCatalog.swift, PostAdCarScreen.swift, PostAdTruckScreen.swift (in target 'bymy' from project 'Bymy')
+
+SwiftDriver\ Compilation bymy normal arm64 com.apple.xcode.tools.swift.compiler (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    builtin-Swift-Compilation -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name bymy -Onone @/Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/arm64/bymy.SwiftFileList -DDEBUG -enable-bare-slash-regex -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.5.sdk -target arm64-apple-ios17.0-simulator -g -module-cache-path /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex -Xfrontend -serialize-debugging-options -enable-testing -index-store-path /Users/rbocsa/bymy/ios/build/DerivedData/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator -F /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator -emit-localized-strings -emit-localized-strings-path /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/arm64 -c -j15 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /Users/rbocsa/bymy/ios/build/DerivedData/SDKStatCaches.noindex/iphonesimulator26.5-23F81a-6cfe768891a92b912361537c460fe42b.sdkstatcache -output-file-map /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/arm64/bymy-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex -sdk-module-cache-path /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/arm64/bymy.swiftmodule -validate-clang-modules-once -clang-build-session-file /Users/rbocsa/bymy/ios/build/DerivedData/ModuleCache.noindex/Session.modulevalidation -Xcc -I/Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/arm64/bymy_const_extract_protocols.json -Xcc -iquote -Xcc /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy-generated-files.hmap -Xcc -I/Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy-own-target-headers.hmap -Xcc -I/Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy-all-target-headers.hmap -Xcc -iquote -Xcc /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy-project-headers.hmap -Xcc -I/Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/include -Xcc -I/Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/DerivedSources-normal/arm64 -Xcc -I/Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/DerivedSources/arm64 -Xcc -I/Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/DerivedSources -emit-objc-header -emit-objc-header-path /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/arm64/bymy-Swift.h -working-directory /Users/rbocsa/bymy/ios -experimental-emit-module-separately -disable-cmo
+
+Ld /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/arm64/Binary/bymy.debug.dylib normal arm64 (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -Xlinker -reproducible -target arm64-apple-ios17.0-simulator -dynamiclib -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.5.sdk -O0 -L/Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/EagerLinkingTBDs/Debug-iphonesimulator -L/Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator -F/Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/EagerLinkingTBDs/Debug-iphonesimulator -F/Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator -filelist /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/arm64/bymy.LinkFileList -install_name @rpath/bymy.debug.dylib -Xlinker -rpath -Xlinker /usr/lib/swift -Xlinker -rpath -Xlinker @executable_path/Frameworks -Xlinker -dead_strip -Xlinker -object_path_lto -Xlinker /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/arm64/bymy_lto.o -rdynamic -Xlinker -no_deduplicate -Xlinker -objc_abi_version -Xlinker 2 -Xlinker -dependency_info -Xlinker /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/arm64/bymy_dependency_info.dat -fobjc-link-runtime -L/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator -L/usr/lib/swift -Xlinker -add_ast_path -Xlinker /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/arm64/bymy.swiftmodule @/Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/arm64/bymy-linker-args.resp -Xlinker -alias -Xlinker _main -Xlinker ___debug_main_executable_dylib_entry_point -framework WebKit -framework Network -framework AuthenticationServices -framework LocalAuthentication -Xlinker -no_adhoc_codesign -o /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/arm64/Binary/bymy.debug.dylib
+
+CreateUniversalBinary /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.app/bymy.debug.dylib normal arm64\ x86_64 (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/lipo -create /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/arm64/Binary/bymy.debug.dylib /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/x86_64/Binary/bymy.debug.dylib -output /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.app/bymy.debug.dylib
+
+ConstructStubExecutorLinkFileList /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy-ExecutorLinkFileList-normal-arm64.txt (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    construct-stub-executor-link-file-list /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/arm64/Binary/bymy.debug.dylib /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/lib/libPreviewsJITStubExecutor_no_swift_entry_point.a /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/lib/libPreviewsJITStubExecutor.a --output /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy-ExecutorLinkFileList-normal-arm64.txt
+note: Using stub executor library with Swift entry point. (in target 'bymy' from project 'Bymy')
+
+Ld /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/arm64/Binary/bymy normal arm64 (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -Xlinker -reproducible -target arm64-apple-ios17.0-simulator -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.5.sdk -O0 -L/Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator -F/Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator -Xlinker -rpath -Xlinker @executable_path -Xlinker -rpath -Xlinker @executable_path/Frameworks -rdynamic -Xlinker -no_deduplicate -Xlinker -objc_abi_version -Xlinker 2 -e ___debug_blank_executor_main -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __debug_dylib -Xlinker /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy-DebugDylibPath-normal-arm64.txt -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __debug_instlnm -Xlinker /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy-DebugDylibInstallName-normal-arm64.txt -Xlinker -filelist -Xlinker /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy-ExecutorLinkFileList-normal-arm64.txt -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __entitlements -Xlinker /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy.app-Simulated.xcent -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __ents_der -Xlinker /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy.app-Simulated.xcent.der /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/arm64/Binary/bymy.debug.dylib -Xlinker -no_adhoc_codesign -o /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/arm64/Binary/bymy
+
+CreateUniversalBinary /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.app/bymy normal arm64\ x86_64 (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/lipo -create /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/arm64/Binary/bymy /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/x86_64/Binary/bymy -output /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.app/bymy
+
+CopySwiftLibs /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.app (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    builtin-swiftStdLibTool --copy --verbose --sign - --scan-executable /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.app/bymy.debug.dylib --scan-folder /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.app/Frameworks --scan-folder /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.app/PlugIns --scan-folder /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.app/SystemExtensions --scan-folder /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.app/Extensions --scan-folder /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.5.sdk/System/Library/Frameworks/WebKit.framework --scan-folder /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.5.sdk/System/Library/Frameworks/Network.framework --scan-folder /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.5.sdk/System/Library/Frameworks/AuthenticationServices.framework --scan-folder /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.5.sdk/System/Library/Frameworks/LocalAuthentication.framework --platform iphonesimulator --toolchain /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain --destination /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.app/Frameworks --strip-bitcode --strip-bitcode-tool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/bitcode_strip --emit-dependency-info /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/SwiftStdLibToolInputDependencies.dep --filter-for-swift-os --back-deploy-swift-span
+
+ExtractAppIntentsMetadata (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/appintentsmetadataprocessor --toolchain-dir /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain --module-name bymy --sdk-root /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.5.sdk --xcode-version 17F113 --platform-family iOS --deployment-target 17.0 --bundle-identifier hu.bymy.app --output /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.app --target-triple arm64-apple-ios17.0-simulator --target-triple x86_64-apple-ios17.0-simulator --binary-file /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.app/bymy --dependency-file /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/arm64/bymy_dependency_info.dat --dependency-file /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/x86_64/bymy_dependency_info.dat --stringsdata-file /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/arm64/ExtractedAppShortcutsMetadata.stringsdata --stringsdata-file /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/x86_64/ExtractedAppShortcutsMetadata.stringsdata --source-file-list /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/arm64/bymy.SwiftFileList --source-file-list /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/x86_64/bymy.SwiftFileList --metadata-file-list /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy.DependencyMetadataFileList --static-metadata-file-list /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy.DependencyStaticMetadataFileList --swift-const-vals-list /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/arm64/bymy.SwiftConstValuesFileList --swift-const-vals-list /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/Objects-normal/x86_64/bymy.SwiftConstValuesFileList --compile-time-extraction --deployment-aware-processing --validate-assistant-intents --no-app-shortcuts-localization
+2026-08-14 11:59:14.143 appintentsmetadataprocessor[12000:151570] Starting appintentsmetadataprocessor export
+2026-08-14 11:59:14.147 appintentsmetadataprocessor[12000:151570] warning: Metadata extraction skipped. No AppIntents.framework dependency found.
+
+AppIntentsSSUTraining (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/appintentsnltrainingprocessor --infoplist-path /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.app/Info.plist --temp-dir-path /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/ssu --bundle-id hu.bymy.app --product-path /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.app --extracted-metadata-path /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.app/Metadata.appintents --metadata-file-list /Users/rbocsa/bymy/ios/build/DerivedData/Build/Intermediates.noindex/Bymy.build/Debug-iphonesimulator/bymy.build/bymy.DependencyMetadataFileList --source-file /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.app/Info.plist --archive-ssu-assets
+2026-08-14 11:59:14.161 appintentsnltrainingprocessor[12002:151577] Parsing options for appintentsnltrainingprocessor
+2026-08-14 11:59:14.161 appintentsnltrainingprocessor[12002:151577] Starting AppIntents SSU YAML Generation
+2026-08-14 11:59:14.161 appintentsnltrainingprocessor[12002:151577] No AppShortcuts found - Skipping.
+
+CodeSign /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.app/bymy.debug.dylib (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+    Signing Identity:     "Sign to Run Locally"
+    
+    /usr/bin/codesign --force --sign - --timestamp\=none --generate-entitlement-der /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.app/bymy.debug.dylib
+
+CodeSign /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.app/__preview.dylib (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+    Signing Identity:     "Sign to Run Locally"
+    
+    /usr/bin/codesign --force --sign - --timestamp\=none --generate-entitlement-der /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.app/__preview.dylib
+
+CodeSign /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.app (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    
+    Signing Identity:     "Sign to Run Locally"
+    
+    /usr/bin/codesign --force --sign - --timestamp\=none --generate-entitlement-der /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.app
+
+RegisterExecutionPolicyException /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.app (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    builtin-RegisterExecutionPolicyException /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.app
+
+Validate /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.app (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    builtin-validationUtility /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.app -shallow-bundle -infoplist-subpath Info.plist
+
+Touch /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.app (in target 'bymy' from project 'Bymy')
+    cd /Users/rbocsa/bymy/ios
+    /usr/bin/touch -c /Users/rbocsa/bymy/ios/build/DerivedData/Build/Products/Debug-iphonesimulator/bymy.app
+
+** BUILD SUCCEEDED **
+

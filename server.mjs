@@ -139,6 +139,7 @@ import { getLevel1TokenFromRequest, getLevel1AdminBySession } from "./lib/level1
 import { safeInternalPath } from "./lib/safe-path.mjs";
 import { rateLimit, clientIp } from "./lib/rate-limit.mjs";
 import { applySecurityHeaders } from "./lib/security-headers.mjs";
+import { turnstilePublicConfig, verifyTurnstileToken } from "./lib/turnstile.mjs";
 import { recordPageVisit, visitorCookieHeader } from "./lib/site-visitors.mjs";
 import { isIpBlocked } from "./lib/site-ip-blocks.mjs";
 import { enforceMembersGate } from "./lib/site-gate.mjs";
@@ -1676,9 +1677,19 @@ async function handleAuthApi(req, res, pathname) {
       return;
     }
 
+    if (pathname === "/api/auth/turnstile-config" && req.method === "GET") {
+      sendJson(res, 200, turnstilePublicConfig());
+      return;
+    }
+
     if (pathname === "/api/auth/register" && req.method === "POST") {
       if (!assertAuthRate(req, res, "register", { limit: 8, windowMs: 60 * 60 * 1000 })) return;
       const body = await readBody(req);
+      const turnstile = await verifyTurnstileToken(body.turnstileToken ?? body["cf-turnstile-response"], req);
+      if (!turnstile.ok) {
+        sendJson(res, 400, { error: turnstile.error });
+        return;
+      }
       const registered = await registerUser(
         body.email,
         body.password,
@@ -1814,6 +1825,11 @@ async function handleAuthApi(req, res, pathname) {
       if (!assertAuthRate(req, res, "login", { limit: 15, windowMs: 15 * 60 * 1000 })) return;
       const body = await readBody(req);
       try {
+        const turnstile = await verifyTurnstileToken(body.turnstileToken ?? body["cf-turnstile-response"], req);
+        if (!turnstile.ok) {
+          sendJson(res, 400, { error: turnstile.error });
+          return;
+        }
         const emailKey = String(body.email ?? "").trim().toLowerCase();
         if (emailKey) {
           const emailRl = rateLimit(`login-email:${emailKey}`, { limit: 10, windowMs: 15 * 60 * 1000 });

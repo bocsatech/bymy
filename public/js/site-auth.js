@@ -1,4 +1,5 @@
 import { safeInternalPath } from "./safe-path.js?v=sec1";
+import { mountTurnstile } from "./turnstile-ui.js?v=turnstile1";
 
 function migrateLegacyAutoswebStorage() {
   try {
@@ -177,7 +178,7 @@ export async function loadProfileFromServer() {
   return data.profile ?? getProfile();
 }
 
-export async function register(email, password, passwordConfirm, accountType) {
+export async function register(email, password, passwordConfirm, accountType, turnstileToken = "") {
   const data = await authFetch("/api/auth/register", {
     method: "POST",
     body: JSON.stringify({
@@ -185,6 +186,7 @@ export async function register(email, password, passwordConfirm, accountType) {
       password,
       passwordConfirm,
       accountType,
+      turnstileToken,
     }),
   });
   return data;
@@ -219,10 +221,10 @@ export async function resetPasswordByToken(token, password, passwordConfirm) {
   });
 }
 
-export async function login(email, password) {
+export async function login(email, password, turnstileToken = "") {
   const data = await authFetch("/api/auth/login", {
     method: "POST",
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ email, password, turnstileToken }),
   });
   rememberAuth(data);
   clearSensitiveLocalData();
@@ -573,6 +575,11 @@ export function initRegisterPage() {
   const submitBtn = form?.querySelector('button[type="submit"]');
   if (!form) return;
 
+  let turnstile = { enabled: false, getToken: async () => "", reset: () => {} };
+  void mountTurnstile(document.getElementById("auth-turnstile")).then((widget) => {
+    turnstile = widget;
+  });
+
   refreshAuthSession().then((user) => {
     if (user?.email) window.location.replace("/");
   });
@@ -636,7 +643,17 @@ export function initRegisterPage() {
     const data = new FormData(form);
     const email = String(data.get("email") || "").trim();
     try {
-      const result = await register(email, data.get("password"), data.get("password_confirm"), accountType);
+      const turnstileToken = await turnstile.getToken();
+      if (turnstile.enabled && !turnstileToken) {
+        throw new Error("Pipáld be a biztonsági ellenőrzést.");
+      }
+      const result = await register(
+        email,
+        data.get("password"),
+        data.get("password_confirm"),
+        accountType,
+        turnstileToken
+      );
 
       const autoLoggedIn = Boolean(result.token || result.user || result.needsActivation === false);
       if (autoLoggedIn) {
@@ -657,6 +674,7 @@ export function initRegisterPage() {
       window.alert(`${msg}${extra}`);
       window.location.href = "/belepes.html";
     } catch (error) {
+      turnstile.reset();
       if (errorEl) {
         errorEl.hidden = false;
         const msg = error.message ?? "Sikertelen regisztráció.";
@@ -680,6 +698,11 @@ export function initLoginPage() {
   const form = document.getElementById("login-form");
   const errorEl = document.getElementById("login-error");
   if (!form) return;
+
+  let turnstile = { enabled: false, getToken: async () => "", reset: () => {} };
+  void mountTurnstile(document.getElementById("auth-turnstile")).then((widget) => {
+    turnstile = widget;
+  });
 
   const params = new URLSearchParams(window.location.search);
   const next = safeInternalPath(params.get("next") || "/", "/");
@@ -706,9 +729,14 @@ export function initLoginPage() {
     const data = new FormData(form);
     const email = data.get("email");
     try {
-      await login(email, data.get("password"));
+      const turnstileToken = await turnstile.getToken();
+      if (turnstile.enabled && !turnstileToken) {
+        throw new Error("Pipáld be a biztonsági ellenőrzést.");
+      }
+      await login(email, data.get("password"), turnstileToken);
       window.location.href = next;
     } catch (error) {
+      turnstile.reset();
       errorEl.hidden = false;
       let msg = error.message ?? "Sikertelen belépés.";
       if (String(msg).includes("aktiváld") || String(msg).includes("aktivál")) {

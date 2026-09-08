@@ -188,6 +188,12 @@ body.auth-gate-page .login-form {
   gap: 0.75rem;
 }
 
+body.auth-gate-page .auth-turnstile {
+  display: flex;
+  justify-content: center;
+  min-height: 65px;
+}
+
 body.auth-gate-page .login-field {
   display: flex;
   flex-direction: column;

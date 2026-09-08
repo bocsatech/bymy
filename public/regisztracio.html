@@ -21,7 +21,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/css/style.css?v=noScroll1" />
-    <link rel="stylesheet" href="/css/auth-gate.css?v=gate2" />
+    <link rel="stylesheet" href="/css/auth-gate.css?v=turnstile1" />
     <link rel="stylesheet" href="/css/bymy-logo-size.css?v=logoHalf1" />
   </head>
   <body class="auth-gate-page login-page" data-site-page="regisztracio" data-auth-init="manual">
@@ -78,6 +78,7 @@
             <span class="login-label">Jelszó megerősítése</span>
             <input type="password" name="password_confirm" autocomplete="new-password" required minlength="12" />
           </label>
+          <div id="auth-turnstile" class="auth-turnstile" hidden></div>
           <button type="submit" class="site-header-btn site-header-btn--primary login-submit" disabled>Regisztráció</button>
         </form>
         <div id="register-ok" class="login-lead" hidden></div>
@@ -86,7 +87,7 @@
     </main>
 
     <script type="module">
-      import { initRegisterPage } from "/js/site-auth.js?v=oauthRestore1";
+      import { initRegisterPage } from "/js/site-auth.js?v=turnstile1";
       initRegisterPage();
     </script>
     <script src="/js/theme.js?v=gate1" type="module"></script>

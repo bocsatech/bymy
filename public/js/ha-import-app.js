@@ -19,9 +19,9 @@ const MODES = {
   dealer: {
     title: "Kereskedői import",
     startURL: "https://admin.hasznaltauto.hu/",
-    steps: "1. Bejelentkezés (admin)  ·  2. Hirdetéseim / járműlista  ·  3. Lista importálása",
+    steps: "1. Bejelentkezés (admin)  ·  2. Járműlista  ·  3. Lista importálása (Módosítás oldalak)",
     action: "Lista importálása (összes autó)",
-    footer: "A listából automatikusan végigmegyünk a hirdetéseken (max. 50 / kör). Lapozás után futtasd újra.",
+    footer: "Minden listás autót megnyitunk Módosításként, kimásoljuk az adatokat, majd mentjük (max. 50 / kör).",
     openLabel: "admin.hasznaltauto.hu megnyitása",
   },
 };
@@ -48,7 +48,7 @@ function setMode(mode) {
 
 function bookmarkletHref(mode) {
   const origin = location.origin;
-  const src = `${origin}/js/ha-import-bookmarklet.js?v=haImp25`;
+  const src = `${origin}/js/ha-import-bookmarklet.js?v=haImp26`;
   return `javascript:void(function(){var o=${JSON.stringify(origin)};var m=${JSON.stringify(mode)};var src=${JSON.stringify(src)}+"&t="+Date.now();function go(){try{window.BymyHaImport.run({origin:o,mode:m});}catch(e){alert((e&&e.message)||e);}}try{delete window.BymyHaImport;}catch(e){window.BymyHaImport=undefined;}var s=document.createElement("script");s.src=src;s.onload=go;s.onerror=function(){alert("A hasznaltauto.hu blokkolta a Bymy scriptet. Másold a hirdetés URL-jét a Bymy Autóimport oldalra.");};(document.documentElement||document.body).appendChild(s);})();`;
 }
 
@@ -259,7 +259,7 @@ function promptHaBookmark(url) {
   setStatus(
     currentMode() === "dealer"
       ? "Az admin / járműlista oldalt a szerver nem látja. A megnyílt hasznaltauto fülön kattints a „Lista importálása” könyvjelzőre."
-      : "A gyorsnézetet a szerver nem látja. A megnyílt hasznaltauto fülön kattints a „Hirdetés importálása” könyvjelzőre.",
+      : "A megnyitott hirdetést a szerver nem látja. A hasznaltauto fülön kattints a „Hirdetés importálása” könyvjelzőre.",
     "err"
   );
 }

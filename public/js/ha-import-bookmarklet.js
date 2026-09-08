@@ -29,7 +29,7 @@
     const v = clean(t);
     return (
       !v ||
-      /javascript|gyorsnézet|gyorsnezet|hiba!|belépés|haszn[aá]ltaut[oó]\.hu|regisztr|képkezelés|kepkezeles|címlapra|cimlapra/i.test(
+      /javascript|gyorsnézet|gyorsnezet|hiba!|belépés|haszn[aá]ltaut[oó]\.hu|regisztr|képkezelés|kepkezeles|címlapra|cimlapra|^keretes$/i.test(
         v
       ) ||
       /^(19|20)\d{2}(\/\d{1,2})?$/.test(v) ||
@@ -44,7 +44,7 @@
       !v ||
       v.length < 4 ||
       v.length > 240 ||
-      /javascript|gyorsnézet|gyorsnezet|hiba!|belépés|haszn[aá]ltaut[oó]\.hu|regisztr|képkezelés|kepkezeles|címlapra|cimlapra/i.test(
+      /javascript|gyorsnézet|gyorsnezet|hiba!|belépés|haszn[aá]ltaut[oó]\.hu|regisztr|képkezelés|kepkezeles|címlapra|cimlapra|^keretes$/i.test(
         v
       ) ||
       /^(19|20)\d{2}(\/\d{1,2})?$/.test(v) ||
@@ -419,7 +419,7 @@
         adminUrl:
           extra.adminUrl ||
           prev.adminUrl ||
-          "https://admin.hasznaltauto.hu/gyorsnezet/szemelyauto/" + n,
+          "https://admin.hasznaltauto.hu/hirdetesfeladas/szemelyauto?id=" + n,
         publicUrl: extra.publicUrl || prev.publicUrl || "",
       };
     };
@@ -432,8 +432,11 @@
         const u = new URL(href);
         const host = u.hostname.replace(/^www\./, "").toLowerCase();
         if (!host.endsWith("hasznaltauto.hu")) continue;
-        if (/\/gyorsnezet\//i.test(u.pathname)) {
-          add(id, { adminUrl: `${u.origin}${u.pathname}` });
+        if (/\/hirdetesfeladas\//i.test(u.pathname)) {
+          add(id, { adminUrl: href.split("#")[0] });
+        } else if (/\/gyorsnezet\//i.test(u.pathname)) {
+          // gyorsnézet csak tartalék — a teljes hirdetés (Módosítás) az elsődleges
+          add(id, {});
         } else if (/\/[^/?#]+\/.+-\d{5,}\/?$/i.test(u.pathname)) {
           add(id, { publicUrl: `${u.origin}${u.pathname}` });
         }
@@ -456,7 +459,7 @@
     }
     const self = pickListingId(location.href);
     if (self) {
-      if (/\/gyorsnezet\//i.test(location.href)) add(self, { adminUrl: location.href.split("?")[0] });
+      if (/\/hirdetesfeladas\//i.test(location.href)) add(self, { adminUrl: location.href.split("#")[0] });
       else if (isPublicListingPage()) add(self, { publicUrl: location.href.split("?")[0] });
       else add(self);
     }
@@ -467,7 +470,7 @@
     return discoverRefs().map((ref) => ({ id: ref.id, adminUrl: ref.adminUrl }));
   }
 
-  const GYORS_CATS = [
+  const EDIT_CATS = [
     "szemelyauto",
     "kishaszonjarmu",
     "haszonjarmu",
@@ -476,7 +479,8 @@
     "agro",
   ];
 
-  function adminGyorsUrls(id, preferred) {
+  /** Teljes hirdetés (Módosítás) — NEM gyorsnézet. */
+  function adminEditUrls(id, preferred) {
     const n = String(id || "").replace(/\D/g, "");
     if (!n) return [];
     const out = [];
@@ -485,8 +489,10 @@
       if (u && !out.includes(u)) out.push(u);
     };
     push(preferred);
-    for (const cat of GYORS_CATS) {
-      push(`https://admin.hasznaltauto.hu/gyorsnezet/${cat}/${n}`);
+    for (const cat of EDIT_CATS) {
+      push(`https://admin.hasznaltauto.hu/hirdetesfeladas/${cat}?id=${n}`);
+      push(`https://admin.hasznaltauto.hu/hirdetesfeladas/${cat}/${n}`);
+      push(`https://admin.hasznaltauto.hu/hirdetesfeladas/${cat}/modositas/${n}`);
     }
     return out;
   }
@@ -571,16 +577,20 @@
       let publicUrl = "";
       for (const a of row.querySelectorAll("a[href]")) {
         const href = String(a.href || "");
+        const aText = clean(a.innerText || a.textContent || "");
         try {
           const u = new URL(href);
           const host = u.hostname.replace(/^www\./, "").toLowerCase();
-          if (host.startsWith("admin.") && /\/gyorsnezet\//i.test(u.pathname)) {
-            adminUrl = `${u.origin}${u.pathname}`;
+          if (host.startsWith("admin.") && (/\/hirdetesfeladas\//i.test(u.pathname) || /m[oó]dos[ií]t/i.test(aText))) {
+            adminUrl = href.split("#")[0];
           } else if (host.endsWith("hasznaltauto.hu") && !host.startsWith("admin.") && pickListingId(href)) {
             publicUrl = `${u.origin}${u.pathname}`;
           }
         } catch {
         }
+      }
+      if (!adminUrl) {
+        adminUrl = `https://admin.hasznaltauto.hu/hirdetesfeladas/szemelyauto?id=${id}`;
       }
 
       const lines = text
@@ -607,7 +617,7 @@
       if (/^https?:\/\//i.test(raw) && !/logo|icon|sprite|badge/i.test(raw)) imageUrl = raw;
 
       const page = {
-        url: publicUrl || adminUrl || `https://admin.hasznaltauto.hu/gyorsnezet/szemelyauto/${id}`,
+        url: adminUrl || publicUrl || `https://admin.hasznaltauto.hu/hirdetesfeladas/szemelyauto?id=${id}`,
         listingId: id,
         visibleTitle: title,
         visibleImage: imageUrl,
@@ -619,7 +629,7 @@
         felszereltseg: [],
         html: "",
         fromListCard: true,
-        adminUrl: adminUrl || `https://admin.hasznaltauto.hu/gyorsnezet/szemelyauto/${id}`,
+        adminUrl: adminUrl || `https://admin.hasznaltauto.hu/hirdetesfeladas/szemelyauto?id=${id}`,
         publicUrl,
       };
       if (!isUsefulPage(page)) continue;
@@ -735,14 +745,15 @@
         const u = String(url || "").trim();
         if (u && !candidates.includes(u)) candidates.push(u);
       };
+      // Teljes hirdetés (Módosítás / hirdetesfeladas) — gyorsnézet NEM
       if (onAdmin) {
-        for (const u of adminGyorsUrls(ref.id, ref.adminUrl)) push(u);
+        for (const u of adminEditUrls(ref.id, ref.adminUrl)) push(u);
         push(ref.publicUrl);
       } else {
         push(ref.publicUrl);
-        for (const u of adminGyorsUrls(ref.id, ref.adminUrl)) push(u);
+        for (const u of adminEditUrls(ref.id, ref.adminUrl)) push(u);
       }
-      for (const url of candidates.slice(0, onAdmin ? 3 : 4)) {
+      for (const url of candidates.slice(0, onAdmin ? 4 : 5)) {
         try {
           const page = await extractFromUrl(url);
           if (isUsefulPage(page)) {
@@ -947,9 +958,10 @@
 
     const pages = [];
     const onAdminHost = /admin\.hasznaltauto\.hu$/i.test(location.hostname.replace(/^www\./, ""));
+    const onEditListing = /\/hirdetesfeladas\//i.test(location.pathname || "");
     const onGyorsnezet = /\/gyorsnezet\/[^/]+\/\d{5,}/i.test(location.pathname || "");
-    // Egy megnyitott gyorsnézet / nyilvános adatlap — élő DOM (cím = KIA SPORTAGE…)
-    if (onGyorsnezet || (mode === "standard" && isSingleListing())) {
+    // Egy megnyitott teljes hirdetés (Módosítás) / nyilvános adatlap — élő DOM
+    if (onEditListing || onGyorsnezet || (mode === "standard" && isSingleListing())) {
       showProgress(1, 1, "beolvasás");
       const one = extractPage();
       if (isUsefulPage(one)) pages.push(one);
@@ -968,9 +980,9 @@
       for (const card of fromList) {
         if (isUsefulPage(card)) pages.push(card);
       }
-      // Mindig gyorsnézet: a listában gyakran nincs márka, a cím a gyorsnézetben van
+      // Mindig teljes hirdetés (Módosítás): a listában gyakran hiányzik márka/km
       if (pages.length) {
-        showProgress(0, pages.length, "gyorsnézet kiegészítés");
+        showProgress(0, pages.length, "hirdetés megnyitás");
         const base = pages.slice();
         pages.length = 0;
         const enriched = await mapPool(
@@ -1018,7 +1030,7 @@
               return card;
             }
           },
-          (done, total) => showProgress(done, total, "gyorsnézet")
+          (done, total) => showProgress(done, total, "hirdetés")
         );
         for (const page of enriched) {
           if (isUsefulPage(page)) pages.push(page);

@@ -34,6 +34,7 @@ function isSiteChromeLine(line) {
   if (!n) return true;
   if (/\bkepkezeles\b/.test(n)) return true;
   if (/\bcimlapra\b/.test(n)) return true;
+  if (/^keretes$/.test(n)) return true;
   if (/^(19|20)\d{2}(\/\d{1,2})?$/.test(n)) return true;
   // Lista-sor szemét: "2022/4 , Dízel (23439253)"
   if (/^(19|20)\d{2}\/\d{1,2}\b/.test(n)) return true;

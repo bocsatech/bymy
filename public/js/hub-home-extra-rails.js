@@ -5,7 +5,7 @@ import {
   createListingTileCard,
   formatListingCountBadge,
   slimListingTile,
-} from "./listing-tile.js?v=titleNoise3";
+} from "./listing-tile.js?v=titleNoise4";
 import { restoreListingReturn, bindListingOpen } from "./listing-return.js?v=scrollTop1";
 import {
   buildNearbyFilter,

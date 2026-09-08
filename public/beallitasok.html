@@ -16,7 +16,6 @@
           var user = raw ? JSON.parse(raw) : null;
           var loggedIn = !!(user && user.email);
           document.documentElement.setAttribute("data-auth", loggedIn ? "member" : "guest");
-          document.documentElement.setAttribute("data-mm-account-pending", "");
           var accountType = String((user && user.profile && user.profile.accountType) || "private");
           document.documentElement.setAttribute(
             "data-mm-account-kind",
@@ -58,7 +57,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/css/style.css?v=noScroll1" />
-    <link rel="stylesheet" href="/css/site-app.css?v=parkThumb1" />
+    <link rel="stylesheet" href="/css/site-app.css?v=settingsFailOpen1" />
       <link rel="stylesheet" href="/css/hub.css?v=hubHeroDemo1" />
 </head>
   <body class="site-app settings-page mm-page" data-site-page="beallitasok" data-auth-init="manual">
@@ -108,6 +107,9 @@
 
 
     <main class="mm-shell">
+      <p class="mm-boot-error" role="alert">
+        A Fiókom felület betöltése sikertelen. Frissítsd az oldalt; ha megmarad, jelezd — valószínű modulhiba.
+      </p>
       <aside class="mm-side" aria-label="Fiók menü">
         <p class="mm-side-kicker">Fiókom <span class="mm-side-account-type" data-mm-account-type hidden></span></p>
         <h1 class="mm-side-title">Üdv, <span data-mm-hello>—</span></h1>
@@ -594,8 +596,17 @@
 
     <script src="/js/site-avatar-menu.js?v=settingsNav2" type="module"></script>
     <script src="/js/ha-import-app.js?v=fiokPage11" type="module"></script>
-    <script src="/js/beallitasok-app.js?v=settingsFix1" type="module"></script>
-  
+    <script src="/js/beallitasok-app.js?v=settingsFailOpen1" type="module"></script>
+    <script>
+      /* Modulhiba esetén se maradjon örökre rejtett / csendes a Fiókom. */
+      setTimeout(function () {
+        var root = document.documentElement;
+        root.removeAttribute("data-mm-account-pending");
+        if (!root.hasAttribute("data-mm-settings-ready")) {
+          root.setAttribute("data-mm-boot-failed", "");
+        }
+      }, 4000);
+    </script>
     <script>
       (function () {
         var q = new URLSearchParams(location.search).get("szekcio");

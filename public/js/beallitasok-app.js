@@ -998,11 +998,9 @@ function initNotifyForm(email) {
   });
 }
 export async function initSettingsPage() {
+  try {
   const ok = await requireAuthForPage();
-  if (!ok) {
-    document.documentElement.removeAttribute("data-mm-account-pending");
-    return;
-  }
+  if (!ok) return;
   let loadedProfile = null;
   try {
     loadedProfile = await loadProfileFromServer();
@@ -1010,14 +1008,9 @@ export async function initSettingsPage() {
     /* session már ellenőrizve */
   }
   const user = getAuthUser();
-  if (!user?.email) {
-    document.documentElement.removeAttribute("data-mm-account-pending");
-    return;
-  }
+  if (!user?.email) return;
 
   syncSidebarAccountType((loadedProfile || getProfile())?.accountType);
-  document.documentElement.removeAttribute("data-mm-account-pending");
-
   const hello = document.querySelector("[data-mm-hello]");
   if (hello) hello.textContent = getDisplayName() || user.email.split("@")[0];
 
@@ -1203,6 +1196,14 @@ export async function initSettingsPage() {
   });
 
   window.addEventListener("popstate", () => setSection(currentSection()));
+  document.documentElement.setAttribute("data-mm-settings-ready", "1");
+  document.documentElement.removeAttribute("data-mm-boot-failed");
+  } catch (error) {
+    console.error("[beallitasok] init failed", error);
+    document.documentElement.setAttribute("data-mm-boot-failed", "");
+  } finally {
+    document.documentElement.removeAttribute("data-mm-account-pending");
+  }
 }
 
 /** Mentés listener AZONNAL — ne várjon az auth hálózatra (különben natív submit = nincs mentés). */

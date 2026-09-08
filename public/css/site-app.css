@@ -104,9 +104,20 @@ html[data-mm-account-kind="company"] body.settings-page [data-mm-settings-nav] {
   display: none !important;
 }
 
-html[data-mm-account-pending] body.settings-page .mm-side,
-html[data-mm-account-pending] body.settings-page .mm-main {
-  visibility: hidden;
+/* Ne rejtse el a teljes Fiókom felületet: modulhiba esetén üres oldal lenne. */
+body.site-app.settings-page .mm-boot-error {
+  display: none;
+  margin: 1rem;
+  padding: 0.85rem 1rem;
+  border-radius: 10px;
+  border: 1px solid #fda29b;
+  background: #fef3f2;
+  color: #b42318;
+  font-size: 0.92rem;
+}
+
+html[data-mm-boot-failed] body.site-app.settings-page .mm-boot-error {
+  display: block;
 }
 
 /* Fejléc + navigáció (home + aloldalak) — willhaben-szerű */

@@ -48,7 +48,7 @@ function setMode(mode) {
 
 function bookmarkletHref(mode) {
   const origin = location.origin;
-  const src = `${origin}/js/ha-import-bookmarklet.js?v=haImp23`;
+  const src = `${origin}/js/ha-import-bookmarklet.js?v=haImp24`;
   return `javascript:void(function(){var o=${JSON.stringify(origin)};var m=${JSON.stringify(mode)};var src=${JSON.stringify(src)}+"&t="+Date.now();function go(){try{window.BymyHaImport.run({origin:o,mode:m});}catch(e){alert((e&&e.message)||e);}}try{delete window.BymyHaImport;}catch(e){window.BymyHaImport=undefined;}var s=document.createElement("script");s.src=src;s.onload=go;s.onerror=function(){alert("A hasznaltauto.hu blokkolta a Bymy scriptet. Másold a hirdetés URL-jét a Bymy Autóimport oldalra.");};(document.documentElement||document.body).appendChild(s);})();`;
 }
 

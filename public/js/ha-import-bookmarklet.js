@@ -32,7 +32,9 @@
       /javascript|gyorsnézet|gyorsnezet|hiba!|belépés|haszn[aá]ltaut[oó]\.hu|regisztr|képkezelés|kepkezeles/i.test(
         v
       ) ||
-      /^(19|20)\d{2}(\/\d{1,2})?$/.test(v)
+      /^(19|20)\d{2}(\/\d{1,2})?$/.test(v) ||
+      /^(19|20)\d{2}\/\d{1,2}\b/.test(v) ||
+      /^(benzin|d[ií]zel|elektromos|hibrid|hybrid)(\/|\s|,|$)/i.test(v)
     );
   }
 
@@ -47,7 +49,8 @@
       ) ||
       /^(19|20)\d{2}(\/\d{1,2})?$/.test(v) ||
       /^(19|20)\d{2}\/\d{1,2}\b/.test(v) ||
-      /\(\d{5,}\)\s*$/.test(v) && /^(19|20)\d{2}/.test(v) ||
+      (/\(\d{5,}\)\s*$/.test(v) && /^(19|20)\d{2}/.test(v)) ||
+      /^(benzin|d[ií]zel|elektromos|hibrid|hybrid)(\/|\s|,|$)/i.test(v) ||
       /^(módosítás|törlés|képek|felszereltség|leírás)$/i.test(v)
     );
   }
@@ -280,30 +283,62 @@
   function looksLikeSpecToken(t) {
     const v = clean(t);
     if (!v) return true;
-    return /^(?:\d+[.,]?\d*|t-?gdi|gdi|tdi|cdi|dci|hev|phev|mhev|bhev|gt|line|4wd|awd|2wd|fwd|rwd|xdrive|quattro|automata|manual|manu[aá]lis|full|led|panor[aá]ma|b[oő]r|navi|hybrid|hibrid)(?:\b|$)/i.test(
+    return /^(?:\d+[.,]?\d*|t-?gdi|gdi|tdi|cdi|dci|hev|phev|mhev|bhev|gt|line|4wd|awd|2wd|fwd|rwd|xdrive|quattro|automata|manual|manu[aá]lis|full|led|panor[aá]ma|b[oő]r|navi|hybrid|hibrid|benzin|d[ií]zel|elektromos)(?:\b|$)/i.test(
       v
     );
   }
 
   function brandModelFromTitle(title) {
-    const parts = String(title || "")
+    const line = String(title || "")
       .split(/\n+/)[0]
-      .split(/\s+/)
-      .filter(Boolean);
+      .replace(/\s+/g, " ")
+      .trim();
+    if (!line || isBadTitle(line)) return { brand: "", model: "" };
+    const upper = line.toLocaleUpperCase("hu-HU");
+    const multi = [
+      "MERCEDES-BENZ",
+      "MERCEDES BENZ",
+      "LAND ROVER",
+      "ALFA ROMEO",
+      "ASTON MARTIN",
+      "ROLLS-ROYCE",
+      "ROLLS ROYCE",
+      "RANGE ROVER",
+    ];
     let brand = "";
-    let model = "";
-    for (let i = 0; i < parts.length; i += 1) {
-      if (isChromeName(parts[i]) || looksLikeSpecToken(parts[i])) continue;
-      if (!brand) {
-        brand = parts[i];
-        continue;
+    let rest = line;
+    for (const name of multi) {
+      if (upper.startsWith(name)) {
+        brand = line.slice(0, name.length);
+        rest = line.slice(name.length).trim();
+        break;
       }
-      if (!looksLikeSpecToken(parts[i])) {
-        model = parts[i];
-      }
-      break;
     }
-    return { brand, model };
+    const parts = rest.split(/\s+/).filter(Boolean);
+    if (!brand) {
+      for (let i = 0; i < parts.length; i += 1) {
+        if (isChromeName(parts[i]) || looksLikeSpecToken(parts[i])) continue;
+        brand = parts[i];
+        rest = parts.slice(i + 1).join(" ");
+        break;
+      }
+      parts.length = 0;
+      parts.push(...rest.split(/\s+/).filter(Boolean));
+    }
+    let model = "";
+    // RANGE ROVER VELAR / DS 7 Crossback — több token amíg nem spec
+    const modelBits = [];
+    for (const part of parts) {
+      if (looksLikeSpecToken(part) || isChromeName(part)) break;
+      if (/^\(/.test(part)) break;
+      modelBits.push(part);
+      if (modelBits.length >= 3) break;
+    }
+    model = modelBits.join(" ");
+    return {
+      brand: isChromeName(brand) ? "" : brand,
+      model: isChromeName(model) ? "" : model,
+    };
   }
 
   function extractFromDoc(doc, href) {
@@ -956,19 +991,19 @@
                 detail.map && typeof detail.map === "object" ? Object.keys(detail.map).length : 0;
               const brand = detail.brand || card.brand || brandModelFromTitle(keepTitle).brand;
               const model = detail.model || card.model || brandModelFromTitle(keepTitle).model;
-              const detailOk =
-                (brand && !isChromeName(brand)) ||
-                (keepTitle && !isBadTitle(keepTitle) && detailMapCount >= 3);
+              const titleOk = keepTitle && !isBadTitle(keepTitle) && !isChromeName(keepTitle.split(/\s+/)[0] || "");
+              const brandOk = brand && !isChromeName(brand);
+              const detailOk = Boolean(brandOk || titleOk);
               return {
                 ...card,
-                visibleTitle: keepTitle,
+                visibleTitle: titleOk ? keepTitle : brandOk ? [brand, model].filter(Boolean).join(" ") : "",
                 visibleImage: detail.visibleImage || card.visibleImage,
                 price: detail.price || card.price,
                 km: detail.km || card.km,
                 year: detail.year || card.year,
                 fuel: detail.fuel || card.fuel,
-                brand,
-                model,
+                brand: brandOk ? brand : "",
+                model: brandOk && model && !isChromeName(model) ? model : "",
                 map: detailMapCount >= 5 ? detail.map : { ...(card.map || {}), ...(detail.map || {}) },
                 html: String(detail.html || "").length > 800 ? detail.html : card.html,
                 bodyText: detail.bodyText || card.bodyText,

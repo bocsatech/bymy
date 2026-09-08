@@ -6,13 +6,15 @@ Az iOS app forrása: `ios/Bymy/` (SwiftUI, natív).
 
 ## Production backend
 
-- **API:** `https://bymy.vercel.app` (`AutoswebBaseURL.defaultProduction`)
+- **API:** `https://bymy.hu` (`AutoswebBaseURL.defaultProduction`)
 - **Adatbázis:** Supabase (Postgres)
-- Alapértelmezett URL az appban: éles Vercel (nem localhost)
+- Alapértelmezett URL az appban: éles `bymy.hu` (a régi `bymy.vercel.app` mentés automatikusan átíródik)
 
-## Lokális Mac dev (opcionális)
+## Lokális Mac / Vercel teszt (opcionális)
 
-Beállítások / UserDefaults `autosweb.baseURL` → `http://127.0.0.1:3456` vagy Mac Wi‑Fi IP.
+Fogaskerék a belépő képernyőn → API cím:
+- Vercel teszt: `https://bymy.vercel.app`
+- Lokális: `http://127.0.0.1:3456` vagy Mac Wi‑Fi IP
 
 ## Profil és adatvédelem
 

@@ -4,10 +4,11 @@ import Network
 import Darwin
 #endif
 
-/// Autosweb / Bymy API gyökér — éles: bymy.vercel.app (nem a telefon localhostja).
+/// Autosweb / Bymy API gyökér — éles: bymy.hu (nem a telefon localhostja).
 enum AutoswebBaseURL {
     static let defaultsKey = "autosweb.baseURL"
-    static let defaultProduction = "https://bymy.vercel.app"
+    static let defaultProduction = "https://bymy.hu"
+    static let legacyVercel = "https://bymy.vercel.app"
     static let port = 3456
 
     static var isSimulator: Bool {
@@ -25,10 +26,16 @@ enum AutoswebBaseURL {
     }
 
     static func applyStored() {
-        if let stored = UserDefaults.standard.string(forKey: defaultsKey),
-           let url = normalizedURL(from: stored),
-           isLoopback(url) {
-            UserDefaults.standard.removeObject(forKey: defaultsKey)
+        if let stored = UserDefaults.standard.string(forKey: defaultsKey)?
+            .trimmingCharacters(in: .whitespacesAndNewlines),
+           !stored.isEmpty {
+            let lower = stored.lowercased()
+            // Régi alapértelmezés / teszt: vercel → éles bymy.hu
+            if lower.contains("bymy.vercel.app") {
+                UserDefaults.standard.removeObject(forKey: defaultsKey)
+            } else if let url = normalizedURL(from: stored), isLoopback(url) {
+                UserDefaults.standard.removeObject(forKey: defaultsKey)
+            }
         }
         _ = currentURL()
     }

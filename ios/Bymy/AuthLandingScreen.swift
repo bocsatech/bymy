@@ -457,7 +457,7 @@ private struct AuthServerSettingsSheet: View {
         NavigationStack {
             Form {
                 Section("API cím") {
-                    TextField("https://bymy.vercel.app", text: $urlText)
+                    TextField("https://bymy.hu", text: $urlText)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
                         .keyboardType(.URL)
@@ -474,7 +474,7 @@ private struct AuthServerSettingsSheet: View {
                             note = "Érvénytelen cím."
                         }
                     }
-                    Button("Alapértelmezett (bymy.vercel.app)") {
+                    Button("Alapértelmezett (bymy.hu)") {
                         _ = AutoswebBaseURL.set("")
                         urlText = AutoswebBaseURL.currentString()
                         note = "Visszaállítva."

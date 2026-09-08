@@ -1824,6 +1824,14 @@ function listingCategoryLabel(l) {
   return "Személyautó";
 }
 
+function listingOwnerLabel(l) {
+  const email = l.ownerEmail || (l.ownerUserId ? `#${l.ownerUserId}` : "");
+  if (!email) return "—";
+  const type = String(l.ownerAccountType || "").toLowerCase();
+  const typeLabel = type === "business" ? "céges" : type === "private" ? "magán" : "";
+  return typeLabel ? `${email} · ${typeLabel}` : email;
+}
+
 function listingsView({ title = "Hirdetések", emptyHint = "Nincs hirdetés." } = {}) {
   const groups = new Map();
   for (const l of listings) {
@@ -1840,7 +1848,7 @@ function listingsView({ title = "Hirdetések", emptyHint = "Nincs hirdetés." } 
         <td>${l.id}</td>
         <td>${esc(l.title || "")}</td>
         <td>${esc(l.gyartmany || "")} ${esc(l.tipus || "")}</td>
-        <td>${esc(l.ownerEmail || (l.ownerUserId ? `#${l.ownerUserId}` : "—"))}</td>
+        <td>${esc(listingOwnerLabel(l))}</td>
         <td>
           <select data-act="setStatus" data-id="${l.id}">
             ${["mentett", "feladott", "inaktiv"]

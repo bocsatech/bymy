@@ -18,7 +18,6 @@ export const PARTNER_CATEGORIES = [
   // Ingatlan
   { id: "ertekesites", label: "Értékesítés", image: "ajanlas-ertekesites", vertical: "ingatlan" },
   { id: "ertekbecsles", label: "Értékbecslés", image: "ajanlas-ertekbecsles", vertical: "ingatlan" },
-  { id: "allapotfelmeres", label: "Állapotfelmérés", image: "ajanlas-allapotfelmeres", vertical: "ingatlan" },
   {
     id: "energetikai_tanusitvany",
     label: "Energetikai tanúsítvány",

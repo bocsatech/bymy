@@ -129,7 +129,7 @@ export function ensureDemoMessages(email) {
       id: "m2",
       from: "Bymy",
       subject: "Üdvözlünk a fiókodban",
-      body: "Itt kezelheted a parkolót, mentett kereséseket és a fiókadatokat.",
+      body: "Itt kezelheted a kedvenceket, mentett kereséseket és a fiókadatokat.",
       read: true,
       at: Date.now() - 86_400_000,
     },

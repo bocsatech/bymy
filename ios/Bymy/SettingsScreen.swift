@@ -437,7 +437,7 @@ struct SettingsScreen: View {
         VStack(alignment: .leading, spacing: 4) {
             Toggle("Üzenetek e-mailben", isOn: $profile.profile.notifyMessages)
                 .tint(.green)
-            Toggle("Parkoló: árváltozás", isOn: $profile.profile.notifyFavorites)
+            Toggle("Kedvencek: árváltozás", isOn: $profile.profile.notifyFavorites)
                 .tint(.green)
             Toggle("Érdeklődések", isOn: $profile.profile.notifyInterests)
                 .tint(.green)

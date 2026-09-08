@@ -130,7 +130,7 @@
           <a class="mm-nav-link" href="?szekcio=nyomtatasok" data-mm-nav="nyomtatasok">Nyomtatások</a>
           <a class="mm-nav-link" href="?szekcio=ertekelesek" data-mm-nav="ertekelesek">Értékelések</a>
           <p class="mm-nav-plain">Kiemelések <span>Hamarosan</span></p>
-          <a class="mm-nav-link" href="?szekcio=parkolo" data-mm-nav="parkolo">Parkoló</a>
+          <a class="mm-nav-link" href="?szekcio=parkolo" data-mm-nav="parkolo">Kedvencek</a>
           <a class="mm-nav-link" href="?szekcio=hirdetes" data-mm-nav="hirdetes">Saját hirdetések</a>
           <a class="mm-nav-link" href="?szekcio=keresesek" data-mm-nav="keresesek">Mentett kereséseim</a>
           <a class="mm-nav-link" href="/uzenetek.html" data-mm-nav="uzenetek">Üzenetek <span class="mm-nav-badge" data-mm-msg-count hidden>0</span></a>
@@ -267,7 +267,7 @@
           </header>
           <div class="mm-cards">
             <a class="mm-card" href="?szekcio=parkolo">
-              <strong>Parkoló</strong>
+              <strong>Kedvencek</strong>
               <span data-mm-stat-park>0 jármű</span>
             </a>
             <a class="mm-card" href="?szekcio=keresesek">
@@ -293,19 +293,19 @@
           </div>
         </section>
 
-        <!-- Parkoló -->
+        <!-- Kedvencek (szekcio=parkolo) -->
         <section class="mm-panel" data-mm-panel="parkolo" hidden>
           <header class="mm-panel-head">
-            <h2 class="mm-panel-title">Parkoló</h2>
+            <h2 class="mm-panel-title">Kedvencek</h2>
             <p class="mm-panel-lead">Érdekes hirdetések, amelyekkel később foglalkoznál — a kedvenceid.</p>
           </header>
           <form id="mm-park-add" class="mm-inline-form">
             <input type="text" name="title" required placeholder="Pl. BMW 320d 2018" aria-label="Jármű megnevezése" />
             <input type="text" name="price" placeholder="Ár (opcionális)" aria-label="Ár" />
-            <button type="submit" class="site-header-btn site-header-btn--primary">Parkolás</button>
+            <button type="submit" class="site-header-btn site-header-btn--primary">Hozzáadás</button>
           </form>
           <div id="mm-park-list" class="mm-list"></div>
-          <p class="mm-empty" id="mm-park-empty" hidden>Még nincs jármű a parkolóban.</p>
+          <p class="mm-empty" id="mm-park-empty" hidden>Még nincs kedvenced.</p>
         </section>
 
         <!-- Mentett keresések -->
@@ -587,7 +587,7 @@
           </header>
           <form id="settings-notify-form" class="settings-form">
             <label class="settings-switch"><span>Üzenetek e-mailben</span><input type="checkbox" name="messages" /><span class="settings-switch-ui" aria-hidden="true"></span></label>
-            <label class="settings-switch"><span>Parkoló: árváltozás</span><input type="checkbox" name="favorites" /><span class="settings-switch-ui" aria-hidden="true"></span></label>
+            <label class="settings-switch"><span>Kedvencek: árváltozás</span><input type="checkbox" name="favorites" /><span class="settings-switch-ui" aria-hidden="true"></span></label>
             <label class="settings-switch"><span>Érdeklődések</span><input type="checkbox" name="interests" /><span class="settings-switch-ui" aria-hidden="true"></span></label>
             <label class="settings-switch"><span>Hírlevél / tippek (marketing)</span><input type="checkbox" name="newsletter" /><span class="settings-switch-ui" aria-hidden="true"></span></label>
             <p id="settings-notify-flash" class="settings-flash" role="status" hidden></p>

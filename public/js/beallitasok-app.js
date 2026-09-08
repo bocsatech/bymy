@@ -263,7 +263,7 @@ function setSection(section) {
       import: "Autóimport",
       nyomtatasok: "Nyomtatások",
       ertekelesek: "Értékelések",
-      parkolo: "Parkoló",
+      parkolo: "Kedvencek",
       keresesek: "Mentett kereséseim",
       hirdetes: "Saját hirdetések",
       megjelenes: "Megjelenés",

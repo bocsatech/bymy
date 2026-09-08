@@ -26,6 +26,7 @@ import {
   closeDb,
 } from "./lib/db-store.mjs";
 import { isSupabaseBackend } from "./lib/supabase/client.mjs";
+import { assertCanCreateListing, isBusinessAccount, lockedVerticalFromListings, verticalFromForm } from "./lib/listing-quota.mjs";
 import { getSiteBlocks, saveSiteBlocks } from "./lib/site-blocks.mjs";
 import {
   getSiteHero,
@@ -494,6 +495,7 @@ async function handleImageUploadApi(req, res) {
 }
 
 async function handleOpenChrome(req, res) {
+  if (!(await requireLevel1Admin(req, res))) return;
   let body;
   try {
     body = await readBody(req);
@@ -521,6 +523,11 @@ async function handleOpenChrome(req, res) {
 }
 
 async function handleImportDiscover(req, res) {
+  const user = await requestUser(req);
+  if (!user) {
+    sendJson(res, 401, { error: "Csak regisztrált felhasználók importálhatnak.", code: "AUTH_REQUIRED" });
+    return;
+  }
   let body;
   try {
     body = await readBody(req);
@@ -597,6 +604,11 @@ async function handleImportExtracted(req, res) {
 }
 
 async function handleImportClient(req, res) {
+  const user = await requestUser(req);
+  if (!user) {
+    sendJson(res, 401, { error: "Csak regisztrált felhasználók importálhatnak.", code: "AUTH_REQUIRED" });
+    return;
+  }
   let body;
   try {
     body = await readBody(req);
@@ -607,6 +619,7 @@ async function handleImportClient(req, res) {
   try {
     const { importFromClient } = await import("./lib/import-client.mjs");
     const result = await importFromClient({
+      userId: user.id,
       listHtml: body.listHtml,
       listUrl: body.listUrl,
       listings: body.listings,
@@ -623,6 +636,11 @@ async function handleImportClient(req, res) {
 }
 
 async function handleImport(req, res) {
+  const user = await requestUser(req);
+  if (!user) {
+    sendJson(res, 401, { error: "Csak regisztrált felhasználók importálhatnak.", code: "AUTH_REQUIRED" });
+    return;
+  }
   if (importRunning) {
     sendJson(res, 409, { error: "Már fut egy import." });
     return;
@@ -671,6 +689,29 @@ async function handleImport(req, res) {
 
 async function requestUser(req) {
   return getUserBySessionToken(getSessionTokenFromRequest(req));
+}
+
+function allowDevSecretsInResponse() {
+  return String(process.env.ALLOW_DEV_SECRETS ?? "").trim() === "1";
+}
+
+async function requireLevel1Admin(req, res) {
+  const admin = await getLevel1AdminBySession(getLevel1TokenFromRequest(req));
+  if (!admin) {
+    sendJson(res, 401, { error: "Admin belépés szükséges (Bocsatech)." });
+    return null;
+  }
+  return admin;
+}
+
+async function assertNewListingAllowed(req, res, user, formData) {
+  const mine = await listMyListings({ userId: user.id, limit: 500 });
+  const check = assertCanCreateListing({ user, formData, existingListings: mine });
+  if (!check.ok) {
+    sendJson(res, check.status || 403, { error: check.error, code: check.code });
+    return false;
+  }
+  return true;
 }
 
 async function handleListingsApi(req, res, pathname) {
@@ -921,6 +962,11 @@ async function handleListingsApi(req, res, pathname) {
   }
 
   if (batchMatch && req.method === "POST") {
+    const user = await requestUser(req);
+    if (!user) {
+      sendJson(res, 401, { error: "Csak regisztrált felhasználók adhatnak fel hirdetést.", code: "AUTH_REQUIRED" });
+      return;
+    }
     let body;
     try {
       body = await readBody(req);
@@ -943,6 +989,7 @@ async function handleListingsApi(req, res, pathname) {
     const results = [];
     let savedCount = 0;
     let skippedCount = 0;
+    let mine = await listMyListings({ userId: user.id, limit: 500 });
 
     for (const formData of forms) {
       if (!formData || typeof formData !== "object") {
@@ -957,9 +1004,16 @@ async function handleListingsApi(req, res, pathname) {
         skippedCount += 1;
         continue;
       }
-      const saved = await saveListing(formData, null, { status });
+      const check = assertCanCreateListing({ user, formData, existingListings: mine });
+      if (!check.ok) {
+        results.push({ skipped: true, reason: check.code || "limit", error: check.error });
+        skippedCount += 1;
+        continue;
+      }
+      const saved = await saveListing(formData, null, { status, userId: user.id });
       results.push({ skipped: false, listing: saved });
       savedCount += 1;
+      mine = [...mine, saved];
     }
 
     sendJson(res, 200, { savedCount, skippedCount, count: forms.length, results });
@@ -998,9 +1052,21 @@ async function handleListingsApi(req, res, pathname) {
           sendJson(res, 403, { error: "Ezt a hirdetést nem módosíthatod." });
           return;
         }
+        if (isBusinessAccount(user)) {
+          const mine = await listMyListings({ userId: user.id, limit: 500 });
+          const locked = lockedVerticalFromListings(mine);
+          const next = verticalFromForm(formData);
+          if (locked && next !== locked) {
+            sendJson(res, 403, {
+              error: `Kereskedői / céges fiókkal csak egy kategóriába tartozhatsz (${locked}).`,
+              code: "VERTICAL_LOCKED",
+            });
+            return;
+          }
+        }
       } else {
         if (!user) {
-          sendJson(res, 401, { error: "Nem vagy bejelentkezve." });
+          sendJson(res, 401, { error: "Csak regisztrált felhasználók adhatnak fel hirdetést.", code: "AUTH_REQUIRED" });
           return;
         }
         const sourceUrl = String(formData.forras_url || "").trim();
@@ -1011,6 +1077,7 @@ async function handleListingsApi(req, res, pathname) {
             return;
           }
         }
+        if (!(await assertNewListingAllowed(req, res, user, formData))) return;
       }
       let saved = await saveListing(formData, listingId, {
         status: body.status,
@@ -1107,6 +1174,7 @@ async function handleListingsApi(req, res, pathname) {
 }
 
 async function handleFugvenyApi(req, res, pathname) {
+  if (!(await requireLevel1Admin(req, res))) return;
   try {
     if (pathname === "/api/fugveny/lists" && req.method === "GET") {
       sendJson(res, 200, listFugvenyLists());
@@ -1357,6 +1425,7 @@ async function handlePartnersApi(req, res, pathname) {
     }
 
     if (pathname === "/api/partners/import" && req.method === "POST") {
+      if (!(await requireLevel1Admin(req, res))) return;
       let body;
       try {
         body = await readBody(req);
@@ -1404,6 +1473,7 @@ async function handlePartnersApi(req, res, pathname) {
     }
 
     if (pathname === "/api/postal-codes/import" && req.method === "POST") {
+      if (!(await requireLevel1Admin(req, res))) return;
       let body;
       try {
         body = await readBody(req);
@@ -1433,6 +1503,7 @@ async function handlePartnersApi(req, res, pathname) {
     }
 
     if (pathname === "/api/partners" && req.method === "POST") {
+      if (!(await requireLevel1Admin(req, res))) return;
       let body;
       try {
         body = await readBody(req);
@@ -1455,6 +1526,7 @@ async function handlePartnersApi(req, res, pathname) {
     }
 
     if (idMatch && req.method === "DELETE") {
+      if (!(await requireLevel1Admin(req, res))) return;
       deletePartner(Number(idMatch[1]));
       sendJson(res, 200, { ok: true });
       return;
@@ -1733,12 +1805,14 @@ async function handleAuthApi(req, res, pathname) {
         needsActivation: true,
         email: registered.email,
         emailSent: mail.sent,
-        activationLink: mail.sent ? undefined : mail.link,
+        activationLink: mail.sent || !allowDevSecretsInResponse() ? undefined : mail.link,
         message: mail.sent
           ? `Küldtünk aktiváló emailt ide: ${registered.email}`
-          : mail.error
-            ? `Regisztráció OK, de az email nem ment ki (${mail.error}). Használd a linket / terminál logot.`
-            : `SMTP nincs beállítva. Aktiváló link (terminálban is): ${mail.link}`,
+          : allowDevSecretsInResponse() && mail.link
+            ? mail.error
+              ? `Regisztráció OK, de az email nem ment ki (${mail.error}). Használd a linket / terminál logot.`
+              : `SMTP nincs beállítva. Aktiváló link (terminálban is): ${mail.link}`
+            : `Regisztráció OK. Ha az aktiváló email nem érkezik meg, nézd a spam mappát, vagy jelezd az adminnak.`,
       });
       return;
     }
@@ -1770,7 +1844,7 @@ async function handleAuthApi(req, res, pathname) {
         ok: true,
         email: created.email,
         emailSent: mail.sent,
-        activationLink: mail.sent ? undefined : mail.link,
+        activationLink: mail.sent || !allowDevSecretsInResponse() ? undefined : mail.link,
         message: mail.sent
           ? `Új aktiváló emailt küldtünk: ${created.email}`
           : `SMTP nincs beállítva. Link: ${mail.link}`,
@@ -1801,7 +1875,7 @@ async function handleAuthApi(req, res, pathname) {
         ok: true,
         message: mail.sent ? generic : result.resetToken ? `${generic} (SMTP hiba — link a válaszban.)` : generic,
         emailSent: mail.sent,
-        resetLink: mail.sent || !result.resetToken ? undefined : mail.link,
+        resetLink: mail.sent || !result.resetToken || !allowDevSecretsInResponse() ? undefined : mail.link,
       });
       return;
     }
@@ -2007,13 +2081,17 @@ export async function handleHttpRequest(req, res) {
     sendJson(res, 200, {
       ok: true,
       version: readFileSync(join(PUBLIC, "version.txt"), "utf8").trim(),
-      chrome: findChromeExecutable(),
-      dbPath,
-      profilesPath,
-      users,
-      backend: isSupabaseBackend() ? "supabase" : "sqlite",
       service: "bymy-autosweb",
-      listingsMine: true,
+      backend: isSupabaseBackend() ? "supabase" : "sqlite",
+      ...(allowDevSecretsInResponse()
+        ? {
+            chrome: findChromeExecutable(),
+            dbPath,
+            profilesPath,
+            users,
+            listingsMine: true,
+          }
+        : {}),
     });
     return;
   }

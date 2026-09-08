@@ -890,7 +890,7 @@ struct PostAdTruckScreen: View {
             name: contactName,
             phone: contactPhone,
             email: profile.profile.email,
-            street: profile.profile.street,
+            street: profile.listingStreetForAds(),
             postalCode: profile.profile.postalCode,
             city: profile.profile.city
         )

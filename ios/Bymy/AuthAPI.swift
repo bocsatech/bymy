@@ -279,14 +279,19 @@ extension UserProfile {
     if let v = p.phone { phone = v }
     if let v = p.company { company = v }
     if let v = p.accountType { accountType = v }
+    // Magánfiók: utca/házszám nem a szerveren — ürítjük a helyi szerver-másolatot.
+    if accountType.lowercased() == "private" {
+      street = ""
+    }
   }
 
   func remotePayload() -> [String: String] {
-    [
+    let isPrivate = accountType.lowercased() == "private"
+    return [
       "salutation": salutation,
       "firstName": firstName,
       "lastName": lastName,
-      "street": street,
+      "street": isPrivate ? "" : street,
       "postalCode": postalCode,
       "city": city,
       "country": country,

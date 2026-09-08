@@ -405,6 +405,15 @@ final class ProfileStore: ObservableObject {
         }
     }
 
+    /// Hirdetés / térkép cím — magánnál a telefonon tárolt lakcím.
+    func listingStreetForAds() -> String {
+        DeviceContractIdentityStore.shared.load(email: profile.email)
+        return DeviceContractIdentityStore.listingStreet(
+            profile: profile,
+            identity: DeviceContractIdentityStore.shared.identity
+        )
+    }
+
     func changePassword(current: String, newPassword: String, confirm: String) async -> String? {
         guard let token else { return "Nem vagy bejelentkezve." }
         do {
@@ -473,6 +482,7 @@ final class ProfileStore: ObservableObject {
         if removeAvatarFiles {
             self.removeAvatarFiles()
             clearAvatarDefaults()
+            DeviceContractIdentityStore.shared.clear(email: profile.email)
         }
         token = nil
         userId = nil

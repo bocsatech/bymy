@@ -1,35 +1,32 @@
 # iOS mobil app — bymy cloud
 
-Az iOS app forrása: `/Users/rbocsa/Downloads/autosapp/`
+Az iOS app forrása: `ios/Bymy/` (SwiftUI, natív).
+
+**Android:** Capacitor héj — lásd [`docs/android-app.md`](android-app.md) (`npm run android`).
 
 ## Production backend
 
-- **API:** `https://bymy.vercel.app`
+- **API:** `https://bymy.vercel.app` (`AutoswebBaseURL.defaultProduction`)
 - **Adatbázis:** Supabase (Postgres)
-- Alapértelmezett URL az appban: `AutoswebBaseURL.productionCloud`
+- Alapértelmezett URL az appban: éles Vercel (nem localhost)
 
 ## Lokális Mac dev (opcionális)
 
-Beállítások → Autosweb szerver → `http://127.0.0.1:3456` vagy Mac Wi‑Fi IP.
+Beállítások / UserDefaults `autosweb.baseURL` → `http://127.0.0.1:3456` vagy Mac Wi‑Fi IP.
 
-## API-k amit az app használ
+## Profil és adatvédelem
 
-| Végpont | Funkció |
-|---------|---------|
-| `GET /api/health` | Elérhetőség (`service: bymy-autosweb`) |
-| `GET/POST /api/listings` | Hirdetések |
-| `POST /api/auth/login` | Belépés |
-| `GET /api/auth/me` | Session |
-| `PUT /api/auth/avatar` | Profilkép |
-| `PUT /api/auth/prefs` | Lap elrendezés |
-| `/api/messages/*` | Chat |
+| Adat | Hol |
+|------|-----|
+| Név, irányítószám, város, telefon, cégnév | Szerver (`PUT /api/auth/profile`) |
+| Magán utca / lakcím, születési / okmány adatok, cég székhely + cégjegyzék + képviselő | **Csak telefon** (`DeviceContractIdentityStore`) |
 
 ## Xcode
 
-1. Nyisd meg: `Downloads/autosapp/AddElAutod.xcodeproj`
-2. Build & Run (Simulator vagy iPhone)
-3. Első indítás: automatikusan a cloud szervert használja
+1. Nyisd meg: `ios/Bymy.xcodeproj`
+2. Clean Build Folder (⇧⌘K), majd Run (⌘R)
+3. Simulator vagy iPhone — első indítás: cloud szerver
 
 ## Megjegyzés
 
-Push értesítés: outbox + 12 mp-es poll (nem APNs). Üzenet-csatolmány Vercelen `/tmp`-ben (nem tartós cold start után).
+Push értesítés: outbox + poll (nem APNs). Üzenet-csatolmány Vercelen `/tmp`-ben (nem tartós cold start után).

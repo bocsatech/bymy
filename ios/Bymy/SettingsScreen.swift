@@ -8,7 +8,7 @@ struct SettingsScreen: View {
     var onClose: () -> Void
 
     private enum Accordion: String {
-        case personal, searchArea, recommendationsArea, password, notify, haImport
+        case personal, contract, searchArea, recommendationsArea, password, notify, haImport
     }
 
     @State private var openAccordion: Accordion? = nil
@@ -22,6 +22,16 @@ struct SettingsScreen: View {
     @State private var showHaImport = false
     @State private var showDealerImport = false
     @ObservedObject private var biometricLock = BiometricLock.shared
+    @ObservedObject private var contractIdentity = DeviceContractIdentityStore.shared
+
+    private var isPrivateAccount: Bool {
+        profile.profile.accountType.lowercased() == "private"
+    }
+
+    private var isBusinessLike: Bool {
+        let t = profile.profile.accountType.lowercased()
+        return t == "business" || t == "dealer"
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -34,6 +44,9 @@ struct SettingsScreen: View {
 
                     accordion(.personal, title: "Személyes adatok") {
                         personalFields
+                    }
+                    accordion(.contract, title: "Szerződéses adatok") {
+                        contractFields
                     }
                     accordion(.searchArea, title: "Keresési körzet") {
                         searchAreaFields
@@ -56,6 +69,14 @@ struct SettingsScreen: View {
             }
         }
         .background(AppTheme.bgGrouped)
+        .onAppear {
+            contractIdentity.load(email: profile.profile.email)
+            prefillContractDefaults()
+        }
+        .onChange(of: profile.profile.email) { _, email in
+            contractIdentity.load(email: email)
+            prefillContractDefaults()
+        }
         .alert("Beállítások", isPresented: Binding(
             get: { toast != nil },
             set: { if !$0 { toast = nil } }
@@ -204,10 +225,12 @@ struct SettingsScreen: View {
                 }
             }
 
-            fieldLabel("Utca, házszám")
-            TextField("", text: $profile.profile.street)
-                .textFieldStyle(.roundedBorder)
-                .textContentType(.streetAddressLine1)
+            if isBusinessLike {
+                fieldLabel("Utca, házszám")
+                TextField("", text: $profile.profile.street)
+                    .textFieldStyle(.roundedBorder)
+                    .textContentType(.streetAddressLine1)
+            }
 
             postalAndCityRow
 
@@ -232,14 +255,19 @@ struct SettingsScreen: View {
                 .disabled(true)
 
             fieldLabel("Fióktípus")
-            Picker("", selection: $profile.profile.accountType) {
-                Text("Magánszemély").tag("private")
-                Text("Vállalkozás (nem kereskedő)").tag("business")
-                Text("Autókereskedő").tag("dealer")
-            }
-            .pickerStyle(.menu)
+            Text(accountTypeLabel(profile.profile.accountType))
+                .font(.body)
+                .foregroundStyle(AppTheme.textSecondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.vertical, 8)
+                .padding(.horizontal, 10)
+                .background(Color(.secondarySystemBackground))
+                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+            Text("A fióktípus regisztrációkor rögzül, később nem módosítható.")
+                .font(.caption)
+                .foregroundStyle(AppTheme.textTertiary)
 
-            if profile.profile.accountType == "business" || profile.profile.accountType == "dealer" {
+            if isBusinessLike {
                 fieldLabel(profile.profile.accountType == "dealer" ? "Kereskedés neve" : "Cégnév")
                 TextField("", text: $profile.profile.company)
                     .textFieldStyle(.roundedBorder)
@@ -247,13 +275,7 @@ struct SettingsScreen: View {
             }
 
             Button {
-                Task {
-                    if let err = await profile.saveProfileToServer() {
-                        toast = err
-                    } else {
-                        toast = "Adatok mentve (web + app)."
-                    }
-                }
+                Task { await savePersonalAndContract() }
             } label: {
                 Text("Adatok mentése")
                     .font(.body.weight(.semibold))
@@ -269,6 +291,7 @@ struct SettingsScreen: View {
                     if let err = await profile.deleteAccount() {
                         toast = err
                     } else {
+                        contractIdentity.clear(email: profile.profile.email)
                         onClose()
                     }
                 }
@@ -280,6 +303,149 @@ struct SettingsScreen: View {
                     .padding(.top, 8)
             }
             .buttonStyle(.plain)
+        }
+    }
+
+    private var contractFields: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Adásvételi szerződéshez. Ezek az adatok csak a telefonon tárolódnak, a Bymy szerverre nem kerülnek.")
+                .font(.footnote)
+                .foregroundStyle(AppTheme.textSecondary)
+
+            if isPrivateAccount {
+                fieldLabel("Név (családi és utónév)")
+                TextField("", text: $contractIdentity.identity.fullName)
+                    .textFieldStyle(.roundedBorder)
+                    .textContentType(.name)
+
+                fieldLabel("Születéskori név (családi és utónév)")
+                TextField("", text: $contractIdentity.identity.birthName)
+                    .textFieldStyle(.roundedBorder)
+
+                HStack(spacing: 10) {
+                    VStack(alignment: .leading, spacing: 6) {
+                        fieldLabel("Születési hely")
+                        TextField("", text: $contractIdentity.identity.birthPlace)
+                            .textFieldStyle(.roundedBorder)
+                    }
+                    VStack(alignment: .leading, spacing: 6) {
+                        fieldLabel("Születési idő")
+                        TextField("ÉÉÉÉ-HH-NN", text: $contractIdentity.identity.birthDate)
+                            .textFieldStyle(.roundedBorder)
+                            .keyboardType(.numbersAndPunctuation)
+                    }
+                }
+
+                fieldLabel("Anyja neve (családi és utónév)")
+                TextField("", text: $contractIdentity.identity.motherName)
+                    .textFieldStyle(.roundedBorder)
+
+                HStack(spacing: 10) {
+                    VStack(alignment: .leading, spacing: 6) {
+                        fieldLabel("Személyi okmány típusa")
+                        TextField("pl. személyi igazolvány", text: $contractIdentity.identity.idDocType)
+                            .textFieldStyle(.roundedBorder)
+                    }
+                    VStack(alignment: .leading, spacing: 6) {
+                        fieldLabel("Okmány száma")
+                        TextField("", text: $contractIdentity.identity.idDocNumber)
+                            .textFieldStyle(.roundedBorder)
+                    }
+                }
+
+                fieldLabel("Lakcíme")
+                TextField("", text: $contractIdentity.identity.homeAddress)
+                    .textFieldStyle(.roundedBorder)
+                    .textContentType(.fullStreetAddress)
+
+                fieldLabel("Állampolgársága")
+                TextField("magyar", text: $contractIdentity.identity.citizenship)
+                    .textFieldStyle(.roundedBorder)
+            } else {
+                fieldLabel("Név")
+                TextField("", text: $contractIdentity.identity.companyName)
+                    .textFieldStyle(.roundedBorder)
+                    .textContentType(.organizationName)
+
+                fieldLabel("Székhely")
+                TextField("", text: $contractIdentity.identity.companySeat)
+                    .textFieldStyle(.roundedBorder)
+                    .textContentType(.fullStreetAddress)
+
+                fieldLabel("Cégjegyzék vagy nyilvántartási szám")
+                TextField("", text: $contractIdentity.identity.companyRegistry)
+                    .textFieldStyle(.roundedBorder)
+
+                fieldLabel("Képviselő neve")
+                TextField("", text: $contractIdentity.identity.representative)
+                    .textFieldStyle(.roundedBorder)
+                    .textContentType(.name)
+            }
+
+            Button {
+                Task { await savePersonalAndContract() }
+            } label: {
+                Text("Szerződéses adatok mentése")
+                    .font(.body.weight(.semibold))
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 12)
+                    .foregroundStyle(.white)
+                    .background(AppTheme.accent)
+                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+            }
+        }
+    }
+
+    private func accountTypeLabel(_ type: String) -> String {
+        switch type.lowercased() {
+        case "business": return "Vállalkozás (nem kereskedő)"
+        case "dealer": return "Autókereskedő"
+        default: return "Magánszemély"
+        }
+    }
+
+    private func prefillContractDefaults() {
+        if isPrivateAccount {
+            if contractIdentity.identity.fullName.trimmingCharacters(in: .whitespaces).isEmpty {
+                let composed = "\(profile.profile.lastName) \(profile.profile.firstName)"
+                    .trimmingCharacters(in: .whitespaces)
+                if !composed.isEmpty {
+                    contractIdentity.identity.fullName = composed
+                }
+            }
+            if contractIdentity.identity.citizenship.trimmingCharacters(in: .whitespaces).isEmpty {
+                contractIdentity.identity.citizenship = "magyar"
+            }
+        } else {
+            if contractIdentity.identity.companyName.trimmingCharacters(in: .whitespaces).isEmpty,
+               !profile.profile.company.isEmpty {
+                contractIdentity.identity.companyName = profile.profile.company
+            }
+            if contractIdentity.identity.companySeat.trimmingCharacters(in: .whitespaces).isEmpty,
+               !profile.profile.street.isEmpty {
+                let parts = [profile.profile.postalCode, profile.profile.city, profile.profile.street]
+                    .map { $0.trimmingCharacters(in: .whitespaces) }
+                    .filter { !$0.isEmpty }
+                if !parts.isEmpty {
+                    contractIdentity.identity.companySeat = parts.joined(separator: ", ")
+                }
+            }
+            if contractIdentity.identity.representative.trimmingCharacters(in: .whitespaces).isEmpty {
+                let composed = "\(profile.profile.lastName) \(profile.profile.firstName)"
+                    .trimmingCharacters(in: .whitespaces)
+                if !composed.isEmpty {
+                    contractIdentity.identity.representative = composed
+                }
+            }
+        }
+    }
+
+    private func savePersonalAndContract() async {
+        _ = contractIdentity.save(email: profile.profile.email)
+        if let err = await profile.saveProfileToServer() {
+            toast = err
+        } else {
+            toast = "Adatok mentve. Szerződéses mezők csak a telefonon."
         }
     }
 

@@ -576,7 +576,7 @@ struct ListingDetailLoader: View {
           loaded = loaded.enrichedWithProfileContact(
             name: profile.profile.displayName,
             phone: profile.profile.phone,
-            street: profile.profile.street,
+            street: profile.listingStreetForAds(),
             postalCode: profile.profile.postalCode,
             city: profile.profile.city
           )

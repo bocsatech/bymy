@@ -13,6 +13,7 @@
 		4E4A054B6A794CAAB12CA9AB /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10B4A4D1FF4749A3869C8AD7 /* ContentView.swift */; };
 		507BBB86C4C74A5C966F91C2 /* AutoswebCategoryPhoto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A5F8B9EA24E418F9797981A /* AutoswebCategoryPhoto.swift */; };
 		5234A81B4BE444FAABBEBF1F /* ProfileStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35870FE7B2E24EA4A78B9D05 /* ProfileStore.swift */; };
+		A1DCI001B /* DeviceContractIdentityStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1DCI002B /* DeviceContractIdentityStore.swift */; };
 		6851CEF42EBD48A98A7E0783 /* QuickCategory.swift in Sources */ = {isa = PBXBuildFile; fileRef = E04F260009AB4D16A23FB255 /* QuickCategory.swift */; };
 		6DCD44F9A505405E8B30405F /* CategoryResultsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE63FA243C6D4C498FA5FBCE /* CategoryResultsScreen.swift */; };
 		7669DAAB7CD44197B5DB9569 /* BymyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1398B4CEB8BE4DDCAF96D11D /* BymyApp.swift */; };
@@ -87,6 +88,7 @@
 		28B784D70F74423CA2713653 /* FeedFeaturedScreens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedFeaturedScreens.swift; sourceTree = "<group>"; };
 		2DED661A8646464A8691D774 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		35870FE7B2E24EA4A78B9D05 /* ProfileStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileStore.swift; sourceTree = "<group>"; };
+		A1DCI002B /* DeviceContractIdentityStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceContractIdentityStore.swift; sourceTree = "<group>"; };
 		42A8EA4835534A6A815C9EEA /* AuthLandingScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthLandingScreen.swift; sourceTree = "<group>"; };
 		4EA38AC378A84D3A91E2BD2B /* HomeIconButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeIconButton.swift; sourceTree = "<group>"; };
 		71858E9000D643608B066981 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
@@ -182,6 +184,7 @@
 				F05479F640874E71B65C7956 /* SearchScreen.swift */,
 				F5994CEB2B17435F94B75D4B /* SavedSearchesScreen.swift */,
 				35870FE7B2E24EA4A78B9D05 /* ProfileStore.swift */,
+				A1DCI002B /* DeviceContractIdentityStore.swift */,
 				06D03F70F75E4340965F21D0 /* SettingsScreen.swift */,
 				A1HIMP001B /* ImportAPI.swift */,
 				A1HPAR001B /* HaListingHtmlParser.swift */,
@@ -403,6 +406,7 @@
 				6851CEF42EBD48A98A7E0783 /* QuickCategory.swift in Sources */,
 				DF2B1A37C381486F8EDD4D2A /* HomeIconButton.swift in Sources */,
 				B674E1A81A9946258753FA6A /* SettingsScreen.swift in Sources */,
+				A1DCI001B /* DeviceContractIdentityStore.swift in Sources */,
 				5234A81B4BE444FAABBEBF1F /* ProfileStore.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

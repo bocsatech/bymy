@@ -79,9 +79,6 @@ export function initMessagesUi(root, { onUnreadChange, openConversationId } = {}
   let openConv = null;
   let messages = [];
   let busy = false;
-  let query = "";
-  /** true = felhasználó visszalépett a listára; ne nyissuk újra automatikusan */
-  let stayOnInbox = false;
   const options = { openConversationId };
 
   root.innerHTML = `
@@ -91,9 +88,6 @@ export function initMessagesUi(root, { onUnreadChange, openConversationId } = {}
           <h1 class="wh-msg__title">Üzenetek</h1>
           <button type="button" class="wh-msg__edit" data-msg-edit>Szerkesztés</button>
         </header>
-        <div class="wh-msg__filters">
-          <input type="search" data-msg-search placeholder="Keresés név vagy hirdetés szerint" autocomplete="off" />
-        </div>
         <div class="wh-msg__state" data-msg-state hidden></div>
         <div class="wh-msg__rows" data-msg-list></div>
         <div class="wh-msg__empty" data-msg-empty hidden>
@@ -172,7 +166,6 @@ export function initMessagesUi(root, { onUnreadChange, openConversationId } = {}
     file: root.querySelector("[data-msg-file]"),
     menuBtn: root.querySelector("[data-msg-menu]"),
     actions: root.querySelector("[data-msg-actions]"),
-    search: root.querySelector("[data-msg-search]"),
     sendStatus: root.querySelector("[data-msg-send-status]"),
   };
 
@@ -200,7 +193,6 @@ export function initMessagesUi(root, { onUnreadChange, openConversationId } = {}
 
   function showInboxOnly() {
     openConv = null;
-    stayOnInbox = true;
     els.shell?.setAttribute("data-msg-view", "inbox");
     if (els.placeholder) els.placeholder.hidden = false;
     if (els.threadMain) els.threadMain.hidden = true;
@@ -209,46 +201,15 @@ export function initMessagesUi(root, { onUnreadChange, openConversationId } = {}
   }
 
   function showThreadPane() {
-    stayOnInbox = false;
     els.shell?.setAttribute("data-msg-view", "thread");
     if (els.placeholder) els.placeholder.hidden = true;
     if (els.threadMain) els.threadMain.hidden = false;
   }
 
-  function pickLatestConversation(list) {
-    if (!Array.isArray(list) || !list.length) return null;
-    return [...list].sort((a, b) => {
-      const ta = Date.parse(a?.lastMessage?.createdAt || a?.updatedAt || 0) || 0;
-      const tb = Date.parse(b?.lastMessage?.createdAt || b?.updatedAt || 0) || 0;
-      if (tb !== ta) return tb - ta;
-      return Number(b?.id || 0) - Number(a?.id || 0);
-    })[0];
-  }
-
-  function scrollBubblesToLatest() {
-    if (!els.bubbles) return;
-    const go = () => {
-      els.bubbles.scrollTop = els.bubbles.scrollHeight;
-    };
-    go();
-    requestAnimationFrame(() => {
-      go();
-      requestAnimationFrame(go);
-    });
-  }
-
   function renderList() {
     if (!els.list) return;
     els.list.innerHTML = "";
-    const needle = query.trim().toLocaleLowerCase("hu-HU");
-    const visible = conversations.filter((conv) => {
-      if (!needle) return true;
-      const haystack = [conv.peer?.displayName, conv.listing?.title, conv.listing?.code, conv.lastMessage?.body]
-        .filter(Boolean)
-        .join(" ")
-        .toLocaleLowerCase("hu-HU");
-      return haystack.includes(needle);
-    });
+    const visible = conversations;
     const has = visible.length > 0;
     if (els.empty) els.empty.hidden = has;
     els.list.hidden = !has;
@@ -342,7 +303,7 @@ export function initMessagesUi(root, { onUnreadChange, openConversationId } = {}
       }
     }
     els.bubbles.innerHTML = parts.join("");
-    scrollBubblesToLatest();
+    els.bubbles.scrollTop = els.bubbles.scrollHeight;
   }
 
   function renderListingBar() {
@@ -366,8 +327,6 @@ export function initMessagesUi(root, { onUnreadChange, openConversationId } = {}
   }
 
   async function openConversation(conv) {
-    if (!conv) return;
-    stayOnInbox = false;
     openConv = conv;
     if (els.peer) els.peer.textContent = conv.peer?.displayName || "—";
     if (els.peerStatus) els.peerStatus.textContent = "Bymy üzenet";
@@ -405,40 +364,15 @@ export function initMessagesUi(root, { onUnreadChange, openConversationId } = {}
       conversations = await listConversations();
       showState("");
       renderList();
-
-      const requested = Number(options.openConversationId);
-      const deepLink =
-        Number.isFinite(requested) && requested > 0
-          ? conversations.find((conversation) => Number(conversation.id) === requested)
-          : null;
-
-      if (deepLink) {
-        options.openConversationId = undefined;
-        await openConversation(deepLink);
-        return;
-      }
-
       if (openConv) {
         const still = conversations.find((c) => Number(c.id) === Number(openConv.id));
-        if (!still) {
-          showInboxOnly();
-          return;
-        }
-        openConv = still;
-        renderList();
-        try {
-          const data = await listMessages(still.id);
-          openConv = data.conversation || still;
-          messages = data.messages;
-          renderBubbles();
-        } catch {
-          /* lista frissült, a szál később újrapróbálható */
-        }
-        return;
-      }
-
-      if (conversations.length && !stayOnInbox) {
-        await openConversation(pickLatestConversation(conversations));
+        if (!still) showInboxOnly();
+      } else if (conversations.length) {
+        const requested = Number(options.openConversationId);
+        const selected = Number.isFinite(requested) && requested > 0
+          ? conversations.find((conversation) => Number(conversation.id) === requested)
+          : null;
+        await openConversation(selected || conversations[0]);
       }
     } catch (error) {
       conversations = [];
@@ -557,12 +491,8 @@ export function initMessagesUi(root, { onUnreadChange, openConversationId } = {}
     }
   });
 
-  els.search?.addEventListener("input", () => {
-    query = els.search.value;
-    renderList();
-  });
 
-  stayOnInbox = false;
+  showInboxOnly();
   refresh();
   const refreshTimer = window.setInterval(() => {
     if (document.visibilityState === "visible" && !busy) refresh();

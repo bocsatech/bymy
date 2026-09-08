@@ -58,12 +58,6 @@ function normalizeForMatch(value) {
     .trim();
 }
 
-/**
- * A katalógus típusneve ("500 Coupe 1.4 TJet 140 [3 ajtós, …]") és a hirdetés
- * szabad szöveges típusa ("1.4 TJet") ritkán egyezik karakterre. Az űrlapon
- * feladott új hirdetés pontosan egyezik, az importált régiekre részleges
- * egyezés kell mindkét irányban.
- */
 export function matchesCatalogTipus(item, selected) {
   if (!selected) return true;
 
@@ -213,8 +207,6 @@ export function filterListingsBySidebar(items, filters) {
     if (!inRange(f.teljesitmeny_le, filters.le_tol, filters.le_ig)) return false;
     if (!inRange(f.hengerurtartalom, filters.ccm_tol, filters.ccm_ig)) return false;
 
-    // Helyszín: pontos település / irányítószám (körzet nélkül).
-    // Körzet aktív esetén ezeket a radius-szűrő kezeli — ne essen el a találat.
     if (!filters._locationByRadius) {
       if (filters.telepules) {
         const got = normalizeForMatch(f.telepules || preview.location || "");
@@ -225,7 +217,6 @@ export function filterListingsBySidebar(items, filters) {
         const want = String(filters.iranyitoszam).replace(/\D/g, "").slice(0, 4);
         const got = String(f.iranyitoszam || "").replace(/\D/g, "").slice(0, 4);
         if (want && got && got !== want) return false;
-        // Ha a hirdetésen nincs irányítószám, a település-egyezés elég.
       }
     }
 
@@ -270,7 +261,6 @@ export function filterListingsBySidebar(items, filters) {
           "ccm_tol",
           "ccm_ig",
           "features",
-          // Nem hirdetésmező / helyszín (fent kezelve)
           "keresesi_korzet",
           "telepules",
           "iranyitoszam",

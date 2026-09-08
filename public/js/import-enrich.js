@@ -1,4 +1,3 @@
-/** Import sor kiegészítése (km, forrás URL, hiányzó alapértékek) — böngésző és teszt is használja. */
 
 const IMPORT_DEFAULTS = {
   allapot: "Normál",

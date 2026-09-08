@@ -1,7 +1,3 @@
-/**
- * Autó asztali — Üzemanyag kapcsolós panel (gyártmány/modell stílus).
- * Fő kategóriák becsukva; bekapcsoláskor nyílnak a részletek; több is lehet egyszerre.
- */
 
 import { UZEMANYAG_CATEGORIES } from "./equipment-data.js";
 import { bindAutoBmDismiss, autoBmPanelIsOpen } from "./auto-bm-dismiss.js?v=bmDismiss1";
@@ -58,9 +54,6 @@ function escapeAttr(value) {
   return escapeHtml(value).replace(/'/g, "&#39;");
 }
 
-/**
- * @param {HTMLFormElement} form
- */
 export async function mountAutoFuelPicker(form) {
   if (!form || !isAutoDesk() || form.dataset.fuelPicker === "1") return;
 
@@ -72,9 +65,7 @@ export async function mountAutoFuelPicker(form) {
 
   fuelField.remove();
 
-  /** @type {Set<string>} main category ids that are ON (expanded) */
   const openMains = new Set();
-  /** @type {Set<string>} selected concrete fuel values */
   const selected = new Set();
 
   const fuelsInput = document.createElement("input");
@@ -95,7 +86,6 @@ export async function mountAutoFuelPicker(form) {
   `;
   wrap.appendChild(fuelsInput);
 
-  // Üzemanyag a gyártmány/modell után
   const bmPair = alapHost.querySelector(".auto-bm-pair");
   if (bmPair?.nextSibling) alapHost.insertBefore(wrap, bmPair.nextSibling);
   else if (bmPair) alapHost.appendChild(wrap);
@@ -137,7 +127,6 @@ export async function mountAutoFuelPicker(form) {
     return labels;
   }
 
-  /** Szűréshez: ha a fő be van kapcsolva, de nincs gyerek, az összes gyerek érték számít. */
   function effectiveSelectedValues() {
     const values = new Set();
     for (const cat of UZEMANYAG_CATEGORIES) {
@@ -164,7 +153,6 @@ export async function mountAutoFuelPicker(form) {
   function turnMainOn(cat) {
     openMains.add(cat.id);
     if (cat.children?.length) {
-      // Csak kinyit — gyerekeket a user választja; ha egyik sincs, a fő címke számít
     } else if (cat.value) {
       selected.add(cat.value);
     }
@@ -301,7 +289,6 @@ export function readFuelFilterValues(form) {
   return uzemanyagok.length ? { uzemanyagok } : {};
 }
 
-/** Listing üzemanyag szöveg egyezik-e a kiválasztott értékekkel (rugalmas aliasokkal). */
 export function fuelValueMatches(listingFuel, selectedValues) {
   if (!selectedValues?.length) return true;
   const got = normalizeFuel(listingFuel);
@@ -322,7 +309,6 @@ function fuelsCompatible(got, want) {
   if (!want) return true;
   if (got === want) return true;
   if (got.includes(want) || want.includes(got)) return true;
-  // Aliasok a régi / importált feliratokra
   const aliases = {
     hibrid: ["hibrid", "benzin/elektromos", "dizel/elektromos", "hybrid"],
     "hibrid (benzin)": ["hibrid (benzin)", "benzin/elektromos", "hybrid"],

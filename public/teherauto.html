@@ -10,7 +10,7 @@
           }
           document.documentElement.setAttribute("data-theme", t);
         } catch (e) {}
-                /* Auth fejléc: ne villanjon vendég gomb → profil a modul / API előtt */
+                
         try {
           var raw = sessionStorage.getItem("bymy-auth-user");
           var user = raw ? JSON.parse(raw) : null;
@@ -66,7 +66,7 @@
     <link rel="stylesheet" href="/css/listing-photo-cover.css?v=tileAllPages1" />
     <link rel="stylesheet" href="/css/ingatlan-search.css?v=autoDrums15" />
     <style id="home-scroll-fix">
-      /* Inline: cache-biztos — a teljes oldal görget, külön görgetősáv nincs sehol. */
+      
       html:has(body.home-page) {
         overflow-x: hidden !important;
         overflow-y: auto !important;
@@ -102,7 +102,7 @@
         max-width: 100% !important;
         display: block !important;
       }
-      /* Autó asztali fejléc: logó | menü KÖZÉPEN | akciók — inline, cascade-biztos */
+      
       @media (min-width: 901px) {
         body.home-page.site-app:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-header-inner,
         body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-header-inner {
@@ -164,7 +164,7 @@
           align-items: center !important;
         }
       }
-      /* Autó asztali: kereső BALRA, találatok JOBBRA — felülírja a display:block-ot */
+      
       @media (min-width: 901px) {
         body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main {
           display: grid !important;
@@ -223,7 +223,7 @@
         overflow-y: visible !important;
         max-width: 100% !important;
       }
-      /* Sem a hirdetéslistának, sem az oldalsávnak nincs saját görgetője. */
+      
       body.home-page .home-listings-panel,
       body.home-page .home-info-sidebar,
       body.home-page .home-partner-results,
@@ -261,7 +261,7 @@
               <a class="hub-btn hub-btn--ghost" href="/regisztracio.html" data-auth-register>Regisztráció</a>
             </div>
             <div class="site-header-avatar-wrap" data-avatar-menu data-auth-member hidden>
-              <button type="button" class="site-header-profile" data-auth-avatar data-avatar-toggle aria-expanded="false" aria-haspopup="menu" aria-label="Fiók" title="Fiók">
+              <button type="button" class="site-header-profile" data-auth-avatar data-avatar-toggle aria-expanded="false" aria-label="Fiók" title="Fiók">
                 <span class="site-header-avatar">
                   <span data-avatar-letter>A</span>
                   <img data-avatar-img alt="" hidden width="44" height="44" />
@@ -269,7 +269,6 @@
                 <span class="site-header-firstname" data-auth-firstname></span>
                 <svg class="site-header-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
               </button>
-              <div class="site-avatar-dropdown site-avatar-dropdown--fiok" data-avatar-dropdown role="menu" hidden></div>
             </div>
             <a class="hub-btn hub-btn--post" href="/hirdetesfeladas.html?vertical=teher&subtype=kisteher&start=1" data-auth-guard id="teher-post-link">+ Hirdetésfeladás</a>
             <button type="button" class="hub-theme-toggle" data-theme-toggle aria-label="Színmód" title="Színmód"></button>
@@ -287,7 +286,7 @@
       <section class="auto-search-hero" data-auto-search-hero aria-labelledby="auto-search-title">
 
         <div class="auto-search-hero__stage">
-          <!-- Háttérkép cseréje: csak az src. (asztali layout elrejti) -->
+          
           <img
             class="auto-search-hero__image"
             data-auto-hero-image

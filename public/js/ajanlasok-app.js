@@ -24,7 +24,6 @@ function queryVertical() {
 const PAGE_VERTICAL = queryVertical();
 const PAGE_CATEGORIES = categoriesForVertical(PAGE_VERTICAL);
 
-/** Mobil PartnerRecommendationsDemo — API hiba esetén. */
 const DEMO_CATEGORIES_AUTO = [
   {
     id: "atiras_ugyintezes",
@@ -373,7 +372,6 @@ export function initAjanlasokPage() {
 
   function render(categories, openPreferred) {
     const radiusKm = loadRadiusKm();
-    // Teljes kategórialista (mint a főoldali sín) — üres kategóriák is látszanak.
     const filtered = filterByRadius(ensureCategoryShell(categories), radiusKm);
 
     listEl.innerHTML = "";

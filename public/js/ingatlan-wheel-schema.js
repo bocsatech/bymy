@@ -1,13 +1,8 @@
-/**
- * Közös ingatlan kerék-séma (kliens) — kereső + feladás.
- * Alapértelmezés megegyezik a szerver defaulttal; élő config: GET /api/level1/ingatlan-wheel-schema
- */
 
 import { escapeHtml, escapeAttr, wheelFieldHtml } from "./ingatlan-wheels.js?v=scrollLock4";
 
 export const WHEEL_COLS = 12;
 
-/** Admin: Kiadó (master) + Eladó + Airbnb */
 export const INGATLAN_WHEEL_ADMIN_CATEGORIES = ["ingatlan", "elado-ingatlan", "airbnb"];
 export const INGATLAN_TIPUS_LAYOUTS = [
   "lakas", "haz", "telek", "garazs", "nyaralo", "iroda", "uzlethelyiseg",
@@ -35,7 +30,6 @@ export function isIngatlanWheelAdminCategory(category) {
   return false;
 }
 
-/** Élő keresőn osztott (min–max) kerék — adminban egy csempe. */
 export const INGATLAN_DUAL_RANGE_GROUPS = [
   {
     id: "ar",
@@ -101,7 +95,6 @@ export const INGATLAN_DUAL_RANGE_GROUPS = [
     ariaLabel: "Építmény terület tartomány",
   },
 ];
-
 
 const FIELD_DEFS = [
   { field_key: "keresesi_hely", label: "Település", kind: "text", surfaces: ["search"] },
@@ -197,7 +190,6 @@ function defaultRaw() {
     { field_key: "szobaszam", section: "main", row: 5, col: 1, colSpan: 3, hidden: false },
     { field_key: "ingatlan_lakas_tipus", section: "main", row: 6, col: 1, colSpan: 6, hidden: false },
     { field_key: "ingatlan_tipus_2", section: "main", row: 6, col: 7, colSpan: 6, hidden: false },
-    /* Részletek sorrend ≈ ingatlan.com: állapot → fogyasztás → fűtés → energia → rezsi → napelem/szigetelés */
     { field_key: "allapot", section: "more", row: 1, col: 1, colSpan: 6, hidden: false },
     { field_key: "ingatlan_kora", section: "more", row: 1, col: 7, colSpan: 6, hidden: false },
     { field_key: "atlagos_aram_fogyasztas", section: "more", row: 2, col: 1, colSpan: 6, hidden: false },
@@ -255,7 +247,6 @@ function defaultRaw() {
 }
 
 const FALLBACK = new Map(defaultRaw().map((c) => [c.field_key, c]));
-
 
 export function syncDualRangeCells(cells) {
   const map = new Map(cells.filter((c) => !isSpacer(c)).map((c) => [c.field_key, c]));
@@ -331,7 +322,6 @@ function sectionUnitsForRowResolve(cells, section) {
   return units;
 }
 
-/** Egy szekción belül minden látható egység kap külön sort — nincs rácssor-ütközés. */
 export function resolveIngatlanWheelSectionRows(cells) {
   if (!Array.isArray(cells)) return;
   syncDualRangeCells(cells);
@@ -416,8 +406,6 @@ export function normalizeIngatlanWheelSchema(raw) {
   for (const sp of spacers) cells.push(sp);
   syncDualRangeCells(cells);
 
-  /* Típus 2 csak akkor kap alap pozíciót, ha még soha nem volt a sémában.
-     Mentett elrendezést (main/more/hidden) soha ne írjuk felül. */
   const tip2 = cells.find((c) => c.field_key === "ingatlan_tipus_2");
   if (tip2 && !byKey.has("ingatlan_tipus_2")) {
     const maxMain = Math.max(
@@ -474,7 +462,6 @@ export function createSpacerCell(section = "main", row = 1) {
 
 let cachedSchemaByVariant = new Map();
 
-/** Admin típus-szerkesztő (lakas, haz, …) vs üzletág (ingatlan, elado-ingatlan, airbnb). */
 export function resolveIngatlanSchemaVariant(uzletag, tipusList = []) {
   const tips = (Array.isArray(tipusList) ? tipusList : String(tipusList || "").split(","))
     .map((v) => String(v || "").trim().toLowerCase())
@@ -512,7 +499,6 @@ export async function fetchIngatlanWheelSchema(variant = "ingatlan", { force = f
       return normalized;
     }
   } catch {
-    /* offline / default */
   }
   const fallback = defaultIngatlanWheelSchema();
   cachedSchemaByVariant.set(key, fallback);
@@ -655,7 +641,6 @@ function compactPostRows(cells) {
   return compacted;
 }
 
-/** Kitölti a main/more hostokat a sémából (kategória nélkül). */
 export function renderIngatlanSchemaHosts(mainHost, moreHost, schema, surface) {
   const surfaceCells = cellsForSurface(schema, surface);
   const cells = (surface === "post" ? compactPostRows(surfaceCells) : surfaceCells).map((cell) => {

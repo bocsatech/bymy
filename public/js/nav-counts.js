@@ -1,4 +1,3 @@
-/** Főmenü: kategória hirdetésszámok betöltése. */
 const COUNT_BY_HREF = [
   { match: /\/auto\.html(?:$|\?)/, key: "auto" },
   { match: /\/teherauto\.html(?:$|\?)/, key: "teher" },
@@ -43,7 +42,6 @@ function writeStoredCounts(counts) {
   try {
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(counts));
   } catch {
-    /* private mode / quota */
   }
 }
 
@@ -60,7 +58,6 @@ function paintCounts(counts) {
   });
 }
 
-/** Lista / más forrás felülírhat egy vagy több kategóriát. */
 export function applyNavCounts(partial = {}) {
   const base = readStoredCounts() || { auto: 0, teher: 0, ingatlan: 0 };
   const next = { ...base };
@@ -116,7 +113,6 @@ export async function initNavCounts() {
     const prev = readStoredCounts();
     const apiTotal = counts.auto + counts.teher + counts.ingatlan;
     const prevTotal = prev ? prev.auto + prev.teher + prev.ingatlan : 0;
-    // Üres API választ ne írjuk a listából már ismert szám fölé (cache / hideg start).
     if (apiTotal === 0 && prevTotal > 0) {
       paintCounts(prev);
       return;
@@ -124,11 +120,9 @@ export async function initNavCounts() {
     writeStoredCounts(counts);
     paintCounts(counts);
   } catch {
-    /* Ne írjunk 0-t hiba esetén — marad a sessionStorage / üres. */
   }
 }
 
-// Rövid idle — a lista API továbbra is előnyben, de ne várjunk 4 mp-et.
 if (typeof requestIdleCallback === "function") {
   requestIdleCallback(() => initNavCounts(), { timeout: 1200 });
 } else {

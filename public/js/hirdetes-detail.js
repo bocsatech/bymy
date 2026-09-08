@@ -56,7 +56,6 @@ function formatDate(value) {
   }
 }
 
-/** Breadcrumb címke: ne legyen végig nagybetűs márkanév. */
 function formatCrumbLabel(value) {
   const raw = String(value ?? "").trim();
   if (!raw) return "";
@@ -133,7 +132,6 @@ function relatedCard(item) {
 
 function applyRelated(view, related) {
   if (!root) return;
-  // Saját hirdetésnél soha (hd-owner = Szerkesztés/Törlés már a DOM-ban).
   if (root.dataset.ownListing === "1" || root.querySelector(".hd-owner") || isOwnListing(view)) {
     clearRelatedUi();
     return;
@@ -214,7 +212,6 @@ async function loadRelatedListings(listingId, view) {
     });
     applyRelated(view, related);
   } catch {
-    /* ignore — a fő tartalom már látszik */
   }
 }
 
@@ -565,7 +562,6 @@ function bindUi(view, listing) {
         const id = new URL(link.href, location.origin).searchParams.get("id");
         if (id) touchListingReturnId(id);
       } catch {
-        /* ignore */
       }
     });
   });
@@ -612,7 +608,6 @@ function bindUi(view, listing) {
         window.alert("A link a vágólapra került.");
       }
     } catch {
-      /* cancelled */
     }
   });
 
@@ -748,7 +743,6 @@ async function init() {
     if (!listing) throw new Error("Nincs ilyen hirdetés.");
     const view = listing.detail;
     if (!view) throw new Error("A hirdetés adatai hiányosak.");
-    // Először rajzolunk — view számláló és „több ettől” ne blokkolja a megnyitást.
     render(view, listing, []);
     recordListingView(id, "web").catch(() => {});
     void loadRelatedListings(id, view);

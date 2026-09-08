@@ -27,7 +27,6 @@ const INITIAL_COUNT = 9;
 const SCROLL_BATCH = 5;
 const RAIL_CAP = 13;
 
-/** @type {object[]} */
 let nearbyItems = [];
 let renderedCount = 0;
 let allHref = "/auto.html?nearby=1";
@@ -168,7 +167,6 @@ function writeCache(postal, radiusKm, items, meta = {}) {
       })
     );
   } catch {
-    /* quota */
   }
 }
 

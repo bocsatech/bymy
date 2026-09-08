@@ -260,7 +260,6 @@ function bindPhotoTrack(track) {
       try {
         track.setPointerCapture(pointerId);
       } catch {
-        /* ignore */
       }
     }
     track.scrollLeft = startScroll - dx;

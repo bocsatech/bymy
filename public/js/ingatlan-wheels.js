@@ -1,4 +1,3 @@
-/** Közös kerék / lenyíló menü — kereső + feladás. */
 
 export function escapeHtml(value) {
   return String(value ?? "")
@@ -12,7 +11,6 @@ export function escapeAttr(value) {
   return escapeHtml(value).replace(/'/g, "&#39;");
 }
 
-/** Oldal görgetés zárolása, amíg a kerek menü / dobkerék nyitva van. */
 let pageScrollLocked = false;
 let scrollLockY = 0;
 let lastTouchY = 0;
@@ -35,7 +33,6 @@ function isCylinderSurface(el) {
 
 function onLockedTouchStart(event) {
   if (event.touches?.[0]) lastTouchY = event.touches[0].clientY;
-  /* iOS néha elengedi a zárat — nyitott keréknél újra ráhúzzuk */
   if (
     document.querySelector(".immo-wheel-wrap--drum-inline.is-open") ||
     document.querySelector(".immo-wheel-wrap--menu.is-open") ||
@@ -48,13 +45,11 @@ function onLockedTouchStart(event) {
 
 function onLockedTouchMove(event) {
   if (!pageScrollLocked) return;
-  /* Henger: csak húzáskor tiltjuk — koppintás így megy iOS-en is. */
   if (isCylinderSurface(event.target)) {
     if (!document.body.hasAttribute("data-cyl-dragging")) return;
     event.preventDefault();
     return;
   }
-  /* Mindig tiltjuk az oldalgörgetést; a kerék scrollTop-ját kézzel állítjuk. */
   event.preventDefault();
   const touch = event.touches?.[0];
   if (!touch) return;
@@ -70,7 +65,6 @@ function onLockedTouchMove(event) {
     scrollEl = document.querySelector(".immo-wheel-wrap--drum-inline.is-open .immo-drum-inline-scroll");
   }
   if (!scrollEl || !dy) return;
-  /* Ujj lefelé → tartalom lefelé (természetes iOS picker) */
   scrollEl.scrollTop -= dy;
   const ring = scrollEl.closest?.(".immo-drum-wheel-ring") || scrollEl.querySelector?.(".immo-drum-wheel-ring");
   const ringEl = scrollEl.classList?.contains("immo-drum-inline-scroll")
@@ -143,7 +137,6 @@ function assertScrollLockStyles() {
   body.style.setProperty("overflow-y", "hidden", "important");
   body.style.setProperty("overscroll-behavior", "none", "important");
   body.style.setProperty("touch-action", "none", "important");
-  /* position:fixed iOS-en pár mp után elengedheti — csak overflow + scrollTo */
   body.style.setProperty("position", "relative", "important");
   body.style.removeProperty("top");
   body.style.removeProperty("left");
@@ -206,7 +199,6 @@ export function unlockPageScroll(force = false) {
   window.scrollTo(0, scrollLockY);
 }
 
-/** Többválasztós mezők (kereső). */
 export const MULTI_WHEEL_KEYS = new Set([
   "ingatlan_lakas_tipus",
   "ingatlan_tipus_2",
@@ -323,7 +315,6 @@ function parseRoomInput(raw) {
   const n = Number(t.replace(",", ".").replace(/[^\d.]/g, ""));
   if (!Number.isFinite(n) || n <= 0) return "";
   if (n >= 6) return "6";
-  // 1, 1.5, 2, … fél szobák
   const rounded = Math.round(n * 2) / 2;
   return String(rounded);
 }
@@ -388,7 +379,6 @@ function updateTrigger(wheel) {
   syncWheelClearButton(wrap, wheel, values.length > 0);
 }
 
-/** Mező jobb szélén × — törli a kiválasztást / szöveget. */
 export function syncHostClearButton(host, { hasValue, onClear } = {}) {
   if (!host || typeof onClear !== "function") return;
   let clear = host.querySelector(":scope > .immo-wheel-clear");
@@ -413,7 +403,6 @@ export function syncHostClearButton(host, { hasValue, onClear } = {}) {
   host.classList.add("has-wheel-clear");
 }
 
-/** Kerék mező jobb szélén × — törli a kiválasztást. */
 export function syncWheelClearButton(wrap, wheel, hasValue) {
   if (!wrap || !wheel) return;
   syncHostClearButton(wrap, {
@@ -496,7 +485,6 @@ function isMobileMenuViewport() {
 const PRICE_WHEEL_KEYS = new Set(["ar_tol", "ar_ig"]);
 let menuMeasureEl;
 
-/** Ár kerékmenü: szélesség = legszélesebb opció (nem teljes képernyő). */
 export function syncCompactPriceMenuWidth(wheel, extraLabels = []) {
   if (!wheel || !PRICE_WHEEL_KEYS.has(wheel.getAttribute("data-wheel") || "")) return;
   wheel.classList.add("immo-wheel--menu-compact");
@@ -597,9 +585,6 @@ function ensureOutsideClose() {
   });
 }
 
-/**
- * Lenyíló menü. multiple: több érték; customInput: kézi szám (Ár).
- */
 export function initMenuWheel(wheel, { emptyLabel = "Mindegy", multiple = false, customInput = false, customKind = "price" } = {}) {
   if (!wheel) return;
   let wrap = wheel.closest(".immo-wheel-wrap");
@@ -608,7 +593,6 @@ export function initMenuWheel(wheel, { emptyLabel = "Mindegy", multiple = false,
     return;
   }
 
-  // Újratöltéskor ne halmozódjanak a listenerok.
   if (wheel.dataset.menuBound === "1") {
     const clone = wheel.cloneNode(true);
     wheel.replaceWith(clone);
@@ -711,7 +695,6 @@ export function initMenuWheel(wheel, { emptyLabel = "Mindegy", multiple = false,
     trigger.addEventListener("focus", () => {
       open();
       if (wheel.dataset.multiple === "1") {
-        // Íráshoz ürítjük a összefoglalót; Enter hozzáad, Escape / üres blur visszaállít.
         trigger.dataset.wasSummary = trigger.value;
         trigger.value = "";
         trigger.placeholder = "Pl. 2,5 — Enter";
@@ -721,7 +704,6 @@ export function initMenuWheel(wheel, { emptyLabel = "Mindegy", multiple = false,
       const kind = wheel.dataset.customKind || "price";
       const multiple = wheel.dataset.multiple === "1";
       const typed = String(trigger.value ?? "").trim();
-      // Többválasztásnál a „3 kiválasztva” / összefűzött címke ne írja felül a választást blur-kor.
       if (multiple && (/^\d+\s*kiválasztva$/i.test(typed) || typed.includes(","))) {
         close();
         updateTrigger(wheel);
@@ -764,7 +746,6 @@ export function initMenuWheel(wheel, { emptyLabel = "Mindegy", multiple = false,
       if (event.key === "Escape") close();
     });
     trigger.addEventListener("blur", () => {
-      // Késleltetés: lista kattintás előbb fusson.
       setTimeout(() => {
         if (!wrap.contains(document.activeElement)) commitCustom();
       }, 150);

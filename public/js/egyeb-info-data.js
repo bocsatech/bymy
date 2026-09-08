@@ -1,4 +1,3 @@
-/** Egyéb információk jelölők (hasznaltauto.hu látható cellái). */
 export const EGYEB_INFO_OPTIONS = [
   "garanciális",
   "amerikai modell",

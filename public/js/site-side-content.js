@@ -136,7 +136,6 @@ export async function initSiteSideContent() {
 
   if (!document.querySelector("[data-site-side]")) return;
 
-  // Nyilvános szerkesztő csak Bocsatech admin sessionnel
   let canEdit = false;
   try {
     const me = await fetch("/api/level1/me", { credentials: "same-origin" });

@@ -1,7 +1,3 @@
-/**
- * Autó oldal — Kivitel menü (minden kategóriában), URL ?kivitel=…
- * Opciók: /api/level1/kivitel-menu (admin), fallback: KIVITEL_OPTIONS.
- */
 
 import { KIVITEL_OPTIONS, kivitelMenuHref, normalizeKivitel } from "./kivitel-options.js?v=kivitel1";
 
@@ -120,7 +116,6 @@ async function loadKivitelLabels() {
       : [];
     if (labels.length) kivitelLabels = labels;
   } catch {
-    /* fallback: KIVITEL_OPTIONS */
   }
 }
 

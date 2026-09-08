@@ -1,4 +1,3 @@
-/** Gumi méret selectek + hátsó külön méret pipák (hirdetésfeladás). */
 
 const TIRE_WIDTHS = [
   125, 135, 145, 155, 165, 175, 185, 195, 205, 215, 225, 235, 245, 255, 265, 275, 285, 295, 305, 315, 325, 335, 345, 355,
@@ -70,10 +69,6 @@ function syncAllRearGroups(form) {
   for (const group of REAR_GROUPS) syncRearGroup(form, group);
 }
 
-/**
- * @param {HTMLFormElement | null} form
- * @returns {{ syncRearTires: () => void }}
- */
 export function initTireSizes(form) {
   if (!form) return { syncRearTires: () => {} };
 

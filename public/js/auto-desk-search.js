@@ -1,7 +1,3 @@
-/**
- * Autó oldal — asztali kereső: Gyors / Részletes + demó mezősorrend.
- * Csak desktop (min-width 901px), data-site-page=auto|teherauto.
- */
 
 const DESK_MQ = "(min-width: 901px)";
 
@@ -10,7 +6,6 @@ function isVehicleDeskPage() {
   return page === "auto" || page === "teherauto";
 }
 
-/** Fallback sorrend, ha nincs admin layout. */
 const DESK_ALAP_FALLBACK = [
   { field: "gyartmany", label: "Gyártmány" },
   { field: "modell", label: "Modell" },
@@ -21,7 +16,6 @@ const DESK_ALAP_FALLBACK = [
   { field: "allapot", label: "Állapot" },
 ];
 
-/** Műszaki accordion — legacy / layout nélküli sorrend. */
 const DESK_MUSZAKI_FALLBACK = [
   { field: "km", label: "Futott km", range: true },
   { field: "teljesitmeny_le", label: "Teljesítmény", range: true },
@@ -197,7 +191,6 @@ function mountDeskField(host, item, form, { quickKeys, used }) {
         range.appendChild(el);
       });
       field.appendChild(range);
-      // Ne töröljük a wrap-et, ha az maga az egyik select (különben eltűnik a -tól)
       if (wrap && !pair.includes(wrap)) wrap.remove();
       used.add(item.field);
       host.appendChild(field);
@@ -246,10 +239,6 @@ function ensureDeskSelectPlaceholders(wrap, range) {
   });
 }
 
-/**
- * Demó Alap sorrend: meglévő layout mezőket átrendezi natív selectként.
- * Gyors mód: csak az 1. lépés (admin gyorskereső) mezői látszanak.
- */
 export function arrangeAutoDeskDemoFields(form = document.getElementById("home-qs-form")) {
   if (!form || !isAutoDesk()) return;
   const alapBody = form.querySelector('[data-desk-acc="alap"] .auto-desk-acc__body');
@@ -259,7 +248,6 @@ export function arrangeAutoDeskDemoFields(form = document.getElementById("home-q
   const mainHost = document.getElementById("qs-layout-main");
   const moreHost = document.getElementById("qs-more-layout");
 
-  // Admin Gyorskereső (1. lépés) — applyAutoSearchLayout tölti (dataset.deskQuickKeys)
   const quickKeys = new Set((form.dataset.deskQuickKeys || "").split(",").filter(Boolean));
   if (!quickKeys.size) {
     ["gyartmany", "modell", "uzemanyag", "gyartasi_ev", "vetelar", "kivitel", "allapot"].forEach((k) => quickKeys.add(k));
@@ -288,14 +276,12 @@ export function arrangeAutoDeskDemoFields(form = document.getElementById("home-q
   for (const item of fieldOrder) {
     mountDeskField(host, item, form, mountOpts);
   }
-  // Ha a layout mezők nem voltak átvihetők — teljes alap fallback
   if (!host.children.length) {
     for (const item of DESK_ALAP_FALLBACK) {
       mountDeskField(host, item, form, mountOpts);
     }
   }
 
-  // Kivitel: adminban step 2 — előre az Alap gyors mezőkhöz, mielőtt a Műszaki megkapná
   if (!used.has("kivitel")) {
     mountDeskField(host, { field: "kivitel", label: "Kivitel" }, form, mountOpts);
   }
@@ -321,7 +307,6 @@ export function arrangeAutoDeskDemoFields(form = document.getElementById("home-q
       mountDeskField(muszakiHost, item, form, mountOpts);
     }
 
-    // Ha a layout üres volt, a fallback sem talált mindent — maradék [data-qs-field]
     if (moreHost) {
       moreHost.querySelectorAll("[data-qs-field]").forEach((el) => {
         const key = el.getAttribute("data-qs-field");
@@ -335,7 +320,6 @@ export function arrangeAutoDeskDemoFields(form = document.getElementById("home-q
       });
     }
 
-    // Bármilyen maradék Kivitel a Műszakiból → Alap
     muszakiHost.querySelectorAll('[data-desk-field="kivitel"]').forEach((el) => {
       el.dataset.deskQuick = "1";
       host.appendChild(el);
@@ -399,14 +383,6 @@ export function updateAutoDeskResultCount(n) {
   el.textContent = `${count.toLocaleString("hu-HU")} találat`;
 }
 
-/**
- * @param {{
- *   onModeChange?: (mode: string) => void,
- *   mountDetailed?: (form: HTMLElement) => Promise<unknown>,
- *   onSortChange?: (sort: string) => void,
- *   onViewChange?: (view: 'grid' | 'list') => void,
- * }} [opts]
- */
 export function initAutoDeskSearch({
   onModeChange,
   mountDetailed,
@@ -454,7 +430,6 @@ export function initAutoDeskSearch({
         }
         openAccordion("alap");
       } else {
-        // Desk: a műszaki mezők az accordion body-ban vannak, #qs-more legacy husk
         if (morePanel) {
           morePanel.hidden = true;
           morePanel.classList.remove("is-open");
@@ -484,7 +459,6 @@ export function initAutoDeskSearch({
       const wasOpen = acc.classList.contains("is-open");
       const scrollY = window.scrollY;
       openAccordion(wasOpen ? "" : id);
-      // Ne ugorjon az oldal közepe felé a sticky panel növekedésekor.
       window.scrollTo(0, scrollY);
       requestAnimationFrame(() => {
         window.scrollTo(0, scrollY);

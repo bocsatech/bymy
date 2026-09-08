@@ -27,7 +27,6 @@ async function loadActiveHeroImage() {
     if (!url) return;
     img.src = withCacheBust(url);
   } catch {
-    /* keep default src from HTML */
   }
 }
 

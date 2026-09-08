@@ -1,4 +1,4 @@
-/* —— Görgetősávok elrejtve az egész weben (görgetés marad) —— */
+
 html,
 body,
 * {
@@ -15,8 +15,6 @@ body::-webkit-scrollbar,
   background: transparent !important;
 }
 
-/* —— Közös app shell: főoldal stílusú világos téma (minden oldalon) —— */
-
 body.site-app {
   margin: 0;
   font-family: Inter, Roboto, system-ui, sans-serif;
@@ -24,7 +22,6 @@ body.site-app {
   color: #202124;
 }
 
-/* Kezdőlap feed: ne a szürke site-app háttér legyen a státuszsáv mögött */
 body.site-app.hub-page--feed {
   background: #fff;
 }
@@ -72,7 +69,6 @@ body.site-app .site-message-badge {
   z-index: 1;
 }
 
-/* Asztalon a badge mindig a szöveg UTÁN legyen, soha ne takarjon */
 @media (min-width: 801px) {
   body.site-app .hub-header-msg .site-message-badge,
   body.site-app .site-header-msg .site-message-badge {
@@ -104,7 +100,6 @@ html[data-mm-account-kind="company"] body.settings-page [data-mm-settings-nav] {
   display: none !important;
 }
 
-/* Ne rejtse el a teljes Fiókom felületet: modulhiba esetén üres oldal lenne. */
 body.site-app.settings-page .mm-boot-error {
   display: none;
   margin: 1rem;
@@ -120,7 +115,6 @@ html[data-mm-boot-failed] body.site-app.settings-page .mm-boot-error {
   display: block;
 }
 
-/* Fejléc + navigáció (home + aloldalak) — willhaben-szerű */
 body.site-app .site-header,
 body.site-app .home-header,
 body.site-app .site-app-header,
@@ -134,7 +128,6 @@ body.site-app .hub-header {
   overflow: visible;
 }
 
-/* —— Asztali fix fejléc minden oldalon (≥901px) —— */
 @media (min-width: 901px) {
   body.site-app {
     --site-fixed-header-h: 64px;
@@ -337,8 +330,6 @@ body.site-app .site-app-logo .bymy-logo-img {
   object-fit: contain;
 }
 
-/* --nav must beat .site-app-logo .bymy-logo-img (0,3,1), else logo stays 36px
-   and the header top row looks empty / broken on Beállítások etc. */
 body.site-app .bymy-logo-img--nav,
 body.site-app .home-logo .bymy-logo-img--nav,
 body.site-app .hub-logo .bymy-logo-img--nav,
@@ -348,7 +339,6 @@ body.site-app .site-app-logo .bymy-logo-img--nav {
   width: auto;
 }
 
-/* —— Mobil: ne csússzanak szét a fejléc / kártyák —— */
 html {
   overflow-x: hidden;
   max-width: 100%;
@@ -490,13 +480,11 @@ body.home-page .site-layout {
     font-size: 0.8rem;
   }
 
-  /* Csak a címke tűnjön el — a badge ne */
   body.site-app .hub-header-msg > span:not(.site-message-badge),
   body.site-app .site-header-msg > span:not(.site-message-badge) {
     display: none;
   }
 
-  /* Ikon-only: badge az ikon sarkában (szöveg nincs) */
   body.site-app .hub-header-msg .site-message-badge,
   body.site-app .site-header-msg .site-message-badge {
     position: absolute !important;
@@ -535,7 +523,6 @@ body.home-page .site-layout {
     max-width: min(70vw, 12rem);
   }
 
-  /* Keskeny telefon: Regisztráció elrejtve (Belépés oldalról elérhető) */
   body.site-app .site-header-auth-row a[data-auth-register] {
     display: none !important;
   }
@@ -608,8 +595,6 @@ body.site-app .import-nav::-webkit-scrollbar {
   display: none;
 }
 
-
-
 body.site-app .home-header-spacer,
 body.site-app .site-app-header-spacer {
   justify-self: end;
@@ -649,7 +634,6 @@ body.site-app [data-auth-member][hidden] {
   display: none !important;
 }
 
-/* Korai auth állapot (html data-auth) — ne villanjon Belépés ↔ profil oldalváltáskor */
 html[data-auth="member"] body.site-app [data-auth-guest] {
   display: none !important;
 }
@@ -852,241 +836,6 @@ body.site-app .site-header-avatar img {
   border-radius: inherit;
 }
 
-body.site-app .site-avatar-dropdown {
-  position: absolute;
-  top: calc(100% + 0.45rem);
-  right: 0;
-  z-index: 200;
-  width: min(20rem, calc(100vw - 1.25rem));
-  padding: 0;
-  background: #f2f3f5;
-  border: 0;
-  border-radius: 16px;
-  box-shadow: 0 12px 36px rgba(15, 23, 42, 0.16);
-  overflow: hidden;
-}
-
-body.site-app .site-avatar-dropdown--fiok {
-  padding: 0.65rem 0.7rem 0.85rem;
-}
-
-body.site-app .site-avatar-sheet-head {
-  display: none;
-}
-
-body.site-app .site-avatar-dropdown[hidden] {
-  display: none !important;
-}
-
-body.site-app .site-avatar-guest {
-  margin: 0.35rem 0.25rem 0.55rem;
-  padding: 0.85rem 1rem;
-  background: #fff;
-  border-radius: 12px;
-  color: #6b7280;
-  font-size: 0.9rem;
-}
-
-body.site-app .site-avatar-card {
-  background: #fff;
-  border-radius: 14px;
-  overflow: hidden;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
-}
-
-body.site-app .site-avatar-item {
-  display: grid;
-  grid-template-columns: 28px 1fr 18px;
-  align-items: center;
-  gap: 0.75rem;
-  width: 100%;
-  padding: 0.9rem 1rem;
-  border: 0;
-  border-bottom: 1px solid #eef0f3;
-  background: transparent;
-  color: #111;
-  font: inherit;
-  font-size: 0.98rem;
-  font-weight: 500;
-  text-decoration: none;
-  text-align: left;
-  cursor: pointer;
-}
-
-body.site-app .site-avatar-card .site-avatar-item:last-child,
-body.site-app .site-avatar-subwrap:last-child .site-avatar-item {
-  border-bottom: 0;
-}
-
-body.site-app .site-avatar-item:hover {
-  background: #f8fafc;
-}
-
-body.site-app .site-avatar-item-icon {
-  display: grid;
-  place-items: center;
-  color: #374151;
-}
-
-body.site-app .site-avatar-item-icon svg {
-  display: block;
-}
-
-body.site-app .site-avatar-item-copy {
-  min-width: 0;
-  display: grid;
-  gap: 0.15rem;
-}
-
-body.site-app .site-avatar-item-label {
-  min-width: 0;
-}
-
-body.site-app .site-avatar-item-desc {
-  font-size: 0.78rem;
-  font-weight: 400;
-  color: #6b7280;
-  line-height: 1.25;
-}
-
-body.site-app .site-avatar-item--plain {
-  cursor: default;
-  color: #6b7280;
-}
-
-body.site-app .site-avatar-item--plain:hover {
-  background: transparent;
-}
-
-body.site-app .site-avatar-item--plain .site-avatar-item-label {
-  font-weight: 500;
-  color: #6b7280;
-}
-
-body.site-app .site-avatar-chevron {
-  color: #9ca3af;
-  justify-self: end;
-}
-
-body.site-app .site-avatar-subwrap .site-avatar-item[aria-expanded="true"] .site-avatar-chevron--down {
-  transform: rotate(180deg);
-}
-
-body.site-app .site-avatar-sub {
-  background: #f8fafc;
-  border-bottom: 1px solid #eef0f3;
-}
-
-body.site-app .site-avatar-sub[hidden] {
-  display: none !important;
-}
-
-body.site-app .site-avatar-subitem {
-  display: block;
-  padding: 0.7rem 1rem 0.7rem 3.35rem;
-  color: #111;
-  text-decoration: none;
-  font-size: 0.92rem;
-  border-bottom: 1px solid #eef0f3;
-}
-
-body.site-app .site-avatar-subitem:last-child {
-  border-bottom: 0;
-}
-
-body.site-app .site-avatar-subitem:hover {
-  background: #f1f5f9;
-}
-
-body.site-app .site-avatar-footer {
-  margin-top: 0.75rem;
-  padding: 0 0.15rem;
-}
-
-body.site-app .site-avatar-logged {
-  margin: 0 0 0.65rem;
-  text-align: center;
-  color: #9ca3af;
-  font-size: 0.88rem;
-}
-
-body.site-app .site-avatar-logged strong {
-  color: #6b7280;
-  font-weight: 600;
-}
-
-body.site-app .site-avatar-logout {
-  display: block;
-  width: 100%;
-  padding: 0.85rem 1rem;
-  border: 1.5px solid #7c3aed;
-  border-radius: 12px;
-  background: #fff;
-  color: #7c3aed;
-  font: inherit;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-body.site-app .site-avatar-logout:hover {
-  background: #f5f3ff;
-}
-
-@media (max-width: 720px) {
-  body.site-app .site-avatar-dropdown--fiok {
-    position: fixed;
-    inset: 0;
-    top: 0;
-    right: 0;
-    left: 0;
-    bottom: 0;
-    width: 100%;
-    max-width: none;
-    border-radius: 0;
-    padding: 0.85rem 1rem 1.25rem;
-    background: #f2f3f5;
-    z-index: 300;
-    overflow: auto;
-  }
-
-  body.site-app .site-avatar-sheet-head {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    align-items: center;
-    min-height: 2.5rem;
-    margin-bottom: 0.75rem;
-  }
-
-  body.site-app .site-avatar-sheet-back {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.15rem;
-    justify-self: start;
-    margin: 0;
-    padding: 0.35rem 0.2rem;
-    border: 0;
-    background: transparent;
-    color: #5b5bd6;
-    font: inherit;
-    font-size: 1rem;
-    font-weight: 500;
-    cursor: pointer;
-  }
-
-  body.site-app .site-avatar-sheet-title {
-    margin: 0;
-    justify-self: center;
-    font-size: 1.15rem;
-    font-weight: 700;
-    color: #111;
-  }
-
-  body.fiok-menu-open {
-    overflow: hidden;
-  }
-}
-
 body.site-app .site-header-btn,
 body.site-app .hub-btn {
   display: inline-flex;
@@ -1107,7 +856,6 @@ body.site-app .hub-btn {
   transition: background 0.15s, color 0.15s, border-color 0.15s, filter 0.15s;
 }
 
-/* A display:inline-flex felülírná a natív [hidden]-t — belépve a Regisztráció ne látszódjon. */
 body.site-app .site-header-btn[hidden],
 body.site-app .hub-btn[hidden],
 body.site-app [data-auth-register][hidden] {
@@ -1457,7 +1205,6 @@ body.site-app .login-hint a:hover {
   text-decoration: underline;
 }
 
-/* ——— Beállítások ——— */
 body.site-app.settings-page {
   background: #f3f4f6;
 }
@@ -1519,7 +1266,6 @@ body.site-app .settings-form {
   gap: 0.85rem;
 }
 
-/* Mobilapp Beállítások accordion */
 body.site-app .settings-profile-header {
   display: flex;
   align-items: center;
@@ -1936,7 +1682,6 @@ body.site-app .import-db-badge {
   border-radius: 999px;
 }
 
-/* Lépéssáv (hirdetésfeladás) */
 body.site-app .site-app-wizard-steps {
   max-width: 1320px;
   margin: 0 auto;
@@ -1974,7 +1719,6 @@ body.site-app .site-app-wizard-steps .step {
   white-space: nowrap;
 }
 
-/* Mobilon se oszlopba tördeljük — a style.css .steps { column } felülírása */
 @media (max-width: 768px) {
   body.site-app .site-app-wizard-steps {
     padding: 0.65rem 1rem 0;
@@ -2010,7 +1754,6 @@ body.site-app .site-app-wizard-steps .step.done {
   background: #f0f2f5;
 }
 
-/* Tartalom */
 body.site-app .page,
 body.site-app .home-main,
 body.site-app main {
@@ -2154,7 +1897,6 @@ body.site-app .category-bar strong {
   color: #111;
 }
 
-/* Kártyák */
 body.site-app .card {
   background: #fff;
   border: 1px solid #e3e6ea;
@@ -2174,7 +1916,6 @@ body.site-app .card-body {
   background: #fff;
 }
 
-/* Gumi méretek — egyenlő 2 oszlop */
 body.site-app .tire-sizes-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2248,7 +1989,6 @@ body.site-app .tire-sizes-grid .tire-row select:disabled {
   }
 }
 
-/* Gombok */
 body.site-app .btn-primary,
 body.site-app #next-btn.btn-primary,
 body.site-app #new-ad-btn.btn-primary,
@@ -2286,7 +2026,6 @@ body.site-app .btn-secondary:hover {
   background: #f8f9fb;
 }
 
-/* Űrlap mezők */
 body.site-app {
   --site-field-height: 34px;
 }
@@ -2348,7 +2087,6 @@ body.site-app .md-outlined > textarea {
   box-sizing: border-box;
 }
 
-/* Leírás teljes szélesség + Megtalálható alatta */
 body.site-app .form-grid > .field-stack.full {
   grid-column: 1 / -1;
   display: flex;
@@ -2382,37 +2120,6 @@ body.site-app .form-grid > .field-stack--leiras .leiras-head {
 
 body.site-app .form-grid > .field-stack--leiras .leiras-head label {
   margin: 0;
-}
-
-body.site-app .leiras-ai-btn {
-  appearance: none;
-  border: 1px solid #c5d0dc;
-  background: #f5f8fc;
-  color: #1565c0;
-  font: inherit;
-  font-size: 0.88rem;
-  font-weight: 700;
-  padding: 0.4rem 0.75rem;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-body.site-app .leiras-ai-btn:hover:not(:disabled) {
-  background: #e8f1fb;
-  border-color: #1565c0;
-}
-
-body.site-app .leiras-ai-btn:disabled {
-  opacity: 0.65;
-  cursor: wait;
-}
-
-body.site-app .leiras-ai-status.is-error {
-  color: #b42318;
-}
-
-body.site-app .form-grid > .field-stack--leiras .hint {
-  margin: 0.15rem 0 0;
 }
 
 body.site-app .form-grid > .field-stack--location .inline-2 {
@@ -2470,7 +2177,6 @@ body.site-app #ad-form .ad-location-settings-link {
   margin: 0.1rem 0 0;
 }
 
-/* Telefonszám + beszélt nyelvek */
 body.site-app .form-grid > .phone-lang-grid.full {
   grid-column: 1 / -1;
   display: flex;
@@ -2678,7 +2384,6 @@ body.site-app #ad-form .ad-layout-hidden {
   display: none !important;
 }
 
-/* Ingatlan feladás — keresővel azonos panel */
 body.site-app #ad-form.ad-form--ingatlan #ingatlan-fields {
   display: block !important;
   width: 100%;
@@ -2699,7 +2404,6 @@ body.site-app #ad-form.ad-form--ingatlan .immo-search-panel {
   box-shadow: none;
 }
 
-/* Feladás: ugyanaz a 12-oszlopos rács, mint a kereső (ingatlan.html desk). */
 body.site-app #ad-form.ad-form--ingatlan .immo-search-panel--post .immo-schema-grid {
   display: grid !important;
   grid-template-columns: repeat(12, minmax(0, 1fr)) !important;
@@ -2735,7 +2439,7 @@ body.site-app #ad-form.ad-form--ingatlan .immo-action {
   font-weight: 600;
   cursor: pointer;
 }
-/* Asztali: bal oldalsáv mint az /ingatlan.html kereső (360px panel). */
+
 @media (min-width: 901px) {
   body.site-app.ad-vertical-ingatlan[data-site-page="hirdetesfeladas"] .site-layout--wide .site-center--automax {
     grid-template-columns: 360px minmax(0, 1fr) !important;
@@ -2763,8 +2467,6 @@ body.site-app #ad-form.ad-form--ingatlan .immo-action {
   }
 }
 
-
-/* Ingatlan feladás: járműmezők / lépések soha ne látszódjanak (canvasról sem). */
 body.site-app #ad-form.ad-form--ingatlan .ad-layout-item:has(#gyartasi_ev),
 body.site-app #ad-form.ad-form--ingatlan .ad-layout-item:has(#gyartasi_honap),
 body.site-app #ad-form.ad-form--ingatlan .ad-layout-item:has(#forgalomba_helyezes_ev),
@@ -3039,8 +2741,6 @@ body.site-app .field-row.full.field-row--tech-top .suffix-field .hint-inline {
   white-space: nowrap;
 }
 
-
-/* Műszaki alsó rács — egyenlő 2 oszlop */
 body.site-app .muszaki-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -3104,7 +2804,6 @@ body.site-app .field-row--tech-top .suffix-field > span:not(.hint-inline) {
   text-align: left;
 }
 
-/* Teljesítmény: input = felirat szélesség; kW + LE egy sorban jobbra */
 body.site-app #ad-form .field-row.full.field-row--tech-top .labeled-field--power,
 body.site-app .field-row.full.field-row--tech-top .labeled-field--power {
   display: grid !important;
@@ -3155,8 +2854,6 @@ body.site-app .field-row--tech-top .labeled-field--power > .hint-inline#le-displ
 body.site-app .field-row--tech-top .labeled-field--power > input[type="hidden"] {
   display: none;
 }
-
-
 
 body.site-app .muszaki-grid input,
 body.site-app .muszaki-grid select,
@@ -3243,7 +2940,6 @@ body.site-app #ad-form input[type="number"]::-webkit-credentials-auto-fill-butto
   }
 }
 
-/* Elektromos műszaki mezők (csak tiszta Elektromos) */
 body.site-app .ev-tech-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -3359,7 +3055,6 @@ body.site-app .help-link {
   color: #1565c0;
 }
 
-/* Import panel */
 body.site-app .import-panel-head {
   color: #111;
 }
@@ -3470,7 +3165,6 @@ body.import-page.site-page {
   padding-bottom: 0;
 }
 
-/* Listings */
 body.site-app .listings-filter-btn {
   background: #fff;
   border: 1px solid #d5d9e0;
@@ -3499,7 +3193,6 @@ body.site-app .ha-card-title {
   color: #111;
 }
 
-/* Oldalsáv videók */
 body.site-app .site-side-card {
   background: #fff;
   border: 1px solid #e3e6ea;
@@ -3582,7 +3275,6 @@ body.site-app[data-site-page="hirdetesfeladas"] #new-ad-btn.btn-primary:hover {
   color: #111;
 }
 
-/* Mobilweben a feladás = asztali web (nincs app-shell / tabbar) */
 @media (max-width: 800px) {
   body.site-app[data-site-page="hirdetesfeladas"] {
     padding-bottom: 1.25rem !important;
@@ -3674,7 +3366,6 @@ body.site-app .package.selected {
     grid-template-columns: 1fr;
   }
 
-
   body.site-app .field-row--vehicle-ident {
     flex-direction: row;
     flex-wrap: wrap;
@@ -3740,8 +3431,6 @@ body.site-app .package.selected {
   }
 }
 
-
-/* ——— Fiókom / Mein mobile layout ——— */
 body.site-app.mm-page {
   background: #eef1f4;
 }
@@ -3863,7 +3552,6 @@ body.site-app .mm-nav-group {
   gap: 0.1rem;
 }
 
-/* display:grid felülírná a natív [hidden]-t — magán fióknál a Cégadatok ne látszódjon */
 body.site-app .mm-nav-group[hidden] {
   display: none !important;
 }
@@ -4639,8 +4327,6 @@ body.site-app .settings-db-inspect {
   }
 }
 
-
-/* ——— Üzenetek: app-vászon + keretes shell (nem full-bleed fehér) ——— */
 body.site-app.mm-messages-open,
 body.site-app[data-site-page="uzenetek"] {
   background: #eef0f3;
@@ -4696,7 +4382,6 @@ body.site-app .wh-msg {
   border: 0;
 }
 
-/* Lista: ne legyen üres jobb/felső „Válassz egy beszélgetést” sáv */
 body.site-app .wh-msg[data-msg-view="inbox"] {
   grid-template-columns: minmax(0, 1fr);
 }
@@ -5293,10 +4978,6 @@ body.site-app .wh-msg__error {
   }
 }
 
-/* —— Színmód (világos / sötét) —— */
-/* Böngésző / feed: sötét oldalháttér.
-   Üzenetek + beállítások/fiók + hirdetésfeladás + hirdetés részlet: saját sötét felület.
-   Egyéb app-oldalak: világos vászon. */
 html[data-theme="dark"] body.site-app.hub-page--feed,
 html[data-theme="dark"] body.site-app.home-page {
   background: #12161c;
@@ -5599,7 +5280,6 @@ html[data-theme="dark"] body.site-app .ha-imp-mode {
   outline-offset: 2px;
 }
 
-/* —— Hirdetésfeladás: sárga folytatás gomb —— */
 body.site-app[data-site-page="hirdetesfeladas"] .footer-actions,
 body.site-app[data-site-page="hirdetesfeladas"] #footer-actions {
   position: static !important;
@@ -5630,10 +5310,6 @@ body.site-app[data-site-page="hirdetesfeladas"] #new-ad-btn.btn-primary:hover {
   color: #111 !important;
 }
 
-/* ============================================================
- * Globális sötét mód olvashatóság — minden site-app oldal.
- * Sötét chrome: világos szöveg. Fehér kártya/input: sötét szöveg.
- * ============================================================ */
 html[data-theme="dark"] body.site-app {
   color: #e8eaed;
 }
@@ -5691,7 +5367,6 @@ html[data-theme="dark"] body.site-app .mm-nav-sublink.is-active {
   color: #93c5fd;
 }
 
-/* Fehér felületek: mindig sötét szöveg (böngésző csempék / promo) */
 html[data-theme="dark"] body.site-app .login-card,
 html[data-theme="dark"] body.site-app .home-grid-card,
 html[data-theme="dark"] body.site-app .hf-card,
@@ -5703,12 +5378,6 @@ html[data-theme="dark"] body.site-app .hub-sell {
   border-color: #d4d4d4;
 }
 
-/* Eldobható menü: sötét háttér + fehér szöveg */
-html[data-theme="dark"] body.site-app .site-avatar-dropdown {
-  background: #1a1f26 !important;
-  color: #fff !important;
-  border-color: #2a313c !important;
-}
 
 html[data-theme="dark"] body.site-app .login-card,
 html[data-theme="dark"] body.site-app .login-card h1,
@@ -5756,7 +5425,6 @@ html[data-theme="dark"] body.site-app .settings-form .login-label {
   color: #fff;
 }
 
-/* —— Egységes világos app-vászon (fiók / feladás / stb.) sötét fejléc mellett —— */
 html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]):not([data-site-page="hirdetes"]):not(.hd-page) h1,
 html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]):not([data-site-page="hirdetes"]):not(.hd-page) h2,
 html[data-theme="dark"] body.site-app:not(.hub-page--feed):not(.home-page):not([data-site-page="uzenetek"]):not(.mm-messages-open):not([data-site-page="beallitasok"]):not([data-site-page="fiok"]):not(.settings-page):not([data-site-page="hirdetesfeladas"]):not([data-site-page="hirdetes"]):not(.hd-page) h3,
@@ -5799,7 +5467,6 @@ html[data-theme="dark"] body.site-app.mm-page:not([data-site-page="uzenetek"]):n
   background: #eef1f4 !important;
 }
 
-/* —— Üzenetek: valódi sötét mód —— */
 html[data-theme="dark"] body.site-app[data-site-page="uzenetek"],
 html[data-theme="dark"] body.site-app.mm-messages-open {
   background: #12161c !important;
@@ -5951,7 +5618,6 @@ html[data-theme="dark"] body.site-app .wh-msg__send:hover {
   background: #1d4ed8;
 }
 
-/* —— Beállítások / fiók: valódi sötét mód —— */
 html[data-theme="dark"] body.site-app.settings-page,
 html[data-theme="dark"] body.site-app[data-site-page="beallitasok"],
 html[data-theme="dark"] body.site-app[data-site-page="fiok"],
@@ -6104,7 +5770,6 @@ html[data-theme="dark"] body.site-app.settings-page .settings-wheel-opt.is-activ
   color: #f3f4f6;
 }
 
-/* Fiók / beállítások: minden panel, lista, tábla, űrlap sötét */
 html[data-theme="dark"] body.site-app.settings-page .mm-panel,
 html[data-theme="dark"] body.site-app.settings-page .ha-imp-panel,
 html[data-theme="dark"] body.site-app.settings-page .ha-imp-result,
@@ -6243,7 +5908,6 @@ html[data-theme="dark"] body.site-app.settings-page .login-field {
   color: #d1d5db !important;
 }
 
-/* —— Hirdetésfeladás: valódi sötét mód —— */
 html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] {
   background: #12161c !important;
   color: #e8eaed !important;
@@ -6333,10 +5997,6 @@ html[data-theme="dark"] body.site-app.ad-vertical-ingatlan[data-site-page="hirde
   color: #e8eaed !important;
 }
 
-/* ============================================================
- * Sötét háttéren: fehér szöveg az egész weben.
- * Kivétel: fehér listing/promo kártyák + citromsárga CTA-k.
- * ============================================================ */
 html[data-theme="dark"] {
   color-scheme: dark;
 }
@@ -6361,11 +6021,7 @@ html[data-theme="dark"] body.site-app.mm-messages-open :is(a, strong, b, p, span
 html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] :is(a, strong, b, p, span, label, li, h1, h2, h3, h4, small, em, button),
 html[data-theme="dark"] body.site-app.hub-page--feed :is(h1, h2, h3, h4, p, span, a, label, li, small, em),
 html[data-theme="dark"] body.site-app.home-page :is(h1, h2, h3, h4, .hf-title, .hf-all, .hub-nav-link, .ajanlas-title, .ajanlas-subtitle, .ajanlas-note),
-html[data-theme="dark"] body.site-app .site-avatar-dropdown :is(a, strong, b, p, span, label, li, button, small, em, div) {
-  color: #fff !important;
-}
 
-/* Input / select / textarea: fehér betű sötét mezőn (webkit fill is) */
 html[data-theme="dark"] body.site-app :is(
   input[type="text"],
   input[type="email"],
@@ -6442,7 +6098,6 @@ html[data-theme="dark"] body.site-app :is(
   transition: background-color 99999s ease-out;
 }
 
-/* Fehér kártyákon maradjon fekete a szöveg */
 html[data-theme="dark"] body.site-app :is(
   .hf-card,
   .hf-card--listing,
@@ -6476,7 +6131,6 @@ html[data-theme="dark"] body.site-app :is(
   color-scheme: light;
 }
 
-/* Citromsárga CTA: fekete szöveg */
 html[data-theme="dark"] body.site-app :is(
   .hub-btn--post,
   .hub-btn--primary,
@@ -6491,7 +6145,6 @@ html[data-theme="dark"] body.site-app :is(
   color: #111 !important;
 }
 
-/* Veszély / kiemelés színek megmaradnak */
 html[data-theme="dark"] body.site-app.settings-page :is(
   .myads-link--danger,
   .settings-danger-btn,
@@ -6517,7 +6170,6 @@ html[data-theme="dark"] body.site-app .site-message-badge {
   color: #fff !important;
 }
 
-/* Világos gomb / select / wheel: soha ne legyen fehér-a-fehéren */
 html[data-theme="dark"] body.site-app :is(
   .settings-btn-secondary,
   .btn-secondary,
@@ -6583,12 +6235,3 @@ html[data-theme="dark"] body.site-app.settings-page .settings-kicker {
   color: #fff !important;
 }
 
-/* Avatar / fiók dropdown menü elemei */
-html[data-theme="dark"] body.site-app .site-avatar-dropdown a,
-html[data-theme="dark"] body.site-app .site-avatar-dropdown button,
-html[data-theme="dark"] body.site-app .site-avatar-dropdown span,
-html[data-theme="dark"] body.site-app .site-avatar-dropdown strong,
-html[data-theme="dark"] body.site-app .site-avatar-dropdown .site-avatar-dropdown-label,
-html[data-theme="dark"] body.site-app .site-avatar-dropdown .site-avatar-menu-item {
-  color: #fff !important;
-}

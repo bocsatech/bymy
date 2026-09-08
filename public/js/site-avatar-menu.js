@@ -1,9 +1,3 @@
-/**
- * Fejléc profilkép + név (asztali):
- * — Beállítások oldal megnyitása (/beallitasok.html)
- * — Bezáráskor visszatérés az előző oldalra
- * Mobil weben: Fiókom menü (/fiok.html)
- */
 
 const AUTH_KEY = "bymy-auth-user";
 const PHOTO_KEY = "bymy-avatar-photos";
@@ -45,7 +39,6 @@ function getAvatarPhoto(email) {
   return user?.profile?.avatarDataUrl || null;
 }
 
-/** Egyszeri: helyi profilkép feltöltése a szerverre, ha még nincs ott. */
 async function syncLocalAvatarOnce() {
   if (sessionStorage.getItem("bymy-avatar-server-sync") === "1") return;
   const user = getAuthUser();
@@ -76,12 +69,10 @@ async function syncLocalAvatarOnce() {
           loggedInAt: Date.now(),
         }));
       } catch {
-        /* ignore */
       }
       window.dispatchEvent(new CustomEvent("bymy-auth-changed"));
     }
   } catch {
-    /* ignore */
   }
 }
 
@@ -116,10 +107,6 @@ function letterFromUser(user) {
 }
 
 function hideDropdown(wrap) {
-  wrap.querySelectorAll("[data-avatar-dropdown]").forEach((el) => {
-    el.hidden = true;
-    el.innerHTML = "";
-  });
   wrap.querySelector("[data-avatar-toggle]")?.setAttribute("aria-expanded", "false");
 }
 
@@ -135,7 +122,6 @@ function isFiokPath(path = window.location.pathname) {
   return path === "/fiok.html" || path.endsWith("/fiok.html");
 }
 
-/** Csak same-origin relatív útvonal; ne loopoljon vissza a Beállításokra. */
 export function safeSettingsReturnUrl(raw) {
   const s = String(raw || "").trim();
   if (!s.startsWith("/") || s.startsWith("//")) return "/";
@@ -151,7 +137,6 @@ export function rememberSettingsReturn(url = currentPath()) {
   try {
     sessionStorage.setItem(RETURN_KEY, safeSettingsReturnUrl(url));
   } catch {
-    /* ignore */
   }
 }
 
@@ -162,14 +147,6 @@ export function consumeSettingsReturn() {
     return safeSettingsReturnUrl(raw);
   } catch {
     return "/";
-  }
-}
-
-export function peekSettingsReturn() {
-  try {
-    return safeSettingsReturnUrl(sessionStorage.getItem(RETURN_KEY));
-  } catch {
-    return "";
   }
 }
 
@@ -263,7 +240,6 @@ function bindWrap(wrap) {
       return;
     }
 
-    /* Mobil: Fiókom menü */
     if (isFiokPath()) return;
     toggle.dataset.navigating = "1";
     window.location.assign("/fiok.html");

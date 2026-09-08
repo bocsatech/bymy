@@ -1,9 +1,7 @@
-/** Kliens oldali kategória lista (mobil PartnerCategoryCatalog). */
 
 export const PARTNER_VERTICALS = Object.freeze(["auto", "ingatlan"]);
 
 export const PARTNER_CATEGORIES = [
-  // Autó
   { id: "atiras_ugyintezes", label: "Átírás ügyintézés", image: "ajanlas-atiras", vertical: "auto" },
   { id: "eredetvizsga", label: "Eredetvizsga", image: "ajanlas-eredet", vertical: "auto" },
   { id: "muszakivizsga", label: "Műszaki vizsga", image: "ajanlas-muszaki", vertical: "auto" },
@@ -15,7 +13,6 @@ export const PARTNER_CATEGORIES = [
   { id: "autokozmetika", label: "Autókozmetika", image: "ajanlas-kozmetika", vertical: "auto" },
   { id: "autovillamossag", label: "Autóvillamosság", image: "ajanlas-villamos", vertical: "auto" },
 
-  // Ingatlan
   { id: "ertekesites", label: "Értékesítés", image: "ajanlas-ertekesites", vertical: "ingatlan" },
   { id: "ertekbecsles", label: "Értékbecslés", image: "ajanlas-ertekbecsles", vertical: "ingatlan" },
   {

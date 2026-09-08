@@ -1,4 +1,4 @@
-/* —— Oldalsáv videók (minden oldalon) —— */
+
 
 .site-layout {
   display: grid;
@@ -7,7 +7,6 @@
   align-items: start;
 }
 
-/* Ha nincs oldalsáv a statikus HTML-ben, ne szoruljon 200px-be a tartalom */
 .site-layout:not(:has(> [data-site-side])) {
   grid-template-columns: minmax(0, 1fr);
 }
@@ -281,7 +280,6 @@ body.home-page .site-side-card {
   }
 }
 
-/* Hirdetésfeladás: mobilon is asztali webes elrendezés / tipp panel */
 @media (max-width: 900px) {
   body[data-site-page="hirdetesfeladas"] .site-layout--wide .site-center--automax {
     grid-template-columns: minmax(0, 1fr);

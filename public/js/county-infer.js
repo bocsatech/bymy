@@ -1,4 +1,3 @@
-/** Település / irányítószám → vármegye (HU) — hirdetés Megtalálható mezőhöz. */
 
 const COUNTY_SEATS = {
   Budapest: "Budapest",

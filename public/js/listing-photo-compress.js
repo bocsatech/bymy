@@ -1,4 +1,3 @@
-/** Hirdetéskép: JPEG-re kicsinyítés, hogy a Vercel body limit alá férjen. */
 
 export const MAX_LISTING_PHOTOS = 12;
 const MAX_SIDE = 1280;
@@ -15,7 +14,6 @@ async function decodeToBitmap(file) {
     try {
       return await createImageBitmap(file);
     } catch {
-      /* HEIC / egyes böngészők */
     }
   }
   const url = URL.createObjectURL(file);

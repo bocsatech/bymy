@@ -1,7 +1,3 @@
-/**
- * Hirdetés fotó sablon overlay (előnézet / mentés).
- * Egyelőre egy sablon; később több választható + előnézet.
- */
 
 export const PHOTO_OVERLAY_TEMPLATES = [
   {
@@ -13,21 +9,6 @@ export const PHOTO_OVERLAY_TEMPLATES = [
 
 export const DEFAULT_PHOTO_OVERLAY_ID = PHOTO_OVERLAY_TEMPLATES[0].id;
 
-/**
- * @param {string} src image URL or data URL
- * @param {{
- *   templateId?: string,
- *   brand?: string,
- *   model?: string,
- *   year?: string,
- *   km?: string,
- *   power?: string,
- *   fuel?: string,
- *   price?: string,
- *   place?: string,
- * }} [info]
- * @returns {Promise<string>} PNG data URL
- */
 export async function renderListingPhotoOverlay(src, info = {}) {
   const templateId = info.templateId || DEFAULT_PHOTO_OVERLAY_ID;
   if (templateId !== "soft-left-v1") {
@@ -47,7 +28,6 @@ export async function renderListingPhotoOverlay(src, info = {}) {
 
   ctx.drawImage(img, 0, 0, w, h);
 
-  // Soft bal + alsó veil
   const left = ctx.createLinearGradient(0, 0, w, 0);
   left.addColorStop(0, "rgba(11,18,32,0.82)");
   left.addColorStop(0.42, "rgba(11,18,32,0.48)");
@@ -73,7 +53,6 @@ export async function renderListingPhotoOverlay(src, info = {}) {
   const price = formatPrice(info.price);
   const place = clean(info.place) || "bymy";
 
-  // Badge
   const badgeH = Math.max(22, Math.round(h * 0.036));
   const badgeW = Math.round(badgeH * 4.2);
   roundRect(ctx, pad, pad, badgeW, badgeH, Math.round(badgeH * 0.28));

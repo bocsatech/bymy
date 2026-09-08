@@ -1,6 +1,3 @@
-/**
- * Autó asztali — Sebességváltó kapcsolós panel (üzemanyag / állapot stílus).
- */
 
 import { SEBESSEGVALTO_CATEGORIES } from "./equipment-data.js";
 import { bindAutoBmDismiss, autoBmPanelIsOpen } from "./auto-bm-dismiss.js?v=bmDismiss1";
@@ -57,9 +54,6 @@ function escapeAttr(value) {
   return escapeHtml(value).replace(/'/g, "&#39;");
 }
 
-/**
- * @param {HTMLFormElement} form
- */
 export async function mountAutoSebessegvaltoPicker(form) {
   if (!form || !isAutoDesk() || form.dataset.sebessegvaltoPicker === "1") return;
 
@@ -75,9 +69,7 @@ export async function mountAutoSebessegvaltoPicker(form) {
   const deskQuick = field.dataset.deskQuick || "0";
   field.remove();
 
-  /** @type {Set<string>} */
   const openMains = new Set();
-  /** @type {Set<string>} */
   const selected = new Set();
 
   const hidden = document.createElement("input");

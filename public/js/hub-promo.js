@@ -1,7 +1,3 @@
-/**
- * Főoldal / fő navigációs oldalak promo sávja — demó kinézet (szöveg + fotó).
- * Stock: HTML split kártyák. Egyedi admin feltöltés: teljes kész kép (fullimg).
- */
 const ASSET_V = "hubHeroDemo1";
 
 const ICON_HOUSE = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1v-9.5Z" stroke="#fff" stroke-width="1.7" stroke-linejoin="round"/></svg>`;
@@ -170,7 +166,6 @@ export async function mountHubPromos(target = document) {
       if (Array.isArray(data.images)) images = data.images;
     }
   } catch {
-    /* stock marad */
   }
 
   if (images) paint(target, images);

@@ -1,8 +1,3 @@
-/**
- * Fiókom — mobile.de Mein mobile / Konto bearbeiten mintára.
- * Szekciók: attekintes | cegadatok | import | nyomtatasok | ertekelesek | parkolo | keresesek |
- *           uzenetek | hirdetes | megjelenes | fiok
- */
 
 import {
   getAuthUser,
@@ -538,7 +533,6 @@ async function enrichParkImages(email, items) {
         patchParkplatzItem(email, item.id, { imageUrl: String(imageUrl) });
         changed = true;
       } catch {
-        /* ignore */
       }
     }
   } finally {
@@ -634,7 +628,6 @@ async function lookupCityFromPostal(postalInput, cityInput, busyEl) {
       });
     }
   } catch {
-    /* ignore */
   } finally {
     cityLookupBusy = false;
     if (busyEl) busyEl.hidden = true;
@@ -712,9 +705,6 @@ function syncCompanyWrap(form) {
   if (locked) locked.textContent = accountTypeLabel(type);
 }
 
-function initAccordionExclusive() {
-  /* Accordion megszűnt — a beállítások külön oldalmenü-panelek. */
-}
 
 function initPostalLookups(root = document) {
   root.querySelectorAll("[data-postal-lookup]").forEach((input) => {
@@ -829,9 +819,6 @@ function initAreaForms() {
   });
 }
 
-async function refreshDbInspect() {
-  /* Fejlesztői DB panel eltávolítva a mobil UI-ból. */
-}
 
 function applyProfileToForm(profile) {
   const form = document.getElementById("mm-profile-form");
@@ -1005,7 +992,6 @@ export async function initSettingsPage() {
   try {
     loadedProfile = await loadProfileFromServer();
   } catch {
-    /* session már ellenőrizve */
   }
   const user = getAuthUser();
   if (!user?.email) return;
@@ -1036,10 +1022,8 @@ export async function initSettingsPage() {
   });
   fillProfileForm(user, loadedProfile);
   initMyAdsPanel(document.getElementById("mm-ad-list")).reload();
-  // Második kör: ha a panel most vált láthatóra, biztosan kitöltjük.
   requestAnimationFrame(() => fillProfileForm(getAuthUser(), loadedProfile || getProfile()));
 
-  // Régi helyi profilkép → szerver (hirdetés oldalon is megjelenjen)
   try {
     const localPhoto = readPhotos()[user.email];
     const serverPhoto = String((loadedProfile || getProfile())?.avatarDataUrl || "").trim();
@@ -1054,11 +1038,9 @@ export async function initSettingsPage() {
       }
     }
   } catch {
-    /* ne blokkolja a Beállításokat */
   }
 
   initNotifyForm(user.email);
-  initAccordionExclusive();
   initPostalLookups();
   initAreaForms();
   initHeroSettings();
@@ -1118,7 +1100,6 @@ export async function initSettingsPage() {
         if (!parsed.v) parsed.v = CAT_STORAGE_VERSION;
         sessionStorage.setItem(CAT_STORAGE_KEY, JSON.stringify(parsed));
       } catch {
-        /* ignore */
       }
     });
   });
@@ -1150,8 +1131,6 @@ export async function initSettingsPage() {
 
   const profileForm = document.getElementById("mm-profile-form");
   syncCompanyWrap(profileForm);
-
-  // A submit listener korán kötődik (bindProfileFormEarly) — itt csak a hello frissül mentés után.
 
   document.getElementById("settings-password-form")?.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -1206,7 +1185,6 @@ export async function initSettingsPage() {
   }
 }
 
-/** Mentés listener AZONNAL — ne várjon az auth hálózatra (különben natív submit = nincs mentés). */
 function bindProfileFormEarly() {
   const profileForm = document.getElementById("mm-profile-form");
   if (!profileForm || profileForm.dataset.bound === "1") return;

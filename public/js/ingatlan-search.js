@@ -1,7 +1,3 @@
-/**
- * Ingatlan bérlés kereső — mobil-szerű kerék pickerek + szűrés.
- * Csak ezekkel a mezőkulcsokkal kötjük össze a listát.
- */
 
 import {
   INGATLAN_UZLETAG,
@@ -180,7 +176,6 @@ function isImmoMobileLayout() {
 }
 
 function useDrumPicker() {
-  // Ingatlan kereső: mindig portál dobkerék (egységes megjelenés / × / pipa).
   return true;
 }
 
@@ -204,7 +199,6 @@ function syncImmoSearchWheelDisplay(wheel) {
   if (wheel.dataset.drumBound === "1") syncDrumWheelDisplay(wheel);
 }
 
-/** Mobil: min + max egy sorban (ár, alapterület). */
 const MOBILE_DUAL_RANGES = INGATLAN_DUAL_RANGE_GROUPS;
 
 function setupMobileDualRanges(mainHost) {
@@ -298,7 +292,6 @@ function setupMobileDualRange(mainHost, { id, tolKey, igKey, title, ariaLabel, u
     block.appendChild(wrap);
   }
 
-  // Admin rácspozíció: data-attribútum (megbízható), CSS parse csak fallback.
   const parsePlacement = (el) => {
     const dataCol = Number(el.getAttribute("data-grid-col"));
     const dataSpan = Number(el.getAttribute("data-grid-span"));
@@ -435,7 +428,6 @@ function clearPriceInputs(form) {
   });
 }
 
-/** Ár: kézi min–max mezők (millió Ft eladónál, Ft bérlésnél) — nem dobkerék. */
 function setupPriceManualInputs(form) {
   const wrap = form?.querySelector('.immo-dual-range[data-range="ar"]');
   if (!wrap) return;
@@ -506,7 +498,6 @@ function fillDualRangeWheels(form, { tolKey, igKey, options, emptyMin = "min.", 
   const prevIg = readWheel(ig);
   fillWheel(tol, options, { emptyLabel: emptyMin });
   fillWheel(ig, options, { emptyLabel: emptyMax });
-  /* Ár / alapterület / emelet: ugyanaz a 3-soros dobkerék, de mindig egyetlen érték. */
   initImmoSearchWheel(tol, { emptyLabel: emptyMin, multiple: false, customInput: false });
   initImmoSearchWheel(ig, { emptyLabel: emptyMax, multiple: false, customInput: false });
   tol = form.querySelector(`[data-wheel="${tolKey}"]`);
@@ -786,7 +777,6 @@ function syncTipus2Menu(form) {
   wheel.setAttribute("aria-disabled", disabled ? "true" : "false");
 }
 
-/** Tipus szerint mutatja/rejti a típusfüggő mezőket + területmátrix. */
 function syncTipusFieldVisibility(form) {
   if (!form) return;
   const parents = readWheelList(form.querySelector('[data-wheel="ingatlan_lakas_tipus"]'));
@@ -847,7 +837,6 @@ function syncTipusFieldVisibility(form) {
   syncDetailConditionals(form);
 }
 
-/** ingatlan.com-szerű feltételes mezők: gáz / napelem kW / szigetelés cm. */
 function syncDetailConditionals(form) {
   if (!form) return;
   const parents = readWheelList(form.querySelector('[data-wheel="ingatlan_lakas_tipus"]'));
@@ -875,7 +864,6 @@ function syncDetailConditionals(form) {
   setHidden("napelem_kw", solarOn);
   setHidden("szigeteles_cm", insOn);
 
-  /* Ház/nyaraló/intézmény: tetőtér = beépített…; lakás: tetőtéri… */
   const tetoter = form.querySelector('[data-wheel="tetoter"]');
   if (tetoter && tipusVisible.has("tetoter")) {
     const hazLike = parents.some((p) => ["haz", "nyaralo", "intezmeny"].includes(p));
@@ -888,12 +876,6 @@ function syncDetailConditionals(form) {
   }
 }
 
-/**
- * Területmezők elrendezése a fő sávon:
- * - csak alapterület
- * - csak telekterület
- * - mindkettő (ház / nyaraló): Alapterület + Telekterület egymás alatt
- */
 function layoutAreaDuals(form, { showAlap, showTelek }) {
   const main = form.querySelector("#immo-schema-main");
   const alap = form.querySelector('.immo-dual-range-block[data-range="alapterulet"]');
@@ -962,7 +944,6 @@ function layoutAreaDuals(form, { showAlap, showTelek }) {
       else main.appendChild(telek);
     }
   } else if (!showAlap && showTelek && telek && alap) {
-    /* Csak telek: a telekterület az alapterület helyére a fő sávban */
     const col = alap.dataset.gridCol || "1";
     const span = alap.dataset.gridSpan || "12";
     const row = Number(alap.dataset.gridRow) || 3;
@@ -985,7 +966,6 @@ function layoutAreaDuals(form, { showAlap, showTelek }) {
   main.style.gridTemplateRows = `repeat(${maxRow}, auto)`;
 }
 
-/** Élő kereső/feladás: Tipus 2 a Tipus mellett (adminban törölt szekcióban marad a default). */
 function ensureTipus2Field(root, { enable }) {
   const existing = root.querySelector('[data-schema-field="ingatlan_tipus_2"]');
   if (!enable) {
@@ -1240,7 +1220,6 @@ export async function initIngatlanSearch({
       applyIngatlanTipusFieldsConfig(data);
     }
   } catch {
-    /* kód alapértelmezés */
   }
 
   const initialUz = normalizeIngatlanUzletag(defaultUzletag);
@@ -1277,7 +1256,6 @@ export async function initIngatlanSearch({
     moreBtn.textContent = open ? "Kevesebb feltétel" : "További feltételek";
   }
 
-  /** Típus választásakor a típusmenük (Állapot, Fűtés, …) a „további” panelben vannak — nyisd ki. */
   function syncMorePanelForTipus() {
     const parents = readWheelList(root.querySelector('[data-wheel="ingatlan_lakas_tipus"]'));
     if (!parents.length) {

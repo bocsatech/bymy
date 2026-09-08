@@ -34,7 +34,6 @@ export const UZEMANYAG_CATEGORIES = [
   { id: "gaz", label: "Gáz", value: "Gáz" },
 ];
 
-/** Kisteher 3,5 t-ig — Kivitel (lapos lista). */
 export const TEHER_KISTEHER_KIVITEL = [
   "Kisteher",
   "Dobozos",
@@ -45,10 +44,6 @@ export const TEHER_KISTEHER_KIVITEL = [
   "Alváz",
 ];
 
-/**
- * Teherautó 3,5 t-tól — Kivitel (hierarchikus, kapcsolós menü).
- * Szülő bekapcsolásakor nyílnak a részletek (állapot / üzemanyag stílus).
- */
 export const TEHER_35_KIVITEL_CATEGORIES = [
   {
     id: "pickup",
@@ -136,7 +131,6 @@ export function flattenTeher35KivitelOptions() {
   return out;
 }
 
-/** Autó / teher — állapot (kereső + feladás). */
 export const ALLAPOT_CATEGORIES = [
   {
     id: "normal",
@@ -200,7 +194,6 @@ export function flattenUzemanyagOptions() {
   return out;
 }
 
-/** Autó / teher — sebességváltó (kereső). */
 export const SEBESSEGVALTO_CATEGORIES = [
   {
     id: "manualis",
@@ -270,7 +263,6 @@ export function flattenSebessegvaltoOptions() {
   return out;
 }
 
-/** Autó / teher — okmányok jellege (kereső + feladás). */
 export const OKMANY_JELLEG_OPTIONS = [
   "Külföldi okmányokkal",
   "Magyar okmányokkal",
@@ -293,7 +285,6 @@ export function normalizeOkmanyJelleg(value) {
   return raw;
 }
 
-/** AC töltőcsatlakozó (kereső + feladás). */
 export const AC_TOLTO_CSATLAKOZAS_OPTIONS = ["Type 1", "Type 2"];
 
 export function normalizeAcToltoCsatlakozas(value) {
@@ -436,7 +427,6 @@ export const KLIM_OPTIONS = [
   "hőszivattyús klíma",
 ];
 
-/** Kisteher 3,5 t-ig — Extrák lépés (Klíma select + ezek a pipák). */
 export const KISTEHER_EQUIPMENT_ITEMS = [
   "állítható kormány",
   "centrálzár",

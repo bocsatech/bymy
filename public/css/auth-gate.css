@@ -1,4 +1,4 @@
-/* Belépés / regisztráció — üres háttér, nincs app shell */
+
 html,
 body.auth-gate-page {
   margin: 0;
@@ -83,7 +83,6 @@ body.auth-gate-page {
   text-decoration: underline;
 }
 
-/* Form / OAuth — korábban csak body.site-app alatt voltak, ezért csúszott szét */
 body.auth-gate-page .oauth-block {
   display: flex;
   flex-direction: column;

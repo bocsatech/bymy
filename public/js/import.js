@@ -13,7 +13,6 @@
       }
     }
   } catch {
-    /* ignore */
   }
 })();
 
@@ -108,10 +107,8 @@ export function initImportPanel({ onApply, onSelected, alertOnApply = true, onRe
           appendLog(`SQLite: ${stats.listings} hirdetés, ${stats.cells} cella`);
         }
       } catch {
-        /* db offline */
       }
     } catch {
-      /* offline / server down */
     }
   }
 

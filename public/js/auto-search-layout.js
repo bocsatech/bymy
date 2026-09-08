@@ -1,7 +1,3 @@
-/**
- * Autó / teherautó kereső — mentett admin-elrendezés
- * (szemelyauto-search | teherauto-search).
- */
 
 import { initVehicleCatalogSelects, fillSelect } from "./vehicle-catalog-client.js";
 import { KIVITEL_OPTIONS } from "./kivitel-options.js?v=kivitel1";
@@ -42,7 +38,6 @@ const KM_MAX = 500_000;
 const LE_STEPS = [50, 75, 100, 125, 150, 175, 200, 225, 250, 300, 350, 400, 500, 600, 800];
 const CCM_STEPS = [600, 800, 1000, 1200, 1400, 1600, 1800, 2000, 2200, 2500, 3000, 3500, 4000, 5000, 6000];
 
-/** Keresőben egyetlen szabad számmező (nem legördülő, nem -tól/-ig). */
 const FREE_NUMBER_FIELDS = new Set([
   "fogyasztas_varosi",
   "fogyasztas_orszaguti",
@@ -57,7 +52,6 @@ const FREE_NUMBER_SUFFIX = {
   co2_kibocsatas: "g/km",
 };
 
-/** Admin mező → kereső filter kulcs / widget. */
 const RANGE_SPECS = {
   gyartasi_ev: { tol: "ev_tol", ig: "ev_ig", kind: "year" },
   vetelar: { tol: "ar_tol", ig: "ar_ig", kind: "price" },
@@ -76,7 +70,6 @@ const RANGE_SPECS = {
   teli_hatotav: { tol: "teli_hatotav_tol", ig: "teli_hatotav_ig", kind: "number" },
 };
 
-/** Keresési körzet: 10 km-es lépés, 200 km-ig. */
 export const KERESESI_KORZET_OPTIONS = Array.from({ length: 20 }, (_, i) => {
   const km = (i + 1) * 10;
   return { value: String(km), label: `${km} km` };
@@ -147,7 +140,6 @@ function selectOptionsFor(key) {
   return SELECT_OPTIONS[key];
 }
 
-/** Rövid megjelenő címke a keresőben (a hosszú admin-címke helyett). */
 const SEARCH_LABEL_SHORT = {
   szemelyek: "Személyek",
   megye: "Megye",
@@ -158,7 +150,6 @@ const SEARCH_LABEL_SHORT = {
 
 const NARROW_FIELD_KEYS = new Set(["szemelyek", "megye", "ajtok", "telepules", "iranyitoszam", "keresesi_korzet"]);
 
-/** Szabad szöveges keresőmezők — ne legyenek dobkerék. */
 const TEXT_FIELD_KEYS = new Set(["telepules", "iranyitoszam"]);
 
 const LAYOUT_COLS = 12;
@@ -258,12 +249,10 @@ function cellsForStep(layout, step) {
     .sort((a, b) => (a.row - b.row) || (a.col - b.col));
 }
 
-/** Admin Gyorskereső (1. lépés) mezőkulcsok. */
 export function quickSearchFieldKeysFromLayout(layout) {
   return cellsForStep(layout, 1).map((c) => c.field_key).filter(Boolean);
 }
 
-/** Dobkerék / select közös opciólista egy filter kulcshoz. */
 export function optionsForAutoFilterKey(filterKey, emptyLabel = "Mindegy") {
   const key = String(filterKey || "");
   const withEmpty = (list) => [{ value: "", label: emptyLabel }, ...list];
@@ -316,7 +305,6 @@ function groupByRow(cells) {
 }
 
 function fieldWidthClass(_cell) {
-  /* Szélességet a 12 oszlopos grid (colSpan) adja — ne flex wide/narrow. */
   return "";
 }
 
@@ -411,7 +399,6 @@ function fieldHtml(cell) {
       ${suffix}
     </label>`;
   }
-  /* Település / irányítószám: szövegmező (ingatlan immo-field kinézet), nem dobkerék */
   const attrs =
     key === "iranyitoszam"
       ? 'inputmode="numeric" maxlength="4" autocomplete="postal-code"'
@@ -521,23 +508,18 @@ function setFieldValue(input, value) {
   input.dispatchEvent(new Event("change", { bubbles: true }));
 }
 
-/**
- * Irányítószám ↔ település autofill (/api/postal-codes/lookup).
- */
 function wirePostalCityAutofill(form) {
   if (!form || form.dataset.postalCityBound === "1") return;
   const postalInput = form.querySelector('[data-filter-key="iranyitoszam"]');
   const cityInput = form.querySelector('[data-filter-key="telepules"]');
   if (!postalInput || postalInput.tagName !== "INPUT") return;
   if (!cityInput || cityInput.tagName !== "INPUT") {
-    // Csak IRSZ → település, ha nincs szöveges településmező
   }
 
   form.dataset.postalCityBound = "1";
   let lastPostalLookedUp = "";
   let lastCityLookedUp = "";
   let busy = false;
-  /** 'postal' | 'city' — ne írjuk felül egymást visszacsatoláskor */
   let fillSource = "";
 
   async function lookupFromPostal() {
@@ -623,7 +605,6 @@ export async function applyAutoSearchLayout(form = document.getElementById("home
   if (!form) return null;
   const layout = await fetchAutoSearchLayout({ force: true });
   let quickKeys = quickSearchFieldKeysFromLayout(layout);
-  // Teher kereső: Kivitel legyen a gyors mezők között (adminban gyakran step 2)
   if (searchLayoutCategory() === "teherauto-search" && !quickKeys.includes("kivitel")) {
     quickKeys = [...quickKeys, "kivitel"];
   }
@@ -639,7 +620,6 @@ export async function applyAutoSearchLayout(form = document.getElementById("home
   }
 
   hideLegacy(form);
-  // 1. lépés: sűrű sorok (admin ritka row → ne legyen üres térköz)
   const step1 = cellsForStep(layout, 1).map((cell, index) => ({
     ...cell,
     row: index + 1,
@@ -652,7 +632,6 @@ export async function applyAutoSearchLayout(form = document.getElementById("home
     const moreCells = (layout.cells || [])
       .filter((c) => isSearchCellVisible(c) && Number(c.step) >= 2 && Number(c.step) <= 5)
       .sort((a, b) => (a.step - b.step) || (a.row - b.row) || (a.col - b.col));
-    // Sűrű 1..n sorok — az admin board ritka row számai (15, 30…) üres grid-sávot hagytak.
     const withRows = moreCells.map((cell, index) => ({
       ...cell,
       row: index + 1,
@@ -665,7 +644,6 @@ export async function applyAutoSearchLayout(form = document.getElementById("home
   wireRangeSelects(form);
   wireSelectOptions(form);
   wirePostalCityAutofill(form);
-  /* Mobil: katalógus a dob/sheet háttérben tölt — ne várakoztassa a keresőt */
   if (typeof window !== "undefined" && window.matchMedia("(max-width: 900px)").matches) {
     return layout;
   }
@@ -689,7 +667,6 @@ export function readLayoutFilterValues(form) {
   form.querySelectorAll("[data-filter-key]").forEach((el) => {
     const key = el.getAttribute("data-filter-key");
     if (!key || seen.has(key)) return;
-    // Dobkerék: a hidden input a forrás (select már nincs / mellőzve)
     if (el.tagName === "SELECT" && form.querySelector(`input[type="hidden"][data-filter-key="${key}"]`)) {
       return;
     }

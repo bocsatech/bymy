@@ -49,7 +49,6 @@ function isSiteChromeLine(line) {
   return false;
 }
 
-/** Megjelenítéshez: „Eladó …” prefix nélkül + Használtautó.hu / Belépés nélkül */
 export function formatListingDisplayTitle(value) {
   const lines = String(value ?? "")
     .replace(/\r\n/g, "\n")
@@ -63,7 +62,6 @@ export function formatListingDisplayTitle(value) {
   return text;
 }
 
-/** Leírás: site chrome sorok / tokenek nélkül */
 export function sanitizeListingDescription(value) {
   const lines = String(value ?? "")
     .replace(/\r\n/g, "\n")

@@ -1,4 +1,3 @@
-/** Autó karosszéria / kivitel — közös lista (kereső, feladás, menü). */
 
 export const KIVITEL_OPTIONS = [
   "Pickup",

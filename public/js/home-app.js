@@ -38,7 +38,6 @@ let categoryFilter = null;
 let categoryUi = null;
 let statsUi = null;
 let statsFilter = null;
-/** Gyorskeresőből jövő körzet-szűrő (ne ütközzön a stats sáv / ?nearby= URL-lel). */
 let quickRadiusFilter = null;
 let detailedFilters = null;
 let deskSort = "newest";
@@ -85,7 +84,6 @@ function listingVertical(item) {
 }
 
 function filterBySitePage(items) {
-  // A szerver már vertical szerint szűr; itt csak biztonsági háló.
   if (PAGE === "teherauto") {
     return items.filter((item) => listingVertical(item) === "teher");
   }
@@ -226,14 +224,12 @@ async function loadListings() {
   allItems = sortForHome(filterBySitePage(active));
   const vert = pageVerticalParam();
   if (vert === "auto" || vert === "teher" || vert === "ingatlan") {
-    // Ha a /api/nav/counts elbukik vagy 0-t cache-el, a lista a forrás.
     applyNavCounts({ [vert]: active.length });
   }
   populateFilterOptions(allItems);
   renderListings(allItems);
   updateFilterResultCount();
   statsUi?.refreshActiveCount?.();
-  // Ne görgessünk a listához betöltéskor — a lap a tetején maradjon (menüből nyitás).
   await applyNearbyFromUrl();
 }
 
@@ -261,7 +257,6 @@ async function applyNearbyFromUrl() {
     applyFilters();
     scrollToListings();
   } catch {
-    /* ignore invalid nearby params */
   }
 }
 
@@ -391,7 +386,6 @@ if (PAGE === "ingatlan") {
             postal,
             radiusKm,
           });
-          // Körzet aktív: ne követeljen pontos település/IRSZ egyezést a hirdetésmezőkön.
           sidebarFilters = { ...sidebarFilters, _locationByRadius: true };
         } catch {
           quickRadiusFilter = null;

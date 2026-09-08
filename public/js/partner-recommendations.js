@@ -45,7 +45,6 @@ export function savePostalCode(value) {
   try {
     localStorage.setItem(STORAGE_KEY, value);
   } catch {
-    /* ignore */
   }
 }
 

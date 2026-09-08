@@ -1,4 +1,4 @@
-/* Keresés — nagy 3D henger-dobkerék (mobilweb próba) */
+
 
 body[data-site-page="kereses"] {
   background:
@@ -26,7 +26,6 @@ body[data-site-page="kereses"] .cyl-title.visually-hidden {
   border: 0;
 }
 
-/* —— Viewport: majdnem teljes mobil szélesség —— */
 body[data-site-page="kereses"] .cyl-viewport {
   --cyl-face-h: clamp(7rem, 26vw, 9.75rem);
   --cyl-center-offset: 1.5cm;
@@ -34,7 +33,7 @@ body[data-site-page="kereses"] .cyl-viewport {
   position: relative;
   width: min(100%, 26rem);
   margin: 0 auto;
-  /* Közép (nagyobb) + 1 felül + 1 alul */
+
   height: calc(var(--cyl-face-h) * 3.25);
   perspective: 980px;
   perspective-origin: 50% 50%;
@@ -231,7 +230,6 @@ html[data-theme="dark"] body[data-site-page="kereses"] .cyl-viewport::after {
   background: linear-gradient(0deg, #0d1117 8%, transparent);
 }
 
-/* Asztal: ugyanaz a próba, középre igazítva */
 @media (min-width: 801px) {
   body[data-site-page="kereses"] .cyl-page {
     padding-top: 1.5rem;

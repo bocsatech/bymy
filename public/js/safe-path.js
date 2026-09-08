@@ -1,4 +1,3 @@
-/** Böngésző: belső útvonal open-redirect ellen. */
 
 export function safeInternalPath(value, fallback = "/") {
   const raw = String(value ?? "").trim();

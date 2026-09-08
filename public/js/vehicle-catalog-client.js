@@ -1,7 +1,5 @@
-/** Járműkatalógus (lista.csv): gyártmány → modell → évjárat → típus. */
 
 let catalogPromise = null;
-/** Teljes katalógus a statikus fallbackból (tipusok is) — API nélkül is megy. */
 let staticCatalogPromise = null;
 const typeCache = new Map();
 
@@ -93,7 +91,6 @@ function yearsFromTypes(tipusok) {
   return [...years].sort((a, b) => b - a);
 }
 
-/** Egy modell évjáratai + típusai. Év szűrés a kliensen, hogy ne kelljen újra kérni. */
 export async function fetchModelTypes(gyartmany, modell) {
   const key = `${gyartmany}|${modell}`;
   if (typeCache.has(key)) return typeCache.get(key);
@@ -133,18 +130,12 @@ export function fillSelect(select, values, emptyLabel = "Mindegy") {
   if (current && values?.includes(current)) select.value = current;
 }
 
-/** "500 1.4 [3 ajtós, 135 LE, …]" → "500 1.4" */
 export function shortTypeName(value) {
   const text = String(value ?? "").trim();
   const cut = text.split("[")[0].trim();
   return cut || text;
 }
 
-/**
- * A katalógus típusneve gyakran a modellel kezdődik ("500 Coupe 1.4 TJet 140"),
- * a Típus mezőbe viszont a modell nélküli rész való, különben a hirdetés címe
- * "ABARTH 500 500 Coupe 1.4 TJet 140" lenne.
- */
 export function typeNameForField(tipusNev, modell) {
   const short = shortTypeName(tipusNev);
   const model = String(modell ?? "").trim();
@@ -168,15 +159,9 @@ export function typesForYear(tipusok, year) {
     return y >= from && y <= to;
   });
 
-  // Hiányos katalógusnál ne maradjon üres a lista.
   return matching.length ? matching : tipusok;
 }
 
-/**
- * Összeköti a legördülőket. A yearSelect kétféle lehet:
- *  - yearFromCatalog: true  → az évek a katalógusból töltődnek (kereső)
- *  - yearFromCatalog: false → meglévő évlista marad (hirdetésfeladás gyártási éve)
- */
 export function bindCatalogSelects({
   brandSelect,
   modelSelect,

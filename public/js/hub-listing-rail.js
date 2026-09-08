@@ -1,7 +1,3 @@
-/**
- * Újrafelhasználható vízszintes hirdetés-sín a főoldalon
- * (Autók a közelben mintájára).
- */
 import {
   createListingTileCard,
   formatListingCountBadge,
@@ -33,28 +29,6 @@ function createPromptCard(label, href) {
   return link;
 }
 
-/**
- * @param {{
- *   railEl: HTMLElement,
- *   statusEl?: HTMLElement|null,
- *   countEl?: HTMLElement|null,
- *   allLinkEl?: HTMLAnchorElement|null,
- *   cacheKey: string,
- *   defaultAllHref: string,
- *   settingsHref?: string,
- *   noun: string,
- *   nounPlural?: string,
- *   needsPostal?: boolean,
- *   loadFresh: (ctx: { postal: string, radiusKm: number }) => Promise<{
- *     items: object[],
- *     city?: string,
- *     href?: string,
- *     skipPostal?: boolean,
- *   }>,
- *   emptyPrompt?: (ctx: { href: string, city: string, radiusKm: number }) => { label: string, href: string, status: string },
- *   noPostalPrompt?: { label: string, href: string, status: string },
- * }} opts
- */
 export function initHubListingRail(opts) {
   const {
     railEl: RAIL,
@@ -75,7 +49,6 @@ export function initHubListingRail(opts) {
   if (!RAIL) return;
 
   const plural = nounPlural || `${noun}ok`;
-  /** @type {object[]} */
   let nearbyItems = [];
   let renderedCount = 0;
   let allHref = defaultAllHref;
@@ -196,7 +169,6 @@ export function initHubListingRail(opts) {
         })
       );
     } catch {
-      /* quota */
     }
   }
 
@@ -211,7 +183,6 @@ export function initHubListingRail(opts) {
     async start({ postal, radiusKm }) {
       radiusLabel = radiusKm;
       if (ALL_LINK && postal.length === 4 && needsPostal) {
-        /* href frissül loadFresh után */
       }
 
       if (needsPostal && postal.length !== 4) {

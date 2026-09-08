@@ -59,16 +59,11 @@ export function listingReturnHref(fallback = "/auto.html") {
         return `${ref.pathname}${ref.search}${ref.hash}`;
       }
     } catch {
-      /* ignore */
     }
   }
   return fallback;
 }
 
-/**
- * Előző / következő hirdetés a keresési listából.
- * @returns {{ returnHref: string, prevId: string|null, nextId: string|null, index: number, total: number }}
- */
 export function getListingSearchNav(currentId, fallbackHref = "/auto.html") {
   const data = readReturn();
   const returnHref = listingReturnHref(fallbackHref);
@@ -89,7 +84,6 @@ export function getListingSearchNav(currentId, fallbackHref = "/auto.html") {
   };
 }
 
-/** Előző/következő hirdetésre lépéskor a lista-kontextus megmaradjon. */
 export function touchListingReturnId(listingId) {
   const id = String(listingId ?? "").trim();
   if (!id) return;
@@ -119,7 +113,6 @@ export function restoreListingReturn() {
   const data = readReturn();
   if (!data?.listingId) return;
 
-  // Csak hirdetésről visszaérkezve állítsuk vissza a scrollt — menüből /auto.html nyitásnál maradjon a lap teteje.
   let fromDetail = false;
   try {
     const ref = document.referrer ? new URL(document.referrer) : null;

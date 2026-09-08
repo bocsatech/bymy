@@ -1,6 +1,3 @@
-/**
- * Világos / sötét színmód — localStorage + data-theme a <html>-en.
- */
 const STORAGE_KEY = "bymy-theme";
 
 function preferredTheme() {
@@ -8,12 +5,10 @@ function preferredTheme() {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored === "dark" || stored === "light") return stored;
   } catch {
-    /* ignore */
   }
   try {
     if (window.matchMedia("(prefers-color-scheme: dark)").matches) return "dark";
   } catch {
-    /* ignore */
   }
   return "light";
 }
@@ -30,7 +25,6 @@ export function setTheme(theme) {
   try {
     localStorage.setItem(STORAGE_KEY, next);
   } catch {
-    /* ignore */
   }
   syncToggleUi();
   window.dispatchEvent(new CustomEvent("bymy-theme-changed", { detail: { theme: next } }));

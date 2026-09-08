@@ -43,7 +43,6 @@ export function readNearbyPrefs(profile = null) {
     if (savedPostal) postal = savedPostal.replace(/\D/g, "").slice(0, 4);
     if (savedRadius) radiusKm = Number(savedRadius.replace(/[^\d.,]/g, "").replace(",", "."));
   } catch {
-    /* ignore */
   }
   if (!Number.isFinite(radiusKm) || radiusKm <= 0) radiusKm = 30;
   return { postal, radiusKm };
@@ -139,11 +138,6 @@ function tipustTokens(item) {
     .filter(Boolean);
 }
 
-/**
- * @param {object[]} items
- * @param {{ uzletag?: string, tipus?: string }} [opts]
- *        tipus: "lakas" | "haz" | "" (összes)
- */
 export function filterIngatlanListings(items, { uzletag = "", tipus = "" } = {}) {
   const wantUz = uzletag ? normalizeUzletag(uzletag) : "";
   const wantTipus = String(tipus || "")
@@ -166,11 +160,6 @@ export function filterIngatlanListings(items, { uzletag = "", tipus = "" } = {})
   });
 }
 
-/**
- * @param {string} postal
- * @param {number} radiusKm
- * @param {{ uzletag?: string, tipus?: string }} [opts]
- */
 export function ingatlanNearbyHref(postal, radiusKm, { uzletag = "", tipus = "" } = {}) {
   const params = new URLSearchParams({
     nearby: "1",

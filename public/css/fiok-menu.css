@@ -1,4 +1,4 @@
-/* Fiók menü oldal — a weboldal Beállítások oldalsáv menüje teljes oldalként */
+
 
 body.fiok-page {
   margin: 0;
@@ -48,7 +48,6 @@ body.fiok-page .fiok-main {
   margin: 0 auto;
 }
 
-/* Teljes szélességű oldalsáv-stílusú menü */
 body.fiok-page .mm-side {
   width: 100%;
   max-width: none;

@@ -1,7 +1,3 @@
-/**
- * Mobil web: felső sáv + alsó sziget (tabbar) minden site-app oldalon.
- * Asztalon CSS rejti. Görgetés közben a sziget elrejtődik, megálláskor visszajön.
- */
 (function () {
   var body = document.body;
   if (!body || !body.classList.contains("site-app")) return;
@@ -10,7 +6,6 @@
   var page = body.getAttribute("data-site-page") || "";
   var isHub = body.classList.contains("hub-page--feed") || page === "hub";
   var isFiok = body.classList.contains("fiok-page") || page === "fiok";
-  /* Hirdetésfeladás: asztali web chrome (fejléc + űrlap), ne mobil app-shell */
   var isPostAd = page === "hirdetesfeladas";
   var CSS_HREF = "/css/hub-mobile-app.css?v=tileFill3";
 
@@ -187,9 +182,6 @@
     });
   }
 
-  /**
-   * Görgetés / húzás közben elrejtjük a szigetet; megálláskor visszajön.
-   */
   function bindScrollHide() {
     var bar = document.querySelector(".mw-app-tabbar");
     if (!bar || bar.dataset.scrollHideBound === "1") return;
@@ -247,7 +239,6 @@
   injectTabbar();
   if (!isPostAd) bindScrollHide();
 
-  /* Hero promo sáv a fő navigációs oldalakon */
   import("/js/hub-promo.js?v=promoHomeOnly1")
     .then(function (mod) {
       if (mod && typeof mod.mountHubPromos === "function") return mod.mountHubPromos();

@@ -1,7 +1,3 @@
-/**
- * Autó asztali — Gyártmány + Modell (mobil app kinézet).
- * Két külön sor: címke fölött, kerekített gomb ⌄-vel; panel a márka/típus választáshoz.
- */
 
 import { fetchVehicleCatalog } from "./vehicle-catalog-client.js?v=autoDesk16";
 import { bindAutoBmDismiss, autoBmPanelIsOpen } from "./auto-bm-dismiss.js?v=bmDismiss1";
@@ -41,9 +37,6 @@ function isAutoDesk() {
   );
 }
 
-/**
- * @param {HTMLFormElement} form
- */
 export async function mountAutoBrandModelPicker(form) {
   if (!form || !isAutoDesk() || form.dataset.brandModelPicker === "1") return;
 
@@ -108,11 +101,8 @@ export async function mountAutoBrandModelPicker(form) {
   const openBrandBtn = wrap.querySelector('[data-auto-bm-open="brand"]');
   const openModelBtn = wrap.querySelector('[data-auto-bm-open="model"]');
 
-  /** @type {string[]} */
   let selectedBrands = [];
-  /** @type {string[]} */
   let selectedModels = [];
-  /** @type {string | null} */
   let modelBrand = null;
   let brandQuery = "";
 
@@ -179,7 +169,6 @@ export async function mountAutoBrandModelPicker(form) {
       .trim()
       .toLocaleLowerCase("hu");
     if (!q) return brands;
-    // Csak a márkanév elején egyező betűk (pl. CH → CHERY, CHEVROLET)
     return brands.filter((b) => b.toLocaleLowerCase("hu").startsWith(q));
   }
 
@@ -353,7 +342,6 @@ export async function mountAutoBrandModelPicker(form) {
       }
       return;
     }
-    // Enter ne küldje el a kereső formot
     if (event.key === "Enter") {
       event.preventDefault();
     }

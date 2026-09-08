@@ -1,4 +1,3 @@
-/** Kliens oldali űrlap betöltés — ha a szerver nem injektálta a partialt. */
 export async function loadAdFormPartial() {
   const form = document.getElementById("ad-form");
   if (!form) return false;

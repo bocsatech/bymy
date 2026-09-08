@@ -1,4 +1,3 @@
-/** Böngésző + szerver: ingatlan mezőopciók (kereső / űrlap / admin). */
 
 export const INGATLAN_UZLETAG = [
   { value: "elado", label: "Eladó" },
@@ -6,7 +5,6 @@ export const INGATLAN_UZLETAG = [
   { value: "airbnb", label: "Airbnb" },
 ];
 
-/** Régi értékek → Eladó / Kiadó / Airbnb. */
 export function normalizeIngatlanUzletag(value) {
   const v = String(value ?? "")
     .trim()
@@ -26,7 +24,6 @@ export function normalizeIngatlanUzletag(value) {
   return v || "kiado";
 }
 
-/** Admin kerék-séma variant a kategóriából. */
 export function schemaVariantFromUzletag(uz) {
   const v = normalizeIngatlanUzletag(uz);
   if (v === "elado") return "elado-ingatlan";
@@ -34,13 +31,11 @@ export function schemaVariantFromUzletag(uz) {
   return "ingatlan";
 }
 
-/** Ft (bérlés) vs M Ft (eladó). */
 export function isIngatlanRentUzletag(uz) {
   const v = normalizeIngatlanUzletag(uz);
   return v === "kiado" || v === "airbnb";
 }
 
-/** Kereső + Eladó/Kiadó feladás — ingatlan típus. */
 export const INGATLAN_LAKAS_TIPUS = [
   { value: "", label: "Mindegy" },
   { value: "lakas", label: "Lakás" },
@@ -59,7 +54,6 @@ export const INGATLAN_LAKAS_TIPUS = [
   { value: "egyeb", label: "Egyéb" },
 ];
 
-/** Airbnb feladás — rövid távú / lakás típusok. */
 export const INGATLAN_LAKAS_TIPUS_AIRBNB = [
   { value: "", label: "Mindegy" },
   { value: "teglalakas", label: "Téglalakás" },
@@ -68,17 +62,11 @@ export const INGATLAN_LAKAS_TIPUS_AIRBNB = [
   { value: "rovid_berles", label: "Rövid bérlés" },
 ];
 
-/**
- * Típus 2 almenük (szülő Tipus value → opciók).
- * Forrás: data/ingatlan-tipus2-catalog.json
- * Az value-k szülővel prefixelve, hogy az „Egyéb” stb. ne ütközzön.
- */
 export const INGATLAN_TIPUS_2_BY_PARENT = {
   lakas: [
     { value: "lakas_tegla_lakas", label: "Tégla lakás" },
     { value: "lakas_panel_lakas", label: "Panel lakás" },
     { value: "lakas_csusztatott_zsalus", label: "Csúsztatott zsalus" },
-    /* Kiadó-only — tipus2OptionsForParents szűri eladó esetén */
     { value: "lakas_szoba", label: "Szoba", kiadoOnly: true },
   ],
   haz: [
@@ -151,7 +139,6 @@ export const INGATLAN_TIPUS_2_BY_PARENT = {
     { value: "intezmeny_muzeum", label: "Múzeum" },
     { value: "intezmeny_ovoda", label: "Óvoda" },
   ],
-  /* Nem jött új lista — régi fallback */
   raktar: [
     { value: "raktar_raktarhelyiseg", label: "Raktárhelyiség" },
     { value: "raktar_egyeb", label: "Egyéb" },
@@ -159,11 +146,6 @@ export const INGATLAN_TIPUS_2_BY_PARENT = {
   egyeb: [{ value: "egyeb_egyeb", label: "Egyéb" }],
 };
 
-/**
- * Tipus 1 érték(ek) → Tipus 2 opciólista (üres szülőnél csak Mindegy).
- * @param {string|string[]} parentValues
- * @param {{ uzletag?: string }} [opts] — eladónál kihagyja a `kiadoOnly` altípusokat (pl. Szoba).
- */
 export function tipus2OptionsForParents(parentValues, opts = {}) {
   const uz = normalizeIngatlanUzletag(opts.uzletag || "");
   const hideKiadoOnly = uz === "elado";
@@ -195,7 +177,6 @@ export const INGATLAN_ALLAPOT = [
   { value: "uj_epitesu", label: "Új építésű" },
 ];
 
-/** Energetikai tanúsítvány — ingatlan.com A+++ … I. */
 export const ENERGETIKAI_TANUSITVANY = [
   { value: "", label: "Mindegy" },
   { value: "a+++", label: "A+++" },
@@ -212,7 +193,6 @@ export const ENERGETIKAI_TANUSITVANY = [
   { value: "i", label: "I" },
 ];
 
-/** Van / nincs (feladás + kereső), kompatibilis a régi „igen” értékkel. */
 export const VAN_NINCS = [
   { value: "", label: "Mindegy" },
   { value: "van", label: "Van" },
@@ -325,7 +305,6 @@ export const KOMFORT = [
   { value: "komfort_nelkuli", label: "Komfort nélküli" },
 ];
 
-/** Ház / nyaraló tetőtér (ingatlan.com attic_type). */
 export const TETOTER_HAZ = [
   { value: "", label: "Mindegy" },
   { value: "beepitett", label: "Beépített" },
@@ -400,7 +379,6 @@ export const IGEN_MINDEGY = [
   { value: "igen", label: "Igen" },
 ];
 
-/** Közmű mezők — opciólista később pontosítható adminból. */
 export const KOZMU_OPTIONS = [
   { value: "", label: "Mindegy" },
   { value: "van", label: "Van" },
@@ -408,7 +386,6 @@ export const KOZMU_OPTIONS = [
   { value: "kozmuvesitheto", label: "Közművesíthető" },
 ];
 
-/** Irodaház kategória — placeholder, amíg nincs végleges lista. */
 export const IRODAHAZ_KATEGORIA = [
   { value: "", label: "Mindegy" },
   { value: "a", label: "A" },
@@ -416,10 +393,6 @@ export const IRODAHAZ_KATEGORIA = [
   { value: "c", label: "C" },
 ];
 
-/**
- * Bool / igen-van mezők. value mindig "igen" (szűrés), a yesLabel a UI szöveg.
- * Napelem / szigetelés / energia: külön van–nincs / tanúsítvány listák.
- */
 export const INGATLAN_BOOL_FIELDS = [
   { field_key: "lift", label: "Lift", yesLabel: "Van" },
   { field_key: "erkely", label: "Erkély", yesLabel: "Van" },
@@ -434,7 +407,6 @@ export const INGATLAN_BOOL_FIELDS = [
   { field_key: "uj_parcellazasu", label: "Csak új parcellázású", yesLabel: "Igen" },
 ];
 
-/** Van/nincs listás mezők (nem a bool „igen” szűrő). */
 export const INGATLAN_VAN_NINCS_FIELDS = [
   { field_key: "napelem", label: "Napelem" },
   { field_key: "szigeteles", label: "Szigetelés" },
@@ -457,7 +429,6 @@ export function boolOptionsForField(fieldOrKey) {
   ];
 }
 
-/** Mindig látszik (típus független). Területmezők NEM itt — típus szerint. */
 export const INGATLAN_CORE_FIELD_KEYS = [
   "keresesi_hely",
   "ar_tol",
@@ -466,12 +437,6 @@ export const INGATLAN_CORE_FIELD_KEYS = [
   "ingatlan_tipus_2",
 ];
 
-/**
- * Típus → területmezők (a küldött listákból).
- * alapterulet = épület / ház területe
- * telekterulet = telek, amin áll / önálló telek
- */
-/** Típus → területmezők. Forrás: ingatlan.com adform_v2 area_size / lot_size. */
 export const INGATLAN_AREA_BY_TIPUS = {
   lakas: ["alapterulet"],
   haz: ["alapterulet", "telekterulet"],
@@ -495,7 +460,6 @@ const AREA_FIELD_KEYS = {
   epitmeny_terulet: ["epitmeny_terulet_tol", "epitmeny_terulet_ig", "epitmeny_terulet"],
 };
 
-/** Tipus(ok) → terület kulcsok (tol/ig/post). Üres típusnál csak alapterület (általános kereső). */
 export function areaFieldKeysForTipus(parentValues) {
   const parents = (Array.isArray(parentValues) ? parentValues : String(parentValues ?? "").split(","))
     .map((v) => resolveTipusFieldParent(v))
@@ -523,11 +487,6 @@ export function areaFieldKeysForTipus(parentValues) {
   return out;
 }
 
-/**
- * Típus 1 → megjelenő mezőkulcsok.
- * Forrás: docs/ingatlan-com-hirdetesfeladas-matrix.md (ingatlan.com adform_v2).
- * Kiadó-only mezők: lásd INGATLAN_KIADO_ONLY_FIELDS (üzletág szűri).
- */
 export const INGATLAN_FIELDS_BY_TIPUS = {
   lakas: [
     "szobaszam",
@@ -762,11 +721,9 @@ export const INGATLAN_FIELDS_BY_TIPUS = {
     "kisallat_megengedett",
     "dohanyzas_megengedett",
   ],
-  /* Nincs külön lista — minden típusmező uniója */
   egyeb: null,
 };
 
-/** Csak kiadó / Airbnb üzletágnál látszanak (ingatlan.com listing_type === 2). */
 export const INGATLAN_KIADO_ONLY_FIELDS = [
   "min_berleti_ido",
   "butorozott",
@@ -779,7 +736,6 @@ export const INGATLAN_KIADO_ONLY_FIELDS = [
   "kaucio_max",
 ];
 
-/** Airbnb / rövid típusok → lakás mezőkészlet. */
 export const INGATLAN_TIPUS_FIELD_ALIAS = {
   teglalakas: "lakas",
   panellakas: "lakas",
@@ -793,7 +749,6 @@ export function resolveTipusFieldParent(tipusValue) {
   return INGATLAN_TIPUS_FIELD_ALIAS[v] || v;
 }
 
-/** Adminban pipálható mezők (típus → mezők oldal). CORE mezők nem ide tartoznak. */
 export const INGATLAN_ASSIGNABLE_FIELD_DEFS = [
   { field_key: "allapot", label: "Állapot", group: "lista" },
   { field_key: "ingatlan_kora", label: "Építés éve", group: "lista" },
@@ -842,7 +797,6 @@ export const INGATLAN_ASSIGNABLE_FIELD_DEFS = [
   })),
 ];
 
-/** Élő admin config (null = kód alapértelmezés). */
 let liveFieldsByTipus = null;
 
 export function applyIngatlanTipusFieldsConfig(config) {
@@ -857,7 +811,6 @@ export function effectiveIngatlanFieldsByTipus() {
   return liveFieldsByTipus || INGATLAN_FIELDS_BY_TIPUS;
 }
 
-/** Kiválasztott típus(ok) → látható mezőkulcsok (CORE + terület + típusmezők). */
 export function fieldKeysVisibleForTipus(parentValues, opts = {}) {
   const map = effectiveIngatlanFieldsByTipus();
   const parents = (Array.isArray(parentValues) ? parentValues : String(parentValues ?? "").split(","))
@@ -889,7 +842,6 @@ export function fieldKeysVisibleForTipus(parentValues, opts = {}) {
     }
   }
 
-  /* Kereső min–max párok ↔ feladás egyszeres mezők (ugyanaz a láthatóság). */
   for (const [tol, ig, single] of [
     ["alapterulet_tol", "alapterulet_ig", "alapterulet"],
     ["telekterulet_tol", "telekterulet_ig", "telekterulet"],

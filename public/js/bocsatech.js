@@ -302,7 +302,6 @@ let backupPreview = null;
 let backupBusy = false;
 let backupForceFeladott = true;
 let devOtpCode = "";
-/** @type {{ backend?: string, dbPath?: string } | null} */
 let deployBackend = null;
 
 function pageBlocksKey(pageKey) {
@@ -456,7 +455,6 @@ const actions = {
         }),
         signal: AbortSignal.timeout(25_000),
       });
-      // IDEIGLENES localhost: localadmin 2FA nélkül
       if (data.skipOtp && data.admin) {
         admin = data.admin;
         otpUser = "";
@@ -927,7 +925,6 @@ const actions = {
           }),
         });
       } catch {
-        /* az előnézet frissítése másodlagos */
       }
     } catch (error) {
       err = error.message;
@@ -1402,7 +1399,6 @@ function fileToDataUrl(file) {
 const PROMO_W = 1400;
 const PROMO_H = 840;
 
-/** Cover crop → 1400×840 JPEG (rossz méretű képet is igazít). */
 async function resizePromoToTarget(file) {
   if (typeof createImageBitmap !== "function") {
     return fileToDataUrl(file);
@@ -2555,7 +2551,6 @@ function render() {
     return;
   }
   if (isPreviewTab()) {
-    /* Csak ugrógombok — nincs read-only tábla. */
   }
 }
 

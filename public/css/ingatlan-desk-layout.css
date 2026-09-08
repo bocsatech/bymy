@@ -1,8 +1,4 @@
-/**
- * Ingatlan asztali — autó desk héj (bal kereső / jobb találatok).
- * Az immo menük (Kategória, kerekek, További feltételek) változatlanok.
- * Csak ≥901px + data-site-page=ingatlan.
- */
+
 
 @media (min-width: 901px) {
   html:not([data-theme="dark"]) body.home-page[data-site-page="ingatlan"],
@@ -135,7 +131,6 @@
     margin: 0 !important;
   }
 
-  /* Desktop oldalsáv: minden ingatlanmező egy jól olvasható oszlopban. */
   body.home-page[data-site-page="ingatlan"] .immo-search-form .immo-schema-grid {
     grid-template-columns: repeat(12, minmax(0, 1fr)) !important;
     grid-template-rows: none !important;
@@ -181,7 +176,6 @@
     border-color: var(--ad-line) !important;
   }
 
-  /* Belső inputok: ne fehér kocka — csak a külső mezőkeret látszik */
   body.home-page[data-site-page="ingatlan"] .immo-search-form .immo-field .immo-control,
   body.home-page[data-site-page="ingatlan"] .immo-search-form .immo-dual-range input,
   body.home-page[data-site-page="ingatlan"] .immo-search-form .immo-price-input {

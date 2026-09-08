@@ -1,4 +1,4 @@
-/* Bymy hub (kezdőlap) — IAD-szerű struktúra, saját arculat (nem willhaben) */
+
 
 :root {
   --hub-bg: #0f1419;
@@ -57,7 +57,7 @@ body.hub-page .local-banner {
   justify-content: flex-end;
   align-items: center;
   padding: 0.4rem 1rem 0.35rem;
-  /* Hely a felfelé növő logónak (nem tolja le az alsó vonalat) */
+
   min-height: 5.75rem;
   width: 100%;
   box-sizing: border-box;
@@ -79,7 +79,7 @@ body.hub-page .local-banner {
   flex: 0 0 auto;
   white-space: nowrap;
   position: absolute;
-  /* 1.5 cm balra, de ne lógjon ki a viewportból (overflow clip) */
+
   left: max(0.5rem, calc(1rem - 1.5cm));
   bottom: 0.05rem;
   z-index: 3;
@@ -100,7 +100,6 @@ body.hub-page .local-banner {
   object-fit: contain;
 }
 
-/* 3× a korábbi 48px — felfelé nő, az alsó vonalat nem tolja */
 .bymy-logo-img--nav {
   height: 144px;
   max-width: min(520px, 58vw);
@@ -129,7 +128,7 @@ body.hub-page .local-banner {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  /* Rögzített sávmagasság — a nagy logó felfelé lóg, lefelé nem tol */
+
   height: 3.35rem;
   min-height: 3.35rem;
   max-height: 3.35rem;
@@ -169,8 +168,6 @@ body.hub-page .local-banner {
 .hub-nav .hub-nav-link {
   pointer-events: auto;
 }
-
-
 
 .hub-nav-link {
   font-family: "DM Sans", system-ui, sans-serif;
@@ -229,7 +226,6 @@ body.hub-page .local-banner {
   flex: 0 0 auto;
 }
 
-/* site-app oszlopos actions ne törje a hub sort */
 .hub-header .site-header-actions,
 .hub-header-actions.site-header-actions {
   flex-direction: row !important;
@@ -423,7 +419,6 @@ body.hub-page .local-banner {
   padding: 3.5rem 1.25rem 3.25rem;
 }
 
-/* Kezdőlap: üres fehér sáv, vékony szürke keret — logo/szöveg nélkül */
 .hub-hero--empty {
   background: #fff;
   color: inherit;
@@ -473,7 +468,6 @@ body.hub-page:has(.hub-hero--empty) .hub-main {
   align-items: stretch;
 }
 
-/* Egyforma promo kártyák — saját komponens, nem .hub-card leszármazott */
 .hub-promo {
   --promo-accent: #c45c26;
   box-sizing: border-box;
@@ -499,7 +493,6 @@ body.hub-page:has(.hub-hero--empty) .hub-main {
   --promo-accent: #e31c23;
 }
 
-/* Teljes kész kártyakép — pontosan kitölti a keretet, tartalom nem vágódik */
 .hub-promo--fullimg {
   display: block;
   position: relative;
@@ -773,7 +766,6 @@ body.hub-page:has(.hub-hero--empty) .hub-main {
     padding: 0.85rem 0.85rem 0.35rem;
   }
 
-  /* Mobilon a nav logó elég — a nagy középső logó csak helyet foglal */
   .hub-home-logo {
     display: none;
   }
@@ -937,7 +929,6 @@ body.hub-page:has(.hub-hero--empty) .hub-main {
   }
 }
 
-/* —— Kezdőlap feed (willhaben-szerű szekciók) —— */
 body.hub-page--feed {
   background: #fff;
   font-family: "DM Sans", system-ui, sans-serif;
@@ -1012,13 +1003,12 @@ body.hub-page--feed {
   scroll-snap-type: x proximity;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-x: contain;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* legacy Edge */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   cursor: grab;
   touch-action: pan-x pan-y;
 }
 
-/* Csík nélkül — height:0, ne display:none (az törheti a görgetést) */
 .hf-rail::-webkit-scrollbar {
   width: 0;
   height: 0;
@@ -1194,7 +1184,6 @@ body.hub-page--feed {
   overflow: hidden;
 }
 
-/* Kitölti a keretet; enyhe zoom a stúdió fehér szélek levágásához. */
 .hf-card--listing .hf-card-media img,
 .hf-card--listing .hf-card-media-img {
   display: block !important;
@@ -1356,7 +1345,6 @@ body.hub-page--feed {
   }
 }
 
-/* Kezdőlap: kártyák + eladás sáv a feed felett */
 .hub-intro {
   max-width: var(--hub-max);
   margin: 0 auto;
@@ -1371,7 +1359,6 @@ body.hub-page--feed .hub-feed {
   padding-top: 0.75rem;
 }
 
-/* —— Színmód (világos / sötét) —— */
 html[data-theme="dark"] body.hub-page {
   --hub-surface: #12161c;
   --hub-ink: #e8eaed;
@@ -1450,7 +1437,6 @@ html[data-theme="dark"] .hf-all {
   color: #9ca3af;
 }
 
-/* Fehér csempék: sötét módban is demó-szerűen sötét szöveg, fehér média */
 html[data-theme="dark"] .hf-card,
 html[data-theme="dark"] .hf-card--listing,
 html[data-theme="dark"] .hf-card--kategoria,
@@ -1522,7 +1508,6 @@ html[data-theme="dark"] .hub-promo__text {
   color: #6b7280;
 }
 
-/* Hub promo sáv — fő navigációs oldalakon */
 .hub-promo-band {
   max-width: var(--hub-max, 1120px);
   margin: 0 auto;

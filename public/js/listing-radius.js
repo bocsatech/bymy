@@ -57,7 +57,6 @@ export function filterListingsInRadius(items, originLat, originLon, radiusKm, ci
     if (coords) {
       return haversineKm(originLat, originLon, coords.lat, coords.lon) <= radius;
     }
-    // Nincs koordináta: az origin településnév egyezés még bent tartja (0 km mag).
     if (!originNorm) return false;
     const name = normalizePlace(listingCityName(item));
     return Boolean(name && (name === originNorm || name.includes(originNorm) || originNorm.includes(name)));

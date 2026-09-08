@@ -1,7 +1,3 @@
-/**
- * Üzenetek UI — willhaben Nachrichten/chat másolat (fehér, magyar).
- * Adat: /api/messages/*
- */
 
 import { getAuthUser } from "./site-auth.js?v=auth20260805localdb9";
 import {
@@ -79,7 +75,6 @@ export function initMessagesUi(root, { onUnreadChange, openConversationId } = {}
   let openConv = null;
   let messages = [];
   let busy = false;
-  /** true = felhasználó visszalépett a listára; ne nyissuk újra automatikusan */
   let stayOnInbox = false;
   const options = { openConversationId };
 
@@ -419,7 +414,6 @@ export function initMessagesUi(root, { onUnreadChange, openConversationId } = {}
           messages = data.messages;
           renderBubbles();
         } catch {
-          /* lista frissült, a szál később újrapróbálható */
         }
         return;
       }

@@ -1,8 +1,3 @@
-/**
- * Főoldal: Eladó lakások / házak a közelben, Kedvenc hirdetések.
- * (Az „Ajánlások ingatlan” sín statikus kategóriakártyák az index.html-ben.)
- * Működés: Autók a közelben sín mintájára.
- */
 import { fetchListings, fetchListing } from "./db-client.js?v=nearby2";
 import { getAuthUser } from "./site-auth.js?v=nearby1";
 import { getParkplatz } from "./fok-data.js?v=auth20260805localdb9";
@@ -41,7 +36,6 @@ async function loadNearbyIngatlan({ postal, radiusKm, uzletag, tipus, cacheKey }
       })
     );
   } catch {
-    /* quota */
   }
   return {
     items: nearby,
@@ -137,7 +131,6 @@ async function initFavoritesRail({ postal, radiusKm }) {
           continue;
         }
       } catch {
-        /* hiányzó */
       }
       items.push(
         slimListingTile({

@@ -1,8 +1,6 @@
-/** Fiókom (Mein mobile.de mintára) — helyi adatok parkóóhoz, keresésekhez, üzenetekhez. */
 
 const PARK_KEY = "bymy-parkplatz";
 const SEARCH_KEY = "bymy-saved-searches";
-const MSG_KEY = "bymy-messages";
 
 function readMap(key) {
   try {
@@ -109,45 +107,3 @@ export function toggleSavedSearchNotify(email, id) {
   return next;
 }
 
-export function getMessages(email) {
-  return listForEmail(MSG_KEY, email);
-}
-
-export function ensureDemoMessages(email) {
-  const existing = getMessages(email);
-  if (existing.length) return existing;
-  const demo = [
-    {
-      id: "m1",
-      from: "Érdeklődő",
-      subject: "Érdeklődés a hirdetésed iránt",
-      body: "Szia! Még eladó a jármű? Mikor lehet megnézni?",
-      read: false,
-      at: Date.now() - 3600_000,
-    },
-    {
-      id: "m2",
-      from: "Bymy",
-      subject: "Üdvözlünk a fiókodban",
-      body: "Itt kezelheted a kedvenceket, mentett kereséseket és a fiókadatokat.",
-      read: true,
-      at: Date.now() - 86_400_000,
-    },
-  ];
-  saveForEmail(MSG_KEY, email, demo);
-  return demo;
-}
-
-export function markMessageRead(email, id) {
-  const next = getMessages(email).map((row) =>
-    String(row.id) === String(id) ? { ...row, read: true } : row
-  );
-  saveForEmail(MSG_KEY, email, next);
-  return next;
-}
-
-export function deleteMessage(email, id) {
-  const next = getMessages(email).filter((row) => String(row.id) !== String(id));
-  saveForEmail(MSG_KEY, email, next);
-  return next;
-}

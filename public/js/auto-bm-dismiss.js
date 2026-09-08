@@ -1,15 +1,4 @@
-/**
- * Kapcsolós auto-bm panelek: bezárás panelen kívüli kattintásra / Escape-re.
- */
 
-/**
- * @param {{
- *   panel: HTMLElement,
- *   roots?: Array<Element | null | undefined>,
- *   isOpen: () => boolean,
- *   close: () => void,
- * }} opts
- */
 export function bindAutoBmDismiss(opts) {
   const { panel, roots = [], isOpen, close } = opts;
 

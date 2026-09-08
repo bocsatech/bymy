@@ -78,7 +78,6 @@ export async function saveListingToDb(formData, listingId = null, { status = nul
   return saved;
 }
 
-/** Több importált űrlap egyszerre — duplikátumokat a szerver átugorja. */
 export async function saveListingsBatchToDb(forms, { status = "feladott" } = {}) {
   const response = await fetch("/api/listings/batch", {
     method: "POST",

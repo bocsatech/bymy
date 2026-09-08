@@ -1,4 +1,3 @@
-/** Telefonszám + beszélt nyelvek UI (hirdetésfeladás). */
 
 export const PHONE_COUNTRIES = [
   { value: "+36", label: "(H) 36" },
@@ -91,9 +90,6 @@ function syncBeszeltNyelvek(form) {
   hidden.value = unique.join(", ") || "Magyar";
 }
 
-/**
- * @param {HTMLFormElement | null} form
- */
 export function initPhoneLanguages(form) {
   if (!form) return { syncLanguages: () => {} };
 

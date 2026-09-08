@@ -21,7 +21,6 @@ export function formatCellValue(cell) {
   }
   const raw = String(cell.value ?? "");
   if (cell.field_key === "leiras" || cell.field_key === "hirdetes_cime") {
-    // Használtautó.hu / Belépés ne jelenjen meg (inline tokenek is)
     const lines = raw
       .replace(/\r\n/g, "\n")
       .split(/\n+/)

@@ -10,7 +10,7 @@
           }
           document.documentElement.setAttribute("data-theme", t);
         } catch (e) {}
-                /* Auth fejléc: ne villanjon vendég gomb → profil a modul / API előtt */
+                
         try {
           var raw = sessionStorage.getItem("bymy-auth-user");
           var user = raw ? JSON.parse(raw) : null;
@@ -88,7 +88,7 @@
             <a class="hub-btn hub-btn--ghost" href="/regisztracio.html" data-auth-register>Regisztráció</a>
           </div>
           <div class="site-header-avatar-wrap" data-avatar-menu data-auth-member hidden>
-            <button type="button" class="site-header-profile" data-auth-avatar data-avatar-toggle aria-expanded="false" aria-haspopup="menu" aria-label="Fiók" title="Fiók">
+            <button type="button" class="site-header-profile" data-auth-avatar data-avatar-toggle aria-expanded="false" aria-label="Fiók" title="Fiók">
               <span class="site-header-avatar">
                 <span data-avatar-letter>A</span>
                 <img data-avatar-img alt="" hidden width="44" height="44" />
@@ -96,7 +96,6 @@
               <span class="site-header-firstname" data-auth-firstname></span>
               <svg class="site-header-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </button>
-            <div class="site-avatar-dropdown site-avatar-dropdown--fiok" data-avatar-dropdown role="menu" hidden></div>
           </div>
           <a class="hub-btn hub-btn--post" href="/hirdetesfeladas.html" data-auth-guard>+ Hirdetésfeladás</a>
           <button type="button" class="hub-theme-toggle" data-theme-toggle aria-label="Színmód" title="Színmód"></button>
@@ -116,7 +115,6 @@
         </div>
       </div>
     </header>
-
 
     <main class="partners-main">
       <header class="partners-header">

@@ -1,7 +1,3 @@
-/**
- * Hirdetésfeladás — kapcsolós panel pickerek (személyautó / teherautó).
- * Egy mező = egy választás; a lista fixed overlay-ként nyílik.
- */
 
 import { ALLAPOT_CATEGORIES, OKMANY_JELLEG_OPTIONS, UZEMANYAG_CATEGORIES } from "./equipment-data.js?v=teherKivitel35e";
 import { KIVITEL_OPTIONS } from "./kivitel-options.js?v=kivitel1";
@@ -102,7 +98,6 @@ function categoryValues(cat) {
 
 const BM_PICKER_SUBTYPES = new Set(["szemelyauto", "teherauto"]);
 
-/** Személyautó és teherautó (3,5 t-tól) feladás — kapcsolós panel pickerek. */
 export function isBmPickerAdForm(form) {
   if (!form) return false;
   const subtype = String(
@@ -121,7 +116,6 @@ export function isBmPickerAdForm(form) {
   return vertical === "auto" || vertical === "";
 }
 
-/** @type {(() => void) | null} */
 let closeOpenPanel = null;
 let suppressBmFocusOpen = false;
 
@@ -321,20 +315,6 @@ function unmountPicker(select) {
   delete select.dataset.adBmPicker;
 }
 
-/**
- * @param {{
- *   select: HTMLSelectElement,
- *   title: string,
- *   panelClass: string,
- *   openAttr: string,
- *   renderBody: (bodyEl: HTMLElement) => void,
- *   bindBody: (bodyEl: HTMLElement) => void,
- *   syncFromHidden: () => void,
- *   syncSummary: (summaryEl: HTMLElement | null, hidden: HTMLInputElement) => void,
- *   syncHidden: () => void,
- *   singleSelect?: boolean,
- * }} opts
- */
 function mountBmPicker(opts) {
   const {
     select,
@@ -481,25 +461,6 @@ function mountBmPicker(opts) {
   select._adBmClose = closePanel;
 }
 
-/**
- * Keresős legördülő: a trigger cella maga a keresőmező, a lista alatta overlay-ként nyílik.
- * @param {HTMLSelectElement} select
- * @param {{
- *   title: string,
- *   panelClass: string,
- *   unit?: string,
- *   disabledMessage?: string,
- *   isDisabled?: () => boolean,
- *   syncFromHidden: () => void,
- *   syncHidden: () => void,
- *   getSummary: () => string,
- *   getFilteredItems: (query: string) => unknown[],
- *   renderRows: (bodyEl: HTMLElement, items: unknown[], scrollTop: number) => void,
- *   bindBody: (bodyEl: HTMLElement) => void,
- *   onQueryChange?: (query: string) => void,
- *   singleSelect?: boolean,
- * }} opts
- */
 function mountSearchDropdownPicker(select, opts) {
   const {
     title,
@@ -750,7 +711,6 @@ function mountSearchDropdownPicker(select, opts) {
   select._adBmRefreshDropdown = () => renderList(true);
 }
 
-/** Egy választós kapcsolós legördülő (év / hó). */
 function mountSingleSelectDropdown(select, { title, panelClass, placeholder = PLACEHOLDER } = {}) {
   if (!select || select.tagName !== "SELECT" || select.dataset.adBmPicker === "1") return;
 
@@ -1276,9 +1236,7 @@ function mountAllapotPicker(select) {
 }
 
 function mountHierarchicalPicker(select, { title, panelClass, openAttr, categories, attrMain, attrChild, attrParent, unit }) {
-  /** @type {Set<string>} */
   let openMains = new Set();
-  /** @type {Set<string>} */
   let selected = new Set();
 
   function selectedLabels() {
@@ -1775,7 +1733,6 @@ export function applyAdFormBmFieldValues(data) {
   }
 }
 
-/** @type {object | null} */
 let cachedVehicleCatalog = null;
 
 export function unmountAdFormBmPickers(form) {

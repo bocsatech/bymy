@@ -1,4 +1,4 @@
-/* Willhaben-szerű hirdetés oldal — magyar, feltöltött autóadatok. */
+
 
 .hd-page {
   background: #f4f5f7;
@@ -946,7 +946,6 @@ body.hd-has-msg-bar #hd-root {
   font-weight: 700;
 }
 
-/* —— Sötét mód: hirdetés részletező —— */
 html[data-theme="dark"] body.hd-page,
 html[data-theme="dark"] body.site-app[data-site-page="hirdetes"] {
   background: #12161c !important;

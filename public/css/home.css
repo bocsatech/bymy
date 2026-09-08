@@ -1,4 +1,4 @@
-/* —— Főoldal: feladott hirdetések grid (CarGurus-szerű kártyák) —— */
+
 
 .visually-hidden {
   position: absolute;
@@ -51,7 +51,6 @@ body.home-page .local-banner {
   overflow: visible;
 }
 
-/* —— Fejléc és kategória sáv közötti banner helyek —— */
 .home-ad-strip {
   background: #eef0f3;
   padding: 0.75rem 1.25rem 0;
@@ -130,7 +129,6 @@ body.home-page .local-banner {
   background: transparent;
 }
 
-/* —— Partner ajánló (bal oldalsáv) —— */
 .home-partner-rec {
   margin-top: 0.75rem;
   padding: 0.85rem;
@@ -485,182 +483,6 @@ body.home-page .local-banner {
   font-style: italic;
 }
 
-/* —— Értékbecslő (bal oldalsáv) —— */
-.home-valuation-rec {
-  margin-top: 0.75rem;
-  padding: 0.85rem;
-  border-radius: 12px;
-  background: #fff;
-  border: 1px solid #e3e6ea;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-}
-
-.home-valuation-rec.is-collapsed {
-  padding-bottom: 0.85rem;
-}
-
-.home-valuation-toggle {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-  padding: 0;
-  border: none;
-  background: none;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-  color: inherit;
-}
-
-.home-valuation-toggle:hover .home-valuation-title {
-  color: #1565c0;
-}
-
-.home-valuation-title {
-  margin: 0;
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: #111;
-}
-
-.home-valuation-chevron {
-  width: 0.45rem;
-  height: 0.45rem;
-  border-right: 2px solid #667085;
-  border-bottom: 2px solid #667085;
-  transform: rotate(45deg);
-  flex-shrink: 0;
-  transition: transform 0.15s ease;
-}
-
-.home-valuation-rec:not(.is-collapsed) .home-valuation-chevron {
-  transform: rotate(-135deg);
-  margin-top: 0.15rem;
-}
-
-.home-valuation-body[hidden] {
-  display: none !important;
-}
-
-.home-valuation-body {
-  margin-top: 0.65rem;
-}
-
-.home-valuation-lead {
-  margin: 0 0 0.65rem;
-  font-size: 0.78rem;
-  line-height: 1.35;
-  color: #666;
-}
-
-.home-valuation-form {
-  display: flex;
-  flex-direction: column;
-  gap: 0.55rem;
-}
-
-.home-valuation-field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-}
-
-.home-valuation-label {
-  font-size: 0.68rem;
-  font-weight: 600;
-  color: #777;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.home-valuation-field select,
-.home-valuation-field input {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 0.45rem 0.55rem;
-  border: 1px solid #cfd4dc;
-  border-radius: 8px;
-  font-size: 0.88rem;
-  font: inherit;
-}
-
-.home-valuation-field select {
-  appearance: none;
-  background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23667085' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 0.65rem center;
-  padding-right: 1.8rem;
-}
-
-.home-valuation-btn {
-  margin-top: 0.15rem;
-  padding: 0.48rem 0.75rem;
-  border: none;
-  border-radius: 8px;
-  background: #1565c0;
-  color: #fff;
-  font-size: 0.82rem;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.home-valuation-btn:hover {
-  background: #0d47a1;
-}
-
-.home-valuation-status {
-  margin: 0.5rem 0 0;
-  font-size: 0.76rem;
-  line-height: 1.35;
-  color: #555;
-}
-
-.home-valuation-status[data-status-type="err"] {
-  color: #c62828;
-}
-
-.home-valuation-result {
-  margin-top: 0.65rem;
-  padding: 0.65rem 0.7rem;
-  border-radius: 10px;
-  background: #f7f9fb;
-  border: 1px solid #e8ebef;
-}
-
-.home-valuation-result--empty {
-  font-size: 0.78rem;
-  color: #666;
-}
-
-.home-valuation-result-label {
-  margin: 0 0 0.2rem;
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: #666;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.home-valuation-result-price {
-  margin: 0 0 0.25rem;
-  font-size: 1.15rem;
-  font-weight: 700;
-  color: #111;
-}
-
-.home-valuation-result-meta,
-.home-valuation-result-range {
-  margin: 0;
-  font-size: 0.76rem;
-  color: #555;
-  line-height: 1.35;
-}
-
-.home-valuation-result-range {
-  margin-top: 0.2rem;
-  color: #666;
-}
-
 .home-header-top,
 .home-header-inner {
   width: 100%;
@@ -870,13 +692,11 @@ body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-n
   text-decoration: underline;
 }
 
-/* —— Kategória sáv (CarGurus-szerű kártyák) —— */
 .home-category-bar {
   width: 100%;
   margin-bottom: 0.85rem;
 }
 
-/* —— Összesítő sáv (statikus mockup) —— */
 .home-stats-bar {
   width: 100%;
   margin-bottom: 1rem;
@@ -901,7 +721,7 @@ body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-n
   align-items: flex-start;
   gap: 0.85rem;
   min-width: 0;
-  /* A sor kártyái 1 cm-rel magasabbak: fent-lent fél centi ráhagyás. */
+
   padding: calc(1rem + 0.5cm) 1.05rem;
   border-radius: 16px;
   background: #fff;
@@ -909,7 +729,6 @@ body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-n
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
 }
 
-/* A gyorskereső a sor utolsó három hasábját foglalja el. */
 .home-stats-card--quicksearch {
   grid-column: span 3;
   align-items: center;
@@ -965,7 +784,6 @@ body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-n
   box-shadow: 0 0 0 3px rgba(21, 101, 192, 0.12);
 }
 
-/* A címke a felső szegélyen „ül”, ezért kell alá fehér háttér. */
 .home-qs-label {
   position: absolute;
   top: -0.52rem;
@@ -1001,15 +819,6 @@ body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-n
   outline: none;
 }
 
-/*
- * A style.css `input[type="number"]` és `input:focus` szabálya erősebb egy sima
- * osztálynál, ezért a szegélyt és a fókuszgyűrűt itt kell semlegesíteni —
- * különben dupla keret látszik a mezőn belül.
- *
- * A selectre NEM mehet appearance: textfield — az felülírná az appearance: none-t
- * (nagyobb specificitás), és a böngésző saját nyila + a ::after háromszög együtt
- * jelennének meg.
- */
 .home-qs-field input.home-qs-control,
 .home-qs-field select.home-qs-control {
   padding: 0;
@@ -1365,7 +1174,6 @@ body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-n
   color: #5c6773;
 }
 
-/* Fotós kockán a kép mellett is fehér a háttér, nincs szürke szegélysáv. */
 .home-category-card--has-photo .home-category-visual {
   align-items: center;
   justify-content: center;
@@ -1484,7 +1292,6 @@ body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-n
   }
 }
 
-/* Mobil: vízszintes görgetősáv — mint a főoldal Autókategóriák (hf-rail) */
 @media (max-width: 800px) {
   .home-category-bar {
     margin-bottom: 0.75rem;
@@ -1555,39 +1362,6 @@ body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-n
   .home-category-text span {
     display: none;
   }
-}
-
-.home-quick-filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.45rem;
-  margin-bottom: 0.75rem;
-}
-
-.home-quick-pill {
-  margin: 0;
-  padding: 0.45rem 0.75rem;
-  border: 1px solid #d5d9e0;
-  border-radius: 999px;
-  background: #fff;
-  color: #333;
-  font: inherit;
-  font-size: 0.78rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: border-color 0.15s, background 0.15s, color 0.15s;
-  white-space: nowrap;
-}
-
-.home-quick-pill:hover {
-  border-color: #111;
-  color: #111;
-}
-
-.home-quick-pill.is-active {
-  border-color: #111;
-  background: #111;
-  color: #fff;
 }
 
 .home-filter-sidebar {
@@ -1801,8 +1575,6 @@ body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-n
   margin-bottom: 0.35rem;
 }
 
-/* legacy reset class removed from markup */
-
 @media (max-width: 1200px) {
   .home-layout.site-layout {
     grid-template-columns: 1fr;
@@ -1865,7 +1637,6 @@ body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-n
   overflow: visible;
 }
 
-/* Nincs saját görgetője: a hirdetéslista a teljes oldallal együtt görög. */
 .home-listings-panel {
   min-width: 0;
   flex: 1 1 auto;
@@ -2012,7 +1783,6 @@ body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-n
   border: 1px solid #d5d9e0;
 }
 
-/* Régi teljes rács — függőleges 4 oszlop */
 .home-grid {
   display: none;
 }
@@ -2322,7 +2092,6 @@ body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-n
   color: #666;
 }
 
-/* Főoldal: csak a középső hirdetéslista görget — oldal és oldalsávok nem */
 body.home-page.site-page {
   overflow: hidden;
   height: 100vh;

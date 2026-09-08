@@ -1,7 +1,3 @@
-/**
- * Könyvjelző: a hasznaltauto.hu oldalon fut, kiolvassa a hirdetést,
- * majd átadja a Bymy Autóimport ablaknak (postMessage).
- */
 (function (root) {
   const MAX_DEALER = 50;
 
@@ -9,7 +5,6 @@
     return String(t || "").replace(/\s+/g, " ").trim();
   }
 
-  /** Cím: sortörések megmaradnak (1. sor márka/modell/típus, 2. sor → típus). */
   function cleanTitleMultiline(t) {
     return String(t || "")
       .replace(/\r\n/g, "\n")
@@ -293,7 +288,6 @@
     };
   }
 
-  /** Könnyű payload a Bymy felé — a nagy HTML 504-et okozott. */
   function slimPageForDelivery(page) {
     if (!page || typeof page !== "object") return page;
     const mapCount = page.map && typeof page.map === "object" ? Object.keys(page.map).length : 0;
@@ -353,7 +347,6 @@
           add(id, { publicUrl: `${u.origin}${u.pathname}` });
         }
       } catch {
-        /* skip */
       }
     }
 
@@ -419,7 +412,6 @@
       !/^hirdetés\s*#?\s*\d+$/i.test(title) &&
       !/^m[oó]dos[ií]t|^t[oö]rl[eé]s|^[aá]rt[aá]bla|^kiemel|^top\b/i.test(title) &&
       title.length >= 5;
-    // Soha ne fogadjunk el „Hiba!” + űrlapmezős map-et járműnév nélkül.
     if (goodTitle) return true;
     if (htmlLen > 1200 && goodTitle) return true;
     if (mapCount >= 5 && price.length >= 4 && goodTitle) return true;
@@ -431,7 +423,6 @@
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
-  /** Admin lista: a már kirenderelt sorokból. */
   function pickIdFromRow(row) {
     const attrs = [
       row.getAttribute("data-id"),
@@ -459,11 +450,9 @@
     if (m) return m[1];
     m = html.match(/hirdetes(?:kod|kód|code)?["'\s:=]+(\d{5,12})/i);
     if (m) return m[1];
-    // utolsó: 7–10 jegyű kód a sorban (hasznaltauto hirdetéskód)
     const nums = [...html.matchAll(/\b(\d{7,10})\b/g)].map((x) => x[1]);
     if (nums.length === 1) return nums[0];
     if (nums.length > 1) {
-      // leggyakoribb / leghosszabb
       nums.sort((a, b) => b.length - a.length || Number(b) - Number(a));
       return nums[0];
     }
@@ -500,7 +489,6 @@
             publicUrl = `${u.origin}${u.pathname}`;
           }
         } catch {
-          /* ignore */
         }
       }
 
@@ -621,7 +609,6 @@
         try {
           iframe.remove();
         } catch {
-          /* ignore */
         }
         if (err) reject(err);
         else resolve(page);
@@ -672,7 +659,6 @@
             return page;
           }
         } catch {
-          /* try next */
         }
       }
       return extractListCardFallback(ref);
@@ -704,7 +690,6 @@
         const page = await extractFromUrlIframe(url);
         if (isUsefulPage(page)) return page;
       } catch {
-        /* fetch tartalék */
       }
     }
     const res = await fetch(url, { credentials: "include", cache: "no-store" });
@@ -714,7 +699,6 @@
     return extractFromDoc(new DOMParser().parseFromString(html, "text/html"), url);
   }
 
-  /** Párhuzamos beolvasás — ne egyesével várjon. */
   async function mapPool(items, concurrency, worker, onProgress) {
     const out = new Array(items.length);
     let next = 0;
@@ -768,7 +752,6 @@
         try {
           el.remove();
         } catch {
-          /* ignore */
         }
       }, 4500);
       return;
@@ -776,7 +759,6 @@
     try {
       el.remove();
     } catch {
-      /* ignore */
     }
   }
 
@@ -794,13 +776,11 @@
       try {
         window.removeEventListener("message", onAck);
       } catch {
-        /* ignore */
       }
     };
     try {
       window.addEventListener("message", onAck);
     } catch {
-      /* ignore */
     }
 
     const sendTo = (target) => {
@@ -822,19 +802,16 @@
         }
         n += 1;
         sendTo(target);
-        // Max ~6 mp — ack után azonnal leáll.
         if (n >= 12) clearInterval(timer);
       }, 500);
     };
 
-    // Ha a Bymy Autóimport nyitotta a hasznaltautót: ne nyissunk új lapot, ne navigáljunk.
     if (window.opener && !window.opener.closed && sendTo(window.opener)) {
       retrySend(window.opener);
       return;
     }
 
     const targetUrl = `${origin}/beallitasok.html?szekcio=import&ha=1`;
-    // about:blank először — ha a böngésző a jelenlegi lapot cserélné, azonnal kiszállunk.
     let w = null;
     try {
       w = window.open("about:blank", "bymy-ha-import");
@@ -894,13 +871,10 @@
         );
         return;
       }
-      // A listasor már kirenderelt (cím/ár/kép). A gyorsnézet fetch/iframe gyakran „Hiba!” vázat ad —
-      // ne írjuk felül vele a jó listaadatokat. Opcionális finomítás csak ha jobb a részlet.
       showProgress(0, fromList.length, "lista feldolgozása");
       for (const card of fromList) {
         if (isUsefulPage(card)) pages.push(card);
       }
-      // Ha van idő / kevés autó: próbáljunk képet/mezőt pótolni, de a lista marad a fallback.
       if (pages.length && pages.length <= 15) {
         showProgress(0, pages.length, "gyorsnézet kiegészítés");
         const base = pages.slice();
@@ -953,7 +927,6 @@
             pages.push(base.find((c) => c.listingId === page.listingId));
           }
         }
-        // Ha a kiegészítés mindent elrontott, menjünk vissza a tiszta listára.
         if (!pages.length) {
           for (const card of base) {
             if (isUsefulPage(card)) pages.push(card);

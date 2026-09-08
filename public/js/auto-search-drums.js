@@ -1,7 +1,3 @@
-/**
- * Autó / teherautó kereső dobkerék.
- * Mobil: portált gyűrű. Asztali: helyben görgethető inline dob + dupla kattintás = kézi érték.
- */
 
 import { fillWheel, setWheelValue, readWheel } from "./ingatlan-wheels.js?v=immoClear1";
 import {
@@ -126,10 +122,6 @@ function finishWheel(cell, emptyLabel) {
   return wheel;
 }
 
-/**
- * Asztali: a mező cellájában görgethető lista (nincs lenyíló menü).
- * Gépelés: prefixre ugrik; a beírt rész éles, a többi halvány.
- */
 function mountDesktopCellDrum(wrap, wheel, emptyLabel = "Mindegy") {
   if (!wrap || !wheel) return;
   closeAllInlineDrums(false);
@@ -268,7 +260,6 @@ function mountDesktopCellDrum(wrap, wheel, emptyLabel = "Mindegy") {
   scroll.addEventListener(
     "wheel",
     (event) => {
-      /* maradjon a cellában — ne görgessen az oldal */
       event.stopPropagation();
     },
     { passive: true }
@@ -489,7 +480,6 @@ async function fetchCatalogQuick() {
     const data = await res.json();
     if (data?.gyartmanyok?.length) return data;
   } catch {
-    /* fallback below */
   }
   const { fetchVehicleCatalog } = await import("./vehicle-catalog-client.js");
   return fetchVehicleCatalog();
@@ -540,10 +530,6 @@ async function wireCatalogDrums(form) {
   });
 }
 
-/**
- * Select mezők → dobkerék (mobil: portál, asztali: inline + kézi szerkesztés).
- * @returns {Promise<boolean>}
- */
 export async function mountAutoSearchDrums(form = document.getElementById("home-qs-form")) {
   if (!form || form.dataset.drumsMounted === "1") return form.dataset.drumsMounted === "1";
   const page = document.body?.getAttribute("data-site-page") || "";
@@ -606,7 +592,6 @@ export function readAutoDrumFilterValues(form) {
   };
   const seen = new Set();
 
-  /* Dob: hidden; Település / irányítószám: megmaradt text input */
   form.querySelectorAll("[data-filter-key]").forEach((el) => {
     const key = el.getAttribute("data-filter-key");
     if (!key || seen.has(key)) return;

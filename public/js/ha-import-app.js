@@ -49,8 +49,6 @@ function setMode(mode) {
 function bookmarkletHref(mode) {
   const origin = location.origin;
   const src = `${origin}/js/ha-import-bookmarklet.js?v=haImp22`;
-  // Mindig újra betöltjük a scriptet — a régi BymyHaImport a fülön beragadhat.
-  // void(...): a visszatérési érték ne cserélje le a hasznaltauto oldalt
   return `javascript:void(function(){var o=${JSON.stringify(origin)};var m=${JSON.stringify(mode)};var src=${JSON.stringify(src)}+"&t="+Date.now();function go(){try{window.BymyHaImport.run({origin:o,mode:m});}catch(e){alert((e&&e.message)||e);}}try{delete window.BymyHaImport;}catch(e){window.BymyHaImport=undefined;}var s=document.createElement("script");s.src=src;s.onload=go;s.onerror=function(){alert("A hasznaltauto.hu blokkolta a Bymy scriptet. Másold a hirdetés URL-jét a Bymy Autóimport oldalra.");};(document.documentElement||document.body).appendChild(s);})();`;
 }
 
@@ -282,7 +280,6 @@ async function runUrlImport() {
     setStatus("Csak hasznaltauto.hu linket lehet importálni.", "err");
     return;
   }
-  // A szerver fetch-et a Cloudflare mindig blokkolja — könyvjelző kell.
   promptHaBookmark(urls[0]);
 }
 
@@ -316,7 +313,6 @@ function ackHaImport(event, data) {
       event.origin || "*"
     );
   } catch {
-    /* ignore */
   }
 }
 
@@ -328,7 +324,6 @@ function enqueueHaImport(data) {
   return true;
 }
 
-/** Listener azonnal — ne vesszen el a postMessage, amíg a belépés fut. */
 window.addEventListener("message", (event) => {
   const data = acceptHaImportMessage(event);
   if (!data) return;
@@ -340,7 +335,6 @@ window.addEventListener("message", (event) => {
   try {
     sessionStorage.setItem("bymy-ha-import-pending", JSON.stringify(data));
   } catch {
-    /* ignore quota / private mode */
   }
   if (!haImportReady) {
     enqueueHaImport(data);
@@ -366,7 +360,6 @@ async function runMessageImport(data) {
   importBusy = true;
   currentHaImportKey = key;
   seenHaImportKeys.add(key);
-  // Ne nőjön végtelenül a set.
   if (seenHaImportKeys.size > 40) {
     const first = seenHaImportKeys.values().next().value;
     seenHaImportKeys.delete(first);
@@ -413,14 +406,12 @@ async function runMessageImport(data) {
     try {
       sessionStorage.removeItem("bymy-ha-import-pending");
     } catch {
-      /* ignore */
     }
   } catch (error) {
     setStatus(error.message ?? "Import sikertelen.", "err");
   } finally {
     importBusy = false;
     currentHaImportKey = "";
-    // Duplikátumok kidobása a sorból.
     while (pendingHaImports.length && seenHaImportKeys.has(haImportKey(pendingHaImports[0]))) {
       pendingHaImports.shift();
     }
@@ -458,7 +449,6 @@ function bindAccountNav() {
         if (!parsed.v) parsed.v = CAT_STORAGE_VERSION;
         sessionStorage.setItem(CAT_STORAGE_KEY, JSON.stringify(parsed));
       } catch {
-        /* ignore */
       }
     });
   });
@@ -511,7 +501,6 @@ export async function initHaImportPage() {
       pendingHaImports.push(JSON.parse(raw));
     }
   } catch {
-    /* ignore */
   }
   if (pendingHaImports.length) {
     const queued = pendingHaImports.splice(0);

@@ -1,7 +1,3 @@
-/**
- * Dobkerék portál a body-n — natív overflow görgetés (autó + ingatlan).
- * Nincs page-scroll lock / preventDefault a touchmove-on.
- */
 
 import { readWheel, readWheelList, setWheelValue } from "./ingatlan-wheels.js?v=immoClearAll1";
 import { syncDrumWheelDisplay } from "./immo-drum-picker.js?v=immoClearAll1";
@@ -111,7 +107,6 @@ function bindPortalNativeScroll(scrollEl, ring, wheel) {
   let startY = 0;
   let moved = false;
 
-  /* Natív overflow görgetés — nincs preventDefault. */
   scrollEl.addEventListener(
     "touchstart",
     (event) => {
@@ -167,7 +162,6 @@ function positionPortal(stage, trigger) {
   stage.style.top = `${top}px`;
 }
 
-/** Dobkerék gyűrű a mező felett (body portál). */
 export function openAutoDrumSheet(wheel, trigger) {
   if (!wheel || !trigger) return;
   closeAutoDrumSheet(false);
@@ -263,7 +257,6 @@ export function openAutoDrumSheet(wheel, trigger) {
   });
 }
 
-/** Trigger → portált dobkerék (felülírja az inline nyitást). */
 export function bindAutoDrumSheet(wheel) {
   if (!wheel) return;
   const name = wheel.getAttribute?.("data-wheel") || "";
@@ -276,7 +269,6 @@ export function bindAutoDrumSheet(wheel) {
   const trigger = wrap?.querySelector(".immo-wheel-trigger");
   if (!trigger) return;
 
-  /* Újrainításkor a trigger cserélődik — mindig kössük újra. */
   const next = trigger.cloneNode(true);
   next.dataset.sheetBound = "1";
   trigger.replaceWith(next);

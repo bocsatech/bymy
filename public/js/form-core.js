@@ -689,7 +689,6 @@ function isIngatlanAd() {
   );
 }
 
-/** Ingatlan: 2–3. (műszaki / felszereltség) lépés kihagyása. */
 function nextWizardStep(from) {
   if (isIngatlanAd()) {
     if (from === 1) return 4;
@@ -1701,7 +1700,6 @@ if (mode === "wizard") {
       "input",
       (event) => {
         if (userTouchedForm) return;
-        // Profilból / kézzel töltött cím ne törlődjön az első billentyűre.
         if (event.target?.closest?.(".ad-location-fields, .field-stack--location, #email")) {
           userTouchedForm = true;
           return;

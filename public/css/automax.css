@@ -1,4 +1,4 @@
-/* AUTOMAX prémium dizájn — szövegek változatlanok */
+
 
 .theme-automax {
   --ax-orange: #ff5500;
@@ -52,7 +52,6 @@ body.theme-automax .local-banner {
   padding: 6px 48px;
 }
 
-/* —— Fejléc + lépéssáv —— */
 .theme-automax .site-header,
 .theme-automax .automax-header {
   background: #000;
@@ -106,7 +105,6 @@ body.theme-automax .local-banner {
   color: #000;
 }
 
-/* Lépéssáv a fejlécben */
 .theme-automax .automax-header .steps {
   display: flex;
   flex-wrap: wrap;
@@ -172,7 +170,6 @@ body.theme-automax .local-banner {
   color: #555;
 }
 
-/* —— Layout: bal űrlap, jobb panel —— */
 .page-automax {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(320px, 38%);
@@ -188,7 +185,6 @@ body.theme-automax .local-banner {
   min-width: 0;
 }
 
-/* Lépés cím (Playfair) */
 .automax-step-header {
   margin-bottom: 28px;
 }
@@ -216,7 +212,6 @@ body.theme-automax .local-banner {
   display: none;
 }
 
-/* —— Jobb panel —— */
 .automax-panel {
   position: relative;
   background: #000;
@@ -345,7 +340,6 @@ body.theme-automax .local-banner {
   color: var(--ax-orange);
 }
 
-/* —— Kategória —— */
 .theme-automax .category-bar {
   display: flex;
   flex-wrap: wrap;
@@ -369,7 +363,6 @@ body.theme-automax .local-banner {
   letter-spacing: 0.12em;
 }
 
-/* —— Kártyák, űrlap —— */
 .theme-automax .card {
   background: transparent;
   box-shadow: none;
@@ -482,7 +475,6 @@ body.theme-automax .local-banner {
   box-sizing: border-box;
 }
 
-/* —— Mezők: címke felül, sötét input —— */
 .theme-automax .md-outlined,
 .theme-automax .labeled-field.md-outlined,
 .theme-automax .autofelvitele-title.md-outlined {
@@ -637,7 +629,6 @@ body.theme-automax .local-banner {
   color: #fff;
 }
 
-/* —— Lábléc gombok —— */
 .theme-automax .footer-actions {
   margin-top: 48px;
   padding-top: 0;
@@ -699,7 +690,6 @@ body.theme-automax .local-banner {
   color: #fff;
 }
 
-/* Lépésalcím alatt már megjelenő szövegek elrejtése (duplikáció nélkül) */
 .theme-automax .step-panel[data-step="3"] > .card > .card-body > .hint:first-of-type,
 .theme-automax .step-panel[data-step="4"] .upload-zone strong {
   display: none;
@@ -863,7 +853,6 @@ body.theme-automax .import-url-row .btn-secondary {
   flex: 0 0 auto;
 }
 
-/* —— Import oldal —— */
 body.import-page .page-import {
   max-width: 960px;
   margin: 0 auto;
@@ -1081,7 +1070,6 @@ body.import-page .import-save-bar {
   border-top: 1px solid #333;
 }
 
-/* —— Hirdetések lista oldal —— */
 body.listings-page .page-listings {
   max-width: 920px;
   margin: 0 auto;
@@ -1100,7 +1088,6 @@ body.listings-page .ha-card-feed {
   gap: 0.75rem;
 }
 
-/* —— Hasznaltauto.hu stílusú hirdetéskártya —— */
 body.listings-page .ha-card {
   display: block;
   width: 100%;

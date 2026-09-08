@@ -1,4 +1,3 @@
-/** Mentett 12 oszlopos elrendezés — minden mező ugyanazon a lépésrácson. */
 import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=immoUiParity1";
 import { refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=autoRestore20";
 
@@ -21,7 +20,6 @@ function wrapFor(form, fieldKey) {
     document.getElementById(fieldKey) || form.querySelector(`[name="${cssEscape(fieldKey)}"]`);
   if (!input) return null;
   if (input.closest(SKIP_HOST) || input.closest(KEEP_OUT)) return null;
-  // A kerék-panel (#ingatlan-fields) ne menjen a canvasra — saját UI.
   if (input.closest("#ingatlan-fields")) return null;
   const existing = input.closest(".labeled-field, .field-stack, .md-outlined");
   if (existing) {
@@ -70,7 +68,6 @@ function pinExtras(form) {
   }
 }
 
-/** Ingatlan feladáskor az elrendezésbe nem került autó mezők / sorok / kártyák elrejtése. */
 function hideUnplacedVehicleChrome(form, placed) {
   form.querySelectorAll(".labeled-field, .field-stack, .md-outlined").forEach((el) => {
     if (placed.has(el)) return;
@@ -128,7 +125,6 @@ function hideUnplacedVehicleChrome(form, placed) {
   });
 }
 
-/** Előző kategória layout elemei (pl. autó → ingatlan) ne maradjanak láthatóak. */
 function resetPlacedLayoutItems(form) {
   form.querySelectorAll(".ad-layout-item").forEach((el) => {
     el.classList.add("ad-layout-hidden");
@@ -222,7 +218,6 @@ function placeWrap(wrap, cell) {
   });
 }
 
-/** Üres sorok összezárása — pl. törölt videó/ár mezők után ne maradjon lyuk. */
 function compactCanvasRows(form) {
   form.querySelectorAll(".ad-layout-canvas").forEach((canvas) => {
     const items = [...canvas.querySelectorAll(".ad-layout-item:not(.ad-layout-hidden)")];
@@ -272,7 +267,6 @@ function hideLayoutShellCards(form) {
     if (!canvas?.querySelector(".ad-layout-item:not(.ad-layout-hidden)")) return;
     panel.querySelectorAll(":scope > .card").forEach((card) => {
       if (card.id === "success-panel") return;
-      // Ne rejtsük el, ha a címblokk még a kártyában van (nem került a canvasra).
       if (
         card.querySelector(
           ".field-stack--location, .ad-location-fields, #megtekintesi_cim, #telepules, #iranyitoszam"
@@ -309,7 +303,6 @@ async function applyAdFormLayout() {
     if (isImmo) {
       await ensureIngatlanFormFields(form);
     } else {
-      // Autó/teher: ingatlan mezők ne maradjanak a DOM-ban.
       form.querySelector("#ingatlan-fields")?.remove();
       clearImmoOrphans(form);
     }
@@ -329,11 +322,9 @@ async function applyAdFormLayout() {
       if (isImmo) hideVehicleChromeWithoutLayout(form);
       return;
     }
-    // Előző kategória (autó) canvas elemei ne maradjanak láthatóak.
     resetPlacedLayoutItems(form);
     const placed = new Set();
     for (const cell of cells) {
-      // Autó layoutban ne helyezzünk el ingatlan-only mezőket, ha mégis a listában lennének.
       if (category !== "ingatlan" && String(cell.field_key || "").startsWith("ingatlan_")) continue;
       if (
         category !== "ingatlan" &&
@@ -383,7 +374,6 @@ async function applyAdFormLayout() {
       ) {
         continue;
       }
-      // Ingatlan layout: ne helyezzünk el jármű-only mezőket, ha valahogy a listában vannak.
       if (
         category === "ingatlan" &&
         [
@@ -459,7 +449,6 @@ async function applyAdFormLayout() {
       placeWrap(wrap, cell);
     }
     if (isImmo) {
-      // Kerék UI marad egyben; csak a járműmaradékot rejtjük.
       hideVehicleChromeWithoutLayout(form);
       form.querySelectorAll(".step-panel[data-step='1'] .form-grid > .field-row").forEach((row) => {
         if (row.closest("#ingatlan-fields")) return;
@@ -467,7 +456,6 @@ async function applyAdFormLayout() {
         row.classList.add("ad-immo-orphan");
         row.style.setProperty("display", "none", "important");
       });
-      // Canvasra került autó mezők elrejtése
       form.querySelectorAll(".ad-layout-item").forEach((el) => {
         if (el.closest("#ingatlan-fields")) return;
         const id = el.querySelector("input, select, textarea")?.id || el.querySelector("[name]")?.name;
@@ -511,7 +499,6 @@ async function applyAdFormLayout() {
   }
 }
 
-/** Layout nélküli fallback: ingatlan feladáskor rejtsd el a járműblokkot. */
 function hideVehicleChromeWithoutLayout(form) {
   const selectors = [
     ".field-row--vehicle-top",

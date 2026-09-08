@@ -1,9 +1,3 @@
-/**
- * Keresés oldal — közös 3D henger-dobkerék (autó / teher / ingatlan almenük).
- * Snap + haptic; kattintásra megnyílik a kiválasztott kereső.
- * Folytonos forgás max 20 teljes körig, utána megáll (nincs végtelen wrap-ugrás).
- * Menüelemek: GET /api/level1/search-cylinder (admin szerkeszthető).
- */
 
 import { lockPageScroll, unlockPageScroll } from "./ingatlan-wheels.js?v=scrollLock7";
 
@@ -76,10 +70,8 @@ const FALLBACK_ITEMS = [
 const STEP_DEG = 40;
 const FRICTION = 0.92;
 const SNAP_EPS = 0.35;
-/** Max teljes fordulat mindkét irányban — utána nem forog tovább. */
 const MAX_REVS = 20;
 const MAX_ANGLE = MAX_REVS * 360;
-/** iOS ujjremegés alatt ennyi px alatt még koppintás, nem húzás. */
 const DRAG_START_PX = 28;
 const TAP_MAX_PX = 36;
 
@@ -93,7 +85,6 @@ function itemIndexFromAngle(angleDeg, n) {
   return (n - 1 - m) % n;
 }
 
-/** Snap a legközelebbi lépésre — NEM ugrik vissza az első fordulatra. */
 function snapAngleNear(angleDeg) {
   const stepped = Math.round(angleDeg / STEP_DEG) * STEP_DEG;
   return clampAngle(stepped);
@@ -104,7 +95,6 @@ function hapticCenterLock() {
     if (!navigator.vibrate) return;
     navigator.vibrate([14, 24, 10]);
   } catch {
-    /* ignore */
   }
 }
 
@@ -323,7 +313,6 @@ export async function initSearchCylinder(root = document) {
     try {
       viewport.releasePointerCapture?.(ev.pointerId);
     } catch {
-      /* ignore */
     }
     const face = tapFace;
     tapFace = null;

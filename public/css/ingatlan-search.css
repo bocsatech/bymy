@@ -1,4 +1,4 @@
-/* Oldal görgetés tiltva, amíg kerek menü / dobkerék nyitva — üti az inline home-scroll-fix !important szabályokat is */
+
 html.immo-scroll-locked,
 html.immo-scroll-locked:has(body.home-page),
 html.immo-scroll-locked:has(body.site-app),
@@ -18,7 +18,7 @@ body.home-page.site-page.immo-scroll-locked {
 body.immo-scroll-locked,
 body.home-page.immo-scroll-locked,
 body.site-app.immo-scroll-locked {
-  /* ne position:fixed — iOS pár mp után elengedi */
+
   position: relative !important;
 }
 
@@ -40,14 +40,11 @@ body.immo-cyl-scroll-lock .immo-scroll-blocker {
   pointer-events: none;
 }
 
-/* Auto hero isolation:isolate alatt a dobkerék z-indexe nem üti a fix blockert —
-   nyitott dobnál a blocker ne fogja el az érintést (a document listener így is zár). */
 body.immo-scroll-locked:has(.immo-wheel-wrap--drum-inline.is-open) .immo-scroll-blocker,
 body.immo-drum-active:has(.immo-wheel-wrap--drum-inline.is-open) .immo-scroll-blocker {
   pointer-events: none !important;
 }
 
-/* Teljes képernyős érintés-blokkoló a nyitott kerék alatt */
 .immo-scroll-blocker {
   position: fixed;
   inset: 0;
@@ -69,8 +66,6 @@ body.immo-drum-active .immo-dual-range__half:has(.immo-wheel-wrap--drum-inline.i
   z-index: 200;
   position: relative;
 }
-
-/* Ingatlan kereső — mobil-szerű kerék */
 
 body[data-site-page="ingatlan"] .immo-search-hero,
 .immo-search-hero {
@@ -106,7 +101,6 @@ body[data-site-page="ingatlan"] .immo-search-panel,
   gap: 0.85rem;
 }
 
-/* Ár: kézi min–max — millió Ft (eladó) / Ft (bérlés) */
 .immo-dual-range__unit strong {
   font-weight: 800;
 }
@@ -142,7 +136,6 @@ body[data-site-page="ingatlan"] .immo-search-panel,
   background: #fff;
 }
 
-/* Ne legyen belső fehér kocka (Ft / szeparátor / input) — csak a külső keret */
 .immo-dual-range__unit,
 .immo-dual-range__sep,
 .immo-dual-range__half,
@@ -162,7 +155,6 @@ body[data-site-page="ingatlan"] .immo-search-panel,
   box-shadow: none !important;
 }
 
-/* Fülek: Eladó / Kiadó / Airbnb (autó kereső tab stílus) */
 .immo-search-tabs {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -191,7 +183,7 @@ body[data-site-page="ingatlan"] .immo-search-tabs {
 .immo-schema-cell {
   min-width: 0;
   max-width: 100%;
-  /* Ne clippelje a lenyíló menüt — a szövegvágás a .immo-wheel-trigger-en van. */
+
   overflow: visible;
   position: relative;
   z-index: 0;
@@ -218,7 +210,6 @@ body[data-site-page="ingatlan"] .immo-search-tabs {
   pointer-events: none;
 }
 
-/* Egységes cellafelirás a vonalon — kereső űrlap, dual-range minta minden mezőn */
 .immo-search-form .immo-field,
 .immo-search-form .immo-schema-cell:not(.immo-dual-range__half) > .immo-wheel-wrap {
   position: relative;
@@ -247,7 +238,6 @@ body[data-site-page="ingatlan"] .immo-search-tabs {
   padding-top: 0.42rem;
 }
 
-/* Aktív állapot = Ár / Alapterület dual-range minta */
 .immo-search-form .immo-field:focus-within,
 .immo-search-form .immo-schema-cell:not(.immo-dual-range__half) > .immo-wheel-wrap.has-drum-open,
 .immo-search-form .immo-schema-cell:not(.immo-dual-range__half) > .immo-wheel-wrap:focus-within,
@@ -284,7 +274,6 @@ body[data-site-page="ingatlan"] .immo-search-tabs {
   color: #111;
 }
 
-/* Dobkerék nyitva: címke marad (mint Alapterület) */
 .immo-search-form .immo-schema-cell:not(.immo-dual-range__half) .immo-wheel-wrap--drum-inline.is-open .immo-label {
   display: block;
 }
@@ -387,7 +376,6 @@ body[data-site-page="ingatlan"] .immo-search-tabs {
   -webkit-overflow-scrolling: touch;
 }
 
-/* Zárt trigger + lenyíló lista; cella nem nő, hosszú szöveg eleje + … */
 .immo-wheel-wrap--menu {
   position: relative;
   max-width: 100%;
@@ -697,7 +685,6 @@ input.immo-wheel-custom.immo-wheel-trigger {
   border-color: #6b7280;
 }
 
-/* —— Mobil (800px: egyezik a mobil web shell breakpointtal) —— */
 @media (max-width: 800px) {
   body[data-site-page="ingatlan"] .immo-search-hero,
   .immo-search-hero {
@@ -721,7 +708,6 @@ input.immo-wheel-custom.immo-wheel-trigger {
     gap: 0.7rem;
   }
 
-  /* Szűk képernyő: az admin rácspozíciói ne hagyjanak üres sorokat. */
   .immo-schema-grid {
     grid-template-columns: minmax(0, 1fr) !important;
     grid-template-rows: none !important;
@@ -736,7 +722,7 @@ input.immo-wheel-custom.immo-wheel-trigger {
   }
 
   .immo-dual-range-block {
-    /* 1 oszlopos mobilon: admin col 5+ implicit keskeny oszlopokat hozna létre */
+
     grid-column: 1 / -1 !important;
     grid-row: auto !important;
     padding-top: 0.42rem;
@@ -773,7 +759,6 @@ input.immo-wheel-custom.immo-wheel-trigger {
     overflow: visible;
   }
 
-  /* Min–max blokk (ár, alapterület): szegélyes címke + osztott sor */
   .immo-dual-range-block {
     min-width: 0;
     max-width: 100%;
@@ -801,7 +786,6 @@ input.immo-wheel-custom.immo-wheel-trigger {
     color: #111;
   }
 
-  /* Min–max sor: fix 3rem magasság, kerék kívül görget */
   .immo-dual-range {
     position: relative;
     grid-column: auto;
@@ -853,7 +837,6 @@ input.immo-wheel-custom.immo-wheel-trigger {
     z-index: 45;
   }
 
-  /* v2: nincs kék belső keret — külső doboz jelzi az aktív állapotot */
   body.immo-drum-mode-v2 .immo-dual-range__half.is-drum-active,
   body.immo-drum-mode-v2 .immo-schema-cell.is-drum-active {
     box-shadow: none;
@@ -960,7 +943,6 @@ input.immo-wheel-custom.immo-wheel-trigger {
     pointer-events: none;
   }
 
-  /* Ár / alapterület: a cella = kerék közepe (számok egymás felett, nem lebegő ablak) */
   .immo-dual-range__half .immo-drum-inline {
     left: 0.75rem;
     right: auto;
@@ -974,7 +956,6 @@ input.immo-wheel-custom.immo-wheel-trigger {
     min-width: 4.5rem;
   }
 
-  /* Minden választós mező: inline kerék (nem csak ár) */
   .immo-schema-cell:has(.immo-wheel-wrap--drum-inline.is-open) {
     z-index: 50;
     overflow: visible;
@@ -1001,7 +982,6 @@ input.immo-wheel-custom.immo-wheel-trigger {
     pointer-events: none;
   }
 
-  /* Kerék gyűrű — számok egymás felett; a közép sor = a cella */
   .immo-drum-inline {
     position: absolute;
     left: 0.75rem;
@@ -1034,224 +1014,7 @@ input.immo-wheel-custom.immo-wheel-trigger {
     z-index: 60;
   }
 
-  body.immo-drum-mode-legacy .immo-drum-wheel-ring {
-    border: 0;
-    box-shadow: none;
-    background: transparent;
-    border-radius: 0;
-  }
-
-  .immo-drum-inline-highlight {
-    position: absolute;
-    left: 0.3rem;
-    right: 0.3rem;
-    top: 50%;
-    transform: translateY(-50%);
-    height: var(--immo-drum-item-h, 2.5rem);
-    margin-top: 0;
-    border-radius: 6px;
-    background: rgba(148, 163, 184, 0.22);
-    pointer-events: none;
-    z-index: 3;
-  }
-
-  /* Gyűrű: pontosan 3 sor (1 fent + közép + 1 lent); padding = 1 sor */
-  .immo-drum-inline-scroll {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    overflow-x: hidden;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior: none;
-    overscroll-behavior-y: none;
-    scrollbar-width: none;
-    padding: var(--immo-drum-item-h, 40px) 0.35rem;
-    box-sizing: border-box;
-    z-index: 2;
-    touch-action: pan-y;
-  }
-
-  .immo-drum-inline-scroll::-webkit-scrollbar {
-    display: none;
-  }
-
-  .immo-drum-inline-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.35rem;
-    height: 40px;
-    margin: 0;
-    padding: 0 0.35rem;
-    color: #0f172a;
-    font: 500 1rem/1 Inter, system-ui, sans-serif;
-    font-variant-numeric: tabular-nums;
-    white-space: nowrap;
-    opacity: 0.25;
-    cursor: pointer;
-  }
-
-  .immo-drum-inline-item--photo {
-    height: 48px;
-    gap: 0.55rem;
-    padding-left: 0.2rem;
-  }
-
-  .immo-drum-inline-thumb {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    object-fit: cover;
-    flex-shrink: 0;
-    background: #e2e8f0;
-  }
-
-  .immo-drum-inline-text {
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .immo-drum-inline-item.is-in-cell {
-    color: #0f172a;
-  }
-
-  .immo-drum-inline-item.is-selected {
-    font-weight: 700;
-  }
-
-  .immo-drum-inline-item.is-selected::after,
-  .immo-wheel-wrap--multi .immo-drum-inline-item.is-selected::after {
-    content: "✓";
-    flex: 0 0 auto;
-    margin-left: 0.35rem;
-    font-weight: 800;
-    color: #111;
-  }
-
-  [data-theme="dark"] .immo-drum-wheel-ring {
-    background: #0b1220;
-    border-color: #475569;
-    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
-  }
-
-  [data-theme="dark"] .immo-drum-inline-item {
-    color: #e5e7eb;
-  }
-
-  [data-theme="dark"] .immo-drum-inline-highlight {
-    background: rgba(148, 163, 184, 0.16);
-  }
-
-  .immo-dual-range__half:has(.immo-wheel-wrap--drum-inline.is-open),
-  .immo-schema-cell:has(.immo-wheel-wrap--drum-inline.is-open) {
-    overflow: visible;
-  }
-
-  .immo-wheel--drum-source {
-    display: none !important;
-  }
-
-  .immo-control {
-    font-size: 1rem;
-  }
-
-  /* Egyéb mezők: alsó lista menü */
-  .immo-wheel--menu:not(.immo-wheel--menu-compact) {
-    position: fixed;
-    left: 0.65rem;
-    right: 0.65rem;
-    top: auto;
-    bottom: max(0.65rem, env(safe-area-inset-bottom, 0px));
-    max-height: min(55vh, 22rem);
-    min-height: 0;
-    z-index: 230;
-    border-radius: 16px;
-    border: 1px solid #e2e8f0;
-    background: #fff;
-    box-shadow: 0 -8px 32px rgba(15, 23, 42, 0.18);
-    padding: 0.45rem;
-  }
-
-  /* Ár kerékmenü: keskeny, a legszélesebb szám szélességére (nem teljes képernyő) */
-  .immo-wheel--menu.immo-wheel--menu-compact,
-  body > .immo-wheel.immo-wheel--menu.immo-wheel--menu-compact {
-    left: 50%;
-    right: auto;
-    width: var(--immo-wheel-menu-w, 11rem);
-    max-width: calc(100vw - 1.3rem);
-    transform: translateX(-50%);
-  }
-
-  .immo-wheel--menu-compact .immo-wheel-opt {
-    text-align: center;
-    white-space: nowrap;
-  }
-
-  /* body-ra portált lista is látszódjon a backdrop fölött */
-  body > .immo-wheel.immo-wheel--menu {
-    z-index: 230;
-  }
-
-  .immo-wheel-opt {
-    min-height: 2.85rem;
-    font-size: 1rem;
-    padding: 0.65rem 0.75rem;
-    border-radius: 10px;
-    text-align: left;
-  }
-
-  .immo-wheel-wrap--multi .immo-wheel-opt.is-active {
-    border-radius: 10px;
-  }
-
-  .immo-submit {
-    min-height: 3.1rem;
-    font-size: 1.05rem;
-    border-radius: 12px;
-  }
-
-  .immo-actions-secondary {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .immo-action {
-    width: 100%;
-    text-align: center;
-    min-height: 2.85rem;
-    box-sizing: border-box;
-  }
-
-  .immo-bool-grid {
-    grid-template-columns: 1fr;
-  }
-
-  body.immo-menu-open {
-    overflow: hidden;
-    touch-action: none;
-  }
-
-  body.immo-drum-active {
-    overflow: hidden;
-    touch-action: none;
-  }
-
-  .immo-menu-backdrop {
-    position: fixed;
-    inset: 0;
-    z-index: 210;
-    background: rgba(15, 23, 42, 0.35);
-    border: 0;
-    padding: 0;
-    margin: 0;
-    cursor: pointer;
-  }
-}
-
+  
 @media (max-width: 420px) {
   .immo-schema-grid {
     grid-template-columns: 1fr !important;
@@ -1297,7 +1060,6 @@ input.immo-wheel-custom.immo-wheel-trigger {
   }
 }
 
-/* —— Asztali: ugyanaz a dobkerék, mint mobilon —— */
 @media (min-width: 801px) {
   body.immo-price-drum-active .immo-search-panel,
   body.immo-price-drum-active .immo-search-form,
@@ -1372,7 +1134,6 @@ input.immo-wheel-custom.immo-wheel-trigger {
     z-index: 51;
   }
 
-  /* v2: nincs kék belső keret — külső doboz jelzi az aktív állapotot */
   body.immo-drum-mode-v2 .immo-dual-range__half.is-drum-active,
   body.immo-drum-mode-v2 .immo-schema-cell.is-drum-active {
     box-shadow: none;
@@ -1460,7 +1221,6 @@ input.immo-wheel-custom.immo-wheel-trigger {
     pointer-events: none;
   }
 
-  /* Ár / alapterület: a cella = kerék közepe (számok egymás felett, nem lebegő ablak) */
   .immo-dual-range__half .immo-drum-inline {
     left: 0.75rem;
     right: auto;
@@ -1532,149 +1292,7 @@ input.immo-wheel-custom.immo-wheel-trigger {
     z-index: 60;
   }
 
-  body.immo-drum-mode-legacy .immo-drum-wheel-ring {
-    border: 0;
-    box-shadow: none;
-    background: transparent;
-    border-radius: 0;
-  }
-
-  .immo-drum-inline-highlight {
-    position: absolute;
-    left: 0.3rem;
-    right: 0.3rem;
-    top: 50%;
-    transform: translateY(-50%);
-    height: var(--immo-drum-item-h, 2.5rem);
-    margin-top: 0;
-    border-radius: 6px;
-    background: rgba(148, 163, 184, 0.22);
-    pointer-events: none;
-    z-index: 3;
-  }
-
-  .immo-drum-inline-scroll {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    overflow-x: hidden;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior: none;
-    overscroll-behavior-y: none;
-    scrollbar-width: none;
-    padding: var(--immo-drum-item-h, 40px) 0.35rem;
-    box-sizing: border-box;
-    z-index: 2;
-    touch-action: pan-y;
-  }
-
-  .immo-drum-inline-scroll::-webkit-scrollbar {
-    display: none;
-  }
-
-  .immo-drum-inline-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.35rem;
-    height: 40px;
-    margin: 0;
-    padding: 0 0.35rem;
-    color: #0f172a;
-    font: 500 1rem/1 Inter, system-ui, sans-serif;
-    font-variant-numeric: tabular-nums;
-    white-space: nowrap;
-    opacity: 0.25;
-    cursor: pointer;
-  }
-
-  .immo-drum-inline-item--photo {
-    height: 48px;
-    gap: 0.55rem;
-    padding-left: 0.2rem;
-  }
-
-  .immo-drum-inline-thumb {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    object-fit: cover;
-    flex-shrink: 0;
-    background: #e2e8f0;
-  }
-
-  .immo-drum-inline-text {
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .immo-drum-inline-item.is-in-cell {
-    color: #0f172a;
-  }
-
-  .immo-drum-inline-item.is-selected {
-    font-weight: 700;
-  }
-
-  .immo-drum-inline-item.is-selected::after,
-  .immo-wheel-wrap--multi .immo-drum-inline-item.is-selected::after {
-    content: "✓";
-    flex: 0 0 auto;
-    margin-left: 0.35rem;
-    font-weight: 800;
-    color: #111;
-  }
-
-  .immo-dual-range__half:has(.immo-wheel-wrap--drum-inline.is-open),
-  .immo-schema-cell:has(.immo-wheel-wrap--drum-inline.is-open) {
-    overflow: visible;
-  }
-
-  .immo-wheel--drum-source {
-    display: none !important;
-  }
-
-  [data-theme="dark"] .immo-dual-range__unit {
-    color: #e5e7eb;
-    background: transparent;
-    border-left: 0;
-  }
-
-  [data-theme="dark"] .immo-dual-range {
-    background: #0b1220;
-    border-color: #374151;
-  }
-
-  [data-theme="dark"] .immo-dual-range__title {
-    background: var(--hub-card, #0b1220);
-    color: #94a3b8;
-  }
-
-  [data-theme="dark"] .immo-dual-range.has-drum-open {
-    background: #111827;
-    border-color: #6b7280;
-  }
-
-  [data-theme="dark"] .immo-drum-wheel-ring {
-    background: #0b1220;
-    border-color: #475569;
-    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
-  }
-
-  [data-theme="dark"] .immo-drum-inline-item {
-    color: #e5e7eb;
-  }
-
-  [data-theme="dark"] .immo-drum-inline-highlight {
-    background: rgba(148, 163, 184, 0.16);
-  }
-}
-
-/* Kék fókuszkeret / outline kikapcsolva az ingatlan keresőben */
+  
 body[data-site-page="ingatlan"] .immo-search-form .immo-wheel-trigger:focus,
 body[data-site-page="ingatlan"] .immo-search-form .immo-wheel-trigger:focus-visible,
 body[data-site-page="ingatlan"] .immo-search-form .immo-control:focus,
@@ -1690,7 +1308,6 @@ body[data-site-page="ingatlan"] .immo-search-form select:focus-visible {
   pointer-events: none;
 }
 
-/* Település typeahead — a lista a többi mező / menü felett */
 .immo-field {
   position: relative;
 }
@@ -1755,7 +1372,6 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   background: #243041;
 }
 
-/* Portált dobkerék (autó oldal megoldása) — natív görgetés */
 .auto-drum-portal {
   position: fixed;
   inset: 0;

@@ -1,6 +1,3 @@
-/**
- * Részletes keresés — hero panel mount, olvasás, szűrés.
- */
 
 import {
   DETAILED_SEARCH_SECTIONS,
@@ -9,7 +6,6 @@ import {
 
 const FORM_FLAG_KEYS = new Set(["villamtoltes", "zold_rendszam"]);
 
-/** Rövidítések / import badge aliasok (OR egyezés). */
 const EXTRA_ALIASES = new Map([
   ["könnyűfém felni", ["alufelni", "aluminium felni", "könnyűfém"]],
   ["bluetooth-os kihangosító", ["bluetooth", "bt"]],
@@ -280,7 +276,6 @@ function sectionFieldCount(section) {
 
 function buildDetailedSections(akkuLoad) {
   const section = akkuLoad?.section;
-  // Üres akku szekció ne jelenjen meg a keresőn (admin még nem kapcsolt be mezőt).
   if (section?.id && sectionFieldCount(section) > 0) return [section, ...DETAILED_SEARCH_SECTIONS];
   return [...DETAILED_SEARCH_SECTIONS];
 }
@@ -311,7 +306,6 @@ export function readDetailedSearchValues(form = document.getElementById("home-qs
   const flags = {};
   const extras = [];
 
-  // Multi kapcsoló selectek (AC töltő Type 1/2): checkbox → tömb
   panel.querySelectorAll("[data-multi-select]").forEach((wrap) => {
     const key = wrap.getAttribute("data-multi-select");
     if (!key) return;

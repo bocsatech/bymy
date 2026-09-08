@@ -1,14 +1,4 @@
-/*
- * Autó kereső hero — willhaben Gebrauchtwagen arány / méret.
- * Forrás: https://www.willhaben.at/iad/gebrauchtwagen
- * (felhasználói képernyőfotó: 2026-08-16)
- *
- * Szerkezet:
- * 1) felső fül sáv
- * 2) stage: fotó + keresőpanel a teljes szélességen
- *
- * Háttérkép: auto.html → [data-auto-hero-image] src
- */
+
 
 body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-layout.site-layout {
   grid-template-columns: minmax(0, 1fr);
@@ -29,7 +19,6 @@ body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-a
     padding-right: 0.55rem;
   }
 
-  /* Mobilon a nagy üres HIRDETÉS blokkok lejjebb tolják a keresőt. */
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-ad-strip:not(.home-ad-strip--bottom) {
     display: none;
   }
@@ -40,7 +29,6 @@ body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-a
   overflow: hidden;
 }
 
-/* —— Fülek (willhaben: világos sáv, aktív kiemelés) —— */
 .auto-search-tabs {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
@@ -90,7 +78,6 @@ body[data-site-page="teherauto"] .auto-search-tabs {
   color: #fff;
 }
 
-/* —— Kivitel menü (minden járműkategóriában) —— */
 .auto-kivitel-nav {
   position: relative;
   z-index: 5;
@@ -183,7 +170,6 @@ body[data-site-page="teherauto"] .auto-search-tabs {
   }
 }
 
-/* —— Stage: fotó + panel — magasság a tartalomtól (nem vágja le a mezőket) —— */
 .auto-search-hero__stage {
   position: relative;
   isolation: isolate;
@@ -204,7 +190,6 @@ body[data-site-page="teherauto"] .auto-search-tabs {
   object-position: 62% 48%;
 }
 
-/* Bal→jobb sötétítés: a mezők olvashatók a teljes szélességen. */
 .auto-search-hero__stage::before {
   content: "";
   position: absolute;
@@ -220,7 +205,6 @@ body[data-site-page="teherauto"] .auto-search-tabs {
   pointer-events: none;
 }
 
-/* Jobb alsó brand terület. */
 .auto-search-hero__stage::after {
   content: "";
   position: absolute;
@@ -301,7 +285,6 @@ body[data-site-page="teherauto"] .auto-search-tabs {
   min-width: 0;
 }
 
-/* —— Form: kompakt mezők, átlátszó panel —— */
 .auto-search-panel .home-qs-form {
   gap: 0.75rem;
   width: 100%;
@@ -347,7 +330,7 @@ body[data-site-page="teherauto"] .auto-search-tabs {
 
 .auto-search-panel .home-qs-label {
   color: #f9fafb;
-  /* Lebegő címke a sötét fotón — ne legyen átlátszó (összecsúszás). */
+
   background: #1a1f26;
   font-size: 0.68rem;
   text-shadow: none;
@@ -482,7 +465,6 @@ body[data-site-page="teherauto"] .auto-search-tabs {
   min-height: 100%;
 }
 
-/* Részletes keresés panel — a Több szűrő alatt, mindkettő lehet nyitva */
 .auto-search-panel .home-qs-detailed {
   display: none;
   flex-direction: column;
@@ -761,7 +743,6 @@ body[data-site-page="teherauto"] .auto-search-tabs {
     border-right: 0;
   }
 
-  /* Mobil: nem overlay a fotón — fehér kártya, olvasható mezők. */
   .auto-search-hero__stage {
     aspect-ratio: auto;
     min-height: 0;
@@ -973,7 +954,6 @@ body[data-site-page="teherauto"] .auto-search-tabs {
   display: none !important;
 }
 
-/* Mobil: ne villanjon a select UI a dobkerék előtt */
 @media (max-width: 900px) {
   .auto-search-panel .home-qs-static-legacy {
     display: none !important;
@@ -991,9 +971,8 @@ body[data-site-page="teherauto"] .auto-search-tabs {
   }
 }
 
-/* Mobil dobkerék kereső — ingatlan stílus a fehér panelben */
 @media (max-width: 900px) {
-  /* Hero stacking context ne nyelje el a dobkerék érintéseit */
+
   body[data-site-page="auto"].immo-scroll-locked .auto-search-hero,
   body[data-site-page="auto"].immo-drum-active .auto-search-hero,
   body[data-site-page="auto"].auto-drum-open .auto-search-hero,
@@ -1028,7 +1007,6 @@ body[data-site-page="teherauto"] .auto-search-tabs {
     overflow: visible;
   }
 
-  /* Dobkerék gyűrű — 900px-ig (ingatlan CSS csak 800px alatt) */
   .auto-search-panel .auto-qs-drums .immo-drum-inline {
     position: absolute;
     left: 0;
@@ -1168,7 +1146,6 @@ body[data-site-page="teherauto"] .auto-search-tabs {
     gap: 0;
   }
 
-  /* Település + irányítószám: egymás mellett, ne teljes szélességű óriás mező */
   .auto-search-panel .auto-qs-drums .home-qs-row:has(.home-qs-field--text) {
     flex-direction: row;
     align-items: stretch;
@@ -1275,7 +1252,6 @@ body[data-site-page="teherauto"] .auto-search-tabs {
   }
 }
 
-/* Portált dobkerék — ingatlan gyűrű a body-n (hero stacking felett) */
 .auto-drum-portal {
   position: fixed;
   inset: 0;
@@ -1408,12 +1384,10 @@ body.auto-drum-portal-open {
   overflow: hidden;
 }
 
-/* régi sheet osztályok ne zavarjanak */
 .auto-drum-sheet {
   display: none !important;
 }
 
-/* —— Asztali: cellán belüli görgethető lista (nincs lenyíló menü) —— */
 @media (min-width: 901px) {
   .auto-search-panel .auto-qs-drums--desktop {
     --auto-qs-field-h: 2.4rem;
@@ -1511,7 +1485,7 @@ body.auto-drum-portal-open {
     background: transparent !important;
     background-color: transparent !important;
     box-shadow: none !important;
-    /* visible: a lebegő cellafelirat (top negatív) ne vágódjon le */
+
     overflow: visible;
     box-sizing: border-box;
   }
@@ -1647,7 +1621,6 @@ body.auto-drum-portal-open {
     align-items: center;
   }
 
-  /* Irányítószám / Település — ugyanaz a keret/háttér, mint a Megye dobnál */
   .auto-search-panel .auto-qs-drums--desktop .home-qs-field--text,
   .auto-search-panel .auto-qs-drums--desktop .immo-field.home-qs-field--text,
   .auto-search-panel .auto-qs-drums--desktop .home-qs-field:has(input.home-qs-control) {

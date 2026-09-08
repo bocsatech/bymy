@@ -1,7 +1,3 @@
-/**
- * Település typeahead — HU posta lista + Budapest I–XXIII. kerület.
- * Használat: wireTelepulesSuggest(input)
- */
 
 const ROMAN = [
   "I",
@@ -65,7 +61,6 @@ async function loadCityNames() {
         if (city) names.add(city);
       }
     } catch {
-      /* offline */
     }
     names.add("Budapest");
     for (const k of BUDAPEST_KERULETEK) names.add(k);
@@ -102,7 +97,6 @@ function suggestNames(all, query, limit = 12) {
     let bonus = 0;
     const di = districtIndex(name);
     if (di >= 0) {
-      /* bud / kerület / római → kerületek is jöjjenek, sorrend I→XXIII */
       if (q.startsWith("bud") || q.includes("ker") || /^[ivx]+$/.test(q)) {
         bonus = 200 - di;
       }
@@ -119,10 +113,6 @@ function suggestNames(all, query, limit = 12) {
   return scored.slice(0, limit).map((s) => s.name);
 }
 
-/**
- * @param {HTMLInputElement} input
- * @param {{ onPick?: (value: string) => void }} [opts]
- */
 export function wireTelepulesSuggest(input, opts = {}) {
   if (!input || input.dataset.telepulesSuggestBound === "1") return;
   input.dataset.telepulesSuggestBound = "1";
@@ -150,7 +140,6 @@ export function wireTelepulesSuggest(input, opts = {}) {
   let active = -1;
   let items = [];
   let allNames = [];
-  /** Kiválasztás után ne nyíljon újra az input/focus eseménytől. */
   let suppressOpen = false;
   let timer = 0;
 

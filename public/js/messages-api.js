@@ -1,7 +1,3 @@
-/**
- * Üzenetek API — ugyanaz, mint a mobil MessagesAPI.swift:
- * /api/messages/* (szerver SQLite, később VPS).
- */
 
 export const MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024;
 

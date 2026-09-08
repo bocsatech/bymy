@@ -1,4 +1,4 @@
-/* Hirdetésfeladás — kategóriaválasztó (mobilapp accordion mintára) */
+
 :root {
   --cp-bg: #e8edf3;
   --cp-card: #ffffff;
@@ -359,7 +359,6 @@
   filter: brightness(0.96);
 }
 
-/* Sheet / picker overlay */
 .cp-sheet-backdrop {
   position: fixed;
   inset: 0;
@@ -664,7 +663,6 @@ body.cp-sheet-open {
   overflow: hidden;
 }
 
-/* —— Sötét mód —— */
 html[data-theme="dark"] {
   --cp-bg: #12161c;
   --cp-card: #1a1f26;

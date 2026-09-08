@@ -1,7 +1,3 @@
-/**
- * Kompakt autócsempe: kép + cím + alcím + ár + év/km/LE (autó oldal hierarchia).
- * Használat: főoldal közelben / kedvencek — a csempe szélesség változatlan.
- */
 import { formatListingDisplayTitle } from "./listing-card.js";
 import { listingDetailHref } from "./listing-return.js?v=scrollTop1";
 
@@ -13,13 +9,11 @@ export function listingTileTitle(item) {
   const preview = item?.preview ?? {};
   const raw = preview.title || item?.hirdetes_cime || `Hirdetés #${item?.id ?? "?"}`;
   let title = formatListingDisplayTitle(raw) || `Hirdetés #${item?.id ?? "?"}`;
-  // Év a meta sorban van — a címből levesszük.
   title = title.replace(/\s*\(\d{4}(?:\/\d{1,2})?\)\s*$/u, "").trim();
   title = softTitleCase(title);
   return title || `Hirdetés #${item?.id ?? "?"}`;
 }
 
-/** Ha a forrás FULL CAPS, olvasható címformára. */
 function softTitleCase(value) {
   const s = String(value ?? "").trim();
   if (!s) return s;
@@ -46,7 +40,6 @@ export function listingTileSubtitle(item) {
   const form = item?.form ?? {};
   const fuel = pickFilter(preview, form, "uzemanyag");
   const gear = pickFilter(preview, form, "sebessegvalto");
-  // Kompakt csempén rövidebb váltófelirat — ne törje szét a sort.
   const gearShort = gear
     .replace(/^Fokozatmentes\s+automata$/iu, "Automata")
     .replace(/^Fokozatmentes$/iu, "Automata");
@@ -73,7 +66,6 @@ export function listingTilePower(item) {
   return "";
 }
 
-/** pl. „2021, 5.000 km” — legacy szöveges meta */
 export function listingTileMeta(item) {
   const year = listingTileYear(item);
   const km = listingTileKm(item);
@@ -130,10 +122,6 @@ function appendSpec(row, iconSvg, text, spec) {
   row.appendChild(el);
 }
 
-/**
- * @param {object} item
- * @param {{ className?: string }} [opts]
- */
 export function createListingTileCard(item, { className = "hf-card hf-card--listing" } = {}) {
   const preview = item.preview ?? {};
   const link = document.createElement("a");

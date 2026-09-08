@@ -10,7 +10,7 @@
           }
           document.documentElement.setAttribute("data-theme", t);
         } catch (e) {}
-                /* Auth fejléc: ne villanjon vendég gomb → profil a modul / API előtt */
+                
         try {
           var raw = sessionStorage.getItem("bymy-auth-user");
           var user = raw ? JSON.parse(raw) : null;
@@ -76,7 +76,7 @@
             <a class="hub-btn hub-btn--ghost" href="/regisztracio.html" data-auth-register>Regisztráció</a>
           </div>
           <div class="site-header-avatar-wrap" data-avatar-menu data-auth-member hidden>
-            <button type="button" class="site-header-profile" data-auth-avatar data-avatar-toggle aria-expanded="false" aria-haspopup="menu" aria-label="Fiók" title="Fiók">
+            <button type="button" class="site-header-profile" data-auth-avatar data-avatar-toggle aria-expanded="false" aria-label="Fiók" title="Fiók">
               <span class="site-header-avatar">
                 <span data-avatar-letter>A</span>
                 <img data-avatar-img alt="" hidden width="44" height="44" />
@@ -84,7 +84,6 @@
               <span class="site-header-firstname" data-auth-firstname></span>
               <svg class="site-header-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </button>
-            <div class="site-avatar-dropdown site-avatar-dropdown--fiok" data-avatar-dropdown role="menu" hidden></div>
           </div>
           <a class="hub-btn hub-btn--post" href="/hirdetesfeladas.html" data-auth-guard>+ Hirdetésfeladás</a>
           <button type="button" class="hub-theme-toggle" data-theme-toggle aria-label="Színmód" title="Színmód"></button>
@@ -104,7 +103,6 @@
         </div>
       </div>
     </header>
-
 
     <main class="mm-shell">
       <p class="mm-boot-error" role="alert">
@@ -220,7 +218,7 @@
           </form>
         </section>
 
-        <!-- Autóimport -->
+        
         <section class="mm-panel ha-imp-panel" data-mm-panel="import" hidden>
           <header class="mm-panel-head">
             <h2 class="mm-panel-title" data-ha-title>Használtautó import</h2>
@@ -259,7 +257,7 @@
           <p class="ha-imp-footer" data-ha-footer>A jelszavadat nem tároljuk — csak a megnyitott oldal adatait olvassuk ki.</p>
         </section>
 
-        <!-- Áttekintés -->
+        
         <section class="mm-panel" data-mm-panel="attekintes" hidden>
           <header class="mm-panel-head">
             <h2 class="mm-panel-title">Áttekintés</h2>
@@ -293,7 +291,7 @@
           </div>
         </section>
 
-        <!-- Kedvencek (szekcio=parkolo) -->
+        
         <section class="mm-panel" data-mm-panel="parkolo" hidden>
           <header class="mm-panel-head">
             <h2 class="mm-panel-title">Kedvencek</h2>
@@ -308,7 +306,7 @@
           <p class="mm-empty" id="mm-park-empty" hidden>Még nincs kedvenced.</p>
         </section>
 
-        <!-- Mentett keresések -->
+        
         <section class="mm-panel" data-mm-panel="keresesek" hidden>
           <header class="mm-panel-head">
             <h2 class="mm-panel-title">Mentett kereséseim</h2>
@@ -324,12 +322,12 @@
           <p class="mm-empty" id="mm-search-empty" hidden>Nincs mentett keresésed.</p>
         </section>
 
-        <!-- Üzenetek — willhaben szerkezet, fehér -->
+        
         <section class="mm-panel mm-panel--messages" data-mm-panel="uzenetek" hidden>
           <div id="mm-msg-root" class="msg-root"></div>
         </section>
 
-        <!-- Hirdetésem -->
+        
         <section class="mm-panel" data-mm-panel="hirdetes" hidden>
           <header class="mm-panel-head">
             <h2 class="mm-panel-title">Saját hirdetések</h2>
@@ -338,7 +336,7 @@
           <div id="mm-ad-list" class="mm-ad-list"></div>
         </section>
 
-        <!-- Nyomtatások -->
+        
         <section class="mm-panel" data-mm-panel="nyomtatasok" hidden>
           <header class="mm-panel-head">
             <h2 class="mm-panel-title">Nyomtatások</h2>
@@ -347,7 +345,7 @@
           <p class="mm-empty">Ez a menüpont előkészületben van.</p>
         </section>
 
-        <!-- Értékelések -->
+        
         <section class="mm-panel" data-mm-panel="ertekelesek" hidden>
           <header class="mm-panel-head">
             <h2 class="mm-panel-title">Értékelések</h2>
@@ -356,7 +354,7 @@
           <p class="mm-empty">Ez a menüpont előkészületben van.</p>
         </section>
 
-        <!-- Megjelenés — autó hero háttér (mindenkinek) -->
+        
         <section class="mm-panel" data-mm-panel="megjelenes" hidden>
           <header class="mm-panel-head">
             <h2 class="mm-panel-title">Megjelenés</h2>
@@ -416,7 +414,7 @@
           </div>
         </section>
 
-        <!-- Beállítások almenük (korábban accordion) -->
+        
         <section class="mm-panel" data-mm-panel="szemelyes" hidden>
           <header class="mm-panel-head">
             <h2 class="mm-panel-title">Személyes adatok</h2>
@@ -595,7 +593,7 @@
           </form>
         </section>
 
-        <!-- legacy alias: fiok → személyes (üres, JS átirányít) -->
+        
         <section class="mm-panel" data-mm-panel="fiok" hidden></section>
       </div>
     </main>
@@ -604,7 +602,7 @@
     <script src="/js/ha-import-app.js?v=haBookmarkCopy1" type="module"></script>
     <script src="/js/beallitasok-app.js?v=settingsFailOpen1" type="module"></script>
     <script>
-      /* Modulhiba esetén se maradjon örökre rejtett / csendes a Fiókom. */
+      
       setTimeout(function () {
         var root = document.documentElement;
         root.removeAttribute("data-mm-account-pending");

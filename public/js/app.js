@@ -193,7 +193,6 @@ function ensureFormReady() {
           "Add meg a címed (utca, irányítószám, település), vagy töltsd ki a Beállítások → Cégadatok / Személyes adatok részt."
         );
       }
-      // A form mezők legyenek a forrás, ha a felhasználó ide írt be.
       if (listingAddressComplete(fromForm)) {
         const streetEl = adForm.elements.namedItem("megtekintesi_cim");
         const postalEl = adForm.elements.namedItem("iranyitoszam");
@@ -277,7 +276,6 @@ const categoryPicker = initCategoryPicker({
     }
   },
   onReset: () => {
-    // picker visible again
   },
 });
 
@@ -299,7 +297,6 @@ if (editing) {
     syncPhotoUrlsFromListing(listing);
     const catSel = categorySelectionFromForm(listing.form);
     if (catSel) categoryPicker?.syncWizardContext?.(catSel);
-    /* Publikált ingatlan: üzletág + típus zárolva (ingatlan.com viselkedés). */
     const published = String(listing.status || "") === "feladott";
     const isImmo = String(listing.form?.hirdetes_vertical || "").toLowerCase() === "ingatlan";
     if (published && isImmo) {

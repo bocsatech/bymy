@@ -1,4 +1,3 @@
-/** Régi autosweb-* localStorage kulcsok átvezetése bymy-*-ra (adatvesztés nélkül). */
 import { safeInternalPath } from "./safe-path.js?v=sec1";
 
 function migrateLegacyAutoswebStorage() {
@@ -16,7 +15,6 @@ function migrateLegacyAutoswebStorage() {
       }
     }
   } catch {
-    /* ignore */
   }
 }
 migrateLegacyAutoswebStorage();
@@ -25,7 +23,6 @@ const AUTH_KEY = "bymy-auth-user";
 const TOKEN_KEY = "bymy-auth-token";
 const PROFILE_BACKUP_KEY = "bymy-profile-backup";
 
-/** Token ne legyen localStorage-ban (XSS). Cookie HttpOnly; Bearer csak memóriában (mobil). */
 let memoryToken = "";
 
 function clearLegacyTokenStorage() {
@@ -33,7 +30,6 @@ function clearLegacyTokenStorage() {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem("autosweb-auth-token");
   } catch {
-    /* ignore */
   }
 }
 
@@ -54,7 +50,6 @@ function clearSensitiveLocalData() {
     localStorage.removeItem(PROFILE_BACKUP_KEY);
     localStorage.removeItem("autosweb-profile-backup");
   } catch {
-    /* ignore */
   }
 }
 
@@ -75,7 +70,6 @@ function setCachedUser(user) {
 }
 
 function rememberAuth(data) {
-  // Token csak memóriában (mobil Bearer); web cookie-t használ.
   if (data?.token) setStoredToken(data.token);
   return setCachedUser(data?.user ?? null);
 }
@@ -160,7 +154,6 @@ export async function refreshAuthSession() {
         clearSensitiveLocalData();
         return null;
       }
-      /* Hálózati / átmeneti hiba: ne dobjunk loginra, maradjon a cache. */
       return getAuthUser();
     } finally {
       refreshInflight = null;
@@ -169,7 +162,6 @@ export async function refreshAuthSession() {
   return refreshInflight;
 }
 
-/** Profil mindig a szerverről (SQLite), ne a böngésző cache-ből. */
 export async function loadProfileFromServer() {
   const data = await authFetch("/api/auth/profile");
   if (data.user) rememberAuth(data);
@@ -195,7 +187,6 @@ export async function register(email, password, passwordConfirm, accountType) {
       accountType,
     }),
   });
-  // Aktiválás előtt nincs session.
   return data;
 }
 
@@ -242,7 +233,6 @@ export async function logout() {
   try {
     await authFetch("/api/auth/logout", { method: "POST", body: "{}" });
   } catch {
-    /* ignore */
   }
   sessionStorage.removeItem(AUTH_KEY);
   setStoredToken("");
@@ -287,7 +277,6 @@ export async function setDisplayName(name) {
   return data.displayName;
 }
 
-/** Profilkép mentése a szerverre (hirdetés oldalon is látszódjon). */
 export async function saveAvatarPhoto(avatarDataUrl) {
   const data = await authFetch("/api/auth/avatar", {
     method: "PUT",
@@ -370,7 +359,6 @@ export async function saveProfile(profile) {
     throw new Error("A mentés nem sikerült — próbáld újra belépés után.");
   }
 
-  // Újraolvasás — ha a szerver üresen adná vissza, azonnal jelezzük.
   try {
     const verify = await authFetch("/api/auth/profile");
     if (!profileSaveLooksOk(verify.profile)) {
@@ -421,7 +409,6 @@ function updateHeaderAuthUi() {
   try {
     document.documentElement.setAttribute("data-auth", loggedIn ? "member" : "guest");
   } catch {
-    /* ignore */
   }
 
   registerBtns.forEach((btn) => {
@@ -457,7 +444,6 @@ function updateHeaderAuthUi() {
     el.textContent = lastName || "";
   });
 
-  // Az avatar menü külön script (site-avatar-menu.js) — ne importáld újra (különben dupla listener).
   window.dispatchEvent(new CustomEvent("bymy-auth-changed"));
 }
 
@@ -497,12 +483,10 @@ async function refreshUnreadMessageCount() {
     const unread = (data.conversations || []).reduce((total, conversation) => total + (Number(conversation.unread) || 0), 0);
     paintUnreadMessageCount(unread);
   } catch {
-    /* Az üzenetoldal hibája ne akadályozza a globális fejlécet. */
   }
 }
 
 export function initSiteAuth(options = {}) {
-  // Azonnali UI a session cache-ből — ne várjuk meg a hálózatot (FOUC / Belépés-villanás).
   updateHeaderAuthUi();
   try {
     document.documentElement.setAttribute(
@@ -510,7 +494,6 @@ export function initSiteAuth(options = {}) {
       isLoggedIn() ? "member" : "guest"
     );
   } catch {
-    /* ignore */
   }
 
   if (!options.skipRefresh) {
@@ -523,7 +506,6 @@ export function initSiteAuth(options = {}) {
           isLoggedIn() ? "member" : "guest"
         );
       } catch {
-        /* ignore */
       }
     });
   }
@@ -580,7 +562,6 @@ async function enforceClientMembersGate() {
   if (isAuthGatePage() || isPublicClientPage()) return;
   const user = await refreshAuthSession();
   if (user?.email) return;
-  /* Csak tényleges kijelentkezésnél — ne villanjon a login oldal hálózati hibánál. */
   if (getAuthUser()?.email) return;
   window.location.replace(loginUrl(window.location.pathname + window.location.search));
 }
@@ -592,7 +573,6 @@ export function initRegisterPage() {
   const submitBtn = form?.querySelector('button[type="submit"]');
   if (!form) return;
 
-  // Már belépve: ne mutassuk a regisztrációs űrlapot.
   refreshAuthSession().then((user) => {
     if (user?.email) window.location.replace("/");
   });
@@ -616,7 +596,6 @@ export function initRegisterPage() {
     });
     if (submitBtn) submitBtn.disabled = !type;
     if (errorEl && type) {
-      // típus kiválasztva — töröld a „válassz típust” hibát, oauth_error-t hagyd
       if (errorEl.textContent.includes("Privát") || errorEl.textContent.includes("Céges") || errorEl.textContent.includes("fióktípus")) {
         errorEl.hidden = true;
         errorEl.textContent = "";
@@ -659,7 +638,6 @@ export function initRegisterPage() {
     try {
       const result = await register(email, data.get("password"), data.get("password_confirm"), accountType);
 
-      // Felhő + nincs SMTP: a szerver azonnal aktivál + session tokent ad → „be vagy lépve”.
       const autoLoggedIn = Boolean(result.token || result.user || result.needsActivation === false);
       if (autoLoggedIn) {
         if (result.user) rememberAuth(result);
@@ -682,7 +660,6 @@ export function initRegisterPage() {
       if (errorEl) {
         errorEl.hidden = false;
         const msg = error.message ?? "Sikertelen regisztráció.";
-        // Már létező fiók: nincs új mail — irányítsuk belépésre / újraküldésre.
         if (String(msg).includes("már regisztrálva")) {
           const q = encodeURIComponent(email);
           errorEl.innerHTML =
@@ -865,7 +842,6 @@ export function initForgotPasswordPage() {
               statusEl.appendChild(a);
             }
           } catch {
-            /* ignore unsafe link */
           }
         }
       }
@@ -960,7 +936,6 @@ export function initActivatePage() {
         statusEl.appendChild(document.createTextNode(result.message || "Elküldve."));
         const link = String(result.activationLink || "").trim();
         if (link && safeInternalPath(new URL(link, window.location.origin).pathname) !== "/") {
-          // Only show link if same-origin relative activation path
         }
         if (link) {
           try {
@@ -975,7 +950,6 @@ export function initActivatePage() {
               statusEl.appendChild(a);
             }
           } catch {
-            /* ignore unsafe link */
           }
         }
       }

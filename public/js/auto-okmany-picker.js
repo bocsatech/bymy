@@ -1,6 +1,3 @@
-/**
- * Autó asztali — Okmányok jellege kapcsolós multi-select.
- */
 
 import { OKMANY_JELLEG_OPTIONS, normalizeOkmanyJelleg } from "./equipment-data.js";
 import { bindAutoBmDismiss, autoBmPanelIsOpen } from "./auto-bm-dismiss.js?v=bmDismiss1";
@@ -52,9 +49,6 @@ function escapeAttr(value) {
   return escapeHtml(value).replace(/'/g, "&#39;");
 }
 
-/**
- * @param {HTMLFormElement} form
- */
 export async function mountAutoOkmanyPicker(form) {
   if (!form || !isAutoDesk() || form.dataset.okmanyPicker === "1") return;
 
@@ -70,7 +64,6 @@ export async function mountAutoOkmanyPicker(form) {
   const deskQuick = field.dataset.deskQuick || "0";
   field.remove();
 
-  /** @type {Set<string>} */
   const selected = new Set();
 
   const hidden = document.createElement("input");

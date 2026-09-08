@@ -1,42 +1,16 @@
-/**
- * Inline drum picker — fix cella + kerék gyűrű (v2).
- * Visszaállítás: ?immoDrum=legacy vagy localStorage immo-drum-mode=legacy
- *
- * Látható sorok: 1 fent + középső (kijelölt) + 1 lent.
- * Cellába kattintás: érték (többesnél toggle) + bezárás.
- */
 
 import { readWheel, readWheelList, setWheelValue, lockPageScroll, unlockPageScroll, syncWheelClearButton } from "./ingatlan-wheels.js?v=immoClearAll1";
 
 const ITEM_H = 40;
-/** Pontosan 3 sor: fent / közép / lent */
 const VISIBLE_ROWS = 3;
 let paintFrame = 0;
 let snapTimer = 0;
 
-/** v2 = kerék gyűrű + alatta rejtés | legacy = előző egyszerű inline */
-export function getDrumMode() {
-  try {
-    const q = new URLSearchParams(window.location.search).get("immoDrum");
-    if (q === "legacy" || q === "v2") return q;
-  } catch {
-    /* ignore */
-  }
-  try {
-    const stored = localStorage.getItem("immo-drum-mode");
-    if (stored === "legacy" || stored === "v2") return stored;
-  } catch {
-    /* ignore */
-  }
-  return "v2";
-}
-
 export function applyDrumModeClass() {
   document.body.classList.remove("immo-drum-mode-v2", "immo-drum-mode-legacy");
-  document.body.classList.add(`immo-drum-mode-${getDrumMode()}`);
+  document.body.classList.add("immo-drum-mode-v2");
 }
 
-/** Asztali + mobil: a kerék az ingatlan oldalon mindkét nézetben nyitható. */
 function isDrumViewport() {
   return true;
 }
@@ -90,7 +64,6 @@ function itemsOf(scrollEl) {
   return [...scrollEl.querySelectorAll(".immo-drum-inline-item")];
 }
 
-/** padding-top = itemH mellett: scrollTop = index * itemH → a sor a gyűrű közepén. */
 function scrollToIndex(scrollEl, index) {
   const items = itemsOf(scrollEl);
   if (!items.length) return;
@@ -178,8 +151,6 @@ function setDrumFormState(open) {
 
   if (useNativeDrumScroll) {
     document.body.classList.toggle("auto-drum-open", open);
-    /* Autó hero isolation/overflow alatt a full-page touch lock eltöri a dobot —
-       natív pan-y + helyi húzás kell, nem immo-scroll-blocker. */
     if (!open) unlockPageScroll(true);
     return;
   }
@@ -188,9 +159,6 @@ function setDrumFormState(open) {
   else unlockPageScroll(true);
 }
 
-/**
- * Asztali egérhúzás + görgő. Touch: `onLockedTouchMove` görget (ne duplázzuk).
- */
 function bindDrumPan(scrollEl, ring, wrap) {
   if (!scrollEl || !ring || ring.dataset.panBound === "1") return;
   ring.dataset.panBound = "1";
@@ -222,7 +190,6 @@ function bindDrumPan(scrollEl, ring, wrap) {
       try {
         ring.setPointerCapture(event.pointerId);
       } catch {
-        /* ignore */
       }
     }
     if (!moved || !dy) return;
@@ -238,7 +205,6 @@ function bindDrumPan(scrollEl, ring, wrap) {
     try {
       ring.releasePointerCapture(event.pointerId);
     } catch {
-      /* ignore */
     }
     if (moved) {
       ring.dataset.drumDragged = "1";
@@ -251,7 +217,6 @@ function bindDrumPan(scrollEl, ring, wrap) {
   ring.addEventListener("pointerup", endDrag);
   ring.addEventListener("pointercancel", endDrag);
 
-  /* Egérgörgő: a page-lock onLockedWheel intézi — itt ne duplázzuk. */
 }
 
 function refreshDrumItemStates(scrollEl, wheel) {
@@ -302,7 +267,6 @@ function closeAllInlineDrums(commit = true) {
 function populateInlineScroll(scrollEl, wheel, wrap) {
   const opts = [...wheel.querySelectorAll(".immo-wheel-opt")];
   const withPhoto = opts.some((btn) => Boolean(btn.dataset.image));
-  /* Sor magasság = cella magasság → a kijelölt érték pontosan a cellában van. */
   const cellH = Math.round(
     wrap?.querySelector(".immo-wheel-trigger")?.getBoundingClientRect().height || ITEM_H
   );
@@ -417,7 +381,6 @@ function ensureOutsideClose() {
     "pointerdown",
     (event) => {
       const openWrap = event.target?.closest?.(".immo-wheel-wrap--drum-inline.is-open");
-      /* Nyitott dobon belül (trigger / lista): ne zárjuk capture-ben — a saját handler intézi. */
       if (openWrap) return;
       if (!document.querySelector(".immo-wheel-wrap--drum-inline.is-open")) return;
       closeAllInlineDrums(true);
@@ -480,7 +443,6 @@ export function initDrumWheel(wheel, { emptyLabel = "Mindegy", multiple = false,
   if (labelEl?.nextSibling) wrap.insertBefore(trigger, labelEl.nextSibling);
   else wrap.insertBefore(trigger, wheel);
 
-  /* portal: a bindAutoDrumSheet köti a kattintást (natív görgetés). */
   if (openMode !== "portal") {
     trigger.addEventListener("click", (event) => {
       event.stopPropagation();
@@ -535,4 +497,4 @@ export function syncDrumWheelDisplay(wheel) {
   syncWheelClearButton(wrap, wheel, true);
 }
 
-export { isDrumViewport, formatTriggerShort, closeAllInlineDrums };
+export { closeAllInlineDrums };

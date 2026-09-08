@@ -1,7 +1,4 @@
-/**
- * Hirdetés-csempék minden oldalon / témában:
- * fehér kártya, fekete szöveg, kép cover (lightbox kivétel).
- */
+
 
 .hf-card--listing,
 .home-grid-card,
@@ -73,7 +70,6 @@ body.site-app .myads-photo-item img {
   object-position: center center !important;
 }
 
-/* Sötét oldalchrome mellett is marad a fehér csempe */
 html[data-theme="dark"] .hf-card--listing,
 html[data-theme="dark"] .home-grid-card,
 html[data-theme="dark"] body.listings-page .ha-card,

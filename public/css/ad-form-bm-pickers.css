@@ -1,6 +1,4 @@
-/**
- * Hirdetésfeladás — keresős kapcsolós panel (Állapot, Kivitel, Okmány).
- */
+
 
 body.site-app[data-site-page="hirdetesfeladas"] {
   --ad-form-bm-panel: #fff;
@@ -67,7 +65,6 @@ body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-anchor.is-open {
   overflow: visible !important;
 }
 
-/* Teljes cellát lefedő panel (állapot, kivitel) */
 body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-anchor .ad-form-bm-panel:not(.ad-form-bm-dropdown) {
   position: absolute;
   top: 0;
@@ -312,7 +309,6 @@ body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-native-host input {
   -webkit-appearance: none !important;
 }
 
-/* Rejtett natív select — ne legyen szürke vonal a trigger alatt */
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .labeled-field > select.ad-form-bm-native,
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form select.ad-form-bm-native,
 body.site-app[data-site-page="hirdetesfeladas"] .labeled-field > select.ad-form-bm-native,

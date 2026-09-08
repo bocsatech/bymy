@@ -1,5 +1,4 @@
-/* Mobil web felső sáv (logo / Hello / oldalnevek) + alsó sziget — minden site-app oldalon.
-   Asztali web: rejtve. */
+
 
 .mw-app-top,
 .mw-app-tabbar {
@@ -7,10 +6,7 @@
 }
 
 @media (max-width: 800px) {
-  /*
-   * Logo a képernyő tetejétől indul (status bar ALÁ rajzolódik).
-   * TILOS negatív margin: az overflow-x:hidden levágja a tetejét.
-   */
+
   html:has(body.hub-page--feed) {
     background: #fff;
     overflow-x: visible;
@@ -26,7 +22,6 @@
     overflow-y: auto !important;
   }
 
-  /* Vízszintes túlcsordulás: aloldalakon se csússzon az egész oldal */
   body.site-app:not(.hub-page--feed) {
     overflow-x: hidden !important;
     overscroll-behavior-x: none;
@@ -39,7 +34,6 @@
     overflow-x: clip;
   }
 
-  /* Vízszintes túlcsordulás: ne a body vágjon, hanem a tartalom */
   body.hub-page--feed main,
   body.hub-page--feed .hub-intro,
   body.hub-page--feed .hub-feed {
@@ -61,7 +55,6 @@
     border-bottom-color: #2a313c;
   }
 
-  /* Asztali fejléc eltüntetése, ha a mobil felső sáv aktív */
   body.site-app:has(.mw-app-top) > .hub-header,
   body.site-app:has(.mw-app-top) > .site-header,
   body.site-app:has(.mw-app-top) > .home-header,
@@ -78,7 +71,6 @@
     display: none;
   }
 
-  /* —— Logo: teljes kép, arányos, a dokumentum tetejétől (nincs levágás) —— */
   body.site-app .mw-app-top {
     --mw-logo-h: calc(100vw * 415 / 958);
     --mw-logo-gap: 1.5cm;
@@ -102,7 +94,7 @@
     width: 100%;
     padding: 0;
     margin: 0;
-    /* Hely a Hello + profilkép sávnak — az oldalnevek ez ALATT legyenek */
+
     margin-bottom: var(--mw-logo-gap);
   }
 
@@ -118,7 +110,6 @@
     transform: none !important;
   }
 
-  /* Hello + vezetéknév — balra, közvetlenül a logo alatt */
   body.site-app .mw-app-hello {
     position: absolute;
     left: max(0.85rem, env(safe-area-inset-left, 0px));
@@ -205,7 +196,6 @@
     display: none !important;
   }
 
-  /* Guest: belépés ikon ugyanott, a logo alatti sávban */
   body.site-app .mw-app-login {
     position: absolute;
     right: max(0.75rem, env(safe-area-inset-right, 0px));
@@ -248,7 +238,6 @@
     display: block !important;
   }
 
-  /* Oldalnevek — mint a webes főmenü, vízszintesen görgethető */
   body.site-app .mw-app-pages {
     display: flex;
     flex-wrap: nowrap;
@@ -320,7 +309,6 @@
     border-bottom-color: #e8eaed;
   }
 
-  /* —— Promo kártyák: egymás mellett, vízszintes görgetés (több kép is jön) —— */
   body.hub-page--feed .hub-intro {
     padding: 0.5rem 0 0.25rem;
   }
@@ -363,7 +351,6 @@
     border: 1px solid #d4d4d4;
   }
 
-  /* Főoldal: semmi ne zárja a fel-le görgetést (vízszintes sávok is engedik) */
   body.hub-page--feed .hub-verticals,
   body.hub-page--feed .hf-rail,
   body.hub-page--feed .hub-promo,
@@ -371,7 +358,6 @@
     touch-action: pan-x pan-y;
   }
 
-  /* —— Feed: app-szerű vízszintes sorok —— */
   body.hub-page--feed .hub-feed {
     padding: 0.5rem 0 1rem;
   }
@@ -387,7 +373,7 @@
   }
 
   body.hub-page--feed .hf-all {
-    display: none; /* app képen nincs „Összes” a sorcímek mellett */
+    display: none;
   }
 
   body.hub-page--feed .hf-section[data-hf="kozelben"] .hf-all {
@@ -466,7 +452,6 @@
     transform-origin: center center;
   }
 
-  /* Autókategóriák: demó — fehér háttér, teljes autó, sötét cím */
   body.hub-page--feed .hf-card--kategoria .hf-card-media img {
     position: absolute;
     inset: 0;
@@ -568,17 +553,14 @@
     font-size: 0.76rem;
   }
 
-  /* Lebegő alsó sziget helye — minden site-app oldalon */
   body.site-app {
     padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
   }
 
-  /* Régi tartalom-szerkesztő sáv soha ne takarja a szigetet mobilweben */
   body.site-app .site-content-bar {
     display: none !important;
   }
 
-  /* —— Lebegő alsó sziget (mint a natív app) —— minden oldalon —— */
   body.site-app .mw-app-tabbar {
     display: flex;
     align-items: flex-end;
@@ -587,7 +569,7 @@
     left: 50%;
     bottom: 0.4rem;
     transform: translateX(-50%);
-    /* Magasabb, mint a régi site-content-bar (9999) és egyéb fixed UI */
+
     z-index: 10050;
     width: min(22.75rem, calc(100% - 1.35rem));
     min-height: 3.55rem;
@@ -719,7 +701,6 @@
   }
 }
 
-/* Asztal: biztosan rejtve, ha valami media query felülírná */
 @media (min-width: 801px) {
   .mw-app-top,
   .mw-app-tabbar {

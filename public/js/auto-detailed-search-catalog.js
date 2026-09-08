@@ -1,6 +1,4 @@
-/** Részletes keresés — szekciók és mezők (felszereltség címkék). */
 
-/** Üres sablon — a mezők csak az admin Akkumulátor menüből jönnek. */
 export const AKKU_SEARCH_SECTION_EMPTY = {
   id: "akku",
   title: "Akkumulátor és hatótáv adatok",
@@ -9,7 +7,6 @@ export const AKKU_SEARCH_SECTION_EMPTY = {
   toggles: [],
 };
 
-/** Mezőkatalógus (admin + layout bridge). */
 export const AKKU_SEARCH_SECTION_FALLBACK = {
   id: "akku",
   title: "Akkumulátor és hatótáv adatok",
@@ -46,10 +43,6 @@ const AKKU_DEF_BY_ID = new Map([
   ...AKKU_SEARCH_SECTION_FALLBACK.toggles.map((item) => [item.id, { ...item, kind: "toggle" }]),
 ]);
 
-/**
- * Személyautó kereső form-layout celláiból Részletes keresés akku szekció.
- * Rejtett cella → nem jelenik meg; címke/sorrend a layoutból jön.
- */
 export function buildAkkuSectionFromLayoutCells(cells, title = "Akkumulátor és hatótáv adatok") {
   const list = Array.isArray(cells) ? cells : [];
   const matched = list

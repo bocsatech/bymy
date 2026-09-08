@@ -17,7 +17,6 @@ const IMMO_TIPUS = [
   { id: "airbnb", label: "Airbnb Ingatlanok", image: "/images/hub-ingatlan-photo.jpg" },
 ];
 
-/** Wizard „Kategória” kerék — egy választás, kis képekkel. */
 const WIZARD_CATEGORY_OPTIONS = [
   {
     id: "szemelyauto",

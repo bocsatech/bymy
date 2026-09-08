@@ -1,8 +1,3 @@
-/**
- * Asztali Kivitel kapcsolós multi-select.
- * Autó / kisteher: lapos lista.
- * Teherautó 3,5-tól: hierarchikus (állapot / üzemanyag stílus).
- */
 
 import { KIVITEL_OPTIONS, normalizeKivitel } from "./kivitel-options.js?v=kivitel1";
 import {
@@ -61,7 +56,6 @@ function useTeher35Categories() {
   return document.body?.getAttribute("data-site-page") === "teherauto" && truckKategoria() === "35-felett";
 }
 
-/** Teher 3,5-tól: mindig kapcsolós hierarchia (asztal + mobil). Egyébként csak asztali desk. */
 function shouldMountKivitelPicker() {
   if (!isVehicleSearchPage()) return false;
   if (useTeher35Categories()) return true;
@@ -99,16 +93,12 @@ function normKey(value) {
     .replace(/[\u0300-\u036f]/g, "");
 }
 
-/**
- * @param {HTMLFormElement} form
- */
 export async function mountAutoKivitelPicker(form) {
   if (!form || !shouldMountKivitelPicker() || form.dataset.kivitelPicker === "1") return;
 
   let alapHost = form.querySelector(".auto-desk-fields[data-desk-alap]");
   const muszakiHost = form.querySelector(".auto-desk-fields[data-desk-muszaki]");
 
-  // Mobil / layout nélkül: cseréljük a meglévő kivitel mezőt, vagy hozzunk létre hostot
   const legacyKivitel =
     form.querySelector('[data-qs-field="kivitel"]') ||
     form.querySelector("#qs-kivitel")?.closest(".home-qs-field, .immo-schema-cell, [data-qs-field], label") ||
@@ -134,9 +124,7 @@ export async function mountAutoKivitelPicker(form) {
   const categories = hierarchical ? TEHER_35_KIVITEL_CATEGORIES : null;
   const flatOptions = hierarchical ? null : flatOptionsForPage();
 
-  /** @type {Set<string>} */
   const openMains = new Set();
-  /** @type {Set<string>} */
   const selected = new Set();
 
   const hidden = document.createElement("input");

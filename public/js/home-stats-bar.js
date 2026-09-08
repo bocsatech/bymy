@@ -178,7 +178,6 @@ export function initHomeStatsBar({ onChange, getItems }) {
         localStorage.setItem(STORAGE_POSTAL, postal_code);
         localStorage.setItem(STORAGE_RADIUS, String(radiusKm));
       } catch {
-        /* ignore */
       }
 
       document.querySelector(".home-listings-panel")?.scrollIntoView({
@@ -212,7 +211,6 @@ export function initHomeStatsBar({ onChange, getItems }) {
       updateCardUi(activeFilter);
       onChange?.(activeFilter);
     } catch {
-      /* keep previous count */
     }
   }
 
@@ -256,7 +254,6 @@ export function initHomeStatsBar({ onChange, getItems }) {
       radiusInput.value = savedRadius.replace(/[^\d.,]/g, "").replace(",", ".");
     }
   } catch {
-    /* ignore */
   }
 
   resetCardUi();

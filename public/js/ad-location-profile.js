@@ -46,7 +46,6 @@ async function lookupMegye(postalCode, city) {
     if (res.ok && data.megye) return data.megye;
     if (res.ok && data.city) return inferMegyeFromCity(data.city, postal);
   } catch {
-    /* ignore */
   }
   return inferMegyeFromCity(city, postal);
 }
@@ -65,7 +64,6 @@ function setHint(form, message, { isError = false } = {}) {
   hint.classList.toggle("ad-location-hint--error", isError);
 }
 
-/** Címmezők mindig szerkeszthetők (profilból előtöltve). */
 function unlockLocationFields(form) {
   form.querySelectorAll(".ad-location-fields input").forEach((el) => {
     if (el.type === "hidden") return;
@@ -92,7 +90,6 @@ function ensureLocationVisible(form) {
   }
 }
 
-/** E-mail a cég / fiók profilból (ha a mező üres vagy még nem szerkesztett). */
 export function applyContactFromProfile(form, profile = null) {
   if (!form) return;
   const p = profile ?? getProfile();
@@ -153,7 +150,6 @@ function updateLocationHint(form, result) {
   );
 }
 
-/** Szinkron kitöltés — validáció és mentés előtt. */
 export function applyListingAddressFromProfileSync(form, profile = null) {
   if (!form) return { ok: false, reason: "missing-form", address: null };
 

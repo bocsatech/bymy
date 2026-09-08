@@ -1,11 +1,9 @@
-/** Böngésző beacon — oldallátogatás + heartbeat (jelenlegi látogatók). */
 (function () {
   const KEY = "bymy_vid";
   let vid = "";
   try {
     vid = localStorage.getItem(KEY) || "";
   } catch {
-    /* ignore */
   }
 
   function connType() {
@@ -58,7 +56,6 @@
           try {
             localStorage.setItem(KEY, vid);
           } catch {
-            /* ignore */
           }
         }
       })

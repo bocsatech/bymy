@@ -122,7 +122,6 @@ async function selectListing(id) {
       await recordListingView(id, "web");
     }
   } catch {
-    /* ignore */
   }
 
   currentListing = listing;

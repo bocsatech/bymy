@@ -1,6 +1,3 @@
-/**
- * Autó asztali — AC töltőcsatlakozó kapcsolós multi-select (Type 1 / Type 2).
- */
 
 import { AC_TOLTO_CSATLAKOZAS_OPTIONS, normalizeAcToltoCsatlakozas } from "./equipment-data.js";
 import { bindAutoBmDismiss, autoBmPanelIsOpen } from "./auto-bm-dismiss.js?v=bmDismiss1";
@@ -83,7 +80,6 @@ function mountOne(form, spec) {
   const deskQuick = field.dataset.deskQuick || "0";
   field.remove();
 
-  /** @type {Set<string>} */
   const selected = new Set();
 
   const hidden = document.createElement("input");
@@ -212,9 +208,6 @@ function mountOne(form, spec) {
   return true;
 }
 
-/**
- * @param {HTMLFormElement} form
- */
 export async function mountAutoToltoPickers(form) {
   if (!form || !isAutoDesk()) return;
   for (const spec of FIELD_SPECS) mountOne(form, spec);

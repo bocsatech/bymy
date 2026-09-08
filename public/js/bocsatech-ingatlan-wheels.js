@@ -1,4 +1,3 @@
-/** Bocsatech — ingatlan kerék-séma drag-and-drop + osztott min–max csempék. */
 
 import {
   WHEEL_COLS,
@@ -44,7 +43,6 @@ export function mountIngatlanWheelBoard(root, schema, { onChange, readOnly = fal
     return Math.max(...rows);
   }
 
-  /** Max sor a húzott mező nélkül + 1 (legaljára), üres lyukak nélkül. */
   function clampRowInSection(section, row, excludeKeys = []) {
     const skip = new Set(excludeKeys.filter(Boolean));
     const occupied = visible(section)
@@ -54,7 +52,6 @@ export function mountIngatlanWheelBoard(root, schema, { onChange, readOnly = fal
     return clamp(row, 1, floor + 1);
   }
 
-  /** Üres (nem spacer) sorok összehúzása — meglévő mezők relatív sorrendje megmarad. */
   function compactSection(section) {
     const items = visible(section);
     if (!items.length) return;
@@ -70,7 +67,6 @@ export function mountIngatlanWheelBoard(root, schema, { onChange, readOnly = fal
     const main = root.querySelector('.layout-board[data-board="main"]');
     const more = root.querySelector('.layout-board[data-board="more"]');
 
-    /* Hiszterézis: ne ugráljon oda-vissza a két tábla között a határnál. */
     if (main && more) {
       const mainR = main.getBoundingClientRect();
       const moreR = more.getBoundingClientRect();
@@ -120,7 +116,6 @@ export function mountIngatlanWheelBoard(root, schema, { onChange, readOnly = fal
       return;
     }
 
-    /* Másik táblára húzáskor: mindig a cél tábla legaljára — meglévő elrendezés érintetlen. */
     if (crossed) {
       cell.row = maxRow(section, { excludeKey: cell.field_key }) + 1;
       cell.col = 1;
@@ -496,7 +491,6 @@ export function mountIngatlanWheelBoard(root, schema, { onChange, readOnly = fal
           return;
         }
 
-        // Szélesség gombok: azonnal alkalmaz (ne preventDefault + külön click, touchön elhal)
         const widthBtn = event.target.closest("[data-width-delta], [data-width-full]");
         if (widthBtn || event.target.closest("[data-width-btns]")) {
           event.preventDefault();
@@ -538,14 +532,12 @@ export function mountIngatlanWheelBoard(root, schema, { onChange, readOnly = fal
         event.preventDefault();
         tile.setPointerCapture(event.pointerId);
         tile.classList.add("dragging");
-        /* Mindkét tábla nőjön, hogy a Fő→További húzás ne akadjon el. */
         root.querySelectorAll(".layout-board").forEach((b) => setBoardHeight(b, { buffer: DROP_BUFFER }));
         const grab = {
           startCol: group ? Math.min(tol.col, ig.col) : cell.col,
           startRow: cell.row,
           col: colFromEvent(board, event.clientX),
           row: rowFromEvent(board, event.clientY),
-          // Resize: pixel-delta, hogy vissza is lehessen szélesíteni (ne ragadjon a bal szélhez)
           resizeOriginStart: group ? Math.min(tol.col, ig.col) : cell.col,
           resizeOriginTotal: group ? tol.colSpan + ig.colSpan : cell.colSpan,
           resizeOriginX: event.clientX,
@@ -583,7 +575,6 @@ export function mountIngatlanWheelBoard(root, schema, { onChange, readOnly = fal
             if (group && tol && ig) {
               let total = clamp(grab.resizeOriginTotal + deltaCols, 2, COLS);
               let start = grab.resizeOriginStart;
-              // Jobbra a rács végéig → teljes 12/12
               if (deltaCols > 0 && edge >= COLS) {
                 total = COLS;
                 start = 1;
@@ -623,7 +614,6 @@ export function mountIngatlanWheelBoard(root, schema, { onChange, readOnly = fal
           try {
             tile.releasePointerCapture(event.pointerId);
           } catch {
-            /* */
           }
           tile.removeEventListener("pointermove", move);
           tile.removeEventListener("pointerup", end);
@@ -640,7 +630,6 @@ export function mountIngatlanWheelBoard(root, schema, { onChange, readOnly = fal
         tile.addEventListener("lostpointercapture", end);
       });
 
-      // − / + / 12 szélesség gombok
       tile.querySelectorAll("[data-width-delta], [data-width-full], [data-order-delta]").forEach((btn) => {
         btn.addEventListener("click", (event) => {
           event.preventDefault();
@@ -690,7 +679,6 @@ export function mountIngatlanWheelBoard(root, schema, { onChange, readOnly = fal
         });
       });
 
-      // Dupla kattintás a resize fogón → teljes szélesség (12/12)
       const resizeHandle = tile.querySelector("[data-resize]");
       if (resizeHandle) {
         resizeHandle.addEventListener("dblclick", (event) => {

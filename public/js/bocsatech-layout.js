@@ -1,7 +1,6 @@
 const COLS = 12;
 const ROW_PX = 64;
 const DROP_BUFFER = 2;
-/** Ennyi pixel alatt kattintásnak számít (nem mozgatás). */
 const DRAG_THRESHOLD_PX = 8;
 const DEFAULT_STEP_NAMES = {
   1: "Alapadatok",
@@ -155,7 +154,6 @@ export function mountLayoutBoard(root, layout, { onChange, stepNames } = {}) {
     return Math.max(1, maxRowOnStep(step));
   }
 
-  /** Lépés-sávok Y szerint — fejléc és rés is a cél lépéshez tartozik. */
   function boardAtPoint(clientX, clientY, preferBoard) {
     const boards = [...root.querySelectorAll(".layout-board")].sort(
       (a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top
@@ -189,7 +187,6 @@ export function mountLayoutBoard(root, layout, { onChange, stepNames } = {}) {
     return pool[pool.length - 1].board;
   }
 
-  /** Üres sorok kiszűrése: a használt sorok egymás alá csúsznak. */
   function compactStep(step) {
     const items = editable().filter((cell) => !cell.hidden && Number(cell.step) === step);
     if (!items.length) return false;
@@ -295,7 +292,6 @@ export function mountLayoutBoard(root, layout, { onChange, stepNames } = {}) {
           startRow: cell.row,
           col: colFromEvent(board, event.clientX),
           row: rowFromEvent(board, event.clientY),
-          // Resize: pixel-delta, hogy visszafele is lehessen keskenyíteni/szélesíteni
           resizeOriginCol: cell.col,
           resizeOriginSpan: cell.colSpan,
           resizeOriginX: event.clientX,
@@ -377,13 +373,11 @@ export function mountLayoutBoard(root, layout, { onChange, stepNames } = {}) {
           try {
             tile.releasePointerCapture(event.pointerId);
           } catch {
-            /* */
           }
           tile.removeEventListener("pointermove", move);
           tile.removeEventListener("pointerup", up);
           tile.removeEventListener("pointercancel", up);
 
-          // Puszta kattintás: ne mozduljon el a cella (ne jöjjön plusz sor)
           if (!dragArmed) {
             cell.col = originCol;
             cell.row = originRow;

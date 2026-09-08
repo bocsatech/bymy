@@ -1,6 +1,3 @@
-/**
- * Gyorskereső az autó hero panelen — elrendezés: GET /api/level1/form-layout?category=szemelyauto-search
- */
 
 import { applyAutoSearchLayout, readLayoutFilterValues } from "./auto-search-layout.js?v=teherKivitel35e";
 import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums } from "./auto-search-drums.js?v=fogyNum1";
@@ -164,14 +161,12 @@ export function initHomeQuickSearch({ onSearch = () => {}, onDeskSortChange } = 
       const deskAuto =
         (page === "auto" || page === "teherauto") &&
         window.matchMedia(DESK_MQ).matches;
-      // Asztali auto: natív select = demó dropdown (dob nélkül). Mobil / teher: dobok.
       if (!deskAuto) {
         try {
           await mountAutoSearchDrums(form);
         } catch (drumError) {
           console.warn("Kereső dobkerék:", drumError);
         }
-        // Teher 3,5-tól: dob helyett kapcsolós hierarchikus Kivitel
         if (page === "teherauto") {
           try {
             await mountAutoKivitelPicker(form);

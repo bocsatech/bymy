@@ -1,7 +1,3 @@
-/**
- * Ingatlan feladás — ugyanaz a kereső UI, mint /ingatlan.html (kinézet + működés).
- * Séma: eladó / kiadó / airbnb külön variant.
- */
 
 import { normalizeIngatlanUzletag, INGATLAN_LAKAS_TIPUS, INGATLAN_LAKAS_TIPUS_AIRBNB } from "./ingatlan-fields.js?v=immoUiParity1";
 import {
@@ -24,7 +20,6 @@ function readPickerTip(form) {
     .toLowerCase();
 }
 
-/** Picker tip → admin kerék-séma variant. */
 export function schemaVariantFromImmoTip(tip) {
   const t = String(tip || "").trim().toLowerCase();
   if (t === "elado") return "elado-ingatlan";
@@ -61,7 +56,6 @@ export async function ensureIngatlanFormFields(form) {
   root.setAttribute("data-ingatlan-only", "1");
   root.dataset.schemaVariant = variant;
 
-  /* Kereső UI mezők — Kategória kerék csak az élő keresőn; feladáson hidden a tipből. */
   const uz = defaultUzletagFromTip(tip);
   root.innerHTML = `
     <article class="immo-search-panel immo-search-panel--post">
@@ -98,7 +92,6 @@ export async function ensureIngatlanFormFields(form) {
     onSearch: () => {},
   });
 
-  /* Település mező: címke + ajánló (keresővel megegyező). */
   root.querySelectorAll('[data-schema-field="keresesi_hely"] .immo-label, label[data-schema-field="keresesi_hely"] .immo-label').forEach((el) => {
     el.textContent = "Település";
   });

@@ -157,7 +157,6 @@ function formToObject(form) {
   return obj;
 }
 
-/** Becsléshez: a katalógus hosszú típusnevét lerövidíti (szögletes zárójel nélkül, modellnév nélkül). */
 function estimateParamsFromForm(form) {
   const params = formToObject(form);
   if (params.tipus) {

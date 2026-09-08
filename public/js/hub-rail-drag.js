@@ -1,4 +1,3 @@
-/** Vízszintes feed-sáv: egérrel húzható görgetés, scrollbar nélkül. */
 function initHubRailDrag(root = document) {
   root.querySelectorAll(".hf-rail").forEach((rail) => {
     if (rail.dataset.dragBound === "1") return;
@@ -29,7 +28,6 @@ function initHubRailDrag(root = document) {
         try {
           rail.setPointerCapture(pointerId);
         } catch {
-          /* ignore */
         }
       }
 

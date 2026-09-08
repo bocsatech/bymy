@@ -1,4 +1,4 @@
-/* Görgetősávok elrejtve az egész weben (görgetés marad) */
+
 html,
 body,
 * {
@@ -15,7 +15,7 @@ body::-webkit-scrollbar,
 }
 
 :root {
-  /* M3 — narancs primary, semleges felületek (7. minta, lilac nélkül) */
+
   --orange: #f57c00;
   --orange-dark: #e65100;
   --orange-light: #fff3e0;
@@ -379,7 +379,6 @@ select.auto-filled {
   color: var(--muted);
 }
 
-/* Menü — elrendezés változatlan; M3 szegmens, semleges + narancs */
 .steps {
   display: flex;
   gap: 0;
@@ -866,7 +865,6 @@ textarea {
   }
 }
 
-/* ===== 7. minta — Material, szövegek változatlanok ===== */
 .theme-m7 {
   --primary: #ff7043;
   --orange: #ff7043;
@@ -1370,7 +1368,6 @@ body.theme-m7::after {
   min-width: 0;
 }
 
-/* —— Mockup cellák: lebegő címke, 14px radius, #d1d1d1 keret —— */
 .theme-m7 {
   --m7-field-border: #d1d1d1;
   --m7-field-radius: 14px;

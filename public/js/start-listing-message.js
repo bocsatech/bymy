@@ -1,6 +1,3 @@
-/**
- * Hirdetés → belső üzenet (éles: valódi tulajdonos).
- */
 import { getAuthUser, loginUrl } from "./site-auth.js";
 import { startConversation } from "./messages-api.js?v=msgLive1";
 
@@ -16,9 +13,6 @@ export function canMessageListing(sellerId) {
   return !isOwnListing(owner);
 }
 
-/**
- * @returns {Promise<{ conversationId: number } | null>}
- */
 export async function openListingMessage({
   listingId,
   title,

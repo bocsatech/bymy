@@ -142,9 +142,8 @@
                     <label for="okmany_jelleg">Okmányok jellege: <span class="req">*</span></label>
                     <select id="okmany_jelleg" name="okmany_jelleg" required>
                       <option value="">Válasszon</option>
-                      <option>Külföldi okmányokkal</option>
-                      <option>Magyar okmányokkal</option>
-                      <option>Okmányok nélkül</option>
+                      <option>Érvényes magyar okmányokkal</option>
+                      <option>Érvényes külföldi okmányokkal</option>
                     </select>
                   </div>
                 </div>
@@ -287,8 +286,10 @@
               <label for="tolto_csatlakozas">Töltőcsatlakozó:</label>
               <select id="tolto_csatlakozas" name="tolto_csatlakozas">
                 <option value="">—</option>
-                <option>Type 1</option>
                 <option>Type 2</option>
+                <option>CCS</option>
+                <option>CHAdeMO</option>
+                <option>Schuko / hálózati</option>
               </select>
             </div>
           </div>
@@ -418,15 +419,9 @@
             <div class="card">
               <div class="card-head">Leírás és elérhetőség</div>
               <div class="card-body form-grid">
-                <div class="field-stack full field-stack--leiras">
-                  <div class="leiras-head">
-                    <label for="leiras">Leírás:</label>
-                    <button type="button" class="leiras-ai-btn" data-improve-description>
-                      Szöveg javítása
-                    </button>
-                  </div>
-                  <textarea id="leiras" name="leiras" rows="6" placeholder="Írj pár mondatot az autóról — a gomb emberszerű hirdetésszöveget készít belőle."></textarea>
-                  <p class="hint leiras-ai-status" data-improve-description-status hidden></p>
+                <label for="leiras">Leírás:</label>
+                <div>
+                  <textarea id="leiras" name="leiras" rows="6"></textarea>
                   <p class="hint">A kereső a leírásban szereplő szövegben nem tud keresni!</p>
                 </div>
 

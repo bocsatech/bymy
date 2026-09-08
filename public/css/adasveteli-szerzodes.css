@@ -1,0 +1,37 @@
+:root { color-scheme: light; }
+* { box-sizing: border-box; }
+body { margin: 0; background: #e8edf2; color: #17202b; font-family: Manrope, sans-serif; }
+.contract-top { height: 64px; display: flex; align-items: center; justify-content: space-between; padding: 0 5vw; background: #172a3a; color: #fff; }
+.contract-brand { color: #f7c948; text-decoration: none; font-weight: 800; letter-spacing: 1.5px; }
+.contract-back { color: #fff; font-size: .9rem; text-decoration: none; }
+.contract-wrap { max-width: 1160px; margin: 0 auto; padding: 24px; }
+.contract-loading { text-align: center; color: #5c6b78; }
+.contract-layout { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 20px; align-items: start; }
+.contract-sheet { background: #fff; box-shadow: 0 4px 22px rgba(27, 39, 53, .16); padding: clamp(22px, 4vw, 52px); min-height: 1050px; }
+.contract-sheet h1 { font-size: 1.45rem; margin: 0; text-align: center; letter-spacing: .02em; }
+.contract-sheet > p { text-align: center; font-size: .82rem; color: #4d5d6d; margin: 8px 0 28px; }
+.contract-section { border-top: 1px solid #c8d0d8; padding-top: 18px; margin-top: 22px; }
+.contract-section h2 { margin: 0 0 12px; font-size: 1rem; color: #1f5d78; }
+.contract-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 16px; }
+.contract-field { display: block; font-size: .75rem; font-weight: 700; color: #455566; }
+.contract-field input, .contract-field select { width: 100%; border: 0; border-bottom: 1px solid #7e8b97; border-radius: 0; padding: 7px 1px 5px; background: transparent; color: #17202b; font: 500 .91rem/1.25 Manrope, sans-serif; }
+.contract-field input:focus, .contract-field select:focus { outline: 2px solid #f7c948; outline-offset: 2px; }
+.contract-field--wide { grid-column: 1 / -1; }
+.contract-note { font-size: .75rem; color: #5d6b77; margin: 0 0 14px; }
+.contract-signatures { display: grid; grid-template-columns: repeat(2, 1fr); gap: 52px; margin-top: 64px; }
+.contract-signature { padding-top: 8px; border-top: 1px solid #364553; text-align: center; font-size: .78rem; }
+.contract-side { position: sticky; top: 16px; background: #fff; border: 1px solid #cdd6de; padding: 18px; }
+.contract-side h2 { font-size: 1rem; margin: 0 0 10px; }
+.contract-side p { color: #526170; font-size: .78rem; line-height: 1.5; }
+.contract-role { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin: 10px 0 18px; }
+.contract-role button, .contract-action { border: 1px solid #1f5d78; background: #fff; color: #1f5d78; padding: 10px; border-radius: 4px; font: 700 .82rem Manrope, sans-serif; cursor: pointer; }
+.contract-role button.is-active, .contract-action--primary { background: #1f5d78; color: #fff; }
+.contract-actions { display: grid; gap: 8px; margin-top: 18px; }
+.contract-action--danger { border-color: #a33a32; color: #a33a32; }
+.contract-status { margin: 12px 0 0; color: #0c6b46; font-size: .78rem; min-height: 1.2em; }
+.contract-sensitive { background: #fff7df; border-left: 3px solid #e8af28; padding: 10px; }
+.contract-qr { border: 1px dashed #9eabb6; padding: 12px; margin-top: 14px; text-align: center; }
+.contract-qr strong { display: block; font-size: .84rem; margin-bottom: 6px; }
+@media (max-width: 860px) { .contract-layout { grid-template-columns: 1fr; } .contract-side { position: static; order: -1; } }
+@media (max-width: 560px) { .contract-wrap { padding: 12px; } .contract-sheet { padding: 20px; } .contract-grid { grid-template-columns: 1fr; } .contract-signatures { gap: 20px; } }
+@media print { @page { size: A4; margin: 12mm; } body { background: #fff; font-family: Arial, sans-serif; } .no-print, .contract-side { display: none !important; } .contract-wrap { max-width: none; padding: 0; } .contract-layout { display: block; } .contract-sheet { box-shadow: none; min-height: 0; padding: 0; } .contract-sheet h1 { font-size: 16pt; } .contract-section { break-inside: avoid; margin-top: 14px; padding-top: 10px; } .contract-grid { gap: 8px 14px; } .contract-field input, .contract-field select { font-size: 9pt; padding: 3px 1px; } }

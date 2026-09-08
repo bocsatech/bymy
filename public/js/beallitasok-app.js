@@ -498,8 +498,8 @@ function renderPark(email) {
       </div>
       <div class="mm-list-actions">
         ${item.url ? `<a class="site-header-btn site-header-btn--outline" href="${escapeAttr(item.url)}">Megnyitás</a>` : ""}
-        <button type="button" class="settings-link-btn" data-park-save>Jegyzet mentése</button>
-        <button type="button" class="settings-danger-btn" data-park-del>Törlés</button>
+        <button type="button" class="site-header-btn site-header-btn--outline" data-park-save>Jegyzet mentése</button>
+        <button type="button" class="site-header-btn site-header-btn--outline" data-park-del>Törlés</button>
       </div>`;
     row.querySelector("[data-park-save]")?.addEventListener("click", () => {
       const note = row.querySelector("[data-park-note]")?.value ?? "";

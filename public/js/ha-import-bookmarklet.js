@@ -29,7 +29,7 @@
     const v = clean(t);
     return (
       !v ||
-      /javascript|gyorsnézet|gyorsnezet|hiba!|belépés|haszn[aá]ltaut[oó]\.hu|regisztr|képkezelés|kepkezeles/i.test(
+      /javascript|gyorsnézet|gyorsnezet|hiba!|belépés|haszn[aá]ltaut[oó]\.hu|regisztr|képkezelés|kepkezeles|címlapra|cimlapra/i.test(
         v
       ) ||
       /^(19|20)\d{2}(\/\d{1,2})?$/.test(v) ||
@@ -44,7 +44,7 @@
       !v ||
       v.length < 4 ||
       v.length > 240 ||
-      /javascript|gyorsnézet|gyorsnezet|hiba!|belépés|haszn[aá]ltaut[oó]\.hu|regisztr|képkezelés|kepkezeles/i.test(
+      /javascript|gyorsnézet|gyorsnezet|hiba!|belépés|haszn[aá]ltaut[oó]\.hu|regisztr|képkezelés|kepkezeles|címlapra|cimlapra/i.test(
         v
       ) ||
       /^(19|20)\d{2}(\/\d{1,2})?$/.test(v) ||

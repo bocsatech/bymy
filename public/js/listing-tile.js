@@ -14,6 +14,7 @@ function looksLikeListMetaTitle(value) {
     .replace(/\p{M}/gu, "");
   if (!n) return true;
   if (/\bkepkezeles\b/.test(n)) return true;
+  if (/\bcimlapra\b/.test(n)) return true;
   if (/^(19|20)\d{2}\/\d{1,2}\b/.test(n)) return true;
   if (/\(\d{5,}\)\s*$/.test(n) && /^(19|20)\d{2}/.test(n)) return true;
   if (/^(benzin|dizel|elektromos|hibrid)(\/|\s|,|$)/.test(n) && n.length <= 40) return true;

@@ -129,6 +129,26 @@ input, select, textarea {
 }
 .badge.ok { color: var(--ok); border-color: rgba(61, 190, 122, 0.45); }
 .badge.warn { color: #f0c14b; border-color: rgba(240, 193, 75, 0.45); }
+.badge.account-private {
+  color: #93c5fd;
+  border-color: rgba(147, 197, 253, 0.55);
+  background: rgba(59, 130, 246, 0.18);
+}
+.badge.account-business {
+  color: #fcd34d;
+  border-color: rgba(252, 211, 77, 0.55);
+  background: rgba(240, 193, 75, 0.18);
+}
+.owner-cell {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.45rem;
+  line-height: 1.35;
+}
+.owner-cell__email {
+  word-break: break-all;
+}
 .row-blocked td { opacity: 0.72; background: rgba(226, 92, 92, 0.06); }
 .row-selected td { background: rgba(240, 193, 75, 0.08); }
 .row-actions {
@@ -261,7 +281,9 @@ th { color: var(--muted); font-weight: 600; }
   border-radius: 4px;
   color: var(--muted);
   font-size: 1rem;
-  z-index: 2;
+  z-index: 6;
+  pointer-events: auto;
+  cursor: pointer;
 }
 .layout-del:hover { color: var(--danger); background: rgba(226, 92, 92, 0.15); }
 .layout-resize {
@@ -272,7 +294,8 @@ th { color: var(--muted); font-weight: 600; }
   width: 22px;
   cursor: ew-resize;
   border-radius: 0 7px 7px 0;
-  z-index: 3;
+  z-index: 5;
+  pointer-events: auto;
 }
 .layout-resize::after {
   content: "";
@@ -606,7 +629,15 @@ th { color: var(--muted); font-weight: 600; }
   gap: 0.28rem;
   margin-top: 0.15rem;
   position: relative;
-  z-index: 5;
+  z-index: 6;
+  pointer-events: auto;
+}
+.layout-order-btns {
+  display: flex;
+  gap: 0.28rem;
+  margin-top: 0.15rem;
+  position: relative;
+  z-index: 6;
   pointer-events: auto;
 }
 .layout-width-btn {

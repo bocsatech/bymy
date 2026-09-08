@@ -1824,12 +1824,18 @@ function listingCategoryLabel(l) {
   return "Személyautó";
 }
 
-function listingOwnerLabel(l) {
+function listingOwnerHtml(l) {
   const email = l.ownerEmail || (l.ownerUserId ? `#${l.ownerUserId}` : "");
   if (!email) return "—";
   const type = String(l.ownerAccountType || "").toLowerCase();
-  const typeLabel = type === "business" ? "céges" : type === "private" ? "magán" : "";
-  return typeLabel ? `${email} · ${typeLabel}` : email;
+  const isBusiness = type === "business";
+  const isPrivate = type === "private" || (!type && Boolean(email));
+  const badge = isBusiness
+    ? `<span class="badge account-business">céges</span>`
+    : isPrivate
+      ? `<span class="badge account-private">magán</span>`
+      : "";
+  return `<span class="owner-cell"><span class="owner-cell__email">${esc(email)}</span>${badge}</span>`;
 }
 
 function listingsView({ title = "Hirdetések", emptyHint = "Nincs hirdetés." } = {}) {
@@ -1848,7 +1854,7 @@ function listingsView({ title = "Hirdetések", emptyHint = "Nincs hirdetés." } 
         <td>${l.id}</td>
         <td>${esc(l.title || "")}</td>
         <td>${esc(l.gyartmany || "")} ${esc(l.tipus || "")}</td>
-        <td>${esc(listingOwnerLabel(l))}</td>
+        <td>${listingOwnerHtml(l)}</td>
         <td>
           <select data-act="setStatus" data-id="${l.id}">
             ${["mentett", "feladott", "inaktiv"]

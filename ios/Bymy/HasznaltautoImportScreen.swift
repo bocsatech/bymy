@@ -378,38 +378,46 @@ struct HasznaltautoImportScreen: View {
       function clean(t) {
         return (t || '').replace(/\\s+/g, ' ').trim();
       }
-      function isBadTitle(t) {
-        return !t || t.length < 4 || t.length > 140
-          || /javascript|gyorsnézet|gyorsnezet|hiba!|belépés|haszn[aá]ltaut[oó]\\.hu|regisztr/i.test(t);
+      function isChromeName(t) {
+    const v = clean(t);
+    return !v || /javascript|gyorsnézet|gyorsnezet|hiba!|belépés|haszn[aá]ltaut[oó]\\.hu|regisztr|képkezelés|kepkezeles/i.test(v)
+      || /^(19|20)\\d{2}(\\/\\d{1,2})?$/.test(v);
+  }
+  function isBadTitle(t) {
+    return !t || t.length < 4 || t.length > 140
+      || /javascript|gyorsnézet|gyorsnezet|hiba!|belépés|haszn[aá]ltaut[oó]\\.hu|regisztr|képkezelés|kepkezeles/i.test(t)
+      || /^(19|20)\\d{2}(\\/\\d{1,2})?$/.test(t)
+      || /^(módosítás|törlés|képek|felszereltség|leírás)$/i.test(t);
+  }
+  function pickTitle() {
+    const og = document.querySelector('meta[property="og:title"]');
+    if (og && og.content && !isBadTitle(clean(og.content))) return clean(og.content).replace(/\\s*[|–-].*$/, '');
+    const selectors = [
+      'h1',
+      '[class*="hirdetes"][class*="cim"]',
+      '.jarmu-adat h1',
+      '.adatlap h1',
+      'h2',
+      '[class*="title"]',
+      '[class*="cim"]',
+      '[class*="Cim"]'
+    ];
+    for (const sel of selectors) {
+      for (const el of document.querySelectorAll(sel)) {
+        const t = clean(el.innerText || el.textContent || '');
+        if (!isBadTitle(t)) return t;
       }
-      function pickTitle() {
-        const og = document.querySelector('meta[property="og:title"]');
-        if (og && og.content && !isBadTitle(clean(og.content))) return clean(og.content).replace(/\\s*[|–-].*$/, '');
-        const selectors = [
-          'h1', 'h2',
-          '[class*="hirdetes"][class*="cim"]',
-          '[class*="title"]',
-          '[class*="cim"]',
-          '[class*="Cim"]',
-          '.jarmu-adat h1',
-          '.adatlap h1'
-        ];
-        for (const sel of selectors) {
-          for (const el of document.querySelectorAll(sel)) {
-            const t = clean(el.innerText || el.textContent || '');
-            if (!isBadTitle(t)) return t;
-          }
-        }
-        const dt = [...document.querySelectorAll('dt, td.bal.pontos, th')];
-        for (const el of dt) {
-          const label = clean(el.innerText || '');
-          if (!/c[ií]m|hirdet[eé]s c[ií]me/i.test(label)) continue;
-          const val = clean((el.nextElementSibling && el.nextElementSibling.innerText) || '');
-          if (!isBadTitle(val)) return val;
-        }
-        const docTitle = clean((document.title || '').replace(/\\s*[|–-].*$/, ''));
-        return isBadTitle(docTitle) ? '' : docTitle;
-      }
+    }
+    const dt = [...document.querySelectorAll('dt, td.bal.pontos, th')];
+    for (const el of dt) {
+      const label = clean(el.innerText || '');
+      if (!/c[ií]m|hirdet[eé]s c[ií]me/i.test(label)) continue;
+      const val = clean((el.nextElementSibling && el.nextElementSibling.innerText) || '');
+      if (!isBadTitle(val)) return val;
+    }
+    const docTitle = clean((document.title || '').replace(/\\s*[|–-].*$/, ''));
+    return isBadTitle(docTitle) ? '' : docTitle;
+  }
       function pickImage() {
         const og = document.querySelector('meta[property="og:image"]');
         if (og && og.content && /^https?:/i.test(og.content)) return og.content;

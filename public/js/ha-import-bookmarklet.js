@@ -27,7 +27,13 @@
 
   function isChromeName(t) {
     const v = clean(t);
-    return !v || /javascript|gyorsnézet|gyorsnezet|hiba!|belépés|haszn[aá]ltaut[oó]\.hu|regisztr/i.test(v);
+    return (
+      !v ||
+      /javascript|gyorsnézet|gyorsnezet|hiba!|belépés|haszn[aá]ltaut[oó]\.hu|regisztr|képkezelés|kepkezeles/i.test(
+        v
+      ) ||
+      /^(19|20)\d{2}(\/\d{1,2})?$/.test(v)
+    );
   }
 
   function isBadTitle(t) {
@@ -36,7 +42,11 @@
       !v ||
       v.length < 4 ||
       v.length > 240 ||
-      /javascript|gyorsnézet|gyorsnezet|hiba!|belépés|haszn[aá]ltaut[oó]\.hu|regisztr/i.test(v)
+      /javascript|gyorsnézet|gyorsnezet|hiba!|belépés|haszn[aá]ltaut[oó]\.hu|regisztr|képkezelés|kepkezeles/i.test(
+        v
+      ) ||
+      /^(19|20)\d{2}(\/\d{1,2})?$/.test(v) ||
+      /^(módosítás|törlés|képek|felszereltség|leírás)$/i.test(v)
     );
   }
 
@@ -45,14 +55,15 @@
     if (og && og.content && !isBadTitle(clean(og.content))) {
       return clean(og.content).replace(/\s*[|–-].*$/, "");
     }
+    // h1 előbb — h2 gyakran admin fül (Képkezelés)
     const selectors = [
       "h1",
-      "h2",
       '[class*="hirdetes"][class*="cim"]',
-      '[class*="title"]',
-      '[class*="cim"]',
       ".jarmu-adat h1",
       ".adatlap h1",
+      "h2",
+      '[class*="title"]',
+      '[class*="cim"]',
     ];
     for (const sel of selectors) {
       for (const el of doc.querySelectorAll(sel)) {

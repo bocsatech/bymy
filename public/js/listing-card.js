@@ -32,11 +32,21 @@ function isSiteChromeLine(line) {
     .replace(/\s+/g, " ")
     .trim();
   if (!n) return true;
+  if (/\bkepkezeles\b/.test(n)) return true;
+  if (/^(19|20)\d{2}(\/\d{1,2})?$/.test(n)) return true;
+  if (
+    /^(modositas|torles|kepek|felszereltseg|leiras|alapadatok|muszaki adatok|hirdetesadatok)([.!|]*)$/.test(
+      n
+    )
+  ) {
+    return true;
+  }
   const onlyChrome = n
     .replace(/hasznaltauto(\.hu)?/g, " ")
     .replace(/\bbelepes\b/g, " ")
     .replace(/\bregisztracio\b/g, " ")
     .replace(/\badd el autod(\.hu)?\b/g, " ")
+    .replace(/\bkepkezeles\b/g, " ")
     .replace(/[|·•\-–—./:!]+/g, " ")
     .replace(/\s+/g, " ")
     .trim();

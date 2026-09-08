@@ -7,8 +7,19 @@ const ICON_POWER = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><cir
 
 export function listingTileTitle(item) {
   const preview = item?.preview ?? {};
-  const raw = preview.title || item?.hirdetes_cime || `Hirdetés #${item?.id ?? "?"}`;
-  let title = formatListingDisplayTitle(raw) || `Hirdetés #${item?.id ?? "?"}`;
+  const filter = preview.filter ?? {};
+  const fromBrand = [filter.gyartmany, filter.modell].filter(Boolean).join(" ");
+  const candidates = [
+    preview.title,
+    item?.hirdetes_cime,
+    fromBrand,
+    `Hirdetés #${item?.id ?? "?"}`,
+  ];
+  let title = "";
+  for (const raw of candidates) {
+    title = formatListingDisplayTitle(raw);
+    if (title) break;
+  }
   title = title.replace(/\s*\(\d{4}(?:\/\d{1,2})?\)\s*$/u, "").trim();
   title = softTitleCase(title);
   return title || `Hirdetés #${item?.id ?? "?"}`;

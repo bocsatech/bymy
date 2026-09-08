@@ -21,7 +21,8 @@
     "cap:open:android": "npx cap open android",
     "cap:open:ios": "npx cap open ios",
     "android": "npx cap sync android && npx cap open android",
-    "ios": "npx cap sync ios && npx cap open ios"
+    "ios": "open -a Xcode ios/Bymy.xcodeproj",
+    "ios:capacitor": "npx cap sync ios && npx cap open ios"
   },
   "engines": {
     "node": "24.x"

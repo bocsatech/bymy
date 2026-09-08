@@ -13,6 +13,7 @@
     "backgroundColor": "#ffffff"
   },
   "ios": {
+    "path": "ios-capacitor",
     "contentInset": "automatic",
     "backgroundColor": "#ffffff",
     "preferredContentMode": "mobile"

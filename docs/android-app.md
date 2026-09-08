@@ -97,9 +97,9 @@ bymy/
 
 | | iOS | Android |
 |---|-----|---------|
-| Technológia | Capacitor + web (`ios/`) | Capacitor + web (`android/`) |
-| Éles URL | bymy.hu | bymy.hu |
-| Régi natív Swift | `ios-native/` (archív) | — |
+| Technológia | Natív SwiftUI (`ios/`) | Capacitor + web (`android/`) |
+| Éles API / web | bymy.hu API | bymy.hu web |
+| Opcionális web-héj | `ios-capacitor/` | — |
 | Bundle ID | hu.bymy.app | hu.bymy.app |
 
 ---

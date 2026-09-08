@@ -1,40 +1,36 @@
-# iOS mobil app — éles web (Capacitor)
+# iOS mobil app — natív SwiftUI
 
-Az **aktuális iOS app** a Capacitor héj: `ios/App/App.xcodeproj`.  
-Betölti az éles weboldalt: **`https://bymy.hu`** (ugyanaz, mint a böngésző).
+Az **iOS app** natív SwiftUI program: `ios/Bymy.xcodeproj`.  
+Nem böngészős „asztalra mentett” oldal — saját UI, az API-t hívja: **`https://bymy.hu`**.
 
-A korábbi natív SwiftUI forrás megmaradt: `ios-native/` (archivált / referencia).
+Opcionális web-héj (Capacitor, mint az Android): `ios-capacitor/` — ez szándékosan a weboldalt tölti.
 
-**Android:** ugyanígy Capacitor — [`docs/android-app.md`](android-app.md).
+**Android:** Capacitor web héj — [`docs/android-app.md`](android-app.md).
 
-## Első indítás
+## Első indítás (natív app)
 
 ```bash
 cd /Users/rbocsa/bymy
-npm install
 npm run ios
 ```
 
-Ez syncel, majd megnyitja az Xcode-ot. Utána: telefon / szimulátor → **Run** (⌘R).
+Vagy Xcode: nyisd meg `ios/Bymy.xcodeproj` → telefon / szimulátor → **Run** (⌘R).
 
-## Parancsok
+## Mit tud a natív app
 
-| Parancs | Mit csinál |
-|---------|------------|
-| `npm run ios` | Sync + Xcode |
-| `npm run cap:sync` | Android + iOS sync |
-| `npm run cap:open:ios` | Csak Xcode |
+- Belépés / regisztráció / OAuth a `bymy.hu` API-ra
+- Hirdetések, keresés, üzenetek, beállítások (SwiftUI)
+- **Szerződéses adatok** csak a telefonon (`DeviceContractIdentityStore`)
+- Magán utca/lakcím nem megy a szerverre
 
-## API / web
+## Capacitor web-héj (opcionális)
 
-- Éles: `https://bymy.hu` (`capacitor.config.json` → `server.url`)
-- Vercel teszt: állítsd ideiglenesen `https://bymy.vercel.app`-ra, majd `npm run cap:sync`
-- Lokális: lásd `capacitor.config.local.example.json`
+```bash
+npm run ios:capacitor
+```
 
-## OAuth
-
-Deep link: `bymy://oauth` (Info.plist `CFBundleURLSchemes`).
+Ez a `https://bymy.hu` weboldalt jeleníti meg — kinézetre web, nem külön natív felület.
 
 ## Bundle ID
 
-`hu.bymy.app` — megegyezik az Androiddal és a régi natív appal.
+`hu.bymy.app`

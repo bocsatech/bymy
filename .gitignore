@@ -20,13 +20,12 @@ public/uploads/listings/
 .DS_Store
 .vercel
 ios/build/
-ios-native/build/
+ios-capacitor/App/Pods/
+ios-capacitor/App/App/public/
 ios/dist/
 ios/build-out.log
 **/xcuserdata/
 *.xcuserstate
-ios/App/Pods/
-ios/App/App/public/
 scripts/_apply-all-migrations.sql
 .env*
 capacitor.config.local.json

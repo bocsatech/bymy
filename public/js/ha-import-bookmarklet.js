@@ -66,11 +66,14 @@
       "h2",
       '[class*="title"]',
       '[class*="cim"]',
+      "strong",
+      "b",
     ];
     for (const sel of selectors) {
       for (const el of doc.querySelectorAll(sel)) {
         const t = titleOf(el);
-        if (!isBadTitle(t)) return t;
+        const first = t.split("\n").map(clean).find(Boolean) || "";
+        if (!isBadTitle(first) && first.length >= 8) return first;
       }
     }
     for (const el of doc.querySelectorAll("dt, td.bal.pontos, th, td.pontos")) {
@@ -78,6 +81,20 @@
       if (!/c[ií]m|hirdet[eé]s c[ií]me|m[aá]rka|gy[aá]rtm[aá]ny/i.test(label)) continue;
       const val = titleOf(el.nextElementSibling);
       if (!isBadTitle(val) && /c[ií]m/i.test(label)) return val;
+    }
+    // Gyorsnézet: a cím sokszor nem h1, hanem a body első „autó” sora
+    const bodyLines = String(doc.body?.innerText || doc.body?.textContent || "")
+      .split("\n")
+      .map((line) => clean(line))
+      .filter(Boolean);
+    for (const line of bodyLines.slice(0, 50)) {
+      if (isBadTitle(line)) continue;
+      if (/^(bez[aá]r[aá]s|hirdet[eé]s gyors|v[eé]tel[aá]r|[aá]r,?\s*k[oö]lts|gy[aá]rt[aá]si [eé]v|km\.?\s*[oó]ra|j[aá]rm[uű]|motor adatok|okm[aá]ny)/i.test(line))
+        continue;
+      if (line.length < 10 || line.length > 220) continue;
+      if (/\b(?:1\.\d|2\.\d|tdi|gdi|hev|phev|automata|4wd|awd|benzin|d[ií]zel|hybrid|hibrid)\b/i.test(line)) {
+        return line;
+      }
     }
     const docTitle = clean((doc.title || "").replace(/\s*[|–-].*$/, ""));
     return isBadTitle(docTitle) ? "" : docTitle;
@@ -260,17 +277,43 @@
     return m ? m[1] : "";
   }
 
+  function looksLikeSpecToken(t) {
+    const v = clean(t);
+    if (!v) return true;
+    return /^(?:\d+[.,]?\d*|t-?gdi|gdi|tdi|cdi|dci|hev|phev|mhev|bhev|gt|line|4wd|awd|2wd|fwd|rwd|xdrive|quattro|automata|manual|manu[aá]lis|full|led|panor[aá]ma|b[oő]r|navi|hybrid|hibrid)(?:\b|$)/i.test(
+      v
+    );
+  }
+
+  function brandModelFromTitle(title) {
+    const parts = String(title || "")
+      .split(/\n+/)[0]
+      .split(/\s+/)
+      .filter(Boolean);
+    let brand = "";
+    let model = "";
+    for (let i = 0; i < parts.length; i += 1) {
+      if (isChromeName(parts[i]) || looksLikeSpecToken(parts[i])) continue;
+      if (!brand) {
+        brand = parts[i];
+        continue;
+      }
+      if (!looksLikeSpecToken(parts[i])) {
+        model = parts[i];
+      }
+      break;
+    }
+    return { brand, model };
+  }
+
   function extractFromDoc(doc, href) {
     const map = extractMap(doc);
     const title = pickTitle(doc) || fieldFromMap(map, ["Cím", "Hirdetés címe"]);
     const brandRaw = fieldFromMap(map, ["Márka", "Gyártmány"]) || "";
     const modelRaw = fieldFromMap(map, ["Modell"]) || "";
-    const titleParts = String(title || "")
-      .split(/\n+/)[0]
-      .split(/\s+/)
-      .filter(Boolean);
-    const brand = isChromeName(brandRaw) ? (isChromeName(titleParts[0]) ? "" : titleParts[0] || "") : brandRaw;
-    const model = isChromeName(modelRaw) ? "" : modelRaw;
+    const fromTitle = brandModelFromTitle(title);
+    const brand = isChromeName(brandRaw) ? fromTitle.brand : brandRaw;
+    const model = isChromeName(modelRaw) ? fromTitle.model : modelRaw;
     const price =
       fieldFromMap(map, ["Vételár", "Hirdetési ár", "Ár"]) ||
       ((doc.body?.innerText || doc.body?.textContent || "").match(/(\d[\d\s.]{3,})\s*Ft/i) || [])[1] ||
@@ -869,7 +912,9 @@
 
     const pages = [];
     const onAdminHost = /admin\.hasznaltauto\.hu$/i.test(location.hostname.replace(/^www\./, ""));
-    if (mode === "standard" && isSingleListing()) {
+    const onGyorsnezet = /\/gyorsnezet\/[^/]+\/\d{5,}/i.test(location.pathname || "");
+    // Egy megnyitott gyorsnézet / nyilvános adatlap — élő DOM (cím = KIA SPORTAGE…)
+    if (onGyorsnezet || (mode === "standard" && isSingleListing())) {
       showProgress(1, 1, "beolvasás");
       const one = extractPage();
       if (isUsefulPage(one)) pages.push(one);
@@ -888,13 +933,14 @@
       for (const card of fromList) {
         if (isUsefulPage(card)) pages.push(card);
       }
-      if (pages.length && pages.length <= 15) {
+      // Mindig gyorsnézet: a listában gyakran nincs márka, a cím a gyorsnézetben van
+      if (pages.length) {
         showProgress(0, pages.length, "gyorsnézet kiegészítés");
         const base = pages.slice();
         pages.length = 0;
         const enriched = await mapPool(
           base,
-          2,
+          3,
           async (card) => {
             try {
               const detail = await extractRefPage({
@@ -908,6 +954,11 @@
                 detailTitle && !isBadTitle(detailTitle) ? detailTitle : card.visibleTitle;
               const detailMapCount =
                 detail.map && typeof detail.map === "object" ? Object.keys(detail.map).length : 0;
+              const brand = detail.brand || card.brand || brandModelFromTitle(keepTitle).brand;
+              const model = detail.model || card.model || brandModelFromTitle(keepTitle).model;
+              const detailOk =
+                (brand && !isChromeName(brand)) ||
+                (keepTitle && !isBadTitle(keepTitle) && detailMapCount >= 3);
               return {
                 ...card,
                 visibleTitle: keepTitle,
@@ -916,9 +967,9 @@
                 km: detail.km || card.km,
                 year: detail.year || card.year,
                 fuel: detail.fuel || card.fuel,
-                brand: detail.brand || card.brand,
-                model: detail.model || card.model,
-                map: detailMapCount >= 5 ? detail.map : card.map,
+                brand,
+                model,
+                map: detailMapCount >= 5 ? detail.map : { ...(card.map || {}), ...(detail.map || {}) },
                 html: String(detail.html || "").length > 800 ? detail.html : card.html,
                 bodyText: detail.bodyText || card.bodyText,
                 felszereltseg:
@@ -926,7 +977,7 @@
                     ? detail.felszereltseg
                     : card.felszereltseg,
                 listingId: detail.listingId || card.listingId,
-                fromListCard: true,
+                fromListCard: !detailOk,
               };
             } catch {
               return card;

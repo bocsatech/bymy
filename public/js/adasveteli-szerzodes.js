@@ -1,7 +1,10 @@
 import { fetchListing } from "./db-client.js?v=contract1";
 import { getAuthUser, getProfile, requireAuthForPage } from "./site-auth.js?v=privateStreet1";
-import { emptyPerson, isBusinessProfile, personFromProfile, vehicleFromListing } from "./adasveteli-data.js?v=contract1";
-import { getPrivateStreet } from "./private-local-street.js?v=privateStreet1";
+import { emptyPerson, isBusinessProfile, personFromProfile, vehicleFromListing } from "./adasveteli-data.js?v=contractId1";
+import {
+  applyDeviceIdentityToPerson,
+  getDeviceIdentity,
+} from "./device-contract-identity.js?v=contractId1";
 
 const root = document.getElementById("contract-root");
 const state = { role: "seller", listing: null, vehicle: null, own: null, other: emptyPerson("person") };
@@ -16,20 +19,33 @@ function field(name, label, value = "", wide = false, type = "text") {
 
 function partyFields(prefix, party, heading) {
   const isCompany = party.type === "company";
+  if (isCompany) {
+    return `<section class="contract-section"><h2>${heading}</h2>
+      <div class="contract-grid">
+        <label class="contract-field"><span>Fél típusa</span><select data-party-type="${prefix}"><option value="person">Magánszemély</option><option value="company" selected>Cég</option></select></label>
+        ${field(`${prefix}.companyName`, "Név", party.companyName, true)}
+        ${field(`${prefix}.street`, "Székhely", party.street || party.homeAddress || "", true)}
+        ${field(`${prefix}.companyRegistry`, "Cégjegyzék vagy nyilvántartási szám", party.companyRegistry || party.taxId, true)}
+        ${field(`${prefix}.representative`, "Képviselő neve", party.representative || party.fullName, true)}
+        ${field(`${prefix}.phone`, "Telefonszám", party.phone, false, "tel")}
+        ${field(`${prefix}.email`, "E-mail", party.email, false, "email")}
+      </div></section>`;
+  }
   return `<section class="contract-section"><h2>${heading}</h2>
     <div class="contract-grid">
-      <label class="contract-field"><span>Fél típusa</span><select data-party-type="${prefix}"><option value="person"${isCompany ? "" : " selected"}>Magánszemély</option><option value="company"${isCompany ? " selected" : ""}>Cég</option></select></label>
-      ${field(`${prefix}.fullName`, isCompany ? "Kapcsolattartó / képviselő neve" : "Teljes név", party.fullName)}
-      ${isCompany ? field(`${prefix}.companyName`, "Cégnév", party.companyName, true) + field(`${prefix}.taxId`, "Adószám", party.taxId) + field(`${prefix}.representative`, "Cégjegyzésre jogosult képviselő", party.representative) : ""}
-      ${field(`${prefix}.postalCode`, "Irányítószám", party.postalCode)}
-      ${field(`${prefix}.city`, "Település", party.city)}
-      ${field(`${prefix}.street`, "Utca, házszám", party.street, true)}
+      <label class="contract-field"><span>Fél típusa</span><select data-party-type="${prefix}"><option value="person" selected>Magánszemély</option><option value="company">Cég</option></select></label>
+      ${field(`${prefix}.fullName`, "Név (családi és utónév)", party.fullName, true)}
+      ${field(`${prefix}.birthName`, "Születéskori név (családi és utónév)", party.birthName, true)}
+      ${field(`${prefix}.birthPlace`, "Születési hely", party.birthPlace)}
+      ${field(`${prefix}.birthDate`, "Születési idő", party.birthDate, false, "date")}
+      ${field(`${prefix}.motherName`, "Anyja neve (családi és utónév)", party.motherName, true)}
+      ${field(`${prefix}.idDocType`, "Személyi okmány típusa", party.idDocType)}
+      ${field(`${prefix}.idCardNumber`, "Okmány száma", party.idDocNumber || party.idCardNumber)}
+      ${field(`${prefix}.street`, "Lakcíme", party.homeAddress || party.street, true)}
+      ${field(`${prefix}.citizenship`, "Állampolgársága", party.citizenship)}
       ${field(`${prefix}.phone`, "Telefonszám", party.phone, false, "tel")}
       ${field(`${prefix}.email`, "E-mail", party.email, false, "email")}
-      <div class="contract-field--wide contract-sensitive"><p class="contract-note"><strong>Csak ebben a böngészőben:</strong> a következő adatokat a Bymy nem menti és nem továbbítja.</p></div>
-      ${!isCompany ? field(`${prefix}.birthPlace`, "Születési hely", party.birthPlace) + field(`${prefix}.birthDate`, "Születési idő", party.birthDate, false, "date") + field(`${prefix}.motherName`, "Anyja neve", party.motherName, true) : ""}
-      ${field(`${prefix}.idCardNumber`, "Személyazonosító okmány száma", party.idCardNumber)}
-      ${field(`${prefix}.addressCardNumber`, "Lakcímkártya száma", party.addressCardNumber)}
+      <div class="contract-field--wide contract-sensitive"><p class="contract-note"><strong>Csak ezen az eszközön:</strong> a szerződéses személyes adatok a Bymy szerverre nem kerülnek.</p></div>
     </div></section>`;
 }
 
@@ -51,7 +67,7 @@ function render() {
     </article>
     <aside class="contract-side no-print"><h2>Adásvételi kitöltése</h2><p>Az autó és a saját fiókod adatai automatikusan bekerültek.</p>
       <div class="contract-role"><button type="button" data-role="seller" class="${state.role === "seller" ? "is-active" : ""}">Eladó vagyok</button><button type="button" data-role="buyer" class="${state.role === "buyer" ? "is-active" : ""}">Vevő vagyok</button></div>
-      <p class="contract-sensitive">A másik fél adatait kézzel töltheted ki. Az okmány- és születési adatok csak ezen az eszközön, a nyitott szerződésben szerepelnek.</p>
+      <p class="contract-sensitive">A másik fél adatait kézzel töltheted ki. A szerződéses személyes adatok a Beállítások → Személyes menüből a telefonról töltődnek be.</p>
       <div class="contract-qr"><strong>Mobilappos QR-adatátadás</strong><span>A biztonságos appos jóváhagyás a következő kiadásban érkezik. Addig a másik fél mezői kézzel kitölthetők.</span></div>
       <div class="contract-actions"><button type="button" class="contract-action contract-action--primary" data-print>Nyomtatás / PDF mentése</button><button type="button" class="contract-action" data-clear>Szenzitív adatok törlése</button></div><p class="contract-status" data-status></p>
     </aside></div>`;
@@ -68,12 +84,28 @@ function bind() {
     const [group, key] = input.dataset.field.split(".");
     if (group === "vehicle") state.vehicle[key] = input.value;
     else if (group === "contract") return;
-    else partyForPrefix(group)[key] = input.value;
+    else {
+      const party = partyForPrefix(group);
+      party[key] = input.value;
+      if (key === "idCardNumber") party.idDocNumber = input.value;
+      if (key === "street") party.homeAddress = input.value;
+    }
   }));
   root.querySelectorAll("[data-role]").forEach((button) => button.addEventListener("click", () => { state.role = button.dataset.role; render(); }));
   root.querySelectorAll("[data-party-type]").forEach((select) => select.addEventListener("change", () => { partyForPrefix(select.dataset.partyType).type = select.value; render(); }));
   root.querySelector("[data-clear]")?.addEventListener("click", () => {
-    [state.own, state.other].forEach((party) => { party.birthPlace = ""; party.birthDate = ""; party.motherName = ""; party.idCardNumber = ""; party.addressCardNumber = ""; });
+    [state.own, state.other].forEach((party) => {
+      party.birthName = "";
+      party.birthPlace = "";
+      party.birthDate = "";
+      party.motherName = "";
+      party.idDocType = "";
+      party.idDocNumber = "";
+      party.idCardNumber = "";
+      party.addressCardNumber = "";
+      party.citizenship = "";
+      party.companyRegistry = "";
+    });
     render();
     root.querySelector("[data-status]").textContent = "A csak helyben kezelt szenzitív mezők törölve.";
   });
@@ -90,11 +122,10 @@ async function init() {
     state.vehicle = vehicleFromListing(state.listing);
     const profile = getProfile();
     const user = getAuthUser();
+    const business = isBusinessProfile(profile);
     state.own = personFromProfile(profile, user);
-    if (!isBusinessProfile(profile)) {
-      const localStreet = await getPrivateStreet(user?.email);
-      if (localStreet) state.own.street = localStreet;
-    }
+    const identity = await getDeviceIdentity(user?.email);
+    state.own = applyDeviceIdentityToPerson(state.own, identity, { business });
     document.querySelector("[data-contract-back]").href = `/hirdetes.html?id=${listingId}`;
     render();
   } catch (error) { root.innerHTML = `<p class="contract-loading">${escapeHtml(error.message || "A szerződés nem tölthető be.")}</p>`; }

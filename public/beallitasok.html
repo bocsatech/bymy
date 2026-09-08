@@ -57,7 +57,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/css/style.css?v=noScroll1" />
-    <link rel="stylesheet" href="/css/site-app.css?v=settingsPhone2" />
+    <link rel="stylesheet" href="/css/site-app.css?v=contractId1" />
       <link rel="stylesheet" href="/css/hub.css?v=hubHeroDemo1" />
 </head>
   <body class="site-app settings-page mm-page" data-site-page="beallitasok" data-auth-init="manual">
@@ -449,11 +449,11 @@
                 <input type="text" name="firstName" required autocomplete="given-name" />
               </label>
             </div>
-            <label class="login-field">
+            <label class="login-field" data-private-street-wrap>
               <span class="login-label">Utca, házszám</span>
               <input type="text" name="street" autocomplete="street-address" />
               <p class="settings-acc-hint" data-private-street-hint hidden>
-                Magánfióknál az utca és házszám csak a mobilalkalmazásban tárolódik, a Bymy szerverre nem kerül.
+                Magánfióknál az utca a lenti szerződéses lakcímben mentődik a telefonra.
               </p>
             </label>
             <div class="settings-postal-row">
@@ -509,6 +509,81 @@
               <input type="hidden" name="accountType" value="" />
               <p class="settings-acc-hint">A fióktípus regisztrációkor rögzül, később nem módosítható.</p>
             </div>
+
+            <div class="settings-device-contract" data-device-contract>
+              <h3 class="settings-device-contract-title">Szerződéses adatok</h3>
+              <p class="settings-acc-hint">
+                Adásvételi szerződéshez. Ezek az adatok <strong>csak a mobilalkalmazásban</strong> tárolódnak, a Bymy szerverre nem kerülnek.
+              </p>
+              <p class="settings-acc-hint" data-device-contract-web-only hidden>
+                Böngészőben nem szerkeszthető — nyisd meg a Bymy appot a telefonodon.
+              </p>
+
+              <div class="settings-device-contract-block" data-device-contract-person>
+                <p class="settings-device-contract-caption">Magánszemély</p>
+                <label class="login-field">
+                  <span class="login-label">Név (családi és utónév)</span>
+                  <input type="text" name="local_fullName" autocomplete="name" />
+                </label>
+                <label class="login-field">
+                  <span class="login-label">Születéskori név (családi és utónév)</span>
+                  <input type="text" name="local_birthName" autocomplete="off" />
+                </label>
+                <div class="mm-grid-2">
+                  <label class="login-field">
+                    <span class="login-label">Születési hely</span>
+                    <input type="text" name="local_birthPlace" autocomplete="off" />
+                  </label>
+                  <label class="login-field">
+                    <span class="login-label">Születési idő</span>
+                    <input type="date" name="local_birthDate" autocomplete="bday" />
+                  </label>
+                </div>
+                <label class="login-field">
+                  <span class="login-label">Anyja neve (családi és utónév)</span>
+                  <input type="text" name="local_motherName" autocomplete="off" />
+                </label>
+                <div class="mm-grid-2">
+                  <label class="login-field">
+                    <span class="login-label">Személyi okmány típusa</span>
+                    <input type="text" name="local_idDocType" placeholder="pl. személyi igazolvány" autocomplete="off" />
+                  </label>
+                  <label class="login-field">
+                    <span class="login-label">Okmány száma</span>
+                    <input type="text" name="local_idDocNumber" autocomplete="off" />
+                  </label>
+                </div>
+                <label class="login-field">
+                  <span class="login-label">Lakcíme</span>
+                  <input type="text" name="local_homeAddress" autocomplete="street-address" />
+                </label>
+                <label class="login-field">
+                  <span class="login-label">Állampolgársága</span>
+                  <input type="text" name="local_citizenship" value="" placeholder="magyar" autocomplete="off" />
+                </label>
+              </div>
+
+              <div class="settings-device-contract-block" data-device-contract-company hidden>
+                <p class="settings-device-contract-caption">Cég</p>
+                <label class="login-field">
+                  <span class="login-label">Név</span>
+                  <input type="text" name="local_companyName" autocomplete="organization" />
+                </label>
+                <label class="login-field">
+                  <span class="login-label">Székhely</span>
+                  <input type="text" name="local_companySeat" autocomplete="street-address" />
+                </label>
+                <label class="login-field">
+                  <span class="login-label">Cégjegyzék vagy nyilvántartási szám</span>
+                  <input type="text" name="local_companyRegistry" autocomplete="off" />
+                </label>
+                <label class="login-field">
+                  <span class="login-label">Képviselő neve</span>
+                  <input type="text" name="local_representative" autocomplete="name" />
+                </label>
+              </div>
+            </div>
+
             <input type="hidden" name="company" value="" />
             <button type="submit" class="settings-btn-primary" id="mm-profile-save">Adatok mentése</button>
             <button type="button" class="settings-danger-btn settings-danger-btn--block" id="settings-delete-account">Fiók törlése</button>
@@ -628,7 +703,7 @@
 
     <script src="/js/site-avatar-menu.js?v=settingsNav2" type="module"></script>
     <script src="/js/ha-import-app.js?v=haBookmarkCopy1" type="module"></script>
-    <script src="/js/beallitasok-app.js?v=privateStreet1" type="module"></script>
+    <script src="/js/beallitasok-app.js?v=contractId1" type="module"></script>
     <script>
       
       setTimeout(function () {

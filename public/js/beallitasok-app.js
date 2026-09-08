@@ -30,12 +30,15 @@ import {
   hasSettingsReturn,
 } from "./site-avatar-menu.js?v=avatarSync1";
 import { fetchListing } from "./db-client.js?v=parkThumb1";
-import { fillCountrySelect, PHONE_COUNTRIES } from "./phone-lang-ui.js?v=settingsPhone1";
 import {
-  getPrivateStreet,
+  applyDeviceIdentityToPerson,
+  getDeviceIdentity,
+  identityFromFormData,
   isNativeApp,
-  setPrivateStreet,
-} from "./private-local-street.js?v=privateStreet1";
+  setDeviceIdentity,
+  stripDeviceIdentityFormFields,
+} from "./device-contract-identity.js?v=contractId1";
+import { fillCountrySelect, PHONE_COUNTRIES } from "./phone-lang-ui.js?v=settingsPhone1";
 
 const PHOTO_KEY = "bymy-avatar-photos";
 const NOTIFY_KEY = "bymy-notify-prefs";
@@ -954,34 +957,87 @@ function applyProfileToForm(profile) {
   initSettingsPhoneRow(form);
   applyPhonePartsToForm(form, data.phone);
   updateProfileSummary(data, getAuthUser());
-  void hydratePrivateStreetField(form, data, getAuthUser());
+  void hydrateDeviceContractFields(form, data, getAuthUser());
 }
 
-async function hydratePrivateStreetField(form, profile, user) {
+async function hydrateDeviceContractFields(form, profile, user) {
   if (!form) return;
-  const streetInput = form.elements.namedItem("street");
-  const hint = document.querySelector("[data-private-street-hint]");
-  if (!(streetInput instanceof HTMLInputElement)) return;
-
   const isBusiness = String(profile?.accountType || "").toLowerCase() === "business";
-  if (isBusiness) {
-    if (hint) hint.hidden = true;
-    streetInput.readOnly = false;
-    streetInput.placeholder = "";
-    return;
+  const personBlock = document.querySelector("[data-device-contract-person]");
+  const companyBlock = document.querySelector("[data-device-contract-company]");
+  const webOnly = document.querySelector("[data-device-contract-web-only]");
+  const streetWrap = document.querySelector("[data-private-street-wrap]");
+  const streetHint = document.querySelector("[data-private-street-hint]");
+  const streetInput = form.elements.namedItem("street");
+  const native = isNativeApp();
+
+  if (personBlock) personBlock.hidden = isBusiness;
+  if (companyBlock) companyBlock.hidden = !isBusiness;
+  if (webOnly) webOnly.hidden = native;
+
+  if (streetWrap instanceof HTMLElement) {
+    streetWrap.hidden = !isBusiness;
+  }
+  if (streetHint) streetHint.hidden = true;
+  if (streetInput instanceof HTMLInputElement && !isBusiness) {
+    streetInput.value = "";
   }
 
-  if (hint) hint.hidden = false;
-  const userKey = user?.email || "";
-  if (isNativeApp()) {
-    streetInput.readOnly = false;
-    streetInput.placeholder = "";
-    const local = await getPrivateStreet(userKey);
-    streetInput.value = local;
-  } else {
-    streetInput.value = "";
-    streetInput.readOnly = true;
-    streetInput.placeholder = "Csak a mobilalkalmazásban";
+  const identity = native ? await getDeviceIdentity(user?.email || "") : null;
+  const map = {
+    local_fullName: identity?.fullName,
+    local_birthName: identity?.birthName,
+    local_birthPlace: identity?.birthPlace,
+    local_birthDate: identity?.birthDate,
+    local_motherName: identity?.motherName,
+    local_idDocType: identity?.idDocType,
+    local_idDocNumber: identity?.idDocNumber,
+    local_homeAddress: identity?.homeAddress || identity?.street,
+    local_citizenship: identity?.citizenship,
+    local_companyName: identity?.companyName,
+    local_companySeat: identity?.companySeat,
+    local_companyRegistry: identity?.companyRegistry,
+    local_representative: identity?.representative,
+  };
+
+  for (const [name, value] of Object.entries(map)) {
+    const field = form.elements.namedItem(name);
+    if (!(field instanceof HTMLInputElement)) continue;
+    field.readOnly = !native;
+    field.value = native ? value || "" : "";
+    if (!native) field.placeholder = "Csak a mobilalkalmazásban";
+    else if (name === "local_citizenship" && !field.value) field.placeholder = "magyar";
+    else if (name === "local_idDocType" && !field.value) field.placeholder = "pl. személyi igazolvány";
+    else field.placeholder = "";
+  }
+
+  if (native && !isBusiness) {
+    const fullName = form.elements.namedItem("local_fullName");
+    if (fullName instanceof HTMLInputElement && !fullName.value) {
+      const composed = [profile?.lastName, profile?.firstName].filter(Boolean).join(" ");
+      if (composed) fullName.value = composed;
+    }
+  }
+
+  if (native && isBusiness) {
+    const companyName = form.elements.namedItem("local_companyName");
+    if (companyName instanceof HTMLInputElement && !companyName.value && profile?.company) {
+      companyName.value = String(profile.company).trim();
+    }
+    const seat = form.elements.namedItem("local_companySeat");
+    if (seat instanceof HTMLInputElement && !seat.value) {
+      const composed = [profile?.companyPostalCode, profile?.companyCity, profile?.companyStreet]
+        .map((v) => String(v || "").trim())
+        .filter(Boolean)
+        .join(", ");
+      if (composed) seat.value = composed;
+    }
+    const rep = form.elements.namedItem("local_representative");
+    if (rep instanceof HTMLInputElement && !rep.value) {
+      const composed = [profile?.lastName, profile?.firstName].filter(Boolean).join(" ");
+      if (profile?.salespersonName) rep.value = String(profile.salespersonName).trim();
+      else if (composed) rep.value = composed;
+    }
   }
 }
 
@@ -1336,21 +1392,22 @@ function bindProfileFormEarly() {
       document.querySelector("#mm-company-form [name=company]")?.value ?? data.company ?? ""
     ).trim();
     const accountType = String(data.accountType || getProfile().accountType || "private").toLowerCase();
-    const streetLocal = String(data.street || "").trim();
+    const deviceIdentity = identityFromFormData(data);
+    Object.assign(data, stripDeviceIdentityFormFields(data));
     if (accountType !== "business") {
       data.street = "";
     }
     if (btn) btn.disabled = true;
     try {
-      let streetNote = "";
-      if (accountType !== "business") {
-        const userForStreet = getAuthUser();
-        if (isNativeApp() && userForStreet?.email) {
-          await setPrivateStreet(userForStreet.email, streetLocal);
-          streetNote = " Utca a telefonon mentve.";
-        } else if (streetLocal) {
-          streetNote = " Az utca/házszám csak a mobilalkalmazásban menthető.";
-        }
+      let deviceNote = "";
+      const userForDevice = getAuthUser();
+      if (isNativeApp() && userForDevice?.email) {
+        await setDeviceIdentity(userForDevice.email, deviceIdentity);
+        deviceNote = " Szerződéses adatok a telefonon mentve.";
+      } else if (
+        Object.values(deviceIdentity).some((value) => String(value || "").trim())
+      ) {
+        deviceNote = " A szerződéses adatok csak a mobilalkalmazásban menthetők.";
       }
       const saved = await saveProfile(data);
       applyProfileToForm(saved);
@@ -1361,7 +1418,7 @@ function bindProfileFormEarly() {
       window.dispatchEvent(new CustomEvent("bymy-auth-changed"));
       showFlash(
         flash,
-        `Adatok mentve: ${saved.lastName} ${saved.firstName}.${streetNote}`.trim(),
+        `Adatok mentve: ${saved.lastName} ${saved.firstName}.${deviceNote}`.trim(),
         true
       );
       flash?.scrollIntoView({ behavior: "smooth", block: "nearest" });

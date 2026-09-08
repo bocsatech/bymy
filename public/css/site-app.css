@@ -1266,6 +1266,42 @@ body.site-app .settings-form {
   gap: 0.85rem;
 }
 
+body.site-app .settings-device-contract {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 0.35rem;
+  padding: 1rem;
+  background: #fff;
+  border: 1px solid #e8eaed;
+  border-radius: 12px;
+}
+
+body.site-app .settings-device-contract-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 650;
+  color: #101828;
+}
+
+body.site-app .settings-device-contract-caption {
+  margin: 0.35rem 0 0;
+  font-size: 0.82rem;
+  font-weight: 650;
+  color: #4b5563;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+body.site-app .settings-device-contract-block {
+  display: grid;
+  gap: 0.75rem;
+}
+
+body.site-app .settings-device-contract input:read-only {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
 body.site-app [data-mm-panel="szemelyes"] .settings-profile-header,
 body.site-app [data-mm-panel="szemelyes"] .settings-form {
   max-width: 28rem;

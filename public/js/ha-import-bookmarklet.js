@@ -413,11 +413,17 @@
     const title = clean(page.visibleTitle || page.title || "");
     const price = String(page.price || "").replace(/\D/g, "");
     const htmlLen = String(page.html || "").length;
-    if (mapCount >= 3) return true;
-    if (htmlLen > 800 && title && !isBadTitle(title)) return true;
-    // Lista-sor: a kirenderelt járműnév elég (fetch gyakran üres vázat ad).
-    if (title && !isBadTitle(title) && !/^hirdetés\s*#?\s*\d+$/i.test(title) && title.length >= 5) return true;
-    if (price.length >= 4 && mapCount >= 1) return true;
+    const goodTitle =
+      title &&
+      !isBadTitle(title) &&
+      !/^hirdetés\s*#?\s*\d+$/i.test(title) &&
+      !/^m[oó]dos[ií]t|^t[oö]rl[eé]s|^[aá]rt[aá]bla|^kiemel|^top\b/i.test(title) &&
+      title.length >= 5;
+    // Soha ne fogadjunk el „Hiba!” + űrlapmezős map-et járműnév nélkül.
+    if (goodTitle) return true;
+    if (htmlLen > 1200 && goodTitle) return true;
+    if (mapCount >= 5 && price.length >= 4 && goodTitle) return true;
+    if (price.length >= 5 && mapCount >= 3 && !isBadTitle(title)) return true;
     return false;
   }
 
@@ -426,46 +432,77 @@
   }
 
   /** Admin lista: a már kirenderelt sorokból. */
+  function pickIdFromRow(row) {
+    const attrs = [
+      row.getAttribute("data-id"),
+      row.getAttribute("data-hirdetesid"),
+      row.getAttribute("data-adid"),
+      row.getAttribute("data-hirdetes-id"),
+      row.getAttribute("data-jarmu-id"),
+    ];
+    for (const raw of attrs) {
+      const n = String(raw || "").replace(/\D/g, "");
+      if (n.length >= 5) return n;
+    }
+    for (const el of row.querySelectorAll("input[type='checkbox'], input[type='hidden'], input[name*='id' i]")) {
+      const n = String(el.value || el.getAttribute("data-id") || "").replace(/\D/g, "");
+      if (n.length >= 5 && n.length <= 12) return n;
+    }
+    for (const a of row.querySelectorAll("a[href]")) {
+      const found = pickListingId(a.href || "");
+      if (found) return found;
+    }
+    const html = String(row.innerHTML || "");
+    let m = html.match(/\/gyorsnezet\/[^/"'\s]+\/(\d{5,12})/i);
+    if (m) return m[1];
+    m = html.match(/[?&](?:id|hirdetesid|adid|hirdetes_id|jarmu_id)=(\d{5,12})/i);
+    if (m) return m[1];
+    m = html.match(/hirdetes(?:kod|kód|code)?["'\s:=]+(\d{5,12})/i);
+    if (m) return m[1];
+    // utolsó: 7–10 jegyű kód a sorban (hasznaltauto hirdetéskód)
+    const nums = [...html.matchAll(/\b(\d{7,10})\b/g)].map((x) => x[1]);
+    if (nums.length === 1) return nums[0];
+    if (nums.length > 1) {
+      // leggyakoribb / leghosszabb
+      nums.sort((a, b) => b.length - a.length || Number(b) - Number(a));
+      return nums[0];
+    }
+    return "";
+  }
+
   function extractDealerListPages() {
     const byId = {};
     const rowNodes = [
-      ...document.querySelectorAll("table tr, .talalati-sor, [class*='hirdetes'] tr, [class*='jarmu'] tr, article, li"),
+      ...document.querySelectorAll(
+        "table tbody tr, table tr, .talalati-sor, [class*='hirdetes'] tr, [class*='jarmu'] tr, [class*='list'] tr, article, li, [class*='row']"
+      ),
     ];
     for (const row of rowNodes) {
       const text = String(row.innerText || "");
       if (text.length < 12) continue;
-      if (!/m[oó]dos[ií]t[aá]s|t[oö]rl[eé]s|gyorsn[eé]zet|[aá]rt[aá]bla/i.test(text)) continue;
-      if (/menü|navig|belép|kijelent/i.test(text) && text.length < 40) continue;
+      if (!/m[oó]dos[ií]t[aá]s|t[oö]rl[eé]s|gyorsn[eé]zet|[aá]rt[aá]bla|lexus|kia|mercedes|bmw|audi|ford|opel|toyota|volkswagen|skoda|hyundai/i.test(text))
+        continue;
+      if (/menü|navig|belép|kijelent|^ssz/i.test(text) && text.length < 40) continue;
 
-      let id = "";
+      const id = pickIdFromRow(row);
+      if (id.length < 5) continue;
+
       let adminUrl = "";
       let publicUrl = "";
       for (const a of row.querySelectorAll("a[href]")) {
         const href = String(a.href || "");
-        const found = pickListingId(href);
-        if (!found) continue;
-        id = found;
         try {
           const u = new URL(href);
           const host = u.hostname.replace(/^www\./, "").toLowerCase();
           if (host.startsWith("admin.") && /\/gyorsnezet\//i.test(u.pathname)) {
             adminUrl = `${u.origin}${u.pathname}`;
-          } else if (host.endsWith("hasznaltauto.hu") && !host.startsWith("admin.")) {
+          } else if (host.endsWith("hasznaltauto.hu") && !host.startsWith("admin.") && pickListingId(href)) {
             publicUrl = `${u.origin}${u.pathname}`;
           }
         } catch {
           /* ignore */
         }
       }
-      if (!id) {
-        id = String(
-          row.getAttribute("data-id") ||
-            row.getAttribute("data-hirdetesid") ||
-            row.getAttribute("data-adid") ||
-            ""
-        ).replace(/\D/g, "");
-      }
-      if (id.length < 5) continue;
 
       const lines = text
         .split("\n")
@@ -474,15 +511,15 @@
       const title =
         lines.find((line) => {
           if (isBadTitle(line)) return false;
-          if (/m[oó]dos[ií]t|t[oö]rl[eé]s|[aá]rt[aá]bla|kiemel|megtekint|lefoglal|inakt[ií]v|akt[ií]v|top\b|ssz\.|sorsz/i.test(line))
+          if (/m[oó]dos[ií]t|t[oö]rl[eé]s|[aá]rt[aá]bla|kiemel|megtekint|lefoglal|inakt[ií]v|akt[ií]v|top\b|ssz\.|sorsz|megtekintve|találat/i.test(line))
             return false;
-          if (/^\d+([.,]\d+)?\s*(ft|€)?$/i.test(line)) return false;
+          if (/^\d+([.\s]\d+){0,3}\s*(ft|€)?$/i.test(line)) return false;
           if (/^\d{5,}$/.test(line)) return false;
-          return /[a-záéíóöőúüű]{2,}/i.test(line) && line.length >= 5 && line.length <= 90;
+          return /[a-záéíóöőúüű]{2,}/i.test(line) && line.length >= 5 && line.length <= 100;
         }) || "";
 
-      const priceMatch = text.match(/(\d[\d\s.]{3,})\s*Ft/i);
-      const price = priceMatch ? priceMatch[1].replace(/\s/g, "") : "";
+      const priceMatch = text.match(/(\d{1,3}(?:[.\s]\d{3})+|\d{5,})\s*Ft/i);
+      const price = priceMatch ? priceMatch[1].replace(/[.\s]/g, "") : "";
       const km = (text.match(/(\d[\d\s.]*)\s*km/i) || [])[0] || "";
       const year = (text.match(/\b((?:19|20)\d{2})(?:\/\d{1,2})?\b/) || [])[1] || "";
       let imageUrl = "";
@@ -824,42 +861,77 @@
       const fromList = extractDealerListPages().slice(0, MAX_DEALER);
       if (!fromList.length) {
         hideProgress();
+        const trCount = document.querySelectorAll("table tr, .talalati-sor").length;
         alert(
-          "Nem találtunk autót a listán. Görgess le a táblázatig (Módosítás / Törlés sorok), majd próbáld újra."
+          `Nem találtunk autót a listán (táblázatsor: ${trCount}). Görgess le a Módosítás / Törlés sorokig, majd próbáld újra.`
         );
         return;
       }
-      showProgress(0, fromList.length, "gyorsnézet kiegészítés");
-      // Lista már ad címet; gyorsnézet (iframe) kitölti a mezőket / képet ahol lehet.
-      const enriched = await mapPool(
-        fromList,
-        2,
-        async (card) => {
-          try {
-            const detail = await extractRefPage({
-              id: card.listingId,
-              adminUrl: card.adminUrl,
-              publicUrl: card.publicUrl,
-            });
-            if (!detail) return card;
-            return {
-              ...card,
-              ...detail,
-              visibleTitle: detail.visibleTitle || card.visibleTitle,
-              visibleImage: detail.visibleImage || card.visibleImage,
-              price: detail.price || card.price,
-              km: detail.km || card.km,
-              year: detail.year || card.year,
-              listingId: detail.listingId || card.listingId,
-            };
-          } catch {
-            return card;
+      // A listasor már kirenderelt (cím/ár/kép). A gyorsnézet fetch/iframe gyakran „Hiba!” vázat ad —
+      // ne írjuk felül vele a jó listaadatokat. Opcionális finomítás csak ha jobb a részlet.
+      showProgress(0, fromList.length, "lista feldolgozása");
+      for (const card of fromList) {
+        if (isUsefulPage(card)) pages.push(card);
+      }
+      // Ha van idő / kevés autó: próbáljunk képet/mezőt pótolni, de a lista marad a fallback.
+      if (pages.length && pages.length <= 15) {
+        showProgress(0, pages.length, "gyorsnézet kiegészítés");
+        const base = pages.slice();
+        pages.length = 0;
+        const enriched = await mapPool(
+          base,
+          2,
+          async (card) => {
+            try {
+              const detail = await extractRefPage({
+                id: card.listingId,
+                adminUrl: card.adminUrl,
+                publicUrl: card.publicUrl,
+              });
+              if (!detail || !isUsefulPage(detail)) return card;
+              const detailTitle = clean(detail.visibleTitle || "");
+              const keepTitle =
+                detailTitle && !isBadTitle(detailTitle) ? detailTitle : card.visibleTitle;
+              const detailMapCount =
+                detail.map && typeof detail.map === "object" ? Object.keys(detail.map).length : 0;
+              return {
+                ...card,
+                visibleTitle: keepTitle,
+                visibleImage: detail.visibleImage || card.visibleImage,
+                price: detail.price || card.price,
+                km: detail.km || card.km,
+                year: detail.year || card.year,
+                fuel: detail.fuel || card.fuel,
+                brand: detail.brand || card.brand,
+                model: detail.model || card.model,
+                map: detailMapCount >= 5 ? detail.map : card.map,
+                html: String(detail.html || "").length > 800 ? detail.html : card.html,
+                bodyText: detail.bodyText || card.bodyText,
+                felszereltseg:
+                  Array.isArray(detail.felszereltseg) && detail.felszereltseg.length
+                    ? detail.felszereltseg
+                    : card.felszereltseg,
+                listingId: detail.listingId || card.listingId,
+                fromListCard: true,
+              };
+            } catch {
+              return card;
+            }
+          },
+          (done, total) => showProgress(done, total, "gyorsnézet")
+        );
+        for (const page of enriched) {
+          if (isUsefulPage(page)) pages.push(page);
+          else if (isUsefulPage(base.find((c) => c.listingId === page?.listingId) || null)) {
+            pages.push(base.find((c) => c.listingId === page.listingId));
           }
-        },
-        (done, total) => showProgress(done, total, "gyorsnézet")
-      );
-      for (const page of enriched) {
-        if (isUsefulPage(page)) pages.push(page);
+        }
+        // Ha a kiegészítés mindent elrontott, menjünk vissza a tiszta listára.
+        if (!pages.length) {
+          for (const card of base) {
+            if (isUsefulPage(card)) pages.push(card);
+          }
+        }
       }
     } else {
       const refs = discoverRefs().slice(0, MAX_DEALER);

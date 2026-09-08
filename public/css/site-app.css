@@ -163,7 +163,7 @@ body.site-app .hub-header {
     grid-template-columns: 1fr auto 1fr !important;
     grid-template-areas: "logo nav actions" !important;
     align-items: center !important;
-    column-gap: 16px !important;
+    column-gap: 36px !important;
     max-width: 1440px !important;
     margin: 0 auto !important;
     padding: 0 24px !important;
@@ -226,7 +226,7 @@ body.site-app .hub-header {
     width: max-content !important;
     max-width: none !important;
     margin: 0 !important;
-    padding: 0 !important;
+    padding: 0 0.75rem 0 0 !important;
     height: auto !important;
     pointer-events: auto !important;
     overflow: visible !important;
@@ -261,7 +261,7 @@ body.site-app .hub-header {
     justify-self: end !important;
     align-self: center !important;
     min-height: 0 !important;
-    padding: 0 !important;
+    padding: 0 0 0 1rem !important;
     width: auto !important;
     display: flex !important;
     align-items: center !important;

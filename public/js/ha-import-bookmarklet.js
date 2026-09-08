@@ -415,9 +415,104 @@
     const htmlLen = String(page.html || "").length;
     if (mapCount >= 3) return true;
     if (htmlLen > 800 && title && !isBadTitle(title)) return true;
-    if (title && !isBadTitle(title) && !/^hirdetés\s*#?\s*\d+$/i.test(title) && price.length >= 4) return true;
-    if (title && !isBadTitle(title) && mapCount >= 1 && price.length >= 4) return true;
+    // Lista-sor: a kirenderelt járműnév elég (fetch gyakran üres vázat ad).
+    if (title && !isBadTitle(title) && !/^hirdetés\s*#?\s*\d+$/i.test(title) && title.length >= 5) return true;
+    if (price.length >= 4 && mapCount >= 1) return true;
     return false;
+  }
+
+  function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  /** Admin lista: a már kirenderelt sorokból. */
+  function extractDealerListPages() {
+    const byId = {};
+    const rowNodes = [
+      ...document.querySelectorAll("table tr, .talalati-sor, [class*='hirdetes'] tr, [class*='jarmu'] tr, article, li"),
+    ];
+    for (const row of rowNodes) {
+      const text = String(row.innerText || "");
+      if (text.length < 12) continue;
+      if (!/m[oó]dos[ií]t[aá]s|t[oö]rl[eé]s|gyorsn[eé]zet|[aá]rt[aá]bla/i.test(text)) continue;
+      if (/menü|navig|belép|kijelent/i.test(text) && text.length < 40) continue;
+
+      let id = "";
+      let adminUrl = "";
+      let publicUrl = "";
+      for (const a of row.querySelectorAll("a[href]")) {
+        const href = String(a.href || "");
+        const found = pickListingId(href);
+        if (!found) continue;
+        id = found;
+        try {
+          const u = new URL(href);
+          const host = u.hostname.replace(/^www\./, "").toLowerCase();
+          if (host.startsWith("admin.") && /\/gyorsnezet\//i.test(u.pathname)) {
+            adminUrl = `${u.origin}${u.pathname}`;
+          } else if (host.endsWith("hasznaltauto.hu") && !host.startsWith("admin.")) {
+            publicUrl = `${u.origin}${u.pathname}`;
+          }
+        } catch {
+          /* ignore */
+        }
+      }
+      if (!id) {
+        id = String(
+          row.getAttribute("data-id") ||
+            row.getAttribute("data-hirdetesid") ||
+            row.getAttribute("data-adid") ||
+            ""
+        ).replace(/\D/g, "");
+      }
+      if (id.length < 5) continue;
+
+      const lines = text
+        .split("\n")
+        .map((line) => clean(line))
+        .filter(Boolean);
+      const title =
+        lines.find((line) => {
+          if (isBadTitle(line)) return false;
+          if (/m[oó]dos[ií]t|t[oö]rl[eé]s|[aá]rt[aá]bla|kiemel|megtekint|lefoglal|inakt[ií]v|akt[ií]v|top\b|ssz\.|sorsz/i.test(line))
+            return false;
+          if (/^\d+([.,]\d+)?\s*(ft|€)?$/i.test(line)) return false;
+          if (/^\d{5,}$/.test(line)) return false;
+          return /[a-záéíóöőúüű]{2,}/i.test(line) && line.length >= 5 && line.length <= 90;
+        }) || "";
+
+      const priceMatch = text.match(/(\d[\d\s.]{3,})\s*Ft/i);
+      const price = priceMatch ? priceMatch[1].replace(/\s/g, "") : "";
+      const km = (text.match(/(\d[\d\s.]*)\s*km/i) || [])[0] || "";
+      const year = (text.match(/\b((?:19|20)\d{2})(?:\/\d{1,2})?\b/) || [])[1] || "";
+      let imageUrl = "";
+      const img = row.querySelector("img[src], img[data-src], img[data-lazy]");
+      const raw = img?.currentSrc || img?.src || img?.getAttribute("data-src") || img?.getAttribute("data-lazy") || "";
+      if (/^https?:\/\//i.test(raw) && !/logo|icon|sprite|badge/i.test(raw)) imageUrl = raw;
+
+      const page = {
+        url: publicUrl || adminUrl || `https://admin.hasznaltauto.hu/gyorsnezet/szemelyauto/${id}`,
+        listingId: id,
+        visibleTitle: title,
+        visibleImage: imageUrl,
+        price,
+        km,
+        year,
+        map: {},
+        bodyText: clean(text).slice(0, 2500),
+        felszereltseg: [],
+        html: "",
+        fromListCard: true,
+        adminUrl: adminUrl || `https://admin.hasznaltauto.hu/gyorsnezet/szemelyauto/${id}`,
+        publicUrl,
+      };
+      if (!isUsefulPage(page)) continue;
+      const prev = byId[id];
+      if (!prev || clean(page.visibleTitle).length > clean(prev.visibleTitle || "").length) {
+        byId[id] = page;
+      }
+    }
+    return Object.values(byId);
   }
 
   function extractListCardFallback(ref) {
@@ -429,7 +524,7 @@
       let row = null;
       for (const a of anchors) {
         row = a.closest(
-          ".talalati-sor, .row, tr, article, li, .hirdetes, [class*='hirdetes'], [class*='jarmu'], [class*='listing']"
+          "tr, .talalati-sor, .row, article, li, .hirdetes, [class*='hirdetes'], [class*='jarmu'], [class*='listing']"
         );
         if (row) break;
       }
@@ -438,7 +533,6 @@
           document.querySelector(`[data-id="${id}"], [data-hirdetesid="${id}"], [data-adid="${id}"]`) ||
           null;
       }
-      // Ha nincs sor, ne a teljes oldal szövegéből találgassunk — az szemetet ad.
       if (!row && !anchors.length) return null;
       const text = clean((row || anchors[0]?.parentElement)?.innerText || "").slice(0, 2000);
       const title = clean(
@@ -446,7 +540,7 @@
           anchors[0]?.innerText ||
           text.split("\n").find((line) => {
             const t = clean(line);
-            return t && !isBadTitle(t) && !/módosítás|törlés|ártábla|megtekint/i.test(t);
+            return t && !isBadTitle(t) && !/módosítás|törlés|ártábla|megtekint|kiemel/i.test(t);
           }) ||
           ""
       );
@@ -477,6 +571,47 @@
     }
   }
 
+  async function extractFromUrlIframe(url) {
+    return new Promise((resolve, reject) => {
+      const iframe = document.createElement("iframe");
+      iframe.setAttribute("title", "bymy-ha-detail");
+      iframe.style.cssText =
+        "position:fixed;left:-10000px;top:0;width:900px;height:1200px;opacity:0;pointer-events:none;border:0;";
+      let settled = false;
+      const finish = (err, page) => {
+        if (settled) return;
+        settled = true;
+        try {
+          iframe.remove();
+        } catch {
+          /* ignore */
+        }
+        if (err) reject(err);
+        else resolve(page);
+      };
+      const timer = setTimeout(() => finish(new Error("iframe timeout")), 12000);
+      iframe.onload = async () => {
+        try {
+          await sleep(1400);
+          const doc = iframe.contentDocument;
+          if (!doc?.body) throw new Error("iframe empty");
+          const page = extractFromDoc(doc, url);
+          clearTimeout(timer);
+          finish(null, page);
+        } catch (error) {
+          clearTimeout(timer);
+          finish(error);
+        }
+      };
+      iframe.onerror = () => {
+        clearTimeout(timer);
+        finish(new Error("iframe error"));
+      };
+      (document.body || document.documentElement).appendChild(iframe);
+      iframe.src = url;
+    });
+  }
+
   async function extractRefPage(ref) {
     try {
       const onAdmin = /admin\.hasznaltauto\.hu$/i.test(location.hostname.replace(/^www\./, ""));
@@ -492,7 +627,7 @@
         push(ref.publicUrl);
         for (const u of adminGyorsUrls(ref.id, ref.adminUrl)) push(u);
       }
-      for (const url of candidates) {
+      for (const url of candidates.slice(0, onAdmin ? 3 : 4)) {
         try {
           const page = await extractFromUrl(url);
           if (isUsefulPage(page)) {
@@ -526,12 +661,20 @@
   }
 
   async function extractFromUrl(url) {
+    const onAdmin = /admin\.hasznaltauto\.hu$/i.test(location.hostname.replace(/^www\./, ""));
+    if (onAdmin) {
+      try {
+        const page = await extractFromUrlIframe(url);
+        if (isUsefulPage(page)) return page;
+      } catch {
+        /* fetch tartalék */
+      }
+    }
     const res = await fetch(url, { credentials: "include", cache: "no-store" });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const html = await res.text();
     if (!html || html.length < 40) throw new Error("Üres válasz");
-    const doc = new DOMParser().parseFromString(html, "text/html");
-    return extractFromDoc(doc, url);
+    return extractFromDoc(new DOMParser().parseFromString(html, "text/html"), url);
   }
 
   /** Párhuzamos beolvasás — ne egyesével várjon. */
@@ -671,9 +814,53 @@
     }
 
     const pages = [];
+    const onAdminHost = /admin\.hasznaltauto\.hu$/i.test(location.hostname.replace(/^www\./, ""));
     if (mode === "standard" && isSingleListing()) {
       showProgress(1, 1, "beolvasás");
-      pages.push(extractPage());
+      const one = extractPage();
+      if (isUsefulPage(one)) pages.push(one);
+    } else if (mode === "dealer" || (onAdminHost && !isPublicListingPage())) {
+      showProgress(0, 1, "lista beolvasása");
+      const fromList = extractDealerListPages().slice(0, MAX_DEALER);
+      if (!fromList.length) {
+        hideProgress();
+        alert(
+          "Nem találtunk autót a listán. Görgess le a táblázatig (Módosítás / Törlés sorok), majd próbáld újra."
+        );
+        return;
+      }
+      showProgress(0, fromList.length, "gyorsnézet kiegészítés");
+      // Lista már ad címet; gyorsnézet (iframe) kitölti a mezőket / képet ahol lehet.
+      const enriched = await mapPool(
+        fromList,
+        2,
+        async (card) => {
+          try {
+            const detail = await extractRefPage({
+              id: card.listingId,
+              adminUrl: card.adminUrl,
+              publicUrl: card.publicUrl,
+            });
+            if (!detail) return card;
+            return {
+              ...card,
+              ...detail,
+              visibleTitle: detail.visibleTitle || card.visibleTitle,
+              visibleImage: detail.visibleImage || card.visibleImage,
+              price: detail.price || card.price,
+              km: detail.km || card.km,
+              year: detail.year || card.year,
+              listingId: detail.listingId || card.listingId,
+            };
+          } catch {
+            return card;
+          }
+        },
+        (done, total) => showProgress(done, total, "gyorsnézet")
+      );
+      for (const page of enriched) {
+        if (isUsefulPage(page)) pages.push(page);
+      }
     } else {
       const refs = discoverRefs().slice(0, MAX_DEALER);
       if (!refs.length) {
@@ -687,7 +874,8 @@
       }
       if (mode === "standard" && refs.length === 1 && isPublicListingPage()) {
         showProgress(1, 1, "beolvasás");
-        pages.push(extractPage());
+        const one = extractPage();
+        if (isUsefulPage(one)) pages.push(one);
       } else {
         showProgress(0, refs.length, "lista beolvasása");
         const extracted = await mapPool(
@@ -705,7 +893,7 @@
     if (!pages.length) {
       hideProgress();
       alert(
-        "Nem sikerült kiolvasni a hirdetés adatait (cím/ár/kép). Nyiss meg egy autó gyorsnézetét a listán, vagy a nyilvános hirdetés oldalt, majd futtasd újra — üres ID-ket nem mentünk."
+        "Nem sikerült kiolvasni a hirdetés adatait. Görgess a lista végére, hogy látszódjanak az autók, majd futtasd újra."
       );
       return;
     }

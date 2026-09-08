@@ -36,7 +36,7 @@ export const PHONE_LANGUAGES = [
   "Русский",
 ];
 
-function fillCountrySelect(select, preferred = "+36") {
+export function fillCountrySelect(select, preferred = "+36") {
   if (!select || select.tagName !== "SELECT") return;
   const current = select.value || preferred;
   select.innerHTML = "";

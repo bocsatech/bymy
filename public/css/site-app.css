@@ -1271,6 +1271,62 @@ body.site-app [data-mm-panel="szemelyes"] .settings-form {
   max-width: 28rem;
 }
 
+body.site-app .settings-phone-row {
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  gap: 0.4rem;
+  width: 100%;
+  max-width: 100%;
+}
+
+body.site-app .settings-phone-row > span {
+  flex: 0 0 auto;
+  color: #6b7280;
+  font-size: 0.9rem;
+  line-height: 1;
+}
+
+body.site-app .settings-phone-row select.phone-country,
+body.site-app .settings-phone-row input.phone-part {
+  font: inherit;
+  font-size: 0.92rem;
+  border: 1px solid #d5d9e0;
+  border-radius: 10px;
+  padding: 0.55rem 0.65rem;
+  background: #fff;
+  color: #111;
+  box-sizing: border-box;
+}
+
+body.site-app .settings-phone-row select.phone-country {
+  flex: 0 0 auto;
+  width: auto;
+  min-width: 6.5rem;
+  max-width: 8.5rem;
+  cursor: pointer;
+}
+
+body.site-app .settings-phone-row input.phone-part {
+  flex: 0 0 auto;
+  width: 4.25rem;
+  min-width: 3.5rem;
+  max-width: 5rem;
+}
+
+body.site-app .settings-phone-row input.phone-part.wide {
+  flex: 1 1 auto;
+  width: auto;
+  min-width: 7rem;
+  max-width: none;
+}
+
+@media (max-width: 420px) {
+  body.site-app .settings-phone-row {
+    flex-wrap: wrap;
+  }
+}
+
 body.site-app .settings-profile-header {
   display: flex;
   align-items: center;

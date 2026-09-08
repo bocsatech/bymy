@@ -57,7 +57,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/css/style.css?v=noScroll1" />
-    <link rel="stylesheet" href="/css/site-app.css?v=profileNarrow1" />
+    <link rel="stylesheet" href="/css/site-app.css?v=settingsPhone1" />
       <link rel="stylesheet" href="/css/hub.css?v=hubHeroDemo1" />
 </head>
   <body class="site-app settings-page mm-page" data-site-page="beallitasok" data-auth-init="manual">
@@ -467,10 +467,35 @@
               <span class="login-label">Ország</span>
               <input type="text" name="country" value="Magyarország" autocomplete="country-name" />
             </label>
-            <label class="login-field">
+            <div class="login-field">
               <span class="login-label">Telefon</span>
-              <input type="tel" name="phone" autocomplete="tel" placeholder="+36 …" />
-            </label>
+              <div class="settings-phone-row" data-settings-phone>
+                <select class="phone-country" name="phoneCountry" aria-label="Országkód"></select>
+                <span aria-hidden="true">-</span>
+                <input
+                  type="tel"
+                  name="phoneArea"
+                  class="phone-part"
+                  inputmode="numeric"
+                  maxlength="4"
+                  autocomplete="tel-national"
+                  placeholder="30"
+                  aria-label="Körzetszám"
+                />
+                <span aria-hidden="true">/</span>
+                <input
+                  type="tel"
+                  name="phoneLocal"
+                  class="phone-part wide"
+                  inputmode="numeric"
+                  maxlength="12"
+                  autocomplete="tel-national"
+                  placeholder="1234567"
+                  aria-label="Telefonszám"
+                />
+                <input type="hidden" name="phone" value="" />
+              </div>
+            </div>
             <label class="login-field">
               <span class="login-label">Email</span>
               <input type="email" id="settings-email" value="" readonly tabindex="-1" />
@@ -600,7 +625,7 @@
 
     <script src="/js/site-avatar-menu.js?v=settingsNav2" type="module"></script>
     <script src="/js/ha-import-app.js?v=haBookmarkCopy1" type="module"></script>
-    <script src="/js/beallitasok-app.js?v=settingsFailOpen1" type="module"></script>
+    <script src="/js/beallitasok-app.js?v=settingsPhone1" type="module"></script>
     <script>
       
       setTimeout(function () {

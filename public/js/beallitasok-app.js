@@ -30,6 +30,7 @@ import {
   hasSettingsReturn,
 } from "./site-avatar-menu.js?v=avatarSync1";
 import { fetchListing } from "./db-client.js?v=parkThumb1";
+import { fillCountrySelect, PHONE_COUNTRIES } from "./phone-lang-ui.js?v=settingsPhone1";
 
 const PHOTO_KEY = "bymy-avatar-photos";
 const NOTIFY_KEY = "bymy-notify-prefs";
@@ -820,6 +821,95 @@ function initAreaForms() {
 }
 
 
+function parseSettingsPhone(phone) {
+  const raw = String(phone || "").trim();
+  if (!raw) return { orszag: "+36", korzet: "", szam: "" };
+  let compact = raw.replace(/[^\d+]/g, "");
+  if (/^\+?06\d/.test(compact)) {
+    compact = `+36${compact.replace(/^\+?06/, "")}`;
+  }
+
+  const countries = [...PHONE_COUNTRIES].sort((a, b) => b.value.length - a.value.length);
+  let orszag = "+36";
+  let rest = compact.startsWith("+") ? compact.slice(1) : compact;
+
+  for (const item of countries) {
+    const code = item.value.replace(/^\+/, "");
+    if (compact.startsWith(item.value) || rest.startsWith(code)) {
+      orszag = item.value;
+      rest = compact.startsWith(item.value)
+        ? compact.slice(item.value.length)
+        : rest.slice(code.length);
+      break;
+    }
+  }
+
+  rest = String(rest).replace(/\D/g, "");
+  if (!rest) return { orszag, korzet: "", szam: "" };
+
+  let korzetLen = 2;
+  if (orszag === "+36" && rest.startsWith("1") && rest.length >= 7) korzetLen = 1;
+  else if (rest.length >= 10) korzetLen = 3;
+  else if (rest.length <= 7) korzetLen = Math.min(2, Math.max(1, rest.length - 5));
+
+  const korzet = rest.slice(0, Math.min(korzetLen, Math.max(0, rest.length - 4)));
+  const szam = rest.slice(korzet.length);
+  return { orszag, korzet, szam };
+}
+
+function composeSettingsPhone(orszag, korzet, szam) {
+  const o = String(orszag || "+36").trim() || "+36";
+  const k = String(korzet || "").replace(/\D/g, "");
+  const s = String(szam || "").replace(/\D/g, "");
+  if (!k && !s) return "";
+  return [o, k, s].filter(Boolean).join(" ");
+}
+
+function applyPhonePartsToForm(form, phone) {
+  if (!form) return;
+  const parts = parseSettingsPhone(phone);
+  const country = form.elements.namedItem("phoneCountry");
+  const area = form.elements.namedItem("phoneArea");
+  const local = form.elements.namedItem("phoneLocal");
+  const hidden = form.elements.namedItem("phone");
+  if (country instanceof HTMLSelectElement) {
+    fillCountrySelect(country, parts.orszag || "+36");
+  }
+  if (area instanceof HTMLInputElement) area.value = parts.korzet;
+  if (local instanceof HTMLInputElement) local.value = parts.szam;
+  if (hidden instanceof HTMLInputElement) {
+    hidden.value = composeSettingsPhone(parts.orszag, parts.korzet, parts.szam);
+  }
+}
+
+function syncSettingsPhoneHidden(form) {
+  if (!form) return "";
+  const country = form.elements.namedItem("phoneCountry");
+  const area = form.elements.namedItem("phoneArea");
+  const local = form.elements.namedItem("phoneLocal");
+  const hidden = form.elements.namedItem("phone");
+  const value = composeSettingsPhone(
+    country instanceof HTMLSelectElement ? country.value : "+36",
+    area instanceof HTMLInputElement ? area.value : "",
+    local instanceof HTMLInputElement ? local.value : ""
+  );
+  if (hidden instanceof HTMLInputElement) hidden.value = value;
+  return value;
+}
+
+function initSettingsPhoneRow(form) {
+  if (!form || form.dataset.phoneBound === "1") return;
+  const row = form.querySelector("[data-settings-phone]");
+  if (!row) return;
+  form.dataset.phoneBound = "1";
+  const country = form.elements.namedItem("phoneCountry");
+  if (country instanceof HTMLSelectElement) fillCountrySelect(country, "+36");
+  const sync = () => syncSettingsPhoneHidden(form);
+  row.addEventListener("input", sync);
+  row.addEventListener("change", sync);
+  sync();
+}
+
 function applyProfileToForm(profile) {
   const form = document.getElementById("mm-profile-form");
   if (!form) return;
@@ -835,7 +925,6 @@ function applyProfileToForm(profile) {
     "postalCode",
     "city",
     "country",
-    "phone",
     "company",
     "companyTaxId",
     "companyStreet",
@@ -857,6 +946,8 @@ function applyProfileToForm(profile) {
       field.value = value;
     });
   }
+  initSettingsPhoneRow(form);
+  applyPhonePartsToForm(form, data.phone);
   updateProfileSummary(data, getAuthUser());
 }
 
@@ -1199,6 +1290,10 @@ function bindProfileFormEarly() {
     data.postalCode = String(data.postalCode || "")
       .replace(/\D/g, "")
       .slice(0, 4);
+    data.phone = syncSettingsPhoneHidden(profileForm);
+    delete data.phoneCountry;
+    delete data.phoneArea;
+    delete data.phoneLocal;
     if (!String(data.firstName || "").trim() || !String(data.lastName || "").trim()) {
       showFlash(flash, "Keresztnév és vezetéknév kötelező.", false);
       return;

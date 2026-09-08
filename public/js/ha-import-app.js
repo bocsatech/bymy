@@ -3,7 +3,7 @@ import {
   getDisplayName,
   requireAuthForPage,
   initSiteAuth,
-} from "./site-auth.js?v=haImp1";
+} from "./site-auth.js?v=settingsFix1";
 
 const CAT_STORAGE_KEY = "bymy-hirdetes-category";
 const CAT_STORAGE_VERSION = 2;
@@ -48,9 +48,10 @@ function setMode(mode) {
 
 function bookmarkletHref(mode) {
   const origin = location.origin;
-  const src = `${origin}/js/ha-import-bookmarklet.js?v=haImp16`;
+  const src = `${origin}/js/ha-import-bookmarklet.js?v=haImp17`;
+  // Mindig újra betöltjük a scriptet — a régi BymyHaImport a fülön beragadhat.
   // void(...): a visszatérési érték ne cserélje le a hasznaltauto oldalt
-  return `javascript:void(function(){var o=${JSON.stringify(origin)};var m=${JSON.stringify(mode)};function go(){try{window.BymyHaImport.run({origin:o,mode:m});}catch(e){alert((e&&e.message)||e);}}if(window.BymyHaImport){go();return;}var s=document.createElement("script");s.src=${JSON.stringify(src)};s.onload=go;s.onerror=function(){alert("A hasznaltauto.hu blokkolta a Bymy scriptet. Másold a hirdetés URL-jét a Bymy Autóimport oldalra.");};(document.documentElement||document.body).appendChild(s);})();`;
+  return `javascript:void(function(){var o=${JSON.stringify(origin)};var m=${JSON.stringify(mode)};var src=${JSON.stringify(src)}+"&t="+Date.now();function go(){try{window.BymyHaImport.run({origin:o,mode:m});}catch(e){alert((e&&e.message)||e);}}try{delete window.BymyHaImport;}catch(e){window.BymyHaImport=undefined;}var s=document.createElement("script");s.src=src;s.onload=go;s.onerror=function(){alert("A hasznaltauto.hu blokkolta a Bymy scriptet. Másold a hirdetés URL-jét a Bymy Autóimport oldalra.");};(document.documentElement||document.body).appendChild(s);})();`;
 }
 
 function renderMode() {

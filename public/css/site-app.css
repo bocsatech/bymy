@@ -4102,6 +4102,39 @@ body.site-app .mm-list-actions {
   align-items: flex-start;
 }
 
+body.site-app .mm-list-item--park {
+  align-items: flex-start;
+}
+
+body.site-app .mm-park-thumb {
+  flex: 0 0 88px;
+  width: 88px;
+  height: 66px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #eef1f5;
+  border: 1px solid #e4e7ec;
+  display: grid;
+  place-items: center;
+  text-decoration: none;
+  color: inherit;
+}
+
+body.site-app .mm-park-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+body.site-app .mm-park-thumb-empty {
+  font-size: 0.68rem;
+  color: #98a2b3;
+  text-align: center;
+  padding: 0.25rem;
+  line-height: 1.2;
+}
+
 body.site-app .mm-note-field {
   display: grid;
   gap: 0.25rem;
@@ -4110,11 +4143,21 @@ body.site-app .mm-note-field {
   color: #667085;
 }
 
-body.site-app .mm-note-field input {
+body.site-app .mm-note-field input,
+body.site-app .mm-note-field textarea {
   border: 1px solid #d0d5dd;
   border-radius: 8px;
   padding: 0.4rem 0.55rem;
   font: inherit;
+  width: 100%;
+  box-sizing: border-box;
+  resize: vertical;
+  min-height: 2.8em;
+  line-height: 1.35;
+}
+
+body.site-app .mm-note-field textarea {
+  min-height: calc(1.35em * 2 + 0.8rem);
 }
 
 body.site-app .mm-empty {
@@ -6104,12 +6147,23 @@ html[data-theme="dark"] body.site-app.settings-page .ha-imp-go {
 html[data-theme="dark"] body.site-app.settings-page .ha-imp-url-fields input,
 html[data-theme="dark"] body.site-app.settings-page .mm-inline-form input,
 html[data-theme="dark"] body.site-app.settings-page .mm-note-field input,
+html[data-theme="dark"] body.site-app.settings-page .mm-note-field textarea,
 html[data-theme="dark"] body.site-app.settings-page .myads-search input,
 html[data-theme="dark"] body.site-app.settings-page input[type="url"],
 html[data-theme="dark"] body.site-app.settings-page input[type="file"] {
   background: #12161c !important;
   color: #f3f4f6 !important;
   border-color: #3b4450 !important;
+  -webkit-text-fill-color: #f3f4f6 !important;
+}
+
+html[data-theme="dark"] body.site-app.settings-page .mm-park-thumb {
+  background: #1a1f27 !important;
+  border-color: #3b4450 !important;
+}
+
+html[data-theme="dark"] body.site-app.settings-page .mm-park-thumb-empty {
+  color: #98a2b3 !important;
 }
 
 html[data-theme="dark"] body.site-app.settings-page .mm-list-item.is-unread {

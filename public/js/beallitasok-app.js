@@ -21,11 +21,12 @@ import {
   addParkplatzItem,
   removeParkplatzItem,
   updateParkplatzNote,
+  patchParkplatzItem,
   getSavedSearches,
   addSavedSearch,
   removeSavedSearch,
   toggleSavedSearchNotify,
-} from "./fok-data.js?v=auth20260805localdb9";
+} from "./fok-data.js?v=parkThumb1";
 import { initMessagesUi } from "./messages-ui.js?v=noMsgSearch2";
 import { listConversations } from "./messages-api.js?v=msgLive1";
 import { initMyAdsPanel } from "./my-ads.js?v=hdView1";
@@ -33,6 +34,7 @@ import {
   consumeSettingsReturn,
   hasSettingsReturn,
 } from "./site-avatar-menu.js?v=avatarSync1";
+import { fetchListing } from "./db-client.js?v=parkThumb1";
 
 const PHOTO_KEY = "bymy-avatar-photos";
 const NOTIFY_KEY = "bymy-notify-prefs";
@@ -470,8 +472,18 @@ function renderPark(email) {
   if (empty) empty.hidden = items.length > 0;
   for (const item of items) {
     const row = document.createElement("article");
-    row.className = "mm-list-item";
+    row.className = "mm-list-item mm-list-item--park";
+    const imageUrl = String(item.imageUrl || "").trim();
+    const thumbTag = item.url ? "a" : "div";
+    const thumbHref = item.url ? ` href="${escapeAttr(item.url)}"` : "";
     row.innerHTML = `
+      <${thumbTag} class="mm-park-thumb"${thumbHref} aria-hidden="${imageUrl ? "false" : "true"}">
+        ${
+          imageUrl
+            ? `<img src="${escapeAttr(imageUrl)}" alt="${escapeAttr(item.title || "Autó")}" width="88" height="66" loading="lazy" decoding="async" />`
+            : `<span class="mm-park-thumb-empty">Nincs kép</span>`
+        }
+      </${thumbTag}>
       <div class="mm-list-main">
         <strong>${
           item.url
@@ -481,7 +493,7 @@ function renderPark(email) {
         <span class="mm-list-meta">${escapeHtml(item.price || "Ár nincs megadva")} · ${fmtDate(item.savedAt)}</span>
         <label class="mm-note-field">
           <span>Jegyzet</span>
-          <input type="text" data-park-note value="${escapeAttr(item.note || "")}" />
+          <textarea data-park-note rows="2" maxlength="280">${escapeHtml(item.note || "")}</textarea>
         </label>
       </div>
       <div class="mm-list-actions">
@@ -502,6 +514,37 @@ function renderPark(email) {
     });
     list.appendChild(row);
   }
+  void enrichParkImages(email, items);
+}
+
+let parkImageEnrichBusy = false;
+
+async function enrichParkImages(email, items) {
+  const missing = items.filter((item) => item.id && !String(item.imageUrl || "").trim());
+  if (!missing.length || parkImageEnrichBusy) return;
+  parkImageEnrichBusy = true;
+  let changed = false;
+  try {
+    for (const item of missing) {
+      try {
+        const listing = await fetchListing(item.id);
+        const imageUrl =
+          listing?.preview?.imageUrl ||
+          listing?.fo_kep ||
+          listing?.detail?.images?.[0] ||
+          listing?.preview?.imageUrls?.[0] ||
+          "";
+        if (!imageUrl) continue;
+        patchParkplatzItem(email, item.id, { imageUrl: String(imageUrl) });
+        changed = true;
+      } catch {
+        /* ignore */
+      }
+    }
+  } finally {
+    parkImageEnrichBusy = false;
+  }
+  if (changed) renderPark(email);
 }
 
 function renderSearches(email) {

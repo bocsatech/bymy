@@ -10,7 +10,7 @@ import {
   getParkplatz,
   addParkplatzItem,
   removeParkplatzItem,
-} from "./fok-data.js?v=auth20260805localdb9";
+} from "./fok-data.js?v=parkThumb1";
 
 function collectPhotoUrls(item) {
   const preview = item.preview || {};
@@ -156,6 +156,7 @@ export function createHomeGridCard(item) {
         title,
         price,
         url: detailHref,
+        imageUrl: photoUrls[0] || "",
       });
       btn.classList.add("is-on");
       btn.setAttribute("aria-pressed", "true");

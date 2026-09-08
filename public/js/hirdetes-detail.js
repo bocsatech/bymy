@@ -2,7 +2,7 @@ import { fetchListing, fetchListings, recordListingView, deleteListingFromDb } f
 import { getAuthUser, getDisplayName, getProfile } from "./site-auth.js?v=auth20260805localdb9";
 import { startConversation, sendMessage } from "./messages-api.js?v=msgLive1";
 import { canMessageListing, openListingMessage } from "./start-listing-message.js?v=msgLive1";
-import { getParkplatz, addParkplatzItem, removeParkplatzItem } from "./fok-data.js?v=auth20260805localdb9";
+import { getParkplatz, addParkplatzItem, removeParkplatzItem } from "./fok-data.js?v=parkThumb1";
 import { listingReturnHref, listingDetailHref, rememberListingOpen, getListingSearchNav, touchListingReturnId } from "./listing-return.js?v=searchNav1";
 
 const root = document.getElementById("hd-root");
@@ -637,6 +637,7 @@ function bindUi(view, listing) {
         title: view.title,
         price: view.price,
         url: listingDetailHref(view.id),
+        imageUrl: view.images?.[0] || "",
       });
     }
     star.classList.toggle("is-on", !on);

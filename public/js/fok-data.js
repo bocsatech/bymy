@@ -44,6 +44,7 @@ export function addParkplatzItem(email, item) {
       price: item.price || "",
       note: item.note || "",
       url: item.url || "/listings.html",
+      imageUrl: String(item.imageUrl || item.image || "").trim(),
       savedAt: Date.now(),
     },
     ...list,
@@ -61,6 +62,14 @@ export function removeParkplatzItem(email, id) {
 export function updateParkplatzNote(email, id, note) {
   const next = getParkplatz(email).map((row) =>
     String(row.id) === String(id) ? { ...row, note: String(note ?? "") } : row
+  );
+  saveForEmail(PARK_KEY, email, next);
+  return next;
+}
+
+export function patchParkplatzItem(email, id, patch = {}) {
+  const next = getParkplatz(email).map((row) =>
+    String(row.id) === String(id) ? { ...row, ...patch } : row
   );
   saveForEmail(PARK_KEY, email, next);
   return next;

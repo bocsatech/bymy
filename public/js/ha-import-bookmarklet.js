@@ -781,10 +781,32 @@
   }
 
   function deliver(origin, payload) {
+    const body = {
+      ...payload,
+      importId: payload.importId || `ha-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    };
+    let acked = false;
+    const onAck = (event) => {
+      const data = event?.data;
+      if (!data || data.type !== "bymy-ha-import-ack") return;
+      if (data.importId && data.importId !== body.importId) return;
+      acked = true;
+      try {
+        window.removeEventListener("message", onAck);
+      } catch {
+        /* ignore */
+      }
+    };
+    try {
+      window.addEventListener("message", onAck);
+    } catch {
+      /* ignore */
+    }
+
     const sendTo = (target) => {
       if (!target || target.closed) return false;
       try {
-        target.postMessage(payload, origin);
+        target.postMessage(body, origin);
         return true;
       } catch {
         return false;
@@ -794,9 +816,14 @@
     const retrySend = (target) => {
       let n = 0;
       const timer = setInterval(() => {
+        if (acked || !target || target.closed) {
+          clearInterval(timer);
+          return;
+        }
         n += 1;
         sendTo(target);
-        if (n >= 40) clearInterval(timer);
+        // Max ~6 mp — ack után azonnal leáll.
+        if (n >= 12) clearInterval(timer);
       }, 500);
     };
 

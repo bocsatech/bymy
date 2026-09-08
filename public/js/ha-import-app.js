@@ -48,7 +48,7 @@ function setMode(mode) {
 
 function bookmarkletHref(mode) {
   const origin = location.origin;
-  const src = `${origin}/js/ha-import-bookmarklet.js?v=haImp20`;
+  const src = `${origin}/js/ha-import-bookmarklet.js?v=haImp21`;
   // Mindig újra betöltjük a scriptet — a régi BymyHaImport a fülön beragadhat.
   // void(...): a visszatérési érték ne cserélje le a hasznaltauto oldalt
   return `javascript:void(function(){var o=${JSON.stringify(origin)};var m=${JSON.stringify(mode)};var src=${JSON.stringify(src)}+"&t="+Date.now();function go(){try{window.BymyHaImport.run({origin:o,mode:m});}catch(e){alert((e&&e.message)||e);}}try{delete window.BymyHaImport;}catch(e){window.BymyHaImport=undefined;}var s=document.createElement("script");s.src=src;s.onload=go;s.onerror=function(){alert("A hasznaltauto.hu blokkolta a Bymy scriptet. Másold a hirdetés URL-jét a Bymy Autóimport oldalra.");};(document.documentElement||document.body).appendChild(s);})();`;
@@ -261,6 +261,17 @@ async function runUrlImport() {
 let importBusy = false;
 const pendingHaImports = [];
 let haImportReady = false;
+const seenHaImportKeys = new Set();
+
+function haImportKey(data) {
+  const pages = Array.isArray(data?.pages) ? data.pages : [];
+  const ids = pages
+    .map((page) => String(page?.listingId || page?.id || page?.url || "").trim())
+    .filter(Boolean)
+    .slice(0, 40)
+    .join(",");
+  return `${data?.importId || ""}|${data?.listUrl || ""}|${pages.length}|${ids}`;
+}
 
 function acceptHaImportMessage(event) {
   const data = event.data;
@@ -270,21 +281,47 @@ function acceptHaImportMessage(event) {
   return data;
 }
 
+function ackHaImport(event, data) {
+  try {
+    event.source?.postMessage(
+      { type: "bymy-ha-import-ack", importId: data?.importId || null, pages: Array.isArray(data?.pages) ? data.pages.length : 0 },
+      event.origin || "*"
+    );
+  } catch {
+    /* ignore */
+  }
+}
+
+function enqueueHaImport(data) {
+  const key = haImportKey(data);
+  if (seenHaImportKeys.has(key)) return false;
+  if (pendingHaImports.some((item) => haImportKey(item) === key)) return false;
+  pendingHaImports.push(data);
+  return true;
+}
+
 /** Listener azonnal — ne vesszen el a postMessage, amíg a belépés fut. */
 window.addEventListener("message", (event) => {
   const data = acceptHaImportMessage(event);
   if (!data) return;
+  ackHaImport(event, data);
+  const key = haImportKey(data);
+  if (seenHaImportKeys.has(key) || (importBusy && key === currentHaImportKey)) {
+    return;
+  }
   try {
     sessionStorage.setItem("bymy-ha-import-pending", JSON.stringify(data));
   } catch {
     /* ignore quota / private mode */
   }
   if (!haImportReady) {
-    pendingHaImports.push(data);
+    enqueueHaImport(data);
     return;
   }
   runMessageImport(data);
 });
+
+let currentHaImportKey = "";
 
 async function runMessageImport(data) {
   const pages = Array.isArray(data.pages) ? data.pages : [];
@@ -292,11 +329,20 @@ async function runMessageImport(data) {
     setStatus("Üres import — nyisd meg a hirdetést, majd próbáld újra.", "err");
     return;
   }
+  const key = haImportKey(data);
+  if (seenHaImportKeys.has(key)) return;
   if (importBusy) {
-    pendingHaImports.push(data);
+    enqueueHaImport(data);
     return;
   }
   importBusy = true;
+  currentHaImportKey = key;
+  seenHaImportKeys.add(key);
+  // Ne nőjön végtelenül a set.
+  if (seenHaImportKeys.size > 40) {
+    const first = seenHaImportKeys.values().next().value;
+    seenHaImportKeys.delete(first);
+  }
   const total = pages.length;
   const SAVE_BATCH = 2;
   setStatus(total > 1 ? `Mentés: 0 / ${total}…` : "Hirdetés feldolgozása…");
@@ -345,6 +391,11 @@ async function runMessageImport(data) {
     setStatus(error.message ?? "Import sikertelen.", "err");
   } finally {
     importBusy = false;
+    currentHaImportKey = "";
+    // Duplikátumok kidobása a sorból.
+    while (pendingHaImports.length && seenHaImportKeys.has(haImportKey(pendingHaImports[0]))) {
+      pendingHaImports.shift();
+    }
     if (pendingHaImports.length) {
       const next = pendingHaImports.shift();
       queueMicrotask(() => runMessageImport(next));

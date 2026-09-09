@@ -155,30 +155,40 @@
 
   function upgradeImageUrl(src) {
     let url = String(src || "").trim();
+    if (url.startsWith("//")) url = "https:" + url;
     if (!/^https?:\/\//i.test(url)) return "";
-    url = url
-      .replace(/([?&](?:w|width|h|height|q|quality)=)[^&]*/gi, "")
-      .replace(/\/(?:thumb|thumbs|mini|small|icon|preview)\//gi, "/nagy/")
-      .replace(/_(?:thumb|mini|small|sm|xs)(\.[a-z0-9]+)(?:\?|$)/i, "_nagy$1")
-      .replace(/\/t\d+\//gi, "/nagy/");
-    // imgix / common CDN: kérj nagyobb képet
     try {
       const u = new URL(url);
-      if (/imgix\.net|cloudinary|hasznaltauto|hazn/i.test(u.hostname)) {
-        u.searchParams.delete("w");
-        u.searchParams.delete("h");
-        u.searchParams.delete("width");
-        u.searchParams.delete("height");
-        if (!u.searchParams.has("w") && /imgix/i.test(u.hostname)) {
-          u.searchParams.set("w", "1600");
-          u.searchParams.set("auto", "format");
-          u.searchParams.set("q", "85");
-        }
-        url = u.href;
+      const host = u.hostname.replace(/^www\./, "").toLowerCase();
+      // HA CDN: /118x88/{id}/{img}.jpg → /2048x1536/...
+      if (host === "hasznaltautocdn.com" || host.endsWith(".hasznaltautocdn.com")) {
+        u.pathname = u.pathname.replace(/^\/\d{2,4}x\d{2,4}\//i, "/2048x1536/");
+        u.search = "";
+        return u.href;
       }
+      let next = u.href
+        .replace(/\/(?:thumb|thumbs|mini|small|icon|preview)\//gi, "/nagy/")
+        .replace(/_(?:thumb|mini|small|sm|xs)(\.[a-z0-9]+)(?:\?|$)/i, "_nagy$1")
+        .replace(/\/t\d+\//gi, "/nagy/");
+      const parsed = new URL(next);
+      if (/imgix\.net|cloudinary|hasznaltauto|hazn/i.test(parsed.hostname)) {
+        parsed.searchParams.delete("w");
+        parsed.searchParams.delete("h");
+        parsed.searchParams.delete("width");
+        parsed.searchParams.delete("height");
+        parsed.searchParams.delete("q");
+        parsed.searchParams.delete("quality");
+        if (/imgix/i.test(parsed.hostname)) {
+          parsed.searchParams.set("w", "1600");
+          parsed.searchParams.set("auto", "format");
+          parsed.searchParams.set("q", "85");
+        }
+        next = parsed.href;
+      }
+      return next;
     } catch {
+      return url;
     }
-    return url;
   }
 
   function pickImage(doc) {
@@ -190,9 +200,10 @@
       if (!src.startsWith("http")) return;
       if (/close|logo|icon|sprite|placeholder|prototip|static\/images|avatar|badge|favicon|pixel/i.test(src)) return;
       let score = bonus;
-      if (/hasznaltauto|hazn|kep|photo|galeria|images/i.test(src)) score += 50000;
+      if (/hasznaltauto|hazn|kep|photo|galeria|images|hasznaltautocdn/i.test(src)) score += 50000;
+      if (/\/2048x1536\//i.test(src)) score += 400000;
       if (/\/(nagy|large|orig|full|main|fo)\b/i.test(src)) score += 250000;
-      if (/thumb|mini|small|icon/i.test(src)) score -= 150000;
+      if (/thumb|mini|small|icon|118x88|240x180/i.test(src)) score -= 150000;
       candidates.push({ src, score });
     };
     const og = doc.querySelector('meta[property="og:image"]');
@@ -205,7 +216,17 @@
     ];
     if (gallery[0]) {
       const g = gallery[0];
-      push(g.getAttribute("data-src") || g.getAttribute("data-lazy") || g.currentSrc || g.src, 350000);
+      push(
+        g.getAttribute("data-full") ||
+          g.getAttribute("data-zoom") ||
+          g.getAttribute("data-large") ||
+          g.getAttribute("data-original") ||
+          g.getAttribute("data-src") ||
+          g.getAttribute("data-lazy") ||
+          g.currentSrc ||
+          g.src,
+        350000
+      );
       const parentHref = g.closest("a[href]")?.getAttribute("href") || "";
       if (/\.(jpe?g|png|webp)(\?|$)/i.test(parentHref) || /hasznaltauto|hazn|kep/i.test(parentHref)) {
         push(parentHref, 380000);
@@ -214,7 +235,34 @@
     for (const img of doc.querySelectorAll("img")) {
       const w = Number(img.naturalWidth || img.width || img.getAttribute("width") || 0);
       const h = Number(img.naturalHeight || img.height || img.getAttribute("height") || 0);
-      push(img.getAttribute("data-src") || img.getAttribute("data-lazy") || img.currentSrc || img.src, w * h);
+      push(
+        img.getAttribute("data-full") ||
+          img.getAttribute("data-zoom") ||
+          img.getAttribute("data-large") ||
+          img.getAttribute("data-original") ||
+          img.getAttribute("data-src") ||
+          img.getAttribute("data-lazy") ||
+          img.currentSrc ||
+          img.src,
+        w * h
+      );
+      const srcset = img.getAttribute("srcset") || "";
+      if (srcset) {
+        let best = "";
+        let bestW = -1;
+        for (const part of srcset.split(",")) {
+          const bits = part.trim().split(/\s+/);
+          const candidate = bits[0] || "";
+          const desc = bits[1] || "";
+          const wm = desc.match(/(\d+)w/i);
+          const ww = wm ? Number(wm[1]) : 0;
+          if (candidate && ww >= bestW) {
+            bestW = ww;
+            best = candidate;
+          }
+        }
+        if (best) push(best, 200000 + bestW);
+      }
     }
     candidates.sort((a, b) => b.score - a.score);
     return candidates[0]?.src || "";
@@ -778,17 +826,41 @@
       if (!/^https?:\/\//i.test(src)) return;
       if (/logo|icon|sprite|badge|avatar|favicon|pixel|placeholder/i.test(src)) return;
       let score = bonus;
-      if (/hasznaltauto|hazn|kep|photo|img\.|cdn/i.test(src)) score += 50000;
-      if (/thumb|mini|small|118x88|t\d+\b/i.test(src)) score += 1000;
+      if (/hasznaltauto|hazn|kep|photo|img\.|cdn|hasznaltautocdn/i.test(src)) score += 50000;
+      if (/thumb|mini|small|118x88|240x180|t\d+\b/i.test(src)) score -= 150000;
+      if (/\/2048x1536\//i.test(src)) score += 400000;
       if (/\/(nagy|large|2048|orig|full)\b/i.test(src)) score += 200000;
       candidates.push({ src: upgradeImageUrl(src), score });
     };
     for (const img of row.querySelectorAll("img")) {
-      push(img.getAttribute("data-src") || img.getAttribute("data-lazy") || img.getAttribute("data-original") || "", 10000);
+      push(
+        img.getAttribute("data-full") ||
+          img.getAttribute("data-zoom") ||
+          img.getAttribute("data-large") ||
+          img.getAttribute("data-original") ||
+          img.getAttribute("data-src") ||
+          img.getAttribute("data-lazy") ||
+          "",
+        10000
+      );
       push(img.currentSrc || img.src || "", Number(img.naturalWidth || img.width || 0) * Number(img.naturalHeight || img.height || 0));
       const srcset = img.getAttribute("srcset") || "";
-      const first = srcset.split(",")[0]?.trim().split(/\s+/)[0];
-      if (first) push(first, 8000);
+      if (srcset) {
+        let best = "";
+        let bestW = -1;
+        for (const part of srcset.split(",")) {
+          const bits = part.trim().split(/\s+/);
+          const candidate = bits[0] || "";
+          const desc = bits[1] || "";
+          const wm = desc.match(/(\d+)w/i);
+          const ww = wm ? Number(wm[1]) : 0;
+          if (candidate && ww >= bestW) {
+            bestW = ww;
+            best = candidate;
+          }
+        }
+        if (best) push(best, 8000 + bestW);
+      }
     }
     for (const el of row.querySelectorAll("[style*='background'], [data-bg], [data-background], [data-image]")) {
       const style = el.getAttribute("style") || "";

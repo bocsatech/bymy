@@ -153,42 +153,87 @@
     return isBadTitle(docTitle) ? "" : docTitle;
   }
 
+  function upgradeImageUrl(src) {
+    let url = String(src || "").trim();
+    if (!/^https?:\/\//i.test(url)) return "";
+    url = url
+      .replace(/([?&](?:w|width|h|height|q|quality)=)[^&]*/gi, "")
+      .replace(/\/(?:thumb|thumbs|mini|small|icon|preview)\//gi, "/nagy/")
+      .replace(/_(?:thumb|mini|small|sm|xs)(\.[a-z0-9]+)(?:\?|$)/i, "_nagy$1")
+      .replace(/\/t\d+\//gi, "/nagy/");
+    // imgix / common CDN: kérj nagyobb képet
+    try {
+      const u = new URL(url);
+      if (/imgix\.net|cloudinary|hasznaltauto|hazn/i.test(u.hostname)) {
+        u.searchParams.delete("w");
+        u.searchParams.delete("h");
+        u.searchParams.delete("width");
+        u.searchParams.delete("height");
+        if (!u.searchParams.has("w") && /imgix/i.test(u.hostname)) {
+          u.searchParams.set("w", "1600");
+          u.searchParams.set("auto", "format");
+          u.searchParams.set("q", "85");
+        }
+        url = u.href;
+      }
+    } catch {
+    }
+    return url;
+  }
+
   function pickImage(doc) {
-    const og = doc.querySelector('meta[property="og:image"]');
-    if (og && og.content && /^https?:/i.test(og.content)) return og.content;
-    const scored = [];
-    for (const img of doc.querySelectorAll("img")) {
-      let src = img.currentSrc || img.src || img.getAttribute("data-src") || img.getAttribute("data-lazy") || "";
+    const candidates = [];
+    const push = (raw, bonus = 0) => {
+      let src = String(raw || "").trim();
       if (src.startsWith("//")) src = "https:" + src;
-      if (!src.startsWith("http")) continue;
-      if (/close|logo|icon|sprite|placeholder|prototip|static\/images|avatar|badge|favicon|pixel/i.test(src)) continue;
+      src = upgradeImageUrl(src);
+      if (!src.startsWith("http")) return;
+      if (/close|logo|icon|sprite|placeholder|prototip|static\/images|avatar|badge|favicon|pixel/i.test(src)) return;
+      let score = bonus;
+      if (/hasznaltauto|hazn|kep|photo|galeria|images/i.test(src)) score += 50000;
+      if (/\/(nagy|large|orig|full|main|fo)\b/i.test(src)) score += 250000;
+      if (/thumb|mini|small|icon/i.test(src)) score -= 150000;
+      candidates.push({ src, score });
+    };
+    const og = doc.querySelector('meta[property="og:image"]');
+    if (og?.content) push(og.content, 400000);
+    // Galéria első képe = fő fénykép (jó minőségre upgradelve)
+    const gallery = [
+      ...doc.querySelectorAll(
+        ".gallery img, .galeria img, [class*='gallery'] img, [class*='galeria'] img, [class*='swiper'] img, [data-gallery] img, a[href*='kep'] img, a[href*='photo'] img"
+      ),
+    ];
+    if (gallery[0]) {
+      const g = gallery[0];
+      push(g.getAttribute("data-src") || g.getAttribute("data-lazy") || g.currentSrc || g.src, 350000);
+      const parentHref = g.closest("a[href]")?.getAttribute("href") || "";
+      if (/\.(jpe?g|png|webp)(\?|$)/i.test(parentHref) || /hasznaltauto|hazn|kep/i.test(parentHref)) {
+        push(parentHref, 380000);
+      }
+    }
+    for (const img of doc.querySelectorAll("img")) {
       const w = Number(img.naturalWidth || img.width || img.getAttribute("width") || 0);
       const h = Number(img.naturalHeight || img.height || img.getAttribute("height") || 0);
-      let score = w * h;
-      if (/hasznaltauto|kep|photo|galeria|images/i.test(src)) score += 50000;
-      if (/\/(nagy|large|orig|full|main|fo)\b/i.test(src)) score += 200000;
-      if (/thumb|mini|small|icon|interior|belso|belső/i.test(src)) score -= 100000;
-      // Első galéria kép gyakran a fő külső fotó
-      if (score > 0 || w >= 120 || /hasznaltauto/i.test(src)) scored.push({ src, score: score || 1000 });
+      push(img.getAttribute("data-src") || img.getAttribute("data-lazy") || img.currentSrc || img.src, w * h);
     }
-    scored.sort((a, b) => b.score - a.score);
-    return scored[0]?.src || "";
+    candidates.sort((a, b) => b.score - a.score);
+    return candidates[0]?.src || "";
   }
 
   function pickDescription(doc) {
-    for (const sel of ["textarea", '[class*="leiras"]', '[class*="description"]', '[id*="leiras"]']) {
+    for (const sel of ["textarea[name*='leiras' i]", "textarea[id*='leiras' i]", '[class*="leiras"]', '[class*="description"]', '[id*="leiras"]']) {
       for (const el of doc.querySelectorAll(sel)) {
         const t = clean(el.value || el.innerText || el.textContent || "");
-        if (t.length >= 20 && !/^leírás$/i.test(t) && !/megtekinthető telefonon/i.test(t)) return t;
+        if (t.length >= 20 && !/^leírás$/i.test(t) && !/megtekinthető telefonon/i.test(t)) return t.slice(0, 12000);
       }
     }
     const body = (doc.body?.innerText || doc.body?.textContent || "").replace(/\r\n/g, "\n");
     const m = body.match(
-      /(?:^|\n)\s*Leírás\s*\n+([\s\S]{8,4000}?)(?=\n\s*(?:Felszereltség|Általános|Műszaki|Megtalálható|Okmányok|Hirdetés)\b|$)/i
+      /(?:^|\n)\s*Leírás\s*\n+([\s\S]{8,12000}?)(?=\n\s*(?:Felszereltség|Általános|Műszaki|Megtalálható|Okmányok|Hirdetés|Beltér|Kültér|Egyéb információ)\b|$)/i
     );
     if (m) {
       const t = clean(m[1]);
-      if (t.length >= 20 && !/megtekinthető telefonon/i.test(t)) return t;
+      if (t.length >= 20 && !/megtekinthető telefonon/i.test(t)) return t.slice(0, 12000);
     }
     return "";
   }
@@ -211,10 +256,10 @@
   function addPair(map, rawKey, rawValue) {
     const key = clean(rawKey).replace(/:$/, "");
     const value = clean(rawValue);
-    if (!key || !value || key.length > 80 || value.length > 220) return;
+    if (!key || !value || key.length > 100 || value.length > 400) return;
     if (/válasszon/i.test(value)) return;
-    if (value.length > 100 && value.split(/\s+/).length > 10) return;
-    if (/^(ár|ar|költségek|altalanos adatok|muszaki adatok|felszereltseg|felszereltség|beltér|belter|műszaki|muszaki|kültér|kulter|egyéb|egyeb|hiba!?)$/i.test(key))
+    if (value.length > 180 && value.split(/\s+/).length > 18) return;
+    if (/^(ár|ar|ár, költségek|költségek|általános adatok|altalanos adatok|jármű adatok|jarmu adatok|motor adatok|muszaki adatok|felszereltseg|felszereltség|beltér|belter|műszaki|muszaki|kültér|kulter|egyéb|egyeb|okmányok|abroncs|hirdetés|hitel|hiba!?)$/i.test(key))
       return;
     const existing = map[key];
     const isName = /m[aá]rka|gy[aá]rtm[aá]ny|modell/i.test(key);
@@ -226,10 +271,11 @@
   function extractEquipment(doc) {
     const items = [];
     const push = (raw) => {
-      const t = clean(raw);
-      if (!t || t.length < 2 || t.length > 60) return;
-      if (/^(beltér|belter|műszaki|muszaki|kültér|kulter|multimédia|multimedia|egyéb|egyeb|felszereltség|leírás)$/i.test(t))
+      const t = clean(raw).replace(/^[-•·]\s*/, "");
+      if (!t || t.length < 2 || t.length > 90) return;
+      if (/^(beltér|belter|műszaki|muszaki|kültér|kulter|multimédia|multimedia|egyéb|egyeb|egyéb információ|felszereltség|leírás|navigáció)$/i.test(t))
         return;
+      if (/:$/.test(t)) return;
       if (!items.includes(t)) items.push(t);
     };
     for (const sel of [
@@ -237,22 +283,29 @@
       ".felszereltseg-list li",
       "[class*='felszer'] li",
       "[class*='extra'] li",
+      "[class*='equipment'] li",
+      "ul li",
       ".extranev",
       ".extra-badge",
       ".tooltip-badge",
     ]) {
-      for (const node of doc.querySelectorAll(sel)) push(node.innerText || node.textContent);
+      for (const node of doc.querySelectorAll(sel)) {
+        const parentText = clean(node.closest("section, .box, .card, div")?.querySelector("h2, h3, h4, strong, b")?.innerText || "");
+        if (/beltér|műszaki|kültér|multimédia|egyéb|felszereltség|navigáció/i.test(parentText) || sel !== "ul li") {
+          push(node.innerText || node.textContent);
+        }
+      }
     }
     const body = String(doc.body?.innerText || "").replace(/\r\n/g, "\n");
     const sectionRe =
-      /(?:^|\n)\s*(Beltér|Műszaki|Kültér|Multimédia\s*\/\s*Navigáció|Egyéb információ)\s*\n([\s\S]*?)(?=\n\s*(?:Beltér|Műszaki|Kültér|Multimédia|Egyéb információ|Leírás|Általános|Hirdetés)\b|$)/gi;
+      /(?:^|\n)\s*(Beltér|Műszaki|Kültér|Multimédia\s*\/\s*Navigáció|Multimédia|Egyéb információ|Egyéb)\s*\n([\s\S]*?)(?=\n\s*(?:Beltér|Műszaki|Kültér|Multimédia|Egyéb információ|Egyéb|Leírás|Általános|Hirdetés|Okmányok|Abroncs|Ár,?\s*költségek|Jármű adatok|Motor adatok)\b|$)/gi;
     for (const match of body.matchAll(sectionRe)) {
       for (const line of String(match[2] || "").split("\n")) {
         const t = clean(line);
-        if (t && !/:$/.test(t) && t.split(/\s+/).length <= 8) push(t);
+        if (t && !/:$/.test(t) && t.split(/\s+/).length <= 12) push(t);
       }
     }
-    return items.slice(0, 200);
+    return items.slice(0, 300);
   }
 
   function extractMap(doc) {
@@ -400,7 +453,22 @@
 
   function extractFromDoc(doc, href) {
     const map = extractMap(doc);
-    const title = pickTitle(doc) || fieldFromMap(map, ["Cím", "Hirdetés címe"]);
+    let title = pickTitle(doc) || fieldFromMap(map, ["Cím", "Hirdetés címe"]);
+    let featureLine = "";
+    const titleLines = String(title || "")
+      .split(/\n+/)
+      .map(clean)
+      .filter(Boolean);
+    if (titleLines.length >= 2) {
+      title = titleLines[0];
+      featureLine = titleLines.slice(1).join(" / ");
+    } else if (/\b(Navi|LED|Tempomat|Parkszenzor|Ülésfűtés)\b/i.test(title) && /\//.test(title)) {
+      const split = title.match(/^(.+?\))\s+(.+)$/) || title.match(/^(.+?)\s+((?:Navi|LED|Tempomat).+)$/i);
+      if (split) {
+        title = clean(split[1]);
+        featureLine = clean(split[2]);
+      }
+    }
     const brandRaw = fieldFromMap(map, ["Márka", "Gyártmány"]) || "";
     const modelRaw = fieldFromMap(map, ["Modell"]) || "";
     const fromTitle = brandModelFromTitle(title);
@@ -410,13 +478,25 @@
       fieldFromMap(map, ["Vételár", "Hirdetési ár", "Ár"]) ||
       ((doc.body?.innerText || doc.body?.textContent || "").match(/(\d[\d\s.]{3,})\s*Ft/i) || [])[1] ||
       "";
-    const km = fieldFromMap(map, ["Futásteljesítmény", "Kilométeróra", "Km. óra állás"]);
+    const km = fieldFromMap(map, [
+      "Futásteljesítmény",
+      "Kilométeróra",
+      "Km. óra állás",
+      "Km. óra állása",
+      "Km óra állás",
+    ]);
     const yearRaw = fieldFromMap(map, ["Évjárat", "Gyártási év"]);
     const year = (yearRaw.match(/(19|20)\d{2}/) || [])[0] || "";
     const fuel = fieldFromMap(map, ["Üzemanyag"]);
     const rawHtml = doc.documentElement?.outerHTML || "";
-    const html = rawHtml.slice(0, Object.keys(map).length >= 6 ? 8000 : 40000);
+    const html = rawHtml.slice(0, Object.keys(map).length >= 8 ? 40000 : 100000);
     const felszereltseg = extractEquipment(doc);
+    if (featureLine) {
+      for (const part of featureLine.split(/\/+/)) {
+        const t = clean(part);
+        if (t && t.length >= 2 && t.length <= 40 && !felszereltseg.includes(t)) felszereltseg.unshift(t);
+      }
+    }
     return {
       url: href,
       html,
@@ -430,9 +510,10 @@
       fuel,
       brand: isChromeName(brand) || /^a$/i.test(brand) ? "" : brand,
       model: isChromeName(model) || /^a$/i.test(model) ? "" : model,
+      featureLine,
       map,
-      felszereltseg,
-      bodyText: String(doc.body?.innerText || doc.body?.textContent || "").slice(0, 12000),
+      felszereltseg: felszereltseg.slice(0, 300),
+      bodyText: String(doc.body?.innerText || doc.body?.textContent || "").slice(0, 25000),
     };
   }
 
@@ -458,9 +539,10 @@
       fuel: page.fuel || "",
       brand: page.brand || "",
       model: page.model || "",
+      featureLine: page.featureLine || "",
       map: page.map && typeof page.map === "object" ? page.map : {},
-      felszereltseg: Array.isArray(page.felszereltseg) ? page.felszereltseg.slice(0, 200) : [],
-      bodyText: String(page.bodyText || "").slice(0, 20000),
+      felszereltseg: Array.isArray(page.felszereltseg) ? page.felszereltseg.slice(0, 300) : [],
+      bodyText: String(page.bodyText || "").slice(0, 25000),
       html,
       fromListCard: Boolean(page.fromListCard),
       clickUrl: page.clickUrl || page.url || "",
@@ -985,7 +1067,7 @@
     return out;
   }
 
-  const FETCH_CONCURRENCY = 8;
+  const FETCH_CONCURRENCY = 1;
 
   function showProgress(current, total, phase) {
     let el = document.getElementById("bymy-ha-progress");
@@ -1149,7 +1231,7 @@
         pages.length = 0;
         const enriched = await mapPool(
           base,
-          2,
+          1,
           async (card) => {
             try {
               const detail = await extractRefPage({

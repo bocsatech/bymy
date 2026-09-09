@@ -40,6 +40,10 @@ function getStoredToken() {
   return memoryToken || "";
 }
 
+export function getAuthToken() {
+  return getStoredToken();
+}
+
 function setStoredToken(token) {
   memoryToken = token ? String(token) : "";
   clearLegacyTokenStorage();

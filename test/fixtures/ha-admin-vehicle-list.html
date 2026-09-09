@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="utf-8" />
+  <title>Hirdetéseim — fixture</title>
+  <base href="https://admin.hasznaltauto.hu/" />
+</head>
+<body>
+  <nav>
+    <a href="/beallitasok">Beállítások</a>
+    <a href="/szemelyes-adatok">Személyes adatok</a>
+    <a href="/lista.pdf">Lista PDF-ben</a>
+  </nav>
+
+  <h1>Hirdetéseim</h1>
+
+  <!-- Tipikus HA admin: külső kártya + belső .row csak a gomboknak (ez törte a closest-et) -->
+  <div class="jarmu-kartya listing-card" data-id="23505596">
+    <div class="media">
+      <img
+        src="https://img.hasznaltautocdn.com/118x88/23505596/28800111.jpg"
+        data-src="https://img.hasznaltautocdn.com/118x88/23505596/28800111.jpg"
+        width="118"
+        height="88"
+        alt=""
+      />
+    </div>
+    <div class="info">
+      <a class="cim" href="https://www.hasznaltauto.hu/szemelyauto/mercedes-benz/e_250-23505596">
+        Mercedes-Benz E 250 CDI 4Matic
+      </a>
+      <div class="meta">3.999.990 Ft · Dízel · (23505596)</div>
+      <span class="badge">TOP Kiemelés</span>
+      <span class="badge">Címlapra</span>
+    </div>
+    <div class="row actions">
+      <a href="/hirdetesfeladas/szemelyauto?id=23505596">Módosítás</a>
+      <a href="#">Ártábla</a>
+      <a href="#">Törlés</a>
+    </div>
+  </div>
+
+  <div class="jarmu-kartya listing-card" data-id="23161660">
+    <div class="media">
+      <img src="https://img.hasznaltautocdn.com/118x88/23161660/27770001.jpg" alt="" />
+    </div>
+    <div class="info">
+      <a class="cim" href="https://www.hasznaltauto.hu/szemelyauto/kia/ceed-23161660">Kia Ceed 1.6 CRDI Hybrid 48V</a>
+      <div class="meta">inaktív · Dízel · (23161660)</div>
+    </div>
+    <div class="row actions">
+      <a href="/hirdetesfeladas/szemelyauto?id=23161660">Módosítás</a>
+      <a href="#">Ártábla</a>
+      <a href="#">Törlés</a>
+    </div>
+  </div>
+
+  <div class="jarmu-kartya listing-card">
+    <div class="media">
+      <img src="//img.hasznaltautocdn.com/240x180/23113337/26375069.jpg" alt="" />
+    </div>
+    <div class="info">
+      <a class="cim" href="/gyorsnezet/szemelyauto/23113337">MERCEDES-BENZ E 220</a>
+      <div class="meta">4.200.000 Ft · (23113337)</div>
+    </div>
+    <div class="row actions">
+      <a href="javascript:void(0)" onclick="location.href='/hirdetesfeladas/szemelyauto?id=23113337'">Módosítás</a>
+      <a href="#">Törlés</a>
+    </div>
+  </div>
+
+  <select id="pager">
+    <option value="1">1</option>
+    <option value="2">2</option>
+    <option value="3">3</option>
+  </select>
+  <a href="?page=2">következő</a>
+</body>
+</html>

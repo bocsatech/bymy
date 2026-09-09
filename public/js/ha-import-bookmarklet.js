@@ -1038,12 +1038,6 @@
       }
       pushRow(closestListingRow(a, rootDoc));
     }
-    // ID a szövegben: (23161660)
-    for (const el of rootDoc.querySelectorAll("a[href], span, td, div, li")) {
-      const t = clean(el.innerText || el.textContent || "");
-      if (!/^\(?\d{7,10}\)?$/.test(t) && !/\(\d{7,10}\)/.test(t)) continue;
-      pushRow(closestListingRow(el, rootDoc));
-    }
     for (const row of rowNodes) {
       const text = String(row.innerText || "");
       if (text.length < 8) continue;
@@ -1196,14 +1190,18 @@
 
   async function ensureListThumbsVisible() {
     try {
-      const h = Math.max(document.body?.scrollHeight || 0, document.documentElement?.scrollHeight || 0);
-      const step = Math.max(400, Math.floor(window.innerHeight * 0.85) || 600);
-      for (let y = 0; y < h; y += step) {
+      const h = Math.max(document.body?.scrollHeight || 0, document.documentElement?.scrollHeight || 0, 1);
+      const step = Math.max(500, Math.floor(window.innerHeight * 0.9) || 700);
+      const maxSteps = 12;
+      let steps = 0;
+      for (let y = 0; y < h && steps < maxSteps; y += step, steps += 1) {
         window.scrollTo(0, y);
-        await sleep(40);
+        await sleep(35);
       }
+      window.scrollTo(0, Math.min(h, step * 2));
+      await sleep(50);
       window.scrollTo(0, 0);
-      await sleep(80);
+      await sleep(40);
     } catch {
     }
   }
@@ -1228,33 +1226,33 @@
     if (typeof onProgress === "function") onProgress(0, 1, "lista görgetés");
     await ensureListThumbsVisible();
     merge(extractDealerListPages(document));
+    let found = Object.keys(byId).length;
     if (typeof onProgress === "function") {
-      onProgress(Object.keys(byId).length, Math.max(Object.keys(byId).length, 1), "lista autó");
+      onProgress(found, Math.max(found, 1), found ? `lista: ${found} autó` : "lista keresés");
     }
 
-    const queue = discoverPaginationUrls(document);
+    // Ha az élő oldalon megvannak az autók, ne faljuk fel a lapozást (SPA üres fetch)
+    const queue = found > 0 ? discoverPaginationUrls(document).slice(0, 5) : discoverPaginationUrls(document).slice(0, 12);
     const seen = new Set([String(location.href || "").split("#")[0]]);
     let i = 0;
-    while (i < queue.length && seen.size <= 20) {
+    while (i < queue.length && seen.size <= 12) {
       const url = queue[i];
       i += 1;
       if (seen.has(url)) continue;
       seen.add(url);
       if (typeof onProgress === "function") {
-        onProgress(i, queue.length, `lista lapozás · ${Object.keys(byId).length} autó`);
+        onProgress(Object.keys(byId).length || i, Math.max(queue.length, Object.keys(byId).length, 1), `lista lap · ${Object.keys(byId).length} autó`);
       }
       try {
         const doc = await fetchListDocument(url);
         merge(extractDealerListPages(doc));
-        for (const next of discoverPaginationUrls(doc)) {
-          if (!seen.has(next) && !queue.includes(next) && queue.length < 20) queue.push(next);
-        }
       } catch {
         /* skip unreachable list page */
       }
     }
+    found = Object.keys(byId).length;
     if (typeof onProgress === "function") {
-      onProgress(Object.keys(byId).length, Math.max(Object.keys(byId).length, 1), "lista kész");
+      onProgress(found, Math.max(found, 1), found ? `lista kész: ${found}` : "lista üres");
     }
     return Object.values(byId).slice(0, MAX_DEALER);
   }
@@ -1615,12 +1613,47 @@
     });
   }
 
-  async function deliverDealerPages(origin, payload) {
+  async function postDirectExtracted(origin, authToken, payload) {
+    const token = String(authToken || "").trim();
+    if (!token) return { ok: false, error: "Nincs Bymy session token." };
+    try {
+      const res = await fetch(`${String(origin).replace(/\/$/, "")}/api/import/extracted`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          pages: payload.pages || [],
+          mode: payload.mode || "dealer",
+          photoOnly: payload.photoOnly !== false,
+          listUrl: payload.listUrl || location.href,
+        }),
+      });
+      const raw = await res.text();
+      let data = {};
+      try {
+        data = raw ? JSON.parse(raw) : {};
+      } catch {
+        data = {};
+      }
+      if (!res.ok) {
+        return { ok: false, error: data.error || `HTTP ${res.status}` };
+      }
+      const saved = Number(data?.result?.savedCount || 0);
+      return { ok: saved > 0 || res.ok, saved, result: data.result };
+    } catch (error) {
+      return { ok: false, error: error.message || String(error) };
+    }
+  }
+
+  async function deliverDealerPages(origin, payload, authToken = "") {
     const pages = Array.isArray(payload.pages) ? payload.pages : [];
     if (!pages.length) return false;
 
     const target = resolveBymyTarget();
-    if (!target) {
+    const token = String(authToken || "").trim();
+    if (!target && !token) {
       noOpenerAlert("dealer");
       return false;
     }
@@ -1630,23 +1663,9 @@
     let failed = 0;
     for (let i = 0; i < pages.length; i += 1) {
       showProgress(i + 1, pages.length, `mentés Bymy-n (${i + 1}/${pages.length})`);
-      const acked = await deliverOneAwait(origin, target, {
-        type: "bymy-ha-import",
-        v: 1,
-        mode: "dealer",
-        photoOnly: true,
-        listUrl: payload.listUrl || location.href,
-        batchId,
-        index: i + 1,
-        total: pages.length,
-        importId: `${batchId}-${i + 1}`,
-        pages: [pages[i]],
-      });
-      if (acked) ok += 1;
-      else {
-        failed += 1;
-        showProgress(i + 1, pages.length, `hiba — újra (${i + 1}/${pages.length})`);
-        const retry = await deliverOneAwait(origin, target, {
+      let acked = false;
+      if (target) {
+        acked = await deliverOneAwait(origin, target, {
           type: "bymy-ha-import",
           v: 1,
           mode: "dealer",
@@ -1655,14 +1674,26 @@
           batchId,
           index: i + 1,
           total: pages.length,
-          importId: `${batchId}-${i + 1}-retry`,
+          importId: `${batchId}-${i + 1}`,
           pages: [pages[i]],
         });
-        if (retry) {
-          ok += 1;
-          failed -= 1;
+      }
+      if (!acked && token) {
+        showProgress(i + 1, pages.length, `közvetlen mentés (${i + 1}/${pages.length})`);
+        const direct = await postDirectExtracted(origin, token, {
+          pages: [pages[i]],
+          mode: "dealer",
+          photoOnly: true,
+          listUrl: payload.listUrl || location.href,
+        });
+        acked = Boolean(direct.ok);
+        if (!acked && direct.error) {
+          showProgress(i + 1, pages.length, `hiba: ${String(direct.error).slice(0, 40)}`);
+          await sleep(400);
         }
       }
+      if (acked) ok += 1;
+      else failed += 1;
     }
     return ok > 0;
   }
@@ -1670,6 +1701,7 @@
   async function run(opts) {
     const origin = String(opts?.origin || "").replace(/\/$/, "");
     const mode = opts?.mode === "dealer" ? "dealer" : "standard";
+    const authToken = String(opts?.authToken || "").trim();
     if (!origin) {
       alert("Hiányzik a Bymy cím.");
       return;
@@ -1697,7 +1729,7 @@
       const fromList = await collectAllDealerListPages((done, total, label) => showProgress(done, total, label));
       if (!fromList.length) {
         hideProgress();
-        const trCount = document.querySelectorAll("table tr, .talalati-sor").length;
+        const trCount = document.querySelectorAll("table tr, .talalati-sor, .jarmu-kartya, .listing-card").length;
         const modCount = [...document.querySelectorAll("a, button")].filter((el) =>
           /m[oó]dos[ií]t/i.test(el.innerText || el.textContent || "")
         ).length;
@@ -1827,17 +1859,21 @@
     showProgress(pages.length, pages.length, "küldés a Bymy-ra");
     const slim = pages.map(slimPageForDelivery);
     if (mode === "dealer") {
-      const ok = await deliverDealerPages(origin, {
-        type: "bymy-ha-import",
-        v: 1,
-        mode,
-        photoOnly: true,
-        listUrl: location.href,
-        pages: slim,
-      });
+      const delivered = await deliverDealerPages(
+        origin,
+        {
+          type: "bymy-ha-import",
+          v: 1,
+          mode,
+          photoOnly: true,
+          listUrl: location.href,
+          pages: slim,
+        },
+        authToken
+      );
       hideProgress(
-        ok
-          ? `Kész: ${ok}/${slim.length} autó átadva / mentve a Bymy-n`
+        delivered
+          ? `Kész: ${slim.length} autó átadva / mentve a Bymy-n`
           : "A Bymy nem fogadta az adatokat — nézd az Autóimport lapot, majd próbáld újra."
       );
       return;
@@ -1853,5 +1889,13 @@
     hideProgress(`Kész: ${pages.length} hirdetés átadva a Bymy-nak`);
   }
 
-  root.BymyHaImport = { run, extractPage, discoverIds, discoverRefs };
+  root.BymyHaImport = {
+    run,
+    extractPage,
+    discoverIds,
+    discoverRefs,
+    extractDealerListPages,
+    pickRowImage,
+    upgradeImageUrl,
+  };
 })(window);

@@ -62,6 +62,8 @@ function isPublicApi(pathname, method) {
   if (pathname === "/api/field-defs" && method === "GET") return true;
   // Kép proxy: <img> kérés cookie nélkül is kell (különben törött ikon)
   if (pathname === "/api/media/proxy" && method === "GET") return true;
+  // HA bookmarklet → közvetlen mentés (Bearer), CORS preflight
+  if (pathname === "/api/import/extracted" && (method === "POST" || method === "OPTIONS")) return true;
   if (pathname.startsWith("/api/vehicle-catalog") && method === "GET") return true;
   if ((pathname === "/api/postal-codes/lookup" || pathname === "/api/postal-codes/cities") && method === "GET") {
     return true;

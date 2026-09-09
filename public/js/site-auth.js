@@ -1,5 +1,5 @@
 import { safeInternalPath } from "./safe-path.js?v=sec1";
-import { mountTurnstile } from "./turnstile-ui.js?v=turnstile4";
+import { mountTurnstile } from "./turnstile-ui.js?v=turnstile5";
 
 function migrateLegacyAutoswebStorage() {
   try {
@@ -652,10 +652,9 @@ export function initRegisterPage() {
       if (turnstile.enabled && turnstile.ready === false) {
         throw new Error("A biztonsági ellenőrző nem töltődött be. Frissítsd az oldalt.");
       }
-      const turnstileToken = await turnstile.getToken();
-      if (turnstile.enabled && !turnstileToken) {
-        throw new Error("Pipáld be a biztonsági ellenőrzést.");
-      }
+      const turnstileToken = turnstile.enabled
+        ? await turnstile.getToken({ waitMs: 10000 })
+        : "";
       const result = await register(
         email,
         data.get("password"),
@@ -743,10 +742,9 @@ export function initLoginPage() {
       if (turnstile.enabled && turnstile.ready === false) {
         throw new Error("A biztonsági ellenőrző nem töltődött be. Frissítsd az oldalt.");
       }
-      const turnstileToken = await turnstile.getToken();
-      if (turnstile.enabled && !turnstileToken) {
-        throw new Error("Pipáld be a biztonsági ellenőrzést.");
-      }
+      const turnstileToken = turnstile.enabled
+        ? await turnstile.getToken({ waitMs: 10000 })
+        : "";
       await login(email, data.get("password"), turnstileToken);
       window.location.href = next;
     } catch (error) {

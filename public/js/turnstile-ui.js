@@ -122,13 +122,24 @@ export async function mountTurnstile(container, { theme = "light" } = {}) {
   return {
     enabled: true,
     ready: true,
-    getToken: async () => {
-      if (token) return token;
-      try {
-        return String(window.turnstile?.getResponse?.(widgetId) || "");
-      } catch {
-        return "";
+    getToken: async ({ waitMs = 0 } = {}) => {
+      const read = () => {
+        if (token) return token;
+        try {
+          return String(window.turnstile?.getResponse?.(widgetId) || "");
+        } catch {
+          return "";
+        }
+      };
+      let value = read();
+      if (value || waitMs <= 0) return value;
+      const deadline = Date.now() + waitMs;
+      while (Date.now() < deadline) {
+        await new Promise((r) => setTimeout(r, 50));
+        value = read();
+        if (value) return value;
       }
+      return read();
     },
     reset: () => {
       token = "";

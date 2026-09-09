@@ -268,8 +268,16 @@
     return candidates[0]?.src || "";
   }
 
-  async function fetchImageBase64(url) {
-    const src = upgradeImageUrl(url);
+  function upgradeImageUrlForTransfer(src) {
+    const hq = upgradeImageUrl(src);
+    if (!hq) return "";
+    // Átadáshoz 1280x960: jó minőség, postMessage-barát méret (~100–250 KB)
+    return hq.replace(/\/2048x1536\//i, "/1280x960/");
+  }
+
+  async function fetchImageBase64(url, allowDownsize = true) {
+    let src = String(url || "").trim();
+    if (src.startsWith("//")) src = "https:" + src;
     if (!/^https?:\/\//i.test(src)) return "";
     try {
       const res = await fetch(src, { credentials: "include", mode: "cors", cache: "force-cache" });
@@ -277,8 +285,12 @@
       const blob = await res.blob();
       if (!blob || blob.size < 800) return "";
       if (blob.type && !/^image\//i.test(blob.type) && !/octet-stream/i.test(blob.type)) return "";
-      // Max ~1.8 MB raw — a postMessage-nak bírnia kell
-      if (blob.size > 1_800_000) return "";
+      if (blob.size > 1_200_000 && allowDownsize) {
+        const smaller = src.replace(/\/(?:2048x1536|1600x1200|1280x960|1024x768)\//i, "/800x600/");
+        if (smaller !== src) return fetchImageBase64(smaller, false);
+        return "";
+      }
+      if (blob.size > 1_200_000) return "";
       const buf = await blob.arrayBuffer();
       const bytes = new Uint8Array(buf);
       let binary = "";
@@ -298,9 +310,9 @@
     const url = page.visibleImage || "";
     if (!url) return page;
     page.visibleImage = upgradeImageUrl(url) || url;
-    // HTTP URL → a Bymy szerver tölti le (HQ). Ne pakoljunk base64-et a postMessage-be.
-    if (page.photoOnly || /^https?:\/\//i.test(page.visibleImage)) return page;
-    const b64 = await fetchImageBase64(page.visibleImage);
+    // Böngészőből: 1280x960 (jó minőség), szerver CDN fetch Vercelen gyakran fail
+    const mid = upgradeImageUrlForTransfer(page.visibleImage);
+    const b64 = (await fetchImageBase64(mid)) || (await fetchImageBase64(page.visibleImage));
     if (b64) page.imageJpegBase64 = b64;
     return page;
   }
@@ -623,11 +635,14 @@
     if (!page || typeof page !== "object") return page;
     if (page.photoOnly) {
       const visibleImage = upgradeImageUrl(page.visibleImage || "") || page.visibleImage || "";
+      const b64 = String(page.imageJpegBase64 || "");
+      // Egy autó / üzenet: a base64 kell (szerver CDN fetch gyakran fail), de ne óriási
+      const useB64 = b64.length > 800 && b64.length < 1_600_000;
       return {
         url: page.url || page.clickUrl || "",
         listingId: page.listingId || "",
         visibleImage,
-        imageJpegBase64: "",
+        imageJpegBase64: useB64 ? b64 : "",
         clickUrl: page.clickUrl || page.url || "",
         adminUrl: page.adminUrl || "",
         publicUrl: page.publicUrl || "",
@@ -636,21 +651,20 @@
     }
     const mapCount = page.map && typeof page.map === "object" ? Object.keys(page.map).length : 0;
     const hasBody = String(page.bodyText || "").length >= 400;
-    // Teljes Módosítás oldal: tartsuk meg a HTML-t is, ha a map még vékony
     const htmlRaw = String(page.html || "");
     const html =
       mapCount >= 12 && hasBody
         ? ""
         : htmlRaw.slice(0, mapCount >= 5 ? 60000 : 120000);
     const visibleImage = upgradeImageUrl(page.visibleImage || "") || page.visibleImage || "";
-    const hasHttpImage = /^https?:\/\//i.test(visibleImage);
+    const b64 = String(page.imageJpegBase64 || "");
+    const useB64 = b64.length > 800 && b64.length < 1_600_000;
     return {
       url: page.url || "",
       listingId: page.listingId || "",
       visibleTitle: page.visibleTitle || page.title || "",
       visibleImage,
-      // HTTP kép URL elég — a nagy HQ base64 elrontja a postMessage / sessionStorage átadást
-      imageJpegBase64: hasHttpImage ? "" : page.imageJpegBase64 || "",
+      imageJpegBase64: useB64 ? b64 : "",
       visibleDescription: page.visibleDescription || page.description || "",
       price: page.price || "",
       km: page.km || "",
@@ -1300,6 +1314,25 @@
     }
   }
 
+  function resolveBymyTarget(origin, mode) {
+    const targetUrl = `${origin}/beallitasok.html?szekcio=import&mode=${mode === "dealer" ? "dealer" : "standard"}&ha=1`;
+    // 1) A lap, ahonnan megnyitottuk a hasznaltautót (Autóimport)
+    if (window.opener && !window.opener.closed) {
+      return { target: window.opener, opened: false, targetUrl };
+    }
+    // 2) Már nyitott Autóimport lap (window.name = bymy-ha-import) — ne új tab
+    let w = null;
+    try {
+      w = window.open(targetUrl, "bymy-ha-import");
+    } catch {
+      w = null;
+    }
+    if (!w || w === window) {
+      return { target: null, opened: false, targetUrl };
+    }
+    return { target: w, opened: true, targetUrl };
+  }
+
   function deliver(origin, payload) {
     const body = {
       ...payload,
@@ -1324,7 +1357,6 @@
     const sendTo = (target) => {
       if (!target || target.closed) return false;
       try {
-        // "*" — ha a lap vercel.app ↔ bymy.hu között redirectel, specifikus origin elnyeli az üzenetet
         target.postMessage(body, "*");
         return true;
       } catch {
@@ -1345,36 +1377,15 @@
       }, 500);
     };
 
-    if (window.opener && !window.opener.closed && sendTo(window.opener)) {
-      retrySend(window.opener);
-      return true;
-    }
-
-    const targetUrl = `${origin}/beallitasok.html?szekcio=import&mode=${payload.mode === "dealer" ? "dealer" : "standard"}&ha=1`;
-    let w = null;
-    try {
-      w = window.open("about:blank", "bymy-ha-import");
-    } catch {
-      w = null;
-    }
-    if (!w || w === window) {
+    const { target } = resolveBymyTarget(origin, payload.mode);
+    if (!target) {
       alert(
-        "Nem sikerült új Bymy lapot nyitni (a hasznaltauto oldal így nyitva marad). Nyisd meg külön lapon a Bymy Autóimportot, majd futtasd újra a könyvjelzőt — vagy engedélyezd a felugró ablakot."
+        "Nem találom a Bymy Autóimport lapot. Nyisd meg az Autóimportot, onnan a hasznaltautót, majd futtasd újra a könyvjelzőt — ne zárd be az Autóimport lapot."
       );
       return false;
     }
-    try {
-      w.location.href = targetUrl;
-    } catch {
-      try {
-        w.location.replace(targetUrl);
-      } catch {
-        alert("A Bymy lapot nem sikerült megnyitni. A hasznaltauto oldal nyitva maradt.");
-        return false;
-      }
-    }
-    sendTo(w);
-    retrySend(w);
+    sendTo(target);
+    retrySend(target);
     return true;
   }
 
@@ -1434,32 +1445,14 @@
     const pages = Array.isArray(payload.pages) ? payload.pages : [];
     if (!pages.length) return false;
 
-    let target = window.opener && !window.opener.closed ? window.opener : null;
+    const { target, opened } = resolveBymyTarget(origin, "dealer");
     if (!target) {
-      const targetUrl = `${origin}/beallitasok.html?szekcio=import&mode=dealer&ha=1`;
-      try {
-        target = window.open("about:blank", "bymy-ha-import");
-      } catch {
-        target = null;
-      }
-      if (!target || target === window) {
-        alert(
-          "Nem sikerült a Bymy lapot megnyitni. Nyisd meg külön a Bymy Autóimportot (kereskedői), majd futtasd újra a könyvjelzőt."
-        );
-        return false;
-      }
-      try {
-        target.location.href = targetUrl;
-      } catch {
-        try {
-          target.location.replace(targetUrl);
-        } catch {
-          alert("A Bymy lapot nem sikerült megnyitni.");
-          return false;
-        }
-      }
-      await sleep(2500);
+      alert(
+        "Nem találom a Bymy Autóimport lapot. Nyisd meg az Autóimportot, onnan az admin listát, majd futtasd újra a könyvjelzőt — ne zárd be az Autóimport lapot."
+      );
+      return false;
     }
+    if (opened) await sleep(2000);
 
     let ok = 0;
     for (let i = 0; i < pages.length; i += 1) {
@@ -1547,8 +1540,7 @@
               const listingId = (detail && detail.listingId) || card.listingId || "";
               const detailUrl =
                 (detail && detail.url) || card.adminUrl || card.clickUrl || card.url || "";
-              // Csak URL — ne base64 (HQ kép beragasztja a Bymy handoffot)
-              return {
+              const withPhoto = await attachPhotoBase64({
                 url: detailUrl,
                 clickUrl: card.clickUrl || card.url || "",
                 listingId,
@@ -1556,16 +1548,23 @@
                 adminUrl: card.adminUrl || "",
                 publicUrl: card.publicUrl || "",
                 photoOnly: true,
-              };
+              });
+              if (!withPhoto.imageJpegBase64 && card.visibleImage) {
+                return attachPhotoBase64({
+                  ...withPhoto,
+                  visibleImage: upgradeImageUrl(card.visibleImage) || card.visibleImage,
+                });
+              }
+              return withPhoto;
             } catch {
-              return {
+              return attachPhotoBase64({
                 url: card.adminUrl || card.clickUrl || card.url || "",
                 listingId: card.listingId || "",
                 visibleImage: upgradeImageUrl(card.visibleImage || "") || "",
                 adminUrl: card.adminUrl || "",
                 publicUrl: card.publicUrl || "",
                 photoOnly: true,
-              };
+              });
             }
           },
           (done, total) => showProgress(done, total, "kép")
@@ -1575,19 +1574,18 @@
             pages.push(page);
           }
         }
-        // Ha a részletes oldal nem adott képet, lista-thumb (HQ-ra upgrade-elve)
         if (!pages.length) {
           for (const card of base) {
             if (!card?.listingId) continue;
-            const fallback = {
+            const fallback = await attachPhotoBase64({
               url: card.adminUrl || card.clickUrl || card.url || "",
               listingId: card.listingId,
               visibleImage: upgradeImageUrl(card.visibleImage || "") || "",
               adminUrl: card.adminUrl || "",
               publicUrl: card.publicUrl || "",
               photoOnly: true,
-            };
-            if (fallback.visibleImage) pages.push(fallback);
+            });
+            if (fallback.imageJpegBase64 || fallback.visibleImage) pages.push(fallback);
           }
         }
         if (!pages.length) {

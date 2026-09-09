@@ -48,7 +48,7 @@ function setMode(mode) {
 
 function bookmarkletHref(mode) {
   const origin = location.origin;
-  const src = `${origin}/js/ha-import-bookmarklet.js?v=haDealerPhoto5`;
+  const src = `${origin}/js/ha-import-bookmarklet.js?v=haDealerPhoto6`;
   return `javascript:void(function(){var o=${JSON.stringify(origin)};var m=${JSON.stringify(mode)};var src=${JSON.stringify(src)}+"&t="+Date.now();function go(){try{window.BymyHaImport.run({origin:o,mode:m});}catch(e){alert((e&&e.message)||e);}}try{delete window.BymyHaImport;}catch(e){window.BymyHaImport=undefined;}var s=document.createElement("script");s.src=src;s.onload=go;s.onerror=function(){alert("A hasznaltauto.hu blokkolta a Bymy scriptet. Másold a hirdetés URL-jét a Bymy Autóimport oldalra.");};(document.documentElement||document.body).appendChild(s);})();`;
 }
 
@@ -473,6 +473,11 @@ function bindAccountNav() {
 export async function initHaImportPage() {
   const ok = await requireAuthForPage();
   if (!ok) return;
+  try {
+    // Könyvjelző ezzel a névvel találja meg / fókuszálja ezt a lapot (ne új tab)
+    window.name = "bymy-ha-import";
+  } catch {
+  }
   const user = getAuthUser();
   const hello = document.querySelector("[data-mm-hello]");
   if (hello) hello.textContent = getDisplayName() || user?.email?.split("@")[0] || "—";

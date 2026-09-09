@@ -21,16 +21,18 @@ function loadScript() {
   if (scriptPromise) return scriptPromise;
   scriptPromise = new Promise((resolve, reject) => {
     const existing = document.querySelector('script[src*="challenges.cloudflare.com/turnstile"]');
-    if (existing && window.turnstile?.render) {
-      resolve();
+    if (existing) {
+      waitForTurnstileApi(8000).then(resolve, reject);
       return;
     }
     const s = document.createElement("script");
     s.src = SCRIPT_SRC;
     s.async = true;
-    s.defer = true;
     s.onload = () => resolve();
-    s.onerror = () => reject(new Error("Turnstile script hiba"));
+    s.onerror = () => {
+      scriptPromise = null;
+      reject(new Error("Turnstile script hiba"));
+    };
     document.head.appendChild(s);
   });
   return scriptPromise;
@@ -55,7 +57,7 @@ function waitForTurnstileApi(timeoutMs = 12000) {
 }
 
 /**
- * Cloudflare Turnstile — hasznaltauto-szerű pipás ellenőrző.
+ * Cloudflare Turnstile — Managed pipás ellenőrző (hasznaltauto-szerű).
  * @returns {Promise<{ enabled: boolean, ready: boolean, getToken: () => Promise<string>, reset: () => void, error?: string }>}
  */
 export async function mountTurnstile(container, { theme = "light" } = {}) {
@@ -74,29 +76,21 @@ export async function mountTurnstile(container, { theme = "light" } = {}) {
 
   let widgetId = null;
   let token = "";
-  let ready = false;
 
   try {
     await loadScript();
     await waitForTurnstileApi();
-    await new Promise((resolve) => {
-      if (typeof window.turnstile.ready === "function") {
-        window.turnstile.ready(resolve);
-      } else {
-        resolve();
-      }
-    });
 
+    // Ne hívd turnstile.ready()-t explicit render=explicit mellett —
+    // Cloudflare szerint ez elronthatja a widgetet, ha rosszul időzül.
     widgetId = window.turnstile.render(container, {
       sitekey: config.siteKey,
       theme,
       size: "normal",
       appearance: "always",
-      execution: "render",
       language: "hu",
       callback: (value) => {
         token = String(value || "");
-        ready = true;
         container.setAttribute("aria-busy", "false");
         container.removeAttribute("data-turnstile-error");
       },
@@ -111,11 +105,11 @@ export async function mountTurnstile(container, { theme = "light" } = {}) {
         token = "";
       },
     });
-    ready = true;
     container.setAttribute("aria-busy", "false");
   } catch (error) {
+    console.error("[turnstile]", error);
     container.innerHTML =
-      '<p class="auth-security-fail">A biztonsági ellenőrző nem töltődött be. Frissítsd az oldalt, vagy kapcsold ki a reklámblokkolót.</p>';
+      '<p class="auth-security-fail">A biztonsági ellenőrző most nem elérhető. Frissítsd az oldalt, és próbáld újra.</p>';
     return {
       enabled: true,
       ready: false,
@@ -141,6 +135,7 @@ export async function mountTurnstile(container, { theme = "light" } = {}) {
       try {
         window.turnstile?.reset?.(widgetId);
       } catch {
+        /* ignore */
       }
     },
   };

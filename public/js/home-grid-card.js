@@ -37,7 +37,14 @@ function collectPhotoUrls(item) {
   const preview = item.preview || {};
   const urls = [...(preview.imageUrls || [])];
   if (preview.imageUrl && !urls.includes(preview.imageUrl)) urls.unshift(preview.imageUrl);
-  if (item.fo_kep && !urls.includes(item.fo_kep)) urls.unshift(item.fo_kep);
+  const fo = String(item.fo_kep || "").trim();
+  if (
+    fo &&
+    !urls.includes(fo) &&
+    (/^https?:\/\//i.test(fo) || fo.startsWith("/api/media/proxy") || fo.startsWith("/uploads/"))
+  ) {
+    urls.unshift(fo);
+  }
   return [...new Set(urls.map(upgradeHaThumbClient).filter(Boolean))];
 }
 

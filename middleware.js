@@ -57,6 +57,19 @@ function isPublicApi(pathname, method) {
   if (pathname.startsWith("/api/level1/")) return true;
   // Oldalsáv tartalom: GET nyilvános; PUT a szerveren level1 admint ellenőriz
   if (pathname === "/api/site-blocks") return true;
+  if (pathname === "/api/hub-promo" && method === "GET") return true;
+  if (pathname === "/api/nav/counts" && method === "GET") return true;
+  if (pathname === "/api/field-defs" && method === "GET") return true;
+  // Kép proxy: <img> kérés cookie nélkül is kell (különben törött ikon)
+  if (pathname === "/api/media/proxy" && method === "GET") return true;
+  if (pathname.startsWith("/api/vehicle-catalog") && method === "GET") return true;
+  if ((pathname === "/api/postal-codes/lookup" || pathname === "/api/postal-codes/cities") && method === "GET") {
+    return true;
+  }
+  if (pathname.startsWith("/api/partners") && method === "GET") return true;
+  if (pathname === "/api/listings" && method === "GET") return true;
+  if (pathname === "/api/listings/latest" && method === "GET") return true;
+  if (/^\/api\/listings\/\d+$/.test(pathname) && method === "GET") return true;
   return false;
 }
 

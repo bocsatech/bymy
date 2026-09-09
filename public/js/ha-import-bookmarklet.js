@@ -571,11 +571,14 @@
   function slimPageForDelivery(page) {
     if (!page || typeof page !== "object") return page;
     if (page.photoOnly) {
+      const visibleImage = page.visibleImage || "";
+      const hasHttpImage = /^https?:\/\//i.test(visibleImage);
       return {
         url: page.url || page.clickUrl || "",
         listingId: page.listingId || "",
-        visibleImage: page.visibleImage || "",
-        imageJpegBase64: page.imageJpegBase64 || "",
+        visibleImage,
+        // HTTP kép URL elég — a nagy base64 elrontja a postMessage / sessionStorage átadást
+        imageJpegBase64: hasHttpImage ? "" : page.imageJpegBase64 || "",
         clickUrl: page.clickUrl || page.url || "",
         adminUrl: page.adminUrl || "",
         publicUrl: page.publicUrl || "",
@@ -1261,16 +1264,16 @@
         }
         n += 1;
         sendTo(target);
-        if (n >= 12) clearInterval(timer);
-      }, 500);
+        if (n >= 16) clearInterval(timer);
+      }, 400);
     };
 
     if (window.opener && !window.opener.closed && sendTo(window.opener)) {
       retrySend(window.opener);
-      return;
+      return true;
     }
 
-    const targetUrl = `${origin}/beallitasok.html?szekcio=import&ha=1`;
+    const targetUrl = `${origin}/beallitasok.html?szekcio=import&mode=${payload.mode === "dealer" ? "dealer" : "standard"}&ha=1`;
     let w = null;
     try {
       w = window.open("about:blank", "bymy-ha-import");
@@ -1281,7 +1284,7 @@
       alert(
         "Nem sikerült új Bymy lapot nyitni (a hasznaltauto oldal így nyitva marad). Nyisd meg külön lapon a Bymy Autóimportot, majd futtasd újra a könyvjelzőt — vagy engedélyezd a felugró ablakot."
       );
-      return;
+      return false;
     }
     try {
       w.location.href = targetUrl;
@@ -1290,11 +1293,112 @@
         w.location.replace(targetUrl);
       } catch {
         alert("A Bymy lapot nem sikerült megnyitni. A hasznaltauto oldal nyitva maradt.");
-        return;
+        return false;
       }
     }
     sendTo(w);
     retrySend(w);
+    return true;
+  }
+
+  function deliverOneAwait(origin, target, payload) {
+    return new Promise((resolve) => {
+      const body = {
+        ...payload,
+        importId: payload.importId || `ha-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      };
+      let acked = false;
+      const onAck = (event) => {
+        const data = event?.data;
+        if (!data || data.type !== "bymy-ha-import-ack") return;
+        if (data.importId && data.importId !== body.importId) return;
+        acked = true;
+        try {
+          window.removeEventListener("message", onAck);
+        } catch {
+        }
+        resolve(true);
+      };
+      try {
+        window.addEventListener("message", onAck);
+      } catch {
+      }
+      const send = () => {
+        if (!target || target.closed) return false;
+        try {
+          target.postMessage(body, origin);
+          return true;
+        } catch {
+          return false;
+        }
+      };
+      send();
+      let n = 0;
+      const timer = setInterval(() => {
+        if (acked) {
+          clearInterval(timer);
+          return;
+        }
+        n += 1;
+        send();
+        if (n >= 20) {
+          clearInterval(timer);
+          try {
+            window.removeEventListener("message", onAck);
+          } catch {
+          }
+          resolve(false);
+        }
+      }, 400);
+    });
+  }
+
+  async function deliverDealerPages(origin, payload) {
+    const pages = Array.isArray(payload.pages) ? payload.pages : [];
+    if (!pages.length) return false;
+
+    let target = window.opener && !window.opener.closed ? window.opener : null;
+    if (!target) {
+      const targetUrl = `${origin}/beallitasok.html?szekcio=import&mode=dealer&ha=1`;
+      try {
+        target = window.open("about:blank", "bymy-ha-import");
+      } catch {
+        target = null;
+      }
+      if (!target || target === window) {
+        alert(
+          "Nem sikerült a Bymy lapot megnyitni. Nyisd meg külön a Bymy Autóimportot (kereskedői), majd futtasd újra a könyvjelzőt."
+        );
+        return false;
+      }
+      try {
+        target.location.href = targetUrl;
+      } catch {
+        try {
+          target.location.replace(targetUrl);
+        } catch {
+          alert("A Bymy lapot nem sikerült megnyitni.");
+          return false;
+        }
+      }
+      await sleep(1200);
+    }
+
+    let ok = 0;
+    for (let i = 0; i < pages.length; i += 1) {
+      showProgress(i + 1, pages.length, "küldés a Bymy-ra");
+      const acked = await deliverOneAwait(origin, target, {
+        type: "bymy-ha-import",
+        v: 1,
+        mode: "dealer",
+        photoOnly: true,
+        listUrl: payload.listUrl || location.href,
+        importId: `ha-dealer-${Date.now()}-${i + 1}`,
+        pages: [pages[i]],
+      });
+      if (acked) ok += 1;
+    }
+    return ok > 0;
   }
 
   async function run(opts) {
@@ -1461,13 +1565,26 @@
     }
 
     showProgress(pages.length, pages.length, "küldés a Bymy-ra");
+    const slim = pages.map(slimPageForDelivery);
+    if (mode === "dealer") {
+      const ok = await deliverDealerPages(origin, {
+        type: "bymy-ha-import",
+        v: 1,
+        mode,
+        photoOnly: true,
+        listUrl: location.href,
+        pages: slim,
+      });
+      hideProgress(ok ? `Kész: ${slim.length} kép átadva a Bymy-nak` : "A Bymy nem fogadta az adatokat — nyisd meg a Bymy Autóimport lapot, majd próbáld újra.");
+      return;
+    }
     deliver(origin, {
       type: "bymy-ha-import",
       v: 1,
       mode,
-      photoOnly: mode === "dealer",
+      photoOnly: false,
       listUrl: location.href,
-      pages: pages.map(slimPageForDelivery),
+      pages: slim,
     });
     hideProgress(`Kész: ${pages.length} hirdetés átadva a Bymy-nak`);
   }

@@ -41,6 +41,10 @@
 
   function isBadTitle(t) {
     const v = clean(t);
+    const n = v
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
     return (
       !v ||
       v.length < 4 ||
@@ -48,15 +52,65 @@
       /javascript|gyorsnézet|gyorsnezet|hiba!|belépés|haszn[aá]ltaut[oó]\.hu|regisztr|képkezelés|kepkezeles|címlapra|cimlapra|^keretes$/i.test(
         v
       ) ||
+      /^(új[!.,]*)+$/i.test(v) ||
+      /^uj[!.,]*(\s+uj[!.,]*)*$/i.test(n) ||
+      /^\d{1,2}\.\s*\d{1,2}\.?$/.test(v) ||
+      /^\d{1,2}\/\d{1,2}(\/\d{2,4})?$/.test(v) ||
       /^(19|20)\d{2}(\/\d{1,2})?$/.test(v) ||
       /^(19|20)\d{2}\/\d{1,2}\b/.test(v) ||
       (/\(\d{5,}\)\s*$/.test(v) && /^(19|20)\d{2}/.test(v)) ||
       /^(benzin|d[ií]zel|elektromos|hibrid|hybrid)(\/|\s|,|$)/i.test(v) ||
-      /^(módosítás|törlés|képek|felszereltség|leírás)$/i.test(v)
+      /^(módosítás|törlés|képek|felszereltség|leírás|aktív|inaktív)$/i.test(v) ||
+      /^ár egyeztetés/i.test(v)
     );
   }
 
+  function looksLikeVehicleTitleLink(text) {
+    const t = clean(text);
+    if (isBadTitle(t) || t.length < 8) return false;
+    if (/m[oó]dos[ií]t|t[oö]rl[eé]s|[aá]rt[aá]bla|kiemel|megtekint|lefoglal|gyorsn/i.test(t)) return false;
+    if (/^(új[!.,]*)+$/i.test(t)) return false;
+    // Márka + modell jelleg: betű + nem csak dátum
+    if (!/[A-Za-záéíóöőúüűÁÉÍÓÖŐÚÜŰ]{2,}/.test(t)) return false;
+    if (/MERCEDES|BMW|AUDI|FORD|OPEL|TOYOTA|VOLKSWAGEN|VW|SKODA|ŠKODA|HYUNDAI|KIA|LEXUS|VOLVO|MAZDA|NISSAN|HONDA|SUZUKI|PEUGEOT|RENAULT|CITROEN|CITROËN|FIAT|SEAT|DACIA|TESLA|PORSCHE|JAGUAR|LAND\s*ROVER|RANGE\s*ROVER|MASERATI|MINI|JEEP|DODGE|CHEVROLET|CUPRA|DS\b|MG\b|BYD/i.test(t))
+      return true;
+    if (t.length >= 12 && /\s/.test(t) && !/^\d/.test(t)) return true;
+    return false;
+  }
+
+  function pickTitleLinkFromRow(row, rootDoc = document) {
+    let best = null;
+    let bestScore = 0;
+    for (const a of row.querySelectorAll("a[href]")) {
+      const text = clean(a.innerText || a.textContent || "");
+      if (!looksLikeVehicleTitleLink(text)) continue;
+      let href = "";
+      try {
+        href = new URL(a.getAttribute("href") || a.href || "", rootDoc.baseURI || location.href).href.split("#")[0];
+      } catch {
+        continue;
+      }
+      if (!/hasznaltauto\.hu/i.test(href)) continue;
+      let score = text.length;
+      if (/\/hirdetesfeladas\//i.test(href) || /m[oó]dos[ií]t/i.test(text)) score += 1000;
+      if (/[?&]id=\d{5,}/i.test(href) || /-\d{5,}(?:[/?#]|$)/.test(href)) score += 200;
+      if (/\/gyorsnezet\//i.test(href)) score += 50;
+      if (score > bestScore) {
+        bestScore = score;
+        best = { href, text };
+      }
+    }
+    return best;
+  }
+
   function pickTitle(doc) {
+    // Űrlap mező: Hirdetés címe — ez a megbízható forrás a Módosítás oldalon
+    for (const el of doc.querySelectorAll("input, textarea")) {
+      const name = `${el.getAttribute("name") || ""} ${el.getAttribute("id") || ""} ${el.getAttribute("placeholder") || ""}`;
+      if (!/c[ií]m|title|hirdetes.*cim/i.test(name)) continue;
+      const val = clean(el.value || "");
+      if (!isBadTitle(val) && val.length >= 8) return val;
+    }
     const og = doc.querySelector('meta[property="og:title"]');
     if (og && og.content && !isBadTitle(clean(og.content))) {
       return clean(og.content).replace(/\s*[|–-].*$/, "");
@@ -70,35 +124,30 @@
       "h2",
       '[class*="title"]',
       '[class*="cim"]',
-      "strong",
-      "b",
     ];
     for (const sel of selectors) {
       for (const el of doc.querySelectorAll(sel)) {
         const t = titleOf(el);
         const first = t.split("\n").map(clean).find(Boolean) || "";
-        if (!isBadTitle(first) && first.length >= 8) return first;
+        if (!isBadTitle(first) && first.length >= 8 && looksLikeVehicleTitleLink(first)) return first;
       }
     }
-    for (const el of doc.querySelectorAll("dt, td.bal.pontos, th, td.pontos")) {
+    for (const el of doc.querySelectorAll("dt, td.bal.pontos, th, td.pontos, label")) {
       const label = textOf(el);
-      if (!/c[ií]m|hirdet[eé]s c[ií]me|m[aá]rka|gy[aá]rtm[aá]ny/i.test(label)) continue;
-      const val = titleOf(el.nextElementSibling);
-      if (!isBadTitle(val) && /c[ií]m/i.test(label)) return val;
+      if (!/c[ií]m|hirdet[eé]s c[ií]me/i.test(label)) continue;
+      const val = titleOf(el.nextElementSibling) || clean(el.parentElement?.querySelector("input, textarea")?.value || "");
+      if (!isBadTitle(val) && val.length >= 8) return val;
     }
-    // Gyorsnézet: a cím sokszor nem h1, hanem a body első „autó” sora
     const bodyLines = String(doc.body?.innerText || doc.body?.textContent || "")
       .split("\n")
       .map((line) => clean(line))
       .filter(Boolean);
-    for (const line of bodyLines.slice(0, 50)) {
+    for (const line of bodyLines.slice(0, 80)) {
       if (isBadTitle(line)) continue;
-      if (/^(bez[aá]r[aá]s|hirdet[eé]s gyors|v[eé]tel[aá]r|[aá]r,?\s*k[oö]lts|gy[aá]rt[aá]si [eé]v|km\.?\s*[oó]ra|j[aá]rm[uű]|motor adatok|okm[aá]ny)/i.test(line))
+      if (/^(bez[aá]r[aá]s|hirdet[eé]s gyors|v[eé]tel[aá]r|[aá]r,?\s*k[oö]lts|gy[aá]rt[aá]si [eé]v|km\.?\s*[oó]ra|j[aá]rm[uű]|motor adatok|okm[aá]ny|új!)/i.test(line))
         continue;
       if (line.length < 10 || line.length > 220) continue;
-      if (/\b(?:1\.\d|2\.\d|tdi|gdi|hev|phev|automata|4wd|awd|benzin|d[ií]zel|hybrid|hibrid)\b/i.test(line)) {
-        return line;
-      }
+      if (looksLikeVehicleTitleLink(line)) return line;
     }
     const docTitle = clean((doc.title || "").replace(/\s*[|–-].*$/, ""));
     return isBadTitle(docTitle) ? "" : docTitle;
@@ -107,16 +156,23 @@
   function pickImage(doc) {
     const og = doc.querySelector('meta[property="og:image"]');
     if (og && og.content && /^https?:/i.test(og.content)) return og.content;
-    const imgs = [...doc.querySelectorAll("img")];
-    imgs.sort((a, b) => (b.naturalWidth * b.naturalHeight) - (a.naturalWidth * a.naturalHeight));
-    for (const img of imgs) {
-      let src = img.currentSrc || img.src || img.getAttribute("data-src") || "";
+    const scored = [];
+    for (const img of doc.querySelectorAll("img")) {
+      let src = img.currentSrc || img.src || img.getAttribute("data-src") || img.getAttribute("data-lazy") || "";
       if (src.startsWith("//")) src = "https:" + src;
       if (!src.startsWith("http")) continue;
-      if (/close|logo|icon|sprite|placeholder|prototip|static\/images|avatar|badge/i.test(src)) continue;
-      if (img.naturalWidth >= 80 || img.width >= 80 || /hasznaltauto|kep|photo|galeria/i.test(src)) return src;
+      if (/close|logo|icon|sprite|placeholder|prototip|static\/images|avatar|badge|favicon|pixel/i.test(src)) continue;
+      const w = Number(img.naturalWidth || img.width || img.getAttribute("width") || 0);
+      const h = Number(img.naturalHeight || img.height || img.getAttribute("height") || 0);
+      let score = w * h;
+      if (/hasznaltauto|kep|photo|galeria|images/i.test(src)) score += 50000;
+      if (/\/(nagy|large|orig|full|main|fo)\b/i.test(src)) score += 200000;
+      if (/thumb|mini|small|icon|interior|belso|belső/i.test(src)) score -= 100000;
+      // Első galéria kép gyakran a fő külső fotó
+      if (score > 0 || w >= 120 || /hasznaltauto/i.test(src)) scored.push({ src, score: score || 1000 });
     }
-    return "";
+    scored.sort((a, b) => b.score - a.score);
+    return scored[0]?.src || "";
   }
 
   function pickDescription(doc) {
@@ -407,6 +463,7 @@
       bodyText: String(page.bodyText || "").slice(0, 20000),
       html,
       fromListCard: Boolean(page.fromListCard),
+      clickUrl: page.clickUrl || page.url || "",
       adminUrl: page.adminUrl || "",
       publicUrl: page.publicUrl || "",
     };
@@ -574,15 +631,17 @@
     for (const row of rowNodes) {
       const text = String(row.innerText || "");
       if (text.length < 12) continue;
-      if (!/m[oó]dos[ií]t[aá]s|t[oö]rl[eé]s|gyorsn[eé]zet|[aá]rt[aá]bla|lexus|kia|mercedes|bmw|audi|ford|opel|toyota|volkswagen|skoda|hyundai/i.test(text))
+      if (!/m[oó]dos[ií]t[aá]s|t[oö]rl[eé]s|gyorsn[eé]zet|[aá]rt[aá]bla|lexus|kia|mercedes|bmw|audi|ford|opel|toyota|volkswagen|skoda|hyundai|maserati|land\s*rover|volvo/i.test(text))
         continue;
       if (/menü|navig|belép|kijelent|^ssz/i.test(text) && text.length < 40) continue;
 
-      const id = pickIdFromRow(row);
+      const titleLink = pickTitleLinkFromRow(row, rootDoc);
+      const id = pickIdFromRow(row) || (titleLink ? pickListingId(titleLink.href) : "");
       if (id.length < 5) continue;
 
       let adminUrl = "";
       let publicUrl = "";
+      let clickUrl = titleLink?.href || "";
       for (const a of row.querySelectorAll("a[href]")) {
         const href = String(a.href || a.getAttribute("href") || "");
         const aText = clean(a.innerText || a.textContent || "");
@@ -597,23 +656,17 @@
         } catch {
         }
       }
-      if (!adminUrl) {
-        adminUrl = `https://admin.hasznaltauto.hu/hirdetesfeladas/szemelyauto?id=${id}`;
-      }
+      // 1. lépés: a járműlista cím-linkje (kattintás) — ez az elsődleges URL
+      if (!clickUrl) clickUrl = adminUrl || publicUrl || `https://admin.hasznaltauto.hu/hirdetesfeladas/szemelyauto?id=${id}`;
+      if (!adminUrl && /\/hirdetesfeladas\//i.test(clickUrl)) adminUrl = clickUrl;
+      if (!adminUrl) adminUrl = `https://admin.hasznaltauto.hu/hirdetesfeladas/szemelyauto?id=${id}`;
 
-      const lines = text
-        .split("\n")
-        .map((line) => clean(line))
-        .filter(Boolean);
       const title =
-        lines.find((line) => {
-          if (isBadTitle(line)) return false;
-          if (/m[oó]dos[ií]t|t[oö]rl[eé]s|[aá]rt[aá]bla|kiemel|megtekint|lefoglal|inakt[ií]v|akt[ií]v|top\b|ssz\.|sorsz|megtekintve|találat/i.test(line))
-            return false;
-          if (/^\d+([.\s]\d+){0,3}\s*(ft|€)?$/i.test(line)) return false;
-          if (/^\d{5,}$/.test(line)) return false;
-          return /[a-záéíóöőúüű]{2,}/i.test(line) && line.length >= 5 && line.length <= 100;
-        }) || "";
+        (titleLink && !isBadTitle(titleLink.text) ? titleLink.text : "") ||
+        [...row.querySelectorAll("a[href]")]
+          .map((a) => clean(a.innerText || a.textContent || ""))
+          .find((line) => looksLikeVehicleTitleLink(line)) ||
+        "";
 
       const priceMatch = text.match(/(\d{1,3}(?:[.\s]\d{3})+|\d{5,})\s*Ft/i);
       const price = priceMatch ? priceMatch[1].replace(/[.\s]/g, "") : "";
@@ -624,23 +677,31 @@
       const raw = img?.currentSrc || img?.src || img?.getAttribute("data-src") || img?.getAttribute("data-lazy") || "";
       if (/^https?:\/\//i.test(raw) && !/logo|icon|sprite|badge/i.test(raw)) imageUrl = raw;
 
+      const fromTitle = brandModelFromTitle(title);
       const page = {
-        url: adminUrl || publicUrl || `https://admin.hasznaltauto.hu/hirdetesfeladas/szemelyauto?id=${id}`,
+        url: clickUrl,
         listingId: id,
         visibleTitle: title,
         visibleImage: imageUrl,
         price,
         km,
         year,
+        brand: fromTitle.brand || "",
+        model: fromTitle.model || "",
         map: {},
         bodyText: clean(text).slice(0, 2500),
         felszereltseg: [],
         html: "",
         fromListCard: true,
-        adminUrl: adminUrl || `https://admin.hasznaltauto.hu/hirdetesfeladas/szemelyauto?id=${id}`,
+        clickUrl,
+        adminUrl,
         publicUrl,
       };
-      if (!isUsefulPage(page)) continue;
+      if (!isUsefulPage(page) && !title) continue;
+      if (!isUsefulPage(page) && title) {
+        // Cím-link megvan — akkor is vigyük tovább, a részletes oldal fogja feltölteni
+        page.fromListCard = true;
+      }
       const prev = byId[id];
       if (!prev || clean(page.visibleTitle).length > clean(prev.visibleTitle || "").length) {
         byId[id] = page;
@@ -840,7 +901,9 @@
         const u = String(url || "").trim();
         if (u && !candidates.includes(u)) candidates.push(u);
       };
-      // Teljes hirdetés (Módosítás / hirdetesfeladas) — gyorsnézet NEM
+      // 1. Kattintás a lista cím-linkjén
+      push(ref.clickUrl);
+      // Teljes hirdetés (Módosítás / hirdetesfeladas) — gyorsnézet NEM első
       if (onAdmin) {
         for (const u of adminEditUrls(ref.id, ref.adminUrl)) push(u);
         push(ref.publicUrl);
@@ -848,11 +911,15 @@
         push(ref.publicUrl);
         for (const u of adminEditUrls(ref.id, ref.adminUrl)) push(u);
       }
-      for (const url of candidates.slice(0, onAdmin ? 4 : 5)) {
+      for (const url of candidates.slice(0, onAdmin ? 5 : 6)) {
         try {
           const page = await extractFromUrl(url);
-          if (isUsefulPage(page)) {
+          if (isUsefulPage(page) || (page && clean(page.visibleTitle) && !isBadTitle(page.visibleTitle))) {
             page.listingId = page.listingId || ref.id;
+            page.clickUrl = ref.clickUrl || page.clickUrl || "";
+            if (ref.visibleTitle && (!page.visibleTitle || isBadTitle(page.visibleTitle))) {
+              page.visibleTitle = ref.visibleTitle;
+            }
             return page;
           }
         } catch {
@@ -1089,11 +1156,18 @@
                 id: card.listingId,
                 adminUrl: card.adminUrl,
                 publicUrl: card.publicUrl,
+                clickUrl: card.clickUrl || card.url,
+                visibleTitle: card.visibleTitle,
               });
               if (!detail || !isUsefulPage(detail)) return card;
               const detailTitle = clean(detail.visibleTitle || "");
+              const listTitle = clean(card.visibleTitle || "");
               const keepTitle =
-                detailTitle && !isBadTitle(detailTitle) ? detailTitle : card.visibleTitle;
+                listTitle && looksLikeVehicleTitleLink(listTitle)
+                  ? listTitle
+                  : detailTitle && !isBadTitle(detailTitle)
+                    ? detailTitle
+                    : listTitle;
               const detailMapCount =
                 detail.map && typeof detail.map === "object" ? Object.keys(detail.map).length : 0;
               const brand = detail.brand || card.brand || brandModelFromTitle(keepTitle).brand;
@@ -1103,7 +1177,9 @@
               const detailOk = Boolean(brandOk || titleOk);
               return {
                 ...card,
-                visibleTitle: titleOk ? keepTitle : brandOk ? [brand, model].filter(Boolean).join(" ") : "",
+                url: detail.url || card.clickUrl || card.url,
+                clickUrl: card.clickUrl || card.url,
+                visibleTitle: titleOk ? keepTitle : brandOk ? [brand, model].filter(Boolean).join(" ") : keepTitle,
                 visibleImage: detail.visibleImage || card.visibleImage,
                 price: detail.price || card.price,
                 km: detail.km || card.km,

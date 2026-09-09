@@ -220,6 +220,40 @@
     return candidates[0]?.src || "";
   }
 
+  async function fetchImageBase64(url) {
+    const src = upgradeImageUrl(url);
+    if (!/^https?:\/\//i.test(src)) return "";
+    try {
+      const res = await fetch(src, { credentials: "include", mode: "cors", cache: "force-cache" });
+      if (!res.ok) return "";
+      const blob = await res.blob();
+      if (!blob || blob.size < 800) return "";
+      if (blob.type && !/^image\//i.test(blob.type) && !/octet-stream/i.test(blob.type)) return "";
+      // Max ~1.8 MB raw — a postMessage-nak bírnia kell
+      if (blob.size > 1_800_000) return "";
+      const buf = await blob.arrayBuffer();
+      const bytes = new Uint8Array(buf);
+      let binary = "";
+      const chunk = 0x8000;
+      for (let i = 0; i < bytes.length; i += chunk) {
+        binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
+      }
+      return btoa(binary);
+    } catch {
+      return "";
+    }
+  }
+
+  async function attachPhotoBase64(page) {
+    if (!page || typeof page !== "object") return page;
+    if (page.imageJpegBase64) return page;
+    const url = page.visibleImage || "";
+    if (!url) return page;
+    const b64 = await fetchImageBase64(url);
+    if (b64) page.imageJpegBase64 = b64;
+    return page;
+  }
+
   function pickDescription(doc) {
     for (const sel of ["textarea[name*='leiras' i]", "textarea[id*='leiras' i]", '[class*="leiras"]', '[class*="description"]', '[id*="leiras"]']) {
       for (const el of doc.querySelectorAll(sel)) {
@@ -253,17 +287,34 @@
     return textOf(el);
   }
 
+  function splitChainedValue(value) {
+    const v = clean(value);
+    if (!v) return "";
+    return clean(
+      v.split(
+        /\s+(?=(?:Saját tömeg|Össztömeg|Kárpit színe(?:\s*\(\d+\))?|Csomagtartó|Hengerűrtartalom|Teljesítmény|Sebességváltó|Hajtás|Üzemanyag|Állapot|Évjárat|Futásteljesítmény|Vételár|Ajtók száma|Szállítható|Klíma(?:\s+fajtája)?|Tető|Nyári gumi|Téli gumi|Okmányok|Szín)\s*:)/i
+      )[0] || v
+    );
+  }
+
+  function valueScore(value) {
+    const v = clean(value);
+    if (!v) return -1;
+    if (/\b(?:Saját tömeg|Össztömeg|Kárpit színe)\s*:/i.test(v)) return -500;
+    if (v.length > 120) return 40;
+    return 220 - Math.min(v.length, 80);
+  }
+
   function addPair(map, rawKey, rawValue) {
     const key = clean(rawKey).replace(/:$/, "");
-    const value = clean(rawValue);
+    const value = splitChainedValue(rawValue);
     if (!key || !value || key.length > 100 || value.length > 400) return;
     if (/válasszon/i.test(value)) return;
     if (value.length > 180 && value.split(/\s+/).length > 18) return;
     if (/^(ár|ar|ár, költségek|költségek|általános adatok|altalanos adatok|jármű adatok|jarmu adatok|motor adatok|muszaki adatok|felszereltseg|felszereltség|beltér|belter|műszaki|muszaki|kültér|kulter|egyéb|egyeb|okmányok|abroncs|hirdetés|hitel|hiba!?)$/i.test(key))
       return;
     const existing = map[key];
-    const isName = /m[aá]rka|gy[aá]rtm[aá]ny|modell/i.test(key);
-    if (!existing || (isName && existing.length > value.length) || (!isName && existing.length < value.length)) {
+    if (!existing || valueScore(value) > valueScore(existing)) {
       map[key] = value;
     }
   }
@@ -532,6 +583,7 @@
       listingId: page.listingId || "",
       visibleTitle: page.visibleTitle || page.title || "",
       visibleImage: page.visibleImage || "",
+      imageJpegBase64: page.imageJpegBase64 || "",
       visibleDescription: page.visibleDescription || page.description || "",
       price: page.price || "",
       km: page.km || "",
@@ -1207,7 +1259,7 @@
     // Egy megnyitott teljes hirdetés (Módosítás) / nyilvános adatlap — élő DOM
     if (onEditListing || onGyorsnezet || (mode === "standard" && isSingleListing())) {
       showProgress(1, 1, "beolvasás");
-      const one = extractPage();
+      const one = await attachPhotoBase64(extractPage());
       if (isUsefulPage(one)) pages.push(one);
     } else if (mode === "dealer" || (onAdminHost && !isPublicListingPage())) {
       showProgress(0, 1, "lista beolvasása");
@@ -1257,7 +1309,7 @@
               const titleOk = keepTitle && !isBadTitle(keepTitle) && !isChromeName(keepTitle.split(/\s+/)[0] || "");
               const brandOk = brand && !isChromeName(brand);
               const detailOk = Boolean(brandOk || titleOk);
-              return {
+              return attachPhotoBase64({
                 ...card,
                 url: detail.url || card.clickUrl || card.url,
                 clickUrl: card.clickUrl || card.url,
@@ -1277,8 +1329,10 @@
                     ? detail.felszereltseg
                     : card.felszereltseg,
                 listingId: detail.listingId || card.listingId,
+                featureLine: detail.featureLine || card.featureLine || "",
+                visibleDescription: detail.visibleDescription || card.visibleDescription || "",
                 fromListCard: !detailOk,
-              };
+              });
             } catch {
               return card;
             }
@@ -1310,14 +1364,14 @@
       }
       if (mode === "standard" && refs.length === 1 && isPublicListingPage()) {
         showProgress(1, 1, "beolvasás");
-        const one = extractPage();
+        const one = await attachPhotoBase64(extractPage());
         if (isUsefulPage(one)) pages.push(one);
       } else {
         showProgress(0, refs.length, "lista beolvasása");
         const extracted = await mapPool(
           refs,
           FETCH_CONCURRENCY,
-          (ref) => extractRefPage(ref),
+          async (ref) => attachPhotoBase64(await extractRefPage(ref)),
           (done, total) => showProgress(done, total, "beolvasás")
         );
         for (const page of extracted) {

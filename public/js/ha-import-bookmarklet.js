@@ -767,22 +767,76 @@
     return "";
   }
 
+  function pickRowImage(row) {
+    const candidates = [];
+    const push = (raw, bonus = 0) => {
+      let src = String(raw || "").trim();
+      if (src.startsWith("//")) src = "https:" + src;
+      if (!/^https?:\/\//i.test(src)) return;
+      if (/logo|icon|sprite|badge|avatar|favicon|pixel|placeholder/i.test(src)) return;
+      let score = bonus;
+      if (/hasznaltauto|hazn|kep|photo|img\.|cdn/i.test(src)) score += 50000;
+      if (/thumb|mini|small|118x88|t\d+\b/i.test(src)) score += 1000;
+      if (/\/(nagy|large|2048|orig|full)\b/i.test(src)) score += 200000;
+      candidates.push({ src: upgradeImageUrl(src), score });
+    };
+    for (const img of row.querySelectorAll("img")) {
+      push(img.getAttribute("data-src") || img.getAttribute("data-lazy") || img.getAttribute("data-original") || "", 10000);
+      push(img.currentSrc || img.src || "", Number(img.naturalWidth || img.width || 0) * Number(img.naturalHeight || img.height || 0));
+      const srcset = img.getAttribute("srcset") || "";
+      const first = srcset.split(",")[0]?.trim().split(/\s+/)[0];
+      if (first) push(first, 8000);
+    }
+    for (const el of row.querySelectorAll("[style*='background'], [data-bg], [data-background], [data-image]")) {
+      const style = el.getAttribute("style") || "";
+      const m = style.match(/url\(\s*['"]?(https?:\/\/[^'")\s]+|\/\/[^'")\s]+)/i);
+      if (m) push(m[1], 20000);
+      push(el.getAttribute("data-bg") || el.getAttribute("data-background") || el.getAttribute("data-image") || "", 15000);
+    }
+    for (const a of row.querySelectorAll("a[href]")) {
+      const href = a.getAttribute("href") || "";
+      if (/\.(jpe?g|png|webp)(\?|$)/i.test(href)) push(href, 12000);
+    }
+    candidates.sort((a, b) => b.score - a.score);
+    return candidates[0]?.src || "";
+  }
+
   function extractDealerListPages(rootDoc = document) {
     const byId = {};
     const rowNodes = [
       ...rootDoc.querySelectorAll(
-        "table tbody tr, table tr, .talalati-sor, [class*='hirdetes'] tr, [class*='jarmu'] tr, [class*='list'] tr, article, li, [class*='row']"
+        "table tbody tr, table tr, .talalati-sor, [class*='hirdetes'] tr, [class*='jarmu'] tr, [class*='list'] tr, article, li, [class*='row'], [class*='jarmu'], [class*='hirdetes-sor']"
       ),
     ];
+    // Fallback: minden Módosítás / hirdetesfeladas link sorából
+    for (const a of rootDoc.querySelectorAll("a[href]")) {
+      const href = String(a.getAttribute("href") || a.href || "");
+      const aText = clean(a.innerText || a.textContent || "");
+      if (!/\/hirdetesfeladas\//i.test(href) && !/m[oó]dos[ií]t/i.test(aText)) continue;
+      const row =
+        a.closest("tr, article, li, .talalati-sor, [class*='row'], [class*='hirdetes'], [class*='jarmu']") || a.parentElement;
+      if (row && !rowNodes.includes(row)) rowNodes.push(row);
+    }
     for (const row of rowNodes) {
       const text = String(row.innerText || "");
-      if (text.length < 12) continue;
-      if (!/m[oó]dos[ií]t[aá]s|t[oö]rl[eé]s|gyorsn[eé]zet|[aá]rt[aá]bla|lexus|kia|mercedes|bmw|audi|ford|opel|toyota|volkswagen|skoda|hyundai|maserati|land\s*rover|volvo/i.test(text))
+      if (text.length < 8) continue;
+      if (
+        !/m[oó]dos[ií]t|t[oö]rl[eé]s|gyorsn[eé]zet|[aá]rt[aá]bla|kiemel|c[ií]mlap|lexus|kia|mercedes|bmw|audi|ford|opel|toyota|volkswagen|skoda|hyundai|maserati|land\s*rover|volvo|suzuki|nissan|honda|peugeot|renault|\bE\s*250\b|\bCDI\b/i.test(
+          text
+        )
+      ) {
         continue;
+      }
       if (/menü|navig|belép|kijelent|^ssz/i.test(text) && text.length < 40) continue;
 
       const titleLink = pickTitleLinkFromRow(row, rootDoc);
-      const id = pickIdFromRow(row) || (titleLink ? pickListingId(titleLink.href) : "");
+      let id = pickIdFromRow(row) || (titleLink ? pickListingId(titleLink.href) : "");
+      if (id.length < 5) {
+        for (const a of row.querySelectorAll("a[href]")) {
+          id = pickListingId(a.href || a.getAttribute("href") || "");
+          if (id.length >= 5) break;
+        }
+      }
       if (id.length < 5) continue;
 
       let adminUrl = "";
@@ -796,6 +850,9 @@
           const host = u.hostname.replace(/^www\./, "").toLowerCase();
           if (host.startsWith("admin.") && (/\/hirdetesfeladas\//i.test(u.pathname) || /m[oó]dos[ií]t/i.test(aText))) {
             adminUrl = u.href.split("#")[0];
+            if (/m[oó]dos[ií]t/i.test(aText) || /\/hirdetesfeladas\//i.test(u.pathname)) {
+              clickUrl = clickUrl || adminUrl;
+            }
           } else if (host.endsWith("hasznaltauto.hu") && !host.startsWith("admin.") && pickListingId(u.href)) {
             publicUrl = `${u.origin}${u.pathname}`;
           }
@@ -818,10 +875,7 @@
       const price = priceMatch ? priceMatch[1].replace(/[.\s]/g, "") : "";
       const km = (text.match(/(\d[\d\s.]*)\s*km/i) || [])[0] || "";
       const year = (text.match(/\b((?:19|20)\d{2})(?:\/\d{1,2})?\b/) || [])[1] || "";
-      let imageUrl = "";
-      const img = row.querySelector("img[src], img[data-src], img[data-lazy]");
-      const raw = img?.currentSrc || img?.src || img?.getAttribute("data-src") || img?.getAttribute("data-lazy") || "";
-      if (/^https?:\/\//i.test(raw) && !/logo|icon|sprite|badge/i.test(raw)) imageUrl = raw;
+      const imageUrl = pickRowImage(row);
 
       const fromTitle = brandModelFromTitle(title);
       const page = {
@@ -843,13 +897,8 @@
         adminUrl,
         publicUrl,
       };
-      if (!isUsefulPage(page) && !title) continue;
-      if (!isUsefulPage(page) && title) {
-        // Cím-link megvan — akkor is vigyük tovább, a részletes oldal fogja feltölteni
-        page.fromListCard = true;
-      }
       const prev = byId[id];
-      if (!prev || clean(page.visibleTitle).length > clean(prev.visibleTitle || "").length) {
+      if (!prev || clean(page.visibleTitle).length > clean(prev.visibleTitle || "").length || (!prev.visibleImage && page.visibleImage)) {
         byId[id] = page;
       }
     }
@@ -1307,13 +1356,17 @@
                 id: card.listingId,
                 adminUrl: card.adminUrl,
                 publicUrl: card.publicUrl,
-                clickUrl: card.clickUrl || card.url,
+                clickUrl: card.adminUrl || card.clickUrl || card.url,
                 visibleTitle: card.visibleTitle,
               });
-              const imageUrl = (detail && detail.visibleImage) || card.visibleImage || "";
+              const imageUrl =
+                upgradeImageUrl((detail && detail.visibleImage) || "") ||
+                upgradeImageUrl(card.visibleImage || "") ||
+                "";
               const listingId = (detail && detail.listingId) || card.listingId || "";
-              const detailUrl = (detail && detail.url) || card.clickUrl || card.url || "";
-              return attachPhotoBase64({
+              const detailUrl =
+                (detail && detail.url) || card.adminUrl || card.clickUrl || card.url || "";
+              const withPhoto = await attachPhotoBase64({
                 url: detailUrl,
                 clickUrl: card.clickUrl || card.url || "",
                 listingId,
@@ -1322,11 +1375,18 @@
                 publicUrl: card.publicUrl || "",
                 photoOnly: true,
               });
+              if (!withPhoto.imageJpegBase64 && card.visibleImage && card.visibleImage !== imageUrl) {
+                return attachPhotoBase64({
+                  ...withPhoto,
+                  visibleImage: upgradeImageUrl(card.visibleImage),
+                });
+              }
+              return withPhoto;
             } catch {
               return attachPhotoBase64({
-                url: card.clickUrl || card.url || "",
+                url: card.adminUrl || card.clickUrl || card.url || "",
                 listingId: card.listingId || "",
-                visibleImage: card.visibleImage || "",
+                visibleImage: upgradeImageUrl(card.visibleImage || ""),
                 adminUrl: card.adminUrl || "",
                 publicUrl: card.publicUrl || "",
                 photoOnly: true,
@@ -1336,9 +1396,31 @@
           (done, total) => showProgress(done, total, "kép")
         );
         for (const page of enriched) {
-          if (page && (page.imageJpegBase64 || page.visibleImage) && page.listingId) {
+          if (page && page.listingId && (page.imageJpegBase64 || page.visibleImage)) {
             pages.push(page);
           }
+        }
+        // Ha a részletes oldal nem adott képet, lista-thumb mentése
+        if (!pages.length) {
+          for (const card of base) {
+            if (!card?.listingId) continue;
+            const fallback = await attachPhotoBase64({
+              url: card.adminUrl || card.clickUrl || card.url || "",
+              listingId: card.listingId,
+              visibleImage: upgradeImageUrl(card.visibleImage || ""),
+              adminUrl: card.adminUrl || "",
+              publicUrl: card.publicUrl || "",
+              photoOnly: true,
+            });
+            if (fallback.imageJpegBase64 || fallback.visibleImage) pages.push(fallback);
+          }
+        }
+        if (!pages.length) {
+          hideProgress();
+          alert(
+            `Találtunk ${base.length} autót a listán, de egyikről sem sikerült az első képet menteni. Próbáld újra, vagy nyiss meg egy Módosítás oldalt.`
+          );
+          return;
         }
       }
     } else {

@@ -1,5 +1,6 @@
 (function (root) {
-  const MAX_DEALER = 50;
+  const MAX_DEALER = 500;
+  const MAX_LIST_PAGES = 80;
 
   function clean(t) {
     return String(t || "").replace(/\s+/g, " ").trim();
@@ -383,7 +384,12 @@
     if (!page || typeof page !== "object") return page;
     const mapCount = page.map && typeof page.map === "object" ? Object.keys(page.map).length : 0;
     const hasBody = String(page.bodyText || "").length >= 400;
-    const html = mapCount >= 5 || hasBody ? "" : String(page.html || "").slice(0, 20000);
+    // Teljes Módosítás oldal: tartsuk meg a HTML-t is, ha a map még vékony
+    const htmlRaw = String(page.html || "");
+    const html =
+      mapCount >= 12 && hasBody
+        ? ""
+        : htmlRaw.slice(0, mapCount >= 5 ? 60000 : 120000);
     return {
       url: page.url || "",
       listingId: page.listingId || "",
@@ -397,10 +403,12 @@
       brand: page.brand || "",
       model: page.model || "",
       map: page.map && typeof page.map === "object" ? page.map : {},
-      felszereltseg: Array.isArray(page.felszereltseg) ? page.felszereltseg.slice(0, 120) : [],
-      bodyText: String(page.bodyText || "").slice(0, 12000),
+      felszereltseg: Array.isArray(page.felszereltseg) ? page.felszereltseg.slice(0, 200) : [],
+      bodyText: String(page.bodyText || "").slice(0, 20000),
       html,
       fromListCard: Boolean(page.fromListCard),
+      adminUrl: page.adminUrl || "",
+      publicUrl: page.publicUrl || "",
     };
   }
 
@@ -556,10 +564,10 @@
     return "";
   }
 
-  function extractDealerListPages() {
+  function extractDealerListPages(rootDoc = document) {
     const byId = {};
     const rowNodes = [
-      ...document.querySelectorAll(
+      ...rootDoc.querySelectorAll(
         "table tbody tr, table tr, .talalati-sor, [class*='hirdetes'] tr, [class*='jarmu'] tr, [class*='list'] tr, article, li, [class*='row']"
       ),
     ];
@@ -576,14 +584,14 @@
       let adminUrl = "";
       let publicUrl = "";
       for (const a of row.querySelectorAll("a[href]")) {
-        const href = String(a.href || "");
+        const href = String(a.href || a.getAttribute("href") || "");
         const aText = clean(a.innerText || a.textContent || "");
         try {
-          const u = new URL(href);
+          const u = new URL(href, rootDoc.baseURI || location.href);
           const host = u.hostname.replace(/^www\./, "").toLowerCase();
           if (host.startsWith("admin.") && (/\/hirdetesfeladas\//i.test(u.pathname) || /m[oó]dos[ií]t/i.test(aText))) {
-            adminUrl = href.split("#")[0];
-          } else if (host.endsWith("hasznaltauto.hu") && !host.startsWith("admin.") && pickListingId(href)) {
+            adminUrl = u.href.split("#")[0];
+          } else if (host.endsWith("hasznaltauto.hu") && !host.startsWith("admin.") && pickListingId(u.href)) {
             publicUrl = `${u.origin}${u.pathname}`;
           }
         } catch {
@@ -639,6 +647,93 @@
       }
     }
     return Object.values(byId);
+  }
+
+  function discoverPaginationUrls(rootDoc = document) {
+    const selfUrl = String(location.href || "").split("#")[0];
+    const urls = new Set([selfUrl]);
+    const push = (href) => {
+      try {
+        const u = new URL(href, rootDoc.baseURI || location.href);
+        if (u.hostname.replace(/^www\./, "") !== location.hostname.replace(/^www\./, "")) return;
+        const bare = u.href.split("#")[0];
+        if (bare) urls.add(bare);
+      } catch {
+      }
+    };
+    for (const a of rootDoc.querySelectorAll("a[href]")) {
+      const href = String(a.getAttribute("href") || a.href || "");
+      const text = clean(a.innerText || a.textContent || "");
+      if (
+        /[?&](page|oldal|p|offset|start)=/i.test(href) ||
+        /\/(page|oldal)\/\d+/i.test(href) ||
+        /^(?:\d+|következ[oő]|kovetkezo|előző|elozo|next|prev|›|»|‹|«)$/i.test(text) ||
+        /következ|kovetkez|next|előző|elozo|prev/i.test(text)
+      ) {
+        push(href);
+      }
+    }
+    for (const opt of rootDoc.querySelectorAll("select option[value]")) {
+      const value = String(opt.value || "");
+      if (/^\d+$/.test(value) && Number(value) >= 1 && Number(value) <= 200) {
+        try {
+          const u = new URL(selfUrl);
+          if (u.searchParams.has("page")) u.searchParams.set("page", value);
+          else if (u.searchParams.has("oldal")) u.searchParams.set("oldal", value);
+          else if (u.searchParams.has("p")) u.searchParams.set("p", value);
+          else u.searchParams.set("page", value);
+          urls.add(u.href.split("#")[0]);
+        } catch {
+        }
+      }
+    }
+    return [...urls].slice(0, MAX_LIST_PAGES);
+  }
+
+  async function fetchListDocument(url) {
+    const res = await fetch(url, {
+      credentials: "include",
+      headers: { Accept: "text/html,application/xhtml+xml" },
+    });
+    if (!res.ok) throw new Error(`Lista oldal hiba (${res.status})`);
+    const html = await res.text();
+    return new DOMParser().parseFromString(html, "text/html");
+  }
+
+  async function collectAllDealerListPages(onProgress) {
+    const byId = {};
+    const merge = (pages) => {
+      for (const page of pages) {
+        const id = page.listingId;
+        if (!id) continue;
+        const prev = byId[id];
+        if (!prev || clean(page.visibleTitle).length > clean(prev.visibleTitle || "").length) {
+          byId[id] = page;
+        }
+      }
+    };
+
+    merge(extractDealerListPages(document));
+    const queue = discoverPaginationUrls(document);
+    const seen = new Set([String(location.href || "").split("#")[0]]);
+    let i = 0;
+    while (i < queue.length && seen.size < MAX_LIST_PAGES) {
+      const url = queue[i];
+      i += 1;
+      if (seen.has(url)) continue;
+      seen.add(url);
+      if (typeof onProgress === "function") onProgress(seen.size, Math.max(queue.length, seen.size), "lista lapozás");
+      try {
+        const doc = await fetchListDocument(url);
+        merge(extractDealerListPages(doc));
+        for (const next of discoverPaginationUrls(doc)) {
+          if (!seen.has(next) && !queue.includes(next) && queue.length < MAX_LIST_PAGES) queue.push(next);
+        }
+      } catch {
+        /* skip unreachable list page */
+      }
+    }
+    return Object.values(byId).slice(0, MAX_DEALER);
   }
 
   function extractListCardFallback(ref) {
@@ -967,7 +1062,7 @@
       if (isUsefulPage(one)) pages.push(one);
     } else if (mode === "dealer" || (onAdminHost && !isPublicListingPage())) {
       showProgress(0, 1, "lista beolvasása");
-      const fromList = extractDealerListPages().slice(0, MAX_DEALER);
+      const fromList = await collectAllDealerListPages((done, total, label) => showProgress(done, total, label));
       if (!fromList.length) {
         hideProgress();
         const trCount = document.querySelectorAll("table tr, .talalati-sor").length;
@@ -987,7 +1082,7 @@
         pages.length = 0;
         const enriched = await mapPool(
           base,
-          3,
+          2,
           async (card) => {
             try {
               const detail = await extractRefPage({

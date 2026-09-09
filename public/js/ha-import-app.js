@@ -48,7 +48,7 @@ function setMode(mode) {
 
 function bookmarkletHref(mode) {
   const origin = location.origin;
-  const src = `${origin}/js/ha-import-bookmarklet.js?v=haImp26`;
+  const src = `${origin}/js/ha-import-bookmarklet.js?v=haImp27`;
   return `javascript:void(function(){var o=${JSON.stringify(origin)};var m=${JSON.stringify(mode)};var src=${JSON.stringify(src)}+"&t="+Date.now();function go(){try{window.BymyHaImport.run({origin:o,mode:m});}catch(e){alert((e&&e.message)||e);}}try{delete window.BymyHaImport;}catch(e){window.BymyHaImport=undefined;}var s=document.createElement("script");s.src=src;s.onload=go;s.onerror=function(){alert("A hasznaltauto.hu blokkolta a Bymy scriptet. Másold a hirdetés URL-jét a Bymy Autóimport oldalra.");};(document.documentElement||document.body).appendChild(s);})();`;
 }
 
@@ -124,22 +124,19 @@ function renderResult(result) {
   const saved = result?.savedCount ?? 0;
   const skipped = result?.skippedCount ?? 0;
   const errors = result?.errorCount ?? 0;
+  const updated = (result?.items || []).filter((item) => item?.updated).length;
+  const created = Math.max(0, saved - updated);
   let summary = "";
-  if (saved === 0 && skipped > 0 && errors === 0) {
-    summary =
-      skipped === 1
-        ? "Ez a hirdetés már bent van — átugrottuk, nem került be újra."
-        : `${skipped} hirdetés már bent volt — mindet átugrottuk.`;
+  if (saved === 0 && errors === 0) {
+    summary = "Nem került be új / frissített hirdetés.";
   } else {
-    summary = `${saved} hirdetés importálva.`;
-    if (skipped > 0) summary += ` ${skipped} már bent volt, ezeket átugrottuk.`;
+    const parts = [];
+    if (created > 0) parts.push(`${created} új`);
+    if (updated > 0) parts.push(`${updated} frissítve`);
+    summary = parts.length ? `${parts.join(", ")}.` : `${saved} hirdetés mentve.`;
     if (errors > 0) summary += ` ${errors} hiba.`;
   }
-  if (currentMode() === "dealer" && saved === 0 && skipped <= 1) {
-    summary += " Több autóhoz nyisd meg a Hirdetéseim listát, majd futtasd újra a könyvjelzőt.";
-  } else if (currentMode() === "dealer" && (result?.count ?? 0) >= 50) {
-    summary += " Ha a listán több autó volt, lapozz, majd importáld újra a többit.";
-  }
+  if (skipped > 0) summary += ` ${skipped} kihagyva.`;
   box.hidden = false;
   box.innerHTML = `<p>${summary}</p>`;
   const items = result?.items ?? [];

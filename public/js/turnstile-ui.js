@@ -1,4 +1,4 @@
-const SCRIPT_SRC = "https://challenges.cloudflare.com/turnstile/v0/api.js";
+const SCRIPT_SRC = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
 let scriptPromise = null;
 let cachedConfig = null;
 
@@ -17,14 +17,12 @@ async function loadConfig() {
 }
 
 function loadScript() {
-  if (window.turnstile) return Promise.resolve();
+  if (window.turnstile?.render) return Promise.resolve();
   if (scriptPromise) return scriptPromise;
   scriptPromise = new Promise((resolve, reject) => {
-    const existing = document.querySelector(`script[src="${SCRIPT_SRC}"]`);
-    if (existing) {
-      existing.addEventListener("load", () => resolve());
-      existing.addEventListener("error", () => reject(new Error("Turnstile script hiba")));
-      if (window.turnstile) resolve();
+    const existing = document.querySelector('script[src*="challenges.cloudflare.com/turnstile"]');
+    if (existing && window.turnstile?.render) {
+      resolve();
       return;
     }
     const s = document.createElement("script");
@@ -38,40 +36,102 @@ function loadScript() {
   return scriptPromise;
 }
 
-export async function mountTurnstile(container, { theme = "auto" } = {}) {
-  if (!container) return { enabled: false, getToken: async () => "", reset: () => {} };
+function waitForTurnstileApi(timeoutMs = 12000) {
+  return new Promise((resolve, reject) => {
+    const started = Date.now();
+    const tick = () => {
+      if (window.turnstile?.render) {
+        resolve();
+        return;
+      }
+      if (Date.now() - started > timeoutMs) {
+        reject(new Error("Turnstile nem töltődött be"));
+        return;
+      }
+      setTimeout(tick, 40);
+    };
+    tick();
+  });
+}
+
+/**
+ * Cloudflare Turnstile — hasznaltauto-szerű pipás ellenőrző.
+ * @returns {Promise<{ enabled: boolean, ready: boolean, getToken: () => Promise<string>, reset: () => void, error?: string }>}
+ */
+export async function mountTurnstile(container, { theme = "light" } = {}) {
+  if (!container) return { enabled: false, ready: true, getToken: async () => "", reset: () => {} };
+
   const config = await loadConfig();
   if (!config.enabled || !config.siteKey) {
-    return { enabled: false, getToken: async () => "", reset: () => {} };
+    return { enabled: false, ready: true, getToken: async () => "", reset: () => {} };
   }
 
-  await loadScript();
+  const box = container.closest(".auth-security-box") || container;
+  box.hidden = false;
   container.hidden = false;
   container.innerHTML = "";
+  container.setAttribute("aria-busy", "true");
+
   let widgetId = null;
   let token = "";
+  let ready = false;
 
-  widgetId = window.turnstile.render(container, {
-    sitekey: config.siteKey,
-    theme,
-    callback: (value) => {
-      token = String(value || "");
-    },
-    "expired-callback": () => {
-      token = "";
-    },
-    "error-callback": () => {
-      token = "";
-    },
-  });
+  try {
+    await loadScript();
+    await waitForTurnstileApi();
+    await new Promise((resolve) => {
+      if (typeof window.turnstile.ready === "function") {
+        window.turnstile.ready(resolve);
+      } else {
+        resolve();
+      }
+    });
+
+    widgetId = window.turnstile.render(container, {
+      sitekey: config.siteKey,
+      theme,
+      size: "normal",
+      appearance: "always",
+      execution: "render",
+      language: "hu",
+      callback: (value) => {
+        token = String(value || "");
+        ready = true;
+        container.setAttribute("aria-busy", "false");
+        container.removeAttribute("data-turnstile-error");
+      },
+      "expired-callback": () => {
+        token = "";
+      },
+      "error-callback": () => {
+        token = "";
+        container.setAttribute("data-turnstile-error", "1");
+      },
+      "timeout-callback": () => {
+        token = "";
+      },
+    });
+    ready = true;
+    container.setAttribute("aria-busy", "false");
+  } catch (error) {
+    container.innerHTML =
+      '<p class="auth-security-fail">A biztonsági ellenőrző nem töltődött be. Frissítsd az oldalt, vagy kapcsold ki a reklámblokkolót.</p>';
+    return {
+      enabled: true,
+      ready: false,
+      error: error?.message || "Turnstile hiba",
+      getToken: async () => "",
+      reset: () => {},
+    };
+  }
 
   return {
     enabled: true,
+    ready: true,
     getToken: async () => {
       if (token) return token;
       try {
-        const fresh = window.turnstile?.getResponse?.(widgetId);
-        return String(fresh || "");
+        return String(window.turnstile?.getResponse?.(widgetId) || "");
       } catch {
         return "";
       }

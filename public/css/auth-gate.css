@@ -188,10 +188,37 @@ body.auth-gate-page .login-form {
   gap: 0.75rem;
 }
 
-body.auth-gate-page .auth-turnstile {
+body.auth-gate-page .auth-security-box {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  margin: 0.1rem 0 0.15rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-sizing: border-box;
+  overflow: visible;
+}
+
+body.auth-gate-page .auth-turnstile {
+  display: block;
   min-height: 65px;
+  width: 100%;
+  max-width: 100%;
+  overflow: visible;
+  line-height: 0;
+}
+
+body.auth-gate-page .auth-turnstile iframe {
+  max-width: 100%;
+}
+
+body.auth-gate-page .auth-security-fail {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #b42318;
+  line-height: 1.4;
 }
 
 body.auth-gate-page .login-field {

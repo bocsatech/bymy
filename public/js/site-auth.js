@@ -1,5 +1,5 @@
 import { safeInternalPath } from "./safe-path.js?v=sec1";
-import { mountTurnstile } from "./turnstile-ui.js?v=turnstile1";
+import { mountTurnstile } from "./turnstile-ui.js?v=turnstile3";
 
 function migrateLegacyAutoswebStorage() {
   try {
@@ -579,9 +579,10 @@ export function initRegisterPage() {
   const submitBtn = form?.querySelector('button[type="submit"]');
   if (!form) return;
 
-  let turnstile = { enabled: false, getToken: async () => "", reset: () => {} };
-  void mountTurnstile(document.getElementById("auth-turnstile")).then((widget) => {
+  let turnstile = { enabled: false, ready: true, getToken: async () => "", reset: () => {} };
+  const turnstileReady = mountTurnstile(document.getElementById("auth-turnstile")).then((widget) => {
     turnstile = widget;
+    return widget;
   });
 
   refreshAuthSession().then((user) => {
@@ -647,6 +648,10 @@ export function initRegisterPage() {
     const data = new FormData(form);
     const email = String(data.get("email") || "").trim();
     try {
+      await turnstileReady;
+      if (turnstile.enabled && turnstile.ready === false) {
+        throw new Error("A biztonsági ellenőrző nem töltődött be. Frissítsd az oldalt.");
+      }
       const turnstileToken = await turnstile.getToken();
       if (turnstile.enabled && !turnstileToken) {
         throw new Error("Pipáld be a biztonsági ellenőrzést.");
@@ -703,9 +708,10 @@ export function initLoginPage() {
   const errorEl = document.getElementById("login-error");
   if (!form) return;
 
-  let turnstile = { enabled: false, getToken: async () => "", reset: () => {} };
-  void mountTurnstile(document.getElementById("auth-turnstile")).then((widget) => {
+  let turnstile = { enabled: false, ready: true, getToken: async () => "", reset: () => {} };
+  const turnstileReady = mountTurnstile(document.getElementById("auth-turnstile")).then((widget) => {
     turnstile = widget;
+    return widget;
   });
 
   const params = new URLSearchParams(window.location.search);
@@ -733,6 +739,10 @@ export function initLoginPage() {
     const data = new FormData(form);
     const email = data.get("email");
     try {
+      await turnstileReady;
+      if (turnstile.enabled && turnstile.ready === false) {
+        throw new Error("A biztonsági ellenőrző nem töltődött be. Frissítsd az oldalt.");
+      }
       const turnstileToken = await turnstile.getToken();
       if (turnstile.enabled && !turnstileToken) {
         throw new Error("Pipáld be a biztonsági ellenőrzést.");

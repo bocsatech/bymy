@@ -1,0 +1,31 @@
+---
+description: HA gyorsnézet kiolvasás — az import alapja (1 autó)
+alwaysApply: true
+---
+
+# HA import kiolvasás alapja
+
+Referencia hirdetés: `https://admin.hasznaltauto.hu/gyorsnezet/szemelyauto/23113337`
+
+**Arany mentés (jó form, amit a 394-es feladás használt):**  
+`docs/ha-import-mercedes-23113337-gold.json`  
+Ezt ne írd felül kísérleti importtal. Az import célja: ugyanilyen mezők jöjjenek ki.
+
+## Hogyan kell kiolvasni
+
+1. Bejelentkezett böngészőben nyitva a **admin gyorsnézet** oldal (nem nyilvános www, nem lista).
+2. A lap **HTML forrása** (Safari: tab `source`) — Cloudflare / JS nélkül is megvan a tartalom.
+3. Ebből kinyerni:
+   - **Cím:** az értelmes `<h1>` (nem „Hiba! JavaScript…”, nem „Hirdetés gyorsnézet”).
+   - **Mezők:** `table` / `tr` → első cella = címke, utolsó = érték (Vételár, Gyártási év, Km, Szín, Motor, Okmányok, gumi, stb.).
+   - **Felszereltség:** szövegblokkok `Beltér`, `Műszaki`, `Kültér`, `Multimédia / Navigáció`, `Egyéb információ` alatt, soronként.
+   - **Kép:** első galéria kép **HQ** URL: `https://img.hasznaltautocdn.com/2048x1536/{id}/{imgId}.jpg` (ne a `118x88` thumb).
+   - **Hirdetés ID** az URL-ből / Hirdetéskód.
+4. Egyéb (kereskedés telefon, dataLayer) **nem** hirdetésmező.
+5. Import: **egyszerre 1 autó**, amíg ez a pipeline 100% stimmel.
+
+## Ne
+
+- Lista / gyorsnézet-kártya szövegből találgatni címet („Új!”, dátum).
+- Szerveroldali HA fetch Cloudflare mögül egyedüli forrásként.
+- Sok autó batch, amíg az 1-autó út nem stabil.

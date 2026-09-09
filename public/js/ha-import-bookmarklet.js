@@ -297,7 +297,10 @@
     if (page.imageJpegBase64) return page;
     const url = page.visibleImage || "";
     if (!url) return page;
-    const b64 = await fetchImageBase64(url);
+    page.visibleImage = upgradeImageUrl(url) || url;
+    // HTTP URL → a Bymy szerver tölti le (HQ). Ne pakoljunk base64-et a postMessage-be.
+    if (page.photoOnly || /^https?:\/\//i.test(page.visibleImage)) return page;
+    const b64 = await fetchImageBase64(page.visibleImage);
     if (b64) page.imageJpegBase64 = b64;
     return page;
   }
@@ -619,14 +622,12 @@
   function slimPageForDelivery(page) {
     if (!page || typeof page !== "object") return page;
     if (page.photoOnly) {
-      const visibleImage = page.visibleImage || "";
-      const hasHttpImage = /^https?:\/\//i.test(visibleImage);
+      const visibleImage = upgradeImageUrl(page.visibleImage || "") || page.visibleImage || "";
       return {
         url: page.url || page.clickUrl || "",
         listingId: page.listingId || "",
         visibleImage,
-        // HTTP kép URL elég — a nagy base64 elrontja a postMessage / sessionStorage átadást
-        imageJpegBase64: hasHttpImage ? "" : page.imageJpegBase64 || "",
+        imageJpegBase64: "",
         clickUrl: page.clickUrl || page.url || "",
         adminUrl: page.adminUrl || "",
         publicUrl: page.publicUrl || "",
@@ -641,12 +642,15 @@
       mapCount >= 12 && hasBody
         ? ""
         : htmlRaw.slice(0, mapCount >= 5 ? 60000 : 120000);
+    const visibleImage = upgradeImageUrl(page.visibleImage || "") || page.visibleImage || "";
+    const hasHttpImage = /^https?:\/\//i.test(visibleImage);
     return {
       url: page.url || "",
       listingId: page.listingId || "",
       visibleTitle: page.visibleTitle || page.title || "",
-      visibleImage: page.visibleImage || "",
-      imageJpegBase64: page.imageJpegBase64 || "",
+      visibleImage,
+      // HTTP kép URL elég — a nagy HQ base64 elrontja a postMessage / sessionStorage átadást
+      imageJpegBase64: hasHttpImage ? "" : page.imageJpegBase64 || "",
       visibleDescription: page.visibleDescription || page.description || "",
       price: page.price || "",
       km: page.km || "",
@@ -1320,7 +1324,8 @@
     const sendTo = (target) => {
       if (!target || target.closed) return false;
       try {
-        target.postMessage(body, origin);
+        // "*" — ha a lap vercel.app ↔ bymy.hu között redirectel, specifikus origin elnyeli az üzenetet
+        target.postMessage(body, "*");
         return true;
       } catch {
         return false;
@@ -1336,8 +1341,8 @@
         }
         n += 1;
         sendTo(target);
-        if (n >= 16) clearInterval(timer);
-      }, 400);
+        if (n >= 40) clearInterval(timer);
+      }, 500);
     };
 
     if (window.opener && !window.opener.closed && sendTo(window.opener)) {
@@ -1398,7 +1403,7 @@
       const send = () => {
         if (!target || target.closed) return false;
         try {
-          target.postMessage(body, origin);
+          target.postMessage(body, "*");
           return true;
         } catch {
           return false;
@@ -1413,7 +1418,7 @@
         }
         n += 1;
         send();
-        if (n >= 20) {
+        if (n >= 40) {
           clearInterval(timer);
           try {
             window.removeEventListener("message", onAck);
@@ -1421,7 +1426,7 @@
           }
           resolve(false);
         }
-      }, 400);
+      }, 500);
     });
   }
 
@@ -1453,7 +1458,7 @@
           return false;
         }
       }
-      await sleep(1200);
+      await sleep(2500);
     }
 
     let ok = 0;
@@ -1542,31 +1547,25 @@
               const listingId = (detail && detail.listingId) || card.listingId || "";
               const detailUrl =
                 (detail && detail.url) || card.adminUrl || card.clickUrl || card.url || "";
-              const withPhoto = await attachPhotoBase64({
+              // Csak URL — ne base64 (HQ kép beragasztja a Bymy handoffot)
+              return {
                 url: detailUrl,
                 clickUrl: card.clickUrl || card.url || "",
                 listingId,
-                visibleImage: imageUrl,
+                visibleImage: imageUrl || upgradeImageUrl(card.visibleImage || "") || "",
                 adminUrl: card.adminUrl || "",
                 publicUrl: card.publicUrl || "",
                 photoOnly: true,
-              });
-              if (!withPhoto.imageJpegBase64 && card.visibleImage && card.visibleImage !== imageUrl) {
-                return attachPhotoBase64({
-                  ...withPhoto,
-                  visibleImage: upgradeImageUrl(card.visibleImage),
-                });
-              }
-              return withPhoto;
+              };
             } catch {
-              return attachPhotoBase64({
+              return {
                 url: card.adminUrl || card.clickUrl || card.url || "",
                 listingId: card.listingId || "",
-                visibleImage: upgradeImageUrl(card.visibleImage || ""),
+                visibleImage: upgradeImageUrl(card.visibleImage || "") || "",
                 adminUrl: card.adminUrl || "",
                 publicUrl: card.publicUrl || "",
                 photoOnly: true,
-              });
+              };
             }
           },
           (done, total) => showProgress(done, total, "kép")
@@ -1576,19 +1575,19 @@
             pages.push(page);
           }
         }
-        // Ha a részletes oldal nem adott képet, lista-thumb mentése
+        // Ha a részletes oldal nem adott képet, lista-thumb (HQ-ra upgrade-elve)
         if (!pages.length) {
           for (const card of base) {
             if (!card?.listingId) continue;
-            const fallback = await attachPhotoBase64({
+            const fallback = {
               url: card.adminUrl || card.clickUrl || card.url || "",
               listingId: card.listingId,
-              visibleImage: upgradeImageUrl(card.visibleImage || ""),
+              visibleImage: upgradeImageUrl(card.visibleImage || "") || "",
               adminUrl: card.adminUrl || "",
               publicUrl: card.publicUrl || "",
               photoOnly: true,
-            });
-            if (fallback.imageJpegBase64 || fallback.visibleImage) pages.push(fallback);
+            };
+            if (fallback.visibleImage) pages.push(fallback);
           }
         }
         if (!pages.length) {

@@ -48,7 +48,7 @@ function setMode(mode) {
 
 function bookmarkletHref(mode) {
   const origin = location.origin;
-  const src = `${origin}/js/ha-import-bookmarklet.js?v=haDealerPhoto4`;
+  const src = `${origin}/js/ha-import-bookmarklet.js?v=haDealerPhoto5`;
   return `javascript:void(function(){var o=${JSON.stringify(origin)};var m=${JSON.stringify(mode)};var src=${JSON.stringify(src)}+"&t="+Date.now();function go(){try{window.BymyHaImport.run({origin:o,mode:m});}catch(e){alert((e&&e.message)||e);}}try{delete window.BymyHaImport;}catch(e){window.BymyHaImport=undefined;}var s=document.createElement("script");s.src=src;s.onload=go;s.onerror=function(){alert("A hasznaltauto.hu blokkolta a Bymy scriptet. Másold a hirdetés URL-jét a Bymy Autóimport oldalra.");};(document.documentElement||document.body).appendChild(s);})();`;
 }
 
@@ -313,7 +313,7 @@ function ackHaImport(event, data) {
   try {
     event.source?.postMessage(
       { type: "bymy-ha-import-ack", importId: data?.importId || null, pages: Array.isArray(data?.pages) ? data.pages.length : 0 },
-      event.origin || "*"
+      "*"
     );
   } catch {
   }
@@ -525,6 +525,16 @@ export async function initHaImportPage() {
     }
   } else if (new URLSearchParams(location.search).has("ha")) {
     setStatus("Várom a hasznaltauto.hu oldal adatait…");
+    window.setTimeout(() => {
+      const el = document.getElementById("ha-imp-status");
+      if (!el) return;
+      const text = String(el.textContent || "");
+      if (!/Várom a hasznaltauto/i.test(text)) return;
+      setStatus(
+        "Még nem jött adat. A hasznaltauto lapon nézd a fekete sávot (küldés). Ha kész, futtasd újra a könyvjelzőt — ne zárd be ezt a Bymy lapot.",
+        "err"
+      );
+    }, 20000);
   }
 }
 

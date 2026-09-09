@@ -1634,7 +1634,7 @@ async function handleAuthApi(req, res, pathname) {
         }
         throw error;
       }
-      sendJson(res, 200, { user: me });
+      sendJson(res, 200, { user: me, token: me && token ? token : null });
       return;
     }
 

@@ -4,7 +4,7 @@ import {
   getDisplayName,
   requireAuthForPage,
   initSiteAuth,
-} from "./site-auth.js?v=haToken1";
+} from "./site-auth.js?v=haCdn1";
 
 const CAT_STORAGE_KEY = "bymy-hirdetes-category";
 const CAT_STORAGE_VERSION = 2;
@@ -20,16 +20,18 @@ const MODES = {
   dealer: {
     title: "Kereskedői import",
     startURL: "https://admin.hasznaltauto.hu/",
-    steps: "1. Ezen a lapon: admin megnyitása  ·  2. Járműlista  ·  3. Könyvjelző (friss)  ·  4. Ne zárd be ezt a lapot",
-    action: "Lista importálása (csak első kép)",
-    footer: "Fontos: másold / húzd a friss könyvjelzőt. Opener nélkül is ment (session token). Új Bymy tabot nem nyitunk.",
+    steps: "1. Admin megnyitása  ·  2. Járműlista (thumbök látszanak)  ·  3. Friss könyvjelző másolása / futtatása",
+    action: "Lista → csak első kép (CDN)",
+    footer: "Új motor: a lista CDN képeiből olvassuk az ID-t. Opener nem kell — session token megy a könyvjelzőben.",
     openLabel: "admin.hasznaltauto.hu megnyitása",
   },
 };
 
 function authHeaders() {
+  const token = getAuthToken();
   return {
     "Content-Type": "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
 }
 
@@ -49,9 +51,13 @@ function setMode(mode) {
 
 function bookmarkletHref(mode) {
   const origin = location.origin;
-  const src = `${origin}/js/ha-import-bookmarklet.js?v=haDealerPhoto14`;
+  const isDealer = mode === "dealer";
+  const src = isDealer
+    ? `${origin}/js/ha-dealer-import.js?v=haCdn1`
+    : `${origin}/js/ha-import-bookmarklet.js?v=haDealerPhoto14`;
   const token = getAuthToken() || "";
-  return `javascript:void(function(){var o=${JSON.stringify(origin)};var m=${JSON.stringify(mode)};var t=${JSON.stringify(token)};var src=${JSON.stringify(src)}+"&t="+Date.now();function go(){try{window.BymyHaImport.run({origin:o,mode:m,authToken:t});}catch(e){alert((e&&e.message)||e);}}try{delete window.BymyHaImport;}catch(e){window.BymyHaImport=undefined;}var s=document.createElement("script");s.src=src;s.onload=go;s.onerror=function(){alert("A hasznaltauto.hu blokkolta a Bymy scriptet. Másold a hirdetés URL-jét a Bymy Autóimport oldalra.");};(document.documentElement||document.body).appendChild(s);})();`;
+  const runner = isDealer ? "BymyHaDealerImport" : "BymyHaImport";
+  return `javascript:void(function(){var o=${JSON.stringify(origin)};var m=${JSON.stringify(mode)};var t=${JSON.stringify(token)};var src=${JSON.stringify(src)}+"&t="+Date.now();function go(){try{window.${runner}.run({origin:o,mode:m,authToken:t});}catch(e){alert((e&&e.message)||e);}}try{delete window.${runner};}catch(e){window.${runner}=undefined;}var s=document.createElement("script");s.src=src;s.onload=go;s.onerror=function(){alert("A hasznaltauto.hu blokkolta a Bymy scriptet.");};(document.documentElement||document.body).appendChild(s);})();`;
 }
 
 async function copyBookmarkletLink() {

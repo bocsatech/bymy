@@ -22,6 +22,7 @@ migrateLegacyAutoswebStorage();
 
 const AUTH_KEY = "bymy-auth-user";
 const TOKEN_KEY = "bymy-auth-token";
+const TOKEN_SESSION_KEY = "bymy-auth-token-session";
 const PROFILE_BACKUP_KEY = "bymy-profile-backup";
 
 let memoryToken = "";
@@ -37,7 +38,16 @@ function clearLegacyTokenStorage() {
 clearLegacyTokenStorage();
 
 function getStoredToken() {
-  return memoryToken || "";
+  if (memoryToken) return memoryToken;
+  try {
+    const fromSession = sessionStorage.getItem(TOKEN_SESSION_KEY);
+    if (fromSession) {
+      memoryToken = fromSession;
+      return memoryToken;
+    }
+  } catch {
+  }
+  return "";
 }
 
 export function getAuthToken() {
@@ -47,10 +57,19 @@ export function getAuthToken() {
 function setStoredToken(token) {
   memoryToken = token ? String(token) : "";
   clearLegacyTokenStorage();
+  try {
+    if (memoryToken) sessionStorage.setItem(TOKEN_SESSION_KEY, memoryToken);
+    else sessionStorage.removeItem(TOKEN_SESSION_KEY);
+  } catch {
+  }
 }
 
 function clearSensitiveLocalData() {
   clearLegacyTokenStorage();
+  try {
+    sessionStorage.removeItem(TOKEN_SESSION_KEY);
+  } catch {
+  }
   try {
     localStorage.removeItem(PROFILE_BACKUP_KEY);
     localStorage.removeItem("autosweb-profile-backup");

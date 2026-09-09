@@ -896,19 +896,69 @@
     return "";
   }
 
-  function pickRowImage(row) {
+  /** Módosítás link gyakran egy szűk .row-ban van — menjünk feljebb, ahol van ID + autó szöveg. */
+  function closestListingRow(startEl, rootDoc = document) {
+    let node = startEl;
+    let fallback = null;
+    for (let depth = 0; depth < 14 && node && node !== rootDoc.body; depth += 1) {
+      if (node.nodeType !== 1) {
+        node = node.parentElement;
+        continue;
+      }
+      const text = String(node.innerText || node.textContent || "");
+      if (text.length < 20 || text.length > 12000) {
+        node = node.parentElement;
+        continue;
+      }
+      const hasAction = /m[oó]dos[ií]t|t[oö]rl[eé]s|[aá]rt[aá]bla|gyorsn[eé]zet/i.test(text);
+      const hasVehicle =
+        /mercedes|bmw|audi|ford|opel|toyota|volkswagen|skoda|hyundai|lexus|kia|volvo|suzuki|nissan|honda|peugeot|renault|maserati|land\s*rover|\bCDI\b|\bCRDI\b|\bFt\b|\bkm\b/i.test(
+          text
+        );
+      const id = pickIdFromRow(node);
+      if (hasAction && id.length >= 5 && (hasVehicle || text.length > 60)) {
+        return node;
+      }
+      if (!fallback && hasAction && (hasVehicle || id.length >= 5)) fallback = node;
+      node = node.parentElement;
+    }
+    return (
+      fallback ||
+      startEl?.closest?.(
+        "tr, article, li, .talalati-sor, [class*='hirdetes-sor'], [class*='jarmu-sor'], [class*='listing']"
+      ) ||
+      startEl?.parentElement ||
+      null
+    );
+  }
+
+  function absUrl(raw, rootDoc = document) {
+    let src = String(raw || "").trim();
+    if (!src || src.startsWith("data:")) return "";
+    if (src.startsWith("//")) src = `https:${src}`;
+    if (/^https?:\/\//i.test(src)) return src;
+    try {
+      return new URL(src, rootDoc.baseURI || location.href).href;
+    } catch {
+      return "";
+    }
+  }
+
+  function pickRowImage(row, rootDoc = document) {
     const candidates = [];
     const push = (raw, bonus = 0) => {
-      let src = String(raw || "").trim();
-      if (src.startsWith("//")) src = "https:" + src;
-      if (!/^https?:\/\//i.test(src)) return;
-      if (/logo|icon|sprite|badge|avatar|favicon|pixel|placeholder/i.test(src)) return;
+      let src = absUrl(raw, rootDoc);
+      if (!src) return;
+      if (/logo|icon|sprite|badge|avatar|favicon|pixel|placeholder|1x1|blank\./i.test(src)) return;
+      const upgraded = upgradeImageUrl(src) || src;
       let score = bonus;
       if (/hasznaltauto|hazn|kep|photo|img\.|cdn|hasznaltautocdn/i.test(src)) score += 50000;
-      if (/thumb|mini|small|118x88|240x180|t\d+\b/i.test(src)) score -= 150000;
-      if (/\/2048x1536\//i.test(src)) score += 400000;
-      if (/\/(nagy|large|2048|orig|full)\b/i.test(src)) score += 200000;
-      candidates.push({ src: upgradeImageUrl(src), score });
+      if (/\/2048x1536\//i.test(upgraded)) score += 400000;
+      else if (/\/(1600x1200|1280x960|1024x768|800x600)\//i.test(upgraded)) score += 200000;
+      if (/\/(?:118x88|240x180|100x75|80x60)\//i.test(src)) score += 5000; // thumb is ok — upgrade-oljuk
+      if (/thumb|mini|small|t\d+\b/i.test(src) && !/hasznaltautocdn/i.test(src)) score -= 80000;
+      if (/\/(nagy|large|orig|full)\b/i.test(src)) score += 200000;
+      candidates.push({ src: upgraded, score });
     };
     for (const img of row.querySelectorAll("img")) {
       push(
@@ -963,25 +1013,42 @@
 
   function extractDealerListPages(rootDoc = document) {
     const byId = {};
-    const rowNodes = [
-      ...rootDoc.querySelectorAll(
-        "table tbody tr, table tr, .talalati-sor, [class*='hirdetes'] tr, [class*='jarmu'] tr, [class*='list'] tr, article, li, [class*='row'], [class*='jarmu'], [class*='hirdetes-sor']"
-      ),
-    ];
-    // Fallback: minden Módosítás / hirdetesfeladas link sorából
-    for (const a of rootDoc.querySelectorAll("a[href]")) {
-      const href = String(a.getAttribute("href") || a.href || "");
-      const aText = clean(a.innerText || a.textContent || "");
-      if (!/\/hirdetesfeladas\//i.test(href) && !/m[oó]dos[ií]t/i.test(aText)) continue;
-      const row =
-        a.closest("tr, article, li, .talalati-sor, [class*='row'], [class*='hirdetes'], [class*='jarmu']") || a.parentElement;
+    const rowNodes = [];
+    const pushRow = (row) => {
       if (row && !rowNodes.includes(row)) rowNodes.push(row);
+    };
+    for (const row of rootDoc.querySelectorAll(
+      "table tbody tr, table tr, .talalati-sor, [class*='hirdetes'] tr, [class*='jarmu'] tr, [class*='list'] tr, article, [class*='hirdetes-sor'], [class*='jarmu-sor']"
+    )) {
+      pushRow(row);
+    }
+    // Módosítás / Törlés / hirdetesfeladas — a teljes kártya-ős, ne a szűk gomb-sor
+    for (const a of rootDoc.querySelectorAll("a[href], button, [role='button'], [onclick]")) {
+      const href = String(a.getAttribute("href") || a.href || "");
+      const aText = clean(a.innerText || a.textContent || a.getAttribute("title") || a.getAttribute("aria-label") || "");
+      const onclick = String(a.getAttribute("onclick") || "");
+      if (
+        !/\/hirdetesfeladas\//i.test(href) &&
+        !/\/hirdetesfeladas\//i.test(onclick) &&
+        !/m[oó]dos[ií]t/i.test(aText) &&
+        !/t[oö]rl[eé]s/i.test(aText) &&
+        !/[aá]rt[aá]bla/i.test(aText)
+      ) {
+        continue;
+      }
+      pushRow(closestListingRow(a, rootDoc));
+    }
+    // ID a szövegben: (23161660)
+    for (const el of rootDoc.querySelectorAll("a[href], span, td, div, li")) {
+      const t = clean(el.innerText || el.textContent || "");
+      if (!/^\(?\d{7,10}\)?$/.test(t) && !/\(\d{7,10}\)/.test(t)) continue;
+      pushRow(closestListingRow(el, rootDoc));
     }
     for (const row of rowNodes) {
       const text = String(row.innerText || "");
       if (text.length < 8) continue;
       if (
-        !/m[oó]dos[ií]t|t[oö]rl[eé]s|gyorsn[eé]zet|[aá]rt[aá]bla|kiemel|c[ií]mlap|lexus|kia|mercedes|bmw|audi|ford|opel|toyota|volkswagen|skoda|hyundai|maserati|land\s*rover|volvo|suzuki|nissan|honda|peugeot|renault|\bE\s*250\b|\bCDI\b/i.test(
+        !/m[oó]dos[ií]t|t[oö]rl[eé]s|gyorsn[eé]zet|[aá]rt[aá]bla|kiemel|c[ií]mlap|lexus|kia|mercedes|bmw|audi|ford|opel|toyota|volkswagen|skoda|hyundai|maserati|land\s*rover|volvo|suzuki|nissan|honda|peugeot|renault|\bE\s*250\b|\bCDI\b|\bCRDI\b|\(\d{7,10}\)/i.test(
           text
         )
       ) {
@@ -993,9 +1060,13 @@
       let id = pickIdFromRow(row) || (titleLink ? pickListingId(titleLink.href) : "");
       if (id.length < 5) {
         for (const a of row.querySelectorAll("a[href]")) {
-          id = pickListingId(a.href || a.getAttribute("href") || "");
+          id = pickListingId(a.href || a.getAttribute("href") || "") || pickListingId(a.getAttribute("onclick") || "");
           if (id.length >= 5) break;
         }
+      }
+      if (id.length < 5) {
+        const m = text.match(/\((\d{7,10})\)/) || text.match(/\b(\d{7,10})\b/);
+        if (m) id = m[1];
       }
       if (id.length < 5) continue;
 
@@ -1035,7 +1106,7 @@
       const price = priceMatch ? priceMatch[1].replace(/[.\s]/g, "") : "";
       const km = (text.match(/(\d[\d\s.]*)\s*km/i) || [])[0] || "";
       const year = (text.match(/\b((?:19|20)\d{2})(?:\/\d{1,2})?\b/) || [])[1] || "";
-      const imageUrl = pickRowImage(row);
+      const imageUrl = pickRowImage(row, rootDoc);
 
       const fromTitle = brandModelFromTitle(title);
       const page = {
@@ -1067,13 +1138,15 @@
 
   function discoverPaginationUrls(rootDoc = document) {
     const selfUrl = String(location.href || "").split("#")[0];
-    const urls = new Set([selfUrl]);
+    const urls = new Set();
     const push = (href) => {
       try {
         const u = new URL(href, rootDoc.baseURI || location.href);
         if (u.hostname.replace(/^www\./, "") !== location.hostname.replace(/^www\./, "")) return;
         const bare = u.href.split("#")[0];
-        if (bare) urls.add(bare);
+        // Ne a saját URL-t pakoljuk a fetch-sorba (az élő DOM már megvan)
+        if (!bare || bare === selfUrl) return;
+        urls.add(bare);
       } catch {
       }
     };
@@ -1089,21 +1162,26 @@
         push(href);
       }
     }
-    for (const opt of rootDoc.querySelectorAll("select option[value]")) {
-      const value = String(opt.value || "");
-      if (/^\d+$/.test(value) && Number(value) >= 1 && Number(value) <= 200) {
-        try {
-          const u = new URL(selfUrl);
-          if (u.searchParams.has("page")) u.searchParams.set("page", value);
-          else if (u.searchParams.has("oldal")) u.searchParams.set("oldal", value);
-          else if (u.searchParams.has("p")) u.searchParams.set("p", value);
-          else u.searchParams.set("page", value);
-          urls.add(u.href.split("#")[0]);
-        } catch {
-        }
+    // Select: max 15 oldal — ne 31+ üres SPA fetch
+    const pageOpts = [...rootDoc.querySelectorAll("select option[value]")]
+      .map((opt) => String(opt.value || ""))
+      .filter((value) => /^\d+$/.test(value) && Number(value) >= 1 && Number(value) <= 200)
+      .map(Number)
+      .filter((n, i, arr) => arr.indexOf(n) === i)
+      .sort((a, b) => a - b)
+      .slice(0, 15);
+    for (const value of pageOpts) {
+      try {
+        const u = new URL(selfUrl);
+        if (u.searchParams.has("page")) u.searchParams.set("page", String(value));
+        else if (u.searchParams.has("oldal")) u.searchParams.set("oldal", String(value));
+        else if (u.searchParams.has("p")) u.searchParams.set("p", String(value));
+        else continue; // ne találjunk ki page= paramot ha a lista nem így lapoz
+        push(u.href.split("#")[0]);
+      } catch {
       }
     }
-    return [...urls].slice(0, MAX_LIST_PAGES);
+    return [...urls].slice(0, Math.min(MAX_LIST_PAGES, 20));
   }
 
   async function fetchListDocument(url) {
@@ -1116,6 +1194,20 @@
     return new DOMParser().parseFromString(html, "text/html");
   }
 
+  async function ensureListThumbsVisible() {
+    try {
+      const h = Math.max(document.body?.scrollHeight || 0, document.documentElement?.scrollHeight || 0);
+      const step = Math.max(400, Math.floor(window.innerHeight * 0.85) || 600);
+      for (let y = 0; y < h; y += step) {
+        window.scrollTo(0, y);
+        await sleep(40);
+      }
+      window.scrollTo(0, 0);
+      await sleep(80);
+    } catch {
+    }
+  }
+
   async function collectAllDealerListPages(onProgress) {
     const byId = {};
     const merge = (pages) => {
@@ -1123,31 +1215,46 @@
         const id = page.listingId;
         if (!id) continue;
         const prev = byId[id];
-        if (!prev || clean(page.visibleTitle).length > clean(prev.visibleTitle || "").length) {
-          byId[id] = page;
+        if (
+          !prev ||
+          clean(page.visibleTitle).length > clean(prev.visibleTitle || "").length ||
+          (!prev.visibleImage && page.visibleImage)
+        ) {
+          byId[id] = { ...prev, ...page, visibleImage: page.visibleImage || prev?.visibleImage || "" };
         }
       }
     };
 
+    if (typeof onProgress === "function") onProgress(0, 1, "lista görgetés");
+    await ensureListThumbsVisible();
     merge(extractDealerListPages(document));
+    if (typeof onProgress === "function") {
+      onProgress(Object.keys(byId).length, Math.max(Object.keys(byId).length, 1), "lista autó");
+    }
+
     const queue = discoverPaginationUrls(document);
     const seen = new Set([String(location.href || "").split("#")[0]]);
     let i = 0;
-    while (i < queue.length && seen.size < MAX_LIST_PAGES) {
+    while (i < queue.length && seen.size <= 20) {
       const url = queue[i];
       i += 1;
       if (seen.has(url)) continue;
       seen.add(url);
-      if (typeof onProgress === "function") onProgress(seen.size, Math.max(queue.length, seen.size), "lista lapozás");
+      if (typeof onProgress === "function") {
+        onProgress(i, queue.length, `lista lapozás · ${Object.keys(byId).length} autó`);
+      }
       try {
         const doc = await fetchListDocument(url);
         merge(extractDealerListPages(doc));
         for (const next of discoverPaginationUrls(doc)) {
-          if (!seen.has(next) && !queue.includes(next) && queue.length < MAX_LIST_PAGES) queue.push(next);
+          if (!seen.has(next) && !queue.includes(next) && queue.length < 20) queue.push(next);
         }
       } catch {
         /* skip unreachable list page */
       }
+    }
+    if (typeof onProgress === "function") {
+      onProgress(Object.keys(byId).length, Math.max(Object.keys(byId).length, 1), "lista kész");
     }
     return Object.values(byId).slice(0, MAX_DEALER);
   }
@@ -1591,8 +1698,11 @@
       if (!fromList.length) {
         hideProgress();
         const trCount = document.querySelectorAll("table tr, .talalati-sor").length;
+        const modCount = [...document.querySelectorAll("a, button")].filter((el) =>
+          /m[oó]dos[ií]t/i.test(el.innerText || el.textContent || "")
+        ).length;
         alert(
-          `Nem találtunk autót a listán (táblázatsor: ${trCount}). Görgess le a Módosítás / Törlés sorokig, majd próbáld újra.`
+          `Nem találtunk autót a listán (sor: ${trCount}, Módosítás: ${modCount}). Görgess le a járművekig, majd futtasd újra a friss bookmarkletet.`
         );
         return;
       }

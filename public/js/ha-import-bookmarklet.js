@@ -1372,23 +1372,24 @@
     }
   }
 
-  function resolveBymyTarget(origin, mode) {
-    const targetUrl = `${origin}/beallitasok.html?szekcio=import&mode=${mode === "dealer" ? "dealer" : "standard"}&ha=1`;
-    // 1) A lap, ahonnan megnyitottuk a hasznaltautót (Autóimport)
+  function resolveBymyTarget() {
+    // CSAK az Autóimport lap (opener) — soha ne nyissunk új Bymy tabot
     if (window.opener && !window.opener.closed) {
-      return { target: window.opener, opened: false, targetUrl };
+      try {
+        window.opener.focus();
+      } catch {
+      }
+      return window.opener;
     }
-    // 2) Már nyitott Autóimport lap (window.name = bymy-ha-import) — ne új tab
-    let w = null;
-    try {
-      w = window.open(targetUrl, "bymy-ha-import");
-    } catch {
-      w = null;
-    }
-    if (!w || w === window) {
-      return { target: null, opened: false, targetUrl };
-    }
-    return { target: w, opened: true, targetUrl };
+    return null;
+  }
+
+  function noOpenerAlert(mode) {
+    alert(
+      mode === "dealer"
+        ? "Nincs meg a Bymy Autóimport lap (opener).\n\n1) Nyisd meg a Bymy Autóimportot\n2) Onnan kattints: admin.hasznaltauto.hu megnyitása\n3) A listán futtasd a könyvjelzőt\n\nNe nyiss külön böngészőből admin oldalt — és ne zárd be az Autóimport lapot."
+        : "Nincs meg a Bymy Autóimport lap (opener).\n\n1) Nyisd meg a Bymy Autóimportot\n2) Onnan nyisd a hasznaltauto.hu-t\n3) Ott futtasd a könyvjelzőt\n\nNe zárd be az Autóimport lapot."
+    );
   }
 
   function deliver(origin, payload) {
@@ -1435,11 +1436,9 @@
       }, 500);
     };
 
-    const { target } = resolveBymyTarget(origin, payload.mode);
+    const target = resolveBymyTarget();
     if (!target) {
-      alert(
-        "Nem találom a Bymy Autóimport lapot. Nyisd meg az Autóimportot, onnan a hasznaltautót, majd futtasd újra a könyvjelzőt — ne zárd be az Autóimport lapot."
-      );
+      noOpenerAlert(payload.mode);
       return false;
     }
     sendTo(target);
@@ -1503,14 +1502,11 @@
     const pages = Array.isArray(payload.pages) ? payload.pages : [];
     if (!pages.length) return false;
 
-    const { target, opened } = resolveBymyTarget(origin, "dealer");
+    const target = resolveBymyTarget();
     if (!target) {
-      alert(
-        "Nem találom a Bymy Autóimport lapot. Nyisd meg az Autóimportot, onnan az admin listát, majd futtasd újra a könyvjelzőt — ne zárd be az Autóimport lapot."
-      );
+      noOpenerAlert("dealer");
       return false;
     }
-    if (opened) await sleep(2000);
 
     let ok = 0;
     for (let i = 0; i < pages.length; i += 1) {

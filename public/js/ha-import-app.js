@@ -19,9 +19,9 @@ const MODES = {
   dealer: {
     title: "Kereskedői import",
     startURL: "https://admin.hasznaltauto.hu/",
-    steps: "1. Bejelentkezés (admin)  ·  2. Járműlista  ·  3. Autónként megnyitás  ·  4. Csak az első kép mentése",
+    steps: "1. Ezen a lapon: admin megnyitása  ·  2. Járműlista  ·  3. Könyvjelző  ·  4. Csak első kép (ne zárd be ezt a lapot)",
     action: "Lista importálása (csak első kép)",
-    footer: "A járműlistáról egyenként megnyitjuk az autókat, csak az első képet mentjük, majd új hirdetésként feladjuk / frissítjük a Bymy-n.",
+    footer: "Fontos: a hasznaltautót EBBŐL a lapból nyisd (gomb). Új Bymy tabot nem nyitunk — az adat ide jön vissza.",
     openLabel: "admin.hasznaltauto.hu megnyitása",
   },
 };
@@ -48,7 +48,7 @@ function setMode(mode) {
 
 function bookmarkletHref(mode) {
   const origin = location.origin;
-  const src = `${origin}/js/ha-import-bookmarklet.js?v=haDealerPhoto7`;
+  const src = `${origin}/js/ha-import-bookmarklet.js?v=haDealerPhoto8`;
   return `javascript:void(function(){var o=${JSON.stringify(origin)};var m=${JSON.stringify(mode)};var src=${JSON.stringify(src)}+"&t="+Date.now();function go(){try{window.BymyHaImport.run({origin:o,mode:m});}catch(e){alert((e&&e.message)||e);}}try{delete window.BymyHaImport;}catch(e){window.BymyHaImport=undefined;}var s=document.createElement("script");s.src=src;s.onload=go;s.onerror=function(){alert("A hasznaltauto.hu blokkolta a Bymy scriptet. Másold a hirdetés URL-jét a Bymy Autóimport oldalra.");};(document.documentElement||document.body).appendChild(s);})();`;
 }
 
@@ -529,17 +529,13 @@ export async function initHaImportPage() {
       await runMessageImport(data);
     }
   } else if (new URLSearchParams(location.search).has("ha")) {
-    setStatus("Várom a hasznaltauto.hu oldal adatait…");
-    window.setTimeout(() => {
-      const el = document.getElementById("ha-imp-status");
-      if (!el) return;
-      const text = String(el.textContent || "");
-      if (!/Várom a hasznaltauto/i.test(text)) return;
-      setStatus(
-        "Még nem jött adat. A hasznaltauto lapon nézd a fekete sávot (küldés). Ha kész, futtasd újra a könyvjelzőt — ne zárd be ezt a Bymy lapot.",
-        "err"
-      );
-    }, 20000);
+    // Régi hibás flow nyitott üres várakozó tabot — ne ragadjunk „Várom…”-on
+    const url = new URL(location.href);
+    url.searchParams.delete("ha");
+    history.replaceState({}, "", url);
+    setStatus(
+      "Használd az „admin megnyitása” gombot ezen a lapon, majd a listán a könyvjelzőt. Új Autóimport tabot már nem nyitunk."
+    );
   }
 }
 

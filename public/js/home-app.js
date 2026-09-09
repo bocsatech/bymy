@@ -1,5 +1,5 @@
 import { fetchListings } from "./db-client.js?v=teherVert1";
-import { createHomeGridCard, initHomeGridCardPhotos } from "./home-grid-card.js?v=haHqThumb1";
+import { createHomeGridCard, initHomeGridCardPhotos } from "./home-grid-card.js?v=haHqDirect1";
 import {
   emptyFilters,
   filterListingsBySidebar,

@@ -251,18 +251,29 @@ async function handleMediaProxy(req, res) {
       sendJson(res, 400, { error: "Hiányzó url paraméter." });
       return;
     }
-    try {
-      const { upgradeHaImageUrl } = await import("./lib/listing-image.mjs");
-      target = upgradeHaImageUrl(target) || target;
-    } catch {
+    const { upgradeHaImageUrl, haImageUrlCandidates, fetchRemoteListingImage } = await import(
+      "./lib/listing-image.mjs"
+    );
+    target = upgradeHaImageUrl(target) || target;
+    let lastErr = null;
+    for (const candidate of haImageUrlCandidates(target)) {
+      try {
+        const { buffer, contentType } = await fetchRemoteListingImage(candidate);
+        if (buffer?.length >= 500) {
+          res.writeHead(200, {
+            "Content-Type": contentType,
+            "Cache-Control": "public, max-age=86400",
+            "Content-Length": String(buffer.length),
+          });
+          res.end(buffer);
+          return;
+        }
+      } catch (error) {
+        lastErr = error;
+      }
     }
-    const { buffer, contentType } = await fetchRemoteListingImage(target);
-    res.writeHead(200, {
-      "Content-Type": contentType,
-      "Cache-Control": "public, max-age=86400",
-      "Content-Length": String(buffer.length),
-    });
-    res.end(buffer);
+    const status = lastErr?.code === "FORBIDDEN_IMAGE" ? 403 : 502;
+    sendJson(res, status, { error: lastErr?.message ?? "Kép proxy hiba." });
   } catch (error) {
     const status = error.code === "FORBIDDEN_IMAGE" ? 403 : 502;
     sendJson(res, status, { error: error.message ?? "Kép proxy hiba." });

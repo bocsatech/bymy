@@ -15,16 +15,20 @@ import {
 function upgradeHaThumbClient(url) {
   let s = String(url || "").trim();
   if (!s) return "";
-  if (s.startsWith("/api/media/proxy")) return s;
+  if (s.startsWith("/api/media/proxy")) {
+    try {
+      const inner = new URL(s, location.origin).searchParams.get("url");
+      if (inner) s = inner;
+    } catch {
+    }
+  }
   if (/hasznaltautocdn\.com/i.test(s)) {
     const m = s.match(/\/(\d{5,12})\/(\d{5,12})\.(jpe?g|png|webp)/i);
     if (m) {
       const ext = m[3].toLowerCase().replace("jpeg", "jpg");
-      s = `https://img.hasznaltautocdn.com/2048x1536/${m[1]}/${m[2]}.${ext}`;
-    } else {
-      s = s.replace(/\/\d{2,4}x\d{2,4}\//i, "/2048x1536/");
+      return `https://img.hasznaltautocdn.com/2048x1536/${m[1]}/${m[2]}.${ext}`;
     }
-    if (/^https?:\/\//i.test(s)) return `/api/media/proxy?url=${encodeURIComponent(s)}`;
+    return s.replace(/\/\d{2,4}x\d{2,4}\//i, "/2048x1536/");
   }
   return s;
 }

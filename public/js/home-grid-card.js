@@ -12,12 +12,29 @@ import {
   removeParkplatzItem,
 } from "./fok-data.js?v=parkThumb1";
 
+function upgradeHaThumbClient(url) {
+  let s = String(url || "").trim();
+  if (!s) return "";
+  if (s.startsWith("/api/media/proxy")) return s;
+  if (/hasznaltautocdn\.com/i.test(s)) {
+    const m = s.match(/\/(\d{5,12})\/(\d{5,12})\.(jpe?g|png|webp)/i);
+    if (m) {
+      const ext = m[3].toLowerCase().replace("jpeg", "jpg");
+      s = `https://img.hasznaltautocdn.com/2048x1536/${m[1]}/${m[2]}.${ext}`;
+    } else {
+      s = s.replace(/\/\d{2,4}x\d{2,4}\//i, "/2048x1536/");
+    }
+    if (/^https?:\/\//i.test(s)) return `/api/media/proxy?url=${encodeURIComponent(s)}`;
+  }
+  return s;
+}
+
 function collectPhotoUrls(item) {
   const preview = item.preview || {};
   const urls = [...(preview.imageUrls || [])];
   if (preview.imageUrl && !urls.includes(preview.imageUrl)) urls.unshift(preview.imageUrl);
   if (item.fo_kep && !urls.includes(item.fo_kep)) urls.unshift(item.fo_kep);
-  return urls.filter(Boolean);
+  return [...new Set(urls.map(upgradeHaThumbClient).filter(Boolean))];
 }
 
 const ICON_YEAR = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M3 10h18M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>`;

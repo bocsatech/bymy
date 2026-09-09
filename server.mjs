@@ -246,10 +246,15 @@ function sendRedirect(res, location, headers = {}) {
 async function handleMediaProxy(req, res) {
   try {
     const urlObj = new URL(req.url ?? "", `http://${HOST}:${PORT}`);
-    const target = urlObj.searchParams.get("url");
+    let target = urlObj.searchParams.get("url");
     if (!target) {
       sendJson(res, 400, { error: "Hiányzó url paraméter." });
       return;
+    }
+    try {
+      const { upgradeHaImageUrl } = await import("./lib/listing-image.mjs");
+      target = upgradeHaImageUrl(target) || target;
+    } catch {
     }
     const { buffer, contentType } = await fetchRemoteListingImage(target);
     res.writeHead(200, {

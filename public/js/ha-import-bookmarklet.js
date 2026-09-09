@@ -940,6 +940,13 @@
         if (best) push(best, 8000 + bestW);
       }
     }
+    // HTML-ben rejlő CDN URL-ek (akár thumb path → upgradeImageUrl HQ-ra)
+    const html = String(row.innerHTML || "");
+    for (const m of html.matchAll(
+      /https?:\/\/(?:img\.)?hasznaltautocdn\.com\/[^\s"'<>\\]+?\.(?:jpe?g|png|webp)/gi
+    )) {
+      push(m[0], 60000);
+    }
     for (const el of row.querySelectorAll("[style*='background'], [data-bg], [data-background], [data-image]")) {
       const style = el.getAttribute("style") || "";
       const m = style.match(/url\(\s*['"]?(https?:\/\/[^'")\s]+|\/\/[^'")\s]+)/i);

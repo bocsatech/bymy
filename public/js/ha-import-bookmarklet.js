@@ -570,6 +570,18 @@
 
   function slimPageForDelivery(page) {
     if (!page || typeof page !== "object") return page;
+    if (page.photoOnly) {
+      return {
+        url: page.url || page.clickUrl || "",
+        listingId: page.listingId || "",
+        visibleImage: page.visibleImage || "",
+        imageJpegBase64: page.imageJpegBase64 || "",
+        clickUrl: page.clickUrl || page.url || "",
+        adminUrl: page.adminUrl || "",
+        publicUrl: page.publicUrl || "",
+        photoOnly: true,
+      };
+    }
     const mapCount = page.map && typeof page.map === "object" ? Object.keys(page.map).length : 0;
     const hasBody = String(page.bodyText || "").length >= 400;
     // Teljes Módosítás oldal: tartsuk meg a HTML-t is, ha a map még vékony
@@ -1274,9 +1286,14 @@
       }
       showProgress(0, fromList.length, "lista feldolgozása");
       for (const card of fromList) {
-        if (isUsefulPage(card)) pages.push(card);
+        if (mode === "dealer") {
+          if (card?.listingId) pages.push(card);
+        } else if (isUsefulPage(card)) {
+          pages.push(card);
+        }
       }
       // Mindig teljes hirdetés (Módosítás): a listában gyakran hiányzik márka/km
+      // Kereskedői mód: csak első kép — semmi más mező
       if (pages.length) {
         showProgress(0, pages.length, "hirdetés megnyitás");
         const base = pages.slice();
@@ -1293,61 +1310,34 @@
                 clickUrl: card.clickUrl || card.url,
                 visibleTitle: card.visibleTitle,
               });
-              if (!detail || !isUsefulPage(detail)) return card;
-              const detailTitle = clean(detail.visibleTitle || "");
-              const listTitle = clean(card.visibleTitle || "");
-              const keepTitle =
-                listTitle && looksLikeVehicleTitleLink(listTitle)
-                  ? listTitle
-                  : detailTitle && !isBadTitle(detailTitle)
-                    ? detailTitle
-                    : listTitle;
-              const detailMapCount =
-                detail.map && typeof detail.map === "object" ? Object.keys(detail.map).length : 0;
-              const brand = detail.brand || card.brand || brandModelFromTitle(keepTitle).brand;
-              const model = detail.model || card.model || brandModelFromTitle(keepTitle).model;
-              const titleOk = keepTitle && !isBadTitle(keepTitle) && !isChromeName(keepTitle.split(/\s+/)[0] || "");
-              const brandOk = brand && !isChromeName(brand);
-              const detailOk = Boolean(brandOk || titleOk);
+              const imageUrl = (detail && detail.visibleImage) || card.visibleImage || "";
+              const listingId = (detail && detail.listingId) || card.listingId || "";
+              const detailUrl = (detail && detail.url) || card.clickUrl || card.url || "";
               return attachPhotoBase64({
-                ...card,
-                url: detail.url || card.clickUrl || card.url,
-                clickUrl: card.clickUrl || card.url,
-                visibleTitle: titleOk ? keepTitle : brandOk ? [brand, model].filter(Boolean).join(" ") : keepTitle,
-                visibleImage: detail.visibleImage || card.visibleImage,
-                price: detail.price || card.price,
-                km: detail.km || card.km,
-                year: detail.year || card.year,
-                fuel: detail.fuel || card.fuel,
-                brand: brandOk ? brand : "",
-                model: brandOk && model && !isChromeName(model) ? model : "",
-                map: detailMapCount >= 5 ? detail.map : { ...(card.map || {}), ...(detail.map || {}) },
-                html: String(detail.html || "").length > 800 ? detail.html : card.html,
-                bodyText: detail.bodyText || card.bodyText,
-                felszereltseg:
-                  Array.isArray(detail.felszereltseg) && detail.felszereltseg.length
-                    ? detail.felszereltseg
-                    : card.felszereltseg,
-                listingId: detail.listingId || card.listingId,
-                featureLine: detail.featureLine || card.featureLine || "",
-                visibleDescription: detail.visibleDescription || card.visibleDescription || "",
-                fromListCard: !detailOk,
+                url: detailUrl,
+                clickUrl: card.clickUrl || card.url || "",
+                listingId,
+                visibleImage: imageUrl,
+                adminUrl: card.adminUrl || "",
+                publicUrl: card.publicUrl || "",
+                photoOnly: true,
               });
             } catch {
-              return card;
+              return attachPhotoBase64({
+                url: card.clickUrl || card.url || "",
+                listingId: card.listingId || "",
+                visibleImage: card.visibleImage || "",
+                adminUrl: card.adminUrl || "",
+                publicUrl: card.publicUrl || "",
+                photoOnly: true,
+              });
             }
           },
-          (done, total) => showProgress(done, total, "hirdetés")
+          (done, total) => showProgress(done, total, "kép")
         );
         for (const page of enriched) {
-          if (isUsefulPage(page)) pages.push(page);
-          else if (isUsefulPage(base.find((c) => c.listingId === page?.listingId) || null)) {
-            pages.push(base.find((c) => c.listingId === page.listingId));
-          }
-        }
-        if (!pages.length) {
-          for (const card of base) {
-            if (isUsefulPage(card)) pages.push(card);
+          if (page && (page.imageJpegBase64 || page.visibleImage) && page.listingId) {
+            pages.push(page);
           }
         }
       }
@@ -1393,6 +1383,7 @@
       type: "bymy-ha-import",
       v: 1,
       mode,
+      photoOnly: mode === "dealer",
       listUrl: location.href,
       pages: pages.map(slimPageForDelivery),
     });

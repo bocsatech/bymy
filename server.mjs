@@ -567,6 +567,30 @@ async function handleImportExtracted(req, res) {
   }
 
   try {
+    const photoOnly =
+      body.photoOnly === true ||
+      body.mode === "dealer" ||
+      (Array.isArray(body.pages) && body.pages.length > 0 && body.pages.every((p) => p?.photoOnly));
+
+    if (photoOnly) {
+      const { saveDealerPhotoImportPages } = await import("./lib/ha-dealer-photo-import.mjs");
+      const { MAX_IMPORT_BATCH } = await import("./lib/ha-import-save.mjs");
+      const pages = [];
+      if (Array.isArray(body.pages)) pages.push(...body.pages);
+      if (body.page && typeof body.page === "object") pages.push(body.page);
+      if (!pages.length) {
+        sendJson(res, 400, { error: "Nincs importálandó oldal (kép)." }, cors);
+        return;
+      }
+      const result = await saveDealerPhotoImportPages({
+        pages,
+        userId: user.id,
+        limit: body.limit ?? MAX_IMPORT_BATCH,
+      });
+      sendJson(res, 200, { ok: true, result }, cors);
+      return;
+    }
+
     const { pageFromPublicUrl, saveExtractedPages, MAX_IMPORT_BATCH } = await import("./lib/ha-import-save.mjs");
     const pages = [];
     if (Array.isArray(body.pages)) pages.push(...body.pages);

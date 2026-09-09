@@ -19,9 +19,9 @@ const MODES = {
   dealer: {
     title: "Kereskedői import",
     startURL: "https://admin.hasznaltauto.hu/",
-    steps: "1. Bejelentkezés (admin)  ·  2. Járműlista  ·  3. Lista importálása (Módosítás oldalak)",
-    action: "Lista importálása (összes autó)",
-    footer: "Minden listás autót megnyitunk Módosításként, kimásoljuk az adatokat, majd mentjük (max. 50 / kör).",
+    steps: "1. Bejelentkezés (admin)  ·  2. Járműlista  ·  3. Autónként megnyitás  ·  4. Csak az első kép mentése",
+    action: "Lista importálása (csak első kép)",
+    footer: "A járműlistáról egyenként megnyitjuk az autókat, csak az első képet mentjük, majd új hirdetésként feladjuk / frissítjük a Bymy-n.",
     openLabel: "admin.hasznaltauto.hu megnyitása",
   },
 };
@@ -48,7 +48,7 @@ function setMode(mode) {
 
 function bookmarkletHref(mode) {
   const origin = location.origin;
-  const src = `${origin}/js/ha-import-bookmarklet.js?v=haImp30`;
+  const src = `${origin}/js/ha-import-bookmarklet.js?v=haDealerPhoto1`;
   return `javascript:void(function(){var o=${JSON.stringify(origin)};var m=${JSON.stringify(mode)};var src=${JSON.stringify(src)}+"&t="+Date.now();function go(){try{window.BymyHaImport.run({origin:o,mode:m});}catch(e){alert((e&&e.message)||e);}}try{delete window.BymyHaImport;}catch(e){window.BymyHaImport=undefined;}var s=document.createElement("script");s.src=src;s.onload=go;s.onerror=function(){alert("A hasznaltauto.hu blokkolta a Bymy scriptet. Másold a hirdetés URL-jét a Bymy Autóimport oldalra.");};(document.documentElement||document.body).appendChild(s);})();`;
 }
 
@@ -199,11 +199,16 @@ async function postExtracted(payload) {
 async function postExtractedResilient(pages, meta = {}) {
   const list = Array.isArray(pages) ? pages : [];
   if (!list.length) return { savedCount: 0, skippedCount: 0, errorCount: 0, items: [], errors: [] };
+  const photoOnly =
+    meta.photoOnly === true ||
+    meta.mode === "dealer" ||
+    list.every((p) => p?.photoOnly);
   try {
     return await postExtracted({
       pages: list,
       listUrl: meta.listUrl,
       mode: meta.mode,
+      photoOnly,
     });
   } catch (error) {
     if (list.length === 1 || ![502, 504, 413].includes(Number(error.status))) throw error;
@@ -218,6 +223,7 @@ async function postExtractedResilient(pages, meta = {}) {
           pages: [page],
           listUrl: meta.listUrl,
           mode: meta.mode,
+          photoOnly,
         });
         savedCount += result?.savedCount ?? 0;
         skippedCount += result?.skippedCount ?? 0;
@@ -377,6 +383,7 @@ async function runMessageImport(data) {
         const result = await postExtractedResilient(chunk, {
           listUrl: data.listUrl,
           mode: data.mode || currentMode(),
+          photoOnly: data.photoOnly === true || data.mode === "dealer",
         });
         savedCount += result?.savedCount ?? 0;
         skippedCount += result?.skippedCount ?? 0;

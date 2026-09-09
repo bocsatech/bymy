@@ -48,7 +48,7 @@ function setMode(mode) {
 
 function bookmarkletHref(mode) {
   const origin = location.origin;
-  const src = `${origin}/js/ha-import-bookmarklet.js?v=haDealerPhoto9`;
+  const src = `${origin}/js/ha-import-bookmarklet.js?v=haDealerPhoto10`;
   return `javascript:void(function(){var o=${JSON.stringify(origin)};var m=${JSON.stringify(mode)};var src=${JSON.stringify(src)}+"&t="+Date.now();function go(){try{window.BymyHaImport.run({origin:o,mode:m});}catch(e){alert((e&&e.message)||e);}}try{delete window.BymyHaImport;}catch(e){window.BymyHaImport=undefined;}var s=document.createElement("script");s.src=src;s.onload=go;s.onerror=function(){alert("A hasznaltauto.hu blokkolta a Bymy scriptet. Másold a hirdetés URL-jét a Bymy Autóimport oldalra.");};(document.documentElement||document.body).appendChild(s);})();`;
 }
 
@@ -167,12 +167,26 @@ function renderResult(result, { partial = false, index = 0, total = 0 } = {}) {
 }
 
 async function postExtracted(payload) {
-  const response = await fetch("/api/import/extracted", {
-    method: "POST",
-    headers: authHeaders(),
-    credentials: "same-origin",
-    body: JSON.stringify(payload),
-  });
+  const controller = typeof AbortController !== "undefined" ? new AbortController() : null;
+  const timer = controller ? setTimeout(() => controller.abort(), 25000) : null;
+  let response;
+  try {
+    response = await fetch("/api/import/extracted", {
+      method: "POST",
+      headers: authHeaders(),
+      credentials: "same-origin",
+      body: JSON.stringify(payload),
+      signal: controller?.signal,
+    });
+  } catch (error) {
+    if (timer) clearTimeout(timer);
+    const err = new Error(
+      error?.name === "AbortError" ? "Mentés időtúllépés (25s) — ugrok a következőre." : error.message || "Hálózati hiba."
+    );
+    err.status = 504;
+    throw err;
+  }
+  if (timer) clearTimeout(timer);
   const raw = await response.text();
   let data = {};
   try {
@@ -498,16 +512,15 @@ async function runMessageImport(data) {
   } catch (error) {
     setStatus(error.message ?? "Import sikertelen.", "err");
   } finally {
-    if (data.__ackSource) ackHaImport(data.__ackSource, data);
+    // Előbb szabadítsuk a busy flaget, aztán ack — ne ragadjon a következő autó
     importBusy = false;
     currentHaImportKey = "";
     while (pendingHaImports.length && seenHaImportKeys.has(haImportKey(pendingHaImports[0]))) {
       pendingHaImports.shift();
     }
-    if (pendingHaImports.length) {
-      const next = pendingHaImports.shift();
-      queueMicrotask(() => runMessageImport(next));
-    }
+    const next = pendingHaImports.length ? pendingHaImports.shift() : null;
+    if (data.__ackSource) ackHaImport(data.__ackSource, data);
+    if (next) queueMicrotask(() => runMessageImport(next));
   }
 }
 

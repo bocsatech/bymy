@@ -355,12 +355,17 @@
 
   async function attachPhotoBase64(page) {
     if (!page || typeof page !== "object") return page;
-    if (page.imageJpegBase64 && String(page.imageJpegBase64).length >= 27000) return page;
-    page.imageJpegBase64 = "";
     const url = page.visibleImage || "";
     if (!url) return page;
     const hq = upgradeImageUrl(url) || url;
     page.visibleImage = hq;
+    // Kereskedői: csak HQ URL — a Bymy fo_kep-be teszi (gyors, nem ragad be).
+    if (page.photoOnly) {
+      page.imageJpegBase64 = "";
+      return page;
+    }
+    if (page.imageJpegBase64 && String(page.imageJpegBase64).length >= 27000) return page;
+    page.imageJpegBase64 = "";
     const ladder = ["1280x960", "1024x768", "800x600", "2048x1536"];
     for (const size of ladder) {
       const candidate = /\/2048x1536\//i.test(hq)
@@ -693,14 +698,11 @@
     if (!page || typeof page !== "object") return page;
     if (page.photoOnly) {
       const visibleImage = upgradeImageUrl(page.visibleImage || "") || page.visibleImage || "";
-      const b64 = String(page.imageJpegBase64 || "");
-      // Thumb base64 (~4k) elutasítva; egy autó / üzenet max ~1.6M
-      const useB64 = b64.length >= 27000 && b64.length < 1_600_000;
       return {
         url: page.url || page.clickUrl || "",
         listingId: page.listingId || "",
         visibleImage,
-        imageJpegBase64: useB64 ? b64 : "",
+        imageJpegBase64: "",
         clickUrl: page.clickUrl || page.url || "",
         adminUrl: page.adminUrl || "",
         publicUrl: page.publicUrl || "",
@@ -1479,7 +1481,7 @@
       };
       send();
       let n = 0;
-      // Mentés (kép feltöltés) sokáig tarthat — várjuk az ack-ot mentés után
+  // Mentés (gyors URL-út) — max ~45 mp / autó
       const timer = setInterval(() => {
         if (acked) {
           clearInterval(timer);
@@ -1487,7 +1489,7 @@
         }
         n += 1;
         send();
-        if (n >= 240) {
+        if (n >= 90) {
           clearInterval(timer);
           try {
             window.removeEventListener("message", onAck);
@@ -1595,9 +1597,36 @@
           pages.push(card);
         }
       }
-      // Mindig teljes hirdetés (Módosítás): a listában gyakran hiányzik márka/km
-      // Kereskedői mód: csak első kép — semmi más mező
-      if (pages.length) {
+      // Kereskedői: csak lista első kép → HQ URL (nincs autónkénti oldalnyitás)
+      if (pages.length && mode === "dealer") {
+        showProgress(0, pages.length, "kép URL");
+        const base = pages.slice();
+        pages.length = 0;
+        for (let i = 0; i < base.length; i += 1) {
+          const card = base[i];
+          if (!card?.listingId) continue;
+          const imageUrl = upgradeImageUrl(card.visibleImage || "") || "";
+          if (!imageUrl) continue;
+          pages.push({
+            url: card.adminUrl || card.clickUrl || card.url || "",
+            listingId: card.listingId,
+            visibleImage: imageUrl,
+            clickUrl: card.clickUrl || card.url || "",
+            adminUrl: card.adminUrl || "",
+            publicUrl: card.publicUrl || "",
+            photoOnly: true,
+          });
+          if (i % 5 === 0 || i === base.length - 1) showProgress(i + 1, base.length, "kép URL");
+        }
+        if (!pages.length) {
+          hideProgress();
+          alert(
+            `Találtunk ${base.length} autót a listán, de egyikről sem sikerült a kép URL-t kiolvasni. Görgess le, hogy látszódjanak a thumbök.`
+          );
+          return;
+        }
+      } else if (pages.length) {
+        // Standard admin lista: részletes oldal
         showProgress(0, pages.length, "hirdetés megnyitás");
         const base = pages.slice();
         pages.length = 0;
@@ -1617,25 +1646,14 @@
                 upgradeImageUrl((detail && detail.visibleImage) || "") ||
                 upgradeImageUrl(card.visibleImage || "") ||
                 "";
-              const listingId = (detail && detail.listingId) || card.listingId || "";
-              const detailUrl =
-                (detail && detail.url) || card.adminUrl || card.clickUrl || card.url || "";
-              const withPhoto = await attachPhotoBase64({
-                url: detailUrl,
-                clickUrl: card.clickUrl || card.url || "",
-                listingId,
-                visibleImage: imageUrl || upgradeImageUrl(card.visibleImage || "") || "",
+              return attachPhotoBase64({
+                ...(detail || {}),
+                url: (detail && detail.url) || card.adminUrl || card.clickUrl || card.url || "",
+                listingId: (detail && detail.listingId) || card.listingId || "",
+                visibleImage: imageUrl,
                 adminUrl: card.adminUrl || "",
                 publicUrl: card.publicUrl || "",
-                photoOnly: true,
               });
-              if (!withPhoto.imageJpegBase64 && card.visibleImage) {
-                return attachPhotoBase64({
-                  ...withPhoto,
-                  visibleImage: upgradeImageUrl(card.visibleImage) || card.visibleImage,
-                });
-              }
-              return withPhoto;
             } catch {
               return attachPhotoBase64({
                 url: card.adminUrl || card.clickUrl || card.url || "",
@@ -1643,37 +1661,13 @@
                 visibleImage: upgradeImageUrl(card.visibleImage || "") || "",
                 adminUrl: card.adminUrl || "",
                 publicUrl: card.publicUrl || "",
-                photoOnly: true,
               });
             }
           },
-          (done, total) => showProgress(done, total, "kép")
+          (done, total) => showProgress(done, total, "beolvasás")
         );
         for (const page of enriched) {
-          if (page && page.listingId && (page.imageJpegBase64 || page.visibleImage)) {
-            pages.push(page);
-          }
-        }
-        if (!pages.length) {
-          for (const card of base) {
-            if (!card?.listingId) continue;
-            const fallback = await attachPhotoBase64({
-              url: card.adminUrl || card.clickUrl || card.url || "",
-              listingId: card.listingId,
-              visibleImage: upgradeImageUrl(card.visibleImage || "") || "",
-              adminUrl: card.adminUrl || "",
-              publicUrl: card.publicUrl || "",
-              photoOnly: true,
-            });
-            if (fallback.imageJpegBase64 || fallback.visibleImage) pages.push(fallback);
-          }
-        }
-        if (!pages.length) {
-          hideProgress();
-          alert(
-            `Találtunk ${base.length} autót a listán, de egyikről sem sikerült az első képet menteni. Próbáld újra, vagy nyiss meg egy Módosítás oldalt.`
-          );
-          return;
+          if (page && isUsefulPage(page)) pages.push(page);
         }
       }
     } else {

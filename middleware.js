@@ -80,6 +80,9 @@ export default function middleware(request) {
   const pathname = url.pathname;
   const method = request.method || "GET";
 
+  // Cloudflare Turnstile / challenge paths — soha ne tereld belépre
+  if (pathname.startsWith("/cdn-cgi/")) return;
+
   if (isPublic(pathname, method)) return;
 
   if (hasSessionCookie(request)) return;
@@ -96,5 +99,5 @@ export default function middleware(request) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|cdn-cgi/).*)"],
 };

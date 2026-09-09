@@ -1,5 +1,5 @@
 import { safeInternalPath } from "./safe-path.js?v=sec1";
-import { mountTurnstile } from "./turnstile-ui.js?v=turnstile5";
+import { mountTurnstile } from "./turnstile-ui.js?v=turnstile6";
 
 function migrateLegacyAutoswebStorage() {
   try {

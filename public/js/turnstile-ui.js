@@ -89,6 +89,7 @@ export async function mountTurnstile(container, { theme = "light" } = {}) {
       size: "normal",
       appearance: "always",
       language: "hu",
+      "feedback-enabled": false,
       callback: (value) => {
         token = String(value || "");
         container.setAttribute("aria-busy", "false");

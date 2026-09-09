@@ -160,9 +160,14 @@
     try {
       const u = new URL(url);
       const host = u.hostname.replace(/^www\./, "").toLowerCase();
-      // HA CDN: /118x88/{id}/{img}.jpg → /2048x1536/...
+      // HA CDN: mindig 2048x1536/{hirdetesId}/{kepId}.jpg
       if (host === "hasznaltautocdn.com" || host.endsWith(".hasznaltautocdn.com")) {
-        u.pathname = u.pathname.replace(/^\/\d{2,4}x\d{2,4}\//i, "/2048x1536/");
+        const m = u.pathname.match(/\/(\d{5,12})\/(\d{5,12})\.(jpe?g|png|webp)$/i);
+        if (m) {
+          const ext = m[3].toLowerCase().replace("jpeg", "jpg");
+          return `https://img.hasznaltautocdn.com/2048x1536/${m[1]}/${m[2]}.${ext}`;
+        }
+        u.pathname = u.pathname.replace(/\/\d{2,4}x\d{2,4}\//i, "/2048x1536/");
         u.search = "";
         return u.href;
       }
@@ -271,19 +276,21 @@
   function upgradeImageUrlForTransfer(src) {
     const hq = upgradeImageUrl(src);
     if (!hq) return "";
-    // Átadáshoz 1280x960: jó minőség, postMessage-barát méret (~100–250 KB)
     return hq.replace(/\/2048x1536\//i, "/1280x960/");
   }
+
+  const MIN_PHOTO_BYTES = 20000;
 
   async function fetchImageBase64(url, allowDownsize = true) {
     let src = String(url || "").trim();
     if (src.startsWith("//")) src = "https:" + src;
     if (!/^https?:\/\//i.test(src)) return "";
+    if (/\/(?:118x88|240x180|100x75|80x60)\//i.test(src)) return "";
     try {
-      const res = await fetch(src, { credentials: "include", mode: "cors", cache: "force-cache" });
+      const res = await fetch(src, { credentials: "omit", mode: "cors", cache: "no-store" });
       if (!res.ok) return "";
       const blob = await res.blob();
-      if (!blob || blob.size < 800) return "";
+      if (!blob || blob.size < MIN_PHOTO_BYTES) return "";
       if (blob.type && !/^image\//i.test(blob.type) && !/octet-stream/i.test(blob.type)) return "";
       if (blob.size > 1_200_000 && allowDownsize) {
         const smaller = src.replace(/\/(?:2048x1536|1600x1200|1280x960|1024x768)\//i, "/800x600/");
@@ -304,16 +311,67 @@
     }
   }
 
+  function fetchImageBase64ViaImg(url) {
+    return new Promise((resolve) => {
+      const src = String(url || "").trim();
+      if (!/^https?:\/\//i.test(src) || /\/(?:118x88|240x180)\//i.test(src)) {
+        resolve("");
+        return;
+      }
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      const timer = setTimeout(() => {
+        try {
+          img.src = "";
+        } catch {
+        }
+        resolve("");
+      }, 12000);
+      img.onload = () => {
+        clearTimeout(timer);
+        try {
+          if (img.naturalWidth < 400 || img.naturalHeight < 300) {
+            resolve("");
+            return;
+          }
+          const canvas = document.createElement("canvas");
+          canvas.width = img.naturalWidth;
+          canvas.height = img.naturalHeight;
+          canvas.getContext("2d").drawImage(img, 0, 0);
+          const data = canvas.toDataURL("image/jpeg", 0.9);
+          const b64 = (data.split(",")[1] || "").replace(/\s/g, "");
+          resolve(b64.length >= 27000 ? b64 : "");
+        } catch {
+          resolve("");
+        }
+      };
+      img.onerror = () => {
+        clearTimeout(timer);
+        resolve("");
+      };
+      img.src = src;
+    });
+  }
+
   async function attachPhotoBase64(page) {
     if (!page || typeof page !== "object") return page;
-    if (page.imageJpegBase64) return page;
+    if (page.imageJpegBase64 && String(page.imageJpegBase64).length >= 27000) return page;
+    page.imageJpegBase64 = "";
     const url = page.visibleImage || "";
     if (!url) return page;
-    page.visibleImage = upgradeImageUrl(url) || url;
-    // Böngészőből: 1280x960 (jó minőség), szerver CDN fetch Vercelen gyakran fail
-    const mid = upgradeImageUrlForTransfer(page.visibleImage);
-    const b64 = (await fetchImageBase64(mid)) || (await fetchImageBase64(page.visibleImage));
-    if (b64) page.imageJpegBase64 = b64;
+    const hq = upgradeImageUrl(url) || url;
+    page.visibleImage = hq;
+    const ladder = ["1280x960", "1024x768", "800x600", "2048x1536"];
+    for (const size of ladder) {
+      const candidate = /\/2048x1536\//i.test(hq)
+        ? hq.replace(/\/2048x1536\//i, `/${size}/`)
+        : upgradeImageUrlForTransfer(hq) || hq;
+      const b64 = (await fetchImageBase64(candidate, false)) || (await fetchImageBase64ViaImg(candidate));
+      if (b64) {
+        page.imageJpegBase64 = b64;
+        return page;
+      }
+    }
     return page;
   }
 
@@ -636,8 +694,8 @@
     if (page.photoOnly) {
       const visibleImage = upgradeImageUrl(page.visibleImage || "") || page.visibleImage || "";
       const b64 = String(page.imageJpegBase64 || "");
-      // Egy autó / üzenet: a base64 kell (szerver CDN fetch gyakran fail), de ne óriási
-      const useB64 = b64.length > 800 && b64.length < 1_600_000;
+      // Thumb base64 (~4k) elutasítva; egy autó / üzenet max ~1.6M
+      const useB64 = b64.length >= 27000 && b64.length < 1_600_000;
       return {
         url: page.url || page.clickUrl || "",
         listingId: page.listingId || "",
@@ -658,7 +716,7 @@
         : htmlRaw.slice(0, mapCount >= 5 ? 60000 : 120000);
     const visibleImage = upgradeImageUrl(page.visibleImage || "") || page.visibleImage || "";
     const b64 = String(page.imageJpegBase64 || "");
-    const useB64 = b64.length > 800 && b64.length < 1_600_000;
+    const useB64 = b64.length >= 27000 && b64.length < 1_600_000;
     return {
       url: page.url || "",
       listingId: page.listingId || "",

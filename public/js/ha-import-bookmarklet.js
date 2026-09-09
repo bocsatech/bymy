@@ -1479,6 +1479,7 @@
       };
       send();
       let n = 0;
+      // Mentés (kép feltöltés) sokáig tarthat — várjuk az ack-ot mentés után
       const timer = setInterval(() => {
         if (acked) {
           clearInterval(timer);
@@ -1486,7 +1487,7 @@
         }
         n += 1;
         send();
-        if (n >= 40) {
+        if (n >= 240) {
           clearInterval(timer);
           try {
             window.removeEventListener("message", onAck);
@@ -1508,19 +1509,44 @@
       return false;
     }
 
+    const batchId = `ha-batch-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
     let ok = 0;
+    let failed = 0;
     for (let i = 0; i < pages.length; i += 1) {
-      showProgress(i + 1, pages.length, "küldés a Bymy-ra");
+      showProgress(i + 1, pages.length, `mentés Bymy-n (${i + 1}/${pages.length})`);
       const acked = await deliverOneAwait(origin, target, {
         type: "bymy-ha-import",
         v: 1,
         mode: "dealer",
         photoOnly: true,
         listUrl: payload.listUrl || location.href,
-        importId: `ha-dealer-${Date.now()}-${i + 1}`,
+        batchId,
+        index: i + 1,
+        total: pages.length,
+        importId: `${batchId}-${i + 1}`,
         pages: [pages[i]],
       });
       if (acked) ok += 1;
+      else {
+        failed += 1;
+        showProgress(i + 1, pages.length, `hiba — újra (${i + 1}/${pages.length})`);
+        const retry = await deliverOneAwait(origin, target, {
+          type: "bymy-ha-import",
+          v: 1,
+          mode: "dealer",
+          photoOnly: true,
+          listUrl: payload.listUrl || location.href,
+          batchId,
+          index: i + 1,
+          total: pages.length,
+          importId: `${batchId}-${i + 1}-retry`,
+          pages: [pages[i]],
+        });
+        if (retry) {
+          ok += 1;
+          failed -= 1;
+        }
+      }
     }
     return ok > 0;
   }
@@ -1698,7 +1724,11 @@
         listUrl: location.href,
         pages: slim,
       });
-      hideProgress(ok ? `Kész: ${slim.length} kép átadva a Bymy-nak` : "A Bymy nem fogadta az adatokat — nyisd meg a Bymy Autóimport lapot, majd próbáld újra.");
+      hideProgress(
+        ok
+          ? `Kész: ${ok}/${slim.length} autó átadva / mentve a Bymy-n`
+          : "A Bymy nem fogadta az adatokat — nézd az Autóimport lapot, majd próbáld újra."
+      );
       return;
     }
     deliver(origin, {

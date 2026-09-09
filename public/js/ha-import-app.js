@@ -48,7 +48,7 @@ function setMode(mode) {
 
 function bookmarkletHref(mode) {
   const origin = location.origin;
-  const src = `${origin}/js/ha-import-bookmarklet.js?v=haDealerPhoto8`;
+  const src = `${origin}/js/ha-import-bookmarklet.js?v=haDealerPhoto9`;
   return `javascript:void(function(){var o=${JSON.stringify(origin)};var m=${JSON.stringify(mode)};var src=${JSON.stringify(src)}+"&t="+Date.now();function go(){try{window.BymyHaImport.run({origin:o,mode:m});}catch(e){alert((e&&e.message)||e);}}try{delete window.BymyHaImport;}catch(e){window.BymyHaImport=undefined;}var s=document.createElement("script");s.src=src;s.onload=go;s.onerror=function(){alert("A hasznaltauto.hu blokkolta a Bymy scriptet. Másold a hirdetés URL-jét a Bymy Autóimport oldalra.");};(document.documentElement||document.body).appendChild(s);})();`;
 }
 
@@ -118,7 +118,7 @@ function setStatus(message, type = "") {
   el.dataset.type = type;
 }
 
-function renderResult(result) {
+function renderResult(result, { partial = false, index = 0, total = 0 } = {}) {
   const box = document.getElementById("ha-imp-result");
   if (!box) return;
   const saved = result?.savedCount ?? 0;
@@ -127,13 +127,18 @@ function renderResult(result) {
   const updated = (result?.items || []).filter((item) => item?.updated).length;
   const created = Math.max(0, saved - updated);
   let summary = "";
-  if (saved === 0 && errors === 0) {
+  if (partial && total > 0) {
+    summary = `Folyamatban: ${index} / ${total}. eddig ${saved} mentve`;
+    if (errors > 0) summary += `, ${errors} hiba`;
+    summary += "…";
+  } else if (saved === 0 && errors === 0) {
     summary = "Nem került be új / frissített hirdetés.";
   } else {
     const parts = [];
     if (created > 0) parts.push(`${created} új`);
     if (updated > 0) parts.push(`${updated} frissítve`);
     summary = parts.length ? `${parts.join(", ")}.` : `${saved} hirdetés mentve.`;
+    if (total > 1) summary = `${total}-ből ${summary}`;
     if (errors > 0) summary += ` ${errors} hiba.`;
   }
   if (skipped > 0) summary += ` ${skipped} kihagyva.`;
@@ -143,7 +148,7 @@ function renderResult(result) {
   if (items.length) {
     const list = document.createElement("ul");
     list.className = "ha-imp-items";
-    for (const item of items.slice(0, 12)) {
+    for (const item of items.slice(-12)) {
       const li = document.createElement("li");
       li.textContent = `${item.cim || "—"} · ${item.ar || "—"} Ft${item.skipped ? " (már bent volt)" : ""}`;
       list.appendChild(li);
@@ -154,7 +159,7 @@ function renderResult(result) {
     const err = document.createElement("p");
     err.className = "ha-imp-errors";
     err.textContent = result.errors
-      .slice(0, 4)
+      .slice(-4)
       .map((entry) => entry.message)
       .join(" ");
     box.appendChild(err);
@@ -290,6 +295,8 @@ let importBusy = false;
 const pendingHaImports = [];
 let haImportReady = false;
 const seenHaImportKeys = new Set();
+/** Kereskedői sorozat: több egyautós postMessage → egy összesített progress */
+let dealerBatchState = null;
 
 function haImportKey(data) {
   const pages = Array.isArray(data?.pages) ? data.pages : [];
@@ -309,10 +316,17 @@ function acceptHaImportMessage(event) {
   return data;
 }
 
-function ackHaImport(event, data) {
+function ackHaImport(eventOrSource, data) {
+  const source = eventOrSource?.source ?? eventOrSource;
   try {
-    event.source?.postMessage(
-      { type: "bymy-ha-import-ack", importId: data?.importId || null, pages: Array.isArray(data?.pages) ? data.pages.length : 0 },
+    source?.postMessage(
+      {
+        type: "bymy-ha-import-ack",
+        importId: data?.importId || null,
+        pages: Array.isArray(data?.pages) ? data.pages.length : 0,
+        index: data?.index || null,
+        total: data?.total || null,
+      },
       "*"
     );
   } catch {
@@ -327,22 +341,54 @@ function enqueueHaImport(data) {
   return true;
 }
 
+function ensureDealerBatch(data) {
+  const batchId = String(data?.batchId || "").trim();
+  const total = Math.max(1, Number(data?.total) || 1);
+  if (!batchId) return null;
+  if (!dealerBatchState || dealerBatchState.batchId !== batchId) {
+    dealerBatchState = {
+      batchId,
+      total,
+      savedCount: 0,
+      skippedCount: 0,
+      errorCount: 0,
+      items: [],
+      errors: [],
+    };
+  }
+  dealerBatchState.total = Math.max(dealerBatchState.total, total);
+  return dealerBatchState;
+}
+
 window.addEventListener("message", (event) => {
   const data = acceptHaImportMessage(event);
   if (!data) return;
-  ackHaImport(event, data);
+  const deferAck = data.photoOnly === true || data.mode === "dealer";
+  // Kereskedői: ack csak mentés után — így a bookmarklet nem küldi egyszerre az összes nagy képet
+  if (!deferAck) ackHaImport(event, data);
+  else {
+    data.__ackSource = event.source;
+  }
+
+  const index = Math.max(1, Number(data.index) || 1);
+  const total = Math.max(1, Number(data.total) || (Array.isArray(data.pages) ? data.pages.length : 1) || 1);
   setStatus(
-    Array.isArray(data.pages) && data.pages.length
-      ? `Érkezett: ${data.pages.length} tétel a hasznaltauto.hu-ról…`
-      : "Érkezett üzenet a hasznaltauto.hu-ról…"
+    total > 1 || deferAck
+      ? `Érkezett: ${index} / ${total} — mentés indul…`
+      : Array.isArray(data.pages) && data.pages.length
+        ? `Érkezett: ${data.pages.length} tétel a hasznaltauto.hu-ról…`
+        : "Érkezett üzenet a hasznaltauto.hu-ról…"
   );
+
   const key = haImportKey(data);
   if (seenHaImportKeys.has(key) || (importBusy && key === currentHaImportKey)) {
+    if (deferAck) ackHaImport(event, data);
     return;
   }
   try {
     const light = {
       ...data,
+      __ackSource: undefined,
       pages: (Array.isArray(data.pages) ? data.pages : []).map((page) => ({
         ...page,
         imageJpegBase64: "",
@@ -364,10 +410,14 @@ async function runMessageImport(data) {
   const pages = Array.isArray(data.pages) ? data.pages : [];
   if (!pages.length) {
     setStatus("Üres import — nyisd meg a hirdetést, majd próbáld újra.", "err");
+    if (data.__ackSource) ackHaImport(data.__ackSource, data);
     return;
   }
   const key = haImportKey(data);
-  if (seenHaImportKeys.has(key)) return;
+  if (seenHaImportKeys.has(key)) {
+    if (data.__ackSource) ackHaImport(data.__ackSource, data);
+    return;
+  }
   if (importBusy) {
     enqueueHaImport(data);
     return;
@@ -375,13 +425,17 @@ async function runMessageImport(data) {
   importBusy = true;
   currentHaImportKey = key;
   seenHaImportKeys.add(key);
-  if (seenHaImportKeys.size > 40) {
+  if (seenHaImportKeys.size > 80) {
     const first = seenHaImportKeys.values().next().value;
     seenHaImportKeys.delete(first);
   }
-  const total = pages.length;
+
+  const index = Math.max(1, Number(data.index) || 1);
+  const total = Math.max(1, Number(data.total) || pages.length);
+  const batch = ensureDealerBatch(data);
   const SAVE_BATCH = 1;
-  setStatus(total > 1 ? `Mentés: 0 / ${total}…` : "Hirdetés feldolgozása…");
+  setStatus(`Mentés: ${index} / ${total}…`);
+
   try {
     let savedCount = 0;
     let skippedCount = 0;
@@ -390,7 +444,7 @@ async function runMessageImport(data) {
     const errors = [];
     for (let offset = 0; offset < pages.length; offset += SAVE_BATCH) {
       const chunk = pages.slice(offset, offset + SAVE_BATCH);
-      setStatus(`Mentés: ${Math.min(offset + chunk.length, total)} / ${total}…`);
+      setStatus(`Mentés: ${index} / ${total}…`);
       try {
         const result = await postExtractedResilient(chunk, {
           listUrl: data.listUrl,
@@ -410,15 +464,33 @@ async function runMessageImport(data) {
         });
       }
     }
-    setStatus("");
-    renderResult({
-      savedCount,
-      skippedCount,
-      errorCount,
-      count: items.length,
-      items,
-      errors,
-    });
+
+    if (batch) {
+      batch.savedCount += savedCount;
+      batch.skippedCount += skippedCount;
+      batch.errorCount += errorCount;
+      batch.items.push(...items);
+      batch.errors.push(...errors);
+      const done = index >= batch.total;
+      if (done) {
+        setStatus("");
+        renderResult(batch);
+        dealerBatchState = null;
+      } else {
+        setStatus(`Mentés: ${index} / ${batch.total} kész — várom a következőt…`);
+        renderResult(batch, { partial: true, index, total: batch.total });
+      }
+    } else {
+      setStatus("");
+      renderResult({
+        savedCount,
+        skippedCount,
+        errorCount,
+        count: items.length,
+        items,
+        errors,
+      });
+    }
     try {
       sessionStorage.removeItem("bymy-ha-import-pending");
     } catch {
@@ -426,6 +498,7 @@ async function runMessageImport(data) {
   } catch (error) {
     setStatus(error.message ?? "Import sikertelen.", "err");
   } finally {
+    if (data.__ackSource) ackHaImport(data.__ackSource, data);
     importBusy = false;
     currentHaImportKey = "";
     while (pendingHaImports.length && seenHaImportKeys.has(haImportKey(pendingHaImports[0]))) {

@@ -56,7 +56,10 @@ function clearSensitiveLocalData() {
 
 function setCachedUser(user) {
   if (!user?.email) {
-    sessionStorage.removeItem(AUTH_KEY);
+    try {
+      sessionStorage.removeItem(AUTH_KEY);
+    } catch {
+    }
     return null;
   }
   const cached = {
@@ -66,7 +69,11 @@ function setCachedUser(user) {
     profile: user.profile || null,
     loggedInAt: Date.now(),
   };
-  sessionStorage.setItem(AUTH_KEY, JSON.stringify(cached));
+  try {
+    sessionStorage.setItem(AUTH_KEY, JSON.stringify(cached));
+  } catch {
+    /* Safari: cookie tiltás / privát mód → sessionStorage SecurityError */
+  }
   return cached;
 }
 
@@ -109,7 +116,10 @@ async function authFetch(url, options = {}) {
   }
   if (response.status === 401) {
     setStoredToken("");
-    sessionStorage.removeItem(AUTH_KEY);
+    try {
+      sessionStorage.removeItem(AUTH_KEY);
+    } catch {
+    }
     clearSensitiveLocalData();
     const err = new Error(data.error || "Nem vagy bejelentkezve.");
     err.status = 401;
@@ -143,7 +153,10 @@ export async function refreshAuthSession() {
       const data = await authFetch("/api/auth/me");
       if (!data.user?.email) {
         setStoredToken("");
-        sessionStorage.removeItem(AUTH_KEY);
+        try {
+          sessionStorage.removeItem(AUTH_KEY);
+        } catch {
+        }
         clearSensitiveLocalData();
         return null;
       }
@@ -151,7 +164,10 @@ export async function refreshAuthSession() {
     } catch (error) {
       if (error?.status === 401) {
         setStoredToken("");
-        sessionStorage.removeItem(AUTH_KEY);
+        try {
+          sessionStorage.removeItem(AUTH_KEY);
+        } catch {
+        }
         clearSensitiveLocalData();
         return null;
       }
@@ -236,7 +252,10 @@ export async function logout() {
     await authFetch("/api/auth/logout", { method: "POST", body: "{}" });
   } catch {
   }
-  sessionStorage.removeItem(AUTH_KEY);
+  try {
+    sessionStorage.removeItem(AUTH_KEY);
+  } catch {
+  }
   setStoredToken("");
   clearSensitiveLocalData();
 }
@@ -290,7 +309,10 @@ export async function saveAvatarPhoto(avatarDataUrl) {
 
 export async function deleteAccount() {
   await authFetch("/api/auth/account", { method: "DELETE" });
-  sessionStorage.removeItem(AUTH_KEY);
+  try {
+    sessionStorage.removeItem(AUTH_KEY);
+  } catch {
+  }
   setStoredToken("");
   clearSensitiveLocalData();
 }

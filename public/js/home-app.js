@@ -22,7 +22,6 @@ import { initHomeStatsBar } from "./home-stats-bar.js";
 import { buildNearbyFilter, readNearbyPrefs } from "./nearby-search.js?v=korzetFix1";
 import { getAuthUser } from "./site-auth.js?v=nearby1";
 import { bindListingOpen, restoreListingReturn } from "./listing-return.js?v=searchNav1";
-import { applyNavCounts } from "./nav-counts.js?v=navCount3";
 import { normalizeKivitel } from "./kivitel-options.js?v=kivitel1";
 
 const gridTrack = document.getElementById("home-grid-track");
@@ -222,10 +221,6 @@ async function loadListings() {
   });
   const active = all.filter((item) => (item.status || "feladott") === "feladott");
   allItems = sortForHome(filterBySitePage(active));
-  const vert = pageVerticalParam();
-  if (vert === "auto" || vert === "teher" || vert === "ingatlan") {
-    applyNavCounts({ [vert]: active.length });
-  }
   populateFilterOptions(allItems);
   renderListings(allItems);
   updateFilterResultCount();

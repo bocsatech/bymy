@@ -1,10 +1,14 @@
+const NAV_LINK_SELECTOR =
+  ".hub-nav-link, .import-nav-link, .home-nav-link, .site-app-nav-link, .mw-app-pages-link";
+
 const COUNT_BY_HREF = [
-  { match: /\/auto\.html(?:$|\?)/, key: "auto" },
-  { match: /\/teherauto\.html(?:$|\?)/, key: "teher" },
-  { match: /\/ingatlan\.html(?:$|\?)/, key: "ingatlan" },
+  { match: /\/auto\.html(?:$|[?#])/, key: "auto" },
+  { match: /\/teherauto\.html(?:$|[?#])/, key: "teher" },
+  { match: /\/ingatlan\.html(?:$|[?#])/, key: "ingatlan" },
 ];
 
 const STORAGE_KEY = "bymy.navCounts.v1";
+const ZERO_COUNTS = { auto: 0, teher: 0, ingatlan: 0 };
 
 function formatCount(n) {
   const num = Number(n) || 0;
@@ -46,9 +50,7 @@ function writeStoredCounts(counts) {
 }
 
 function paintCounts(counts) {
-  const links = document.querySelectorAll(
-    ".hub-nav-link, .import-nav-link, .home-nav-link, .site-app-nav-link"
-  );
+  const links = document.querySelectorAll(NAV_LINK_SELECTOR);
   links.forEach((link) => {
     const href = link.getAttribute("href") || "";
     const hit = COUNT_BY_HREF.find((row) => row.match.test(href));
@@ -59,7 +61,7 @@ function paintCounts(counts) {
 }
 
 export function applyNavCounts(partial = {}) {
-  const base = readStoredCounts() || { auto: 0, teher: 0, ingatlan: 0 };
+  const base = readStoredCounts() || { ...ZERO_COUNTS };
   const next = { ...base };
   for (const key of ["auto", "teher", "ingatlan"]) {
     if (partial[key] != null && Number.isFinite(Number(partial[key]))) {
@@ -100,13 +102,11 @@ async function fetchCountsWithRetry(attempts = 3) {
 }
 
 export async function initNavCounts() {
-  const links = document.querySelectorAll(
-    ".hub-nav-link, .import-nav-link, .home-nav-link, .site-app-nav-link"
-  );
+  const links = document.querySelectorAll(NAV_LINK_SELECTOR);
   if (!links.length) return;
 
   const stored = readStoredCounts();
-  if (stored) paintCounts(stored);
+  paintCounts(stored || { ...ZERO_COUNTS });
 
   try {
     const counts = await fetchCountsWithRetry();
@@ -120,11 +120,16 @@ export async function initNavCounts() {
     writeStoredCounts(counts);
     paintCounts(counts);
   } catch {
+    if (!stored) paintCounts({ ...ZERO_COUNTS });
   }
 }
 
-if (typeof requestIdleCallback === "function") {
-  requestIdleCallback(() => initNavCounts(), { timeout: 1200 });
+function bootNavCounts() {
+  initNavCounts();
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", bootNavCounts);
 } else {
-  setTimeout(initNavCounts, 400);
+  bootNavCounts();
 }

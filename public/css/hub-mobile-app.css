@@ -264,8 +264,9 @@
   body.site-app .mw-app-pages-link {
     flex: 0 0 auto;
     display: inline-flex;
-    align-items: center;
+    align-items: baseline;
     justify-content: center;
+    gap: 0.3rem;
     min-height: 2.65rem;
     padding: 0.45rem 0.85rem;
     white-space: nowrap;
@@ -277,6 +278,12 @@
     color: #4b5563;
     border-bottom: 2px solid transparent;
     box-sizing: border-box;
+  }
+
+  body.site-app .mw-app-pages-link .nav-count {
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: #9ca3af;
   }
 
   body.site-app .mw-app-pages-link.is-active {

@@ -827,6 +827,7 @@ function showStep(step) {
     window.dispatchEvent(new Event("ad-form-sync-location"));
   }
   syncPhotoNextButton();
+  window.dispatchEvent(new CustomEvent("ad-form-step", { detail: { step } }));
 }
 
 function collectFormData() {

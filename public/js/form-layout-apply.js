@@ -1,5 +1,5 @@
 import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=immoUiParity1";
-import { refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=autoRestore22";
+import { refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=autoRestore23";
 
 function cssEscape(value) {
   if (window.CSS?.escape) return window.CSS.escape(value);

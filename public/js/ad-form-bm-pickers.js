@@ -466,11 +466,24 @@ function mountBmPicker(opts) {
   });
 
   hidden.addEventListener("change", refreshSummary);
+
+  const formEl = select.closest("form");
+  const stored = formEl?._bymyLastFormData?.[select.id];
+  if (stored != null && String(stored).trim() && !readSingleStoredValue(hidden.value)) {
+    writePlainValue(select, readSingleStoredValue(String(stored)));
+  }
+
   syncFromHidden();
   refreshSummary();
 
   select.dataset.adBmPicker = "1";
   select._adBmClose = closePanel;
+  select._adBmSyncFromValue = (value) => {
+    const next = readSingleStoredValue(String(value ?? ""));
+    writePlainValue(select, next);
+    syncFromHidden();
+    refreshSummary();
+  };
 }
 
 function mountSearchDropdownPicker(select, opts) {
@@ -1781,9 +1794,13 @@ export function unmountAdFormBmPickers(form) {
 export async function refreshAdFormBmPickers(form, catalog = null) {
   try {
     if (catalog) cachedVehicleCatalog = catalog;
+    const pending = form?._bymyLastFormData;
     unmountAdFormBmPickers(form);
     await mountAdFormBmPickers(form, catalog || cachedVehicleCatalog);
-    if (form?._bymyLastFormData) applyAdFormBmFieldValues(form._bymyLastFormData);
+    if (pending) {
+      applyAdFormBmFieldValues(pending);
+      requestAnimationFrame(() => applyAdFormBmFieldValues(pending));
+    }
   } catch (error) {
     console.warn("Alapadatok kapcsolós panel frissítés:", error);
   }
@@ -1848,8 +1865,3 @@ export async function mountAdFormBmPickers(form, catalog = null) {
   form.dataset.adBmPickers = "1";
 }
 
-if (typeof window !== "undefined") {
-  window.addEventListener("ad-form-layout-refresh", () => {
-    void refreshAdFormBmPickers(document.getElementById("ad-form"));
-  });
-}

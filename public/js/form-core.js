@@ -19,7 +19,7 @@ import {
   DEFAULT_PHOTO_OVERLAY_ID,
   renderListingPhotoOverlay,
 } from "./listing-photo-overlay.js?v=photoOverlay1";
-import { refreshAdFormBmPickers, applyAdFormBmFieldValues } from "./ad-form-bm-pickers.js?v=autoRestore22";
+import { refreshAdFormBmPickers, applyAdFormBmFieldValues } from "./ad-form-bm-pickers.js?v=autoRestore23";
 
 export function createAdForm(options = {}) {
   const mode = options.mode ?? "wizard";
@@ -872,6 +872,9 @@ function scheduleBmFieldApply(payload) {
   const run = () => applyAdFormBmFieldValues(payload);
   run();
   requestAnimationFrame(run);
+  for (const ms of [80, 250, 600, 1200]) {
+    window.setTimeout(run, ms);
+  }
   window.addEventListener("ad-form-ready", run, { once: true });
 }
 

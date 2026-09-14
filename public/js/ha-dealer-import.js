@@ -202,20 +202,31 @@
     return clean(String(raw ?? "").replace(/<[^>]+>/g, " "));
   }
 
-  /** Gyorsnézet táblázat → { "Állapot": "Kitűnő", "Kivitel": "...", ... } */
+  /** Gyorsnézet táblázat → { "Állapot": "Kitűnő", "Kivitel": "...", ... } (ugyanaz a logika mint lib/parse-listing parseTableRows) */
   function extractMapFromHtml(html) {
     const map = {};
     const raw = String(html || "");
     for (const row of raw.matchAll(/<tr[^>]*>([\s\S]*?)<\/tr>/gi)) {
       const block = row[1] || "";
-      const keyMatch = block.match(/<t[dh][^>]*class="[^"]*pontos[^"]*"[^>]*>([\s\S]*?)<\/t[dh]>/i);
-      if (!keyMatch) continue;
-      const after = block.slice(keyMatch.index + keyMatch[0].length);
-      const valMatch = after.match(/<td[^>]*>([\s\S]*?)<\/td>/i);
-      if (!valMatch) continue;
-      const key = stripCellHtml(keyMatch[1]).replace(/:$/, "");
-      const val = stripCellHtml(valMatch[1]);
-      if (key && val && val.length <= 500) map[key] = val;
+      const cells = [...block.matchAll(/<t[dh][^>]*>([\s\S]*?)<\/t[dh]>/gi)];
+      if (cells.length < 2) continue;
+
+      let keyCell = cells[0][1];
+      let valueCell = cells[cells.length - 1][1];
+
+      const keyFromBal = block.match(/<td[^>]*class="[^"]*bal[^"]*pontos[^"]*"[^>]*>([\s\S]*?)<\/td>/i);
+      if (keyFromBal) {
+        keyCell = keyFromBal[1];
+        const afterKey = block.slice(keyFromBal.index + keyFromBal[0].length);
+        const valueAfterKey = afterKey.match(/<td[^>]*>([\s\S]*?)<\/td>/i);
+        if (valueAfterKey) valueCell = valueAfterKey[1];
+      }
+
+      const key = stripCellHtml(keyCell).replace(/:$/, "");
+      const val = stripCellHtml(valueCell);
+      if (key && val && val.length <= 500 && !/^válasszon|^nincs megadva$/i.test(val)) {
+        map[key] = val;
+      }
     }
     return map;
   }

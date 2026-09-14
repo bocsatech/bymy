@@ -48,12 +48,16 @@ function countFilled(root) {
 }
 
 function updateAccordionSums(form) {
-  for (const { id } of ACCORDIONS) {
+  for (const { id, step } of ACCORDIONS) {
     const acc = form.querySelector(`[data-desk-acc="${id}"]`);
     const sum = acc?.querySelector("[data-desk-acc-sum]");
     const body = acc?.querySelector(".auto-desk-acc__body");
     if (!sum || !body) continue;
-    const n = countFilled(body);
+    let root = body;
+    if (id === "kepek" && document.body.classList.contains("ad-form-desk-kepek")) {
+      root = form.querySelector(`.step-panel[data-step="${step}"]`) || body;
+    }
+    const n = countFilled(root);
     sum.textContent = n > 0 ? `${n} kitöltve` : "";
   }
 }
@@ -136,6 +140,76 @@ function setDeskActive(on) {
   document.getElementById("wizard-steps-bar")?.toggleAttribute("hidden", on);
 }
 
+function kepekAccordionBody(form) {
+  return form.querySelector('[data-desk-acc="kepek"] .auto-desk-acc__body');
+}
+
+function ensureRightStack() {
+  const center = document.querySelector(".site-center--automax");
+  if (!center) return null;
+  let stack = center.querySelector("#ad-desk-right-stack");
+  if (stack) return stack;
+
+  const panel = center.querySelector(".automax-panel");
+  if (!panel) return null;
+
+  stack = document.createElement("div");
+  stack.id = "ad-desk-right-stack";
+  stack.className = "ad-desk-right-stack";
+  center.insertBefore(stack, panel);
+  stack.appendChild(panel);
+  return stack;
+}
+
+function ensurePhotoStage() {
+  const stack = ensureRightStack();
+  if (!stack) return null;
+  let stage = stack.querySelector("#ad-photo-desk-stage");
+  if (stage) return stage;
+  stage = document.createElement("div");
+  stage.id = "ad-photo-desk-stage";
+  stage.className = "ad-photo-desk-stage";
+  stack.appendChild(stage);
+  return stage;
+}
+
+function teardownRightStack(form) {
+  const center = document.querySelector(".site-center--automax");
+  const stack = center?.querySelector("#ad-desk-right-stack");
+  const panel = stack?.querySelector(".automax-panel");
+  const photoPanel = form?.querySelector('.step-panel[data-step="4"]');
+  const kepekBody = form ? kepekAccordionBody(form) : null;
+
+  document.body.classList.remove("ad-form-desk-kepek");
+
+  if (photoPanel && kepekBody && !kepekBody.contains(photoPanel)) {
+    kepekBody.appendChild(photoPanel);
+  }
+
+  if (stack && panel && center) {
+    center.insertBefore(panel, stack);
+    stack.remove();
+  }
+}
+
+function syncPhotoStage(form, step) {
+  const panel = form.querySelector('.step-panel[data-step="4"]');
+  if (!panel) return;
+
+  const showPhotos = isAdFormDesk(form) && step === 4;
+  document.body.classList.toggle("ad-form-desk-kepek", showPhotos);
+
+  if (!showPhotos) {
+    const body = kepekAccordionBody(form);
+    if (body && !body.contains(panel)) body.appendChild(panel);
+    return;
+  }
+
+  ensureRightStack();
+  const stage = ensurePhotoStage();
+  if (stage && panel.parentElement !== stage) stage.appendChild(panel);
+}
+
 function applyAdFormDesk({ openStep = null } = {}) {
   const form = document.getElementById("ad-form");
   if (!form || form.closest("#ad-wizard-shell")?.hidden) {
@@ -148,6 +222,7 @@ function applyAdFormDesk({ openStep = null } = {}) {
   setDeskActive(desk);
 
   if (!desk) {
+    teardownRightStack(form);
     if (shell) {
       shell.hidden = true;
       const footer = form.querySelector("#footer-actions");
@@ -160,6 +235,7 @@ function applyAdFormDesk({ openStep = null } = {}) {
     return;
   }
 
+  ensureRightStack();
   mountDeskPanels(form);
   restackCanvasItems(form);
   if (shell) shell.hidden = false;
@@ -167,6 +243,7 @@ function applyAdFormDesk({ openStep = null } = {}) {
   const activeIndicator = document.querySelector("[data-step-indicator].active");
   const step = openStep ?? Number(activeIndicator?.dataset.stepIndicator) ?? 1;
   openAccordion(form, accordionForStep(step));
+  syncPhotoStage(form, step);
   updateAccordionSums(form);
 }
 
@@ -182,7 +259,14 @@ function bindDeskEvents() {
     const id = acc?.getAttribute("data-desk-acc");
     if (!id) return;
     const open = acc.classList.contains("is-open");
-    openAccordion(form, open ? "" : id);
+    if (open) {
+      openAccordion(form, "");
+      syncPhotoStage(form, 0);
+    } else {
+      openAccordion(form, id);
+      const accStep = ACCORDIONS.find((item) => item.id === id)?.step ?? 1;
+      syncPhotoStage(form, accStep);
+    }
   });
 
   form.addEventListener("input", () => {
@@ -196,8 +280,14 @@ function bindDeskEvents() {
     const step = Number(event.detail?.step);
     if (!document.body.classList.contains("ad-form-desk-active") || !step) return;
     openAccordion(form, accordionForStep(step));
+    syncPhotoStage(form, step);
+    updateAccordionSums(form);
     const acc = form.querySelector(`[data-desk-acc="${accordionForStep(step)}"]`);
-    acc?.scrollIntoView?.({ block: "nearest", behavior: "smooth" });
+    if (step === 4) {
+      document.getElementById("ad-photo-desk-stage")?.scrollIntoView?.({ block: "start", behavior: "smooth" });
+    } else {
+      acc?.scrollIntoView?.({ block: "nearest", behavior: "smooth" });
+    }
   });
 
   window.matchMedia(DESK_MQ).addEventListener("change", () => applyAdFormDesk());

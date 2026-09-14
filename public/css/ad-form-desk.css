@@ -44,8 +44,67 @@
     overscroll-behavior: contain;
   }
 
-  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .automax-panel {
+  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .ad-desk-right-stack {
+    grid-column: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 20px;
+    width: 100%;
+    max-width: 520px;
+    margin: 0 auto;
+    justify-self: center;
     align-self: start;
+  }
+
+  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .ad-desk-right-stack .automax-panel {
+    width: 100%;
+    max-width: 420px;
+    align-self: center;
+    border-left: 0;
+    border: 1px solid var(--ad-line);
+    border-radius: 8px;
+    background: var(--ad-panel);
+  }
+
+  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .ad-desk-right-stack .automax-panel-content {
+    padding: 1rem 1.1rem 1.15rem;
+  }
+
+  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .ad-photo-desk-stage {
+    display: none;
+    width: 100%;
+    max-width: 520px;
+    align-self: center;
+  }
+
+  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"].ad-form-desk-kepek .ad-photo-desk-stage {
+    display: block;
+  }
+
+  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"].ad-form-desk-kepek .ad-photo-desk-stage .step-panel[data-step="4"] {
+    width: 100%;
+  }
+
+  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"].ad-form-desk-kepek .ad-photo-desk-stage .upload-zone {
+    text-align: center;
+    padding: 28px 20px;
+  }
+
+  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"].ad-form-desk-kepek .ad-photo-desk-stage .photo-grid {
+    justify-content: center;
+  }
+
+  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"].ad-form-desk-kepek .ad-photo-desk-stage .photo-upload-bar {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] [data-desk-acc="kepek"] .auto-desk-acc__body:empty {
+    min-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
   }
 
   body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form {

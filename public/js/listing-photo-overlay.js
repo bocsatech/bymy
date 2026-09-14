@@ -15,7 +15,7 @@ export async function renderListingPhotoOverlay(src, info = {}) {
     throw new Error("Ismeretlen sablon.");
   }
 
-  const img = await loadImage(src);
+  const img = await loadImageForCanvas(src);
   const w = img.naturalWidth || img.width;
   const h = img.naturalHeight || img.height;
   if (!w || !h) throw new Error("A kép mérete nem olvasható.");
@@ -145,13 +145,58 @@ function roundRect(ctx, x, y, w, h, r) {
   ctx.closePath();
 }
 
+function isCrossOriginSrc(src) {
+  const raw = String(src ?? "").trim();
+  if (!raw || raw.startsWith("data:") || raw.startsWith("blob:")) return false;
+  try {
+    return new URL(raw, window.location.href).origin !== window.location.origin;
+  } catch {
+    return false;
+  }
+}
+
 function loadImage(src) {
   return new Promise((resolve, reject) => {
     const img = new Image();
-    const isRemote = /^https?:/i.test(src);
-    if (isRemote) img.crossOrigin = "anonymous";
+    if (isCrossOriginSrc(src)) img.crossOrigin = "anonymous";
     img.onload = () => resolve(img);
     img.onerror = () => reject(new Error("A kép nem tölthető be a sablonhoz."));
     img.src = src;
   });
+}
+
+async function fetchImageDataUrl(url) {
+  let fetchUrl = String(url ?? "").trim();
+  if (!fetchUrl) throw new Error("A kép nem tölthető be a sablonhoz.");
+  try {
+    const parsed = new URL(fetchUrl, window.location.href);
+    if (parsed.origin !== window.location.origin) {
+      fetchUrl = `/api/media/proxy?url=${encodeURIComponent(fetchUrl)}`;
+    }
+  } catch {
+    fetchUrl = `/api/media/proxy?url=${encodeURIComponent(fetchUrl)}`;
+  }
+  const res = await fetch(fetchUrl, { credentials: "same-origin" });
+  if (!res.ok) throw new Error("A kép nem tölthető be a sablonhoz.");
+  const blob = await res.blob();
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ""));
+    reader.onerror = () => reject(new Error("A kép nem tölthető be a sablonhoz."));
+    reader.readAsDataURL(blob);
+  });
+}
+
+export async function loadImageForCanvas(src) {
+  const raw = String(src ?? "").trim();
+  if (!raw) throw new Error("A kép nem tölthető be a sablonhoz.");
+  if (raw.startsWith("data:") || raw.startsWith("blob:") || !isCrossOriginSrc(raw)) {
+    try {
+      return await loadImage(raw);
+    } catch (error) {
+      if (raw.startsWith("data:") || raw.startsWith("blob:")) throw error;
+    }
+  }
+  const dataUrl = await fetchImageDataUrl(raw);
+  return loadImage(dataUrl);
 }

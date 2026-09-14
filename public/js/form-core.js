@@ -18,7 +18,7 @@ import { syncIngatlanFormVisibility } from "./ingatlan-form-fields.js?v=immoUiPa
 import {
   DEFAULT_PHOTO_OVERLAY_ID,
   renderListingPhotoOverlay,
-} from "./listing-photo-overlay.js?v=photoOverlay1";
+} from "./listing-photo-overlay.js?v=photoOverlay2";
 import { refreshAdFormBmPickers, applyAdFormBmFieldValues } from "./ad-form-bm-pickers.js?v=autoRestore23";
 
 export function createAdForm(options = {}) {
@@ -1472,12 +1472,23 @@ async function applyPhotoOverlayToFirst() {
     alert("Előbb adj hozzá legalább egy képet.");
     return;
   }
-  const src = item.basePreviewUrl || item.url || item.previewUrl;
+  let src = "";
+  if (item.file) {
+    try {
+      src = await compressListingPhoto(item.file);
+      item.dataUrl = src;
+    } catch {
+      src = item.basePreviewUrl || item.previewUrl || "";
+    }
+  }
+  if (!src) {
+    src = item.dataUrl || item.basePreviewUrl || item.previewUrl || item.url || "";
+  }
   if (!src) {
     alert("A főkép még nem elérhető.");
     return;
   }
-  if (!item.basePreviewUrl) item.basePreviewUrl = src;
+  if (!item.basePreviewUrl) item.basePreviewUrl = item.previewUrl || item.url || src;
 
   photoItems.forEach((other, index) => {
     if (index !== 0) clearPhotoOverlay(other);

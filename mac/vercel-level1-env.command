@@ -43,6 +43,28 @@ SMTP_USER="${ENV[SMTP_USER]:-}"
 SMTP_PASS="${ENV[SMTP_PASS]:-}"
 SMTP_FROM="${ENV[SMTP_FROM]:-$SMTP_USER}"
 
+# Ha nincs SMTP a .env.local-ban, próbáljuk ~/.autosweb/smtp.json (Gmail app jelszó).
+if [[ -z "$SMTP_USER" || -z "$SMTP_PASS" ]] && command -v node >/dev/null 2>&1; then
+  read -r _SMTP_JSON _SMTP_USER _SMTP_PASS _SMTP_FROM _SMTP_HOST _SMTP_PORT <<EOF
+$(node -e "
+const fs=require('fs'); const os=require('os'); const p=os.homedir()+'/.autosweb/smtp.json';
+try {
+  const j=JSON.parse(fs.readFileSync(p,'utf8'));
+  if (!j.user||!j.pass) process.exit(0);
+  console.log([p,j.user,String(j.pass).replace(/\\s+/g,''),j.from||j.user,j.host||'smtp.gmail.com',String(j.port??587)].join('\\t'));
+} catch {}
+")
+EOF
+  if [[ -n "${_SMTP_USER:-}" && -n "${_SMTP_PASS:-}" ]]; then
+    echo "→ SMTP a Mac ~/.autosweb/smtp.json-ból ($_SMTP_JSON)"
+    SMTP_USER="$_SMTP_USER"
+    SMTP_PASS="$_SMTP_PASS"
+    SMTP_FROM="${_SMTP_FROM:-$SMTP_USER}"
+    SMTP_HOST="${_SMTP_HOST:-smtp.gmail.com}"
+    SMTP_PORT="${_SMTP_PORT:-587}"
+  fi
+fi
+
 if [[ -z "$L1_PASS" || -z "$L1_EMAIL" ]]; then
   echo "A .env.local-ban kötelező:"
   echo "  LEVEL1_BOOTSTRAP_USERNAME=bocsatechadmin"

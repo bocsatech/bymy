@@ -236,6 +236,9 @@ function ensureFormReady() {
     },
     onCatalogReady: async (catalog) => {
       if (!pendingEditForm) return;
+      const catSel = categorySelectionFromForm(pendingEditForm);
+      if (catSel) categoryPicker?.syncWizardContext?.(catSel);
+      formApi?.applyFormData?.(pendingEditForm, { fromImport: true });
       if (pendingEditForm.gyartmany) {
         await applyImportedVehicleToSelects({
           brandSelect: document.getElementById("gyartmany"),
@@ -297,16 +300,21 @@ if (editing) {
     }
     const api = ensureFormReady();
     showWizardShell();
-    pendingEditForm = listing.form;
-    api?.applyFormData?.(listing.form, { fromImport: true });
-    applyListingAddressFromProfileSync(adForm);
-    await applyListingAddressFromProfile(adForm);
-    phoneLanguages?.syncLanguages?.();
-    tireSizes?.syncRearTires?.();
+    pendingEditForm = { ...listing.form };
+    if (!pendingEditForm.hirdetes_vertical) pendingEditForm.hirdetes_vertical = "auto";
+    if (!pendingEditForm.hirdetes_alkategoria) pendingEditForm.hirdetes_alkategoria = "szemelyauto";
+    if (!pendingEditForm.jarmu_kategoria) pendingEditForm.jarmu_kategoria = "szemelyauto";
+    adForm._bymyLastFormData = pendingEditForm;
+    for (const [key, value] of Object.entries(pendingEditForm)) {
+      const el = adForm.elements.namedItem(key);
+      if (!el || value == null || String(value).trim() === "") continue;
+      if (el instanceof RadioNodeList) continue;
+      if (el.type === "checkbox") continue;
+      el.value = Array.isArray(value) ? JSON.stringify(value) : String(value);
+    }
     setStoredListingId(editId);
     syncPhotoUrlsFromListing(listing);
-    const catSel = categorySelectionFromForm(listing.form);
-    if (catSel) categoryPicker?.syncWizardContext?.(catSel);
+    api?.applyFormData?.(pendingEditForm, { fromImport: true });
     const published = String(listing.status || "") === "feladott";
     const isImmo = String(listing.form?.hirdetes_vertical || "").toLowerCase() === "ingatlan";
     if (published && isImmo) {

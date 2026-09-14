@@ -295,6 +295,18 @@ function restoreHiddenInput(select) {
   if (hidden.required) {
     select.required = true;
   }
+  if (select.tagName === "SELECT") {
+    const value = readSingleStoredValue(hidden.value);
+    if (value) {
+      if (![...select.options].some((option) => option.value === value)) {
+        const option = document.createElement("option");
+        option.value = value;
+        option.textContent = value;
+        select.appendChild(option);
+      }
+      select.value = value;
+    }
+  }
   hidden.remove();
   delete select._adBmHidden;
 }
@@ -1670,6 +1682,17 @@ function mountModelPicker(select, catalog) {
   document.getElementById("gyartmany")?._adBmHidden?.addEventListener("change", onBrandChange);
 }
 
+function allapotLabelForValue(value) {
+  const v = String(value ?? "").trim();
+  if (!v) return "";
+  for (const cat of ALLAPOT_CATEGORIES) {
+    if (cat.value === v) return cat.label;
+    const child = cat.children?.find((c) => c.value === v);
+    if (child) return child.label;
+  }
+  return v;
+}
+
 export function applyAdFormBmFieldValues(data) {
   if (!data || typeof data !== "object") return;
   const ids = [
@@ -1683,10 +1706,10 @@ export function applyAdFormBmFieldValues(data) {
     "forgalomba_helyezes_honap",
   ];
   for (const id of ids) {
-    if (!(id in data)) continue;
+    const raw = data[id];
+    if (raw == null || String(raw).trim() === "") continue;
     const select = document.getElementById(id);
     if (!select) continue;
-    const raw = data[id];
     let list = [];
     if (Array.isArray(raw)) list = raw.map(String).filter(Boolean);
     else if (raw != null && String(raw).trim()) {
@@ -1703,11 +1726,12 @@ export function applyAdFormBmFieldValues(data) {
       const normalized =
         id === "gyartmany" ? value.toUpperCase() : id === "uzemanyag" ? normalizePrimaryValue(select, value) : value;
       writePlainValue(select, normalized);
-      const summary = normalized || PLACEHOLDER;
+      const summary =
+        id === "allapot" ? allapotLabelForValue(normalized) || PLACEHOLDER : normalized || PLACEHOLDER;
       if (select._adBmPanel?.classList.contains("ad-form-bm-dropdown")) {
         updateBmSearchTrigger(select, summary === PLACEHOLDER ? "" : summary, Boolean(normalized));
       } else {
-        updateBmSummary(select, summary, Boolean(normalized));
+        updateBmSummary(select, summary === PLACEHOLDER ? "" : summary, Boolean(normalized));
       }
     } else if (select._adBmHidden) {
       writePickerList(select, list);
@@ -1759,6 +1783,7 @@ export async function refreshAdFormBmPickers(form, catalog = null) {
     if (catalog) cachedVehicleCatalog = catalog;
     unmountAdFormBmPickers(form);
     await mountAdFormBmPickers(form, catalog || cachedVehicleCatalog);
+    if (form?._bymyLastFormData) applyAdFormBmFieldValues(form._bymyLastFormData);
   } catch (error) {
     console.warn("Alapadatok kapcsolós panel frissítés:", error);
   }
@@ -1825,9 +1850,6 @@ export async function mountAdFormBmPickers(form, catalog = null) {
 
 if (typeof window !== "undefined") {
   window.addEventListener("ad-form-layout-refresh", () => {
-    refreshAdFormBmPickers(document.getElementById("ad-form"));
-  });
-  window.addEventListener("ad-form-ready", () => {
-    refreshAdFormBmPickers(document.getElementById("ad-form"));
+    void refreshAdFormBmPickers(document.getElementById("ad-form"));
   });
 }

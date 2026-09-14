@@ -1,5 +1,14 @@
-import { UZEMANYAG_CATEGORIES, ALLAPOT_CATEGORIES, EQUIPMENT_SECTIONS, KLIM_OPTIONS, KISTEHER_EQUIPMENT_ITEMS, TEHER_KISTEHER_KIVITEL, TEHER_35_KIVITEL_CATEGORIES } from "./equipment-data.js?v=teherKivitel35e";
-import { KIVITEL_OPTIONS } from "./kivitel-options.js?v=kivitel1";
+import {
+  UZEMANYAG_CATEGORIES,
+  ALLAPOT_CATEGORIES,
+  EQUIPMENT_SECTIONS,
+  KLIM_OPTIONS,
+  KISTEHER_EQUIPMENT_ITEMS,
+  TEHER_KISTEHER_KIVITEL,
+  TEHER_35_KIVITEL_CATEGORIES,
+  normalizeOkmanyJelleg,
+} from "./equipment-data.js?v=teherKivitel35e";
+import { KIVITEL_OPTIONS, normalizeKivitel } from "./kivitel-options.js?v=kivitel1";
 import { EGYEB_INFO_OPTIONS } from "./egyeb-info-data.js";
 import { initVehicleCatalogSelects } from "./vehicle-catalog-client.js";
 import { compressListingPhoto, MAX_LISTING_PHOTOS } from "./listing-photo-compress.js?v=myAds2";
@@ -10,7 +19,7 @@ import {
   DEFAULT_PHOTO_OVERLAY_ID,
   renderListingPhotoOverlay,
 } from "./listing-photo-overlay.js?v=photoOverlay1";
-import { refreshAdFormBmPickers, applyAdFormBmFieldValues } from "./ad-form-bm-pickers.js?v=autoRestore20";
+import { refreshAdFormBmPickers, applyAdFormBmFieldValues } from "./ad-form-bm-pickers.js?v=autoRestore22";
 
 export function createAdForm(options = {}) {
   const mode = options.mode ?? "wizard";
@@ -838,8 +847,38 @@ function ensureSelectOption(select, value) {
   select.value = value;
 }
 
+function collectEgyebInfoFromFormData(data) {
+  const items = new Set(Array.isArray(data?.egyeb_info) ? data.egyeb_info : []);
+  for (const raw of data?.felszereltseg ?? []) {
+    const text = String(raw ?? "").trim();
+    if (!text) continue;
+    for (const opt of EGYEB_INFO_OPTIONS) {
+      if (text.toLowerCase().includes(opt.toLowerCase())) items.add(opt);
+    }
+  }
+  return [...items];
+}
+
+function normalizeAppliedFormData(data) {
+  const next = { ...data };
+  if (next.kivitel) next.kivitel = normalizeKivitel(next.kivitel);
+  if (next.okmany_jelleg) next.okmany_jelleg = normalizeOkmanyJelleg(next.okmany_jelleg);
+  const egyeb = collectEgyebInfoFromFormData(next);
+  if (egyeb.length) next.egyeb_info = egyeb;
+  return next;
+}
+
+function scheduleBmFieldApply(payload) {
+  const run = () => applyAdFormBmFieldValues(payload);
+  run();
+  requestAnimationFrame(run);
+  window.addEventListener("ad-form-ready", run, { once: true });
+}
+
 function applyFormData(data, { fromImport = false } = {}) {
   if (!data || typeof data !== "object") return;
+  const payload = normalizeAppliedFormData(data);
+  form._bymyLastFormData = payload;
 
   form.querySelectorAll('input[name="felszereltseg"]').forEach((box) => {
     box.checked = false;
@@ -848,7 +887,7 @@ function applyFormData(data, { fromImport = false } = {}) {
     box.checked = false;
   });
 
-  for (const [key, value] of Object.entries(data)) {
+  for (const [key, value] of Object.entries(payload)) {
     if (key === "felszereltseg" || key === "egyeb_info") continue;
     const field = form.elements.namedItem(key);
     if (!field) continue;
@@ -876,7 +915,8 @@ function applyFormData(data, { fromImport = false } = {}) {
     }
   }
 
-  for (const item of data.felszereltseg ?? []) {
+  for (const item of payload.felszereltseg ?? []) {
+    if (EGYEB_INFO_OPTIONS.some((opt) => String(item).toLowerCase().includes(opt.toLowerCase()))) continue;
     const needle = String(item).toLowerCase();
     const box = [...form.querySelectorAll('input[name="felszereltseg"]')].find(
       (el) => el.value === item || el.value.toLowerCase() === needle || el.value.toLowerCase().includes(needle)
@@ -884,21 +924,25 @@ function applyFormData(data, { fromImport = false } = {}) {
     if (box) box.checked = true;
   }
 
-  for (const item of data.egyeb_info ?? []) {
+  for (const item of payload.egyeb_info ?? []) {
     const needle = String(item).toLowerCase();
     const box = [...form.querySelectorAll('input[name="egyeb_info"]')].find(
-      (el) => el.value === item || el.value.toLowerCase() === needle
+      (el) =>
+        el.value === item ||
+        el.value.toLowerCase() === needle ||
+        el.value.toLowerCase().includes(needle) ||
+        needle.includes(el.value.toLowerCase())
     );
     if (box) box.checked = true;
   }
 
-  if (data.hirdetes_cime && hirdetesCime) {
+  if (payload.hirdetes_cime && hirdetesCime) {
     hirdetesCime.dataset.userEdited = "1";
   }
 
   syncPackageSelection();
-  if (fromImport && data.hirdetes_cime && hirdetesCime) {
-    hirdetesCime.value = data.hirdetes_cime;
+  if (fromImport && payload.hirdetes_cime && hirdetesCime) {
+    hirdetesCime.value = payload.hirdetes_cime;
     hirdetesCime.dataset.userEdited = "1";
     fitInputWidth(hirdetesCime);
   } else {
@@ -906,18 +950,18 @@ function applyFormData(data, { fromImport = false } = {}) {
   }
 
   const kmInput = document.getElementById("km");
-  if (kmInput && data.km != null && String(data.km).trim() !== "") {
-    kmInput.value = String(data.km);
+  if (kmInput && payload.km != null && String(payload.km).trim() !== "") {
+    kmInput.value = String(payload.km);
     if (fromImport) kmInput.dataset.userEdited = "1";
   }
   updateLeDisplay();
-  restoreFuelSelection(data.uzemanyag);
-  applyAdFormBmFieldValues(data);
+  restoreFuelSelection(payload.uzemanyag);
+  scheduleBmFieldApply(payload);
   syncFuelDependentFields();
   fitAllFormFields();
   loadExistingPhotos(data);
   if (mode === "import") {
-    options.onApplied?.(data);
+    options.onApplied?.(payload);
   } else {
     saveDraft();
     goToStep(1);
@@ -1654,9 +1698,9 @@ initVehicleCatalogSelects({
   },
   onTypeDataChange: (entry) => applyCatalogTypeData(entry),
 })
-  .then((catalog) => {
+  .then(async (catalog) => {
     if (mode === "wizard" && !userTouchedForm && !editing) resetForm();
-    refreshAdFormBmPickers(form, catalog);
+    await refreshAdFormBmPickers(form, catalog);
     options.onCatalogReady?.(catalog);
     window.dispatchEvent(new Event("ad-form-ready"));
   })
@@ -1720,7 +1764,6 @@ if (mode === "wizard") {
 }
 
 renderPhotoPreview();
-window.dispatchEvent(new Event("ad-form-ready"));
 
 return {
   applyFormData,

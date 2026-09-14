@@ -198,6 +198,28 @@
     return extractLeirasSectionText(plain);
   }
 
+  function stripCellHtml(raw) {
+    return clean(String(raw ?? "").replace(/<[^>]+>/g, " "));
+  }
+
+  /** Gyorsnézet táblázat → { "Állapot": "Kitűnő", "Kivitel": "...", ... } */
+  function extractMapFromHtml(html) {
+    const map = {};
+    const raw = String(html || "");
+    for (const row of raw.matchAll(/<tr[^>]*>([\s\S]*?)<\/tr>/gi)) {
+      const block = row[1] || "";
+      const keyMatch = block.match(/<t[dh][^>]*class="[^"]*pontos[^"]*"[^>]*>([\s\S]*?)<\/t[dh]>/i);
+      if (!keyMatch) continue;
+      const after = block.slice(keyMatch.index + keyMatch[0].length);
+      const valMatch = after.match(/<td[^>]*>([\s\S]*?)<\/td>/i);
+      if (!valMatch) continue;
+      const key = stripCellHtml(keyMatch[1]).replace(/:$/, "");
+      const val = stripCellHtml(valMatch[1]);
+      if (key && val && val.length <= 500) map[key] = val;
+    }
+    return map;
+  }
+
   async function fetchGyorsnezetHtml(listingId) {
     const id = clean(listingId);
     if (!id) return "";
@@ -212,14 +234,107 @@
     }
   }
 
+  function extractEquipmentFromHtml(html) {
+    const items = [];
+    const push = (raw) => {
+      const t = clean(String(raw || "").replace(/^[-•·]\s*/, ""));
+      if (!t || t.length < 2 || t.length > 90) return;
+      if (/^(beltér|műszaki|kültér|multimédia|egyéb|felszereltség|navigáció|leírás)$/i.test(t)) return;
+      if (/:$/.test(t)) return;
+      if (!items.includes(t)) items.push(t);
+    };
+    const splitTokens = (raw) => {
+      for (const part of String(raw || "").split(/[\n,;·•|/]+/)) push(part);
+    };
+
+    const raw = String(html || "");
+    if (!raw) return items;
+
+    try {
+      const doc = new DOMParser().parseFromString(raw, "text/html");
+      for (const sel of [
+        ".hirdetes-felszereltseg li",
+        ".felszereltseg-list li",
+        "[class*='felszer'] li",
+        "[class*='extra'] li",
+        "[class*='equipment'] li",
+        "ul li",
+        ".extranev",
+        ".extra-badge",
+        ".tooltip-badge",
+      ]) {
+        for (const node of doc.querySelectorAll(sel)) {
+          const parentText = clean(
+            node.closest("section, .box, .card, div")?.querySelector("h2, h3, h4, strong, b")?.innerText || ""
+          );
+          if (/beltér|műszaki|kültér|multimédia|egyéb|felszereltség|navigáció/i.test(parentText) || sel !== "ul li") {
+            splitTokens(node.innerText || node.textContent || "");
+          }
+        }
+      }
+      for (const input of doc.querySelectorAll('input[type="checkbox"]:checked')) {
+        const value = clean(input.value || "");
+        if (value.length >= 2) push(value);
+      }
+    } catch {
+      /* regex fallback alább */
+    }
+
+    for (const re of [
+      /class="[^"]*\bextranev\b[^"]*"[^>]*>([^<]{2,90})</gi,
+      /class="[^"]*(?:extra-badge|tooltip-badge)[^"]*"[^>]*>([^<]{2,90})</gi,
+    ]) {
+      let m;
+      while ((m = re.exec(raw))) push(m[1]);
+    }
+
+    const plain = raw
+      .replace(/<script[\s\S]*?<\/script>/gi, " ")
+      .replace(/<style[\s\S]*?<\/style>/gi, " ")
+      .replace(/<br\s*\/?>/gi, "\n")
+      .replace(/<li[^>]*>/gi, "\n• ")
+      .replace(/<[^>]+>/g, "\n")
+      .replace(/\r\n/g, "\n");
+    const sectionRe =
+      /(?:^|\n)\s*(Beltér|Műszaki|Kültér|Multimédia\s*\/\s*Navigáció|Multimédia|Egyéb információ|Egyéb|Felszereltség)\s*\n([\s\S]*?)(?=\n\s*(?:Beltér|Műszaki|Kültér|Multimédia|Egyéb információ|Egyéb|Felszereltség|Leírás|Általános|Hirdetés|Okmányok|Abroncs|Ár,?\s*költségek|Jármű adatok|Motor adatok)\b|$)/gi;
+    for (const match of plain.matchAll(sectionRe)) {
+      for (const line of String(match[2] || "").split("\n")) {
+        const t = clean(line);
+        if (t && !/:$/.test(t) && t.split(/\s+/).length <= 14) push(t);
+      }
+    }
+
+    return items.slice(0, 300);
+  }
+
   async function ensureCarDescription(car) {
-    if (car.html && String(car.html).length > 400) return car;
-    const html = await fetchGyorsnezetHtml(car.listingId);
-    if (!html) return car;
+    const existingHtml = String(car.html || car.gyorsnezetHtml || "");
+    const html =
+      existingHtml.length > 400 ? existingHtml : await fetchGyorsnezetHtml(car.listingId);
+    if (!html || html.length <= 400) return car;
     const visibleDescription =
       normalizeImportedLeiras(car.visibleDescription || car.description || car.leiras || "") ||
       findDescriptionInHtml(html);
-    return { ...car, html, gyorsnezetHtml: html, visibleDescription };
+    const map = extractMapFromHtml(html);
+    const felszereltseg = extractEquipmentFromHtml(html);
+    const bodyText = html
+      .replace(/<script[\s\S]*?<\/script>/gi, " ")
+      .replace(/<style[\s\S]*?<\/style>/gi, " ")
+      .replace(/<br\s*\/?>/gi, "\n")
+      .replace(/<[^>]+>/g, "\n")
+      .slice(0, 25000);
+    const kmRaw = map["Km. óra állás"] || map["Futásteljesítmény"] || map["Futasteljesitmeny"] || "";
+    const kmDigits = String(kmRaw).replace(/\D/g, "");
+    return {
+      ...car,
+      html,
+      gyorsnezetHtml: html,
+      visibleDescription,
+      map,
+      felszereltseg,
+      bodyText,
+      km: kmDigits || car.km || "",
+    };
   }
 
   function pickPageListingIdFromUrl(url) {

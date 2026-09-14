@@ -1,5 +1,5 @@
 import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=immoUiParity1";
-import { refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=autoRestore20";
+import { refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=autoRestore22";
 
 function cssEscape(value) {
   if (window.CSS?.escape) return window.CSS.escape(value);
@@ -493,7 +493,7 @@ async function applyAdFormLayout() {
     pinLocation(form);
     pinFooter(form);
     window.dispatchEvent(new Event("ad-form-sync-location"));
-    refreshAdFormBmPickers(form);
+    void refreshAdFormBmPickers(form);
   } catch (error) {
     console.warn("Ad form layout apply:", error);
   }

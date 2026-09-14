@@ -1223,10 +1223,19 @@ function mountAllapotPicker(select) {
     }
   }
 
+  function visibleChildren(cat) {
+    return (cat.children ?? []).filter((child) => child.label !== cat.label && child.value !== cat.label);
+  }
+
   function turnMainOn(cat) {
     openMains.clear();
     openMains.add(cat.id);
-    selected = !cat.children?.length && cat.value ? cat.value : "";
+    if (!cat.children?.length && cat.value) {
+      selected = cat.value;
+      return;
+    }
+    const sameChild = cat.children?.find((child) => child.label === cat.label || child.value === cat.label);
+    selected = sameChild?.value ?? "";
   }
 
   function turnMainOff(cat) {
@@ -1243,7 +1252,7 @@ function mountAllapotPicker(select) {
       let kidsHtml = "";
       if (hasKids && on) {
         kidsHtml = `<div class="auto-fuel-children">
-          ${cat.children
+          ${visibleChildren(cat)
             .map((child) => {
               const childOn = selected === child.value;
               return `<div class="auto-bm-row auto-fuel-child-row">

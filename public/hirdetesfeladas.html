@@ -47,10 +47,6 @@
           document.documentElement.setAttribute("data-auth", "guest");
           location.replace("/belepes.html?next=" + encodeURIComponent(location.pathname + location.search));
         }
-
-        if (/\bid=\d+/.test(location.search) && window.matchMedia("(min-width: 901px)").matches) {
-          document.documentElement.classList.add("ad-form-edit-boot");
-        }
       })();
     </script>
     <meta charset="utf-8" />
@@ -64,7 +60,7 @@
     <link rel="stylesheet" href="/css/style.css?v=postDark1" />
     <link rel="stylesheet" href="/css/automax.css?v=automax20260720homelist" />
     <link rel="stylesheet" href="/css/site-app.css?v=powerHint1" />
-    <link rel="stylesheet" href="/css/ad-form-desk.css?v=adFormDesk6" />
+    <link rel="stylesheet" href="/css/ad-form-desk.css?v=adFormDesk5" />
     <link rel="stylesheet" href="/css/ad-form-bm-pickers.css?v=adBmMore3" />
     <link rel="stylesheet" href="/css/site-side.css?v=mwPostDesk1" />
     <link rel="stylesheet" href="/css/category-picker.css?v=catDrumStand2" />
@@ -952,10 +948,10 @@
     </main>
 
     <script src="/js/site-avatar-menu.js?v=avatarSync1" type="module"></script>
-    <script src="/js/app.js?v=editBoot1" type="module"></script>
+    <script src="/js/app.js?v=powerHint1" type="module"></script>
       <script src="/js/nav-counts.js?v=navCount2" type="module"></script>
       <script src="/js/theme.js?v=willhabenHdr1" type="module"></script>
     <script src="/js/form-layout-apply.js?v=leirasStep3" type="module"></script>
-    <script src="/js/ad-form-desk.js?v=adFormDesk6" type="module"></script>
+    <script src="/js/ad-form-desk.js?v=adFormDesk5" type="module"></script>
 </body>
 </html>

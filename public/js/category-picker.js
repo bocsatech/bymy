@@ -2,8 +2,11 @@ import {
   initDrumWheel,
   syncDrumWheelDisplay,
   closeAllInlineDrums,
-} from "./immo-drum-picker.js?v=catDrumFix2";
-import { setWheelValue, readWheel } from "./ingatlan-wheels.js?v=catDrumFix2";
+} from "./immo-drum-picker.js?v=catDrumPortal1";
+import { bindAutoDrumSheet, closeAutoDrumSheet } from "./auto-drum-sheet.js?v=catDrumPortal1";
+import { setWheelValue, readWheel } from "./ingatlan-wheels.js?v=catDrumPortal1";
+
+const WIZARD_DRUM_V = "portal1";
 
 const STORAGE_KEY = "bymy-hirdetes-category";
 const STORAGE_VERSION = 4;
@@ -242,6 +245,14 @@ export function initCategoryPicker({
   `;
   document.body.append(backdrop, sheet);
 
+  function resetWizardCategoryDrumUi() {
+    closeAutoDrumSheet(false);
+    closeAllInlineDrums(false);
+    const wrap = document.getElementById("wizard-category-wheel-wrap");
+    wrap?.classList.remove("is-open", "has-drum-open", "has-drum-open");
+    wrap?.querySelector(".immo-drum-inline")?.remove();
+  }
+
   function ensureCategoryDrum() {
     const wrap = document.getElementById("wizard-category-wheel-wrap");
     const wheel = document.getElementById("wizard-category-wheel");
@@ -249,7 +260,14 @@ export function initCategoryPicker({
 
     wrap.querySelector("#wizard-category-select")?.remove();
 
-    if (wheel.dataset.drumBound === "1") return wheel;
+    if (wheel.dataset.categoryDrumV === WIZARD_DRUM_V && wheel.dataset.drumBound === "1") {
+      return wheel;
+    }
+
+    resetWizardCategoryDrumUi();
+    wrap.querySelector(".immo-wheel-trigger")?.remove();
+    wheel.removeAttribute("data-drum-bound");
+    delete wheel.dataset.drumBound;
 
     wheel.innerHTML = WIZARD_CATEGORY_OPTIONS.map(
       (opt) =>
@@ -257,15 +275,20 @@ export function initCategoryPicker({
     ).join("");
 
     wheel.dataset.noClear = "1";
-    initDrumWheel(wheel, { emptyLabel: "Válassz kategóriát", openMode: "inline" });
+    wheel.dataset.categoryDrumV = WIZARD_DRUM_V;
+    initDrumWheel(wheel, { emptyLabel: "Válassz kategóriát", openMode: "portal" });
+    bindAutoDrumSheet(wheel);
 
-    wheel.addEventListener("immo-wheel-change", (event) => {
-      if (categoryLocked) return;
-      closeAllInlineDrums(false);
-      const id = String(event.detail?.value ?? readWheel(wheel) ?? "").trim();
-      if (!id || id === currentWizardCategoryId()) return;
-      void applyCatWheelChoice(id);
-    });
+    if (wheel.dataset.changeBound !== "1") {
+      wheel.dataset.changeBound = "1";
+      wheel.addEventListener("immo-wheel-change", (event) => {
+        if (categoryLocked) return;
+        closeAutoDrumSheet(false);
+        const id = String(event.detail?.value ?? readWheel(wheel) ?? "").trim();
+        if (!id || id === currentWizardCategoryId()) return;
+        void applyCatWheelChoice(id);
+      });
+    }
 
     return wheel;
   }
@@ -287,6 +310,7 @@ export function initCategoryPicker({
     const opt = WIZARD_CATEGORY_OPTIONS.find((x) => x.id === catId);
     const selection = selectionFromOption(opt);
     if (!selection) return;
+    closeAutoDrumSheet(false);
     closeAllInlineDrums(false);
     await showVehicleWizard(selection);
   }
@@ -339,7 +363,7 @@ export function initCategoryPicker({
     try {
       ensureCategoryDrum();
       syncWizardContext(selection);
-      closeAllInlineDrums(false);
+      resetWizardCategoryDrumUi();
     } catch (error) {
       console.warn("Kategória kerék:", error);
     }

@@ -5,6 +5,10 @@ const ICON_YEAR = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect
 const ICON_KM = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 18 12 6l8 12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M7.5 18h9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>`;
 const ICON_POWER = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="13" r="7" stroke="currentColor" stroke-width="1.6"/><path d="M12 13 16 9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M12 6v1.5M5.5 10.5 6.6 11.2M18.5 10.5 17.4 11.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>`;
 
+function isImportStubTitle(value) {
+  return /importált autó\s*\(\d{5,}\)/i.test(String(value ?? "").trim());
+}
+
 function looksLikeListMetaTitle(value) {
   const n = String(value ?? "")
     .replace(/\s+/g, " ")
@@ -25,20 +29,22 @@ function looksLikeListMetaTitle(value) {
 export function listingTileTitle(item) {
   const preview = item?.preview ?? {};
   const filter = preview.filter ?? {};
-  const brand = String(filter.gyartmany || "").trim();
-  const model = String(filter.modell || "").trim();
-  const fromBrand = [brand, model]
+  const brand = String(filter.gyartmany || item?.form?.gyartmany || "").trim();
+  const model = String(filter.modell || item?.form?.modell || "").trim();
+  const tipus = String(filter.tipus || item?.form?.tipus || "").trim();
+  const fromBrand = [brand, model, tipus]
     .filter((part) => part && !looksLikeListMetaTitle(part))
     .join(" ");
   const candidates = [
-    fromBrand,
     preview.title,
+    fromBrand,
     item?.hirdetes_cime,
+    item?.form?.hirdetes_cime,
     `Hirdetés #${item?.id ?? "?"}`,
   ];
   let title = "";
   for (const raw of candidates) {
-    if (looksLikeListMetaTitle(raw)) continue;
+    if (looksLikeListMetaTitle(raw) || isImportStubTitle(raw)) continue;
     title = formatListingDisplayTitle(raw);
     if (title && !looksLikeListMetaTitle(title)) break;
     title = "";
@@ -130,6 +136,9 @@ export function slimListingTile(item) {
       specLine: preview.specLine,
       imageUrl: preview.imageUrl || item.fo_kep || "",
       filter: {
+        gyartmany: preview.filter?.gyartmany ?? form.gyartmany ?? null,
+        modell: preview.filter?.modell ?? form.modell ?? null,
+        tipus: preview.filter?.tipus ?? form.tipus ?? null,
         gyartasi_ev: preview.filter?.gyartasi_ev ?? null,
         uzemanyag: preview.filter?.uzemanyag ?? form.uzemanyag ?? null,
         sebessegvalto: preview.filter?.sebessegvalto ?? form.sebessegvalto ?? null,

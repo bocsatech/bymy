@@ -5,7 +5,8 @@ import {
   saveListingPhotosOrder,
   getStoredListingId,
 } from "./db-client.js?v=wizardSave1";
-import { createAdForm } from "./form-core.js?v=editRadioFix1";
+import { createAdForm } from "./form-core.js?v=importVehicle1";
+import { applyImportedVehicleToSelects } from "./vehicle-catalog-client.js?v=importVehicle1";
 import { initTireSizes } from "./tire-sizes-ui.js";
 import { initPhoneLanguages } from "./phone-lang-ui.js";
 import { initCategoryPicker } from "./category-picker.js?v=immoPortalPage1";
@@ -233,14 +234,23 @@ function ensureFormReady() {
       setStoredListingId(null);
       categoryPicker?.reset();
     },
-    onCatalogReady: () => {
-      if (pendingEditForm) {
-        formApi?.applyFormData?.(pendingEditForm, { fromImport: true });
-        applyListingAddressFromProfileSync(adForm);
-        applyListingAddressFromProfile(adForm).catch(() => {});
-        phoneLanguages?.syncLanguages?.();
-        tireSizes?.syncRearTires?.();
+    onCatalogReady: async (catalog) => {
+      if (!pendingEditForm) return;
+      if (pendingEditForm.gyartmany) {
+        await applyImportedVehicleToSelects({
+          brandSelect: document.getElementById("gyartmany"),
+          modelSelect: document.getElementById("modell"),
+          tipusSelect: document.getElementById("tipus"),
+          egyebTipusInput: document.getElementById("egyeb_tipus"),
+          catalog,
+          formData: pendingEditForm,
+        });
       }
+      formApi?.applyFormData?.(pendingEditForm, { fromImport: true });
+      applyListingAddressFromProfileSync(adForm);
+      applyListingAddressFromProfile(adForm).catch(() => {});
+      phoneLanguages?.syncLanguages?.();
+      tireSizes?.syncRearTires?.();
     },
   });
   tireSizes?.syncRearTires?.();

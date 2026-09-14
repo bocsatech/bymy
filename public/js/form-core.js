@@ -784,8 +784,10 @@ function updateAutomaxStepHeader(step) {
 
 function showStep(step) {
   currentStep = step;
+  // Személyautó / jármű feladás: minden menü és extra egyszerre látszódjon
   panels.forEach((panel) => {
-    panel.classList.toggle("hidden", Number(panel.dataset.step) !== step);
+    panel.classList.remove("hidden");
+    panel.hidden = false;
   });
   indicators.forEach((indicator) => {
     const n = Number(indicator.dataset.stepIndicator);
@@ -1655,7 +1657,7 @@ initVehicleCatalogSelects({
   .then((catalog) => {
     if (mode === "wizard" && !userTouchedForm && !editing) resetForm();
     refreshAdFormBmPickers(form, catalog);
-    options.onCatalogReady?.();
+    options.onCatalogReady?.(catalog);
     window.dispatchEvent(new Event("ad-form-ready"));
   })
   .catch(() => {});

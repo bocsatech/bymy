@@ -24,7 +24,22 @@ function photoUrls(item) {
 }
 
 function titleOf(item) {
-  return item.preview?.title || item.hirdetes_cime || `Hirdetés #${item.id}`;
+  const f = item.form || {};
+  const filter = item.preview?.filter || {};
+  const brand = String(f.gyartmany || filter.gyartmany || "").trim();
+  const model = String(f.modell || filter.modell || "").trim();
+  const tipus = String(f.tipus || filter.tipus || "").trim();
+  const fromIdentity = [brand, model, tipus].filter(Boolean).join(" ");
+  if (fromIdentity) return fromIdentity;
+
+  const previewTitle = String(item.preview?.title || "").trim();
+  if (previewTitle && !/importált autó\s*\(\d{5,}\)/i.test(previewTitle)) return previewTitle;
+
+  const cim = String(item.hirdetes_cime || f.hirdetes_cime || "").trim();
+  if (cim && !/importált autó\s*\(\d{5,}\)/i.test(cim)) {
+    return cim.replace(/^Eladó\s+/i, "").trim() || cim;
+  }
+  return `Hirdetés #${item.id}`;
 }
 
 function specOf(item) {

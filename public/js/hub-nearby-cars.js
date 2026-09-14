@@ -8,7 +8,7 @@ import {
   createListingTileCard,
   formatListingCountBadge,
   slimListingTile,
-} from "./listing-tile.js?v=titleNoise4";
+} from "./listing-tile.js?v=importVehicle1";
 import {
   autoNearbyHref,
   buildNearbyFilter,

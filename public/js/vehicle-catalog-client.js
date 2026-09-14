@@ -130,6 +130,119 @@ export function fillSelect(select, values, emptyLabel = "Mindegy") {
   if (current && values?.includes(current)) select.value = current;
 }
 
+export function ensureSelectOption(select, value) {
+  if (!select || value == null) return;
+  const applied = String(Array.isArray(value) ? value[0] : value).trim();
+  if (!applied) return;
+  const has = [...select.options].some(
+    (option) => option.value === applied || option.textContent === applied
+  );
+  if (!has) {
+    const option = document.createElement("option");
+    option.value = applied;
+    option.textContent = applied;
+    select.appendChild(option);
+  }
+  select.value = applied;
+}
+
+export function matchCatalogBrand(catalog, raw) {
+  const v = String(raw ?? "").trim();
+  if (!v || !catalog?.gyartmanyok?.length) return "";
+  const upper = v.toLocaleUpperCase("hu-HU").replace(/\s+/g, " ");
+  for (const brand of catalog.gyartmanyok) {
+    if (String(brand).toLocaleUpperCase("hu-HU") === upper) return brand;
+  }
+  if (/^MERCEDES[\s-]?BENZ$/i.test(upper) || upper === "MERCEDES") {
+    return catalog.gyartmanyok.find((b) => b === "MERCEDES-BENZ") || "MERCEDES-BENZ";
+  }
+  if (upper === "VW") return catalog.gyartmanyok.find((b) => b === "VOLKSWAGEN") || "VOLKSWAGEN";
+  return upper;
+}
+
+function guessCatalogModel(models, modell, tipus) {
+  const m = String(modell ?? "").trim();
+  const t = String(tipus ?? "").trim();
+  if (!m) return "";
+  const list = Array.isArray(models) ? models : [];
+  if (list.includes(m)) return m;
+  const firstTip = t.split(/\s+/).find(Boolean) || "";
+  if (firstTip) {
+    const combo = `${m} ${firstTip}`;
+    if (list.includes(combo)) return combo;
+    const prefixHit = list.find((name) => name.toUpperCase().startsWith(`${combo.toUpperCase()}`));
+    if (prefixHit) return prefixHit;
+  }
+  const loose = list.find(
+    (name) =>
+      name.toUpperCase() === m.toUpperCase() ||
+      name.toUpperCase().startsWith(`${m.toUpperCase()} `)
+  );
+  return loose || m;
+}
+
+function guessCatalogTipus(tipusok, tipusRaw, modell) {
+  const raw = String(tipusRaw ?? "").trim();
+  if (!raw) return "";
+  const names = (tipusok ?? [])
+    .map((entry) => (typeof entry === "string" ? entry : entry?.nev))
+    .filter(Boolean);
+  if (names.includes(raw)) return raw;
+  const field = typeNameForField(raw, modell);
+  if (names.includes(field)) return field;
+  const lower = raw.toLowerCase();
+  const hit = names.find((name) => {
+    const short = shortTypeName(name).toLowerCase();
+    return short.includes(lower) || lower.includes(short);
+  });
+  return hit || raw;
+}
+
+/** Import / szerkesztés: gyártmány–modell–típus megmarad a katalógus-selectekben. */
+export async function applyImportedVehicleToSelects({
+  brandSelect,
+  modelSelect,
+  tipusSelect = null,
+  egyebTipusInput = null,
+  catalog,
+  formData,
+}) {
+  if (!brandSelect || !modelSelect || !catalog || !formData) return;
+
+  const brand = matchCatalogBrand(catalog, formData.gyartmany);
+  if (!brand) return;
+
+  brandSelect.value = brand;
+  const models = catalog.modellek?.[brand] ?? [];
+  fillSelect(modelSelect, models, "Válasszon");
+
+  const model = guessCatalogModel(models, formData.modell, formData.tipus);
+  ensureSelectOption(modelSelect, model);
+
+  let typeList = [];
+  if (modelSelect.value) {
+    try {
+      const data = await fetchModelTypes(brand, modelSelect.value);
+      typeList = data.tipusok ?? [];
+    } catch (error) {
+      console.error("Import típusok betöltése:", error);
+    }
+  }
+
+  if (tipusSelect) {
+    fillSelect(
+      tipusSelect,
+      typeList.map((entry) => entry.nev),
+      "Válasszon"
+    );
+    const tipus = guessCatalogTipus(typeList, formData.tipus, modelSelect.value);
+    ensureSelectOption(tipusSelect, tipus);
+    if (!tipusSelect.value && formData.tipus && egyebTipusInput) {
+      egyebTipusInput.value = formData.tipus;
+    }
+  }
+}
+
 export function shortTypeName(value) {
   const text = String(value ?? "").trim();
   const cut = text.split("[")[0].trim();

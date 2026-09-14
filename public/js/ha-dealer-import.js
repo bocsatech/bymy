@@ -50,13 +50,113 @@
     }
   }
 
+  /** Szinkron: lib/ha-title-parse.mjs */
+  const MULTI_BRANDS = [
+    "MERCEDES-BENZ",
+    "MERCEDES BENZ",
+    "LAND ROVER",
+    "ALFA ROMEO",
+    "ASTON MARTIN",
+    "ROLLS-ROYCE",
+    "ROLLS ROYCE",
+    "RANGE ROVER",
+  ];
+
+  function parseVehicleTitleFields(title) {
+    const vehicleTitle = clean(String(title || "").split(/\n+/)[0]);
+    if (!vehicleTitle || vehicleTitle.length < 4) {
+      return { gyartmany: "", modell: "", tipus: "", visibleTitle: "" };
+    }
+    const upper = vehicleTitle.toLocaleUpperCase("hu-HU");
+    let gyartmany = "";
+    let rest = vehicleTitle;
+    for (const name of MULTI_BRANDS) {
+      if (upper.startsWith(name)) {
+        gyartmany = vehicleTitle.slice(0, name.length).trim();
+        rest = vehicleTitle.slice(name.length).trim();
+        break;
+      }
+    }
+    const tokens = rest.split(/\s+/).filter(Boolean);
+    if (!gyartmany && tokens.length) {
+      gyartmany = tokens.shift();
+      rest = tokens.join(" ");
+    }
+    const parts = rest.split(/\s+/).filter(Boolean);
+    const modell = parts[0] || "";
+    const tipus = parts.slice(1).join(" ");
+    gyartmany = normalizeGyartmany(gyartmany);
+    return { gyartmany, modell, tipus, visibleTitle: vehicleTitle };
+  }
+
+  function normalizeGyartmany(brand) {
+    const v = clean(brand);
+    if (!v) return "";
+    const upper = v.toLocaleUpperCase("hu-HU").replace(/\s+/g, " ");
+    if (/^MERCEDES[\s-]?BENZ$/i.test(upper) || upper === "MERCEDES") return "MERCEDES-BENZ";
+    if (upper === "VW") return "VOLKSWAGEN";
+    return upper;
+  }
+
+  function pickTitleNearImg(img) {
+    const row =
+      img?.closest?.(
+        ".jarmu-kartya, .listing-card, tr, article, li, [class*='jarmu'], [class*='hirdetes'], [class*='listing']"
+      ) || null;
+    if (row) {
+      const el =
+        row.querySelector(".cim, h1, h2, h3, [class*='cim'], [class*='title']") ||
+        row.querySelector('a[href*="hasznaltauto"], a[href*="gyorsnezet"]');
+      const t = clean(el?.innerText || el?.textContent || "");
+      if (t.length >= 4 && !/^(módosítás|törlés|ártábla)$/i.test(t)) return t;
+    }
+    return "";
+  }
+
+  function enrichCarsWithTitles(cars, html) {
+    const pageTitle = clean(document.querySelector("h1")?.innerText || document.querySelector("h1")?.textContent || "");
+    return cars.map((car) => {
+      let visibleTitle = clean(car.visibleTitle || "");
+      if (!visibleTitle && html) {
+        const esc = String(car.listingId || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        const tries = [
+          new RegExp(
+            `data-id=["']${esc}["'][\\s\\S]{0,4000}?class=["'][^"']*\\bcim\\b[^"']*["'][^>]*>([^<]+)<`,
+            "i"
+          ),
+          new RegExp(`class=["'][^"']*\\bcim\\b[^"']*["'][^>]*href=["'][^"']*${esc}[^"']*["'][^>]*>([^<]+)<`, "i"),
+          new RegExp(`href=["'][^"']*${esc}[^"']*["'][^>]*>([^<]{4,160})<`, "i"),
+          new RegExp(`-${esc}(?:["'/]|</)[^>]*>([^<]{4,160})<`, "i"),
+        ];
+        for (const re of tries) {
+          const m = html.match(re);
+          visibleTitle = clean(m?.[1] || "");
+          if (visibleTitle.length >= 4) break;
+        }
+      }
+      if (!visibleTitle) {
+        for (const img of document.querySelectorAll("img")) {
+          const src = img.currentSrc || img.src || img.getAttribute("data-src") || "";
+          if (!src.includes(String(car.listingId))) continue;
+          visibleTitle = pickTitleNearImg(img);
+          if (visibleTitle) break;
+        }
+      }
+      if (!visibleTitle && cars.length === 1 && pageTitle.length >= 4) visibleTitle = pageTitle;
+      if (!visibleTitle) return car;
+      const fields = parseVehicleTitleFields(visibleTitle);
+      return { ...car, ...fields, visibleTitle: fields.visibleTitle || visibleTitle };
+    });
+  }
+
   /** Ugyanaz a logika, mint lib/ha-dealer-cdn-extract.mjs (bookmarklet nem importál ESM-et). */
   function extractCarsFromHtml(html) {
+    const raw = String(html || "");
     const re =
       /(?:https?:)?\/\/(?:img\.)?hasznaltautocdn\.com\/(?:\d{2,4}x\d{2,4}\/)?(\d{5,12})\/(\d{5,12})\.(jpe?g|png|webp)/gi;
     const byId = new Map();
     let m;
-    while ((m = re.exec(String(html || "")))) {
+    while ((m = re.exec(raw))) {
       const listingId = m[1];
       const imageId = m[2];
       const ext = String(m[3] || "jpg").toLowerCase().replace("jpeg", "jpg");
@@ -69,11 +169,12 @@
         photoOnly: true,
       });
     }
-    return [...byId.values()];
+    return enrichCarsWithTitles([...byId.values()], raw);
   }
 
   function extractCarsFromPage() {
-    const chunks = [String(document.documentElement?.outerHTML || "")];
+    const html = String(document.documentElement?.outerHTML || "");
+    const chunks = [html];
     for (const img of document.querySelectorAll("img")) {
       chunks.push(
         img.getAttribute("src") || "",
@@ -85,7 +186,6 @@
         img.getAttribute("srcset") || ""
       );
     }
-    // style background
     for (const el of document.querySelectorAll("[style*='hasznaltautocdn'], [style*='url(']")) {
       chunks.push(el.getAttribute("style") || "");
     }

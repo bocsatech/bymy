@@ -389,11 +389,23 @@ function otpSentMessage(data) {
     devOtpCode = String(data.devCode).trim();
     return (
       `Belépési kód (másold be alább): ${data.devCode}. ` +
-      `Email most nem megy ki — állítsd be a Vercel-en: SMTP_USER, SMTP_PASS.`
+      `Email most nem megy ki — állítsd be az SMTP-t (SMTP_USER, SMTP_PASS).`
     );
   }
   devOtpCode = "";
-  return `A kódot elküldtük emailben${to}. Nézd a spam mappát is.`;
+  if (data.smtpRequired) {
+    return `Az email kód nem küldhető ki — nincs SMTP beállítás a szerveren. Kérd a rendszergazdát (SMTP_USER / SMTP_PASS).`;
+  }
+  if (data.otpSent === false) {
+    const detail = data.smtpWarning
+      ? String(data.smtpWarning)
+      : "ismeretlen SMTP hiba";
+    return `Az email kód nem ment ki${to}: ${detail}. A Gmail küldő fiók app jelszavát ellenőrizd (~/.autosweb/smtp.json).`;
+  }
+  if (data.otpSent !== true) {
+    return `Az email küldés állapota ismeretlen${to}. Próbáld újra, vagy kérj új kódot.`;
+  }
+  return `A kódot elküldtük emailben${to}. Nézd a spam mappát is (iCloud: Junk is).`;
 }
 
 async function api(path, opts = {}) {

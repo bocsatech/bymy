@@ -99,6 +99,9 @@
   }
 
   /** Szinkron: lib/ha-description-parse.mjs */
+  const LEIRAS_SECTION_END =
+    /(?:^|\n)\s*(?:Felszereltség|Általános|Műszaki|Megtalálható|Okmányok|Hirdetés|Beltér|Kültér|Egyéb információ|Autó jellemzői|Jármű adatok|Motor adatok|Ár,?\s*költségek|Abroncs)\b/i;
+
   function normalizeImportedLeiras(raw) {
     let desc = clean(String(raw || "").replace(/<[^>]+>/g, " ")).slice(0, 2000);
     desc = desc.replace(/^le[ií]r[aá]s\s*[:.\-]?\s*/i, "").trim();
@@ -109,29 +112,60 @@
     return desc;
   }
 
+  function extractLeirasSectionText(text) {
+    const body = String(text || "").replace(/\r\n/g, "\n");
+    const m = body.match(
+      new RegExp(
+        `(?:^|\\n)\\s*Leírás\\s*[:.]?\\s*(?:\\n+|(?=[A-Za-zÁÉÍÓÖŐÚÜŰ0-9]))([\\s\\S]{8,12000}?)(?=${LEIRAS_SECTION_END.source}|$)`,
+        "i"
+      )
+    );
+    return m ? normalizeImportedLeiras(m[1]) : "";
+  }
+
+  function pickDescriptionHeadingBlocks(doc) {
+    const d = doc || document;
+    for (const el of d.querySelectorAll("h1,h2,h3,h4,h5,h6,label,legend,strong,th,dt")) {
+      if (!/^leírás\s*[:.]?\s*$/i.test(clean(el.textContent || ""))) continue;
+      let node = el.nextElementSibling;
+      while (node && !node.matches("h1,h2,h3,h4,h5,h6,section,table")) {
+        const t = normalizeImportedLeiras(node.value || node.innerText || node.textContent || "");
+        if (t) return t;
+        node = node.nextElementSibling;
+      }
+      const block = el.closest("section, .card, .field-stack, .labeled-field, tr, div");
+      if (block) {
+        const t = normalizeImportedLeiras(block.innerText || block.textContent || "");
+        if (t) return t;
+      }
+    }
+    return "";
+  }
+
   function pickDescriptionFromDocument(doc) {
     const d = doc || document;
     for (const sel of [
+      "textarea#leiras",
       "textarea[name*='leiras' i]",
       "textarea[id*='leiras' i]",
-      '[class*="leiras"]',
-      '[class*="description"]',
-      '[id*="leiras"]',
+      "#leiras[contenteditable='true']",
+      "[contenteditable='true'][id*='leiras' i]",
+      ".cke_editable",
     ]) {
       for (const el of d.querySelectorAll(sel)) {
         const t = normalizeImportedLeiras(el.value || el.innerText || el.textContent || "");
         if (t) return t;
       }
     }
-    const body = String(d.body?.innerText || d.body?.textContent || "").replace(/\r\n/g, "\n");
-    const m = body.match(
-      /(?:^|\n)\s*Leírás\s*\n+([\s\S]{8,12000}?)(?=\n\s*(?:Felszereltség|Általános|Műszaki|Megtalálható|Okmányok|Hirdetés|Beltér|Kültér|Egyéb információ)\b|$)/i
-    );
-    if (m) {
-      const t = normalizeImportedLeiras(m[1]);
-      if (t) return t;
+    const fromHeading = pickDescriptionHeadingBlocks(d);
+    if (fromHeading) return fromHeading;
+    for (const sel of ['[class*="leiras"]', '[id*="leiras"]']) {
+      for (const el of d.querySelectorAll(sel)) {
+        const t = normalizeImportedLeiras(el.value || el.innerText || el.textContent || "");
+        if (t) return t;
+      }
     }
-    return "";
+    return extractLeirasSectionText(d.body?.innerText || d.body?.textContent || "");
   }
 
   function findDescriptionInHtml(html) {
@@ -143,20 +177,47 @@
       const t = normalizeImportedLeiras(m[1]);
       if (t) return t;
     }
+    const anyTextareaRe = /<textarea[^>]*>([\s\S]{20,12000}?)<\/textarea>/gi;
+    while ((m = anyTextareaRe.exec(raw))) {
+      const t = normalizeImportedLeiras(m[1]);
+      if (t) return t;
+    }
+    const headingRe =
+      /<h[1-6][^>]*>\s*Leírás\s*:?\s*<\/h[1-6]>\s*<(?:p|div|span|td)[^>]*>([\s\S]*?)<\/(?:p|div|span|td)>/i;
+    m = raw.match(headingRe);
+    if (m) {
+      const t = normalizeImportedLeiras(m[1]);
+      if (t) return t;
+    }
     const plain = raw
       .replace(/<script[\s\S]*?<\/script>/gi, " ")
       .replace(/<style[\s\S]*?<\/style>/gi, " ")
       .replace(/<br\s*\/?>/gi, "\n")
       .replace(/<[^>]+>/g, "\n")
       .replace(/\r\n/g, "\n");
-    const section = plain.match(
-      /(?:^|\n)\s*Leírás\s*\n+([\s\S]{8,12000}?)(?=\n\s*(?:Felszereltség|Általános|Műszaki|Megtalálható|Okmányok|Hirdetés|Beltér|Kültér|Egyéb információ)\b|$)/i
-    );
-    if (section) {
-      const t = normalizeImportedLeiras(section[1]);
-      if (t) return t;
+    return extractLeirasSectionText(plain);
+  }
+
+  async function fetchDescriptionForListing(listingId) {
+    const id = clean(listingId);
+    if (!id) return "";
+    try {
+      const res = await fetch(`https://admin.hasznaltauto.hu/gyorsnezet/szemelyauto/${id}`, {
+        credentials: "include",
+      });
+      if (!res.ok) return "";
+      return findDescriptionInHtml(await res.text());
+    } catch {
+      return "";
     }
-    return "";
+  }
+
+  async function ensureCarDescription(car) {
+    const existing = normalizeImportedLeiras(car.visibleDescription || car.description || car.leiras || "");
+    if (existing) return { ...car, visibleDescription: existing };
+    const fetched = await fetchDescriptionForListing(car.listingId);
+    if (!fetched) return car;
+    return { ...car, visibleDescription: fetched };
   }
 
   function pickPageListingIdFromUrl(url) {
@@ -273,6 +334,13 @@
     for (const el of document.querySelectorAll("[style*='hasznaltautocdn'], [style*='url(']")) {
       chunks.push(el.getAttribute("style") || "");
     }
+    for (const ta of document.querySelectorAll("textarea")) {
+      const v = ta.value || "";
+      if (v.length >= 20) {
+        const name = ta.getAttribute("name") || ta.id || "leiras";
+        chunks.push(`<textarea name="${name}">${v}</textarea>`);
+      }
+    }
     return extractCarsFromHtml(chunks.join("\n"), location.href).slice(0, MAX);
   }
 
@@ -350,7 +418,8 @@
     for (let i = 0; i < cars.length; i += 1) {
       showProgress(i + 1, cars.length, `mentés ${i + 1}/${cars.length}`);
       try {
-        const result = await saveOne(origin, token, cars[i], i + 1, cars.length);
+        const car = await ensureCarDescription(cars[i]);
+        const result = await saveOne(origin, token, car, i + 1, cars.length);
         if ((result.savedCount || 0) > 0 || result.ok !== false) ok += 1;
         else {
           fail += 1;

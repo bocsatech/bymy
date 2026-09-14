@@ -210,10 +210,18 @@ function updateBmSummary(select, text, hasValue) {
 function updateBmSearchTrigger(select, text, hasValue) {
   const wrap = bmWrap(select);
   const input = wrap?.querySelector("[data-ad-bm-search-trigger]");
-  if (!input || input.dataset.adBmEditing === "1") return;
-  input.value = hasValue ? text : "";
+  if (!input) return;
+  if (hasValue) {
+    input.dataset.adBmEditing = "0";
+    input.value = text;
+    input.placeholder = PLACEHOLDER;
+    wrap?.classList.toggle("has-value", true);
+    return;
+  }
+  if (input.dataset.adBmEditing === "1") return;
+  input.value = "";
   input.placeholder = PLACEHOLDER;
-  wrap?.classList.toggle("has-value", hasValue);
+  wrap?.classList.toggle("has-value", false);
 }
 
 function hideNativeSelect(select) {
@@ -849,10 +857,18 @@ function mountSingleSelectDropdown(select, { title, panelClass, placeholder = PL
   }
 
   function refreshTrigger() {
-    if (!input || input.dataset.adBmEditing === "1") return;
-    input.value = selected || "";
+    if (!input) return;
+    if (selected) {
+      input.dataset.adBmEditing = "0";
+      input.value = selected;
+      input.placeholder = placeholder;
+      wrap.classList.toggle("has-value", true);
+      return;
+    }
+    if (input.dataset.adBmEditing === "1") return;
+    input.value = "";
     input.placeholder = placeholder;
-    wrap.classList.toggle("has-value", Boolean(selected));
+    wrap.classList.toggle("has-value", false);
   }
 
   function renderList(force = false) {
@@ -880,6 +896,7 @@ function mountSingleSelectDropdown(select, { title, panelClass, placeholder = PL
       const value = el.getAttribute("data-ad-bm-single") ?? "";
       selected = el.checked ? value : "";
       writePlainValue(select, selected);
+      enforceSingleToggleChecks(bodyEl, "data-ad-bm-single", selected);
       refreshTrigger();
       renderList(true);
     };

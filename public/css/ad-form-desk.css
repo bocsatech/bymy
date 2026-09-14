@@ -63,11 +63,14 @@
   body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout #ad-photo-desk-stage {
     grid-column: 2;
     grid-row: 1;
-    display: block;
+    display: flex;
+    flex-direction: column;
     width: 100%;
-    max-width: 480px;
-    justify-self: center;
-    align-self: start;
+    min-width: 0;
+    max-width: none;
+    justify-self: stretch;
+    align-self: stretch;
+    min-height: calc(100vh - var(--site-fixed-header-h, 64px) - 24px);
   }
 
   body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout #ad-desk-tips-col {
@@ -96,21 +99,51 @@
     grid-row: 2;
   }
 
-  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .ad-photo-desk-stage .step-panel[data-step="4"] {
+  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .ad-photo-desk-stage .step-panel[data-step="4"],
+  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .ad-photo-desk-stage .step-panel[data-step="4"] .card,
+  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .ad-photo-desk-stage .step-panel[data-step="4"] .card-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
     width: 100%;
+    min-width: 0;
+    min-height: 0;
   }
 
   body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .ad-photo-desk-stage .upload-zone {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 320px;
+    box-sizing: border-box;
     text-align: center;
-    padding: 28px 20px;
+    padding: 32px 24px;
     background: var(--ad-panel);
     border: 2px dashed var(--ad-line);
     border-radius: 8px;
   }
 
+  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .ad-photo-desk-stage .photo-grid {
+    width: 100%;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  }
+
   body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .ad-photo-desk-stage .photo-upload-bar {
-    justify-content: center;
+    width: 100%;
+    justify-content: flex-start;
     flex-wrap: wrap;
+  }
+
+  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .ad-photo-desk-stage .photo-upload-status {
+    flex: 1 1 180px;
+    min-width: 160px;
+  }
+
+  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .ad-photo-desk-stage #photo-overlay-hint {
+    width: 100%;
   }
 
   body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .ad-form-desk-shell {

@@ -625,7 +625,7 @@
   font-size: 0.875rem;
   font-weight: 400;
   line-height: 1.45;
-  color: #667085;
+  color: #000;
 }
 
 .hd-kv dd {
@@ -1011,7 +1011,7 @@ html[data-theme="dark"] body.hd-page .hd-kv dd {
 }
 
 html[data-theme="dark"] body.hd-page .hd-kv dt {
-  color: #667085 !important;
+  color: #000 !important;
 }
 
 html[data-theme="dark"] body.hd-page .hd-topnav,

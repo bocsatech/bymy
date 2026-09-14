@@ -135,7 +135,7 @@
   font-size: clamp(1.35rem, 2.2vw, 1.85rem);
   line-height: 1.25;
   font-weight: 800;
-  color: #101828;
+  color: #000;
 }
 
 .hd-tools {
@@ -176,12 +176,12 @@
   gap: 0.4rem 1.1rem;
   font-size: 0.95rem;
   font-weight: 700;
-  color: #101828;
+  color: #000;
 }
 
 .hd-specbar-meta {
   font-size: 0.78rem;
-  color: #667085;
+  color: #000;
 }
 
 .hd-hero {
@@ -601,7 +601,7 @@
   flex: 0 0 auto;
   font-size: 0.88rem;
   font-weight: 500;
-  color: #667085;
+  color: #000;
 }
 
 .hd-kv dd {
@@ -610,7 +610,7 @@
   min-width: 0;
   font-size: 0.95rem;
   font-weight: 700;
-  color: #101828;
+  color: #000;
   text-align: left;
 }
 
@@ -618,7 +618,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  color: #101828;
+  color: #000;
   font-weight: 700;
   font-size: 0.92rem;
   margin-right: 1.2rem;
@@ -633,7 +633,7 @@
 .hd-desc {
   font-size: 0.95rem;
   line-height: 1.55;
-  color: #344054;
+  color: #000;
   white-space: pre-wrap;
 }
 
@@ -647,7 +647,7 @@
 .hd-list {
   margin: 0;
   padding-left: 1.1rem;
-  color: #344054;
+  color: #000;
   font-size: 0.95rem;
   line-height: 1.5;
 }
@@ -946,111 +946,67 @@ body.hd-has-msg-bar #hd-root {
   font-weight: 700;
 }
 
+/* Hirdetés megjelenés: világos lap, fekete betű — sötét téma mellett is */
 html[data-theme="dark"] body.hd-page,
 html[data-theme="dark"] body.site-app[data-site-page="hirdetes"] {
-  background: #12161c !important;
-  color: #fff !important;
+  background: #f4f5f7 !important;
+  color: #000 !important;
 }
 
-html[data-theme="dark"] body.hd-page .hd-wrap,
-html[data-theme="dark"] body.hd-page .hd-topnav,
 html[data-theme="dark"] body.hd-page .hd-title,
 html[data-theme="dark"] body.hd-page .hd-specbar-main,
+html[data-theme="dark"] body.hd-page .hd-specbar-meta,
 html[data-theme="dark"] body.hd-page .hd-price,
 html[data-theme="dark"] body.hd-page .hd-price-sub,
+html[data-theme="dark"] body.hd-page .hd-price-old,
 html[data-theme="dark"] body.hd-page .hd-seller-name,
+html[data-theme="dark"] body.hd-page .hd-seller-since,
 html[data-theme="dark"] body.hd-page .hd-seller-addr,
 html[data-theme="dark"] body.hd-page .hd-h2,
+html[data-theme="dark"] body.hd-page .hd-h3,
 html[data-theme="dark"] body.hd-page .hd-kv dt,
 html[data-theme="dark"] body.hd-page .hd-kv dd,
-html[data-theme="dark"] body.hd-page .hd-section,
 html[data-theme="dark"] body.hd-page .hd-desc,
-html[data-theme="dark"] body.hd-page p,
-html[data-theme="dark"] body.hd-page span,
-html[data-theme="dark"] body.hd-page strong,
-html[data-theme="dark"] body.hd-page a,
-html[data-theme="dark"] body.hd-page li,
-html[data-theme="dark"] body.hd-page h1,
-html[data-theme="dark"] body.hd-page h2,
-html[data-theme="dark"] body.hd-page h3 {
-  color: #fff !important;
+html[data-theme="dark"] body.hd-page .hd-list,
+html[data-theme="dark"] body.hd-page .hd-check,
+html[data-theme="dark"] body.hd-page .hd-section,
+html[data-theme="dark"] body.hd-page .hd-card,
+html[data-theme="dark"] body.hd-page .hd-wrap p,
+html[data-theme="dark"] body.hd-page .hd-wrap li,
+html[data-theme="dark"] body.hd-page .hd-wrap strong {
+  color: #000 !important;
 }
 
 html[data-theme="dark"] body.hd-page .hd-topnav,
-html[data-theme="dark"] body.hd-page .hd-specbar-meta,
 html[data-theme="dark"] body.hd-page .hd-crumb-list li,
 html[data-theme="dark"] body.hd-page .hd-topnav a,
 html[data-theme="dark"] body.hd-page .hd-search-back,
 html[data-theme="dark"] body.hd-page .hd-search-prev,
 html[data-theme="dark"] body.hd-page .hd-search-next {
-  color: #e5e7eb !important;
-}
-
-html[data-theme="dark"] body.hd-page .hd-search-back:hover,
-html[data-theme="dark"] body.hd-page .hd-search-prev:hover,
-html[data-theme="dark"] body.hd-page .hd-search-next:hover,
-html[data-theme="dark"] body.hd-page .hd-topnav a:hover,
-html[data-theme="dark"] body.hd-page .hd-more {
-  color: #93c5fd !important;
+  color: #475467 !important;
 }
 
 html[data-theme="dark"] body.hd-page .hd-gallery,
 html[data-theme="dark"] body.hd-page .hd-side,
-html[data-theme="dark"] body.hd-page .hd-section,
-html[data-theme="dark"] body.hd-page .hd-dealer,
+html[data-theme="dark"] body.hd-page .hd-card,
 html[data-theme="dark"] body.hd-page .hd-rel {
-  background: #1a1f26 !important;
-  border-color: #2a313c !important;
-  color: #fff !important;
-}
-
-html[data-theme="dark"] body.hd-page .hd-stage,
-html[data-theme="dark"] body.hd-page .hd-thumb,
-html[data-theme="dark"] body.hd-page .hd-rel-empty {
-  background: #12161c !important;
+  background: #fff !important;
+  border-color: #e4e7ec !important;
+  color: #000 !important;
 }
 
 html[data-theme="dark"] body.hd-page .hd-tool {
-  background: #1a1f26 !important;
-  border-color: #3b4450 !important;
-  color: #fff !important;
-}
-
-html[data-theme="dark"] body.hd-page .hd-tool.is-on {
-  color: #93c5fd !important;
-  border-color: #93c5fd !important;
+  background: #fff !important;
+  border-color: #d0d5dd !important;
+  color: #344054 !important;
 }
 
 html[data-theme="dark"] body.hd-page .hd-price-box {
-  border-bottom-color: #2a313c !important;
-}
-
-html[data-theme="dark"] body.hd-page .hd-btn--primary,
-html[data-theme="dark"] body.hd-page .hd-btn--ghost {
-  background: #f0c52c !important;
-  border-color: #f0c52c !important;
-  color: #111 !important;
-}
-
-html[data-theme="dark"] body.hd-page .hd-kv {
-  border-color: #2a313c !important;
-}
-
-html[data-theme="dark"] body.hd-page .hd-kv dt {
-  color: #9ca3af !important;
-}
-
-html[data-theme="dark"] body.hd-page .hd-kv dd {
-  color: #fff !important;
-}
-
-html[data-theme="dark"] body.hd-page .hd-empty {
-  color: #e5e7eb !important;
+  border-bottom-color: #eef0f3 !important;
 }
 
 html[data-theme="dark"] body.hd-page .hd-msg-bar {
-  background: #1a1f26 !important;
-  border-color: #2a313c !important;
-  color: #fff !important;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, #fff 28%) !important;
+  color: #000 !important;
 }
 

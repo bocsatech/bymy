@@ -1691,7 +1691,7 @@ async function handleAuthApi(req, res, pathname) {
       try {
         const accountType = urlObj.searchParams.get("accountType") || "";
         const state = createOAuthState(provider, next, undefined, accountType);
-        const authorizeUrl = buildAuthorizeUrl(provider, state);
+        const authorizeUrl = buildAuthorizeUrl(provider, state, undefined, req);
         sendRedirect(res, authorizeUrl);
       } catch (error) {
         const msg = encodeURIComponent(error.message ?? "OAuth indítás sikertelen");
@@ -1750,7 +1750,7 @@ async function handleAuthApi(req, res, pathname) {
         }
 
         const stateInfo = parseOAuthState(params.state, provider);
-        const identity = await exchangeOAuthCode(provider, params.code);
+        const identity = await exchangeOAuthCode(provider, params.code, undefined, req);
         if (provider === "apple") {
           const appleName = appleNameFromForm(params.user);
           if (appleName && !identity.name) identity.name = appleName;

@@ -143,49 +143,66 @@ function setDeskActive(on) {
   document.getElementById("wizard-steps-bar")?.toggleAttribute("hidden", on);
 }
 
-function ensureDeskCenter(form) {
-  let col = form.querySelector("#ad-desk-center-col");
-  if (col) return col;
-  col = document.createElement("div");
-  col.id = "ad-desk-center-col";
-  col.className = "ad-desk-center-col";
+function migrateLegacyDeskColumns(form) {
+  const legacyCenter = form.querySelector("#ad-desk-center-col");
+  const legacyStack = document.querySelector(".site-center--automax > #ad-desk-right-stack");
   const footer = form.querySelector("#footer-actions");
-  form.insertBefore(col, footer);
-  return col;
+
+  if (legacyCenter) {
+    const panel = legacyCenter.querySelector(".automax-panel");
+    const stage = legacyCenter.querySelector("#ad-photo-desk-stage");
+    if (stage && stage.parentElement === legacyCenter) {
+      form.insertBefore(stage, footer);
+    }
+    if (panel) {
+      const tipsCol = ensureTipsColumn(form);
+      if (tipsCol && panel.parentElement !== tipsCol) tipsCol.appendChild(panel);
+    }
+    legacyCenter.remove();
+  }
+
+  if (legacyStack) {
+    const panel = legacyStack.querySelector(".automax-panel");
+    if (panel) {
+      const tipsCol = ensureTipsColumn(form);
+      if (tipsCol && panel.parentElement !== tipsCol) tipsCol.appendChild(panel);
+    }
+    legacyStack.remove();
+  }
 }
 
-function ensureRightStack(form) {
-  const col = ensureDeskCenter(form);
-  let stack = col.querySelector("#ad-desk-right-stack");
-  if (stack) return stack;
+function ensureTipsColumn(form) {
+  let col = form.querySelector("#ad-desk-tips-col");
+  if (col) return col;
 
   const panel = document.querySelector(".site-center--automax .automax-panel");
   if (!panel) return null;
 
-  stack = document.createElement("div");
-  stack.id = "ad-desk-right-stack";
-  stack.className = "ad-desk-right-stack";
-  col.appendChild(stack);
-  stack.appendChild(panel);
-  return stack;
+  col = document.createElement("div");
+  col.id = "ad-desk-tips-col";
+  col.className = "ad-desk-tips-col";
+  const footer = form.querySelector("#footer-actions");
+  form.insertBefore(col, footer);
+  col.appendChild(panel);
+  return col;
 }
 
 function ensurePhotoStage(form) {
-  const col = ensureDeskCenter(form);
-  let stage = col.querySelector("#ad-photo-desk-stage");
+  let stage = form.querySelector("#ad-photo-desk-stage");
   if (stage) return stage;
   stage = document.createElement("div");
   stage.id = "ad-photo-desk-stage";
   stage.className = "ad-photo-desk-stage";
-  col.insertBefore(stage, col.firstChild);
+  const footer = form.querySelector("#footer-actions");
+  const tipsCol = form.querySelector("#ad-desk-tips-col");
+  form.insertBefore(stage, tipsCol || footer);
   return stage;
 }
 
-function teardownRightStack(form) {
+function teardownDeskColumns(form) {
   const center = document.querySelector(".site-center--automax");
-  const col = form?.querySelector("#ad-desk-center-col");
-  const stack = col?.querySelector("#ad-desk-right-stack");
-  const panel = stack?.querySelector(".automax-panel");
+  const tipsCol = form?.querySelector("#ad-desk-tips-col");
+  const panel = tipsCol?.querySelector(".automax-panel");
   const photoPanel = form?.querySelector(`.step-panel[data-step="${PHOTO_STEP}"]`);
   const footer = form?.querySelector("#footer-actions");
   const shell = form?.querySelector("#ad-form-desk-shell");
@@ -200,7 +217,9 @@ function teardownRightStack(form) {
     else center.appendChild(panel);
   }
 
-  col?.remove();
+  form?.querySelector("#ad-desk-center-col")?.remove();
+  tipsCol?.remove();
+  form?.querySelector("#ad-photo-desk-stage")?.remove();
   form?.classList.remove("ad-form-desk-layout");
 }
 
@@ -208,7 +227,7 @@ function syncPhotoStage(form) {
   const panel = form.querySelector(`.step-panel[data-step="${PHOTO_STEP}"]`);
   if (!panel || !isAdFormDesk(form)) return;
 
-  ensureRightStack(form);
+  ensureTipsColumn(form);
   const stage = ensurePhotoStage(form);
   if (stage && panel.parentElement !== stage) stage.appendChild(panel);
 }
@@ -217,7 +236,7 @@ function applyAdFormDesk({ openStep = null } = {}) {
   const form = document.getElementById("ad-form");
   if (!form || form.closest("#ad-wizard-shell")?.hidden) {
     setDeskActive(false);
-    if (form) teardownRightStack(form);
+    if (form) teardownDeskColumns(form);
     return;
   }
 
@@ -226,7 +245,7 @@ function applyAdFormDesk({ openStep = null } = {}) {
   setDeskActive(desk);
 
   if (!desk) {
-    teardownRightStack(form);
+    teardownDeskColumns(form);
     if (shell) {
       shell.hidden = true;
       const footer = form.querySelector("#footer-actions");
@@ -241,14 +260,8 @@ function applyAdFormDesk({ openStep = null } = {}) {
 
   form.classList.add("ad-form-desk-layout");
   form.querySelector('#ad-form-desk-shell [data-desk-acc="kepek"]')?.remove();
-  const legacyStack = document.querySelector(".site-center--automax > #ad-desk-right-stack");
-  if (legacyStack) {
-    const legacyPanel = legacyStack.querySelector(".automax-panel");
-    const main = document.querySelector(".site-center--automax .automax-main");
-    if (legacyPanel && main) main.insertAdjacentElement("afterend", legacyPanel);
-    legacyStack.remove();
-  }
-  ensureRightStack(form);
+  migrateLegacyDeskColumns(form);
+  ensureTipsColumn(form);
   mountDeskPanels(form);
   restackCanvasItems(form);
   if (shell) shell.hidden = false;

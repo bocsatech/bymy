@@ -1241,7 +1241,7 @@ function mountAllapotPicker(select) {
       const on = openMains.has(cat.id);
       const hasKids = Boolean(cat.children?.length);
       let kidsHtml = "";
-      if (hasKids) {
+      if (hasKids && on) {
         kidsHtml = `<div class="auto-fuel-children">
           ${cat.children
             .map((child) => {
@@ -1282,9 +1282,6 @@ function mountAllapotPicker(select) {
       selected = readSingleStoredValue(raw);
       if (raw.trim().startsWith("[")) writePlainValue(select, selected);
       syncOpenFromValues();
-      for (const cat of ALLAPOT_CATEGORIES) {
-        if (cat.children?.length) openMains.add(cat.id);
-      }
     },
     syncSummary(summaryEl) {
       if (summaryEl) summaryEl.textContent = labelForValue(selected) || PLACEHOLDER;

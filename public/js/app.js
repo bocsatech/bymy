@@ -156,10 +156,43 @@ function registerAbandonPhotoCleanup() {
   });
 }
 
-function showWizardShell() {
+function isDeskSzemelyautoFormData(formData) {
+  const vertical = String(formData?.hirdetes_vertical ?? "")
+    .trim()
+    .toLowerCase();
+  if (vertical === "ingatlan") return false;
+  const subtype = String(formData?.hirdetes_alkategoria ?? formData?.jarmu_kategoria ?? "")
+    .trim()
+    .toLowerCase();
+  if (vertical === "teher") return false;
+  return window.matchMedia("(min-width: 901px)").matches && (subtype === "szemelyauto" || !subtype);
+}
+
+function showWizardShell({ deskMode = false } = {}) {
   document.getElementById("category-picker-shell")?.setAttribute("hidden", "");
   document.getElementById("ad-wizard-shell")?.removeAttribute("hidden");
-  document.getElementById("wizard-steps-bar")?.removeAttribute("hidden");
+  const stepsBar = document.getElementById("wizard-steps-bar");
+  if (deskMode) stepsBar?.setAttribute("hidden", "");
+  else stepsBar?.removeAttribute("hidden");
+}
+
+function finishEditBoot() {
+  document.documentElement.classList.remove("ad-form-edit-boot");
+}
+
+async function prepareEditShell(formData) {
+  const deskMode = isDeskSzemelyautoFormData(formData);
+  if (deskMode) {
+    const { applyAdFormDesk } = await import("./ad-form-desk.js?v=adFormDesk6");
+    applyAdFormDesk();
+  }
+  showWizardShell({ deskMode });
+  window.dispatchEvent(new Event("ad-form-layout-refresh"));
+  await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+  if (deskMode) {
+    await new Promise((resolve) => window.setTimeout(resolve, 180));
+  }
+  finishEditBoot();
 }
 
 function ensureFormReady() {
@@ -293,13 +326,13 @@ const categoryPicker = initCategoryPicker({
 });
 
 if (editing) {
+  document.documentElement.classList.add("ad-form-edit-boot");
   try {
     const listing = await fetchListing(editId);
     if (!listing?.form) {
       throw new Error("A hirdetés nem tölthető be.");
     }
     const api = ensureFormReady();
-    showWizardShell();
     pendingEditForm = { ...listing.form };
     if (!pendingEditForm.hirdetes_vertical) pendingEditForm.hirdetes_vertical = "auto";
     if (!pendingEditForm.hirdetes_alkategoria) pendingEditForm.hirdetes_alkategoria = "szemelyauto";
@@ -312,9 +345,12 @@ if (editing) {
       if (el.type === "checkbox") continue;
       el.value = Array.isArray(value) ? JSON.stringify(value) : String(value);
     }
+    const catSel = categorySelectionFromForm(pendingEditForm);
+    if (catSel) categoryPicker?.syncWizardContext?.(catSel);
     setStoredListingId(editId);
     syncPhotoUrlsFromListing(listing);
     api?.applyFormData?.(pendingEditForm, { fromImport: true });
+    await prepareEditShell(pendingEditForm);
     const published = String(listing.status || "") === "feladott";
     const isImmo = String(listing.form?.hirdetes_vertical || "").toLowerCase() === "ingatlan";
     if (published && isImmo) {
@@ -323,6 +359,7 @@ if (editing) {
       window.dispatchEvent(new Event("ad-form-layout-refresh"));
     }
   } catch (error) {
+    finishEditBoot();
     alert(error.message ?? "A hirdetés betöltése sikertelen.");
     window.location.assign("/beallitasok.html?szekcio=hirdetes");
   }

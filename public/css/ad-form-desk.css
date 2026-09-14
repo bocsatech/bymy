@@ -1,5 +1,9 @@
-
 @media (min-width: 901px) {
+  html.ad-form-edit-boot body[data-site-page="hirdetesfeladas"] #category-picker-shell,
+  html.ad-form-edit-boot body[data-site-page="hirdetesfeladas"] #ad-wizard-shell,
+  html.ad-form-edit-boot body[data-site-page="hirdetesfeladas"] #wizard-steps-bar {
+    visibility: hidden;
+  }
   html:not([data-theme="dark"]) body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"],
   html[data-theme="light"] body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] {
     --ad-bg: #f3f3f3;

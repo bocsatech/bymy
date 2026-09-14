@@ -1,6 +1,6 @@
-import { initDrumWheel, syncDrumWheelDisplay } from "./immo-drum-picker.js?v=immoClear1";
-import { setWheelValue, readWheel } from "./ingatlan-wheels.js?v=immoClear1";
-import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=immoClear1";
+import { initDrumWheel, syncDrumWheelDisplay } from "./immo-drum-picker.js?v=immoClearAll1";
+import { setWheelValue, readWheel } from "./ingatlan-wheels.js?v=immoClearAll1";
+import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=catWheelFix1";
 
 const STORAGE_KEY = "bymy-hirdetes-category";
 const STORAGE_VERSION = 4;

@@ -76,7 +76,7 @@ function paintPortal(scrollEl, ring, wheel) {
       const t = Math.min(dist / (ITEM_H * 1.15), 1);
       const v = item.dataset.value ?? "";
       const isSel = v === "" ? selected.size === 0 : selected.has(v);
-      item.style.opacity = String(Math.max(0.15, 1 - t * 0.72));
+      item.style.opacity = String(Math.max(0.42, 1 - t * 0.55));
       item.style.fontWeight = dist < ITEM_H * 0.42 || isSel ? "650" : "500";
       item.classList.toggle("is-in-cell", inCell);
       item.classList.toggle("is-selected", isSel);
@@ -130,10 +130,6 @@ function bindPortalNativeScroll(scrollEl, ring, wheel) {
     const snap = nearestPortalItem(scrollEl, ring);
     if (snap) scrollToPortalItem(scrollEl, ring, snap);
     paintPortal(scrollEl, ring, wheel);
-    ring.dataset.drumDragged = "1";
-    window.setTimeout(() => {
-      delete ring.dataset.drumDragged;
-    }, 80);
   };
   scrollEl.addEventListener("touchend", snapEnd);
   scrollEl.addEventListener("touchcancel", snapEnd);
@@ -204,29 +200,46 @@ export function openAutoDrumSheet(wheel, trigger) {
   root.querySelector(".auto-drum-portal__backdrop")?.addEventListener("click", () => closeAutoDrumSheet(true));
   root.querySelector(".auto-drum-portal__done")?.addEventListener("click", () => closeAutoDrumSheet(true));
 
+  function selectPortalItem(item) {
+    if (!item) return;
+    const value = item.dataset.value ?? "";
+    if (multiple) {
+      if (value === "") {
+        setWheelValue(wheel, "");
+      } else {
+        const cur = new Set(readWheelList(wheel));
+        if (cur.has(value)) cur.delete(value);
+        else cur.add(value);
+        setWheelValue(wheel, [...cur]);
+      }
+      syncDrumWheelDisplay(wheel);
+      wheel.dispatchEvent(new CustomEvent("immo-wheel-change", { bubbles: true, detail: { value: readWheel(wheel) } }));
+      closeAutoDrumSheet(false);
+      return;
+    }
+    setWheelValue(wheel, value);
+    syncDrumWheelDisplay(wheel);
+    wheel.dispatchEvent(new CustomEvent("immo-wheel-change", { bubbles: true, detail: { value } }));
+    closeAutoDrumSheet(false);
+  }
+
   scrollEl.querySelectorAll(".immo-drum-inline-item").forEach((item) => {
+    let tapStart = null;
+    item.addEventListener(
+      "pointerdown",
+      (event) => {
+        tapStart = { x: event.clientX, y: event.clientY };
+      },
+      { passive: true }
+    );
     item.addEventListener("click", (event) => {
       event.stopPropagation();
-      if (ring.dataset.drumDragged === "1") return;
-      const value = item.dataset.value ?? "";
-      if (multiple) {
-        if (value === "") {
-          setWheelValue(wheel, "");
-        } else {
-          const cur = new Set(readWheelList(wheel));
-          if (cur.has(value)) cur.delete(value);
-          else cur.add(value);
-          setWheelValue(wheel, [...cur]);
-        }
-        syncDrumWheelDisplay(wheel);
-        wheel.dispatchEvent(new CustomEvent("immo-wheel-change", { bubbles: true, detail: { value: readWheel(wheel) } }));
-        closeAutoDrumSheet(false);
-        return;
+      if (tapStart) {
+        const dx = Math.abs(event.clientX - tapStart.x);
+        const dy = Math.abs(event.clientY - tapStart.y);
+        if (dx > 10 || dy > 10) return;
       }
-      setWheelValue(wheel, value);
-      syncDrumWheelDisplay(wheel);
-      wheel.dispatchEvent(new CustomEvent("immo-wheel-change", { bubbles: true, detail: { value } }));
-      closeAutoDrumSheet(false);
+      selectPortalItem(item);
     });
   });
 

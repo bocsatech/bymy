@@ -19,6 +19,7 @@ let scrollBlockerEl = null;
 function isScrollableWheel(el) {
   if (!el?.closest) return null;
   return (
+    el.closest(".auto-drum-portal__scroll") ||
     el.closest(".immo-drum-inline-scroll") ||
     el.closest(".immo-drum-wheel-ring")?.querySelector(".immo-drum-inline-scroll") ||
     el.closest(".immo-wheel--menu") ||
@@ -62,7 +63,9 @@ function onLockedTouchMove(event) {
     scrollEl = isScrollableWheel(under);
   }
   if (!scrollEl) {
-    scrollEl = document.querySelector(".immo-wheel-wrap--drum-inline.is-open .immo-drum-inline-scroll");
+    scrollEl =
+      document.querySelector(".auto-drum-portal .auto-drum-portal__scroll") ||
+      document.querySelector(".immo-wheel-wrap--drum-inline.is-open .immo-drum-inline-scroll");
   }
   if (!scrollEl || !dy) return;
   scrollEl.scrollTop -= dy;
@@ -84,7 +87,9 @@ function onLockedWheel(event) {
   event.preventDefault();
   let scrollEl = isScrollableWheel(event.target);
   if (!scrollEl) {
-    scrollEl = document.querySelector(".immo-wheel-wrap--drum-inline.is-open .immo-drum-inline-scroll");
+    scrollEl =
+      document.querySelector(".auto-drum-portal .auto-drum-portal__scroll") ||
+      document.querySelector(".immo-wheel-wrap--drum-inline.is-open .immo-drum-inline-scroll");
   }
   if (!scrollEl) {
     scrollEl = document.querySelector(".immo-wheel-wrap--menu.is-open .immo-wheel--menu");

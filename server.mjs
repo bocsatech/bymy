@@ -38,6 +38,10 @@ import {
 } from "./lib/site-hero.mjs";
 import { getHubPromoPublic, resolveHubPromoFile } from "./lib/hub-promo.mjs";
 import {
+  getAdFormDeskGuidePublic,
+  resolveAdFormDeskGuideFile,
+} from "./lib/ad-form-desk-guide.mjs";
+import {
   deleteQuery,
   listFugvenyLists,
   loadQueries,
@@ -329,6 +333,19 @@ function serveStatic(path, res) {
   // Hub promo (kezdőlap téglalapok)
   if (rel.startsWith("uploads/hub-promo/")) {
     const uploadFile = resolveHubPromoFile(`/${rel}`);
+    if (uploadFile) {
+      const ext = extname(uploadFile);
+      res.writeHead(200, {
+        "Content-Type": MIME[ext] ?? "application/octet-stream",
+        "Cache-Control": "public, max-age=86400",
+      });
+      res.end(readFileSync(uploadFile));
+      return;
+    }
+  }
+
+  if (rel.startsWith("uploads/ad-form-desk-guide/")) {
+    const uploadFile = resolveAdFormDeskGuideFile(`/${rel}`);
     if (uploadFile) {
       const ext = extname(uploadFile);
       res.writeHead(200, {
@@ -2176,6 +2193,17 @@ export async function handleHttpRequest(req, res) {
       });
     } catch (error) {
       sendJson(res, 500, { error: error.message ?? "Hub promo hiba." });
+    }
+    return;
+  }
+
+  if (pathname === "/api/ad-form-desk-guide" && req.method === "GET") {
+    try {
+      sendJson(res, 200, await getAdFormDeskGuidePublic(), {
+        "Cache-Control": "public, max-age=60, stale-while-revalidate=300",
+      });
+    } catch (error) {
+      sendJson(res, 500, { error: error.message ?? "Hirdetésfeladás kép hiba." });
     }
     return;
   }

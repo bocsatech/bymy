@@ -64,7 +64,7 @@
     overscroll-behavior: contain;
   }
 
-  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout #ad-photo-desk-stage {
+  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout #ad-desk-center-col {
     grid-column: 2;
     grid-row: 1;
     display: flex;
@@ -72,10 +72,68 @@
     width: 100%;
     min-width: 0;
     max-width: none;
-    justify-self: stretch;
     align-self: start;
-    margin-top: 7cm;
-    min-height: calc(100vh - var(--site-fixed-header-h, 64px) - 24px - 7cm);
+    gap: 0;
+    min-height: calc(100vh - var(--site-fixed-header-h, 64px) - 24px);
+  }
+
+  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout #ad-desk-guide-frame {
+    flex: 0 0 7cm;
+    height: 7cm;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .ad-desk-guide-frame__inner {
+    width: 100%;
+    height: 100%;
+    border: 2px dashed var(--ad-line);
+    border-radius: 8px;
+    background: var(--ad-panel);
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .ad-desk-guide-frame.has-image .ad-desk-guide-frame__inner {
+    border-style: solid;
+  }
+
+  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .ad-desk-guide-frame__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .ad-desk-guide-frame__empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    padding: 1rem;
+    box-sizing: border-box;
+    text-align: center;
+    color: var(--ad-muted);
+    font-size: 0.92rem;
+  }
+
+  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .ad-desk-guide-frame__label {
+    font-weight: 600;
+    color: var(--ad-muted);
+  }
+
+  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout #ad-photo-desk-stage {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+    min-height: 320px;
   }
 
   body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout #ad-desk-tips-col {

@@ -58,6 +58,7 @@ function isPublicApi(pathname, method) {
   // Oldalsáv tartalom: GET nyilvános; PUT a szerveren level1 admint ellenőriz
   if (pathname === "/api/site-blocks") return true;
   if (pathname === "/api/hub-promo" && method === "GET") return true;
+  if (pathname === "/api/ad-form-desk-guide" && method === "GET") return true;
   if (pathname === "/api/nav/counts" && method === "GET") return true;
   if (pathname === "/api/field-defs" && method === "GET") return true;
   // Kép proxy: <img> kérés cookie nélkül is kell (különben törött ikon)

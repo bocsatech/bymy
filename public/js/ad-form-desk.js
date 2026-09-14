@@ -1,3 +1,5 @@
+import { initAdFormDeskGuide, refreshAdFormDeskGuide } from "./ad-form-desk-guide.js?v=adDeskGuide1";
+
 const DESK_MQ = "(min-width: 901px)";
 
 const ACCORDIONS = [
@@ -152,7 +154,7 @@ function migrateLegacyDeskColumns(form) {
     const panel = legacyCenter.querySelector(".automax-panel");
     const stage = legacyCenter.querySelector("#ad-photo-desk-stage");
     if (stage && stage.parentElement === legacyCenter) {
-      form.insertBefore(stage, footer);
+      ensureCenterColumn(form).appendChild(stage);
     }
     if (panel) {
       const tipsCol = ensureTipsColumn(form);
@@ -187,15 +189,42 @@ function ensureTipsColumn(form) {
   return col;
 }
 
-function ensurePhotoStage(form) {
-  let stage = form.querySelector("#ad-photo-desk-stage");
-  if (stage) return stage;
-  stage = document.createElement("div");
-  stage.id = "ad-photo-desk-stage";
-  stage.className = "ad-photo-desk-stage";
+function ensureCenterColumn(form) {
+  let col = form.querySelector("#ad-desk-center-col");
+  if (col) return col;
+
+  col = document.createElement("div");
+  col.id = "ad-desk-center-col";
+  col.className = "ad-desk-center-col";
+
+  const guide = document.createElement("div");
+  guide.id = "ad-desk-guide-frame";
+  guide.className = "ad-desk-guide-frame";
+  guide.innerHTML = `
+    <div class="ad-desk-guide-frame__inner">
+      <img class="ad-desk-guide-frame__img" data-desk-guide-img alt="" hidden decoding="async" />
+      <div class="ad-desk-guide-frame__empty" data-desk-guide-empty>
+        <span class="ad-desk-guide-frame__label" data-desk-guide-label>Alap adatok</span>
+      </div>
+    </div>
+  `;
+  col.appendChild(guide);
+
   const footer = form.querySelector("#footer-actions");
   const tipsCol = form.querySelector("#ad-desk-tips-col");
-  form.insertBefore(stage, tipsCol || footer);
+  form.insertBefore(col, tipsCol || footer);
+  return col;
+}
+
+function ensurePhotoStage(form) {
+  let stage = form.querySelector("#ad-photo-desk-stage");
+  if (!stage) {
+    stage = document.createElement("div");
+    stage.id = "ad-photo-desk-stage";
+    stage.className = "ad-photo-desk-stage";
+  }
+  const col = ensureCenterColumn(form);
+  if (stage.parentElement !== col) col.appendChild(stage);
   return stage;
 }
 
@@ -272,6 +301,8 @@ function applyAdFormDesk({ openStep = null } = {}) {
   if (accId) openAccordion(form, accId);
   syncPhotoStage(form);
   updateAccordionSums(form);
+  refreshAdFormDeskGuide(form);
+  initAdFormDeskGuide();
 }
 
 function bindDeskEvents() {
@@ -287,6 +318,7 @@ function bindDeskEvents() {
     if (!id) return;
     const open = acc.classList.contains("is-open");
     openAccordion(form, open ? "" : id);
+    refreshAdFormDeskGuide(form);
   });
 
   form.addEventListener("input", () => {
@@ -303,6 +335,7 @@ function bindDeskEvents() {
     if (accId) openAccordion(form, accId);
     syncPhotoStage(form);
     updateAccordionSums(form);
+    refreshAdFormDeskGuide(form);
     if (step === PHOTO_STEP) {
       document.getElementById("ad-photo-desk-stage")?.scrollIntoView?.({ block: "start", behavior: "smooth" });
       return;

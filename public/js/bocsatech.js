@@ -88,6 +88,7 @@ const ADMIN_SECTIONS = [
     defaultTab: "auto:listings",
     tabs: [
       { id: "auto:listings", label: "Hirdetések" },
+      { id: "auto:desk-guide", label: "Feladás képek" },
       { id: "auto:kivitel", label: "Kivitel menü" },
       { id: "auto:akku", label: "Akkumulátor kereső" },
       ...AUTO_LAYOUT_ITEMS.map((item) => ({
@@ -276,6 +277,7 @@ let visitors = {
 let layout = { cells: [], category: "szemelyauto" };
 let wheelSchema = { version: 1, cells: [] };
 let hubPromo = { images: [], max: 8, size: { width: 1400, height: 840 }, count: 0 };
+let adFormDeskGuide = { images: [], slots: {} };
 let searchCylinderMenu = { version: 1, items: [] };
 let searchCylinderImagePresets = [];
 let kivitelMenu = { version: 1, items: [] };
@@ -1020,6 +1022,64 @@ const actions = {
       render();
     }
   },
+  async deskGuideDelete(_, el) {
+    const slot = el.getAttribute("data-slot");
+    if (!slot || !confirm(`Törlöd a(z) „${slot}” szekció képét?`)) return;
+    err = "";
+    info = "";
+    try {
+      adFormDeskGuide = await api("/api/level1/ad-form-desk-guide/image", {
+        method: "DELETE",
+        body: JSON.stringify({ slot }),
+      });
+      info = "Kép törölve.";
+      render();
+    } catch (error) {
+      err = error.message;
+      render();
+    }
+  },
+  async deskGuideSaveAlt(_, el) {
+    const slot = el.getAttribute("data-slot");
+    const card = el.closest(".hub-promo-admin__card");
+    const alt = String(card?.querySelector("[data-alt]")?.value ?? "").trim();
+    err = "";
+    info = "";
+    try {
+      adFormDeskGuide = await api("/api/level1/ad-form-desk-guide/image", {
+        method: "PATCH",
+        body: JSON.stringify({ slot, alt }),
+      });
+      info = "Alt szöveg mentve.";
+      render();
+    } catch (error) {
+      err = error.message;
+      render();
+    }
+  },
+  async deskGuideUpload(_, el) {
+    const file = el.files?.[0];
+    const slot = el.getAttribute("data-slot");
+    if (!file || !slot) return;
+    err = "";
+    info = "";
+    try {
+      const alt = String(
+        el.closest(".hub-promo-admin__card")?.querySelector("[data-alt]")?.value ?? ""
+      ).trim();
+      const image = await fileToDataUrl(file);
+      adFormDeskGuide = await api("/api/level1/ad-form-desk-guide/upload", {
+        method: "POST",
+        body: JSON.stringify({ slot, image, alt }),
+      });
+      info = "Kép feltöltve.";
+      el.value = "";
+      render();
+    } catch (error) {
+      err = error.message;
+      render();
+    }
+  },
   async hubPromoUpload(_, el) {
     const file = el.files?.[0];
     if (!file) return;
@@ -1483,6 +1543,9 @@ async function loadTab() {
     const data = await api(immoWheelApiUrl("ingatlan"));
     wheelSchema = data.schema || { version: 1, cells: [] };
   }
+  if (section === "auto" && sub === "desk-guide") {
+    adFormDeskGuide = await api("/api/level1/ad-form-desk-guide");
+  }
   if (section === "home" && sub === "promo") {
     hubPromo = await api("/api/level1/hub-promo");
   }
@@ -1900,6 +1963,47 @@ function ingatlanPreviewView() {
     </div>`;
 }
 
+function adFormDeskGuideView() {
+  const images = adFormDeskGuide?.images || [];
+  const cards = images
+    .map((item) => {
+      const hasImage = Boolean(String(item.url || "").trim());
+      return `<div class="hub-promo-admin__card">
+        <h3 class="admin-section-title">${esc(item.label || item.slot)}</h3>
+        <div class="hub-promo-admin__thumb ad-desk-guide-admin__thumb">
+          ${
+            hasImage
+              ? `<img src="${esc(item.url)}" alt="" />`
+              : `<div class="ad-desk-guide-admin__placeholder">7 cm magas keret · nincs kép</div>`
+          }
+        </div>
+        <label>
+          <div>Alt szöveg</div>
+          <input type="text" data-alt value="${esc(item.alt || item.label || "")}" />
+        </label>
+        <div class="row-actions">
+          ${
+            hasImage
+              ? `<button type="button" class="btn ghost" data-act="deskGuideSaveAlt" data-slot="${esc(item.slot)}">Alt mentése</button>
+          <button type="button" class="btn danger" data-act="deskGuideDelete" data-slot="${esc(item.slot)}">Törlés</button>`
+              : ""
+          }
+          <label class="btn ghost hub-promo-admin__upload">${hasImage ? "Csere" : "Feltöltés"} (JPG/PNG/WebP)
+            <input type="file" accept="image/jpeg,image/png,image/webp" hidden data-act="deskGuideUpload" data-slot="${esc(item.slot)}" />
+          </label>
+        </div>
+      </div>`;
+    })
+    .join("");
+
+  return `
+    <h2 class="layout-cat-title">Személyautó hirdetésfeladás — középső képek</h2>
+    <p class="ok">${esc(info)}</p>
+    <p class="err">${esc(err)}</p>
+    <p class="hint"><strong>5 szekció, 1 kép mindegyikhez.</strong> A bal oldali accordion / lépés váltásakor ugyanott, a 7 cm magas keretben jelenik meg a megfelelő kép: Alap adatok, Műszaki adatok, Extrák, Hirdetés, Képek.</p>
+    <div class="hub-promo-admin__grid">${cards}</div>`;
+}
+
 function hubPromoView() {
   const images = hubPromo?.images || [];
   const max = hubPromo?.max || 8;
@@ -2249,6 +2353,7 @@ function shellBody() {
     if (sub === "listings") {
       return listingsView({ title: "Autóhirdetések", emptyHint: "Nincs autó/teher hirdetés." });
     }
+    if (sub === "desk-guide") return adFormDeskGuideView();
     if (sub === "kivitel") return kivitelMenuView();
     if (sub === "akku") return akkuSearchMenuView();
     return layoutView();

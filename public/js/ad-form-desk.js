@@ -4,9 +4,15 @@ const ACCORDIONS = [
   { id: "alap", step: 1, label: "Alap adatok" },
   { id: "muszaki", step: 2, label: "Műszaki adatok" },
   { id: "extrak", step: 3, label: "Extrák" },
-  { id: "kepek", step: 4, label: "Képek" },
+  { id: "kepek", step: 4, label: "Képek", shell: false },
   { id: "hirdetes", step: 5, label: "Hirdetés" },
 ];
+
+const PHOTO_STEP = 4;
+
+function shellAccordions() {
+  return ACCORDIONS.filter((item) => item.shell !== false);
+}
 
 function currentSubtype(form) {
   return String(
@@ -48,16 +54,12 @@ function countFilled(root) {
 }
 
 function updateAccordionSums(form) {
-  for (const { id, step } of ACCORDIONS) {
+  for (const { id, step } of shellAccordions()) {
     const acc = form.querySelector(`[data-desk-acc="${id}"]`);
     const sum = acc?.querySelector("[data-desk-acc-sum]");
     const body = acc?.querySelector(".auto-desk-acc__body");
     if (!sum || !body) continue;
-    let root = body;
-    if (id === "kepek" && document.body.classList.contains("ad-form-desk-kepek")) {
-      root = form.querySelector(`.step-panel[data-step="${step}"]`) || body;
-    }
-    const n = countFilled(root);
+    const n = countFilled(body);
     sum.textContent = n > 0 ? `${n} kitöltve` : "";
   }
 }
@@ -72,7 +74,8 @@ function openAccordion(form, id) {
 }
 
 function accordionForStep(step) {
-  return ACCORDIONS.find((item) => item.step === step)?.id ?? "alap";
+  if (step === PHOTO_STEP) return "";
+  return ACCORDIONS.find((item) => item.step === step && item.shell !== false)?.id ?? "alap";
 }
 
 function restackCanvasItems(form) {
@@ -103,7 +106,7 @@ function ensureDeskShell(form) {
   shell.className = "ad-form-desk-shell";
   shell.hidden = true;
 
-  for (const { id, label } of ACCORDIONS) {
+  for (const { id, label } of shellAccordions()) {
     const acc = document.createElement("div");
     acc.className = "auto-desk-acc";
     acc.dataset.deskAcc = id;
@@ -126,7 +129,7 @@ function ensureDeskShell(form) {
 
 function mountDeskPanels(form) {
   const shell = ensureDeskShell(form);
-  for (const { id, step } of ACCORDIONS) {
+  for (const { id, step } of shellAccordions()) {
     const body = shell.querySelector(`[data-desk-acc="${id}"] .auto-desk-acc__body`);
     const panel = form.querySelector(`.step-panel[data-step="${step}"]`);
     if (!body || !panel) continue;
@@ -140,73 +143,73 @@ function setDeskActive(on) {
   document.getElementById("wizard-steps-bar")?.toggleAttribute("hidden", on);
 }
 
-function kepekAccordionBody(form) {
-  return form.querySelector('[data-desk-acc="kepek"] .auto-desk-acc__body');
+function ensureDeskCenter(form) {
+  let col = form.querySelector("#ad-desk-center-col");
+  if (col) return col;
+  col = document.createElement("div");
+  col.id = "ad-desk-center-col";
+  col.className = "ad-desk-center-col";
+  const footer = form.querySelector("#footer-actions");
+  form.insertBefore(col, footer);
+  return col;
 }
 
-function ensureRightStack() {
-  const center = document.querySelector(".site-center--automax");
-  if (!center) return null;
-  let stack = center.querySelector("#ad-desk-right-stack");
+function ensureRightStack(form) {
+  const col = ensureDeskCenter(form);
+  let stack = col.querySelector("#ad-desk-right-stack");
   if (stack) return stack;
 
-  const panel = center.querySelector(".automax-panel");
+  const panel = document.querySelector(".site-center--automax .automax-panel");
   if (!panel) return null;
 
   stack = document.createElement("div");
   stack.id = "ad-desk-right-stack";
   stack.className = "ad-desk-right-stack";
-  center.insertBefore(stack, panel);
+  col.appendChild(stack);
   stack.appendChild(panel);
   return stack;
 }
 
-function ensurePhotoStage() {
-  const stack = ensureRightStack();
-  if (!stack) return null;
-  let stage = stack.querySelector("#ad-photo-desk-stage");
+function ensurePhotoStage(form) {
+  const col = ensureDeskCenter(form);
+  let stage = col.querySelector("#ad-photo-desk-stage");
   if (stage) return stage;
   stage = document.createElement("div");
   stage.id = "ad-photo-desk-stage";
   stage.className = "ad-photo-desk-stage";
-  stack.appendChild(stage);
+  col.insertBefore(stage, col.firstChild);
   return stage;
 }
 
 function teardownRightStack(form) {
   const center = document.querySelector(".site-center--automax");
-  const stack = center?.querySelector("#ad-desk-right-stack");
+  const col = form?.querySelector("#ad-desk-center-col");
+  const stack = col?.querySelector("#ad-desk-right-stack");
   const panel = stack?.querySelector(".automax-panel");
-  const photoPanel = form?.querySelector('.step-panel[data-step="4"]');
-  const kepekBody = form ? kepekAccordionBody(form) : null;
+  const photoPanel = form?.querySelector(`.step-panel[data-step="${PHOTO_STEP}"]`);
+  const footer = form?.querySelector("#footer-actions");
+  const shell = form?.querySelector("#ad-form-desk-shell");
 
-  document.body.classList.remove("ad-form-desk-kepek");
-
-  if (photoPanel && kepekBody && !kepekBody.contains(photoPanel)) {
-    kepekBody.appendChild(photoPanel);
+  if (photoPanel && form && photoPanel.parentElement !== form) {
+    form.insertBefore(photoPanel, footer || shell?.nextSibling || null);
   }
 
-  if (stack && panel && center) {
-    center.insertBefore(panel, stack);
-    stack.remove();
+  if (panel && center) {
+    const main = center.querySelector(".automax-main");
+    if (main) main.insertAdjacentElement("afterend", panel);
+    else center.appendChild(panel);
   }
+
+  col?.remove();
+  form?.classList.remove("ad-form-desk-layout");
 }
 
-function syncPhotoStage(form, step) {
-  const panel = form.querySelector('.step-panel[data-step="4"]');
-  if (!panel) return;
+function syncPhotoStage(form) {
+  const panel = form.querySelector(`.step-panel[data-step="${PHOTO_STEP}"]`);
+  if (!panel || !isAdFormDesk(form)) return;
 
-  const showPhotos = isAdFormDesk(form) && step === 4;
-  document.body.classList.toggle("ad-form-desk-kepek", showPhotos);
-
-  if (!showPhotos) {
-    const body = kepekAccordionBody(form);
-    if (body && !body.contains(panel)) body.appendChild(panel);
-    return;
-  }
-
-  ensureRightStack();
-  const stage = ensurePhotoStage();
+  ensureRightStack(form);
+  const stage = ensurePhotoStage(form);
   if (stage && panel.parentElement !== stage) stage.appendChild(panel);
 }
 
@@ -214,6 +217,7 @@ function applyAdFormDesk({ openStep = null } = {}) {
   const form = document.getElementById("ad-form");
   if (!form || form.closest("#ad-wizard-shell")?.hidden) {
     setDeskActive(false);
+    if (form) teardownRightStack(form);
     return;
   }
 
@@ -235,15 +239,25 @@ function applyAdFormDesk({ openStep = null } = {}) {
     return;
   }
 
-  ensureRightStack();
+  form.classList.add("ad-form-desk-layout");
+  form.querySelector('#ad-form-desk-shell [data-desk-acc="kepek"]')?.remove();
+  const legacyStack = document.querySelector(".site-center--automax > #ad-desk-right-stack");
+  if (legacyStack) {
+    const legacyPanel = legacyStack.querySelector(".automax-panel");
+    const main = document.querySelector(".site-center--automax .automax-main");
+    if (legacyPanel && main) main.insertAdjacentElement("afterend", legacyPanel);
+    legacyStack.remove();
+  }
+  ensureRightStack(form);
   mountDeskPanels(form);
   restackCanvasItems(form);
   if (shell) shell.hidden = false;
 
   const activeIndicator = document.querySelector("[data-step-indicator].active");
   const step = openStep ?? Number(activeIndicator?.dataset.stepIndicator) ?? 1;
-  openAccordion(form, accordionForStep(step));
-  syncPhotoStage(form, step);
+  const accId = accordionForStep(step);
+  if (accId) openAccordion(form, accId);
+  syncPhotoStage(form);
   updateAccordionSums(form);
 }
 
@@ -259,14 +273,7 @@ function bindDeskEvents() {
     const id = acc?.getAttribute("data-desk-acc");
     if (!id) return;
     const open = acc.classList.contains("is-open");
-    if (open) {
-      openAccordion(form, "");
-      syncPhotoStage(form, 0);
-    } else {
-      openAccordion(form, id);
-      const accStep = ACCORDIONS.find((item) => item.id === id)?.step ?? 1;
-      syncPhotoStage(form, accStep);
-    }
+    openAccordion(form, open ? "" : id);
   });
 
   form.addEventListener("input", () => {
@@ -279,15 +286,16 @@ function bindDeskEvents() {
   window.addEventListener("ad-form-step", (event) => {
     const step = Number(event.detail?.step);
     if (!document.body.classList.contains("ad-form-desk-active") || !step) return;
-    openAccordion(form, accordionForStep(step));
-    syncPhotoStage(form, step);
+    const accId = accordionForStep(step);
+    if (accId) openAccordion(form, accId);
+    syncPhotoStage(form);
     updateAccordionSums(form);
-    const acc = form.querySelector(`[data-desk-acc="${accordionForStep(step)}"]`);
-    if (step === 4) {
+    if (step === PHOTO_STEP) {
       document.getElementById("ad-photo-desk-stage")?.scrollIntoView?.({ block: "start", behavior: "smooth" });
-    } else {
-      acc?.scrollIntoView?.({ block: "nearest", behavior: "smooth" });
+      return;
     }
+    const acc = accId ? form.querySelector(`[data-desk-acc="${accId}"]`) : null;
+    acc?.scrollIntoView?.({ block: "nearest", behavior: "smooth" });
   });
 
   window.matchMedia(DESK_MQ).addEventListener("change", () => applyAdFormDesk());

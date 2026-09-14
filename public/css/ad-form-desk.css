@@ -24,17 +24,30 @@
   }
 
   body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .site-layout--wide .site-center--automax {
-    grid-template-columns: var(--ad-filter-w, 320px) minmax(0, 1fr) !important;
-    gap: 28px;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 0;
     padding: 12px 24px 2rem;
     background: var(--ad-bg) !important;
   }
 
   body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .automax-main {
-    width: var(--ad-filter-w, 320px);
-    max-width: var(--ad-filter-w, 320px);
+    width: 100%;
+    max-width: none;
     padding: 0 !important;
     background: transparent !important;
+  }
+
+  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout {
+    display: grid;
+    grid-template-columns: var(--ad-filter-w, 320px) minmax(0, 1fr);
+    gap: 28px;
+    align-items: start;
+    width: 100%;
+    max-width: none;
+  }
+
+  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell {
+    grid-column: 1;
     position: sticky;
     top: calc(var(--site-fixed-header-h, 64px) + 12px);
     align-self: start;
@@ -44,18 +57,26 @@
     overscroll-behavior: contain;
   }
 
-  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .ad-desk-right-stack {
+  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout #ad-desk-center-col {
     grid-column: 2;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
     gap: 20px;
     width: 100%;
     max-width: 520px;
-    margin: 0 auto;
     justify-self: center;
-    align-self: start;
+  }
+
+  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout #footer-actions {
+    grid-column: 1;
+  }
+
+  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .ad-desk-right-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
   }
 
   body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .ad-desk-right-stack .automax-panel {
@@ -73,43 +94,27 @@
   }
 
   body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .ad-photo-desk-stage {
-    display: none;
+    display: block;
     width: 100%;
     max-width: 520px;
     align-self: center;
   }
 
-  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"].ad-form-desk-kepek .ad-photo-desk-stage {
-    display: block;
-  }
-
-  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"].ad-form-desk-kepek .ad-photo-desk-stage .step-panel[data-step="4"] {
+  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .ad-photo-desk-stage .step-panel[data-step="4"] {
     width: 100%;
   }
 
-  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"].ad-form-desk-kepek .ad-photo-desk-stage .upload-zone {
+  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .ad-photo-desk-stage .upload-zone {
     text-align: center;
     padding: 28px 20px;
+    background: var(--ad-panel);
+    border: 2px dashed var(--ad-line);
+    border-radius: 8px;
   }
 
-  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"].ad-form-desk-kepek .ad-photo-desk-stage .photo-grid {
-    justify-content: center;
-  }
-
-  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"].ad-form-desk-kepek .ad-photo-desk-stage .photo-upload-bar {
+  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .ad-photo-desk-stage .photo-upload-bar {
     justify-content: center;
     flex-wrap: wrap;
-  }
-
-  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] [data-desk-acc="kepek"] .auto-desk-acc__body:empty {
-    min-height: 0;
-    padding-top: 0;
-    padding-bottom: 0;
-  }
-
-  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form {
-    width: 100%;
-    max-width: var(--ad-filter-w, 320px);
   }
 
   body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .ad-form-desk-shell {
@@ -236,14 +241,14 @@
     margin-top: 12px;
   }
 
-  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #footer-actions {
+  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout #footer-actions {
     margin-top: 8px;
     padding: 0;
     flex-direction: column;
     align-items: stretch;
   }
 
-  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #footer-actions .btn {
+  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout #footer-actions .btn {
     width: 100%;
     justify-content: center;
   }

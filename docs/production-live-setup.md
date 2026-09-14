@@ -40,8 +40,9 @@ OAUTH_STATE_SECRET=
 ```
 
 Important:
-- PUBLIC_BASE_URL must be the public prod URL, not localhost
-- use the same Supabase project for all keys
+- **Két adatbázis:** `bymy.vercel.app` → saját Supabase.com projekt (Vercel env). `bymy.hu` (S1) → self-hosted Supabase a `bymy-data` VPS-en — **külön adat**, szándékosan.
+- Vercel env: `mac/vercel-supabase-env.command` (forrás: `.env.local` felhős kulcsok)
+- PUBLIC_BASE_URL on Vercel: `https://bymy.vercel.app`
 - never expose SUPABASE_SERVICE_ROLE_KEY to the browser
 
 ## 2) Redeploy

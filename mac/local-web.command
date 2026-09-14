@@ -25,14 +25,8 @@ fi
 
 cd "$ROOT"
 mkdir -p "$ROOT/data"
-export PORT=3456
-export HOST=127.0.0.1
 
-if [ ! -f "$ROOT/.env.local" ]; then
-  echo "Hiányzik: $ROOT/.env.local (SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY — ugyanaz, mint bymy.hu)"
-  read -r "?Enter..."
-  exit 1
-fi
+export LEVEL1_DB_PATH="${LEVEL1_DB_PATH:-$ROOT/data/level1.db}"
 
 if [ ! -d node_modules ]; then
   echo "npm install…"

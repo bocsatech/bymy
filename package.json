@@ -7,12 +7,10 @@
   "scripts": {
     "start": "node server.mjs",
     "dev": "node server.mjs",
-    "dev:local": "PORT=3456 node server.mjs",
     "telepites": "bash mac/telepites.command",
     "test:map": "node --test lib/map-to-form.test.mjs",
     "test:links": "node --test lib/links.test.mjs",
     "test": "node --test lib/*.test.mjs",
-    "check:db": "node scripts/check-supabase-parity.mjs",
     "seed:partners": "node scripts/seed-partners.mjs",
     "import:catalog": "node scripts/import-vehicle-catalog.mjs",
     "build:html": "node scripts/embed-ad-form.mjs",

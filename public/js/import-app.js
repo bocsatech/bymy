@@ -112,7 +112,7 @@ async function checkServerReady() {
     if (typeof stats.listings !== "number") throw new Error("stats shape");
 
     dbBadge.hidden = false;
-    dbBadge.textContent = `Supabase: ${stats.listings} hirdetés · ${stats.cells} cella · szerver ${health.version ?? "?"}`;
+    dbBadge.textContent = `SQLite: ${stats.listings} hirdetés · ${stats.cells} cella · szerver ${health.version ?? "?"}`;
 
     if (EMBEDDED_VERSION && health.version && health.version !== EMBEDDED_VERSION) {
       setVersionWarning(

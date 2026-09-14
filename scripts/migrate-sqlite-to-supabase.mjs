@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 /**
- * @deprecated Egyszeri migráció — a rendszer már csak Supabase-et használ.
  * Helyi SQLite (~/.autosweb/autosweb.db + level1.db) → Supabase feltöltés.
  *
  * Használat:

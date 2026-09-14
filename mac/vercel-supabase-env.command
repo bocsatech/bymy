@@ -1,5 +1,5 @@
 #!/bin/zsh
-# Vercel env: SUPABASE_* a .env.local-ból → Production (ugyanaz, mint bymy.hu / S1), majd redeploy.
+# Vercel env: SUPABASE_* a .env.local-ból → Production, majd redeploy.
 # Dupla katt / Terminalből: mac/vercel-supabase-env.command
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"

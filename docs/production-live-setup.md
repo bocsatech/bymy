@@ -40,11 +40,8 @@ OAUTH_STATE_SECRET=
 ```
 
 Important:
-- **One database**: self-hosted Supabase on `bymy-data`, not a separate supabase.com cloud project
-- S1 app (`bymy-app`): `SUPABASE_URL=http://168.231.110.159:8000` (internal)
-- Mac + Vercel: `SUPABASE_URL=https://bymy.hu` (nginx proxy → same DB)
-- Sync keys from éles: `mac/s1-pull-supabase-env.command`, then `mac/vercel-supabase-env.command`
-- SSH alias: `bymy-app`, app dir: `/var/www/bymy`, env file: `/var/www/bymy/.env`
+- PUBLIC_BASE_URL must be the public prod URL, not localhost
+- use the same Supabase project for all keys
 - never expose SUPABASE_SERVICE_ROLE_KEY to the browser
 
 ## 2) Redeploy

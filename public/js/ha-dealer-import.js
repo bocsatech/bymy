@@ -198,7 +198,7 @@
     return extractLeirasSectionText(plain);
   }
 
-  async function fetchDescriptionForListing(listingId) {
+  async function fetchGyorsnezetHtml(listingId) {
     const id = clean(listingId);
     if (!id) return "";
     try {
@@ -206,18 +206,20 @@
         credentials: "include",
       });
       if (!res.ok) return "";
-      return findDescriptionInHtml(await res.text());
+      return await res.text();
     } catch {
       return "";
     }
   }
 
   async function ensureCarDescription(car) {
-    const existing = normalizeImportedLeiras(car.visibleDescription || car.description || car.leiras || "");
-    if (existing) return { ...car, visibleDescription: existing };
-    const fetched = await fetchDescriptionForListing(car.listingId);
-    if (!fetched) return car;
-    return { ...car, visibleDescription: fetched };
+    if (car.html && String(car.html).length > 400) return car;
+    const html = await fetchGyorsnezetHtml(car.listingId);
+    if (!html) return car;
+    const visibleDescription =
+      normalizeImportedLeiras(car.visibleDescription || car.description || car.leiras || "") ||
+      findDescriptionInHtml(html);
+    return { ...car, html, gyorsnezetHtml: html, visibleDescription };
   }
 
   function pickPageListingIdFromUrl(url) {

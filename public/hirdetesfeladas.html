@@ -59,7 +59,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/css/style.css?v=postDark1" />
     <link rel="stylesheet" href="/css/automax.css?v=automax20260720homelist" />
-    <link rel="stylesheet" href="/css/site-app.css?v=navGap1" />
+    <link rel="stylesheet" href="/css/site-app.css?v=powerHint1" />
     <link rel="stylesheet" href="/css/ad-form-bm-pickers.css?v=autoRestore20" />
     <link rel="stylesheet" href="/css/site-side.css?v=mwPostDesk1" />
     <link rel="stylesheet" href="/css/category-picker.css?v=catDrumStand2" />
@@ -478,9 +478,10 @@
                 </div>
                 <div class="labeled-field labeled-field--power">
                   <label for="teljesitmeny_kw">Teljesítmény:</label>
-                  <input id="teljesitmeny_kw" name="teljesitmeny_kw" type="number" class="auto-filled" />
-                  <span class="power-unit">kW</span>
-                  <span id="le-display" class="hint-inline">(= 0 LE)</span>
+                  <div class="suffix-field suffix-field--power">
+                    <input id="teljesitmeny_kw" name="teljesitmeny_kw" type="number" class="auto-filled" />
+                    <span id="le-display" class="power-hint" aria-live="polite"></span>
+                  </div>
                   <input type="hidden" id="teljesitmeny_le" name="teljesitmeny_le" />
                 </div>
               </div>
@@ -946,7 +947,7 @@
     </main>
 
     <script src="/js/site-avatar-menu.js?v=avatarSync1" type="module"></script>
-    <script src="/js/app.js?v=catDrumStand2" type="module"></script>
+    <script src="/js/app.js?v=powerHint1" type="module"></script>
       <script src="/js/nav-counts.js?v=navCount2" type="module"></script>
       <script src="/js/theme.js?v=willhabenHdr1" type="module"></script>
     <script src="/js/form-layout-apply.js?v=leirasStep3" type="module"></script>

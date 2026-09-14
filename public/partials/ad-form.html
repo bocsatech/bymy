@@ -193,9 +193,10 @@
                 </div>
                 <div class="labeled-field labeled-field--power">
                   <label for="teljesitmeny_kw">Teljesítmény:</label>
-                  <input id="teljesitmeny_kw" name="teljesitmeny_kw" type="number" class="auto-filled" />
-                  <span class="power-unit">kW</span>
-                  <span id="le-display" class="hint-inline">(= 0 LE)</span>
+                  <div class="suffix-field suffix-field--power">
+                    <input id="teljesitmeny_kw" name="teljesitmeny_kw" type="number" class="auto-filled" />
+                    <span id="le-display" class="power-hint" aria-live="polite"></span>
+                  </div>
                   <input type="hidden" id="teljesitmeny_le" name="teljesitmeny_le" />
                 </div>
               </div>

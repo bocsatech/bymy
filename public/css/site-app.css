@@ -2921,55 +2921,37 @@ body.site-app .field-row--tech-top .suffix-field > span:not(.hint-inline) {
   text-align: left;
 }
 
-body.site-app #ad-form .field-row.full.field-row--tech-top .labeled-field--power,
-body.site-app .field-row.full.field-row--tech-top .labeled-field--power {
-  display: grid !important;
-  grid-template-columns: max-content auto auto;
-  grid-template-rows: auto var(--site-field-height);
-  column-gap: 0.45rem;
-  row-gap: 0.35rem;
-  align-items: center;
-  width: max-content !important;
-  max-width: 100%;
-  justify-self: start;
-}
-
-body.site-app .field-row--tech-top .labeled-field--power > label {
-  grid-column: 1;
-  grid-row: 1;
-}
-
-body.site-app #ad-form .field-row--tech-top .labeled-field--power > input#teljesitmeny_kw,
-body.site-app .field-row--tech-top .labeled-field--power > input#teljesitmeny_kw {
-  grid-column: 1;
-  grid-row: 2;
-  width: 100% !important;
-  max-width: none !important;
-  min-width: 0 !important;
-  height: var(--site-field-height) !important;
-}
-
-body.site-app .field-row--tech-top .labeled-field--power > .power-unit {
-  grid-column: 2;
-  grid-row: 2;
-  color: #666;
-  font-size: 0.875rem;
-  line-height: 1;
-  white-space: nowrap;
-}
-
-body.site-app .field-row--tech-top .labeled-field--power > .hint-inline#le-display {
-  grid-column: 3;
-  grid-row: 2;
-  margin: 0;
-  font-size: 0.72rem;
-  color: #666;
-  white-space: nowrap;
-  line-height: 1;
-}
-
 body.site-app .field-row--tech-top .labeled-field--power > input[type="hidden"] {
   display: none;
+}
+
+body.site-app #ad-form .field-row--tech-top .suffix-field--power,
+body.site-app .field-row--tech-top .suffix-field--power {
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  gap: 0.55rem;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+body.site-app #ad-form .field-row--tech-top .suffix-field--power > input#teljesitmeny_kw,
+body.site-app .field-row--tech-top .suffix-field--power > input#teljesitmeny_kw {
+  flex: 0 0 5.5rem;
+  width: 5.5rem !important;
+  min-width: 0 !important;
+  max-width: 5.5rem !important;
+}
+
+body.site-app .field-row--tech-top .suffix-field--power > .power-hint {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  color: #666;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
 }
 
 body.site-app .muszaki-grid input,

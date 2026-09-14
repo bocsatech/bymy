@@ -556,10 +556,17 @@ function syncFuelDependentFields() {
 }
 
 function updateLeDisplay() {
-  const kw = Number(teljesitmenyKw.value);
-  const le = Number.isFinite(kw) ? Math.round(kw * 1.36) : 0;
-  leDisplay.textContent = `(= ${le.toLocaleString("hu-HU")} LE)`;
-  if (teljesitmenyLe) teljesitmenyLe.value = le > 0 ? String(le) : "";
+  if (!leDisplay) return;
+  const kwRaw = String(teljesitmenyKw?.value ?? "").trim();
+  const kw = Number(kwRaw);
+  if (!kwRaw || !Number.isFinite(kw) || kw <= 0) {
+    leDisplay.textContent = "";
+    if (teljesitmenyLe) teljesitmenyLe.value = "";
+    return;
+  }
+  const le = Math.round(kw * 1.36);
+  leDisplay.textContent = `${le.toLocaleString("hu-HU")} LE (${kw.toLocaleString("hu-HU")} kW)`;
+  if (teljesitmenyLe) teljesitmenyLe.value = String(le);
 }
 
 function updateTitle() {

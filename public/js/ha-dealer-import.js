@@ -98,6 +98,89 @@
     return upper;
   }
 
+  /** Szinkron: lib/ha-description-parse.mjs */
+  function normalizeImportedLeiras(raw) {
+    let desc = clean(String(raw || "").replace(/<[^>]+>/g, " ")).slice(0, 2000);
+    desc = desc.replace(/^le[ií]r[aá]s\s*[:.\-]?\s*/i, "").trim();
+    if (!desc || desc.length < 20) return "";
+    if (/^le[ií]r[aá]s\b/i.test(desc) && desc.length < 90) return "";
+    if (/^leírás$/i.test(desc)) return "";
+    if (/megtekinthet[oő]\s+telefonon/i.test(desc) && desc.length < 160) return "";
+    return desc;
+  }
+
+  function pickDescriptionFromDocument(doc) {
+    const d = doc || document;
+    for (const sel of [
+      "textarea[name*='leiras' i]",
+      "textarea[id*='leiras' i]",
+      '[class*="leiras"]',
+      '[class*="description"]',
+      '[id*="leiras"]',
+    ]) {
+      for (const el of d.querySelectorAll(sel)) {
+        const t = normalizeImportedLeiras(el.value || el.innerText || el.textContent || "");
+        if (t) return t;
+      }
+    }
+    const body = String(d.body?.innerText || d.body?.textContent || "").replace(/\r\n/g, "\n");
+    const m = body.match(
+      /(?:^|\n)\s*Leírás\s*\n+([\s\S]{8,12000}?)(?=\n\s*(?:Felszereltség|Általános|Műszaki|Megtalálható|Okmányok|Hirdetés|Beltér|Kültér|Egyéb információ)\b|$)/i
+    );
+    if (m) {
+      const t = normalizeImportedLeiras(m[1]);
+      if (t) return t;
+    }
+    return "";
+  }
+
+  function findDescriptionInHtml(html) {
+    const raw = String(html || "");
+    const textareaRe =
+      /<textarea[^>]*(?:name|id)=["'][^"']*leiras[^"']*["'][^>]*>([\s\S]*?)<\/textarea>/gi;
+    let m;
+    while ((m = textareaRe.exec(raw))) {
+      const t = normalizeImportedLeiras(m[1]);
+      if (t) return t;
+    }
+    const plain = raw
+      .replace(/<script[\s\S]*?<\/script>/gi, " ")
+      .replace(/<style[\s\S]*?<\/style>/gi, " ")
+      .replace(/<br\s*\/?>/gi, "\n")
+      .replace(/<[^>]+>/g, "\n")
+      .replace(/\r\n/g, "\n");
+    const section = plain.match(
+      /(?:^|\n)\s*Leírás\s*\n+([\s\S]{8,12000}?)(?=\n\s*(?:Felszereltség|Általános|Műszaki|Megtalálható|Okmányok|Hirdetés|Beltér|Kültér|Egyéb információ)\b|$)/i
+    );
+    if (section) {
+      const t = normalizeImportedLeiras(section[1]);
+      if (t) return t;
+    }
+    return "";
+  }
+
+  function pickPageListingIdFromUrl(url) {
+    const u = String(url || "");
+    return (
+      u.match(/[?&]id=(\d{5,12})\b/i)?.[1] ||
+      u.match(/\/gyorsnezet\/[^/]+\/(\d{5,12})\b/i)?.[1] ||
+      ""
+    );
+  }
+
+  function enrichCarsWithDescriptions(cars, html, pageUrl) {
+    const pageDesc = pickDescriptionFromDocument(document) || findDescriptionInHtml(html);
+    if (!pageDesc) return cars;
+    const urlId = pickPageListingIdFromUrl(pageUrl);
+    return cars.map((car) => {
+      if (car.visibleDescription || car.description || car.leiras) return car;
+      const id = String(car.listingId || "");
+      const attach = cars.length === 1 || (urlId && urlId === id);
+      if (!attach) return car;
+      return { ...car, visibleDescription: pageDesc };
+    });
+  }
+
   function pickTitleNearImg(img) {
     const row =
       img?.closest?.(
@@ -150,7 +233,7 @@
   }
 
   /** Ugyanaz a logika, mint lib/ha-dealer-cdn-extract.mjs (bookmarklet nem importál ESM-et). */
-  function extractCarsFromHtml(html) {
+  function extractCarsFromHtml(html, pageUrl) {
     const raw = String(html || "");
     const re =
       /(?:https?:)?\/\/(?:img\.)?hasznaltautocdn\.com\/(?:\d{2,4}x\d{2,4}\/)?(\d{5,12})\/(\d{5,12})\.(jpe?g|png|webp)/gi;
@@ -169,7 +252,8 @@
         photoOnly: true,
       });
     }
-    return enrichCarsWithTitles([...byId.values()], raw);
+    const withTitles = enrichCarsWithTitles([...byId.values()], raw);
+    return enrichCarsWithDescriptions(withTitles, raw, pageUrl);
   }
 
   function extractCarsFromPage() {
@@ -189,7 +273,7 @@
     for (const el of document.querySelectorAll("[style*='hasznaltautocdn'], [style*='url(']")) {
       chunks.push(el.getAttribute("style") || "");
     }
-    return extractCarsFromHtml(chunks.join("\n")).slice(0, MAX);
+    return extractCarsFromHtml(chunks.join("\n"), location.href).slice(0, MAX);
   }
 
   async function quickScrollThumbs() {

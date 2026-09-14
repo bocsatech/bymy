@@ -1,6 +1,5 @@
-import { initDrumWheel, syncDrumWheelDisplay } from "./immo-drum-picker.js?v=immoClearAll1";
-import { setWheelValue, readWheel } from "./ingatlan-wheels.js?v=immoClearAll1";
-import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=catWheelFix1";
+import { initDrumWheel, syncDrumWheelDisplay } from "./immo-drum-picker.js?v=catDrumInline1";
+import { setWheelValue, readWheel } from "./ingatlan-wheels.js?v=catDrumInline1";
 
 const STORAGE_KEY = "bymy-hirdetes-category";
 const STORAGE_VERSION = 4;
@@ -243,18 +242,26 @@ export function initCategoryPicker({
     const wrap = document.getElementById("wizard-category-wheel-wrap");
     const wheel = document.getElementById("wizard-category-wheel");
     if (!wrap || !wheel) return null;
+
+    wrap.querySelector("#wizard-category-select")?.remove();
+
     if (wheel.dataset.drumBound === "1") return wheel;
+
     wheel.innerHTML = WIZARD_CATEGORY_OPTIONS.map(
       (opt) =>
         `<button type="button" class="immo-wheel-opt" data-value="${opt.id}" data-image="${opt.image}?v=immoCat4">${opt.label}</button>`
     ).join("");
-    initDrumWheel(wheel, { emptyLabel: "Válassz kategóriát", openMode: "portal" });
-    bindAutoDrumSheet(wheel);
+
+    wheel.dataset.noClear = "1";
+    initDrumWheel(wheel, { emptyLabel: "Válassz kategóriát", openMode: "inline" });
+
     wheel.addEventListener("immo-wheel-change", () => {
+      if (categoryLocked) return;
       const id = readWheel(wheel);
       if (!id || id === currentWizardCategoryId()) return;
       void applyCatWheelChoice(id);
     });
+
     return wheel;
   }
 
@@ -266,6 +273,8 @@ export function initCategoryPicker({
     const wrap = wheel?.closest(".immo-wheel-wrap");
     if (wrap) wrap.classList.toggle("is-disabled", categoryLocked);
     wheel?.setAttribute("aria-disabled", categoryLocked ? "true" : "false");
+    const trigger = wrap?.querySelector(".immo-wheel-trigger");
+    if (trigger) trigger.disabled = categoryLocked;
   }
 
   async function applyCatWheelChoice(catId) {
@@ -485,7 +494,6 @@ export function initCategoryPicker({
     syncOpenGroups();
   });
 
-  ensureCategoryDrum();
   syncOpenGroups();
   syncImmoLabels();
 

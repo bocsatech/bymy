@@ -86,6 +86,8 @@ function nearestItem(scrollEl) {
 function paintInline(scrollEl) {
   cancelAnimationFrame(paintFrame);
   paintFrame = requestAnimationFrame(() => {
+    const wrap = scrollEl.closest(".immo-wheel-wrap");
+    const minOpacity = wrap?.classList?.contains("wizard-category-wheel") ? 0.48 : 0.22;
     const itemH = itemHeight(scrollEl);
     const centerIdx = itemH > 0 ? scrollEl.scrollTop / itemH : 0;
     itemsOf(scrollEl).forEach((item, i) => {
@@ -94,7 +96,7 @@ function paintInline(scrollEl) {
       const t = Math.min(dist / 1.15, 1);
       let opacity = 1 - t * 0.55;
       if (inCenter) opacity = 1;
-      item.style.opacity = String(Math.max(0.22, opacity));
+      item.style.opacity = String(Math.max(minOpacity, opacity));
       item.style.fontWeight = inCenter ? "700" : "500";
       item.classList.toggle("is-in-cell", inCenter);
     });
@@ -320,8 +322,8 @@ function openInlineDrum(wrap, wheel, trigger) {
 
   const multiple = wheel.dataset.multiple === "1";
 
-  function selectItem(item) {
-    if (!item || ring.dataset.drumDragged === "1") return;
+  function selectItem(item, { fromTap = false } = {}) {
+    if (!item || (!fromTap && ring.dataset.drumDragged === "1")) return;
     const v = item.dataset.value ?? "";
     scrollToItem(scrollEl, item);
     paintInline(scrollEl);
@@ -348,10 +350,23 @@ function openInlineDrum(wrap, wheel, trigger) {
   }
 
   scrollEl.querySelectorAll(".immo-drum-inline-item").forEach((item) => {
+    let tapStart = null;
+    item.addEventListener(
+      "pointerdown",
+      (event) => {
+        tapStart = { x: event.clientX, y: event.clientY };
+      },
+      { passive: true }
+    );
     item.addEventListener("click", (event) => {
       event.preventDefault();
       event.stopPropagation();
-      selectItem(item);
+      if (tapStart) {
+        const dx = Math.abs(event.clientX - tapStart.x);
+        const dy = Math.abs(event.clientY - tapStart.y);
+        if (dx > 10 || dy > 10) return;
+      }
+      selectItem(item, { fromTap: true });
     });
   });
   refreshDrumItemStates(scrollEl, wheel);

@@ -410,6 +410,11 @@ export function syncHostClearButton(host, { hasValue, onClear } = {}) {
 
 export function syncWheelClearButton(wrap, wheel, hasValue) {
   if (!wrap || !wheel) return;
+  if (wheel.dataset.noClear === "1") {
+    wrap.querySelector(".immo-wheel-clear")?.remove();
+    wrap.classList.remove("has-wheel-clear");
+    return;
+  }
   syncHostClearButton(wrap, {
     hasValue,
     onClear: () => {

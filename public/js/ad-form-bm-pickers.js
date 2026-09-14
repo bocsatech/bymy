@@ -8,6 +8,56 @@ const PLACEHOLDER = "Válasszon";
 const DROPDOWN_VISIBLE_ROWS = 7;
 const DROPDOWN_ROW_PX = 44;
 
+const DC_TOLTO_OPTIONS = ["CCS", "CHAdeMO", "Egyéb"];
+
+const AD_BM_SINGLE_DROPDOWN_SPECS = [
+  { id: "gyartasi_ev", title: "Gyártási év", panelClass: "ad-form-year-panel", placeholder: "év" },
+  { id: "gyartasi_honap", title: "Gyártási hónap", panelClass: "ad-form-month-panel", placeholder: "hó" },
+  { id: "muszaki_ev", title: "Műszaki vizsga érvényes – év", panelClass: "ad-form-muszaki-ev-panel", placeholder: "év" },
+  { id: "muszaki_honap", title: "Műszaki vizsga érvényes – hónap", panelClass: "ad-form-month-panel", placeholder: "hó" },
+  { id: "tulajdonosok_szama", title: "Tulajdonosok száma", panelClass: "ad-form-tulaj-panel", placeholder: "—" },
+  { id: "sebessegvalto", title: "Sebességváltó", panelClass: "ad-form-sebesseg-panel", placeholder: "—" },
+  { id: "hajtas", title: "Hajtás", panelClass: "ad-form-hajtas-panel", placeholder: "—" },
+  { id: "ac_tolto_csatlakozas", title: "AC töltőcsatlakozó típusa", panelClass: "ad-form-ac-tolto-panel" },
+  { id: "dc_tolto_csatlakozas", title: "DC töltőcsatlakozó típusa", panelClass: "ad-form-dc-tolto-panel" },
+  { id: "tolto_csatlakozas", title: "Töltőcsatlakozó", panelClass: "ad-form-tolto-panel" },
+];
+
+const AD_BM_PICKER_IDS = [
+  "allapot",
+  "kivitel",
+  "okmany_jelleg",
+  "gyartmany",
+  "modell",
+  "uzemanyag",
+  "forgalomba_helyezes_ev",
+  "forgalomba_helyezes_honap",
+  ...AD_BM_SINGLE_DROPDOWN_SPECS.map((spec) => spec.id),
+];
+
+function ensureSelectOptions(select, values) {
+  if (!select || select.tagName !== "SELECT") return;
+  const seen = new Set([...select.options].map((option) => option.value).filter(Boolean));
+  for (const value of values) {
+    if (seen.has(value)) continue;
+    const option = document.createElement("option");
+    option.value = value;
+    option.textContent = value;
+    select.appendChild(option);
+    seen.add(value);
+  }
+}
+
+function mountAdSingleDropdown(spec) {
+  const select = document.getElementById(spec.id);
+  if (!select || select.tagName !== "SELECT" || select.dataset.adBmPicker === "1") return;
+  mountSingleSelectDropdown(select, {
+    title: spec.title,
+    panelClass: spec.panelClass,
+    placeholder: spec.placeholder ?? PLACEHOLDER,
+  });
+}
+
 function escapeHtml(value) {
   return String(value ?? "")
     .replace(/&/g, "&amp;")
@@ -1708,16 +1758,7 @@ function allapotLabelForValue(value) {
 
 export function applyAdFormBmFieldValues(data) {
   if (!data || typeof data !== "object") return;
-  const ids = [
-    "allapot",
-    "kivitel",
-    "okmany_jelleg",
-    "gyartmany",
-    "modell",
-    "uzemanyag",
-    "forgalomba_helyezes_ev",
-    "forgalomba_helyezes_honap",
-  ];
+  const ids = AD_BM_PICKER_IDS;
   for (const id of ids) {
     const raw = data[id];
     if (raw == null || String(raw).trim() === "") continue;
@@ -1774,16 +1815,7 @@ let cachedVehicleCatalog = null;
 
 export function unmountAdFormBmPickers(form) {
   if (!form) return;
-  [
-    "allapot",
-    "kivitel",
-    "okmany_jelleg",
-    "gyartmany",
-    "modell",
-    "uzemanyag",
-    "forgalomba_helyezes_ev",
-    "forgalomba_helyezes_honap",
-  ].forEach((id) => {
+  AD_BM_PICKER_IDS.forEach((id) => {
     const select = document.getElementById(id);
     if (select?._adBmClose) select._adBmClose();
     unmountPicker(select);
@@ -1852,6 +1884,11 @@ export async function mountAdFormBmPickers(form, catalog = null) {
       panelClass: "ad-form-month-panel",
       placeholder: "hó",
     });
+  }
+
+  ensureSelectOptions(document.getElementById("dc_tolto_csatlakozas"), DC_TOLTO_OPTIONS);
+  for (const spec of AD_BM_SINGLE_DROPDOWN_SPECS) {
+    mountAdSingleDropdown(spec);
   }
 
   try {

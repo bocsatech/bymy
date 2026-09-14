@@ -349,6 +349,7 @@ function openInlineDrum(wrap, wheel, trigger) {
     closeInlineDrum(wrap, wheel, false);
   }
 
+  let lastPickAt = 0;
   scrollEl.querySelectorAll(".immo-drum-inline-item").forEach((item) => {
     let tapStart = null;
     item.addEventListener(
@@ -358,16 +359,22 @@ function openInlineDrum(wrap, wheel, trigger) {
       },
       { passive: true }
     );
-    item.addEventListener("click", (event) => {
+    const tapSelect = (event) => {
       event.preventDefault();
       event.stopPropagation();
+      if (Date.now() - lastPickAt < 400) return;
       if (tapStart) {
-        const dx = Math.abs(event.clientX - tapStart.x);
-        const dy = Math.abs(event.clientY - tapStart.y);
-        if (dx > 10 || dy > 10) return;
+        const x = event.clientX ?? tapStart.x;
+        const y = event.clientY ?? tapStart.y;
+        const dx = Math.abs(x - tapStart.x);
+        const dy = Math.abs(y - tapStart.y);
+        if (dx > 12 || dy > 12) return;
       }
+      lastPickAt = Date.now();
       selectItem(item, { fromTap: true });
-    });
+    };
+    item.addEventListener("click", tapSelect);
+    item.addEventListener("touchend", tapSelect, { passive: false });
   });
   refreshDrumItemStates(scrollEl, wheel);
 

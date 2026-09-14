@@ -1,5 +1,9 @@
-import { initDrumWheel, syncDrumWheelDisplay } from "./immo-drum-picker.js?v=catDrumInline1";
-import { setWheelValue, readWheel } from "./ingatlan-wheels.js?v=catDrumInline1";
+import {
+  initDrumWheel,
+  syncDrumWheelDisplay,
+  closeAllInlineDrums,
+} from "./immo-drum-picker.js?v=catDrumFix2";
+import { setWheelValue, readWheel } from "./ingatlan-wheels.js?v=catDrumFix2";
 
 const STORAGE_KEY = "bymy-hirdetes-category";
 const STORAGE_VERSION = 4;
@@ -255,9 +259,10 @@ export function initCategoryPicker({
     wheel.dataset.noClear = "1";
     initDrumWheel(wheel, { emptyLabel: "Válassz kategóriát", openMode: "inline" });
 
-    wheel.addEventListener("immo-wheel-change", () => {
+    wheel.addEventListener("immo-wheel-change", (event) => {
       if (categoryLocked) return;
-      const id = readWheel(wheel);
+      closeAllInlineDrums(false);
+      const id = String(event.detail?.value ?? readWheel(wheel) ?? "").trim();
       if (!id || id === currentWizardCategoryId()) return;
       void applyCatWheelChoice(id);
     });
@@ -282,6 +287,7 @@ export function initCategoryPicker({
     const opt = WIZARD_CATEGORY_OPTIONS.find((x) => x.id === catId);
     const selection = selectionFromOption(opt);
     if (!selection) return;
+    closeAllInlineDrums(false);
     await showVehicleWizard(selection);
   }
 
@@ -333,6 +339,7 @@ export function initCategoryPicker({
     try {
       ensureCategoryDrum();
       syncWizardContext(selection);
+      closeAllInlineDrums(false);
     } catch (error) {
       console.warn("Kategória kerék:", error);
     }

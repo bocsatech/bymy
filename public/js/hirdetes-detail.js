@@ -96,9 +96,14 @@ function kvHtml(rows) {
   return `<dl class="hd-grid">${rows
     .map(
       (row) =>
-        `<div class="hd-kv"><dt>${escapeHtml(row.label)}</dt><dd>${escapeHtml(row.value)}</dd></div>`
+        `<div class="hd-kv"><dt>${escapeHtml(row.label)}:</dt><dd>${escapeHtml(row.value)}</dd></div>`
     )
     .join("")}</dl>`;
+}
+
+function specBlockHtml(title, rows) {
+  if (!rows?.length) return "";
+  return `<section class="hd-spec-block"><h2 class="hd-spec-block__title">${escapeHtml(title)}</h2>${kvHtml(rows)}</section>`;
 }
 
 function equipmentGroupsHtml(groups) {
@@ -405,16 +410,17 @@ function render(view, listing, related) {
       </aside>
     </div>
 
-    <section class="hd-section">
-      ${view.vehicleSpecs?.length ? `<h2 class="hd-h2">Jármű adatok</h2>${kvHtml(view.vehicleSpecs)}` : ""}
-      ${view.motorSpecs?.length ? `<h2 class="hd-h2"${view.vehicleSpecs?.length ? ' style="margin-top:1.35rem"' : ""}>Motor adatok</h2>${kvHtml(view.motorSpecs)}` : ""}
-      ${view.documentSpecs?.length ? `<h2 class="hd-h2"${view.vehicleSpecs?.length || view.motorSpecs?.length ? ' style="margin-top:1.35rem"' : ""}>Okmányok</h2>${kvHtml(view.documentSpecs)}` : ""}
+    <div class="hd-specs">
+      ${specBlockHtml("Jármű adatok", view.vehicleSpecs)}
+      ${specBlockHtml("Motor adatok", view.motorSpecs)}
+      ${specBlockHtml("Okmányok", view.documentSpecs)}
+      ${specBlockHtml("Abroncs", view.tireSpecs)}
       ${
         view.perks.length
-          ? `<h3 class="hd-h3" style="margin-top:1.1rem">További előnyök</h3>${view.perks.map((p) => `<span class="hd-check">${escapeHtml(p)}</span>`).join("")}`
+          ? `<section class="hd-spec-block hd-spec-block--perks"><h2 class="hd-spec-block__title">További előnyök</h2>${view.perks.map((p) => `<span class="hd-check">${escapeHtml(p)}</span>`).join("")}</section>`
           : ""
       }
-    </section>
+    </div>
 
     ${
       equipmentGroups.length

@@ -2591,20 +2591,19 @@ async function bootBocsatech() {
         console.error("Bocsatech loadTab:", loadError);
       }
     }
-
-    render();
   } catch (bootError) {
     console.error("Bocsatech boot:", bootError);
     if (!admin) {
       err = bootError?.message || "Indítási hiba.";
-      render();
-      return;
+    } else {
+      showBootPlaceholder("");
+      app.querySelector(".hint")?.insertAdjacentHTML(
+        "afterend",
+        `<p class="err">${esc(bootError?.message || "Indítási hiba.")}</p><p class="hint">Hard refresh (Cmd+Shift+R), majd próbáld újra.</p>`
+      );
     }
-    showBootPlaceholder("");
-    app.querySelector(".hint")?.insertAdjacentHTML(
-      "afterend",
-      `<p class="err">${esc(bootError?.message || "Indítási hiba.")}</p><p class="hint">Hard refresh (Cmd+Shift+R), majd próbáld újra.</p>`
-    );
+  } finally {
+    render();
   }
 }
 

@@ -73,8 +73,9 @@
     min-width: 0;
     max-width: none;
     justify-self: stretch;
-    align-self: stretch;
-    min-height: calc(100vh - var(--site-fixed-header-h, 64px) - 24px);
+    align-self: start;
+    margin-top: 7cm;
+    min-height: calc(100vh - var(--site-fixed-header-h, 64px) - 24px - 7cm);
   }
 
   body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout #ad-desk-tips-col {

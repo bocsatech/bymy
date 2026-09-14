@@ -40,6 +40,34 @@ function wrapFor(form, fieldKey) {
   return wrap;
 }
 
+function pinLeiras(form) {
+  if (currentLayoutCategory(form) === "ingatlan") return;
+  const panel = form.querySelector('.step-panel[data-step="3"]');
+  const leirasWrap =
+    form.querySelector(".field-stack--leiras") ||
+    document.getElementById("leiras")?.closest(".ad-layout-item, .field-stack, .labeled-field, .md-outlined");
+  if (!panel || !leirasWrap) return;
+
+  let leirasCard = panel.querySelector(".card--leiras");
+  if (!leirasCard) {
+    leirasCard = document.createElement("div");
+    leirasCard.className = "card card--leiras";
+    leirasCard.innerHTML = '<div class="card-head">Leírás</div><div class="card-body"></div>';
+    const egyebCard = document.getElementById("egyeb-info-sections")?.closest(".card");
+    if (egyebCard) egyebCard.insertAdjacentElement("afterend", leirasCard);
+    else panel.appendChild(leirasCard);
+  }
+
+  const body = leirasCard.querySelector(".card-body");
+  if (body && leirasWrap.parentElement !== body) {
+    body.appendChild(leirasWrap);
+  }
+  leirasWrap.hidden = false;
+  leirasWrap.classList.remove("ad-layout-hidden", "ad-immo-orphan");
+  leirasWrap.removeAttribute("hidden");
+  leirasWrap.style.removeProperty("display");
+}
+
 function pinExtras(form) {
   const panel = form.querySelector('.step-panel[data-step="3"]');
   if (!panel) return;
@@ -490,6 +518,7 @@ async function applyAdFormLayout() {
     compactCanvasRows(form);
     hideLayoutShellCards(form);
     pinExtras(form);
+    pinLeiras(form);
     pinLocation(form);
     pinFooter(form);
     window.dispatchEvent(new Event("ad-form-sync-location"));

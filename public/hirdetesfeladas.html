@@ -725,6 +725,19 @@
               <div id="egyeb-info-sections" class="equipment-grid"></div>
             </div>
           </div>
+
+          <div class="card card--leiras">
+            <div class="card-head">Leírás</div>
+            <div class="card-body">
+              <div class="field-stack full field-stack--leiras">
+                <div class="leiras-head">
+                  <label for="leiras">Leírás:</label>
+                </div>
+                <textarea id="leiras" name="leiras" rows="6" placeholder="Írj pár mondatot az autóról — a gomb emberszerű hirdetésszöveget készít belőle."></textarea>
+                <p class="hint">A kereső a leírásban szereplő szövegben nem tud keresni!</p>
+              </div>
+            </div>
+          </div>
         </section>
 
         <section class="step-panel" data-step="4">
@@ -808,16 +821,8 @@
             <input type="hidden" name="csomag" value="ingyenes" />
 
             <div class="card">
-              <div class="card-head">Leírás és elérhetőség</div>
+              <div class="card-head">Elérhetőség</div>
               <div class="card-body form-grid">
-                <div class="field-stack full field-stack--leiras">
-                  <div class="leiras-head">
-                    <label for="leiras">Leírás:</label>
-                  </div>
-                  <textarea id="leiras" name="leiras" rows="6" placeholder="Írj pár mondatot az autóról — a gomb emberszerű hirdetésszöveget készít belőle."></textarea>
-                  <p class="hint">A kereső a leírásban szereplő szövegben nem tud keresni!</p>
-                </div>
-
                 <div class="field-stack full field-stack--location">
                   <label class="ad-location-label">Megtalálható <span class="req">*</span></label>
                   <p class="hint ad-location-hint" data-ad-location-hint hidden></p>
@@ -940,9 +945,9 @@
     </main>
 
     <script src="/js/site-avatar-menu.js?v=avatarSync1" type="module"></script>
-    <script src="/js/app.js?v=editRestore3" type="module"></script>
+    <script src="/js/app.js?v=editRestore4" type="module"></script>
       <script src="/js/nav-counts.js?v=navCount2" type="module"></script>
       <script src="/js/theme.js?v=willhabenHdr1" type="module"></script>
-    <script src="/js/form-layout-apply.js?v=immoUiParity1" type="module"></script>
+    <script src="/js/form-layout-apply.js?v=leirasStep3" type="module"></script>
 </body>
 </html>

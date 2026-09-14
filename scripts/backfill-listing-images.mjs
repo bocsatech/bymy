@@ -1,7 +1,10 @@
 #!/usr/bin/env node
 /** Hiányzó főoldal-képek letöltése meglévő hirdetésekhez (hasznaltauto forrás URL alapján). */
 
-import { listListings, updateListingFoKep } from "../lib/db.mjs";
+import { loadEnvFiles } from "../lib/load-env.mjs";
+import { listListings, updateListingFoKep } from "../lib/db-store.mjs";
+
+loadEnvFiles();
 import {
   extractMainImageUrl,
   downloadMainImage,

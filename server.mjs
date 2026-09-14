@@ -25,7 +25,7 @@ import {
   getDbPath,
   closeDb,
 } from "./lib/db-store.mjs";
-import { isSupabaseBackend } from "./lib/supabase/client.mjs";
+import { isSupabaseBackend, assertSupabaseConfigured } from "./lib/supabase/client.mjs";
 import { assertCanCreateListing, isBusinessAccount, lockedVerticalFromListings, verticalFromForm } from "./lib/listing-quota.mjs";
 import { getSiteBlocks, saveSiteBlocks } from "./lib/site-blocks.mjs";
 import {
@@ -148,6 +148,7 @@ import { readJsonBody } from "./lib/read-json-body.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 loadEnvFiles(__dirname);
+assertSupabaseConfigured("server start");
 const PUBLIC = join(__dirname, "public");
 const PORT = Number(process.env.PORT ?? 3456);
 const HOST = "127.0.0.1";
@@ -422,11 +423,6 @@ function serveStatic(path, res) {
 }
 
 async function handleImageUploadApi(req, res) {
-  if (!isSupabaseBackend()) {
-    sendJson(res, 400, { error: "A Supabase Storage csak beállított SUPABASE_* környezettel működik." });
-    return;
-  }
-
   const user = await requestUser(req);
   if (!user) {
     sendJson(res, 401, { error: "Nem vagy bejelentkezve." });
@@ -1661,7 +1657,7 @@ async function handleAuthApi(req, res, pathname) {
         currentEmail: currentUser?.email || null,
         smtpConfigured: isSmtpConfigured(),
         oauthProviders: listOAuthProviders(),
-        backend: isSupabaseBackend() ? "supabase" : "sqlite",
+        backend: "supabase",
       });
       return;
     }
@@ -2122,7 +2118,7 @@ export async function handleHttpRequest(req, res) {
       ok: true,
       version: readFileSync(join(PUBLIC, "version.txt"), "utf8").trim(),
       service: "bymy-autosweb",
-      backend: isSupabaseBackend() ? "supabase" : "sqlite",
+      backend: "supabase",
       ...(allowDevSecretsInResponse()
         ? {
             chrome: findChromeExecutable(),
@@ -2439,11 +2435,11 @@ server.listen(PORT, HOST, async () => {
     const stats = await dbStats();
     const users = await countWebUsers();
     console.log(
-      `${isSupabaseBackend() ? "Supabase" : "SQLite"}: ${stats.path} (${stats.listings} hirdetés, ${stats.cells} cella, ${users} user)`
+      `Supabase: ${stats.path} (${stats.listings} hirdetés, ${stats.cells} cella, ${users} user)`
     );
     console.log(`Profil fájl: ${getProfilesFilePath()}`);
   } catch (error) {
-    console.warn("SQLite inicializálás:", error.message ?? error);
+    console.warn("Supabase kapcsolat:", error.message ?? error);
   }
   try {
     const catalog = ensureVehicleCatalog();

@@ -1,8 +1,12 @@
 #!/usr/bin/env node
 /** Import + mentés ellenőrzés — hirdetés URL vagy lista URL. */
-import { importListings } from "../lib/import-listings.mjs";
-import { saveListing } from "../lib/db.mjs";
 import { mkdtempSync, rmSync } from "fs";
+import { loadEnvFiles } from "../lib/load-env.mjs";
+
+loadEnvFiles();
+
+const { importListings } = await import("../lib/import-listings.mjs");
+const { saveListing } = await import("../lib/db-store.mjs");
 import { join } from "path";
 import { tmpdir } from "os";
 

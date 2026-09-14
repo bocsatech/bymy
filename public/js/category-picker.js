@@ -1,12 +1,18 @@
-import {
-  initDrumWheel,
-  syncDrumWheelDisplay,
-  closeAllInlineDrums,
-} from "./immo-drum-picker.js?v=catDrumPortal1";
-import { bindAutoDrumSheet, closeAutoDrumSheet } from "./auto-drum-sheet.js?v=catDrumPortal1";
-import { setWheelValue, readWheel } from "./ingatlan-wheels.js?v=catDrumPortal1";
+const WIZARD_CAT_V = "standalone2";
+const WIZARD_CAT_ITEM_H = 52;
+let activeWizardCatPortal = null;
 
-const WIZARD_DRUM_V = "portal1";
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function wizardCatLabel(catId) {
+  return WIZARD_CATEGORY_OPTIONS.find((opt) => opt.id === catId)?.label || "Válassz kategóriát";
+}
 
 const STORAGE_KEY = "bymy-hirdetes-category";
 const STORAGE_VERSION = 4;
@@ -179,19 +185,21 @@ function currentWizardCategoryId(selection = readStored()) {
   return String(selection.subtype || "").trim();
 }
 
+function setWizardCatTriggerLabel(wrap, catId) {
+  const text = wrap?.querySelector(".wizard-cat-trigger-text");
+  if (text) text.textContent = catId ? wizardCatLabel(catId) : "Válassz kategóriát";
+}
+
 function syncWizardContext(selection) {
   const contextBar = document.getElementById("wizard-context-bar");
-  const wheel = document.getElementById("wizard-category-wheel");
+  const wrap = document.getElementById("wizard-category-wheel-wrap");
   if (!selection?.label) {
     contextBar?.setAttribute("hidden", "");
     return;
   }
   contextBar?.removeAttribute("hidden");
   const catId = currentWizardCategoryId(selection);
-  if (wheel?.dataset.drumBound === "1" && catId) {
-    setWheelValue(wheel, catId);
-    syncDrumWheelDisplay(wheel);
-  }
+  if (wrap && catId) setWizardCatTriggerLabel(wrap, catId);
 }
 
 export function initCategoryPicker({
@@ -245,64 +253,159 @@ export function initCategoryPicker({
   `;
   document.body.append(backdrop, sheet);
 
-  function resetWizardCategoryDrumUi() {
-    closeAutoDrumSheet(false);
-    closeAllInlineDrums(false);
-    const wrap = document.getElementById("wizard-category-wheel-wrap");
-    wrap?.classList.remove("is-open", "has-drum-open", "has-drum-open");
-    wrap?.querySelector(".immo-drum-inline")?.remove();
+  function closeWizardCatPortal() {
+    if (!activeWizardCatPortal) return;
+    const { root, wrap, trigger } = activeWizardCatPortal;
+    wrap?.classList.remove("is-open");
+    trigger?.setAttribute("aria-expanded", "false");
+    root.remove();
+    activeWizardCatPortal = null;
+    document.body.classList.remove("wizard-cat-portal-open");
   }
 
-  function ensureCategoryDrum() {
+  function nearestWizardCatItem(scrollEl) {
+    const centerY = scrollEl.getBoundingClientRect().top + scrollEl.clientHeight / 2;
+    let best = null;
+    let bestDist = Infinity;
+    scrollEl.querySelectorAll(".wizard-cat-portal__item").forEach((item) => {
+      const rect = item.getBoundingClientRect();
+      const mid = rect.top + rect.height / 2;
+      const dist = Math.abs(mid - centerY);
+      if (dist < bestDist) {
+        bestDist = dist;
+        best = item;
+      }
+    });
+    return best;
+  }
+
+  function paintWizardCatItems(scrollEl) {
+    const centerY = scrollEl.getBoundingClientRect().top + scrollEl.clientHeight / 2;
+    scrollEl.querySelectorAll(".wizard-cat-portal__item").forEach((item) => {
+      const rect = item.getBoundingClientRect();
+      const mid = rect.top + rect.height / 2;
+      const dist = Math.abs(mid - centerY);
+      const t = Math.min(dist / (WIZARD_CAT_ITEM_H * 1.2), 1);
+      item.style.opacity = String(Math.max(0.5, 1 - t * 0.45));
+      item.style.fontWeight = dist < WIZARD_CAT_ITEM_H * 0.35 ? "700" : "500";
+    });
+  }
+
+  function scrollWizardCatToItem(scrollEl, item) {
+    if (!item || !scrollEl) return;
+    const centerY = scrollEl.getBoundingClientRect().top + scrollEl.clientHeight / 2;
+    const itemMid = item.getBoundingClientRect().top + item.getBoundingClientRect().height / 2;
+    scrollEl.scrollTop += itemMid - centerY;
+  }
+
+  function pickWizardCategory(wrap, catId) {
+    closeWizardCatPortal();
+    setWizardCatTriggerLabel(wrap, catId);
+    if (!catId || catId === currentWizardCategoryId()) return;
+    void applyCatWheelChoice(catId);
+  }
+
+  function openWizardCatPortal(wrap, trigger) {
+    closeWizardCatPortal();
+    const currentId = currentWizardCategoryId();
+
+    const root = document.createElement("div");
+    root.className = "wizard-cat-portal";
+    root.setAttribute("role", "presentation");
+    root.innerHTML = `
+      <button type="button" class="wizard-cat-portal__backdrop" aria-label="Bezárás"></button>
+      <div class="wizard-cat-portal__panel" role="dialog" aria-modal="true" aria-label="Kategória">
+        <div class="wizard-cat-portal__ring">
+          <div class="wizard-cat-portal__highlight" aria-hidden="true"></div>
+          <div class="wizard-cat-portal__scroll" tabindex="-1"></div>
+        </div>
+        <button type="button" class="wizard-cat-portal__done">Kész</button>
+      </div>`;
+
+    const scrollEl = root.querySelector(".wizard-cat-portal__scroll");
+    scrollEl.innerHTML = WIZARD_CATEGORY_OPTIONS.map(
+      (opt) =>
+        `<button type="button" class="wizard-cat-portal__item" data-value="${escapeHtml(opt.id)}">` +
+        `<img class="wizard-cat-portal__thumb" src="${escapeHtml(opt.image)}" alt="" width="32" height="32" decoding="async" />` +
+        `<span class="wizard-cat-portal__text">${escapeHtml(opt.label)}</span></button>`
+    ).join("");
+
+    root.querySelector(".wizard-cat-portal__backdrop")?.addEventListener("click", () => closeWizardCatPortal());
+    root.querySelector(".wizard-cat-portal__done")?.addEventListener("click", () => {
+      const item = nearestWizardCatItem(scrollEl);
+      pickWizardCategory(wrap, String(item?.dataset?.value ?? "").trim());
+    });
+
+    scrollEl.querySelectorAll(".wizard-cat-portal__item").forEach((item) => {
+      item.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        pickWizardCategory(wrap, String(item.dataset.value ?? "").trim());
+      });
+    });
+
+    scrollEl.addEventListener("scroll", () => paintWizardCatItems(scrollEl), { passive: true });
+
+    document.body.appendChild(root);
+    document.body.classList.add("wizard-cat-portal-open");
+    wrap.classList.add("is-open");
+    trigger.setAttribute("aria-expanded", "true");
+    activeWizardCatPortal = { root, wrap, trigger, scrollEl };
+
+    const start =
+      scrollEl.querySelector(`.wizard-cat-portal__item[data-value="${CSS.escape(currentId)}"]`) ||
+      scrollEl.querySelector(".wizard-cat-portal__item");
+    requestAnimationFrame(() => {
+      scrollWizardCatToItem(scrollEl, start);
+      paintWizardCatItems(scrollEl);
+    });
+  }
+
+  function resetWizardCategoryDrumUi() {
+    closeWizardCatPortal();
+    document.getElementById("wizard-category-wheel-wrap")?.classList.remove("is-open");
+  }
+
+  function ensureWizardCategoryPicker() {
     const wrap = document.getElementById("wizard-category-wheel-wrap");
-    const wheel = document.getElementById("wizard-category-wheel");
-    if (!wrap || !wheel) return null;
+    if (!wrap) return null;
 
-    wrap.querySelector("#wizard-category-select")?.remove();
-
-    if (wheel.dataset.categoryDrumV === WIZARD_DRUM_V && wheel.dataset.drumBound === "1") {
-      return wheel;
+    if (wrap.dataset.wizardCatV === WIZARD_CAT_V && wrap.querySelector(".wizard-cat-trigger")) {
+      return wrap;
     }
 
     resetWizardCategoryDrumUi();
-    wrap.querySelector(".immo-wheel-trigger")?.remove();
-    wheel.removeAttribute("data-drum-bound");
-    delete wheel.dataset.drumBound;
+    wrap.className = "wizard-category-wheel";
+    wrap.innerHTML = `
+      <span class="immo-label">Kategória</span>
+      <button type="button" class="wizard-cat-trigger" aria-haspopup="dialog" aria-expanded="false">
+        <span class="wizard-cat-trigger-text">Válassz kategóriát</span>
+      </button>`;
+    wrap.dataset.wizardCatV = WIZARD_CAT_V;
 
-    wheel.innerHTML = WIZARD_CATEGORY_OPTIONS.map(
-      (opt) =>
-        `<button type="button" class="immo-wheel-opt" data-value="${opt.id}" data-image="${opt.image}?v=immoCat4">${opt.label}</button>`
-    ).join("");
+    const trigger = wrap.querySelector(".wizard-cat-trigger");
+    trigger?.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      if (categoryLocked) return;
+      if (activeWizardCatPortal) {
+        closeWizardCatPortal();
+        return;
+      }
+      openWizardCatPortal(wrap, trigger);
+    });
 
-    wheel.dataset.noClear = "1";
-    wheel.dataset.categoryDrumV = WIZARD_DRUM_V;
-    initDrumWheel(wheel, { emptyLabel: "Válassz kategóriát", openMode: "portal" });
-    bindAutoDrumSheet(wheel);
-
-    if (wheel.dataset.changeBound !== "1") {
-      wheel.dataset.changeBound = "1";
-      wheel.addEventListener("immo-wheel-change", (event) => {
-        if (categoryLocked) return;
-        closeAutoDrumSheet(false);
-        const id = String(event.detail?.value ?? readWheel(wheel) ?? "").trim();
-        if (!id || id === currentWizardCategoryId()) return;
-        void applyCatWheelChoice(id);
-      });
-    }
-
-    return wheel;
+    return wrap;
   }
 
   let categoryLocked = false;
 
   function lockCategoryChange(locked = true) {
     categoryLocked = Boolean(locked);
-    const wheel = document.getElementById("wizard-category-wheel");
-    const wrap = wheel?.closest(".immo-wheel-wrap");
-    if (wrap) wrap.classList.toggle("is-disabled", categoryLocked);
-    wheel?.setAttribute("aria-disabled", categoryLocked ? "true" : "false");
-    const trigger = wrap?.querySelector(".immo-wheel-trigger");
+    const wrap = document.getElementById("wizard-category-wheel-wrap");
+    const trigger = wrap?.querySelector(".wizard-cat-trigger");
     if (trigger) trigger.disabled = categoryLocked;
+    wrap?.classList.toggle("is-disabled", categoryLocked);
   }
 
   async function applyCatWheelChoice(catId) {
@@ -310,8 +413,7 @@ export function initCategoryPicker({
     const opt = WIZARD_CATEGORY_OPTIONS.find((x) => x.id === catId);
     const selection = selectionFromOption(opt);
     if (!selection) return;
-    closeAutoDrumSheet(false);
-    closeAllInlineDrums(false);
+    closeWizardCatPortal();
     await showVehicleWizard(selection);
   }
 
@@ -361,9 +463,10 @@ export function initCategoryPicker({
     writeStored(selection);
     setHiddenFields(selection);
     try {
-      ensureCategoryDrum();
+      const wrap = ensureWizardCategoryPicker();
       syncWizardContext(selection);
       resetWizardCategoryDrumUi();
+      if (wrap) setWizardCatTriggerLabel(wrap, currentWizardCategoryId(selection));
     } catch (error) {
       console.warn("Kategória kerék:", error);
     }

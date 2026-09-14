@@ -9,7 +9,7 @@ import { createAdForm } from "./form-core.js?v=importVehicle1";
 import { applyImportedVehicleToSelects } from "./vehicle-catalog-client.js?v=importVehicle1";
 import { initTireSizes } from "./tire-sizes-ui.js";
 import { initPhoneLanguages } from "./phone-lang-ui.js";
-import { initCategoryPicker } from "./category-picker.js?v=catDrumPortal1";
+import { initCategoryPicker } from "./category-picker.js?v=catDrumStand2";
 import {
   requireAuthForPage,
   getAuthUser,

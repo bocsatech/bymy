@@ -563,8 +563,10 @@
   line-height: 1;
 }
 
-.wizard-context-bar .wizard-category-wheel .immo-wheel-trigger,
-.wizard-context-bar .wizard-category-select {
+.wizard-context-bar .wizard-category-wheel .wizard-cat-trigger {
+  display: block;
+  width: 100%;
+  margin: 0;
   border: 1px solid #d0d5dd;
   border-radius: 12px;
   background: var(--cp-card, #fff);
@@ -572,50 +574,158 @@
   height: auto;
   min-height: 2.75rem;
   padding: 0.85rem 2.1rem 0.7rem 0.95rem;
-  font-weight: 650;
-  color: var(--cp-ink);
-}
-
-.wizard-context-bar .wizard-category-select {
-  display: block;
-  width: 100%;
-  margin: 0;
   font: inherit;
   font-size: 1rem;
   line-height: 1.25;
+  font-weight: 650;
+  color: var(--cp-ink);
+  text-align: left;
   cursor: pointer;
-  appearance: none;
-  -webkit-appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none'%3E%3Cpath d='M6 9l6 6 6-6' stroke='%23667085' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 0.75rem center;
   background-size: 1.1rem;
 }
 
-.wizard-context-bar .wizard-category-select:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
-
-.wizard-context-bar .wizard-category-wheel .immo-wheel-trigger:hover,
-.wizard-context-bar .wizard-category-wheel .immo-wheel-trigger:focus-visible {
+.wizard-context-bar .wizard-category-wheel .wizard-cat-trigger:hover,
+.wizard-context-bar .wizard-category-wheel .wizard-cat-trigger:focus-visible {
   border-color: #111;
   outline: none;
   box-shadow: 0 0 0 2px rgba(17, 24, 39, 0.08);
+}
+
+.wizard-context-bar .wizard-category-wheel .wizard-cat-trigger:disabled,
+.wizard-context-bar .wizard-category-wheel.is-disabled .wizard-cat-trigger {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 .wizard-context-bar .wizard-category-wheel {
   z-index: 40;
 }
 
-.wizard-context-bar .wizard-category-wheel .immo-wheel-clear,
-.wizard-context-bar .wizard-category-wheel .immo-drum-inline {
-  display: none !important;
+.wizard-cat-portal {
+  position: fixed;
+  inset: 0;
+  z-index: 10050;
 }
 
-.wizard-context-bar .wizard-category-wheel.is-open .immo-wheel-trigger {
-  visibility: visible !important;
-  pointer-events: auto !important;
+.wizard-cat-portal__backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  background: rgba(15, 23, 42, 0.28);
+  cursor: pointer;
+}
+
+.wizard-cat-portal__panel {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.55rem;
+  z-index: 1;
+  pointer-events: auto;
+}
+
+.wizard-cat-portal__ring {
+  position: relative;
+  width: min(18rem, calc(100vw - 2rem));
+  height: 11.5rem;
+  border-radius: 1.15rem;
+  border: 1.5px solid #64748b;
+  background: #fff;
+  box-shadow: 0 10px 32px rgba(15, 23, 42, 0.22);
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.wizard-cat-portal__highlight {
+  position: absolute;
+  left: 0.45rem;
+  right: 0.45rem;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 2.75rem;
+  border-radius: 8px;
+  background: rgba(148, 163, 184, 0.22);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.wizard-cat-portal__scroll {
+  position: absolute;
+  inset: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  padding: 4.375rem 0;
+  z-index: 3;
+}
+
+.wizard-cat-portal__item {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  width: 100%;
+  min-height: 3.25rem;
+  padding: 0 0.85rem;
+  border: 0;
+  background: transparent;
+  color: #0f172a;
+  font: 500 1.05rem/1.2 system-ui, sans-serif;
+  text-align: left;
+  cursor: pointer;
+  scroll-snap-align: center;
+  -webkit-tap-highlight-color: rgba(15, 23, 42, 0.08);
+}
+
+.wizard-cat-portal__thumb {
+  flex: 0 0 auto;
+  width: 2rem;
+  height: 2rem;
+  object-fit: contain;
+}
+
+.wizard-cat-portal__text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wizard-cat-portal__done {
+  border: 0;
+  border-radius: 999px;
+  padding: 0.55rem 1.35rem;
+  background: #111827;
+  color: #fff;
+  font: 600 0.95rem/1 system-ui, sans-serif;
+  cursor: pointer;
+}
+
+body.wizard-cat-portal-open {
+  overflow: hidden;
+}
+
+[data-theme="dark"] .wizard-cat-portal__ring {
+  background: #0b1220;
+  border-color: #475569;
+}
+
+[data-theme="dark"] .wizard-cat-portal__item {
+  color: #e5e7eb;
+}
+
+[data-theme="dark"] .wizard-cat-portal__highlight {
+  background: rgba(148, 163, 184, 0.18);
 }
 
 .cp-sheet-bar-spacer {

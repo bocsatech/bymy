@@ -306,6 +306,20 @@ function pinElectricFields(form) {
   block.classList.remove("ad-immo-orphan", "ad-layout-hidden");
   block.removeAttribute("hidden");
   block.style.removeProperty("display");
+  cleanupStrayEvLayoutItems(form);
+}
+
+function cleanupStrayEvLayoutItems(form) {
+  for (const key of EV_LAYOUT_GROUP_KEYS) {
+    form.querySelectorAll(`#${cssEscape(key)}`).forEach((el) => {
+      if (el.closest("#electric-fields-block")) return;
+      const wrap = el.closest(".labeled-field, .md-outlined, .ad-layout-item");
+      if (!wrap) return;
+      wrap.classList.add("ad-layout-hidden");
+      wrap.hidden = true;
+      wrap.style.setProperty("display", "none", "important");
+    });
+  }
 }
 
 function pinLocation(form) {

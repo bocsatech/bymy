@@ -20,6 +20,7 @@ import {
   renderListingPhotoOverlay,
 } from "./listing-photo-overlay.js?v=photoOverlay2";
 import { refreshAdFormBmPickers, applyAdFormBmFieldValues } from "./ad-form-bm-pickers.js?v=adBmMore3";
+import { initKmInput, parseKmDigits, setKmInputValue } from "./km-input.js?v=kmFmt1";
 
 export function createAdForm(options = {}) {
   const mode = options.mode ?? "wizard";
@@ -844,6 +845,7 @@ function collectFormData() {
   const data = Object.fromEntries(new FormData(form).entries());
   data.felszereltseg = [...form.querySelectorAll('input[name="felszereltseg"]:checked')].map((el) => el.value);
   data.egyeb_info = [...form.querySelectorAll('input[name="egyeb_info"]:checked')].map((el) => el.value);
+  if (data.km != null) data.km = parseKmDigits(data.km);
   return data;
 }
 
@@ -909,7 +911,7 @@ function applyFormData(data, { fromImport = false } = {}) {
   });
 
   for (const [key, value] of Object.entries(payload)) {
-    if (key === "felszereltseg" || key === "egyeb_info") continue;
+    if (key === "felszereltseg" || key === "egyeb_info" || key === "km") continue;
     const field = form.elements.namedItem(key);
     if (!field) continue;
     const appliedValue = key === "gyartmany" && value ? String(value).toUpperCase() : value;
@@ -972,7 +974,7 @@ function applyFormData(data, { fromImport = false } = {}) {
 
   const kmInput = document.getElementById("km");
   if (kmInput && payload.km != null && String(payload.km).trim() !== "") {
-    kmInput.value = String(payload.km);
+    setKmInputValue(kmInput, payload.km);
     if (fromImport) kmInput.dataset.userEdited = "1";
   }
   updateLeDisplay();
@@ -1483,7 +1485,7 @@ function overlayInfoFromForm() {
     brand: String(gyartmany?.value ?? "").trim(),
     model: String(modell?.value ?? "").trim(),
     year: String(gyartasiEv?.value ?? "").trim(),
-    km: String(document.getElementById("km")?.value ?? "").trim(),
+    km: parseKmDigits(document.getElementById("km")?.value ?? ""),
     power,
     fuel,
     price: String(document.getElementById("vetelar")?.value ?? "").trim(),
@@ -1774,6 +1776,7 @@ renderEquipment();
 renderEgyebInfo();
 wrapMdOutlinedFields();
 syncFuelDependentFields();
+initKmInput(document.getElementById("km"));
 fitAllFormFields();
 
 uzemanyag?.addEventListener("change", () => {

@@ -1,4 +1,4 @@
-import { isDeskVehicleSubtype } from "./ad-form-desk.js?v=adFormDesk31";
+import { isDeskVehicleSubtype } from "./ad-form-desk.js?v=adFormDesk33";
 
 const WIZARD_CAT_V = "standalone2";
 const WIZARD_CAT_ITEM_H = 52;
@@ -641,6 +641,8 @@ export function initCategoryPicker({
 
   const params = new URLSearchParams(window.location.search);
   const urlSelection = selectionFromUrl();
+  const editId = Number(params.get("id"));
+  const isEditBoot = Number.isFinite(editId) && editId > 0;
   const shouldContinue =
     params.get("continue") === "1" &&
     (stored?.vertical === "auto" || stored?.vertical === "teher" || stored?.vertical === "ingatlan");
@@ -650,6 +652,11 @@ export function initCategoryPicker({
     void showVehicleWizard(urlSelection);
   } else if (shouldContinue) {
     void showVehicleWizard(stored);
+  } else if (isEditBoot) {
+    pickerShell?.setAttribute("hidden", "");
+    wizardShell?.setAttribute("hidden", "");
+    stepsBar?.setAttribute("hidden", "");
+    contextBar?.setAttribute("hidden", "");
   } else {
     if (urlSelection?.vertical === "teher") {
       state.open = "teher";

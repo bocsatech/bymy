@@ -396,6 +396,11 @@ function syncPhotoStage(form) {
   window.dispatchEvent(new Event("ad-form-photo-stage-sync"));
 }
 
+function clearAdFormEditBoot() {
+  document.documentElement.classList.remove("ad-form-edit-boot");
+  document.getElementById("ad-form-edit-boot-inline")?.remove();
+}
+
 function applyAdFormDesk({ openStep = null } = {}) {
   const form = document.getElementById("ad-form");
   if (!form || form.closest("#ad-wizard-shell")?.hidden) {
@@ -419,6 +424,7 @@ function applyAdFormDesk({ openStep = null } = {}) {
         form.insertBefore(panel, footer || shell);
       }
     }
+    clearAdFormEditBoot();
     return;
   }
 
@@ -432,15 +438,16 @@ function applyAdFormDesk({ openStep = null } = {}) {
   restackCanvasItems(form);
   if (shell) shell.hidden = false;
 
-  const activeIndicator = document.querySelector("[data-step-indicator].active");
-  const step = openStep ?? Number(activeIndicator?.dataset.stepIndicator) ?? 1;
-  const accId = accordionForStep(step);
-  if (accId) openAccordion(form, accId);
+  const preserved =
+    form.querySelector("[data-desk-acc]:not(.auto-desk-acc--sub).is-open")?.getAttribute("data-desk-acc") || "";
+  const accId = openStep != null ? accordionForStep(openStep) : preserved;
+  openAccordion(form, accId || "");
   mountExtrakSubAccordions(form);
   syncPhotoStage(form);
   updateAccordionSums(form);
   refreshAdFormDeskGuide(form);
   initAdFormDeskGuide();
+  clearAdFormEditBoot();
 }
 
 function bindDeskEvents() {
@@ -452,6 +459,7 @@ function bindDeskEvents() {
     const subToggle = event.target.closest("[data-desk-sub-acc-toggle]");
     if (subToggle && document.body.classList.contains("ad-form-desk-active")) {
       event.preventDefault();
+      event.stopPropagation();
       const subAcc = subToggle.closest("[data-desk-sub-acc]");
       toggleSubAccordion(subAcc);
       updateSubAccordionSums(form);
@@ -486,6 +494,7 @@ function bindDeskEvents() {
   window.addEventListener("ad-form-step", (event) => {
     const step = Number(event.detail?.step);
     if (!document.body.classList.contains("ad-form-desk-active") || !step) return;
+    if (event.detail?.openDeskAccordion === false) return;
     const accId = accordionForStep(step);
     if (accId) openAccordion(form, accId);
     syncPhotoStage(form);
@@ -530,6 +539,7 @@ window.addEventListener("ad-form-equipment-rendered", () => {
 
 export {
   applyAdFormDesk,
+  clearAdFormEditBoot,
   isAdFormDesk,
   isDeskVehicleAdForm,
   isDeskVehicleSubtype,

@@ -752,7 +752,7 @@ function goToStep(step) {
   }
   saveDraft();
   if (currentStep === TOTAL_STEPS) resetSuccess();
-  showStep(step);
+  showStep(step, { openDeskAccordion: true });
   return true;
 }
 
@@ -779,7 +779,7 @@ async function tryGoToStep(step) {
     }
   }
   if (currentStep === TOTAL_STEPS) resetSuccess();
-  showStep(step);
+  showStep(step, { openDeskAccordion: true });
   return true;
 }
 
@@ -809,9 +809,8 @@ function updateAutomaxStepHeader(step) {
   automaxStepLead.hidden = !lead;
 }
 
-function showStep(step) {
+function showStep(step, { openDeskAccordion = false } = {}) {
   currentStep = step;
-  // Személyautó / jármű feladás: minden menü és extra egyszerre látszódjon
   panels.forEach((panel) => {
     panel.classList.remove("hidden");
     panel.hidden = false;
@@ -838,7 +837,7 @@ function showStep(step) {
     window.dispatchEvent(new Event("ad-form-sync-location"));
   }
   syncPhotoNextButton();
-  window.dispatchEvent(new CustomEvent("ad-form-step", { detail: { step } }));
+  window.dispatchEvent(new CustomEvent("ad-form-step", { detail: { step, openDeskAccordion } }));
 }
 
 function collectFormData() {

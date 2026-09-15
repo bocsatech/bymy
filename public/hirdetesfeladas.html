@@ -47,6 +47,21 @@
           document.documentElement.setAttribute("data-auth", "guest");
           location.replace("/belepes.html?next=" + encodeURIComponent(location.pathname + location.search));
         }
+
+        try {
+          var editMatch = location.search.match(/[?&]id=(\d+)/);
+          if (editMatch && Number(editMatch[1]) > 0) {
+            document.documentElement.classList.add("ad-form-edit-boot");
+            var bootStyle = document.createElement("style");
+            bootStyle.id = "ad-form-edit-boot-inline";
+            bootStyle.textContent =
+              "html.ad-form-edit-boot #category-picker-shell," +
+              "html.ad-form-edit-boot #ad-wizard-shell," +
+              "html.ad-form-edit-boot #wizard-steps-bar," +
+              "html.ad-form-edit-boot #wizard-context-bar{display:none!important}";
+            document.head.appendChild(bootStyle);
+          }
+        } catch (e) {}
       })();
     </script>
     <meta charset="utf-8" />
@@ -60,7 +75,7 @@
     <link rel="stylesheet" href="/css/style.css?v=postDark1" />
     <link rel="stylesheet" href="/css/automax.css?v=automax20260720homelist" />
     <link rel="stylesheet" href="/css/site-app.css?v=cellGap2" />
-    <link rel="stylesheet" href="/css/ad-form-desk.css?v=adFormDeskAccFlow2" />
+    <link rel="stylesheet" href="/css/ad-form-desk.css?v=adFormDeskAccFix1" />
     <link rel="stylesheet" href="/css/ad-form-bm-pickers.css?v=adBmMore3" />
     <link rel="stylesheet" href="/css/site-side.css?v=mwPostDesk1" />
     <link rel="stylesheet" href="/css/category-picker.css?v=catDrumStand2" />
@@ -959,7 +974,7 @@
     </main>
 
     <script src="/js/site-avatar-menu.js?v=avatarSync1" type="module"></script>
-    <script src="/js/app.js?v=extrakSubAcc2" type="module"></script>
+    <script src="/js/app.js?v=accFix1" type="module"></script>
       <script src="/js/nav-counts.js?v=navCount4" type="module"></script>
       <script src="/js/theme.js?v=willhabenHdr1" type="module"></script>
     <script src="/js/form-layout-apply.js?v=leirasStep5" type="module"></script>

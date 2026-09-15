@@ -5,12 +5,12 @@ import {
   saveListingPhotosOrder,
   getStoredListingId,
 } from "./db-client.js?v=wizardSave1";
-import { createAdForm } from "./form-core.js?v=extrakSubAcc2";
+import { createAdForm } from "./form-core.js?v=extrakSubAcc3";
 import { applyImportedVehicleToSelects } from "./vehicle-catalog-client.js?v=importVehicle1";
 import { initTireSizes } from "./tire-sizes-ui.js";
 import { initPhoneLanguages } from "./phone-lang-ui.js";
-import { initCategoryPicker } from "./category-picker.js?v=catDeskAcc2";
-import { applyAdFormDesk, isDeskVehicleSubtype } from "./ad-form-desk.js?v=adFormDesk31";
+import { initCategoryPicker } from "./category-picker.js?v=accFix1";
+import { applyAdFormDesk, clearAdFormEditBoot, isDeskVehicleSubtype } from "./ad-form-desk.js?v=adFormDesk33";
 import {
   requireAuthForPage,
   getAuthUser,
@@ -311,7 +311,6 @@ if (editing) {
       throw new Error("A hirdetés nem tölthető be.");
     }
     const api = ensureFormReady();
-    showWizardShell();
     pendingEditForm = { ...listing.form };
     if (!pendingEditForm.hirdetes_vertical) pendingEditForm.hirdetes_vertical = "auto";
     if (!pendingEditForm.hirdetes_alkategoria) pendingEditForm.hirdetes_alkategoria = "szemelyauto";
@@ -324,17 +323,24 @@ if (editing) {
       if (el.type === "checkbox") continue;
       el.value = Array.isArray(value) ? JSON.stringify(value) : String(value);
     }
+    const catSel = categorySelectionFromForm(pendingEditForm);
+    if (catSel) categoryPicker?.syncWizardContext?.(catSel);
+    showWizardShell();
     setStoredListingId(editId);
     syncPhotoUrlsFromListing(listing);
     api?.applyFormData?.(pendingEditForm, { fromImport: true });
+    window.dispatchEvent(new Event("ad-form-layout-refresh"));
+    applyAdFormDesk();
     const published = String(listing.status || "") === "feladott";
     const isImmo = String(listing.form?.hirdetes_vertical || "").toLowerCase() === "ingatlan";
     if (published && isImmo) {
       categoryPicker?.lockCategoryChange?.(true);
       adForm?.setAttribute("data-ingatlan-type-locked", "1");
       window.dispatchEvent(new Event("ad-form-layout-refresh"));
+      applyAdFormDesk();
     }
   } catch (error) {
+    clearAdFormEditBoot();
     alert(error.message ?? "A hirdetés betöltése sikertelen.");
     window.location.assign("/beallitasok.html?szekcio=hirdetes");
   }

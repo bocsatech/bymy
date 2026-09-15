@@ -19,6 +19,9 @@ const STORAGE_VERSION = 4;
 
 const VEHICLE_PRESETS = {
   szemelyauto: { vertical: "auto", subtype: "szemelyauto", label: "Személyautó" },
+  leasing: { vertical: "auto", subtype: "leasing", label: "Leasing hirdetés" },
+  berauto: { vertical: "auto", subtype: "berauto", label: "Bérautó hirdetés" },
+  lakokocsi: { vertical: "auto", subtype: "lakokocsi", label: "Bérelhető lakókocsi hirdetés" },
   kisteher: { vertical: "teher", subtype: "kisteher", label: "Kisteher 3,5 t-ig" },
   teherauto: { vertical: "teher", subtype: "teherauto", label: "Teherautó 3,5 t-tól" },
 };
@@ -139,9 +142,8 @@ function selectionFromUrl() {
   const params = new URLSearchParams(window.location.search);
   const vertical = String(params.get("vertical") ?? "").trim().toLowerCase();
   const subtype = String(params.get("subtype") ?? "").trim().toLowerCase();
-  if (vertical === "auto" && subtype === "szemelyauto") return { ...VEHICLE_PRESETS.szemelyauto };
-  if (vertical === "teher" && subtype === "kisteher") return { ...VEHICLE_PRESETS.kisteher };
-  if (vertical === "teher" && subtype === "teherauto") return { ...VEHICLE_PRESETS.teherauto };
+  if (vertical === "auto" && VEHICLE_PRESETS[subtype]) return { ...VEHICLE_PRESETS[subtype] };
+  if (vertical === "teher" && VEHICLE_PRESETS[subtype]) return { ...VEHICLE_PRESETS[subtype] };
   if (vertical === "ingatlan") {
     const tipus = String(params.get("tipus") ?? "").trim().toLowerCase();
     const hit = IMMO_TIPUS.find((x) => x.id === tipus);

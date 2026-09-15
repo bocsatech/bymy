@@ -44,7 +44,7 @@ function isDeskVehicleAdForm(form) {
 }
 
 function isAdFormDesk(form) {
-  return isDeskVehicleAdForm(form) && window.matchMedia(DESK_MQ).matches;
+  return isDeskVehicleAdForm(form);
 }
 
 function filledControl(el) {

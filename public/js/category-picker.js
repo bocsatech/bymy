@@ -1,3 +1,5 @@
+import { isDeskVehicleSubtype } from "./ad-form-desk.js?v=adFormDesk31";
+
 const WIZARD_CAT_V = "standalone2";
 const WIZARD_CAT_ITEM_H = 52;
 let activeWizardCatPortal = null;
@@ -13,8 +15,6 @@ function escapeHtml(value) {
 function wizardCatLabel(catId) {
   return WIZARD_CATEGORY_OPTIONS.find((opt) => opt.id === catId)?.label || "Válassz kategóriát";
 }
-
-import { isDeskVehicleSubtype } from "./ad-form-desk.js";
 
 const STORAGE_KEY = "bymy-hirdetes-category";
 const STORAGE_VERSION = 4;

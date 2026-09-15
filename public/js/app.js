@@ -5,12 +5,12 @@ import {
   saveListingPhotosOrder,
   getStoredListingId,
 } from "./db-client.js?v=wizardSave1";
-import { createAdForm } from "./form-core.js?v=photoGridMenu1";
+import { createAdForm } from "./form-core.js?v=extrakSubAcc2";
 import { applyImportedVehicleToSelects } from "./vehicle-catalog-client.js?v=importVehicle1";
 import { initTireSizes } from "./tire-sizes-ui.js";
 import { initPhoneLanguages } from "./phone-lang-ui.js";
-import { initCategoryPicker } from "./category-picker.js?v=catDeskMenu1";
-import { isDeskVehicleSubtype } from "./ad-form-desk.js";
+import { initCategoryPicker } from "./category-picker.js?v=catDeskAcc2";
+import { applyAdFormDesk, isDeskVehicleSubtype } from "./ad-form-desk.js?v=adFormDesk31";
 import {
   requireAuthForPage,
   getAuthUser,
@@ -170,6 +170,7 @@ function showWizardShell() {
   const stepsBar = document.getElementById("wizard-steps-bar");
   if (isDeskVehicleSubtype(subtype)) stepsBar?.setAttribute("hidden", "");
   else stepsBar?.removeAttribute("hidden");
+  applyAdFormDesk();
 }
 
 function ensureFormReady() {
@@ -294,6 +295,7 @@ const categoryPicker = initCategoryPicker({
       applyListingAddressFromProfile(adForm).catch(() => {});
       window.dispatchEvent(new Event("ad-form-sync-location"));
       window.dispatchEvent(new Event("ad-form-layout-refresh"));
+      applyAdFormDesk();
     } catch (error) {
       console.error("Űrlap indítás hiba:", error);
     }

@@ -422,6 +422,7 @@ function applyAdFormDesk({ openStep = null } = {}) {
     return;
   }
 
+  bindDeskEvents();
   form.classList.add("ad-form-desk-layout");
   removeLegacyKepekAccordion(form);
   ensureTipsColumn(form);
@@ -450,6 +451,7 @@ function bindDeskEvents() {
   form.addEventListener("click", (event) => {
     const subToggle = event.target.closest("[data-desk-sub-acc-toggle]");
     if (subToggle && document.body.classList.contains("ad-form-desk-active")) {
+      event.preventDefault();
       const subAcc = subToggle.closest("[data-desk-sub-acc]");
       toggleSubAccordion(subAcc);
       updateSubAccordionSums(form);
@@ -458,6 +460,7 @@ function bindDeskEvents() {
 
     const toggle = event.target.closest("[data-desk-acc-toggle]");
     if (!toggle || !document.body.classList.contains("ad-form-desk-active")) return;
+    event.preventDefault();
     const acc = toggle.closest("[data-desk-acc]");
     const id = acc?.getAttribute("data-desk-acc");
     if (!id) return;

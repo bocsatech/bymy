@@ -146,20 +146,18 @@ function mountExtrakSubAccordions(form) {
 
   const egyebCard = form.querySelector("#egyeb-info-sections")?.closest(".card");
   const egyebGrid = form.querySelector("#egyeb-info-sections");
-  if (egyebCard && egyebGrid && !egyebCard.hidden && !egyebCard.querySelector("[data-desk-sub-acc]")) {
+  if (
+    equipmentRoot &&
+    egyebGrid &&
+    egyebCard &&
+    !egyebCard.hidden &&
+    !equipmentRoot.querySelector('[data-desk-sub-acc="egyeb-info"]')
+  ) {
     const label = egyebCard.querySelector(".card-head")?.textContent?.trim() || "Egyéb információk";
-    const acc = createSubAccordion("egyeb-info", label, egyebGrid);
-    egyebCard.classList.add("card--desk-sub-acc");
-    const cardBody = egyebCard.querySelector(".card-body");
-    if (cardBody) {
-      cardBody.innerHTML = "";
-      cardBody.appendChild(acc);
-    } else {
-      egyebCard.innerHTML = "";
-      egyebCard.appendChild(acc);
-    }
-    const head = egyebCard.querySelector(".card-head");
-    if (head) head.remove();
+    equipmentRoot.appendChild(createSubAccordion("egyeb-info", label, egyebGrid));
+    egyebCard.hidden = true;
+    egyebCard.classList.add("hidden");
+    egyebCard.setAttribute("hidden", "");
   }
 }
 

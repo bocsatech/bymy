@@ -7,7 +7,7 @@ import {
   TEHER_KISTEHER_KIVITEL,
   TEHER_35_KIVITEL_CATEGORIES,
   normalizeOkmanyJelleg,
-} from "./equipment-data.js?v=teherKivitel35e";
+} from "./equipment-data.js?v=egyebDupFix1";
 import { KIVITEL_OPTIONS, normalizeKivitel } from "./kivitel-options.js?v=kivitel1";
 import { EGYEB_INFO_OPTIONS } from "./egyeb-info-data.js";
 import { initVehicleCatalogSelects } from "./vehicle-catalog-client.js";

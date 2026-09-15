@@ -400,21 +400,6 @@ export const EQUIPMENT_SECTIONS = {
       "Type2 töltőkábel",
     ],
   },
-  egyeb: {
-    title: "Egyéb információk",
-    items: [
-      "garanciális",
-      "azonnal elvihető",
-      "első tulajdonostól",
-      "garázsban tartott",
-      "keveset futott",
-      "nem dohányzó",
-      "rendszeresen karbantartott",
-      "vezetett szervizkönyv",
-      "ÁFA visszaigényelhető",
-      "autóbeszámítás lehetséges",
-    ],
-  },
 };
 
 export const KLIM_OPTIONS = [

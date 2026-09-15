@@ -2226,16 +2226,18 @@ body.site-app .field-stack--leiras textarea {
   resize: vertical;
 }
 
+body.site-app[data-site-page="hirdetesfeladas"] .step-panel[data-step="4"] {
+  display: flex;
+  flex-direction: column;
+  gap: 1cm;
+}
+
 body.site-app[data-site-page="hirdetesfeladas"] .step-panel[data-step="4"] > .card--photos,
 body.site-app[data-site-page="hirdetesfeladas"] .step-panel[data-step="4"] > .card--leiras {
   border: 1px solid var(--site-line, #d4d4d4);
   border-radius: 8px;
   background: var(--site-surface, #fff);
   overflow: hidden;
-  margin-bottom: 1cm;
-}
-
-body.site-app[data-site-page="hirdetesfeladas"] .step-panel[data-step="4"] > .card--leiras {
   margin-bottom: 0;
 }
 

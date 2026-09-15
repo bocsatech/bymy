@@ -188,7 +188,7 @@ th { color: var(--muted); font-weight: 600; }
 
 .layout-desk-editor {
   display: grid;
-  grid-template-columns: minmax(280px, 320px) minmax(0, 1fr);
+  grid-template-columns: minmax(280px, 320px) minmax(0, 1fr) minmax(240px, 280px);
   gap: 24px;
   align-items: start;
   margin-bottom: 1rem;
@@ -246,9 +246,54 @@ th { color: var(--muted); font-weight: 600; }
   font-weight: 600;
   line-height: 1.4;
 }
+.layout-desk-tips {
+  border: 1px dashed var(--line);
+  border-radius: 10px;
+  background: #12171e;
+  padding: 14px 16px;
+  min-height: 140px;
+}
+.layout-desk-tips-label {
+  margin: 0 0 0.5rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+  font-weight: 600;
+}
+.layout-desk-tips-hint {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--muted);
+  line-height: 1.45;
+}
 .layout-desk-shell .layout-step,
 .layout-desk-center .layout-step {
   margin: 0;
+}
+.layout-board--desk-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  grid-template-columns: unset;
+  grid-template-rows: unset;
+  background: #12171e;
+  min-height: 72px;
+}
+.layout-board--desk-stack .layout-tile {
+  width: 100%;
+  min-height: 52px;
+  flex: 0 0 auto;
+}
+.layout-board--desk-stack .layout-tile.layout-tile--desk-stack {
+  grid-column: unset;
+  grid-row: unset;
+}
+@media (max-width: 1100px) {
+  .layout-desk-editor {
+    grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
+  }
+  .layout-desk-tips {
+    display: none;
+  }
 }
 @media (max-width: 900px) {
   .layout-desk-editor {

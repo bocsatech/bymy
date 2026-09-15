@@ -1,4 +1,4 @@
-import { mountLayoutBoard } from "./bocsatech-layout.js?v=deskPostingAcc1";
+import { mountLayoutBoard } from "./bocsatech-layout.js?v=deskStackLayout1";
 import { mountIngatlanWheelBoard } from "./bocsatech-ingatlan-wheels.js?v=immoUiParity1";
 import {
   isIngatlanWheelAdminCategory,
@@ -2338,7 +2338,7 @@ function layoutView() {
       : isImmoWizard
         ? "Az ingatlanfeladás kerék-panelen kívüli mezői. Húzd a cellát a lapon belül vagy másik lépésre; az ár, leírás, képek és helyszín elrendezése itt kezelhető."
         : isVehiclePostingLayoutCat(cat)
-          ? "Bal: accordion menü (mint a live desk). Jobb: képek/leírás középső oszlop. Húzd a mezőket; mentés után hard refresh a hirdetésfeladáson."
+          ? "3 oszlop mint a live desk: bal accordion (mezők egymás alatt), közép képek/leírás (12 oszlopos rács), jobb tippek váz. Bal oldalon csak sorrend; szélesség a középső oszlopban."
           : "Csak ennek a kategóriának a mezői. Húzd a cellát a lapon belül vagy másik lépésre. Mentés után a hirdetésfeladáson hard refresh kell.";
   if (isVehiclePostingLayoutCat(cat)) {
     return vehicleDeskPostingLayoutView(cat, label, sharedHint);

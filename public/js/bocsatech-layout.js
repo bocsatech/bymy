@@ -76,16 +76,55 @@ export function mountLayoutBoard(root, layout, { onChange, stepNames, deskPostin
     other.order = cell.order;
   }
 
-  function tileHtml(cell) {
-    return `<button type="button" class="layout-tile" data-field="${escapeAttr(cell.field_key)}" style="${tileStyle(cell)}">
+  function isStackBoard(board) {
+    return board?.dataset?.deskStack === "1";
+  }
+
+  function stackItems(step, { excludeKey = "" } = {}) {
+    return editable()
+      .filter((cell) => !cell.hidden && Number(cell.step) === step && cell.field_key !== excludeKey)
+      .sort(
+        (a, b) =>
+          (Number(a.row) || 1) - (Number(b.row) || 1) ||
+          (Number(a.col) || 1) - (Number(b.col) || 1) ||
+          (Number(a.order) || 0) - (Number(b.order) || 0)
+      );
+  }
+
+  function normalizeStackStep(step) {
+    const items = stackItems(step);
+    let changed = false;
+    items.forEach((cell, index) => {
+      const row = index + 1;
+      if (cell.row !== row || cell.col !== 1 || cell.colSpan !== 12) {
+        cell.row = row;
+        cell.col = 1;
+        cell.colSpan = 12;
+        cell.order = row;
+        syncPair(cell);
+        changed = true;
+      }
+    });
+    return changed;
+  }
+
+  function ensureDeskStackCells() {
+    if (!deskPosting) return;
+    for (const step of [1, 2, 3, 5]) normalizeStackStep(step);
+  }
+
+  function tileHtml(cell, { stack = false } = {}) {
+    const style = stack ? "" : tileStyle(cell);
+    const meta = stack ? `#${cell.row} · lépés ${cell.step}` : `${cell.colSpan}/12 · lépés ${cell.step}`;
+    return `<button type="button" class="layout-tile${stack ? " layout-tile--desk-stack" : ""}" data-field="${escapeAttr(cell.field_key)}"${style ? ` style="${style}"` : ""}>
       <span class="layout-tile-label">${escapeHtml(cell.label)}</span>
-      <span class="layout-tile-meta">${cell.colSpan}/12 · lépés ${cell.step}</span>
+      <span class="layout-tile-meta">${meta}</span>
       <span class="layout-tile-steps" data-step-btns="1">
         <span class="layout-step-btn" data-step-delta="-1" title="Előző lépés">↑</span>
         <span class="layout-step-btn" data-step-delta="1" title="Következő lépés">↓</span>
       </span>
       <span class="layout-del" data-del="1" title="Törlés">×</span>
-      <span class="layout-resize" data-resize="1"></span>
+      ${stack ? "" : '<span class="layout-resize" data-resize="1"></span>'}
     </button>`;
   }
 
@@ -108,9 +147,17 @@ export function mountLayoutBoard(root, layout, { onChange, stepNames, deskPostin
   function stepBoardHtml(step) {
     const items = editable().filter((cell) => !cell.hidden && Number(cell.step) === step);
     const maxRow = Math.max(3, ...items.map((cell) => Number(cell.row) || 1));
-    const tiles = items.map(tileHtml).join("");
+    const tiles = items.map((cell) => tileHtml(cell)).join("");
     return `<section class="layout-step" data-step="${step}">
       <div class="layout-board" data-board="${step}" style="grid-template-rows: repeat(${maxRow}, ${ROW_PX}px)">${tiles}</div>
+    </section>`;
+  }
+
+  function deskStackBoardHtml(step) {
+    const items = stackItems(step);
+    const tiles = items.map((cell) => tileHtml(cell, { stack: true })).join("");
+    return `<section class="layout-step" data-step="${step}">
+      <div class="layout-board layout-board--desk-stack" data-board="${step}" data-desk-stack="1">${tiles}</div>
     </section>`;
   }
 
@@ -136,7 +183,7 @@ export function mountLayoutBoard(root, layout, { onChange, stepNames, deskPostin
           <span>${escapeHtml(label)}</span>
           <span class="layout-desk-acc__chev" aria-hidden="true">▼</span>
         </button>
-        <div class="layout-desk-acc__body">${stepBoardHtml(step)}</div>
+        <div class="layout-desk-acc__body">${deskStackBoardHtml(step)}</div>
       </div>`
     ).join("");
     return `
@@ -146,6 +193,10 @@ export function mountLayoutBoard(root, layout, { onChange, stepNames, deskPostin
           <p class="layout-desk-center-label">Képek és leírás — live desk középső oszlop</p>
           ${stepBoardHtml(4)}
         </div>
+        <aside class="layout-desk-tips" aria-hidden="true">
+          <p class="layout-desk-tips-label">Tippek (live jobb oszlop)</p>
+          <p class="layout-desk-tips-hint">A feladási űrlapon itt jelennek meg a súgó szövegek. Ez csak vizuális váz — a mezők bal accordionban és középen szerkeszthetők.</p>
+        </aside>
       </div>`;
   }
 
@@ -166,10 +217,46 @@ export function mountLayoutBoard(root, layout, { onChange, stepNames, deskPostin
     });
   }
 
+  function reorderStackDom(board, draggingTile, clientY) {
+    const tiles = [...board.querySelectorAll(".layout-tile")].filter((tile) => tile !== draggingTile);
+    let inserted = false;
+    for (const tile of tiles) {
+      const rect = tile.getBoundingClientRect();
+      if (clientY < rect.top + rect.height / 2) {
+        board.insertBefore(draggingTile, tile);
+        inserted = true;
+        break;
+      }
+    }
+    if (!inserted) board.appendChild(draggingTile);
+  }
+
+  function syncStackFromDom(board) {
+    const step = Number(board.getAttribute("data-board"));
+    [...board.querySelectorAll(".layout-tile")].forEach((tile, index) => {
+      const cell = byKey.get(tile.getAttribute("data-field"));
+      if (!cell) return;
+      const row = index + 1;
+      cell.step = step;
+      cell.row = row;
+      cell.col = 1;
+      cell.colSpan = 12;
+      cell.order = row;
+      syncPair(cell);
+    });
+  }
+
   function paint(tile, cell) {
+    const board = tile.closest(".layout-board");
+    if (isStackBoard(board)) {
+      tile.removeAttribute("style");
+      const meta = tile.querySelector(".layout-tile-meta");
+      if (meta) meta.textContent = `#${cell.row} · lépés ${cell.step}`;
+      return;
+    }
     tile.setAttribute("style", tileStyle(cell));
     const meta = tile.querySelector(".layout-tile-meta");
-    if (meta) meta.textContent = `${cell.colSpan}/12`;
+    if (meta) meta.textContent = `${cell.colSpan}/12 · lépés ${cell.step}`;
   }
 
   function boardMetrics(board) {
@@ -273,7 +360,12 @@ export function mountLayoutBoard(root, layout, { onChange, stepNames, deskPostin
       cell.step = toStep;
       cell.row = maxRowOnStep(toStep, { excludeKey: cell.field_key }) + 1;
       cell.col = 1;
-      cell.order = (cell.row - 1) * COLS + cell.col;
+      if (deskPosting && [1, 2, 3, 5].includes(toStep)) {
+        cell.colSpan = 12;
+        cell.order = cell.row;
+      } else {
+        cell.order = (cell.row - 1) * COLS + cell.col;
+      }
       syncPair(cell);
       return;
     }
@@ -318,10 +410,20 @@ export function mountLayoutBoard(root, layout, { onChange, stepNames, deskPostin
           cell.step = next;
           cell.row = maxRowOnStep(next, { excludeKey: cell.field_key }) + 1;
           cell.col = 1;
-          cell.order = (cell.row - 1) * COLS + cell.col;
+          if (deskPosting && [1, 2, 3, 5].includes(next)) {
+            cell.colSpan = 12;
+            cell.order = cell.row;
+          } else {
+            cell.order = (cell.row - 1) * COLS + cell.col;
+          }
           syncPair(cell);
-          compactStep(fromStep);
-          compactStep(next);
+          if (deskPosting && ([1, 2, 3, 5].includes(fromStep) || [1, 2, 3, 5].includes(next))) {
+            normalizeStackStep(fromStep);
+            normalizeStackStep(next);
+          } else {
+            compactStep(fromStep);
+            compactStep(next);
+          }
           notify();
           mount();
           return;
@@ -330,7 +432,8 @@ export function mountLayoutBoard(root, layout, { onChange, stepNames, deskPostin
         const cell = byKey.get(tile.getAttribute("data-field"));
         let board = tile.closest(".layout-board");
         if (!cell || !board) return;
-        const resize = Boolean(event.target.closest("[data-resize]"));
+        const stackBoard = isStackBoard(board);
+        const resize = !stackBoard && Boolean(event.target.closest("[data-resize]"));
         const fromStep = Number(cell.step);
         const originCol = cell.col;
         const originRow = cell.row;
@@ -401,6 +504,28 @@ export function mountLayoutBoard(root, layout, { onChange, stepNames, deskPostin
           root.querySelectorAll(".layout-board").forEach((el) => el.classList.toggle("is-drop", el === nextBoard));
           if (!nextBoard) return;
 
+          if (isStackBoard(nextBoard)) {
+            if (nextBoard !== board) {
+              nextBoard.appendChild(tile);
+              board = nextBoard;
+            }
+            reorderStackDom(board, tile, ev.clientY);
+            return;
+          }
+
+          if (stackBoard && nextBoard !== board) {
+            assignToBoard(cell, nextBoard, ev.clientX, ev.clientY, { crossed: true });
+            paint(tile, cell);
+            nextBoard.appendChild(tile);
+            board = nextBoard;
+            setBoardHeight(board, { buffer: DROP_BUFFER });
+            grab.startCol = cell.col;
+            grab.startRow = cell.row;
+            grab.col = colFromEvent(board, ev.clientX);
+            grab.row = rowFromEvent(board, ev.clientY);
+            return;
+          }
+
           if (nextBoard !== board) {
             assignToBoard(cell, nextBoard, ev.clientX, ev.clientY, { crossed: true });
             paint(tile, cell);
@@ -444,17 +569,28 @@ export function mountLayoutBoard(root, layout, { onChange, stepNames, deskPostin
             return;
           }
 
+          const dropBoard = boardAtPoint(lastX, lastY, board) || board;
           if (!resize) {
-            const dropBoard = boardAtPoint(lastX, lastY, board) || board;
-            if (dropBoard !== board) {
+            if (isStackBoard(dropBoard)) {
+              if (dropBoard !== board) dropBoard.appendChild(tile);
+              reorderStackDom(dropBoard, tile, lastY);
+              syncStackFromDom(dropBoard);
+              if (fromStep !== Number(dropBoard.getAttribute("data-board"))) {
+                normalizeStackStep(fromStep);
+              }
+            } else if (dropBoard !== board) {
               assignToBoard(cell, dropBoard, lastX, lastY, { crossed: true });
-            } else {
+            } else if (!stackBoard) {
               assignToBoard(cell, dropBoard, lastX, lastY, { grab });
             }
           }
 
-          compactStep(fromStep);
-          compactStep(Number(cell.step));
+          if (isStackBoard(dropBoard)) {
+            normalizeStackStep(Number(dropBoard.getAttribute("data-board")));
+          } else {
+            compactStep(fromStep);
+            compactStep(Number(cell.step));
+          }
           notify();
           mount();
         };
@@ -473,9 +609,16 @@ export function mountLayoutBoard(root, layout, { onChange, stepNames, deskPostin
         if (![1, 2, 3, 4, 5].includes(Number(cell.step))) cell.step = 1;
         const step = Number(cell.step);
         cell.row = maxRowOn(step) + 1;
-        cell.order = (cell.row - 1) * COLS + cell.col;
+        cell.col = 1;
+        if (deskPosting && [1, 2, 3, 5].includes(step)) {
+          cell.colSpan = 12;
+          cell.order = cell.row;
+        } else {
+          cell.order = (cell.row - 1) * COLS + cell.col;
+        }
         syncPair(cell);
-        compactStep(step);
+        if (deskPosting && [1, 2, 3, 5].includes(step)) normalizeStackStep(step);
+        else compactStep(step);
         notify();
         mount();
       });
@@ -483,6 +626,7 @@ export function mountLayoutBoard(root, layout, { onChange, stepNames, deskPostin
   }
 
   function mount() {
+    if (deskPosting) ensureDeskStackCells();
     root.innerHTML = `${deskPosting ? deskBoardsHtml() : boardsHtml()}${trashHtml()}`;
     bindDeskAccordions();
     bindTiles();

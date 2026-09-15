@@ -15,7 +15,7 @@
     --ad-yellow-ink: #111111;
     --ad-filter-w: 320px;
     --ad-tips-w: 280px;
-    --ad-cell-gap: 1cm;
+    --ad-cell-gap: 8px;
   }
 
   html[data-theme="dark"] body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] {
@@ -28,7 +28,7 @@
     --ad-yellow-ink: #111111;
     --ad-filter-w: 320px;
     --ad-tips-w: 280px;
-    --ad-cell-gap: 1cm;
+    --ad-cell-gap: 8px;
   }
 
   body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .site-layout--wide .site-center--automax {

@@ -2229,7 +2229,7 @@ body.site-app .field-stack--leiras textarea {
 body.site-app[data-site-page="hirdetesfeladas"] .step-panel[data-step="4"] {
   display: flex;
   flex-direction: column;
-  gap: 1cm;
+  gap: 8px;
 }
 
 body.site-app[data-site-page="hirdetesfeladas"] .step-panel[data-step="4"] > .card--photos,

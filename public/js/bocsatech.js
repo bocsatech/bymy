@@ -402,7 +402,12 @@ function otpSentMessage(data) {
     const detail = data.smtpWarning
       ? String(data.smtpWarning)
       : "ismeretlen SMTP hiba";
-    return `Az email kód nem ment ki${to}: ${detail}. A Gmail küldő fiók app jelszavát ellenőrizd (~/.autosweb/smtp.json).`;
+    const host = String(location.hostname || "").toLowerCase();
+    const vercelHint =
+      host.includes("vercel.app") || host.endsWith(".bymy.hu")
+        ? " Vercelen: mac/vercel-smtp-env.command (forrás: ~/.autosweb/smtp.json). Élesen: bymy.hu/Bocsatech.html is működhet, ha ott van SMTP."
+        : " A Gmail küldő fiók app jelszavát ellenőrizd (~/.autosweb/smtp.json).";
+    return `Az email kód nem ment ki${to}: ${detail}.${vercelHint}`;
   }
   if (data.otpSent !== true) {
     return `Az email küldés állapota ismeretlen${to}. Próbáld újra, vagy kérj új kódot.`;
@@ -1974,7 +1979,7 @@ function adFormDeskGuideView() {
           ${
             hasImage
               ? `<img src="${esc(item.url)}" alt="" />`
-              : `<div class="ad-desk-guide-admin__placeholder">7 cm magas keret · nincs kép</div>`
+              : `<div class="ad-desk-guide-admin__placeholder">1300×492 px · nincs kép</div>`
           }
         </div>
         <label>
@@ -2000,7 +2005,7 @@ function adFormDeskGuideView() {
     <h2 class="layout-cat-title">Személyautó hirdetésfeladás — középső képek</h2>
     <p class="ok">${esc(info)}</p>
     <p class="err">${esc(err)}</p>
-    <p class="hint"><strong>5 szekció, 1 kép mindegyikhez.</strong> A bal oldali accordion / lépés váltásakor ugyanott, a 7 cm magas keretben jelenik meg a megfelelő kép: Alap adatok, Műszaki adatok, Extrák, Hirdetés, Képek.</p>
+    <p class="hint"><strong>5 szekció, 1 kép mindegyikhez.</strong> Ajánlott méret: <strong>1300 × 492 px</strong> (JPG/PNG/WebP, max 6 MB) — ez pontosan illeszkedik a kerethez, nincs fehér sáv és nincs torzítás. A lényeg legyen középen. Szekciók: Alap, Műszaki, Extrák, Hirdetés, Képek.</p>
     <div class="hub-promo-admin__grid">${cards}</div>`;
 }
 

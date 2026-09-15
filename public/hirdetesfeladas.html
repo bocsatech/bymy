@@ -59,8 +59,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/css/style.css?v=postDark1" />
     <link rel="stylesheet" href="/css/automax.css?v=automax20260720homelist" />
-    <link rel="stylesheet" href="/css/site-app.css?v=powerHint1" />
-    <link rel="stylesheet" href="/css/ad-form-desk.css?v=adFormDesk7" />
+    <link rel="stylesheet" href="/css/site-app.css?v=descAi3" />
+    <link rel="stylesheet" href="/css/ad-form-desk.css?v=adFormDesk20" />
     <link rel="stylesheet" href="/css/ad-form-bm-pickers.css?v=adBmMore3" />
     <link rel="stylesheet" href="/css/site-side.css?v=mwPostDesk1" />
     <link rel="stylesheet" href="/css/category-picker.css?v=catDrumStand2" />
@@ -729,29 +729,16 @@
             </div>
           </div>
 
-          <div class="card card--leiras">
-            <div class="card-head">Leírás</div>
-            <div class="card-body">
-              <div class="field-stack full field-stack--leiras">
-                <div class="leiras-head">
-                  <label for="leiras">Leírás:</label>
-                </div>
-                <textarea id="leiras" name="leiras" rows="6" placeholder="Írj pár mondatot az autóról — a gomb emberszerű hirdetésszöveget készít belőle."></textarea>
-                <p class="hint">A kereső a leírásban szereplő szövegben nem tud keresni!</p>
-              </div>
-            </div>
-          </div>
         </section>
 
         <section class="step-panel" data-step="4">
-          <div class="card">
+          <div class="card card--photos">
             <div class="card-body">
               <div class="upload-zone" id="upload-zone">
                 <strong>Húzd ide a képeket, vagy kattints a tallózáshoz</strong>
                 <span>Legfeljebb 12 kép · JPG / PNG — a telefon fotóit automatikusan kicsinyítjük</span>
                 <input id="photo-input" type="file" accept="image/*" multiple hidden />
               </div>
-              <div class="photo-grid" id="photo-grid"></div>
               <div class="photo-upload-bar" id="photo-upload-bar">
                 <button type="button" class="btn primary" id="photo-upload-btn">Feltöltés</button>
                 <button type="button" class="btn ghost" id="photo-overlay-apply" disabled>Sablon használata</button>
@@ -761,7 +748,25 @@
                   <span id="photo-upload-label">Válassz képeket, majd kattints a Feltöltésre.</span>
                 </div>
               </div>
+              <div class="photo-grid" id="photo-grid"></div>
               <p class="hint" id="photo-overlay-hint">Sablon: az első képre (főkép) kerül. Később több sablon közül lehet választani.</p>
+            </div>
+          </div>
+
+          <div class="card card--leiras">
+            <div class="card-head">Leírás</div>
+            <div class="card-body">
+              <div class="field-stack full field-stack--leiras">
+                <div class="leiras-head">
+                  <label for="leiras">Leírás:</label>
+                  <button type="button" class="leiras-ai-btn" data-improve-description>
+                    Szöveg javítása
+                  </button>
+                </div>
+                <textarea id="leiras" name="leiras" rows="6" placeholder="Írj pár mondatot az autóról — a gomb emberszerű hirdetésszöveget készít belőle."></textarea>
+                <p class="hint leiras-ai-status" data-improve-description-status hidden></p>
+                <p class="hint">A kereső a leírásban szereplő szövegben nem tud keresni!</p>
+              </div>
             </div>
           </div>
         </section>
@@ -948,10 +953,10 @@
     </main>
 
     <script src="/js/site-avatar-menu.js?v=avatarSync1" type="module"></script>
-    <script src="/js/app.js?v=powerHint1" type="module"></script>
+    <script src="/js/app.js?v=photoGridMenu1" type="module"></script>
       <script src="/js/nav-counts.js?v=navCount4" type="module"></script>
       <script src="/js/theme.js?v=willhabenHdr1" type="module"></script>
-    <script src="/js/form-layout-apply.js?v=leirasStep3" type="module"></script>
-    <script src="/js/ad-form-desk.js?v=adFormDesk7" type="module"></script>
+    <script src="/js/form-layout-apply.js?v=leirasStep5" type="module"></script>
+    <script src="/js/ad-form-desk.js?v=adFormDesk20" type="module"></script>
 </body>
 </html>

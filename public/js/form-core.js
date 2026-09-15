@@ -36,9 +36,17 @@ export function createAdForm(options = {}) {
   const footerActions = document.getElementById("footer-actions");
   const automaxStepTitle = document.getElementById("automax-step-title");
   const automaxStepLead = document.getElementById("automax-step-lead");
-  const uploadZone = document.getElementById("upload-zone");
-  const photoInput = document.getElementById("photo-input");
-  const photoGrid = document.getElementById("photo-grid");
+  const photoGridEl = () => document.getElementById("photo-grid");
+  const deskPhotoGridEl = () => document.getElementById("ad-desk-photo-preview");
+  const uploadZoneEl = () => document.getElementById("upload-zone");
+  const photoInputEl = () => document.getElementById("photo-input");
+
+  function photoPreviewGrids() {
+    const main = photoGridEl();
+    if (main) return [main];
+    const desk = deskPhotoGridEl();
+    return desk ? [desk] : [];
+  }
   const photoUploadBtn = document.getElementById("photo-upload-btn");
   const photoUploadProgress = document.getElementById("photo-upload-progress");
   const photoUploadLabel = document.getElementById("photo-upload-label");
@@ -1173,7 +1181,8 @@ function revokePhotoPreview(item) {
 function clearPhotoItems() {
   photoItems.forEach(revokePhotoPreview);
   photoItems = [];
-  if (photoInput) photoInput.value = "";
+  const input = photoInputEl();
+  if (input) input.value = "";
   renderPhotoPreview();
 }
 
@@ -1338,15 +1347,13 @@ function updatePhotoStatus() {
   syncPhotoNextButton();
 }
 
-function renderPhotoPreview() {
-  if (!photoGrid) return;
+function paintPhotoGrid(photoGrid) {
   photoGrid.innerHTML = "";
   if (!photoItems.length) {
     const slot = document.createElement("div");
-    slot.className = "photo-slot";
+    slot.className = "photo-slot photo-slot--empty";
     slot.textContent = "Még nincs kép";
     photoGrid.appendChild(slot);
-    updatePhotoStatus();
     return;
   }
   photoItems.forEach((item, index) => {
@@ -1386,6 +1393,21 @@ function renderPhotoPreview() {
     slot.appendChild(actions);
     photoGrid.appendChild(slot);
   });
+}
+
+function renderPhotoPreview() {
+  const grids = photoPreviewGrids();
+  if (!grids.length) return;
+  document
+    .querySelector('.step-panel[data-step="4"] .card-body')
+    ?.classList.toggle("has-photo-preview", photoItems.length > 0);
+  for (const photoGrid of grids) {
+    if (!photoItems.length && photoGrid.id === "photo-grid") {
+      photoGrid.innerHTML = "";
+      continue;
+    }
+    paintPhotoGrid(photoGrid);
+  }
   updatePhotoStatus();
 }
 
@@ -1615,24 +1637,33 @@ if (mode === "wizard") {
   form.addEventListener("change", saveDraft);
 }
 
-uploadZone?.addEventListener("click", () => photoInput.click());
-uploadZone?.addEventListener("dragover", (event) => {
+form.addEventListener("click", (event) => {
+  if (!event.target.closest("#upload-zone")) return;
+  photoInputEl()?.click();
+});
+form.addEventListener("dragover", (event) => {
+  const zone = event.target.closest("#upload-zone");
+  if (!zone) return;
   event.preventDefault();
-  uploadZone.style.borderColor = "#f57c00";
+  zone.style.borderColor = "#f57c00";
 });
-uploadZone?.addEventListener("dragleave", () => {
-  uploadZone.style.borderColor = "";
+form.addEventListener("dragleave", (event) => {
+  const zone = event.target.closest("#upload-zone");
+  if (!zone) return;
+  zone.style.borderColor = "";
 });
-uploadZone?.addEventListener("drop", (event) => {
+form.addEventListener("drop", (event) => {
+  const zone = event.target.closest("#upload-zone");
+  if (!zone) return;
   event.preventDefault();
-  uploadZone.style.borderColor = "";
-  if (event.dataTransfer?.files?.length) {
-    addPhotoFiles(event.dataTransfer.files);
-  }
+  zone.style.borderColor = "";
+  if (event.dataTransfer?.files?.length) addPhotoFiles(event.dataTransfer.files);
 });
-photoInput?.addEventListener("change", () => {
-  if (photoInput.files) addPhotoFiles(photoInput.files);
-  photoInput.value = "";
+form.addEventListener("change", (event) => {
+  if (event.target?.id !== "photo-input") return;
+  const input = photoInputEl();
+  if (input?.files) addPhotoFiles(input.files);
+  if (input) input.value = "";
 });
 photoUploadBtn?.addEventListener("click", () => {
   uploadPendingPhotos();
@@ -1643,7 +1674,8 @@ photoOverlayApplyBtn?.addEventListener("click", () => {
 photoOverlayClearBtn?.addEventListener("click", () => {
   removePhotoOverlayFromFirst();
 });
-photoGrid?.addEventListener("click", (event) => {
+form.addEventListener("click", (event) => {
+  if (!event.target.closest("#photo-grid, #ad-desk-photo-preview")) return;
   const up = event.target.closest("[data-photo-up]");
   const down = event.target.closest("[data-photo-down]");
   const del = event.target.closest("[data-photo-del]");
@@ -1786,6 +1818,10 @@ if (mode === "wizard") {
 }
 
 renderPhotoPreview();
+window.addEventListener("ad-form-photo-stage-sync", () => renderPhotoPreview());
+window.addEventListener("ad-form-layout-refresh", () => {
+  window.requestAnimationFrame(() => renderPhotoPreview());
+});
 
 return {
   applyFormData,

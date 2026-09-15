@@ -363,6 +363,17 @@ th { color: var(--muted); font-weight: 600; }
   height: 100%;
   object-fit: cover;
 }
+.ad-desk-guide-admin__thumb {
+  width: 100%;
+  max-width: 650px;
+  aspect-ratio: 1300 / 492;
+  height: auto;
+  margin-inline: auto;
+}
+.ad-desk-guide-admin__thumb img {
+  object-fit: contain;
+  object-position: center;
+}
 .hub-promo-admin__thumb .badge {
   position: absolute;
   top: 0.4rem;

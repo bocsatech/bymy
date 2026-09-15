@@ -1,4 +1,4 @@
-import { initAdFormDeskGuide, refreshAdFormDeskGuide } from "./ad-form-desk-guide.js?v=adDeskGuide1";
+import { initAdFormDeskGuide, refreshAdFormDeskGuide, showDeskGuideSlot } from "./ad-form-desk-guide.js?v=adDeskGuide4";
 
 const DESK_MQ = "(min-width: 901px)";
 
@@ -145,22 +145,39 @@ function setDeskActive(on) {
   document.getElementById("wizard-steps-bar")?.toggleAttribute("hidden", on);
 }
 
+function ensureGuideFrame(col) {
+  if (!col) return null;
+  let guide = col.querySelector("#ad-desk-guide-frame");
+  if (guide) return guide;
+
+  guide = document.createElement("div");
+  guide.id = "ad-desk-guide-frame";
+  guide.className = "ad-desk-guide-frame";
+  guide.innerHTML = `
+    <div class="ad-desk-guide-frame__inner">
+      <img class="ad-desk-guide-frame__img" data-desk-guide-img alt="" hidden decoding="async" />
+      <div class="ad-desk-guide-frame__empty" data-desk-guide-empty>
+        <span class="ad-desk-guide-frame__label" data-desk-guide-label>Alap adatok</span>
+      </div>
+    </div>
+  `;
+  const stage = col.querySelector("#ad-photo-desk-stage");
+  col.insertBefore(guide, stage || col.firstChild);
+  return guide;
+}
+
 function migrateLegacyDeskColumns(form) {
   const legacyCenter = form.querySelector("#ad-desk-center-col");
   const legacyStack = document.querySelector(".site-center--automax > #ad-desk-right-stack");
-  const footer = form.querySelector("#footer-actions");
 
+  // Régi középsó oszlop: csak bővítjük (útmutató keret), SOHA nem töröljük — benne lehet a képmező.
   if (legacyCenter) {
+    ensureGuideFrame(legacyCenter);
     const panel = legacyCenter.querySelector(".automax-panel");
-    const stage = legacyCenter.querySelector("#ad-photo-desk-stage");
-    if (stage && stage.parentElement === legacyCenter) {
-      ensureCenterColumn(form).appendChild(stage);
-    }
     if (panel) {
       const tipsCol = ensureTipsColumn(form);
       if (tipsCol && panel.parentElement !== tipsCol) tipsCol.appendChild(panel);
     }
-    legacyCenter.remove();
   }
 
   if (legacyStack) {
@@ -171,6 +188,17 @@ function migrateLegacyDeskColumns(form) {
     }
     legacyStack.remove();
   }
+}
+
+function removeLegacyKepekAccordion(form) {
+  const kepekAcc = form.querySelector('#ad-form-desk-shell [data-desk-acc="kepek"]');
+  if (!kepekAcc) return;
+  const panel = kepekAcc.querySelector(`.step-panel[data-step="${PHOTO_STEP}"]`);
+  if (panel) {
+    const footer = form.querySelector("#footer-actions");
+    form.insertBefore(panel, footer || null);
+  }
+  kepekAcc.remove();
 }
 
 function ensureTipsColumn(form) {
@@ -191,29 +219,27 @@ function ensureTipsColumn(form) {
 
 function ensureCenterColumn(form) {
   let col = form.querySelector("#ad-desk-center-col");
-  if (col) return col;
-
-  col = document.createElement("div");
-  col.id = "ad-desk-center-col";
-  col.className = "ad-desk-center-col";
-
-  const guide = document.createElement("div");
-  guide.id = "ad-desk-guide-frame";
-  guide.className = "ad-desk-guide-frame";
-  guide.innerHTML = `
-    <div class="ad-desk-guide-frame__inner">
-      <img class="ad-desk-guide-frame__img" data-desk-guide-img alt="" hidden decoding="async" />
-      <div class="ad-desk-guide-frame__empty" data-desk-guide-empty>
-        <span class="ad-desk-guide-frame__label" data-desk-guide-label>Alap adatok</span>
-      </div>
-    </div>
-  `;
-  col.appendChild(guide);
-
-  const footer = form.querySelector("#footer-actions");
-  const tipsCol = form.querySelector("#ad-desk-tips-col");
-  form.insertBefore(col, tipsCol || footer);
+  if (!col) {
+    col = document.createElement("div");
+    col.id = "ad-desk-center-col";
+    col.className = "ad-desk-center-col";
+    const footer = form.querySelector("#footer-actions");
+    const tipsCol = form.querySelector("#ad-desk-tips-col");
+    form.insertBefore(col, tipsCol || footer);
+  }
+  ensureGuideFrame(col);
   return col;
+}
+
+function syncPhotoGridInPanel(form) {
+  const cardBody = form.querySelector(`.step-panel[data-step="${PHOTO_STEP}"] .card--photos .card-body`);
+  const grid = form.querySelector("#photo-grid");
+  const bar = form.querySelector("#photo-upload-bar");
+  if (!cardBody || !grid || !bar) return;
+  if (grid.parentElement !== cardBody) cardBody.appendChild(grid);
+  if (bar.nextElementSibling !== grid) bar.insertAdjacentElement("afterend", grid);
+  const legacyPreview = form.querySelector("#ad-desk-photo-preview");
+  if (legacyPreview) legacyPreview.remove();
 }
 
 function ensurePhotoStage(form) {
@@ -225,6 +251,7 @@ function ensurePhotoStage(form) {
   }
   const col = ensureCenterColumn(form);
   if (stage.parentElement !== col) col.appendChild(stage);
+  syncPhotoGridInPanel(form);
   return stage;
 }
 
@@ -252,6 +279,20 @@ function teardownDeskColumns(form) {
   form?.classList.remove("ad-form-desk-layout");
 }
 
+function syncLeirasInPhotoPanel(form) {
+  const panel = form.querySelector(`.step-panel[data-step="${PHOTO_STEP}"]`);
+  const leirasCard = form.querySelector(".card--leiras");
+  const leirasWrap = form.querySelector(".field-stack--leiras");
+  if (!panel || !leirasCard || !leirasWrap) return;
+  if (leirasCard.parentElement !== panel) panel.appendChild(leirasCard);
+  leirasCard.hidden = false;
+  leirasCard.classList.remove("ad-immo-orphan", "ad-layout-hidden");
+  leirasCard.style.removeProperty("display");
+  leirasWrap.hidden = false;
+  leirasWrap.classList.remove("ad-layout-hidden", "ad-immo-orphan", "ad-layout-item");
+  leirasWrap.style.removeProperty("display");
+}
+
 function syncPhotoStage(form) {
   const panel = form.querySelector(`.step-panel[data-step="${PHOTO_STEP}"]`);
   if (!panel || !isAdFormDesk(form)) return;
@@ -259,6 +300,9 @@ function syncPhotoStage(form) {
   ensureTipsColumn(form);
   const stage = ensurePhotoStage(form);
   if (stage && panel.parentElement !== stage) stage.appendChild(panel);
+  syncPhotoGridInPanel(form);
+  syncLeirasInPhotoPanel(form);
+  window.dispatchEvent(new Event("ad-form-photo-stage-sync"));
 }
 
 function applyAdFormDesk({ openStep = null } = {}) {
@@ -288,9 +332,10 @@ function applyAdFormDesk({ openStep = null } = {}) {
   }
 
   form.classList.add("ad-form-desk-layout");
-  form.querySelector('#ad-form-desk-shell [data-desk-acc="kepek"]')?.remove();
-  migrateLegacyDeskColumns(form);
+  removeLegacyKepekAccordion(form);
   ensureTipsColumn(form);
+  ensureCenterColumn(form);
+  migrateLegacyDeskColumns(form);
   mountDeskPanels(form);
   restackCanvasItems(form);
   if (shell) shell.hidden = false;
@@ -318,7 +363,8 @@ function bindDeskEvents() {
     if (!id) return;
     const open = acc.classList.contains("is-open");
     openAccordion(form, open ? "" : id);
-    refreshAdFormDeskGuide(form);
+    if (open) refreshAdFormDeskGuide(form);
+    else showDeskGuideSlot(id, { photoFocus: false });
   });
 
   form.addEventListener("input", () => {
@@ -337,6 +383,7 @@ function bindDeskEvents() {
     updateAccordionSums(form);
     refreshAdFormDeskGuide(form);
     if (step === PHOTO_STEP) {
+      showDeskGuideSlot("kepek", { photoFocus: true });
       document.getElementById("ad-photo-desk-stage")?.scrollIntoView?.({ block: "start", behavior: "smooth" });
       return;
     }
@@ -358,6 +405,10 @@ if (document.readyState === "loading") {
 window.addEventListener("ad-form-layout-refresh", () => {
   window.setTimeout(() => applyAdFormDesk(), 0);
   window.setTimeout(() => applyAdFormDesk(), 150);
+  window.setTimeout(() => {
+    const form = document.getElementById("ad-form");
+    if (form && isAdFormDesk(form)) syncLeirasInPhotoPanel(form);
+  }, 200);
 });
 window.addEventListener("ad-form-ready", () => applyAdFormDesk());
 

@@ -42,7 +42,7 @@ function wrapFor(form, fieldKey) {
 
 function pinLeiras(form) {
   if (currentLayoutCategory(form) === "ingatlan") return;
-  const panel = form.querySelector('.step-panel[data-step="3"]');
+  const panel = form.querySelector('.step-panel[data-step="4"]');
   const leirasWrap =
     form.querySelector(".field-stack--leiras") ||
     document.getElementById("leiras")?.closest(".ad-layout-item, .field-stack, .labeled-field, .md-outlined");
@@ -58,14 +58,24 @@ function pinLeiras(form) {
     else panel.appendChild(leirasCard);
   }
 
+  if (leirasCard.parentElement !== panel) {
+    panel.appendChild(leirasCard);
+  }
+
   const body = leirasCard.querySelector(".card-body");
   if (body && leirasWrap.parentElement !== body) {
     body.appendChild(leirasWrap);
   }
   leirasWrap.hidden = false;
-  leirasWrap.classList.remove("ad-layout-hidden", "ad-immo-orphan");
+  leirasWrap.classList.remove("ad-layout-hidden", "ad-immo-orphan", "ad-layout-item");
   leirasWrap.removeAttribute("hidden");
   leirasWrap.style.removeProperty("display");
+  leirasWrap.style.removeProperty("grid-column");
+  leirasWrap.style.removeProperty("grid-row");
+  leirasCard.hidden = false;
+  leirasCard.classList.remove("ad-immo-orphan", "ad-layout-hidden");
+  leirasCard.removeAttribute("hidden");
+  leirasCard.style.removeProperty("display");
 }
 
 function pinExtras(form) {
@@ -315,7 +325,14 @@ function pruneEmptyCards(form) {
   });
   form.querySelectorAll(".step-panel .card").forEach((card) => {
     if (card.id === "success-panel") return;
-    if (card.querySelector(".packages, .phone-lang-grid, .photo-list, .ad-layout-canvas, #equipment-sections, #egyeb-info-sections")) return;
+    if (
+      card.querySelector(
+        ".packages, .phone-lang-grid, .photo-list, .ad-layout-canvas, #equipment-sections, #egyeb-info-sections, .upload-zone, #photo-grid, .field-stack--leiras, #leiras"
+      ) ||
+      card.classList.contains("card--leiras")
+    ) {
+      return;
+    }
     if (card.querySelector(".labeled-field, .field-stack, .md-outlined, input:not([type=hidden]), select, textarea")) return;
     card.style.display = "none";
   });
@@ -353,6 +370,7 @@ async function applyAdFormLayout() {
     resetPlacedLayoutItems(form);
     const placed = new Set();
     for (const cell of cells) {
+      if (cell.field_key === "leiras") continue;
       if (category !== "ingatlan" && String(cell.field_key || "").startsWith("ingatlan_")) continue;
       if (
         category !== "ingatlan" &&

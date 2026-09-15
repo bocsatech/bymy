@@ -2219,14 +2219,14 @@ body.site-app .form-grid > .field-stack.full > label {
   margin: 0;
 }
 
-body.site-app .form-grid > .field-stack--leiras textarea {
+body.site-app .field-stack--leiras textarea {
   width: 100% !important;
   max-width: 100% !important;
   min-height: 140px;
   resize: vertical;
 }
 
-body.site-app .form-grid > .field-stack--leiras .leiras-head {
+body.site-app .field-stack--leiras .leiras-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -2235,8 +2235,35 @@ body.site-app .form-grid > .field-stack--leiras .leiras-head {
   margin: 0 0 0.35rem;
 }
 
-body.site-app .form-grid > .field-stack--leiras .leiras-head label {
+body.site-app .field-stack--leiras .leiras-head label {
   margin: 0;
+}
+
+body.site-app .leiras-ai-btn {
+  appearance: none;
+  border: 1px solid #c5d0dc;
+  background: #f5f8fc;
+  color: #1565c0;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 700;
+  padding: 0.4rem 0.75rem;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+body.site-app .leiras-ai-btn:hover:not(:disabled) {
+  background: #e8f1fb;
+  border-color: #1565c0;
+}
+
+body.site-app .leiras-ai-btn:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+body.site-app .leiras-ai-status.is-error {
+  color: #b42318;
 }
 
 body.site-app .form-grid > .field-stack--location .inline-2 {

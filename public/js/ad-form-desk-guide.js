@@ -18,8 +18,10 @@ let guideData = { slots: {} };
 let activeSlot = "alap";
 let loadPromise = null;
 let bound = false;
+let photoSectionActive = false;
 
 function activeGuideSlot(form) {
+  if (photoSectionActive) return "kepek";
   const step = Number(document.querySelector("[data-step-indicator].active")?.dataset.stepIndicator) || 1;
   if (step === 4) return "kepek";
   const open = form?.querySelector("[data-desk-acc].is-open");
@@ -28,6 +30,12 @@ function activeGuideSlot(form) {
     if (id && SLOT_LABELS[id]) return id;
   }
   return GUIDE_SLOT_BY_STEP[step] || "alap";
+}
+
+export function showDeskGuideSlot(slotId, { photoFocus = false } = {}) {
+  if (photoFocus) photoSectionActive = slotId === "kepek";
+  else if (slotId !== "kepek") photoSectionActive = false;
+  paintGuideFrame(slotId);
 }
 
 function paintGuideFrame(slotId) {
@@ -43,12 +51,25 @@ function paintGuideFrame(slotId) {
   frame.dataset.deskGuideSlot = slotId;
   if (label) label.textContent = SLOT_LABELS[slotId] || slotId;
   if (url && img) {
+    const onReady = () => {
+      if (frame.dataset.deskGuideSlot !== slotId) return;
+      frame.classList.add("has-image");
+    };
+    img.onload = onReady;
+    img.onerror = () => {
+      if (frame.dataset.deskGuideSlot !== slotId) return;
+      frame.classList.remove("has-image");
+    };
     img.src = url;
     img.alt = alt;
     img.hidden = false;
     empty?.setAttribute("hidden", "");
-    frame.classList.add("has-image");
+    if (img.complete && img.naturalWidth > 0) onReady();
   } else {
+    if (img) {
+      img.onload = null;
+      img.onerror = null;
+    }
     if (img) {
       img.removeAttribute("src");
       img.alt = "";
@@ -94,11 +115,29 @@ export async function initAdFormDeskGuide() {
 
   form.addEventListener("click", (event) => {
     if (!document.body.classList.contains("ad-form-desk-active")) return;
-    if (!event.target.closest("[data-desk-acc-toggle]")) return;
+    if (event.target.closest("#ad-photo-desk-stage, #photo-grid, #upload-zone, .card--photos")) {
+      showDeskGuideSlot("kepek", { photoFocus: true });
+      return;
+    }
+    const toggle = event.target.closest("[data-desk-acc-toggle]");
+    if (!toggle) return;
+    photoSectionActive = false;
     window.setTimeout(() => refreshAdFormDeskGuide(form), 0);
   });
 
-  window.addEventListener("ad-form-step", () => {
+  form.addEventListener(
+    "focusin",
+    (event) => {
+      if (!document.body.classList.contains("ad-form-desk-active")) return;
+      if (!event.target.closest("#ad-photo-desk-stage, #photo-grid, #upload-zone, .card--photos")) return;
+      showDeskGuideSlot("kepek", { photoFocus: true });
+    },
+    true
+  );
+
+  window.addEventListener("ad-form-step", (event) => {
+    const step = Number(event.detail?.step);
+    photoSectionActive = step === 4;
     window.setTimeout(() => refreshAdFormDeskGuide(document.getElementById("ad-form")), 0);
   });
 

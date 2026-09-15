@@ -115,12 +115,19 @@ function createSubAccordion(id, label, contentEl) {
   return acc;
 }
 
-function toggleSubAccordion(acc, open) {
-  if (!acc) return;
-  const on = open ?? !acc.classList.contains("is-open");
-  acc.classList.toggle("is-open", on);
-  const btn = acc.querySelector("[data-desk-sub-acc-toggle]");
-  if (btn) btn.setAttribute("aria-expanded", on ? "true" : "false");
+function subAccordionsInExtrak(form) {
+  const extrakBody = form.querySelector('[data-desk-acc="extrak"] > .auto-desk-acc__body');
+  if (!extrakBody) return [];
+  return [...extrakBody.querySelectorAll("[data-desk-sub-acc]")];
+}
+
+function openSubAccordionInExtrak(form, activeAcc) {
+  for (const acc of subAccordionsInExtrak(form)) {
+    const on = Boolean(activeAcc) && acc === activeAcc;
+    acc.classList.toggle("is-open", on);
+    const btn = acc.querySelector("[data-desk-sub-acc-toggle]");
+    if (btn) btn.setAttribute("aria-expanded", on ? "true" : "false");
+  }
 }
 
 function mountExtrakSubAccordions(form) {
@@ -461,7 +468,8 @@ function bindDeskEvents() {
       event.preventDefault();
       event.stopPropagation();
       const subAcc = subToggle.closest("[data-desk-sub-acc]");
-      toggleSubAccordion(subAcc);
+      const wasOpen = subAcc?.classList.contains("is-open");
+      openSubAccordionInExtrak(form, wasOpen ? null : subAcc);
       updateSubAccordionSums(form);
       return;
     }

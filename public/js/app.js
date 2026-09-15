@@ -9,8 +9,8 @@ import { createAdForm } from "./form-core.js?v=extrakSubAcc3";
 import { applyImportedVehicleToSelects } from "./vehicle-catalog-client.js?v=importVehicle1";
 import { initTireSizes } from "./tire-sizes-ui.js";
 import { initPhoneLanguages } from "./phone-lang-ui.js";
-import { initCategoryPicker } from "./category-picker.js?v=accFix1";
-import { applyAdFormDesk, clearAdFormEditBoot, isDeskVehicleSubtype } from "./ad-form-desk.js?v=adFormDesk33";
+import { initCategoryPicker } from "./category-picker.js?v=accFix2";
+import { applyAdFormDesk, clearAdFormEditBoot, isDeskVehicleSubtype } from "./ad-form-desk.js?v=adFormDesk34";
 import {
   requireAuthForPage,
   getAuthUser,

@@ -269,23 +269,9 @@ th { color: var(--muted); font-weight: 600; }
 .layout-desk-center .layout-step {
   margin: 0;
 }
-.layout-board--desk-stack {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  grid-template-columns: unset;
-  grid-template-rows: unset;
-  background: #12171e;
-  min-height: 72px;
-}
-.layout-board--desk-stack .layout-tile {
+.layout-desk-acc__body .layout-step {
   width: 100%;
-  min-height: 52px;
-  flex: 0 0 auto;
-}
-.layout-board--desk-stack .layout-tile.layout-tile--desk-stack {
-  grid-column: unset;
-  grid-row: unset;
+  min-width: 0;
 }
 @media (max-width: 1100px) {
   .layout-desk-editor {
@@ -335,6 +321,29 @@ th { color: var(--muted); font-weight: 600; }
 .layout-board.is-drop {
   border-color: var(--accent);
   box-shadow: inset 0 0 0 1px var(--accent);
+}
+/* Desk accordion bal oldal: függőleges stack (a .layout-board grid UTÁN kell, különben felülírja) */
+.layout-board.layout-board--desk-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  grid-template-columns: unset;
+  grid-template-rows: unset;
+  grid-auto-rows: unset;
+  background: #12171e;
+  min-height: 72px;
+  width: 100%;
+  box-sizing: border-box;
+}
+.layout-board.layout-board--desk-stack .layout-tile,
+.layout-board.layout-board--desk-stack .layout-tile.layout-tile--desk-stack {
+  width: 100%;
+  max-width: none;
+  min-height: 52px;
+  flex: 0 0 auto;
+  grid-column: unset !important;
+  grid-row: unset !important;
 }
 .layout-tile {
   position: relative;

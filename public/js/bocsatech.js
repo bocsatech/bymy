@@ -1,4 +1,4 @@
-import { mountLayoutBoard } from "./bocsatech-layout.js?v=deskStackLayout1";
+import { mountLayoutBoard } from "./bocsatech-layout.js?v=deskStackLayout2";
 import { mountIngatlanWheelBoard } from "./bocsatech-ingatlan-wheels.js?v=immoUiParity1";
 import {
   isIngatlanWheelAdminCategory,

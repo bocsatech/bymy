@@ -1,5 +1,6 @@
 import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=immoUiParity1";
 import { refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=adBmMore3";
+import { initTireSizes } from "./tire-sizes-ui.js?v=tireFill1";
 
 function cssEscape(value) {
   if (window.CSS?.escape) return window.CSS.escape(value);
@@ -296,6 +297,90 @@ const EV_LAYOUT_GROUP_KEYS = new Set([
   "zold_rendszam",
 ]);
 
+/** Gumi méretek egy blokkban maradnak — a layout ne szórja szét a 6 selectet címke nélkül. */
+const TIRE_LAYOUT_GROUP_KEYS = new Set([
+  "nyari_gumi_szelesseg",
+  "nyari_gumi_magassag",
+  "nyari_gumi_atmero",
+  "teli_gumi_szelesseg",
+  "teli_gumi_magassag",
+  "teli_gumi_atmero",
+]);
+
+const TIRE_ROW_SLOTS = [
+  {
+    rowSelector: ".tire-block:first-child .tire-row",
+    names: ["nyari_gumi_szelesseg", "nyari_gumi_magassag", "nyari_gumi_atmero"],
+  },
+  {
+    rowSelector: ".tire-block:last-child .tire-row",
+    names: ["teli_gumi_szelesseg", "teli_gumi_magassag", "teli_gumi_atmero"],
+  },
+];
+
+function restoreTireSelectsToBlock(form) {
+  const grid = form.querySelector(".tire-sizes-grid");
+  if (!grid) return;
+
+  for (const { rowSelector, names } of TIRE_ROW_SLOTS) {
+    const row = grid.querySelector(rowSelector);
+    if (!row) continue;
+
+    for (let i = 0; i < names.length; i++) {
+      const name = names[i];
+      const select = form.querySelector(`select[name="${cssEscape(name)}"]`);
+      if (!(select instanceof HTMLSelectElement)) continue;
+      if (row.contains(select)) continue;
+
+      const strayWrap = select.closest(".labeled-field, .md-outlined, .ad-layout-item");
+      const insertBefore = row.children[i * 2] ?? null;
+      row.insertBefore(select, insertBefore);
+
+      if (strayWrap && !grid.contains(strayWrap)) {
+        const hasOtherControls = [...strayWrap.querySelectorAll("select, input, textarea")].some((el) => el !== select);
+        if (!hasOtherControls) strayWrap.remove();
+        else {
+          strayWrap.classList.add("ad-layout-hidden");
+          strayWrap.hidden = true;
+          strayWrap.style.setProperty("display", "none", "important");
+        }
+      }
+
+      select.hidden = false;
+      select.classList.remove("ad-layout-hidden");
+      select.style.removeProperty("display");
+    }
+  }
+}
+
+function cleanupStrayTireLayoutItems(form) {
+  const grid = form.querySelector(".tire-sizes-grid");
+  for (const key of TIRE_LAYOUT_GROUP_KEYS) {
+    form.querySelectorAll(`select[name="${cssEscape(key)}"]`).forEach((el) => {
+      if (grid?.contains(el)) return;
+      const wrap = el.closest(".labeled-field, .md-outlined, .ad-layout-item");
+      if (!wrap) return;
+      wrap.classList.add("ad-layout-hidden");
+      wrap.hidden = true;
+      wrap.style.setProperty("display", "none", "important");
+    });
+  }
+}
+
+function pinTireFields(form) {
+  if (currentLayoutCategory(form) === "ingatlan") return;
+  restoreTireSelectsToBlock(form);
+  const block = document.getElementById("tire-sizes-card") || form.querySelector(".tire-sizes-grid")?.closest(".card");
+  const canvas = canvasForStep(form, 2);
+  if (!block || !canvas) return;
+  if (block.parentElement !== canvas) canvas.appendChild(block);
+  block.hidden = false;
+  block.classList.remove("ad-immo-orphan", "ad-layout-hidden");
+  block.removeAttribute("hidden");
+  block.style.removeProperty("display");
+  cleanupStrayTireLayoutItems(form);
+}
+
 function pinElectricFields(form) {
   if (currentLayoutCategory(form) === "ingatlan") return;
   const block = document.getElementById("electric-fields-block");
@@ -414,6 +499,7 @@ async function applyAdFormLayout() {
     for (const cell of cells) {
       if (cell.field_key === "leiras") continue;
       if (category !== "ingatlan" && EV_LAYOUT_GROUP_KEYS.has(cell.field_key)) continue;
+      if (category !== "ingatlan" && TIRE_LAYOUT_GROUP_KEYS.has(cell.field_key)) continue;
       if (category !== "ingatlan" && String(cell.field_key || "").startsWith("ingatlan_")) continue;
       if (
         category !== "ingatlan" &&
@@ -580,11 +666,13 @@ async function applyAdFormLayout() {
     hideLayoutShellCards(form);
     pinExtras(form);
     pinElectricFields(form);
+    pinTireFields(form);
     pinLeiras(form);
     pinLocation(form);
     pinFooter(form);
     window.dispatchEvent(new Event("ad-form-sync-location"));
     void refreshAdFormBmPickers(form);
+    initTireSizes(form);
   } catch (error) {
     console.warn("Ad form layout apply:", error);
   }

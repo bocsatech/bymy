@@ -69,13 +69,20 @@ function syncAllRearGroups(form) {
   for (const group of REAR_GROUPS) syncRearGroup(form, group);
 }
 
+function tireSelectsIn(form) {
+  return [...form.querySelectorAll("select[name]")].filter((select) => {
+    const name = select.name || "";
+    return name.includes("gumi") && /_(szelesseg|magassag|atmero)$/.test(name);
+  });
+}
+
 export function initTireSizes(form) {
   if (!form) return { syncRearTires: () => {} };
 
-  const root = form.querySelector(".tire-sizes-grid");
-  if (!root) return { syncRearTires: () => {} };
+  const selects = tireSelectsIn(form);
+  if (!selects.length) return { syncRearTires: () => {} };
 
-  root.querySelectorAll("select[name]").forEach((select) => fillTireSelect(select));
+  selects.forEach((select) => fillTireSelect(select));
 
   for (const group of REAR_GROUPS) {
     const checkbox = form.elements.namedItem(group.checkboxName);

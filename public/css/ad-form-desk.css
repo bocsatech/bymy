@@ -226,6 +226,50 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form .fi
   margin: 0 0 6px !important;
 }
 
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #tire-sizes-card {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #tire-sizes-card .card-head {
+  padding: 0 0 8px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: var(--ad-text) !important;
+  border: 0 !important;
+  background: transparent !important;
+}
+
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #tire-sizes-card .card-body {
+  padding: 0 !important;
+}
+
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #tire-sizes-card .tire-sizes-grid {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+}
+
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #tire-sizes-card .tire-block-label {
+  display: block !important;
+  margin: 0 0 6px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: var(--ad-text) !important;
+}
+
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #tire-sizes-card .tire-row {
+  display: flex !important;
+  flex-flow: row nowrap !important;
+  align-items: center !important;
+  gap: 6px !important;
+  width: 100% !important;
+}
+
 body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #equipment-sections,
 body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #egyeb-info-sections {
   margin-top: 0;

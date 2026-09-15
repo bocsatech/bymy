@@ -39,8 +39,16 @@ function isSzemelyautoAdForm(form) {
   return currentSubtype(form) === "szemelyauto";
 }
 
+function isDeskVehicleSubtype(subtype) {
+  return DESK_VEHICLE_SUBTYPES.has(
+    String(subtype ?? "")
+      .trim()
+      .toLowerCase()
+  );
+}
+
 function isDeskVehicleAdForm(form) {
-  return DESK_VEHICLE_SUBTYPES.has(currentSubtype(form));
+  return isDeskVehicleSubtype(currentSubtype(form));
 }
 
 function isAdFormDesk(form) {
@@ -156,6 +164,7 @@ function setDeskActive(on) {
   document.body.classList.toggle("ad-form-desk-active", on);
   document.body.classList.toggle("auto-desk-reszletes", on);
   document.getElementById("wizard-steps-bar")?.toggleAttribute("hidden", on);
+  if (on) document.getElementById("wizard-steps-bar")?.setAttribute("hidden", "");
 }
 
 function ensureGuideFrame(col) {
@@ -425,4 +434,10 @@ window.addEventListener("ad-form-layout-refresh", () => {
 });
 window.addEventListener("ad-form-ready", () => applyAdFormDesk());
 
-export { applyAdFormDesk, isAdFormDesk, isDeskVehicleAdForm, isSzemelyautoAdForm };
+export {
+  applyAdFormDesk,
+  isAdFormDesk,
+  isDeskVehicleAdForm,
+  isDeskVehicleSubtype,
+  isSzemelyautoAdForm,
+};

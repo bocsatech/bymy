@@ -9,7 +9,8 @@ import { createAdForm } from "./form-core.js?v=photoGridMenu1";
 import { applyImportedVehicleToSelects } from "./vehicle-catalog-client.js?v=importVehicle1";
 import { initTireSizes } from "./tire-sizes-ui.js";
 import { initPhoneLanguages } from "./phone-lang-ui.js";
-import { initCategoryPicker } from "./category-picker.js?v=catEnableAll1";
+import { initCategoryPicker } from "./category-picker.js?v=catDeskMenu1";
+import { isDeskVehicleSubtype } from "./ad-form-desk.js";
 import {
   requireAuthForPage,
   getAuthUser,
@@ -161,7 +162,14 @@ function registerAbandonPhotoCleanup() {
 function showWizardShell() {
   document.getElementById("category-picker-shell")?.setAttribute("hidden", "");
   document.getElementById("ad-wizard-shell")?.removeAttribute("hidden");
-  document.getElementById("wizard-steps-bar")?.removeAttribute("hidden");
+  const subtype =
+    adForm?.elements.namedItem("hirdetes_alkategoria")?.value ??
+    adForm?.elements.namedItem("jarmu_kategoria")?.value ??
+    categoryPicker?.getSelection?.()?.subtype ??
+    "";
+  const stepsBar = document.getElementById("wizard-steps-bar");
+  if (isDeskVehicleSubtype(subtype)) stepsBar?.setAttribute("hidden", "");
+  else stepsBar?.removeAttribute("hidden");
 }
 
 function ensureFormReady() {

@@ -14,6 +14,8 @@ function wizardCatLabel(catId) {
   return WIZARD_CATEGORY_OPTIONS.find((opt) => opt.id === catId)?.label || "Válassz kategóriát";
 }
 
+import { isDeskVehicleSubtype } from "./ad-form-desk.js";
+
 const STORAGE_KEY = "bymy-hirdetes-category";
 const STORAGE_VERSION = 4;
 
@@ -481,7 +483,11 @@ export function initCategoryPicker({
     pickerShell?.setAttribute("hidden", "");
     stub?.setAttribute("hidden", "");
     wizardShell?.removeAttribute("hidden");
-    stepsBar?.removeAttribute("hidden");
+    if (isDeskVehicleSubtype(selection?.subtype)) {
+      stepsBar?.setAttribute("hidden", "");
+    } else {
+      stepsBar?.removeAttribute("hidden");
+    }
 
     try {
       onVehicleSelected?.(selection);

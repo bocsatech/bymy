@@ -73,7 +73,7 @@
     min-width: 0;
     max-width: none;
     align-self: start;
-    gap: 0;
+    gap: 1cm;
     min-height: calc(100vh - var(--site-fixed-header-h, 64px) - 24px);
   }
 

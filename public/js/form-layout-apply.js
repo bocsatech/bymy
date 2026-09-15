@@ -280,6 +280,34 @@ function compactCanvasRows(form) {
 
 const LOCATION_FIELD_KEYS = new Set(["megtekintesi_cim", "iranyitoszam", "telepules", "megye"]);
 
+/** Ezek egy blokkban maradnak (#electric-fields-block) — ne szórja szét őket a layout rács. */
+const EV_LAYOUT_GROUP_KEYS = new Set([
+  "akkumulator_kwh",
+  "jelenlegi_akkukapacitas",
+  "ac_tolto_csatlakozas",
+  "ac_toltesi_teljesitmeny",
+  "dc_tolto_csatlakozas",
+  "dc_toltesi_teljesitmeny",
+  "hatotav",
+  "autopalya_hatotav",
+  "teli_hatotav",
+  "tolto_csatlakozas",
+  "villamtoltes",
+  "zold_rendszam",
+]);
+
+function pinElectricFields(form) {
+  if (currentLayoutCategory(form) === "ingatlan") return;
+  const block = document.getElementById("electric-fields-block");
+  const canvas = canvasForStep(form, 2);
+  if (!block || !canvas) return;
+  if (block.parentElement !== canvas) canvas.appendChild(block);
+  block.hidden = false;
+  block.classList.remove("ad-immo-orphan", "ad-layout-hidden");
+  block.removeAttribute("hidden");
+  block.style.removeProperty("display");
+}
+
 function pinLocation(form) {
   const stack = form.querySelector(".field-stack--location");
   if (!stack) return;
@@ -371,6 +399,7 @@ async function applyAdFormLayout() {
     const placed = new Set();
     for (const cell of cells) {
       if (cell.field_key === "leiras") continue;
+      if (category !== "ingatlan" && EV_LAYOUT_GROUP_KEYS.has(cell.field_key)) continue;
       if (category !== "ingatlan" && String(cell.field_key || "").startsWith("ingatlan_")) continue;
       if (
         category !== "ingatlan" &&
@@ -536,6 +565,7 @@ async function applyAdFormLayout() {
     compactCanvasRows(form);
     hideLayoutShellCards(form);
     pinExtras(form);
+    pinElectricFields(form);
     pinLeiras(form);
     pinLocation(form);
     pinFooter(form);

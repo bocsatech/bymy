@@ -408,12 +408,14 @@ function renderEquipment() {
     }
     block.appendChild(grid);
     equipmentRoot.appendChild(block);
+    window.dispatchEvent(new Event("ad-form-equipment-rendered"));
     return;
   }
 
   for (const [key, section] of Object.entries(EQUIPMENT_SECTIONS)) {
     const block = document.createElement("div");
     block.className = "equipment-block";
+    block.dataset.equipmentKey = key;
     block.innerHTML = `<h3>${section.title}</h3>`;
     const grid = document.createElement("div");
     grid.className = "equipment-grid";
@@ -429,6 +431,7 @@ function renderEquipment() {
     block.appendChild(grid);
     equipmentRoot.appendChild(block);
   }
+  window.dispatchEvent(new Event("ad-form-equipment-rendered"));
 }
 
 function syncEgyebInfoVisibility() {

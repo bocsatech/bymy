@@ -77,13 +77,82 @@ function countFilled(root) {
 }
 
 function updateAccordionSums(form) {
-  for (const { id, step } of shellAccordions()) {
+  for (const { id } of shellAccordions()) {
     const acc = form.querySelector(`[data-desk-acc="${id}"]`);
     const sum = acc?.querySelector("[data-desk-acc-sum]");
     const body = acc?.querySelector(".auto-desk-acc__body");
     if (!sum || !body) continue;
     const n = countFilled(body);
     sum.textContent = n > 0 ? `${n} kitöltve` : "";
+  }
+  updateSubAccordionSums(form);
+}
+
+function updateSubAccordionSums(form) {
+  form.querySelectorAll("[data-desk-sub-acc]").forEach((acc) => {
+    const sum = acc.querySelector("[data-desk-sub-acc-sum]");
+    const body = acc.querySelector(".auto-desk-acc__body");
+    if (!sum || !body) return;
+    const n = countFilled(body);
+    sum.textContent = n > 0 ? `${n} kitöltve` : "";
+  });
+}
+
+function createSubAccordion(id, label, contentEl) {
+  const acc = document.createElement("div");
+  acc.className = "auto-desk-acc auto-desk-acc--sub";
+  acc.dataset.deskSubAcc = id;
+  const n = countFilled(contentEl);
+  acc.innerHTML = `
+    <button type="button" class="auto-desk-acc__head" data-desk-sub-acc-toggle aria-expanded="false">
+      <span>${label}</span>
+      <span class="auto-desk-acc__sum" data-desk-sub-acc-sum>${n > 0 ? `${n} kitöltve` : ""}</span>
+      <span class="auto-desk-acc__chev" aria-hidden="true">▼</span>
+    </button>
+    <div class="auto-desk-acc__body"></div>
+  `;
+  acc.querySelector(".auto-desk-acc__body").appendChild(contentEl);
+  return acc;
+}
+
+function toggleSubAccordion(acc, open) {
+  if (!acc) return;
+  const on = open ?? !acc.classList.contains("is-open");
+  acc.classList.toggle("is-open", on);
+  const btn = acc.querySelector("[data-desk-sub-acc-toggle]");
+  if (btn) btn.setAttribute("aria-expanded", on ? "true" : "false");
+}
+
+function mountExtrakSubAccordions(form) {
+  if (!form || !isAdFormDesk(form)) return;
+
+  const equipmentRoot = form.querySelector("#equipment-sections");
+  if (equipmentRoot) {
+    [...equipmentRoot.querySelectorAll(".equipment-block")].forEach((block, index) => {
+      const label = block.querySelector("h3")?.textContent?.trim() || `Felszereltség ${index + 1}`;
+      const grid = block.querySelector(".equipment-grid");
+      if (!grid) return;
+      const id = block.dataset.equipmentKey || `eq-${index}`;
+      block.replaceWith(createSubAccordion(id, label, grid));
+    });
+  }
+
+  const egyebCard = form.querySelector("#egyeb-info-sections")?.closest(".card");
+  const egyebGrid = form.querySelector("#egyeb-info-sections");
+  if (egyebCard && egyebGrid && !egyebCard.hidden && !egyebCard.querySelector("[data-desk-sub-acc]")) {
+    const label = egyebCard.querySelector(".card-head")?.textContent?.trim() || "Egyéb információk";
+    const acc = createSubAccordion("egyeb-info", label, egyebGrid);
+    egyebCard.classList.add("card--desk-sub-acc");
+    const cardBody = egyebCard.querySelector(".card-body");
+    if (cardBody) {
+      cardBody.innerHTML = "";
+      cardBody.appendChild(acc);
+    } else {
+      egyebCard.innerHTML = "";
+      egyebCard.appendChild(acc);
+    }
+    const head = egyebCard.querySelector(".card-head");
+    if (head) head.remove();
   }
 }
 
@@ -366,6 +435,7 @@ function applyAdFormDesk({ openStep = null } = {}) {
   const step = openStep ?? Number(activeIndicator?.dataset.stepIndicator) ?? 1;
   const accId = accordionForStep(step);
   if (accId) openAccordion(form, accId);
+  mountExtrakSubAccordions(form);
   syncPhotoStage(form);
   updateAccordionSums(form);
   refreshAdFormDeskGuide(form);
@@ -378,6 +448,14 @@ function bindDeskEvents() {
   form.dataset.adFormDeskBound = "1";
 
   form.addEventListener("click", (event) => {
+    const subToggle = event.target.closest("[data-desk-sub-acc-toggle]");
+    if (subToggle && document.body.classList.contains("ad-form-desk-active")) {
+      const subAcc = subToggle.closest("[data-desk-sub-acc]");
+      toggleSubAccordion(subAcc);
+      updateSubAccordionSums(form);
+      return;
+    }
+
     const toggle = event.target.closest("[data-desk-acc-toggle]");
     if (!toggle || !document.body.classList.contains("ad-form-desk-active")) return;
     const acc = toggle.closest("[data-desk-acc]");
@@ -385,8 +463,14 @@ function bindDeskEvents() {
     if (!id) return;
     const open = acc.classList.contains("is-open");
     openAccordion(form, open ? "" : id);
-    if (open) refreshAdFormDeskGuide(form);
-    else showDeskGuideSlot(id, { photoFocus: false });
+    if (open) {
+      refreshAdFormDeskGuide(form);
+      return;
+    }
+    showDeskGuideSlot(id, { photoFocus: false });
+    requestAnimationFrame(() => {
+      acc.scrollIntoView({ block: "start", behavior: "smooth" });
+    });
   });
 
   form.addEventListener("input", () => {
@@ -433,6 +517,13 @@ window.addEventListener("ad-form-layout-refresh", () => {
   }, 200);
 });
 window.addEventListener("ad-form-ready", () => applyAdFormDesk());
+window.addEventListener("ad-form-equipment-rendered", () => {
+  const form = document.getElementById("ad-form");
+  if (form && isAdFormDesk(form)) {
+    mountExtrakSubAccordions(form);
+    updateSubAccordionSums(form);
+  }
+});
 
 export {
   applyAdFormDesk,

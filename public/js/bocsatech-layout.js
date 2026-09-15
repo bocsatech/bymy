@@ -9,13 +9,20 @@ const DEFAULT_STEP_NAMES = {
   4: "Képek",
   5: "Hirdetés",
 };
+
+const DESK_POSTING_ACCORDIONS = [
+  { id: "alap", step: 1, label: "Alap adatok" },
+  { id: "muszaki", step: 2, label: "Műszaki adatok" },
+  { id: "extrak", step: 3, label: "Extrák" },
+  { id: "hirdetes", step: 5, label: "Hirdetés" },
+];
 const PAIR_OF = {
   gyartasi_ev: "gyartasi_honap",
   forgalomba_helyezes_ev: "forgalomba_helyezes_honap",
   muszaki_ev: "muszaki_honap",
 };
 
-export function mountLayoutBoard(root, layout, { onChange, stepNames } = {}) {
+export function mountLayoutBoard(root, layout, { onChange, stepNames, deskPosting = false } = {}) {
   if (!root) return { cells: layout?.cells || [] };
   const STEP_NAMES = { ...DEFAULT_STEP_NAMES, ...(stepNames || {}) };
   const cells = Array.isArray(layout?.cells) ? layout.cells : [];
@@ -98,18 +105,65 @@ export function mountLayoutBoard(root, layout, { onChange, stepNames } = {}) {
     </section>`;
   }
 
+  function stepBoardHtml(step) {
+    const items = editable().filter((cell) => !cell.hidden && Number(cell.step) === step);
+    const maxRow = Math.max(3, ...items.map((cell) => Number(cell.row) || 1));
+    const tiles = items.map(tileHtml).join("");
+    return `<section class="layout-step" data-step="${step}">
+      <div class="layout-board" data-board="${step}" style="grid-template-rows: repeat(${maxRow}, ${ROW_PX}px)">${tiles}</div>
+    </section>`;
+  }
+
+  function flatStepBoardHtml(step) {
+    const items = editable().filter((cell) => !cell.hidden && Number(cell.step) === step);
+    const maxRow = Math.max(3, ...items.map((cell) => Number(cell.row) || 1));
+    const tiles = items.map(tileHtml).join("");
+    return `<section class="layout-step" data-step="${step}">
+      <h3>Lépés ${step} — ${STEP_NAMES[step]}</h3>
+      <div class="layout-board" data-board="${step}" style="grid-template-rows: repeat(${maxRow}, ${ROW_PX}px)">${tiles}</div>
+    </section>`;
+  }
+
   function boardsHtml() {
-    return [1, 2, 3, 4, 5]
-      .map((step) => {
-        const items = editable().filter((cell) => !cell.hidden && Number(cell.step) === step);
-        const maxRow = Math.max(3, ...items.map((cell) => Number(cell.row) || 1));
-        const tiles = items.map(tileHtml).join("");
-        return `<section class="layout-step" data-step="${step}">
-          <h3>Lépés ${step} — ${STEP_NAMES[step]}</h3>
-          <div class="layout-board" data-board="${step}" style="grid-template-rows: repeat(${maxRow}, ${ROW_PX}px)">${tiles}</div>
-        </section>`;
-      })
-      .join("");
+    return [1, 2, 3, 4, 5].map((step) => flatStepBoardHtml(step)).join("");
+  }
+
+  function deskBoardsHtml() {
+    const accHtml = DESK_POSTING_ACCORDIONS.map(
+      ({ id, step, label }) => `
+      <div class="layout-desk-acc" data-desk-acc="${id}">
+        <button type="button" class="layout-desk-acc__head" data-desk-acc-toggle aria-expanded="false">
+          <span>${escapeHtml(label)}</span>
+          <span class="layout-desk-acc__chev" aria-hidden="true">▼</span>
+        </button>
+        <div class="layout-desk-acc__body">${stepBoardHtml(step)}</div>
+      </div>`
+    ).join("");
+    return `
+      <div class="layout-desk-editor">
+        <div class="layout-desk-shell">${accHtml}</div>
+        <div class="layout-desk-center">
+          <p class="layout-desk-center-label">Képek és leírás — live desk középső oszlop</p>
+          ${stepBoardHtml(4)}
+        </div>
+      </div>`;
+  }
+
+  function bindDeskAccordions() {
+    if (!deskPosting) return;
+    root.querySelectorAll("[data-desk-acc-toggle]").forEach((btn) => {
+      btn.addEventListener("click", (event) => {
+        event.preventDefault();
+        const acc = btn.closest("[data-desk-acc]");
+        if (!acc) return;
+        const wasOpen = acc.classList.contains("is-open");
+        root.querySelectorAll(".layout-desk-acc[data-desk-acc]").forEach((el) => {
+          const on = !wasOpen && el === acc;
+          el.classList.toggle("is-open", on);
+          el.querySelector("[data-desk-acc-toggle]")?.setAttribute("aria-expanded", on ? "true" : "false");
+        });
+      });
+    });
   }
 
   function paint(tile, cell) {
@@ -429,7 +483,8 @@ export function mountLayoutBoard(root, layout, { onChange, stepNames } = {}) {
   }
 
   function mount() {
-    root.innerHTML = `${boardsHtml()}${trashHtml()}`;
+    root.innerHTML = `${deskPosting ? deskBoardsHtml() : boardsHtml()}${trashHtml()}`;
+    bindDeskAccordions();
     bindTiles();
   }
 

@@ -186,6 +186,76 @@ th { color: var(--muted); font-weight: 600; }
 .layout-card small { color: var(--muted); }
 .hint { color: var(--muted); font-size: 0.85rem; line-height: 1.45; }
 
+.layout-desk-editor {
+  display: grid;
+  grid-template-columns: minmax(280px, 320px) minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+  margin-bottom: 1rem;
+}
+.layout-desk-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.layout-desk-acc {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #1a222c;
+}
+.layout-desk-acc__head {
+  display: flex;
+  width: 100%;
+  appearance: none;
+  border: 0;
+  background: transparent;
+  padding: 13px 14px;
+  font: inherit;
+  font-weight: 700;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+  color: var(--text);
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.layout-desk-acc.is-open > .layout-desk-acc__head {
+  border-bottom: 1px solid var(--line);
+}
+.layout-desk-acc > .layout-desk-acc__body {
+  display: none;
+  padding: 8px;
+}
+.layout-desk-acc.is-open > .layout-desk-acc__body {
+  display: block;
+}
+.layout-desk-acc__chev {
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1;
+  transition: transform 0.15s ease;
+}
+.layout-desk-acc.is-open > .layout-desk-acc__head .layout-desk-acc__chev {
+  transform: rotate(180deg);
+}
+.layout-desk-center-label {
+  margin: 0 0 0.65rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+  font-weight: 600;
+  line-height: 1.4;
+}
+.layout-desk-shell .layout-step,
+.layout-desk-center .layout-step {
+  margin: 0;
+}
+@media (max-width: 900px) {
+  .layout-desk-editor {
+    grid-template-columns: 1fr;
+  }
+}
+
 .layout-step { margin: 1.25rem 0 1.75rem; }
 .layout-step-head {
   display: flex;

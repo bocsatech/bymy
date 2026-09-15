@@ -1,4 +1,4 @@
-import { mountLayoutBoard } from "./bocsatech-layout.js?v=layoutSpacer1";
+import { mountLayoutBoard } from "./bocsatech-layout.js?v=deskPostingAcc1";
 import { mountIngatlanWheelBoard } from "./bocsatech-ingatlan-wheels.js?v=immoUiParity1";
 import {
   isIngatlanWheelAdminCategory,
@@ -2304,8 +2304,7 @@ function vehicleDeskPostingLayoutView(cat, label, sharedHint) {
   const previewHref = vehiclePostingPreviewHref(cat);
   const isMaster = cat === DESK_POSTING_LAYOUT_MASTER;
   const inheritNotice = isMaster
-    ? `<p class="hint">Ez a <strong>master</strong> elrendezés — a live desk feladás (személyautó, leasing, bérautó, teher…) innen örökli a mezősorrendet és megjelenést.</p>
-       <p><a class="btn ghost" href="${esc(previewHref)}" target="_blank" rel="noopener">Live desk előnézet — személyautó</a></p>`
+    ? `<p class="hint">Ez a <strong>master</strong> elrendezés — a live desk feladás (személyautó, leasing, bérautó, teher…) innen örökli a mezősorrendet. A szerkesztő ugyanazt az accordion menüt mutatja, mint a <a href="${esc(previewHref)}" target="_blank" rel="noopener">hirdetésfeladás</a> oldal (Alap / Műszaki / Extrák / Hirdetés + képek középen).</p>`
     : `<p class="hint">A mezőelrendezés és desk megjelenés a <strong>Személyautó feladás</strong> masterből jön (ugyanaz a 3 oszlopos desk, accordion menü, kép+leírás középen).</p>
        <p class="hint">Szerkesztés: Autók → Személyautó feladás. Itt csak előnézet.</p>
        <p><a class="btn" href="${esc(previewHref)}" target="_blank" rel="noopener">Live desk előnézet — ${esc(label)}</a></p>`;
@@ -2339,7 +2338,7 @@ function layoutView() {
       : isImmoWizard
         ? "Az ingatlanfeladás kerék-panelen kívüli mezői. Húzd a cellát a lapon belül vagy másik lépésre; az ár, leírás, képek és helyszín elrendezése itt kezelhető."
         : isVehiclePostingLayoutCat(cat)
-          ? "Master (személyautó): húzd a mezőket; mentés után hard refresh. Többi autótípus ugyanazt a desk megjelenést használja — előnézet gombbal."
+          ? "Bal: accordion menü (mint a live desk). Jobb: képek/leírás középső oszlop. Húzd a mezőket; mentés után hard refresh a hirdetésfeladáson."
           : "Csak ennek a kategóriának a mezői. Húzd a cellát a lapon belül vagy másik lépésre. Mentés után a hirdetésfeladáson hard refresh kell.";
   if (isVehiclePostingLayoutCat(cat)) {
     return vehicleDeskPostingLayoutView(cat, label, sharedHint);
@@ -2697,6 +2696,7 @@ function render() {
       try {
         const isImmoWizard = isIngatlanWizardLayoutTab();
         mountLayoutBoard(root, layout, {
+          deskPosting: layoutCategoryFromTab() === DESK_POSTING_LAYOUT_MASTER,
           stepNames: isImmoWizard
             ? {
                 1: "Ingatlan alapadatok",

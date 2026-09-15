@@ -385,6 +385,22 @@ function isSearchLayoutCat(id) {
   return id === "szemelyauto-search" || id === "teherauto-search";
 }
 
+const DESK_POSTING_LAYOUT_MASTER = "szemelyauto";
+const DESK_POSTING_LAYOUT_ALIASES = new Set(["leasing", "berauto", "lakokocsi", "kisteher", "teherauto"]);
+
+function isVehiclePostingLayoutCat(id) {
+  return id === DESK_POSTING_LAYOUT_MASTER || DESK_POSTING_LAYOUT_ALIASES.has(id);
+}
+
+function isDeskPostingLayoutAlias(id) {
+  return DESK_POSTING_LAYOUT_ALIASES.has(id);
+}
+
+function vehiclePostingPreviewHref(id) {
+  const vertical = id === "kisteher" || id === "teherauto" ? "teher" : "auto";
+  return `/hirdetesfeladas.html?vertical=${encodeURIComponent(vertical)}&subtype=${encodeURIComponent(id)}&start=1`;
+}
+
 function otpSentMessage(data) {
   const to = data.emailMasked ? ` (${data.emailMasked})` : "";
   if (data.devCode) {
@@ -957,6 +973,11 @@ const actions = {
     info = "";
     try {
       const cat = layoutCategoryFromTab();
+      if (isDeskPostingLayoutAlias(cat)) {
+        throw new Error(
+          "Ennek a kategóriának az elrendezése a Személyautó feladás masterből jön. Szerkeszd ott."
+        );
+      }
       if (isIngatlanWheelLayoutTab()) {
         const data = await api("/api/level1/ingatlan-wheel-schema", {
           method: "PUT",
@@ -2279,6 +2300,28 @@ function tipusFieldsView() {
     </div>`;
 }
 
+function vehicleDeskPostingLayoutView(cat, label, sharedHint) {
+  const previewHref = vehiclePostingPreviewHref(cat);
+  const isMaster = cat === DESK_POSTING_LAYOUT_MASTER;
+  const inheritNotice = isMaster
+    ? `<p class="hint">Ez a <strong>master</strong> elrendezés — a live desk feladás (személyautó, leasing, bérautó, teher…) innen örökli a mezősorrendet és megjelenést.</p>
+       <p><a class="btn ghost" href="${esc(previewHref)}" target="_blank" rel="noopener">Live desk előnézet — személyautó</a></p>`
+    : `<p class="hint">A mezőelrendezés és desk megjelenés a <strong>Személyautó feladás</strong> masterből jön (ugyanaz a 3 oszlopos desk, accordion menü, kép+leírás középen).</p>
+       <p class="hint">Szerkesztés: Autók → Személyautó feladás. Itt csak előnézet.</p>
+       <p><a class="btn" href="${esc(previewHref)}" target="_blank" rel="noopener">Live desk előnézet — ${esc(label)}</a></p>`;
+  const editorBlock = isMaster
+    ? `<div id="layout-root"></div>
+       <div class="row" style="margin-top:1rem"><button class="btn" type="button" data-act="saveLayout">Elrendezés mentése</button></div>`
+    : "";
+  return `
+    <h2 class="layout-cat-title">${esc(label)} — feladási mezők (desk)</h2>
+    ${inheritNotice}
+    <p class="hint">${esc(sharedHint)}</p>
+    ${editorBlock}
+    <p class="ok">${info}</p>
+    <p class="err">${err}</p>`;
+}
+
 function layoutView() {
   const cat = layoutCategoryFromTab();
   const isImmoWizard = isIngatlanWizardLayoutTab();
@@ -2295,7 +2338,12 @@ function layoutView() {
         : "Személyautó gyorskereső + Több szűrő. 1 = gyorskereső, 2 = műszaki, 3 = Akkumulátor és hatótáv adatok (Extrák felett — üres rács, Törölt mezőkből rakd vissza), 4 = Extrák, 5 = helyszín. Szélesség / pozíció mint a többi. Mentés után az autó oldalon hard refresh."
       : isImmoWizard
         ? "Az ingatlanfeladás kerék-panelen kívüli mezői. Húzd a cellát a lapon belül vagy másik lépésre; az ár, leírás, képek és helyszín elrendezése itt kezelhető."
-        : "Csak ennek a kategóriának a mezői. Húzd a cellát a lapon belül vagy másik lépésre. Mentés után a hirdetésfeladáson hard refresh kell.";
+        : isVehiclePostingLayoutCat(cat)
+          ? "Master (személyautó): húzd a mezőket; mentés után hard refresh. Többi autótípus ugyanazt a desk megjelenést használja — előnézet gombbal."
+          : "Csak ennek a kategóriának a mezői. Húzd a cellát a lapon belül vagy másik lépésre. Mentés után a hirdetésfeladáson hard refresh kell.";
+  if (isVehiclePostingLayoutCat(cat)) {
+    return vehicleDeskPostingLayoutView(cat, label, sharedHint);
+  }
   const titleSuffix = isImmo
     ? "kerék-séma"
     : isSearch
@@ -2616,8 +2664,13 @@ function render() {
   h(admin ? shell() : loginView());
   if (!admin) return;
   if (isLayoutTab()) {
+    const layoutCat = layoutCategoryFromTab();
+    if (isDeskPostingLayoutAlias(layoutCat)) {
+      return;
+    }
     const root = document.getElementById("layout-root");
     if (!root) {
+      if (isVehiclePostingLayoutCat(layoutCat)) return;
       err = err || "Hiányzik a szerkesztő felület (layout-root).";
       h(admin ? shell() : loginView());
       return;

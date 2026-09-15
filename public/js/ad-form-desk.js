@@ -12,6 +12,15 @@ const ACCORDIONS = [
 
 const PHOTO_STEP = 4;
 
+const DESK_VEHICLE_SUBTYPES = new Set([
+  "szemelyauto",
+  "leasing",
+  "berauto",
+  "lakokocsi",
+  "kisteher",
+  "teherauto",
+]);
+
 function shellAccordions() {
   return ACCORDIONS.filter((item) => item.shell !== false);
 }
@@ -30,8 +39,12 @@ function isSzemelyautoAdForm(form) {
   return currentSubtype(form) === "szemelyauto";
 }
 
+function isDeskVehicleAdForm(form) {
+  return DESK_VEHICLE_SUBTYPES.has(currentSubtype(form));
+}
+
 function isAdFormDesk(form) {
-  return isSzemelyautoAdForm(form) && window.matchMedia(DESK_MQ).matches;
+  return isDeskVehicleAdForm(form) && window.matchMedia(DESK_MQ).matches;
 }
 
 function filledControl(el) {
@@ -412,4 +425,4 @@ window.addEventListener("ad-form-layout-refresh", () => {
 });
 window.addEventListener("ad-form-ready", () => applyAdFormDesk());
 
-export { applyAdFormDesk, isAdFormDesk };
+export { applyAdFormDesk, isAdFormDesk, isDeskVehicleAdForm, isSzemelyautoAdForm };

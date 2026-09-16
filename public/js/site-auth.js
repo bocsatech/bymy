@@ -101,8 +101,19 @@ function setCachedUser(user) {
 }
 
 function rememberAuth(data) {
-  if (data?.token) setStoredToken(data.token);
   return setCachedUser(data?.user ?? null);
+}
+
+export async function ensureBookmarkletToken() {
+  try {
+    const response = await fetch("/api/auth/bookmarklet-token", { credentials: "same-origin" });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || !data.token) return "";
+    setStoredToken(data.token);
+    return data.token;
+  } catch {
+    return "";
+  }
 }
 
 export function getAuthUser() {
@@ -161,9 +172,11 @@ async function authFetch(url, options = {}) {
         "A belépő szerver most nem elérhető (API hiányzik). Próbáld újra pár perc múlva — nem a jelszó a gond."
       );
     }
-    throw new Error(data.error || "Kérés sikertelen.");
+    const err = new Error(data.error || "Kérés sikertelen.");
+    err.code = data.code;
+    err.status = response.status;
+    throw err;
   }
-  if (data.token) setStoredToken(data.token);
   return data;
 }
 
@@ -731,10 +744,10 @@ export function initRegisterPage() {
       if (errorEl) {
         errorEl.hidden = false;
         const msg = error.message ?? "Sikertelen regisztráció.";
-        if (String(msg).includes("már regisztrálva")) {
+        if (error.code === "EMAIL_ALREADY_REGISTERED") {
           const q = encodeURIComponent(email);
           errorEl.innerHTML =
-            `Ez az email már regisztrálva van — ezért nem megy ki új aktiváló email.<br>` +
+            `Ha már van fiókod ezzel az email címmel, jelentkezz be.<br>` +
             `<a href="/belepes.html">Belépés</a>` +
             (email
               ? ` · <a href="/aktivalas.html?email=${q}">Aktiváló email újraküldése</a>`

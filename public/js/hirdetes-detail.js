@@ -1,7 +1,13 @@
-import { fetchListing, fetchListings, recordListingView, deleteListingFromDb } from "./db-client.js?v=relatedAll2";
+import {
+  fetchListing,
+  fetchRelatedListings,
+  revealListingContact,
+  recordListingView,
+  deleteListingFromDb,
+} from "./db-client.js?v=secList1";
 import { getAuthUser, getDisplayName, getProfile } from "./site-auth.js?v=auth20260805localdb9";
 import { startConversation, sendMessage } from "./messages-api.js?v=msgLive1";
-import { canMessageListing, openListingMessage } from "./start-listing-message.js?v=msgLive1";
+import { openListingMessage } from "./start-listing-message.js?v=msgLive1";
 import { getParkplatz, addParkplatzItem, removeParkplatzItem } from "./fok-data.js?v=parkThumb1";
 import { listingReturnHref, listingDetailHref, rememberListingOpen, getListingSearchNav, touchListingReturnId } from "./listing-return.js?v=searchNav1";
 
@@ -206,15 +212,9 @@ function revealRelatedListings(event) {
 }
 
 async function loadRelatedListings(listingId, view) {
-  if (!view?.userId) return;
   if (root?.dataset.ownListing === "1" || isOwnListing(view)) return;
   try {
-    const related = await fetchListings({
-      owner: view.userId,
-      excludeId: listingId,
-      limit: 500,
-      status: "feladott",
-    });
+    const related = await fetchRelatedListings(listingId, { limit: 24 });
     applyRelated(view, related);
   } catch {
   }
@@ -225,7 +225,7 @@ function render(view, listing, related) {
   const first = images[0] || "";
   const equipmentGroups = Array.isArray(view.equipmentGroups) ? view.equipmentGroups : [];
   const own = isOwnListing(view, listing);
-  const canMsg = !own && canMessageListing(view.userId);
+  const canMsg = !own;
   const user = getAuthUser();
   const profile = getProfile() || {};
   const partner = listing?.partner;
@@ -386,15 +386,15 @@ function render(view, listing, related) {
               : `<button type="button" class="hd-btn hd-btn--primary" data-hd-goto-form>${ICON.mail} Hirdető kapcsolata</button>`
         }
         ${
-          view.phone
-            ? `<button type="button" class="hd-btn hd-btn--ghost" data-hd-phone data-full="${escapeHtml(view.phone)}">${ICON.phone} ${escapeHtml(view.phoneMasked)} szám mutatása</button>`
+          view.hasPhone || view.phone
+            ? `<button type="button" class="hd-btn hd-btn--ghost" data-hd-phone>${ICON.phone} ${escapeHtml(view.phoneMasked || "Telefonszám")} mutatása</button>`
             : ""
         }
         <a class="hd-btn hd-btn--ghost" href="/adasveteli-szerzodes.html?id=${encodeURIComponent(view.id)}">Adásvételi szerződés</a>
         ${
           !own && related.length
             ? `<button type="button" class="hd-btn hd-btn--ghost" data-hd-related-link aria-expanded="false" aria-controls="hd-related">Több ettől a hirdetőtől ${related.length}</button>`
-            : !own && view.userId
+            : !own
               ? `<button type="button" class="hd-btn hd-btn--ghost" data-hd-related-link aria-expanded="false" aria-controls="hd-related">Több ettől a hirdetőtől …</button>`
               : ""
         }
@@ -460,8 +460,8 @@ function render(view, listing, related) {
         <p class="hd-seller-addr">Hivatkozási szám: ${escapeHtml(view.code || String(view.id))}</p>
         ${view.website ? `<p><a class="hd-web" href="${escapeHtml(view.website)}" target="_blank" rel="noopener">Weboldal</a></p>` : ""}
         ${
-          view.phone
-            ? `<button type="button" class="hd-btn hd-btn--ghost" data-hd-phone data-full="${escapeHtml(view.phone)}">${ICON.phone} ${escapeHtml(view.phoneMasked)} szám mutatása</button>`
+          view.hasPhone || view.phone
+            ? `<button type="button" class="hd-btn hd-btn--ghost" data-hd-phone>${ICON.phone} ${escapeHtml(view.phoneMasked || "Telefonszám")} mutatása</button>`
             : ""
         }
       </div>
@@ -645,11 +645,35 @@ function bindUi(view, listing) {
   });
 
   root.querySelectorAll("[data-hd-phone]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const full = btn.getAttribute("data-full") || "";
-      btn.textContent = full;
-      const digits = full.replace(/[^\d+]/g, "");
-      if (digits.length >= 7) window.location.href = `tel:${digits}`;
+    btn.addEventListener("click", async () => {
+      if (btn.dataset.revealed === "1") return;
+      btn.disabled = true;
+      try {
+        const contact = view.phone
+          ? { phone: view.phone, addressLines: view.addressLines || [] }
+          : await revealListingContact(view.id);
+        const full = String(contact.phone || "").trim();
+        if (!full) {
+          btn.textContent = "Nincs telefonszám";
+          return;
+        }
+        btn.dataset.revealed = "1";
+        btn.textContent = full;
+        const digits = full.replace(/[^\d+]/g, "");
+        if (digits.length >= 7) window.location.href = `tel:${digits}`;
+        if (contact.addressLines?.length && !view.addressLines?.length) {
+          for (const addrEl of root.querySelectorAll(".hd-seller-addr")) {
+            if (!addrEl.textContent?.trim()) {
+              addrEl.innerHTML = contact.addressLines.map(escapeHtml).join("<br>");
+            }
+          }
+        }
+      } catch (error) {
+        btn.textContent = "Nem elérhető";
+        alert(error.message ?? "A telefonszám most nem kérhető le.");
+      } finally {
+        btn.disabled = false;
+      }
     });
   });
 
@@ -667,7 +691,6 @@ function bindUi(view, listing) {
           priceLabel: view.price,
           meta: view.metaLine,
           code: view.code,
-          sellerId: view.userId,
         });
       } catch (error) {
         alert(error.message ?? "Az üzenet indítása sikertelen.");
@@ -714,7 +737,6 @@ function bindUi(view, listing) {
         priceLabel: view.price,
         meta: view.metaLine,
         code: view.code,
-        sellerId: view.userId,
       });
       await sendMessage(conv.id, { body: parts.join("\n") });
       if (status) {

@@ -149,6 +149,11 @@ import { recordPageVisit, visitorCookieHeader } from "./lib/site-visitors.mjs";
 import { isIpBlocked } from "./lib/site-ip-blocks.mjs";
 import { enforceMembersGate } from "./lib/site-gate.mjs";
 import { readJsonBody } from "./lib/read-json-body.mjs";
+import {
+  applyListingAccessPolicy,
+  sanitizeListingList,
+} from "./lib/listing-api-access.mjs";
+import { withOptionalSessionToken } from "./lib/auth-client-token.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 loadEnvFiles(__dirname);
@@ -169,6 +174,27 @@ function assertAuthRate(req, res, bucket, { limit = 12, windowMs = 15 * 60 * 100
     return false;
   }
   return true;
+}
+
+function assertPublicListingRate(req, res, bucket, { limit = 60, windowMs = 15 * 60 * 1000 } = {}) {
+  const ip = clientIp(req);
+  const result = rateLimit(`${bucket}:${ip}`, { limit, windowMs });
+  if (!result.ok) {
+    sendJson(
+      res,
+      429,
+      { error: "Túl sok kérés. Próbáld újra később." },
+      { "Retry-After": String(result.retryAfterSec || 60) }
+    );
+    return false;
+  }
+  return true;
+}
+
+async function listingAccessFlags(req) {
+  const user = await requestUser(req);
+  const admin = await getLevel1AdminBySession(getLevel1TokenFromRequest(req));
+  return { user, isAdmin: Boolean(admin) };
 }
 
 function adminBypassBlockedIp(pathname) {
@@ -822,7 +848,11 @@ async function handleListingsApi(req, res, pathname) {
   }
 
   if (latestMatch && req.method === "GET") {
-    sendJson(res, 200, { listing: await getLatestListing() });
+    const latest = await getLatestListing();
+    const access = await listingAccessFlags(req);
+    sendJson(res, 200, {
+      listing: latest ? applyListingAccessPolicy(latest, access) : null,
+    });
     return;
   }
 
@@ -847,20 +877,85 @@ async function handleListingsApi(req, res, pathname) {
     const vertical = url.searchParams.get("vertical");
     const owner = url.searchParams.get("owner") || url.searchParams.get("userId");
     if (owner) {
+      const access = await listingAccessFlags(req);
+      const ownerId = Number(owner);
+      if (!access.isAdmin && (!access.user || access.user.id !== ownerId)) {
+        sendJson(res, 403, { error: "Nincs jogosultság ehhez a listához." });
+        return;
+      }
       const limit = Math.min(Math.max(Number(url.searchParams.get("limit") ?? 200), 1), 500);
       const excludeId = url.searchParams.get("exclude");
-      sendJson(res, 200, {
-        listings: await listListingsByOwner({
-          userId: owner,
-          limit,
-          excludeId,
-          status: status || "feladott",
-        }),
+      const listings = await listListingsByOwner({
+        userId: owner,
+        limit,
+        excludeId,
+        status: status || "feladott",
       });
+      sendJson(res, 200, { listings });
       return;
     }
     const limit = Math.min(Math.max(Number(url.searchParams.get("limit") ?? 50), 1), 50);
-    sendJson(res, 200, { listings: await listListingsWithPreview({ limit, status, vertical }) });
+    const listings = await listListingsWithPreview({ limit, status, vertical });
+    sendJson(res, 200, { listings: sanitizeListingList(listings) });
+    return;
+  }
+
+  const relatedMatch = pathname.match(/^\/api\/listings\/(\d+)\/related$/);
+  if (relatedMatch && req.method === "GET") {
+    if (!assertPublicListingRate(req, res, "listing-related", { limit: 120, windowMs: 15 * 60 * 1000 })) {
+      return;
+    }
+    const listingId = Number(relatedMatch[1]);
+    const url = new URL(req.url ?? "", `http://${HOST}`);
+    const limit = Math.min(Math.max(Number(url.searchParams.get("limit") ?? 24), 1), 60);
+    const listing = await getListing(listingId, { mode: "detail" });
+    if (!listing?.user_id || listing.status !== "feladott") {
+      sendJson(res, 404, { error: "Nincs ilyen hirdetés." });
+      return;
+    }
+    const listings = await listListingsByOwner({
+      userId: listing.user_id,
+      limit,
+      excludeId: listingId,
+      status: "feladott",
+    });
+    sendJson(res, 200, { listings: sanitizeListingList(listings) });
+    return;
+  }
+
+  const revealContactMatch = pathname.match(/^\/api\/listings\/(\d+)\/reveal-contact$/);
+  if (revealContactMatch && req.method === "POST") {
+    if (!assertPublicListingRate(req, res, "listing-reveal", { limit: 40, windowMs: 60 * 60 * 1000 })) {
+      return;
+    }
+    const listingId = Number(revealContactMatch[1]);
+    const perListing = rateLimit(`listing-reveal:${clientIp(req)}:${listingId}`, {
+      limit: 8,
+      windowMs: 60 * 60 * 1000,
+    });
+    if (!perListing.ok) {
+      sendJson(
+        res,
+        429,
+        { error: "Túl sok kérés ehhez a hirdetéshez. Próbáld később." },
+        { "Retry-After": String(perListing.retryAfterSec || 60) }
+      );
+      return;
+    }
+    const listing = await getListing(listingId, { mode: "detail" });
+    if (!listing || listing.status !== "feladott") {
+      sendJson(res, 404, { error: "Nincs ilyen hirdetés." });
+      return;
+    }
+    const phone = String(listing.detail?.phone ?? "").trim();
+    const addressLines = Array.isArray(listing.detail?.addressLines)
+      ? listing.detail.addressLines.map((line) => String(line ?? "").trim()).filter(Boolean)
+      : [];
+    if (!phone && !addressLines.length) {
+      sendJson(res, 404, { error: "Ehhez a hirdetéshez nincs megadott elérhetőség." });
+      return;
+    }
+    sendJson(res, 200, { phone, addressLines });
     return;
   }
 
@@ -1014,7 +1109,8 @@ async function handleListingsApi(req, res, pathname) {
         listing.partner = null;
       }
     }
-    sendJson(res, 200, { listing });
+    const access = await listingAccessFlags(req);
+    sendJson(res, 200, { listing: applyListingAccessPolicy(listing, access) });
     return;
   }
 
@@ -1651,7 +1747,7 @@ async function handleAuthApi(req, res, pathname) {
         }
         throw error;
       }
-      sendJson(res, 200, { user: me, token: me && token ? token : null });
+      sendJson(res, 200, { user: me });
       return;
     }
 
@@ -1664,6 +1760,18 @@ async function handleAuthApi(req, res, pathname) {
       } else {
         throw error;
       }
+    }
+
+    if (pathname === "/api/auth/bookmarklet-token" && req.method === "GET") {
+      if (!currentUser || !token) {
+        sendJson(res, 401, { error: "Nem vagy bejelentkezve." });
+        return;
+      }
+      if (!assertAuthRate(req, res, "bookmarklet-token", { limit: 30, windowMs: 60 * 60 * 1000 })) {
+        return;
+      }
+      sendJson(res, 200, { token });
+      return;
     }
 
     if (pathname === "/api/auth/db" && req.method === "GET") {
@@ -1833,14 +1941,17 @@ async function handleAuthApi(req, res, pathname) {
         sendJson(
           res,
           200,
-          {
-            ok: true,
-            needsActivation: false,
-            email: registered.email,
-            user,
-            token: session.token,
-            message: "Regisztráció sikeres.",
-          },
+          withOptionalSessionToken(
+            req,
+            {
+              ok: true,
+              needsActivation: false,
+              email: registered.email,
+              user,
+              message: "Regisztráció sikeres.",
+            },
+            session.token
+          ),
           { "Set-Cookie": sessionCookieHeader(session.token, session.expires) }
         );
         return;
@@ -1880,7 +1991,7 @@ async function handleAuthApi(req, res, pathname) {
       sendJson(
         res,
         200,
-        { ok: true, user, token: session.token },
+        withOptionalSessionToken(req, { ok: true, user }, session.token),
         { "Set-Cookie": sessionCookieHeader(session.token, session.expires) }
       );
       return;
@@ -1979,12 +2090,15 @@ async function handleAuthApi(req, res, pathname) {
         sendJson(
           res,
           200,
-          { user, token: session.token },
+          withOptionalSessionToken(req, { user }, session.token),
           { "Set-Cookie": sessionCookieHeader(session.token, session.expires) }
         );
       } catch (error) {
         if (error.code === "EMAIL_NOT_VERIFIED") {
-          sendJson(res, 403, { error: error.message, code: "EMAIL_NOT_VERIFIED", email: body.email });
+          sendJson(res, 403, {
+            error: error.message,
+            code: "EMAIL_NOT_VERIFIED",
+          });
           return;
         }
         throw error;
@@ -2047,7 +2161,7 @@ async function handleAuthApi(req, res, pathname) {
       const body = await readBody(req);
       const pageLayout = body.pageLayout ?? body.page_layout ?? null;
       const user = await mergeUserProfileJson(currentUser.id, { pageLayout });
-      sendJson(res, 200, { ok: true, user, token });
+      sendJson(res, 200, { ok: true, user });
       return;
     }
 
@@ -2060,7 +2174,7 @@ async function handleAuthApi(req, res, pathname) {
       if (body.displayName !== undefined && body.profile === undefined) {
         const displayName = await setUserDisplayName(currentUser.id, body.displayName);
         const user = await getUserById(currentUser.id);
-        sendJson(res, 200, { displayName, user, token });
+        sendJson(res, 200, { displayName, user });
         return;
       }
       const saved = await saveUserProfile(currentUser.id, body.profile ?? body);
@@ -2081,7 +2195,6 @@ async function handleAuthApi(req, res, pathname) {
       sendJson(res, 200, {
         profile,
         user,
-        token,
         savedTo: _savedTo || getProfilesFilePath(),
       });
       return;
@@ -2109,10 +2222,16 @@ async function handleAuthApi(req, res, pathname) {
     const status =
       message.includes("bejelentkezve") || message.includes("Hibás")
         ? 401
-        : message.includes("már regisztrálva") || message.includes("kötelező") || message.includes("egyezik")
+        : error.code === "EMAIL_ALREADY_REGISTERED" ||
+            message.includes("kötelező") ||
+            message.includes("egyezik") ||
+            message.includes("Regisztráció sikertelen")
           ? 400
           : 400;
-    sendJson(res, status, { error: message });
+    sendJson(res, status, {
+      error: message,
+      ...(error.code ? { code: error.code } : {}),
+    });
   }
 }
 

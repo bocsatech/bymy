@@ -4,7 +4,8 @@ import {
   getDisplayName,
   requireAuthForPage,
   initSiteAuth,
-} from "./site-auth.js?v=haCdn1";
+  ensureBookmarkletToken,
+} from "./site-auth.js?v=secAuth1";
 
 const CAT_STORAGE_KEY = "bymy-hirdetes-category";
 const CAT_STORAGE_VERSION = 2;
@@ -67,6 +68,9 @@ async function copyBookmarkletLink() {
   if (!href || href === "#") {
     setStatus("A könyvjelző link most nem elérhető.", "err");
     return;
+  }
+  if (!getAuthToken()) {
+    await ensureBookmarkletToken();
   }
   if (!getAuthToken()) {
     setStatus("Nincs bejelentkezési token — frissítsd az oldalt, majd másold újra a könyvjelzőt.", "err");
@@ -572,6 +576,7 @@ function bindAccountNav() {
 export async function initHaImportPage() {
   const ok = await requireAuthForPage();
   if (!ok) return;
+  await ensureBookmarkletToken();
   try {
     // Könyvjelző ezzel a névvel találja meg / fókuszálja ezt a lapot (ne új tab)
     window.name = "bymy-ha-import";

@@ -7,10 +7,10 @@ export function isOwnListing(sellerId) {
   return Boolean(me > 0 && owner > 0 && me === owner);
 }
 
-export function canMessageListing(sellerId) {
+export function canMessageListing(sellerId, { listingId } = {}) {
   const owner = Number(sellerId);
-  if (!Number.isFinite(owner) || owner <= 0) return false;
-  return !isOwnListing(owner);
+  if (Number.isFinite(owner) && owner > 0) return !isOwnListing(owner);
+  return Number(listingId) > 0;
 }
 
 export async function openListingMessage({
@@ -29,7 +29,7 @@ export async function openListingMessage({
     );
     return null;
   }
-  if (!canMessageListing(sellerId)) {
+  if (!canMessageListing(sellerId, { listingId })) {
     throw new Error(
       isOwnListing(sellerId)
         ? "Saját hirdetésedre nem küldhetsz üzenetet."
@@ -42,7 +42,7 @@ export async function openListingMessage({
     priceLabel,
     meta,
     code,
-    sellerId: Number(sellerId),
+    ...(Number(sellerId) > 0 ? { sellerId: Number(sellerId) } : {}),
   });
   if (redirect && conv?.id) {
     window.location.href = `/uzenetek.html?c=${encodeURIComponent(conv.id)}`;

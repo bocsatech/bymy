@@ -65,6 +65,28 @@ export async function fetchListing(id, { view } = {}) {
   return data.listing ?? null;
 }
 
+export async function fetchRelatedListings(listingId, { limit = 24 } = {}) {
+  const params = new URLSearchParams({ limit: String(limit) });
+  const response = await fetch(`/api/listings/${listingId}/related?${params}`, {
+    credentials: "same-origin",
+  });
+  const data = await parseJson(response);
+  return data.listings ?? [];
+}
+
+export async function revealListingContact(listingId) {
+  const response = await fetch(`/api/listings/${listingId}/reveal-contact`, {
+    method: "POST",
+    credentials: "same-origin",
+    headers: { "Content-Type": "application/json" },
+  });
+  const data = await parseJson(response);
+  return {
+    phone: String(data.phone ?? "").trim(),
+    addressLines: Array.isArray(data.addressLines) ? data.addressLines : [],
+  };
+}
+
 export async function saveListingToDb(formData, listingId = null, { status = null, photos = [] } = {}) {
   const response = await fetch("/api/listings", {
     method: "POST",

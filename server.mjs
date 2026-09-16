@@ -144,7 +144,7 @@ import { getLevel1TokenFromRequest, getLevel1AdminBySession } from "./lib/level1
 import { safeInternalPath } from "./lib/safe-path.mjs";
 import { rateLimit, clientIp } from "./lib/rate-limit.mjs";
 import { applySecurityHeaders } from "./lib/security-headers.mjs";
-import { turnstilePublicConfig, verifyTurnstileToken } from "./lib/turnstile.mjs";
+import { turnstilePublicConfig, turnstileHealthStatus, verifyTurnstileToken } from "./lib/turnstile.mjs";
 import { recordPageVisit, visitorCookieHeader } from "./lib/site-visitors.mjs";
 import { isIpBlocked } from "./lib/site-ip-blocks.mjs";
 import { enforceMembersGate } from "./lib/site-gate.mjs";
@@ -2273,6 +2273,7 @@ export async function handleHttpRequest(req, res) {
       version: readFileSync(join(PUBLIC, "version.txt"), "utf8").trim(),
       service: "bymy-autosweb",
       backend: isSupabaseBackend() ? "supabase" : "sqlite",
+      turnstile: turnstileHealthStatus(),
       ...(allowDevSecretsInResponse()
         ? {
             chrome: findChromeExecutable(),

@@ -64,6 +64,19 @@ export async function mountTurnstile(container, { theme = "light", size = "norma
   if (!container) return { enabled: false, ready: true, getToken: async () => "", reset: () => {} };
 
   const config = await loadConfig();
+  if (config.required && !config.enabled) {
+    if (container && size !== "invisible") {
+      container.innerHTML =
+        '<p class="auth-security-fail">A biztonsági ellenőrzés nincs beállítva az oldalon. Próbáld később.</p>';
+    }
+    return {
+      enabled: true,
+      ready: false,
+      error: "Turnstile nincs konfigurálva",
+      getToken: async () => "",
+      reset: () => {},
+    };
+  }
   if (!config.enabled || !config.siteKey) {
     return { enabled: false, ready: true, getToken: async () => "", reset: () => {} };
   }

@@ -6,7 +6,7 @@ import {
   deleteListingFromDb,
 } from "./db-client.js?v=secReveal1";
 import { getAuthUser, getDisplayName, getProfile } from "./site-auth.js?v=auth20260805localdb9";
-import { mountTurnstile } from "./turnstile-ui.js?v=turnstile7";
+import { mountTurnstile } from "./turnstile-ui.js?v=turnstile8";
 import { startConversation, sendMessage } from "./messages-api.js?v=msgLive1";
 import { openListingMessage } from "./start-listing-message.js?v=msgLive1";
 import { getParkplatz, addParkplatzItem, removeParkplatzItem } from "./fok-data.js?v=parkThumb1";

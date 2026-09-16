@@ -22,7 +22,10 @@ Turnstile (belépés / regisztráció botvédelem):
 - Domain: `bymy.vercel.app` (és később `bymy.hu`)
 - Widget mode: Managed
 - A site key + secret key a fenti két env változó
-- Ha nincs beállítva, a formok Turnstile nélkül is mennek (lokális / WIP)
+- **Production / Vercel:** Turnstile kötelező — env nélkül auth és telefon reveal elutasítva
+- Lokális dev (`NODE_ENV` nem production): Turnstile nélkül is mehet (WIP)
+
+Részletes Cloudflare perimeter (DNS proxied, WAF, rate limit, S1 nginx): **`docs/cloudflare-perimeter.md`**
 
 If you are using OAuth later, also add:
 

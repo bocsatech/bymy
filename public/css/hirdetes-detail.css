@@ -1047,3 +1047,31 @@ html[data-theme="dark"] body.hd-page .hd-msg-bar {
   color: #000 !important;
 }
 
+.hd-phone-security {
+  margin: 0.85rem 0 0.5rem;
+}
+
+.hd-manual-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  margin: 0 0 0.65rem;
+  font-size: 0.88rem;
+  line-height: 1.35;
+  color: #344054;
+  cursor: pointer;
+  user-select: none;
+}
+
+.hd-manual-check input {
+  margin-top: 0.15rem;
+  flex-shrink: 0;
+  width: 1rem;
+  height: 1rem;
+  accent-color: #2563eb;
+}
+
+.hd-turnstile {
+  min-height: 65px;
+}
+

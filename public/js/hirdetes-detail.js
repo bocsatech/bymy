@@ -6,7 +6,7 @@ import {
   deleteListingFromDb,
 } from "./db-client.js?v=secReveal1";
 import { getAuthUser, getDisplayName, getProfile } from "./site-auth.js?v=auth20260805localdb9";
-import { mountTurnstile } from "./turnstile-ui.js?v=turnstile8";
+import { mountTurnstile } from "./turnstile-ui.js?v=turnstile9";
 import { startConversation, sendMessage } from "./messages-api.js?v=msgLive1";
 import { openListingMessage } from "./start-listing-message.js?v=msgLive1";
 import { getParkplatz, addParkplatzItem, removeParkplatzItem } from "./fok-data.js?v=parkThumb1";
@@ -516,7 +516,11 @@ function render(view, listing, related) {
           </div>`
         : ""
     }
-    ${view.hasPhone && !view.phone ? `<div id="hd-phone-turnstile" class="hd-turnstile" aria-hidden="true"></div>` : ""}
+    ${
+      view.hasPhone && !view.phone
+        ? `<div class="hd-phone-security" id="hd-phone-security"><div id="hd-phone-turnstile" class="hd-turnstile"></div></div>`
+        : ""
+    }
   `;
 
   bindUi(view, listing);
@@ -526,7 +530,7 @@ function bindUi(view, listing) {
   const needPhoneReveal = Boolean(view.hasPhone && !view.phone);
   let phoneTurnstile = { enabled: false, ready: true, execute: null, getToken: async () => "", reset: () => {} };
   const phoneTurnstileReady = needPhoneReveal
-    ? mountTurnstile(document.getElementById("hd-phone-turnstile"), { size: "invisible" }).then((widget) => {
+    ? mountTurnstile(document.getElementById("hd-phone-turnstile"), { requireManualCheck: true }).then((widget) => {
         phoneTurnstile = widget;
         return widget;
       })
@@ -677,13 +681,16 @@ function bindUi(view, listing) {
             alert("A biztonsági ellenőrző most nem elérhető. Frissítsd az oldalt.");
             return;
           }
+          if (phoneTurnstile.enabled && !phoneTurnstile.isManualChecked?.()) {
+            document.getElementById("hd-phone-security")?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+            alert("Előbb pipáld be a biztonsági ellenőrzést.");
+            return;
+          }
           let token = "";
           if (phoneTurnstile.enabled) {
-            token = phoneTurnstile.execute
-              ? await phoneTurnstile.execute({ waitMs: 15000 })
-              : await phoneTurnstile.getToken({ waitMs: 10000 });
+            token = await phoneTurnstile.getToken({ waitMs: 15000 });
             if (!token) {
-              alert("A biztonsági ellenőrzés sikertelen. Próbáld újra.");
+              alert("Várj, amíg a biztonsági ellenőrzés kész, vagy pipáld be újra.");
               phoneTurnstile.reset();
               return;
             }

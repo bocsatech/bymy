@@ -201,6 +201,26 @@ body.auth-gate-page .auth-security-box {
   overflow: visible;
 }
 
+body.auth-gate-page .auth-manual-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  margin: 0.35rem 0 0.5rem;
+  font-size: 0.88rem;
+  line-height: 1.35;
+  color: #344054;
+  cursor: pointer;
+  user-select: none;
+}
+
+body.auth-gate-page .auth-manual-check input {
+  margin-top: 0.15rem;
+  flex-shrink: 0;
+  width: 1rem;
+  height: 1rem;
+  accent-color: #2563eb;
+}
+
 body.auth-gate-page .auth-turnstile {
   display: block;
   min-height: 65px;

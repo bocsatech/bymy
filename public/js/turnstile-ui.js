@@ -56,49 +56,11 @@ function waitForTurnstileApi(timeoutMs = 12000) {
   });
 }
 
-function manualCheckClass(container) {
-  if (container.closest(".auth-security-box")) return "auth-manual-check";
-  if (container.closest(".hd-phone-security")) return "hd-manual-check";
-  return "bymy-manual-check";
-}
-
-function attachManualCheck(container) {
-  const label = document.createElement("label");
-  label.className = manualCheckClass(container);
-  label.innerHTML =
-    '<input type="checkbox" autocomplete="off" /><span>Biztonsági ellenőrzés — pipáld be a mezőt</span>';
-  container.parentElement?.insertBefore(label, container);
-  const input = label.querySelector("input");
-  return {
-    label,
-    isChecked: () => Boolean(input?.checked),
-    reset: () => {
-      if (input) input.checked = false;
-    },
-    onChange: (fn) => input?.addEventListener("change", fn),
-  };
-}
-
-function disabledWidget(extra = {}) {
-  return {
-    enabled: false,
-    ready: true,
-    getToken: async () => "",
-    reset: () => {},
-    isManualChecked: () => true,
-    ...extra,
-  };
-}
-
 /**
- * Cloudflare Turnstile — Managed ellenőrző.
- * requireManualCheck: saját pipa kötelező (Managed auto-pass ellen); alapból normal méretnél be.
+ * Cloudflare Turnstile — Managed ellenőrző, Cloudflare logóval (normal méret).
  */
-export async function mountTurnstile(
-  container,
-  { theme = "light", size = "normal", appearance = "always", requireManualCheck = null } = {}
-) {
-  if (!container) return disabledWidget();
+export async function mountTurnstile(container, { theme = "light", size = "normal", appearance = "always" } = {}) {
+  if (!container) return { enabled: false, ready: true, getToken: async () => "", reset: () => {} };
 
   const config = await loadConfig();
   if (config.required && !config.enabled) {
@@ -112,49 +74,37 @@ export async function mountTurnstile(
       error: "Turnstile nincs konfigurálva",
       getToken: async () => "",
       reset: () => {},
-      isManualChecked: () => false,
     };
   }
   if (!config.enabled || !config.siteKey) {
-    return disabledWidget({ isManualChecked: () => true });
+    return { enabled: false, ready: true, getToken: async () => "", reset: () => {} };
   }
 
   const invisible = size === "invisible";
-  const needManual = requireManualCheck ?? !invisible;
-  const box = container.closest(".auth-security-box") || container.closest(".hd-phone-security") || container;
-
-  if (!invisible) {
+  if (invisible) {
+    container.setAttribute("aria-hidden", "true");
+    container.style.cssText = "position:absolute;width:0;height:0;overflow:hidden;clip:rect(0,0,0,0)";
+  } else {
+    const box = container.closest(".auth-security-box") || container.closest(".hd-phone-security") || container;
     box.hidden = false;
     container.hidden = false;
   }
-
-  let manual = null;
-  if (needManual) {
-    manual = attachManualCheck(container);
-    container.hidden = true;
-  }
+  container.innerHTML = "";
+  container.setAttribute("aria-busy", "true");
 
   let widgetId = null;
   let token = "";
-  let rendered = false;
 
-  const renderWidget = async () => {
-    if (rendered) return;
-    rendered = true;
-    container.hidden = false;
-    container.innerHTML = "";
-    container.setAttribute("aria-busy", "true");
-
+  try {
     await loadScript();
     await waitForTurnstileApi();
 
     widgetId = window.turnstile.render(container, {
       sitekey: config.siteKey,
       theme,
-      size: invisible ? "invisible" : size,
+      size,
       appearance: invisible ? "execute" : appearance,
       language: "hu",
-      "feedback-enabled": false,
       callback: (value) => {
         token = String(value || "");
         container.setAttribute("aria-busy", "false");
@@ -172,115 +122,53 @@ export async function mountTurnstile(
       },
     });
     container.setAttribute("aria-busy", "false");
-  };
-
-  if (manual) {
-    manual.onChange(async () => {
-      if (!manual.isChecked()) {
-        token = "";
-        rendered = false;
-        container.innerHTML = "";
-        container.hidden = true;
-        if (widgetId != null) {
-          try {
-            window.turnstile?.remove?.(widgetId);
-          } catch {
-            /* ignore */
-          }
-          widgetId = null;
-        }
-        return;
-      }
-      try {
-        await renderWidget();
-      } catch (error) {
-        console.error("[turnstile]", error);
-        container.innerHTML =
-          '<p class="auth-security-fail">A biztonsági ellenőrző most nem elérhető. Frissítsd az oldalt.</p>';
-        container.hidden = false;
-      }
-    });
-  } else {
-    try {
-      if (invisible) {
-        container.setAttribute("aria-hidden", "true");
-        container.style.cssText = "position:absolute;width:0;height:0;overflow:hidden;clip:rect(0,0,0,0)";
-      }
-      await renderWidget();
-    } catch (error) {
-      console.error("[turnstile]", error);
-      container.innerHTML =
-        '<p class="auth-security-fail">A biztonsági ellenőrző most nem elérhető. Frissítsd az oldalt, és próbáld újra.</p>';
-      return {
-        enabled: true,
-        ready: false,
-        error: error?.message || "Turnstile hiba",
-        getToken: async () => "",
-        reset: () => {},
-        isManualChecked: () => true,
-      };
-    }
+  } catch (error) {
+    console.error("[turnstile]", error);
+    container.innerHTML =
+      '<p class="auth-security-fail">A biztonsági ellenőrző most nem elérhető. Frissítsd az oldalt, és próbáld újra.</p>';
+    return {
+      enabled: true,
+      ready: false,
+      error: error?.message || "Turnstile hiba",
+      getToken: async () => "",
+      reset: () => {},
+    };
   }
 
-  const readToken = () => {
-    if (manual && !manual.isChecked()) return "";
-    if (token) return token;
-    if (widgetId == null) return "";
-    try {
-      return String(window.turnstile?.getResponse?.(widgetId) || "");
-    } catch {
-      return "";
-    }
-  };
-
   const getToken = async ({ waitMs = 0 } = {}) => {
-    if (manual && !manual.isChecked()) return "";
-    if (!rendered && manual?.isChecked()) {
+    const read = () => {
+      if (token) return token;
       try {
-        await renderWidget();
+        return String(window.turnstile?.getResponse?.(widgetId) || "");
       } catch {
         return "";
       }
-    }
-    let value = readToken();
+    };
+    let value = read();
     if (value || waitMs <= 0) return value;
     const deadline = Date.now() + waitMs;
     while (Date.now() < deadline) {
       await new Promise((r) => setTimeout(r, 50));
-      value = readToken();
+      value = read();
       if (value) return value;
     }
-    return readToken();
+    return read();
   };
 
   const reset = () => {
     token = "";
-    manual?.reset();
-    rendered = false;
-    container.innerHTML = "";
-    container.hidden = Boolean(manual);
-    if (widgetId != null) {
-      try {
-        window.turnstile?.remove?.(widgetId);
-      } catch {
-        /* ignore */
-      }
-      widgetId = null;
+    try {
+      window.turnstile?.reset?.(widgetId);
+    } catch {
+      /* ignore */
     }
   };
 
-  const widget = {
-    enabled: true,
-    ready: true,
-    getToken,
-    reset,
-    isManualChecked: () => (manual ? manual.isChecked() : true),
-  };
+  const widget = { enabled: true, ready: true, getToken, reset };
 
-  if (invisible && !needManual) {
+  if (invisible) {
     widget.execute = async ({ waitMs = 15000 } = {}) => {
       token = "";
-      if (!rendered) await renderWidget();
       try {
         await window.turnstile?.execute?.(widgetId);
       } catch {

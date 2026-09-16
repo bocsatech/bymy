@@ -74,11 +74,12 @@ export async function fetchRelatedListings(listingId, { limit = 24 } = {}) {
   return data.listings ?? [];
 }
 
-export async function revealListingContact(listingId) {
+export async function revealListingContact(listingId, turnstileToken = "") {
   const response = await fetch(`/api/listings/${listingId}/reveal-contact`, {
     method: "POST",
     credentials: "same-origin",
     headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ turnstileToken }),
   });
   const data = await parseJson(response);
   return {

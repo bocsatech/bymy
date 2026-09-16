@@ -925,6 +925,20 @@ async function handleListingsApi(req, res, pathname) {
 
   const revealContactMatch = pathname.match(/^\/api\/listings\/(\d+)\/reveal-contact$/);
   if (revealContactMatch && req.method === "POST") {
+    let revealBody = {};
+    try {
+      revealBody = await readBody(req);
+    } catch {
+      revealBody = {};
+    }
+    const turnstileReveal = await verifyTurnstileToken(
+      revealBody.turnstileToken ?? revealBody["cf-turnstile-response"],
+      req
+    );
+    if (!turnstileReveal.ok) {
+      sendJson(res, 400, { error: turnstileReveal.error });
+      return;
+    }
     if (!assertPublicListingRate(req, res, "listing-reveal", { limit: 40, windowMs: 60 * 60 * 1000 })) {
       return;
     }

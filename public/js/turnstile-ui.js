@@ -60,7 +60,7 @@ function waitForTurnstileApi(timeoutMs = 12000) {
  * Cloudflare Turnstile — Managed pipás ellenőrző (hasznaltauto-szerű).
  * @returns {Promise<{ enabled: boolean, ready: boolean, getToken: () => Promise<string>, reset: () => void, error?: string }>}
  */
-export async function mountTurnstile(container, { theme = "light" } = {}) {
+export async function mountTurnstile(container, { theme = "light", size = "normal", appearance = "always" } = {}) {
   if (!container) return { enabled: false, ready: true, getToken: async () => "", reset: () => {} };
 
   const config = await loadConfig();
@@ -68,9 +68,15 @@ export async function mountTurnstile(container, { theme = "light" } = {}) {
     return { enabled: false, ready: true, getToken: async () => "", reset: () => {} };
   }
 
-  const box = container.closest(".auth-security-box") || container;
-  box.hidden = false;
-  container.hidden = false;
+  const invisible = size === "invisible";
+  if (invisible) {
+    container.setAttribute("aria-hidden", "true");
+    container.style.cssText = "position:absolute;width:0;height:0;overflow:hidden;clip:rect(0,0,0,0)";
+  } else {
+    const box = container.closest(".auth-security-box") || container;
+    box.hidden = false;
+    container.hidden = false;
+  }
   container.innerHTML = "";
   container.setAttribute("aria-busy", "true");
 
@@ -86,8 +92,8 @@ export async function mountTurnstile(container, { theme = "light" } = {}) {
     widgetId = window.turnstile.render(container, {
       sitekey: config.siteKey,
       theme,
-      size: "normal",
-      appearance: "always",
+      size,
+      appearance: invisible ? "execute" : appearance,
       language: "hu",
       "feedback-enabled": false,
       callback: (value) => {
@@ -120,35 +126,48 @@ export async function mountTurnstile(container, { theme = "light" } = {}) {
     };
   }
 
-  return {
-    enabled: true,
-    ready: true,
-    getToken: async ({ waitMs = 0 } = {}) => {
-      const read = () => {
-        if (token) return token;
-        try {
-          return String(window.turnstile?.getResponse?.(widgetId) || "");
-        } catch {
-          return "";
-        }
-      };
-      let value = read();
-      if (value || waitMs <= 0) return value;
-      const deadline = Date.now() + waitMs;
-      while (Date.now() < deadline) {
-        await new Promise((r) => setTimeout(r, 50));
-        value = read();
-        if (value) return value;
+  const getToken = async ({ waitMs = 0 } = {}) => {
+    const read = () => {
+      if (token) return token;
+      try {
+        return String(window.turnstile?.getResponse?.(widgetId) || "");
+      } catch {
+        return "";
       }
-      return read();
-    },
-    reset: () => {
+    };
+    let value = read();
+    if (value || waitMs <= 0) return value;
+    const deadline = Date.now() + waitMs;
+    while (Date.now() < deadline) {
+      await new Promise((r) => setTimeout(r, 50));
+      value = read();
+      if (value) return value;
+    }
+    return read();
+  };
+
+  const reset = () => {
+    token = "";
+    try {
+      window.turnstile?.reset?.(widgetId);
+    } catch {
+      /* ignore */
+    }
+  };
+
+  const widget = { enabled: true, ready: true, getToken, reset };
+
+  if (invisible) {
+    widget.execute = async ({ waitMs = 15000 } = {}) => {
       token = "";
       try {
-        window.turnstile?.reset?.(widgetId);
+        await window.turnstile?.execute?.(widgetId);
       } catch {
         /* ignore */
       }
-    },
-  };
+      return getToken({ waitMs });
+    };
+  }
+
+  return widget;
 }

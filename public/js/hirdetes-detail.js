@@ -4,8 +4,9 @@ import {
   revealListingContact,
   recordListingView,
   deleteListingFromDb,
-} from "./db-client.js?v=secList1";
+} from "./db-client.js?v=secReveal1";
 import { getAuthUser, getDisplayName, getProfile } from "./site-auth.js?v=auth20260805localdb9";
+import { mountTurnstile } from "./turnstile-ui.js?v=turnstile7";
 import { startConversation, sendMessage } from "./messages-api.js?v=msgLive1";
 import { openListingMessage } from "./start-listing-message.js?v=msgLive1";
 import { getParkplatz, addParkplatzItem, removeParkplatzItem } from "./fok-data.js?v=parkThumb1";
@@ -507,18 +508,30 @@ function render(view, listing, related) {
             ${
               view.phone
                 ? `<button type="button" class="hd-btn hd-btn--primary" data-hd-phone data-full="${escapeHtml(view.phone)}">${ICON.phone} Hívás</button>`
-                : ""
+                : view.hasPhone
+                  ? `<button type="button" class="hd-btn hd-btn--primary" data-hd-phone>${ICON.phone} Hívás</button>`
+                  : ""
             }
             <button type="button" class="hd-btn hd-btn--primary" data-hd-message>${ICON.mail} Üzenet</button>
           </div>`
         : ""
     }
+    ${view.hasPhone && !view.phone ? `<div id="hd-phone-turnstile" class="hd-turnstile" aria-hidden="true"></div>` : ""}
   `;
 
   bindUi(view, listing);
 }
 
 function bindUi(view, listing) {
+  const needPhoneReveal = Boolean(view.hasPhone && !view.phone);
+  let phoneTurnstile = { enabled: false, ready: true, execute: null, getToken: async () => "", reset: () => {} };
+  const phoneTurnstileReady = needPhoneReveal
+    ? mountTurnstile(document.getElementById("hd-phone-turnstile"), { size: "invisible" }).then((widget) => {
+        phoneTurnstile = widget;
+        return widget;
+      })
+    : Promise.resolve(phoneTurnstile);
+
   let index = 0;
   const images = view.images || [];
   const main = root.querySelector("[data-hd-main]");
@@ -647,11 +660,37 @@ function bindUi(view, listing) {
   root.querySelectorAll("[data-hd-phone]").forEach((btn) => {
     btn.addEventListener("click", async () => {
       if (btn.dataset.revealed === "1") return;
+      const fullAlready = String(btn.dataset.full || "").trim();
+      if (fullAlready) {
+        const digits = fullAlready.replace(/[^\d+]/g, "");
+        if (digits.length >= 7) window.location.href = `tel:${digits}`;
+        return;
+      }
       btn.disabled = true;
       try {
-        const contact = view.phone
-          ? { phone: view.phone, addressLines: view.addressLines || [] }
-          : await revealListingContact(view.id);
+        let contact;
+        if (view.phone) {
+          contact = { phone: view.phone, addressLines: view.addressLines || [] };
+        } else {
+          await phoneTurnstileReady;
+          if (phoneTurnstile.enabled && phoneTurnstile.ready === false) {
+            alert("A biztonsági ellenőrző most nem elérhető. Frissítsd az oldalt.");
+            return;
+          }
+          let token = "";
+          if (phoneTurnstile.enabled) {
+            token = phoneTurnstile.execute
+              ? await phoneTurnstile.execute({ waitMs: 15000 })
+              : await phoneTurnstile.getToken({ waitMs: 10000 });
+            if (!token) {
+              alert("A biztonsági ellenőrzés sikertelen. Próbáld újra.");
+              phoneTurnstile.reset();
+              return;
+            }
+          }
+          contact = await revealListingContact(view.id, token);
+          phoneTurnstile.reset();
+        }
         const full = String(contact.phone || "").trim();
         if (!full) {
           btn.textContent = "Nincs telefonszám";
@@ -671,6 +710,7 @@ function bindUi(view, listing) {
       } catch (error) {
         btn.textContent = "Nem elérhető";
         alert(error.message ?? "A telefonszám most nem kérhető le.");
+        phoneTurnstile.reset?.();
       } finally {
         btn.disabled = false;
       }

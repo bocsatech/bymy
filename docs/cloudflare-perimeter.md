@@ -3,7 +3,18 @@
 A kód oldali lépések (CF-Connecting-IP, Turnstile reveal-contact, prod Turnstile kötelező) már a repóban vannak.  
 Ez a dokumentum a **Cloudflare Dashboard + S1 nginx** beállításait írja le.
 
-## 1) DNS — proxied (narancs felhő)
+## Vercel vs bymy.hu — mit kell Cloudflare-en?
+
+| | `bymy.vercel.app` | `bymy.hu` (S1 éles) |
+|--|-------------------|---------------------|
+| **DNS narancs felhő (proxy)** | **Nem kell** — a domain a Vercel infrán fut (`server: Vercel`) | **Kell** — VPS elé WAF/DDoS (`server: cloudflare`, `cf-ray`) |
+| **Turnstile widget** | Igen — hostname a widget listában | Igen — ugyanaz a site key env-ben |
+| **Bot Fight / WAF / edge rate limit** | Vercel edge (külön) | Cloudflare dashboard |
+| **CF-Connecting-IP** | Nincs — Vercel saját `x-forwarded-for` / `x-real-ip` | Van — `clientIp()` ezt olvassa |
+
+**Fontos:** a `bymy.vercel.app` **nem** megy át Cloudflare DNS proxy-n; ettől függetlenül a Turnstile (Cloudflare *termék*) működik, mert a böngésző közvetlenül a `challenges.cloudflare.com`-ot hívja.
+
+## 1) DNS — proxied (narancs felhő) — csak bymy.hu
 
 Cloudflare → **DNS** → `bymy.hu` / `www`:
 
@@ -14,7 +25,7 @@ Cloudflare → **DNS** → `bymy.hu` / `www`:
 
 Ne legyen szürke felhő (DNS only) éles web/API-n — különben nincs WAF, nincs CF-Connecting-IP, a VPS IP közvetlenül látszik.
 
-**Vercel (`bymy.vercel.app`):** tesztkörnyezet; Turnstile widget domain listában legyen mindkettő.
+**Ellenőrzés (2026-03):** `dig bymy.hu` → Cloudflare IP-k (`104.21.x`, `172.67.x`); `curl -I https://bymy.hu` → `server: cloudflare`.
 
 ## 2) SSL/TLS
 

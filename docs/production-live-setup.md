@@ -17,9 +17,10 @@ TURNSTILE_SITE_KEY=YOUR_TURNSTILE_SITE_KEY
 TURNSTILE_SECRET_KEY=YOUR_TURNSTILE_SECRET_KEY
 ```
 
-Turnstile (belépés / regisztráció botvédelem):
+Turnstile (belépés / regisztráció / telefon reveal botvédelem):
 - Cloudflare Dashboard → Turnstile → Add widget
-- Domain: `bymy.vercel.app` (és később `bymy.hu`)
+- Hostnames: `bymy.vercel.app`, `bymy.hu`, `www.bymy.hu` (widget lista — **nem** DNS proxy)
+- **Vercel domainhez nem kell** Cloudflare narancs felhő; a Turnstile script így is működik
 - Widget mode: Managed
 - A site key + secret key a fenti két env változó
 - **Production / Vercel:** Turnstile kötelező — env nélkül auth és telefon reveal elutasítva

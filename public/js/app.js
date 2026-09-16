@@ -24,7 +24,7 @@ import {
   initAdLocationProfile,
   listingAddressComplete,
   getListingAddressFromProfile,
-} from "./ad-location-profile.js?v=locProf3";
+} from "./ad-location-profile.js?v=locProf4";
 import { initImproveDescription } from "./improve-description.js?v=descAi2";
 
 if (!(await requireAuthForPage())) {

@@ -90,18 +90,57 @@ function ensureLocationVisible(form) {
   }
 }
 
+function parsePhoneParts(phone) {
+  if (!phone) return null;
+  const compact = String(phone).replace(/[^\d+]/g, "");
+  const match = compact.match(/^(\+36|06)(\d{1,2})(\d{6,8})$/);
+  if (!match) return null;
+  const orszag = match[1].startsWith("06") ? "+36" : match[1];
+  const szam = match[3].replace(/(\d{3})(\d+)/, "$1 $2");
+  return { orszag, korzet: match[2], szam };
+}
+
+function listingPhoneFilled(form) {
+  const korzet = form.elements.namedItem("telefon1_korzet");
+  const szam = form.elements.namedItem("telefon1_szam");
+  if (!korzet || !szam || korzet instanceof RadioNodeList || szam instanceof RadioNodeList) {
+    return false;
+  }
+  return Boolean(String(korzet.value || "").trim() || String(szam.value || "").trim());
+}
+
+function applyPhoneFromProfile(form, profile) {
+  if (!form || listingPhoneFilled(form)) return;
+  const raw = isBusinessProfile(profile)
+    ? String(profile.companyPhone || profile.phone || "").trim()
+    : String(profile.phone || "").trim();
+  if (!raw) return;
+  const parts = parsePhoneParts(raw);
+  if (parts) {
+    setField(form, "telefon1_orszag", parts.orszag);
+    setField(form, "telefon1_korzet", parts.korzet);
+    setField(form, "telefon1_szam", parts.szam);
+    return;
+  }
+  setField(form, "telefon1_orszag", "+36");
+  setField(form, "telefon1_szam", raw);
+}
+
 export function applyContactFromProfile(form, profile = null) {
   if (!form) return;
   const p = profile ?? getProfile();
   const emailField = form.elements.namedItem("email");
-  if (!emailField || emailField instanceof RadioNodeList) return;
-  if (emailField.dataset.userEdited === "1" && String(emailField.value || "").trim()) return;
-  const fromCompany = isBusinessProfile(p)
-    ? String(p.companyEmail || p.companyEmail2 || "").trim()
-    : "";
-  const fromUser = String(getAuthUser()?.email || p.email || "").trim();
-  const next = fromCompany || fromUser;
-  if (next) emailField.value = next;
+  if (emailField && !(emailField instanceof RadioNodeList)) {
+    if (!(emailField.dataset.userEdited === "1" && String(emailField.value || "").trim())) {
+      const fromCompany = isBusinessProfile(p)
+        ? String(p.companyEmail || p.companyEmail2 || "").trim()
+        : "";
+      const fromUser = String(getAuthUser()?.email || p.email || "").trim();
+      const next = fromCompany || fromUser;
+      if (next) emailField.value = next;
+    }
+  }
+  applyPhoneFromProfile(form, p);
 }
 
 export async function applyListingAddressFromProfile(form, profile = null) {

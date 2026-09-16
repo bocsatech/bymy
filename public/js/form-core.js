@@ -13,7 +13,7 @@ import { EGYEB_INFO_OPTIONS } from "./egyeb-info-data.js";
 import { initVehicleCatalogSelects } from "./vehicle-catalog-client.js";
 import { compressListingPhoto, MAX_LISTING_PHOTOS } from "./listing-photo-compress.js?v=myAds2";
 import { uploadImage } from "./upload-image.js?v=supabaseUpload1";
-import { applyListingAddressFromProfileSync } from "./ad-location-profile.js?v=locProf3";
+import { applyListingAddressFromProfileSync } from "./ad-location-profile.js?v=locProf4";
 import { syncIngatlanFormVisibility } from "./ingatlan-form-fields.js?v=immoUiParity1";
 import {
   DEFAULT_PHOTO_OVERLAY_ID,

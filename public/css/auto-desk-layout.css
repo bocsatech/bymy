@@ -259,10 +259,9 @@
     z-index: 2 !important;
     justify-self: start !important;
     align-self: start !important;
-    max-height: calc(100vh - var(--site-fixed-header-h, 64px) - 24px);
-    overflow-x: hidden;
-    overflow-y: auto;
-    overscroll-behavior: contain;
+    max-height: none;
+    overflow: visible;
+    overscroll-behavior: auto;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-hero {
@@ -728,6 +727,12 @@
     gap: 10px;
     margin-top: 12px;
     align-items: stretch;
+    position: sticky;
+    bottom: 0;
+    z-index: 4;
+    padding-top: 10px;
+    padding-bottom: 4px;
+    background: var(--ad-bg);
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) #qs-save-search {

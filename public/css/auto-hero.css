@@ -826,7 +826,26 @@ body[data-site-page="teherauto"] .auto-search-tabs {
 
   .auto-search-panel.is-open .auto-search-body {
     display: flex;
+    flex-direction: column;
     margin-top: 0.75rem;
+    min-height: 0;
+  }
+
+  .auto-search-panel.is-open .home-qs-form {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .auto-search-panel.is-open .home-qs-row--actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 12;
+    margin-top: auto;
+    padding-top: 0.65rem;
+    padding-bottom: calc(0.2rem + env(safe-area-inset-bottom, 0px));
+    background: linear-gradient(to top, #fff 82%, rgba(255, 255, 255, 0.95) 100%);
+    box-shadow: 0 -10px 20px rgba(16, 24, 40, 0.08);
   }
 
   .auto-search-panel.is-open .auto-search-toggle {

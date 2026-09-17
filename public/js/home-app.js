@@ -7,9 +7,9 @@ import {
   initHomeSearchSidebar,
   initHomeFilterCatalog,
 } from "./home-search-filter.js?v=fuelMatch2";
-import { initHomeQuickSearch } from "./home-quicksearch.js?v=savedSearch4";
-import { decodeSavedSearchParam } from "./saved-search.js?v=savedSearch4";
-import { initSavedSearchUi } from "./saved-search-ui.js?v=savedSearch4";
+import { initHomeQuickSearch } from "./home-quicksearch.js?v=savedSearch5";
+import { decodeSavedSearchParam } from "./saved-search.js?v=savedSearch5";
+import { initSavedSearchUi } from "./saved-search-ui.js?v=savedSearch5";
 import { matchDetailedSearch, hasActiveDetailedSearch } from "./auto-detailed-search.js?v=autoDesk16";
 import { updateAutoDeskResultCount } from "./auto-desk-search.js?v=teherKivitel35e";
 import {
@@ -34,6 +34,7 @@ const LISTINGS_FETCH_LIMIT = 50;
 
 let allItems = [];
 let sidebarFilters = emptyFilters();
+let quickSearchFilters = emptyFilters();
 let ingatlanFilters = emptyIngatlanFilters();
 let categoryFilter = null;
 let categoryUi = null;
@@ -149,12 +150,20 @@ function filterByTruckSubtype(items) {
   });
 }
 
+function mergedVehicleFilters() {
+  const merged = { ...emptyFilters(), ...sidebarFilters };
+  if (hasActiveSidebarFilters(quickSearchFilters)) {
+    Object.assign(merged, quickSearchFilters);
+  }
+  return merged;
+}
+
 function filterItems(items) {
   let result = items;
   if (PAGE === "ingatlan") {
     result = filterListingsByIngatlan(result, ingatlanFilters);
   } else {
-    result = filterListingsBySidebar(result, sidebarFilters);
+    result = filterListingsBySidebar(result, mergedVehicleFilters());
     if (detailedFilters && hasActiveDetailedSearch(detailedFilters)) {
       result = result.filter((item) => matchDetailedSearch(item, detailedFilters));
     }
@@ -368,10 +377,15 @@ if (PAGE === "ingatlan") {
   quickSearchApi = initHomeQuickSearch({
     onSearch: async (values) => {
       const { detailed, ...sidebarValues } = values ?? {};
-      sidebarFilters = { ...emptyFilters(), ...sidebarValues };
+      quickSearchFilters = { ...emptyFilters(), ...sidebarValues };
       detailedFilters = detailed ?? null;
       categoryUi?.clear();
       categoryFilter = null;
+      const url = new URL(window.location.href);
+      if (url.searchParams.has("cat")) {
+        url.searchParams.delete("cat");
+        history.replaceState(null, "", url);
+      }
 
       const postal = String(values.iranyitoszam || "")
         .replace(/\D/g, "")

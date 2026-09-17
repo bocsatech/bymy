@@ -1,11 +1,11 @@
 
-import { getAuthUser } from "./site-auth.js?v=savedSearch4";
-import { addSavedSearch } from "./fok-data.js?v=savedSearch4";
+import { getAuthUser } from "./site-auth.js?v=savedSearch5";
+import { addSavedSearch } from "./fok-data.js?v=savedSearch5";
 import {
   buildSavedSearchUrl,
   normalizeSavedSearchFilters,
   summarizeSavedSearchFilters,
-} from "./saved-search.js?v=savedSearch4";
+} from "./saved-search.js?v=savedSearch5";
 
 function defaultSearchName(filters) {
   const summary = summarizeSavedSearchFilters(filters);
@@ -59,7 +59,9 @@ async function saveCurrentSearch({ page, getFilters, whenReady, triggerEl }) {
 }
 
 export function initSavedSearchUi({ page = "auto", getFilters, whenReady } = {}) {
-  const buttons = [...document.querySelectorAll("#qs-save-search, #qs-save-search-bar")];
+  const buttons = [
+    ...document.querySelectorAll("#qs-save-search, #qs-save-search-bar, #qs-save-search-top"),
+  ];
   if (!buttons.length) return;
 
   for (const btn of buttons) {

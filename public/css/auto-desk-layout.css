@@ -307,6 +307,7 @@
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-hero__stage::before,
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-hero__stage::after,
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-toggle,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-save,
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-kivitel-nav,
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-category-bar,
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-ad-strip,

@@ -132,14 +132,34 @@ export function initHomeQuickSearch({ onSearch = () => {}, onDeskSortChange, onR
     triggerSearchFromForm();
   });
 
-  form.addEventListener("immo-wheel-change", () => {
-    if (!mobile()) return;
+  function scheduleSearchFromForm({ scroll = false } = {}) {
     clearTimeout(wheelSearchTimer);
     wheelSearchTimer = setTimeout(() => {
+      if (!form.classList.contains("is-qs-ready")) return;
       triggerSearchFromForm();
-      scrollToListingsAfterSearch();
+      if (scroll) scrollToListingsAfterSearch();
     }, 120);
+  }
+
+  form.addEventListener("immo-wheel-change", () => {
+    scheduleSearchFromForm({ scroll: mobile() });
   });
+
+  form.addEventListener("change", (event) => {
+    if (!form.classList.contains("is-qs-ready")) return;
+    if (!event.target?.closest?.("#home-qs-form")) return;
+    scheduleSearchFromForm({ scroll: false });
+  });
+
+  document.addEventListener(
+    "immo-wheel-change",
+    (event) => {
+      const wheel = event.target?.closest?.("[data-wheel]");
+      if (!wheel || !form.contains(wheel)) return;
+      scheduleSearchFromForm({ scroll: mobile() });
+    },
+    true
+  );
 
   function scrollToListingsAfterSearch() {
     const target = document.getElementById("home-category-bar") || document.getElementById("home-grid-track");

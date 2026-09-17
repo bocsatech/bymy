@@ -1,5 +1,5 @@
 import { fetchListings } from "./db-client.js?v=nearby2";
-import { getAuthUser } from "./site-auth.js?v=nearby1";
+import { getAuthUser, isLoggedIn, refreshAuthSession } from "./site-auth.js?v=nearbyBoot1";
 import {
   bindListingOpen,
   restoreListingReturn,
@@ -12,9 +12,12 @@ import {
 import {
   autoNearbyHref,
   buildNearbyFilter,
+  ensureNearbyPrefsStored,
   filterAutoListings,
   readNearbyPrefs,
-} from "./nearby-search.js?v=nearby1";
+  STORAGE_POSTAL,
+  STORAGE_RADIUS,
+} from "./nearby-search.js?v=nearbyBoot1";
 
 const RAIL = document.getElementById("hub-nearby-rail");
 const STATUS = document.getElementById("hub-nearby-status");
@@ -109,6 +112,27 @@ function renderInitial(items) {
   RAIL.innerHTML = "";
   setCountBadge(items.length);
   appendNext(INITIAL_COUNT);
+  requestAnimationFrame(() => {
+    if (renderedCount < Math.min(INITIAL_COUNT, nearbyItems.length)) {
+      appendNext(Math.min(INITIAL_COUNT, nearbyItems.length) - renderedCount);
+    }
+    onRailScroll();
+  });
+}
+
+function bindSectionVisibility() {
+  const section = RAIL?.closest(".hf-section");
+  if (!section || section.dataset.nearbyVisBound === "1") return;
+  section.dataset.nearbyVisBound = "1";
+  const io = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        if (entry.isIntersecting) onRailScroll();
+      }
+    },
+    { threshold: 0.05 }
+  );
+  io.observe(section);
 }
 
 function onRailScroll() {
@@ -186,10 +210,15 @@ async function loadNearbyFresh(postal, radiusKm) {
 async function initHubNearbyCars() {
   if (!RAIL) return;
 
-  bindListingOpen(RAIL);
+  if (RAIL.dataset.listingOpenBound !== "1") {
+    RAIL.dataset.listingOpenBound = "1";
+    bindListingOpen(RAIL);
+  }
   bindRailLazy();
+  bindSectionVisibility();
 
   const profile = getAuthUser()?.profile ?? null;
+  ensureNearbyPrefsStored(profile);
   const { postal, radiusKm } = readNearbyPrefs(profile);
   radiusLabel = radiusKm;
 
@@ -262,10 +291,35 @@ async function initHubNearbyCars() {
   restoreListingReturn();
 }
 
-initHubNearbyCars();
+let bootGen = 0;
 
-window.addEventListener("pageshow", (event) => {
-  if (event.persisted && RAIL?.children.length) {
-    restoreListingReturn();
+async function bootHubNearbyCars() {
+  if (!RAIL) return;
+  const gen = ++bootGen;
+  if (isLoggedIn()) {
+    try {
+      await refreshAuthSession();
+    } catch {
+    }
   }
+  if (gen !== bootGen) return;
+  ensureNearbyPrefsStored(getAuthUser()?.profile ?? null);
+  await initHubNearbyCars();
+}
+
+function scheduleHubNearbyBoot() {
+  void bootHubNearbyCars();
+}
+
+scheduleHubNearbyBoot();
+window.addEventListener("site-auth-ready", scheduleHubNearbyBoot);
+window.addEventListener("bymy-auth-changed", scheduleHubNearbyBoot);
+window.addEventListener("storage", (event) => {
+  if (event.key === STORAGE_POSTAL || event.key === STORAGE_RADIUS) scheduleHubNearbyBoot();
+});
+window.addEventListener("bymy-nearby-prefs-changed", scheduleHubNearbyBoot);
+window.addEventListener("pageshow", (event) => {
+  const hasCards = Boolean(RAIL?.querySelector(".hf-card--listing"));
+  if (event.persisted || !hasCards) scheduleHubNearbyBoot();
+  else restoreListingReturn();
 });

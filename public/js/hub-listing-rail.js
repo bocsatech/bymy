@@ -111,6 +111,27 @@ export function initHubListingRail(opts) {
     RAIL.innerHTML = "";
     setCountBadge(items.length);
     appendNext(INITIAL_COUNT);
+    requestAnimationFrame(() => {
+      if (renderedCount < Math.min(INITIAL_COUNT, nearbyItems.length)) {
+        appendNext(Math.min(INITIAL_COUNT, nearbyItems.length) - renderedCount);
+      }
+      onRailScroll();
+    });
+  }
+
+  function bindSectionVisibility() {
+    const section = RAIL.closest(".hf-section");
+    if (!section || section.dataset.nearbyVisBound === "1") return;
+    section.dataset.nearbyVisBound = "1";
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) onRailScroll();
+        }
+      },
+      { threshold: 0.05 }
+    );
+    io.observe(section);
   }
 
   function onRailScroll() {
@@ -174,6 +195,7 @@ export function initHubListingRail(opts) {
 
   bindListingOpen(RAIL);
   bindRailLazy();
+  bindSectionVisibility();
 
   return {
     sortByDate,

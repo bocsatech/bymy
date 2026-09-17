@@ -786,6 +786,7 @@ function initAreaForms() {
       const profile = { ...getProfile(), postalCode: postal, city, searchRadiusKm: radiusKm };
       await saveProfile(profile).catch(() => null);
       fillAreaForms(profile);
+      window.dispatchEvent(new CustomEvent("bymy-nearby-prefs-changed"));
       showFlash(flash, "Keresési körzet mentve.", true);
     } catch (error) {
       showFlash(flash, error.message ?? "Mentés sikertelen.", false);

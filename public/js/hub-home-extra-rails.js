@@ -1,5 +1,5 @@
 import { fetchListings, fetchListing } from "./db-client.js?v=nearby2";
-import { getAuthUser } from "./site-auth.js?v=nearby1";
+import { getAuthUser, isLoggedIn, refreshAuthSession } from "./site-auth.js?v=nearbyBoot1";
 import { getParkplatz } from "./fok-data.js?v=auth20260805localdb9";
 import {
   createListingTileCard,
@@ -11,9 +11,12 @@ import {
   buildNearbyFilter,
   filterIngatlanListings,
   ingatlanNearbyHref,
+  ensureNearbyPrefsStored,
   readNearbyPrefs,
-} from "./nearby-search.js?v=immoRails1";
-import { createPromptCard, initHubListingRail, sortByDate } from "./hub-listing-rail.js?v=immoRails1";
+  STORAGE_POSTAL,
+  STORAGE_RADIUS,
+} from "./nearby-search.js?v=nearbyBoot1";
+import { createPromptCard, initHubListingRail, sortByDate } from "./hub-listing-rail.js?v=immoRails2";
 
 function el(id) {
   return document.getElementById(id);
@@ -80,7 +83,10 @@ async function initFavoritesRail({ postal, radiusKm }) {
   const ALL = el("hub-fav-all");
   if (!RAIL) return;
 
-  bindListingOpen(RAIL);
+  if (RAIL.dataset.listingOpenBound !== "1") {
+    RAIL.dataset.listingOpenBound = "1";
+    bindListingOpen(RAIL);
+  }
 
   function setStatus(msg, { hidden = false } = {}) {
     if (!STATUS) return;
@@ -162,11 +168,17 @@ async function initFavoritesRail({ postal, radiusKm }) {
   restoreListingReturn();
 }
 
+let lakasRail = null;
+let hazRail = null;
+let bootGen = 0;
+
 async function init() {
   const profile = getAuthUser()?.profile ?? null;
+  ensureNearbyPrefsStored(profile);
   const { postal, radiusKm } = readNearbyPrefs(profile);
 
-  const lakas = initNearbyIngatlanRail({
+  if (!lakasRail) {
+    lakasRail = initNearbyIngatlanRail({
     railId: "hub-nearby-lakas-rail",
     statusId: "hub-nearby-lakas-status",
     countId: "hub-nearby-lakas-count",
@@ -177,9 +189,11 @@ async function init() {
     noun: "lakás",
     nounPlural: "lakás",
     defaultHref: "/ingatlan.html?uzletag=elado&kat=lakas",
-  });
+    });
+  }
 
-  const haz = initNearbyIngatlanRail({
+  if (!hazRail) {
+    hazRail = initNearbyIngatlanRail({
     railId: "hub-nearby-haz-rail",
     statusId: "hub-nearby-haz-status",
     countId: "hub-nearby-haz-count",
@@ -190,17 +204,43 @@ async function init() {
     noun: "ház",
     nounPlural: "ház",
     defaultHref: "/ingatlan.html?uzletag=elado&kat=haz",
-  });
+    });
+  }
 
   await Promise.all([
-    lakas?.start({ postal, radiusKm }),
-    haz?.start({ postal, radiusKm }),
+    lakasRail?.start({ postal, radiusKm }),
+    hazRail?.start({ postal, radiusKm }),
     initFavoritesRail({ postal, radiusKm }),
   ]);
 }
 
-init();
+async function bootHomeExtraRails() {
+  const gen = ++bootGen;
+  if (isLoggedIn()) {
+    try {
+      await refreshAuthSession();
+    } catch {
+    }
+  }
+  if (gen !== bootGen) return;
+  await init();
+}
 
+function scheduleHomeExtraRailsBoot() {
+  void bootHomeExtraRails();
+}
+
+scheduleHomeExtraRailsBoot();
+window.addEventListener("site-auth-ready", scheduleHomeExtraRailsBoot);
+window.addEventListener("bymy-auth-changed", scheduleHomeExtraRailsBoot);
+window.addEventListener("storage", (event) => {
+  if (event.key === STORAGE_POSTAL || event.key === STORAGE_RADIUS) scheduleHomeExtraRailsBoot();
+});
+window.addEventListener("bymy-nearby-prefs-changed", scheduleHomeExtraRailsBoot);
 window.addEventListener("pageshow", (event) => {
-  if (event.persisted) restoreListingReturn();
+  const needsBoot =
+    event.persisted ||
+    !document.getElementById("hub-nearby-lakas-rail")?.querySelector(".hf-card--listing");
+  if (needsBoot) scheduleHomeExtraRailsBoot();
+  else restoreListingReturn();
 });

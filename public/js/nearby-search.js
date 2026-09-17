@@ -44,8 +44,28 @@ export function readNearbyPrefs(profile = null) {
     if (savedRadius) radiusKm = Number(savedRadius.replace(/[^\d.,]/g, "").replace(",", "."));
   } catch {
   }
+  if (!postal && profile?.postalCode) {
+    postal = String(profile.postalCode).replace(/\D/g, "").slice(0, 4);
+  }
   if (!Number.isFinite(radiusKm) || radiusKm <= 0) radiusKm = 30;
   return { postal, radiusKm };
+}
+
+/** Profil irányítószám → localStorage, ha a keresési körzet még nincs elmentve. */
+export function ensureNearbyPrefsStored(profile = null) {
+  const p = profile ?? null;
+  if (!p) return;
+  try {
+    const postal = String(p.postalCode ?? "").replace(/\D/g, "").slice(0, 4);
+    if (postal.length === 4 && !localStorage.getItem(STORAGE_POSTAL)) {
+      localStorage.setItem(STORAGE_POSTAL, postal);
+    }
+    const radius = Number(p.searchRadiusKm);
+    if (Number.isFinite(radius) && radius > 0 && !localStorage.getItem(STORAGE_RADIUS)) {
+      localStorage.setItem(STORAGE_RADIUS, String(radius));
+    }
+  } catch {
+  }
 }
 
 function filterItemsForMode(mode, items, origin, radiusKm, cityIndex) {

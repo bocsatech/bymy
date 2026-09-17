@@ -571,6 +571,10 @@ export function initSiteAuth(options = {}) {
         );
       } catch {
       }
+      try {
+        window.dispatchEvent(new CustomEvent("site-auth-ready"));
+      } catch {
+      }
     });
   }
 

@@ -1,11 +1,11 @@
 
-import { getAuthUser } from "./site-auth.js?v=savedSearch1";
-import { addSavedSearch } from "./fok-data.js?v=savedSearch1";
+import { getAuthUser } from "./site-auth.js?v=savedSearch3";
+import { addSavedSearch } from "./fok-data.js?v=savedSearch3";
 import {
   buildSavedSearchUrl,
   normalizeSavedSearchFilters,
   summarizeSavedSearchFilters,
-} from "./saved-search.js?v=savedSearch1";
+} from "./saved-search.js?v=savedSearch3";
 
 function defaultSearchName(filters) {
   const summary = summarizeSavedSearchFilters(filters);
@@ -13,12 +13,7 @@ function defaultSearchName(filters) {
   return "Mentett keresés";
 }
 
-export function initSavedSearchUi({ page = "auto", getFilters, whenReady } = {}) {
-  const btn = document.getElementById("qs-save-search");
-  if (!btn || btn.dataset.bound === "1") return;
-  btn.dataset.bound = "1";
-
-  btn.addEventListener("click", async () => {
+async function saveCurrentSearch({ page, getFilters, whenReady, triggerEl }) {
     const user = getAuthUser();
     if (!user?.email) {
       const login = "/bejelentkezes.html?return=" + encodeURIComponent(window.location.pathname + window.location.search);
@@ -56,9 +51,23 @@ export function initSavedSearchUi({ page = "auto", getFilters, whenReady } = {})
       notify: false,
     });
 
-    btn.textContent = "Mentve ✓";
+    const defaultLabel = triggerEl?.dataset?.saveLabel || "Keresés mentése";
+    triggerEl.textContent = "Mentve ✓";
     window.setTimeout(() => {
-      btn.textContent = "Keresés mentése";
+      triggerEl.textContent = defaultLabel;
     }, 2000);
-  });
+}
+
+export function initSavedSearchUi({ page = "auto", getFilters, whenReady } = {}) {
+  const buttons = [...document.querySelectorAll("#qs-save-search, #qs-save-search-bar")];
+  if (!buttons.length) return;
+
+  for (const btn of buttons) {
+    if (btn.dataset.bound === "1") continue;
+    btn.dataset.bound = "1";
+    if (!btn.dataset.saveLabel) {
+      btn.dataset.saveLabel = String(btn.textContent || "Keresés mentése").trim();
+    }
+    btn.addEventListener("click", () => saveCurrentSearch({ page, getFilters, whenReady, triggerEl: btn }));
+  }
 }

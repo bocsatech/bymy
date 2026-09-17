@@ -10,6 +10,10 @@ import { toltoListMatches } from "./auto-tolto-picker.js?v=fogyNum1";
 const FUEL_QUICK_FILTERS = [
   { id: "benzin", label: "Benzin", match: (value) => value === "Benzin" },
   { id: "diesel", label: "Diesel", match: (value) => value === "Diesel" || value === "Dízel" },
+  { id: "Dízel", label: "Dízel", match: (value) => value === "Diesel" || value === "Dízel" },
+  { id: "Benzin", label: "Benzin", match: (value) => value === "Benzin" },
+  { id: "Elektromos", label: "Elektromos", match: (value) => value === "Elektromos" },
+  { id: "elektromos", label: "Elektromos", match: (value) => value === "Elektromos" },
   {
     id: "hybrid",
     label: "Hybrid",

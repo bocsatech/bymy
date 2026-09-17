@@ -6,10 +6,10 @@ import {
   populateFilterOptions,
   initHomeSearchSidebar,
   initHomeFilterCatalog,
-} from "./home-search-filter.js?v=fuelMatch1";
-import { initHomeQuickSearch } from "./home-quicksearch.js?v=savedSearch1";
-import { decodeSavedSearchParam } from "./saved-search.js?v=savedSearch1";
-import { initSavedSearchUi } from "./saved-search-ui.js?v=savedSearch1";
+} from "./home-search-filter.js?v=fuelMatch2";
+import { initHomeQuickSearch } from "./home-quicksearch.js?v=savedSearch3";
+import { decodeSavedSearchParam } from "./saved-search.js?v=savedSearch3";
+import { initSavedSearchUi } from "./saved-search-ui.js?v=savedSearch3";
 import { matchDetailedSearch, hasActiveDetailedSearch } from "./auto-detailed-search.js?v=autoDesk16";
 import { updateAutoDeskResultCount } from "./auto-desk-search.js?v=teherKivitel35e";
 import {

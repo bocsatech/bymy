@@ -111,9 +111,21 @@ export function initHomeQuickSearch({ onSearch = () => {}, onDeskSortChange, onR
     form.classList.toggle("is-qs-ready", ready);
   }
 
+  let wheelSearchTimer = null;
+
+  function triggerSearchFromForm() {
+    onSearch(readQuickSearchValues());
+  }
+
   form.addEventListener("submit", (event) => {
     event.preventDefault();
-    onSearch(readQuickSearchValues());
+    triggerSearchFromForm();
+  });
+
+  form.addEventListener("immo-wheel-change", () => {
+    if (!mobile()) return;
+    clearTimeout(wheelSearchTimer);
+    wheelSearchTimer = setTimeout(triggerSearchFromForm, 120);
   });
 
   form.addEventListener("reset", () => {

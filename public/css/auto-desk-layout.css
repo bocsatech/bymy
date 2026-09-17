@@ -729,6 +729,30 @@
     align-items: stretch;
   }
 
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) #qs-save-search {
+    grid-column: 1 / -1;
+    appearance: none;
+    display: block;
+    width: 100%;
+    border-radius: 6px;
+    padding: 11px 10px;
+    font: inherit;
+    font-weight: 700;
+    font-size: 13px;
+    text-align: center;
+    cursor: pointer;
+    border: 1px solid #5a5a5a;
+    background: transparent;
+    color: var(--ad-text);
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) #qs-save-search:hover,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) #qs-save-search:focus-visible {
+    border-color: var(--ad-yellow);
+    color: var(--ad-yellow-ink);
+    background: rgba(240, 197, 44, 0.12);
+  }
+
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-reset {
     appearance: none;
     display: block;

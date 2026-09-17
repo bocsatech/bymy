@@ -6,7 +6,7 @@ import {
   populateFilterOptions,
   initHomeSearchSidebar,
   initHomeFilterCatalog,
-} from "./home-search-filter.js?v=teherKivitel35e";
+} from "./home-search-filter.js?v=fuelMatch1";
 import { initHomeQuickSearch } from "./home-quicksearch.js?v=savedSearch1";
 import { decodeSavedSearchParam } from "./saved-search.js?v=savedSearch1";
 import { initSavedSearchUi } from "./saved-search-ui.js?v=savedSearch1";

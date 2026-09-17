@@ -23,6 +23,24 @@ const FUEL_QUICK_FILTERS = [
   { id: "elektromos", label: "Elektromos", match: (value) => value === "Elektromos" },
 ];
 
+function matchListingFuel(listingFuel, filters) {
+  if (filters.uzemanyagok?.length) {
+    return fuelValueMatches(listingFuel, filters.uzemanyagok);
+  }
+  if (filters.uzemanyagQuick) {
+    const quick = filters.uzemanyagQuick;
+    const rule =
+      FUEL_QUICK_FILTERS.find((entry) => entry.id === quick) ||
+      FUEL_QUICK_FILTERS.find((entry) => entry.label === quick);
+    if (rule) return rule.match(listingFuel);
+    return fuelValueMatches(listingFuel, [quick]);
+  }
+  if (filters.uzemanyag) {
+    return fuelValueMatches(listingFuel, [filters.uzemanyag]);
+  }
+  return true;
+}
+
 const FEATURE_CHECKS = [
   { id: "automata", label: "automata", match: (item) => hasBadgeOrText(item, ["AUTOMATA", "automata"]) },
   { id: "tempomat", label: "tempomat", match: (item) => hasBadgeOrText(item, ["TEMPOMAT", "tempomat"]) },
@@ -158,12 +176,7 @@ export function filterListingsBySidebar(items, filters) {
     if (filters.sebessegvaltok?.length) {
       if (!sebessegvaltoListMatches(f.sebessegvalto, filters.sebessegvaltok)) return false;
     } else if (!matchesSebessegvalto(f.sebessegvalto, filters.sebessegvalto)) return false;
-    if (filters.uzemanyagok?.length) {
-      if (!fuelValueMatches(f.uzemanyag, filters.uzemanyagok)) return false;
-    } else if (filters.uzemanyagQuick) {
-      const rule = FUEL_QUICK_FILTERS.find((entry) => entry.id === filters.uzemanyagQuick);
-      if (rule && !rule.match(f.uzemanyag)) return false;
-    } else if (filters.uzemanyag && f.uzemanyag !== filters.uzemanyag) return false;
+    if (!matchListingFuel(f.uzemanyag, filters)) return false;
     if (filters.allapotok?.length) {
       if (!allapotValueMatches(f.allapot, filters.allapotok)) return false;
     } else if (filters.allapot && f.allapot !== filters.allapot) return false;

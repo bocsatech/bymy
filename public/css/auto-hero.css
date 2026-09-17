@@ -1261,7 +1261,13 @@ body[data-site-page="teherauto"] .auto-search-tabs {
   }
 
   .auto-search-panel .auto-qs-drums .home-qs-row--actions {
-    margin-top: 0.35rem;
+    position: sticky;
+    bottom: 0;
+    z-index: 12;
+    margin-top: 0.75rem;
+    padding: 0.65rem 0 calc(0.35rem + env(safe-area-inset-bottom, 0px));
+    background: linear-gradient(to top, #fff 78%, rgba(255, 255, 255, 0.94) 100%);
+    box-shadow: 0 -8px 18px rgba(16, 24, 40, 0.08);
   }
 }
 

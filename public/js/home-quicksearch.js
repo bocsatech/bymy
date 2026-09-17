@@ -1,11 +1,12 @@
 
 import { applyAutoSearchLayout, readLayoutFilterValues } from "./auto-search-layout.js?v=teherKivitel35e";
-import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums } from "./auto-search-drums.js?v=fogyNum1";
+import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums } from "./auto-search-drums.js?v=savedSearch4";
 import {
   mountDetailedSearch,
   readDetailedSearchValues,
   resetDetailedSearch,
 } from "./auto-detailed-search.js?v=fogyNum1";
+import { readWheel } from "./ingatlan-wheels.js?v=immoClearAll1";
 import { readBrandModelFilterValues, mountAutoBrandModelPicker } from "./auto-brand-model-picker.js?v=fogyNum1";
 import { readFuelFilterValues, mountAutoFuelPicker } from "./auto-fuel-picker.js?v=fogyNum1";
 import { readKivitelFilterValues, mountAutoKivitelPicker } from "./auto-kivitel-picker.js?v=teherKivitel35e";
@@ -39,9 +40,18 @@ export function initHomeQuickSearch({ onSearch = () => {}, onDeskSortChange, onR
   const statusEl = document.getElementById("home-qs-status");
   const mobile = () => window.matchMedia(MOBILE_MQ).matches;
 
+  function enrichDrumFilterValues(base) {
+    if (form.dataset.drumsMounted !== "1" || !base || typeof base !== "object") return base;
+    const fuelWheel = form.querySelector('[data-filter-key="uzemanyagQuick"][data-wheel]');
+    const fuelFromWheel = fuelWheel ? readWheel(fuelWheel) : "";
+    if (fuelFromWheel) base.uzemanyagQuick = fuelFromWheel;
+    return base;
+  }
+
   function readQuickSearchValues() {
-    const base =
-      form.dataset.drumsMounted === "1" ? readAutoDrumFilterValues(form) : readLayoutFilterValues(form);
+    const base = enrichDrumFilterValues(
+      form.dataset.drumsMounted === "1" ? readAutoDrumFilterValues(form) : readLayoutFilterValues(form)
+    );
     const brandModel = readBrandModelFilterValues(form);
     const fuel = readFuelFilterValues(form);
     const kivitel = readKivitelFilterValues(form);
@@ -125,8 +135,16 @@ export function initHomeQuickSearch({ onSearch = () => {}, onDeskSortChange, onR
   form.addEventListener("immo-wheel-change", () => {
     if (!mobile()) return;
     clearTimeout(wheelSearchTimer);
-    wheelSearchTimer = setTimeout(triggerSearchFromForm, 120);
+    wheelSearchTimer = setTimeout(() => {
+      triggerSearchFromForm();
+      scrollToListingsAfterSearch();
+    }, 120);
   });
+
+  function scrollToListingsAfterSearch() {
+    const target = document.getElementById("home-category-bar") || document.getElementById("home-grid-track");
+    target?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 
   form.addEventListener("reset", () => {
     requestAnimationFrame(() => {

@@ -1,11 +1,11 @@
 
-import { getAuthUser } from "./site-auth.js?v=savedSearch3";
-import { addSavedSearch } from "./fok-data.js?v=savedSearch3";
+import { getAuthUser } from "./site-auth.js?v=savedSearch4";
+import { addSavedSearch } from "./fok-data.js?v=savedSearch4";
 import {
   buildSavedSearchUrl,
   normalizeSavedSearchFilters,
   summarizeSavedSearchFilters,
-} from "./saved-search.js?v=savedSearch3";
+} from "./saved-search.js?v=savedSearch4";
 
 function defaultSearchName(filters) {
   const summary = summarizeSavedSearchFilters(filters);

@@ -379,7 +379,7 @@ function convertSimpleField(wrap) {
   const current = select.value;
   const cell = buildWheelCell({
     filterKey,
-    wheelName: filterKey === "uzemanyagQuick" ? "uzemanyag" : filterKey,
+    wheelName: filterKey,
     label,
     options,
   });

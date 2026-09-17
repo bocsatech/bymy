@@ -7,9 +7,9 @@ import {
   initHomeSearchSidebar,
   initHomeFilterCatalog,
 } from "./home-search-filter.js?v=fuelMatch2";
-import { initHomeQuickSearch } from "./home-quicksearch.js?v=savedSearch3";
-import { decodeSavedSearchParam } from "./saved-search.js?v=savedSearch3";
-import { initSavedSearchUi } from "./saved-search-ui.js?v=savedSearch3";
+import { initHomeQuickSearch } from "./home-quicksearch.js?v=savedSearch4";
+import { decodeSavedSearchParam } from "./saved-search.js?v=savedSearch4";
+import { initSavedSearchUi } from "./saved-search-ui.js?v=savedSearch4";
 import { matchDetailedSearch, hasActiveDetailedSearch } from "./auto-detailed-search.js?v=autoDesk16";
 import { updateAutoDeskResultCount } from "./auto-desk-search.js?v=teherKivitel35e";
 import {
@@ -454,10 +454,13 @@ if (PAGE !== "ingatlan") {
   }
 
   initHomeFilterCatalog(() => {
-    sidebarFilters = readSidebarFilters?.() ?? emptyFilters();
-    if (hasActiveSidebarFilters(sidebarFilters)) {
-      categoryUi?.clear();
-      categoryFilter = null;
+    // A hero gyorskereső szűrőit ne írjuk felül, amikor a katalógus később betölt.
+    if (!hasActiveSidebarFilters(sidebarFilters)) {
+      sidebarFilters = readSidebarFilters?.() ?? emptyFilters();
+      if (hasActiveSidebarFilters(sidebarFilters)) {
+        categoryUi?.clear();
+        categoryFilter = null;
+      }
     }
     applyFilters();
   }).catch((error) => console.error("Járműkatalógus (szűrő):", error));

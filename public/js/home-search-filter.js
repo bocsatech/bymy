@@ -251,6 +251,8 @@ export function filterListingsBySidebar(items, filters) {
           "sebessegvaltok",
           "uzemanyag",
           "uzemanyagQuick",
+          "uzemanyagok",
+          "kivitelek",
           "allapot",
           "allapotok",
           "okmany_jelleg",

@@ -9,8 +9,8 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const host = process.env.BMYMY_S1_HOST || process.env.BYMY_S1_HOST || "root@179.198.205.130";
-const appDir = process.env.BYMY_S1_APP || "/root/bymy-app";
+const host = process.env.BYMY_S1_HOST || "bymy-app";
+const appDir = process.env.BYMY_S1_APP || "/var/www/bymy";
 
 const cmds = [
   `rsync -az --delete "${root}/public/" ${host}:${appDir}/public/`,

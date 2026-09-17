@@ -1,5 +1,5 @@
 import { requireAuthForPage, initSiteAuth } from "./site-auth.js";
-import { initMessagesUi } from "./messages-ui.js?v=noMsgSearch2";
+import { initMessagesUi } from "./messages-ui.js?v=msgListingImg1";
 
 if (!(await requireAuthForPage())) {
   throw new Error("Belépés szükséges");

@@ -246,7 +246,7 @@ export function initMessagesUi(root, { onUnreadChange, openConversationId } = {}
       const preview = conv.lastMessage?.body || "Új beszélgetés";
       row.innerHTML = `
         <span class="wh-msg__thumb" aria-hidden="true">
-          ${conv.listing?.imageUrl ? `<img class="wh-msg__thumb-img" src="${escapeHtml(conv.listing.imageUrl)}" alt="" />` : `<span class="wh-msg__thumb-img">${ICONS.car}</span>`}
+          ${conv.listing?.imageUrl ? `<img class="wh-msg__thumb-img" src="${escapeHtml(conv.listing.imageUrl)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" />` : `<span class="wh-msg__thumb-img">${ICONS.car}</span>`}
           <span class="wh-msg__thumb-avatar">${escapeHtml(letter)}</span>
         </span>
         <span class="wh-msg__row-body">
@@ -330,7 +330,7 @@ export function initMessagesUi(root, { onUnreadChange, openConversationId } = {}
   function renderListingBar() {
     if (!els.listing || !openConv) return;
     els.listing.innerHTML = `
-      <div class="wh-msg__ad-img" aria-hidden="true">${openConv.listing?.imageUrl ? `<img src="${escapeHtml(openConv.listing.imageUrl)}" alt="" />` : ICONS.car}</div>
+      <div class="wh-msg__ad-img" aria-hidden="true">${openConv.listing?.imageUrl ? `<img src="${escapeHtml(openConv.listing.imageUrl)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" />` : ICONS.car}</div>
       <div class="wh-msg__ad-text">
         <strong>${escapeHtml(openConv.listing?.title || "")}</strong>
         <span class="wh-msg__ad-price">${escapeHtml(openConv.listing?.priceLabel || "")}</span>

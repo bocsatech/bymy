@@ -22,7 +22,7 @@ import {
   removeSavedSearch,
   toggleSavedSearchNotify,
 } from "./fok-data.js?v=parkThumb1";
-import { initMessagesUi } from "./messages-ui.js?v=noMsgSearch2";
+import { initMessagesUi } from "./messages-ui.js?v=msgListingImg1";
 import { listConversations } from "./messages-api.js?v=msgLive1";
 import { initMyAdsPanel } from "./my-ads.js?v=importVehicle1";
 import {

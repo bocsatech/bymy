@@ -22,9 +22,14 @@ import {
 const MOBILE_MQ = "(max-width: 900px)";
 const DESK_MQ = "(min-width: 901px)";
 
-export function initHomeQuickSearch({ onSearch = () => {}, onDeskSortChange } = {}) {
+export function initHomeQuickSearch({ onSearch = () => {}, onDeskSortChange, onReady } = {}) {
   const form = document.getElementById("home-qs-form");
-  if (!form) return;
+  if (!form) return null;
+
+  let resolveReady;
+  const whenReady = new Promise((resolve) => {
+    resolveReady = resolve;
+  });
 
   const hero = document.querySelector("[data-auto-search-hero]");
   const morePanel = document.getElementById("qs-more");
@@ -222,6 +227,8 @@ export function initHomeQuickSearch({ onSearch = () => {}, onDeskSortChange } = 
       }
       setQsReady(true);
       updateAutoDeskAccSummaries(form);
+      onReady?.();
+      resolveReady?.();
       if (statusEl) {
         statusEl.hidden = true;
         statusEl.textContent = "";
@@ -263,11 +270,26 @@ export function initHomeQuickSearch({ onSearch = () => {}, onDeskSortChange } = 
         }
       }
       setQsReady(true);
+      onReady?.();
+      resolveReady?.();
       if (statusEl) {
         statusEl.hidden = false;
         statusEl.textContent = "A kereső elrendezés nem töltődött be. Hard refresh, majd szerver újraindítás.";
       }
     });
+
+  async function applySavedFilters(filters) {
+    const { applySavedSearchFilters } = await import("./saved-search.js?v=savedSearch1");
+    await applySavedSearchFilters(form, filters);
+    updateAutoDeskAccSummaries(form);
+    onSearch(readQuickSearchValues());
+  }
+
+  return {
+    readQuickSearchValues: () => readQuickSearchValues(),
+    applySavedFilters,
+    whenReady,
+  };
 }
 
 export { readDetailedSearchValues } from "./auto-detailed-search.js?v=autoDesk16";

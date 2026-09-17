@@ -21,7 +21,8 @@ import {
   addSavedSearch,
   removeSavedSearch,
   toggleSavedSearchNotify,
-} from "./fok-data.js?v=parkThumb1";
+} from "./fok-data.js?v=savedSearch1";
+import { savedSearchHref, summarizeSavedSearchFilters } from "./saved-search.js?v=savedSearch1";
 import { initMessagesUi } from "./messages-ui.js?v=msgListingImg1";
 import { listConversations } from "./messages-api.js?v=msgLive1";
 import { initMyAdsPanel } from "./my-ads.js?v=importVehicle1";
@@ -558,16 +559,21 @@ function renderSearches(email) {
   list.innerHTML = "";
   if (empty) empty.hidden = items.length > 0;
   for (const item of items) {
+    const summary =
+      (item.filters && summarizeSavedSearchFilters(item.filters)) ||
+      String(item.query || "").trim() ||
+      "Nincs részletes szűrő";
+    const href = savedSearchHref(item);
     const row = document.createElement("article");
     row.className = "mm-list-item";
     row.innerHTML = `
       <div class="mm-list-main">
         <strong>${escapeHtml(item.name)}</strong>
-        <span class="mm-list-meta">${escapeHtml(item.query || "Nincs részletes szűrő")} · ${fmtDate(item.savedAt)}</span>
+        <span class="mm-list-meta">${escapeHtml(summary)} · ${fmtDate(item.savedAt)}</span>
         <span class="mm-list-meta">Értesítés: ${item.notify ? "be" : "ki"}</span>
       </div>
       <div class="mm-list-actions">
-        <a class="site-header-btn site-header-btn--outline" href="/">Keresés megnyitása</a>
+        <a class="site-header-btn site-header-btn--outline" href="${escapeAttr(href)}">Keresés megnyitása</a>
         <button type="button" class="settings-link-btn" data-search-toggle>Értesítés</button>
         <button type="button" class="settings-danger-btn" data-search-del>Törlés</button>
       </div>`;
@@ -1301,9 +1307,12 @@ export async function initSettingsPage() {
   document.getElementById("mm-search-add")?.addEventListener("submit", (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
+    const query = String(data.get("query") || "").trim();
     addSavedSearch(user.email, {
       name: data.get("name"),
-      query: data.get("query"),
+      query,
+      page: "auto",
+      href: query.startsWith("/") ? query : query ? `/auto.html?q=${encodeURIComponent(query)}` : "/auto.html",
       notify: Boolean(data.get("notify")),
     });
     event.currentTarget.reset();

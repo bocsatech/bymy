@@ -7,7 +7,9 @@ import {
   initHomeSearchSidebar,
   initHomeFilterCatalog,
 } from "./home-search-filter.js?v=teherKivitel35e";
-import { initHomeQuickSearch } from "./home-quicksearch.js?v=teherKivitel35e";
+import { initHomeQuickSearch } from "./home-quicksearch.js?v=savedSearch1";
+import { decodeSavedSearchParam } from "./saved-search.js?v=savedSearch1";
+import { initSavedSearchUi } from "./saved-search-ui.js?v=savedSearch1";
 import { matchDetailedSearch, hasActiveDetailedSearch } from "./auto-detailed-search.js?v=autoDesk16";
 import { updateAutoDeskResultCount } from "./auto-desk-search.js?v=teherKivitel35e";
 import {
@@ -40,6 +42,7 @@ let statsFilter = null;
 let quickRadiusFilter = null;
 let detailedFilters = null;
 let deskSort = "newest";
+let quickSearchApi = null;
 
 const PAGE = document.body?.getAttribute("data-site-page") || "";
 if (gridTrack) bindListingOpen(gridTrack);
@@ -362,7 +365,7 @@ if (PAGE === "ingatlan") {
       .catch(() => {});
   });
 } else {
-  initHomeQuickSearch({
+  quickSearchApi = initHomeQuickSearch({
     onSearch: async (values) => {
       const { detailed, ...sidebarValues } = values ?? {};
       sidebarFilters = { ...emptyFilters(), ...sidebarValues };
@@ -397,6 +400,22 @@ if (PAGE === "ingatlan") {
       applyFilters();
     },
   });
+
+  initSavedSearchUi({
+    page: PAGE || "auto",
+    getFilters: () => quickSearchApi?.readQuickSearchValues?.() ?? {},
+    whenReady: () => quickSearchApi?.whenReady ?? Promise.resolve(),
+  });
+
+  const savedParam = new URLSearchParams(window.location.search).get("ss");
+  if (savedParam && quickSearchApi) {
+    quickSearchApi.whenReady.then(async () => {
+      const decoded = decodeSavedSearchParam(savedParam);
+      if (!decoded?.filters || !Object.keys(decoded.filters).length) return;
+      await quickSearchApi.applySavedFilters(decoded.filters);
+      scrollToListings();
+    });
+  }
 }
 
 if (PAGE !== "ingatlan") {

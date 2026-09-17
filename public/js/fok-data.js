@@ -79,11 +79,16 @@ export function getSavedSearches(email) {
 
 export function addSavedSearch(email, item) {
   const list = getSavedSearches(email);
+  const filters =
+    item.filters && typeof item.filters === "object" && Object.keys(item.filters).length ? item.filters : null;
   const next = [
     {
       id: String(item.id ?? `s-${Date.now()}`),
       name: item.name || "Mentett keresés",
       query: item.query || "",
+      page: item.page || "auto",
+      filters,
+      href: String(item.href || "").trim(),
       notify: Boolean(item.notify),
       savedAt: Date.now(),
     },

@@ -376,6 +376,8 @@ const EMPTY_PROFILE = {
   salespersonName: "",
   salespersonName2: "",
   accountType: "private",
+  searchRadiusKm: 30,
+  recommendationsRadiusKm: 30,
 };
 
 export function getProfile() {

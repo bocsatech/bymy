@@ -15,7 +15,7 @@ import {
   readNearbyPrefs,
   STORAGE_POSTAL,
   STORAGE_RADIUS,
-} from "./nearby-search.js?v=nearbyBoot1";
+} from "./nearby-search.js?v=nearbyPrefs2";
 import { createPromptCard, initHubListingRail, sortByDate } from "./hub-listing-rail.js?v=immoRails3";
 
 function el(id) {

@@ -41,7 +41,11 @@ export function readNearbyPrefs(profile = null) {
     const savedPostal = localStorage.getItem(STORAGE_POSTAL);
     const savedRadius = localStorage.getItem(STORAGE_RADIUS);
     if (savedPostal) postal = savedPostal.replace(/\D/g, "").slice(0, 4);
-    if (savedRadius) radiusKm = Number(savedRadius.replace(/[^\d.,]/g, "").replace(",", "."));
+    if (savedRadius) {
+      radiusKm = Number(savedRadius.replace(/[^\d.,]/g, "").replace(",", "."));
+    } else if (Number.isFinite(Number(profile?.searchRadiusKm)) && Number(profile.searchRadiusKm) > 0) {
+      radiusKm = Number(profile.searchRadiusKm);
+    }
   } catch {
   }
   if (!postal && profile?.postalCode) {

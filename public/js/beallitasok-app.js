@@ -261,6 +261,9 @@ function setSection(section) {
     link.classList.toggle("is-active", link.getAttribute("data-mm-nav") === next);
   });
   document.body.classList.toggle("mm-messages-open", false);
+  if (next === "keresesi-korzet" || next === "ajanlasok-korzet") {
+    fillAreaForms(getProfile());
+  }
   document.title =
     {
       attekintes: "Áttekintés",
@@ -652,6 +655,7 @@ async function lookupCityFromPostal(postalInput, cityInput, busyEl) {
 function setWheelValue(wheel, km) {
   if (!wheel) return;
   const value = Number(km);
+  if (!Number.isFinite(value)) return;
   wheel.querySelectorAll("[data-km]").forEach((btn) => {
     btn.classList.toggle("is-active", Number(btn.dataset.km) === value);
   });
@@ -659,6 +663,31 @@ function setWheelValue(wheel, km) {
   active?.scrollIntoView({ block: "nearest", behavior: "smooth" });
   const hidden = wheel.parentElement?.querySelector('input[type="hidden"]');
   if (hidden) hidden.value = String(value);
+}
+
+function syncWheelActiveFromScroll(wheel) {
+  if (!wheel) return;
+  const rect = wheel.getBoundingClientRect();
+  const centerY = rect.top + rect.height / 2;
+  let bestBtn = null;
+  let bestDist = Infinity;
+  wheel.querySelectorAll("[data-km]").forEach((btn) => {
+    const r = btn.getBoundingClientRect();
+    const mid = r.top + r.height / 2;
+    const d = Math.abs(mid - centerY);
+    if (d < bestDist) {
+      bestDist = d;
+      bestBtn = btn;
+    }
+  });
+  if (bestBtn) setWheelValue(wheel, bestBtn.dataset.km);
+}
+
+function readRadiusKmFromForm(form) {
+  const wheel = form?.querySelector("[data-wheel]");
+  const active = wheel?.querySelector(".settings-wheel-opt.is-active");
+  if (active?.dataset?.km) return Number(active.dataset.km);
+  return Number(form?.radiusKm?.value || 30);
 }
 
 function initWheel(wheel) {
@@ -669,6 +698,14 @@ function initWheel(wheel) {
     if (!btn || !wheel.contains(btn)) return;
     setWheelValue(wheel, btn.dataset.km);
   });
+  wheel.addEventListener(
+    "scroll",
+    () => {
+      clearTimeout(wheel._syncScrollT);
+      wheel._syncScrollT = setTimeout(() => syncWheelActiveFromScroll(wheel), 80);
+    },
+    { passive: true }
+  );
 }
 
 function accountTypeLabel(type) {
@@ -777,7 +814,8 @@ function initAreaForms() {
       .replace(/\D/g, "")
       .slice(0, 4);
     const city = String(form.city?.value || "").trim();
-    const radiusKm = Number(form.radiusKm?.value || 30);
+    syncWheelActiveFromScroll(form.querySelector("[data-wheel=search]"));
+    const radiusKm = readRadiusKmFromForm(form);
     if (postal.length !== 4) {
       showFlash(flash, "Adj meg egy 4 jegyű irányítószámot.", false);
       return;
@@ -790,8 +828,12 @@ function initAreaForms() {
       localStorage.setItem(SEARCH_POSTAL_KEY, postal);
       localStorage.setItem(SEARCH_RADIUS_KEY, String(radiusKm));
       const profile = { ...getProfile(), postalCode: postal, city, searchRadiusKm: radiusKm };
-      await saveProfile(profile).catch(() => null);
-      fillAreaForms(profile);
+      try {
+        await saveProfile(profile);
+      } catch (saveErr) {
+        console.warn("Körzet profil mentés:", saveErr);
+      }
+      fillAreaForms(getProfile());
       window.dispatchEvent(new CustomEvent("bymy-nearby-prefs-changed"));
       showFlash(flash, "Keresési körzet mentve.", true);
     } catch (error) {
@@ -807,7 +849,8 @@ function initAreaForms() {
       .replace(/\D/g, "")
       .slice(0, 4);
     const city = String(form.city?.value || "").trim();
-    let radiusKm = Number(form.radiusKm?.value || 30);
+    syncWheelActiveFromScroll(form.querySelector("[data-wheel=rec]"));
+    let radiusKm = readRadiusKmFromForm(form);
     if (radiusKm > 30) radiusKm = 30;
     if (postal.length !== 4) {
       showFlash(flash, "Adj meg egy 4 jegyű irányítószámot.", false);
@@ -826,8 +869,12 @@ function initAreaForms() {
         city,
         recommendationsRadiusKm: radiusKm,
       };
-      await saveProfile(profile).catch(() => null);
-      fillAreaForms(profile);
+      try {
+        await saveProfile(profile);
+      } catch (saveErr) {
+        console.warn("Ajánlások körzet mentés:", saveErr);
+      }
+      fillAreaForms(getProfile());
       showFlash(flash, "Ajánlások körzete mentve.", true);
     } catch (error) {
       showFlash(flash, error.message ?? "Mentés sikertelen.", false);

@@ -17,7 +17,7 @@ import {
   readNearbyPrefs,
   STORAGE_POSTAL,
   STORAGE_RADIUS,
-} from "./nearby-search.js?v=nearbyBoot1";
+} from "./nearby-search.js?v=nearbyPrefs2";
 import { setHubSectionVisible } from "./hub-listing-rail.js?v=immoRails3";
 
 const RAIL = document.getElementById("hub-nearby-rail");

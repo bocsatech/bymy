@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /** Meglévő hirdetések település/cím kitöltése a tulajdonos profiljából (közeli autók sáv). */
 
-import { listListings, getListing, saveListing } from "../lib/db-store.mjs";
+import { listListingsWithPreview, getListing, saveListing } from "../lib/db-store.mjs";
 
 function blank(value) {
   return !String(value ?? "").trim();
@@ -10,7 +10,7 @@ function blank(value) {
 async function main() {
   const dryRun = process.argv.includes("--dry-run");
   const limit = Math.min(Math.max(Number(process.argv.find((a) => /^\d+$/.test(a)) || 500), 1), 2000);
-  const items = await listListings({ limit, status: "feladott" });
+  const items = await listListingsWithPreview({ limit, status: "feladott" });
   let touched = 0;
   let skipped = 0;
 

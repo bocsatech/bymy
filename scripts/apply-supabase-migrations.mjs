@@ -20,6 +20,10 @@ const FILES = [
   "007_visitors_and_last_login.sql",
   "008_visitor_monitoring.sql",
   "009_password_reset.sql",
+  "010_image_assets.sql",
+  "011_partner_profiles.sql",
+  "012_ingatlan_ajanlas_categories.sql",
+  "013_remove_allapotfelmeres.sql",
 ];
 
 function loadEnvLocal() {

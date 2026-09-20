@@ -44,7 +44,7 @@ OAUTH_STATE_SECRET=
 ```
 
 Important:
-- **Két adatbázis:** `bymy.vercel.app` → saját Supabase.com projekt (Vercel env). `bymy.hu` (S1) → self-hosted Supabase a `bymy-data` VPS-en — **külön adat**, szándékosan.
+- **Két adatbázis:** `bymy.vercel.app` → saját Supabase.com projekt (Vercel env). `bymy.hu` (S1) → self-hosted Supabase a `bymy-data` VPS-en — **külön adat**, szándékosan. Részletek + **Studio GUI:** [`docs/supabase-s2-bymy-data.md`](supabase-s2-bymy-data.md).
 - Vercel env: `mac/vercel-supabase-env.command` (forrás: `.env.local` felhős kulcsok)
 - PUBLIC_BASE_URL on Vercel: `https://bymy.vercel.app`
 - never expose SUPABASE_SERVICE_ROLE_KEY to the browser

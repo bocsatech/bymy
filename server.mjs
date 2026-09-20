@@ -122,6 +122,16 @@ import {
 import { listingImageDir, resolveListingImageFile, fetchRemoteListingImage, clearListingImageFiles } from "./lib/listing-image.mjs";
 import { resolveFilesystemImageMediaFile, imageStorageRoot } from "./lib/filesystem-image-storage.mjs";
 import { getImageStorageBackend } from "./lib/image-storage-backend.mjs";
+import {
+  HA_IMPORT_ORIGINS,
+  createImportToken,
+  getUserByImportToken,
+  haOriginRequiresImportToken,
+  isImportScopedToken,
+  consumeImportSaveQuota,
+  importTokenTtlMs,
+  importRateLimitPerHour,
+} from "./lib/import-auth.mjs";
 import { attachSellerProfile } from "./lib/listing-detail-seller.mjs";
 import { saveListingPhotos } from "./lib/listing-photos.mjs";
 import {
@@ -321,12 +331,6 @@ function sendJson(res, status, data, headers = {}) {
   });
   res.end(JSON.stringify(data));
 }
-
-const HA_IMPORT_ORIGINS = new Set([
-  "https://www.hasznaltauto.hu",
-  "https://hasznaltauto.hu",
-  "https://admin.hasznaltauto.hu",
-]);
 
 function haImportCorsHeaders(req) {
   const origin = String(req.headers.origin ?? "").trim();
@@ -628,9 +632,12 @@ async function handleImportExtracted(req, res) {
     res.end();
     return;
   }
-  const user = await requestUser(req);
+  const user = await requestImportUser(req);
   if (!user) {
-    sendJson(res, 401, { error: "Az importhoz be kell jelentkezned a Bymy fiókodba." }, cors);
+    const hint = haOriginRequiresImportToken(req)
+      ? "Frissítsd a könyvjelzőt a Bymy Autóimport oldalon (Másolás gomb), majd futtasd újra."
+      : "Az importhoz be kell jelentkezned a Bymy fiókodba.";
+    sendJson(res, 401, { error: hint, code: "AUTH_REQUIRED" }, cors);
     return;
   }
   let body;
@@ -638,6 +645,32 @@ async function handleImportExtracted(req, res) {
     body = await readBody(req);
   } catch {
     sendJson(res, 400, { error: "Érvénytelen JSON." }, cors);
+    return;
+  }
+
+  const urlCount = [
+    ...(Array.isArray(body.urls) ? body.urls : []),
+    body.url ? body.url : "",
+  ]
+    .map((item) => String(item ?? "").trim())
+    .filter(Boolean).length;
+  const pageCount = Math.min(
+    500,
+    (Array.isArray(body.pages) ? body.pages.length : 0) +
+      (body.page && typeof body.page === "object" ? 1 : 0) +
+      urlCount
+  );
+  const quota = consumeImportSaveQuota(user.id, Math.max(1, pageCount));
+  if (!quota.ok) {
+    sendJson(
+      res,
+      429,
+      {
+        error: `Import limit (${importRateLimitPerHour()} hirdetés / óra / fiók). Próbáld később.`,
+        code: "IMPORT_RATE_LIMIT",
+      },
+      { ...cors, "Retry-After": String(quota.retryAfterSec || 300) }
+    );
     return;
   }
 
@@ -788,6 +821,17 @@ async function handleImport(req, res) {
 
 async function requestUser(req) {
   return getUserBySessionToken(getSessionTokenFromRequest(req));
+}
+
+async function requestImportUser(req) {
+  const token = getSessionTokenFromRequest(req);
+  if (!token) return null;
+  if (haOriginRequiresImportToken(req)) {
+    if (!isImportScopedToken(token)) return null;
+    return getUserByImportToken(token);
+  }
+  if (isImportScopedToken(token)) return getUserByImportToken(token);
+  return getUserBySessionToken(token);
 }
 
 function allowDevSecretsInResponse() {
@@ -1800,7 +1844,16 @@ async function handleAuthApi(req, res, pathname) {
       if (!assertAuthRate(req, res, "bookmarklet-token", { limit: 30, windowMs: 60 * 60 * 1000 })) {
         return;
       }
-      sendJson(res, 200, { token });
+      try {
+        const importToken = createImportToken(currentUser.id);
+        sendJson(res, 200, {
+          token: importToken,
+          scope: "import",
+          expiresInMs: importTokenTtlMs(),
+        });
+      } catch (error) {
+        sendJson(res, 500, { error: error.message ?? "Import token nem hozható létre." });
+      }
       return;
     }
 

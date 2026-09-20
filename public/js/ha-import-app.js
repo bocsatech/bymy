@@ -5,7 +5,13 @@ import {
   requireAuthForPage,
   initSiteAuth,
   ensureBookmarkletToken,
-} from "./site-auth.js?v=secAuth1";
+} from "./site-auth.js?v=secAuth2";
+
+const HA_POSTMESSAGE_ORIGINS = new Set([
+  "https://www.hasznaltauto.hu",
+  "https://hasznaltauto.hu",
+  "https://admin.hasznaltauto.hu",
+]);
 
 const CAT_STORAGE_KEY = "bymy-hirdetes-category";
 const CAT_STORAGE_VERSION = 2;
@@ -23,7 +29,7 @@ const MODES = {
     startURL: "https://admin.hasznaltauto.hu/",
     steps: "1. Admin megnyitása  ·  2. Járműlista (thumbök látszanak)  ·  3. Friss könyvjelző másolása / futtatása",
     action: "Lista → csak első kép (CDN)",
-    footer: "Új motor: a lista CDN képeiből olvassuk az ID-t. Opener nem kell — session token megy a könyvjelzőben.",
+    footer: "CDN lista → ID. A könyvjelző rövid élettartamú import tokent kap (nem a teljes belépés) — másold újra, ha lejárt (~4 óra).",
     openLabel: "admin.hasznaltauto.hu megnyitása",
   },
 };
@@ -54,8 +60,8 @@ function bookmarkletHref(mode) {
   const origin = location.origin;
   const isDealer = mode === "dealer";
   const src = isDealer
-    ? `${origin}/js/ha-dealer-import.js?v=haCdn9`
-    : `${origin}/js/ha-import-bookmarklet.js?v=haDealerPhoto14`;
+    ? `${origin}/js/ha-dealer-import.js?v=haCdn10`
+    : `${origin}/js/ha-import-bookmarklet.js?v=haDealerPhoto15`;
   const token = getAuthToken() || "";
   const runner = isDealer ? "BymyHaDealerImport" : "BymyHaImport";
   return `javascript:void(function(){var o=${JSON.stringify(origin)};var m=${JSON.stringify(mode)};var t=${JSON.stringify(token)};var src=${JSON.stringify(src)}+"&t="+Date.now();function go(){try{window.${runner}.run({origin:o,mode:m,authToken:t});}catch(e){alert((e&&e.message)||e);}}try{delete window.${runner};}catch(e){window.${runner}=undefined;}var s=document.createElement("script");s.src=src;s.onload=go;s.onerror=function(){alert("A hasznaltauto.hu blokkolta a Bymy scriptet.");};(document.documentElement||document.body).appendChild(s);})();`;
@@ -343,12 +349,16 @@ function acceptHaImportMessage(event) {
   const data = event.data;
   if (!data || data.type !== "bymy-ha-import") return null;
   const origin = String(event.origin || "");
-  if (!origin.includes("hasznaltauto.hu") && origin !== location.origin) return null;
+  if (origin !== location.origin && !HA_POSTMESSAGE_ORIGINS.has(origin)) return null;
   return data;
 }
 
-function ackHaImport(eventOrSource, data) {
+function ackHaImport(eventOrSource, data, targetOrigin = "*") {
   const source = eventOrSource?.source ?? eventOrSource;
+  const origin =
+    typeof targetOrigin === "string" && targetOrigin
+      ? targetOrigin
+      : eventOrSource?.origin || "*";
   try {
     source?.postMessage(
       {
@@ -358,7 +368,7 @@ function ackHaImport(eventOrSource, data) {
         index: data?.index || null,
         total: data?.total || null,
       },
-      "*"
+      origin
     );
   } catch {
   }
@@ -396,9 +406,10 @@ window.addEventListener("message", (event) => {
   if (!data) return;
   const deferAck = data.photoOnly === true || data.mode === "dealer";
   // Kereskedői: ack csak mentés után — így a bookmarklet nem küldi egyszerre az összes nagy képet
-  if (!deferAck) ackHaImport(event, data);
+  if (!deferAck) ackHaImport(event, data, event.origin);
   else {
     data.__ackSource = event.source;
+    data.__ackOrigin = event.origin;
   }
 
   const index = Math.max(1, Number(data.index) || 1);
@@ -413,7 +424,7 @@ window.addEventListener("message", (event) => {
 
   const key = haImportKey(data);
   if (seenHaImportKeys.has(key) || (importBusy && key === currentHaImportKey)) {
-    if (deferAck) ackHaImport(event, data);
+    if (deferAck) ackHaImport(event, data, event.origin);
     return;
   }
   try {
@@ -441,12 +452,12 @@ async function runMessageImport(data) {
   const pages = Array.isArray(data.pages) ? data.pages : [];
   if (!pages.length) {
     setStatus("Üres import — nyisd meg a hirdetést, majd próbáld újra.", "err");
-    if (data.__ackSource) ackHaImport(data.__ackSource, data);
+    if (data.__ackSource) ackHaImport(data.__ackSource, data, data.__ackOrigin);
     return;
   }
   const key = haImportKey(data);
   if (seenHaImportKeys.has(key)) {
-    if (data.__ackSource) ackHaImport(data.__ackSource, data);
+    if (data.__ackSource) ackHaImport(data.__ackSource, data, data.__ackOrigin);
     return;
   }
   if (importBusy) {
@@ -536,7 +547,7 @@ async function runMessageImport(data) {
       pendingHaImports.shift();
     }
     const next = pendingHaImports.length ? pendingHaImports.shift() : null;
-    if (data.__ackSource) ackHaImport(data.__ackSource, data);
+    if (data.__ackSource) ackHaImport(data.__ackSource, data, data.__ackOrigin);
     if (next) queueMicrotask(() => runMessageImport(next));
   }
 }

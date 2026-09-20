@@ -275,8 +275,10 @@ async function initHubNearbyCars() {
 
     if (!fresh.nearby.length) {
       renderInitial([]);
-      RAIL.appendChild(createPromptCard("Nincs autó a körzetben", allHref));
-      setStatus(`Nincs autó ${cityLabel || ""} ${radiusKm} km-es körzetében.`);
+      RAIL.appendChild(createPromptCard("Körzet / sugár módosítása", "/beallitasok.html?szekcio=keresesi-korzet"));
+      setStatus(
+        `Nincs autó ${cityLabel || ""} ${radiusKm} km-es körzetében. Ellenőrizd a Beállítások → Keresési körzet irányítószámát és sugarát.`
+      );
       restoreListingReturn();
       return;
     }

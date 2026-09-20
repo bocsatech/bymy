@@ -1,0 +1,7 @@
+# Csak localhoston publikálja a Supabase Studiót (SSH tunnelhez).
+# S2-n: másold /root/supabase-project/docker-compose.studio-localhost.yml alá,
+# majd: COMPOSE_FILE=docker-compose.yml:docker-compose.studio-localhost.yml
+services:
+  studio:
+    ports:
+      - "127.0.0.1:54323:3000"

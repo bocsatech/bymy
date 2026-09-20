@@ -97,21 +97,14 @@ export function initMyAdsPanel(root) {
         </div>
       </div>
       <p class="myads-count">Megjelenített járművek száma: <strong>${rows.length} db</strong></p>
-      <div class="myads-table-wrap">
-        <table class="myads-table">
-          <thead>
-            <tr>
-              <th>Ssz.</th>
-              <th>Kép</th>
-              <th>Gyártmány, típus</th>
-              <th>Vételár / Statisztika</th>
-              <th>Funkciók</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${rows.length ? rows.map((item, index) => rowHtml(item, index + 1)).join("") : `<tr><td colspan="5" class="myads-empty-cell">Nincs megjeleníthető hirdetés.</td></tr>`}
-          </tbody>
-        </table>
+      <div class="myads-list-wrap">
+        <div class="myads-list" role="list">
+          ${
+            rows.length
+              ? rows.map((item, index) => rowHtml(item, index + 1)).join("")
+              : `<p class="myads-empty-cell">Nincs megjeleníthető hirdetés.</p>`
+          }
+        </div>
       </div>
       <div class="myads-actions">
         <a class="site-header-btn site-header-btn--outline" href="/hirdetesfeladas.html" data-auth-guard>Új hirdetés feladása</a>
@@ -131,34 +124,34 @@ export function initMyAdsPanel(root) {
     const app = Number(views.app || item.views_app || 0);
     const active = isActive(item);
     return `
-      <tr data-id="${item.id}">
-        <td class="myads-ssz">${index}.</td>
-        <td class="myads-photo-cell">
+      <article class="myads-row" role="listitem" data-id="${item.id}">
+        <div class="myads-ssz">${index}.</div>
+        <div class="myads-photo-cell">
           <div class="myads-thumb">
             ${thumb ? `<img src="${escapeHtml(thumb)}" alt="" />` : `<span class="myads-thumb-empty">Nincs kép</span>`}
             <span class="myads-photo-count">${count}</span>
           </div>
           <button type="button" class="myads-link" data-photos="${item.id}">Képkezelés</button>
-        </td>
-        <td>
-          <a class="myads-title" href="/hirdetes.html?id=${item.id}" data-listing-id="${item.id}">${escapeHtml(titleOf(item))}</a>
+        </div>
+        <div class="myads-row-body">
+          <div class="myads-row-top">
+            <a class="myads-title" href="/hirdetes.html?id=${item.id}" data-listing-id="${item.id}">${escapeHtml(titleOf(item))}</a>
+            <strong class="myads-price">${escapeHtml(item.preview?.price || "—")}</strong>
+          </div>
           <p class="myads-spec">${escapeHtml(specOf(item))}</p>
+          <p class="myads-views">Megtekintve: ${web + app}</p>
+          <p class="myads-views-split">Web: <strong>${web}</strong> · Mobilapp: <strong>${app}</strong></p>
           <label class="myads-inactive">
             <input type="checkbox" data-inactive="${item.id}" ${active ? "" : "checked"} />
             Lefoglalózva / inaktív
           </label>
-        </td>
-        <td>
-          <strong class="myads-price">${escapeHtml(item.preview?.price || "—")}</strong>
-          <p class="myads-views">Megtekintve: ${web + app}</p>
-          <p class="myads-views-split">Web: <strong>${web}</strong> · Mobilapp: <strong>${app}</strong></p>
-        </td>
-        <td class="myads-fn">
-          <a class="myads-link" href="/hirdetesfeladas.html?id=${item.id}">Módosítás</a>
-          <a class="myads-link" href="/hirdetes.html?id=${item.id}" data-listing-id="${item.id}">Megtekintés</a>
-          <button type="button" class="myads-link myads-link--danger" data-delete="${item.id}">Törlés</button>
-        </td>
-      </tr>
+          <div class="myads-fn">
+            <a class="myads-link" href="/hirdetesfeladas.html?id=${item.id}">Módosítás</a>
+            <a class="myads-link" href="/hirdetes.html?id=${item.id}" data-listing-id="${item.id}">Megtekintés</a>
+            <button type="button" class="myads-link myads-link--danger" data-delete="${item.id}">Törlés</button>
+          </div>
+        </div>
+      </article>
     `;
   }
 

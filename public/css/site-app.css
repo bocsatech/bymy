@@ -4105,54 +4105,48 @@ body.site-app .myads-count {
   font-size: 0.9rem;
 }
 
-body.site-app .myads-table-wrap {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  max-width: 100%;
+body.site-app .myads-list-wrap {
   border: 1px solid #dfe3ea;
   border-radius: 10px;
   background: #fff;
+  overflow: visible;
 }
 
-body.site-app .myads-table {
-  width: 100%;
-  min-width: 52rem;
-  border-collapse: collapse;
-  font-size: 0.92rem;
-  table-layout: auto;
+body.site-app .myads-list {
+  display: grid;
+  gap: 0;
 }
 
-body.site-app .myads-table th,
-body.site-app .myads-table td {
-  padding: 0.75rem 0.8rem;
+body.site-app .myads-row {
+  display: grid;
+  grid-template-columns: 1.85rem 96px minmax(0, 1fr);
+  gap: 0.45rem 0.65rem;
+  padding: 0.85rem 0.75rem;
   border-bottom: 1px solid #eef1f5;
-  text-align: left;
-  vertical-align: top;
+  align-items: start;
+  font-size: 0.92rem;
 }
 
-body.site-app .myads-table th {
-  background: #f4f6f8;
-  font-size: 0.78rem;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  color: #667085;
-  white-space: normal;
-  line-height: 1.25;
+body.site-app .myads-row:last-child {
+  border-bottom: 0;
 }
 
-body.site-app .myads-table th:nth-child(4),
-body.site-app .myads-table td:nth-child(4) {
-  min-width: 9.5rem;
+body.site-app .myads-row-body {
+  min-width: 0;
 }
 
-body.site-app .myads-table th:nth-child(5),
-body.site-app .myads-table td:nth-child(5) {
-  min-width: 6.75rem;
+body.site-app .myads-row-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.35rem 0.75rem;
 }
 
 body.site-app .myads-ssz {
-  width: 2.4rem;
   color: #667085;
+  font-size: 0.88rem;
+  padding-top: 0.15rem;
 }
 
 body.site-app .myads-thumb {
@@ -4192,13 +4186,17 @@ body.site-app .myads-photo-count {
 }
 
 body.site-app .myads-photo-cell {
-  width: 110px;
+  width: auto;
+  max-width: 96px;
 }
 
 body.site-app .myads-title {
+  flex: 1 1 10rem;
+  min-width: 0;
   color: #0b63ce;
   font-weight: 700;
   text-decoration: none;
+  word-break: break-word;
 }
 
 body.site-app .myads-spec,
@@ -4225,14 +4223,17 @@ body.site-app .myads-inactive {
 }
 
 body.site-app .myads-price {
-  display: block;
+  flex: 0 1 auto;
   color: #c2410c;
+  white-space: normal;
+  text-align: right;
 }
 
 body.site-app .myads-fn {
-  display: grid;
-  gap: 0.25rem;
-  white-space: nowrap;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem 0.85rem;
+  margin-top: 0.5rem;
 }
 
 body.site-app .myads-link {
@@ -4253,7 +4254,8 @@ body.site-app .myads-link--danger {
 body.site-app .myads-empty-cell {
   text-align: center;
   color: #667085;
-  padding: 1.4rem !important;
+  padding: 1.4rem 1rem;
+  margin: 0;
 }
 
 body.site-app .myads-actions {
@@ -5959,6 +5961,7 @@ html[data-theme="dark"] body.site-app.settings-page .mm-ad-box,
 html[data-theme="dark"] body.site-app.settings-page .hero-settings,
 html[data-theme="dark"] body.site-app.settings-page .mm-list-item,
 html[data-theme="dark"] body.site-app.settings-page .mm-ad-row,
+html[data-theme="dark"] body.site-app.settings-page .myads-list-wrap,
 html[data-theme="dark"] body.site-app.settings-page .myads-table-wrap,
 html[data-theme="dark"] body.site-app.settings-page .myads-modal-card {
   background: #1a1f26 !important;
@@ -6042,16 +6045,9 @@ html[data-theme="dark"] body.site-app.settings-page .mm-list-item.is-unread {
   border-color: #3b82f6 !important;
 }
 
-html[data-theme="dark"] body.site-app.settings-page .myads-table th,
-html[data-theme="dark"] body.site-app.settings-page .myads-table td {
-  background: #1a1f26 !important;
-  color: #e8eaed !important;
+html[data-theme="dark"] body.site-app.settings-page .myads-row {
   border-bottom-color: #2a313c !important;
-}
-
-html[data-theme="dark"] body.site-app.settings-page .myads-table th {
-  background: #222831 !important;
-  color: #9ca3af !important;
+  color: #e8eaed !important;
 }
 
 html[data-theme="dark"] body.site-app.settings-page .myads-link {

@@ -1280,6 +1280,7 @@ function addPhotoFiles(files) {
     alert("Legfeljebb 12 kép tölthető fel. A többletet nem vettük fel.");
   }
   renderPhotoPreview();
+  void uploadPendingPhotos();
 }
 
 function photosReadyForNext() {
@@ -1294,7 +1295,7 @@ function photoBlockMessage() {
   if (photoItems.some((item) => item.status === "error")) {
     return "Van hibás kép. Töröld, vagy töltsd fel újra a Feltöltés gombbal.";
   }
-  return "Először töltsd fel a képeket a Feltöltés gombbal.";
+  return "Várj, amíg minden új kép feltöltődik.";
 }
 
 function syncPhotoNextButton() {
@@ -1338,8 +1339,8 @@ function updatePhotoStatus() {
   if (photoUploadLabel) {
     if (!total) {
       photoUploadLabel.textContent = editing
-        ? "Ha új képet adsz, a Feltöltés után lehet továbbmenni."
-        : "Válassz képeket, majd kattints a Feltöltésre.";
+        ? "Új képek automatikusan feltöltődnek."
+        : "Válassz képeket — a feltöltés automatikusan indul.";
     } else if (photoBusy || uploading) {
       photoUploadLabel.textContent = `Feltöltés: ${ready} / ${total}`;
     } else if (pending) {
@@ -1596,6 +1597,12 @@ if (mode === "wizard") {
   });
 
   nextBtn?.addEventListener("click", async () => {
+    if (
+      currentStep === 4 &&
+      photoItems.some((item) => item.status === "pending" || item.status === "error")
+    ) {
+      await uploadPendingPhotos();
+    }
     if (!validateStep(currentStep)) return;
     saveDraft();
     if (currentStep < TOTAL_STEPS) {

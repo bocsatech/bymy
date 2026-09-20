@@ -546,25 +546,31 @@ async function handleImageUploadApi(req, res) {
       },
     });
 
-    const asset = await saveImageAssetMetadata({
-      bucket,
-      path: uploaded.path,
-      publicUrl: uploaded.publicUrl,
-      entityType,
-      entityId,
-      uploadedByUserId: user.id,
-      originalName: fileName,
-      contentType: uploaded.format ? `image/${uploaded.format}` : 'image/webp',
-      width: uploaded.width,
-      height: uploaded.height,
-      fileSize: uploaded.size,
-      processingStatus: 'ready',
-    });
+    let asset = null;
+    try {
+      asset = await saveImageAssetMetadata({
+        bucket,
+        path: uploaded.path,
+        publicUrl: uploaded.publicUrl,
+        entityType,
+        entityId,
+        uploadedByUserId: user.id,
+        originalName: fileName,
+        contentType: uploaded.format ? `image/${uploaded.format}` : 'image/webp',
+        width: uploaded.width,
+        height: uploaded.height,
+        fileSize: uploaded.size,
+        processingStatus: 'ready',
+      });
+    } catch (metaError) {
+      console.warn("[uploads] image_assets metadata skipped:", metaError?.message ?? metaError);
+    }
 
     sendJson(res, 200, {
       ok: true,
       bucket,
       url: uploaded.publicUrl,
+      publicUrl: uploaded.publicUrl,
       path: uploaded.path,
       asset,
     });

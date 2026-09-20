@@ -1,18 +1,39 @@
-# Bymy képtár (Supabase Storage nélkül)
+# Bymy képtár (Cloudflare R2 — ajánlott)
 
-A hirdetés- és feltöltött képek **fájlrendszerben** tárolódnak (S1 vagy S2 lemez), **nem** a Supabase Storage bucketekben.  
-Az adatbázis (Postgres / Supabase DB) továbbra is tarthatja a hirdetés metaadatot és opcionálisan az `image_assets` sort.
+A hirdetésfotók **Cloudflare R2**-ben (`bymy-listings` bucket), publikus URL: **`https://img.bymy.hu/...`**.  
+**Supabase Storage** és **S1/S2 lemez** csak fallback / Vercel preview.
 
-## Env (S1 éles példa)
+Az adatbázis (Postgres) továbbra is tarthatja a metaadatot; a fájl **nem** megy Supabase Storage-ba.
+
+## Env (S1 éles — R2)
 
 ```env
-# Kötelező éles feltöltéshez
+BYMY_IMAGE_STORAGE=r2
+
+# Cloudflare dashboard → R2 → Manage R2 API Tokens
+R2_ACCOUNT_ID=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+R2_ACCESS_KEY_ID=xxxxxxxxxxxxxxxxxxxxxxxx
+R2_SECRET_ACCESS_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+R2_BUCKET_NAME=bymy-listings
+R2_PUBLIC_BASE_URL=https://img.bymy.hu
+```
+
+| Változó | Jelentés |
+|---------|----------|
+| `BYMY_IMAGE_STORAGE` | `r2` (éles), `filesystem` (lokál teszt), `supabase` (régi) |
+| `R2_ACCOUNT_ID` | Cloudflare fiók ID (Overview oldal) |
+| `R2_*` kulcsok | R2 API token (Object Read & Write) |
+| `R2_PUBLIC_BASE_URL` | Custom domain: `https://img.bymy.hu` |
+
+Publikus fájl URL minta:  
+`https://img.bymy.hu/listing-images/{listingId}/{name}.webp`
+
+## Env (fallback: VPS lemez)
+
+```env
 BYMY_IMAGE_STORAGE=filesystem
 BYMY_IMAGE_ROOT=/var/www/bymy/data/images
 BYMY_IMAGE_PUBLIC_BASE=https://bymy.hu
-
-# Később CDN / külön host:
-# BYMY_IMAGE_PUBLIC_BASE=https://img.bymy.hu
 ```
 
 | Változó | Jelentés |

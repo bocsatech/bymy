@@ -120,11 +120,8 @@ import {
   verifyAppleIdentityToken,
 } from "./lib/oauth.mjs";
 import { listingImageDir, resolveListingImageFile, fetchRemoteListingImage, clearListingImageFiles } from "./lib/listing-image.mjs";
-import {
-  resolveFilesystemImageMediaFile,
-  isFilesystemImageStorage,
-  imageStorageRoot,
-} from "./lib/filesystem-image-storage.mjs";
+import { resolveFilesystemImageMediaFile, imageStorageRoot } from "./lib/filesystem-image-storage.mjs";
+import { getImageStorageBackend } from "./lib/image-storage-backend.mjs";
 import { attachSellerProfile } from "./lib/listing-detail-seller.mjs";
 import { saveListingPhotos } from "./lib/listing-photos.mjs";
 import {
@@ -2292,8 +2289,14 @@ export async function handleHttpRequest(req, res) {
       version: readFileSync(join(PUBLIC, "version.txt"), "utf8").trim(),
       service: "bymy-autosweb",
       backend: isSupabaseBackend() ? "supabase" : "sqlite",
-      imageStorage: isFilesystemImageStorage() ? "filesystem" : "supabase",
-      ...(isFilesystemImageStorage() ? { imageRoot: imageStorageRoot() } : {}),
+      imageStorage: getImageStorageBackend(),
+      ...(getImageStorageBackend() === "filesystem" ? { imageRoot: imageStorageRoot() } : {}),
+      ...(getImageStorageBackend() === "r2"
+        ? {
+            r2Bucket: process.env.R2_BUCKET_NAME || process.env.BYMY_R2_BUCKET || "bymy-listings",
+            r2PublicBase: process.env.R2_PUBLIC_BASE_URL || process.env.BYMY_IMAGE_PUBLIC_BASE || "https://img.bymy.hu",
+          }
+        : {}),
       turnstile: turnstileHealthStatus(),
       ...(allowDevSecretsInResponse()
         ? {

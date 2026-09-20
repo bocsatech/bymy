@@ -1,5 +1,5 @@
 import { getAuthUser, loginUrl } from "./site-auth.js";
-import { startConversation } from "./messages-api.js?v=msgLive1";
+import { findConversationForListing } from "./messages-api.js?v=msgLive2";
 
 export function isOwnListing(sellerId) {
   const me = Number(getAuthUser()?.id);
@@ -20,6 +20,7 @@ export async function openListingMessage({
   meta = "",
   code,
   sellerId,
+  sellerName = "",
   redirect = true,
 } = {}) {
   const user = getAuthUser();
@@ -36,16 +37,33 @@ export async function openListingMessage({
         : "Ehhez a hirdetéshez nem indítható üzenet."
     );
   }
-  const conv = await startConversation({
+  const lookup = {
     listingId: String(listingId),
     title: String(title || `Hirdetés #${listingId}`),
     priceLabel,
     meta,
     code,
     ...(Number(sellerId) > 0 ? { sellerId: Number(sellerId) } : {}),
-  });
-  if (redirect && conv?.id) {
-    window.location.href = `/uzenetek.html?c=${encodeURIComponent(conv.id)}`;
+  };
+  const conv = await findConversationForListing(lookup);
+  if (redirect) {
+    if (conv?.id) {
+      window.location.href = `/uzenetek.html?c=${encodeURIComponent(conv.id)}`;
+    } else {
+      const q = new URLSearchParams({
+        compose: "1",
+        listing_id: lookup.listingId,
+        title: lookup.title,
+        price: priceLabel,
+        meta,
+        code: code || `AEA-${listingId}`,
+      });
+      if (Number(sellerId) > 0) q.set("seller_id", String(sellerId));
+      if (sellerName) q.set("seller_name", sellerName);
+      window.location.href = `/uzenetek.html?${q.toString()}`;
+    }
   }
-  return conv?.id ? { conversationId: conv.id, conversation: conv } : null;
+  return conv?.id
+    ? { conversationId: conv.id, conversation: conv }
+    : { compose: true, ...lookup };
 }

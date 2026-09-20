@@ -41,6 +41,29 @@ export async function listConversations() {
   return Array.isArray(data.conversations) ? data.conversations : [];
 }
 
+export async function findConversationForListing({
+  listingId,
+  title = "",
+  priceLabel = "",
+  meta = "",
+  code,
+  sellerId,
+} = {}) {
+  const params = new URLSearchParams({
+    listing_id: String(listingId ?? ""),
+    title: String(title || ""),
+    price: String(priceLabel || ""),
+    meta: String(meta || ""),
+    code: code || `AEA-${listingId}`,
+  });
+  const sid = Number(sellerId);
+  if (Number.isFinite(sid) && sid > 0) params.set("seller_id", String(sid));
+  const data = await messagesFetch(
+    `/api/messages/conversations/for-listing?${params.toString()}`
+  );
+  return data.conversation || null;
+}
+
 export async function startConversation({
   listingId,
   title,
@@ -48,7 +71,10 @@ export async function startConversation({
   meta = "",
   code,
   sellerId,
-}) {
+  initialBody,
+  message,
+  attachment,
+} = {}) {
   const body = {
     listing_id: listingId,
     listing_title: title,
@@ -58,6 +84,15 @@ export async function startConversation({
   };
   const sid = Number(sellerId);
   if (Number.isFinite(sid) && sid > 0) body.seller_id = sid;
+  const text = String(initialBody ?? message ?? "").trim();
+  if (text) body.initial_body = text;
+  if (attachment) {
+    body.attachment = {
+      filename: attachment.filename,
+      mime: attachment.mime,
+      data_base64: attachment.dataBase64,
+    };
+  }
   const data = await messagesFetch("/api/messages/conversations", {
     method: "POST",
     body,

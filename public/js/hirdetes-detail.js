@@ -7,8 +7,8 @@ import {
 } from "./db-client.js?v=secReveal1";
 import { getAuthUser, getDisplayName, getProfile } from "./site-auth.js?v=auth20260805localdb9";
 import { mountTurnstile } from "./turnstile-ui.js?v=turnstile10";
-import { startConversation, sendMessage } from "./messages-api.js?v=msgLive1";
-import { openListingMessage } from "./start-listing-message.js?v=msgLive1";
+import { startConversation } from "./messages-api.js?v=msgLive2";
+import { openListingMessage } from "./start-listing-message.js?v=msgLive2";
 import { getParkplatz, addParkplatzItem, removeParkplatzItem } from "./fok-data.js?v=parkThumb1";
 import { listingReturnHref, listingDetailHref, rememberListingOpen, getListingSearchNav, touchListingReturnId } from "./listing-return.js?v=searchNav1";
 
@@ -735,6 +735,8 @@ function bindUi(view, listing) {
           priceLabel: view.price,
           meta: view.metaLine,
           code: view.code,
+          sellerId: view.userId,
+          sellerName: view.sellerName,
         });
       } catch (error) {
         alert(error.message ?? "Az üzenet indítása sikertelen.");
@@ -781,8 +783,9 @@ function bindUi(view, listing) {
         priceLabel: view.price,
         meta: view.metaLine,
         code: view.code,
+        sellerId: view.userId,
+        initialBody: parts.join("\n"),
       });
-      await sendMessage(conv.id, { body: parts.join("\n") });
       if (status) {
         status.hidden = false;
         status.textContent = "Az érdeklődés elküldve.";

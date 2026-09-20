@@ -79,6 +79,34 @@ enum MessagesAPI {
     return try decodeList(data, key: "conversations")
   }
 
+  static func findConversationForListing(
+    token: String,
+    listingId: String,
+    title: String = "",
+    priceLabel: String = "",
+    meta: String = "",
+    code: String? = nil,
+    sellerId: Int? = nil
+  ) async throws -> Conversation? {
+    var items: [URLQueryItem] = [
+      URLQueryItem(name: "listing_id", value: listingId),
+      URLQueryItem(name: "title", value: title),
+      URLQueryItem(name: "price", value: priceLabel),
+      URLQueryItem(name: "meta", value: meta),
+      URLQueryItem(name: "code", value: code ?? "AEA-\(listingId)"),
+    ]
+    if let sellerId, sellerId > 0 {
+      items.append(URLQueryItem(name: "seller_id", value: String(sellerId)))
+    }
+    var comp = URLComponents()
+    comp.path = "api/messages/conversations/for-listing"
+    comp.queryItems = items
+    guard let path = comp.string else { throw MsgError.unreachable }
+    let data = try await get(path: path, token: token)
+    struct Wrap: Decodable { let conversation: Conversation? }
+    return try JSONDecoder().decode(Wrap.self, from: data).conversation
+  }
+
   static func startConversation(
     token: String,
     listingId: String,
@@ -86,7 +114,8 @@ enum MessagesAPI {
     priceLabel: String,
     meta: String,
     code: String? = nil,
-    sellerId: Int? = nil
+    sellerId: Int? = nil,
+    initialBody: String? = nil
   ) async throws -> Conversation {
     var body: [String: Any] = [
       "listing_id": listingId,
@@ -98,9 +127,31 @@ enum MessagesAPI {
     if let sellerId, sellerId > 0 {
       body["seller_id"] = sellerId
     }
+    let text = initialBody?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+    if !text.isEmpty {
+      body["initial_body"] = text
+    }
     let data = try await post(path: "api/messages/conversations", token: token, json: body)
     struct Wrap: Decodable { let conversation: Conversation }
     return try JSONDecoder().decode(Wrap.self, from: data).conversation
+  }
+
+  static func composeConversation(from target: ListingMessageTarget) -> Conversation {
+    Conversation(
+      id: 0,
+      listing: ListingInfo(
+        id: target.listingId,
+        title: target.title,
+        priceLabel: target.priceLabel,
+        code: target.code,
+        meta: target.meta
+      ),
+      peer: Peer(id: target.sellerId ?? 0, email: "", displayName: "Eladó"),
+      role: "buyer",
+      unread: 0,
+      updatedAt: ISO8601DateFormatter().string(from: Date()),
+      lastMessage: nil
+    )
   }
 
   static func messages(token: String, conversationId: Int) async throws -> (Conversation, [Message]) {

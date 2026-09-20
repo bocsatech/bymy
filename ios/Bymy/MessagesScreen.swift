@@ -15,7 +15,7 @@ struct StartChatScreen: View {
   var body: some View {
     Group {
       if let conversation {
-        ChatThreadScreen(conversation: conversation, onClose: onClose)
+        ChatThreadScreen(conversation: conversation, composeTarget: target, onClose: onClose)
       } else if let errorText {
         VStack(spacing: 14) {
           ScreenHeader(title: "Üzenet", subtitle: nil, onBack: onClose)
@@ -48,7 +48,7 @@ struct StartChatScreen: View {
     }
     errorText = nil
     do {
-      conversation = try await MessagesAPI.startConversation(
+      if let existing = try await MessagesAPI.findConversationForListing(
         token: token,
         listingId: target.listingId,
         title: target.title,
@@ -56,7 +56,11 @@ struct StartChatScreen: View {
         meta: target.meta,
         code: target.code,
         sellerId: target.sellerId
-      )
+      ) {
+        conversation = existing
+      } else {
+        conversation = MessagesAPI.composeConversation(from: target)
+      }
     } catch {
       errorText = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
     }
@@ -242,6 +246,7 @@ struct MessagesScreen: View {
 struct ChatThreadScreen: View {
   @EnvironmentObject private var profile: ProfileStore
   let conversation: MessagesAPI.Conversation
+  var composeTarget: ListingMessageTarget? = nil
   var onClose: () -> Void
 
   @State private var conv: MessagesAPI.Conversation
@@ -253,8 +258,13 @@ struct ChatThreadScreen: View {
   @State private var photoItem: PhotosPickerItem?
   @State private var showFileImporter = false
 
-  init(conversation: MessagesAPI.Conversation, onClose: @escaping () -> Void) {
+  init(
+    conversation: MessagesAPI.Conversation,
+    composeTarget: ListingMessageTarget? = nil,
+    onClose: @escaping () -> Void
+  ) {
     self.conversation = conversation
+    self.composeTarget = composeTarget
     self.onClose = onClose
     _conv = State(initialValue: conversation)
   }
@@ -479,6 +489,10 @@ struct ChatThreadScreen: View {
 
   private func reload(markRead: Bool) async {
     guard let token = profile.token else { return }
+    if conv.id <= 0 {
+      messages = []
+      return
+    }
     do {
       let result = try await MessagesAPI.messages(token: token, conversationId: conv.id)
       conv = result.0
@@ -498,7 +512,20 @@ struct ChatThreadScreen: View {
     busy = true
     defer { busy = false }
     do {
-      _ = try await MessagesAPI.send(token: token, conversationId: conv.id, body: text, attachment: nil)
+      if conv.id <= 0, let target = composeTarget {
+        conv = try await MessagesAPI.startConversation(
+          token: token,
+          listingId: target.listingId,
+          title: target.title,
+          priceLabel: target.priceLabel,
+          meta: target.meta,
+          code: target.code,
+          sellerId: target.sellerId,
+          initialBody: text
+        )
+      } else {
+        _ = try await MessagesAPI.send(token: token, conversationId: conv.id, body: text, attachment: nil)
+      }
       draft = ""
       await reload(markRead: true)
     } catch {

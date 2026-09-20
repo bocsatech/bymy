@@ -4,13 +4,14 @@ import {
   listConversations,
   listMessages,
   sendMessage,
+  startConversation,
   markRead,
   markUnread,
   deleteConversation,
   reportConversation,
   blockUser,
   fileToAttachment,
-} from "./messages-api.js?v=msgLive1";
+} from "./messages-api.js?v=msgLive2";
 
 const ICONS = {
   unread: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4.8 7.2h11.2A2.4 2.4 0 0 1 18.4 9.6v5.6a2.4 2.4 0 0 1-2.4 2.4H9.2L6 20v-2.4H4.8A2.4 2.4 0 0 1 2.4 15.2V9.6A2.4 2.4 0 0 1 4.8 7.2Z" stroke="currentColor" stroke-width="1.6"/><path d="M7 11.2h7.2M7 14h4.6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>`,
@@ -67,7 +68,30 @@ function peerLetter(name) {
   return String(name || "?").trim().charAt(0).toUpperCase() || "?";
 }
 
-export function initMessagesUi(root, { onUnreadChange, openConversationId } = {}) {
+function syntheticComposeConv(draft) {
+  return {
+    id: null,
+    compose: true,
+    listing: {
+      id: draft.listingId,
+      title: draft.title,
+      priceLabel: draft.priceLabel || "",
+      code: draft.code || `AEA-${draft.listingId}`,
+      meta: draft.meta || "",
+      imageUrl: "",
+    },
+    peer: {
+      id: draft.sellerId || 0,
+      displayName: draft.sellerName || "Eladó",
+    },
+    role: "buyer",
+    unread: 0,
+    updatedAt: new Date().toISOString(),
+    lastMessage: null,
+  };
+}
+
+export function initMessagesUi(root, { onUnreadChange, openConversationId, composeDraft } = {}) {
   if (!root) return { refresh: async () => {} };
 
   let conversations = [];
@@ -76,7 +100,7 @@ export function initMessagesUi(root, { onUnreadChange, openConversationId } = {}
   let messages = [];
   let busy = false;
   let stayOnInbox = false;
-  const options = { openConversationId };
+  const options = { openConversationId, composeDraft: composeDraft || null };
 
   root.innerHTML = `
     <div class="wh-msg" data-msg-view="inbox">
@@ -381,24 +405,74 @@ export function initMessagesUi(root, { onUnreadChange, openConversationId } = {}
     els.threadError.textContent = text || "";
   }
 
+  function loadInboxInBackground() {
+    listConversations()
+      .then((list) => {
+        conversations = list;
+        showState("");
+        renderList();
+        setUnreadBadge();
+      })
+      .catch((error) => {
+        if (!openConv) showState(error.message || "Betöltés sikertelen.", true);
+      });
+  }
+
+  function openComposeDraft(draft) {
+    if (!draft) return;
+    options.composeDraft = null;
+    openConv = syntheticComposeConv(draft);
+    messages = [];
+    if (els.peer) els.peer.textContent = openConv.peer?.displayName || "—";
+    if (els.peerStatus) els.peerStatus.textContent = "Bymy üzenet";
+    renderListingBar();
+    renderBubbles();
+    showThreadPane();
+    showThreadError("");
+    closeMenu();
+    loadInboxInBackground();
+  }
+
   async function refresh() {
+    const requested = Number(options.openConversationId);
+    if (Number.isFinite(requested) && requested > 0) {
+      options.openConversationId = undefined;
+      showState("");
+      showThreadPane();
+      showThreadError("");
+      try {
+        const data = await listMessages(requested);
+        openConv = data.conversation;
+        messages = data.messages;
+        if (els.peer) els.peer.textContent = openConv.peer?.displayName || "—";
+        if (els.peerStatus) els.peerStatus.textContent = "Bymy üzenet";
+        renderListingBar();
+        renderBubbles();
+        await markRead(requested);
+        renderList();
+        loadInboxInBackground();
+      } catch (error) {
+        showState(error.message || "Betöltés sikertelen.", true);
+        loadInboxInBackground();
+      }
+      return;
+    }
+
+    if (options.composeDraft) {
+      openComposeDraft(options.composeDraft);
+      return;
+    }
+
+    if (openConv?.compose) {
+      loadInboxInBackground();
+      return;
+    }
+
     showState("Betöltés…");
     try {
       conversations = await listConversations();
       showState("");
       renderList();
-
-      const requested = Number(options.openConversationId);
-      const deepLink =
-        Number.isFinite(requested) && requested > 0
-          ? conversations.find((conversation) => Number(conversation.id) === requested)
-          : null;
-
-      if (deepLink) {
-        options.openConversationId = undefined;
-        await openConversation(deepLink);
-        return;
-      }
 
       if (openConv) {
         const still = conversations.find((c) => Number(c.id) === Number(openConv.id));
@@ -494,7 +568,24 @@ export function initMessagesUi(root, { onUnreadChange, openConversationId } = {}
     if (sendButton) sendButton.disabled = true;
     setSendStatus("Üzenet küldése…");
     try {
-      await sendMessage(openConv.id, { body: text });
+      if (openConv.compose) {
+        const listing = openConv.listing || {};
+        const created = await startConversation({
+          listingId: listing.id,
+          title: listing.title,
+          priceLabel: listing.priceLabel,
+          meta: listing.meta,
+          code: listing.code,
+          sellerId: openConv.peer?.id,
+          initialBody: text,
+        });
+        openConv = created;
+        openConv.compose = false;
+        const url = `/uzenetek.html?c=${encodeURIComponent(created.id)}`;
+        window.history.replaceState(null, "", url);
+      } else {
+        await sendMessage(openConv.id, { body: text });
+      }
       if (els.draft) els.draft.value = "";
       const data = await listMessages(openConv.id);
       openConv = data.conversation || openConv;
@@ -521,7 +612,25 @@ export function initMessagesUi(root, { onUnreadChange, openConversationId } = {}
     try {
       const attachment = await fileToAttachment(file);
       const text = String(els.draft?.value || "").trim();
-      await sendMessage(openConv.id, { body: text, attachment });
+      if (openConv.compose) {
+        if (!text && !attachment) return;
+        const listing = openConv.listing || {};
+        const created = await startConversation({
+          listingId: listing.id,
+          title: listing.title,
+          priceLabel: listing.priceLabel,
+          meta: listing.meta,
+          code: listing.code,
+          sellerId: openConv.peer?.id,
+          initialBody: text,
+          attachment,
+        });
+        openConv = created;
+        openConv.compose = false;
+        window.history.replaceState(null, "", `/uzenetek.html?c=${encodeURIComponent(created.id)}`);
+      } else {
+        await sendMessage(openConv.id, { body: text, attachment });
+      }
       if (els.draft) els.draft.value = "";
       const data = await listMessages(openConv.id);
       openConv = data.conversation || openConv;

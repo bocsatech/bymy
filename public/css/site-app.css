@@ -4022,6 +4022,11 @@ body.site-app .mm-ad-list {
   display: grid;
   gap: 0.55rem;
   margin: 0.75rem 0 1rem;
+  min-width: 0;
+}
+
+body.site-app [data-mm-panel="hirdetes"] {
+  min-width: 0;
 }
 
 body.site-app .mm-ad-row {
@@ -4064,9 +4069,22 @@ body.site-app .myads-radio {
 
 body.site-app .myads-search {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.4rem;
   align-items: center;
   margin-left: auto;
+}
+
+@media (max-width: 960px) {
+  body.site-app .myads-search {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  body.site-app .myads-search input {
+    flex: 1 1 10rem;
+    min-width: 0;
+  }
 }
 
 body.site-app .myads-search input {
@@ -4089,6 +4107,8 @@ body.site-app .myads-count {
 
 body.site-app .myads-table-wrap {
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  max-width: 100%;
   border: 1px solid #dfe3ea;
   border-radius: 10px;
   background: #fff;
@@ -4096,8 +4116,10 @@ body.site-app .myads-table-wrap {
 
 body.site-app .myads-table {
   width: 100%;
+  min-width: 52rem;
   border-collapse: collapse;
   font-size: 0.92rem;
+  table-layout: auto;
 }
 
 body.site-app .myads-table th,
@@ -4114,6 +4136,18 @@ body.site-app .myads-table th {
   text-transform: uppercase;
   letter-spacing: 0.03em;
   color: #667085;
+  white-space: normal;
+  line-height: 1.25;
+}
+
+body.site-app .myads-table th:nth-child(4),
+body.site-app .myads-table td:nth-child(4) {
+  min-width: 9.5rem;
+}
+
+body.site-app .myads-table th:nth-child(5),
+body.site-app .myads-table td:nth-child(5) {
+  min-width: 6.75rem;
 }
 
 body.site-app .myads-ssz {
@@ -4178,6 +4212,8 @@ body.site-app .myads-views-split {
   margin: 0.15rem 0 0;
   color: #334;
   font-size: 0.85rem;
+  white-space: normal;
+  line-height: 1.35;
 }
 
 body.site-app .myads-inactive {

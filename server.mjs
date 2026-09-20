@@ -120,6 +120,11 @@ import {
   verifyAppleIdentityToken,
 } from "./lib/oauth.mjs";
 import { listingImageDir, resolveListingImageFile, fetchRemoteListingImage, clearListingImageFiles } from "./lib/listing-image.mjs";
+import {
+  resolveFilesystemImageMediaFile,
+  isFilesystemImageStorage,
+  imageStorageRoot,
+} from "./lib/filesystem-image-storage.mjs";
 import { attachSellerProfile } from "./lib/listing-detail-seller.mjs";
 import { saveListingPhotos } from "./lib/listing-photos.mjs";
 import {
@@ -341,6 +346,20 @@ function haImportCorsHeaders(req) {
 function serveStatic(path, res) {
   applySecurityHeaders(res);
   const rel = path === "/" ? "index.html" : path.replace(/^\//, "");
+
+  // Saját képtár (BYMY_IMAGE_ROOT): /media/img/listing-images/…
+  if (rel.startsWith("media/img/")) {
+    const mediaFile = resolveFilesystemImageMediaFile(`/${rel}`);
+    if (mediaFile) {
+      const ext = extname(mediaFile);
+      res.writeHead(200, {
+        "Content-Type": MIME[ext] ?? "application/octet-stream",
+        "Cache-Control": "public, max-age=31536000, immutable",
+      });
+      res.end(readFileSync(mediaFile));
+      return;
+    }
+  }
 
   // Hirdetésképek: ~/.autosweb/uploads (túléli a frissítést)
   if (rel.startsWith("uploads/listings/")) {
@@ -2273,6 +2292,8 @@ export async function handleHttpRequest(req, res) {
       version: readFileSync(join(PUBLIC, "version.txt"), "utf8").trim(),
       service: "bymy-autosweb",
       backend: isSupabaseBackend() ? "supabase" : "sqlite",
+      imageStorage: isFilesystemImageStorage() ? "filesystem" : "supabase",
+      ...(isFilesystemImageStorage() ? { imageRoot: imageStorageRoot() } : {}),
       turnstile: turnstileHealthStatus(),
       ...(allowDevSecretsInResponse()
         ? {

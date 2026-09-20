@@ -18,6 +18,7 @@ import {
   STORAGE_POSTAL,
   STORAGE_RADIUS,
 } from "./nearby-search.js?v=nearbyBoot1";
+import { setHubSectionVisible } from "./hub-listing-rail.js?v=immoRails3";
 
 const RAIL = document.getElementById("hub-nearby-rail");
 const STATUS = document.getElementById("hub-nearby-status");
@@ -221,6 +222,7 @@ async function initHubNearbyCars() {
   ensureNearbyPrefsStored(profile);
   const { postal, radiusKm } = readNearbyPrefs(profile);
   radiusLabel = radiusKm;
+  setHubSectionVisible(RAIL, false);
 
   if (ALL_LINK && postal.length === 4) {
     ALL_LINK.href = autoNearbyHref(postal, radiusKm);
@@ -229,10 +231,7 @@ async function initHubNearbyCars() {
 
   if (postal.length !== 4) {
     renderInitial([]);
-    RAIL.appendChild(
-      createPromptCard("Keresési körzet beállítása", "/beallitasok.html?szekcio=keresesi-korzet")
-    );
-    setStatus("Add meg az irányítószámot a Beállításokban a közeli autók megjelenítéséhez.");
+    setStatus("", { hidden: true });
     restoreListingReturn();
     return;
   }
@@ -242,6 +241,7 @@ async function initHubNearbyCars() {
     cityLabel = cached.city || "";
     allHref = autoNearbyHref(postal, radiusKm);
     if (ALL_LINK) ALL_LINK.href = allHref;
+    setHubSectionVisible(RAIL, true);
     renderInitial(cached.items);
     setStatus(
       `${cached.items.length} autó${cityLabel ? ` ${cityLabel}` : ""} ${radiusKm} km-en belül.`,
@@ -250,7 +250,12 @@ async function initHubNearbyCars() {
     restoreListingReturn();
     loadNearbyFresh(postal, radiusKm)
       .then((fresh) => {
-        if (!fresh.nearby.length) return;
+        if (!fresh.nearby.length) {
+          renderInitial([]);
+          setStatus("", { hidden: true });
+          setHubSectionVisible(RAIL, false);
+          return;
+        }
         const sameIds =
           fresh.nearby.length === nearbyItems.length &&
           fresh.nearby.every((item, i) => Number(item.id) === Number(nearbyItems[i]?.id));
@@ -258,6 +263,7 @@ async function initHubNearbyCars() {
         cityLabel = fresh.city;
         allHref = fresh.href;
         if (ALL_LINK) ALL_LINK.href = allHref;
+        setHubSectionVisible(RAIL, true);
         const keepScroll = RAIL.scrollLeft;
         renderInitial(fresh.nearby);
         RAIL.scrollLeft = keepScroll;
@@ -275,20 +281,20 @@ async function initHubNearbyCars() {
 
     if (!fresh.nearby.length) {
       renderInitial([]);
-      RAIL.appendChild(createPromptCard("Körzet / sugár módosítása", "/beallitasok.html?szekcio=keresesi-korzet"));
-      setStatus(
-        `Nincs autó ${cityLabel || ""} ${radiusKm} km-es körzetében. Ellenőrizd a Beállítások → Keresési körzet irányítószámát és sugarát.`
-      );
+      setStatus("", { hidden: true });
+      setHubSectionVisible(RAIL, false);
       restoreListingReturn();
       return;
     }
 
+    setHubSectionVisible(RAIL, true);
     renderInitial(fresh.nearby);
     setStatus(`${fresh.nearby.length} autó ${cityLabel} ${radiusKm} km-en belül.`, { hidden: true });
   } catch (error) {
     renderInitial([]);
-    RAIL.appendChild(createPromptCard("Újrapróbálás", "/beallitasok.html?szekcio=keresesi-korzet"));
-    setStatus(error.message ?? "Nem sikerült betölteni a közeli autókat.");
+    setStatus("", { hidden: true });
+    setHubSectionVisible(RAIL, false);
+    console.warn("hub nearby cars:", error);
   }
   restoreListingReturn();
 }

@@ -10,6 +10,13 @@ const SCROLL_BATCH = 5;
 const RAIL_CAP = 13;
 const CACHE_TTL_MS = 15 * 60 * 1000;
 
+/** Teljes „közelben” szekció: csak ha van megjeleníthető hirdetés. */
+export function setHubSectionVisible(railEl, visible) {
+  const section = railEl?.closest?.(".hf-section");
+  if (!section) return;
+  section.hidden = !visible;
+}
+
 function sortByDate(items) {
   return [...items].sort((a, b) => {
     const ta = new Date(a.updated_at ?? a.created_at ?? 0).getTime();
@@ -204,18 +211,11 @@ export function initHubListingRail(opts) {
     writeCache,
     async start({ postal, radiusKm }) {
       radiusLabel = radiusKm;
-      if (ALL_LINK && postal.length === 4 && needsPostal) {
-      }
+      setHubSectionVisible(RAIL, false);
 
       if (needsPostal && postal.length !== 4) {
         renderInitial([]);
-        const prompt = noPostalPrompt || {
-          label: "Keresési körzet beállítása",
-          href: settingsHref,
-          status: `Add meg az irányítószámot a Beállításokban a közeli ${plural} megjelenítéséhez.`,
-        };
-        RAIL.appendChild(createPromptCard(prompt.label, prompt.href));
-        setStatus(prompt.status);
+        setStatus("", { hidden: true });
         restoreListingReturn();
         return;
       }
@@ -223,6 +223,7 @@ export function initHubListingRail(opts) {
       const cached = needsPostal ? readCache(postal, radiusKm) : null;
       if (cached?.items?.length) {
         cityLabel = cached.city || "";
+        setHubSectionVisible(RAIL, true);
         renderInitial(cached.items);
         setStatus(
           `${cached.items.length} ${cached.items.length === 1 ? noun : plural}${cityLabel ? ` ${cityLabel}` : ""} ${radiusKm} km-en belül.`,
@@ -232,7 +233,12 @@ export function initHubListingRail(opts) {
         loadFresh({ postal, radiusKm })
           .then((fresh) => {
             const items = fresh.items || [];
-            if (!items.length) return;
+            if (!items.length) {
+              renderInitial([]);
+              setStatus("", { hidden: true });
+              setHubSectionVisible(RAIL, false);
+              return;
+            }
             const sameIds =
               items.length === nearbyItems.length &&
               items.every((item, i) => Number(item.id) === Number(nearbyItems[i]?.id));
@@ -240,6 +246,7 @@ export function initHubListingRail(opts) {
             cityLabel = fresh.city || "";
             allHref = fresh.href || allHref;
             if (ALL_LINK && allHref) ALL_LINK.href = allHref;
+            setHubSectionVisible(RAIL, true);
             const keepScroll = RAIL.scrollLeft;
             renderInitial(items);
             RAIL.scrollLeft = keepScroll;
@@ -258,14 +265,8 @@ export function initHubListingRail(opts) {
         const items = fresh.items || [];
         if (!items.length) {
           renderInitial([]);
-          const empty =
-            emptyPrompt?.({ href: allHref, city: cityLabel, radiusKm }) || {
-              label: `Nincs ${noun} a körzetben`,
-              href: allHref,
-              status: `Nincs ${noun} ${cityLabel || ""} ${radiusKm} km-es körzetében.`,
-            };
-          RAIL.appendChild(createPromptCard(empty.label, empty.href));
-          setStatus(empty.status);
+          setStatus("", { hidden: true });
+          setHubSectionVisible(RAIL, false);
           restoreListingReturn();
           return;
         }
@@ -273,6 +274,7 @@ export function initHubListingRail(opts) {
         if (needsPostal && !fresh.skipCache) {
           writeCache(postal, radiusKm, items, { city: cityLabel });
         }
+        setHubSectionVisible(RAIL, true);
         renderInitial(items);
         setStatus(
           `${items.length} ${items.length === 1 ? noun : plural}${cityLabel ? ` ${cityLabel}` : ""} ${radiusKm} km-en belül.`,
@@ -280,8 +282,9 @@ export function initHubListingRail(opts) {
         );
       } catch (error) {
         renderInitial([]);
-        RAIL.appendChild(createPromptCard("Újrapróbálás", settingsHref));
-        setStatus(error.message ?? `Nem sikerült betölteni a közeli ${plural}.`);
+        setStatus("", { hidden: true });
+        setHubSectionVisible(RAIL, false);
+        console.warn("hub listing rail:", error);
       }
       restoreListingReturn();
     },

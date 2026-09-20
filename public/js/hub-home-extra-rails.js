@@ -16,7 +16,7 @@ import {
   STORAGE_POSTAL,
   STORAGE_RADIUS,
 } from "./nearby-search.js?v=nearbyBoot1";
-import { createPromptCard, initHubListingRail, sortByDate } from "./hub-listing-rail.js?v=immoRails2";
+import { createPromptCard, initHubListingRail, sortByDate } from "./hub-listing-rail.js?v=immoRails3";
 
 function el(id) {
   return document.getElementById(id);

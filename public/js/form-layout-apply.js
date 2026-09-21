@@ -156,7 +156,10 @@ function hideUnplacedVehicleChrome(form, placed) {
 
   form.querySelectorAll(".step-panel .card").forEach((card) => {
     if (card.id === "success-panel") return;
-    if (card.querySelector(".packages, .phone-lang-grid, .photo-list")) return;
+    if (card.classList.contains("card--photos") || card.classList.contains("card--leiras")) return;
+    if (card.querySelector(".packages, .phone-lang-grid, .photo-list, #upload-zone, #photo-grid, .photo-upload-bar")) {
+      return;
+    }
     if (card.querySelector(".ad-layout-canvas .ad-layout-item:not(.ad-layout-hidden)")) return;
     const visible = [...card.querySelectorAll("input, select, textarea, .labeled-field, .field-stack, .md-outlined")].some(
       (el) => {
@@ -501,6 +504,23 @@ function retireLegacyFormGrid(form) {
   });
 }
 
+function ensurePhotoUploadVisible(form) {
+  form.querySelectorAll(".card--photos").forEach((card) => {
+    card.hidden = false;
+    card.classList.remove("ad-immo-orphan", "ad-layout-hidden");
+    card.removeAttribute("hidden");
+    card.style.removeProperty("display");
+  });
+  for (const id of ["upload-zone", "photo-upload-bar", "photo-grid", "photo-input"]) {
+    const el = form.querySelector(`#${cssEscape(id)}`);
+    if (!el) continue;
+    if (id === "photo-input") continue;
+    el.hidden = false;
+    el.classList.remove("ad-layout-hidden", "ad-immo-orphan");
+    el.style.removeProperty("display");
+  }
+}
+
 function pruneEmptyCards(form) {
   form.querySelectorAll(".field-row").forEach((row) => {
     if (!row.querySelector("input, select, textarea, .labeled-field, .field-stack, .md-outlined")) {
@@ -723,6 +743,7 @@ async function applyAdFormLayout() {
     }
     if (!isImmo) {
       hideUnplacedVehicleChrome(form, placed);
+      ensurePhotoUploadVisible(form);
       retireLegacyFormGrid(form);
     }
     pruneEmptyCards(form);

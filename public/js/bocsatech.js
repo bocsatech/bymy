@@ -1920,6 +1920,7 @@ function userEditView() {
   const profile = editingUser.profileJson ?? {};
   const fields = profileFields(profile);
   const profileWideKeys = new Set([
+    "accountType",
     "companyAddress",
     "street",
     "companyStreet",

@@ -75,6 +75,7 @@
     <link rel="stylesheet" href="/css/automax.css?v=automax20260720homelist" />
     <link rel="stylesheet" href="/css/site-app.css?v=postalVisible6" />
     <link rel="stylesheet" href="/css/ad-form-desk.css?v=postalSlot2" />
+    <link rel="stylesheet" href="/css/ad-form-address.css?v=addressBlock1" />
     <link rel="stylesheet" href="/css/ad-form-bm-pickers.css?v=deskTireFit1" />
     <link rel="stylesheet" href="/css/site-side.css?v=mwPostDesk1" />
     <link rel="stylesheet" href="/css/category-picker.css?v=catDrumStand2" />
@@ -794,32 +795,6 @@
         <section class="step-panel" data-step="5">
           <h2 class="import-step-label">Hirdetés és elérhetőség</h2>
           <div id="ad-panel">
-            <div id="ad-megtalalhato-slot" class="ad-megtalalhato-slot">
-              <div class="field-stack full field-stack--location" data-ad-hide-street-only="1">
-                <p class="hint ad-location-hint" data-ad-location-hint hidden></p>
-                <div class="ad-location-fields ad-location-fields--postal-only settings-form">
-                  <label class="login-field ad-location-field ad-form-street-hidden" hidden>
-                    <span class="login-label">Utca, házszám</span>
-                    <input id="megtekintesi_cim" name="megtekintesi_cim" type="text" autocomplete="street-address" tabindex="-1" />
-                  </label>
-                  <div class="settings-postal-row ad-location-postal-row">
-                    <label class="login-field settings-postal-field ad-location-field">
-                      <span class="login-label">Irányítószám</span>
-                      <input id="iranyitoszam" name="iranyitoszam" type="text" inputmode="numeric" maxlength="4" autocomplete="postal-code" data-postal-lookup data-ad-postal required />
-                    </label>
-                    <label class="login-field settings-city-field ad-location-field">
-                      <span class="login-label">Település</span>
-                      <input id="telepules" name="telepules" type="text" autocomplete="address-level2" required />
-                    </label>
-                  </div>
-                  <label class="login-field ad-location-field ad-location-country-field">
-                    <span class="login-label">Ország</span>
-                    <input id="megtalalhato_orszag" name="megtalalhato_orszag" type="text" value="Magyarország" autocomplete="country-name" />
-                  </label>
-                  <input type="hidden" id="megye" name="megye" />
-                </div>
-              </div>
-            </div>
             <div class="card">
               <div class="card-head">Hitel és bérlés</div>
               <div class="card-body form-grid">
@@ -873,6 +848,33 @@
             </div>
 
             <input type="hidden" name="csomag" value="ingyenes" />
+
+            <div id="ad-megtalalhato-slot" class="ad-megtalalhato-slot">
+              <div class="field-stack field-stack--location" data-ad-hide-street-only="1">
+                <p class="hint ad-location-hint" data-ad-location-hint hidden></p>
+                <div class="ad-address-block ad-location-fields ad-location-fields--postal-only">
+                  <label class="login-field ad-form-street-hidden" hidden>
+                    <span class="login-label">Utca, házszám</span>
+                    <input id="megtekintesi_cim" name="megtekintesi_cim" type="text" autocomplete="street-address" tabindex="-1" />
+                  </label>
+                  <div class="settings-postal-row ad-location-postal-row">
+                    <label class="login-field settings-postal-field">
+                      <span class="login-label">Irányítószám</span>
+                      <input id="iranyitoszam" name="iranyitoszam" type="text" inputmode="numeric" maxlength="4" autocomplete="postal-code" data-postal-lookup data-ad-postal required />
+                    </label>
+                    <label class="login-field settings-city-field">
+                      <span class="login-label">Település</span>
+                      <input id="telepules" name="telepules" type="text" autocomplete="address-level2" required />
+                    </label>
+                  </div>
+                  <label class="login-field ad-location-country-field">
+                    <span class="login-label">Ország</span>
+                    <input id="megtalalhato_orszag" name="megtalalhato_orszag" type="text" value="Magyarország" autocomplete="country-name" />
+                  </label>
+                  <input type="hidden" id="megye" name="megye" />
+                </div>
+              </div>
+            </div>
 
             <div class="card ad-form-contact-store" data-ad-postal-card="1" hidden>
               <div class="card-body form-grid">
@@ -973,6 +975,6 @@
     <script src="/js/app.js?v=contactOpt4" type="module"></script>
       <script src="/js/nav-counts.js?v=navCount4" type="module"></script>
       <script src="/js/theme.js?v=willhabenHdr1" type="module"></script>
-    <script src="/js/form-layout-apply.js?v=contactOpt10" type="module"></script>
+    <script src="/js/form-layout-apply.js?v=contactOpt11" type="module"></script>
 </body>
 </html>

@@ -1,0 +1,84 @@
+/* Hirdetésfeladás: címmezők = Beállítások (login-field + settings-postal-row) */
+
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot {
+  width: 100%;
+  display: block;
+  margin: 0.75rem 0 0;
+  order: 2;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form #ad-panel .ad-layout-canvas {
+  order: 1;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form #ad-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot:empty {
+  display: none;
+  margin: 0;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot .ad-address-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  width: 100%;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot .settings-postal-row {
+  display: grid;
+  grid-template-columns: 6.5rem 1fr;
+  gap: 0.65rem;
+  width: 100%;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot .login-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin: 0;
+  min-width: 0;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot .login-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #444;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot .login-field input {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  font: inherit;
+  font-size: 0.92rem;
+  border: 1px solid #d5d9e0;
+  border-radius: 10px;
+  padding: 0.55rem 0.7rem;
+  background: #fff;
+  color: #111;
+  height: auto;
+  min-height: 2.75rem;
+  max-height: none;
+  line-height: 1.35;
+  field-sizing: border-box;
+  flex: none;
+}
+
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot {
+  margin: var(--ad-cell-gap, 8px) 0 0;
+}
+
+html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot .login-label {
+  color: #cbd5e1;
+}
+
+html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot .login-field input {
+  background: #1d1d1d;
+  border-color: #404040;
+  color: #f4f4f5;
+}

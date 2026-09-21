@@ -377,10 +377,10 @@ function ensureMegtalalhatoSlot(form) {
     panel.appendChild(slot);
   }
   const canvas = panel.querySelector(".ad-layout-canvas");
-  if (canvas && slot.previousElementSibling !== canvas) {
-    canvas.insertAdjacentElement("afterend", slot);
-  } else if (!canvas && panel.firstElementChild !== slot) {
-    panel.prepend(slot);
+  if (canvas) {
+    if (slot.previousElementSibling !== canvas) {
+      canvas.insertAdjacentElement("afterend", slot);
+    }
   }
   return slot;
 }

@@ -851,8 +851,8 @@
             <div class="card">
               <div class="card-head">Elérhetőség</div>
               <div class="card-body form-grid">
-                <div class="field-stack full field-stack--location">
-                  <label class="ad-location-label">Megtalálható <span class="req">*</span></label>
+                <div class="field-stack full field-stack--location" data-ad-contact-profile-only="1" hidden>
+                  <label class="ad-location-label">Megtalálható</label>
                   <p class="hint ad-location-hint" data-ad-location-hint hidden></p>
                   <div class="ad-location-fields">
                     <label class="login-field ad-location-field">
@@ -866,7 +866,7 @@
                       </label>
                       <label class="login-field settings-city-field ad-location-field">
                         <span class="login-label">Település</span>
-                        <input id="telepules" name="telepules" type="text" autocomplete="address-level2" required />
+                        <input id="telepules" name="telepules" type="text" autocomplete="address-level2" />
                       </label>
                     </div>
                     <label class="login-field ad-location-field">
@@ -878,8 +878,8 @@
                   </div>
                 </div>
 
-                <label for="email">E-mail:</label>
-                <input id="email" name="email" type="email" />
+                <label for="email" class="ad-form-contact-hidden" hidden>E-mail:</label>
+                <input id="email" name="email" type="email" class="ad-form-contact-hidden" hidden />
 
                 <input type="hidden" id="beszelt_nyelvek" name="beszelt_nyelvek" value="Magyar" />
               </div>
@@ -973,7 +973,7 @@
     </main>
 
     <script src="/js/site-avatar-menu.js?v=avatarSync1" type="module"></script>
-    <script src="/js/app.js?v=deskAccScroll1" type="module"></script>
+    <script src="/js/app.js?v=contactOpt1" type="module"></script>
       <script src="/js/nav-counts.js?v=navCount4" type="module"></script>
       <script src="/js/theme.js?v=willhabenHdr1" type="module"></script>
     <script src="/js/form-layout-apply.js?v=deskAccScroll1" type="module"></script>

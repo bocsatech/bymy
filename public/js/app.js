@@ -5,7 +5,7 @@ import {
   saveListingPhotosOrder,
   getStoredListingId,
 } from "./db-client.js?v=wizardSave1";
-import { createAdForm } from "./form-core.js?v=egyebInfoFix2";
+import { createAdForm } from "./form-core.js?v=contactOpt1";
 import { applyImportedVehicleToSelects } from "./vehicle-catalog-client.js?v=importVehicle1";
 import { initTireSizes } from "./tire-sizes-ui.js";
 import { initPhoneLanguages } from "./phone-lang-ui.js";
@@ -14,6 +14,7 @@ import { applyAdFormDesk, clearAdFormEditBoot, isDeskVehicleSubtype } from "./ad
 import {
   requireAuthForPage,
   getAuthUser,
+  getProfile,
   loginUrl,
   initSiteAuth,
   loadProfileFromServer,
@@ -22,9 +23,8 @@ import {
   applyListingAddressFromProfile,
   applyListingAddressFromProfileSync,
   initAdLocationProfile,
-  listingAddressComplete,
   getListingAddressFromProfile,
-} from "./ad-location-profile.js?v=locProf4";
+} from "./ad-location-profile.js?v=locProf5";
 import { initImproveDescription } from "./improve-description.js?v=descAi2";
 
 if (!(await requireAuthForPage())) {
@@ -192,29 +192,17 @@ function ensureFormReady() {
     onStepPersist: persistWizardStep,
     onWizardComplete: async (formData) => {
       applyListingAddressFromProfileSync(adForm);
-      const loc = await applyListingAddressFromProfile(adForm);
-      const fromForm = {
-        street: String(formData.megtekintesi_cim || adForm.elements.namedItem("megtekintesi_cim")?.value || "").trim(),
-        postalCode: String(formData.iranyitoszam || adForm.elements.namedItem("iranyitoszam")?.value || "")
-          .replace(/\D/g, "")
-          .slice(0, 4),
-        city: String(formData.telepules || adForm.elements.namedItem("telepules")?.value || "").trim(),
-      };
-      if (!listingAddressComplete(fromForm) && !(loc.ok && listingAddressComplete(getListingAddressFromProfile()))) {
-        throw new Error(
-          "Add meg a címed (utca, irányítószám, település), vagy töltsd ki a Beállítások → Cégadatok / Személyes adatok részt."
-        );
-      }
-      if (listingAddressComplete(fromForm)) {
-        const streetEl = adForm.elements.namedItem("megtekintesi_cim");
-        const postalEl = adForm.elements.namedItem("iranyitoszam");
-        const cityEl = adForm.elements.namedItem("telepules");
-        if (streetEl && !(streetEl instanceof RadioNodeList)) streetEl.value = fromForm.street;
-        if (postalEl && !(postalEl instanceof RadioNodeList)) postalEl.value = fromForm.postalCode;
-        if (cityEl && !(cityEl instanceof RadioNodeList)) cityEl.value = fromForm.city;
-        formData.megtekintesi_cim = fromForm.street;
-        formData.iranyitoszam = fromForm.postalCode;
-        formData.telepules = fromForm.city;
+      await applyListingAddressFromProfile(adForm);
+      const profileAddr = getListingAddressFromProfile();
+      const pick = (formKey, profileVal) =>
+        String(formData[formKey] || adForm.elements.namedItem(formKey)?.value || profileVal || "").trim();
+      formData.megtekintesi_cim = pick("megtekintesi_cim", profileAddr.street);
+      formData.iranyitoszam = pick("iranyitoszam", profileAddr.postalCode).replace(/\D/g, "").slice(0, 4);
+      formData.telepules = pick("telepules", profileAddr.city);
+      if (!String(formData.email || "").trim()) {
+        const p = getProfile();
+        formData.email =
+          String(getAuthUser()?.email || p?.companyEmail || p?.email || "").trim();
       }
       const items = formApi?.getPreparedPhotoItems?.() ?? [];
       if (!editing && !items.length) {

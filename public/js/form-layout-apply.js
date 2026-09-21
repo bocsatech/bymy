@@ -529,7 +529,7 @@ function cleanupStrayEvLayoutItems(form) {
 
 function pinLocation(form) {
   const stack = form.querySelector(".field-stack--location");
-  if (!stack) return;
+  if (!stack || stack.dataset.adContactProfileOnly === "1") return;
   const canvas = canvasForStep(form, 5);
   if (canvas && stack.parentElement !== canvas) {
     canvas.appendChild(stack);

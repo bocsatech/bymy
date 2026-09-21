@@ -74,7 +74,7 @@ function unlockLocationFields(form) {
 
 function ensureLocationVisible(form) {
   const stack = form.querySelector(".field-stack--location");
-  if (!stack) return;
+  if (!stack || stack.dataset.adContactProfileOnly === "1") return;
   stack.classList.remove("ad-layout-hidden");
   stack.hidden = false;
   stack.removeAttribute("hidden");
@@ -165,6 +165,10 @@ export async function applyListingAddressFromProfile(form, profile = null) {
 }
 
 function updateLocationHint(form, result) {
+  if (form.querySelector(".field-stack--location")?.dataset.adContactProfileOnly === "1") {
+    setHint(form, "", { isError: false });
+    return;
+  }
   if (!listingAddressComplete(result.address)) {
     setHint(
       form,

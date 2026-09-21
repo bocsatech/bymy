@@ -1231,14 +1231,7 @@ function validateStep(step) {
     ? ["allapot", "ingatlan_uzletag"]
     : ["gyartasi_ev", "gyartmany", "modell", "kivitel", "allapot", "okmany_jelleg", "km"];
   const techRequired = isIngatlan ? [] : ["uzemanyag"];
-  const adRequired = [
-    "vetelar",
-    "megtekintesi_cim",
-    "iranyitoszam",
-    "telepules",
-    "telefon1_korzet",
-    "telefon1_szam",
-  ];
+  const adRequired = ["vetelar", "telefon1_korzet", "telefon1_szam"];
 
   if (step === 1) {
     if (!validateFields(basicRequired, 1) || !validateFields(techRequired, 1) || !validateFields(adRequired, 1)) {

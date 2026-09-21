@@ -5,12 +5,12 @@ import {
   saveListingPhotosOrder,
   getStoredListingId,
 } from "./db-client.js?v=wizardSave1";
-import { createAdForm } from "./form-core.js?v=extrakSubScroll2";
+import { createAdForm } from "./form-core.js?v=deskAlapOpen1";
 import { applyImportedVehicleToSelects } from "./vehicle-catalog-client.js?v=importVehicle1";
 import { initTireSizes } from "./tire-sizes-ui.js";
 import { initPhoneLanguages } from "./phone-lang-ui.js";
 import { initCategoryPicker } from "./category-picker.js?v=accFix3";
-import { applyAdFormDesk, clearAdFormEditBoot, isDeskVehicleSubtype } from "./ad-form-desk.js?v=adFormDesk38";
+import { applyAdFormDesk, clearAdFormEditBoot, isDeskVehicleSubtype } from "./ad-form-desk.js?v=adFormDesk39";
 import {
   requireAuthForPage,
   getAuthUser,
@@ -170,7 +170,7 @@ function showWizardShell() {
   const stepsBar = document.getElementById("wizard-steps-bar");
   if (isDeskVehicleSubtype(subtype)) stepsBar?.setAttribute("hidden", "");
   else stepsBar?.removeAttribute("hidden");
-  applyAdFormDesk();
+  applyAdFormDesk({ openStep: 1, scrollToAccordion: "alap" });
 }
 
 function ensureFormReady() {
@@ -295,7 +295,7 @@ const categoryPicker = initCategoryPicker({
       applyListingAddressFromProfile(adForm).catch(() => {});
       window.dispatchEvent(new Event("ad-form-sync-location"));
       window.dispatchEvent(new Event("ad-form-layout-refresh"));
-      applyAdFormDesk();
+      applyAdFormDesk({ openStep: 1, scrollToAccordion: "alap" });
     } catch (error) {
       console.error("Űrlap indítás hiba:", error);
     }
@@ -330,7 +330,7 @@ if (editing) {
     syncPhotoUrlsFromListing(listing);
     api?.applyFormData?.(pendingEditForm, { fromImport: true });
     window.dispatchEvent(new Event("ad-form-layout-refresh"));
-    applyAdFormDesk();
+    applyAdFormDesk({ openStep: 1, scrollToAccordion: "alap" });
     const published = String(listing.status || "") === "feladott";
     const isImmo = String(listing.form?.hirdetes_vertical || "").toLowerCase() === "ingatlan";
     if (published && isImmo) {

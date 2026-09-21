@@ -1,4 +1,4 @@
-import { isDeskVehicleSubtype } from "./ad-form-desk.js?v=adFormDesk38";
+import { isDeskVehicleSubtype } from "./ad-form-desk.js?v=adFormDesk39";
 
 const WIZARD_CAT_V = "standalone2";
 const WIZARD_CAT_ITEM_H = 52;

@@ -135,6 +135,16 @@ function deskScrollOffsetTop() {
   return (header?.getBoundingClientRect().height ?? 64) + 12;
 }
 
+function scrollDeskMainAccordionToStart(form, accId) {
+  const acc = form.querySelector(`[data-desk-acc="${accId}"]:not(.auto-desk-acc--sub)`);
+  if (!acc?.classList.contains("is-open")) return;
+  const head = acc.querySelector(".auto-desk-acc__head");
+  const target = head || acc;
+  const offset = deskScrollOffsetTop();
+  const top = target.getBoundingClientRect().top + window.scrollY - offset;
+  window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+}
+
 /** Extrák almenü lenyitás: az almenü fejléc kerül felülre (mint a képen). */
 function scrollDeskExtrakSubAccordionToStart(subAcc) {
   if (!subAcc?.classList.contains("is-open")) return;
@@ -428,7 +438,7 @@ function clearAdFormEditBoot() {
   document.getElementById("ad-form-edit-boot-inline")?.remove();
 }
 
-function applyAdFormDesk({ openStep = null } = {}) {
+function applyAdFormDesk({ openStep = null, scrollToAccordion = null } = {}) {
   const form = document.getElementById("ad-form");
   if (!form || form.closest("#ad-wizard-shell")?.hidden) {
     setDeskActive(false);
@@ -467,14 +477,22 @@ function applyAdFormDesk({ openStep = null } = {}) {
 
   const preserved =
     form.querySelector("[data-desk-acc]:not(.auto-desk-acc--sub).is-open")?.getAttribute("data-desk-acc") || "";
-  const accId = openStep != null ? accordionForStep(openStep) : preserved;
-  openAccordion(form, accId || "");
+  let accId = openStep != null ? accordionForStep(openStep) : preserved;
+  if (!accId) accId = "alap";
+  openAccordion(form, accId);
   mountExtrakSubAccordions(form);
   syncPhotoStage(form);
   updateAccordionSums(form);
+  if (accId && accId !== "kepek") showDeskGuideSlot(accId, { photoFocus: false });
   refreshAdFormDeskGuide(form);
   initAdFormDeskGuide();
   clearAdFormEditBoot();
+  const scrollId = scrollToAccordion || null;
+  if (scrollId) {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => scrollDeskMainAccordionToStart(form, scrollId));
+    });
+  }
 }
 
 function bindDeskEvents() {

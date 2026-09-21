@@ -19,7 +19,8 @@ import {
   DEFAULT_PHOTO_OVERLAY_ID,
   renderListingPhotoOverlay,
 } from "./listing-photo-overlay.js?v=photoOverlay2";
-import { refreshAdFormBmPickers, applyAdFormBmFieldValues } from "./ad-form-bm-pickers.js?v=fuelProfile1";
+import { refreshAdFormBmPickers, applyAdFormBmFieldValues } from "./ad-form-bm-pickers.js?v=fuelProfile3";
+import { applyAdFormDesk } from "./ad-form-desk.js?v=adFormDesk37";
 import { initKmInput, parseKmDigits, setKmInputValue } from "./km-input.js?v=kmFmt1";
 import {
   EV_FUEL_FIELD_IDS,
@@ -27,7 +28,7 @@ import {
   fuelProfile,
   normalizeAdFuelValue,
   readAdFormFuelValue,
-} from "./ad-form-fuel-profile.js?v=fuelProfile2";
+} from "./ad-form-fuel-profile.js?v=fuelProfile3";
 
 export function createAdForm(options = {}) {
   const mode = options.mode ?? "wizard";
@@ -578,7 +579,13 @@ function syncFuelDependentFields() {
 
   document.querySelectorAll(".fuel-electric-only").forEach((el) => {
     setFuelSectionVisible(el, showElectric);
+    el.classList.toggle("ad-layout-hidden", !showElectric);
   });
+  const evBlock = document.getElementById("electric-fields-block");
+  if (evBlock) {
+    setFuelSectionVisible(evBlock, showElectric);
+    evBlock.classList.toggle("ad-layout-hidden", !showElectric);
+  }
   document.querySelectorAll(".fuel-combustion-only").forEach((el) => {
     setFuelSectionVisible(el, showConsumption);
   });
@@ -1880,6 +1887,7 @@ window.addEventListener("ad-form-layout-refresh", () => {
 window.addEventListener("ad-form-sync-fuel-fields", () => {
   bindFuelPickerSync();
   syncFuelDependentFields();
+  applyAdFormDesk();
 });
 
 return {

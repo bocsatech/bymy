@@ -47,11 +47,34 @@ export function fuelFieldVisibility(profile) {
   return { showElectric, showConsumption, showHenger };
 }
 
+function parseStoredFuelValue(raw) {
+  const text = String(raw ?? "").trim();
+  if (!text) return "";
+  if (text.startsWith("[")) {
+    try {
+      const parsed = JSON.parse(text);
+      if (Array.isArray(parsed) && parsed[0] != null && String(parsed[0]).trim()) {
+        return normalizeAdFuelValue(String(parsed[0]).trim());
+      }
+    } catch {
+      /* plain string fallback */
+    }
+  }
+  if (text.includes(",")) {
+    const first = text
+      .split(",")
+      .map((s) => s.trim())
+      .find(Boolean);
+    if (first) return normalizeAdFuelValue(first);
+  }
+  return normalizeAdFuelValue(text);
+}
+
 export function readAdFormFuelValue(uzemanyagEl) {
   if (!uzemanyagEl) return "";
   const fromSelect = String(uzemanyagEl.value ?? "").trim();
   if (fromSelect) return normalizeAdFuelValue(fromSelect);
   const hidden = uzemanyagEl._adBmHidden?.value;
-  if (hidden != null && String(hidden).trim()) return normalizeAdFuelValue(String(hidden).trim());
+  if (hidden != null && String(hidden).trim()) return parseStoredFuelValue(hidden);
   return "";
 }

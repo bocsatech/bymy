@@ -738,6 +738,46 @@ textarea {
   color: #111;
 }
 
+.photo-overlay-samples {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+.photo-overlay-samples__icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid #d0d5dd;
+  background: #f8f9fb;
+  color: #444;
+}
+
+.photo-overlay-samples__thumb {
+  display: block;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid #d0d5dd;
+  line-height: 0;
+  box-shadow: 0 1px 3px rgba(17, 24, 39, 0.08);
+}
+
+.photo-overlay-samples__thumb img {
+  display: block;
+  width: 72px;
+  height: auto;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+
+.photo-overlay-samples__thumb:hover {
+  border-color: #f0c52c;
+  box-shadow: 0 0 0 1px #f0c52c;
+}
+
 .photo-upload-status {
   flex: 1;
   min-width: 180px;

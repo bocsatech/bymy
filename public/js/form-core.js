@@ -21,7 +21,7 @@ import { syncIngatlanFormVisibility } from "./ingatlan-form-fields.js?v=immoUiPa
 import {
   DEFAULT_PHOTO_OVERLAY_ID,
   renderListingPhotoOverlay,
-} from "./listing-photo-overlay.js?v=photoOverlay2";
+} from "./listing-photo-overlay.js?v=photoOverlayIcons3";
 import { refreshAdFormBmPickers, applyAdFormBmFieldValues } from "./ad-form-bm-pickers.js?v=egyebInfoFix1";
 import { applyAdFormDesk, isAdFormDesk } from "./ad-form-desk.js?v=adFormDesk44";
 import { initKmInput, parseKmDigits, setKmInputValue } from "./km-input.js?v=kmFmt1";
@@ -1465,7 +1465,7 @@ function updatePhotoStatus() {
     photoUploadBtn.textContent = photoBusy ? "Feltöltés…" : "Feltöltés";
   }
   if (photoOverlayApplyBtn) {
-    photoOverlayApplyBtn.disabled = photoBusy || !first || first.status === "uploading";
+    photoOverlayApplyBtn.disabled = photoBusy || !photoAllowsOverlay(first) || first.status === "uploading";
   }
   if (photoOverlayClearBtn) {
     photoOverlayClearBtn.disabled = photoBusy || !hasOverlay;
@@ -1473,7 +1473,7 @@ function updatePhotoStatus() {
   if (photoOverlayHint) {
     photoOverlayHint.textContent = hasOverlay
       ? "Sablon aktív a főképen. „Sablon törlése” visszaállítja az eredeti fotót."
-      : "Sablon: az első képre (főkép) kerül. Később több sablon közül lehet választani.";
+      : "Sablon: csak az első, újonnan feltöltött főképre. Importált / meglévő URL-képre nem.";
   }
   if (photoUploadLabel) {
     if (!total) {
@@ -1618,7 +1618,6 @@ function preparedPhotoItems() {
 function overlayInfoFromForm() {
   const le = String(teljesitmenyLe?.value ?? "").trim();
   const kw = String(teljesitmenyKw?.value ?? "").trim();
-  const power = le ? `${le} LE` : kw ? `${kw} kW` : "";
   const fuel = String(uzemanyag?.value ?? "").trim();
   return {
     templateId: DEFAULT_PHOTO_OVERLAY_ID,
@@ -1626,11 +1625,22 @@ function overlayInfoFromForm() {
     model: String(modell?.value ?? "").trim(),
     year: String(gyartasiEv?.value ?? "").trim(),
     km: parseKmDigits(document.getElementById("km")?.value ?? ""),
-    power,
+    le,
+    kw,
     fuel,
-    price: String(document.getElementById("vetelar")?.value ?? "").trim(),
-    place: String(document.getElementById("telepules")?.value ?? "").trim() || "bymy",
+    drive: String(document.getElementById("hajtas")?.value ?? "").trim(),
+    gearbox: String(document.getElementById("sebessegvalto")?.value ?? "").trim(),
+    body: String(document.getElementById("kivitel")?.value ?? "").trim(),
+    doors: String(document.getElementById("ajtok")?.value ?? "").trim(),
+    seats: String(document.getElementById("szemelyek")?.value ?? "").trim(),
+    dealer: "",
   };
+}
+
+function photoAllowsOverlay(item) {
+  if (!item) return false;
+  if (item.file) return true;
+  return false;
 }
 
 function clearPhotoOverlay(item) {
@@ -1644,6 +1654,10 @@ async function applyPhotoOverlayToFirst() {
   const item = photoItems[0];
   if (!item) {
     alert("Előbb adj hozzá legalább egy képet.");
+    return;
+  }
+  if (!photoAllowsOverlay(item)) {
+    alert("Sablon csak újonnan feltöltött főképre alkalmazható (importált vagy meglévő képre nem).");
     return;
   }
   let src = "";

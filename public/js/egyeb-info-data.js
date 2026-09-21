@@ -1,3 +1,4 @@
+/** Használtautó „Egyéb információ” — szinkron: lib/egyeb-info-catalog.mjs, listing-extra-categories.mjs */
 export const EGYEB_INFO_OPTIONS = [
   "garanciális",
   "amerikai modell",
@@ -12,10 +13,12 @@ export const EGYEB_INFO_OPTIONS = [
   "frissen szervizelt",
   "garantált km futás",
   "garázsban tartott",
+  "hölgy tulajdonostól",
   "keveset futott",
   "második tulajdonostól",
   "motorbeszámítás lehetséges",
   "mozgássérült",
+  "nem dohányzó",
   "rendszeresen karbantartott",
   "taxi",
   "törzskönyv",

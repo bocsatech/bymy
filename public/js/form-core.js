@@ -19,8 +19,8 @@ import {
   DEFAULT_PHOTO_OVERLAY_ID,
   renderListingPhotoOverlay,
 } from "./listing-photo-overlay.js?v=photoOverlay2";
-import { refreshAdFormBmPickers, applyAdFormBmFieldValues } from "./ad-form-bm-pickers.js?v=deskAccScroll1";
-import { applyAdFormDesk } from "./ad-form-desk.js?v=adFormDesk41";
+import { refreshAdFormBmPickers, applyAdFormBmFieldValues } from "./ad-form-bm-pickers.js?v=egyebInfoFix1";
+import { applyAdFormDesk, isAdFormDesk } from "./ad-form-desk.js?v=adFormDesk42";
 import { initKmInput, parseKmDigits, setKmInputValue } from "./km-input.js?v=kmFmt1";
 import {
   EV_FUEL_FIELD_IDS,
@@ -421,14 +421,48 @@ function appendBmToggleCheckbox(parent, { name, value, id, checked }) {
   parent.appendChild(row);
 }
 
+function ensureEgyebInfoRoot() {
+  let root = document.getElementById("egyeb-info-sections");
+  if (root?.isConnected) return root;
+
+  const panel = form.querySelector('.step-panel[data-step="3"]');
+  if (!panel) return root || egyebInfoRoot;
+
+  for (const card of panel.querySelectorAll(".card")) {
+    const head = card.querySelector(".card-head")?.textContent?.trim() || "";
+    if (!/egy[eé]b inform/i.test(head)) continue;
+    const body = card.querySelector(".card-body") || card;
+    root = document.createElement("div");
+    root.id = "egyeb-info-sections";
+    root.className = "equipment-grid";
+    body.appendChild(root);
+    return root;
+  }
+  return root || egyebInfoRoot;
+}
+
 function renderEgyebInfo() {
-  if (!egyebInfoRoot) return;
-  egyebInfoRoot.className = "equipment-grid ad-form-toggle-list";
-  egyebInfoRoot.innerHTML = "";
+  const root = ensureEgyebInfoRoot();
+  if (!root) return;
+  const checked = new Set(
+    [...form.querySelectorAll('input[name="egyeb_info"]:checked')].map((el) => el.value)
+  );
+  root.className = "equipment-grid ad-form-toggle-list";
+  root.innerHTML = "";
   for (const item of EGYEB_INFO_OPTIONS) {
     const id = `info_${item.replace(/[^a-z0-9]+/gi, "_").toLowerCase()}`;
-    appendBmToggleCheckbox(egyebInfoRoot, { name: "egyeb_info", value: item, id, checked: false });
+    appendBmToggleCheckbox(root, {
+      name: "egyeb_info",
+      value: item,
+      id,
+      checked: checked.has(item),
+    });
   }
+}
+
+function deskExtrakSubAccordionsMounted() {
+  if (!equipmentRoot || !isAdFormDesk(form)) return false;
+  return Boolean(equipmentRoot.querySelector(":scope > [data-desk-sub-acc]"));
 }
 
 function renderEquipment() {
@@ -436,7 +470,15 @@ function renderEquipment() {
   const checked = new Set(
     [...form.querySelectorAll('input[name="felszereltseg"]:checked')].map((el) => el.value)
   );
-  equipmentRoot.innerHTML = "";
+
+  if (deskExtrakSubAccordionsMounted() && !isKisteherAd()) {
+    window.dispatchEvent(new Event("ad-form-equipment-rendered"));
+    return;
+  }
+
+  equipmentRoot.querySelectorAll(":scope > .equipment-block, :scope > [data-desk-sub-acc]").forEach((el) => {
+    el.remove();
+  });
 
   if (isKisteherAd()) {
     const block = document.createElement("div");
@@ -593,6 +635,7 @@ function syncKisteherFields() {
   });
   syncEgyebInfoVisibility();
   renderEquipment();
+  renderEgyebInfo();
   renderKivitelDropdown();
   void syncIngatlanFormVisibility(form);
   window.dispatchEvent(new Event("ad-form-layout-refresh"));

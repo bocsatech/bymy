@@ -210,11 +210,16 @@ function mountExtrakSubAccordions(form) {
     });
   }
 
-  const egyebCard = form.querySelector("#egyeb-info-sections")?.closest(".card");
   const egyebGrid = form.querySelector("#egyeb-info-sections");
+  const egyebCard = egyebGrid?.closest(".card");
+  const staleEgyebSub = equipmentRoot?.querySelector('[data-desk-sub-acc="egyeb-info"]');
+  if (staleEgyebSub && !staleEgyebSub.querySelector('input[name="egyeb_info"]')) {
+    staleEgyebSub.remove();
+  }
   if (
     equipmentRoot &&
-    egyebGrid &&
+    egyebGrid?.isConnected &&
+    egyebGrid.querySelector('input[name="egyeb_info"]') &&
     egyebCard &&
     !egyebCard.hidden &&
     !equipmentRoot.querySelector('[data-desk-sub-acc="egyeb-info"]')

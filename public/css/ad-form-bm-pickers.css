@@ -10,6 +10,44 @@ body.site-app[data-site-page="hirdetesfeladas"] {
   --ad-form-bm-row-h: 44px;
   --ad-form-bm-dropdown-rows: 7;
   --site-field-height: 44px;
+  --ad-form-suffix-input-width: 10.5rem;
+  --ad-form-suffix-unit-gap: 0.55rem;
+}
+
+/* Mértékegységes mezők: rövid cella + egység egyforma távolságra */
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .muszaki-grid .suffix-field,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .field-row--tech-top .suffix-field:not(.suffix-field--power),
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ev-tech-grid .suffix-field,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-layout-item .suffix-field:not(.suffix-field--power),
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .field-row.full .suffix-field:not(.suffix-field--power) {
+  width: max-content !important;
+  max-width: 100% !important;
+  gap: var(--ad-form-suffix-unit-gap) !important;
+  align-self: start;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .muszaki-grid .suffix-field > input,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .field-row--tech-top .suffix-field:not(.suffix-field--power) > input,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ev-tech-grid .suffix-field > input,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-layout-item .suffix-field:not(.suffix-field--power) > input,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .field-row.full .suffix-field:not(.suffix-field--power) > input,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .layout-sized .suffix-field:not(.suffix-field--power) > input {
+  flex: 0 0 var(--ad-form-suffix-input-width) !important;
+  width: var(--ad-form-suffix-input-width) !important;
+  max-width: var(--ad-form-suffix-input-width) !important;
+  min-width: 0 !important;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .muszaki-grid .suffix-field > span:not(.hint-inline):not(.power-hint),
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .field-row--tech-top .suffix-field:not(.suffix-field--power) > span:not(.hint-inline):not(.power-hint),
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ev-tech-grid .suffix-field > span:not(.hint-inline),
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-layout-item .suffix-field:not(.suffix-field--power) > span:not(.hint-inline):not(.power-hint),
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .field-row.full .suffix-field:not(.suffix-field--power) > span:not(.hint-inline):not(.power-hint) {
+  flex: 0 0 auto !important;
+  width: auto !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  text-align: left;
 }
 
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="hidden"]):not(.ad-form-bm-search-trigger),

@@ -101,10 +101,60 @@ export function deskPinnedGroupKeys() {
   return keys;
 }
 
+const PINNED_ANCHOR_LABELS = {
+  nyari_gumi_szelesseg: "Nyári gumi szélesség",
+  nyari_gumi_magassag: "Nyári gumi magasság",
+  nyari_gumi_atmero: "Nyári gumi átmérő",
+  teli_gumi_szelesseg: "Téli gumi szélesség",
+  teli_gumi_magassag: "Téli gumi magasság",
+  teli_gumi_atmero: "Téli gumi átmérő",
+  akkumulator_kwh: "Akkumulátor kapacitás",
+  jelenlegi_akkukapacitas: "Jelenlegi akkukapacitás",
+  ac_toltesi_teljesitmeny: "AC töltési teljesítmény",
+  dc_toltesi_teljesitmeny: "DC töltési teljesítmény",
+  ac_tolto_csatlakozas: "AC töltőcsatlakozó típusa",
+  dc_tolto_csatlakozas: "DC töltőcsatlakozó típusa",
+  hatotav: "WLTP hatótáv",
+  autopalya_hatotav: "Autópálya hatótáv",
+  teli_hatotav: "Téli hatótáv",
+  villamtoltes: "Villámtöltés",
+  zold_rendszam: "Zöld rendszám",
+  tolto_csatlakozas: "Töltőcsatlakozó",
+};
+
+/** Admin desk: hiányzó gumi/EV layout cellák pótlása, hogy a szintetikus csempék megjelenjenek. */
+export function ensureDeskPinnedAnchorCells(cells, byKey) {
+  if (!Array.isArray(cells) || !byKey) return false;
+  let changed = false;
+  for (const block of DESK_STEP2_PINNED_BLOCKS) {
+    const hasAnchor = [...block.anchorKeys].some((key) => byKey.get(key));
+    if (hasAnchor) continue;
+    const row = deskStep2CanonicalRank(block.syntheticKey) + 1;
+    for (const key of block.anchorKeys) {
+      const cell = {
+        field_key: key,
+        label: PINNED_ANCHOR_LABELS[key] || key,
+        step: 2,
+        row,
+        col: 1,
+        colSpan: 12,
+        order: row * 12,
+        hidden: false,
+      };
+      cells.push(cell);
+      byKey.set(key, cell);
+      changed = true;
+    }
+  }
+  return changed;
+}
+
 export function anchorCellsForBlock(byKey, block, step) {
   const cells = [...block.anchorKeys].map((k) => byKey.get(k)).filter(Boolean);
-  if (step !== 2) return cells.filter((cell) => Number(cell.step) === step);
-  return cells;
+  const visible = cells.filter((cell) => !cell.hidden);
+  const pool = visible.length ? visible : cells;
+  if (step !== 2) return pool.filter((cell) => Number(cell.step) === step);
+  return pool;
 }
 
 export function minAnchorRow(cells) {

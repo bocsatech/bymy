@@ -13,6 +13,13 @@ export const DESK_FUEL_PREVIEW_PROFILES = [
   { id: "hybrid", label: "Hibrid autó feladás" },
 ];
 
+export function deskFuelPreviewFromLayoutIntent(intent) {
+  const v = String(intent ?? "").trim().toLowerCase();
+  if (v === "fuel-electric") return "electric";
+  if (v === "fuel-hybrid") return "hybrid";
+  return "combustion";
+}
+
 export function normalizeDeskFuelPreviewProfile(value) {
   const v = String(value ?? "")
     .trim()

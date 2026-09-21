@@ -1,5 +1,8 @@
-import { mountLayoutBoard } from "./bocsatech-layout.js?v=deskFuelPrev1";
-import { DESK_FUEL_PREVIEW_PROFILES } from "./ad-form-layout-fuel-preview.js?v=deskFuelPrev1";
+import { mountLayoutBoard } from "./bocsatech-layout.js?v=deskFuelPrev2";
+import {
+  DESK_FUEL_PREVIEW_PROFILES,
+  deskFuelPreviewFromLayoutIntent,
+} from "./ad-form-layout-fuel-preview.js?v=deskFuelPrev2";
 import { mountIngatlanWheelBoard } from "./bocsatech-ingatlan-wheels.js?v=immoUiParity1";
 import {
   isIngatlanWheelAdminCategory,
@@ -39,7 +42,9 @@ const LAYOUT_NAV = [
   {
     group: "Autók",
     items: [
-      { id: "szemelyauto", label: "Személyautó feladás" },
+      { id: "szemelyauto", label: "Normál autó feladás" },
+      { id: "szemelyauto", label: "Elektromos autó feladás", intent: "fuel-electric" },
+      { id: "szemelyauto", label: "Hibrid autó feladás", intent: "fuel-hybrid" },
       { id: "szemelyauto-search", label: "Személyautó kereső" },
       { id: "teherauto-search", label: "Teherautó kereső" },
       { id: "leasing", label: "Leasing autók" },
@@ -374,9 +379,26 @@ function immoWheelApiUrl(variant) {
   return `/api/level1/ingatlan-wheel-schema?variant=${v}`;
 }
 
+function layoutNavItemForTab(value = tab) {
+  if (!isLayoutTab(value)) return null;
+  const raw = parseTab(value).sub.slice("layout:".length) || "szemelyauto";
+  for (const group of LAYOUT_NAV) {
+    for (const item of group.items) {
+      const path = item.intent ? `${item.id}:${item.intent}` : item.id;
+      if (raw === path) return item;
+    }
+  }
+  return null;
+}
+
+function syncDeskFuelPreviewFromTab(value = tab) {
+  if (layoutCategoryFromTab(value) !== DESK_POSTING_LAYOUT_MASTER) return;
+  deskFuelPreviewProfile = deskFuelPreviewFromLayoutIntent(layoutIntentFromTab(value));
+}
+
 function categoryLabel(id) {
   for (const group of LAYOUT_NAV) {
-    const hit = group.items.find((c) => c.id === id);
+    const hit = group.items.find((c) => c.id === id && !c.intent);
     if (hit) return hit.label;
   }
   const type = INGATLAN_LAKAS_TIPUS.find((item) => item.value === id);
@@ -673,6 +695,7 @@ const actions = {
     if (isLayoutTab(tab)) {
       layoutCategory = layoutCategoryFromTab(tab);
       layoutIntent = layoutIntentFromTab(tab);
+      syncDeskFuelPreviewFromTab(tab);
     }
     err = "";
     info = "";
@@ -1613,6 +1636,7 @@ async function loadTab() {
   if (isLayoutTab()) {
     layoutCategory = layoutCategoryFromTab();
     layoutIntent = layoutIntentFromTab();
+    syncDeskFuelPreviewFromTab();
     if (isIngatlanWheelLayoutTab()) {
       const data = await api(immoWheelApiUrl(layoutCategory));
       wheelSchema = data.schema || { version: 1, cells: [] };
@@ -2343,7 +2367,8 @@ function vehicleDeskPostingLayoutView(cat, label, sharedHint) {
 function layoutView() {
   const cat = layoutCategoryFromTab();
   const isImmoWizard = isIngatlanWizardLayoutTab();
-  const label = isImmoWizard ? "Ingatlan feladás" : categoryLabel(cat);
+  const navItem = layoutNavItemForTab();
+  const label = isImmoWizard ? "Ingatlan feladás" : navItem?.label || categoryLabel(cat);
   const isImmo = isIngatlanWheelLayoutTab();
   const isSearch = isSearchLayoutCat(cat);
   const sharedHint = isImmo

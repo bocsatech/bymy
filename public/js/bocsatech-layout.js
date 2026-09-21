@@ -4,11 +4,13 @@ import {
   anchorCellsForBlock,
   collapsePinnedAnchorRows,
   deskPinnedGroupKeys,
+  deskStep2CanonicalRank,
+  ensureDeskPinnedAnchorCells,
   hideSyntheticAnchors,
   isDeskSyntheticFieldKey,
   minAnchorRow,
 } from "./ad-form-desk-pinned-blocks.js?v=layoutFromKv1";
-import { layoutFieldVisibleForFuelProfile } from "./ad-form-layout-fuel-preview.js?v=deskFuelPrev1";
+import { layoutFieldVisibleForFuelProfile } from "./ad-form-layout-fuel-preview.js?v=deskFuelPrev2";
 
 const COLS = 12;
 const ROW_PX = 64;
@@ -122,9 +124,13 @@ export function mountLayoutBoard(
     const out = [];
     for (const block of DESK_STEP2_PINNED_BLOCKS) {
       if (fuelPreview && !layoutFieldVisibleForFuelProfile(block.syntheticKey, fuelPreview)) continue;
-      const anchors = anchorCellsForBlock(byKey, block, step);
+      let anchors = anchorCellsForBlock(byKey, block, step);
+      let row = anchors.length ? minAnchorRow(anchors) ?? 1 : deskStep2CanonicalRank(block.syntheticKey) + 1;
+      if (!anchors.length && deskPosting && step === 2) {
+        anchors = [{ field_key: block.syntheticKey, row }];
+      }
       if (!anchors.length) continue;
-      const row = minAnchorRow(anchors) ?? 1;
+      if (!Number.isFinite(row) || row < 1) row = 1;
       out.push({
         field_key: block.syntheticKey,
         label: block.label,
@@ -164,6 +170,7 @@ export function mountLayoutBoard(
 
   function ensureDeskStackCells() {
     if (!deskPosting) return;
+    if (ensureDeskPinnedAnchorCells(cells, byKey)) notify();
     collapsePinnedAnchorRows(byKey, 2);
   }
 

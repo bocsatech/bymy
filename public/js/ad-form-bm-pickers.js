@@ -1609,6 +1609,7 @@ function mountFuelPicker(select) {
           renderFuelBody(bodyEl);
           writePlainValue(select, selected);
           updateBmSearchTrigger(select, labelForValue(selected) || PLACEHOLDER, Boolean(selected));
+          window.dispatchEvent(new Event("ad-form-sync-fuel-fields"));
           if (!cat.children?.length && selected) closeAdBmPicker(select);
           return;
         }
@@ -1627,6 +1628,7 @@ function mountFuelPicker(select) {
         renderFuelBody(bodyEl);
         writePlainValue(select, selected);
         updateBmSearchTrigger(select, labelForValue(selected) || PLACEHOLDER, Boolean(selected));
+        window.dispatchEvent(new Event("ad-form-sync-fuel-fields"));
         if (childEl.checked && selected) closeAdBmPicker(select);
       };
     },

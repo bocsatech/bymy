@@ -1,5 +1,5 @@
 import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=immoUiParity1";
-import { refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=deskGridTrim1";
+import { refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=fuelProfile1";
 import { initTireSizes } from "./tire-sizes-ui.js?v=tireFill1";
 import { applyAdFormDesk } from "./ad-form-desk.js?v=adFormDesk35";
 
@@ -388,10 +388,7 @@ function pinElectricFields(form) {
   const canvas = canvasForStep(form, 2);
   if (!block || !canvas) return;
   if (block.parentElement !== canvas) canvas.appendChild(block);
-  block.hidden = false;
   block.classList.remove("ad-immo-orphan", "ad-layout-hidden");
-  block.removeAttribute("hidden");
-  block.style.removeProperty("display");
   cleanupStrayEvLayoutItems(form);
 }
 
@@ -694,6 +691,7 @@ async function applyAdFormLayout() {
     await refreshAdFormBmPickers(form);
     initTireSizes(form);
     applyAdFormDesk();
+    window.dispatchEvent(new Event("ad-form-sync-fuel-fields"));
   } catch (error) {
     console.warn("Ad form layout apply:", error);
   }

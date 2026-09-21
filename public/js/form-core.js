@@ -19,8 +19,15 @@ import {
   DEFAULT_PHOTO_OVERLAY_ID,
   renderListingPhotoOverlay,
 } from "./listing-photo-overlay.js?v=photoOverlay2";
-import { refreshAdFormBmPickers, applyAdFormBmFieldValues } from "./ad-form-bm-pickers.js?v=deskGridTrim1";
+import { refreshAdFormBmPickers, applyAdFormBmFieldValues } from "./ad-form-bm-pickers.js?v=fuelProfile1";
 import { initKmInput, parseKmDigits, setKmInputValue } from "./km-input.js?v=kmFmt1";
+import {
+  EV_FUEL_FIELD_IDS,
+  fuelFieldVisibility,
+  fuelProfile,
+  normalizeAdFuelValue,
+  readAdFormFuelValue,
+} from "./ad-form-fuel-profile.js?v=fuelProfile1";
 
 export function createAdForm(options = {}) {
   const mode = options.mode ?? "wizard";
@@ -120,11 +127,7 @@ function fillYearSelect(select, { maxYear = new Date().getFullYear(), minYear = 
 }
 
 function normalizeFuelValue(value) {
-  const aliases = {
-    Diesel: "Dízel",
-    "Diesel/elektromos": "Dízel/elektromos",
-  };
-  return aliases[value] ?? value;
+  return normalizeAdFuelValue(value);
 }
 
 function applyCatalogTypeData(entry) {
@@ -466,10 +469,6 @@ function applyAutoFill() {
   fitAllFormFields();
 }
 
-function isElectricFuel(value) {
-  return String(value ?? "").trim().toLowerCase() === "elektromos";
-}
-
 function isKisteherAd() {
   const subtype = String(
     form.elements.namedItem("hirdetes_alkategoria")?.value ??
@@ -556,15 +555,55 @@ function syncKisteherFields() {
   window.dispatchEvent(new Event("ad-form-layout-refresh"));
 }
 
+function cssEscapeFuelId(value) {
+  if (window.CSS?.escape) return window.CSS.escape(value);
+  return String(value).replace(/"/g, '\\"');
+}
+
+function setFuelSectionVisible(el, visible) {
+  el.classList.toggle("hidden", !visible);
+  if (visible) {
+    el.hidden = false;
+    el.removeAttribute("hidden");
+    el.style.removeProperty("display");
+  } else {
+    el.hidden = true;
+    el.style.setProperty("display", "none", "important");
+  }
+}
+
 function syncFuelDependentFields() {
-  const value = uzemanyag?.value ?? "";
-  const electric = isElectricFuel(value);
+  const value = readAdFormFuelValue(uzemanyag);
+  const { showElectric, showConsumption, showHenger } = fuelFieldVisibility(fuelProfile(value));
+
   document.querySelectorAll(".fuel-electric-only").forEach((el) => {
-    el.classList.toggle("hidden", !electric);
+    setFuelSectionVisible(el, showElectric);
   });
   document.querySelectorAll(".fuel-combustion-only").forEach((el) => {
-    el.classList.toggle("hidden", electric);
+    setFuelSectionVisible(el, showConsumption);
   });
+  document.querySelectorAll(".fuel-henger-field").forEach((el) => {
+    setFuelSectionVisible(el, showHenger);
+  });
+
+  for (const id of EV_FUEL_FIELD_IDS) {
+    document.querySelectorAll(`#${cssEscapeFuelId(id)}`).forEach((input) => {
+      if (input.closest("#electric-fields-block")) return;
+      const wrap = input.closest(".ad-layout-item, .labeled-field, .md-outlined");
+      if (!wrap) return;
+      setFuelSectionVisible(wrap, showElectric);
+      if (!showElectric) wrap.classList.add("ad-layout-hidden");
+      else wrap.classList.remove("ad-layout-hidden");
+    });
+  }
+}
+
+function bindFuelPickerSync() {
+  const fuel = document.getElementById("uzemanyag");
+  if (!fuel || fuel.dataset.adFormFuelSyncBound === "1") return;
+  fuel.dataset.adFormFuelSyncBound = "1";
+  fuel._adBmHidden?.addEventListener("change", () => syncFuelDependentFields());
+  fuel._adBmHidden?.addEventListener("input", () => syncFuelDependentFields());
 }
 
 function updateLeDisplay() {
@@ -1782,6 +1821,7 @@ renderKlimaOptions();
 renderEquipment();
 renderEgyebInfo();
 wrapMdOutlinedFields();
+bindFuelPickerSync();
 syncFuelDependentFields();
 initKmInput(document.getElementById("km"));
 fitAllFormFields();
@@ -1833,6 +1873,13 @@ renderPhotoPreview();
 window.addEventListener("ad-form-photo-stage-sync", () => renderPhotoPreview());
 window.addEventListener("ad-form-layout-refresh", () => {
   window.requestAnimationFrame(() => renderPhotoPreview());
+  bindFuelPickerSync();
+  syncFuelDependentFields();
+});
+
+window.addEventListener("ad-form-sync-fuel-fields", () => {
+  bindFuelPickerSync();
+  syncFuelDependentFields();
 });
 
 return {

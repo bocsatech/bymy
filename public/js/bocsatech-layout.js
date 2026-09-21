@@ -152,6 +152,70 @@ export function mountLayoutBoard(root, layout, { onChange, stepNames, deskPostin
     collapsePinnedAnchorRows(byKey, 2);
   }
 
+  function isDeskGapInsertBoard(board) {
+    if (!board || !deskPosting) return false;
+    const step = Number(board.getAttribute("data-board"));
+    return step === 1 || step === 2 || step === 3 || step === 5;
+  }
+
+  function deskOrderItems(step, excludeKey = "") {
+    const all = deskPosting && step === 2 ? stackDisplayItems(step) : stackItems(step);
+    return all.filter((cell) => cell.field_key !== excludeKey);
+  }
+
+  function insertIndexFromPointer(board, clientY, draggingTile = null) {
+    const tiles = [...board.querySelectorAll(".layout-tile")].filter((tile) => tile !== draggingTile);
+    for (let i = 0; i < tiles.length; i += 1) {
+      const rect = tiles[i].getBoundingClientRect();
+      if (clientY < rect.top + rect.height / 2) return i;
+    }
+    return tiles.length;
+  }
+
+  function rowWithSingleGap(itemIndex, gapBeforeIndex) {
+    return itemIndex + 1 + (itemIndex >= gapBeforeIndex ? 1 : 0);
+  }
+
+  function applyDeskVerticalInsert(step, movedKey, gapBeforeIndex, movedCellRef) {
+    const moved = movedCellRef || byKey.get(movedKey);
+    if (!moved) return;
+    const movedCol = moved.col ?? 1;
+    const movedSpan = moved.colSpan ?? 12;
+    const rest = deskOrderItems(step, movedKey);
+    const ordered = [...rest.slice(0, gapBeforeIndex), moved, ...rest.slice(gapBeforeIndex)];
+    ordered.forEach((item, index) => {
+      const row = rowWithSingleGap(index, gapBeforeIndex);
+      item.row = row;
+      item.step = step;
+      if (item === moved) {
+        item.col = movedCol;
+        item.colSpan = movedSpan;
+      } else if (item.col == null) {
+        item.col = 1;
+        item.colSpan = item.colSpan ?? 12;
+      }
+      item.order = (row - 1) * COLS + (Number(item.col) || 1);
+      if (item.__synthetic) {
+        commitSyntheticCell(item, step);
+      } else {
+        syncPair(item);
+      }
+    });
+  }
+
+  function repaintBoardTiles(board) {
+    const step = Number(board.getAttribute("data-board"));
+    board.querySelectorAll(".layout-tile").forEach((tile) => {
+      const key = tile.getAttribute("data-field");
+      let cell = byKey.get(key);
+      if (!cell && isDeskSyntheticFieldKey(key)) {
+        cell = stackDisplayItems(step).find((c) => c.field_key === key);
+      }
+      if (cell) paint(tile, cell);
+    });
+    setBoardHeight(board, { buffer: DROP_BUFFER });
+  }
+
   function tileHtml(cell, { stack = false } = {}) {
     const style = stack ? "" : tileStyle(cell);
     const meta = stack ? `#${cell.row} · lépés ${cell.step}` : `${cell.colSpan}/12 · lépés ${cell.step}`;
@@ -566,6 +630,15 @@ export function mountLayoutBoard(root, layout, { onChange, stepNames, deskPostin
           root.querySelectorAll(".layout-board").forEach((el) => el.classList.toggle("is-drop", el === nextBoard));
           if (!nextBoard) return;
 
+          if (isDeskGapInsertBoard(nextBoard)) {
+            if (nextBoard !== board) board = nextBoard;
+            const step = Number(board.getAttribute("data-board"));
+            const insertAt = insertIndexFromPointer(board, ev.clientY, tile);
+            applyDeskVerticalInsert(step, fieldKey, insertAt, cell);
+            repaintBoardTiles(board);
+            return;
+          }
+
           if (isStackBoard(nextBoard)) {
             if (nextBoard !== board) {
               nextBoard.appendChild(tile);
@@ -632,6 +705,16 @@ export function mountLayoutBoard(root, layout, { onChange, stepNames, deskPostin
           }
 
           const dropBoard = boardAtPoint(lastX, lastY, board) || board;
+          if (!resize && isDeskGapInsertBoard(dropBoard)) {
+            const dropStep = Number(dropBoard.getAttribute("data-board"));
+            const insertAt = insertIndexFromPointer(dropBoard, lastY, tile);
+            applyDeskVerticalInsert(dropStep, fieldKey, insertAt, cell);
+            if (fromStep !== dropStep) compactStep(fromStep);
+            notify();
+            mount();
+            return;
+          }
+
           if (!resize) {
             if (isStackBoard(dropBoard)) {
               if (dropBoard !== board) dropBoard.appendChild(tile);

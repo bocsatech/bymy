@@ -1,11 +1,3 @@
-const GUIDE_SLOT_BY_STEP = {
-  1: "alap",
-  2: "muszaki",
-  3: "extrak",
-  4: "kepek",
-  5: "hirdetes",
-};
-
 const SLOT_LABELS = {
   alap: "Alap adatok",
   muszaki: "Műszaki adatok",
@@ -22,20 +14,19 @@ let photoSectionActive = false;
 
 function activeGuideSlot(form) {
   if (photoSectionActive) return "kepek";
-  const step = Number(document.querySelector("[data-step-indicator].active")?.dataset.stepIndicator) || 1;
-  if (step === 4) return "kepek";
-  const open = form?.querySelector("[data-desk-acc].is-open");
+  const open = form?.querySelector("[data-desk-acc]:not(.auto-desk-acc--sub).is-open");
   if (open) {
     const id = open.getAttribute("data-desk-acc");
     if (id && SLOT_LABELS[id]) return id;
   }
-  return GUIDE_SLOT_BY_STEP[step] || "alap";
+  return "alap";
 }
 
 export function showDeskGuideSlot(slotId, { photoFocus = false } = {}) {
   if (photoFocus) photoSectionActive = slotId === "kepek";
   else if (slotId !== "kepek") photoSectionActive = false;
   paintGuideFrame(slotId);
+  window.dispatchEvent(new CustomEvent("ad-desk-guide-slot", { detail: { slotId, photoFocus } }));
 }
 
 function paintGuideFrame(slotId) {

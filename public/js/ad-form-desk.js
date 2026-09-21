@@ -1,4 +1,4 @@
-import { initAdFormDeskGuide, refreshAdFormDeskGuide, showDeskGuideSlot } from "./ad-form-desk-guide.js?v=adDeskGuide4";
+import { initAdFormDeskGuide, refreshAdFormDeskGuide, showDeskGuideSlot } from "./ad-form-desk-guide.js?v=adDeskGuide5";
 
 const DESK_MQ = "(min-width: 901px)";
 
@@ -153,6 +153,47 @@ function scrollDeskExtrakSubAccordionToStart(subAcc) {
   const offset = deskScrollOffsetTop();
   const top = target.getBoundingClientRect().top + window.scrollY - offset;
   window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+}
+
+/** Középső útmutató keret vízszintesen a nyitott fő accordion fejlécével egy magasságban (Extrák stb.). */
+function syncDeskGuideFrameAlign(form, { accId = null, photoFocus = false } = {}) {
+  const frame = document.getElementById("ad-desk-guide-frame");
+  const col = form?.querySelector("#ad-desk-center-col");
+  if (!frame || !col) return;
+
+  if (photoFocus || frame.dataset.deskGuideSlot === "kepek") {
+    frame.style.removeProperty("margin-top");
+    return;
+  }
+
+  const id =
+    accId ||
+    form.querySelector("[data-desk-acc]:not(.auto-desk-acc--sub).is-open")?.getAttribute("data-desk-acc") ||
+    "";
+  if (!id || id === "kepek") {
+    frame.style.removeProperty("margin-top");
+    return;
+  }
+
+  const acc = form.querySelector(`[data-desk-acc="${id}"]:not(.auto-desk-acc--sub)`);
+  if (!acc?.classList.contains("is-open")) {
+    frame.style.removeProperty("margin-top");
+    return;
+  }
+
+  const head = acc.querySelector(".auto-desk-acc__head");
+  const colTop = col.getBoundingClientRect().top;
+  const headTop = (head || acc).getBoundingClientRect().top;
+  const gap = Math.max(0, Math.round(headTop - colTop));
+  if (gap > 0) frame.style.marginTop = `${gap}px`;
+  else frame.style.removeProperty("margin-top");
+}
+
+function afterDeskGuideAlign(form, accId, { photoFocus = false } = {}) {
+  requestAnimationFrame(() => {
+    syncDeskGuideFrameAlign(form, { accId, photoFocus });
+    requestAnimationFrame(() => syncDeskGuideFrameAlign(form, { accId, photoFocus }));
+  });
 }
 
 function mountExtrakSubAccordions(form) {
@@ -486,11 +527,15 @@ function applyAdFormDesk({ openStep = null, scrollToAccordion = null } = {}) {
   if (accId && accId !== "kepek") showDeskGuideSlot(accId, { photoFocus: false });
   refreshAdFormDeskGuide(form);
   initAdFormDeskGuide();
+  afterDeskGuideAlign(form, accId);
   clearAdFormEditBoot();
   const scrollId = scrollToAccordion || null;
   if (scrollId) {
     requestAnimationFrame(() => {
-      requestAnimationFrame(() => scrollDeskMainAccordionToStart(form, scrollId));
+      requestAnimationFrame(() => {
+        scrollDeskMainAccordionToStart(form, scrollId);
+        afterDeskGuideAlign(form, scrollId);
+      });
     });
   }
 }
@@ -512,8 +557,13 @@ function bindDeskEvents() {
       openSubAccordionInExtrak(form, wasOpen ? null : subAcc);
       updateSubAccordionSums(form);
       if (opening) {
+        showDeskGuideSlot("extrak", { photoFocus: false });
+        afterDeskGuideAlign(form, "extrak");
         requestAnimationFrame(() => {
-          requestAnimationFrame(() => scrollDeskExtrakSubAccordionToStart(subAcc));
+          requestAnimationFrame(() => {
+            scrollDeskExtrakSubAccordionToStart(subAcc);
+            afterDeskGuideAlign(form, "extrak");
+          });
         });
       }
       return;
@@ -533,8 +583,12 @@ function bindDeskEvents() {
     }
     showDeskGuideSlot(id, { photoFocus: false });
     refreshAdFormDeskGuide(form);
+    afterDeskGuideAlign(form, id);
     requestAnimationFrame(() => {
-      requestAnimationFrame(() => scrollDeskMainAccordionToStart(form, id));
+      requestAnimationFrame(() => {
+        scrollDeskMainAccordionToStart(form, id);
+        afterDeskGuideAlign(form, id);
+      });
     });
   });
 
@@ -558,15 +612,35 @@ function bindDeskEvents() {
     refreshAdFormDeskGuide(form);
     if (step === PHOTO_STEP) {
       showDeskGuideSlot("kepek", { photoFocus: true });
+      afterDeskGuideAlign(form, accId, { photoFocus: true });
       document.getElementById("ad-photo-desk-stage")?.scrollIntoView?.({ block: "start", behavior: "smooth" });
       return;
     }
     if (accId) {
       showDeskGuideSlot(accId, { photoFocus: false });
+      afterDeskGuideAlign(form, accId);
       requestAnimationFrame(() => {
-        requestAnimationFrame(() => scrollDeskMainAccordionToStart(form, accId));
+        requestAnimationFrame(() => {
+          scrollDeskMainAccordionToStart(form, accId);
+          afterDeskGuideAlign(form, accId);
+        });
       });
     }
+  });
+
+  let guideAlignResizeTimer = 0;
+  window.addEventListener("resize", () => {
+    window.clearTimeout(guideAlignResizeTimer);
+    guideAlignResizeTimer = window.setTimeout(() => {
+      const f = document.getElementById("ad-form");
+      if (f && isAdFormDesk(f)) afterDeskGuideAlign(f);
+    }, 120);
+  });
+
+  window.addEventListener("ad-desk-guide-slot", (event) => {
+    const form = document.getElementById("ad-form");
+    if (!form || !isAdFormDesk(form)) return;
+    afterDeskGuideAlign(form, null, { photoFocus: Boolean(event.detail?.photoFocus) });
   });
 
   window.matchMedia(DESK_MQ).addEventListener("change", () => applyAdFormDesk());

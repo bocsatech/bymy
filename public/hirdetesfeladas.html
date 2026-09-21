@@ -57,7 +57,6 @@
             bootStyle.textContent =
               "html.ad-form-edit-boot #category-picker-shell," +
               "html.ad-form-edit-boot #ad-wizard-shell," +
-              "html.ad-form-edit-boot #wizard-steps-bar," +
               "html.ad-form-edit-boot #wizard-context-bar{display:none!important}";
             document.head.appendChild(bootStyle);
           }
@@ -75,7 +74,7 @@
     <link rel="stylesheet" href="/css/style.css?v=postDark1" />
     <link rel="stylesheet" href="/css/automax.css?v=automax20260720homelist" />
     <link rel="stylesheet" href="/css/site-app.css?v=cellGap2" />
-    <link rel="stylesheet" href="/css/ad-form-desk.css?v=deskAccScroll1" />
+    <link rel="stylesheet" href="/css/ad-form-desk.css?v=noWizardSteps1" />
     <link rel="stylesheet" href="/css/ad-form-bm-pickers.css?v=deskTireFit1" />
     <link rel="stylesheet" href="/css/site-side.css?v=mwPostDesk1" />
     <link rel="stylesheet" href="/css/category-picker.css?v=catDrumStand2" />
@@ -124,16 +123,6 @@
         </div>
       </div>
     </header>
-
-    <div class="site-app-wizard-steps" id="wizard-steps-bar" hidden>
-      <nav class="steps" aria-label="Lépések">
-        <div class="step" data-step-indicator="4">Képek</div>
-        <div class="step active" data-step-indicator="1">Alapadatok</div>
-        <div class="step" data-step-indicator="2">Műszaki adatok</div>
-        <div class="step" data-step-indicator="3">Extrák</div>
-        <div class="step" data-step-indicator="5">Hirdetés</div>
-      </nav>
-    </div>
 
     <div class="wizard-context-bar" id="wizard-context-bar" hidden>
       <div class="wizard-category-wheel" id="wizard-category-wheel-wrap">

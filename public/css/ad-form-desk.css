@@ -6,7 +6,7 @@ html.ad-form-edit-boot body[data-site-page="hirdetesfeladas"] #wizard-context-ba
   display: none !important;
 }
 
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #wizard-steps-bar {
+body.site-app[data-site-page="hirdetesfeladas"] #wizard-steps-bar {
   display: none !important;
 }
 

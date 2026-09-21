@@ -20,7 +20,7 @@ import {
   renderListingPhotoOverlay,
 } from "./listing-photo-overlay.js?v=photoOverlay2";
 import { refreshAdFormBmPickers, applyAdFormBmFieldValues } from "./ad-form-bm-pickers.js?v=deskAccScroll1";
-import { applyAdFormDesk } from "./ad-form-desk.js?v=adFormDesk40";
+import { applyAdFormDesk } from "./ad-form-desk.js?v=adFormDesk41";
 import { initKmInput, parseKmDigits, setKmInputValue } from "./km-input.js?v=kmFmt1";
 import {
   EV_FUEL_FIELD_IDS,

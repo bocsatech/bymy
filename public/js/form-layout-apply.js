@@ -667,9 +667,33 @@ function findElérhetőségCard(form) {
   return null;
 }
 
+function hidePostalShellWhenLocationInSlot(form) {
+  if (!adHideStreetOnly(form)) return;
+  const slot = form.querySelector("#ad-megtalalhato-slot");
+  const stack = form.querySelector(".field-stack--location");
+  if (!slot || !stack?.parentElement || !slot.contains(stack)) return;
+
+  const card = form.querySelector('[data-ad-postal-card="1"]') || findElérhetőségCard(form);
+  if (!card) return;
+
+  card.style.setProperty("display", "none", "important");
+  card.classList.add("ad-immo-orphan");
+  card.hidden = true;
+}
+
 function ensurePostalCardVisible(form) {
   if (!adHideStreetOnly(form)) return;
+  const slot = form.querySelector("#ad-megtalalhato-slot");
   const stack = form.querySelector(".field-stack--location");
+  if (stack && slot && slot.contains(stack)) {
+    stack.hidden = false;
+    stack.classList.remove("ad-layout-hidden", "ad-form-contact-profile-hidden");
+    stack.removeAttribute("hidden");
+    stack.style.removeProperty("display");
+    hidePostalShellWhenLocationInSlot(form);
+    return;
+  }
+
   const card = findElérhetőségCard(form) || stack?.closest(".card");
   if (!card) return;
 
@@ -708,7 +732,7 @@ function pinLocation(form) {
     if (slot && stack.parentElement !== slot) {
       slot.appendChild(stack);
     }
-    ensurePostalCardVisible(form);
+    hidePostalShellWhenLocationInSlot(form);
     return;
   }
 

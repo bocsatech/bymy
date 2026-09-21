@@ -377,15 +377,34 @@ function renderKlimaOptions() {
   }
 }
 
+function appendBmToggleCheckbox(parent, { name, value, id, checked }) {
+  const row = document.createElement("div");
+  row.className = "auto-bm-row";
+  const label = document.createElement("label");
+  label.className = "auto-bm-toggle";
+  const text = document.createElement("span");
+  text.textContent = value;
+  const input = document.createElement("input");
+  input.type = "checkbox";
+  input.name = name;
+  input.value = value;
+  if (id) input.id = id;
+  if (checked) input.checked = true;
+  const sw = document.createElement("span");
+  sw.className = "auto-bm-switch";
+  sw.setAttribute("aria-hidden", "true");
+  label.append(text, input, sw);
+  row.appendChild(label);
+  parent.appendChild(row);
+}
+
 function renderEgyebInfo() {
   if (!egyebInfoRoot) return;
+  egyebInfoRoot.className = "equipment-grid ad-form-toggle-list";
   egyebInfoRoot.innerHTML = "";
   for (const item of EGYEB_INFO_OPTIONS) {
     const id = `info_${item.replace(/[^a-z0-9]+/gi, "_").toLowerCase()}`;
-    const label = document.createElement("label");
-    label.className = "check";
-    label.innerHTML = `<input type="checkbox" name="egyeb_info" value="${item}" id="${id}" /> ${item}`;
-    egyebInfoRoot.appendChild(label);
+    appendBmToggleCheckbox(egyebInfoRoot, { name: "egyeb_info", value: item, id, checked: false });
   }
 }
 
@@ -401,15 +420,15 @@ function renderEquipment() {
     block.className = "equipment-block";
     block.innerHTML = `<h3>Felszereltség</h3>`;
     const grid = document.createElement("div");
-    grid.className = "equipment-grid";
+    grid.className = "equipment-grid ad-form-toggle-list";
     for (const item of KISTEHER_EQUIPMENT_ITEMS) {
       const id = `kisteher_${item.replace(/[^a-z0-9]+/gi, "_").toLowerCase()}`;
-      const label = document.createElement("label");
-      label.className = "check";
-      label.innerHTML = `<input type="checkbox" name="felszereltseg" value="${item}" id="${id}" ${
-        checked.has(item) ? "checked" : ""
-      } /> ${item}`;
-      grid.appendChild(label);
+      appendBmToggleCheckbox(grid, {
+        name: "felszereltseg",
+        value: item,
+        id,
+        checked: checked.has(item),
+      });
     }
     block.appendChild(grid);
     equipmentRoot.appendChild(block);
@@ -423,15 +442,15 @@ function renderEquipment() {
     block.dataset.equipmentKey = key;
     block.innerHTML = `<h3>${section.title}</h3>`;
     const grid = document.createElement("div");
-    grid.className = "equipment-grid";
+    grid.className = "equipment-grid ad-form-toggle-list";
     for (const item of section.items) {
       const id = `${key}_${item.replace(/[^a-z0-9]+/gi, "_").toLowerCase()}`;
-      const label = document.createElement("label");
-      label.className = "check";
-      label.innerHTML = `<input type="checkbox" name="felszereltseg" value="${item}" id="${id}" ${
-        checked.has(item) ? "checked" : ""
-      } /> ${item}`;
-      grid.appendChild(label);
+      appendBmToggleCheckbox(grid, {
+        name: "felszereltseg",
+        value: item,
+        id,
+        checked: checked.has(item),
+      });
     }
     block.appendChild(grid);
     equipmentRoot.appendChild(block);

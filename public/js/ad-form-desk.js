@@ -501,7 +501,9 @@ function bindDeskEvents() {
     if (document.body.classList.contains("ad-form-desk-active")) updateAccordionSums(form);
   });
   form.addEventListener("change", () => {
-    if (document.body.classList.contains("ad-form-desk-active")) updateAccordionSums(form);
+    if (!document.body.classList.contains("ad-form-desk-active")) return;
+    updateAccordionSums(form);
+    updateSubAccordionSums(form);
   });
 
   window.addEventListener("ad-form-step", (event) => {

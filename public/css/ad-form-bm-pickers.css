@@ -562,3 +562,67 @@ body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-panel .ad-form-bm-em
   font-size: 14px;
   text-align: center;
 }
+
+/* Extrák / egyéb info — ugyanaz a kapcsolós sor, mint a BM panelekben */
+body.site-app[data-site-page="hirdetesfeladas"] .ad-form-toggle-list {
+  display: flex;
+  flex-direction: column;
+  grid-template-columns: unset;
+  gap: 0;
+  border: 1px solid var(--ad-form-bm-line);
+  border-radius: 10px;
+  background: var(--ad-form-bm-panel);
+  overflow: hidden;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] .ad-form-toggle-list .auto-bm-row + .auto-bm-row {
+  border-top: 1px solid var(--ad-form-bm-line);
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] .ad-form-toggle-list .auto-bm-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 52px;
+  padding: 0 14px;
+  color: var(--ad-form-bm-text);
+  font-size: 15px;
+  cursor: pointer;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] .ad-form-toggle-list .auto-bm-toggle input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] .ad-form-toggle-list .auto-bm-switch {
+  width: 46px;
+  height: 28px;
+  border-radius: 999px;
+  background: #c6c6c6;
+  position: relative;
+  flex: 0 0 auto;
+  transition: background 0.15s;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] .ad-form-toggle-list .auto-bm-switch::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.15s;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] .ad-form-toggle-list .auto-bm-toggle input:checked + .auto-bm-switch {
+  background: #34c759;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] .ad-form-toggle-list .auto-bm-toggle input:checked + .auto-bm-switch::after {
+  transform: translateX(18px);
+}

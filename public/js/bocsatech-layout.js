@@ -1,3 +1,15 @@
+import {
+  DESK_STEP2_PINNED_BLOCKS,
+  applySyntheticStackRow,
+  anchorCellsForBlock,
+  collapsePinnedAnchorRows,
+  deskPinnedGroupKeys,
+  hideSyntheticAnchors,
+  isDeskSyntheticFieldKey,
+  minAnchorRow,
+  sortDeskStep2StackItems,
+} from "./ad-form-desk-pinned-blocks.js?v=deskPinned2";
+
 const COLS = 12;
 const ROW_PX = 64;
 const DROP_BUFFER = 2;
@@ -16,16 +28,6 @@ const DESK_POSTING_ACCORDIONS = [
   { id: "extrak", step: 3, label: "Extrák" },
   { id: "hirdetes", step: 5, label: "Hirdetés" },
 ];
-import {
-  DESK_STEP2_PINNED_BLOCKS,
-  applySyntheticStackRow,
-  anchorCellsForBlock,
-  collapsePinnedAnchorRows,
-  deskPinnedGroupKeys,
-  hideSyntheticAnchors,
-  isDeskSyntheticFieldKey,
-  minAnchorRow,
-} from "./ad-form-desk-pinned-blocks.js?v=deskPinned1";
 
 const PAIR_OF = {
   gyartasi_ev: "gyartasi_honap",
@@ -60,6 +62,7 @@ export function mountLayoutBoard(root, layout, { onChange, stepNames, deskPostin
     "gyartasi_honap",
     "forgalomba_helyezes_honap",
     "muszaki_honap",
+    "teljesitmeny_le",
     "akcios_ar",
     "egyeb_modell",
     "video_url",
@@ -128,13 +131,7 @@ export function mountLayoutBoard(root, layout, { onChange, stepNames, deskPostin
     const grouped = deskPinnedGroupKeys();
     const regular = stackItems(step).filter((cell) => !grouped.has(cell.field_key));
     const synthetics = syntheticStackCells(step);
-    return [...regular, ...synthetics].sort(
-      (a, b) =>
-        (Number(a.row) || 1) - (Number(b.row) || 1) ||
-        (Number(a.col) || 1) - (Number(b.col) || 1) ||
-        (Number(a.order) || 0) - (Number(b.order) || 0) ||
-        String(a.field_key).localeCompare(String(b.field_key))
-    );
+    return sortDeskStep2StackItems([...regular, ...synthetics]);
   }
 
   function normalizeStackStep(step) {
@@ -148,7 +145,13 @@ export function mountLayoutBoard(root, layout, { onChange, stepNames, deskPostin
           if (block.syntheticKey !== cell.field_key) continue;
           const anchors = anchorCellsForBlock(byKey, block, step);
           for (const anchor of anchors) {
-            if (anchor.row !== row || anchor.col !== 1 || anchor.colSpan !== 12) {
+            if (
+              anchor.step !== step ||
+              anchor.row !== row ||
+              anchor.col !== 1 ||
+              anchor.colSpan !== 12
+            ) {
+              anchor.step = step;
               anchor.row = row;
               anchor.col = 1;
               anchor.colSpan = 12;

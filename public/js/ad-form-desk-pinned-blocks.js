@@ -24,6 +24,51 @@ export const EV_LAYOUT_GROUP_KEYS = new Set([
   "zold_rendszam",
 ]);
 
+/** Használtautó desk „Műszaki adatok” — admin stack és éles canvas ugyanilyen sorrendben. */
+export const DESK_STEP2_CANONICAL_STACK = [
+  "__desk_tire_sizes__",
+  "hengerurtartalom",
+  "teljesitmeny_kw",
+  "fogyasztas_varosi",
+  "fogyasztas_orszaguti",
+  "fogyasztas_kombinalt",
+  "__desk_electric_block__",
+  "sebessegvalto",
+  "hajtas",
+  "sajat_tomeg",
+  "ossztomeg",
+  "nyomatek_nm",
+  "rakter_terfogat",
+  "rakter_hossz",
+  "rakter_szelesseg",
+  "rakter_magassag",
+  "ajtok",
+  "szemelyek",
+  "csomagtarto",
+  "tetto",
+  "szin",
+  "karpit1",
+  "karpit2",
+];
+
+const CANONICAL_RANK = new Map(DESK_STEP2_CANONICAL_STACK.map((key, index) => [key, index]));
+
+export function deskStep2CanonicalRank(fieldKey) {
+  const key = String(fieldKey || "");
+  if (CANONICAL_RANK.has(key)) return CANONICAL_RANK.get(key);
+  return 900 + (CANONICAL_RANK.size || 0);
+}
+
+export function sortDeskStep2StackItems(items) {
+  return [...items].sort(
+    (a, b) =>
+      deskStep2CanonicalRank(a.field_key) - deskStep2CanonicalRank(b.field_key) ||
+      (Number(a.row) || 1) - (Number(b.row) || 1) ||
+      (Number(a.order) || 0) - (Number(b.order) || 0) ||
+      String(a.field_key).localeCompare(String(b.field_key))
+  );
+}
+
 export const DESK_STEP2_PINNED_BLOCKS = [
   {
     syntheticKey: "__desk_tire_sizes__",
@@ -54,9 +99,9 @@ export function deskPinnedGroupKeys() {
 }
 
 export function anchorCellsForBlock(byKey, block, step) {
-  return [...block.anchorKeys]
-    .map((k) => byKey.get(k))
-    .filter((cell) => cell && Number(cell.step) === step);
+  const cells = [...block.anchorKeys].map((k) => byKey.get(k)).filter(Boolean);
+  if (step !== 2) return cells.filter((cell) => Number(cell.step) === step);
+  return cells;
 }
 
 export function minAnchorRow(cells) {
@@ -105,7 +150,10 @@ export function hideSyntheticAnchors(byKey, syntheticKey) {
   }
 }
 
-export function layoutRowForPinnedBlock(cells, anchorKeys) {
+export function layoutRowForPinnedBlock(cells, anchorKeys, syntheticKey) {
+  if (syntheticKey && CANONICAL_RANK.has(syntheticKey)) {
+    return CANONICAL_RANK.get(syntheticKey) + 1;
+  }
   const anchors = (cells || []).filter((c) => anchorKeys.has(c.field_key) && !c.hidden);
   if (anchors.length) return minAnchorRow(anchors) ?? 1;
   const any = (cells || []).filter((c) => anchorKeys.has(c.field_key));

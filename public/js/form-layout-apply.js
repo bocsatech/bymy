@@ -3,11 +3,13 @@ import { refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=fuelProfile1";
 import { initTireSizes } from "./tire-sizes-ui.js?v=tireFill1";
 import { applyAdFormDesk } from "./ad-form-desk.js?v=adFormDesk36";
 import {
+  DESK_STEP2_CANONICAL_STACK,
   EV_LAYOUT_GROUP_KEYS,
   TIRE_LAYOUT_GROUP_KEYS,
+  deskStep2CanonicalRank,
   insertPinnedDomBlock,
   layoutRowForPinnedBlock,
-} from "./ad-form-desk-pinned-blocks.js?v=deskPinned1";
+} from "./ad-form-desk-pinned-blocks.js?v=deskPinned2";
 
 function cssEscape(value) {
   if (window.CSS?.escape) return window.CSS.escape(value);
@@ -348,13 +350,48 @@ function cleanupStrayTireLayoutItems(form) {
   }
 }
 
+function applyDeskStep2CanvasOrder(form) {
+  if (currentLayoutCategory(form) === "ingatlan") return;
+  const canvas = canvasForStep(form, 2);
+  if (!canvas) return;
+
+  let rank = 0;
+  const assignRow = (el, key) => {
+    if (!el || el.classList.contains("ad-layout-hidden") || el.hidden) return;
+    if (deskStep2CanonicalRank(key) >= 900) return;
+    rank += 1;
+    el.dataset.layoutRow = String(rank);
+  };
+
+  for (const key of DESK_STEP2_CANONICAL_STACK) {
+    if (key === "__desk_tire_sizes__") {
+      assignRow(document.getElementById("tire-sizes-card"), key);
+      continue;
+    }
+    if (key === "__desk_electric_block__") {
+      assignRow(document.getElementById("electric-fields-block"), key);
+      continue;
+    }
+    const wrap = wrapFor(form, key);
+    if (wrap?.closest('.step-panel[data-step="2"]') && canvas.contains(wrap)) assignRow(wrap, key);
+  }
+
+  canvas.querySelectorAll(".ad-layout-item:not(.ad-layout-hidden)").forEach((el) => {
+    if (el.dataset.layoutRow) return;
+    const id = el.querySelector("input, select, textarea")?.id || el.querySelector("[name]")?.name || "";
+    if (!id || deskStep2CanonicalRank(id) < 900) return;
+    rank += 1;
+    el.dataset.layoutRow = String(rank);
+  });
+}
+
 function pinTireFields(form, layoutCells) {
   if (currentLayoutCategory(form) === "ingatlan") return;
   restoreTireSelectsToBlock(form);
   const block = document.getElementById("tire-sizes-card") || form.querySelector(".tire-sizes-grid")?.closest(".card");
   const canvas = canvasForStep(form, 2);
   if (!block || !canvas) return;
-  const row = layoutRowForPinnedBlock(layoutCells, TIRE_LAYOUT_GROUP_KEYS);
+  const row = layoutRowForPinnedBlock(layoutCells, TIRE_LAYOUT_GROUP_KEYS, "__desk_tire_sizes__");
   insertPinnedDomBlock(canvas, block, row);
   block.hidden = false;
   block.classList.remove("ad-immo-orphan", "ad-layout-hidden");
@@ -368,7 +405,7 @@ function pinElectricFields(form, layoutCells) {
   const block = document.getElementById("electric-fields-block");
   const canvas = canvasForStep(form, 2);
   if (!block || !canvas) return;
-  const row = layoutRowForPinnedBlock(layoutCells, EV_LAYOUT_GROUP_KEYS);
+  const row = layoutRowForPinnedBlock(layoutCells, EV_LAYOUT_GROUP_KEYS, "__desk_electric_block__");
   insertPinnedDomBlock(canvas, block, row);
   block.classList.remove("ad-immo-orphan", "ad-layout-hidden");
   cleanupStrayEvLayoutItems(form);
@@ -666,6 +703,7 @@ async function applyAdFormLayout() {
     pinExtras(form);
     pinElectricFields(form, cells);
     pinTireFields(form, cells);
+    applyDeskStep2CanvasOrder(form);
     pinLeiras(form);
     pinLocation(form);
     pinFooter(form);

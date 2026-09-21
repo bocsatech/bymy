@@ -438,9 +438,8 @@
                 </div>
 
                 <div class="field-stack full field-stack--location" data-ad-hide-street-only="1">
-                  <label class="ad-location-label">Megtalálható <span class="req">*</span></label>
                   <p class="hint ad-location-hint" data-ad-location-hint hidden></p>
-                  <div class="ad-location-fields">
+                  <div class="ad-location-fields ad-location-fields--postal-only">
                     <label class="login-field ad-location-field ad-form-street-hidden" hidden>
                       <span class="login-label">Utca, házszám</span>
                       <input id="megtekintesi_cim" name="megtekintesi_cim" type="text" autocomplete="street-address" tabindex="-1" />
@@ -455,9 +454,9 @@
                         <input id="telepules" name="telepules" type="text" autocomplete="address-level2" required />
                       </label>
                     </div>
-                    <label class="login-field ad-location-field ad-form-street-hidden" hidden>
+                    <label class="login-field ad-location-field ad-location-country-field">
                       <span class="login-label">Ország</span>
-                      <input id="megtalalhato_orszag" type="text" autocomplete="country-name" tabindex="-1" />
+                      <input id="megtalalhato_orszag" name="megtalalhato_orszag" type="text" value="Magyarország" autocomplete="country-name" />
                     </label>
                     <input type="hidden" id="megye" name="megye" />
                   </div>

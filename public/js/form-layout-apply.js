@@ -459,6 +459,18 @@ function applyAdHideStreetOnlyFields(form) {
     }
     input.setAttribute("required", "");
   }
+
+  const countryInput = form.querySelector("#megtalalhato_orszag");
+  const countryWrap = countryInput?.closest(".login-field");
+  if (countryWrap) {
+    countryWrap.hidden = false;
+    countryWrap.classList.remove("ad-layout-hidden", "ad-form-street-hidden", "ad-form-contact-profile-hidden");
+    countryWrap.removeAttribute("hidden");
+    countryWrap.style.removeProperty("display");
+  }
+  if (countryInput && !String(countryInput.value || "").trim()) {
+    countryInput.value = "Magyarország";
+  }
 }
 
 const TIRE_ROW_SLOTS = [

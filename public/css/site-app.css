@@ -2367,17 +2367,30 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot:e
 }
 
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot .field-stack--location[data-ad-hide-street-only="1"] {
-  display: flex !important;
+  display: block !important;
+  width: 100%;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot .ad-location-fields--postal-only {
+  display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.65rem;
   width: 100%;
 }
 
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot .ad-location-postal-row {
   display: grid !important;
-  grid-template-columns: minmax(7rem, 9rem) 1fr;
-  gap: 0.75rem;
+  grid-template-columns: 6.5rem 1fr;
+  gap: 0.65rem;
   width: 100%;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot .login-field input {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  flex: none !important;
+  field-sizing: content !important;
 }
 
 body.site-app #ad-form .ad-location-hint--error {

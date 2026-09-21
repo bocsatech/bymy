@@ -177,7 +177,12 @@ function accordionForStep(step) {
 
 function restackCanvasItems(form) {
   form.querySelectorAll(".ad-layout-canvas").forEach((canvas) => {
-    const items = [...canvas.querySelectorAll(".ad-layout-item:not(.ad-layout-hidden)")];
+    const items = [...canvas.children].filter((el) => {
+      if (el.matches(".ad-layout-hidden") || el.hidden) return false;
+      if (el.matches(".ad-layout-item:not(.ad-layout-hidden)")) return true;
+      if (el.matches(".ad-desk-pinned-block")) return true;
+      return false;
+    });
     items.sort((a, b) => {
       const ra = Number(a.dataset.layoutRow) || 0;
       const rb = Number(b.dataset.layoutRow) || 0;
@@ -188,8 +193,10 @@ function restackCanvasItems(form) {
     });
     for (const item of items) {
       canvas.appendChild(item);
-      item.style.removeProperty("grid-column");
-      item.style.removeProperty("grid-row");
+      if (item.matches(".ad-layout-item")) {
+        item.style.removeProperty("grid-column");
+        item.style.removeProperty("grid-row");
+      }
     }
   });
 }

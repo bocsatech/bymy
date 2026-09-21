@@ -1,7 +1,13 @@
 import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=immoUiParity1";
 import { refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=fuelProfile1";
 import { initTireSizes } from "./tire-sizes-ui.js?v=tireFill1";
-import { applyAdFormDesk } from "./ad-form-desk.js?v=adFormDesk35";
+import { applyAdFormDesk } from "./ad-form-desk.js?v=adFormDesk36";
+import {
+  EV_LAYOUT_GROUP_KEYS,
+  TIRE_LAYOUT_GROUP_KEYS,
+  insertPinnedDomBlock,
+  layoutRowForPinnedBlock,
+} from "./ad-form-desk-pinned-blocks.js?v=deskPinned1";
 
 function cssEscape(value) {
   if (window.CSS?.escape) return window.CSS.escape(value);
@@ -282,32 +288,6 @@ function compactCanvasRows(form) {
 
 const LOCATION_FIELD_KEYS = new Set(["megtekintesi_cim", "iranyitoszam", "telepules", "megye"]);
 
-/** Ezek egy blokkban maradnak (#electric-fields-block) — ne szórja szét őket a layout rács. */
-const EV_LAYOUT_GROUP_KEYS = new Set([
-  "akkumulator_kwh",
-  "jelenlegi_akkukapacitas",
-  "ac_tolto_csatlakozas",
-  "ac_toltesi_teljesitmeny",
-  "dc_tolto_csatlakozas",
-  "dc_toltesi_teljesitmeny",
-  "hatotav",
-  "autopalya_hatotav",
-  "teli_hatotav",
-  "tolto_csatlakozas",
-  "villamtoltes",
-  "zold_rendszam",
-]);
-
-/** Gumi méretek egy blokkban maradnak — a layout ne szórja szét a 6 selectet címke nélkül. */
-const TIRE_LAYOUT_GROUP_KEYS = new Set([
-  "nyari_gumi_szelesseg",
-  "nyari_gumi_magassag",
-  "nyari_gumi_atmero",
-  "teli_gumi_szelesseg",
-  "teli_gumi_magassag",
-  "teli_gumi_atmero",
-]);
-
 const TIRE_ROW_SLOTS = [
   {
     rowSelector: ".tire-block:first-child .tire-row",
@@ -368,13 +348,14 @@ function cleanupStrayTireLayoutItems(form) {
   }
 }
 
-function pinTireFields(form) {
+function pinTireFields(form, layoutCells) {
   if (currentLayoutCategory(form) === "ingatlan") return;
   restoreTireSelectsToBlock(form);
   const block = document.getElementById("tire-sizes-card") || form.querySelector(".tire-sizes-grid")?.closest(".card");
   const canvas = canvasForStep(form, 2);
   if (!block || !canvas) return;
-  if (block.parentElement !== canvas) canvas.appendChild(block);
+  const row = layoutRowForPinnedBlock(layoutCells, TIRE_LAYOUT_GROUP_KEYS);
+  insertPinnedDomBlock(canvas, block, row);
   block.hidden = false;
   block.classList.remove("ad-immo-orphan", "ad-layout-hidden");
   block.removeAttribute("hidden");
@@ -382,12 +363,13 @@ function pinTireFields(form) {
   cleanupStrayTireLayoutItems(form);
 }
 
-function pinElectricFields(form) {
+function pinElectricFields(form, layoutCells) {
   if (currentLayoutCategory(form) === "ingatlan") return;
   const block = document.getElementById("electric-fields-block");
   const canvas = canvasForStep(form, 2);
   if (!block || !canvas) return;
-  if (block.parentElement !== canvas) canvas.appendChild(block);
+  const row = layoutRowForPinnedBlock(layoutCells, EV_LAYOUT_GROUP_KEYS);
+  insertPinnedDomBlock(canvas, block, row);
   block.classList.remove("ad-immo-orphan", "ad-layout-hidden");
   cleanupStrayEvLayoutItems(form);
 }
@@ -682,8 +664,8 @@ async function applyAdFormLayout() {
     compactCanvasRows(form);
     hideLayoutShellCards(form);
     pinExtras(form);
-    pinElectricFields(form);
-    pinTireFields(form);
+    pinElectricFields(form, cells);
+    pinTireFields(form, cells);
     pinLeiras(form);
     pinLocation(form);
     pinFooter(form);

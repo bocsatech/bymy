@@ -16,6 +16,17 @@ const DESK_POSTING_ACCORDIONS = [
   { id: "extrak", step: 3, label: "Extrák" },
   { id: "hirdetes", step: 5, label: "Hirdetés" },
 ];
+import {
+  DESK_STEP2_PINNED_BLOCKS,
+  applySyntheticStackRow,
+  anchorCellsForBlock,
+  collapsePinnedAnchorRows,
+  deskPinnedGroupKeys,
+  hideSyntheticAnchors,
+  isDeskSyntheticFieldKey,
+  minAnchorRow,
+} from "./ad-form-desk-pinned-blocks.js?v=deskPinned1";
+
 const PAIR_OF = {
   gyartasi_ev: "gyartasi_honap",
   forgalomba_helyezes_ev: "forgalomba_helyezes_honap",
@@ -91,11 +102,63 @@ export function mountLayoutBoard(root, layout, { onChange, stepNames, deskPostin
       );
   }
 
+  function syntheticStackCells(step) {
+    const out = [];
+    for (const block of DESK_STEP2_PINNED_BLOCKS) {
+      const anchors = anchorCellsForBlock(byKey, block, step);
+      if (!anchors.length) continue;
+      const row = minAnchorRow(anchors) ?? 1;
+      out.push({
+        field_key: block.syntheticKey,
+        label: block.label,
+        step,
+        row,
+        col: 1,
+        colSpan: 12,
+        order: row,
+        hidden: false,
+        __synthetic: true,
+      });
+    }
+    return out;
+  }
+
+  function stackDisplayItems(step) {
+    if (!deskPosting || step !== 2) return stackItems(step);
+    const grouped = deskPinnedGroupKeys();
+    const regular = stackItems(step).filter((cell) => !grouped.has(cell.field_key));
+    const synthetics = syntheticStackCells(step);
+    return [...regular, ...synthetics].sort(
+      (a, b) =>
+        (Number(a.row) || 1) - (Number(b.row) || 1) ||
+        (Number(a.col) || 1) - (Number(b.col) || 1) ||
+        (Number(a.order) || 0) - (Number(b.order) || 0) ||
+        String(a.field_key).localeCompare(String(b.field_key))
+    );
+  }
+
   function normalizeStackStep(step) {
-    const items = stackItems(step);
+    if (deskPosting && step === 2) collapsePinnedAnchorRows(byKey, step);
+    const items = stackDisplayItems(step);
     let changed = false;
     items.forEach((cell, index) => {
       const row = index + 1;
+      if (cell.__synthetic) {
+        for (const block of DESK_STEP2_PINNED_BLOCKS) {
+          if (block.syntheticKey !== cell.field_key) continue;
+          const anchors = anchorCellsForBlock(byKey, block, step);
+          for (const anchor of anchors) {
+            if (anchor.row !== row || anchor.col !== 1 || anchor.colSpan !== 12) {
+              anchor.row = row;
+              anchor.col = 1;
+              anchor.colSpan = 12;
+              anchor.order = row;
+              changed = true;
+            }
+          }
+        }
+        return;
+      }
       if (cell.row !== row || cell.col !== 1 || cell.colSpan !== 12) {
         cell.row = row;
         cell.col = 1;
@@ -154,7 +217,7 @@ export function mountLayoutBoard(root, layout, { onChange, stepNames, deskPostin
   }
 
   function deskStackBoardHtml(step) {
-    const items = stackItems(step);
+    const items = stackDisplayItems(step);
     const tiles = items.map((cell) => tileHtml(cell, { stack: true })).join("");
     return `<section class="layout-step" data-step="${step}">
       <div class="layout-board layout-board--desk-stack" data-board="${step}" data-desk-stack="1">${tiles}</div>
@@ -234,9 +297,14 @@ export function mountLayoutBoard(root, layout, { onChange, stepNames, deskPostin
   function syncStackFromDom(board) {
     const step = Number(board.getAttribute("data-board"));
     [...board.querySelectorAll(".layout-tile")].forEach((tile, index) => {
-      const cell = byKey.get(tile.getAttribute("data-field"));
-      if (!cell) return;
+      const key = tile.getAttribute("data-field");
       const row = index + 1;
+      if (isDeskSyntheticFieldKey(key)) {
+        applySyntheticStackRow(byKey, key, row, step);
+        return;
+      }
+      const cell = byKey.get(key);
+      if (!cell) return;
       cell.step = step;
       cell.row = row;
       cell.col = 1;
@@ -390,7 +458,14 @@ export function mountLayoutBoard(root, layout, { onChange, stepNames, deskPostin
         if (event.target.closest("[data-del]")) {
           event.preventDefault();
           event.stopPropagation();
-          const cell = byKey.get(tile.getAttribute("data-field"));
+          const key = tile.getAttribute("data-field");
+          if (isDeskSyntheticFieldKey(key)) {
+            hideSyntheticAnchors(byKey, key);
+            notify();
+            mount();
+            return;
+          }
+          const cell = byKey.get(key);
           if (!cell) return;
           cell.hidden = true;
           syncPair(cell);
@@ -402,9 +477,25 @@ export function mountLayoutBoard(root, layout, { onChange, stepNames, deskPostin
           event.preventDefault();
           event.stopPropagation();
           const btn = event.target.closest("[data-step-delta]");
-          const cell = byKey.get(tile.getAttribute("data-field"));
+          const stepKey = tile.getAttribute("data-field");
+          let cell = byKey.get(stepKey);
+          if (!cell && isDeskSyntheticFieldKey(stepKey)) {
+            cell = stackDisplayItems(Number(tile.closest(".layout-board")?.getAttribute("data-board"))).find(
+              (c) => c.field_key === stepKey
+            );
+          }
           if (!btn || !cell) return;
           const fromStep = Number(cell.step);
+          if (cell.__synthetic) {
+            const next = clamp(fromStep + Number(btn.getAttribute("data-step-delta")), 1, 5);
+            if (next === fromStep) return;
+            applySyntheticStackRow(byKey, stepKey, maxRowOnStep(next, { excludeKey: stepKey }) + 1, next);
+            if (deskPosting && [1, 2, 3, 5].includes(fromStep)) normalizeStackStep(fromStep);
+            if (deskPosting && [1, 2, 3, 5].includes(next)) normalizeStackStep(next);
+            notify();
+            mount();
+            return;
+          }
           const next = clamp(fromStep + Number(btn.getAttribute("data-step-delta")), 1, 5);
           if (next === fromStep) return;
           cell.step = next;
@@ -429,7 +520,13 @@ export function mountLayoutBoard(root, layout, { onChange, stepNames, deskPostin
           return;
         }
 
-        const cell = byKey.get(tile.getAttribute("data-field"));
+        const fieldKey = tile.getAttribute("data-field");
+        let cell = byKey.get(fieldKey);
+        if (isDeskSyntheticFieldKey(fieldKey)) {
+          cell = stackDisplayItems(Number(tile.closest(".layout-board")?.getAttribute("data-board"))).find(
+            (c) => c.field_key === fieldKey
+          );
+        }
         let board = tile.closest(".layout-board");
         if (!cell || !board) return;
         const stackBoard = isStackBoard(board);

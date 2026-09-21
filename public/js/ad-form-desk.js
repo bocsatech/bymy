@@ -532,8 +532,9 @@ function bindDeskEvents() {
       return;
     }
     showDeskGuideSlot(id, { photoFocus: false });
+    refreshAdFormDeskGuide(form);
     requestAnimationFrame(() => {
-      acc.scrollIntoView({ block: "start", behavior: "smooth" });
+      requestAnimationFrame(() => scrollDeskMainAccordionToStart(form, id));
     });
   });
 
@@ -560,8 +561,12 @@ function bindDeskEvents() {
       document.getElementById("ad-photo-desk-stage")?.scrollIntoView?.({ block: "start", behavior: "smooth" });
       return;
     }
-    const acc = accId ? form.querySelector(`[data-desk-acc="${accId}"]`) : null;
-    acc?.scrollIntoView?.({ block: "nearest", behavior: "smooth" });
+    if (accId) {
+      showDeskGuideSlot(accId, { photoFocus: false });
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => scrollDeskMainAccordionToStart(form, accId));
+      });
+    }
   });
 
   window.matchMedia(DESK_MQ).addEventListener("change", () => applyAdFormDesk());

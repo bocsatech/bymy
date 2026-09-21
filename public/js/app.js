@@ -5,12 +5,12 @@ import {
   saveListingPhotosOrder,
   getStoredListingId,
 } from "./db-client.js?v=wizardSave1";
-import { createAdForm } from "./form-core.js?v=deskAlapOpen1";
+import { createAdForm } from "./form-core.js?v=deskAccScroll1";
 import { applyImportedVehicleToSelects } from "./vehicle-catalog-client.js?v=importVehicle1";
 import { initTireSizes } from "./tire-sizes-ui.js";
 import { initPhoneLanguages } from "./phone-lang-ui.js";
 import { initCategoryPicker } from "./category-picker.js?v=accFix3";
-import { applyAdFormDesk, clearAdFormEditBoot, isDeskVehicleSubtype } from "./ad-form-desk.js?v=adFormDesk39";
+import { applyAdFormDesk, clearAdFormEditBoot, isDeskVehicleSubtype } from "./ad-form-desk.js?v=adFormDesk40";
 import {
   requireAuthForPage,
   getAuthUser,

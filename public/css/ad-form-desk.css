@@ -353,6 +353,10 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .ad-form-des
   scroll-margin-top: calc(var(--site-fixed-header-h, 64px) + 12px);
 }
 
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .ad-form-desk-shell [data-desk-acc]:not([data-desk-sub-acc]) > .auto-desk-acc__head {
+  scroll-margin-top: calc(var(--site-fixed-header-h, 64px) + 12px);
+}
+
 body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .card.card--desk-sub-acc {
   border: 0 !important;
   background: transparent !important;

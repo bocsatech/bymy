@@ -2333,15 +2333,26 @@ body.site-app #ad-form .ad-location-postal-row {
   gap: 0.75rem;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form:has(.field-stack--location[data-ad-hide-street-only="1"]) .field-stack--location[data-ad-hide-street-only="1"],
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form:has(.field-stack--location[data-ad-hide-street-only="1"]) .ad-location-postal-row,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form:has(.field-stack--location[data-ad-hide-street-only="1"]) .login-field:has(#iranyitoszam),
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form:has(.field-stack--location[data-ad-hide-street-only="1"]) .login-field:has(#telepules),
+/* data-ad-hide-street-only: csak utca + rejtett email; irsz + település marad */
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form:has(.field-stack--location[data-ad-hide-street-only="1"]) .ad-form-street-hidden,
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form:has(.field-stack--location[data-ad-hide-street-only="1"]) .ad-layout-item:has(#megtekintesi_cim),
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form:has(.field-stack--location[data-ad-hide-street-only="1"]) .login-field:has(#megtekintesi_cim),
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form:has(.field-stack--location[data-ad-hide-street-only="1"]) label.ad-form-contact-hidden {
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form:has(.field-stack--location[data-ad-hide-street-only="1"]) label.ad-form-contact-hidden,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form:has(.field-stack--location[data-ad-hide-street-only="1"]) input.ad-form-contact-hidden {
   display: none !important;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form:has(.field-stack--location[data-ad-hide-street-only="1"]) .field-stack--location[data-ad-hide-street-only="1"] {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  grid-column: 1 / -1;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form:has(.field-stack--location[data-ad-hide-street-only="1"]) .ad-location-postal-row {
+  display: grid;
+  grid-template-columns: minmax(7rem, 9rem) 1fr;
+  gap: 0.75rem;
 }
 
 body.site-app #ad-form .ad-location-hint--error {

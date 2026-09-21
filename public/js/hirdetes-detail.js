@@ -566,8 +566,24 @@ function bindUi(view, listing) {
     markThumbs("[data-hd-lb-thumb]");
   }
 
+  let lbFullscreen = false;
+
+  function setLbFullscreen(on) {
+    lbFullscreen = Boolean(on);
+    lightbox?.classList.toggle("is-fs", lbFullscreen);
+    const closeBtn = root.querySelector("[data-hd-lb-close]");
+    if (closeBtn) {
+      closeBtn.setAttribute(
+        "aria-label",
+        lbFullscreen ? "Kicsinyítés" : "Bezárás"
+      );
+      closeBtn.setAttribute("title", lbFullscreen ? "Vissza a galériához" : "Bezárás");
+    }
+  }
+
   function openLightbox() {
     if (!lightbox || !images.length) return;
+    setLbFullscreen(false);
     show(index);
     if (typeof lightbox.showModal === "function") lightbox.showModal();
     else lightbox.setAttribute("open", "");
@@ -575,6 +591,7 @@ function bindUi(view, listing) {
 
   function closeLightbox() {
     if (!lightbox) return;
+    setLbFullscreen(false);
     if (typeof lightbox.close === "function" && lightbox.open) lightbox.close();
     else lightbox.removeAttribute("open");
   }
@@ -605,13 +622,28 @@ function bindUi(view, listing) {
   root.querySelectorAll("[data-hd-lb-thumb]").forEach((btn) => {
     btn.addEventListener("click", () => show(Number(btn.dataset.hdLbThumb)));
   });
-  root.querySelector("[data-hd-lb-close]")?.addEventListener("click", closeLightbox);
+  root.querySelector("[data-hd-lb-close]")?.addEventListener("click", () => {
+    if (lbFullscreen) setLbFullscreen(false);
+    else closeLightbox();
+  });
+  const lbStage = root.querySelector(".hd-lb-stage");
+  lbStage?.addEventListener("click", (event) => {
+    if (event.target.closest("[data-hd-lb-prev], [data-hd-lb-next]")) return;
+    if (!lbFullscreen) setLbFullscreen(true);
+  });
+  lbMain?.addEventListener("dblclick", () => {
+    if (lbFullscreen) setLbFullscreen(false);
+  });
   lightbox?.addEventListener("click", (event) => {
-    if (event.target === lightbox) closeLightbox();
+    if (event.target === lightbox) {
+      if (lbFullscreen) setLbFullscreen(false);
+      else closeLightbox();
+    }
   });
   lightbox?.addEventListener("cancel", (event) => {
     event.preventDefault();
-    closeLightbox();
+    if (lbFullscreen) setLbFullscreen(false);
+    else closeLightbox();
   });
   document.addEventListener("keydown", (event) => {
     if (!images.length) return;
@@ -619,7 +651,10 @@ function bindUi(view, listing) {
     if (!open && event.target !== document.body && event.target?.tagName !== "BODY") return;
     if (event.key === "ArrowLeft") show(index - 1);
     if (event.key === "ArrowRight") show(index + 1);
-    if (event.key === "Escape" && open) closeLightbox();
+    if (event.key === "Escape" && open) {
+      if (lbFullscreen) setLbFullscreen(false);
+      else closeLightbox();
+    }
   });
   root.querySelector("[data-hd-print]")?.addEventListener("click", () => window.print());
   root.querySelector("[data-hd-share]")?.addEventListener("click", async () => {

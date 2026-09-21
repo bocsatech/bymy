@@ -196,6 +196,15 @@ th { color: var(--muted); font-weight: 600; }
   margin-top: 0;
   margin-bottom: 1rem;
 }
+.layout-trash-blocks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0 0 0.75rem;
+}
+.layout-tile--desk-ev-block .layout-tile-label {
+  color: #7ec8ff;
+}
 
 .layout-desk-editor {
   display: grid;

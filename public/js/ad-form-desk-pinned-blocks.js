@@ -122,15 +122,14 @@ const PINNED_ANCHOR_LABELS = {
   tolto_csatlakozas: "Töltőcsatlakozó",
 };
 
-/** Admin desk: hiányzó gumi/EV layout cellák pótlása, hogy a szintetikus csempék megjelenjenek. */
+/** Admin desk: hiányzó gumi/EV layout cellák pótlása (akár csak néhány kulcs). */
 export function ensureDeskPinnedAnchorCells(cells, byKey) {
   if (!Array.isArray(cells) || !byKey) return false;
   let changed = false;
   for (const block of DESK_STEP2_PINNED_BLOCKS) {
-    const hasAnchor = [...block.anchorKeys].some((key) => byKey.get(key));
-    if (hasAnchor) continue;
     const row = deskStep2CanonicalRank(block.syntheticKey) + 1;
     for (const key of block.anchorKeys) {
+      if (byKey.get(key)) continue;
       const cell = {
         field_key: key,
         label: PINNED_ANCHOR_LABELS[key] || key,
@@ -147,6 +146,30 @@ export function ensureDeskPinnedAnchorCells(cells, byKey) {
     }
   }
   return changed;
+}
+
+export function restorePinnedBlockAnchors(byKey, syntheticKey) {
+  const block = SYNTHETIC_BY_KEY.get(syntheticKey);
+  if (!block) return false;
+  let changed = false;
+  for (const key of block.anchorKeys) {
+    const cell = byKey.get(key);
+    if (!cell || !cell.hidden) continue;
+    cell.hidden = false;
+    changed = true;
+  }
+  return changed;
+}
+
+export function hiddenPinnedAnchorCount(byKey, syntheticKey) {
+  const block = SYNTHETIC_BY_KEY.get(syntheticKey);
+  if (!block) return 0;
+  let n = 0;
+  for (const key of block.anchorKeys) {
+    const cell = byKey.get(key);
+    if (cell?.hidden) n += 1;
+  }
+  return n;
 }
 
 export function anchorCellsForBlock(byKey, block, step) {

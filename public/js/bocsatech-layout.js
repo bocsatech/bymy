@@ -6,12 +6,13 @@ import {
   deskPinnedGroupKeys,
   deskStep2CanonicalRank,
   ensureDeskPinnedAnchorCells,
-  EV_LAYOUT_GROUP_KEYS,
+  hiddenPinnedAnchorCount,
   hideSyntheticAnchors,
+  restorePinnedBlockAnchors,
   isDeskSyntheticFieldKey,
   minAnchorRow,
-} from "./ad-form-desk-pinned-blocks.js?v=layoutFromKv1";
-import { layoutFieldVisibleForFuelProfile } from "./ad-form-layout-fuel-preview.js?v=deskFuelPrev3";
+} from "./ad-form-desk-pinned-blocks.js?v=deskPinned4";
+import { layoutFieldVisibleForFuelProfile } from "./ad-form-layout-fuel-preview.js?v=deskFuelPrev4";
 
 const COLS = 12;
 const ROW_PX = 64;
@@ -104,35 +105,14 @@ export function mountLayoutBoard(
 
   function passesFuelPreview(cell) {
     if (!fuelPreview) return true;
-    if (cell.__synthetic) return layoutFieldVisibleForFuelProfile(cell.field_key, fuelPreview);
-    if (deskPinnedGroupKeys().has(cell.field_key)) {
-      if (showEvFieldsAsIndividuals() && EV_LAYOUT_GROUP_KEYS.has(cell.field_key)) {
-        return layoutFieldVisibleForFuelProfile(cell.field_key, fuelPreview);
-      }
-      return false;
-    }
+    if (cell.__synthetic) return true;
+    if (deskPinnedGroupKeys().has(cell.field_key)) return false;
     return layoutFieldVisibleForFuelProfile(cell.field_key, fuelPreview);
-  }
-
-  function showEvFieldsAsIndividuals() {
-    return fuelPreview === "electric" || fuelPreview === "hybrid";
   }
 
   function stackItems(step, { excludeKey = "" } = {}) {
     return editable()
-      .filter((cell) => {
-        if (cell.field_key === excludeKey) return false;
-        if (Number(cell.step) !== step) return false;
-        if (
-          showEvFieldsAsIndividuals() &&
-          step === 2 &&
-          EV_LAYOUT_GROUP_KEYS.has(cell.field_key) &&
-          layoutFieldVisibleForFuelProfile(cell.field_key, fuelPreview)
-        ) {
-          return true;
-        }
-        return !cell.hidden;
-      })
+      .filter((cell) => !cell.hidden && Number(cell.step) === step && cell.field_key !== excludeKey)
       .filter(passesFuelPreview)
       .sort(
         (a, b) =>
@@ -145,7 +125,6 @@ export function mountLayoutBoard(
   function syntheticStackCells(step) {
     const out = [];
     for (const block of DESK_STEP2_PINNED_BLOCKS) {
-      if (fuelPreview && !layoutFieldVisibleForFuelProfile(block.syntheticKey, fuelPreview)) continue;
       let anchors = anchorCellsForBlock(byKey, block, step);
       let row = anchors.length ? minAnchorRow(anchors) ?? 1 : deskStep2CanonicalRank(block.syntheticKey) + 1;
       if (!anchors.length && deskPosting && step === 2) {
@@ -171,14 +150,8 @@ export function mountLayoutBoard(
   function stackDisplayItems(step) {
     if (!deskPosting || step !== 2) return stackItems(step);
     const grouped = deskPinnedGroupKeys();
-    const evIndividuals = showEvFieldsAsIndividuals();
-    const regular = stackItems(step).filter((cell) => {
-      if (!grouped.has(cell.field_key)) return true;
-      return evIndividuals && EV_LAYOUT_GROUP_KEYS.has(cell.field_key);
-    });
-    const synthetics = syntheticStackCells(step).filter(
-      (cell) => !(evIndividuals && cell.field_key === "__desk_electric_block__")
-    );
+    const regular = stackItems(step).filter((cell) => !grouped.has(cell.field_key));
+    const synthetics = syntheticStackCells(step);
     return [...regular, ...synthetics].sort(
       (a, b) =>
         (Number(a.row) || 1) - (Number(b.row) || 1) ||
@@ -266,10 +239,21 @@ export function mountLayoutBoard(
     setBoardHeight(board, { buffer: DROP_BUFFER });
   }
 
+  function syntheticTileMeta(cell) {
+    if (!cell.__synthetic || !fuelPreview) return "";
+    const liveVisible = layoutFieldVisibleForFuelProfile(cell.field_key, fuelPreview);
+    if (liveVisible) return "";
+    return " · élőben rejtve (más üzemanyag)";
+  }
+
   function tileHtml(cell, { stack = false } = {}) {
     const style = stack ? "" : tileStyle(cell);
-    const meta = stack ? `#${cell.row} · lépés ${cell.step}` : `${cell.colSpan}/12 · lépés ${cell.step}`;
-    return `<button type="button" class="layout-tile${stack ? " layout-tile--desk-stack" : ""}" data-field="${escapeAttr(cell.field_key)}"${style ? ` style="${style}"` : ""}>
+    const meta = stack
+      ? `#${cell.row} · lépés ${cell.step}${syntheticTileMeta(cell)}`
+      : `${cell.colSpan}/12 · lépés ${cell.step}${syntheticTileMeta(cell)}`;
+    const synClass =
+      cell.__synthetic && cell.field_key === "__desk_electric_block__" ? " layout-tile--desk-ev-block" : "";
+    return `<button type="button" class="layout-tile${stack ? " layout-tile--desk-stack" : ""}${synClass}" data-field="${escapeAttr(cell.field_key)}"${style ? ` style="${style}"` : ""}>
       <span class="layout-tile-label">${escapeHtml(cell.label)}</span>
       <span class="layout-tile-meta">${meta}</span>
       <span class="layout-tile-steps" data-step-btns="1">
@@ -290,9 +274,19 @@ export function mountLayoutBoard(
         </button>`
       )
       .join("");
+    const evHidden = deskPosting ? hiddenPinnedAnchorCount(byKey, "__desk_electric_block__") : 0;
+    const tireHidden = deskPosting ? hiddenPinnedAnchorCount(byKey, "__desk_tire_sizes__") : 0;
+    const blockRestore =
+      deskPosting && (evHidden || tireHidden)
+        ? `<div class="layout-trash-blocks">
+            ${evHidden ? `<button type="button" class="btn ghost layout-trash-block-btn" data-restore-block="__desk_electric_block__">Elektromos / hibrid blokk vissza (${evHidden} mező)</button>` : ""}
+            ${tireHidden ? `<button type="button" class="btn ghost layout-trash-block-btn" data-restore-block="__desk_tire_sizes__">Gumi méretek blokk vissza (${tireHidden} mező)</button>` : ""}
+          </div>`
+        : "";
     return `<section class="layout-trash">
       <h3>Törölt mezők</h3>
-      <p class="layout-trash-hint">${hidden.length ? "Kattints a visszaállításhoz." : "Itt jelennek meg a törölt cellák."}</p>
+      <p class="layout-trash-hint">${hidden.length ? "Kattints a visszaállításhoz." : "Itt jelennek meg a törölt cellák."}${deskPosting ? " A gumi és EV blokk csempéi a bal „Műszaki adatok” accordionban mindig szerkeszthetők." : ""}</p>
+      ${blockRestore}
       <div class="layout-trash-list">${items}</div>
     </section>`;
   }
@@ -356,6 +350,15 @@ export function mountLayoutBoard(
 
   function bindDeskAccordions() {
     if (!deskPosting) return;
+    const openMuszaki =
+      fuelPreview === "electric" || fuelPreview === "hybrid" || fuelPreview === "combustion";
+    if (openMuszaki) {
+      root.querySelectorAll(".layout-desk-acc[data-desk-acc]").forEach((el) => {
+        const on = el.getAttribute("data-desk-acc") === "muszaki";
+        el.classList.toggle("is-open", on);
+        el.querySelector("[data-desk-acc-toggle]")?.setAttribute("aria-expanded", on ? "true" : "false");
+      });
+    }
     root.querySelectorAll("[data-desk-acc-toggle]").forEach((btn) => {
       btn.addEventListener("click", (event) => {
         event.preventDefault();
@@ -806,6 +809,16 @@ export function mountLayoutBoard(
         cell.order = (cell.row - 1) * COLS + cell.col;
         syncPair(cell);
         compactStep(step);
+        notify();
+        mount();
+      });
+    });
+
+    root.querySelectorAll("[data-restore-block]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const key = btn.getAttribute("data-restore-block");
+        if (!key || !restorePinnedBlockAnchors(byKey, key)) return;
+        collapsePinnedAnchorRows(byKey, 2);
         notify();
         mount();
       });

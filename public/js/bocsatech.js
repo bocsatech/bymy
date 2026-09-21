@@ -1,8 +1,8 @@
-import { mountLayoutBoard } from "./bocsatech-layout.js?v=deskFuelPrev3";
+import { mountLayoutBoard } from "./bocsatech-layout.js?v=deskFuelPrev4";
 import {
   DESK_FUEL_PREVIEW_PROFILES,
   deskFuelPreviewFromLayoutIntent,
-} from "./ad-form-layout-fuel-preview.js?v=deskFuelPrev3";
+} from "./ad-form-layout-fuel-preview.js?v=deskFuelPrev4";
 import { mountIngatlanWheelBoard } from "./bocsatech-ingatlan-wheels.js?v=immoUiParity1";
 import {
   isIngatlanWheelAdminCategory,
@@ -2349,7 +2349,7 @@ function vehicleDeskPostingLayoutView(cat, label, sharedHint) {
             `<button type="button" class="btn${deskFuelPreviewProfile === id ? "" : " ghost"}" data-act="setDeskFuelPreview" data-fuel-preview="${esc(id)}">${esc(btnLabel)}</button>`
         ).join("")}
       </div>
-      <p class="hint layout-desk-fuel-preview-hint">Előnézet: mely mezők látszanak a feladáson az adott üzemanyagnál. A mentett elrendezés mindháromnál közös — csak a láthatóság változik.</p>`
+      <p class="hint layout-desk-fuel-preview-hint">Előnézet: mely mezők látszanak élőben az adott üzemanyagnál. A <strong>Gumi méretek</strong> és <strong>Elektromos / hibrid mezők</strong> csempéi mindig a bal oldali <strong>Műszaki adatok</strong> accordionban szerkeszthetők (húzás, sorrend).</p>`
     : "";
   const editorBlock = isMaster
     ? `${fuelPreviewToolbar}<div id="layout-root"></div>

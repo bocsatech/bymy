@@ -349,6 +349,10 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .auto-desk-a
   transform: rotate(180deg);
 }
 
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .ad-form-desk-shell [data-desk-sub-acc] .auto-bm-row:first-child {
+  scroll-margin-top: calc(var(--site-fixed-header-h, 64px) + 12px);
+}
+
 body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .card.card--desk-sub-acc {
   border: 0 !important;
   background: transparent !important;

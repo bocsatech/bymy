@@ -130,6 +130,25 @@ function openSubAccordionInExtrak(form, activeAcc) {
   }
 }
 
+function deskScrollOffsetTop() {
+  const header = document.querySelector(".site-app-header, .site-header");
+  return (header?.getBoundingClientRect().height ?? 64) + 12;
+}
+
+/** Extrák almenü lenyitás: görgetés az adott lista első sorához (fejléc alatt). */
+function scrollDeskExtrakSubAccordionToStart(subAcc) {
+  if (!subAcc?.classList.contains("is-open")) return;
+  const body = subAcc.querySelector(".auto-desk-acc__body");
+  const target =
+    body?.querySelector(".auto-bm-row") ||
+    body?.querySelector(".ad-form-toggle-list > *") ||
+    subAcc.querySelector(".auto-desk-acc__head");
+  if (!target) return;
+  const offset = deskScrollOffsetTop();
+  const top = target.getBoundingClientRect().top + window.scrollY - offset;
+  window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+}
+
 function mountExtrakSubAccordions(form) {
   if (!form || !isAdFormDesk(form)) return;
 
@@ -474,8 +493,15 @@ function bindDeskEvents() {
       event.stopPropagation();
       const subAcc = subToggle.closest("[data-desk-sub-acc]");
       const wasOpen = subAcc?.classList.contains("is-open");
+      const opening = Boolean(subAcc) && !wasOpen;
+      if (opening) openAccordion(form, "extrak");
       openSubAccordionInExtrak(form, wasOpen ? null : subAcc);
       updateSubAccordionSums(form);
+      if (opening) {
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => scrollDeskExtrakSubAccordionToStart(subAcc));
+        });
+      }
       return;
     }
 

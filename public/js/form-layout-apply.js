@@ -3,13 +3,14 @@ import { refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=fuelProfile1";
 import { initTireSizes } from "./tire-sizes-ui.js?v=tireFill1";
 import { applyAdFormDesk } from "./ad-form-desk.js?v=adFormDesk36";
 import {
+  DESK_MUSZAKI_CORE_FIELD_KEYS,
   DESK_STEP2_CANONICAL_STACK,
   EV_LAYOUT_GROUP_KEYS,
   TIRE_LAYOUT_GROUP_KEYS,
   deskStep2CanonicalRank,
   insertPinnedDomBlock,
   layoutRowForPinnedBlock,
-} from "./ad-form-desk-pinned-blocks.js?v=deskPinned2";
+} from "./ad-form-desk-pinned-blocks.js?v=deskPinned3";
 
 function cssEscape(value) {
   if (window.CSS?.escape) return window.CSS.escape(value);
@@ -350,6 +351,34 @@ function cleanupStrayTireLayoutItems(form) {
   }
 }
 
+function ensureDeskMuszakiCoreFields(form, cells) {
+  if (currentLayoutCategory(form) === "ingatlan") return;
+  const lookup = new Map((cells || []).map((cell) => [cell.field_key, cell]));
+  for (const key of DESK_MUSZAKI_CORE_FIELD_KEYS) {
+    const cell = lookup.get(key);
+    if (!cell || cell.hidden) continue;
+    const wrap = wrapFor(form, key);
+    if (!wrap) continue;
+    wrap.classList.remove("ad-layout-hidden", "ad-immo-orphan");
+    wrap.hidden = false;
+    wrap.removeAttribute("hidden");
+    wrap.style.removeProperty("display");
+    setRequired(wrap, true);
+    const targetStep = clamp(cell.step || 2, 1, 5);
+    const canvas = canvasForStep(form, targetStep);
+    if (!canvas || wrap.closest(KEEP_OUT) || wrap.querySelector(KEEP_OUT)) continue;
+    canvas.appendChild(wrap);
+    const row = targetStep === 2 ? deskStep2CanonicalRank(key) + 1 : clamp(cell.row || 1, 1, 80);
+    placeWrap(wrap, {
+      ...cell,
+      step: targetStep,
+      col: 1,
+      colSpan: 12,
+      row,
+    });
+  }
+}
+
 function applyDeskStep2CanvasOrder(form) {
   if (currentLayoutCategory(form) === "ingatlan") return;
   const canvas = canvasForStep(form, 2);
@@ -373,7 +402,7 @@ function applyDeskStep2CanvasOrder(form) {
       continue;
     }
     const wrap = wrapFor(form, key);
-    if (wrap?.closest('.step-panel[data-step="2"]') && canvas.contains(wrap)) assignRow(wrap, key);
+    if (wrap && canvas.contains(wrap)) assignRow(wrap, key);
   }
 
   canvas.querySelectorAll(".ad-layout-item:not(.ad-layout-hidden)").forEach((el) => {
@@ -655,6 +684,9 @@ async function applyAdFormLayout() {
       canvas.appendChild(wrap);
       placeWrap(wrap, cell);
     }
+    if (!isImmo) {
+      ensureDeskMuszakiCoreFields(form, cells);
+    }
     if (isImmo) {
       hideVehicleChromeWithoutLayout(form);
       form.querySelectorAll(".step-panel[data-step='1'] .form-grid > .field-row").forEach((row) => {
@@ -712,6 +744,11 @@ async function applyAdFormLayout() {
     initTireSizes(form);
     applyAdFormDesk();
     window.dispatchEvent(new Event("ad-form-sync-fuel-fields"));
+    if (!isImmo) {
+      ensureDeskMuszakiCoreFields(form, cells);
+      applyDeskStep2CanvasOrder(form);
+      applyAdFormDesk();
+    }
   } catch (error) {
     console.warn("Ad form layout apply:", error);
   }

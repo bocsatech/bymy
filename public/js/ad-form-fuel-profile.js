@@ -43,7 +43,7 @@ export function fuelProfile(value) {
 export function fuelFieldVisibility(profile) {
   const showElectric = profile === "electric" || profile === "hybrid";
   const showConsumption = profile === "combustion" || profile === "hybrid" || profile === "unknown";
-  const showHenger = profile === "combustion" || profile === "hybrid" || profile === "electric";
+  const showHenger = true;
   return { showElectric, showConsumption, showHenger };
 }
 

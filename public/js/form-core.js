@@ -27,7 +27,7 @@ import {
   fuelProfile,
   normalizeAdFuelValue,
   readAdFormFuelValue,
-} from "./ad-form-fuel-profile.js?v=fuelProfile1";
+} from "./ad-form-fuel-profile.js?v=fuelProfile2";
 
 export function createAdForm(options = {}) {
   const mode = options.mode ?? "wizard";

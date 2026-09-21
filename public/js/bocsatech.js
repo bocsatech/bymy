@@ -770,13 +770,23 @@ const actions = {
     err = "";
     info = "";
     const id = el.getAttribute("data-id");
+    if (!id) return;
+    const prevLabel = el.textContent;
+    el.disabled = true;
+    if (prevLabel) el.textContent = "Betöltés…";
     try {
       const data = await api(`/api/level1/users/${id}`);
       editingUser = data.user;
       render();
+      requestAnimationFrame(() => {
+        app.querySelector(".user-edit")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
     } catch (error) {
-      err = error.message;
+      err = error.message || "A felhasználó betöltése sikertelen.";
       render();
+    } finally {
+      el.disabled = false;
+      if (prevLabel) el.textContent = prevLabel;
     }
   },
   cancelEditUser() {
@@ -795,7 +805,18 @@ const actions = {
       const profileJson = { ...(editingUser.profileJson ?? {}) };
       app.querySelectorAll(".edit-profile-field").forEach((el) => {
         const key = el.getAttribute("data-key");
-        if (key) profileJson[key] = el.value;
+        if (!key) return;
+        const raw = String(el.value ?? "").trim();
+        if (key === "companyActivities" || (raw.startsWith("[") && raw.endsWith("]"))) {
+          try {
+            profileJson[key] = JSON.parse(raw);
+            return;
+          } catch {
+            profileJson[key] = raw;
+            return;
+          }
+        }
+        profileJson[key] = el.value;
       });
       const data = await api(`/api/level1/users/${editingUser.id}`, {
         method: "PATCH",
@@ -1806,9 +1827,9 @@ function usersView(kind = "private") {
         <td>${esc(fmtWhen(u.lastLoginAt))}</td>
         <td>${u.listingCount ?? 0}</td>
         <td class="row-actions">
-          <button class="btn" data-act="editUser" data-id="${u.id}">Kezelés</button>
+          <button class="btn" type="button" data-act="editUser" data-id="${u.id}">Kezelés</button>
           <button class="btn ghost" type="button" data-act="toggleUserActive" data-id="${u.id}" data-active="${u.emailVerified ? "1" : "0"}">${u.emailVerified ? "Deaktivál" : "Aktivál"}</button>
-          <button class="btn danger" data-act="delUser" data-id="${u.id}">Törlés</button>
+          <button class="btn danger" type="button" data-act="delUser" data-id="${u.id}">Törlés</button>
         </td>
       </tr>`
     )
@@ -1831,6 +1852,30 @@ function usersView(kind = "private") {
       </div>
       ${editor}
     </div>`;
+}
+
+const PROFILE_FIELD_SKIP = new Set([
+  "avatarDataUrl",
+  "companyLogoDataUrl",
+  "pageLayout",
+]);
+
+function shouldSkipProfileField(key, value) {
+  if (PROFILE_FIELD_SKIP.has(key)) return true;
+  if (/dataurl|base64|logo/i.test(key) && typeof value === "string" && value.length > 500) return true;
+  return false;
+}
+
+function formatProfileFieldValue(value) {
+  if (value == null) return "";
+  if (Array.isArray(value) || (typeof value === "object" && value !== null)) {
+    try {
+      return JSON.stringify(value);
+    } catch {
+      return String(value);
+    }
+  }
+  return String(value);
 }
 
 function profileFields(profile) {
@@ -1859,12 +1904,16 @@ function profileFields(profile) {
     salespersonName2: "Kapcsolattartó 2",
   };
   const keys = Object.keys(labels);
-  const extra = Object.keys(profile).filter((k) => !keys.includes(k) && k !== "avatarDataUrl" && k !== "pageLayout");
-  return [...keys, ...extra].map((key) => {
-    const label = labels[key] || key;
-    const value = profile[key] ?? "";
-    return { key, label, value };
-  });
+  const extra = Object.keys(profile).filter(
+    (k) => !keys.includes(k) && !shouldSkipProfileField(k, profile[k])
+  );
+  return [...keys, ...extra]
+    .filter((key) => !shouldSkipProfileField(key, profile[key]))
+    .map((key) => {
+      const label = labels[key] || key;
+      const value = formatProfileFieldValue(profile[key]);
+      return { key, label, value };
+    });
 }
 
 function userEditView() {
@@ -1881,7 +1930,7 @@ function userEditView() {
                 <option value="private" ${String(f.value) === "private" ? "selected" : ""}>magán</option>
                 <option value="business" ${String(f.value) === "business" ? "selected" : ""}>céges</option>
               </select>`
-            : `<input class="edit-profile-field" data-key="${esc(f.key)}" type="text" value="${esc(String(f.value))}" />`
+            : `<input class="edit-profile-field" data-key="${esc(f.key)}" type="text" value="${esc(f.value)}" />`
         }
       </label>`
     )

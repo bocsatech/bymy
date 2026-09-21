@@ -17,6 +17,8 @@ body.site-app[data-site-page="hirdetesfeladas"] {
 /* Mértékegységes mezők: rövid cella + egység egyforma távolságra */
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .muszaki-grid .suffix-field,
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .field-row--tech-top .suffix-field:not(.suffix-field--power),
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .field-row.full.field-row--tech-top .labeled-field > .suffix-field:not(.suffix-field--power),
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .labeled-field--henger > .suffix-field,
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ev-tech-grid .suffix-field,
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-layout-item .suffix-field:not(.suffix-field--power),
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .field-row.full .suffix-field:not(.suffix-field--power) {
@@ -28,6 +30,9 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .field-row.full .suffix
 
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .muszaki-grid .suffix-field > input,
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .field-row--tech-top .suffix-field:not(.suffix-field--power) > input,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .field-row.full.field-row--tech-top .labeled-field > .suffix-field:not(.suffix-field--power) > input,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .labeled-field--henger .suffix-field > input,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form #hengerurtartalom,
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ev-tech-grid .suffix-field > input,
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-layout-item .suffix-field:not(.suffix-field--power) > input,
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .field-row.full .suffix-field:not(.suffix-field--power) > input,

@@ -91,8 +91,12 @@ body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field--dropdown {
   position: relative;
   z-index: 1;
   overflow: visible;
-  flex: 0 0 auto;
+  flex: 0 0 var(--ad-form-cell-width);
+  width: var(--ad-form-cell-width);
+  min-width: var(--ad-form-cell-width);
+  max-width: var(--ad-form-cell-width);
   min-height: 0;
+  box-sizing: border-box;
 }
 
 body.site-app[data-site-page="hirdetesfeladas"] .labeled-field.ad-form-bm-anchor:not(.is-open),
@@ -395,10 +399,11 @@ body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field {
   width: 100%;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .inline-2 > .ad-form-bm-field {
-  flex: 1 1 0;
-  min-width: 0;
-  width: auto;
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .inline-2 > .ad-form-bm-field {
+  flex: 0 0 var(--ad-form-cell-width) !important;
+  width: var(--ad-form-cell-width) !important;
+  min-width: var(--ad-form-cell-width) !important;
+  max-width: var(--ad-form-cell-width) !important;
 }
 
 body.site-app[data-site-page="hirdetesfeladas"] .inline-2 {
@@ -662,7 +667,6 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .inline-2 {
 
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .inline-2 > .ad-form-bm-field.ad-form-cell {
   grid-column: span 1;
-  min-width: 0 !important;
 }
 
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .suffix-field,
@@ -692,4 +696,21 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .field-stack--leiras .a
   min-width: 0 !important;
   max-width: 100% !important;
   flex: 1 1 auto !important;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field {
+  width: var(--ad-form-cell-width) !important;
+  min-width: var(--ad-form-cell-width) !important;
+  max-width: var(--ad-form-cell-width) !important;
+  flex: 0 0 var(--ad-form-cell-width) !important;
+  box-sizing: border-box !important;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .labeled-field > select:not(.ad-form-bm-native),
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .md-outlined > select:not(.ad-form-bm-native) {
+  width: var(--ad-form-cell-width) !important;
+  min-width: var(--ad-form-cell-width) !important;
+  max-width: var(--ad-form-cell-width) !important;
+  flex: 0 0 var(--ad-form-cell-width) !important;
+  box-sizing: border-box !important;
 }

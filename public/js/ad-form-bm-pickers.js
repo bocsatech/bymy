@@ -435,7 +435,7 @@ function mountBmPicker(opts) {
   const hidden = singleSelect ? ensurePlainHiddenInput(select) : ensureHiddenInput(select);
 
   const wrap = document.createElement("div");
-  wrap.className = "ad-form-bm-field ad-form-bm-field--flat auto-bm-field";
+  wrap.className = "ad-form-bm-field ad-form-bm-field--flat auto-bm-field ad-form-cell";
   wrap.dataset.adBmFor = select.id;
   wrap.innerHTML = `
     <button type="button" class="auto-bm-trigger" ${openAttr}>
@@ -617,7 +617,7 @@ function mountSearchDropdownPicker(select, opts) {
   let lastWindowStart = -1;
 
   const wrap = document.createElement("div");
-  wrap.className = "ad-form-bm-field ad-form-bm-field--dropdown auto-bm-field";
+  wrap.className = "ad-form-bm-field ad-form-bm-field--dropdown auto-bm-field ad-form-cell";
   wrap.dataset.adBmFor = select.id;
   wrap.innerHTML = `
     <div class="ad-form-bm-input-wrap">
@@ -874,7 +874,7 @@ function mountSingleSelectDropdown(select, { title, panelClass, placeholder = PL
   let lastWindowStart = -1;
 
   const wrap = document.createElement("div");
-  wrap.className = "ad-form-bm-field ad-form-bm-field--dropdown ad-form-bm-field--single auto-bm-field";
+  wrap.className = "ad-form-bm-field ad-form-bm-field--dropdown ad-form-bm-field--single auto-bm-field ad-form-cell";
   wrap.dataset.adBmFor = select.id;
   wrap.innerHTML = `
     <div class="ad-form-bm-input-wrap">

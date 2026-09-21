@@ -398,13 +398,6 @@ body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field {
   box-sizing: border-box;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .inline-2 > .ad-form-bm-field {
-  flex: 0 0 var(--ad-form-cell-width) !important;
-  width: var(--ad-form-cell-width) !important;
-  min-width: var(--ad-form-cell-width) !important;
-  max-width: var(--ad-form-cell-width) !important;
-}
-
 body.site-app[data-site-page="hirdetesfeladas"] .inline-2 {
   overflow: visible !important;
 }
@@ -655,13 +648,15 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field.ad-fo
   max-width: 100% !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .inline-2 {
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .inline-2,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .inline-2-labeled {
   display: grid !important;
-  grid-template-columns: var(--ad-form-cell-width) var(--ad-form-cell-width);
-  gap: 0.5rem !important;
-  width: max-content !important;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+  gap: var(--ad-cell-gap, 0.5rem) !important;
+  width: 100% !important;
   max-width: 100% !important;
   align-items: center;
+  box-sizing: border-box;
 }
 
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .inline-2 > .ad-form-bm-field.ad-form-cell {
@@ -720,27 +715,22 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-layout-item > selec
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .labeled-field > input.ad-form-cell,
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .labeled-field > select.ad-form-cell:not(.ad-form-bm-native),
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-layout-item .suffix-field > input.ad-form-cell,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .inline-2 > select:not(.ad-form-bm-native),
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .inline-2 > input:not(.ad-form-bm-search-trigger),
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .inline-2 > .ad-form-bm-field,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .inline-2-labeled > select:not(.ad-form-bm-native),
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .inline-2-labeled > input:not(.ad-form-bm-search-trigger),
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-layout-item .inline-2 > select.ad-form-cell:not(.ad-form-bm-native),
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-layout-item .inline-2 > input.ad-form-cell {
-  width: var(--ad-form-cell-width) !important;
-  min-width: var(--ad-form-cell-width) !important;
-  max-width: var(--ad-form-cell-width) !important;
-  flex: 0 0 var(--ad-form-cell-width) !important;
-}
-
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form .inline-2,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form .inline-2-labeled {
-  width: max-content !important;
+  width: 100% !important;
+  min-width: 0 !important;
   max-width: 100% !important;
+  flex: unset !important;
+  box-sizing: border-box !important;
 }
 
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form .inline-2 > select:not(.ad-form-bm-native),
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form .inline-2 > input:not(.ad-form-bm-search-trigger),
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form .inline-2 > .ad-form-bm-field,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form .inline-2-labeled > select:not(.ad-form-bm-native),
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form .inline-2-labeled > input:not(.ad-form-bm-search-trigger) {
-  flex: 0 0 var(--ad-form-cell-width) !important;
-  width: var(--ad-form-cell-width) !important;
-  min-width: var(--ad-form-cell-width) !important;
-  max-width: var(--ad-form-cell-width) !important;
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .labeled-field,
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-layout-item {
+  min-width: 0 !important;
+  max-width: 100% !important;
 }

@@ -1,5 +1,5 @@
 import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=immoUiParity1";
-import { refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=cell168px3";
+import { refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=cell168px4";
 import { initTireSizes } from "./tire-sizes-ui.js?v=tireFill1";
 import { applyAdFormDesk } from "./ad-form-desk.js?v=adFormDesk37";
 import {
@@ -256,6 +256,18 @@ function isFullWidthDeskControl(el) {
   return false;
 }
 
+function isInlinePairDeskControl(el) {
+  return Boolean(el.closest(".inline-2, .inline-2-labeled"));
+}
+
+function applyDeskInlinePairWidth(el) {
+  el.style.setProperty("width", "100%", "important");
+  el.style.setProperty("min-width", "0", "important");
+  el.style.setProperty("max-width", "100%", "important");
+  el.style.setProperty("flex", "1 1 0%", "important");
+  el.style.removeProperty("field-sizing");
+}
+
 function applyDeskControlWidth(el, fullWidth) {
   if (fullWidth) {
     el.style.setProperty("width", "100%", "important");
@@ -263,6 +275,10 @@ function applyDeskControlWidth(el, fullWidth) {
     el.style.setProperty("flex", "1 1 0%", "important");
     el.style.setProperty("field-sizing", "fixed", "important");
     el.style.removeProperty("min-width");
+    return;
+  }
+  if (isInlinePairDeskControl(el)) {
+    applyDeskInlinePairWidth(el);
     return;
   }
   el.style.setProperty("width", AD_FORM_DESK_CELL_PX, "important");
@@ -284,7 +300,11 @@ function placeWrap(wrap, cell) {
   wrap.dataset.layoutRow = String(row);
   wrap.style.setProperty("width", "100%", "important");
   wrap.style.setProperty("max-width", "none", "important");
-  wrap.querySelectorAll(".inline-2, .suffix-field").forEach((el) => {
+  wrap.querySelectorAll(".inline-2, .inline-2-labeled").forEach((el) => {
+    el.style.setProperty("width", "100%", "important");
+    el.style.setProperty("max-width", "100%", "important");
+  });
+  wrap.querySelectorAll(".suffix-field").forEach((el) => {
     el.style.setProperty("width", "max-content", "important");
     el.style.setProperty("max-width", "100%", "important");
   });

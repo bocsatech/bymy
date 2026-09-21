@@ -57,7 +57,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/css/style.css?v=noScroll1" />
-    <link rel="stylesheet" href="/css/site-app.css?v=myadsCards1" />
+    <link rel="stylesheet" href="/css/site-app.css?v=companyActivities1" />
       <link rel="stylesheet" href="/css/hub.css?v=hubHeroDemo1" />
 </head>
   <body class="site-app settings-page mm-page" data-site-page="beallitasok" data-auth-init="manual">
@@ -161,6 +161,36 @@
               <span class="login-label">Cégnév/név</span>
               <input type="text" name="company" autocomplete="organization" />
             </label>
+            <div class="login-field settings-multi-dropdown" data-company-activities>
+              <span class="login-label">Cég tevékenysége</span>
+              <input type="hidden" name="companyActivities" value="" />
+              <div class="settings-multi-dropdown__wrap">
+                <button
+                  type="button"
+                  class="settings-multi-dropdown__trigger"
+                  data-company-activities-trigger
+                  aria-haspopup="listbox"
+                  aria-expanded="false"
+                >
+                  <span data-company-activities-summary>Válassz tevékenységet…</span>
+                  <span class="settings-multi-dropdown__chev" aria-hidden="true">▾</span>
+                </button>
+                <div class="settings-multi-dropdown__panel" data-company-activities-panel hidden role="listbox">
+                  <label class="settings-multi-dropdown__option">
+                    <input type="checkbox" value="auto" data-company-activity-cb />
+                    <span>Autó</span>
+                  </label>
+                  <label class="settings-multi-dropdown__option">
+                    <input type="checkbox" value="teherauto" data-company-activity-cb />
+                    <span>Teherautó</span>
+                  </label>
+                  <label class="settings-multi-dropdown__option">
+                    <input type="checkbox" value="ingatlan" data-company-activity-cb />
+                    <span>Ingatlan</span>
+                  </label>
+                </div>
+              </div>
+            </div>
             <label class="login-field">
               <span class="login-label">Cég adószáma</span>
               <input type="text" name="companyTaxId" autocomplete="off" inputmode="numeric" />
@@ -703,7 +733,7 @@
 
     <script src="/js/site-avatar-menu.js?v=settingsNav2" type="module"></script>
     <script src="/js/ha-import-app.js?v=haImportSec1" type="module"></script>
-    <script src="/js/beallitasok-app.js?v=myadsCards1" type="module"></script>
+    <script src="/js/beallitasok-app.js?v=companyActivities1" type="module"></script>
     <script>
       
       setTimeout(function () {

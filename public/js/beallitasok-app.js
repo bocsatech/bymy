@@ -43,6 +43,92 @@ import { fillCountrySelect, PHONE_COUNTRIES } from "./phone-lang-ui.js?v=setting
 
 const PHOTO_KEY = "bymy-avatar-photos";
 const NOTIFY_KEY = "bymy-notify-prefs";
+
+const COMPANY_ACTIVITY_LABELS = {
+  auto: "Autó",
+  teherauto: "Teherautó",
+  ingatlan: "Ingatlan",
+};
+
+function parseCompanyActivities(raw) {
+  if (Array.isArray(raw)) {
+    return raw.map((v) => String(v ?? "").trim()).filter((id) => COMPANY_ACTIVITY_LABELS[id]);
+  }
+  if (typeof raw === "string" && raw.trim()) {
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parseCompanyActivities(parsed);
+    } catch {
+      /* fall through */
+    }
+  }
+  return [];
+}
+
+function updateCompanyActivitiesSummary(form) {
+  const summary = form?.querySelector("[data-company-activities-summary]");
+  if (!summary) return;
+  const ids = [...form.querySelectorAll("[data-company-activity-cb]:checked")].map((el) => el.value);
+  if (!ids.length) {
+    summary.textContent = "Válassz tevékenységet…";
+    return;
+  }
+  summary.textContent = ids.map((id) => COMPANY_ACTIVITY_LABELS[id] || id).join(", ");
+}
+
+function syncCompanyActivitiesHidden(form) {
+  const hidden = form?.querySelector('[name="companyActivities"]');
+  if (!hidden) return;
+  const ids = [...form.querySelectorAll("[data-company-activity-cb]:checked")].map((el) => el.value);
+  hidden.value = ids.length ? JSON.stringify(ids) : "";
+  updateCompanyActivitiesSummary(form);
+}
+
+function applyCompanyActivitiesToForm(profile) {
+  const form = document.getElementById("mm-company-form");
+  if (!form) return;
+  const ids = parseCompanyActivities(profile?.companyActivities);
+  form.querySelectorAll("[data-company-activity-cb]").forEach((cb) => {
+    cb.checked = ids.includes(cb.value);
+  });
+  syncCompanyActivitiesHidden(form);
+}
+
+function readCompanyActivitiesFromForm(form) {
+  return [...form.querySelectorAll("[data-company-activity-cb]:checked")].map((el) => String(el.value || "").trim()).filter(Boolean);
+}
+
+function initCompanyActivitiesDropdown(form) {
+  if (!form || form.dataset.companyActivitiesBound === "1") return;
+  form.dataset.companyActivitiesBound = "1";
+  const trigger = form.querySelector("[data-company-activities-trigger]");
+  const panel = form.querySelector("[data-company-activities-panel]");
+  if (!trigger || !panel) return;
+
+  const setOpen = (open) => {
+    panel.hidden = !open;
+    trigger.setAttribute("aria-expanded", open ? "true" : "false");
+    form.classList.toggle("settings-multi-dropdown--open", open);
+  };
+
+  trigger.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setOpen(panel.hidden);
+  });
+
+  panel.querySelectorAll("[data-company-activity-cb]").forEach((cb) => {
+    cb.addEventListener("change", () => syncCompanyActivitiesHidden(form));
+  });
+
+  document.addEventListener("click", (event) => {
+    if (!form.contains(event.target)) setOpen(false);
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !panel.hidden) setOpen(false);
+  });
+}
 const SEARCH_POSTAL_KEY = "bymy_stats_postal";
 const SEARCH_RADIUS_KEY = "bymy_stats_radius_km";
 const REC_POSTAL_KEY = "bymy_partner_postal_code";
@@ -1008,6 +1094,8 @@ function applyProfileToForm(profile) {
       field.value = value;
     });
   }
+  applyCompanyActivitiesToForm(data);
+  initCompanyActivitiesDropdown(document.getElementById("mm-company-form"));
   initSettingsPhoneRow(form);
   applyPhonePartsToForm(form, data.phone);
   updateProfileSummary(data, getAuthUser());
@@ -1492,6 +1580,7 @@ function bindCompanyFormEarly() {
   const form = document.getElementById("mm-company-form");
   if (!form || form.dataset.bound === "1") return;
   form.dataset.bound = "1";
+  initCompanyActivitiesDropdown(form);
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
     event.stopPropagation();
@@ -1503,6 +1592,7 @@ function bindCompanyFormEarly() {
       const saved = await saveProfile({
         ...getProfile(),
         company: String(data.company || "").trim(),
+        companyActivities: readCompanyActivitiesFromForm(form),
         companyTaxId: String(data.companyTaxId || "").trim(),
         companyStreet: String(data.companyStreet || "").trim(),
         companyPostalCode: String(data.companyPostalCode || "")

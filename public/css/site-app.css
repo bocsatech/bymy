@@ -4526,6 +4526,88 @@ body.site-app .settings-form select {
   color: #111;
 }
 
+body.site-app .settings-multi-dropdown__wrap {
+  position: relative;
+}
+
+body.site-app .settings-multi-dropdown__trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+  border: 1px solid #d0d5dd;
+  border-radius: 10px;
+  padding: 0.72rem 0.85rem;
+  font: inherit;
+  background: #fff;
+  color: #111;
+  text-align: left;
+  cursor: pointer;
+}
+
+body.site-app .settings-multi-dropdown__trigger:hover,
+body.site-app .settings-multi-dropdown__trigger:focus-visible {
+  border-color: #98a2b3;
+  outline: none;
+}
+
+body.site-app .settings-multi-dropdown--open .settings-multi-dropdown__trigger {
+  border-color: #1565c0;
+  box-shadow: 0 0 0 1px #1565c0;
+}
+
+body.site-app .settings-multi-dropdown__chev {
+  color: #667085;
+  font-size: 0.85rem;
+}
+
+body.site-app .settings-multi-dropdown__panel {
+  position: absolute;
+  z-index: 20;
+  left: 0;
+  right: 0;
+  top: calc(100% + 4px);
+  margin: 0;
+  padding: 0.35rem 0;
+  list-style: none;
+  background: #fff;
+  border: 1px solid #d0d5dd;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(16, 24, 40, 0.12);
+}
+
+body.site-app .settings-multi-dropdown__option {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.55rem 0.85rem;
+  cursor: pointer;
+  font-size: 0.95rem;
+  color: #111;
+}
+
+body.site-app .settings-multi-dropdown__option:hover {
+  background: #f2f4f7;
+}
+
+body.site-app .settings-multi-dropdown__option input {
+  width: 1rem;
+  height: 1rem;
+  accent-color: #1565c0;
+}
+
+html[data-theme="dark"] body.site-app.settings-page .settings-multi-dropdown__trigger,
+html[data-theme="dark"] body.site-app.settings-page .settings-multi-dropdown__panel {
+  background: #12161c !important;
+  border-color: #3b4450 !important;
+  color: #fff !important;
+}
+
+html[data-theme="dark"] body.site-app.settings-page .settings-multi-dropdown__option:hover {
+  background: #222831;
+}
+
 body.site-app .settings-form input[type="text"],
 body.site-app .settings-form input[type="tel"],
 body.site-app .settings-form input[type="email"],

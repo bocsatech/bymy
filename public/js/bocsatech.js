@@ -1845,6 +1845,7 @@ function profileFields(profile) {
     phone: "Telefon",
     company: "Cégnév",
     companyTaxId: "Adószám",
+    companyActivities: "Cég tevékenysége",
     companyStreet: "Cég — utca, házszám",
     companyPostalCode: "Cég — irányítószám",
     companyCity: "Cég — település",

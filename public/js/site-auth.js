@@ -375,6 +375,7 @@ const EMPTY_PROFILE = {
   companyEmail2: "",
   salespersonName: "",
   salespersonName2: "",
+  companyActivities: [],
   accountType: "private",
   searchRadiusKm: 30,
   recommendationsRadiusKm: 30,

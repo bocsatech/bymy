@@ -22,6 +22,8 @@ html[data-theme="light"] body.site-app.ad-form-desk-active[data-site-page="hirde
   --ad-filter-w: 320px;
   --ad-tips-w: 280px;
   --ad-cell-gap: 8px;
+  --ad-desk-cell-trim: 1.5cm;
+  --ad-desk-cell-span: calc(100% - var(--ad-desk-cell-trim));
 }
 
 html[data-theme="dark"] body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] {
@@ -586,6 +588,8 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-
     --ad-filter-w: 320px;
     --ad-tips-w: 280px;
     --ad-cell-gap: 8px;
+    --ad-desk-cell-trim: 1.5cm;
+    --ad-desk-cell-span: calc(100% - var(--ad-desk-cell-trim));
   }
 
   body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .site-layout--wide .site-center--automax {

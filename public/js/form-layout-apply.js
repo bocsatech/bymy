@@ -1,5 +1,5 @@
 import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=immoUiParity1";
-import { refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=deskSidebarFull1";
+import { refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=deskSidebarTrim15";
 import { initTireSizes } from "./tire-sizes-ui.js?v=tireFill1";
 import { applyAdFormDesk } from "./ad-form-desk.js?v=adFormDesk37";
 import {
@@ -258,6 +258,16 @@ function isInlinePairDeskControl(el) {
   return Boolean(el.closest(".inline-2, .inline-2-labeled"));
 }
 
+const AD_FORM_DESK_ROW_WIDTH = "calc(100% - 1.5cm)";
+
+function applyDeskSidebarRowWidth(el) {
+  el.style.setProperty("width", AD_FORM_DESK_ROW_WIDTH, "important");
+  el.style.setProperty("min-width", "0", "important");
+  el.style.setProperty("max-width", AD_FORM_DESK_ROW_WIDTH, "important");
+  el.style.setProperty("flex", "0 0 auto", "important");
+  el.style.removeProperty("field-sizing");
+}
+
 function applyDeskSidebarControlWidth(el) {
   el.style.setProperty("width", "100%", "important");
   el.style.setProperty("min-width", "0", "important");
@@ -279,7 +289,7 @@ function applyDeskControlWidth(el, fullWidth) {
     applyDeskSidebarControlWidth(el);
     return;
   }
-  applyDeskSidebarControlWidth(el);
+  applyDeskSidebarRowWidth(el);
 }
 
 function placeWrap(wrap, cell) {
@@ -295,12 +305,12 @@ function placeWrap(wrap, cell) {
   wrap.style.setProperty("width", "100%", "important");
   wrap.style.setProperty("max-width", "none", "important");
   wrap.querySelectorAll(".inline-2, .inline-2-labeled").forEach((el) => {
-    el.style.setProperty("width", "100%", "important");
-    el.style.setProperty("max-width", "100%", "important");
+    el.style.setProperty("width", AD_FORM_DESK_ROW_WIDTH, "important");
+    el.style.setProperty("max-width", AD_FORM_DESK_ROW_WIDTH, "important");
   });
   wrap.querySelectorAll(".suffix-field").forEach((el) => {
-    el.style.setProperty("width", "100%", "important");
-    el.style.setProperty("max-width", "100%", "important");
+    el.style.setProperty("width", AD_FORM_DESK_ROW_WIDTH, "important");
+    el.style.setProperty("max-width", AD_FORM_DESK_ROW_WIDTH, "important");
   });
   wrap.querySelectorAll(".suffix-field > input").forEach((el) => {
     if (el.classList.contains("ad-form-bm-native")) return;
@@ -310,7 +320,8 @@ function placeWrap(wrap, cell) {
     el.style.setProperty("flex", "1 1 0%", "important");
   });
   wrap.querySelectorAll(".ad-form-bm-field").forEach((el) => {
-    applyDeskControlWidth(el, false);
+    if (isInlinePairDeskControl(el)) applyDeskSidebarControlWidth(el);
+    else applyDeskSidebarRowWidth(el);
   });
   wrap.querySelectorAll("select, input:not([type=checkbox]):not([type=hidden]):not([type=file])").forEach((el) => {
     if (el.classList.contains("ad-form-bm-native")) return;

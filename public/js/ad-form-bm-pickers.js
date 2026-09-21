@@ -385,6 +385,10 @@ function unmountPicker(select) {
   delete select.dataset.adBmPicker;
 }
 
+function closeAdBmPicker(select) {
+  if (select && typeof select._adBmClose === "function") select._adBmClose();
+}
+
 function mountBmPicker(opts) {
   const {
     select,
@@ -899,6 +903,7 @@ function mountSingleSelectDropdown(select, { title, panelClass, placeholder = PL
       enforceSingleToggleChecks(bodyEl, "data-ad-bm-single", selected);
       refreshTrigger();
       renderList(true);
+      if (el.checked && selected) closeAdBmPicker(select);
     };
   }
 
@@ -1144,6 +1149,7 @@ function mountSearchFlatPicker(select, title, options, panelClass, unit = "db") 
         enforceSingleToggleChecks(bodyEl, "data-ad-bm-flat", selected);
         updateBmSearchTrigger(select, selected || PLACEHOLDER, Boolean(selected));
         select._adBmRefreshDropdown?.();
+        closeAdBmPicker(select);
       };
     },
   });
@@ -1194,6 +1200,7 @@ function mountFlatPicker(select, title, options, panelClass, openAttr) {
         writePlainValue(select, selected);
         enforceSingleToggleChecks(bodyEl, "data-ad-bm-flat", selected);
         updateBmSummary(select, selected || PLACEHOLDER, Boolean(selected));
+        closeAdBmPicker(select);
       };
     },
   });
@@ -1311,6 +1318,7 @@ function mountAllapotPicker(select) {
           renderAllapotBody(bodyEl);
           writePlainValue(select, selected);
           updateBmSummary(select, labelForValue(selected) || PLACEHOLDER, Boolean(selected));
+          if (!cat.children?.length && selected) closeAdBmPicker(select);
           return;
         }
 
@@ -1328,6 +1336,7 @@ function mountAllapotPicker(select) {
         renderAllapotBody(bodyEl);
         writePlainValue(select, selected);
         updateBmSummary(select, labelForValue(selected) || PLACEHOLDER, Boolean(selected));
+        if (childEl.checked && selected) closeAdBmPicker(select);
       };
     },
   });
@@ -1592,6 +1601,7 @@ function mountFuelPicker(select) {
           renderFuelBody(bodyEl);
           writePlainValue(select, selected);
           updateBmSearchTrigger(select, labelForValue(selected) || PLACEHOLDER, Boolean(selected));
+          if (!cat.children?.length && selected) closeAdBmPicker(select);
           return;
         }
 
@@ -1609,6 +1619,7 @@ function mountFuelPicker(select) {
         renderFuelBody(bodyEl);
         writePlainValue(select, selected);
         updateBmSearchTrigger(select, labelForValue(selected) || PLACEHOLDER, Boolean(selected));
+        if (childEl.checked && selected) closeAdBmPicker(select);
       };
     },
     onQueryChange(next) {
@@ -1670,6 +1681,7 @@ function mountBrandPicker(select, catalog) {
         updateBmSearchTrigger(select, selected || PLACEHOLDER, Boolean(selected));
         const modell = document.getElementById("modell");
         modell?._adBmOnBrandChange?.();
+        closeAdBmPicker(select);
       };
     },
     onQueryChange(next) {
@@ -1750,6 +1762,7 @@ function mountModelPicker(select, catalog) {
         writePlainValue(select, selected);
         enforceSingleToggleChecks(bodyEl, "data-ad-bm-model", selected);
         updateBmSearchTrigger(select, selected || PLACEHOLDER, Boolean(selected));
+        closeAdBmPicker(select);
       };
     },
     onQueryChange(next) {

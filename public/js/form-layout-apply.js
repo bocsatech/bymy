@@ -1,5 +1,5 @@
 import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=immoUiParity1";
-import { refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=adBmMore3";
+import { refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=adBmClose1";
 import { initTireSizes } from "./tire-sizes-ui.js?v=tireFill1";
 import { applyAdFormDesk } from "./ad-form-desk.js?v=adFormDesk35";
 

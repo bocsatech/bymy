@@ -1,5 +1,5 @@
 import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=immoUiParity1";
-import { refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=deskSidebarTrim15";
+import { refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=deskTireFit1";
 import { initTireSizes } from "./tire-sizes-ui.js?v=tireFill1";
 import { applyAdFormDesk } from "./ad-form-desk.js?v=adFormDesk37";
 import {
@@ -397,6 +397,12 @@ function restoreTireSelectsToBlock(form) {
       select.hidden = false;
       select.classList.remove("ad-layout-hidden");
       select.style.removeProperty("display");
+      select.classList.remove("ad-form-cell");
+      select.style.removeProperty("width");
+      select.style.removeProperty("min-width");
+      select.style.removeProperty("max-width");
+      select.style.removeProperty("flex");
+      select.style.removeProperty("field-sizing");
     }
   }
 }
@@ -480,6 +486,15 @@ function pinTireFields(form, layoutCells) {
   block.removeAttribute("hidden");
   block.style.removeProperty("display");
   cleanupStrayTireLayoutItems(form);
+  block.querySelectorAll(".tire-row").forEach((row) => {
+    row.style.setProperty("width", AD_FORM_DESK_ROW_WIDTH, "important");
+    row.style.setProperty("max-width", AD_FORM_DESK_ROW_WIDTH, "important");
+    row.style.setProperty("min-width", "0", "important");
+  });
+  block.style.setProperty("width", "100%", "important");
+  block.style.setProperty("max-width", "100%", "important");
+  block.style.setProperty("min-width", "0", "important");
+  block.style.setProperty("overflow", "hidden", "important");
 }
 
 function pinElectricFields(form, layoutCells) {

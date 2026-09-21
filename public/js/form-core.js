@@ -19,7 +19,7 @@ import {
   DEFAULT_PHOTO_OVERLAY_ID,
   renderListingPhotoOverlay,
 } from "./listing-photo-overlay.js?v=photoOverlay2";
-import { refreshAdFormBmPickers, applyAdFormBmFieldValues } from "./ad-form-bm-pickers.js?v=deskSidebarTrim15";
+import { refreshAdFormBmPickers, applyAdFormBmFieldValues } from "./ad-form-bm-pickers.js?v=deskTireFit1";
 import { applyAdFormDesk } from "./ad-form-desk.js?v=adFormDesk37";
 import { initKmInput, parseKmDigits, setKmInputValue } from "./km-input.js?v=kmFmt1";
 import {
@@ -386,6 +386,7 @@ function stampAdFormUniformCells(root = form) {
     if (el.classList.contains("ad-form-bm-native") || el.classList.contains("ad-form-bm-search-trigger")) return;
     if (el.closest(".card--photos") || el.id === "leiras" || el.closest(".field-stack--leiras")) return;
     if (el.closest(".suffix-field") || el.closest(".ad-form-bm-field")) return;
+    if (el.closest("#tire-sizes-card, .tire-sizes-grid")) return;
     el.classList.add(cell);
   });
 }

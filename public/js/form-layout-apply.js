@@ -1,16 +1,14 @@
 import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=immoUiParity1";
 import { refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=fuelProfile1";
 import { initTireSizes } from "./tire-sizes-ui.js?v=tireFill1";
-import { applyAdFormDesk } from "./ad-form-desk.js?v=adFormDesk36";
+import { applyAdFormDesk } from "./ad-form-desk.js?v=adFormDesk37";
 import {
   DESK_MUSZAKI_CORE_FIELD_KEYS,
-  DESK_STEP2_CANONICAL_STACK,
   EV_LAYOUT_GROUP_KEYS,
   TIRE_LAYOUT_GROUP_KEYS,
-  deskStep2CanonicalRank,
   insertPinnedDomBlock,
   layoutRowForPinnedBlock,
-} from "./ad-form-desk-pinned-blocks.js?v=deskPinned3";
+} from "./ad-form-desk-pinned-blocks.js?v=layoutFromKv1";
 
 function cssEscape(value) {
   if (window.CSS?.escape) return window.CSS.escape(value);
@@ -351,14 +349,14 @@ function cleanupStrayTireLayoutItems(form) {
   }
 }
 
-function ensureDeskMuszakiCoreFields(form, cells) {
+function ensureDeskMuszakiCoreFields(form, cells, placed) {
   if (currentLayoutCategory(form) === "ingatlan") return;
   const lookup = new Map((cells || []).map((cell) => [cell.field_key, cell]));
   for (const key of DESK_MUSZAKI_CORE_FIELD_KEYS) {
     const cell = lookup.get(key);
     if (!cell || cell.hidden) continue;
     const wrap = wrapFor(form, key);
-    if (!wrap) continue;
+    if (!wrap || placed.has(wrap)) continue;
     wrap.classList.remove("ad-layout-hidden", "ad-immo-orphan");
     wrap.hidden = false;
     wrap.removeAttribute("hidden");
@@ -368,50 +366,39 @@ function ensureDeskMuszakiCoreFields(form, cells) {
     const canvas = canvasForStep(form, targetStep);
     if (!canvas || wrap.closest(KEEP_OUT) || wrap.querySelector(KEEP_OUT)) continue;
     canvas.appendChild(wrap);
-    const row = targetStep === 2 ? deskStep2CanonicalRank(key) + 1 : clamp(cell.row || 1, 1, 80);
-    placeWrap(wrap, {
-      ...cell,
-      step: targetStep,
-      col: 1,
-      colSpan: 12,
-      row,
-    });
+    placeWrap(wrap, cell);
+    placed.add(wrap);
   }
 }
 
-function applyDeskStep2CanvasOrder(form) {
+/** Éles desk: DOM sorrend = adminban mentett row/col (KV), nem fix kanonikus lista. */
+function syncCanvasOrderFromLayoutCells(form, cells) {
   if (currentLayoutCategory(form) === "ingatlan") return;
-  const canvas = canvasForStep(form, 2);
-  if (!canvas) return;
+  const lookup = new Map((cells || []).map((cell) => [cell.field_key, cell]));
 
-  let rank = 0;
-  const assignRow = (el, key) => {
-    if (!el || el.classList.contains("ad-layout-hidden") || el.hidden) return;
-    if (deskStep2CanonicalRank(key) >= 900) return;
-    rank += 1;
-    el.dataset.layoutRow = String(rank);
-  };
-
-  for (const key of DESK_STEP2_CANONICAL_STACK) {
-    if (key === "__desk_tire_sizes__") {
-      assignRow(document.getElementById("tire-sizes-card"), key);
-      continue;
-    }
-    if (key === "__desk_electric_block__") {
-      assignRow(document.getElementById("electric-fields-block"), key);
-      continue;
-    }
-    const wrap = wrapFor(form, key);
-    if (wrap && canvas.contains(wrap)) assignRow(wrap, key);
-  }
-
-  canvas.querySelectorAll(".ad-layout-item:not(.ad-layout-hidden)").forEach((el) => {
-    if (el.dataset.layoutRow) return;
-    const id = el.querySelector("input, select, textarea")?.id || el.querySelector("[name]")?.name || "";
-    if (!id || deskStep2CanonicalRank(id) < 900) return;
-    rank += 1;
-    el.dataset.layoutRow = String(rank);
+  form.querySelectorAll(".ad-layout-item:not(.ad-layout-hidden)").forEach((wrap) => {
+    const id =
+      wrap.querySelector("input, select, textarea")?.id || wrap.querySelector("[name]")?.name || "";
+    const cell = id ? lookup.get(id) : null;
+    if (!cell || cell.hidden) return;
+    const row = clamp(Number(cell.row) || 1, 1, 80);
+    const col = clamp(Number(cell.col) || 1, 1, 12);
+    const span = clamp(Number(cell.colSpan) || 6, 1, 13 - col);
+    wrap.dataset.layoutRow = String(row);
+    wrap.style.setProperty("grid-column", `${col} / span ${span}`, "important");
+    wrap.style.setProperty("grid-row", String(row), "important");
   });
+
+  const tireRow = layoutRowForPinnedBlock(cells, TIRE_LAYOUT_GROUP_KEYS);
+  const tire = document.getElementById("tire-sizes-card");
+  if (tire && !tire.classList.contains("ad-layout-hidden")) {
+    tire.dataset.layoutRow = String(tireRow);
+  }
+  const evRow = layoutRowForPinnedBlock(cells, EV_LAYOUT_GROUP_KEYS);
+  const ev = document.getElementById("electric-fields-block");
+  if (ev && !ev.classList.contains("ad-layout-hidden") && !ev.hidden) {
+    ev.dataset.layoutRow = String(evRow);
+  }
 }
 
 function pinTireFields(form, layoutCells) {
@@ -420,7 +407,7 @@ function pinTireFields(form, layoutCells) {
   const block = document.getElementById("tire-sizes-card") || form.querySelector(".tire-sizes-grid")?.closest(".card");
   const canvas = canvasForStep(form, 2);
   if (!block || !canvas) return;
-  const row = layoutRowForPinnedBlock(layoutCells, TIRE_LAYOUT_GROUP_KEYS, "__desk_tire_sizes__");
+  const row = layoutRowForPinnedBlock(layoutCells, TIRE_LAYOUT_GROUP_KEYS);
   insertPinnedDomBlock(canvas, block, row);
   block.hidden = false;
   block.classList.remove("ad-immo-orphan", "ad-layout-hidden");
@@ -434,7 +421,7 @@ function pinElectricFields(form, layoutCells) {
   const block = document.getElementById("electric-fields-block");
   const canvas = canvasForStep(form, 2);
   if (!block || !canvas) return;
-  const row = layoutRowForPinnedBlock(layoutCells, EV_LAYOUT_GROUP_KEYS, "__desk_electric_block__");
+  const row = layoutRowForPinnedBlock(layoutCells, EV_LAYOUT_GROUP_KEYS);
   insertPinnedDomBlock(canvas, block, row);
   block.classList.remove("ad-immo-orphan", "ad-layout-hidden");
   cleanupStrayEvLayoutItems(form);
@@ -685,7 +672,7 @@ async function applyAdFormLayout() {
       placeWrap(wrap, cell);
     }
     if (!isImmo) {
-      ensureDeskMuszakiCoreFields(form, cells);
+      ensureDeskMuszakiCoreFields(form, cells, placed);
     }
     if (isImmo) {
       hideVehicleChromeWithoutLayout(form);
@@ -730,25 +717,20 @@ async function applyAdFormLayout() {
       retireLegacyFormGrid(form);
     }
     pruneEmptyCards(form);
-    compactCanvasRows(form);
+    if (isImmo) compactCanvasRows(form);
     hideLayoutShellCards(form);
     pinExtras(form);
     pinElectricFields(form, cells);
     pinTireFields(form, cells);
-    applyDeskStep2CanvasOrder(form);
+    syncCanvasOrderFromLayoutCells(form, cells);
     pinLeiras(form);
     pinLocation(form);
     pinFooter(form);
     window.dispatchEvent(new Event("ad-form-sync-location"));
     await refreshAdFormBmPickers(form);
     initTireSizes(form);
-    applyAdFormDesk();
     window.dispatchEvent(new Event("ad-form-sync-fuel-fields"));
-    if (!isImmo) {
-      ensureDeskMuszakiCoreFields(form, cells);
-      applyDeskStep2CanvasOrder(form);
-      applyAdFormDesk();
-    }
+    applyAdFormDesk();
   } catch (error) {
     console.warn("Ad form layout apply:", error);
   }

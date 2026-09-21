@@ -167,10 +167,7 @@ export function hideSyntheticAnchors(byKey, syntheticKey) {
   }
 }
 
-export function layoutRowForPinnedBlock(cells, anchorKeys, syntheticKey) {
-  if (syntheticKey && CANONICAL_RANK.has(syntheticKey)) {
-    return CANONICAL_RANK.get(syntheticKey) + 1;
-  }
+export function layoutRowForPinnedBlock(cells, anchorKeys) {
   const anchors = (cells || []).filter((c) => anchorKeys.has(c.field_key) && !c.hidden);
   if (anchors.length) return minAnchorRow(anchors) ?? 1;
   const any = (cells || []).filter((c) => anchorKeys.has(c.field_key));

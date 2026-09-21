@@ -135,15 +135,11 @@ function deskScrollOffsetTop() {
   return (header?.getBoundingClientRect().height ?? 64) + 12;
 }
 
-/** Extrák almenü lenyitás: görgetés az adott lista első sorához (fejléc alatt). */
+/** Extrák almenü lenyitás: az almenü fejléc kerül felülre (mint a képen). */
 function scrollDeskExtrakSubAccordionToStart(subAcc) {
   if (!subAcc?.classList.contains("is-open")) return;
-  const body = subAcc.querySelector(".auto-desk-acc__body");
-  const target =
-    body?.querySelector(".auto-bm-row") ||
-    body?.querySelector(".ad-form-toggle-list > *") ||
-    subAcc.querySelector(".auto-desk-acc__head");
-  if (!target) return;
+  const head = subAcc.querySelector(".auto-desk-acc__head");
+  const target = head || subAcc;
   const offset = deskScrollOffsetTop();
   const top = target.getBoundingClientRect().top + window.scrollY - offset;
   window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });

@@ -368,6 +368,21 @@ function restoreFuelSelection(value) {
   }
 }
 
+const SUFFIX_UNIT_FIELD_IDS = [
+  "hengerurtartalom",
+  "fogyasztas_varosi",
+  "fogyasztas_orszaguti",
+  "fogyasztas_kombinalt",
+];
+
+function stampSuffixUnitFields(root = form) {
+  if (!root) return;
+  for (const id of SUFFIX_UNIT_FIELD_IDS) {
+    const input = root.querySelector(`#${id}`);
+    input?.closest(".suffix-field")?.classList.add("ad-form-suffix-unit");
+  }
+}
+
 function renderKlimaOptions() {
   for (const option of KLIM_OPTIONS) {
     const el = document.createElement("option");
@@ -1859,6 +1874,7 @@ bindFuelPickerSync();
 syncFuelDependentFields();
 initKmInput(document.getElementById("km"));
 fitAllFormFields();
+stampSuffixUnitFields();
 
 uzemanyag?.addEventListener("change", () => {
   if (uzemanyag.tagName !== "SELECT") return;
@@ -1909,6 +1925,7 @@ window.addEventListener("ad-form-layout-refresh", () => {
   window.requestAnimationFrame(() => renderPhotoPreview());
   bindFuelPickerSync();
   syncFuelDependentFields();
+  stampSuffixUnitFields();
 });
 
 window.addEventListener("ad-form-sync-fuel-fields", () => {

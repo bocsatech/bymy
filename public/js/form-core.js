@@ -368,9 +368,26 @@ function restoreFuelSelection(value) {
   }
 }
 
+const AD_FORM_CELL_WIDTH_FALLBACK_PX = 168;
+
+function syncAdFormCellWidthFromReference(root = form) {
+  if (!root) return;
+  const ref = root.querySelector("#fogyasztas_varosi");
+  let px = AD_FORM_CELL_WIDTH_FALLBACK_PX;
+  if (ref && ref.offsetParent !== null) {
+    const w = ref.getBoundingClientRect().width;
+    if (Number.isFinite(w) && w >= 48 && w <= 360) px = Math.round(w);
+  }
+  const value = `${px}px`;
+  root.style.setProperty("--ad-form-cell-width", value);
+  root.style.setProperty("--ad-form-suffix-input-width", value);
+}
+
 function stampAdFormUniformCells(root = form) {
   if (!root) return;
   root.querySelectorAll(".suffix-field").forEach((el) => el.classList.add("ad-form-suffix-unit"));
+  syncAdFormCellWidthFromReference(root);
+  window.requestAnimationFrame(() => syncAdFormCellWidthFromReference(root));
 }
 
 function renderKlimaOptions() {
@@ -1922,10 +1939,19 @@ window.addEventListener("ad-form-ready", () => {
   stampAdFormUniformCells();
 });
 
+window.addEventListener(
+  "resize",
+  () => {
+    window.requestAnimationFrame(() => syncAdFormCellWidthFromReference(form));
+  },
+  { passive: true }
+);
+
 window.addEventListener("ad-form-sync-fuel-fields", () => {
   bindFuelPickerSync();
   syncFuelDependentFields();
   applyAdFormDesk();
+  window.requestAnimationFrame(() => syncAdFormCellWidthFromReference(form));
 });
 
 return {

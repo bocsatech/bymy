@@ -549,6 +549,7 @@ function applyAdFormDesk({ openStep = null, scrollToAccordion = null } = {}) {
   refreshAdFormDeskGuide(form);
   initAdFormDeskGuide();
   afterDeskGuideAlign(form, accId);
+  window.dispatchEvent(new Event("ad-form-sync-location-postal"));
   clearAdFormEditBoot();
   const scrollId = scrollToAccordion || null;
   if (scrollId) {

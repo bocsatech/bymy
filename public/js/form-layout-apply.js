@@ -1,7 +1,7 @@
 import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=immoUiParity1";
 import { refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=deskAccScroll1";
 import { initTireSizes } from "./tire-sizes-ui.js?v=tireFill1";
-import { applyAdFormDesk } from "./ad-form-desk.js?v=adFormDesk43";
+import { applyAdFormDesk } from "./ad-form-desk.js?v=adFormDesk44";
 import {
   DESK_MUSZAKI_CORE_FIELD_KEYS,
   EV_LAYOUT_GROUP_KEYS,
@@ -355,10 +355,31 @@ function compactCanvasRows(form) {
 
 const LOCATION_FIELD_KEYS = new Set(["megtekintesi_cim", "iranyitoszam", "telepules", "megye"]);
 
-const STREET_PROFILE_ONLY_KEYS = new Set(["megtekintesi_cim"]);
-
 function adHideStreetOnly(form) {
   return Boolean(form.querySelector('.field-stack--location[data-ad-hide-street-only="1"]'));
+}
+
+/** Layout canvas ne szedje szét: irsz + település maradjon a Megtalálható blokkban. */
+function restoreAdLocationStackForHideStreet(form) {
+  if (!adHideStreetOnly(form)) return;
+  const stack = form.querySelector(".field-stack--location");
+  const fields = stack?.querySelector(".ad-location-fields");
+  const postalRow = stack?.querySelector(".ad-location-postal-row");
+  if (!fields || !postalRow) return;
+
+  const streetInput = document.getElementById("megtekintesi_cim");
+  const streetWrap = streetInput?.closest(".login-field, .labeled-field, .md-outlined, .ad-layout-item");
+  if (streetWrap && fields.contains(streetWrap) === false) {
+    fields.insertBefore(streetWrap, postalRow);
+  }
+
+  for (const id of ["iranyitoszam", "telepules"]) {
+    const input = document.getElementById(id);
+    const wrap = input?.closest(".login-field, .labeled-field, .md-outlined, .ad-layout-item");
+    if (wrap && !postalRow.contains(wrap)) {
+      postalRow.appendChild(wrap);
+    }
+  }
 }
 
 /** Utca rejtve (profilból mentéskor); irányítószám + település marad az űrlapon. */
@@ -366,12 +387,20 @@ function applyAdHideStreetOnlyFields(form) {
   if (!adHideStreetOnly(form)) return;
 
   const stack = form.querySelector(".field-stack--location");
+  const postalRow = stack?.querySelector(".ad-location-postal-row");
   if (stack) {
     stack.hidden = false;
     stack.classList.remove("ad-layout-hidden", "ad-form-contact-profile-hidden");
     stack.removeAttribute("hidden");
     stack.style.removeProperty("display");
   }
+  if (postalRow) {
+    postalRow.hidden = false;
+    postalRow.classList.remove("ad-layout-hidden", "ad-form-contact-profile-hidden");
+    postalRow.removeAttribute("hidden");
+    postalRow.style.removeProperty("display");
+  }
+  stack?.querySelector(".ad-location-label")?.style.removeProperty("display");
 
   form.querySelectorAll(".ad-form-street-hidden, .ad-location-settings-link").forEach((el) => {
     el.hidden = true;
@@ -808,7 +837,7 @@ async function applyAdFormLayout() {
       ) {
         continue;
       }
-      if (adHideStreetOnly(form) && STREET_PROFILE_ONLY_KEYS.has(cell.field_key)) {
+      if (adHideStreetOnly(form) && LOCATION_FIELD_KEYS.has(cell.field_key)) {
         continue;
       }
       const wrap = wrapFor(form, cell.field_key);
@@ -885,6 +914,7 @@ async function applyAdFormLayout() {
     pinTireFields(form, cells);
     syncCanvasOrderFromLayoutCells(form, cells);
     pinLeiras(form);
+    restoreAdLocationStackForHideStreet(form);
     pinLocation(form);
     applyAdHideStreetOnlyFields(form);
     pinFooter(form);
@@ -972,6 +1002,13 @@ function scheduleApply() {
   window.setTimeout(applyAdFormLayout, 900);
 }
 
+function syncAdLocationPostalVisibility(form = document.getElementById("ad-form")) {
+  if (!form) return;
+  restoreAdLocationStackForHideStreet(form);
+  pinLocation(form);
+  applyAdHideStreetOnlyFields(form);
+}
+
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", scheduleApply);
 } else {
@@ -979,3 +1016,4 @@ if (document.readyState === "loading") {
 }
 window.addEventListener("ad-form-ready", applyAdFormLayout);
 window.addEventListener("ad-form-layout-refresh", applyAdFormLayout);
+window.addEventListener("ad-form-sync-location-postal", () => syncAdLocationPostalVisibility());

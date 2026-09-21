@@ -2333,6 +2333,10 @@ body.site-app #ad-form .ad-location-postal-row {
   gap: 0.75rem;
 }
 
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form:has(.field-stack--location[data-ad-hide-street-only="1"]) .field-stack--location[data-ad-hide-street-only="1"],
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form:has(.field-stack--location[data-ad-hide-street-only="1"]) .ad-location-postal-row,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form:has(.field-stack--location[data-ad-hide-street-only="1"]) .login-field:has(#iranyitoszam),
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form:has(.field-stack--location[data-ad-hide-street-only="1"]) .login-field:has(#telepules),
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form:has(.field-stack--location[data-ad-hide-street-only="1"]) .ad-form-street-hidden,
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form:has(.field-stack--location[data-ad-hide-street-only="1"]) .ad-layout-item:has(#megtekintesi_cim),
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form:has(.field-stack--location[data-ad-hide-street-only="1"]) .login-field:has(#megtekintesi_cim),

@@ -585,6 +585,14 @@ function syncFuelDependentFields() {
   if (evBlock) {
     setFuelSectionVisible(evBlock, showElectric);
     evBlock.classList.toggle("ad-layout-hidden", !showElectric);
+    if (showElectric) {
+      evBlock.querySelectorAll(".labeled-field").forEach((el) => {
+        el.classList.remove("ad-layout-hidden", "ad-immo-orphan");
+        el.hidden = false;
+        el.removeAttribute("hidden");
+        el.style.removeProperty("display");
+      });
+    }
   }
   document.querySelectorAll(".fuel-combustion-only").forEach((el) => {
     setFuelSectionVisible(el, showConsumption);

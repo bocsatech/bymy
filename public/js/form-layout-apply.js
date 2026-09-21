@@ -115,9 +115,12 @@ function pinExtras(form) {
   }
 }
 
+const PINNED_DESK_FIELD_HOST = "#electric-fields-block, #tire-sizes-card, .tire-sizes-grid";
+
 function hideUnplacedVehicleChrome(form, placed) {
   form.querySelectorAll(".labeled-field, .field-stack, .md-outlined").forEach((el) => {
     if (placed.has(el)) return;
+    if (el.closest(PINNED_DESK_FIELD_HOST)) return;
     if (el.closest("#ingatlan-fields")) return;
     if (el.closest(KEEP_OUT)) return;
     if (el.closest(".packages, .phone-lang-grid, .photo-list, #equipment-sections, #egyeb-info-sections")) return;
@@ -424,6 +427,12 @@ function pinElectricFields(form, layoutCells) {
   const row = layoutRowForPinnedBlock(layoutCells, EV_LAYOUT_GROUP_KEYS);
   insertPinnedDomBlock(canvas, block, row);
   block.classList.remove("ad-immo-orphan", "ad-layout-hidden");
+  block.querySelectorAll(".labeled-field").forEach((el) => {
+    el.classList.remove("ad-layout-hidden", "ad-immo-orphan");
+    el.removeAttribute("hidden");
+    el.hidden = false;
+    el.style.removeProperty("display");
+  });
   cleanupStrayEvLayoutItems(form);
 }
 

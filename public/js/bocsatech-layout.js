@@ -6,11 +6,12 @@ import {
   deskPinnedGroupKeys,
   deskStep2CanonicalRank,
   ensureDeskPinnedAnchorCells,
+  EV_LAYOUT_GROUP_KEYS,
   hideSyntheticAnchors,
   isDeskSyntheticFieldKey,
   minAnchorRow,
 } from "./ad-form-desk-pinned-blocks.js?v=layoutFromKv1";
-import { layoutFieldVisibleForFuelProfile } from "./ad-form-layout-fuel-preview.js?v=deskFuelPrev2";
+import { layoutFieldVisibleForFuelProfile } from "./ad-form-layout-fuel-preview.js?v=deskFuelPrev3";
 
 const COLS = 12;
 const ROW_PX = 64;
@@ -104,13 +105,34 @@ export function mountLayoutBoard(
   function passesFuelPreview(cell) {
     if (!fuelPreview) return true;
     if (cell.__synthetic) return layoutFieldVisibleForFuelProfile(cell.field_key, fuelPreview);
-    if (deskPinnedGroupKeys().has(cell.field_key)) return false;
+    if (deskPinnedGroupKeys().has(cell.field_key)) {
+      if (showEvFieldsAsIndividuals() && EV_LAYOUT_GROUP_KEYS.has(cell.field_key)) {
+        return layoutFieldVisibleForFuelProfile(cell.field_key, fuelPreview);
+      }
+      return false;
+    }
     return layoutFieldVisibleForFuelProfile(cell.field_key, fuelPreview);
+  }
+
+  function showEvFieldsAsIndividuals() {
+    return fuelPreview === "electric" || fuelPreview === "hybrid";
   }
 
   function stackItems(step, { excludeKey = "" } = {}) {
     return editable()
-      .filter((cell) => !cell.hidden && Number(cell.step) === step && cell.field_key !== excludeKey)
+      .filter((cell) => {
+        if (cell.field_key === excludeKey) return false;
+        if (Number(cell.step) !== step) return false;
+        if (
+          showEvFieldsAsIndividuals() &&
+          step === 2 &&
+          EV_LAYOUT_GROUP_KEYS.has(cell.field_key) &&
+          layoutFieldVisibleForFuelProfile(cell.field_key, fuelPreview)
+        ) {
+          return true;
+        }
+        return !cell.hidden;
+      })
       .filter(passesFuelPreview)
       .sort(
         (a, b) =>
@@ -149,8 +171,14 @@ export function mountLayoutBoard(
   function stackDisplayItems(step) {
     if (!deskPosting || step !== 2) return stackItems(step);
     const grouped = deskPinnedGroupKeys();
-    const regular = stackItems(step).filter((cell) => !grouped.has(cell.field_key));
-    const synthetics = syntheticStackCells(step);
+    const evIndividuals = showEvFieldsAsIndividuals();
+    const regular = stackItems(step).filter((cell) => {
+      if (!grouped.has(cell.field_key)) return true;
+      return evIndividuals && EV_LAYOUT_GROUP_KEYS.has(cell.field_key);
+    });
+    const synthetics = syntheticStackCells(step).filter(
+      (cell) => !(evIndividuals && cell.field_key === "__desk_electric_block__")
+    );
     return [...regular, ...synthetics].sort(
       (a, b) =>
         (Number(a.row) || 1) - (Number(b.row) || 1) ||

@@ -2355,15 +2355,25 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form:has(.field-stack--locat
   gap: 0.75rem;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-layout-canvas .field-stack--location[data-ad-hide-street-only="1"] {
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot {
+  width: 100%;
+  display: block;
+  margin: 0.75rem 0 0;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot:empty {
+  display: none;
+  margin: 0;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot .field-stack--location[data-ad-hide-street-only="1"] {
   display: flex !important;
   flex-direction: column;
   gap: 0.5rem;
   width: 100%;
-  margin-top: 0.25rem;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-layout-canvas .field-stack--location[data-ad-hide-street-only="1"] .ad-location-postal-row {
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot .ad-location-postal-row {
   display: grid !important;
   grid-template-columns: minmax(7rem, 9rem) 1fr;
   gap: 0.75rem;

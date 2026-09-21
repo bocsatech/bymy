@@ -958,7 +958,18 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-
     gap: var(--ad-cell-gap) !important;
   }
 
-  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form .field-stack--location[data-ad-hide-street-only="1"] {
+  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot {
+    display: block !important;
+    width: 100%;
+    margin: var(--ad-cell-gap) 0 0;
+  }
+
+  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot:empty {
+    display: none !important;
+    margin: 0;
+  }
+
+  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot .field-stack--location[data-ad-hide-street-only="1"] {
     display: flex !important;
     flex-direction: column !important;
     width: 100%;

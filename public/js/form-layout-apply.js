@@ -183,6 +183,7 @@ function hideUnplacedVehicleChrome(form, placed) {
 
 function resetPlacedLayoutItems(form) {
   form.querySelectorAll(".ad-layout-item").forEach((el) => {
+    if (el.matches(".field-stack--location")) return;
     el.classList.add("ad-layout-hidden");
     el.hidden = true;
     setRequired(el, false);
@@ -360,6 +361,26 @@ const LOCATION_FIELD_KEYS = new Set(["megtekintesi_cim", "iranyitoszam", "telepu
 
 function adHideStreetOnly(form) {
   return Boolean(form.querySelector('.field-stack--location[data-ad-hide-street-only="1"]'));
+}
+
+/** Megtalálható (irsz + település) — a layout canvas nem kezeli, fix slot a Hitel alatt. */
+function ensureMegtalalhatoSlot(form) {
+  const panel = form.querySelector('.step-panel[data-step="5"] #ad-panel');
+  if (!panel) return null;
+  let slot = panel.querySelector("#ad-megtalalhato-slot");
+  if (!slot) {
+    slot = document.createElement("div");
+    slot.id = "ad-megtalalhato-slot";
+    slot.className = "ad-megtalalhato-slot";
+    panel.appendChild(slot);
+  }
+  const canvas = panel.querySelector(".ad-layout-canvas");
+  if (canvas && slot.previousElementSibling !== canvas) {
+    canvas.insertAdjacentElement("afterend", slot);
+  } else if (!canvas && panel.firstElementChild !== slot) {
+    panel.prepend(slot);
+  }
+  return slot;
 }
 
 /** Layout canvas ne szedje szét: irsz + település maradjon a Megtalálható blokkban. */
@@ -652,20 +673,17 @@ function pinLocation(form) {
   if (!stack) return;
 
   if (adHideStreetOnly(form)) {
-    stack.classList.remove("ad-layout-hidden", "ad-form-contact-profile-hidden");
+    stack.classList.remove("ad-layout-item", "ad-layout-hidden", "ad-form-contact-profile-hidden");
     stack.hidden = false;
     stack.removeAttribute("hidden");
     stack.style.removeProperty("display");
     stack.style.removeProperty("grid-column");
     stack.style.removeProperty("grid-row");
-    const canvas = canvasForStep(form, 5);
-    if (canvas && stack.parentElement !== canvas) {
-      canvas.appendChild(stack);
+    delete stack.dataset.layoutRow;
+    const slot = ensureMegtalalhatoSlot(form);
+    if (slot && stack.parentElement !== slot) {
+      slot.appendChild(stack);
     }
-    if (!stack.classList.contains("ad-layout-item")) {
-      stack.classList.add("ad-layout-item");
-    }
-    stack.dataset.layoutRow = "95";
     ensurePostalCardVisible(form);
     return;
   }
@@ -1063,6 +1081,7 @@ function scheduleApply() {
 
 function syncAdLocationPostalVisibility(form = document.getElementById("ad-form")) {
   if (!form) return;
+  ensureMegtalalhatoSlot(form);
   restoreAdLocationStackForHideStreet(form);
   pinLocation(form);
   applyAdHideStreetOnlyFields(form);

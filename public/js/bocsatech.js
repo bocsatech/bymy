@@ -1919,11 +1919,18 @@ function profileFields(profile) {
 function userEditView() {
   const profile = editingUser.profileJson ?? {};
   const fields = profileFields(profile);
+  const profileWideKeys = new Set([
+    "companyAddress",
+    "street",
+    "companyStreet",
+    "companyEmail",
+    "companyEmail2",
+  ]);
   const fieldRows = fields
     .map(
       (f) => `
-      <label>
-        <div>${esc(f.label)} <small style="color:var(--muted)">(${esc(f.key)})</small></div>
+      <label class="user-edit__field${profileWideKeys.has(f.key) ? " user-edit__field--wide" : ""}">
+        <span class="user-edit__label">${esc(f.label)} <small>(${esc(f.key)})</small></span>
         ${
           f.key === "accountType"
             ? `<select class="edit-profile-field" data-key="accountType">
@@ -1940,23 +1947,25 @@ function userEditView() {
     <div class="user-edit">
       <h2>Felhasználó kezelése (#${esc(editingUser.id)})</h2>
       <p class="hint">Regisztráció: ${esc(fmtWhen(editingUser.createdAt))} · Utoljára belépett: ${esc(fmtWhen(editingUser.lastLoginAt))} · Hirdetések: ${editingUser.listingCount ?? (editingUser.listings || []).length}</p>
-      <label>
-        <div>Email</div>
-        <input id="edit-email" type="email" value="${esc(editingUser.email || "")}" />
-      </label>
+      <div class="user-edit__core">
+        <label class="user-edit__field user-edit__field--wide">
+          <span class="user-edit__label">Email</span>
+          <input id="edit-email" type="email" value="${esc(editingUser.email || "")}" />
+        </label>
 
-      <label>
-        <div>Megjelenített név</div>
-        <input id="edit-displayName" type="text" value="${esc(editingUser.displayName || "")}" />
-      </label>
+        <label class="user-edit__field">
+          <span class="user-edit__label">Megjelenített név</span>
+          <input id="edit-displayName" type="text" value="${esc(editingUser.displayName || "")}" />
+        </label>
 
-      <label style="display:flex; align-items:center; gap:0.5rem">
-        <input id="edit-emailVerified" type="checkbox" ${editingUser.emailVerified ? "checked" : ""} />
-        <span>Email aktivált</span>
-      </label>
+        <label class="user-edit__field user-edit__field--check">
+          <input id="edit-emailVerified" type="checkbox" ${editingUser.emailVerified ? "checked" : ""} />
+          <span>Email aktivált</span>
+        </label>
+      </div>
 
-      <h3 style="margin:1.25rem 0 0.5rem; font-size:0.95rem; color:var(--muted)">Profil mezők</h3>
-      ${fieldRows}
+      <h3 class="user-edit__section-title">Profil mezők</h3>
+      <div class="user-edit__profile-fields">${fieldRows}</div>
 
       <h3 style="margin:1.25rem 0 0.5rem; font-size:0.95rem; color:var(--muted)">Hirdetései</h3>
       <div class="table-scroll">

@@ -118,8 +118,10 @@ function pinExtras(form) {
 const PINNED_DESK_FIELD_HOST = "#electric-fields-block, #tire-sizes-card, .tire-sizes-grid";
 
 function hideUnplacedVehicleChrome(form, placed) {
+  const hideStreet = adHideStreetOnly(form);
   form.querySelectorAll(".labeled-field, .field-stack, .md-outlined").forEach((el) => {
     if (placed.has(el)) return;
+    if (hideStreet && (el.matches(".field-stack--location") || el.closest(".field-stack--location"))) return;
     if (el.closest(PINNED_DESK_FIELD_HOST)) return;
     if (el.closest("#ingatlan-fields")) return;
     if (el.closest(KEEP_OUT)) return;
@@ -156,6 +158,7 @@ function hideUnplacedVehicleChrome(form, placed) {
 
   form.querySelectorAll(".step-panel .card").forEach((card) => {
     if (card.id === "success-panel") return;
+    if (hideStreet && card.dataset.adPostalCard === "1") return;
     if (card.classList.contains("card--photos") || card.classList.contains("card--leiras")) return;
     if (card.querySelector(".packages, .phone-lang-grid, .photo-list, #upload-zone, #photo-grid, .photo-upload-bar")) {
       return;
@@ -649,10 +652,20 @@ function pinLocation(form) {
   if (!stack) return;
 
   if (adHideStreetOnly(form)) {
-    stack.classList.remove("ad-layout-item", "ad-layout-hidden", "ad-form-contact-profile-hidden");
+    stack.classList.remove("ad-layout-hidden", "ad-form-contact-profile-hidden");
+    stack.hidden = false;
+    stack.removeAttribute("hidden");
+    stack.style.removeProperty("display");
     stack.style.removeProperty("grid-column");
     stack.style.removeProperty("grid-row");
-    delete stack.dataset.layoutRow;
+    const canvas = canvasForStep(form, 5);
+    if (canvas && stack.parentElement !== canvas) {
+      canvas.appendChild(stack);
+    }
+    if (!stack.classList.contains("ad-layout-item")) {
+      stack.classList.add("ad-layout-item");
+    }
+    stack.dataset.layoutRow = "95";
     ensurePostalCardVisible(form);
     return;
   }

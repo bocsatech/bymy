@@ -28,9 +28,10 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot .
   width: 100%;
 }
 
+/* Irányítószám ~1/3, település ~2/3 (mint a Beállítások képernyőn) */
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot .settings-postal-row {
   display: grid;
-  grid-template-columns: 6.5rem 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
   gap: 0.65rem;
   width: 100%;
 }
@@ -71,6 +72,15 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot .
 
 body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot {
   margin: var(--ad-cell-gap, 8px) 0 0;
+  width: var(--ad-desk-cell-span, calc(100% - 1.5cm));
+  max-width: var(--ad-desk-cell-span, calc(100% - 1.5cm));
+  align-self: flex-start;
+}
+
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot .ad-address-block,
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot .settings-postal-row {
+  width: 100%;
+  max-width: 100%;
 }
 
 html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot .login-label {

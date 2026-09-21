@@ -19,7 +19,7 @@ import {
   DEFAULT_PHOTO_OVERLAY_ID,
   renderListingPhotoOverlay,
 } from "./listing-photo-overlay.js?v=photoOverlay2";
-import { refreshAdFormBmPickers, applyAdFormBmFieldValues } from "./ad-form-bm-pickers.js?v=appearanceBm2";
+import { refreshAdFormBmPickers, applyAdFormBmFieldValues } from "./ad-form-bm-pickers.js?v=cell168px1";
 import { applyAdFormDesk } from "./ad-form-desk.js?v=adFormDesk37";
 import { initKmInput, parseKmDigits, setKmInputValue } from "./km-input.js?v=kmFmt1";
 import {
@@ -368,26 +368,26 @@ function restoreFuelSelection(value) {
   }
 }
 
-const AD_FORM_CELL_WIDTH_FALLBACK_PX = 168;
-
-function syncAdFormCellWidthFromReference(root = form) {
-  if (!root) return;
-  const ref = root.querySelector("#fogyasztas_varosi");
-  let px = AD_FORM_CELL_WIDTH_FALLBACK_PX;
-  if (ref && ref.offsetParent !== null) {
-    const w = ref.getBoundingClientRect().width;
-    if (Number.isFinite(w) && w >= 48 && w <= 360) px = Math.round(w);
-  }
-  const value = `${px}px`;
-  root.style.setProperty("--ad-form-cell-width", value);
-  root.style.setProperty("--ad-form-suffix-input-width", value);
-}
-
 function stampAdFormUniformCells(root = form) {
   if (!root) return;
+  const cell = "ad-form-cell";
+  const skipTypes = new Set(["checkbox", "radio", "file", "hidden"]);
+
   root.querySelectorAll(".suffix-field").forEach((el) => el.classList.add("ad-form-suffix-unit"));
-  syncAdFormCellWidthFromReference(root);
-  window.requestAnimationFrame(() => syncAdFormCellWidthFromReference(root));
+
+  root.querySelectorAll(".ad-form-bm-field").forEach((el) => el.classList.add(cell));
+
+  root.querySelectorAll(".suffix-field > input").forEach((el) => {
+    if (!skipTypes.has(el.type)) el.classList.add(cell);
+  });
+
+  root.querySelectorAll("input, select, textarea").forEach((el) => {
+    if (skipTypes.has(el.type)) return;
+    if (el.classList.contains("ad-form-bm-native") || el.classList.contains("ad-form-bm-search-trigger")) return;
+    if (el.closest(".card--photos") || el.id === "leiras" || el.closest(".field-stack--leiras")) return;
+    if (el.closest(".suffix-field") || el.closest(".ad-form-bm-field")) return;
+    el.classList.add(cell);
+  });
 }
 
 function renderKlimaOptions() {
@@ -1939,19 +1939,15 @@ window.addEventListener("ad-form-ready", () => {
   stampAdFormUniformCells();
 });
 
-window.addEventListener(
-  "resize",
-  () => {
-    window.requestAnimationFrame(() => syncAdFormCellWidthFromReference(form));
-  },
-  { passive: true }
-);
+window.addEventListener("ad-form-bm-ready", (event) => {
+  stampAdFormUniformCells(event.detail?.form || form);
+});
 
 window.addEventListener("ad-form-sync-fuel-fields", () => {
   bindFuelPickerSync();
   syncFuelDependentFields();
   applyAdFormDesk();
-  window.requestAnimationFrame(() => syncAdFormCellWidthFromReference(form));
+  stampAdFormUniformCells(form);
 });
 
 return {

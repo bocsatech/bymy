@@ -2008,5 +2008,6 @@ export async function mountAdFormBmPickers(form, catalog = null) {
   }
 
   form.dataset.adBmPickers = "1";
+  window.dispatchEvent(new CustomEvent("ad-form-bm-ready", { detail: { form } }));
 }
 

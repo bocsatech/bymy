@@ -1,8 +1,18 @@
 
-import { ALLAPOT_CATEGORIES, OKMANY_JELLEG_OPTIONS, UZEMANYAG_CATEGORIES } from "./equipment-data.js?v=teherKivitel35e";
+import {
+  ALLAPOT_CATEGORIES,
+  KLIM_OPTIONS,
+  OKMANY_JELLEG_OPTIONS,
+  UZEMANYAG_CATEGORIES,
+} from "./equipment-data.js?v=teherKivitel35e";
 import { KIVITEL_OPTIONS } from "./kivitel-options.js?v=kivitel1";
 import { fetchVehicleCatalog } from "./vehicle-catalog-client.js?v=adBmCatalog1";
 import { bindAutoBmDismiss, autoBmPanelIsOpen } from "./auto-bm-dismiss.js?v=bmDismiss1";
+import {
+  VEHICLE_KARPIT_OPTIONS,
+  VEHICLE_SZIN_OPTIONS,
+  VEHICLE_TETTO_OPTIONS,
+} from "./vehicle-appearance-options.js?v=appearanceBm1";
 
 const PLACEHOLDER = "Válasszon";
 const DROPDOWN_VISIBLE_ROWS = 7;
@@ -16,6 +26,13 @@ const AD_BM_SINGLE_DROPDOWN_SPECS = [
   { id: "muszaki_ev", title: "Műszaki vizsga érvényes – év", panelClass: "ad-form-muszaki-ev-panel", placeholder: "év" },
   { id: "muszaki_honap", title: "Műszaki vizsga érvényes – hónap", panelClass: "ad-form-month-panel", placeholder: "hó" },
   { id: "tulajdonosok_szama", title: "Tulajdonosok száma", panelClass: "ad-form-tulaj-panel", placeholder: "—" },
+  { id: "ajtok", title: "Ajtók száma", panelClass: "ad-form-ajtok-panel", placeholder: "—" },
+  { id: "szemelyek", title: "Szállítható személyek száma", panelClass: "ad-form-szemelyek-panel", placeholder: "—" },
+  { id: "szin", title: "Szín", panelClass: "ad-form-szin-panel", placeholder: "—" },
+  { id: "karpit1", title: "Kárpit színe (1)", panelClass: "ad-form-karpit-panel", placeholder: "—" },
+  { id: "karpit2", title: "Kárpit színe (2)", panelClass: "ad-form-karpit-panel", placeholder: "—" },
+  { id: "tetto", title: "Tető", panelClass: "ad-form-tetto-panel", placeholder: "—" },
+  { id: "klima", title: "Klíma", panelClass: "ad-form-klima-panel", placeholder: "—" },
   { id: "sebessegvalto", title: "Sebességváltó", panelClass: "ad-form-sebesseg-panel", placeholder: "—" },
   { id: "hajtas", title: "Hajtás", panelClass: "ad-form-hajtas-panel", placeholder: "—" },
   { id: "ac_tolto_csatlakozas", title: "AC töltőcsatlakozó típusa", panelClass: "ad-form-ac-tolto-panel" },
@@ -498,7 +515,23 @@ function mountBmPicker(opts) {
   }
 
   function openPanel() {
-    ["gyartmany", "modell", "uzemanyag", "okmany_jelleg", "allapot", "kivitel", "forgalomba_helyezes_ev", "forgalomba_helyezes_honap"].forEach((id) => {
+    [
+      "gyartmany",
+      "modell",
+      "uzemanyag",
+      "okmany_jelleg",
+      "allapot",
+      "kivitel",
+      "ajtok",
+      "szemelyek",
+      "szin",
+      "karpit1",
+      "karpit2",
+      "tetto",
+      "klima",
+      "forgalomba_helyezes_ev",
+      "forgalomba_helyezes_honap",
+    ].forEach((id) => {
       const other = document.getElementById(id);
       if (!other || other === select) return;
       if (autoBmPanelIsOpen(other._adBmPanel) && typeof other._adBmClose === "function") other._adBmClose();
@@ -651,7 +684,23 @@ function mountSearchDropdownPicker(select, opts) {
   }
 
   function openDropdown() {
-    ["gyartmany", "modell", "uzemanyag", "okmany_jelleg", "allapot", "kivitel", "forgalomba_helyezes_ev", "forgalomba_helyezes_honap"].forEach((id) => {
+    [
+      "gyartmany",
+      "modell",
+      "uzemanyag",
+      "okmany_jelleg",
+      "allapot",
+      "kivitel",
+      "ajtok",
+      "szemelyek",
+      "szin",
+      "karpit1",
+      "karpit2",
+      "tetto",
+      "klima",
+      "forgalomba_helyezes_ev",
+      "forgalomba_helyezes_honap",
+    ].forEach((id) => {
       const other = document.getElementById(id);
       if (!other || other === select) return;
       if (autoBmPanelIsOpen(other._adBmPanel) && typeof other._adBmClose === "function") other._adBmClose();
@@ -871,7 +920,8 @@ function mountSingleSelectDropdown(select, { title, panelClass, placeholder = PL
     if (!input) return;
     if (selected) {
       input.dataset.adBmEditing = "0";
-      input.value = selected;
+      const opt = options.find((item) => item.value === selected);
+      input.value = opt?.label || selected;
       input.placeholder = placeholder;
       wrap.classList.toggle("has-value", true);
       return;
@@ -955,6 +1005,13 @@ function mountSingleSelectDropdown(select, { title, panelClass, placeholder = PL
       "okmany_jelleg",
       "allapot",
       "kivitel",
+      "ajtok",
+      "szemelyek",
+      "szin",
+      "karpit1",
+      "karpit2",
+      "tetto",
+      "klima",
       "forgalomba_helyezes_ev",
       "forgalomba_helyezes_honap",
     ].forEach((id) => {
@@ -1933,6 +1990,11 @@ export async function mountAdFormBmPickers(form, catalog = null) {
   }
 
   ensureSelectOptions(document.getElementById("dc_tolto_csatlakozas"), DC_TOLTO_OPTIONS);
+  ensureSelectOptions(document.getElementById("szin"), VEHICLE_SZIN_OPTIONS);
+  ensureSelectOptions(document.getElementById("karpit1"), VEHICLE_KARPIT_OPTIONS);
+  ensureSelectOptions(document.getElementById("karpit2"), VEHICLE_KARPIT_OPTIONS);
+  ensureSelectOptions(document.getElementById("tetto"), VEHICLE_TETTO_OPTIONS);
+  ensureSelectOptions(document.getElementById("klima"), KLIM_OPTIONS);
   for (const spec of AD_BM_SINGLE_DROPDOWN_SPECS) {
     mountAdSingleDropdown(spec);
   }

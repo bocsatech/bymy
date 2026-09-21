@@ -444,12 +444,20 @@
                       <option>2</option><option>3</option><option>4</option><option>5</option>
                     </select>
                   </div>
-                  <div class="labeled-field">
+                  <div class="labeled-field labeled-field--szemelyek">
                     <label for="szemelyek">Szállítható szem. száma:</label>
-                    <div class="suffix-field">
-                      <input id="szemelyek" name="szemelyek" type="number" min="1" max="9" />
-                      <span>fő</span>
-                    </div>
+                    <select id="szemelyek" name="szemelyek">
+                      <option value="">—</option>
+                      <option value="1">1 fő</option>
+                      <option value="2">2 fő</option>
+                      <option value="3">3 fő</option>
+                      <option value="4">4 fő</option>
+                      <option value="5">5 fő</option>
+                      <option value="6">6 fő</option>
+                      <option value="7">7 fő</option>
+                      <option value="8">8 fő</option>
+                      <option value="9">9 fő</option>
+                    </select>
                   </div>
                 </div>
 
@@ -675,20 +683,20 @@
 
                 <div class="labeled-field">
                   <label for="karpit1">Kárpit színe (1):</label>
-                  <input id="karpit1" name="karpit1" type="text" />
+                  <select id="karpit1" name="karpit1"><option value="">—</option></select>
                 </div>
                 <div class="labeled-field">
                   <label for="karpit2">Kárpit színe (2):</label>
-                  <input id="karpit2" name="karpit2" type="text" />
+                  <select id="karpit2" name="karpit2"><option value="">—</option></select>
                 </div>
 
                 <div class="labeled-field">
                   <label for="szin">Szín:</label>
-                  <input id="szin" name="szin" type="text" />
+                  <select id="szin" name="szin"><option value="">—</option></select>
                 </div>
                 <div class="labeled-field">
                   <label for="tetto">Tető:</label>
-                  <input id="tetto" name="tetto" type="text" />
+                  <select id="tetto" name="tetto"><option value="">—</option></select>
                 </div>
 
                 <div class="labeled-field">
@@ -734,10 +742,12 @@
           <div class="card">
             <div class="card-body">
               <div class="form-grid compact">
-                <label for="klima">Klíma</label>
-                <select id="klima" name="klima">
-                  <option value="">—</option>
-                </select>
+                <div class="labeled-field labeled-field--klima">
+                  <label for="klima">Klíma</label>
+                  <select id="klima" name="klima">
+                    <option value="">—</option>
+                  </select>
+                </div>
               </div>
               <div id="equipment-sections"></div>
             </div>
@@ -974,7 +984,7 @@
     </main>
 
     <script src="/js/site-avatar-menu.js?v=avatarSync1" type="module"></script>
-    <script src="/js/app.js?v=fuelProfile3" type="module"></script>
+    <script src="/js/app.js?v=appearanceBm2" type="module"></script>
       <script src="/js/nav-counts.js?v=navCount4" type="module"></script>
       <script src="/js/theme.js?v=willhabenHdr1" type="module"></script>
     <script src="/js/form-layout-apply.js?v=layoutPhotoFix1" type="module"></script>

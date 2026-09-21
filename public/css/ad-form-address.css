@@ -1,19 +1,19 @@
 /* Hirdetésfeladás: címmezők = Beállítások (login-field + settings-postal-row) */
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot {
-  width: 100%;
-  display: block;
-  margin: 0.75rem 0 0;
-  order: 2;
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form #ad-panel {
+  display: flex;
+  flex-direction: column;
 }
 
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form #ad-panel .ad-layout-canvas {
   order: 1;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form #ad-panel {
-  display: flex;
-  flex-direction: column;
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot {
+  order: 2;
+  width: 100%;
+  display: block;
+  margin: 0.75rem 0 0;
 }
 
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot:empty {
@@ -28,11 +28,16 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot .
   width: 100%;
 }
 
-/* Irányítószám ~1/3, település ~2/3 (mint a Beállítások képernyőn) */
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot .settings-postal-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  grid-template-columns: minmax(5.5rem, 1fr) minmax(0, 2fr);
   gap: 0.65rem;
+  width: 100%;
+  align-items: start;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot .settings-postal-row > .login-field {
+  min-width: 0;
   width: 100%;
 }
 
@@ -42,6 +47,7 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot .
   gap: 0.3rem;
   margin: 0;
   min-width: 0;
+  width: 100%;
 }
 
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot .login-label {
@@ -50,23 +56,24 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot .
   color: #444;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot .login-field input {
-  width: 100%;
-  min-width: 0;
-  max-width: 100%;
-  box-sizing: border-box;
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form input.ad-address-input,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot .login-field input.ad-address-input {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
   font: inherit;
-  font-size: 0.92rem;
-  border: 1px solid #d5d9e0;
-  border-radius: 10px;
-  padding: 0.55rem 0.7rem;
-  background: #fff;
-  color: #111;
-  height: auto;
-  min-height: 2.75rem;
-  max-height: none;
-  line-height: 1.35;
-  field-sizing: border-box;
+  font-size: 0.92rem !important;
+  border: 1px solid #d5d9e0 !important;
+  border-radius: 10px !important;
+  padding: 0.55rem 0.7rem !important;
+  background: #fff !important;
+  color: #111 !important;
+  height: auto !important;
+  min-height: 2.75rem !important;
+  max-height: none !important;
+  line-height: 1.35 !important;
+  field-sizing: border-box !important;
   flex: none;
 }
 
@@ -87,8 +94,8 @@ html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] #ad-form
   color: #cbd5e1;
 }
 
-html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot .login-field input {
-  background: #1d1d1d;
-  border-color: #404040;
-  color: #f4f4f5;
+html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] #ad-form input.ad-address-input {
+  background: #1d1d1d !important;
+  border-color: #404040 !important;
+  color: #f4f4f5 !important;
 }

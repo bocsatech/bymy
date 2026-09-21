@@ -776,7 +776,7 @@ function fitSelectWidth(select) {
 function fitInputWidth(input) {
   if (!input || input.tagName !== "INPUT") return;
   if (input.classList.contains("ad-form-bm-search-trigger")) return;
-  if (input.closest(".ad-megtalalhato-slot, .ad-location-fields--postal-only")) return;
+  if (input.closest(".ad-megtalalhato-slot, .ad-location-fields--postal-only") || input.classList.contains("ad-address-input")) return;
   if (shouldUseFluidFieldWidths()) return;
   if (input.type === "checkbox" || input.type === "radio" || input.type === "file") return;
   const style = getComputedStyle(input);

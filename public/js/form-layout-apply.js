@@ -29,7 +29,10 @@ function wrapFor(form, fieldKey) {
     document.getElementById(fieldKey) || form.querySelector(`[name="${cssEscape(fieldKey)}"]`);
   if (!input) return null;
   if (input.closest(SKIP_HOST) || input.closest(KEEP_OUT)) return null;
-  if (input.closest("#ingatlan-fields, .ad-location-fields, #ad-megtalalhato-slot, .field-stack--location")) {
+  if (
+    input.closest("#ingatlan-fields, .ad-location-fields, #ad-megtalalhato-slot, .field-stack--location") ||
+    input.classList.contains("ad-address-input")
+  ) {
     return null;
   }
   const existing = input.closest(".labeled-field, .field-stack, .md-outlined");
@@ -408,6 +411,47 @@ function restoreAdLocationStackForHideStreet(form) {
   }
 }
 
+/** Layout canvas ne szedje szét: input maradjon a login-field blokkban a slotban. */
+function anchorAddressFieldsInSlot(form) {
+  if (!adHideStreetOnly(form)) return;
+  const slot = form.querySelector("#ad-megtalalhato-slot");
+  const block = slot?.querySelector(".ad-address-block");
+  const postalRow = block?.querySelector(".ad-location-postal-row");
+  if (!block || !postalRow) return;
+
+  const anchors = [
+    { id: "iranyitoszam", host: postalRow.querySelector(".settings-postal-field") },
+    { id: "telepules", host: postalRow.querySelector(".settings-city-field") },
+    { id: "megtalalhato_orszag", host: block.querySelector(".ad-location-country-field") },
+  ];
+
+  for (const { id, host } of anchors) {
+    const input = document.getElementById(id);
+    if (!(input instanceof HTMLInputElement) || !host) continue;
+
+    const canvasWrap = input.closest(".ad-layout-canvas .labeled-field, .ad-layout-canvas .ad-layout-item, .ad-layout-canvas .md-outlined");
+    if (!host.contains(input)) {
+      host.appendChild(input);
+    }
+    if (canvasWrap && !host.contains(canvasWrap)) {
+      canvasWrap.remove();
+    }
+    host.hidden = false;
+    host.classList.remove("ad-layout-hidden", "ad-immo-orphan", "ad-form-street-hidden");
+    host.removeAttribute("hidden");
+    host.style.removeProperty("display");
+  }
+
+  form.querySelectorAll(".ad-layout-canvas .ad-layout-item, .ad-layout-canvas .labeled-field").forEach((wrap) => {
+    const id = wrap.querySelector("input, select, textarea")?.id;
+    if (id && LOCATION_FIELD_KEYS.has(id)) {
+      wrap.classList.add("ad-layout-hidden");
+      wrap.hidden = true;
+      wrap.style.setProperty("display", "none", "important");
+    }
+  });
+}
+
 /** Utca rejtve (profilból mentéskor); irányítószám + település marad az űrlapon. */
 function applyAdHideStreetOnlyFields(form) {
   if (!adHideStreetOnly(form)) return;
@@ -474,7 +518,9 @@ function applyAdHideStreetOnlyFields(form) {
     countryInput.value = "Magyarország";
   }
 
-  form.querySelectorAll(".ad-megtalalhato-slot input, .ad-location-fields--postal-only input").forEach((el) => {
+  anchorAddressFieldsInSlot(form);
+
+  form.querySelectorAll(".ad-megtalalhato-slot .ad-address-input, .ad-location-fields--postal-only .ad-address-input").forEach((el) => {
     el.style.removeProperty("width");
     el.style.removeProperty("min-width");
     el.style.removeProperty("max-width");
@@ -482,6 +528,9 @@ function applyAdHideStreetOnlyFields(form) {
     el.style.removeProperty("field-sizing");
     el.style.removeProperty("height");
     el.style.removeProperty("line-height");
+    el.style.setProperty("width", "100%", "important");
+    el.style.setProperty("max-width", "100%", "important");
+    el.style.setProperty("box-sizing", "border-box", "important");
   });
 }
 

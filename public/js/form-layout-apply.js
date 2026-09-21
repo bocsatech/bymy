@@ -29,7 +29,9 @@ function wrapFor(form, fieldKey) {
     document.getElementById(fieldKey) || form.querySelector(`[name="${cssEscape(fieldKey)}"]`);
   if (!input) return null;
   if (input.closest(SKIP_HOST) || input.closest(KEEP_OUT)) return null;
-  if (input.closest("#ingatlan-fields")) return null;
+  if (input.closest("#ingatlan-fields, .ad-location-fields, #ad-megtalalhato-slot, .field-stack--location")) {
+    return null;
+  }
   const existing = input.closest(".labeled-field, .field-stack, .md-outlined");
   if (existing) {
     if (existing.closest(KEEP_OUT) || existing.querySelector(KEEP_OUT)) return null;
@@ -471,6 +473,16 @@ function applyAdHideStreetOnlyFields(form) {
   if (countryInput && !String(countryInput.value || "").trim()) {
     countryInput.value = "Magyarország";
   }
+
+  form.querySelectorAll(".ad-megtalalhato-slot input, .ad-location-fields--postal-only input").forEach((el) => {
+    el.style.removeProperty("width");
+    el.style.removeProperty("min-width");
+    el.style.removeProperty("max-width");
+    el.style.removeProperty("flex");
+    el.style.removeProperty("field-sizing");
+    el.style.removeProperty("height");
+    el.style.removeProperty("line-height");
+  });
 }
 
 const TIRE_ROW_SLOTS = [

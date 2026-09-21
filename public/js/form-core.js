@@ -16,7 +16,7 @@ window.addEventListener("ad-form-render-egyeb-info", () => renderEgyebInfoHook?.
 import { initVehicleCatalogSelects } from "./vehicle-catalog-client.js";
 import { compressListingPhoto, MAX_LISTING_PHOTOS } from "./listing-photo-compress.js?v=myAds2";
 import { uploadImage } from "./upload-image.js?v=supabaseUpload1";
-import { applyListingAddressFromProfileSync } from "./ad-location-profile.js?v=locProf6";
+import { applyListingAddressFromProfileSync } from "./ad-location-profile.js?v=locProf7";
 import { syncIngatlanFormVisibility } from "./ingatlan-form-fields.js?v=immoUiParity1";
 import {
   DEFAULT_PHOTO_OVERLAY_ID,
@@ -776,6 +776,7 @@ function fitSelectWidth(select) {
 function fitInputWidth(input) {
   if (!input || input.tagName !== "INPUT") return;
   if (input.classList.contains("ad-form-bm-search-trigger")) return;
+  if (input.closest(".ad-megtalalhato-slot, .ad-location-fields--postal-only")) return;
   if (shouldUseFluidFieldWidths()) return;
   if (input.type === "checkbox" || input.type === "radio" || input.type === "file") return;
   const style = getComputedStyle(input);

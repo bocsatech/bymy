@@ -5,7 +5,7 @@ import {
   saveListingPhotosOrder,
   getStoredListingId,
 } from "./db-client.js?v=wizardSave1";
-import { createAdForm } from "./form-core.js?v=contactOpt3";
+import { createAdForm } from "./form-core.js?v=contactOpt4";
 import { applyImportedVehicleToSelects } from "./vehicle-catalog-client.js?v=importVehicle1";
 import { initTireSizes } from "./tire-sizes-ui.js";
 import { initPhoneLanguages } from "./phone-lang-ui.js";
@@ -24,7 +24,7 @@ import {
   applyListingAddressFromProfileSync,
   initAdLocationProfile,
   getListingAddressFromProfile,
-} from "./ad-location-profile.js?v=locProf6";
+} from "./ad-location-profile.js?v=locProf7";
 import { initImproveDescription } from "./improve-description.js?v=descAi2";
 
 if (!(await requireAuthForPage())) {

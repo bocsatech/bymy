@@ -733,4 +733,35 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-
 body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-layout-item {
   min-width: 0 !important;
   max-width: 100% !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Desk oldalsáv: egy cellás mező = teljes sáv (páros év/hó marad 2 oszlop) */
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-cell,
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-bm-field,
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-bm-field--dropdown,
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .labeled-field > input.ad-form-cell,
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .labeled-field > select.ad-form-cell:not(.ad-form-bm-native),
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-layout-item > input.ad-form-cell,
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-layout-item > select.ad-form-cell:not(.ad-form-bm-native) {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  flex: 1 1 auto !important;
+  box-sizing: border-box !important;
+}
+
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .suffix-field,
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-suffix-unit {
+  width: 100% !important;
+  max-width: 100% !important;
+  align-self: stretch !important;
+}
+
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .suffix-field > input.ad-form-cell {
+  flex: 1 1 0 !important;
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
 }

@@ -1,5 +1,5 @@
 import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=immoUiParity1";
-import { refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=cell168px4";
+import { refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=deskSidebarFull1";
 import { initTireSizes } from "./tire-sizes-ui.js?v=tireFill1";
 import { applyAdFormDesk } from "./ad-form-desk.js?v=adFormDesk37";
 import {
@@ -247,8 +247,6 @@ function setRequired(wrap, on) {
   });
 }
 
-const AD_FORM_DESK_CELL_PX = "168px";
-
 function isFullWidthDeskControl(el) {
   if (el.id === "leiras") return true;
   if (LOCATION_FIELD_KEYS.has(el.id)) return true;
@@ -260,7 +258,7 @@ function isInlinePairDeskControl(el) {
   return Boolean(el.closest(".inline-2, .inline-2-labeled"));
 }
 
-function applyDeskInlinePairWidth(el) {
+function applyDeskSidebarControlWidth(el) {
   el.style.setProperty("width", "100%", "important");
   el.style.setProperty("min-width", "0", "important");
   el.style.setProperty("max-width", "100%", "important");
@@ -278,14 +276,10 @@ function applyDeskControlWidth(el, fullWidth) {
     return;
   }
   if (isInlinePairDeskControl(el)) {
-    applyDeskInlinePairWidth(el);
+    applyDeskSidebarControlWidth(el);
     return;
   }
-  el.style.setProperty("width", AD_FORM_DESK_CELL_PX, "important");
-  el.style.setProperty("min-width", AD_FORM_DESK_CELL_PX, "important");
-  el.style.setProperty("max-width", AD_FORM_DESK_CELL_PX, "important");
-  el.style.setProperty("flex", `0 0 ${AD_FORM_DESK_CELL_PX}`, "important");
-  el.style.removeProperty("field-sizing");
+  applyDeskSidebarControlWidth(el);
 }
 
 function placeWrap(wrap, cell) {
@@ -305,8 +299,15 @@ function placeWrap(wrap, cell) {
     el.style.setProperty("max-width", "100%", "important");
   });
   wrap.querySelectorAll(".suffix-field").forEach((el) => {
-    el.style.setProperty("width", "max-content", "important");
+    el.style.setProperty("width", "100%", "important");
     el.style.setProperty("max-width", "100%", "important");
+  });
+  wrap.querySelectorAll(".suffix-field > input").forEach((el) => {
+    if (el.classList.contains("ad-form-bm-native")) return;
+    el.style.setProperty("width", "100%", "important");
+    el.style.setProperty("min-width", "0", "important");
+    el.style.setProperty("max-width", "100%", "important");
+    el.style.setProperty("flex", "1 1 0%", "important");
   });
   wrap.querySelectorAll(".ad-form-bm-field").forEach((el) => {
     applyDeskControlWidth(el, false);

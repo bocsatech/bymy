@@ -6,14 +6,6 @@ const SLOT_LABELS = {
   kepek: "Képek",
 };
 
-/** Nyilvános demó képek — ha nincs admin útmutató feltöltve (Vercel / éles). */
-const GUIDE_FALLBACK = {
-  kepek: {
-    url: "/design-demos/sablon-demo-B.jpg",
-    alt: "Főkép sablon minta (demó B)",
-  },
-};
-
 let guideData = { slots: {} };
 let activeSlot = "alap";
 let loadPromise = null;
@@ -42,9 +34,8 @@ function paintGuideFrame(slotId) {
   if (!frame) return;
   activeSlot = slotId;
   const slot = guideData.slots?.[slotId] || {};
-  const fallback = GUIDE_FALLBACK[slotId];
-  const url = String(slot.url || fallback?.url || "").trim();
-  const alt = String(slot.alt || fallback?.alt || SLOT_LABELS[slotId] || "Útmutató").trim();
+  const url = String(slot.url || "").trim();
+  const alt = String(slot.alt || SLOT_LABELS[slotId] || "Útmutató").trim();
   const img = frame.querySelector("[data-desk-guide-img]");
   const empty = frame.querySelector("[data-desk-guide-empty]");
   const label = frame.querySelector("[data-desk-guide-label]");

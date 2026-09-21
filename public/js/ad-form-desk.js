@@ -1,4 +1,4 @@
-import { initAdFormDeskGuide, refreshAdFormDeskGuide, showDeskGuideSlot } from "./ad-form-desk-guide.js?v=adDeskGuide6";
+import { initAdFormDeskGuide, refreshAdFormDeskGuide, showDeskGuideSlot } from "./ad-form-desk-guide.js?v=adDeskGuide7";
 
 const DESK_MQ = "(min-width: 901px)";
 

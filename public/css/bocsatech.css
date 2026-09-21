@@ -205,6 +205,19 @@ th { color: var(--muted); font-weight: 600; }
 .layout-tile--desk-ev-block .layout-tile-label {
   color: #7ec8ff;
 }
+.layout-tile--desk-hidden-field {
+  border-style: dashed;
+  opacity: 0.72;
+}
+.layout-tile--desk-hidden-field .layout-tile-meta::after {
+  content: " · törölve (élőben rejtve)";
+}
+.layout-desk-empty-hint {
+  margin: 0.5rem 0 0;
+  font-size: 0.82rem;
+  color: var(--muted);
+  line-height: 1.45;
+}
 
 .layout-desk-editor {
   display: grid;

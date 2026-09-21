@@ -6,13 +6,14 @@ import {
   deskPinnedGroupKeys,
   deskStep2CanonicalRank,
   ensureDeskPinnedAnchorCells,
+  EV_LAYOUT_GROUP_KEYS,
   hiddenPinnedAnchorCount,
   hideSyntheticAnchors,
   restorePinnedBlockAnchors,
   isDeskSyntheticFieldKey,
   minAnchorRow,
-} from "./ad-form-desk-pinned-blocks.js?v=deskPinned4";
-import { layoutFieldVisibleForFuelProfile } from "./ad-form-layout-fuel-preview.js?v=deskFuelPrev4";
+} from "./ad-form-desk-pinned-blocks.js?v=deskPinned5";
+import { layoutFieldVisibleForFuelProfile } from "./ad-form-layout-fuel-preview.js?v=deskFuelPrev5";
 
 const COLS = 12;
 const ROW_PX = 64;
@@ -110,6 +111,24 @@ export function mountLayoutBoard(
     return layoutFieldVisibleForFuelProfile(cell.field_key, fuelPreview);
   }
 
+  function showEvFieldTilesInAdmin() {
+    return fuelPreview === "electric" || fuelPreview === "hybrid";
+  }
+
+  function evAdminStackCells(step) {
+    if (!deskPosting || step !== 2 || !showEvFieldTilesInAdmin()) return [];
+    return [...EV_LAYOUT_GROUP_KEYS]
+      .map((key) => byKey.get(key))
+      .filter(Boolean)
+      .filter((cell) => layoutFieldVisibleForFuelProfile(cell.field_key, fuelPreview))
+      .sort(
+        (a, b) =>
+          (Number(a.row) || 1) - (Number(b.row) || 1) ||
+          (Number(a.order) || 0) - (Number(b.order) || 0) ||
+          String(a.field_key).localeCompare(String(b.field_key))
+      );
+  }
+
   function stackItems(step, { excludeKey = "" } = {}) {
     return editable()
       .filter((cell) => !cell.hidden && Number(cell.step) === step && cell.field_key !== excludeKey)
@@ -150,9 +169,13 @@ export function mountLayoutBoard(
   function stackDisplayItems(step) {
     if (!deskPosting || step !== 2) return stackItems(step);
     const grouped = deskPinnedGroupKeys();
+    const evTiles = showEvFieldTilesInAdmin();
     const regular = stackItems(step).filter((cell) => !grouped.has(cell.field_key));
-    const synthetics = syntheticStackCells(step);
-    return [...regular, ...synthetics].sort(
+    const synthetics = syntheticStackCells(step).filter(
+      (cell) => !(evTiles && cell.field_key === "__desk_electric_block__")
+    );
+    const evFields = evAdminStackCells(step);
+    return [...regular, ...synthetics, ...evFields].sort(
       (a, b) =>
         (Number(a.row) || 1) - (Number(b.row) || 1) ||
         (Number(a.col) || 1) - (Number(b.col) || 1) ||
@@ -169,10 +192,45 @@ export function mountLayoutBoard(
     });
   }
 
+  function renumberDeskStackStep(step) {
+    const items =
+      deskPosting && step === 2
+        ? (() => {
+            const grouped = deskPinnedGroupKeys();
+            const evTiles = showEvFieldTilesInAdmin();
+            const regular = stackItems(step).filter((cell) => !grouped.has(cell.field_key));
+            const synthetics = syntheticStackCells(step).filter(
+              (cell) => !(evTiles && cell.field_key === "__desk_electric_block__")
+            );
+            const evFields = evAdminStackCells(step);
+            return [...regular, ...synthetics, ...evFields].sort(
+              (a, b) =>
+                (Number(a.row) || 1) - (Number(b.row) || 1) ||
+                (Number(a.order) || 0) - (Number(b.order) || 0) ||
+                String(a.field_key).localeCompare(String(b.field_key))
+            );
+          })()
+        : stackItems(step);
+    items.forEach((item, index) => {
+      const row = index + 1;
+      if (item.__synthetic) {
+        applySyntheticStackRow(byKey, item.field_key, row, step);
+        item.row = row;
+        return;
+      }
+      item.row = row;
+      item.col = 1;
+      item.colSpan = 12;
+      item.order = row;
+      syncPair(item);
+    });
+  }
+
   function ensureDeskStackCells() {
     if (!deskPosting) return;
     if (ensureDeskPinnedAnchorCells(cells, byKey)) notify();
-    collapsePinnedAnchorRows(byKey, 2);
+    if (!showEvFieldTilesInAdmin()) collapsePinnedAnchorRows(byKey, 2);
+    for (const step of [1, 2, 3, 5]) renumberDeskStackStep(step);
   }
 
   function isDeskGapInsertBoard(board) {
@@ -253,7 +311,8 @@ export function mountLayoutBoard(
       : `${cell.colSpan}/12 · lépés ${cell.step}${syntheticTileMeta(cell)}`;
     const synClass =
       cell.__synthetic && cell.field_key === "__desk_electric_block__" ? " layout-tile--desk-ev-block" : "";
-    return `<button type="button" class="layout-tile${stack ? " layout-tile--desk-stack" : ""}${synClass}" data-field="${escapeAttr(cell.field_key)}"${style ? ` style="${style}"` : ""}>
+    const hiddenClass = cell.hidden && !cell.__synthetic ? " layout-tile--desk-hidden-field" : "";
+    return `<button type="button" class="layout-tile${stack ? " layout-tile--desk-stack" : ""}${synClass}${hiddenClass}" data-field="${escapeAttr(cell.field_key)}"${style ? ` style="${style}"` : ""}>
       <span class="layout-tile-label">${escapeHtml(cell.label)}</span>
       <span class="layout-tile-meta">${meta}</span>
       <span class="layout-tile-steps" data-step-btns="1">
@@ -302,10 +361,13 @@ export function mountLayoutBoard(
 
   function deskStackBoardHtml(step) {
     const items = stackDisplayItems(step);
-    const maxRow = Math.max(3, ...items.map((cell) => Number(cell.row) || 1));
-    const tiles = items.map((cell) => tileHtml(cell)).join("");
+    const tiles = items.map((cell) => tileHtml(cell, { stack: true })).join("");
+    const emptyHint =
+      items.length === 0
+        ? `<p class="layout-desk-empty-hint">Nincs látható mező ebben az előnézetben. Próbáld a másik üzemanyag-fület, vagy állítsd vissza a Törölt mezők közül.</p>`
+        : "";
     return `<section class="layout-step" data-step="${step}">
-      <div class="layout-board" data-board="${step}" style="grid-template-rows: repeat(${maxRow}, ${ROW_PX}px)">${tiles}</div>
+      <div class="layout-board layout-board--desk-stack" data-board="${step}" data-desk-stack="1">${tiles}${emptyHint}</div>
     </section>`;
   }
 
@@ -350,9 +412,7 @@ export function mountLayoutBoard(
 
   function bindDeskAccordions() {
     if (!deskPosting) return;
-    const openMuszaki =
-      fuelPreview === "electric" || fuelPreview === "hybrid" || fuelPreview === "combustion";
-    if (openMuszaki) {
+    if (deskPosting) {
       root.querySelectorAll(".layout-desk-acc[data-desk-acc]").forEach((el) => {
         const on = el.getAttribute("data-desk-acc") === "muszaki";
         el.classList.toggle("is-open", on);

@@ -130,18 +130,32 @@ export function collapsePinnedAnchorRows(byKey, step) {
   }
 }
 
-export function applySyntheticStackRow(byKey, syntheticKey, row, step) {
+export function applySyntheticStackRow(byKey, syntheticKey, row, step, { col = 1, colSpan = 12 } = {}) {
   const block = SYNTHETIC_BY_KEY.get(syntheticKey);
   if (!block) return;
+  const c = clampCol(col);
+  const span = clampColSpan(colSpan, c);
   for (const key of block.anchorKeys) {
     const cell = byKey.get(key);
     if (!cell) continue;
     cell.step = step;
     cell.row = row;
-    cell.col = 1;
-    cell.colSpan = 12;
-    cell.order = row;
+    cell.col = c;
+    cell.colSpan = span;
+    cell.order = (row - 1) * 12 + c;
   }
+}
+
+function clampCol(value) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return 1;
+  return Math.min(12, Math.max(1, Math.round(n)));
+}
+
+function clampColSpan(span, col) {
+  const n = Number(span);
+  const s = Number.isFinite(n) ? Math.round(n) : 12;
+  return Math.min(12, Math.max(1, s), 13 - col);
 }
 
 export function hideSyntheticAnchors(byKey, syntheticKey) {

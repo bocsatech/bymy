@@ -7,8 +7,7 @@ import {
   hideSyntheticAnchors,
   isDeskSyntheticFieldKey,
   minAnchorRow,
-  sortDeskStep2StackItems,
-} from "./ad-form-desk-pinned-blocks.js?v=deskPinned2";
+} from "./ad-form-desk-pinned-blocks.js?v=deskPinned3";
 
 const COLS = 12;
 const ROW_PX = 64;
@@ -131,52 +130,26 @@ export function mountLayoutBoard(root, layout, { onChange, stepNames, deskPostin
     const grouped = deskPinnedGroupKeys();
     const regular = stackItems(step).filter((cell) => !grouped.has(cell.field_key));
     const synthetics = syntheticStackCells(step);
-    return sortDeskStep2StackItems([...regular, ...synthetics]);
+    return [...regular, ...synthetics].sort(
+      (a, b) =>
+        (Number(a.row) || 1) - (Number(b.row) || 1) ||
+        (Number(a.col) || 1) - (Number(b.col) || 1) ||
+        (Number(a.order) || 0) - (Number(b.order) || 0) ||
+        String(a.field_key).localeCompare(String(b.field_key))
+    );
   }
 
-  function normalizeStackStep(step) {
-    if (deskPosting && step === 2) collapsePinnedAnchorRows(byKey, step);
-    const items = stackDisplayItems(step);
-    let changed = false;
-    items.forEach((cell, index) => {
-      const row = index + 1;
-      if (cell.__synthetic) {
-        for (const block of DESK_STEP2_PINNED_BLOCKS) {
-          if (block.syntheticKey !== cell.field_key) continue;
-          const anchors = anchorCellsForBlock(byKey, block, step);
-          for (const anchor of anchors) {
-            if (
-              anchor.step !== step ||
-              anchor.row !== row ||
-              anchor.col !== 1 ||
-              anchor.colSpan !== 12
-            ) {
-              anchor.step = step;
-              anchor.row = row;
-              anchor.col = 1;
-              anchor.colSpan = 12;
-              anchor.order = row;
-              changed = true;
-            }
-          }
-        }
-        return;
-      }
-      if (cell.row !== row || cell.col !== 1 || cell.colSpan !== 12) {
-        cell.row = row;
-        cell.col = 1;
-        cell.colSpan = 12;
-        cell.order = row;
-        syncPair(cell);
-        changed = true;
-      }
+  function commitSyntheticCell(cell, step) {
+    if (!cell?.__synthetic) return;
+    applySyntheticStackRow(byKey, cell.field_key, cell.row, step, {
+      col: cell.col,
+      colSpan: cell.colSpan,
     });
-    return changed;
   }
 
   function ensureDeskStackCells() {
     if (!deskPosting) return;
-    for (const step of [1, 2, 3, 5]) normalizeStackStep(step);
+    collapsePinnedAnchorRows(byKey, 2);
   }
 
   function tileHtml(cell, { stack = false } = {}) {
@@ -221,9 +194,10 @@ export function mountLayoutBoard(root, layout, { onChange, stepNames, deskPostin
 
   function deskStackBoardHtml(step) {
     const items = stackDisplayItems(step);
-    const tiles = items.map((cell) => tileHtml(cell, { stack: true })).join("");
+    const maxRow = Math.max(3, ...items.map((cell) => Number(cell.row) || 1));
+    const tiles = items.map((cell) => tileHtml(cell)).join("");
     return `<section class="layout-step" data-step="${step}">
-      <div class="layout-board layout-board--desk-stack" data-board="${step}" data-desk-stack="1">${tiles}</div>
+      <div class="layout-board" data-board="${step}" style="grid-template-rows: repeat(${maxRow}, ${ROW_PX}px)">${tiles}</div>
     </section>`;
   }
 
@@ -431,13 +405,9 @@ export function mountLayoutBoard(root, layout, { onChange, stepNames, deskPostin
       cell.step = toStep;
       cell.row = maxRowOnStep(toStep, { excludeKey: cell.field_key }) + 1;
       cell.col = 1;
-      if (deskPosting && [1, 2, 3, 5].includes(toStep)) {
-        cell.colSpan = 12;
-        cell.order = cell.row;
-      } else {
-        cell.order = (cell.row - 1) * COLS + cell.col;
-      }
-      syncPair(cell);
+      cell.order = (cell.row - 1) * COLS + cell.col;
+      if (cell.__synthetic) commitSyntheticCell(cell, toStep);
+      else syncPair(cell);
       return;
     }
 
@@ -452,7 +422,8 @@ export function mountLayoutBoard(root, layout, { onChange, stepNames, deskPostin
     }
     cell.step = toStep;
     cell.order = (cell.row - 1) * COLS + cell.col;
-    syncPair(cell);
+    if (cell.__synthetic) commitSyntheticCell(cell, toStep);
+    else syncPair(cell);
   }
 
   function bindTiles() {
@@ -493,8 +464,8 @@ export function mountLayoutBoard(root, layout, { onChange, stepNames, deskPostin
             const next = clamp(fromStep + Number(btn.getAttribute("data-step-delta")), 1, 5);
             if (next === fromStep) return;
             applySyntheticStackRow(byKey, stepKey, maxRowOnStep(next, { excludeKey: stepKey }) + 1, next);
-            if (deskPosting && [1, 2, 3, 5].includes(fromStep)) normalizeStackStep(fromStep);
-            if (deskPosting && [1, 2, 3, 5].includes(next)) normalizeStackStep(next);
+            compactStep(fromStep);
+            compactStep(next);
             notify();
             mount();
             return;
@@ -504,20 +475,10 @@ export function mountLayoutBoard(root, layout, { onChange, stepNames, deskPostin
           cell.step = next;
           cell.row = maxRowOnStep(next, { excludeKey: cell.field_key }) + 1;
           cell.col = 1;
-          if (deskPosting && [1, 2, 3, 5].includes(next)) {
-            cell.colSpan = 12;
-            cell.order = cell.row;
-          } else {
-            cell.order = (cell.row - 1) * COLS + cell.col;
-          }
+          cell.order = (cell.row - 1) * COLS + cell.col;
           syncPair(cell);
-          if (deskPosting && ([1, 2, 3, 5].includes(fromStep) || [1, 2, 3, 5].includes(next))) {
-            normalizeStackStep(fromStep);
-            normalizeStackStep(next);
-          } else {
-            compactStep(fromStep);
-            compactStep(next);
-          }
+          compactStep(fromStep);
+          compactStep(next);
           notify();
           mount();
           return;
@@ -595,7 +556,8 @@ export function mountLayoutBoard(root, layout, { onChange, stepNames, deskPostin
             cell.col = col;
             cell.colSpan = span;
             cell.order = (cell.row - 1) * COLS + cell.col;
-            syncPair(cell);
+            if (cell.__synthetic) commitSyntheticCell(cell, Number(board.getAttribute("data-board")));
+            else syncPair(cell);
             paint(tile, cell);
             return;
           }
@@ -676,7 +638,7 @@ export function mountLayoutBoard(root, layout, { onChange, stepNames, deskPostin
               reorderStackDom(dropBoard, tile, lastY);
               syncStackFromDom(dropBoard);
               if (fromStep !== Number(dropBoard.getAttribute("data-board"))) {
-                normalizeStackStep(fromStep);
+                compactStep(fromStep);
               }
             } else if (dropBoard !== board) {
               assignToBoard(cell, dropBoard, lastX, lastY, { crossed: true });
@@ -685,12 +647,10 @@ export function mountLayoutBoard(root, layout, { onChange, stepNames, deskPostin
             }
           }
 
-          if (isStackBoard(dropBoard)) {
-            normalizeStackStep(Number(dropBoard.getAttribute("data-board")));
-          } else {
-            compactStep(fromStep);
-            compactStep(Number(cell.step));
-          }
+          const dropStep = Number(cell.step);
+          if (cell.__synthetic) commitSyntheticCell(cell, dropStep);
+          compactStep(fromStep);
+          compactStep(dropStep);
           notify();
           mount();
         };
@@ -710,15 +670,9 @@ export function mountLayoutBoard(root, layout, { onChange, stepNames, deskPostin
         const step = Number(cell.step);
         cell.row = maxRowOn(step) + 1;
         cell.col = 1;
-        if (deskPosting && [1, 2, 3, 5].includes(step)) {
-          cell.colSpan = 12;
-          cell.order = cell.row;
-        } else {
-          cell.order = (cell.row - 1) * COLS + cell.col;
-        }
+        cell.order = (cell.row - 1) * COLS + cell.col;
         syncPair(cell);
-        if (deskPosting && [1, 2, 3, 5].includes(step)) normalizeStackStep(step);
-        else compactStep(step);
+        compactStep(step);
         notify();
         mount();
       });

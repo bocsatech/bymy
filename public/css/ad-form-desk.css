@@ -948,6 +948,23 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-
     width: 100% !important;
   }
 
+  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form .card[data-ad-postal-card="1"] {
+    display: block !important;
+  }
+
+  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form .card[data-ad-postal-card="1"] > .card-body.form-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: var(--ad-cell-gap) !important;
+  }
+
+  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form .field-stack--location[data-ad-hide-street-only="1"] {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100%;
+    gap: var(--ad-cell-gap);
+  }
+
   body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form .inline-2,
   body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form .inline-2-labeled {
     gap: var(--ad-cell-gap) !important;

@@ -609,9 +609,54 @@ function cleanupStrayEvLayoutItems(form) {
   }
 }
 
+function findElérhetőségCard(form) {
+  const panel = form.querySelector('.step-panel[data-step="5"]');
+  if (!panel) return null;
+  for (const card of panel.querySelectorAll(".card")) {
+    const head = card.querySelector(".card-head")?.textContent?.trim() || "";
+    if (/elérhetőség/i.test(head)) return card;
+  }
+  return null;
+}
+
+function ensurePostalCardVisible(form) {
+  if (!adHideStreetOnly(form)) return;
+  const stack = form.querySelector(".field-stack--location");
+  const card = findElérhetőségCard(form) || stack?.closest(".card");
+  if (!card) return;
+
+  card.hidden = false;
+  card.classList.remove("ad-immo-orphan", "ad-layout-hidden");
+  card.removeAttribute("hidden");
+  card.style.removeProperty("display");
+
+  const body = card.querySelector(".card-body") || card;
+  if (stack && stack.parentElement !== body && !body.contains(stack)) {
+    body.prepend(stack);
+  }
+
+  const grid = body.querySelector(":scope > .form-grid");
+  if (grid) {
+    grid.hidden = false;
+    grid.classList.remove("ad-layout-grid-retired");
+    grid.removeAttribute("hidden");
+    grid.style.removeProperty("display");
+  }
+}
+
 function pinLocation(form) {
   const stack = form.querySelector(".field-stack--location");
   if (!stack) return;
+
+  if (adHideStreetOnly(form)) {
+    stack.classList.remove("ad-layout-item", "ad-layout-hidden", "ad-form-contact-profile-hidden");
+    stack.style.removeProperty("grid-column");
+    stack.style.removeProperty("grid-row");
+    delete stack.dataset.layoutRow;
+    ensurePostalCardVisible(form);
+    return;
+  }
+
   const canvas = canvasForStep(form, 5);
   if (canvas && stack.parentElement !== canvas) {
     canvas.appendChild(stack);
@@ -635,6 +680,7 @@ function hideLayoutShellCards(form) {
     panel.querySelectorAll(":scope > .card").forEach((card) => {
       if (card.id === "success-panel") return;
       if (
+        card.dataset.adPostalCard === "1" ||
         card.querySelector(
           ".field-stack--location, .ad-location-fields, #megtekintesi_cim, #telepules, #iranyitoszam"
         )
@@ -1007,6 +1053,7 @@ function syncAdLocationPostalVisibility(form = document.getElementById("ad-form"
   restoreAdLocationStackForHideStreet(form);
   pinLocation(form);
   applyAdHideStreetOnlyFields(form);
+  ensurePostalCardVisible(form);
 }
 
 if (document.readyState === "loading") {

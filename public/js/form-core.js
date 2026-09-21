@@ -9,7 +9,10 @@ import {
   normalizeOkmanyJelleg,
 } from "./equipment-data.js?v=egyebDupFix1";
 import { KIVITEL_OPTIONS, normalizeKivitel } from "./kivitel-options.js?v=kivitel1";
-import { EGYEB_INFO_OPTIONS } from "./egyeb-info-data.js";
+import { EGYEB_INFO_OPTIONS } from "./egyeb-info-data.js?v=egyebInfoFix2";
+
+let renderEgyebInfoHook = null;
+window.addEventListener("ad-form-render-egyeb-info", () => renderEgyebInfoHook?.());
 import { initVehicleCatalogSelects } from "./vehicle-catalog-client.js";
 import { compressListingPhoto, MAX_LISTING_PHOTOS } from "./listing-photo-compress.js?v=myAds2";
 import { uploadImage } from "./upload-image.js?v=supabaseUpload1";
@@ -20,7 +23,7 @@ import {
   renderListingPhotoOverlay,
 } from "./listing-photo-overlay.js?v=photoOverlay2";
 import { refreshAdFormBmPickers, applyAdFormBmFieldValues } from "./ad-form-bm-pickers.js?v=egyebInfoFix1";
-import { applyAdFormDesk, isAdFormDesk } from "./ad-form-desk.js?v=adFormDesk42";
+import { applyAdFormDesk, isAdFormDesk } from "./ad-form-desk.js?v=adFormDesk43";
 import { initKmInput, parseKmDigits, setKmInputValue } from "./km-input.js?v=kmFmt1";
 import {
   EV_FUEL_FIELD_IDS,
@@ -524,11 +527,14 @@ function renderEquipment() {
 }
 
 function syncEgyebInfoVisibility() {
-  const card = egyebInfoRoot?.closest(".card");
+  const card = ensureEgyebInfoRoot()?.closest(".card") || egyebInfoRoot?.closest(".card");
   if (!card) return;
   const show = !isKisteherAd();
   card.hidden = !show;
   card.classList.toggle("hidden", !show);
+  if (!show) {
+    form.querySelector('[data-desk-sub-acc="egyeb-info"]')?.remove();
+  }
 }
 
 function applyAutoFill() {
@@ -1918,8 +1924,9 @@ renderFuelDropdown();
 renderAllapotDropdown();
 renderFuelSelector();
 renderKlimaOptions();
-renderEquipment();
 renderEgyebInfo();
+renderEgyebInfoHook = renderEgyebInfo;
+renderEquipment();
 wrapMdOutlinedFields();
 bindFuelPickerSync();
 syncFuelDependentFields();

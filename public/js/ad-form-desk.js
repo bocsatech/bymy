@@ -196,8 +196,21 @@ function afterDeskGuideAlign(form, accId, { photoFocus = false } = {}) {
   });
 }
 
+function isEgyebInfoHiddenForForm(form) {
+  const subtype = String(
+    form?.elements.namedItem("hirdetes_alkategoria")?.value ??
+      form?.elements.namedItem("jarmu_kategoria")?.value ??
+      ""
+  )
+    .trim()
+    .toLowerCase();
+  return subtype === "kisteher";
+}
+
 function mountExtrakSubAccordions(form) {
   if (!form || !isAdFormDesk(form)) return;
+
+  window.dispatchEvent(new Event("ad-form-render-egyeb-info"));
 
   const equipmentRoot = form.querySelector("#equipment-sections");
   if (equipmentRoot) {
@@ -218,17 +231,18 @@ function mountExtrakSubAccordions(form) {
   }
   if (
     equipmentRoot &&
+    !isEgyebInfoHiddenForForm(form) &&
     egyebGrid?.isConnected &&
     egyebGrid.querySelector('input[name="egyeb_info"]') &&
-    egyebCard &&
-    !egyebCard.hidden &&
     !equipmentRoot.querySelector('[data-desk-sub-acc="egyeb-info"]')
   ) {
-    const label = egyebCard.querySelector(".card-head")?.textContent?.trim() || "Egyéb információk";
+    const label = egyebCard?.querySelector(".card-head")?.textContent?.trim() || "Egyéb információk";
     equipmentRoot.appendChild(createSubAccordion("egyeb-info", label, egyebGrid));
-    egyebCard.hidden = true;
-    egyebCard.classList.add("hidden");
-    egyebCard.setAttribute("hidden", "");
+    if (egyebCard) {
+      egyebCard.hidden = true;
+      egyebCard.classList.add("hidden");
+      egyebCard.setAttribute("hidden", "");
+    }
   }
 }
 
@@ -526,6 +540,8 @@ function applyAdFormDesk({ openStep = null, scrollToAccordion = null } = {}) {
   let accId = openStep != null ? accordionForStep(openStep) : preserved;
   if (!accId) accId = "alap";
   openAccordion(form, accId);
+  mountExtrakSubAccordions(form);
+  window.dispatchEvent(new Event("ad-form-render-egyeb-info"));
   mountExtrakSubAccordions(form);
   syncPhotoStage(form);
   updateAccordionSums(form);

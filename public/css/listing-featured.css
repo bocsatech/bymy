@@ -1,0 +1,72 @@
+/* Kiemelt hirdetés — lista kártya (F kombó demó) */
+:root {
+  --listing-featured-yellow: #f0c14b;
+  --listing-featured-yellow-dark: #e6a800;
+}
+
+.hf-card--listing.hf-card--featured,
+.home-grid-card.home-grid-card--featured {
+  border: 2px solid var(--listing-featured-yellow);
+  box-shadow: 0 8px 22px rgba(240, 193, 75, 0.22);
+}
+
+.hf-card--listing.hf-card--featured .hf-card-price,
+.home-grid-card.home-grid-card--featured .home-grid-card-price {
+  color: #0d47a1;
+}
+
+.hf-card--listing.hf-card--featured .hf-card-media::after,
+.home-grid-card.home-grid-card--featured .home-grid-card-media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background: linear-gradient(0deg, rgba(11, 18, 32, 0.35) 0%, rgba(11, 18, 32, 0) 38%);
+}
+
+.listing-featured-badge,
+.listing-featured-ribbon {
+  position: absolute;
+  z-index: 2;
+  pointer-events: none;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.listing-featured-badge {
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 5px 14px;
+  border-radius: 999px;
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  background: var(--listing-featured-yellow);
+  color: #1a1200;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.listing-featured-ribbon {
+  bottom: 8px;
+  right: 8px;
+  padding: 5px 10px;
+  border-radius: 7px;
+  font-size: 0.6rem;
+  letter-spacing: 0.04em;
+  background: linear-gradient(135deg, var(--listing-featured-yellow) 0%, var(--listing-featured-yellow-dark) 100%);
+  color: #1a1200;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.22);
+}
+
+html[data-theme="dark"] .hf-card--listing.hf-card--featured,
+html[data-theme="dark"] .home-grid-card.home-grid-card--featured {
+  border-color: #e6b422;
+  box-shadow: 0 8px 22px rgba(240, 193, 75, 0.15);
+}
+
+html[data-theme="dark"] .hf-card--listing.hf-card--featured .hf-card-price,
+html[data-theme="dark"] .home-grid-card.home-grid-card--featured .home-grid-card-price {
+  color: #64b5f6;
+}

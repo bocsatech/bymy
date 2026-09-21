@@ -1948,6 +1948,7 @@ function userEditView() {
     <div class="user-edit">
       <h2>Felhasználó kezelése (#${esc(editingUser.id)})</h2>
       <p class="hint">Regisztráció: ${esc(fmtWhen(editingUser.createdAt))} · Utoljára belépett: ${esc(fmtWhen(editingUser.lastLoginAt))} · Hirdetések: ${editingUser.listingCount ?? (editingUser.listings || []).length}</p>
+      <div class="user-edit__narrow">
       <div class="user-edit__core">
         <label class="user-edit__field user-edit__field--wide">
           <span class="user-edit__label">Email</span>
@@ -1967,8 +1968,10 @@ function userEditView() {
 
       <h3 class="user-edit__section-title">Profil mezők</h3>
       <div class="user-edit__profile-fields">${fieldRows}</div>
+      </div>
 
-      <h3 style="margin:1.25rem 0 0.5rem; font-size:0.95rem; color:var(--muted)">Hirdetései</h3>
+      <div class="user-edit__listings">
+      <h3 class="user-edit__section-title">Hirdetései</h3>
       <div class="table-scroll">
         <table class="table-dense">
           <thead><tr><th>#</th><th>Cím</th><th>Státusz</th><th>Frissítve</th><th></th></tr></thead>
@@ -1977,7 +1980,7 @@ function userEditView() {
               .map(
                 (l) => `<tr>
                   <td>${l.id}</td>
-                  <td>${esc(l.title || "")}</td>
+                  <td class="user-edit__listing-title">${esc(l.title || "")}</td>
                   <td>
                     <select data-act="setUserListingStatus" data-id="${l.id}">
                       ${["mentett", "feladott", "inaktiv"]
@@ -1996,6 +1999,7 @@ function userEditView() {
               .join("") || `<tr><td colspan="5">Nincs hirdetése.</td></tr>`}
           </tbody>
         </table>
+      </div>
       </div>
 
       <div class="row" style="display:flex; gap:0.75rem; flex-wrap:wrap; margin-top:1.25rem">

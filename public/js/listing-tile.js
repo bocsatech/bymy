@@ -1,5 +1,6 @@
 import { formatListingDisplayTitle } from "./listing-card.js";
 import { listingDetailHref } from "./listing-return.js?v=scrollTop1";
+import { appendListingFeaturedDecor } from "./listing-featured-decor.js?v=featured1";
 
 const ICON_YEAR = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M3 10h18M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>`;
 const ICON_KM = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 18 12 6l8 12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M7.5 18h9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>`;
@@ -165,10 +166,10 @@ function appendSpec(row, iconSvg, text, spec) {
   row.appendChild(el);
 }
 
-export function createListingTileCard(item, { className = "hf-card hf-card--listing" } = {}) {
+export function createListingTileCard(item, { className = "hf-card hf-card--listing", featured = false } = {}) {
   const preview = item.preview ?? {};
   const link = document.createElement("a");
-  link.className = className;
+  link.className = featured ? `${className} hf-card--featured`.trim() : className;
   link.href = listingDetailHref(item.id);
   link.dataset.listingId = String(item.id);
   link.setAttribute("role", "listitem");
@@ -193,6 +194,7 @@ export function createListingTileCard(item, { className = "hf-card hf-card--list
     img.referrerPolicy = "no-referrer";
     media.appendChild(img);
   }
+  if (featured) appendListingFeaturedDecor(media);
 
   const label = document.createElement("span");
   label.className = "hf-card-label";

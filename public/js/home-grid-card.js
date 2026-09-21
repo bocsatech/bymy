@@ -11,6 +11,7 @@ import {
   addParkplatzItem,
   removeParkplatzItem,
 } from "./fok-data.js?v=parkThumb1";
+import { listingFeaturedDecorHtml } from "./listing-featured-decor.js?v=featured1";
 
 function upgradeHaThumbClient(url) {
   let s = String(url || "").trim();
@@ -92,9 +93,9 @@ function buildPhotoMarkup(urls) {
   return `<div class="home-grid-card-photo-track is-multi" tabindex="0" role="group" aria-label="Hirdetés képei">${slides}</div>`;
 }
 
-export function createHomeGridCard(item) {
+export function createHomeGridCard(item, { featured = false } = {}) {
   const card = document.createElement("article");
-  card.className = "home-grid-card";
+  card.className = featured ? "home-grid-card home-grid-card--featured" : "home-grid-card";
   card.dataset.listingId = String(item.id);
   card.setAttribute("role", "listitem");
 
@@ -137,6 +138,7 @@ export function createHomeGridCard(item) {
 
   card.innerHTML = `
     <div class="home-grid-card-media">
+      ${featured ? listingFeaturedDecorHtml() : ""}
       ${buildPhotoMarkup(photoUrls)}
       ${
         multi

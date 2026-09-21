@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="hu">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Kiemelt hirdetés — lista kártya demók</title>
+    <style>
+      :root {
+        --ink: #111;
+        --muted: #555;
+        --panel: #eceff3;
+        --border: #d4d4d4;
+        --yellow: #f0c14b;
+        --yellow-dark: #c99700;
+        --blue: #1565c0;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: Inter, "Helvetica Neue", Arial, sans-serif;
+        background: var(--panel);
+        color: var(--ink);
+        padding: 28px 20px 56px;
+      }
+      h1 {
+        margin: 0 0 8px;
+        font-size: 1.4rem;
+      }
+      .lead {
+        margin: 0 0 20px;
+        max-width: 54rem;
+        color: var(--muted);
+        line-height: 1.5;
+        font-size: 0.95rem;
+      }
+      .toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 28px;
+      }
+      .toolbar button {
+        padding: 9px 14px;
+        border-radius: 8px;
+        border: 1px solid var(--blue);
+        background: var(--blue);
+        color: #fff;
+        font: inherit;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .toolbar button.secondary {
+        background: #fff;
+        color: var(--blue);
+      }
+      .scenario {
+        margin-bottom: 36px;
+        max-width: 1180px;
+      }
+      .scenario__head {
+        margin-bottom: 12px;
+      }
+      .scenario__head h2 {
+        margin: 0 0 6px;
+        font-size: 1.08rem;
+      }
+      .scenario__head p {
+        margin: 0;
+        font-size: 0.88rem;
+        color: var(--muted);
+        line-height: 1.45;
+        max-width: 52rem;
+      }
+      .scenario__tag {
+        display: inline-block;
+        margin-bottom: 6px;
+        padding: 3px 8px;
+        border-radius: 6px;
+        background: #fff;
+        border: 1px solid var(--border);
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: #444;
+      }
+      .capture {
+        background: #f6f7f9;
+        border: 1px solid #c8cdd4;
+        border-radius: 12px;
+        padding: 18px 16px 20px;
+      }
+      .capture__label {
+        font-size: 0.75rem;
+        font-weight: 650;
+        color: #666;
+        margin-bottom: 12px;
+        letter-spacing: 0.02em;
+      }
+
+      /* —— Lista rács (használtautó-szerű kártyák) —— */
+      .list-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+        max-width: 960px;
+      }
+      .list-grid--wide-first {
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+      }
+      .list-grid--wide-first .card:nth-child(1) {
+        grid-column: span 2;
+      }
+      .list-grid--wide-first .card:nth-child(1) .card__media {
+        aspect-ratio: 16 / 9;
+      }
+
+      .card {
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 9px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        padding: 0 0 0.72rem;
+        position: relative;
+        text-decoration: none;
+        color: inherit;
+        transition: box-shadow 0.15s ease, transform 0.15s ease, border-color 0.15s ease;
+      }
+      .card:hover {
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+      }
+      .card__media {
+        position: relative;
+        aspect-ratio: 16 / 10;
+        background: #e8ebef;
+        overflow: hidden;
+      }
+      .card__media img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transform: scale(1.08);
+        transform-origin: center;
+      }
+      .card__fav {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.92);
+        border: 0;
+        display: grid;
+        place-items: center;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+        pointer-events: none;
+      }
+      .card__fav svg {
+        width: 18px;
+        height: 18px;
+      }
+      .card__title {
+        margin: 0.6rem 0.72rem 0;
+        font-size: 0.99rem;
+        font-weight: 800;
+        line-height: 1.25;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .card__sub {
+        margin: 0.13rem 0.72rem 0;
+        font-size: 0.79rem;
+        color: #333;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .card__price {
+        margin: 0.44rem 0.72rem 0;
+        font-size: 1.16rem;
+        font-weight: 800;
+        line-height: 1.15;
+      }
+      .card__specs {
+        display: flex;
+        flex-wrap: nowrap;
+        gap: 0.44rem;
+        margin: 0.44rem 0.72rem 0;
+        font-size: 0.77rem;
+        font-weight: 500;
+        overflow: hidden;
+      }
+      .card__spec {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.28rem;
+        white-space: nowrap;
+      }
+      .card__spec svg {
+        width: 13px;
+        height: 13px;
+        flex-shrink: 0;
+      }
+
+      /* —— Kiemelés variánsok —— */
+      .card--feat-border {
+        border: 2px solid var(--yellow);
+        box-shadow: 0 0 0 1px rgba(201, 151, 0, 0.25), 0 10px 24px rgba(240, 193, 75, 0.22);
+      }
+      .card--feat-border:hover {
+        box-shadow: 0 0 0 1px rgba(201, 151, 0, 0.35), 0 14px 28px rgba(240, 193, 75, 0.28);
+      }
+      .card--feat-lift {
+        transform: scale(1.02);
+        z-index: 1;
+        border-color: #b8bcc4;
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+      }
+      .card--feat-stripe::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--yellow) 0%, #ffe082 100%);
+        z-index: 2;
+      }
+      .card__badge {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        z-index: 2;
+        padding: 4px 9px;
+        border-radius: 6px;
+        font-size: 0.68rem;
+        font-weight: 800;
+        letter-spacing: 0.06em;
+        background: var(--yellow);
+        color: #1a1200;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+      }
+      .card__badge--dark {
+        background: rgba(11, 18, 32, 0.82);
+        color: #fff;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+      .card--feat-price .card__price {
+        color: #0d47a1;
+      }
+      .card__ribbon {
+        position: absolute;
+        top: 12px;
+        right: -28px;
+        z-index: 3;
+        transform: rotate(36deg);
+        background: var(--yellow);
+        color: #1a1200;
+        font-size: 0.62rem;
+        font-weight: 800;
+        letter-spacing: 0.05em;
+        padding: 4px 36px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+      }
+      .card--feat-overlay .card__media::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background: linear-gradient(
+          0deg,
+          rgba(11, 18, 32, 0.45) 0%,
+          rgba(11, 18, 32, 0) 42%
+        );
+      }
+      .card--feat-combo {
+        border: 2px solid var(--yellow);
+        box-shadow: 0 8px 22px rgba(240, 193, 75, 0.22);
+      }
+      .card--feat-combo .card__media::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background: linear-gradient(
+          0deg,
+          rgba(11, 18, 32, 0.35) 0%,
+          rgba(11, 18, 32, 0) 38%
+        );
+      }
+      .card--feat-combo .card__price {
+        color: #0d47a1;
+      }
+      .card__badge--top-center {
+        top: 8px;
+        left: 50%;
+        right: auto;
+        transform: translateX(-50%);
+        padding: 5px 14px;
+        border-radius: 999px;
+        font-size: 0.65rem;
+        letter-spacing: 0.08em;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      }
+      .card__ribbon--br {
+        top: auto;
+        bottom: 8px;
+        right: 8px;
+        left: auto;
+        transform: none;
+        border-radius: 7px;
+        padding: 5px 10px;
+        font-size: 0.6rem;
+        letter-spacing: 0.04em;
+        background: linear-gradient(135deg, #f0c14b 0%, #e6a800 100%);
+        border: 1px solid rgba(255, 255, 255, 0.45);
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.22);
+      }
+
+      .legend {
+        margin-top: 14px;
+        font-size: 0.8rem;
+        color: var(--muted);
+        line-height: 1.4;
+      }
+      .legend strong {
+        color: var(--ink);
+      }
+
+      @media (max-width: 820px) {
+        .list-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .list-grid--wide-first {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .list-grid--wide-first .card:nth-child(1) {
+          grid-column: span 2;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Kiemelt hirdetés — lista kártya demók</h1>
+    <p class="lead">
+      Cél: több kattintás ugyanazon a listán belül. Az alap kártya a jelenlegi bymy / használtautó-szerű
+      elrendezés. Minden változatnál <strong>egy</strong> hirdetés kap kiemelést (Peugeot), a többi referencia.
+      A PNG fájlok a <code>docs/design-demos/</code> mappába kerülnek (Playwright vagy „Összes PNG” gomb).
+    </p>
+    <div class="toolbar">
+      <button type="button" id="btn-export-all">Összes PNG letöltése (böngésző)</button>
+      <button type="button" class="secondary" id="btn-scroll-top">Fel ↑</button>
+    </div>
+
+    <article class="scenario" id="s01">
+      <div class="scenario__head">
+        <span class="scenario__tag">Referencia</span>
+        <h2>A — Alap lista (nincs kiemelés)</h2>
+        <p>Minden kártya egyforma: nehéz szemet vetni egy konkrét autóra. Jó kiindulópont összehasonlításhoz.</p>
+      </div>
+      <div class="capture" data-export="kiemelt-cards-01-alap">
+        <div class="capture__label">3×2 rács — mind normál</div>
+        <div class="list-grid" data-grid="standard"></div>
+      </div>
+    </article>
+
+    <article class="scenario" id="s02">
+      <div class="scenario__head">
+        <span class="scenario__tag">Ajánlott v1</span>
+        <h2>B — Sárga keret + „KIEMELT” badge a fotón</h2>
+        <p>Azonnal látszik, nem tolja szét a rácsot. A badge és a keret együtt ~HA „kiemelt” érzet.</p>
+      </div>
+      <div class="capture" data-export="kiemelt-cards-02-keret-badge">
+        <div class="capture__label">1. kártya kiemelt</div>
+        <div class="list-grid" data-grid="feat-border-badge"></div>
+        <p class="legend"><strong>Implementáció:</strong> <code>.hf-card--featured</code> — border + abszolút badge.</p>
+      </div>
+    </article>
+
+    <article class="scenario" id="s03">
+      <div class="scenario__head">
+        <span class="scenario__tag">Erősebb CTR</span>
+        <h2>C — Dupla szélesség (első slot, nagyobb fotó)</h2>
+        <p>A kiemelt hirdetés kétszer annyi helyet foglal — főleg mobilon és főoldali sávban erős.</p>
+      </div>
+      <div class="capture" data-export="kiemelt-cards-03-dupla-slot">
+        <div class="capture__label">Első kártya 2 oszlop + keret</div>
+        <div class="list-grid list-grid--wide-first" data-grid="feat-wide"></div>
+      </div>
+    </article>
+
+    <article class="scenario" id="s04">
+      <div class="scenario__head">
+        <span class="scenario__tag">Finom</span>
+        <h2>D — Felső sárga csík + enyhe emelés</h2>
+        <p>Kevesebb „reklám” érzet, mégis elkülönül. Jó B2B / prémium listákhoz.</p>
+      </div>
+      <div class="capture" data-export="kiemelt-cards-04-csik-lift">
+        <div class="capture__label">Csík + scale(1.02)</div>
+        <div class="list-grid" data-grid="feat-stripe-lift"></div>
+      </div>
+    </article>
+
+    <article class="scenario" id="s05">
+      <div class="scenario__head">
+        <span class="scenario__tag">Fotó</span>
+        <h2>E — Soft overlay a képen + sötét badge</h2>
+        <p>Összhang a főoldali nagy kiemelt blokkal (<code>kiemelt-overlay-demo.html</code>).</p>
+      </div>
+      <div class="capture" data-export="kiemelt-cards-05-overlay">
+        <div class="capture__label">Alsó gradient + KIEMELT</div>
+        <div class="list-grid" data-grid="feat-overlay"></div>
+      </div>
+    </article>
+
+    <article class="scenario" id="s06">
+      <div class="scenario__head">
+        <span class="scenario__tag">Kombinált</span>
+        <h2>F — Keret + kiemelt ár (kombó, finomított)</h2>
+        <p><strong>KIEMELT</strong> felül középen a fotón; <strong>TOP AJÁNLAT</strong> jobb alul. Sárga keret + kék ár.</p>
+      </div>
+      <div class="capture" data-export="kiemelt-cards-06-kombo">
+        <div class="capture__label">6 kártyás lista — 1. kiemelt (új elrendezés)</div>
+        <div class="list-grid" data-grid="feat-combo"></div>
+      </div>
+      <div class="capture capture--solo" data-export="kiemelt-cards-06-uj" style="margin-top: 14px; max-width: 320px">
+        <div class="capture__label">Közeli nézet — implementációs referencia</div>
+        <div class="list-grid" style="grid-template-columns: 1fr; max-width: 280px" data-grid="feat-combo-solo"></div>
+      </div>
+    </article>
+
+    <script>
+      const ICON_CAL =
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>';
+      const ICON_KM =
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 16l4-8 4 4 4-6 4 10"/></svg>';
+      const ICON_PWR =
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>';
+      const HEART =
+        '<svg viewBox="0 0 24 24" fill="#e53935" stroke="#e53935" stroke-width="1.5"><path d="M12 21s-7-4.5-7-10a4 4 0 0 1 7-2 4 4 0 0 1 7 2c0 5.5-7 10-7 10z"/></svg>';
+      const HEART_OUT =
+        '<svg viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2"><path d="M12 21s-7-4.5-7-10a4 4 0 0 1 7-2 4 4 0 0 1 7 2c0 5.5-7 10-7 10z"/></svg>';
+
+      const LISTINGS = [
+        {
+          id: 1,
+          title: "Peugeot 308 SW 1.6 HDi Active+ (7 személyes)",
+          sub: "Dízel, Manuális (5 fokozatú) sebességváltó",
+          price: "1 499 990 Ft",
+          year: "2012",
+          km: "265 900 km",
+          hp: "92 LE",
+          img: "./kiemelt-demo-auto.png",
+          fav: true,
+        },
+        {
+          id: 2,
+          title: "Lada GRANTA Sedan 1.6 Lux",
+          sub: "Benzin, Manuális (5 fokozatú) sebességváltó",
+          price: "2 990 000 Ft",
+          year: "2022",
+          km: "18 500 km",
+          hp: "90 LE",
+          img: "./kiemelt-demo-auto.png",
+          fav: false,
+        },
+        {
+          id: 3,
+          title: "Lexus NX 300h Comfort Safety CVT Facelift",
+          sub: "Hibrid (Benzin), Fokozatmentes automata",
+          price: "6 890 000 Ft",
+          year: "2018",
+          km: "112 000 km",
+          hp: "197 LE",
+          img: "./kiemelt-demo-auto.png",
+          fav: false,
+        },
+        {
+          id: 4,
+          title: "Kia Sportage 1.6 GDI Spirit",
+          sub: "Benzin, Manuális (6 fokozatú) sebességváltó",
+          price: "2 399 000 Ft",
+          year: "2014",
+          km: "198 000 km",
+          hp: "135 LE",
+          img: "./kiemelt-demo-auto.png",
+          fav: true,
+        },
+        {
+          id: 5,
+          title: "Volvo V90 2.0 D4 Momentum",
+          sub: "Dízel, Automata (8 fokozatú)",
+          price: "5 490 000 Ft",
+          year: "2017",
+          km: "156 000 km",
+          hp: "190 LE",
+          img: "./kiemelt-demo-auto.png",
+          fav: false,
+        },
+        {
+          id: 6,
+          title: "Maserati Grecale 2.0 GT",
+          sub: "Benzin, Automata",
+          price: "14 990 000 Ft",
+          year: "2023",
+          km: "12 400 km",
+          hp: "300 LE",
+          img: "./kiemelt-demo-auto.png",
+          fav: false,
+        },
+      ];
+
+      function cardHtml(item, extraClass = "", inner = "", mediaInner = "") {
+        return `
+          <a class="card ${extraClass}" href="#" aria-label="${item.title}">
+            ${inner}
+            <div class="card__media">
+              ${mediaInner}
+              <img src="${item.img}" alt="" loading="lazy" />
+              <span class="card__fav" aria-hidden="true">${item.fav ? HEART : HEART_OUT}</span>
+            </div>
+            <p class="card__title">${item.title}</p>
+            <p class="card__sub">${item.sub}</p>
+            <p class="card__price">${item.price}</p>
+            <div class="card__specs">
+              <span class="card__spec">${ICON_CAL}${item.year}</span>
+              <span class="card__spec">${ICON_KM}${item.km}</span>
+              <span class="card__spec">${ICON_PWR}${item.hp}</span>
+            </div>
+          </a>`;
+      }
+
+      function featuredExtras(mode) {
+        const first = LISTINGS[0];
+        const rest = LISTINGS.slice(1);
+        const grids = {
+          standard: () => LISTINGS.map((x) => cardHtml(x)).join(""),
+          "feat-border-badge": () =>
+            cardHtml(first, "card--feat-border", '<span class="card__badge">KIEMELT</span>') +
+            rest.map((x) => cardHtml(x)).join(""),
+          "feat-wide": () =>
+            cardHtml(first, "card--feat-border card--feat-wide", '<span class="card__badge">KIEMELT</span>') +
+            rest.map((x) => cardHtml(x)).join(""),
+          "feat-stripe-lift": () =>
+            cardHtml(first, "card--feat-stripe card--feat-lift", '<span class="card__badge">KIEMELT</span>') +
+            rest.map((x) => cardHtml(x)).join(""),
+          "feat-overlay": () =>
+            cardHtml(
+              first,
+              "card--feat-overlay",
+              '<span class="card__badge card__badge--dark">KIEMELT</span>'
+            ) + rest.map((x) => cardHtml(x)).join(""),
+          "feat-combo": () =>
+            cardHtml(
+              first,
+              "card--feat-combo card--feat-price",
+              "",
+              '<span class="card__badge card__badge--top-center">KIEMELT</span><span class="card__ribbon card__ribbon--br">TOP AJÁNLAT</span>'
+            ) + rest.map((x) => cardHtml(x)).join(""),
+          "feat-combo-solo": () =>
+            cardHtml(
+              first,
+              "card--feat-combo card--feat-price",
+              "",
+              '<span class="card__badge card__badge--top-center">KIEMELT</span><span class="card__ribbon card__ribbon--br">TOP AJÁNLAT</span>'
+            ),
+        };
+        return grids[mode] || grids.standard;
+      }
+
+      document.querySelectorAll("[data-grid]").forEach((el) => {
+        el.innerHTML = featuredExtras(el.getAttribute("data-grid"))();
+      });
+
+      async function captureEl(el, name) {
+        const scale = 2;
+        const w = el.offsetWidth;
+        const h = el.offsetHeight;
+        const canvas = document.createElement("canvas");
+        canvas.width = w * scale;
+        canvas.height = h * scale;
+        const ctx = canvas.getContext("2d");
+        ctx.scale(scale, scale);
+        ctx.fillStyle = "#f6f7f9";
+        ctx.fillRect(0, 0, w, h);
+
+        const imgs = [...el.querySelectorAll("img")];
+        await Promise.all(
+          imgs.map(
+            (img) =>
+              new Promise((resolve) => {
+                if (img.complete) resolve();
+                else img.onload = img.onerror = resolve;
+              })
+          )
+        );
+
+        const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}">
+          <foreignObject width="100%" height="100%">
+            <div xmlns="http://www.w3.org/1999/xhtml" style="width:${w}px;height:${h}px">
+              ${el.outerHTML}
+            </div>
+          </foreignObject>
+        </svg>`;
+        const url = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+        const image = new Image();
+        await new Promise((res, rej) => {
+          image.onload = () => res();
+          image.onerror = rej;
+          image.src = url;
+        });
+        ctx.drawImage(image, 0, 0);
+        const a = document.createElement("a");
+        a.download = name + ".png";
+        a.href = canvas.toDataURL("image/png");
+        a.click();
+      }
+
+      document.getElementById("btn-export-all").addEventListener("click", async () => {
+        const blocks = document.querySelectorAll(".capture[data-export]");
+        for (const block of blocks) {
+          await captureEl(block, block.getAttribute("data-export"));
+          await new Promise((r) => setTimeout(r, 400));
+        }
+      });
+      document.getElementById("btn-scroll-top").addEventListener("click", () =>
+        window.scrollTo({ top: 0, behavior: "smooth" })
+      );
+    </script>
+  </body>
+</html>

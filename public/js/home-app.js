@@ -1,5 +1,5 @@
 import { fetchListings } from "./db-client.js?v=teherVert1";
-import { createHomeGridCard, initHomeGridCardPhotos } from "./home-grid-card.js?v=haCdnOnly2";
+import { createHomeGridCard, initHomeGridCardPhotos } from "./home-grid-card.js?v=featured1";
 import {
   emptyFilters,
   filterListingsBySidebar,
@@ -25,6 +25,7 @@ import { buildNearbyFilter, readNearbyPrefs } from "./nearby-search.js?v=korzetF
 import { getAuthUser } from "./site-auth.js?v=nearby1";
 import { bindListingOpen, restoreListingReturn } from "./listing-return.js?v=searchNav1";
 import { normalizeKivitel } from "./kivitel-options.js?v=kivitel1";
+import { featuredListingIdSet } from "./home-featured-slots.js?v=featured1";
 
 const gridTrack = document.getElementById("home-grid-track");
 const emptyEl = document.getElementById("home-empty");
@@ -44,6 +45,7 @@ let quickRadiusFilter = null;
 let detailedFilters = null;
 let deskSort = "newest";
 let quickSearchApi = null;
+let featuredListingIds = new Set();
 
 const PAGE = document.body?.getAttribute("data-site-page") || "";
 if (gridTrack) bindListingOpen(gridTrack);
@@ -210,7 +212,9 @@ function renderListings(items) {
   }
 
   for (const item of filtered) {
-    const card = createHomeGridCard(item);
+    const card = createHomeGridCard(item, {
+      featured: featuredListingIds.has(Number(item.id)),
+    });
     card.__bymyListing = item;
     gridTrack.appendChild(card);
   }
@@ -233,6 +237,7 @@ async function loadListings() {
   });
   const active = all.filter((item) => (item.status || "feladott") === "feladott");
   allItems = sortForHome(filterBySitePage(active));
+  featuredListingIds = featuredListingIdSet(allItems);
   populateFilterOptions(allItems);
   renderListings(allItems);
   updateFilterResultCount();

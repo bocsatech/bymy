@@ -88,6 +88,14 @@ body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field--dropdown {
   position: relative;
   z-index: 1;
   overflow: visible;
+  flex: 0 0 auto;
+  min-height: 0;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] .labeled-field.ad-form-bm-anchor:not(.is-open),
+body.site-app[data-site-page="hirdetesfeladas"] .md-outlined.ad-form-bm-anchor:not(.is-open) {
+  min-height: 0;
+  flex: 0 0 auto;
 }
 
 body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field--dropdown.is-open {

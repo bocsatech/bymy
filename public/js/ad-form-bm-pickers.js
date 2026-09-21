@@ -389,6 +389,12 @@ function closeAdBmPicker(select) {
   if (select && typeof select._adBmClose === "function") select._adBmClose();
 }
 
+function resetBmDropdownBody(bodyEl) {
+  if (!bodyEl) return;
+  bodyEl.style.removeProperty("--ad-form-bm-list-height");
+  bodyEl.replaceChildren();
+}
+
 function mountBmPicker(opts) {
   const {
     select,
@@ -691,6 +697,7 @@ function mountSearchDropdownPicker(select, opts) {
     onQueryChange?.(query);
     syncHidden();
     refreshTrigger();
+    resetBmDropdownBody(bodyEl);
   }
 
   function refreshTrigger() {
@@ -995,6 +1002,7 @@ function mountSingleSelectDropdown(select, { title, panelClass, placeholder = PL
     query = "";
     writePlainValue(select, selected);
     refreshTrigger();
+    resetBmDropdownBody(bodyEl);
   }
 
   function beginSearch() {

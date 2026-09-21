@@ -183,8 +183,17 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form .in
 body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form .ad-layout-item {
   width: 100% !important;
   max-width: none !important;
+  min-height: 0 !important;
+  flex: 0 0 auto;
   grid-column: unset !important;
   grid-row: unset !important;
+}
+
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form .card-body:has(.ad-layout-canvas .ad-layout-item:not(.ad-layout-hidden)) > .form-grid {
+  display: none !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
 body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form .ad-layout-item.ad-layout-hidden {

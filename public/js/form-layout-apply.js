@@ -1,5 +1,5 @@
 import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=immoUiParity1";
-import { refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=adBmClose1";
+import { refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=deskGridTrim1";
 import { initTireSizes } from "./tire-sizes-ui.js?v=tireFill1";
 import { applyAdFormDesk } from "./ad-form-desk.js?v=adFormDesk35";
 
@@ -445,6 +445,21 @@ function hideLayoutShellCards(form) {
   });
 }
 
+function retireLegacyFormGrid(form) {
+  form.querySelectorAll(".step-panel .card-body").forEach((body) => {
+    const canvas = body.querySelector(".ad-layout-canvas");
+    if (!canvas?.querySelector(".ad-layout-item:not(.ad-layout-hidden)")) return;
+    body.querySelectorAll(":scope > .form-grid").forEach((grid) => {
+      grid.hidden = true;
+      grid.classList.add("ad-layout-grid-retired");
+      grid.style.setProperty("display", "none", "important");
+      grid.style.setProperty("min-height", "0", "important");
+      grid.style.setProperty("margin", "0", "important");
+      grid.style.setProperty("padding", "0", "important");
+    });
+  });
+}
+
 function pruneEmptyCards(form) {
   form.querySelectorAll(".field-row").forEach((row) => {
     if (!row.querySelector("input, select, textarea, .labeled-field, .field-stack, .md-outlined")) {
@@ -661,6 +676,10 @@ async function applyAdFormLayout() {
         el.classList.add("ad-layout-hidden", "ad-immo-orphan");
         el.hidden = true;
       });
+    }
+    if (!isImmo) {
+      hideUnplacedVehicleChrome(form, placed);
+      retireLegacyFormGrid(form);
     }
     pruneEmptyCards(form);
     compactCanvasRows(form);

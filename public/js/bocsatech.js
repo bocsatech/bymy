@@ -1,4 +1,5 @@
-import { mountLayoutBoard } from "./bocsatech-layout.js?v=deskGapRow1";
+import { mountLayoutBoard } from "./bocsatech-layout.js?v=deskFuelPrev1";
+import { DESK_FUEL_PREVIEW_PROFILES } from "./ad-form-layout-fuel-preview.js?v=deskFuelPrev1";
 import { mountIngatlanWheelBoard } from "./bocsatech-ingatlan-wheels.js?v=immoUiParity1";
 import {
   isIngatlanWheelAdminCategory,
@@ -275,6 +276,8 @@ let visitors = {
   warning: "",
 };
 let layout = { cells: [], category: "szemelyauto" };
+/** Admin desk elrendezés: normál / elektromos / hibrid mező-előnézet (ugyanaz a mentett layout). */
+let deskFuelPreviewProfile = "combustion";
 let wheelSchema = { version: 1, cells: [] };
 let hubPromo = { images: [], max: 8, size: { width: 1400, height: 840 }, count: 0 };
 let adFormDeskGuide = { images: [], slots: {} };
@@ -967,6 +970,13 @@ const actions = {
       backupBusy = false;
       render();
     }
+  },
+  setDeskFuelPreview(_event, el) {
+    const next = el?.getAttribute?.("data-fuel-preview");
+    if (!next || !["combustion", "electric", "hybrid"].includes(next)) return;
+    if (deskFuelPreviewProfile === next) return;
+    deskFuelPreviewProfile = next;
+    render();
   },
   async saveLayout() {
     err = "";
@@ -2308,8 +2318,17 @@ function vehicleDeskPostingLayoutView(cat, label, sharedHint) {
     : `<p class="hint">A mezőelrendezés és desk megjelenés a <strong>Személyautó feladás</strong> masterből jön (ugyanaz a 3 oszlopos desk, accordion menü, kép+leírás középen).</p>
        <p class="hint">Szerkesztés: Autók → Személyautó feladás. Itt csak előnézet.</p>
        <p><a class="btn" href="${esc(previewHref)}" target="_blank" rel="noopener">Live desk előnézet — ${esc(label)}</a></p>`;
+  const fuelPreviewToolbar = isMaster
+    ? `<div class="layout-desk-fuel-preview" role="group" aria-label="Üzemanyag-előnézet">
+        ${DESK_FUEL_PREVIEW_PROFILES.map(
+          ({ id, label: btnLabel }) =>
+            `<button type="button" class="btn${deskFuelPreviewProfile === id ? "" : " ghost"}" data-act="setDeskFuelPreview" data-fuel-preview="${esc(id)}">${esc(btnLabel)}</button>`
+        ).join("")}
+      </div>
+      <p class="hint layout-desk-fuel-preview-hint">Előnézet: mely mezők látszanak a feladáson az adott üzemanyagnál. A mentett elrendezés mindháromnál közös — csak a láthatóság változik.</p>`
+    : "";
   const editorBlock = isMaster
-    ? `<div id="layout-root"></div>
+    ? `${fuelPreviewToolbar}<div id="layout-root"></div>
        <div class="row" style="margin-top:1rem"><button class="btn" type="button" data-act="saveLayout">Elrendezés mentése</button></div>`
     : "";
   return `
@@ -2697,6 +2716,8 @@ function render() {
         const isImmoWizard = isIngatlanWizardLayoutTab();
         mountLayoutBoard(root, layout, {
           deskPosting: layoutCategoryFromTab() === DESK_POSTING_LAYOUT_MASTER,
+          fuelPreviewProfile:
+            layoutCategoryFromTab() === DESK_POSTING_LAYOUT_MASTER ? deskFuelPreviewProfile : null,
           stepNames: isImmoWizard
             ? {
                 1: "Ingatlan alapadatok",

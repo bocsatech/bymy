@@ -7,7 +7,8 @@ import {
   hideSyntheticAnchors,
   isDeskSyntheticFieldKey,
   minAnchorRow,
-} from "./ad-form-desk-pinned-blocks.js?v=deskPinned3";
+} from "./ad-form-desk-pinned-blocks.js?v=layoutFromKv1";
+import { layoutFieldVisibleForFuelProfile } from "./ad-form-layout-fuel-preview.js?v=deskFuelPrev1";
 
 const COLS = 12;
 const ROW_PX = 64;
@@ -34,10 +35,15 @@ const PAIR_OF = {
   muszaki_ev: "muszaki_honap",
 };
 
-export function mountLayoutBoard(root, layout, { onChange, stepNames, deskPosting = false } = {}) {
+export function mountLayoutBoard(
+  root,
+  layout,
+  { onChange, stepNames, deskPosting = false, fuelPreviewProfile = null } = {}
+) {
   if (!root) return { cells: layout?.cells || [] };
   const STEP_NAMES = { ...DEFAULT_STEP_NAMES, ...(stepNames || {}) };
   const cells = Array.isArray(layout?.cells) ? layout.cells : [];
+  const fuelPreview = deskPosting && fuelPreviewProfile ? fuelPreviewProfile : null;
   const byKey = new Map(cells.map((cell) => [cell.field_key, cell]));
   const skip = new Set([
     "hirdetes_cime",
@@ -93,9 +99,17 @@ export function mountLayoutBoard(root, layout, { onChange, stepNames, deskPostin
     return board?.dataset?.deskStack === "1";
   }
 
+  function passesFuelPreview(cell) {
+    if (!fuelPreview) return true;
+    if (cell.__synthetic) return layoutFieldVisibleForFuelProfile(cell.field_key, fuelPreview);
+    if (deskPinnedGroupKeys().has(cell.field_key)) return false;
+    return layoutFieldVisibleForFuelProfile(cell.field_key, fuelPreview);
+  }
+
   function stackItems(step, { excludeKey = "" } = {}) {
     return editable()
       .filter((cell) => !cell.hidden && Number(cell.step) === step && cell.field_key !== excludeKey)
+      .filter(passesFuelPreview)
       .sort(
         (a, b) =>
           (Number(a.row) || 1) - (Number(b.row) || 1) ||
@@ -107,6 +121,7 @@ export function mountLayoutBoard(root, layout, { onChange, stepNames, deskPostin
   function syntheticStackCells(step) {
     const out = [];
     for (const block of DESK_STEP2_PINNED_BLOCKS) {
+      if (fuelPreview && !layoutFieldVisibleForFuelProfile(block.syntheticKey, fuelPreview)) continue;
       const anchors = anchorCellsForBlock(byKey, block, step);
       if (!anchors.length) continue;
       const row = minAnchorRow(anchors) ?? 1;

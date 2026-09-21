@@ -1,5 +1,5 @@
 import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=immoUiParity1";
-import { refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=cell168px2";
+import { refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=cell168px3";
 import { initTireSizes } from "./tire-sizes-ui.js?v=tireFill1";
 import { applyAdFormDesk } from "./ad-form-desk.js?v=adFormDesk37";
 import {
@@ -247,6 +247,31 @@ function setRequired(wrap, on) {
   });
 }
 
+const AD_FORM_DESK_CELL_PX = "168px";
+
+function isFullWidthDeskControl(el) {
+  if (el.id === "leiras") return true;
+  if (LOCATION_FIELD_KEYS.has(el.id)) return true;
+  if (el.closest(".field-stack--leiras, .card--photos, .field-stack--location, .ad-location-fields")) return true;
+  return false;
+}
+
+function applyDeskControlWidth(el, fullWidth) {
+  if (fullWidth) {
+    el.style.setProperty("width", "100%", "important");
+    el.style.setProperty("max-width", "none", "important");
+    el.style.setProperty("flex", "1 1 0%", "important");
+    el.style.setProperty("field-sizing", "fixed", "important");
+    el.style.removeProperty("min-width");
+    return;
+  }
+  el.style.setProperty("width", AD_FORM_DESK_CELL_PX, "important");
+  el.style.setProperty("min-width", AD_FORM_DESK_CELL_PX, "important");
+  el.style.setProperty("max-width", AD_FORM_DESK_CELL_PX, "important");
+  el.style.setProperty("flex", `0 0 ${AD_FORM_DESK_CELL_PX}`, "important");
+  el.style.removeProperty("field-sizing");
+}
+
 function placeWrap(wrap, cell) {
   const col = clamp(cell.col, 1, 12);
   const span = clamp(cell.colSpan || 6, 1, 13 - col);
@@ -260,14 +285,17 @@ function placeWrap(wrap, cell) {
   wrap.style.setProperty("width", "100%", "important");
   wrap.style.setProperty("max-width", "none", "important");
   wrap.querySelectorAll(".inline-2, .suffix-field").forEach((el) => {
-    el.style.setProperty("width", "100%", "important");
-    el.style.setProperty("max-width", "none", "important");
+    el.style.setProperty("width", "max-content", "important");
+    el.style.setProperty("max-width", "100%", "important");
+  });
+  wrap.querySelectorAll(".ad-form-bm-field").forEach((el) => {
+    applyDeskControlWidth(el, false);
   });
   wrap.querySelectorAll("select, input:not([type=checkbox]):not([type=hidden]):not([type=file])").forEach((el) => {
-    el.style.setProperty("width", "100%", "important");
-    el.style.setProperty("max-width", "none", "important");
-    el.style.setProperty("field-sizing", "fixed", "important");
-    el.style.setProperty("flex", "1 1 0%", "important");
+    if (el.classList.contains("ad-form-bm-native")) return;
+    if (el.classList.contains("ad-form-bm-search-trigger")) return;
+    if (el.closest(".ad-form-bm-field")) return;
+    applyDeskControlWidth(el, isFullWidthDeskControl(el));
   });
 }
 

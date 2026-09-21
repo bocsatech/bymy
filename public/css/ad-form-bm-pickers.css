@@ -395,8 +395,7 @@ body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field {
   display: flex;
   flex-direction: column;
   gap: 0;
-  min-width: 0;
-  width: 100%;
+  box-sizing: border-box;
 }
 
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .inline-2 > .ad-form-bm-field {
@@ -713,4 +712,35 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .md-outlined > select:n
   max-width: var(--ad-form-cell-width) !important;
   flex: 0 0 var(--ad-form-cell-width) !important;
   box-sizing: border-box !important;
+}
+
+/* site-app .ad-layout-item > input { width:100% } + desk placeWrap inline — explicit win */
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-layout-item > input.ad-form-cell,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-layout-item > select.ad-form-cell:not(.ad-form-bm-native),
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .labeled-field > input.ad-form-cell,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .labeled-field > select.ad-form-cell:not(.ad-form-bm-native),
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-layout-item .suffix-field > input.ad-form-cell,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-layout-item .inline-2 > select.ad-form-cell:not(.ad-form-bm-native),
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-layout-item .inline-2 > input.ad-form-cell {
+  width: var(--ad-form-cell-width) !important;
+  min-width: var(--ad-form-cell-width) !important;
+  max-width: var(--ad-form-cell-width) !important;
+  flex: 0 0 var(--ad-form-cell-width) !important;
+}
+
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form .inline-2,
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form .inline-2-labeled {
+  width: max-content !important;
+  max-width: 100% !important;
+}
+
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form .inline-2 > select:not(.ad-form-bm-native),
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form .inline-2 > input:not(.ad-form-bm-search-trigger),
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form .inline-2 > .ad-form-bm-field,
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form .inline-2-labeled > select:not(.ad-form-bm-native),
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form .inline-2-labeled > input:not(.ad-form-bm-search-trigger) {
+  flex: 0 0 var(--ad-form-cell-width) !important;
+  width: var(--ad-form-cell-width) !important;
+  min-width: var(--ad-form-cell-width) !important;
+  max-width: var(--ad-form-cell-width) !important;
 }

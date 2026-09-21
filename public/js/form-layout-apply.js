@@ -1,6 +1,7 @@
 import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=immoUiParity1";
 import { refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=adBmMore3";
 import { initTireSizes } from "./tire-sizes-ui.js?v=tireFill1";
+import { applyAdFormDesk } from "./ad-form-desk.js?v=adFormDesk35";
 
 function cssEscape(value) {
   if (window.CSS?.escape) return window.CSS.escape(value);
@@ -671,8 +672,9 @@ async function applyAdFormLayout() {
     pinLocation(form);
     pinFooter(form);
     window.dispatchEvent(new Event("ad-form-sync-location"));
-    void refreshAdFormBmPickers(form);
+    await refreshAdFormBmPickers(form);
     initTireSizes(form);
+    applyAdFormDesk();
   } catch (error) {
     console.warn("Ad form layout apply:", error);
   }

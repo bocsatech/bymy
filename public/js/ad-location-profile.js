@@ -74,7 +74,7 @@ function unlockLocationFields(form) {
 
 function ensureLocationVisible(form) {
   const stack = form.querySelector(".field-stack--location");
-  if (!stack || stack.dataset.adContactProfileOnly === "1") return;
+  if (!stack) return;
   stack.classList.remove("ad-layout-hidden");
   stack.hidden = false;
   stack.removeAttribute("hidden");
@@ -165,8 +165,15 @@ export async function applyListingAddressFromProfile(form, profile = null) {
 }
 
 function updateLocationHint(form, result) {
-  if (form.querySelector(".field-stack--location")?.dataset.adContactProfileOnly === "1") {
-    setHint(form, "", { isError: false });
+  const hideStreet = form.querySelector(".field-stack--location")?.dataset.adHideStreetOnly === "1";
+  if (hideStreet) {
+    const postal = String(form.elements.namedItem("iranyitoszam")?.value ?? "").replace(/\D/g, "");
+    const city = String(form.elements.namedItem("telepules")?.value ?? "").trim();
+    if (postal.length === 4 && city) {
+      setHint(form, "", { isError: false });
+      return;
+    }
+    setHint(form, "Add meg az irányítószámot és a települést.", { isError: false });
     return;
   }
   if (!listingAddressComplete(result.address)) {

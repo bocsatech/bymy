@@ -355,37 +355,57 @@ function compactCanvasRows(form) {
 
 const LOCATION_FIELD_KEYS = new Set(["megtekintesi_cim", "iranyitoszam", "telepules", "megye"]);
 
-function adContactFromProfileOnly(form) {
-  return Boolean(form.querySelector('.field-stack--location[data-ad-contact-profile-only="1"]'));
+const STREET_PROFILE_ONLY_KEYS = new Set(["megtekintesi_cim"]);
+
+function adHideStreetOnly(form) {
+  return Boolean(form.querySelector('.field-stack--location[data-ad-hide-street-only="1"]'));
 }
 
-/** Cím mezők rejtve — layout canvas ne rakja ki őket (profilból töltődnek mentéskor). */
-function hideAdContactFromProfileFields(form) {
-  if (!adContactFromProfileOnly(form)) return;
-  for (const key of LOCATION_FIELD_KEYS) {
+/** Utca rejtve (profilból mentéskor); irányítószám + település marad az űrlapon. */
+function applyAdHideStreetOnlyFields(form) {
+  if (!adHideStreetOnly(form)) return;
+
+  const stack = form.querySelector(".field-stack--location");
+  if (stack) {
+    stack.hidden = false;
+    stack.classList.remove("ad-layout-hidden", "ad-form-contact-profile-hidden");
+    stack.removeAttribute("hidden");
+    stack.style.removeProperty("display");
+  }
+
+  form.querySelectorAll(".ad-form-street-hidden, .ad-location-settings-link").forEach((el) => {
+    el.hidden = true;
+    el.classList.add("ad-form-street-hidden");
+    el.style.setProperty("display", "none", "important");
+  });
+
+  const street = document.getElementById("megtekintesi_cim");
+  if (street) {
+    const wrap = street.closest(".login-field, .ad-layout-item, .labeled-field, .md-outlined");
+    if (wrap) {
+      wrap.hidden = true;
+      wrap.style.setProperty("display", "none", "important");
+      setRequired(wrap, false);
+    }
+  }
+
+  for (const key of ["iranyitoszam", "telepules"]) {
     const input = document.getElementById(key);
     if (!input) continue;
     const wrap =
       input.closest(".ad-layout-item") ||
       input.closest(".login-field") ||
       input.closest(".labeled-field") ||
-      input.closest(".md-outlined") ||
-      input.closest(".field-stack");
+      input.closest(".md-outlined");
     if (wrap) {
-      wrap.hidden = true;
-      wrap.classList.add("ad-layout-hidden", "ad-form-contact-profile-hidden");
-      wrap.style.setProperty("display", "none", "important");
-      setRequired(wrap, false);
+      wrap.hidden = false;
+      wrap.classList.remove("ad-layout-hidden", "ad-form-contact-profile-hidden");
+      wrap.removeAttribute("hidden");
+      wrap.style.removeProperty("display");
+      setRequired(wrap, true);
     }
-    input.removeAttribute("required");
+    input.setAttribute("required", "");
   }
-  form.querySelectorAll(
-    ".field-stack--location, .ad-location-fields, .ad-location-hint, .ad-location-settings-link, .ad-location-label"
-  ).forEach((el) => {
-    el.hidden = true;
-    el.classList.add("ad-layout-hidden", "ad-form-contact-profile-hidden");
-    el.style.setProperty("display", "none", "important");
-  });
 }
 
 const TIRE_ROW_SLOTS = [
@@ -562,7 +582,7 @@ function cleanupStrayEvLayoutItems(form) {
 
 function pinLocation(form) {
   const stack = form.querySelector(".field-stack--location");
-  if (!stack || stack.dataset.adContactProfileOnly === "1") return;
+  if (!stack) return;
   const canvas = canvasForStep(form, 5);
   if (canvas && stack.parentElement !== canvas) {
     canvas.appendChild(stack);
@@ -788,15 +808,12 @@ async function applyAdFormLayout() {
       ) {
         continue;
       }
-      if (adContactFromProfileOnly(form) && LOCATION_FIELD_KEYS.has(cell.field_key)) {
+      if (adHideStreetOnly(form) && STREET_PROFILE_ONLY_KEYS.has(cell.field_key)) {
         continue;
       }
       const wrap = wrapFor(form, cell.field_key);
       if (!wrap || placed.has(wrap)) continue;
       if (wrap.closest("#ingatlan-fields") && category !== "ingatlan") continue;
-      if (adContactFromProfileOnly(form) && wrap.matches?.(".field-stack--location, .ad-location-fields")) {
-        continue;
-      }
       placed.add(wrap);
       const isLocation = LOCATION_FIELD_KEYS.has(cell.field_key) || wrap.matches?.(".field-stack--location");
       if (cell.hidden && !isLocation) {
@@ -869,7 +886,7 @@ async function applyAdFormLayout() {
     syncCanvasOrderFromLayoutCells(form, cells);
     pinLeiras(form);
     pinLocation(form);
-    hideAdContactFromProfileFields(form);
+    applyAdHideStreetOnlyFields(form);
     pinFooter(form);
     window.dispatchEvent(new Event("ad-form-sync-location"));
     await refreshAdFormBmPickers(form);

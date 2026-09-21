@@ -436,30 +436,29 @@
                   <p class="hint">A kereső a leírásban szereplő szövegben nem tud keresni!</p>
                 </div>
 
-                <div class="field-stack full field-stack--location" data-ad-contact-profile-only="1" hidden>
-                  <label class="ad-location-label">Megtalálható</label>
+                <div class="field-stack full field-stack--location" data-ad-hide-street-only="1">
+                  <label class="ad-location-label">Megtalálható <span class="req">*</span></label>
                   <p class="hint ad-location-hint" data-ad-location-hint hidden></p>
                   <div class="ad-location-fields">
-                    <label class="login-field ad-location-field">
+                    <label class="login-field ad-location-field ad-form-street-hidden" hidden>
                       <span class="login-label">Utca, házszám</span>
-                      <input id="megtekintesi_cim" name="megtekintesi_cim" type="text" autocomplete="street-address" readonly tabindex="-1" />
+                      <input id="megtekintesi_cim" name="megtekintesi_cim" type="text" autocomplete="street-address" tabindex="-1" />
                     </label>
                     <div class="settings-postal-row ad-location-postal-row">
                       <label class="login-field settings-postal-field ad-location-field">
                         <span class="login-label">Irányítószám</span>
-                        <input id="iranyitoszam" name="iranyitoszam" type="text" inputmode="numeric" maxlength="4" autocomplete="postal-code" readonly tabindex="-1" />
+                        <input id="iranyitoszam" name="iranyitoszam" type="text" inputmode="numeric" maxlength="4" autocomplete="postal-code" required />
                       </label>
                       <label class="login-field settings-city-field ad-location-field">
                         <span class="login-label">Település</span>
-                        <input id="telepules" name="telepules" type="text" autocomplete="address-level2" readonly tabindex="-1" />
+                        <input id="telepules" name="telepules" type="text" autocomplete="address-level2" required />
                       </label>
                     </div>
-                    <label class="login-field ad-location-field">
+                    <label class="login-field ad-location-field ad-form-street-hidden" hidden>
                       <span class="login-label">Ország</span>
-                      <input id="megtalalhato_orszag" type="text" autocomplete="country-name" readonly tabindex="-1" />
+                      <input id="megtalalhato_orszag" type="text" autocomplete="country-name" tabindex="-1" />
                     </label>
                     <input type="hidden" id="megye" name="megye" />
-                    <p class="hint ad-location-settings-link"><a href="/beallitasok.html?szekcio=szemelyes">Cím módosítása a Beállításokban</a></p>
                   </div>
                 </div>
 

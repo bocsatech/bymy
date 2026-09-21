@@ -5,7 +5,7 @@ import {
   saveListingPhotosOrder,
   getStoredListingId,
 } from "./db-client.js?v=wizardSave1";
-import { createAdForm } from "./form-core.js?v=contactOpt1";
+import { createAdForm } from "./form-core.js?v=contactOpt3";
 import { applyImportedVehicleToSelects } from "./vehicle-catalog-client.js?v=importVehicle1";
 import { initTireSizes } from "./tire-sizes-ui.js";
 import { initPhoneLanguages } from "./phone-lang-ui.js";
@@ -24,7 +24,7 @@ import {
   applyListingAddressFromProfileSync,
   initAdLocationProfile,
   getListingAddressFromProfile,
-} from "./ad-location-profile.js?v=locProf5";
+} from "./ad-location-profile.js?v=locProf6";
 import { initImproveDescription } from "./improve-description.js?v=descAi2";
 
 if (!(await requireAuthForPage())) {
@@ -199,6 +199,10 @@ function ensureFormReady() {
       formData.megtekintesi_cim = pick("megtekintesi_cim", profileAddr.street);
       formData.iranyitoszam = pick("iranyitoszam", profileAddr.postalCode).replace(/\D/g, "").slice(0, 4);
       formData.telepules = pick("telepules", profileAddr.city);
+      formData.iranyitoszam = String(formData.iranyitoszam || "").replace(/\D/g, "").slice(0, 4);
+      if (formData.iranyitoszam.length !== 4 || !formData.telepules) {
+        throw new Error("Add meg az irányítószámot (4 számjegy) és a települést.");
+      }
       if (!String(formData.email || "").trim()) {
         const p = getProfile();
         formData.email =

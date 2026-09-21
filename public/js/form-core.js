@@ -16,7 +16,7 @@ window.addEventListener("ad-form-render-egyeb-info", () => renderEgyebInfoHook?.
 import { initVehicleCatalogSelects } from "./vehicle-catalog-client.js";
 import { compressListingPhoto, MAX_LISTING_PHOTOS } from "./listing-photo-compress.js?v=myAds2";
 import { uploadImage } from "./upload-image.js?v=supabaseUpload1";
-import { applyListingAddressFromProfileSync } from "./ad-location-profile.js?v=locProf4";
+import { applyListingAddressFromProfileSync } from "./ad-location-profile.js?v=locProf6";
 import { syncIngatlanFormVisibility } from "./ingatlan-form-fields.js?v=immoUiParity1";
 import {
   DEFAULT_PHOTO_OVERLAY_ID,
@@ -1231,7 +1231,7 @@ function validateStep(step) {
     ? ["allapot", "ingatlan_uzletag"]
     : ["gyartasi_ev", "gyartmany", "modell", "kivitel", "allapot", "okmany_jelleg", "km"];
   const techRequired = isIngatlan ? [] : ["uzemanyag"];
-  const adRequired = ["vetelar", "telefon1_korzet", "telefon1_szam"];
+  const adRequired = ["vetelar", "iranyitoszam", "telepules", "telefon1_korzet", "telefon1_szam"];
 
   if (step === 1) {
     if (!validateFields(basicRequired, 1) || !validateFields(techRequired, 1) || !validateFields(adRequired, 1)) {

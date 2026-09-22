@@ -525,7 +525,6 @@ export function initCategoryPicker({
       if (!ok) return;
     }
 
-    document.body.classList.remove("ad-form-layout-ready");
     pickerShell?.setAttribute("hidden", "");
     stub?.setAttribute("hidden", "");
     wizardShell?.removeAttribute("hidden");

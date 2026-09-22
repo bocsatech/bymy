@@ -284,9 +284,9 @@ const categoryPicker = initCategoryPicker({
       tireSizes?.syncRearTires?.();
       applyListingAddressFromProfileSync(adForm);
       applyListingAddressFromProfile(adForm).catch(() => {});
-      document.body.classList.remove("ad-form-layout-ready");
       window.dispatchEvent(new Event("ad-form-sync-location"));
       window.dispatchEvent(new Event("ad-form-layout-refresh"));
+      applyAdFormDesk({ openStep: 1, scrollToAccordion: "alap" });
     } catch (error) {
       console.error("Űrlap indítás hiba:", error);
     }

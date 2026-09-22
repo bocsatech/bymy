@@ -1,14 +1,4 @@
 /* Közös desk jármű űrlap — accordion menü, mezők, kép/leírás (mobil + desktop) */
-
-/* Ne villogjon a nyers űrlap a layout API + desk mount után */
-body.site-app[data-site-page="hirdetesfeladas"]:not(.ad-form-layout-ready) #ad-wizard-shell:not([hidden]) .automax-main {
-  visibility: hidden;
-}
-
-body.site-app[data-site-page="hirdetesfeladas"].ad-form-layout-ready #ad-wizard-shell:not([hidden]) .automax-main {
-  visibility: visible;
-}
-
 html.ad-form-edit-boot body[data-site-page="hirdetesfeladas"] #category-picker-shell,
 html.ad-form-edit-boot body[data-site-page="hirdetesfeladas"] #ad-wizard-shell,
 html.ad-form-edit-boot body[data-site-page="hirdetesfeladas"] #wizard-steps-bar,
@@ -32,8 +22,8 @@ html[data-theme="light"] body.site-app.ad-form-desk-active[data-site-page="hirde
   --ad-filter-w: 320px;
   --ad-tips-w: 280px;
   --ad-cell-gap: 8px;
-  --ad-desk-cell-trim: 0;
-  --ad-desk-cell-span: 100%;
+  --ad-desk-cell-trim: 1.5cm;
+  --ad-desk-cell-span: calc(100% - var(--ad-desk-cell-trim));
 }
 
 html[data-theme="dark"] body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] {
@@ -296,8 +286,8 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #tire-sizes-
   flex-flow: row nowrap !important;
   align-items: center !important;
   gap: 4px !important;
-  width: var(--ad-desk-cell-span, 100%) !important;
-  max-width: var(--ad-desk-cell-span, 100%) !important;
+  width: var(--ad-desk-cell-span, calc(100% - 1.5cm)) !important;
+  max-width: var(--ad-desk-cell-span, calc(100% - 1.5cm)) !important;
   min-width: 0 !important;
   box-sizing: border-box !important;
 }
@@ -635,8 +625,8 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-
     --ad-filter-w: 320px;
     --ad-tips-w: 280px;
     --ad-cell-gap: 8px;
-    --ad-desk-cell-trim: 0;
-    --ad-desk-cell-span: 100%;
+    --ad-desk-cell-trim: 1.5cm;
+    --ad-desk-cell-span: calc(100% - var(--ad-desk-cell-trim));
   }
 
   body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .site-layout--wide .site-center--automax {

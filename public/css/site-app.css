@@ -2724,7 +2724,7 @@ body.site-app #ad-form.ad-form--ingatlan .immo-search-form .immo-field > .immo-l
 }
 
 body.site-app #ad-form.ad-form--ingatlan .immo-search-form .immo-schema-cell:not(.immo-dual-range__half) > .immo-wheel-wrap > .immo-wheel-trigger,
-body.site-app #ad-form.ad-form--ingatlan .immo-search-form .immo-field .immo-control {
+body.site-app #ad-form.ad-form--ingatlan .immo-search-form .immo-field:not(.immo-field--number) .immo-control {
   order: 1;
   width: 100%;
   min-height: 2.75rem;
@@ -2739,6 +2739,34 @@ body.site-app #ad-form.ad-form--ingatlan .immo-search-form .immo-field .immo-con
   box-shadow: none !important;
 }
 
+body.site-app #ad-form.ad-form--ingatlan .immo-search-form .immo-field--number .immo-number-wrap {
+  order: 1;
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  gap: 0.45rem;
+  width: 100%;
+  min-height: 2.75rem;
+  box-sizing: border-box;
+  border: 1px solid #d0d5dd !important;
+  border-radius: 8px !important;
+  background-color: #f8fafc !important;
+  padding: 0 0.85rem;
+}
+
+body.site-app #ad-form.ad-form--ingatlan .immo-search-form .immo-field--number .immo-control {
+  flex: 1 1 auto;
+  width: auto;
+  min-width: 0;
+  min-height: 0;
+  height: auto;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
 body.site-app #ad-form.ad-form--ingatlan .immo-search-form .immo-wheel-wrap.is-open > .immo-label,
 body.site-app #ad-form.ad-form--ingatlan .immo-search-form .immo-wheel-wrap:focus-within > .immo-label,
 body.site-app #ad-form.ad-form--ingatlan .immo-search-form .immo-field:focus-within > .immo-label {
@@ -2747,11 +2775,17 @@ body.site-app #ad-form.ad-form--ingatlan .immo-search-form .immo-field:focus-wit
 
 body.site-app #ad-form.ad-form--ingatlan .immo-search-form .immo-wheel-wrap.is-open > .immo-wheel-trigger,
 body.site-app #ad-form.ad-form--ingatlan .immo-search-form .immo-wheel-wrap:focus-within > .immo-wheel-trigger,
-body.site-app #ad-form.ad-form--ingatlan .immo-search-form .immo-field:focus-within .immo-control {
+body.site-app #ad-form.ad-form--ingatlan .immo-search-form .immo-field:not(.immo-field--number):focus-within .immo-control {
   border-color: #111 !important;
   background-color: #fff !important;
   box-shadow: 0 0 0 2px rgba(17, 24, 39, 0.08);
   color: #0f172a;
+}
+
+body.site-app #ad-form.ad-form--ingatlan .immo-search-form .immo-field--number:focus-within .immo-number-wrap {
+  border-color: #111 !important;
+  background-color: #fff !important;
+  box-shadow: 0 0 0 2px rgba(17, 24, 39, 0.08);
 }
 
 body.site-app #ad-form.ad-form--ingatlan .immo-wheel-wrap--menu {

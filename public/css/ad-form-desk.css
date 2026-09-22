@@ -86,7 +86,7 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form:has(#ingatlan-fields) .
 }
 
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form:has(#ingatlan-fields) .immo-search-form .immo-schema-cell:not(.immo-dual-range__half) > .immo-wheel-wrap > .immo-wheel-trigger,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form:has(#ingatlan-fields) .immo-search-form .immo-field .immo-control {
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form:has(#ingatlan-fields) .immo-search-form .immo-field:not(.immo-field--number) .immo-control {
   order: 1;
   display: block !important;
   width: 100% !important;
@@ -106,6 +106,61 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form:has(#ingatlan-fields) .
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form:has(#ingatlan-fields) .immo-search-form .immo-field--number .immo-number-wrap {
+  order: 1;
+  display: flex !important;
+  flex-flow: row nowrap;
+  align-items: center;
+  gap: 0.45rem;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  min-height: 2.75rem;
+  box-sizing: border-box;
+  border: 1px solid #d0d5dd !important;
+  border-radius: 8px !important;
+  background-color: #f8fafc !important;
+  padding: 0 0.85rem;
+  box-shadow: none !important;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form:has(#ingatlan-fields) .immo-search-form .immo-field--number .immo-control {
+  order: unset !important;
+  flex: 1 1 auto !important;
+  display: block !important;
+  width: auto !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  height: auto !important;
+  max-height: none !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  color: #0f172a;
+  text-overflow: clip;
+  white-space: normal;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form:has(#ingatlan-fields) .immo-search-form .immo-field--number .immo-field-unit {
+  flex: 0 0 auto;
+  order: unset !important;
+  font-size: 0.82rem;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form:has(#ingatlan-fields) .immo-search-form .immo-field--number:focus-within .immo-number-wrap {
+  border-color: #111 !important;
+  background-color: #fff !important;
+  box-shadow: 0 0 0 2px rgba(17, 24, 39, 0.08);
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form:has(#ingatlan-fields) .immo-search-form .immo-field--number:focus-within > .immo-label {
+  color: #111;
 }
 
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form:has(#ingatlan-fields) .immo-wheel-wrap--drum-inline .immo-drum-inline {

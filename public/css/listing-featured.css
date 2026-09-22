@@ -59,6 +59,19 @@ body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"])
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 }
 
+/* KIEMELT — kép alatt, gyártmány (cím) fölött */
+.listing-featured-badge--under-photo,
+.home-grid-card-body > .listing-featured-badge,
+.hf-card--featured > .listing-featured-badge--under-photo {
+  position: static;
+  top: auto;
+  left: auto;
+  transform: none;
+  display: inline-block;
+  margin: 0 0 6px;
+  z-index: auto;
+}
+
 .listing-featured-ribbon {
   bottom: 8px;
   right: 8px;

@@ -11,7 +11,10 @@ import {
   addParkplatzItem,
   removeParkplatzItem,
 } from "./fok-data.js?v=parkThumb1";
-import { listingFeaturedDecorHtml } from "./listing-featured-decor.js?v=featured1";
+import {
+  listingFeaturedBadgeHtml,
+  listingFeaturedRibbonHtml,
+} from "./listing-featured-decor.js?v=featured2";
 
 function upgradeHaThumbClient(url) {
   let s = String(url || "").trim();
@@ -138,7 +141,7 @@ export function createHomeGridCard(item, { featured = false } = {}) {
 
   card.innerHTML = `
     <div class="home-grid-card-media">
-      ${featured ? listingFeaturedDecorHtml() : ""}
+      ${featured ? listingFeaturedRibbonHtml() : ""}
       ${buildPhotoMarkup(photoUrls)}
       ${
         multi
@@ -154,6 +157,7 @@ export function createHomeGridCard(item, { featured = false } = {}) {
       </button>
     </div>
     <a class="home-grid-card-body" href="${escapeHtml(detailHref)}">
+      ${featured ? listingFeaturedBadgeHtml() : ""}
       <h2 class="home-grid-card-title">${escapeHtml(title)}</h2>
       ${desk && subtitle ? `<p class="home-grid-card-sub">${escapeHtml(subtitle)}</p>` : ""}
       <strong class="home-grid-card-price">${escapeHtml(price)}</strong>

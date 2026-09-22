@@ -5,14 +5,17 @@
   max-width: min(75px, 14vw) !important;
 }
 
-.bymy-logo-img--nav,
-.home-logo .bymy-logo-img,
-body.site-app .bymy-logo-img--nav,
-body.site-app .home-logo .bymy-logo-img--nav,
-body.site-app .hub-logo .bymy-logo-img--nav,
-body.site-app .site-app-logo .bymy-logo-img--nav {
-  height: 72px !important;
-  max-width: min(260px, 29vw) !important;
+@media (min-width: 901px) {
+  .bymy-logo-img--nav,
+  .home-logo .bymy-logo-img--nav,
+  body.site-app .bymy-logo-img--nav,
+  body.site-app .home-logo .bymy-logo-img--nav,
+  body.site-app .hub-logo .bymy-logo-img--nav,
+  body.site-app .site-app-logo .bymy-logo-img--nav {
+    height: 40px !important;
+    max-width: 140px !important;
+    width: auto !important;
+  }
 }
 
 .bymy-logo-img--hero {

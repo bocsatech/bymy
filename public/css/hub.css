@@ -65,27 +65,26 @@ body.hub-page .local-banner {
   z-index: 4;
 }
 
-@media (min-width: 801px) {
-.hub-logo {
-  font-family: "DM Sans", system-ui, sans-serif;
-  font-weight: 700;
-  font-size: 1.05rem;
-  letter-spacing: -0.02em;
-  color: #111;
-  text-decoration: none;
-  display: inline-flex;
-  align-items: flex-end;
-  line-height: 1;
-  flex: 0 0 auto;
-  white-space: nowrap;
-  position: absolute;
-
-  left: max(0.5rem, calc(1rem - 1.5cm));
-  bottom: 0.05rem;
-  z-index: 3;
-  height: auto;
-  pointer-events: auto;
-}
+@media (min-width: 801px) and (max-width: 900px) {
+  .hub-logo {
+    font-family: "DM Sans", system-ui, sans-serif;
+    font-weight: 700;
+    font-size: 1.05rem;
+    letter-spacing: -0.02em;
+    color: #111;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: flex-end;
+    line-height: 1;
+    flex: 0 0 auto;
+    white-space: nowrap;
+    position: absolute;
+    left: max(0.5rem, calc(1rem - 1.5cm));
+    bottom: 0.05rem;
+    z-index: 3;
+    height: auto;
+    pointer-events: auto;
+  }
 }
 
 .hub-logo:hover {
@@ -101,8 +100,8 @@ body.hub-page .local-banner {
 }
 
 .bymy-logo-img--nav {
-  height: 144px;
-  max-width: min(520px, 58vw);
+  height: 40px;
+  max-width: 140px;
   width: auto;
 }
 

@@ -976,7 +976,12 @@ async function handleListingsApi(req, res, pathname) {
     }
     const limit = Math.min(Math.max(Number(url.searchParams.get("limit") ?? 50), 1), 50);
     const listings = await listListingsWithPreview({ limit, status, vertical });
-    sendJson(res, 200, { listings: sanitizeListingList(listings) });
+    sendJson(
+      res,
+      200,
+      { listings: sanitizeListingList(listings) },
+      { "Cache-Control": "public, max-age=10, stale-while-revalidate=20" }
+    );
     return;
   }
 

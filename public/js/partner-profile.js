@@ -1,4 +1,11 @@
-import { requireAuthForPage } from "./site-auth.js?v=publicPartner1";
+import {
+  requireAuthForPage,
+  getAuthUser,
+  getProfile,
+  getDisplayName,
+  loadProfileFromServer,
+  initSiteAuth,
+} from "./site-auth.js?v=publicPartner1";
 
 const root = document.getElementById("partner-root");
 
@@ -59,8 +66,68 @@ async function jsonFetch(url, options = {}) {
   return data;
 }
 
+function syncManageSidebar(accountType) {
+  const company = accountType === "business" || accountType === "dealer";
+  document.documentElement.setAttribute("data-mm-account-kind", company ? "company" : "private");
+  const typeEl = document.querySelector("[data-mm-account-type]");
+  if (typeEl) {
+    typeEl.textContent = company ? "céges fiók" : "magán fiók";
+    typeEl.hidden = false;
+  }
+  const companyWrap = document.querySelector("[data-mm-company-nav-wrap]");
+  const settingsNav = document.querySelector("[data-mm-settings-nav]");
+  if (companyWrap) companyWrap.hidden = !company;
+  if (settingsNav) settingsNav.hidden = company;
+
+  const hello = document.querySelector("[data-mm-hello]");
+  const user = getAuthUser();
+  if (hello) hello.textContent = getDisplayName() || user?.email?.split("@")[0] || "—";
+
+  if (company && companyWrap) {
+    const sub = companyWrap.querySelector("[data-mm-sub]");
+    const btn = companyWrap.querySelector("[data-mm-subtoggle]");
+    if (sub) sub.hidden = false;
+    if (btn) {
+      btn.setAttribute("aria-expanded", "true");
+      btn.classList.add("is-active");
+    }
+  }
+
+  document.querySelectorAll("[data-mm-subtoggle]").forEach((btn) => {
+    if (btn.dataset.partnerSubBound === "1") return;
+    btn.dataset.partnerSubBound = "1";
+    btn.addEventListener("click", () => {
+      const group = btn.closest(".mm-nav-group");
+      const sub = group?.querySelector("[data-mm-sub]");
+      if (!sub) return;
+      const open = sub.hidden;
+      document.querySelectorAll(".mm-nav-group [data-mm-sub]").forEach((el) => {
+        el.hidden = true;
+      });
+      document.querySelectorAll("[data-mm-subtoggle]").forEach((el) => {
+        el.setAttribute("aria-expanded", "false");
+        el.classList.remove("is-active");
+      });
+      if (open) {
+        sub.hidden = false;
+        btn.setAttribute("aria-expanded", "true");
+        btn.classList.add("is-active");
+      }
+    });
+  });
+}
+
 async function manage() {
   if (!(await requireAuthForPage())) return;
+  initSiteAuth();
+  let accountType = String(getProfile()?.accountType || "private");
+  try {
+    const loaded = await loadProfileFromServer();
+    if (loaded?.accountType) accountType = String(loaded.accountType);
+  } catch {
+  }
+  syncManageSidebar(accountType);
+
   const [profileResult, listingsResult] = await Promise.all([
     jsonFetch("/api/partner-profiles/mine"),
     jsonFetch("/api/listings/mine?limit=200").catch(() => ({ listings: [] })),

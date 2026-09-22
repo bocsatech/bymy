@@ -25,6 +25,17 @@ body.partner-page {
   padding: 26px 0 64px;
 }
 
+body.partner-manage-page.mm-page .partner-main--in-mm {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0 0 1.5rem;
+}
+
+body.partner-manage-page.mm-page {
+  background: #eef1f4;
+}
+
 .partner-loading,
 .partner-error {
   margin: 80px auto;

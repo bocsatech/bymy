@@ -46,6 +46,7 @@ let detailedFilters = null;
 let deskSort = "newest";
 let quickSearchApi = null;
 let featuredListingIds = new Set();
+let featuredOnlyMode = false;
 
 const PAGE = document.body?.getAttribute("data-site-page") || "";
 if (gridTrack) bindListingOpen(gridTrack);
@@ -177,6 +178,9 @@ function filterItems(items) {
   } else if (quickRadiusFilter) {
     result = result.filter((item) => quickRadiusFilter.listingIds.has(item.id));
   }
+  if (featuredOnlyMode) {
+    result = result.filter((item) => featuredListingIds.has(Number(item.id)));
+  }
   return result;
 }
 
@@ -198,6 +202,8 @@ function renderListings(items) {
     } else {
       emptyEl.textContent = `Nincs hirdetés ${radiusMeta.origin?.city || ""} ${radiusMeta.radiusKm} km-es körzetében.`;
     }
+  } else if (!filtered.length && featuredOnlyMode) {
+    emptyEl.textContent = "Jelenleg nincs kiemelt autó hirdetés.";
   } else if (!filtered.length) {
     emptyEl.textContent =
       PAGE === "ingatlan"
@@ -243,6 +249,19 @@ async function loadListings() {
   updateFilterResultCount();
   statsUi?.refreshActiveCount?.();
   await applyNearbyFromUrl();
+  applyFeaturedFromUrl();
+}
+
+function applyFeaturedFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("kiemelt") !== "1") return;
+  if (PAGE !== "auto" && PAGE !== "teherauto") return;
+
+  featuredOnlyMode = true;
+  categoryUi?.clear();
+  categoryFilter = null;
+  applyFilters();
+  scrollToListings();
 }
 
 async function applyNearbyFromUrl() {
@@ -498,7 +517,8 @@ loadListings()
     } catch {
       fromDetail = false;
     }
-    if (!fromDetail && !new URLSearchParams(window.location.search).has("nearby")) {
+    const qs = new URLSearchParams(window.location.search);
+    if (!fromDetail && !qs.has("nearby") && !qs.has("kiemelt")) {
       window.scrollTo(0, 0);
     }
   })

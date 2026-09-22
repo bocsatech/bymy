@@ -2681,6 +2681,73 @@ body.site-app #ad-form.ad-form--ingatlan .immo-wheel-wrap--drum-inline.is-open .
   pointer-events: auto !important;
 }
 
+body.site-app #ad-form.ad-form--ingatlan .immo-search-form .immo-schema-cell:not(.immo-dual-range__half) {
+  padding-top: 0;
+}
+
+body.site-app #ad-form.ad-form--ingatlan .immo-search-form .immo-schema-cell:not(.immo-dual-range__half) > .immo-wheel-wrap--menu,
+body.site-app #ad-form.ad-form--ingatlan .immo-search-form .immo-schema-cell:not(.immo-dual-range__half) > .immo-field {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.35rem;
+  align-items: stretch;
+  position: relative;
+  min-height: 0;
+  height: auto;
+  max-height: none;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  overflow: visible;
+}
+
+body.site-app #ad-form.ad-form--ingatlan .immo-search-form .immo-schema-cell:not(.immo-dual-range__half) > .immo-wheel-wrap--menu > .immo-label,
+body.site-app #ad-form.ad-form--ingatlan .immo-search-form .immo-field > .immo-label {
+  position: static;
+  top: auto;
+  left: auto;
+  order: 0;
+  padding: 0;
+  background: transparent;
+  font-size: 0.82rem;
+  font-weight: 650;
+  color: #64748b;
+  white-space: normal;
+  line-height: 1.25;
+}
+
+body.site-app #ad-form.ad-form--ingatlan .immo-search-form .immo-schema-cell:not(.immo-dual-range__half) > .immo-wheel-wrap--menu > .immo-wheel-trigger,
+body.site-app #ad-form.ad-form--ingatlan .immo-search-form .immo-field .immo-control {
+  order: 1;
+  width: 100%;
+  min-height: 2.75rem;
+  height: 2.75rem;
+  max-height: none;
+  box-sizing: border-box;
+  border: 1px solid #d0d5dd !important;
+  border-radius: 8px !important;
+  background-color: #f8fafc !important;
+  color: #64748b;
+  padding: 0 2.1rem 0 0.85rem;
+  box-shadow: none !important;
+}
+
+body.site-app #ad-form.ad-form--ingatlan .immo-search-form .immo-wheel-wrap--menu.is-open > .immo-label,
+body.site-app #ad-form.ad-form--ingatlan .immo-search-form .immo-wheel-wrap--menu:focus-within > .immo-label,
+body.site-app #ad-form.ad-form--ingatlan .immo-search-form .immo-field:focus-within > .immo-label {
+  color: #111;
+}
+
+body.site-app #ad-form.ad-form--ingatlan .immo-search-form .immo-wheel-wrap--menu.is-open > .immo-wheel-trigger,
+body.site-app #ad-form.ad-form--ingatlan .immo-search-form .immo-wheel-wrap--menu:focus-within > .immo-wheel-trigger,
+body.site-app #ad-form.ad-form--ingatlan .immo-search-form .immo-field:focus-within .immo-control {
+  border-color: #111 !important;
+  background-color: #fff !important;
+  box-shadow: 0 0 0 2px rgba(17, 24, 39, 0.08);
+  color: #0f172a;
+}
+
 body.site-app #ad-form.ad-form--ingatlan .immo-wheel-wrap--menu {
   position: relative;
   z-index: 1;
@@ -2693,8 +2760,24 @@ body.site-app #ad-form.ad-form--ingatlan .immo-wheel-wrap--menu.is-open {
 body.site-app #ad-form.ad-form--ingatlan .immo-wheel--menu {
   left: 0;
   right: 0;
+  top: calc(100% + 0.25rem);
   max-height: min(14rem, 45vh);
   z-index: 121;
+}
+
+body.site-app #ad-form.ad-form--ingatlan .immo-search-form .immo-dual-range-block {
+  padding-top: 0;
+}
+
+body.site-app #ad-form.ad-form--ingatlan .immo-search-form .immo-dual-range-block > .immo-dual-range__title {
+  position: static;
+  display: block;
+  margin: 0 0 0.35rem;
+  padding: 0;
+  background: transparent;
+  font-size: 0.82rem;
+  font-weight: 650;
+  color: #64748b;
 }
 
 body.site-app #ad-form.ad-form--ingatlan .immo-search-panel--post .immo-actions {

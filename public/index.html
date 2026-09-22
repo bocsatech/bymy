@@ -223,13 +223,13 @@
         </div>
       </section>
 
-      <section class="hf-section" data-hf="kiemelt">
+      <section class="hf-section" data-hf="kiemelt" hidden>
         <div class="hf-head">
           <h2 class="hf-title">Kiemelt hirdetések</h2>
           <a class="hf-all" id="hub-featured-all" href="/auto.html?kiemelt=1">Összes</a>
         </div>
         <div class="hf-rail" id="hub-featured-rail" role="list" hidden></div>
-        <p class="hf-empty" id="hub-featured-empty">Még nincs kiemelt hirdetés. Nézd meg az <a href="/auto.html">autó listát</a>.</p>
+        <p class="hf-empty" id="hub-featured-empty" hidden>Még nincs kiemelt hirdetés. Nézd meg az <a href="/auto.html">autó listát</a>.</p>
       </section>
 
       <section class="hf-section" data-hf="kozelben">
@@ -443,7 +443,7 @@
     <script src="/js/hub-rail-drag.js?v=hubDrag2" defer></script>
     <script src="/js/hub-auto-categories.js?v=autoCat2" type="module"></script>
     <script>window.BYMY_FEATURED_LISTING_IDS = window.BYMY_FEATURED_LISTING_IDS || [];</script>
-    <script src="/js/hub-featured-listings.js?v=featuredNoAuto1" type="module"></script>
+    <script src="/js/hub-featured-listings.js?v=featuredHideEmpty1" type="module"></script>
     <script src="/js/hub-nearby-cars.js?v=nearbyLoc3" type="module"></script>
     <script src="/js/hub-home-extra-rails.js?v=favHide1" type="module"></script>
     <script src="/js/nav-counts.js?v=navCount4" type="module"></script>

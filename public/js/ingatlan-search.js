@@ -67,7 +67,7 @@ import {
   INGATLAN_DUAL_RANGE_GROUPS,
   resolveIngatlanSchemaVariant,
   clearIngatlanWheelSchemaCache,
-} from "./ingatlan-wheel-schema.js?v=immoUiParity1";
+} from "./ingatlan-wheel-schema.js?v=immoAdFormDesk2";
 import { wireTelepulesSuggestIn } from "./telepules-suggest.js?v=telepClose1";
 
 const EXACT_KEYS = [
@@ -202,6 +202,28 @@ function initImmoSearchWheel(wheel, { emptyLabel = "Mindegy", multiple = false, 
     bindAutoDrumSheet(bound);
     syncDrumWheelDisplay(bound);
   }
+}
+
+function applyAdFormImmoDeskLayout(root) {
+  const scope = root?.closest?.("#immo-search-form") || root;
+  if (!scope?.closest?.("#ad-form")) return;
+  scope.querySelectorAll(".immo-schema-grid").forEach((grid) => {
+    grid.classList.add("immo-schema-grid--ad-stack");
+    grid.style.removeProperty("grid-template-rows");
+    grid.style.setProperty("grid-template-columns", "minmax(0, 1fr)", "important");
+    grid.style.setProperty("grid-auto-flow", "row", "important");
+    grid.style.setProperty("grid-auto-rows", "auto", "important");
+  });
+  scope.querySelectorAll(".immo-schema-cell, .immo-dual-range-block").forEach((cell) => {
+    cell.dataset.gridCol = "1";
+    cell.dataset.gridSpan = "12";
+    cell.dataset.gridRow = "auto";
+    cell.style.setProperty("grid-column", "1 / -1", "important");
+    cell.style.setProperty("grid-row", "auto", "important");
+    cell.style.setProperty("width", "100%", "important");
+    cell.style.setProperty("max-width", "100%", "important");
+    cell.style.setProperty("justify-self", "stretch", "important");
+  });
 }
 
 function resetAdFormIngatlanPickers(root) {
@@ -856,6 +878,7 @@ function syncTipusFieldVisibility(form) {
 
   layoutAreaDuals(form, { showAlap, showTelek });
   syncDetailConditionals(form);
+  applyAdFormImmoDeskLayout(form);
 }
 
 function syncDetailConditionals(form) {
@@ -1005,7 +1028,13 @@ function ensureTipus2Field(root, { enable }) {
   cell.dataset.gridCol = "1";
   cell.dataset.gridSpan = "6";
   cell.dataset.gridRow = String(row);
-  cell.style.cssText = `grid-column:1 / span 6;grid-row:${row}`;
+  const inAdForm = Boolean(host?.closest?.("#ad-form"));
+  cell.style.cssText = inAdForm
+    ? "grid-column:1 / -1;grid-row:auto"
+    : `grid-column:1 / span 6;grid-row:${row}`;
+  cell.dataset.gridCol = inAdForm ? "1" : "1";
+  cell.dataset.gridSpan = inAdForm ? "12" : "6";
+  cell.dataset.gridRow = inAdForm ? "auto" : String(row);
   cell.innerHTML = wheelFieldHtml("ingatlan_tipus_2", "Típus 2");
   host.appendChild(cell);
   host.style.gridTemplateRows = `repeat(${row}, auto)`;
@@ -1220,6 +1249,7 @@ async function reloadIngatlanSchemaLayout(root, opts) {
   resetAdFormIngatlanPickers(root);
   setupIngatlanSearchWheels(root, { tipusOpts, tipus2Enabled, defaultUzletag });
   restoreIngatlanSearchValues(root, saved);
+  applyAdFormImmoDeskLayout(root);
   return schema;
 }
 
@@ -1414,6 +1444,7 @@ export async function initIngatlanSearch({
   if (tipus2Enabled) syncTipus2Menu(root);
   syncTipusFieldVisibility(root);
   syncMorePanelForTipus();
+  applyAdFormImmoDeskLayout(root);
 }
 
 export { readForm as readIngatlanSearchForm };

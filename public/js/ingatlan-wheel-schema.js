@@ -510,7 +510,8 @@ export function getCachedIngatlanWheelSchema(variant = "ingatlan") {
   return cachedSchemaByVariant.get(key) || defaultIngatlanWheelSchema();
 }
 
-function cellStyle(cell) {
+function cellStyle(cell, { fullWidth = false } = {}) {
+  if (fullWidth) return "grid-column:1 / -1;grid-row:auto";
   const col = clamp(cell.col, 1, WHEEL_COLS);
   const span = clamp(cell.colSpan, 1, WHEEL_COLS - col + 1);
   const row = clamp(cell.row, 1, 40);
@@ -543,8 +544,9 @@ function numberFieldHtml(name, label, def = {}) {
   </label>`;
 }
 
-function cellHtml(cell) {
+function cellHtml(cell, { fullWidth = false } = {}) {
   if (isSpacer(cell)) {
+    if (fullWidth) return "";
     const col = clamp(cell.col, 1, WHEEL_COLS);
     const span = clamp(cell.colSpan, 1, WHEEL_COLS - col + 1);
     const row = clamp(cell.row, 1, 40);
@@ -557,10 +559,10 @@ function cellHtml(cell) {
   if (kind === "text") inner = textFieldHtml(cell.field_key, label);
   else if (kind === "number") inner = numberFieldHtml(cell.field_key, label, def || {});
   else inner = wheelFieldHtml(cell.field_key, label);
-  const col = clamp(cell.col, 1, WHEEL_COLS);
-  const span = clamp(cell.colSpan, 1, WHEEL_COLS - col + 1);
-  const row = clamp(cell.row, 1, 40);
-  return `<div class="immo-schema-cell" data-schema-field="${escapeAttr(cell.field_key)}" data-grid-col="${col}" data-grid-span="${span}" data-grid-row="${row}" style="${cellStyle(cell)}">${inner}</div>`;
+  const col = fullWidth ? 1 : clamp(cell.col, 1, WHEEL_COLS);
+  const span = fullWidth ? WHEEL_COLS : clamp(cell.colSpan, 1, WHEEL_COLS - col + 1);
+  const row = fullWidth ? "auto" : clamp(cell.row, 1, 40);
+  return `<div class="immo-schema-cell" data-schema-field="${escapeAttr(cell.field_key)}" data-grid-col="${col}" data-grid-span="${span}" data-grid-row="${row}" style="${cellStyle(cell, { fullWidth })}">${inner}</div>`;
 }
 
 function dualPlacement(tol, ig) {
@@ -580,9 +582,11 @@ function dualHalfHtml(fieldKey, halfClass) {
   return `<div class="immo-schema-cell immo-dual-range__half immo-dual-range__half--${halfClass}" data-schema-field="${escapeAttr(fieldKey)}">${inner}</div>`;
 }
 
-function dualRangeBlockHtml(group, tol, ig) {
+function dualRangeBlockHtml(group, tol, ig, { fullWidth = false } = {}) {
   const { startCol, span, row } = dualPlacement(tol, ig);
-  const style = `grid-column:${startCol} / span ${span};grid-row:${row}`;
+  const style = fullWidth
+    ? "grid-column:1 / -1;grid-row:auto"
+    : `grid-column:${startCol} / span ${span};grid-row:${row}`;
   const unitHtml = group.unit
     ? `<span class="immo-dual-range__unit" aria-hidden="true">${escapeHtml(group.unit)}</span>`
     : "";
@@ -597,7 +601,7 @@ function dualRangeBlockHtml(group, tol, ig) {
 </div>`;
 }
 
-function sectionItemsHtml(cells) {
+function sectionItemsHtml(cells, { fullWidth = false } = {}) {
   const byKey = new Map(cells.map((c) => [c.field_key, c]));
   const skip = new Set();
   const out = [];
@@ -610,11 +614,11 @@ function sectionItemsHtml(cells) {
       if (tol && ig && !tol.hidden && !ig.hidden) {
         skip.add(group.tolKey);
         skip.add(group.igKey);
-        out.push(dualRangeBlockHtml(group, tol, ig));
+        out.push(dualRangeBlockHtml(group, tol, ig, { fullWidth }));
         continue;
       }
     }
-    out.push(cellHtml(cell));
+    out.push(cellHtml(cell, { fullWidth }));
   }
   return out.join("");
 }
@@ -641,6 +645,24 @@ function compactPostRows(cells) {
   return compacted;
 }
 
+function paintSchemaGridHost(host, cells, { fullWidth = false } = {}) {
+  if (!host) return;
+  host.className = fullWidth ? "immo-schema-grid immo-schema-grid--ad-stack" : "immo-schema-grid";
+  if (fullWidth) {
+    host.style.removeProperty("grid-template-rows");
+    host.style.setProperty("grid-template-columns", "minmax(0, 1fr)", "important");
+    host.style.setProperty("grid-auto-flow", "row", "important");
+    host.style.setProperty("grid-auto-rows", "auto", "important");
+  } else {
+    const maxRow = Math.max(1, ...cells.map((c) => Number(c.row) || 1));
+    host.style.gridTemplateRows = `repeat(${maxRow}, auto)`;
+    host.style.removeProperty("grid-template-columns");
+    host.style.removeProperty("grid-auto-flow");
+    host.style.removeProperty("grid-auto-rows");
+  }
+  host.innerHTML = sectionItemsHtml(cells, { fullWidth });
+}
+
 export function renderIngatlanSchemaHosts(mainHost, moreHost, schema, surface) {
   const surfaceCells = cellsForSurface(schema, surface);
   const cells = (surface === "post" ? compactPostRows(surfaceCells) : surfaceCells).map((cell) => {
@@ -649,18 +671,10 @@ export function renderIngatlanSchemaHosts(mainHost, moreHost, schema, surface) {
   });
   const main = cells.filter((c) => c.section !== "more");
   const more = cells.filter((c) => c.section === "more");
-  const maxMain = Math.max(1, ...main.map((c) => Number(c.row) || 1));
-  const maxMore = Math.max(1, ...more.map((c) => Number(c.row) || 1));
-  if (mainHost) {
-    mainHost.className = "immo-schema-grid";
-    mainHost.style.gridTemplateRows = `repeat(${maxMain}, auto)`;
-    mainHost.innerHTML = sectionItemsHtml(main);
-  }
-  if (moreHost) {
-    moreHost.className = "immo-schema-grid";
-    moreHost.style.gridTemplateRows = `repeat(${maxMore}, auto)`;
-    moreHost.innerHTML = sectionItemsHtml(more);
-  }
+  const fullWidth =
+    surface === "post" && Boolean(mainHost?.closest?.("#ad-form") || moreHost?.closest?.("#ad-form"));
+  paintSchemaGridHost(mainHost, main, { fullWidth });
+  paintSchemaGridHost(moreHost, more, { fullWidth });
 }
 
 export { FIELD_DEFS as INGATLAN_WHEEL_FIELD_DEFS };

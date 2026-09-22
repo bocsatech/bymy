@@ -147,15 +147,21 @@ function renderResult(result, { partial = false, index = 0, total = 0 } = {}) {
   const saved = result?.savedCount ?? 0;
   const skipped = result?.skippedCount ?? 0;
   const errors = result?.errorCount ?? 0;
-  const updated = (result?.items || []).filter((item) => item?.updated).length;
+  const items = result?.items ?? [];
+  const updated = items.filter((item) => item?.updated).length;
   const created = Math.max(0, saved - updated);
+  const otherOwner = items.filter(
+    (item) => item?.skipped && /más Bymy fiók/i.test(String(item.message || ""))
+  ).length;
   let summary = "";
   if (partial && total > 0) {
     summary = `Folyamatban: ${index} / ${total}. eddig ${saved} mentve`;
     if (errors > 0) summary += `, ${errors} hiba`;
     summary += "…";
-  } else if (saved === 0 && errors === 0) {
+  } else if (saved === 0 && errors === 0 && skipped === 0) {
     summary = "Nem került be új / frissített hirdetés.";
+  } else if (saved === 0 && otherOwner > 0 && errors === 0) {
+    summary = `${otherOwner} hirdetés már más Bymy fiókhoz tartozik — mentés kihagyva.`;
   } else {
     const parts = [];
     if (created > 0) parts.push(`${created} új`);
@@ -164,16 +170,29 @@ function renderResult(result, { partial = false, index = 0, total = 0 } = {}) {
     if (total > 1) summary = `${total}-ből ${summary}`;
     if (errors > 0) summary += ` ${errors} hiba.`;
   }
-  if (skipped > 0) summary += ` ${skipped} kihagyva.`;
+  if (skipped > 0 && otherOwner !== skipped) {
+    summary += ` ${skipped} kihagyva.`;
+  } else if (skipped > 0 && saved > 0 && otherOwner > 0) {
+    summary += ` ${otherOwner} más fióké (kihagyva).`;
+  }
   box.hidden = false;
   box.innerHTML = `<p>${summary}</p>`;
-  const items = result?.items ?? [];
   if (items.length) {
     const list = document.createElement("ul");
     list.className = "ha-imp-items";
     for (const item of items.slice(-12)) {
       const li = document.createElement("li");
-      li.textContent = `${item.cim || "—"} · ${item.ar || "—"} Ft${item.skipped ? " (már bent volt)" : ""}`;
+      const label = item.cim || item.url || "—";
+      const price = item.ar ? ` · ${item.ar} Ft` : "";
+      let note = "";
+      if (item.skipped) {
+        note = item.message
+          ? ` (${item.message})`
+          : " (már bent volt / kihagyva)";
+      } else if (item.updated) {
+        note = " (frissítve)";
+      }
+      li.textContent = `${label}${price}${note}`;
       list.appendChild(li);
     }
     box.appendChild(list);

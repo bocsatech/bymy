@@ -167,8 +167,8 @@
       </nav>
       <script>
         (function () {
-          var tip = new URLSearchParams(location.search).get("tipus") || "kiado";
-          if (tip !== "elado" && tip !== "kiado" && tip !== "airbnb") tip = "kiado";
+          var tip = new URLSearchParams(location.search).get("tipus") || "elado";
+          if (tip !== "elado" && tip !== "kiado" && tip !== "airbnb") tip = "elado";
           document.querySelectorAll("[data-immo-tip]").forEach(function (el) {
             var on = el.getAttribute("data-immo-tip") === tip;
             el.classList.toggle("is-active", on);
@@ -182,7 +182,7 @@
         <article class="immo-search-panel">
           <h1 class="immo-search-title" id="immo-search-title">Melyik ingatlant keresed?</h1>
           <form class="immo-search-form" id="immo-search-form">
-            <input type="hidden" id="immo-uzletag" name="ingatlan_uzletag" value="kiado" />
+            <input type="hidden" id="immo-uzletag" name="ingatlan_uzletag" value="elado" />
 
             <div id="immo-schema-main" class="immo-schema-grid" aria-label="Fő szűrők"></div>
 
@@ -237,7 +237,7 @@
       </div>
     </main>
 
-    <script src="/js/home-app.js?v=immoUiParity1" type="module"></script>
+    <script src="/js/home-app.js?v=immoEladoDefault1" type="module"></script>
     <script src="/js/ingatlan-partnerek.js?v=partnerAds1" type="module"></script>
     <script src="/js/site-avatar-menu.js?v=avatarSync1" type="module"></script>
     <script src="/js/nav-counts.js?v=navCount4" type="module"></script>

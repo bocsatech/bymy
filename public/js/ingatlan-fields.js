@@ -21,7 +21,7 @@ export function normalizeIngatlanUzletag(value) {
   ) {
     return "kiado";
   }
-  return v || "kiado";
+  return v || "elado";
 }
 
 export function schemaVariantFromUzletag(uz) {

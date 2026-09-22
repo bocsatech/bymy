@@ -43,7 +43,7 @@ import {
   tipus2OptionsForParents,
   applyIngatlanTipusFieldsConfig,
   resolveTipusFieldParent,
-} from "./ingatlan-fields.js?v=immoUiParity1";
+} from "./ingatlan-fields.js?v=immoEladoDefault1";
 import {
   fillWheel,
   readWheel,
@@ -100,7 +100,7 @@ const EXACT_KEYS = [
 
 export function emptyIngatlanFilters() {
   return {
-    ingatlan_uzletag: "kiado",
+    ingatlan_uzletag: "elado",
     keresesi_hely: "",
     ar_tol: null,
     ar_ig: null,
@@ -431,12 +431,12 @@ function setupMobileDualRange(mainHost, { id, tolKey, igKey, title, ariaLabel, u
 
 function readUzletag(form) {
   const wheel = form?.querySelector?.('[data-wheel="ingatlan_uzletag"]');
-  if (wheel) return normalizeIngatlanUzletag(readWheel(wheel) || "kiado");
-  return normalizeIngatlanUzletag(form?.querySelector?.("#immo-uzletag")?.value || "kiado");
+  if (wheel) return normalizeIngatlanUzletag(readWheel(wheel) || "elado");
+  return normalizeIngatlanUzletag(form?.querySelector?.("#immo-uzletag")?.value || "elado");
 }
 
 function setUzletag(form, value) {
-  const next = normalizeIngatlanUzletag(value || "kiado");
+  const next = normalizeIngatlanUzletag(value || "elado");
   const wheel = form?.querySelector?.('[data-wheel="ingatlan_uzletag"]');
   if (wheel) {
     setWheelValue(wheel, next);
@@ -1272,7 +1272,7 @@ export async function initIngatlanSearch({
   form = null,
   schema = null,
   surface = "search",
-  defaultUzletag = "kiado",
+  defaultUzletag = "elado",
   lakasTipusOptions = null,
   enableTipus2 = true,
 } = {}) {

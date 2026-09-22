@@ -7,6 +7,13 @@ import {
 import { compressListingPhotos } from "./listing-photo-compress.js?v=myAds1";
 import { bindListingOpen, restoreListingReturn } from "./listing-return.js?v=scrollTop1";
 
+const ICON_CAM = `<svg class="myads-ico" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="13.5" r="3" stroke="currentColor" stroke-width="1.6"/><path d="M8 7 9.5 5h5L15 7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>`;
+const ICON_PIN = `<svg class="myads-ico" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 21s7-5.2 7-11a7 7 0 1 0-14 0c0 5.8 7 11 7 11Z" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="10" r="2.2" stroke="currentColor" stroke-width="1.5"/></svg>`;
+const ICON_STAR = `<svg class="myads-ico myads-ico--star" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.5 14.8 9l7.2.6-5.5 4.7 1.7 7.1L12 17.8 5.8 21.4l1.7-7.1L2 9.6 9.2 9 12 2.5Z"/></svg>`;
+const ICON_EYE = `<svg class="myads-ico" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M2.5 12s3.5-6.5 9.5-6.5S21.5 12 21.5 12s-3.5 6.5-9.5 6.5S2.5 12 2.5 12Z" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="12" r="2.8" stroke="currentColor" stroke-width="1.6"/></svg>`;
+const ICON_EDIT = `<svg class="myads-ico" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 20h4l9.5-9.5a2.1 2.1 0 0 0 0-3L16.5 4.5a2.1 2.1 0 0 0-3 0L4 14v6Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>`;
+const ICON_TRASH = `<svg class="myads-ico" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M9 7V5h6v2M8 7l1 12h6l1-12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+
 function escapeHtml(value) {
   return String(value ?? "")
     .replaceAll("&", "&amp;")
@@ -42,11 +49,43 @@ function titleOf(item) {
   return `Hirdetés #${item.id}`;
 }
 
-function specOf(item) {
+function isImmo(item) {
+  const f = item.preview?.filter || item.form || {};
+  const v = String(f.hirdetes_vertical ?? "").trim().toLowerCase();
+  return v === "ingatlan";
+}
+
+function metaLine(item) {
   const f = item.preview?.filter || {};
+  const form = item.form || {};
+  if (isImmo(item)) {
+    const city = String(form.telepules || f.telepules || item.preview?.telepules || "").trim();
+    const kat = String(form.ingatlan_tipus || f.ingatlan_tipus || form.tipus || "").trim();
+    return [city, kat].filter(Boolean).join(" • ");
+  }
   const year = f.gyartasi_ev || "";
   const fuel = f.uzemanyag || "";
-  return [year, fuel, `#${item.id}`].filter(Boolean).join(", ");
+  const tipus = String(form.tipus || f.tipus || "").trim();
+  return [year, fuel, tipus].filter(Boolean).join(" • ");
+}
+
+function locationLine(item) {
+  const form = item.form || {};
+  const f = item.preview?.filter || {};
+  const city = String(form.telepules || f.telepules || item.preview?.telepules || "").trim();
+  const street = String(form.cim || form.utca || f.cim || "").trim();
+  if (street && city) return `${city}, ${street}`;
+  return city || street || `#${item.id}`;
+}
+
+function priceSecondary(item) {
+  if (!isImmo(item)) return "";
+  const form = item.form || {};
+  const ar = Number(String(form.vetelar || "").replace(/\D/g, ""));
+  const m2 = Number(String(form.alapterulet || form.lakoterulet || "").replace(/\D/g, ""));
+  if (!Number.isFinite(ar) || ar <= 0 || !Number.isFinite(m2) || m2 <= 0) return "";
+  const per = Math.round(ar / m2);
+  return `(kb. ${per.toLocaleString("hu-HU")} Ft/m²)`;
 }
 
 function isActive(item) {
@@ -59,15 +98,23 @@ function readFeaturedIdSet() {
   return new Set(g.map((x) => Number(x)).filter((n) => Number.isFinite(n) && n > 0));
 }
 
-function sablonLabel(item) {
+function hasSablon(item) {
   const photos = item.form?.photos || item.photos;
-  if (!Array.isArray(photos)) return "Sablon: nincs";
-  const has = photos.some((p) => p?.overlayTemplateId || p?.overlayDataUrl);
-  return has ? "Sablon: aktív" : "Sablon: nincs";
+  return Array.isArray(photos) && photos.some((p) => p?.overlayTemplateId || p?.overlayDataUrl);
 }
 
 function editHref(id) {
   return `/hirdetesfeladas.html?id=${encodeURIComponent(String(id))}`;
+}
+
+function listingTime(item) {
+  return new Date(item.updated_at ?? item.created_at ?? 0).getTime();
+}
+
+function listingPriceNum(item) {
+  const raw = String(item?.preview?.price ?? item?.form?.vetelar ?? "").replace(/\D/g, "");
+  const n = Number(raw);
+  return Number.isFinite(n) ? n : null;
 }
 
 export function initMyAdsPanel(root) {
@@ -76,7 +123,7 @@ export function initMyAdsPanel(root) {
 
   let items = [];
   let filter = "all";
-  let query = "";
+  let sort = "newest";
   let photoState = null;
 
   async function reload() {
@@ -89,42 +136,82 @@ export function initMyAdsPanel(root) {
     }
   }
 
+  function counts() {
+    const featured = readFeaturedIdSet();
+    let active = 0;
+    let inactive = 0;
+    let kiemelt = 0;
+    let sablon = 0;
+    for (const item of items) {
+      if (isActive(item)) active += 1;
+      else inactive += 1;
+      if (featured.has(Number(item.id))) kiemelt += 1;
+      if (hasSablon(item)) sablon += 1;
+    }
+    return { active, inactive, kiemelt, sablon, all: items.length };
+  }
+
   function filtered() {
-    const q = query.trim().toLowerCase();
+    const featured = readFeaturedIdSet();
     return items.filter((item) => {
       if (filter === "active" && !isActive(item)) return false;
       if (filter === "inactive" && isActive(item)) return false;
-      if (!q) return true;
-      const hay = `${titleOf(item)} ${item.id} ${item.preview?.hirdeteskod || ""}`.toLowerCase();
-      return hay.includes(q);
+      if (filter === "featured" && !featured.has(Number(item.id))) return false;
+      if (filter === "sablon" && !hasSablon(item)) return false;
+      return true;
     });
   }
 
+  function sorted(rows) {
+    const list = [...rows];
+    if (sort === "oldest") {
+      return list.sort((a, b) => listingTime(a) - listingTime(b));
+    }
+    if (sort === "price-asc") {
+      return list.sort((a, b) => (listingPriceNum(a) ?? Infinity) - (listingPriceNum(b) ?? Infinity));
+    }
+    if (sort === "price-desc") {
+      return list.sort((a, b) => (listingPriceNum(b) ?? -1) - (listingPriceNum(a) ?? -1));
+    }
+    return list.sort((a, b) => listingTime(b) - listingTime(a));
+  }
+
   function render() {
-    const rows = filtered();
+    const c = counts();
+    const rows = sorted(filtered());
     root.innerHTML = `
-      <div class="myads-toolbar">
-        <label class="myads-radio"><input type="radio" name="myads-filter" value="all" ${filter === "all" ? "checked" : ""} /> Összes hirdetés</label>
-        <label class="myads-radio"><input type="radio" name="myads-filter" value="inactive" ${filter === "inactive" ? "checked" : ""} /> Inaktív hirdetések</label>
-        <label class="myads-radio"><input type="radio" name="myads-filter" value="active" ${filter === "active" ? "checked" : ""} /> Aktív hirdetések</label>
-        <div class="myads-search">
-          <span>Keresés hirdetéskód szerint:</span>
-          <input type="search" data-myads-q value="${escapeHtml(query)}" placeholder="gyártmány, modell vagy #" />
-          <button type="button" class="site-header-btn site-header-btn--primary" data-myads-search>Keresés</button>
+      <div class="myads-shell">
+        <div class="myads-topbar">
+          <h2 class="myads-page-title">Saját hirdetések</h2>
+          <a class="myads-new-btn" href="/hirdetesfeladas.html" data-auth-guard>+ Új hirdetés <span class="myads-new-caret" aria-hidden="true">▾</span></a>
         </div>
-      </div>
-      <p class="myads-count">Megjelenített járművek száma: <strong>${rows.length} db</strong></p>
-      <div class="myads-list-wrap">
-        <div class="myads-list" role="list">
-          ${
-            rows.length
-              ? rows.map((item) => rowHtml(item)).join("")
-              : `<p class="myads-empty-cell">Nincs megjeleníthető hirdetés.</p>`
-          }
+        <div class="myads-filters-row">
+          <div class="myads-pills" role="tablist" aria-label="Szűrés">
+            <button type="button" class="myads-pill${filter === "all" ? " is-active" : ""}" data-filter="all" role="tab" aria-selected="${filter === "all"}">Összes</button>
+            <button type="button" class="myads-pill${filter === "active" ? " is-active" : ""}" data-filter="active" role="tab" aria-selected="${filter === "active"}">Aktív (${c.active})</button>
+            <button type="button" class="myads-pill${filter === "inactive" ? " is-active" : ""}" data-filter="inactive" role="tab" aria-selected="${filter === "inactive"}">Inaktív (${c.inactive})</button>
+            <button type="button" class="myads-pill${filter === "featured" ? " is-active" : ""}" data-filter="featured" role="tab" aria-selected="${filter === "featured"}">Kiemelt (${c.kiemelt})</button>
+            <button type="button" class="myads-pill${filter === "sablon" ? " is-active" : ""}" data-filter="sablon" role="tab" aria-selected="${filter === "sablon"}">Sablon (${c.sablon})</button>
+          </div>
+          <label class="myads-sort">
+            <span class="myads-sort-icon" aria-hidden="true">⇅</span>
+            <select data-myads-sort aria-label="Rendezés">
+              <option value="newest"${sort === "newest" ? " selected" : ""}>Legújabb elöl</option>
+              <option value="oldest"${sort === "oldest" ? " selected" : ""}>Legrégebbi elöl</option>
+              <option value="price-desc"${sort === "price-desc" ? " selected" : ""}>Ár: csökkenő</option>
+              <option value="price-asc"${sort === "price-asc" ? " selected" : ""}>Ár: növekvő</option>
+            </select>
+          </label>
         </div>
-      </div>
-      <div class="myads-actions">
-        <a class="site-header-btn site-header-btn--outline" href="/hirdetesfeladas.html" data-auth-guard>Új hirdetés feladása</a>
+        <div class="myads-list-wrap">
+          <div class="myads-list" role="list">
+            ${
+              rows.length
+                ? rows.map((item) => rowHtml(item)).join("")
+                : `<p class="myads-empty-cell">Nincs megjeleníthető hirdetés.</p>`
+            }
+          </div>
+        </div>
       </div>
       ${photoModalHtml()}
     `;
@@ -142,43 +229,60 @@ export function initMyAdsPanel(root) {
     const active = isActive(item);
     const featuredIds = readFeaturedIdSet();
     const isFeatured = featuredIds.has(Number(item.id));
-    const sablon = sablonLabel(item);
+    const sablonOn = hasSablon(item);
     const edit = editHref(item.id);
+    const price = escapeHtml(item.preview?.price || "—");
+    const priceSub = priceSecondary(item);
+    const badge = isFeatured ? "Kiemelt" : active ? "Aktív" : "Inaktív";
+    const badgeClass = isFeatured ? "is-featured" : active ? "is-active" : "is-inactive";
+
     return `
       <article class="myads-card${isFeatured ? " myads-card--featured" : ""}" role="listitem" data-id="${item.id}">
-        <div class="myads-card-main">
+        <div class="myads-card-top">
           <div class="myads-photo-cell">
             <div class="myads-thumb">
               ${thumb ? `<img src="${escapeHtml(thumb)}" alt="" />` : `<span class="myads-thumb-empty">Nincs kép</span>`}
               ${count ? `<span class="myads-photo-count">${count}</span>` : ""}
             </div>
-            <div class="myads-photo-links">
-              <button type="button" class="myads-link" data-photos="${item.id}">Képkezelés</button>
-              <a class="myads-link myads-sablon-meta" href="${escapeHtml(edit)}">${escapeHtml(sablon)}</a>
-            </div>
+            <button type="button" class="myads-photo-manage" data-photos="${item.id}">${ICON_CAM} Képkezelés</button>
           </div>
-          <div class="myads-card-content">
-            <a class="myads-title" href="/hirdetes.html?id=${item.id}" data-listing-id="${item.id}">${escapeHtml(titleOf(item))}</a>
-            <p class="myads-spec">${escapeHtml(specOf(item))}</p>
-            <p class="myads-views">Megtekintve: ${web + app}</p>
-            <p class="myads-views-split">Web: <strong>${web}</strong> · Mobilapp: <strong>${app}</strong></p>
-            <label class="myads-inactive">
+          <div class="myads-card-head">
+            <div class="myads-title-row">
+              ${isFeatured ? `<span class="myads-star" aria-hidden="true">${ICON_STAR}</span>` : ""}
+              <a class="myads-title" href="/hirdetes.html?id=${item.id}" data-listing-id="${item.id}">${escapeHtml(titleOf(item))}</a>
+              <span class="myads-status-badge myads-status-badge--${badgeClass}">${badge}</span>
+            </div>
+            <p class="myads-meta">${escapeHtml(metaLine(item))}</p>
+            <p class="myads-loc">${ICON_PIN}<span>${escapeHtml(locationLine(item))}</span></p>
+            <p class="myads-views">Megtekintve: <strong>${web + app}</strong> · Web: <strong>${web}</strong> · Mobilapp: <strong>${app}</strong></p>
+            <label class="myads-inactive myads-inactive--compact">
               <input type="checkbox" data-inactive="${item.id}" ${active ? "" : "checked"} />
-              Lefoglalózva / inaktív
+              <span>Lefoglalózva / inaktív</span>
             </label>
-            <div class="myads-promo-strip" role="group" aria-label="Promóció">
-              <button type="button" class="myads-promo-btn${isFeatured ? " is-on" : ""}" data-promo="kiemelt" data-id="${item.id}" aria-pressed="${isFeatured ? "true" : "false"}">★ Kiemelés</button>
-              <button type="button" class="myads-promo-btn" data-promo="top" data-id="${item.id}" aria-pressed="false">TOP ajánlat</button>
-              <a class="myads-promo-btn myads-promo-btn--link" href="${escapeHtml(edit)}">Sablon</a>
+          </div>
+          <div class="myads-price-block">
+            <strong class="myads-price-lg">${price}</strong>
+            ${priceSub ? `<span class="myads-price-sub">${escapeHtml(priceSub)}</span>` : ""}
+            <div class="myads-sablon-toggle">
+              <span class="myads-sablon-toggle-label">${sablonOn ? "Sablon: Aktív" : "Sablon: nincs"}</span>
+              <span class="myads-sablon-dot${sablonOn ? " is-on" : ""}" aria-hidden="true"></span>
+              <input type="checkbox" class="myads-switch" disabled aria-hidden="true" ${sablonOn ? "checked" : ""} tabindex="-1" />
             </div>
           </div>
         </div>
+        <div class="myads-promo-strip" role="group" aria-label="Promóció">
+          <div class="myads-promo-btns">
+            <button type="button" class="myads-promo-btn${isFeatured ? " is-on" : ""}" data-promo="kiemelt" data-id="${item.id}">${ICON_STAR}<span>Kiemelés</span></button>
+            <button type="button" class="myads-promo-btn" data-promo="top" data-id="${item.id}"><span>TOP ajánlat</span></button>
+            <a class="myads-promo-btn myads-promo-btn--link" href="${escapeHtml(edit)}">${ICON_EYE}<span>Sablon</span></a>
+          </div>
+        </div>
         <footer class="myads-card-foot">
-          <strong class="myads-price">${escapeHtml(item.preview?.price || "—")}</strong>
+          <strong class="myads-price-foot">${price}</strong>
           <div class="myads-fn">
-            <a class="myads-link" href="${escapeHtml(edit)}">Módosítás</a>
-            <a class="myads-link" href="/hirdetes.html?id=${item.id}" data-listing-id="${item.id}">Megtekintés</a>
-            <button type="button" class="myads-link myads-link--danger" data-delete="${item.id}">Törlés</button>
+            <a class="myads-fn-btn" href="${escapeHtml(edit)}">${ICON_EDIT}<span>Módosítás</span></a>
+            <a class="myads-fn-btn" href="/hirdetes.html?id=${item.id}" data-listing-id="${item.id}">${ICON_EYE}<span>Megtekintés</span></a>
+            <button type="button" class="myads-fn-btn myads-fn-btn--danger" data-delete="${item.id}">${ICON_TRASH}<span>Törlés</span></button>
           </div>
         </footer>
       </article>
@@ -246,36 +350,23 @@ export function initMyAdsPanel(root) {
   }
 
   function bind() {
-    root.querySelectorAll('input[name="myads-filter"]').forEach((el) => {
-      el.addEventListener("change", () => {
-        filter = el.value;
+    root.querySelectorAll("[data-filter]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        filter = btn.dataset.filter || "all";
         render();
       });
     });
-    const applyQuery = (restoreCaret = false) => {
-      const input = root.querySelector("[data-myads-q]");
-      const start = input?.selectionStart;
-      const end = input?.selectionEnd;
-      query = input?.value ?? "";
+    root.querySelector("[data-myads-sort]")?.addEventListener("change", (event) => {
+      sort = event.target.value;
       render();
-      if (!restoreCaret) return;
-      const next = root.querySelector("[data-myads-q]");
-      if (!next) return;
-      next.focus();
-      if (typeof start === "number" && typeof end === "number") {
-        next.setSelectionRange(start, end);
-      }
-    };
-    root.querySelector("[data-myads-q]")?.addEventListener("input", () => applyQuery(true));
-    root.querySelector("[data-myads-q]")?.addEventListener("keydown", (event) => {
-      if (event.key === "Enter") {
-        event.preventDefault();
-        applyQuery(true);
-      }
     });
-    root.querySelector("[data-myads-search]")?.addEventListener("click", () => applyQuery(true));
     root.querySelectorAll("[data-photos]").forEach((btn) => {
       btn.addEventListener("click", () => openPhotos(btn.dataset.photos));
+    });
+    root.querySelectorAll("[data-promo='kiemelt'], [data-promo='top']").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        alert("A Kiemelés és TOP ajánlat beállítása hamarosan elérhető a fiókodból.");
+      });
     });
     root.querySelectorAll("[data-inactive]").forEach((box) => {
       box.addEventListener("change", async () => {
@@ -287,11 +378,6 @@ export function initMyAdsPanel(root) {
           alert(error.message ?? "A státusz mentése sikertelen.");
           box.checked = !box.checked;
         }
-      });
-    });
-    root.querySelectorAll("[data-promo='kiemelt'], [data-promo='top']").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        alert("A Kiemelés és TOP ajánlat beállítása hamarosan elérhető a fiókodból.");
       });
     });
     root.querySelectorAll("[data-delete]").forEach((btn) => {

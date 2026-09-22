@@ -53,6 +53,23 @@ function isActive(item) {
   return (item.status || "feladott") === "feladott";
 }
 
+function readFeaturedIdSet() {
+  const g = globalThis.BYMY_FEATURED_LISTING_IDS;
+  if (!Array.isArray(g)) return new Set();
+  return new Set(g.map((x) => Number(x)).filter((n) => Number.isFinite(n) && n > 0));
+}
+
+function sablonLabel(item) {
+  const photos = item.form?.photos || item.photos;
+  if (!Array.isArray(photos)) return "Sablon: nincs";
+  const has = photos.some((p) => p?.overlayTemplateId || p?.overlayDataUrl);
+  return has ? "Sablon: aktív" : "Sablon: nincs";
+}
+
+function editHref(id) {
+  return `/hirdetesfeladas.html?id=${encodeURIComponent(String(id))}`;
+}
+
 export function initMyAdsPanel(root) {
   if (!root) return { reload() {} };
   bindListingOpen(root);
@@ -101,7 +118,7 @@ export function initMyAdsPanel(root) {
         <div class="myads-list" role="list">
           ${
             rows.length
-              ? rows.map((item, index) => rowHtml(item, index + 1)).join("")
+              ? rows.map((item) => rowHtml(item)).join("")
               : `<p class="myads-empty-cell">Nincs megjeleníthető hirdetés.</p>`
           }
         </div>
@@ -115,7 +132,7 @@ export function initMyAdsPanel(root) {
     restoreListingReturn();
   }
 
-  function rowHtml(item, index) {
+  function rowHtml(item) {
     const urls = photoUrls(item);
     const thumb = urls[0] || "";
     const count = urls.length;
@@ -123,34 +140,47 @@ export function initMyAdsPanel(root) {
     const web = Number(views.web || item.views_web || 0);
     const app = Number(views.app || item.views_app || 0);
     const active = isActive(item);
+    const featuredIds = readFeaturedIdSet();
+    const isFeatured = featuredIds.has(Number(item.id));
+    const sablon = sablonLabel(item);
+    const edit = editHref(item.id);
     return `
-      <article class="myads-row" role="listitem" data-id="${item.id}">
-        <div class="myads-ssz">${index}.</div>
-        <div class="myads-photo-cell">
-          <div class="myads-thumb">
-            ${thumb ? `<img src="${escapeHtml(thumb)}" alt="" />` : `<span class="myads-thumb-empty">Nincs kép</span>`}
-            <span class="myads-photo-count">${count}</span>
+      <article class="myads-card${isFeatured ? " myads-card--featured" : ""}" role="listitem" data-id="${item.id}">
+        <div class="myads-card-main">
+          <div class="myads-photo-cell">
+            <div class="myads-thumb">
+              ${thumb ? `<img src="${escapeHtml(thumb)}" alt="" />` : `<span class="myads-thumb-empty">Nincs kép</span>`}
+              ${count ? `<span class="myads-photo-count">${count}</span>` : ""}
+            </div>
+            <div class="myads-photo-links">
+              <button type="button" class="myads-link" data-photos="${item.id}">Képkezelés</button>
+              <a class="myads-link myads-sablon-meta" href="${escapeHtml(edit)}">${escapeHtml(sablon)}</a>
+            </div>
           </div>
-          <button type="button" class="myads-link" data-photos="${item.id}">Képkezelés</button>
-        </div>
-        <div class="myads-row-body">
-          <div class="myads-row-top">
+          <div class="myads-card-content">
             <a class="myads-title" href="/hirdetes.html?id=${item.id}" data-listing-id="${item.id}">${escapeHtml(titleOf(item))}</a>
-            <strong class="myads-price">${escapeHtml(item.preview?.price || "—")}</strong>
+            <p class="myads-spec">${escapeHtml(specOf(item))}</p>
+            <p class="myads-views">Megtekintve: ${web + app}</p>
+            <p class="myads-views-split">Web: <strong>${web}</strong> · Mobilapp: <strong>${app}</strong></p>
+            <label class="myads-inactive">
+              <input type="checkbox" data-inactive="${item.id}" ${active ? "" : "checked"} />
+              Lefoglalózva / inaktív
+            </label>
+            <div class="myads-promo-strip" role="group" aria-label="Promóció">
+              <button type="button" class="myads-promo-btn${isFeatured ? " is-on" : ""}" data-promo="kiemelt" data-id="${item.id}" aria-pressed="${isFeatured ? "true" : "false"}">★ Kiemelés</button>
+              <button type="button" class="myads-promo-btn" data-promo="top" data-id="${item.id}" aria-pressed="false">TOP ajánlat</button>
+              <a class="myads-promo-btn myads-promo-btn--link" href="${escapeHtml(edit)}">Sablon</a>
+            </div>
           </div>
-          <p class="myads-spec">${escapeHtml(specOf(item))}</p>
-          <p class="myads-views">Megtekintve: ${web + app}</p>
-          <p class="myads-views-split">Web: <strong>${web}</strong> · Mobilapp: <strong>${app}</strong></p>
-          <label class="myads-inactive">
-            <input type="checkbox" data-inactive="${item.id}" ${active ? "" : "checked"} />
-            Lefoglalózva / inaktív
-          </label>
+        </div>
+        <footer class="myads-card-foot">
+          <strong class="myads-price">${escapeHtml(item.preview?.price || "—")}</strong>
           <div class="myads-fn">
-            <a class="myads-link" href="/hirdetesfeladas.html?id=${item.id}">Módosítás</a>
+            <a class="myads-link" href="${escapeHtml(edit)}">Módosítás</a>
             <a class="myads-link" href="/hirdetes.html?id=${item.id}" data-listing-id="${item.id}">Megtekintés</a>
             <button type="button" class="myads-link myads-link--danger" data-delete="${item.id}">Törlés</button>
           </div>
-        </div>
+        </footer>
       </article>
     `;
   }
@@ -257,6 +287,11 @@ export function initMyAdsPanel(root) {
           alert(error.message ?? "A státusz mentése sikertelen.");
           box.checked = !box.checked;
         }
+      });
+    });
+    root.querySelectorAll("[data-promo='kiemelt'], [data-promo='top']").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        alert("A Kiemelés és TOP ajánlat beállítása hamarosan elérhető a fiókodból.");
       });
     });
     root.querySelectorAll("[data-delete]").forEach((btn) => {

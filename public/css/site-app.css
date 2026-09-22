@@ -4349,54 +4349,47 @@ body.site-app .myads-count {
 }
 
 body.site-app .myads-list-wrap {
-  border: 1px solid #dfe3ea;
-  border-radius: 10px;
-  background: #fff;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
   overflow: visible;
 }
 
 body.site-app .myads-list {
   display: grid;
-  gap: 0;
+  gap: 0.75rem;
 }
 
-body.site-app .myads-row {
-  display: grid;
-  grid-template-columns: 1.85rem 96px minmax(0, 1fr);
-  gap: 0.45rem 0.65rem;
-  padding: 0.85rem 0.75rem;
-  border-bottom: 1px solid #eef1f5;
-  align-items: start;
+body.site-app .myads-card {
+  border: 1px solid #e5e8ee;
+  border-radius: 12px;
+  background: #fff;
+  padding: 0.85rem 1rem;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.05);
   font-size: 0.92rem;
 }
 
-body.site-app .myads-row:last-child {
-  border-bottom: 0;
+body.site-app .myads-card--featured {
+  border-color: #f0c14b;
+  box-shadow: 0 4px 18px rgba(240, 193, 75, 0.18);
 }
 
-body.site-app .myads-row-body {
+body.site-app .myads-card-main {
+  display: grid;
+  grid-template-columns: 112px minmax(0, 1fr);
+  gap: 0.85rem;
+  align-items: start;
+}
+
+body.site-app .myads-card-content {
   min-width: 0;
-}
-
-body.site-app .myads-row-top {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 0.35rem 0.75rem;
-}
-
-body.site-app .myads-ssz {
-  color: #667085;
-  font-size: 0.88rem;
-  padding-top: 0.15rem;
 }
 
 body.site-app .myads-thumb {
   position: relative;
-  width: 92px;
-  height: 68px;
-  border-radius: 6px;
+  width: 112px;
+  height: 84px;
+  border-radius: 8px;
   overflow: hidden;
   background: #e8edf2;
 }
@@ -4430,14 +4423,29 @@ body.site-app .myads-photo-count {
 
 body.site-app .myads-photo-cell {
   width: auto;
-  max-width: 96px;
+  max-width: 112px;
+}
+
+body.site-app .myads-photo-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  margin-top: 0.35rem;
+  font-size: 0.82rem;
+}
+
+body.site-app .myads-sablon-meta {
+  color: #667085;
+  font-size: 0.78rem;
 }
 
 body.site-app .myads-title {
-  flex: 1 1 10rem;
+  display: block;
   min-width: 0;
   color: #0b63ce;
   font-weight: 700;
+  font-size: 1rem;
+  line-height: 1.25;
   text-decoration: none;
   word-break: break-word;
 }
@@ -4465,18 +4473,63 @@ body.site-app .myads-inactive {
   font-size: 0.85rem;
 }
 
+body.site-app .myads-promo-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.65rem;
+  padding: 0.5rem 0.65rem;
+  background: #fff8e1;
+  border-radius: 8px;
+}
+
+body.site-app .myads-promo-btn {
+  border: 1px solid #e6b422;
+  background: #fff;
+  color: #1a1200;
+  border-radius: 999px;
+  padding: 0.28rem 0.72rem;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  line-height: 1.2;
+}
+
+body.site-app .myads-promo-btn.is-on {
+  background: #f0c14b;
+  border-color: #e6a800;
+}
+
+body.site-app .myads-promo-btn--link {
+  display: inline-flex;
+  align-items: center;
+}
+
+body.site-app .myads-card-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  margin-top: 0.7rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid #eef1f5;
+}
+
 body.site-app .myads-price {
   flex: 0 1 auto;
-  color: #c2410c;
+  color: #111;
+  font-size: 1.15rem;
   white-space: normal;
-  text-align: right;
 }
 
 body.site-app .myads-fn {
   display: flex;
   flex-wrap: wrap;
   gap: 0.45rem 0.85rem;
-  margin-top: 0.5rem;
+  margin-top: 0;
 }
 
 body.site-app .myads-link {
@@ -6368,6 +6421,36 @@ html[data-theme="dark"] body.site-app.settings-page .mm-park-thumb-empty {
 html[data-theme="dark"] body.site-app.settings-page .mm-list-item.is-unread {
   background: #1e2a36 !important;
   border-color: #3b82f6 !important;
+}
+
+@media (max-width: 560px) {
+  body.site-app .myads-card-main {
+    grid-template-columns: 1fr;
+  }
+
+  body.site-app .myads-photo-cell {
+    max-width: none;
+  }
+
+  body.site-app .myads-thumb {
+    width: 100%;
+    max-width: 200px;
+    height: auto;
+    aspect-ratio: 4 / 3;
+  }
+}
+
+html[data-theme="dark"] body.site-app.settings-page .myads-card {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+html[data-theme="dark"] body.site-app.settings-page .myads-card--featured {
+  border-color: #c9941a;
+}
+
+html[data-theme="dark"] body.site-app.settings-page .myads-promo-strip {
+  background: rgba(240, 193, 75, 0.12);
 }
 
 html[data-theme="dark"] body.site-app.settings-page .myads-row {

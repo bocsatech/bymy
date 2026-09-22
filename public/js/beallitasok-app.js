@@ -25,7 +25,7 @@ import {
 import { savedSearchHref, summarizeSavedSearchFilters } from "./saved-search.js?v=savedSearch1";
 import { initMessagesUi } from "./messages-ui.js?v=msgListingImg1";
 import { listConversations } from "./messages-api.js?v=msgLive1";
-import { initMyAdsPanel } from "./my-ads.js?v=myadsCards1";
+import { initMyAdsPanel } from "./my-ads.js?v=myadsD1";
 import {
   consumeSettingsReturn,
   hasSettingsReturn,

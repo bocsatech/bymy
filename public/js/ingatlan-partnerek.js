@@ -17,6 +17,7 @@ function partnerCard(partner) {
     ? `<img src="${escapeHtml(partner.logo_url)}" alt="" loading="lazy" decoding="async" />`
     : `<span class="immo-partner-photo-fallback">${escapeHtml(String(partner.display_name || "P").slice(0, 1))}</span>`;
   const phone = String(partner.phone || "").trim();
+  const email = String(partner.email || "").trim();
   const call = telHref(phone);
   const areas = String(partner.service_areas || "").trim();
   const commission = String(partner.commission || "").trim();
@@ -30,6 +31,11 @@ function partnerCard(partner) {
           : phone
             ? `<span class="immo-partner-phone">${escapeHtml(phone)}</span>`
             : ""
+      }
+      ${
+        email
+          ? `<a class="immo-partner-email" href="mailto:${escapeHtml(email)}">${escapeHtml(email)}</a>`
+          : ""
       }
       ${
         areas

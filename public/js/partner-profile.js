@@ -149,12 +149,12 @@ async function manage() {
         <label>Publikus profilcím *<span class="partner-slug"><span>bymy.hu/partner/</span><input name="slug" value="${esc(profile.slug)}" maxlength="100" required /></span></label>
         <label>Kapcsolattartó neve<input name="contactPerson" value="${esc(profile.contact_person)}" maxlength="160" /></label>
         <label>Telefonszám *<input name="phone" type="tel" value="${esc(profile.phone)}" maxlength="40" required placeholder="+36 30 123 4567" /></label>
+        <label>E-mail cím *<input name="email" type="email" value="${esc(profile.email)}" maxlength="320" required /></label>
         <label>Jutalék *<input name="commission" value="${esc(profile.commission)}" maxlength="80" required placeholder="pl. bruttó 2–4%" /></label>
-        <label>E-mail cím<input name="email" type="email" value="${esc(profile.email)}" maxlength="320" /></label>
         <label>Weboldal<input name="website" type="url" value="${esc(profile.website)}" placeholder="https://…" maxlength="300" /></label>
         <label>Profilkép URL<input name="logoUrl" type="url" value="${esc(profile.logo_url)}" placeholder="https://… (fénykép a kártyához)" /></label>
         <label>Borítókép URL<input name="coverUrl" type="url" value="${esc(profile.cover_url)}" placeholder="https://…" /></label>
-        <label class="partner-form-wide">Értékesítési területek<input name="serviceAreas" value="${esc(profile.service_areas)}" placeholder="Például: Szombathely, Badacsonytomaj, Sé" maxlength="1000" /></label>
+        <label class="partner-form-wide">Kerület / értékesítési területek *<input name="serviceAreas" value="${esc(profile.service_areas)}" placeholder="Például: Budapest XI., Budaörs, Érd" maxlength="1000" required /></label>
         <label class="partner-form-wide">Bemutatkozás<textarea name="description" maxlength="4000" placeholder="Mutasd be az irodát, a szakterületedet és azt, miben tudsz segíteni.">${esc(profile.description)}</textarea></label>
         <label class="partner-check partner-form-wide"><input type="checkbox" name="isPublic" ${profile.is_public !== false ? "checked" : ""} /><span>A jóváhagyás után legyen nyilvános a profilom</span></label>
       </div>

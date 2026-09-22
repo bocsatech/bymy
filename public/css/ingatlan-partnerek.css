@@ -188,6 +188,20 @@
   text-decoration: underline;
 }
 
+.immo-partner-email {
+  color: #334155;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  line-height: 1.3;
+  word-break: break-all;
+}
+
+.immo-partner-email:hover {
+  color: #126d8b;
+  text-decoration: underline;
+}
+
 .immo-partner-area {
   display: flex;
   align-items: flex-start;

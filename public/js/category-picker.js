@@ -217,8 +217,22 @@ function syncWizardContext(selection) {
   if (wrap && catId) setWizardCatTriggerLabel(wrap, catId);
 }
 
-function clearImmoAdWizardBoot() {
+export function clearImmoAdWizardBoot() {
   document.documentElement.classList.remove("immo-ad-wizard-boot");
+  document.getElementById("immo-ad-wizard-boot-inline")?.remove();
+  document.body.classList.remove("immo-post-view-ready");
+  try {
+    delete window.__bymyImmoWizardBoot;
+  } catch {
+    window.__bymyImmoWizardBoot = undefined;
+  }
+}
+
+export function markImmoPostViewReady() {
+  if (!document.documentElement.classList.contains("immo-ad-wizard-boot")) return;
+  document.body.classList.add("immo-post-view-ready");
+  document.documentElement.classList.remove("immo-ad-wizard-boot");
+  document.getElementById("immo-ad-wizard-boot-inline")?.remove();
   try {
     delete window.__bymyImmoWizardBoot;
   } catch {
@@ -553,7 +567,6 @@ export function initCategoryPicker({
     } catch (error) {
       console.error("Űrlap indítás hiba:", error);
     }
-    clearImmoAdWizardBoot();
   }
 
   function showIngatlanStub(selection) {
@@ -724,6 +737,11 @@ export function initCategoryPicker({
     wizardShell?.setAttribute("hidden", "");
     stepsBar?.setAttribute("hidden", "");
     contextBar?.setAttribute("hidden", "");
+  } else if (
+    document.documentElement.classList.contains("immo-ad-wizard-boot") &&
+    window.__bymyImmoWizardBoot
+  ) {
+    void showVehicleWizard(window.__bymyImmoWizardBoot);
   } else {
     if (urlSelection?.vertical === "teher") {
       state.open = "teher";

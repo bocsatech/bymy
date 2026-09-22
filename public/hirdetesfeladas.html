@@ -102,6 +102,18 @@
             if (immoSel) {
               document.documentElement.classList.add("immo-ad-wizard-boot");
               window.__bymyImmoWizardBoot = immoSel;
+              var immoBootStyle = document.createElement("style");
+              immoBootStyle.id = "immo-ad-wizard-boot-inline";
+              immoBootStyle.textContent =
+                "html.immo-ad-wizard-boot body[data-site-page=hirdetesfeladas] #category-picker-shell," +
+                "html.immo-ad-wizard-boot body[data-site-page=hirdetesfeladas] #ingatlan-stub{display:none!important}" +
+                "html.immo-ad-wizard-boot body[data-site-page=hirdetesfeladas] #ad-wizard-shell[hidden]{display:block!important}" +
+                "html.immo-ad-wizard-boot body[data-site-page=hirdetesfeladas] #wizard-context-bar[hidden]{display:flex!important}" +
+                "html.immo-ad-wizard-boot body:not(.immo-post-view-ready) #ad-wizard-shell," +
+                "html.immo-ad-wizard-boot body:not(.immo-post-view-ready) #wizard-context-bar{visibility:hidden!important}" +
+                "html.immo-ad-wizard-boot #ad-form:not(:has(#ingatlan-fields)) .step-panel[data-step=\"1\"] .form-grid," +
+                "html.immo-ad-wizard-boot #ad-form:not(:has(#ingatlan-fields)) .step-panel[data-step=\"1\"] > .import-step-label{display:none!important}";
+              document.head.appendChild(immoBootStyle);
             }
           }
         } catch (bootErr) {}
@@ -146,7 +158,7 @@
     <link rel="stylesheet" href="/css/automax.css?v=automax20260720homelist" />
     <link rel="stylesheet" href="/css/site-app.css?v=immoAdFormNum1" />
     <link rel="stylesheet" href="/css/ingatlan-search.css?v=immoAdFormMenu1" />
-    <link rel="stylesheet" href="/css/ad-form-desk.css?v=immoAdFormBoot3" />
+    <link rel="stylesheet" href="/css/ad-form-desk.css?v=immoAdFormBoot4" />
     <link rel="stylesheet" href="/css/ad-form-address.css?v=addressBlock3" />
     <link rel="stylesheet" href="/css/ad-form-bm-pickers.css?v=deskTireFit1" />
     <link rel="stylesheet" href="/css/site-side.css?v=mwPostDesk1" />
@@ -1074,10 +1086,10 @@
     </main>
 
     <script src="/js/site-avatar-menu.js?v=avatarSync1" type="module"></script>
-    <script src="/js/hirdetes-category-boot.js?v=pickerBoot3" type="module"></script>
-    <script src="/js/app.js?v=deskMountFirst2" type="module"></script>
+    <script src="/js/hirdetes-category-boot.js?v=pickerBoot4" type="module"></script>
+    <script src="/js/app.js?v=immoAdFormBoot4" type="module"></script>
       <script src="/js/nav-counts.js?v=navCount4" type="module"></script>
       <script src="/js/theme.js?v=willhabenHdr1" type="module"></script>
-    <script src="/js/form-layout-apply.js?v=immoPostNum1" type="module"></script>
+    <script src="/js/form-layout-apply.js?v=immoAdFormBoot4" type="module"></script>
 </body>
 </html>

@@ -1,7 +1,8 @@
 import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=immoPostNum1";
 import { refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=deskAccScroll1";
 import { initTireSizes } from "./tire-sizes-ui.js?v=tireFill1";
-import { applyAdFormDesk } from "./ad-form-desk.js?v=immoAdFormBoot3";
+import { applyAdFormDesk } from "./ad-form-desk.js?v=immoAdFormBoot4";
+import { markImmoPostViewReady } from "./category-picker.js?v=pickerBoot4";
 import {
   DESK_MUSZAKI_CORE_FIELD_KEYS,
   EV_LAYOUT_GROUP_KEYS,
@@ -1096,8 +1097,17 @@ async function applyAdFormLayout() {
     initTireSizes(form);
     window.dispatchEvent(new Event("ad-form-sync-fuel-fields"));
     applyAdFormDesk();
+    if (
+      isImmo &&
+      document.documentElement.classList.contains("immo-ad-wizard-boot")
+    ) {
+      markImmoPostViewReady();
+    }
   } catch (error) {
     console.warn("Ad form layout apply:", error);
+    if (document.documentElement.classList.contains("immo-ad-wizard-boot")) {
+      markImmoPostViewReady();
+    }
   }
 }
 

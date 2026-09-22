@@ -23,7 +23,7 @@ import {
   renderListingPhotoOverlay,
 } from "./listing-photo-overlay.js?v=photoOverlayIcons3";
 import { refreshAdFormBmPickers, applyAdFormBmFieldValues } from "./ad-form-bm-pickers.js?v=egyebInfoFix1";
-import { applyAdFormDesk, isAdFormDesk } from "./ad-form-desk.js?v=adFormDesk44";
+import { applyAdFormDesk, isAdFormDesk } from "./ad-form-desk.js?v=immoAdFormBoot4";
 import { initKmInput, parseKmDigits, setKmInputValue } from "./km-input.js?v=kmFmt1";
 import {
   EV_FUEL_FIELD_IDS,
@@ -98,6 +98,14 @@ export function createAdForm(options = {}) {
     "ingatlan_kategoria",
     "csomag",
   ]);
+
+  function isIngatlanWizardForm() {
+    const el = form.elements.namedItem("hirdetes_vertical");
+    const raw = el instanceof RadioNodeList ? el[0]?.value : el?.value;
+    return String(raw ?? "")
+      .trim()
+      .toLowerCase() === "ingatlan";
+  }
 
   let currentStep = 1;
   let userTouchedForm = false;
@@ -1911,7 +1919,7 @@ initVehicleCatalogSelects({
   onTypeDataChange: (entry) => applyCatalogTypeData(entry),
 })
   .then(async (catalog) => {
-    if (mode === "wizard" && !userTouchedForm && !editing) resetForm();
+    if (mode === "wizard" && !userTouchedForm && !editing && !isIngatlanWizardForm()) resetForm();
     await refreshAdFormBmPickers(form, catalog);
     options.onCatalogReady?.(catalog);
     window.dispatchEvent(new Event("ad-form-ready"));
@@ -1953,27 +1961,31 @@ if (mode === "wizard") {
     showStep(1);
   } else {
     userTouchedForm = false;
-    resetForm({ fresh: true });
-    showStep(1);
-    const emptyIfPristine = () => {
-      if (!userTouchedForm) resetForm();
-    };
-    form.addEventListener(
-      "input",
-      (event) => {
-        if (userTouchedForm) return;
-        if (event.target?.closest?.(".ad-location-fields, .field-stack--location, #email")) {
-          userTouchedForm = true;
-          return;
-        }
-        resetForm();
-      },
-      { capture: true }
-    );
-    requestAnimationFrame(emptyIfPristine);
-    window.setTimeout(emptyIfPristine, 80);
-    window.setTimeout(emptyIfPristine, 300);
-    window.addEventListener("pageshow", emptyIfPristine);
+    if (isIngatlanWizardForm()) {
+      showStep(1);
+    } else {
+      resetForm({ fresh: true });
+      showStep(1);
+      const emptyIfPristine = () => {
+        if (!userTouchedForm) resetForm();
+      };
+      form.addEventListener(
+        "input",
+        (event) => {
+          if (userTouchedForm) return;
+          if (event.target?.closest?.(".ad-location-fields, .field-stack--location, #email")) {
+            userTouchedForm = true;
+            return;
+          }
+          resetForm();
+        },
+        { capture: true }
+      );
+      requestAnimationFrame(emptyIfPristine);
+      window.setTimeout(emptyIfPristine, 80);
+      window.setTimeout(emptyIfPristine, 300);
+      window.addEventListener("pageshow", emptyIfPristine);
+    }
   }
 } else {
   showAllSteps();

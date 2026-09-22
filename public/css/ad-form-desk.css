@@ -25,6 +25,16 @@ html.immo-ad-wizard-boot body[data-site-page="hirdetesfeladas"] #ad-form:not(:ha
   display: none !important;
 }
 
+html.immo-ad-wizard-boot body:not(.immo-post-view-ready) #ad-wizard-shell,
+html.immo-ad-wizard-boot body:not(.immo-post-view-ready) #wizard-context-bar {
+  visibility: hidden !important;
+}
+
+body.site-app #ad-form.ad-form--ingatlan .step-panel[data-step="1"] .card-body > .form-grid,
+body.site-app.ad-vertical-ingatlan #ad-form .step-panel[data-step="1"] .card-body > .form-grid {
+  display: none !important;
+}
+
 body.site-app[data-site-page="hirdetesfeladas"] #wizard-steps-bar {
   display: none !important;
 }

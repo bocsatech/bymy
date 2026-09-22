@@ -2832,8 +2832,8 @@ body.site-app #ad-form.ad-form--ingatlan .step-panel[data-step="1"] .card-body:h
   padding: 0;
 }
 
-body.site-app #ad-form.ad-form--ingatlan .step-panel[data-step="1"] .form-grid:has(#ingatlan-fields) {
-  display: block;
+body.site-app #ad-form.ad-form--ingatlan .step-panel[data-step="1"] .card-body > .form-grid {
+  display: none !important;
 }
 
 body.site-app #ad-form.ad-form--ingatlan .immo-action {

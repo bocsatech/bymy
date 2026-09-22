@@ -1,7 +1,7 @@
 import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=immoUiParity1";
 import { refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=deskAccScroll1";
 import { initTireSizes } from "./tire-sizes-ui.js?v=tireFill1";
-import { applyAdFormDesk, isAdFormDesk } from "./ad-form-desk.js?v=adFormDesk44";
+import { applyAdFormDesk } from "./ad-form-desk.js?v=adFormDesk44";
 import {
   DESK_MUSZAKI_CORE_FIELD_KEYS,
   EV_LAYOUT_GROUP_KEYS,
@@ -876,8 +876,6 @@ function pruneEmptyCards(form) {
 async function applyAdFormLayout() {
   const form = document.getElementById("ad-form");
   if (!form) return;
-  const wizardOpen = !form.closest("#ad-wizard-shell")?.hidden;
-  let layoutApplied = false;
   try {
     const category = currentLayoutCategory(form);
     const isImmo = category === "ingatlan";
@@ -892,21 +890,16 @@ async function applyAdFormLayout() {
       credentials: "same-origin",
       cache: "no-store",
     });
-    if (!res.ok) {
-      layoutApplied = true;
-      return;
-    }
+    if (!res.ok) return;
     const data = await res.json();
     const layout = data.layout;
     if (!layout?.live && Number(layout?.version) < 2) {
       if (isImmo) hideVehicleChromeWithoutLayout(form);
-      layoutApplied = true;
       return;
     }
     const cells = layout?.cells;
     if (!Array.isArray(cells) || !cells.length) {
       if (isImmo) hideVehicleChromeWithoutLayout(form);
-      layoutApplied = true;
       return;
     }
     resetPlacedLayoutItems(form);
@@ -1103,23 +1096,9 @@ async function applyAdFormLayout() {
     await refreshAdFormBmPickers(form);
     initTireSizes(form);
     window.dispatchEvent(new Event("ad-form-sync-fuel-fields"));
-    layoutApplied = true;
+    applyAdFormDesk();
   } catch (error) {
     console.warn("Ad form layout apply:", error);
-  } finally {
-    if (!wizardOpen) return;
-    applyAdFormDesk();
-    if (layoutApplied || !isAdFormDesk(form)) {
-      requestAnimationFrame(() => {
-        document.body.classList.add("ad-form-ui-ready");
-      });
-    } else {
-      window.setTimeout(() => {
-        if (!document.body.classList.contains("ad-form-ui-ready")) {
-          document.body.classList.add("ad-form-ui-ready");
-        }
-      }, 980);
-    }
   }
 }
 

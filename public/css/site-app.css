@@ -130,7 +130,10 @@ body.site-app .hub-header {
 
 @media (min-width: 901px) {
   body.site-app {
-    --site-fixed-header-h: 64px;
+    --site-nav-logo-h: 72px;
+    --site-nav-logo-max-w: min(260px, 29vw);
+    --site-nav-logo-col: 260px;
+    --site-fixed-header-h: 80px;
     padding-top: var(--site-fixed-header-h);
   }
 
@@ -153,10 +156,10 @@ body.site-app .hub-header {
   body.site-app .home-header-inner,
   body.site-app .site-app-header-inner {
     display: grid !important;
-    grid-template-columns: 1fr auto 1fr !important;
+    grid-template-columns: var(--site-nav-logo-col) auto minmax(0, 1fr) !important;
     grid-template-areas: "logo nav actions" !important;
     align-items: center !important;
-    column-gap: 36px !important;
+    column-gap: 24px !important;
     max-width: 1440px !important;
     margin: 0 auto !important;
     padding: 0 24px !important;
@@ -182,12 +185,15 @@ body.site-app .hub-header {
     justify-self: start !important;
     align-self: center !important;
     position: relative !important;
-    left: auto !important;
+    left: 0 !important;
     right: auto !important;
     top: auto !important;
     bottom: auto !important;
     transform: none !important;
+    margin: 0 !important;
     padding: 0 !important;
+    width: var(--site-nav-logo-col) !important;
+    max-width: var(--site-nav-logo-col) !important;
     z-index: 2;
   }
 
@@ -195,8 +201,8 @@ body.site-app .hub-header {
   body.site-app .home-logo .bymy-logo-img--nav,
   body.site-app .site-app-logo .bymy-logo-img--nav,
   body.site-app .bymy-logo-img--nav {
-    height: 40px !important;
-    max-width: 140px !important;
+    height: var(--site-nav-logo-h) !important;
+    max-width: var(--site-nav-logo-max-w) !important;
     width: auto !important;
   }
 
@@ -334,8 +340,8 @@ body.site-app .bymy-logo-img--nav,
 body.site-app .home-logo .bymy-logo-img--nav,
 body.site-app .hub-logo .bymy-logo-img--nav,
 body.site-app .site-app-logo .bymy-logo-img--nav {
-  height: 40px;
-  max-width: 140px;
+  height: 48px;
+  max-width: min(190px, 29vw);
   width: auto;
 }
 

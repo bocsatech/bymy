@@ -100,8 +100,8 @@ body.hub-page .local-banner {
 }
 
 .bymy-logo-img--nav {
-  height: 40px;
-  max-width: 140px;
+  height: 48px;
+  max-width: min(190px, 29vw);
   width: auto;
 }
 
@@ -121,8 +121,8 @@ body.hub-page .local-banner {
   margin: 0 auto;
 }
 
-@media (min-width: 801px) {
-.hub-nav-band {
+@media (min-width: 801px) and (max-width: 900px) {
+  .hub-nav-band {
   position: relative;
   display: flex;
   align-items: center;

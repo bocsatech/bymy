@@ -12,8 +12,8 @@
   body.site-app .home-logo .bymy-logo-img--nav,
   body.site-app .hub-logo .bymy-logo-img--nav,
   body.site-app .site-app-logo .bymy-logo-img--nav {
-    height: 40px !important;
-    max-width: 140px !important;
+    height: 72px !important;
+    max-width: min(260px, 29vw) !important;
     width: auto !important;
   }
 }

@@ -133,6 +133,16 @@ async function manage() {
     jsonFetch("/api/listings/mine?limit=200").catch(() => ({ listings: [] })),
   ]);
   const profile = profileResult.profile || {};
+  const account = getProfile() || {};
+  if (!String(profile.phone || "").trim()) {
+    profile.phone = String(account.companyPhone || account.phone || "").trim();
+  }
+  if (!String(profile.service_areas || "").trim()) {
+    profile.service_areas = String(account.companyCity || account.city || "").trim();
+  }
+  if (!String(profile.email || "").trim()) {
+    profile.email = String(account.companyEmail || getAuthUser()?.email || "").trim();
+  }
   const listings = (listingsResult.listings || []).filter(
     (listing) => String(listing.vertical || listing.preview?.filter?.vertical || "").toLowerCase() === "ingatlan"
   );

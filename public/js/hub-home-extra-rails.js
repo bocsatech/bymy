@@ -81,7 +81,12 @@ async function initFavoritesRail({ postal, radiusKm }) {
   const STATUS = el("hub-fav-status");
   const COUNT_EL = el("hub-fav-count");
   const ALL = el("hub-fav-all");
+  const SECTION = RAIL?.closest?.(".hf-section");
   if (!RAIL) return;
+
+  function setSectionVisible(visible) {
+    if (SECTION) SECTION.hidden = !visible;
+  }
 
   if (RAIL.dataset.listingOpenBound !== "1") {
     RAIL.dataset.listingOpenBound = "1";
@@ -101,16 +106,13 @@ async function initFavoritesRail({ postal, radiusKm }) {
     COUNT_EL.hidden = !label;
   }
 
-  setStatus("Kedvencek betöltése…");
+  setStatus("Kedvencek betöltése…", { hidden: true });
   try {
     const email = getAuthUser()?.email;
     if (!email) {
       RAIL.innerHTML = "";
       setCount(0);
-      const href = `/belepes.html?next=${encodeURIComponent("/")}`;
-      if (ALL) ALL.href = href;
-      RAIL.appendChild(createPromptCard("Bejelentkezés", href));
-      setStatus("Jelentkezz be a kedvenc hirdetéseid megtekintéséhez.");
+      setSectionVisible(false);
       restoreListingReturn();
       return;
     }
@@ -120,10 +122,7 @@ async function initFavoritesRail({ postal, radiusKm }) {
     if (!saved.length) {
       RAIL.innerHTML = "";
       setCount(0);
-      RAIL.appendChild(
-        createPromptCard("Még nincs kedvenced", "/beallitasok.html?szekcio=parkolo")
-      );
-      setStatus("A szív ikonnal menthetsz hirdetéseket a kedvencek közé.");
+      setSectionVisible(false);
       restoreListingReturn();
       return;
     }
@@ -161,6 +160,14 @@ async function initFavoritesRail({ postal, radiusKm }) {
     }
 
     RAIL.innerHTML = "";
+    if (!items.length) {
+      setCount(0);
+      setSectionVisible(false);
+      restoreListingReturn();
+      return;
+    }
+
+    setSectionVisible(true);
     setCount(items.length);
     const INITIAL = 9;
     for (const item of items.slice(0, INITIAL)) {
@@ -171,12 +178,12 @@ async function initFavoritesRail({ postal, radiusKm }) {
       more.classList.add("hf-card--prompt-all");
       RAIL.appendChild(more);
     }
-    setStatus(`${items.length} kedvenc hirdetés.`, { hidden: true });
+    setStatus("", { hidden: true });
   } catch (error) {
+    void error;
     RAIL.innerHTML = "";
     setCount(0);
-    RAIL.appendChild(createPromptCard("Újrapróbálás", "/beallitasok.html?szekcio=parkolo"));
-    setStatus(error.message ?? "Nem sikerült betölteni a kedvenceket.");
+    setSectionVisible(false);
   }
   restoreListingReturn();
 }

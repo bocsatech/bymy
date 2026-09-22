@@ -684,10 +684,7 @@ window.addEventListener("ad-form-layout-refresh", () => {
     if (form && isAdFormDesk(form)) syncLeirasInPhotoPanel(form);
   }, 200);
 });
-window.addEventListener("ad-form-ready", () => {
-  if (document.getElementById("ad-wizard-shell")?.hasAttribute("hidden")) return;
-  window.dispatchEvent(new Event("ad-form-layout-refresh"));
-});
+window.addEventListener("ad-form-ready", () => applyAdFormDesk());
 window.addEventListener("ad-form-equipment-rendered", () => {
   const form = document.getElementById("ad-form");
   if (form && isAdFormDesk(form)) {

@@ -1,18 +1,7 @@
 import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=immoUiParity1";
 import { refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=deskAccScroll1";
 import { initTireSizes } from "./tire-sizes-ui.js?v=tireFill1";
-import { applyAdFormDesk, isAdFormDesk } from "./ad-form-desk.js?v=adFormDesk44";
-
-let layoutApplyQueue = Promise.resolve();
-
-export function ensureAdFormLayoutReady() {
-  layoutApplyQueue = layoutApplyQueue
-    .then(() => applyAdFormLayout())
-    .catch((error) => {
-      console.warn("Ad form layout apply:", error);
-    });
-  return layoutApplyQueue;
-}
+import { applyAdFormDesk } from "./ad-form-desk.js?v=adFormDesk44";
 import {
   DESK_MUSZAKI_CORE_FIELD_KEYS,
   EV_LAYOUT_GROUP_KEYS,
@@ -884,27 +873,9 @@ function pruneEmptyCards(form) {
   });
 }
 
-function isAdWizardShellVisible() {
-  const shell = document.getElementById("ad-wizard-shell");
-  return Boolean(shell && !shell.hasAttribute("hidden"));
-}
-
-function prepDeskBeforeGridPlacement(form) {
-  if (!form || !isAdWizardShellVisible()) return;
-  if (!isAdFormDesk(form)) return;
-  applyAdFormDesk();
-}
-
-/** Ne helyezzünk gridet a rejtett űrlapra (kategóriaválasztó) — csak desk init után. */
-function isAdFormLayoutDeferred() {
-  if (document.documentElement.classList.contains("ad-form-edit-boot")) return false;
-  return !isAdWizardShellVisible();
-}
-
 async function applyAdFormLayout() {
   const form = document.getElementById("ad-form");
   if (!form) return;
-  if (isAdFormLayoutDeferred()) return;
   try {
     const category = currentLayoutCategory(form);
     const isImmo = category === "ingatlan";
@@ -931,7 +902,6 @@ async function applyAdFormLayout() {
       if (isImmo) hideVehicleChromeWithoutLayout(form);
       return;
     }
-    prepDeskBeforeGridPlacement(form);
     resetPlacedLayoutItems(form);
     const placed = new Set();
     for (const cell of cells) {
@@ -1199,23 +1169,11 @@ function currentLayoutCategory(form) {
   return "szemelyauto";
 }
 
-function scheduleApplyOnce() {
-  if (isAdFormLayoutDeferred()) return;
-  ensureAdFormLayoutReady();
-  window.setTimeout(() => {
-    if (!isAdFormLayoutDeferred()) ensureAdFormLayoutReady();
-  }, 120);
-  window.setTimeout(() => {
-    if (!isAdFormLayoutDeferred()) ensureAdFormLayoutReady();
-  }, 450);
-  window.setTimeout(() => {
-    if (!isAdFormLayoutDeferred()) ensureAdFormLayoutReady();
-  }, 900);
-}
-
 function scheduleApply() {
-  if (isAdFormLayoutDeferred()) return;
-  scheduleApplyOnce();
+  applyAdFormLayout();
+  window.setTimeout(applyAdFormLayout, 120);
+  window.setTimeout(applyAdFormLayout, 450);
+  window.setTimeout(applyAdFormLayout, 900);
 }
 
 function syncAdLocationPostalVisibility(form = document.getElementById("ad-form")) {
@@ -1232,9 +1190,6 @@ if (document.readyState === "loading") {
 } else {
   scheduleApply();
 }
-window.addEventListener("ad-form-ready", () => {
-  if (isAdFormLayoutDeferred()) return;
-  ensureAdFormLayoutReady();
-});
-window.addEventListener("ad-form-layout-refresh", () => ensureAdFormLayoutReady());
+window.addEventListener("ad-form-ready", applyAdFormLayout);
+window.addEventListener("ad-form-layout-refresh", applyAdFormLayout);
 window.addEventListener("ad-form-sync-location-postal", () => syncAdLocationPostalVisibility());

@@ -9,8 +9,8 @@ import { createAdForm } from "./form-core.js?v=submitBtn1";
 import { applyImportedVehicleToSelects } from "./vehicle-catalog-client.js?v=importVehicle1";
 import { initTireSizes } from "./tire-sizes-ui.js";
 import { initPhoneLanguages } from "./phone-lang-ui.js";
-import { initCategoryPicker } from "./category-picker.js?v=rowWidthStable6";
-import { applyAdFormDesk, clearAdFormEditBoot, isDeskVehicleSubtype } from "./ad-form-desk.js?v=rowWidthStable6";
+import { initCategoryPicker } from "./category-picker.js?v=pickerBoot2";
+import { applyAdFormDesk, clearAdFormEditBoot, isDeskVehicleSubtype } from "./ad-form-desk.js?v=adFormDesk44";
 import {
   requireAuthForPage,
   getAuthUser,
@@ -263,12 +263,6 @@ function ensureFormReady() {
   return formApi;
 }
 
-if (!window.__bymyAdFormAppReady) {
-  window.__bymyAdFormAppReady = new Promise((resolve) => {
-    window.__bymyAdFormAppReadyResolve = resolve;
-  });
-}
-
 const categoryPicker = initCategoryPicker({
   requireLogin: async () => {
     const user = getAuthUser();
@@ -278,7 +272,7 @@ const categoryPicker = initCategoryPicker({
     );
     return false;
   },
-  onVehicleSelected: async () => {
+  onVehicleSelected: () => {
     try {
       const api = ensureFormReady();
       if (!editing) api?.resetForm?.({ fresh: true });
@@ -291,8 +285,7 @@ const categoryPicker = initCategoryPicker({
       applyListingAddressFromProfileSync(adForm);
       applyListingAddressFromProfile(adForm).catch(() => {});
       window.dispatchEvent(new Event("ad-form-sync-location"));
-      const { ensureAdFormLayoutReady } = await import("./form-layout-apply.js?v=rowWidthStable6");
-      await ensureAdFormLayoutReady();
+      window.dispatchEvent(new Event("ad-form-layout-refresh"));
       applyAdFormDesk({ openStep: 1, scrollToAccordion: "alap" });
     } catch (error) {
       console.error("Űrlap indítás hiba:", error);
@@ -301,9 +294,6 @@ const categoryPicker = initCategoryPicker({
   onReset: () => {
   },
 });
-
-window.__bymyAdFormAppReadyResolve?.();
-window.__bymyAdFormAppReadyResolve = null;
 
 if (editing) {
   if (!(await authPromise)) {

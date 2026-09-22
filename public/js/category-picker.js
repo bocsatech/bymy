@@ -508,21 +508,7 @@ export function initCategoryPicker({
     pickerHandlers.onReset?.();
   }
 
-  function ensureAdFormAppReadyPromise() {
-    if (!window.__bymyAdFormAppReady) {
-      window.__bymyAdFormAppReady = new Promise((resolve) => {
-        window.__bymyAdFormAppReadyResolve = resolve;
-      });
-    }
-    return window.__bymyAdFormAppReady;
-  }
-
   async function showVehicleWizard(selection) {
-    try {
-      await ensureAdFormAppReadyPromise();
-    } catch {
-      /* app.js betöltés hiba */
-    }
     writeStored(selection);
     setHiddenFields(selection);
     try {
@@ -539,25 +525,19 @@ export function initCategoryPicker({
       if (!ok) return;
     }
 
-    const deskWizard = isDeskVehicleSubtype(selection?.subtype);
-
     pickerShell?.setAttribute("hidden", "");
     stub?.setAttribute("hidden", "");
     wizardShell?.removeAttribute("hidden");
-    if (deskWizard) {
-      wizardShell?.classList.add("ad-wizard-preparing");
+    if (isDeskVehicleSubtype(selection?.subtype)) {
       stepsBar?.setAttribute("hidden", "");
     } else {
-      wizardShell?.classList.remove("ad-wizard-preparing");
       stepsBar?.removeAttribute("hidden");
     }
 
     try {
-      await pickerHandlers.onVehicleSelected?.(selection);
+      pickerHandlers.onVehicleSelected?.(selection);
     } catch (error) {
       console.error("Űrlap indítás hiba:", error);
-    } finally {
-      wizardShell?.classList.remove("ad-wizard-preparing");
     }
   }
 
@@ -720,19 +700,10 @@ export function initCategoryPicker({
     (stored?.vertical === "auto" || stored?.vertical === "teher" || stored?.vertical === "ingatlan");
   const shouldStart = params.get("start") === "1" && urlSelection;
 
-  async function openWizardWhenAppReady(selection) {
-    try {
-      await window.__bymyAdFormAppReady;
-    } catch {
-      /* app.js hiba */
-    }
-    await showVehicleWizard(selection);
-  }
-
   if (shouldStart) {
-    void openWizardWhenAppReady(urlSelection);
+    void showVehicleWizard(urlSelection);
   } else if (shouldContinue) {
-    void openWizardWhenAppReady(stored);
+    void showVehicleWizard(stored);
   } else if (isEditBoot) {
     pickerShell?.setAttribute("hidden", "");
     wizardShell?.setAttribute("hidden", "");

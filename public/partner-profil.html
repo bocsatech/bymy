@@ -2,28 +2,65 @@
 <html lang="hu">
   <head>
     <script>
-      try {
-        var theme = localStorage.getItem("bymy-theme");
-        if (theme) document.documentElement.setAttribute("data-theme", theme);
-      } catch (e) {}
+      (function () {
+        try {
+          var t = localStorage.getItem("bymy-theme");
+          if (t !== "dark" && t !== "light") {
+            t = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+          }
+          document.documentElement.setAttribute("data-theme", t);
+        } catch (e) {}
+        try {
+          var raw = sessionStorage.getItem("bymy-auth-user");
+          var user = raw ? JSON.parse(raw) : null;
+          var loggedIn = !!(user && user.email);
+          document.documentElement.setAttribute("data-auth", loggedIn ? "member" : "guest");
+          var first = "";
+          if (user) {
+            first = String((user.profile && user.profile.firstName) || "").trim();
+            if (!first && user.displayName && String(user.displayName).indexOf("@") < 0) {
+              first = String(user.displayName).trim().split(/\s+/)[0] || "";
+            }
+            if (!first && user.email) {
+              var local = String(user.email).split("@")[0] || "";
+              first = local ? local.charAt(0).toUpperCase() + local.slice(1) : "";
+            }
+          }
+          if (first) {
+            document.addEventListener("DOMContentLoaded", function () {
+              document.querySelectorAll("span[data-auth-firstname]").forEach(function (el) {
+                el.textContent = first;
+              });
+              var letter = first.charAt(0).toUpperCase();
+              document.querySelectorAll("[data-avatar-letter]").forEach(function (el) {
+                el.textContent = letter;
+              });
+            });
+          }
+        } catch (e) {
+          document.documentElement.setAttribute("data-auth", "guest");
+        }
+      })();
     </script>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
     <title>Ingatlanos partner — Bymy</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/css/style.css?v=noScroll1" />
     <link rel="stylesheet" href="/css/hub.css?v=hubLogo72Align1" />
-    <link rel="stylesheet" href="/css/site-app.css?v=logoNav72Align1" />
-    <link rel="stylesheet" href="/css/partner-profile.css?v=partnerProfile2" />
+    <link rel="stylesheet" href="/css/site-app.css?v=partnerHdr1" />
+    <link rel="stylesheet" href="/css/partner-profile.css?v=partnerHdr1" />
     <link rel="stylesheet" href="/css/bymy-logo-size.css?v=logoNav72Align1" />
   </head>
-  <body class="site-page partner-page">
+  <body class="site-page site-app partner-page" data-site-page="partner">
+    <script src="/js/mw-app-shell.js?v=promoHomeOnly1"></script>
     <header class="hub-header">
       <div class="hub-header-inner">
         <a class="hub-logo" href="/" aria-label="Bymy">
-          <img class="bymy-logo-img bymy-logo-img--nav" src="/images/bymy-logo.png?v=logoUpload1" alt="Bymy.hu" width="190" height="48" />
+          <img class="bymy-logo-img bymy-logo-img--nav" src="/images/bymy-logo.png?v=logoUpload1" alt="Bymy.hu" width="190" height="48" decoding="async" />
         </a>
         <nav class="hub-nav" aria-label="Főmenü">
           <a class="hub-nav-link" href="/">Kezdőlap</a>
@@ -32,16 +69,36 @@
           <a class="hub-nav-link active" href="/ingatlan.html">Ingatlan</a>
           <a class="hub-nav-link" href="/ajanlasok.html">Ajánlások</a>
         </nav>
-        <div class="hub-header-actions">
-          <a class="hub-btn hub-btn--post" href="/hirdetesfeladas.html?vertical=ingatlan&subtype=ingatlan&start=1">+ Hirdetésfeladás</a>
-          <button type="button" class="hub-theme-toggle" data-theme-toggle aria-label="Színmód"></button>
+        <div class="hub-header-top">
+          <div class="hub-header-actions site-header-actions">
+            <a class="hub-header-msg" href="/uzenetek.html" data-auth-member hidden>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 6.8h9.5a2.2 2.2 0 0 1 2.2 2.2v4.2a2.2 2.2 0 0 1-2.2 2.2H10l-3.2 2.4V15.2H5A2.2 2.2 0 0 1 2.8 13V9a2.2 2.2 0 0 1 2.2-2.2Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M14.2 8.2h4A2.2 2.2 0 0 1 20.4 10.4v3.4a2.2 2.2 0 0 1-2.2 2.2h-.7v1.7l-2.2-1.7" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+              <span>Üzenetek</span>
+            </a>
+            <div class="site-header-auth-row" data-auth-guest>
+              <a class="hub-btn hub-btn--ghost" href="/belepes.html" data-auth-login>Belépés</a>
+              <a class="hub-btn hub-btn--ghost" href="/regisztracio.html" data-auth-register>Regisztráció</a>
+            </div>
+            <div class="site-header-avatar-wrap" data-avatar-menu data-auth-member hidden>
+              <button type="button" class="site-header-profile" data-auth-avatar data-avatar-toggle aria-expanded="false" aria-label="Fiók" title="Fiók">
+                <span class="site-header-avatar">
+                  <span data-avatar-letter>A</span>
+                  <img data-avatar-img alt="" hidden width="44" height="44" />
+                </span>
+                <span class="site-header-firstname" data-auth-firstname></span>
+                <svg class="site-header-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+            </div>
+            <a class="hub-btn hub-btn--post" href="/hirdetesfeladas.html?vertical=ingatlan&subtype=ingatlan&start=1" data-auth-guard>+ Hirdetésfeladás</a>
+            <button type="button" class="hub-theme-toggle" data-theme-toggle aria-label="Színmód" title="Színmód"></button>
+          </div>
         </div>
       </div>
     </header>
     <main id="partner-root" class="partner-main" aria-live="polite">
       <div class="partner-loading">Partnerprofil betöltése…</div>
     </main>
-    <script type="module" src="/js/partner-profile.js?v=partnerProfile2"></script>
+    <script type="module" src="/js/partner-profile.js?v=partnerHdr1"></script>
     <script type="module" src="/js/theme.js?v=willhabenHdr1"></script>
   </body>
 </html>

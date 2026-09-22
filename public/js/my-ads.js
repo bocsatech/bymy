@@ -366,7 +366,7 @@ export function initMyAdsPanel(root) {
     const form = {
       ...(item.form || {}),
       photo_overlay_base_url: String(baseUrl || item.form?.photo_overlay_base_url || "").trim(),
-      photo_overlay_template_id: active ? DEFAULT_PHOTO_OVERLAY_ID : "",
+      photo_overlay_template_id: active ? DEFAULT_PHOTO_OVERLAY_ID : null,
     };
     await saveListingToDb(form, item.id, { status: item.status || "feladott" });
   }

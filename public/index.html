@@ -61,14 +61,14 @@
     />
     <link rel="preload" as="image" href="/images/hub-ingatlan.jpg?v=hubPromoRail2" fetchpriority="high" />
     <link rel="preload" as="image" href="/images/hub-auto-motor.jpg?v=hubPromoRail2" fetchpriority="high" />
-    <link rel="stylesheet" href="/css/hub.css?v=hubDemoFix1" />
-    <link rel="stylesheet" href="/css/listing-featured.css?v=featured1" />
+    <link rel="stylesheet" href="/css/hub.css?v=hubLogo72Align1" />
     <link rel="stylesheet" href="/css/listing-photo-cover.css?v=tileAllPages1" />
+    <link rel="stylesheet" href="/css/listing-featured.css?v=featured2" />
     <link rel="stylesheet" href="/css/hub-mobile-app.css?v=hubDemoFix1" />
-    <link rel="stylesheet" href="/css/site-app.css?v=navGap1" />
+    <link rel="stylesheet" href="/css/site-app.css?v=logoNav72Align1" />
     <link rel="manifest" href="/manifest.webmanifest" />
     <meta name="mobile-web-app-capable" content="yes" />
-    <link rel="stylesheet" href="/css/bymy-logo-size.css?v=logoHalf1" />
+    <link rel="stylesheet" href="/css/bymy-logo-size.css?v=logoNav72Align1" />
   </head>
   <body class="hub-page site-page site-app hub-page--feed" data-site-page="hub">
     
@@ -226,7 +226,7 @@
       <section class="hf-section" data-hf="kiemelt">
         <div class="hf-head">
           <h2 class="hf-title">Kiemelt hirdetések</h2>
-          <a class="hf-all" href="/auto.html">Összes</a>
+          <a class="hf-all" id="hub-featured-all" href="/auto.html?kiemelt=1">Összes</a>
         </div>
         <div class="hf-rail" id="hub-featured-rail" role="list" hidden></div>
         <p class="hf-empty" id="hub-featured-empty">Még nincs kiemelt hirdetés. Nézd meg az <a href="/auto.html">autó listát</a>.</p>
@@ -321,7 +321,7 @@
         </div>
       </section>
 
-      <section class="hf-section" data-hf="kedvencek">
+      <section class="hf-section" data-hf="kedvencek" hidden>
         <div class="hf-head">
           <h2 class="hf-title">
             Kedvenc hirdetések
@@ -445,7 +445,7 @@
     <script>window.BYMY_FEATURED_LISTING_IDS = window.BYMY_FEATURED_LISTING_IDS || [];</script>
     <script src="/js/hub-featured-listings.js?v=featured1" type="module"></script>
     <script src="/js/hub-nearby-cars.js?v=nearbyLoc3" type="module"></script>
-    <script src="/js/hub-home-extra-rails.js?v=immoHideEmpty1" type="module"></script>
+    <script src="/js/hub-home-extra-rails.js?v=favHide1" type="module"></script>
     <script src="/js/nav-counts.js?v=navCount4" type="module"></script>
     <script src="/js/theme.js?v=willhabenHdr1" type="module"></script>
     <script src="/js/mw-app-shell.js?v=promoHomeOnly1"></script>

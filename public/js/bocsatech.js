@@ -299,6 +299,8 @@ let sitePageBlocks = {
   center: null,
 };
 let editingUser = null;
+let usersSearchQuery = "";
+let usersStatusFilter = "all";
 let partnerProfiles = [];
 let selectedVisitorId = "";
 let visitorHits = [];
@@ -477,15 +479,23 @@ function h(html) {
     const isFile = el.tagName === "INPUT" && el.type === "file";
     const isText =
       el.tagName === "INPUT" &&
-      (el.type === "text" || el.type === "email" || el.type === "number" || el.type === "" || !el.type);
+      (el.type === "text" ||
+        el.type === "search" ||
+        el.type === "email" ||
+        el.type === "number" ||
+        el.type === "" ||
+        !el.type);
+    const liveInput = isText && el.hasAttribute("data-live");
     const evt =
       el.tagName === "FORM"
         ? "submit"
         : el.tagName === "SELECT" || isFile || (el.tagName === "INPUT" && el.type === "checkbox")
           ? "change"
-          : isText
-            ? "change"
-            : "click";
+          : liveInput
+            ? "input"
+            : isText
+              ? "change"
+              : "click";
     el.addEventListener(evt, (event) => {
       if (el.tagName === "FORM") event.preventDefault();
       const act = el.getAttribute("data-act");
@@ -624,6 +634,27 @@ const actions = {
       err = error.message;
       render();
     }
+  },
+  usersSearch(_, el) {
+    usersSearchQuery = String(el?.value || "");
+    const caret = typeof el?.selectionStart === "number" ? el.selectionStart : null;
+    render();
+    const next = app.querySelector('[data-act="usersSearch"]');
+    if (next) {
+      next.focus();
+      if (caret != null && typeof next.setSelectionRange === "function") {
+        try {
+          next.setSelectionRange(caret, caret);
+        } catch {
+          /* search inputs may not support setSelectionRange in every browser */
+        }
+      }
+    }
+  },
+  usersStatusFilter(_, el) {
+    const next = String(el?.getAttribute("data-filter") || "all");
+    usersStatusFilter = next === "active" || next === "inactive" ? next : "all";
+    render();
   },
   async reviewPartner(_, el) {
     const id = el.getAttribute("data-id");
@@ -1814,25 +1845,54 @@ function visitorsView() {
     </div>`;
 }
 
+function userInitials(user) {
+  const name = String(user?.displayName || "").trim();
+  if (name) {
+    const parts = name.split(/\s+/).filter(Boolean);
+    if (parts.length >= 2) {
+      return `${parts[0][0] || ""}${parts[1][0] || ""}`.toUpperCase();
+    }
+    return name.slice(0, 2).toUpperCase();
+  }
+  const email = String(user?.email || "").trim();
+  return email ? email.slice(0, 2).toUpperCase() : "?";
+}
+
 function usersView(kind = "private") {
   const filtered = users.filter((u) => (u.accountType || "private") === kind);
-  const rows = filtered
-    .map(
-      (u) => `<tr>
-        <td>${u.id}</td>
-        <td>${esc(u.email)}</td>
-        <td>${esc(u.displayName || "")}</td>
-        <td>${u.emailVerified ? '<span class="badge ok">aktív</span>' : '<span class="badge warn">inaktív</span>'}</td>
-        <td>${esc(fmtWhen(u.createdAt))}</td>
-        <td>${esc(fmtWhen(u.lastLoginAt))}</td>
-        <td>${u.listingCount ?? 0}</td>
-        <td class="row-actions">
-          <button class="btn" type="button" data-act="editUser" data-id="${u.id}">Kezelés</button>
-          <button class="btn ghost" type="button" data-act="toggleUserActive" data-id="${u.id}" data-active="${u.emailVerified ? "1" : "0"}">${u.emailVerified ? "Deaktivál" : "Aktivál"}</button>
-          <button class="btn danger" type="button" data-act="delUser" data-id="${u.id}">Törlés</button>
-        </td>
-      </tr>`
-    )
+  const q = usersSearchQuery.trim().toLowerCase();
+  const visible = filtered.filter((u) => {
+    if (usersStatusFilter === "active" && !u.emailVerified) return false;
+    if (usersStatusFilter === "inactive" && u.emailVerified) return false;
+    if (!q) return true;
+    const hay = `${u.email || ""} ${u.displayName || ""}`.toLowerCase();
+    return hay.includes(q);
+  });
+  const cards = visible
+    .map((u) => {
+      const active = Boolean(u.emailVerified);
+      const ads = Number(u.listingCount ?? 0) || 0;
+      return `<article class="users-card">
+        <div class="users-card__main">
+          <div class="users-card__avatar" aria-hidden="true">${esc(userInitials(u))}</div>
+          <div class="users-card__who">
+            <div class="users-card__email">${esc(u.email)}</div>
+            <div class="users-card__name">${esc(u.displayName || "—")}</div>
+          </div>
+          <span class="users-card__status ${active ? "is-on" : "is-off"}">${active ? "aktív" : "inaktív"}</span>
+          <div class="users-card__meta">
+            <span>Reg: ${esc(fmtWhen(u.createdAt))}</span>
+            <span>Ut: ${esc(fmtWhen(u.lastLoginAt))}</span>
+          </div>
+          <span class="users-card__ads" title="Hirdetések">${ads}</span>
+        </div>
+        <div class="users-card__actions">
+          <button class="users-card__btn users-card__btn--primary" type="button" data-act="editUser" data-id="${u.id}">Kezelés</button>
+          <button class="users-card__btn" type="button" data-act="toggleUserActive" data-id="${u.id}" data-active="${active ? "1" : "0"}">${active ? "Deaktivál" : "Aktivál"}</button>
+          <button class="users-card__btn" type="button" data-act="delUser" data-id="${u.id}">Törlés</button>
+        </div>
+      </article>`;
+    })
     .join("");
   const editor = editingUser ? userEditView() : "";
   const messages = `
@@ -1840,15 +1900,28 @@ function usersView(kind = "private") {
     ${err ? `<p class="err">${esc(err)}</p>` : ""}
   `;
   const title = kind === "business" ? "Céges fiókok" : "Privát fiókok";
+  const emptyLabel = kind === "business" ? "céges" : "privát";
   return `
     <div class="users-edit">
       ${messages}
-      <p class="hint"><strong>${title}</strong> — hirdetések, profil szerkesztés, aktiválás/deaktiválás, törlés.</p>
-      <div class="table-scroll">
-        <table class="table-dense"><thead><tr>
-          <th>#</th><th>Email</th><th>Név</th><th>Státusz</th>
-          <th>Regisztráció</th><th>Utoljára belépett</th><th>Hirdetések</th><th></th>
-        </tr></thead><tbody>${rows || `<tr><td colspan="8">Nincs ${kind === "business" ? "céges" : "privát"} user.</td></tr>`}</tbody></table>
+      <div class="users-cards-wrap">
+        <div class="users-cards-head">
+          <h2 class="users-cards-title">${esc(title)}</h2>
+          <div class="users-cards-toolbar">
+            <label class="users-cards-search">
+              <span class="users-cards-search__ico" aria-hidden="true">⌕</span>
+              <input type="search" data-act="usersSearch" data-live placeholder="Keresés…" value="${esc(usersSearchQuery)}" />
+            </label>
+            <div class="users-cards-filters" role="group" aria-label="Státusz szűrő">
+              <button type="button" class="users-cards-chip ${usersStatusFilter === "all" ? "on" : ""}" data-act="usersStatusFilter" data-filter="all">Összes</button>
+              <button type="button" class="users-cards-chip ${usersStatusFilter === "active" ? "on" : ""}" data-act="usersStatusFilter" data-filter="active">Aktív</button>
+              <button type="button" class="users-cards-chip ${usersStatusFilter === "inactive" ? "on" : ""}" data-act="usersStatusFilter" data-filter="inactive">Inaktív</button>
+            </div>
+          </div>
+        </div>
+        <div class="users-cards-list">
+          ${cards || `<p class="users-cards-empty">Nincs ${emptyLabel} user${q || usersStatusFilter !== "all" ? " a szűrővel" : ""}.</p>`}
+        </div>
       </div>
       ${editor}
     </div>`;

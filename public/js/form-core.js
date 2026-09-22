@@ -974,15 +974,7 @@ function showStep(step, { openDeskAccordion = false } = {}) {
   } else {
     footerActions.classList.remove("hidden");
   }
-  if (step === 1) nextBtn.textContent = "Hirdetésfeladás folytatása";
-  if (step === 2) nextBtn.textContent = "Tovább az extrákhoz";
-  if (step === 3) nextBtn.textContent = "Tovább a képekhez";
-  if (step === 4) nextBtn.textContent = "Tovább a hirdetéshez";
-  if (step === 5) {
-    nextBtn.textContent = "Hirdetés feladása";
-    applyListingAddressFromProfileSync(form);
-    window.dispatchEvent(new Event("ad-form-sync-location"));
-  }
+  if (nextBtn) nextBtn.textContent = "Hirdetés feladása";
   syncPhotoNextButton();
   window.dispatchEvent(new CustomEvent("ad-form-step", { detail: { step, openDeskAccordion } }));
 }
@@ -1287,13 +1279,20 @@ function validateStep(step) {
     }
     if (!photosReadyForNext()) {
       alert(photoBlockMessage());
-      showStep(4);
       return false;
     }
     return true;
   }
 
   return true;
+}
+
+/** Kötelező (*) mezők + képek — mentés / feladás előtt, lépésközi ugrás nélkül. */
+function validateForSubmit() {
+  if (shouldSkipWizardStep(TOTAL_STEPS)) return validateStep(TOTAL_STEPS);
+  applyListingAddressFromProfileSync(form);
+  window.dispatchEvent(new Event("ad-form-sync-location"));
+  return validateStep(TOTAL_STEPS);
 }
 
 function buildSummary() {
@@ -1439,14 +1438,13 @@ function photoBlockMessage() {
 
 function syncPhotoNextButton() {
   if (!nextBtn) return;
-  if (currentStep !== 4) {
-    nextBtn.disabled = false;
-    nextBtn.removeAttribute("title");
+  if (photoBusy) {
+    nextBtn.disabled = true;
+    nextBtn.title = photoBlockMessage();
     return;
   }
-  const ready = photosReadyForNext();
-  nextBtn.disabled = !ready;
-  nextBtn.title = ready ? "" : photoBlockMessage();
+  nextBtn.disabled = false;
+  nextBtn.removeAttribute("title");
 }
 
 function updatePhotoStatus() {
@@ -1728,6 +1726,9 @@ gyartmany?.addEventListener("change", applyAutoFill);
 teljesitmenyKw?.addEventListener("input", updateLeDisplay);
 
 if (mode === "wizard") {
+  backBtn?.classList.add("hidden");
+  if (nextBtn) nextBtn.textContent = "Hirdetés feladása";
+
   backBtn?.addEventListener("click", async () => {
     if (currentStep > 1) await tryGoToStep(prevWizardStep(currentStep));
   });
@@ -1750,19 +1751,11 @@ if (mode === "wizard") {
   });
 
   nextBtn?.addEventListener("click", async () => {
-    if (
-      currentStep === 4 &&
-      photoItems.some((item) => item.status === "pending" || item.status === "error")
-    ) {
+    if (photoItems.some((item) => item.status === "pending" || item.status === "error")) {
       await uploadPendingPhotos();
     }
-    if (!validateStep(currentStep)) return;
+    if (!validateForSubmit()) return;
     saveDraft();
-    if (currentStep < TOTAL_STEPS) {
-      await tryGoToStep(nextWizardStep(currentStep));
-      return;
-    }
-    buildSummary();
     const formData = collectFormData();
     nextBtn.disabled = true;
     try {
@@ -1772,6 +1765,7 @@ if (mode === "wizard") {
       alert(error?.message ?? "A hirdetés mentése nem sikerült.");
     } finally {
       nextBtn.disabled = false;
+      syncPhotoNextButton();
     }
   });
 

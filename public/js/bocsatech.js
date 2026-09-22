@@ -446,7 +446,7 @@ function otpSentMessage(data) {
     const host = String(location.hostname || "").toLowerCase();
     const vercelHint =
       host.includes("vercel.app") || host.endsWith(".bymy.hu")
-        ? " Vercelen: mac/vercel-smtp-env.command (forrás: ~/.autosweb/smtp.json). Élesen: bymy.hu/Bocsatech.html is működhet, ha ott van SMTP."
+        ? " Vercelen: scripts/sync-vercel-mail-relay.mjs (SMTP relay az éles S1-ről) vagy mac/vercel-smtp-env.command. Ideiglenesen: bymy.hu/Bocsatech.html."
         : " A Gmail küldő fiók app jelszavát ellenőrizd (~/.autosweb/smtp.json).";
     return `Az email kód nem ment ki${to}: ${detail}.${vercelHint}`;
   }

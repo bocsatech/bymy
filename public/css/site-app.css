@@ -2681,6 +2681,22 @@ body.site-app #ad-form.ad-form--ingatlan .immo-wheel-wrap--drum-inline.is-open .
   pointer-events: auto !important;
 }
 
+body.site-app #ad-form.ad-form--ingatlan .immo-wheel-wrap--menu {
+  position: relative;
+  z-index: 1;
+}
+
+body.site-app #ad-form.ad-form--ingatlan .immo-wheel-wrap--menu.is-open {
+  z-index: 120;
+}
+
+body.site-app #ad-form.ad-form--ingatlan .immo-wheel--menu {
+  left: 0;
+  right: 0;
+  max-height: min(14rem, 45vh);
+  z-index: 121;
+}
+
 body.site-app #ad-form.ad-form--ingatlan .immo-search-panel--post .immo-actions {
   margin-top: 0.25rem;
 }

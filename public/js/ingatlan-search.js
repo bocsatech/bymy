@@ -52,9 +52,15 @@ import {
   MULTI_WHEEL_KEYS,
   wheelFieldHtml,
   syncHostClearButton,
+  initMenuWheel,
 } from "./ingatlan-wheels.js?v=immoClearAll1";
-import { initDrumWheel, syncDrumWheelDisplay, applyDrumModeClass } from "./immo-drum-picker.js?v=immoAdFormDrum1";
-import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=immoAdFormDrum1";
+import {
+  closeAllInlineDrums,
+  initDrumWheel,
+  syncDrumWheelDisplay,
+  applyDrumModeClass,
+} from "./immo-drum-picker.js?v=immoAdFormMenu1";
+import { bindAutoDrumSheet, closeAutoDrumSheet } from "./auto-drum-sheet.js?v=immoAdFormMenu1";
 import {
   fetchIngatlanWheelSchema,
   renderIngatlanSchemaHosts,
@@ -181,6 +187,10 @@ function useDrumPicker() {
 
 function initImmoSearchWheel(wheel, { emptyLabel = "Mindegy", multiple = false, customInput = false, customKind = "price" } = {}) {
   if (!wheel) return;
+  if (wheel.closest("#ad-form")) {
+    initMenuWheel(wheel, { emptyLabel, multiple, customInput, customKind });
+    return;
+  }
   const name = wheel.getAttribute("data-wheel") || "";
   const live = initDrumWheel(wheel, { emptyLabel, multiple, openMode: "portal" });
   const form = live?.closest("form") || wheel.closest?.("form") || document.getElementById("immo-search-form");
@@ -192,6 +202,17 @@ function initImmoSearchWheel(wheel, { emptyLabel = "Mindegy", multiple = false, 
     bindAutoDrumSheet(bound);
     syncDrumWheelDisplay(bound);
   }
+}
+
+function resetAdFormIngatlanPickers(root) {
+  if (!root?.closest("#ad-form")) return;
+  closeAutoDrumSheet(false);
+  closeAllInlineDrums(false);
+  root.querySelectorAll(".immo-wheel-wrap--drum-inline").forEach((wrap) => {
+    wrap.classList.remove("is-open", "has-drum-open");
+    wrap.querySelector(".immo-drum-inline")?.remove();
+  });
+  document.querySelectorAll(".auto-drum-portal").forEach((el) => el.remove());
 }
 
 function syncImmoSearchWheelDisplay(wheel) {
@@ -1196,6 +1217,7 @@ async function reloadIngatlanSchemaLayout(root, opts) {
   setupMobileDualRanges(moreHost);
   wireTelepulesSuggestIn(root);
   wireTelepulesClear(root);
+  resetAdFormIngatlanPickers(root);
   setupIngatlanSearchWheels(root, { tipusOpts, tipus2Enabled, defaultUzletag });
   restoreIngatlanSearchValues(root, saved);
   return schema;
@@ -1247,6 +1269,7 @@ export async function initIngatlanSearch({
   wireTelepulesSuggestIn(root);
   wireTelepulesClear(root);
 
+  resetAdFormIngatlanPickers(root);
   setupIngatlanSearchWheels(root, { tipusOpts, tipus2Enabled, defaultUzletag: initialUz });
 
   function setMoreOpen(open) {

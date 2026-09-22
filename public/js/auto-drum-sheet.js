@@ -1,6 +1,6 @@
 
 import { readWheel, readWheelList, setWheelValue } from "./ingatlan-wheels.js?v=immoClearAll1";
-import { closeAllInlineDrums, syncDrumWheelDisplay } from "./immo-drum-picker.js?v=immoAdFormDrum1";
+import { closeAllInlineDrums, syncDrumWheelDisplay } from "./immo-drum-picker.js?v=immoAdFormMenu1";
 
 const ITEM_H = 60;
 let activePortal = null;

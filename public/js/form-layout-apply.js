@@ -1104,9 +1104,12 @@ async function applyAdFormLayout() {
     await refreshAdFormBmPickers(form);
     initTireSizes(form);
     window.dispatchEvent(new Event("ad-form-sync-fuel-fields"));
-    applyAdFormDesk();
   } catch (error) {
     console.warn("Ad form layout apply:", error);
+  } finally {
+    if (!form.closest("#ad-wizard-shell")?.hidden) {
+      applyAdFormDesk();
+    }
   }
 }
 

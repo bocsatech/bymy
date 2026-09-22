@@ -143,9 +143,26 @@ async function manage() {
   if (!String(profile.email || "").trim()) {
     profile.email = String(account.companyEmail || getAuthUser()?.email || "").trim();
   }
-  const listings = (listingsResult.listings || []).filter(
-    (listing) => String(listing.vertical || listing.preview?.filter?.vertical || "").toLowerCase() === "ingatlan"
-  );
+  const listings = (listingsResult.listings || []).filter((listing) => {
+    const vertical = String(
+      listing.vertical ||
+        listing.preview?.filter?.hirdetes_vertical ||
+        listing.preview?.filter?.vertical ||
+        listing.form?.hirdetes_vertical ||
+        ""
+    ).toLowerCase();
+    // Partner oldal: elsősorban ingatlan; ha nincs, mutassuk a többi saját hirdetést is.
+    return vertical === "ingatlan";
+  });
+  const ownListings = listings.length
+    ? listings
+    : listingsResult.listings || [];
+  const listingsTitle = listings.length ? "Ingatlanhirdetéseim" : "Saját hirdetéseim";
+  const listingsEmpty = listings.length
+    ? ""
+    : ownListings.length
+      ? ""
+      : '<p class="partner-empty">Még nincs saját hirdetésed.</p>';
   root.innerHTML = `
     <nav class="partner-breadcrumb"><a href="/ingatlan.html">Ingatlan</a><span>›</span><span>Partnerprofil kezelése</span></nav>
     <header class="partner-manage-head">
@@ -175,8 +192,8 @@ async function manage() {
       </div>
     </form>
     <section class="partner-own-listings">
-      <div class="partner-section-head"><div><p class="partner-eyebrow">SAJÁT HIRDETÉSEK</p><h2>Ingatlanhirdetéseim</h2></div><a class="partner-primary-link" href="/hirdetesfeladas.html?vertical=ingatlan&subtype=ingatlan&start=1">+ Új hirdetés</a></div>
-      <div class="partner-own-list">${listings.length ? listings.map((listing) => `<div class="partner-own-row"><div><strong>${esc(listing.preview?.title || listing.hirdetes_cime || `Hirdetés #${listing.id}`)}</strong><span>${esc(listing.preview?.price || "")}</span></div><span class="partner-own-status">${esc(listing.status || "")}</span><div><a href="/hirdetes.html?id=${listing.id}">Megnyitás</a><a href="/hirdetesfeladas.html?id=${listing.id}">Szerkesztés</a></div></div>`).join("") : "<p class=\"partner-empty\">Még nincs saját hirdetésed.</p>"}</div>
+      <div class="partner-section-head"><div><p class="partner-eyebrow">SAJÁT HIRDETÉSEK</p><h2>${listingsTitle}</h2></div><a class="partner-primary-link" href="/hirdetesfeladas.html?vertical=ingatlan&subtype=ingatlan&start=1">+ Új hirdetés</a></div>
+      <div class="partner-own-list">${ownListings.length ? ownListings.map((listing) => `<div class="partner-own-row"><div><strong>${esc(listing.preview?.title || listing.hirdetes_cime || `Hirdetés #${listing.id}`)}</strong><span>${esc(listing.preview?.price || "")}</span></div><span class="partner-own-status">${esc(listing.status || "")}</span><div><a href="/hirdetes.html?id=${listing.id}">Megnyitás</a><a href="/hirdetesfeladas.html?id=${listing.id}">Szerkesztés</a></div></div>`).join("") : listingsEmpty}</div>
     </section>`;
 
   root.querySelector("#partner-form").addEventListener("submit", async (event) => {

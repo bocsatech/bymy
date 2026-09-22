@@ -5,7 +5,7 @@ import {
   createListingTileCard,
   formatListingCountBadge,
   slimListingTile,
-} from "./listing-tile.js?v=importVehicle1";
+} from "./listing-tile.js?v=favImg1";
 import { restoreListingReturn, bindListingOpen } from "./listing-return.js?v=scrollTop1";
 import {
   buildNearbyFilter,
@@ -128,21 +128,34 @@ async function initFavoritesRail({ postal, radiusKm }) {
       return;
     }
 
+    let listingPool = [];
+    try {
+      listingPool = await fetchListings({ limit: 250, status: "feladott" });
+    } catch {
+    }
+    const listingById = new Map(listingPool.map((row) => [Number(row.id), row]));
+
     const items = [];
     for (const row of saved.slice(0, 20)) {
-      try {
-        const listing = await fetchListing(row.id);
-        if (listing && (listing.status || "feladott") === "feladott") {
-          items.push(slimListingTile(listing));
-          continue;
+      const id = Number(row.id);
+      let listing = listingById.get(id);
+      if (!listing) {
+        try {
+          listing = await fetchListing(row.id);
+        } catch {
+          listing = null;
         }
-      } catch {
+      }
+      if (listing && (listing.status || "feladott") === "feladott") {
+        items.push(slimListingTile(listing));
+        continue;
       }
       items.push(
         slimListingTile({
           id: row.id,
           hirdetes_cime: row.title,
-          preview: { title: row.title, price: row.price, imageUrl: "" },
+          fo_kep: row.imageUrl || "",
+          preview: { title: row.title, price: row.price, imageUrl: row.imageUrl || "" },
         })
       );
     }

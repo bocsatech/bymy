@@ -6,8 +6,20 @@
 
 .hf-card--listing.hf-card--featured,
 .home-grid-card.home-grid-card--featured {
-  border: 2px solid var(--listing-featured-yellow);
-  box-shadow: 0 8px 22px rgba(240, 193, 75, 0.22);
+  border: 2px solid var(--listing-featured-yellow) !important;
+  box-shadow: 0 8px 22px rgba(240, 193, 75, 0.22) !important;
+}
+
+/* auto/teher desk: szürke 1px keret !important felülírása */
+body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"])
+  .home-grid-card.home-grid-card--featured {
+  border: 2px solid var(--listing-featured-yellow) !important;
+  box-shadow: 0 8px 22px rgba(240, 193, 75, 0.22) !important;
+}
+
+body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"])
+  .home-grid-card.home-grid-card--featured:hover {
+  border-color: var(--listing-featured-yellow-dark) !important;
 }
 
 .hf-card--listing.hf-card--featured .hf-card-price,
@@ -62,8 +74,8 @@
 
 html[data-theme="dark"] .hf-card--listing.hf-card--featured,
 html[data-theme="dark"] .home-grid-card.home-grid-card--featured {
-  border-color: #e6b422;
-  box-shadow: 0 8px 22px rgba(240, 193, 75, 0.15);
+  border-color: #e6b422 !important;
+  box-shadow: 0 8px 22px rgba(240, 193, 75, 0.15) !important;
 }
 
 html[data-theme="dark"] .hf-card--listing.hf-card--featured .hf-card-price,

@@ -149,6 +149,18 @@ export async function updateListingStatusInDb(id, status) {
   return data.listing ?? null;
 }
 
+/** Csak megadott mezők — nem írja felül a teljes hirdetést. */
+export async function patchListingFieldsInDb(id, fields) {
+  const response = await fetch(`/api/listings/${id}`, {
+    method: "PATCH",
+    headers: authHeaders(),
+    credentials: "same-origin",
+    body: JSON.stringify({ fields }),
+  });
+  const data = await parseJson(response);
+  return data.listing ?? null;
+}
+
 export async function saveListingPhotosOrder(id, items) {
   const response = await fetch(`/api/listings/${id}/photos`, {
     method: "POST",

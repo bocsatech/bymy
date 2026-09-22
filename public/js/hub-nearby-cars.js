@@ -25,7 +25,7 @@ const STATUS = document.getElementById("hub-nearby-status");
 const ALL_LINK = document.getElementById("hub-nearby-all");
 const COUNT_EL = document.getElementById("hub-nearby-count");
 
-const CACHE_KEY = "bymy-hub-nearby-v6";
+const CACHE_KEY = "bymy-hub-nearby-v7";
 const CACHE_TTL_MS = 15 * 60 * 1000;
 const INITIAL_COUNT = 9;
 const SCROLL_BATCH = 5;

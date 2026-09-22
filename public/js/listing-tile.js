@@ -137,6 +137,10 @@ export function slimListingTile(item) {
       km: preview.km,
       specLine: preview.specLine,
       imageUrl: preview.imageUrl || item.fo_kep || "",
+      promo: preview.promo || {
+        kiemelt: String(form.promo_kiemelt ?? "").trim() === "1",
+        top: String(form.promo_top_ajanlat ?? "").trim() === "1",
+      },
       filter: {
         gyartmany: preview.filter?.gyartmany ?? form.gyartmany ?? null,
         modell: preview.filter?.modell ?? form.modell ?? null,

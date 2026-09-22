@@ -22,6 +22,7 @@ import {
   listMyListings,
   listListingsByOwner,
   updateListingStatus,
+  patchListingFormFields,
   getDbPath,
   closeDb,
 } from "./lib/db-store.mjs";
@@ -1175,6 +1176,26 @@ async function handleListingsApi(req, res, pathname) {
     }
     if (body.status) {
       const updated = await updateListingStatus(listing.id, body.status, user.id);
+      sendJson(res, 200, { listing: updated });
+      return;
+    }
+    if (body.fields && typeof body.fields === "object" && !Array.isArray(body.fields)) {
+      const allowed = new Set([
+        "promo_kiemelt",
+        "promo_top_ajanlat",
+        "photo_overlay_template_id",
+        "photo_overlay_base_url",
+      ]);
+      const fields = {};
+      for (const [key, value] of Object.entries(body.fields)) {
+        if (!allowed.has(key)) continue;
+        fields[key] = value;
+      }
+      if (!Object.keys(fields).length) {
+        sendJson(res, 400, { error: "Nincs módosítható mező." });
+        return;
+      }
+      const updated = await patchListingFormFields(listing.id, fields);
       sendJson(res, 200, { listing: updated });
       return;
     }

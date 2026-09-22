@@ -1,10 +1,12 @@
 /** Saját hirdetés promó — listing_cells: promo_kiemelt, promo_top_ajanlat ("1" / "0"). */
 
 export function promoKiemeltActive(item) {
+  if (item?.preview?.promo?.kiemelt === true) return true;
   return String(item?.form?.promo_kiemelt ?? "").trim() === "1";
 }
 
 export function promoTopAjanlatActive(item) {
+  if (item?.preview?.promo?.top === true) return true;
   return String(item?.form?.promo_top_ajanlat ?? "").trim() === "1";
 }
 

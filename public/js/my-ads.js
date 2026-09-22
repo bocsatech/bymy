@@ -1,11 +1,10 @@
 import {
   fetchMyListings,
-  fetchListing,
   updateListingStatusInDb,
+  patchListingFieldsInDb,
   saveListingPhotosOrder,
-  saveListingToDb,
   deleteListingFromDb,
-} from "./db-client.js?v=myAdsForm1";
+} from "./db-client.js?v=myAdsPatch1";
 import {
   DEFAULT_PHOTO_OVERLAY_ID,
   detectBymyPhotoOverlay,
@@ -466,29 +465,20 @@ export function initMyAdsPanel(root) {
       .join("");
   }
 
-  async function fullListingForm(item) {
-    const base = { ...(item.form || {}) };
-    if (Object.keys(base).length >= 8) return base;
-    const full = await fetchListing(item.id);
-    return { ...(full?.form || {}), ...base };
-  }
-
   async function persistPromoFlag(item, fieldKey, active) {
-    const form = {
-      ...(await fullListingForm(item)),
+    const updated = await patchListingFieldsInDb(item.id, {
       [fieldKey]: active ? "1" : "0",
-    };
-    await saveListingToDb(form, item.id, { status: item.status || "feladott" });
-    item.form = { ...(item.form || {}), ...form };
+    });
+    if (updated?.form) item.form = { ...(item.form || {}), ...updated.form };
+    else item.form = { ...(item.form || {}), [fieldKey]: active ? "1" : "0" };
   }
 
   async function persistSablonMeta(item, { active, baseUrl }) {
-    const form = {
-      ...(await fullListingForm(item)),
+    const updated = await patchListingFieldsInDb(item.id, {
       photo_overlay_base_url: String(baseUrl || item.form?.photo_overlay_base_url || "").trim(),
-      photo_overlay_template_id: active ? DEFAULT_PHOTO_OVERLAY_ID : null,
-    };
-    await saveListingToDb(form, item.id, { status: item.status || "feladott" });
+      photo_overlay_template_id: active ? DEFAULT_PHOTO_OVERLAY_ID : "",
+    });
+    if (updated?.form) item.form = { ...(item.form || {}), ...updated.form };
   }
 
   async function setSablonActive(item, wantActive) {

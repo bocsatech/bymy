@@ -7,6 +7,7 @@ function listingHasPhoto(item) {
 }
 
 function isPromoKiemelt(item) {
+  if (item?.preview?.promo?.kiemelt === true) return true;
   return String(item?.form?.promo_kiemelt ?? "").trim() === "1";
 }
 

@@ -52,6 +52,14 @@ let featuredOnlyMode = false;
 const PAGE = document.body?.getAttribute("data-site-page") || "";
 if (gridTrack) bindListingOpen(gridTrack);
 
+function sellerFromId() {
+  return String(new URLSearchParams(window.location.search).get("hirdeto") || "").trim();
+}
+
+function isSellerMode() {
+  return Boolean(sellerFromId());
+}
+
 function initialTruckSubtypeFromUrl() {
   if (PAGE !== "teherauto") return null;
   const kat = new URLSearchParams(window.location.search).get("kategoria") || "35-alatt";
@@ -163,6 +171,7 @@ function mergedVehicleFilters() {
 }
 
 function filterItems(items) {
+  if (isSellerMode()) return items;
   let result = items;
   if (PAGE === "ingatlan") {
     result = filterListingsByIngatlan(result, ingatlanFilters);
@@ -263,7 +272,7 @@ async function loadSellerListings(fromId) {
 }
 
 async function loadListings() {
-  const sellerFrom = String(new URLSearchParams(window.location.search).get("hirdeto") || "").trim();
+  const sellerFrom = sellerFromId();
   if (sellerFrom) {
     await loadSellerListings(sellerFrom);
     return;
@@ -414,6 +423,10 @@ if (PAGE === "ingatlan") {
   initIngatlanSearch({
     defaultUzletag,
     onSearch: (values) => {
+      if (isSellerMode()) {
+        applyFilters();
+        return;
+      }
       ingatlanFilters = { ...emptyIngatlanFilters(), ...values };
       applyFilters();
     },
@@ -432,6 +445,10 @@ if (PAGE === "ingatlan") {
 } else {
   quickSearchApi = initHomeQuickSearch({
     onSearch: async (values) => {
+      if (isSellerMode()) {
+        applyFilters();
+        return;
+      }
       const { detailed, ...sidebarValues } = values ?? {};
       quickSearchFilters = { ...emptyFilters(), ...sidebarValues };
       detailedFilters = detailed ?? null;

@@ -21,18 +21,26 @@ const DESK_VEHICLE_SUBTYPES = new Set([
   "teherauto",
 ]);
 
+const DESK_AD_SUBTYPES = new Set([...DESK_VEHICLE_SUBTYPES, "ingatlan"]);
+
 function shellAccordions() {
   return ACCORDIONS.filter((item) => item.shell !== false);
 }
 
 function currentSubtype(form) {
-  return String(
+  const subtype = String(
     form?.elements.namedItem("hirdetes_alkategoria")?.value ??
       form?.elements.namedItem("jarmu_kategoria")?.value ??
       ""
   )
     .trim()
     .toLowerCase();
+  if (subtype) return subtype;
+  const vertical = String(form?.elements.namedItem("hirdetes_vertical")?.value ?? "")
+    .trim()
+    .toLowerCase();
+  if (vertical === "ingatlan") return "ingatlan";
+  return "";
 }
 
 function isSzemelyautoAdForm(form) {
@@ -47,12 +55,40 @@ function isDeskVehicleSubtype(subtype) {
   );
 }
 
+function isDeskAdSubtype(subtype) {
+  return DESK_AD_SUBTYPES.has(
+    String(subtype ?? "")
+      .trim()
+      .toLowerCase()
+  );
+}
+
 function isDeskVehicleAdForm(form) {
   return isDeskVehicleSubtype(currentSubtype(form));
 }
 
+function isIngatlanAdForm(form) {
+  return currentSubtype(form) === "ingatlan";
+}
+
 function isAdFormDesk(form) {
-  return isDeskVehicleAdForm(form);
+  return isDeskAdSubtype(currentSubtype(form));
+}
+
+function syncIngatlanDeskAccordions(form) {
+  const shell = form.querySelector("#ad-form-desk-shell");
+  if (!shell) return;
+  for (const id of ["muszaki", "extrak"]) {
+    const acc = shell.querySelector(`[data-desk-acc="${id}"]`);
+    if (!acc) continue;
+    if (isIngatlanAdForm(form)) {
+      acc.hidden = true;
+      acc.setAttribute("hidden", "");
+    } else {
+      acc.hidden = false;
+      acc.removeAttribute("hidden");
+    }
+  }
 }
 
 function filledControl(el) {
@@ -532,6 +568,7 @@ function applyAdFormDesk({ openStep = null, scrollToAccordion = null } = {}) {
   ensureCenterColumn(form);
   migrateLegacyDeskColumns(form);
   mountDeskPanels(form);
+  syncIngatlanDeskAccordions(form);
   restackCanvasItems(form);
   if (shell) shell.hidden = false;
 

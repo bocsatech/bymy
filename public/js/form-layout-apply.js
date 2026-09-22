@@ -1,7 +1,7 @@
 import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=immoUiParity1";
 import { refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=deskAccScroll1";
 import { initTireSizes } from "./tire-sizes-ui.js?v=tireFill1";
-import { applyAdFormDesk } from "./ad-form-desk.js?v=adFormDesk44";
+import { applyAdFormDesk } from "./ad-form-desk.js?v=immoDeskParity1";
 import {
   DESK_MUSZAKI_CORE_FIELD_KEYS,
   EV_LAYOUT_GROUP_KEYS,
@@ -55,7 +55,6 @@ function wrapFor(form, fieldKey) {
 }
 
 function pinLeiras(form) {
-  if (currentLayoutCategory(form) === "ingatlan") return;
   const panel = form.querySelector('.step-panel[data-step="4"]');
   const leirasWrap =
     form.querySelector(".field-stack--leiras") ||
@@ -1077,9 +1076,9 @@ async function applyAdFormLayout() {
     }
     if (!isImmo) {
       hideUnplacedVehicleChrome(form, placed);
-      ensurePhotoUploadVisible(form);
-      retireLegacyFormGrid(form);
     }
+    ensurePhotoUploadVisible(form);
+    retireLegacyFormGrid(form);
     pruneEmptyCards(form);
     if (isImmo) compactCanvasRows(form);
     hideLayoutShellCards(form);

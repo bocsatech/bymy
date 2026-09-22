@@ -267,7 +267,7 @@ function isInlinePairDeskControl(el) {
   return Boolean(el.closest(".inline-2, .inline-2-labeled"));
 }
 
-const AD_FORM_DESK_ROW_WIDTH = "calc(100% - 1.5cm)";
+const AD_FORM_DESK_ROW_WIDTH = "100%";
 
 function applyDeskSidebarRowWidth(el) {
   el.style.setProperty("width", AD_FORM_DESK_ROW_WIDTH, "important");

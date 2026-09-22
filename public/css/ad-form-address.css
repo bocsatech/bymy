@@ -79,8 +79,8 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot .
 
 body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot {
   margin: var(--ad-cell-gap, 8px) 0 0;
-  width: var(--ad-desk-cell-span, calc(100% - 1.5cm));
-  max-width: var(--ad-desk-cell-span, calc(100% - 1.5cm));
+  width: var(--ad-desk-cell-span, 100%);
+  max-width: var(--ad-desk-cell-span, 100%);
   align-self: flex-start;
 }
 

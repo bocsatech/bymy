@@ -1,7 +1,7 @@
 import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=immoUiParity1";
 import { refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=deskAccScroll1";
 import { initTireSizes } from "./tire-sizes-ui.js?v=tireFill1";
-import { applyAdFormDesk } from "./ad-form-desk.js?v=adFormDesk44";
+import { applyAdFormDesk, isAdFormDesk } from "./ad-form-desk.js?v=adFormDesk44";
 import {
   DESK_MUSZAKI_CORE_FIELD_KEYS,
   EV_LAYOUT_GROUP_KEYS,
@@ -876,6 +876,10 @@ function pruneEmptyCards(form) {
 async function applyAdFormLayout() {
   const form = document.getElementById("ad-form");
   if (!form) return;
+  const wizardOpen = !form.closest("#ad-wizard-shell")?.hidden;
+  if (wizardOpen && isAdFormDesk(form)) {
+    applyAdFormDesk({ openStep: 1, scrollToAccordion: "alap" });
+  }
   try {
     const category = currentLayoutCategory(form);
     const isImmo = category === "ingatlan";
@@ -1096,9 +1100,14 @@ async function applyAdFormLayout() {
     await refreshAdFormBmPickers(form);
     initTireSizes(form);
     window.dispatchEvent(new Event("ad-form-sync-fuel-fields"));
-    applyAdFormDesk();
   } catch (error) {
     console.warn("Ad form layout apply:", error);
+  } finally {
+    if (!wizardOpen) return;
+    applyAdFormDesk();
+    if (isAdFormDesk(form)) {
+      document.body.classList.add("ad-form-layout-ready");
+    }
   }
 }
 

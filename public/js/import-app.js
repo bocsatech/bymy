@@ -244,17 +244,25 @@ async function handleSave() {
       hideTopAlert();
       const saved = batch?.savedCount ?? 0;
       const skipped = batch?.skippedCount ?? 0;
+      const otherOwner = (batch?.results || []).filter((entry) => entry?.reason === "other_owner").length;
+      const skipHint = otherOwner
+        ? `${otherOwner} már más fiókhoz tartozik`
+        : skipped
+          ? `${skipped} kihagyva`
+          : "";
       setSaveStatus(
-        `Kész: ${saved} mentve, ${skipped} kihagyva (már bent volt) — főoldal: /`,
+        `Kész: ${saved} mentve${skipHint ? `, ${skipHint}` : ""} — saját hirdetések: Beállítások`,
         saved > 0 || skipped > 0 ? "ok" : "err"
       );
       showTopAlert(
         saved > 0
-          ? `${saved} hirdetés mentve az adatbázisba${skipped ? `, ${skipped} duplikátum kihagyva` : ""}.`
-          : skipped
-            ? `Minden hirdetés már az adatbázisban volt (${skipped}).`
-            : "Nem sikerült menteni.",
-        saved > 0 ? "ok" : skipped ? "warn" : "err"
+          ? `${saved} hirdetés mentve${otherOwner ? `, ${otherOwner} más fióké (kihagyva)` : skipped ? `, ${skipped} duplikátum kihagyva` : ""}.`
+          : otherOwner
+            ? `Ezek a hasznaltauto.hu hirdetések már más Bymy fiókhoz tartoznak (${otherOwner}).`
+            : skipped
+              ? `Minden hirdetés már az adatbázisban volt (${skipped}).`
+              : "Nem sikerült menteni.",
+        saved > 0 ? "ok" : skipped || otherOwner ? "warn" : "err"
       );
       await checkServerReady();
       updateSaveButtonLabel();

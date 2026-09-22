@@ -15,6 +15,7 @@ import {
   dbStats,
   listFieldDefs,
   listingSourceExists,
+  findListingBySource,
   updateListingFoKep,
   updateListingPhotoUrls,
   clearListingPhotos,
@@ -33,6 +34,7 @@ import {
   isBusinessAccount,
   verticalFromForm,
 } from "./lib/listing-quota.mjs";
+import { assertCanImportExistingListing } from "./lib/listing-import-guard.mjs";
 import { getSiteBlocks, saveSiteBlocks } from "./lib/site-blocks.mjs";
 import {
   getSiteHero,
@@ -1266,9 +1268,29 @@ async function handleListingsApi(req, res, pathname) {
       }
       const sourceUrl = String(formData.forras_url || "").trim();
       const hasznaltautoId = String(formData.hasznaltauto_hirdetes_id || "").trim();
-      if (await listingSourceExists({ sourceUrl, hasznaltautoId })) {
-        results.push({ skipped: true, reason: "duplicate", forras_url: sourceUrl });
-        skippedCount += 1;
+      let existing = null;
+      if (sourceUrl || hasznaltautoId) {
+        try {
+          existing = await findListingBySource({ sourceUrl, hasznaltautoId });
+        } catch {
+          existing = null;
+        }
+      }
+      if (existing?.id) {
+        const ownerGuard = assertCanImportExistingListing(existing, user);
+        if (!ownerGuard.ok) {
+          results.push({
+            skipped: true,
+            reason: "other_owner",
+            error: ownerGuard.message,
+            forras_url: sourceUrl,
+          });
+          skippedCount += 1;
+          continue;
+        }
+        const saved = await saveListing(formData, existing.id, { status, userId: user.id });
+        results.push({ skipped: false, listing: saved, updated: true });
+        savedCount += 1;
         continue;
       }
       const check = assertCanCreateListing({ user, formData, existingListings: mine });

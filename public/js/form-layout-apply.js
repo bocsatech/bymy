@@ -890,9 +890,19 @@ function prepDeskBeforeGridPlacement(form) {
   applyAdFormDesk();
 }
 
+/** Ne helyezzünk gridet a rejtett űrlapra (kategóriaválasztó) — csak desk init után. */
+function isAdFormLayoutDeferred() {
+  if (document.documentElement.classList.contains("ad-form-edit-boot")) return false;
+  const editId = Number(new URLSearchParams(window.location.search).get("id"));
+  if (Number.isFinite(editId) && editId > 0) return false;
+  const wizard = document.getElementById("ad-wizard-shell");
+  return Boolean(wizard?.hasAttribute("hidden"));
+}
+
 async function applyAdFormLayout() {
   const form = document.getElementById("ad-form");
   if (!form) return;
+  if (isAdFormLayoutDeferred()) return;
   try {
     const category = currentLayoutCategory(form);
     const isImmo = category === "ingatlan";

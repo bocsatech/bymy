@@ -884,8 +884,13 @@ function pruneEmptyCards(form) {
   });
 }
 
+function isAdWizardShellVisible() {
+  const shell = document.getElementById("ad-wizard-shell");
+  return Boolean(shell && !shell.hasAttribute("hidden"));
+}
+
 function prepDeskBeforeGridPlacement(form) {
-  if (!form || form.closest("#ad-wizard-shell")?.hidden) return;
+  if (!form || !isAdWizardShellVisible()) return;
   if (!isAdFormDesk(form)) return;
   applyAdFormDesk();
 }
@@ -893,10 +898,7 @@ function prepDeskBeforeGridPlacement(form) {
 /** Ne helyezzünk gridet a rejtett űrlapra (kategóriaválasztó) — csak desk init után. */
 function isAdFormLayoutDeferred() {
   if (document.documentElement.classList.contains("ad-form-edit-boot")) return false;
-  const editId = Number(new URLSearchParams(window.location.search).get("id"));
-  if (Number.isFinite(editId) && editId > 0) return false;
-  const wizard = document.getElementById("ad-wizard-shell");
-  return Boolean(wizard?.hasAttribute("hidden"));
+  return !isAdWizardShellVisible();
 }
 
 async function applyAdFormLayout() {
@@ -1197,11 +1199,23 @@ function currentLayoutCategory(form) {
   return "szemelyauto";
 }
 
-function scheduleApply() {
+function scheduleApplyOnce() {
+  if (isAdFormLayoutDeferred()) return;
   ensureAdFormLayoutReady();
-  window.setTimeout(() => ensureAdFormLayoutReady(), 120);
-  window.setTimeout(() => ensureAdFormLayoutReady(), 450);
-  window.setTimeout(() => ensureAdFormLayoutReady(), 900);
+  window.setTimeout(() => {
+    if (!isAdFormLayoutDeferred()) ensureAdFormLayoutReady();
+  }, 120);
+  window.setTimeout(() => {
+    if (!isAdFormLayoutDeferred()) ensureAdFormLayoutReady();
+  }, 450);
+  window.setTimeout(() => {
+    if (!isAdFormLayoutDeferred()) ensureAdFormLayoutReady();
+  }, 900);
+}
+
+function scheduleApply() {
+  if (isAdFormLayoutDeferred()) return;
+  scheduleApplyOnce();
 }
 
 function syncAdLocationPostalVisibility(form = document.getElementById("ad-form")) {
@@ -1218,6 +1232,9 @@ if (document.readyState === "loading") {
 } else {
   scheduleApply();
 }
-window.addEventListener("ad-form-ready", () => ensureAdFormLayoutReady());
+window.addEventListener("ad-form-ready", () => {
+  if (isAdFormLayoutDeferred()) return;
+  ensureAdFormLayoutReady();
+});
 window.addEventListener("ad-form-layout-refresh", () => ensureAdFormLayoutReady());
 window.addEventListener("ad-form-sync-location-postal", () => syncAdLocationPostalVisibility());

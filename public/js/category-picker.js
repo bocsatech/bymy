@@ -508,7 +508,21 @@ export function initCategoryPicker({
     pickerHandlers.onReset?.();
   }
 
+  function ensureAdFormAppReadyPromise() {
+    if (!window.__bymyAdFormAppReady) {
+      window.__bymyAdFormAppReady = new Promise((resolve) => {
+        window.__bymyAdFormAppReadyResolve = resolve;
+      });
+    }
+    return window.__bymyAdFormAppReady;
+  }
+
   async function showVehicleWizard(selection) {
+    try {
+      await ensureAdFormAppReadyPromise();
+    } catch {
+      /* app.js betöltés hiba */
+    }
     writeStored(selection);
     setHiddenFields(selection);
     try {
@@ -706,10 +720,19 @@ export function initCategoryPicker({
     (stored?.vertical === "auto" || stored?.vertical === "teher" || stored?.vertical === "ingatlan");
   const shouldStart = params.get("start") === "1" && urlSelection;
 
+  async function openWizardWhenAppReady(selection) {
+    try {
+      await window.__bymyAdFormAppReady;
+    } catch {
+      /* app.js hiba */
+    }
+    await showVehicleWizard(selection);
+  }
+
   if (shouldStart) {
-    void showVehicleWizard(urlSelection);
+    void openWizardWhenAppReady(urlSelection);
   } else if (shouldContinue) {
-    void showVehicleWizard(stored);
+    void openWizardWhenAppReady(stored);
   } else if (isEditBoot) {
     pickerShell?.setAttribute("hidden", "");
     wizardShell?.setAttribute("hidden", "");

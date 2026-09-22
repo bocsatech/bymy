@@ -1945,9 +1945,13 @@ initVehicleCatalogSelects({
     if (mode === "wizard" && !userTouchedForm && !editing) resetForm();
     await refreshAdFormBmPickers(form, catalog);
     options.onCatalogReady?.(catalog);
+    window.__bymyAdFormCatalogReady = true;
     window.dispatchEvent(new Event("ad-form-ready"));
   })
-  .catch(() => {});
+  .catch(() => {
+    window.__bymyAdFormCatalogReady = true;
+    window.dispatchEvent(new Event("ad-form-ready"));
+  });
 
 modell?.addEventListener("change", () => {
   syncTipusFromModell();

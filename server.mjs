@@ -2379,6 +2379,45 @@ export async function handleHttpRequest(req, res) {
     return;
   }
 
+  if (pathname === "/api/internal/mail-relay" && req.method === "POST") {
+    const secret = String(process.env.BYMY_MAIL_RELAY_SECRET ?? "").trim();
+    const auth = String(req.headers.authorization ?? "").trim();
+    if (!secret || auth !== `Bearer ${secret}`) {
+      sendJson(res, 403, { error: "Forbidden." });
+      return;
+    }
+    if (
+      !assertAuthRate(req, res, "mail-relay", {
+        limit: 30,
+        windowMs: 15 * 60 * 1000,
+      })
+    ) {
+      return;
+    }
+    try {
+      const body = await readJsonBody(req);
+      const to = String(body?.to ?? "").trim();
+      const subject = String(body?.subject ?? "").trim();
+      if (!to || !subject) {
+        sendJson(res, 400, { error: "Hiányzó cím vagy tárgy." });
+        return;
+      }
+      const result = await sendMailSmtp({
+        to,
+        subject,
+        text: String(body?.text ?? ""),
+        html: body?.html ? String(body.html) : undefined,
+      });
+      sendJson(res, 200, { ok: true, messageId: result.messageId, from: result.from });
+    } catch (error) {
+      sendJson(res, 502, {
+        error: "SMTP küldés sikertelen.",
+        smtpWarning: String(error?.message ?? error),
+      });
+    }
+    return;
+  }
+
   if (await rejectBlockedIp(req, res, pathname)) return;
 
   const gate = await enforceMembersGate(req, res, pathname, {
@@ -2430,45 +2469,6 @@ export async function handleHttpRequest(req, res) {
       });
     } catch (error) {
       sendJson(res, 500, { error: error.message ?? "Hirdetésfeladás kép hiba." });
-    }
-    return;
-  }
-
-  if (pathname === "/api/internal/mail-relay" && req.method === "POST") {
-    const secret = String(process.env.BYMY_MAIL_RELAY_SECRET ?? "").trim();
-    const auth = String(req.headers.authorization ?? "").trim();
-    if (!secret || auth !== `Bearer ${secret}`) {
-      sendJson(res, 403, { error: "Forbidden." });
-      return;
-    }
-    if (
-      !assertAuthRate(req, res, "mail-relay", {
-        limit: 30,
-        windowMs: 15 * 60 * 1000,
-      })
-    ) {
-      return;
-    }
-    try {
-      const body = await readJsonBody(req);
-      const to = String(body?.to ?? "").trim();
-      const subject = String(body?.subject ?? "").trim();
-      if (!to || !subject) {
-        sendJson(res, 400, { error: "Hiányzó cím vagy tárgy." });
-        return;
-      }
-      const result = await sendMailSmtp({
-        to,
-        subject,
-        text: String(body?.text ?? ""),
-        html: body?.html ? String(body.html) : undefined,
-      });
-      sendJson(res, 200, { ok: true, messageId: result.messageId, from: result.from });
-    } catch (error) {
-      sendJson(res, 502, {
-        error: "SMTP küldés sikertelen.",
-        smtpWarning: String(error?.message ?? error),
-      });
     }
     return;
   }

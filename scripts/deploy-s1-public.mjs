@@ -15,7 +15,8 @@ const appDir = process.env.BYMY_S1_APP || "/var/www/bymy";
 const cmds = [
   `rsync -az --delete "${root}/public/" ${host}:${appDir}/public/`,
   `rsync -az --delete "${root}/lib/" ${host}:${appDir}/lib/`,
-  `ssh ${host} "cd ${appDir} && (pm2 restart bymy-app 2>/dev/null || pm2 restart all 2>/dev/null || true)"`,
+  `rsync -az "${root}/server.mjs" ${host}:${appDir}/server.mjs`,
+  `ssh ${host} "cd ${appDir} && (pm2 restart bymy 2>/dev/null || pm2 restart bymy-app 2>/dev/null || pm2 restart all 2>/dev/null || true)"`,
 ];
 
 for (const cmd of cmds) {

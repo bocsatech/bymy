@@ -130,10 +130,7 @@ body.site-app .hub-header {
 
 @media (min-width: 901px) {
   body.site-app {
-    --site-nav-logo-h: 72px;
-    --site-nav-logo-max-w: min(260px, 29vw);
-    --site-nav-logo-col: 260px;
-    --site-fixed-header-h: 80px;
+    --site-fixed-header-h: 64px;
     padding-top: var(--site-fixed-header-h);
   }
 
@@ -156,10 +153,10 @@ body.site-app .hub-header {
   body.site-app .home-header-inner,
   body.site-app .site-app-header-inner {
     display: grid !important;
-    grid-template-columns: var(--site-nav-logo-col) auto minmax(0, 1fr) !important;
+    grid-template-columns: 1fr auto 1fr !important;
     grid-template-areas: "logo nav actions" !important;
     align-items: center !important;
-    column-gap: 24px !important;
+    column-gap: 36px !important;
     max-width: 1440px !important;
     margin: 0 auto !important;
     padding: 0 24px !important;
@@ -185,15 +182,12 @@ body.site-app .hub-header {
     justify-self: start !important;
     align-self: center !important;
     position: relative !important;
-    left: 0 !important;
+    left: auto !important;
     right: auto !important;
     top: auto !important;
     bottom: auto !important;
     transform: none !important;
-    margin: 0 !important;
     padding: 0 !important;
-    width: var(--site-nav-logo-col) !important;
-    max-width: var(--site-nav-logo-col) !important;
     z-index: 2;
   }
 
@@ -201,8 +195,8 @@ body.site-app .hub-header {
   body.site-app .home-logo .bymy-logo-img--nav,
   body.site-app .site-app-logo .bymy-logo-img--nav,
   body.site-app .bymy-logo-img--nav {
-    height: var(--site-nav-logo-h) !important;
-    max-width: var(--site-nav-logo-max-w) !important;
+    height: 40px !important;
+    max-width: 140px !important;
     width: auto !important;
   }
 
@@ -305,25 +299,25 @@ body.site-app .site-header-top {
   z-index: 4;
 }
 
-@media (min-width: 801px) and (max-width: 900px) {
-  body.site-app .home-logo,
-  body.site-app .hub-logo,
-  body.site-app .site-app-logo {
-    justify-self: start;
-    font-size: 1.15rem;
-    font-weight: 700;
-    color: #111;
-    text-decoration: none;
-    letter-spacing: -0.02em;
-    display: inline-flex;
-    align-items: flex-end;
-    line-height: 1;
-    position: absolute;
-    left: max(0.5rem, calc(1rem - 1.5cm));
-    bottom: 0.05rem;
-    z-index: 3;
-    flex: 0 0 auto;
-  }
+@media (min-width: 801px) {
+body.site-app .home-logo,
+body.site-app .hub-logo,
+body.site-app .site-app-logo {
+  justify-self: start;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #111;
+  text-decoration: none;
+  letter-spacing: -0.02em;
+  display: inline-flex;
+  align-items: flex-end;
+  line-height: 1;
+  position: absolute;
+  left: max(0.5rem, calc(1rem - 1.5cm));
+  bottom: 0.05rem;
+  z-index: 3;
+  flex: 0 0 auto;
+}
 }
 
 body.site-app .bymy-logo-img,
@@ -340,8 +334,8 @@ body.site-app .bymy-logo-img--nav,
 body.site-app .home-logo .bymy-logo-img--nav,
 body.site-app .hub-logo .bymy-logo-img--nav,
 body.site-app .site-app-logo .bymy-logo-img--nav {
-  height: 48px;
-  max-width: min(190px, 29vw);
+  height: 144px;
+  max-width: min(520px, 58vw);
   width: auto;
 }
 

@@ -55,14 +55,14 @@
       href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="/css/style.css?v=noScroll1" />    <link rel="stylesheet" href="/css/hub.css?v=hubLogo72Align1" />
+    <link rel="stylesheet" href="/css/style.css?v=noScroll1" />    <link rel="stylesheet" href="/css/hub.css?v=hubHeroDemo1" />
 
-    <link rel="stylesheet" href="/css/site-app.css?v=logoNav72Align1" />
+    <link rel="stylesheet" href="/css/site-app.css?v=navGap1" />
     <link rel="stylesheet" href="/css/site-side.css?v=mwPostDesk1" />
     <link rel="stylesheet" href="/css/hub-mobile-app.css?v=tileFill3" />
     <link rel="stylesheet" href="/css/home.css?v=tileAllPages1" />
     <link rel="stylesheet" href="/css/auto-hero.css?v=searchStickyActions1" />
-    <link rel="stylesheet" href="/css/auto-desk-layout.css?v=logoNav72Align1" />
+    <link rel="stylesheet" href="/css/auto-desk-layout.css?v=searchStickyActions1" />
     <link rel="stylesheet" href="/css/listing-photo-cover.css?v=tileAllPages1" />
     <link rel="stylesheet" href="/css/listing-featured.css?v=featured2" />
     <link rel="stylesheet" href="/css/ingatlan-search.css?v=autoDrums15" />
@@ -108,14 +108,14 @@
         body.home-page.site-app:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-header-inner,
         body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-header-inner {
           display: grid !important;
-          grid-template-columns: 260px auto minmax(0, 1fr) !important;
+          grid-template-columns: 1fr auto 1fr !important;
           grid-template-areas: "logo nav actions" !important;
           align-items: center !important;
           column-gap: 20px !important;
           max-width: 1440px !important;
           margin: 0 auto !important;
           padding: 0 24px !important;
-          min-height: 80px !important;
+          min-height: 64px !important;
           flex-direction: row !important;
         }
         body.home-page.site-app:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-logo,
@@ -129,6 +129,12 @@
           bottom: auto !important;
           transform: none !important;
           z-index: 2 !important;
+        }
+        body.home-page.site-app:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-logo .bymy-logo-img--nav,
+        body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-logo .bymy-logo-img--nav {
+          height: 40px !important;
+          max-width: 140px !important;
+          width: auto !important;
         }
         body.home-page.site-app:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav,
         body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav {
@@ -229,7 +235,7 @@
         max-width: 100% !important;
       }
     </style>
-    <link rel="stylesheet" href="/css/bymy-logo-size.css?v=logoNav72Align1" />
+    <link rel="stylesheet" href="/css/bymy-logo-size.css?v=logoHalf1" />
   </head>
   <body class="home-page site-page site-app auto-desk-gyors" data-site-page="teherauto">
     <script src="/js/mw-app-shell.js?v=promoHomeOnly1"></script>

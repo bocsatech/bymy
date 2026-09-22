@@ -1,6 +1,6 @@
 import { fetchListings } from "./db-client.js?v=featured1";
 import { pickFeaturedListings } from "./home-featured-slots.js?v=featured1";
-import { createListingTileCard } from "./listing-tile.js?v=featured1";
+import { createListingTileCard } from "./listing-tile.js?v=featured2";
 import { bindListingOpen, restoreListingReturn } from "./listing-return.js?v=scrollTop1";
 
 const RAIL = document.getElementById("hub-featured-rail");

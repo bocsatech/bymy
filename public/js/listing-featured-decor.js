@@ -1,13 +1,4 @@
-/** Kiemelt lista kártya — TOP AJÁNLAT a fotón, KIEMELT a kép alatt a cím fölött. */
-export function appendListingFeaturedRibbon(container) {
-  if (!container || container.querySelector(".listing-featured-ribbon")) return;
-
-  const ribbon = document.createElement("span");
-  ribbon.className = "listing-featured-ribbon";
-  ribbon.textContent = "TOP AJÁNLAT";
-  container.append(ribbon);
-}
-
+/** Kiemelt lista kártya — KIEMELT + TOP AJÁNLAT a kép alatt, cím fölött. */
 export function createListingFeaturedBadge() {
   const badge = document.createElement("span");
   badge.className = "listing-featured-badge listing-featured-badge--under-photo";
@@ -16,15 +7,34 @@ export function createListingFeaturedBadge() {
   return badge;
 }
 
-export function listingFeaturedRibbonHtml() {
-  return `<span class="listing-featured-ribbon" aria-hidden="true">TOP AJÁNLAT</span>`;
+export function createListingFeaturedRibbon() {
+  const ribbon = document.createElement("span");
+  ribbon.className = "listing-featured-ribbon listing-featured-ribbon--under-photo";
+  ribbon.textContent = "TOP AJÁNLAT";
+  ribbon.setAttribute("aria-hidden", "true");
+  return ribbon;
 }
 
-export function listingFeaturedBadgeHtml() {
-  return `<span class="listing-featured-badge listing-featured-badge--under-photo" aria-hidden="true">KIEMELT</span>`;
+export function createListingFeaturedUnderPhotoStrip() {
+  const wrap = document.createElement("span");
+  wrap.className = "listing-featured-under-photo";
+  wrap.setAttribute("aria-hidden", "true");
+  wrap.append(createListingFeaturedBadge(), createListingFeaturedRibbon());
+  return wrap;
 }
 
-/** @deprecated csak a szalag — hub régi hívások */
+export function listingFeaturedUnderPhotoHtml() {
+  return `<span class="listing-featured-under-photo" aria-hidden="true"><span class="listing-featured-badge listing-featured-badge--under-photo">KIEMELT</span><span class="listing-featured-ribbon listing-featured-ribbon--under-photo">TOP AJÁNLAT</span></span>`;
+}
+
+/** @deprecated hub — használd createListingFeaturedUnderPhotoStrip */
 export function appendListingFeaturedDecor(container) {
-  appendListingFeaturedRibbon(container);
+  if (!container || container.querySelector(".listing-featured-under-photo")) return;
+  const parent = container.parentElement;
+  const strip = createListingFeaturedUnderPhotoStrip();
+  if (parent && container.nextSibling) {
+    parent.insertBefore(strip, container.nextSibling);
+  } else if (parent) {
+    parent.appendChild(strip);
+  }
 }

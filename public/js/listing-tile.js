@@ -1,9 +1,6 @@
 import { formatListingDisplayTitle } from "./listing-card.js";
 import { listingDetailHref } from "./listing-return.js?v=scrollTop1";
-import {
-  appendListingFeaturedDecor,
-  createListingFeaturedBadge,
-} from "./listing-featured-decor.js?v=featured2";
+import { createListingFeaturedUnderPhotoStrip } from "./listing-featured-decor.js?v=featured3";
 
 const ICON_YEAR = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M3 10h18M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>`;
 const ICON_KM = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 18 12 6l8 12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M7.5 18h9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>`;
@@ -197,14 +194,12 @@ export function createListingTileCard(item, { className = "hf-card hf-card--list
     img.referrerPolicy = "no-referrer";
     media.appendChild(img);
   }
-  if (featured) appendListingFeaturedDecor(media);
-
   const label = document.createElement("span");
   label.className = "hf-card-label";
   label.textContent = title;
 
   link.append(media);
-  if (featured) link.appendChild(createListingFeaturedBadge());
+  if (featured) link.appendChild(createListingFeaturedUnderPhotoStrip());
   link.appendChild(label);
 
   const sub = document.createElement("span");

@@ -980,7 +980,7 @@ async function handleListingsApi(req, res, pathname) {
       res,
       200,
       { listings: sanitizeListingList(listings) },
-      { "Cache-Control": "public, max-age=10, stale-while-revalidate=20" }
+      { "Cache-Control": "public, max-age=20, stale-while-revalidate=40" }
     );
     return;
   }

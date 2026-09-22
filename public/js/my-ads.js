@@ -1,10 +1,11 @@
 import {
   fetchMyListings,
+  fetchListing,
   updateListingStatusInDb,
   saveListingPhotosOrder,
   saveListingToDb,
   deleteListingFromDb,
-} from "./db-client.js?v=myAdsSablon2";
+} from "./db-client.js?v=myAdsForm1";
 import {
   DEFAULT_PHOTO_OVERLAY_ID,
   detectBymyPhotoOverlay,
@@ -465,18 +466,25 @@ export function initMyAdsPanel(root) {
       .join("");
   }
 
+  async function fullListingForm(item) {
+    const base = { ...(item.form || {}) };
+    if (Object.keys(base).length >= 8) return base;
+    const full = await fetchListing(item.id);
+    return { ...(full?.form || {}), ...base };
+  }
+
   async function persistPromoFlag(item, fieldKey, active) {
     const form = {
-      ...(item.form || {}),
+      ...(await fullListingForm(item)),
       [fieldKey]: active ? "1" : "0",
     };
     await saveListingToDb(form, item.id, { status: item.status || "feladott" });
-    if (item.form) item.form[fieldKey] = form[fieldKey];
+    item.form = { ...(item.form || {}), ...form };
   }
 
   async function persistSablonMeta(item, { active, baseUrl }) {
     const form = {
-      ...(item.form || {}),
+      ...(await fullListingForm(item)),
       photo_overlay_base_url: String(baseUrl || item.form?.photo_overlay_base_url || "").trim(),
       photo_overlay_template_id: active ? DEFAULT_PHOTO_OVERLAY_ID : null,
     };

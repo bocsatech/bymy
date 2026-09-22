@@ -26,6 +26,12 @@ import { refreshAdFormBmPickers, applyAdFormBmFieldValues } from "./ad-form-bm-p
 import { applyAdFormDesk, isAdFormDesk } from "./ad-form-desk.js?v=adFormDesk44";
 import { initKmInput, parseKmDigits, setKmInputValue } from "./km-input.js?v=kmFmt1";
 import {
+  initPriceInput,
+  parsePriceDigits,
+  setPriceInputValue,
+  PRICE_INPUT_IDS,
+} from "./price-input.js?v=priceFmt1";
+import {
   EV_FUEL_FIELD_IDS,
   fuelFieldVisibility,
   fuelProfile,
@@ -1005,6 +1011,9 @@ function collectFormData() {
   data.felszereltseg = [...form.querySelectorAll('input[name="felszereltseg"]:checked')].map((el) => el.value);
   data.egyeb_info = [...form.querySelectorAll('input[name="egyeb_info"]:checked')].map((el) => el.value);
   if (data.km != null) data.km = parseKmDigits(data.km);
+  for (const key of PRICE_INPUT_IDS) {
+    if (data[key] != null && data[key] !== "") data[key] = parsePriceDigits(data[key]);
+  }
   return data;
 }
 
@@ -1071,6 +1080,7 @@ function applyFormData(data, { fromImport = false } = {}) {
 
   for (const [key, value] of Object.entries(payload)) {
     if (key === "felszereltseg" || key === "egyeb_info" || key === "km") continue;
+    if (PRICE_INPUT_IDS.includes(key)) continue;
     const field = form.elements.namedItem(key);
     if (!field) continue;
     const appliedValue = key === "gyartmany" && value ? String(value).toUpperCase() : value;
@@ -1135,6 +1145,13 @@ function applyFormData(data, { fromImport = false } = {}) {
   if (kmInput && payload.km != null && String(payload.km).trim() !== "") {
     setKmInputValue(kmInput, payload.km);
     if (fromImport) kmInput.dataset.userEdited = "1";
+  }
+  for (const key of PRICE_INPUT_IDS) {
+    if (payload[key] == null || String(payload[key]).trim() === "") continue;
+    const priceInput = document.getElementById(key);
+    if (!priceInput) continue;
+    setPriceInputValue(priceInput, payload[key]);
+    if (fromImport) priceInput.dataset.userEdited = "1";
   }
   migratePowerFieldsFromKwIfNeeded();
   updateLeDisplay();
@@ -1953,6 +1970,10 @@ wrapMdOutlinedFields();
 bindFuelPickerSync();
 syncFuelDependentFields();
 initKmInput(document.getElementById("km"));
+for (const id of PRICE_INPUT_IDS) {
+  const priceEl = document.getElementById(id);
+  if (priceEl) initPriceInput(priceEl);
+}
 fitAllFormFields();
 stampAdFormUniformCells();
 

@@ -200,12 +200,13 @@
                   </div>
                 </div>
                 <div class="labeled-field labeled-field--power">
-                  <label for="teljesitmeny_kw">Teljesítmény:</label>
-                  <div class="suffix-field suffix-field--power">
-                    <input id="teljesitmeny_kw" name="teljesitmeny_kw" type="number" class="auto-filled" />
-                    <span id="le-display" class="power-hint" aria-live="polite"></span>
+                  <label for="teljesitmeny_le">Teljesítmény:</label>
+                  <div class="suffix-field ad-form-suffix-unit suffix-field--power">
+                    <input id="teljesitmeny_le" name="teljesitmeny_le" type="number" min="0" step="1" class="auto-filled" />
+                    <span>LE</span>
                   </div>
-                  <input type="hidden" id="teljesitmeny_le" name="teljesitmeny_le" />
+                  <span id="le-display" class="power-hint" aria-live="polite"></span>
+                  <input type="hidden" id="teljesitmeny_kw" name="teljesitmeny_kw" />
                 </div>
               </div>
               <div class="form-grid">

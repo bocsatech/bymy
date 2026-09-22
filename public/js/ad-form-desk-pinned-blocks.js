@@ -25,13 +25,13 @@ export const EV_LAYOUT_GROUP_KEYS = new Set([
 ]);
 
 /** Használtautó desk „Műszaki adatok” — admin stack és éles canvas ugyanilyen sorrendben. */
-export const DESK_MUSZAKI_CORE_FIELD_KEYS = ["uzemanyag", "hengerurtartalom", "teljesitmeny_kw"];
+export const DESK_MUSZAKI_CORE_FIELD_KEYS = ["uzemanyag", "hengerurtartalom", "teljesitmeny_le"];
 
 export const DESK_STEP2_CANONICAL_STACK = [
   "__desk_tire_sizes__",
   "uzemanyag",
   "hengerurtartalom",
-  "teljesitmeny_kw",
+  "teljesitmeny_le",
   "fogyasztas_varosi",
   "fogyasztas_orszaguti",
   "fogyasztas_kombinalt",

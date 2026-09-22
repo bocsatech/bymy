@@ -107,9 +107,9 @@ export function createAdForm(options = {}) {
   let photoSeq = 0;
 
 const AUTO_FILL_PRESETS = {
-  TESLA: { tipus: "Long Range AWD", hengerurtartalom: "", uzemanyag: "Elektromos", sebessegvalto: "Automata", hajtas: "Összkerék", teljesitmeny_kw: "258" },
-  VOLKSWAGEN: { tipus: "1.6 TDI", hengerurtartalom: "1598", uzemanyag: "Dízel", sebessegvalto: "Manuális (6 seb.)", hajtas: "Első kerék", teljesitmeny_kw: "77" },
-  TOYOTA: { tipus: "1.8 Hybrid", hengerurtartalom: "1798", uzemanyag: "Benzin/elektromos", sebessegvalto: "Fokozatmentes automata", hajtas: "Első kerék", teljesitmeny_kw: "72" },
+  TESLA: { tipus: "Long Range AWD", hengerurtartalom: "", uzemanyag: "Elektromos", sebessegvalto: "Automata", hajtas: "Összkerék", teljesitmeny_le: "351" },
+  VOLKSWAGEN: { tipus: "1.6 TDI", hengerurtartalom: "1598", uzemanyag: "Dízel", sebessegvalto: "Manuális (6 seb.)", hajtas: "Első kerék", teljesitmeny_le: "105" },
+  TOYOTA: { tipus: "1.8 Hybrid", hengerurtartalom: "1798", uzemanyag: "Benzin/elektromos", sebessegvalto: "Fokozatmentes automata", hajtas: "Első kerék", teljesitmeny_le: "98" },
 };
 
 const YEAR_SELECT_MIN = 1980;
@@ -712,18 +712,31 @@ function bindFuelPickerSync() {
   fuel._adBmHidden?.addEventListener("input", () => syncFuelDependentFields());
 }
 
+const LE_TO_KW = 1 / 1.36;
+
 function updateLeDisplay() {
-  if (!leDisplay) return;
-  const kwRaw = String(teljesitmenyKw?.value ?? "").trim();
-  const kw = Number(kwRaw);
-  if (!kwRaw || !Number.isFinite(kw) || kw <= 0) {
-    leDisplay.textContent = "";
-    if (teljesitmenyLe) teljesitmenyLe.value = "";
+  if (!teljesitmenyLe) return;
+  const leRaw = String(teljesitmenyLe.value ?? "").trim();
+  const le = Number(leRaw);
+  if (!leRaw || !Number.isFinite(le) || le <= 0) {
+    if (leDisplay) leDisplay.textContent = "";
+    if (teljesitmenyKw) teljesitmenyKw.value = "";
     return;
   }
-  const le = Math.round(kw * 1.36);
-  leDisplay.textContent = `${le.toLocaleString("hu-HU")} LE (${kw.toLocaleString("hu-HU")} kW)`;
-  if (teljesitmenyLe) teljesitmenyLe.value = String(le);
+  const kw = Math.round(le * LE_TO_KW);
+  if (leDisplay) leDisplay.textContent = `${kw.toLocaleString("hu-HU")} kW`;
+  if (teljesitmenyKw) teljesitmenyKw.value = String(kw);
+}
+
+/** Régi mentés: csak kW volt kitöltve — szerkesztéskor LE mezőbe visszaszámoljuk. */
+export function migratePowerFieldsFromKwIfNeeded() {
+  if (!teljesitmenyLe || !teljesitmenyKw) return;
+  const leRaw = String(teljesitmenyLe.value ?? "").trim();
+  if (leRaw) return;
+  const kw = Number(String(teljesitmenyKw.value ?? "").trim());
+  if (!Number.isFinite(kw) || kw <= 0) return;
+  teljesitmenyLe.value = String(Math.round(kw / LE_TO_KW));
+  updateLeDisplay();
 }
 
 function updateTitle() {
@@ -1123,6 +1136,7 @@ function applyFormData(data, { fromImport = false } = {}) {
     setKmInputValue(kmInput, payload.km);
     if (fromImport) kmInput.dataset.userEdited = "1";
   }
+  migratePowerFieldsFromKwIfNeeded();
   updateLeDisplay();
   restoreFuelSelection(payload.uzemanyag);
   scheduleBmFieldApply(payload);
@@ -1708,7 +1722,7 @@ function removePhotoOverlayFromFirst() {
   renderPhotoPreview();
 }
 
-form.querySelectorAll(".auto-filled, #tipus, #hengerurtartalom, #sebessegvalto, #hajtas, #teljesitmeny_kw").forEach((field) => {
+form.querySelectorAll(".auto-filled, #tipus, #hengerurtartalom, #sebessegvalto, #hajtas, #teljesitmeny_le").forEach((field) => {
   field?.addEventListener("input", () => {
     field.dataset.userEdited = "1";
     field.classList.remove("auto-filled");
@@ -1725,7 +1739,7 @@ hirdetesCime?.addEventListener("input", () => {
 });
 
 gyartmany?.addEventListener("change", applyAutoFill);
-teljesitmenyKw?.addEventListener("input", updateLeDisplay);
+teljesitmenyLe?.addEventListener("input", updateLeDisplay);
 
 if (mode === "wizard") {
   backBtn?.addEventListener("click", async () => {

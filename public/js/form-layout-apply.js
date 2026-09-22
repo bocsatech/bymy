@@ -8,7 +8,7 @@ import {
   TIRE_LAYOUT_GROUP_KEYS,
   insertPinnedDomBlock,
   layoutRowForPinnedBlock,
-} from "./ad-form-desk-pinned-blocks.js?v=layoutFromKv1";
+} from "./ad-form-desk-pinned-blocks.js?v=powerLeInput1";
 
 function cssEscape(value) {
   if (window.CSS?.escape) return window.CSS.escape(value);

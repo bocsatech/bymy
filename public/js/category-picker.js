@@ -217,6 +217,23 @@ function syncWizardContext(selection) {
   if (wrap && catId) setWizardCatTriggerLabel(wrap, catId);
 }
 
+function clearImmoAdWizardBoot() {
+  document.documentElement.classList.remove("immo-ad-wizard-boot");
+  try {
+    delete window.__bymyImmoWizardBoot;
+  } catch {
+    window.__bymyImmoWizardBoot = undefined;
+  }
+}
+
+function hideWizardStepsForDeskSelection(selection) {
+  const stepsBar = document.getElementById("wizard-steps-bar");
+  const deskLike =
+    isDeskVehicleSubtype(selection?.subtype) || selection?.vertical === "ingatlan";
+  if (deskLike) stepsBar?.setAttribute("hidden", "");
+  else stepsBar?.removeAttribute("hidden");
+}
+
 const pickerHandlers = {
   onVehicleSelected: null,
   onIngatlanSelected: null,
@@ -497,6 +514,7 @@ export function initCategoryPicker({
   }
 
   function showPicker() {
+    clearImmoAdWizardBoot();
     resetCategoryPickerUi();
     pickerShell?.removeAttribute("hidden");
     wizardShell?.setAttribute("hidden", "");
@@ -528,17 +546,14 @@ export function initCategoryPicker({
     pickerShell?.setAttribute("hidden", "");
     stub?.setAttribute("hidden", "");
     wizardShell?.removeAttribute("hidden");
-    if (isDeskVehicleSubtype(selection?.subtype)) {
-      stepsBar?.setAttribute("hidden", "");
-    } else {
-      stepsBar?.removeAttribute("hidden");
-    }
+    hideWizardStepsForDeskSelection(selection);
 
     try {
       pickerHandlers.onVehicleSelected?.(selection);
     } catch (error) {
       console.error("Űrlap indítás hiba:", error);
     }
+    clearImmoAdWizardBoot();
   }
 
   function showIngatlanStub(selection) {

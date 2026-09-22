@@ -61,6 +61,50 @@
             document.head.appendChild(bootStyle);
           }
         } catch (e) {}
+
+        try {
+          if (document.documentElement.classList.contains("ad-form-edit-boot")) {
+            /* szerkesztés: külön boot */
+          } else {
+            var bootParams = new URLSearchParams(location.search);
+            var bootStart = bootParams.get("start") === "1";
+            var bootContinue = bootParams.get("continue") === "1";
+            var bootVertical = String(bootParams.get("vertical") || "")
+              .trim()
+              .toLowerCase();
+            var immoSel = null;
+            if (bootStart && bootVertical === "ingatlan") {
+              var bootTipus = String(bootParams.get("tipus") || "")
+                .trim()
+                .toLowerCase();
+              var immoLabels = {
+                elado: "Eladó Ingatlanok",
+                kiado: "Kiadó Ingatlanok",
+                airbnb: "Airbnb Ingatlanok",
+              };
+              immoSel = {
+                vertical: "ingatlan",
+                subtype: "ingatlan",
+                label: immoLabels[bootTipus] || "Ingatlan",
+                immoTipus: bootTipus && immoLabels[bootTipus] ? [bootTipus] : [],
+                immoKategoria: [],
+              };
+            } else if (bootContinue) {
+              try {
+                var storedRaw = JSON.parse(
+                  sessionStorage.getItem("bymy-hirdetes-category") || "null"
+                );
+                if (storedRaw && storedRaw.v === 4 && storedRaw.vertical === "ingatlan") {
+                  immoSel = storedRaw;
+                }
+              } catch (bootStoreErr) {}
+            }
+            if (immoSel) {
+              document.documentElement.classList.add("immo-ad-wizard-boot");
+              window.__bymyImmoWizardBoot = immoSel;
+            }
+          }
+        } catch (bootErr) {}
       })();
     </script>
     <meta charset="utf-8" />
@@ -102,7 +146,7 @@
     <link rel="stylesheet" href="/css/automax.css?v=automax20260720homelist" />
     <link rel="stylesheet" href="/css/site-app.css?v=immoAdFormNum1" />
     <link rel="stylesheet" href="/css/ingatlan-search.css?v=immoAdFormMenu1" />
-    <link rel="stylesheet" href="/css/ad-form-desk.css?v=immoAdFormBoot2" />
+    <link rel="stylesheet" href="/css/ad-form-desk.css?v=immoAdFormBoot3" />
     <link rel="stylesheet" href="/css/ad-form-address.css?v=addressBlock3" />
     <link rel="stylesheet" href="/css/ad-form-bm-pickers.css?v=deskTireFit1" />
     <link rel="stylesheet" href="/css/site-side.css?v=mwPostDesk1" />
@@ -326,6 +370,36 @@
               <input type="hidden" id="jarmu_kategoria" name="jarmu_kategoria" />
               <input type="hidden" id="ingatlan_tipus" name="ingatlan_tipus" />
               <input type="hidden" id="ingatlan_kategoria" name="ingatlan_kategoria" />
+              <script>
+                (function () {
+                  var sel = window.__bymyImmoWizardBoot;
+                  if (!sel || sel.vertical !== "ingatlan") return;
+                  var map = {
+                    hirdetes_vertical: sel.vertical || "ingatlan",
+                    hirdetes_alkategoria: sel.subtype || "ingatlan",
+                    jarmu_kategoria: sel.subtype || "ingatlan",
+                    ingatlan_tipus: (sel.immoTipus || []).join(","),
+                    ingatlan_kategoria: (sel.immoKategoria || []).join(","),
+                  };
+                  for (var id in map) {
+                    var el = document.getElementById(id);
+                    if (el) el.value = map[id];
+                  }
+                  var form = document.getElementById("ad-form");
+                  if (form) form.classList.add("ad-form--ingatlan");
+                  document.body.classList.add("ad-vertical-ingatlan", "ad-form-desk-active");
+                  var pickerShell = document.getElementById("category-picker-shell");
+                  var stub = document.getElementById("ingatlan-stub");
+                  var wizardShell = document.getElementById("ad-wizard-shell");
+                  var contextBar = document.getElementById("wizard-context-bar");
+                  var stepsBar = document.getElementById("wizard-steps-bar");
+                  pickerShell?.setAttribute("hidden", "");
+                  stub?.setAttribute("hidden", "");
+                  wizardShell?.removeAttribute("hidden");
+                  contextBar?.removeAttribute("hidden");
+                  stepsBar?.setAttribute("hidden", "");
+                })();
+              </script>
 
               <div class="form-grid">
                 <div class="field-row full field-row--vehicle-year field-row--year-km">
@@ -1000,7 +1074,7 @@
     </main>
 
     <script src="/js/site-avatar-menu.js?v=avatarSync1" type="module"></script>
-    <script src="/js/hirdetes-category-boot.js?v=pickerBoot2" type="module"></script>
+    <script src="/js/hirdetes-category-boot.js?v=pickerBoot3" type="module"></script>
     <script src="/js/app.js?v=deskMountFirst2" type="module"></script>
       <script src="/js/nav-counts.js?v=navCount4" type="module"></script>
       <script src="/js/theme.js?v=willhabenHdr1" type="module"></script>

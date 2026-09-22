@@ -1234,39 +1234,23 @@ async function reloadIngatlanSchemaLayout(root, opts) {
   if (prevVariant === nextVariant) return null;
 
   const saved = readForm(root);
-  const immoRoot = root.closest("#ingatlan-fields");
-  const adFormPending = Boolean(immoRoot?.closest("#ad-form"));
-  if (adFormPending) {
-    immoRoot.classList.add("immo-fields-pending");
-    immoRoot.classList.remove("immo-fields-ready");
-    immoRoot.setAttribute("aria-busy", "true");
-  }
-  try {
-    clearIngatlanWheelSchemaCache();
-    const schema = await fetchIngatlanWheelSchema(nextVariant, { force: true });
-    root.dataset.activeSchemaVariant = nextVariant;
+  clearIngatlanWheelSchemaCache();
+  const schema = await fetchIngatlanWheelSchema(nextVariant, { force: true });
+  root.dataset.activeSchemaVariant = nextVariant;
 
-    const mainHost = root.querySelector("#immo-schema-main") || document.getElementById("immo-schema-main");
-    const moreHost = root.querySelector("#immo-schema-more") || document.getElementById("immo-schema-more");
-    renderIngatlanSchemaHosts(mainHost, moreHost, schema, surface);
-    ensureTipus2Field(root, { enable: tipus2Enabled });
-    setupMobileDualRanges(mainHost);
-    setupMobileDualRanges(moreHost);
-    wireTelepulesSuggestIn(root);
-    wireTelepulesClear(root);
-    resetAdFormIngatlanPickers(root);
-    setupIngatlanSearchWheels(root, { tipusOpts, tipus2Enabled, defaultUzletag });
-    restoreIngatlanSearchValues(root, saved);
-    applyAdFormImmoDeskLayout(root);
-    return schema;
-  } finally {
-    if (adFormPending && immoRoot) {
-      immoRoot.classList.remove("immo-fields-pending");
-      immoRoot.classList.add("immo-fields-ready");
-      immoRoot.removeAttribute("aria-busy");
-      window.dispatchEvent(new Event("ad-form-immo-fields-ready"));
-    }
-  }
+  const mainHost = root.querySelector("#immo-schema-main") || document.getElementById("immo-schema-main");
+  const moreHost = root.querySelector("#immo-schema-more") || document.getElementById("immo-schema-more");
+  renderIngatlanSchemaHosts(mainHost, moreHost, schema, surface);
+  ensureTipus2Field(root, { enable: tipus2Enabled });
+  setupMobileDualRanges(mainHost);
+  setupMobileDualRanges(moreHost);
+  wireTelepulesSuggestIn(root);
+  wireTelepulesClear(root);
+  resetAdFormIngatlanPickers(root);
+  setupIngatlanSearchWheels(root, { tipusOpts, tipus2Enabled, defaultUzletag });
+  restoreIngatlanSearchValues(root, saved);
+  applyAdFormImmoDeskLayout(root);
+  return schema;
 }
 
 export async function initIngatlanSearch({

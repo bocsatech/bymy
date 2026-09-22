@@ -39,7 +39,14 @@ function loadOrCreateSecret() {
 }
 
 function vercelEnvSet(key, value) {
-  run(`npx --yes vercel env rm ${key} production --yes`, null);
+  try {
+    execSync(`npx --yes vercel env rm ${key} production --yes`, {
+      cwd: ROOT,
+      stdio: "ignore",
+    });
+  } catch {
+    /* first add */
+  }
   run(`npx --yes vercel env add ${key} production`, value);
 }
 

@@ -51,5 +51,9 @@ export function pickFeaturedListings(items, configuredIds = readConfiguredFeatur
 }
 
 export function featuredListingIdSet(items, configuredIds = readConfiguredFeaturedIds()) {
-  return new Set(pickFeaturedListings(items, configuredIds).map((item) => Number(item.id)));
+  const fromSlots = pickFeaturedListings(items, configuredIds).map((item) => Number(item.id));
+  const fromPromo = (Array.isArray(items) ? items : [])
+    .filter((item) => String(item?.form?.promo_kiemelt ?? "").trim() === "1")
+    .map((item) => Number(item.id));
+  return new Set([...fromSlots, ...fromPromo].filter((n) => Number.isFinite(n) && n > 0));
 }

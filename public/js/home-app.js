@@ -1,5 +1,6 @@
 import { fetchListings } from "./db-client.js?v=teherVert1";
-import { createHomeGridCard, initHomeGridCardPhotos } from "./home-grid-card.js?v=featured3";
+import { createHomeGridCard, initHomeGridCardPhotos } from "./home-grid-card.js?v=featured4";
+import { promoKiemeltActive, promoTopAjanlatActive } from "./listing-promo.js?v=promo1";
 import {
   emptyFilters,
   filterListingsBySidebar,
@@ -219,7 +220,9 @@ function renderListings(items) {
 
   for (const item of filtered) {
     const card = createHomeGridCard(item, {
-      featured: featuredListingIds.has(Number(item.id)),
+      featured: featuredListingIds.has(Number(item.id)) || promoKiemeltActive(item),
+      topOffer: promoTopAjanlatActive(item),
+      configuredFeaturedIds: featuredListingIds,
     });
     card.__bymyListing = item;
     gridTrack.appendChild(card);

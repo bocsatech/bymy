@@ -1,6 +1,6 @@
 import { fetchListings } from "./db-client.js?v=featured1";
 import { pickFeaturedListings } from "./home-featured-slots.js?v=featured1";
-import { createListingTileCard } from "./listing-tile.js?v=featured2";
+import { createListingTileCard } from "./listing-tile.js?v=featured4";
 import { bindListingOpen, restoreListingReturn } from "./listing-return.js?v=scrollTop1";
 
 const RAIL = document.getElementById("hub-featured-rail");
@@ -25,7 +25,7 @@ async function init() {
     }
 
     for (const item of picked) {
-      RAIL.appendChild(createListingTileCard(item, { featured: true }));
+      RAIL.appendChild(createListingTileCard(item, { featured: true, configuredFeaturedIds: new Set(picked.map((r) => Number(r.id))) }));
     }
 
     bindListingOpen(RAIL);

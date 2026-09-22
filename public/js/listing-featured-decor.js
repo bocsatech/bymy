@@ -15,16 +15,30 @@ export function createListingFeaturedRibbon() {
   return ribbon;
 }
 
-export function createListingFeaturedUnderPhotoStrip() {
+export function createListingFeaturedUnderPhotoStrip({ kiemelt = true, topOffer = true } = {}) {
   const wrap = document.createElement("span");
   wrap.className = "listing-featured-under-photo";
   wrap.setAttribute("aria-hidden", "true");
-  wrap.append(createListingFeaturedBadge(), createListingFeaturedRibbon());
+  if (kiemelt) wrap.append(createListingFeaturedBadge());
+  if (topOffer) wrap.append(createListingFeaturedRibbon());
+  if (!wrap.childNodes.length) return null;
   return wrap;
 }
 
-export function listingFeaturedUnderPhotoHtml() {
-  return `<span class="listing-featured-under-photo" aria-hidden="true"><span class="listing-featured-badge listing-featured-badge--under-photo">KIEMELT</span><span class="listing-featured-ribbon listing-featured-ribbon--under-photo">TOP AJÁNLAT</span></span>`;
+export function listingFeaturedUnderPhotoHtml({ kiemelt = true, topOffer = true } = {}) {
+  const parts = [];
+  if (kiemelt) {
+    parts.push(
+      `<span class="listing-featured-badge listing-featured-badge--under-photo">KIEMELT</span>`
+    );
+  }
+  if (topOffer) {
+    parts.push(
+      `<span class="listing-featured-ribbon listing-featured-ribbon--under-photo">TOP AJÁNLAT</span>`
+    );
+  }
+  if (!parts.length) return "";
+  return `<span class="listing-featured-under-photo" aria-hidden="true">${parts.join("")}</span>`;
 }
 
 /** @deprecated hub — használd createListingFeaturedUnderPhotoStrip */

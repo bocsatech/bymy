@@ -12,6 +12,11 @@ import {
 } from "./listing-photo-overlay.js?v=photoOverlayDetect1";
 import { compressListingPhotos } from "./listing-photo-compress.js?v=myAds1";
 import { bindListingOpen, restoreListingReturn } from "./listing-return.js?v=scrollTop1";
+import {
+  promoKiemeltActive,
+  promoTopAjanlatActive,
+  listingShowsKiemeltDecor,
+} from "./listing-promo.js?v=promo1";
 
 const ICON_CAM = `<svg class="myads-ico" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="13.5" r="3" stroke="currentColor" stroke-width="1.6"/><path d="M8 7 9.5 5h5L15 7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>`;
 const ICON_PIN = `<svg class="myads-ico" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 21s7-5.2 7-11a7 7 0 1 0-14 0c0 5.8 7 11 7 11Z" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="10" r="2.2" stroke="currentColor" stroke-width="1.5"/></svg>`;
@@ -195,7 +200,7 @@ export function initMyAdsPanel(root) {
     for (const item of items) {
       if (isActive(item)) active += 1;
       else inactive += 1;
-      if (featured.has(Number(item.id))) kiemelt += 1;
+      if (listingShowsKiemeltDecor(item, featured)) kiemelt += 1;
       if (hasSablon(item)) sablon += 1;
     }
     return { active, inactive, kiemelt, sablon, all: items.length };
@@ -206,7 +211,7 @@ export function initMyAdsPanel(root) {
     return items.filter((item) => {
       if (filter === "active" && !isActive(item)) return false;
       if (filter === "inactive" && isActive(item)) return false;
-      if (filter === "featured" && !featured.has(Number(item.id))) return false;
+      if (filter === "featured" && !listingShowsKiemeltDecor(item, featured)) return false;
       if (filter === "sablon" && !hasSablon(item)) return false;
       return true;
     });
@@ -278,7 +283,9 @@ export function initMyAdsPanel(root) {
     const app = Number(views.app || item.views_app || 0);
     const active = isActive(item);
     const featuredIds = readFeaturedIdSet();
-    const isFeatured = featuredIds.has(Number(item.id));
+    const isFeatured = listingShowsKiemeltDecor(item, featuredIds);
+    const kiemeltPromoOn = promoKiemeltActive(item);
+    const isTopOffer = promoTopAjanlatActive(item);
     const sablonOn = hasSablon(item);
     const edit = editHref(item.id);
     const price = escapeHtml(item.preview?.price || "—");
@@ -322,8 +329,8 @@ export function initMyAdsPanel(root) {
         </div>
         <div class="myads-promo-strip" role="group" aria-label="Promóció">
           <div class="myads-promo-btns">
-            <button type="button" class="myads-promo-btn${isFeatured ? " is-on" : ""}" data-promo="kiemelt" data-id="${item.id}">${ICON_STAR}<span>Kiemelés</span></button>
-            <button type="button" class="myads-promo-btn" data-promo="top" data-id="${item.id}"><span>TOP ajánlat</span></button>
+            <button type="button" class="myads-promo-btn${kiemeltPromoOn ? " is-on" : ""}" data-promo="kiemelt" data-id="${item.id}">${ICON_STAR}<span>Kiemelés</span></button>
+            <button type="button" class="myads-promo-btn${isTopOffer ? " is-on" : ""}" data-promo="top" data-id="${item.id}"><span>TOP ajánlat</span></button>
             <a class="myads-promo-btn myads-promo-btn--link" href="${escapeHtml(edit)}">${ICON_EYE}<span>Sablon</span></a>
           </div>
         </div>
@@ -382,6 +389,15 @@ export function initMyAdsPanel(root) {
         `;
       })
       .join("");
+  }
+
+  async function persistPromoFlag(item, fieldKey, active) {
+    const form = {
+      ...(item.form || {}),
+      [fieldKey]: active ? "1" : "0",
+    };
+    await saveListingToDb(form, item.id, { status: item.status || "feladott" });
+    if (item.form) item.form[fieldKey] = form[fieldKey];
   }
 
   async function persistSablonMeta(item, { active, baseUrl }) {
@@ -468,8 +484,25 @@ export function initMyAdsPanel(root) {
       btn.addEventListener("click", () => openPhotos(btn.dataset.photos));
     });
     root.querySelectorAll("[data-promo='kiemelt'], [data-promo='top']").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        alert("A Kiemelés és TOP ajánlat beállítása hamarosan elérhető a fiókodból.");
+      btn.addEventListener("click", async () => {
+        const id = Number(btn.dataset.id);
+        const item = items.find((row) => Number(row.id) === id);
+        if (!item) return;
+        const kind = btn.dataset.promo;
+        const fieldKey = kind === "top" ? "promo_top_ajanlat" : "promo_kiemelt";
+        const wasOn = kind === "top" ? promoTopAjanlatActive(item) : promoKiemeltActive(item);
+        const wantOn = !wasOn;
+        btn.disabled = true;
+        btn.classList.add("is-busy");
+        try {
+          await persistPromoFlag(item, fieldKey, wantOn);
+          await reload();
+        } catch (error) {
+          alert(error.message ?? "A promó mentése sikertelen.");
+        } finally {
+          btn.disabled = false;
+          btn.classList.remove("is-busy");
+        }
       });
     });
     root.querySelectorAll("[data-sablon-toggle]").forEach((input) => {

@@ -11,7 +11,8 @@ import {
   addParkplatzItem,
   removeParkplatzItem,
 } from "./fok-data.js?v=parkThumb1";
-import { listingFeaturedUnderPhotoHtml } from "./listing-featured-decor.js?v=featured3";
+import { listingFeaturedUnderPhotoHtml } from "./listing-featured-decor.js?v=featured4";
+import { listingShowsKiemeltDecor, promoTopAjanlatActive } from "./listing-promo.js?v=promo1";
 
 function upgradeHaThumbClient(url) {
   let s = String(url || "").trim();
@@ -93,9 +94,12 @@ function buildPhotoMarkup(urls) {
   return `<div class="home-grid-card-photo-track is-multi" tabindex="0" role="group" aria-label="Hirdetés képei">${slides}</div>`;
 }
 
-export function createHomeGridCard(item, { featured = false } = {}) {
+export function createHomeGridCard(item, { featured = false, topOffer = false, configuredFeaturedIds = null } = {}) {
+  const showKiemelt =
+    featured || listingShowsKiemeltDecor(item, configuredFeaturedIds);
+  const showTop = topOffer || promoTopAjanlatActive(item);
   const card = document.createElement("article");
-  card.className = featured ? "home-grid-card home-grid-card--featured" : "home-grid-card";
+  card.className = showKiemelt ? "home-grid-card home-grid-card--featured" : "home-grid-card";
   card.dataset.listingId = String(item.id);
   card.setAttribute("role", "listitem");
 
@@ -153,7 +157,7 @@ export function createHomeGridCard(item, { featured = false } = {}) {
       </button>
     </div>
     <a class="home-grid-card-body" href="${escapeHtml(detailHref)}">
-      ${featured ? listingFeaturedUnderPhotoHtml() : ""}
+      ${showKiemelt || showTop ? listingFeaturedUnderPhotoHtml({ kiemelt: showKiemelt, topOffer: showTop }) : ""}
       <h2 class="home-grid-card-title">${escapeHtml(title)}</h2>
       ${desk && subtitle ? `<p class="home-grid-card-sub">${escapeHtml(subtitle)}</p>` : ""}
       <strong class="home-grid-card-price">${escapeHtml(price)}</strong>

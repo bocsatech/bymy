@@ -65,6 +65,20 @@
     </script>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <style id="immo-ad-form-critical">
+      body[data-site-page="hirdetesfeladas"] #ingatlan-fields.immo-fields-pending,
+      body[data-site-page="hirdetesfeladas"] #ad-form:has(#ingatlan-fields.immo-fields-pending) #ad-form-desk-shell {
+        visibility: hidden !important;
+        pointer-events: none !important;
+      }
+      body[data-site-page="hirdetesfeladas"] #ad-form:has(#ingatlan-fields) .immo-schema-grid {
+        grid-template-columns: minmax(0, 1fr) !important;
+      }
+      body[data-site-page="hirdetesfeladas"] #ad-form:has(#ingatlan-fields) .immo-schema-cell,
+      body[data-site-page="hirdetesfeladas"] #ad-form:has(#ingatlan-fields) .immo-dual-range-block {
+        grid-column: 1 / -1 !important;
+      }
+    </style>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext x='16' y='22' text-anchor='middle' font-size='14' font-family='system-ui,sans-serif' font-weight='700'%3EB%3C/text%3E%3C/svg%3E" type="image/svg+xml" />
     <meta name="bymy-version" content="yearKmNarrow3" />
     <title>Hirdetésfeladás — Bymy</title>
@@ -75,7 +89,7 @@
     <link rel="stylesheet" href="/css/automax.css?v=automax20260720homelist" />
     <link rel="stylesheet" href="/css/site-app.css?v=immoAdFormNum1" />
     <link rel="stylesheet" href="/css/ingatlan-search.css?v=immoAdFormMenu1" />
-    <link rel="stylesheet" href="/css/ad-form-desk.css?v=immoAdFormNum1" />
+    <link rel="stylesheet" href="/css/ad-form-desk.css?v=immoAdFormBoot1" />
     <link rel="stylesheet" href="/css/ad-form-address.css?v=addressBlock3" />
     <link rel="stylesheet" href="/css/ad-form-bm-pickers.css?v=deskTireFit1" />
     <link rel="stylesheet" href="/css/site-side.css?v=mwPostDesk1" />
@@ -977,6 +991,6 @@
     <script src="/js/app.js?v=deskMountFirst2" type="module"></script>
       <script src="/js/nav-counts.js?v=navCount4" type="module"></script>
       <script src="/js/theme.js?v=willhabenHdr1" type="module"></script>
-    <script src="/js/form-layout-apply.js?v=immoAdFormDesk2" type="module"></script>
+    <script src="/js/form-layout-apply.js?v=immoAdFormBoot1" type="module"></script>
 </body>
 </html>

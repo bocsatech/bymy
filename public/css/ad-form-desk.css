@@ -10,6 +10,17 @@ body.site-app[data-site-page="hirdetesfeladas"] #wizard-steps-bar {
   display: none !important;
 }
 
+body.site-app[data-site-page="hirdetesfeladas"] #ingatlan-fields.immo-fields-pending {
+  visibility: hidden !important;
+  pointer-events: none !important;
+  min-height: 8rem;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form:has(#ingatlan-fields.immo-fields-pending) #ad-form-desk-shell {
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
 /* Ingatlan hirdetésfeladás: egy oszlop, teljes szélesség (ne a kereső 12 oszlopos rácsa) */
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form:has(#ingatlan-fields) .immo-search-panel,
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form:has(#ingatlan-fields) .immo-search-form,

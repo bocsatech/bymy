@@ -3,7 +3,7 @@ import { normalizeIngatlanUzletag, INGATLAN_LAKAS_TIPUS, INGATLAN_LAKAS_TIPUS_AI
 import {
   initIngatlanSearch,
   readIngatlanSearchForm,
-} from "./ingatlan-search.js?v=immoAdFormDesk2";
+} from "./ingatlan-search.js?v=immoAdFormBoot1";
 import { fetchIngatlanWheelSchema } from "./ingatlan-wheel-schema.js?v=immoAdFormDesk2";
 import { wireTelepulesSuggestIn } from "./telepules-suggest.js?v=telepClose1";
 
@@ -40,6 +40,9 @@ export async function ensureIngatlanFormFields(form) {
   const variant = schemaVariantFromImmoTip(tip);
   const existing = form.querySelector("#ingatlan-fields");
   if (existing?.dataset.schemaReady === "1" && existing.dataset.schemaVariant === variant) {
+    existing.classList.add("immo-fields-ready");
+    existing.classList.remove("immo-fields-pending");
+    existing.removeAttribute("aria-busy");
     return existing;
   }
 
@@ -52,8 +55,9 @@ export async function ensureIngatlanFormFields(form) {
 
   const root = document.createElement("div");
   root.id = "ingatlan-fields";
-  root.className = "ingatlan-fields";
+  root.className = "ingatlan-fields immo-fields-pending";
   root.setAttribute("data-ingatlan-only", "1");
+  root.setAttribute("aria-busy", "true");
   root.dataset.schemaVariant = variant;
 
   const uz = defaultUzletagFromTip(tip);
@@ -80,30 +84,37 @@ export async function ensureIngatlanFormFields(form) {
   host.prepend(root);
 
   const searchRoot = root.querySelector("#immo-search-form");
-  const schema = await fetchIngatlanWheelSchema(variant, { force: true });
-  searchRoot.dataset.activeSchemaVariant = variant;
-  await initIngatlanSearch({
-    form: searchRoot,
-    schema,
-    surface: "post",
-    defaultUzletag: defaultUzletagFromTip(tip),
-    lakasTipusOptions: tip === "airbnb" ? INGATLAN_LAKAS_TIPUS_AIRBNB : INGATLAN_LAKAS_TIPUS,
-    enableTipus2: tip !== "airbnb",
-    onSearch: () => {},
-  });
+  try {
+    const schema = await fetchIngatlanWheelSchema(variant, { force: true });
+    searchRoot.dataset.activeSchemaVariant = variant;
+    await initIngatlanSearch({
+      form: searchRoot,
+      schema,
+      surface: "post",
+      defaultUzletag: defaultUzletagFromTip(tip),
+      lakasTipusOptions: tip === "airbnb" ? INGATLAN_LAKAS_TIPUS_AIRBNB : INGATLAN_LAKAS_TIPUS,
+      enableTipus2: tip !== "airbnb",
+      onSearch: () => {},
+    });
 
-  root.querySelectorAll('[data-schema-field="keresesi_hely"] .immo-label, label[data-schema-field="keresesi_hely"] .immo-label').forEach((el) => {
-    el.textContent = "Település";
-  });
-  const helyInput = root.querySelector('#immo-keresesi_hely, [name="keresesi_hely"]');
-  if (helyInput) {
-    helyInput.setAttribute("placeholder", "Település neve");
-    helyInput.setAttribute("aria-label", "Település");
+    root.querySelectorAll('[data-schema-field="keresesi_hely"] .immo-label, label[data-schema-field="keresesi_hely"] .immo-label').forEach((el) => {
+      el.textContent = "Település";
+    });
+    const helyInput = root.querySelector('#immo-keresesi_hely, [name="keresesi_hely"]');
+    if (helyInput) {
+      helyInput.setAttribute("placeholder", "Település neve");
+      helyInput.setAttribute("aria-label", "Település");
+    }
+    wireTelepulesSuggestIn(root);
+
+    root.dataset.schemaReady = "1";
+    return root;
+  } finally {
+    root.classList.remove("immo-fields-pending");
+    root.classList.add("immo-fields-ready");
+    root.removeAttribute("aria-busy");
+    window.dispatchEvent(new Event("ad-form-immo-fields-ready"));
   }
-  wireTelepulesSuggestIn(root);
-
-  root.dataset.schemaReady = "1";
-  return root;
 }
 
 function readVertical(form) {

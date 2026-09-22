@@ -71,6 +71,12 @@ function isIngatlanAdForm(form) {
   return currentSubtype(form) === "ingatlan";
 }
 
+function ingatlanFieldsNotReady(form) {
+  if (!isIngatlanAdForm(form)) return false;
+  const root = form.querySelector("#ingatlan-fields");
+  return !root?.classList.contains("immo-fields-ready");
+}
+
 function isAdFormDesk(form) {
   return isDeskAdSubtype(currentSubtype(form));
 }
@@ -544,6 +550,12 @@ function applyAdFormDesk({ openStep = null, scrollToAccordion = null } = {}) {
 
   const desk = isAdFormDesk(form);
   const shell = form.querySelector("#ad-form-desk-shell");
+  if (desk && ingatlanFieldsNotReady(form)) {
+    setDeskActive(false);
+    if (shell) shell.hidden = true;
+    return;
+  }
+
   setDeskActive(desk);
 
   if (!desk) {
@@ -722,6 +734,7 @@ window.addEventListener("ad-form-layout-refresh", () => {
   }, 200);
 });
 window.addEventListener("ad-form-ready", () => applyAdFormDesk());
+window.addEventListener("ad-form-immo-fields-ready", () => applyAdFormDesk());
 window.addEventListener("ad-form-equipment-rendered", () => {
   const form = document.getElementById("ad-form");
   if (form && isAdFormDesk(form)) {

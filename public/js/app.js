@@ -9,7 +9,7 @@ import { createAdForm } from "./form-core.js?v=submitBtn1";
 import { applyImportedVehicleToSelects } from "./vehicle-catalog-client.js?v=importVehicle1";
 import { initTireSizes } from "./tire-sizes-ui.js";
 import { initPhoneLanguages } from "./phone-lang-ui.js";
-import { initCategoryPicker } from "./category-picker.js?v=pickerBoot2";
+import { initCategoryPicker } from "./category-picker.js?v=rowWidthStable3";
 import { applyAdFormDesk, clearAdFormEditBoot, isDeskVehicleSubtype } from "./ad-form-desk.js?v=adFormDesk44";
 import {
   requireAuthForPage,
@@ -286,7 +286,7 @@ const categoryPicker = initCategoryPicker({
       applyListingAddressFromProfileSync(adForm);
       applyListingAddressFromProfile(adForm).catch(() => {});
       window.dispatchEvent(new Event("ad-form-sync-location"));
-      const { ensureAdFormLayoutReady } = await import("./form-layout-apply.js?v=rowWidthStable2");
+      const { ensureAdFormLayoutReady } = await import("./form-layout-apply.js?v=rowWidthStable3");
       await ensureAdFormLayoutReady();
       applyAdFormDesk({ openStep: 1, scrollToAccordion: "alap" });
     } catch (error) {

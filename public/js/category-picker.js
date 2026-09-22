@@ -525,28 +525,25 @@ export function initCategoryPicker({
       if (!ok) return;
     }
 
-    if (isDeskVehicleSubtype(selection?.subtype)) {
-      try {
-        const { ensureAdFormLayoutReady } = await import("./form-layout-apply.js?v=rowWidthStable2");
-        await ensureAdFormLayoutReady();
-      } catch (error) {
-        console.warn("Űrlap layout előkészítés:", error);
-      }
-    }
+    const deskWizard = isDeskVehicleSubtype(selection?.subtype);
 
     pickerShell?.setAttribute("hidden", "");
     stub?.setAttribute("hidden", "");
     wizardShell?.removeAttribute("hidden");
-    if (isDeskVehicleSubtype(selection?.subtype)) {
+    if (deskWizard) {
+      wizardShell?.classList.add("ad-wizard-preparing");
       stepsBar?.setAttribute("hidden", "");
     } else {
+      wizardShell?.classList.remove("ad-wizard-preparing");
       stepsBar?.removeAttribute("hidden");
     }
 
     try {
-      pickerHandlers.onVehicleSelected?.(selection);
+      await pickerHandlers.onVehicleSelected?.(selection);
     } catch (error) {
       console.error("Űrlap indítás hiba:", error);
+    } finally {
+      wizardShell?.classList.remove("ad-wizard-preparing");
     }
   }
 

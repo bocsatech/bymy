@@ -501,7 +501,6 @@ function clearAdFormEditBoot() {
 function applyAdFormDesk({ openStep = null, scrollToAccordion = null } = {}) {
   const form = document.getElementById("ad-form");
   if (!form || form.closest("#ad-wizard-shell")?.hidden) {
-    document.body.classList.remove("ad-form-desk-mount");
     setDeskActive(false);
     if (form) teardownDeskColumns(form);
     return;
@@ -512,7 +511,6 @@ function applyAdFormDesk({ openStep = null, scrollToAccordion = null } = {}) {
   setDeskActive(desk);
 
   if (!desk) {
-    document.body.classList.remove("ad-form-desk-mount");
     teardownDeskColumns(form);
     if (shell) {
       shell.hidden = true;
@@ -529,12 +527,11 @@ function applyAdFormDesk({ openStep = null, scrollToAccordion = null } = {}) {
 
   bindDeskEvents();
   form.classList.add("ad-form-desk-layout");
-  mountDeskPanels(form);
-  document.body.classList.remove("ad-form-desk-mount");
   removeLegacyKepekAccordion(form);
   ensureTipsColumn(form);
   ensureCenterColumn(form);
   migrateLegacyDeskColumns(form);
+  mountDeskPanels(form);
   restackCanvasItems(form);
   if (shell) shell.hidden = false;
 

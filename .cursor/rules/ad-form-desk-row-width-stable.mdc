@@ -1,0 +1,19 @@
+---
+description: Hirdetésfeladás desk sor szélesség — ne változtasd magadtól
+alwaysApply: true
+---
+
+# Ad form desk: sor szélesség és megjelenés
+
+Referencia állapot: commit **`4c8de78`** logika (reggeli desk kinézet).
+
+## Rögzített értékek (ne módosítsd explicit kérés nélkül)
+
+- CSS: `--ad-desk-cell-trim: 1.5cm`, `--ad-desk-cell-span: calc(100% - var(--ad-desk-cell-trim))`
+- JS: `AD_FORM_DESK_ROW_WIDTH = "calc(100% - 1.5cm)"` in `form-layout-apply.js`
+- Ne vezess be új `ad-form-ui-ready`, `ad-form-desk-mount`, panel-elrejtő CSS-t vagy layout-FOUC kísérletet a hirdetésfeladás űrlapon.
+
+## Engedett
+
+- Bugfix, ami **nem** érinti a desk cella szélességet, accordion mount sorrendet, vagy a layout canvas grid megjelenését.
+- Ha a felhasználó **kifejezetten** kéri a sor szélesség vagy desk megjelenés változtatását.

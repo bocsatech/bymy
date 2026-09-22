@@ -497,6 +497,7 @@ export function initCategoryPicker({
   }
 
   function showPicker() {
+    document.body.classList.remove("ad-form-ui-ready");
     resetCategoryPickerUi();
     pickerShell?.removeAttribute("hidden");
     wizardShell?.setAttribute("hidden", "");
@@ -525,6 +526,7 @@ export function initCategoryPicker({
       if (!ok) return;
     }
 
+    document.body.classList.remove("ad-form-ui-ready");
     pickerShell?.setAttribute("hidden", "");
     stub?.setAttribute("hidden", "");
     wizardShell?.removeAttribute("hidden");

@@ -1,4 +1,10 @@
 /* Közös desk jármű űrlap — accordion menü, mezők, kép/leírás (mobil + desktop) */
+
+/* Ne villogjon a nyers grid a layout API befejezéséig (reggeli desk kinézet megmarad) */
+body.site-app[data-site-page="hirdetesfeladas"]:not(.ad-form-ui-ready) #ad-wizard-shell:not([hidden]) .automax-main {
+  visibility: hidden;
+}
+
 html.ad-form-edit-boot body[data-site-page="hirdetesfeladas"] #category-picker-shell,
 html.ad-form-edit-boot body[data-site-page="hirdetesfeladas"] #ad-wizard-shell,
 html.ad-form-edit-boot body[data-site-page="hirdetesfeladas"] #wizard-steps-bar,

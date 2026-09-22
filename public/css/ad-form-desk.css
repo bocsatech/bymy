@@ -1,7 +1,7 @@
 /* Közös desk jármű űrlap — accordion menü, mezők, kép/leírás (mobil + desktop) */
 
-/* Nyers 12 oszlopos grid csak a shellben jelenjen meg (nincs Gumi méret villanás) */
-body.site-app[data-site-page="hirdetesfeladas"] #ad-wizard-shell:not([hidden]) #ad-form:not(.ad-form-desk-layout) .step-panel {
+/* Nyers grid: csak a form gyerekeként lévő panelek (shell előtt), ne a shellben lévők */
+body.site-app[data-site-page="hirdetesfeladas"] #ad-wizard-shell:not([hidden]) #ad-form:not(.ad-form-desk-layout) > .step-panel {
   display: none !important;
 }
 

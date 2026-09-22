@@ -276,10 +276,10 @@ const categoryPicker = initCategoryPicker({
     try {
       const api = ensureFormReady();
       if (!editing) api?.resetForm?.({ fresh: true });
-      applyAdFormDesk({ openStep: 1, scrollToAccordion: "alap" });
       api?.markTouched?.();
       const sel = categoryPicker?.getSelection?.();
       if (sel) categoryPicker?.syncWizardContext?.(sel);
+      applyAdFormDesk({ openStep: 1, scrollToAccordion: "alap" });
       api?.syncKisteherFields?.();
       phoneLanguages?.syncLanguages?.();
       tireSizes?.syncRearTires?.();

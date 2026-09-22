@@ -873,13 +873,16 @@ function pruneEmptyCards(form) {
   });
 }
 
+function ensureWizardDeskBeforeLayout(form) {
+  if (!form || form.closest("#ad-wizard-shell")?.hidden) return;
+  if (!isAdFormDesk(form)) return;
+  applyAdFormDesk();
+}
+
 async function applyAdFormLayout() {
   const form = document.getElementById("ad-form");
   if (!form) return;
-  const wizardOpen = !form.closest("#ad-wizard-shell")?.hidden;
-  if (wizardOpen && isAdFormDesk(form)) {
-    applyAdFormDesk();
-  }
+  ensureWizardDeskBeforeLayout(form);
   try {
     const category = currentLayoutCategory(form);
     const isImmo = category === "ingatlan";
@@ -906,6 +909,7 @@ async function applyAdFormLayout() {
       if (isImmo) hideVehicleChromeWithoutLayout(form);
       return;
     }
+    ensureWizardDeskBeforeLayout(form);
     resetPlacedLayoutItems(form);
     const placed = new Set();
     for (const cell of cells) {

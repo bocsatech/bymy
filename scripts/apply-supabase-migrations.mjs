@@ -24,6 +24,7 @@ const FILES = [
   "011_partner_profiles.sql",
   "012_ingatlan_ajanlas_categories.sql",
   "013_remove_allapotfelmeres.sql",
+  "014_partner_commission.sql",
 ];
 
 function loadEnvLocal() {

@@ -148,11 +148,13 @@ async function manage() {
         <label>Partner vagy iroda neve *<input name="displayName" value="${esc(profile.display_name)}" maxlength="100" required /></label>
         <label>Publikus profilcím *<span class="partner-slug"><span>bymy.hu/partner/</span><input name="slug" value="${esc(profile.slug)}" maxlength="100" required /></span></label>
         <label>Kapcsolattartó neve<input name="contactPerson" value="${esc(profile.contact_person)}" maxlength="160" /></label>
+        <label>Telefonszám *<input name="phone" type="tel" value="${esc(profile.phone)}" maxlength="40" required placeholder="+36 30 123 4567" /></label>
+        <label>Jutalék *<input name="commission" value="${esc(profile.commission)}" maxlength="80" required placeholder="pl. bruttó 2–4%" /></label>
         <label>E-mail cím<input name="email" type="email" value="${esc(profile.email)}" maxlength="320" /></label>
         <label>Weboldal<input name="website" type="url" value="${esc(profile.website)}" placeholder="https://…" maxlength="300" /></label>
-        <label>Logó URL<input name="logoUrl" type="url" value="${esc(profile.logo_url)}" placeholder="https://…" /></label>
+        <label>Profilkép URL<input name="logoUrl" type="url" value="${esc(profile.logo_url)}" placeholder="https://… (fénykép a kártyához)" /></label>
         <label>Borítókép URL<input name="coverUrl" type="url" value="${esc(profile.cover_url)}" placeholder="https://…" /></label>
-        <label class="partner-form-wide">Szolgáltatási terület<input name="serviceAreas" value="${esc(profile.service_areas)}" placeholder="Például: Budapest XI. kerület, Budaörs" maxlength="1000" /></label>
+        <label class="partner-form-wide">Értékesítési területek<input name="serviceAreas" value="${esc(profile.service_areas)}" placeholder="Például: Szombathely, Badacsonytomaj, Sé" maxlength="1000" /></label>
         <label class="partner-form-wide">Bemutatkozás<textarea name="description" maxlength="4000" placeholder="Mutasd be az irodát, a szakterületedet és azt, miben tudsz segíteni.">${esc(profile.description)}</textarea></label>
         <label class="partner-check partner-form-wide"><input type="checkbox" name="isPublic" ${profile.is_public !== false ? "checked" : ""} /><span>A jóváhagyás után legyen nyilvános a profilom</span></label>
       </div>
@@ -202,17 +204,22 @@ async function view() {
   const logo = safeUrl(profile.logo_url);
   const cover = safeUrl(profile.cover_url);
   const website = safeUrl(profile.website);
+  const phone = String(profile.phone || "").trim();
+  const tel = phone.replace(/[^\d+]/g, "");
+  const commission = String(profile.commission || "").trim();
   document.title = `${profile.display_name} — Bymy ingatlanos partner`;
   root.innerHTML = `
     <nav class="partner-breadcrumb"><a href="/ingatlan.html">Ingatlan</a><span>›</span><a href="/ingatlan.html#immo-partners-title">Ingatlanos partnerek</a><span>›</span><span>${esc(profile.display_name)}</span></nav>
     <section class="partner-profile-hero ${cover ? "has-cover" : ""}" ${cover ? `data-cover="${esc(cover)}"` : ""}>
       <div class="partner-profile-identity">
-        <span class="partner-profile-logo">${logo ? `<img src="${esc(logo)}" alt="${esc(profile.display_name)} logója" />` : `<span>${profileInitial(profile)}</span>`}</span>
+        <span class="partner-profile-logo">${logo ? `<img src="${esc(logo)}" alt="${esc(profile.display_name)} képe" />` : `<span>${profileInitial(profile)}</span>`}</span>
         <div>
           <span class="partner-verified"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m6 10 2.4 2.4L14 7"/></svg>Ellenőrzött Bymy partner</span>
           <h1>${esc(profile.display_name)}</h1>
           ${profile.contact_person ? `<p class="partner-contact-name">${esc(profile.contact_person)}</p>` : ""}
+          ${phone ? `<p class="partner-service-area"><a href="tel:${esc(tel)}">${esc(phone)}</a></p>` : ""}
           ${profile.service_areas ? `<p class="partner-service-area"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 18s5-5.2 5-10a5 5 0 1 0-10 0c0 4.8 5 10 5 10Z"/><circle cx="10" cy="8" r="1.8"/></svg>${esc(profile.service_areas)}</p>` : ""}
+          ${commission ? `<p class="partner-service-area">Jutalék: <strong>${esc(commission)}</strong></p>` : ""}
         </div>
       </div>
     </section>
@@ -231,8 +238,10 @@ async function view() {
       <aside class="partner-card partner-contact-card">
         <h2>Kapcsolat</h2>
         ${profile.contact_person ? `<div><span>Kapcsolattartó</span><strong>${esc(profile.contact_person)}</strong></div>` : ""}
+        ${phone ? `<a href="tel:${esc(tel)}"><span>Telefon</span><strong>${esc(phone)}</strong></a>` : ""}
         ${profile.email ? `<a href="mailto:${encodeURIComponent(profile.email)}"><span>E-mail</span><strong>${esc(profile.email)}</strong></a>` : ""}
         ${website ? `<a href="${esc(website)}" target="_blank" rel="noopener"><span>Weboldal</span><strong>Weboldal megnyitása ↗</strong></a>` : ""}
+        ${commission ? `<div><span>Jutalék</span><strong>${esc(commission)}</strong></div>` : ""}
         <a class="partner-contact-cta" href="#partner-listings">Hirdetések megtekintése</a>
       </aside>
     </div>`;

@@ -1,8 +1,3 @@
-const root = document.getElementById("immo-partners-list");
-const form = document.getElementById("immo-partners-search");
-const queryInput = document.getElementById("immo-partners-query");
-const count = document.getElementById("immo-partners-count");
-
 function escapeHtml(value) {
   return String(value ?? "")
     .replaceAll("&", "&amp;")
@@ -11,23 +6,45 @@ function escapeHtml(value) {
     .replaceAll('"', "&quot;");
 }
 
-function partnerCard(partner) {
-  const logo = partner.logo_url
-    ? `<img src="${escapeHtml(partner.logo_url)}" alt="" loading="lazy" />`
-    : `<span>${escapeHtml(String(partner.display_name || "P").slice(0, 1))}</span>`;
-  return `<a class="immo-partner-card" href="/partner/${encodeURIComponent(partner.slug)}">
-    <span class="immo-partner-card-top">
-      <span class="immo-partner-logo">${logo}</span>
-      ${partner.is_verified ? `<span class="immo-partner-verified"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m6 10 2.4 2.4L14 7"/></svg>Ellenőrzött partner</span>` : ""}
-    </span>
-    <span class="immo-partner-copy">
-      <span class="immo-partner-name">${escapeHtml(partner.display_name)}</span>
-      ${partner.contact_person ? `<span class="immo-partner-contact">${escapeHtml(partner.contact_person)}</span>` : ""}
-      ${partner.service_areas ? `<span class="immo-partner-area"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 18s5-5.2 5-10a5 5 0 1 0-10 0c0 4.8 5 10 5 10Z"/><circle cx="10" cy="8" r="1.8"/></svg>${escapeHtml(partner.service_areas)}</span>` : ""}
-    </span>
-    <span class="immo-partner-open">Profil megnyitása <span aria-hidden="true">→</span></span>
-  </a>`;
+function telHref(phone) {
+  const digits = String(phone ?? "").replace(/[^\d+]/g, "");
+  return digits ? `tel:${digits}` : "";
 }
+
+function partnerCard(partner) {
+  const href = `/partner/${encodeURIComponent(partner.slug)}`;
+  const photo = partner.logo_url
+    ? `<img src="${escapeHtml(partner.logo_url)}" alt="" loading="lazy" decoding="async" />`
+    : `<span class="immo-partner-photo-fallback">${escapeHtml(String(partner.display_name || "P").slice(0, 1))}</span>`;
+  const phone = String(partner.phone || "").trim();
+  const call = telHref(phone);
+  const areas = String(partner.service_areas || "").trim();
+  const commission = String(partner.commission || "").trim();
+  return `<article class="immo-partner-card">
+    <a class="immo-partner-photo" href="${href}" aria-label="${escapeHtml(partner.display_name || "Partner")} profilja">${photo}</a>
+    <div class="immo-partner-body">
+      <a class="immo-partner-name" href="${href}">${escapeHtml(partner.display_name)}</a>
+      ${
+        phone && call
+          ? `<a class="immo-partner-phone" href="${escapeHtml(call)}">${escapeHtml(phone)}</a>`
+          : phone
+            ? `<span class="immo-partner-phone">${escapeHtml(phone)}</span>`
+            : ""
+      }
+      ${
+        areas
+          ? `<p class="immo-partner-area"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 18s5-5.2 5-10a5 5 0 1 0-10 0c0 4.8 5 10 5 10Z"/><circle cx="10" cy="8" r="1.8"/></svg><span>${escapeHtml(areas)}</span></p>`
+          : ""
+      }
+      ${commission ? `<p class="immo-partner-commission">Jutalék: <strong>${escapeHtml(commission)}</strong></p>` : ""}
+    </div>
+  </article>`;
+}
+
+const root = document.getElementById("immo-partners-list");
+const form = document.getElementById("immo-partners-search");
+const queryInput = document.getElementById("immo-partners-query");
+const count = document.getElementById("immo-partners-count");
 
 async function loadPartners(query = "") {
   if (!root) return;
@@ -40,7 +57,13 @@ async function loadPartners(query = "") {
     const data = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(data.error || "Partnerek betöltése sikertelen.");
     const partners = data.partners || [];
-    if (count) count.textContent = query ? `${partners.length} partner található` : partners.length ? `${partners.length} ellenőrzött partner` : "";
+    if (count) {
+      count.textContent = query
+        ? `${partners.length} partner található`
+        : partners.length
+          ? `${partners.length} ellenőrzött partner`
+          : "";
+    }
     root.innerHTML = partners.length
       ? partners.map(partnerCard).join("")
       : `<div class="immo-partners-state"><strong>${query ? "Nincs találat." : "Hamarosan érkeznek partnereink."}</strong><span>${query ? "Próbálj másik nevet vagy területet." : "Addig is jelentkezhetsz első ingatlanos partnereink közé."}</span></div>`;

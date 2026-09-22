@@ -131,16 +131,36 @@ export function isLoggedIn() {
 
 async function authFetch(url, options = {}) {
   const token = getStoredToken();
-  const { headers: optHeaders, ...rest } = options;
-  const response = await fetch(url, {
-    credentials: "same-origin",
-    ...rest,
-    headers: {
-      "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...(optHeaders || {}),
-    },
-  });
+  const { headers: optHeaders, timeoutMs, ...rest } = options;
+  const controller =
+    Number.isFinite(timeoutMs) && timeoutMs > 0 ? new AbortController() : null;
+  const timer =
+    controller &&
+    window.setTimeout(() => {
+      controller.abort();
+    }, timeoutMs);
+  let response;
+  try {
+    response = await fetch(url, {
+      credentials: "same-origin",
+      ...rest,
+      signal: controller?.signal,
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(optHeaders || {}),
+      },
+    });
+  } catch (error) {
+    if (timer) window.clearTimeout(timer);
+    if (error?.name === "AbortError") {
+      const err = new Error("A szerver lassan válaszol — próbáld újra.");
+      err.code = "AUTH_TIMEOUT";
+      throw err;
+    }
+    throw error;
+  }
+  if (timer) window.clearTimeout(timer);
   const raw = await response.text();
   let data = {};
   try {
@@ -186,7 +206,7 @@ export async function refreshAuthSession() {
   if (refreshInflight) return refreshInflight;
   refreshInflight = (async () => {
     try {
-      const data = await authFetch("/api/auth/me");
+      const data = await authFetch("/api/auth/me", { timeoutMs: 12_000 });
       if (!data.user?.email) {
         setStoredToken("");
         try {

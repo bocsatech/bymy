@@ -452,7 +452,14 @@ export function initCategoryPicker({
     }
   }
 
+  function resetCategoryPickerUi() {
+    closeWizardCatPortal();
+    closeSheet();
+    document.body.classList.remove("wizard-cat-portal-open", "cp-sheet-open");
+  }
+
   function showPicker() {
+    resetCategoryPickerUi();
     pickerShell?.removeAttribute("hidden");
     wizardShell?.setAttribute("hidden", "");
     stepsBar?.setAttribute("hidden", "");
@@ -639,6 +646,13 @@ export function initCategoryPicker({
   syncOpenGroups();
   syncImmoLabels();
 
+  window.addEventListener("pageshow", (event) => {
+    if (!event.persisted) return;
+    resetCategoryPickerUi();
+    const pickerVisible = pickerShell && !pickerShell.hasAttribute("hidden");
+    if (pickerVisible) showPicker();
+  });
+
   const params = new URLSearchParams(window.location.search);
   const urlSelection = selectionFromUrl();
   const editId = Number(params.get("id"));
@@ -673,6 +687,7 @@ export function initCategoryPicker({
 
   return {
     reset: showPicker,
+    resetUi: resetCategoryPickerUi,
     getSelection: () => readStored(),
     syncWizardContext,
     lockCategoryChange,

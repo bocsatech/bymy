@@ -26,7 +26,12 @@ import {
   closeDb,
 } from "./lib/db-store.mjs";
 import { isSupabaseBackend } from "./lib/supabase/client.mjs";
-import { assertCanCreateListing, isBusinessAccount, lockedVerticalFromListings, verticalFromForm } from "./lib/listing-quota.mjs";
+import {
+  assertBusinessVerticalAllowed,
+  assertCanCreateListing,
+  isBusinessAccount,
+  verticalFromForm,
+} from "./lib/listing-quota.mjs";
 import { getSiteBlocks, saveSiteBlocks } from "./lib/site-blocks.mjs";
 import {
   getSiteHero,
@@ -1287,13 +1292,10 @@ async function handleListingsApi(req, res, pathname) {
         }
         if (isBusinessAccount(user)) {
           const mine = await listMyListings({ userId: user.id, limit: 500 });
-          const locked = lockedVerticalFromListings(mine);
           const next = verticalFromForm(formData);
-          if (locked && next !== locked) {
-            sendJson(res, 403, {
-              error: `Kereskedői / céges fiókkal csak egy kategóriába tartozhatsz (${locked}).`,
-              code: "VERTICAL_LOCKED",
-            });
+          const vertCheck = assertBusinessVerticalAllowed(user, next, mine);
+          if (!vertCheck.ok) {
+            sendJson(res, vertCheck.status || 403, { error: vertCheck.error, code: vertCheck.code });
             return;
           }
         }

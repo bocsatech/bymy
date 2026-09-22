@@ -1,4 +1,15 @@
-import { isDeskVehicleSubtype } from "./ad-form-desk.js?v=adFormDesk44";
+const DESK_VEHICLE_SUBTYPES = new Set([
+  "szemelyauto",
+  "leasing",
+  "berauto",
+  "lakokocsi",
+  "kisteher",
+  "teherauto",
+]);
+
+function isDeskVehicleSubtype(subtype) {
+  return DESK_VEHICLE_SUBTYPES.has(String(subtype ?? "").trim().toLowerCase());
+}
 
 const WIZARD_CAT_V = "standalone2";
 const WIZARD_CAT_ITEM_H = 52;
@@ -206,14 +217,35 @@ function syncWizardContext(selection) {
   if (wrap && catId) setWizardCatTriggerLabel(wrap, catId);
 }
 
+const pickerHandlers = {
+  onVehicleSelected: null,
+  onIngatlanSelected: null,
+  onReset: null,
+  requireLogin: null,
+};
+
+let pickerApi = null;
+
 export function initCategoryPicker({
   onVehicleSelected,
   onIngatlanSelected,
   onReset,
   requireLogin,
 } = {}) {
+  Object.assign(pickerHandlers, {
+    onVehicleSelected: onVehicleSelected ?? pickerHandlers.onVehicleSelected,
+    onIngatlanSelected: onIngatlanSelected ?? pickerHandlers.onIngatlanSelected,
+    onReset: onReset ?? pickerHandlers.onReset,
+    requireLogin: requireLogin ?? pickerHandlers.requireLogin,
+  });
+
   const root = document.getElementById("category-picker");
   if (!root) return null;
+
+  if (root.dataset.pickerBound === "1") {
+    return pickerApi;
+  }
+  root.dataset.pickerBound = "1";
 
   const pickerShell = document.getElementById("category-picker-shell");
   const wizardShell = document.getElementById("ad-wizard-shell");
@@ -454,7 +486,13 @@ export function initCategoryPicker({
 
   function resetCategoryPickerUi() {
     closeWizardCatPortal();
+    document.querySelectorAll(".wizard-cat-portal").forEach((el) => el.remove());
+    activeWizardCatPortal = null;
     closeSheet();
+    backdrop.hidden = true;
+    backdrop.classList.remove("is-open");
+    sheet.hidden = true;
+    sheet.classList.remove("is-open");
     document.body.classList.remove("wizard-cat-portal-open", "cp-sheet-open");
   }
 
@@ -467,7 +505,7 @@ export function initCategoryPicker({
     stub?.setAttribute("hidden", "");
     writeStored(null);
     setHiddenFields(null);
-    onReset?.();
+    pickerHandlers.onReset?.();
   }
 
   async function showVehicleWizard(selection) {
@@ -482,8 +520,8 @@ export function initCategoryPicker({
       console.warn("Kategória kerék:", error);
     }
 
-    if (typeof requireLogin === "function") {
-      const ok = await requireLogin(selection);
+    if (typeof pickerHandlers.requireLogin === "function") {
+      const ok = await pickerHandlers.requireLogin(selection);
       if (!ok) return;
     }
 
@@ -497,7 +535,7 @@ export function initCategoryPicker({
     }
 
     try {
-      onVehicleSelected?.(selection);
+      pickerHandlers.onVehicleSelected?.(selection);
     } catch (error) {
       console.error("Űrlap indítás hiba:", error);
     }
@@ -516,7 +554,7 @@ export function initCategoryPicker({
       const kat = labelList(selection.immoKategoria, IMMO_KATEGORIA);
       stubSummary.textContent = `Típus: ${tipus}. Kategória: ${kat}. Az ingatlan űrlap hamarosan érkezik — a választásod elmentve.`;
     }
-    onIngatlanSelected?.(selection);
+    pickerHandlers.onIngatlanSelected?.(selection);
   }
 
   function closeSheet() {
@@ -647,8 +685,8 @@ export function initCategoryPicker({
   syncImmoLabels();
 
   window.addEventListener("pageshow", (event) => {
-    if (!event.persisted) return;
     resetCategoryPickerUi();
+    if (!event.persisted) return;
     const pickerVisible = pickerShell && !pickerShell.hasAttribute("hidden");
     if (pickerVisible) showPicker();
   });
@@ -685,11 +723,13 @@ export function initCategoryPicker({
     showPicker();
   }
 
-  return {
+  pickerApi = {
     reset: showPicker,
     resetUi: resetCategoryPickerUi,
     getSelection: () => readStored(),
     syncWizardContext,
     lockCategoryChange,
   };
+  window.__bymyCategoryPicker = pickerApi;
+  return pickerApi;
 }

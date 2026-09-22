@@ -644,6 +644,26 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-
     max-width: none !important;
   }
 
+  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form--ingatlan .immo-search-panel--post,
+  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form--ingatlan .immo-search-form,
+  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form--ingatlan #ingatlan-fields {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form--ingatlan .immo-schema-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 0.65rem !important;
+  }
+
+  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form--ingatlan .immo-schema-cell,
+  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form--ingatlan .immo-dual-range-block {
+    grid-column: 1 / -1 !important;
+    grid-row: auto !important;
+  }
+
   body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .automax-main {
     width: 100%;
     max-width: none;

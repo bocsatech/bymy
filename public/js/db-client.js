@@ -65,8 +65,9 @@ export async function fetchListing(id, { view } = {}) {
   return data.listing ?? null;
 }
 
-export async function fetchRelatedListings(listingId, { limit = 24 } = {}) {
+export async function fetchRelatedListings(listingId, { limit = 24, includeSelf = false } = {}) {
   const params = new URLSearchParams({ limit: String(limit) });
+  if (includeSelf) params.set("includeSelf", "1");
   const response = await fetch(`/api/listings/${listingId}/related?${params}`, {
     credentials: "same-origin",
   });

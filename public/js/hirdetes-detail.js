@@ -149,7 +149,8 @@ function applyRelated(view, related) {
     return;
   }
   const items = Array.isArray(related) ? related : [];
-  const label = items.length ? `Több ettől a hirdetőtől ${items.length}` : "Több ettől a hirdetőtől";
+  const total = items.length + 1;
+  const label = `Több ettől a hirdetőtől ${total}`;
   const aside = root.querySelector(".hd-side") || root.querySelector("aside");
   let link =
     aside?.querySelector("[data-hd-related-link]") ||
@@ -165,9 +166,9 @@ function applyRelated(view, related) {
   }
   if (link) {
     link.textContent = label;
-    link.hidden = items.length === 0;
-    link.setAttribute("aria-expanded", "false");
-    link.setAttribute("aria-controls", "hd-related");
+    link.hidden = false;
+    link.removeAttribute("aria-expanded");
+    link.removeAttribute("aria-controls");
   }
   if (!items.length) {
     document.getElementById("hd-related")?.remove();
@@ -191,10 +192,33 @@ function applyRelated(view, related) {
     </div>
     <div class="hd-related">${items.map(relatedCard).join("")}</div>
   `;
-  if (link) link.setAttribute("aria-expanded", wasOpen ? "true" : "false");
+  if (link) link.removeAttribute("aria-expanded");
   section.querySelectorAll("a[data-listing-id]").forEach((a) => {
     a.addEventListener("click", () => rememberListingOpen(a.dataset.listingId, a));
   });
+}
+
+function listPageForVertical(vertical) {
+  const v = String(vertical || "").trim().toLowerCase();
+  if (v === "ingatlan") return "/ingatlan.html";
+  if (v === "teher" || v === "teherauto") return "/teherauto.html";
+  return "/auto.html";
+}
+
+function listingVerticalFromView(view) {
+  const explicit = String(view?.vertical || "").trim().toLowerCase();
+  if (explicit === "teher" || explicit === "ingatlan" || explicit === "auto") return explicit;
+  const href = String(view?.categoryHref || "");
+  if (href.includes("ingatlan")) return "ingatlan";
+  if (href.includes("teher")) return "teher";
+  return "auto";
+}
+
+function sellerListHref(listingId, vertical) {
+  const page = listPageForVertical(vertical);
+  const url = new URL(page, window.location.origin);
+  url.searchParams.set("hirdeto", String(listingId));
+  return `${url.pathname}${url.search}`;
 }
 
 function revealRelatedListings(event) {
@@ -205,11 +229,10 @@ function revealRelatedListings(event) {
     return;
   }
   event.preventDefault();
-  const section = document.getElementById("hd-related");
-  if (!section) return;
-  section.hidden = false;
-  trigger.setAttribute("aria-expanded", "true");
-  section.scrollIntoView({ behavior: "smooth", block: "start" });
+  const listingId = root.dataset.listingId || new URLSearchParams(location.search).get("id");
+  if (!listingId) return;
+  const vertical = root.dataset.listingVertical || "auto";
+  window.location.href = sellerListHref(listingId, vertical);
 }
 
 async function loadRelatedListings(listingId, view) {
@@ -234,6 +257,10 @@ function render(view, listing, related) {
     ? `/partner/${encodeURIComponent(partner.slug)}`
     : "";
   const loginNext = `/belepes.html?next=${encodeURIComponent(location.pathname + location.search)}`;
+  root.dataset.listingId = String(view.id);
+  root.dataset.listingVertical = listingVerticalFromView(view);
+  if (own) root.dataset.ownListing = "1";
+  else delete root.dataset.ownListing;
 
   const searchNav = getListingSearchNav(view.id, view.categoryHref);
   const hasPrevNext = Boolean(searchNav.prevId || searchNav.nextId);
@@ -394,9 +421,9 @@ function render(view, listing, related) {
         <a class="hd-btn hd-btn--ghost" href="/adasveteli-szerzodes.html?id=${encodeURIComponent(view.id)}">Adásvételi szerződés</a>
         ${
           !own && related.length
-            ? `<button type="button" class="hd-btn hd-btn--ghost" data-hd-related-link aria-expanded="false" aria-controls="hd-related">Több ettől a hirdetőtől ${related.length}</button>`
+            ? `<button type="button" class="hd-btn hd-btn--ghost" data-hd-related-link>Több ettől a hirdetőtől ${related.length + 1}</button>`
             : !own
-              ? `<button type="button" class="hd-btn hd-btn--ghost" data-hd-related-link aria-expanded="false" aria-controls="hd-related">Több ettől a hirdetőtől …</button>`
+              ? `<button type="button" class="hd-btn hd-btn--ghost" data-hd-related-link>Több ettől a hirdetőtől …</button>`
               : ""
         }
         ${view.website ? `<a class="hd-web" href="${escapeHtml(view.website)}" target="_blank" rel="noopener">Céges weboldal</a>` : ""}

@@ -985,7 +985,9 @@ async function handleListingsApi(req, res, pathname) {
     }
     const listingId = Number(relatedMatch[1]);
     const url = new URL(req.url ?? "", `http://${HOST}`);
-    const limit = Math.min(Math.max(Number(url.searchParams.get("limit") ?? 24), 1), 60);
+    const includeSelf =
+      url.searchParams.get("includeSelf") === "1" || url.searchParams.get("all") === "1";
+    const limit = Math.min(Math.max(Number(url.searchParams.get("limit") ?? 24), 1), includeSelf ? 200 : 60);
     const listing = await getListing(listingId, { mode: "detail" });
     if (!listing?.user_id || listing.status !== "feladott") {
       sendJson(res, 404, { error: "Nincs ilyen hirdetés." });
@@ -994,7 +996,7 @@ async function handleListingsApi(req, res, pathname) {
     const listings = await listListingsByOwner({
       userId: listing.user_id,
       limit,
-      excludeId: listingId,
+      excludeId: includeSelf ? null : listingId,
       status: "feladott",
     });
     sendJson(res, 200, { listings: sanitizeListingList(listings) });

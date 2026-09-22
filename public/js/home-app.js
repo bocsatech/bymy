@@ -1,4 +1,4 @@
-import { fetchListings } from "./db-client.js?v=teherVert1";
+import { fetchListings, fetchRelatedListings } from "./db-client.js?v=sellerList1";
 import { createHomeGridCard, initHomeGridCardPhotos } from "./home-grid-card.js?v=featured4";
 import { promoKiemeltActive, promoTopAjanlatActive } from "./listing-promo.js?v=promo1";
 import {
@@ -238,7 +238,36 @@ function pageVerticalParam() {
   return null;
 }
 
+async function loadSellerListings(fromId) {
+  if (!gridTrack) return;
+  if (emptyEl) {
+    emptyEl.hidden = true;
+    emptyEl.textContent = "";
+  }
+  if (PAGE === "ingatlan") {
+    ingatlanFilters = { ...emptyIngatlanFilters(), ingatlan_uzletag: "" };
+  }
+  categoryFilter = null;
+  featuredOnlyMode = false;
+  statsFilter = null;
+  quickRadiusFilter = null;
+  const items = await fetchRelatedListings(fromId, { limit: 200, includeSelf: true });
+  const active = (items || []).filter((item) => (item.status || "feladott") === "feladott");
+  allItems = sortForHome(active);
+  featuredListingIds = featuredListingIdSet(allItems);
+  populateFilterOptions(allItems);
+  renderListings(allItems);
+  updateFilterResultCount();
+  statsUi?.refreshActiveCount?.();
+  scrollToListings();
+}
+
 async function loadListings() {
+  const sellerFrom = String(new URLSearchParams(window.location.search).get("hirdeto") || "").trim();
+  if (sellerFrom) {
+    await loadSellerListings(sellerFrom);
+    return;
+  }
   const all = await fetchListings({
     limit: LISTINGS_FETCH_LIMIT,
     status: "feladott",

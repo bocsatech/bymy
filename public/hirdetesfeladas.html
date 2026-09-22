@@ -78,7 +78,7 @@
     <link rel="stylesheet" href="/css/ad-form-address.css?v=addressBlock3" />
     <link rel="stylesheet" href="/css/ad-form-bm-pickers.css?v=deskTireFit1" />
     <link rel="stylesheet" href="/css/site-side.css?v=mwPostDesk1" />
-    <link rel="stylesheet" href="/css/category-picker.css?v=pickerBoot2" />
+    <link rel="stylesheet" href="/css/category-picker.css?v=catDrumStand2" />
       <link rel="stylesheet" href="/css/hub.css?v=hubHeroDemo1" />
 </head>
   <body class="site-app site-page" data-site-page="hirdetesfeladas">
@@ -144,6 +144,7 @@
           <header class="category-picker-head">
             <h1>Hirdetés feladás</h1>
             <p>Milyen hirdetést adsz fel?</p>
+            <p class="category-picker-limits">Magán: max. 2 hirdetés (összes kategória). Kereskedő / cég: max. 50, de csak egy kategóriában.</p>
           </header>
           <div class="cp-stack" role="list">
             <section class="cp-group is-open" data-accent="car" data-group="auto" role="listitem">
@@ -496,13 +497,12 @@
                   </div>
                 </div>
                 <div class="labeled-field labeled-field--power">
-                  <label for="teljesitmeny_le">Teljesítmény:</label>
-                  <div class="suffix-field ad-form-suffix-unit suffix-field--power">
-                    <input id="teljesitmeny_le" name="teljesitmeny_le" type="number" min="0" step="1" class="auto-filled" />
-                    <span>LE</span>
+                  <label for="teljesitmeny_kw">Teljesítmény:</label>
+                  <div class="suffix-field suffix-field--power">
+                    <input id="teljesitmeny_kw" name="teljesitmeny_kw" type="number" class="auto-filled" />
+                    <span id="le-display" class="power-hint" aria-live="polite"></span>
                   </div>
-                  <span id="le-display" class="power-hint" aria-live="polite"></span>
-                  <input type="hidden" id="teljesitmeny_kw" name="teljesitmeny_kw" />
+                  <input type="hidden" id="teljesitmeny_le" name="teljesitmeny_le" />
                 </div>
               </div>
               <div class="ev-tech-grid fuel-electric-only hidden" id="electric-fields-block">
@@ -829,19 +829,19 @@
               <div class="card-body form-grid">
                 <label for="vetelar">Vételár: <span class="req">*</span></label>
                 <div class="suffix-field">
-                  <input id="vetelar" name="vetelar" type="text" inputmode="numeric" autocomplete="off" placeholder="pl. 3 700 000" required />
+                  <input id="vetelar" name="vetelar" type="number" min="0" step="1000" required />
                   <span>Ft</span>
                 </div>
 
                 <label for="vetelar_eur">Ár (EUR):</label>
                 <div class="suffix-field">
-                  <input id="vetelar_eur" name="vetelar_eur" type="text" inputmode="numeric" autocomplete="off" placeholder="pl. 12 500" />
+                  <input id="vetelar_eur" name="vetelar_eur" type="number" min="0" step="1" />
                   <span>EUR</span>
                 </div>
 
                 <label for="forgalomba_helyezes_ar">Forgalomba helyezés ára:</label>
                 <div class="suffix-field">
-                  <input id="forgalomba_helyezes_ar" name="forgalomba_helyezes_ar" type="text" inputmode="numeric" autocomplete="off" />
+                  <input id="forgalomba_helyezes_ar" name="forgalomba_helyezes_ar" type="number" min="0" step="1000" />
                   <span>Ft</span>
                 </div>
               </div>
@@ -901,7 +901,7 @@
 
         <div class="footer-actions" id="footer-actions">
           <button type="button" class="btn btn-secondary hidden" id="back-btn">Vissza</button>
-          <button type="button" class="btn btn-primary" id="next-btn">Hirdetés feladása</button>
+          <button type="button" class="btn btn-primary" id="next-btn">Hirdetésfeladás folytatása</button>
         </div>
 
       </form>
@@ -972,10 +972,9 @@
     </main>
 
     <script src="/js/site-avatar-menu.js?v=avatarSync1" type="module"></script>
-    <script src="/js/hirdetes-category-boot.js?v=pickerBoot2" type="module"></script>
-    <script src="/js/app.js?v=pickerBoot2" type="module"></script>
+    <script src="/js/app.js?v=contactOpt5" type="module"></script>
       <script src="/js/nav-counts.js?v=navCount4" type="module"></script>
       <script src="/js/theme.js?v=willhabenHdr1" type="module"></script>
-    <script src="/js/form-layout-apply.js?v=powerLeInput1" type="module"></script>
+    <script src="/js/form-layout-apply.js?v=contactOpt12" type="module"></script>
 </body>
 </html>

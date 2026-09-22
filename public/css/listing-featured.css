@@ -6,26 +6,8 @@
 
 .hf-card--listing.hf-card--featured,
 .home-grid-card.home-grid-card--featured {
-  border: 2px solid var(--listing-featured-yellow) !important;
-  box-shadow: 0 8px 22px rgba(240, 193, 75, 0.22) !important;
-}
-
-body.hub-page--feed .hf-card--listing.hf-card--featured {
-  border: 2px solid var(--listing-featured-yellow) !important;
-  box-shadow: 0 8px 22px rgba(240, 193, 75, 0.22) !important;
-}
-
-body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"])
-  .home-grid-card.home-grid-card--featured {
-  border: 2px solid var(--listing-featured-yellow) !important;
-  box-shadow: 0 8px 22px rgba(240, 193, 75, 0.22) !important;
-}
-
-body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"])
-  .home-grid-card.home-grid-card--featured:hover {
-  border-color: var(--listing-featured-yellow) !important;
-  box-shadow: 0 10px 26px rgba(240, 193, 75, 0.28) !important;
-  transform: none !important;
+  border: 2px solid var(--listing-featured-yellow);
+  box-shadow: 0 8px 22px rgba(240, 193, 75, 0.22);
 }
 
 .hf-card--listing.hf-card--featured .hf-card-price,
@@ -79,11 +61,9 @@ body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"])
 }
 
 html[data-theme="dark"] .hf-card--listing.hf-card--featured,
-html[data-theme="dark"] .home-grid-card.home-grid-card--featured,
-html[data-theme="dark"] body.site-app .hf-card--listing.hf-card--featured,
-html[data-theme="dark"] body.site-app .home-grid-card.home-grid-card--featured {
-  border: 2px solid #e6b422 !important;
-  box-shadow: 0 8px 22px rgba(240, 193, 75, 0.15) !important;
+html[data-theme="dark"] .home-grid-card.home-grid-card--featured {
+  border-color: #e6b422;
+  box-shadow: 0 8px 22px rgba(240, 193, 75, 0.15);
 }
 
 html[data-theme="dark"] .hf-card--listing.hf-card--featured .hf-card-price,

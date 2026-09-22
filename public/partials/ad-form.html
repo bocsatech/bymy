@@ -200,13 +200,12 @@
                   </div>
                 </div>
                 <div class="labeled-field labeled-field--power">
-                  <label for="teljesitmeny_le">Teljesítmény:</label>
-                  <div class="suffix-field ad-form-suffix-unit suffix-field--power">
-                    <input id="teljesitmeny_le" name="teljesitmeny_le" type="number" min="0" step="1" class="auto-filled" />
-                    <span>LE</span>
+                  <label for="teljesitmeny_kw">Teljesítmény:</label>
+                  <div class="suffix-field suffix-field--power">
+                    <input id="teljesitmeny_kw" name="teljesitmeny_kw" type="number" class="auto-filled" />
+                    <span id="le-display" class="power-hint" aria-live="polite"></span>
                   </div>
-                  <span id="le-display" class="power-hint" aria-live="polite"></span>
-                  <input type="hidden" id="teljesitmeny_kw" name="teljesitmeny_kw" />
+                  <input type="hidden" id="teljesitmeny_le" name="teljesitmeny_le" />
                 </div>
               </div>
               <div class="form-grid">
@@ -409,19 +408,19 @@
               <div class="card-body form-grid">
                 <label for="vetelar">Vételár: <span class="req">*</span></label>
                 <div class="suffix-field">
-                  <input id="vetelar" name="vetelar" type="text" inputmode="numeric" autocomplete="off" placeholder="pl. 3 700 000" required />
+                  <input id="vetelar" name="vetelar" type="number" min="0" step="1000" required />
                   <span>Ft</span>
                 </div>
 
                 <label for="vetelar_eur">Ár (EUR):</label>
                 <div class="suffix-field">
-                  <input id="vetelar_eur" name="vetelar_eur" type="text" inputmode="numeric" autocomplete="off" placeholder="pl. 12 500" />
+                  <input id="vetelar_eur" name="vetelar_eur" type="number" min="0" step="1" />
                   <span>EUR</span>
                 </div>
 
                 <label for="forgalomba_helyezes_ar">Forgalomba helyezés ára:</label>
                 <div class="suffix-field">
-                  <input id="forgalomba_helyezes_ar" name="forgalomba_helyezes_ar" type="text" inputmode="numeric" autocomplete="off" />
+                  <input id="forgalomba_helyezes_ar" name="forgalomba_helyezes_ar" type="number" min="0" step="1000" />
                   <span>Ft</span>
                 </div>
               </div>
@@ -518,5 +517,5 @@
         <div class="footer-actions" id="footer-actions">
           <button type="button" class="btn btn-secondary hidden" id="back-btn">Vissza</button>
           <div></div>
-          <button type="button" class="btn btn-primary" id="next-btn">Hirdetés feladása</button>
+          <button type="button" class="btn btn-primary" id="next-btn">Hirdetésfeladás folytatása</button>
         </div>

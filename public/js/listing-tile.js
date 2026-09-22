@@ -6,77 +6,6 @@ const ICON_YEAR = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect
 const ICON_KM = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 18 12 6l8 12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M7.5 18h9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>`;
 const ICON_POWER = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="13" r="7" stroke="currentColor" stroke-width="1.6"/><path d="M12 13 16 9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M12 6v1.5M5.5 10.5 6.6 11.2M18.5 10.5 17.4 11.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>`;
 
-function parsePhotoUrlList(value) {
-  const raw = String(value ?? "").trim();
-  if (!raw) return [];
-  if (raw.startsWith("[")) {
-    try {
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) {
-        return parsed.map((item) => String(item ?? "").trim()).filter(Boolean);
-      }
-    } catch {
-    }
-  }
-  return raw
-    .split(/[\n,]+/)
-    .map((item) => item.trim())
-    .filter(Boolean);
-}
-
-function upgradeHaThumbClient(url) {
-  let s = String(url || "").trim();
-  if (!s) return "";
-  if (s.startsWith("/api/media/proxy")) {
-    try {
-      const inner = new URL(s, location.origin).searchParams.get("url");
-      if (inner) s = inner;
-    } catch {
-    }
-  }
-  if (/hasznaltautocdn\.com/i.test(s)) {
-    const m = s.match(/\/(\d{5,12})\/(\d{5,12})\.(jpe?g|png|webp)/i);
-    if (m) {
-      const ext = m[3].toLowerCase().replace("jpeg", "jpg");
-      return `https://img.hasznaltautocdn.com/2048x1536/${m[1]}/${m[2]}.${ext}`;
-    }
-    return s.replace(/\/\d{2,4}x\d{2,4}\//i, "/2048x1536/");
-  }
-  return s;
-}
-
-function isUsableCardImageUrl(url) {
-  const s = String(url || "").trim();
-  if (!s) return false;
-  return (
-    /^https?:\/\//i.test(s) ||
-    s.startsWith("/api/media/proxy") ||
-    s.startsWith("/uploads/") ||
-    s.startsWith("/media/")
-  );
-}
-
-/** Lista kártya — preview nélküli GET /api/listings/:id válaszból is. */
-export function listingTileImageUrl(item) {
-  const preview = item?.preview ?? {};
-  const form = item?.form ?? {};
-  const seen = new Set();
-  const candidates = [];
-  for (const raw of [
-    preview.imageUrl,
-    ...(Array.isArray(preview.imageUrls) ? preview.imageUrls : []),
-    item?.fo_kep,
-    form.fo_kep,
-    ...parsePhotoUrlList(form.fotok),
-  ]) {
-    const url = upgradeHaThumbClient(String(raw ?? "").trim());
-    if (!url || seen.has(url)) continue;
-    seen.add(url);
-    candidates.push(url);
-  }
-  return candidates.find(isUsableCardImageUrl) || "";
-}
-
 function isImportStubTitle(value) {
   return /importált autó\s*\(\d{5,}\)/i.test(String(value ?? "").trim());
 }
@@ -206,7 +135,7 @@ export function slimListingTile(item) {
       price: preview.price,
       km: preview.km,
       specLine: preview.specLine,
-      imageUrl: listingTileImageUrl(item),
+      imageUrl: preview.imageUrl || item.fo_kep || "",
       filter: {
         gyartmany: preview.filter?.gyartmany ?? form.gyartmany ?? null,
         modell: preview.filter?.modell ?? form.modell ?? null,
@@ -251,7 +180,7 @@ export function createListingTileCard(item, { className = "hf-card hf-card--list
   const year = listingTileYear(item);
   const km = listingTileKm(item);
   const power = listingTilePower(item);
-  const imageUrl = listingTileImageUrl(item) || String(preview.imageUrl || item.fo_kep || "").trim();
+  const imageUrl = String(preview.imageUrl || item.fo_kep || "").trim();
 
   const media = document.createElement("span");
   media.className = "hf-card-media";

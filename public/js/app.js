@@ -5,11 +5,11 @@ import {
   saveListingPhotosOrder,
   getStoredListingId,
 } from "./db-client.js?v=wizardSave1";
-import { createAdForm } from "./form-core.js?v=submitBtn1";
+import { createAdForm } from "./form-core.js?v=photoOverlayIcons3";
 import { applyImportedVehicleToSelects } from "./vehicle-catalog-client.js?v=importVehicle1";
 import { initTireSizes } from "./tire-sizes-ui.js";
 import { initPhoneLanguages } from "./phone-lang-ui.js";
-import { initCategoryPicker } from "./category-picker.js?v=pickerBoot2";
+import { initCategoryPicker } from "./category-picker.js?v=accFix3";
 import { applyAdFormDesk, clearAdFormEditBoot, isDeskVehicleSubtype } from "./ad-form-desk.js?v=adFormDesk44";
 import {
   requireAuthForPage,
@@ -18,7 +18,7 @@ import {
   loginUrl,
   initSiteAuth,
   loadProfileFromServer,
-} from "./site-auth.js?v=pickerBoot2";
+} from "./site-auth.js";
 import {
   applyListingAddressFromProfile,
   applyListingAddressFromProfileSync,
@@ -27,9 +27,10 @@ import {
 } from "./ad-location-profile.js?v=locProf7";
 import { initImproveDescription } from "./improve-description.js?v=descAi2";
 
+if (!(await requireAuthForPage())) {
+  throw new Error("Belépés szükséges");
+}
 initSiteAuth();
-/** Ne blokkolja a kategóriaválasztót — sessionStorage alapján azonnal kattintható; háttérben /api/auth/me. */
-const authPromise = requireAuthForPage();
 
 const adForm = document.getElementById("ad-form");
 initImproveDescription(adForm);
@@ -296,9 +297,6 @@ const categoryPicker = initCategoryPicker({
 });
 
 if (editing) {
-  if (!(await authPromise)) {
-    throw new Error("Belépés szükséges");
-  }
   try {
     const listing = await fetchListing(editId);
     if (!listing?.form) {

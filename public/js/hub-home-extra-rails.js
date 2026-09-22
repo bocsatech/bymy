@@ -5,7 +5,7 @@ import {
   createListingTileCard,
   formatListingCountBadge,
   slimListingTile,
-} from "./listing-tile.js?v=favImg1";
+} from "./listing-tile.js?v=importVehicle1";
 import { restoreListingReturn, bindListingOpen } from "./listing-return.js?v=scrollTop1";
 import {
   buildNearbyFilter,
@@ -81,12 +81,7 @@ async function initFavoritesRail({ postal, radiusKm }) {
   const STATUS = el("hub-fav-status");
   const COUNT_EL = el("hub-fav-count");
   const ALL = el("hub-fav-all");
-  const SECTION = RAIL?.closest?.(".hf-section");
   if (!RAIL) return;
-
-  function setSectionVisible(visible) {
-    if (SECTION) SECTION.hidden = !visible;
-  }
 
   if (RAIL.dataset.listingOpenBound !== "1") {
     RAIL.dataset.listingOpenBound = "1";
@@ -106,13 +101,16 @@ async function initFavoritesRail({ postal, radiusKm }) {
     COUNT_EL.hidden = !label;
   }
 
-  setStatus("Kedvencek betöltése…", { hidden: true });
+  setStatus("Kedvencek betöltése…");
   try {
     const email = getAuthUser()?.email;
     if (!email) {
       RAIL.innerHTML = "";
       setCount(0);
-      setSectionVisible(false);
+      const href = `/belepes.html?next=${encodeURIComponent("/")}`;
+      if (ALL) ALL.href = href;
+      RAIL.appendChild(createPromptCard("Bejelentkezés", href));
+      setStatus("Jelentkezz be a kedvenc hirdetéseid megtekintéséhez.");
       restoreListingReturn();
       return;
     }
@@ -122,52 +120,34 @@ async function initFavoritesRail({ postal, radiusKm }) {
     if (!saved.length) {
       RAIL.innerHTML = "";
       setCount(0);
-      setSectionVisible(false);
+      RAIL.appendChild(
+        createPromptCard("Még nincs kedvenced", "/beallitasok.html?szekcio=parkolo")
+      );
+      setStatus("A szív ikonnal menthetsz hirdetéseket a kedvencek közé.");
       restoreListingReturn();
       return;
     }
 
-    let listingPool = [];
-    try {
-      listingPool = await fetchListings({ limit: 250, status: "feladott" });
-    } catch {
-    }
-    const listingById = new Map(listingPool.map((row) => [Number(row.id), row]));
-
     const items = [];
     for (const row of saved.slice(0, 20)) {
-      const id = Number(row.id);
-      let listing = listingById.get(id);
-      if (!listing) {
-        try {
-          listing = await fetchListing(row.id);
-        } catch {
-          listing = null;
+      try {
+        const listing = await fetchListing(row.id);
+        if (listing && (listing.status || "feladott") === "feladott") {
+          items.push(slimListingTile(listing));
+          continue;
         }
-      }
-      if (listing && (listing.status || "feladott") === "feladott") {
-        items.push(slimListingTile(listing));
-        continue;
+      } catch {
       }
       items.push(
         slimListingTile({
           id: row.id,
           hirdetes_cime: row.title,
-          fo_kep: row.imageUrl || "",
-          preview: { title: row.title, price: row.price, imageUrl: row.imageUrl || "" },
+          preview: { title: row.title, price: row.price, imageUrl: "" },
         })
       );
     }
 
     RAIL.innerHTML = "";
-    if (!items.length) {
-      setCount(0);
-      setSectionVisible(false);
-      restoreListingReturn();
-      return;
-    }
-
-    setSectionVisible(true);
     setCount(items.length);
     const INITIAL = 9;
     for (const item of items.slice(0, INITIAL)) {
@@ -178,12 +158,12 @@ async function initFavoritesRail({ postal, radiusKm }) {
       more.classList.add("hf-card--prompt-all");
       RAIL.appendChild(more);
     }
-    setStatus("", { hidden: true });
+    setStatus(`${items.length} kedvenc hirdetés.`, { hidden: true });
   } catch (error) {
-    void error;
     RAIL.innerHTML = "";
     setCount(0);
-    setSectionVisible(false);
+    RAIL.appendChild(createPromptCard("Újrapróbálás", "/beallitasok.html?szekcio=parkolo"));
+    setStatus(error.message ?? "Nem sikerült betölteni a kedvenceket.");
   }
   restoreListingReturn();
 }

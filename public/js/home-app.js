@@ -25,10 +25,7 @@ import { buildNearbyFilter, readNearbyPrefs } from "./nearby-search.js?v=korzetF
 import { getAuthUser } from "./site-auth.js?v=nearby1";
 import { bindListingOpen, restoreListingReturn } from "./listing-return.js?v=searchNav1";
 import { normalizeKivitel } from "./kivitel-options.js?v=kivitel1";
-import {
-  featuredListingIdSet,
-  pickFeaturedListings,
-} from "./home-featured-slots.js?v=featured1";
+import { featuredListingIdSet } from "./home-featured-slots.js?v=featured1";
 
 const gridTrack = document.getElementById("home-grid-track");
 const emptyEl = document.getElementById("home-empty");
@@ -49,13 +46,6 @@ let detailedFilters = null;
 let deskSort = "newest";
 let quickSearchApi = null;
 let featuredListingIds = new Set();
-
-function isFeaturedOnlyFromUrl() {
-  const params = new URLSearchParams(window.location.search);
-  return params.get("kiemelt") === "1" || params.get("featured") === "1";
-}
-
-let featuredOnlyMode = isFeaturedOnlyFromUrl();
 
 const PAGE = document.body?.getAttribute("data-site-page") || "";
 if (gridTrack) bindListingOpen(gridTrack);
@@ -187,9 +177,6 @@ function filterItems(items) {
   } else if (quickRadiusFilter) {
     result = result.filter((item) => quickRadiusFilter.listingIds.has(item.id));
   }
-  if (featuredOnlyMode) {
-    result = result.filter((item) => featuredListingIds.has(Number(item.id)));
-  }
   return result;
 }
 
@@ -198,21 +185,12 @@ function renderListings(items) {
 
   gridTrack.innerHTML = "";
 
-  let filtered =
+  const filtered =
     PAGE === "auto" || PAGE === "teherauto"
       ? sortDeskListings(filterItems(items))
       : filterItems(items);
-  if (featuredOnlyMode && filtered.length) {
-    const order = pickFeaturedListings(allItems).map((item) => Number(item.id));
-    const rank = new Map(order.map((id, index) => [id, index]));
-    filtered = [...filtered].sort(
-      (a, b) => (rank.get(Number(a.id)) ?? 99) - (rank.get(Number(b.id)) ?? 99)
-    );
-  }
   emptyEl.hidden = filtered.length > 0;
-  if (!filtered.length && featuredOnlyMode) {
-    emptyEl.textContent = "Jelenleg nincs kiemelt hirdetés.";
-  } else if (!filtered.length && (statsFilter || quickRadiusFilter)) {
+  if (!filtered.length && (statsFilter || quickRadiusFilter)) {
     emptyEl.hidden = false;
     const radiusMeta = statsFilter || quickRadiusFilter;
     if (statsFilter?.mode === "recent24h") {

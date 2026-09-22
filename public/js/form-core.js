@@ -26,12 +26,6 @@ import { refreshAdFormBmPickers, applyAdFormBmFieldValues } from "./ad-form-bm-p
 import { applyAdFormDesk, isAdFormDesk } from "./ad-form-desk.js?v=adFormDesk44";
 import { initKmInput, parseKmDigits, setKmInputValue } from "./km-input.js?v=kmFmt1";
 import {
-  initPriceInput,
-  parsePriceDigits,
-  setPriceInputValue,
-  PRICE_INPUT_IDS,
-} from "./price-input.js?v=priceFmt1";
-import {
   EV_FUEL_FIELD_IDS,
   fuelFieldVisibility,
   fuelProfile,
@@ -113,9 +107,9 @@ export function createAdForm(options = {}) {
   let photoSeq = 0;
 
 const AUTO_FILL_PRESETS = {
-  TESLA: { tipus: "Long Range AWD", hengerurtartalom: "", uzemanyag: "Elektromos", sebessegvalto: "Automata", hajtas: "Összkerék", teljesitmeny_le: "351" },
-  VOLKSWAGEN: { tipus: "1.6 TDI", hengerurtartalom: "1598", uzemanyag: "Dízel", sebessegvalto: "Manuális (6 seb.)", hajtas: "Első kerék", teljesitmeny_le: "105" },
-  TOYOTA: { tipus: "1.8 Hybrid", hengerurtartalom: "1798", uzemanyag: "Benzin/elektromos", sebessegvalto: "Fokozatmentes automata", hajtas: "Első kerék", teljesitmeny_le: "98" },
+  TESLA: { tipus: "Long Range AWD", hengerurtartalom: "", uzemanyag: "Elektromos", sebessegvalto: "Automata", hajtas: "Összkerék", teljesitmeny_kw: "258" },
+  VOLKSWAGEN: { tipus: "1.6 TDI", hengerurtartalom: "1598", uzemanyag: "Dízel", sebessegvalto: "Manuális (6 seb.)", hajtas: "Első kerék", teljesitmeny_kw: "77" },
+  TOYOTA: { tipus: "1.8 Hybrid", hengerurtartalom: "1798", uzemanyag: "Benzin/elektromos", sebessegvalto: "Fokozatmentes automata", hajtas: "Első kerék", teljesitmeny_kw: "72" },
 };
 
 const YEAR_SELECT_MIN = 1980;
@@ -718,31 +712,18 @@ function bindFuelPickerSync() {
   fuel._adBmHidden?.addEventListener("input", () => syncFuelDependentFields());
 }
 
-const LE_TO_KW = 1 / 1.36;
-
 function updateLeDisplay() {
-  if (!teljesitmenyLe) return;
-  const leRaw = String(teljesitmenyLe.value ?? "").trim();
-  const le = Number(leRaw);
-  if (!leRaw || !Number.isFinite(le) || le <= 0) {
-    if (leDisplay) leDisplay.textContent = "";
-    if (teljesitmenyKw) teljesitmenyKw.value = "";
+  if (!leDisplay) return;
+  const kwRaw = String(teljesitmenyKw?.value ?? "").trim();
+  const kw = Number(kwRaw);
+  if (!kwRaw || !Number.isFinite(kw) || kw <= 0) {
+    leDisplay.textContent = "";
+    if (teljesitmenyLe) teljesitmenyLe.value = "";
     return;
   }
-  const kw = Math.round(le * LE_TO_KW);
-  if (leDisplay) leDisplay.textContent = `${kw.toLocaleString("hu-HU")} kW`;
-  if (teljesitmenyKw) teljesitmenyKw.value = String(kw);
-}
-
-/** Régi mentés: csak kW volt kitöltve — szerkesztéskor LE mezőbe visszaszámoljuk. */
-export function migratePowerFieldsFromKwIfNeeded() {
-  if (!teljesitmenyLe || !teljesitmenyKw) return;
-  const leRaw = String(teljesitmenyLe.value ?? "").trim();
-  if (leRaw) return;
-  const kw = Number(String(teljesitmenyKw.value ?? "").trim());
-  if (!Number.isFinite(kw) || kw <= 0) return;
-  teljesitmenyLe.value = String(Math.round(kw / LE_TO_KW));
-  updateLeDisplay();
+  const le = Math.round(kw * 1.36);
+  leDisplay.textContent = `${le.toLocaleString("hu-HU")} LE (${kw.toLocaleString("hu-HU")} kW)`;
+  if (teljesitmenyLe) teljesitmenyLe.value = String(le);
 }
 
 function updateTitle() {
@@ -993,7 +974,15 @@ function showStep(step, { openDeskAccordion = false } = {}) {
   } else {
     footerActions.classList.remove("hidden");
   }
-  if (nextBtn) nextBtn.textContent = "Hirdetés feladása";
+  if (step === 1) nextBtn.textContent = "Hirdetésfeladás folytatása";
+  if (step === 2) nextBtn.textContent = "Tovább az extrákhoz";
+  if (step === 3) nextBtn.textContent = "Tovább a képekhez";
+  if (step === 4) nextBtn.textContent = "Tovább a hirdetéshez";
+  if (step === 5) {
+    nextBtn.textContent = "Hirdetés feladása";
+    applyListingAddressFromProfileSync(form);
+    window.dispatchEvent(new Event("ad-form-sync-location"));
+  }
   syncPhotoNextButton();
   window.dispatchEvent(new CustomEvent("ad-form-step", { detail: { step, openDeskAccordion } }));
 }
@@ -1003,9 +992,6 @@ function collectFormData() {
   data.felszereltseg = [...form.querySelectorAll('input[name="felszereltseg"]:checked')].map((el) => el.value);
   data.egyeb_info = [...form.querySelectorAll('input[name="egyeb_info"]:checked')].map((el) => el.value);
   if (data.km != null) data.km = parseKmDigits(data.km);
-  for (const key of PRICE_INPUT_IDS) {
-    if (data[key] != null && data[key] !== "") data[key] = parsePriceDigits(data[key]);
-  }
   return data;
 }
 
@@ -1072,7 +1058,6 @@ function applyFormData(data, { fromImport = false } = {}) {
 
   for (const [key, value] of Object.entries(payload)) {
     if (key === "felszereltseg" || key === "egyeb_info" || key === "km") continue;
-    if (PRICE_INPUT_IDS.includes(key)) continue;
     const field = form.elements.namedItem(key);
     if (!field) continue;
     const appliedValue = key === "gyartmany" && value ? String(value).toUpperCase() : value;
@@ -1138,14 +1123,6 @@ function applyFormData(data, { fromImport = false } = {}) {
     setKmInputValue(kmInput, payload.km);
     if (fromImport) kmInput.dataset.userEdited = "1";
   }
-  for (const key of PRICE_INPUT_IDS) {
-    if (payload[key] == null || String(payload[key]).trim() === "") continue;
-    const priceInput = document.getElementById(key);
-    if (!priceInput) continue;
-    setPriceInputValue(priceInput, payload[key]);
-    if (fromImport) priceInput.dataset.userEdited = "1";
-  }
-  migratePowerFieldsFromKwIfNeeded();
   updateLeDisplay();
   restoreFuelSelection(payload.uzemanyag);
   scheduleBmFieldApply(payload);
@@ -1310,20 +1287,13 @@ function validateStep(step) {
     }
     if (!photosReadyForNext()) {
       alert(photoBlockMessage());
+      showStep(4);
       return false;
     }
     return true;
   }
 
   return true;
-}
-
-/** Kötelező (*) mezők + képek — mentés / feladás előtt, lépésközi ugrás nélkül. */
-function validateForSubmit() {
-  if (shouldSkipWizardStep(TOTAL_STEPS)) return validateStep(TOTAL_STEPS);
-  applyListingAddressFromProfileSync(form);
-  window.dispatchEvent(new Event("ad-form-sync-location"));
-  return validateStep(TOTAL_STEPS);
 }
 
 function buildSummary() {
@@ -1469,13 +1439,14 @@ function photoBlockMessage() {
 
 function syncPhotoNextButton() {
   if (!nextBtn) return;
-  if (photoBusy) {
-    nextBtn.disabled = true;
-    nextBtn.title = photoBlockMessage();
+  if (currentStep !== 4) {
+    nextBtn.disabled = false;
+    nextBtn.removeAttribute("title");
     return;
   }
-  nextBtn.disabled = false;
-  nextBtn.removeAttribute("title");
+  const ready = photosReadyForNext();
+  nextBtn.disabled = !ready;
+  nextBtn.title = ready ? "" : photoBlockMessage();
 }
 
 function updatePhotoStatus() {
@@ -1737,7 +1708,7 @@ function removePhotoOverlayFromFirst() {
   renderPhotoPreview();
 }
 
-form.querySelectorAll(".auto-filled, #tipus, #hengerurtartalom, #sebessegvalto, #hajtas, #teljesitmeny_le").forEach((field) => {
+form.querySelectorAll(".auto-filled, #tipus, #hengerurtartalom, #sebessegvalto, #hajtas, #teljesitmeny_kw").forEach((field) => {
   field?.addEventListener("input", () => {
     field.dataset.userEdited = "1";
     field.classList.remove("auto-filled");
@@ -1754,12 +1725,9 @@ hirdetesCime?.addEventListener("input", () => {
 });
 
 gyartmany?.addEventListener("change", applyAutoFill);
-teljesitmenyLe?.addEventListener("input", updateLeDisplay);
+teljesitmenyKw?.addEventListener("input", updateLeDisplay);
 
 if (mode === "wizard") {
-  backBtn?.classList.add("hidden");
-  if (nextBtn) nextBtn.textContent = "Hirdetés feladása";
-
   backBtn?.addEventListener("click", async () => {
     if (currentStep > 1) await tryGoToStep(prevWizardStep(currentStep));
   });
@@ -1782,11 +1750,19 @@ if (mode === "wizard") {
   });
 
   nextBtn?.addEventListener("click", async () => {
-    if (photoItems.some((item) => item.status === "pending" || item.status === "error")) {
+    if (
+      currentStep === 4 &&
+      photoItems.some((item) => item.status === "pending" || item.status === "error")
+    ) {
       await uploadPendingPhotos();
     }
-    if (!validateForSubmit()) return;
+    if (!validateStep(currentStep)) return;
     saveDraft();
+    if (currentStep < TOTAL_STEPS) {
+      await tryGoToStep(nextWizardStep(currentStep));
+      return;
+    }
+    buildSummary();
     const formData = collectFormData();
     nextBtn.disabled = true;
     try {
@@ -1796,7 +1772,6 @@ if (mode === "wizard") {
       alert(error?.message ?? "A hirdetés mentése nem sikerült.");
     } finally {
       nextBtn.disabled = false;
-      syncPhotoNextButton();
     }
   });
 
@@ -1964,10 +1939,6 @@ wrapMdOutlinedFields();
 bindFuelPickerSync();
 syncFuelDependentFields();
 initKmInput(document.getElementById("km"));
-for (const id of PRICE_INPUT_IDS) {
-  const priceEl = document.getElementById(id);
-  if (priceEl) initPriceInput(priceEl);
-}
 fitAllFormFields();
 stampAdFormUniformCells();
 

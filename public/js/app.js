@@ -285,7 +285,6 @@ const categoryPicker = initCategoryPicker({
       applyListingAddressFromProfileSync(adForm);
       applyListingAddressFromProfile(adForm).catch(() => {});
       document.body.classList.remove("ad-form-layout-ready");
-      applyAdFormDesk({ openStep: 1, scrollToAccordion: "alap" });
       window.dispatchEvent(new Event("ad-form-sync-location"));
       window.dispatchEvent(new Event("ad-form-layout-refresh"));
     } catch (error) {

@@ -878,8 +878,9 @@ async function applyAdFormLayout() {
   if (!form) return;
   const wizardOpen = !form.closest("#ad-wizard-shell")?.hidden;
   if (wizardOpen && isAdFormDesk(form)) {
-    applyAdFormDesk({ openStep: 1, scrollToAccordion: "alap" });
+    document.body.classList.remove("ad-form-layout-ready");
   }
+  let layoutApplied = false;
   try {
     const category = currentLayoutCategory(form);
     const isImmo = category === "ingatlan";
@@ -1100,12 +1101,21 @@ async function applyAdFormLayout() {
     await refreshAdFormBmPickers(form);
     initTireSizes(form);
     window.dispatchEvent(new Event("ad-form-sync-fuel-fields"));
+    layoutApplied = true;
   } catch (error) {
     console.warn("Ad form layout apply:", error);
   } finally {
     if (!wizardOpen) return;
-    applyAdFormDesk();
     if (isAdFormDesk(form)) {
+      applyAdFormDesk({ openStep: 1, scrollToAccordion: "alap" });
+      if (layoutApplied) {
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            document.body.classList.add("ad-form-layout-ready");
+          });
+        });
+      }
+    } else {
       document.body.classList.add("ad-form-layout-ready");
     }
   }

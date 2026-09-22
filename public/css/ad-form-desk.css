@@ -1,11 +1,11 @@
 /* Közös desk jármű űrlap — accordion menü, mezők, kép/leírás (mobil + desktop) */
 
-/* Ne villogjon a nyers űrlap a layout API válaszáig */
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"]:not(.ad-form-layout-ready) #ad-form.ad-form-desk-layout {
+/* Ne villogjon a nyers űrlap a layout API + desk mount után */
+body.site-app[data-site-page="hirdetesfeladas"]:not(.ad-form-layout-ready) #ad-wizard-shell:not([hidden]) .automax-main {
   visibility: hidden;
 }
 
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"].ad-form-layout-ready #ad-form.ad-form-desk-layout {
+body.site-app[data-site-page="hirdetesfeladas"].ad-form-layout-ready #ad-wizard-shell:not([hidden]) .automax-main {
   visibility: visible;
 }
 

@@ -9,8 +9,8 @@ import { createAdForm } from "./form-core.js?v=submitBtn1";
 import { applyImportedVehicleToSelects } from "./vehicle-catalog-client.js?v=importVehicle1";
 import { initTireSizes } from "./tire-sizes-ui.js";
 import { initPhoneLanguages } from "./phone-lang-ui.js";
-import { initCategoryPicker } from "./category-picker.js?v=pickerBoot2";
-import { applyAdFormDesk, clearAdFormEditBoot, isDeskVehicleSubtype } from "./ad-form-desk.js?v=adFormDesk44";
+import { initCategoryPicker } from "./category-picker.js?v=deskMountFirst4";
+import { applyAdFormDesk, clearAdFormEditBoot, isDeskVehicleSubtype } from "./ad-form-desk.js?v=adFormDesk45";
 import {
   requireAuthForPage,
   getAuthUser,
@@ -286,7 +286,9 @@ const categoryPicker = initCategoryPicker({
       applyListingAddressFromProfileSync(adForm);
       applyListingAddressFromProfile(adForm).catch(() => {});
       window.dispatchEvent(new Event("ad-form-sync-location"));
-      window.dispatchEvent(new Event("ad-form-layout-refresh"));
+      requestAnimationFrame(() => {
+        window.dispatchEvent(new Event("ad-form-layout-refresh"));
+      });
     } catch (error) {
       console.error("Űrlap indítás hiba:", error);
     }

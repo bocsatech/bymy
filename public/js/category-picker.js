@@ -497,6 +497,7 @@ export function initCategoryPicker({
   }
 
   function showPicker() {
+    document.body.classList.remove("ad-form-desk-mount");
     resetCategoryPickerUi();
     pickerShell?.removeAttribute("hidden");
     wizardShell?.setAttribute("hidden", "");
@@ -529,8 +530,10 @@ export function initCategoryPicker({
     stub?.setAttribute("hidden", "");
     wizardShell?.removeAttribute("hidden");
     if (isDeskVehicleSubtype(selection?.subtype)) {
+      document.body.classList.add("ad-form-desk-mount");
       stepsBar?.setAttribute("hidden", "");
     } else {
+      document.body.classList.remove("ad-form-desk-mount");
       stepsBar?.removeAttribute("hidden");
     }
 

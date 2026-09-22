@@ -526,7 +526,19 @@ export function syncCompactPriceMenuWidth(wheel, extraLabels = []) {
   wheel.style.setProperty("--immo-wheel-menu-w", `${menuW}px`);
 }
 
+function clearPortaledMenuStyle(wheel) {
+  if (!wheel) return;
+  wheel.style.removeProperty("position");
+  wheel.style.removeProperty("left");
+  wheel.style.removeProperty("top");
+  wheel.style.removeProperty("right");
+  wheel.style.removeProperty("width");
+  wheel.style.removeProperty("max-width");
+  wheel.style.removeProperty("z-index");
+}
+
 function parkWheelInWrap(wheel) {
+  clearPortaledMenuStyle(wheel);
   const home = wheel._immoMenuHome;
   if (!home?.parent?.isConnected) return;
   if (wheel.parentElement === home.parent) return;
@@ -537,10 +549,29 @@ function parkWheelInWrap(wheel) {
   }
 }
 
+function positionPortaledMenu(wheel, wrap) {
+  const trigger = wrap?.querySelector?.(".immo-wheel-trigger");
+  if (!wheel || !trigger) return;
+  const rect = trigger.getBoundingClientRect();
+  const width = Math.max(120, Math.round(rect.width));
+  const left = Math.max(8, Math.min(Math.round(rect.left), window.innerWidth - width - 8));
+  const top = Math.min(Math.round(rect.bottom + 4), window.innerHeight - 16);
+  wheel.style.position = "fixed";
+  wheel.style.left = `${left}px`;
+  wheel.style.top = `${top}px`;
+  wheel.style.right = "auto";
+  wheel.style.width = `${width}px`;
+  wheel.style.maxWidth = `min(${width}px, calc(100vw - 16px))`;
+  wheel.style.zIndex = "10060";
+}
+
 function portalWheelToBody(wheel, wrap) {
-  if (wheel.parentElement === document.body) return;
-  wheel._immoMenuHome = { parent: wrap, next: wheel.nextSibling };
-  document.body.appendChild(wheel);
+  if (!wheel || !wrap) return;
+  if (wheel.parentElement !== document.body) {
+    wheel._immoMenuHome = { parent: wrap, next: wheel.nextSibling };
+    document.body.appendChild(wheel);
+  }
+  positionPortaledMenu(wheel, wrap);
 }
 
 function closeAllMenuWheels() {
@@ -678,13 +709,15 @@ export function initMenuWheel(wheel, { emptyLabel = "Mindegy", multiple = false,
     wrap.classList.add("is-open");
     wheel.removeAttribute("hidden");
     trigger.setAttribute("aria-expanded", "true");
-    if (isMobileMenuViewport()) {
+    const inAdForm = Boolean(wrap.closest("#ad-form"));
+    if (isMobileMenuViewport() || inAdForm) {
       if (PRICE_WHEEL_KEYS.has(wheel.getAttribute("data-wheel") || "")) {
         const emptyLabel = trigger.dataset.emptyLabel || "";
         syncCompactPriceMenuWidth(wheel, emptyLabel ? [emptyLabel] : []);
       }
       portalWheelToBody(wheel, wrap);
-      showMenuBackdrop();
+      if (isMobileMenuViewport()) showMenuBackdrop();
+      else hideMenuBackdrop();
     } else {
       parkWheelInWrap(wheel);
       hideMenuBackdrop();
@@ -693,6 +726,7 @@ export function initMenuWheel(wheel, { emptyLabel = "Mindegy", multiple = false,
 
   trigger.addEventListener("click", (event) => {
     event.stopPropagation();
+    if (wrap.classList.contains("is-disabled") || wheel.getAttribute("aria-disabled") === "true") return;
     if (customInput) {
       open();
       return;

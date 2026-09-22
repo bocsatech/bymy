@@ -886,12 +886,44 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-
   /* Ingatlan: a keskeny bal sáv ne takaródjon a grid közép/jobb oszlopa alá (kattintás a Típus stb. mezőkre). */
   body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form--ingatlan.ad-form-desk-layout .ad-form-desk-shell {
     position: relative;
-    z-index: 4;
+    z-index: 40;
   }
 
   body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form--ingatlan.ad-form-desk-layout #ad-desk-center-col,
   body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form--ingatlan.ad-form-desk-layout #ad-desk-tips-col {
     z-index: 1;
+    /* Üres / átfedő területek ne fogják el a bal oldali mezők kattintásait. */
+    pointer-events: none;
+  }
+
+  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form--ingatlan.ad-form-desk-layout #ad-desk-center-col :is(
+    button,
+    a,
+    input,
+    select,
+    textarea,
+    label,
+    summary,
+    [role="button"],
+    [role="listbox"],
+    [role="option"],
+    .immo-wheel-trigger,
+    .wizard-cat-trigger,
+    .photo-upload-bar,
+    #photo-grid,
+    .ad-desk-guide-frame__img
+  ),
+  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form--ingatlan.ad-form-desk-layout #ad-desk-tips-col :is(
+    button,
+    a,
+    input,
+    select,
+    textarea,
+    label,
+    summary,
+    [role="button"]
+  ) {
+    pointer-events: auto;
   }
 
   body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout #ad-desk-center-col {

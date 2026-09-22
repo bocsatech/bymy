@@ -2805,6 +2805,19 @@ body.site-app #ad-form.ad-form--ingatlan .immo-wheel--menu {
   z-index: 121;
 }
 
+/* Portált menü a body-n: a bal sáv fölött, clip / overlay nélkül. */
+body.site-app > .immo-wheel.immo-wheel--menu {
+  position: fixed;
+  z-index: 10060;
+  max-height: min(14rem, 45vh);
+  margin: 0;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.16);
+  overflow: auto;
+}
+
 body.site-app #ad-form.ad-form--ingatlan .immo-search-form .immo-dual-range-block {
   padding-top: 0;
 }

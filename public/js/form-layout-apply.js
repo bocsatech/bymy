@@ -1,7 +1,7 @@
-import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=immoPostNum1";
+import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=immoTipusPick1";
 import { refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=deskAccScroll1";
 import { initTireSizes } from "./tire-sizes-ui.js?v=tireFill1";
-import { applyAdFormDesk } from "./ad-form-desk.js?v=immoAdFormBoot5";
+import { applyAdFormDesk } from "./ad-form-desk.js?v=immoTipusPick1";
 import { markImmoPostViewReady } from "./category-picker.js?v=pickerBoot4";
 import {
   DESK_MUSZAKI_CORE_FIELD_KEYS,

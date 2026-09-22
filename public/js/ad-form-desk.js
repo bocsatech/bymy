@@ -613,6 +613,8 @@ function bindDeskEvents() {
   form.dataset.adFormDeskBound = "1";
 
   form.addEventListener("click", (event) => {
+    if (event.target.closest(".immo-wheel-wrap, .immo-wheel--menu, .immo-menu-backdrop")) return;
+
     const subToggle = event.target.closest("[data-desk-sub-acc-toggle]");
     if (subToggle && document.body.classList.contains("ad-form-desk-active")) {
       event.preventDefault();

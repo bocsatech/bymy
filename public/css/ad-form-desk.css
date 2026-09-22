@@ -883,6 +883,17 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-
     max-height: none;
   }
 
+  /* Ingatlan: a keskeny bal sáv ne takaródjon a grid közép/jobb oszlopa alá (kattintás a Típus stb. mezőkre). */
+  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form--ingatlan.ad-form-desk-layout .ad-form-desk-shell {
+    position: relative;
+    z-index: 4;
+  }
+
+  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form--ingatlan.ad-form-desk-layout #ad-desk-center-col,
+  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form--ingatlan.ad-form-desk-layout #ad-desk-tips-col {
+    z-index: 1;
+  }
+
   body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout #ad-desk-center-col {
     grid-column: 2;
     grid-row: 1;

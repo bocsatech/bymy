@@ -2,8 +2,13 @@ import {
   fetchMyListings,
   updateListingStatusInDb,
   saveListingPhotosOrder,
+  saveListingToDb,
   deleteListingFromDb,
-} from "./db-client.js?v=myAds1";
+} from "./db-client.js?v=myAdsSablon1";
+import {
+  DEFAULT_PHOTO_OVERLAY_ID,
+  renderListingPhotoOverlay,
+} from "./listing-photo-overlay.js?v=photoOverlayIcons3";
 import { compressListingPhotos } from "./listing-photo-compress.js?v=myAds1";
 import { bindListingOpen, restoreListingReturn } from "./listing-return.js?v=scrollTop1";
 
@@ -99,8 +104,31 @@ function readFeaturedIdSet() {
 }
 
 function hasSablon(item) {
-  const photos = item.form?.photos || item.photos;
-  return Array.isArray(photos) && photos.some((p) => p?.overlayTemplateId || p?.overlayDataUrl);
+  return Boolean(String(item.form?.photo_overlay_template_id ?? "").trim());
+}
+
+function overlayInfoFromListing(item) {
+  const f = item.form || {};
+  const filter = item.preview?.filter || {};
+  const le = String(f.teljesitmeny_le ?? filter.teljesitmeny_le ?? "").trim();
+  const kw = String(f.teljesitmeny_kw ?? filter.teljesitmeny_kw ?? "").trim();
+  const kmRaw = String(f.km ?? filter.km ?? item.preview?.km ?? "").replace(/\D/g, "");
+  return {
+    templateId: DEFAULT_PHOTO_OVERLAY_ID,
+    brand: String(f.gyartmany ?? filter.gyartmany ?? "").trim(),
+    model: [f.modell, f.tipus].filter(Boolean).join(" ") || String(f.modell ?? filter.modell ?? "").trim(),
+    year: String(f.gyartasi_ev ?? filter.gyartasi_ev ?? "").trim(),
+    km: kmRaw,
+    le,
+    kw,
+    fuel: String(f.uzemanyag ?? filter.uzemanyag ?? "").trim(),
+    drive: String(f.hajtas ?? filter.hajtas ?? "").trim(),
+    gearbox: String(f.sebessegvalto ?? filter.sebessegvalto ?? "").trim(),
+    body: String(f.kivitel ?? filter.kivitel ?? "").trim(),
+    doors: String(f.ajtok ?? filter.ajtok ?? "").trim(),
+    seats: String(f.szemelyek ?? filter.szemelyek ?? "").trim(),
+    dealer: "",
+  };
 }
 
 function editHref(id) {
@@ -263,11 +291,11 @@ export function initMyAdsPanel(root) {
           <div class="myads-price-block">
             <strong class="myads-price-lg">${price}</strong>
             ${priceSub ? `<span class="myads-price-sub">${escapeHtml(priceSub)}</span>` : ""}
-            <div class="myads-sablon-toggle">
+            <label class="myads-sablon-toggle">
               <span class="myads-sablon-toggle-label">${sablonOn ? "Sablon: Aktív" : "Sablon: nincs"}</span>
               <span class="myads-sablon-dot${sablonOn ? " is-on" : ""}" aria-hidden="true"></span>
-              <input type="checkbox" class="myads-switch" disabled aria-hidden="true" ${sablonOn ? "checked" : ""} tabindex="-1" />
-            </div>
+              <input type="checkbox" class="myads-switch" data-sablon-toggle="${item.id}" ${sablonOn ? "checked" : ""} aria-label="Sablon be- és kikapcsolása" />
+            </label>
           </div>
         </div>
         <div class="myads-promo-strip" role="group" aria-label="Promóció">
@@ -334,6 +362,42 @@ export function initMyAdsPanel(root) {
       .join("");
   }
 
+  async function persistSablonMeta(item, { active, baseUrl }) {
+    const form = {
+      ...(item.form || {}),
+      photo_overlay_base_url: String(baseUrl || item.form?.photo_overlay_base_url || "").trim(),
+      photo_overlay_template_id: active ? DEFAULT_PHOTO_OVERLAY_ID : "",
+    };
+    await saveListingToDb(form, item.id, { status: item.status || "feladott" });
+  }
+
+  async function setSablonActive(item, wantActive) {
+    const urls = photoUrls(item);
+    if (!urls.length) {
+      throw new Error("Előbb adj hozzá legalább egy képet.");
+    }
+    const form = item.form || {};
+    let base = String(form.photo_overlay_base_url || "").trim();
+    if (!base) base = urls[0];
+    const rest = urls.slice(1).map((url) => ({ url }));
+
+    if (wantActive) {
+      if (!String(form.photo_overlay_base_url || "").trim()) {
+        base = urls[0];
+      }
+      const dataUrl = await renderListingPhotoOverlay(base, overlayInfoFromListing(item));
+      await saveListingPhotosOrder(item.id, [{ data: dataUrl }, ...rest]);
+      await persistSablonMeta(item, { active: true, baseUrl: base });
+      return;
+    }
+
+    if (!base) {
+      throw new Error("Az eredeti főkép nem állítható vissza. Szerkesztésben állítsd vissza a képet.");
+    }
+    await saveListingPhotosOrder(item.id, [{ url: base }, ...rest]);
+    await persistSablonMeta(item, { active: false, baseUrl: base });
+  }
+
   function openPhotos(id) {
     const item = items.find((row) => Number(row.id) === Number(id));
     if (!item) return;
@@ -366,6 +430,27 @@ export function initMyAdsPanel(root) {
     root.querySelectorAll("[data-promo='kiemelt'], [data-promo='top']").forEach((btn) => {
       btn.addEventListener("click", () => {
         alert("A Kiemelés és TOP ajánlat beállítása hamarosan elérhető a fiókodból.");
+      });
+    });
+    root.querySelectorAll("[data-sablon-toggle]").forEach((input) => {
+      input.addEventListener("change", async () => {
+        const id = Number(input.dataset.sablonToggle);
+        const item = items.find((row) => Number(row.id) === id);
+        if (!item) return;
+        const wantActive = input.checked;
+        const label = input.closest(".myads-sablon-toggle");
+        label?.classList.add("is-busy");
+        input.disabled = true;
+        try {
+          await setSablonActive(item, wantActive);
+          await reload();
+        } catch (error) {
+          input.checked = !wantActive;
+          alert(error.message ?? "A sablon mentése sikertelen.");
+        } finally {
+          input.disabled = false;
+          label?.classList.remove("is-busy");
+        }
       });
     });
     root.querySelectorAll("[data-inactive]").forEach((box) => {

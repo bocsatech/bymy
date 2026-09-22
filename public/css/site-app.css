@@ -4613,6 +4613,13 @@ body.site-app .myads-sablon-toggle {
   margin-top: 0.65rem;
   font-size: 0.78rem;
   color: #475467;
+  cursor: pointer;
+  user-select: none;
+}
+
+body.site-app .myads-sablon-toggle.is-busy {
+  opacity: 0.55;
+  pointer-events: none;
 }
 
 body.site-app .myads-sablon-dot {
@@ -4620,6 +4627,7 @@ body.site-app .myads-sablon-dot {
   height: 7px;
   border-radius: 50%;
   background: #d0d5dd;
+  flex-shrink: 0;
 }
 
 body.site-app .myads-sablon-dot.is-on {
@@ -4627,17 +4635,43 @@ body.site-app .myads-sablon-dot.is-on {
 }
 
 body.site-app .myads-switch {
-  width: 2.1rem;
-  height: 1.15rem;
+  position: relative;
+  width: 2.35rem;
+  height: 1.25rem;
+  margin: 0;
   appearance: none;
+  border: 0;
   border-radius: 999px;
   background: #d0d5dd;
-  position: relative;
-  opacity: 0.85;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s ease;
+}
+
+body.site-app .myads-switch::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: calc(1.25rem - 4px);
+  height: calc(1.25rem - 4px);
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  transition: transform 0.15s ease;
 }
 
 body.site-app .myads-switch:checked {
   background: #12b76a;
+}
+
+body.site-app .myads-switch:checked::after {
+  transform: translateX(1.05rem);
+}
+
+body.site-app .myads-switch:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
 }
 
 body.site-app .myads-promo-strip {

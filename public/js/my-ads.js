@@ -177,6 +177,16 @@ function formatDayCount(n) {
   return `${n} nap`;
 }
 
+function myadsCardToggleHtml({ labelActive, labelInactive, on, inputAttrs, ariaLabel }) {
+  return `
+    <label class="myads-card-toggle">
+      <span class="myads-card-toggle-label">${on ? labelActive : labelInactive}</span>
+      <span class="myads-card-toggle-dot${on ? " is-on" : ""}" aria-hidden="true"></span>
+      <input type="checkbox" class="myads-switch" ${inputAttrs} ${on ? "checked" : ""} aria-label="${escapeHtml(ariaLabel)}" />
+    </label>
+  `;
+}
+
 function listingTenureHtml(item) {
   const elapsed = listingAgeDays(item);
   const remaining = listingDaysRemaining(item);
@@ -366,11 +376,29 @@ export function initMyAdsPanel(root) {
           <div class="myads-price-block">
             <strong class="myads-price-lg">${price}</strong>
             ${priceSub ? `<span class="myads-price-sub">${escapeHtml(priceSub)}</span>` : ""}
-            <label class="myads-sablon-toggle">
-              <span class="myads-sablon-toggle-label">${sablonOn ? "Sablon: Aktív" : "Sablon: nincs"}</span>
-              <span class="myads-sablon-dot${sablonOn ? " is-on" : ""}" aria-hidden="true"></span>
-              <input type="checkbox" class="myads-switch" data-sablon-toggle="${item.id}" ${sablonOn ? "checked" : ""} aria-label="Sablon be- és kikapcsolása" />
-            </label>
+            <div class="myads-card-toggles">
+              ${myadsCardToggleHtml({
+                labelActive: "Sablon: Aktív",
+                labelInactive: "Sablon: nincs",
+                on: sablonOn,
+                inputAttrs: `data-sablon-toggle="${item.id}"`,
+                ariaLabel: "Sablon be- és kikapcsolása",
+              })}
+              ${myadsCardToggleHtml({
+                labelActive: "Kiemelés: Aktív",
+                labelInactive: "Kiemelés: nincs",
+                on: kiemeltPromoOn,
+                inputAttrs: `data-promo-toggle="${item.id}" data-promo-kind="kiemelt"`,
+                ariaLabel: "Kiemelés be- és kikapcsolása",
+              })}
+              ${myadsCardToggleHtml({
+                labelActive: "TOP ajánlat: Aktív",
+                labelInactive: "TOP ajánlat: nincs",
+                on: isTopOffer,
+                inputAttrs: `data-promo-toggle="${item.id}" data-promo-kind="top"`,
+                ariaLabel: "TOP ajánlat be- és kikapcsolása",
+              })}
+            </div>
           </div>
         </div>
         <div class="myads-promo-strip" role="group" aria-label="Promóció">
@@ -529,19 +557,23 @@ export function initMyAdsPanel(root) {
     root.querySelectorAll("[data-photos]").forEach((btn) => {
       btn.addEventListener("click", () => openPhotos(btn.dataset.photos));
     });
+    async function setPromoKindActive(item, kind, wantOn) {
+      const fieldKey = kind === "top" ? "promo_top_ajanlat" : "promo_kiemelt";
+      await persistPromoFlag(item, fieldKey, wantOn);
+    }
+
     root.querySelectorAll("[data-promo='kiemelt'], [data-promo='top']").forEach((btn) => {
       btn.addEventListener("click", async () => {
         const id = Number(btn.dataset.id);
         const item = items.find((row) => Number(row.id) === id);
         if (!item) return;
         const kind = btn.dataset.promo;
-        const fieldKey = kind === "top" ? "promo_top_ajanlat" : "promo_kiemelt";
         const wasOn = kind === "top" ? promoTopAjanlatActive(item) : promoKiemeltActive(item);
         const wantOn = !wasOn;
         btn.disabled = true;
         btn.classList.add("is-busy");
         try {
-          await persistPromoFlag(item, fieldKey, wantOn);
+          await setPromoKindActive(item, kind, wantOn);
           await reload();
         } catch (error) {
           alert(error.message ?? "A promó mentése sikertelen.");
@@ -551,13 +583,35 @@ export function initMyAdsPanel(root) {
         }
       });
     });
+    root.querySelectorAll("[data-promo-toggle]").forEach((input) => {
+      input.addEventListener("change", async () => {
+        const id = Number(input.dataset.promoToggle);
+        const kind = input.dataset.promoKind;
+        const item = items.find((row) => Number(row.id) === id);
+        if (!item || !kind) return;
+        const wantOn = input.checked;
+        const label = input.closest(".myads-card-toggle");
+        label?.classList.add("is-busy");
+        input.disabled = true;
+        try {
+          await setPromoKindActive(item, kind, wantOn);
+          await reload();
+        } catch (error) {
+          input.checked = !wantOn;
+          alert(error.message ?? "A promó mentése sikertelen.");
+        } finally {
+          input.disabled = false;
+          label?.classList.remove("is-busy");
+        }
+      });
+    });
     root.querySelectorAll("[data-sablon-toggle]").forEach((input) => {
       input.addEventListener("change", async () => {
         const id = Number(input.dataset.sablonToggle);
         const item = items.find((row) => Number(row.id) === id);
         if (!item) return;
         const wantActive = input.checked;
-        const label = input.closest(".myads-sablon-toggle");
+        const label = input.closest(".myads-card-toggle");
         label?.classList.add("is-busy");
         input.disabled = true;
         try {

@@ -4627,25 +4627,32 @@ body.site-app .myads-price-sub {
   color: #667085;
 }
 
-body.site-app .myads-sablon-toggle {
+body.site-app .myads-card-toggles {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.4rem;
+  margin-top: 0.65rem;
+}
+
+body.site-app .myads-card-toggle {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: flex-end;
   gap: 0.35rem;
-  margin-top: 0.65rem;
   font-size: 0.78rem;
   color: #475467;
   cursor: pointer;
   user-select: none;
 }
 
-body.site-app .myads-sablon-toggle.is-busy {
+body.site-app .myads-card-toggle.is-busy {
   opacity: 0.55;
   pointer-events: none;
 }
 
-body.site-app .myads-sablon-dot {
+body.site-app .myads-card-toggle-dot {
   width: 7px;
   height: 7px;
   border-radius: 50%;
@@ -4653,7 +4660,7 @@ body.site-app .myads-sablon-dot {
   flex-shrink: 0;
 }
 
-body.site-app .myads-sablon-dot.is-on {
+body.site-app .myads-card-toggle-dot.is-on {
   background: #12b76a;
 }
 
@@ -6687,9 +6694,13 @@ html[data-theme="dark"] body.site-app.settings-page .mm-list-item.is-unread {
     gap: 0.5rem;
   }
 
-  body.site-app .myads-sablon-toggle {
-    justify-content: flex-start;
+  body.site-app .myads-card-toggles {
+    align-items: flex-start;
     margin-top: 0;
+  }
+
+  body.site-app .myads-card-toggle {
+    justify-content: flex-start;
   }
 }
 

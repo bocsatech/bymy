@@ -1,5 +1,5 @@
 import { fetchListings } from "./db-client.js?v=featured1";
-import { pickFeaturedListings } from "./home-featured-slots.js?v=featured1";
+import { pickFeaturedListings } from "./home-featured-slots.js?v=featuredNoAuto1";
 import { createListingTileCard } from "./listing-tile.js?v=featured4";
 import { bindListingOpen, restoreListingReturn } from "./listing-return.js?v=scrollTop1";
 

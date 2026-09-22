@@ -6,6 +6,10 @@ function listingHasPhoto(item) {
   return Boolean(String(preview.imageUrl || item?.fo_kep || "").trim());
 }
 
+function isPromoKiemelt(item) {
+  return String(item?.form?.promo_kiemelt ?? "").trim() === "1";
+}
+
 export function readConfiguredFeaturedIds() {
   const g = globalThis.BYMY_FEATURED_LISTING_IDS;
   if (!Array.isArray(g)) return [];
@@ -13,6 +17,8 @@ export function readConfiguredFeaturedIds() {
 }
 
 /**
+ * Csak tényleges kiemelés: admin ID-k, vagy promo_kiemelt.
+ * Nincs automatikus „legújabb 4” kitöltés.
  * @param {object[]} items
  * @param {number[]} [configuredIds]
  * @returns {object[]}
@@ -22,38 +28,38 @@ export function pickFeaturedListings(items, configuredIds = readConfiguredFeatur
   const ids = Array.isArray(configuredIds) ? configuredIds : [];
   const byId = new Map(list.map((item) => [Number(item.id), item]));
   const picked = [];
+  const used = new Set();
 
   for (const rawId of ids) {
     const id = Number(rawId);
-    if (!Number.isFinite(id) || id <= 0) continue;
+    if (!Number.isFinite(id) || id <= 0 || used.has(id)) continue;
     const item = byId.get(id);
-    if (item && listingHasPhoto(item)) picked.push(item);
+    if (item && listingHasPhoto(item)) {
+      picked.push(item);
+      used.add(id);
+    }
   }
 
   if (ids.length > 0) {
-    return picked;
+    return picked.slice(0, FEATURED_SLOT_IDS.length);
   }
 
-  const used = new Set(picked.map((item) => Number(item.id)));
-  const rest = [...list]
-    .filter((item) => listingHasPhoto(item) && !used.has(Number(item.id)))
+  const fromPromo = list
+    .filter((item) => listingHasPhoto(item) && isPromoKiemelt(item) && !used.has(Number(item.id)))
     .sort((a, b) => {
       const ta = new Date(a.updated_at ?? a.created_at ?? 0).getTime();
       const tb = new Date(b.updated_at ?? b.created_at ?? 0).getTime();
       return tb - ta;
     });
 
-  while (picked.length < FEATURED_SLOT_IDS.length && rest.length) {
-    picked.push(rest.shift());
+  for (const item of fromPromo) {
+    if (picked.length >= FEATURED_SLOT_IDS.length) break;
+    picked.push(item);
   }
 
-  return picked.slice(0, FEATURED_SLOT_IDS.length);
+  return picked;
 }
 
 export function featuredListingIdSet(items, configuredIds = readConfiguredFeaturedIds()) {
-  const fromSlots = pickFeaturedListings(items, configuredIds).map((item) => Number(item.id));
-  const fromPromo = (Array.isArray(items) ? items : [])
-    .filter((item) => String(item?.form?.promo_kiemelt ?? "").trim() === "1")
-    .map((item) => Number(item.id));
-  return new Set([...fromSlots, ...fromPromo].filter((n) => Number.isFinite(n) && n > 0));
+  return new Set(pickFeaturedListings(items, configuredIds).map((item) => Number(item.id)));
 }

@@ -1,7 +1,18 @@
 import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=immoUiParity1";
 import { refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=deskAccScroll1";
 import { initTireSizes } from "./tire-sizes-ui.js?v=tireFill1";
-import { applyAdFormDesk } from "./ad-form-desk.js?v=adFormDesk44";
+import { applyAdFormDesk, isAdFormDesk } from "./ad-form-desk.js?v=adFormDesk44";
+
+let layoutApplyQueue = Promise.resolve();
+
+export function ensureAdFormLayoutReady() {
+  layoutApplyQueue = layoutApplyQueue
+    .then(() => applyAdFormLayout())
+    .catch((error) => {
+      console.warn("Ad form layout apply:", error);
+    });
+  return layoutApplyQueue;
+}
 import {
   DESK_MUSZAKI_CORE_FIELD_KEYS,
   EV_LAYOUT_GROUP_KEYS,
@@ -873,6 +884,12 @@ function pruneEmptyCards(form) {
   });
 }
 
+function prepDeskBeforeGridPlacement(form) {
+  if (!form || form.closest("#ad-wizard-shell")?.hidden) return;
+  if (!isAdFormDesk(form)) return;
+  applyAdFormDesk();
+}
+
 async function applyAdFormLayout() {
   const form = document.getElementById("ad-form");
   if (!form) return;
@@ -902,6 +919,7 @@ async function applyAdFormLayout() {
       if (isImmo) hideVehicleChromeWithoutLayout(form);
       return;
     }
+    prepDeskBeforeGridPlacement(form);
     resetPlacedLayoutItems(form);
     const placed = new Set();
     for (const cell of cells) {
@@ -1170,10 +1188,10 @@ function currentLayoutCategory(form) {
 }
 
 function scheduleApply() {
-  applyAdFormLayout();
-  window.setTimeout(applyAdFormLayout, 120);
-  window.setTimeout(applyAdFormLayout, 450);
-  window.setTimeout(applyAdFormLayout, 900);
+  ensureAdFormLayoutReady();
+  window.setTimeout(() => ensureAdFormLayoutReady(), 120);
+  window.setTimeout(() => ensureAdFormLayoutReady(), 450);
+  window.setTimeout(() => ensureAdFormLayoutReady(), 900);
 }
 
 function syncAdLocationPostalVisibility(form = document.getElementById("ad-form")) {
@@ -1190,6 +1208,6 @@ if (document.readyState === "loading") {
 } else {
   scheduleApply();
 }
-window.addEventListener("ad-form-ready", applyAdFormLayout);
-window.addEventListener("ad-form-layout-refresh", applyAdFormLayout);
+window.addEventListener("ad-form-ready", () => ensureAdFormLayoutReady());
+window.addEventListener("ad-form-layout-refresh", () => ensureAdFormLayoutReady());
 window.addEventListener("ad-form-sync-location-postal", () => syncAdLocationPostalVisibility());

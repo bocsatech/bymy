@@ -525,6 +525,15 @@ export function initCategoryPicker({
       if (!ok) return;
     }
 
+    if (isDeskVehicleSubtype(selection?.subtype)) {
+      try {
+        const { ensureAdFormLayoutReady } = await import("./form-layout-apply.js?v=rowWidthStable2");
+        await ensureAdFormLayoutReady();
+      } catch (error) {
+        console.warn("Űrlap layout előkészítés:", error);
+      }
+    }
+
     pickerShell?.setAttribute("hidden", "");
     stub?.setAttribute("hidden", "");
     wizardShell?.removeAttribute("hidden");

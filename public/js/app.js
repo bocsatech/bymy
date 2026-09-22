@@ -272,20 +272,22 @@ const categoryPicker = initCategoryPicker({
     );
     return false;
   },
-  onVehicleSelected: () => {
+  onVehicleSelected: async () => {
     try {
       const api = ensureFormReady();
       if (!editing) api?.resetForm?.({ fresh: true });
       api?.markTouched?.();
       const sel = categoryPicker?.getSelection?.();
       if (sel) categoryPicker?.syncWizardContext?.(sel);
+      applyAdFormDesk({ openStep: 1, scrollToAccordion: "alap" });
       api?.syncKisteherFields?.();
       phoneLanguages?.syncLanguages?.();
       tireSizes?.syncRearTires?.();
       applyListingAddressFromProfileSync(adForm);
       applyListingAddressFromProfile(adForm).catch(() => {});
       window.dispatchEvent(new Event("ad-form-sync-location"));
-      window.dispatchEvent(new Event("ad-form-layout-refresh"));
+      const { ensureAdFormLayoutReady } = await import("./form-layout-apply.js?v=rowWidthStable2");
+      await ensureAdFormLayoutReady();
       applyAdFormDesk({ openStep: 1, scrollToAccordion: "alap" });
     } catch (error) {
       console.error("Űrlap indítás hiba:", error);

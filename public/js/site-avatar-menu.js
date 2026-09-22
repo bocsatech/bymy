@@ -159,7 +159,7 @@ export function hasSettingsReturn() {
 }
 
 function settingsTargetHref() {
-  return "/beallitasok.html?szekcio=szemelyes";
+  return "/beallitasok.html";
 }
 
 export function refreshAvatarMenuUi(root = document) {

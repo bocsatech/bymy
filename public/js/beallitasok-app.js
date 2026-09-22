@@ -29,7 +29,7 @@ import { initMyAdsPanel } from "./my-ads.js?v=myadsPatch1";
 import {
   consumeSettingsReturn,
   hasSettingsReturn,
-} from "./site-avatar-menu.js?v=avatarSync1";
+} from "./site-avatar-menu.js?v=settingsHome1";
 import { fetchListing } from "./db-client.js?v=parkThumb1";
 import {
   applyDeviceIdentityToPerson,
@@ -266,11 +266,16 @@ function resizeImageFile(file) {
 }
 
 function currentSection() {
-  const raw = new URLSearchParams(window.location.search).get("szekcio") || "szemelyes";
+  const raw = new URLSearchParams(window.location.search).get("szekcio");
+  if (!raw) {
+    const hash = String(window.location.hash || "").replace(/^#/, "");
+    if (LEGACY_ACC_TO_SECTION[hash]) return LEGACY_ACC_TO_SECTION[hash];
+    return null;
+  }
   if (raw === "fiok") return "szemelyes";
   const hash = String(window.location.hash || "").replace(/^#/, "");
   if (LEGACY_ACC_TO_SECTION[hash]) return LEGACY_ACC_TO_SECTION[hash];
-  return SECTIONS.includes(raw) ? raw : "szemelyes";
+  return SECTIONS.includes(raw) ? raw : null;
 }
 
 function settingsAccordionHash() {
@@ -298,13 +303,13 @@ function syncSettingsSublinkActive() {
   document.querySelectorAll("[data-mm-settings-nav] [data-mm-nav], [data-mm-company-nav-wrap] [data-mm-nav]").forEach((link) => {
     const nav = link.getAttribute("data-mm-nav");
     if (!SETTINGS_SECTIONS.has(nav) && nav !== "cegadatok") return;
-    link.classList.toggle("is-active", nav === section);
+    link.classList.toggle("is-active", Boolean(section) && nav === section);
   });
 }
 
 function syncSettingsSubnav() {
   const section = currentSection();
-  const openForSettings = SETTINGS_SECTIONS.has(section);
+  const openForSettings = Boolean(section) && SETTINGS_SECTIONS.has(section);
   const openForCompany = section === "cegadatok" || openForSettings;
 
   document.querySelectorAll("[data-mm-settings-nav]").forEach((group) => {
@@ -329,9 +334,33 @@ function openSettingsAccordion(accId) {
   }
 }
 
+function clearSection() {
+  const url = new URL(window.location.href);
+  url.searchParams.delete("szekcio");
+  url.hash = "";
+  window.history.replaceState({}, "", url);
+  document.querySelectorAll("[data-mm-panel]").forEach((panel) => {
+    panel.hidden = true;
+  });
+  document.querySelectorAll("[data-mm-nav]").forEach((link) => {
+    link.classList.remove("is-active");
+  });
+  document.body.classList.toggle("mm-messages-open", false);
+  document.title = "Fiókom — bymy";
+  document.querySelectorAll(".mm-nav-group").forEach((group) => collapseSettingsSubnav(group));
+}
+
 function setSection(section) {
-  let next = SECTIONS.includes(section) ? section : "szemelyes";
+  if (!section) {
+    clearSection();
+    return;
+  }
+  let next = SECTIONS.includes(section) ? section : null;
   if (next === "fiok") next = "szemelyes";
+  if (!next) {
+    clearSection();
+    return;
+  }
   if (next === "uzenetek") {
     window.location.href = "/uzenetek.html";
     return;
@@ -824,13 +853,14 @@ function syncSidebarAccountType(type) {
   }
   if (companyWrap) companyWrap.hidden = !companyType;
   if (settingsNav) settingsNav.hidden = companyType;
-  if (!companyType && currentSection() === "cegadatok") {
-    setSection("szemelyes");
+  const section = currentSection();
+  if (!companyType && section === "cegadatok") {
+    clearSection();
+  } else if (companyType && (section === "fiok" || section === "szemelyes" || section === "megjelenes" || section === "ajanlasok-korzet")) {
+    clearSection();
+  } else {
+    syncSettingsSubnav();
   }
-  if (companyType && (currentSection() === "fiok" || currentSection() === "szemelyes")) {
-    setSection("cegadatok");
-  }
-  syncSettingsSubnav();
 }
 
 function syncCompanyWrap(form) {
@@ -1327,7 +1357,9 @@ export async function initSettingsPage() {
   if (accHash) {
     openSettingsAccordion(accHash);
   } else {
-    setSection(currentSection());
+    const section = currentSection();
+    if (section) setSection(section);
+    else clearSection();
   }
   await refreshStats(user.email);
   renderPark(user.email);

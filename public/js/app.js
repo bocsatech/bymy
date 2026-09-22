@@ -276,6 +276,7 @@ const categoryPicker = initCategoryPicker({
     try {
       const api = ensureFormReady();
       if (!editing) api?.resetForm?.({ fresh: true });
+      applyAdFormDesk({ openStep: 1, scrollToAccordion: "alap" });
       api?.markTouched?.();
       const sel = categoryPicker?.getSelection?.();
       if (sel) categoryPicker?.syncWizardContext?.(sel);
@@ -286,7 +287,6 @@ const categoryPicker = initCategoryPicker({
       applyListingAddressFromProfile(adForm).catch(() => {});
       window.dispatchEvent(new Event("ad-form-sync-location"));
       window.dispatchEvent(new Event("ad-form-layout-refresh"));
-      applyAdFormDesk({ openStep: 1, scrollToAccordion: "alap" });
     } catch (error) {
       console.error("Űrlap indítás hiba:", error);
     }

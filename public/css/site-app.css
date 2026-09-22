@@ -2672,6 +2672,15 @@ body.site-app #ad-form.ad-form--ingatlan .immo-search-panel--post .immo-dual-ran
   max-width: 100%;
 }
 
+body.site-app #ad-form.ad-form--ingatlan .immo-wheel-wrap--drum-inline .immo-drum-inline {
+  display: none !important;
+}
+
+body.site-app #ad-form.ad-form--ingatlan .immo-wheel-wrap--drum-inline.is-open .immo-wheel-trigger {
+  visibility: visible !important;
+  pointer-events: auto !important;
+}
+
 body.site-app #ad-form.ad-form--ingatlan .immo-search-panel--post .immo-actions {
   margin-top: 0.25rem;
 }

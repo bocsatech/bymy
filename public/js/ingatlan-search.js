@@ -53,8 +53,8 @@ import {
   wheelFieldHtml,
   syncHostClearButton,
 } from "./ingatlan-wheels.js?v=immoClearAll1";
-import { initDrumWheel, syncDrumWheelDisplay, applyDrumModeClass } from "./immo-drum-picker.js?v=immoClearAll1";
-import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=immoClearAll1";
+import { initDrumWheel, syncDrumWheelDisplay, applyDrumModeClass } from "./immo-drum-picker.js?v=immoAdFormDrum1";
+import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=immoAdFormDrum1";
 import {
   fetchIngatlanWheelSchema,
   renderIngatlanSchemaHosts,

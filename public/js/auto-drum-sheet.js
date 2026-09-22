@@ -1,6 +1,6 @@
 
 import { readWheel, readWheelList, setWheelValue } from "./ingatlan-wheels.js?v=immoClearAll1";
-import { syncDrumWheelDisplay } from "./immo-drum-picker.js?v=immoClearAll1";
+import { closeAllInlineDrums, syncDrumWheelDisplay } from "./immo-drum-picker.js?v=immoAdFormDrum1";
 
 const ITEM_H = 60;
 let activePortal = null;
@@ -144,6 +144,11 @@ function bindPortalNativeScroll(scrollEl, ring, wheel) {
 }
 
 function positionPortal(stage, trigger) {
+  if (trigger.closest("#ad-form")) {
+    stage.style.left = "50%";
+    stage.style.top = "50%";
+    return;
+  }
   const rect = trigger.getBoundingClientRect();
   const cx = rect.left + rect.width / 2;
   const cy = rect.top + rect.height / 2;
@@ -161,6 +166,7 @@ function positionPortal(stage, trigger) {
 export function openAutoDrumSheet(wheel, trigger) {
   if (!wheel || !trigger) return;
   closeAutoDrumSheet(false);
+  closeAllInlineDrums(false);
 
   const wrap = wheel.closest(".immo-wheel-wrap");
   const emptyLabel = trigger.dataset.emptyLabel || "Mindegy";

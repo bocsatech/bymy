@@ -664,6 +664,15 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-
     grid-row: auto !important;
   }
 
+  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form--ingatlan .immo-wheel-wrap--drum-inline .immo-drum-inline {
+    display: none !important;
+  }
+
+  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form--ingatlan .immo-wheel-wrap--drum-inline.is-open .immo-wheel-trigger {
+    visibility: visible !important;
+    pointer-events: auto !important;
+  }
+
   body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .automax-main {
     width: 100%;
     max-width: none;

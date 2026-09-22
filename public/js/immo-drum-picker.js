@@ -11,7 +11,8 @@ export function applyDrumModeClass() {
   document.body.classList.add("immo-drum-mode-v2");
 }
 
-function isDrumViewport() {
+function isDrumViewport(contextEl) {
+  if (contextEl?.closest?.("#ad-form")) return false;
   return true;
 }
 
@@ -302,7 +303,7 @@ function findStartItem(scrollEl, wheel) {
 }
 
 function openInlineDrum(wrap, wheel, trigger) {
-  if (!isDrumViewport()) return;
+  if (!isDrumViewport(wrap)) return;
   closeAllInlineDrums(true);
 
   const drum = ensureInlineDrum(wrap);
@@ -468,7 +469,7 @@ export function initDrumWheel(wheel, { emptyLabel = "Mindegy", multiple = false,
   if (openMode !== "portal") {
     trigger.addEventListener("click", (event) => {
       event.stopPropagation();
-      if (!isDrumViewport()) return;
+      if (!isDrumViewport(wrap)) return;
       if (wrap.classList.contains("is-open")) {
         closeInlineDrum(wrap, wheel, true);
         return;

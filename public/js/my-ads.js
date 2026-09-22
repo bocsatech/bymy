@@ -145,6 +145,51 @@ function listingTime(item) {
   return new Date(item.updated_at ?? item.created_at ?? 0).getTime();
 }
 
+/** Alap érvényesség feladás napjától (naptári nap, helyi idő). */
+const LISTING_VALIDITY_DAYS = 30;
+
+function startOfLocalDay(value) {
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return null;
+  d.setHours(0, 0, 0, 0);
+  return d.getTime();
+}
+
+function listingPostedAtIso(item) {
+  return String(item.created_at ?? "").trim() || null;
+}
+
+function listingAgeDays(item) {
+  const start = startOfLocalDay(listingPostedAtIso(item));
+  const today = startOfLocalDay(new Date());
+  if (start == null || today == null) return null;
+  return Math.max(0, Math.round((today - start) / 86400000));
+}
+
+function listingDaysRemaining(item) {
+  const age = listingAgeDays(item);
+  if (age == null) return null;
+  return Math.max(0, LISTING_VALIDITY_DAYS - age);
+}
+
+function formatDayCount(n) {
+  if (n == null) return "—";
+  return `${n} nap`;
+}
+
+function listingTenureHtml(item) {
+  const elapsed = listingAgeDays(item);
+  const remaining = listingDaysRemaining(item);
+  const expired = remaining === 0 && elapsed != null && elapsed >= LISTING_VALIDITY_DAYS;
+  return `
+    <p class="myads-tenure" aria-label="Feladás ideje és érvényesség">
+      <span class="myads-tenure-item">Feladás óta: <strong>${escapeHtml(formatDayCount(elapsed))}</strong></span>
+      <span class="myads-tenure-sep" aria-hidden="true">·</span>
+      <span class="myads-tenure-item${expired ? " myads-tenure-item--warn" : ""}">Érvényes még: <strong>${escapeHtml(expired ? "Lejárt" : formatDayCount(remaining))}</strong></span>
+    </p>
+  `;
+}
+
 function listingPriceNum(item) {
   const raw = String(item?.preview?.price ?? item?.form?.vetelar ?? "").replace(/\D/g, "");
   const n = Number(raw);
@@ -312,6 +357,7 @@ export function initMyAdsPanel(root) {
             <p class="myads-meta">${escapeHtml(metaLine(item))}</p>
             <p class="myads-loc">${ICON_PIN}<span>${escapeHtml(locationLine(item))}</span></p>
             <p class="myads-views">Megtekintve: <strong>${web + app}</strong> · Web: <strong>${web}</strong> · Mobilapp: <strong>${app}</strong></p>
+            ${listingTenureHtml(item)}
             <label class="myads-inactive myads-inactive--compact">
               <input type="checkbox" data-inactive="${item.id}" ${active ? "" : "checked"} />
               <span>Lefoglalózva / inaktív</span>

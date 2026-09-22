@@ -4573,6 +4573,29 @@ body.site-app .myads-views {
   font-size: 0.8rem;
 }
 
+body.site-app .myads-tenure {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.5rem;
+  margin: 0.15rem 0 0;
+  color: #475467;
+  font-size: 0.8rem;
+}
+
+body.site-app .myads-tenure-sep {
+  color: #98a2b3;
+}
+
+body.site-app .myads-tenure-item strong {
+  color: #344054;
+  font-weight: 700;
+}
+
+body.site-app .myads-tenure-item--warn strong {
+  color: #b42318;
+}
+
 body.site-app .myads-inactive--compact {
   display: flex;
   gap: 0.35rem;

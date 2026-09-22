@@ -5,7 +5,7 @@ import {
   saveListingPhotosOrder,
   getStoredListingId,
 } from "./db-client.js?v=wizardSave1";
-import { createAdForm } from "./form-core.js?v=submitBtn1";
+import { createAdForm } from "./form-core.js?v=photoOverlayMeta1";
 import { applyImportedVehicleToSelects } from "./vehicle-catalog-client.js?v=importVehicle1";
 import { initTireSizes } from "./tire-sizes-ui.js";
 import { initPhoneLanguages } from "./phone-lang-ui.js";
@@ -93,6 +93,12 @@ function resolveListingId() {
   return getStoredListingId();
 }
 
+function withPhotoOverlayMeta(formData) {
+  const meta = formApi?.getPhotoOverlayMetaForSave?.();
+  if (!meta) return formData;
+  return { ...formData, ...meta };
+}
+
 function syncPhotoUrlsFromListing(listing) {
   const urls = listing?.preview?.imageUrls?.length
     ? listing.preview.imageUrls
@@ -115,7 +121,7 @@ async function persistWizardStep(formData, { fromStep } = {}) {
   const photos = readyItems.filter((item) => item.data).map((item) => item.data);
 
   try {
-    const saved = await saveListingToDb(formData, listingId, {
+    const saved = await saveListingToDb(withPhotoOverlayMeta(formData), listingId, {
       status: "mentett",
       photos: fromStep >= 4 ? photos : [],
     });
@@ -213,7 +219,7 @@ function ensureFormReady() {
       }
       const allData = items.length > 0 && items.every((item) => item.data || item.url);
       const photos = items.filter((item) => item.data).map((item) => item.data);
-      const saved = await saveListingToDb(formData, resolveListingId(), {
+      const saved = await saveListingToDb(withPhotoOverlayMeta(formData), resolveListingId(), {
         status: "feladott",
         photos,
       });

@@ -4,11 +4,12 @@ import {
   saveListingPhotosOrder,
   saveListingToDb,
   deleteListingFromDb,
-} from "./db-client.js?v=myAdsSablon1";
+} from "./db-client.js?v=myAdsSablon2";
 import {
   DEFAULT_PHOTO_OVERLAY_ID,
+  detectBymyPhotoOverlay,
   renderListingPhotoOverlay,
-} from "./listing-photo-overlay.js?v=photoOverlayIcons3";
+} from "./listing-photo-overlay.js?v=photoOverlayDetect1";
 import { compressListingPhotos } from "./listing-photo-compress.js?v=myAds1";
 import { bindListingOpen, restoreListingReturn } from "./listing-return.js?v=scrollTop1";
 
@@ -103,7 +104,7 @@ function readFeaturedIdSet() {
   return new Set(g.map((x) => Number(x)).filter((n) => Number.isFinite(n) && n > 0));
 }
 
-function hasSablon(item) {
+function hasSablonMeta(item) {
   return Boolean(String(item.form?.photo_overlay_template_id ?? "").trim());
 }
 
@@ -153,11 +154,32 @@ export function initMyAdsPanel(root) {
   let filter = "all";
   let sort = "newest";
   let photoState = null;
+  /** Főképen beégetett sablon, meta nélkül (régi feladás). */
+  const sablonDetectedIds = new Set();
+
+  function hasSablon(item) {
+    return hasSablonMeta(item) || sablonDetectedIds.has(Number(item.id));
+  }
+
+  async function detectSablonOnItems(rows) {
+    sablonDetectedIds.clear();
+    await Promise.all(
+      rows.map(async (item) => {
+        if (hasSablonMeta(item)) return;
+        const url = photoUrls(item)[0];
+        if (!url) return;
+        if (await detectBymyPhotoOverlay(url)) {
+          sablonDetectedIds.add(Number(item.id));
+        }
+      })
+    );
+  }
 
   async function reload() {
     root.innerHTML = `<p class="mm-empty">Hirdetések betöltése…</p>`;
     try {
       items = await fetchMyListings({ limit: 200 });
+      await detectSablonOnItems(items);
       render();
     } catch (error) {
       root.innerHTML = `<p class="mm-empty">${escapeHtml(error.message ?? "Nem sikerült betölteni.")}</p>`;
@@ -377,17 +399,34 @@ export function initMyAdsPanel(root) {
       throw new Error("Előbb adj hozzá legalább egy képet.");
     }
     const form = item.form || {};
+    const fo = urls[0];
     let base = String(form.photo_overlay_base_url || "").trim();
-    if (!base) base = urls[0];
+    if (!base) base = fo;
     const rest = urls.slice(1).map((url) => ({ url }));
+    const id = Number(item.id);
+    const alreadyOnImage =
+      hasSablon(item) || sablonDetectedIds.has(id) || (await detectBymyPhotoOverlay(fo));
 
     if (wantActive) {
+      if (alreadyOnImage) {
+        await persistSablonMeta(item, { active: true, baseUrl: base });
+        sablonDetectedIds.add(id);
+        return;
+      }
       if (!String(form.photo_overlay_base_url || "").trim()) {
-        base = urls[0];
+        base = fo;
       }
       const dataUrl = await renderListingPhotoOverlay(base, overlayInfoFromListing(item));
       await saveListingPhotosOrder(item.id, [{ data: dataUrl }, ...rest]);
       await persistSablonMeta(item, { active: true, baseUrl: base });
+      sablonDetectedIds.add(id);
+      return;
+    }
+
+    const baseIsOverlay = base === fo && (alreadyOnImage || (await detectBymyPhotoOverlay(fo)));
+    if (baseIsOverlay) {
+      await persistSablonMeta(item, { active: false, baseUrl: base });
+      sablonDetectedIds.delete(id);
       return;
     }
 
@@ -396,6 +435,7 @@ export function initMyAdsPanel(root) {
     }
     await saveListingPhotosOrder(item.id, [{ url: base }, ...rest]);
     await persistSablonMeta(item, { active: false, baseUrl: base });
+    sablonDetectedIds.delete(id);
   }
 
   function openPhotos(id) {

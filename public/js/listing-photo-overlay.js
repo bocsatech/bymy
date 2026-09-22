@@ -297,3 +297,41 @@ export async function loadImageForCanvas(src) {
   const dataUrl = await fetchImageDataUrl(raw);
   return loadImage(dataUrl);
 }
+
+/** Baked-in soft-left-v1 overlay (sárga BYMY badge a bal felső sarokban). */
+export async function detectBymyPhotoOverlay(src) {
+  try {
+    const img = await loadImageForCanvas(src);
+    const w = img.naturalWidth || img.width;
+    const h = img.naturalHeight || img.height;
+    if (!w || !h) return false;
+
+    const canvas = document.createElement("canvas");
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return false;
+    ctx.drawImage(img, 0, 0, w, h);
+
+    const maxX = Math.min(Math.floor(w * 0.16), w);
+    const maxY = Math.min(Math.floor(h * 0.14), h);
+    let yellowHits = 0;
+    for (let y = 2; y < maxY; y += 2) {
+      for (let x = 2; x < maxX; x += 2) {
+        const [r, g, b] = ctx.getImageData(x, y, 1, 1).data;
+        if (r > 195 && g > 150 && g < 235 && b < 95) yellowHits += 1;
+      }
+    }
+    if (yellowHits >= 3) return true;
+
+    const lx = Math.max(2, Math.floor(w * 0.04));
+    const rx = Math.min(w - 2, Math.floor(w * 0.72));
+    const cy = Math.floor(h * 0.35);
+    const left = ctx.getImageData(lx, cy, 1, 1).data;
+    const right = ctx.getImageData(rx, cy, 1, 1).data;
+    const lum = (p) => 0.299 * p[0] + 0.587 * p[1] + 0.114 * p[2];
+    return lum(left) < 55 && lum(right) - lum(left) > 35 && yellowHits >= 1;
+  } catch {
+    return false;
+  }
+}

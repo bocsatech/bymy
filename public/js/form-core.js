@@ -1621,6 +1621,17 @@ function preparedPhotoItems() {
     .filter((item) => item.url || item.data);
 }
 
+function photoOverlayMetaForSave() {
+  const item = photoItems[0];
+  if (!item?.overlayTemplateId) return null;
+  const base = String(item.basePreviewUrl || item.url || "").trim();
+  if (!base) return null;
+  return {
+    photo_overlay_template_id: item.overlayTemplateId,
+    photo_overlay_base_url: base,
+  };
+}
+
 function overlayInfoFromForm() {
   const le = String(teljesitmenyLe?.value ?? "").trim();
   const kw = String(teljesitmenyKw?.value ?? "").trim();
@@ -2025,6 +2036,7 @@ return {
   applyPhotoUrls,
   getPhotoFiles: () => photoItems.map((item) => item.file).filter(Boolean),
   getPreparedPhotoItems: preparedPhotoItems,
+  getPhotoOverlayMetaForSave: photoOverlayMetaForSave,
   showAllSteps,
   syncFuelDependentFields,
   syncKisteherFields,

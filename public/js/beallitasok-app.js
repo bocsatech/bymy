@@ -1403,46 +1403,54 @@ export async function initSettingsPage() {
     loadHeroSettings();
   }
 
+  function applyNavSideEffects(next) {
+    if (next === "szemelyes" || next === "fiok") {
+      fillProfileForm(getAuthUser(), getProfile());
+    }
+    if (next === "uzenetek") {
+      messagesUi?.refresh?.();
+    }
+    if (next === "megjelenes") {
+      loadHeroSettings();
+    }
+    if (next === "hirdetes") {
+      initMyAdsPanel(document.getElementById("mm-ad-list")).reload();
+    }
+  }
+
   document.querySelectorAll("[data-mm-nav]").forEach((link) => {
+    if (link.hasAttribute("data-mm-subtoggle")) return;
     link.addEventListener("click", (event) => {
       const next = link.getAttribute("data-mm-nav");
       if (!SECTIONS.includes(next)) return;
       event.preventDefault();
       setSection(next);
-      if (next === "szemelyes" || next === "fiok") {
-        fillProfileForm(getAuthUser(), getProfile());
-      }
       if (SETTINGS_SECTIONS.has(next) || next === "cegadatok") {
         expandSettingsSubnav(link.closest(".mm-nav-group"));
       }
-      if (next === "uzenetek") {
-        messagesUi?.refresh?.();
-      }
-      if (next === "megjelenes") {
-        loadHeroSettings();
-      }
-      if (next === "hirdetes") {
-        initMyAdsPanel(document.getElementById("mm-ad-list")).reload();
-      }
+      applyNavSideEffects(next);
     });
   });
 
   document.querySelectorAll("[data-mm-subtoggle]").forEach((btn) => {
-    if (btn.hasAttribute("data-mm-nav")) return;
     btn.addEventListener("click", () => {
       const group = btn.closest(".mm-nav-group");
       const sub = group?.querySelector("[data-mm-sub]");
       if (!sub) return;
-      const open = sub.hidden;
+      const willOpen = sub.hidden;
+      const next = btn.getAttribute("data-mm-nav");
       document.querySelectorAll("[data-mm-sub]").forEach((el) => {
         el.hidden = true;
       });
       document.querySelectorAll("[data-mm-subtoggle]").forEach((el) => {
         el.setAttribute("aria-expanded", "false");
       });
-      if (open) {
-        sub.hidden = false;
-        btn.setAttribute("aria-expanded", "true");
+      if (!willOpen) return;
+      sub.hidden = false;
+      btn.setAttribute("aria-expanded", "true");
+      if (next && SECTIONS.includes(next)) {
+        setSection(next);
+        applyNavSideEffects(next);
       }
     });
   });

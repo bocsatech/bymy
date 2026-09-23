@@ -137,7 +137,16 @@ body.site-app .mm-nav-sublink.is-active .mm-nav-ico {
 
 body.site-app .mm-nav-caret {
   justify-self: end;
-  opacity: 0.55;
+  width: 1.15rem;
+  height: 1.15rem;
+  color: #475467;
+  opacity: 1;
+  flex-shrink: 0;
+}
+
+body.site-app .mm-nav-link.is-active .mm-nav-caret,
+body.site-app .mm-nav-toggle[aria-expanded="true"] .mm-nav-caret {
+  color: #1f2937;
 }
 
 body.site-app .mm-nav-plain {

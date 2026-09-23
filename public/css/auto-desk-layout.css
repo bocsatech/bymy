@@ -1053,6 +1053,20 @@
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-grid-card-meta {
     display: none !important;
   }
+
+  /* Desk: hide filter until JS finishes mounting fields/pickers (no mid-boot jump). */
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-qs-form.auto-qs-booting {
+    opacity: 0;
+    min-height: 560px;
+    pointer-events: none;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-qs-form.is-qs-ready {
+    opacity: 1;
+    min-height: 0;
+    pointer-events: auto;
+    transition: opacity 0.12s ease;
+  }
 }
 
 @media (max-width: 900px) {

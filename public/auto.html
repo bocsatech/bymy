@@ -62,7 +62,7 @@
     <link rel="stylesheet" href="/css/hub-mobile-app.css?v=deskHdr5" />
     <link rel="stylesheet" href="/css/home.css?v=tileAllPages1" />
     <link rel="stylesheet" href="/css/auto-hero.css?v=qsYellowBtns1" />
-    <link rel="stylesheet" href="/css/auto-desk-layout.css?v=deskHdr5" />
+    <link rel="stylesheet" href="/css/auto-desk-layout.css?v=deskQsBoot1" />
     <link rel="stylesheet" href="/css/listing-photo-cover.css?v=tileAllPages1" />
     <link rel="stylesheet" href="/css/listing-featured.css?v=featured5" />
     <link rel="stylesheet" href="/css/ingatlan-search.css?v=autoDrums15" />
@@ -236,6 +236,13 @@
       <link rel="stylesheet" href="/css/site-desk-header.css?v=deskHdr5" />
 </head>
   <body class="home-page site-page site-app auto-desk-gyors" data-site-page="auto">
+    <script>
+      try {
+        if (window.matchMedia("(min-width: 901px)").matches) {
+          document.body.classList.add("auto-desk-active");
+        }
+      } catch (e) {}
+    </script>
     <script src="/js/mw-app-shell.js?v=deskHdr5"></script>
 <header class="hub-header home-header">
       <div class="hub-header-inner">
@@ -503,7 +510,7 @@
     </main>
 
     <script>window.BYMY_FEATURED_LISTING_IDS = window.BYMY_FEATURED_LISTING_IDS || [];</script>
-    <script src="/js/home-app.js?v=mapBack1" type="module"></script>
+    <script src="/js/home-app.js?v=deskQsBoot1" type="module"></script>
     <script src="/js/auto-hero.js?v=searchCollapse1" type="module"></script>
     <script src="/js/auto-kivitel-menu.js?v=kivitelAdmin1" type="module"></script>
     <script src="/js/site-avatar-menu.js?v=avatarSync1" type="module"></script>

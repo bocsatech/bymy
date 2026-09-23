@@ -39,6 +39,10 @@ export function initHomeQuickSearch({ onSearch = () => {}, onDeskSortChange, onR
   const detailedBtn = document.getElementById("qs-detailed");
   const statusEl = document.getElementById("home-qs-status");
   const mobile = () => window.matchMedia(MOBILE_MQ).matches;
+  const vehicleDesk = () => {
+    const page = document.body?.getAttribute("data-site-page");
+    return (page === "auto" || page === "teherauto") && window.matchMedia(DESK_MQ).matches;
+  };
 
   function enrichDrumFilterValues(base) {
     if (form.dataset.drumsMounted !== "1" || !base || typeof base !== "object") return base;
@@ -117,7 +121,8 @@ export function initHomeQuickSearch({ onSearch = () => {}, onDeskSortChange, onR
   }
 
   function setQsReady(ready) {
-    form.classList.toggle("auto-qs-booting", !ready && mobile());
+    // Keep form hidden on desk too until layout + pickers settle (avoids filter panel jump).
+    form.classList.toggle("auto-qs-booting", !ready && (mobile() || vehicleDesk()));
     form.classList.toggle("is-qs-ready", ready);
   }
 

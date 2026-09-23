@@ -497,3 +497,19 @@ html[data-theme="dark"] body.site-app.home-page[data-site-page="ingatlan"] > .im
   border-color: #3a3a3a;
   color: #fff;
 }
+@media (max-width: 900px) {
+  body.home-page[data-site-page="ingatlan"] .immo-search-desk-shell .auto-desk-acc {
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+  }
+
+  body.home-page[data-site-page="ingatlan"] .immo-search-desk-shell .auto-desk-acc__head {
+    display: none !important;
+  }
+
+  body.home-page[data-site-page="ingatlan"] .immo-search-desk-shell .auto-desk-acc__body {
+    display: block !important;
+    padding: 0 !important;
+  }
+}

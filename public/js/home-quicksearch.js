@@ -1,6 +1,6 @@
 
-import { applyAutoSearchLayout, readLayoutFilterValues, refillAutoSearchRangeSelects } from "./auto-search-layout.js?v=rangeFill1";
-import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums } from "./auto-search-drums.js?v=savedSearch4";
+import { applyAutoSearchLayout, readLayoutFilterValues, refillAutoSearchRangeSelects } from "./auto-search-layout.js?v=priceFree1";
+import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums } from "./auto-search-drums.js?v=priceFree1";
 import {
   mountDetailedSearch,
   readDetailedSearchValues,

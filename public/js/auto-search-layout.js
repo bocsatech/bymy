@@ -328,17 +328,34 @@ function rangeHtml(cell, spec) {
     (spec.kind === "price" ? "Ft" : spec.kind === "le" ? "LE" : "");
   const suffix = unit ? `<span class="home-qs-suffix" aria-hidden="true">${unit}</span>` : "";
 
-  if (freeNumber) {
-    return `<div class="home-qs-pair home-qs-pair--number" data-qs-field="${cell.field_key}">
+  if (freeNumber || spec.kind === "price") {
+    const isPrice = spec.kind === "price";
+    const inputType = isPrice ? "text" : "number";
+    const inputMode = isPrice ? "numeric" : "numeric";
+    const step = isPrice ? "" : ' step="1"';
+    const extraClass = isPrice ? " home-qs-control--price" : " home-qs-control--number";
+    const listTol = isPrice ? ` list="qs-datalist-${spec.tol}"` : "";
+    const listIg = isPrice ? ` list="qs-datalist-${spec.ig}"` : "";
+    const datalist =
+      isPrice
+        ? `<datalist id="qs-datalist-${spec.tol}">${priceOptions()
+            .map((n) => `<option value="${n.toLocaleString("hu-HU")}"></option>`)
+            .join("")}</datalist>
+    <datalist id="qs-datalist-${spec.ig}">${priceOptions()
+            .map((n) => `<option value="${n.toLocaleString("hu-HU")}"></option>`)
+            .join("")}</datalist>`
+        : "";
+    return `<div class="home-qs-pair${isPrice ? " home-qs-pair--price" : " home-qs-pair--number"}" data-qs-field="${cell.field_key}">
     <label class="home-qs-field">
       <span class="home-qs-label">${label}</span>
-      <input class="home-qs-control home-qs-control--number" type="number" inputmode="numeric" min="0" step="1" placeholder="-tól" data-filter-key="${spec.tol}" aria-label="${label} -tól" />
+      <input class="home-qs-control${extraClass}" type="${inputType}" inputmode="${inputMode}" min="0"${step} placeholder="-tól" data-filter-key="${spec.tol}" aria-label="${label} -tól"${listTol} autocomplete="off" />
       ${suffix}
     </label>
     <label class="home-qs-field">
-      <input class="home-qs-control home-qs-control--number" type="number" inputmode="numeric" min="0" step="1" placeholder="-ig" data-filter-key="${spec.ig}" aria-label="${label} -ig" />
+      <input class="home-qs-control${extraClass}" type="${inputType}" inputmode="${inputMode}" min="0"${step} placeholder="-ig" data-filter-key="${spec.ig}" aria-label="${label} -ig"${listIg} autocomplete="off" />
       ${suffix}
     </label>
+    ${datalist}
   </div>`;
   }
 
@@ -434,19 +451,79 @@ function renderStep(host, layout, step) {
   renderGrid(host, cellsForStep(layout, step));
 }
 
+function formatPriceInputValue(raw) {
+  const digits = String(raw ?? "").replace(/\D/g, "");
+  if (!digits) return "";
+  const n = Number(digits);
+  if (!Number.isFinite(n) || n <= 0) return "";
+  return n.toLocaleString("hu-HU");
+}
+
+function upgradePriceSelectToInput(select, emptyLabel) {
+  if (!select || select.tagName !== "SELECT") return select;
+  const key = select.getAttribute("data-filter-key") || "";
+  const prev = String(select.value || "").trim();
+  const input = document.createElement("input");
+  input.type = "text";
+  input.inputMode = "numeric";
+  input.autocomplete = "off";
+  input.className = `${select.className} home-qs-control--price`.trim();
+  input.placeholder = emptyLabel || "";
+  if (select.id) input.id = select.id;
+  const aria = select.getAttribute("aria-label");
+  if (aria) input.setAttribute("aria-label", aria);
+  if (key) {
+    input.setAttribute("data-filter-key", key);
+    const listId = `qs-datalist-${key}`;
+    input.setAttribute("list", listId);
+    if (!document.getElementById(listId)) {
+      const list = document.createElement("datalist");
+      list.id = listId;
+      for (const n of priceOptions()) {
+        const opt = document.createElement("option");
+        opt.value = n.toLocaleString("hu-HU");
+        list.appendChild(opt);
+      }
+      (select.closest("form") || select.parentElement || document.body).appendChild(list);
+    }
+  }
+  if (prev) input.value = formatPriceInputValue(prev);
+  select.replaceWith(input);
+  return input;
+}
+
+function bindPriceInput(input) {
+  if (!input || input.dataset.priceBound === "1") return;
+  input.dataset.priceBound = "1";
+  input.addEventListener("blur", () => {
+    input.value = formatPriceInputValue(input.value);
+  });
+  input.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      input.value = formatPriceInputValue(input.value);
+    }
+  });
+}
+
+function wirePriceInputs(root) {
+  if (!root) return;
+  root.querySelectorAll('[data-filter-key="ar_tol"]').forEach((el) => {
+    const input = el.tagName === "SELECT" ? upgradePriceSelectToInput(el, "-tól") : el;
+    if (input?.tagName === "INPUT") bindPriceInput(input);
+  });
+  root.querySelectorAll('[data-filter-key="ar_ig"]').forEach((el) => {
+    const input = el.tagName === "SELECT" ? upgradePriceSelectToInput(el, "-ig") : el;
+    if (input?.tagName === "INPUT") bindPriceInput(input);
+  });
+}
+
 function wireRangeSelects(root) {
   if (!root) return;
   const years = yearOptions();
   root.querySelectorAll('[data-filter-key="ev_tol"]').forEach((el) => fillSelectYears(el, years, "-tól"));
   root.querySelectorAll('[data-filter-key="ev_ig"]').forEach((el) => fillSelectYears(el, years, "-ig"));
 
-  const prices = priceOptions();
-  root.querySelectorAll('[data-filter-key="ar_tol"]').forEach((el) =>
-    fillNumberSelect(el, prices, "-tól")
-  );
-  root.querySelectorAll('[data-filter-key="ar_ig"]').forEach((el) =>
-    fillNumberSelect(el, prices, "-ig")
-  );
+  wirePriceInputs(root);
 
   const kms = kmOptions();
   root.querySelectorAll('[data-filter-key="km_tol"]').forEach((el) =>

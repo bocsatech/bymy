@@ -548,6 +548,7 @@ export async function mountAutoSearchDrums(form = document.getElementById("home-
   const dualKeys = new Set(DUAL_RANGES.map((d) => d.fieldKey));
 
   for (const cfg of DUAL_RANGES) {
+    if (cfg.fieldKey === "vetelar") continue;
     const wrap = form.querySelector(`[data-qs-field="${cfg.fieldKey}"]`);
     if (wrap) convertRangePairToDual(wrap, cfg);
   }
@@ -556,6 +557,10 @@ export async function mountAutoSearchDrums(form = document.getElementById("home-
     if (wrap.closest(".immo-dual-range-block")) return;
     const key = wrap.getAttribute("data-qs-field");
     if (dualKeys.has(key) || SEARCH_OMIT_FIELDS.has(key)) return;
+    if (key === "vetelar") return;
+    if (wrap.querySelector("input.home-qs-control--price, input.home-qs-control[type='text'][data-filter-key^='ar_']")) {
+      return;
+    }
     if (wrap.querySelector("input.home-qs-control[type='text'], input.immo-control[type='text']")) return;
     if (wrap.querySelectorAll("select.home-qs-control").length >= 2) {
       convertRangePairToTwoDrums(wrap);

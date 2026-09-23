@@ -367,7 +367,7 @@ function renderSideAll(side, pins) {
     : `Állíts be irányítószámot a <a href="/beallitasok.html?szekcio=keresesi-korzet">Keresési körzet</a>ben.`;
 
   if (!pins?.length) {
-    side.innerHTML = `<p class="search-map-modal__hint">${homeHint}</p>`;
+    side.innerHTML = `<div class="search-map-modal__side-pin"><p class="search-map-modal__hint">${homeHint}</p></div>`;
     return;
   }
 
@@ -385,9 +385,11 @@ function renderSideAll(side, pins) {
       </div>`;
 
   side.innerHTML = `
-    ${routeTeaser}
-    <p class="search-map-modal__list-label">${pins.length} autó a találati listából</p>
-    <div class="search-map-modal__cards">${cards}</div>
+    <div class="search-map-modal__side-pin">${routeTeaser}</div>
+    <div class="search-map-modal__side-scroll">
+      <p class="search-map-modal__list-label">${pins.length} autó a találati listából</p>
+      <div class="search-map-modal__cards">${cards}</div>
+    </div>
   `;
 }
 
@@ -456,20 +458,23 @@ function renderSideListing(side, pin, routeInfo = null) {
 
   const others = lastPins
     .filter((p) => String(p.item?.id) !== String(pin.item?.id))
-    .slice(0, 12)
     .map((p) => pickCardHtml(p))
     .join("");
 
   side.innerHTML = `
-    <button type="button" class="search-map-modal__back" data-search-map-back>‹ Vissza az összes autóhoz</button>
-    ${renderRouteBlock(pin, routeInfo)}
-    <p class="search-map-modal__list-label">Kiválasztott</p>
-    ${pickCardHtml(pin, { selected: true, asLink: true })}
-    ${
-      others
-        ? `<p class="search-map-modal__list-label">Többi a listából</p><div class="search-map-modal__cards">${others}</div>`
-        : ""
-    }
+    <div class="search-map-modal__side-pin">
+      <button type="button" class="search-map-modal__back" data-search-map-back>‹ Vissza az összes autóhoz</button>
+      ${renderRouteBlock(pin, routeInfo)}
+      <p class="search-map-modal__list-label">Kiválasztott</p>
+      ${pickCardHtml(pin, { selected: true, asLink: true })}
+    </div>
+    <div class="search-map-modal__side-scroll">
+      ${
+        others
+          ? `<p class="search-map-modal__list-label">Többi a listából</p><div class="search-map-modal__cards">${others}</div>`
+          : `<p class="search-map-modal__hint">Nincs más autó a listában.</p>`
+      }
+    </div>
   `;
 }
 

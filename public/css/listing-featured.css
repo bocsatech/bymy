@@ -7,18 +7,15 @@
 .hf-card--listing.hf-card--featured,
 .home-grid-card.home-grid-card--featured {
   border: 1px solid var(--listing-featured-yellow) !important;
-  box-shadow:
-    0 0 0 1px var(--listing-featured-yellow),
-    0 8px 22px rgba(240, 193, 75, 0.22) !important;
+  /* Nincs kifelé növő glow: a csempe széle egy vonalban marad a többi sávval */
+  box-shadow: none !important;
 }
 
 /* auto/teher desk: szürke 1px keret !important felülírása */
 body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"])
   .home-grid-card.home-grid-card--featured {
   border: 1px solid var(--listing-featured-yellow) !important;
-  box-shadow:
-    0 0 0 1px var(--listing-featured-yellow),
-    0 8px 22px rgba(240, 193, 75, 0.22) !important;
+  box-shadow: none !important;
 }
 
 body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"])
@@ -69,7 +66,7 @@ body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"])
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
-  margin: 0 0 8px;
+  margin: 0.55rem 0.61rem 0;
 }
 
 .listing-featured-badge--under-photo,
@@ -109,7 +106,7 @@ body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"])
 html[data-theme="dark"] .hf-card--listing.hf-card--featured,
 html[data-theme="dark"] .home-grid-card.home-grid-card--featured {
   border-color: #e6b422 !important;
-  box-shadow: 0 8px 22px rgba(240, 193, 75, 0.15) !important;
+  box-shadow: none !important;
 }
 
 html[data-theme="dark"] .hf-card--listing.hf-card--featured .hf-card-price,

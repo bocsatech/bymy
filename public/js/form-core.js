@@ -1026,6 +1026,8 @@ function collectFormData() {
   data.felszereltseg = [...form.querySelectorAll('input[name="felszereltseg"]:checked')].map((el) => el.value);
   data.egyeb_info = [...form.querySelectorAll('input[name="egyeb_info"]:checked')].map((el) => el.value);
   if (data.km != null) data.km = parseKmDigits(data.km);
+  if (data.vetelar != null) data.vetelar = parseKmDigits(data.vetelar);
+  if (data.vetelar_eur != null) data.vetelar_eur = parseKmDigits(data.vetelar_eur);
   return data;
 }
 
@@ -1091,7 +1093,7 @@ function applyFormData(data, { fromImport = false } = {}) {
   });
 
   for (const [key, value] of Object.entries(payload)) {
-    if (key === "felszereltseg" || key === "egyeb_info" || key === "km") continue;
+    if (key === "felszereltseg" || key === "egyeb_info" || key === "km" || key === "vetelar" || key === "vetelar_eur") continue;
     const field = form.elements.namedItem(key);
     if (!field) continue;
     const appliedValue = key === "gyartmany" && value ? String(value).toUpperCase() : value;
@@ -1156,6 +1158,13 @@ function applyFormData(data, { fromImport = false } = {}) {
   if (kmInput && payload.km != null && String(payload.km).trim() !== "") {
     setKmInputValue(kmInput, payload.km);
     if (fromImport) kmInput.dataset.userEdited = "1";
+  }
+  for (const priceKey of ["vetelar", "vetelar_eur"]) {
+    const priceInput = document.getElementById(priceKey);
+    if (priceInput && payload[priceKey] != null && String(payload[priceKey]).trim() !== "") {
+      setKmInputValue(priceInput, payload[priceKey]);
+      if (fromImport) priceInput.dataset.userEdited = "1";
+    }
   }
   updateLeDisplay();
   restoreFuelSelection(payload.uzemanyag);
@@ -1987,6 +1996,8 @@ wrapMdOutlinedFields();
 bindFuelPickerSync();
 syncFuelDependentFields();
 initKmInput(document.getElementById("km"));
+initKmInput(document.getElementById("vetelar"));
+initKmInput(document.getElementById("vetelar_eur"));
 fitAllFormFields();
 stampAdFormUniformCells();
 

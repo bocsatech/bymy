@@ -936,9 +936,9 @@ body[data-site-page="teherauto"] .auto-search-tabs {
   }
 
   .auto-search-panel .home-qs-action--save {
-    background: #fff !important;
-    color: #344054 !important;
-    border: 1px solid #d0d5dd !important;
+    background: #f0c52c !important;
+    color: #111 !important;
+    border: 0 !important;
   }
 
   .auto-search-panel .home-qs-submit:hover,
@@ -952,9 +952,8 @@ body[data-site-page="teherauto"] .auto-search-tabs {
 
   .auto-search-panel .home-qs-action--save:hover,
   .auto-search-panel .home-qs-action--save:focus-visible {
-    background: #f9fafb !important;
+    background: #e8bb20 !important;
     color: #111 !important;
-    border-color: #98a2b3 !important;
   }
 
   .auto-search-panel .home-qs-actions-secondary {

@@ -722,7 +722,7 @@
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-qs-row--actions {
     display: grid;
-    grid-template-columns: 0.9fr 1.4fr;
+    grid-template-columns: 1fr 1fr;
     gap: 10px;
     margin-top: 12px;
     align-items: stretch;
@@ -734,59 +734,47 @@
     background: var(--ad-bg);
   }
 
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-reset,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-qs-submit,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-qs-action--map,
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) #qs-save-search {
-    grid-column: 1 / -1;
     appearance: none;
-    display: block;
-    width: 100%;
-    border-radius: 6px;
-    padding: 11px 10px;
-    font: inherit;
-    font-weight: 700;
-    font-size: 13px;
-    text-align: center;
-    cursor: pointer;
-    border: 1px solid #5a5a5a;
-    background: transparent;
-    color: var(--ad-text);
-  }
-
-  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) #qs-save-search:hover,
-  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) #qs-save-search:focus-visible {
-    border-color: var(--ad-yellow);
-    color: var(--ad-yellow-ink);
-    background: rgba(240, 197, 44, 0.12);
-  }
-
-  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-reset {
-    appearance: none;
-    display: block;
-    width: 100%;
-    border-radius: 6px;
-    padding: 12px 10px;
-    font: inherit;
-    font-weight: 700;
-    font-size: 13px;
-    text-align: center;
-    cursor: pointer;
-    border: 1px solid #5a5a5a;
-    background: transparent;
-    color: var(--ad-text);
-  }
-
-  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-qs-submit {
-    width: 100%;
-    border-radius: 6px;
-    padding: 12px 10px;
-    font-weight: 800;
-    font-size: 13px;
-    border: 0;
-    background: var(--ad-yellow) !important;
-    color: var(--ad-yellow-ink) !important;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
+    width: 100%;
+    min-height: 44px;
+    border-radius: 6px;
+    padding: 12px 10px;
+    font: inherit;
+    font-weight: 800;
+    font-size: 13px;
+    text-align: center;
+    text-decoration: none;
+    text-shadow: none;
+    cursor: pointer;
+    border: 0 !important;
+    background: var(--ad-yellow) !important;
+    color: var(--ad-yellow-ink, #111) !important;
+    box-sizing: border-box;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-reset:hover,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-reset:focus-visible,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-qs-submit:hover,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-qs-submit:focus-visible,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-qs-action--map:hover,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-qs-action--map:focus-visible,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) #qs-save-search:hover,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) #qs-save-search:focus-visible {
+    background: #e8bb20 !important;
+    color: #111 !important;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-qs-action--map,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) #qs-save-search {
+    grid-column: 1 / -1;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-qs-submit::before {

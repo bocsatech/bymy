@@ -660,6 +660,12 @@
     -moz-appearance: textfield;
   }
 
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel input.home-qs-control--price.is-suggest-open {
+    border-color: #111 !important;
+    background-color: #fff !important;
+    box-shadow: 0 0 0 2px rgba(17, 24, 39, 0.08);
+  }
+
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel input.home-qs-control--number::-webkit-outer-spin-button,
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel input.home-qs-control--number::-webkit-inner-spin-button,
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel input[type="number"].home-qs-control::-webkit-outer-spin-button,
@@ -1067,6 +1073,98 @@
     pointer-events: auto;
     transition: opacity 0.12s ease;
   }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel input.home-qs-control--price::-webkit-contacts-auto-fill-button,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel input.home-qs-control--price::-webkit-credentials-auto-fill-button {
+    visibility: hidden;
+    display: none !important;
+    pointer-events: none;
+    position: absolute;
+    right: 0;
+    width: 0;
+    height: 0;
+    margin: 0;
+  }
+}
+
+/* Custom Vételár suggest — ported to body (replaces native datalist). */
+body.site-app > .auto-price-suggest {
+  position: fixed;
+  z-index: 10060;
+  max-height: min(14rem, 45vh);
+  margin: 0;
+  padding: 0.35rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.16);
+  overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+body.site-app > .auto-price-suggest::-webkit-scrollbar {
+  width: 6px;
+}
+
+body.site-app > .auto-price-suggest::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
+}
+
+body.site-app > .auto-price-suggest::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+body.site-app > .auto-price-suggest .auto-price-suggest__opt {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: #0f172a;
+  font: inherit;
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+  padding: 0.5rem 0.7rem;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+}
+
+body.site-app > .auto-price-suggest .auto-price-suggest__opt:hover,
+body.site-app > .auto-price-suggest .auto-price-suggest__opt:focus-visible {
+  background: #f1f5f9;
+  outline: none;
+}
+
+body.site-app > .auto-price-suggest .auto-price-suggest__empty {
+  margin: 0;
+  padding: 0.55rem 0.7rem;
+  font-size: 0.86rem;
+  color: #64748b;
+}
+
+html[data-theme="dark"] body.site-app > .auto-price-suggest {
+  background: #1d1d1d;
+  border-color: #3a3a3a;
+  color: #fff;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
+}
+
+html[data-theme="dark"] body.site-app > .auto-price-suggest .auto-price-suggest__opt {
+  color: #f1f5f9;
+}
+
+html[data-theme="dark"] body.site-app > .auto-price-suggest .auto-price-suggest__opt:hover,
+html[data-theme="dark"] body.site-app > .auto-price-suggest .auto-price-suggest__opt:focus-visible {
+  background: #2a2a2a;
+}
+
+html[data-theme="dark"] body.site-app > .auto-price-suggest .auto-price-suggest__empty {
+  color: #94a3b8;
 }
 
 @media (max-width: 900px) {

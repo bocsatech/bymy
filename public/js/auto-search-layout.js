@@ -395,28 +395,16 @@ function rangeHtml(cell, spec) {
     const inputMode = isPrice ? "numeric" : "numeric";
     const step = isPrice ? "" : ' step="1"';
     const extraClass = isPrice ? " home-qs-control--price" : " home-qs-control--number";
-    const listTol = isPrice ? ` list="qs-datalist-${spec.tol}"` : "";
-    const listIg = isPrice ? ` list="qs-datalist-${spec.ig}"` : "";
-    const datalist =
-      isPrice
-        ? `<datalist id="qs-datalist-${spec.tol}">${priceOptions()
-            .map((n) => `<option value="${n.toLocaleString("hu-HU")}"></option>`)
-            .join("")}</datalist>
-    <datalist id="qs-datalist-${spec.ig}">${priceOptions()
-            .map((n) => `<option value="${n.toLocaleString("hu-HU")}"></option>`)
-            .join("")}</datalist>`
-        : "";
     return `<div class="home-qs-pair${isPrice ? " home-qs-pair--price" : " home-qs-pair--number"}" data-qs-field="${cell.field_key}">
     <label class="home-qs-field">
       <span class="home-qs-label">${label}</span>
-      <input class="home-qs-control${extraClass}" type="${inputType}" inputmode="${inputMode}" min="0"${step} placeholder="-tól" data-filter-key="${spec.tol}" aria-label="${label} -tól"${listTol} autocomplete="off" />
+      <input class="home-qs-control${extraClass}" type="${inputType}" inputmode="${inputMode}" min="0"${step} placeholder="-tól" data-filter-key="${spec.tol}" aria-label="${label} -tól" autocomplete="off" data-lpignore="true" data-1p-ignore="true" data-form-type="other" />
       ${suffix}
     </label>
     <label class="home-qs-field">
-      <input class="home-qs-control${extraClass}" type="${inputType}" inputmode="${inputMode}" min="0"${step} placeholder="-ig" data-filter-key="${spec.ig}" aria-label="${label} -ig"${listIg} autocomplete="off" />
+      <input class="home-qs-control${extraClass}" type="${inputType}" inputmode="${inputMode}" min="0"${step} placeholder="-ig" data-filter-key="${spec.ig}" aria-label="${label} -ig" autocomplete="off" data-lpignore="true" data-1p-ignore="true" data-form-type="other" />
       ${suffix}
     </label>
-    ${datalist}
   </div>`;
   }
 
@@ -528,34 +516,138 @@ function upgradePriceSelectToInput(select, emptyLabel) {
   input.type = "text";
   input.inputMode = "numeric";
   input.autocomplete = "off";
+  input.setAttribute("data-lpignore", "true");
+  input.setAttribute("data-1p-ignore", "true");
+  input.setAttribute("data-form-type", "other");
   input.className = `${select.className} home-qs-control--price`.trim();
   input.placeholder = emptyLabel || "";
   if (select.id) input.id = select.id;
   const aria = select.getAttribute("aria-label");
   if (aria) input.setAttribute("aria-label", aria);
-  if (key) {
-    input.setAttribute("data-filter-key", key);
-    const listId = `qs-datalist-${key}`;
-    input.setAttribute("list", listId);
-    if (!document.getElementById(listId)) {
-      const list = document.createElement("datalist");
-      list.id = listId;
-      for (const n of priceOptions()) {
-        const opt = document.createElement("option");
-        opt.value = n.toLocaleString("hu-HU");
-        list.appendChild(opt);
-      }
-      (select.closest("form") || select.parentElement || document.body).appendChild(list);
-    }
-  }
+  if (key) input.setAttribute("data-filter-key", key);
   if (prev) input.value = formatPriceInputValue(prev);
   select.replaceWith(input);
   return input;
 }
 
+function closeAutoPriceSuggest() {
+  document.querySelectorAll(".auto-price-suggest").forEach((el) => el.remove());
+  document.querySelectorAll(".home-qs-control--price.is-suggest-open").forEach((el) => {
+    el.classList.remove("is-suggest-open");
+  });
+}
+
+function positionAutoPriceSuggest(menu, input) {
+  const rect = input.getBoundingClientRect();
+  const width = Math.max(140, Math.round(rect.width));
+  const left = Math.max(8, Math.min(Math.round(rect.left), window.innerWidth - width - 8));
+  const top = Math.min(Math.round(rect.bottom + 6), window.innerHeight - 16);
+  menu.style.left = `${left}px`;
+  menu.style.top = `${top}px`;
+  menu.style.width = `${width}px`;
+}
+
+function openAutoPriceSuggest(input) {
+  if (!input || input.tagName !== "INPUT") return;
+  closeAutoPriceSuggest();
+  const typed = String(input.value || "").replace(/\D/g, "");
+  const options = priceOptions()
+    .map((n) => ({
+      value: String(n),
+      label: `${n.toLocaleString("hu-HU")} Ft`,
+    }))
+    .filter((opt) => !typed || opt.value.startsWith(typed) || opt.label.replace(/\s/g, "").includes(typed));
+
+  const menu = document.createElement("div");
+  menu.className = "auto-price-suggest";
+  menu.setAttribute("role", "listbox");
+  menu.innerHTML = options
+    .slice(0, 40)
+    .map(
+      (opt) =>
+        `<button type="button" class="auto-price-suggest__opt" role="option" data-value="${opt.value}">${opt.label}</button>`
+    )
+    .join("");
+  if (!menu.children.length) {
+    menu.innerHTML = `<p class="auto-price-suggest__empty">Írd be az árat Ft-ban</p>`;
+  }
+  document.body.appendChild(menu);
+  input.classList.add("is-suggest-open");
+  positionAutoPriceSuggest(menu, input);
+
+  menu.addEventListener("mousedown", (event) => {
+    const btn = event.target.closest(".auto-price-suggest__opt");
+    if (!btn) return;
+    event.preventDefault();
+    input.value = formatPriceInputValue(btn.getAttribute("data-value") || "");
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+    closeAutoPriceSuggest();
+    input.blur();
+  });
+}
+
+function bindAutoPriceSuggest(input) {
+  if (!input || input.dataset.priceSuggestBound === "1") return;
+  input.dataset.priceSuggestBound = "1";
+  input.removeAttribute("list");
+  input.autocomplete = "off";
+  input.setAttribute("data-lpignore", "true");
+  input.setAttribute("data-1p-ignore", "true");
+  input.setAttribute("data-form-type", "other");
+  input.setAttribute("autoCorrect", "off");
+  input.setAttribute("spellcheck", "false");
+  // Chrome contact-autofill icon: unlock only on focus.
+  if (!input.readOnly) {
+    input.readOnly = true;
+    input.addEventListener(
+      "focus",
+      () => {
+        input.readOnly = false;
+      },
+      { once: true }
+    );
+  }
+
+  input.addEventListener("focus", () => openAutoPriceSuggest(input));
+  input.addEventListener("input", () => {
+    if (document.activeElement === input) openAutoPriceSuggest(input);
+  });
+  input.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") closeAutoPriceSuggest();
+  });
+  input.addEventListener("blur", () => {
+    window.setTimeout(() => {
+      if (document.activeElement === input) return;
+      closeAutoPriceSuggest();
+    }, 120);
+  });
+}
+
+if (typeof window !== "undefined" && !window.__bymyPriceSuggestBound) {
+  window.__bymyPriceSuggestBound = 1;
+  document.addEventListener(
+    "scroll",
+    () => {
+      const open = document.querySelector(".home-qs-control--price.is-suggest-open");
+      const menu = document.querySelector(".auto-price-suggest");
+      if (open && menu) positionAutoPriceSuggest(menu, open);
+      else closeAutoPriceSuggest();
+    },
+    true
+  );
+  window.addEventListener("resize", () => closeAutoPriceSuggest());
+  document.addEventListener("mousedown", (event) => {
+    if (event.target.closest?.(".auto-price-suggest")) return;
+    if (event.target.closest?.(".home-qs-control--price")) return;
+    closeAutoPriceSuggest();
+  });
+}
+
 function bindPriceInput(input) {
   if (!input || input.dataset.priceBound === "1") return;
   input.dataset.priceBound = "1";
+  bindAutoPriceSuggest(input);
   input.addEventListener("blur", () => {
     input.value = formatPriceInputValue(input.value);
   });
@@ -576,6 +668,8 @@ function wirePriceInputs(root) {
     const input = el.tagName === "SELECT" ? upgradePriceSelectToInput(el, "-ig") : el;
     if (input?.tagName === "INPUT") bindPriceInput(input);
   });
+  // Drop leftover native datalists — they look wrong and fight our custom menu.
+  root.querySelectorAll('datalist[id^="qs-datalist-ar_"]').forEach((el) => el.remove());
 }
 
 function wireRangeSelects(root) {

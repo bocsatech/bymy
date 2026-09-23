@@ -221,30 +221,39 @@ export function initMyAdsPanel(root) {
     return hasSablonMeta(item) || sablonDetectedIds.has(Number(item.id));
   }
 
-  async function detectSablonOnItems(rows) {
-    sablonDetectedIds.clear();
-    await Promise.all(
-      rows.map(async (item) => {
-        if (hasSablonMeta(item)) return;
-        const url = photoUrls(item)[0];
-        if (!url) return;
-        if (await detectBymyPhotoOverlay(url)) {
-          sablonDetectedIds.add(Number(item.id));
-        }
-      })
-    );
-  }
-
-  async function reload() {
-    root.innerHTML = `<p class="mm-empty">Hirdetések betöltése…</p>`;
-    try {
-      items = await fetchMyListings({ limit: 200 });
-      await detectSablonOnItems(items);
-      render();
-    } catch (error) {
-      root.innerHTML = `<p class="mm-empty">${escapeHtml(error.message ?? "Nem sikerült betölteni.")}</p>`;
+async function detectSablonOnItems(rows) {
+  sablonDetectedIds.clear();
+  const pending = rows.filter((item) => !hasSablonMeta(item) && photoUrls(item)[0]);
+  const concurrency = 3;
+  let cursor = 0;
+  async function worker() {
+    while (cursor < pending.length) {
+      const item = pending[cursor];
+      cursor += 1;
+      const url = photoUrls(item)[0];
+      if (!url) continue;
+      if (await detectBymyPhotoOverlay(url)) {
+        sablonDetectedIds.add(Number(item.id));
+      }
     }
   }
+  await Promise.all(Array.from({ length: Math.min(concurrency, pending.length || 1) }, () => worker()));
+}
+
+async function reload() {
+  root.innerHTML = `<p class="mm-empty">Hirdetések betöltése…</p>`;
+  try {
+    items = await fetchMyListings({ limit: 200 });
+    render();
+    /* Sablon-detektálás háttérben — ne várja a lista megjelenése. */
+    void detectSablonOnItems(items).then(() => {
+      if (!root.isConnected) return;
+      render();
+    });
+  } catch (error) {
+    root.innerHTML = `<p class="mm-empty">${escapeHtml(error.message ?? "Nem sikerült betölteni.")}</p>`;
+  }
+}
 
   function counts() {
     const featured = readFeaturedIdSet();

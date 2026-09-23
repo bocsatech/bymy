@@ -16,6 +16,13 @@
     max-width: min(260px, 29vw) !important;
     width: auto !important;
   }
+
+  /* Ne tolja szét a közös 80px desk savot */
+  .hub-header-top,
+  body.site-app .hub-header-top,
+  body.site-app .site-header-top {
+    min-height: 0 !important;
+  }
 }
 
 .bymy-logo-img--hero {

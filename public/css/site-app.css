@@ -137,6 +137,15 @@ body.site-app .hub-header {
     padding-top: var(--site-fixed-header-h);
   }
 
+  /* Amíg a közös sav be nem töltődik, a régi/eltérő headerek ne villanjanak */
+  body.site-app:not([data-desk-hdr-ready]) > .hub-header,
+  body.site-app:not([data-desk-hdr-ready]) > .home-header,
+  body.site-app:not([data-desk-hdr-ready]) > .site-header,
+  body.site-app:not([data-desk-hdr-ready]) > header.site-app-header,
+  body.site-app:not([data-desk-hdr-ready]) > .site-app-header {
+    visibility: hidden !important;
+  }
+
   body.site-app > .hub-header,
   body.site-app > .home-header,
   body.site-app > .site-header,
@@ -148,9 +157,13 @@ body.site-app .hub-header {
     left: 0 !important;
     right: 0 !important;
     width: 100% !important;
+    height: var(--site-fixed-header-h) !important;
+    min-height: var(--site-fixed-header-h) !important;
+    max-height: var(--site-fixed-header-h) !important;
     z-index: 400 !important;
     margin: 0 !important;
     box-sizing: border-box;
+    overflow: visible !important;
   }
 
   body.site-app .hub-header-inner,
@@ -164,9 +177,12 @@ body.site-app .hub-header {
     max-width: 1440px !important;
     margin: 0 auto !important;
     padding: 0 24px !important;
+    height: 100% !important;
     min-height: var(--site-fixed-header-h) !important;
+    max-height: var(--site-fixed-header-h) !important;
     flex-direction: row !important;
     gap: 0 !important;
+    box-sizing: border-box !important;
   }
 
   body.site-app .hub-nav-band,
@@ -261,6 +277,8 @@ body.site-app .hub-header {
     justify-self: end !important;
     align-self: center !important;
     min-height: 0 !important;
+    height: auto !important;
+    max-height: none !important;
     padding: 0 0 0 1rem !important;
     width: auto !important;
     display: flex !important;

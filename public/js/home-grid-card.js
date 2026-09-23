@@ -4,7 +4,7 @@ import {
   listingTileMeta,
   listingTilePrice,
   listingTileTitle,
-} from "./listing-tile.js?v=importVehicle1";
+} from "./listing-tile.js?v=listThumb1";
 import { getAuthUser } from "./site-auth.js?v=cegAdatok1";
 import {
   getParkplatz,

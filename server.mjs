@@ -491,9 +491,28 @@ function serveStatic(path, res) {
     res.end(html);
     return;
   }
+  // JS/CSS/?v=… — böngésző cache (HTML mindig friss, a query version bust).
+  const longLived =
+    ext === ".js" ||
+    ext === ".css" ||
+    ext === ".woff" ||
+    ext === ".woff2" ||
+    ext === ".ttf" ||
+    ext === ".otf" ||
+    ext === ".svg" ||
+    ext === ".png" ||
+    ext === ".jpg" ||
+    ext === ".jpeg" ||
+    ext === ".webp" ||
+    ext === ".gif" ||
+    ext === ".ico" ||
+    ext === ".map" ||
+    ext === ".json";
   res.writeHead(200, {
     "Content-Type": MIME[ext] ?? "application/octet-stream",
-    "Cache-Control": "no-store, no-cache, must-revalidate",
+    "Cache-Control": longLived
+      ? "public, max-age=604800, stale-while-revalidate=86400"
+      : "no-store, no-cache, must-revalidate",
   });
   res.end(readFileSync(filePath));
 }
@@ -980,7 +999,7 @@ async function handleListingsApi(req, res, pathname) {
       res,
       200,
       { listings: sanitizeListingList(listings) },
-      { "Cache-Control": "public, max-age=20, stale-while-revalidate=40" }
+      { "Cache-Control": "public, max-age=45, stale-while-revalidate=120" }
     );
     return;
   }

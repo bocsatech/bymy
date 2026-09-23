@@ -68,6 +68,31 @@ function softTitleCase(value) {
     .replace(/(^|[\s\-_/])(\p{L})/gu, (_, sep, ch) => `${sep}${ch.toLocaleUpperCase("hu-HU")}`);
 }
 
+/** Lista-kártya: HA CDN HQ → 640x480 (böngésző ne töltsön 2K képet a mozaikra). */
+export function listCardImageUrl(src) {
+  const raw = String(src ?? "").trim();
+  if (!raw) return "";
+  try {
+    const u = new URL(raw.startsWith("//") ? `https:${raw}` : raw, "https://bymy.local");
+    const host = u.hostname.replace(/^www\./, "").toLowerCase();
+    if (host === "hasznaltautocdn.com" || host.endsWith(".hasznaltautocdn.com")) {
+      const m = u.pathname.match(/\/(\d{5,12})\/(\d{5,12})\.(jpe?g|png|webp)$/i);
+      if (m) {
+        const ext = m[3].toLowerCase().replace("jpeg", "jpg");
+        return `https://img.hasznaltautocdn.com/640x480/${m[1]}/${m[2]}.${ext}`;
+      }
+      if (/\/\d{2,4}x\d{2,4}\//i.test(u.pathname)) {
+        u.pathname = u.pathname.replace(/\/\d{2,4}x\d{2,4}\//i, "/640x480/");
+        u.search = "";
+        return u.href;
+      }
+    }
+  } catch {
+    /* keep raw */
+  }
+  return raw;
+}
+
 export function listingTilePrice(item) {
   const price = String(item?.preview?.price ?? "").trim();
   return price || "Ár egyeztetés szerint";
@@ -173,7 +198,7 @@ function appendSpec(row, iconSvg, text, spec) {
 
 export function createListingTileCard(
   item,
-  { className = "hf-card hf-card--listing", featured = false, configuredFeaturedIds = null } = {}
+  { className = "hf-card hf-card--listing", featured = false, configuredFeaturedIds = null, eager = false } = {}
 ) {
   const preview = item.preview ?? {};
   const showKiemelt = featured || listingShowsKiemeltDecor(item, configuredFeaturedIds);
@@ -190,7 +215,7 @@ export function createListingTileCard(
   const year = listingTileYear(item);
   const km = listingTileKm(item);
   const power = listingTilePower(item);
-  const imageUrl = String(preview.imageUrl || item.fo_kep || "").trim();
+  const imageUrl = listCardImageUrl(preview.imageUrl || item.fo_kep || "");
 
   const media = document.createElement("span");
   media.className = "hf-card-media";
@@ -199,8 +224,9 @@ export function createListingTileCard(
     img.className = "hf-card-media-img";
     img.src = imageUrl;
     img.alt = title;
-    img.loading = "lazy";
+    img.loading = eager ? "eager" : "lazy";
     img.decoding = "async";
+    if (eager) img.fetchPriority = "high";
     img.referrerPolicy = "no-referrer";
     media.appendChild(img);
   }

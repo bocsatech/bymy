@@ -76,7 +76,6 @@ export function applyNavCounts(partial = {}) {
 async function fetchCountsOnce() {
   const res = await fetch("/api/nav/counts", {
     credentials: "same-origin",
-    cache: "no-store",
   });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   const data = await res.json();

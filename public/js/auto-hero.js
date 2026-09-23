@@ -20,7 +20,7 @@ async function loadActiveHeroImage() {
 
   const kind = heroKindFromPage();
   try {
-    const res = await fetch(`/api/site-hero?kind=${encodeURIComponent(kind)}`, { cache: "no-store" });
+    const res = await fetch(`/api/site-hero?kind=${encodeURIComponent(kind)}`);
     if (!res.ok) return;
     const data = await res.json();
     const url = String(data?.activeUrl || "").trim();

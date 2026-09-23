@@ -1,6 +1,6 @@
 import { fetchListings } from "./db-client.js?v=featured1";
 import { pickFeaturedListings } from "./home-featured-slots.js?v=featuredNoAuto1";
-import { createListingTileCard } from "./listing-tile.js?v=featured4";
+import { createListingTileCard } from "./listing-tile.js?v=listThumb1";
 import { bindListingOpen, restoreListingReturn } from "./listing-return.js?v=scrollTop1";
 
 const SECTION = document.querySelector('[data-hf="kiemelt"]');
@@ -28,14 +28,15 @@ async function init() {
       return;
     }
 
-    for (const item of picked) {
+    picked.forEach((item, index) => {
       RAIL.appendChild(
         createListingTileCard(item, {
           featured: true,
           configuredFeaturedIds: new Set(picked.map((r) => Number(r.id))),
+          eager: index < 4,
         })
       );
-    }
+    });
 
     bindListingOpen(RAIL);
     restoreListingReturn();

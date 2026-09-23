@@ -321,34 +321,67 @@
     --hf-rail-gap: 10px;
   }
 
+  /* Minden vízszintes inset nullázása — egyetlen gutter forrás marad */
+  body.hub-page--feed main,
+  body.hub-page--feed .hub-intro,
+  body.hub-page--feed .hub-feed,
+  body.hub-page--feed .hub-promo-band,
+  body.hub-page--feed .hf-section {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  body.hub-page--feed .hub-promo-band {
+    max-width: none !important;
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.25rem !important;
+  }
+
   body.hub-page--feed .hub-intro {
-    padding: 0.5rem 0 0.25rem !important;
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.25rem !important;
   }
 
   body.hub-page--feed .hub-intro > .hub-sell {
-    margin-left: var(--hf-gutter);
-    margin-right: var(--hf-gutter);
+    margin-left: var(--hf-gutter) !important;
+    margin-right: var(--hf-gutter) !important;
   }
 
-  /* Közös bal szél: gutter a első/utolsó gyereken, NEM padding+snap (Safari elcsúsztatja) */
+  /* Közös bal szél: CSAK container padding (nincs first-child margin) */
+  body.hub-page--feed .hub-verticals,
+  body.hub-page--feed .hf-rail,
+  body.hub-page--feed .hf-head,
+  body.hub-page--feed .hf-status {
+    padding-left: var(--hf-gutter) !important;
+    padding-right: var(--hf-gutter) !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    box-sizing: border-box !important;
+    scroll-snap-type: none !important;
+    scroll-padding: 0 !important;
+  }
+
   body.hub-page--feed .hub-verticals,
   body.hub-page--feed .hf-rail {
-    display: flex;
-    flex-wrap: nowrap;
-    align-items: stretch;
-    gap: 0;
-    overflow-x: auto;
-    overflow-y: hidden;
-    padding: 0 0 0.35rem !important;
-    margin: 0 !important;
-    scroll-snap-type: none;
-    scroll-padding: 0;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: stretch !important;
+    gap: var(--hf-rail-gap) !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    padding-top: 0 !important;
+    padding-bottom: 0.4rem !important;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-x: contain;
     scrollbar-width: none;
     -ms-overflow-style: none;
     touch-action: pan-x pan-y;
-    box-sizing: border-box;
+  }
+
+  body.hub-page--feed .hub-verticals {
+    padding-bottom: 0.35rem !important;
   }
 
   body.hub-page--feed .hub-verticals::-webkit-scrollbar,
@@ -358,31 +391,22 @@
     background: transparent;
   }
 
-  body.hub-page--feed .hub-verticals > *:first-child,
-  body.hub-page--feed .hf-rail > *:first-child {
-    margin-left: var(--hf-gutter) !important;
-  }
-
-  body.hub-page--feed .hub-verticals > *:last-child,
-  body.hub-page--feed .hf-rail > *:last-child {
-    margin-right: var(--hf-gutter) !important;
-  }
-
-  body.hub-page--feed .hub-verticals > * + *,
-  body.hub-page--feed .hf-rail > * + * {
-    margin-left: var(--hf-rail-gap) !important;
+  body.hub-page--feed .hub-verticals > *,
+  body.hub-page--feed .hf-rail > * {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    scroll-snap-align: none !important;
   }
 
   body.hub-page--feed .hub-promo {
-    flex: 0 0 calc(100vw - (2 * var(--hf-gutter)));
-    width: calc(100vw - (2 * var(--hf-gutter)));
-    max-width: calc(100vw - (2 * var(--hf-gutter)));
+    flex: 0 0 calc(100vw - (2 * var(--hf-gutter))) !important;
+    width: calc(100vw - (2 * var(--hf-gutter))) !important;
+    max-width: calc(100vw - (2 * var(--hf-gutter))) !important;
     aspect-ratio: 16 / 10;
     border-radius: 9px;
-    box-shadow: none;
-    scroll-snap-align: none;
+    box-shadow: none !important;
     border: 1px solid #d4d4d4;
-    box-sizing: border-box;
+    box-sizing: border-box !important;
   }
 
   body.hub-page--feed .hub-verticals,
@@ -393,19 +417,13 @@
   }
 
   body.hub-page--feed .hub-feed {
-    padding: 0.5rem 0 1rem;
-  }
-
-  body.hub-page--feed .hf-head,
-  body.hub-page--feed .hf-status {
-    padding-left: var(--hf-gutter) !important;
-    padding-right: var(--hf-gutter) !important;
-    box-sizing: border-box;
+    padding-top: 0.5rem !important;
+    padding-bottom: 1rem !important;
   }
 
   body.hub-page--feed .hf-head {
-    padding-top: 0;
-    padding-bottom: 0;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
     margin-bottom: 0.55rem;
   }
 
@@ -424,23 +442,14 @@
     font-weight: 600;
   }
 
-  body.hub-page--feed .hf-rail {
-    padding-bottom: 0.4rem !important;
-  }
-
-  body.hub-page--feed .hub-verticals {
-    padding-bottom: 0.35rem !important;
-  }
-
   body.hub-page--feed .hf-card,
   body.hub-page--feed .hf-card--kategoria,
   body.hub-page--feed .hf-card--ajanlas,
   body.hub-page--feed .hf-card--listing,
   body.hub-page--feed .hf-card--featured {
-    margin-top: 0;
-    margin-bottom: 0;
-    scroll-snap-align: none;
-    box-sizing: border-box;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    box-sizing: border-box !important;
   }
 
   body.hub-page--feed .hf-card,

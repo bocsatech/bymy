@@ -1530,11 +1530,13 @@ html[data-theme="dark"] .hub-promo__text {
   margin: 0;
 }
 body.home-page .hub-promo-band,
-body.hub-page .hub-promo-band,
-body.hub-page--feed .hub-promo-band {
+body.hub-page .hub-promo-band {
   padding-top: 0.75rem;
 }
 
-body:not(.hub-page--feed) .hub-promo-band {
-  padding-bottom: 0.75rem;
+/* Feed: a band ne adjon külön vízszintes paddinget (csempe-szél) */
+body.hub-page--feed .hub-promo-band {
+  max-width: none;
+  margin: 0;
+  padding: 0.5rem 0 0.25rem;
 }

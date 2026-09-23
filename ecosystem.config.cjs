@@ -4,7 +4,7 @@ module.exports = {
       name: "bymy",
       script: "server.mjs",
       cwd: "/var/www/bymy",
-      instances: 2,
+      instances: 4,
       exec_mode: "cluster",
       max_memory_restart: "512M",
       kill_timeout: 5000,

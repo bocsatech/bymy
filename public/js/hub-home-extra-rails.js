@@ -1,6 +1,6 @@
 import { fetchListings, fetchListing } from "./db-client.js?v=nearby2";
-import { getAuthUser, isLoggedIn, refreshAuthSession } from "./site-auth.js?v=nearbyBoot1";
-import { getParkplatz } from "./fok-data.js?v=auth20260805localdb9";
+import { getAuthUser, refreshAuthSession } from "./site-auth.js?v=nearbyBoot1";
+import { getParkplatz, PARKPLATZ_CHANGED } from "./fok-data.js?v=favShow2";
 import {
   createListingTileCard,
   formatListingCountBadge,
@@ -81,7 +81,7 @@ async function initFavoritesRail({ postal, radiusKm }) {
   const STATUS = el("hub-fav-status");
   const COUNT_EL = el("hub-fav-count");
   const ALL = el("hub-fav-all");
-  const SECTION = RAIL?.closest?.(".hf-section");
+  const SECTION = RAIL?.closest?.(".hf-section") || document.querySelector('[data-hf="kedvencek"]');
   if (!RAIL) return;
 
   function setSectionVisible(visible) {
@@ -106,9 +106,48 @@ async function initFavoritesRail({ postal, radiusKm }) {
     COUNT_EL.hidden = !label;
   }
 
+  function rowsToTiles(rows) {
+    return rows.map((row) =>
+      slimListingTile({
+        id: row.id,
+        hirdetes_cime: row.title,
+        fo_kep: row.imageUrl || "",
+        preview: { title: row.title, price: row.price, imageUrl: row.imageUrl || "" },
+      })
+    );
+  }
+
+  function paintItems(items) {
+    RAIL.innerHTML = "";
+    if (!items.length) {
+      setCount(0);
+      setSectionVisible(false);
+      return;
+    }
+    setSectionVisible(true);
+    setCount(items.length);
+    const INITIAL = 9;
+    for (const item of items.slice(0, INITIAL)) {
+      RAIL.appendChild(createListingTileCard(item));
+    }
+    if (items.length > INITIAL) {
+      const more = createPromptCard("Összes megnyitása", "/beallitasok.html?szekcio=parkolo");
+      more.classList.add("hf-card--prompt-all");
+      RAIL.appendChild(more);
+    }
+    setStatus("", { hidden: true });
+  }
+
   setStatus("Kedvencek betöltése…", { hidden: true });
   try {
-    const email = getAuthUser()?.email;
+    let email = getAuthUser()?.email;
+    if (!email) {
+      try {
+        await refreshAuthSession();
+      } catch {
+      }
+      email = getAuthUser()?.email;
+    }
     if (!email) {
       RAIL.innerHTML = "";
       setCount(0);
@@ -127,51 +166,38 @@ async function initFavoritesRail({ postal, radiusKm }) {
       return;
     }
 
-    const items = [];
-    for (const row of saved.slice(0, 20)) {
-      try {
-        const listing = await fetchListing(row.id);
-        if (listing && (listing.status || "feladott") === "feladott") {
-          items.push(slimListingTile(listing));
-          continue;
+    // Azonnal mutasd a mentett listát (kép/cím a Parkolóból), majd frissíts API-ból.
+    paintItems(rowsToTiles(saved.slice(0, 20)));
+    restoreListingReturn();
+
+    const enriched = await Promise.all(
+      saved.slice(0, 20).map(async (row) => {
+        try {
+          const listing = await fetchListing(row.id);
+          if (listing && (listing.status || "feladott") === "feladott") {
+            return slimListingTile(listing);
+          }
+        } catch {
         }
-      } catch {
-      }
-      items.push(
-        slimListingTile({
+        return slimListingTile({
           id: row.id,
           hirdetes_cime: row.title,
           fo_kep: row.imageUrl || "",
           preview: { title: row.title, price: row.price, imageUrl: row.imageUrl || "" },
-        })
-      );
-    }
+        });
+      })
+    );
 
-    RAIL.innerHTML = "";
-    if (!items.length) {
+    if (enriched.length) paintItems(enriched);
+  } catch {
+    const email = getAuthUser()?.email;
+    const saved = email ? getParkplatz(email) : [];
+    if (saved.length) paintItems(rowsToTiles(saved.slice(0, 20)));
+    else {
+      RAIL.innerHTML = "";
       setCount(0);
       setSectionVisible(false);
-      restoreListingReturn();
-      return;
     }
-
-    setSectionVisible(true);
-    setCount(items.length);
-    const INITIAL = 9;
-    for (const item of items.slice(0, INITIAL)) {
-      RAIL.appendChild(createListingTileCard(item));
-    }
-    if (items.length > INITIAL) {
-      const more = createPromptCard("Összes megnyitása", "/beallitasok.html?szekcio=parkolo");
-      more.classList.add("hf-card--prompt-all");
-      RAIL.appendChild(more);
-    }
-    setStatus("", { hidden: true });
-  } catch (error) {
-    void error;
-    RAIL.innerHTML = "";
-    setCount(0);
-    setSectionVisible(false);
   }
   restoreListingReturn();
 }
@@ -224,11 +250,9 @@ async function init() {
 
 async function bootHomeExtraRails() {
   const gen = ++bootGen;
-  if (isLoggedIn()) {
-    try {
-      await refreshAuthSession();
-    } catch {
-    }
+  try {
+    await refreshAuthSession();
+  } catch {
   }
   if (gen !== bootGen) return;
   await init();
@@ -241,8 +265,11 @@ function scheduleHomeExtraRailsBoot() {
 scheduleHomeExtraRailsBoot();
 window.addEventListener("site-auth-ready", scheduleHomeExtraRailsBoot);
 window.addEventListener("bymy-auth-changed", scheduleHomeExtraRailsBoot);
+window.addEventListener(PARKPLATZ_CHANGED, scheduleHomeExtraRailsBoot);
 window.addEventListener("storage", (event) => {
-  if (event.key === STORAGE_POSTAL || event.key === STORAGE_RADIUS) scheduleHomeExtraRailsBoot();
+  if (event.key === STORAGE_POSTAL || event.key === STORAGE_RADIUS || event.key === "bymy-parkplatz") {
+    scheduleHomeExtraRailsBoot();
+  }
 });
 window.addEventListener("bymy-nearby-prefs-changed", scheduleHomeExtraRailsBoot);
 window.addEventListener("pageshow", (event) => {

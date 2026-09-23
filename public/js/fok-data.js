@@ -1,6 +1,12 @@
-
 const PARK_KEY = "bymy-parkplatz";
 const SEARCH_KEY = "bymy-saved-searches";
+export const PARKPLATZ_CHANGED = "bymy-parkplatz-changed";
+
+function normalizeEmail(email) {
+  return String(email || "")
+    .trim()
+    .toLowerCase();
+}
 
 function readMap(key) {
   try {
@@ -14,16 +20,50 @@ function writeMap(key, map) {
   localStorage.setItem(key, JSON.stringify(map));
 }
 
+function notifyParkplatzChanged() {
+  try {
+    window.dispatchEvent(new CustomEvent(PARKPLATZ_CHANGED));
+  } catch {
+  }
+}
+
+/** Resolve list for email; merge legacy mixed-case keys into lowercase. */
 function listForEmail(key, email) {
-  if (!email) return [];
+  const norm = normalizeEmail(email);
+  if (!norm) return [];
   const map = readMap(key);
-  return Array.isArray(map[email]) ? map[email] : [];
+  const exact = Array.isArray(map[norm]) ? map[norm] : null;
+  if (exact) return exact;
+
+  const merged = [];
+  const seen = new Set();
+  let migrated = false;
+  for (const [rawKey, rows] of Object.entries(map)) {
+    if (normalizeEmail(rawKey) !== norm || !Array.isArray(rows)) continue;
+    migrated = true;
+    for (const row of rows) {
+      const id = String(row?.id ?? "");
+      if (!id || seen.has(id)) continue;
+      seen.add(id);
+      merged.push(row);
+    }
+    if (rawKey !== norm) delete map[rawKey];
+  }
+  if (migrated) {
+    map[norm] = merged;
+    writeMap(key, map);
+  }
+  return merged;
 }
 
 function saveForEmail(key, email, list) {
-  if (!email) return;
+  const norm = normalizeEmail(email);
+  if (!norm) return;
   const map = readMap(key);
-  map[email] = list;
+  for (const rawKey of Object.keys(map)) {
+    if (rawKey !== norm && normalizeEmail(rawKey) === norm) delete map[rawKey];
+  }
+  map[norm] = list;
   writeMap(key, map);
 }
 
@@ -48,12 +88,14 @@ export function addParkplatzItem(email, item) {
     ...list,
   ];
   saveForEmail(PARK_KEY, email, next);
+  notifyParkplatzChanged();
   return next;
 }
 
 export function removeParkplatzItem(email, id) {
   const next = getParkplatz(email).filter((row) => String(row.id) !== String(id));
   saveForEmail(PARK_KEY, email, next);
+  notifyParkplatzChanged();
   return next;
 }
 
@@ -70,6 +112,7 @@ export function patchParkplatzItem(email, id, patch = {}) {
     String(row.id) === String(id) ? { ...row, ...patch } : row
   );
   saveForEmail(PARK_KEY, email, next);
+  notifyParkplatzChanged();
   return next;
 }
 
@@ -111,4 +154,3 @@ export function toggleSavedSearchNotify(email, id) {
   saveForEmail(SEARCH_KEY, email, next);
   return next;
 }
-

@@ -1256,6 +1256,59 @@ th { color: var(--muted); font-weight: 600; }
 }
 .users-card__btn:hover { border-color: #94a3b8; }
 .users-card__btn--primary:hover { background: #1e293b; border-color: #1e293b; }
+
+.users-create {
+  margin: 0 0 1rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid #dbe1ea;
+  border-radius: 14px;
+  background: #fff;
+}
+.users-create__title {
+  margin: 0 0 0.35rem;
+  font-size: 1rem;
+  font-weight: 750;
+  color: #0f172a;
+}
+.users-create__hint {
+  margin: 0 0 0.85rem;
+  font-size: 0.82rem;
+  color: #64748b;
+  line-height: 1.4;
+}
+.users-create__hint code {
+  font-size: 0.78rem;
+  background: #f1f5f9;
+  padding: 0.05rem 0.3rem;
+  border-radius: 4px;
+}
+.users-create__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 0.65rem 0.75rem;
+  margin-bottom: 0.85rem;
+}
+.users-create__grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.78rem;
+  font-weight: 650;
+  color: #475569;
+}
+.users-create__grid input {
+  border: 1px solid #dbe1ea;
+  border-radius: 10px;
+  padding: 0.55rem 0.65rem;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: #0f172a;
+}
+.users-create__grid input:focus {
+  outline: 2px solid #cbd5e1;
+  outline-offset: 1px;
+}
+
 @media (max-width: 900px) {
   .users-card {
     grid-template-columns: 1fr;

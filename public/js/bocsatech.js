@@ -615,6 +615,41 @@ const actions = {
       render();
     }
   },
+  async createUser(event) {
+    err = "";
+    info = "";
+    const form = event.target;
+    const submitBtn = form.querySelector('button[type="submit"]');
+    if (submitBtn) submitBtn.disabled = true;
+    try {
+      const accountType = tab === "users:business" ? "business" : "private";
+      const data = await api("/api/level1/users", {
+        method: "POST",
+        body: JSON.stringify({
+          email: form.email.value,
+          displayName: form.displayName.value,
+          password: form.password.value,
+          accountType,
+          listingTitle: form.listingTitle?.value,
+          listingTelepules: form.listingTelepules?.value,
+          listingGyartmany: form.listingGyartmany?.value,
+          listingModell: form.listingModell?.value,
+          listingPrice: form.listingPrice?.value,
+          listingVertical: "auto",
+        }),
+      });
+      users = (await api("/api/level1/users")).users;
+      const listingNote = data.listing?.id ? ` · hirdetés #${data.listing.id}` : "";
+      info = `Fiók létrehozva: ${data.user?.email || ""} (azonnal aktív)${listingNote}. Belépés: email vagy a @ előtti név + jelszó.`;
+      form.reset();
+      render();
+    } catch (error) {
+      err = error.message;
+      render();
+    } finally {
+      if (submitBtn) submitBtn.disabled = false;
+    }
+  },
   async toggleUserActive(_, el) {
     const id = el.getAttribute("data-id");
     const active = el.getAttribute("data-active") === "1";
@@ -1901,9 +1936,26 @@ function usersView(kind = "private") {
   `;
   const title = kind === "business" ? "Céges fiókok" : "Privát fiókok";
   const emptyLabel = kind === "business" ? "céges" : "privát";
+  const createForm = `
+    <form class="users-create" data-act="createUser">
+      <h3 class="users-create__title">Új ${emptyLabel} fiók (teszt)</h3>
+      <p class="users-create__hint">Azonnal aktív. Ha csak nevet adsz (pl. <code>teszt01</code>), email: <code>teszt01@test.bymy.hu</code>. Jelszó min. 12 karakter. Település megadásával feladott teszt-hirdetés is készül (térkép).</p>
+      <div class="users-create__grid">
+        <label>Felhasználónév / email<input name="email" required placeholder="teszt01 vagy teszt01@test.bymy.hu" autocomplete="off" /></label>
+        <label>Megjelenített név<input name="displayName" placeholder="Teszt Elek" maxlength="40" /></label>
+        <label>Jelszó (min. 12)<input name="password" type="password" required minlength="12" placeholder="tesztjelszo12" autocomplete="new-password" /></label>
+        <label>Hirdetés címe<input name="listingTitle" placeholder="BMW 320d teszt" /></label>
+        <label>Település (térkép)<input name="listingTelepules" placeholder="Budapest" /></label>
+        <label>Gyártmány<input name="listingGyartmany" placeholder="BMW" /></label>
+        <label>Modell<input name="listingModell" placeholder="320d" /></label>
+        <label>Ár<input name="listingPrice" placeholder="4 900 000 Ft" /></label>
+      </div>
+      <button type="submit" class="users-card__btn users-card__btn--primary">Fiók létrehozása</button>
+    </form>`;
   return `
     <div class="users-edit">
       ${messages}
+      ${createForm}
       <div class="users-cards-wrap">
         <div class="users-cards-head">
           <h2 class="users-cards-title">${esc(title)}</h2>

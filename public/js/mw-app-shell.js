@@ -7,7 +7,7 @@
   var isHub = body.classList.contains("hub-page--feed") || page === "hub";
   var isFiok = body.classList.contains("fiok-page") || page === "fiok";
   var isPostAd = page === "hirdetesfeladas";
-  var CSS_HREF = "/css/hub-mobile-app.css?v=deskHdr2";
+  var CSS_HREF = "/css/hub-mobile-app.css?v=deskHdr3";
 
   function ensureCss() {
     if (document.querySelector('link[href*="hub-mobile-app.css"]')) return;
@@ -271,8 +271,54 @@
     if (document.querySelector('link[href*="bymy-logo-size.css"]')) return;
     var link = document.createElement("link");
     link.rel = "stylesheet";
-    link.href = "/css/bymy-logo-size.css?v=deskHdr2";
+    link.href = "/css/bymy-logo-size.css?v=deskHdr3";
     document.head.appendChild(link);
+  }
+
+  function ensureNavFont() {
+    if (document.querySelector('link[href*="family=DM+Sans"]')) return;
+    if (!document.querySelector('link[href*="fonts.googleapis.com"]')) {
+      var pre1 = document.createElement("link");
+      pre1.rel = "preconnect";
+      pre1.href = "https://fonts.googleapis.com";
+      document.head.appendChild(pre1);
+      var pre2 = document.createElement("link");
+      pre2.rel = "preconnect";
+      pre2.href = "https://fonts.gstatic.com";
+      pre2.crossOrigin = "anonymous";
+      document.head.appendChild(pre2);
+    }
+    var link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = "https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;600;700;800&display=swap";
+    document.head.appendChild(link);
+  }
+
+  function readNavCountsSync() {
+    try {
+      var raw = sessionStorage.getItem("bymy.navCounts.v1");
+      if (!raw) return { auto: 0, teher: 0, ingatlan: 0 };
+      var parsed = JSON.parse(raw);
+      return {
+        auto: Number(parsed && parsed.auto) || 0,
+        teher: Number(parsed && parsed.teher) || 0,
+        ingatlan: Number(parsed && parsed.ingatlan) || 0,
+      };
+    } catch (e) {
+      return { auto: 0, teher: 0, ingatlan: 0 };
+    }
+  }
+
+  function formatNavCount(n) {
+    try {
+      return new Intl.NumberFormat("hu-HU").format(Number(n) || 0);
+    } catch (e) {
+      return String(Number(n) || 0);
+    }
+  }
+
+  function navCountHtml(key, counts) {
+    return '<span class="nav-count" aria-hidden="true">' + formatNavCount(counts[key]) + "</span>";
   }
 
   function pruneForeignHeaders() {
@@ -292,6 +338,8 @@
     var msgSvg =
       '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 6.8h9.5a2.2 2.2 0 0 1 2.2 2.2v4.2a2.2 2.2 0 0 1-2.2 2.2H10l-3.2 2.4V15.2H5A2.2 2.2 0 0 1 2.8 13V9a2.2 2.2 0 0 1 2.2-2.2Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M14.2 8.2h4A2.2 2.2 0 0 1 20.4 10.4v3.4a2.2 2.2 0 0 1-2.2 2.2h-.7v1.7l-2.2-1.7" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>';
 
+    var counts = readNavCountsSync();
+
     var html =
       '<header class="hub-header" data-site-desk-header aria-label="Bymy">' +
       '<div class="hub-header-inner">' +
@@ -304,13 +352,19 @@
       '" href="/">Kezdőlap</a>' +
       '<a class="hub-nav-link' +
       navActiveClass("auto") +
-      '" href="/auto.html">Autó</a>' +
+      '" href="/auto.html">Autó ' +
+      navCountHtml("auto", counts) +
+      "</a>" +
       '<a class="hub-nav-link' +
       navActiveClass("teherauto") +
-      '" href="/teherauto.html">Teherautó</a>' +
+      '" href="/teherauto.html">Teherautó ' +
+      navCountHtml("teher", counts) +
+      "</a>" +
       '<a class="hub-nav-link' +
       navActiveClass("ingatlan") +
-      '" href="/ingatlan.html">Ingatlan</a>' +
+      '" href="/ingatlan.html">Ingatlan ' +
+      navCountHtml("ingatlan", counts) +
+      "</a>" +
       '<a class="hub-nav-link' +
       navActiveClass("ajanlasok") +
       '" href="' +
@@ -371,6 +425,7 @@
 
   ensureCss();
   ensureLogoCss();
+  ensureNavFont();
   injectTop();
   injectDeskHeader();
   injectTabbar();

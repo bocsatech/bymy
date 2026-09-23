@@ -255,6 +255,7 @@ body.site-app .hub-header {
   body.site-app .site-app-nav-link,
   body.site-app .import-nav-link {
     white-space: nowrap;
+    font-family: "DM Sans", system-ui, sans-serif !important;
     font-size: 14px !important;
     font-weight: 500 !important;
     padding: 0 0 2px !important;
@@ -262,6 +263,10 @@ body.site-app .hub-header {
     border-bottom: 2px solid transparent !important;
     box-shadow: none !important;
     background: transparent !important;
+    line-height: 1.2 !important;
+    display: inline-flex !important;
+    align-items: baseline !important;
+    gap: 0.35rem !important;
   }
 
   body.site-app .hub-nav-link.active,
@@ -269,6 +274,22 @@ body.site-app .hub-header {
   body.site-app .site-app-nav-link.active,
   body.site-app .import-nav-link.active {
     border-bottom-color: #f0c52c !important;
+    font-weight: 500 !important;
+    color: #111 !important;
+  }
+
+  body.site-app .hub-nav-link .nav-count,
+  body.site-app .home-nav-link .nav-count,
+  body.site-app .site-app-nav-link .nav-count,
+  body.site-app .import-nav-link .nav-count,
+  body.site-app .nav-count {
+    display: inline-block !important;
+    min-width: 2.75ch !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    font-variant-numeric: tabular-nums !important;
+    color: #9ca3af !important;
+    line-height: 1 !important;
   }
 
   body.site-app .hub-header-top,
@@ -1824,15 +1845,18 @@ body.site-app .hub-nav-link.active,
 body.site-app .site-app-nav-link.active,
 body.site-app .import-nav-link.active {
   background: transparent;
-  color: #6b7280;
-  font-weight: 700;
+  color: #111;
+  font-weight: 500;
   text-decoration: none;
-  border-bottom-color: #9ca3af;
+  border-bottom-color: #f0c52c;
 }
 
 body.site-app .nav-count {
-  font-size: 0.94rem;
+  display: inline-block;
+  min-width: 2.75ch;
+  font-size: 13px;
   font-weight: 500;
+  font-variant-numeric: tabular-nums;
   color: #9ca3af;
 }
 

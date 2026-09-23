@@ -63,10 +63,12 @@
     padding: 0 24px;
     min-height: 80px;
     display: grid !important;
-    grid-template-columns: 260px auto minmax(0, 1fr);
+    grid-template-columns: 260px max-content minmax(0, 1fr);
     grid-template-areas: "logo nav actions";
     align-items: center;
     column-gap: 24px;
+    row-gap: 0;
+    gap: 0 24px;
     position: relative;
     overflow: visible;
     flex-direction: unset !important;
@@ -103,11 +105,11 @@
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav {
     grid-area: nav;
-    justify-self: center;
+    justify-self: start;
     align-self: center;
     display: flex !important;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     gap: 22px;
     position: static !important;
     left: auto !important;
@@ -118,7 +120,7 @@
     width: max-content;
     max-width: none;
     margin: 0 !important;
-    padding: 0 0.75rem 0 0 !important;
+    padding: 0 !important;
     pointer-events: auto;
     overflow: visible;
   }
@@ -175,10 +177,13 @@
     background: var(--ad-yellow) !important;
     border-color: var(--ad-yellow) !important;
     color: var(--ad-yellow-ink) !important;
-    border-radius: 6px !important;
+    border-radius: 8px !important;
     font-weight: 700 !important;
-    padding: 0.45rem 0.95rem !important;
-    min-height: 0 !important;
+    padding: 0 14px !important;
+    height: 36px !important;
+    min-height: 36px !important;
+    max-height: 36px !important;
+    box-sizing: border-box !important;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-theme-toggle {

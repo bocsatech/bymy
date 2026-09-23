@@ -1,17 +1,112 @@
-/* Desk felső sav — azonos betű és méret minden oldalon */
+/* Desk felső sav — azonos betű, méret ÉS pozíció minden oldalon */
 @media (min-width: 901px) {
-  body.site-app > .hub-header,
-  body.site-app > .home-header,
-  body.site-app > .site-header,
-  body.site-app > header.site-app-header,
-  body.site-app > .site-app-header,
-  body.site-app > header[data-site-desk-header] {
+  body.site-app {
     --desk-nav-font: "DM Sans", system-ui, -apple-system, sans-serif;
     --desk-nav-size: 14px;
     --desk-nav-weight: 500;
     --desk-count-size: 13px;
     --desk-action-size: 14px;
     --desk-cta-size: 13px;
+    --desk-header-h: 80px;
+    --desk-logo-col: 260px;
+    --desk-pad-x: 24px;
+    --desk-gap: 24px;
+    --desk-nav-gap: 22px;
+    --desk-cta-h: 36px;
+  }
+
+  body.site-app > .hub-header,
+  body.site-app > .home-header,
+  body.site-app > .site-header,
+  body.site-app > header.site-app-header,
+  body.site-app > .site-app-header,
+  body.site-app > header[data-site-desk-header],
+  body.home-page > .hub-header,
+  body.home-page > .home-header {
+    height: var(--desk-header-h) !important;
+    min-height: var(--desk-header-h) !important;
+    max-height: var(--desk-header-h) !important;
+  }
+
+  body.site-app .hub-header-inner,
+  body.site-app .home-header-inner,
+  body.site-app .site-app-header-inner,
+  body.home-page .hub-header-inner,
+  body.home-page .home-header-inner {
+    display: grid !important;
+    grid-template-columns: var(--desk-logo-col) max-content minmax(0, 1fr) !important;
+    grid-template-areas: "logo nav actions" !important;
+    align-items: center !important;
+    column-gap: var(--desk-gap) !important;
+    row-gap: 0 !important;
+    gap: 0 var(--desk-gap) !important;
+    max-width: 1440px !important;
+    margin: 0 auto !important;
+    padding: 0 var(--desk-pad-x) !important;
+    height: var(--desk-header-h) !important;
+    min-height: var(--desk-header-h) !important;
+    max-height: var(--desk-header-h) !important;
+    box-sizing: border-box !important;
+  }
+
+  body.site-app .hub-logo,
+  body.site-app .home-logo,
+  body.site-app .site-app-logo,
+  body.home-page .hub-logo {
+    grid-area: logo !important;
+    justify-self: start !important;
+    align-self: center !important;
+    width: var(--desk-logo-col) !important;
+    max-width: var(--desk-logo-col) !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  body.site-app .hub-nav,
+  body.site-app .home-nav,
+  body.site-app .site-app-nav,
+  body.site-app .import-nav,
+  body.home-page .hub-nav {
+    grid-area: nav !important;
+    justify-self: start !important;
+    align-self: center !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: var(--desk-nav-gap) !important;
+    width: max-content !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    position: static !important;
+    transform: none !important;
+    left: auto !important;
+    right: auto !important;
+  }
+
+  body.site-app .hub-header-top,
+  body.site-app .site-header-top,
+  body.home-page .hub-header-top {
+    grid-area: actions !important;
+    justify-self: end !important;
+    align-self: center !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    min-height: 0 !important;
+    height: var(--desk-cta-h) !important;
+    max-height: var(--desk-cta-h) !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: auto !important;
+  }
+
+  body.site-app .hub-header-actions,
+  body.site-app .site-header-actions,
+  body.home-page .hub-header-actions {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.65rem !important;
+    height: var(--desk-cta-h) !important;
+    margin: 0 !important;
   }
 
   body.site-app .hub-nav-link,
@@ -21,23 +116,22 @@
   body.site-app .hub-nav a,
   body.site-app .home-nav a,
   body.site-app .site-app-nav a,
-  body.site-app .import-nav a {
+  body.site-app .import-nav a,
+  body.home-page .hub-nav-link {
     font-family: var(--desk-nav-font) !important;
     font-size: var(--desk-nav-size) !important;
     font-weight: var(--desk-nav-weight) !important;
     letter-spacing: 0 !important;
     line-height: 1.2 !important;
     text-transform: none !important;
+    padding: 0 0 2px !important;
   }
 
   body.site-app .hub-nav-link.active,
   body.site-app .home-nav-link.active,
   body.site-app .site-app-nav-link.active,
   body.site-app .import-nav-link.active,
-  body.site-app .hub-nav a.active,
-  body.site-app .home-nav a.active,
-  body.site-app .site-app-nav a.active,
-  body.site-app .import-nav a.active {
+  body.home-page .hub-nav-link.active {
     font-family: var(--desk-nav-font) !important;
     font-size: var(--desk-nav-size) !important;
     font-weight: var(--desk-nav-weight) !important;
@@ -45,15 +139,15 @@
 
   body.site-app .nav-count,
   body.site-app .hub-nav-link .nav-count,
-  body.site-app .home-nav-link .nav-count,
-  body.site-app .site-app-nav-link .nav-count,
-  body.site-app .import-nav-link .nav-count {
+  body.home-page .hub-nav-link .nav-count {
     font-family: var(--desk-nav-font) !important;
     font-size: var(--desk-count-size) !important;
     font-weight: 500 !important;
     font-variant-numeric: tabular-nums !important;
     letter-spacing: 0 !important;
     line-height: 1 !important;
+    display: inline-block !important;
+    min-width: 2.75ch !important;
   }
 
   body.site-app .hub-header-msg,
@@ -62,7 +156,9 @@
   body.site-app .site-header-firstname,
   body.site-app .site-header-profile,
   body.site-app .hub-btn--ghost,
-  body.site-app .site-header-auth-row a {
+  body.site-app .site-header-auth-row a,
+  body.home-page .hub-header-msg,
+  body.home-page .site-header-firstname {
     font-family: var(--desk-nav-font) !important;
     font-size: var(--desk-action-size) !important;
     font-weight: 500 !important;
@@ -72,12 +168,37 @@
   }
 
   body.site-app .hub-btn--post,
-  body.site-app .site-header-btn--post {
+  body.site-app .site-header-btn--post,
+  body.home-page .hub-btn--post {
     font-family: var(--desk-nav-font) !important;
     font-size: var(--desk-cta-size) !important;
     font-weight: 700 !important;
     letter-spacing: 0 !important;
     line-height: 1 !important;
     text-transform: none !important;
+    height: var(--desk-cta-h) !important;
+    min-height: var(--desk-cta-h) !important;
+    max-height: var(--desk-cta-h) !important;
+    padding: 0 14px !important;
+    box-sizing: border-box !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 8px !important;
+  }
+
+  body.site-app .hub-theme-toggle,
+  body.home-page .hub-theme-toggle {
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    min-height: 34px !important;
+    flex: 0 0 34px !important;
+  }
+
+  body.site-app .site-header-avatar,
+  body.home-page .site-header-avatar {
+    width: 28px !important;
+    height: 28px !important;
   }
 }

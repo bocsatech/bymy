@@ -7,7 +7,7 @@
   var isHub = body.classList.contains("hub-page--feed") || page === "hub";
   var isFiok = body.classList.contains("fiok-page") || page === "fiok";
   var isPostAd = page === "hirdetesfeladas";
-  var CSS_HREF = "/css/hub-mobile-app.css?v=deskHdr4";
+  var CSS_HREF = "/css/hub-mobile-app.css?v=deskHdr5";
 
   function ensureCss() {
     if (document.querySelector('link[href*="hub-mobile-app.css"]')) return;
@@ -271,15 +271,18 @@
     if (document.querySelector('link[href*="bymy-logo-size.css"]')) return;
     var link = document.createElement("link");
     link.rel = "stylesheet";
-    link.href = "/css/bymy-logo-size.css?v=deskHdr4";
+    link.href = "/css/bymy-logo-size.css?v=deskHdr5";
     document.head.appendChild(link);
   }
 
   function ensureDeskHeaderCss() {
-    if (document.querySelector('link[href*="site-desk-header.css"]')) return;
+    var href = "/css/site-desk-header.css?v=deskHdr5";
+    var existing = document.querySelector("link[data-site-desk-header-css], link[href*='site-desk-header.css']");
+    if (existing) existing.remove();
     var link = document.createElement("link");
     link.rel = "stylesheet";
-    link.href = "/css/site-desk-header.css?v=deskHdr4";
+    link.href = href;
+    link.setAttribute("data-site-desk-header-css", "1");
     document.head.appendChild(link);
   }
 
@@ -439,6 +442,11 @@
   injectDeskHeader();
   injectTabbar();
   if (!isPostAd) bindScrollHide();
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", ensureDeskHeaderCss);
+  } else {
+    ensureDeskHeaderCss();
+  }
 
   import("/js/hub-promo.js?v=promoHomeOnly1")
     .then(function (mod) {

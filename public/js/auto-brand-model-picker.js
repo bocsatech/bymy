@@ -199,7 +199,6 @@ export async function mountAutoBrandModelPicker(form) {
       group.innerHTML = html;
     } else {
       bodyEl.innerHTML = `
-        <p class="auto-bm-hint">Kapcsolók — több gyártmány is</p>
         <button type="button" class="auto-bm-clear" data-auto-bm-clear-brands>Összes kikapcsolása</button>
         <div class="auto-bm-group">${html}</div>
       `;
@@ -214,7 +213,6 @@ export async function mountAutoBrandModelPicker(form) {
     searchWrap.hidden = false;
     if (searchInput && searchInput.value !== brandQuery) searchInput.value = brandQuery;
     bodyEl.innerHTML = `
-      <p class="auto-bm-hint">Kapcsolók — több gyártmány is</p>
       <button type="button" class="auto-bm-clear" data-auto-bm-clear-brands>Összes kikapcsolása</button>
       <div class="auto-bm-group"></div>
     `;
@@ -244,7 +242,6 @@ export async function mountAutoBrandModelPicker(form) {
       .join("");
 
     bodyEl.innerHTML = `
-      <p class="auto-bm-hint">Kapcsolók — több modell is</p>
       <button type="button" class="auto-bm-clear" data-auto-bm-clear-models>Összes kikapcsolása</button>
       <div class="auto-bm-group">${
         rows || `<p class="auto-bm-empty">Nincs modell ehhez a gyártmányhoz.</p>`

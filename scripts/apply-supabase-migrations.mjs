@@ -27,6 +27,7 @@ const FILES = [
   "014_partner_commission.sql",
   "015_listings_vertical_feed.sql",
   "016_listing_cells_listing_field_idx.sql",
+  "017_listing_feed.sql",
 ];
 
 function loadEnvLocal() {

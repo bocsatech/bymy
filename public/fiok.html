@@ -29,9 +29,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="/css/site-app.css?v=logoNav72Align1" />
+    <link rel="stylesheet" href="/css/site-app.css?v=mmNavC1" />
     <link rel="stylesheet" href="/css/listing-photo-cover.css?v=tileAllPages1" />
-    <link rel="stylesheet" href="/css/fiok-menu.css?v=fiokWebMenu1" />
+    <link rel="stylesheet" href="/css/mm-nav-c.css?v=mmNavC1" />
+    <link rel="stylesheet" href="/css/fiok-menu.css?v=mmNavC1" />
     <link rel="stylesheet" href="/css/hub-mobile-app.css?v=tileFill3" />
     <link rel="stylesheet" href="/css/bymy-logo-size.css?v=logoNav72Align1" />
   </head>
@@ -49,27 +50,79 @@
     <main class="fiok-main">
       
       <aside class="mm-side" aria-label="Fiók menü">
-        <p class="mm-side-kicker">Fiókom <span class="mm-side-account-type" data-mm-account-type hidden></span></p>
-        <h2 class="mm-side-title">Üdv, <span data-mm-hello>—</span></h2>
+        <div class="mm-side-head">
+          <p class="mm-side-kicker">Fiókom <span class="mm-side-account-type" data-mm-account-type hidden></span></p>
+          <h2 class="mm-side-title">Üdv, <span data-mm-hello>—</span></h2>
+        </div>
         <nav class="mm-nav">
           <div class="mm-nav-group" data-mm-company-nav-wrap hidden>
-            <a class="mm-nav-link" href="/beallitasok.html?szekcio=cegadatok" data-mm-nav="cegadatok">Cégadatok</a>
-            <a class="mm-nav-link" href="/partner-profil-kezelese.html">Partneri profil</a>
+            <a class="mm-nav-link" href="/beallitasok.html?szekcio=cegadatok" data-mm-nav="cegadatok">
+              <span class="mm-nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4 20V10l8-6 8 6v10H4Z" stroke="currentColor" stroke-width="1.7"/></svg></span>
+              <span class="mm-nav-text">Cégadatok</span>
+            </a>
+            <a class="mm-nav-link" href="/partner-profil-kezelese.html">
+              <span class="mm-nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M8 20v-7h8v7M4 10l8-6 8 6" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg></span>
+              <span class="mm-nav-text">Partneri profil</span>
+            </a>
           </div>
-          <a class="mm-nav-link" href="/beallitasok.html?szekcio=import" data-mm-nav="import">Autóimport</a>
-          <a class="mm-nav-link" href="/beallitasok.html?szekcio=nyomtatasok" data-mm-nav="nyomtatasok">Nyomtatások</a>
-          <a class="mm-nav-link" href="/beallitasok.html?szekcio=ertekelesek" data-mm-nav="ertekelesek">Értékelések</a>
-          <p class="mm-nav-plain">Kiemelések <span>Hamarosan</span></p>
-          <a class="mm-nav-link" href="/beallitasok.html?szekcio=parkolo" data-mm-nav="parkolo">Kedvencek</a>
-          <a class="mm-nav-link" href="/beallitasok.html?szekcio=hirdetes" data-mm-nav="hirdetes">Saját hirdetések</a>
-          <a class="mm-nav-link" href="/beallitasok.html?szekcio=keresesek" data-mm-nav="keresesek">Mentett kereséseim</a>
-          <a class="mm-nav-link" href="/uzenetek.html" data-mm-nav="uzenetek">Üzenetek <span class="mm-nav-badge" data-mm-msg-count hidden>0</span></a>
-          <a class="mm-nav-link" href="/beallitasok.html?szekcio=szemelyes" data-mm-nav="szemelyes">Személyes adatok</a>
-          <a class="mm-nav-link" href="/beallitasok.html?szekcio=keresesi-korzet" data-mm-nav="keresesi-korzet">Keresési körzet</a>
-          <a class="mm-nav-link" href="/beallitasok.html?szekcio=ajanlasok-korzet" data-mm-nav="ajanlasok-korzet">Ajánlások körzete</a>
-          <a class="mm-nav-link" href="/beallitasok.html?szekcio=jelszo" data-mm-nav="jelszo">Jelszó módosítása</a>
-          <a class="mm-nav-link" href="/beallitasok.html?szekcio=notify" data-mm-nav="notify">Hírlevél és értesítések</a>
-          <a class="mm-nav-link" href="/beallitasok.html?szekcio=megjelenes" data-mm-nav="megjelenes">Megjelenés</a>
+          <a class="mm-nav-link" href="/beallitasok.html?szekcio=import" data-mm-nav="import">
+            <span class="mm-nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4 16l4-8h8l4 8H4Z" stroke="currentColor" stroke-width="1.7"/><circle cx="8" cy="17" r="1.5" fill="currentColor"/><circle cx="16" cy="17" r="1.5" fill="currentColor"/></svg></span>
+            <span class="mm-nav-text">Autóimport</span>
+          </a>
+          <a class="mm-nav-link" href="/beallitasok.html?szekcio=nyomtatasok" data-mm-nav="nyomtatasok">
+            <span class="mm-nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M7 8h10M7 12h10M7 16h6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span>
+            <span class="mm-nav-text">Nyomtatások</span>
+          </a>
+          <a class="mm-nav-link" href="/beallitasok.html?szekcio=ertekelesek" data-mm-nav="ertekelesek">
+            <span class="mm-nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3l2.2 6.5H21l-5.2 3.8 2 6.7L12 16.8 6.2 20l2-6.7L3 9.5h6.8L12 3Z" stroke="currentColor" stroke-width="1.5"/></svg></span>
+            <span class="mm-nav-text">Értékelések</span>
+          </a>
+          <p class="mm-nav-plain">
+            <span class="mm-nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M12 5v14" stroke="currentColor" stroke-width="1.7"/></svg></span>
+            <span class="mm-nav-text">Kiemelések</span>
+            <span>Hamarosan</span>
+          </p>
+          <a class="mm-nav-link" href="/beallitasok.html?szekcio=parkolo" data-mm-nav="parkolo">
+            <span class="mm-nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 20s-7-4.5-7-10a7 7 0 1 1 14 0c0 5.5-7 10-7 10Z" stroke="currentColor" stroke-width="1.7"/></svg></span>
+            <span class="mm-nav-text">Kedvencek</span>
+          </a>
+          <a class="mm-nav-link" href="/beallitasok.html?szekcio=hirdetes" data-mm-nav="hirdetes">
+            <span class="mm-nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="4" y="5" width="16" height="14" rx="2" stroke="currentColor" stroke-width="1.7"/><path d="M8 9h8M8 13h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span>
+            <span class="mm-nav-text">Saját hirdetések</span>
+          </a>
+          <a class="mm-nav-link" href="/beallitasok.html?szekcio=keresesek" data-mm-nav="keresesek">
+            <span class="mm-nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="6" stroke="currentColor" stroke-width="1.7"/><path d="M20 20l-3.5-3.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span>
+            <span class="mm-nav-text">Mentett kereséseim</span>
+          </a>
+          <a class="mm-nav-link" href="/uzenetek.html" data-mm-nav="uzenetek">
+            <span class="mm-nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4 6h16v10H7l-3 3V6Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg></span>
+            <span class="mm-nav-text">Üzenetek</span>
+            <span class="mm-nav-badge" data-mm-msg-count hidden>0</span>
+          </a>
+          <a class="mm-nav-link" href="/beallitasok.html?szekcio=szemelyes" data-mm-nav="szemelyes">
+            <span class="mm-nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.2" stroke="currentColor" stroke-width="1.7"/><path d="M5 19c1.5-3.2 4-4.8 7-4.8S17.5 15.8 19 19" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span>
+            <span class="mm-nav-text">Személyes adatok</span>
+          </a>
+          <a class="mm-nav-link" href="/beallitasok.html?szekcio=keresesi-korzet" data-mm-nav="keresesi-korzet">
+            <span class="mm-nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="7" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12" r="2.5" stroke="currentColor" stroke-width="1.7"/></svg></span>
+            <span class="mm-nav-text">Keresési körzet</span>
+          </a>
+          <a class="mm-nav-link" href="/beallitasok.html?szekcio=ajanlasok-korzet" data-mm-nav="ajanlasok-korzet">
+            <span class="mm-nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 21s7-5.2 7-11a7 7 0 1 0-14 0c0 5.8 7 11 7 11Z" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="10" r="2.2" stroke="currentColor" stroke-width="1.7"/></svg></span>
+            <span class="mm-nav-text">Ajánlások körzete</span>
+          </a>
+          <a class="mm-nav-link" href="/beallitasok.html?szekcio=jelszo" data-mm-nav="jelszo">
+            <span class="mm-nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="5" y="10" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.7"/><path d="M8 10V7a4 4 0 0 1 8 0v3" stroke="currentColor" stroke-width="1.7"/></svg></span>
+            <span class="mm-nav-text">Jelszó módosítása</span>
+          </a>
+          <a class="mm-nav-link" href="/beallitasok.html?szekcio=notify" data-mm-nav="notify">
+            <span class="mm-nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M6 17h12l-1.2-2.2V10a4.8 4.8 0 1 0-9.6 0v4.8L6 17Z" stroke="currentColor" stroke-width="1.7"/><path d="M10 19a2 2 0 0 0 4 0" stroke="currentColor" stroke-width="1.7"/></svg></span>
+            <span class="mm-nav-text">Hírlevél és értesítések</span>
+          </a>
+          <a class="mm-nav-link" href="/beallitasok.html?szekcio=megjelenes" data-mm-nav="megjelenes">
+            <span class="mm-nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.7"/><path d="M12 3v2.2M12 18.8V21M3 12h2.2M18.8 12H21" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span>
+            <span class="mm-nav-text">Megjelenés</span>
+          </a>
         </nav>
         <button type="button" class="mm-side-logout" data-auth-logout>Kijelentkezés</button>
       </aside>

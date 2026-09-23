@@ -32,7 +32,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/css/style.css?v=noScroll1" />
-    <link rel="stylesheet" href="/css/site-app.css?v=partnerHdr2" />
+    <link rel="stylesheet" href="/css/site-app.css?v=mmNavC1" />
+    <link rel="stylesheet" href="/css/mm-nav-c.css?v=mmNavC1" />
     <link rel="stylesheet" href="/css/hub.css?v=hubLogo72Align1" />
     <link rel="stylesheet" href="/css/partner-profile.css?v=partnerHdr2" />
     <link rel="stylesheet" href="/css/bymy-logo-size.css?v=logoNav72Align1" />
@@ -83,12 +84,15 @@
 
     <main class="mm-shell">
       <aside class="mm-side" aria-label="Fiók menü">
-        <p class="mm-side-kicker">Fiókom <span class="mm-side-account-type" data-mm-account-type hidden></span></p>
-        <h1 class="mm-side-title">Üdv, <span data-mm-hello>—</span></h1>
+        <div class="mm-side-head">
+          <p class="mm-side-kicker">Fiókom <span class="mm-side-account-type" data-mm-account-type hidden></span></p>
+          <h1 class="mm-side-title">Üdv, <span data-mm-hello>—</span></h1>
+        </div>
         <nav class="mm-nav">
           <div class="mm-nav-group" data-mm-company-nav-wrap hidden>
             <button type="button" class="mm-nav-link mm-nav-toggle is-active" data-mm-subtoggle aria-expanded="true">
-              <span>Cégadatok</span>
+              <span class="mm-nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4 20V10l8-6 8 6v10H4Z" stroke="currentColor" stroke-width="1.7"/></svg></span>
+              <span class="mm-nav-text">Cégadatok</span>
               <svg class="mm-nav-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </button>
             <div class="mm-nav-sub" data-mm-sub>
@@ -98,17 +102,43 @@
               <a class="mm-nav-sublink" href="/beallitasok.html?szekcio=notify">Hírlevél és értesítések</a>
             </div>
           </div>
-          <a class="mm-nav-link" href="/beallitasok.html?szekcio=import">Autóimport</a>
-          <a class="mm-nav-link" href="/beallitasok.html?szekcio=nyomtatasok">Nyomtatások</a>
-          <a class="mm-nav-link" href="/beallitasok.html?szekcio=ertekelesek">Értékelések</a>
-          <p class="mm-nav-plain">Kiemelések <span>Hamarosan</span></p>
-          <a class="mm-nav-link" href="/beallitasok.html?szekcio=parkolo">Kedvencek</a>
-          <a class="mm-nav-link" href="/beallitasok.html?szekcio=hirdetes">Saját hirdetések</a>
-          <a class="mm-nav-link" href="/beallitasok.html?szekcio=keresesek">Mentett kereséseim</a>
-          <a class="mm-nav-link" href="/uzenetek.html">Üzenetek</a>
+          <a class="mm-nav-link" href="/beallitasok.html?szekcio=import">
+            <span class="mm-nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4 16l4-8h8l4 8H4Z" stroke="currentColor" stroke-width="1.7"/><circle cx="8" cy="17" r="1.5" fill="currentColor"/><circle cx="16" cy="17" r="1.5" fill="currentColor"/></svg></span>
+            <span class="mm-nav-text">Autóimport</span>
+          </a>
+          <a class="mm-nav-link" href="/beallitasok.html?szekcio=nyomtatasok">
+            <span class="mm-nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M7 8h10M7 12h10M7 16h6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span>
+            <span class="mm-nav-text">Nyomtatások</span>
+          </a>
+          <a class="mm-nav-link" href="/beallitasok.html?szekcio=ertekelesek">
+            <span class="mm-nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3l2.2 6.5H21l-5.2 3.8 2 6.7L12 16.8 6.2 20l2-6.7L3 9.5h6.8L12 3Z" stroke="currentColor" stroke-width="1.5"/></svg></span>
+            <span class="mm-nav-text">Értékelések</span>
+          </a>
+          <p class="mm-nav-plain">
+            <span class="mm-nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M12 5v14" stroke="currentColor" stroke-width="1.7"/></svg></span>
+            <span class="mm-nav-text">Kiemelések</span>
+            <span>Hamarosan</span>
+          </p>
+          <a class="mm-nav-link" href="/beallitasok.html?szekcio=parkolo">
+            <span class="mm-nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 20s-7-4.5-7-10a7 7 0 1 1 14 0c0 5.5-7 10-7 10Z" stroke="currentColor" stroke-width="1.7"/></svg></span>
+            <span class="mm-nav-text">Kedvencek</span>
+          </a>
+          <a class="mm-nav-link" href="/beallitasok.html?szekcio=hirdetes">
+            <span class="mm-nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="4" y="5" width="16" height="14" rx="2" stroke="currentColor" stroke-width="1.7"/><path d="M8 9h8M8 13h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span>
+            <span class="mm-nav-text">Saját hirdetések</span>
+          </a>
+          <a class="mm-nav-link" href="/beallitasok.html?szekcio=keresesek">
+            <span class="mm-nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="6" stroke="currentColor" stroke-width="1.7"/><path d="M20 20l-3.5-3.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span>
+            <span class="mm-nav-text">Mentett kereséseim</span>
+          </a>
+          <a class="mm-nav-link" href="/uzenetek.html">
+            <span class="mm-nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4 6h16v10H7l-3 3V6Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg></span>
+            <span class="mm-nav-text">Üzenetek</span>
+          </a>
           <div class="mm-nav-group" data-mm-settings-nav>
             <button type="button" class="mm-nav-link mm-nav-toggle" data-mm-subtoggle aria-expanded="false">
-              <span>Beállítások</span>
+              <span class="mm-nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.7"/><path d="M12 3.5v2.2M12 18.3v2.2M3.5 12h2.2M18.3 12h2.2M5.6 5.6l1.6 1.6M16.8 16.8l1.6 1.6M5.6 18.4l1.6-1.6M16.8 7.2l1.6-1.6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span>
+              <span class="mm-nav-text">Beállítások</span>
               <svg class="mm-nav-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </button>
             <div class="mm-nav-sub" data-mm-sub hidden>

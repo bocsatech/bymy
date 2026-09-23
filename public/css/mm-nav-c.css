@@ -1,0 +1,187 @@
+/* Fiók menü C nézet: sötét fejléc + ikonos sorok + sárga aktív keret */
+
+body.site-app .mm-side:not(.mm-side--cats) {
+  padding: 0.85rem 0.75rem 1.1rem;
+}
+
+body.site-app .mm-side-head {
+  margin: 0 0 0.85rem;
+  padding: 0.85rem 0.75rem;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #1a2b3a 0%, #243949 100%);
+  color: #fff;
+}
+
+body.site-app .mm-side-head .mm-side-kicker {
+  margin: 0;
+  color: #b8c5d1;
+}
+
+body.site-app .mm-side-head .mm-side-title {
+  margin: 0.15rem 0 0;
+  font-size: 1.12rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+body.site-app .mm-nav {
+  gap: 0.2rem;
+}
+
+body.site-app .mm-nav-link {
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr) auto;
+  align-items: center;
+  justify-content: stretch;
+  gap: 0.55rem;
+  padding: 0.62rem 0.65rem;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 650;
+  box-sizing: border-box;
+}
+
+body.site-app .mm-nav-link:hover {
+  background: #f2f4f7;
+}
+
+body.site-app .mm-nav-link.is-active {
+  background: #fff;
+  border-color: #f0c52c;
+  box-shadow: 0 0 0 1px #f0c52c;
+  color: #101828;
+  font-weight: 750;
+}
+
+body.site-app .mm-nav-ico {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9px;
+  background: #f2f4f7;
+  color: #475467;
+  display: grid;
+  place-items: center;
+}
+
+body.site-app .mm-nav-link.is-active .mm-nav-ico {
+  background: #f0c52c;
+  color: #111;
+}
+
+body.site-app .mm-nav-ico svg {
+  display: block;
+  width: 1.05rem;
+  height: 1.05rem;
+}
+
+body.site-app .mm-nav-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+body.site-app .mm-nav-badge {
+  font-weight: 800;
+  justify-self: end;
+}
+
+body.site-app .mm-nav-toggle[aria-expanded="true"] {
+  background: #f2f4f7;
+}
+
+body.site-app .mm-nav-toggle.is-active[aria-expanded="true"] {
+  background: #fff;
+}
+
+body.site-app .mm-nav-sub {
+  margin: 0.1rem 0 0.2rem 2.55rem;
+  padding: 0.1rem 0 0.2rem 0.55rem;
+  border-left: 2px solid #e4e7ec;
+  gap: 0.1rem;
+}
+
+body.site-app .mm-nav-sublink {
+  padding: 0.42rem 0.55rem;
+  border-radius: 8px;
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+
+body.site-app .mm-nav-sublink:hover {
+  background: #f2f4f7;
+  color: #101828;
+}
+
+body.site-app .mm-nav-sublink.is-active {
+  background: #fff8e0;
+  color: #101828;
+  font-weight: 700;
+}
+
+body.site-app .mm-nav-caret {
+  justify-self: end;
+  opacity: 0.55;
+}
+
+body.site-app .mm-nav-plain {
+  margin: 0;
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.62rem 0.65rem;
+  border-radius: 12px;
+  opacity: 0.85;
+}
+
+body.site-app .mm-nav-plain .mm-nav-ico {
+  background: #f2f4f7;
+  color: #98a2b3;
+}
+
+body.site-app .mm-nav-plain > span:not(.mm-nav-ico):not(.mm-nav-text) {
+  margin-left: 0;
+  font-weight: 650;
+  font-size: 0.68rem;
+  letter-spacing: 0.02em;
+  color: #9ca3af;
+  background: #f3f4f6;
+  border-radius: 999px;
+  padding: 0.15rem 0.45rem;
+}
+
+body.site-app .mm-side-logout:hover {
+  background: #f2f4f7;
+}
+
+html[data-theme="dark"] body.site-app .mm-side-head {
+  background: linear-gradient(135deg, #0f1720 0%, #1a2430 100%);
+}
+
+html[data-theme="dark"] body.site-app .mm-nav-link.is-active {
+  background: #1d1d1d;
+  border-color: #f0c52c;
+  box-shadow: 0 0 0 1px #f0c52c;
+  color: #f4f4f5;
+}
+
+html[data-theme="dark"] body.site-app .mm-nav-ico {
+  background: #2a2a2a;
+  color: #cbd5e1;
+}
+
+html[data-theme="dark"] body.site-app .mm-nav-link.is-active .mm-nav-ico {
+  background: #f0c52c;
+  color: #111;
+}
+
+html[data-theme="dark"] body.site-app .mm-nav-sub {
+  border-left-color: #404040;
+}
+
+html[data-theme="dark"] body.site-app .mm-nav-sublink.is-active {
+  background: #2a2410;
+  color: #f4f4f5;
+}

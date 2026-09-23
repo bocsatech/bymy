@@ -240,6 +240,8 @@
       try {
         if (window.matchMedia("(min-width: 901px)").matches) {
           document.body.classList.add("auto-desk-active");
+          fetch("/api/level1/form-layout?category=szemelyauto-search", { credentials: "same-origin" }).catch(function () {});
+          fetch("/api/vehicle-catalog", { credentials: "same-origin" }).catch(function () {});
         }
       } catch (e) {}
     </script>
@@ -510,7 +512,7 @@
     </main>
 
     <script>window.BYMY_FEATURED_LISTING_IDS = window.BYMY_FEATURED_LISTING_IDS || [];</script>
-    <script src="/js/home-app.js?v=deskQsBoot1" type="module"></script>
+    <script src="/js/home-app.js?v=deskQsFast1" type="module"></script>
     <script src="/js/auto-hero.js?v=searchCollapse1" type="module"></script>
     <script src="/js/auto-kivitel-menu.js?v=kivitelAdmin1" type="module"></script>
     <script src="/js/site-avatar-menu.js?v=avatarSync1" type="module"></script>

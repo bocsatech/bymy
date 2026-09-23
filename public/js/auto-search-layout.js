@@ -179,15 +179,76 @@ function wrapGridCell(cell, innerHtml, rowOverride = null) {
 }
 let cachedLayout = null;
 let cachedLayoutCategory = "";
+let layoutNetworkPromise = null;
+
+function layoutSessionKey(category) {
+  return `bymy-search-layout:v1:${category}`;
+}
+
+function readLayoutSession(category) {
+  try {
+    const raw = sessionStorage.getItem(layoutSessionKey(category));
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed?.layout || typeof parsed.layout !== "object") return null;
+    return parsed.layout;
+  } catch {
+    return null;
+  }
+}
+
+function writeLayoutSession(category, layout) {
+  try {
+    sessionStorage.setItem(
+      layoutSessionKey(category),
+      JSON.stringify({ savedAt: Date.now(), layout })
+    );
+  } catch {
+    /* quota / private mode */
+  }
+}
+
+async function refreshLayoutFromNetwork(category) {
+  if (layoutNetworkPromise && cachedLayoutCategory === category) return layoutNetworkPromise;
+  layoutNetworkPromise = (async () => {
+    const res = await fetch(layoutUrl(), { credentials: "same-origin" });
+    const data = await res.json().catch(() => ({}));
+    cachedLayout = data.layout || { version: 2, category, cells: [] };
+    cachedLayoutCategory = category;
+    writeLayoutSession(category, cachedLayout);
+    return cachedLayout;
+  })().finally(() => {
+    layoutNetworkPromise = null;
+  });
+  return layoutNetworkPromise;
+}
 
 export async function fetchAutoSearchLayout({ force = false } = {}) {
   const category = searchLayoutCategory();
   if (cachedLayout && !force && cachedLayoutCategory === category) return cachedLayout;
-  const res = await fetch(layoutUrl(), { credentials: "same-origin", cache: "no-store" });
-  const data = await res.json().catch(() => ({}));
-  cachedLayout = data.layout || { version: 2, category, cells: [] };
-  cachedLayoutCategory = category;
-  return cachedLayout;
+
+  if (!force) {
+    const fromSession = readLayoutSession(category);
+    if (fromSession) {
+      cachedLayout = fromSession;
+      cachedLayoutCategory = category;
+      void refreshLayoutFromNetwork(category).catch(() => {});
+      return cachedLayout;
+    }
+  }
+
+  return refreshLayoutFromNetwork(category);
+}
+
+/** Warm layout + catalog while the page shell paints (desk auto/teher). */
+export function prefetchAutoSearchBoot() {
+  if (typeof window === "undefined") return;
+  const page = document.body?.getAttribute("data-site-page");
+  if (page !== "auto" && page !== "teherauto") return;
+  void fetchAutoSearchLayout({ force: false }).catch(() => {});
+  void import("./vehicle-catalog-client.js?v=deskQsFast1")
+    .then((m) => m.fetchVehicleCatalog?.())
+    .catch(() => {});
 }
 
 function yearOptions() {
@@ -715,9 +776,9 @@ function wirePostalCityAutofill(form) {
   }
 }
 
-export async function applyAutoSearchLayout(form = document.getElementById("home-qs-form")) {
+export async function applyAutoSearchLayout(form = document.getElementById("home-qs-form"), { force = false } = {}) {
   if (!form) return null;
-  const layout = await fetchAutoSearchLayout({ force: true });
+  const layout = await fetchAutoSearchLayout({ force });
   let quickKeys = quickSearchFieldKeysFromLayout(layout);
   if (searchLayoutCategory() === "teherauto-search" && !quickKeys.includes("kivitel")) {
     quickKeys = [...quickKeys, "kivitel"];
@@ -759,6 +820,11 @@ export async function applyAutoSearchLayout(form = document.getElementById("home
   wireSelectOptions(form);
   wirePostalCityAutofill(form);
   if (typeof window !== "undefined" && window.matchMedia("(max-width: 900px)").matches) {
+    return layout;
+  }
+  // Desk auto/teher: brand/model pickers own the catalog — skip duplicate wait.
+  const page = document.body?.getAttribute("data-site-page");
+  if (page === "auto" || page === "teherauto") {
     return layout;
   }
   await wireCatalog(form);

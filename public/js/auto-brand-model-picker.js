@@ -1,5 +1,5 @@
 
-import { fetchVehicleCatalog } from "./vehicle-catalog-client.js?v=autoDesk16";
+import { fetchVehicleCatalog } from "./vehicle-catalog-client.js?v=deskQsFast1";
 import { bindAutoBmDismiss, autoBmPanelIsOpen } from "./auto-bm-dismiss.js?v=bmDismiss1";
 
 function labelList(items, unit) {

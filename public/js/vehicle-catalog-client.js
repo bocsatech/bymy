@@ -13,7 +13,7 @@ function catalogErrorMessage(data, status) {
 
 async function fetchStaticCatalog() {
   if (!staticCatalogPromise) {
-    staticCatalogPromise = fetch("/data/vehicle-catalog.json", { cache: "no-store" })
+    staticCatalogPromise = fetch("/data/vehicle-catalog.json", { cache: "force-cache" })
       .then(async (response) => {
         const data = await response.json().catch(() => ({}));
         if (!response.ok || !data?.gyartmanyok?.length) {
@@ -41,7 +41,7 @@ function summaryFromCatalog(catalog) {
 
 export async function fetchVehicleCatalog() {
   if (!catalogPromise) {
-    catalogPromise = fetch("/api/vehicle-catalog")
+    catalogPromise = fetch("/api/vehicle-catalog", { credentials: "same-origin" })
       .then(async (response) => {
         const data = await response.json().catch(() => ({}));
         if (!response.ok) throw new Error(catalogErrorMessage(data, response.status));

@@ -1313,6 +1313,26 @@ body.site-app [data-mm-panel="szemelyes"] .settings-form {
   max-width: 28rem;
 }
 
+body.site-app [data-mm-panel="cegadatok"] .settings-form,
+body.site-app [data-mm-panel="jelszo"] .settings-form,
+body.site-app [data-mm-panel="keresesi-korzet"] .settings-form,
+body.site-app [data-mm-panel="ajanlasok-korzet"] .settings-form,
+body.site-app [data-mm-panel="notify"] .settings-form {
+  max-width: 28rem;
+}
+
+body.site-app [data-mm-panel="cegadatok"] .settings-btn-primary,
+body.site-app [data-mm-panel="jelszo"] .settings-btn-primary,
+body.site-app [data-mm-panel="keresesi-korzet"] .settings-btn-primary,
+body.site-app [data-mm-panel="ajanlasok-korzet"] .settings-btn-primary,
+body.site-app [data-mm-panel="notify"] .settings-btn-primary,
+body.site-app [data-mm-panel="szemelyes"] .settings-btn-primary {
+  width: auto;
+  min-width: 10rem;
+  max-width: 100%;
+  justify-self: start;
+}
+
 body.site-app .settings-phone-row {
   display: flex;
   flex-flow: row nowrap;

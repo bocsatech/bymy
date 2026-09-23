@@ -17,7 +17,7 @@ const cmds = [
   `rsync -az --delete "${root}/lib/" ${host}:${appDir}/lib/`,
   `rsync -az "${root}/server.mjs" ${host}:${appDir}/server.mjs`,
   `rsync -az "${root}/ecosystem.config.cjs" ${host}:${appDir}/ecosystem.config.cjs`,
-  `ssh ${host} "cd ${appDir} && (pm2 startOrReload ecosystem.config.cjs --update-env 2>/dev/null || pm2 restart bymy 2>/dev/null || true) && pm2 scale bymy 4 >/dev/null && pm2 save >/dev/null"`,
+  `ssh ${host} "cd ${appDir} && (pm2 startOrReload ecosystem.config.cjs --update-env 2>/dev/null || pm2 restart bymy 2>/dev/null || true); pm2 scale bymy 4 >/dev/null 2>&1 || true; pm2 save >/dev/null 2>&1 || true"`,
 ];
 
 for (const cmd of cmds) {

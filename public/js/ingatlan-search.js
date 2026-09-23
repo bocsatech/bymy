@@ -53,7 +53,7 @@ import {
   wheelFieldHtml,
   syncHostClearButton,
   initMenuWheel,
-} from "./ingatlan-wheels.js?v=immoTipusPick1";
+} from "./ingatlan-wheels.js?v=immoSearchMenu1";
 import {
   closeAllInlineDrums,
   initDrumWheel,
@@ -67,9 +67,29 @@ import {
   INGATLAN_DUAL_RANGE_GROUPS,
   resolveIngatlanSchemaVariant,
   clearIngatlanWheelSchemaCache,
-} from "./ingatlan-wheel-schema.js?v=immoPostNum1";
+} from "./ingatlan-wheel-schema.js?v=immoSearchMenu1";
 import { wireTelepulesSuggestIn } from "./telepules-suggest.js?v=telepClose1";
 
+const IMMO_DESK_MQ = "(min-width: 901px)";
+
+function isIngatlanSearchDesk() {
+  return (
+    document.body?.getAttribute("data-site-page") === "ingatlan" &&
+    typeof window !== "undefined" &&
+    window.matchMedia(IMMO_DESK_MQ).matches
+  );
+}
+
+function isImmoMenuPickerRoot(el) {
+  if (!el) return false;
+  if (el.closest?.("#ad-form")) return true;
+  if (el.closest?.('[data-immo-desk-ui="1"]') && isIngatlanSearchDesk()) return true;
+  return false;
+}
+
+function isImmoDeskStackRoot(el) {
+  return isImmoMenuPickerRoot(el);
+}
 const EXACT_KEYS = [
   "ingatlan_uzletag",
   "ingatlan_lakas_tipus",
@@ -199,7 +219,7 @@ function useDrumPicker() {
 
 function initImmoSearchWheel(wheel, { emptyLabel = "Mindegy", multiple = false, customInput = false, customKind = "price" } = {}) {
   if (!wheel) return;
-  if (wheel.closest("#ad-form")) {
+  if (isImmoMenuPickerRoot(wheel)) {
     initMenuWheel(wheel, { emptyLabel, multiple, customInput, customKind });
     return;
   }
@@ -218,7 +238,7 @@ function initImmoSearchWheel(wheel, { emptyLabel = "Mindegy", multiple = false, 
 
 function applyAdFormImmoDeskLayout(root) {
   const scope = root?.closest?.("#immo-search-form") || root;
-  if (!scope?.closest?.("#ad-form")) return;
+  if (!isImmoDeskStackRoot(scope)) return;
   scope.querySelectorAll(".immo-schema-grid").forEach((grid) => {
     grid.classList.add("immo-schema-grid--ad-stack");
     grid.style.removeProperty("grid-template-rows");
@@ -239,7 +259,7 @@ function applyAdFormImmoDeskLayout(root) {
 }
 
 function resetAdFormIngatlanPickers(root) {
-  if (!root?.closest("#ad-form")) return;
+  if (!isImmoMenuPickerRoot(root)) return;
   closeAutoDrumSheet(false);
   closeAllInlineDrums(false);
   root.querySelectorAll(".immo-wheel-wrap--drum-inline").forEach((wrap) => {
@@ -808,18 +828,18 @@ function syncTipus2Menu(form) {
   if (!wheel) return;
   const prev = readWheel(wheel);
   const opts = tipus2OptionsForParents(parents, { uzletag: readUzletag(form) });
-  const postSurface = Boolean(form?.closest?.("#ad-form"));
-  fillWheel(wheel, opts.filter((o) => o.value), { emptyLabel: postSurface ? "Válassz" : "Mindegy" });
+  const postLike = isImmoMenuPickerRoot(form);
+  fillWheel(wheel, opts.filter((o) => o.value), { emptyLabel: postLike ? "Válassz" : "Mindegy" });
   initImmoSearchWheel(wheel, {
-    emptyLabel: postSurface ? "Válassz" : "Mindegy",
-    multiple: postSurface ? false : MULTI_WHEEL_KEYS.has("ingatlan_tipus_2"),
+    emptyLabel: postLike ? "Válassz" : "Mindegy",
+    multiple: postLike ? false : MULTI_WHEEL_KEYS.has("ingatlan_tipus_2"),
   });
   const allowed = new Set(opts.map((o) => o.value).filter(Boolean));
   const keep = String(prev)
     .split(",")
     .map((v) => v.trim())
     .filter((v) => allowed.has(v));
-  setWheelValue(wheel, postSurface ? keep[0] || "" : keep.join(","));
+  setWheelValue(wheel, postLike ? keep[0] || "" : keep.join(","));
   const wrap = wheel.closest(".immo-wheel-wrap");
   const disabled = parents.length === 0 || form.closest("[data-ingatlan-type-locked=\"1\"]");
   if (wrap) wrap.classList.toggle("is-disabled", disabled);
@@ -1034,13 +1054,13 @@ function ensureTipus2Field(root, { enable }) {
   cell.dataset.gridCol = "1";
   cell.dataset.gridSpan = "6";
   cell.dataset.gridRow = String(row);
-  const inAdForm = Boolean(host?.closest?.("#ad-form"));
-  cell.style.cssText = inAdForm
+  const inDeskStack = isImmoDeskStackRoot(host);
+  cell.style.cssText = inDeskStack
     ? "grid-column:1 / -1;grid-row:auto"
     : `grid-column:1 / span 6;grid-row:${row}`;
-  cell.dataset.gridCol = inAdForm ? "1" : "1";
-  cell.dataset.gridSpan = inAdForm ? "12" : "6";
-  cell.dataset.gridRow = inAdForm ? "auto" : String(row);
+  cell.dataset.gridCol = inDeskStack ? "1" : "1";
+  cell.dataset.gridSpan = inDeskStack ? "12" : "6";
+  cell.dataset.gridRow = inDeskStack ? "auto" : String(row);
   cell.innerHTML = wheelFieldHtml("ingatlan_tipus_2", "Típus 2");
   host.appendChild(cell);
   host.style.gridTemplateRows = `repeat(${row}, auto)`;
@@ -1166,6 +1186,8 @@ function restoreIngatlanSearchValues(root, values) {
 
 function setupIngatlanSearchWheels(root, { tipusOpts, tipus2Enabled, defaultUzletag, surface = "search" }) {
   const postSurface = surface === "post" || Boolean(root?.closest?.("#ad-form"));
+  const deskMenu = isImmoMenuPickerRoot(root);
+  const postLikePickers = postSurface || deskMenu;
   fillPriceRangeWheels(root);
   fillAreaRangeWheels(root);
   fillEmeletRangeWheels(root);
@@ -1176,7 +1198,7 @@ function setupIngatlanSearchWheels(root, { tipusOpts, tipus2Enabled, defaultUzle
   });
   fillWheel(root.querySelector('[data-wheel="szobaszam"]'), szobaszamOptions(), { emptyLabel: "Mindegy" });
   fillWheel(root.querySelector('[data-wheel="ingatlan_lakas_tipus"]'), tipusOpts.filter((o) => o.value), {
-    emptyLabel: postSurface ? "Válassz típust" : "Mindegy",
+    emptyLabel: postLikePickers ? "Válassz típust" : "Mindegy",
   });
   fillWheel(root.querySelector('[data-wheel="allapot"]'), INGATLAN_ALLAPOT.filter((o) => o.value));
   fillWheel(root.querySelector('[data-wheel="ingatlan_kora"]'), INGATLAN_KORA.filter((o) => o.value));
@@ -1212,8 +1234,8 @@ function setupIngatlanSearchWheels(root, { tipusOpts, tipus2Enabled, defaultUzle
   const emptyByName = {
     szobaszam: "Szobaszám",
     ingatlan_uzletag: "Kategória",
-    ingatlan_lakas_tipus: postSurface ? "Válassz típust" : "Mindegy",
-    ingatlan_tipus_2: postSurface ? "Válassz" : "Mindegy",
+    ingatlan_lakas_tipus: postLikePickers ? "Válassz típust" : "Mindegy",
+    ingatlan_tipus_2: postLikePickers ? "Válassz" : "Mindegy",
   };
   const dualRangeKeys = new Set(
     INGATLAN_DUAL_RANGE_GROUPS.flatMap((g) => [g.tolKey, g.igKey])
@@ -1223,7 +1245,7 @@ function setupIngatlanSearchWheels(root, { tipusOpts, tipus2Enabled, defaultUzle
     const name = wheel.getAttribute("data-wheel") || "";
     if (dualRangeKeys.has(name)) return;
     const isRooms = name === "szobaszam";
-    const multiple = postSurface && postSingleKeys.has(name) ? false : MULTI_WHEEL_KEYS.has(name);
+    const multiple = postLikePickers && postSingleKeys.has(name) ? false : MULTI_WHEEL_KEYS.has(name);
     initImmoSearchWheel(wheel, {
       emptyLabel: emptyByName[name] || "Mindegy",
       multiple,
@@ -1372,17 +1394,18 @@ export async function initIngatlanSearch({
         const opts = uz === "airbnb" ? INGATLAN_LAKAS_TIPUS_AIRBNB : INGATLAN_LAKAS_TIPUS;
         const tipusWheel = root.querySelector('[data-wheel="ingatlan_lakas_tipus"]');
         const prevTipus = readWheel(tipusWheel);
+        const postLike = isImmoMenuPickerRoot(root);
         fillWheel(tipusWheel, opts.filter((o) => o.value), {
-          emptyLabel: root.closest("#ad-form") ? "Válassz típust" : "Mindegy",
+          emptyLabel: postLike ? "Válassz típust" : "Mindegy",
         });
         initImmoSearchWheel(tipusWheel, {
-          emptyLabel: root.closest("#ad-form") ? "Válassz típust" : "Mindegy",
-          multiple: root.closest("#ad-form") ? false : MULTI_WHEEL_KEYS.has("ingatlan_lakas_tipus"),
+          emptyLabel: postLike ? "Válassz típust" : "Mindegy",
+          multiple: postLike ? false : MULTI_WHEEL_KEYS.has("ingatlan_lakas_tipus"),
         });
         const keep = String(prevTipus)
           .split(",")
           .filter((v) => opts.some((o) => o.value === v));
-        setWheelValue(tipusWheel, root.closest("#ad-form") ? keep[0] || "" : keep.join(","));
+        setWheelValue(tipusWheel, postLike ? keep[0] || "" : keep.join(","));
         syncRovidMenus(root);
         if (tipus2Enabled) syncTipus2Menu(root);
         syncTipusFieldVisibility(root);
@@ -1461,6 +1484,28 @@ export async function initIngatlanSearch({
   syncTipusFieldVisibility(root);
   syncMorePanelForTipus();
   applyAdFormImmoDeskLayout(root);
+  bindIngatlanSearchDeskAccordion(root);
+}
+
+function bindIngatlanSearchDeskAccordion(root) {
+  if (document.body?.getAttribute("data-site-page") !== "ingatlan") return;
+  if (root.dataset.immoSearchAccBound === "1") return;
+  const shell = document.querySelector(".immo-search-desk-shell");
+  if (!shell) return;
+  root.dataset.immoSearchAccBound = "1";
+  shell.querySelectorAll("[data-immo-search-acc-toggle]").forEach((btn) => {
+    btn.addEventListener("click", (event) => {
+      if (event.target?.closest?.(".immo-wheel-wrap, .immo-wheel--menu, .immo-menu-backdrop")) return;
+      const acc = btn.closest("[data-immo-search-acc]");
+      if (!acc) return;
+      const open = !acc.classList.contains("is-open");
+      shell.querySelectorAll("[data-immo-search-acc]").forEach((el) => {
+        const on = open && el === acc;
+        el.classList.toggle("is-open", on);
+        el.querySelector("[data-immo-search-acc-toggle]")?.setAttribute("aria-expanded", on ? "true" : "false");
+      });
+    });
+  });
 }
 
 export { readForm as readIngatlanSearchForm };

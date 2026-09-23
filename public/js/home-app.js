@@ -17,7 +17,7 @@ import {
   emptyIngatlanFilters,
   filterListingsByIngatlan,
   initIngatlanSearch,
-} from "./ingatlan-search.js?v=immoEladoDefault1";
+} from "./ingatlan-search.js?v=immoSearchMenu1";
 import { normalizeIngatlanUzletag } from "./ingatlan-fields.js?v=immoEladoDefault1";
 import { filterByCategory, initHomeCategoryBar, renderHomeCategoryBar } from "./home-category-bar.js";
 import { initHomeUnifiedScroll } from "./home-unified-scroll.js";
@@ -446,7 +446,7 @@ if (PAGE === "ingatlan") {
     const form = document.getElementById("immo-search-form");
     const wheel = form?.querySelector?.('[data-wheel="ingatlan_lakas_tipus"]');
     if (!wheel) return;
-    import("./ingatlan-wheels.js?v=immoClearAll1")
+    import("./ingatlan-wheels.js?v=immoSearchMenu1")
       .then(({ setWheelValue }) => {
         setWheelValue(wheel, katParam);
         wheel.dispatchEvent(new CustomEvent("immo-wheel-change", { bubbles: true }));

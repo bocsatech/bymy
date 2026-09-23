@@ -710,7 +710,8 @@ export function initMenuWheel(wheel, { emptyLabel = "Mindegy", multiple = false,
     wheel.removeAttribute("hidden");
     trigger.setAttribute("aria-expanded", "true");
     const inAdForm = Boolean(wrap.closest("#ad-form"));
-    if (isMobileMenuViewport() || inAdForm) {
+    const inSearchDesk = Boolean(wrap.closest('[data-immo-desk-ui="1"]'));
+    if (isMobileMenuViewport() || inAdForm || inSearchDesk) {
       if (PRICE_WHEEL_KEYS.has(wheel.getAttribute("data-wheel") || "")) {
         const emptyLabel = trigger.dataset.emptyLabel || "";
         syncCompactPriceMenuWidth(wheel, emptyLabel ? [emptyLabel] : []);

@@ -58,7 +58,7 @@
     <link rel="stylesheet" href="/css/home.css?v=tileAllPages1" />
     <link rel="stylesheet" href="/css/hub-mobile-app.css?v=deskHdr5" />
     <link rel="stylesheet" href="/css/ingatlan-search.css?v=immoMenus1" />
-    <link rel="stylesheet" href="/css/ingatlan-desk-layout.css?v=immoSearchPost1" />
+    <link rel="stylesheet" href="/css/ingatlan-desk-layout.css?v=immoSearchMenu1" />
     <link rel="stylesheet" href="/css/ingatlan-partnerek.css?v=partnerAds1" />
     <link rel="stylesheet" href="/css/auto-hero.css?v=switchOff1" />
     <link rel="stylesheet" href="/css/listing-photo-cover.css?v=tileAllPages1" />
@@ -179,27 +179,42 @@
         })();
       </script>
 
-      <section class="immo-search-hero" aria-labelledby="immo-search-title">
-        <article class="immo-search-panel">
-          <h1 class="immo-search-title" id="immo-search-title">Melyik ingatlant keresed?</h1>
-          <form class="immo-search-form" id="immo-search-form">
-            <input type="hidden" id="immo-uzletag" name="ingatlan_uzletag" value="elado" />
+      <section class="immo-search-hero" aria-label="Ingatlan kereső">
+        <div class="immo-search-desk-shell">
+          <div class="auto-desk-acc is-open" data-immo-search-acc="alap">
+            <button
+              type="button"
+              class="auto-desk-acc__head"
+              data-immo-search-acc-toggle
+              aria-expanded="true"
+            >
+              <span>Alap adatok</span>
+              <span class="auto-desk-acc__sum" data-immo-search-acc-sum></span>
+              <span class="auto-desk-acc__chev" aria-hidden="true">▼</span>
+            </button>
+            <div class="auto-desk-acc__body">
+              <article class="immo-search-panel immo-search-panel--post">
+                <form class="immo-search-form" id="immo-search-form" data-immo-desk-ui="1">
+                  <input type="hidden" id="immo-uzletag" name="ingatlan_uzletag" value="elado" />
 
-            <div id="immo-schema-main" class="immo-schema-grid" aria-label="Fő szűrők"></div>
+                  <div id="immo-schema-main" class="immo-schema-grid" aria-label="Fő szűrők"></div>
 
-            <div class="immo-more" id="immo-more" hidden>
-              <div id="immo-schema-more" class="immo-schema-grid" aria-label="További feltételek"></div>
+                  <div class="immo-more" id="immo-more" hidden>
+                    <div id="immo-schema-more" class="immo-schema-grid" aria-label="További feltételek"></div>
+                  </div>
+
+                  <div class="immo-actions">
+                    <button type="submit" class="immo-submit">Ingatlanok megjelenítése</button>
+                    <div class="immo-actions-secondary">
+                      <button type="button" class="immo-action" id="immo-tovabbi" aria-expanded="false" aria-controls="immo-more">További feltételek</button>
+                      <button type="reset" class="immo-action">Szűrők törlése</button>
+                    </div>
+                  </div>
+                </form>
+              </article>
             </div>
-
-            <div class="immo-actions">
-              <button type="submit" class="immo-submit">Ingatlanok megjelenítése</button>
-              <div class="immo-actions-secondary">
-                <button type="button" class="immo-action" id="immo-tovabbi" aria-expanded="false" aria-controls="immo-more">További feltételek</button>
-                <button type="reset" class="immo-action">Szűrők törlése</button>
-              </div>
-            </div>
-          </form>
-        </article>
+          </div>
+        </div>
       </section>
 
       <section class="immo-partners" aria-labelledby="immo-partners-title">
@@ -238,7 +253,7 @@
       </div>
     </main>
 
-    <script src="/js/home-app.js?v=sellerList2" type="module"></script>
+    <script src="/js/home-app.js?v=immoSearchMenu1" type="module"></script>
     <script src="/js/ingatlan-partnerek.js?v=partnerAds1" type="module"></script>
     <script src="/js/site-avatar-menu.js?v=avatarSync1" type="module"></script>
     <script src="/js/nav-counts.js?v=navCount4" type="module"></script>

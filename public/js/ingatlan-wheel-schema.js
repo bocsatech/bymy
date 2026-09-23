@@ -671,10 +671,15 @@ export function renderIngatlanSchemaHosts(mainHost, moreHost, schema, surface) {
   });
   const main = cells.filter((c) => c.section !== "more");
   const more = cells.filter((c) => c.section === "more");
-  const fullWidth =
-    surface === "post" && Boolean(mainHost?.closest?.("#ad-form") || moreHost?.closest?.("#ad-form"));
-  paintSchemaGridHost(mainHost, main, { fullWidth });
-  paintSchemaGridHost(moreHost, more, { fullWidth });
+  const stackFullWidth =
+    Boolean(mainHost?.closest?.("#ad-form") || moreHost?.closest?.("#ad-form")) ||
+    (typeof window !== "undefined" &&
+      window.matchMedia("(min-width: 901px)").matches &&
+      Boolean(
+        mainHost?.closest?.('[data-immo-desk-ui="1"]') || moreHost?.closest?.('[data-immo-desk-ui="1"]')
+      ));
+  paintSchemaGridHost(mainHost, main, { fullWidth: stackFullWidth });
+  paintSchemaGridHost(moreHost, more, { fullWidth: stackFullWidth });
 }
 
 export { FIELD_DEFS as INGATLAN_WHEEL_FIELD_DEFS };

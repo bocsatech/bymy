@@ -319,10 +319,7 @@ export async function mountAutoBrandModelPicker(form) {
   });
 
   function onDoneClick() {
-    if (modelBrand) {
-      renderBrandList();
-      requestAnimationFrame(() => searchInput?.focus());
-    } else closePanel();
+    closePanel();
   }
 
   searchInput?.addEventListener("mousedown", (event) => {

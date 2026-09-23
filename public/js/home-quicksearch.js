@@ -7,7 +7,7 @@ import {
   resetDetailedSearch,
 } from "./auto-detailed-search.js?v=fogyNum1";
 import { readWheel } from "./ingatlan-wheels.js?v=immoClearAll1";
-import { readBrandModelFilterValues, mountAutoBrandModelPicker } from "./auto-brand-model-picker.js?v=bmActions1";
+import { readBrandModelFilterValues, mountAutoBrandModelPicker } from "./auto-brand-model-picker.js?v=bmDoneClose1";
 import { readFuelFilterValues, mountAutoFuelPicker } from "./auto-fuel-picker.js?v=bmActions1";
 import { readKivitelFilterValues, mountAutoKivitelPicker } from "./auto-kivitel-picker.js?v=bmActions1";
 import { readAllapotFilterValues, mountAutoAllapotPicker } from "./auto-allapot-picker.js?v=bmActions1";

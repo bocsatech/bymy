@@ -89,6 +89,45 @@
   color: #5b677a;
 }
 
+.search-map-modal__list-label {
+  margin: 0.75rem 0 0.45rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: #5b677a;
+}
+
+.search-map-modal__back {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin: 0 0 0.75rem;
+  padding: 0.65rem 0.85rem;
+  border: 0;
+  border-radius: 8px;
+  background: #f0c52c;
+  color: #111;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.search-map-modal__back:hover,
+.search-map-modal__back:focus-visible {
+  background: #e8bb20;
+}
+
+.search-map-modal__card--pick {
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+
 .search-map-modal__city h3 {
   margin: 0;
   font-size: 1rem;

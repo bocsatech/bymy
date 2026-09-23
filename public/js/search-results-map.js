@@ -26,6 +26,9 @@ let carIcon = null;
 let homeIcon = null;
 let homeOrigin = null;
 let routeRequestId = 0;
+let lastPins = [];
+let lastLeaflet = null;
+let selectedPinId = null;
 
 function escapeHtml(value) {
   return String(value ?? "")
@@ -129,10 +132,26 @@ function ensureModal() {
   `;
   document.body.appendChild(root);
   root.addEventListener("click", (event) => {
-    if (event.target?.closest?.("[data-search-map-close]")) closeSearchResultsMap();
+    if (event.target?.closest?.("[data-search-map-close]")) {
+      closeSearchResultsMap();
+      return;
+    }
+    if (event.target?.closest?.("[data-search-map-back]")) {
+      showAllResults();
+      return;
+    }
+    const pick = event.target?.closest?.("[data-search-map-pick]");
+    if (pick) {
+      const id = String(pick.getAttribute("data-search-map-pick") || "");
+      const pin = lastPins.find((p) => String(p.item?.id) === id);
+      if (pin && lastLeaflet) showRouteToPin(lastLeaflet, pin, root.querySelector("[data-search-map-side]"));
+    }
   });
   document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && !root.hidden) closeSearchResultsMap();
+    if (event.key === "Escape" && !root.hidden) {
+      if (selectedPinId != null) showAllResults();
+      else closeSearchResultsMap();
+    }
   });
   return root;
 }
@@ -266,13 +285,40 @@ function googleDirectionsUrl(from, to, toLabel) {
   return `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${dest}&travelmode=driving`;
 }
 
+function renderSideAll(side, pins) {
+  if (!side) return;
+  const homeHint = homeOrigin
+    ? `Lakhely: <strong>${escapeHtml(homeOrigin.label)}</strong>. Kattints egy autóra az útvonalhoz.`
+    : `Állíts be irányítószámot a <a href="/beallitasok.html?szekcio=keresesi-korzet">Keresési körzet</a>ben, hogy mutassuk az utat.`;
+
+  if (!pins?.length) {
+    side.innerHTML = `<p class="search-map-modal__hint">${homeHint}</p>`;
+    return;
+  }
+
+  const cards = pins
+    .map((pin) => {
+      const title = escapeHtml(listingTileTitle(pin.item));
+      const price = escapeHtml(listingTilePrice(pin.item));
+      const city = pin.city ? escapeHtml(pin.city) : "";
+      return `<button type="button" class="search-map-modal__card search-map-modal__card--pick" data-search-map-pick="${escapeHtml(String(pin.item.id))}">
+        <strong>${title}</strong>
+        <span>${price}${city ? ` · ${city}` : ""}</span>
+      </button>`;
+    })
+    .join("");
+
+  side.innerHTML = `
+    <p class="search-map-modal__hint">${homeHint}</p>
+    <p class="search-map-modal__list-label">${pins.length} autó a találati listából</p>
+    <div class="search-map-modal__cards">${cards}</div>
+  `;
+}
+
 function renderSideListing(side, pin, routeInfo = null) {
   if (!side) return;
   if (!pin) {
-    const homeHint = homeOrigin
-      ? `Lakhely: <strong>${escapeHtml(homeOrigin.label)}</strong>. Kattints egy autó ikonra az útvonalhoz.`
-      : `Állíts be irányítószámot a <a href="/beallitasok.html?szekcio=keresesi-korzet">Keresési körzet</a>ben, hogy mutassuk az utat.`;
-    side.innerHTML = `<p class="search-map-modal__hint">${homeHint}</p>`;
+    renderSideAll(side, lastPins);
     return;
   }
   const { item, city } = pin;
@@ -309,6 +355,7 @@ function renderSideListing(side, pin, routeInfo = null) {
   }
 
   side.innerHTML = `
+    <button type="button" class="search-map-modal__back" data-search-map-back>‹ Vissza az összes autóhoz</button>
     <div class="search-map-modal__city">
       <h3>${title}</h3>
       <p>${price}${city ? ` · ${escapeHtml(city)}` : ""}</p>
@@ -323,7 +370,27 @@ function renderSideListing(side, pin, routeInfo = null) {
   `;
 }
 
+function fitAllPins() {
+  if (!mapInstance || !lastPins.length) return;
+  const bounds = [];
+  if (homeOrigin) bounds.push([homeOrigin.lat, homeOrigin.lon]);
+  for (const pin of lastPins) bounds.push([pin.lat, pin.lon]);
+  if (bounds.length === 1) mapInstance.setView(bounds[0], 11);
+  else if (bounds.length > 1) mapInstance.fitBounds(bounds, { padding: [40, 40], maxZoom: 12 });
+}
+
+function showAllResults() {
+  selectedPinId = null;
+  clearRoute();
+  routeRequestId += 1;
+  const side = document.querySelector("[data-search-map-side]");
+  renderSideAll(side, lastPins);
+  fitAllPins();
+  requestAnimationFrame(() => mapInstance?.invalidateSize());
+}
+
 async function showRouteToPin(L, pin, side) {
+  selectedPinId = pin?.item?.id ?? null;
   clearRoute();
   if (!homeOrigin || !mapInstance || !pin) {
     renderSideListing(side, pin);
@@ -373,6 +440,10 @@ async function showRouteToPin(L, pin, side) {
 function paintMap(L, pins, side) {
   const canvas = document.getElementById("search-map-canvas");
   if (!canvas) return;
+
+  lastLeaflet = L;
+  lastPins = pins;
+  selectedPinId = null;
 
   if (mapInstance) {
     mapInstance.remove();
@@ -432,6 +503,7 @@ function paintMap(L, pins, side) {
     mapInstance.fitBounds(bounds, { padding: [40, 40], maxZoom: 12 });
   }
 
+  renderSideAll(side, pins);
   requestAnimationFrame(() => mapInstance?.invalidateSize());
 }
 
@@ -441,6 +513,7 @@ export function closeSearchResultsMap() {
   document.body.classList.remove("search-map-open");
   clearRoute();
   routeRequestId += 1;
+  selectedPinId = null;
 }
 
 export async function openSearchResultsMap(items) {
@@ -451,8 +524,10 @@ export async function openSearchResultsMap(items) {
   root.hidden = false;
   document.body.classList.add("search-map-open");
   homeOrigin = null;
+  lastPins = [];
+  selectedPinId = null;
   clearRoute();
-  renderSideListing(side, null);
+  renderSideAll(side, []);
 
   if (!list.length) {
     if (sub) sub.textContent = "Nincs találat a jelenlegi szűrőkkel.";
@@ -470,7 +545,6 @@ export async function openSearchResultsMap(items) {
           ? `${pins.length} autó · ${skipped} kihagyva. ${homeBit} Kattints egy autóra az útvonalhoz.`
           : `${pins.length} autó. ${homeBit} Kattints egy autóra az útvonalhoz.`;
     }
-    renderSideListing(side, null);
     if (!pins.length) {
       if (side) {
         side.innerHTML = `<p class="search-map-modal__hint">Nincs településadat a találatokhoz — a térkép üres.</p>`;

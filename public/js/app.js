@@ -5,7 +5,7 @@ import {
   saveListingPhotosOrder,
   getStoredListingId,
 } from "./db-client.js?v=wizardSave1";
-import { createAdForm } from "./form-core.js?v=addrFix1";
+import { createAdForm } from "./form-core.js?v=photoKeep1";
 import { applyImportedVehicleToSelects } from "./vehicle-catalog-client.js?v=importVehicle1";
 import { initTireSizes } from "./tire-sizes-ui.js";
 import { initPhoneLanguages } from "./phone-lang-ui.js";
@@ -100,11 +100,17 @@ function withPhotoOverlayMeta(formData) {
 }
 
 function syncPhotoUrlsFromListing(listing) {
-  const urls = listing?.preview?.imageUrls?.length
-    ? listing.preview.imageUrls
-    : listing?.fo_kep
-      ? [listing.fo_kep]
-      : [];
+  const fromPreview = Array.isArray(listing?.preview?.imageUrls)
+    ? listing.preview.imageUrls.map((url) => String(url ?? "").trim()).filter(Boolean)
+    : [];
+  const fo = String(listing?.fo_kep || listing?.form?.fo_kep || "").trim();
+  const fromForm = [];
+  if (fo) fromForm.push(fo);
+  for (const line of String(listing?.form?.fotok ?? "").split(/\n+/)) {
+    const url = line.trim();
+    if (url && !fromForm.includes(url)) fromForm.push(url);
+  }
+  const urls = fromPreview.length >= fromForm.length ? fromPreview : fromForm;
   if (!urls.length || !formApi?.applyPhotoUrls) return;
   formApi.applyPhotoUrls(urls);
 }
@@ -118,12 +124,12 @@ async function persistWizardStep(formData, { fromStep } = {}) {
   const listingId = resolveListingId();
   const items = formApi?.getPreparedPhotoItems?.() ?? [];
   const readyItems = items.filter((item) => item.data || item.url);
-  const photos = readyItems.filter((item) => item.data).map((item) => item.data);
 
   try {
+    /* Ne photos[]-szel mentsünk: az csak az új base64 képeket vinné, a meglévő URL-eket törölné. */
     const saved = await saveListingToDb(withPhotoOverlayMeta(formData), listingId, {
       status: "mentett",
-      photos: fromStep >= 4 ? photos : [],
+      photos: [],
     });
 
     if (!saved?.id) {
@@ -133,12 +139,9 @@ async function persistWizardStep(formData, { fromStep } = {}) {
     setStoredListingId(saved.id);
 
     if (fromStep >= 4 && readyItems.length) {
-      const withUrls = readyItems.every((item) => item.url || item.data);
-      if (!withUrls || readyItems.some((item) => item.url)) {
-        const updated = await saveListingPhotosOrder(saved.id, readyItems);
-        syncPhotoUrlsFromListing(updated);
-        return updated ?? saved;
-      }
+      const updated = await saveListingPhotosOrder(saved.id, readyItems);
+      syncPhotoUrlsFromListing(updated);
+      return updated ?? saved;
     }
 
     syncPhotoUrlsFromListing(saved);
@@ -217,19 +220,18 @@ function ensureFormReady() {
       if (!editing && !items.length) {
         throw new Error("Legalább egy fénykép kell a hirdetéshez.");
       }
-      const allData = items.length > 0 && items.every((item) => item.data || item.url);
-      const photos = items.filter((item) => item.data).map((item) => item.data);
       const saved = await saveListingToDb(withPhotoOverlayMeta(formData), resolveListingId(), {
         status: "feladott",
-        photos,
+        photos: [],
       });
       if (!saved?.id) {
         throw new Error("A szerver nem mentette a hirdetést.");
       }
-      if (!allData && items.length) {
-        await saveListingPhotosOrder(saved.id, items);
+      if (items.length) {
+        const updated = await saveListingPhotosOrder(saved.id, items);
+        syncPhotoUrlsFromListing(updated ?? saved);
       }
-      if (!editing && !saved.fo_kep && !saved.preview?.imageUrl && !items.length) {
+      if (!editing && !items.length && !saved.fo_kep && !saved.preview?.imageUrl) {
         throw new Error("A hirdetés mentődött, de a kép nem. Próbáld kisebb JPG-gel.");
       }
       wizardSubmitted = true;
@@ -313,6 +315,7 @@ if (editing) {
     }
     const api = ensureFormReady();
     pendingEditForm = { ...listing.form };
+    if (listing.fo_kep && !pendingEditForm.fo_kep) pendingEditForm.fo_kep = listing.fo_kep;
     if (!pendingEditForm.hirdetes_vertical) pendingEditForm.hirdetes_vertical = "auto";
     if (!pendingEditForm.hirdetes_alkategoria) pendingEditForm.hirdetes_alkategoria = "szemelyauto";
     if (!pendingEditForm.jarmu_kategoria) pendingEditForm.jarmu_kategoria = "szemelyauto";
@@ -328,9 +331,8 @@ if (editing) {
     if (catSel) categoryPicker?.syncWizardContext?.(catSel);
     showWizardShell();
     setStoredListingId(editId);
-    syncPhotoUrlsFromListing(listing);
     api?.applyFormData?.(pendingEditForm, { fromImport: true });
-    window.dispatchEvent(new Event("ad-form-layout-refresh"));
+    syncPhotoUrlsFromListing(listing);    window.dispatchEvent(new Event("ad-form-layout-refresh"));
     applyAdFormDesk({ openStep: 1, scrollToAccordion: "alap" });
     const published = String(listing.status || "") === "feladott";
     const isImmo = String(listing.form?.hirdetes_vertical || "").toLowerCase() === "ingatlan";

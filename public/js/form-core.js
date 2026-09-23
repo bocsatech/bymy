@@ -1399,12 +1399,16 @@ function existingPhotoUrls(data = {}) {
 }
 
 function loadExistingPhotos(data) {
-  if (photoItems.length) return;
   const urls = existingPhotoUrls(data).slice(0, MAX_LISTING_PHOTOS);
   if (!urls.length) {
-    renderPhotoPreview();
+    if (!photoItems.length) renderPhotoPreview();
     return;
   }
+  const onlyRemote = photoItems.length > 0 && photoItems.every((item) => item.url && !item.file);
+  if (photoItems.length && !(onlyRemote && urls.length > photoItems.length)) {
+    return;
+  }
+  if (photoItems.length) photoItems.forEach(revokePhotoPreview);
   photoItems = urls.map((url) => ({
     id: `url-${++photoSeq}`,
     file: null,
@@ -1423,6 +1427,27 @@ function loadExistingPhotos(data) {
 function applyPhotoUrls(urls) {
   const list = (urls ?? []).map((url) => String(url ?? "").trim()).filter(Boolean).slice(0, MAX_LISTING_PHOTOS);
   if (!list.length) return;
+
+  /* Szerkesztés: ha csak a főkép jött be, a teljes fotok lista felülírhatja. */
+  const onlyRemote = photoItems.length > 0 && photoItems.every((item) => item.url && !item.file);
+  if (onlyRemote && list.length >= photoItems.length) {
+    photoItems.forEach(revokePhotoPreview);
+    photoItems = list.map((url) => ({
+      id: `url-${++photoSeq}`,
+      file: null,
+      previewUrl: url,
+      basePreviewUrl: url,
+      dataUrl: null,
+      url,
+      status: "ready",
+      error: "",
+      overlayTemplateId: null,
+      overlayDataUrl: null,
+    }));
+    renderPhotoPreview();
+    return;
+  }
+
   list.forEach((url, index) => {
     const item = photoItems[index];
     if (item) {

@@ -276,9 +276,8 @@
   }
 
   function ensureDeskHeaderCss() {
-    var href = "/css/site-desk-header.css?v=deskHdr5";
-    var existing = document.querySelector("link[data-site-desk-header-css], link[href*='site-desk-header.css']");
-    if (existing) existing.remove();
+    var href = "/css/site-desk-header.css?v=deskHdr6";
+    if (document.querySelector("link[data-site-desk-header-css], link[href*='site-desk-header.css']")) return;
     var link = document.createElement("link");
     link.rel = "stylesheet";
     link.href = href;

@@ -146,6 +146,15 @@ body.site-app .hub-header {
     visibility: hidden !important;
   }
 
+  /* Shell már kész: a HTML-ben lévő második (régi) header ne villanjon a prune előtt */
+  body.site-app[data-desk-hdr-ready] > .hub-header:not([data-site-desk-header]),
+  body.site-app[data-desk-hdr-ready] > .home-header:not([data-site-desk-header]),
+  body.site-app[data-desk-hdr-ready] > .site-header:not([data-site-desk-header]),
+  body.site-app[data-desk-hdr-ready] > header.site-app-header:not([data-site-desk-header]),
+  body.site-app[data-desk-hdr-ready] > .site-app-header:not([data-site-desk-header]) {
+    display: none !important;
+  }
+
   body.site-app > .hub-header,
   body.site-app > .home-header,
   body.site-app > .site-header,

@@ -210,6 +210,19 @@
     padding: 4px 6px 8px !important;
   }
 
+  body.home-page[data-site-page="ingatlan"] .immo-search-form.immo-qs-booting {
+    opacity: 0;
+    min-height: 420px;
+    pointer-events: none;
+  }
+
+  body.home-page[data-site-page="ingatlan"] .immo-search-form.immo-qs-ready {
+    opacity: 1;
+    min-height: 0;
+    pointer-events: auto;
+    transition: opacity 0.12s ease;
+  }
+
   body.home-page[data-site-page="ingatlan"] .immo-wheel-wrap--menu {
     position: relative;
     z-index: 1;

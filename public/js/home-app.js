@@ -17,7 +17,7 @@ import {
   emptyIngatlanFilters,
   filterListingsByIngatlan,
   initIngatlanSearch,
-} from "./ingatlan-search.js?v=immoSearchMenu1";
+} from "./ingatlan-search.js?v=immoNoFlash1";
 import { normalizeIngatlanUzletag } from "./ingatlan-fields.js?v=immoEladoDefault1";
 import { filterByCategory, initHomeCategoryBar, renderHomeCategoryBar } from "./home-category-bar.js";
 import { initHomeUnifiedScroll } from "./home-unified-scroll.js";

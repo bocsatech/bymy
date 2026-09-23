@@ -1485,6 +1485,8 @@ export async function initIngatlanSearch({
   syncMorePanelForTipus();
   applyAdFormImmoDeskLayout(root);
   bindIngatlanSearchDeskAccordion(root);
+  root.classList.remove("immo-qs-booting");
+  root.classList.add("immo-qs-ready");
 }
 
 function bindIngatlanSearchDeskAccordion(root) {

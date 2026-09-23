@@ -762,7 +762,7 @@ body.hub-page:has(.hub-hero--empty) .hub-main {
   }
 
   .hub-intro {
-    padding: 0.85rem 0.85rem 0.35rem;
+    padding: 0.5rem 0 0.35rem;
   }
 
   .hub-home-logo {
@@ -901,9 +901,10 @@ body.hub-page:has(.hub-hero--empty) .hub-main {
   }
 
   .hf-head,
-  .hf-rail {
-    padding-left: 0.85rem;
-    padding-right: 0.85rem;
+  .hf-rail,
+  .hub-verticals {
+    padding-left: 16px;
+    padding-right: 16px;
   }
 }
 

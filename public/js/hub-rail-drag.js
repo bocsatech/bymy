@@ -1,5 +1,15 @@
 function initHubRailDrag(root = document) {
-  root.querySelectorAll(".hf-rail").forEach((rail) => {
+  const rails = [
+    ...root.querySelectorAll(".hf-rail"),
+    ...root.querySelectorAll(".hub-verticals"),
+  ];
+
+  rails.forEach((rail) => {
+    try {
+      rail.scrollLeft = 0;
+    } catch {
+    }
+
     if (rail.dataset.dragBound === "1") return;
     rail.dataset.dragBound = "1";
 

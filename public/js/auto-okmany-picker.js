@@ -122,7 +122,6 @@ export async function mountAutoOkmanyPicker(form) {
       </div>`;
     }).join("");
     bodyEl.innerHTML = `
-      <p class="auto-bm-hint">Kapcsolók — több is</p>
       <div class="auto-bm-actions">
       <button type="button" class="auto-bm-btn auto-bm-btn--clear" data-auto-okmany-clear>Összes kikapcsolása</button>
       <button type="button" class="auto-bm-btn auto-bm-btn--done" data-auto-okmany-done>Kész</button>

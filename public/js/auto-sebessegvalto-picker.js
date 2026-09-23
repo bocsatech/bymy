@@ -190,7 +190,6 @@ export async function mountAutoSebessegvaltoPicker(form) {
     }).join("");
 
     bodyEl.innerHTML = `
-      <p class="auto-bm-hint">Kapcsolók — több váltó is</p>
       <div class="auto-bm-actions">
       <button type="button" class="auto-bm-btn auto-bm-btn--clear" data-auto-valto-clear>Összes kikapcsolása</button>
       <button type="button" class="auto-bm-btn auto-bm-btn--done" data-auto-valto-done>Kész</button>

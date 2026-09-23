@@ -189,7 +189,6 @@ export async function mountAutoAllapotPicker(form) {
     }).join("");
 
     bodyEl.innerHTML = `
-      <p class="auto-bm-hint">Kapcsolók — több állapot is</p>
       <div class="auto-bm-actions">
       <button type="button" class="auto-bm-btn auto-bm-btn--clear" data-auto-allapot-clear>Összes kikapcsolása</button>
       <button type="button" class="auto-bm-btn auto-bm-btn--done" data-auto-allapot-done>Kész</button>

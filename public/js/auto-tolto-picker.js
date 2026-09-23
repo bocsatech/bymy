@@ -140,7 +140,6 @@ function mountOne(form, spec) {
       })
       .join("");
     bodyEl.innerHTML = `
-      <p class="auto-bm-hint">Kapcsolók — több is</p>
       <div class="auto-bm-actions">
       <button type="button" class="auto-bm-btn auto-bm-btn--clear" data-auto-tolto-clear>Összes kikapcsolása</button>
       <button type="button" class="auto-bm-btn auto-bm-btn--done" data-auto-tolto-done>Kész</button>

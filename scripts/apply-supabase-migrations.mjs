@@ -25,6 +25,8 @@ const FILES = [
   "012_ingatlan_ajanlas_categories.sql",
   "013_remove_allapotfelmeres.sql",
   "014_partner_commission.sql",
+  "015_listings_vertical_feed.sql",
+  "016_listing_cells_listing_field_idx.sql",
 ];
 
 function loadEnvLocal() {

@@ -2881,7 +2881,7 @@ body.site-app #ad-form.ad-form--ingatlan .immo-wheel--menu {
 /* Portált menü a body-n: a bal sáv fölött, clip / overlay nélkül. */
 body.site-app > .immo-wheel.immo-wheel--menu {
   position: fixed;
-  z-index: 10060;
+  z-index: 11000;
   max-height: min(14rem, 45vh);
   margin: 0;
   background: #fff;

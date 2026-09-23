@@ -201,8 +201,7 @@ export async function mountAutoKivitelPicker(form) {
     </div>
     <div class="auto-bm-panel__body" data-auto-kivitel-body></div>
   `;
-  const hero = document.querySelector(".auto-search-hero") || form.closest(".auto-search-hero") || form;
-  hero.appendChild(panel);
+  document.body.appendChild(panel);
   const bodyEl = panel.querySelector("[data-auto-kivitel-body]");
 
   function selectedLabelsHierarchical() {

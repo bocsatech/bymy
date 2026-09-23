@@ -31,7 +31,14 @@
   body.site-app:not(.hub-page--feed) .home-main,
   body.site-app:not(.hub-page--feed) main {
     max-width: 100%;
-    overflow-x: clip;
+    overflow-x: visible;
+  }
+
+  /* Feed rails still need horizontal clip; search pages must not clip overlays. */
+  body.site-app:is([data-site-page="auto"], [data-site-page="teherauto"], [data-site-page="ingatlan"]) .home-main,
+  body.site-app:is([data-site-page="auto"], [data-site-page="teherauto"], [data-site-page="ingatlan"]) main {
+    overflow-x: visible;
+    overflow-y: visible;
   }
 
   body.hub-page--feed main,

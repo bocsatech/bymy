@@ -144,23 +144,10 @@ function bindPortalNativeScroll(scrollEl, ring, wheel) {
 }
 
 function positionPortal(stage, trigger) {
-  if (trigger.closest("#ad-form")) {
-    stage.style.left = "50%";
-    stage.style.top = "50%";
-    return;
-  }
-  const rect = trigger.getBoundingClientRect();
-  const cx = rect.left + rect.width / 2;
-  const cy = rect.top + rect.height / 2;
-  const pad = 12;
-  const approxW = 210;
-  const approxH = 240;
-  let left = cx;
-  let top = cy;
-  left = Math.min(Math.max(left, pad + approxW / 2), window.innerWidth - pad - approxW / 2);
-  top = Math.min(Math.max(top, pad + approxH / 2), window.innerHeight - pad - approxH / 2);
-  stage.style.left = `${left}px`;
-  stage.style.top = `${top}px`;
+  // Always center in viewport — avoids overlapping dual-range siblings / sticky CTA.
+  void trigger;
+  stage.style.left = "50%";
+  stage.style.top = "48%";
 }
 
 export function openAutoDrumSheet(wheel, trigger) {

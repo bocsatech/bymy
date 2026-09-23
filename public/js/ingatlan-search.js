@@ -60,7 +60,7 @@ import {
   syncDrumWheelDisplay,
   applyDrumModeClass,
 } from "./immo-drum-picker.js?v=immoAdFormMenu1";
-import { bindAutoDrumSheet, closeAutoDrumSheet } from "./auto-drum-sheet.js?v=immoAdFormMenu1";
+import { bindAutoDrumSheet, closeAutoDrumSheet } from "./auto-drum-sheet.js?v=mobMenuFix1";
 import {
   fetchIngatlanWheelSchema,
   renderIngatlanSchemaHosts,

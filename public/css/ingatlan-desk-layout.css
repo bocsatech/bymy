@@ -495,7 +495,7 @@
 /* Ported dropdown menus sit on body (same as feladás). */
 body.site-app.home-page[data-site-page="ingatlan"] > .immo-wheel.immo-wheel--menu {
   position: fixed;
-  z-index: 10060;
+  z-index: 11000;
   max-height: min(14rem, 45vh);
   margin: 0;
   background: #fff;

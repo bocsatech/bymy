@@ -1375,7 +1375,7 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
 .auto-drum-portal {
   position: fixed;
   inset: 0;
-  z-index: 10000;
+  z-index: 11000;
 }
 
 .auto-drum-portal__backdrop {
@@ -1502,6 +1502,16 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
 
 body.auto-drum-portal-open {
   overflow: hidden;
+}
+
+@media (max-width: 900px) {
+  body.site-app.auto-drum-portal-open .mw-app-tabbar,
+  body.site-app.immo-scroll-locked .mw-app-tabbar,
+  body.site-app.immo-drum-active .mw-app-tabbar {
+    transform: translateX(-50%) translateY(calc(100% + 1.25rem));
+    opacity: 0;
+    pointer-events: none;
+  }
 }
 
 .auto-drum-sheet {

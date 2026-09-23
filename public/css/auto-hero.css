@@ -1031,19 +1031,41 @@ body[data-site-page="teherauto"] .auto-search-tabs {
   body[data-site-page="auto"].immo-scroll-locked .auto-search-hero,
   body[data-site-page="auto"].immo-drum-active .auto-search-hero,
   body[data-site-page="auto"].auto-drum-open .auto-search-hero,
+  body[data-site-page="auto"].auto-drum-portal-open .auto-search-hero,
+  body[data-site-page="teherauto"].immo-scroll-locked .auto-search-hero,
+  body[data-site-page="teherauto"].immo-drum-active .auto-search-hero,
+  body[data-site-page="teherauto"].auto-drum-open .auto-search-hero,
+  body[data-site-page="teherauto"].auto-drum-portal-open .auto-search-hero,
   body[data-site-page="auto"].immo-scroll-locked .auto-search-hero__stage,
   body[data-site-page="auto"].immo-drum-active .auto-search-hero__stage,
-  body[data-site-page="auto"].auto-drum-open .auto-search-hero__stage {
+  body[data-site-page="auto"].auto-drum-open .auto-search-hero__stage,
+  body[data-site-page="auto"].auto-drum-portal-open .auto-search-hero__stage,
+  body[data-site-page="teherauto"].immo-scroll-locked .auto-search-hero__stage,
+  body[data-site-page="teherauto"].immo-drum-active .auto-search-hero__stage,
+  body[data-site-page="teherauto"].auto-drum-open .auto-search-hero__stage,
+  body[data-site-page="teherauto"].auto-drum-portal-open .auto-search-hero__stage {
     overflow: visible !important;
     isolation: auto;
   }
 
   body[data-site-page="auto"].immo-scroll-locked .auto-search-panel,
   body[data-site-page="auto"].immo-drum-active .auto-search-panel,
-  body[data-site-page="auto"].auto-drum-open .auto-search-panel {
+  body[data-site-page="auto"].auto-drum-open .auto-search-panel,
+  body[data-site-page="auto"].auto-drum-portal-open .auto-search-panel,
+  body[data-site-page="teherauto"].immo-scroll-locked .auto-search-panel,
+  body[data-site-page="teherauto"].immo-drum-active .auto-search-panel,
+  body[data-site-page="teherauto"].auto-drum-open .auto-search-panel,
+  body[data-site-page="teherauto"].auto-drum-portal-open .auto-search-panel {
     position: relative;
     z-index: 190;
     overflow: visible;
+  }
+
+  /* Shared immo dual-range mobile CSS fights auto portal drums — keep halves flat. */
+  body:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-qs-drums .immo-dual-range.has-drum-open,
+  body:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-qs-drums .immo-dual-range__half.is-drum-active,
+  body:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-qs-drums .immo-dual-range:has(.immo-wheel-wrap--menu.is-open) {
+    z-index: auto !important;
   }
 
   body.auto-drum-open {
@@ -1316,7 +1338,7 @@ body[data-site-page="teherauto"] .auto-search-tabs {
 .auto-drum-portal {
   position: fixed;
   inset: 0;
-  z-index: 10000;
+  z-index: 11000;
 }
 
 .auto-drum-portal__backdrop {
@@ -1443,6 +1465,20 @@ body[data-site-page="teherauto"] .auto-search-tabs {
 
 body.auto-drum-portal-open {
   overflow: hidden;
+}
+
+/* Keep floating tab bar out of picker / drum / map overlays. */
+@media (max-width: 900px) {
+  body.site-app.auto-drum-portal-open .mw-app-tabbar,
+  body.site-app.auto-bm-open .mw-app-tabbar,
+  body.site-app.immo-scroll-locked .mw-app-tabbar,
+  body.site-app.immo-drum-active .mw-app-tabbar,
+  body.site-app.search-map-open .mw-app-tabbar,
+  body.site-app:has(.auto-price-suggest) .mw-app-tabbar {
+    transform: translateX(-50%) translateY(calc(100% + 1.25rem));
+    opacity: 0;
+    pointer-events: none;
+  }
 }
 
 .auto-drum-sheet {

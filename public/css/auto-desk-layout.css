@@ -1090,7 +1090,7 @@
 /* Custom Vételár suggest — ported to body (replaces native datalist). */
 body.site-app > .auto-price-suggest {
   position: fixed;
-  z-index: 10060;
+  z-index: 11000;
   max-height: min(14rem, 45vh);
   margin: 0;
   padding: 0.35rem;
@@ -1615,7 +1615,7 @@ html[data-theme="dark"] body.site-app > .auto-price-suggest .auto-price-suggest_
   body.home-page[data-site-page="teherauto"] .auto-kivitel-panel {
     position: fixed;
     inset: 0;
-    z-index: 80;
+    z-index: 11000;
     display: flex;
     flex-direction: column;
     background: var(--ad-panel);

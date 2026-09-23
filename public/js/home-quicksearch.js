@@ -1,6 +1,6 @@
 
 import { applyAutoSearchLayout, readLayoutFilterValues, refillAutoSearchRangeSelects, prefetchAutoSearchBoot } from "./auto-search-layout.js?v=priceSuggest1";
-import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums } from "./auto-search-drums.js?v=priceFree1";
+import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums } from "./auto-search-drums.js?v=mobMenuFix1";
 import {
   mountDetailedSearch,
   readDetailedSearchValues,
@@ -9,7 +9,7 @@ import {
 import { readWheel } from "./ingatlan-wheels.js?v=immoClearAll1";
 import { readBrandModelFilterValues, mountAutoBrandModelPicker } from "./auto-brand-model-picker.js?v=bmDoneClose1";
 import { readFuelFilterValues, mountAutoFuelPicker } from "./auto-fuel-picker.js?v=noHint2";
-import { readKivitelFilterValues, mountAutoKivitelPicker } from "./auto-kivitel-picker.js?v=noHint2";
+import { readKivitelFilterValues, mountAutoKivitelPicker } from "./auto-kivitel-picker.js?v=mobMenuFix1";
 import { readAllapotFilterValues, mountAutoAllapotPicker } from "./auto-allapot-picker.js?v=noHint2";
 import { readSebessegvaltoFilterValues, mountAutoSebessegvaltoPicker } from "./auto-sebessegvalto-picker.js?v=noHint2";
 import { readOkmanyFilterValues, mountAutoOkmanyPicker } from "./auto-okmany-picker.js?v=noHint2";
@@ -206,6 +206,14 @@ export function initHomeQuickSearch({ onSearch = () => {}, onDeskSortChange, onR
   setMoreOpen(false);
   setDetailedOpen(false);
   setQsReady(false);
+  // Never leave the form permanently blocked if a picker hangs.
+  const bootFailsafe = window.setTimeout(() => {
+    if (!form.classList.contains("is-qs-ready")) {
+      console.warn("Kereső boot timeout — feloldom a formot.");
+      setQsReady(true);
+      resolveReady?.();
+    }
+  }, 8000);
 
   initAutoDeskSearch({
     mountDetailed: (f) => mountDetailedSearch(f, { force: true }),
@@ -262,6 +270,7 @@ export function initHomeQuickSearch({ onSearch = () => {}, onDeskSortChange, onR
       updateAutoDeskAccSummaries(form);
       onReady?.();
       resolveReady?.();
+      window.clearTimeout(bootFailsafe);
       if (statusEl) {
         statusEl.hidden = true;
         statusEl.textContent = "";
@@ -322,6 +331,7 @@ export function initHomeQuickSearch({ onSearch = () => {}, onDeskSortChange, onR
       setQsReady(true);
       onReady?.();
       resolveReady?.();
+      window.clearTimeout(bootFailsafe);
       if (statusEl) {
         statusEl.hidden = false;
         statusEl.textContent = "A kereső elrendezés nem töltődött be. Hard refresh, majd szerver újraindítás.";

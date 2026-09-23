@@ -1000,13 +1000,22 @@ body.hub-page--feed {
   overflow-x: auto;
   overflow-y: hidden;
   padding: 0 1.25rem 0.35rem;
-  scroll-snap-type: x proximity;
+  scroll-snap-type: none;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-x: contain;
   scrollbar-width: none;
   -ms-overflow-style: none;
   cursor: grab;
   touch-action: pan-x pan-y;
+}
+
+body.hub-page--feed .hf-rail {
+  scroll-snap-type: none;
+  scroll-padding: 0;
+}
+
+body.hub-page--feed .hf-card {
+  scroll-snap-align: none;
 }
 
 .hf-rail::-webkit-scrollbar {

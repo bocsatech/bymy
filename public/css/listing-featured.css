@@ -5,10 +5,14 @@
 }
 
 .hf-card--listing.hf-card--featured,
-.home-grid-card.home-grid-card--featured {
+.home-grid-card.home-grid-card--featured,
+body.hub-page--feed .hf-card--listing.hf-card--featured,
+body.hub-page--feed .hf-card--featured {
   border: 1px solid var(--listing-featured-yellow) !important;
   /* Nincs kifelé növő glow: a csempe széle egy vonalban marad a többi sávval */
   box-shadow: none !important;
+  outline: none !important;
+  filter: none !important;
 }
 
 /* auto/teher desk: szürke 1px keret !important felülírása */

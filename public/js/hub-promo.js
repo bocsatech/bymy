@@ -133,6 +133,16 @@ function clearPromoMounts(target = document) {
   }
 }
 
+function resetRailScroll(target = document) {
+  for (const rail of target.querySelectorAll(".hub-verticals, .hf-rail")) {
+    try {
+      rail.scrollLeft = 0;
+    } catch {
+      /* ignore */
+    }
+  }
+}
+
 function paint(target, images) {
   ensurePromoRoot(target);
   const html = markupFromImages(images);
@@ -145,6 +155,8 @@ function paint(target, images) {
     if (section.closest("[data-hub-promo-root]")) continue;
     section.outerHTML = html;
   }
+  resetRailScroll(target);
+  requestAnimationFrame(() => resetRailScroll(target));
 }
 
 function paintStockFirst(target) {

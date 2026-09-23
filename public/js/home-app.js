@@ -27,7 +27,7 @@ import { getAuthUser } from "./site-auth.js?v=nearby1";
 import { bindListingOpen, restoreListingReturn } from "./listing-return.js?v=searchNav1";
 import { normalizeKivitel } from "./kivitel-options.js?v=kivitel1";
 import { featuredListingIdSet } from "./home-featured-slots.js?v=featuredNoAuto1";
-import { initSearchResultsMapButtons } from "./search-results-map.js?v=map1";
+import { initSearchResultsMapButtons } from "./search-results-map.js?v=map2";
 
 const gridTrack = document.getElementById("home-grid-track");
 const emptyEl = document.getElementById("home-empty");

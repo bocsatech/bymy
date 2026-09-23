@@ -141,9 +141,44 @@
   color: #152033;
 }
 
-.search-map-modal__card span {
-  font-size: 0.82rem;
-  color: #3d4a5e;
+.search-map-modal__card--solo {
+  gap: 0.35rem;
+}
+
+.search-map-modal__thumb {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  border-radius: 6px;
+  background: #e8eef6;
+  margin-bottom: 0.15rem;
+}
+
+.search-map-modal__cta {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #1a73e8;
+}
+
+.search-map-car-icon {
+  background: transparent !important;
+  border: 0 !important;
+}
+
+.search-map-car-icon__dot {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: #1a73e8;
+  color: #fff;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 8px rgba(15, 30, 60, 0.35);
+}
+
+.search-map-car-icon__dot svg {
+  display: block;
 }
 
 body.search-map-open {

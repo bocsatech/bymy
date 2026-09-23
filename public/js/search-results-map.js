@@ -1,6 +1,6 @@
 /**
- * Keresési találatok térképen — település-középpont pin-ekkel.
- * (Pontos cím nem kerül ki; a pin a város központja.)
+ * Keresési találatok térképen — minden autónak saját ikonja.
+ * (Pontos cím nem kerül ki; a pin a település központja körül, enyhén szétcsúsztatva.)
  */
 import {
   buildCityIndex,
@@ -12,11 +12,14 @@ import { listingTileTitle, listingTilePrice } from "./listing-tile.js?v=listThum
 
 const HU_CENTER = [47.1625, 19.5033];
 const HU_ZOOM = 7;
+/** ~150–400 m szétcsúsztatás azonos városban, hogy minden autó külön ikon legyen. */
+const JITTER_DEG = 0.0035;
 
 let cityIndexPromise = null;
 let leafletPromise = null;
 let mapInstance = null;
 let markersLayer = null;
+let carIcon = null;
 
 function escapeHtml(value) {
   return String(value ?? "")
@@ -72,14 +75,14 @@ function ensureModal() {
       <header class="search-map-modal__head">
         <div>
           <h2 id="search-map-title" class="search-map-modal__title">Találatok a térképen</h2>
-          <p class="search-map-modal__sub" data-search-map-sub>A pin a település központját mutatja.</p>
+          <p class="search-map-modal__sub" data-search-map-sub>Minden autónak saját ikonja van (település szerint).</p>
         </div>
         <button type="button" class="search-map-modal__close" data-search-map-close aria-label="Bezárás">×</button>
       </header>
       <div class="search-map-modal__body">
         <div id="search-map-canvas" class="search-map-modal__canvas" aria-label="Térkép"></div>
         <aside class="search-map-modal__side" data-search-map-side>
-          <p class="search-map-modal__hint">Kattints egy pinre a hirdetésekhez.</p>
+          <p class="search-map-modal__hint">Kattints egy autó ikonra a részletekhez.</p>
         </aside>
       </div>
     </div>
@@ -94,8 +97,25 @@ function ensureModal() {
   return root;
 }
 
-function groupByCity(items, cityIndex) {
-  const groups = new Map();
+function hashId(id) {
+  const n = Number(id) || 0;
+  return Math.abs((n * 9301 + 49297) % 233280) / 233280;
+}
+
+/** Azonos városnál körben szétcsúsztatott lat/lon — minden autó külön látszik. */
+function jitterCoords(lat, lon, indexInCity, totalInCity, listingId) {
+  if (totalInCity <= 1) return { lat, lon };
+  const angle = (2 * Math.PI * indexInCity) / totalInCity + hashId(listingId) * 0.4;
+  const radius = JITTER_DEG * (0.45 + 0.55 * Math.min(1, Math.sqrt(totalInCity) / 4));
+  const cosLat = Math.cos((lat * Math.PI) / 180) || 0.7;
+  return {
+    lat: lat + Math.sin(angle) * radius,
+    lon: lon + (Math.cos(angle) * radius) / cosLat,
+  };
+}
+
+function placeListings(items, cityIndex) {
+  const byCity = new Map();
   let skipped = 0;
   for (const item of items ?? []) {
     const coords = resolveListingCoords(item, cityIndex);
@@ -104,52 +124,83 @@ function groupByCity(items, cityIndex) {
       continue;
     }
     const key = `${coords.lat.toFixed(4)},${coords.lon.toFixed(4)}`;
-    let group = groups.get(key);
-    if (!group) {
-      group = {
+    if (!byCity.has(key)) {
+      byCity.set(key, {
         city: coords.city || listingCityName(item) || "Ismeretlen",
-        lat: coords.lat,
-        lon: coords.lon,
+        baseLat: coords.lat,
+        baseLon: coords.lon,
         items: [],
-      };
-      groups.set(key, group);
+      });
     }
-    group.items.push(item);
+    byCity.get(key).items.push(item);
   }
-  return { groups: [...groups.values()], skipped };
+
+  const pins = [];
+  for (const group of byCity.values()) {
+    const total = group.items.length;
+    group.items.forEach((item, index) => {
+      const pos = jitterCoords(group.baseLat, group.baseLon, index, total, item.id);
+      pins.push({
+        item,
+        city: group.city,
+        lat: pos.lat,
+        lon: pos.lon,
+      });
+    });
+  }
+  return { pins, skipped };
 }
 
-function renderSideList(side, group) {
+function getCarIcon(L) {
+  if (carIcon) return carIcon;
+  carIcon = L.divIcon({
+    className: "search-map-car-icon",
+    html: `<span class="search-map-car-icon__dot" aria-hidden="true">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none">
+        <path d="M4.5 14.5 6 9.2A2 2 0 0 1 7.9 7.8h8.2A2 2 0 0 1 18 9.2l1.5 5.3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+        <path d="M5 14.5h14" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+        <circle cx="7.5" cy="15.2" r="1.6" fill="currentColor"/>
+        <circle cx="16.5" cy="15.2" r="1.6" fill="currentColor"/>
+      </svg>
+    </span>`,
+    iconSize: [28, 28],
+    iconAnchor: [14, 14],
+    popupAnchor: [0, -12],
+  });
+  return carIcon;
+}
+
+function renderSideListing(side, pin) {
   if (!side) return;
-  if (!group) {
-    side.innerHTML = `<p class="search-map-modal__hint">Kattints egy pinre a hirdetésekhez.</p>`;
+  if (!pin) {
+    side.innerHTML = `<p class="search-map-modal__hint">Kattints egy autó ikonra a részletekhez.</p>`;
     return;
   }
-  const gmaps = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${group.city}, Magyarország`)}`;
-  const rows = group.items
-    .slice(0, 40)
-    .map((item) => {
-      const title = escapeHtml(listingTileTitle(item));
-      const price = escapeHtml(listingTilePrice(item));
-      const href = escapeHtml(listingDetailHref(item.id));
-      return `<a class="search-map-modal__card" href="${href}"><strong>${title}</strong><span>${price}</span></a>`;
-    })
-    .join("");
-  const more =
-    group.items.length > 40
-      ? `<p class="search-map-modal__hint">+${group.items.length - 40} további</p>`
-      : "";
+  const { item, city } = pin;
+  const title = escapeHtml(listingTileTitle(item));
+  const price = escapeHtml(listingTilePrice(item));
+  const href = escapeHtml(listingDetailHref(item.id));
+  const gmaps = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${city}, Magyarország`)}`;
+  const img = String(item.preview?.imageUrl || item.fo_kep || "").trim();
+  const photo = img
+    ? `<img class="search-map-modal__thumb" src="${escapeHtml(img)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" />`
+    : "";
   side.innerHTML = `
     <div class="search-map-modal__city">
-      <h3>${escapeHtml(group.city)}</h3>
-      <p>${group.items.length} hirdetés</p>
+      <h3>${title}</h3>
+      <p>${price}${city ? ` · ${escapeHtml(city)}` : ""}</p>
       <a class="search-map-modal__gmaps" href="${escapeHtml(gmaps)}" target="_blank" rel="noopener noreferrer">Megnyitás Google Térképen</a>
     </div>
-    <div class="search-map-modal__cards">${rows}${more}</div>
+    <a class="search-map-modal__card search-map-modal__card--solo" href="${href}">
+      ${photo}
+      <strong>${title}</strong>
+      <span>${price}</span>
+      <span class="search-map-modal__cta">Hirdetés megnyitása →</span>
+    </a>
   `;
 }
 
-function paintMap(L, groups, side) {
+function paintMap(L, pins, side) {
   const canvas = document.getElementById("search-map-canvas");
   if (!canvas) return;
 
@@ -170,19 +221,25 @@ function paintMap(L, groups, side) {
   }).addTo(mapInstance);
 
   L.Icon.Default.imagePath = "/vendor/leaflet/images/";
+  const icon = getCarIcon(L);
 
   markersLayer = L.layerGroup().addTo(mapInstance);
   const bounds = [];
 
-  for (const group of groups) {
-    const count = group.items.length;
-    const marker = L.marker([group.lat, group.lon], {
-      title: `${group.city} (${count})`,
+  for (const pin of pins) {
+    const title = listingTileTitle(pin.item);
+    const marker = L.marker([pin.lat, pin.lon], {
+      title,
+      icon,
+      riseOnHover: true,
     });
-    marker.bindTooltip(`${group.city} · ${count}`, { direction: "top", offset: [0, -12] });
-    marker.on("click", () => renderSideList(side, group));
+    marker.bindTooltip(`${title}${pin.city ? ` · ${pin.city}` : ""}`, {
+      direction: "top",
+      offset: [0, -10],
+    });
+    marker.on("click", () => renderSideListing(side, pin));
     marker.addTo(markersLayer);
-    bounds.push([group.lat, group.lon]);
+    bounds.push([pin.lat, pin.lon]);
   }
 
   if (bounds.length === 1) {
@@ -207,7 +264,7 @@ export async function openSearchResultsMap(items) {
   const side = root.querySelector("[data-search-map-side]");
   root.hidden = false;
   document.body.classList.add("search-map-open");
-  renderSideList(side, null);
+  renderSideListing(side, null);
 
   if (!list.length) {
     if (sub) sub.textContent = "Nincs találat a jelenlegi szűrőkkel.";
@@ -216,21 +273,20 @@ export async function openSearchResultsMap(items) {
 
   try {
     const [L, cityIndex] = await Promise.all([loadLeaflet(), getCityIndex()]);
-    const { groups, skipped } = groupByCity(list, cityIndex);
+    const { pins, skipped } = placeListings(list, cityIndex);
     if (sub) {
-      const placed = groups.reduce((n, g) => n + g.items.length, 0);
       sub.textContent =
         skipped > 0
-          ? `${placed} hirdetés a térképen · ${skipped} település nélkül kihagyva. A pin a város központja.`
-          : `${placed} hirdetés · a pin a település központját mutatja.`;
+          ? `${pins.length} autó a térképen · ${skipped} település nélkül kihagyva. Minden autónak saját ikonja van.`
+          : `${pins.length} autó · minden találatnak saját ikonja (település szerint).`;
     }
-    if (!groups.length) {
+    if (!pins.length) {
       if (side) {
         side.innerHTML = `<p class="search-map-modal__hint">Nincs településadat a találatokhoz — a térkép üres.</p>`;
       }
       return;
     }
-    paintMap(L, groups, side);
+    paintMap(L, pins, side);
   } catch (error) {
     if (sub) sub.textContent = error?.message || "Térkép betöltési hiba.";
   }

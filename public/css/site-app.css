@@ -2390,7 +2390,7 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot .
 
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot .ad-location-postal-row {
   display: grid !important;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  grid-template-columns: minmax(6.75rem, 8.5rem) minmax(0, 1fr);
   gap: 0.65rem;
   width: 100%;
 }
@@ -2415,7 +2415,7 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot .
   height: auto !important;
   min-height: 2.75rem !important;
   max-height: none !important;
-  field-sizing: border-box !important;
+  field-sizing: fixed !important;
   background: #fff !important;
   color: #111 !important;
 }

@@ -26,19 +26,24 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot .
   flex-direction: column;
   gap: 0.65rem;
   width: 100%;
+  max-width: 100%;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot .settings-postal-row {
-  display: grid;
-  grid-template-columns: minmax(5.5rem, 1fr) minmax(0, 2fr);
-  gap: 0.65rem;
-  width: 100%;
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot .settings-postal-row,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot .ad-location-postal-row {
+  display: grid !important;
+  grid-template-columns: minmax(6.75rem, 8.5rem) minmax(0, 1fr) !important;
+  gap: 0.65rem !important;
+  width: 100% !important;
+  max-width: 100% !important;
   align-items: start;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot .settings-postal-row > .login-field {
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot .settings-postal-row > .login-field,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot .ad-location-postal-row > .login-field {
   min-width: 0;
   width: 100%;
+  max-width: 100%;
 }
 
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot .login-field {
@@ -57,7 +62,8 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot .
 }
 
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form input.ad-address-input,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot .login-field input.ad-address-input {
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot .login-field input.ad-address-input,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot .login-field input {
   width: 100% !important;
   min-width: 0 !important;
   max-width: 100% !important;
@@ -73,8 +79,8 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot .
   min-height: 2.75rem !important;
   max-height: none !important;
   line-height: 1.35 !important;
-  field-sizing: border-box !important;
-  flex: none;
+  field-sizing: fixed !important;
+  flex: none !important;
 }
 
 body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot {
@@ -85,7 +91,8 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form .ad
 }
 
 body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot .ad-address-block,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot .settings-postal-row {
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot .settings-postal-row,
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot .ad-location-postal-row {
   width: 100%;
   max-width: 100%;
 }

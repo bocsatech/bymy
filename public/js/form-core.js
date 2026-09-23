@@ -395,6 +395,14 @@ function stampAdFormUniformCells(root = form) {
   root.querySelectorAll("input, select, textarea").forEach((el) => {
     if (skipTypes.has(el.type)) return;
     if (el.classList.contains("ad-form-bm-native") || el.classList.contains("ad-form-bm-search-trigger")) return;
+    if (el.classList.contains("ad-address-input")) {
+      el.classList.remove(cell);
+      return;
+    }
+    if (el.closest(".ad-megtalalhato-slot, .ad-location-fields--postal-only, .ad-address-block")) {
+      el.classList.remove(cell);
+      return;
+    }
     if (el.closest(".card--photos") || el.id === "leiras" || el.closest(".field-stack--leiras")) return;
     if (el.closest(".suffix-field") || el.closest(".ad-form-bm-field")) return;
     if (el.closest("#tire-sizes-card, .tire-sizes-grid")) return;

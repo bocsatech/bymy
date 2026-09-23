@@ -521,6 +521,7 @@ function applyAdHideStreetOnlyFields(form) {
   anchorAddressFieldsInSlot(form);
 
   form.querySelectorAll(".ad-megtalalhato-slot .ad-address-input, .ad-location-fields--postal-only .ad-address-input").forEach((el) => {
+    el.classList.remove("ad-form-cell");
     el.style.removeProperty("width");
     el.style.removeProperty("min-width");
     el.style.removeProperty("max-width");
@@ -531,6 +532,7 @@ function applyAdHideStreetOnlyFields(form) {
     el.style.setProperty("width", "100%", "important");
     el.style.setProperty("max-width", "100%", "important");
     el.style.setProperty("box-sizing", "border-box", "important");
+    el.style.setProperty("field-sizing", "fixed", "important");
   });
 }
 

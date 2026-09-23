@@ -642,6 +642,16 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-cell {
   box-sizing: border-box !important;
 }
 
+/* Címmezők: teljes sor szélesség, ne a 168px cella */
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot .ad-form-cell,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form input.ad-address-input.ad-form-cell,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-location-fields--postal-only .ad-form-cell {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  flex: none !important;
+}
+
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field.ad-form-cell .ad-form-bm-input-wrap,
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field.ad-form-cell .ad-form-bm-search-trigger {
   width: 100% !important;

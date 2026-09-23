@@ -541,18 +541,32 @@
   body.hub-page--feed .hf-card--listing .hf-card-specs-row {
     display: flex;
     flex-wrap: nowrap;
+    align-items: center;
     justify-content: flex-start;
-    gap: 0.39rem;
+    gap: 0.5rem;
+    line-height: 1;
   }
 
   body.hub-page--feed .hf-card--listing .hf-card-spec {
+    display: inline-flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.26rem;
     color: #111;
     font-size: 0.72rem;
+    line-height: 1;
   }
 
   body.hub-page--feed .hf-card--listing .hf-card-spec svg {
-    width: 13px;
-    height: 13px;
+    display: block;
+    width: 12px;
+    height: 12px;
+    flex: 0 0 auto;
+  }
+
+  body.hub-page--feed .hf-card--listing .hf-card-spec > span {
+    display: block;
+    line-height: 1;
   }
 
   body.hub-page--feed .hf-status {

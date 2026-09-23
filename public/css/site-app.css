@@ -5236,6 +5236,29 @@ body.site-app .wh-msg {
   min-height: 0;
 }
 
+/* Fiók sáv mellett: üzenetek a fő panelen (sidebar megmarad) */
+body.site-app.mm-inbox-inline .mm-shell {
+  max-width: 1280px;
+}
+
+body.site-app.mm-inbox-inline .mm-main {
+  min-height: calc(100dvh - var(--site-fixed-header-h, 64px) - 2.5rem);
+}
+
+body.site-app.mm-inbox-inline .mm-panel--messages {
+  height: calc(100dvh - var(--site-fixed-header-h, 64px) - 2.5rem);
+  min-height: 480px;
+  background: #fff;
+  border: 1px solid #dfe3ea;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+body.site-app.mm-inbox-inline .mm-panel--messages .msg-root,
+body.site-app.mm-inbox-inline .mm-panel--messages .wh-msg {
+  height: 100%;
+}
+
 body.site-app .wh-msg {
   display: grid;
   grid-template-columns: 380px minmax(0, 1fr);

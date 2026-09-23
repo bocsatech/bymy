@@ -94,6 +94,17 @@ function syntheticComposeConv(draft) {
 export function initMessagesUi(root, { onUnreadChange, openConversationId, composeDraft } = {}) {
   if (!root) return { refresh: async () => {} };
 
+  function conversationUrl(id) {
+    const onSettings =
+      document.body?.dataset?.sitePage === "beallitasok" ||
+      document.body?.classList?.contains("settings-page") ||
+      document.body?.classList?.contains("mm-inbox-inline");
+    if (onSettings) {
+      return `/beallitasok.html?szekcio=uzenetek&c=${encodeURIComponent(id)}`;
+    }
+    return `/uzenetek.html?c=${encodeURIComponent(id)}`;
+  }
+
   let conversations = [];
   let editing = false;
   let openConv = null;
@@ -581,7 +592,7 @@ export function initMessagesUi(root, { onUnreadChange, openConversationId, compo
         });
         openConv = created;
         openConv.compose = false;
-        const url = `/uzenetek.html?c=${encodeURIComponent(created.id)}`;
+        const url = conversationUrl(created.id);
         window.history.replaceState(null, "", url);
       } else {
         await sendMessage(openConv.id, { body: text });
@@ -627,7 +638,7 @@ export function initMessagesUi(root, { onUnreadChange, openConversationId, compo
         });
         openConv = created;
         openConv.compose = false;
-        window.history.replaceState(null, "", `/uzenetek.html?c=${encodeURIComponent(created.id)}`);
+        window.history.replaceState(null, "", conversationUrl(created.id));
       } else {
         await sendMessage(openConv.id, { body: text, attachment });
       }

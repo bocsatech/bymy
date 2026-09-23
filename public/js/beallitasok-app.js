@@ -23,7 +23,7 @@ import {
   toggleSavedSearchNotify,
 } from "./fok-data.js?v=savedSearch1";
 import { savedSearchHref, summarizeSavedSearchFilters } from "./saved-search.js?v=savedSearch1";
-import { initMessagesUi } from "./messages-ui.js?v=msgListingImg1";
+import { initMessagesUi } from "./messages-ui.js?v=inboxInline1";
 import { listConversations } from "./messages-api.js?v=msgLive1";
 import { initMyAdsPanel } from "./my-ads.js?v=myAdsFast1";
 import {
@@ -346,6 +346,7 @@ function clearSection() {
     link.classList.remove("is-active");
   });
   document.body.classList.toggle("mm-messages-open", false);
+  document.body.classList.toggle("mm-inbox-inline", false);
   document.title = "Fiókom — bymy";
   document.querySelectorAll(".mm-nav-group").forEach((group) => collapseSettingsSubnav(group));
 }
@@ -361,12 +362,9 @@ function setSection(section) {
     clearSection();
     return;
   }
-  if (next === "uzenetek") {
-    window.location.href = "/uzenetek.html";
-    return;
-  }
   const url = new URL(window.location.href);
   url.searchParams.set("szekcio", next);
+  if (next !== "uzenetek") url.searchParams.delete("c");
   url.hash = "";
   window.history.replaceState({}, "", url);
   document.querySelectorAll("[data-mm-panel]").forEach((panel) => {
@@ -376,6 +374,7 @@ function setSection(section) {
     link.classList.toggle("is-active", link.getAttribute("data-mm-nav") === next);
   });
   document.body.classList.toggle("mm-messages-open", false);
+  document.body.classList.toggle("mm-inbox-inline", next === "uzenetek");
   if (next === "keresesi-korzet" || next === "ajanlasok-korzet") {
     fillAreaForms(getProfile());
   }
@@ -396,6 +395,7 @@ function setSection(section) {
       "ajanlasok-korzet": "Ajánlások körzete",
       jelszo: "Jelszó módosítása",
       notify: "Hírlevél és értesítések",
+      uzenetek: "Üzenetek",
     }[next] + " — Fiókom";
   syncSettingsSubnav();
 }
@@ -1364,7 +1364,9 @@ export async function initSettingsPage() {
   await refreshStats(user.email);
   renderPark(user.email);
   renderSearches(user.email);
+  const openMsgId = Number(new URLSearchParams(window.location.search).get("c"));
   messagesUi = initMessagesUi(document.getElementById("mm-msg-root"), {
+    openConversationId: Number.isFinite(openMsgId) && openMsgId > 0 ? openMsgId : undefined,
     onUnreadChange: (n) => {
       const badge = document.querySelector("[data-mm-msg-count]");
       const msgStat = document.querySelector("[data-mm-stat-msg]");

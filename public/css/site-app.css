@@ -141,7 +141,8 @@ body.site-app .hub-header {
   body.site-app > .home-header,
   body.site-app > .site-header,
   body.site-app > header.site-app-header,
-  body.site-app > .site-app-header {
+  body.site-app > .site-app-header,
+  body.site-app > header[data-site-desk-header] {
     position: fixed !important;
     top: 0 !important;
     left: 0 !important;

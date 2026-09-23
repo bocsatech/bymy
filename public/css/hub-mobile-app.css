@@ -59,7 +59,10 @@
   body.site-app:has(.mw-app-top) > .site-header,
   body.site-app:has(.mw-app-top) > .home-header,
   body.site-app:has(.mw-app-top) > header.site-app-header,
-  body.site-app:has(.mw-app-top) > .site-app-header {
+  body.site-app:has(.mw-app-top) > .site-app-header,
+  body.site-app:has(.fiok-top) > .hub-header,
+  body.site-app:has(.fiok-top) > .site-header,
+  body.site-app:has(.fiok-top) > header.site-app-header {
     display: none !important;
   }
 

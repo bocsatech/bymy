@@ -7,7 +7,7 @@
   var isHub = body.classList.contains("hub-page--feed") || page === "hub";
   var isFiok = body.classList.contains("fiok-page") || page === "fiok";
   var isPostAd = page === "hirdetesfeladas";
-  var CSS_HREF = "/css/hub-mobile-app.css?v=tileFill3";
+  var CSS_HREF = "/css/hub-mobile-app.css?v=deskHdr1";
 
   function ensureCss() {
     if (document.querySelector('link[href*="hub-mobile-app.css"]')) return;
@@ -92,11 +92,11 @@
         first = local ? local.charAt(0).toUpperCase() + local.slice(1) : "";
       }
       if (!first) return;
-      body.querySelectorAll(".mw-app-top span[data-auth-firstname]").forEach(function (el) {
+      body.querySelectorAll(".mw-app-top span[data-auth-firstname], .hub-header span[data-auth-firstname], .site-app-header span[data-auth-firstname], .site-header span[data-auth-firstname]").forEach(function (el) {
         el.textContent = first;
       });
       var letter = first.charAt(0).toUpperCase();
-      body.querySelectorAll(".mw-app-top [data-avatar-letter]").forEach(function (el) {
+      body.querySelectorAll(".mw-app-top [data-avatar-letter], .hub-header [data-avatar-letter], .site-app-header [data-avatar-letter], .site-header [data-avatar-letter]").forEach(function (el) {
         el.textContent = letter;
       });
     } catch (e) {}
@@ -234,8 +234,105 @@
     document.addEventListener("bymy-scroll-activity", onScrollActivity);
   }
 
+  function deskHeaderExists() {
+    var header = document.querySelector(
+      "body.site-app > .hub-header, body.site-app > .site-header, body.site-app > header.site-app-header, body.site-app > .site-app-header, body.site-app > .home-header"
+    );
+    if (!header) return false;
+    var hasLogo = !!header.querySelector(".hub-logo, .site-app-logo, .home-logo, .bymy-logo-img--nav");
+    var hasNav = !!header.querySelector(".hub-nav, .site-app-nav, .import-nav, .home-nav");
+    var hasActions = !!header.querySelector(".hub-header-actions, .site-header-actions");
+    return hasLogo && hasNav && hasActions;
+  }
+
+  function navActiveClass(id) {
+    if (id === "hub") return isActivePage("hub") ? " active" : "";
+    if (id === "auto") return page === "auto" ? " active" : "";
+    if (id === "teherauto") return page === "teherauto" ? " active" : "";
+    if (id === "ingatlan") return page === "ingatlan" ? " active" : "";
+    if (id === "ajanlasok") return page === "ajanlasok" ? " active" : "";
+    return "";
+  }
+
+  function injectDeskHeader() {
+    if (deskHeaderExists()) return;
+    if (document.querySelector("[data-site-desk-header]")) return;
+
+    var msgSvg =
+      '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 6.8h9.5a2.2 2.2 0 0 1 2.2 2.2v4.2a2.2 2.2 0 0 1-2.2 2.2H10l-3.2 2.4V15.2H5A2.2 2.2 0 0 1 2.8 13V9a2.2 2.2 0 0 1 2.2-2.2Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M14.2 8.2h4A2.2 2.2 0 0 1 20.4 10.4v3.4a2.2 2.2 0 0 1-2.2 2.2h-.7v1.7l-2.2-1.7" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>';
+
+    var html =
+      '<header class="hub-header" data-site-desk-header aria-label="Bymy">' +
+      '<div class="hub-header-inner">' +
+      '<div class="hub-header-top">' +
+      '<div class="hub-header-actions site-header-actions">' +
+      '<a class="hub-header-msg" href="/uzenetek.html" data-auth-member hidden>' +
+      msgSvg +
+      "<span>Üzenetek</span></a>" +
+      '<div class="site-header-auth-row" data-auth-guest>' +
+      '<a class="hub-btn hub-btn--ghost" href="/belepes.html" data-auth-login>Belépés</a>' +
+      '<a class="hub-btn hub-btn--ghost" href="/regisztracio.html" data-auth-register>Regisztráció</a>' +
+      "</div>" +
+      '<div class="site-header-avatar-wrap" data-avatar-menu data-auth-member hidden>' +
+      '<button type="button" class="site-header-profile" data-auth-avatar data-avatar-toggle aria-expanded="false" aria-label="Fiók" title="Fiók">' +
+      '<span class="site-header-avatar">' +
+      '<span data-avatar-letter>A</span>' +
+      '<img data-avatar-img alt="" hidden width="44" height="44" />' +
+      "</span>" +
+      '<span class="site-header-firstname" data-auth-firstname></span>' +
+      '<svg class="site-header-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+      "</button></div>" +
+      '<a class="hub-btn hub-btn--post" href="/hirdetesfeladas.html" data-auth-guard>+ Hirdetésfeladás</a>' +
+      '<button type="button" class="hub-theme-toggle" data-theme-toggle aria-label="Színmód" title="Színmód"></button>' +
+      "</div></div>" +
+      '<div class="hub-nav-band">' +
+      '<a class="hub-logo" href="/" aria-label="Bymy">' +
+      '<img class="bymy-logo-img bymy-logo-img--nav" src="/images/bymy-logo.png?v=logoUpload1" alt="Bymy.hu" width="190" height="48" decoding="async" />' +
+      "</a>" +
+      '<nav class="hub-nav" aria-label="Főmenü">' +
+      '<a class="hub-nav-link' +
+      navActiveClass("hub") +
+      '" href="/">Kezdőlap</a>' +
+      '<a class="hub-nav-link' +
+      navActiveClass("auto") +
+      '" href="/auto.html">Autó</a>' +
+      '<a class="hub-nav-link' +
+      navActiveClass("teherauto") +
+      '" href="/teherauto.html">Teherautó</a>' +
+      '<a class="hub-nav-link' +
+      navActiveClass("ingatlan") +
+      '" href="/ingatlan.html">Ingatlan</a>' +
+      '<a class="hub-nav-link' +
+      navActiveClass("ajanlasok") +
+      '" href="/ajanlasok.html">Ajánlások</a>' +
+      "</nav></div></div></header>";
+
+    var after = document.querySelector(".mw-app-top, .fiok-top");
+    if (after && after.parentNode === body) {
+      after.insertAdjacentHTML("afterend", html);
+    } else {
+      body.insertAdjacentHTML("afterbegin", html);
+    }
+    syncAuthCache();
+    ensureDeskHeaderDeps();
+  }
+
+  function ensureDeskHeaderDeps() {
+    function addModule(src) {
+      if (document.querySelector('script[src="' + src + '"]')) return;
+      var s = document.createElement("script");
+      s.type = "module";
+      s.src = src;
+      document.body.appendChild(s);
+    }
+    addModule("/js/theme.js?v=willhabenHdr1");
+    addModule("/js/site-avatar-menu.js?v=settingsHome1");
+    addModule("/js/nav-counts.js?v=navCount4");
+  }
+
   ensureCss();
   injectTop();
+  injectDeskHeader();
   injectTabbar();
   if (!isPostAd) bindScrollHide();
 

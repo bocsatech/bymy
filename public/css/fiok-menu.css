@@ -48,6 +48,18 @@ body.fiok-page .fiok-main {
   margin: 0 auto;
 }
 
+/* Desk: ugyanaz a felső sav, mint a kezdőlapon — a mobil fiok-top eltűnik */
+@media (min-width: 901px) {
+  body.fiok-page .fiok-top {
+    display: none !important;
+  }
+
+  body.fiok-page .fiok-main {
+    max-width: 720px;
+    padding-top: 1rem;
+  }
+}
+
 body.fiok-page .mm-side {
   width: 100%;
   max-width: none;

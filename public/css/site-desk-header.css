@@ -1,0 +1,83 @@
+/* Desk felső sav — azonos betű és méret minden oldalon */
+@media (min-width: 901px) {
+  body.site-app > .hub-header,
+  body.site-app > .home-header,
+  body.site-app > .site-header,
+  body.site-app > header.site-app-header,
+  body.site-app > .site-app-header,
+  body.site-app > header[data-site-desk-header] {
+    --desk-nav-font: "DM Sans", system-ui, -apple-system, sans-serif;
+    --desk-nav-size: 14px;
+    --desk-nav-weight: 500;
+    --desk-count-size: 13px;
+    --desk-action-size: 14px;
+    --desk-cta-size: 13px;
+  }
+
+  body.site-app .hub-nav-link,
+  body.site-app .home-nav-link,
+  body.site-app .site-app-nav-link,
+  body.site-app .import-nav-link,
+  body.site-app .hub-nav a,
+  body.site-app .home-nav a,
+  body.site-app .site-app-nav a,
+  body.site-app .import-nav a {
+    font-family: var(--desk-nav-font) !important;
+    font-size: var(--desk-nav-size) !important;
+    font-weight: var(--desk-nav-weight) !important;
+    letter-spacing: 0 !important;
+    line-height: 1.2 !important;
+    text-transform: none !important;
+  }
+
+  body.site-app .hub-nav-link.active,
+  body.site-app .home-nav-link.active,
+  body.site-app .site-app-nav-link.active,
+  body.site-app .import-nav-link.active,
+  body.site-app .hub-nav a.active,
+  body.site-app .home-nav a.active,
+  body.site-app .site-app-nav a.active,
+  body.site-app .import-nav a.active {
+    font-family: var(--desk-nav-font) !important;
+    font-size: var(--desk-nav-size) !important;
+    font-weight: var(--desk-nav-weight) !important;
+  }
+
+  body.site-app .nav-count,
+  body.site-app .hub-nav-link .nav-count,
+  body.site-app .home-nav-link .nav-count,
+  body.site-app .site-app-nav-link .nav-count,
+  body.site-app .import-nav-link .nav-count {
+    font-family: var(--desk-nav-font) !important;
+    font-size: var(--desk-count-size) !important;
+    font-weight: 500 !important;
+    font-variant-numeric: tabular-nums !important;
+    letter-spacing: 0 !important;
+    line-height: 1 !important;
+  }
+
+  body.site-app .hub-header-msg,
+  body.site-app .site-header-msg,
+  body.site-app .hub-header-msg > span:not(.site-message-badge),
+  body.site-app .site-header-firstname,
+  body.site-app .site-header-profile,
+  body.site-app .hub-btn--ghost,
+  body.site-app .site-header-auth-row a {
+    font-family: var(--desk-nav-font) !important;
+    font-size: var(--desk-action-size) !important;
+    font-weight: 500 !important;
+    letter-spacing: 0 !important;
+    line-height: 1.2 !important;
+    text-transform: none !important;
+  }
+
+  body.site-app .hub-btn--post,
+  body.site-app .site-header-btn--post {
+    font-family: var(--desk-nav-font) !important;
+    font-size: var(--desk-cta-size) !important;
+    font-weight: 700 !important;
+    letter-spacing: 0 !important;
+    line-height: 1 !important;
+    text-transform: none !important;
+  }
+}

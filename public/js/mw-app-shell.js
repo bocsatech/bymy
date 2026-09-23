@@ -7,7 +7,7 @@
   var isHub = body.classList.contains("hub-page--feed") || page === "hub";
   var isFiok = body.classList.contains("fiok-page") || page === "fiok";
   var isPostAd = page === "hirdetesfeladas";
-  var CSS_HREF = "/css/hub-mobile-app.css?v=deskHdr3";
+  var CSS_HREF = "/css/hub-mobile-app.css?v=deskHdr4";
 
   function ensureCss() {
     if (document.querySelector('link[href*="hub-mobile-app.css"]')) return;
@@ -271,7 +271,15 @@
     if (document.querySelector('link[href*="bymy-logo-size.css"]')) return;
     var link = document.createElement("link");
     link.rel = "stylesheet";
-    link.href = "/css/bymy-logo-size.css?v=deskHdr3";
+    link.href = "/css/bymy-logo-size.css?v=deskHdr4";
+    document.head.appendChild(link);
+  }
+
+  function ensureDeskHeaderCss() {
+    if (document.querySelector('link[href*="site-desk-header.css"]')) return;
+    var link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = "/css/site-desk-header.css?v=deskHdr4";
     document.head.appendChild(link);
   }
 
@@ -425,6 +433,7 @@
 
   ensureCss();
   ensureLogoCss();
+  ensureDeskHeaderCss();
   ensureNavFont();
   injectTop();
   injectDeskHeader();

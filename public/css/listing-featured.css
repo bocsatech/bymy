@@ -6,15 +6,19 @@
 
 .hf-card--listing.hf-card--featured,
 .home-grid-card.home-grid-card--featured {
-  border: 2px solid var(--listing-featured-yellow) !important;
-  box-shadow: 0 8px 22px rgba(240, 193, 75, 0.22) !important;
+  border: 1px solid var(--listing-featured-yellow) !important;
+  box-shadow:
+    0 0 0 1px var(--listing-featured-yellow),
+    0 8px 22px rgba(240, 193, 75, 0.22) !important;
 }
 
 /* auto/teher desk: szürke 1px keret !important felülírása */
 body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"])
   .home-grid-card.home-grid-card--featured {
-  border: 2px solid var(--listing-featured-yellow) !important;
-  box-shadow: 0 8px 22px rgba(240, 193, 75, 0.22) !important;
+  border: 1px solid var(--listing-featured-yellow) !important;
+  box-shadow:
+    0 0 0 1px var(--listing-featured-yellow),
+    0 8px 22px rgba(240, 193, 75, 0.22) !important;
 }
 
 body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"])

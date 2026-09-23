@@ -285,6 +285,11 @@
   font-weight: 700;
 }
 
+.search-map-modal__route--teaser .search-map-modal__route-title {
+  font-size: 0.98rem;
+  font-weight: 750;
+}
+
 .search-map-modal__gmaps {
   display: none;
 }

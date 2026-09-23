@@ -106,12 +106,7 @@ async function resolveHomeOrigin(cityIndex) {
 
 function ensureModal() {
   let root = document.getElementById("search-map-modal");
-  if (root) return root;
-  root = document.createElement("div");
-  root.id = "search-map-modal";
-  root.className = "search-map-modal";
-  root.hidden = true;
-  root.innerHTML = `
+  const markup = `
     <div class="search-map-modal__backdrop" data-search-map-close tabindex="-1"></div>
     <div class="search-map-modal__panel" role="dialog" aria-modal="true" aria-labelledby="search-map-title">
       <header class="search-map-modal__head">
@@ -130,29 +125,43 @@ function ensureModal() {
       </div>
     </div>
   `;
-  document.body.appendChild(root);
-  root.addEventListener("click", (event) => {
-    if (event.target?.closest?.("[data-search-map-close]")) {
-      closeSearchResultsMap();
-      return;
-    }
-    if (event.target?.closest?.("[data-search-map-back]")) {
-      showAllResults();
-      return;
-    }
-    const pick = event.target?.closest?.("[data-search-map-pick]");
-    if (pick) {
-      const id = String(pick.getAttribute("data-search-map-pick") || "");
-      const pin = lastPins.find((p) => String(p.item?.id) === id);
-      if (pin && lastLeaflet) showRouteToPin(lastLeaflet, pin, root.querySelector("[data-search-map-side]"));
-    }
-  });
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && !root.hidden) {
-      if (selectedPinId != null) showAllResults();
-      else closeSearchResultsMap();
-    }
-  });
+  if (!root) {
+    root = document.createElement("div");
+    root.id = "search-map-modal";
+    root.className = "search-map-modal";
+    root.hidden = true;
+    root.innerHTML = markup;
+    document.body.appendChild(root);
+    root.addEventListener("click", (event) => {
+      if (event.target?.closest?.("[data-search-map-close]")) {
+        closeSearchResultsMap();
+        return;
+      }
+      if (event.target?.closest?.("[data-search-map-back]")) {
+        showAllResults();
+        return;
+      }
+      const pick = event.target?.closest?.("[data-search-map-pick]");
+      if (pick) {
+        const id = String(pick.getAttribute("data-search-map-pick") || "");
+        const pin = lastPins.find((p) => String(p.item?.id) === id);
+        if (pin && lastLeaflet) showRouteToPin(lastLeaflet, pin, root.querySelector("[data-search-map-side]"));
+      }
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && !root.hidden) {
+        if (selectedPinId != null) showAllResults();
+        else closeSearchResultsMap();
+      }
+    });
+    return root;
+  }
+  // Upgrade older modal shells (cached tab / previous build).
+  if (!root.querySelector("[data-search-map-stats]")) {
+    const wasHidden = root.hidden;
+    root.innerHTML = markup;
+    root.hidden = wasHidden;
+  }
   return root;
 }
 
@@ -354,8 +363,8 @@ function googleDirectionsUrl(from, to, toLabel) {
 function renderSideAll(side, pins) {
   if (!side) return;
   const homeHint = homeOrigin
-    ? `Lakhely: <strong>${escapeHtml(homeOrigin.label)}</strong>. Kattints egy autóra az útvonalhoz.`
-    : `Állíts be irányítószámot a <a href="/beallitasok.html?szekcio=keresesi-korzet">Keresési körzet</a>ben, hogy mutassuk az utat.`;
+    ? `${escapeHtml(homeOrigin.label)} → válassz autót`
+    : `Állíts be irányítószámot a <a href="/beallitasok.html?szekcio=keresesi-korzet">Keresési körzet</a>ben.`;
 
   if (!pins?.length) {
     side.innerHTML = `<p class="search-map-modal__hint">${homeHint}</p>`;
@@ -363,9 +372,20 @@ function renderSideAll(side, pins) {
   }
 
   const cards = pins.map((pin) => pickCardHtml(pin)).join("");
+  const routeTeaser = homeOrigin
+    ? `<div class="search-map-modal__route search-map-modal__route--teaser">
+        <div class="search-map-modal__route-lab">Útvonal</div>
+        <p class="search-map-modal__route-title">Válassz autót</p>
+        <p class="search-map-modal__route-note">${escapeHtml(homeOrigin.label)} → kattints a listában vagy a térképen</p>
+      </div>`
+    : `<div class="search-map-modal__route search-map-modal__route--warn">
+        <div class="search-map-modal__route-lab">Útvonal</div>
+        <p class="search-map-modal__route-title" style="font-size:0.95rem;font-weight:700">Nincs lakhely</p>
+        <p class="search-map-modal__route-note">${homeHint}</p>
+      </div>`;
 
   side.innerHTML = `
-    <p class="search-map-modal__hint">${homeHint}</p>
+    ${routeTeaser}
     <p class="search-map-modal__list-label">${pins.length} autó a találati listából</p>
     <div class="search-map-modal__cards">${cards}</div>
   `;

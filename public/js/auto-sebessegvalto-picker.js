@@ -103,7 +103,6 @@ export async function mountAutoSebessegvaltoPicker(form) {
       <div class="auto-bm-panel__titles">
         <p class="auto-bm-panel__title">Sebességváltó</p>
       </div>
-      <button type="button" class="auto-bm-panel__done" data-auto-valto-done>Kész</button>
     </div>
     <div class="auto-bm-panel__body" data-auto-valto-body></div>
   `;
@@ -192,7 +191,10 @@ export async function mountAutoSebessegvaltoPicker(form) {
 
     bodyEl.innerHTML = `
       <p class="auto-bm-hint">Kapcsolók — több váltó is</p>
-      <button type="button" class="auto-bm-clear" data-auto-valto-clear>Összes kikapcsolása</button>
+      <div class="auto-bm-actions">
+      <button type="button" class="auto-bm-btn auto-bm-btn--clear" data-auto-valto-clear>Összes kikapcsolása</button>
+      <button type="button" class="auto-bm-btn auto-bm-btn--done" data-auto-valto-done>Kész</button>
+    </div>
       <div class="auto-bm-group">${rows}</div>
     `;
   }
@@ -227,7 +229,7 @@ export async function mountAutoSebessegvaltoPicker(form) {
   });
 
   panel.querySelector("[data-auto-valto-back]")?.addEventListener("click", closePanel);
-  panel.querySelector("[data-auto-valto-done]")?.addEventListener("click", closePanel);
+  // done handled in body click (data-auto-valto-done)
 
   bodyEl.addEventListener("change", (event) => {
     const mainEl = event.target.closest("[data-auto-valto-main-toggle]");
@@ -261,6 +263,13 @@ export async function mountAutoSebessegvaltoPicker(form) {
     selected.clear();
     renderList();
     syncHidden();
+  });
+
+  bodyEl.addEventListener("click", (event) => {
+    if (event.target.closest("[data-auto-valto-done]")) {
+      closePanel();
+      return;
+    }
   });
 
   form.addEventListener("reset", () => {

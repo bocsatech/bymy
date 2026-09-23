@@ -97,7 +97,6 @@ export async function mountAutoOkmanyPicker(form) {
       <div class="auto-bm-panel__titles">
         <p class="auto-bm-panel__title">Okmányok jellege</p>
       </div>
-      <button type="button" class="auto-bm-panel__done" data-auto-okmany-done>Kész</button>
     </div>
     <div class="auto-bm-panel__body" data-auto-okmany-body></div>
   `;
@@ -124,7 +123,10 @@ export async function mountAutoOkmanyPicker(form) {
     }).join("");
     bodyEl.innerHTML = `
       <p class="auto-bm-hint">Kapcsolók — több is</p>
-      <button type="button" class="auto-bm-clear" data-auto-okmany-clear>Összes kikapcsolása</button>
+      <div class="auto-bm-actions">
+      <button type="button" class="auto-bm-btn auto-bm-btn--clear" data-auto-okmany-clear>Összes kikapcsolása</button>
+      <button type="button" class="auto-bm-btn auto-bm-btn--done" data-auto-okmany-done>Kész</button>
+    </div>
       <div class="auto-bm-group">${rows}</div>
     `;
   }
@@ -159,7 +161,7 @@ export async function mountAutoOkmanyPicker(form) {
   });
 
   panel.querySelector("[data-auto-okmany-back]")?.addEventListener("click", closePanel);
-  panel.querySelector("[data-auto-okmany-done]")?.addEventListener("click", closePanel);
+  // done handled in body click (data-auto-okmany-done)
 
   bodyEl.addEventListener("change", (event) => {
     const el = event.target.closest("[data-auto-okmany-opt]");
@@ -175,6 +177,13 @@ export async function mountAutoOkmanyPicker(form) {
     selected.clear();
     renderList();
     syncHidden();
+  });
+
+  bodyEl.addEventListener("click", (event) => {
+    if (event.target.closest("[data-auto-okmany-done]")) {
+      closePanel();
+      return;
+    }
   });
 
   form.addEventListener("reset", () => {

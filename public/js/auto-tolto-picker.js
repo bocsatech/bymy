@@ -113,7 +113,6 @@ function mountOne(form, spec) {
       <div class="auto-bm-panel__titles">
         <p class="auto-bm-panel__title">${escapeHtml(spec.label)}</p>
       </div>
-      <button type="button" class="auto-bm-panel__done" data-auto-tolto-done>Kész</button>
     </div>
     <div class="auto-bm-panel__body" data-auto-tolto-body></div>
   `;
@@ -142,7 +141,10 @@ function mountOne(form, spec) {
       .join("");
     bodyEl.innerHTML = `
       <p class="auto-bm-hint">Kapcsolók — több is</p>
-      <button type="button" class="auto-bm-clear" data-auto-tolto-clear>Összes kikapcsolása</button>
+      <div class="auto-bm-actions">
+      <button type="button" class="auto-bm-btn auto-bm-btn--clear" data-auto-tolto-clear>Összes kikapcsolása</button>
+      <button type="button" class="auto-bm-btn auto-bm-btn--done" data-auto-tolto-done>Kész</button>
+    </div>
       <div class="auto-bm-group">${rows}</div>
     `;
   }
@@ -177,7 +179,7 @@ function mountOne(form, spec) {
   });
 
   panel.querySelector("[data-auto-tolto-back]")?.addEventListener("click", closePanel);
-  panel.querySelector("[data-auto-tolto-done]")?.addEventListener("click", closePanel);
+  // done handled in body click (data-auto-tolto-done)
 
   bodyEl.addEventListener("change", (event) => {
     const el = event.target.closest("[data-auto-tolto-opt]");
@@ -193,6 +195,13 @@ function mountOne(form, spec) {
     selected.clear();
     renderList();
     syncHidden();
+  });
+
+  bodyEl.addEventListener("click", (event) => {
+    if (event.target.closest("[data-auto-tolto-done]")) {
+      closePanel();
+      return;
+    }
   });
 
   form.addEventListener("reset", () => {

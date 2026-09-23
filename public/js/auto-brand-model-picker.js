@@ -116,7 +116,6 @@ export async function mountAutoBrandModelPicker(form) {
         <p class="auto-bm-panel__title" data-auto-bm-title>Gyártmány</p>
         <p class="auto-bm-panel__sub" data-auto-bm-sub hidden></p>
       </div>
-      <button type="button" class="auto-bm-panel__done" data-auto-bm-done>Kész</button>
     </div>
     <div class="auto-bm-panel__search" data-auto-bm-search-wrap>
       <input
@@ -172,6 +171,13 @@ export async function mountAutoBrandModelPicker(form) {
     return brands.filter((b) => b.toLocaleLowerCase("hu").startsWith(q));
   }
 
+  function actionsHtml({ clearAttr, clearLabel = "Összes kikapcsolása" }) {
+    return `<div class="auto-bm-actions">
+      <button type="button" class="auto-bm-btn auto-bm-btn--clear" ${clearAttr}>${clearLabel}</button>
+      <button type="button" class="auto-bm-btn auto-bm-btn--done" data-auto-bm-done>Kész</button>
+    </div>`;
+  }
+
   function renderBrandRowsOnly() {
     const filtered = brandsMatchingQuery(brandQuery);
     const group = bodyEl.querySelector(".auto-bm-group");
@@ -199,7 +205,7 @@ export async function mountAutoBrandModelPicker(form) {
       group.innerHTML = html;
     } else {
       bodyEl.innerHTML = `
-        <button type="button" class="auto-bm-clear" data-auto-bm-clear-brands>Összes kikapcsolása</button>
+        ${actionsHtml({ clearAttr: 'data-auto-bm-clear-brands' })}
         <div class="auto-bm-group">${html}</div>
       `;
     }
@@ -213,7 +219,7 @@ export async function mountAutoBrandModelPicker(form) {
     searchWrap.hidden = false;
     if (searchInput && searchInput.value !== brandQuery) searchInput.value = brandQuery;
     bodyEl.innerHTML = `
-      <button type="button" class="auto-bm-clear" data-auto-bm-clear-brands>Összes kikapcsolása</button>
+      ${actionsHtml({ clearAttr: 'data-auto-bm-clear-brands' })}
       <div class="auto-bm-group"></div>
     `;
     renderBrandRowsOnly();
@@ -242,7 +248,7 @@ export async function mountAutoBrandModelPicker(form) {
       .join("");
 
     bodyEl.innerHTML = `
-      <button type="button" class="auto-bm-clear" data-auto-bm-clear-models>Összes kikapcsolása</button>
+      ${actionsHtml({ clearAttr: 'data-auto-bm-clear-models' })}
       <div class="auto-bm-group">${
         rows || `<p class="auto-bm-empty">Nincs modell ehhez a gyártmányhoz.</p>`
       }</div>
@@ -312,12 +318,12 @@ export async function mountAutoBrandModelPicker(form) {
     } else closePanel();
   });
 
-  panel.querySelector("[data-auto-bm-done]")?.addEventListener("click", () => {
+  function onDoneClick() {
     if (modelBrand) {
       renderBrandList();
       requestAnimationFrame(() => searchInput?.focus());
     } else closePanel();
-  });
+  }
 
   searchInput?.addEventListener("mousedown", (event) => {
     event.stopPropagation();
@@ -380,6 +386,10 @@ export async function mountAutoBrandModelPicker(form) {
   });
 
   bodyEl.addEventListener("click", (event) => {
+    if (event.target.closest("[data-auto-bm-done]")) {
+      onDoneClick();
+      return;
+    }
     const openModels = event.target.closest("[data-auto-bm-open-models]");
     if (openModels) {
       renderModelList(openModels.getAttribute("data-auto-bm-open-models"));

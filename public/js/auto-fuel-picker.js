@@ -103,7 +103,6 @@ export async function mountAutoFuelPicker(form) {
       <div class="auto-bm-panel__titles">
         <p class="auto-bm-panel__title">Üzemanyag</p>
       </div>
-      <button type="button" class="auto-bm-panel__done" data-auto-fuel-done>Kész</button>
     </div>
     <div class="auto-bm-panel__body" data-auto-fuel-body></div>
   `;
@@ -196,7 +195,10 @@ export async function mountAutoFuelPicker(form) {
 
     bodyEl.innerHTML = `
       <p class="auto-bm-hint">Kapcsolók — több üzemanyag is</p>
-      <button type="button" class="auto-bm-clear" data-auto-fuel-clear>Összes kikapcsolása</button>
+      <div class="auto-bm-actions">
+      <button type="button" class="auto-bm-btn auto-bm-btn--clear" data-auto-fuel-clear>Összes kikapcsolása</button>
+      <button type="button" class="auto-bm-btn auto-bm-btn--done" data-auto-fuel-done>Kész</button>
+    </div>
       <div class="auto-bm-group">${rows}</div>
     `;
   }
@@ -231,7 +233,7 @@ export async function mountAutoFuelPicker(form) {
   });
 
   panel.querySelector("[data-auto-fuel-back]")?.addEventListener("click", closePanel);
-  panel.querySelector("[data-auto-fuel-done]")?.addEventListener("click", closePanel);
+  // done handled in body click (data-auto-fuel-done)
 
   bodyEl.addEventListener("change", (event) => {
     const mainEl = event.target.closest("[data-auto-fuel-main-toggle]");
@@ -260,6 +262,10 @@ export async function mountAutoFuelPicker(form) {
   });
 
   bodyEl.addEventListener("click", (event) => {
+    if (event.target.closest("[data-auto-fuel-done]")) {
+      closePanel();
+      return;
+    }
     if (event.target.closest("[data-auto-fuel-clear]")) {
       openMains.clear();
       selected.clear();

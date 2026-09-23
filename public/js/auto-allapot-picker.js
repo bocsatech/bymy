@@ -102,7 +102,6 @@ export async function mountAutoAllapotPicker(form) {
       <div class="auto-bm-panel__titles">
         <p class="auto-bm-panel__title">Állapot</p>
       </div>
-      <button type="button" class="auto-bm-panel__done" data-auto-allapot-done>Kész</button>
     </div>
     <div class="auto-bm-panel__body" data-auto-allapot-body></div>
   `;
@@ -191,7 +190,10 @@ export async function mountAutoAllapotPicker(form) {
 
     bodyEl.innerHTML = `
       <p class="auto-bm-hint">Kapcsolók — több állapot is</p>
-      <button type="button" class="auto-bm-clear" data-auto-allapot-clear>Összes kikapcsolása</button>
+      <div class="auto-bm-actions">
+      <button type="button" class="auto-bm-btn auto-bm-btn--clear" data-auto-allapot-clear>Összes kikapcsolása</button>
+      <button type="button" class="auto-bm-btn auto-bm-btn--done" data-auto-allapot-done>Kész</button>
+    </div>
       <div class="auto-bm-group">${rows}</div>
     `;
   }
@@ -226,7 +228,7 @@ export async function mountAutoAllapotPicker(form) {
   });
 
   panel.querySelector("[data-auto-allapot-back]")?.addEventListener("click", closePanel);
-  panel.querySelector("[data-auto-allapot-done]")?.addEventListener("click", closePanel);
+  // done handled in body click (data-auto-allapot-done)
 
   bodyEl.addEventListener("change", (event) => {
     const mainEl = event.target.closest("[data-auto-allapot-main-toggle]");
@@ -260,6 +262,13 @@ export async function mountAutoAllapotPicker(form) {
     selected.clear();
     renderList();
     syncHidden();
+  });
+
+  bodyEl.addEventListener("click", (event) => {
+    if (event.target.closest("[data-auto-allapot-done]")) {
+      closePanel();
+      return;
+    }
   });
 
   form.addEventListener("reset", () => {

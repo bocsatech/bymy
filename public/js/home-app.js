@@ -7,8 +7,8 @@ import {
   populateFilterOptions,
   initHomeSearchSidebar,
   initHomeFilterCatalog,
-} from "./home-search-filter.js?v=fuelMatch3";
-import { initHomeQuickSearch } from "./home-quicksearch.js?v=savedSearch5";
+} from "./home-search-filter.js?v=rangeFill1";
+import { initHomeQuickSearch } from "./home-quicksearch.js?v=rangeFill1";
 import { decodeSavedSearchParam } from "./saved-search.js?v=savedSearch5";
 import { initSavedSearchUi } from "./saved-search-ui.js?v=savedSearch5";
 import { matchDetailedSearch, hasActiveDetailedSearch } from "./auto-detailed-search.js?v=autoDesk16";

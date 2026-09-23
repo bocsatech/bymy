@@ -1,5 +1,5 @@
 
-import { applyAutoSearchLayout, readLayoutFilterValues } from "./auto-search-layout.js?v=teherKivitel35e";
+import { applyAutoSearchLayout, readLayoutFilterValues, refillAutoSearchRangeSelects } from "./auto-search-layout.js?v=rangeFill1";
 import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums } from "./auto-search-drums.js?v=savedSearch4";
 import {
   mountDetailedSearch,
@@ -231,6 +231,7 @@ export function initHomeQuickSearch({ onSearch = () => {}, onDeskSortChange, onR
         }
       } else {
         arrangeAutoDeskDemoFields(form);
+        refillAutoSearchRangeSelects(form);
         try {
           await mountAutoBrandModelPicker(form);
         } catch (pickerError) {
@@ -302,6 +303,7 @@ export function initHomeQuickSearch({ onSearch = () => {}, onDeskSortChange, onR
       if (deskAuto) {
         try {
           arrangeAutoDeskDemoFields(form);
+          refillAutoSearchRangeSelects(form);
           await mountAutoBrandModelPicker(form);
           await mountAutoFuelPicker(form);
           await mountAutoKivitelPicker(form);

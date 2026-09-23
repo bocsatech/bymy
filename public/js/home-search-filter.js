@@ -135,9 +135,12 @@ function numOrNull(value) {
 }
 
 function inRange(value, min, max) {
-  if (value == null) return min == null && max == null;
-  if (min != null && value < min) return false;
-  if (max != null && value > max) return false;
+  if (min == null && max == null) return true;
+  if (value == null || value === "") return false;
+  const n = Number(String(value).replace(",", ".").replace(/[^\d.-]/g, ""));
+  if (!Number.isFinite(n)) return false;
+  if (min != null && n < min) return false;
+  if (max != null && n > max) return false;
   return true;
 }
 

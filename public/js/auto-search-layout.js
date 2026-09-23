@@ -435,29 +435,66 @@ function renderStep(host, layout, step) {
 }
 
 function wireRangeSelects(root) {
+  if (!root) return;
+  const years = yearOptions();
+  root.querySelectorAll('[data-filter-key="ev_tol"]').forEach((el) => fillSelectYears(el, years, "-tól"));
+  root.querySelectorAll('[data-filter-key="ev_ig"]').forEach((el) => fillSelectYears(el, years, "-ig"));
+
+  const prices = priceOptions();
+  root.querySelectorAll('[data-filter-key="ar_tol"]').forEach((el) =>
+    fillNumberSelect(el, prices, "-tól")
+  );
+  root.querySelectorAll('[data-filter-key="ar_ig"]').forEach((el) =>
+    fillNumberSelect(el, prices, "-ig")
+  );
+
+  const kms = kmOptions();
+  root.querySelectorAll('[data-filter-key="km_tol"]').forEach((el) =>
+    fillNumberSelect(el, kms, "-tól", (n) => `${n.toLocaleString("hu-HU")} km`)
+  );
+  root.querySelectorAll('[data-filter-key="km_ig"]').forEach((el) =>
+    fillNumberSelect(el, kms, "-ig", (n) => `${n.toLocaleString("hu-HU")} km`)
+  );
+
+  root.querySelectorAll('[data-filter-key="le_tol"]').forEach((el) =>
+    fillNumberSelect(el, LE_STEPS, "-tól", (n) => `${n} LE`)
+  );
+  root.querySelectorAll('[data-filter-key="le_ig"]').forEach((el) =>
+    fillNumberSelect(el, LE_STEPS, "-ig", (n) => `${n} LE`)
+  );
+
+  root.querySelectorAll('[data-filter-key="ccm_tol"]').forEach((el) =>
+    fillNumberSelect(el, CCM_STEPS, "-tól", (n) => `${n.toLocaleString("hu-HU")} cm³`)
+  );
+  root.querySelectorAll('[data-filter-key="ccm_ig"]').forEach((el) =>
+    fillNumberSelect(el, CCM_STEPS, "-ig", (n) => `${n.toLocaleString("hu-HU")} cm³`)
+  );
+
+  // Szabad szám / layout párok (data-qs-field) — régi út is megmarad.
   for (const [fieldKey, spec] of Object.entries(RANGE_SPECS)) {
+    if (spec.kind !== "number") continue;
     const wrap = root.querySelector(`[data-qs-field="${fieldKey}"]`);
     if (!wrap) continue;
-    const tol = wrap.querySelector(`[data-filter-key="${spec.tol}"]`);
-    const ig = wrap.querySelector(`[data-filter-key="${spec.ig}"]`);
-    if (spec.kind === "year") {
-      const years = yearOptions();
-      fillSelect(tol, years, "-tól");
-      fillSelect(ig, years, "-ig");
-    } else if (spec.kind === "price") {
-      fillNumberSelect(tol, priceOptions(), "-tól");
-      fillNumberSelect(ig, priceOptions(), "-ig");
-    } else if (spec.kind === "km") {
-      fillNumberSelect(tol, kmOptions(), "-tól", (n) => `${n.toLocaleString("hu-HU")} km`);
-      fillNumberSelect(ig, kmOptions(), "-ig", (n) => `${n.toLocaleString("hu-HU")} km`);
-    } else if (spec.kind === "le") {
-      fillNumberSelect(tol, LE_STEPS, "-tól", (n) => `${n} LE`);
-      fillNumberSelect(ig, LE_STEPS, "-ig", (n) => `${n} LE`);
-    } else if (spec.kind === "ccm") {
-      fillNumberSelect(tol, CCM_STEPS, "-tól", (n) => `${n.toLocaleString("hu-HU")} cm³`);
-      fillNumberSelect(ig, CCM_STEPS, "-ig", (n) => `${n.toLocaleString("hu-HU")} cm³`);
-    }
+    // number inputs: nincs option-lista
   }
+}
+
+function fillSelectYears(select, years, emptyLabel) {
+  if (!select || select.tagName !== "SELECT") return;
+  const prev = String(select.value || "");
+  select.innerHTML = `<option value="">${emptyLabel}</option>`;
+  for (const year of years) {
+    const opt = document.createElement("option");
+    opt.value = year;
+    opt.textContent = year;
+    select.appendChild(opt);
+  }
+  if (prev && [...select.options].some((o) => o.value === prev)) select.value = prev;
+}
+
+/** Desk átrendezés után is újra kell tölteni (legacy selectek üresen maradhatnak). */
+export function refillAutoSearchRangeSelects(form = document.getElementById("home-qs-form")) {
+  wireRangeSelects(form);
 }
 
 function wireSelectOptions(root) {

@@ -96,17 +96,25 @@ body.site-app .mm-nav-toggle.is-active[aria-expanded="true"] {
 }
 
 body.site-app .mm-nav-sub {
-  margin: 0.1rem 0 0.2rem 2.55rem;
-  padding: 0.1rem 0 0.2rem 0.55rem;
-  border-left: 2px solid #e4e7ec;
-  gap: 0.1rem;
+  margin: 0.15rem 0 0.25rem;
+  padding: 0;
+  border-left: 0;
+  gap: 0.2rem;
 }
 
 body.site-app .mm-nav-sublink {
-  padding: 0.42rem 0.55rem;
-  border-radius: 8px;
-  font-size: 0.84rem;
-  font-weight: 600;
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.62rem 0.65rem;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 650;
+  color: #344054;
+  text-decoration: none;
+  box-sizing: border-box;
 }
 
 body.site-app .mm-nav-sublink:hover {
@@ -115,9 +123,16 @@ body.site-app .mm-nav-sublink:hover {
 }
 
 body.site-app .mm-nav-sublink.is-active {
-  background: #fff8e0;
+  background: #fff;
+  border-color: #f0c52c;
+  box-shadow: 0 0 0 1px #f0c52c;
   color: #101828;
-  font-weight: 700;
+  font-weight: 750;
+}
+
+body.site-app .mm-nav-sublink.is-active .mm-nav-ico {
+  background: #f0c52c;
+  color: #111;
 }
 
 body.site-app .mm-nav-caret {
@@ -178,10 +193,17 @@ html[data-theme="dark"] body.site-app .mm-nav-link.is-active .mm-nav-ico {
 }
 
 html[data-theme="dark"] body.site-app .mm-nav-sub {
-  border-left-color: #404040;
+  border-left-color: transparent;
 }
 
 html[data-theme="dark"] body.site-app .mm-nav-sublink.is-active {
-  background: #2a2410;
+  background: #1d1d1d;
+  border-color: #f0c52c;
+  box-shadow: 0 0 0 1px #f0c52c;
   color: #f4f4f5;
+}
+
+html[data-theme="dark"] body.site-app .mm-nav-sublink.is-active .mm-nav-ico {
+  background: #f0c52c;
+  color: #111;
 }

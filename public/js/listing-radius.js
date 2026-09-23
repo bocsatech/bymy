@@ -32,7 +32,8 @@ export function buildCityIndex(cities) {
 
 export function listingCityName(item) {
   const filter = item.preview?.filter ?? {};
-  const fromFilter = filter.telepules || "";
+  const form = item.form ?? {};
+  const fromFilter = filter.telepules || form.telepules || "";
   const fromLocation = item.preview?.location || "";
   return String(fromFilter || fromLocation.split(",")[0] || "").trim();
 }

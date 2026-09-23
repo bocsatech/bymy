@@ -66,6 +66,7 @@
     <link rel="stylesheet" href="/css/listing-photo-cover.css?v=tileAllPages1" />
     <link rel="stylesheet" href="/css/listing-featured.css?v=featured5" />
     <link rel="stylesheet" href="/css/ingatlan-search.css?v=autoDrums15" />
+    <link rel="stylesheet" href="/css/search-results-map.css?v=map1" />
     <style id="home-scroll-fix">
       
       html:has(body.home-page) {
@@ -395,6 +396,7 @@
               <div class="home-qs-row home-qs-row--actions">
                 <button type="button" class="auto-desk-reset" data-desk-reset>Alaphelyzet</button>
                 <button type="submit" class="home-qs-submit">Találatok mutatása</button>
+                <button type="button" class="home-qs-action home-qs-action--map" data-search-map-open>Találatok a térképen</button>
                 <button type="button" class="home-qs-action home-qs-action--save" id="qs-save-search">Keresés mentése</button>
                 <div class="home-qs-actions-secondary">
                   <button type="button" class="home-qs-action home-qs-action--advanced" id="qs-reszletes" aria-expanded="false" aria-controls="qs-more">Több szűrő</button>
@@ -470,7 +472,7 @@
     </main>
 
     <script>window.BYMY_FEATURED_LISTING_IDS = window.BYMY_FEATURED_LISTING_IDS || [];</script>
-    <script src="/js/home-app.js?v=sellerList2" type="module"></script>
+    <script src="/js/home-app.js?v=searchMap1" type="module"></script>
     <script src="/js/auto-hero.js?v=searchCollapse1" type="module"></script>
     <script src="/js/site-avatar-menu.js?v=avatarSync1" type="module"></script>
 

@@ -3216,8 +3216,8 @@ body.site-app .field-row--tech-top .suffix-field > input {
 
 body.site-app #ad-form .muszaki-grid .suffix-field > span,
 body.site-app .muszaki-grid .suffix-field > span,
-body.site-app #ad-form .field-row--tech-top .suffix-field > span:not(.hint-inline),
-body.site-app .field-row--tech-top .suffix-field > span:not(.hint-inline) {
+body.site-app #ad-form .field-row--tech-top .suffix-field > span:not(.hint-inline):not(.power-hint),
+body.site-app .field-row--tech-top .suffix-field > span:not(.hint-inline):not(.power-hint) {
   flex: 0 0 5.5rem !important;
   width: 5.5rem !important;
   max-width: 5.5rem !important;
@@ -3239,15 +3239,25 @@ body.site-app .field-row--tech-top .suffix-field--power {
 }
 
 body.site-app #ad-form .field-row--tech-top .suffix-field--power > input#teljesitmeny_kw,
-body.site-app .field-row--tech-top .suffix-field--power > input#teljesitmeny_kw {
+body.site-app .field-row--tech-top .suffix-field--power > input#teljesitmeny_kw,
+body.site-app #ad-form .field-row--tech-top .suffix-field--power > input#teljesitmeny_le,
+body.site-app .field-row--tech-top .suffix-field--power > input#teljesitmeny_le {
   flex: 0 0 5.5rem;
   width: 5.5rem !important;
   min-width: 0 !important;
   max-width: 5.5rem !important;
 }
 
+body.site-app .field-row--tech-top .suffix-field--power > span:not(.power-hint) {
+  flex: 0 0 auto !important;
+  width: auto !important;
+  max-width: none !important;
+}
+
 body.site-app .field-row--tech-top .suffix-field--power > .power-hint {
-  flex: 1 1 auto;
+  flex: 1 1 auto !important;
+  width: auto !important;
+  max-width: none !important;
   min-width: 0;
   margin: 0;
   color: #666;

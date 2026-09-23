@@ -720,7 +720,41 @@ function bindFuelPickerSync() {
   fuel._adBmHidden?.addEventListener("input", () => syncFuelDependentFields());
 }
 
+function isLePrimaryPower() {
+  return Boolean(teljesitmenyLe && teljesitmenyLe.type !== "hidden");
+}
+
 function updateLeDisplay() {
+  const setHint = (text) => {
+    if (leDisplay) leDisplay.textContent = text;
+  };
+
+  /* LE-first UI (hirdetésfeladás): input LE, hint shows kW */
+  if (isLePrimaryPower()) {
+    const leRaw = String(teljesitmenyLe?.value ?? "").trim();
+    const le = Number(leRaw);
+    if (leRaw && Number.isFinite(le) && le > 0) {
+      const kw = Math.round(le / 1.36);
+      if (teljesitmenyKw) teljesitmenyKw.value = String(kw);
+      setHint(`(${kw.toLocaleString("hu-HU")} kW)`);
+      return;
+    }
+    const kwRaw = String(teljesitmenyKw?.value ?? "").trim();
+    const kw = Number(kwRaw);
+    if (kwRaw && Number.isFinite(kw) && kw > 0) {
+      const leFromKw = Math.round(kw * 1.36);
+      if (teljesitmenyLe && teljesitmenyLe.dataset.userEdited !== "1") {
+        teljesitmenyLe.value = String(leFromKw);
+      }
+      setHint(`(${kw.toLocaleString("hu-HU")} kW)`);
+      return;
+    }
+    setHint("");
+    if (teljesitmenyKw) teljesitmenyKw.value = "";
+    return;
+  }
+
+  /* kW-first UI: input kW, hint shows LE (+ kW) */
   if (!leDisplay) return;
   const kwRaw = String(teljesitmenyKw?.value ?? "").trim();
   const kw = Number(kwRaw);
@@ -1725,7 +1759,7 @@ function removePhotoOverlayFromFirst() {
   renderPhotoPreview();
 }
 
-form.querySelectorAll(".auto-filled, #tipus, #hengerurtartalom, #sebessegvalto, #hajtas, #teljesitmeny_kw").forEach((field) => {
+form.querySelectorAll(".auto-filled, #tipus, #hengerurtartalom, #sebessegvalto, #hajtas, #teljesitmeny_kw, #teljesitmeny_le").forEach((field) => {
   field?.addEventListener("input", () => {
     field.dataset.userEdited = "1";
     field.classList.remove("auto-filled");
@@ -1743,6 +1777,7 @@ hirdetesCime?.addEventListener("input", () => {
 
 gyartmany?.addEventListener("change", applyAutoFill);
 teljesitmenyKw?.addEventListener("input", updateLeDisplay);
+teljesitmenyLe?.addEventListener("input", updateLeDisplay);
 
 if (mode === "wizard") {
   backBtn?.classList.add("hidden");

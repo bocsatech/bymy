@@ -179,48 +179,7 @@
           <h2 class="hf-title">Autó kategóriák</h2>
           <a class="hf-all" href="/auto.html">Összes</a>
         </div>
-        <div class="hf-rail hf-rail--ajanlas hf-rail--kategoriak" role="list">
-          <a class="hf-card hf-card--ajanlas hf-card--kategoria" href="/auto.html?cat=uj" data-auto-cat="uj" role="listitem">
-            <span class="hf-card-media"><img src="/images/categories/uj.png?v=autoCat1" alt="" width="486" height="236" loading="lazy" decoding="async" /></span>
-            <span class="hf-card-label">Új</span>
-            <span class="hf-card-sub">Friss modell</span>
-          </a>
-          <a class="hf-card hf-card--ajanlas hf-card--kategoria" href="/auto.html?cat=benzin" data-auto-cat="benzin" role="listitem">
-            <span class="hf-card-media"><img src="/images/categories/benzin.png?v=autoCat1" alt="" width="486" height="236" loading="lazy" decoding="async" /></span>
-            <span class="hf-card-label">Benzin</span>
-            <span class="hf-card-sub">Otto motor</span>
-          </a>
-          <a class="hf-card hf-card--ajanlas hf-card--kategoria" href="/auto.html?cat=diesel" data-auto-cat="diesel" role="listitem">
-            <span class="hf-card-media"><img src="/images/categories/diesel.png?v=autoCat1" alt="" width="466" height="242" loading="lazy" decoding="async" /></span>
-            <span class="hf-card-label">Diesel</span>
-            <span class="hf-card-sub">Dízelmotor</span>
-          </a>
-          <a class="hf-card hf-card--ajanlas hf-card--kategoria" href="/auto.html?cat=elektromos" data-auto-cat="elektromos" role="listitem">
-            <span class="hf-card-media"><img src="/images/categories/elektromos.png?v=autoCat1" alt="" width="462" height="231" loading="lazy" decoding="async" /></span>
-            <span class="hf-card-label">Elektromos</span>
-            <span class="hf-card-sub">Zöld hajtás</span>
-          </a>
-          <a class="hf-card hf-card--ajanlas hf-card--kategoria" href="/auto.html?cat=hybrid" data-auto-cat="hybrid" role="listitem">
-            <span class="hf-card-media"><img src="/images/categories/hybrid.png?v=autoCat1" alt="" width="486" height="247" loading="lazy" decoding="async" /></span>
-            <span class="hf-card-label">Hybrid</span>
-            <span class="hf-card-sub">Kombinált</span>
-          </a>
-          <a class="hf-card hf-card--ajanlas hf-card--kategoria" href="/auto.html?cat=leasing" data-auto-cat="leasing" role="listitem">
-            <span class="hf-card-media"><img src="/images/categories/leasing.png?v=autoCat1" alt="" width="460" height="224" loading="lazy" decoding="async" /></span>
-            <span class="hf-card-label">Leasing</span>
-            <span class="hf-card-sub">Havi díj</span>
-          </a>
-          <a class="hf-card hf-card--ajanlas hf-card--kategoria" href="/auto.html?cat=berelheto" data-auto-cat="berelheto" role="listitem">
-            <span class="hf-card-media"><img src="/images/categories/berelheto.png?v=autoCat1" alt="" width="470" height="228" loading="lazy" decoding="async" /></span>
-            <span class="hf-card-label">Bérelhető</span>
-            <span class="hf-card-sub">Rövid táv</span>
-          </a>
-          <a class="hf-card hf-card--ajanlas hf-card--kategoria" href="/auto.html?cat=ot" data-auto-cat="ot" role="listitem">
-            <span class="hf-card-media"><img src="/images/categories/ot.png?v=autoCat1" alt="" width="480" height="233" loading="lazy" decoding="async" /></span>
-            <span class="hf-card-label">OT</span>
-            <span class="hf-card-sub">Oldtimer</span>
-          </a>
-        </div>
+        <div class="hf-rail hf-rail--ajanlas hf-rail--kategoriak" id="hub-auto-kategoriak-rail" role="list"></div>
       </section>
 
       <section class="hf-section" data-hf="kiemelt" hidden>
@@ -273,52 +232,7 @@
           <h2 class="hf-title">Ajánlások ingatlan</h2>
           <a class="hf-all" href="/ajanlasok.html?vertical=ingatlan">Összes</a>
         </div>
-        <div class="hf-rail hf-rail--ajanlas" role="list">
-          <a class="hf-card hf-card--ajanlas" href="/ajanlasok.html?vertical=ingatlan&amp;cat=ertekesites" role="listitem">
-            <span class="hf-card-media"><img src="/images/ajanlas/ajanlas-ertekesites.png?v=ingatlanDemoImg1" alt="" width="512" height="512" loading="lazy" decoding="async" /></span>
-            <span class="hf-card-label">Értékesítés</span>
-          </a>
-          <a class="hf-card hf-card--ajanlas" href="/ajanlasok.html?vertical=ingatlan&amp;cat=ertekbecsles" role="listitem">
-            <span class="hf-card-media"><img src="/images/ajanlas/ajanlas-ertekbecsles.png?v=ingatlanDemoImg1" alt="" width="512" height="512" loading="lazy" decoding="async" /></span>
-            <span class="hf-card-label">Értékbecslés</span>
-          </a>
-          <a class="hf-card hf-card--ajanlas" href="/ajanlasok.html?vertical=ingatlan&amp;cat=energetikai_tanusitvany" role="listitem">
-            <span class="hf-card-media"><img src="/images/ajanlas/ajanlas-energetikai.png?v=ingatlanDemoImg1" alt="" width="512" height="512" loading="lazy" decoding="async" /></span>
-            <span class="hf-card-label">Energetikai tanúsítvány</span>
-          </a>
-          <a class="hf-card hf-card--ajanlas" href="/ajanlasok.html?vertical=ingatlan&amp;cat=szerkezeti_vizsgalat" role="listitem">
-            <span class="hf-card-media"><img src="/images/ajanlas/ajanlas-szerkezeti.png?v=ingatlanDemoImg1" alt="" width="512" height="512" loading="lazy" decoding="async" /></span>
-            <span class="hf-card-label">Szerkezeti vizsgálat</span>
-          </a>
-          <a class="hf-card hf-card--ajanlas" href="/ajanlasok.html?vertical=ingatlan&amp;cat=hitelugyintezes" role="listitem">
-            <span class="hf-card-media"><img src="/images/ajanlas/ajanlas-hitel.png?v=ingatlanDemoImg1" alt="" width="512" height="512" loading="lazy" decoding="async" /></span>
-            <span class="hf-card-label">Hitelügyintézés</span>
-          </a>
-          <a class="hf-card hf-card--ajanlas" href="/ajanlasok.html?vertical=ingatlan&amp;cat=foldmeres" role="listitem">
-            <span class="hf-card-media"><img src="/images/ajanlas/ajanlas-foldmeres.png?v=ingatlanDemoImg1" alt="" width="512" height="512" loading="lazy" decoding="async" /></span>
-            <span class="hf-card-label">Földmérés</span>
-          </a>
-          <a class="hf-card hf-card--ajanlas" href="/ajanlasok.html?vertical=ingatlan&amp;cat=tervezok" role="listitem">
-            <span class="hf-card-media"><img src="/images/ajanlas/ajanlas-tervezok.png?v=ingatlanDemoImg1" alt="" width="512" height="512" loading="lazy" decoding="async" /></span>
-            <span class="hf-card-label">Tervezők</span>
-          </a>
-          <a class="hf-card hf-card--ajanlas" href="/ajanlasok.html?vertical=ingatlan&amp;cat=lakberendezo" role="listitem">
-            <span class="hf-card-media"><img src="/images/ajanlas/ajanlas-lakberendezo.png?v=ingatlanDemoImg1" alt="" width="512" height="512" loading="lazy" decoding="async" /></span>
-            <span class="hf-card-label">Lakberendező</span>
-          </a>
-          <a class="hf-card hf-card--ajanlas" href="/ajanlasok.html?vertical=ingatlan&amp;cat=kertepito" role="listitem">
-            <span class="hf-card-media"><img src="/images/ajanlas/ajanlas-kertepito.png?v=ingatlanDemoImg1" alt="" width="512" height="512" loading="lazy" decoding="async" /></span>
-            <span class="hf-card-label">Kertépítő</span>
-          </a>
-          <a class="hf-card hf-card--ajanlas" href="/ajanlasok.html?vertical=ingatlan&amp;cat=ugyvedek" role="listitem">
-            <span class="hf-card-media"><img src="/images/ajanlas/ajanlas-ugyvedek.png?v=ingatlanDemoImg1" alt="" width="512" height="512" loading="lazy" decoding="async" /></span>
-            <span class="hf-card-label">Ügyvédek</span>
-          </a>
-          <a class="hf-card hf-card--ajanlas" href="/ajanlasok.html?vertical=ingatlan&amp;cat=kozjegyzok" role="listitem">
-            <span class="hf-card-media"><img src="/images/ajanlas/ajanlas-kozjegyzok.png?v=ingatlanDemoImg1" alt="" width="512" height="512" loading="lazy" decoding="async" /></span>
-            <span class="hf-card-label">Közjegyzők</span>
-          </a>
-        </div>
+        <div class="hf-rail hf-rail--ajanlas" id="hub-ajanlas-ingatlan-rail" role="list"></div>
       </section>
 
       <section class="hf-section" data-hf="kedvencek" hidden>
@@ -346,48 +260,7 @@
           <h2 class="hf-title">Ajánlások autó</h2>
           <a class="hf-all" href="/ajanlasok.html?vertical=auto">Összes</a>
         </div>
-        <div class="hf-rail hf-rail--ajanlas" role="list">
-          <a class="hf-card hf-card--ajanlas" href="/ajanlasok.html?vertical=auto&amp;cat=atiras_ugyintezes" role="listitem">
-            <span class="hf-card-media"><img src="/images/ajanlas/ajanlas-atiras.png?v=ajanlasMobile1" alt="" width="512" height="512" loading="lazy" decoding="async" /></span>
-            <span class="hf-card-label">Átírás ügyintézés</span>
-          </a>
-          <a class="hf-card hf-card--ajanlas" href="/ajanlasok.html?vertical=auto&amp;cat=eredetvizsga" role="listitem">
-            <span class="hf-card-media"><img src="/images/ajanlas/ajanlas-eredet.png?v=ajanlasMobile1" alt="" width="512" height="512" loading="lazy" decoding="async" /></span>
-            <span class="hf-card-label">Eredetvizsga</span>
-          </a>
-          <a class="hf-card hf-card--ajanlas" href="/ajanlasok.html?vertical=auto&amp;cat=muszakivizsga" role="listitem">
-            <span class="hf-card-media"><img src="/images/ajanlas/ajanlas-muszaki.png?v=ajanlasMobile1" alt="" width="512" height="512" loading="lazy" decoding="async" /></span>
-            <span class="hf-card-label">Műszaki vizsga</span>
-          </a>
-          <a class="hf-card hf-card--ajanlas" href="/ajanlasok.html?vertical=auto&amp;cat=autoatvizsgalas" role="listitem">
-            <span class="hf-card-media"><img src="/images/ajanlas/ajanlas-atvizsgalas.png?v=ajanlasMobile1" alt="" width="512" height="512" loading="lazy" decoding="async" /></span>
-            <span class="hf-card-label">Autoátvizsgálás</span>
-          </a>
-          <a class="hf-card hf-card--ajanlas" href="/ajanlasok.html?vertical=auto&amp;cat=autoszerelo" role="listitem">
-            <span class="hf-card-media"><img src="/images/ajanlas/ajanlas-szerelo.png?v=ajanlasMobile1" alt="" width="512" height="512" loading="lazy" decoding="async" /></span>
-            <span class="hf-card-label">Autószerelő</span>
-          </a>
-          <a class="hf-card hf-card--ajanlas" href="/ajanlasok.html?vertical=auto&amp;cat=gumiszerelo" role="listitem">
-            <span class="hf-card-media"><img src="/images/ajanlas/ajanlas-gumi.png?v=ajanlasMobile1" alt="" width="512" height="512" loading="lazy" decoding="async" /></span>
-            <span class="hf-card-label">Gumiszerelő</span>
-          </a>
-          <a class="hf-card hf-card--ajanlas" href="/ajanlasok.html?vertical=auto&amp;cat=lakatos" role="listitem">
-            <span class="hf-card-media"><img src="/images/ajanlas/ajanlas-lakatos.png?v=ajanlasMobile1" alt="" width="512" height="512" loading="lazy" decoding="async" /></span>
-            <span class="hf-card-label">Lakatos</span>
-          </a>
-          <a class="hf-card hf-card--ajanlas" href="/ajanlasok.html?vertical=auto&amp;cat=klimaszerelo" role="listitem">
-            <span class="hf-card-media"><img src="/images/ajanlas/ajanlas-klima.png?v=ajanlasMobile1" alt="" width="512" height="512" loading="lazy" decoding="async" /></span>
-            <span class="hf-card-label">Klímaszerelő</span>
-          </a>
-          <a class="hf-card hf-card--ajanlas" href="/ajanlasok.html?vertical=auto&amp;cat=autokozmetika" role="listitem">
-            <span class="hf-card-media"><img src="/images/ajanlas/ajanlas-kozmetika.png?v=ajanlasMobile1" alt="" width="512" height="512" loading="lazy" decoding="async" /></span>
-            <span class="hf-card-label">Autókozmetika</span>
-          </a>
-          <a class="hf-card hf-card--ajanlas" href="/ajanlasok.html?vertical=auto&amp;cat=autovillamossag" role="listitem">
-            <span class="hf-card-media"><img src="/images/ajanlas/ajanlas-villamos.png?v=ajanlasMobile1" alt="" width="512" height="512" loading="lazy" decoding="async" /></span>
-            <span class="hf-card-label">Autóvillamosság</span>
-          </a>
-        </div>
+        <div class="hf-rail hf-rail--ajanlas" id="hub-ajanlas-auto-rail" role="list"></div>
       </section>
 
       <section class="hf-section" data-hf="videok">
@@ -441,7 +314,7 @@
     </nav>
 
     <script src="/js/hub-rail-drag.js?v=hubDrag2" defer></script>
-    <script src="/js/hub-auto-categories.js?v=autoCat2" type="module"></script>
+    <script src="/js/hub-menu-rails.js?v=menuRails1" type="module"></script>
     <script>window.BYMY_FEATURED_LISTING_IDS = window.BYMY_FEATURED_LISTING_IDS || [];</script>
     <script src="/js/hub-featured-listings.js?v=featuredHideEmpty1" type="module"></script>
     <script src="/js/hub-nearby-cars.js?v=nearbyV7" type="module"></script>

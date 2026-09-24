@@ -1,12 +1,12 @@
 
-import { applyAutoSearchLayout, readLayoutFilterValues, refillAutoSearchRangeSelects, prefetchAutoSearchBoot } from "./auto-search-layout.js?v=priceSuggest1";
-import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums } from "./auto-search-drums.js?v=mobMenuFix1";
+import { applyAutoSearchLayout, readLayoutFilterValues, refillAutoSearchRangeSelects, prefetchAutoSearchBoot } from "./auto-search-layout.js?v=mobFix3";
+import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums } from "./auto-search-drums.js?v=mobFix3";
 import {
   mountDetailedSearch,
   readDetailedSearchValues,
   resetDetailedSearch,
 } from "./auto-detailed-search.js?v=fogyNum1";
-import { readWheel } from "./ingatlan-wheels.js?v=immoClearAll1";
+import { readWheel } from "./ingatlan-wheels.js?v=mobFix3";
 import { readBrandModelFilterValues, mountAutoBrandModelPicker } from "./auto-brand-model-picker.js?v=bmDoneClose1";
 import { readFuelFilterValues, mountAutoFuelPicker } from "./auto-fuel-picker.js?v=noHint2";
 import { readKivitelFilterValues, mountAutoKivitelPicker } from "./auto-kivitel-picker.js?v=mobMenuFix1";
@@ -224,6 +224,59 @@ export function initHomeQuickSearch({ onSearch = () => {}, onDeskSortChange, onR
     form.reset();
   });
 
+  function qsHasFields() {
+    return Boolean(
+      form.querySelector(
+        "#qs-layout-main [data-qs-field], #qs-layout-main [data-wheel], .auto-desk-fields [data-desk-field], .auto-desk-fields [data-qs-field]"
+      )
+    );
+  }
+
+  function clearQsStatus() {
+    if (!statusEl) return;
+    statusEl.hidden = true;
+    statusEl.textContent = "";
+  }
+
+  function showQsStatus(message) {
+    if (!statusEl) return;
+    statusEl.hidden = false;
+    statusEl.textContent = message;
+  }
+
+  function finishQsBoot({ deskAuto = false, ok = true } = {}) {
+    setQsReady(true);
+    try {
+      updateAutoDeskAccSummaries(form);
+    } catch (sumError) {
+      console.warn("Desk összefoglaló:", sumError);
+    }
+    onReady?.();
+    resolveReady?.();
+    window.clearTimeout(bootFailsafe);
+    if (ok || qsHasFields()) clearQsStatus();
+    else {
+      showQsStatus("A kereső elrendezés nem töltődött be. Hard refresh, majd szerver újraindítás.");
+    }
+    if (deskAuto && ok) {
+      const mountSafe = (fn, label) =>
+        fn(form).catch((error) => {
+          console.warn(label, error);
+        });
+      void Promise.all([
+        mountSafe(mountAutoSebessegvaltoPicker, "Sebességváltó picker:"),
+        mountSafe(mountAutoOkmanyPicker, "Okmány picker:"),
+        mountSafe(mountAutoToltoPickers, "Töltőcsatlakozó picker:"),
+      ]).then(() => {
+        try {
+          updateAutoDeskAccSummaries(form);
+        } catch {
+          /* ignore */
+        }
+      });
+    }
+  }
+
   applyAutoSearchLayout(form)
     .then(async () => {
       const page = document.body?.getAttribute("data-site-page");
@@ -234,54 +287,42 @@ export function initHomeQuickSearch({ onSearch = () => {}, onDeskSortChange, onR
         fn(form).catch((error) => {
           console.warn(label, error);
         });
-      if (!deskAuto) {
-        try {
-          await mountAutoSearchDrums(form);
-        } catch (drumError) {
-          console.warn("Kereső dobkerék:", drumError);
-        }
-        if (page === "teherauto") {
+      try {
+        if (!deskAuto) {
           try {
-            await mountAutoKivitelPicker(form);
-          } catch (kivitelError) {
-            console.warn("Kivitel picker:", kivitelError);
+            await mountAutoSearchDrums(form);
+          } catch (drumError) {
+            console.warn("Kereső dobkerék:", drumError);
           }
+          if (page === "teherauto") {
+            try {
+              await mountAutoKivitelPicker(form);
+            } catch (kivitelError) {
+              console.warn("Kivitel picker:", kivitelError);
+            }
+          }
+        } else {
+          arrangeAutoDeskDemoFields(form);
+          refillAutoSearchRangeSelects(form);
+          await mountSafe(mountAutoBrandModelPicker, "Gyártmány/Modell picker:");
+          await Promise.all([
+            mountSafe(mountAutoFuelPicker, "Üzemanyag picker:"),
+            mountSafe(mountAutoKivitelPicker, "Kivitel picker:"),
+            mountSafe(mountAutoAllapotPicker, "Állapot picker:"),
+          ]);
         }
-      } else {
-        arrangeAutoDeskDemoFields(form);
-        refillAutoSearchRangeSelects(form);
-        // Brand first (fuel inserts relative to bm-pair), then gyors pickers in parallel.
-        await mountSafe(mountAutoBrandModelPicker, "Gyártmány/Modell picker:");
-        await Promise.all([
-          mountSafe(mountAutoFuelPicker, "Üzemanyag picker:"),
-          mountSafe(mountAutoKivitelPicker, "Kivitel picker:"),
-          mountSafe(mountAutoAllapotPicker, "Állapot picker:"),
-        ]);
-      }
-      const urlKivitel = new URLSearchParams(window.location.search).get("kivitel");
-      if (urlKivitel && form.dataset.kivitelPicker !== "1") {
-        const el =
-          form.querySelector("#qs-kivitel") ||
-          form.querySelector('[name="kivitel"]') ||
-          form.querySelector('[data-filter-key="kivitel"]');
-        if (el && "value" in el) el.value = urlKivitel;
-      }
-      setQsReady(true);
-      updateAutoDeskAccSummaries(form);
-      onReady?.();
-      resolveReady?.();
-      window.clearTimeout(bootFailsafe);
-      if (statusEl) {
-        statusEl.hidden = true;
-        statusEl.textContent = "";
-      }
-      if (deskAuto) {
-        // Muszaki/extrák pickers — not needed for Gyors first paint.
-        void Promise.all([
-          mountSafe(mountAutoSebessegvaltoPicker, "Sebességváltó picker:"),
-          mountSafe(mountAutoOkmanyPicker, "Okmány picker:"),
-          mountSafe(mountAutoToltoPickers, "Töltőcsatlakozó picker:"),
-        ]).then(() => updateAutoDeskAccSummaries(form));
+        const urlKivitel = new URLSearchParams(window.location.search).get("kivitel");
+        if (urlKivitel && form.dataset.kivitelPicker !== "1") {
+          const el =
+            form.querySelector("#qs-kivitel") ||
+            form.querySelector('[name="kivitel"]') ||
+            form.querySelector('[data-filter-key="kivitel"]');
+          if (el && "value" in el) el.value = urlKivitel;
+        }
+        finishQsBoot({ deskAuto, ok: qsHasFields() || deskAuto });
+      } catch (bootError) {
+        console.warn("Kereső boot:", bootError);
+        throw bootError;
       }
     })
     .catch(async (error) => {
@@ -294,17 +335,10 @@ export function initHomeQuickSearch({ onSearch = () => {}, onDeskSortChange, onR
         fn(form).catch((err) => {
           console.warn(label, err);
         });
-      form.querySelectorAll(".home-qs-static-legacy").forEach((el) => {
-        if (deskAuto) {
-          el.hidden = true;
-          el.style.setProperty("display", "none", "important");
-        } else {
-          el.hidden = false;
-          el.style.display = "";
-        }
-      });
-      if (deskAuto) {
+      let recovered = qsHasFields();
+      if (!recovered && deskAuto) {
         try {
+          await applyAutoSearchLayout(form, { force: true }).catch(() => null);
           arrangeAutoDeskDemoFields(form);
           refillAutoSearchRangeSelects(form);
           await mountSafe(mountAutoBrandModelPicker, "Gyártmány/Modell picker:");
@@ -313,29 +347,29 @@ export function initHomeQuickSearch({ onSearch = () => {}, onDeskSortChange, onR
             mountSafe(mountAutoKivitelPicker, "Kivitel picker:"),
             mountSafe(mountAutoAllapotPicker, "Állapot picker:"),
           ]);
-          void Promise.all([
-            mountSafe(mountAutoSebessegvaltoPicker, "Sebességváltó picker:"),
-            mountSafe(mountAutoOkmanyPicker, "Okmány picker:"),
-            mountSafe(mountAutoToltoPickers, "Töltőcsatlakozó picker:"),
-          ]);
+          recovered = true;
         } catch (deskError) {
           console.warn("Desk fallback kereső:", deskError);
         }
-      } else if (page === "teherauto") {
+      } else if (!recovered) {
         try {
-          await mountAutoKivitelPicker(form);
-        } catch (kivitelError) {
-          console.warn("Kivitel picker fallback:", kivitelError);
+          await applyAutoSearchLayout(form, { force: true }).catch(() => null);
+          await mountAutoSearchDrums(form);
+          if (page === "teherauto") await mountAutoKivitelPicker(form);
+          recovered = qsHasFields();
+          if (!recovered) {
+            form.querySelectorAll(".home-qs-static-legacy").forEach((el) => {
+              el.hidden = false;
+              el.removeAttribute("aria-hidden");
+              el.style.setProperty("display", "flex", "important");
+            });
+            recovered = Boolean(form.querySelector(".home-qs-static-legacy select, .home-qs-static-legacy [data-filter-key]"));
+          }
+        } catch (mobileError) {
+          console.warn("Mobil kereső fallback:", mobileError);
         }
       }
-      setQsReady(true);
-      onReady?.();
-      resolveReady?.();
-      window.clearTimeout(bootFailsafe);
-      if (statusEl) {
-        statusEl.hidden = false;
-        statusEl.textContent = "A kereső elrendezés nem töltődött be. Hard refresh, majd szerver újraindítás.";
-      }
+      finishQsBoot({ deskAuto, ok: recovered });
     });
 
   async function applySavedFilters(filters) {

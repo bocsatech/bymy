@@ -6,7 +6,7 @@ import {
   syncDrumWheelDisplay,
   closeAllInlineDrums,
 } from "./immo-drum-picker.js?v=immoClear1";
-import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=mobMenuFix1";
+import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=mobFix3";
 import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=priceSuggest1";
 
 const MOBILE_MQ = "(max-width: 900px)";

@@ -1998,6 +1998,34 @@ body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-n
   display: none;
 }
 
+/* Always size card icons — desk media query alone left mobile SVGs full-width. */
+.home-grid-card-spec svg,
+.home-grid-card-loc svg {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 auto;
+  display: block;
+  max-width: 14px;
+  max-height: 14px;
+  overflow: hidden;
+}
+
+.home-grid-card-loc {
+  display: none;
+  align-items: center;
+  gap: 6px;
+  margin: 4px 0 0;
+  font-size: 0.8rem;
+  color: #111;
+}
+
+.home-grid-card-loc svg {
+  width: 12px;
+  height: 14px;
+  max-width: 12px;
+  max-height: 14px;
+}
+
 .home-grid-card-title {
   margin: 0;
   font-size: 1.05rem;

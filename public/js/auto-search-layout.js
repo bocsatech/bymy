@@ -211,12 +211,22 @@ function writeLayoutSession(category, layout) {
 async function refreshLayoutFromNetwork(category) {
   if (layoutNetworkPromise && cachedLayoutCategory === category) return layoutNetworkPromise;
   layoutNetworkPromise = (async () => {
-    const res = await fetch(layoutUrl(), { credentials: "same-origin" });
-    const data = await res.json().catch(() => ({}));
-    cachedLayout = data.layout || { version: 2, category, cells: [] };
-    cachedLayoutCategory = category;
-    writeLayoutSession(category, cachedLayout);
-    return cachedLayout;
+    try {
+      const res = await fetch(layoutUrl(), { credentials: "same-origin" });
+      const data = await res.json().catch(() => ({}));
+      cachedLayout = data.layout || { version: 2, category, cells: [] };
+      cachedLayoutCategory = category;
+      writeLayoutSession(category, cachedLayout);
+      return cachedLayout;
+    } catch (error) {
+      console.warn("Kereső layout hálózat:", error);
+      const fallback = cachedLayout && cachedLayoutCategory === category
+        ? cachedLayout
+        : readLayoutSession(category) || { version: 2, category, cells: [] };
+      cachedLayout = fallback;
+      cachedLayoutCategory = category;
+      return fallback;
+    }
   })().finally(() => {
     layoutNetworkPromise = null;
   });
@@ -282,7 +292,7 @@ function fillNumberSelect(select, values, emptyLabel, format = (n) => n.toLocale
 }
 
 function fillOptionsSelect(select, options) {
-  if (!select) return;
+  if (!select || select.tagName !== "SELECT") return;
   select.innerHTML = `<option value="">Mindegy</option>`;
   for (const opt of options) {
     const el = document.createElement("option");
@@ -872,57 +882,66 @@ function wirePostalCityAutofill(form) {
 
 export async function applyAutoSearchLayout(form = document.getElementById("home-qs-form"), { force = false } = {}) {
   if (!form) return null;
-  const layout = await fetchAutoSearchLayout({ force });
-  let quickKeys = quickSearchFieldKeysFromLayout(layout);
-  if (searchLayoutCategory() === "teherauto-search" && !quickKeys.includes("kivitel")) {
-    quickKeys = [...quickKeys, "kivitel"];
-  }
-  form.dataset.deskQuickKeys = quickKeys.join(",");
-  const mainHost = document.getElementById("qs-layout-main");
-  const moreHost = document.getElementById("qs-more-layout");
+  try {
+    const layout = await fetchAutoSearchLayout({ force });
+    let quickKeys = quickSearchFieldKeysFromLayout(layout);
+    if (searchLayoutCategory() === "teherauto-search" && !quickKeys.includes("kivitel")) {
+      quickKeys = [...quickKeys, "kivitel"];
+    }
+    form.dataset.deskQuickKeys = quickKeys.join(",");
+    const mainHost = document.getElementById("qs-layout-main");
+    const moreHost = document.getElementById("qs-more-layout");
 
-  const visible = (layout.cells || []).filter((c) => isSearchCellVisible(c));
+    const visible = (layout.cells || []).filter((c) => isSearchCellVisible(c));
 
-  if (!visible.length) {
+    if (!visible.length) {
+      hideLegacy(form);
+      return layout;
+    }
+
+    // Remount after a failed boot: clear drum flag so converters can run again.
+    delete form.dataset.drumsMounted;
+    form.classList.remove("auto-qs-drums", "auto-qs-drums--mobile", "auto-qs-drums--desktop");
+
     hideLegacy(form);
-    return layout;
-  }
-
-  hideLegacy(form);
-  const step1 = cellsForStep(layout, 1).map((cell, index) => ({
-    ...cell,
-    row: index + 1,
-    col: 1,
-    colSpan: 12,
-  }));
-  renderGrid(mainHost, step1);
-
-  if (moreHost) {
-    const moreCells = (layout.cells || [])
-      .filter((c) => isSearchCellVisible(c) && Number(c.step) >= 2 && Number(c.step) <= 5)
-      .sort((a, b) => (a.step - b.step) || (a.row - b.row) || (a.col - b.col));
-    const withRows = moreCells.map((cell, index) => ({
+    const step1 = cellsForStep(layout, 1).map((cell, index) => ({
       ...cell,
       row: index + 1,
       col: 1,
       colSpan: 12,
     }));
-    renderGrid(moreHost, withRows);
-  }
+    renderGrid(mainHost, step1);
 
-  wireRangeSelects(form);
-  wireSelectOptions(form);
-  wirePostalCityAutofill(form);
-  if (typeof window !== "undefined" && window.matchMedia("(max-width: 900px)").matches) {
+    if (moreHost) {
+      const moreCells = (layout.cells || [])
+        .filter((c) => isSearchCellVisible(c) && Number(c.step) >= 2 && Number(c.step) <= 5)
+        .sort((a, b) => (a.step - b.step) || (a.row - b.row) || (a.col - b.col));
+      const withRows = moreCells.map((cell, index) => ({
+        ...cell,
+        row: index + 1,
+        col: 1,
+        colSpan: 12,
+      }));
+      renderGrid(moreHost, withRows);
+    }
+
+    wireRangeSelects(form);
+    wireSelectOptions(form);
+    wirePostalCityAutofill(form);
+    if (typeof window !== "undefined" && window.matchMedia("(max-width: 900px)").matches) {
+      return layout;
+    }
+    // Desk auto/teher: brand/model pickers own the catalog — skip duplicate wait.
+    const page = document.body?.getAttribute("data-site-page");
+    if (page === "auto" || page === "teherauto") {
+      return layout;
+    }
+    await wireCatalog(form);
     return layout;
+  } catch (error) {
+    console.warn("applyAutoSearchLayout:", error);
+    return cachedLayout || { version: 2, category: searchLayoutCategory(), cells: [] };
   }
-  // Desk auto/teher: brand/model pickers own the catalog — skip duplicate wait.
-  const page = document.body?.getAttribute("data-site-page");
-  if (page === "auto" || page === "teherauto") {
-    return layout;
-  }
-  await wireCatalog(form);
-  return layout;
 }
 
 export function readLayoutFilterValues(form) {

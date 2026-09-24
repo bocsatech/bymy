@@ -1168,6 +1168,44 @@ html[data-theme="dark"] body.site-app > .auto-price-suggest .auto-price-suggest_
 }
 
 @media (max-width: 900px) {
+  /* Never hide the dynamic search grid on mobile (desk-only rule). */
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel #qs-layout-main,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .home-qs-layout-main {
+    display: flex !important;
+    height: auto !important;
+    overflow: visible !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    visibility: visible !important;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-grid-card-loc {
+    display: inline-flex !important;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-grid-card-specs,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-grid-card-spec {
+    display: none !important;
+  }
+
+  /* Closed menu wheels must never paint inline next to triggers. */
+  body[data-site-page="ingatlan"] .immo-wheel.immo-wheel--menu:not(.is-open),
+  body[data-site-page="ingatlan"] .immo-wheel-wrap--menu:not(.is-open) > .immo-wheel.immo-wheel--menu,
+  body[data-site-page="ingatlan"] .immo-wheel.immo-wheel--menu[hidden] {
+    display: none !important;
+  }
+
+  body[data-site-page="ingatlan"] .immo-wheel-wrap--drum-inline:not(.is-open) .immo-drum-inline,
+  body[data-site-page="ingatlan"] .immo-drum-inline[hidden] {
+    display: none !important;
+  }
+
+  body[data-site-page="auto"] .immo-wheel-wrap--drum-inline:not(.is-open) .immo-drum-inline,
+  body[data-site-page="teherauto"] .immo-wheel-wrap--drum-inline:not(.is-open) .immo-drum-inline,
+  body:is([data-site-page="auto"], [data-site-page="teherauto"]) .immo-drum-inline[hidden] {
+    display: none !important;
+  }
+
   .auto-desk-mode,
   .auto-desk-acc__head,
   .auto-desk-reset {

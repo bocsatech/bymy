@@ -548,6 +548,15 @@ input.immo-wheel-custom.immo-wheel-trigger {
   display: none !important;
 }
 
+/* Parked menu wheels must stay invisible even if [hidden] is stripped. */
+.immo-wheel-wrap--menu:not(.is-open) > .immo-wheel.immo-wheel--menu {
+  display: none !important;
+}
+
+.immo-wheel-wrap--drum-inline:not(.is-open) > .immo-drum-inline {
+  display: none !important;
+}
+
 .immo-wheel-opt {
   appearance: none;
   border: 0;

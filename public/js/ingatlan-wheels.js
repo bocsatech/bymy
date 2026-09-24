@@ -562,7 +562,7 @@ function positionPortaledMenu(wheel, wrap) {
   wheel.style.right = "auto";
   wheel.style.width = `${width}px`;
   wheel.style.maxWidth = `min(${width}px, calc(100vw - 16px))`;
-  wheel.style.zIndex = "10060";
+  wheel.style.zIndex = "11000";
 }
 
 function portalWheelToBody(wheel, wrap) {

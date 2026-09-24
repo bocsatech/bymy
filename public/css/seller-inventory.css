@@ -422,6 +422,35 @@ body.seller-inventory-mode .home-grid-track {
   display: none !important;
 }
 
+.seller-inv__map-wrap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 260px;
+  height: 100%;
+}
+
+.seller-inv__map-open {
+  position: absolute;
+  z-index: 2;
+  top: 0.55rem;
+  left: 0.55rem;
+  padding: 0.35rem 0.55rem;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid var(--si-line);
+  color: #1a73e8;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+}
+
+.seller-inv__map-open:hover {
+  text-decoration: underline;
+}
+
 .seller-inv__map {
   display: block;
   width: 100%;

@@ -19,7 +19,7 @@ function injectStylesheet() {
   if (document.querySelector('link[data-seller-inv-css]')) return;
   const link = document.createElement("link");
   link.rel = "stylesheet";
-  link.href = "/css/seller-inventory.css?v=sellerInv23";
+  link.href = "/css/seller-inventory.css?v=sellerInv24";
   link.dataset.sellerInvCss = "1";
   document.head.appendChild(link);
 }
@@ -309,18 +309,91 @@ function bindPhoneReveal(host, fromId) {
   });
 }
 
-function mapEmbedSrc(mapQuery) {
-  const q = String(mapQuery || "").trim();
-  if (!q) return "";
-  return `https://maps.google.com/maps?q=${encodeURIComponent(q)}&z=15&output=embed`;
+function buildMapQuery(contact) {
+  const lines = (Array.isArray(contact?.addressLines) ? contact.addressLines : [])
+    .map((l) => String(l || "").replace(/\s+/g, " ").trim())
+    .filter(Boolean);
+  const mq = String(contact?.mapQuery || "").replace(/\s+/g, " ").trim();
+  const postalCity = lines.find((l) => /^\d{4}\b/.test(l)) || "";
+  const street = lines.find((l) => l && l !== postalCity) || "";
+  const parts = [street, postalCity, "Magyarország"].filter(Boolean);
+  const built = parts.join(", ");
+  if (built.replace(/,?\s*Magyarország\s*$/i, "").trim()) return built;
+  if (mq) return /magyarország/i.test(mq) ? mq : `${mq}, Magyarország`;
+  return "";
 }
 
-function mapPanelHtml(mapQuery) {
-  const src = mapEmbedSrc(mapQuery);
+function mapEmbedSrc(query) {
+  const q = String(query || "").trim();
+  if (!q) return "";
+  // hl + ie segít; lat,lng esetén is működik
+  return `https://maps.google.com/maps?q=${encodeURIComponent(q)}&hl=hu&z=16&ie=UTF8&output=embed`;
+}
+
+function mapOpenHref(query) {
+  const q = String(query || "").trim();
+  if (!q) return "";
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`;
+}
+
+function mapPanelHtml({ src, openHref, label }) {
   if (!src) {
     return `<p class="seller-inv__hint">Nincs megjeleníthető cím a térképhez.</p>`;
   }
-  return `<iframe class="seller-inv__map" title="Kereskedés helye" loading="lazy" referrerpolicy="no-referrer-when-downgrade" sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox" src="${esc(src)}"></iframe>`;
+  const open = openHref
+    ? `<a class="seller-inv__map-open" href="${esc(openHref)}" target="_blank" rel="noopener noreferrer">Megnyitás a Google Térképen</a>`
+    : "";
+  return `
+    <div class="seller-inv__map-wrap">
+      ${open}
+      <iframe class="seller-inv__map" title="${esc(label || "Kereskedés helye")}" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen src="${esc(src)}"></iframe>
+    </div>
+  `;
+}
+
+async function geocodeHungary(query) {
+  const q = String(query || "").trim();
+  if (!q) return null;
+  try {
+    const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=hu&q=${encodeURIComponent(q)}`;
+    const res = await fetch(url, {
+      headers: { Accept: "application/json" },
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    const hit = Array.isArray(data) ? data[0] : null;
+    const lat = hit?.lat != null ? String(hit.lat) : "";
+    const lon = hit?.lon != null ? String(hit.lon) : "";
+    if (!lat || !lon) return null;
+    return { lat, lon };
+  } catch {
+    return null;
+  }
+}
+
+async function fillSellerMap(panel, contact) {
+  if (!panel) return;
+  const q = buildMapQuery(contact);
+  if (!q) {
+    panel.hidden = true;
+    panel.innerHTML = `<p class="seller-inv__hint">Nincs megjeleníthető cím a térképhez.</p>`;
+    return;
+  }
+  panel.hidden = false;
+  panel.innerHTML = mapPanelHtml({
+    src: mapEmbedSrc(q),
+    openHref: mapOpenHref(q),
+    label: "Kereskedés helye",
+  });
+
+  const geo = await geocodeHungary(q);
+  if (!geo) return;
+  const pin = `${geo.lat},${geo.lon}`;
+  panel.innerHTML = mapPanelHtml({
+    src: mapEmbedSrc(pin),
+    openHref: mapOpenHref(pin),
+    label: "Kereskedés helye",
+  });
 }
 
 /**
@@ -391,12 +464,7 @@ export async function mountSellerInventory({ fromId, count = 0 } = {}) {
   }
 
   const mapPanel = host.querySelector("[data-si-map-panel]");
-  if (mapPanel) {
-    const lines = Array.isArray(contact?.addressLines) ? contact.addressLines : [];
-    const q = String(contact?.mapQuery || lines.join(", ")).trim();
-    mapPanel.innerHTML = mapPanelHtml(q);
-    if (!q) mapPanel.hidden = true;
-  }
+  await fillSellerMap(mapPanel, contact);
 
   const label = String(contact?.sellerName || "").trim() || "Hirdető";
   const logoWrap = host.querySelector("[data-si-share-logo]");

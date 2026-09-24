@@ -74,25 +74,45 @@ body.seller-inventory-mode .home-grid-track {
 
 /* Desk: ne hagyjon üres bal oszlopot a elrejtett keresőnek */
 @media (min-width: 901px) {
+  html:has(body.seller-inventory-mode),
+  body.seller-inventory-mode {
+    height: auto !important;
+    max-height: none !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+  }
+
   body.seller-inventory-mode.home-page .home-main.auto-desk-main,
   body.seller-inventory-mode.home-page[data-site-page="auto"] .home-main.auto-desk-main,
   body.seller-inventory-mode.home-page[data-site-page="teherauto"] .home-main.auto-desk-main {
     display: block !important;
     grid-template-columns: none !important;
+    grid-template-rows: none !important;
     max-width: 1440px !important;
     width: 100% !important;
     margin: 0 auto !important;
     padding: 18px 24px 48px !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
   }
 
   body.seller-inventory-mode.home-page .home-main.auto-desk-main > .home-layout.site-layout,
-  body.seller-inventory-mode.home-page .home-main.auto-desk-main > .site-layout {
+  body.seller-inventory-mode.home-page .home-main.auto-desk-main > .site-layout,
+  body.seller-inventory-mode.home-page .home-main.auto-desk-main .home-center,
+  body.seller-inventory-mode.home-page .home-main.auto-desk-main .site-center,
+  body.seller-inventory-mode.home-page .home-main.auto-desk-main .home-layout,
+  body.seller-inventory-mode.home-page .home-main.auto-desk-main .home-listings-panel {
     grid-column: unset !important;
     grid-row: unset !important;
     width: 100% !important;
     max-width: none !important;
     margin: 0 !important;
     display: block !important;
+    flex: none !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
   }
 
   body.seller-inventory-mode #home-grid-track,

@@ -1183,6 +1183,55 @@
     height: 0;
     margin: 0;
   }
+
+  /* Kereskedői készlet (?hirdeto=): tile-scroll lock kikapcsolva — különben a lap lefagy */
+  html:has(body.seller-inventory-mode.home-page:is([data-site-page="auto"], [data-site-page="teherauto"])),
+  body.seller-inventory-mode.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) {
+    height: auto !important;
+    max-height: none !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    overscroll-behavior: auto;
+  }
+
+  body.seller-inventory-mode.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main {
+    display: block !important;
+    grid-template-columns: none !important;
+    grid-template-rows: none !important;
+    align-items: start !important;
+    height: auto !important;
+    max-height: none !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    padding: 18px 24px 48px !important;
+  }
+
+  body.seller-inventory-mode.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main > .home-layout.site-layout,
+  body.seller-inventory-mode.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main > .site-layout {
+    display: block !important;
+    flex-direction: unset !important;
+    height: auto !important;
+    max-height: none !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
+
+  body.seller-inventory-mode.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main .home-center,
+  body.seller-inventory-mode.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main .site-center,
+  body.seller-inventory-mode.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main .home-layout {
+    display: block !important;
+    flex: none !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  body.seller-inventory-mode.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main .home-listings-panel {
+    flex: none !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
 }
 
 /* Custom Vételár suggest — ported to body (replaces native datalist). */

@@ -62,7 +62,7 @@
     <link rel="stylesheet" href="/css/hub-mobile-app.css?v=mobFix8" />
     <link rel="stylesheet" href="/css/home.css?v=mobFix8" />
     <link rel="stylesheet" href="/css/auto-hero.css?v=mobFix8" />
-    <link rel="stylesheet" href="/css/auto-desk-layout.css?v=tileScroll3" />
+    <link rel="stylesheet" href="/css/auto-desk-layout.css?v=tileScroll4" />
     <link rel="stylesheet" href="/css/listing-photo-cover.css?v=tileAllPages1" />
     <link rel="stylesheet" href="/css/listing-featured.css?v=featured5" />
     <link rel="stylesheet" href="/css/ingatlan-search.css?v=mobFix8" />
@@ -247,6 +247,34 @@
         body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main .home-center {
           overflow-y: hidden !important;
         }
+
+        /* Kereskedői készlet: ne zárja le a görgetést */
+        html:has(body.seller-inventory-mode.home-page:is([data-site-page="auto"], [data-site-page="teherauto"])),
+        body.seller-inventory-mode.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) {
+          height: auto !important;
+          max-height: none !important;
+          overflow-x: hidden !important;
+          overflow-y: auto !important;
+        }
+        body.seller-inventory-mode.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main {
+          display: block !important;
+          height: auto !important;
+          max-height: none !important;
+          overflow: visible !important;
+          padding: 18px 24px 48px !important;
+        }
+        body.seller-inventory-mode.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main > .home-layout.site-layout,
+        body.seller-inventory-mode.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main > .site-layout,
+        body.seller-inventory-mode.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main .home-center,
+        body.seller-inventory-mode.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main .site-center,
+        body.seller-inventory-mode.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main .home-layout,
+        body.seller-inventory-mode.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main .home-listings-panel {
+          display: block !important;
+          flex: none !important;
+          height: auto !important;
+          max-height: none !important;
+          overflow: visible !important;
+        }
       }
       body.home-page .home-layout {
         min-height: 0 !important;
@@ -278,6 +306,9 @@
   <body class="home-page site-page site-app auto-desk-gyors" data-site-page="teherauto">
     <script>
       try {
+        if (new URLSearchParams(window.location.search).get("hirdeto")) {
+          document.body.classList.add("seller-inventory-mode");
+        }
         if (window.matchMedia("(min-width: 901px)").matches) {
           document.body.classList.add("auto-desk-active");
           fetch("/api/level1/form-layout?category=teherauto-search", { credentials: "same-origin" }).catch(function () {});
@@ -521,7 +552,7 @@
     </main>
 
     <script>window.BYMY_FEATURED_LISTING_IDS = window.BYMY_FEATURED_LISTING_IDS || [];</script>
-    <script src="/js/home-app.js?v=sellerInv16" type="module"></script>
+    <script src="/js/home-app.js?v=sellerInv17" type="module"></script>
     <script src="/js/auto-hero.js?v=searchCollapse1" type="module"></script>
     <script src="/js/site-avatar-menu.js?v=avatarSync1" type="module"></script>
 

@@ -411,12 +411,47 @@
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .home-qs-form {
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  /* Gyors: mezők a fehér kártyában görgetnek, alsó gombok mindig látszanak */
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-gyors
+    .auto-search-panel
+    .auto-desk-acc[data-desk-acc="alap"] {
     flex: 1 1 auto !important;
     min-height: 0 !important;
     overflow-x: hidden !important;
     overflow-y: auto !important;
-    overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-gyors
+    .auto-search-panel
+    .auto-desk-acc[data-desk-acc="alap"]
+    .auto-desk-acc__body {
+    overflow: visible;
+  }
+
+  /* Részletes: az egész form görget, gombok sticky alul */
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-reszletes
+    .auto-search-panel
+    .home-qs-form {
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-reszletes
+    .auto-search-panel
+    .auto-desk-acc {
+    flex: 0 0 auto !important;
+    overflow: visible !important;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-mode {
@@ -835,12 +870,18 @@
     gap: 10px;
     margin-top: 12px;
     align-items: stretch;
+    flex: 0 0 auto;
     position: sticky;
     bottom: 0;
     z-index: 4;
     padding-top: 10px;
     padding-bottom: 4px;
     background: var(--ad-bg);
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-gyors .home-qs-row--actions {
+    position: relative;
+    margin-top: 10px;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-reset,

@@ -18,7 +18,7 @@ function injectStylesheet() {
   if (document.querySelector('link[data-seller-inv-css]')) return;
   const link = document.createElement("link");
   link.rel = "stylesheet";
-  link.href = "/css/seller-inventory.css?v=sellerInv7";
+  link.href = "/css/seller-inventory.css?v=sellerInv8";
   link.dataset.sellerInvCss = "1";
   document.head.appendChild(link);
 }
@@ -151,7 +151,10 @@ export async function mountSellerInventory({ fromId, count = 0 } = {}) {
     <a class="seller-inv__back" href="${esc(backHref)}">← Vissza a hirdetéshez</a>
     <div class="seller-inv__head" data-si-head>Kereskedő</div>
     <div class="seller-inv__panel seller-inv__share">
-      <h2>Oszd meg ezt a kereskedőt</h2>
+      <div class="seller-inv__share-main">
+        <div class="seller-inv__share-logo" data-si-share-logo hidden></div>
+        <p class="seller-inv__share-text">Oszd meg barátaiddal a kereskedésünk autóit.</p>
+      </div>
       <div class="seller-inv__share-actions">
         <button type="button" class="seller-inv__btn seller-inv__btn--yellow" data-si-share>Megosztás</button>
         <button type="button" class="seller-inv__ico" data-si-fb aria-label="Facebook" title="Facebook">f</button>
@@ -189,17 +192,23 @@ export async function mountSellerInventory({ fromId, count = 0 } = {}) {
   const label = String(contact?.sellerName || "").trim() || "Hirdető";
   const head = host.querySelector("[data-si-head]");
   if (head) head.textContent = label;
-  const shareTitle = host.querySelector(".seller-inv__share h2");
-  if (shareTitle && label !== "Hirdető") {
-    shareTitle.textContent = `Oszd meg: ${label}`;
+  const logoWrap = host.querySelector("[data-si-share-logo]");
+  const logoUrl = String(contact?.sellerAvatarUrl || "").trim();
+  if (logoWrap && logoUrl) {
+    logoWrap.hidden = false;
+    logoWrap.innerHTML = `<img src="${esc(logoUrl)}" alt="" />`;
+  } else if (logoWrap) {
+    logoWrap.hidden = true;
+    logoWrap.innerHTML = "";
   }
 
   const url = pageShareUrl();
+  const shareText = "Oszd meg barátaiddal a kereskedésünk autóit.";
 
   host.querySelector("[data-si-share]")?.addEventListener("click", async () => {
     try {
       if (navigator.share) {
-        await navigator.share({ title: label, url, text: `${label} hirdetései a Bymy-n` });
+        await navigator.share({ title: label, url, text: shareText });
         return;
       }
     } catch {

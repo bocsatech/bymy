@@ -52,28 +52,87 @@ body.seller-inventory-mode .home-main {
 body.seller-inventory-mode .site-layout.home-layout,
 body.seller-inventory-mode .home-layout {
   grid-template-columns: minmax(0, 1fr);
-  max-width: 1120px;
-  margin-inline: auto;
+  max-width: none;
+  width: 100%;
+  margin-inline: 0;
 }
 
 body.seller-inventory-mode .home-center,
 body.seller-inventory-mode .site-center {
-  max-width: 640px;
-  margin-inline: auto;
+  max-width: none;
+  margin-inline: 0;
   width: 100%;
-  padding-inline: 0.75rem;
+  padding-inline: 0;
 }
 
 body.seller-inventory-mode .home-listings-panel,
 body.seller-inventory-mode .home-grid-track {
-  max-width: 640px;
-  margin-inline: auto;
+  max-width: none;
+  width: 100%;
+  margin-inline: 0;
+}
+
+/* Desk: ne hagyjon üres bal oszlopot a elrejtett keresőnek */
+@media (min-width: 901px) {
+  body.seller-inventory-mode.home-page .home-main.auto-desk-main,
+  body.seller-inventory-mode.home-page[data-site-page="auto"] .home-main.auto-desk-main,
+  body.seller-inventory-mode.home-page[data-site-page="teherauto"] .home-main.auto-desk-main {
+    display: block !important;
+    grid-template-columns: none !important;
+    max-width: 1440px !important;
+    width: 100% !important;
+    margin: 0 auto !important;
+    padding: 18px 24px 48px !important;
+  }
+
+  body.seller-inventory-mode.home-page .home-main.auto-desk-main > .home-layout.site-layout,
+  body.seller-inventory-mode.home-page .home-main.auto-desk-main > .site-layout {
+    grid-column: unset !important;
+    grid-row: unset !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    display: block !important;
+  }
+
+  body.seller-inventory-mode #home-grid-track,
+  body.seller-inventory-mode .home-grid-track {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 18px !important;
+    width: 100% !important;
+  }
+}
+
+@media (min-width: 901px) and (max-width: 1100px) {
+  body.seller-inventory-mode #home-grid-track,
+  body.seller-inventory-mode .home-grid-track {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 900px) {
+  body.seller-inventory-mode #home-grid-track,
+  body.seller-inventory-mode .home-grid-track {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 0.85rem !important;
+    width: 100% !important;
+  }
+}
+
+@media (max-width: 520px) {
+  body.seller-inventory-mode #home-grid-track,
+  body.seller-inventory-mode .home-grid-track {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
 }
 
 .seller-inv {
   margin: 0 0 1rem;
   padding: 0;
   color: var(--si-text);
+  max-width: 640px;
 }
 
 .seller-inv__back {

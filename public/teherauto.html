@@ -62,7 +62,7 @@
     <link rel="stylesheet" href="/css/hub-mobile-app.css?v=mobFix8" />
     <link rel="stylesheet" href="/css/home.css?v=mobFix8" />
     <link rel="stylesheet" href="/css/auto-hero.css?v=mobFix8" />
-    <link rel="stylesheet" href="/css/auto-desk-layout.css?v=mobFix8" />
+    <link rel="stylesheet" href="/css/auto-desk-layout.css?v=tileScroll1" />
     <link rel="stylesheet" href="/css/listing-photo-cover.css?v=tileAllPages1" />
     <link rel="stylesheet" href="/css/listing-featured.css?v=featured5" />
     <link rel="stylesheet" href="/css/ingatlan-search.css?v=mobFix8" />
@@ -167,18 +167,28 @@
       }
       
       @media (min-width: 901px) {
+        html:has(body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"])),
+        body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) {
+          height: 100% !important;
+          max-height: 100% !important;
+          overflow: hidden !important;
+        }
         body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main {
           display: grid !important;
           grid-template-columns: 320px minmax(0, 1fr) !important;
-          grid-template-rows: auto auto !important;
+          grid-template-rows: auto minmax(0, 1fr) !important;
           gap: 12px 28px !important;
-          align-items: start !important;
+          align-items: stretch !important;
           max-width: 1440px !important;
           width: 100% !important;
           margin-left: auto !important;
           margin-right: auto !important;
-          padding: 18px 24px 48px !important;
+          padding: 18px 24px 18px !important;
           box-sizing: border-box !important;
+          height: calc(100dvh - var(--site-fixed-header-h, 80px)) !important;
+          max-height: calc(100dvh - var(--site-fixed-header-h, 80px)) !important;
+          min-height: 0 !important;
+          overflow: hidden !important;
         }
         body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main > .auto-search-tabs {
           display: grid !important;
@@ -199,7 +209,11 @@
           width: 320px !important;
           max-width: 320px !important;
           margin: 0 !important;
-          justify-self: start !important;
+          justify-self: stretch !important;
+          align-self: stretch !important;
+          min-height: 0 !important;
+          max-height: 100% !important;
+          overflow: hidden !important;
         }
         body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main > .home-layout.site-layout,
         body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main > .site-layout {
@@ -208,7 +222,30 @@
           width: auto !important;
           max-width: none !important;
           margin: 0 !important;
-          display: block !important;
+          display: flex !important;
+          flex-direction: column !important;
+          min-height: 0 !important;
+          max-height: 100% !important;
+          overflow: hidden !important;
+        }
+        body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main .home-center,
+        body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main .site-center {
+          display: flex !important;
+          flex-direction: column !important;
+          flex: 1 1 auto !important;
+          min-height: 0 !important;
+          overflow: hidden !important;
+        }
+        body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main .home-listings-panel {
+          flex: 1 1 auto !important;
+          min-height: 0 !important;
+          overflow-x: hidden !important;
+          overflow-y: auto !important;
+          max-height: none !important;
+        }
+        body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main .home-layout,
+        body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main .home-center {
+          overflow-y: hidden !important;
         }
       }
       body.home-page .home-layout {

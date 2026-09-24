@@ -199,20 +199,31 @@
     background: linear-gradient(90deg, #e5e7eb 50%, #111827 50%) !important;
   }
 
+  html:has(body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"])),
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) {
+    height: 100% !important;
+    max-height: 100% !important;
+    overflow: hidden !important;
+    overscroll-behavior: none;
+  }
+
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main {
     display: grid !important;
     grid-template-columns: 320px minmax(0, 1fr) !important;
-    grid-template-rows: auto auto !important;
+    grid-template-rows: auto minmax(0, 1fr) !important;
     gap: 12px 28px !important;
-    align-items: start !important;
+    align-items: stretch !important;
     max-width: 1440px !important;
     width: 100% !important;
     margin: 0 auto !important;
-    padding: 18px 24px 48px !important;
+    padding: 18px 24px 18px !important;
     box-sizing: border-box !important;
     background: var(--ad-bg) !important;
     color: var(--ad-text);
-    min-height: calc(100vh - 56px);
+    height: calc(100dvh - var(--site-fixed-header-h, 80px)) !important;
+    max-height: calc(100dvh - var(--site-fixed-header-h, 80px)) !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main > .auto-search-tabs {
@@ -257,18 +268,22 @@
     width: 320px !important;
     max-width: 320px !important;
     margin: 0 !important;
-    position: sticky !important;
-    top: calc(var(--site-fixed-header-h, 64px) + 12px) !important;
+    position: relative !important;
+    top: auto !important;
     z-index: 2 !important;
-    justify-self: start !important;
-    align-self: start !important;
-    max-height: none;
-    overflow: visible;
-    overscroll-behavior: auto;
+    justify-self: stretch !important;
+    align-self: stretch !important;
+    height: auto !important;
+    max-height: 100% !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+    overscroll-behavior: contain;
+    display: flex !important;
+    flex-direction: column;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-hero {
-    position: sticky;
+    position: relative;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-hero,
@@ -285,8 +300,40 @@
     width: auto !important;
     max-width: none !important;
     margin: 0 !important;
-    display: block !important;
+    display: flex !important;
+    flex-direction: column !important;
     justify-self: stretch !important;
+    align-self: stretch !important;
+    min-height: 0 !important;
+    height: auto !important;
+    max-height: 100% !important;
+    overflow: hidden !important;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main .home-center,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main .site-center {
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    overflow: hidden !important;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main .auto-desk-results-bar {
+    flex: 0 0 auto;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main .home-listings-panel {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 8px;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-layout,
@@ -322,7 +369,10 @@
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-hero__stage {
     min-height: 0 !important;
     height: auto !important;
-    overflow: visible !important;
+    flex: 1 1 auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-hero__content {
@@ -332,16 +382,41 @@
     width: 100% !important;
     max-width: none !important;
     padding: 0 !important;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel,
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-body {
-    display: block !important;
+    display: flex !important;
+    flex-direction: column !important;
     width: 100%;
     max-width: none;
     margin: 0;
     padding: 0 !important;
     border-radius: 0 !important;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel {
+    overflow: hidden !important;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-body {
+    overflow: hidden !important;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .home-qs-form {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-mode {

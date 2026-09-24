@@ -295,11 +295,11 @@ html[data-theme="dark"] .seller-inv__btn--ghost:hover {
   align-items: center;
   gap: 0.45rem;
   color: var(--si-text);
-  min-height: 2.5rem;
-  padding: 0.45rem 0.7rem;
-  border: 1px solid var(--si-line);
-  border-radius: var(--si-radius-sm);
-  background: var(--si-panel);
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
 }
 
 .seller-inv__dot {
@@ -324,10 +324,10 @@ html[data-theme="dark"] .seller-inv__btn--ghost:hover {
   align-items: center;
   gap: 0.65rem;
   min-width: 0;
-  padding: 0.4rem 0.55rem;
-  border: 1px solid var(--si-line);
-  border-radius: var(--si-radius-sm);
-  background: var(--si-panel);
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
 }
 
 .seller-inv__staff-avatar {
@@ -373,7 +373,7 @@ html[data-theme="dark"] .seller-inv__btn--ghost:hover {
   margin: 0;
   padding: 0;
   display: grid;
-  gap: 0.35rem;
+  gap: 0.2rem;
 }
 
 .seller-inv__phones li,
@@ -383,10 +383,10 @@ html[data-theme="dark"] .seller-inv__btn--ghost:hover {
   font-weight: 650;
   color: var(--si-text);
   line-height: 1.4;
-  padding: 0.5rem 0.7rem;
-  border: 1px solid var(--si-line);
-  border-radius: var(--si-radius-sm);
-  background: var(--si-panel);
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
 }
 
 .seller-inv__phones a {

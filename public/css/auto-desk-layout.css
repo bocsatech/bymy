@@ -1179,6 +1179,12 @@ html[data-theme="dark"] body.site-app > .auto-price-suggest .auto-price-suggest_
     visibility: visible !important;
   }
 
+  /* Top kivitel bar is desk/hero chrome — search form already has Kivitel field. */
+  .auto-kivitel-nav,
+  body.home-page[data-site-page="auto"] .auto-kivitel-nav {
+    display: none !important;
+  }
+
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-grid-card-loc {
     display: inline-flex !important;
   }

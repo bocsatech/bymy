@@ -1,6 +1,7 @@
 /** „Több ettől a hirdetőtől” — kereskedő készlet (demo A), bymy menüsáv érintetlen. */
 
-import { fetchSellerContact } from "./db-client.js?v=sellerInv3";
+import { fetchSellerContact, revealListingContact } from "./db-client.js?v=sellerInv9";
+import { mountTurnstile } from "./turnstile-ui.js?v=turnstile10";
 
 function esc(value) {
   return String(value ?? "")
@@ -18,7 +19,7 @@ function injectStylesheet() {
   if (document.querySelector('link[data-seller-inv-css]')) return;
   const link = document.createElement("link");
   link.rel = "stylesheet";
-  link.href = "/css/seller-inventory.css?v=sellerInv8";
+  link.href = "/css/seller-inventory.css?v=sellerInv9";
   link.dataset.sellerInvCss = "1";
   document.head.appendChild(link);
 }
@@ -86,7 +87,22 @@ function staffHtml(staff = []) {
     .join("")}</ul>`;
 }
 
-function phonesHtml(phones = []) {
+function maskedPhonesHtml(masked = [], hasPhone = false) {
+  const list = (masked || []).map((p) => String(p || "").trim()).filter(Boolean);
+  if (!list.length && !hasPhone) return `<p class="seller-inv__hint">Nincs telefonszám.</p>`;
+  const shown = list.length ? list : ["…"];
+  return `
+    <ul class="seller-inv__phones" data-si-phones>
+      ${shown.map((phone) => `<li>${esc(phone)}</li>`).join("")}
+    </ul>
+    <button type="button" class="seller-inv__btn seller-inv__btn--ghost seller-inv__phone-reveal" data-si-phone-reveal>
+      Telefonszám mutatása
+    </button>
+    <div class="seller-inv__turnstile" data-si-turnstile hidden></div>
+  `;
+}
+
+function fullPhonesHtml(phones = []) {
   const list = (phones || []).map((p) => String(p || "").trim()).filter(Boolean);
   if (!list.length) return `<p class="seller-inv__hint">Nincs telefonszám.</p>`;
   return `<ul class="seller-inv__phones">${list
@@ -114,15 +130,20 @@ function navHref(mapQuery) {
 
 function contactPanelHtml(contact) {
   const staff = Array.isArray(contact?.staff) ? contact.staff : [];
-  const phones = Array.isArray(contact?.phones) ? contact.phones : [];
+  const masked = Array.isArray(contact?.phonesMasked) ? contact.phonesMasked : [];
+  const hasPhone = Boolean(contact?.hasPhone) || masked.length > 0;
   const lines = Array.isArray(contact?.addressLines) ? contact.addressLines : [];
   const nav = navHref(contact?.mapQuery || lines.join(", "));
   return `
     <p class="seller-inv__label">Kapcsolat</p>
-    ${staffHtml(staff)}
-    <div class="seller-inv__block">
-      <p class="seller-inv__label">Telefon</p>
-      ${phonesHtml(phones)}
+    <div class="seller-inv__contact-row">
+      <div class="seller-inv__contact-col">
+        ${staffHtml(staff)}
+      </div>
+      <div class="seller-inv__contact-col" data-si-phone-col>
+        <p class="seller-inv__label">Telefon</p>
+        ${maskedPhonesHtml(masked, hasPhone)}
+      </div>
     </div>
     <div class="seller-inv__block">
       <p class="seller-inv__label">Cím</p>
@@ -134,6 +155,50 @@ function contactPanelHtml(contact) {
         : `<p class="seller-inv__hint">Navigációhoz nincs elég címadat.</p>`
     }
   `;
+}
+
+function bindPhoneReveal(host, fromId) {
+  const btn = host.querySelector("[data-si-phone-reveal]");
+  const col = host.querySelector("[data-si-phone-col]");
+  const turnstileHost = host.querySelector("[data-si-turnstile]");
+  if (!btn || !col) return;
+  let turnstileApi = null;
+
+  btn.addEventListener("click", async () => {
+    if (btn.dataset.done === "1") return;
+    btn.disabled = true;
+    try {
+      if (!turnstileApi && turnstileHost) {
+        turnstileHost.hidden = false;
+        turnstileApi = await mountTurnstile(turnstileHost, { action: "listing-reveal" });
+      }
+      let token = "";
+      if (turnstileApi?.enabled) {
+        token = turnstileApi.execute
+          ? await turnstileApi.execute({ waitMs: 15000 })
+          : await turnstileApi.getToken({ waitMs: 10000 });
+        if (!token) {
+          throw new Error("A biztonsági ellenőrzés sikertelen. Próbáld újra.");
+        }
+      }
+      const revealed = await revealListingContact(fromId, token);
+      const phones = revealed.phones?.length
+        ? revealed.phones
+        : revealed.phone
+          ? [revealed.phone]
+          : [];
+      const label = col.querySelector(".seller-inv__label");
+      col.innerHTML = `${label ? label.outerHTML : `<p class="seller-inv__label">Telefon</p>`}${fullPhonesHtml(phones)}`;
+      btn.dataset.done = "1";
+    } catch (err) {
+      btn.disabled = false;
+      const hint = document.createElement("p");
+      hint.className = "seller-inv__hint";
+      hint.textContent = err?.message || "A telefonszám most nem érhető el.";
+      turnstileHost?.insertAdjacentElement("beforebegin", hint);
+      turnstileApi?.reset?.();
+    }
+  });
 }
 
 /**
@@ -187,6 +252,7 @@ export async function mountSellerInventory({ fromId, count = 0 } = {}) {
     contactPanel.innerHTML = contact
       ? contactPanelHtml(contact)
       : `<p class="seller-inv__label">Kapcsolat</p><p class="seller-inv__hint">Nincs megjeleníthető kapcsolat.</p>`;
+    if (contact) bindPhoneReveal(contactPanel, fromId);
   }
 
   const label = String(contact?.sellerName || "").trim() || "Hirdető";

@@ -347,6 +347,33 @@ html[data-theme="dark"] .seller-inv__btn--ghost:hover {
   flex-shrink: 0;
 }
 
+.seller-inv__contact-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem 1.25rem;
+  align-items: start;
+  margin-bottom: 0.35rem;
+}
+
+.seller-inv__contact-col {
+  min-width: 0;
+}
+
+.seller-inv__phone-reveal {
+  margin-top: 0.55rem;
+  width: 100%;
+}
+
+.seller-inv__turnstile {
+  margin-top: 0.55rem;
+}
+
+@media (max-width: 720px) {
+  .seller-inv__contact-row {
+    grid-template-columns: 1fr;
+  }
+}
+
 .seller-inv__staff {
   list-style: none;
   margin: 0 0 0.85rem;

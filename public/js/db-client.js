@@ -85,6 +85,11 @@ export async function revealListingContact(listingId, turnstileToken = "") {
   const data = await parseJson(response);
   return {
     phone: String(data.phone ?? "").trim(),
+    phones: Array.isArray(data.phones)
+      ? data.phones.map((p) => String(p ?? "").trim()).filter(Boolean)
+      : String(data.phone ?? "").trim()
+        ? [String(data.phone).trim()]
+        : [],
     addressLines: Array.isArray(data.addressLines) ? data.addressLines : [],
   };
 }

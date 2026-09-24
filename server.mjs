@@ -146,7 +146,7 @@ import {
   importTokenTtlMs,
   importRateLimitPerHour,
 } from "./lib/import-auth.mjs";
-import { attachSellerProfile, getSellerInventoryContactForUserId } from "./lib/listing-detail-seller.mjs";
+import { attachSellerProfile, getSellerInventoryContactForUserId, publicSellerInventoryContact } from "./lib/listing-detail-seller.mjs";
 import { saveListingPhotos } from "./lib/listing-photos.mjs";
 import {
   dataUrlToBuffer,
@@ -1047,7 +1047,7 @@ async function handleListingsApi(req, res, pathname) {
       sendJson(res, 404, { error: "Nincs megjeleníthető kapcsolat." });
       return;
     }
-    sendJson(res, 200, { contact });
+    sendJson(res, 200, { contact: publicSellerInventoryContact(contact) });
     return;
   }
 
@@ -1089,15 +1089,24 @@ async function handleListingsApi(req, res, pathname) {
       sendJson(res, 404, { error: "Nincs ilyen hirdetés." });
       return;
     }
-    const phone = String(listing.detail?.phone ?? "").trim();
-    const addressLines = Array.isArray(listing.detail?.addressLines)
+    let phone = String(listing.detail?.phone ?? "").trim();
+    let addressLines = Array.isArray(listing.detail?.addressLines)
       ? listing.detail.addressLines.map((line) => String(line ?? "").trim()).filter(Boolean)
       : [];
-    if (!phone && !addressLines.length) {
+    let phones = phone ? [phone] : [];
+    if (listing.user_id) {
+      const seller = await getSellerInventoryContactForUserId(listing.user_id);
+      if (seller?.phones?.length) phones = seller.phones;
+      if (!phone && phones[0]) phone = phones[0];
+      if ((!addressLines.length) && seller?.addressLines?.length) {
+        addressLines = seller.addressLines;
+      }
+    }
+    if (!phones.length && !addressLines.length) {
       sendJson(res, 404, { error: "Ehhez a hirdetéshez nincs megadott elérhetőség." });
       return;
     }
-    sendJson(res, 200, { phone, addressLines });
+    sendJson(res, 200, { phone: phone || phones[0] || "", phones, addressLines });
     return;
   }
 

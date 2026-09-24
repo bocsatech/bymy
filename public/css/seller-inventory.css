@@ -368,6 +368,8 @@ body.seller-inventory-mode .home-grid-track {
 
 .seller-inv__share {
   width: 100%;
+  max-width: 52rem;
+  box-sizing: border-box;
 }
 
 .seller-inv__back {

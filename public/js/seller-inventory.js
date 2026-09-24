@@ -1,6 +1,6 @@
 /** „Több ettől a hirdetőtől” — kereskedő készlet (demo A), bymy menüsáv érintetlen. */
 
-import { fetchSellerContact, revealListingContact, fetchSellerRating, submitSellerRating } from "./db-client.js?v=sellerInv13";
+import { fetchSellerContact, revealListingContact, fetchSellerRating, submitSellerRating } from "./db-client.js?v=sellerInv14";
 import { mountTurnstile } from "./turnstile-ui.js?v=turnstile10";
 
 function esc(value) {
@@ -19,7 +19,7 @@ function injectStylesheet() {
   if (document.querySelector('link[data-seller-inv-css]')) return;
   const link = document.createElement("link");
   link.rel = "stylesheet";
-  link.href = "/css/seller-inventory.css?v=sellerInv13";
+  link.href = "/css/seller-inventory.css?v=sellerInv14";
   link.dataset.sellerInvCss = "1";
   document.head.appendChild(link);
 }
@@ -227,7 +227,7 @@ function fullPhonesHtml(phones = []) {
 
 function addressHtml(lines = []) {
   const list = (lines || []).map((l) => String(l || "").trim()).filter(Boolean);
-  if (!list.length) return `<p class="seller-inv__hint">Nincs cím.</p>`;
+  if (!list.length) return "";
   return `<p class="seller-inv__address">${list.map(esc).join("<br />")}</p>`;
 }
 
@@ -243,22 +243,24 @@ function contactPanelHtml(contact) {
   const hasPhone = Boolean(contact?.hasPhone) || masked.length > 0;
   const lines = Array.isArray(contact?.addressLines) ? contact.addressLines : [];
   const nav = navHref(contact?.mapQuery || lines.join(", "));
+  const addr = addressHtml(lines);
   return `
-    <div class="seller-inv__contact-stack">
-      ${staffHtml(staff)}
-      <div class="seller-inv__phone-wrap" data-si-phone-col>
-        ${maskedPhonesHtml(masked, hasPhone)}
+    <div class="seller-inv__contact">
+      <div class="seller-inv__contact-top">
+        <div class="seller-inv__contact-identity">${staffHtml(staff)}</div>
+        ${addr ? `<div class="seller-inv__contact-addr">${addr}</div>` : ""}
+      </div>
+      <div class="seller-inv__contact-actions">
+        <div class="seller-inv__phone-wrap" data-si-phone-col>
+          ${maskedPhonesHtml(masked, hasPhone)}
+        </div>
+        ${
+          nav
+            ? `<a class="seller-inv__btn seller-inv__btn--yellow seller-inv__nav" href="${esc(nav)}" target="_blank" rel="noopener noreferrer">Navigáció</a>`
+            : ""
+        }
       </div>
     </div>
-    <div class="seller-inv__block">
-      <p class="seller-inv__label">Cím</p>
-      ${addressHtml(lines)}
-    </div>
-    ${
-      nav
-        ? `<a class="seller-inv__btn seller-inv__btn--yellow seller-inv__nav" href="${esc(nav)}" target="_blank" rel="noopener noreferrer">Navigáció</a>`
-        : `<p class="seller-inv__hint">Navigációhoz nincs elég címadat.</p>`
-    }
   `;
 }
 

@@ -390,23 +390,60 @@ button.seller-inv__star:focus-visible {
   margin-top: 0.1rem;
 }
 
-.seller-inv__contact-stack {
+.seller-inv__contact {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  margin-bottom: 0.35rem;
   min-width: 0;
+}
+
+.seller-inv__contact-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem 1.25rem;
+  min-width: 0;
+}
+
+.seller-inv__contact-identity {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.seller-inv__contact-addr {
+  flex: 0 1 14rem;
+  text-align: right;
+  min-width: 0;
+}
+
+.seller-inv__contact-addr .seller-inv__address {
+  font-size: 0.88rem;
+  font-weight: 650;
+  line-height: 1.35;
+  text-align: right;
+}
+
+.seller-inv__contact-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.65rem;
 }
 
 .seller-inv__phone-wrap {
   min-width: 0;
-  max-width: 22rem;
+  flex: 0 1 auto;
 }
 
-.seller-inv__phone-reveal {
+.seller-inv__phone-reveal,
+.seller-inv__nav {
   margin-top: 0;
-  width: 100%;
-  gap: 0.45rem;
+  width: auto;
+  max-width: 100%;
+  gap: 0.4rem;
+  padding: 0.45rem 0.75rem;
+  font-size: 0.84rem;
+  white-space: nowrap;
 }
 
 .seller-inv__phone-reveal svg {
@@ -415,6 +452,20 @@ button.seller-inv__star:focus-visible {
 
 .seller-inv__turnstile {
   margin-top: 0.55rem;
+  flex: 1 1 100%;
+}
+
+@media (max-width: 560px) {
+  .seller-inv__contact-top {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .seller-inv__contact-addr,
+  .seller-inv__contact-addr .seller-inv__address {
+    text-align: left;
+    flex-basis: auto;
+  }
 }
 
 .seller-inv__staff {
@@ -470,10 +521,6 @@ button.seller-inv__star:focus-visible {
   text-overflow: ellipsis;
 }
 
-.seller-inv__block {
-  margin-top: 0.75rem;
-}
-
 .seller-inv__phones {
   list-style: none;
   margin: 0;
@@ -503,12 +550,6 @@ button.seller-inv__star:focus-visible {
 
 .seller-inv__phones a:hover {
   text-decoration: underline;
-}
-
-.seller-inv__nav {
-  margin-top: 0.85rem;
-  width: 100%;
-  text-align: center;
 }
 
 .seller-inv__title {

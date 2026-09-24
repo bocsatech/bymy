@@ -1206,6 +1206,11 @@ html[data-theme="dark"] body.site-app > .auto-price-suggest .auto-price-suggest_
     display: none !important;
   }
 
+  body:is([data-site-page="auto"], [data-site-page="teherauto"]) .immo-wheel[hidden],
+  body:is([data-site-page="auto"], [data-site-page="teherauto"]) .immo-wheel--drum-source {
+    display: none !important;
+  }
+
   .auto-desk-mode,
   .auto-desk-acc__head,
   .auto-desk-reset {

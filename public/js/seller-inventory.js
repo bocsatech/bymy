@@ -1,6 +1,6 @@
 /** „Több ettől a hirdetőtől” — kereskedő készlet (demo A), bymy menüsáv érintetlen. */
 
-import { fetchSellerContact, revealListingContact, fetchSellerRating, submitSellerRating } from "./db-client.js?v=sellerInv12";
+import { fetchSellerContact, revealListingContact, fetchSellerRating, submitSellerRating } from "./db-client.js?v=sellerInv13";
 import { mountTurnstile } from "./turnstile-ui.js?v=turnstile10";
 
 function esc(value) {
@@ -19,7 +19,7 @@ function injectStylesheet() {
   if (document.querySelector('link[data-seller-inv-css]')) return;
   const link = document.createElement("link");
   link.rel = "stylesheet";
-  link.href = "/css/seller-inventory.css?v=sellerInv12";
+  link.href = "/css/seller-inventory.css?v=sellerInv13";
   link.dataset.sellerInvCss = "1";
   document.head.appendChild(link);
 }
@@ -244,13 +244,9 @@ function contactPanelHtml(contact) {
   const lines = Array.isArray(contact?.addressLines) ? contact.addressLines : [];
   const nav = navHref(contact?.mapQuery || lines.join(", "));
   return `
-    <p class="seller-inv__label">Kapcsolat</p>
-    <div class="seller-inv__contact-row">
-      <div class="seller-inv__contact-col">
-        ${staffHtml(staff)}
-      </div>
-      <div class="seller-inv__contact-col" data-si-phone-col>
-        <p class="seller-inv__label">Telefon</p>
+    <div class="seller-inv__contact-stack">
+      ${staffHtml(staff)}
+      <div class="seller-inv__phone-wrap" data-si-phone-col>
         ${maskedPhonesHtml(masked, hasPhone)}
       </div>
     </div>
@@ -296,8 +292,7 @@ function bindPhoneReveal(host, fromId) {
         : revealed.phone
           ? [revealed.phone]
           : [];
-      const label = col.querySelector(".seller-inv__label");
-      col.innerHTML = `${label ? label.outerHTML : `<p class="seller-inv__label">Telefon</p>`}${fullPhonesHtml(phones)}`;
+      col.innerHTML = fullPhonesHtml(phones);
       btn.dataset.done = "1";
     } catch (err) {
       btn.disabled = false;
@@ -335,7 +330,6 @@ export async function mountSellerInventory({ fromId, count = 0 } = {}) {
     </div>
     <div class="seller-inv__duo">
       <div class="seller-inv__panel" data-si-contact-panel>
-        <p class="seller-inv__label">Kapcsolat</p>
         <p class="seller-inv__hint">Kapcsolat betöltése…</p>
       </div>
       <div class="seller-inv__panel" data-si-status-panel>
@@ -362,7 +356,7 @@ export async function mountSellerInventory({ fromId, count = 0 } = {}) {
   if (contactPanel) {
     contactPanel.innerHTML = contact
       ? contactPanelHtml(contact)
-      : `<p class="seller-inv__label">Kapcsolat</p><p class="seller-inv__hint">Nincs megjeleníthető kapcsolat.</p>`;
+      : `<p class="seller-inv__hint">Nincs megjeleníthető kapcsolat.</p>`;
     if (contact) bindPhoneReveal(contactPanel, fromId);
   }
 

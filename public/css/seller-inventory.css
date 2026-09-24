@@ -390,16 +390,17 @@ button.seller-inv__star:focus-visible {
   margin-top: 0.1rem;
 }
 
-.seller-inv__contact-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem 1.25rem;
-  align-items: start;
+.seller-inv__contact-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
   margin-bottom: 0.35rem;
+  min-width: 0;
 }
 
-.seller-inv__contact-col {
+.seller-inv__phone-wrap {
   min-width: 0;
+  max-width: 22rem;
 }
 
 .seller-inv__phone-reveal {
@@ -416,15 +417,9 @@ button.seller-inv__star:focus-visible {
   margin-top: 0.55rem;
 }
 
-@media (max-width: 720px) {
-  .seller-inv__contact-row {
-    grid-template-columns: 1fr;
-  }
-}
-
 .seller-inv__staff {
   list-style: none;
-  margin: 0 0 0.85rem;
+  margin: 0;
   padding: 0;
   display: grid;
   gap: 0.55rem;

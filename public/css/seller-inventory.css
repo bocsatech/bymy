@@ -360,8 +360,13 @@ html[data-theme="dark"] .seller-inv__btn--ghost:hover {
 }
 
 .seller-inv__phone-reveal {
-  margin-top: 0.55rem;
+  margin-top: 0;
   width: 100%;
+  gap: 0.45rem;
+}
+
+.seller-inv__phone-reveal svg {
+  flex-shrink: 0;
 }
 
 .seller-inv__turnstile {

@@ -19,7 +19,7 @@ function injectStylesheet() {
   if (document.querySelector('link[data-seller-inv-css]')) return;
   const link = document.createElement("link");
   link.rel = "stylesheet";
-  link.href = "/css/seller-inventory.css?v=sellerInv9";
+  link.href = "/css/seller-inventory.css?v=sellerInv10";
   link.dataset.sellerInvCss = "1";
   document.head.appendChild(link);
 }
@@ -87,16 +87,16 @@ function staffHtml(staff = []) {
     .join("")}</ul>`;
 }
 
+const PHONE_ICON = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6.5 4.8h3.2l1.1 3.2-1.8 1.1a12 12 0 0 0 6 6l1.1-1.8 3.2 1.1v3.2A2 2 0 0 1 17.3 20 15 15 0 0 1 4 6.7 2 2 0 0 1 6.5 4.8Z" stroke="currentColor" stroke-width="1.6"/></svg>`;
+
 function maskedPhonesHtml(masked = [], hasPhone = false) {
   const list = (masked || []).map((p) => String(p || "").trim()).filter(Boolean);
   if (!list.length && !hasPhone) return `<p class="seller-inv__hint">Nincs telefonszám.</p>`;
-  const shown = list.length ? list : ["…"];
+  const label = list[0] || "Telefonszám";
   return `
-    <ul class="seller-inv__phones" data-si-phones>
-      ${shown.map((phone) => `<li>${esc(phone)}</li>`).join("")}
-    </ul>
-    <button type="button" class="seller-inv__btn seller-inv__btn--ghost seller-inv__phone-reveal" data-si-phone-reveal>
-      Telefonszám mutatása
+    <button type="button" class="seller-inv__btn seller-inv__btn--yellow seller-inv__phone-reveal" data-si-phone-reveal>
+      ${PHONE_ICON}
+      <span>${esc(label)} mutatása</span>
     </button>
     <div class="seller-inv__turnstile" data-si-turnstile hidden></div>
   `;
@@ -105,15 +105,30 @@ function maskedPhonesHtml(masked = [], hasPhone = false) {
 function fullPhonesHtml(phones = []) {
   const list = (phones || []).map((p) => String(p || "").trim()).filter(Boolean);
   if (!list.length) return `<p class="seller-inv__hint">Nincs telefonszám.</p>`;
-  return `<ul class="seller-inv__phones">${list
-    .map((phone) => {
-      const digits = phone.replace(/[^\d+]/g, "");
-      const href = digits.length >= 7 ? `tel:${digits}` : "";
-      return href
-        ? `<li><a href="${esc(href)}">${esc(phone)}</a></li>`
-        : `<li>${esc(phone)}</li>`;
-    })
-    .join("")}</ul>`;
+  const first = list[0];
+  const digits = first.replace(/[^\d+]/g, "");
+  const href = digits.length >= 7 ? `tel:${digits}` : "";
+  const more =
+    list.length > 1
+      ? `<ul class="seller-inv__phones">${list
+          .slice(1)
+          .map((phone) => {
+            const d = phone.replace(/[^\d+]/g, "");
+            const h = d.length >= 7 ? `tel:${d}` : "";
+            return h
+              ? `<li><a href="${esc(h)}">${esc(phone)}</a></li>`
+              : `<li>${esc(phone)}</li>`;
+          })
+          .join("")}</ul>`
+      : "";
+  return `
+    ${
+      href
+        ? `<a class="seller-inv__btn seller-inv__btn--yellow seller-inv__phone-reveal" href="${esc(href)}">${PHONE_ICON}<span>Hívás · ${esc(first)}</span></a>`
+        : `<p class="seller-inv__phones"><span>${esc(first)}</span></p>`
+    }
+    ${more}
+  `;
 }
 
 function addressHtml(lines = []) {

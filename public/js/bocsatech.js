@@ -2425,7 +2425,7 @@ function userEditView() {
     .map(
       (f) => `
       <label class="user-edit__field${profileWideKeys.has(f.key) ? " user-edit__field--wide" : ""}">
-        <span class="user-edit__label">${esc(f.label)} <small>(${esc(f.key)})</small></span>
+        <span class="user-edit__label">${esc(f.label)}</span>
         ${
           f.key === "accountType"
             ? `<select class="edit-profile-field" data-key="accountType">
@@ -2438,68 +2438,87 @@ function userEditView() {
     )
     .join("");
 
+  const ads = Number(editingUser.listingCount ?? (editingUser.listings || []).length) || 0;
+  const active = Boolean(editingUser.emailVerified);
+  const listingRows = (editingUser.listings || [])
+    .map(
+      (l) => `<article class="user-edit__listing">
+        <div class="user-edit__listing-main">
+          <span class="user-edit__listing-id">#${l.id}</span>
+          <div class="user-edit__listing-who">
+            <div class="user-edit__listing-title">${esc(l.title || "—")}</div>
+            <div class="user-edit__listing-meta">${esc(fmtWhen(l.updatedAt))}</div>
+          </div>
+          <label class="user-edit__listing-status">
+            <select data-act="setUserListingStatus" data-id="${l.id}">
+              ${["mentett", "feladott", "inaktiv"]
+                .map((s) => `<option ${s === l.status ? "selected" : ""}>${s}</option>`)
+                .join("")}
+            </select>
+          </label>
+        </div>
+        <div class="user-edit__listing-actions">
+          <a class="users-card__btn" href="/hirdetes.html?id=${l.id}" target="_blank" rel="noreferrer">Nyit</a>
+          <a class="users-card__btn" href="/hirdetesfeladas.html?id=${l.id}" target="_blank" rel="noreferrer">Szerk.</a>
+          <button class="users-card__btn users-card__btn--danger" type="button" data-act="delUserListing" data-id="${l.id}">Törlés</button>
+        </div>
+      </article>`
+    )
+    .join("");
+
   return `
-    <div class="user-edit">
-      <h2>Felhasználó kezelése (#${esc(editingUser.id)})</h2>
-      <p class="hint">Regisztráció: ${esc(fmtWhen(editingUser.createdAt))} · Utoljára belépett: ${esc(fmtWhen(editingUser.lastLoginAt))} · Hirdetések: ${editingUser.listingCount ?? (editingUser.listings || []).length}</p>
-      <div class="user-edit__narrow">
-      <div class="user-edit__core">
-        <label class="user-edit__field user-edit__field--wide">
-          <span class="user-edit__label">Email</span>
-          <input id="edit-email" type="email" value="${esc(editingUser.email || "")}" />
-        </label>
-
-        <label class="user-edit__field">
-          <span class="user-edit__label">Megjelenített név</span>
-          <input id="edit-displayName" type="text" value="${esc(editingUser.displayName || "")}" />
-        </label>
-
-        <label class="user-edit__field user-edit__field--check">
-          <input id="edit-emailVerified" type="checkbox" ${editingUser.emailVerified ? "checked" : ""} />
-          <span>Email aktivált</span>
-        </label>
+    <div class="user-edit users-cards-wrap">
+      <div class="user-edit__head">
+        <div class="user-edit__head-main">
+          <div class="users-card__avatar" aria-hidden="true">${esc(userInitials(editingUser))}</div>
+          <div>
+            <h2 class="users-cards-title">Felhasználó kezelése <span class="user-edit__id">#${esc(editingUser.id)}</span></h2>
+            <p class="user-edit__meta">
+              <span>Reg: ${esc(fmtWhen(editingUser.createdAt))}</span>
+              <span>Ut: ${esc(fmtWhen(editingUser.lastLoginAt))}</span>
+            </p>
+          </div>
+        </div>
+        <div class="user-edit__head-badges">
+          <span class="users-card__status ${active ? "is-on" : "is-off"}">${active ? "aktív" : "inaktív"}</span>
+          <span class="users-card__ads" title="Hirdetések">${ads}</span>
+        </div>
       </div>
 
-      <h3 class="user-edit__section-title">Profil mezők</h3>
-      <div class="user-edit__profile-fields">${fieldRows}</div>
-      </div>
+      <section class="user-edit__card">
+        <h3 class="user-edit__section-title">Fiók</h3>
+        <div class="user-edit__core">
+          <label class="user-edit__field user-edit__field--wide">
+            <span class="user-edit__label">Email</span>
+            <input id="edit-email" type="email" value="${esc(editingUser.email || "")}" />
+          </label>
+          <label class="user-edit__field">
+            <span class="user-edit__label">Megjelenített név</span>
+            <input id="edit-displayName" type="text" value="${esc(editingUser.displayName || "")}" />
+          </label>
+          <label class="user-edit__field user-edit__field--check">
+            <input id="edit-emailVerified" type="checkbox" ${editingUser.emailVerified ? "checked" : ""} />
+            <span>Email aktivált</span>
+          </label>
+        </div>
+      </section>
 
-      <div class="user-edit__listings">
-      <h3 class="user-edit__section-title">Hirdetései</h3>
-      <div class="table-scroll">
-        <table class="table-dense">
-          <thead><tr><th>#</th><th>Cím</th><th>Státusz</th><th>Frissítve</th><th></th></tr></thead>
-          <tbody>
-            ${(editingUser.listings || [])
-              .map(
-                (l) => `<tr>
-                  <td>${l.id}</td>
-                  <td class="user-edit__listing-title">${esc(l.title || "")}</td>
-                  <td>
-                    <select data-act="setUserListingStatus" data-id="${l.id}">
-                      ${["mentett", "feladott", "inaktiv"]
-                        .map((s) => `<option ${s === l.status ? "selected" : ""}>${s}</option>`)
-                        .join("")}
-                    </select>
-                  </td>
-                  <td>${esc(fmtWhen(l.updatedAt))}</td>
-                  <td class="row-actions">
-                    <a href="/hirdetes.html?id=${l.id}" target="_blank" rel="noreferrer">nyit</a>
-                    <a href="/hirdetesfeladas.html?id=${l.id}" target="_blank" rel="noreferrer">szerk.</a>
-                    <button class="btn danger" type="button" data-act="delUserListing" data-id="${l.id}">Törlés</button>
-                  </td>
-                </tr>`
-              )
-              .join("") || `<tr><td colspan="5">Nincs hirdetése.</td></tr>`}
-          </tbody>
-        </table>
-      </div>
-      </div>
+      <section class="user-edit__card">
+        <h3 class="user-edit__section-title">Profil mezők</h3>
+        <div class="user-edit__profile-fields">${fieldRows || `<p class="users-cards-empty">Nincs profilmező.</p>`}</div>
+      </section>
 
-      <div class="row" style="display:flex; gap:0.75rem; flex-wrap:wrap; margin-top:1.25rem">
-        <button class="btn" type="button" data-act="saveUser">Mentés</button>
-        <button class="btn ghost" type="button" data-act="toggleUserActive" data-id="${editingUser.id}" data-active="${editingUser.emailVerified ? "1" : "0"}">${editingUser.emailVerified ? "Deaktivál" : "Aktivál"}</button>
-        <button class="btn" type="button" data-act="cancelEditUser">Mégse</button>
+      <section class="user-edit__card">
+        <h3 class="user-edit__section-title">Hirdetései <small>(${ads})</small></h3>
+        <div class="user-edit__listings">
+          ${listingRows || `<p class="users-cards-empty">Nincs hirdetése.</p>`}
+        </div>
+      </section>
+
+      <div class="user-edit__actions">
+        <button class="users-card__btn users-card__btn--primary" type="button" data-act="saveUser">Mentés</button>
+        <button class="users-card__btn" type="button" data-act="toggleUserActive" data-id="${editingUser.id}" data-active="${editingUser.emailVerified ? "1" : "0"}">${editingUser.emailVerified ? "Deaktivál" : "Aktivál"}</button>
+        <button class="users-card__btn" type="button" data-act="cancelEditUser">Mégse</button>
       </div>
     </div>`;
 }

@@ -426,6 +426,10 @@ body.seller-inventory-mode .home-grid-track {
   box-sizing: border-box;
 }
 
+.seller-inv__share-logo[hidden] {
+  display: none !important;
+}
+
 .seller-inv__share-logo img {
   display: block;
   max-width: 100%;

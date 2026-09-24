@@ -19,7 +19,7 @@ function injectStylesheet() {
   if (document.querySelector('link[data-seller-inv-css]')) return;
   const link = document.createElement("link");
   link.rel = "stylesheet";
-  link.href = "/css/seller-inventory.css?v=sellerInv20";
+  link.href = "/css/seller-inventory.css?v=sellerInv21";
   link.dataset.sellerInvCss = "1";
   document.head.appendChild(link);
 }
@@ -372,12 +372,15 @@ export async function mountSellerInventory({ fromId, count = 0 } = {}) {
   const label = String(contact?.sellerName || "").trim() || "Hirdető";
   const logoWrap = host.querySelector("[data-si-share-logo]");
   const logoUrl = String(contact?.sellerAvatarUrl || "").trim();
-  if (logoWrap && logoUrl) {
-    logoWrap.hidden = false;
-    logoWrap.innerHTML = `<img src="${esc(logoUrl)}" alt="" />`;
-  } else if (logoWrap) {
-    logoWrap.hidden = true;
-    logoWrap.innerHTML = "";
+  if (logoWrap) {
+    if (logoUrl) {
+      logoWrap.hidden = false;
+      logoWrap.innerHTML = `<img src="${esc(logoUrl)}" alt="" width="48" height="48" decoding="async" />`;
+    } else {
+      const letter = label.charAt(0).toUpperCase() || "?";
+      logoWrap.hidden = false;
+      logoWrap.innerHTML = `<span class="seller-inv__staff-letter" aria-hidden="true">${esc(letter)}</span>`;
+    }
   }
 
   const url = pageShareUrl();

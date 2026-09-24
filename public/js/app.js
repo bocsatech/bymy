@@ -24,7 +24,7 @@ import {
   applyListingAddressFromProfileSync,
   initAdLocationProfile,
   getListingAddressFromProfile,
-} from "./ad-location-profile.js?v=locProf7";
+} from "./ad-location-profile.js?v=postalFill1";
 import { initImproveDescription } from "./improve-description.js?v=descAi2";
 
 initSiteAuth();

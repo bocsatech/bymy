@@ -513,6 +513,9 @@ function h(html) {
       if (typeof actions[act] === "function") actions[act](event, el);
     });
   });
+  import("./postal-city-autofill.js?v=postalFill1")
+    .then((m) => m.wirePostalCityAutofill(app))
+    .catch(() => {});
 }
 
 const actions = {

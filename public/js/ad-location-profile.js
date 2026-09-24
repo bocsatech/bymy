@@ -1,5 +1,6 @@
 import { getAuthUser, getProfile, loadProfileFromServer } from "./site-auth.js";
 import { inferMegyeFromCity } from "./county-infer.js";
+import { wirePostalCityAutofill } from "./postal-city-autofill.js?v=postalFill1";
 
 function isBusinessProfile(profile) {
   const type = String(profile?.accountType || "").trim();
@@ -223,44 +224,8 @@ export function applyListingAddressFromProfileSync(form, profile = null) {
   return { ok, address };
 }
 
-let adPostalLookupBusy = false;
-let adPostalLookupLast = "";
-
-async function lookupAdCityFromPostal(postalInput, cityInput) {
-  const digits = String(postalInput?.value ?? "")
-    .replace(/\D/g, "")
-    .slice(0, 4);
-  if (postalInput) postalInput.value = digits;
-  if (digits.length !== 4 || digits === adPostalLookupLast || adPostalLookupBusy) return;
-  adPostalLookupBusy = true;
-  try {
-    const params = new URLSearchParams({ postal_code: digits });
-    const res = await fetch(`/api/postal-codes/lookup?${params}`);
-    const data = await res.json().catch(() => ({}));
-    if (res.ok && data.city && cityInput && !String(cityInput.dataset.userEdited || "")) {
-      adPostalLookupLast = digits;
-      cityInput.value = data.city;
-    }
-  } catch {
-    /* ignore */
-  } finally {
-    adPostalLookupBusy = false;
-  }
-}
-
 function initAdPostalLookup(form) {
-  const postal = form.querySelector("[data-ad-postal]");
-  const city = form.elements.namedItem("telepules");
-  if (!postal || postal.dataset.adPostalLookupBound === "1") return;
-  postal.dataset.adPostalLookupBound = "1";
-  postal.addEventListener("input", () => {
-    lookupAdCityFromPostal(postal, city instanceof RadioNodeList ? null : city);
-  });
-  if (city && !(city instanceof RadioNodeList)) {
-    city.addEventListener("input", () => {
-      city.dataset.userEdited = "1";
-    });
-  }
+  wirePostalCityAutofill(form);
 }
 
 export function initAdLocationProfile(form) {

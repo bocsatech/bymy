@@ -1,6 +1,7 @@
 
 import { initVehicleCatalogSelects, fillSelect } from "./vehicle-catalog-client.js";
 import { KIVITEL_OPTIONS } from "./kivitel-options.js?v=kivitel1";
+import { wirePostalCityAutofill as wireSharedPostalCityAutofill } from "./postal-city-autofill.js?v=postalFill1";
 import {
   flattenAllapotOptions,
   flattenSebessegvaltoOptions,
@@ -837,12 +838,13 @@ function setFieldValue(input, value) {
 }
 
 function wirePostalCityAutofill(form) {
-  if (!form || form.dataset.postalCityBound === "1") return;
+  if (!form) return;
+  wireSharedPostalCityAutofill(form);
+  if (form.dataset.postalCityBound === "1") return;
   const postalInput = form.querySelector('[data-filter-key="iranyitoszam"]');
   const cityInput = form.querySelector('[data-filter-key="telepules"]');
   if (!postalInput || postalInput.tagName !== "INPUT") return;
-  if (!cityInput || cityInput.tagName !== "INPUT") {
-  }
+  if (!cityInput || cityInput.tagName !== "INPUT") return;
 
   form.dataset.postalCityBound = "1";
   let lastPostalLookedUp = "";
@@ -850,38 +852,7 @@ function wirePostalCityAutofill(form) {
   let busy = false;
   let fillSource = "";
 
-  async function lookupFromPostal() {
-    const digits = String(postalInput.value ?? "")
-      .replace(/\D/g, "")
-      .slice(0, 4);
-    if (postalInput.value !== digits) postalInput.value = digits;
-    if (digits.length !== 4) return;
-    if (digits === lastPostalLookedUp || busy) return;
-    if (fillSource === "city") return;
-    busy = true;
-    fillSource = "postal";
-    try {
-      const params = new URLSearchParams({ postal_code: digits });
-      const res = await fetch(`/api/postal-codes/lookup?${params}`, { credentials: "same-origin" });
-      const data = await res.json().catch(() => ({}));
-      lastPostalLookedUp = digits;
-      if (res.ok && data.city) {
-        lastCityLookedUp = String(data.city).trim();
-        setFieldValue(cityInput, data.city);
-      } else if (cityInput) {
-        lastCityLookedUp = "";
-        setFieldValue(cityInput, "");
-      }
-    } catch {
-      lastPostalLookedUp = digits;
-    } finally {
-      busy = false;
-      fillSource = "";
-    }
-  }
-
   async function lookupFromCity() {
-    if (!cityInput) return;
     const city = String(cityInput.value ?? "").trim();
     if (city.length < 2) return;
     if (city === lastCityLookedUp || busy) return;
@@ -909,24 +880,12 @@ function wirePostalCityAutofill(form) {
     }
   }
 
-  postalInput.addEventListener("input", () => {
-    const digits = String(postalInput.value ?? "").replace(/\D/g, "").slice(0, 4);
-    if (digits.length < 4) lastPostalLookedUp = "";
-    lookupFromPostal();
+  cityInput.addEventListener("change", () => {
+    void lookupFromCity();
   });
-  postalInput.addEventListener("change", lookupFromPostal);
-  postalInput.addEventListener("blur", lookupFromPostal);
-
-  if (cityInput) {
-    let cityTimer = 0;
-    cityInput.addEventListener("input", () => {
-      lastCityLookedUp = "";
-      window.clearTimeout(cityTimer);
-      cityTimer = window.setTimeout(() => lookupFromCity(), 350);
-    });
-    cityInput.addEventListener("change", lookupFromCity);
-    cityInput.addEventListener("blur", lookupFromCity);
-  }
+  cityInput.addEventListener("blur", () => {
+    void lookupFromCity();
+  });
 }
 
 export async function applyAutoSearchLayout(form = document.getElementById("home-qs-form"), { force = false } = {}) {

@@ -11,6 +11,7 @@ import {
   requireAuthForPage,
   initSiteAuth,
 } from "./site-auth.js?v=privateStreet1";
+import { wirePostalCityAutofill } from "./postal-city-autofill.js?v=postalFill1";
 import {
   getParkplatz,
   addParkplatzItem,
@@ -875,17 +876,7 @@ function syncCompanyWrap(form) {
 
 
 function initPostalLookups(root = document) {
-  root.querySelectorAll("[data-postal-lookup]").forEach((input) => {
-    if (input.dataset.lookupBound === "1") return;
-    input.dataset.lookupBound = "1";
-    const row = input.closest(".settings-postal-row") || input.closest("form");
-    const cityInput = row?.querySelector("[name=city], [data-search-city], [data-rec-city]");
-    const busyEl = row?.querySelector("[data-city-busy]");
-    input.addEventListener("input", () => {
-      input.value = input.value.replace(/\D/g, "").slice(0, 4);
-      lookupCityFromPostal(input, cityInput, busyEl);
-    });
-  });
+  wirePostalCityAutofill(root);
 }
 
 function fillAreaForms(profile) {

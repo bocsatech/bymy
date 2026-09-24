@@ -89,6 +89,14 @@ export async function revealListingContact(listingId, turnstileToken = "") {
   };
 }
 
+export async function fetchSellerContact(listingId) {
+  const response = await fetch(`/api/listings/${listingId}/seller-contact`, {
+    credentials: "same-origin",
+  });
+  const data = await parseJson(response);
+  return data.contact ?? null;
+}
+
 export async function saveListingToDb(formData, listingId = null, { status = null, photos = [] } = {}) {
   const response = await fetch("/api/listings", {
     method: "POST",

@@ -1,7 +1,6 @@
 /** „Több ettől a hirdetőtől” — kereskedő készlet (demo A), bymy menüsáv érintetlen. */
 
-import { fetchListing, revealListingContact } from "./db-client.js?v=sellerInv1";
-import { mountTurnstile } from "./turnstile-ui.js?v=turnstile10";
+import { fetchSellerContact } from "./db-client.js?v=sellerInv2";
 
 function esc(value) {
   return String(value ?? "")
@@ -9,15 +8,6 @@ function esc(value) {
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
-}
-
-function sellerLabel(listing) {
-  const detail = listing?.detail ?? {};
-  const name =
-    String(detail.sellerName || "").trim() ||
-    String(listing?.preview?.sellerName || "").trim() ||
-    String(listing?.form?.company || listing?.form?.cegnev || "").trim();
-  return name || "Hirdető";
 }
 
 function pageShareUrl() {
@@ -28,7 +18,7 @@ function injectStylesheet() {
   if (document.querySelector('link[data-seller-inv-css]')) return;
   const link = document.createElement("link");
   link.rel = "stylesheet";
-  link.href = "/css/seller-inventory.css?v=sellerInv1";
+  link.href = "/css/seller-inventory.css?v=sellerInv2";
   link.dataset.sellerInvCss = "1";
   document.head.appendChild(link);
 }
@@ -76,6 +66,76 @@ async function copyText(text) {
   }
 }
 
+function staffHtml(staff = []) {
+  if (!staff.length) return `<p class="seller-inv__hint">Nincs megadott munkatárs.</p>`;
+  return `<ul class="seller-inv__staff">${staff
+    .map((person) => {
+      const name = String(person?.name || "").trim();
+      if (!name) return "";
+      const photo = String(person?.photoUrl || "").trim();
+      const letter = name.charAt(0).toUpperCase();
+      const avatar = photo
+        ? `<img class="seller-inv__staff-photo" src="${esc(photo)}" alt="" width="48" height="48" loading="lazy" />`
+        : `<span class="seller-inv__staff-letter" aria-hidden="true">${esc(letter)}</span>`;
+      return `<li class="seller-inv__staff-item">
+        <div class="seller-inv__staff-avatar">${avatar}</div>
+        <span class="seller-inv__staff-name">${esc(name)}</span>
+      </li>`;
+    })
+    .filter(Boolean)
+    .join("")}</ul>`;
+}
+
+function phonesHtml(phones = []) {
+  const list = (phones || []).map((p) => String(p || "").trim()).filter(Boolean);
+  if (!list.length) return `<p class="seller-inv__hint">Nincs telefonszám.</p>`;
+  return `<ul class="seller-inv__phones">${list
+    .map((phone) => {
+      const digits = phone.replace(/[^\d+]/g, "");
+      const href = digits.length >= 7 ? `tel:${digits}` : "";
+      return href
+        ? `<li><a href="${esc(href)}">${esc(phone)}</a></li>`
+        : `<li>${esc(phone)}</li>`;
+    })
+    .join("")}</ul>`;
+}
+
+function addressHtml(lines = []) {
+  const list = (lines || []).map((l) => String(l || "").trim()).filter(Boolean);
+  if (!list.length) return `<p class="seller-inv__hint">Nincs cím.</p>`;
+  return `<p class="seller-inv__address">${list.map(esc).join("<br />")}</p>`;
+}
+
+function navHref(mapQuery) {
+  const q = String(mapQuery || "").trim();
+  if (!q) return "";
+  return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(q)}`;
+}
+
+function contactPanelHtml(contact) {
+  const staff = Array.isArray(contact?.staff) ? contact.staff : [];
+  const phones = Array.isArray(contact?.phones) ? contact.phones : [];
+  const lines = Array.isArray(contact?.addressLines) ? contact.addressLines : [];
+  const nav = navHref(contact?.mapQuery || lines.join(", "));
+  return `
+    <p class="seller-inv__eyebrow">Kapcsolat</p>
+    ${staffHtml(staff)}
+    <div class="seller-inv__block">
+      <p class="seller-inv__eyebrow">Telefon</p>
+      ${phonesHtml(phones)}
+    </div>
+    <div class="seller-inv__block">
+      <p class="seller-inv__eyebrow">Cím</p>
+      ${addressHtml(lines)}
+    </div>
+    ${
+      nav
+        ? `<a class="seller-inv__btn seller-inv__btn--accent seller-inv__nav" href="${esc(nav)}" target="_blank" rel="noopener noreferrer">Navigáció</a>`
+        : `<p class="seller-inv__hint">Navigációhoz nincs elég címadat.</p>`
+    }
+  `;
+}
+
 /**
  * @param {{ fromId: string, count?: number }} opts
  */
@@ -99,11 +159,9 @@ export async function mountSellerInventory({ fromId, count = 0 } = {}) {
       </div>
     </div>
     <div class="seller-inv__duo">
-      <div class="seller-inv__panel">
+      <div class="seller-inv__panel" data-si-contact-panel>
         <p class="seller-inv__eyebrow">Kapcsolat</p>
-        <button type="button" class="seller-inv__btn seller-inv__btn--accent" data-si-contact>Kapcsolat megjelenítése</button>
-        <div class="seller-inv__contact-out" data-si-contact-out hidden></div>
-        <div data-si-turnstile hidden></div>
+        <p class="seller-inv__hint">Kapcsolat betöltése…</p>
       </div>
       <div class="seller-inv__panel">
         <p class="seller-inv__eyebrow">Állapot</p>
@@ -113,15 +171,23 @@ export async function mountSellerInventory({ fromId, count = 0 } = {}) {
     <h3 class="seller-inv__title">Készlet <small data-si-count>(${Number(count) || 0})</small></h3>
   `;
 
-  let listing = null;
+  let contact = null;
   try {
-    listing = await fetchListing(fromId);
+    contact = await fetchSellerContact(fromId);
   } catch {
-    listing = null;
+    contact = null;
   }
-  const label = sellerLabel(listing);
+
+  const contactPanel = host.querySelector("[data-si-contact-panel]");
+  if (contactPanel) {
+    contactPanel.innerHTML = contact
+      ? contactPanelHtml(contact)
+      : `<p class="seller-inv__eyebrow">Kapcsolat</p><p class="seller-inv__hint">Nincs megjeleníthető kapcsolat.</p>`;
+  }
+
+  const label = String(contact?.sellerName || "").trim() || "Hirdető";
   const shareTitle = host.querySelector(".seller-inv__share h2");
-  if (shareTitle && label && label !== "Hirdető") {
+  if (shareTitle && label !== "Hirdető") {
     shareTitle.textContent = `Oszd meg: ${label}`;
   }
 
@@ -173,51 +239,6 @@ export async function mountSellerInventory({ fromId, count = 0 } = {}) {
       "_blank",
       "noopener,noreferrer"
     );
-  });
-
-  const contactBtn = host.querySelector("[data-si-contact]");
-  const contactOut = host.querySelector("[data-si-contact-out]");
-  const turnstileHost = host.querySelector("[data-si-turnstile]");
-  let turnstileApi = null;
-
-  contactBtn?.addEventListener("click", async () => {
-    if (!contactBtn || contactBtn.dataset.done === "1") return;
-    contactBtn.disabled = true;
-    try {
-      if (!turnstileApi && turnstileHost) {
-        turnstileHost.hidden = false;
-        turnstileApi = await mountTurnstile(turnstileHost, { action: "listing-reveal" });
-      }
-      const token = turnstileApi ? await turnstileApi.getToken() : "";
-      const contact = await revealListingContact(fromId, token);
-      const phone = String(contact.phone || "").trim();
-      const lines = Array.isArray(contact.addressLines) ? contact.addressLines.filter(Boolean) : [];
-      const parts = [];
-      if (phone) {
-        const digits = phone.replace(/[^\d+]/g, "");
-        parts.push(
-          digits.length >= 7
-            ? `<a href="tel:${esc(digits)}">${esc(phone)}</a>`
-            : esc(phone)
-        );
-      }
-      for (const line of lines) parts.push(esc(line));
-      if (contactOut) {
-        contactOut.hidden = false;
-        contactOut.innerHTML = parts.length
-          ? parts.join("<br />")
-          : "Nincs megjeleníthető kapcsolat.";
-      }
-      contactBtn.dataset.done = "1";
-      contactBtn.textContent = "Kapcsolat";
-      if (turnstileHost) turnstileHost.hidden = true;
-    } catch (err) {
-      if (contactOut) {
-        contactOut.hidden = false;
-        contactOut.textContent = err?.message || "A kapcsolat most nem érhető el.";
-      }
-      contactBtn.disabled = false;
-    }
   });
 }
 

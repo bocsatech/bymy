@@ -146,7 +146,7 @@ import {
   importTokenTtlMs,
   importRateLimitPerHour,
 } from "./lib/import-auth.mjs";
-import { attachSellerProfile } from "./lib/listing-detail-seller.mjs";
+import { attachSellerProfile, getSellerInventoryContactForUserId } from "./lib/listing-detail-seller.mjs";
 import { saveListingPhotos } from "./lib/listing-photos.mjs";
 import {
   dataUrlToBuffer,
@@ -1026,6 +1026,26 @@ async function handleListingsApi(req, res, pathname) {
       status: "feladott",
     });
     sendJson(res, 200, { listings: sanitizeListingList(listings) });
+    return;
+  }
+
+  const sellerContactMatch = pathname.match(/^\/api\/listings\/(\d+)\/seller-contact$/);
+  if (sellerContactMatch && req.method === "GET") {
+    if (!assertPublicListingRate(req, res, "listing-seller-contact", { limit: 80, windowMs: 15 * 60 * 1000 })) {
+      return;
+    }
+    const listingId = Number(sellerContactMatch[1]);
+    const listing = await getListing(listingId, { mode: "detail" });
+    if (!listing?.user_id || listing.status !== "feladott") {
+      sendJson(res, 404, { error: "Nincs ilyen hirdetés." });
+      return;
+    }
+    const contact = await getSellerInventoryContactForUserId(listing.user_id);
+    if (!contact) {
+      sendJson(res, 404, { error: "Nincs megjeleníthető kapcsolat." });
+      return;
+    }
+    sendJson(res, 200, { contact });
     return;
   }
 

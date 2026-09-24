@@ -2275,6 +2275,13 @@ async function handleAuthApi(req, res, pathname) {
           });
           return;
         }
+        if (error.code === "ACCOUNT_INACTIVE") {
+          sendJson(res, 403, {
+            error: friendlyAuthErrorMessage(error),
+            code: "ACCOUNT_INACTIVE",
+          });
+          return;
+        }
         sendJson(res, 401, {
           error: friendlyAuthErrorMessage(error, "Sikertelen belépés."),
           ...(error.code ? { code: error.code } : {}),

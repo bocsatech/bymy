@@ -278,13 +278,6 @@ html[data-theme="dark"] .seller-inv__btn--ghost:hover {
   border-color: #b0b0b0;
 }
 
-.seller-inv__duo {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.75rem;
-  margin-bottom: 0.35rem;
-}
-
 .seller-inv__label,
 .seller-inv__eyebrow {
   margin: 0 0 0.4rem;

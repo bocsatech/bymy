@@ -726,6 +726,22 @@ body[data-site-page="teherauto"] .auto-search-tabs {
     gap: 0;
   }
 
+  /* Hero Kivitel dropdown — not on mobile (form has its own Kivitel field). */
+  .auto-kivitel-nav,
+  .auto-kivitel-toggle,
+  .auto-kivitel-panel,
+  [data-auto-kivitel-nav] {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    max-height: 0 !important;
+    overflow: hidden !important;
+    border: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    pointer-events: none !important;
+  }
+
   .auto-search-tabs::-webkit-scrollbar {
     display: none;
   }

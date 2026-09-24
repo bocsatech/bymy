@@ -110,7 +110,7 @@ import {
   sessionCookieHeader,
   setUserDisplayName,
 } from "./lib/web-users-store.mjs";
-import { isSupabaseSchemaMissingError } from "./lib/supabase/users.mjs";
+import { isSupabaseSchemaMissingError, friendlyAuthErrorMessage } from "./lib/supabase/users.mjs";
 import {
   ensureSmtpExample,
   isSmtpConfigured,
@@ -2063,7 +2063,8 @@ async function handleAuthApi(req, res, pathname) {
         }
         console.log(`OAuth OK (${provider}): ${user.email}`);
       } catch (error) {
-        const msg = encodeURIComponent(error.message ?? "OAuth sikertelen");
+        const safeMsg = friendlyAuthErrorMessage(error, "OAuth sikertelen");
+        const msg = encodeURIComponent(safeMsg);
         let mobile = false;
         try {
           mobile = Boolean(parseOAuthState(params.state).mobile);
@@ -2071,7 +2072,7 @@ async function handleAuthApi(req, res, pathname) {
           mobile = false;
         }
         if (mobile) {
-          sendRedirect(res, mobileOAuthCompleteUrl({ error: error.message ?? "OAuth sikertelen" }));
+          sendRedirect(res, mobileOAuthCompleteUrl({ error: safeMsg }));
         } else {
           sendRedirect(res, `/belepes.html?oauth_error=${msg}`);
         }
@@ -2262,12 +2263,22 @@ async function handleAuthApi(req, res, pathname) {
       } catch (error) {
         if (error.code === "EMAIL_NOT_VERIFIED") {
           sendJson(res, 403, {
-            error: error.message,
+            error: friendlyAuthErrorMessage(error),
             code: "EMAIL_NOT_VERIFIED",
           });
           return;
         }
-        throw error;
+        if (error.code === "ACCOUNT_NOT_FOUND") {
+          sendJson(res, 401, {
+            error: friendlyAuthErrorMessage(error),
+            code: "ACCOUNT_NOT_FOUND",
+          });
+          return;
+        }
+        sendJson(res, 401, {
+          error: friendlyAuthErrorMessage(error, "Sikertelen belépés."),
+          ...(error.code ? { code: error.code } : {}),
+        });
       }
       return;
     }
@@ -2378,7 +2389,7 @@ async function handleAuthApi(req, res, pathname) {
 
     sendJson(res, 404, { error: "Ismeretlen auth API." });
   } catch (error) {
-    const message = error.message ?? String(error);
+    const message = friendlyAuthErrorMessage(error, error.message ?? String(error));
     if (isSupabaseSchemaMissingError(error)) {
       if (!res.headersSent) {
         sendJson(res, 200, { user: null, providers: [] });
@@ -2386,7 +2397,10 @@ async function handleAuthApi(req, res, pathname) {
       return;
     }
     const status =
-      message.includes("bejelentkezve") || message.includes("Hibás")
+      error.code === "ACCOUNT_NOT_FOUND" ||
+      message.includes("bejelentkezve") ||
+      message.includes("Hibás") ||
+      message.includes("Nincs ilyen fiók")
         ? 401
         : error.code === "EMAIL_ALREADY_REGISTERED" ||
             message.includes("kötelező") ||

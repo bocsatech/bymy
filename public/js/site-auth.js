@@ -836,7 +836,8 @@ export function initLoginPage() {
       turnstile.reset();
       errorEl.hidden = false;
       let msg = error.message ?? "Sikertelen belépés.";
-      if (String(msg).includes("aktiváld") || String(msg).includes("aktivál")) {
+      const code = error.code || "";
+      if (String(msg).includes("aktiváld") || String(msg).includes("aktivál") || code === "EMAIL_NOT_VERIFIED") {
         errorEl.textContent = "";
         errorEl.append(
           document.createTextNode(
@@ -847,6 +848,17 @@ export function initLoginPage() {
         a.href = `/aktivalas.html?email=${encodeURIComponent(String(email || ""))}`;
         a.textContent = "Aktiváló email újraküldése";
         errorEl.appendChild(a);
+      } else if (
+        code === "ACCOUNT_NOT_FOUND" ||
+        /nincs ilyen fiók|előbb regisztrálj|regisztrálj/i.test(String(msg))
+      ) {
+        errorEl.textContent = "";
+        errorEl.append(document.createTextNode("Nincs ilyen fiók. Előbb "));
+        const a = document.createElement("a");
+        a.href = "/regisztracio.html";
+        a.textContent = "regisztrálj";
+        errorEl.appendChild(a);
+        errorEl.append(document.createTextNode(", utána tudsz belépni."));
       } else {
         errorEl.textContent = msg;
       }

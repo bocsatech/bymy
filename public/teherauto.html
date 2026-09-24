@@ -62,7 +62,7 @@
     <link rel="stylesheet" href="/css/hub-mobile-app.css?v=mobFix8" />
     <link rel="stylesheet" href="/css/home.css?v=mobFix8" />
     <link rel="stylesheet" href="/css/auto-hero.css?v=mobFix8" />
-    <link rel="stylesheet" href="/css/auto-desk-layout.css?v=tileSame1" />
+    <link rel="stylesheet" href="/css/auto-desk-layout.css?v=tileSame2" />
     <link rel="stylesheet" href="/css/listing-photo-cover.css?v=tileSame1" />
     <link rel="stylesheet" href="/css/listing-featured.css?v=featured5" />
     <link rel="stylesheet" href="/css/ingatlan-search.css?v=mobFix8" />
@@ -224,6 +224,7 @@
           margin: 0 !important;
           display: flex !important;
           flex-direction: column !important;
+          align-items: stretch !important;
           min-height: 0 !important;
           max-height: 100% !important;
           overflow: hidden !important;
@@ -233,8 +234,17 @@
           display: flex !important;
           flex-direction: column !important;
           flex: 1 1 auto !important;
+          align-self: stretch !important;
+          width: 100% !important;
+          min-width: 0 !important;
           min-height: 0 !important;
           overflow: hidden !important;
+        }
+        body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main .home-listings-panel,
+        body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main #home-grid-track {
+          width: 100% !important;
+          max-width: none !important;
+          box-sizing: border-box !important;
         }
         body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main .home-listings-panel {
           flex: 1 1 auto !important;
@@ -557,7 +567,7 @@
     <script src="/js/site-avatar-menu.js?v=avatarSync1" type="module"></script>
 
     <script src="/js/nav-counts.js?v=navCount4" type="module"></script>
-    <script src="/js/theme.js?v=tileSame1" type="module"></script>
+    <script src="/js/theme.js?v=tileSame2" type="module"></script>
     <script src="/js/site-auth.js?v=authAcct1" type="module"></script>
 
     <script>

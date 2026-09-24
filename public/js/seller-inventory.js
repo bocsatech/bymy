@@ -19,7 +19,7 @@ function injectStylesheet() {
   if (document.querySelector('link[data-seller-inv-css]')) return;
   const link = document.createElement("link");
   link.rel = "stylesheet";
-  link.href = "/css/seller-inventory.css?v=sellerInv18";
+  link.href = "/css/seller-inventory.css?v=sellerInv19";
   link.dataset.sellerInvCss = "1";
   document.head.appendChild(link);
 }
@@ -322,7 +322,6 @@ export async function mountSellerInventory({ fromId, count = 0 } = {}) {
 
   host.innerHTML = `
     <a class="seller-inv__back" href="${esc(backHref)}">← Vissza a hirdetéshez</a>
-    <div class="seller-inv__head" data-si-head>Kereskedő</div>
     <div class="seller-inv__panel seller-inv__share">
       <div class="seller-inv__share-main">
         <div class="seller-inv__share-logo" data-si-share-logo hidden></div>
@@ -371,8 +370,6 @@ export async function mountSellerInventory({ fromId, count = 0 } = {}) {
   }
 
   const label = String(contact?.sellerName || "").trim() || "Hirdető";
-  const head = host.querySelector("[data-si-head]");
-  if (head) head.textContent = label;
   const logoWrap = host.querySelector("[data-si-share-logo]");
   const logoUrl = String(contact?.sellerAvatarUrl || "").trim();
   if (logoWrap && logoUrl) {

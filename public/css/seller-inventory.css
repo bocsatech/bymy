@@ -184,11 +184,6 @@ body.seller-inventory-mode .home-grid-track {
   width: 100%;
 }
 
-.seller-inv__head {
-  width: 100%;
-  box-sizing: border-box;
-}
-
 .seller-inv__back {
   display: inline-flex;
   align-items: center;
@@ -202,22 +197,6 @@ body.seller-inventory-mode .home-grid-track {
 
 .seller-inv__back:hover {
   color: var(--si-text);
-}
-
-.seller-inv__head {
-  display: block;
-  width: 100%;
-  margin: 0 0 0.75rem;
-  padding: 0.85rem 1rem;
-  background: var(--si-panel);
-  border: 1px solid var(--si-line);
-  border-radius: var(--si-radius);
-  font-size: 1.05rem;
-  font-weight: 800;
-  color: var(--si-text);
-  letter-spacing: -0.02em;
-  text-align: left;
-  box-sizing: border-box;
 }
 
 .seller-inv__panel {

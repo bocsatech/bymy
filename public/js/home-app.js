@@ -28,7 +28,7 @@ import { bindListingOpen, restoreListingReturn } from "./listing-return.js?v=sea
 import { normalizeKivitel } from "./kivitel-options.js?v=kivitel1";
 import { featuredListingIdSet } from "./home-featured-slots.js?v=featuredNoAuto1";
 import { initSearchResultsMapButtons } from "./search-results-map.js?v=mapRouteD3";
-import { mountSellerInventory, updateSellerInventoryCount } from "./seller-inventory.js?v=sellerInv15";
+import { mountSellerInventory, updateSellerInventoryCount } from "./seller-inventory.js?v=sellerInv16";
 
 const gridTrack = document.getElementById("home-grid-track");
 const emptyEl = document.getElementById("home-empty");
@@ -274,8 +274,9 @@ async function loadSellerListings(fromId) {
   featuredOnlyMode = false;
   statsFilter = null;
   quickRadiusFilter = null;
-  await mountSellerInventory({ fromId, count: 0 });
-  const items = await fetchRelatedListings(fromId, { limit: 500, includeSelf: true });
+  const shellPromise = mountSellerInventory({ fromId, count: 0 });
+  const itemsPromise = fetchRelatedListings(fromId, { limit: 500, includeSelf: true });
+  const [, items] = await Promise.all([shellPromise, itemsPromise]);
   const active = (items || []).filter((item) => (item.status || "feladott") === "feladott");
   allItems = sortForHome(active);
   featuredListingIds = featuredListingIdSet(allItems);

@@ -22,6 +22,7 @@ import {
   recordListingView,
   listMyListings,
   listListingsByOwner,
+  getListingOwnerMeta,
   updateListingStatus,
   patchListingFormFields,
   getDbPath,
@@ -1015,9 +1016,9 @@ async function handleListingsApi(req, res, pathname) {
     const includeSelf =
       url.searchParams.get("includeSelf") === "1" || url.searchParams.get("all") === "1";
     const limit = Math.min(Math.max(Number(url.searchParams.get("limit") ?? 24), 1), 500);
-    const listing = await getListing(listingId, { mode: "detail" });
-    const ownerId = Number(listing?.user_id || listing?.detail?.userId || 0);
-    if (!listing || !Number.isFinite(ownerId) || ownerId <= 0) {
+    const meta = await getListingOwnerMeta(listingId);
+    const ownerId = Number(meta?.user_id || 0);
+    if (!meta || !Number.isFinite(ownerId) || ownerId <= 0) {
       sendJson(res, 404, { error: "Nincs ilyen hirdetés." });
       return;
     }
@@ -1038,12 +1039,12 @@ async function handleListingsApi(req, res, pathname) {
       return;
     }
     const listingId = Number(sellerContactMatch[1]);
-    const listing = await getListing(listingId, { mode: "detail" });
-    if (!listing?.user_id || listing.status !== "feladott") {
+    const meta = await getListingOwnerMeta(listingId);
+    if (!meta?.user_id || meta.status !== "feladott") {
       sendJson(res, 404, { error: "Nincs ilyen hirdetés." });
       return;
     }
-    const contact = await getSellerInventoryContactForUserId(listing.user_id);
+    const contact = await getSellerInventoryContactForUserId(meta.user_id);
     if (!contact) {
       sendJson(res, 404, { error: "Nincs megjeleníthető kapcsolat." });
       return;
@@ -1058,9 +1059,9 @@ async function handleListingsApi(req, res, pathname) {
       return;
     }
     const listingId = Number(sellerRatingMatch[1]);
-    const listing = await getListing(listingId, { mode: "detail" });
-    const ownerId = Number(listing?.user_id || 0);
-    if (!listing || !Number.isFinite(ownerId) || ownerId <= 0) {
+    const meta = await getListingOwnerMeta(listingId);
+    const ownerId = Number(meta?.user_id || 0);
+    if (!meta || !Number.isFinite(ownerId) || ownerId <= 0) {
       sendJson(res, 404, { error: "Nincs ilyen hirdetés." });
       return;
     }
@@ -1088,9 +1089,9 @@ async function handleListingsApi(req, res, pathname) {
       body = {};
     }
     const listingId = Number(sellerRatingMatch[1]);
-    const listing = await getListing(listingId, { mode: "detail" });
-    const ownerId = Number(listing?.user_id || 0);
-    if (!listing || !Number.isFinite(ownerId) || ownerId <= 0) {
+    const meta = await getListingOwnerMeta(listingId);
+    const ownerId = Number(meta?.user_id || 0);
+    if (!meta || !Number.isFinite(ownerId) || ownerId <= 0) {
       sendJson(res, 404, { error: "Nincs ilyen hirdetés." });
       return;
     }

@@ -45,6 +45,14 @@ const FREE_NUMBER_FIELDS = new Set([
   "co2_kibocsatas",
 ]);
 
+const SEARCH_OMIT_FIELDS = new Set([
+  "gyartasi_honap",
+  "forgalomba_helyezes_ev",
+  "forgalomba_helyezes_honap",
+  "muszaki_honap",
+  "keresesi_korzet",
+]);
+
 const FREE_NUMBER_SUFFIX = {
   fogyasztas_varosi: "l/100 km",
   fogyasztas_orszaguti: "l/100 km",

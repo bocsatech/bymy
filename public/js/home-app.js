@@ -1,5 +1,5 @@
 import { fetchListings, fetchRelatedListings } from "./db-client.js?v=sellerList1";
-import { createHomeGridCard, initHomeGridCardPhotos } from "./home-grid-card.js?v=mobFix4";
+import { createHomeGridCard, initHomeGridCardPhotos } from "./home-grid-card.js?v=mobFix5";
 import { promoKiemeltActive, promoTopAjanlatActive } from "./listing-promo.js?v=promo1";
 import {
   emptyFilters,
@@ -8,7 +8,7 @@ import {
   initHomeSearchSidebar,
   initHomeFilterCatalog,
 } from "./home-search-filter.js?v=rangeFill1";
-import { initHomeQuickSearch } from "./home-quicksearch.js?v=mobFix4";
+import { initHomeQuickSearch } from "./home-quicksearch.js?v=mobFix5";
 import { decodeSavedSearchParam } from "./saved-search.js?v=savedSearch5";
 import { initSavedSearchUi } from "./saved-search-ui.js?v=savedSearch5";
 import { matchDetailedSearch, hasActiveDetailedSearch } from "./auto-detailed-search.js?v=autoDesk16";
@@ -17,7 +17,7 @@ import {
   emptyIngatlanFilters,
   filterListingsByIngatlan,
   initIngatlanSearch,
-} from "./ingatlan-search.js?v=mobFix4";
+} from "./ingatlan-search.js?v=mobFix5";
 import { normalizeIngatlanUzletag } from "./ingatlan-fields.js?v=immoEladoDefault1";
 import { filterByCategory, initHomeCategoryBar, renderHomeCategoryBar } from "./home-category-bar.js";
 import { initHomeUnifiedScroll } from "./home-unified-scroll.js";

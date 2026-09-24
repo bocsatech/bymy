@@ -68,6 +68,8 @@ body.site-app .myads-thumb img,
 body.site-app .myads-photo-item img {
   object-fit: cover !important;
   object-position: center center !important;
+  transform: scale(1.14);
+  transform-origin: center center;
 }
 
 html[data-theme="dark"] .hf-card--listing,

@@ -1052,6 +1052,15 @@
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-grid-card-media {
     aspect-ratio: 16 / 10;
     background: #e8ebef !important;
+    overflow: hidden !important;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-grid-card-photo-img,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-grid-card-photo-slide img {
+    object-fit: cover !important;
+    object-position: center center !important;
+    transform: scale(1.14) !important;
+    transform-origin: center center !important;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-grid-card-save {
@@ -1380,6 +1389,36 @@ html[data-theme="dark"] body.site-app > .auto-price-suggest .auto-price-suggest_
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-grid-card-specs,
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-grid-card-spec {
     display: none !important;
+  }
+
+  /* Mobilon is ugyanaz a csempe kinézet, mint desk / auto oldalon */
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-grid-card {
+    background: #fff !important;
+    border: 1px solid #d4d4d4 !important;
+    border-radius: 9px !important;
+    overflow: hidden;
+    box-shadow: none !important;
+    color: #111 !important;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-grid-card:hover {
+    transform: none !important;
+    box-shadow: none !important;
+    border-color: #bdbdbd !important;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-grid-card-media {
+    aspect-ratio: 16 / 10;
+    background: #e8ebef !important;
+    overflow: hidden !important;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-grid-card-photo-img,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-grid-card-photo-slide img {
+    object-fit: cover !important;
+    object-position: center center !important;
+    transform: scale(1.14) !important;
+    transform-origin: center center !important;
   }
 
   /* Closed menu wheels must never paint inline next to triggers. */

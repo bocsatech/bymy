@@ -62,8 +62,8 @@
     <link rel="stylesheet" href="/css/hub-mobile-app.css?v=mobFix8" />
     <link rel="stylesheet" href="/css/home.css?v=mobFix8" />
     <link rel="stylesheet" href="/css/auto-hero.css?v=mobFix8" />
-    <link rel="stylesheet" href="/css/auto-desk-layout.css?v=tileScroll5" />
-    <link rel="stylesheet" href="/css/listing-photo-cover.css?v=tileAllPages1" />
+    <link rel="stylesheet" href="/css/auto-desk-layout.css?v=tileSame1" />
+    <link rel="stylesheet" href="/css/listing-photo-cover.css?v=tileSame1" />
     <link rel="stylesheet" href="/css/listing-featured.css?v=featured5" />
     <link rel="stylesheet" href="/css/ingatlan-search.css?v=mobFix8" />
     <link rel="stylesheet" href="/css/search-results-map.css?v=mapRouteD3" />
@@ -106,8 +106,8 @@
       }
       
       @media (min-width: 901px) {
-        body.home-page.site-app[data-site-page="auto"] .hub-header-inner,
-        body.home-page[data-site-page="auto"] .hub-header-inner {
+        body.home-page.site-app:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-header-inner,
+        body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-header-inner {
           display: grid !important;
           grid-template-columns: 260px max-content minmax(0, 1fr) !important;
           grid-template-areas: "logo nav actions" !important;
@@ -123,8 +123,8 @@
           max-height: 80px !important;
           flex-direction: row !important;
         }
-        body.home-page.site-app[data-site-page="auto"] .hub-logo,
-        body.home-page[data-site-page="auto"] .hub-logo {
+        body.home-page.site-app:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-logo,
+        body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-logo {
           grid-area: logo !important;
           justify-self: start !important;
           position: relative !important;
@@ -135,8 +135,8 @@
           transform: none !important;
           z-index: 2 !important;
         }
-        body.home-page.site-app[data-site-page="auto"] .hub-nav,
-        body.home-page[data-site-page="auto"] .hub-nav {
+        body.home-page.site-app:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav,
+        body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav {
           grid-area: nav !important;
           justify-self: start !important;
           position: static !important;
@@ -153,8 +153,8 @@
           padding: 0 !important;
           pointer-events: auto !important;
         }
-        body.home-page.site-app[data-site-page="auto"] .hub-header-top,
-        body.home-page[data-site-page="auto"] .hub-header-top {
+        body.home-page.site-app:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-header-top,
+        body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-header-top {
           grid-area: actions !important;
           justify-self: end !important;
           width: auto !important;
@@ -167,13 +167,13 @@
       }
       
       @media (min-width: 901px) {
-        html:has(body.home-page[data-site-page="auto"]),
-        body.home-page[data-site-page="auto"] {
+        html:has(body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"])),
+        body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) {
           height: 100% !important;
           max-height: 100% !important;
           overflow: hidden !important;
         }
-        body.home-page[data-site-page="auto"] .home-main.auto-desk-main {
+        body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main {
           display: grid !important;
           grid-template-columns: 320px minmax(0, 1fr) !important;
           grid-template-rows: auto minmax(0, 1fr) !important;
@@ -190,7 +190,7 @@
           min-height: 0 !important;
           overflow: hidden !important;
         }
-        body.home-page[data-site-page="auto"] .home-main.auto-desk-main > .auto-search-tabs {
+        body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main > .auto-search-tabs {
           display: grid !important;
           grid-column: 1 / -1 !important;
           grid-row: 1 / 2 !important;
@@ -200,7 +200,10 @@
           border-radius: 8px;
           overflow: hidden;
         }
-        body.home-page[data-site-page="auto"] .home-main.auto-desk-main > .auto-search-hero {
+                body.home-page[data-site-page="teherauto"] .home-main.auto-desk-main > .auto-search-tabs {
+          grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        }
+body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main > .auto-search-hero {
           grid-column: 1 / 2 !important;
           grid-row: 2 / 3 !important;
           width: 320px !important;
@@ -212,8 +215,8 @@
           max-height: 100% !important;
           overflow: hidden !important;
         }
-        body.home-page[data-site-page="auto"] .home-main.auto-desk-main > .home-layout.site-layout,
-        body.home-page[data-site-page="auto"] .home-main.auto-desk-main > .site-layout {
+        body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main > .home-layout.site-layout,
+        body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main > .site-layout {
           grid-column: 2 / 3 !important;
           grid-row: 2 / 3 !important;
           width: auto !important;
@@ -225,47 +228,47 @@
           max-height: 100% !important;
           overflow: hidden !important;
         }
-        body.home-page[data-site-page="auto"] .home-main.auto-desk-main .home-center,
-        body.home-page[data-site-page="auto"] .home-main.auto-desk-main .site-center {
+        body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main .home-center,
+        body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main .site-center {
           display: flex !important;
           flex-direction: column !important;
           flex: 1 1 auto !important;
           min-height: 0 !important;
           overflow: hidden !important;
         }
-        body.home-page[data-site-page="auto"] .home-main.auto-desk-main .home-listings-panel {
+        body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main .home-listings-panel {
           flex: 1 1 auto !important;
           min-height: 0 !important;
           overflow-x: hidden !important;
           overflow-y: auto !important;
           max-height: none !important;
         }
-        body.home-page[data-site-page="auto"] .home-main.auto-desk-main .home-layout,
-        body.home-page[data-site-page="auto"] .home-main.auto-desk-main .home-center {
+        body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main .home-layout,
+        body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main .home-center {
           overflow-y: hidden !important;
         }
 
         /* Kereskedői készlet: ne zárja le a görgetést */
-        html:has(body.seller-inventory-mode.home-page[data-site-page="auto"]),
-        body.seller-inventory-mode.home-page[data-site-page="auto"] {
+        html:has(body.seller-inventory-mode.home-page:is([data-site-page="auto"], [data-site-page="teherauto"])),
+        body.seller-inventory-mode.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) {
           height: auto !important;
           max-height: none !important;
           overflow-x: hidden !important;
           overflow-y: auto !important;
         }
-        body.seller-inventory-mode.home-page[data-site-page="auto"] .home-main.auto-desk-main {
+        body.seller-inventory-mode.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main {
           display: block !important;
           height: auto !important;
           max-height: none !important;
           overflow: visible !important;
           padding: 18px 24px 48px !important;
         }
-        body.seller-inventory-mode.home-page[data-site-page="auto"] .home-main.auto-desk-main > .home-layout.site-layout,
-        body.seller-inventory-mode.home-page[data-site-page="auto"] .home-main.auto-desk-main > .site-layout,
-        body.seller-inventory-mode.home-page[data-site-page="auto"] .home-main.auto-desk-main .home-center,
-        body.seller-inventory-mode.home-page[data-site-page="auto"] .home-main.auto-desk-main .site-center,
-        body.seller-inventory-mode.home-page[data-site-page="auto"] .home-main.auto-desk-main .home-layout,
-        body.seller-inventory-mode.home-page[data-site-page="auto"] .home-main.auto-desk-main .home-listings-panel {
+        body.seller-inventory-mode.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main > .home-layout.site-layout,
+        body.seller-inventory-mode.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main > .site-layout,
+        body.seller-inventory-mode.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main .home-center,
+        body.seller-inventory-mode.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main .site-center,
+        body.seller-inventory-mode.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main .home-layout,
+        body.seller-inventory-mode.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main .home-listings-panel {
           display: block !important;
           flex: none !important;
           height: auto !important;
@@ -583,7 +586,7 @@
     <script src="/js/site-avatar-menu.js?v=avatarSync1" type="module"></script>
 
     <script src="/js/nav-counts.js?v=navCount4" type="module"></script>
-    <script src="/js/theme.js?v=autoDesk16" type="module"></script>
+    <script src="/js/theme.js?v=tileSame1" type="module"></script>
     <script src="/js/site-auth.js?v=authAcct1" type="module"></script>
 </body>
 </html>

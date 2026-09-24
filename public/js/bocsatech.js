@@ -305,6 +305,7 @@ let partnerProfiles = [];
 let selectedVisitorId = "";
 let selectedVisitorIp = "";
 let visitorHits = [];
+let visitorHitsSource = "hits"; // hits | sessions
 let blockedIps = [];
 let visitorsSearchQuery = "";
 let visitorsStatusFilter = "all"; // all | blocked (online moved to time range)
@@ -791,6 +792,7 @@ const actions = {
     if (selectedVisitorIp === ip && !selectedVisitorId) {
       selectedVisitorIp = "";
       visitorHits = [];
+      visitorHitsSource = "hits";
       render();
       return;
     }
@@ -800,10 +802,12 @@ const actions = {
       const qs = visitorsQueryString({ ip });
       const data = await api(`/api/level1/visitors/ip-hits?${qs}`);
       visitorHits = data.hits || [];
+      visitorHitsSource = data.source === "sessions" ? "sessions" : "hits";
       render();
     } catch (error) {
       err = error.message;
       visitorHits = [];
+      visitorHitsSource = "hits";
       render();
     }
   },
@@ -2114,11 +2118,17 @@ function visitorsView() {
   const hitItems = hitsSorted
     .map(
       (hit) => `<div class="visitors-hit">
-        <span class="visitors-hit__path" title="${esc(hit.pageTitle || hit.path)}">${esc(hit.path || "—")}</span>
+        <span class="visitors-hit__path" title="${esc(hit.pageTitle || hit.path)}">${esc(hit.path || "—")}${hit.kind === "session" ? ' <em class="visitors-hit__tag">session</em>' : ""}</span>
         <span class="visitors-hit__time">${esc(fmtWhen(hit.createdAt))}</span>
       </div>`
     )
     .join("");
+
+  const hitsHint =
+    visitorHitsSource === "sessions"
+      ? `<p class="visitors-detail__hint">Részletes oldallista eddig hiányzott (naplóhiba). Mostantól újra gyűlik. Alább a session utolsó oldalai / aktivitás.</p>`
+      : "";
+  const hitsEmpty = `<p class="visitors-detail__empty">Nincs rögzített aktivitás ehhez az IP-hez ebben az időszakban.</p>`;
 
   const detailLabel = selectedDevice
     ? `${selectedDevice.ip || "—"} · ${selectedDevice.deviceName || selectedDevice.browser || "eszköz"}`
@@ -2148,7 +2158,8 @@ function visitorsView() {
         <span>Utolsó: ${esc(fmtWhen(selectedGroup?.lastSeen || metaSource?.lastSeenAt))}</span>
       </div>
       <div class="visitors-hits">
-        ${hitItems || `<p class="visitors-detail__empty">Nincs oldalmegtekintés ebben az időszakban.</p>`}
+        ${hitsHint}
+        ${hitItems || hitsEmpty}
       </div>
       <div class="visitors-detail__actions">
         <button class="users-card__btn users-card__btn--primary" type="button" data-act="refreshVisitors">Frissítés</button>

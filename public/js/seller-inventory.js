@@ -19,7 +19,7 @@ function injectStylesheet() {
   if (document.querySelector('link[data-seller-inv-css]')) return;
   const link = document.createElement("link");
   link.rel = "stylesheet";
-  link.href = "/css/seller-inventory.css?v=sellerInv22";
+  link.href = "/css/seller-inventory.css?v=sellerInv23";
   link.dataset.sellerInvCss = "1";
   document.head.appendChild(link);
 }
@@ -309,6 +309,20 @@ function bindPhoneReveal(host, fromId) {
   });
 }
 
+function mapEmbedSrc(mapQuery) {
+  const q = String(mapQuery || "").trim();
+  if (!q) return "";
+  return `https://maps.google.com/maps?q=${encodeURIComponent(q)}&z=15&output=embed`;
+}
+
+function mapPanelHtml(mapQuery) {
+  const src = mapEmbedSrc(mapQuery);
+  if (!src) {
+    return `<p class="seller-inv__hint">Nincs megjeleníthető cím a térképhez.</p>`;
+  }
+  return `<iframe class="seller-inv__map" title="Kereskedés helye" loading="lazy" referrerpolicy="no-referrer-when-downgrade" sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox" src="${esc(src)}"></iframe>`;
+}
+
 /**
  * @param {{ fromId: string, count?: number }} opts
  */
@@ -322,22 +336,29 @@ export async function mountSellerInventory({ fromId, count = 0 } = {}) {
 
   host.innerHTML = `
     <a class="seller-inv__back" href="${esc(backHref)}">← Vissza a hirdetéshez</a>
-    <div class="seller-inv__panel seller-inv__share">
-      <div class="seller-inv__share-main">
-        <div class="seller-inv__share-logo" data-si-share-logo hidden></div>
-        <p class="seller-inv__share-text">Oszd meg barátaiddal a kereskedésünk autóit.</p>
+    <div class="seller-inv__top">
+      <div class="seller-inv__top-main">
+        <div class="seller-inv__panel seller-inv__share">
+          <div class="seller-inv__share-main">
+            <div class="seller-inv__share-logo" data-si-share-logo hidden></div>
+            <p class="seller-inv__share-text">Oszd meg barátaiddal a kereskedésünk autóit.</p>
+          </div>
+          <div class="seller-inv__share-actions">
+            <button type="button" class="seller-inv__btn seller-inv__btn--yellow" data-si-share>Megosztás</button>
+          </div>
+        </div>
+        <div class="seller-inv__duo">
+          <div class="seller-inv__panel" data-si-contact-panel>
+            <p class="seller-inv__hint">Kapcsolat betöltése…</p>
+          </div>
+          <div class="seller-inv__panel" data-si-status-panel>
+            <p class="seller-inv__label">Állapot</p>
+            <p class="seller-inv__hint">Betöltés…</p>
+          </div>
+        </div>
       </div>
-      <div class="seller-inv__share-actions">
-        <button type="button" class="seller-inv__btn seller-inv__btn--yellow" data-si-share>Megosztás</button>
-      </div>
-    </div>
-    <div class="seller-inv__duo">
-      <div class="seller-inv__panel" data-si-contact-panel>
-        <p class="seller-inv__hint">Kapcsolat betöltése…</p>
-      </div>
-      <div class="seller-inv__panel" data-si-status-panel>
-        <p class="seller-inv__label">Állapot</p>
-        <p class="seller-inv__hint">Betöltés…</p>
+      <div class="seller-inv__panel seller-inv__map-panel" data-si-map-panel>
+        <p class="seller-inv__hint">Térkép betöltése…</p>
       </div>
     </div>
     <h3 class="seller-inv__title">Készlet <small data-si-count>(${Number(count) || 0})</small></h3>
@@ -367,6 +388,14 @@ export async function mountSellerInventory({ fromId, count = 0 } = {}) {
   if (statusPanel) {
     statusPanel.innerHTML = statusPanelHtml(rating, count);
     bindSellerRating(statusPanel, fromId);
+  }
+
+  const mapPanel = host.querySelector("[data-si-map-panel]");
+  if (mapPanel) {
+    const lines = Array.isArray(contact?.addressLines) ? contact.addressLines : [];
+    const q = String(contact?.mapQuery || lines.join(", ")).trim();
+    mapPanel.innerHTML = mapPanelHtml(q);
+    if (!q) mapPanel.hidden = true;
   }
 
   const label = String(contact?.sellerName || "").trim() || "Hirdető";

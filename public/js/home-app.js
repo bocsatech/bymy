@@ -1,4 +1,4 @@
-import { fetchListings, fetchRelatedListings } from "./db-client.js?v=sellerList1";
+import { fetchListings, fetchRelatedListings } from "./db-client.js?v=sellerInv1";
 import { createHomeGridCard, initHomeGridCardPhotos } from "./home-grid-card.js?v=mobFix8";
 import { promoKiemeltActive, promoTopAjanlatActive } from "./listing-promo.js?v=promo1";
 import {
@@ -28,6 +28,7 @@ import { bindListingOpen, restoreListingReturn } from "./listing-return.js?v=sea
 import { normalizeKivitel } from "./kivitel-options.js?v=kivitel1";
 import { featuredListingIdSet } from "./home-featured-slots.js?v=featuredNoAuto1";
 import { initSearchResultsMapButtons } from "./search-results-map.js?v=mapRouteD3";
+import { mountSellerInventory, updateSellerInventoryCount } from "./seller-inventory.js?v=sellerInv1";
 
 const gridTrack = document.getElementById("home-grid-track");
 const emptyEl = document.getElementById("home-empty");
@@ -75,6 +76,10 @@ function initialCategoryFromUrl() {
 }
 
 function scrollToListings() {
+  if (isSellerMode()) {
+    document.getElementById("seller-inv-root")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    return;
+  }
   const target = document.getElementById("home-category-bar") || gridTrack;
   target?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
@@ -221,6 +226,8 @@ function renderListings(items) {
     }
   } else if (!filtered.length && featuredOnlyMode) {
     emptyEl.textContent = "Jelenleg nincs kiemelt autó hirdetés.";
+  } else if (!filtered.length && isSellerMode()) {
+    emptyEl.textContent = "Ennek a hirdetőnek jelenleg nincs aktív hirdetése.";
   } else if (!filtered.length) {
     emptyEl.textContent =
       PAGE === "ingatlan"
@@ -267,12 +274,14 @@ async function loadSellerListings(fromId) {
   featuredOnlyMode = false;
   statsFilter = null;
   quickRadiusFilter = null;
+  await mountSellerInventory({ fromId, count: 0 });
   const items = await fetchRelatedListings(fromId, { limit: 200, includeSelf: true });
   const active = (items || []).filter((item) => (item.status || "feladott") === "feladott");
   allItems = sortForHome(active);
   featuredListingIds = featuredListingIdSet(allItems);
   populateFilterOptions(allItems);
   renderListings(allItems);
+  updateSellerInventoryCount(allItems.length);
   updateFilterResultCount();
   statsUi?.refreshActiveCount?.();
   scrollToListings();

@@ -32,7 +32,22 @@ body.seller-inventory-mode .auto-desk-results-bar,
 body.seller-inventory-mode .home-ad-strip,
 body.seller-inventory-mode .home-info-sidebar,
 body.seller-inventory-mode .site-side,
-body.seller-inventory-mode .home-bottom-extra {
+body.seller-inventory-mode .home-bottom-extra,
+body.seller-inventory-mode.home-page .home-main.auto-desk-main > .auto-search-tabs,
+body.seller-inventory-mode.home-page .home-main.auto-desk-main > .auto-search-hero,
+body.seller-inventory-mode.home-page[data-site-page="auto"] .home-main.auto-desk-main > .auto-search-tabs,
+body.seller-inventory-mode.home-page[data-site-page="auto"] .home-main.auto-desk-main > .auto-search-hero,
+body.seller-inventory-mode.home-page[data-site-page="teherauto"] .home-main.auto-desk-main > .auto-search-tabs,
+body.seller-inventory-mode.home-page[data-site-page="teherauto"] .home-main.auto-desk-main > .auto-search-hero,
+body.seller-inventory-mode .auto-search-panel,
+body.seller-inventory-mode .auto-search-body,
+body.seller-inventory-mode .home-qs-form,
+body.seller-inventory-mode .home-qs-row--actions,
+body.seller-inventory-mode .auto-desk-mode,
+body.seller-inventory-mode .auto-desk-acc,
+body.seller-inventory-mode .auto-desk-reset,
+body.seller-inventory-mode .home-qs-submit,
+body.seller-inventory-mode .home-qs-action--map {
   display: none !important;
 }
 

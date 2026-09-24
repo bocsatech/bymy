@@ -1,6 +1,6 @@
 /** „Több ettől a hirdetőtől” — kereskedő készlet (demo A), bymy menüsáv érintetlen. */
 
-import { fetchSellerContact } from "./db-client.js?v=sellerInv2";
+import { fetchSellerContact } from "./db-client.js?v=sellerInv3";
 
 function esc(value) {
   return String(value ?? "")
@@ -18,7 +18,7 @@ function injectStylesheet() {
   if (document.querySelector('link[data-seller-inv-css]')) return;
   const link = document.createElement("link");
   link.rel = "stylesheet";
-  link.href = "/css/seller-inventory.css?v=sellerInv2";
+  link.href = "/css/seller-inventory.css?v=sellerInv4";
   link.dataset.sellerInvCss = "1";
   document.head.appendChild(link);
 }
@@ -118,19 +118,19 @@ function contactPanelHtml(contact) {
   const lines = Array.isArray(contact?.addressLines) ? contact.addressLines : [];
   const nav = navHref(contact?.mapQuery || lines.join(", "));
   return `
-    <p class="seller-inv__eyebrow">Kapcsolat</p>
+    <p class="seller-inv__label">Kapcsolat</p>
     ${staffHtml(staff)}
     <div class="seller-inv__block">
-      <p class="seller-inv__eyebrow">Telefon</p>
+      <p class="seller-inv__label">Telefon</p>
       ${phonesHtml(phones)}
     </div>
     <div class="seller-inv__block">
-      <p class="seller-inv__eyebrow">Cím</p>
+      <p class="seller-inv__label">Cím</p>
       ${addressHtml(lines)}
     </div>
     ${
       nav
-        ? `<a class="seller-inv__btn seller-inv__btn--accent seller-inv__nav" href="${esc(nav)}" target="_blank" rel="noopener noreferrer">Navigáció</a>`
+        ? `<a class="seller-inv__btn seller-inv__btn--yellow seller-inv__nav" href="${esc(nav)}" target="_blank" rel="noopener noreferrer">Navigáció</a>`
         : `<p class="seller-inv__hint">Navigációhoz nincs elég címadat.</p>`
     }
   `;
@@ -149,10 +149,11 @@ export async function mountSellerInventory({ fromId, count = 0 } = {}) {
 
   host.innerHTML = `
     <a class="seller-inv__back" href="${esc(backHref)}">← Vissza a hirdetéshez</a>
+    <div class="seller-inv__head" data-si-head>Kereskedő</div>
     <div class="seller-inv__panel seller-inv__share">
       <h2>Oszd meg ezt a kereskedőt</h2>
       <div class="seller-inv__share-actions">
-        <button type="button" class="seller-inv__btn seller-inv__btn--accent" data-si-share>Megosztás</button>
+        <button type="button" class="seller-inv__btn seller-inv__btn--yellow" data-si-share>Megosztás</button>
         <button type="button" class="seller-inv__ico" data-si-fb aria-label="Facebook" title="Facebook">f</button>
         <button type="button" class="seller-inv__ico" data-si-wa aria-label="WhatsApp" title="WhatsApp">W</button>
         <button type="button" class="seller-inv__btn seller-inv__btn--ghost" data-si-copy>Link másolása</button>
@@ -160,11 +161,11 @@ export async function mountSellerInventory({ fromId, count = 0 } = {}) {
     </div>
     <div class="seller-inv__duo">
       <div class="seller-inv__panel" data-si-contact-panel>
-        <p class="seller-inv__eyebrow">Kapcsolat</p>
+        <p class="seller-inv__label">Kapcsolat</p>
         <p class="seller-inv__hint">Kapcsolat betöltése…</p>
       </div>
       <div class="seller-inv__panel">
-        <p class="seller-inv__eyebrow">Állapot</p>
+        <p class="seller-inv__label">Állapot</p>
         <div class="seller-inv__status"><span class="seller-inv__dot" aria-hidden="true"></span> Aktív kereskedő</div>
       </div>
     </div>
@@ -182,10 +183,12 @@ export async function mountSellerInventory({ fromId, count = 0 } = {}) {
   if (contactPanel) {
     contactPanel.innerHTML = contact
       ? contactPanelHtml(contact)
-      : `<p class="seller-inv__eyebrow">Kapcsolat</p><p class="seller-inv__hint">Nincs megjeleníthető kapcsolat.</p>`;
+      : `<p class="seller-inv__label">Kapcsolat</p><p class="seller-inv__hint">Nincs megjeleníthető kapcsolat.</p>`;
   }
 
   const label = String(contact?.sellerName || "").trim() || "Hirdető";
+  const head = host.querySelector("[data-si-head]");
+  if (head) head.textContent = label;
   const shareTitle = host.querySelector(".seller-inv__share h2");
   if (shareTitle && label !== "Hirdető") {
     shareTitle.textContent = `Oszd meg: ${label}`;

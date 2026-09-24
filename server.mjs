@@ -73,6 +73,7 @@ import {
   savePartner,
   upsertPostalCodes,
 } from "./lib/partners.mjs";
+import { geocodeHungaryAddress } from "./lib/geocode.mjs";
 import {
   PARTNER_CATEGORIES,
   categoriesForVertical,
@@ -1885,6 +1886,30 @@ async function handlePartnersApi(req, res, pathname) {
         return;
       }
       sendJson(res, 200, origin);
+      return;
+    }
+
+    if (pathname === "/api/geocode" && req.method === "GET") {
+      const url = new URL(req.url ?? "", `http://${HOST}`);
+      const q = String(url.searchParams.get("q") || "").trim();
+      const linesRaw = String(url.searchParams.get("lines") || "").trim();
+      const addressLines = linesRaw
+        ? linesRaw.split("|").map((s) => s.trim()).filter(Boolean)
+        : [];
+      if (!q && !addressLines.length) {
+        sendJson(res, 400, { error: "Hiányzó cím (q)." });
+        return;
+      }
+      try {
+        const hit = await geocodeHungaryAddress({ query: q, addressLines });
+        if (!hit) {
+          sendJson(res, 404, { error: "Cím nem található." });
+          return;
+        }
+        sendJson(res, 200, hit);
+      } catch (error) {
+        sendJson(res, 502, { error: error?.message || "Geocode hiba." });
+      }
       return;
     }
 

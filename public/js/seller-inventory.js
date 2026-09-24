@@ -19,7 +19,7 @@ function injectStylesheet() {
   if (document.querySelector('link[data-seller-inv-css]')) return;
   const link = document.createElement("link");
   link.rel = "stylesheet";
-  link.href = "/css/seller-inventory.css?v=sellerInv25";
+  link.href = "/css/seller-inventory.css?v=sellerInv26";
   link.dataset.sellerInvCss = "1";
   document.head.appendChild(link);
 }
@@ -323,35 +323,50 @@ function buildMapQuery(contact) {
   return "";
 }
 
-function mapEmbedSrc(query) {
-  const q = String(query || "").trim();
-  if (!q) return "";
-  // Egyszeri cím-alapú embed — a lat,lng cseréje világnézetre esett vissza.
-  return `https://maps.google.com/maps?q=${encodeURIComponent(q)}&hl=hu&z=16&ie=UTF8&output=embed`;
-}
-
 function mapOpenHref(query) {
   const q = String(query || "").trim();
   if (!q) return "";
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`;
 }
 
-function mapPanelHtml({ src, openHref, label }) {
-  if (!src) {
-    return `<p class="seller-inv__hint">Nincs megjeleníthető cím a térképhez.</p>`;
-  }
-  const open = openHref
-    ? `<a class="seller-inv__map-open" href="${esc(openHref)}" target="_blank" rel="noopener noreferrer">Megnyitás a Google Térképen</a>`
-    : "";
-  return `
-    <div class="seller-inv__map-wrap">
-      ${open}
-      <iframe class="seller-inv__map" title="${esc(label || "Kereskedés helye")}" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen src="${esc(src)}"></iframe>
-    </div>
-  `;
+let leafletPromise = null;
+
+function loadLeaflet() {
+  if (window.L) return Promise.resolve(window.L);
+  if (leafletPromise) return leafletPromise;
+  leafletPromise = new Promise((resolve, reject) => {
+    if (!document.querySelector('link[data-leaflet-css]')) {
+      const link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.href = "/vendor/leaflet/leaflet.css";
+      link.dataset.leafletCss = "1";
+      document.head.appendChild(link);
+    }
+    const script = document.createElement("script");
+    script.src = "/vendor/leaflet/leaflet.js";
+    script.async = true;
+    script.onload = () => (window.L ? resolve(window.L) : reject(new Error("Leaflet nem töltődött.")));
+    script.onerror = () => reject(new Error("Leaflet betöltési hiba."));
+    document.head.appendChild(script);
+  });
+  return leafletPromise;
 }
 
-function fillSellerMap(panel, contact) {
+async function fetchSellerCoords(contact, query) {
+  const lines = Array.isArray(contact?.addressLines) ? contact.addressLines : [];
+  const params = new URLSearchParams();
+  if (query) params.set("q", query);
+  if (lines.length) params.set("lines", lines.join("|"));
+  const res = await fetch(`/api/geocode?${params.toString()}`);
+  if (!res.ok) return null;
+  const data = await res.json().catch(() => null);
+  const lat = data?.lat != null ? Number(data.lat) : NaN;
+  const lon = data?.lon != null ? Number(data.lon) : NaN;
+  if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
+  return { lat, lon };
+}
+
+async function fillSellerMap(panel, contact) {
   if (!panel) return;
   const q = buildMapQuery(contact);
   if (!q) {
@@ -360,12 +375,47 @@ function fillSellerMap(panel, contact) {
     return;
   }
   panel.hidden = false;
-  // Csak egyszer állítjuk be — a geocode utáni iframe-csere „betölt majd eltűnik” volt.
-  panel.innerHTML = mapPanelHtml({
-    src: mapEmbedSrc(q),
-    openHref: mapOpenHref(q),
-    label: "Kereskedés helye",
-  });
+  const open = mapOpenHref(q);
+  panel.innerHTML = `
+    <div class="seller-inv__map-wrap">
+      ${
+        open
+          ? `<a class="seller-inv__map-open" href="${esc(open)}" target="_blank" rel="noopener noreferrer">Megnyitás a Google Térképen</a>`
+          : ""
+      }
+      <div class="seller-inv__map" data-si-map-canvas role="img" aria-label="Kereskedés helye"></div>
+    </div>
+  `;
+  const canvas = panel.querySelector("[data-si-map-canvas]");
+  if (!canvas) return;
+
+  let geo = null;
+  try {
+    geo = await fetchSellerCoords(contact, q);
+  } catch {
+    geo = null;
+  }
+  if (!geo) {
+    canvas.innerHTML = `<p class="seller-inv__hint">A cím nem található a térképen.</p>`;
+    return;
+  }
+
+  try {
+    const L = await loadLeaflet();
+    const map = L.map(canvas, {
+      scrollWheelZoom: false,
+      attributionControl: true,
+    }).setView([geo.lat, geo.lon], 14);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    }).addTo(map);
+    L.marker([geo.lat, geo.lon]).addTo(map);
+    requestAnimationFrame(() => map.invalidateSize());
+    setTimeout(() => map.invalidateSize(), 200);
+  } catch {
+    canvas.innerHTML = `<p class="seller-inv__hint">A térkép nem tölthető be.</p>`;
+  }
 }
 
 /**
@@ -436,7 +486,7 @@ export async function mountSellerInventory({ fromId, count = 0 } = {}) {
   }
 
   const mapPanel = host.querySelector("[data-si-map-panel]");
-  fillSellerMap(mapPanel, contact);
+  await fillSellerMap(mapPanel, contact);
 
   const label = String(contact?.sellerName || "").trim() || "Hirdető";
   const logoWrap = host.querySelector("[data-si-share-logo]");

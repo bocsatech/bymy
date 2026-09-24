@@ -36,7 +36,7 @@
       const bootTimer = setTimeout(() => {
         bootFail("Az admin felület lassan tölt — ellenőrizd a hálózatot, majd frissíts.");
       }, 15000);
-      import("/js/bocsatech.js?v=adminCreateUser1")
+      import("/js/bocsatech.js?v=userDelAds1")
         .then(() => {
           clearTimeout(bootTimer);
         })

@@ -822,9 +822,13 @@ const actions = {
   },
   async delUser(_, el) {
     const id = el.getAttribute("data-id");
-    if (!confirm(`Törlöd a #${id} usert?`)) return;
+    if (!confirm(`Törlöd a #${id} usert? A hirdetései is törlődnek.`)) return;
     try {
-      await api(`/api/level1/users/${id}`, { method: "DELETE" });
+      const data = await api(`/api/level1/users/${id}`, { method: "DELETE" });
+      const n = Number(data?.deletedListings) || 0;
+      info = n > 0 ? `Felhasználó törölve (${n} hirdetés is).` : "Felhasználó törölve.";
+      err = "";
+      editingUser = null;
       await loadTab();
       render();
     } catch (error) {

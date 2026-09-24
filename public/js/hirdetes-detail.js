@@ -214,9 +214,9 @@ function listingVerticalFromView(view) {
   return "auto";
 }
 
-function sellerListHref(listingId, vertical) {
-  const page = listPageForVertical(vertical);
-  const url = new URL(page, window.location.origin);
+function sellerListHref(listingId, _vertical) {
+  // Egy készletoldal: a kereskedő összes feladott hirdetése (minden vertical).
+  const url = new URL("/auto.html", window.location.origin);
   url.searchParams.set("hirdeto", String(listingId));
   return `${url.pathname}${url.search}`;
 }

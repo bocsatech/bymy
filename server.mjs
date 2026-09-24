@@ -1013,14 +1013,16 @@ async function handleListingsApi(req, res, pathname) {
     const url = new URL(req.url ?? "", `http://${HOST}`);
     const includeSelf =
       url.searchParams.get("includeSelf") === "1" || url.searchParams.get("all") === "1";
-    const limit = Math.min(Math.max(Number(url.searchParams.get("limit") ?? 24), 1), includeSelf ? 200 : 60);
+    const limit = Math.min(Math.max(Number(url.searchParams.get("limit") ?? 24), 1), 500);
     const listing = await getListing(listingId, { mode: "detail" });
-    if (!listing?.user_id || listing.status !== "feladott") {
+    const ownerId = Number(listing?.user_id || listing?.detail?.userId || 0);
+    if (!listing || !Number.isFinite(ownerId) || ownerId <= 0) {
       sendJson(res, 404, { error: "Nincs ilyen hirdetés." });
       return;
     }
+    // Seed lehet nem feladott — a készletben csak feladottakat adunk vissza.
     const listings = await listListingsByOwner({
-      userId: listing.user_id,
+      userId: ownerId,
       limit,
       excludeId: includeSelf ? null : listingId,
       status: "feladott",

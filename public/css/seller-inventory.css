@@ -282,38 +282,6 @@ body.seller-inventory-mode .home-grid-track {
   filter: brightness(0.97);
 }
 
-.seller-inv__btn--ghost {
-  border-color: var(--si-line);
-  background: var(--si-panel);
-  color: var(--si-text);
-}
-
-.seller-inv__btn--ghost:hover {
-  background: #f7f7f7;
-}
-
-html[data-theme="dark"] .seller-inv__btn--ghost:hover {
-  background: #2a2a2a;
-}
-
-.seller-inv__ico {
-  width: 2.05rem;
-  height: 2.05rem;
-  border-radius: 999px;
-  border: 1px solid var(--si-line);
-  display: inline-grid;
-  place-items: center;
-  background: var(--si-panel);
-  color: var(--si-text);
-  cursor: pointer;
-  padding: 0;
-  font-weight: 700;
-}
-
-.seller-inv__ico:hover {
-  border-color: #b0b0b0;
-}
-
 .seller-inv__label,
 .seller-inv__eyebrow {
   margin: 0 0 0.4rem;

@@ -19,7 +19,7 @@ function injectStylesheet() {
   if (document.querySelector('link[data-seller-inv-css]')) return;
   const link = document.createElement("link");
   link.rel = "stylesheet";
-  link.href = "/css/seller-inventory.css?v=sellerInv10";
+  link.href = "/css/seller-inventory.css?v=sellerInv11";
   link.dataset.sellerInvCss = "1";
   document.head.appendChild(link);
 }
@@ -237,9 +237,6 @@ export async function mountSellerInventory({ fromId, count = 0 } = {}) {
       </div>
       <div class="seller-inv__share-actions">
         <button type="button" class="seller-inv__btn seller-inv__btn--yellow" data-si-share>Megosztás</button>
-        <button type="button" class="seller-inv__ico" data-si-fb aria-label="Facebook" title="Facebook">f</button>
-        <button type="button" class="seller-inv__ico" data-si-wa aria-label="WhatsApp" title="WhatsApp">W</button>
-        <button type="button" class="seller-inv__btn seller-inv__btn--ghost" data-si-copy>Link másolása</button>
       </div>
     </div>
     <div class="seller-inv__duo">
@@ -304,34 +301,6 @@ export async function mountSellerInventory({ fromId, count = 0 } = {}) {
         btn.textContent = prev;
       }, 1600);
     }
-  });
-
-  host.querySelector("[data-si-copy]")?.addEventListener("click", async () => {
-    const btn = host.querySelector("[data-si-copy]");
-    const ok = await copyText(url);
-    if (btn) {
-      const prev = btn.textContent;
-      btn.textContent = ok ? "Másolva" : "Nem sikerült";
-      setTimeout(() => {
-        btn.textContent = prev;
-      }, 1600);
-    }
-  });
-
-  host.querySelector("[data-si-fb]")?.addEventListener("click", () => {
-    window.open(
-      `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
-      "_blank",
-      "noopener,noreferrer"
-    );
-  });
-
-  host.querySelector("[data-si-wa]")?.addEventListener("click", () => {
-    window.open(
-      `https://wa.me/?text=${encodeURIComponent(`${label} — ${url}`)}`,
-      "_blank",
-      "noopener,noreferrer"
-    );
   });
 }
 

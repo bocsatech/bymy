@@ -102,6 +102,25 @@ export async function fetchSellerContact(listingId) {
   return data.contact ?? null;
 }
 
+export async function fetchSellerRating(listingId) {
+  const response = await fetch(`/api/listings/${listingId}/seller-rating`, {
+    credentials: "same-origin",
+  });
+  const data = await parseJson(response);
+  return data.rating ?? null;
+}
+
+export async function submitSellerRating(listingId, score) {
+  const response = await fetch(`/api/listings/${listingId}/seller-rating`, {
+    method: "POST",
+    credentials: "same-origin",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ score }),
+  });
+  const data = await parseJson(response);
+  return data.rating ?? null;
+}
+
 export async function saveListingToDb(formData, listingId = null, { status = null, photos = [] } = {}) {
   const response = await fetch("/api/listings", {
     method: "POST",

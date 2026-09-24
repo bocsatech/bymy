@@ -147,6 +147,7 @@ import {
   importRateLimitPerHour,
 } from "./lib/import-auth.mjs";
 import { attachSellerProfile, getSellerInventoryContactForUserId, publicSellerInventoryContact } from "./lib/listing-detail-seller.mjs";
+import { getSellerRatingSummary, submitSellerRating } from "./lib/seller-ratings.mjs";
 import { saveListingPhotos } from "./lib/listing-photos.mjs";
 import {
   dataUrlToBuffer,
@@ -1048,6 +1049,61 @@ async function handleListingsApi(req, res, pathname) {
       return;
     }
     sendJson(res, 200, { contact: publicSellerInventoryContact(contact) });
+    return;
+  }
+
+  const sellerRatingMatch = pathname.match(/^\/api\/listings\/(\d+)\/seller-rating$/);
+  if (sellerRatingMatch && req.method === "GET") {
+    if (!assertPublicListingRate(req, res, "listing-seller-rating", { limit: 120, windowMs: 15 * 60 * 1000 })) {
+      return;
+    }
+    const listingId = Number(sellerRatingMatch[1]);
+    const listing = await getListing(listingId, { mode: "detail" });
+    const ownerId = Number(listing?.user_id || 0);
+    if (!listing || !Number.isFinite(ownerId) || ownerId <= 0) {
+      sendJson(res, 404, { error: "Nincs ilyen hirdetés." });
+      return;
+    }
+    const viewer = await requestUser(req);
+    const rating = await getSellerRatingSummary({
+      sellerUserId: ownerId,
+      viewerUserId: viewer?.id ?? null,
+    });
+    sendJson(res, 200, { rating });
+    return;
+  }
+  if (sellerRatingMatch && req.method === "POST") {
+    const user = await requestUser(req);
+    if (!user) {
+      sendJson(res, 401, { error: "Jelentkezz be az értékeléshez." });
+      return;
+    }
+    if (!assertPublicListingRate(req, res, "listing-seller-rating-post", { limit: 40, windowMs: 60 * 60 * 1000 })) {
+      return;
+    }
+    let body = {};
+    try {
+      body = await readBody(req);
+    } catch {
+      body = {};
+    }
+    const listingId = Number(sellerRatingMatch[1]);
+    const listing = await getListing(listingId, { mode: "detail" });
+    const ownerId = Number(listing?.user_id || 0);
+    if (!listing || !Number.isFinite(ownerId) || ownerId <= 0) {
+      sendJson(res, 404, { error: "Nincs ilyen hirdetés." });
+      return;
+    }
+    try {
+      const rating = await submitSellerRating({
+        sellerUserId: ownerId,
+        raterUserId: user.id,
+        score: body.score,
+      });
+      sendJson(res, 200, { rating });
+    } catch (err) {
+      sendJson(res, err.status || 500, { error: err.message || "Nem sikerült az értékelés." });
+    }
     return;
   }
 

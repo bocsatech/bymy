@@ -28,6 +28,7 @@ const FILES = [
   "015_listings_vertical_feed.sql",
   "016_listing_cells_listing_field_idx.sql",
   "017_listing_feed.sql",
+  "018_seller_ratings.sql",
 ];
 
 function loadEnvLocal() {

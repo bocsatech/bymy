@@ -1,6 +1,6 @@
 /** „Több ettől a hirdetőtől” — kereskedő készlet (demo A), bymy menüsáv érintetlen. */
 
-import { fetchSellerContact, revealListingContact } from "./db-client.js?v=sellerInv9";
+import { fetchSellerContact, revealListingContact, fetchSellerRating, submitSellerRating } from "./db-client.js?v=sellerInv12";
 import { mountTurnstile } from "./turnstile-ui.js?v=turnstile10";
 
 function esc(value) {
@@ -19,7 +19,7 @@ function injectStylesheet() {
   if (document.querySelector('link[data-seller-inv-css]')) return;
   const link = document.createElement("link");
   link.rel = "stylesheet";
-  link.href = "/css/seller-inventory.css?v=sellerInv11";
+  link.href = "/css/seller-inventory.css?v=sellerInv12";
   link.dataset.sellerInvCss = "1";
   document.head.appendChild(link);
 }
@@ -85,6 +85,100 @@ function staffHtml(staff = []) {
     })
     .filter(Boolean)
     .join("")}</ul>`;
+}
+
+function starsHtml(average, { interactive = false, selected = 0 } = {}) {
+  const avg = average != null && Number.isFinite(Number(average)) ? Number(average) : null;
+  const filled = selected > 0 ? selected : avg != null ? Math.round(avg) : 0;
+  const buttons = Array.from({ length: 10 }, (_, i) => {
+    const n = i + 1;
+    const on = n <= filled;
+    if (interactive) {
+      return `<button type="button" class="seller-inv__star${on ? " is-on" : ""}" data-si-rate="${n}" aria-label="${n} csillag">${on ? "★" : "☆"}</button>`;
+    }
+    return `<span class="seller-inv__star${on ? " is-on" : ""}" aria-hidden="true">${on ? "★" : "☆"}</span>`;
+  }).join("");
+  return `<div class="seller-inv__stars" role="${interactive ? "group" : "img"}" aria-label="${
+    avg != null ? `Értékelés ${avg} / 10` : "Még nincs értékelés"
+  }">${buttons}</div>`;
+}
+
+function statusPanelHtml(rating, activeCount) {
+  const count = Number(activeCount) || 0;
+  const avg = rating?.average;
+  const ratingCount = Number(rating?.count) || 0;
+  const myScore = rating?.myScore != null ? Number(rating.myScore) : null;
+  const avgLabel =
+    avg != null
+      ? `<span class="seller-inv__rating-avg">${esc(String(avg))}/10</span> <span class="seller-inv__rating-n">(${ratingCount})</span>`
+      : `<span class="seller-inv__rating-n">Még nincs értékelés</span>`;
+
+  let rateBlock = "";
+  if (myScore != null) {
+    rateBlock = `<p class="seller-inv__hint">Te értékelésed: <strong>${esc(String(myScore))}/10</strong></p>`;
+  } else if (rating?.canRate) {
+    rateBlock = `
+      <p class="seller-inv__rate-label">Értékeld (1–10):</p>
+      ${starsHtml(null, { interactive: true, selected: 0 })}
+      <p class="seller-inv__hint" data-si-rate-msg hidden></p>
+    `;
+  } else if (!rating?.loggedIn) {
+    const next = encodeURIComponent(window.location.pathname + window.location.search);
+    rateBlock = `<p class="seller-inv__hint"><a href="/belepes.html?next=${next}">Jelentkezz be</a> az értékeléshez.</p>`;
+  } else {
+    rateBlock = `<p class="seller-inv__hint">Saját magadat nem értékelheted.</p>`;
+  }
+
+  return `
+    <p class="seller-inv__label">Állapot</p>
+    <div class="seller-inv__status"><span class="seller-inv__dot" aria-hidden="true"></span> Aktív kereskedő</div>
+    <p class="seller-inv__stat-line">Aktív hirdetések: <strong data-si-active-count>${esc(String(count))}</strong></p>
+    <div class="seller-inv__rating" data-si-rating>
+      <p class="seller-inv__stat-line">Értékelés: ${avgLabel}</p>
+      ${starsHtml(avg)}
+      <div class="seller-inv__rate" data-si-rate-wrap>${rateBlock}</div>
+    </div>
+  `;
+}
+
+function bindSellerRating(panel, fromId) {
+  const wrap = panel.querySelector("[data-si-rate-wrap]");
+  if (!wrap) return;
+  const stars = [...wrap.querySelectorAll("[data-si-rate]")];
+  const paint = (n) => {
+    stars.forEach((b) => {
+      const v = Number(b.getAttribute("data-si-rate"));
+      const on = v <= n;
+      b.classList.toggle("is-on", on);
+      b.textContent = on ? "★" : "☆";
+    });
+  };
+  stars.forEach((btn) => {
+    btn.addEventListener("mouseenter", () => paint(Number(btn.getAttribute("data-si-rate"))));
+    btn.addEventListener("mouseleave", () => paint(0));
+    btn.addEventListener("click", async () => {
+      const score = Number(btn.getAttribute("data-si-rate"));
+      if (!Number.isFinite(score)) return;
+      const msg = wrap.querySelector("[data-si-rate-msg]");
+      stars.forEach((b) => {
+        b.disabled = true;
+      });
+      try {
+        const rating = await submitSellerRating(fromId, score);
+        const active = Number(document.querySelector("[data-si-active-count]")?.textContent) || 0;
+        panel.innerHTML = statusPanelHtml(rating, active);
+        bindSellerRating(panel, fromId);
+      } catch (err) {
+        if (msg) {
+          msg.hidden = false;
+          msg.textContent = err?.message || "Nem sikerült az értékelés.";
+        }
+        stars.forEach((b) => {
+          b.disabled = false;
+        });
+      }
+    });
+  });
 }
 
 const PHONE_ICON = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6.5 4.8h3.2l1.1 3.2-1.8 1.1a12 12 0 0 0 6 6l1.1-1.8 3.2 1.1v3.2A2 2 0 0 1 17.3 20 15 15 0 0 1 4 6.7 2 2 0 0 1 6.5 4.8Z" stroke="currentColor" stroke-width="1.6"/></svg>`;
@@ -244,19 +338,24 @@ export async function mountSellerInventory({ fromId, count = 0 } = {}) {
         <p class="seller-inv__label">Kapcsolat</p>
         <p class="seller-inv__hint">Kapcsolat betöltése…</p>
       </div>
-      <div class="seller-inv__panel">
+      <div class="seller-inv__panel" data-si-status-panel>
         <p class="seller-inv__label">Állapot</p>
-        <div class="seller-inv__status"><span class="seller-inv__dot" aria-hidden="true"></span> Aktív kereskedő</div>
+        <p class="seller-inv__hint">Betöltés…</p>
       </div>
     </div>
     <h3 class="seller-inv__title">Készlet <small data-si-count>(${Number(count) || 0})</small></h3>
   `;
 
   let contact = null;
+  let rating = null;
   try {
-    contact = await fetchSellerContact(fromId);
+    [contact, rating] = await Promise.all([
+      fetchSellerContact(fromId).catch(() => null),
+      fetchSellerRating(fromId).catch(() => null),
+    ]);
   } catch {
     contact = null;
+    rating = null;
   }
 
   const contactPanel = host.querySelector("[data-si-contact-panel]");
@@ -265,6 +364,12 @@ export async function mountSellerInventory({ fromId, count = 0 } = {}) {
       ? contactPanelHtml(contact)
       : `<p class="seller-inv__label">Kapcsolat</p><p class="seller-inv__hint">Nincs megjeleníthető kapcsolat.</p>`;
     if (contact) bindPhoneReveal(contactPanel, fromId);
+  }
+
+  const statusPanel = host.querySelector("[data-si-status-panel]");
+  if (statusPanel) {
+    statusPanel.innerHTML = statusPanelHtml(rating, count);
+    bindSellerRating(statusPanel, fromId);
   }
 
   const label = String(contact?.sellerName || "").trim() || "Hirdető";
@@ -305,6 +410,9 @@ export async function mountSellerInventory({ fromId, count = 0 } = {}) {
 }
 
 export function updateSellerInventoryCount(count) {
+  const n = Number(count) || 0;
   const el = document.querySelector("[data-si-count]");
-  if (el) el.textContent = `(${Number(count) || 0})`;
+  if (el) el.textContent = `(${n})`;
+  const active = document.querySelector("[data-si-active-count]");
+  if (active) active.textContent = String(n);
 }

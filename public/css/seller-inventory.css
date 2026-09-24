@@ -315,6 +315,81 @@ body.seller-inventory-mode .home-grid-track {
   flex-shrink: 0;
 }
 
+.seller-inv__stat-line {
+  margin: 0.55rem 0 0;
+  font-size: 0.9rem;
+  font-weight: 650;
+  color: var(--si-text);
+}
+
+.seller-inv__rating {
+  margin-top: 0.35rem;
+}
+
+.seller-inv__rating-avg {
+  font-weight: 800;
+}
+
+.seller-inv__rating-n {
+  font-weight: 600;
+  color: #666;
+}
+
+html[data-theme="dark"] .seller-inv__rating-n {
+  color: #aaa;
+}
+
+.seller-inv__stars {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.05rem;
+  margin: 0.25rem 0 0;
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+.seller-inv__star {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  padding: 0.1rem 0.05rem;
+  margin: 0;
+  font-size: 1.05rem;
+  line-height: 1;
+  color: #c8c8c8;
+  cursor: default;
+  font-family: inherit;
+}
+
+button.seller-inv__star {
+  cursor: pointer;
+}
+
+button.seller-inv__star:hover,
+button.seller-inv__star:focus-visible {
+  color: #e6a800;
+  outline: none;
+}
+
+.seller-inv__star.is-on {
+  color: #e6a800;
+}
+
+.seller-inv__rate {
+  margin-top: 0.55rem;
+}
+
+.seller-inv__rate-label {
+  margin: 0 0 0.2rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--si-text);
+}
+
+.seller-inv__rate .seller-inv__stars {
+  margin-top: 0.1rem;
+}
+
 .seller-inv__contact-row {
   display: grid;
   grid-template-columns: 1fr 1fr;

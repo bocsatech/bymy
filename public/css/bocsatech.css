@@ -153,7 +153,7 @@ input, select, textarea {
 .row-selected td { background: rgba(240, 193, 75, 0.08); }
 .user-edit {
   margin-top: 1.25rem;
-  max-width: none;
+  max-width: 38rem;
 }
 .user-edit.users-cards-wrap {
   padding-top: 1.15rem;
@@ -211,8 +211,8 @@ input, select, textarea {
 .user-edit__core,
 .user-edit__profile-fields {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.65rem 0.85rem;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 0.55rem 0.65rem;
   align-items: start;
 }
 .user-edit__field {
@@ -220,6 +220,16 @@ input, select, textarea {
   gap: 0.28rem;
   margin: 0;
   min-width: 0;
+  grid-column: span 3;
+}
+.user-edit__field--sm {
+  grid-column: span 2;
+}
+.user-edit__field--md {
+  grid-column: span 3;
+}
+.user-edit__field--lg {
+  grid-column: span 4;
 }
 .user-edit__field--wide {
   grid-column: 1 / -1;
@@ -251,12 +261,17 @@ input, select, textarea {
 .user-edit__listing-status select {
   width: 100%;
   max-width: 100%;
+  box-sizing: border-box;
   background: #fff;
   border: 1px solid #e2e8f0;
   border-radius: 10px;
-  padding: 0.55rem 0.7rem;
+  padding: 0.45rem 0.6rem;
   color: #0f172a;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
+}
+.user-edit__field--sm input:not([type="checkbox"]),
+.user-edit__field--sm select {
+  max-width: 7.5rem;
 }
 .user-edit__field input:focus,
 .user-edit__field select:focus,
@@ -330,7 +345,21 @@ input, select, textarea {
 @media (max-width: 720px) {
   .user-edit__core,
   .user-edit__profile-fields {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .user-edit__field,
+  .user-edit__field--sm,
+  .user-edit__field--md,
+  .user-edit__field--lg {
+    grid-column: span 1;
+  }
+  .user-edit__field--wide,
+  .user-edit__field--check {
+    grid-column: 1 / -1;
+  }
+  .user-edit__field--sm input:not([type="checkbox"]),
+  .user-edit__field--sm select {
+    max-width: 100%;
   }
   .user-edit__listing {
     grid-template-columns: 1fr;
@@ -347,6 +376,18 @@ input, select, textarea {
   .user-edit__listing-actions .users-card__btn {
     flex: 1 1 auto;
     justify-content: center;
+  }
+}
+@media (max-width: 480px) {
+  .user-edit__core,
+  .user-edit__profile-fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .user-edit__field,
+  .user-edit__field--sm,
+  .user-edit__field--md,
+  .user-edit__field--lg {
+    grid-column: 1 / -1;
   }
 }
 

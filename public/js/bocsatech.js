@@ -2413,18 +2413,45 @@ function profileFields(profile) {
 function userEditView() {
   const profile = editingUser.profileJson ?? {};
   const fields = profileFields(profile);
-  const profileWideKeys = new Set([
-    "accountType",
-    "companyAddress",
-    "street",
-    "companyStreet",
-    "companyEmail",
-    "companyEmail2",
-  ]);
+  const profileFieldSize = (key) => {
+    if (
+      /postal|zip|salutation|tax|adó|radius|km$/i.test(key) ||
+      ["postalCode", "companyPostalCode", "companyTaxId", "searchRadiusKm", "recommendationsRadiusKm", "salutation"].includes(key)
+    ) {
+      return "sm";
+    }
+    if (
+      /phone|telefon|country|ország|city|város|település|firstName|lastName|accountType/i.test(key) ||
+      [
+        "phone",
+        "companyPhone",
+        "companyPhone2",
+        "country",
+        "companyCountry",
+        "city",
+        "companyCity",
+        "firstName",
+        "lastName",
+        "accountType",
+        "salespersonName",
+        "salespersonName2",
+      ].includes(key)
+    ) {
+      return "md";
+    }
+    if (
+      ["companyAddress", "street", "companyStreet", "companyEmail", "companyEmail2", "companyActivities", "company", "email"].includes(key) ||
+      /address|street|email|activities|cégnév|company$/i.test(key)
+    ) {
+      return "wide";
+    }
+    return "md";
+  };
   const fieldRows = fields
-    .map(
-      (f) => `
-      <label class="user-edit__field${profileWideKeys.has(f.key) ? " user-edit__field--wide" : ""}">
+    .map((f) => {
+      const size = profileFieldSize(f.key);
+      return `
+      <label class="user-edit__field user-edit__field--${size}">
         <span class="user-edit__label">${esc(f.label)}</span>
         ${
           f.key === "accountType"
@@ -2434,8 +2461,8 @@ function userEditView() {
               </select>`
             : `<input class="edit-profile-field" data-key="${esc(f.key)}" type="text" value="${esc(f.value)}" />`
         }
-      </label>`
-    )
+      </label>`;
+    })
     .join("");
 
   const ads = Number(editingUser.listingCount ?? (editingUser.listings || []).length) || 0;

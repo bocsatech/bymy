@@ -1,12 +1,12 @@
 
-import { applyAutoSearchLayout, readLayoutFilterValues, refillAutoSearchRangeSelects, prefetchAutoSearchBoot } from "./auto-search-layout.js?v=mobFix3";
-import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums } from "./auto-search-drums.js?v=mobFix3";
+import { applyAutoSearchLayout, readLayoutFilterValues, refillAutoSearchRangeSelects, prefetchAutoSearchBoot } from "./auto-search-layout.js?v=mobFix4";
+import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums } from "./auto-search-drums.js?v=mobFix4";
 import {
   mountDetailedSearch,
   readDetailedSearchValues,
   resetDetailedSearch,
 } from "./auto-detailed-search.js?v=fogyNum1";
-import { readWheel } from "./ingatlan-wheels.js?v=mobFix3";
+import { readWheel } from "./ingatlan-wheels.js?v=mobFix4";
 import { readBrandModelFilterValues, mountAutoBrandModelPicker } from "./auto-brand-model-picker.js?v=bmDoneClose1";
 import { readFuelFilterValues, mountAutoFuelPicker } from "./auto-fuel-picker.js?v=noHint2";
 import { readKivitelFilterValues, mountAutoKivitelPicker } from "./auto-kivitel-picker.js?v=mobMenuFix1";
@@ -310,6 +310,15 @@ export function initHomeQuickSearch({ onSearch = () => {}, onDeskSortChange, onR
             mountSafe(mountAutoKivitelPicker, "Kivitel picker:"),
             mountSafe(mountAutoAllapotPicker, "Állapot picker:"),
           ]);
+        }
+        // Empty "success" (poisoned session cache) — one forced remount before giving up.
+        if (!qsHasFields() && !deskAuto) {
+          await applyAutoSearchLayout(form, { force: true }).catch(() => null);
+          try {
+            await mountAutoSearchDrums(form);
+          } catch (retryDrumError) {
+            console.warn("Kereső dobkerék retry:", retryDrumError);
+          }
         }
         const urlKivitel = new URLSearchParams(window.location.search).get("kivitel");
         if (urlKivitel && form.dataset.kivitelPicker !== "1") {

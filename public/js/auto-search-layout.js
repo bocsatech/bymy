@@ -182,7 +182,11 @@ let cachedLayoutCategory = "";
 let layoutNetworkPromise = null;
 
 function layoutSessionKey(category) {
-  return `bymy-search-layout:v1:${category}`;
+  return `bymy-search-layout:v2:${category}`;
+}
+
+function layoutHasCells(layout) {
+  return Array.isArray(layout?.cells) && layout.cells.length > 0;
 }
 
 function readLayoutSession(category) {
@@ -191,6 +195,10 @@ function readLayoutSession(category) {
     if (!raw) return null;
     const parsed = JSON.parse(raw);
     if (!parsed?.layout || typeof parsed.layout !== "object") return null;
+    if (!layoutHasCells(parsed.layout)) {
+      sessionStorage.removeItem(layoutSessionKey(category));
+      return null;
+    }
     return parsed.layout;
   } catch {
     return null;
@@ -198,6 +206,7 @@ function readLayoutSession(category) {
 }
 
 function writeLayoutSession(category, layout) {
+  if (!layoutHasCells(layout)) return;
   try {
     sessionStorage.setItem(
       layoutSessionKey(category),
@@ -214,15 +223,32 @@ async function refreshLayoutFromNetwork(category) {
     try {
       const res = await fetch(layoutUrl(), { credentials: "same-origin" });
       const data = await res.json().catch(() => ({}));
-      cachedLayout = data.layout || { version: 2, category, cells: [] };
+      const next = data.layout && typeof data.layout === "object" ? data.layout : null;
+      if (!res.ok || !layoutHasCells(next)) {
+        // Keep a previous good cache; never poison session with empty/error payloads.
+        if (cachedLayout && cachedLayoutCategory === category && layoutHasCells(cachedLayout)) {
+          return cachedLayout;
+        }
+        const fromSession = readLayoutSession(category);
+        if (fromSession) {
+          cachedLayout = fromSession;
+          cachedLayoutCategory = category;
+          return fromSession;
+        }
+        cachedLayout = { version: 2, category, cells: [] };
+        cachedLayoutCategory = category;
+        return cachedLayout;
+      }
+      cachedLayout = next;
       cachedLayoutCategory = category;
       writeLayoutSession(category, cachedLayout);
       return cachedLayout;
     } catch (error) {
       console.warn("Kereső layout hálózat:", error);
-      const fallback = cachedLayout && cachedLayoutCategory === category
-        ? cachedLayout
-        : readLayoutSession(category) || { version: 2, category, cells: [] };
+      const fallback =
+        cachedLayout && cachedLayoutCategory === category && layoutHasCells(cachedLayout)
+          ? cachedLayout
+          : readLayoutSession(category) || { version: 2, category, cells: [] };
       cachedLayout = fallback;
       cachedLayoutCategory = category;
       return fallback;
@@ -235,7 +261,9 @@ async function refreshLayoutFromNetwork(category) {
 
 export async function fetchAutoSearchLayout({ force = false } = {}) {
   const category = searchLayoutCategory();
-  if (cachedLayout && !force && cachedLayoutCategory === category) return cachedLayout;
+  if (cachedLayout && !force && cachedLayoutCategory === category && layoutHasCells(cachedLayout)) {
+    return cachedLayout;
+  }
 
   if (!force) {
     const fromSession = readLayoutSession(category);
@@ -255,6 +283,19 @@ export function prefetchAutoSearchBoot() {
   if (typeof window === "undefined") return;
   const page = document.body?.getAttribute("data-site-page");
   if (page !== "auto" && page !== "teherauto") return;
+  // Drop legacy empty v1 session caches that blanked the mobile search.
+  try {
+    for (const key of Object.keys(sessionStorage)) {
+      if (!key.startsWith("bymy-search-layout:")) continue;
+      const raw = sessionStorage.getItem(key);
+      const parsed = raw ? JSON.parse(raw) : null;
+      if (!Array.isArray(parsed?.layout?.cells) || !parsed.layout.cells.length) {
+        sessionStorage.removeItem(key);
+      }
+    }
+  } catch {
+    /* private mode */
+  }
   void fetchAutoSearchLayout({ force: false }).catch(() => {});
   void import("./vehicle-catalog-client.js?v=deskQsFast1")
     .then((m) => m.fetchVehicleCatalog?.())
@@ -883,7 +924,13 @@ function wirePostalCityAutofill(form) {
 export async function applyAutoSearchLayout(form = document.getElementById("home-qs-form"), { force = false } = {}) {
   if (!form) return null;
   try {
-    const layout = await fetchAutoSearchLayout({ force });
+    let layout = await fetchAutoSearchLayout({ force });
+    let visible = (layout.cells || []).filter((c) => isSearchCellVisible(c));
+    // Empty session/memory cache used to "succeed" and skip network — force one real fetch.
+    if (!visible.length && !force) {
+      layout = await fetchAutoSearchLayout({ force: true });
+      visible = (layout.cells || []).filter((c) => isSearchCellVisible(c));
+    }
     let quickKeys = quickSearchFieldKeysFromLayout(layout);
     if (searchLayoutCategory() === "teherauto-search" && !quickKeys.includes("kivitel")) {
       quickKeys = [...quickKeys, "kivitel"];
@@ -891,8 +938,6 @@ export async function applyAutoSearchLayout(form = document.getElementById("home
     form.dataset.deskQuickKeys = quickKeys.join(",");
     const mainHost = document.getElementById("qs-layout-main");
     const moreHost = document.getElementById("qs-more-layout");
-
-    const visible = (layout.cells || []).filter((c) => isSearchCellVisible(c));
 
     if (!visible.length) {
       hideLegacy(form);

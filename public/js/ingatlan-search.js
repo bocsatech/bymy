@@ -53,14 +53,14 @@ import {
   wheelFieldHtml,
   syncHostClearButton,
   initMenuWheel,
-} from "./ingatlan-wheels.js?v=mobFix3";
+} from "./ingatlan-wheels.js?v=mobFix4";
 import {
   closeAllInlineDrums,
   initDrumWheel,
   syncDrumWheelDisplay,
   applyDrumModeClass,
 } from "./immo-drum-picker.js?v=immoAdFormMenu1";
-import { bindAutoDrumSheet, closeAutoDrumSheet } from "./auto-drum-sheet.js?v=mobFix3";
+import { bindAutoDrumSheet, closeAutoDrumSheet } from "./auto-drum-sheet.js?v=mobFix4";
 import {
   fetchIngatlanWheelSchema,
   renderIngatlanSchemaHosts,

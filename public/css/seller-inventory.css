@@ -129,10 +129,28 @@ body.seller-inventory-mode .home-grid-track {
 }
 
 .seller-inv {
-  margin: 0 0 1rem;
+  margin: 0 0 1.15rem;
   padding: 0;
   color: var(--si-text);
-  max-width: 640px;
+  max-width: none;
+  width: 100%;
+}
+
+.seller-inv__duo {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 0.85rem;
+  margin-bottom: 0.35rem;
+  width: 100%;
+}
+
+.seller-inv__share {
+  width: 100%;
+}
+
+.seller-inv__head {
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .seller-inv__back {

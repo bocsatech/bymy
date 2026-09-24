@@ -149,6 +149,11 @@ import {
 } from "./lib/import-auth.mjs";
 import { attachSellerProfile, getSellerInventoryContactForUserId, publicSellerInventoryContact } from "./lib/listing-detail-seller.mjs";
 import { getSellerRatingSummary, submitSellerRating } from "./lib/seller-ratings.mjs";
+import {
+  buildListingOpenGraph,
+  injectOpenGraphIntoHtml,
+  isSocialShareCrawler,
+} from "./lib/listing-og.mjs";
 import { saveListingPhotos } from "./lib/listing-photos.mjs";
 import {
   dataUrlToBuffer,
@@ -360,7 +365,7 @@ function haImportCorsHeaders(req) {
   };
 }
 
-function serveStatic(path, res) {
+async function serveStatic(path, res, req = null) {
   applySecurityHeaders(res);
   const rel = path === "/" ? "index.html" : path.replace(/^\//, "");
 
@@ -485,6 +490,24 @@ function serveStatic(path, res) {
         "<!-- SITE_SIDE_CONTROLS -->",
         readFileSync(join(PUBLIC, "partials", "site-side-controls.html"), "utf8")
       );
+    }
+    if (rel === "hirdetes.html" && req && isSocialShareCrawler(req)) {
+      try {
+        const url = new URL(req.url ?? "", `http://${HOST}`);
+        const listingId = Number(url.searchParams.get("id"));
+        if (Number.isFinite(listingId) && listingId > 0) {
+          const listing = await getListing(listingId, { mode: "detail" });
+          if (listing?.status === "feladott") {
+            const og = buildListingOpenGraph({
+              listing,
+              baseUrl: publicBaseUrl(req),
+            });
+            html = injectOpenGraphIntoHtml(html, og);
+          }
+        }
+      } catch {
+        /* OG nélkül is kiszolgáljuk az oldalt */
+      }
     }
     res.writeHead(200, {
       "Content-Type": MIME[".html"],
@@ -2842,11 +2865,11 @@ export async function handleHttpRequest(req, res) {
   }
 
   if (/^\/partner\/[a-z0-9-]+\/?$/.test(pathname)) {
-    serveStatic("/partner-profil.html", res);
+    await serveStatic("/partner-profil.html", res, req);
     return;
   }
 
-  serveStatic(pathname, res);
+  await serveStatic(pathname, res, req);
 }
 
 const server = createServer(handleHttpRequest);

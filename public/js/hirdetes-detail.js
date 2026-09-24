@@ -20,6 +20,8 @@ const ICON = {
   close: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,
   star: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="m12 3.6 2.1 4.4 4.8.5-3.6 3.1 1.1 4.7L12 14.2 7.6 16.3l1.1-4.7-3.6-3.1 4.8-.5L12 3.6Z" stroke="currentColor" stroke-width="1.6"/></svg>`,
   share: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M16 8a3 3 0 1 0-2.8-4M8 12a3 3 0 1 0 0 0.01M16 20a3 3 0 1 0-2.8-4M8.7 13.2l6.6 3.6M15.3 7.2l-6.6 3.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>`,
+  facebook: `<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M14.5 8.5h2.2V5.2H14.3c-2.6 0-4.3 1.6-4.3 4.4v1.9H7.8v3.4h2.2V22h3.5v-7.1h2.5l.5-3.4h-3V9.8c0-1 .3-1.3 1.2-1.3Z"/></svg>`,
+  link: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M10 14a5 5 0 0 0 7.1.1l1.8-1.8a5 5 0 0 0-7.1-7.1L10.5 6.5M14 10a5 5 0 0 0-7.1-.1L5.1 11.7a5 5 0 0 0 7.1 7.1l1.3-1.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>`,
   print: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M7 8V5h10v3M6 14h12v5H6v-5Z" stroke="currentColor" stroke-width="1.6"/><path d="M4.8 9h14.4A1.7 1.7 0 0 1 21 10.7v4.2h-3M3 14.9V10.7A1.7 1.7 0 0 1 4.8 9" stroke="currentColor" stroke-width="1.6"/></svg>`,
   mail: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 7h16v10H4V7Z" stroke="currentColor" stroke-width="1.6"/><path d="m4 7 8 6 8-6" stroke="currentColor" stroke-width="1.6"/></svg>`,
   phone: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6.5 4.8h3.2l1.1 3.2-1.8 1.1a12 12 0 0 0 6 6l1.1-1.8 3.2 1.1v3.2A2 2 0 0 1 17.3 20 15 15 0 0 1 4 6.7 2 2 0 0 1 6.5 4.8Z" stroke="currentColor" stroke-width="1.6"/></svg>`,
@@ -314,7 +316,37 @@ function render(view, listing, related) {
             ? ""
             : `<button type="button" class="hd-tool" data-hd-star aria-label="Mentés">${ICON.star}</button>`
         }
-        <button type="button" class="hd-tool" data-hd-share aria-label="Megosztás">${ICON.share}</button>
+        <div class="hd-share-wrap" data-hd-share-wrap>
+          <button type="button" class="hd-tool" data-hd-share aria-label="Megosztás" aria-expanded="false" aria-haspopup="true">${ICON.share}</button>
+          <div class="hd-share-menu" data-hd-share-menu hidden>
+            <p class="hd-share-menu__label">Megosztás</p>
+            <button type="button" class="hd-share-item hd-share-item--fb" data-hd-share-fb>
+              <span class="hd-share-item__icon">${ICON.facebook}</span>
+              <span class="hd-share-item__text">
+                <strong>Facebook</strong>
+                <small>Csoportba vagy üzenőfalra</small>
+              </span>
+            </button>
+            <button type="button" class="hd-share-item" data-hd-share-copy>
+              <span class="hd-share-item__icon">${ICON.link}</span>
+              <span class="hd-share-item__text">
+                <strong>Link másolása</strong>
+                <small data-hd-share-copy-hint>Vágólapra</small>
+              </span>
+            </button>
+            ${
+              typeof navigator !== "undefined" && typeof navigator.share === "function"
+                ? `<button type="button" class="hd-share-item" data-hd-share-native>
+              <span class="hd-share-item__icon">${ICON.share}</span>
+              <span class="hd-share-item__text">
+                <strong>Egyéb megosztás</strong>
+                <small>Rendszeremenü</small>
+              </span>
+            </button>`
+                : ""
+            }
+          </div>
+        </div>
         <button type="button" class="hd-tool" data-hd-print aria-label="Nyomtatás">${ICON.print}</button>
       </div>
     </div>
@@ -684,17 +716,74 @@ function bindUi(view, listing) {
     }
   });
   root.querySelector("[data-hd-print]")?.addEventListener("click", () => window.print());
-  root.querySelector("[data-hd-share]")?.addEventListener("click", async () => {
-    const url = window.location.href;
+
+  const shareUrl = () => {
     try {
-      if (navigator.share) await navigator.share({ title: view.title, url });
-      else {
-        await navigator.clipboard.writeText(url);
-        window.alert("A link a vágólapra került.");
+      const u = new URL(window.location.href);
+      u.hash = "";
+      return u.toString();
+    } catch {
+      return window.location.href.split("#")[0];
+    }
+  };
+  const shareWrap = root.querySelector("[data-hd-share-wrap]");
+  const shareBtn = root.querySelector("[data-hd-share]");
+  const shareMenu = root.querySelector("[data-hd-share-menu]");
+  const closeShareMenu = () => {
+    if (!shareMenu || shareMenu.hidden) return;
+    shareMenu.hidden = true;
+    shareBtn?.setAttribute("aria-expanded", "false");
+  };
+  const openShareMenu = () => {
+    if (!shareMenu) return;
+    shareMenu.hidden = false;
+    shareBtn?.setAttribute("aria-expanded", "true");
+  };
+  shareBtn?.addEventListener("click", (event) => {
+    event.stopPropagation();
+    if (shareMenu?.hidden) openShareMenu();
+    else closeShareMenu();
+  });
+  shareMenu?.addEventListener("click", (event) => event.stopPropagation());
+  document.addEventListener("click", closeShareMenu);
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") closeShareMenu();
+  });
+  shareMenu?.querySelector("[data-hd-share-fb]")?.addEventListener("click", () => {
+    const url = shareUrl();
+    const href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+    window.open(href, "_blank", "noopener,noreferrer,width=640,height=720");
+    closeShareMenu();
+  });
+  shareMenu?.querySelector("[data-hd-share-copy]")?.addEventListener("click", async () => {
+    const hint = shareMenu.querySelector("[data-hd-share-copy-hint]");
+    try {
+      await navigator.clipboard.writeText(shareUrl());
+      if (hint) {
+        const prev = hint.textContent;
+        hint.textContent = "Kimásolva";
+        setTimeout(() => {
+          hint.textContent = prev;
+        }, 1600);
       }
     } catch {
+      if (hint) hint.textContent = "Nem sikerült";
     }
   });
+  shareMenu?.querySelector("[data-hd-share-native]")?.addEventListener("click", async () => {
+    try {
+      await navigator.share({ title: view.title, url: shareUrl(), text: view.title });
+    } catch {
+      /* cancelled */
+    }
+    closeShareMenu();
+  });
+
+  try {
+    document.title = `${view.title} | Bymy`;
+  } catch {
+    /* ignore */
+  }
 
   const star = root.querySelector("[data-hd-star]");
   const email = getAuthUser()?.email;

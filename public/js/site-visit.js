@@ -40,7 +40,7 @@
     const headers = { "Content-Type": "application/json" };
     if (vid) headers["X-Bymy-Vid"] = vid;
     const controller = new AbortController();
-    const timeout = window.setTimeout(() => controller.abort(), 1500);
+    const timeout = window.setTimeout(() => controller.abort(), 8000);
     fetch("/api/visit", {
       method: "POST",
       headers,

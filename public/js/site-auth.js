@@ -1109,7 +1109,7 @@ if (typeof document !== "undefined") {
   if (!window.__bymyVisitBoot && !isAuthGatePage()) {
     window.__bymyVisitBoot = true;
     const s = document.createElement("script");
-    s.src = "/js/site-visit.js?v=visit2";
+    s.src = "/js/site-visit.js?v=visit3";
     s.defer = true;
     (document.head || document.documentElement).appendChild(s);
   }

@@ -1377,10 +1377,11 @@ th { color: var(--muted); font-weight: 600; }
   color: #64748b;
   font-size: 0.78rem;
 }
-.visitors-row__sub {
-  color: #64748b;
-  font-size: 0.78rem;
-  margin-top: 0.1rem;
+.visitors-row__geo {
+  color: #0369a1;
+  font-size: 0.74rem;
+  font-weight: 650;
+  margin-top: 0.12rem;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

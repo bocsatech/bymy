@@ -2069,6 +2069,11 @@ function visitorsView() {
           : [group.primary?.deviceName || group.primary?.deviceType, group.primary?.browser, group.primary?.os]
               .filter(Boolean)
               .join(" · ") || "—";
+      const geoLine = group.primary?.geoLabel
+        ? `<div class="visitors-row__geo">${esc(group.primary.geoLabel)}</div>`
+        : group.devices.map((d) => d.geoLabel).find(Boolean)
+          ? `<div class="visitors-row__geo">${esc(group.devices.map((d) => d.geoLabel).find(Boolean))}</div>`
+          : "";
       const childRows =
         expanded && group.devices.length > 1
           ? group.devices
@@ -2096,6 +2101,7 @@ function visitorsView() {
           <div class="visitors-row__who">
             <div class="visitors-row__ip">${esc(group.ip)} ${expandBtn}</div>
             <div class="visitors-row__sub">${esc(whoSub)}</div>
+            ${geoLine}
           </div>
           ${status}
           <span class="visitors-row__hits" title="Időszak találatok">${group.hits}</span>
@@ -2137,6 +2143,7 @@ function visitorsView() {
       </div>
       <div class="visitors-detail__meta">
         <span>Eszközök: ${selectedGroup?.devices?.length || (selectedDevice ? 1 : 0)}</span>
+        <span>${esc((selectedDevice || selectedGroup?.primary)?.geoLabel || "hely: —")}</span>
         <span>Első: ${esc(fmtWhen(selectedGroup?.firstSeen || metaSource?.firstSeenAt))}</span>
         <span>Utolsó: ${esc(fmtWhen(selectedGroup?.lastSeen || metaSource?.lastSeenAt))}</span>
       </div>
@@ -2212,7 +2219,7 @@ function visitorsView() {
       </div>
       <div class="visitors-stats">
         <div class="visitors-stat"><div class="l">Időszak</div><div class="v" style="font-size:1rem">${esc(rangeLabel)}</div><div class="s">${periodUnique} · ${periodHits} találat</div></div>
-        <div class="visitors-stat"><div class="l">Jelenleg</div><div class="v">${visitors?.online ?? 0}</div><div class="s">aktív · ${visitors?.onlineWindowMinutes || 5} perc</div></div>
+        <div class="visitors-stat"><div class="l">Jelenleg</div><div class="v">${visitors?.online ?? 0}</div><div class="s">aktív · ${visitors?.onlineWindowMinutes || 15} perc</div></div>
         <div class="visitors-stat"><div class="l">Ma</div><div class="v">${d.unique ?? 0}</div><div class="s">${d.hits ?? 0} megtekintés</div></div>
         <div class="visitors-stat"><div class="l">Hét / hó</div><div class="v">${w.unique ?? 0}</div><div class="s">hó: ${m.unique ?? 0} unique</div></div>
       </div>

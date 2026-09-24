@@ -303,13 +303,18 @@ let usersSearchQuery = "";
 let usersStatusFilter = "all";
 let partnerProfiles = [];
 let selectedVisitorId = "";
+let selectedVisitorIp = "";
 let visitorHits = [];
 let blockedIps = [];
 let visitorsSearchQuery = "";
-let visitorsStatusFilter = "all"; // all | online | blocked
+let visitorsStatusFilter = "all"; // all | blocked (online moved to time range)
+let visitorsTimeRange = "all"; // all | online | today | yesterday | week | lastweek | month | custom
+let visitorsCustomFrom = "";
+let visitorsCustomTo = "";
 let visitorsSortKey = "lastSeen"; // lastSeen | hits | ip | firstSeen
 let visitorsSortDir = "desc"; // asc | desc
 let visitorHitsSortDir = "desc";
+let visitorsExpandedIps = {};
 let backupList = { backups: [], categories: [], dir: "", keepDays: 30 };
 let backupSelectedId = "";
 let backupCategory = "all";
@@ -714,7 +719,52 @@ const actions = {
   },
   visitorsStatusFilter(_, el) {
     const next = String(el?.getAttribute("data-filter") || "all");
-    visitorsStatusFilter = next === "online" || next === "blocked" ? next : "all";
+    visitorsStatusFilter = next === "blocked" ? "blocked" : "all";
+    render();
+  },
+  visitorsTimeRange(_, el) {
+    const next = String(el?.getAttribute("data-range") || "all");
+    const allowed = new Set(["all", "online", "today", "yesterday", "week", "lastweek", "month", "custom"]);
+    visitorsTimeRange = allowed.has(next) ? next : "all";
+    selectedVisitorIp = "";
+    selectedVisitorId = "";
+    visitorHits = [];
+    loadVisitors()
+      .then(() => {
+        info = "";
+        render();
+      })
+      .catch((error) => {
+        err = error.message || "Látogatók betöltése sikertelen.";
+        render();
+      });
+  },
+  visitorsCustomFrom(_, el) {
+    visitorsCustomFrom = String(el?.value || "");
+  },
+  visitorsCustomTo(_, el) {
+    visitorsCustomTo = String(el?.value || "");
+  },
+  applyVisitorsCustomRange() {
+    visitorsTimeRange = "custom";
+    selectedVisitorIp = "";
+    selectedVisitorId = "";
+    visitorHits = [];
+    loadVisitors()
+      .then(() => {
+        info = "Egyedi intervallum alkalmazva.";
+        render();
+      })
+      .catch((error) => {
+        err = error.message || "Látogatók betöltése sikertelen.";
+        render();
+      });
+  },
+  toggleVisitorIpGroup(event, el) {
+    event?.stopPropagation?.();
+    const ip = el.getAttribute("data-ip");
+    if (!ip) return;
+    visitorsExpandedIps = { ...visitorsExpandedIps, [ip]: !visitorsExpandedIps[ip] };
     render();
   },
   visitorsSort(_, el) {
@@ -732,6 +782,30 @@ const actions = {
   visitorHitsSort() {
     visitorHitsSortDir = visitorHitsSortDir === "asc" ? "desc" : "asc";
     render();
+  },
+  async selectVisitorIp(_, el) {
+    const ip = el.getAttribute("data-ip");
+    if (!ip) return;
+    err = "";
+    info = "";
+    if (selectedVisitorIp === ip && !selectedVisitorId) {
+      selectedVisitorIp = "";
+      visitorHits = [];
+      render();
+      return;
+    }
+    selectedVisitorIp = ip;
+    selectedVisitorId = "";
+    try {
+      const qs = visitorsQueryString({ ip });
+      const data = await api(`/api/level1/visitors/ip-hits?${qs}`);
+      visitorHits = data.hits || [];
+      render();
+    } catch (error) {
+      err = error.message;
+      visitorHits = [];
+      render();
+    }
   },
   async selectVisitor(_, el) {
     const id = el.getAttribute("data-id");
@@ -824,8 +898,7 @@ const actions = {
     err = "";
     info = "";
     try {
-      visitors = await api("/api/level1/visitors");
-      blockedIps = visitors.blockedIps || blockedIps;
+      await loadVisitors();
       info = "Látogatóadatok frissítve.";
       render();
     } catch (error) {
@@ -838,7 +911,8 @@ const actions = {
     info = "";
     try {
       const data = await api("/api/level1/visitors/init", { method: "POST" });
-      visitors = data.stats || (await api("/api/level1/visitors"));
+      await loadVisitors();
+      if (data?.stats) visitors = { ...visitors, ...data.stats, blockedIps: visitors.blockedIps };
       info = "Látogató táblák létrehozva.";
       render();
     } catch (error) {
@@ -852,19 +926,37 @@ const actions = {
     info = "";
     if (selectedVisitorId === id) {
       selectedVisitorId = "";
+      selectedVisitorIp = "";
       visitorHits = [];
       render();
       return;
     }
     selectedVisitorId = id;
+    const device = (visitors?.devices || []).find((d) => d.id === id);
+    selectedVisitorIp = device?.ip || selectedVisitorIp;
     try {
-      const data = await api(`/api/level1/visitors/${id}/hits`);
+      const qs = new URLSearchParams();
+      if (visitorsTimeRange && visitorsTimeRange !== "all") qs.set("range", visitorsTimeRange);
+      if (visitorsTimeRange === "custom") {
+        if (visitorsCustomFrom) qs.set("from", visitorsCustomFrom);
+        if (visitorsCustomTo) qs.set("to", visitorsCustomTo);
+      }
+      const suffix = qs.toString() ? `?${qs}` : "";
+      // still use visitor hits endpoint; range filtering on IP panel is preferred
+      const data = await api(`/api/level1/visitors/${id}/hits${suffix}`);
       visitorHits = data.hits || [];
       render();
     } catch (error) {
-      err = error.message;
-      visitorHits = [];
-      render();
+      // fallback without range query if server ignores unknown params
+      try {
+        const data = await api(`/api/level1/visitors/${id}/hits`);
+        visitorHits = data.hits || [];
+        render();
+      } catch (error2) {
+        err = error2.message || error.message;
+        visitorHits = [];
+        render();
+      }
     }
   },
   async delUser(_, el) {
@@ -1691,13 +1783,34 @@ async function resizePromoToTarget(file) {
   }
 }
 
+function visitorsQueryString(extra = {}) {
+  const qs = new URLSearchParams();
+  if (visitorsTimeRange && visitorsTimeRange !== "all") qs.set("range", visitorsTimeRange);
+  if (visitorsTimeRange === "custom") {
+    if (visitorsCustomFrom) qs.set("from", visitorsCustomFrom);
+    if (visitorsCustomTo) qs.set("to", visitorsCustomTo);
+  } else if (visitors?.range?.from && visitorsTimeRange !== "online") {
+    /* server resolves named ranges */
+  }
+  if (extra.ip) qs.set("ip", extra.ip);
+  if (visitorsTimeRange && visitorsTimeRange !== "all") {
+    // for ip-hits also pass range
+  }
+  return qs.toString();
+}
+
+async function loadVisitors() {
+  const qs = visitorsQueryString();
+  visitors = await api(`/api/level1/visitors${qs ? `?${qs}` : ""}`);
+  blockedIps = visitors.blockedIps || blockedIps;
+}
+
 async function loadTab() {
   if (!admin) return;
   const { section, sub } = parseTab();
   if (section === "users") {
     if (sub === "visitors") {
-      visitors = await api("/api/level1/visitors");
-      blockedIps = visitors.blockedIps || [];
+      await loadVisitors();
     } else if (sub === "private" || sub === "business") {
       users = (await api("/api/level1/users")).users;
     }
@@ -1854,19 +1967,51 @@ function visitorSortArrow(key) {
   return visitorsSortDir === "asc" ? " ↑" : " ↓";
 }
 
+function devicePeriodHits(dev) {
+  return Number(dev?.periodHitCount ?? dev?.hitCount) || 0;
+}
+
+function groupVisitorsByIp(devices) {
+  const map = new Map();
+  for (const dev of devices) {
+    const ip = String(dev.ip || "").trim() || "(ismeretlen)";
+    if (!map.has(ip)) map.set(ip, []);
+    map.get(ip).push(dev);
+  }
+  return [...map.entries()].map(([ip, list]) => {
+    const sortedDevices = [...list].sort((a, b) =>
+      String(b.lastSeenAt || "").localeCompare(String(a.lastSeenAt || ""))
+    );
+    const hits = sortedDevices.reduce((s, d) => s + devicePeriodHits(d), 0);
+    const lastSeen = sortedDevices.map((d) => d.lastSeenAt).filter(Boolean).sort().at(-1) || "";
+    const firstSeen = sortedDevices.map((d) => d.firstSeenAt).filter(Boolean).sort()[0] || "";
+    const online = sortedDevices.some(isVisitorOnline);
+    const labels = [...new Set(sortedDevices.map((d) => d.deviceName || d.browser || d.os).filter(Boolean))];
+    return {
+      ip,
+      devices: sortedDevices,
+      hits,
+      lastSeen,
+      firstSeen,
+      online,
+      primary: sortedDevices[0],
+      labels,
+    };
+  });
+}
+
 function visitorsView() {
   const d = visitors?.daily || {};
   const w = visitors?.weekly || {};
   const m = visitors?.monthly || {};
+  const period = visitors?.period || {};
   const devices = visitors?.devices || [];
   const blocked = blockedIps || visitors?.blockedIps || [];
   const blockedSet = new Set(blocked);
   const q = visitorsSearchQuery.trim().toLowerCase();
 
   const filtered = devices.filter((dev) => {
-    const online = isVisitorOnline(dev);
     const blockedIp = blockedSet.has(dev.ip);
-    if (visitorsStatusFilter === "online" && !online) return false;
     if (visitorsStatusFilter === "blocked" && !blockedIp) return false;
     if (!q) return true;
     const hay = [
@@ -1885,48 +2030,78 @@ function visitorsView() {
     return hay.includes(q);
   });
 
+  let groups = groupVisitorsByIp(filtered);
   const dirMul = visitorsSortDir === "asc" ? 1 : -1;
-  const sorted = [...filtered].sort((a, b) => {
+  groups = [...groups].sort((a, b) => {
     let cmp = 0;
-    if (visitorsSortKey === "hits") {
-      cmp = (Number(a.hitCount) || 0) - (Number(b.hitCount) || 0);
-    } else if (visitorsSortKey === "ip") {
-      cmp = String(a.ip || "").localeCompare(String(b.ip || ""), "hu", { numeric: true });
-    } else if (visitorsSortKey === "firstSeen") {
-      cmp = String(a.firstSeenAt || "").localeCompare(String(b.firstSeenAt || ""));
-    } else {
-      cmp = String(a.lastSeenAt || "").localeCompare(String(b.lastSeenAt || ""));
-    }
-    if (cmp === 0) cmp = String(a.id || "").localeCompare(String(b.id || ""));
+    if (visitorsSortKey === "hits") cmp = a.hits - b.hits;
+    else if (visitorsSortKey === "ip") cmp = String(a.ip).localeCompare(String(b.ip), "hu", { numeric: true });
+    else if (visitorsSortKey === "firstSeen") cmp = String(a.firstSeen || "").localeCompare(String(b.firstSeen || ""));
+    else cmp = String(a.lastSeen || "").localeCompare(String(b.lastSeen || ""));
+    if (cmp === 0) cmp = String(a.ip).localeCompare(String(b.ip));
     return cmp * dirMul;
   });
 
-  const selected = sorted.find((dev) => dev.id === selectedVisitorId) || devices.find((dev) => dev.id === selectedVisitorId);
+  const selectedGroup = groups.find((g) => g.ip === selectedVisitorIp);
+  const selectedDevice =
+    (selectedVisitorId && filtered.find((dev) => dev.id === selectedVisitorId)) ||
+    (selectedVisitorId && devices.find((dev) => dev.id === selectedVisitorId)) ||
+    null;
+
   const hitsSorted = [...visitorHits].sort((a, b) => {
     const cmp = String(a.createdAt || "").localeCompare(String(b.createdAt || ""));
     return visitorHitsSortDir === "asc" ? cmp : -cmp;
   });
 
-  const listRows = sorted
-    .map((dev) => {
-      const online = isVisitorOnline(dev);
-      const blockedIp = blockedSet.has(dev.ip);
-      const selectedCls = selectedVisitorId === dev.id ? " is-selected" : "";
+  const listRows = groups
+    .map((group) => {
+      const blockedIp = blockedSet.has(group.ip);
+      const selectedCls = selectedVisitorIp === group.ip ? " is-selected" : "";
+      const expanded = Boolean(visitorsExpandedIps[group.ip]) || selectedVisitorIp === group.ip;
       const status = blockedIp
         ? `<span class="visitors-badge is-block">blokk</span>`
-        : online
+        : group.online
           ? `<span class="visitors-badge is-on">online</span>`
           : `<span class="visitors-badge is-off">idle</span>`;
-      const whoSub = [dev.deviceName || dev.deviceType, dev.browser, dev.os].filter(Boolean).join(" · ") || "—";
-      return `<article class="visitors-row${selectedCls}" data-act="selectVisitor" data-id="${esc(dev.id)}" role="button" tabindex="0">
-        <div class="visitors-row__avatar" aria-hidden="true">${esc(visitorAvatarLabel(dev))}</div>
-        <div class="visitors-row__who">
-          <div class="visitors-row__ip">${esc(dev.ip || "—")}${dev.userId ? ` <span class="visitors-row__uid">#${esc(dev.userId)}</span>` : ""}</div>
-          <div class="visitors-row__sub">${esc(whoSub)}</div>
-        </div>
-        ${status}
-        <span class="visitors-row__hits" title="Találatok">${Number(dev.hitCount) || 0}</span>
-      </article>`;
+      const whoSub =
+        group.devices.length > 1
+          ? `${group.devices.length} eszköz · ${group.labels.slice(0, 3).join(", ")}${group.labels.length > 3 ? "…" : ""}`
+          : [group.primary?.deviceName || group.primary?.deviceType, group.primary?.browser, group.primary?.os]
+              .filter(Boolean)
+              .join(" · ") || "—";
+      const childRows =
+        expanded && group.devices.length > 1
+          ? group.devices
+              .map((dev) => {
+                const childSel = selectedVisitorId === dev.id ? " is-selected" : "";
+                const childSub = [dev.deviceName || dev.deviceType, dev.browser, dev.os].filter(Boolean).join(" · ") || "—";
+                return `<article class="visitors-row visitors-row--child${childSel}" data-act="selectVisitor" data-id="${esc(dev.id)}" role="button" tabindex="0">
+                  <div class="visitors-row__avatar visitors-row__avatar--sm" aria-hidden="true">${esc(visitorAvatarLabel(dev))}</div>
+                  <div class="visitors-row__who">
+                    <div class="visitors-row__ip">${esc(childSub)}${dev.userId ? ` <span class="visitors-row__uid">#${esc(dev.userId)}</span>` : ""}</div>
+                    <div class="visitors-row__sub">${esc(fmtWhen(dev.lastSeenAt))}</div>
+                  </div>
+                  <span class="visitors-row__hits" title="Időszak találatok">${devicePeriodHits(dev)}</span>
+                </article>`;
+              })
+              .join("")
+          : "";
+      const expandBtn =
+        group.devices.length > 1
+          ? `<button type="button" class="visitors-expand" data-act="toggleVisitorIpGroup" data-ip="${esc(group.ip)}" title="Eszközök">${expanded ? "▾" : "▸"} ${group.devices.length}</button>`
+          : "";
+      return `<div class="visitors-group">
+        <article class="visitors-row${selectedCls}" data-act="selectVisitorIp" data-ip="${esc(group.ip)}" role="button" tabindex="0">
+          <div class="visitors-row__avatar" aria-hidden="true">${esc(visitorAvatarLabel(group.primary))}</div>
+          <div class="visitors-row__who">
+            <div class="visitors-row__ip">${esc(group.ip)} ${expandBtn}</div>
+            <div class="visitors-row__sub">${esc(whoSub)}</div>
+          </div>
+          ${status}
+          <span class="visitors-row__hits" title="Időszak találatok">${group.hits}</span>
+        </article>
+        ${childRows}
+      </div>`;
     })
     .join("");
 
@@ -1939,35 +2114,70 @@ function visitorsView() {
     )
     .join("");
 
-  let detailBody = `<p class="visitors-detail__empty">Válassz egy eszközt a listából — megjelennek az oldalmegtekintések.</p>`;
-  if (selectedVisitorId) {
-    const label = selected?.ip || `${selectedVisitorId.slice(0, 8)}…`;
-    const blockBtn = selected?.ip
-      ? blockedSet.has(selected.ip)
-        ? `<button class="users-card__btn" type="button" data-act="unblockVisitorIp" data-ip="${esc(selected.ip)}">IP felold</button>`
-        : `<button class="users-card__btn users-card__btn--danger" type="button" data-act="blockVisitorIp" data-ip="${esc(selected.ip)}">IP blokkol</button>`
-      : "";
+  const detailLabel = selectedDevice
+    ? `${selectedDevice.ip || "—"} · ${selectedDevice.deviceName || selectedDevice.browser || "eszköz"}`
+    : selectedVisitorIp || "";
+
+  let detailBody = `<p class="visitors-detail__empty">Válassz egy IP-t a listából — megjelennek az oldalmegtekintések az adott időszakban.</p>`;
+  if (selectedVisitorIp || selectedVisitorId) {
+    const blockIp = selectedDevice?.ip || selectedVisitorIp;
+    const blockBtn =
+      blockIp && blockIp !== "(ismeretlen)"
+        ? blockedSet.has(blockIp)
+          ? `<button class="users-card__btn" type="button" data-act="unblockVisitorIp" data-ip="${esc(blockIp)}">IP felold</button>`
+          : `<button class="users-card__btn users-card__btn--danger" type="button" data-act="blockVisitorIp" data-ip="${esc(blockIp)}">IP blokkol</button>`
+        : "";
+    const metaSource = selectedDevice || selectedGroup?.primary;
     detailBody = `
       <div class="visitors-detail__head">
-        <h4>Oldalak — ${esc(label)}</h4>
+        <h4>Oldalak — ${esc(detailLabel)}</h4>
         <button type="button" class="visitors-sort-btn" data-act="visitorHitsSort">
           Idő${visitorHitsSortDir === "asc" ? " ↑" : " ↓"}
         </button>
       </div>
       <div class="visitors-detail__meta">
-        <span>Első: ${esc(fmtWhen(selected?.firstSeenAt))}</span>
-        <span>Utolsó: ${esc(fmtWhen(selected?.lastSeenAt))}</span>
-        <span title="${esc(selected?.lastPath || "")}">${esc((selected?.lastPath || "—").slice(0, 48))}${(selected?.lastPath || "").length > 48 ? "…" : ""}</span>
+        <span>Eszközök: ${selectedGroup?.devices?.length || (selectedDevice ? 1 : 0)}</span>
+        <span>Első: ${esc(fmtWhen(selectedGroup?.firstSeen || metaSource?.firstSeenAt))}</span>
+        <span>Utolsó: ${esc(fmtWhen(selectedGroup?.lastSeen || metaSource?.lastSeenAt))}</span>
       </div>
       <div class="visitors-hits">
-        ${hitItems || `<p class="visitors-detail__empty">Ehhez az eszközhöz még nincs oldalmegtekintés.</p>`}
+        ${hitItems || `<p class="visitors-detail__empty">Nincs oldalmegtekintés ebben az időszakban.</p>`}
       </div>
       <div class="visitors-detail__actions">
         <button class="users-card__btn users-card__btn--primary" type="button" data-act="refreshVisitors">Frissítés</button>
         ${blockBtn}
-        <button class="users-card__btn" type="button" data-act="showVisitorHits" data-id="${esc(selectedVisitorId)}">Bezár</button>
+        <button class="users-card__btn" type="button" data-act="selectVisitorIp" data-ip="${esc(selectedVisitorIp || blockIp || "")}">Bezár</button>
       </div>`;
   }
+
+  const timeChips = [
+    ["all", "Összes"],
+    ["online", "Jelenleg"],
+    ["today", "Ma"],
+    ["yesterday", "Tegnap"],
+    ["week", "Héten"],
+    ["lastweek", "Előző héten"],
+    ["month", "Ebben a hónapban"],
+    ["custom", "Intervallum"],
+  ]
+    .map(
+      ([key, label]) =>
+        `<button type="button" class="users-cards-chip ${visitorsTimeRange === key ? "on" : ""}" data-act="visitorsTimeRange" data-range="${key}">${label}</button>`
+    )
+    .join("");
+
+  const customBox =
+    visitorsTimeRange === "custom"
+      ? `<div class="visitors-custom-range">
+          <label>Tól<input type="datetime-local" data-act="visitorsCustomFrom" data-live value="${esc(visitorsCustomFrom)}" /></label>
+          <label>Ig<input type="datetime-local" data-act="visitorsCustomTo" data-live value="${esc(visitorsCustomTo)}" /></label>
+          <button type="button" class="users-card__btn users-card__btn--primary" data-act="applyVisitorsCustomRange">Szűrés</button>
+        </div>`
+      : "";
+
+  const rangeLabel = visitors?.range?.label || "Összes";
+  const periodHits = period.hits ?? 0;
+  const periodUnique = period.unique ?? groups.length;
 
   return `
     <div class="users-cards-wrap visitors-wrap">
@@ -1981,12 +2191,15 @@ function visitorsView() {
             <span class="users-cards-search__ico" aria-hidden="true">⌕</span>
             <input type="search" data-act="visitorsSearch" data-live placeholder="Keresés IP / eszköz / oldal…" value="${esc(visitorsSearchQuery)}" />
           </label>
-          <div class="users-cards-filters" role="group" aria-label="Státusz szűrő">
-            <button type="button" class="users-cards-chip ${visitorsStatusFilter === "all" ? "on" : ""}" data-act="visitorsStatusFilter" data-filter="all">Összes</button>
-            <button type="button" class="users-cards-chip ${visitorsStatusFilter === "online" ? "on" : ""}" data-act="visitorsStatusFilter" data-filter="online">Online</button>
+          <div class="users-cards-filters" role="group" aria-label="Státusz">
+            <button type="button" class="users-cards-chip ${visitorsStatusFilter === "all" ? "on" : ""}" data-act="visitorsStatusFilter" data-filter="all">Mind</button>
             <button type="button" class="users-cards-chip ${visitorsStatusFilter === "blocked" ? "on" : ""}" data-act="visitorsStatusFilter" data-filter="blocked">Blokkolt</button>
           </div>
         </div>
+        <div class="users-cards-filters visitors-time-filters" role="group" aria-label="Forgalom időszak">
+          ${timeChips}
+        </div>
+        ${customBox}
         <div class="visitors-sortbar" role="group" aria-label="Rendezés">
           <span class="visitors-sortbar__label">Rendezés:</span>
           <button type="button" class="visitors-sort-btn ${visitorsSortKey === "lastSeen" ? "on" : ""}" data-act="visitorsSort" data-sort="lastSeen">Utolsó${visitorSortArrow("lastSeen")}</button>
@@ -1998,14 +2211,14 @@ function visitorsView() {
         </div>
       </div>
       <div class="visitors-stats">
+        <div class="visitors-stat"><div class="l">Időszak</div><div class="v" style="font-size:1rem">${esc(rangeLabel)}</div><div class="s">${periodUnique} · ${periodHits} találat</div></div>
         <div class="visitors-stat"><div class="l">Jelenleg</div><div class="v">${visitors?.online ?? 0}</div><div class="s">aktív · ${visitors?.onlineWindowMinutes || 5} perc</div></div>
-        <div class="visitors-stat"><div class="l">Naponta</div><div class="v">${d.unique ?? 0}</div><div class="s">${d.hits ?? 0} megtekintés</div></div>
-        <div class="visitors-stat"><div class="l">Hetente</div><div class="v">${w.unique ?? 0}</div><div class="s">${w.hits ?? 0} megtekintés</div></div>
-        <div class="visitors-stat"><div class="l">Havonta</div><div class="v">${m.unique ?? 0}</div><div class="s">${m.hits ?? 0} megtekintés</div></div>
+        <div class="visitors-stat"><div class="l">Ma</div><div class="v">${d.unique ?? 0}</div><div class="s">${d.hits ?? 0} megtekintés</div></div>
+        <div class="visitors-stat"><div class="l">Hét / hó</div><div class="v">${w.unique ?? 0}</div><div class="s">hó: ${m.unique ?? 0} unique</div></div>
       </div>
       <div class="visitors-split">
         <div class="visitors-list">
-          ${listRows || `<p class="users-cards-empty">Nincs látogató${q || visitorsStatusFilter !== "all" ? " a szűrővel" : ""}. Nyiss meg egy oldalt a weben, majd frissíts.</p>`}
+          ${listRows || `<p class="users-cards-empty">Nincs forgalom${q || visitorsStatusFilter !== "all" || visitorsTimeRange !== "all" ? " a szűrővel" : ""}.</p>`}
         </div>
         <aside class="visitors-detail">${detailBody}</aside>
       </div>

@@ -138,10 +138,11 @@ body.seller-inventory-mode .home-grid-track {
 
 .seller-inv__duo {
   display: grid;
-  grid-template-columns: 1.4fr 1fr;
+  grid-template-columns: minmax(0, 32rem) minmax(0, 1fr);
   gap: 0.85rem;
   margin-bottom: 0.35rem;
   width: 100%;
+  max-width: 52rem;
 }
 
 .seller-inv__share {
@@ -391,48 +392,45 @@ button.seller-inv__star:focus-visible {
 }
 
 .seller-inv__contact {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  min-width: 0;
-}
-
-.seller-inv__contact-top {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem 1.25rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "identity right"
+    "phone right";
+  column-gap: 1rem;
+  row-gap: 0.7rem;
+  align-items: start;
   min-width: 0;
 }
 
 .seller-inv__contact-identity {
+  grid-area: identity;
   min-width: 0;
-  flex: 1 1 auto;
 }
 
-.seller-inv__contact-addr {
-  flex: 0 1 14rem;
+.seller-inv__contact-right {
+  grid-area: right;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
   text-align: right;
   min-width: 0;
+  max-width: 13rem;
 }
 
-.seller-inv__contact-addr .seller-inv__address {
+.seller-inv__contact-right .seller-inv__address {
   font-size: 0.88rem;
   font-weight: 650;
   line-height: 1.35;
   text-align: right;
-}
-
-.seller-inv__contact-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem 0.65rem;
+  margin: 0;
 }
 
 .seller-inv__phone-wrap {
+  grid-area: phone;
   min-width: 0;
-  flex: 0 1 auto;
+  justify-self: start;
 }
 
 .seller-inv__phone-reveal,
@@ -452,19 +450,25 @@ button.seller-inv__star:focus-visible {
 
 .seller-inv__turnstile {
   margin-top: 0.55rem;
-  flex: 1 1 100%;
 }
 
 @media (max-width: 560px) {
-  .seller-inv__contact-top {
-    flex-direction: column;
-    align-items: stretch;
+  .seller-inv__contact {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "identity"
+      "right"
+      "phone";
   }
 
-  .seller-inv__contact-addr,
-  .seller-inv__contact-addr .seller-inv__address {
+  .seller-inv__contact-right {
+    align-items: flex-start;
     text-align: left;
-    flex-basis: auto;
+    max-width: none;
+  }
+
+  .seller-inv__contact-right .seller-inv__address {
+    text-align: left;
   }
 }
 
@@ -575,6 +579,7 @@ button.seller-inv__star:focus-visible {
 @media (max-width: 720px) {
   .seller-inv__duo {
     grid-template-columns: 1fr;
+    max-width: none;
   }
   .seller-inv__share {
     flex-direction: column;

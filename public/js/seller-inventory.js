@@ -1,6 +1,6 @@
 /** „Több ettől a hirdetőtől” — kereskedő készlet (demo A), bymy menüsáv érintetlen. */
 
-import { fetchSellerContact, revealListingContact, fetchSellerRating, submitSellerRating } from "./db-client.js?v=sellerInv14";
+import { fetchSellerContact, revealListingContact, fetchSellerRating, submitSellerRating } from "./db-client.js?v=sellerInv15";
 import { mountTurnstile } from "./turnstile-ui.js?v=turnstile10";
 
 function esc(value) {
@@ -19,7 +19,7 @@ function injectStylesheet() {
   if (document.querySelector('link[data-seller-inv-css]')) return;
   const link = document.createElement("link");
   link.rel = "stylesheet";
-  link.href = "/css/seller-inventory.css?v=sellerInv14";
+  link.href = "/css/seller-inventory.css?v=sellerInv15";
   link.dataset.sellerInvCss = "1";
   document.head.appendChild(link);
 }
@@ -244,21 +244,23 @@ function contactPanelHtml(contact) {
   const lines = Array.isArray(contact?.addressLines) ? contact.addressLines : [];
   const nav = navHref(contact?.mapQuery || lines.join(", "));
   const addr = addressHtml(lines);
+  const right =
+    addr || nav
+      ? `<div class="seller-inv__contact-right">
+          ${addr || ""}
+          ${
+            nav
+              ? `<a class="seller-inv__btn seller-inv__btn--yellow seller-inv__nav" href="${esc(nav)}" target="_blank" rel="noopener noreferrer">Navigáció</a>`
+              : ""
+          }
+        </div>`
+      : "";
   return `
     <div class="seller-inv__contact">
-      <div class="seller-inv__contact-top">
-        <div class="seller-inv__contact-identity">${staffHtml(staff)}</div>
-        ${addr ? `<div class="seller-inv__contact-addr">${addr}</div>` : ""}
-      </div>
-      <div class="seller-inv__contact-actions">
-        <div class="seller-inv__phone-wrap" data-si-phone-col>
-          ${maskedPhonesHtml(masked, hasPhone)}
-        </div>
-        ${
-          nav
-            ? `<a class="seller-inv__btn seller-inv__btn--yellow seller-inv__nav" href="${esc(nav)}" target="_blank" rel="noopener noreferrer">Navigáció</a>`
-            : ""
-        }
+      <div class="seller-inv__contact-identity">${staffHtml(staff)}</div>
+      ${right}
+      <div class="seller-inv__phone-wrap" data-si-phone-col>
+        ${maskedPhonesHtml(masked, hasPhone)}
       </div>
     </div>
   `;

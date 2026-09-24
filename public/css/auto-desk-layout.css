@@ -427,26 +427,44 @@
     padding: 0;
     border: 1px solid var(--ad-line);
     border-radius: 8px;
-    overflow: hidden;
+    overflow: visible;
     background: var(--ad-elev);
+    align-items: stretch;
+    flex: 0 0 auto;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-mode__btn {
+    -webkit-appearance: none;
     appearance: none;
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    height: 44px;
+    min-height: 44px;
+    max-height: 44px;
+    margin: 0;
+    padding: 0 10px;
     border: 0;
     border-radius: 0;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 42px;
-    padding: 0 10px;
-    font: inherit;
-    font-weight: 700;
+    font-family: inherit;
     font-size: 14px;
-    line-height: 1.2;
+    font-weight: 700;
+    line-height: 44px;
+    letter-spacing: normal;
+    text-align: center;
+    vertical-align: middle;
+    white-space: nowrap;
     cursor: pointer;
     color: var(--ad-text);
     background: transparent;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-mode__btn:first-child {
+    border-radius: 7px 0 0 7px;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-mode__btn:last-child {
+    border-radius: 0 7px 7px 0;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-mode__btn.is-active {

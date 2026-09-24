@@ -435,10 +435,15 @@
     appearance: none;
     border: 0;
     border-radius: 0;
-    padding: 11px 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 42px;
+    padding: 0 10px;
     font: inherit;
     font-weight: 700;
     font-size: 14px;
+    line-height: 1.2;
     cursor: pointer;
     color: var(--ad-text);
     background: transparent;

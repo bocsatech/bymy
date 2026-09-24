@@ -19,7 +19,7 @@ function injectStylesheet() {
   if (document.querySelector('link[data-seller-inv-css]')) return;
   const link = document.createElement("link");
   link.rel = "stylesheet";
-  link.href = "/css/seller-inventory.css?v=sellerInv24";
+  link.href = "/css/seller-inventory.css?v=sellerInv25";
   link.dataset.sellerInvCss = "1";
   document.head.appendChild(link);
 }
@@ -326,7 +326,7 @@ function buildMapQuery(contact) {
 function mapEmbedSrc(query) {
   const q = String(query || "").trim();
   if (!q) return "";
-  // hl + ie segít; lat,lng esetén is működik
+  // Egyszeri cím-alapú embed — a lat,lng cseréje világnézetre esett vissza.
   return `https://maps.google.com/maps?q=${encodeURIComponent(q)}&hl=hu&z=16&ie=UTF8&output=embed`;
 }
 
@@ -351,27 +351,7 @@ function mapPanelHtml({ src, openHref, label }) {
   `;
 }
 
-async function geocodeHungary(query) {
-  const q = String(query || "").trim();
-  if (!q) return null;
-  try {
-    const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=hu&q=${encodeURIComponent(q)}`;
-    const res = await fetch(url, {
-      headers: { Accept: "application/json" },
-    });
-    if (!res.ok) return null;
-    const data = await res.json();
-    const hit = Array.isArray(data) ? data[0] : null;
-    const lat = hit?.lat != null ? String(hit.lat) : "";
-    const lon = hit?.lon != null ? String(hit.lon) : "";
-    if (!lat || !lon) return null;
-    return { lat, lon };
-  } catch {
-    return null;
-  }
-}
-
-async function fillSellerMap(panel, contact) {
+function fillSellerMap(panel, contact) {
   if (!panel) return;
   const q = buildMapQuery(contact);
   if (!q) {
@@ -380,18 +360,10 @@ async function fillSellerMap(panel, contact) {
     return;
   }
   panel.hidden = false;
+  // Csak egyszer állítjuk be — a geocode utáni iframe-csere „betölt majd eltűnik” volt.
   panel.innerHTML = mapPanelHtml({
     src: mapEmbedSrc(q),
     openHref: mapOpenHref(q),
-    label: "Kereskedés helye",
-  });
-
-  const geo = await geocodeHungary(q);
-  if (!geo) return;
-  const pin = `${geo.lat},${geo.lon}`;
-  panel.innerHTML = mapPanelHtml({
-    src: mapEmbedSrc(pin),
-    openHref: mapOpenHref(pin),
     label: "Kereskedés helye",
   });
 }
@@ -464,7 +436,7 @@ export async function mountSellerInventory({ fromId, count = 0 } = {}) {
   }
 
   const mapPanel = host.querySelector("[data-si-map-panel]");
-  await fillSellerMap(mapPanel, contact);
+  fillSellerMap(mapPanel, contact);
 
   const label = String(contact?.sellerName || "").trim() || "Hirdető";
   const logoWrap = host.querySelector("[data-si-share-logo]");

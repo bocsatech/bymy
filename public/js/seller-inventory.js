@@ -23,7 +23,7 @@ function injectStylesheet() {
   if (document.querySelector('link[data-seller-inv-css]')) return;
   const link = document.createElement("link");
   link.rel = "stylesheet";
-  link.href = "/css/seller-inventory.css?v=sellerInv28";
+  link.href = "/css/seller-inventory.css?v=sellerInv29";
   link.dataset.sellerInvCss = "1";
   document.head.appendChild(link);
 }

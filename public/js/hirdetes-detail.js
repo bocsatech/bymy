@@ -27,6 +27,7 @@ const ICON = {
   heart: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 20s-7-4.4-7-9.2A3.8 3.8 0 0 1 12 7.2a3.8 3.8 0 0 1 7 3.6C19 15.6 12 20 12 20Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>`,
   grid: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="6.5" height="6.5" rx="1.2" stroke="currentColor" stroke-width="1.6"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.2" stroke="currentColor" stroke-width="1.6"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.2" stroke="currentColor" stroke-width="1.6"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.2" stroke="currentColor" stroke-width="1.6"/></svg>`,
   zoom: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="5.5" stroke="currentColor" stroke-width="1.6"/><path d="M16 16l4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>`,
+  pin: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 21s6-5.2 6-10a6 6 0 1 0-12 0c0 4.8 6 10 6 10Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="12" cy="11" r="2.2" stroke="currentColor" stroke-width="1.6"/></svg>`,
 };
 
 const HIGHLIGHT_ICONS = {
@@ -94,6 +95,18 @@ function promoBannerText(view) {
   if (view.vertical === "ingatlan") return "Ingatlan: Végre egyszerű";
   if (view.vertical === "teher") return "Teherautó: Végre egyszerű";
   return "Autóvásárlás: Végre egyszerű";
+}
+
+function navigationDestination(view) {
+  const lines = Array.isArray(view.addressLines) ? view.addressLines.filter(Boolean) : [];
+  if (lines.length) return lines.join(", ");
+  return String(view.mapQuery || "").trim();
+}
+
+function navigationHref(view) {
+  const dest = navigationDestination(view);
+  if (!dest) return "";
+  return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(dest)}`;
 }
 
 function sideHeadline(view) {
@@ -365,6 +378,7 @@ function render(view, listing, related) {
   const highlights = highlightSpecsFromView(view);
   const headline = sideHeadline(view);
   const promoText = promoBannerText(view);
+  const navHref = navigationHref(view);
 
   document.title = `${view.title} — Bymy`;
   document.body.classList.toggle("hd-has-msg-bar", canMsg);
@@ -523,6 +537,11 @@ function render(view, listing, related) {
         ${
           view.hasPhone || view.phone
             ? `<button type="button" class="hd-btn hd-btn--soft" data-hd-phone>${ICON.phone} ${escapeHtml(view.phoneMasked || "Telefonszám")} mutatása</button>`
+            : ""
+        }
+        ${
+          navHref
+            ? `<a class="hd-btn hd-btn--soft" href="${escapeHtml(navHref)}" target="_blank" rel="noopener" data-hd-navigate>${ICON.pin} Navigáció</a>`
             : ""
         }
         <div class="hd-side-tools">
@@ -899,12 +918,32 @@ function bindUi(view, listing) {
         btn.textContent = full;
         const digits = full.replace(/[^\d+]/g, "");
         if (digits.length >= 7) window.location.href = `tel:${digits}`;
-        if (contact.addressLines?.length && !view.addressLines?.length) {
+        if (contact.addressLines?.length) {
+          view.addressLines = contact.addressLines;
+          if (!view.mapQuery) {
+            view.mapQuery = contact.addressLines.join(", ");
+          }
           for (const addrEl of root.querySelectorAll(".hd-seller-addr")) {
             if (!addrEl.textContent?.trim()) {
               addrEl.innerHTML = contact.addressLines.map(escapeHtml).join("<br>");
             }
           }
+          const href = navigationHref(view);
+          let navBtn = root.querySelector("[data-hd-navigate]");
+          if (href && !navBtn) {
+            navBtn = document.createElement("a");
+            navBtn.className = "hd-btn hd-btn--soft";
+            navBtn.dataset.hdNavigate = "";
+            navBtn.target = "_blank";
+            navBtn.rel = "noopener";
+            navBtn.innerHTML = `${ICON.pin} Navigáció`;
+            const tools = root.querySelector(".hd-side-tools");
+            const phoneBtn = root.querySelector(".hd-side [data-hd-phone]");
+            if (tools) tools.before(navBtn);
+            else if (phoneBtn) phoneBtn.after(navBtn);
+            else root.querySelector(".hd-side")?.appendChild(navBtn);
+          }
+          if (navBtn && href) navBtn.href = href;
         }
       } catch (error) {
         btn.textContent = "Nem elérhető";

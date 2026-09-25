@@ -17,13 +17,21 @@ import {
 const PLACEHOLDER = "Válasszon";
 const DROPDOWN_VISIBLE_ROWS = 7;
 const DROPDOWN_ROW_PX = 44;
+const YEAR_SELECT_MIN = 1980;
+const YEAR_SELECT_MAX = 2035;
 
 const DC_TOLTO_OPTIONS = ["CCS", "CHAdeMO", "Egyéb"];
 
 const AD_BM_SINGLE_DROPDOWN_SPECS = [
-  { id: "gyartasi_ev", title: "Gyártási év", panelClass: "ad-form-year-panel", placeholder: "év" },
+  { id: "gyartasi_ev", title: "Gyártási év", panelClass: "ad-form-year-panel", placeholder: "év", yearMax: null },
   { id: "gyartasi_honap", title: "Gyártási hónap", panelClass: "ad-form-month-panel", placeholder: "hó" },
-  { id: "muszaki_ev", title: "Műszaki vizsga érvényes – év", panelClass: "ad-form-muszaki-ev-panel", placeholder: "év" },
+  {
+    id: "muszaki_ev",
+    title: "Műszaki vizsga érvényes – év",
+    panelClass: "ad-form-muszaki-ev-panel",
+    placeholder: "év",
+    yearMax: YEAR_SELECT_MAX,
+  },
   { id: "muszaki_honap", title: "Műszaki vizsga érvényes – hónap", panelClass: "ad-form-month-panel", placeholder: "hó" },
   { id: "tulajdonosok_szama", title: "Tulajdonosok száma", panelClass: "ad-form-tulaj-panel", placeholder: "—" },
   { id: "ajtok", title: "Ajtók száma", panelClass: "ad-form-ajtok-panel", placeholder: "—" },
@@ -65,9 +73,35 @@ function ensureSelectOptions(select, values) {
   }
 }
 
+function ensureYearSelectFilled(select, maxYear = new Date().getFullYear()) {
+  if (!select || select.tagName !== "SELECT") return;
+  const years = [...select.options].filter((o) => /^\d{4}$/.test(o.value));
+  if (years.length >= 20) return;
+  const prev = String(select.value || "");
+  const cap = Math.max(maxYear, new Date().getFullYear());
+  select.replaceChildren();
+  const empty = document.createElement("option");
+  empty.value = "";
+  empty.textContent = "év";
+  select.appendChild(empty);
+  for (let year = cap; year >= YEAR_SELECT_MIN; year -= 1) {
+    const option = document.createElement("option");
+    option.value = String(year);
+    option.textContent = String(year);
+    select.appendChild(option);
+  }
+  select.value = [...select.options].some((o) => o.value === prev) ? prev : "";
+}
+
 function mountAdSingleDropdown(spec) {
   const select = document.getElementById(spec.id);
   if (!select || select.tagName !== "SELECT" || select.dataset.adBmPicker === "1") return;
+  if (spec.yearMax !== undefined) {
+    ensureYearSelectFilled(
+      select,
+      spec.yearMax == null ? new Date().getFullYear() : spec.yearMax
+    );
+  }
   mountSingleSelectDropdown(select, {
     title: spec.title,
     panelClass: spec.panelClass,
@@ -1988,6 +2022,7 @@ export async function mountAdFormBmPickers(form, catalog = null) {
   const forgalombaEv = document.getElementById("forgalomba_helyezes_ev");
   const forgalombaHonap = document.getElementById("forgalomba_helyezes_honap");
   if (forgalombaEv?.tagName === "SELECT" && forgalombaEv.dataset.adBmPicker !== "1") {
+    ensureYearSelectFilled(forgalombaEv);
     mountSingleSelectDropdown(forgalombaEv, {
       title: "Forgalomba helyezés éve",
       panelClass: "ad-form-year-panel",

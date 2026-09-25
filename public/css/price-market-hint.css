@@ -1,0 +1,73 @@
+/* Vételár melletti piaci jelző — sávok + felirat (hasznaltauto-stílus) */
+.vetelar-market-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.55rem 0.85rem;
+}
+
+.vetelar-market-wrap > .suffix-field {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+.price-market-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex: 0 0 auto;
+  line-height: 1;
+  user-select: none;
+}
+
+.price-market-hint[hidden] {
+  display: none !important;
+}
+
+.price-market-bars {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 16px;
+}
+
+.price-market-bars > i {
+  display: block;
+  width: 4px;
+  border-radius: 1px;
+  background: #d4dae2;
+}
+
+.price-market-bars > i:nth-child(1) { height: 7px; }
+.price-market-bars > i:nth-child(2) { height: 10px; }
+.price-market-bars > i:nth-child(3) { height: 13px; }
+.price-market-bars > i:nth-child(4) { height: 16px; }
+
+.price-market-hint[data-opinion="jó ár"] .price-market-bars > i:nth-child(-n+3),
+.price-market-hint[data-opinion="kevés"] .price-market-bars > i {
+  background: #22c55e;
+}
+
+.price-market-hint[data-opinion="sok"] .price-market-bars[data-level="1"] > i:nth-child(1),
+.price-market-hint[data-opinion="sok"] .price-market-bars[data-level="2"] > i:nth-child(-n+2) {
+  background: #f59e0b;
+}
+
+.price-market-label {
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.price-market-hint[data-opinion="jó ár"] .price-market-label,
+.price-market-hint[data-opinion="kevés"] .price-market-label {
+  color: #16a34a;
+}
+
+.price-market-hint[data-opinion="sok"] .price-market-label {
+  color: #d97706;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .vetelar-market-wrap > .suffix-field {
+  max-width: none;
+}

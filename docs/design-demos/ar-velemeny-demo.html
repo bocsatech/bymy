@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bymy — Árvélemény demó (hol legyen?)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0f1720;
+    --muted: #5a6570;
+    --line: #e4e8ee;
+    --bg: #eef1f5;
+    --paper: #fff;
+    --gold: #f0c52c;
+    --navy: #172a3a;
+    --ok: #166534;
+    --ok-bg: #e8f6ec;
+    --low: #1d4ed8;
+    --low-bg: #eff6ff;
+    --hi: #9a3412;
+    --hi-bg: #fff7ed;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: Manrope, system-ui, sans-serif;
+  }
+  .top {
+    height: 56px;
+    background: var(--navy);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 max(16px, 4vw);
+  }
+  .logo { font-weight: 800; letter-spacing: 1.6px; color: var(--gold); }
+  .top span { font-size: 13px; color: #c9d4de; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 28px 18px 56px; }
+  h1 { margin: 0 0 6px; font-size: 1.45rem; }
+  .lead { margin: 0 0 10px; color: #445; font-size: 0.92rem; line-height: 1.45; max-width: 70ch; }
+  .pick {
+    margin: 0 0 22px;
+    padding: 12px 14px;
+    background: #fff8dc;
+    border: 1px solid #e8d48a;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    line-height: 1.45;
+  }
+  .pick strong { font-weight: 800; }
+  .grid {
+    display: grid;
+    gap: 18px;
+  }
+  @media (min-width: 960px) {
+    .grid { grid-template-columns: 1fr 1fr; }
+  }
+  .grid .wide { grid-column: 1 / -1; }
+  .card {
+    background: var(--paper);
+    border: 1px solid #d8dee6;
+    border-radius: 12px;
+    padding: 1rem 1.1rem 1.2rem;
+    box-shadow: 0 6px 18px #20304010;
+  }
+  .card.rec { border-color: #c9a227; box-shadow: 0 0 0 2px #f0c52c55, 0 6px 18px #20304010; }
+  .tag {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 0.22rem 0.5rem;
+    border-radius: 4px;
+    margin-bottom: 0.55rem;
+    background: #eef1f5;
+    color: #334;
+  }
+  .tag.rec { background: #f0c52c; color: #172a3a; }
+  .card h2 { margin: 0 0 0.35rem; font-size: 1.05rem; }
+  .why { margin: 0 0 0.9rem; font-size: 0.8rem; color: var(--muted); line-height: 1.4; }
+
+  /* mock chrome */
+  .mock {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+    background: #f7f8fa;
+  }
+  .mock-bar {
+    height: 36px;
+    background: var(--navy);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+  .mock-bar em { color: var(--gold); font-style: normal; margin-right: 8px; }
+  .mock-body { padding: 14px; }
+  .field {
+    margin-bottom: 10px;
+  }
+  .field label {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #445;
+    margin-bottom: 4px;
+  }
+  .field .box {
+    background: #fff;
+    border: 1px solid #cfd6de;
+    border-radius: 6px;
+    padding: 9px 11px;
+    font-size: 0.92rem;
+    font-weight: 600;
+  }
+  .row2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .opinion {
+    margin-top: 12px;
+    border-radius: 10px;
+    padding: 12px 13px;
+    border: 1px solid transparent;
+  }
+  .opinion.low { background: var(--low-bg); border-color: #bfdbfe; }
+  .opinion.ok { background: var(--ok-bg); border-color: #bbf7d0; }
+  .opinion.hi { background: var(--hi-bg); border-color: #fed7aa; }
+  .opinion .badge {
+    display: inline-block;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 999px;
+    margin-bottom: 6px;
+  }
+  .opinion.low .badge { background: #2563eb; color: #fff; }
+  .opinion.ok .badge { background: #16a34a; color: #fff; }
+  .opinion.hi .badge { background: #ea580c; color: #fff; }
+  .opinion .rec-price {
+    font-size: 1.25rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin: 2px 0 4px;
+  }
+  .opinion .meta {
+    font-size: 0.75rem;
+    color: #556;
+    line-height: 1.4;
+  }
+  .side-layout {
+    display: grid;
+    gap: 12px;
+  }
+  @media (min-width: 640px) {
+    .side-layout { grid-template-columns: 1.15fr 0.85fr; align-items: start; }
+  }
+  .drawer {
+    background: #fff;
+    border: 1px solid #d8dee6;
+    border-radius: 10px;
+    padding: 12px;
+  }
+  .drawer h3 {
+    margin: 0 0 8px;
+    font-size: 0.85rem;
+    font-weight: 800;
+  }
+  .chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    margin-top: 8px;
+  }
+  .chip {
+    font-size: 0.75rem;
+    font-weight: 800;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: var(--ok-bg);
+    color: var(--ok);
+    border: 1px solid #bbf7d0;
+  }
+  .chip.low { background: var(--low-bg); color: var(--low); border-color: #bfdbfe; }
+  .chip.hi { background: var(--hi-bg); color: var(--hi); border-color: #fed7aa; }
+  .hint { font-size: 0.72rem; color: var(--muted); }
+  .shots {
+    display: grid;
+    gap: 12px;
+    margin-top: 10px;
+  }
+  @media (min-width: 700px) {
+    .shots { grid-template-columns: repeat(3, 1fr); }
+  }
+  .shots figure {
+    margin: 0;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .shots img {
+    display: block;
+    width: 100%;
+    height: auto;
+    background: #dde3ea;
+    min-height: 140px;
+  }
+  .shots figcaption {
+    padding: 8px 10px;
+    font-size: 0.75rem;
+    color: #445;
+  }
+</style>
+</head>
+<body>
+  <div class="top">
+    <div class="logo">BYMY</div>
+    <span>Demó · árvélemény elhelyezés</span>
+  </div>
+  <div class="wrap">
+    <h1>Hol legyen az árvélemény?</h1>
+    <p class="lead">
+      Offline lista alapján (akciós ár, ha van) → ajánlott medián + vélemény a beírt árra:
+      <strong>kevés / jó ár / sok</strong>. Élő oldalon még ne; ez csak design demó.
+    </p>
+    <p class="pick">
+      <strong>Ajánlás:</strong> A változat — hirdetésfeladás „Ár” blokkja, közvetlenül a vételár alatt.
+      Ott dönti el az eladó az árat; a típus/év/km már megvan az űrlapon.
+    </p>
+
+    <div class="grid">
+      <!-- A -->
+      <article class="card rec">
+        <span class="tag rec">A · ajánlott</span>
+        <h2>Feladás → Ár mező alatt</h2>
+        <p class="why">Inline visszajelzés: beírod a vételárat → azonnal „KEVÉS / JÓ ÁR / SOK” + ajánlott Ft.</p>
+        <div class="mock">
+          <div class="mock-bar"><em>BYMY</em> Hirdetésfeladás · Ár</div>
+          <div class="mock-body">
+            <div class="field">
+              <label>Pontos típus (űrlapról)</label>
+              <div class="box">BMW X5 xDrive30d</div>
+            </div>
+            <div class="row2">
+              <div class="field"><label>Évjárat</label><div class="box">2019</div></div>
+              <div class="field"><label>Km</label><div class="box">150 000</div></div>
+            </div>
+            <div class="field">
+              <label>Vételár *</label>
+              <div class="box">12 500 000 Ft</div>
+            </div>
+            <div class="opinion low">
+              <span class="badge">Kevés</span>
+              <div class="rec-price">Ajánlott: 14 189 000 Ft</div>
+              <div class="meta">11 hasonló hirdetés mediánja · ±10% sáv · akciós ár, ha volt</div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- B -->
+      <article class="card">
+        <span class="tag">B</span>
+        <h2>Oldalsáv / fiók a feladáson</h2>
+        <p class="why">Az űrlap mellett külön „Piaci ár” panel. Több hely, de elvonja a figyelmet.</p>
+        <div class="mock">
+          <div class="mock-bar"><em>BYMY</em> Feladás</div>
+          <div class="mock-body side-layout">
+            <div>
+              <div class="field"><label>Vételár</label><div class="box">15 900 000 Ft</div></div>
+              <div class="field"><label>Akciós ár</label><div class="box">—</div></div>
+            </div>
+            <div class="drawer">
+              <h3>Piaci ár</h3>
+              <div class="opinion hi" style="margin:0">
+                <span class="badge">Sok</span>
+                <div class="rec-price" style="font-size:1.05rem">14 189 000 Ft</div>
+                <div class="meta">A te árad a piac felett van.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- C -->
+      <article class="card">
+        <span class="tag">C</span>
+        <h2>Saját hirdetés szerkesztésénél</h2>
+        <p class="why">Későbbi finomhangolás: készlet / szerkesztés. Első beállításnak gyengébb, mint A.</p>
+        <div class="mock">
+          <div class="mock-bar"><em>BYMY</em> Saját hirdetés</div>
+          <div class="mock-body">
+            <div class="field"><label>Ár</label><div class="box">14 200 000 Ft</div></div>
+            <div class="chip-row">
+              <span class="chip">Jó ár</span>
+              <span class="hint">Ajánlott 14 189 000 Ft · 11 db</span>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- opinion states -->
+      <article class="card wide">
+        <span class="tag">Állapotok</span>
+        <h2>A három vélemény</h2>
+        <p class="why">Ugyanaz a panel, három eredmény — a demóképekhez.</p>
+        <div class="row2" style="grid-template-columns:1fr 1fr 1fr; gap:12px">
+          <div class="opinion low" style="margin:0">
+            <span class="badge">Kevés</span>
+            <div class="rec-price" style="font-size:1rem">14 189 000 Ft</div>
+            <div class="meta">Te: 12 500 000 · piac alatt</div>
+          </div>
+          <div class="opinion ok" style="margin:0">
+            <span class="badge">Jó ár</span>
+            <div class="rec-price" style="font-size:1rem">14 189 000 Ft</div>
+            <div class="meta">Te: 14 200 000 · ±10%</div>
+          </div>
+          <div class="opinion hi" style="margin:0">
+            <span class="badge">Sok</span>
+            <div class="rec-price" style="font-size:1rem">14 189 000 Ft</div>
+            <div class="meta">Te: 15 900 000 · piac felett</div>
+          </div>
+        </div>
+      </article>
+
+      <article class="card wide">
+        <span class="tag">Képek</span>
+        <h2>Generált demóképek</h2>
+        <div class="shots" id="shots">
+          <figure>
+            <img src="ar-velemeny-demo-a.png" alt="A változat — feladás Ár alatt, KEVÉS">
+            <figcaption>A — feladás, KEVÉS</figcaption>
+          </figure>
+          <figure>
+            <img src="ar-velemeny-demo-b.png" alt="B változat — oldalsáv, SOK">
+            <figcaption>B — oldalsáv, SOK</figcaption>
+          </figure>
+          <figure>
+            <img src="ar-velemeny-demo-c.png" alt="C változat — saját hirdetés, JÓ ÁR">
+            <figcaption>C — saját hirdetés, JÓ ÁR</figcaption>
+          </figure>
+        </div>
+      </article>
+    </div>
+  </div>
+</body>
+</html>

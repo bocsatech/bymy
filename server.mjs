@@ -81,6 +81,7 @@ import {
   normalizePartnerVertical,
 } from "./lib/partner-categories.mjs";
 import { estimateValuation, valuationOptions } from "./lib/valuation.mjs";
+import { estimateMarketValuation, marketDataAvailable } from "./lib/market-valuation.mjs";
 import {
   ensureVehicleCatalog,
   getVehicleCatalog,
@@ -1782,12 +1783,24 @@ async function handleValuationApi(req, res, pathname) {
 
     if (pathname === "/api/valuation/estimate" && req.method === "GET") {
       const url = new URL(req.url ?? "", `http://${HOST}`);
-      const result = estimateValuation({
+      const useMarket =
+        url.searchParams.get("source") === "market" || marketDataAvailable();
+      const params = {
         gyartmany: url.searchParams.get("gyartmany"),
-        modell_tipus: url.searchParams.get("modell_tipus"),
+        modell: url.searchParams.get("modell"),
+        tipus: url.searchParams.get("tipus"),
+        modell_tipus:
+          url.searchParams.get("modell_tipus") ||
+          [url.searchParams.get("modell"), url.searchParams.get("tipus")]
+            .filter(Boolean)
+            .join(" "),
         gyartasi_ev: url.searchParams.get("gyartasi_ev"),
         km: url.searchParams.get("km"),
-      });
+        ar: url.searchParams.get("ar"),
+      };
+      const result = useMarket
+        ? estimateMarketValuation(params)
+        : estimateValuation(params);
       if (result.error) {
         sendJson(res, 400, result);
         return;

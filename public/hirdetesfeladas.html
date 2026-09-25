@@ -162,6 +162,7 @@
     <link rel="stylesheet" href="/css/ad-form-desk.css?v=addrFix1" />
     <link rel="stylesheet" href="/css/ad-form-address.css?v=addrFix1" />
     <link rel="stylesheet" href="/css/ad-form-bm-pickers.css?v=addrFix1" />
+    <link rel="stylesheet" href="/css/price-market-hint.css?v=priceHint1" />
     <link rel="stylesheet" href="/css/site-side.css?v=mwPostDesk1" />
     <link rel="stylesheet" href="/css/category-picker.css?v=mobMenuFix1" />
       <link rel="stylesheet" href="/css/hub.css?v=hubLogo72Align1" />
@@ -942,9 +943,15 @@
               <div class="card-head">Ár</div>
               <div class="card-body form-grid">
                 <label for="vetelar">Vételár: <span class="req">*</span></label>
-                <div class="suffix-field">
-                  <input id="vetelar" name="vetelar" type="text" inputmode="numeric" autocomplete="off" placeholder="pl. 3 700 000" required />
-                  <span>Ft</span>
+                <div class="vetelar-market-wrap">
+                  <div class="suffix-field">
+                    <input id="vetelar" name="vetelar" type="text" inputmode="numeric" autocomplete="off" placeholder="pl. 3 700 000" required />
+                    <span>Ft</span>
+                  </div>
+                  <div id="price-market-hint" class="price-market-hint" hidden aria-live="polite">
+                    <span class="price-market-bars" data-level="0" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+                    <span class="price-market-label"></span>
+                  </div>
                 </div>
 
                 <label for="vetelar_eur">Ár (EUR):</label>
@@ -1087,7 +1094,7 @@
 
     <script src="/js/site-avatar-menu.js?v=avatarSync1" type="module"></script>
     <script src="/js/hirdetes-category-boot.js?v=pickerBoot4" type="module"></script>
-    <script src="/js/app.js?v=photoKeep1" type="module"></script>
+    <script src="/js/app.js?v=priceHint1" type="module"></script>
       <script src="/js/nav-counts.js?v=navCount4" type="module"></script>
       <script src="/js/theme.js?v=willhabenHdr1" type="module"></script>
     <script src="/js/form-layout-apply.js?v=addrFix1" type="module"></script>

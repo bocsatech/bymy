@@ -1,6 +1,7 @@
 import {
   fetchListing,
   fetchRelatedListings,
+  fetchSellerRating,
   revealListingContact,
   recordListingView,
   deleteListingFromDb,
@@ -157,6 +158,43 @@ const SELLER_AVATAR_PLACEHOLDER =
 function sellerAvatarHtml(view) {
   const src = String(view.sellerAvatarUrl || "").trim() || SELLER_AVATAR_PLACEHOLDER;
   return `<span class="hd-seller-avatar" aria-hidden="true"><img src="${escapeHtml(src)}" alt="" width="48" height="48" decoding="async" /></span>`;
+}
+
+function sellerRatingHtml(rating) {
+  const avg = rating?.average != null ? Number(rating.average) : null;
+  const count = Number(rating?.count) || 0;
+  if (avg == null || count <= 0) {
+    return `<p class="hd-seller-rating hd-seller-rating--empty" data-hd-seller-rating>Még nincs értékelés</p>`;
+  }
+  const filled = Math.max(0, Math.min(5, Math.round((avg / 10) * 5)));
+  const stars = Array.from({ length: 5 }, (_, i) =>
+    i < filled
+      ? `<span class="hd-seller-star is-on" aria-hidden="true">★</span>`
+      : `<span class="hd-seller-star" aria-hidden="true">☆</span>`
+  ).join("");
+  return `<p class="hd-seller-rating" data-hd-seller-rating title="${escapeHtml(String(avg))} / 10">
+    <span class="hd-seller-stars" role="img" aria-label="Értékelés ${escapeHtml(String(avg))} / 10">${stars}</span>
+    <strong class="hd-seller-avg">${escapeHtml(String(avg))}</strong>
+    <span class="hd-seller-count">(${count})</span>
+  </p>`;
+}
+
+function paintSellerRating(rating) {
+  const el = root?.querySelector("[data-hd-seller-rating]");
+  if (!el) return;
+  const wrap = document.createElement("div");
+  wrap.innerHTML = sellerRatingHtml(rating);
+  const next = wrap.firstElementChild;
+  if (next) el.replaceWith(next);
+}
+
+async function loadSellerRating(listingId) {
+  try {
+    const rating = await fetchSellerRating(listingId);
+    paintSellerRating(rating);
+  } catch {
+    /* értékelés opcionális */
+  }
 }
 
 function formatDate(value) {
@@ -506,6 +544,7 @@ function render(view, listing, related) {
           ${sellerAvatarHtml(view)}
           <div class="hd-seller-meta">
             <p class="hd-seller-name">${escapeHtml(view.sellerName)}</p>
+            <p class="hd-seller-rating hd-seller-rating--loading" data-hd-seller-rating>Értékelés betöltése…</p>
             ${view.sellerSince ? `<p class="hd-seller-since">Felhasználó ezóta: ${escapeHtml(view.sellerSince)}</p>` : ""}
           </div>
         </div>
@@ -1059,6 +1098,7 @@ async function init() {
     render(view, listing, []);
     recordListingView(id, "web").catch(() => {});
     void loadRelatedListings(id, view);
+    void loadSellerRating(id);
   } catch (error) {
     root.innerHTML = `<p class="hd-empty">${escapeHtml(error.message ?? "A hirdetés nem tölthető be.")}</p>`;
   }

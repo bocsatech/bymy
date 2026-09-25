@@ -826,6 +826,48 @@ html[data-theme="dark"] body.hd-page .hd-tool--fb {
   color: #667085;
 }
 
+.hd-seller-rating {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem 0.45rem;
+  margin: 0.28rem 0 0;
+  font-size: 0.84rem;
+  line-height: 1.2;
+  color: #344054;
+}
+
+.hd-seller-rating--empty,
+.hd-seller-rating--loading {
+  color: #98a2b3;
+  font-weight: 500;
+}
+
+.hd-seller-stars {
+  display: inline-flex;
+  gap: 0.05rem;
+  letter-spacing: 0;
+}
+
+.hd-seller-star {
+  color: #d0d5dd;
+  font-size: 0.95rem;
+}
+
+.hd-seller-star.is-on {
+  color: #f5a524;
+}
+
+.hd-seller-avg {
+  font-weight: 800;
+  color: #101828;
+}
+
+.hd-seller-count {
+  color: #667085;
+  font-weight: 600;
+}
+
 .hd-seller-addr {
   margin: 0;
   font-size: 0.88rem;

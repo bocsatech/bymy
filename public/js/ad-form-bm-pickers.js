@@ -900,12 +900,23 @@ function mountSingleSelectDropdown(select, { title, panelClass, placeholder = PL
 
   /** Élő olvasás — ne mount-kori üres snapshot (évlista race). */
   function readOptions() {
-    return [...select.options]
+    const fromSelect = [...select.options]
       .filter((option) => option.value !== "")
       .map((option) => ({
         value: option.value,
         label: option.textContent?.trim() || option.value,
       }));
+    if (fromSelect.length) return fromSelect;
+    // utolsó menedék évmezőkre
+    if (/_ev$/.test(select.id) || select.id === "gyartasi_ev") {
+      const max = select.id === "muszaki_ev" ? YEAR_SELECT_MAX : new Date().getFullYear();
+      const out = [];
+      for (let y = max; y >= YEAR_SELECT_MIN; y -= 1) {
+        out.push({ value: String(y), label: String(y) });
+      }
+      return out;
+    }
+    return fromSelect;
   }
 
   let selected = "";

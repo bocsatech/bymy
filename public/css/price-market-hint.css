@@ -4,6 +4,8 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 0.55rem 0.85rem;
+  width: 100%;
+  max-width: 100%;
 }
 
 .vetelar-market-wrap > .suffix-field {
@@ -57,6 +59,7 @@
   font-size: 0.92rem;
   font-weight: 700;
   letter-spacing: -0.01em;
+  white-space: nowrap;
 }
 
 .price-market-hint[data-opinion="jó ár"] .price-market-label,
@@ -70,4 +73,15 @@
 
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .vetelar-market-wrap > .suffix-field {
   max-width: none;
+}
+
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form .vetelar-market-wrap {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form .vetelar-market-wrap > .suffix-field {
+  width: auto !important;
+  max-width: none !important;
+  flex: 1 1 14rem !important;
 }

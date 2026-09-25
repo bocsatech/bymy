@@ -9,6 +9,7 @@
   "functions": {
     "api/index.mjs": {
       "maxDuration": 60,
+      "includeFiles": "lib/ha-market/**",
       "excludeFiles": "{node_modules/playwright/**,node_modules/playwright-core/**}"
     }
   },

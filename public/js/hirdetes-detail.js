@@ -487,9 +487,6 @@ function render(view, listing, related) {
             </div>
           </div>
           ${view.salePrice ? `<p class="hd-price-old">Korábbi ár: ${escapeHtml(view.salePrice)}</p>` : ""}
-          <div class="hd-price-links">
-            <span>Átvétel / szállítás egyeztethető</span>
-          </div>
         </div>
         <div class="hd-seller-card">
           ${sellerAvatarHtml(view)}

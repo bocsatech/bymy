@@ -12,7 +12,7 @@ import { mountTurnstile } from "./turnstile-ui.js?v=turnstile11";
 import { startConversation } from "./messages-api.js?v=msgLive2";
 import { openListingMessage } from "./start-listing-message.js?v=msgLive3";
 import { getParkplatz, addParkplatzItem, removeParkplatzItem } from "./fok-data.js?v=parkThumb1";
-import { listingReturnHref, listingDetailHref, rememberListingOpen, getListingSearchNav, touchListingReturnId } from "./listing-return.js?v=searchNav1";
+import { listingReturnHref, listingDetailHref, rememberListingOpen } from "./listing-return.js?v=searchNav1";
 
 const root = document.getElementById("hd-root");
 const ICON = {
@@ -314,20 +314,6 @@ function formatDate(value) {
   }
 }
 
-function formatCrumbLabel(value) {
-  const raw = String(value ?? "").trim();
-  if (!raw) return "";
-  if (raw !== raw.toLocaleUpperCase("hu-HU")) return raw;
-  return raw
-    .toLocaleLowerCase("hu-HU")
-    .split(/([\s/-]+)/)
-    .map((part) => {
-      if (/^[\s/-]+$/.test(part) || !part) return part;
-      return part.charAt(0).toLocaleUpperCase("hu-HU") + part.slice(1);
-    })
-    .join("");
-}
-
 function currentUserId() {
   const id = Number(getAuthUser()?.id);
   return Number.isFinite(id) && id > 0 ? id : null;
@@ -529,8 +515,6 @@ function render(view, listing, related = []) {
   if (own) root.dataset.ownListing = "1";
   else delete root.dataset.ownListing;
 
-  const searchNav = getListingSearchNav(view.id, view.categoryHref);
-  const hasPrevNext = Boolean(searchNav.prevId || searchNav.nextId);
   const highlights = highlightSpecsFromView(view);
   const headline = sideHeadline(view);
   const promoText = promoBannerText(view);
@@ -542,41 +526,6 @@ function render(view, listing, related = []) {
   if (own) clearRelatedUi();
 
   root.innerHTML = `
-    <nav class="hd-topnav" aria-label="Navigáció">
-      <ol class="hd-crumb-list">
-        <li><a href="/">Kezdőlap</a></li>
-        <li><a href="${escapeHtml(view.categoryHref)}">${escapeHtml(view.categoryLabel)}</a></li>
-        ${
-          view.brand
-            ? `<li${view.typeName ? "" : ' aria-current="page"'}>${escapeHtml(formatCrumbLabel(view.brand))}</li>`
-            : ""
-        }
-        ${view.typeName ? `<li aria-current="page">${escapeHtml(formatCrumbLabel(view.typeName))}</li>` : ""}
-      </ol>
-      <div class="hd-topnav-actions">
-        <a class="hd-search-back" href="${escapeHtml(searchNav.returnHref)}">
-          <span aria-hidden="true">◂</span> vissza a keresési eredményekhez
-        </a>
-        ${
-          hasPrevNext
-            ? `<span class="hd-search-siblings">
-          ${
-            searchNav.prevId
-              ? `<a class="hd-search-prev" href="${escapeHtml(listingDetailHref(searchNav.prevId))}"><span aria-hidden="true">◂</span> előző</a>`
-              : `<span class="hd-search-prev is-disabled"><span aria-hidden="true">◂</span> előző</span>`
-          }
-          <span class="hd-search-sep" aria-hidden="true">|</span>
-          ${
-            searchNav.nextId
-              ? `<a class="hd-search-next" href="${escapeHtml(listingDetailHref(searchNav.nextId))}">következő <span aria-hidden="true">▸</span></a>`
-              : `<span class="hd-search-next is-disabled">következő <span aria-hidden="true">▸</span></span>`
-          }
-        </span>`
-            : ""
-        }
-      </div>
-    </nav>
-
     <div class="hd-hero">
       <div class="hd-gallery">
         <div class="hd-stage">
@@ -870,15 +819,6 @@ function bindUi(view, listing) {
     else lightbox.removeAttribute("open");
   }
 
-  root.querySelectorAll("a.hd-search-prev, a.hd-search-next").forEach((link) => {
-    link.addEventListener("click", () => {
-      try {
-        const id = new URL(link.href, location.origin).searchParams.get("id");
-        if (id) touchListingReturnId(id);
-      } catch {
-      }
-    });
-  });
   root.querySelector("[data-hd-prev]")?.addEventListener("click", (event) => {
     event.stopPropagation();
     show(index - 1);

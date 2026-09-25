@@ -7,7 +7,7 @@ import {
   recordListingView,
   deleteListingFromDb,
 } from "./db-client.js?v=secReveal1";
-import { getAuthUser, getDisplayName, getProfile } from "./site-auth.js?v=authPublicGate2";
+import { getAuthUser, getDisplayName, getProfile } from "./site-auth.js?v=authMembersOnly1";
 import { mountTurnstile } from "./turnstile-ui.js?v=turnstile11";
 import { startConversation } from "./messages-api.js?v=msgLive2";
 import { openListingMessage } from "./start-listing-message.js?v=msgLive3";

@@ -11,6 +11,13 @@ import {
   isStaticAssetPath,
 } from "./lib/site-gate.mjs";
 
+function isSocialShareCrawler(request) {
+  const ua = request.headers.get("user-agent") || "";
+  return /facebookexternalhit|Facebot|FacebookBot|Twitterbot|LinkedInBot|Slackbot|WhatsApp|TelegramBot|Discordbot|Pinterest|vkShare|Googlebot/i.test(
+    ua
+  );
+}
+
 function isPublic(pathname, method) {
   if (pathname.startsWith("/cdn-cgi/")) return true;
   if (isPublicHtmlPath(pathname)) return true;
@@ -32,6 +39,11 @@ export default function middleware(request) {
   const method = request.method || "GET";
 
   if (isPublic(pathname, method)) return;
+
+  // Facebook / WhatsApp OG előnézet — csak a hirdetés HTML
+  if (method === "GET" && pathname === "/hirdetes.html" && isSocialShareCrawler(request)) {
+    return;
+  }
 
   if (hasSessionCookie(request)) return;
 

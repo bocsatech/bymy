@@ -2689,6 +2689,7 @@ export async function handleHttpRequest(req, res) {
     getSessionTokenFromRequest,
     sendJson,
     sendRedirect,
+    isSocialShareCrawler,
   });
   if (!gate.allowed) return;
 

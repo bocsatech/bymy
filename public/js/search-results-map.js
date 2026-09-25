@@ -9,7 +9,7 @@ import {
 } from "./listing-radius.js";
 import { listingDetailHref } from "./listing-return.js?v=scrollTop1";
 import { listingTileTitle, listingTilePrice } from "./listing-tile.js?v=listThumb1";
-import { getAuthUser } from "./site-auth.js?v=authAcct1";
+import { getAuthUser } from "./site-auth.js?v=authMembersOnly1";
 import { readNearbyPrefs } from "./nearby-search.js?v=korzetFix1";
 
 const HU_CENTER = [47.1625, 19.5033];

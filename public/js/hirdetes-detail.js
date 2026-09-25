@@ -741,26 +741,6 @@ function render(view, listing, related = []) {
     }
 
     <section class="hd-dealer">
-      <div class="hd-card">
-        <p class="hd-seller-name">${escapeHtml(view.sellerName)}</p>
-        <p class="hd-seller-rating hd-seller-rating--loading" data-hd-seller-rating>Értékelés betöltése…</p>
-        ${
-          partnerHref
-            ? `<a class="hd-partner-profile-link" href="${partnerHref}">
-                ${partner.logo_url ? `<img src="${escapeHtml(partner.logo_url)}" alt="" />` : `<span>${escapeHtml(String(partner.display_name || "P").slice(0, 1))}</span>`}
-                <span><small>Ellenőrzött ingatlanos partner</small><strong>${escapeHtml(partner.display_name)}</strong><em>Partnerprofil megnyitása →</em></span>
-              </a>`
-            : ""
-        }
-        ${addressLines.length ? `<p class="hd-seller-addr">${addressLines.map(escapeHtml).join("<br>")}</p>` : ""}
-        <p class="hd-seller-addr">Hivatkozási szám: ${escapeHtml(view.code || String(view.id))}</p>
-        ${view.website ? `<p><a class="hd-web" href="${escapeHtml(view.website)}" target="_blank" rel="noopener">Weboldal</a></p>` : ""}
-        ${
-          view.hasPhone || view.phone
-            ? `<button type="button" class="hd-btn hd-btn--ghost" data-hd-phone>${ICON.phone} ${escapeHtml(view.phoneMasked || "Telefonszám")} mutatása</button>`
-            : ""
-        }
-      </div>
       <div>
         ${
           view.mapQuery

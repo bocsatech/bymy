@@ -1304,23 +1304,6 @@ html[data-theme="dark"] body.hd-page .hd-tool--fb {
   }
 }
 
-.hd-msg-bar {
-  position: sticky;
-  bottom: 0;
-  z-index: 30;
-  display: flex;
-  gap: 0.65rem;
-  padding: 0.75rem 0 1rem;
-  background: linear-gradient(180deg, rgba(255,255,255,0) 0%, #fff 28%);
-}
-.hd-msg-bar .hd-btn {
-  flex: 1 1 0;
-  justify-content: center;
-}
-body.hd-has-msg-bar #hd-root {
-  padding-bottom: 0.25rem;
-}
-
 .hd-partner-badge {
   display: flex;
   align-items: center;
@@ -1473,11 +1456,6 @@ html[data-theme="dark"] body.hd-page .hd-tool {
 
 html[data-theme="dark"] body.hd-page .hd-price-box {
   border-bottom-color: #eef0f3 !important;
-}
-
-html[data-theme="dark"] body.hd-page .hd-msg-bar {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, #fff 28%) !important;
-  color: #000 !important;
 }
 
 .hd-phone-security {

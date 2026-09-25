@@ -524,7 +524,7 @@ function render(view, listing, related = []) {
   const navHref = navigationHref(view);
 
   document.title = `${view.title} — Bymy`;
-  document.body.classList.toggle("hd-has-msg-bar", canMsg);
+  document.body.classList.remove("hd-has-msg-bar");
   if (root) root.dataset.ownListing = own ? "1" : "0";
   if (own) clearRelatedUi();
 
@@ -797,20 +797,6 @@ function render(view, listing, related = []) {
       <span>Bymy-kód: ${escapeHtml(view.code || String(view.id))} ${view.updatedAt ? `| Utoljára módosítva: ${escapeHtml(formatDate(view.updatedAt))}` : ""}</span>
       <a class="hd-report" href="/uzenetek.html">! Hirdetés jelentése</a>
     </div>
-    ${
-      canMsg
-        ? `<div class="hd-msg-bar" role="region" aria-label="Üzenet">
-            ${
-              view.phone
-                ? `<button type="button" class="hd-btn hd-btn--primary" data-hd-phone data-full="${escapeHtml(view.phone)}">${ICON.phone} Hívás</button>`
-                : view.hasPhone
-                  ? `<button type="button" class="hd-btn hd-btn--primary" data-hd-phone>${ICON.phone} Hívás</button>`
-                  : ""
-            }
-            <button type="button" class="hd-btn hd-btn--primary" data-hd-message>${ICON.mail} Üzenet</button>
-          </div>`
-        : ""
-    }
     ${
       view.hasPhone && !view.phone
         ? `<div class="hd-phone-security" id="hd-phone-security"><div id="hd-phone-turnstile" class="hd-turnstile"></div></div>`

@@ -719,11 +719,11 @@ function render(view, listing, related = []) {
 
     ${
       equipmentGroups.length
-        ? `<section class="hd-section hd-section--extras">${equipmentGroupsHtml(equipmentGroups)}</section>`
+        ? `<section class="hd-section hd-section--extras hd-textbox">${equipmentGroupsHtml(equipmentGroups)}</section>`
         : ""
     }
 
-    <section class="hd-section">
+    <section class="hd-section hd-section--desc hd-textbox">
       <h2 class="hd-h2">Leírás</h2>
       ${view.description ? `<p class="hd-desc is-clip" data-hd-desc>${escapeHtml(view.description)}</p>` : "<p class=\"hd-desc\">Nincs leírás.</p>"}
       ${view.description ? `<button type="button" class="hd-more" data-hd-desc-more>Több megjelenítése +</button>` : ""}

@@ -2,9 +2,10 @@
 
 .hd-page {
   background: #f3f4f6;
-  --hd-accent: #e64415;
-  --hd-accent-hover: #d13c10;
-  --hd-outline: #5b2d8e;
+  --hd-accent: #f0c52c;
+  --hd-accent-hover: #e8bb20;
+  --hd-accent-ink: #111111;
+  --hd-outline: #111111;
   --hd-card: #ffffff;
   --hd-line: #e5e7eb;
 }
@@ -320,7 +321,7 @@ html[data-theme="dark"] body.hd-page .hd-tool--fb {
 
 .hd-promo {
   background: var(--hd-accent);
-  color: #fff;
+  color: var(--hd-accent-ink);
   font-weight: 800;
   font-size: 1rem;
   letter-spacing: 0.01em;
@@ -506,7 +507,7 @@ html[data-theme="dark"] body.hd-page .hd-tool--fb {
 }
 
 .hd-price-links a {
-  color: var(--hd-accent);
+  color: #111;
   font-weight: 700;
   text-decoration: underline;
   text-underline-offset: 2px;
@@ -558,24 +559,26 @@ html[data-theme="dark"] body.hd-page .hd-tool--fb {
 
 .hd-btn--primary {
   background: var(--hd-accent);
-  color: #fff;
+  color: var(--hd-accent-ink);
   border: 1.5px solid var(--hd-accent);
 }
 
 .hd-btn--primary:hover {
   background: var(--hd-accent-hover);
   border-color: var(--hd-accent-hover);
+  color: var(--hd-accent-ink);
 }
 
 .hd-btn--outline {
   background: #fff;
   color: #1f2937;
-  border: 1.5px solid var(--hd-outline);
+  border: 1.5px solid #d0d5dd;
 }
 
 .hd-btn--outline:hover,
 .hd-btn--outline.is-on {
-  background: #f8f5fc;
+  background: #fffbeb;
+  border-color: var(--hd-accent);
 }
 
 .hd-btn--soft {

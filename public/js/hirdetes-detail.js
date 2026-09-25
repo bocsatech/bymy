@@ -526,13 +526,15 @@ function render(view, listing, related) {
               ? ""
               : `<button type="button" class="hd-btn hd-btn--primary" data-hd-goto-form>${ICON.mail} Hirdető kapcsolata</button>`
         }
-        <div class="hd-side-actions">
+        <div class="hd-side-actions${own ? " hd-side-actions--3" : ""}">
           ${
             own
               ? ""
               : `<button type="button" class="hd-btn hd-btn--outline" data-hd-star>${ICON.heart} Parkolás</button>`
           }
           <button type="button" class="hd-btn hd-btn--outline" data-hd-share>${ICON.share} Megosztás</button>
+          <button type="button" class="hd-btn hd-btn--outline hd-btn--fb" data-hd-share-fb>${ICON.facebook} Facebook</button>
+          <button type="button" class="hd-btn hd-btn--outline" data-hd-print>${ICON.print} Nyomtatás</button>
         </div>
         ${
           view.hasPhone || view.phone
@@ -544,10 +546,6 @@ function render(view, listing, related) {
             ? `<a class="hd-btn hd-btn--soft" href="${escapeHtml(navHref)}" target="_blank" rel="noopener" data-hd-navigate>${ICON.pin} Navigáció</a>`
             : ""
         }
-        <div class="hd-side-tools">
-          <button type="button" class="hd-tool hd-tool--fb" data-hd-share-fb aria-label="Megosztás Facebookon" title="Facebook">${ICON.facebook}</button>
-          <button type="button" class="hd-tool" data-hd-print aria-label="Nyomtatás">${ICON.print}</button>
-        </div>
         ${
           !own && related.length
             ? `<button type="button" class="hd-btn hd-btn--soft" data-hd-related-link>Kereskedés többi hirdetései ${related.length + 1}</button>`
@@ -937,10 +935,10 @@ function bindUi(view, listing) {
             navBtn.target = "_blank";
             navBtn.rel = "noopener";
             navBtn.innerHTML = `${ICON.pin} Navigáció`;
-            const tools = root.querySelector(".hd-side-tools");
+            const tools = root.querySelector(".hd-side-actions");
             const phoneBtn = root.querySelector(".hd-side [data-hd-phone]");
-            if (tools) tools.before(navBtn);
-            else if (phoneBtn) phoneBtn.after(navBtn);
+            if (phoneBtn) phoneBtn.after(navBtn);
+            else if (tools) tools.after(navBtn);
             else root.querySelector(".hd-side")?.appendChild(navBtn);
           }
           if (navBtn && href) navBtn.href = href;

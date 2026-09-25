@@ -24,7 +24,104 @@ const ICON = {
   print: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M7 8V5h10v3M6 14h12v5H6v-5Z" stroke="currentColor" stroke-width="1.6"/><path d="M4.8 9h14.4A1.7 1.7 0 0 1 21 10.7v4.2h-3M3 14.9V10.7A1.7 1.7 0 0 1 4.8 9" stroke="currentColor" stroke-width="1.6"/></svg>`,
   mail: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 7h16v10H4V7Z" stroke="currentColor" stroke-width="1.6"/><path d="m4 7 8 6 8-6" stroke="currentColor" stroke-width="1.6"/></svg>`,
   phone: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6.5 4.8h3.2l1.1 3.2-1.8 1.1a12 12 0 0 0 6 6l1.1-1.8 3.2 1.1v3.2A2 2 0 0 1 17.3 20 15 15 0 0 1 4 6.7 2 2 0 0 1 6.5 4.8Z" stroke="currentColor" stroke-width="1.6"/></svg>`,
+  heart: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 20s-7-4.4-7-9.2A3.8 3.8 0 0 1 12 7.2a3.8 3.8 0 0 1 7 3.6C19 15.6 12 20 12 20Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>`,
+  grid: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="6.5" height="6.5" rx="1.2" stroke="currentColor" stroke-width="1.6"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.2" stroke="currentColor" stroke-width="1.6"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.2" stroke="currentColor" stroke-width="1.6"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.2" stroke="currentColor" stroke-width="1.6"/></svg>`,
+  zoom: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="5.5" stroke="currentColor" stroke-width="1.6"/><path d="M16 16l4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>`,
 };
+
+const HIGHLIGHT_ICONS = {
+  km: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 18 12 6l8 12" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M7.5 18h9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>`,
+  power: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="13" r="7" stroke="currentColor" stroke-width="1.7"/><path d="M12 13 15.5 8.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M8 10.2a6 6 0 0 1 8 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>`,
+  fuel: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 20V6.5A1.5 1.5 0 0 1 8.5 5h5A1.5 1.5 0 0 1 15 6.5V20" stroke="currentColor" stroke-width="1.7"/><path d="M6 20h10M15 9h2.2A1.8 1.8 0 0 1 19 10.8V16a2 2 0 1 0 2-2v-3.5L18.5 8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>`,
+  gear: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 6v12M16 6v12M8 12h8M8 6h4M16 18h-4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>`,
+  year: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2" stroke="currentColor" stroke-width="1.7"/><path d="M3.5 10h17M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>`,
+  owners: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8.5" r="3.2" stroke="currentColor" stroke-width="1.7"/><path d="M5.5 19.5c1.2-3.4 3.8-5 6.5-5s5.3 1.6 6.5 5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>`,
+  area: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 8.5 12 4l8 4.5V20H4V8.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9.5 20v-6h5v6" stroke="currentColor" stroke-width="1.7"/></svg>`,
+  rooms: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="4" y="5" width="16" height="14" rx="2" stroke="currentColor" stroke-width="1.7"/><path d="M4 12h16M12 5v14" stroke="currentColor" stroke-width="1.7"/></svg>`,
+  condition: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m7 12.5 3.2 3.2L17 8.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.7"/></svg>`,
+  color: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12" r="3.2" fill="currentColor"/></svg>`,
+  generic: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.7"/><path d="M12 8v4.5l2.5 2.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>`,
+};
+
+function specValue(rows, label) {
+  const hit = (rows || []).find((row) => row.label === label);
+  return hit?.value ? String(hit.value) : "";
+}
+
+function shortGear(value) {
+  const raw = String(value || "").trim();
+  if (!raw) return "";
+  if (/automat/i.test(raw)) return "Automata";
+  if (/manuál|manual|kézi/i.test(raw)) return "Manuális";
+  return raw.length > 28 ? `${raw.slice(0, 26)}…` : raw;
+}
+
+function highlightSpecsFromView(view) {
+  if (view.vertical === "ingatlan") {
+    const rows = [
+      { key: "area", label: "Alapterület", value: specValue(view.vehicleSpecs, "Alapterület") || specValue(view.bodyTech, "Alapterület") },
+      { key: "rooms", label: "Szobák", value: specValue(view.vehicleSpecs, "Szobaszám") },
+      { key: "condition", label: "Állapot", value: specValue(view.vehicleSpecs, "Állapot") },
+      { key: "year", label: "Év", value: view.year !== "—" ? view.year : "" },
+      { key: "color", label: "Fűtés", value: specValue(view.vehicleSpecs, "Fűtés") || specValue(view.motorSpecs, "Fűtés") },
+      { key: "generic", label: "Típus", value: specValue(view.vehicleSpecs, "Jármű típusa") || view.typeName },
+    ];
+    return rows.filter((row) => row.value);
+  }
+  return [
+    { key: "km", label: "Kilométeróra", value: view.km !== "—" ? view.km : "" },
+    { key: "power", label: "Teljesítmény", value: view.power !== "—" ? view.power : "" },
+    { key: "fuel", label: "Üzemanyag", value: view.fuel !== "—" ? view.fuel : "" },
+    {
+      key: "gear",
+      label: "Sebességváltó",
+      value: shortGear(specValue(view.motorSpecs, "Sebességváltó")),
+    },
+    {
+      key: "year",
+      label: "Évjárat",
+      value: view.registration !== "—" ? view.registration : view.year !== "—" ? view.year : "",
+    },
+    {
+      key: "owners",
+      label: "Tulajdonosok",
+      value: specValue(view.documentSpecs, "Előző tulajdonosok"),
+    },
+  ].filter((row) => row.value);
+}
+
+function promoBannerText(view) {
+  if (view.vertical === "ingatlan") return "Ingatlan: Végre egyszerű";
+  if (view.vertical === "teher") return "Teherautó: Végre egyszerű";
+  return "Autóvásárlás: Végre egyszerű";
+}
+
+function sideHeadline(view) {
+  if (view.brand && view.typeName) {
+    return { title: view.brand, subtitle: [view.typeName, view.year !== "—" ? view.year : ""].filter(Boolean).join(" · ") };
+  }
+  if (view.brand) {
+    return { title: view.brand, subtitle: view.year !== "—" ? String(view.year) : "" };
+  }
+  return { title: view.title, subtitle: view.year !== "—" ? String(view.year) : "" };
+}
+
+function highlightHtml(items) {
+  if (!items.length) return "";
+  return `<section class="hd-highlights" aria-label="Fő adatok">
+    ${items
+      .map(
+        (item) => `<div class="hd-hi">
+        <span class="hd-hi-icon">${HIGHLIGHT_ICONS[item.key] || HIGHLIGHT_ICONS.generic}</span>
+        <span class="hd-hi-text">
+          <span class="hd-hi-label">${escapeHtml(item.label)}</span>
+          <strong class="hd-hi-value">${escapeHtml(item.value)}</strong>
+        </span>
+      </div>`
+      )
+      .join("")}
+  </section>`;
+}
 
 function escapeHtml(value) {
   return String(value ?? "")
@@ -265,6 +362,9 @@ function render(view, listing, related) {
 
   const searchNav = getListingSearchNav(view.id, view.categoryHref);
   const hasPrevNext = Boolean(searchNav.prevId || searchNav.nextId);
+  const highlights = highlightSpecsFromView(view);
+  const headline = sideHeadline(view);
+  const promoText = promoBannerText(view);
 
   document.title = `${view.title} — Bymy`;
   document.body.classList.toggle("hd-has-msg-bar", canMsg);
@@ -307,27 +407,6 @@ function render(view, listing, related) {
       </div>
     </nav>
 
-    <div class="hd-head">
-      <h1 class="hd-title">${escapeHtml(view.title)}</h1>
-      <div class="hd-tools">
-        ${
-          own
-            ? ""
-            : `<button type="button" class="hd-tool" data-hd-star aria-label="Mentés">${ICON.star}</button>`
-        }
-        <button type="button" class="hd-tool" data-hd-share aria-label="Megosztás">${ICON.share}</button>
-        <button type="button" class="hd-tool hd-tool--fb" data-hd-share-fb aria-label="Megosztás Facebookon" title="Facebook">${ICON.facebook}</button>
-        <button type="button" class="hd-tool" data-hd-print aria-label="Nyomtatás">${ICON.print}</button>
-      </div>
-    </div>
-    <div class="hd-specbar">
-      <div class="hd-specbar-main">${view.headerSpecs.map((s) => `<span>${escapeHtml(s)}</span>`).join("")}</div>
-      <div class="hd-specbar-meta">
-        ${view.updatedAt ? `Utoljára módosítva: ${escapeHtml(formatDate(view.updatedAt))}` : ""}
-        ${view.code ? ` · Bymy-kód: ${escapeHtml(view.code)}` : ""}
-      </div>
-    </div>
-
     <div class="hd-hero">
       <div class="hd-gallery">
         <div class="hd-stage">
@@ -339,7 +418,16 @@ function render(view, listing, related) {
               : ""
           }
           <span class="hd-count" data-hd-count>${images.length ? `1 / ${images.length}` : "0 / 0"}</span>
+          ${
+            images.length
+              ? `<div class="hd-stage-tools">
+                  <button type="button" class="hd-stage-tool" data-hd-open>${ICON.grid} Összes kép</button>
+                  <button type="button" class="hd-stage-tool" data-hd-open>${ICON.zoom} Nagyítás</button>
+                </div>`
+              : ""
+          }
         </div>
+        <div class="hd-promo">${escapeHtml(promoText)}</div>
         ${
           images.length
             ? `<div class="hd-thumbs">
@@ -354,6 +442,7 @@ function render(view, listing, related) {
         </div>`
             : ""
         }
+        ${highlightHtml(highlights)}
       </div>
       ${
         images.length
@@ -385,18 +474,30 @@ function render(view, listing, related) {
           : ""
       }
       <aside class="hd-side">
+        <div class="hd-side-head">
+          <h1 class="hd-side-title">${escapeHtml(headline.title)}</h1>
+          ${headline.subtitle ? `<p class="hd-side-sub">${escapeHtml(headline.subtitle)}</p>` : ""}
+        </div>
         <div class="hd-price-box">
           <div class="hd-price-row">
             <p class="hd-price">${escapeHtml(view.price)}</p>
-            <p class="hd-price-sub">Eladási ár</p>
+            <div class="hd-price-rating" title="Árjelzés">
+              <span class="hd-price-bars" aria-hidden="true"><i></i><i></i><i></i><i class="is-dim"></i></span>
+              <span>Jó ár</span>
+            </div>
           </div>
           ${view.salePrice ? `<p class="hd-price-old">Korábbi ár: ${escapeHtml(view.salePrice)}</p>` : ""}
+          <div class="hd-price-links">
+            <span>Átvétel / szállítás egyeztethető</span>
+            <a href="/adasveteli-szerzodes.html?id=${encodeURIComponent(view.id)}">Adásvételi szerződés</a>
+          </div>
         </div>
         <div class="hd-seller-card">
           ${sellerAvatarHtml(view)}
           <div class="hd-seller-meta">
             <p class="hd-seller-name">${escapeHtml(view.sellerName)}</p>
             ${view.sellerSince ? `<p class="hd-seller-since">Felhasználó ezóta: ${escapeHtml(view.sellerSince)}</p>` : ""}
+            <span class="hd-seller-pill">Átvétel egyeztethető</span>
           </div>
         </div>
         ${
@@ -410,33 +511,48 @@ function render(view, listing, related) {
         ${view.addressLines.length ? `<p class="hd-seller-addr">${view.addressLines.map(escapeHtml).join("<br>")}</p>` : ""}
         ${
           canMsg
-            ? `<button type="button" class="hd-btn hd-btn--primary" data-hd-message>${ICON.mail} Üzenet</button>`
+            ? `<button type="button" class="hd-btn hd-btn--primary" data-hd-message>${ICON.mail} Üzenet küldése</button>`
             : own
               ? ""
               : `<button type="button" class="hd-btn hd-btn--primary" data-hd-goto-form>${ICON.mail} Hirdető kapcsolata</button>`
         }
+        <div class="hd-side-actions">
+          ${
+            own
+              ? ""
+              : `<button type="button" class="hd-btn hd-btn--outline" data-hd-star>${ICON.heart} Parkolás</button>`
+          }
+          <button type="button" class="hd-btn hd-btn--outline" data-hd-share>${ICON.share} Megosztás</button>
+        </div>
         ${
           view.hasPhone || view.phone
-            ? `<button type="button" class="hd-btn hd-btn--ghost" data-hd-phone>${ICON.phone} ${escapeHtml(view.phoneMasked || "Telefonszám")} mutatása</button>`
+            ? `<button type="button" class="hd-btn hd-btn--soft" data-hd-phone>${ICON.phone} ${escapeHtml(view.phoneMasked || "Telefonszám")} mutatása</button>`
             : ""
         }
-        <a class="hd-btn hd-btn--ghost" href="/adasveteli-szerzodes.html?id=${encodeURIComponent(view.id)}">Adásvételi szerződés</a>
+        <div class="hd-side-tools">
+          <button type="button" class="hd-tool hd-tool--fb" data-hd-share-fb aria-label="Megosztás Facebookon" title="Facebook">${ICON.facebook}</button>
+          <button type="button" class="hd-tool" data-hd-print aria-label="Nyomtatás">${ICON.print}</button>
+        </div>
         ${
           !own && related.length
-            ? `<button type="button" class="hd-btn hd-btn--ghost" data-hd-related-link>Több ettől a hirdetőtől ${related.length + 1}</button>`
+            ? `<button type="button" class="hd-btn hd-btn--soft" data-hd-related-link>Több ettől a hirdetőtől ${related.length + 1}</button>`
             : !own
-              ? `<button type="button" class="hd-btn hd-btn--ghost" data-hd-related-link>Több ettől a hirdetőtől …</button>`
+              ? `<button type="button" class="hd-btn hd-btn--soft" data-hd-related-link>Több ettől a hirdetőtől …</button>`
               : ""
         }
         ${view.website ? `<a class="hd-web" href="${escapeHtml(view.website)}" target="_blank" rel="noopener">Céges weboldal</a>` : ""}
         ${
           own
             ? `<div class="hd-owner">
-                <a class="hd-btn hd-btn--ghost" href="/hirdetesfeladas.html?id=${view.id}">Szerkesztés</a>
-                <button type="button" class="hd-btn hd-btn--ghost" data-hd-delete>Törlés</button>
+                <a class="hd-btn hd-btn--soft" href="/hirdetesfeladas.html?id=${view.id}">Szerkesztés</a>
+                <button type="button" class="hd-btn hd-btn--soft" data-hd-delete>Törlés</button>
               </div>`
             : ""
         }
+        <p class="hd-side-meta">
+          ${view.updatedAt ? `Utoljára módosítva: ${escapeHtml(formatDate(view.updatedAt))}` : ""}
+          ${view.code ? `<br>Bymy-kód: ${escapeHtml(view.code)}` : ""}
+        </p>
       </aside>
     </div>
 

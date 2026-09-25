@@ -6,8 +6,8 @@ import {
   recordListingView,
   deleteListingFromDb,
 } from "./db-client.js?v=secReveal1";
-import { getAuthUser, getDisplayName, getProfile } from "./site-auth.js?v=auth20260805localdb9";
-import { mountTurnstile } from "./turnstile-ui.js?v=turnstile10";
+import { getAuthUser, getDisplayName, getProfile } from "./site-auth.js?v=authPublicGate1";
+import { mountTurnstile } from "./turnstile-ui.js?v=turnstile11";
 import { startConversation } from "./messages-api.js?v=msgLive2";
 import { openListingMessage } from "./start-listing-message.js?v=msgLive2";
 import { getParkplatz, addParkplatzItem, removeParkplatzItem } from "./fok-data.js?v=parkThumb1";
@@ -393,10 +393,13 @@ async function loadRelatedListings(listingId, view) {
   }
 }
 
-function render(view, listing, related) {
-  const images = view.images?.length ? view.images : [];
+function render(view, listing, related = []) {
+  const images = Array.isArray(view.images) ? view.images : [];
   const first = images[0] || "";
   const equipmentGroups = Array.isArray(view.equipmentGroups) ? view.equipmentGroups : [];
+  const addressLines = Array.isArray(view.addressLines) ? view.addressLines : [];
+  const perks = Array.isArray(view.perks) ? view.perks : [];
+  const relatedItems = Array.isArray(related) ? related : [];
   const own = isOwnListing(view, listing);
   const canMsg = !own;
   const user = getAuthUser();
@@ -548,7 +551,7 @@ function render(view, listing, related) {
               </a>`
             : ""
         }
-        ${view.addressLines.length ? `<p class="hd-seller-addr">${view.addressLines.map(escapeHtml).join("<br>")}</p>` : ""}
+        ${addressLines.length ? `<p class="hd-seller-addr">${addressLines.map(escapeHtml).join("<br>")}</p>` : ""}
         ${
           canMsg
             ? `<button type="button" class="hd-btn hd-btn--primary" data-hd-message>${ICON.mail} Üzenet küldése</button>`
@@ -577,8 +580,8 @@ function render(view, listing, related) {
             : ""
         }
         ${
-          !own && related.length
-            ? `<button type="button" class="hd-btn hd-btn--soft" data-hd-related-link>Kereskedés többi hirdetései ${related.length + 1}</button>`
+          !own && relatedItems.length
+            ? `<button type="button" class="hd-btn hd-btn--soft" data-hd-related-link>Kereskedés többi hirdetései ${relatedItems.length + 1}</button>`
             : !own
               ? `<button type="button" class="hd-btn hd-btn--soft" data-hd-related-link>Kereskedés többi hirdetései …</button>`
               : ""
@@ -606,8 +609,8 @@ function render(view, listing, related) {
       ${specBlockHtml("Okmányok", view.documentSpecs)}
       ${specBlockHtml("Abroncs", view.tireSpecs)}
       ${
-        view.perks.length
-          ? `<section class="hd-spec-block hd-spec-block--perks"><h2 class="hd-spec-block__title">További előnyök</h2>${view.perks.map((p) => `<span class="hd-check">${escapeHtml(p)}</span>`).join("")}</section>`
+        perks.length
+          ? `<section class="hd-spec-block hd-spec-block--perks"><h2 class="hd-spec-block__title">További előnyök</h2>${perks.map((p) => `<span class="hd-check">${escapeHtml(p)}</span>`).join("")}</section>`
           : ""
       }
     </div>
@@ -625,12 +628,12 @@ function render(view, listing, related) {
     </section>
 
     ${
-      !own && related.length
+      !own && relatedItems.length
         ? `<section class="hd-section" id="hd-related" hidden>
         <div class="hd-related-head">
           <h2 class="hd-h2">Kereskedés többi hirdetései</h2>
         </div>
-        <div class="hd-related">${related.map(relatedCard).join("")}</div>
+        <div class="hd-related">${relatedItems.map(relatedCard).join("")}</div>
       </section>`
         : ""
     }
@@ -646,7 +649,7 @@ function render(view, listing, related) {
               </a>`
             : ""
         }
-        ${view.addressLines.length ? `<p class="hd-seller-addr">${view.addressLines.map(escapeHtml).join("<br>")}</p>` : ""}
+        ${addressLines.length ? `<p class="hd-seller-addr">${addressLines.map(escapeHtml).join("<br>")}</p>` : ""}
         <p class="hd-seller-addr">Hivatkozási szám: ${escapeHtml(view.code || String(view.id))}</p>
         ${view.website ? `<p><a class="hd-web" href="${escapeHtml(view.website)}" target="_blank" rel="noopener">Weboldal</a></p>` : ""}
         ${

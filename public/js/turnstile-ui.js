@@ -99,10 +99,12 @@ export async function mountTurnstile(container, { theme = "light", size = "norma
     await loadScript();
     await waitForTurnstileApi();
 
+    // Cloudflare: size csak compact | flexible | normal (nincs "invisible").
+    const renderSize = invisible ? "normal" : size === "invisible" ? "normal" : size;
     widgetId = window.turnstile.render(container, {
       sitekey: config.siteKey,
       theme,
-      size,
+      size: renderSize,
       appearance: invisible ? "execute" : appearance,
       language: "hu",
       callback: (value) => {

@@ -1,5 +1,5 @@
 import { safeInternalPath } from "./safe-path.js?v=sec1";
-import { mountTurnstile } from "./turnstile-ui.js?v=turnstile10";
+import { mountTurnstile } from "./turnstile-ui.js?v=turnstile11";
 
 function migrateLegacyAutoswebStorage() {
   try {
@@ -644,9 +644,27 @@ function isAuthGatePage() {
   );
 }
 
+/** Egyezzen a szerver / middleware PUBLIC_HTML listájával (lib/site-gate.mjs). */
 function isPublicClientPage() {
   const path = window.location.pathname;
-  return path === "/partner-profil.html" || /^\/partner\/[a-z0-9-]+\/?$/.test(path);
+  if (
+    path === "/" ||
+    path === "/index.html" ||
+    path === "/auto.html" ||
+    path === "/teherauto.html" ||
+    path === "/ingatlan.html" ||
+    path === "/hirdetes.html" ||
+    path === "/listings.html" ||
+    path === "/kereses.html" ||
+    path === "/partners.html" ||
+    path === "/ajanlasok.html" ||
+    path === "/adasveteli-szerzodes.html" ||
+    path === "/partner-profil.html" ||
+    path === "/Bocsatech.html"
+  ) {
+    return true;
+  }
+  return /^\/partner\/[a-z0-9-]+\/?$/.test(path);
 }
 
 async function enforceClientMembersGate() {

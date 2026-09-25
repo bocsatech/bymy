@@ -2,6 +2,10 @@
 
 import { fetchSellerContact, revealListingContact, fetchSellerRating, submitSellerRating } from "./db-client.js?v=sellerInv15";
 import { mountTurnstile } from "./turnstile-ui.js?v=turnstile10";
+import { getAuthUser } from "./site-auth.js?v=authMembersOnly1";
+import { openListingMessage, canMessageListing } from "./start-listing-message.js?v=msgLive3";
+import { getParkplatz, addParkplatzItem, removeParkplatzItem } from "./fok-data.js?v=parkThumb1";
+import { listingDetailHref } from "./listing-return.js?v=searchNav1";
 
 function esc(value) {
   return String(value ?? "")
@@ -19,7 +23,7 @@ function injectStylesheet() {
   if (document.querySelector('link[data-seller-inv-css]')) return;
   const link = document.createElement("link");
   link.rel = "stylesheet";
-  link.href = "/css/seller-inventory.css?v=sellerInv27";
+  link.href = "/css/seller-inventory.css?v=sellerInv28";
   link.dataset.sellerInvCss = "1";
   document.head.appendChild(link);
 }
@@ -67,25 +71,25 @@ async function copyText(text) {
   }
 }
 
-function staffHtml(staff = []) {
-  if (!staff.length) return `<p class="seller-inv__hint">Nincs megadott munkatárs.</p>`;
-  return `<ul class="seller-inv__staff">${staff
-    .map((person) => {
-      const name = String(person?.name || "").trim();
-      if (!name) return "";
-      const photo = String(person?.photoUrl || "").trim();
-      const letter = name.charAt(0).toUpperCase();
-      const avatar = photo
-        ? `<img class="seller-inv__staff-photo" src="${esc(photo)}" alt="" width="48" height="48" loading="lazy" />`
-        : `<span class="seller-inv__staff-letter" aria-hidden="true">${esc(letter)}</span>`;
-      return `<li class="seller-inv__staff-item">
-        <div class="seller-inv__staff-avatar">${avatar}</div>
-        <span class="seller-inv__staff-name">${esc(name)}</span>
-      </li>`;
-    })
-    .filter(Boolean)
-    .join("")}</ul>`;
-}
+const ICON = {
+  share: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M16 8a3 3 0 1 0-2.8-4M8 12a3 3 0 1 0 0 0.01M16 20a3 3 0 1 0-2.8-4M8.7 13.2l6.6 3.6M15.3 7.2l-6.6 3.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>`,
+  facebook: `<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M14.5 8.5h2.2V5.2H14.3c-2.6 0-4.3 1.6-4.3 4.4v1.9H7.8v3.4h2.2V22h3.5v-7.1h2.5l.5-3.4h-3V9.8c0-1 .3-1.3 1.2-1.3Z"/></svg>`,
+  print: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 8V5h10v3M6 14h12v5H6v-5Z" stroke="currentColor" stroke-width="1.6"/><path d="M4.8 9h14.4A1.7 1.7 0 0 1 21 10.7v4.2h-3M3 14.9V10.7A1.7 1.7 0 0 1 4.8 9" stroke="currentColor" stroke-width="1.6"/></svg>`,
+  mail: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16v10H4V7Z" stroke="currentColor" stroke-width="1.6"/><path d="m4 7 8 6 8-6" stroke="currentColor" stroke-width="1.6"/></svg>`,
+  phone: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6.5 4.8h3.2l1.1 3.2-1.8 1.1a12 12 0 0 0 6 6l1.1-1.8 3.2 1.1v3.2A2 2 0 0 1 17.3 20 15 15 0 0 1 4 6.7 2 2 0 0 1 6.5 4.8Z" stroke="currentColor" stroke-width="1.6"/></svg>`,
+  heart: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 20s-7-4.4-7-9.2A3.8 3.8 0 0 1 12 7.2a3.8 3.8 0 0 1 7 3.6C19 15.6 12 20 12 20Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>`,
+  pin: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 21s6-5.2 6-10a6 6 0 1 0-12 0c0 4.8 6 10 6 10Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="12" cy="11" r="2.2" stroke="currentColor" stroke-width="1.6"/></svg>`,
+};
+
+const SELLER_AVATAR_PLACEHOLDER =
+  "data:image/svg+xml," +
+  encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">` +
+      `<circle cx="24" cy="24" r="24" fill="#e4eaf4"/>` +
+      `<circle cx="24" cy="17.5" r="7.5" fill="#8e9aaf"/>` +
+      `<path fill="#8e9aaf" d="M7.2 42.8C9.2 33.8 15.2 29.5 24 29.5s14.8 4.3 16.8 13.3C36.2 45.6 30.4 47.5 24 47.5S11.8 45.6 7.2 42.8z"/>` +
+      `</svg>`
+  );
 
 function starsHtml(average, { interactive = false, selected = 0 } = {}) {
   const avg = average != null && Number.isFinite(Number(average)) ? Number(average) : null;
@@ -103,43 +107,51 @@ function starsHtml(average, { interactive = false, selected = 0 } = {}) {
   }">${buttons}</div>`;
 }
 
-function statusPanelHtml(rating, activeCount) {
-  const count = Number(activeCount) || 0;
-  const avg = rating?.average;
-  const ratingCount = Number(rating?.count) || 0;
-  const myScore = rating?.myScore != null ? Number(rating.myScore) : null;
-  const avgLabel =
-    avg != null
-      ? `<span class="seller-inv__rating-avg">${esc(String(avg))}/10</span> <span class="seller-inv__rating-n">(${ratingCount})</span>`
-      : `<span class="seller-inv__rating-n">Még nincs értékelés</span>`;
+function ratingSummaryHtml(rating) {
+  const avg = rating?.average != null ? Number(rating.average) : null;
+  const count = Number(rating?.count) || 0;
+  if (avg == null || count <= 0) {
+    return `<p class="seller-inv__rating-summary seller-inv__rating-summary--empty">Még nincs értékelés</p>`;
+  }
+  const filled = Math.max(0, Math.min(5, Math.round((avg / 10) * 5)));
+  const stars = Array.from({ length: 5 }, (_, i) =>
+    i < filled
+      ? `<span class="seller-inv__star-sm is-on" aria-hidden="true">★</span>`
+      : `<span class="seller-inv__star-sm" aria-hidden="true">☆</span>`
+  ).join("");
+  const avgLabel = Number.isFinite(avg) ? String(avg).replace(".", ",") : String(avg);
+  return `<p class="seller-inv__rating-summary" title="${esc(avgLabel)} / 10">
+    <span class="seller-inv__stars-sm" role="img" aria-label="Értékelés ${esc(avgLabel)} / 10">${stars}</span>
+    <strong>${esc(avgLabel)}</strong>
+    <span class="seller-inv__rating-scale">/ 10</span>
+    <span class="seller-inv__rating-n">(${count})</span>
+  </p>`;
+}
 
-  let rateBlock = "";
+function ratingBlockHtml(rating) {
+  const myScore = rating?.myScore != null ? Number(rating.myScore) : null;
+  let rateExtra = "";
   if (myScore != null) {
-    rateBlock = `<p class="seller-inv__hint">Te értékelésed: <strong>${esc(String(myScore))}/10</strong></p>`;
+    rateExtra = `<p class="seller-inv__hint">Te értékelésed: <strong>${esc(String(myScore))} / 10</strong></p>`;
   } else if (rating?.canRate) {
-    rateBlock = `
-      <p class="seller-inv__rate-label">Értékeld (1–10):</p>
-      ${starsHtml(null, { interactive: true, selected: 0 })}
-      <button type="button" class="seller-inv__btn seller-inv__btn--yellow seller-inv__rate-save" data-si-rate-save disabled>Mentés</button>
-      <p class="seller-inv__hint" data-si-rate-msg hidden></p>
-    `;
+    rateExtra = `
+      <div class="seller-inv__rate" data-si-rate-wrap>
+        <p class="seller-inv__rate-label">Értékeld (1–10):</p>
+        ${starsHtml(null, { interactive: true, selected: 0 })}
+        <button type="button" class="seller-inv__btn seller-inv__btn--soft seller-inv__rate-save" data-si-rate-save disabled>Mentés</button>
+        <p class="seller-inv__hint" data-si-rate-msg hidden></p>
+      </div>`;
   } else if (!rating?.loggedIn) {
     const next = encodeURIComponent(window.location.pathname + window.location.search);
-    rateBlock = `<p class="seller-inv__hint"><a href="/belepes.html?next=${next}">Jelentkezz be</a> az értékeléshez.</p>`;
+    rateExtra = `<p class="seller-inv__hint"><a href="/belepes.html?next=${next}">Jelentkezz be</a> az értékeléshez.</p>`;
   } else {
-    rateBlock = `<p class="seller-inv__hint">Saját magadat nem értékelheted.</p>`;
+    rateExtra = `<p class="seller-inv__hint">Saját magadat nem értékelheted.</p>`;
   }
 
-  return `
-    <p class="seller-inv__label">Állapot</p>
-    <div class="seller-inv__status"><span class="seller-inv__dot" aria-hidden="true"></span> Aktív kereskedő</div>
-    <p class="seller-inv__stat-line">Aktív hirdetések: <strong data-si-active-count>${esc(String(count))}</strong></p>
-    <div class="seller-inv__rating" data-si-rating>
-      <p class="seller-inv__stat-line">Értékelés: ${avgLabel}</p>
-      ${starsHtml(avg)}
-      <div class="seller-inv__rate" data-si-rate-wrap>${rateBlock}</div>
-    </div>
-  `;
+  return `<div class="seller-inv__rating" data-si-rating>
+    ${ratingSummaryHtml(rating)}
+    ${rateExtra}
+  </div>`;
 }
 
 function bindSellerRating(panel, fromId) {
@@ -188,8 +200,8 @@ function bindSellerRating(panel, fromId) {
     });
     try {
       const rating = await submitSellerRating(fromId, selected);
-      const active = Number(document.querySelector("[data-si-active-count]")?.textContent) || 0;
-      panel.innerHTML = statusPanelHtml(rating, active);
+      const slot = panel.querySelector("[data-si-rating]") || panel;
+      slot.outerHTML = ratingBlockHtml(rating);
       bindSellerRating(panel, fromId);
     } catch (err) {
       if (msg) {
@@ -204,15 +216,13 @@ function bindSellerRating(panel, fromId) {
   });
 }
 
-const PHONE_ICON = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6.5 4.8h3.2l1.1 3.2-1.8 1.1a12 12 0 0 0 6 6l1.1-1.8 3.2 1.1v3.2A2 2 0 0 1 17.3 20 15 15 0 0 1 4 6.7 2 2 0 0 1 6.5 4.8Z" stroke="currentColor" stroke-width="1.6"/></svg>`;
-
 function maskedPhonesHtml(masked = [], hasPhone = false) {
   const list = (masked || []).map((p) => String(p || "").trim()).filter(Boolean);
   if (!list.length && !hasPhone) return `<p class="seller-inv__hint">Nincs telefonszám.</p>`;
   const label = list[0] || "Telefonszám";
   return `
-    <button type="button" class="seller-inv__btn seller-inv__btn--yellow seller-inv__phone-reveal" data-si-phone-reveal>
-      ${PHONE_ICON}
+    <button type="button" class="seller-inv__btn seller-inv__btn--soft seller-inv__phone-reveal" data-si-phone-reveal>
+      ${ICON.phone}
       <span>${esc(label)} mutatása</span>
     </button>
     <div class="seller-inv__turnstile" data-si-turnstile hidden></div>
@@ -241,7 +251,7 @@ function fullPhonesHtml(phones = []) {
   return `
     ${
       href
-        ? `<a class="seller-inv__btn seller-inv__btn--yellow seller-inv__phone-reveal" href="${esc(href)}">${PHONE_ICON}<span>Hívás · ${esc(first)}</span></a>`
+        ? `<a class="seller-inv__btn seller-inv__btn--soft seller-inv__phone-reveal" href="${esc(href)}">${ICON.phone}<span>Hívás · ${esc(first)}</span></a>`
         : `<p class="seller-inv__phones"><span>${esc(first)}</span></p>`
     }
     ${more}
@@ -260,30 +270,61 @@ function navHref(mapQuery) {
   return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(q)}`;
 }
 
-function contactPanelHtml(contact) {
+function displayName(contact) {
   const staff = Array.isArray(contact?.staff) ? contact.staff : [];
-  const masked = Array.isArray(contact?.phonesMasked) ? contact.phonesMasked : [];
-  const hasPhone = Boolean(contact?.hasPhone) || masked.length > 0;
+  const first = String(staff[0]?.name || "").trim();
+  return first || String(contact?.sellerName || "").trim() || "Hirdető";
+}
+
+function sellerMenuHtml(contact, rating, count, fromId) {
+  const name = displayName(contact);
+  const avatar = String(contact?.sellerAvatarUrl || "").trim() || SELLER_AVATAR_PLACEHOLDER;
   const lines = Array.isArray(contact?.addressLines) ? contact.addressLines : [];
   const nav = navHref(contact?.mapQuery || lines.join(", "));
-  const addr = addressHtml(lines);
-  const right =
-    addr || nav
-      ? `<div class="seller-inv__contact-right">
-          ${addr || ""}
-          ${
-            nav
-              ? `<a class="seller-inv__btn seller-inv__btn--yellow seller-inv__nav" href="${esc(nav)}" target="_blank" rel="noopener noreferrer">Navigáció</a>`
-              : ""
-          }
-        </div>`
-      : "";
+  const masked = Array.isArray(contact?.phonesMasked) ? contact.phonesMasked : [];
+  const hasPhone = Boolean(contact?.hasPhone) || masked.length > 0;
+  const n = Number(count) || 0;
+  const sellerId = Number(contact?.sellerId || contact?.ownerId || 0);
+  const canMsg = canMessageListing(sellerId > 0 ? sellerId : undefined, { listingId: fromId });
+
   return `
-    <div class="seller-inv__contact">
-      <div class="seller-inv__contact-identity">${staffHtml(staff)}</div>
-      ${right}
-      <div class="seller-inv__phone-wrap" data-si-phone-col>
-        ${maskedPhonesHtml(masked, hasPhone)}
+    <div class="seller-inv__menu-grid">
+      <div class="seller-inv__menu-identity">
+        <div class="seller-inv__menu-card">
+          <span class="seller-inv__menu-avatar" aria-hidden="true">
+            <img src="${esc(avatar)}" alt="" width="48" height="48" decoding="async" />
+          </span>
+          <div class="seller-inv__menu-meta">
+            <p class="seller-inv__menu-name">${esc(name)}</p>
+            ${ratingBlockHtml(rating)}
+          </div>
+        </div>
+        ${addressHtml(lines)}
+      </div>
+      <div class="seller-inv__menu-actions">
+        ${
+          canMsg
+            ? `<button type="button" class="seller-inv__btn seller-inv__btn--yellow" data-si-message>${ICON.mail} Üzenet küldése</button>`
+            : ""
+        }
+        <div class="seller-inv__menu-icons">
+          <button type="button" class="seller-inv__btn seller-inv__btn--icon" data-si-fav aria-label="Kedvencekhez adás" aria-pressed="false" title="Kedvenc">${ICON.heart}</button>
+          <button type="button" class="seller-inv__btn seller-inv__btn--icon" data-si-share aria-label="Megosztás" title="Megosztás">${ICON.share}</button>
+          <button type="button" class="seller-inv__btn seller-inv__btn--icon seller-inv__btn--fb" data-si-share-fb aria-label="Megosztás Facebookon" title="Facebook">${ICON.facebook}</button>
+          <button type="button" class="seller-inv__btn seller-inv__btn--icon" data-si-print aria-label="Nyomtatás" title="Nyomtatás">${ICON.print}</button>
+        </div>
+        <div class="seller-inv__phone-wrap" data-si-phone-col>
+          ${maskedPhonesHtml(masked, hasPhone)}
+        </div>
+        ${
+          nav
+            ? `<a class="seller-inv__btn seller-inv__btn--soft" href="${esc(nav)}" target="_blank" rel="noopener noreferrer">${ICON.pin} Navigáció</a>`
+            : ""
+        }
+        <button type="button" class="seller-inv__btn seller-inv__btn--soft" data-si-related>
+          Kereskedés többi hirdetései <span data-si-active-count>${esc(String(n))}</span>
+        </button>
+        <a class="seller-inv__btn seller-inv__btn--soft" href="/adasveteli-szerzodes.html?id=${encodeURIComponent(fromId)}">Adásvételi szerződés</a>
       </div>
     </div>
   `;
@@ -330,6 +371,84 @@ function bindPhoneReveal(host, fromId) {
       turnstileApi?.reset?.();
     }
   });
+}
+
+function bindMenuActions(host, { fromId, contact, label }) {
+  const url = pageShareUrl();
+  const shareText = "Oszd meg barátaiddal a kereskedésünk autóit.";
+
+  host.querySelector("[data-si-share]")?.addEventListener("click", async () => {
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: label, url, text: shareText });
+        return;
+      }
+    } catch {
+      /* fall through */
+    }
+    const ok = await copyText(url);
+    const btn = host.querySelector("[data-si-share]");
+    if (btn && ok) {
+      btn.title = "Link másolva";
+      setTimeout(() => {
+        btn.title = "Megosztás";
+      }, 1600);
+    }
+  });
+
+  host.querySelector("[data-si-share-fb]")?.addEventListener("click", () => {
+    const href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+    window.open(href, "_blank", "noopener,noreferrer,width=640,height=720");
+  });
+
+  host.querySelector("[data-si-print]")?.addEventListener("click", () => window.print());
+
+  host.querySelector("[data-si-related]")?.addEventListener("click", () => {
+    host.querySelector(".seller-inv__title")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+
+  host.querySelector("[data-si-message]")?.addEventListener("click", async () => {
+    try {
+      await openListingMessage({
+        listingId: fromId,
+        title: label,
+        sellerId: contact?.sellerId || contact?.ownerId,
+        sellerName: label,
+      });
+    } catch (err) {
+      window.alert(err?.message || "Az üzenet most nem indítható.");
+    }
+  });
+
+  const fav = host.querySelector("[data-si-fav]");
+  const email = getAuthUser()?.email;
+  if (fav && email) {
+    const sync = (on) => {
+      fav.classList.toggle("is-on", on);
+      fav.setAttribute("aria-pressed", on ? "true" : "false");
+    };
+    sync(getParkplatz(email).some((row) => String(row.id) === String(fromId)));
+    fav.addEventListener("click", () => {
+      const on = fav.classList.contains("is-on");
+      if (on) {
+        removeParkplatzItem(email, fromId);
+        sync(false);
+      } else {
+        addParkplatzItem(email, {
+          id: fromId,
+          title: label,
+          price: "",
+          url: listingDetailHref(fromId),
+          imageUrl: String(contact?.sellerAvatarUrl || "").trim(),
+        });
+        sync(true);
+      }
+    });
+  } else if (fav) {
+    fav.addEventListener("click", () => {
+      window.location.href = `/belepes.html?next=${encodeURIComponent(location.pathname + location.search)}`;
+    });
+  }
 }
 
 function buildMapQuery(contact) {
@@ -445,7 +564,6 @@ async function fillSellerMap(panel, contact) {
  * @param {{ fromId: string, count?: number }} opts
  */
 export async function mountSellerInventory({ fromId, count = 0 } = {}) {
-  if (!fromId) return;
   injectStylesheet();
   document.body.classList.add("seller-inventory-mode");
 
@@ -455,25 +573,8 @@ export async function mountSellerInventory({ fromId, count = 0 } = {}) {
   host.innerHTML = `
     <a class="seller-inv__back" href="${esc(backHref)}">← Vissza a hirdetéshez</a>
     <div class="seller-inv__top">
-      <div class="seller-inv__top-main">
-        <div class="seller-inv__panel seller-inv__share">
-          <div class="seller-inv__share-main">
-            <div class="seller-inv__share-logo" data-si-share-logo hidden></div>
-            <p class="seller-inv__share-text">Oszd meg barátaiddal a kereskedésünk autóit.</p>
-          </div>
-          <div class="seller-inv__share-actions">
-            <button type="button" class="seller-inv__btn seller-inv__btn--yellow" data-si-share>Megosztás</button>
-          </div>
-        </div>
-        <div class="seller-inv__duo">
-          <div class="seller-inv__panel" data-si-contact-panel>
-            <p class="seller-inv__hint">Kapcsolat betöltése…</p>
-          </div>
-          <div class="seller-inv__panel" data-si-status-panel>
-            <p class="seller-inv__label">Állapot</p>
-            <p class="seller-inv__hint">Betöltés…</p>
-          </div>
-        </div>
+      <div class="seller-inv__panel seller-inv__menu" data-si-menu>
+        <p class="seller-inv__hint">Kapcsolat betöltése…</p>
       </div>
       <div class="seller-inv__panel seller-inv__map-panel" data-si-map-panel>
         <p class="seller-inv__hint">Térkép betöltése…</p>
@@ -494,59 +595,22 @@ export async function mountSellerInventory({ fromId, count = 0 } = {}) {
     rating = null;
   }
 
-  const contactPanel = host.querySelector("[data-si-contact-panel]");
-  if (contactPanel) {
-    contactPanel.innerHTML = contact
-      ? contactPanelHtml(contact)
-      : `<p class="seller-inv__hint">Nincs megjeleníthető kapcsolat.</p>`;
-    if (contact) bindPhoneReveal(contactPanel, fromId);
-  }
+  const menu = host.querySelector("[data-si-menu]");
+  const label = displayName(contact);
 
-  const statusPanel = host.querySelector("[data-si-status-panel]");
-  if (statusPanel) {
-    statusPanel.innerHTML = statusPanelHtml(rating, count);
-    bindSellerRating(statusPanel, fromId);
+  if (menu) {
+    if (contact) {
+      menu.innerHTML = sellerMenuHtml(contact, rating, count, fromId);
+      bindSellerRating(menu, fromId);
+      bindPhoneReveal(menu, fromId);
+      bindMenuActions(host, { fromId, contact, label });
+    } else {
+      menu.innerHTML = `<p class="seller-inv__hint">Nincs megjeleníthető kapcsolat.</p>`;
+    }
   }
 
   const mapPanel = host.querySelector("[data-si-map-panel]");
   await fillSellerMap(mapPanel, contact);
-
-  const label = String(contact?.sellerName || "").trim() || "Hirdető";
-  const logoWrap = host.querySelector("[data-si-share-logo]");
-  const logoUrl = String(contact?.sellerAvatarUrl || "").trim();
-  if (logoWrap) {
-    if (logoUrl) {
-      logoWrap.hidden = false;
-      logoWrap.innerHTML = `<img src="${esc(logoUrl)}" alt="" width="48" height="48" decoding="async" />`;
-    } else {
-      const letter = label.charAt(0).toUpperCase() || "?";
-      logoWrap.hidden = false;
-      logoWrap.innerHTML = `<span class="seller-inv__staff-letter" aria-hidden="true">${esc(letter)}</span>`;
-    }
-  }
-
-  const url = pageShareUrl();
-  const shareText = "Oszd meg barátaiddal a kereskedésünk autóit.";
-
-  host.querySelector("[data-si-share]")?.addEventListener("click", async () => {
-    try {
-      if (navigator.share) {
-        await navigator.share({ title: label, url, text: shareText });
-        return;
-      }
-    } catch {
-      /* fall through */
-    }
-    const ok = await copyText(url);
-    const btn = host.querySelector("[data-si-share]");
-    if (btn && ok) {
-      const prev = btn.textContent;
-      btn.textContent = "Link másolva";
-      setTimeout(() => {
-        btn.textContent = prev;
-      }, 1600);
-    }
-  });
 }
 
 export function updateSellerInventoryCount(count) {

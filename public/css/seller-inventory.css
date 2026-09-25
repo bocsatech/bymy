@@ -245,8 +245,16 @@ body.seller-inventory-mode .home-grid-track {
     gap: 0.65rem;
   }
 
-  .seller-inv__top-main {
-    gap: 0.65rem;
+  .seller-inv__menu {
+    min-height: 0;
+    height: auto;
+    padding: 0.9rem 0.9rem 1rem;
+  }
+
+  .seller-inv__menu-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+    height: auto;
   }
 
   .seller-inv__map-panel {
@@ -265,84 +273,14 @@ body.seller-inventory-mode .home-grid-track {
     font-size: 0.82rem;
   }
 
-  .seller-inv__share {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.65rem;
-    margin-bottom: 0.65rem;
-    min-height: 0;
-    padding: 0.85rem 0.9rem;
-  }
-
-  .seller-inv__share-main {
-    flex: 1 1 auto;
-    width: 100%;
-  }
-
-  .seller-inv__share-text {
-    font-size: 0.9rem;
-  }
-
-  .seller-inv__share-actions {
-    width: 100%;
-  }
-
-  .seller-inv__share-actions .seller-inv__btn {
-    width: 100%;
-    min-height: 44px;
-  }
-
-  .seller-inv__duo {
-    grid-template-columns: 1fr;
-    max-width: none;
-    gap: 0.65rem;
-    margin-bottom: 0.25rem;
-  }
-
   .seller-inv__panel {
     padding: 0.9rem 0.9rem 1rem;
     border-radius: 12px;
   }
 
-  .seller-inv__contact {
-    grid-template-columns: 1fr;
-    grid-template-areas:
-      "identity"
-      "right"
-      "phone";
-    row-gap: 0.65rem;
-    column-gap: 0;
-  }
-
-  .seller-inv__contact-right {
-    align-items: flex-start;
-    text-align: left;
-    max-width: none;
-    width: 100%;
-  }
-
-  .seller-inv__contact-right .seller-inv__address {
-    text-align: left;
-  }
-
-  .seller-inv__phone-wrap {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 0.45rem;
-  }
-
-  .seller-inv__phone-reveal,
-  .seller-inv__nav {
-    width: 100%;
-    justify-content: center;
+  .seller-inv__menu-actions > .seller-inv__btn,
+  .seller-inv__menu .seller-inv__phone-reveal {
     min-height: 44px;
-    white-space: normal;
-    text-align: center;
-  }
-
-  .seller-inv__contact-right .seller-inv__nav {
-    width: 100%;
   }
 
   .seller-inv__title {
@@ -379,35 +317,184 @@ body.seller-inventory-mode .home-grid-track {
 
 .seller-inv__top {
   display: grid;
-  grid-template-columns: minmax(0, 52rem) minmax(14rem, 1fr);
+  grid-template-columns: minmax(0, 1.2fr) minmax(16rem, 0.9fr);
   gap: 0.85rem;
   align-items: stretch;
   margin-bottom: 0.35rem;
   width: 100%;
 }
 
-.seller-inv__top-main {
+.seller-inv__menu {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  min-height: 280px;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 0.95rem 1rem 1rem;
+}
+
+.seller-inv__menu-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.15fr);
+  gap: 0.85rem 1.15rem;
+  align-items: stretch;
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+}
+
+.seller-inv__menu-identity {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
   min-width: 0;
 }
 
-.seller-inv__duo {
-  display: grid;
-  grid-template-columns: minmax(0, 32rem) minmax(0, 1fr);
-  gap: 0.85rem;
-  margin-bottom: 0;
+.seller-inv__menu-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+}
+
+.seller-inv__menu-avatar {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: block;
+  background: #e4eaf4;
+}
+
+.seller-inv__menu-avatar img {
+  display: block;
   width: 100%;
-  max-width: none;
+  height: 100%;
+  object-fit: cover;
+}
+
+.seller-inv__menu-meta {
+  min-width: 0;
   flex: 1 1 auto;
 }
 
-.seller-inv__share {
+.seller-inv__menu-name {
+  margin: 0;
+  font-size: 1.02rem;
+  font-weight: 800;
+  color: var(--si-text);
+  line-height: 1.25;
+}
+
+.seller-inv__menu-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 0;
+  justify-content: space-between;
+}
+
+.seller-inv__menu-actions > .seller-inv__btn {
   width: 100%;
-  max-width: none;
-  box-sizing: border-box;
-  margin-bottom: 0;
+  min-height: 42px;
+}
+
+.seller-inv__menu-icons {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.4rem;
+}
+
+.seller-inv__btn--soft {
+  background: var(--si-panel);
+  color: var(--si-text);
+  border-color: var(--si-line);
+}
+
+.seller-inv__btn--soft:hover {
+  background: #f7f7f7;
+}
+
+html[data-theme="dark"] .seller-inv__btn--soft:hover {
+  background: #2a2a2a;
+}
+
+.seller-inv__btn--icon {
+  min-height: 42px;
+  padding: 0;
+  font-size: 0;
+  gap: 0;
+}
+
+.seller-inv__btn--icon svg {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+}
+
+.seller-inv__btn--icon.is-on {
+  background: #fffbeb;
+  border-color: var(--si-yellow);
+  color: #a16207;
+}
+
+.seller-inv__btn--fb {
+  color: #1877f2;
+}
+
+.seller-inv__rating-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem 0.4rem;
+  margin: 0.3rem 0 0;
+  font-size: 0.88rem;
+  font-weight: 650;
+  color: var(--si-text);
+  line-height: 1.25;
+}
+
+.seller-inv__rating-summary--empty {
+  color: var(--si-muted);
+  font-weight: 500;
+}
+
+.seller-inv__stars-sm {
+  display: inline-flex;
+  gap: 0.04rem;
+}
+
+.seller-inv__star-sm {
+  color: #d0d5dd;
+  font-size: 1.02rem;
+}
+
+.seller-inv__star-sm.is-on {
+  color: #f5a524;
+}
+
+.seller-inv__rating-scale {
+  color: var(--si-muted);
+  font-weight: 600;
+}
+
+.seller-inv__menu .seller-inv__address {
+  margin: 0;
+  font-size: 0.88rem;
+  font-weight: 650;
+  line-height: 1.4;
+}
+
+.seller-inv__menu .seller-inv__phone-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  width: 100%;
+}
+
+.seller-inv__menu .seller-inv__phone-reveal {
+  width: 100%;
+  white-space: normal;
 }
 
 .seller-inv__map-panel {
@@ -899,13 +986,17 @@ button.seller-inv__star:focus-visible {
 
 @media (max-width: 1100px) and (min-width: 901px) {
   .seller-inv__top {
-    grid-template-columns: minmax(0, 1fr) minmax(12rem, 0.85fr);
+    grid-template-columns: minmax(0, 1fr) minmax(14rem, 0.85fr);
+  }
+
+  .seller-inv__menu-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 0.75rem 0.9rem;
   }
 }
 
 @media (max-width: 720px) {
-  .seller-inv__duo {
+  .seller-inv__menu-grid {
     grid-template-columns: 1fr;
-    max-width: none;
   }
 }

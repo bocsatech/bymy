@@ -6,10 +6,10 @@ import {
   recordListingView,
   deleteListingFromDb,
 } from "./db-client.js?v=secReveal1";
-import { getAuthUser, getDisplayName, getProfile } from "./site-auth.js?v=authPublicGate1";
+import { getAuthUser, getDisplayName, getProfile } from "./site-auth.js?v=authPublicGate2";
 import { mountTurnstile } from "./turnstile-ui.js?v=turnstile11";
 import { startConversation } from "./messages-api.js?v=msgLive2";
-import { openListingMessage } from "./start-listing-message.js?v=msgLive2";
+import { openListingMessage } from "./start-listing-message.js?v=msgLive3";
 import { getParkplatz, addParkplatzItem, removeParkplatzItem } from "./fok-data.js?v=parkThumb1";
 import { listingReturnHref, listingDetailHref, rememberListingOpen, getListingSearchNav, touchListingReturnId } from "./listing-return.js?v=searchNav1";
 

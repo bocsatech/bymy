@@ -507,7 +507,6 @@ function render(view, listing, related) {
           <div class="hd-seller-meta">
             <p class="hd-seller-name">${escapeHtml(view.sellerName)}</p>
             ${view.sellerSince ? `<p class="hd-seller-since">Felhasználó ezóta: ${escapeHtml(view.sellerSince)}</p>` : ""}
-            <span class="hd-seller-pill">Átvétel egyeztethető</span>
           </div>
         </div>
         ${

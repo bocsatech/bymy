@@ -248,7 +248,7 @@ function applyRelated(view, related) {
   }
   const items = Array.isArray(related) ? related : [];
   const total = items.length + 1;
-  const label = `Több ettől a hirdetőtől ${total}`;
+  const label = `Kereskedés többi hirdetései ${total}`;
   const aside = root.querySelector(".hd-side") || root.querySelector("aside");
   let link =
     aside?.querySelector("[data-hd-related-link]") ||
@@ -286,7 +286,7 @@ function applyRelated(view, related) {
   section.hidden = !wasOpen;
   section.innerHTML = `
     <div class="hd-related-head">
-      <h2 class="hd-h2">Több ettől a hirdetőtől</h2>
+      <h2 class="hd-h2">Kereskedés többi hirdetései</h2>
     </div>
     <div class="hd-related">${items.map(relatedCard).join("")}</div>
   `;
@@ -489,7 +489,6 @@ function render(view, listing, related) {
           ${view.salePrice ? `<p class="hd-price-old">Korábbi ár: ${escapeHtml(view.salePrice)}</p>` : ""}
           <div class="hd-price-links">
             <span>Átvétel / szállítás egyeztethető</span>
-            <a href="/adasveteli-szerzodes.html?id=${encodeURIComponent(view.id)}">Adásvételi szerződés</a>
           </div>
         </div>
         <div class="hd-seller-card">
@@ -535,11 +534,12 @@ function render(view, listing, related) {
         </div>
         ${
           !own && related.length
-            ? `<button type="button" class="hd-btn hd-btn--soft" data-hd-related-link>Több ettől a hirdetőtől ${related.length + 1}</button>`
+            ? `<button type="button" class="hd-btn hd-btn--soft" data-hd-related-link>Kereskedés többi hirdetései ${related.length + 1}</button>`
             : !own
-              ? `<button type="button" class="hd-btn hd-btn--soft" data-hd-related-link>Több ettől a hirdetőtől …</button>`
+              ? `<button type="button" class="hd-btn hd-btn--soft" data-hd-related-link>Kereskedés többi hirdetései …</button>`
               : ""
         }
+        <a class="hd-btn hd-btn--soft" href="/adasveteli-szerzodes.html?id=${encodeURIComponent(view.id)}">Adásvételi szerződés</a>
         ${view.website ? `<a class="hd-web" href="${escapeHtml(view.website)}" target="_blank" rel="noopener">Céges weboldal</a>` : ""}
         ${
           own
@@ -584,7 +584,7 @@ function render(view, listing, related) {
       !own && related.length
         ? `<section class="hd-section" id="hd-related" hidden>
         <div class="hd-related-head">
-          <h2 class="hd-h2">Több ettől a hirdetőtől</h2>
+          <h2 class="hd-h2">Kereskedés többi hirdetései</h2>
         </div>
         <div class="hd-related">${related.map(relatedCard).join("")}</div>
       </section>`

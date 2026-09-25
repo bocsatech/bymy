@@ -470,13 +470,6 @@ function render(view, listing, related) {
               : ""
           }
           <span class="hd-count" data-hd-count>${images.length ? `1 / ${images.length}` : "0 / 0"}</span>
-          ${
-            images.length
-              ? `<div class="hd-stage-tools">
-                  <button type="button" class="hd-stage-tool" data-hd-open>${ICON.zoom} Nagyítás</button>
-                </div>`
-              : ""
-          }
         </div>
         <div class="hd-promo">${escapeHtml(promoText)}</div>
         ${

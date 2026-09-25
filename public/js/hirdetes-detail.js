@@ -529,11 +529,11 @@ function render(view, listing, related) {
           ${
             own
               ? ""
-              : `<button type="button" class="hd-btn hd-btn--outline" data-hd-star>${ICON.heart} Parkolás</button>`
+              : `<button type="button" class="hd-btn hd-btn--outline hd-btn--icon" data-hd-star aria-label="Kedvencekhez adás" aria-pressed="false" title="Kedvenc">${ICON.heart}</button>`
           }
-          <button type="button" class="hd-btn hd-btn--outline" data-hd-share>${ICON.share} Megosztás</button>
-          <button type="button" class="hd-btn hd-btn--outline hd-btn--fb" data-hd-share-fb>${ICON.facebook} Facebook</button>
-          <button type="button" class="hd-btn hd-btn--outline" data-hd-print>${ICON.print} Nyomtatás</button>
+          <button type="button" class="hd-btn hd-btn--outline hd-btn--icon" data-hd-share aria-label="Megosztás" title="Megosztás">${ICON.share}</button>
+          <button type="button" class="hd-btn hd-btn--outline hd-btn--icon hd-btn--fb" data-hd-share-fb aria-label="Megosztás Facebookon" title="Facebook">${ICON.facebook}</button>
+          <button type="button" class="hd-btn hd-btn--outline hd-btn--icon" data-hd-print aria-label="Nyomtatás" title="Nyomtatás">${ICON.print}</button>
         </div>
         ${
           view.hasPhone || view.phone
@@ -848,7 +848,14 @@ function bindUi(view, listing) {
   const star = root.querySelector("[data-hd-star]");
   const email = getAuthUser()?.email;
   const saved = email && getParkplatz(email).some((row) => String(row.id) === String(view.id));
-  if (star && saved) star.classList.add("is-on");
+  function syncFavButton(on) {
+    if (!star) return;
+    star.classList.toggle("is-on", on);
+    star.setAttribute("aria-pressed", on ? "true" : "false");
+    star.setAttribute("aria-label", on ? "Eltávolítás a kedvencekből" : "Kedvencekhez adás");
+    star.title = on ? "Kedvenc" : "Kedvencekhez adás";
+  }
+  if (star && saved) syncFavButton(true);
   star?.addEventListener("click", () => {
     if (root.dataset.ownListing === "1" || isOwnListing(view, listing)) {
       clearRelatedUi();
@@ -869,7 +876,7 @@ function bindUi(view, listing) {
         imageUrl: view.images?.[0] || "",
       });
     }
-    star.classList.toggle("is-on", !on);
+    syncFavButton(!on);
   });
 
   root.querySelectorAll("[data-hd-phone]").forEach((btn) => {

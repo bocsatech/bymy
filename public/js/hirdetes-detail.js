@@ -378,7 +378,8 @@ function equipmentGroupsHtml(groups) {
         .join("");
       const moreBtn =
         items.length > PREVIEW
-          ? `<button type="button" class="hd-more hd-extra-more-btn" data-hd-extra-more>Több megjelenítése +</button>`
+          ? `<button type="button" class="hd-more hd-extra-more-btn" data-hd-extra-more>Több megjelenítése +</button>
+             <button type="button" class="hd-more hd-extra-less-btn" data-hd-extra-less hidden>Kevesebb megjelenítése −</button>`
           : "";
       return `<div class="hd-extra-group">
           <h3 class="hd-h3 hd-h3--extra">${escapeHtml(group.title)}</h3>
@@ -1110,6 +1111,20 @@ function bindUi(view, listing) {
       if (!group) return;
       group.classList.add("is-open");
       btn.hidden = true;
+      const less = group.querySelector("[data-hd-extra-less]");
+      if (less) less.hidden = false;
+    });
+  });
+
+  root.querySelectorAll("[data-hd-extra-less]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const group = btn.closest(".hd-extra-group");
+      if (!group) return;
+      group.classList.remove("is-open");
+      btn.hidden = true;
+      const more = group.querySelector("[data-hd-extra-more]");
+      if (more) more.hidden = false;
+      group.querySelector(".hd-h3--extra")?.scrollIntoView({ block: "nearest", behavior: "smooth" });
     });
   });
 

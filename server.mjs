@@ -1019,13 +1019,41 @@ async function handleListingsApi(req, res, pathname) {
       sendJson(res, 200, { listings });
       return;
     }
-    const limit = Math.min(Math.max(Number(url.searchParams.get("limit") ?? 50), 1), 50);
-    const listings = await listListingsWithPreview({ limit, status, vertical });
+    const limit = Math.min(Math.max(Number(url.searchParams.get("limit") ?? 20), 1), 100);
+    const offset = Math.max(0, Math.floor(Number(url.searchParams.get("offset") ?? 0)));
+    const tileMode =
+      url.searchParams.get("tile") === "1" ||
+      url.searchParams.get("mode") === "tile" ||
+      !url.searchParams.get("full");
+    const listings = await listListingsWithPreview({ limit, offset, status, vertical });
+    let total = null;
+    try {
+      const counts = await countNavListings({ status: status || "feladott" });
+      const v = String(vertical || "")
+        .trim()
+        .toLowerCase();
+      if (v === "auto") total = counts.auto;
+      else if (v === "teher") total = counts.teher;
+      else if (v === "ingatlan") total = counts.ingatlan;
+      else total = counts.auto + counts.teher + counts.ingatlan;
+    } catch {
+      total = offset + listings.length;
+    }
+    const hasMore =
+      typeof total === "number"
+        ? offset + listings.length < total
+        : listings.length >= limit;
     sendJson(
       res,
       200,
-      { listings: sanitizeListingList(listings) },
-      { "Cache-Control": "public, max-age=45, stale-while-revalidate=120" }
+      {
+        listings: sanitizeListingList(listings, { tile: tileMode }),
+        total,
+        offset,
+        limit,
+        hasMore,
+      },
+      { "Cache-Control": "public, max-age=30, stale-while-revalidate=90" }
     );
     return;
   }

@@ -34,19 +34,54 @@ export async function fetchDbStats() {
 
 export async function fetchListings({
   limit = 50,
+  offset = 0,
   status = null,
   vertical = null,
   owner = null,
   excludeId = null,
+  tile = true,
 } = {}) {
-  const params = new URLSearchParams({ limit: String(limit) });
+  const page = await fetchListingsPage({
+    limit,
+    offset,
+    status,
+    vertical,
+    owner,
+    excludeId,
+    tile,
+  });
+  return page.listings;
+}
+
+export async function fetchListingsPage({
+  limit = 20,
+  offset = 0,
+  status = null,
+  vertical = null,
+  owner = null,
+  excludeId = null,
+  tile = true,
+} = {}) {
+  const params = new URLSearchParams({
+    limit: String(limit),
+    offset: String(Math.max(0, Number(offset) || 0)),
+  });
   if (status) params.set("status", status);
   if (vertical) params.set("vertical", String(vertical));
   if (owner != null && owner !== "") params.set("owner", String(owner));
   if (excludeId != null && excludeId !== "") params.set("exclude", String(excludeId));
+  if (tile) params.set("tile", "1");
+  else params.set("full", "1");
   const response = await fetch(`/api/listings?${params}`);
   const data = await parseJson(response);
-  return data.listings ?? [];
+  const listings = data.listings ?? [];
+  return {
+    listings,
+    total: data.total != null ? Number(data.total) : null,
+    offset: data.offset != null ? Number(data.offset) : Number(offset) || 0,
+    limit: data.limit != null ? Number(data.limit) : Number(limit) || listings.length,
+    hasMore: Boolean(data.hasMore ?? listings.length >= limit),
+  };
 }
 
 export async function fetchLatestListing() {

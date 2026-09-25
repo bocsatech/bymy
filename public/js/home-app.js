@@ -1,4 +1,4 @@
-import { fetchListings, fetchRelatedListings } from "./db-client.js?v=sellerInv3";
+import { fetchListings, fetchListingsPage, fetchRelatedListings } from "./db-client.js?v=listPage1";
 import { createHomeGridCard, initHomeGridCardPhotos } from "./home-grid-card.js?v=mobFix8";
 import { promoKiemeltActive, promoTopAjanlatActive } from "./listing-promo.js?v=promo1";
 import {
@@ -33,9 +33,14 @@ const gridTrack = document.getElementById("home-grid-track");
 const emptyEl = document.getElementById("home-empty");
 const filterForm = document.getElementById("home-filter-form");
 
-const LISTINGS_FETCH_LIMIT = 50;
+const LISTINGS_INITIAL = 20;
+const LISTINGS_PAGE_MORE = 10;
 
 let allItems = [];
+let listingsTotal = null;
+let listingsHasMore = false;
+let listingsLoadingMore = false;
+let listingsOffset = 0;
 let sidebarFilters = emptyFilters();
 let quickSearchFilters = emptyFilters();
 let ingatlanFilters = emptyIngatlanFilters();
@@ -234,7 +239,7 @@ function renderListings(items) {
         : "Nincs találat ezekre a feltételekre. Próbálj kevesebb szűrőt, vagy adj fel hirdetést.";
   }
 
-  if (PAGE === "auto" || PAGE === "teherauto") updateAutoDeskResultCount(filtered.length);
+  if (PAGE === "auto" || PAGE === "teherauto") updateDeskResultCount(filtered);
   if (PAGE === "ingatlan") {
     const el = document.querySelector("[data-immo-result-count]");
     if (el) el.textContent = `${filtered.length} találat`;
@@ -293,32 +298,142 @@ async function loadListings() {
     await loadSellerListings(sellerFrom);
     return;
   }
-  const all = await fetchListings({
-    limit: LISTINGS_FETCH_LIMIT,
+  listingsLoadingMore = false;
+  listingsOffset = 0;
+  listingsHasMore = false;
+  listingsTotal = null;
+  const page = await fetchListingsPage({
+    limit: LISTINGS_INITIAL,
+    offset: 0,
     status: "feladott",
     vertical: pageVerticalParam(),
+    tile: true,
   });
-  const active = all.filter((item) => (item.status || "feladott") === "feladott");
+  const active = (page.listings || []).filter((item) => (item.status || "feladott") === "feladott");
   allItems = sortForHome(filterBySitePage(active));
+  listingsOffset = (Number(page.offset) || 0) + (page.listings?.length || 0);
+  listingsTotal = page.total != null ? Number(page.total) : allItems.length;
+  listingsHasMore = Boolean(page.hasMore);
   featuredListingIds = featuredListingIdSet(allItems);
   populateFilterOptions(allItems);
   renderListings(allItems);
   updateFilterResultCount();
   statsUi?.refreshActiveCount?.();
+  bindListingsInfiniteScroll();
   await applyNearbyFromUrl();
   applyFeaturedFromUrl();
+  if (hasActiveClientFilters()) {
+    void fillFilteredResults();
+  }
 }
 
-function applyFeaturedFromUrl() {
-  const params = new URLSearchParams(window.location.search);
-  if (params.get("kiemelt") !== "1") return;
-  if (PAGE !== "auto" && PAGE !== "teherauto") return;
+function mergeListings(existing, incoming) {
+  const seen = new Set(existing.map((item) => Number(item.id)));
+  const next = [...existing];
+  for (const item of incoming) {
+    const id = Number(item.id);
+    if (!Number.isFinite(id) || seen.has(id)) continue;
+    seen.add(id);
+    next.push(item);
+  }
+  return next;
+}
 
-  featuredOnlyMode = true;
-  categoryUi?.clear();
-  categoryFilter = null;
-  applyFilters();
-  scrollToListings();
+async function loadMoreListings() {
+  if (isSellerMode()) return;
+  if (!listingsHasMore || listingsLoadingMore) return;
+  if (PAGE !== "auto" && PAGE !== "teherauto" && PAGE !== "ingatlan") return;
+  listingsLoadingMore = true;
+  try {
+    const page = await fetchListingsPage({
+      limit: LISTINGS_PAGE_MORE,
+      offset: listingsOffset,
+      status: "feladott",
+      vertical: pageVerticalParam(),
+      tile: true,
+    });
+    const active = (page.listings || []).filter((item) => (item.status || "feladott") === "feladott");
+    const batch = filterBySitePage(active);
+    listingsOffset = (Number(page.offset) || listingsOffset) + (page.listings?.length || 0);
+    if (page.total != null) listingsTotal = Number(page.total);
+    listingsHasMore = Boolean(page.hasMore);
+    if (!batch.length) {
+      if (!listingsHasMore) return;
+      return;
+    }
+    allItems = sortForHome(mergeListings(allItems, batch));
+    featuredListingIds = featuredListingIdSet(allItems);
+    populateFilterOptions(allItems);
+    renderListings(allItems);
+    updateFilterResultCount();
+    statsUi?.refreshActiveCount?.();
+  } catch (error) {
+    console.warn("Lista folytatás:", error);
+  } finally {
+    listingsLoadingMore = false;
+  }
+}
+
+function hasActiveClientFilters() {
+  if (featuredOnlyMode || statsFilter || quickRadiusFilter || categoryFilter) return true;
+  if (PAGE === "ingatlan") {
+    return Object.values(ingatlanFilters || {}).some((v) => v != null && v !== "");
+  }
+  if (hasActiveSidebarFilters(mergedVehicleFilters())) return true;
+  if (detailedFilters && hasActiveDetailedSearch(detailedFilters)) return true;
+  return false;
+}
+
+function updateDeskResultCount(filtered) {
+  if (PAGE !== "auto" && PAGE !== "teherauto") return;
+  if (!hasActiveClientFilters() && listingsTotal != null) {
+    updateAutoDeskResultCount(listingsTotal);
+    return;
+  }
+  updateAutoDeskResultCount(filtered.length);
+}
+
+async function fillFilteredResults() {
+  let guard = 0;
+  while (
+    hasActiveClientFilters() &&
+    listingsHasMore &&
+    filterItems(allItems).length < LISTINGS_INITIAL &&
+    guard < 40
+  ) {
+    guard += 1;
+    const before = allItems.length;
+    await loadMoreListings();
+    if (allItems.length === before) break;
+  }
+}
+
+function bindListingsInfiniteScroll() {
+  if (bindListingsInfiniteScroll.bound) return;
+  bindListingsInfiniteScroll.bound = true;
+
+  const nearEnd = (el) => {
+    if (!el) return false;
+    return el.scrollHeight - el.scrollTop - el.clientHeight < 560;
+  };
+
+  const onScroll = () => {
+    if (!listingsHasMore || listingsLoadingMore) return;
+    const panel = document.querySelector(".home-listings-panel");
+    if (panel && panel.scrollHeight > panel.clientHeight + 40) {
+      if (nearEnd(panel)) void loadMoreListings();
+      return;
+    }
+    const doc = document.documentElement;
+    if (doc.scrollHeight - window.scrollY - window.innerHeight < 720) {
+      void loadMoreListings();
+    }
+  };
+
+  document.querySelector(".home-listings-panel")?.addEventListener("scroll", onScroll, {
+    passive: true,
+  });
+  window.addEventListener("scroll", onScroll, { passive: true });
 }
 
 async function applyNearbyFromUrl() {
@@ -348,9 +463,22 @@ async function applyNearbyFromUrl() {
   }
 }
 
+function applyFeaturedFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("kiemelt") !== "1") return;
+  if (PAGE !== "auto" && PAGE !== "teherauto") return;
+
+  featuredOnlyMode = true;
+  categoryUi?.clear();
+  categoryFilter = null;
+  applyFilters();
+  scrollToListings();
+}
+
 function applyFilters() {
   renderListings(allItems);
   updateFilterResultCount();
+  if (hasActiveClientFilters()) void fillFilteredResults();
 }
 
 function updateFilterResultCount() {

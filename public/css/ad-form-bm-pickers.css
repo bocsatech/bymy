@@ -684,8 +684,8 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-suffix-unit {
   align-self: flex-start !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .suffix-field > span:not(.hint-inline):not(.power-hint),
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .muszaki-grid .suffix-field > span {
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .suffix-field > span:not(.hint-inline):not(.power-hint):not(.price-market-hint):not(.price-market-label),
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .muszaki-grid .suffix-field > span:not(.price-market-hint):not(.price-market-label) {
   flex: 0 0 auto !important;
   width: auto !important;
   max-width: none !important;

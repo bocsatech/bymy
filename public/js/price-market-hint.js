@@ -24,8 +24,8 @@ function fieldValue(id) {
     }
     return raw;
   }
-  if (select.name) {
-    const named = select.form?.elements?.namedItem(select.name) || select.form?.elements?.namedItem(id);
+  if (select.form) {
+    const named = select.form.elements.namedItem(select.name || id);
     if (named && named !== select && "value" in named && String(named.value || "").trim()) {
       const raw = String(named.value).trim();
       if (raw.startsWith("[")) {
@@ -53,24 +53,16 @@ function readParams() {
   };
 }
 
+/** Hint mindig a vételár suffix-fieldjén belül — nem tör form-gridet. */
 function ensureHintEl() {
   let root = el("price-market-hint");
   const input = el("vetelar");
   if (!input) return null;
-
-  let wrap = input.closest(".vetelar-market-wrap");
-  if (!wrap) {
-    const suffix = input.closest(".suffix-field");
-    const host = suffix?.parentElement;
-    if (!suffix || !host) return root;
-    wrap = document.createElement("div");
-    wrap.className = "vetelar-market-wrap";
-    host.insertBefore(wrap, suffix);
-    wrap.appendChild(suffix);
-  }
+  const suffix = input.closest(".suffix-field");
+  if (!suffix) return root;
 
   if (!root) {
-    root = document.createElement("div");
+    root = document.createElement("span");
     root.id = "price-market-hint";
     root.className = "price-market-hint";
     root.hidden = true;
@@ -79,7 +71,7 @@ function ensureHintEl() {
       '<span class="price-market-bars" data-level="0" aria-hidden="true"><i></i><i></i><i></i><i></i></span>' +
       '<span class="price-market-label"></span>';
   }
-  if (!wrap.contains(root)) wrap.appendChild(root);
+  if (!suffix.contains(root)) suffix.appendChild(root);
   return root;
 }
 

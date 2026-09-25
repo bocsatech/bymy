@@ -1,25 +1,13 @@
-/* Vételár melletti piaci jelző — sávok + felirat (hasznaltauto-stílus) */
-.vetelar-market-wrap {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.55rem 0.85rem;
-  width: 100%;
-  max-width: 100%;
-}
-
-.vetelar-market-wrap > .suffix-field {
-  flex: 1 1 12rem;
-  min-width: 0;
-}
-
+/* Vételár melletti piaci jelző — a suffix-field-en belül, form-gridet nem töri */
 .price-market-hint {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
   flex: 0 0 auto;
+  margin-left: 0.35rem;
   line-height: 1;
   user-select: none;
+  vertical-align: middle;
 }
 
 .price-market-hint[hidden] {
@@ -56,7 +44,7 @@
 }
 
 .price-market-label {
-  font-size: 0.92rem;
+  font-size: 0.88rem;
   font-weight: 700;
   letter-spacing: -0.01em;
   white-space: nowrap;
@@ -71,17 +59,9 @@
   color: #d97706;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .vetelar-market-wrap > .suffix-field {
+/* Ne nyújtsa szét a Ft suffix szabály a jelzőt */
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .suffix-field > .price-market-hint {
+  flex: 0 0 auto;
+  width: auto;
   max-width: none;
-}
-
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form .vetelar-market-wrap {
-  width: 100% !important;
-  max-width: 100% !important;
-}
-
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form .vetelar-market-wrap > .suffix-field {
-  width: auto !important;
-  max-width: none !important;
-  flex: 1 1 14rem !important;
 }

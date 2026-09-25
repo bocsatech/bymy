@@ -1,13 +1,16 @@
-/* Vételár melletti piaci jelző — a suffix-field-en belül, form-gridet nem töri */
+/* Vételár melletti piaci jelző — sávok + Kevés / Jó ár / Sok */
 .price-market-hint {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
   flex: 0 0 auto;
-  margin-left: 0.35rem;
+  margin: 0;
   line-height: 1;
   user-select: none;
   vertical-align: middle;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
 }
 
 .price-market-hint[hidden] {
@@ -48,6 +51,8 @@
   font-weight: 700;
   letter-spacing: -0.01em;
   white-space: nowrap;
+  height: auto !important;
+  max-height: none !important;
 }
 
 .price-market-hint[data-opinion="jó ár"] .price-market-label,
@@ -59,20 +64,20 @@
   color: #d97706;
 }
 
-/* Ne nyújtsa szét a Ft suffix szabály a jelzőt */
+/* Klasszikus form-grid: Ft mellett, a 44px-es suffix belsejében */
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .suffix-field > .price-market-hint {
   flex: 0 0 auto;
   width: auto;
   max-width: none;
+  margin-left: 0.35rem;
 }
 
-/* Desk / mobil: a Ft után is férjen a sáv + felirat (ne vágja le a cella) */
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form .suffix-field {
-  flex-wrap: wrap;
-  row-gap: 0.35rem;
-  overflow: visible !important;
-}
-
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form .suffix-field > .price-market-hint {
-  order: 3;
+/* Desk / labeled: saját sor a vételár mező ALATT — nem lóg rá a következő címkére */
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .labeled-field > .price-market-hint,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .md-outlined > .price-market-hint,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-layout-item > .price-market-hint {
+  display: inline-flex !important;
+  margin-top: 8px;
+  margin-left: 0;
+  align-self: flex-start;
 }

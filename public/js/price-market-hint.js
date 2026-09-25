@@ -53,13 +53,17 @@ function readParams() {
   };
 }
 
-/** Hint mindig a vételár suffix-fieldjén belül — nem tör form-gridet. */
+/**
+ * Desk/labeled: a 44px-es suffix-field NEM nő — a jelző oda belerakva rácsúszik
+ * a következő címkére. Ilyenkor a labeled wrapben, a suffix UTÁN kell lennie.
+ * Klasszikus form-gridben (nincs labeled wrap) marad a Ft mellett.
+ */
 function ensureHintEl() {
   let root = el("price-market-hint");
   const input = el("vetelar");
   if (!input) return null;
   const suffix = input.closest(".suffix-field");
-  if (!suffix) return root;
+  const labeled = input.closest(".labeled-field, .md-outlined, .ad-layout-item");
 
   if (!root) {
     root = document.createElement("span");
@@ -71,7 +75,14 @@ function ensureHintEl() {
       '<span class="price-market-bars" data-level="0" aria-hidden="true"><i></i><i></i><i></i><i></i></span>' +
       '<span class="price-market-label"></span>';
   }
-  if (!suffix.contains(root)) suffix.appendChild(root);
+
+  if (labeled && suffix && labeled.contains(suffix)) {
+    if (root.parentElement !== labeled || root.previousElementSibling !== suffix) {
+      suffix.after(root);
+    }
+  } else if (suffix) {
+    if (!suffix.contains(root)) suffix.appendChild(root);
+  }
   return root;
 }
 

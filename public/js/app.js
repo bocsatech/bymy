@@ -6,7 +6,7 @@ import {
   getStoredListingId,
 } from "./db-client.js?v=wizardSave1";
 import { createAdForm } from "./form-core.js?v=yearFill1";
-import { initPriceMarketHint } from "./price-market-hint.js?v=priceHint4";
+import { initPriceMarketHint } from "./price-market-hint.js?v=priceHint5";
 import { applyImportedVehicleToSelects } from "./vehicle-catalog-client.js?v=importVehicle1";
 import { initTireSizes } from "./tire-sizes-ui.js";
 import { initPhoneLanguages } from "./phone-lang-ui.js";

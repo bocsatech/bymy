@@ -172,20 +172,24 @@ function sellerRatingHtml(rating) {
       ? `<span class="hd-seller-star is-on" aria-hidden="true">★</span>`
       : `<span class="hd-seller-star" aria-hidden="true">☆</span>`
   ).join("");
-  return `<p class="hd-seller-rating" data-hd-seller-rating title="${escapeHtml(String(avg))} / 10">
-    <span class="hd-seller-stars" role="img" aria-label="Értékelés ${escapeHtml(String(avg))} / 10">${stars}</span>
-    <strong class="hd-seller-avg">${escapeHtml(String(avg))}</strong>
+  const avgLabel = Number.isFinite(avg) ? String(avg).replace(".", ",") : String(avg);
+  return `<p class="hd-seller-rating" data-hd-seller-rating title="${escapeHtml(avgLabel)} / 10">
+    <span class="hd-seller-stars" role="img" aria-label="Értékelés ${escapeHtml(avgLabel)} / 10">${stars}</span>
+    <strong class="hd-seller-avg">${escapeHtml(avgLabel)}</strong>
+    <span class="hd-seller-scale">/ 10</span>
     <span class="hd-seller-count">(${count})</span>
   </p>`;
 }
 
 function paintSellerRating(rating) {
-  const el = root?.querySelector("[data-hd-seller-rating]");
-  if (!el) return;
-  const wrap = document.createElement("div");
-  wrap.innerHTML = sellerRatingHtml(rating);
-  const next = wrap.firstElementChild;
-  if (next) el.replaceWith(next);
+  if (!root) return;
+  const html = sellerRatingHtml(rating);
+  root.querySelectorAll("[data-hd-seller-rating]").forEach((el) => {
+    const wrap = document.createElement("div");
+    wrap.innerHTML = html;
+    const next = wrap.firstElementChild;
+    if (next) el.replaceWith(next);
+  });
 }
 
 async function loadSellerRating(listingId) {
@@ -641,6 +645,7 @@ function render(view, listing, related = []) {
     <section class="hd-dealer">
       <div class="hd-card">
         <p class="hd-seller-name">${escapeHtml(view.sellerName)}</p>
+        <p class="hd-seller-rating hd-seller-rating--loading" data-hd-seller-rating>Értékelés betöltése…</p>
         ${
           partnerHref
             ? `<a class="hd-partner-profile-link" href="${partnerHref}">

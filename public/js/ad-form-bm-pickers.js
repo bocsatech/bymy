@@ -864,9 +864,15 @@ function mountSingleSelectDropdown(select, { title, panelClass, placeholder = PL
   hideNativeSelect(select);
   const hidden = ensurePlainHiddenInput(select);
 
-  const options = [...select.options]
-    .filter((option) => option.value !== "")
-    .map((option) => ({ value: option.value, label: option.textContent?.trim() || option.value }));
+  /** Élő olvasás — ne mount-kori üres snapshot (évlista race). */
+  function readOptions() {
+    return [...select.options]
+      .filter((option) => option.value !== "")
+      .map((option) => ({
+        value: option.value,
+        label: option.textContent?.trim() || option.value,
+      }));
+  }
 
   let selected = "";
   let query = "";
@@ -908,6 +914,7 @@ function mountSingleSelectDropdown(select, { title, panelClass, placeholder = PL
   const bodyEl = dropdown.querySelector("[data-ad-bm-body]");
 
   function matchingOptions() {
+    const options = readOptions();
     const q = query.trim().toLocaleLowerCase("hu");
     if (!q) return options;
     return options.filter(
@@ -920,7 +927,7 @@ function mountSingleSelectDropdown(select, { title, panelClass, placeholder = PL
     if (!input) return;
     if (selected) {
       input.dataset.adBmEditing = "0";
-      const opt = options.find((item) => item.value === selected);
+      const opt = readOptions().find((item) => item.value === selected);
       input.value = opt?.label || selected;
       input.placeholder = placeholder;
       wrap.classList.toggle("has-value", true);
@@ -1926,6 +1933,10 @@ export function unmountAdFormBmPickers(form) {
   delete form?.dataset.adBmPickers;
 }
 
+export function markAdFormUiReady() {
+  document.documentElement.classList.add("ad-form-ui-ready");
+}
+
 export async function refreshAdFormBmPickers(form, catalog = null) {
   try {
     if (catalog) cachedVehicleCatalog = catalog;
@@ -1936,8 +1947,10 @@ export async function refreshAdFormBmPickers(form, catalog = null) {
       applyAdFormBmFieldValues(pending);
       requestAnimationFrame(() => applyAdFormBmFieldValues(pending));
     }
+    markAdFormUiReady();
   } catch (error) {
     console.warn("Alapadatok kapcsolós panel frissítés:", error);
+    markAdFormUiReady();
   }
 }
 

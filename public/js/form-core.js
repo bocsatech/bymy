@@ -22,7 +22,7 @@ import {
   DEFAULT_PHOTO_OVERLAY_ID,
   renderListingPhotoOverlay,
 } from "./listing-photo-overlay.js?v=photoOverlayIcons3";
-import { refreshAdFormBmPickers, applyAdFormBmFieldValues } from "./ad-form-bm-pickers.js?v=egyebInfoFix1";
+import { refreshAdFormBmPickers, applyAdFormBmFieldValues } from "./ad-form-bm-pickers.js?v=uiReady1";
 import { applyAdFormDesk, isAdFormDesk } from "./ad-form-desk.js?v=immoTipusPick1";
 import { initKmInput, parseKmDigits, setKmInputValue } from "./km-input.js?v=kmFmt1";
 import {
@@ -125,6 +125,8 @@ const YEAR_SELECT_MAX = 2035;
 
 function fillYearSelect(select, { maxYear = new Date().getFullYear(), minYear = YEAR_SELECT_MIN } = {}) {
   if (!select) return;
+  const prev = String(select.value || "");
+  select.replaceChildren();
   const empty = document.createElement("option");
   empty.value = "";
   empty.textContent = "év";
@@ -135,7 +137,7 @@ function fillYearSelect(select, { maxYear = new Date().getFullYear(), minYear = 
     option.textContent = String(year);
     select.appendChild(option);
   }
-  select.value = "";
+  select.value = [...select.options].some((o) => o.value === prev) ? prev : "";
 }
 
 function normalizeFuelValue(value) {

@@ -700,6 +700,18 @@ button.seller-inv__star:focus-visible {
   margin-top: 0.1rem;
 }
 
+.seller-inv__rate-save {
+  margin-top: 0.55rem;
+  width: auto;
+  min-width: 7.5rem;
+  justify-self: start;
+}
+
+.seller-inv__rate-save:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 .seller-inv__contact {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;

@@ -2,6 +2,7 @@ import {
   fetchListing,
   fetchRelatedListings,
   fetchSellerRating,
+  submitSellerRating,
   revealListingContact,
   recordListingView,
   deleteListingFromDb,
@@ -160,11 +161,11 @@ function sellerAvatarHtml(view) {
   return `<span class="hd-seller-avatar" aria-hidden="true"><img src="${escapeHtml(src)}" alt="" width="48" height="48" decoding="async" /></span>`;
 }
 
-function sellerRatingHtml(rating) {
+function sellerRatingSummaryHtml(rating) {
   const avg = rating?.average != null ? Number(rating.average) : null;
   const count = Number(rating?.count) || 0;
   if (avg == null || count <= 0) {
-    return `<p class="hd-seller-rating hd-seller-rating--empty" data-hd-seller-rating>Még nincs értékelés</p>`;
+    return `<p class="hd-seller-rating hd-seller-rating--empty">Még nincs értékelés</p>`;
   }
   const filled = Math.max(0, Math.min(5, Math.round((avg / 10) * 5)));
   const stars = Array.from({ length: 5 }, (_, i) =>
@@ -173,7 +174,7 @@ function sellerRatingHtml(rating) {
       : `<span class="hd-seller-star" aria-hidden="true">☆</span>`
   ).join("");
   const avgLabel = Number.isFinite(avg) ? String(avg).replace(".", ",") : String(avg);
-  return `<p class="hd-seller-rating" data-hd-seller-rating title="${escapeHtml(avgLabel)} / 10">
+  return `<p class="hd-seller-rating" title="${escapeHtml(avgLabel)} / 10">
     <span class="hd-seller-stars" role="img" aria-label="Értékelés ${escapeHtml(avgLabel)} / 10">${stars}</span>
     <strong class="hd-seller-avg">${escapeHtml(avgLabel)}</strong>
     <span class="hd-seller-scale">/ 10</span>
@@ -181,21 +182,118 @@ function sellerRatingHtml(rating) {
   </p>`;
 }
 
-function paintSellerRating(rating) {
+function sellerRateStarsHtml(selected = 0) {
+  return `<div class="hd-seller-rate-stars" role="group" aria-label="Értékelés 1–10">
+    ${Array.from({ length: 10 }, (_, i) => {
+      const n = i + 1;
+      const on = n <= selected;
+      return `<button type="button" class="hd-seller-rate-star${on ? " is-on" : ""}" data-hd-rate="${n}" aria-label="${n} / 10">${on ? "★" : "☆"}</button>`;
+    }).join("")}
+  </div>`;
+}
+
+function sellerRatingBlockHtml(rating, { interactive = false } = {}) {
+  const myScore = rating?.myScore != null ? Number(rating.myScore) : null;
+  let rateExtra = "";
+  if (interactive) {
+    if (myScore != null) {
+      rateExtra = `<p class="hd-seller-rate-hint">Te értékelésed: <strong>${escapeHtml(String(myScore))} / 10</strong></p>`;
+    } else if (rating?.canRate) {
+      rateExtra = `<div class="hd-seller-rate" data-hd-rate-wrap>
+        <p class="hd-seller-rate-label">Értékeld (1–10):</p>
+        ${sellerRateStarsHtml(0)}
+        <button type="button" class="hd-btn hd-btn--soft hd-seller-rate-save" data-hd-rate-save disabled>Mentés</button>
+        <p class="hd-seller-rate-hint" data-hd-rate-msg hidden></p>
+      </div>`;
+    } else if (!rating?.loggedIn) {
+      const next = encodeURIComponent(location.pathname + location.search);
+      rateExtra = `<p class="hd-seller-rate-hint"><a href="/belepes.html?next=${next}">Jelentkezz be</a> az értékeléshez.</p>`;
+    }
+  }
+  return `<div class="hd-seller-rating-block" data-hd-seller-rating>
+    ${sellerRatingSummaryHtml(rating)}
+    ${rateExtra}
+  </div>`;
+}
+
+function bindSellerRate(block, listingId) {
+  const wrap = block?.querySelector?.("[data-hd-rate-wrap]");
+  if (!wrap || !listingId) return;
+  const stars = [...wrap.querySelectorAll("[data-hd-rate]")];
+  const saveBtn = wrap.querySelector("[data-hd-rate-save]");
+  const msg = wrap.querySelector("[data-hd-rate-msg]");
+  let selected = 0;
+
+  const paint = (n) => {
+    stars.forEach((b) => {
+      const v = Number(b.getAttribute("data-hd-rate"));
+      const on = v <= n;
+      b.classList.toggle("is-on", on);
+      b.textContent = on ? "★" : "☆";
+    });
+  };
+
+  stars.forEach((btn) => {
+    btn.addEventListener("mouseenter", () => paint(Number(btn.getAttribute("data-hd-rate"))));
+    btn.addEventListener("mouseleave", () => paint(selected));
+    btn.addEventListener("click", () => {
+      selected = Number(btn.getAttribute("data-hd-rate"));
+      if (!Number.isFinite(selected) || selected < 1) selected = 0;
+      paint(selected);
+      if (saveBtn) saveBtn.disabled = !(selected >= 1 && selected <= 10);
+      if (msg) {
+        msg.hidden = true;
+        msg.textContent = "";
+      }
+    });
+  });
+
+  saveBtn?.addEventListener("click", async () => {
+    if (!(selected >= 1 && selected <= 10)) {
+      if (msg) {
+        msg.hidden = false;
+        msg.textContent = "Előbb válassz 1–10 csillagot.";
+      }
+      return;
+    }
+    saveBtn.disabled = true;
+    stars.forEach((b) => {
+      b.disabled = true;
+    });
+    try {
+      const rating = await submitSellerRating(listingId, selected);
+      paintSellerRating(rating, listingId);
+    } catch (err) {
+      if (msg) {
+        msg.hidden = false;
+        msg.textContent = err?.message || "Nem sikerült az értékelés.";
+      }
+      stars.forEach((b) => {
+        b.disabled = false;
+      });
+      saveBtn.disabled = false;
+    }
+  });
+}
+
+function paintSellerRating(rating, listingId) {
   if (!root) return;
-  const html = sellerRatingHtml(rating);
-  root.querySelectorAll("[data-hd-seller-rating]").forEach((el) => {
+  const slots = [...root.querySelectorAll("[data-hd-seller-rating]")];
+  slots.forEach((el, index) => {
+    const interactive = index === 0;
     const wrap = document.createElement("div");
-    wrap.innerHTML = html;
+    wrap.innerHTML = sellerRatingBlockHtml(rating, { interactive });
     const next = wrap.firstElementChild;
-    if (next) el.replaceWith(next);
+    if (!next) return;
+    el.replaceWith(next);
+    if (interactive) bindSellerRate(next, listingId);
   });
 }
 
 async function loadSellerRating(listingId) {
   try {
     const rating = await fetchSellerRating(listingId);
-    paintSellerRating(rating);
+    paintSellerRating(rating, listingId);
   } catch {
     /* értékelés opcionális */
   }

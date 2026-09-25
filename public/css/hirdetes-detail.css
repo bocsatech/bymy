@@ -211,7 +211,7 @@ html[data-theme="dark"] body.hd-page .hd-tool--fb {
   display: grid;
   grid-template-columns: minmax(0, 1.65fr) minmax(300px, 0.78fr);
   gap: 1.1rem;
-  align-items: start;
+  align-items: stretch;
 }
 
 .hd-gallery {
@@ -220,6 +220,9 @@ html[data-theme="dark"] body.hd-page .hd-tool--fb {
   border-radius: 14px;
   overflow: hidden;
   box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
 }
 
 .hd-stage {
@@ -368,7 +371,7 @@ html[data-theme="dark"] body.hd-page .hd-tool--fb {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.85rem 1rem;
-  margin: 0;
+  margin: auto 0 0;
   padding: 0.15rem 1rem 1.05rem;
   border-top: 1px solid #eef0f3;
 }
@@ -419,8 +422,10 @@ html[data-theme="dark"] body.hd-page .hd-tool--fb {
   border: 1px solid var(--hd-line);
   border-radius: 14px;
   padding: 1.15rem 1.15rem 1.25rem;
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 0.9rem;
+  min-height: 100%;
   box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
 }
 
@@ -562,7 +567,7 @@ html[data-theme="dark"] body.hd-page .hd-tool--fb {
 }
 
 .hd-side-meta {
-  margin: 0;
+  margin-top: auto;
   font-size: 0.78rem;
   color: #98a2b3;
   line-height: 1.45;
@@ -872,6 +877,73 @@ html[data-theme="dark"] body.hd-page .hd-tool--fb {
 .hd-seller-count {
   color: #667085;
   font-weight: 500;
+}
+
+.hd-seller-rating-block {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.hd-seller-rate {
+  display: grid;
+  gap: 0.35rem;
+  margin-top: 0.15rem;
+}
+
+.hd-seller-rate-label {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #344054;
+}
+
+.hd-seller-rate-stars {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.05rem;
+}
+
+.hd-seller-rate-star {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #d0d5dd;
+  font-size: 1.15rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.hd-seller-rate-star.is-on,
+.hd-seller-rate-star:hover,
+.hd-seller-rate-star:focus-visible {
+  color: #f5a524;
+  outline: none;
+}
+
+.hd-seller-rate-save {
+  width: auto;
+  min-width: 7.5rem;
+  min-height: 38px;
+  justify-self: start;
+  padding: 0.45rem 0.9rem;
+}
+
+.hd-seller-rate-save:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.hd-seller-rate-hint {
+  margin: 0;
+  font-size: 0.78rem;
+  color: #667085;
+  line-height: 1.35;
+}
+
+.hd-seller-rate-hint a {
+  color: #101828;
+  font-weight: 700;
 }
 
 .hd-seller-addr {

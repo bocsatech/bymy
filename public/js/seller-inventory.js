@@ -19,7 +19,7 @@ function injectStylesheet() {
   if (document.querySelector('link[data-seller-inv-css]')) return;
   const link = document.createElement("link");
   link.rel = "stylesheet";
-  link.href = "/css/seller-inventory.css?v=sellerInv26";
+  link.href = "/css/seller-inventory.css?v=sellerInv27";
   link.dataset.sellerInvCss = "1";
   document.head.appendChild(link);
 }
@@ -120,6 +120,7 @@ function statusPanelHtml(rating, activeCount) {
     rateBlock = `
       <p class="seller-inv__rate-label">Értékeld (1–10):</p>
       ${starsHtml(null, { interactive: true, selected: 0 })}
+      <button type="button" class="seller-inv__btn seller-inv__btn--yellow seller-inv__rate-save" data-si-rate-save disabled>Mentés</button>
       <p class="seller-inv__hint" data-si-rate-msg hidden></p>
     `;
   } else if (!rating?.loggedIn) {
@@ -145,6 +146,10 @@ function bindSellerRating(panel, fromId) {
   const wrap = panel.querySelector("[data-si-rate-wrap]");
   if (!wrap) return;
   const stars = [...wrap.querySelectorAll("[data-si-rate]")];
+  const saveBtn = wrap.querySelector("[data-si-rate-save]");
+  const msg = wrap.querySelector("[data-si-rate-msg]");
+  let selected = 0;
+
   const paint = (n) => {
     stars.forEach((b) => {
       const v = Number(b.getAttribute("data-si-rate"));
@@ -153,31 +158,49 @@ function bindSellerRating(panel, fromId) {
       b.textContent = on ? "★" : "☆";
     });
   };
+
   stars.forEach((btn) => {
     btn.addEventListener("mouseenter", () => paint(Number(btn.getAttribute("data-si-rate"))));
-    btn.addEventListener("mouseleave", () => paint(0));
-    btn.addEventListener("click", async () => {
-      const score = Number(btn.getAttribute("data-si-rate"));
-      if (!Number.isFinite(score)) return;
-      const msg = wrap.querySelector("[data-si-rate-msg]");
-      stars.forEach((b) => {
-        b.disabled = true;
-      });
-      try {
-        const rating = await submitSellerRating(fromId, score);
-        const active = Number(document.querySelector("[data-si-active-count]")?.textContent) || 0;
-        panel.innerHTML = statusPanelHtml(rating, active);
-        bindSellerRating(panel, fromId);
-      } catch (err) {
-        if (msg) {
-          msg.hidden = false;
-          msg.textContent = err?.message || "Nem sikerült az értékelés.";
-        }
-        stars.forEach((b) => {
-          b.disabled = false;
-        });
+    btn.addEventListener("mouseleave", () => paint(selected));
+    btn.addEventListener("click", () => {
+      selected = Number(btn.getAttribute("data-si-rate"));
+      if (!Number.isFinite(selected) || selected < 1) selected = 0;
+      paint(selected);
+      if (saveBtn) saveBtn.disabled = !(selected >= 1 && selected <= 10);
+      if (msg) {
+        msg.hidden = true;
+        msg.textContent = "";
       }
     });
+  });
+
+  saveBtn?.addEventListener("click", async () => {
+    if (!(selected >= 1 && selected <= 10)) {
+      if (msg) {
+        msg.hidden = false;
+        msg.textContent = "Előbb válassz 1–10 csillagot.";
+      }
+      return;
+    }
+    saveBtn.disabled = true;
+    stars.forEach((b) => {
+      b.disabled = true;
+    });
+    try {
+      const rating = await submitSellerRating(fromId, selected);
+      const active = Number(document.querySelector("[data-si-active-count]")?.textContent) || 0;
+      panel.innerHTML = statusPanelHtml(rating, active);
+      bindSellerRating(panel, fromId);
+    } catch (err) {
+      if (msg) {
+        msg.hidden = false;
+        msg.textContent = err?.message || "Nem sikerült az értékelés.";
+      }
+      stars.forEach((b) => {
+        b.disabled = false;
+      });
+      saveBtn.disabled = false;
+    }
   });
 }
 

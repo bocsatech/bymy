@@ -660,10 +660,6 @@ function render(view, listing, related = []) {
               </div>`
             : ""
         }
-        <p class="hd-side-meta">
-          ${view.updatedAt ? `Utoljára módosítva: ${escapeHtml(formatDate(view.updatedAt))}` : ""}
-          ${view.code ? `<br>Bymy-kód: ${escapeHtml(view.code)}` : ""}
-        </p>
       </aside>
     </div>
 
@@ -736,7 +732,10 @@ function render(view, listing, related = []) {
     </section>
 
     <div class="hd-foot">
-      <span>Bymy-kód: ${escapeHtml(view.code || String(view.id))} ${view.updatedAt ? `| Utoljára módosítva: ${escapeHtml(formatDate(view.updatedAt))}` : ""}</span>
+      <div class="hd-foot-meta">
+        ${view.updatedAt ? `<span>Utoljára módosítva: ${escapeHtml(formatDate(view.updatedAt))}</span>` : ""}
+        <span>Bymy-kód: ${escapeHtml(view.code || String(view.id))}</span>
+      </div>
       <a class="hd-report" href="/uzenetek.html">! Hirdetés jelentése</a>
     </div>
     ${

@@ -1328,6 +1328,7 @@ html[data-theme="dark"] body.hd-page .hd-tool--fb {
 .hd-foot {
   display: flex;
   justify-content: space-between;
+  align-items: flex-end;
   gap: 1rem;
   flex-wrap: wrap;
   margin-top: 1.2rem;
@@ -1337,6 +1338,11 @@ html[data-theme="dark"] body.hd-page .hd-tool--fb {
   border-radius: 8px;
   font-size: 0.8rem;
   color: #667085;
+}
+
+.hd-foot-meta {
+  display: grid;
+  gap: 0.2rem;
 }
 
 .hd-report {

@@ -23,7 +23,7 @@ function injectStylesheet() {
   if (document.querySelector('link[data-seller-inv-css]')) return;
   const link = document.createElement("link");
   link.rel = "stylesheet";
-  link.href = "/css/seller-inventory.css?v=sellerInv29";
+  link.href = "/css/seller-inventory.css?v=sellerInv30";
   link.dataset.sellerInvCss = "1";
   document.head.appendChild(link);
 }
@@ -499,7 +499,9 @@ async function fetchSellerCoords(contact, query) {
   const params = new URLSearchParams();
   if (query) params.set("q", query);
   if (lines.length) params.set("lines", lines.join("|"));
-  const res = await fetch(`/api/geocode?${params.toString()}`);
+  const res = await fetch(`/api/geocode?${params.toString()}`, {
+    credentials: "same-origin",
+  });
   if (!res.ok) return null;
   const data = await res.json().catch(() => null);
   const lat = data?.lat != null ? Number(data.lat) : NaN;
@@ -553,8 +555,18 @@ async function fillSellerMap(panel, contact) {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
     }).addTo(map);
     L.marker([geo.lat, geo.lon]).addTo(map);
-    requestAnimationFrame(() => map.invalidateSize());
-    setTimeout(() => map.invalidateSize(), 200);
+    const refresh = () => {
+      try {
+        map.invalidateSize({ animate: false });
+      } catch {
+        /* ignore */
+      }
+    };
+    requestAnimationFrame(refresh);
+    setTimeout(refresh, 50);
+    setTimeout(refresh, 250);
+    setTimeout(refresh, 800);
+    window.addEventListener("resize", refresh, { passive: true });
   } catch {
     canvas.innerHTML = `<p class="seller-inv__hint">A térkép nem tölthető be.</p>`;
   }

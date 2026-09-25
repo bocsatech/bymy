@@ -1210,6 +1210,27 @@ html[data-theme="dark"] body.hd-page .hd-tool--fb {
   padding: 0;
 }
 
+/* Mobil: Extrák almenünként csak 5 tétel, Több gomb után a többi */
+.hd-extra-more-btn {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .hd-extra-group:not(.is-open) .hd-extra-item--more {
+    display: none;
+  }
+
+  .hd-extra-group .hd-extra-more-btn {
+    display: inline-flex;
+    margin-top: 0.45rem;
+  }
+
+  .hd-extra-group.is-open .hd-extra-more-btn,
+  .hd-extra-more-btn[hidden] {
+    display: none;
+  }
+}
+
 .hd-related {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));

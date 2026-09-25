@@ -366,14 +366,26 @@ function specBlockHtml(title, rows) {
 
 function equipmentGroupsHtml(groups) {
   if (!groups?.length) return "";
+  const PREVIEW = 5;
   return `<h2 class="hd-h2">Extrák</h2>${groups
-    .map(
-      (group) =>
-        `<div class="hd-extra-group">
+    .map((group) => {
+      const items = Array.isArray(group.items) ? group.items : [];
+      const list = items
+        .map((item, index) => {
+          const more = index >= PREVIEW ? " hd-extra-item--more" : "";
+          return `<li class="hd-extra-item${more}">${escapeHtml(item)}</li>`;
+        })
+        .join("");
+      const moreBtn =
+        items.length > PREVIEW
+          ? `<button type="button" class="hd-more hd-extra-more-btn" data-hd-extra-more>Több megjelenítése +</button>`
+          : "";
+      return `<div class="hd-extra-group">
           <h3 class="hd-h3 hd-h3--extra">${escapeHtml(group.title)}</h3>
-          <ul class="hd-list">${group.items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
-        </div>`
-    )
+          <ul class="hd-list" data-hd-extra-list>${list}</ul>
+          ${moreBtn}
+        </div>`;
+    })
     .join("")}`;
 }
 
@@ -1090,6 +1102,15 @@ function bindUi(view, listing) {
   root.querySelector("[data-hd-desc-more]")?.addEventListener("click", (event) => {
     root.querySelector("[data-hd-desc]")?.classList.remove("is-clip");
     event.currentTarget.hidden = true;
+  });
+
+  root.querySelectorAll("[data-hd-extra-more]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const group = btn.closest(".hd-extra-group");
+      if (!group) return;
+      group.classList.add("is-open");
+      btn.hidden = true;
+    });
   });
 
   root.querySelector("[data-hd-delete]")?.addEventListener("click", async () => {

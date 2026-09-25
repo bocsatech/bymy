@@ -4,10 +4,11 @@ import {
   slimListingTile,
 } from "./listing-tile.js?v=listThumb1";
 import { bindListingOpen, restoreListingReturn } from "./listing-return.js?v=scrollTop1";
+import {
+  TILE_PAGE_INITIAL,
+  TILE_PAGE_MORE,
+} from "./listing-tile-pager.js?v=tilePage1";
 
-const INITIAL_COUNT = 9;
-const SCROLL_BATCH = 5;
-const RAIL_CAP = 13;
 const CACHE_TTL_MS = 15 * 60 * 1000;
 
 /** Teljes „közelben” szekció: csak ha van megjeleníthető hirdetés. */
@@ -36,6 +37,10 @@ function createPromptCard(label, href) {
   return link;
 }
 
+/**
+ * Hub listing sín: első 20 csempe, görgetésre +10 (API folytatás opcionális).
+ * soha nem tölti be az összeset egyben — „Összes” csak link a listoldalra.
+ */
 export function initHubListingRail(opts) {
   const {
     railEl: RAIL,
@@ -44,13 +49,11 @@ export function initHubListingRail(opts) {
     allLinkEl: ALL_LINK,
     cacheKey: CACHE_KEY,
     defaultAllHref,
-    settingsHref = "/beallitasok.html?szekcio=keresesi-korzet",
     noun,
     nounPlural,
     needsPostal = true,
     loadFresh,
-    emptyPrompt,
-    noPostalPrompt,
+    loadMoreFresh = null,
   } = opts;
 
   if (!RAIL) return;
@@ -63,6 +66,8 @@ export function initHubListingRail(opts) {
   let radiusLabel = 30;
   let loadingMore = false;
   let hasAllPrompt = false;
+  let apiHasMore = false;
+  let totalCount = null;
 
   function setCountBadge(n) {
     if (!COUNT_EL) return;
@@ -83,9 +88,10 @@ export function initHubListingRail(opts) {
   }
 
   function ensureAllPrompt() {
-    if (hasAllPrompt) return;
-    if (renderedCount < RAIL_CAP) return;
-    if (nearbyItems.length <= RAIL_CAP) return;
+    if (hasAllPrompt || !allHref) return;
+    const moreOnList = apiHasMore || nearbyItems.length > renderedCount;
+    if (!moreOnList && nearbyItems.length <= TILE_PAGE_INITIAL) return;
+    if (renderedCount < Math.min(TILE_PAGE_INITIAL, nearbyItems.length)) return;
     const card = createPromptCard("Összes megnyitása", allHref);
     card.classList.add("hf-card--prompt-all");
     RAIL.appendChild(card);
@@ -94,7 +100,7 @@ export function initHubListingRail(opts) {
 
   function appendNext(count) {
     if (loadingMore) return;
-    const remaining = Math.min(RAIL_CAP, nearbyItems.length) - renderedCount;
+    const remaining = nearbyItems.length - renderedCount;
     if (remaining <= 0) {
       ensureAllPrompt();
       return;
@@ -111,16 +117,48 @@ export function initHubListingRail(opts) {
     loadingMore = false;
   }
 
-  function renderInitial(items) {
+  async function maybeFetchMore() {
+    if (!loadMoreFresh || loadingMore || !apiHasMore) return;
+    if (nearbyItems.length - renderedCount > TILE_PAGE_MORE) return;
+    loadingMore = true;
+    try {
+      const more = await loadMoreFresh();
+      const batch = Array.isArray(more?.items) ? more.items : [];
+      if (more?.hasMore != null) apiHasMore = Boolean(more.hasMore);
+      if (more?.total != null) {
+        totalCount = Number(more.total);
+        setCountBadge(totalCount);
+      }
+      if (batch.length) {
+        const seen = new Set(nearbyItems.map((row) => Number(row.id)));
+        for (const item of batch) {
+          const id = Number(item.id);
+          if (!Number.isFinite(id) || seen.has(id)) continue;
+          seen.add(id);
+          nearbyItems.push(item);
+        }
+      } else if (!apiHasMore) {
+        /* nothing */
+      }
+    } catch (error) {
+      console.warn("hub rail more:", error);
+    } finally {
+      loadingMore = false;
+    }
+  }
+
+  function renderInitial(items, meta = {}) {
     nearbyItems = items;
     renderedCount = 0;
     hasAllPrompt = false;
+    apiHasMore = Boolean(meta.hasMore);
+    if (meta.total != null) totalCount = Number(meta.total);
     RAIL.innerHTML = "";
-    setCountBadge(items.length);
-    appendNext(INITIAL_COUNT);
+    setCountBadge(totalCount != null ? totalCount : items.length);
+    appendNext(TILE_PAGE_INITIAL);
     requestAnimationFrame(() => {
-      if (renderedCount < Math.min(INITIAL_COUNT, nearbyItems.length)) {
-        appendNext(Math.min(INITIAL_COUNT, nearbyItems.length) - renderedCount);
+      if (renderedCount < Math.min(TILE_PAGE_INITIAL, nearbyItems.length)) {
+        appendNext(Math.min(TILE_PAGE_INITIAL, nearbyItems.length) - renderedCount);
       }
       onRailScroll();
     });
@@ -141,24 +179,34 @@ export function initHubListingRail(opts) {
     io.observe(section);
   }
 
-  function onRailScroll() {
-    if (!nearbyItems.length) return;
-    if (renderedCount >= Math.min(RAIL_CAP, nearbyItems.length)) {
-      ensureAllPrompt();
-      return;
+  async function onRailScroll() {
+    if (!nearbyItems.length && !apiHasMore) return;
+    const nearEnd = RAIL.scrollLeft + RAIL.clientWidth >= RAIL.scrollWidth - 140;
+    if (!nearEnd) return;
+    if (nearbyItems.length - renderedCount < TILE_PAGE_MORE) {
+      await maybeFetchMore();
     }
-    const nearEnd = RAIL.scrollLeft + RAIL.clientWidth >= RAIL.scrollWidth - 120;
-    if (nearEnd) appendNext(SCROLL_BATCH);
+    if (renderedCount < nearbyItems.length) {
+      appendNext(TILE_PAGE_MORE);
+    } else {
+      ensureAllPrompt();
+    }
   }
 
   function bindRailLazy() {
     if (RAIL.dataset.nearbyLazyBound === "1") return;
     RAIL.dataset.nearbyLazyBound = "1";
-    RAIL.addEventListener("scroll", onRailScroll, { passive: true });
+    RAIL.addEventListener(
+      "scroll",
+      () => {
+        void onRailScroll();
+      },
+      { passive: true }
+    );
     const io = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
-          if (entry.isIntersecting) onRailScroll();
+          if (entry.isIntersecting) void onRailScroll();
         }
       },
       { root: RAIL, rootMargin: "0px 80px 0px 0px", threshold: 0.01 }
@@ -193,7 +241,9 @@ export function initHubListingRail(opts) {
           radiusKm,
           at: Date.now(),
           city: meta.city || "",
-          items: items.map(slimListingTile),
+          hasMore: Boolean(meta.hasMore),
+          total: meta.total ?? null,
+          items: items.slice(0, 40).map(slimListingTile),
         })
       );
     } catch {
@@ -212,6 +262,8 @@ export function initHubListingRail(opts) {
     async start({ postal, radiusKm }) {
       radiusLabel = radiusKm;
       setHubSectionVisible(RAIL, false);
+      totalCount = null;
+      apiHasMore = false;
 
       if (needsPostal && postal.length !== 4) {
         renderInitial([]);
@@ -224,7 +276,10 @@ export function initHubListingRail(opts) {
       if (cached?.items?.length) {
         cityLabel = cached.city || "";
         setHubSectionVisible(RAIL, true);
-        renderInitial(cached.items);
+        renderInitial(cached.items, {
+          hasMore: cached.hasMore,
+          total: cached.total,
+        });
         setStatus(
           `${cached.items.length} ${cached.items.length === 1 ? noun : plural}${cityLabel ? ` ${cityLabel}` : ""} ${radiusKm} km-en belül.`,
           { hidden: true }
@@ -239,16 +294,15 @@ export function initHubListingRail(opts) {
               setHubSectionVisible(RAIL, false);
               return;
             }
-            const sameIds =
-              items.length === nearbyItems.length &&
-              items.every((item, i) => Number(item.id) === Number(nearbyItems[i]?.id));
-            if (sameIds) return;
             cityLabel = fresh.city || "";
             allHref = fresh.href || allHref;
             if (ALL_LINK && allHref) ALL_LINK.href = allHref;
             setHubSectionVisible(RAIL, true);
             const keepScroll = RAIL.scrollLeft;
-            renderInitial(items);
+            renderInitial(items, {
+              hasMore: fresh.hasMore,
+              total: fresh.total,
+            });
             RAIL.scrollLeft = keepScroll;
           })
           .catch(() => {});
@@ -272,10 +326,14 @@ export function initHubListingRail(opts) {
         }
 
         if (needsPostal && !fresh.skipCache) {
-          writeCache(postal, radiusKm, items, { city: cityLabel });
+          writeCache(postal, radiusKm, items, {
+            city: cityLabel,
+            hasMore: fresh.hasMore,
+            total: fresh.total,
+          });
         }
         setHubSectionVisible(RAIL, true);
-        renderInitial(items);
+        renderInitial(items, { hasMore: fresh.hasMore, total: fresh.total });
         setStatus(
           `${items.length} ${items.length === 1 ? noun : plural}${cityLabel ? ` ${cityLabel}` : ""} ${radiusKm} km-en belül.`,
           { hidden: true }
@@ -291,4 +349,4 @@ export function initHubListingRail(opts) {
   };
 }
 
-export { createPromptCard, sortByDate, slimListingTile };
+export { createPromptCard, sortByDate, slimListingTile, TILE_PAGE_INITIAL, TILE_PAGE_MORE };

@@ -1,14 +1,6 @@
-import { fetchListings } from "./db-client.js?v=nearby2";
 import { getAuthUser, isLoggedIn, refreshAuthSession } from "./site-auth.js?v=nearbyBoot1";
-import {
-  bindListingOpen,
-  restoreListingReturn,
-} from "./listing-return.js?v=scrollTop1";
-import {
-  createListingTileCard,
-  formatListingCountBadge,
-  slimListingTile,
-} from "./listing-tile.js?v=listThumb1";
+import { restoreListingReturn } from "./listing-return.js?v=scrollTop1";
+import { slimListingTile } from "./listing-tile.js?v=listThumb1";
 import {
   autoNearbyHref,
   buildNearbyFilter,
@@ -18,291 +10,103 @@ import {
   STORAGE_POSTAL,
   STORAGE_RADIUS,
 } from "./nearby-search.js?v=nearbyPrefs2";
-import { setHubSectionVisible } from "./hub-listing-rail.js?v=immoRails3";
+import { initHubListingRail } from "./hub-listing-rail.js?v=tilePage1";
+import {
+  TILE_PAGE_INITIAL,
+  TILE_PAGE_MORE,
+  fetchTilePagesUntil,
+} from "./listing-tile-pager.js?v=tilePage1";
 
-const RAIL = document.getElementById("hub-nearby-rail");
-const STATUS = document.getElementById("hub-nearby-status");
-const ALL_LINK = document.getElementById("hub-nearby-all");
-const COUNT_EL = document.getElementById("hub-nearby-count");
+const CACHE_KEY = "bymy-hub-nearby-v8";
 
-const CACHE_KEY = "bymy-hub-nearby-v7";
-const CACHE_TTL_MS = 15 * 60 * 1000;
-const INITIAL_COUNT = 9;
-const SCROLL_BATCH = 5;
-const RAIL_CAP = 13;
+let railApi = null;
+let pageState = {
+  postal: "",
+  radiusKm: 30,
+  offset: 0,
+  hasMore: false,
+};
 
-let nearbyItems = [];
-let renderedCount = 0;
-let allHref = "/auto.html?nearby=1";
-let cityLabel = "";
-let radiusLabel = 30;
-let loadingMore = false;
-let hasAllPrompt = false;
-
-function sortByDate(items) {
-  return [...items].sort((a, b) => {
-    const ta = new Date(a.updated_at ?? a.created_at ?? 0).getTime();
-    const tb = new Date(b.updated_at ?? b.created_at ?? 0).getTime();
-    return tb - ta;
-  });
-}
-
-function setCountBadge(n) {
-  if (!COUNT_EL) return;
-  const label = formatListingCountBadge(n);
-  COUNT_EL.textContent = label;
-  COUNT_EL.hidden = !label;
-}
-
-function createPromptCard(label, href) {
-  const link = document.createElement("a");
-  link.className = "hf-card hf-card--listing hf-card--prompt";
-  link.href = href;
-  link.setAttribute("role", "listitem");
-  link.innerHTML = `
-    <span class="hf-card-media" aria-hidden="true"></span>
-    <span class="hf-card-label">${label}</span>`;
-  return link;
-}
-
-function setStatus(message, { hidden = false } = {}) {
-  if (!STATUS) return;
-  STATUS.textContent = message || "";
-  STATUS.hidden = hidden || !message;
-}
-
-function removeAllPrompt() {
-  RAIL?.querySelectorAll(".hf-card--prompt-all").forEach((el) => el.remove());
-  hasAllPrompt = false;
-}
-
-function ensureAllPrompt() {
-  if (!RAIL || hasAllPrompt) return;
-  if (renderedCount < RAIL_CAP) return;
-  if (nearbyItems.length <= RAIL_CAP) return;
-  const card = createPromptCard("Összes megnyitása", allHref);
-  card.classList.add("hf-card--prompt-all");
-  RAIL.appendChild(card);
-  hasAllPrompt = true;
-}
-
-function appendNext(count) {
-  if (!RAIL || loadingMore) return;
-  const remaining = Math.min(RAIL_CAP, nearbyItems.length) - renderedCount;
-  if (remaining <= 0) {
-    ensureAllPrompt();
-    return;
-  }
-  loadingMore = true;
-  const take = Math.min(count, remaining);
-  const slice = nearbyItems.slice(renderedCount, renderedCount + take);
-  removeAllPrompt();
-  for (const item of slice) {
-    RAIL.appendChild(createListingTileCard(item));
-  }
-  renderedCount += slice.length;
-  ensureAllPrompt();
-  loadingMore = false;
-}
-
-function renderInitial(items) {
-  if (!RAIL) return;
-  nearbyItems = items;
-  renderedCount = 0;
-  hasAllPrompt = false;
-  RAIL.innerHTML = "";
-  setCountBadge(items.length);
-  appendNext(INITIAL_COUNT);
-  requestAnimationFrame(() => {
-    if (renderedCount < Math.min(INITIAL_COUNT, nearbyItems.length)) {
-      appendNext(Math.min(INITIAL_COUNT, nearbyItems.length) - renderedCount);
-    }
-    onRailScroll();
-  });
-}
-
-function bindSectionVisibility() {
-  const section = RAIL?.closest(".hf-section");
-  if (!section || section.dataset.nearbyVisBound === "1") return;
-  section.dataset.nearbyVisBound = "1";
-  const io = new IntersectionObserver(
-    (entries) => {
-      for (const entry of entries) {
-        if (entry.isIntersecting) onRailScroll();
-      }
-    },
-    { threshold: 0.05 }
-  );
-  io.observe(section);
-}
-
-function onRailScroll() {
-  if (!RAIL || !nearbyItems.length) return;
-  if (renderedCount >= Math.min(RAIL_CAP, nearbyItems.length)) {
-    ensureAllPrompt();
-    return;
-  }
-  const nearEnd = RAIL.scrollLeft + RAIL.clientWidth >= RAIL.scrollWidth - 120;
-  if (nearEnd) appendNext(SCROLL_BATCH);
-}
-
-function bindRailLazy() {
-  if (!RAIL || RAIL.dataset.nearbyLazyBound === "1") return;
-  RAIL.dataset.nearbyLazyBound = "1";
-  RAIL.addEventListener("scroll", onRailScroll, { passive: true });
-  const io = new IntersectionObserver(
-    (entries) => {
-      for (const entry of entries) {
-        if (entry.isIntersecting) onRailScroll();
-      }
-    },
-    { root: RAIL, rootMargin: "0px 80px 0px 0px", threshold: 0.01 }
-  );
-  const watch = () => {
-    const last = RAIL.querySelector(".hf-card--listing:last-of-type");
-    if (last) io.observe(last);
-  };
-  watch();
-  const mo = new MutationObserver(watch);
-  mo.observe(RAIL, { childList: true });
-}
-
-function readCache(postal, radiusKm) {
-  try {
-    const data = JSON.parse(sessionStorage.getItem(CACHE_KEY) || "null");
-    if (!data || !Array.isArray(data.items)) return null;
-    if (data.postal !== postal || Number(data.radiusKm) !== Number(radiusKm)) return null;
-    if (Date.now() - Number(data.at || 0) > CACHE_TTL_MS) return null;
-    return data;
-  } catch {
-    return null;
-  }
-}
-
-function writeCache(postal, radiusKm, items, meta = {}) {
-  try {
-    sessionStorage.setItem(
-      CACHE_KEY,
-      JSON.stringify({
-        postal,
-        radiusKm,
-        at: Date.now(),
-        city: meta.city || "",
-        items: items.map(slimListingTile),
-      })
-    );
-  } catch {
-  }
-}
-
-async function loadNearbyFresh(postal, radiusKm) {
-  const all = await fetchListings({ limit: 50, status: "feladott" });
-  const autos = sortByDate(filterAutoListings(all));
+async function filterNearbyAutoBatch(batch, postal, radiusKm) {
+  const autos = filterAutoListings(batch || []);
+  if (!autos.length) return [];
   const filter = await buildNearbyFilter({ items: autos, postal, radiusKm });
-  const nearby = autos.filter((item) => filter.listingIds.has(item.id)).map(slimListingTile);
-  writeCache(postal, radiusKm, nearby, { city: filter.origin?.city || "" });
+  return autos
+    .filter((item) => filter.listingIds.has(item.id))
+    .map((item) => slimListingTile(item))
+    .map((item) => ({ ...item, __nearbyCity: filter.origin?.city || "" }));
+}
+
+async function loadNearbyFresh({ postal, radiusKm }) {
+  pageState = { postal, radiusKm, offset: 0, hasMore: false };
+  let city = "";
+  const result = await fetchTilePagesUntil({
+    vertical: "auto",
+    wantCount: TILE_PAGE_INITIAL,
+    filterBatch: async (batch) => {
+      const rows = await filterNearbyAutoBatch(batch, postal, radiusKm);
+      if (!city && rows[0]?.__nearbyCity) city = rows[0].__nearbyCity;
+      return rows.map(({ __nearbyCity, ...rest }) => rest);
+    },
+  });
+  pageState.offset = result.offset;
+  pageState.hasMore = result.hasMore;
   return {
-    nearby,
-    city: filter.origin?.city || "",
+    items: result.items,
+    city,
     href: autoNearbyHref(postal, radiusKm),
+    hasMore: result.hasMore,
+    total: result.total,
   };
 }
 
-async function initHubNearbyCars() {
-  if (!RAIL) return;
+async function loadNearbyMore() {
+  const { postal, radiusKm, offset, hasMore } = pageState;
+  if (!hasMore || postal.length !== 4) return { items: [], hasMore: false };
+  const result = await fetchTilePagesUntil({
+    vertical: "auto",
+    offset,
+    wantCount: TILE_PAGE_MORE,
+    filterBatch: async (batch) => {
+      const rows = await filterNearbyAutoBatch(batch, postal, radiusKm);
+      return rows.map(({ __nearbyCity, ...rest }) => rest);
+    },
+  });
+  pageState.offset = result.offset;
+  pageState.hasMore = result.hasMore;
+  return {
+    items: result.items,
+    hasMore: result.hasMore,
+    total: result.total,
+  };
+}
 
-  if (RAIL.dataset.listingOpenBound !== "1") {
-    RAIL.dataset.listingOpenBound = "1";
-    bindListingOpen(RAIL);
+function ensureRail() {
+  const railEl = document.getElementById("hub-nearby-rail");
+  if (!railEl) return null;
+  if (!railApi) {
+    railApi = initHubListingRail({
+      railEl,
+      statusEl: document.getElementById("hub-nearby-status"),
+      countEl: document.getElementById("hub-nearby-count"),
+      allLinkEl: document.getElementById("hub-nearby-all"),
+      cacheKey: CACHE_KEY,
+      defaultAllHref: "/auto.html?nearby=1",
+      noun: "autó",
+      nounPlural: "autó",
+      needsPostal: true,
+      loadFresh: loadNearbyFresh,
+      loadMoreFresh: loadNearbyMore,
+    });
   }
-  bindRailLazy();
-  bindSectionVisibility();
-
-  const profile = getAuthUser()?.profile ?? null;
-  ensureNearbyPrefsStored(profile);
-  const { postal, radiusKm } = readNearbyPrefs(profile);
-  radiusLabel = radiusKm;
-  setHubSectionVisible(RAIL, false);
-
-  if (ALL_LINK && postal.length === 4) {
-    ALL_LINK.href = autoNearbyHref(postal, radiusKm);
-    allHref = ALL_LINK.href;
-  }
-
-  if (postal.length !== 4) {
-    renderInitial([]);
-    setStatus("", { hidden: true });
-    restoreListingReturn();
-    return;
-  }
-
-  const cached = readCache(postal, radiusKm);
-  if (cached?.items?.length) {
-    cityLabel = cached.city || "";
-    allHref = autoNearbyHref(postal, radiusKm);
-    if (ALL_LINK) ALL_LINK.href = allHref;
-    setHubSectionVisible(RAIL, true);
-    renderInitial(cached.items);
-    setStatus(
-      `${cached.items.length} autó${cityLabel ? ` ${cityLabel}` : ""} ${radiusKm} km-en belül.`,
-      { hidden: true }
-    );
-    restoreListingReturn();
-    loadNearbyFresh(postal, radiusKm)
-      .then((fresh) => {
-        if (!fresh.nearby.length) {
-          renderInitial([]);
-          setStatus("", { hidden: true });
-          setHubSectionVisible(RAIL, false);
-          return;
-        }
-        const sameIds =
-          fresh.nearby.length === nearbyItems.length &&
-          fresh.nearby.every((item, i) => Number(item.id) === Number(nearbyItems[i]?.id));
-        if (sameIds) return;
-        cityLabel = fresh.city;
-        allHref = fresh.href;
-        if (ALL_LINK) ALL_LINK.href = allHref;
-        setHubSectionVisible(RAIL, true);
-        const keepScroll = RAIL.scrollLeft;
-        renderInitial(fresh.nearby);
-        RAIL.scrollLeft = keepScroll;
-      })
-      .catch(() => {});
-    return;
-  }
-
-  setStatus("Közeli autók betöltése…");
-  try {
-    const fresh = await loadNearbyFresh(postal, radiusKm);
-    allHref = fresh.href;
-    cityLabel = fresh.city;
-    if (ALL_LINK) ALL_LINK.href = allHref;
-
-    if (!fresh.nearby.length) {
-      renderInitial([]);
-      setStatus("", { hidden: true });
-      setHubSectionVisible(RAIL, false);
-      restoreListingReturn();
-      return;
-    }
-
-    setHubSectionVisible(RAIL, true);
-    renderInitial(fresh.nearby);
-    setStatus(`${fresh.nearby.length} autó ${cityLabel} ${radiusKm} km-en belül.`, { hidden: true });
-  } catch (error) {
-    renderInitial([]);
-    setStatus("", { hidden: true });
-    setHubSectionVisible(RAIL, false);
-    console.warn("hub nearby cars:", error);
-  }
-  restoreListingReturn();
+  return railApi;
 }
 
 let bootGen = 0;
 
 async function bootHubNearbyCars() {
-  if (!RAIL) return;
+  const api = ensureRail();
+  if (!api) return;
   const gen = ++bootGen;
   if (isLoggedIn()) {
     try {
@@ -311,8 +115,10 @@ async function bootHubNearbyCars() {
     }
   }
   if (gen !== bootGen) return;
-  ensureNearbyPrefsStored(getAuthUser()?.profile ?? null);
-  await initHubNearbyCars();
+  const profile = getAuthUser()?.profile ?? null;
+  ensureNearbyPrefsStored(profile);
+  const { postal, radiusKm } = readNearbyPrefs(profile);
+  await api.start({ postal, radiusKm });
 }
 
 function scheduleHubNearbyBoot() {
@@ -327,7 +133,8 @@ window.addEventListener("storage", (event) => {
 });
 window.addEventListener("bymy-nearby-prefs-changed", scheduleHubNearbyBoot);
 window.addEventListener("pageshow", (event) => {
-  const hasCards = Boolean(RAIL?.querySelector(".hf-card--listing"));
+  const rail = document.getElementById("hub-nearby-rail");
+  const hasCards = Boolean(rail?.querySelector(".hf-card--listing"));
   if (event.persisted || !hasCards) scheduleHubNearbyBoot();
   else restoreListingReturn();
 });

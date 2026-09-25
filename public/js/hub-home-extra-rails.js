@@ -1,4 +1,3 @@
-import { fetchListings, fetchListing } from "./db-client.js?v=nearby2";
 import { getAuthUser, refreshAuthSession } from "./site-auth.js?v=nearbyBoot1";
 import { getParkplatz, PARKPLATZ_CHANGED } from "./fok-data.js?v=favShow2";
 import {
@@ -16,34 +15,72 @@ import {
   STORAGE_POSTAL,
   STORAGE_RADIUS,
 } from "./nearby-search.js?v=nearbyPrefs2";
-import { createPromptCard, initHubListingRail, sortByDate } from "./hub-listing-rail.js?v=immoRails3";
+import { initHubListingRail } from "./hub-listing-rail.js?v=tilePage1";
+import {
+  TILE_PAGE_INITIAL,
+  TILE_PAGE_MORE,
+  fetchTilePagesUntil,
+} from "./listing-tile-pager.js?v=tilePage1";
 
 function el(id) {
   return document.getElementById(id);
 }
 
-async function loadNearbyIngatlan({ postal, radiusKm, uzletag, tipus, cacheKey }) {
-  const all = await fetchListings({ limit: 50, status: "feladott", vertical: "ingatlan" });
-  const pool = sortByDate(filterIngatlanListings(all, { uzletag, tipus }));
-  const filter = await buildNearbyFilter({ items: pool, postal, radiusKm });
-  const nearby = pool.filter((item) => filter.listingIds.has(item.id)).map(slimListingTile);
-  try {
-    sessionStorage.setItem(
-      cacheKey,
-      JSON.stringify({
-        postal,
-        radiusKm,
-        at: Date.now(),
-        city: filter.origin?.city || "",
-        items: nearby,
-      })
-    );
-  } catch {
+function makeIngatlanLoader({ uzletag, tipus, cacheKey }) {
+  const state = { postal: "", radiusKm: 30, offset: 0, hasMore: false };
+
+  async function filterBatch(batch, postal, radiusKm) {
+    const pool = filterIngatlanListings(batch || [], { uzletag, tipus });
+    if (!pool.length) return [];
+    const filter = await buildNearbyFilter({ items: pool, postal, radiusKm });
+    return pool
+      .filter((item) => filter.listingIds.has(item.id))
+      .map((item) => slimListingTile(item))
+      .map((item) => ({ ...item, __nearbyCity: filter.origin?.city || "" }));
   }
+
   return {
-    items: nearby,
-    city: filter.origin?.city || "",
-    href: ingatlanNearbyHref(postal, radiusKm, { uzletag, tipus }),
+    async loadFresh({ postal, radiusKm }) {
+      state.postal = postal;
+      state.radiusKm = radiusKm;
+      state.offset = 0;
+      state.hasMore = false;
+      let city = "";
+      const result = await fetchTilePagesUntil({
+        vertical: "ingatlan",
+        wantCount: TILE_PAGE_INITIAL,
+        filterBatch: async (batch) => {
+          const rows = await filterBatch(batch, postal, radiusKm);
+          if (!city && rows[0]?.__nearbyCity) city = rows[0].__nearbyCity;
+          return rows.map(({ __nearbyCity, ...rest }) => rest);
+        },
+      });
+      state.offset = result.offset;
+      state.hasMore = result.hasMore;
+      void cacheKey;
+      return {
+        items: result.items,
+        city,
+        href: ingatlanNearbyHref(postal, radiusKm, { uzletag, tipus }),
+        hasMore: result.hasMore,
+        total: result.total,
+      };
+    },
+    async loadMoreFresh() {
+      if (!state.hasMore || state.postal.length !== 4) return { items: [], hasMore: false };
+      const result = await fetchTilePagesUntil({
+        vertical: "ingatlan",
+        offset: state.offset,
+        wantCount: TILE_PAGE_MORE,
+        filterBatch: async (batch) => {
+          const rows = await filterBatch(batch, state.postal, state.radiusKm);
+          return rows.map(({ __nearbyCity, ...rest }) => rest);
+        },
+      });
+      state.offset = result.offset;
+      state.hasMore = result.hasMore;
+      return { items: result.items, hasMore: result.hasMore, total: result.total };
+    },
   };
 }
 
@@ -59,6 +96,7 @@ function initNearbyIngatlanRail({
   nounPlural,
   defaultHref,
 }) {
+  const loader = makeIngatlanLoader({ uzletag, tipus, cacheKey });
   return initHubListingRail({
     railEl: el(railId),
     statusEl: el(statusId),
@@ -69,14 +107,12 @@ function initNearbyIngatlanRail({
     noun,
     nounPlural,
     needsPostal: true,
-    loadFresh: ({ postal, radiusKm }) =>
-      loadNearbyIngatlan({ postal, radiusKm, uzletag, tipus, cacheKey }),
+    loadFresh: loader.loadFresh,
+    loadMoreFresh: loader.loadMoreFresh,
   });
 }
 
-async function initFavoritesRail({ postal, radiusKm }) {
-  void postal;
-  void radiusKm;
+async function initFavoritesRail() {
   const RAIL = el("hub-fav-rail");
   const STATUS = el("hub-fav-status");
   const COUNT_EL = el("hub-fav-count");
@@ -117,7 +153,40 @@ async function initFavoritesRail({ postal, radiusKm }) {
     );
   }
 
-  function paintItems(items) {
+  let items = [];
+  let rendered = 0;
+  let loading = false;
+
+  function ensureAllPrompt() {
+    RAIL.querySelectorAll(".hf-card--prompt-all").forEach((node) => node.remove());
+    if (items.length <= rendered) return;
+    const more = document.createElement("a");
+    more.className = "hf-card hf-card--listing hf-card--prompt hf-card--prompt-all";
+    more.href = "/beallitasok.html?szekcio=parkolo";
+    more.setAttribute("role", "listitem");
+    more.innerHTML = `<span class="hf-card-media" aria-hidden="true"></span><span class="hf-card-label">Összes megnyitása</span>`;
+    RAIL.appendChild(more);
+  }
+
+  function appendNext(count) {
+    if (loading) return;
+    const remaining = items.length - rendered;
+    if (remaining <= 0) {
+      ensureAllPrompt();
+      return;
+    }
+    loading = true;
+    RAIL.querySelectorAll(".hf-card--prompt-all").forEach((node) => node.remove());
+    const slice = items.slice(rendered, rendered + count);
+    for (const item of slice) RAIL.appendChild(createListingTileCard(item));
+    rendered += slice.length;
+    ensureAllPrompt();
+    loading = false;
+  }
+
+  function paintItems(list) {
+    items = list;
+    rendered = 0;
     RAIL.innerHTML = "";
     if (!items.length) {
       setCount(0);
@@ -126,16 +195,19 @@ async function initFavoritesRail({ postal, radiusKm }) {
     }
     setSectionVisible(true);
     setCount(items.length);
-    const INITIAL = 9;
-    for (const item of items.slice(0, INITIAL)) {
-      RAIL.appendChild(createListingTileCard(item));
-    }
-    if (items.length > INITIAL) {
-      const more = createPromptCard("Összes megnyitása", "/beallitasok.html?szekcio=parkolo");
-      more.classList.add("hf-card--prompt-all");
-      RAIL.appendChild(more);
-    }
+    appendNext(TILE_PAGE_INITIAL);
     setStatus("", { hidden: true });
+  }
+
+  function onScroll() {
+    if (!items.length) return;
+    const nearEnd = RAIL.scrollLeft + RAIL.clientWidth >= RAIL.scrollWidth - 140;
+    if (nearEnd) appendNext(TILE_PAGE_MORE);
+  }
+
+  if (RAIL.dataset.favLazyBound !== "1") {
+    RAIL.dataset.favLazyBound = "1";
+    RAIL.addEventListener("scroll", onScroll, { passive: true });
   }
 
   setStatus("Kedvencek betöltése…", { hidden: true });
@@ -166,33 +238,13 @@ async function initFavoritesRail({ postal, radiusKm }) {
       return;
     }
 
-    // Azonnal mutasd a mentett listát (kép/cím a Parkolóból), majd frissíts API-ból.
-    paintItems(rowsToTiles(saved.slice(0, 20)));
+    // Csak csempe-adat a Parkolóból — teljes hirdetés csak megnyitáskor.
+    paintItems(rowsToTiles(saved));
     restoreListingReturn();
-
-    const enriched = await Promise.all(
-      saved.slice(0, 20).map(async (row) => {
-        try {
-          const listing = await fetchListing(row.id);
-          if (listing && (listing.status || "feladott") === "feladott") {
-            return slimListingTile(listing);
-          }
-        } catch {
-        }
-        return slimListingTile({
-          id: row.id,
-          hirdetes_cime: row.title,
-          fo_kep: row.imageUrl || "",
-          preview: { title: row.title, price: row.price, imageUrl: row.imageUrl || "" },
-        });
-      })
-    );
-
-    if (enriched.length) paintItems(enriched);
   } catch {
     const email = getAuthUser()?.email;
     const saved = email ? getParkplatz(email) : [];
-    if (saved.length) paintItems(rowsToTiles(saved.slice(0, 20)));
+    if (saved.length) paintItems(rowsToTiles(saved));
     else {
       RAIL.innerHTML = "";
       setCount(0);
@@ -213,38 +265,38 @@ async function init() {
 
   if (!lakasRail) {
     lakasRail = initNearbyIngatlanRail({
-    railId: "hub-nearby-lakas-rail",
-    statusId: "hub-nearby-lakas-status",
-    countId: "hub-nearby-lakas-count",
-    allId: "hub-nearby-lakas-all",
-    cacheKey: "bymy-hub-nearby-lakas-v1",
-    uzletag: "elado",
-    tipus: "lakas",
-    noun: "lakás",
-    nounPlural: "lakás",
-    defaultHref: "/ingatlan.html?uzletag=elado&kat=lakas",
+      railId: "hub-nearby-lakas-rail",
+      statusId: "hub-nearby-lakas-status",
+      countId: "hub-nearby-lakas-count",
+      allId: "hub-nearby-lakas-all",
+      cacheKey: "bymy-hub-nearby-lakas-v2",
+      uzletag: "elado",
+      tipus: "lakas",
+      noun: "lakás",
+      nounPlural: "lakás",
+      defaultHref: "/ingatlan.html?uzletag=elado&kat=lakas",
     });
   }
 
   if (!hazRail) {
     hazRail = initNearbyIngatlanRail({
-    railId: "hub-nearby-haz-rail",
-    statusId: "hub-nearby-haz-status",
-    countId: "hub-nearby-haz-count",
-    allId: "hub-nearby-haz-all",
-    cacheKey: "bymy-hub-nearby-haz-v1",
-    uzletag: "elado",
-    tipus: "haz",
-    noun: "ház",
-    nounPlural: "ház",
-    defaultHref: "/ingatlan.html?uzletag=elado&kat=haz",
+      railId: "hub-nearby-haz-rail",
+      statusId: "hub-nearby-haz-status",
+      countId: "hub-nearby-haz-count",
+      allId: "hub-nearby-haz-all",
+      cacheKey: "bymy-hub-nearby-haz-v2",
+      uzletag: "elado",
+      tipus: "haz",
+      noun: "ház",
+      nounPlural: "ház",
+      defaultHref: "/ingatlan.html?uzletag=elado&kat=haz",
     });
   }
 
   await Promise.all([
     lakasRail?.start({ postal, radiusKm }),
     hazRail?.start({ postal, radiusKm }),
-    initFavoritesRail({ postal, radiusKm }),
+    initFavoritesRail(),
   ]);
 }
 

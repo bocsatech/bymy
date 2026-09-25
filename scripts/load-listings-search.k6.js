@@ -44,10 +44,15 @@ export const options = {
 };
 
 const VERTICALS = ["auto", "ingatlan", "teher", ""];
+const LIMIT = Math.max(1, Number(__ENV.LIMIT || 20) || 20);
+const TILE = String(__ENV.TILE || "1") === "1";
+const OFFSETS = [0, 20, 30, 40];
 
 export default function () {
   const vertical = VERTICALS[Math.floor(Math.random() * VERTICALS.length)];
-  let path = "/api/listings?limit=50&status=feladott";
+  const offset = OFFSETS[Math.floor(Math.random() * OFFSETS.length)];
+  let path = `/api/listings?limit=${LIMIT}&offset=${offset}&status=feladott`;
+  if (TILE) path += "&tile=1";
   if (vertical) path += `&vertical=${encodeURIComponent(vertical)}`;
 
   const url = `${BASE_URL}${path}`;

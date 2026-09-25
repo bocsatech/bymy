@@ -1,4 +1,4 @@
-import { HOME_CATEGORIES, autoCategoryHref } from "./home-category-bar.js?v=menuRails1";
+import { HOME_CATEGORIES, autoCategoryHref } from "./home-category-bar.js?v=catLabel1";
 import {
   categoriesForVertical,
   partnerCategoryImageUrl,
@@ -37,8 +37,7 @@ function createCategoryCard(cat, { eager = false } = {}) {
   const fetchPriority = eager ? ' fetchpriority="high"' : "";
   link.innerHTML = `
     <span class="hf-card-media"><img src="${escapeHtml(categoryListImageUrl(cat))}?v=${IMG_V}" alt="" width="360" height="220" loading="${loading}" decoding="async"${fetchPriority} /></span>
-    <span class="hf-card-label">${escapeHtml(cat.label)}</span>
-    <span class="hf-card-sub">${escapeHtml(cat.sub)}</span>`;
+    <span class="hf-card-label">${escapeHtml(cat.label)}</span>`;
   return link;
 }
 

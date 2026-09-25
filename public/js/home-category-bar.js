@@ -10,14 +10,14 @@ export const HOME_CATEGORY_IDS = [
 ];
 
 export const HOME_CATEGORIES = [
-  { id: "uj", label: "Új", sub: "Friss modell", icon: "✨", image: "uj.png" },
-  { id: "benzin", label: "Benzin", sub: "Otto motor", icon: "⛽", image: "benzin.png" },
-  { id: "diesel", label: "Diesel", sub: "Dízelmotor", icon: "🛢", image: "diesel.png" },
-  { id: "elektromos", label: "Elektromos", sub: "Zöld hajtás", icon: "⚡", image: "elektromos.png" },
-  { id: "hybrid", label: "Hybrid", sub: "Kombinált", icon: "🔋", image: "hybrid.png" },
-  { id: "leasing", label: "Leasing", sub: "Havi díj", icon: "📄", image: "leasing.png" },
-  { id: "berelheto", label: "Bérelhető", sub: "Rövid táv", icon: "🔑", image: "berelheto.png" },
-  { id: "ot", label: "OT", sub: "Oldtimer", icon: "🏛", image: "ot.png" },
+  { id: "uj", label: "Új", icon: "✨", image: "uj.png" },
+  { id: "benzin", label: "Benzin", icon: "⛽", image: "benzin.png" },
+  { id: "diesel", label: "Dizel", icon: "🛢", image: "diesel.png" },
+  { id: "elektromos", label: "Elektromos", icon: "⚡", image: "elektromos.png" },
+  { id: "hybrid", label: "Hybrid", icon: "🔋", image: "hybrid.png" },
+  { id: "leasing", label: "Leasing", icon: "📄", image: "leasing.png" },
+  { id: "berelheto", label: "Bérelhető", icon: "🔑", image: "berelheto.png" },
+  { id: "ot", label: "OT", icon: "🏛", image: "ot.png" },
 ];
 
 export function autoCategoryHref(categoryId) {
@@ -52,7 +52,7 @@ export function renderHomeCategoryBar(root) {
       </span>
       <span class="home-category-foot">
         <span class="home-category-icon" aria-hidden="true">${cat.icon}</span>
-        <span class="home-category-text"><strong>${cat.label}</strong><span>${cat.sub}</span></span>
+        <span class="home-category-text"><strong>${cat.label}</strong></span>
       </span>`;
     track.appendChild(button);
   }

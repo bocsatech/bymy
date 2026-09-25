@@ -11,6 +11,7 @@ import {
   getLatestListing,
   listListingsWithPreview,
   countNavListings,
+  countListingsPublic,
   deleteListing,
   dbStats,
   listFieldDefs,
@@ -1019,6 +1020,16 @@ async function handleListingsApi(req, res, pathname) {
       sendJson(res, 200, { listings });
       return;
     }
+    // Opcionális bot-védő — alapból ki (CF + cache véd). Bekapcsolás: LISTINGS_PUBLIC_RATE_PER_MIN=2400
+    const listRatePerMin = Number(process.env.LISTINGS_PUBLIC_RATE_PER_MIN);
+    const listRate =
+      Number.isFinite(listRatePerMin) && listRatePerMin > 0 ? Math.floor(listRatePerMin) : 0;
+    if (
+      listRate > 0 &&
+      !assertPublicListingRate(req, res, "listing-list", { limit: listRate, windowMs: 60 * 1000 })
+    ) {
+      return;
+    }
     const limit = Math.min(Math.max(Number(url.searchParams.get("limit") ?? 20), 1), 100);
     const offset = Math.max(0, Math.floor(Number(url.searchParams.get("offset") ?? 0)));
     const tileMode =
@@ -1028,14 +1039,7 @@ async function handleListingsApi(req, res, pathname) {
     const listings = await listListingsWithPreview({ limit, offset, status, vertical });
     let total = null;
     try {
-      const counts = await countNavListings({ status: status || "feladott" });
-      const v = String(vertical || "")
-        .trim()
-        .toLowerCase();
-      if (v === "auto") total = counts.auto;
-      else if (v === "teher") total = counts.teher;
-      else if (v === "ingatlan") total = counts.ingatlan;
-      else total = counts.auto + counts.teher + counts.ingatlan;
+      total = await countListingsPublic({ status: status || "feladott", vertical });
     } catch {
       total = offset + listings.length;
     }
@@ -1053,7 +1057,13 @@ async function handleListingsApi(req, res, pathname) {
         limit,
         hasMore,
       },
-      { "Cache-Control": "public, max-age=30, stale-while-revalidate=90" }
+      {
+        // Böngésző + CDN (Cloudflare / Vercel): rövid TTL, SWR.
+        "Cache-Control": "public, max-age=30, s-maxage=60, stale-while-revalidate=120",
+        "CDN-Cache-Control": "public, max-age=60, stale-while-revalidate=120",
+        "Cloudflare-CDN-Cache-Control": "public, max-age=60, stale-while-revalidate=120",
+        Vary: "Accept-Encoding",
+      }
     );
     return;
   }
@@ -2863,9 +2873,15 @@ export async function handleHttpRequest(req, res) {
 
   if (pathname === "/api/nav/counts" && req.method === "GET") {
     try {
+      if (!assertPublicListingRate(req, res, "nav-counts", { limit: 120, windowMs: 60 * 1000 })) {
+        return;
+      }
       sendJson(res, 200, await countNavListings({ status: "feladott" }), {
-        // Auth-kötött válasz — ne a CDN cache-eljen 0-t / régi számot.
-        "Cache-Control": "private, max-age=15, stale-while-revalidate=30",
+        // Publikus számok — rövid CDN cache OK (auth nélkül ugyanaz).
+        "Cache-Control": "public, max-age=30, s-maxage=60, stale-while-revalidate=120",
+        "CDN-Cache-Control": "public, max-age=60, stale-while-revalidate=120",
+        "Cloudflare-CDN-Cache-Control": "public, max-age=60, stale-while-revalidate=120",
+        Vary: "Accept-Encoding",
       });
     } catch (error) {
       console.warn("Nav counts:", error.message ?? error);

@@ -1,5 +1,5 @@
 /** Vételár melletti piaci árjelző (sávok + Kevés / Jó ár / Sok). */
-import { parsePriceDigits } from "./price-input.js?v=priceFmt1";
+import { parseKmDigits } from "./km-input.js?v=kmFmt1";
 
 const DEBOUNCE_MS = 400;
 
@@ -48,8 +48,8 @@ function readParams() {
     modell: fieldValue("modell"),
     tipus: fieldValue("tipus") || fieldValue("egyeb_tipus"),
     gyartasi_ev: fieldValue("gyartasi_ev"),
-    km: parsePriceDigits(el("km")?.value || "") || "",
-    ar: parsePriceDigits(el("vetelar")?.value || "") || "",
+    km: parseKmDigits(el("km")?.value || "") || "",
+    ar: parseKmDigits(el("vetelar")?.value || "") || "",
   };
 }
 

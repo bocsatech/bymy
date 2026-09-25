@@ -65,3 +65,14 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .suffix-field > .price-
   width: auto;
   max-width: none;
 }
+
+/* Desk / mobil: a Ft után is férjen a sáv + felirat (ne vágja le a cella) */
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form .suffix-field {
+  flex-wrap: wrap;
+  row-gap: 0.35rem;
+  overflow: visible !important;
+}
+
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form .suffix-field > .price-market-hint {
+  order: 3;
+}

@@ -473,7 +473,6 @@ function render(view, listing, related) {
           ${
             images.length
               ? `<div class="hd-stage-tools">
-                  <button type="button" class="hd-stage-tool" data-hd-open>${ICON.grid} Összes kép</button>
                   <button type="button" class="hd-stage-tool" data-hd-open>${ICON.zoom} Nagyítás</button>
                 </div>`
               : ""

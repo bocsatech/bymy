@@ -150,7 +150,8 @@
     white-space: nowrap;
   }
 
-  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link--kezdolap {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link--kezdolap,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link--auto {
     padding: 0 !important;
     border-bottom: 2px solid transparent !important;
     height: 34px !important;
@@ -158,7 +159,9 @@
     align-items: center !important;
   }
 
-  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-kezdolap-img {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-kezdolap-img,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-auto-img,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-tile {
     width: 86px !important;
     height: 34px !important;
     border-radius: 8px !important;
@@ -170,7 +173,8 @@
     padding-bottom: 2px !important;
   }
 
-  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link--kezdolap.active {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link--kezdolap.active,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link--auto.active {
     padding-bottom: 0 !important;
     border-bottom-color: var(--ad-yellow) !important;
   }

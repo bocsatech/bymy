@@ -362,10 +362,15 @@
       '" href="/" aria-label="Kezdőlap">' +
       '<img class="hub-nav-kezdolap-img" src="/images/kezdolap-nav.png?v=kezdolapNav1" alt="" width="72" height="28" decoding="async" />' +
       "</a>" +
-      '<a class="hub-nav-link' +
+      '<a class="hub-nav-link hub-nav-link--auto' +
       navActiveClass("auto") +
-      '" href="/auto.html">Autó ' +
-      navCountHtml("auto", counts) +
+      '" href="/auto.html" aria-label="Autó">' +
+      '<span class="hub-nav-tile">' +
+      '<img class="hub-nav-auto-img" src="/images/auto-nav.png?v=autoNav1" alt="" width="72" height="28" decoding="async" />' +
+      '<span class="hub-nav-tile-count nav-count" aria-hidden="true">' +
+      formatNavCount(counts.auto) +
+      "</span>" +
+      "</span>" +
       "</a>" +
       '<a class="hub-nav-link' +
       navActiveClass("teherauto") +

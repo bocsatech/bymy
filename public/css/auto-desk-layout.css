@@ -1864,13 +1864,133 @@ html[data-theme="dark"] body.site-app > .auto-price-suggest .auto-price-suggest_
 }
 
 @media (max-width: 900px) {
-  body.home-page[data-site-page="teherauto"] {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) {
     --ad-panel: #fff;
     --ad-line: #d4d4d4;
     --ad-text: #111;
     --ad-muted: #6b6b6b;
     --ad-yellow: #f0c52c;
     --ad-surface-2: #f0f0f0;
+  }
+
+  /* Fullscreen BM pickers (Kivitel / üzemanyag / …) — ne vágja le a hero overflow. */
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-bm-open .auto-search-hero,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-bm-open .auto-search-hero__stage,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-bm-open .auto-search-panel {
+    overflow: visible !important;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-panel {
+    position: fixed !important;
+    inset: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    height: 100% !important;
+    height: 100dvh !important;
+    z-index: 11000 !important;
+    display: flex;
+    flex-direction: column;
+    background: var(--ad-panel, #fff);
+    border: 0 !important;
+    border-radius: 0 !important;
+    overflow: hidden;
+    box-sizing: border-box;
+    margin: 0 !important;
+    transform: none !important;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-panel[hidden],
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-panel.is-closed {
+    display: none !important;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-panel .auto-bm-panel__chrome {
+    display: grid;
+    grid-template-columns: 40px 1fr auto;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    padding-top: calc(10px + env(safe-area-inset-top, 0px));
+    border-bottom: 1px solid var(--ad-line, #d4d4d4);
+    background: var(--ad-surface-2, #f0f0f0);
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-panel .auto-bm-panel__body {
+    flex: 1 1 auto;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 12px;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-panel .auto-bm-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 52px;
+    padding: 0 14px;
+    color: var(--ad-text, #111);
+    font-size: 15px;
+    cursor: pointer;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-panel .auto-bm-toggle input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-panel .auto-bm-switch {
+    width: 46px;
+    height: 28px;
+    border-radius: 999px;
+    background: #6b7280;
+    border: 2px solid #fff;
+    box-sizing: border-box;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2);
+    position: relative;
+    flex: 0 0 auto;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-panel .auto-bm-switch::after {
+    content: "";
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+    transition: transform 0.15s;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-panel .auto-bm-toggle input:checked + .auto-bm-switch {
+    background: #34c759;
+    border-color: #34c759;
+    box-shadow: none;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-panel .auto-bm-toggle input:checked + .auto-bm-switch::after {
+    transform: translateX(16px);
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-panel .auto-bm-group {
+    border: 1px solid var(--ad-line, #d4d4d4);
+    border-radius: 10px;
+    background: var(--ad-panel, #fff);
+    overflow: hidden;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-panel .auto-bm-row + .auto-bm-row {
+    border-top: 1px solid var(--ad-line, #d4d4d4);
   }
 
   body.home-page[data-site-page="teherauto"] .auto-kivitel-field {

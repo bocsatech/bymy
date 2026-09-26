@@ -201,7 +201,8 @@ export async function mountAutoKivitelPicker(form) {
     </div>
     <div class="auto-bm-panel__body" data-auto-kivitel-body></div>
   `;
-  document.body.appendChild(panel);
+  const hero = document.querySelector(".auto-search-hero") || form.closest(".auto-search-hero") || form;
+  hero.appendChild(panel);
   const bodyEl = panel.querySelector("[data-auto-kivitel-body]");
 
   function selectedLabelsHierarchical() {
@@ -327,7 +328,7 @@ export async function mountAutoKivitelPicker(form) {
 
   function openPanel() {
     panel.hidden = false;
-    panel.style.removeProperty("display");
+    panel.style.setProperty("display", "flex", "important");
     panel.classList.remove("is-closed");
     document.body.classList.add("auto-bm-open");
     renderList();

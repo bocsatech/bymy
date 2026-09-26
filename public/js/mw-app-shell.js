@@ -276,7 +276,7 @@
   }
 
   function ensureDeskHeaderCss() {
-    var href = "/css/site-desk-header.css?v=uzenetekNav1";
+    var href = "/css/site-desk-header.css?v=fiokNav1";
     if (document.querySelector("link[data-site-desk-header-css], link[href*='site-desk-header.css']")) return;
     var link = document.createElement("link");
     link.rel = "stylesheet";
@@ -413,13 +413,17 @@
       '<a class="hub-btn hub-btn--ghost" href="/regisztracio.html" data-auth-register>Regisztráció</a>' +
       "</div>" +
       '<div class="site-header-avatar-wrap" data-avatar-menu data-auth-member hidden>' +
-      '<button type="button" class="site-header-profile" data-auth-avatar data-avatar-toggle aria-expanded="false" aria-label="Fiók" title="Fiók">' +
-      '<span class="site-header-avatar">' +
+      '<button type="button" class="site-header-profile site-header-profile--tile' +
+      (page === "fiok" || page === "beallitasok" ? " active" : "") +
+      '" data-auth-avatar data-avatar-toggle aria-expanded="false" aria-label="Fiók" title="Fiók">' +
+      '<span class="hub-nav-tile">' +
+      '<img class="hub-nav-fiok-img" src="/images/fiok-nav.png?v=fiokNav1" alt="" width="128" height="72" decoding="async" />' +
+      "</span>" +
+      '<span class="site-header-avatar" hidden aria-hidden="true">' +
       '<span data-avatar-letter>A</span>' +
       '<img data-avatar-img alt="" hidden width="44" height="44" />' +
       "</span>" +
-      '<span class="site-header-firstname" data-auth-firstname></span>' +
-      '<svg class="site-header-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+      '<span class="site-header-firstname" data-auth-firstname hidden></span>' +
       "</button></div>" +
       '<a class="hub-btn hub-btn--post" href="' +
       postAdHref() +

@@ -86,6 +86,9 @@ const ADMIN_SECTIONS = [
       { id: "users:private", label: "Privát fiókok", navGroup: "Fiókok" },
       { id: "users:business", label: "Céges fiókok", navGroup: "Fiókok" },
       { id: "users:visitors", label: "Látogatók", navGroup: "Fiókok" },
+      { id: "users:auto-dealers", label: "Autókereskedők", navGroup: "Kereskedők" },
+      { id: "users:immo-dealers", label: "Ingatlankereskedők", navGroup: "Kereskedők" },
+      { id: "users:mixed-dealers", label: "Vegyes", navGroup: "Kereskedők" },
     ],
   },
   {
@@ -645,7 +648,13 @@ const actions = {
     const submitBtn = form.querySelector('button[type="submit"]');
     if (submitBtn) submitBtn.disabled = true;
     try {
-      const accountType = tab === "users:business" ? "business" : "private";
+      const accountType =
+        tab === "users:business" ||
+        tab === "users:auto-dealers" ||
+        tab === "users:immo-dealers" ||
+        tab === "users:mixed-dealers"
+          ? "business"
+          : "private";
       const data = await api("/api/level1/users", {
         method: "POST",
         body: JSON.stringify({
@@ -1827,7 +1836,13 @@ async function loadTab() {
   if (section === "users") {
     if (sub === "visitors") {
       await loadVisitors();
-    } else if (sub === "private" || sub === "business") {
+    } else if (
+      sub === "private" ||
+      sub === "business" ||
+      sub === "auto-dealers" ||
+      sub === "immo-dealers" ||
+      sub === "mixed-dealers"
+    ) {
       users = (await api("/api/level1/users")).users;
     }
   }
@@ -2274,26 +2289,73 @@ function userInitials(user) {
   return email ? email.slice(0, 2).toUpperCase() : "?";
 }
 
+function userCompanyActivities(user) {
+  const raw = user?.companyActivities ?? user?.profile?.companyActivities ?? [];
+  if (Array.isArray(raw)) {
+    return raw.map((v) => String(v ?? "").trim().toLowerCase()).filter(Boolean);
+  }
+  if (typeof raw === "string" && raw.trim()) {
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        return parsed.map((v) => String(v ?? "").trim().toLowerCase()).filter(Boolean);
+      }
+    } catch {
+      /* ignore */
+    }
+    return raw
+      .split(/[,;|]+/)
+      .map((v) => v.trim().toLowerCase())
+      .filter(Boolean);
+  }
+  return [];
+}
+
+/** Autó világ = autó vagy teherautó; ingatlan = ingatlan. */
+function userDealerBuckets(user) {
+  const acts = userCompanyActivities(user);
+  const hasAuto = acts.includes("auto") || acts.includes("teherauto");
+  const hasImmo = acts.includes("ingatlan");
+  return { hasAuto, hasImmo };
+}
+
 function usersView(kind = "private") {
-  const filtered = users.filter((u) => (u.accountType || "private") === kind);
+  const filtered = users.filter((u) => {
+    const type = String(u.accountType || "private").toLowerCase();
+    const isBiz = type === "business" || type === "dealer";
+    if (kind === "private") return !isBiz;
+    if (!isBiz) return false;
+    if (kind === "business") return true;
+    const { hasAuto, hasImmo } = userDealerBuckets(u);
+    if (kind === "auto-dealers") return hasAuto && !hasImmo;
+    if (kind === "immo-dealers") return hasImmo && !hasAuto;
+    if (kind === "mixed-dealers") return hasAuto && hasImmo;
+    return false;
+  });
   const q = usersSearchQuery.trim().toLowerCase();
   const visible = filtered.filter((u) => {
     if (usersStatusFilter === "active" && !u.emailVerified) return false;
     if (usersStatusFilter === "inactive" && u.emailVerified) return false;
     if (!q) return true;
-    const hay = `${u.email || ""} ${u.displayName || ""}`.toLowerCase();
+    const hay = `${u.email || ""} ${u.displayName || ""} ${userCompanyActivities(u).join(" ")}`.toLowerCase();
     return hay.includes(q);
   });
   const cards = visible
     .map((u) => {
       const active = Boolean(u.emailVerified);
       const ads = Number(u.listingCount ?? 0) || 0;
+      const acts = userCompanyActivities(u);
+      const actLabel = acts.length
+        ? acts
+            .map((id) => (id === "teherauto" ? "Teherautó" : id === "ingatlan" ? "Ingatlan" : id === "auto" ? "Autó" : id))
+            .join(" · ")
+        : "";
       return `<article class="users-card">
         <div class="users-card__main">
           <div class="users-card__avatar" aria-hidden="true">${esc(userInitials(u))}</div>
           <div class="users-card__who">
             <div class="users-card__email">${esc(u.email)}</div>
-            <div class="users-card__name">${esc(u.displayName || "—")}</div>
+            <div class="users-card__name">${esc(u.displayName || "—")}${actLabel ? ` · <span class="users-card__acts">${esc(actLabel)}</span>` : ""}</div>
           </div>
           <span class="users-card__status ${active ? "is-on" : "is-off"}">${active ? "aktív" : "inaktív"}</span>
           <div class="users-card__meta">
@@ -2315,8 +2377,22 @@ function usersView(kind = "private") {
     ${info ? `<p class="ok">${esc(info)}</p>` : ""}
     ${err ? `<p class="err">${esc(err)}</p>` : ""}
   `;
-  const title = kind === "business" ? "Céges fiókok" : "Privát fiókok";
-  const emptyLabel = kind === "business" ? "céges" : "privát";
+  const titles = {
+    private: "Privát fiókok",
+    business: "Céges fiókok",
+    "auto-dealers": "Autókereskedők",
+    "immo-dealers": "Ingatlankereskedők",
+    "mixed-dealers": "Vegyes kereskedők",
+  };
+  const emptyLabels = {
+    private: "privát",
+    business: "céges",
+    "auto-dealers": "autókereskedő",
+    "immo-dealers": "ingatlankereskedő",
+    "mixed-dealers": "vegyes",
+  };
+  const title = titles[kind] || "Fiókok";
+  const emptyLabel = emptyLabels[kind] || "ilyen";
   const createForm = `
     <form class="users-create" data-act="createUser">
       <h3 class="users-create__title">Új ${emptyLabel} fiók (teszt)</h3>
@@ -3059,6 +3135,9 @@ function shellBody() {
   if (section === "users") {
     if (sub === "visitors") return visitorsView();
     if (sub === "business") return usersView("business");
+    if (sub === "auto-dealers") return usersView("auto-dealers");
+    if (sub === "immo-dealers") return usersView("immo-dealers");
+    if (sub === "mixed-dealers") return usersView("mixed-dealers");
     return usersView("private");
   }
   if (section === "auto") {

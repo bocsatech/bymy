@@ -388,6 +388,34 @@ body.site-app .hub-nav-tile {
   border-bottom-color: #9ca3af;
 }
 
+/* Aktív menücsempe: sárga keret a kép körül */
+.hub-nav-link--kezdolap.active,
+.hub-nav-link--auto.active,
+.hub-nav-link--teherauto.active,
+.hub-nav-link--ingatlan.active,
+.hub-nav-link--ajanlasok.active,
+body.site-app .hub-nav-link--kezdolap.active,
+body.site-app .hub-nav-link--auto.active,
+body.site-app .hub-nav-link--teherauto.active,
+body.site-app .hub-nav-link--ingatlan.active,
+body.site-app .hub-nav-link--ajanlasok.active {
+  border-bottom-color: transparent;
+}
+
+.hub-nav-link--kezdolap.active .hub-nav-kezdolap-img,
+.hub-nav-link--ajanlasok.active .hub-nav-ajanlasok-img,
+.hub-nav-link--auto.active .hub-nav-tile,
+.hub-nav-link--teherauto.active .hub-nav-tile,
+.hub-nav-link--ingatlan.active .hub-nav-tile,
+body.site-app .hub-nav-link--kezdolap.active .hub-nav-kezdolap-img,
+body.site-app .hub-nav-link--ajanlasok.active .hub-nav-ajanlasok-img,
+body.site-app .hub-nav-link--auto.active .hub-nav-tile,
+body.site-app .hub-nav-link--teherauto.active .hub-nav-tile,
+body.site-app .hub-nav-link--ingatlan.active .hub-nav-tile {
+  box-shadow: 0 0 0 2.5px #f0c52c, 0 2px 10px rgba(240, 197, 44, 0.4);
+  border-radius: 12px;
+}
+
 .hub-nav-link .nav-count {
   font-size: 0.94rem;
   font-weight: 500;

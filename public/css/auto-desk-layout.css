@@ -180,8 +180,8 @@
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link.active {
     color: var(--ad-text) !important;
-    border-bottom: 2px solid var(--ad-yellow) !important;
-    padding-bottom: 2px !important;
+    border-bottom: 2px solid transparent !important;
+    padding-bottom: 0 !important;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link--kezdolap.active,
@@ -190,7 +190,16 @@
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link--ingatlan.active,
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link--ajanlasok.active {
     padding-bottom: 0 !important;
-    border-bottom-color: var(--ad-yellow) !important;
+    border-bottom-color: transparent !important;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link--kezdolap.active .hub-nav-kezdolap-img,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link--ajanlasok.active .hub-nav-ajanlasok-img,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link--auto.active .hub-nav-tile,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link--teherauto.active .hub-nav-tile,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link--ingatlan.active .hub-nav-tile {
+    box-shadow: 0 0 0 2.5px var(--ad-yellow), 0 2px 10px rgba(240, 197, 44, 0.4) !important;
+    border-radius: 12px !important;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link .nav-count {

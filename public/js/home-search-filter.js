@@ -1,6 +1,6 @@
 import { initVehicleCatalogSelects, shortTypeName } from "./vehicle-catalog-client.js";
 import { kivitelMatches } from "./kivitel-options.js?v=kivitel1";
-import { fuelValueMatches } from "./auto-fuel-picker.js?v=fogyNum1";
+import { fuelValueMatches } from "./auto-fuel-picker.js?v=fuelMatch1";
 import { kivitelListMatches } from "./auto-kivitel-picker.js?v=teherKivitel35e";
 import { allapotValueMatches } from "./auto-allapot-picker.js?v=fogyNum1";
 import { sebessegvaltoListMatches } from "./auto-sebessegvalto-picker.js?v=fogyNum1";
@@ -17,7 +17,28 @@ const FUEL_QUICK_FILTERS = [
   {
     id: "hybrid",
     label: "Hybrid",
-    match: (value) => /elektromos/i.test(value ?? "") && value !== "Elektromos",
+    match: (value) => {
+      const v = String(value ?? "");
+      return /elektromos|hibrid|hybrid/i.test(v) && !/^elektromos$/i.test(v.trim());
+    },
+  },
+  {
+    id: "Hibrid",
+    label: "Hibrid",
+    match: (value) => {
+      const v = String(value ?? "");
+      return /elektromos|hibrid|hybrid/i.test(v) && !/^elektromos$/i.test(v.trim());
+    },
+  },
+  {
+    id: "Benzin/elektromos",
+    label: "Benzin/elektromos",
+    match: (value) => fuelValueMatches(value, ["Benzin/elektromos"]),
+  },
+  {
+    id: "Dízel/elektromos",
+    label: "Dízel/elektromos",
+    match: (value) => fuelValueMatches(value, ["Dízel/elektromos"]),
   },
   {
     id: "benzin-gaz",

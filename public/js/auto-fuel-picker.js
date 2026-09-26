@@ -310,21 +310,57 @@ function normalizeFuel(value) {
     .trim();
 }
 
+/** Hibrid család — sima benzin/dízel NEM tartozik ide. */
+const HYBRID_FUELS = new Set([
+  "hibrid",
+  "hybrid",
+  "hibrid (benzin)",
+  "hibrid (dizel)",
+  "benzin/elektromos",
+  "dizel/elektromos",
+]);
+
+function isHybridFuel(normalized) {
+  if (!normalized) return false;
+  if (HYBRID_FUELS.has(normalized)) return true;
+  // „Benzin/elektromos”, „… hibrid …”, de nem tiszta Elektromos / Hidrogén
+  if (normalized === "elektromos" || normalized.startsWith("hidrogen")) return false;
+  return /elektromos/.test(normalized) || /\bhibrid\b|\bhybrid\b/.test(normalized);
+}
+
+/**
+ * Pontos / alias egyezés — NINCS laza substring
+ * (különben „benzin” átmenne a „benzin/elektromos” szűrőn).
+ */
 function fuelsCompatible(got, want) {
   if (!want) return true;
   if (got === want) return true;
-  if (got.includes(want) || want.includes(got)) return true;
+
+  if ((got === "dizel" || got === "diesel") && (want === "dizel" || want === "diesel")) {
+    return true;
+  }
+
   const aliases = {
-    hibrid: ["hibrid", "benzin/elektromos", "dizel/elektromos", "hybrid"],
-    "hibrid (benzin)": ["hibrid (benzin)", "benzin/elektromos", "hybrid"],
-    "hibrid (dizel)": ["hibrid (dizel)", "dizel/elektromos", "hybrid"],
+    hibrid: [...HYBRID_FUELS],
+    hybrid: [...HYBRID_FUELS],
+    "hibrid (benzin)": ["hibrid (benzin)", "benzin/elektromos", "hibrid", "hybrid"],
+    "hibrid (dizel)": ["hibrid (dizel)", "dizel/elektromos", "hibrid", "hybrid"],
+    "benzin/elektromos": ["benzin/elektromos", "hibrid (benzin)", "hibrid", "hybrid"],
+    "dizel/elektromos": ["dizel/elektromos", "hibrid (dizel)", "hibrid", "hybrid"],
     lpg: ["lpg", "lpg/benzin", "benzin/gaz"],
     cng: ["cng", "cng/benzin", "benzin/gaz"],
+    "benzin/gaz": ["benzin/gaz", "lpg", "cng", "lpg/benzin", "cng/benzin"],
     "lpg/dizel": ["lpg/dizel", "dizel/gaz"],
     "cng/dizel": ["cng/dizel", "dizel/gaz"],
     dizel: ["dizel", "diesel"],
     diesel: ["dizel", "diesel"],
   };
+
+  if (want === "hibrid" || want === "hybrid" || HYBRID_FUELS.has(want)) {
+    return isHybridFuel(got);
+  }
+
   const list = aliases[want] || [want];
-  return list.some((a) => got === a || got.includes(a) || a.includes(got));
+  return list.some((a) => got === a);
 }
+

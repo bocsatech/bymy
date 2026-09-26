@@ -329,7 +329,7 @@ body.site-app .site-header-profile--tile {
   display: none !important;
 }
 
-/* Aktív: azonos keret, layoutot nem növel */
+/* Aktív: belső keret — nem növeli a csempe méretét */
 .hub-nav-link--kezdolap.active .hub-nav-tile,
 .hub-nav-link--auto.active .hub-nav-tile,
 .hub-nav-link--teherauto.active .hub-nav-tile,
@@ -344,9 +344,8 @@ body.site-app .hub-nav-link--ingatlan.active .hub-nav-tile,
 body.site-app .hub-nav-link--ajanlasok.active .hub-nav-tile,
 body.site-app .hub-header-msg--tile.active .hub-nav-tile,
 body.site-app .site-header-profile--tile.active .hub-nav-tile {
-  outline: 2.5px solid #f0c52c;
-  outline-offset: 1px;
-  box-shadow: none;
+  outline: none;
+  box-shadow: inset 0 0 0 2.5px #f0c52c;
 }
 
 body.site-app .hub-nav-link--kezdolap,

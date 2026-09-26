@@ -60,18 +60,20 @@
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-header-inner {
     max-width: 1440px;
     margin: 0 auto;
-    padding: 0 24px;
+    padding: 0 20px;
     min-height: 80px;
-    display: grid !important;
-    grid-template-columns: 180px max-content minmax(0, 1fr);
-    grid-template-areas: "logo nav actions";
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
     align-items: center;
-    column-gap: 24px;
+    justify-content: center;
+    gap: 8px;
+    column-gap: 8px;
     row-gap: 0;
-    gap: 0 24px;
     position: relative;
     overflow: visible;
-    flex-direction: unset !important;
+    grid-template-columns: none !important;
+    grid-template-areas: none !important;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-band {
@@ -84,8 +86,8 @@
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-logo {
-    grid-area: logo;
-    justify-self: start;
+    grid-area: auto;
+    justify-self: auto;
     align-self: center;
     position: relative !important;
     left: auto !important;
@@ -95,17 +97,20 @@
     transform: none !important;
     z-index: 2;
     pointer-events: auto;
-  }
-
-  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-logo {
-    width: 180px;
-    max-width: 180px;
-    justify-self: start;
+    width: var(--hub-nav-tile-w, 108px) !important;
+    max-width: var(--hub-nav-tile-w, 108px) !important;
+    height: var(--hub-nav-tile-h, 64px) !important;
+    flex: 0 0 var(--hub-nav-tile-w, 108px) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    line-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav {
-    grid-area: nav;
-    justify-self: start;
+    grid-area: auto;
+    justify-self: auto;
     align-self: center;
     display: flex !important;
     align-items: center;
@@ -123,16 +128,20 @@
     padding: 0 !important;
     pointer-events: auto;
     overflow: visible;
+    flex: 0 0 auto !important;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-header-top {
-    grid-area: actions;
-    justify-self: end;
+    grid-area: auto;
+    position: absolute !important;
+    right: 20px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    justify-self: auto;
     align-self: center;
-    position: relative;
-    z-index: 3;
+    z-index: 5;
     min-height: 0;
-    padding: 0 0 0 1rem;
+    padding: 0;
     width: auto;
     display: flex;
     align-items: center;
@@ -192,9 +201,8 @@
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link--ingatlan.active .hub-nav-tile,
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-header-msg--tile.active .hub-nav-tile,
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .site-header-profile--tile.active .hub-nav-tile {
-    outline: 2.5px solid var(--ad-yellow) !important;
-    outline-offset: 1px !important;
-    box-shadow: none !important;
+    outline: none !important;
+    box-shadow: inset 0 0 0 2.5px var(--ad-yellow) !important;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link .nav-count {

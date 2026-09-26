@@ -8,9 +8,9 @@
     --desk-action-size: 14px;
     --desk-cta-size: 13px;
     --desk-header-h: 80px;
-    --desk-logo-col: 180px;
+    --desk-logo-col: auto;
     --desk-pad-x: 20px;
-    --desk-gap: 16px;
+    --desk-gap: 8px;
     --desk-nav-gap: 8px;
     --desk-cta-h: 36px;
     --hub-nav-tile-w: 108px;
@@ -35,13 +35,14 @@
   body.site-app .site-app-header-inner,
   body.home-page .hub-header-inner,
   body.home-page .home-header-inner {
-    display: grid !important;
-    grid-template-columns: var(--desk-logo-col) max-content minmax(0, 1fr) !important;
-    grid-template-areas: "logo nav actions" !important;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
     align-items: center !important;
-    column-gap: var(--desk-gap) !important;
+    justify-content: center !important;
+    gap: var(--desk-nav-gap) !important;
+    column-gap: var(--desk-nav-gap) !important;
     row-gap: 0 !important;
-    gap: 0 var(--desk-gap) !important;
     max-width: 1440px !important;
     margin: 0 auto !important;
     padding: 0 var(--desk-pad-x) !important;
@@ -49,19 +50,42 @@
     min-height: var(--desk-header-h) !important;
     max-height: var(--desk-header-h) !important;
     box-sizing: border-box !important;
+    position: relative !important;
+    grid-template-columns: none !important;
+    grid-template-areas: none !important;
+  }
+
+  body.site-app .hub-nav-band,
+  body.home-page .hub-nav-band {
+    display: contents !important;
   }
 
   body.site-app .hub-logo,
   body.site-app .home-logo,
   body.site-app .site-app-logo,
   body.home-page .hub-logo {
-    grid-area: logo !important;
-    justify-self: start !important;
+    grid-area: auto !important;
+    justify-self: auto !important;
     align-self: center !important;
-    width: var(--desk-logo-col) !important;
-    max-width: var(--desk-logo-col) !important;
+    width: var(--hub-nav-tile-w) !important;
+    max-width: var(--hub-nav-tile-w) !important;
+    height: var(--hub-nav-tile-h) !important;
     margin: 0 !important;
     padding: 0 !important;
+    flex: 0 0 var(--hub-nav-tile-w) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    line-height: 0 !important;
+  }
+
+  body.site-app .hub-logo .bymy-logo-img--nav,
+  body.home-page .hub-logo .bymy-logo-img--nav,
+  body.site-app .bymy-logo-img--nav {
+    width: var(--hub-nav-tile-w) !important;
+    height: var(--hub-nav-tile-h) !important;
+    max-width: var(--hub-nav-tile-w) !important;
+    max-height: var(--hub-nav-tile-h) !important;
+    object-fit: contain !important;
   }
 
   body.site-app .hub-nav,
@@ -69,8 +93,8 @@
   body.site-app .site-app-nav,
   body.site-app .import-nav,
   body.home-page .hub-nav {
-    grid-area: nav !important;
-    justify-self: start !important;
+    grid-area: auto !important;
+    justify-self: auto !important;
     align-self: center !important;
     display: flex !important;
     align-items: center !important;
@@ -82,13 +106,18 @@
     transform: none !important;
     left: auto !important;
     right: auto !important;
+    flex: 0 0 auto !important;
   }
 
   body.site-app .hub-header-top,
   body.site-app .site-header-top,
   body.home-page .hub-header-top {
-    grid-area: actions !important;
-    justify-self: end !important;
+    grid-area: auto !important;
+    position: absolute !important;
+    right: var(--desk-pad-x) !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    justify-self: auto !important;
     align-self: center !important;
     display: flex !important;
     align-items: center !important;

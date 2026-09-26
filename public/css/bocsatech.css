@@ -1318,6 +1318,19 @@ th { color: var(--muted); font-weight: 600; }
   flex-wrap: wrap;
   gap: 0.4rem;
 }
+.users-dealer-filters {
+  margin: 0.85rem 0 0.35rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+.users-dealer-filters__title {
+  margin: 0 0 0.5rem;
+  font-size: 0.68rem;
+  font-weight: 750;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
 .users-cards-chip {
   background: #fff;
   border: 1px solid #e2e8f0;

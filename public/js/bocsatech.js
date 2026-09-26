@@ -86,9 +86,6 @@ const ADMIN_SECTIONS = [
       { id: "users:private", label: "Privát fiókok", navGroup: "Fiókok" },
       { id: "users:business", label: "Céges fiókok", navGroup: "Fiókok" },
       { id: "users:visitors", label: "Látogatók", navGroup: "Fiókok" },
-      { id: "users:auto-dealers", label: "Autókereskedők", navGroup: "Kereskedők" },
-      { id: "users:immo-dealers", label: "Ingatlankereskedők", navGroup: "Kereskedők" },
-      { id: "users:mixed-dealers", label: "Vegyes", navGroup: "Kereskedők" },
     ],
   },
   {
@@ -313,6 +310,8 @@ let sitePageBlocks = {
 let editingUser = null;
 let usersSearchQuery = "";
 let usersStatusFilter = "all";
+/** Céges fiókok alatt: all | auto | immo | mixed */
+let businessDealerFilter = "all";
 let partnerProfiles = [];
 let selectedVisitorId = "";
 let selectedVisitorIp = "";
@@ -648,13 +647,7 @@ const actions = {
     const submitBtn = form.querySelector('button[type="submit"]');
     if (submitBtn) submitBtn.disabled = true;
     try {
-      const accountType =
-        tab === "users:business" ||
-        tab === "users:auto-dealers" ||
-        tab === "users:immo-dealers" ||
-        tab === "users:mixed-dealers"
-          ? "business"
-          : "private";
+      const accountType = tab === "users:business" ? "business" : "private";
       const data = await api("/api/level1/users", {
         method: "POST",
         body: JSON.stringify({
@@ -721,6 +714,13 @@ const actions = {
   usersStatusFilter(_, el) {
     const next = String(el?.getAttribute("data-filter") || "all");
     usersStatusFilter = next === "active" || next === "inactive" ? next : "all";
+    render();
+  },
+  businessDealerFilter(_, el) {
+    const next = String(el?.getAttribute("data-filter") || "all");
+    const allowed = next === "auto" || next === "immo" || next === "mixed" ? next : "all";
+    // ugyanarra kattintva vissza: összes céges
+    businessDealerFilter = businessDealerFilter === allowed ? "all" : allowed;
     render();
   },
   visitorsSearch(_, el) {
@@ -904,6 +904,7 @@ const actions = {
   },
   setTab(_, el) {
     tab = el.getAttribute("data-tab") || tab;
+    if (tab === "users:business") businessDealerFilter = "all";
     if (isLayoutTab(tab)) {
       layoutCategory = layoutCategoryFromTab(tab);
       layoutIntent = layoutIntentFromTab(tab);
@@ -1836,13 +1837,7 @@ async function loadTab() {
   if (section === "users") {
     if (sub === "visitors") {
       await loadVisitors();
-    } else if (
-      sub === "private" ||
-      sub === "business" ||
-      sub === "auto-dealers" ||
-      sub === "immo-dealers" ||
-      sub === "mixed-dealers"
-    ) {
+    } else if (sub === "private" || sub === "business") {
       users = (await api("/api/level1/users")).users;
     }
   }
@@ -2325,12 +2320,11 @@ function usersView(kind = "private") {
     const isBiz = type === "business" || type === "dealer";
     if (kind === "private") return !isBiz;
     if (!isBiz) return false;
-    if (kind === "business") return true;
     const { hasAuto, hasImmo } = userDealerBuckets(u);
-    if (kind === "auto-dealers") return hasAuto && !hasImmo;
-    if (kind === "immo-dealers") return hasImmo && !hasAuto;
-    if (kind === "mixed-dealers") return hasAuto && hasImmo;
-    return false;
+    if (businessDealerFilter === "auto") return hasAuto && !hasImmo;
+    if (businessDealerFilter === "immo") return hasImmo && !hasAuto;
+    if (businessDealerFilter === "mixed") return hasAuto && hasImmo;
+    return true;
   });
   const q = usersSearchQuery.trim().toLowerCase();
   const visible = filtered.filter((u) => {
@@ -2377,22 +2371,19 @@ function usersView(kind = "private") {
     ${info ? `<p class="ok">${esc(info)}</p>` : ""}
     ${err ? `<p class="err">${esc(err)}</p>` : ""}
   `;
-  const titles = {
-    private: "Privát fiókok",
-    business: "Céges fiókok",
-    "auto-dealers": "Autókereskedők",
-    "immo-dealers": "Ingatlankereskedők",
-    "mixed-dealers": "Vegyes kereskedők",
-  };
-  const emptyLabels = {
-    private: "privát",
-    business: "céges",
-    "auto-dealers": "autókereskedő",
-    "immo-dealers": "ingatlankereskedő",
-    "mixed-dealers": "vegyes",
-  };
-  const title = titles[kind] || "Fiókok";
-  const emptyLabel = emptyLabels[kind] || "ilyen";
+  const title = kind === "business" ? "Céges fiókok" : "Privát fiókok";
+  const emptyLabel = kind === "business" ? "céges" : "privát";
+  const dealerFilterRow =
+    kind === "business"
+      ? `<div class="users-dealer-filters">
+          <h3 class="users-dealer-filters__title">Kereskedők</h3>
+          <div class="users-cards-filters" role="group" aria-label="Kereskedő típus">
+            <button type="button" class="users-cards-chip ${businessDealerFilter === "auto" ? "on" : ""}" data-act="businessDealerFilter" data-filter="auto">Autókereskedők</button>
+            <button type="button" class="users-cards-chip ${businessDealerFilter === "immo" ? "on" : ""}" data-act="businessDealerFilter" data-filter="immo">Ingatlankereskedők</button>
+            <button type="button" class="users-cards-chip ${businessDealerFilter === "mixed" ? "on" : ""}" data-act="businessDealerFilter" data-filter="mixed">Vegyes</button>
+          </div>
+        </div>`
+      : "";
   const createForm = `
     <form class="users-create" data-act="createUser">
       <h3 class="users-create__title">Új ${emptyLabel} fiók (teszt)</h3>
@@ -2409,6 +2400,14 @@ function usersView(kind = "private") {
       </div>
       <button type="submit" class="users-card__btn users-card__btn--primary">Fiók létrehozása</button>
     </form>`;
+  const dealerEmpty =
+    kind === "business" && businessDealerFilter !== "all"
+      ? businessDealerFilter === "auto"
+        ? "autókereskedő"
+        : businessDealerFilter === "immo"
+          ? "ingatlankereskedő"
+          : "vegyes"
+      : emptyLabel;
   return `
     <div class="users-edit">
       ${messages}
@@ -2416,6 +2415,7 @@ function usersView(kind = "private") {
       <div class="users-cards-wrap">
         <div class="users-cards-head">
           <h2 class="users-cards-title">${esc(title)}</h2>
+          ${dealerFilterRow}
           <div class="users-cards-toolbar">
             <label class="users-cards-search">
               <span class="users-cards-search__ico" aria-hidden="true">⌕</span>
@@ -2429,7 +2429,7 @@ function usersView(kind = "private") {
           </div>
         </div>
         <div class="users-cards-list">
-          ${cards || `<p class="users-cards-empty">Nincs ${emptyLabel} user${q || usersStatusFilter !== "all" ? " a szűrővel" : ""}.</p>`}
+          ${cards || `<p class="users-cards-empty">Nincs ${dealerEmpty} user${q || usersStatusFilter !== "all" || (kind === "business" && businessDealerFilter !== "all") ? " a szűrővel" : ""}.</p>`}
         </div>
       </div>
       ${editor}
@@ -3135,9 +3135,6 @@ function shellBody() {
   if (section === "users") {
     if (sub === "visitors") return visitorsView();
     if (sub === "business") return usersView("business");
-    if (sub === "auto-dealers") return usersView("auto-dealers");
-    if (sub === "immo-dealers") return usersView("immo-dealers");
-    if (sub === "mixed-dealers") return usersView("mixed-dealers");
     return usersView("private");
   }
   if (section === "auto") {

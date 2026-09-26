@@ -3551,7 +3551,8 @@ function adminSubTabButton(t) {
 function adminSubNavHtml(section) {
   const tabs = section?.tabs || [];
   if (!tabs.length) return "";
-  const useGroups = tabs.length > 3 && tabs.some((t) => t.navGroup);
+  // Felhasználók: mindig a régi lapos chip-sor (Privát / Céges / Letiltottak / Látogatók).
+  const useGroups = section?.id !== "users" && tabs.length > 3 && tabs.some((t) => t.navGroup);
   if (!useGroups) {
     return `<div class="admin-subnav-flat">${tabs.map(adminSubTabButton).join("")}</div>`;
   }

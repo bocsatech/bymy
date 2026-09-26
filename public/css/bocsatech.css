@@ -1516,12 +1516,18 @@ th { color: var(--muted); font-weight: 600; }
 }
 .users-card__max input {
   width: 3.2rem;
+  background: #fff;
   border: 1px solid #dbe1ea;
   border-radius: 8px;
   padding: 0.3rem 0.4rem;
   font-size: 0.8rem;
   font-weight: 650;
   color: #0f172a;
+}
+.users-card__max input:focus {
+  outline: none;
+  border-color: #94a3b8;
+  box-shadow: 0 0 0 2px rgba(15, 23, 42, 0.08);
 }
 
 /* Látogatók — C nézet (lista + részlet, Privát fiókok stílus) */

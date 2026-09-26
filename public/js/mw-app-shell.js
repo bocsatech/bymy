@@ -478,7 +478,7 @@
     ensureDeskHeaderCss();
   }
 
-  import("/js/hub-promo.js?v=promoHomeOnly1")
+  import("/js/hub-promo.js?v=promoSwap1")
     .then(function (mod) {
       if (mod && typeof mod.mountHubPromos === "function") return mod.mountHubPromos();
     })

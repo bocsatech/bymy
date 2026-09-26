@@ -1,4 +1,4 @@
-import { fetchListings, fetchListingsPage, fetchRelatedListings } from "./db-client.js?v=ownerBoost1";
+import { fetchListings, fetchListingsPage, fetchRelatedListings } from "./db-client.js?v=ownerBoost2";
 import { createHomeGridCard, initHomeGridCardPhotos } from "./home-grid-card.js?v=mobFix8";
 import { promoKiemeltActive, promoTopAjanlatActive } from "./listing-promo.js?v=promo1";
 import {
@@ -136,23 +136,32 @@ function listingOwnerId(item) {
   );
 }
 
-/** Boostolt userek találatai előre, ár szerint növekvő; a többi megtartja a base sorrendet. Home kiemelés gombot nem érinti. */
-function applyOwnerBoostSort(items) {
+function isOwnerBoosted(item) {
+  if (item?.ownerBoost === true) return true;
+  const oid = listingOwnerId(item);
+  return oid > 0 && boostOwnerIds.has(oid);
+}
+
+/** Boost mindig előrébb a választott rendezésnél. Boostoltak közt ár ↑. Home kiemelés gombot nem érinti. */
+function applyOwnerBoostSort(items, secondaryCompare) {
   if (featuredOnlyMode) return items;
-  const hasAny = items.some((item) => item?.ownerBoost === true);
-  if (!hasAny && !boostOwnerIds?.size) return items;
-  const boosted = [];
-  const rest = [];
-  for (const item of items) {
-    const oid = listingOwnerId(item);
-    const isBoost =
-      item?.ownerBoost === true || (oid > 0 && boostOwnerIds.has(oid));
-    if (isBoost) boosted.push(item);
-    else rest.push(item);
-  }
-  if (!boosted.length) return items;
-  boosted.sort((a, b) => (listingPriceNum(a) ?? Infinity) - (listingPriceNum(b) ?? Infinity));
-  return [...boosted, ...rest];
+  const cmp =
+    typeof secondaryCompare === "function"
+      ? secondaryCompare
+      : (a, b) => {
+          const ta = new Date(a.updated_at ?? a.created_at ?? 0).getTime();
+          const tb = new Date(b.updated_at ?? b.created_at ?? 0).getTime();
+          return tb - ta;
+        };
+  return [...items].sort((a, b) => {
+    const aB = isOwnerBoosted(a) ? 0 : 1;
+    const bB = isOwnerBoosted(b) ? 0 : 1;
+    if (aB !== bB) return aB - bB;
+    if (aB === 0) {
+      return (listingPriceNum(a) ?? Infinity) - (listingPriceNum(b) ?? Infinity);
+    }
+    return cmp(a, b);
+  });
 }
 
 function listingPriceNum(item) {
@@ -168,18 +177,21 @@ function listingKmNum(item) {
 }
 
 function sortDeskListings(items) {
-  const list = [...items];
-  let sorted;
+  let secondary;
   if (deskSort === "price-asc") {
-    sorted = list.sort((a, b) => (listingPriceNum(a) ?? Infinity) - (listingPriceNum(b) ?? Infinity));
+    secondary = (a, b) => (listingPriceNum(a) ?? Infinity) - (listingPriceNum(b) ?? Infinity);
   } else if (deskSort === "price-desc") {
-    sorted = list.sort((a, b) => (listingPriceNum(b) ?? -1) - (listingPriceNum(a) ?? -1));
+    secondary = (a, b) => (listingPriceNum(b) ?? -1) - (listingPriceNum(a) ?? -1);
   } else if (deskSort === "km-asc") {
-    sorted = list.sort((a, b) => (listingKmNum(a) ?? Infinity) - (listingKmNum(b) ?? Infinity));
+    secondary = (a, b) => (listingKmNum(a) ?? Infinity) - (listingKmNum(b) ?? Infinity);
   } else {
-    sorted = sortForHome(list);
+    secondary = (a, b) => {
+      const ta = new Date(a.updated_at ?? a.created_at ?? 0).getTime();
+      const tb = new Date(b.updated_at ?? b.created_at ?? 0).getTime();
+      return tb - ta;
+    };
   }
-  return applyOwnerBoostSort(sorted);
+  return applyOwnerBoostSort(items, secondary);
 }
 
 function listingSubtype(item) {

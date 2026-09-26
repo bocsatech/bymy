@@ -1037,7 +1037,77 @@ async function handleListingsApi(req, res, pathname) {
       url.searchParams.get("tile") === "1" ||
       url.searchParams.get("mode") === "tile" ||
       !url.searchParams.get("full");
-    const listings = await listListingsWithPreview({ limit, offset, status, vertical });
+
+    let boostOwnerIds = [];
+    try {
+      const { listBoostOwnerIds } = await import("./lib/boost-owners.mjs");
+      boostOwnerIds = await listBoostOwnerIds();
+    } catch {
+      boostOwnerIds = [];
+    }
+    const boostSet = new Set(boostOwnerIds.map(Number).filter((n) => n > 0));
+
+    /** Boostolt userek hirdetései (ár szerint növekvő) — mindig a lista elején. */
+    let boostedRows = [];
+    if (boostSet.size) {
+      try {
+        const { resolveListingVertical } = await import("./lib/listing-vertical.mjs");
+        const want = String(vertical || "")
+          .trim()
+          .toLowerCase();
+        const chunks = await Promise.all(
+          [...boostSet].map((oid) =>
+            listListingsByOwner({
+              userId: oid,
+              limit: 120,
+              status: status || "feladott",
+            })
+          )
+        );
+        const seen = new Set();
+        const priceNum = (item) => {
+          const raw = String(item?.preview?.price ?? item?.form?.vetelar ?? "").replace(/\D/g, "");
+          const n = Number(raw);
+          return Number.isFinite(n) ? n : Infinity;
+        };
+        for (const rows of chunks) {
+          for (const item of rows || []) {
+            const id = Number(item.id);
+            if (!Number.isFinite(id) || id <= 0 || seen.has(id)) continue;
+            if (want === "auto" || want === "teher" || want === "ingatlan") {
+              if (resolveListingVertical(item) !== want) continue;
+            }
+            seen.add(id);
+            boostedRows.push({ ...item, ownerBoost: true });
+          }
+        }
+        boostedRows.sort((a, b) => priceNum(a) - priceNum(b));
+      } catch (error) {
+        console.warn("Boost feed:", error?.message || error);
+        boostedRows = [];
+      }
+    }
+    const boostedIds = new Set(boostedRows.map((row) => Number(row.id)));
+
+    let listings = await listListingsWithPreview({ limit, offset, status, vertical });
+    listings = (listings || [])
+      .filter((item) => !boostedIds.has(Number(item.id)))
+      .map((item) => {
+        const oid = Number(item?.form?.owner_user_id ?? item?.user_id ?? 0);
+        return {
+          ...item,
+          ownerBoost: Boolean(oid && boostSet.has(oid)),
+        };
+      });
+
+    if (offset === 0 && boostedRows.length) {
+      const fill = Math.max(0, limit - boostedRows.length);
+      listings = [...boostedRows, ...listings.slice(0, fill)];
+    } else if (offset > 0 && boostedRows.length) {
+      // Későbbi oldalak: a boostoltak már az első oldalon voltak.
+      listings = listings.slice(0, limit);
+    }
+
     let total = null;
     try {
       total = await countListingsPublic({ status: status || "feladott", vertical });
@@ -1048,21 +1118,8 @@ async function handleListingsApi(req, res, pathname) {
       typeof total === "number"
         ? offset + listings.length < total
         : listings.length >= limit;
-    let boostOwnerIds = [];
-    try {
-      const { listBoostOwnerIds } = await import("./lib/boost-owners.mjs");
-      boostOwnerIds = await listBoostOwnerIds();
-    } catch {
-      boostOwnerIds = [];
-    }
-    const boostSet = new Set(boostOwnerIds.map(Number).filter((n) => n > 0));
-    const stamped = (listings || []).map((item) => {
-      const oid = Number(item?.form?.owner_user_id ?? item?.user_id ?? 0);
-      return {
-        ...item,
-        ownerBoost: Boolean(oid && boostSet.has(oid)),
-      };
-    });
+
+    const stamped = listings;
     sendJson(
       res,
       200,
@@ -1078,10 +1135,16 @@ async function handleListingsApi(req, res, pathname) {
         hasMore,
       },
       {
-        // Böngésző + CDN (Cloudflare / Vercel): rövid TTL, SWR.
-        "Cache-Control": "public, max-age=30, s-maxage=60, stale-while-revalidate=120",
-        "CDN-Cache-Control": "public, max-age=60, stale-while-revalidate=120",
-        "Cloudflare-CDN-Cache-Control": "public, max-age=60, stale-while-revalidate=120",
+        // Boost változhat — ne tartsuk sokáig CDN-en.
+        "Cache-Control": boostSet.size
+          ? "public, max-age=10, s-maxage=15, stale-while-revalidate=30"
+          : "public, max-age=30, s-maxage=60, stale-while-revalidate=120",
+        "CDN-Cache-Control": boostSet.size
+          ? "public, max-age=15, stale-while-revalidate=30"
+          : "public, max-age=60, stale-while-revalidate=120",
+        "Cloudflare-CDN-Cache-Control": boostSet.size
+          ? "public, max-age=15, stale-while-revalidate=30"
+          : "public, max-age=60, stale-while-revalidate=120",
         Vary: "Accept-Encoding",
       }
     );

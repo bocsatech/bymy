@@ -360,13 +360,13 @@
       '<a class="hub-nav-link hub-nav-link--kezdolap' +
       navActiveClass("hub") +
       '" href="/" aria-label="Kezdőlap">' +
-      '<img class="hub-nav-kezdolap-img" src="/images/kezdolap-nav.png?v=kezdolapNav1" alt="" width="72" height="28" decoding="async" />' +
+      '<img class="hub-nav-kezdolap-img" src="/images/kezdolap-nav.png?v=logoTile1" alt="" width="120" height="72" decoding="async" />' +
       "</a>" +
       '<a class="hub-nav-link hub-nav-link--auto' +
       navActiveClass("auto") +
       '" href="/auto.html" aria-label="Autó">' +
       '<span class="hub-nav-tile">' +
-      '<img class="hub-nav-auto-img" src="/images/auto-nav.png?v=autoNav1" alt="" width="72" height="28" decoding="async" />' +
+      '<img class="hub-nav-auto-img" src="/images/auto-nav.png?v=logoTile1" alt="" width="112" height="72" decoding="async" />' +
       '<span class="hub-nav-tile-count nav-count" aria-hidden="true">' +
       formatNavCount(counts.auto) +
       "</span>" +
@@ -376,7 +376,7 @@
       navActiveClass("teherauto") +
       '" href="/teherauto.html" aria-label="Teherautó">' +
       '<span class="hub-nav-tile">' +
-      '<img class="hub-nav-teherauto-img" src="/images/teherauto-nav.png?v=teherNav1" alt="" width="72" height="28" decoding="async" />' +
+      '<img class="hub-nav-teherauto-img" src="/images/teherauto-nav.png?v=logoTile1" alt="" width="108" height="72" decoding="async" />' +
       '<span class="hub-nav-tile-count nav-count" aria-hidden="true">' +
       formatNavCount(counts.teher) +
       "</span>" +
@@ -386,7 +386,7 @@
       navActiveClass("ingatlan") +
       '" href="/ingatlan.html" aria-label="Ingatlan">' +
       '<span class="hub-nav-tile">' +
-      '<img class="hub-nav-ingatlan-img" src="/images/ingatlan-nav.png?v=ingatlanNav1" alt="" width="72" height="28" decoding="async" />' +
+      '<img class="hub-nav-ingatlan-img" src="/images/ingatlan-nav.png?v=logoTile1" alt="" width="112" height="72" decoding="async" />' +
       '<span class="hub-nav-tile-count nav-count" aria-hidden="true">' +
       formatNavCount(counts.ingatlan) +
       "</span>" +
@@ -397,7 +397,7 @@
       '" href="' +
       ajanlasokHref() +
       '" aria-label="Ajánlások">' +
-      '<img class="hub-nav-ajanlasok-img" src="/images/ajanlasok-nav.png?v=ajanlasNav1" alt="" width="72" height="28" decoding="async" />' +
+      '<img class="hub-nav-ajanlasok-img" src="/images/ajanlasok-nav.png?v=logoTile1" alt="" width="107" height="72" decoding="async" />' +
       "</a>" +
       "</nav>" +
       '<div class="hub-header-top">' +

@@ -204,11 +204,12 @@ body.hub-page .local-banner {
 .hub-nav-ingatlan-img,
 .hub-nav-ajanlasok-img {
   display: block;
-  width: 4.5rem;
-  height: 1.7rem;
-  object-fit: cover;
+  height: 48px;
+  width: auto;
+  max-height: 48px;
+  object-fit: contain;
   object-position: left center;
-  border-radius: 7px;
+  border-radius: 10px;
   flex: 0 0 auto;
   pointer-events: none;
 }
@@ -216,15 +217,15 @@ body.hub-page .local-banner {
 .hub-nav-tile {
   position: relative;
   display: block;
-  width: 4.5rem;
-  height: 1.7rem;
+  height: 48px;
+  width: fit-content;
   flex: 0 0 auto;
 }
 
 .hub-nav-tile .hub-nav-auto-img,
 .hub-nav-tile .hub-nav-teherauto-img,
 .hub-nav-tile .hub-nav-ingatlan-img {
-  width: 100%;
+  width: auto;
   height: 100%;
 }
 
@@ -275,16 +276,54 @@ body.site-app .hub-nav-teherauto-img,
 body.site-app .hub-nav-ingatlan-img,
 body.site-app .hub-nav-ajanlasok-img {
   display: block;
-  width: 4.5rem;
-  height: 1.7rem;
-  object-fit: cover;
+  height: 48px;
+  width: auto;
+  max-height: 48px;
+  object-fit: contain;
   object-position: left center;
-  border-radius: 7px;
+  border-radius: 10px;
 }
 
 body.site-app .hub-nav-tile {
-  width: 4.5rem;
-  height: 1.7rem;
+  height: 48px;
+  width: fit-content;
+}
+
+@media (max-width: 800px) {
+  .hub-nav-kezdolap-img,
+  .hub-nav-auto-img,
+  .hub-nav-teherauto-img,
+  .hub-nav-ingatlan-img,
+  .hub-nav-ajanlasok-img,
+  body.site-app .hub-nav-kezdolap-img,
+  body.site-app .hub-nav-auto-img,
+  body.site-app .hub-nav-teherauto-img,
+  body.site-app .hub-nav-ingatlan-img,
+  body.site-app .hub-nav-ajanlasok-img,
+  .hub-nav-tile,
+  body.site-app .hub-nav-tile {
+    height: clamp(24px, 6.5vw, 34px);
+    max-height: clamp(24px, 6.5vw, 34px);
+    border-radius: 7px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hub-nav-kezdolap-img,
+  .hub-nav-auto-img,
+  .hub-nav-teherauto-img,
+  .hub-nav-ingatlan-img,
+  .hub-nav-ajanlasok-img,
+  body.site-app .hub-nav-kezdolap-img,
+  body.site-app .hub-nav-auto-img,
+  body.site-app .hub-nav-teherauto-img,
+  body.site-app .hub-nav-ingatlan-img,
+  body.site-app .hub-nav-ajanlasok-img,
+  .hub-nav-tile,
+  body.site-app .hub-nav-tile {
+    height: 26px;
+    max-height: 26px;
+  }
 }
 
 @media (min-width: 901px) {
@@ -298,8 +337,8 @@ body.site-app .hub-nav-tile {
   body.site-app .hub-nav-link--teherauto,
   body.site-app .hub-nav-link--ingatlan,
   body.site-app .hub-nav-link--ajanlasok {
-    height: 34px;
-    max-height: 34px;
+    height: var(--site-nav-logo-h, 72px);
+    max-height: var(--site-nav-logo-h, 72px);
     padding-top: 0;
     padding-bottom: 0;
   }
@@ -313,20 +352,25 @@ body.site-app .hub-nav-tile {
   body.site-app .hub-nav-auto-img,
   body.site-app .hub-nav-teherauto-img,
   body.site-app .hub-nav-ingatlan-img,
-  body.site-app .hub-nav-ajanlasok-img,
+  body.site-app .hub-nav-ajanlasok-img {
+    height: var(--site-nav-logo-h, 72px);
+    max-height: var(--site-nav-logo-h, 72px);
+    width: auto;
+    border-radius: 12px;
+  }
+
   .hub-nav-tile,
   body.site-app .hub-nav-tile {
-    width: 86px;
-    height: 34px;
-    border-radius: 8px;
+    height: var(--site-nav-logo-h, 72px);
+    width: fit-content;
   }
 
   .hub-nav-tile-count {
-    left: 0.34rem;
-    bottom: 0.16rem;
-    min-width: 1.5rem;
-    font-size: 0.62rem;
-    padding: 0.06rem 0.36rem;
+    left: 0.42rem;
+    bottom: 0.28rem;
+    min-width: 1.65rem;
+    font-size: 0.72rem;
+    padding: 0.1rem 0.42rem;
   }
 }
 

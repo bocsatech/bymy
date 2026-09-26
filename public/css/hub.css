@@ -399,7 +399,8 @@ body.site-app .hub-nav-link--auto.active,
 body.site-app .hub-nav-link--teherauto.active,
 body.site-app .hub-nav-link--ingatlan.active,
 body.site-app .hub-nav-link--ajanlasok.active {
-  border-bottom-color: transparent;
+  border-bottom-color: transparent !important;
+  border-bottom: 0 !important;
 }
 
 .hub-nav-link--kezdolap.active .hub-nav-kezdolap-img,

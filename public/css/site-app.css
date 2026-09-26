@@ -288,6 +288,17 @@ body.site-app .hub-header {
     color: #111 !important;
   }
 
+  /* Képes menücsempék: nincs alsó sárga vonal, csak a keret */
+  body.site-app .hub-nav-link--kezdolap.active,
+  body.site-app .hub-nav-link--auto.active,
+  body.site-app .hub-nav-link--teherauto.active,
+  body.site-app .hub-nav-link--ingatlan.active,
+  body.site-app .hub-nav-link--ajanlasok.active {
+    border-bottom: 0 !important;
+    border-bottom-color: transparent !important;
+    padding-bottom: 0 !important;
+  }
+
   body.site-app .hub-nav-link .nav-count,
   body.site-app .home-nav-link .nav-count,
   body.site-app .site-app-nav-link .nav-count,
@@ -1859,6 +1870,16 @@ body.site-app .import-nav-link.active {
   font-weight: 500;
   text-decoration: none;
   border-bottom-color: #f0c52c;
+}
+
+body.site-app .hub-nav-link--kezdolap.active,
+body.site-app .hub-nav-link--auto.active,
+body.site-app .hub-nav-link--teherauto.active,
+body.site-app .hub-nav-link--ingatlan.active,
+body.site-app .hub-nav-link--ajanlasok.active {
+  border-bottom: 0;
+  border-bottom-color: transparent;
+  padding-bottom: 0;
 }
 
 body.site-app .nav-count {

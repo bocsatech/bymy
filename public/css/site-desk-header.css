@@ -8,14 +8,15 @@
     --desk-action-size: 14px;
     --desk-cta-size: 13px;
     --desk-header-h: 80px;
-    --desk-logo-col: 150px;
+    --desk-logo-col: 100px;
     --desk-pad-x: 16px;
-    --desk-gap: 8px;
+    --desk-gap: 6px;
     --desk-nav-gap: 6px;
     --desk-cta-h: 36px;
     /* Rögzített csempe — ne zsugorodjon; szűk ablaknál a nav görget */
     --hub-nav-tile-w: 96px;
     --hub-nav-tile-h: 56px;
+    --desk-logo-h: 56px;
   }
 
   body.site-app > .hub-header,
@@ -59,7 +60,7 @@
     display: contents !important;
   }
 
-  /* Logo: fix méret + középre a savban — ne csússzon le, ne zsugorodjon */
+  /* Logo: ugyanolyan magasság/közép, mint a csempék — ne csússzon le */
   body.site-app .hub-logo,
   body.site-app .home-logo,
   body.site-app .site-app-logo,
@@ -67,42 +68,46 @@
     grid-area: logo !important;
     justify-self: start !important;
     align-self: center !important;
+    place-self: center start !important;
     position: relative !important;
-    top: auto !important;
+    top: 0 !important;
     bottom: auto !important;
-    left: auto !important;
+    left: 0 !important;
     right: auto !important;
     transform: none !important;
     width: var(--desk-logo-col) !important;
     min-width: var(--desk-logo-col) !important;
     max-width: var(--desk-logo-col) !important;
-    height: 48px !important;
-    min-height: 48px !important;
-    max-height: 48px !important;
+    height: var(--desk-logo-h) !important;
+    min-height: var(--desk-logo-h) !important;
+    max-height: var(--desk-logo-h) !important;
     margin: 0 !important;
     padding: 0 !important;
     flex: 0 0 var(--desk-logo-col) !important;
     flex-shrink: 0 !important;
     display: inline-flex !important;
     align-items: center !important;
+    justify-content: flex-start !important;
     line-height: 0 !important;
+    overflow: hidden !important;
   }
 
   body.site-app .hub-logo .bymy-logo-img--nav,
   body.home-page .hub-logo .bymy-logo-img--nav,
   body.site-app .bymy-logo-img--nav {
+    display: block !important;
     width: auto !important;
-    height: 48px !important;
-    min-width: 120px !important;
-    min-height: 48px !important;
-    max-width: 140px !important;
-    max-height: 48px !important;
+    height: var(--desk-logo-h) !important;
+    min-width: 0 !important;
+    min-height: var(--desk-logo-h) !important;
+    max-width: 100% !important;
+    max-height: var(--desk-logo-h) !important;
     object-fit: contain !important;
     object-position: left center !important;
     flex-shrink: 0 !important;
   }
 
-  /* Menüsor: a logo után kezdődik; szűk helyen vízszintesen görgethető */
+  /* Menüsor: logo után, egy vonalban; rejtett scrollbar (ne tolja el függőlegesen) */
   body.site-app .hub-nav,
   body.site-app .home-nav,
   body.site-app .site-app-nav,
@@ -118,8 +123,11 @@
     width: auto !important;
     max-width: 100% !important;
     min-width: 0 !important;
+    height: var(--hub-nav-tile-h) !important;
+    min-height: var(--hub-nav-tile-h) !important;
+    max-height: var(--hub-nav-tile-h) !important;
     margin: 0 !important;
-    padding: 0 2px !important;
+    padding: 0 !important;
     position: relative !important;
     transform: none !important;
     left: auto !important;
@@ -131,7 +139,8 @@
     overscroll-behavior-x: contain;
     -webkit-overflow-scrolling: touch;
     touch-action: pan-x !important;
-    scrollbar-width: thin !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
     pointer-events: auto !important;
     z-index: 1 !important;
   }
@@ -169,7 +178,7 @@
   body.site-app .site-header-top,
   body.home-page .hub-header-top {
     grid-area: actions !important;
-    position: static !important;
+    position: relative !important;
     transform: none !important;
     justify-self: end !important;
     align-self: center !important;
@@ -177,15 +186,16 @@
     align-items: center !important;
     justify-content: flex-end !important;
     min-height: 0 !important;
-    height: auto !important;
-    max-height: none !important;
-    padding: 0 !important;
+    height: var(--hub-nav-tile-h) !important;
+    max-height: var(--hub-nav-tile-h) !important;
+    padding: 0 0 0 8px !important;
     margin: 0 !important;
     width: max-content !important;
     min-width: max-content !important;
     max-width: none !important;
     flex-shrink: 0 !important;
-    z-index: 3 !important;
+    z-index: 5 !important;
+    background: #fff !important;
   }
 
   body.site-app .hub-header-actions,
@@ -217,8 +227,15 @@
     line-height: 1.2 !important;
     text-transform: none !important;
     padding: 0 !important;
+    border: 0 !important;
+    border-bottom: 0 !important;
+    height: var(--hub-nav-tile-h) !important;
+    max-height: var(--hub-nav-tile-h) !important;
+    display: inline-flex !important;
+    align-items: center !important;
     flex: 0 0 auto !important;
     flex-shrink: 0 !important;
+    box-sizing: border-box !important;
   }
 
   body.site-app .hub-nav-link.active,

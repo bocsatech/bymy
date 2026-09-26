@@ -179,10 +179,10 @@ body.site-app .hub-header {
   body.site-app .home-header-inner,
   body.site-app .site-app-header-inner {
     display: grid !important;
-    grid-template-columns: minmax(150px, 150px) minmax(0, 1fr) max-content !important;
+    grid-template-columns: minmax(100px, 100px) minmax(0, 1fr) max-content !important;
     grid-template-areas: "logo nav actions" !important;
     align-items: center !important;
-    column-gap: 8px !important;
+    column-gap: 6px !important;
     row-gap: 0 !important;
     max-width: 1440px !important;
     margin: 0 auto !important;
@@ -192,7 +192,7 @@ body.site-app .hub-header {
     max-height: var(--site-fixed-header-h) !important;
     box-sizing: border-box !important;
     position: relative !important;
-    gap: 0 8px !important;
+    gap: 0 6px !important;
     min-width: 0 !important;
     overflow: hidden !important;
   }
@@ -213,38 +213,42 @@ body.site-app .hub-header {
     grid-area: logo !important;
     justify-self: start !important;
     align-self: center !important;
+    place-self: center start !important;
     position: relative !important;
     left: 0 !important;
     right: auto !important;
-    top: auto !important;
+    top: 0 !important;
     bottom: auto !important;
     transform: none !important;
     margin: 0 !important;
     padding: 0 !important;
-    width: 150px !important;
-    min-width: 150px !important;
-    max-width: 150px !important;
-    height: 48px !important;
-    min-height: 48px !important;
-    max-height: 48px !important;
-    flex: 0 0 150px !important;
+    width: 100px !important;
+    min-width: 100px !important;
+    max-width: 100px !important;
+    height: 56px !important;
+    min-height: 56px !important;
+    max-height: 56px !important;
+    flex: 0 0 100px !important;
     flex-shrink: 0 !important;
     z-index: 2;
     display: inline-flex !important;
     align-items: center !important;
+    justify-content: flex-start !important;
     line-height: 0 !important;
+    overflow: hidden !important;
   }
 
   body.site-app .hub-logo .bymy-logo-img--nav,
   body.site-app .home-logo .bymy-logo-img--nav,
   body.site-app .site-app-logo .bymy-logo-img--nav,
   body.site-app .bymy-logo-img--nav {
-    height: 48px !important;
-    min-height: 48px !important;
+    display: block !important;
+    height: 56px !important;
+    min-height: 56px !important;
     width: auto !important;
-    min-width: 120px !important;
-    max-width: 140px !important;
-    max-height: 48px !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    max-height: 56px !important;
     object-fit: contain !important;
     object-position: left center !important;
     flex-shrink: 0 !important;
@@ -255,9 +259,9 @@ body.site-app .hub-header {
   body.site-app .site-app-nav,
   body.site-app .import-nav {
     grid-area: nav !important;
-    justify-self: center !important;
+    justify-self: stretch !important;
     align-self: center !important;
-    position: static !important;
+    position: relative !important;
     left: auto !important;
     right: auto !important;
     top: auto !important;
@@ -270,8 +274,10 @@ body.site-app .hub-header {
     width: auto !important;
     max-width: 100% !important;
     margin: 0 !important;
-    padding: 0 2px !important;
-    height: auto !important;
+    padding: 0 !important;
+    height: 56px !important;
+    min-height: 56px !important;
+    max-height: 56px !important;
     flex: 1 1 auto !important;
     min-width: 0 !important;
     pointer-events: auto !important;
@@ -279,7 +285,8 @@ body.site-app .hub-header {
     overflow-y: hidden !important;
     flex-wrap: nowrap !important;
     touch-action: pan-x !important;
-    scrollbar-width: thin !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
     border: 0 !important;
     background: transparent !important;
   }
@@ -292,22 +299,24 @@ body.site-app .hub-header {
     font-family: "DM Sans", system-ui, sans-serif !important;
     font-size: 14px !important;
     font-weight: 500 !important;
-    padding: 0 0 2px !important;
+    padding: 0 !important;
     border: 0 !important;
-    border-bottom: 2px solid transparent !important;
+    border-bottom: 0 !important;
     box-shadow: none !important;
     background: transparent !important;
     line-height: 1.2 !important;
     display: inline-flex !important;
-    align-items: baseline !important;
-    gap: 0.35rem !important;
+    align-items: center !important;
+    height: 56px !important;
+    max-height: 56px !important;
+    box-sizing: border-box !important;
   }
 
   body.site-app .hub-nav-link.active,
   body.site-app .home-nav-link.active,
   body.site-app .site-app-nav-link.active,
   body.site-app .import-nav-link.active {
-    border-bottom-color: #f0c52c !important;
+    border-bottom-color: transparent !important;
     font-weight: 500 !important;
     color: #111 !important;
   }
@@ -430,8 +439,8 @@ body.site-app .bymy-logo-img--nav,
 body.site-app .home-logo .bymy-logo-img--nav,
 body.site-app .hub-logo .bymy-logo-img--nav,
 body.site-app .site-app-logo .bymy-logo-img--nav {
-  height: 48px;
-  max-width: min(190px, 29vw);
+  height: 56px;
+  max-width: 100px;
   width: auto;
 }
 

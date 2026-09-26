@@ -372,10 +372,15 @@
       "</span>" +
       "</span>" +
       "</a>" +
-      '<a class="hub-nav-link' +
+      '<a class="hub-nav-link hub-nav-link--teherauto' +
       navActiveClass("teherauto") +
-      '" href="/teherauto.html">Teherautó ' +
-      navCountHtml("teher", counts) +
+      '" href="/teherauto.html" aria-label="Teherautó">' +
+      '<span class="hub-nav-tile">' +
+      '<img class="hub-nav-teherauto-img" src="/images/teherauto-nav.png?v=teherNav1" alt="" width="72" height="28" decoding="async" />' +
+      '<span class="hub-nav-tile-count nav-count" aria-hidden="true">' +
+      formatNavCount(counts.teher) +
+      "</span>" +
+      "</span>" +
       "</a>" +
       '<a class="hub-nav-link' +
       navActiveClass("ingatlan") +

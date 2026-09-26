@@ -187,7 +187,8 @@ body.hub-page .local-banner {
 }
 
 .hub-nav-link--kezdolap,
-.hub-nav-link--auto {
+.hub-nav-link--auto,
+.hub-nav-link--teherauto {
   align-items: center;
   padding-top: 0.45rem;
   padding-bottom: 0.4rem;
@@ -196,7 +197,8 @@ body.hub-page .local-banner {
 }
 
 .hub-nav-kezdolap-img,
-.hub-nav-auto-img {
+.hub-nav-auto-img,
+.hub-nav-teherauto-img {
   display: block;
   width: 4.5rem;
   height: 1.7rem;
@@ -215,7 +217,8 @@ body.hub-page .local-banner {
   flex: 0 0 auto;
 }
 
-.hub-nav-tile .hub-nav-auto-img {
+.hub-nav-tile .hub-nav-auto-img,
+.hub-nav-tile .hub-nav-teherauto-img {
   width: 100%;
   height: 100%;
 }
@@ -242,8 +245,13 @@ body.hub-page .local-banner {
   pointer-events: none;
 }
 
+.hub-nav-link--teherauto .hub-nav-tile-count {
+  background: #e67e22;
+}
+
 body.site-app .hub-nav-link--kezdolap,
-body.site-app .hub-nav-link--auto {
+body.site-app .hub-nav-link--auto,
+body.site-app .hub-nav-link--teherauto {
   align-items: center;
   padding-top: 0.45rem;
   padding-bottom: 0.4rem;
@@ -251,7 +259,8 @@ body.site-app .hub-nav-link--auto {
 }
 
 body.site-app .hub-nav-kezdolap-img,
-body.site-app .hub-nav-auto-img {
+body.site-app .hub-nav-auto-img,
+body.site-app .hub-nav-teherauto-img {
   display: block;
   width: 4.5rem;
   height: 1.7rem;
@@ -268,8 +277,10 @@ body.site-app .hub-nav-tile {
 @media (min-width: 901px) {
   .hub-nav-link--kezdolap,
   .hub-nav-link--auto,
+  .hub-nav-link--teherauto,
   body.site-app .hub-nav-link--kezdolap,
-  body.site-app .hub-nav-link--auto {
+  body.site-app .hub-nav-link--auto,
+  body.site-app .hub-nav-link--teherauto {
     height: 34px;
     max-height: 34px;
     padding-top: 0;
@@ -278,8 +289,10 @@ body.site-app .hub-nav-tile {
 
   .hub-nav-kezdolap-img,
   .hub-nav-auto-img,
+  .hub-nav-teherauto-img,
   body.site-app .hub-nav-kezdolap-img,
   body.site-app .hub-nav-auto-img,
+  body.site-app .hub-nav-teherauto-img,
   .hub-nav-tile,
   body.site-app .hub-nav-tile {
     width: 86px;

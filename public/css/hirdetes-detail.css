@@ -474,22 +474,53 @@ html[data-theme="dark"] body.hd-page .hd-tool--fb {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  font-size: 0.82rem;
+  font-size: 0.88rem;
   font-weight: 700;
   color: #027a48;
+  line-height: 1;
+  user-select: none;
 }
 
 .hd-price-bars {
   display: inline-flex;
-  gap: 2px;
+  align-items: flex-end;
+  gap: 3px;
+  height: 16px;
 }
 
 .hd-price-bars i {
-  width: 5px;
-  height: 14px;
-  border-radius: 2px;
-  background: #12b76a;
   display: block;
+  width: 4px;
+  border-radius: 1px;
+  background: #d1d5db;
+}
+
+.hd-price-bars i:nth-child(1) { height: 7px; }
+.hd-price-bars i:nth-child(2) { height: 10px; }
+.hd-price-bars i:nth-child(3) { height: 13px; }
+.hd-price-bars i:nth-child(4) { height: 16px; }
+
+.hd-price-rating[data-opinion="jó ár"] .hd-price-bars > i:nth-child(-n+3),
+.hd-price-rating[data-opinion="kevés"] .hd-price-bars > i {
+  background: #12b76a;
+}
+
+.hd-price-rating[data-opinion="sok"] .hd-price-bars[data-level="1"] > i:nth-child(1),
+.hd-price-rating[data-opinion="sok"] .hd-price-bars[data-level="2"] > i:nth-child(-n+2) {
+  background: #f59e0b;
+}
+
+.hd-price-rating[data-opinion="sok"] {
+  color: #d97706;
+}
+
+.hd-price-rating[data-opinion="jó ár"] .hd-price-rating-label,
+.hd-price-rating[data-opinion="kevés"] .hd-price-rating-label {
+  color: #027a48;
+}
+
+.hd-price-rating[data-opinion="sok"] .hd-price-rating-label {
+  color: #d97706;
 }
 
 .hd-price-bars i.is-dim {

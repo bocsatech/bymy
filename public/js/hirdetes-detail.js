@@ -99,6 +99,20 @@ function promoBannerText(view) {
   return "Autóvásárlás: Végre egyszerű";
 }
 
+/** Piaci árjelző az ár mellett (Kevés / Jó ár / Sok). */
+function priceMarketRatingHtml(view) {
+  const hint = view?.marketHint;
+  if (!hint?.opinion || !hint?.bars) return "";
+  const level = Math.max(1, Math.min(4, Number(hint.bars) || 0));
+  const label =
+    hint.label ||
+    (hint.opinion === "jó ár" ? "Jó ár" : hint.opinion === "kevés" ? "Kevés" : "Sok");
+  return `<div class="hd-price-rating" data-opinion="${escapeHtml(hint.opinion)}" title="Piaci árjelzés">
+              <span class="hd-price-bars" data-level="${level}" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+              <span class="hd-price-rating-label">${escapeHtml(label)}</span>
+            </div>`;
+}
+
 function navigationDestination(view) {
   const lines = Array.isArray(view.addressLines) ? view.addressLines.filter(Boolean) : [];
   if (lines.length) return lines.join(", ");
@@ -592,10 +606,7 @@ function render(view, listing, related = []) {
         <div class="hd-price-box">
           <div class="hd-price-row">
             <p class="hd-price">${escapeHtml(view.price)}</p>
-            <div class="hd-price-rating" title="Árjelzés">
-              <span class="hd-price-bars" aria-hidden="true"><i></i><i></i><i></i><i class="is-dim"></i></span>
-              <span>Jó ár</span>
-            </div>
+            ${priceMarketRatingHtml(view)}
           </div>
           ${view.salePrice ? `<p class="hd-price-old">Korábbi ár: ${escapeHtml(view.salePrice)}</p>` : ""}
         </div>

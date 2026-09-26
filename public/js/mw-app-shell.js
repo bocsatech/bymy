@@ -276,7 +276,7 @@
   }
 
   function ensureDeskHeaderCss() {
-    var href = "/css/site-desk-header.css?v=navScroll1";
+    var href = "/css/site-desk-header.css?v=navScroll2";
     if (document.querySelector("link[data-site-desk-header-css], link[href*='site-desk-header.css']")) return;
     var link = document.createElement("link");
     link.rel = "stylesheet";
@@ -447,8 +447,81 @@
     if (document.readyState === "loading") {
       document.addEventListener("DOMContentLoaded", pruneForeignHeaders);
     }
+    bindDeskNavScroll();
     syncAuthCache();
     ensureDeskHeaderDeps();
+  }
+
+  function bindDeskNavScroll() {
+    var nav = document.querySelector("header[data-site-desk-header] .hub-nav");
+    if (!nav || nav.getAttribute("data-desk-nav-scroll") === "1") return;
+    nav.setAttribute("data-desk-nav-scroll", "1");
+
+    nav.addEventListener(
+      "wheel",
+      function (e) {
+        if (nav.scrollWidth <= nav.clientWidth + 1) return;
+        var dx = e.deltaX;
+        var dy = e.deltaY;
+        if (Math.abs(dx) > Math.abs(dy)) {
+          if (dx === 0) return;
+          e.preventDefault();
+          nav.scrollLeft += dx;
+          return;
+        }
+        if (dy === 0) return;
+        var atStart = nav.scrollLeft <= 0;
+        var atEnd = nav.scrollLeft + nav.clientWidth >= nav.scrollWidth - 1;
+        if ((dy < 0 && atStart) || (dy > 0 && atEnd)) return;
+        e.preventDefault();
+        nav.scrollLeft += dy;
+      },
+      { passive: false }
+    );
+
+    var dragging = false;
+    var moved = false;
+    var startX = 0;
+    var startLeft = 0;
+    nav.addEventListener("pointerdown", function (e) {
+      if (e.pointerType === "mouse" && e.button !== 0) return;
+      if (nav.scrollWidth <= nav.clientWidth + 1) return;
+      dragging = true;
+      moved = false;
+      startX = e.clientX;
+      startLeft = nav.scrollLeft;
+      try {
+        nav.setPointerCapture(e.pointerId);
+      } catch (err) {}
+    });
+    nav.addEventListener("pointermove", function (e) {
+      if (!dragging) return;
+      var dx = e.clientX - startX;
+      if (!moved && Math.abs(dx) < 6) return;
+      moved = true;
+      nav.scrollLeft = startLeft - dx;
+    });
+    function endDrag(e) {
+      if (moved) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      dragging = false;
+      moved = false;
+    }
+    nav.addEventListener("pointerup", endDrag);
+    nav.addEventListener("pointercancel", endDrag);
+    nav.addEventListener(
+      "click",
+      function (e) {
+        if (moved) {
+          e.preventDefault();
+          e.stopPropagation();
+          moved = false;
+        }
+      },
+      true
+    );
   }
 
   function ensureDeskHeaderDeps() {

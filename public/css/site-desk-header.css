@@ -9,8 +9,8 @@
     --desk-cta-size: 13px;
     --desk-header-h: 80px;
     --desk-logo-col: 150px;
-    --desk-pad-x: 20px;
-    --desk-gap: 14px;
+    --desk-pad-x: 16px;
+    --desk-gap: 8px;
     --desk-nav-gap: 6px;
     --desk-cta-h: 36px;
     /* Rögzített csempe — ne zsugorodjon; szűk ablaknál a nav görget */
@@ -59,7 +59,7 @@
     display: contents !important;
   }
 
-  /* Logo: fix szélesség, soha ne zsugorodjon */
+  /* Logo: fix méret + középre a savban — ne csússzon le, ne zsugorodjon */
   body.site-app .hub-logo,
   body.site-app .home-logo,
   body.site-app .site-app-logo,
@@ -67,10 +67,18 @@
     grid-area: logo !important;
     justify-self: start !important;
     align-self: center !important;
+    position: relative !important;
+    top: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+    right: auto !important;
+    transform: none !important;
     width: var(--desk-logo-col) !important;
     min-width: var(--desk-logo-col) !important;
     max-width: var(--desk-logo-col) !important;
-    height: auto !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    max-height: 48px !important;
     margin: 0 !important;
     padding: 0 !important;
     flex: 0 0 var(--desk-logo-col) !important;
@@ -85,14 +93,16 @@
   body.site-app .bymy-logo-img--nav {
     width: auto !important;
     height: 48px !important;
-    min-width: 108px !important;
+    min-width: 120px !important;
+    min-height: 48px !important;
     max-width: 140px !important;
     max-height: 48px !important;
     object-fit: contain !important;
+    object-position: left center !important;
     flex-shrink: 0 !important;
   }
 
-  /* Menüsor: csak annyi csempe fér, amennyi összecsúszás nélkül; többi görgethető */
+  /* Menüsor: a logo után kezdődik; szűk helyen vízszintesen görgethető */
   body.site-app .hub-nav,
   body.site-app .home-nav,
   body.site-app .site-app-nav,
@@ -103,25 +113,27 @@
     align-self: center !important;
     display: flex !important;
     align-items: center !important;
-    justify-content: safe center !important;
+    justify-content: flex-start !important;
     gap: var(--desk-nav-gap) !important;
-    width: 100% !important;
+    width: auto !important;
     max-width: 100% !important;
     min-width: 0 !important;
     margin: 0 !important;
-    padding: 0 !important;
-    position: static !important;
+    padding: 0 2px !important;
+    position: relative !important;
     transform: none !important;
     left: auto !important;
     right: auto !important;
-    flex: none !important;
+    flex: 1 1 auto !important;
     flex-wrap: nowrap !important;
     overflow-x: auto !important;
     overflow-y: hidden !important;
     overscroll-behavior-x: contain;
     -webkit-overflow-scrolling: touch;
-    scrollbar-width: none !important;
+    touch-action: pan-x !important;
+    scrollbar-width: thin !important;
     pointer-events: auto !important;
+    z-index: 1 !important;
   }
 
   body.site-app .hub-nav::-webkit-scrollbar,

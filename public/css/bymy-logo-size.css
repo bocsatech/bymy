@@ -12,9 +12,10 @@
   body.site-app .home-logo .bymy-logo-img--nav,
   body.site-app .hub-logo .bymy-logo-img--nav,
   body.site-app .site-app-logo .bymy-logo-img--nav {
-    height: 56px !important;
-    max-width: min(180px, 22vw) !important;
-    width: auto !important;
+    height: var(--hub-nav-tile-h, 64px) !important;
+    width: var(--hub-nav-tile-w, 108px) !important;
+    max-width: var(--hub-nav-tile-w, 108px) !important;
+    object-fit: contain !important;
   }
 
   /* Ne tolja szét a közös 80px desk savot */

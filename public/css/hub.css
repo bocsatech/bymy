@@ -100,9 +100,10 @@ body.hub-page .local-banner {
 }
 
 .bymy-logo-img--nav {
-  height: 48px;
-  max-width: min(190px, 29vw);
-  width: auto;
+  height: var(--hub-nav-tile-h, 42px);
+  width: var(--hub-nav-tile-w, 72px);
+  max-width: var(--hub-nav-tile-w, 72px);
+  object-fit: contain;
 }
 
 .bymy-logo-img--hero {

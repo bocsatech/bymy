@@ -271,12 +271,12 @@
     if (document.querySelector('link[href*="bymy-logo-size.css"]')) return;
     var link = document.createElement("link");
     link.rel = "stylesheet";
-    link.href = "/css/bymy-logo-size.css?v=deskHdr5";
+    link.href = "/css/bymy-logo-size.css?v=logoTileWhite1";
     document.head.appendChild(link);
   }
 
   function ensureDeskHeaderCss() {
-    var href = "/css/site-desk-header.css?v=tileAlign2";
+    var href = "/css/site-desk-header.css?v=logoTileWhite1";
     if (document.querySelector("link[data-site-desk-header-css], link[href*='site-desk-header.css']")) return;
     var link = document.createElement("link");
     link.rel = "stylesheet";
@@ -353,7 +353,7 @@
       '<header class="hub-header" data-site-desk-header aria-label="Bymy">' +
       '<div class="hub-header-inner">' +
       '<a class="hub-logo" href="/" aria-label="Bymy">' +
-      '<img class="bymy-logo-img bymy-logo-img--nav" src="/images/bymy-logo.png?v=logoUpload1" alt="Bymy.hu" width="190" height="48" decoding="async" />' +
+      '<img class="bymy-logo-img bymy-logo-img--nav" src="/images/bymy-logo-nav.png?v=logoTileWhite1" alt="Bymy.hu" width="108" height="64" decoding="async" />' +
       "</a>" +
       '<nav class="hub-nav" aria-label="Főmenü">' +
       '<a class="hub-nav-link hub-nav-link--kezdolap' +

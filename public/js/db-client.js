@@ -40,6 +40,7 @@ export async function fetchListings({
   owner = null,
   excludeId = null,
   tile = true,
+  sort = null,
 } = {}) {
   const page = await fetchListingsPage({
     limit,
@@ -49,6 +50,7 @@ export async function fetchListings({
     owner,
     excludeId,
     tile,
+    sort,
   });
   return page.listings;
 }
@@ -61,6 +63,7 @@ export async function fetchListingsPage({
   owner = null,
   excludeId = null,
   tile = true,
+  sort = null,
 } = {}) {
   const params = new URLSearchParams({
     limit: String(limit),
@@ -70,6 +73,7 @@ export async function fetchListingsPage({
   if (vertical) params.set("vertical", String(vertical));
   if (owner != null && owner !== "") params.set("owner", String(owner));
   if (excludeId != null && excludeId !== "") params.set("exclude", String(excludeId));
+  if (sort) params.set("sort", String(sort));
   if (tile) params.set("tile", "1");
   else params.set("full", "1");
   const response = await fetch(`/api/listings?${params}`);

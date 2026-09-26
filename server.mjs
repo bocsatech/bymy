@@ -1033,10 +1033,39 @@ async function handleListingsApi(req, res, pathname) {
     }
     const limit = Math.min(Math.max(Number(url.searchParams.get("limit") ?? 20), 1), 100);
     const offset = Math.max(0, Math.floor(Number(url.searchParams.get("offset") ?? 0)));
+    const deskSort = String(url.searchParams.get("sort") || "newest").trim().toLowerCase();
     const tileMode =
       url.searchParams.get("tile") === "1" ||
       url.searchParams.get("mode") === "tile" ||
       !url.searchParams.get("full");
+
+    const boostPriceNum = (item) => {
+      const fromNum = Number(item?.preview?.priceNum);
+      if (Number.isFinite(fromNum) && fromNum > 0) return fromNum;
+      const raw = String(item?.preview?.price ?? item?.form?.vetelar ?? "").replace(/\D/g, "");
+      const n = Number(raw);
+      return Number.isFinite(n) && n > 0 ? n : null;
+    };
+    const boostKmNum = (item) => {
+      const fromNum = Number(item?.preview?.kmNum);
+      if (Number.isFinite(fromNum) && fromNum >= 0) return fromNum;
+      const raw = String(item?.preview?.km ?? item?.form?.km ?? "").replace(/\D/g, "");
+      const n = Number(raw);
+      return Number.isFinite(n) ? n : null;
+    };
+    const boostNewestFirst = (a, b) => {
+      const ta = new Date(a.updated_at ?? a.created_at ?? 0).getTime();
+      const tb = new Date(b.updated_at ?? b.created_at ?? 0).getTime();
+      return tb - ta;
+    };
+    const boostDeskCompare =
+      deskSort === "price-asc"
+        ? (a, b) => (boostPriceNum(a) ?? Infinity) - (boostPriceNum(b) ?? Infinity)
+        : deskSort === "price-desc"
+          ? (a, b) => (boostPriceNum(b) ?? -1) - (boostPriceNum(a) ?? -1)
+          : deskSort === "km-asc"
+            ? (a, b) => (boostKmNum(a) ?? Infinity) - (boostKmNum(b) ?? Infinity)
+            : boostNewestFirst;
 
     let boostOwnerIds = [];
     try {
@@ -1047,7 +1076,7 @@ async function handleListingsApi(req, res, pathname) {
     }
     const boostSet = new Set(boostOwnerIds.map(Number).filter((n) => n > 0));
 
-    /** Boostolt userek hirdetései — a kombinált lista elején. */
+    /** Boostolt userek hirdetései — a kombinált lista elején (desk sort a blokkon belül). */
     let boostedRows = [];
     if (boostSet.size) {
       try {
@@ -1065,11 +1094,6 @@ async function handleListingsApi(req, res, pathname) {
           )
         );
         const seen = new Set();
-        const newestFirst = (a, b) => {
-          const ta = new Date(a.updated_at ?? a.created_at ?? 0).getTime();
-          const tb = new Date(b.updated_at ?? b.created_at ?? 0).getTime();
-          return tb - ta;
-        };
         for (const rows of chunks) {
           for (const item of rows || []) {
             const id = Number(item.id);
@@ -1081,7 +1105,7 @@ async function handleListingsApi(req, res, pathname) {
             boostedRows.push({ ...item, ownerBoost: true });
           }
         }
-        boostedRows.sort(newestFirst);
+        boostedRows.sort(boostDeskCompare);
       } catch (error) {
         console.warn("Boost feed:", error?.message || error);
         boostedRows = [];

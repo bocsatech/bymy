@@ -1,4 +1,4 @@
-import { fetchListings, fetchListingsPage, fetchRelatedListings } from "./db-client.js?v=ownerBoost5";
+import { fetchListings, fetchListingsPage, fetchRelatedListings } from "./db-client.js?v=ownerBoost6";
 import { createHomeGridCard, initHomeGridCardPhotos } from "./home-grid-card.js?v=mobFix8";
 import { promoKiemeltActive, promoTopAjanlatActive } from "./listing-promo.js?v=promo1";
 import {
@@ -164,19 +164,31 @@ function applyOwnerBoostSort(items, secondaryCompare) {
   });
 }
 
+function readDeskSort() {
+  const el = document.querySelector("[data-desk-sort]");
+  const fromDom = String(el?.value || "").trim();
+  if (fromDom) return fromDom;
+  return deskSort || "newest";
+}
+
 function listingPriceNum(item) {
+  const fromNum = Number(item?.preview?.priceNum);
+  if (Number.isFinite(fromNum) && fromNum > 0) return fromNum;
   const raw = String(item?.preview?.price ?? item?.form?.vetelar ?? "").replace(/\D/g, "");
   const n = Number(raw);
-  return Number.isFinite(n) ? n : null;
+  return Number.isFinite(n) && n > 0 ? n : null;
 }
 
 function listingKmNum(item) {
+  const fromNum = Number(item?.preview?.kmNum);
+  if (Number.isFinite(fromNum) && fromNum >= 0) return fromNum;
   const raw = String(item?.preview?.km ?? item?.form?.km ?? "").replace(/\D/g, "");
   const n = Number(raw);
   return Number.isFinite(n) ? n : null;
 }
 
 function sortDeskListings(items) {
+  deskSort = readDeskSort();
   let secondary;
   if (deskSort === "price-asc") {
     secondary = (a, b) => (listingPriceNum(a) ?? Infinity) - (listingPriceNum(b) ?? Infinity);
@@ -347,6 +359,7 @@ async function loadListings() {
     status: "feladott",
     vertical: pageVerticalParam(),
     tile: true,
+    sort: readDeskSort(),
   });
   if (Array.isArray(page.boostOwnerIds)) {
     boostOwnerIds = new Set(page.boostOwnerIds.map(Number).filter((n) => n > 0));
@@ -408,6 +421,7 @@ async function loadMoreListings() {
         status: "feladott",
         vertical: pageVerticalParam(),
         tile: true,
+        sort: readDeskSort(),
       });
       if (Array.isArray(page.boostOwnerIds) && page.boostOwnerIds.length) {
         for (const id of page.boostOwnerIds) {
@@ -709,8 +723,9 @@ if (PAGE === "ingatlan") {
       if (postal.length === 4 && radiusKm > 0) scrollToListings();
     },
     onDeskSortChange: (sort) => {
-      deskSort = sort || "newest";
-      applyFilters();
+      deskSort = sort || readDeskSort() || "newest";
+      // Boost blokk lapozása szerveren rendezett — újrarendezéskor újratöltés kell.
+      void loadListings();
     },
   });
 

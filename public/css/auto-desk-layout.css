@@ -98,8 +98,8 @@
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-logo {
-    width: 260px;
-    max-width: 260px;
+    width: 180px;
+    max-width: 180px;
     justify-self: start;
   }
 

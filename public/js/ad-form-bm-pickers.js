@@ -4,7 +4,7 @@ import {
   KLIM_OPTIONS,
   OKMANY_JELLEG_OPTIONS,
   UZEMANYAG_CATEGORIES,
-} from "./equipment-data.js?v=teherKivitel35e";
+} from "./equipment-data.js?v=allapotFlat1";
 import { KIVITEL_OPTIONS } from "./kivitel-options.js?v=kivitel1";
 import { fetchVehicleCatalog } from "./vehicle-catalog-client.js?v=adBmCatalog1";
 import { bindAutoBmDismiss, autoBmPanelIsOpen } from "./auto-bm-dismiss.js?v=bmDismiss1";

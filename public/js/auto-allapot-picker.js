@@ -1,5 +1,5 @@
 
-import { ALLAPOT_CATEGORIES } from "./equipment-data.js";
+import { ALLAPOT_CATEGORIES } from "./equipment-data.js?v=allapotFlat1";
 import { bindAutoBmDismiss, autoBmPanelIsOpen } from "./auto-bm-dismiss.js?v=bmDismiss1";
 
 function labelList(items) {

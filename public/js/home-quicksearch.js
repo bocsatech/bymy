@@ -1,5 +1,5 @@
 
-import { applyAutoSearchLayout, readLayoutFilterValues, refillAutoSearchRangeSelects, prefetchAutoSearchBoot } from "./auto-search-layout.js?v=postalFill1";
+import { applyAutoSearchLayout, readLayoutFilterValues, refillAutoSearchRangeSelects, prefetchAutoSearchBoot } from "./auto-search-layout.js?v=allapotFlat1";
 import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums } from "./auto-search-drums.js?v=mobFix8";
 import {
   mountDetailedSearch,
@@ -10,7 +10,7 @@ import { readWheel } from "./ingatlan-wheels.js?v=mobFix8";
 import { readBrandModelFilterValues, mountAutoBrandModelPicker } from "./auto-brand-model-picker.js?v=bmDoneClose1";
 import { readFuelFilterValues, mountAutoFuelPicker } from "./auto-fuel-picker.js?v=fuelMatch1";
 import { readKivitelFilterValues, mountAutoKivitelPicker } from "./auto-kivitel-picker.js?v=kivitelFix1";
-import { readAllapotFilterValues, mountAutoAllapotPicker } from "./auto-allapot-picker.js?v=noHint2";
+import { readAllapotFilterValues, mountAutoAllapotPicker } from "./auto-allapot-picker.js?v=allapotFlat1";
 import { readSebessegvaltoFilterValues, mountAutoSebessegvaltoPicker } from "./auto-sebessegvalto-picker.js?v=noHint2";
 import { readOkmanyFilterValues, mountAutoOkmanyPicker } from "./auto-okmany-picker.js?v=noHint2";
 import { readToltoFilterValues, mountAutoToltoPickers } from "./auto-tolto-picker.js?v=noHint2";

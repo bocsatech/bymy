@@ -132,22 +132,16 @@ export function flattenTeher35KivitelOptions() {
 }
 
 export const ALLAPOT_CATEGORIES = [
-  {
-    id: "normal",
-    label: "Normál",
-    children: [
-      { label: "Normál", value: "Normál" },
-      { label: "Kitűnő", value: "Kitűnő" },
-      { label: "Megkímélt", value: "Megkímélt" },
-      { label: "Újszerű", value: "Újszerű" },
-      { label: "Sérülésmentes", value: "Sérülésmentes" },
-    ],
-  },
+  { id: "normal", label: "Normál", value: "Normál" },
+  { id: "megkimelt", label: "Megkímélt", value: "Megkímélt" },
+  { id: "ujszeru", label: "Újszerű", value: "Újszerű" },
+  { id: "serulesmentes", label: "Sérülésmentes", value: "Sérülésmentes" },
   {
     id: "serult",
     label: "Sérült",
     children: [
       { label: "Sérült", value: "Sérült" },
+      { label: "Optikai hibás", value: "Optikai hibás" },
       { label: "Enyhén sérült", value: "Enyhén sérült" },
       { label: "Eleje sérült", value: "Eleje sérült" },
       { label: "Hátulja sérült", value: "Hátulja sérült" },

@@ -7,7 +7,7 @@ import {
   TEHER_KISTEHER_KIVITEL,
   TEHER_35_KIVITEL_CATEGORIES,
   normalizeOkmanyJelleg,
-} from "./equipment-data.js?v=egyebDupFix1";
+} from "./equipment-data.js?v=allapotFlat1";
 import { KIVITEL_OPTIONS, normalizeKivitel } from "./kivitel-options.js?v=kivitel1";
 import { EGYEB_INFO_OPTIONS } from "./egyeb-info-data.js?v=egyebInfoFix2";
 
@@ -22,7 +22,7 @@ import {
   DEFAULT_PHOTO_OVERLAY_ID,
   renderListingPhotoOverlay,
 } from "./listing-photo-overlay.js?v=photoOverlayIcons3";
-import { refreshAdFormBmPickers, applyAdFormBmFieldValues } from "./ad-form-bm-pickers.js?v=yearFill1";
+import { refreshAdFormBmPickers, applyAdFormBmFieldValues } from "./ad-form-bm-pickers.js?v=allapotFlat1";
 import { applyAdFormDesk, isAdFormDesk } from "./ad-form-desk.js?v=immoTipusPick1";
 import { initKmInput, parseKmDigits, setKmInputValue } from "./km-input.js?v=kmFmt1";
 import {

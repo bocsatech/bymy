@@ -7,8 +7,8 @@ import {
   populateFilterOptions,
   initHomeSearchSidebar,
   initHomeFilterCatalog,
-} from "./home-search-filter.js?v=fuelMatch1";
-import { initHomeQuickSearch } from "./home-quicksearch.js?v=kivitelFix1";
+} from "./home-search-filter.js?v=allapotFlat1";
+import { initHomeQuickSearch } from "./home-quicksearch.js?v=allapotFlat1";
 import { decodeSavedSearchParam } from "./saved-search.js?v=savedSearch5";
 import { matchDetailedSearch, hasActiveDetailedSearch } from "./auto-detailed-search.js?v=autoDesk16";
 import { updateAutoDeskResultCount } from "./auto-desk-search.js?v=teherKivitel35e";

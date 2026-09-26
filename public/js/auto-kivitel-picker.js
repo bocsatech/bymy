@@ -4,7 +4,7 @@ import {
   TEHER_KISTEHER_KIVITEL,
   TEHER_35_KIVITEL_CATEGORIES,
   flattenTeher35KivitelOptions,
-} from "./equipment-data.js?v=teherKivitel35e";
+} from "./equipment-data.js?v=allapotFlat1";
 import { bindAutoBmDismiss, autoBmPanelIsOpen } from "./auto-bm-dismiss.js?v=bmDismiss1";
 
 function labelList(items) {

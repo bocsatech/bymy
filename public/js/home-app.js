@@ -1,4 +1,4 @@
-import { fetchListings, fetchListingsPage, fetchRelatedListings } from "./db-client.js?v=ownerBoost3";
+import { fetchListings, fetchListingsPage, fetchRelatedListings } from "./db-client.js?v=ownerBoost4";
 import { createHomeGridCard, initHomeGridCardPhotos } from "./home-grid-card.js?v=mobFix8";
 import { promoKiemeltActive, promoTopAjanlatActive } from "./listing-promo.js?v=promo1";
 import {
@@ -145,7 +145,7 @@ function isOwnerBoosted(item) {
   return oid > 0 && boostOwnerIds.has(oid);
 }
 
-/** Boost mindig előrébb a választott rendezésnél. Boostoltak közt ár ↑. Home kiemelés gombot nem érinti. */
+/** Boost mindig előrébb; boostoltakon belül is a választott rendezés. Home kiemelés gombot nem érinti. */
 function applyOwnerBoostSort(items, secondaryCompare) {
   if (featuredOnlyMode) return items;
   const cmp =
@@ -160,9 +160,6 @@ function applyOwnerBoostSort(items, secondaryCompare) {
     const aB = isOwnerBoosted(a) ? 0 : 1;
     const bB = isOwnerBoosted(b) ? 0 : 1;
     if (aB !== bB) return aB - bB;
-    if (aB === 0) {
-      return (listingPriceNum(a) ?? Infinity) - (listingPriceNum(b) ?? Infinity);
-    }
     return cmp(a, b);
   });
 }

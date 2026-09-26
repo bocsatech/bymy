@@ -1065,10 +1065,10 @@ async function handleListingsApi(req, res, pathname) {
           )
         );
         const seen = new Set();
-        const priceNum = (item) => {
-          const raw = String(item?.preview?.price ?? item?.form?.vetelar ?? "").replace(/\D/g, "");
-          const n = Number(raw);
-          return Number.isFinite(n) ? n : Infinity;
+        const newestFirst = (a, b) => {
+          const ta = new Date(a.updated_at ?? a.created_at ?? 0).getTime();
+          const tb = new Date(b.updated_at ?? b.created_at ?? 0).getTime();
+          return tb - ta;
         };
         for (const rows of chunks) {
           for (const item of rows || []) {
@@ -1081,7 +1081,8 @@ async function handleListingsApi(req, res, pathname) {
             boostedRows.push({ ...item, ownerBoost: true });
           }
         }
-        boostedRows.sort((a, b) => priceNum(a) - priceNum(b));
+        // Alap API sorrend = legújabb; a kliens a választott rendezéssel újrarendezi.
+        boostedRows.sort(newestFirst);
       } catch (error) {
         console.warn("Boost feed:", error?.message || error);
         boostedRows = [];
@@ -1101,7 +1102,7 @@ async function handleListingsApi(req, res, pathname) {
       });
 
     if (offset === 0 && boostedRows.length) {
-      // Első oldal: boostoltak elöl (ár ↑), max `limit` db, utána feltöltés.
+      // Első oldal: boostoltak elöl, max `limit` db, utána feltöltés.
       const head = boostedRows.slice(0, limit);
       const fill = Math.max(0, limit - head.length);
       listings = [...head, ...listings.slice(0, fill)];

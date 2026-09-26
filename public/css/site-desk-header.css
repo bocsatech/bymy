@@ -237,8 +237,9 @@
   }
 }
 
-/* Mobil: a desk csempés header elrejtve — a mw-app-top / szöveges nav marad */
-@media (max-width: 900px) {
+/* Mobil (≤800): desk csempés header elrejtve — a mw-app-top / szöveges nav marad.
+   801–900: a desk header látszik (mw-app-top már rejtve); ne legyen „holt sáv”. */
+@media (max-width: 800px) {
   body.site-app > header[data-site-desk-header],
   body.site-app > .hub-header[data-site-desk-header],
   body.home-page > .hub-header[data-site-desk-header] {

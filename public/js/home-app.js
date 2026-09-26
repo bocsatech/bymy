@@ -1,4 +1,4 @@
-import { fetchListings, fetchListingsPage, fetchRelatedListings } from "./db-client.js?v=ownerBoost4";
+import { fetchListings, fetchListingsPage, fetchRelatedListings } from "./db-client.js?v=ownerBoost5";
 import { createHomeGridCard, initHomeGridCardPhotos } from "./home-grid-card.js?v=mobFix8";
 import { promoKiemeltActive, promoTopAjanlatActive } from "./listing-promo.js?v=promo1";
 import {
@@ -399,46 +399,52 @@ async function loadMoreListings() {
   if (PAGE !== "auto" && PAGE !== "teherauto" && PAGE !== "ingatlan") return;
   listingsLoadingMore = true;
   try {
-    const page = await fetchListingsPage({
-      limit: LISTINGS_PAGE_MORE,
-      offset: listingsOffset,
-      status: "feladott",
-      vertical: pageVerticalParam(),
-      tile: true,
-    });
-    if (Array.isArray(page.boostOwnerIds) && page.boostOwnerIds.length) {
-      for (const id of page.boostOwnerIds) {
-        const n = Number(id);
-        if (n > 0) boostOwnerIds.add(n);
+    let guard = 0;
+    while (listingsHasMore && guard < 20) {
+      guard += 1;
+      const page = await fetchListingsPage({
+        limit: LISTINGS_PAGE_MORE,
+        offset: listingsOffset,
+        status: "feladott",
+        vertical: pageVerticalParam(),
+        tile: true,
+      });
+      if (Array.isArray(page.boostOwnerIds) && page.boostOwnerIds.length) {
+        for (const id of page.boostOwnerIds) {
+          const n = Number(id);
+          if (n > 0) boostOwnerIds.add(n);
+        }
       }
-    }
-    if (Array.isArray(page.boostListingIds)) {
-      for (const id of page.boostListingIds) {
-        const n = Number(id);
-        if (n > 0) boostListingIds.add(n);
+      if (Array.isArray(page.boostListingIds)) {
+        for (const id of page.boostListingIds) {
+          const n = Number(id);
+          if (n > 0) boostListingIds.add(n);
+        }
       }
-    }
-    for (const item of page.listings || []) {
-      if (item?.ownerBoost === true) {
-        const id = Number(item.id);
-        if (id > 0) boostListingIds.add(id);
+      for (const item of page.listings || []) {
+        if (item?.ownerBoost === true) {
+          const id = Number(item.id);
+          if (id > 0) boostListingIds.add(id);
+        }
       }
+      const active = (page.listings || []).filter((item) => (item.status || "feladott") === "feladott");
+      const batch = filterBySitePage(active);
+      const got = Math.max(page.listings?.length || 0, 1);
+      listingsOffset = (Number(page.offset) || listingsOffset) + got;
+      if (page.total != null) listingsTotal = Number(page.total);
+      listingsHasMore = Boolean(page.hasMore);
+      if (!batch.length) {
+        if (!listingsHasMore) break;
+        continue;
+      }
+      allItems = mergeListings(allItems, batch);
+      featuredListingIds = featuredListingIdSet(allItems);
+      populateFilterOptions(allItems);
+      renderListings(allItems);
+      updateFilterResultCount();
+      statsUi?.refreshActiveCount?.();
+      break;
     }
-    const active = (page.listings || []).filter((item) => (item.status || "feladott") === "feladott");
-    const batch = filterBySitePage(active);
-    listingsOffset = (Number(page.offset) || listingsOffset) + (page.listings?.length || 0);
-    if (page.total != null) listingsTotal = Number(page.total);
-    listingsHasMore = Boolean(page.hasMore);
-    if (!batch.length) {
-      if (!listingsHasMore) return;
-      return;
-    }
-    allItems = mergeListings(allItems, batch);
-    featuredListingIds = featuredListingIdSet(allItems);
-    populateFilterOptions(allItems);
-    renderListings(allItems);
-    updateFilterResultCount();
-    statsUi?.refreshActiveCount?.();
   } catch (error) {
     console.warn("Lista folytatás:", error);
   } finally {

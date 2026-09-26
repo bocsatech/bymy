@@ -1047,7 +1047,7 @@ async function handleListingsApi(req, res, pathname) {
     }
     const boostSet = new Set(boostOwnerIds.map(Number).filter((n) => n > 0));
 
-    /** Boostolt userek hirdetései (ár szerint növekvő) — mindig a lista elején. */
+    /** Boostolt userek hirdetései — a kombinált lista elején. */
     let boostedRows = [];
     if (boostSet.size) {
       try {
@@ -1081,7 +1081,6 @@ async function handleListingsApi(req, res, pathname) {
             boostedRows.push({ ...item, ownerBoost: true });
           }
         }
-        // Alap API sorrend = legújabb; a kliens a választott rendezéssel újrarendezi.
         boostedRows.sort(newestFirst);
       } catch (error) {
         console.warn("Boost feed:", error?.message || error);
@@ -1090,25 +1089,56 @@ async function handleListingsApi(req, res, pathname) {
     }
     const boostedIds = new Set(boostedRows.map((row) => Number(row.id)));
 
-    let listings = await listListingsWithPreview({ limit, offset, status, vertical });
-    listings = (listings || [])
-      .filter((item) => !boostedIds.has(Number(item.id)))
-      .map((item) => {
+    async function fetchNonBoostedPage({ skip, take }) {
+      const out = [];
+      let skipped = 0;
+      let feedOffset = 0;
+      const chunk = Math.min(Math.max(take * 4, 40), 100);
+      for (let guard = 0; guard < 50 && out.length < take; guard += 1) {
+        const batch = await listListingsWithPreview({
+          limit: chunk,
+          offset: feedOffset,
+          status,
+          vertical,
+        });
+        if (!batch?.length) break;
+        feedOffset += batch.length;
+        for (const item of batch) {
+          const id = Number(item.id);
+          if (boostedIds.has(id)) continue;
+          if (skipped < skip) {
+            skipped += 1;
+            continue;
+          }
+          out.push({
+            ...item,
+            ownerBoost: false,
+          });
+          if (out.length >= take) break;
+        }
+        if (batch.length < chunk) break;
+      }
+      return out;
+    }
+
+    let listings = [];
+    if (!boostedRows.length) {
+      listings = (await listListingsWithPreview({ limit, offset, status, vertical })).map((item) => {
         const oid = Number(item?.form?.owner_user_id ?? item?.user_id ?? 0);
         return {
           ...item,
           ownerBoost: Boolean(oid && boostSet.has(oid)),
         };
       });
-
-    if (offset === 0 && boostedRows.length) {
-      // Első oldal: boostoltak elöl, max `limit` db, utána feltöltés.
-      const head = boostedRows.slice(0, limit);
-      const fill = Math.max(0, limit - head.length);
-      listings = [...head, ...listings.slice(0, fill)];
-    } else if (offset > 0 && boostedRows.length) {
-      // Későbbi oldalak: a boostoltak már az első oldalon voltak.
-      listings = listings.slice(0, limit);
+    } else if (offset < boostedRows.length) {
+      // Kombinált lista: [boostoltak…][többi…]
+      const fromBoost = boostedRows.slice(offset, offset + limit);
+      const need = Math.max(0, limit - fromBoost.length);
+      const nonBoost = need > 0 ? await fetchNonBoostedPage({ skip: 0, take: need }) : [];
+      listings = [...fromBoost, ...nonBoost];
+    } else {
+      const skipNon = offset - boostedRows.length;
+      listings = await fetchNonBoostedPage({ skip: skipNon, take: limit });
     }
 
     let total = null;
@@ -1123,10 +1153,8 @@ async function handleListingsApi(req, res, pathname) {
         : listings.length >= limit;
 
     const stamped = listings;
-    const boostListingIds = stamped
-      .filter((item) => item?.ownerBoost === true)
-      .map((item) => Number(item.id))
-      .filter((id) => id > 0);
+    // Teljes boost ID lista — kliens szűrés után is megtalálja őket.
+    const boostListingIds = boostedRows.map((row) => Number(row.id)).filter((id) => id > 0);
     sendJson(
       res,
       200,
@@ -1143,7 +1171,6 @@ async function handleListingsApi(req, res, pathname) {
         hasMore,
       },
       {
-        // Tagok + boost: ne CDN-eljük (különben régi sorrend marad).
         "Cache-Control": "private, no-store",
         "CDN-Cache-Control": "no-store",
         "Cloudflare-CDN-Cache-Control": "no-store",

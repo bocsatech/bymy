@@ -220,9 +220,11 @@ body.site-app .hub-header {
     margin: 0 !important;
     padding: 0 !important;
     width: 150px !important;
+    min-width: 150px !important;
     max-width: 150px !important;
     height: auto !important;
-    flex: none !important;
+    flex: 0 0 150px !important;
+    flex-shrink: 0 !important;
     z-index: 2;
     display: inline-flex !important;
     align-items: center !important;
@@ -257,7 +259,7 @@ body.site-app .hub-header {
     align-items: center !important;
     justify-content: center !important;
     gap: 6px !important;
-    width: max-content !important;
+    width: 100% !important;
     max-width: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
@@ -265,7 +267,10 @@ body.site-app .hub-header {
     flex: none !important;
     min-width: 0 !important;
     pointer-events: auto !important;
-    overflow: visible !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    flex-wrap: nowrap !important;
+    scrollbar-width: none !important;
     border: 0 !important;
     background: transparent !important;
   }

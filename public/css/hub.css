@@ -381,11 +381,12 @@ body.site-app .hub-nav-tile {
   --hub-nav-tile-h: 52px;
 }
 
-@media (min-width: 901px) {
+@media (min-width: 801px) {
   :root,
   body.site-app {
-    --hub-nav-tile-w: clamp(72px, 6.8vw, 100px);
-    --hub-nav-tile-h: clamp(42px, 4vw, 58px);
+    /* Rögzített méret — szűk ablaknál a menüsor görget, ne a csempe zsugorodjon */
+    --hub-nav-tile-w: 96px;
+    --hub-nav-tile-h: 56px;
   }
 
   .hub-nav-link--kezdolap,
@@ -442,8 +443,8 @@ body.site-app .hub-nav-tile {
   }
 }
 
-/* Mobil: csempe-méret változók ne nyomják a szöveges/mw navot */
-@media (max-width: 900px) {
+/* Mobil (≤800): csempe-méret ne nyomja a szöveges/mw navot */
+@media (max-width: 800px) {
   .hub-nav-kezdolap-img,
   .hub-nav-auto-img,
   .hub-nav-teherauto-img,
@@ -452,7 +453,6 @@ body.site-app .hub-nav-tile {
   .hub-nav-uzenetek-img,
   .hub-nav-fiok-img,
   .hub-nav-tile {
-    /* desk header el van rejtve; ha mégis látszik, ne legyen óriás */
     width: auto;
     height: auto;
     max-width: 4.5rem;

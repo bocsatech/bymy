@@ -276,7 +276,7 @@
   }
 
   function ensureDeskHeaderCss() {
-    var href = "/css/site-desk-header.css?v=navShow1";
+    var href = "/css/site-desk-header.css?v=navScroll1";
     if (document.querySelector("link[data-site-desk-header-css], link[href*='site-desk-header.css']")) return;
     var link = document.createElement("link");
     link.rel = "stylesheet";

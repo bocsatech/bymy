@@ -1,5 +1,5 @@
-/* Desk felső sav — logo balra, csempék középen, CTA jobbra (≥901px) */
-@media (min-width: 901px) {
+/* Desk felső sav — logo balra (fix), csempék középen (görgethető), CTA jobbra (≥801px) */
+@media (min-width: 801px) {
   body.site-app {
     --desk-nav-font: "DM Sans", system-ui, -apple-system, sans-serif;
     --desk-nav-size: 14px;
@@ -13,8 +13,9 @@
     --desk-gap: 14px;
     --desk-nav-gap: 6px;
     --desk-cta-h: 36px;
-    --hub-nav-tile-w: clamp(72px, 6.8vw, 100px);
-    --hub-nav-tile-h: clamp(42px, 4vw, 58px);
+    /* Rögzített csempe — ne zsugorodjon; szűk ablaknál a nav görget */
+    --hub-nav-tile-w: 96px;
+    --hub-nav-tile-h: 56px;
   }
 
   body.site-app > .hub-header,
@@ -36,7 +37,7 @@
   body.home-page .hub-header-inner,
   body.home-page .home-header-inner {
     display: grid !important;
-    grid-template-columns: var(--desk-logo-col) minmax(0, 1fr) auto !important;
+    grid-template-columns: minmax(var(--desk-logo-col), var(--desk-logo-col)) minmax(0, 1fr) max-content !important;
     grid-template-areas: "logo nav actions" !important;
     align-items: center !important;
     column-gap: var(--desk-gap) !important;
@@ -50,6 +51,7 @@
     max-height: var(--desk-header-h) !important;
     box-sizing: border-box !important;
     position: relative !important;
+    min-width: 0 !important;
   }
 
   body.site-app .hub-nav-band,
@@ -57,7 +59,7 @@
     display: contents !important;
   }
 
-  /* Logo: külön, nem csempe-méret */
+  /* Logo: fix szélesség, soha ne zsugorodjon */
   body.site-app .hub-logo,
   body.site-app .home-logo,
   body.site-app .site-app-logo,
@@ -66,11 +68,13 @@
     justify-self: start !important;
     align-self: center !important;
     width: var(--desk-logo-col) !important;
+    min-width: var(--desk-logo-col) !important;
     max-width: var(--desk-logo-col) !important;
     height: auto !important;
     margin: 0 !important;
     padding: 0 !important;
-    flex: none !important;
+    flex: 0 0 var(--desk-logo-col) !important;
+    flex-shrink: 0 !important;
     display: inline-flex !important;
     align-items: center !important;
     line-height: 0 !important;
@@ -81,25 +85,29 @@
   body.site-app .bymy-logo-img--nav {
     width: auto !important;
     height: 48px !important;
+    min-width: 108px !important;
     max-width: 140px !important;
     max-height: 48px !important;
     object-fit: contain !important;
+    flex-shrink: 0 !important;
   }
 
+  /* Menüsor: csak annyi csempe fér, amennyi összecsúszás nélkül; többi görgethető */
   body.site-app .hub-nav,
   body.site-app .home-nav,
   body.site-app .site-app-nav,
   body.site-app .import-nav,
   body.home-page .hub-nav {
     grid-area: nav !important;
-    justify-self: center !important;
+    justify-self: stretch !important;
     align-self: center !important;
     display: flex !important;
     align-items: center !important;
-    justify-content: center !important;
+    justify-content: safe center !important;
     gap: var(--desk-nav-gap) !important;
-    width: max-content !important;
+    width: 100% !important;
     max-width: 100% !important;
+    min-width: 0 !important;
     margin: 0 !important;
     padding: 0 !important;
     position: static !important;
@@ -107,7 +115,42 @@
     left: auto !important;
     right: auto !important;
     flex: none !important;
-    min-width: 0 !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none !important;
+    pointer-events: auto !important;
+  }
+
+  body.site-app .hub-nav::-webkit-scrollbar,
+  body.site-app .home-nav::-webkit-scrollbar,
+  body.site-app .site-app-nav::-webkit-scrollbar,
+  body.home-page .hub-nav::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
+
+  body.site-app .hub-nav-tile,
+  body.site-app .hub-nav-kezdolap-img,
+  body.site-app .hub-nav-auto-img,
+  body.site-app .hub-nav-teherauto-img,
+  body.site-app .hub-nav-ingatlan-img,
+  body.site-app .hub-nav-ajanlasok-img,
+  body.site-app .hub-nav-uzenetek-img,
+  body.site-app .hub-nav-fiok-img,
+  body.home-page .hub-nav-tile {
+    width: var(--hub-nav-tile-w) !important;
+    min-width: var(--hub-nav-tile-w) !important;
+    max-width: var(--hub-nav-tile-w) !important;
+    height: var(--hub-nav-tile-h) !important;
+    min-height: var(--hub-nav-tile-h) !important;
+    max-height: var(--hub-nav-tile-h) !important;
+    flex: 0 0 var(--hub-nav-tile-w) !important;
+    flex-shrink: 0 !important;
+    box-sizing: border-box !important;
   }
 
   body.site-app .hub-header-top,
@@ -126,7 +169,10 @@
     max-height: none !important;
     padding: 0 !important;
     margin: 0 !important;
-    width: auto !important;
+    width: max-content !important;
+    min-width: max-content !important;
+    max-width: none !important;
+    flex-shrink: 0 !important;
     z-index: 3 !important;
   }
 
@@ -139,6 +185,8 @@
     height: auto !important;
     min-height: var(--desk-cta-h) !important;
     margin: 0 !important;
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
   }
 
   body.site-app .hub-nav-link,
@@ -158,6 +206,7 @@
     text-transform: none !important;
     padding: 0 !important;
     flex: 0 0 auto !important;
+    flex-shrink: 0 !important;
   }
 
   body.site-app .hub-nav-link.active,
@@ -219,6 +268,7 @@
     justify-content: center !important;
     border-radius: 8px !important;
     white-space: nowrap !important;
+    flex-shrink: 0 !important;
   }
 
   body.site-app .hub-theme-toggle,
@@ -237,8 +287,7 @@
   }
 }
 
-/* Mobil (≤800): desk csempés header elrejtve — a mw-app-top / szöveges nav marad.
-   801–900: a desk header látszik (mw-app-top már rejtve); ne legyen „holt sáv”. */
+/* Mobil (≤800): desk csempés header elrejtve — a mw-app-top / szöveges nav marad. */
 @media (max-width: 800px) {
   body.site-app > header[data-site-desk-header],
   body.site-app > .hub-header[data-site-desk-header],

@@ -1,4 +1,4 @@
-import { fetchListings, fetchListingsPage, fetchRelatedListings } from "./db-client.js?v=listPage1";
+import { fetchListings, fetchListingsPage, fetchRelatedListings } from "./db-client.js?v=ownerBoost1";
 import { createHomeGridCard, initHomeGridCardPhotos } from "./home-grid-card.js?v=mobFix8";
 import { promoKiemeltActive, promoTopAjanlatActive } from "./listing-promo.js?v=promo1";
 import {
@@ -54,6 +54,7 @@ let deskSort = "newest";
 let quickSearchApi = null;
 let featuredListingIds = new Set();
 let featuredOnlyMode = false;
+let boostOwnerIds = new Set();
 
 const PAGE = document.body?.getAttribute("data-site-page") || "";
 if (gridTrack) bindListingOpen(gridTrack);
@@ -129,6 +130,31 @@ function sortForHome(items) {
   });
 }
 
+function listingOwnerId(item) {
+  return (
+    Number(item?.form?.owner_user_id ?? item?.preview?.filter?.owner_user_id ?? item?.user_id ?? 0) || 0
+  );
+}
+
+/** Boostolt userek találatai előre, ár szerint növekvő; a többi megtartja a base sorrendet. Home kiemelés gombot nem érinti. */
+function applyOwnerBoostSort(items) {
+  if (featuredOnlyMode) return items;
+  const hasAny = items.some((item) => item?.ownerBoost === true);
+  if (!hasAny && !boostOwnerIds?.size) return items;
+  const boosted = [];
+  const rest = [];
+  for (const item of items) {
+    const oid = listingOwnerId(item);
+    const isBoost =
+      item?.ownerBoost === true || (oid > 0 && boostOwnerIds.has(oid));
+    if (isBoost) boosted.push(item);
+    else rest.push(item);
+  }
+  if (!boosted.length) return items;
+  boosted.sort((a, b) => (listingPriceNum(a) ?? Infinity) - (listingPriceNum(b) ?? Infinity));
+  return [...boosted, ...rest];
+}
+
 function listingPriceNum(item) {
   const raw = String(item?.preview?.price ?? item?.form?.vetelar ?? "").replace(/\D/g, "");
   const n = Number(raw);
@@ -143,16 +169,17 @@ function listingKmNum(item) {
 
 function sortDeskListings(items) {
   const list = [...items];
+  let sorted;
   if (deskSort === "price-asc") {
-    return list.sort((a, b) => (listingPriceNum(a) ?? Infinity) - (listingPriceNum(b) ?? Infinity));
+    sorted = list.sort((a, b) => (listingPriceNum(a) ?? Infinity) - (listingPriceNum(b) ?? Infinity));
+  } else if (deskSort === "price-desc") {
+    sorted = list.sort((a, b) => (listingPriceNum(b) ?? -1) - (listingPriceNum(a) ?? -1));
+  } else if (deskSort === "km-asc") {
+    sorted = list.sort((a, b) => (listingKmNum(a) ?? Infinity) - (listingKmNum(b) ?? Infinity));
+  } else {
+    sorted = sortForHome(list);
   }
-  if (deskSort === "price-desc") {
-    return list.sort((a, b) => (listingPriceNum(b) ?? -1) - (listingPriceNum(a) ?? -1));
-  }
-  if (deskSort === "km-asc") {
-    return list.sort((a, b) => (listingKmNum(a) ?? Infinity) - (listingKmNum(b) ?? Infinity));
-  }
-  return sortForHome(list);
+  return applyOwnerBoostSort(sorted);
 }
 
 function listingSubtype(item) {
@@ -207,7 +234,7 @@ function filterItems(items) {
 function currentFilteredListings() {
   const filtered = filterItems(allItems);
   if (PAGE === "auto" || PAGE === "teherauto") return sortDeskListings(filtered);
-  return filtered;
+  return applyOwnerBoostSort(filtered);
 }
 
 function renderListings(items) {
@@ -218,7 +245,7 @@ function renderListings(items) {
   const filtered =
     PAGE === "auto" || PAGE === "teherauto"
       ? sortDeskListings(filterItems(items))
-      : filterItems(items);
+      : applyOwnerBoostSort(filterItems(items));
   emptyEl.hidden = filtered.length > 0;
   if (!filtered.length && (statsFilter || quickRadiusFilter)) {
     emptyEl.hidden = false;
@@ -309,6 +336,9 @@ async function loadListings() {
     vertical: pageVerticalParam(),
     tile: true,
   });
+  if (Array.isArray(page.boostOwnerIds)) {
+    boostOwnerIds = new Set(page.boostOwnerIds.map(Number).filter((n) => n > 0));
+  }
   const active = (page.listings || []).filter((item) => (item.status || "feladott") === "feladott");
   allItems = sortForHome(filterBySitePage(active));
   listingsOffset = (Number(page.offset) || 0) + (page.listings?.length || 0);
@@ -352,6 +382,12 @@ async function loadMoreListings() {
       vertical: pageVerticalParam(),
       tile: true,
     });
+    if (Array.isArray(page.boostOwnerIds) && page.boostOwnerIds.length) {
+      for (const id of page.boostOwnerIds) {
+        const n = Number(id);
+        if (n > 0) boostOwnerIds.add(n);
+      }
+    }
     const active = (page.listings || []).filter((item) => (item.status || "feladott") === "feladott");
     const batch = filterBySitePage(active);
     listingsOffset = (Number(page.offset) || listingsOffset) + (page.listings?.length || 0);

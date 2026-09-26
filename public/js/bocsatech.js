@@ -85,6 +85,7 @@ const ADMIN_SECTIONS = [
     tabs: [
       { id: "users:private", label: "Privát fiókok", navGroup: "Fiókok" },
       { id: "users:business", label: "Céges fiókok", navGroup: "Fiókok" },
+      { id: "users:banned", label: "Letiltottak", navGroup: "Fiókok" },
       { id: "users:visitors", label: "Látogatók", navGroup: "Fiókok" },
     ],
   },
@@ -279,6 +280,7 @@ let otpEmailMasked = "";
 let err = "";
 let info = "";
 let users = [];
+let bannedUsers = [];
 let listings = [];
 let visitors = {
   online: 0,
@@ -995,6 +997,110 @@ const actions = {
       err = "";
       editingUser = null;
       await loadTab();
+      render();
+    } catch (error) {
+      err = error.message;
+      render();
+    }
+  },
+  async banUser(_, el) {
+    const id = el.getAttribute("data-id");
+    const email = el.getAttribute("data-email") || `#${id}`;
+    if (
+      !confirm(
+        `Végleges tiltás: ${email}?\n\n• hirdetések törlése\n• fiók törlése / kiléptetés\n• email újra nem regisztrálható\n• megjelenik a Letiltottak listában`
+      )
+    ) {
+      return;
+    }
+    try {
+      const data = await api(`/api/level1/users/${id}/ban`, { method: "POST", body: "{}" });
+      const n = Number(data?.deletedListings) || 0;
+      info = `Letiltva: ${email}${n ? ` (${n} hirdetés törölve)` : ""}.`;
+      err = "";
+      editingUser = null;
+      await loadTab();
+      render();
+    } catch (error) {
+      err = error.message;
+      render();
+    }
+  },
+  async unbanUser(_, el) {
+    const email = el.getAttribute("data-email");
+    if (!email) return;
+    if (!confirm(`Engedélyezed újra a regisztrációt: ${email}?`)) return;
+    try {
+      const data = await api("/api/level1/banned-users/unban", {
+        method: "POST",
+        body: JSON.stringify({ email }),
+      });
+      bannedUsers = data.users || [];
+      info = `Engedélyezve: ${email} (újra regisztrálhat).`;
+      err = "";
+      render();
+    } catch (error) {
+      err = error.message;
+      render();
+    }
+  },
+  async toggleListingBoost(_, el) {
+    const id = el.getAttribute("data-id");
+    const on = el.getAttribute("data-on") === "1";
+    try {
+      await api(`/api/level1/users/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ adminFlags: { listingBoost: !on } }),
+      });
+      users = (await api("/api/level1/users")).users;
+      info = !on ? "Hirdetések előresorolása: be." : "Hirdetések előresorolása: ki.";
+      err = "";
+      render();
+    } catch (error) {
+      err = error.message;
+      render();
+    }
+  },
+  async togglePromoFlag(_, el) {
+    const id = el.getAttribute("data-id");
+    const flag = el.getAttribute("data-flag");
+    const on = el.getAttribute("data-on") === "1";
+    if (!flag) return;
+    try {
+      await api(`/api/level1/users/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ adminFlags: { [flag]: !on } }),
+      });
+      users = (await api("/api/level1/users")).users;
+      info = "Jogosultság frissítve.";
+      err = "";
+      render();
+    } catch (error) {
+      err = error.message;
+      render();
+    }
+  },
+  async setMaxListings(ev, el) {
+    const id = el.getAttribute("data-id");
+    const vertical = el.getAttribute("data-vertical");
+    if (!id || !vertical) return;
+    const raw = String(el.value ?? "").trim();
+    const num = raw === "" ? null : Number(String(raw).replace(/\D/g, ""));
+    if (raw !== "" && (!Number.isFinite(num) || num < 0)) {
+      err = "Érvénytelen max hirdetésszám.";
+      render();
+      return;
+    }
+    try {
+      await api(`/api/level1/users/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify({
+          adminFlags: { maxListings: { [vertical]: raw === "" ? null : num } },
+        }),
+      });
+      users = (await api("/api/level1/users")).users;
+      info = "";
+      err = "";
       render();
     } catch (error) {
       err = error.message;
@@ -1837,6 +1943,8 @@ async function loadTab() {
   if (section === "users") {
     if (sub === "visitors") {
       await loadVisitors();
+    } else if (sub === "banned") {
+      bannedUsers = (await api("/api/level1/banned-users")).users || [];
     } else if (sub === "private" || sub === "business") {
       users = (await api("/api/level1/users")).users;
     }
@@ -2314,6 +2422,97 @@ function userDealerBuckets(user) {
   return { hasAuto, hasImmo };
 }
 
+function userAdminFlags(user) {
+  const f = user?.adminFlags || user?.profile?.adminFlags || {};
+  return {
+    listingBoost: f.listingBoost === true,
+    maxListings: {
+      auto: f.maxListings?.auto ?? null,
+      teher: f.maxListings?.teher ?? null,
+      ingatlan: f.maxListings?.ingatlan ?? null,
+    },
+    canPromoKiemelt: f.canPromoKiemelt !== false,
+    canPromoTop: f.canPromoTop !== false,
+    canPhotoSablon: f.canPhotoSablon !== false,
+  };
+}
+
+function userMaxListingDefault(user) {
+  const type = String(user.accountType || "private").toLowerCase();
+  return type === "business" || type === "dealer" ? 50 : 2;
+}
+
+function userAdminActionsHtml(u) {
+  const flags = userAdminFlags(u);
+  const def = userMaxListingDefault(u);
+  const maxVal = (v) => (flags.maxListings[v] != null ? String(flags.maxListings[v]) : String(def));
+  return `
+    <div class="users-card__actions users-card__actions--admin">
+      <button class="users-card__btn users-card__btn--primary" type="button" data-act="editUser" data-id="${u.id}">Kezelés</button>
+      <button class="users-card__btn" type="button" data-act="toggleUserActive" data-id="${u.id}" data-active="${u.emailVerified ? "1" : "0"}">${u.emailVerified ? "Deaktivál" : "Aktivál"}</button>
+      <button class="users-card__btn users-card__btn--danger" type="button" data-act="banUser" data-id="${u.id}" data-email="${esc(u.email)}">Letiltás</button>
+      <button class="users-card__btn ${flags.listingBoost ? "users-card__btn--on" : ""}" type="button" data-act="toggleListingBoost" data-id="${u.id}" data-on="${flags.listingBoost ? "1" : "0"}">Előresorolás: ${flags.listingBoost ? "be" : "ki"}</button>
+      <button class="users-card__btn ${flags.canPromoKiemelt ? "users-card__btn--on" : ""}" type="button" data-act="togglePromoFlag" data-flag="canPromoKiemelt" data-id="${u.id}" data-on="${flags.canPromoKiemelt ? "1" : "0"}">Kiemelés: ${flags.canPromoKiemelt ? "be" : "ki"}</button>
+      <button class="users-card__btn ${flags.canPromoTop ? "users-card__btn--on" : ""}" type="button" data-act="togglePromoFlag" data-flag="canPromoTop" data-id="${u.id}" data-on="${flags.canPromoTop ? "1" : "0"}">Top ajánlat: ${flags.canPromoTop ? "be" : "ki"}</button>
+      <button class="users-card__btn ${flags.canPhotoSablon ? "users-card__btn--on" : ""}" type="button" data-act="togglePromoFlag" data-flag="canPhotoSablon" data-id="${u.id}" data-on="${flags.canPhotoSablon ? "1" : "0"}">Sablon: ${flags.canPhotoSablon ? "be" : "ki"}</button>
+      <button class="users-card__btn" type="button" data-act="delUser" data-id="${u.id}">Törlés</button>
+      <div class="users-card__max" title="Max hirdetésszám / kategória">
+        <label>Autó <input type="text" inputmode="numeric" data-act="setMaxListings" data-id="${u.id}" data-vertical="auto" value="${esc(maxVal("auto"))}" /></label>
+        <label>Teher <input type="text" inputmode="numeric" data-act="setMaxListings" data-id="${u.id}" data-vertical="teher" value="${esc(maxVal("teher"))}" /></label>
+        <label>Ingatlan <input type="text" inputmode="numeric" data-act="setMaxListings" data-id="${u.id}" data-vertical="ingatlan" value="${esc(maxVal("ingatlan"))}" /></label>
+      </div>
+    </div>`;
+}
+
+function bannedUsersView() {
+  const q = usersSearchQuery.trim().toLowerCase();
+  const visible = (bannedUsers || []).filter((u) => {
+    if (!q) return true;
+    const hay = `${u.email || ""} ${u.displayName || ""}`.toLowerCase();
+    return hay.includes(q);
+  });
+  const cards = visible
+    .map((u) => {
+      const type = u.accountType === "business" ? "céges" : "privát";
+      return `<article class="users-card">
+        <div class="users-card__main">
+          <div class="users-card__avatar" aria-hidden="true">${esc(userInitials(u))}</div>
+          <div class="users-card__who">
+            <div class="users-card__email">${esc(u.email)}</div>
+            <div class="users-card__name">${esc(u.displayName || "—")} · ${esc(type)}</div>
+          </div>
+          <span class="users-card__status is-off">letiltva</span>
+          <div class="users-card__meta">
+            <span>Tiltva: ${esc(fmtWhen(u.bannedAt))}</span>
+            <span>Törölt hird.: ${esc(String(u.deletedListings ?? 0))}</span>
+          </div>
+          <span class="users-card__ads" title="Korábbi user id">${esc(String(u.formerUserId || "—"))}</span>
+        </div>
+        <div class="users-card__actions">
+          <button class="users-card__btn users-card__btn--primary" type="button" data-act="unbanUser" data-email="${esc(u.email)}">Engedélyezés</button>
+        </div>
+      </article>`;
+    })
+    .join("");
+  return `
+    ${info ? `<p class="ok">${esc(info)}</p>` : ""}
+    ${err ? `<p class="err">${esc(err)}</p>` : ""}
+    <div class="users-cards-wrap">
+      <div class="users-cards-head">
+        <h2 class="users-cards-title">Letiltott felhasználók</h2>
+        <div class="users-cards-toolbar">
+          <label class="users-cards-search">
+            <span class="users-cards-search__ico" aria-hidden="true">⌕</span>
+            <input type="search" placeholder="Keresés email / név…" value="${esc(usersSearchQuery)}" data-act="usersSearch" />
+          </label>
+        </div>
+      </div>
+      <div class="users-cards-list">
+        ${cards || `<p class="users-cards-empty">Nincs letiltott felhasználó${q ? " a szűrővel" : ""}.</p>`}
+      </div>
+    </div>`;
+}
+
 function usersView(kind = "private") {
   const filtered = users.filter((u) => {
     const type = String(u.accountType || "private").toLowerCase();
@@ -2358,11 +2557,7 @@ function usersView(kind = "private") {
           </div>
           <span class="users-card__ads" title="Hirdetések">${ads}</span>
         </div>
-        <div class="users-card__actions">
-          <button class="users-card__btn users-card__btn--primary" type="button" data-act="editUser" data-id="${u.id}">Kezelés</button>
-          <button class="users-card__btn" type="button" data-act="toggleUserActive" data-id="${u.id}" data-active="${active ? "1" : "0"}">${active ? "Deaktivál" : "Aktivál"}</button>
-          <button class="users-card__btn" type="button" data-act="delUser" data-id="${u.id}">Törlés</button>
-        </div>
+        ${userAdminActionsHtml(u)}
       </article>`;
     })
     .join("");
@@ -3134,6 +3329,7 @@ function shellBody() {
   const { section, sub } = parseTab();
   if (section === "users") {
     if (sub === "visitors") return visitorsView();
+    if (sub === "banned") return bannedUsersView();
     if (sub === "business") return usersView("business");
     return usersView("private");
   }

@@ -1048,11 +1048,30 @@ async function handleListingsApi(req, res, pathname) {
       typeof total === "number"
         ? offset + listings.length < total
         : listings.length >= limit;
+    let boostOwnerIds = [];
+    try {
+      const { listBoostOwnerIds } = await import("./lib/boost-owners.mjs");
+      boostOwnerIds = await listBoostOwnerIds();
+    } catch {
+      boostOwnerIds = [];
+    }
+    const boostSet = new Set(boostOwnerIds.map(Number).filter((n) => n > 0));
+    const stamped = (listings || []).map((item) => {
+      const oid = Number(item?.form?.owner_user_id ?? item?.user_id ?? 0);
+      return {
+        ...item,
+        ownerBoost: Boolean(oid && boostSet.has(oid)),
+      };
+    });
     sendJson(
       res,
       200,
       {
-        listings: sanitizeListingList(listings, { tile: tileMode }),
+        listings: sanitizeListingList(stamped, { tile: tileMode }).map((item, i) => ({
+          ...item,
+          ownerBoost: stamped[i]?.ownerBoost === true,
+        })),
+        boostOwnerIds,
         total,
         offset,
         limit,
@@ -1373,6 +1392,27 @@ async function handleListingsApi(req, res, pathname) {
       if (!Object.keys(fields).length) {
         sendJson(res, 400, { error: "Nincs módosítható mező." });
         return;
+      }
+      try {
+        const { adminFlagsFromProfile } = await import("./lib/user-admin-flags.mjs");
+        const flags = adminFlagsFromProfile(user?.profile || {});
+        if ("promo_kiemelt" in fields && !flags.canPromoKiemelt) {
+          sendJson(res, 403, { error: "A kiemelés nincs engedélyezve ehhez a fiókhoz.", code: "PROMO_DENIED" });
+          return;
+        }
+        if ("promo_top_ajanlat" in fields && !flags.canPromoTop) {
+          sendJson(res, 403, { error: "A TOP ajánlat nincs engedélyezve ehhez a fiókhoz.", code: "PROMO_DENIED" });
+          return;
+        }
+        if (
+          ("photo_overlay_template_id" in fields || "photo_overlay_base_url" in fields) &&
+          !flags.canPhotoSablon
+        ) {
+          sendJson(res, 403, { error: "A sablon nincs engedélyezve ehhez a fiókhoz.", code: "PROMO_DENIED" });
+          return;
+        }
+      } catch {
+        /* ignore privilege check failure → deny nothing if module missing */
       }
       const updated = await patchListingFormFields(listing.id, fields);
       sendJson(res, 200, { listing: updated });

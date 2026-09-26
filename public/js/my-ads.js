@@ -25,6 +25,29 @@ const ICON_EYE = `<svg class="myads-ico" viewBox="0 0 24 24" fill="none" aria-hi
 const ICON_EDIT = `<svg class="myads-ico" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 20h4l9.5-9.5a2.1 2.1 0 0 0 0-3L16.5 4.5a2.1 2.1 0 0 0-3 0L4 14v6Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>`;
 const ICON_TRASH = `<svg class="myads-ico" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M9 7V5h6v2M8 7l1 12h6l1-12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 
+/** Alapból mind be — admin kapcsolhatja ki. */
+let promoPrivileges = {
+  canPromoKiemelt: true,
+  canPromoTop: true,
+  canPhotoSablon: true,
+};
+
+async function loadPromoPrivileges() {
+  try {
+    const res = await fetch("/api/auth/me", { credentials: "same-origin" });
+    if (!res.ok) return;
+    const data = await res.json();
+    const flags = data?.user?.adminFlags || data?.user?.profile?.adminFlags || {};
+    promoPrivileges = {
+      canPromoKiemelt: flags.canPromoKiemelt !== false,
+      canPromoTop: flags.canPromoTop !== false,
+      canPhotoSablon: flags.canPhotoSablon !== false,
+    };
+  } catch {
+    /* ignore — default ON */
+  }
+}
+
 function escapeHtml(value) {
   return String(value ?? "")
     .replaceAll("&", "&amp;")
@@ -243,6 +266,7 @@ async function detectSablonOnItems(rows) {
 async function reload() {
   root.innerHTML = `<p class="mm-empty">Hirdetések betöltése…</p>`;
   try {
+    await loadPromoPrivileges();
     items = await fetchMyListings({ limit: 200 });
     render();
     /* Sablon-detektálás háttérben — ne várja a lista megjelenése. */
@@ -386,37 +410,65 @@ async function reload() {
             <strong class="myads-price-lg">${price}</strong>
             ${priceSub ? `<span class="myads-price-sub">${escapeHtml(priceSub)}</span>` : ""}
             <div class="myads-card-toggles">
-              ${myadsCardToggleHtml({
-                labelActive: "Sablon: Aktív",
-                labelInactive: "Sablon: nincs",
-                on: sablonOn,
-                inputAttrs: `data-sablon-toggle="${item.id}"`,
-                ariaLabel: "Sablon be- és kikapcsolása",
-              })}
-              ${myadsCardToggleHtml({
-                labelActive: "Kiemelés: Aktív",
-                labelInactive: "Kiemelés: nincs",
-                on: kiemeltPromoOn,
-                inputAttrs: `data-promo-toggle="${item.id}" data-promo-kind="kiemelt"`,
-                ariaLabel: "Kiemelés be- és kikapcsolása",
-              })}
-              ${myadsCardToggleHtml({
-                labelActive: "TOP ajánlat: Aktív",
-                labelInactive: "TOP ajánlat: nincs",
-                on: isTopOffer,
-                inputAttrs: `data-promo-toggle="${item.id}" data-promo-kind="top"`,
-                ariaLabel: "TOP ajánlat be- és kikapcsolása",
-              })}
+              ${
+                promoPrivileges.canPhotoSablon
+                  ? myadsCardToggleHtml({
+                      labelActive: "Sablon: Aktív",
+                      labelInactive: "Sablon: nincs",
+                      on: sablonOn,
+                      inputAttrs: `data-sablon-toggle="${item.id}"`,
+                      ariaLabel: "Sablon be- és kikapcsolása",
+                    })
+                  : ""
+              }
+              ${
+                promoPrivileges.canPromoKiemelt
+                  ? myadsCardToggleHtml({
+                      labelActive: "Kiemelés: Aktív",
+                      labelInactive: "Kiemelés: nincs",
+                      on: kiemeltPromoOn,
+                      inputAttrs: `data-promo-toggle="${item.id}" data-promo-kind="kiemelt"`,
+                      ariaLabel: "Kiemelés be- és kikapcsolása",
+                    })
+                  : ""
+              }
+              ${
+                promoPrivileges.canPromoTop
+                  ? myadsCardToggleHtml({
+                      labelActive: "TOP ajánlat: Aktív",
+                      labelInactive: "TOP ajánlat: nincs",
+                      on: isTopOffer,
+                      inputAttrs: `data-promo-toggle="${item.id}" data-promo-kind="top"`,
+                      ariaLabel: "TOP ajánlat be- és kikapcsolása",
+                    })
+                  : ""
+              }
             </div>
           </div>
         </div>
-        <div class="myads-promo-strip" role="group" aria-label="Promóció">
+        ${
+          promoPrivileges.canPromoKiemelt || promoPrivileges.canPromoTop || promoPrivileges.canPhotoSablon
+            ? `<div class="myads-promo-strip" role="group" aria-label="Promóció">
           <div class="myads-promo-btns">
-            <button type="button" class="myads-promo-btn${kiemeltPromoOn ? " is-on" : ""}" data-promo="kiemelt" data-id="${item.id}">${ICON_STAR}<span>Kiemelés</span></button>
-            <button type="button" class="myads-promo-btn${isTopOffer ? " is-on" : ""}" data-promo="top" data-id="${item.id}"><span>TOP ajánlat</span></button>
-            <a class="myads-promo-btn myads-promo-btn--link" href="${escapeHtml(edit)}">${ICON_EYE}<span>Sablon</span></a>
+            ${
+              promoPrivileges.canPromoKiemelt
+                ? `<button type="button" class="myads-promo-btn${kiemeltPromoOn ? " is-on" : ""}" data-promo="kiemelt" data-id="${item.id}">${ICON_STAR}<span>Kiemelés</span></button>`
+                : ""
+            }
+            ${
+              promoPrivileges.canPromoTop
+                ? `<button type="button" class="myads-promo-btn${isTopOffer ? " is-on" : ""}" data-promo="top" data-id="${item.id}"><span>TOP ajánlat</span></button>`
+                : ""
+            }
+            ${
+              promoPrivileges.canPhotoSablon
+                ? `<a class="myads-promo-btn myads-promo-btn--link" href="${escapeHtml(edit)}">${ICON_EYE}<span>Sablon</span></a>`
+                : ""
+            }
           </div>
-        </div>
+        </div>`
+            : ""
+        }
         <footer class="myads-card-foot">
           <strong class="myads-price-foot">${price}</strong>
           <div class="myads-fn">

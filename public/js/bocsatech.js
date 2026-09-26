@@ -83,9 +83,9 @@ const ADMIN_SECTIONS = [
     label: "1. Felhasználók",
     defaultTab: "users:private",
     tabs: [
-      { id: "users:private", label: "Privát fiókok" },
-      { id: "users:business", label: "Céges fiókok" },
-      { id: "users:visitors", label: "Látogatók" },
+      { id: "users:private", label: "Privát fiókok", navGroup: "Fiókok" },
+      { id: "users:business", label: "Céges fiókok", navGroup: "Fiókok" },
+      { id: "users:visitors", label: "Látogatók", navGroup: "Fiókok" },
     ],
   },
   {
@@ -93,13 +93,14 @@ const ADMIN_SECTIONS = [
     label: "2. Autóhirdetések",
     defaultTab: "auto:listings",
     tabs: [
-      { id: "auto:listings", label: "Hirdetések" },
-      { id: "auto:desk-guide", label: "Feladás képek" },
-      { id: "auto:kivitel", label: "Kivitel menü" },
-      { id: "auto:akku", label: "Akkumulátor kereső" },
+      { id: "auto:listings", label: "Hirdetések", navGroup: "Lista & szerkesztő" },
+      { id: "auto:desk-guide", label: "Feladás képek", navGroup: "Lista & szerkesztő" },
+      { id: "auto:kivitel", label: "Kivitel menü", navGroup: "Lista & szerkesztő" },
+      { id: "auto:akku", label: "Akkumulátor kereső", navGroup: "Keresők" },
       ...AUTO_LAYOUT_ITEMS.map((item) => ({
         id: layoutTabId(item).replace(/^layout:/, "auto:layout:"),
         label: item.label,
+        navGroup: autoLayoutNavGroup(item),
       })),
     ],
   },
@@ -108,55 +109,63 @@ const ADMIN_SECTIONS = [
     label: "3. Ingatlanhirdetések",
     defaultTab: "ingatlan:layout:ingatlan",
     tabs: [
-      { id: "ingatlan:layout:elado-ingatlan", label: "Eladó — szerkesztő" },
+      { id: "ingatlan:listings", label: "Hirdetések", navGroup: "Lista & beállítás" },
+      { id: "ingatlan:partnerek", label: "Ingatlanos partnerek", navGroup: "Lista & beállítás" },
+      { id: "ingatlan:tipus-mezok", label: "Típus → mezők", navGroup: "Lista & beállítás" },
+      { id: "ingatlan:layout:elado-ingatlan", label: "Eladó — szerkesztő", navGroup: "Eladó" },
       ...INGATLAN_TIPUS_LAYOUTS.map((type) => ({
         id: `ingatlan:layout:${type}`,
         label: `${INGATLAN_LAKAS_TIPUS.find((item) => item.value === type)?.label || type} — szerkesztő`,
+        navGroup: "Eladó",
       })),
-      { id: "ingatlan:layout:ingatlan", label: "Kiadó — szerkesztő" },
-      { id: "ingatlan:layout:airbnb", label: "Airbnb — szerkesztő" },
-      { id: "ingatlan:layout:ingatlan:wizard", label: "Feladási lépések — szerkesztő" },
-      { id: "ingatlan:tipus-mezok", label: "Típus → mezők" },
-      { id: "ingatlan:partnerek", label: "Ingatlanos partnerek" },
-      { id: "ingatlan:listings", label: "Hirdetések" },
+      { id: "ingatlan:layout:ingatlan", label: "Kiadó — szerkesztő", navGroup: "Kiadó & Airbnb" },
+      { id: "ingatlan:layout:airbnb", label: "Airbnb — szerkesztő", navGroup: "Kiadó & Airbnb" },
+      { id: "ingatlan:layout:ingatlan:wizard", label: "Feladási lépések — szerkesztő", navGroup: "Kiadó & Airbnb" },
     ],
   },
   {
     id: "home",
     label: "4. Főoldal",
     defaultTab: "home:promo",
-    tabs: [{ id: "home:promo", label: "Promo képek" }],
+    tabs: [{ id: "home:promo", label: "Promo képek", navGroup: "Főoldal" }],
   },
   {
     id: "mobilweb",
     label: "5. Mobilweb",
     defaultTab: "mobilweb:menu",
-    tabs: [{ id: "mobilweb:menu", label: "Menü elrendezés" }],
+    tabs: [{ id: "mobilweb:menu", label: "Menü elrendezés", navGroup: "Mobilweb" }],
   },
   {
     id: "pages",
     label: "6. Oldalak",
     defaultTab: "pages:hub",
     tabs: [
-      { id: "pages:hub", label: "Kezdőlap" },
-      { id: "pages:auto", label: "Autó" },
-      { id: "pages:teherauto", label: "Teherautó" },
-      { id: "pages:ingatlan", label: "Ingatlan" },
-      { id: "pages:ajanlasok", label: "Ajánlások" },
-      { id: "pages:kereses", label: "Keresés" },
-      { id: "pages:hirdetesfeladas", label: "Hirdetésfeladás" },
-      { id: "pages:uzenetek", label: "Üzenetek" },
-      { id: "pages:fiok", label: "Fiók / Beállítások" },
-      { id: "pages:listings", label: "Listings" },
+      { id: "pages:hub", label: "Kezdőlap", navGroup: "Oldalak" },
+      { id: "pages:auto", label: "Autó", navGroup: "Oldalak" },
+      { id: "pages:teherauto", label: "Teherautó", navGroup: "Oldalak" },
+      { id: "pages:ingatlan", label: "Ingatlan", navGroup: "Oldalak" },
+      { id: "pages:ajanlasok", label: "Ajánlások", navGroup: "Oldalak" },
+      { id: "pages:kereses", label: "Keresés", navGroup: "Oldalak" },
+      { id: "pages:hirdetesfeladas", label: "Hirdetésfeladás", navGroup: "Oldalak" },
+      { id: "pages:uzenetek", label: "Üzenetek", navGroup: "Oldalak" },
+      { id: "pages:fiok", label: "Fiók / Beállítások", navGroup: "Oldalak" },
+      { id: "pages:listings", label: "Listings", navGroup: "Oldalak" },
     ],
   },
   {
     id: "backup",
     label: "7. Mentés",
     defaultTab: "backup:restore",
-    tabs: [{ id: "backup:restore", label: "Visszaállítás" }],
+    tabs: [{ id: "backup:restore", label: "Visszaállítás", navGroup: "Mentés" }],
   },
 ];
+
+function autoLayoutNavGroup(item) {
+  const id = String(item?.id || "");
+  if (id === "szemelyauto-search" || id === "teherauto-search") return "Keresők";
+  if (id === "szemelyauto") return "Feladás layout";
+  return "Egyéb";
+}
 
 const PAGE_ADMIN_GUIDES = {
   hub: {
@@ -3259,22 +3268,48 @@ function backendBannerHtml() {
   const detail = live
     ? "A mentés az élő oldalon is látszik (hard refresh)."
     : "Lokális mentés — nem kerül az éles oldalra.";
-  return `<p class="hint ${live ? "ok" : "warn"}" style="margin:0 0 0.75rem"><strong>${esc(label)}.</strong> ${esc(detail)}</p>`;
+  return `<p class="hint ${live ? "ok" : "warn"}" style="margin:0.85rem 0 0"><strong>${esc(label)}.</strong> ${esc(detail)}</p>`;
+}
+
+function adminSubTabButton(t) {
+  return `<button type="button" class="admin-subtab ${tab === t.id ? "on" : ""}" data-act="setTab" data-tab="${esc(t.id)}">${esc(t.label)}</button>`;
+}
+
+/** D demó: almenü csoportos kártyák (ha van navGroup), különben egy lapos chip-sor. */
+function adminSubNavHtml(section) {
+  const tabs = section?.tabs || [];
+  if (!tabs.length) return "";
+  const useGroups = tabs.length > 3 && tabs.some((t) => t.navGroup);
+  if (!useGroups) {
+    return `<div class="admin-subnav-flat">${tabs.map(adminSubTabButton).join("")}</div>`;
+  }
+  const order = [];
+  const map = new Map();
+  for (const t of tabs) {
+    const g = t.navGroup || "Egyéb";
+    if (!map.has(g)) {
+      map.set(g, []);
+      order.push(g);
+    }
+    map.get(g).push(t);
+  }
+  return `<div class="admin-subnav-groups">${order
+    .map(
+      (g) => `<div class="admin-subnav-group">
+      <h3>${esc(g)}</h3>
+      <div class="admin-subnav-links">${map.get(g).map(adminSubTabButton).join("")}</div>
+    </div>`
+    )
+    .join("")}</div>`;
 }
 
 function shell() {
   const { section } = parseTab();
   const currentSection = ADMIN_SECTIONS.find((s) => s.id === section) || ADMIN_SECTIONS[0];
-  const sectionNav = ADMIN_SECTIONS.map(
-    (s) =>
-      `<button type="button" class="section-tab ${s.id === currentSection.id ? "on" : ""}" data-act="setSection" data-tab="${esc(s.defaultTab)}">${esc(s.label)}</button>`
-  ).join("");
-  const subNav = currentSection.tabs
-    .map(
-      (t) =>
-        `<button type="button" class="tab ${tab === t.id ? "on" : ""}" data-act="setTab" data-tab="${esc(t.id)}">${esc(t.label)}</button>`
-    )
-    .join("");
+  const sectionNav = ADMIN_SECTIONS.map((s) => {
+    const save = s.id === "backup" ? " section-tab--save" : "";
+    return `<button type="button" class="section-tab${save} ${s.id === currentSection.id ? "on" : ""}" data-act="setSection" data-tab="${esc(s.defaultTab)}">${esc(s.label)}</button>`;
+  }).join("");
   const wide =
     section === "users" ||
     section === "home" ||
@@ -3296,9 +3331,11 @@ function shell() {
         </div>
         <button class="btn ghost" data-act="logout">Kilépés</button>
       </div>
-      <div class="admin-sections">${sectionNav}</div>
-      <div class="tabs tabs--sub">${subNav}</div>
-      ${backendBannerHtml()}
+      <div class="admin-nav">
+        <div class="admin-sections">${sectionNav}</div>
+        ${adminSubNavHtml(currentSection)}
+        ${backendBannerHtml()}
+      </div>
       <div class="card">${shellBody()}</div>
     </div>`;
 }

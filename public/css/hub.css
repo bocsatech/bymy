@@ -221,6 +221,23 @@ body.site-app .hub-nav-kezdolap-img {
   border-radius: 7px;
 }
 
+@media (min-width: 901px) {
+  .hub-nav-link--kezdolap,
+  body.site-app .hub-nav-link--kezdolap {
+    height: 34px;
+    max-height: 34px;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  .hub-nav-kezdolap-img,
+  body.site-app .hub-nav-kezdolap-img {
+    width: 86px;
+    height: 34px;
+    border-radius: 8px;
+  }
+}
+
 .hub-nav-link:hover {
   color: #111;
   background: transparent;

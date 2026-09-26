@@ -189,7 +189,8 @@ body.hub-page .local-banner {
 .hub-nav-link--kezdolap,
 .hub-nav-link--auto,
 .hub-nav-link--teherauto,
-.hub-nav-link--ingatlan {
+.hub-nav-link--ingatlan,
+.hub-nav-link--ajanlasok {
   align-items: center;
   padding-top: 0.45rem;
   padding-bottom: 0.4rem;
@@ -200,7 +201,8 @@ body.hub-page .local-banner {
 .hub-nav-kezdolap-img,
 .hub-nav-auto-img,
 .hub-nav-teherauto-img,
-.hub-nav-ingatlan-img {
+.hub-nav-ingatlan-img,
+.hub-nav-ajanlasok-img {
   display: block;
   width: 4.5rem;
   height: 1.7rem;
@@ -259,7 +261,8 @@ body.hub-page .local-banner {
 body.site-app .hub-nav-link--kezdolap,
 body.site-app .hub-nav-link--auto,
 body.site-app .hub-nav-link--teherauto,
-body.site-app .hub-nav-link--ingatlan {
+body.site-app .hub-nav-link--ingatlan,
+body.site-app .hub-nav-link--ajanlasok {
   align-items: center;
   padding-top: 0.45rem;
   padding-bottom: 0.4rem;
@@ -269,7 +272,8 @@ body.site-app .hub-nav-link--ingatlan {
 body.site-app .hub-nav-kezdolap-img,
 body.site-app .hub-nav-auto-img,
 body.site-app .hub-nav-teherauto-img,
-body.site-app .hub-nav-ingatlan-img {
+body.site-app .hub-nav-ingatlan-img,
+body.site-app .hub-nav-ajanlasok-img {
   display: block;
   width: 4.5rem;
   height: 1.7rem;
@@ -288,10 +292,12 @@ body.site-app .hub-nav-tile {
   .hub-nav-link--auto,
   .hub-nav-link--teherauto,
   .hub-nav-link--ingatlan,
+  .hub-nav-link--ajanlasok,
   body.site-app .hub-nav-link--kezdolap,
   body.site-app .hub-nav-link--auto,
   body.site-app .hub-nav-link--teherauto,
-  body.site-app .hub-nav-link--ingatlan {
+  body.site-app .hub-nav-link--ingatlan,
+  body.site-app .hub-nav-link--ajanlasok {
     height: 34px;
     max-height: 34px;
     padding-top: 0;
@@ -302,10 +308,12 @@ body.site-app .hub-nav-tile {
   .hub-nav-auto-img,
   .hub-nav-teherauto-img,
   .hub-nav-ingatlan-img,
+  .hub-nav-ajanlasok-img,
   body.site-app .hub-nav-kezdolap-img,
   body.site-app .hub-nav-auto-img,
   body.site-app .hub-nav-teherauto-img,
   body.site-app .hub-nav-ingatlan-img,
+  body.site-app .hub-nav-ajanlasok-img,
   .hub-nav-tile,
   body.site-app .hub-nav-tile {
     width: 86px;

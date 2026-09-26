@@ -392,11 +392,13 @@
       "</span>" +
       "</span>" +
       "</a>" +
-      '<a class="hub-nav-link' +
+      '<a class="hub-nav-link hub-nav-link--ajanlasok' +
       navActiveClass("ajanlasok") +
       '" href="' +
       ajanlasokHref() +
-      '">Ajánlások</a>' +
+      '" aria-label="Ajánlások">' +
+      '<img class="hub-nav-ajanlasok-img" src="/images/ajanlasok-nav.png?v=ajanlasNav1" alt="" width="72" height="28" decoding="async" />' +
+      "</a>" +
       "</nav>" +
       '<div class="hub-header-top">' +
       '<div class="hub-header-actions site-header-actions">' +

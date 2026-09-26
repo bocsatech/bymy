@@ -153,7 +153,8 @@
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link--kezdolap,
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link--auto,
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link--teherauto,
-  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link--ingatlan {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link--ingatlan,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link--ajanlasok {
     padding: 0 !important;
     border-bottom: 2px solid transparent !important;
     height: 34px !important;
@@ -165,6 +166,7 @@
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-auto-img,
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-teherauto-img,
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-ingatlan-img,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-ajanlasok-img,
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-tile {
     width: 86px !important;
     height: 34px !important;
@@ -180,7 +182,8 @@
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link--kezdolap.active,
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link--auto.active,
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link--teherauto.active,
-  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link--ingatlan.active {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link--ingatlan.active,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link--ajanlasok.active {
     padding-bottom: 0 !important;
     border-bottom-color: var(--ad-yellow) !important;
   }

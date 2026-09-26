@@ -1,4 +1,4 @@
-import { fetchListings, fetchListingsPage, fetchRelatedListings } from "./db-client.js?v=ownerBoost2";
+import { fetchListings, fetchListingsPage, fetchRelatedListings } from "./db-client.js?v=ownerBoost3";
 import { createHomeGridCard, initHomeGridCardPhotos } from "./home-grid-card.js?v=mobFix8";
 import { promoKiemeltActive, promoTopAjanlatActive } from "./listing-promo.js?v=promo1";
 import {
@@ -55,6 +55,7 @@ let quickSearchApi = null;
 let featuredListingIds = new Set();
 let featuredOnlyMode = false;
 let boostOwnerIds = new Set();
+let boostListingIds = new Set();
 
 const PAGE = document.body?.getAttribute("data-site-page") || "";
 if (gridTrack) bindListingOpen(gridTrack);
@@ -137,6 +138,8 @@ function listingOwnerId(item) {
 }
 
 function isOwnerBoosted(item) {
+  const id = Number(item?.id);
+  if (Number.isFinite(id) && id > 0 && boostListingIds.has(id)) return true;
   if (item?.ownerBoost === true) return true;
   const oid = listingOwnerId(item);
   return oid > 0 && boostOwnerIds.has(oid);
@@ -351,8 +354,20 @@ async function loadListings() {
   if (Array.isArray(page.boostOwnerIds)) {
     boostOwnerIds = new Set(page.boostOwnerIds.map(Number).filter((n) => n > 0));
   }
+  boostListingIds = new Set(
+    (Array.isArray(page.boostListingIds) ? page.boostListingIds : [])
+      .map(Number)
+      .filter((n) => n > 0)
+  );
+  for (const item of page.listings || []) {
+    if (item?.ownerBoost === true) {
+      const id = Number(item.id);
+      if (id > 0) boostListingIds.add(id);
+    }
+  }
   const active = (page.listings || []).filter((item) => (item.status || "feladott") === "feladott");
-  allItems = sortForHome(filterBySitePage(active));
+  // Ne rendezünk újra newest-re itt — a render boost+desk sortot alkalmaz.
+  allItems = filterBySitePage(active);
   listingsOffset = (Number(page.offset) || 0) + (page.listings?.length || 0);
   listingsTotal = page.total != null ? Number(page.total) : allItems.length;
   listingsHasMore = Boolean(page.hasMore);
@@ -400,6 +415,18 @@ async function loadMoreListings() {
         if (n > 0) boostOwnerIds.add(n);
       }
     }
+    if (Array.isArray(page.boostListingIds)) {
+      for (const id of page.boostListingIds) {
+        const n = Number(id);
+        if (n > 0) boostListingIds.add(n);
+      }
+    }
+    for (const item of page.listings || []) {
+      if (item?.ownerBoost === true) {
+        const id = Number(item.id);
+        if (id > 0) boostListingIds.add(id);
+      }
+    }
     const active = (page.listings || []).filter((item) => (item.status || "feladott") === "feladott");
     const batch = filterBySitePage(active);
     listingsOffset = (Number(page.offset) || listingsOffset) + (page.listings?.length || 0);
@@ -409,7 +436,7 @@ async function loadMoreListings() {
       if (!listingsHasMore) return;
       return;
     }
-    allItems = sortForHome(mergeListings(allItems, batch));
+    allItems = mergeListings(allItems, batch);
     featuredListingIds = featuredListingIdSet(allItems);
     populateFilterOptions(allItems);
     renderListings(allItems);

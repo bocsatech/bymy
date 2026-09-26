@@ -78,6 +78,9 @@ export async function fetchListingsPage({
   return {
     listings,
     boostOwnerIds: Array.isArray(data.boostOwnerIds) ? data.boostOwnerIds.map(Number).filter((n) => n > 0) : [],
+    boostListingIds: Array.isArray(data.boostListingIds)
+      ? data.boostListingIds.map(Number).filter((n) => n > 0)
+      : [],
     total: data.total != null ? Number(data.total) : null,
     offset: data.offset != null ? Number(data.offset) : Number(offset) || 0,
     limit: data.limit != null ? Number(data.limit) : Number(limit) || listings.length,

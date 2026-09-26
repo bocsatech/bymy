@@ -1101,8 +1101,10 @@ async function handleListingsApi(req, res, pathname) {
       });
 
     if (offset === 0 && boostedRows.length) {
-      const fill = Math.max(0, limit - boostedRows.length);
-      listings = [...boostedRows, ...listings.slice(0, fill)];
+      // Első oldal: boostoltak elöl (ár ↑), max `limit` db, utána feltöltés.
+      const head = boostedRows.slice(0, limit);
+      const fill = Math.max(0, limit - head.length);
+      listings = [...head, ...listings.slice(0, fill)];
     } else if (offset > 0 && boostedRows.length) {
       // Későbbi oldalak: a boostoltak már az első oldalon voltak.
       listings = listings.slice(0, limit);
@@ -1120,6 +1122,10 @@ async function handleListingsApi(req, res, pathname) {
         : listings.length >= limit;
 
     const stamped = listings;
+    const boostListingIds = stamped
+      .filter((item) => item?.ownerBoost === true)
+      .map((item) => Number(item.id))
+      .filter((id) => id > 0);
     sendJson(
       res,
       200,
@@ -1129,23 +1135,18 @@ async function handleListingsApi(req, res, pathname) {
           ownerBoost: stamped[i]?.ownerBoost === true,
         })),
         boostOwnerIds,
+        boostListingIds,
         total,
         offset,
         limit,
         hasMore,
       },
       {
-        // Boost változhat — ne tartsuk sokáig CDN-en.
-        "Cache-Control": boostSet.size
-          ? "public, max-age=10, s-maxage=15, stale-while-revalidate=30"
-          : "public, max-age=30, s-maxage=60, stale-while-revalidate=120",
-        "CDN-Cache-Control": boostSet.size
-          ? "public, max-age=15, stale-while-revalidate=30"
-          : "public, max-age=60, stale-while-revalidate=120",
-        "Cloudflare-CDN-Cache-Control": boostSet.size
-          ? "public, max-age=15, stale-while-revalidate=30"
-          : "public, max-age=60, stale-while-revalidate=120",
-        Vary: "Accept-Encoding",
+        // Tagok + boost: ne CDN-eljük (különben régi sorrend marad).
+        "Cache-Control": "private, no-store",
+        "CDN-Cache-Control": "no-store",
+        "Cloudflare-CDN-Cache-Control": "no-store",
+        Vary: "Cookie, Accept-Encoding",
       }
     );
     return;

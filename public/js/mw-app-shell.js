@@ -276,7 +276,7 @@
   }
 
   function ensureDeskHeaderCss() {
-    var href = "/css/site-desk-header.css?v=fiokNav1";
+    var href = "/css/site-desk-header.css?v=tileAlign1";
     if (document.querySelector("link[data-site-desk-header-css], link[href*='site-desk-header.css']")) return;
     var link = document.createElement("link");
     link.rel = "stylesheet";
@@ -347,6 +347,7 @@
 
     var counts = readNavCountsSync();
     var msgActive = page === "uzenetek" ? " active" : "";
+    var fiokActive = page === "fiok" || page === "beallitasok" ? " active" : "";
 
     var html =
       '<header class="hub-header" data-site-desk-header aria-label="Bymy">' +
@@ -358,13 +359,15 @@
       '<a class="hub-nav-link hub-nav-link--kezdolap' +
       navActiveClass("hub") +
       '" href="/" aria-label="Kezdőlap">' +
-      '<img class="hub-nav-kezdolap-img" src="/images/kezdolap-nav.png?v=logoTile1" alt="" width="120" height="72" decoding="async" />' +
+      '<span class="hub-nav-tile">' +
+      '<img class="hub-nav-kezdolap-img" src="/images/kezdolap-nav.png?v=logoTile1" alt="" width="108" height="64" decoding="async" />' +
+      "</span>" +
       "</a>" +
       '<a class="hub-nav-link hub-nav-link--auto' +
       navActiveClass("auto") +
       '" href="/auto.html" aria-label="Autó">' +
       '<span class="hub-nav-tile">' +
-      '<img class="hub-nav-auto-img" src="/images/auto-nav.png?v=logoTile1" alt="" width="112" height="72" decoding="async" />' +
+      '<img class="hub-nav-auto-img" src="/images/auto-nav.png?v=logoTile1" alt="" width="108" height="64" decoding="async" />' +
       '<span class="hub-nav-tile-count nav-count" aria-hidden="true">' +
       formatNavCount(counts.auto) +
       "</span>" +
@@ -374,7 +377,7 @@
       navActiveClass("teherauto") +
       '" href="/teherauto.html" aria-label="Teherautó">' +
       '<span class="hub-nav-tile">' +
-      '<img class="hub-nav-teherauto-img" src="/images/teherauto-nav.png?v=logoTile1" alt="" width="108" height="72" decoding="async" />' +
+      '<img class="hub-nav-teherauto-img" src="/images/teherauto-nav.png?v=logoTile1" alt="" width="108" height="64" decoding="async" />' +
       '<span class="hub-nav-tile-count nav-count" aria-hidden="true">' +
       formatNavCount(counts.teher) +
       "</span>" +
@@ -384,7 +387,7 @@
       navActiveClass("ingatlan") +
       '" href="/ingatlan.html" aria-label="Ingatlan">' +
       '<span class="hub-nav-tile">' +
-      '<img class="hub-nav-ingatlan-img" src="/images/ingatlan-nav.png?v=logoTile1" alt="" width="112" height="72" decoding="async" />' +
+      '<img class="hub-nav-ingatlan-img" src="/images/ingatlan-nav.png?v=logoTile1" alt="" width="108" height="64" decoding="async" />' +
       '<span class="hub-nav-tile-count nav-count" aria-hidden="true">' +
       formatNavCount(counts.ingatlan) +
       "</span>" +
@@ -395,29 +398,24 @@
       '" href="' +
       ajanlasokHref() +
       '" aria-label="Ajánlások">' +
-      '<img class="hub-nav-ajanlasok-img" src="/images/ajanlasok-nav.png?v=logoTile1" alt="" width="107" height="72" decoding="async" />' +
+      '<span class="hub-nav-tile">' +
+      '<img class="hub-nav-ajanlasok-img" src="/images/ajanlasok-nav.png?v=logoTile1" alt="" width="108" height="64" decoding="async" />' +
+      "</span>" +
       "</a>" +
-      "</nav>" +
-      '<div class="hub-header-top">' +
-      '<div class="hub-header-actions site-header-actions">' +
-      '<a class="hub-header-msg hub-header-msg--tile' +
+      '<a class="hub-nav-link hub-nav-link--uzenetek hub-header-msg hub-header-msg--tile' +
       msgActive +
       '" href="/uzenetek.html" aria-label="Üzenetek" data-auth-member hidden>' +
       '<span class="hub-nav-tile">' +
-      '<img class="hub-nav-uzenetek-img" src="/images/uzenetek-nav.png?v=uzenetekNav1" alt="" width="128" height="72" decoding="async" />' +
+      '<img class="hub-nav-uzenetek-img" src="/images/uzenetek-nav.png?v=uzenetekNav1" alt="" width="108" height="64" decoding="async" />' +
       '<span class="hub-nav-tile-count site-message-badge" data-nav-msg-count hidden aria-label="Olvasatlan üzenetek"></span>' +
       "</span>" +
       "</a>" +
-      '<div class="site-header-auth-row" data-auth-guest>' +
-      '<a class="hub-btn hub-btn--ghost" href="/belepes.html" data-auth-login>Belépés</a>' +
-      '<a class="hub-btn hub-btn--ghost" href="/regisztracio.html" data-auth-register>Regisztráció</a>' +
-      "</div>" +
-      '<div class="site-header-avatar-wrap" data-avatar-menu data-auth-member hidden>' +
-      '<button type="button" class="site-header-profile site-header-profile--tile' +
-      (page === "fiok" || page === "beallitasok" ? " active" : "") +
+      '<div class="site-header-avatar-wrap hub-nav-fiok-wrap" data-avatar-menu data-auth-member hidden>' +
+      '<button type="button" class="hub-nav-link hub-nav-link--fiok site-header-profile site-header-profile--tile' +
+      fiokActive +
       '" data-auth-avatar data-avatar-toggle aria-expanded="false" aria-label="Fiók" title="Fiók">' +
       '<span class="hub-nav-tile">' +
-      '<img class="hub-nav-fiok-img" src="/images/fiok-nav.png?v=fiokNav1" alt="" width="128" height="72" decoding="async" />' +
+      '<img class="hub-nav-fiok-img" src="/images/fiok-nav.png?v=fiokNav1" alt="" width="108" height="64" decoding="async" />' +
       "</span>" +
       '<span class="site-header-avatar" hidden aria-hidden="true">' +
       '<span data-avatar-letter>A</span>' +
@@ -425,6 +423,13 @@
       "</span>" +
       '<span class="site-header-firstname" data-auth-firstname hidden></span>' +
       "</button></div>" +
+      "</nav>" +
+      '<div class="hub-header-top">' +
+      '<div class="hub-header-actions site-header-actions">' +
+      '<div class="site-header-auth-row" data-auth-guest>' +
+      '<a class="hub-btn hub-btn--ghost" href="/belepes.html" data-auth-login>Belépés</a>' +
+      '<a class="hub-btn hub-btn--ghost" href="/regisztracio.html" data-auth-register>Regisztráció</a>' +
+      "</div>" +
       '<a class="hub-btn hub-btn--post" href="' +
       postAdHref() +
       '" data-auth-guard>+ Hirdetésfeladás</a>' +

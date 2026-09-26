@@ -63,7 +63,7 @@
     padding: 0 24px;
     min-height: 80px;
     display: grid !important;
-    grid-template-columns: 260px max-content minmax(0, 1fr);
+    grid-template-columns: 180px max-content minmax(0, 1fr);
     grid-template-areas: "logo nav actions";
     align-items: center;
     column-gap: 24px;
@@ -110,7 +110,7 @@
     display: flex !important;
     align-items: center;
     justify-content: flex-start;
-    gap: 22px;
+    gap: 8px;
     position: static !important;
     left: auto !important;
     right: auto !important;
@@ -154,11 +154,13 @@
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link--auto,
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link--teherauto,
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link--ingatlan,
-  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link--ajanlasok {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link--ajanlasok,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link--uzenetek,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link--fiok {
     padding: 0 !important;
-    border-bottom: 2px solid transparent !important;
-    height: var(--site-nav-logo-h, 72px) !important;
-    max-height: var(--site-nav-logo-h, 72px) !important;
+    border-bottom: 0 !important;
+    height: var(--hub-nav-tile-h, 64px) !important;
+    max-height: var(--hub-nav-tile-h, 64px) !important;
     align-items: center !important;
   }
 
@@ -166,40 +168,33 @@
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-auto-img,
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-teherauto-img,
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-ingatlan-img,
-  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-ajanlasok-img {
-    height: var(--site-nav-logo-h, 72px) !important;
-    max-height: var(--site-nav-logo-h, 72px) !important;
-    width: auto !important;
-    border-radius: 12px !important;
-  }
-
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-ajanlasok-img,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-uzenetek-img,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-fiok-img,
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-tile {
-    height: var(--site-nav-logo-h, 72px) !important;
-    width: fit-content !important;
+    width: var(--hub-nav-tile-w, 108px) !important;
+    height: var(--hub-nav-tile-h, 64px) !important;
+    max-height: none !important;
+    object-fit: cover !important;
+    border-radius: 11px !important;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link.active {
     color: var(--ad-text) !important;
-    border-bottom: 2px solid transparent !important;
+    border-bottom: 0 !important;
     padding-bottom: 0 !important;
   }
 
-  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link--kezdolap.active,
-  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link--auto.active,
-  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link--teherauto.active,
-  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link--ingatlan.active,
-  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link--ajanlasok.active {
-    padding-bottom: 0 !important;
-    border-bottom-color: transparent !important;
-  }
-
-  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link--kezdolap.active .hub-nav-kezdolap-img,
-  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link--ajanlasok.active .hub-nav-ajanlasok-img,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link--kezdolap.active .hub-nav-tile,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link--ajanlasok.active .hub-nav-tile,
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link--auto.active .hub-nav-tile,
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link--teherauto.active .hub-nav-tile,
-  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link--ingatlan.active .hub-nav-tile {
-    box-shadow: 0 0 0 2.5px var(--ad-yellow), 0 2px 10px rgba(240, 197, 44, 0.4) !important;
-    border-radius: 12px !important;
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link--ingatlan.active .hub-nav-tile,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-header-msg--tile.active .hub-nav-tile,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .site-header-profile--tile.active .hub-nav-tile {
+    outline: 2.5px solid var(--ad-yellow) !important;
+    outline-offset: 1px !important;
+    box-shadow: none !important;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link .nav-count {

@@ -203,12 +203,14 @@ body.hub-page .local-banner {
 .hub-nav-teherauto-img,
 .hub-nav-ingatlan-img,
 .hub-nav-ajanlasok-img,
-.hub-nav-uzenetek-img {
+.hub-nav-uzenetek-img,
+.hub-nav-fiok-img {
   display: block;
-  height: 48px;
-  width: auto;
-  max-height: 48px;
-  object-fit: contain;
+  width: var(--hub-nav-tile-w, 4.5rem);
+  height: var(--hub-nav-tile-h, 2.7rem);
+  max-width: none;
+  max-height: none;
+  object-fit: cover;
   object-position: left center;
   border-radius: 10px;
   flex: 0 0 auto;
@@ -218,16 +220,21 @@ body.hub-page .local-banner {
 .hub-nav-tile {
   position: relative;
   display: block;
-  height: 48px;
-  width: fit-content;
+  width: var(--hub-nav-tile-w, 4.5rem);
+  height: var(--hub-nav-tile-h, 2.7rem);
   flex: 0 0 auto;
+  box-sizing: border-box;
+  border-radius: 10px;
 }
 
+.hub-nav-tile .hub-nav-kezdolap-img,
 .hub-nav-tile .hub-nav-auto-img,
 .hub-nav-tile .hub-nav-teherauto-img,
 .hub-nav-tile .hub-nav-ingatlan-img,
-.hub-nav-tile .hub-nav-uzenetek-img {
-  width: auto;
+.hub-nav-tile .hub-nav-ajanlasok-img,
+.hub-nav-tile .hub-nav-uzenetek-img,
+.hub-nav-tile .hub-nav-fiok-img {
+  width: 100%;
   height: 100%;
 }
 
@@ -295,27 +302,11 @@ body.hub-page .local-banner {
   color: #fff !important;
 }
 
-.hub-header-msg--tile.active .hub-nav-tile,
-body.site-app .hub-header-msg--tile.active .hub-nav-tile {
-  box-shadow: 0 0 0 2.5px #f0c52c, 0 2px 10px rgba(240, 197, 44, 0.4);
-  border-radius: 12px;
-}
-
-.hub-nav-fiok-img {
-  display: block;
-  height: 48px;
-  width: auto;
-  max-height: 48px;
-  object-fit: contain;
-  object-position: left center;
-  border-radius: 10px;
+.hub-nav-fiok-wrap {
+  display: inline-flex;
+  align-items: center;
   flex: 0 0 auto;
-  pointer-events: none;
-}
-
-.hub-nav-tile .hub-nav-fiok-img {
-  width: auto;
-  height: 100%;
+  line-height: 0;
 }
 
 .site-header-profile--tile,
@@ -323,11 +314,12 @@ body.site-app .hub-header-msg--tile.active .hub-nav-tile {
 body.site-app .site-header-profile--tile {
   display: inline-flex;
   align-items: center;
-  padding: 0;
+  padding: 0 !important;
   line-height: 0;
   gap: 0;
   border: 0;
   background: transparent;
+  border-bottom: 0 !important;
 }
 
 .site-header-profile--tile .site-header-avatar,
@@ -336,44 +328,33 @@ body.site-app .site-header-profile--tile {
   display: none !important;
 }
 
+/* Aktív: azonos keret, layoutot nem növel */
+.hub-nav-link--kezdolap.active .hub-nav-tile,
+.hub-nav-link--auto.active .hub-nav-tile,
+.hub-nav-link--teherauto.active .hub-nav-tile,
+.hub-nav-link--ingatlan.active .hub-nav-tile,
+.hub-nav-link--ajanlasok.active .hub-nav-tile,
+.hub-header-msg--tile.active .hub-nav-tile,
 .site-header-profile--tile.active .hub-nav-tile,
-.hub-header .site-header-profile--tile.active .hub-nav-tile,
+body.site-app .hub-nav-link--kezdolap.active .hub-nav-tile,
+body.site-app .hub-nav-link--auto.active .hub-nav-tile,
+body.site-app .hub-nav-link--teherauto.active .hub-nav-tile,
+body.site-app .hub-nav-link--ingatlan.active .hub-nav-tile,
+body.site-app .hub-nav-link--ajanlasok.active .hub-nav-tile,
+body.site-app .hub-header-msg--tile.active .hub-nav-tile,
 body.site-app .site-header-profile--tile.active .hub-nav-tile {
-  box-shadow: 0 0 0 2.5px #f0c52c, 0 2px 10px rgba(240, 197, 44, 0.4);
-  border-radius: 12px;
-}
-
-@media (min-width: 901px) {
-  .hub-nav-fiok-img,
-  body.site-app .hub-nav-fiok-img {
-    height: var(--site-nav-logo-h, 72px);
-    max-height: var(--site-nav-logo-h, 72px);
-    border-radius: 12px;
-  }
-}
-
-@media (max-width: 800px) {
-  .hub-nav-fiok-img,
-  body.site-app .hub-nav-fiok-img {
-    height: clamp(24px, 6.5vw, 34px);
-    max-height: clamp(24px, 6.5vw, 34px);
-    border-radius: 7px;
-  }
-}
-
-@media (max-width: 480px) {
-  .hub-nav-fiok-img,
-  body.site-app .hub-nav-fiok-img {
-    height: 26px;
-    max-height: 26px;
-  }
+  outline: 2.5px solid #f0c52c;
+  outline-offset: 1px;
+  box-shadow: none;
 }
 
 body.site-app .hub-nav-link--kezdolap,
 body.site-app .hub-nav-link--auto,
 body.site-app .hub-nav-link--teherauto,
 body.site-app .hub-nav-link--ingatlan,
-body.site-app .hub-nav-link--ajanlasok {
+body.site-app .hub-nav-link--ajanlasok,
+body.site-app .hub-nav-link--uzenetek,
+body.site-app .hub-nav-link--fiok {
   align-items: center;
   padding-top: 0.45rem;
   padding-bottom: 0.4rem;
@@ -385,75 +366,44 @@ body.site-app .hub-nav-auto-img,
 body.site-app .hub-nav-teherauto-img,
 body.site-app .hub-nav-ingatlan-img,
 body.site-app .hub-nav-ajanlasok-img,
-body.site-app .hub-nav-uzenetek-img {
-  display: block;
-  height: 48px;
-  width: auto;
-  max-height: 48px;
-  object-fit: contain;
-  object-position: left center;
-  border-radius: 10px;
-}
-
+body.site-app .hub-nav-uzenetek-img,
+body.site-app .hub-nav-fiok-img,
 body.site-app .hub-nav-tile {
-  height: 48px;
-  width: fit-content;
+  width: var(--hub-nav-tile-w, 4.5rem);
+  height: var(--hub-nav-tile-h, 2.7rem);
+  max-width: none;
+  max-height: none;
+  object-fit: cover;
 }
 
-@media (max-width: 800px) {
-  .hub-nav-kezdolap-img,
-  .hub-nav-auto-img,
-  .hub-nav-teherauto-img,
-  .hub-nav-ingatlan-img,
-  .hub-nav-ajanlasok-img,
-  .hub-nav-uzenetek-img,
-  body.site-app .hub-nav-kezdolap-img,
-  body.site-app .hub-nav-auto-img,
-  body.site-app .hub-nav-teherauto-img,
-  body.site-app .hub-nav-ingatlan-img,
-  body.site-app .hub-nav-ajanlasok-img,
-  body.site-app .hub-nav-uzenetek-img,
-  .hub-nav-tile,
-  body.site-app .hub-nav-tile {
-    height: clamp(24px, 6.5vw, 34px);
-    max-height: clamp(24px, 6.5vw, 34px);
-    border-radius: 7px;
-  }
-}
-
-@media (max-width: 480px) {
-  .hub-nav-kezdolap-img,
-  .hub-nav-auto-img,
-  .hub-nav-teherauto-img,
-  .hub-nav-ingatlan-img,
-  .hub-nav-ajanlasok-img,
-  .hub-nav-uzenetek-img,
-  body.site-app .hub-nav-kezdolap-img,
-  body.site-app .hub-nav-auto-img,
-  body.site-app .hub-nav-teherauto-img,
-  body.site-app .hub-nav-ingatlan-img,
-  body.site-app .hub-nav-ajanlasok-img,
-  body.site-app .hub-nav-uzenetek-img,
-  .hub-nav-tile,
-  body.site-app .hub-nav-tile {
-    height: 26px;
-    max-height: 26px;
-  }
+:root {
+  --hub-nav-tile-w: 72px;
+  --hub-nav-tile-h: 42px;
 }
 
 @media (min-width: 901px) {
+  :root,
+  body.site-app {
+    --hub-nav-tile-w: 108px;
+    --hub-nav-tile-h: 64px;
+  }
+
   .hub-nav-link--kezdolap,
   .hub-nav-link--auto,
   .hub-nav-link--teherauto,
   .hub-nav-link--ingatlan,
   .hub-nav-link--ajanlasok,
+  .hub-nav-link--uzenetek,
+  .hub-nav-link--fiok,
   body.site-app .hub-nav-link--kezdolap,
   body.site-app .hub-nav-link--auto,
   body.site-app .hub-nav-link--teherauto,
   body.site-app .hub-nav-link--ingatlan,
-  body.site-app .hub-nav-link--ajanlasok {
-    height: var(--site-nav-logo-h, 72px);
-    max-height: var(--site-nav-logo-h, 72px);
+  body.site-app .hub-nav-link--ajanlasok,
+  body.site-app .hub-nav-link--uzenetek,
+  body.site-app .hub-nav-link--fiok {
+    height: var(--hub-nav-tile-h);
+    max-height: var(--hub-nav-tile-h);
     padding-top: 0;
     padding-bottom: 0;
   }
@@ -464,30 +414,60 @@ body.site-app .hub-nav-tile {
   .hub-nav-ingatlan-img,
   .hub-nav-ajanlasok-img,
   .hub-nav-uzenetek-img,
+  .hub-nav-fiok-img,
   body.site-app .hub-nav-kezdolap-img,
   body.site-app .hub-nav-auto-img,
   body.site-app .hub-nav-teherauto-img,
   body.site-app .hub-nav-ingatlan-img,
   body.site-app .hub-nav-ajanlasok-img,
-  body.site-app .hub-nav-uzenetek-img {
-    height: var(--site-nav-logo-h, 72px);
-    max-height: var(--site-nav-logo-h, 72px);
-    width: auto;
-    border-radius: 12px;
-  }
-
+  body.site-app .hub-nav-uzenetek-img,
+  body.site-app .hub-nav-fiok-img,
   .hub-nav-tile,
   body.site-app .hub-nav-tile {
-    height: var(--site-nav-logo-h, 72px);
-    width: fit-content;
+    width: var(--hub-nav-tile-w);
+    height: var(--hub-nav-tile-h);
+    border-radius: 11px;
   }
 
   .hub-nav-tile-count {
-    left: 0.42rem;
-    bottom: 0.28rem;
-    min-width: 1.65rem;
-    font-size: 0.72rem;
-    padding: 0.1rem 0.42rem;
+    left: 0.34rem;
+    bottom: 0.2rem;
+    min-width: 1.5rem;
+    font-size: 0.62rem;
+    padding: 0.06rem 0.36rem;
+  }
+}
+
+@media (max-width: 800px) {
+  :root {
+    --hub-nav-tile-w: 56px;
+    --hub-nav-tile-h: 32px;
+  }
+
+  .hub-nav-kezdolap-img,
+  .hub-nav-auto-img,
+  .hub-nav-teherauto-img,
+  .hub-nav-ingatlan-img,
+  .hub-nav-ajanlasok-img,
+  .hub-nav-uzenetek-img,
+  .hub-nav-fiok-img,
+  body.site-app .hub-nav-kezdolap-img,
+  body.site-app .hub-nav-auto-img,
+  body.site-app .hub-nav-teherauto-img,
+  body.site-app .hub-nav-ingatlan-img,
+  body.site-app .hub-nav-ajanlasok-img,
+  body.site-app .hub-nav-uzenetek-img,
+  body.site-app .hub-nav-fiok-img,
+  .hub-nav-tile,
+  body.site-app .hub-nav-tile {
+    border-radius: 7px;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --hub-nav-tile-w: 48px;
+    --hub-nav-tile-h: 28px;
   }
 }
 
@@ -505,33 +485,25 @@ body.site-app .hub-nav-tile {
   border-bottom-color: #9ca3af;
 }
 
-/* Aktív menücsempe: sárga keret a kép körül */
+/* Aktív menücsempe: sárga keret (outline, layout-neutral) */
 .hub-nav-link--kezdolap.active,
 .hub-nav-link--auto.active,
 .hub-nav-link--teherauto.active,
 .hub-nav-link--ingatlan.active,
 .hub-nav-link--ajanlasok.active,
+.hub-nav-link--uzenetek.active,
+.hub-header-msg--tile.active,
+.site-header-profile--tile.active,
 body.site-app .hub-nav-link--kezdolap.active,
 body.site-app .hub-nav-link--auto.active,
 body.site-app .hub-nav-link--teherauto.active,
 body.site-app .hub-nav-link--ingatlan.active,
-body.site-app .hub-nav-link--ajanlasok.active {
+body.site-app .hub-nav-link--ajanlasok.active,
+body.site-app .hub-nav-link--uzenetek.active,
+body.site-app .hub-header-msg--tile.active,
+body.site-app .site-header-profile--tile.active {
   border-bottom-color: transparent !important;
   border-bottom: 0 !important;
-}
-
-.hub-nav-link--kezdolap.active .hub-nav-kezdolap-img,
-.hub-nav-link--ajanlasok.active .hub-nav-ajanlasok-img,
-.hub-nav-link--auto.active .hub-nav-tile,
-.hub-nav-link--teherauto.active .hub-nav-tile,
-.hub-nav-link--ingatlan.active .hub-nav-tile,
-body.site-app .hub-nav-link--kezdolap.active .hub-nav-kezdolap-img,
-body.site-app .hub-nav-link--ajanlasok.active .hub-nav-ajanlasok-img,
-body.site-app .hub-nav-link--auto.active .hub-nav-tile,
-body.site-app .hub-nav-link--teherauto.active .hub-nav-tile,
-body.site-app .hub-nav-link--ingatlan.active .hub-nav-tile {
-  box-shadow: 0 0 0 2.5px #f0c52c, 0 2px 10px rgba(240, 197, 44, 0.4);
-  border-radius: 12px;
 }
 
 .hub-nav-link .nav-count {

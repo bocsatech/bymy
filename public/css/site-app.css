@@ -130,9 +130,9 @@ body.site-app .hub-header {
 
 @media (min-width: 901px) {
   body.site-app {
-    --site-nav-logo-h: 72px;
-    --site-nav-logo-max-w: min(260px, 29vw);
-    --site-nav-logo-col: 260px;
+    --site-nav-logo-h: 64px;
+    --site-nav-logo-max-w: min(180px, 22vw);
+    --site-nav-logo-col: 180px;
     --site-fixed-header-h: 80px;
     padding-top: var(--site-fixed-header-h);
   }

@@ -8,11 +8,13 @@
     --desk-action-size: 14px;
     --desk-cta-size: 13px;
     --desk-header-h: 80px;
-    --desk-logo-col: 260px;
-    --desk-pad-x: 24px;
-    --desk-gap: 24px;
-    --desk-nav-gap: 22px;
+    --desk-logo-col: 180px;
+    --desk-pad-x: 20px;
+    --desk-gap: 16px;
+    --desk-nav-gap: 8px;
     --desk-cta-h: 36px;
+    --hub-nav-tile-w: 108px;
+    --hub-nav-tile-h: 64px;
   }
 
   body.site-app > .hub-header,

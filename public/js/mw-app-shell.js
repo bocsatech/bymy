@@ -481,6 +481,7 @@
 
     var dragging = false;
     var moved = false;
+    var blockClick = false;
     var startX = 0;
     var startLeft = 0;
     nav.addEventListener("pointerdown", function (e) {
@@ -499,13 +500,10 @@
       var dx = e.clientX - startX;
       if (!moved && Math.abs(dx) < 6) return;
       moved = true;
+      blockClick = true;
       nav.scrollLeft = startLeft - dx;
     });
-    function endDrag(e) {
-      if (moved) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
+    function endDrag() {
       dragging = false;
       moved = false;
     }
@@ -514,11 +512,10 @@
     nav.addEventListener(
       "click",
       function (e) {
-        if (moved) {
-          e.preventDefault();
-          e.stopPropagation();
-          moved = false;
-        }
+        if (!blockClick) return;
+        blockClick = false;
+        e.preventDefault();
+        e.stopPropagation();
       },
       true
     );

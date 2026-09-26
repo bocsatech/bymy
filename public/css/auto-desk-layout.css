@@ -150,10 +150,29 @@
     white-space: nowrap;
   }
 
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link--kezdolap {
+    padding: 0 !important;
+    border-bottom: 2px solid transparent !important;
+    height: 28px !important;
+    max-height: 28px !important;
+    align-items: center !important;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-kezdolap-img {
+    width: 72px !important;
+    height: 28px !important;
+    border-radius: 7px !important;
+  }
+
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link.active {
     color: var(--ad-text) !important;
     border-bottom: 2px solid var(--ad-yellow) !important;
     padding-bottom: 2px !important;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link--kezdolap.active {
+    padding-bottom: 0 !important;
+    border-bottom-color: var(--ad-yellow) !important;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link .nav-count {

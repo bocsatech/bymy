@@ -357,9 +357,11 @@
       '<img class="bymy-logo-img bymy-logo-img--nav" src="/images/bymy-logo.png?v=logoUpload1" alt="Bymy.hu" width="190" height="48" decoding="async" />' +
       "</a>" +
       '<nav class="hub-nav" aria-label="Főmenü">' +
-      '<a class="hub-nav-link' +
+      '<a class="hub-nav-link hub-nav-link--kezdolap' +
       navActiveClass("hub") +
-      '" href="/">Kezdőlap</a>' +
+      '" href="/" aria-label="Kezdőlap">' +
+      '<img class="hub-nav-kezdolap-img" src="/images/kezdolap-nav.png?v=kezdolapNav1" alt="" width="72" height="28" decoding="async" />' +
+      "</a>" +
       '<a class="hub-nav-link' +
       navActiveClass("auto") +
       '" href="/auto.html">Autó ' +

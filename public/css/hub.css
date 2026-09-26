@@ -186,6 +186,41 @@ body.hub-page .local-banner {
   gap: 0.35rem;
 }
 
+.hub-nav-link--kezdolap {
+  align-items: center;
+  padding-top: 0.45rem;
+  padding-bottom: 0.4rem;
+  line-height: 0;
+  flex: 0 0 auto;
+}
+
+.hub-nav-kezdolap-img {
+  display: block;
+  width: 4.5rem;
+  height: 1.7rem;
+  object-fit: cover;
+  object-position: left center;
+  border-radius: 7px;
+  flex: 0 0 auto;
+  pointer-events: none;
+}
+
+body.site-app .hub-nav-link--kezdolap {
+  align-items: center;
+  padding-top: 0.45rem;
+  padding-bottom: 0.4rem;
+  line-height: 0;
+}
+
+body.site-app .hub-nav-kezdolap-img {
+  display: block;
+  width: 4.5rem;
+  height: 1.7rem;
+  object-fit: cover;
+  object-position: left center;
+  border-radius: 7px;
+}
+
 .hub-nav-link:hover {
   color: #111;
   background: transparent;

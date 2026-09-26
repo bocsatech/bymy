@@ -276,7 +276,7 @@
   }
 
   function ensureDeskHeaderCss() {
-    var href = "/css/site-desk-header.css?v=deskHdr6";
+    var href = "/css/site-desk-header.css?v=uzenetekNav1";
     if (document.querySelector("link[data-site-desk-header-css], link[href*='site-desk-header.css']")) return;
     var link = document.createElement("link");
     link.rel = "stylesheet";
@@ -345,10 +345,8 @@
     /* Mindig ugyanaz a DOM — különben oldalanként elcsúszik a sav */
     removeExistingDeskHeaders();
 
-    var msgSvg =
-      '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 6.8h9.5a2.2 2.2 0 0 1 2.2 2.2v4.2a2.2 2.2 0 0 1-2.2 2.2H10l-3.2 2.4V15.2H5A2.2 2.2 0 0 1 2.8 13V9a2.2 2.2 0 0 1 2.2-2.2Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M14.2 8.2h4A2.2 2.2 0 0 1 20.4 10.4v3.4a2.2 2.2 0 0 1-2.2 2.2h-.7v1.7l-2.2-1.7" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>';
-
     var counts = readNavCountsSync();
+    var msgActive = page === "uzenetek" ? " active" : "";
 
     var html =
       '<header class="hub-header" data-site-desk-header aria-label="Bymy">' +
@@ -402,9 +400,14 @@
       "</nav>" +
       '<div class="hub-header-top">' +
       '<div class="hub-header-actions site-header-actions">' +
-      '<a class="hub-header-msg" href="/uzenetek.html" data-auth-member hidden>' +
-      msgSvg +
-      "<span>Üzenetek</span></a>" +
+      '<a class="hub-header-msg hub-header-msg--tile' +
+      msgActive +
+      '" href="/uzenetek.html" aria-label="Üzenetek" data-auth-member hidden>' +
+      '<span class="hub-nav-tile">' +
+      '<img class="hub-nav-uzenetek-img" src="/images/uzenetek-nav.png?v=uzenetekNav1" alt="" width="128" height="72" decoding="async" />' +
+      '<span class="hub-nav-tile-count site-message-badge" data-nav-msg-count hidden aria-label="Olvasatlan üzenetek"></span>' +
+      "</span>" +
+      "</a>" +
       '<div class="site-header-auth-row" data-auth-guest>' +
       '<a class="hub-btn hub-btn--ghost" href="/belepes.html" data-auth-login>Belépés</a>' +
       '<a class="hub-btn hub-btn--ghost" href="/regisztracio.html" data-auth-register>Regisztráció</a>' +

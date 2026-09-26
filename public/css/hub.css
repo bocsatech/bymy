@@ -202,7 +202,8 @@ body.hub-page .local-banner {
 .hub-nav-auto-img,
 .hub-nav-teherauto-img,
 .hub-nav-ingatlan-img,
-.hub-nav-ajanlasok-img {
+.hub-nav-ajanlasok-img,
+.hub-nav-uzenetek-img {
   display: block;
   height: 48px;
   width: auto;
@@ -224,7 +225,8 @@ body.hub-page .local-banner {
 
 .hub-nav-tile .hub-nav-auto-img,
 .hub-nav-tile .hub-nav-teherauto-img,
-.hub-nav-tile .hub-nav-ingatlan-img {
+.hub-nav-tile .hub-nav-ingatlan-img,
+.hub-nav-tile .hub-nav-uzenetek-img {
   width: auto;
   height: 100%;
 }
@@ -259,6 +261,46 @@ body.hub-page .local-banner {
   background: #2ecc71;
 }
 
+.hub-header-msg--tile {
+  display: inline-flex;
+  align-items: center;
+  padding: 0;
+  line-height: 0;
+  gap: 0;
+  border-bottom: 0;
+}
+
+.hub-header-msg--tile > svg,
+.hub-header-msg--tile > span:not(.hub-nav-tile) {
+  display: none !important;
+}
+
+.hub-header-msg--tile .hub-nav-tile-count,
+.hub-header-msg--tile .site-message-badge {
+  position: absolute !important;
+  left: 0.28rem !important;
+  bottom: 0.12rem !important;
+  top: auto !important;
+  right: auto !important;
+  inset: auto auto 0.12rem 0.28rem !important;
+  transform: none !important;
+  margin: 0 !important;
+  background: #1abc9c;
+  border: 0;
+  min-width: 1.35rem;
+  height: auto;
+  padding: 0.05rem 0.32rem;
+  font-size: 0.58rem;
+  font-weight: 700;
+  color: #fff !important;
+}
+
+.hub-header-msg--tile.active .hub-nav-tile,
+body.site-app .hub-header-msg--tile.active .hub-nav-tile {
+  box-shadow: 0 0 0 2.5px #f0c52c, 0 2px 10px rgba(240, 197, 44, 0.4);
+  border-radius: 12px;
+}
+
 body.site-app .hub-nav-link--kezdolap,
 body.site-app .hub-nav-link--auto,
 body.site-app .hub-nav-link--teherauto,
@@ -274,7 +316,8 @@ body.site-app .hub-nav-kezdolap-img,
 body.site-app .hub-nav-auto-img,
 body.site-app .hub-nav-teherauto-img,
 body.site-app .hub-nav-ingatlan-img,
-body.site-app .hub-nav-ajanlasok-img {
+body.site-app .hub-nav-ajanlasok-img,
+body.site-app .hub-nav-uzenetek-img {
   display: block;
   height: 48px;
   width: auto;
@@ -295,11 +338,13 @@ body.site-app .hub-nav-tile {
   .hub-nav-teherauto-img,
   .hub-nav-ingatlan-img,
   .hub-nav-ajanlasok-img,
+  .hub-nav-uzenetek-img,
   body.site-app .hub-nav-kezdolap-img,
   body.site-app .hub-nav-auto-img,
   body.site-app .hub-nav-teherauto-img,
   body.site-app .hub-nav-ingatlan-img,
   body.site-app .hub-nav-ajanlasok-img,
+  body.site-app .hub-nav-uzenetek-img,
   .hub-nav-tile,
   body.site-app .hub-nav-tile {
     height: clamp(24px, 6.5vw, 34px);
@@ -314,11 +359,13 @@ body.site-app .hub-nav-tile {
   .hub-nav-teherauto-img,
   .hub-nav-ingatlan-img,
   .hub-nav-ajanlasok-img,
+  .hub-nav-uzenetek-img,
   body.site-app .hub-nav-kezdolap-img,
   body.site-app .hub-nav-auto-img,
   body.site-app .hub-nav-teherauto-img,
   body.site-app .hub-nav-ingatlan-img,
   body.site-app .hub-nav-ajanlasok-img,
+  body.site-app .hub-nav-uzenetek-img,
   .hub-nav-tile,
   body.site-app .hub-nav-tile {
     height: 26px;
@@ -348,11 +395,13 @@ body.site-app .hub-nav-tile {
   .hub-nav-teherauto-img,
   .hub-nav-ingatlan-img,
   .hub-nav-ajanlasok-img,
+  .hub-nav-uzenetek-img,
   body.site-app .hub-nav-kezdolap-img,
   body.site-app .hub-nav-auto-img,
   body.site-app .hub-nav-teherauto-img,
   body.site-app .hub-nav-ingatlan-img,
-  body.site-app .hub-nav-ajanlasok-img {
+  body.site-app .hub-nav-ajanlasok-img,
+  body.site-app .hub-nav-uzenetek-img {
     height: var(--site-nav-logo-h, 72px);
     max-height: var(--site-nav-logo-h, 72px);
     width: auto;

@@ -92,8 +92,8 @@
     align-items: center !important;
     justify-content: flex-end !important;
     min-height: 0 !important;
-    height: var(--desk-cta-h) !important;
-    max-height: var(--desk-cta-h) !important;
+    height: auto !important;
+    max-height: none !important;
     padding: 0 !important;
     margin: 0 !important;
     width: auto !important;
@@ -105,7 +105,8 @@
     display: flex !important;
     align-items: center !important;
     gap: 0.65rem !important;
-    height: var(--desk-cta-h) !important;
+    height: auto !important;
+    min-height: var(--desk-cta-h) !important;
     margin: 0 !important;
   }
 

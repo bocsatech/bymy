@@ -382,10 +382,15 @@
       "</span>" +
       "</span>" +
       "</a>" +
-      '<a class="hub-nav-link' +
+      '<a class="hub-nav-link hub-nav-link--ingatlan' +
       navActiveClass("ingatlan") +
-      '" href="/ingatlan.html">Ingatlan ' +
-      navCountHtml("ingatlan", counts) +
+      '" href="/ingatlan.html" aria-label="Ingatlan">' +
+      '<span class="hub-nav-tile">' +
+      '<img class="hub-nav-ingatlan-img" src="/images/ingatlan-nav.png?v=ingatlanNav1" alt="" width="72" height="28" decoding="async" />' +
+      '<span class="hub-nav-tile-count nav-count" aria-hidden="true">' +
+      formatNavCount(counts.ingatlan) +
+      "</span>" +
+      "</span>" +
       "</a>" +
       '<a class="hub-nav-link' +
       navActiveClass("ajanlasok") +

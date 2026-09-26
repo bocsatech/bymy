@@ -5,17 +5,6 @@ const ICON_CAR = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" ar
 
 const SPLIT_DEFAULTS = [
   {
-    id: "stock-ingatlan",
-    href: "/ingatlan.html",
-    kicker: "Ingatlan",
-    icon: ICON_HOUSE,
-    titleHtml: `<span class="hub-promo__accent">Házak és</span><span>lakások</span>`,
-    text: "Vétel és bérlés egy átlátható felületen.",
-    cta: "Ingatlan keresése →",
-    photo: `/images/hub-ingatlan-photo.jpg?v=${ASSET_V}`,
-    alt: "Ingatlan — Házak és lakások",
-  },
-  {
     id: "stock-auto",
     href: "/auto.html",
     kicker: "Autó és teherautó",
@@ -26,6 +15,17 @@ const SPLIT_DEFAULTS = [
     photo: `/images/hub-auto-photo.jpg?v=${ASSET_V}`,
     alt: "Autó és teherautó — Autók és teherautók",
     promo: "auto",
+  },
+  {
+    id: "stock-ingatlan",
+    href: "/ingatlan.html",
+    kicker: "Ingatlan",
+    icon: ICON_HOUSE,
+    titleHtml: `<span class="hub-promo__accent">Házak és</span><span>lakások</span>`,
+    text: "Vétel és bérlés egy átlátható felületen.",
+    cta: "Ingatlan keresése →",
+    photo: `/images/hub-ingatlan-photo.jpg?v=${ASSET_V}`,
+    alt: "Ingatlan — Házak és lakások",
   },
 ];
 

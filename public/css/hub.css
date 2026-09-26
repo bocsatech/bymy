@@ -100,9 +100,9 @@ body.hub-page .local-banner {
 }
 
 .bymy-logo-img--nav {
-  height: var(--hub-nav-tile-h, 42px);
-  width: var(--hub-nav-tile-w, 72px);
-  max-width: var(--hub-nav-tile-w, 72px);
+  height: clamp(24px, 6.5vw, 34px);
+  max-width: min(110px, 35vw);
+  width: auto;
   object-fit: contain;
 }
 
@@ -377,15 +377,15 @@ body.site-app .hub-nav-tile {
 }
 
 :root {
-  --hub-nav-tile-w: 72px;
-  --hub-nav-tile-h: 42px;
+  --hub-nav-tile-w: 88px;
+  --hub-nav-tile-h: 52px;
 }
 
 @media (min-width: 901px) {
   :root,
   body.site-app {
-    --hub-nav-tile-w: 108px;
-    --hub-nav-tile-h: 64px;
+    --hub-nav-tile-w: clamp(72px, 6.8vw, 100px);
+    --hub-nav-tile-h: clamp(42px, 4vw, 58px);
   }
 
   .hub-nav-link--kezdolap,
@@ -406,6 +406,7 @@ body.site-app .hub-nav-tile {
     max-height: var(--hub-nav-tile-h);
     padding-top: 0;
     padding-bottom: 0;
+    flex: 0 0 auto;
   }
 
   .hub-nav-kezdolap-img,
@@ -426,24 +427,23 @@ body.site-app .hub-nav-tile {
   body.site-app .hub-nav-tile {
     width: var(--hub-nav-tile-w);
     height: var(--hub-nav-tile-h);
-    border-radius: 11px;
+    max-width: var(--hub-nav-tile-w);
+    max-height: var(--hub-nav-tile-h);
+    border-radius: 10px;
+    flex-shrink: 0;
   }
 
   .hub-nav-tile-count {
-    left: 0.34rem;
-    bottom: 0.2rem;
-    min-width: 1.5rem;
-    font-size: 0.62rem;
-    padding: 0.06rem 0.36rem;
+    left: 0.28rem;
+    bottom: 0.16rem;
+    min-width: 1.35rem;
+    font-size: 0.58rem;
+    padding: 0.05rem 0.3rem;
   }
 }
 
-@media (max-width: 800px) {
-  :root {
-    --hub-nav-tile-w: 56px;
-    --hub-nav-tile-h: 32px;
-  }
-
+/* Mobil: csempe-méret változók ne nyomják a szöveges/mw navot */
+@media (max-width: 900px) {
   .hub-nav-kezdolap-img,
   .hub-nav-auto-img,
   .hub-nav-teherauto-img,
@@ -451,23 +451,12 @@ body.site-app .hub-nav-tile {
   .hub-nav-ajanlasok-img,
   .hub-nav-uzenetek-img,
   .hub-nav-fiok-img,
-  body.site-app .hub-nav-kezdolap-img,
-  body.site-app .hub-nav-auto-img,
-  body.site-app .hub-nav-teherauto-img,
-  body.site-app .hub-nav-ingatlan-img,
-  body.site-app .hub-nav-ajanlasok-img,
-  body.site-app .hub-nav-uzenetek-img,
-  body.site-app .hub-nav-fiok-img,
-  .hub-nav-tile,
-  body.site-app .hub-nav-tile {
-    border-radius: 7px;
-  }
-}
-
-@media (max-width: 480px) {
-  :root {
-    --hub-nav-tile-w: 48px;
-    --hub-nav-tile-h: 28px;
+  .hub-nav-tile {
+    /* desk header el van rejtve; ha mégis látszik, ne legyen óriás */
+    width: auto;
+    height: auto;
+    max-width: 4.5rem;
+    max-height: 2rem;
   }
 }
 
@@ -1125,8 +1114,9 @@ body.hub-page:has(.hub-hero--empty) .hub-main {
   }
 
   .bymy-logo-img--nav {
-    height: clamp(48px, 13vw, 68px);
-    max-width: min(220px, 70vw);
+    height: clamp(24px, 6.5vw, 34px);
+    max-width: min(110px, 35vw);
+    width: auto;
   }
 
   .hub-nav {

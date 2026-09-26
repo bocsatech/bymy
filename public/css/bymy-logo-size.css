@@ -12,9 +12,9 @@
   body.site-app .home-logo .bymy-logo-img--nav,
   body.site-app .hub-logo .bymy-logo-img--nav,
   body.site-app .site-app-logo .bymy-logo-img--nav {
-    height: var(--hub-nav-tile-h, 64px) !important;
-    width: var(--hub-nav-tile-w, 108px) !important;
-    max-width: var(--hub-nav-tile-w, 108px) !important;
+    height: 48px !important;
+    width: auto !important;
+    max-width: 140px !important;
     object-fit: contain !important;
   }
 

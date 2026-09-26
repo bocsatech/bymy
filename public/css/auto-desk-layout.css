@@ -62,18 +62,15 @@
     margin: 0 auto;
     padding: 0 20px;
     min-height: 80px;
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: nowrap !important;
+    display: grid !important;
+    grid-template-columns: 150px minmax(0, 1fr) auto !important;
+    grid-template-areas: "logo nav actions" !important;
     align-items: center;
-    justify-content: center;
-    gap: 8px;
-    column-gap: 8px;
+    column-gap: 14px;
     row-gap: 0;
+    gap: 0 14px;
     position: relative;
     overflow: visible;
-    grid-template-columns: none !important;
-    grid-template-areas: none !important;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-band {
@@ -86,8 +83,8 @@
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-logo {
-    grid-area: auto;
-    justify-self: auto;
+    grid-area: logo !important;
+    justify-self: start !important;
     align-self: center;
     position: relative !important;
     left: auto !important;
@@ -97,10 +94,10 @@
     transform: none !important;
     z-index: 2;
     pointer-events: auto;
-    width: var(--hub-nav-tile-w, 108px) !important;
-    max-width: var(--hub-nav-tile-w, 108px) !important;
-    height: var(--hub-nav-tile-h, 64px) !important;
-    flex: 0 0 var(--hub-nav-tile-w, 108px) !important;
+    width: 150px !important;
+    max-width: 150px !important;
+    height: auto !important;
+    flex: none !important;
     display: inline-flex !important;
     align-items: center !important;
     line-height: 0 !important;
@@ -109,13 +106,13 @@
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav {
-    grid-area: auto;
-    justify-self: auto;
+    grid-area: nav !important;
+    justify-self: center !important;
     align-self: center;
     display: flex !important;
     align-items: center;
-    justify-content: flex-start;
-    gap: 8px;
+    justify-content: center;
+    gap: 6px;
     position: static !important;
     left: auto !important;
     right: auto !important;
@@ -123,23 +120,24 @@
     bottom: auto !important;
     transform: none !important;
     width: max-content;
-    max-width: none;
+    max-width: 100%;
     margin: 0 !important;
     padding: 0 !important;
     pointer-events: auto;
     overflow: visible;
-    flex: 0 0 auto !important;
+    flex: none !important;
+    min-width: 0 !important;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-header-top {
-    grid-area: auto;
-    position: absolute !important;
-    right: 20px !important;
-    top: 50% !important;
-    transform: translateY(-50%) !important;
-    justify-self: auto;
+    grid-area: actions !important;
+    position: static !important;
+    right: auto !important;
+    top: auto !important;
+    transform: none !important;
+    justify-self: end !important;
     align-self: center;
-    z-index: 5;
+    z-index: 3;
     min-height: 0;
     padding: 0;
     width: auto;
@@ -168,9 +166,10 @@
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link--fiok {
     padding: 0 !important;
     border-bottom: 0 !important;
-    height: var(--hub-nav-tile-h, 64px) !important;
-    max-height: var(--hub-nav-tile-h, 64px) !important;
+    height: var(--hub-nav-tile-h, clamp(42px, 4vw, 58px)) !important;
+    max-height: var(--hub-nav-tile-h, clamp(42px, 4vw, 58px)) !important;
     align-items: center !important;
+    flex: 0 0 auto !important;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-kezdolap-img,
@@ -181,11 +180,12 @@
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-uzenetek-img,
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-fiok-img,
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-tile {
-    width: var(--hub-nav-tile-w, 108px) !important;
-    height: var(--hub-nav-tile-h, 64px) !important;
+    width: var(--hub-nav-tile-w, clamp(72px, 6.8vw, 100px)) !important;
+    height: var(--hub-nav-tile-h, clamp(42px, 4vw, 58px)) !important;
     max-height: none !important;
     object-fit: cover !important;
-    border-radius: 11px !important;
+    border-radius: 10px !important;
+    flex-shrink: 0 !important;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link.active {

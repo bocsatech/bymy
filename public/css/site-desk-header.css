@@ -1,4 +1,4 @@
-/* Desk felső sav — azonos betű, méret ÉS pozíció minden oldalon */
+/* Desk felső sav — logo balra, csempék középen, CTA jobbra (≥901px) */
 @media (min-width: 901px) {
   body.site-app {
     --desk-nav-font: "DM Sans", system-ui, -apple-system, sans-serif;
@@ -8,13 +8,13 @@
     --desk-action-size: 14px;
     --desk-cta-size: 13px;
     --desk-header-h: 80px;
-    --desk-logo-col: auto;
+    --desk-logo-col: 150px;
     --desk-pad-x: 20px;
-    --desk-gap: 8px;
-    --desk-nav-gap: 8px;
+    --desk-gap: 14px;
+    --desk-nav-gap: 6px;
     --desk-cta-h: 36px;
-    --hub-nav-tile-w: 108px;
-    --hub-nav-tile-h: 64px;
+    --hub-nav-tile-w: clamp(72px, 6.8vw, 100px);
+    --hub-nav-tile-h: clamp(42px, 4vw, 58px);
   }
 
   body.site-app > .hub-header,
@@ -35,14 +35,13 @@
   body.site-app .site-app-header-inner,
   body.home-page .hub-header-inner,
   body.home-page .home-header-inner {
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: nowrap !important;
+    display: grid !important;
+    grid-template-columns: var(--desk-logo-col) minmax(0, 1fr) auto !important;
+    grid-template-areas: "logo nav actions" !important;
     align-items: center !important;
-    justify-content: center !important;
-    gap: var(--desk-nav-gap) !important;
-    column-gap: var(--desk-nav-gap) !important;
+    column-gap: var(--desk-gap) !important;
     row-gap: 0 !important;
+    gap: 0 var(--desk-gap) !important;
     max-width: 1440px !important;
     margin: 0 auto !important;
     padding: 0 var(--desk-pad-x) !important;
@@ -51,8 +50,6 @@
     max-height: var(--desk-header-h) !important;
     box-sizing: border-box !important;
     position: relative !important;
-    grid-template-columns: none !important;
-    grid-template-areas: none !important;
   }
 
   body.site-app .hub-nav-band,
@@ -60,19 +57,20 @@
     display: contents !important;
   }
 
+  /* Logo: külön, nem csempe-méret */
   body.site-app .hub-logo,
   body.site-app .home-logo,
   body.site-app .site-app-logo,
   body.home-page .hub-logo {
-    grid-area: auto !important;
-    justify-self: auto !important;
+    grid-area: logo !important;
+    justify-self: start !important;
     align-self: center !important;
-    width: var(--hub-nav-tile-w) !important;
-    max-width: var(--hub-nav-tile-w) !important;
-    height: var(--hub-nav-tile-h) !important;
+    width: var(--desk-logo-col) !important;
+    max-width: var(--desk-logo-col) !important;
+    height: auto !important;
     margin: 0 !important;
     padding: 0 !important;
-    flex: 0 0 var(--hub-nav-tile-w) !important;
+    flex: none !important;
     display: inline-flex !important;
     align-items: center !important;
     line-height: 0 !important;
@@ -81,10 +79,10 @@
   body.site-app .hub-logo .bymy-logo-img--nav,
   body.home-page .hub-logo .bymy-logo-img--nav,
   body.site-app .bymy-logo-img--nav {
-    width: var(--hub-nav-tile-w) !important;
-    height: var(--hub-nav-tile-h) !important;
-    max-width: var(--hub-nav-tile-w) !important;
-    max-height: var(--hub-nav-tile-h) !important;
+    width: auto !important;
+    height: 48px !important;
+    max-width: 140px !important;
+    max-height: 48px !important;
     object-fit: contain !important;
   }
 
@@ -93,31 +91,32 @@
   body.site-app .site-app-nav,
   body.site-app .import-nav,
   body.home-page .hub-nav {
-    grid-area: auto !important;
-    justify-self: auto !important;
+    grid-area: nav !important;
+    justify-self: center !important;
     align-self: center !important;
     display: flex !important;
     align-items: center !important;
+    justify-content: center !important;
     gap: var(--desk-nav-gap) !important;
     width: max-content !important;
+    max-width: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
     position: static !important;
     transform: none !important;
     left: auto !important;
     right: auto !important;
-    flex: 0 0 auto !important;
+    flex: none !important;
+    min-width: 0 !important;
   }
 
   body.site-app .hub-header-top,
   body.site-app .site-header-top,
   body.home-page .hub-header-top {
-    grid-area: auto !important;
-    position: absolute !important;
-    right: var(--desk-pad-x) !important;
-    top: 50% !important;
-    transform: translateY(-50%) !important;
-    justify-self: auto !important;
+    grid-area: actions !important;
+    position: static !important;
+    transform: none !important;
+    justify-self: end !important;
     align-self: center !important;
     display: flex !important;
     align-items: center !important;
@@ -128,6 +127,7 @@
     padding: 0 !important;
     margin: 0 !important;
     width: auto !important;
+    z-index: 3 !important;
   }
 
   body.site-app .hub-header-actions,
@@ -156,7 +156,8 @@
     letter-spacing: 0 !important;
     line-height: 1.2 !important;
     text-transform: none !important;
-    padding: 0 0 2px !important;
+    padding: 0 !important;
+    flex: 0 0 auto !important;
   }
 
   body.site-app .hub-nav-link.active,
@@ -217,6 +218,7 @@
     align-items: center !important;
     justify-content: center !important;
     border-radius: 8px !important;
+    white-space: nowrap !important;
   }
 
   body.site-app .hub-theme-toggle,
@@ -230,7 +232,16 @@
 
   body.site-app .site-header-avatar,
   body.home-page .site-header-avatar {
-    width: 28px !important;
-    height: 28px !important;
+    width: 36px !important;
+    height: 36px !important;
+  }
+}
+
+/* Mobil: a desk csempés header elrejtve — a mw-app-top / szöveges nav marad */
+@media (max-width: 900px) {
+  body.site-app > header[data-site-desk-header],
+  body.site-app > .hub-header[data-site-desk-header],
+  body.home-page > .hub-header[data-site-desk-header] {
+    display: none !important;
   }
 }

@@ -397,7 +397,7 @@ function googleDirectionsUrl(from, to, toLabel) {
 function renderSideAll(side, pins) {
   if (!side) return;
   const homeHint = homeOrigin
-    ? `${escapeHtml(homeOrigin.label)} → válassz autót`
+    ? `${escapeHtml(homeOrigin.label)} → kattints egy autóra a térképen`
     : `Állíts be irányítószámot a <a href="/beallitasok.html?szekcio=keresesi-korzet">Keresési körzet</a>ben.`;
 
   if (!pins?.length) {
@@ -405,12 +405,11 @@ function renderSideAll(side, pins) {
     return;
   }
 
-  const cards = pins.map((pin) => pickCardHtml(pin)).join("");
   const routeTeaser = homeOrigin
     ? `<div class="search-map-modal__route search-map-modal__route--teaser">
         <div class="search-map-modal__route-lab">Útvonal</div>
         <p class="search-map-modal__route-title">Válassz autót</p>
-        <p class="search-map-modal__route-note">${escapeHtml(homeOrigin.label)} → kattints a listában vagy a térképen</p>
+        <p class="search-map-modal__route-note">${escapeHtml(homeOrigin.label)} → kattints egy pinre a térképen</p>
       </div>`
     : `<div class="search-map-modal__route search-map-modal__route--warn">
         <div class="search-map-modal__route-lab">Útvonal</div>
@@ -418,13 +417,7 @@ function renderSideAll(side, pins) {
         <p class="search-map-modal__route-note">${homeHint}</p>
       </div>`;
 
-  side.innerHTML = `
-    <div class="search-map-modal__side-pin">${routeTeaser}</div>
-    <div class="search-map-modal__side-scroll">
-      <p class="search-map-modal__list-label">${pins.length} autó a találati listából</p>
-      <div class="search-map-modal__cards">${cards}</div>
-    </div>
-  `;
+  side.innerHTML = `<div class="search-map-modal__side-pin">${routeTeaser}</div>`;
 }
 
 function renderRouteBlock(pin, routeInfo) {
@@ -478,7 +471,7 @@ function renderRouteBlock(pin, routeInfo) {
 
   return `<div class="search-map-modal__route">
     <div class="search-map-modal__route-lab">Útvonal</div>
-    <p class="search-map-modal__route-title" style="font-size:0.95rem;font-weight:700">Válassz autót</p>
+    <p class="search-map-modal__route-title" style="font-size:0.95rem;font-weight:700">Kiválasztva</p>
     <div class="search-map-modal__route-actions">${listingBtn}</div>
   </div>`;
 }
@@ -490,24 +483,12 @@ function renderSideListing(side, pin, routeInfo = null) {
     return;
   }
 
-  const others = lastPins
-    .filter((p) => String(p.item?.id) !== String(pin.item?.id))
-    .map((p) => pickCardHtml(p))
-    .join("");
-
   side.innerHTML = `
     <div class="search-map-modal__side-pin">
-      <button type="button" class="search-map-modal__back" data-search-map-back>‹ Vissza az összes autóhoz</button>
+      <button type="button" class="search-map-modal__back" data-search-map-back>‹ Kiválasztás törlése</button>
       ${renderRouteBlock(pin, routeInfo)}
       <p class="search-map-modal__list-label">Kiválasztott</p>
       ${pickCardHtml(pin, { selected: true, asLink: true })}
-    </div>
-    <div class="search-map-modal__side-scroll">
-      ${
-        others
-          ? `<p class="search-map-modal__list-label">Többi a listából</p><div class="search-map-modal__cards">${others}</div>`
-          : `<p class="search-map-modal__hint">Nincs más autó a listában.</p>`
-      }
     </div>
   `;
 }

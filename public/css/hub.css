@@ -1481,7 +1481,8 @@ html[data-theme="dark"] .hub-promo__text {
   padding: 1rem 1.25rem 0.35rem;
 }
 .hub-promo-band .hub-verticals {
-  margin: 0;
+  margin-left: auto;
+  margin-right: auto;
 }
 body.home-page .hub-promo-band,
 body.hub-page .hub-promo-band {

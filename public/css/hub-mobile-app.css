@@ -430,7 +430,6 @@
     margin-bottom: 0.55rem;
   }
 
-  body.hub-page--feed .hub-verticals,
   body.hub-page--feed .hf-rail {
     display: flex !important;
     flex-wrap: nowrap !important;
@@ -456,8 +455,23 @@
     touch-action: pan-x pan-y;
   }
 
+  /* Promo band: always centered 70% × 2-col (same as desk), no left-aligned scroll */
+  body.hub-page--feed .hub-promo-band {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
   body.hub-page--feed .hub-verticals {
-    padding-bottom: 0.35rem !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: var(--hf-rail-gap, 0.7rem) !important;
+    width: 70vw !important;
+    max-width: 70vw !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    padding: 0 0 0.35rem !important;
+    overflow: visible !important;
+    box-sizing: border-box !important;
   }
 
   body.hub-page--feed .hub-verticals::-webkit-scrollbar,
@@ -475,11 +489,9 @@
   }
 
   body.hub-page--feed .hub-promo {
-    /* Match desk band: 70% viewport / 2 columns − gap (no full-bleed size jump) */
-    --hub-promo-w: calc((70vw - var(--hf-rail-gap, 0.7rem)) / 2);
-    flex: 0 0 var(--hub-promo-w) !important;
-    width: var(--hub-promo-w) !important;
-    max-width: var(--hub-promo-w) !important;
+    flex: none !important;
+    width: 100% !important;
+    max-width: none !important;
     aspect-ratio: 16 / 9 !important;
     max-height: none !important;
     height: auto !important;

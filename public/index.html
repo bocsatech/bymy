@@ -61,25 +61,32 @@
     />
     <link rel="preload" as="image" href="/images/hub-ingatlan.jpg?v=hubPromoRail2" fetchpriority="high" />
     <link rel="preload" as="image" href="/images/hub-auto-motor.jpg?v=hubPromoRail2" fetchpriority="high" />
-    <link rel="stylesheet" href="/css/hub.css?v=promoFit2" />
+    <link rel="stylesheet" href="/css/hub.css?v=promoFit4" />
     <link rel="stylesheet" href="/css/listing-photo-cover.css?v=tileAllPages1" />
     <link rel="stylesheet" href="/css/listing-featured.css?v=tileEdge5" />
-    <link rel="stylesheet" href="/css/hub-mobile-app.css?v=promoFit2" />
-    <link rel="stylesheet" href="/css/site-app.css?v=promoFit2" />
+    <link rel="stylesheet" href="/css/hub-mobile-app.css?v=promoFit4" />
+    <link rel="stylesheet" href="/css/site-app.css?v=promoFit4" />
     <link rel="manifest" href="/manifest.webmanifest" />
     <meta name="mobile-web-app-capable" content="yes" />
-    <link rel="stylesheet" href="/css/bymy-logo-size.css?v=promoFit2" />
-        <link rel="stylesheet" href="/css/site-desk-header.css?v=promoFit2" />
+    <link rel="stylesheet" href="/css/bymy-logo-size.css?v=promoFit4" />
+        <link rel="stylesheet" href="/css/site-desk-header.css?v=promoFit4" />
 <style id="hf-tile-edge5">
       @media (max-width: 800px) {
         body.hub-page--feed {
           --hf-gutter: 16px;
         }
         body.hub-page--feed .hub-intro,
-        body.hub-page--feed .hub-feed,
-        body.hub-page--feed .hub-promo-band {
+        body.hub-page--feed .hub-feed {
           padding-left: var(--hf-gutter) !important;
           padding-right: var(--hf-gutter) !important;
+          margin-left: 0 !important;
+          margin-right: 0 !important;
+          max-width: none !important;
+          box-sizing: border-box !important;
+        }
+        body.hub-page--feed .hub-promo-band {
+          padding-left: 0 !important;
+          padding-right: 0 !important;
           margin-left: 0 !important;
           margin-right: 0 !important;
           max-width: none !important;
@@ -93,7 +100,6 @@
           margin-left: 0 !important;
           margin-right: 0 !important;
         }
-        body.hub-page--feed .hub-verticals,
         body.hub-page--feed .hf-rail {
           margin-left: calc(var(--hf-gutter) * -1) !important;
           margin-right: calc(var(--hf-gutter) * -1) !important;
@@ -101,6 +107,18 @@
           padding-right: var(--hf-gutter) !important;
           scroll-snap-type: none !important;
           scroll-padding: 0 !important;
+          box-sizing: border-box !important;
+        }
+        body.hub-page--feed .hub-verticals {
+          display: grid !important;
+          grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+          width: 70vw !important;
+          max-width: 70vw !important;
+          margin-left: auto !important;
+          margin-right: auto !important;
+          padding-left: 0 !important;
+          padding-right: 0 !important;
+          overflow: visible !important;
           box-sizing: border-box !important;
         }
         body.hub-page--feed .hub-verticals > *,
@@ -116,7 +134,7 @@
     </style>
   </head>
   <body class="hub-page site-page site-app hub-page--feed" data-site-page="hub">
-    <script src="/js/mw-app-shell.js?v=promoFit2"></script>
+    <script src="/js/mw-app-shell.js?v=promoFit4"></script>
     
     <header class="mw-app-top" aria-label="Bymy mobil">
       <div class="mw-app-top-row">

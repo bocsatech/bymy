@@ -7,7 +7,7 @@
   var isHub = body.classList.contains("hub-page--feed") || page === "hub";
   var isFiok = body.classList.contains("fiok-page") || page === "fiok";
   var isPostAd = page === "hirdetesfeladas";
-  var CSS_HREF = "/css/hub-mobile-app.css?v=promoFit1";
+  var CSS_HREF = "/css/hub-mobile-app.css?v=promoFit2";
 
   function ensureCss() {
     if (document.querySelector('link[href*="hub-mobile-app.css"]')) return;
@@ -270,12 +270,12 @@
     if (document.querySelector('link[href*="bymy-logo-size.css"]')) return;
     var link = document.createElement("link");
     link.rel = "stylesheet";
-    link.href = "/css/bymy-logo-size.css?v=promoFit1";
+    link.href = "/css/bymy-logo-size.css?v=promoFit2";
     document.head.appendChild(link);
   }
 
   function ensureDeskHeaderCss() {
-    var href = "/css/site-desk-header.css?v=promoFit1";
+    var href = "/css/site-desk-header.css?v=promoFit2";
     if (document.querySelector("link[data-site-desk-header-css], link[href*='site-desk-header.css']")) return;
     var link = document.createElement("link");
     link.rel = "stylesheet";

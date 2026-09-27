@@ -103,9 +103,37 @@
   body.site-app .bymy-logo-img--nav {
     height: var(--desk-logo-h) !important;
     width: auto !important;
-    max-width: 180px !important;
+    max-width: min(240px, 28vw) !important;
     max-height: var(--desk-logo-h) !important;
     object-fit: contain !important;
+    object-position: center !important;
+    aspect-ratio: auto !important;
+  }
+
+  /* Széles desk (≥1400): nagyobb, nem összenyomott logo */
+  @media (min-width: 1400px) {
+    body.site-app {
+      --desk-logo-h: 48px;
+      --desk-top-h: 60px;
+      --desk-header-h: calc(var(--desk-top-h) + var(--desk-nav-h));
+    }
+
+    body.site-app .hub-logo,
+    body.site-app .home-logo,
+    body.site-app .site-app-logo,
+    body.home-page .hub-logo {
+      height: var(--desk-logo-h) !important;
+      max-width: 260px !important;
+    }
+
+    body.site-app .hub-logo .bymy-logo-img--nav,
+    body.home-page .hub-logo .bymy-logo-img--nav,
+    body.site-app .bymy-logo-img--nav {
+      height: 48px !important;
+      max-height: 48px !important;
+      max-width: 220px !important;
+      width: auto !important;
+    }
   }
 
   body.site-app .hub-header-actions,

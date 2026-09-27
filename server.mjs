@@ -151,7 +151,11 @@ import {
   importRateLimitPerHour,
 } from "./lib/import-auth.mjs";
 import { attachSellerProfile, getSellerInventoryContactForUserId, publicSellerInventoryContact } from "./lib/listing-detail-seller.mjs";
-import { getSellerRatingSummary, submitSellerRating } from "./lib/seller-ratings.mjs";
+import {
+  getSellerRatingSummary,
+  listReceivedSellerRatings,
+  submitSellerRating,
+} from "./lib/seller-ratings.mjs";
 import {
   buildListingOpenGraph,
   injectOpenGraphIntoHtml,
@@ -1248,6 +1252,21 @@ async function handleListingsApi(req, res, pathname) {
       return;
     }
     sendJson(res, 200, { contact: publicSellerInventoryContact(contact) });
+    return;
+  }
+
+  if (pathname === "/api/me/seller-ratings" && req.method === "GET") {
+    const user = await requestUser(req);
+    if (!user) {
+      sendJson(res, 401, { error: "Jelentkezz be." });
+      return;
+    }
+    try {
+      const ratings = await listReceivedSellerRatings({ sellerUserId: user.id });
+      sendJson(res, 200, { ratings });
+    } catch (err) {
+      sendJson(res, err.status || 500, { error: err.message || "Nem sikerült az értékelések betöltése." });
+    }
     return;
   }
 

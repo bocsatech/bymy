@@ -57,7 +57,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/css/style.css?v=noScroll1" />
-    <link rel="stylesheet" href="/css/site-app.css?v=whHdr7" />
+    <link rel="stylesheet" href="/css/site-app.css?v=ratings1" />
         <link rel="stylesheet" href="/css/site-desk-header.css?v=whHdr7" />
 <link rel="stylesheet" href="/css/mm-nav-c.css?v=mmNavC3" />
       <link rel="stylesheet" href="/css/hub.css?v=whHdr7" />
@@ -438,9 +438,11 @@
         <section class="mm-panel" data-mm-panel="ertekelesek" hidden>
           <header class="mm-panel-head">
             <h2 class="mm-panel-title">Értékelések</h2>
-            <p class="mm-panel-lead">Más felhasználók értékelései az autóinkról és a kereskedésről.</p>
+            <p class="mm-panel-lead">A kapott értékelések — csak pontszám és dátum.</p>
           </header>
-          <p class="mm-empty">Ez a menüpont előkészületben van.</p>
+          <p class="mm-empty" data-ratings-empty hidden>Még nincs kapott értékelés.</p>
+          <p class="mm-empty" data-ratings-status role="status">Betöltés…</p>
+          <ul class="mm-ratings-list" data-ratings-list hidden></ul>
         </section>
 
         
@@ -792,7 +794,7 @@
 
     <script src="/js/site-avatar-menu.js?v=settingsHome1" type="module"></script>
     <script src="/js/ha-import-app.js?v=haImportOwner2" type="module"></script>
-    <script src="/js/beallitasok-app.js?v=adminPriv1" type="module"></script>
+    <script src="/js/beallitasok-app.js?v=ratings1" type="module"></script>
     <script>
       
       setTimeout(function () {

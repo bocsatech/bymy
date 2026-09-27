@@ -352,6 +352,88 @@ function clearSection() {
   document.querySelectorAll(".mm-nav-group").forEach((group) => collapseSettingsSubnav(group));
 }
 
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function formatRatingDate(raw) {
+  const s = String(raw || "").trim();
+  if (!s) return "—";
+  const d = new Date(s.includes("T") ? s : s.replace(" ", "T") + (s.includes("Z") ? "" : "Z"));
+  if (Number.isNaN(d.getTime())) {
+    const m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (m) return `${m[1]}.${m[2]}.${m[3]}.`;
+    return s.slice(0, 10);
+  }
+  try {
+    return new Intl.DateTimeFormat("hu-HU", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(d);
+  } catch {
+    return d.toISOString().slice(0, 10);
+  }
+}
+
+let ratingsLoadPromise = null;
+
+async function loadReceivedRatings() {
+  const panel = document.querySelector('[data-mm-panel="ertekelesek"]');
+  if (!panel) return;
+  const list = panel.querySelector("[data-ratings-list]");
+  const empty = panel.querySelector("[data-ratings-empty]");
+  const status = panel.querySelector("[data-ratings-status]");
+  if (!list || !empty || !status) return;
+
+  status.hidden = false;
+  status.textContent = "Betöltés…";
+  empty.hidden = true;
+  list.hidden = true;
+  list.innerHTML = "";
+
+  if (!ratingsLoadPromise) {
+    ratingsLoadPromise = fetch("/api/me/seller-ratings", { credentials: "same-origin" })
+      .then(async (res) => {
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || "Nem sikerült az értékelések betöltése.");
+        return Array.isArray(data.ratings) ? data.ratings : [];
+      })
+      .catch((err) => {
+        ratingsLoadPromise = null;
+        throw err;
+      });
+  }
+
+  try {
+    const ratings = await ratingsLoadPromise;
+    status.hidden = true;
+    if (!ratings.length) {
+      empty.hidden = false;
+      return;
+    }
+    list.innerHTML = ratings
+      .map((row) => {
+        const score = Number(row.score);
+        const label = Number.isFinite(score) ? String(score) : "—";
+        const date = formatRatingDate(row.createdAt || row.created_at);
+        return `<li class="mm-ratings-item">
+          <span class="mm-ratings-score">${escapeHtml(label)}<span class="mm-ratings-score-scale">/ 10</span></span>
+          <time class="mm-ratings-date" datetime="${escapeHtml(String(row.createdAt || row.created_at || ""))}">${escapeHtml(date)}</time>
+        </li>`;
+      })
+      .join("");
+    list.hidden = false;
+  } catch (err) {
+    status.hidden = false;
+    status.textContent = err?.message || "Nem sikerült az értékelések betöltése.";
+  }
+}
+
 function setSection(section) {
   if (!section) {
     clearSection();
@@ -1395,6 +1477,9 @@ export async function initSettingsPage() {
   if (currentSection() === "megjelenes") {
     loadHeroSettings();
   }
+  if (currentSection() === "ertekelesek") {
+    loadReceivedRatings();
+  }
 
   function applyNavSideEffects(next) {
     if (next === "szemelyes" || next === "fiok") {
@@ -1408,6 +1493,9 @@ export async function initSettingsPage() {
     }
     if (next === "hirdetes") {
       initMyAdsPanel(document.getElementById("mm-ad-list")).reload();
+    }
+    if (next === "ertekelesek") {
+      loadReceivedRatings();
     }
   }
 

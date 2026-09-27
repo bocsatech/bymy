@@ -4344,6 +4344,61 @@ body.site-app .mm-empty {
   font-size: 0.92rem;
 }
 
+body.site-app .mm-ratings-list {
+  list-style: none;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.55rem;
+}
+
+body.site-app .mm-ratings-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 0.9rem;
+  background: #fff;
+  border: 1px solid #e8c547;
+  border-radius: 12px;
+  box-sizing: border-box;
+}
+
+body.site-app .mm-ratings-score {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.25rem;
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: #111;
+}
+
+body.site-app .mm-ratings-score-scale {
+  font-weight: 500;
+  font-size: 0.85rem;
+  color: #667085;
+}
+
+body.site-app .mm-ratings-date {
+  font-size: 0.88rem;
+  color: #667085;
+  white-space: nowrap;
+}
+
+html[data-theme="dark"] body.site-app .mm-ratings-item {
+  background: #1a1f27;
+  border-color: #c4a024;
+}
+
+html[data-theme="dark"] body.site-app .mm-ratings-score {
+  color: #e8eaed;
+}
+
+html[data-theme="dark"] body.site-app .mm-ratings-score-scale,
+html[data-theme="dark"] body.site-app .mm-ratings-date {
+  color: #9aa3ad;
+}
+
 body.site-app .mm-ad-box {
   background: #fff;
   border: 1px solid #dfe3ea;

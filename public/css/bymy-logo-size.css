@@ -12,12 +12,12 @@
   body.site-app .home-logo .bymy-logo-img--nav,
   body.site-app .hub-logo .bymy-logo-img--nav,
   body.site-app .site-app-logo .bymy-logo-img--nav {
-    height: 72px !important;
-    max-width: min(260px, 29vw) !important;
+    height: 40px !important;
+    max-width: 180px !important;
     width: auto !important;
   }
 
-  /* Ne tolja szét a közös 80px desk savot */
+  /* Ne tolja szét a két-soros desk savot */
   .hub-header-top,
   body.site-app .hub-header-top,
   body.site-app .site-header-top {

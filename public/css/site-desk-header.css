@@ -1,18 +1,24 @@
-/* Desk felső sav — azonos betű, méret ÉS pozíció minden oldalon */
+/* Willhaben-szerű két-soros desk fejléc (≥901px)
+   1. sor: logo balra, akciók jobbra
+   2. sor: szöveges menü teljes szélességben
+   ≤1199px: akciók ikon-kompakt (mint willhaben szűkített nézet) */
 @media (min-width: 901px) {
   body.site-app {
     --desk-nav-font: "DM Sans", system-ui, -apple-system, sans-serif;
     --desk-nav-size: 14px;
-    --desk-nav-weight: 500;
+    --desk-nav-weight: 600;
     --desk-count-size: 13px;
     --desk-action-size: 14px;
     --desk-cta-size: 13px;
-    --desk-header-h: 80px;
-    --desk-logo-col: 260px;
+    --desk-top-h: 56px;
+    --desk-nav-h: 48px;
+    --desk-header-h: calc(var(--desk-top-h) + var(--desk-nav-h));
+    --desk-logo-h: 40px;
     --desk-pad-x: 24px;
-    --desk-gap: 24px;
-    --desk-nav-gap: 22px;
+    --desk-gap: 16px;
+    --desk-nav-gap: 0;
     --desk-cta-h: 36px;
+    --desk-max: 1280px;
   }
 
   body.site-app > .hub-header,
@@ -33,70 +39,72 @@
   body.site-app .site-app-header-inner,
   body.home-page .hub-header-inner,
   body.home-page .home-header-inner {
-    display: grid !important;
-    grid-template-columns: var(--desk-logo-col) max-content minmax(0, 1fr) !important;
-    grid-template-areas: "logo nav actions" !important;
-    align-items: center !important;
-    column-gap: var(--desk-gap) !important;
-    row-gap: 0 !important;
-    gap: 0 var(--desk-gap) !important;
-    max-width: 1440px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+    gap: 0 !important;
+    max-width: var(--desk-max) !important;
     margin: 0 auto !important;
     padding: 0 var(--desk-pad-x) !important;
     height: var(--desk-header-h) !important;
     min-height: var(--desk-header-h) !important;
     max-height: var(--desk-header-h) !important;
     box-sizing: border-box !important;
+    position: relative !important;
+    grid-template-columns: none !important;
+    grid-template-areas: none !important;
+  }
+
+  /* 1. sor: logo | akciók */
+  body.site-app .hub-header-top,
+  body.site-app .site-header-top,
+  body.home-page .hub-header-top {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: var(--desk-gap) !important;
+    width: 100% !important;
+    height: var(--desk-top-h) !important;
+    min-height: var(--desk-top-h) !important;
+    max-height: var(--desk-top-h) !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    position: relative !important;
+    transform: none !important;
+    flex: 0 0 var(--desk-top-h) !important;
   }
 
   body.site-app .hub-logo,
   body.site-app .home-logo,
   body.site-app .site-app-logo,
   body.home-page .hub-logo {
-    grid-area: logo !important;
-    justify-self: start !important;
-    align-self: center !important;
-    width: var(--desk-logo-col) !important;
-    max-width: var(--desk-logo-col) !important;
-    margin: 0 !important;
-    padding: 0 !important;
-  }
-
-  body.site-app .hub-nav,
-  body.site-app .home-nav,
-  body.site-app .site-app-nav,
-  body.site-app .import-nav,
-  body.home-page .hub-nav {
-    grid-area: nav !important;
-    justify-self: start !important;
-    align-self: center !important;
-    display: flex !important;
-    align-items: center !important;
-    gap: var(--desk-nav-gap) !important;
-    width: max-content !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    position: static !important;
-    transform: none !important;
+    position: relative !important;
     left: auto !important;
     right: auto !important;
+    top: auto !important;
+    bottom: auto !important;
+    transform: none !important;
+    width: auto !important;
+    max-width: 200px !important;
+    height: var(--desk-logo-h) !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    flex: 0 0 auto !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    line-height: 0 !important;
   }
 
-  body.site-app .hub-header-top,
-  body.site-app .site-header-top,
-  body.home-page .hub-header-top {
-    grid-area: actions !important;
-    justify-self: end !important;
-    align-self: center !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: flex-end !important;
-    min-height: 0 !important;
-    height: var(--desk-cta-h) !important;
-    max-height: var(--desk-cta-h) !important;
-    padding: 0 !important;
-    margin: 0 !important;
+  body.site-app .hub-logo .bymy-logo-img--nav,
+  body.home-page .hub-logo .bymy-logo-img--nav,
+  body.site-app .bymy-logo-img--nav {
+    height: var(--desk-logo-h) !important;
     width: auto !important;
+    max-width: 180px !important;
+    max-height: var(--desk-logo-h) !important;
+    object-fit: contain !important;
   }
 
   body.site-app .hub-header-actions,
@@ -104,9 +112,49 @@
   body.home-page .hub-header-actions {
     display: flex !important;
     align-items: center !important;
-    gap: 0.65rem !important;
+    justify-content: flex-end !important;
+    gap: 0.75rem !important;
     height: var(--desk-cta-h) !important;
+    margin: 0 0 0 auto !important;
+    flex: 0 0 auto !important;
+  }
+
+  /* 2. sor: menü */
+  body.site-app .hub-nav-band,
+  body.home-page .hub-nav-band {
+    display: flex !important;
+    align-items: center !important;
+    width: 100% !important;
+    height: var(--desk-nav-h) !important;
+    min-height: var(--desk-nav-h) !important;
+    max-height: var(--desk-nav-h) !important;
     margin: 0 !important;
+    padding: 0 !important;
+    border-top: 1px solid #e5e7eb !important;
+    border-bottom: 0 !important;
+    box-sizing: border-box !important;
+    flex: 0 0 var(--desk-nav-h) !important;
+  }
+
+  body.site-app .hub-nav,
+  body.site-app .home-nav,
+  body.site-app .site-app-nav,
+  body.site-app .import-nav,
+  body.home-page .hub-nav {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 1rem !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    position: static !important;
+    transform: none !important;
+    left: auto !important;
+    right: auto !important;
+    height: 100% !important;
+    overflow: visible !important;
   }
 
   body.site-app .hub-nav-link,
@@ -121,10 +169,18 @@
     font-family: var(--desk-nav-font) !important;
     font-size: var(--desk-nav-size) !important;
     font-weight: var(--desk-nav-weight) !important;
-    letter-spacing: 0 !important;
+    letter-spacing: 0.02em !important;
     line-height: 1.2 !important;
     text-transform: none !important;
-    padding: 0 0 2px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-bottom: 3px solid transparent !important;
+    height: 100% !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.35rem !important;
+    flex: 0 0 auto !important;
+    box-sizing: border-box !important;
   }
 
   body.site-app .hub-nav-link.active,
@@ -134,7 +190,9 @@
   body.home-page .hub-nav-link.active {
     font-family: var(--desk-nav-font) !important;
     font-size: var(--desk-nav-size) !important;
-    font-weight: var(--desk-nav-weight) !important;
+    font-weight: 700 !important;
+    border-bottom-color: #111 !important;
+    color: #111 !important;
   }
 
   body.site-app .nav-count,
@@ -148,6 +206,7 @@
     line-height: 1 !important;
     display: inline-block !important;
     min-width: 2.75ch !important;
+    color: #9ca3af !important;
   }
 
   body.site-app .hub-header-msg,
@@ -185,6 +244,12 @@
     align-items: center !important;
     justify-content: center !important;
     border-radius: 8px !important;
+    white-space: nowrap !important;
+  }
+
+  body.site-app .hub-btn--post .hub-post-compact,
+  body.home-page .hub-btn--post .hub-post-compact {
+    display: none !important;
   }
 
   body.site-app .hub-theme-toggle,
@@ -201,4 +266,76 @@
     width: 28px !important;
     height: 28px !important;
   }
+}
+
+/* Szűkített desk (willhaben kompakt): szöveg elrejtve, ikonok maradnak */
+@media (min-width: 901px) and (max-width: 1199px) {
+  body.site-app {
+    --desk-pad-x: 16px;
+    --desk-logo-h: 36px;
+  }
+
+  body.site-app .hub-header-msg > span:not(.site-message-badge),
+  body.site-app .site-header-msg > span:not(.site-message-badge),
+  body.site-app .site-header-firstname,
+  body.site-app .site-header-caret,
+  body.home-page .hub-header-msg > span:not(.site-message-badge),
+  body.home-page .site-header-firstname,
+  body.home-page .site-header-caret {
+    display: none !important;
+  }
+
+  body.site-app .hub-header-actions,
+  body.home-page .hub-header-actions {
+    gap: 0.55rem !important;
+  }
+
+  body.site-app .site-header-auth-row a[data-auth-register],
+  body.home-page .site-header-auth-row a[data-auth-register] {
+    display: none !important;
+  }
+
+  body.site-app .hub-btn--post .hub-post-full,
+  body.home-page .hub-btn--post .hub-post-full {
+    display: none !important;
+  }
+
+  body.site-app .hub-btn--post .hub-post-compact,
+  body.home-page .hub-btn--post .hub-post-compact {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 1.35rem !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+  }
+
+  body.site-app .hub-btn--post,
+  body.home-page .hub-btn--post {
+    width: 36px !important;
+    min-width: 36px !important;
+    max-width: 36px !important;
+    padding: 0 !important;
+    border-radius: 8px !important;
+  }
+
+  body.site-app .hub-nav,
+  body.home-page .hub-nav {
+    gap: 0.75rem !important;
+  }
+
+  body.site-app .hub-nav-link,
+  body.home-page .hub-nav-link {
+    font-size: 13px !important;
+  }
+
+  body.site-app .nav-count,
+  body.home-page .hub-nav-link .nav-count {
+    font-size: 12px !important;
+  }
+}
+
+html[data-theme="dark"] body.site-app .hub-nav-band,
+html[data-theme="dark"] body.home-page .hub-nav-band {
+  border-top-color: #2a313c !important;
 }

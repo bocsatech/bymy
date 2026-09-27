@@ -130,10 +130,10 @@ body.site-app .hub-header {
 
 @media (min-width: 901px) {
   body.site-app {
-    --site-nav-logo-h: 72px;
-    --site-nav-logo-max-w: min(260px, 29vw);
-    --site-nav-logo-col: 260px;
-    --site-fixed-header-h: 80px;
+    --site-nav-logo-h: 40px;
+    --site-nav-logo-max-w: min(180px, 28vw);
+    --site-nav-logo-col: auto;
+    --site-fixed-header-h: 104px;
     padding-top: var(--site-fixed-header-h);
   }
 
@@ -178,39 +178,40 @@ body.site-app .hub-header {
   body.site-app .hub-header-inner,
   body.site-app .home-header-inner,
   body.site-app .site-app-header-inner {
-    display: grid !important;
-    grid-template-columns: var(--site-nav-logo-col) auto minmax(0, 1fr) !important;
-    grid-template-areas: "logo nav actions" !important;
-    align-items: center !important;
-    column-gap: 24px !important;
-    row-gap: 0 !important;
-    max-width: 1440px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+    gap: 0 !important;
+    max-width: 1280px !important;
     margin: 0 auto !important;
     padding: 0 24px !important;
     height: 100% !important;
     min-height: var(--site-fixed-header-h) !important;
     max-height: var(--site-fixed-header-h) !important;
-    flex-direction: row !important;
-    gap: 0 24px !important;
     box-sizing: border-box !important;
+    grid-template-columns: none !important;
+    grid-template-areas: none !important;
   }
 
   body.site-app .hub-nav-band,
   body.site-app .site-nav-band {
-    display: contents !important;
-    height: auto !important;
-    min-height: 0 !important;
-    max-height: none !important;
-    border: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    width: 100% !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    max-height: 48px !important;
+    border-top: 1px solid #e5e7eb !important;
+    border-bottom: 0 !important;
     padding: 0 !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
   }
 
   body.site-app .hub-logo,
   body.site-app .home-logo,
   body.site-app .site-app-logo {
-    grid-area: logo !important;
-    justify-self: start !important;
-    align-self: center !important;
     position: relative !important;
     left: 0 !important;
     right: auto !important;
@@ -219,27 +220,41 @@ body.site-app .hub-header {
     transform: none !important;
     margin: 0 !important;
     padding: 0 !important;
-    width: var(--site-nav-logo-col) !important;
-    max-width: var(--site-nav-logo-col) !important;
+    width: auto !important;
+    max-width: 200px !important;
+    height: 40px !important;
     z-index: 2;
+    display: inline-flex !important;
+    align-items: center !important;
   }
 
   body.site-app .hub-logo .bymy-logo-img--nav,
   body.site-app .home-logo .bymy-logo-img--nav,
   body.site-app .site-app-logo .bymy-logo-img--nav,
   body.site-app .bymy-logo-img--nav {
-    height: var(--site-nav-logo-h) !important;
-    max-width: var(--site-nav-logo-max-w) !important;
+    height: 40px !important;
+    max-width: 180px !important;
     width: auto !important;
+  }
+
+  body.site-app .hub-header-top,
+  body.site-app .site-header-top {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    height: 56px !important;
+    min-height: 56px !important;
+    max-height: 56px !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
   body.site-app .hub-nav,
   body.site-app .home-nav,
   body.site-app .site-app-nav,
   body.site-app .import-nav {
-    grid-area: nav !important;
-    justify-self: start !important;
-    align-self: center !important;
     position: static !important;
     left: auto !important;
     right: auto !important;
@@ -248,12 +263,13 @@ body.site-app .hub-header {
     transform: none !important;
     display: flex !important;
     align-items: center !important;
-    gap: 22px !important;
-    width: max-content !important;
-    max-width: none !important;
+    justify-content: space-between !important;
+    gap: 1rem !important;
+    width: 100% !important;
+    max-width: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
-    height: auto !important;
+    height: 100% !important;
     pointer-events: auto !important;
     overflow: visible !important;
     border: 0 !important;
@@ -267,16 +283,18 @@ body.site-app .hub-header {
     white-space: nowrap;
     font-family: "DM Sans", system-ui, sans-serif !important;
     font-size: 14px !important;
-    font-weight: 500 !important;
-    padding: 0 0 2px !important;
+    font-weight: 600 !important;
+    padding: 0 !important;
     border: 0 !important;
-    border-bottom: 2px solid transparent !important;
+    border-bottom: 3px solid transparent !important;
     box-shadow: none !important;
     background: transparent !important;
     line-height: 1.2 !important;
     display: inline-flex !important;
-    align-items: baseline !important;
+    align-items: center !important;
     gap: 0.35rem !important;
+    height: 100% !important;
+    box-sizing: border-box !important;
   }
 
   body.site-app .hub-nav-link.active,
@@ -300,21 +318,6 @@ body.site-app .hub-header {
     font-variant-numeric: tabular-nums !important;
     color: #9ca3af !important;
     line-height: 1 !important;
-  }
-
-  body.site-app .hub-header-top,
-  body.site-app .site-header-top {
-    grid-area: actions !important;
-    justify-self: end !important;
-    align-self: center !important;
-    min-height: 0 !important;
-    height: auto !important;
-    max-height: none !important;
-    padding: 0 0 0 1rem !important;
-    width: auto !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: flex-end !important;
   }
 }
 

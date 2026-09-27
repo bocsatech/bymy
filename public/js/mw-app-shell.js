@@ -271,12 +271,12 @@
     if (document.querySelector('link[href*="bymy-logo-size.css"]')) return;
     var link = document.createElement("link");
     link.rel = "stylesheet";
-    link.href = "/css/bymy-logo-size.css?v=textNav1";
+    link.href = "/css/bymy-logo-size.css?v=whHdr1";
     document.head.appendChild(link);
   }
 
   function ensureDeskHeaderCss() {
-    var href = "/css/site-desk-header.css?v=textNav1";
+    var href = "/css/site-desk-header.css?v=whHdr1";
     if (document.querySelector("link[data-site-desk-header-css], link[href*='site-desk-header.css']")) return;
     var link = document.createElement("link");
     link.rel = "stylesheet";
@@ -353,9 +353,36 @@
     var html =
       '<header class="hub-header" data-site-desk-header aria-label="Bymy">' +
       '<div class="hub-header-inner">' +
+      '<div class="hub-header-top">' +
       '<a class="hub-logo" href="/" aria-label="Bymy">' +
       '<img class="bymy-logo-img bymy-logo-img--nav" src="/images/bymy-logo.png?v=logoUpload1" alt="Bymy.hu" width="190" height="48" decoding="async" />' +
       "</a>" +
+      '<div class="hub-header-actions site-header-actions">' +
+      '<a class="hub-header-msg" href="/uzenetek.html" data-auth-member hidden>' +
+      msgSvg +
+      "<span>Üzenetek</span></a>" +
+      '<div class="site-header-auth-row" data-auth-guest>' +
+      '<a class="hub-btn hub-btn--ghost" href="/belepes.html" data-auth-login>Belépés</a>' +
+      '<a class="hub-btn hub-btn--ghost" href="/regisztracio.html" data-auth-register>Regisztráció</a>' +
+      "</div>" +
+      '<div class="site-header-avatar-wrap" data-avatar-menu data-auth-member hidden>' +
+      '<button type="button" class="site-header-profile" data-auth-avatar data-avatar-toggle aria-expanded="false" aria-label="Fiók" title="Fiók">' +
+      '<span class="site-header-avatar">' +
+      '<span data-avatar-letter>A</span>' +
+      '<img data-avatar-img alt="" hidden width="44" height="44" />' +
+      "</span>" +
+      '<span class="site-header-firstname" data-auth-firstname></span>' +
+      '<svg class="site-header-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+      "</button></div>" +
+      '<a class="hub-btn hub-btn--post" href="' +
+      postAdHref() +
+      '" data-auth-guard>' +
+      '<span class="hub-post-full">+ Hirdetésfeladás</span>' +
+      '<span class="hub-post-compact" aria-hidden="true">+</span>' +
+      "</a>" +
+      '<button type="button" class="hub-theme-toggle" data-theme-toggle aria-label="Színmód" title="Színmód"></button>' +
+      "</div></div>" +
+      '<div class="hub-nav-band">' +
       '<nav class="hub-nav" aria-label="Főmenü">' +
       '<a class="hub-nav-link' +
       navActiveClass("hub") +
@@ -380,30 +407,7 @@
       '" href="' +
       ajanlasokHref() +
       '">Ajánlások</a>' +
-      "</nav>" +
-      '<div class="hub-header-top">' +
-      '<div class="hub-header-actions site-header-actions">' +
-      '<a class="hub-header-msg" href="/uzenetek.html" data-auth-member hidden>' +
-      msgSvg +
-      "<span>Üzenetek</span></a>" +
-      '<div class="site-header-auth-row" data-auth-guest>' +
-      '<a class="hub-btn hub-btn--ghost" href="/belepes.html" data-auth-login>Belépés</a>' +
-      '<a class="hub-btn hub-btn--ghost" href="/regisztracio.html" data-auth-register>Regisztráció</a>' +
-      "</div>" +
-      '<div class="site-header-avatar-wrap" data-avatar-menu data-auth-member hidden>' +
-      '<button type="button" class="site-header-profile" data-auth-avatar data-avatar-toggle aria-expanded="false" aria-label="Fiók" title="Fiók">' +
-      '<span class="site-header-avatar">' +
-      '<span data-avatar-letter>A</span>' +
-      '<img data-avatar-img alt="" hidden width="44" height="44" />' +
-      "</span>" +
-      '<span class="site-header-firstname" data-auth-firstname></span>' +
-      '<svg class="site-header-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
-      "</button></div>" +
-      '<a class="hub-btn hub-btn--post" href="' +
-      postAdHref() +
-      '" data-auth-guard>+ Hirdetésfeladás</a>' +
-      '<button type="button" class="hub-theme-toggle" data-theme-toggle aria-label="Színmód" title="Színmód"></button>' +
-      "</div></div></div></header>";
+      "</nav></div></div></header>";
 
     var after = document.querySelector(".mw-app-top, .fiok-top");
     if (after && after.parentNode === body) {

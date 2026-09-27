@@ -61,15 +61,15 @@
     />
     <link rel="preload" as="image" href="/images/hub-ingatlan.jpg?v=hubPromoRail2" fetchpriority="high" />
     <link rel="preload" as="image" href="/images/hub-auto-motor.jpg?v=hubPromoRail2" fetchpriority="high" />
-    <link rel="stylesheet" href="/css/hub.css?v=noSell1" />
+    <link rel="stylesheet" href="/css/hub.css?v=whHdr1" />
     <link rel="stylesheet" href="/css/listing-photo-cover.css?v=tileAllPages1" />
     <link rel="stylesheet" href="/css/listing-featured.css?v=tileEdge5" />
     <link rel="stylesheet" href="/css/hub-mobile-app.css?v=noSell1" />
-    <link rel="stylesheet" href="/css/site-app.css?v=noSell1" />
+    <link rel="stylesheet" href="/css/site-app.css?v=whHdr1" />
     <link rel="manifest" href="/manifest.webmanifest" />
     <meta name="mobile-web-app-capable" content="yes" />
-    <link rel="stylesheet" href="/css/bymy-logo-size.css?v=textNav1" />
-        <link rel="stylesheet" href="/css/site-desk-header.css?v=textNav1" />
+    <link rel="stylesheet" href="/css/bymy-logo-size.css?v=whHdr1" />
+        <link rel="stylesheet" href="/css/site-desk-header.css?v=whHdr1" />
 <style id="hf-tile-edge5">
       @media (max-width: 800px) {
         body.hub-page--feed {
@@ -116,7 +116,7 @@
     </style>
   </head>
   <body class="hub-page site-page site-app hub-page--feed" data-site-page="hub">
-    <script src="/js/mw-app-shell.js?v=textNav1"></script>
+    <script src="/js/mw-app-shell.js?v=whHdr1"></script>
     
     <header class="mw-app-top" aria-label="Bymy mobil">
       <a class="mw-app-logo" href="/" aria-label="Bymy">
@@ -145,13 +145,15 @@
     <header class="hub-header">
       <div class="hub-header-inner">
         <div class="hub-header-top">
-        <div class="hub-header-actions site-header-actions">
+          <a class="hub-logo" href="/" aria-label="Bymy">
+            <img class="bymy-logo-img bymy-logo-img--nav" src="/images/bymy-logo.png?v=logoUpload1" alt="Bymy.hu" width="190" height="48" decoding="async" />
+          </a>
+          <div class="hub-header-actions site-header-actions">
           <a class="hub-header-msg" href="/uzenetek.html" data-auth-member hidden>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 6.8h9.5a2.2 2.2 0 0 1 2.2 2.2v4.2a2.2 2.2 0 0 1-2.2 2.2H10l-3.2 2.4V15.2H5A2.2 2.2 0 0 1 2.8 13V9a2.2 2.2 0 0 1 2.2-2.2Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M14.2 8.2h4A2.2 2.2 0 0 1 20.4 10.4v3.4a2.2 2.2 0 0 1-2.2 2.2h-.7v1.7l-2.2-1.7" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
             <span>Üzenetek</span>
           </a>
-
-<div class="site-header-auth-row" data-auth-guest>
+          <div class="site-header-auth-row" data-auth-guest>
             <a class="hub-btn hub-btn--ghost" href="/belepes.html" data-auth-login>Belépés</a>
             <a class="hub-btn hub-btn--ghost" href="/regisztracio.html" data-auth-register>Regisztráció</a>
           </div>
@@ -165,15 +167,12 @@
               <svg class="site-header-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </button>
           </div>
-          <a class="hub-btn hub-btn--post" href="/hirdetesfeladas.html" data-auth-guard>+ Hirdetésfeladás</a>
+          <a class="hub-btn hub-btn--post" href="/hirdetesfeladas.html" data-auth-guard><span class="hub-post-full">+ Hirdetésfeladás</span><span class="hub-post-compact" aria-hidden="true">+</span></a>
           <button type="button" class="hub-theme-toggle" data-theme-toggle aria-label="Színmód" title="Színmód"></button>
         </div>
         </div>
         <div class="hub-nav-band">
-          <a class="hub-logo" href="/" aria-label="Bymy">
-            <img class="bymy-logo-img bymy-logo-img--nav" src="/images/bymy-logo.png?v=logoUpload1" alt="Bymy.hu" width="190" height="48" decoding="async" />
-          </a>
-                        <nav class="hub-nav" aria-label="Főmenü">
+          <nav class="hub-nav" aria-label="Főmenü">
           <a class="hub-nav-link active" href="/">Kezdőlap</a>
           <a class="hub-nav-link" href="/auto.html">Autó</a>
           <a class="hub-nav-link" href="/teherauto.html">Teherautó</a>

@@ -58,34 +58,33 @@
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-header-inner {
-    max-width: 1440px;
+    max-width: 1280px;
     margin: 0 auto;
-    padding: 0 20px;
-    min-height: 80px;
-    display: grid !important;
-    grid-template-columns: 150px minmax(0, 1fr) auto !important;
-    grid-template-areas: "logo nav actions" !important;
-    align-items: center;
-    column-gap: 14px;
-    row-gap: 0;
-    gap: 0 14px;
+    padding: 0 24px;
+    min-height: var(--site-fixed-header-h, 104px);
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch;
+    gap: 0;
     position: relative;
     overflow: visible;
+    grid-template-columns: none !important;
+    grid-template-areas: none !important;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-band {
-    display: contents !important;
-    height: auto !important;
-    min-height: 0 !important;
-    max-height: none !important;
-    border: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    width: 100% !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    max-height: 48px !important;
+    border-top: 1px solid var(--ad-line) !important;
+    border-bottom: 0 !important;
     padding: 0 !important;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-logo {
-    grid-area: logo !important;
-    justify-self: start !important;
-    align-self: center;
     position: relative !important;
     left: auto !important;
     right: auto !important;
@@ -94,10 +93,10 @@
     transform: none !important;
     z-index: 2;
     pointer-events: auto;
-    width: 150px !important;
-    max-width: 150px !important;
-    height: auto !important;
-    flex: none !important;
+    width: auto !important;
+    max-width: 200px !important;
+    height: 40px !important;
+    flex: 0 0 auto !important;
     display: inline-flex !important;
     align-items: center !important;
     line-height: 0 !important;
@@ -106,63 +105,63 @@
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav {
-    grid-area: nav !important;
-    justify-self: center !important;
-    align-self: center;
     display: flex !important;
     align-items: center;
-    justify-content: center;
-    gap: 6px;
+    justify-content: space-between;
+    gap: 1rem;
     position: static !important;
     left: auto !important;
     right: auto !important;
     top: auto !important;
     bottom: auto !important;
     transform: none !important;
-    width: max-content;
+    width: 100%;
     max-width: 100%;
     margin: 0 !important;
     padding: 0 !important;
     pointer-events: auto;
     overflow: visible;
-    flex: none !important;
+    flex: 1 1 auto !important;
     min-width: 0 !important;
+    height: 100%;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-header-top {
-    grid-area: actions !important;
-    position: static !important;
+    position: relative !important;
     right: auto !important;
     top: auto !important;
     transform: none !important;
-    justify-self: end !important;
-    align-self: center;
     z-index: 3;
-    min-height: 0;
+    min-height: 56px;
+    height: 56px;
+    max-height: 56px;
     padding: 0;
-    width: auto;
+    width: 100%;
     display: flex;
+    flex-direction: row;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: space-between;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link {
     color: var(--ad-text) !important;
     font-size: 14px !important;
-    font-weight: 500 !important;
+    font-weight: 600 !important;
     border: 0 !important;
     box-shadow: none !important;
-    padding: 0 0 2px !important;
+    padding: 0 !important;
     background: transparent !important;
     white-space: nowrap;
-    border-bottom: 2px solid transparent !important;
+    border-bottom: 3px solid transparent !important;
+    height: 100% !important;
+    align-items: center !important;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link.active {
     color: var(--ad-text) !important;
     font-weight: 700 !important;
     border-bottom-color: #111 !important;
-    padding-bottom: 2px !important;
+    padding-bottom: 0 !important;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link .nav-count {

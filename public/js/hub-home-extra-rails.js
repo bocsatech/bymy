@@ -1,4 +1,4 @@
-import { getAuthUser, refreshAuthSession } from "./site-auth.js?v=nearbyBoot1";
+import { getAuthUser, refreshAuthSession } from "./site-auth.js?v=bootFix2";
 import { getParkplatz, PARKPLATZ_CHANGED } from "./fok-data.js?v=favShow2";
 import {
   createListingTileCard,

@@ -200,11 +200,31 @@ async function authFetch(url, options = {}) {
   return data;
 }
 
-let refreshInflight = null;
+const AUTH_REFRESH_TTL_MS = 8_000;
 
-export async function refreshAuthSession() {
-  if (refreshInflight) return refreshInflight;
-  refreshInflight = (async () => {
+function authRefreshState() {
+  if (typeof window === "undefined") {
+    return { inflight: null, doneAt: 0, cached: undefined };
+  }
+  if (!window.__bymyAuthRefreshState) {
+    window.__bymyAuthRefreshState = { inflight: null, doneAt: 0, cached: undefined };
+  }
+  return window.__bymyAuthRefreshState;
+}
+
+function invalidateAuthRefreshCache(cached) {
+  const state = authRefreshState();
+  state.doneAt = 0;
+  if (arguments.length) state.cached = cached;
+}
+
+export async function refreshAuthSession({ force = false } = {}) {
+  const state = authRefreshState();
+  if (!force && state.inflight) return state.inflight;
+  if (!force && state.doneAt && Date.now() - state.doneAt < AUTH_REFRESH_TTL_MS) {
+    return state.cached;
+  }
+  state.inflight = (async () => {
     try {
       const data = await authFetch("/api/auth/me", { timeoutMs: 12_000 });
       if (!data.user?.email) {
@@ -214,9 +234,14 @@ export async function refreshAuthSession() {
         } catch {
         }
         clearSensitiveLocalData();
+        state.cached = null;
+        state.doneAt = Date.now();
         return null;
       }
-      return rememberAuth(data);
+      const remembered = rememberAuth(data);
+      state.cached = remembered;
+      state.doneAt = Date.now();
+      return remembered;
     } catch (error) {
       if (error?.status === 401) {
         setStoredToken("");
@@ -225,14 +250,19 @@ export async function refreshAuthSession() {
         } catch {
         }
         clearSensitiveLocalData();
+        state.cached = null;
+        state.doneAt = Date.now();
         return null;
       }
-      return getAuthUser();
+      const fallback = getAuthUser();
+      state.cached = fallback;
+      state.doneAt = Date.now();
+      return fallback;
     } finally {
-      refreshInflight = null;
+      if (state.inflight) state.inflight = null;
     }
   })();
-  return refreshInflight;
+  return state.inflight;
 }
 
 export async function loadProfileFromServer() {
@@ -300,6 +330,7 @@ export async function login(email, password, turnstileToken = "") {
   });
   rememberAuth(data);
   clearSensitiveLocalData();
+  invalidateAuthRefreshCache(getAuthUser());
   return getAuthUser();
 }
 
@@ -314,6 +345,7 @@ export async function logout() {
   }
   setStoredToken("");
   clearSensitiveLocalData();
+  invalidateAuthRefreshCache(null);
 }
 
 export async function changePassword(currentPassword, newPassword, newPasswordConfirm) {
@@ -564,20 +596,44 @@ async function refreshUnreadMessageCount() {
     paintUnreadMessageCount(0);
     return;
   }
-  try {
-    const response = await fetch("/api/messages/conversations", {
-      credentials: "same-origin",
-      cache: "no-store",
-    });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const data = await response.json();
-    const unread = (data.conversations || []).reduce((total, conversation) => total + (Number(conversation.unread) || 0), 0);
-    paintUnreadMessageCount(unread);
-  } catch {
+  if (typeof window !== "undefined") {
+    if (window.__bymyUnreadMsgInflight) return window.__bymyUnreadMsgInflight;
   }
+  const run = (async () => {
+    try {
+      const response = await fetch("/api/messages/conversations", {
+        credentials: "same-origin",
+        cache: "no-store",
+      });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const data = await response.json();
+      const unread = (data.conversations || []).reduce(
+        (total, conversation) => total + (Number(conversation.unread) || 0),
+        0
+      );
+      paintUnreadMessageCount(unread);
+    } catch {
+      /* ignore — badge stays as last known */
+    } finally {
+      if (typeof window !== "undefined" && window.__bymyUnreadMsgInflight === run) {
+        window.__bymyUnreadMsgInflight = null;
+      }
+    }
+  })();
+  if (typeof window !== "undefined") window.__bymyUnreadMsgInflight = run;
+  return run;
 }
 
 export function initSiteAuth(options = {}) {
+  /* Multiple ?v= imports of this module used to re-bind listeners and re-fetch auth/messages. */
+  if (typeof window !== "undefined") {
+    if (window.__bymySiteAuthInited && !options.force) {
+      updateHeaderAuthUi();
+      return;
+    }
+    window.__bymySiteAuthInited = true;
+  }
+
   updateHeaderAuthUi();
   try {
     document.documentElement.setAttribute(
@@ -588,21 +644,30 @@ export function initSiteAuth(options = {}) {
   }
 
   if (!options.skipRefresh) {
-    refreshAuthSession().finally(() => {
-      updateHeaderAuthUi();
-      refreshUnreadMessageCount();
-      try {
-        document.documentElement.setAttribute(
-          "data-auth",
-          isLoggedIn() ? "member" : "guest"
-        );
-      } catch {
-      }
-      try {
-        window.dispatchEvent(new CustomEvent("site-auth-ready"));
-      } catch {
-      }
-    });
+    const state = authRefreshState();
+    if (state.inflight) {
+      state.inflight.finally(() => {
+        updateHeaderAuthUi();
+        void refreshUnreadMessageCount();
+      });
+    } else {
+      const inflight = refreshAuthSession().finally(() => {
+        updateHeaderAuthUi();
+        void refreshUnreadMessageCount();
+        try {
+          document.documentElement.setAttribute(
+            "data-auth",
+            isLoggedIn() ? "member" : "guest"
+          );
+        } catch {
+        }
+        try {
+          window.dispatchEvent(new CustomEvent("site-auth-ready"));
+        } catch {
+        }
+      });
+      void inflight;
+    }
   }
 
   document.querySelectorAll("[data-auth-guard]").forEach((el) => {
@@ -648,13 +713,42 @@ function isAuthGatePage() {
   );
 }
 
-/** Belépés nélkül csak auth oldalak (isAuthGatePage). Minden más members-only. */
+/** Belépés nélkül csak auth oldalak (isAuthGatePage). Minden más members-only (kivéve SITE_PUBLIC). */
 function isPublicClientPage() {
   return false;
 }
 
+async function siteIsMembersOnly() {
+  if (typeof window !== "undefined" && typeof window.__bymyMembersOnly === "boolean") {
+    return window.__bymyMembersOnly;
+  }
+  try {
+    const cached = sessionStorage.getItem("bymy-members-only");
+    if (cached === "1" || cached === "0") {
+      const value = cached === "1";
+      if (typeof window !== "undefined") window.__bymyMembersOnly = value;
+      return value;
+    }
+  } catch {
+  }
+  try {
+    const res = await fetch("/api/health", { credentials: "same-origin" });
+    const data = await res.json().catch(() => ({}));
+    const value = data?.membersOnly !== false;
+    try {
+      sessionStorage.setItem("bymy-members-only", value ? "1" : "0");
+    } catch {
+    }
+    if (typeof window !== "undefined") window.__bymyMembersOnly = value;
+    return value;
+  } catch {
+    return true;
+  }
+}
+
 async function enforceClientMembersGate() {
   if (isAuthGatePage() || isPublicClientPage()) return;
+  if (!(await siteIsMembersOnly())) return;
   const user = await refreshAuthSession();
   if (user?.email) return;
   if (getAuthUser()?.email) return;
@@ -1101,14 +1195,16 @@ export function initActivatePage() {
 }
 
 if (typeof document !== "undefined") {
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", () => {
-      if (document.body?.dataset?.authInit !== "manual") initSiteAuth();
-      enforceClientMembersGate();
-    });
-  } else {
+  const bootAuth = () => {
+    if (typeof window !== "undefined" && window.__bymySiteAuthDomBooted) return;
+    if (typeof window !== "undefined") window.__bymySiteAuthDomBooted = true;
     if (document.body?.dataset?.authInit !== "manual") initSiteAuth();
     enforceClientMembersGate();
+  };
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", bootAuth);
+  } else {
+    bootAuth();
   }
   if (!window.__bymyVisitBoot && !isAuthGatePage()) {
     window.__bymyVisitBoot = true;

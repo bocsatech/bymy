@@ -18,7 +18,7 @@ import {
   initAutoDeskSearch,
   updateAutoDeskAccSummaries,
   arrangeAutoDeskDemoFields,
-} from "./auto-desk-search.js?v=deskMenuRemount1";
+} from "./auto-desk-search.js?v=bootFix2";
 
 prefetchAutoSearchBoot();
 const MOBILE_MQ = "(max-width: 900px)";
@@ -210,10 +210,15 @@ export function initHomeQuickSearch({ onSearch = () => {}, onDeskSortChange, onR
   const bootFailsafe = window.setTimeout(() => {
     if (!form.classList.contains("is-qs-ready")) {
       console.warn("Kereső boot timeout — feloldom a formot.");
+      try {
+        if (vehicleDesk()) arrangeAutoDeskDemoFields(form);
+      } catch {
+        /* ignore */
+      }
       setQsReady(true);
       resolveReady?.();
     }
-  }, 8000);
+  }, 4500);
 
   async function mountDeskFilterMenu(f) {
     arrangeAutoDeskDemoFields(f);
@@ -354,7 +359,7 @@ export function initHomeQuickSearch({ onSearch = () => {}, onDeskSortChange, onR
             form.querySelector('[data-filter-key="kivitel"]');
           if (el && "value" in el) el.value = urlKivitel;
         }
-        finishQsBoot({ deskAuto, ok: qsHasFields() || deskAuto });
+        finishQsBoot({ deskAuto, ok: qsHasFields() });
       } catch (bootError) {
         console.warn("Kereső boot:", bootError);
         throw bootError;
@@ -382,7 +387,7 @@ export function initHomeQuickSearch({ onSearch = () => {}, onDeskSortChange, onR
             mountSafe(mountAutoKivitelPicker, "Kivitel picker:"),
             mountSafe(mountAutoAllapotPicker, "Állapot picker:"),
           ]);
-          recovered = true;
+          recovered = qsHasFields();
         } catch (deskError) {
           console.warn("Desk fallback kereső:", deskError);
         }

@@ -187,7 +187,7 @@ import { applySecurityHeaders } from "./lib/security-headers.mjs";
 import { turnstilePublicConfig, turnstileHealthStatus, verifyTurnstileToken } from "./lib/turnstile.mjs";
 import { recordPageVisit, visitorCookieHeader } from "./lib/site-visitors.mjs";
 import { isIpBlocked } from "./lib/site-ip-blocks.mjs";
-import { enforceMembersGate } from "./lib/site-gate.mjs";
+import { enforceMembersGate, isMembersOnlySite } from "./lib/site-gate.mjs";
 import { readJsonBody } from "./lib/read-json-body.mjs";
 import {
   applyListingAccessPolicy,
@@ -2792,6 +2792,7 @@ export async function handleHttpRequest(req, res) {
       ok: true,
       version: readFileSync(join(PUBLIC, "version.txt"), "utf8").trim(),
       service: "bymy-autosweb",
+      membersOnly: isMembersOnlySite(),
       backend: isSupabaseBackend() ? "supabase" : "sqlite",
       imageStorage: getImageStorageBackend(),
       ...(getImageStorageBackend() === "filesystem" ? { imageRoot: imageStorageRoot() } : {}),

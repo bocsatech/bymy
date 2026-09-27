@@ -433,7 +433,7 @@
     }
     addModule("/js/theme.js?v=willhabenHdr1");
     addModule("/js/site-avatar-menu.js?v=settingsHome1");
-    addModule("/js/nav-counts.js?v=navCount4");
+    addModule("/js/nav-counts.js?v=bootFix2");
   }
 
   ensureCss();

@@ -276,7 +276,10 @@ export function arrangeAutoDeskDemoFields(form = document.getElementById("home-q
   for (const item of fieldOrder) {
     mountDeskField(host, item, form, mountOpts);
   }
-  if (!host.children.length) {
+  /* Layout API empty / failed → always show the classic gyors row set */
+  if (host.children.length < 3) {
+    host.innerHTML = "";
+    used.clear();
     for (const item of DESK_ALAP_FALLBACK) {
       mountDeskField(host, item, form, mountOpts);
     }

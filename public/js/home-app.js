@@ -8,10 +8,10 @@ import {
   initHomeSearchSidebar,
   initHomeFilterCatalog,
 } from "./home-search-filter.js?v=allapotFlat1";
-import { initHomeQuickSearch } from "./home-quicksearch.js?v=deskMenuRemount1";
+import { initHomeQuickSearch } from "./home-quicksearch.js?v=bootFix2";
 import { decodeSavedSearchParam } from "./saved-search.js?v=savedSearch5";
 import { matchDetailedSearch, hasActiveDetailedSearch } from "./auto-detailed-search.js?v=autoDesk16";
-import { updateAutoDeskResultCount } from "./auto-desk-search.js?v=deskMenuRemount1";
+import { updateAutoDeskResultCount } from "./auto-desk-search.js?v=bootFix2";
 import {
   emptyIngatlanFilters,
   filterListingsByIngatlan,
@@ -22,7 +22,7 @@ import { filterByCategory, initHomeCategoryBar, renderHomeCategoryBar } from "./
 import { initHomeUnifiedScroll } from "./home-unified-scroll.js";
 import { initHomeStatsBar } from "./home-stats-bar.js";
 import { buildNearbyFilter, readNearbyPrefs } from "./nearby-search.js?v=korzetFix1";
-import { getAuthUser } from "./site-auth.js?v=nearby1";
+import { getAuthUser } from "./site-auth.js?v=bootFix2";
 import { bindListingOpen, restoreListingReturn } from "./listing-return.js?v=searchNav1";
 import { normalizeKivitel } from "./kivitel-options.js?v=kivitel1";
 import { featuredListingIdSet } from "./home-featured-slots.js?v=featuredNoAuto1";
@@ -41,6 +41,8 @@ let listingsTotal = null;
 let listingsHasMore = false;
 let listingsLoadingMore = false;
 let listingsOffset = 0;
+let listingsLastFetchAt = 0;
+const LISTINGS_VISIBLE_REFRESH_MS = 60_000;
 let sidebarFilters = emptyFilters();
 let quickSearchFilters = emptyFilters();
 let ingatlanFilters = emptyIngatlanFilters();
@@ -347,6 +349,7 @@ async function loadListings() {
   const sellerFrom = sellerFromId();
   if (sellerFrom) {
     await loadSellerListings(sellerFrom);
+    listingsLastFetchAt = Date.now();
     return;
   }
   listingsLoadingMore = false;
@@ -361,6 +364,7 @@ async function loadListings() {
     tile: true,
     sort: readDeskSort(),
   });
+  listingsLastFetchAt = Date.now();
   if (Array.isArray(page.boostOwnerIds)) {
     boostOwnerIds = new Set(page.boostOwnerIds.map(Number).filter((n) => n > 0));
   }
@@ -816,7 +820,7 @@ window.addEventListener("pageshow", (event) => {
 });
 
 document.addEventListener("visibilitychange", () => {
-  if (document.visibilityState === "visible") {
-    loadListings().catch(() => {});
-  }
+  if (document.visibilityState !== "visible") return;
+  if (Date.now() - listingsLastFetchAt < LISTINGS_VISIBLE_REFRESH_MS) return;
+  loadListings().catch(() => {});
 });

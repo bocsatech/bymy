@@ -101,30 +101,45 @@ async function fetchCountsWithRetry(attempts = 3) {
 }
 
 export async function initNavCounts() {
-  const links = document.querySelectorAll(NAV_LINK_SELECTOR);
-  if (!links.length) return;
-
-  const stored = readStoredCounts();
-  paintCounts(stored || { ...ZERO_COUNTS });
-
-  try {
-    const counts = await fetchCountsWithRetry();
-    const prev = readStoredCounts();
-    const apiTotal = counts.auto + counts.teher + counts.ingatlan;
-    const prevTotal = prev ? prev.auto + prev.teher + prev.ingatlan : 0;
-    if (apiTotal === 0 && prevTotal > 0) {
-      paintCounts(prev);
-      return;
-    }
-    writeStoredCounts(counts);
-    paintCounts(counts);
-  } catch {
-    if (!stored) paintCounts({ ...ZERO_COUNTS });
+  if (typeof window !== "undefined") {
+    if (window.__bymyNavCountsInflight) return window.__bymyNavCountsInflight;
   }
+  const run = (async () => {
+    const links = document.querySelectorAll(NAV_LINK_SELECTOR);
+    if (!links.length) return;
+
+    const stored = readStoredCounts();
+    paintCounts(stored || { ...ZERO_COUNTS });
+
+    try {
+      const counts = await fetchCountsWithRetry();
+      const prev = readStoredCounts();
+      const apiTotal = counts.auto + counts.teher + counts.ingatlan;
+      const prevTotal = prev ? prev.auto + prev.teher + prev.ingatlan : 0;
+      if (apiTotal === 0 && prevTotal > 0) {
+        paintCounts(prev);
+        return;
+      }
+      writeStoredCounts(counts);
+      paintCounts(counts);
+    } catch {
+      if (!stored) paintCounts({ ...ZERO_COUNTS });
+    } finally {
+      if (typeof window !== "undefined" && window.__bymyNavCountsInflight === run) {
+        window.__bymyNavCountsInflight = null;
+      }
+    }
+  })();
+  if (typeof window !== "undefined") window.__bymyNavCountsInflight = run;
+  return run;
 }
 
 function bootNavCounts() {
-  initNavCounts();
+  if (typeof window !== "undefined") {
+    if (window.__bymyNavCountsBooted) return;
+    window.__bymyNavCountsBooted = true;
+  }
+  void initNavCounts();
 }
 
 if (document.readyState === "loading") {

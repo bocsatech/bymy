@@ -39,11 +39,15 @@ function escapeHtml(value) {
 
 function getCityIndex() {
   if (!cityIndexPromise) {
-    cityIndexPromise = fetch("/api/postal-codes/cities")
+    cityIndexPromise = fetch("/api/postal-codes/cities", { credentials: "same-origin" })
       .then((res) => res.json().catch(() => ({})))
       .then((data) => {
-        if (!data.cities) throw new Error("Településlista nem elérhető.");
+        if (!data.cities) throw new Error(data.error || "Településlista nem elérhető.");
         return buildCityIndex(data.cities);
+      })
+      .catch((error) => {
+        cityIndexPromise = null;
+        throw error;
       });
   }
   return cityIndexPromise;
@@ -312,7 +316,13 @@ function setMapStats({ pins = 0, skipped = 0, homeLabel = "", empty = false, err
     return;
   }
   if (empty) {
-    stats.innerHTML = `<span class="search-map-modal__stat">Nincs találat</span>`;
+    const bits = [`<span class="search-map-modal__stat">Nincs találat</span>`];
+    if (homeLabel) {
+      bits.push(
+        `<span class="search-map-modal__stat search-map-modal__stat--home">⌂ ${escapeHtml(homeLabel)}</span>`
+      );
+    }
+    stats.innerHTML = bits.join("");
     return;
   }
   const bits = [`<span class="search-map-modal__stat">${pins} autó</span>`];
@@ -641,6 +651,69 @@ function paintMap(L, pins, side) {
   requestAnimationFrame(() => mapInstance?.invalidateSize());
 }
 
+function collectListingsFromDom() {
+  const cards = document.querySelectorAll(
+    "#home-grid-track [data-listing-id], #home-grid-track .home-card, #home-grid-track [data-home-card]"
+  );
+  const out = [];
+  const seen = new Set();
+  for (const el of cards) {
+    const item = el.__bymyListing;
+    if (!item || item.id == null) continue;
+    const id = String(item.id);
+    if (seen.has(id)) continue;
+    seen.add(id);
+    out.push(item);
+  }
+  return out;
+}
+
+async function resolveMapItems(getItems) {
+  const read = () => {
+    let items = [];
+    try {
+      items = typeof getItems === "function" ? getItems() : [];
+    } catch (error) {
+      console.warn("Térkép getItems:", error);
+    }
+    if (Array.isArray(items) && items.length) return items;
+    const fromDom = collectListingsFromDom();
+    if (fromDom.length) return fromDom;
+    return Array.isArray(items) ? items : [];
+  };
+  let items = read();
+  if (items.length) return items;
+  await new Promise((resolve) => setTimeout(resolve, 450));
+  return read();
+}
+
+async function ensureBaseMap(L) {
+  const canvas = document.getElementById("search-map-canvas");
+  if (!canvas || !L) return null;
+  lastLeaflet = L;
+  if (mapInstance) {
+    mapInstance.remove();
+    mapInstance = null;
+    markersLayer = null;
+    routeLayer = null;
+  }
+  mapInstance = L.map(canvas, {
+    scrollWheelZoom: true,
+    zoomControl: true,
+  }).setView(HU_CENTER, HU_ZOOM);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 18,
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+  }).addTo(mapInstance);
+  L.Icon.Default.imagePath = "/vendor/leaflet/images/";
+  markersLayer = L.layerGroup().addTo(mapInstance);
+  requestAnimationFrame(() => {
+    mapInstance?.invalidateSize();
+    requestAnimationFrame(() => mapInstance?.invalidateSize());
+  });
+  return mapInstance;
+}
+
 export function closeSearchResultsMap() {
   const root = document.getElementById("search-map-modal");
   if (root) root.hidden = true;
@@ -667,20 +740,27 @@ export async function openSearchResultsMap(items) {
   selectedPinId = null;
   clearRoute();
   setMapStats({ empty: !list.length });
-  renderSideAll(side, []);
-  try {
-    root.scrollIntoView({ behavior: "smooth", block: "start" });
-  } catch {
+  if (side) {
+    side.innerHTML = `<p class="search-map-modal__hint">Térkép betöltése…</p>`;
   }
-
-  if (!list.length) {
-    setMapStats({ empty: true });
-    return;
+  try {
+    root.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  } catch {
   }
 
   try {
     const [L, cityIndex] = await Promise.all([loadLeaflet(), getCityIndex()]);
     homeOrigin = await resolveHomeOrigin(cityIndex);
+
+    if (!list.length) {
+      setMapStats({ empty: true, homeLabel: homeOrigin?.label || "" });
+      await ensureBaseMap(L);
+      if (side) {
+        side.innerHTML = `<div class="search-map-modal__side-pin"><p class="search-map-modal__hint">Nincs autó a találati listában. Állíts más szűrőt, vagy várj a lista betöltésére.</p></div>`;
+      }
+      return;
+    }
+
     const { pins, skipped } = placeListings(list, cityIndex);
     setMapStats({
       pins: pins.length,
@@ -688,14 +768,33 @@ export async function openSearchResultsMap(items) {
       homeLabel: homeOrigin?.label || "",
     });
     if (!pins.length) {
+      await ensureBaseMap(L);
+      if (homeOrigin && markersLayer) {
+        const homeMarker = L.marker([homeOrigin.lat, homeOrigin.lon], {
+          title: `Lakhely · ${homeOrigin.label}`,
+          icon: getHomeIcon(L),
+          zIndexOffset: 400,
+        });
+        homeMarker.addTo(markersLayer);
+        mapInstance?.setView([homeOrigin.lat, homeOrigin.lon], 10);
+      }
       if (side) {
-        side.innerHTML = `<p class="search-map-modal__hint">Nincs településadat a találatokhoz — a térkép üres.</p>`;
+        side.innerHTML = `<p class="search-map-modal__hint">Nincs településadat a találatokhoz — a térkép üres. (${skipped} kihagyva)</p>`;
       }
       return;
     }
     paintMap(L, pins, side);
   } catch (error) {
     setMapStats({ error: error?.message || "Térkép betöltési hiba." });
+    try {
+      const L = await loadLeaflet();
+      await ensureBaseMap(L);
+    } catch {
+      /* ignore */
+    }
+    if (side) {
+      side.innerHTML = `<p class="search-map-modal__hint">${escapeHtml(error?.message || "Térkép betöltési hiba.")}</p>`;
+    }
   }
 }
 
@@ -704,6 +803,8 @@ export function initSearchResultsMapButtons({ getItems } = {}) {
   if (!buttons.length) return;
 
   buttons.forEach((btn) => {
+    if (btn.dataset.searchMapBound === "1") return;
+    btn.dataset.searchMapBound = "1";
     btn.setAttribute("aria-controls", "search-map-modal");
     btn.setAttribute("aria-expanded", "false");
     btn.addEventListener("click", async () => {
@@ -712,9 +813,9 @@ export function initSearchResultsMapButtons({ getItems } = {}) {
         closeSearchResultsMap();
         return;
       }
-      const items = typeof getItems === "function" ? getItems() : [];
       btn.disabled = true;
       try {
+        const items = await resolveMapItems(getItems);
         await openSearchResultsMap(items);
       } finally {
         btn.disabled = false;

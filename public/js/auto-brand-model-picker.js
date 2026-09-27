@@ -1,5 +1,5 @@
 
-import { fetchVehicleCatalog } from "./vehicle-catalog-client.js?v=bmKidsInline1";
+import { fetchVehicleCatalog } from "./vehicle-catalog-client.js?v=bmScrollTop1";
 import { bindAutoBmDismiss, autoBmPanelIsOpen } from "./auto-bm-dismiss.js?v=bmDismiss1";
 
 function labelList(items, unit) {
@@ -310,6 +310,9 @@ export async function mountAutoBrandModelPicker(form) {
         rows || `<p class="auto-bm-empty">Nincs modell ehhez a gyártmányhoz.</p>`
       }</div>
     `;
+    /* Márka lista scroll pozícióját ne örökölje — mindig az első modellnél */
+    bodyEl.scrollTop = 0;
+    panel.scrollTop = 0;
   }
 
   function renderModelGroupList(brand, groupName) {
@@ -342,6 +345,8 @@ export async function mountAutoBrandModelPicker(form) {
         rows || `<p class="auto-bm-empty">Nincs altípus ebben az almenüben.</p>`
       }</div>
     `;
+    bodyEl.scrollTop = 0;
+    panel.scrollTop = 0;
   }
 
   function openPanel(mode = "brand") {
@@ -459,9 +464,14 @@ export async function mountAutoBrandModelPicker(form) {
       selectedBrands.sort((a, b) => a.localeCompare(b, "hu", { sensitivity: "base" }));
       pruneModels();
       syncHidden();
-      /* Márka bekapcsolásakor rögtön a modell (típus) lista */
+      /* Márka bekapcsolásakor rögtön a modell (típus) lista — tetején */
       if (on && brand) {
+        if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
         renderModelList(brand);
+        requestAnimationFrame(() => {
+          bodyEl.scrollTop = 0;
+          panel.scrollTop = 0;
+        });
       } else {
         renderBrandList();
       }

@@ -41,10 +41,15 @@
   }
 
   body.hub-page--feed main,
-  body.hub-page--feed .hub-intro,
   body.hub-page--feed .hub-feed {
     max-width: 100%;
     overflow-x: clip;
+  }
+
+  /* Promo lives in .hub-intro — never clip the cards */
+  body.hub-page--feed .hub-intro {
+    max-width: 100%;
+    overflow-x: visible;
   }
 
   html[data-theme="dark"] body.site-app.hub-page--feed,
@@ -455,19 +460,21 @@
     touch-action: pan-x pan-y;
   }
 
-  /* Promo band: always centered 70% × 2-col (same as desk), no left-aligned scroll */
+  /* Promo: fill the padded content column (same inset as titles), 2-col, never clipped */
   body.hub-page--feed .hub-promo-band {
-    padding-left: 0 !important;
-    padding-right: 0 !important;
+    padding-left: var(--hf-gutter) !important;
+    padding-right: var(--hf-gutter) !important;
   }
 
+  body.hub-page--feed .hub-intro .hub-verticals,
+  body.hub-page--feed .hub-promo-band .hub-verticals,
   body.hub-page--feed .hub-verticals {
     display: grid !important;
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: var(--hf-rail-gap, 0.7rem) !important;
-    /* Slightly smaller + side inset so no card/image is clipped */
-    width: min(62vw, calc(100vw - 2 * var(--hf-gutter))) !important;
-    max-width: min(62vw, calc(100vw - 2 * var(--hf-gutter))) !important;
+    gap: 10px !important;
+    /* Same 70% band as desk — shrinks continuously, stays centered, never clips */
+    width: 70% !important;
+    max-width: 70% !important;
     margin-left: auto !important;
     margin-right: auto !important;
     padding: 0 0 0.35rem !important;
@@ -492,28 +499,48 @@
   body.hub-page--feed .hub-promo {
     flex: none !important;
     width: 100% !important;
-    max-width: none !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
     aspect-ratio: 16 / 9 !important;
     max-height: none !important;
     height: auto !important;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr) !important;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1.2fr) !important;
     border-radius: 9px;
     box-shadow: none !important;
     border: 1px solid #d4d4d4;
     box-sizing: border-box !important;
+    overflow: hidden !important;
+  }
+
+  body.hub-page--feed .hub-promo__copy {
+    padding: 0.45rem 0.5rem !important;
+  }
+
+  body.hub-page--feed .hub-promo__title {
+    font-size: clamp(0.68rem, 3.2vw, 0.88rem) !important;
+  }
+
+  body.hub-page--feed .hub-promo__text {
+    font-size: 0.52rem !important;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  body.hub-page--feed .hub-promo__cta {
+    margin-top: 0.35rem !important;
+    font-size: 0.55rem !important;
   }
 
   body.hub-page--feed .hub-promo__media {
     position: relative !important;
     height: 100% !important;
     align-self: stretch !important;
+    min-width: 0 !important;
     min-height: 0 !important;
     overflow: hidden !important;
-    background: #fff !important;
-  }
-
-  body.hub-page--feed .hub-promo__media::before {
-    display: none !important;
+    background: #e8e8e8 !important;
   }
 
   body.hub-page--feed .hub-promo__media img,
@@ -522,26 +549,9 @@
     inset: 0 !important;
     width: 100% !important;
     height: 100% !important;
-    /* Show full photo — shrink into the box instead of cropping */
-    object-fit: contain !important;
+    object-fit: cover !important;
     object-position: center center !important;
     transform: none !important;
-  }
-
-  /* Featured / rail listing thumbs: no zoom-crop on small screens */
-  body.hub-page--feed .hf-card--listing .hf-card-media img,
-  body.hub-page--feed .hf-card--listing .hf-card-media-img,
-  body.hub-page--feed .hf-card--kategoria img,
-  body.hub-page--feed .hf-card--ajanlas img {
-    transform: none !important;
-    object-fit: contain !important;
-    object-position: center center !important;
-  }
-
-  body.hub-page--feed .hf-card--listing .hf-card-media,
-  body.hub-page--feed .hf-card--kategoria .hf-card-media,
-  body.hub-page--feed .hf-card--ajanlas .hf-card-media {
-    background: #fff !important;
   }
 
   body.hub-page--feed .hub-verticals,

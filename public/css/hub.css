@@ -715,29 +715,26 @@ body.hub-page:has(.hub-hero--empty) .hub-main {
   }
 
   .hub-verticals {
-    width: min(62%, calc(100% - 2rem));
-    max-width: min(62%, calc(100% - 2rem));
+    width: 70%;
+    max-width: 70%;
+    margin-left: auto;
+    margin-right: auto;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
   }
 
   .hub-promo {
     aspect-ratio: 16 / 9;
     width: 100%;
     max-width: 100%;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
-  }
-
-  .hub-promo__media {
-    background: #fff;
-  }
-
-  .hub-promo__media::before {
-    display: none;
+    min-width: 0;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1.2fr);
   }
 
   .hub-promo__media img,
   .hub-promo--fullimg .hub-promo__full {
     transform: none !important;
-    object-fit: contain !important;
+    object-fit: cover !important;
     object-position: center center !important;
   }
 

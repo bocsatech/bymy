@@ -66,7 +66,7 @@
     <link rel="stylesheet" href="/css/listing-photo-cover.css?v=tileSame1" />
     <link rel="stylesheet" href="/css/listing-featured.css?v=featured5" />
     <link rel="stylesheet" href="/css/ingatlan-search.css?v=mobFix8" />
-    <link rel="stylesheet" href="/css/search-results-map.css?v=mapPostal1" />
+    <link rel="stylesheet" href="/css/search-results-map.css?v=mapPostal2" />
     <style id="home-scroll-fix">
       
       html:has(body.home-page) {
@@ -579,7 +579,15 @@
     </main>
 
     <script>window.BYMY_FEATURED_LISTING_IDS = window.BYMY_FEATURED_LISTING_IDS || [];</script>
-    <script src="/js/home-app.js?v=mapPostal1" type="module"></script>
+    <script>
+      window.setTimeout(function () {
+        var form = document.getElementById("home-qs-form");
+        if (!form || form.classList.contains("is-qs-ready")) return;
+        form.classList.remove("auto-qs-booting");
+        form.classList.add("is-qs-ready");
+      }, 5500);
+    </script>
+    <script src="/js/home-app.js?v=mapPostal2" type="module"></script>
     <script src="/js/auto-hero.js?v=searchCollapse1" type="module"></script>
     <script src="/js/site-avatar-menu.js?v=avatarSync1" type="module"></script>
 

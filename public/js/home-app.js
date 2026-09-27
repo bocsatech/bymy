@@ -20,17 +20,17 @@ import {
 import { normalizeIngatlanUzletag } from "./ingatlan-fields.js?v=immoEladoDefault1";
 import { filterByCategory, initHomeCategoryBar, renderHomeCategoryBar } from "./home-category-bar.js?v=catLabel1";
 import { initHomeUnifiedScroll } from "./home-unified-scroll.js";
-import { initHomeStatsBar } from "./home-stats-bar.js";
-import { buildNearbyFilter, readNearbyPrefs } from "./nearby-search.js?v=korzetFix1";
+import { initHomeStatsBar } from "./home-stats-bar.js?v=mapPostal2";
+import { buildNearbyFilter, readNearbyPrefs } from "./nearby-search.js?v=korzetFix2";
 import { getAuthUser } from "./site-auth.js?v=bootFix2";
 import { bindListingOpen, restoreListingReturn } from "./listing-return.js?v=searchNav1";
 import { normalizeKivitel } from "./kivitel-options.js?v=kivitel1";
 import { featuredListingIdSet } from "./home-featured-slots.js?v=featuredNoAuto1";
-import {
-  initSearchResultsMapButtons,
-  updateSearchMapButtonLabels,
-} from "./search-results-map.js?v=mapPostal1";
 import { mountSellerInventory, updateSellerInventoryCount } from "./seller-inventory.js?v=sellerInv30";
+
+/** Map module is optional — a broken/cached import must not blank the desk filter menu. */
+let updateSearchMapButtonLabels = () => {};
+let initSearchResultsMapButtons = () => {};
 
 const gridTrack = document.getElementById("home-grid-track");
 const emptyEl = document.getElementById("home-empty");
@@ -485,7 +485,8 @@ function formLooksFiltered() {
     if (/^mindegy$/i.test(v)) continue;
     return true;
   }
-  return Boolean(form.querySelector(".auto-desk-field.is-set, [data-desk-field].is-set, [aria-pressed='true']"));
+  /* Only desk field "is-set" markers — not unrelated aria-pressed toggles in the form. */
+  return Boolean(form.querySelector(".auto-desk-field.is-set, [data-desk-field].is-set"));
 }
 
 function hasActiveClientFilters() {
@@ -644,11 +645,18 @@ function hasActiveSidebarFilters(filters) {
 initHomeUnifiedScroll();
 
 if (PAGE === "auto" || PAGE === "teherauto") {
-  initSearchResultsMapButtons({
-    getItems: currentFilteredListings,
-    hasActiveFilters: () => hasActiveClientFilters(),
-    getVertical: () => pageVerticalParam(),
-  });
+  import("./search-results-map.js?v=mapPostal2")
+    .then((mod) => {
+      updateSearchMapButtonLabels = mod.updateSearchMapButtonLabels;
+      initSearchResultsMapButtons = mod.initSearchResultsMapButtons;
+      initSearchResultsMapButtons({
+        getItems: currentFilteredListings,
+        hasActiveFilters: () => hasActiveClientFilters(),
+        getVertical: () => pageVerticalParam(),
+      });
+      updateSearchMapButtonLabels(hasActiveClientFilters());
+    })
+    .catch((error) => console.warn("Térkép modul:", error));
   document.getElementById("home-qs-form")?.addEventListener("change", () => {
     updateSearchMapButtonLabels(hasActiveClientFilters());
   });

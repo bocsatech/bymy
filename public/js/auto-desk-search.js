@@ -388,6 +388,7 @@ export function initAutoDeskSearch({
   mountDetailed,
   onSortChange,
   onViewChange,
+  onDeskLayout,
 } = {}) {
   if (!isVehicleDeskPage()) return;
 
@@ -396,6 +397,7 @@ export function initAutoDeskSearch({
   const detailedPanel = document.getElementById("qs-detailed-panel");
   const advancedBtn = document.getElementById("qs-reszletes");
   const detailedBtn = document.getElementById("qs-detailed");
+  let deskLayoutGen = 0;
 
   setMode("gyors");
   openAccordion("alap");
@@ -495,12 +497,20 @@ export function initAutoDeskSearch({
     });
   });
 
-  function syncChrome() {
+  function deskFieldsMounted() {
+    return Boolean(form?.querySelector(".auto-desk-fields[data-desk-alap] .auto-desk-field, .auto-desk-fields[data-desk-alap] [data-desk-field]"));
+  }
+
+  async function syncChrome({ fromChange = false } = {}) {
     const desk = isAutoDesk();
+    const wasDesk = document.body.classList.contains("auto-desk-active");
     document.body.classList.toggle("auto-desk-active", desk);
     if (desk) {
       if (advancedBtn) advancedBtn.hidden = true;
       if (detailedBtn) detailedBtn.hidden = true;
+      if (!document.body.classList.contains("auto-desk-gyors") && !document.body.classList.contains("auto-desk-reszletes")) {
+        setMode("gyors");
+      }
       if (document.body.classList.contains("auto-desk-gyors")) {
         if (morePanel) {
           morePanel.hidden = true;
@@ -511,6 +521,22 @@ export function initAutoDeskSearch({
           detailedPanel.classList.remove("is-open");
         }
       }
+      openAccordion("alap");
+      /* After resize into desk (or empty sidebar): rebuild filter rows */
+      const enteredDesk = fromChange && !wasDesk;
+      const emptyDesk = deskFieldsMounted() === false;
+      if ((enteredDesk || (fromChange && emptyDesk) || (!fromChange && wasDesk && emptyDesk)) && typeof onDeskLayout === "function") {
+        const gen = ++deskLayoutGen;
+        try {
+          await onDeskLayout(form);
+        } catch (error) {
+          console.warn("Desk kereső újraépítés:", error);
+        }
+        if (gen !== deskLayoutGen) return;
+        syncGyorsFieldVisibility(form);
+      } else {
+        syncGyorsFieldVisibility(form);
+      }
       updateAutoDeskAccSummaries(form);
     } else {
       if (advancedBtn) advancedBtn.hidden = false;
@@ -519,5 +545,7 @@ export function initAutoDeskSearch({
   }
 
   syncChrome();
-  window.matchMedia(DESK_MQ).addEventListener("change", syncChrome);
+  window.matchMedia(DESK_MQ).addEventListener("change", () => {
+    void syncChrome({ fromChange: true });
+  });
 }

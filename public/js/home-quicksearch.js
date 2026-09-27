@@ -18,7 +18,7 @@ import {
   initAutoDeskSearch,
   updateAutoDeskAccSummaries,
   arrangeAutoDeskDemoFields,
-} from "./auto-desk-search.js?v=teherKivitel35e";
+} from "./auto-desk-search.js?v=deskMenuRemount1";
 
 prefetchAutoSearchBoot();
 const MOBILE_MQ = "(max-width: 900px)";
@@ -215,9 +215,35 @@ export function initHomeQuickSearch({ onSearch = () => {}, onDeskSortChange, onR
     }
   }, 8000);
 
+  async function mountDeskFilterMenu(f) {
+    arrangeAutoDeskDemoFields(f);
+    refillAutoSearchRangeSelects(f);
+    const mountSafe = (fn, label) =>
+      fn(f).catch((error) => {
+        console.warn(label, error);
+      });
+    await mountSafe(mountAutoBrandModelPicker, "Gyártmány/Modell picker:");
+    await Promise.all([
+      mountSafe(mountAutoFuelPicker, "Üzemanyag picker:"),
+      mountSafe(mountAutoKivitelPicker, "Kivitel picker:"),
+      mountSafe(mountAutoAllapotPicker, "Állapot picker:"),
+    ]);
+    await Promise.all([
+      mountSafe(mountAutoSebessegvaltoPicker, "Sebességváltó picker:"),
+      mountSafe(mountAutoOkmanyPicker, "Okmány picker:"),
+      mountSafe(mountAutoToltoPickers, "Töltőcsatlakozó picker:"),
+    ]);
+    try {
+      updateAutoDeskAccSummaries(f);
+    } catch {
+      /* ignore */
+    }
+  }
+
   initAutoDeskSearch({
     mountDetailed: (f) => mountDetailedSearch(f, { force: true }),
     onSortChange: (sort) => onDeskSortChange?.(sort),
+    onDeskLayout: mountDeskFilterMenu,
   });
 
   form.querySelector("[data-desk-reset]")?.addEventListener("click", () => {

@@ -715,8 +715,8 @@ body.hub-page:has(.hub-hero--empty) .hub-main {
   }
 
   .hub-verticals {
-    width: 70%;
-    max-width: 70%;
+    width: 86%;
+    max-width: 86%;
     margin-left: auto;
     margin-right: auto;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -731,10 +731,18 @@ body.hub-page:has(.hub-hero--empty) .hub-main {
     grid-template-columns: minmax(0, 1.05fr) minmax(0, 1.2fr);
   }
 
+  .hub-promo__media {
+    background: #fff;
+  }
+
+  .hub-promo__media::before {
+    display: none;
+  }
+
   .hub-promo__media img,
   .hub-promo--fullimg .hub-promo__full {
     transform: none !important;
-    object-fit: cover !important;
+    object-fit: contain !important;
     object-position: center center !important;
   }
 

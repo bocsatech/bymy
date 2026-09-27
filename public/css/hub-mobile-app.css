@@ -472,9 +472,9 @@
     display: grid !important;
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     gap: 10px !important;
-    /* Same 70% band as desk — shrinks continuously, stays centered, never clips */
-    width: 70% !important;
-    max-width: 70% !important;
+    /* A bit larger than 70%, still centered, both cards fully on screen */
+    width: 86% !important;
+    max-width: 86% !important;
     margin-left: auto !important;
     margin-right: auto !important;
     padding: 0 0 0.35rem !important;
@@ -540,7 +540,11 @@
     min-width: 0 !important;
     min-height: 0 !important;
     overflow: hidden !important;
-    background: #e8e8e8 !important;
+    background: #fff !important;
+  }
+
+  body.hub-page--feed .hub-promo__media::before {
+    display: none !important;
   }
 
   body.hub-page--feed .hub-promo__media img,
@@ -549,7 +553,8 @@
     inset: 0 !important;
     width: 100% !important;
     height: 100% !important;
-    object-fit: cover !important;
+    /* Full photo visible — no cover crop */
+    object-fit: contain !important;
     object-position: center center !important;
     transform: none !important;
   }
@@ -597,7 +602,12 @@
   body.hub-page--feed .hf-card--kategoria,
   body.hub-page--feed .hf-card--ajanlas,
   body.hub-page--feed .hf-card--listing {
-    flex-basis: 12.1rem;
+    /* Exactly 2 full cards in view — next card starts off-screen (no mid-cut) */
+    --hf-card-w: calc((100vw - (2 * var(--hf-gutter)) - var(--hf-rail-gap)) / 2);
+    flex: 0 0 var(--hf-card-w) !important;
+    flex-basis: var(--hf-card-w) !important;
+    width: var(--hf-card-w) !important;
+    max-width: var(--hf-card-w) !important;
     background: #fff;
     box-shadow: none;
     border: 1px solid #d4d4d4;
@@ -608,6 +618,7 @@
     display: flex;
     flex-direction: column;
     gap: 0;
+    box-sizing: border-box !important;
   }
 
   body.hub-page--feed .hf-card-media {
@@ -648,14 +659,14 @@
   body.hub-page--feed .hf-card--listing .hf-card-media img,
   body.hub-page--feed .hf-card--listing .hf-card-media-img {
     display: block !important;
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center center;
-    transform: scale(1.14);
-    transform-origin: center center;
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    object-position: center center !important;
+    transform: none !important;
+    transform-origin: center center !important;
   }
 
   body.hub-page--feed .hf-card--kategoria .hf-card-media img {

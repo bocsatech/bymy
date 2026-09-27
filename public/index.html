@@ -61,15 +61,15 @@
     />
     <link rel="preload" as="image" href="/images/hub-ingatlan.jpg?v=hubPromoRail2" fetchpriority="high" />
     <link rel="preload" as="image" href="/images/hub-auto-motor.jpg?v=hubPromoRail2" fetchpriority="high" />
-    <link rel="stylesheet" href="/css/hub.css?v=promoFit7" />
+    <link rel="stylesheet" href="/css/hub.css?v=promoFit8" />
     <link rel="stylesheet" href="/css/listing-photo-cover.css?v=tileAllPages1" />
     <link rel="stylesheet" href="/css/listing-featured.css?v=tileEdge5" />
-    <link rel="stylesheet" href="/css/hub-mobile-app.css?v=promoFit7" />
-    <link rel="stylesheet" href="/css/site-app.css?v=promoFit7" />
+    <link rel="stylesheet" href="/css/hub-mobile-app.css?v=promoFit8" />
+    <link rel="stylesheet" href="/css/site-app.css?v=promoFit8" />
     <link rel="manifest" href="/manifest.webmanifest" />
     <meta name="mobile-web-app-capable" content="yes" />
-    <link rel="stylesheet" href="/css/bymy-logo-size.css?v=promoFit7" />
-        <link rel="stylesheet" href="/css/site-desk-header.css?v=promoFit7" />
+    <link rel="stylesheet" href="/css/bymy-logo-size.css?v=promoFit8" />
+        <link rel="stylesheet" href="/css/site-desk-header.css?v=promoFit8" />
 <style id="hf-tile-edge5">
       @media (max-width: 800px) {
         body.hub-page--feed {
@@ -116,8 +116,8 @@
           display: grid !important;
           grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
           gap: 10px !important;
-          width: 70% !important;
-          max-width: 70% !important;
+          width: 86% !important;
+          max-width: 86% !important;
           margin-left: auto !important;
           margin-right: auto !important;
           padding-left: 0 !important;
@@ -132,8 +132,16 @@
         }
         body.hub-page--feed .hub-promo__media img,
         body.hub-page--feed .hub-promo--fullimg .hub-promo__full {
-          object-fit: cover !important;
+          object-fit: contain !important;
           transform: none !important;
+        }
+        body.hub-page--feed .hf-card--kategoria,
+        body.hub-page--feed .hf-card--listing,
+        body.hub-page--feed .hf-card--ajanlas {
+          --hf-card-w: calc((100vw - (2 * var(--hf-gutter)) - var(--hf-rail-gap, 10px)) / 2);
+          flex: 0 0 var(--hf-card-w) !important;
+          width: var(--hf-card-w) !important;
+          max-width: var(--hf-card-w) !important;
         }
         body.hub-page--feed .hub-verticals > *,
         body.hub-page--feed .hf-rail > * {
@@ -148,7 +156,7 @@
     </style>
   </head>
   <body class="hub-page site-page site-app hub-page--feed" data-site-page="hub">
-    <script src="/js/mw-app-shell.js?v=promoFit7"></script>
+    <script src="/js/mw-app-shell.js?v=promoFit8"></script>
     
     <header class="mw-app-top" aria-label="Bymy mobil">
       <div class="mw-app-top-row">

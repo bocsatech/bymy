@@ -26,7 +26,7 @@ import { getAuthUser } from "./site-auth.js?v=bootFix2";
 import { bindListingOpen, restoreListingReturn } from "./listing-return.js?v=searchNav1";
 import { normalizeKivitel } from "./kivitel-options.js?v=kivitel1";
 import { featuredListingIdSet } from "./home-featured-slots.js?v=featuredNoAuto1";
-import { initSearchResultsMapButtons } from "./search-results-map.js?v=mapInline5";
+import { initSearchResultsMapButtons } from "./search-results-map.js?v=mapInline6";
 import { mountSellerInventory, updateSellerInventoryCount } from "./seller-inventory.js?v=sellerInv30";
 
 const gridTrack = document.getElementById("home-grid-track");

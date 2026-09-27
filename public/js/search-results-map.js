@@ -119,15 +119,7 @@ function findListingsHost() {
 function ensureMapPanel() {
   let root = document.getElementById("search-map-modal");
   const markup = `
-    <div class="search-map-modal__panel" role="region" aria-labelledby="search-map-title">
-      <header class="search-map-modal__head">
-        <div>
-          <h2 id="search-map-title" class="search-map-modal__title">Találatok a térképen</h2>
-          <div class="search-map-modal__stats" data-search-map-stats></div>
-          <p class="search-map-modal__sub" data-search-map-sub hidden></p>
-        </div>
-        <button type="button" class="search-map-modal__close" data-search-map-close aria-label="Térkép bezárása">×</button>
-      </header>
+    <div class="search-map-modal__panel" role="region" aria-label="Találatok a térképen">
       <div class="search-map-modal__body">
         <div id="search-map-canvas" class="search-map-modal__canvas" aria-label="Térkép"></div>
         <aside class="search-map-modal__side" data-search-map-side>
@@ -153,10 +145,6 @@ function ensureMapPanel() {
       document.body.appendChild(root);
     }
     root.addEventListener("click", (event) => {
-      if (event.target?.closest?.("[data-search-map-close]")) {
-        closeSearchResultsMap();
-        return;
-      }
       if (event.target?.closest?.("[data-search-map-back]")) {
         showAllResults();
         return;
@@ -177,10 +165,14 @@ function ensureMapPanel() {
     return root;
   }
 
-  /* Upgrade older modal / wrong parent (cached shell). */
+  /* Upgrade older modal / header shell. */
   root.classList.add("search-map-inline");
   root.classList.remove("search-map-modal");
-  if (!root.querySelector("[data-search-map-stats]") || root.querySelector(".search-map-modal__backdrop")) {
+  if (
+    root.querySelector(".search-map-modal__head") ||
+    root.querySelector(".search-map-modal__backdrop") ||
+    !root.querySelector("[data-search-map-side]")
+  ) {
     const wasHidden = root.hidden;
     root.innerHTML = markup;
     root.hidden = wasHidden;

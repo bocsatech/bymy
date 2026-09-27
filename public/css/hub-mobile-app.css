@@ -465,8 +465,9 @@
     display: grid !important;
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     gap: var(--hf-rail-gap, 0.7rem) !important;
-    width: 70vw !important;
-    max-width: 70vw !important;
+    /* Slightly smaller + side inset so no card/image is clipped */
+    width: min(62vw, calc(100vw - 2 * var(--hf-gutter))) !important;
+    max-width: min(62vw, calc(100vw - 2 * var(--hf-gutter))) !important;
     margin-left: auto !important;
     margin-right: auto !important;
     padding: 0 0 0.35rem !important;
@@ -495,7 +496,7 @@
     aspect-ratio: 16 / 9 !important;
     max-height: none !important;
     height: auto !important;
-    grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.35fr) !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr) !important;
     border-radius: 9px;
     box-shadow: none !important;
     border: 1px solid #d4d4d4;
@@ -508,6 +509,11 @@
     align-self: stretch !important;
     min-height: 0 !important;
     overflow: hidden !important;
+    background: #fff !important;
+  }
+
+  body.hub-page--feed .hub-promo__media::before {
+    display: none !important;
   }
 
   body.hub-page--feed .hub-promo__media img,
@@ -516,9 +522,26 @@
     inset: 0 !important;
     width: 100% !important;
     height: 100% !important;
-    object-fit: cover !important;
+    /* Show full photo — shrink into the box instead of cropping */
+    object-fit: contain !important;
     object-position: center center !important;
     transform: none !important;
+  }
+
+  /* Featured / rail listing thumbs: no zoom-crop on small screens */
+  body.hub-page--feed .hf-card--listing .hf-card-media img,
+  body.hub-page--feed .hf-card--listing .hf-card-media-img,
+  body.hub-page--feed .hf-card--kategoria img,
+  body.hub-page--feed .hf-card--ajanlas img {
+    transform: none !important;
+    object-fit: contain !important;
+    object-position: center center !important;
+  }
+
+  body.hub-page--feed .hf-card--listing .hf-card-media,
+  body.hub-page--feed .hf-card--kategoria .hf-card-media,
+  body.hub-page--feed .hf-card--ajanlas .hf-card-media {
+    background: #fff !important;
   }
 
   body.hub-page--feed .hub-verticals,

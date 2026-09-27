@@ -64,12 +64,12 @@
     <link rel="stylesheet" href="/css/hub.css?v=whHdr1" />
     <link rel="stylesheet" href="/css/listing-photo-cover.css?v=tileAllPages1" />
     <link rel="stylesheet" href="/css/listing-featured.css?v=tileEdge5" />
-    <link rel="stylesheet" href="/css/hub-mobile-app.css?v=noSell1" />
+    <link rel="stylesheet" href="/css/hub-mobile-app.css?v=whHdr2" />
     <link rel="stylesheet" href="/css/site-app.css?v=whHdr1" />
     <link rel="manifest" href="/manifest.webmanifest" />
     <meta name="mobile-web-app-capable" content="yes" />
-    <link rel="stylesheet" href="/css/bymy-logo-size.css?v=whHdr1" />
-        <link rel="stylesheet" href="/css/site-desk-header.css?v=whHdr1" />
+    <link rel="stylesheet" href="/css/bymy-logo-size.css?v=whHdr2" />
+        <link rel="stylesheet" href="/css/site-desk-header.css?v=whHdr2" />
 <style id="hf-tile-edge5">
       @media (max-width: 800px) {
         body.hub-page--feed {
@@ -116,29 +116,33 @@
     </style>
   </head>
   <body class="hub-page site-page site-app hub-page--feed" data-site-page="hub">
-    <script src="/js/mw-app-shell.js?v=whHdr1"></script>
+    <script src="/js/mw-app-shell.js?v=whHdr2"></script>
     
     <header class="mw-app-top" aria-label="Bymy mobil">
-      <a class="mw-app-logo" href="/" aria-label="Bymy">
-        <img class="bymy-logo-img" src="/images/bymy-logo.png?v=logoUpload1" alt="Bymy.hu" width="280" height="130" decoding="async" />
-      </a>
-      <p class="mw-app-hello" data-auth-member hidden>
-        Hello&nbsp;<span data-auth-firstname></span>
-      </p>
-      <a class="mw-app-login" href="/belepes.html" data-auth-guest aria-label="Belépés" title="Belépés">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" stroke="currentColor" stroke-width="1.7"/><path d="M4.5 20.2c1.7-3.2 4.3-4.8 7.5-4.8s5.8 1.6 7.5 4.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
-      </a>
-      <a class="mw-app-avatar" href="/fiok.html" data-auth-member hidden aria-label="Fiók" title="Fiók">
-        <span data-avatar-letter>A</span>
-        <img data-avatar-img alt="" hidden width="44" height="44" />
-      </a>
+      <div class="mw-app-top-row">
+        <a class="mw-app-logo" href="/" aria-label="Bymy">
+          <img class="bymy-logo-img" src="/images/bymy-logo.png?v=logoUpload1" alt="Bymy.hu" width="140" height="40" decoding="async" />
+        </a>
+        <div class="mw-app-top-actions">
+          <a class="mw-app-post" href="/hirdetesfeladas.html" data-auth-guard aria-label="Új hirdetés" title="Új hirdetés">+</a>
+          <a class="mw-app-msg" href="/uzenetek.html" data-auth-member hidden aria-label="Üzenetek" title="Üzenetek">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 6.8h9.5a2.2 2.2 0 0 1 2.2 2.2v4.2a2.2 2.2 0 0 1-2.2 2.2H10l-3.2 2.4V15.2H5A2.2 2.2 0 0 1 2.8 13V9a2.2 2.2 0 0 1 2.2-2.2Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M14.2 8.2h4A2.2 2.2 0 0 1 20.4 10.4v3.4a2.2 2.2 0 0 1-2.2 2.2h-.7v1.7l-2.2-1.7" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+          </a>
+          <a class="mw-app-login" href="/belepes.html" data-auth-guest aria-label="Belépés" title="Belépés">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" stroke="currentColor" stroke-width="1.7"/><path d="M4.5 20.2c1.7-3.2 4.3-4.8 7.5-4.8s5.8 1.6 7.5 4.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+          </a>
+          <a class="mw-app-avatar" href="/fiok.html" data-auth-member hidden aria-label="Fiók" title="Fiók">
+            <span data-avatar-letter>A</span>
+            <img data-avatar-img alt="" hidden width="44" height="44" />
+          </a>
+        </div>
+      </div>
       <nav class="mw-app-pages" aria-label="Főmenü">
         <a class="mw-app-pages-link is-active" href="/">Kezdőlap</a>
         <a class="mw-app-pages-link" href="/auto.html">Autó</a>
         <a class="mw-app-pages-link" href="/teherauto.html">Teherautó</a>
         <a class="mw-app-pages-link" href="/ingatlan.html">Ingatlan</a>
         <a class="mw-app-pages-link" href="/ajanlasok.html">Ajánlások</a>
-        <a class="mw-app-pages-link mw-app-pages-link--post" href="/hirdetesfeladas.html" data-auth-guard>Hirdetés feladás</a>
       </nav>
     </header>
 

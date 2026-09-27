@@ -7,7 +7,7 @@
   var isHub = body.classList.contains("hub-page--feed") || page === "hub";
   var isFiok = body.classList.contains("fiok-page") || page === "fiok";
   var isPostAd = page === "hirdetesfeladas";
-  var CSS_HREF = "/css/hub-mobile-app.css?v=deskHdr5";
+  var CSS_HREF = "/css/hub-mobile-app.css?v=whHdr2";
 
   function ensureCss() {
     if (document.querySelector('link[href*="hub-mobile-app.css"]')) return;
@@ -37,31 +37,29 @@
       { id: "teherauto", href: "/teherauto.html", label: "Teherautó" },
       { id: "ingatlan", href: "/ingatlan.html", label: "Ingatlan" },
       { id: "ajanlasok", href: "/ajanlasok.html", label: "Ajánlások" },
-      {
-        id: "hirdetesfeladas",
-        href: "/hirdetesfeladas.html",
-        label: "Hirdetés feladás",
-        authGuard: true,
-      },
     ];
 
     var nav = pages
       .map(function (p) {
-        var cls =
-          "mw-app-pages-link" +
-          (isActivePage(p.id) ? " is-active" : "") +
-          (p.id === "hirdetesfeladas" ? " mw-app-pages-link--post" : "");
-        var attrs = p.authGuard ? " data-auth-guard" : "";
-        return '<a class="' + cls + '" href="' + p.href + '"' + attrs + ">" + p.label + "</a>";
+        var cls = "mw-app-pages-link" + (isActivePage(p.id) ? " is-active" : "");
+        return '<a class="' + cls + '" href="' + p.href + '">' + p.label + "</a>";
       })
       .join("");
 
+    var msgSvg =
+      '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 6.8h9.5a2.2 2.2 0 0 1 2.2 2.2v4.2a2.2 2.2 0 0 1-2.2 2.2H10l-3.2 2.4V15.2H5A2.2 2.2 0 0 1 2.8 13V9a2.2 2.2 0 0 1 2.2-2.2Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M14.2 8.2h4A2.2 2.2 0 0 1 20.4 10.4v3.4a2.2 2.2 0 0 1-2.2 2.2h-.7v1.7l-2.2-1.7" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>';
+
     var html =
       '<header class="mw-app-top" aria-label="Bymy mobil">' +
+      '<div class="mw-app-top-row">' +
       '<a class="mw-app-logo" href="/" aria-label="Bymy">' +
-      '<img class="bymy-logo-img" src="/images/bymy-logo.png?v=logoUpload1" alt="Bymy.hu" width="280" height="130" decoding="async" />' +
+      '<img class="bymy-logo-img" src="/images/bymy-logo.png?v=logoUpload1" alt="Bymy.hu" width="140" height="40" decoding="async" />' +
       "</a>" +
-      '<p class="mw-app-hello" data-auth-member hidden>Hello&nbsp;<span data-auth-firstname></span></p>' +
+      '<div class="mw-app-top-actions">' +
+      '<a class="mw-app-post" href="/hirdetesfeladas.html" data-auth-guard aria-label="Új hirdetés" title="Új hirdetés">+</a>' +
+      '<a class="mw-app-msg" href="/uzenetek.html" data-auth-member hidden aria-label="Üzenetek" title="Üzenetek">' +
+      msgSvg +
+      "</a>" +
       '<a class="mw-app-login" href="/belepes.html" data-auth-guest aria-label="Belépés" title="Belépés">' +
       '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" stroke="currentColor" stroke-width="1.7"/><path d="M4.5 20.2c1.7-3.2 4.3-4.8 7.5-4.8s5.8 1.6 7.5 4.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>' +
       "</a>" +
@@ -69,6 +67,7 @@
       '<span data-avatar-letter>A</span>' +
       '<img data-avatar-img alt="" hidden width="44" height="44" />' +
       "</a>" +
+      "</div></div>" +
       '<nav class="mw-app-pages" aria-label="Főmenü">' +
       nav +
       "</nav>" +
@@ -271,12 +270,12 @@
     if (document.querySelector('link[href*="bymy-logo-size.css"]')) return;
     var link = document.createElement("link");
     link.rel = "stylesheet";
-    link.href = "/css/bymy-logo-size.css?v=whHdr1";
+    link.href = "/css/bymy-logo-size.css?v=whHdr2";
     document.head.appendChild(link);
   }
 
   function ensureDeskHeaderCss() {
-    var href = "/css/site-desk-header.css?v=whHdr1";
+    var href = "/css/site-desk-header.css?v=whHdr2";
     if (document.querySelector("link[data-site-desk-header-css], link[href*='site-desk-header.css']")) return;
     var link = document.createElement("link");
     link.rel = "stylesheet";

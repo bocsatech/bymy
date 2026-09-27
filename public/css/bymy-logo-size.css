@@ -75,14 +75,18 @@ body.site-app .bymy-logo-img--home {
     min-height: 1.375rem !important;
   }
 
-  body.site-app .mw-app-top {
-    --mw-logo-h: calc(50vw * 415 / 958);
+  body.site-app .mw-app-logo {
+    width: auto;
+    max-width: 42%;
+    margin-left: 0;
+    margin-right: 0;
   }
 
-  body.site-app .mw-app-logo {
-    width: 50%;
-    margin-left: auto;
-    margin-right: auto;
+  body.site-app .mw-app-logo img,
+  body.site-app .mw-app-logo .bymy-logo-img {
+    height: 36px !important;
+    max-width: 140px !important;
+    width: auto !important;
   }
 }
 

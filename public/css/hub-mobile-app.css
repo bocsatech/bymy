@@ -76,11 +76,12 @@
     display: none !important;
   }
 
+  /* Willhaben-szerű kompakt header: logo + akciók / menüsor */
   body.site-app .mw-app-top {
-    --mw-logo-h: calc(100vw * 415 / 958);
-    --mw-logo-gap: 1.5cm;
-    --mw-avatar: 2.25rem;
-    display: block;
+    --mw-avatar: 2rem;
+    --mw-action: 2.125rem;
+    display: flex;
+    flex-direction: column;
     position: relative;
     z-index: 1;
     background: #fff;
@@ -92,62 +93,98 @@
     border-bottom: 0;
   }
 
+  body.site-app .mw-app-top-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    min-height: 3.25rem;
+    padding: 0.4rem max(0.75rem, env(safe-area-inset-right, 0px)) 0.4rem max(0.75rem, env(safe-area-inset-left, 0px));
+    box-sizing: border-box;
+  }
+
   body.site-app .mw-app-logo {
-    display: block;
+    display: flex;
+    align-items: center;
+    flex: 0 1 auto;
+    min-width: 0;
     text-decoration: none;
     line-height: 0;
-    width: 100%;
+    width: auto;
+    max-width: 42%;
     padding: 0;
     margin: 0;
-
-    margin-bottom: var(--mw-logo-gap);
   }
 
   body.site-app .mw-app-logo img,
   body.site-app .mw-app-logo .bymy-logo-img {
     display: block !important;
-    width: 100% !important;
-    height: auto !important;
-    max-width: none !important;
-    aspect-ratio: 958 / 415;
+    width: auto !important;
+    height: 36px !important;
+    max-width: 140px !important;
+    aspect-ratio: auto;
     object-fit: contain !important;
-    object-position: center top;
+    object-position: left center;
     transform: none !important;
   }
 
   body.site-app .mw-app-hello {
-    position: absolute;
-    left: max(0.85rem, env(safe-area-inset-left, 0px));
-    right: calc(var(--mw-avatar) + 1.75rem);
-    top: calc(var(--mw-logo-h) + (var(--mw-logo-gap) - 1.35rem) / 2);
-    margin: 0;
-    padding: 0;
-    z-index: 2;
+    display: none !important;
+  }
+
+  body.site-app .mw-app-top-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.45rem;
+    flex: 0 0 auto;
+    margin-left: auto;
+  }
+
+  body.site-app .mw-app-post {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--mw-action);
+    height: var(--mw-action);
+    min-width: var(--mw-action);
+    border-radius: 8px;
+    border: 1.5px solid #2563eb;
+    background: #fff;
+    color: #2563eb;
     font-family: "DM Sans", system-ui, sans-serif;
-    font-size: 1.05rem;
+    font-size: 1.35rem;
     font-weight: 700;
-    line-height: 1.25;
-    letter-spacing: -0.02em;
-    color: #111;
-    text-align: left;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    pointer-events: none;
+    line-height: 1;
+    text-decoration: none;
+    box-sizing: border-box;
   }
 
-  body.site-app .mw-app-hello [data-auth-firstname] {
-    margin-left: 0.15em;
+  body.site-app .mw-app-msg {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--mw-action);
+    height: var(--mw-action);
+    min-width: var(--mw-action);
+    color: #4b5563;
+    text-decoration: none;
+    box-sizing: border-box;
   }
 
-  html[data-theme="dark"] body.site-app .mw-app-hello {
-    color: #e8eaed;
+  body.site-app .mw-app-msg[hidden] {
+    display: none !important;
+  }
+
+  html[data-auth="member"] body.site-app .mw-app-msg,
+  html[data-auth="member"] body.site-app .mw-app-msg[hidden] {
+    display: inline-flex !important;
   }
 
   body.site-app .mw-app-avatar {
-    position: absolute;
-    right: max(0.75rem, env(safe-area-inset-right, 0px));
-    top: calc(var(--mw-logo-h) + (var(--mw-logo-gap) - var(--mw-avatar)) / 2);
+    position: relative;
+    right: auto;
+    top: auto;
     transform: none;
     width: var(--mw-avatar);
     height: var(--mw-avatar);
@@ -155,9 +192,9 @@
     min-height: var(--mw-avatar);
     border-radius: 999px;
     overflow: hidden;
-    border: 2px solid #fff;
+    border: 1.5px solid #e5e7eb;
     background: #eef2f7;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+    box-shadow: none;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -165,7 +202,7 @@
     color: #1f2937;
     font-family: "DM Sans", system-ui, sans-serif;
     font-weight: 700;
-    font-size: 0.95rem;
+    font-size: 0.85rem;
     line-height: 1;
     flex-shrink: 0;
     z-index: 2;
@@ -202,18 +239,18 @@
   }
 
   body.site-app .mw-app-login {
-    position: absolute;
-    right: max(0.75rem, env(safe-area-inset-right, 0px));
-    top: calc(var(--mw-logo-h) + (var(--mw-logo-gap) - var(--mw-avatar)) / 2);
+    position: relative;
+    right: auto;
+    top: auto;
     transform: none;
     width: var(--mw-avatar);
     height: var(--mw-avatar);
     min-width: var(--mw-avatar);
     min-height: var(--mw-avatar);
     border-radius: 999px;
-    border: 2px solid #fff;
+    border: 1.5px solid #e5e7eb;
     background: #fff;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+    box-shadow: none;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -229,18 +266,13 @@
   }
 
   html[data-auth="guest"] body.site-app .mw-app-avatar,
-  html[data-auth="guest"] body.site-app .mw-app-hello {
+  html[data-auth="guest"] body.site-app .mw-app-msg {
     display: none !important;
   }
 
   html[data-auth="member"] body.site-app .mw-app-avatar,
   html[data-auth="member"] body.site-app .mw-app-avatar[hidden] {
     display: inline-flex !important;
-  }
-
-  html[data-auth="member"] body.site-app .mw-app-hello,
-  html[data-auth="member"] body.site-app .mw-app-hello[hidden] {
-    display: block !important;
   }
 
   body.site-app .mw-app-pages {
@@ -297,19 +329,24 @@
   }
 
   body.site-app .mw-app-pages-link--post {
-    color: #2563eb;
-    font-weight: 700;
-  }
-
-  body.site-app .mw-app-pages-link--post.is-active {
-    color: #1d4ed8;
-    border-bottom-color: #2563eb;
+    display: none !important;
   }
 
   html[data-theme="dark"] body.site-app .mw-app-pages {
     background: #12161c;
     border-top-color: #2a313c;
     border-bottom-color: #2a313c;
+  }
+
+  html[data-theme="dark"] body.site-app .mw-app-post {
+    border-color: #60a5fa;
+    color: #60a5fa;
+    background: transparent;
+  }
+
+  html[data-theme="dark"] body.site-app .mw-app-msg,
+  html[data-theme="dark"] body.site-app .mw-app-login {
+    color: #9aa3ad;
   }
 
   html[data-theme="dark"] body.site-app .mw-app-pages-link {

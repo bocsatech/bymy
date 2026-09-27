@@ -86,6 +86,8 @@ import { estimateMarketValuation, marketDataAvailable } from "./lib/market-valua
 import {
   ensureVehicleCatalog,
   getVehicleCatalog,
+  getVehicleCatalogForKind,
+  normalizeVehicleCatalogKind,
   catalogSummary,
   listModelTypes,
   listModelYears,
@@ -1896,23 +1898,27 @@ async function handleVehicleCatalogApi(req, res, pathname) {
     return;
   }
 
-  const catalog = getVehicleCatalog();
+  const url = new URL(req.url ?? "", `http://${HOST}`);
+  const kind = normalizeVehicleCatalogKind(url.searchParams.get("kind") || url.searchParams.get("category"));
+  const catalog = getVehicleCatalogForKind(kind);
   if (!catalog?.gyartmanyok?.length) {
     sendJson(res, 404, {
-      error: "Nincs járműkatalógus. Futtasd: npm run import:catalog -- ~/Desktop/lista.csv",
+      error:
+        kind === "kisteher"
+          ? "Nincs kisteher katalógus. Futtasd: npm run scrape:ha-brands-models:kisteher"
+          : "Nincs járműkatalógus. Futtasd: npm run import:catalog -- ~/Desktop/lista.csv",
     });
     return;
   }
 
   // Márkák + modellek — a típusok nélkül, hogy az oldal gyorsan induljon.
   if (pathname === "/api/vehicle-catalog") {
-    sendJson(res, 200, catalogSummary(catalog));
+    sendJson(res, 200, { ...catalogSummary(catalog), kind });
     return;
   }
 
   // Egy modell évjáratai és típusai.
   if (pathname === "/api/vehicle-catalog/tipusok") {
-    const url = new URL(req.url ?? "", `http://${HOST}`);
     const gyartmany = url.searchParams.get("gyartmany") ?? "";
     const modell = url.searchParams.get("modell") ?? "";
     const ev = url.searchParams.get("ev");
@@ -1923,6 +1929,7 @@ async function handleVehicleCatalogApi(req, res, pathname) {
     }
 
     sendJson(res, 200, {
+      kind,
       gyartmany,
       modell,
       ev: ev || null,

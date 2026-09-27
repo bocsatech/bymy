@@ -4,29 +4,55 @@
  * Forrás: api.hasznaltauto.hu/v2/tomb (a kereső ugyanezt hívja).
  * Cloudflare cookie kell → saját debug Chrome.
  *
- * 1) bash mac/chrome-debug-hasznaltauto.command
- * 2) Chrome-ban engedd át a CF-t (www.hasznaltauto.hu)
- * 3) cd ~/bymy && npm run scrape:ha-brands-models
+ * Személyautó:
+ *   1) bash mac/chrome-debug-hasznaltauto.command
+ *   2) Chrome-ban engedd át a CF-t (www.hasznaltauto.hu)
+ *   3) npm run scrape:ha-brands-models
+ *
+ * Kisteher / Kishaszon (3,5 t-ig):
+ *   npm run scrape:ha-brands-models:kisteher
  */
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { chromium } from "playwright";
-import { normalizeBrand, saveVehicleCatalog } from "../lib/vehicle-catalog.mjs";
+import {
+  normalizeBrand,
+  saveVehicleCatalogForKind,
+  normalizeVehicleCatalogKind,
+} from "../lib/vehicle-catalog.mjs";
 
 const WWW = "https://www.hasznaltauto.hu";
 const API = "https://api.hasznaltauto.hu";
-const TOMB_URL = `${API}/v2/tomb/markakSzemelyautoFilter,modellekSzemelyautoFilter`;
 const CDP_URL = process.env.CDP_URL || process.env.HA_CDP || "http://127.0.0.1:9222";
-const RAW_OUT = resolve(process.env.HA_BM_RAW || "data/ha-brands-models.json");
+
+const KIND = normalizeVehicleCatalogKind(process.env.HA_KIND || process.argv[2] || "szemelyauto");
+
+const TOMB_BY_KIND = {
+  szemelyauto: {
+    path: "markakSzemelyautoFilter,modellekSzemelyautoFilter",
+    brandKey: "markakSzemelyautoFilter",
+    modelKey: "modellekSzemelyautoFilter",
+    haCategory: "szemelyauto",
+  },
+  kisteher: {
+    path: "markakKishaszonjarmuFilter,modellekKishaszonjarmuFilter",
+    brandKey: "markakKishaszonjarmuFilter",
+    modelKey: "modellekKishaszonjarmuFilter",
+    haCategory: "kishaszonjarmu",
+  },
+};
+
+const tombCfg = TOMB_BY_KIND[KIND] || TOMB_BY_KIND.szemelyauto;
+const TOMB_URL = `${API}/v2/tomb/${tombCfg.path}`;
+const RAW_OUT = resolve(
+  process.env.HA_BM_RAW ||
+    (KIND === "kisteher" ? "data/ha-brands-models-kisteher.json" : "data/ha-brands-models.json")
+);
 
 function sleep(ms) {
   return new Promise((r) => setTimeout(r, ms));
 }
 
-/**
- * HA tomb node: { k: id, v: label, i?: children[] }
- * UI: options = [{label, value}] + nested options under group
- */
 function cleanLabel(value) {
   return String(value ?? "")
     .replace(/\s*\(\d+\)\s*$/g, "")
@@ -152,19 +178,19 @@ async function main() {
   const { context } = await connectChrome();
   const page = await ensureWwwPage(context);
 
+  console.log(`Kind: ${KIND}`);
   console.log(`API: ${TOMB_URL}`);
   const data = await fetchTomb(page);
   writeFileSync("/tmp/ha-tomb.json", `${JSON.stringify(data).slice(0, 2_000_000)}\n`);
 
-  const brandRaw = data.markakSzemelyautoFilter ?? data.brands ?? [];
-  const modelRaw = data.modellekSzemelyautoFilter ?? data.models ?? [];
+  const brandRaw = data[tombCfg.brandKey] ?? data.brands ?? [];
+  const modelRaw = data[tombCfg.modelKey] ?? data.models ?? [];
 
-  if (!Array.isArray(brandRaw) || brandRaw.length < 10) {
+  if (!Array.isArray(brandRaw) || brandRaw.length < 5) {
     console.log("Válasz kulcsok:", Object.keys(data));
     throw new Error(`Keves gyártmány a tomb API-ból (${Array.isArray(brandRaw) ? brandRaw.length : "?"}).`);
   }
 
-  // models: either array of {k: brandId, i: [...models]} OR already keyed
   const modelsByBrandId = new Map();
   if (Array.isArray(modelRaw)) {
     for (const entry of modelRaw) {
@@ -186,7 +212,7 @@ async function main() {
   let groupsWithChildren = 0;
 
   for (const b of brandRaw) {
-    const label = String(b.v ?? b.label ?? "").trim();
+    const label = cleanLabel(b.v ?? b.label ?? "");
     if (!label) continue;
     const id = String(b.k ?? b.value ?? "");
     const name = normalizeBrand(label) || label;
@@ -209,28 +235,20 @@ async function main() {
   brandRows.sort((a, b) => a.name.localeCompare(b.name, "hu"));
   const gyartmanyok = brandRows.map((b) => b.name);
 
-  // Sample Mercedes → ML
-  const merc = brandRows.find((b) => /MERCEDES/i.test(b.name));
-  const ml = merc?.models?.find((m) => /ML/i.test(m.name));
-  if (ml) {
+  const sampleBrand = brandRows.find((b) => /FORD|MERCEDES|VOLKSWAGEN|FIAT/i.test(b.name));
+  if (sampleBrand) {
     console.log(
-      `Ellenőrzés: ${merc.name} → ${ml.name} → [${(ml.children || [])
-        .slice(0, 8)
-        .map((c) => c.name)
-        .join(", ")}${ml.children?.length > 8 ? "…" : ""}]`
+      `Ellenőrzés: ${sampleBrand.name} →`,
+      sampleBrand.models
+        .slice(0, 6)
+        .map((m) => `${m.name}(${m.children?.length || 0})`)
+        .join(", ")
     );
-  } else {
-    console.warn("Figyelem: MERCEDES / ML minta nem egyértelmű — nézd a JSON-t.");
-    if (merc) {
-      console.log(
-        `  ${merc.name} első modellek:`,
-        merc.models.slice(0, 8).map((m) => `${m.name}(${m.children?.length || 0})`).join(", ")
-      );
-    }
   }
 
   const catalog = {
     source: "api.hasznaltauto.hu/v2/tomb",
+    category: KIND,
     imported_at: new Date().toISOString(),
     count_rows: modelCount + childCount,
     count_brands: gyartmanyok.length,
@@ -246,6 +264,7 @@ async function main() {
       search: "csoport (modell) önmagában is szűrhető",
       post: "ha postRequiresChild=true, feladáskor gyermek kötelező",
       tombUrl: TOMB_URL,
+      haCategory: tombCfg.haCategory,
     },
   };
 
@@ -256,6 +275,7 @@ async function main() {
       {
         imported_at: catalog.imported_at,
         source: catalog.source,
+        kind: KIND,
         meta: catalog.meta,
         count_brands: catalog.count_brands,
         count_models: catalog.count_models,
@@ -268,9 +288,7 @@ async function main() {
     "utf8"
   );
 
-  const saved = saveVehicleCatalog(catalog);
-  const brandsOnlyBytes = Buffer.byteLength(JSON.stringify({ gyartmanyok }));
-  const treeBytes = Buffer.byteLength(JSON.stringify({ gyartmanyok, modellekTree }));
+  const saved = saveVehicleCatalogForKind(catalog, KIND);
   const fullBytes = Buffer.byteLength(JSON.stringify(catalog));
 
   console.log(`\nNyers: ${RAW_OUT}`);
@@ -278,9 +296,7 @@ async function main() {
   console.log(
     `Gyártmány: ${catalog.count_brands}, modell: ${catalog.count_models}, almenü-elem: ${catalog.count_model_children} (${groupsWithChildren} csoport almenüvel)`
   );
-  console.log(
-    `Méret — gyártmány: ${(brandsOnlyBytes / 1024).toFixed(1)} KB | fa (3 szint): ${(treeBytes / 1024).toFixed(1)} KB | teljes: ${(fullBytes / 1024).toFixed(1)} KB`
-  );
+  console.log(`Méret: ${(fullBytes / 1024).toFixed(1)} KB`);
 }
 
 main().catch((error) => {

@@ -4,7 +4,7 @@ import {
   TEHER_KISTEHER_KIVITEL,
   TEHER_35_KIVITEL_CATEGORIES,
   flattenTeher35KivitelOptions,
-} from "./equipment-data.js?v=allapotFlat1";
+} from "./equipment-data.js?v=kisteherHa1";
 import { bindAutoBmDismiss, autoBmPanelIsOpen } from "./auto-bm-dismiss.js?v=bmDismiss1";
 
 function labelList(items) {
@@ -52,19 +52,20 @@ function truckKategoria() {
   return new URLSearchParams(window.location.search).get("kategoria") || "35-alatt";
 }
 
-function useTeher35Categories() {
-  return document.body?.getAttribute("data-site-page") === "teherauto" && truckKategoria() === "35-felett";
+/** HA Kishaszon (3,5-ig) hierarchikus kivitel — 3,5-tól később. */
+function useKisteherKivitelCategories() {
+  return document.body?.getAttribute("data-site-page") === "teherauto" && truckKategoria() === "35-alatt";
 }
 
 function shouldMountKivitelPicker() {
   if (!isVehicleSearchPage()) return false;
-  if (useTeher35Categories()) return true;
+  if (useKisteherKivitelCategories()) return true;
   return isAutoDesk();
 }
 
 function flatOptionsForPage() {
   if (document.body?.getAttribute("data-site-page") !== "teherauto") return KIVITEL_OPTIONS;
-  if (useTeher35Categories()) return flattenTeher35KivitelOptions();
+  if (useKisteherKivitelCategories()) return flattenTeher35KivitelOptions();
   return TEHER_KISTEHER_KIVITEL;
 }
 
@@ -120,7 +121,7 @@ export async function mountAutoKivitelPicker(form) {
   form.querySelector("#qs-kivitel")?.remove();
   form.querySelector('[data-wheel="kivitel"]')?.closest(".immo-schema-cell, .home-qs-drum-cell, .auto-cell-drum")?.remove();
 
-  const hierarchical = useTeher35Categories();
+  const hierarchical = useKisteherKivitelCategories();
   const categories = hierarchical ? TEHER_35_KIVITEL_CATEGORIES : null;
   const flatOptions = hierarchical ? null : flatOptionsForPage();
 

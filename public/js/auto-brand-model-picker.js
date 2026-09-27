@@ -1,6 +1,22 @@
 
-import { fetchVehicleCatalog } from "./vehicle-catalog-client.js?v=bmScrollTop1";
+import { fetchVehicleCatalog } from "./vehicle-catalog-client.js?v=bmKisteher1";
 import { bindAutoBmDismiss, autoBmPanelIsOpen } from "./auto-bm-dismiss.js?v=bmDismiss1";
+
+function truckKategoria() {
+  const fromBody = document.body?.dataset?.truckKategoria;
+  if (fromBody === "35-felett" || fromBody === "35-alatt") return fromBody;
+  const activeTab = document.querySelector("[data-truck-tab].is-active");
+  const fromTab = activeTab?.getAttribute("data-truck-tab");
+  if (fromTab === "35-felett" || fromTab === "35-alatt") return fromTab;
+  return new URLSearchParams(window.location.search).get("kategoria") || "35-alatt";
+}
+
+function catalogKindForPage() {
+  if (document.body?.getAttribute("data-site-page") === "teherauto" && truckKategoria() === "35-alatt") {
+    return "kisteher";
+  }
+  return "szemelyauto";
+}
 
 function labelList(items, unit) {
   if (!items.length) return "Mindegy";
@@ -45,7 +61,7 @@ export async function mountAutoBrandModelPicker(form) {
 
   let catalog;
   try {
-    catalog = await fetchVehicleCatalog();
+    catalog = await fetchVehicleCatalog({ kind: catalogKindForPage() });
   } catch (error) {
     console.warn("Gyártmány picker katalógus:", error);
     return;

@@ -3,11 +3,12 @@ import {
   ALLAPOT_CATEGORIES,
   EQUIPMENT_SECTIONS,
   KLIM_OPTIONS,
-  KISTEHER_EQUIPMENT_ITEMS,
+  KISTEHER_EQUIPMENT_SECTIONS,
+  KISTEHER_EGYEB_INFO_OPTIONS,
   TEHER_KISTEHER_KIVITEL,
   TEHER_35_KIVITEL_CATEGORIES,
   normalizeOkmanyJelleg,
-} from "./equipment-data.js?v=allapotFlat1";
+} from "./equipment-data.js?v=kisteherHa1";
 import { KIVITEL_OPTIONS, normalizeKivitel } from "./kivitel-options.js?v=kivitel1";
 import { EGYEB_INFO_OPTIONS } from "./egyeb-info-data.js?v=egyebInfoFix2";
 
@@ -470,7 +471,8 @@ function renderEgyebInfo() {
   );
   root.className = "equipment-grid ad-form-toggle-list";
   root.innerHTML = "";
-  for (const item of EGYEB_INFO_OPTIONS) {
+  const options = isKisteherAd() ? KISTEHER_EGYEB_INFO_OPTIONS : EGYEB_INFO_OPTIONS;
+  for (const item of options) {
     const id = `info_${item.replace(/[^a-z0-9]+/gi, "_").toLowerCase()}`;
     appendBmToggleCheckbox(root, {
       name: "egyeb_info",
@@ -502,22 +504,25 @@ function renderEquipment() {
   });
 
   if (isKisteherAd()) {
-    const block = document.createElement("div");
-    block.className = "equipment-block";
-    block.innerHTML = `<h3>Felszereltség</h3>`;
-    const grid = document.createElement("div");
-    grid.className = "equipment-grid ad-form-toggle-list";
-    for (const item of KISTEHER_EQUIPMENT_ITEMS) {
-      const id = `kisteher_${item.replace(/[^a-z0-9]+/gi, "_").toLowerCase()}`;
-      appendBmToggleCheckbox(grid, {
-        name: "felszereltseg",
-        value: item,
-        id,
-        checked: checked.has(item),
-      });
+    for (const [key, section] of Object.entries(KISTEHER_EQUIPMENT_SECTIONS)) {
+      const block = document.createElement("div");
+      block.className = "equipment-block";
+      block.dataset.equipmentKey = key;
+      block.innerHTML = `<h3>${section.title}</h3>`;
+      const grid = document.createElement("div");
+      grid.className = "equipment-grid ad-form-toggle-list";
+      for (const item of section.items) {
+        const id = `kisteher_${key}_${item.replace(/[^a-z0-9]+/gi, "_").toLowerCase()}`;
+        appendBmToggleCheckbox(grid, {
+          name: "felszereltseg",
+          value: item,
+          id,
+          checked: checked.has(item),
+        });
+      }
+      block.appendChild(grid);
+      equipmentRoot.appendChild(block);
     }
-    block.appendChild(grid);
-    equipmentRoot.appendChild(block);
     window.dispatchEvent(new Event("ad-form-equipment-rendered"));
     return;
   }
@@ -547,12 +552,9 @@ function renderEquipment() {
 function syncEgyebInfoVisibility() {
   const card = ensureEgyebInfoRoot()?.closest(".card") || egyebInfoRoot?.closest(".card");
   if (!card) return;
-  const show = !isKisteherAd();
+  const show = true;
   card.hidden = !show;
   card.classList.toggle("hidden", !show);
-  if (!show) {
-    form.querySelector('[data-desk-sub-acc="egyeb-info"]')?.remove();
-  }
 }
 
 function applyAutoFill() {
@@ -612,7 +614,7 @@ function renderKivitelDropdown() {
   empty.textContent = "Válasszon";
   kivitel.appendChild(empty);
 
-  if (isTeher35Ad()) {
+  if (isKisteherAd()) {
     for (const category of TEHER_35_KIVITEL_CATEGORIES) {
       if (category.children?.length) {
         const group = document.createElement("optgroup");
@@ -632,7 +634,7 @@ function renderKivitelDropdown() {
       option.textContent = category.label;
       kivitel.appendChild(option);
     }
-  } else if (isKisteherAd()) {
+  } else if (isTeher35Ad()) {
     for (const label of TEHER_KISTEHER_KIVITEL) {
       const option = document.createElement("option");
       option.value = label;

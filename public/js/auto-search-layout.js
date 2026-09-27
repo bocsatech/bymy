@@ -9,7 +9,7 @@ import {
   AC_TOLTO_CSATLAKOZAS_OPTIONS,
   TEHER_KISTEHER_KIVITEL,
   flattenTeher35KivitelOptions,
-} from "./equipment-data.js?v=allapotFlat1";
+} from "./equipment-data.js?v=kisteherHa1";
 
 function searchLayoutCategory() {
   return document.body?.getAttribute("data-site-page") === "teherauto"
@@ -22,7 +22,7 @@ function teherKategoria() {
 }
 
 function teherKivitelOptions() {
-  return teherKategoria() === "35-felett"
+  return teherKategoria() === "35-alatt"
     ? flattenTeher35KivitelOptions()
     : TEHER_KISTEHER_KIVITEL;
 }

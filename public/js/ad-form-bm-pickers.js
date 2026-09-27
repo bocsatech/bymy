@@ -6,7 +6,7 @@ import {
   UZEMANYAG_CATEGORIES,
 } from "./equipment-data.js?v=allapotFlat1";
 import { KIVITEL_OPTIONS } from "./kivitel-options.js?v=kivitel1";
-import { fetchVehicleCatalog } from "./vehicle-catalog-client.js?v=bmTree1";
+import { fetchVehicleCatalog } from "./vehicle-catalog-client.js?v=bmKisteher1";
 import { bindAutoBmDismiss, autoBmPanelIsOpen } from "./auto-bm-dismiss.js?v=bmDismiss1";
 import {
   VEHICLE_KARPIT_OPTIONS,
@@ -197,23 +197,32 @@ function categoryValues(cat) {
   return cat.value ? [cat.value] : [];
 }
 
-const BM_PICKER_SUBTYPES = new Set(["szemelyauto", "teherauto"]);
+const BM_PICKER_SUBTYPES = new Set(["szemelyauto", "kisteher", "teherauto"]);
 
-export function isBmPickerAdForm(form) {
-  if (!form) return false;
-  const subtype = String(
-    form.elements.namedItem("hirdetes_alkategoria")?.value ??
-      form.elements.namedItem("jarmu_kategoria")?.value ??
+function adFormSubtype(form) {
+  return String(
+    form?.elements.namedItem("hirdetes_alkategoria")?.value ??
+      form?.elements.namedItem("jarmu_kategoria")?.value ??
       ""
   )
     .trim()
     .toLowerCase();
+}
+
+function catalogKindForAdForm(form) {
+  return adFormSubtype(form) === "kisteher" ? "kisteher" : "szemelyauto";
+}
+
+export function isBmPickerAdForm(form) {
+  if (!form) return false;
+  const subtype = adFormSubtype(form);
   if (subtype) return BM_PICKER_SUBTYPES.has(subtype);
 
   const vertical = String(form.elements.namedItem("hirdetes_vertical")?.value ?? "")
     .trim()
     .toLowerCase();
-  if (vertical === "ingatlan" || vertical === "teher") return false;
+  if (vertical === "ingatlan") return false;
+  if (vertical === "teher") return true;
   return vertical === "auto" || vertical === "";
 }
 
@@ -2179,7 +2188,7 @@ export async function mountAdFormBmPickers(form, catalog = null) {
   }
 
   try {
-    const cat = catalog || (await fetchVehicleCatalog());
+    const cat = catalog || (await fetchVehicleCatalog({ kind: catalogKindForAdForm(form) }));
     if (gyartmany?.tagName === "SELECT" && gyartmany.dataset.adBmPicker !== "1") mountBrandPicker(gyartmany, cat);
     if (modell?.tagName === "SELECT" && modell.dataset.adBmPicker !== "1") mountModelPicker(modell, cat);
   } catch (error) {

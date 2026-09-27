@@ -1,6 +1,6 @@
 
-let catalogPromise = null;
-let staticCatalogPromise = null;
+const catalogPromiseByKind = new Map();
+const staticCatalogPromiseByKind = new Map();
 const typeCache = new Map();
 
 const OLD_SERVER_HINT =
@@ -11,9 +11,27 @@ function catalogErrorMessage(data, status) {
   return data?.error ?? "Katalógus betöltése sikertelen.";
 }
 
-async function fetchStaticCatalog() {
-  if (!staticCatalogPromise) {
-    staticCatalogPromise = fetch("/data/vehicle-catalog.json", { cache: "force-cache" })
+export function normalizeCatalogKind(kind) {
+  const id = String(kind ?? "")
+    .trim()
+    .toLowerCase();
+  if (id === "kisteher" || id === "kishaszon" || id === "kishaszonjarmu" || id === "teher-35-alatt") {
+    return "kisteher";
+  }
+  return "szemelyauto";
+}
+
+function staticCatalogUrl(kind) {
+  return normalizeCatalogKind(kind) === "kisteher"
+    ? "/data/vehicle-catalog-kisteher.json"
+    : "/data/vehicle-catalog.json";
+}
+
+async function fetchStaticCatalog(kind = "szemelyauto") {
+  const key = normalizeCatalogKind(kind);
+  let promise = staticCatalogPromiseByKind.get(key);
+  if (!promise) {
+    promise = fetch(staticCatalogUrl(key), { cache: "force-cache" })
       .then(async (response) => {
         const data = await response.json().catch(() => ({}));
         if (!response.ok || !data?.gyartmanyok?.length) {
@@ -22,15 +40,17 @@ async function fetchStaticCatalog() {
         return data;
       })
       .catch((error) => {
-        staticCatalogPromise = null;
+        staticCatalogPromiseByKind.delete(key);
         throw error;
       });
+    staticCatalogPromiseByKind.set(key, promise);
   }
-  return staticCatalogPromise;
+  return promise;
 }
 
-function summaryFromCatalog(catalog) {
+function summaryFromCatalog(catalog, kind = "szemelyauto") {
   return {
+    kind: normalizeCatalogKind(kind),
     source: catalog.source ?? null,
     imported_at: catalog.imported_at ?? null,
     count_rows: catalog.count_rows ?? 0,
@@ -44,9 +64,15 @@ function summaryFromCatalog(catalog) {
   };
 }
 
-export function fetchVehicleCatalog() {
-  if (!catalogPromise) {
-    catalogPromise = fetch("/api/vehicle-catalog", { credentials: "same-origin" })
+/** @param {string|{kind?: string, category?: string}} [options] */
+export function fetchVehicleCatalog(options) {
+  const kind = normalizeCatalogKind(
+    typeof options === "string" ? options : options?.kind || options?.category
+  );
+  let promise = catalogPromiseByKind.get(kind);
+  if (!promise) {
+    const qs = kind === "kisteher" ? "?kind=kisteher" : "";
+    promise = fetch(`/api/vehicle-catalog${qs}`, { credentials: "same-origin" })
       .then(async (response) => {
         const data = await response.json().catch(() => ({}));
         if (!response.ok) throw new Error(catalogErrorMessage(data, response.status));
@@ -54,16 +80,17 @@ export function fetchVehicleCatalog() {
       })
       .catch(async (apiError) => {
         try {
-          const full = await fetchStaticCatalog();
+          const full = await fetchStaticCatalog(kind);
           console.warn("Járműkatalógus API hiba, statikus fallback:", apiError.message);
-          return summaryFromCatalog(full);
+          return summaryFromCatalog(full, kind);
         } catch {
-          catalogPromise = null;
+          catalogPromiseByKind.delete(kind);
           throw apiError;
         }
       });
+    catalogPromiseByKind.set(kind, promise);
   }
-  return catalogPromise;
+  return promise;
 }
 
 function typesFromStaticCatalog(catalog, gyartmany, modell) {
@@ -96,11 +123,13 @@ function yearsFromTypes(tipusok) {
   return [...years].sort((a, b) => b - a);
 }
 
-export async function fetchModelTypes(gyartmany, modell) {
-  const key = `${gyartmany}|${modell}`;
+export async function fetchModelTypes(gyartmany, modell, options = {}) {
+  const kind = normalizeCatalogKind(options?.kind || options?.category);
+  const key = `${kind}|${gyartmany}|${modell}`;
   if (typeCache.has(key)) return typeCache.get(key);
 
   const query = new URLSearchParams({ gyartmany, modell });
+  if (kind === "kisteher") query.set("kind", "kisteher");
   const promise = fetch(`/api/vehicle-catalog/tipusok?${query}`)
     .then(async (response) => {
       const data = await response.json().catch(() => ({}));
@@ -109,7 +138,7 @@ export async function fetchModelTypes(gyartmany, modell) {
     })
     .catch(async (apiError) => {
       try {
-        const catalog = await fetchStaticCatalog();
+        const catalog = await fetchStaticCatalog(kind);
         const tipusok = typesFromStaticCatalog(catalog, gyartmany, modell);
         return { evek: yearsFromTypes(tipusok), tipusok };
       } catch {

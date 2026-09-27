@@ -7,11 +7,11 @@ import {
   haversineKm,
   listingCityName,
   resolveListingCoords,
-} from "./listing-radius.js?v=mapPostal2";
+} from "./listing-radius.js?v=mapHome1";
 import { listingDetailHref } from "./listing-return.js?v=scrollTop1";
 import { listingTileTitle, listingTilePrice } from "./listing-tile.js?v=listThumb1";
 import { getAuthUser } from "./site-auth.js?v=bootFix2";
-import { readNearbyPrefs } from "./nearby-search.js?v=korzetFix2";
+import { readNearbyPrefs } from "./nearby-search.js?v=korzetFix3";
 import { fetchListingsPage } from "./db-client.js?v=ownerBoost6";
 
 const HU_CENTER = [47.1625, 19.5033];
@@ -126,13 +126,36 @@ function loadLeaflet() {
   return leafletPromise;
 }
 
-async function resolveHomeOrigin(cityIndex) {
-  const user = getAuthUser();
-  const prefs = readNearbyPrefs(user?.profile ?? null);
-  const postal = String(prefs.postal || user?.profile?.postalCode || "")
+function profileHomeBits(profile = null) {
+  const p = profile || {};
+  const postal = String(p.postalCode || p.companyPostalCode || "")
     .replace(/\D/g, "")
     .slice(0, 4);
-  const cityName = String(user?.profile?.city || user?.profile?.companyCity || "").trim();
+  const cityName = String(p.city || p.companyCity || "").trim();
+  const street = String(p.street || p.companyStreet || "").trim();
+  return { postal, cityName, street };
+}
+
+async function resolveHomeOrigin(cityIndex, postalIndex = null) {
+  const user = getAuthUser();
+  let profile = user?.profile ?? null;
+  /* Session cache can lag behind /api/auth/me — refresh once if address fields are missing. */
+  if (user?.email && !profileHomeBits(profile).postal && !profileHomeBits(profile).cityName) {
+    try {
+      const res = await fetch("/api/auth/me", { credentials: "same-origin" });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data?.user?.profile) profile = data.user.profile;
+    } catch {
+      /* keep session profile */
+    }
+  }
+
+  const prefs = readNearbyPrefs(profile);
+  const bits = profileHomeBits(profile);
+  const postal = String(prefs.postal || bits.postal || "")
+    .replace(/\D/g, "")
+    .slice(0, 4);
+  const cityName = bits.cityName;
 
   if (postal.length === 4) {
     try {
@@ -142,22 +165,70 @@ async function resolveHomeOrigin(cityIndex) {
         return {
           lat: Number(data.lat),
           lon: Number(data.lon),
-          label: [data.city, postal].filter(Boolean).join(" · ") || postal,
+          label: [data.city || cityName, postal].filter(Boolean).join(" · ") || postal,
           postal,
         };
       }
     } catch {
       /* fall through */
     }
+    const fromIndex = postalIndex?.get?.(postal);
+    if (fromIndex) {
+      return {
+        lat: fromIndex.lat,
+        lon: fromIndex.lon,
+        label: [fromIndex.city || cityName, postal].filter(Boolean).join(" · ") || postal,
+        postal,
+      };
+    }
   }
 
   if (cityName && cityIndex) {
-    const hit = resolveListingCoords({ preview: { filter: { telepules: cityName } } }, cityIndex);
+    const hit = resolveListingCoords(
+      { preview: { filter: { telepules: cityName, iranyitoszam: postal } } },
+      cityIndex,
+      postalIndex
+    );
     if (hit) {
-      return { lat: hit.lat, lon: hit.lon, label: hit.city || cityName, postal: postal || "" };
+      return { lat: hit.lat, lon: hit.lon, label: hit.city || cityName, postal: postal || hit.postal || "" };
+    }
+  }
+
+  /* Street-level fallback (Nominatim via our API). */
+  if (postal.length === 4 || cityName || bits.street) {
+    try {
+      const lines = [bits.street, [postal, cityName].filter(Boolean).join(" ")].filter(Boolean);
+      const q = lines.join(", ") || `${postal} ${cityName}`.trim();
+      const res = await fetch(
+        `/api/geocode?q=${encodeURIComponent(q)}&lines=${encodeURIComponent(lines.join("|"))}`,
+        { credentials: "same-origin" }
+      );
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.lat != null && data.lon != null) {
+        return {
+          lat: Number(data.lat),
+          lon: Number(data.lon),
+          label: [cityName, postal].filter(Boolean).join(" · ") || data.label || q,
+          postal: postal || "",
+        };
+      }
+    } catch {
+      /* ignore */
     }
   }
   return null;
+}
+
+function placeHomeMarker(L) {
+  if (!homeOrigin || !markersLayer || !L) return null;
+  const homeMarker = L.marker([homeOrigin.lat, homeOrigin.lon], {
+    title: `Lakhely · ${homeOrigin.label}`,
+    icon: getHomeIcon(L),
+    zIndexOffset: 400,
+  });
+  homeMarker.bindTooltip(`Lakhely · ${homeOrigin.label}`, { direction: "top", offset: [0, -10] });
+  homeMarker.addTo(markersLayer);
+  return homeMarker;
 }
 
 function findListingsHost() {
@@ -331,15 +402,7 @@ function refreshVisibleMarkers() {
   markersLayer.clearLayers();
   for (const pin of lastPins) pin.marker = null;
 
-  if (homeOrigin) {
-    const homeMarker = L.marker([homeOrigin.lat, homeOrigin.lon], {
-      title: `Lakhely · ${homeOrigin.label}`,
-      icon: getHomeIcon(L),
-      zIndexOffset: 400,
-    });
-    homeMarker.bindTooltip(`Lakhely · ${homeOrigin.label}`, { direction: "top", offset: [0, -10] });
-    homeMarker.addTo(markersLayer);
-  }
+  placeHomeMarker(L);
 
   const bounds = mapInstance.getBounds().pad(0.05);
   const zoom = mapInstance.getZoom();
@@ -871,13 +934,18 @@ export async function openSearchResultsMap(items, { mode = "filtered" } = {}) {
       getCityIndex(),
       getPostalIndex().catch(() => null),
     ]);
-    homeOrigin = await resolveHomeOrigin(cityIndex);
+    homeOrigin = await resolveHomeOrigin(cityIndex, postalIndex);
 
     if (!list.length) {
       setMapStats({ empty: true, homeLabel: homeOrigin?.label || "" });
       await ensureBaseMap(L);
+      placeHomeMarker(L);
+      if (homeOrigin) mapInstance?.setView([homeOrigin.lat, homeOrigin.lon], 10);
       if (side) {
-        side.innerHTML = `<div class="search-map-modal__side-pin"><p class="search-map-modal__hint">Nincs autó a találati listában. Állíts más szűrőt, vagy várj a lista betöltésére.</p></div>`;
+        const homeNote = homeOrigin
+          ? `<p class="search-map-modal__route-note">Lakhely: ${escapeHtml(homeOrigin.label)}</p>`
+          : "";
+        side.innerHTML = `<div class="search-map-modal__side-pin">${homeNote}<p class="search-map-modal__hint">Nincs autó a találati listában. Állíts más szűrőt, vagy várj a lista betöltésére.</p></div>`;
       }
       return;
     }
@@ -890,17 +958,13 @@ export async function openSearchResultsMap(items, { mode = "filtered" } = {}) {
     });
     if (!pins.length) {
       await ensureBaseMap(L);
-      if (homeOrigin && markersLayer) {
-        const homeMarker = L.marker([homeOrigin.lat, homeOrigin.lon], {
-          title: `Lakhely · ${homeOrigin.label}`,
-          icon: getHomeIcon(L),
-          zIndexOffset: 400,
-        });
-        homeMarker.addTo(markersLayer);
-        mapInstance?.setView([homeOrigin.lat, homeOrigin.lon], 10);
-      }
+      placeHomeMarker(L);
+      if (homeOrigin) mapInstance?.setView([homeOrigin.lat, homeOrigin.lon], 10);
       if (side) {
-        side.innerHTML = `<p class="search-map-modal__hint">Nincs irányítószám / település a találatokhoz — a térkép üres. (${skipped} kihagyva)</p>`;
+        const homeNote = homeOrigin
+          ? `<p class="search-map-modal__route-note">Lakhely: ${escapeHtml(homeOrigin.label)}</p>`
+          : "";
+        side.innerHTML = `<div class="search-map-modal__side-pin">${homeNote}<p class="search-map-modal__hint">Nincs irányítószám / település a találatokhoz — a térkép üres. (${skipped} kihagyva)</p></div>`;
       }
       return;
     }

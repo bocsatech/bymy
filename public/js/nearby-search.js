@@ -2,7 +2,7 @@ import {
   buildCityIndex,
   filterListingsInRadius,
   filterListingsRecentInRadius,
-} from "./listing-radius.js?v=mapPostal2";
+} from "./listing-radius.js?v=mapHome1";
 
 export const STORAGE_POSTAL = "bymy_stats_postal";
 export const STORAGE_RADIUS = "bymy_stats_radius_km";
@@ -34,8 +34,14 @@ function getCityIndex() {
   return cityIndexPromise;
 }
 
+function profilePostalCode(profile = null) {
+  return String(profile?.postalCode || profile?.companyPostalCode || "")
+    .replace(/\D/g, "")
+    .slice(0, 4);
+}
+
 export function readNearbyPrefs(profile = null) {
-  let postal = String(profile?.postalCode ?? "").replace(/\D/g, "").slice(0, 4);
+  let postal = profilePostalCode(profile);
   let radiusKm = Number(profile?.searchRadiusKm ?? 30);
   try {
     const savedPostal = localStorage.getItem(STORAGE_POSTAL);
@@ -48,9 +54,7 @@ export function readNearbyPrefs(profile = null) {
     }
   } catch {
   }
-  if (!postal && profile?.postalCode) {
-    postal = String(profile.postalCode).replace(/\D/g, "").slice(0, 4);
-  }
+  if (postal.length !== 4) postal = profilePostalCode(profile);
   if (!Number.isFinite(radiusKm) || radiusKm <= 0) radiusKm = 30;
   return { postal, radiusKm };
 }
@@ -60,7 +64,7 @@ export function ensureNearbyPrefsStored(profile = null) {
   const p = profile ?? null;
   if (!p) return;
   try {
-    const postal = String(p.postalCode ?? "").replace(/\D/g, "").slice(0, 4);
+    const postal = profilePostalCode(p);
     if (postal.length === 4 && !localStorage.getItem(STORAGE_POSTAL)) {
       localStorage.setItem(STORAGE_POSTAL, postal);
     }

@@ -1255,21 +1255,6 @@ async function handleListingsApi(req, res, pathname) {
     return;
   }
 
-  if (pathname === "/api/me/seller-ratings" && req.method === "GET") {
-    const user = await requestUser(req);
-    if (!user) {
-      sendJson(res, 401, { error: "Jelentkezz be." });
-      return;
-    }
-    try {
-      const ratings = await listReceivedSellerRatings({ sellerUserId: user.id });
-      sendJson(res, 200, { ratings });
-    } catch (err) {
-      sendJson(res, err.status || 500, { error: err.message || "Nem sikerült az értékelések betöltése." });
-    }
-    return;
-  }
-
   const sellerRatingMatch = pathname.match(/^\/api\/listings\/(\d+)\/seller-rating$/);
   if (sellerRatingMatch && req.method === "GET") {
     if (!assertPublicListingRate(req, res, "listing-seller-rating", { limit: 120, windowMs: 15 * 60 * 1000 })) {
@@ -2938,6 +2923,21 @@ export async function handleHttpRequest(req, res) {
 
   if (pathname.startsWith("/api/messages")) {
     await handleMessagesApi(req, res, pathname);
+    return;
+  }
+
+  if (pathname === "/api/me/seller-ratings" && req.method === "GET") {
+    const user = await requestUser(req);
+    if (!user) {
+      sendJson(res, 401, { error: "Jelentkezz be." });
+      return;
+    }
+    try {
+      const ratings = await listReceivedSellerRatings({ sellerUserId: user.id });
+      sendJson(res, 200, { ratings });
+    } catch (err) {
+      sendJson(res, err.status || 500, { error: err.message || "Nem sikerült az értékelések betöltése." });
+    }
     return;
   }
 

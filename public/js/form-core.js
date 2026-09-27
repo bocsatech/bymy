@@ -659,6 +659,21 @@ function syncKisteherFields() {
     el.hidden = !show;
     el.classList.toggle("hidden", !show);
   });
+  // Autó-only mezők soha ne látszódjanak kisteher feladáson.
+  if (show) {
+    for (const key of ["tipus", "egyeb_tipus", "csomagtarto", "tetto", "karpit1", "karpit2"]) {
+      const el = form.elements.namedItem(key) || document.getElementById(key);
+      const wrap =
+        el?.closest?.(
+          ".labeled-field, .field-row, .field-stack, .ad-form-field, [data-desk-field], .immo-schema-cell"
+        ) || el?.closest?.("label");
+      if (wrap) {
+        wrap.hidden = true;
+        wrap.classList.add("ad-layout-hidden", "hidden");
+      }
+      if (el && "disabled" in el) el.disabled = true;
+    }
+  }
   syncEgyebInfoVisibility();
   renderEquipment();
   renderEgyebInfo();
@@ -1995,9 +2010,10 @@ fillYearSelect(gyartasiEv);
 fillYearSelect(muszakiEv, { maxYear: YEAR_SELECT_MAX });
 fillYearSelect(forgalombaHelyezesEv);
 initVehicleCatalogSelects({
+  kind: isKisteherAd() ? "kisteher" : "szemelyauto",
   brandSelect: gyartmany,
   modelSelect: modell,
-  tipusSelect: tipus,
+  tipusSelect: isKisteherAd() ? null : tipus,
   yearSelect: gyartasiEv,
   yearFromCatalog: false,
   brandEmptyLabel: "Válasszon",

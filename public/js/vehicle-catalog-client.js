@@ -396,7 +396,8 @@ export function bindCatalogSelects({
 }
 
 export async function initVehicleCatalogSelects(options) {
-  const catalog = await fetchVehicleCatalog();
+  const kind = normalizeCatalogKind(options?.kind || options?.category);
+  const catalog = await fetchVehicleCatalog({ kind });
   bindCatalogSelects({ ...options, catalog });
   return catalog;
 }

@@ -1,5 +1,5 @@
 
-import { initVehicleCatalogSelects, fillSelect } from "./vehicle-catalog-client.js?v=bmTree1";
+import { initVehicleCatalogSelects, fillSelect } from "./vehicle-catalog-client.js?v=bmKisteher1";
 import { KIVITEL_OPTIONS } from "./kivitel-options.js?v=kivitel1";
 import { wirePostalCityAutofill as wireSharedPostalCityAutofill } from "./postal-city-autofill.js?v=postalFill1";
 import {
@@ -52,6 +52,17 @@ const SEARCH_OMIT_FIELDS = new Set([
   "forgalomba_helyezes_honap",
   "muszaki_honap",
   "keresesi_korzet",
+]);
+
+/** Autó-only mezők — teher keresőben soha. */
+const TEHER_SEARCH_AUTO_ONLY = new Set([
+  "tipus",
+  "egyeb_tipus",
+  "egyeb_modell",
+  "csomagtarto",
+  "tetto",
+  "karpit1",
+  "karpit2",
 ]);
 
 const FREE_NUMBER_SUFFIX = {
@@ -306,8 +317,9 @@ export function prefetchAutoSearchBoot() {
     /* private mode */
   }
   void fetchAutoSearchLayout({ force: false }).catch(() => {});
-  void import("./vehicle-catalog-client.js?v=bmTree1")
-    .then((m) => m.fetchVehicleCatalog?.())
+  const kind = page === "teherauto" ? "kisteher" : "szemelyauto";
+  void import("./vehicle-catalog-client.js?v=bmKisteher1")
+    .then((m) => m.fetchVehicleCatalog?.({ kind }))
     .catch(() => {});
 }
 
@@ -360,6 +372,9 @@ function fillOptionsSelect(select, options) {
 function isSearchCellVisible(cell) {
   if (!cell) return false;
   if (SEARCH_OMIT_FIELDS.has(cell.field_key)) return false;
+  if (searchLayoutCategory() === "teherauto-search" && TEHER_SEARCH_AUTO_ONLY.has(cell.field_key)) {
+    return false;
+  }
   if (cell.hidden) return false;
   return true;
 }
@@ -499,6 +514,7 @@ function fieldHtml(cell) {
     </label>`;
   }
   if (key === "tipus") {
+    if (searchLayoutCategory() === "teherauto-search") return "";
     return `<label class="home-qs-field" data-qs-field="${key}">
       <span class="home-qs-label">Típus</span>
       <select class="home-qs-control" id="qs-tipus" data-filter-key="tipus"></select>
@@ -809,11 +825,13 @@ async function wireCatalog(form) {
   const modelSelect = form.querySelector("#qs-modell");
   const typeSelect = form.querySelector("#qs-tipus");
   if (!brandSelect || !modelSelect) return;
+  const kind = searchLayoutCategory() === "teherauto-search" ? "kisteher" : "szemelyauto";
   try {
     await initVehicleCatalogSelects({
+      kind,
       brandSelect,
       modelSelect,
-      tipusSelect: typeSelect,
+      tipusSelect: kind === "kisteher" ? null : typeSelect,
       brandEmptyLabel: "Mindegy",
       modelEmptyLabel: "Mindegy",
       yearFromCatalog: false,

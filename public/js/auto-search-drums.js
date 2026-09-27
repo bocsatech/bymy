@@ -474,15 +474,28 @@ function convertRangePairToTwoDrums(wrap) {
   wrap.replaceWith(frag);
 }
 
+function catalogKindForDrums() {
+  const page = document.body?.getAttribute("data-site-page") || "";
+  if (page !== "teherauto") return "szemelyauto";
+  const fromBody = document.body?.dataset?.truckKategoria;
+  const fromTab = document.querySelector("[data-truck-tab].is-active")?.getAttribute("data-truck-tab");
+  const kat = fromBody || fromTab || new URLSearchParams(window.location.search).get("kategoria") || "35-alatt";
+  return kat === "35-alatt" ? "kisteher" : "szemelyauto";
+}
+
 async function fetchCatalogQuick() {
+  const kind = catalogKindForDrums();
+  const staticUrl =
+    kind === "kisteher" ? "/data/vehicle-catalog-kisteher.json" : "/data/vehicle-catalog.json";
   try {
-    const res = await fetch("/data/vehicle-catalog.json", { cache: "force-cache" });
+    const res = await fetch(staticUrl, { cache: "force-cache" });
     const data = await res.json();
     if (data?.gyartmanyok?.length) return data;
   } catch {
+    /* fallback API */
   }
-  const { fetchVehicleCatalog } = await import("./vehicle-catalog-client.js");
-  return fetchVehicleCatalog();
+  const { fetchVehicleCatalog } = await import("./vehicle-catalog-client.js?v=bmKisteher1");
+  return fetchVehicleCatalog({ kind });
 }
 
 function rebindWheel(form, wheelName, options, emptyLabel = "Mindegy") {

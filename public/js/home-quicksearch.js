@@ -19,7 +19,7 @@ import {
   updateAutoDeskAccSummaries,
   arrangeAutoDeskDemoFields,
   deskFilterMenuReady,
-} from "./auto-desk-search.js?v=deskFast1";
+} from "./auto-desk-search.js?v=teherNoAuto1";
 
 prefetchAutoSearchBoot();
 const MOBILE_MQ = "(max-width: 900px)";

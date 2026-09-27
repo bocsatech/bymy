@@ -321,6 +321,12 @@ export function arrangeAutoDeskDemoFields(form = document.getElementById("home-q
   used.add("gyartmany");
   used.add("modell");
   used.add("tipus");
+  const isTeherDesk = document.body?.getAttribute("data-site-page") === "teherauto";
+  if (isTeherDesk) {
+    for (const k of ["tipus", "csomagtarto", "tetto", "karpit1", "karpit2", "egyeb_tipus", "egyeb_modell"]) {
+      used.add(k);
+    }
+  }
 
   if (!used.has("kivitel")) {
     mountDeskField(host, { field: "kivitel", label: "Kivitel" }, form, mountOpts);
@@ -344,6 +350,7 @@ export function arrangeAutoDeskDemoFields(form = document.getElementById("home-q
 
     for (const item of muszakiOrder) {
       if (used.has(item.field)) continue;
+      if (isTeherDesk && ["tipus", "csomagtarto", "tetto", "karpit1", "karpit2"].includes(item.field)) continue;
       mountDeskField(muszakiHost, item, form, mountOpts);
     }
 

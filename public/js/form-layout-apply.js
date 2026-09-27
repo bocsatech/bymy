@@ -1016,6 +1016,19 @@ async function applyAdFormLayout() {
       if (adHideStreetOnly(form) && LOCATION_FIELD_KEYS.has(cell.field_key)) {
         continue;
       }
+      // Kisteher: soha ne hozzuk vissza az autó Tipus / Csomagtartó / Tető / Kárpit menüket.
+      if (
+        category === "kisteher" &&
+        ["tipus", "egyeb_tipus", "csomagtarto", "tetto", "karpit1", "karpit2"].includes(cell.field_key)
+      ) {
+        const dead = wrapFor(form, cell.field_key);
+        if (dead) {
+          dead.classList.add("ad-layout-hidden");
+          dead.hidden = true;
+          setRequired(dead, false);
+        }
+        continue;
+      }
       const wrap = wrapFor(form, cell.field_key);
       if (!wrap || placed.has(wrap)) continue;
       if (wrap.closest("#ingatlan-fields") && category !== "ingatlan") continue;

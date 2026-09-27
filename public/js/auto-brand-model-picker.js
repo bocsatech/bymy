@@ -1,5 +1,5 @@
 
-import { fetchVehicleCatalog } from "./vehicle-catalog-client.js?v=bmOpenModel1";
+import { fetchVehicleCatalog } from "./vehicle-catalog-client.js?v=bmKidsInline1";
 import { bindAutoBmDismiss, autoBmPanelIsOpen } from "./auto-bm-dismiss.js?v=bmDismiss1";
 
 function labelList(items, unit) {
@@ -269,16 +269,29 @@ export async function mountAutoBrandModelPicker(form) {
       .map((node) => {
         const model = node.name;
         const on = selectedModels.includes(model);
-        const kids = node.children || [];
-        const kidsOn = kids.filter((c) => selectedModels.includes(c.name)).length;
-        const childRow =
+        const kids = [...(node.children || [])].sort((a, b) =>
+          a.name.localeCompare(b.name, "hu", { sensitivity: "base" })
+        );
+        /* Gyerekek (pl. A3 CABRIO) rögtön látszanak — nem kell „Almenü” kattintás */
+        const kidsHtml =
           kids.length > 0
-            ? `<button type="button" class="auto-bm-subrow" data-auto-bm-open-group="${escapeAttr(model)}">
-                <span>Almenü (${kids.length})</span>
-                <span class="auto-bm-subrow__val">${
-                  kidsOn ? escapeHtml(`${kidsOn} kiválasztva`) : "Mindegy"
-                }</span>
-              </button>`
+            ? `<div class="auto-fuel-children">
+                ${kids
+                  .map((child) => {
+                    const name = child.name;
+                    const childOn = selectedModels.includes(name);
+                    return `<div class="auto-bm-row">
+                      <label class="auto-bm-toggle">
+                        <span>${escapeHtml(name)}</span>
+                        <input type="checkbox" data-auto-bm-model="${escapeAttr(name)}" ${
+                          childOn ? "checked" : ""
+                        } />
+                        <span class="auto-bm-switch" aria-hidden="true"></span>
+                      </label>
+                    </div>`;
+                  })
+                  .join("")}
+              </div>`
             : "";
         return `<div class="auto-bm-row" data-auto-bm-model-row="${escapeAttr(model)}">
           <label class="auto-bm-toggle">
@@ -286,7 +299,7 @@ export async function mountAutoBrandModelPicker(form) {
             <input type="checkbox" data-auto-bm-model="${escapeAttr(model)}" ${on ? "checked" : ""} />
             <span class="auto-bm-switch" aria-hidden="true"></span>
           </label>
-          ${childRow}
+          ${kidsHtml}
         </div>`;
       })
       .join("");

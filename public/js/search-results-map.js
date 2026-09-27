@@ -9,7 +9,7 @@ import {
 } from "./listing-radius.js";
 import { listingDetailHref } from "./listing-return.js?v=scrollTop1";
 import { listingTileTitle, listingTilePrice } from "./listing-tile.js?v=listThumb1";
-import { getAuthUser } from "./site-auth.js?v=authMembersOnly1";
+import { getAuthUser } from "./site-auth.js?v=bootFix2";
 import { readNearbyPrefs } from "./nearby-search.js?v=korzetFix1";
 
 const HU_CENTER = [47.1625, 19.5033];
@@ -104,18 +104,25 @@ async function resolveHomeOrigin(cityIndex) {
   return null;
 }
 
-function ensureModal() {
+function findListingsHost() {
+  return (
+    document.querySelector(".home-listings-panel") ||
+    document.getElementById("home-grid-track")?.parentElement ||
+    null
+  );
+}
+
+function ensureMapPanel() {
   let root = document.getElementById("search-map-modal");
   const markup = `
-    <div class="search-map-modal__backdrop" data-search-map-close tabindex="-1"></div>
-    <div class="search-map-modal__panel" role="dialog" aria-modal="true" aria-labelledby="search-map-title">
+    <div class="search-map-modal__panel" role="region" aria-labelledby="search-map-title">
       <header class="search-map-modal__head">
         <div>
           <h2 id="search-map-title" class="search-map-modal__title">Találatok a térképen</h2>
           <div class="search-map-modal__stats" data-search-map-stats></div>
           <p class="search-map-modal__sub" data-search-map-sub hidden></p>
         </div>
-        <button type="button" class="search-map-modal__close" data-search-map-close aria-label="Bezárás">×</button>
+        <button type="button" class="search-map-modal__close" data-search-map-close aria-label="Térkép bezárása">×</button>
       </header>
       <div class="search-map-modal__body">
         <div id="search-map-canvas" class="search-map-modal__canvas" aria-label="Térkép"></div>
@@ -125,13 +132,22 @@ function ensureModal() {
       </div>
     </div>
   `;
+  const host = findListingsHost();
+  const grid = document.getElementById("home-grid-track");
+
   if (!root) {
     root = document.createElement("div");
     root.id = "search-map-modal";
-    root.className = "search-map-modal";
+    root.className = "search-map-inline";
     root.hidden = true;
     root.innerHTML = markup;
-    document.body.appendChild(root);
+    if (host && grid && grid.parentElement === host) {
+      host.insertBefore(root, grid);
+    } else if (host) {
+      host.prepend(root);
+    } else {
+      document.body.appendChild(root);
+    }
     root.addEventListener("click", (event) => {
       if (event.target?.closest?.("[data-search-map-close]")) {
         closeSearchResultsMap();
@@ -156,11 +172,19 @@ function ensureModal() {
     });
     return root;
   }
-  // Upgrade older modal shells (cached tab / previous build).
-  if (!root.querySelector("[data-search-map-stats]")) {
+
+  /* Upgrade older modal / wrong parent (cached shell). */
+  root.classList.add("search-map-inline");
+  root.classList.remove("search-map-modal");
+  if (!root.querySelector("[data-search-map-stats]") || root.querySelector(".search-map-modal__backdrop")) {
     const wasHidden = root.hidden;
     root.innerHTML = markup;
     root.hidden = wasHidden;
+  }
+  if (host && grid && root.parentElement !== host) {
+    host.insertBefore(root, grid);
+  } else if (host && grid && root.nextElementSibling !== grid) {
+    host.insertBefore(root, grid);
   }
   return root;
 }
@@ -621,6 +645,9 @@ export function closeSearchResultsMap() {
   const root = document.getElementById("search-map-modal");
   if (root) root.hidden = true;
   document.body.classList.remove("search-map-open");
+  document.querySelectorAll("[data-search-map-open]").forEach((btn) => {
+    btn.setAttribute("aria-expanded", "false");
+  });
   clearRoute();
   routeRequestId += 1;
   selectedPinId = null;
@@ -628,16 +655,23 @@ export function closeSearchResultsMap() {
 
 export async function openSearchResultsMap(items) {
   const list = Array.isArray(items) ? items : [];
-  const root = ensureModal();
+  const root = ensureMapPanel();
   const side = root.querySelector("[data-search-map-side]");
   root.hidden = false;
   document.body.classList.add("search-map-open");
+  document.querySelectorAll("[data-search-map-open]").forEach((btn) => {
+    btn.setAttribute("aria-expanded", "true");
+  });
   homeOrigin = null;
   lastPins = [];
   selectedPinId = null;
   clearRoute();
   setMapStats({ empty: !list.length });
   renderSideAll(side, []);
+  try {
+    root.scrollIntoView({ behavior: "smooth", block: "start" });
+  } catch {
+  }
 
   if (!list.length) {
     setMapStats({ empty: true });
@@ -670,7 +704,14 @@ export function initSearchResultsMapButtons({ getItems } = {}) {
   if (!buttons.length) return;
 
   buttons.forEach((btn) => {
+    btn.setAttribute("aria-controls", "search-map-modal");
+    btn.setAttribute("aria-expanded", "false");
     btn.addEventListener("click", async () => {
+      const root = document.getElementById("search-map-modal");
+      if (root && !root.hidden) {
+        closeSearchResultsMap();
+        return;
+      }
       const items = typeof getItems === "function" ? getItems() : [];
       btn.disabled = true;
       try {

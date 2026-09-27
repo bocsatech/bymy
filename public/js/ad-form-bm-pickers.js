@@ -6,7 +6,7 @@ import {
   UZEMANYAG_CATEGORIES,
 } from "./equipment-data.js?v=allapotFlat1";
 import { KIVITEL_OPTIONS } from "./kivitel-options.js?v=kivitel1";
-import { fetchVehicleCatalog } from "./vehicle-catalog-client.js?v=adBmCatalog1";
+import { fetchVehicleCatalog } from "./vehicle-catalog-client.js?v=bmTree1";
 import { bindAutoBmDismiss, autoBmPanelIsOpen } from "./auto-bm-dismiss.js?v=bmDismiss1";
 import {
   VEHICLE_KARPIT_OPTIONS,
@@ -635,6 +635,7 @@ function mountSearchDropdownPicker(select, opts) {
     renderRows,
     bindBody,
     onQueryChange,
+    onClose,
     singleSelect = false,
   } = opts;
   if (!select || select.tagName !== "SELECT" || select.dataset.adBmPicker === "1") return;
@@ -778,6 +779,7 @@ function mountSearchDropdownPicker(select, opts) {
     }
     query = "";
     onQueryChange?.(query);
+    onClose?.();
     syncHidden();
     refreshTrigger();
     resetBmDropdownBody(bodyEl);
@@ -805,7 +807,9 @@ function mountSearchDropdownPicker(select, opts) {
     if (
       !force &&
       nextStart === lastWindowStart &&
-      bodyEl.querySelector("[data-ad-bm-flat], [data-ad-bm-brand], [data-ad-bm-model], [data-ad-bm-fuel-child]")
+      bodyEl.querySelector(
+        "[data-ad-bm-flat], [data-ad-bm-brand], [data-ad-bm-model], [data-ad-bm-fuel-child], [data-ad-bm-open-group]"
+      )
     ) {
       return;
     }
@@ -813,6 +817,11 @@ function mountSearchDropdownPicker(select, opts) {
     renderRows(bodyEl, items, scrollTop);
     bindBody(bodyEl);
   }
+
+  select._adBmRender = () => {
+    lastWindowStart = -1;
+    renderList(true);
+  };
 
   function beginSearch() {
     if (isDisabled()) return;
@@ -1812,6 +1821,8 @@ function mountBrandPicker(select, catalog) {
 function mountModelPicker(select, catalog) {
   let selected = "";
   let query = "";
+  /** null = top models; string = open almenü group name */
+  let openGroup = null;
 
   function selectedBrand() {
     const gyartmany = document.getElementById("gyartmany");
@@ -1819,24 +1830,64 @@ function mountModelPicker(select, catalog) {
     return readSingleStoredValue(raw).toUpperCase();
   }
 
-  function modelOptions() {
+  function modelTree() {
     const brand = selectedBrand();
     if (!brand) return [];
-    return [...(catalog?.modellek?.[brand] || [])].sort((a, b) =>
-      a.localeCompare(b, "hu", { sensitivity: "base" })
-    );
+    const tree = catalog?.modellekTree?.[brand];
+    if (Array.isArray(tree) && tree.length) {
+      return [...tree].sort((a, b) => a.name.localeCompare(b.name, "hu", { sensitivity: "base" }));
+    }
+    return [...(catalog?.modellek?.[brand] || [])]
+      .sort((a, b) => a.localeCompare(b, "hu", { sensitivity: "base" }))
+      .map((name) => ({ name, children: [], postRequiresChild: false }));
   }
 
-  function matchingModels() {
+  function flatAllowedNames() {
+    const names = [];
+    for (const node of modelTree()) {
+      if (node?.name) names.push(node.name);
+      for (const child of node.children || []) {
+        if (child?.name) names.push(child.name);
+      }
+    }
+    return names;
+  }
+
+  function matchingTopModels() {
     const q = query.trim().toLocaleLowerCase("hu");
-    const options = modelOptions();
+    const options = modelTree();
     if (!q) return options;
-    return options.filter((model) => model.toLocaleLowerCase("hu").includes(q));
+    return options.filter((node) => {
+      if (node.name.toLocaleLowerCase("hu").includes(q)) return true;
+      return (node.children || []).some((c) => c.name.toLocaleLowerCase("hu").includes(q));
+    });
+  }
+
+  function matchingGroupChildren() {
+    const group = modelTree().find((n) => n.name === openGroup);
+    const kids = [...(group?.children || [])].sort((a, b) =>
+      a.name.localeCompare(b.name, "hu", { sensitivity: "base" })
+    );
+    const q = query.trim().toLocaleLowerCase("hu");
+    if (!q) return kids;
+    return kids.filter((c) => c.name.toLocaleLowerCase("hu").includes(q));
   }
 
   function pruneSelected() {
-    const allowed = new Set(modelOptions());
+    const allowed = new Set(flatAllowedNames());
     if (selected && !allowed.has(selected)) selected = "";
+  }
+
+  function selectModel(model, node) {
+    if (node?.postRequiresChild || (node?.children?.length && !openGroup)) {
+      openGroup = node.name;
+      select._adBmRender?.();
+      return;
+    }
+    selected = model;
+    writePlainValue(select, selected);
+    updateBmSearchTrigger(select, selected || PLACEHOLDER, Boolean(selected));
+    closeAdBmPicker(select);
   }
 
   mountSearchDropdownPicker(select, {
@@ -1851,6 +1902,7 @@ function mountModelPicker(select, catalog) {
       selected = readSingleStoredValue(raw);
       if (raw.trim().startsWith("[")) writePlainValue(select, selected);
       pruneSelected();
+      openGroup = null;
     },
     syncHidden() {
       writePlainValue(select, selected);
@@ -1858,34 +1910,102 @@ function mountModelPicker(select, catalog) {
     getSummary() {
       return selected || PLACEHOLDER;
     },
-    getFilteredItems: matchingModels,
-    renderRows(bodyEl, items, scrollTop) {
-      const selectedSet = new Set(selected ? [selected] : []);
-      renderWindowedToggleRows(
-        bodyEl,
-        items,
-        scrollTop,
-        (item) => String(item),
-        (item) => String(item),
-        selectedSet,
-        "data-ad-bm-model"
-      );
+    getFilteredItems: () => (openGroup ? matchingGroupChildren() : matchingTopModels()),
+    renderRows(bodyEl, items) {
+      if (openGroup) {
+        const back = `<button type="button" class="auto-bm-subrow" data-ad-bm-model-back>
+          <span>‹ Vissza a modellekhez</span>
+          <span class="auto-bm-subrow__val">${escapeHtml(openGroup)}</span>
+        </button>`;
+        bodyEl.innerHTML =
+          back +
+          (items
+            .map((child) => {
+              const name = child.name;
+              const on = selected === name;
+              return `<div class="auto-bm-row">
+              <label class="auto-bm-toggle">
+                <span>${escapeHtml(name)}</span>
+                <input type="checkbox" data-ad-bm-model="${escapeAttr(name)}" ${on ? "checked" : ""} />
+                <span class="auto-bm-switch" aria-hidden="true"></span>
+              </label>
+            </div>`;
+            })
+            .join("") || `<p class="auto-bm-empty">Nincs altípus.</p>`);
+        return;
+      }
+      bodyEl.innerHTML =
+        items
+          .map((node) => {
+            const name = node.name;
+            const kids = node.children || [];
+            const requires = Boolean(node.postRequiresChild || kids.length);
+            const on = selected === name || kids.some((c) => c.name === selected);
+            const childBtn = requires
+              ? `<button type="button" class="auto-bm-subrow" data-ad-bm-open-group="${escapeAttr(name)}">
+                  <span>Almenü (${kids.length})</span>
+                  <span class="auto-bm-subrow__val">${
+                    kids.some((c) => c.name === selected)
+                      ? escapeHtml(kids.find((c) => c.name === selected).name)
+                      : "Válassz"
+                  }</span>
+                </button>`
+              : "";
+            return `<div class="auto-bm-row">
+              <label class="auto-bm-toggle">
+                <span>${escapeHtml(name)}</span>
+                <input type="checkbox" data-ad-bm-model="${escapeAttr(name)}" data-ad-bm-requires-child="${
+                  requires ? "1" : "0"
+                }" ${on && !requires ? "checked" : ""} ${requires ? "disabled" : ""} />
+                <span class="auto-bm-switch" aria-hidden="true"></span>
+              </label>
+              ${childBtn}
+            </div>`;
+          })
+          .join("") || `<p class="auto-bm-empty">Nincs modell ehhez a gyártmányhoz.</p>`;
     },
     bindBody(bodyEl) {
+      bodyEl.onclick = (event) => {
+        if (event.target.closest("[data-ad-bm-model-back]")) {
+          openGroup = null;
+          select._adBmRender?.();
+          return;
+        }
+        const groupBtn = event.target.closest("[data-ad-bm-open-group]");
+        if (groupBtn) {
+          openGroup = groupBtn.getAttribute("data-ad-bm-open-group") || "";
+          select._adBmRender?.();
+        }
+      };
       bodyEl.onchange = (event) => {
         const el = event.target.closest("[data-ad-bm-model]");
         if (!el) return;
         const model = el.getAttribute("data-ad-bm-model") ?? "";
-        if (el.checked) selected = model;
-        else if (selected === model) selected = "";
-        writePlainValue(select, selected);
-        enforceSingleToggleChecks(bodyEl, "data-ad-bm-model", selected);
-        updateBmSearchTrigger(select, selected || PLACEHOLDER, Boolean(selected));
-        closeAdBmPicker(select);
+        const requires = el.getAttribute("data-ad-bm-requires-child") === "1";
+        if (requires) {
+          el.checked = false;
+          const node = modelTree().find((n) => n.name === model);
+          selectModel(model, node);
+          return;
+        }
+        if (el.checked) {
+          selected = model;
+          writePlainValue(select, selected);
+          enforceSingleToggleChecks(bodyEl, "data-ad-bm-model", selected);
+          updateBmSearchTrigger(select, selected || PLACEHOLDER, Boolean(selected));
+          closeAdBmPicker(select);
+        } else if (selected === model) {
+          selected = "";
+          writePlainValue(select, selected);
+          updateBmSearchTrigger(select, PLACEHOLDER, false);
+        }
       };
     },
     onQueryChange(next) {
       query = next;
+    },
+    onClose: () => {
+      openGroup = null;
     },
   });
 

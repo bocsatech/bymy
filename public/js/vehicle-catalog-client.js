@@ -34,8 +34,13 @@ function summaryFromCatalog(catalog) {
     source: catalog.source ?? null,
     imported_at: catalog.imported_at ?? null,
     count_rows: catalog.count_rows ?? 0,
+    count_brands: catalog.count_brands ?? catalog.gyartmanyok?.length ?? 0,
+    count_models: catalog.count_models ?? 0,
+    count_model_children: catalog.count_model_children ?? 0,
     gyartmanyok: catalog.gyartmanyok ?? [],
     modellek: catalog.modellek ?? {},
+    modellekTree: catalog.modellekTree ?? {},
+    meta: catalog.meta ?? null,
   };
 }
 

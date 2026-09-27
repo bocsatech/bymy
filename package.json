@@ -15,6 +15,7 @@
     "import:catalog": "node scripts/import-vehicle-catalog.mjs",
     "build:html": "node scripts/embed-ad-form.mjs",
     "import:hasznaltauto": "node scripts/import-hasznaltauto-catalog.mjs",
+    "scrape:ha-brands-models": "node scripts/scrape-ha-brands-models.mjs",
     "scrape:ha-dealers": "node scripts/scrape-hasznaltauto-dealers.mjs",
     "login:hasznaltauto": "node scripts/save-hasznaltauto-session.mjs",
     "prestart": "node scripts/embed-ad-form.mjs",

@@ -1,5 +1,5 @@
 
-import { fetchVehicleCatalog } from "./vehicle-catalog-client.js?v=deskFast1";
+import { fetchVehicleCatalog } from "./vehicle-catalog-client.js?v=bmTree1";
 import { bindAutoBmDismiss, autoBmPanelIsOpen } from "./auto-bm-dismiss.js?v=bmDismiss1";
 
 function labelList(items, unit) {
@@ -54,7 +54,34 @@ export async function mountAutoBrandModelPicker(form) {
   const brands = [...(catalog.gyartmanyok || [])].sort((a, b) =>
     a.localeCompare(b, "hu", { sensitivity: "base" })
   );
-  const modelsByBrand = catalog.modellek || {};
+  const treeByBrand = catalog.modellekTree || {};
+  const modelsByBrand = {};
+  for (const brand of brands) {
+    const tree = treeByBrand[brand];
+    if (Array.isArray(tree) && tree.length) {
+      const names = [];
+      for (const node of tree) {
+        if (node?.name) names.push(node.name);
+        for (const child of node.children || []) {
+          if (child?.name) names.push(child.name);
+        }
+      }
+      modelsByBrand[brand] = names;
+    } else {
+      modelsByBrand[brand] = [...(catalog.modellek?.[brand] || [])];
+    }
+  }
+
+  function treeFor(brand) {
+    const tree = treeByBrand[brand];
+    if (Array.isArray(tree) && tree.length) return tree;
+    return (modelsByBrand[brand] || []).map((name) => ({
+      name,
+      children: [],
+      searchSelectable: true,
+      postRequiresChild: false,
+    }));
+  }
 
   /* Drop every plain Gyártmány / Modell / Típus row — picker is the only brand UI. */
   alapHost
@@ -105,6 +132,8 @@ export async function mountAutoBrandModelPicker(form) {
   let selectedBrands = [];
   let selectedModels = [];
   let modelBrand = null;
+  /** Open model group (almenü), e.g. ML-OSZTÁLY */
+  let modelGroup = null;
   let brandQuery = "";
 
   const panel = document.createElement("div");
@@ -228,15 +257,62 @@ export async function mountAutoBrandModelPicker(form) {
 
   function renderModelList(brand) {
     modelBrand = brand;
+    modelGroup = null;
     titleEl.textContent = "Modell";
     subEl.hidden = false;
     subEl.textContent = brand;
     searchWrap.hidden = true;
-    const models = [...(modelsByBrand[brand] || [])].sort((a, b) =>
-      a.localeCompare(b, "hu", { sensitivity: "base" })
+    const models = [...treeFor(brand)].sort((a, b) =>
+      a.name.localeCompare(b.name, "hu", { sensitivity: "base" })
     );
     const rows = models
-      .map((model) => {
+      .map((node) => {
+        const model = node.name;
+        const on = selectedModels.includes(model);
+        const kids = node.children || [];
+        const kidsOn = kids.filter((c) => selectedModels.includes(c.name)).length;
+        const childRow =
+          kids.length > 0
+            ? `<button type="button" class="auto-bm-subrow" data-auto-bm-open-group="${escapeAttr(model)}">
+                <span>Almenü (${kids.length})</span>
+                <span class="auto-bm-subrow__val">${
+                  kidsOn ? escapeHtml(`${kidsOn} kiválasztva`) : "Mindegy"
+                }</span>
+              </button>`
+            : "";
+        return `<div class="auto-bm-row" data-auto-bm-model-row="${escapeAttr(model)}">
+          <label class="auto-bm-toggle">
+            <span>${escapeHtml(model)}</span>
+            <input type="checkbox" data-auto-bm-model="${escapeAttr(model)}" ${on ? "checked" : ""} />
+            <span class="auto-bm-switch" aria-hidden="true"></span>
+          </label>
+          ${childRow}
+        </div>`;
+      })
+      .join("");
+
+    bodyEl.innerHTML = `
+      ${actionsHtml({ clearAttr: 'data-auto-bm-clear-models' })}
+      <div class="auto-bm-group">${
+        rows || `<p class="auto-bm-empty">Nincs modell ehhez a gyártmányhoz.</p>`
+      }</div>
+    `;
+  }
+
+  function renderModelGroupList(brand, groupName) {
+    modelBrand = brand;
+    modelGroup = groupName;
+    const group = treeFor(brand).find((n) => n.name === groupName);
+    const kids = [...(group?.children || [])].sort((a, b) =>
+      a.name.localeCompare(b.name, "hu", { sensitivity: "base" })
+    );
+    titleEl.textContent = groupName;
+    subEl.hidden = false;
+    subEl.textContent = brand;
+    searchWrap.hidden = true;
+    const rows = kids
+      .map((child) => {
+        const model = child.name;
         const on = selectedModels.includes(model);
         return `<div class="auto-bm-row">
           <label class="auto-bm-toggle">
@@ -247,11 +323,10 @@ export async function mountAutoBrandModelPicker(form) {
         </div>`;
       })
       .join("");
-
     bodyEl.innerHTML = `
-      ${actionsHtml({ clearAttr: 'data-auto-bm-clear-models' })}
+      ${actionsHtml({ clearAttr: 'data-auto-bm-clear-group-models' })}
       <div class="auto-bm-group">${
-        rows || `<p class="auto-bm-empty">Nincs modell ehhez a gyártmányhoz.</p>`
+        rows || `<p class="auto-bm-empty">Nincs altípus ebben az almenüben.</p>`
       }</div>
     `;
   }
@@ -285,6 +360,7 @@ export async function mountAutoBrandModelPicker(form) {
     panel.classList.add("is-closed");
     document.body.classList.remove("auto-bm-open");
     modelBrand = null;
+    modelGroup = null;
     brandQuery = "";
     if (searchInput) searchInput.value = "";
     if (document.activeElement instanceof HTMLElement) {
@@ -313,6 +389,10 @@ export async function mountAutoBrandModelPicker(form) {
   });
 
   panel.querySelector("[data-auto-bm-back]")?.addEventListener("click", () => {
+    if (modelGroup && modelBrand) {
+      renderModelList(modelBrand);
+      return;
+    }
     if (modelBrand) {
       renderBrandList();
       requestAnimationFrame(() => searchInput?.focus());
@@ -393,10 +473,23 @@ export async function mountAutoBrandModelPicker(form) {
       renderModelList(openModels.getAttribute("data-auto-bm-open-models"));
       return;
     }
+    const openGroup = event.target.closest("[data-auto-bm-open-group]");
+    if (openGroup && modelBrand) {
+      renderModelGroupList(modelBrand, openGroup.getAttribute("data-auto-bm-open-group"));
+      return;
+    }
     if (event.target.closest("[data-auto-bm-clear-brands]")) {
       selectedBrands = [];
       selectedModels = [];
       renderBrandList();
+      syncHidden();
+      return;
+    }
+    if (event.target.closest("[data-auto-bm-clear-group-models]") && modelBrand && modelGroup) {
+      const group = treeFor(modelBrand).find((n) => n.name === modelGroup);
+      const allowed = new Set((group?.children || []).map((c) => c.name));
+      selectedModels = selectedModels.filter((m) => !allowed.has(m));
+      renderModelGroupList(modelBrand, modelGroup);
       syncHidden();
       return;
     }

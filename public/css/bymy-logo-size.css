@@ -5,7 +5,7 @@
   max-width: min(75px, 14vw) !important;
 }
 
-@media (min-width: 901px) {
+@media (min-width: 801px) {
   .bymy-logo-img--nav,
   .home-logo .bymy-logo-img--nav,
   body.site-app .bymy-logo-img--nav,

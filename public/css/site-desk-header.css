@@ -1,8 +1,8 @@
-/* Willhaben-szerű két-soros desk fejléc (≥901px)
-   1. sor: logo balra, akciók jobbra
-   2. sor: szöveges menü teljes szélességben
-   ≤1199px: akciók ikon-kompakt (mint willhaben szűkített nézet) */
-@media (min-width: 901px) {
+/* Willhaben-szerű két-soros desk fejléc (≥801px; ≤800 = mobil mw-app-top)
+   1. sor: logo középen, akciók jobbra
+   2. sor: szöveges menü
+   ≤1199px: akciók ikon-kompakt */
+@media (min-width: 801px) {
   body.site-app {
     --desk-nav-font: "DM Sans", system-ui, -apple-system, sans-serif;
     --desk-nav-size: 14px;
@@ -291,7 +291,7 @@
 }
 
 /* Szűkített desk (willhaben kompakt): szöveg elrejtve, ikonok maradnak */
-@media (min-width: 901px) and (max-width: 1199px) {
+@media (min-width: 801px) and (max-width: 1199px) {
   body.site-app {
     --desk-pad-x: 16px;
     --desk-logo-h: 48px;

@@ -489,7 +489,13 @@ export async function initHomeFilterCatalog(onChange = () => {}) {
   const modelSelect = document.getElementById("filter-modell");
   if (!brandSelect || !modelSelect) return null;
 
+  const page = document.body?.getAttribute("data-site-page") || "";
+  const truckKat = document.body?.dataset?.truckKategoria || "35-alatt";
+  const kind =
+    page === "teherauto" && truckKat !== "35-felett" ? "kisteher" : "szemelyauto";
+
   return initVehicleCatalogSelects({
+    kind,
     brandSelect,
     modelSelect,
     yearSelect: document.getElementById("filter-ev-jarat"),

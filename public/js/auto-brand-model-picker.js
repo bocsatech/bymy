@@ -12,8 +12,9 @@ function truckKategoria() {
 }
 
 function catalogKindForPage() {
-  if (document.body?.getAttribute("data-site-page") === "teherauto" && truckKategoria() === "35-alatt") {
-    return "kisteher";
+  // Teherautó oldal: 3,5-ig mindig kishaszon katalógus (soha személyautó / Ferrari…).
+  if (document.body?.getAttribute("data-site-page") === "teherauto") {
+    return truckKategoria() === "35-felett" ? "szemelyauto" : "kisteher";
   }
   return "szemelyauto";
 }

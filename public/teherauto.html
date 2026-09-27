@@ -335,10 +335,13 @@
         if (new URLSearchParams(window.location.search).get("hirdeto")) {
           document.body.classList.add("seller-inventory-mode");
         }
+        var kat = new URLSearchParams(window.location.search).get("kategoria") || "35-alatt";
+        document.body.setAttribute("data-truck-kategoria", kat);
         if (window.matchMedia("(min-width: 901px)").matches) {
           document.body.classList.add("auto-desk-active");
           fetch("/api/level1/form-layout?category=teherauto-search", { credentials: "same-origin" }).catch(function () {});
-          fetch("/api/vehicle-catalog", { credentials: "same-origin" }).catch(function () {});
+          var catalogQs = kat === "35-alatt" ? "?kind=kisteher" : "";
+          fetch("/api/vehicle-catalog" + catalogQs, { credentials: "same-origin" }).catch(function () {});
         }
       } catch (e) {}
     </script>
@@ -587,7 +590,7 @@
         form.classList.add("is-qs-ready");
       }, 5500);
     </script>
-    <script src="/js/home-app.js?v=bmScrollTop1" type="module"></script>
+    <script src="/js/home-app.js?v=teherCatalog2" type="module"></script>
     <script src="/js/auto-hero.js?v=searchCollapse1" type="module"></script>
     <script src="/js/site-avatar-menu.js?v=avatarSync1" type="module"></script>
 

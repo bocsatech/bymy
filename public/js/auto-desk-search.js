@@ -19,6 +19,23 @@ const DESK_ALAP_FALLBACK = [
 /** These are owned by mountAutoBrandModelPicker — never mount as plain selects in gyors. */
 const BRAND_MODEL_DESK_KEYS = new Set(["gyartmany", "modell", "tipus"]);
 
+function stripStrayBrandModelFields(host) {
+  if (!host) return;
+  host
+    .querySelectorAll(
+      '[data-desk-field="gyartmany"]:not(.auto-bm-field), [data-desk-field="modell"]:not(.auto-bm-field), [data-desk-field="tipus"]'
+    )
+    .forEach((el) => el.remove());
+}
+
+/** Desk filter already has pickers — avoid wiping/remounting (catalog fetch + DOM rebuild). */
+export function deskFilterMenuReady(form = document.getElementById("home-qs-form")) {
+  if (!form?.classList.contains("auto-desk-native")) return false;
+  if (form.dataset.brandModelPicker !== "1") return false;
+  const host = form.querySelector(".auto-desk-fields[data-desk-alap]");
+  return Boolean(host?.querySelector(".auto-bm-pair"));
+}
+
 const DESK_MUSZAKI_FALLBACK = [
   { field: "km", label: "Futott km", range: true },
   { field: "teljesitmeny_le", label: "Teljesítmény", range: true },
@@ -251,13 +268,6 @@ export function arrangeAutoDeskDemoFields(form = document.getElementById("home-q
   const mainHost = document.getElementById("qs-layout-main");
   const moreHost = document.getElementById("qs-more-layout");
 
-  /* host.innerHTML wipe destroys pickers — allow remount after rearrange */
-  delete form.dataset.brandModelPicker;
-  delete form.dataset.fuelPicker;
-  delete form.dataset.kivitelPicker;
-  delete form.dataset.allapotPicker;
-  form.querySelectorAll(".auto-bm-panel").forEach((el) => el.remove());
-
   const quickKeys = new Set((form.dataset.deskQuickKeys || "").split(",").filter(Boolean));
   if (!quickKeys.size) {
     ["gyartmany", "modell", "uzemanyag", "gyartasi_ev", "vetelar", "kivitel", "allapot"].forEach((k) => quickKeys.add(k));
@@ -271,6 +281,15 @@ export function arrangeAutoDeskDemoFields(form = document.getElementById("home-q
     host.dataset.deskAlap = "1";
     alapBody.insertBefore(host, alapBody.firstChild);
   }
+
+  /* Already built once: keep pickers, only drop stray plain Gyártmány/Modell/Típus. */
+  if (deskFilterMenuReady(form)) {
+    stripStrayBrandModelFields(host);
+    form.classList.add("auto-desk-native");
+    syncGyorsFieldVisibility(form);
+    return;
+  }
+
   host.innerHTML = "";
 
   form.querySelectorAll(".home-qs-static-legacy").forEach((el) => {

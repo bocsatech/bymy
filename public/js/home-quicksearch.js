@@ -1,5 +1,5 @@
 
-import { applyAutoSearchLayout, readLayoutFilterValues, refillAutoSearchRangeSelects, prefetchAutoSearchBoot } from "./auto-search-layout.js?v=allapotFlat1";
+import { applyAutoSearchLayout, readLayoutFilterValues, refillAutoSearchRangeSelects, prefetchAutoSearchBoot } from "./auto-search-layout.js?v=deskFast1";
 import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums } from "./auto-search-drums.js?v=mobFix8";
 import {
   mountDetailedSearch,
@@ -7,7 +7,7 @@ import {
   resetDetailedSearch,
 } from "./auto-detailed-search.js?v=fogyNum1";
 import { readWheel } from "./ingatlan-wheels.js?v=mobFix8";
-import { readBrandModelFilterValues, mountAutoBrandModelPicker } from "./auto-brand-model-picker.js?v=deskDup1";
+import { readBrandModelFilterValues, mountAutoBrandModelPicker } from "./auto-brand-model-picker.js?v=deskFast1";
 import { readFuelFilterValues, mountAutoFuelPicker } from "./auto-fuel-picker.js?v=fuelMatch1";
 import { readKivitelFilterValues, mountAutoKivitelPicker } from "./auto-kivitel-picker.js?v=kivitelFix1";
 import { readAllapotFilterValues, mountAutoAllapotPicker } from "./auto-allapot-picker.js?v=allapotFlat1";
@@ -18,7 +18,8 @@ import {
   initAutoDeskSearch,
   updateAutoDeskAccSummaries,
   arrangeAutoDeskDemoFields,
-} from "./auto-desk-search.js?v=deskDup1";
+  deskFilterMenuReady,
+} from "./auto-desk-search.js?v=deskFast1";
 
 prefetchAutoSearchBoot();
 const MOBILE_MQ = "(max-width: 900px)";
@@ -221,35 +222,58 @@ export function initHomeQuickSearch({ onSearch = () => {}, onDeskSortChange, onR
     }
   }, 4500);
 
+  let deskMenuMountPromise = null;
+
   async function mountDeskFilterMenu(f) {
-    arrangeAutoDeskDemoFields(f);
-    refillAutoSearchRangeSelects(f);
-    const mountSafe = (fn, label) =>
-      fn(f).catch((error) => {
-        console.warn(label, error);
-      });
-    await mountSafe(mountAutoBrandModelPicker, "Gyártmány/Modell picker:");
-    await Promise.all([
-      mountSafe(mountAutoFuelPicker, "Üzemanyag picker:"),
-      mountSafe(mountAutoKivitelPicker, "Kivitel picker:"),
-      mountSafe(mountAutoAllapotPicker, "Állapot picker:"),
-    ]);
-    await Promise.all([
-      mountSafe(mountAutoSebessegvaltoPicker, "Sebességváltó picker:"),
-      mountSafe(mountAutoOkmanyPicker, "Okmány picker:"),
-      mountSafe(mountAutoToltoPickers, "Töltőcsatlakozó picker:"),
-    ]);
-    try {
-      updateAutoDeskAccSummaries(f);
-    } catch {
-      /* ignore */
+    /* Second call (layout + syncChrome): keep existing pickers — no catalog re-fetch. */
+    if (deskFilterMenuReady(f)) {
+      arrangeAutoDeskDemoFields(f);
+      try {
+        updateAutoDeskAccSummaries(f);
+      } catch {
+        /* ignore */
+      }
+      return;
     }
+    /* Coalesce concurrent boots — wait for the in-flight mount instead of no-op. */
+    if (deskMenuMountPromise) return deskMenuMountPromise;
+
+    deskMenuMountPromise = (async () => {
+      arrangeAutoDeskDemoFields(f);
+      refillAutoSearchRangeSelects(f);
+      const mountSafe = (fn, label) =>
+        fn(f).catch((error) => {
+          console.warn(label, error);
+        });
+      await mountSafe(mountAutoBrandModelPicker, "Gyártmány/Modell picker:");
+      await Promise.all([
+        mountSafe(mountAutoFuelPicker, "Üzemanyag picker:"),
+        mountSafe(mountAutoKivitelPicker, "Kivitel picker:"),
+        mountSafe(mountAutoAllapotPicker, "Állapot picker:"),
+      ]);
+      /* Muszaki pickers: only when Részletes can show them — skip on gyors-only first paint. */
+      if (!document.body.classList.contains("auto-desk-gyors")) {
+        await mountMuszakiPickersLazy();
+      }
+      try {
+        updateAutoDeskAccSummaries(f);
+      } catch {
+        /* ignore */
+      }
+    })().finally(() => {
+      deskMenuMountPromise = null;
+    });
+
+    return deskMenuMountPromise;
   }
 
   initAutoDeskSearch({
     mountDetailed: (f) => mountDetailedSearch(f, { force: true }),
     onSortChange: (sort) => onDeskSortChange?.(sort),
     onDeskLayout: mountDeskFilterMenu,
+    onModeChange: (mode) => {
+      if (mode === "reszletes") void mountMuszakiPickersLazy();
+    },
   });
 
   form.querySelector("[data-desk-reset]")?.addEventListener("click", () => {
@@ -290,23 +314,24 @@ export function initHomeQuickSearch({ onSearch = () => {}, onDeskSortChange, onR
     else {
       showQsStatus("A kereső elrendezés nem töltődött be. Hard refresh, majd szerver újraindítás.");
     }
-    if (deskAuto && ok) {
-      const mountSafe = (fn, label) =>
-        fn(form).catch((error) => {
-          console.warn(label, error);
-        });
-      void Promise.all([
-        mountSafe(mountAutoSebessegvaltoPicker, "Sebességváltó picker:"),
-        mountSafe(mountAutoOkmanyPicker, "Okmány picker:"),
-        mountSafe(mountAutoToltoPickers, "Töltőcsatlakozó picker:"),
-      ]).then(() => {
-        try {
-          updateAutoDeskAccSummaries(form);
-        } catch {
-          /* ignore */
-        }
+  }
+
+  function mountMuszakiPickersLazy() {
+    const mountSafe = (fn, label) =>
+      fn(form).catch((error) => {
+        console.warn(label, error);
       });
-    }
+    return Promise.all([
+      mountSafe(mountAutoSebessegvaltoPicker, "Sebességváltó picker:"),
+      mountSafe(mountAutoOkmanyPicker, "Okmány picker:"),
+      mountSafe(mountAutoToltoPickers, "Töltőcsatlakozó picker:"),
+    ]).then(() => {
+      try {
+        updateAutoDeskAccSummaries(form);
+      } catch {
+        /* ignore */
+      }
+    });
   }
 
   applyAutoSearchLayout(form)

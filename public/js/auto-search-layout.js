@@ -1,5 +1,5 @@
 
-import { initVehicleCatalogSelects, fillSelect } from "./vehicle-catalog-client.js";
+import { initVehicleCatalogSelects, fillSelect } from "./vehicle-catalog-client.js?v=deskFast1";
 import { KIVITEL_OPTIONS } from "./kivitel-options.js?v=kivitel1";
 import { wirePostalCityAutofill as wireSharedPostalCityAutofill } from "./postal-city-autofill.js?v=postalFill1";
 import {
@@ -306,7 +306,7 @@ export function prefetchAutoSearchBoot() {
     /* private mode */
   }
   void fetchAutoSearchLayout({ force: false }).catch(() => {});
-  void import("./vehicle-catalog-client.js?v=deskQsFast1")
+  void import("./vehicle-catalog-client.js?v=deskFast1")
     .then((m) => m.fetchVehicleCatalog?.())
     .catch(() => {});
 }

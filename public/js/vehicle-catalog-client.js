@@ -39,7 +39,7 @@ function summaryFromCatalog(catalog) {
   };
 }
 
-export async function fetchVehicleCatalog() {
+export function fetchVehicleCatalog() {
   if (!catalogPromise) {
     catalogPromise = fetch("/api/vehicle-catalog", { credentials: "same-origin" })
       .then(async (response) => {

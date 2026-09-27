@@ -1,5 +1,5 @@
 
-import { fetchVehicleCatalog } from "./vehicle-catalog-client.js?v=bmTree1";
+import { fetchVehicleCatalog } from "./vehicle-catalog-client.js?v=bmOpenModel1";
 import { bindAutoBmDismiss, autoBmPanelIsOpen } from "./auto-bm-dismiss.js?v=bmDismiss1";
 
 function labelList(items, unit) {
@@ -445,8 +445,13 @@ export async function mountAutoBrandModelPicker(form) {
       }
       selectedBrands.sort((a, b) => a.localeCompare(b, "hu", { sensitivity: "base" }));
       pruneModels();
-      renderBrandList();
       syncHidden();
+      /* Márka bekapcsolásakor rögtön a modell (típus) lista */
+      if (on && brand) {
+        renderModelList(brand);
+      } else {
+        renderBrandList();
+      }
       return;
     }
     const modelEl = event.target.closest("[data-auto-bm-model]");

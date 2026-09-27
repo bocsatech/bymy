@@ -38,13 +38,45 @@ export function listingCityName(item) {
   return String(fromFilter || fromLocation.split(",")[0] || "").trim();
 }
 
-export function resolveListingCoords(item, cityIndex) {
+export function listingPostalCode(item) {
+  const filter = item.preview?.filter ?? {};
+  const form = item.form ?? {};
+  const raw = filter.iranyitoszam || form.iranyitoszam || "";
+  return String(raw).replace(/\D/g, "").slice(0, 4);
+}
+
+export function buildPostalIndex(postals) {
+  const byCode = new Map();
+  for (const row of postals ?? []) {
+    const code = String(row.postal_code ?? "").replace(/\D/g, "").slice(0, 4);
+    if (code.length !== 4 || row.lat == null || row.lon == null) continue;
+    byCode.set(code, {
+      postal: code,
+      city: String(row.city ?? "").trim(),
+      lat: Number(row.lat),
+      lon: Number(row.lon),
+    });
+  }
+  return byCode;
+}
+
+export function resolveListingCoords(item, cityIndex, postalIndex = null) {
+  const postal = listingPostalCode(item);
+  if (postal && postalIndex?.has(postal)) {
+    const hit = postalIndex.get(postal);
+    return { city: hit.city || listingCityName(item), lat: hit.lat, lon: hit.lon, postal: hit.postal };
+  }
   const name = listingCityName(item);
   const norm = normalizePlace(name);
-  if (!norm) return null;
-  if (cityIndex.has(norm)) return cityIndex.get(norm);
+  if (!norm || !cityIndex) return null;
+  if (cityIndex.has(norm)) {
+    const hit = cityIndex.get(norm);
+    return { city: hit.city, lat: hit.lat, lon: hit.lon, postal: postal || "" };
+  }
   for (const [key, coords] of cityIndex) {
-    if (norm.includes(key) || key.includes(norm)) return coords;
+    if (norm.includes(key) || key.includes(norm)) {
+      return { city: coords.city, lat: coords.lat, lon: coords.lon, postal: postal || "" };
+    }
   }
   return null;
 }

@@ -26,7 +26,10 @@ import { getAuthUser } from "./site-auth.js?v=bootFix2";
 import { bindListingOpen, restoreListingReturn } from "./listing-return.js?v=searchNav1";
 import { normalizeKivitel } from "./kivitel-options.js?v=kivitel1";
 import { featuredListingIdSet } from "./home-featured-slots.js?v=featuredNoAuto1";
-import { initSearchResultsMapButtons } from "./search-results-map.js?v=mapInline6";
+import {
+  initSearchResultsMapButtons,
+  updateSearchMapButtonLabels,
+} from "./search-results-map.js?v=mapPostal1";
 import { mountSellerInventory, updateSellerInventoryCount } from "./seller-inventory.js?v=sellerInv30";
 
 const gridTrack = document.getElementById("home-grid-track");
@@ -470,6 +473,21 @@ async function loadMoreListings() {
   }
 }
 
+function formLooksFiltered() {
+  const form = document.getElementById("home-qs-form");
+  if (!form) return false;
+  const controls = form.querySelectorAll(
+    "select[data-filter-key], select[name], input[data-filter-key]:not([type='hidden']), input[name]:not([type='hidden'])"
+  );
+  for (const el of controls) {
+    const v = String(el.value || "").trim();
+    if (!v) continue;
+    if (/^mindegy$/i.test(v)) continue;
+    return true;
+  }
+  return Boolean(form.querySelector(".auto-desk-field.is-set, [data-desk-field].is-set, [aria-pressed='true']"));
+}
+
 function hasActiveClientFilters() {
   if (featuredOnlyMode || statsFilter || quickRadiusFilter || categoryFilter) return true;
   if (PAGE === "ingatlan") {
@@ -477,6 +495,7 @@ function hasActiveClientFilters() {
   }
   if (hasActiveSidebarFilters(mergedVehicleFilters())) return true;
   if (detailedFilters && hasActiveDetailedSearch(detailedFilters)) return true;
+  if (formLooksFiltered()) return true;
   return false;
 }
 
@@ -574,6 +593,9 @@ function applyFeaturedFromUrl() {
 function applyFilters() {
   renderListings(allItems);
   updateFilterResultCount();
+  if (PAGE === "auto" || PAGE === "teherauto") {
+    updateSearchMapButtonLabels(hasActiveClientFilters());
+  }
   if (hasActiveClientFilters()) void fillFilteredResults();
 }
 
@@ -622,7 +644,14 @@ function hasActiveSidebarFilters(filters) {
 initHomeUnifiedScroll();
 
 if (PAGE === "auto" || PAGE === "teherauto") {
-  initSearchResultsMapButtons({ getItems: currentFilteredListings });
+  initSearchResultsMapButtons({
+    getItems: currentFilteredListings,
+    hasActiveFilters: () => hasActiveClientFilters(),
+    getVertical: () => pageVerticalParam(),
+  });
+  document.getElementById("home-qs-form")?.addEventListener("change", () => {
+    updateSearchMapButtonLabels(hasActiveClientFilters());
+  });
 }
 
 if ("scrollRestoration" in history) {

@@ -3,6 +3,7 @@
  */
 import {
   buildCityIndex,
+  buildPostalIndex,
   haversineKm,
   listingCityName,
   resolveListingCoords,
@@ -11,13 +12,18 @@ import { listingDetailHref } from "./listing-return.js?v=scrollTop1";
 import { listingTileTitle, listingTilePrice } from "./listing-tile.js?v=listThumb1";
 import { getAuthUser } from "./site-auth.js?v=bootFix2";
 import { readNearbyPrefs } from "./nearby-search.js?v=korzetFix1";
+import { fetchListingsPage } from "./db-client.js?v=ownerBoost6";
 
 const HU_CENTER = [47.1625, 19.5033];
 const HU_ZOOM = 7;
+const CLUSTER_ZOOM = 11;
 const JITTER_DEG = 0.0035;
 const OSRM_URL = "https://router.project-osrm.org/route/v1/driving";
+const LABEL_BROWSE = "Keresés a térképen";
+const LABEL_FILTERED = "Találatok a térképen";
 
 let cityIndexPromise = null;
+let postalIndexPromise = null;
 let leafletPromise = null;
 let mapInstance = null;
 let markersLayer = null;
@@ -28,6 +34,9 @@ let routeRequestId = 0;
 let lastPins = [];
 let lastLeaflet = null;
 let selectedPinId = null;
+let mapMode = "filtered"; /* browse | filtered */
+let mapSideEl = null;
+let moveRefreshBound = false;
 
 function escapeHtml(value) {
   return String(value ?? "")
@@ -51,6 +60,49 @@ function getCityIndex() {
       });
   }
   return cityIndexPromise;
+}
+
+function getPostalIndex() {
+  if (!postalIndexPromise) {
+    postalIndexPromise = fetch("/api/postal-codes/index", { credentials: "same-origin" })
+      .then((res) => res.json().catch(() => ({})))
+      .then((data) => {
+        if (!Array.isArray(data.postals)) throw new Error(data.error || "Irányítószám-lista nem elérhető.");
+        return buildPostalIndex(data.postals);
+      })
+      .catch((error) => {
+        postalIndexPromise = null;
+        throw error;
+      });
+  }
+  return postalIndexPromise;
+}
+
+async function fetchAllVerticalListings(vertical) {
+  const out = [];
+  let offset = 0;
+  for (let pageNo = 0; pageNo < 40; pageNo += 1) {
+    const page = await fetchListingsPage({
+      limit: 100,
+      offset,
+      status: "feladott",
+      vertical: vertical || null,
+      tile: true,
+    });
+    const batch = page.listings || [];
+    out.push(...batch);
+    if (!page.hasMore || !batch.length) break;
+    offset += batch.length;
+  }
+  return out;
+}
+
+export function updateSearchMapButtonLabels(hasFilters) {
+  const label = hasFilters ? LABEL_FILTERED : LABEL_BROWSE;
+  document.querySelectorAll("[data-search-map-open]").forEach((btn) => {
+    btn.textContent = label;
+    btn.dataset.mapMode = hasFilters ? "filtered" : "browse";
+  });
 }
 
 function loadLeaflet() {
@@ -201,41 +253,145 @@ function jitterCoords(lat, lon, indexInCity, totalInCity, listingId) {
   };
 }
 
-function placeListings(items, cityIndex) {
-  const byCity = new Map();
+function placeListings(items, cityIndex, postalIndex = null) {
+  const byKey = new Map();
   let skipped = 0;
   for (const item of items ?? []) {
-    const coords = resolveListingCoords(item, cityIndex);
+    const coords = resolveListingCoords(item, cityIndex, postalIndex);
     if (!coords) {
       skipped += 1;
       continue;
     }
-    const key = `${coords.lat.toFixed(4)},${coords.lon.toFixed(4)}`;
-    if (!byCity.has(key)) {
-      byCity.set(key, {
+    const postal = String(coords.postal || "").replace(/\D/g, "").slice(0, 4);
+    const key = postal.length === 4 ? `p:${postal}` : `${coords.lat.toFixed(4)},${coords.lon.toFixed(4)}`;
+    if (!byKey.has(key)) {
+      byKey.set(key, {
         city: coords.city || listingCityName(item) || "Ismeretlen",
+        postal,
         baseLat: coords.lat,
         baseLon: coords.lon,
         items: [],
       });
     }
-    byCity.get(key).items.push(item);
+    byKey.get(key).items.push(item);
   }
 
   const pins = [];
-  for (const group of byCity.values()) {
+  for (const group of byKey.values()) {
     const total = group.items.length;
     group.items.forEach((item, index) => {
       const pos = jitterCoords(group.baseLat, group.baseLon, index, total, item.id);
       pins.push({
         item,
         city: group.city,
+        postal: group.postal,
+        baseLat: group.baseLat,
+        baseLon: group.baseLon,
         lat: pos.lat,
         lon: pos.lon,
       });
     });
   }
   return { pins, skipped };
+}
+
+function getPostalClusterIcon(L, postal, count) {
+  const label = escapeHtml(postal || "?");
+  const n = Number(count) || 0;
+  return L.divIcon({
+    className: "search-map-postal-cluster",
+    html: `<span class="search-map-postal-cluster__dot" aria-hidden="true"><strong>${label}</strong><em>${n}</em></span>`,
+    iconSize: [54, 36],
+    iconAnchor: [27, 18],
+  });
+}
+
+function groupPinsByPostal(pins) {
+  const groups = new Map();
+  for (const pin of pins) {
+    const key = pin.postal?.length === 4 ? pin.postal : `${pin.baseLat?.toFixed(4)},${pin.baseLon?.toFixed(4)}`;
+    if (!groups.has(key)) {
+      groups.set(key, {
+        postal: pin.postal || "",
+        city: pin.city || "",
+        lat: pin.baseLat ?? pin.lat,
+        lon: pin.baseLon ?? pin.lon,
+        pins: [],
+      });
+    }
+    groups.get(key).pins.push(pin);
+  }
+  return [...groups.values()];
+}
+
+function refreshVisibleMarkers() {
+  if (!mapInstance || !markersLayer || !lastLeaflet) return;
+  const L = lastLeaflet;
+  const side = mapSideEl || document.querySelector("[data-search-map-side]");
+  markersLayer.clearLayers();
+  for (const pin of lastPins) pin.marker = null;
+
+  if (homeOrigin) {
+    const homeMarker = L.marker([homeOrigin.lat, homeOrigin.lon], {
+      title: `Lakhely · ${homeOrigin.label}`,
+      icon: getHomeIcon(L),
+      zIndexOffset: 400,
+    });
+    homeMarker.bindTooltip(`Lakhely · ${homeOrigin.label}`, { direction: "top", offset: [0, -10] });
+    homeMarker.addTo(markersLayer);
+  }
+
+  const bounds = mapInstance.getBounds().pad(0.05);
+  const zoom = mapInstance.getZoom();
+  const useClusters = mapMode === "browse" && zoom < CLUSTER_ZOOM;
+
+  if (useClusters) {
+    const groups = groupPinsByPostal(lastPins).filter((g) => bounds.contains([g.lat, g.lon]));
+    for (const group of groups) {
+      const marker = L.marker([group.lat, group.lon], {
+        title: `${group.postal || group.city} · ${group.pins.length} autó`,
+        icon: getPostalClusterIcon(L, group.postal || group.city, group.pins.length),
+        zIndexOffset: 200,
+      });
+      marker.bindTooltip(
+        `${group.postal || "—"}${group.city ? ` · ${group.city}` : ""} · ${group.pins.length} autó`,
+        { direction: "top", offset: [0, -8] }
+      );
+      marker.on("click", () => {
+        mapInstance.setView([group.lat, group.lon], Math.max(CLUSTER_ZOOM, zoom + 2));
+      });
+      marker.addTo(markersLayer);
+    }
+    if (side && selectedPinId == null) {
+      side.innerHTML = `<div class="search-map-modal__side-pin"><p class="search-map-modal__hint">Irányítószám-csoportok a látható területen. Nagyíts, vagy kattints egy csoportra — kibontja az autókat.</p></div>`;
+    }
+    return;
+  }
+
+  const visiblePins = lastPins.filter((pin) => bounds.contains([pin.lat, pin.lon]));
+  for (const pin of visiblePins) {
+    const title = listingTileTitle(pin.item);
+    const marker = L.marker([pin.lat, pin.lon], {
+      title,
+      icon: getCarIcon(L, selectedPinId != null && String(pin.item?.id) === String(selectedPinId)),
+      riseOnHover: true,
+    });
+    pin.marker = marker;
+    const tip =
+      mapMode === "browse" && pin.postal
+        ? `${pin.postal}${pin.city ? ` · ${pin.city}` : ""}`
+        : `${title}${pin.city ? ` · ${pin.city}` : ""}`;
+    marker.bindTooltip(tip, { direction: "top", offset: [0, -10] });
+    marker.on("click", () => {
+      showRouteToPin(L, pin, side);
+    });
+    marker.addTo(markersLayer);
+  }
+  if (side && selectedPinId == null && mapMode === "browse") {
+    side.innerHTML = `<div class="search-map-modal__side-pin"><p class="search-map-modal__hint">Látható autók: ${visiblePins.length}. Kattints egy pinre a részletekhez.</p></div>`;
+  } else if (side && selectedPinId == null && mapMode === "filtered") {
+    renderSideAll(side, lastPins);
+  }
 }
 
 function getCarIcon(L, selected = false) {
@@ -498,10 +654,8 @@ function showAllResults() {
   selectedPinId = null;
   clearRoute();
   routeRequestId += 1;
-  const side = document.querySelector("[data-search-map-side]");
-  renderSideAll(side, lastPins);
-  if (lastLeaflet) syncPinIcons(lastLeaflet);
-  fitAllPins();
+  refreshVisibleMarkers();
+  if (mapMode === "filtered") fitAllPins();
   requestAnimationFrame(() => mapInstance?.invalidateSize());
 }
 
@@ -554,13 +708,22 @@ async function showRouteToPin(L, pin, side) {
   }
 }
 
+function bindMapViewportRefresh() {
+  if (!mapInstance || moveRefreshBound) return;
+  moveRefreshBound = true;
+  mapInstance.on("moveend", () => refreshVisibleMarkers());
+  mapInstance.on("zoomend", () => refreshVisibleMarkers());
+}
+
 function paintMap(L, pins, side) {
   const canvas = document.getElementById("search-map-canvas");
   if (!canvas) return;
 
   lastLeaflet = L;
   lastPins = pins;
+  mapSideEl = side;
   selectedPinId = null;
+  moveRefreshBound = false;
 
   if (mapInstance) {
     mapInstance.remove();
@@ -580,48 +743,24 @@ function paintMap(L, pins, side) {
   }).addTo(mapInstance);
 
   L.Icon.Default.imagePath = "/vendor/leaflet/images/";
-
   markersLayer = L.layerGroup().addTo(mapInstance);
-  const bounds = [];
+  bindMapViewportRefresh();
 
-  if (homeOrigin) {
-    const homeMarker = L.marker([homeOrigin.lat, homeOrigin.lon], {
-      title: `Lakhely · ${homeOrigin.label}`,
-      icon: getHomeIcon(L),
-      zIndexOffset: 400,
-    });
-    homeMarker.bindTooltip(`Lakhely · ${homeOrigin.label}`, { direction: "top", offset: [0, -10] });
-    homeMarker.addTo(markersLayer);
-    bounds.push([homeOrigin.lat, homeOrigin.lon]);
+  if (mapMode === "browse") {
+    if (homeOrigin) mapInstance.setView([homeOrigin.lat, homeOrigin.lon], 10);
+    else mapInstance.setView(HU_CENTER, HU_ZOOM);
+  } else {
+    const bounds = pins.map((p) => [p.lat, p.lon]);
+    if (homeOrigin) bounds.push([homeOrigin.lat, homeOrigin.lon]);
+    if (bounds.length === 1) mapInstance.setView(bounds[0], 11);
+    else if (bounds.length > 1) mapInstance.fitBounds(bounds, { padding: [40, 40], maxZoom: 12 });
   }
 
-  for (const pin of pins) {
-    const title = listingTileTitle(pin.item);
-    const marker = L.marker([pin.lat, pin.lon], {
-      title,
-      icon: getCarIcon(L, false),
-      riseOnHover: true,
-    });
-    pin.marker = marker;
-    marker.bindTooltip(`${title}${pin.city ? ` · ${pin.city}` : ""}`, {
-      direction: "top",
-      offset: [0, -10],
-    });
-    marker.on("click", () => {
-      showRouteToPin(L, pin, side);
-    });
-    marker.addTo(markersLayer);
-    bounds.push([pin.lat, pin.lon]);
-  }
-
-  if (bounds.length === 1) {
-    mapInstance.setView(bounds[0], 11);
-  } else if (bounds.length > 1) {
-    mapInstance.fitBounds(bounds, { padding: [40, 40], maxZoom: 12 });
-  }
-
-  renderSideAll(side, pins);
-  requestAnimationFrame(() => mapInstance?.invalidateSize());
+  refreshVisibleMarkers();
+  requestAnimationFrame(() => {
+    mapInstance?.invalidateSize();
+    refreshVisibleMarkers();
+  });
 }
 
 function collectListingsFromDom() {
@@ -664,6 +803,7 @@ async function ensureBaseMap(L) {
   const canvas = document.getElementById("search-map-canvas");
   if (!canvas || !L) return null;
   lastLeaflet = L;
+  moveRefreshBound = false;
   if (mapInstance) {
     mapInstance.remove();
     mapInstance = null;
@@ -680,6 +820,7 @@ async function ensureBaseMap(L) {
   }).addTo(mapInstance);
   L.Icon.Default.imagePath = "/vendor/leaflet/images/";
   markersLayer = L.layerGroup().addTo(mapInstance);
+  bindMapViewportRefresh();
   requestAnimationFrame(() => {
     mapInstance?.invalidateSize();
     requestAnimationFrame(() => mapInstance?.invalidateSize());
@@ -697,12 +838,15 @@ export function closeSearchResultsMap() {
   clearRoute();
   routeRequestId += 1;
   selectedPinId = null;
+  mapSideEl = null;
 }
 
-export async function openSearchResultsMap(items) {
+export async function openSearchResultsMap(items, { mode = "filtered" } = {}) {
+  mapMode = mode === "browse" ? "browse" : "filtered";
   const list = Array.isArray(items) ? items : [];
   const root = ensureMapPanel();
   const side = root.querySelector("[data-search-map-side]");
+  mapSideEl = side;
   root.hidden = false;
   document.body.classList.add("search-map-open");
   document.querySelectorAll("[data-search-map-open]").forEach((btn) => {
@@ -722,7 +866,11 @@ export async function openSearchResultsMap(items) {
   }
 
   try {
-    const [L, cityIndex] = await Promise.all([loadLeaflet(), getCityIndex()]);
+    const [L, cityIndex, postalIndex] = await Promise.all([
+      loadLeaflet(),
+      getCityIndex(),
+      getPostalIndex().catch(() => null),
+    ]);
     homeOrigin = await resolveHomeOrigin(cityIndex);
 
     if (!list.length) {
@@ -734,7 +882,7 @@ export async function openSearchResultsMap(items) {
       return;
     }
 
-    const { pins, skipped } = placeListings(list, cityIndex);
+    const { pins, skipped } = placeListings(list, cityIndex, postalIndex);
     setMapStats({
       pins: pins.length,
       skipped,
@@ -752,7 +900,7 @@ export async function openSearchResultsMap(items) {
         mapInstance?.setView([homeOrigin.lat, homeOrigin.lon], 10);
       }
       if (side) {
-        side.innerHTML = `<p class="search-map-modal__hint">Nincs településadat a találatokhoz — a térkép üres. (${skipped} kihagyva)</p>`;
+        side.innerHTML = `<p class="search-map-modal__hint">Nincs irányítószám / település a találatokhoz — a térkép üres. (${skipped} kihagyva)</p>`;
       }
       return;
     }
@@ -771,9 +919,19 @@ export async function openSearchResultsMap(items) {
   }
 }
 
-export function initSearchResultsMapButtons({ getItems } = {}) {
+export function initSearchResultsMapButtons({
+  getItems,
+  hasActiveFilters,
+  getVertical,
+} = {}) {
   const buttons = document.querySelectorAll("[data-search-map-open]");
   if (!buttons.length) return;
+
+  const syncLabel = () => {
+    const filtered = typeof hasActiveFilters === "function" ? Boolean(hasActiveFilters()) : false;
+    updateSearchMapButtonLabels(filtered);
+  };
+  syncLabel();
 
   buttons.forEach((btn) => {
     if (btn.dataset.searchMapBound === "1") return;
@@ -788,10 +946,23 @@ export function initSearchResultsMapButtons({ getItems } = {}) {
       }
       btn.disabled = true;
       try {
-        const items = await resolveMapItems(getItems);
-        await openSearchResultsMap(items);
+        syncLabel();
+        const filtered = typeof hasActiveFilters === "function" ? Boolean(hasActiveFilters()) : false;
+        let items;
+        if (filtered) {
+          items = await resolveMapItems(getItems);
+          await openSearchResultsMap(items, { mode: "filtered" });
+        } else {
+          const vertical = typeof getVertical === "function" ? getVertical() : null;
+          if (btn) btn.textContent = "Térkép betöltése…";
+          items = await fetchAllVerticalListings(vertical);
+          if (!items.length) items = await resolveMapItems(getItems);
+          await openSearchResultsMap(items, { mode: "browse" });
+          syncLabel();
+        }
       } finally {
         btn.disabled = false;
+        syncLabel();
       }
     });
   });

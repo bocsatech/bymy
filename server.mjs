@@ -70,6 +70,7 @@ import {
   importPartners,
   listPartners,
   listPostalCities,
+  listPostalCodes,
   partnerStats,
   savePartner,
   upsertPostalCodes,
@@ -2126,6 +2127,11 @@ async function handlePartnersApi(req, res, pathname) {
 
     if (pathname === "/api/postal-codes/cities" && req.method === "GET") {
       sendJson(res, 200, { cities: listPostalCities() });
+      return;
+    }
+
+    if (pathname === "/api/postal-codes/index" && req.method === "GET") {
+      sendJson(res, 200, { postals: listPostalCodes() });
       return;
     }
 

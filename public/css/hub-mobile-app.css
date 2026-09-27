@@ -478,11 +478,33 @@
     flex: 0 0 calc(100vw - (2 * var(--hf-gutter))) !important;
     width: calc(100vw - (2 * var(--hf-gutter))) !important;
     max-width: calc(100vw - (2 * var(--hf-gutter))) !important;
-    aspect-ratio: 16 / 10;
+    aspect-ratio: 2.2 / 1 !important;
+    max-height: 210px !important;
+    height: auto !important;
+    grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.35fr) !important;
     border-radius: 9px;
     box-shadow: none !important;
     border: 1px solid #d4d4d4;
     box-sizing: border-box !important;
+  }
+
+  body.hub-page--feed .hub-promo__media {
+    position: relative !important;
+    height: 100% !important;
+    align-self: stretch !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  body.hub-page--feed .hub-promo__media img,
+  body.hub-page--feed .hub-promo--fullimg .hub-promo__full {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    object-position: center center !important;
+    transform: none !important;
   }
 
   body.hub-page--feed .hub-verticals,

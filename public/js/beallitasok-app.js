@@ -35,11 +35,12 @@ import { fetchListing } from "./db-client.js?v=parkThumb1";
 import {
   applyDeviceIdentityToPerson,
   getDeviceIdentity,
+  identityForAccountKind,
   identityFromFormData,
   isNativeApp,
   setDeviceIdentity,
   stripDeviceIdentityFormFields,
-} from "./device-contract-identity.js?v=contractId1";
+} from "./device-contract-identity.js?v=contractKind1";
 import { fillCountrySelect, PHONE_COUNTRIES } from "./phone-lang-ui.js?v=settingsPhone1";
 
 const PHOTO_KEY = "bymy-avatar-photos";
@@ -1199,7 +1200,8 @@ function applyProfileToForm(profile) {
 
 async function hydrateDeviceContractFields(form, profile, user) {
   if (!form) return;
-  const isBusiness = String(profile?.accountType || "").toLowerCase() === "business";
+  const accountType = String(profile?.accountType || form.elements?.namedItem("accountType")?.value || "private").toLowerCase();
+  const isCompany = isCompanyAccount(accountType);
   const personBlock = document.querySelector("[data-device-contract-person]");
   const companyBlock = document.querySelector("[data-device-contract-company]");
   const webOnly = document.querySelector("[data-device-contract-web-only]");
@@ -1208,15 +1210,23 @@ async function hydrateDeviceContractFields(form, profile, user) {
   const streetInput = form.elements.namedItem("street");
   const native = isNativeApp();
 
-  if (personBlock) personBlock.hidden = isBusiness;
-  if (companyBlock) companyBlock.hidden = !isBusiness;
+  document.documentElement.setAttribute("data-mm-account-kind", isCompany ? "company" : "private");
+
+  if (personBlock) {
+    personBlock.hidden = isCompany;
+    personBlock.setAttribute("aria-hidden", isCompany ? "true" : "false");
+  }
+  if (companyBlock) {
+    companyBlock.hidden = !isCompany;
+    companyBlock.setAttribute("aria-hidden", isCompany ? "false" : "true");
+  }
   if (webOnly) webOnly.hidden = native;
 
   if (streetWrap instanceof HTMLElement) {
-    streetWrap.hidden = !isBusiness;
+    streetWrap.hidden = !isCompany;
   }
   if (streetHint) streetHint.hidden = true;
-  if (streetInput instanceof HTMLInputElement && !isBusiness) {
+  if (streetInput instanceof HTMLInputElement && !isCompany) {
     streetInput.value = "";
   }
 
@@ -1237,10 +1247,35 @@ async function hydrateDeviceContractFields(form, profile, user) {
     local_representative: identity?.representative,
   };
 
+  const personKeys = new Set([
+    "local_fullName",
+    "local_birthName",
+    "local_birthPlace",
+    "local_birthDate",
+    "local_motherName",
+    "local_idDocType",
+    "local_idDocNumber",
+    "local_homeAddress",
+    "local_citizenship",
+  ]);
+  const companyKeys = new Set([
+    "local_companyName",
+    "local_companySeat",
+    "local_companyRegistry",
+    "local_representative",
+  ]);
+
   for (const [name, value] of Object.entries(map)) {
     const field = form.elements.namedItem(name);
     if (!(field instanceof HTMLInputElement)) continue;
-    field.readOnly = !native;
+    const relevant = isCompany ? companyKeys.has(name) : personKeys.has(name);
+    field.disabled = !relevant;
+    field.readOnly = !native || !relevant;
+    if (!relevant) {
+      field.value = "";
+      field.placeholder = "";
+      continue;
+    }
     field.value = native ? value || "" : "";
     if (!native) field.placeholder = "Csak a mobilalkalmazásban";
     else if (name === "local_citizenship" && !field.value) field.placeholder = "magyar";
@@ -1248,7 +1283,7 @@ async function hydrateDeviceContractFields(form, profile, user) {
     else field.placeholder = "";
   }
 
-  if (native && !isBusiness) {
+  if (native && !isCompany) {
     const fullName = form.elements.namedItem("local_fullName");
     if (fullName instanceof HTMLInputElement && !fullName.value) {
       const composed = [profile?.lastName, profile?.firstName].filter(Boolean).join(" ");
@@ -1256,7 +1291,7 @@ async function hydrateDeviceContractFields(form, profile, user) {
     }
   }
 
-  if (native && isBusiness) {
+  if (native && isCompany) {
     const companyName = form.elements.namedItem("local_companyName");
     if (companyName instanceof HTMLInputElement && !companyName.value && profile?.company) {
       companyName.value = String(profile.company).trim();
@@ -1650,9 +1685,10 @@ function bindProfileFormEarly() {
       document.querySelector("#mm-company-form [name=company]")?.value ?? data.company ?? ""
     ).trim();
     const accountType = String(data.accountType || getProfile().accountType || "private").toLowerCase();
-    const deviceIdentity = identityFromFormData(data);
+    const isCompany = isCompanyAccount(accountType);
+    const deviceIdentity = identityForAccountKind(identityFromFormData(data), { company: isCompany });
     Object.assign(data, stripDeviceIdentityFormFields(data));
-    if (accountType !== "business") {
+    if (!isCompany) {
       data.street = "";
     }
     if (btn) btn.disabled = true;

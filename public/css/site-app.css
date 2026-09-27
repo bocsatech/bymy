@@ -1347,6 +1347,11 @@ body.site-app .settings-device-contract-block {
   gap: 0.75rem;
 }
 
+html[data-mm-account-kind="company"] body.site-app [data-device-contract-person],
+html[data-mm-account-kind="private"] body.site-app [data-device-contract-company] {
+  display: none !important;
+}
+
 body.site-app .settings-device-contract input:read-only {
   background: #f3f4f6;
   color: #6b7280;

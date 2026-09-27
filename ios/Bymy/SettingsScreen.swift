@@ -441,6 +441,7 @@ struct SettingsScreen: View {
     }
 
     private func savePersonalAndContract() async {
+        contractIdentity.identity.keepForAccountKind(isPrivate: isPrivateAccount)
         _ = contractIdentity.save(email: profile.profile.email)
         if let err = await profile.saveProfileToServer() {
             toast = err

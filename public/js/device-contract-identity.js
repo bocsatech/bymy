@@ -209,6 +209,30 @@ export function identityFromFormData(data = {}) {
   });
 }
 
+/** Privát: csak magánszemély mezők; céges: csak cég mezők. */
+export function identityForAccountKind(identity, { company = false } = {}) {
+  const src = normalizeIdentity(identity);
+  const out = emptyDeviceIdentity();
+  if (company) {
+    out.companyName = src.companyName;
+    out.companySeat = src.companySeat;
+    out.companyRegistry = src.companyRegistry;
+    out.representative = src.representative;
+    return out;
+  }
+  out.fullName = src.fullName;
+  out.birthName = src.birthName;
+  out.birthPlace = src.birthPlace;
+  out.birthDate = src.birthDate;
+  out.motherName = src.motherName;
+  out.idDocType = src.idDocType;
+  out.idDocNumber = src.idDocNumber;
+  out.homeAddress = src.homeAddress;
+  out.citizenship = src.citizenship;
+  out.street = src.homeAddress || src.street;
+  return out;
+}
+
 export function stripDeviceIdentityFormFields(data = {}) {
   const next = { ...data };
   for (const key of DEVICE_IDENTITY_FORM_KEYS) delete next[key];

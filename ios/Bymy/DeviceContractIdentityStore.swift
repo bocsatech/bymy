@@ -35,6 +35,28 @@ struct DeviceContractIdentity: Codable, Equatable {
             street = homeAddress
         }
     }
+
+    /// Privát: csak magánszemély mezők; céges: csak cég mezők.
+    mutating func keepForAccountKind(isPrivate: Bool) {
+        if isPrivate {
+            companyName = ""
+            companySeat = ""
+            companyRegistry = ""
+            representative = ""
+        } else {
+            fullName = ""
+            birthName = ""
+            birthPlace = ""
+            birthDate = ""
+            motherName = ""
+            idDocType = ""
+            idDocNumber = ""
+            homeAddress = ""
+            citizenship = ""
+            street = ""
+        }
+        normalize()
+    }
 }
 
 @MainActor

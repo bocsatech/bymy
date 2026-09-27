@@ -26,7 +26,8 @@ function text(value) {
 }
 
 export function isBusinessProfile(profile = {}) {
-  return text(profile.accountType) === "business" || Boolean(text(profile.company));
+  const type = text(profile.accountType).toLowerCase();
+  return type === "business" || type === "dealer" || Boolean(text(profile.company));
 }
 
 export function personFromProfile(profile = {}, user = {}) {

@@ -4,7 +4,7 @@ import { emptyPerson, isBusinessProfile, personFromProfile, vehicleFromListing }
 import {
   applyDeviceIdentityToPerson,
   getDeviceIdentity,
-} from "./device-contract-identity.js?v=contractId1";
+} from "./device-contract-identity.js?v=contractKind1";
 
 const root = document.getElementById("contract-root");
 const state = { role: "seller", listing: null, vehicle: null, own: null, other: emptyPerson("person") };

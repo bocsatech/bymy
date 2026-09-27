@@ -645,7 +645,7 @@ function hasActiveSidebarFilters(filters) {
 initHomeUnifiedScroll();
 
 if (PAGE === "auto" || PAGE === "teherauto") {
-  import("./search-results-map.js?v=mapHome1")
+  import("./search-results-map.js?v=mapPostal3")
     .then((mod) => {
       updateSearchMapButtonLabels = mod.updateSearchMapButtonLabels;
       initSearchResultsMapButtons = mod.initSearchResultsMapButtons;

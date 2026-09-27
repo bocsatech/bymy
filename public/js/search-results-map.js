@@ -7,11 +7,10 @@ import {
   haversineKm,
   listingCityName,
   resolveListingCoords,
-} from "./listing-radius.js?v=mapHome1";
+} from "./listing-radius.js?v=mapPostal3";
 import { listingDetailHref } from "./listing-return.js?v=scrollTop1";
 import { listingTileTitle, listingTilePrice } from "./listing-tile.js?v=listThumb1";
 import { getAuthUser } from "./site-auth.js?v=bootFix2";
-import { readNearbyPrefs } from "./nearby-search.js?v=korzetFix3";
 import { fetchListingsPage } from "./db-client.js?v=ownerBoost6";
 
 const HU_CENTER = [47.1625, 19.5033];
@@ -150,9 +149,9 @@ async function resolveHomeOrigin(cityIndex, postalIndex = null) {
     }
   }
 
-  const prefs = readNearbyPrefs(profile);
   const bits = profileHomeBits(profile);
-  const postal = String(prefs.postal || bits.postal || "")
+  /* Profile address wins for the home pin — stats/nearby localStorage must not move lakhely. */
+  const postal = String(bits.postal || "")
     .replace(/\D/g, "")
     .slice(0, 4);
   const cityName = bits.cityName;

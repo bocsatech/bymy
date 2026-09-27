@@ -2,7 +2,7 @@ import {
   buildCityIndex,
   filterListingsInRadius,
   filterListingsRecentInRadius,
-} from "./listing-radius.js?v=mapHome1";
+} from "./listing-radius.js?v=mapPostal3";
 
 export const STORAGE_POSTAL = "bymy_stats_postal";
 export const STORAGE_RADIUS = "bymy_stats_radius_km";

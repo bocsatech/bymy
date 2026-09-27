@@ -22,6 +22,10 @@ enum AuthAPI {
     var phone: String?
     var company: String?
     var accountType: String?
+    var notifyMessages: Bool?
+    var notifyFavorites: Bool?
+    var notifyInterests: Bool?
+    var notifyNewsletter: Bool?
     /// data:image/jpeg;base64,... — közös a weben és az appban
     var avatarDataUrl: String?
     /// iOS megjelenített lapok (szerveren tárolva)
@@ -170,13 +174,13 @@ enum AuthAPI {
     return user
   }
 
-  static func saveProfile(token: String, profile: [String: String]) async throws -> RemoteUser {
+  static func saveProfile(token: String, profile: [String: Any]) async throws -> RemoteUser {
     var req = URLRequest(url: baseURL.appendingPathComponent("api/auth/profile"))
     req.httpMethod = "PUT"
     req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
     req.setValue("application/json", forHTTPHeaderField: "Content-Type")
     req.setValue("application/json", forHTTPHeaderField: "Accept")
-    req.httpBody = try JSONSerialization.data(withJSONObject: profile)
+    req.httpBody = try JSONSerialization.data(withJSONObject: ["profile": profile])
     let (data, response) = try await perform(req)
     guard let http = response as? HTTPURLResponse else { throw AuthError.unreachable }
     let decoded = try JSONDecoder().decode(AuthResponse.self, from: data)
@@ -279,13 +283,17 @@ extension UserProfile {
     if let v = p.phone { phone = v }
     if let v = p.company { company = v }
     if let v = p.accountType { accountType = v }
+    if let v = p.notifyMessages { notifyMessages = v }
+    if let v = p.notifyFavorites { notifyFavorites = v }
+    if let v = p.notifyInterests { notifyInterests = v }
+    if let v = p.notifyNewsletter { notifyNewsletter = v }
     // Magánfiók: utca/házszám nem a szerveren — ürítjük a helyi szerver-másolatot.
     if accountType.lowercased() == "private" {
       street = ""
     }
   }
 
-  func remotePayload() -> [String: String] {
+  func remotePayload() -> [String: Any] {
     let isPrivate = accountType.lowercased() == "private"
     return [
       "salutation": salutation,
@@ -298,6 +306,10 @@ extension UserProfile {
       "phone": phone,
       "company": company,
       "accountType": accountType,
+      "notifyMessages": notifyMessages,
+      "notifyFavorites": notifyFavorites,
+      "notifyInterests": notifyInterests,
+      "notifyNewsletter": notifyNewsletter,
     ]
   }
 }

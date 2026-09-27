@@ -399,6 +399,10 @@ const EMPTY_PROFILE = {
   accountType: "private",
   searchRadiusKm: 30,
   recommendationsRadiusKm: 30,
+  notifyMessages: true,
+  notifyFavorites: true,
+  notifyInterests: true,
+  notifyNewsletter: true,
 };
 
 export function getProfile() {

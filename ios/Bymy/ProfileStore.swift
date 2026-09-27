@@ -14,10 +14,10 @@ struct UserProfile: Codable, Equatable {
     var email: String = ""
     var accountType: String = "private" // private | business | dealer
     var company: String = ""
-    var notifyMessages: Bool = false
-    var notifyFavorites: Bool = false
-    var notifyInterests: Bool = false
-    var notifyNewsletter: Bool = false
+    var notifyMessages: Bool = true
+    var notifyFavorites: Bool = true
+    var notifyInterests: Bool = true
+    var notifyNewsletter: Bool = true
     /// Gyors kategória keresés: km-sugár az irányítószám körül (helyi, nem szerver)
     var searchRadiusKm: Int = 30
     /// Ajánlások (partnerek) km-sugár — max 30 (Autosweb)

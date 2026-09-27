@@ -302,6 +302,39 @@ input, select, textarea {
   gap: 0.55rem 0.65rem;
   align-items: start;
 }
+.user-edit__notify-list {
+  display: grid;
+  gap: 0.55rem;
+}
+.user-edit__notify-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.45rem 0.15rem;
+  border-bottom: 1px solid #eef2f7;
+}
+.user-edit__notify-row:last-child {
+  border-bottom: 0;
+}
+.user-edit__notify-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+.user-edit__notify-dot {
+  width: 0.85rem;
+  height: 0.85rem;
+  border-radius: 999px;
+  flex: 0 0 auto;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+.user-edit__notify-dot.is-on {
+  background: #22c55e;
+}
+.user-edit__notify-dot.is-off {
+  background: #ef4444;
+}
 .user-edit__field {
   display: grid;
   gap: 0.28rem;

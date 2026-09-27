@@ -193,18 +193,56 @@ function writePhotos(map) {
   localStorage.setItem(PHOTO_KEY, JSON.stringify(map));
 }
 
-function readNotifyPrefs(email) {
+const DEFAULT_NOTIFY_PREFS = {
+  messages: true,
+  favorites: true,
+  interests: true,
+  newsletter: true,
+};
+
+function notifyPrefsFromProfile(profile) {
+  const p = profile || {};
+  const pick = (key, fallback) => {
+    if (p[key] == null || p[key] === "") return fallback;
+    return Boolean(p[key]);
+  };
+  return {
+    messages: pick("notifyMessages", DEFAULT_NOTIFY_PREFS.messages),
+    favorites: pick("notifyFavorites", DEFAULT_NOTIFY_PREFS.favorites),
+    interests: pick("notifyInterests", DEFAULT_NOTIFY_PREFS.interests),
+    newsletter: pick("notifyNewsletter", DEFAULT_NOTIFY_PREFS.newsletter),
+  };
+}
+
+function readNotifyPrefs(email, profile) {
+  const fromProfile = notifyPrefsFromProfile(profile || getProfile());
   try {
     const all = JSON.parse(localStorage.getItem(NOTIFY_KEY) || "{}");
+    let local = all[email];
+    // Régi alapértelmezés mind ki volt — ha soha nem mentettek szándékosan (v2 nélkül), töröljük.
+    if (
+      local &&
+      typeof local === "object" &&
+      !local._v2 &&
+      !local.messages &&
+      !local.favorites &&
+      !local.interests &&
+      !local.newsletter
+    ) {
+      delete all[email];
+      localStorage.setItem(NOTIFY_KEY, JSON.stringify(all));
+      local = null;
+    }
+    if (!local || typeof local !== "object") return { ...fromProfile };
     return {
-      messages: false,
-      favorites: false,
-      interests: false,
-      newsletter: false,
-      ...(all[email] ?? {}),
+      ...fromProfile,
+      messages: Boolean(local.messages),
+      favorites: Boolean(local.favorites),
+      interests: Boolean(local.interests),
+      newsletter: Boolean(local.newsletter),
     };
   } catch {
-    return { messages: false, favorites: false, interests: false, newsletter: false };
+    return { ...fromProfile };
   }
 }
 
@@ -215,7 +253,13 @@ function writeNotifyPrefs(email, prefs) {
   } catch {
     all = {};
   }
-  all[email] = prefs;
+  all[email] = {
+    _v2: 1,
+    messages: Boolean(prefs.messages),
+    favorites: Boolean(prefs.favorites),
+    interests: Boolean(prefs.interests),
+    newsletter: Boolean(prefs.newsletter),
+  };
   localStorage.setItem(NOTIFY_KEY, JSON.stringify(all));
 }
 
@@ -1420,21 +1464,39 @@ async function uploadAvatarFromInput(fileInput, user, flashEl) {
 
 function initNotifyForm(email) {
   const form = document.getElementById("settings-notify-form");
-  if (!form) return;
-  const prefs = readNotifyPrefs(email);
+  if (!form || form.dataset.bound === "1") return;
+  form.dataset.bound = "1";
+  const prefs = readNotifyPrefs(email, getProfile());
   for (const [key, value] of Object.entries(prefs)) {
     const input = form.elements.namedItem(key);
     if (input && "checked" in input) input.checked = Boolean(value);
   }
-  form.addEventListener("submit", (event) => {
+  form.addEventListener("submit", async (event) => {
     event.preventDefault();
-    writeNotifyPrefs(email, {
+    const next = {
       messages: Boolean(form.messages?.checked),
       favorites: Boolean(form.favorites?.checked),
       interests: Boolean(form.interests?.checked),
       newsletter: Boolean(form.newsletter?.checked),
-    });
-    showFlash(document.getElementById("settings-notify-flash"), "Értesítési beállítások mentve.", true);
+    };
+    writeNotifyPrefs(email, next);
+    const flash = document.getElementById("settings-notify-flash");
+    const btn = form.querySelector('button[type="submit"]');
+    if (btn) btn.disabled = true;
+    try {
+      await saveProfile({
+        ...getProfile(),
+        notifyMessages: next.messages,
+        notifyFavorites: next.favorites,
+        notifyInterests: next.interests,
+        notifyNewsletter: next.newsletter,
+      });
+      showFlash(flash, "Értesítési beállítások mentve.", true);
+    } catch (error) {
+      showFlash(flash, error.message ?? "Mentés sikertelen.", false);
+    } finally {
+      if (btn) btn.disabled = false;
+    }
   });
 }
 export async function initSettingsPage() {

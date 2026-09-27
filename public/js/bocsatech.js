@@ -2635,7 +2635,38 @@ const PROFILE_FIELD_SKIP = new Set([
   "avatarDataUrl",
   "companyLogoDataUrl",
   "pageLayout",
+  "notifyMessages",
+  "notifyFavorites",
+  "notifyInterests",
+  "notifyNewsletter",
 ]);
+
+function notifyPrefOn(profile, key) {
+  const v = profile?.[key];
+  if (v == null || v === "") return true;
+  if (typeof v === "boolean") return v;
+  if (v === 1 || v === "1" || v === "true" || v === "on") return true;
+  if (v === 0 || v === "0" || v === "false" || v === "off") return false;
+  return true;
+}
+
+function notifyStatusRowsHtml(profile) {
+  const rows = [
+    { key: "notifyMessages", label: "Üzenetek e-mailben" },
+    { key: "notifyFavorites", label: "Kedvencek: árváltozás" },
+    { key: "notifyInterests", label: "Érdeklődések" },
+    { key: "notifyNewsletter", label: "Hírlevél / tippek (marketing)" },
+  ];
+  return rows
+    .map((row) => {
+      const on = notifyPrefOn(profile, row.key);
+      return `<div class="user-edit__notify-row">
+        <span class="user-edit__notify-label">${esc(row.label)}</span>
+        <span class="user-edit__notify-dot ${on ? "is-on" : "is-off"}" title="${on ? "bekapcsolva" : "kikapcsolva"}" aria-label="${on ? "bekapcsolva" : "kikapcsolva"}"></span>
+      </div>`;
+    })
+    .join("");
+}
 
 function shouldSkipProfileField(key, value) {
   if (PROFILE_FIELD_SKIP.has(key)) return true;
@@ -2811,6 +2842,11 @@ function userEditView() {
             <span>Email aktivált</span>
           </label>
         </div>
+      </section>
+
+      <section class="user-edit__card">
+        <h3 class="user-edit__section-title">Hírlevél és értesítések</h3>
+        <div class="user-edit__notify-list">${notifyStatusRowsHtml(profile)}</div>
       </section>
 
       <section class="user-edit__card">

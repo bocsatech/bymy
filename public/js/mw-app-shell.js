@@ -7,7 +7,7 @@
   var isHub = body.classList.contains("hub-page--feed") || page === "hub";
   var isFiok = body.classList.contains("fiok-page") || page === "fiok";
   var isPostAd = page === "hirdetesfeladas";
-  var CSS_HREF = "/css/hub-mobile-app.css?v=whHdr4";
+  var CSS_HREF = "/css/hub-mobile-app.css?v=whHdr5";
 
   function ensureCss() {
     if (document.querySelector('link[href*="hub-mobile-app.css"]')) return;
@@ -270,12 +270,12 @@
     if (document.querySelector('link[href*="bymy-logo-size.css"]')) return;
     var link = document.createElement("link");
     link.rel = "stylesheet";
-    link.href = "/css/bymy-logo-size.css?v=whHdr4";
+    link.href = "/css/bymy-logo-size.css?v=whHdr5";
     document.head.appendChild(link);
   }
 
   function ensureDeskHeaderCss() {
-    var href = "/css/site-desk-header.css?v=whHdr4";
+    var href = "/css/site-desk-header.css?v=whHdr5";
     if (document.querySelector("link[data-site-desk-header-css], link[href*='site-desk-header.css']")) return;
     var link = document.createElement("link");
     link.rel = "stylesheet";
@@ -354,7 +354,7 @@
       '<div class="hub-header-inner">' +
       '<div class="hub-header-top">' +
       '<a class="hub-logo" href="/" aria-label="Bymy">' +
-      '<img class="bymy-logo-img bymy-logo-img--nav" src="/images/bymy-logo.png?v=logoUpload1" alt="Bymy.hu" width="190" height="48" decoding="async" />' +
+      '<img class="bymy-logo-img bymy-logo-img--nav" src="/images/bymy-logo.png?v=logoUpload1" alt="Bymy.hu" width="260" height="68" decoding="async" />' +
       "</a>" +
       '<div class="hub-header-actions site-header-actions">' +
       '<a class="hub-header-msg" href="/uzenetek.html" data-auth-member hidden>' +

@@ -1,7 +1,7 @@
 /* Willhaben-szerű két-soros desk fejléc (≥901px)
    1. sor: logo balra, akciók jobbra
    2. sor: szöveges menü teljes szélességben
-   ≤1399px: akciók ikon-kompakt (mint willhaben szűkített nézet) */
+   ≤1199px: akciók ikon-kompakt (mint willhaben szűkített nézet) */
 @media (min-width: 901px) {
   body.site-app {
     --desk-nav-font: "DM Sans", system-ui, -apple-system, sans-serif;
@@ -10,10 +10,10 @@
     --desk-count-size: 13px;
     --desk-action-size: 14px;
     --desk-cta-size: 13px;
-    --desk-top-h: 56px;
+    --desk-top-h: 64px;
     --desk-nav-h: 48px;
     --desk-header-h: calc(var(--desk-top-h) + var(--desk-nav-h));
-    --desk-logo-h: 40px;
+    --desk-logo-h: 56px;
     --desk-pad-x: 24px;
     --desk-gap: 16px;
     --desk-nav-gap: 0;
@@ -79,7 +79,9 @@
   body.site-app .hub-logo,
   body.site-app .home-logo,
   body.site-app .site-app-logo,
-  body.home-page .hub-logo {
+  body.home-page .hub-logo,
+  body.site-app .hub-header-top > .hub-logo,
+  body.home-page .hub-header-top > .hub-logo {
     position: absolute !important;
     left: 50% !important;
     right: auto !important;
@@ -87,52 +89,40 @@
     bottom: auto !important;
     transform: translate(-50%, -50%) !important;
     width: auto !important;
-    max-width: 200px !important;
-    height: var(--desk-logo-h) !important;
+    max-width: none !important;
+    height: auto !important;
     margin: 0 !important;
     padding: 0 !important;
     flex: 0 0 auto !important;
     display: inline-flex !important;
     align-items: center !important;
+    justify-content: center !important;
     line-height: 0 !important;
-    z-index: 1 !important;
+    z-index: 2 !important;
   }
 
   body.site-app .hub-logo .bymy-logo-img--nav,
   body.home-page .hub-logo .bymy-logo-img--nav,
+  body.site-app .hub-header-top .bymy-logo-img--nav,
+  body.home-page .hub-header-top .bymy-logo-img--nav,
   body.site-app .bymy-logo-img--nav {
     height: var(--desk-logo-h) !important;
     width: auto !important;
-    max-width: min(240px, 28vw) !important;
+    max-width: none !important;
     max-height: var(--desk-logo-h) !important;
+    min-height: var(--desk-logo-h) !important;
     object-fit: contain !important;
     object-position: center !important;
     aspect-ratio: auto !important;
   }
 
-  /* Széles desk (≥1400): nagyobb, nem összenyomott logo */
-  @media (min-width: 1400px) {
-    body.site-app {
-      --desk-logo-h: 48px;
-      --desk-top-h: 60px;
+  /* Széles desk: még nagyobb logo */
+  @media (min-width: 1200px) {
+    body.site-app,
+    body.home-page.site-app {
+      --desk-logo-h: 68px;
+      --desk-top-h: 76px;
       --desk-header-h: calc(var(--desk-top-h) + var(--desk-nav-h));
-    }
-
-    body.site-app .hub-logo,
-    body.site-app .home-logo,
-    body.site-app .site-app-logo,
-    body.home-page .hub-logo {
-      height: var(--desk-logo-h) !important;
-      max-width: 260px !important;
-    }
-
-    body.site-app .hub-logo .bymy-logo-img--nav,
-    body.home-page .hub-logo .bymy-logo-img--nav,
-    body.site-app .bymy-logo-img--nav {
-      height: 48px !important;
-      max-height: 48px !important;
-      max-width: 220px !important;
-      width: auto !important;
     }
   }
 
@@ -301,10 +291,12 @@
 }
 
 /* Szűkített desk (willhaben kompakt): szöveg elrejtve, ikonok maradnak */
-@media (min-width: 901px) and (max-width: 1399px) {
+@media (min-width: 901px) and (max-width: 1199px) {
   body.site-app {
     --desk-pad-x: 16px;
-    --desk-logo-h: 36px;
+    --desk-logo-h: 48px;
+    --desk-top-h: 58px;
+    --desk-header-h: calc(var(--desk-top-h) + var(--desk-nav-h));
   }
 
   body.site-app .hub-header-msg > span:not(.site-message-badge),

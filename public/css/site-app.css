@@ -130,18 +130,17 @@ body.site-app .hub-header {
 
 @media (min-width: 901px) {
   body.site-app {
-    --site-nav-logo-h: 40px;
-    --site-nav-logo-max-w: min(180px, 28vw);
+    --site-nav-logo-h: 56px;
+    --site-nav-logo-max-w: none;
     --site-nav-logo-col: auto;
-    --site-fixed-header-h: 104px;
+    --site-fixed-header-h: 112px;
     padding-top: var(--site-fixed-header-h);
   }
 
-  @media (min-width: 1400px) {
+  @media (min-width: 1200px) {
     body.site-app {
-      --site-nav-logo-h: 48px;
-      --site-nav-logo-max-w: min(220px, 28vw);
-      --site-fixed-header-h: 108px;
+      --site-nav-logo-h: 68px;
+      --site-fixed-header-h: 124px;
     }
   }
 
@@ -220,17 +219,17 @@ body.site-app .hub-header {
   body.site-app .hub-logo,
   body.site-app .home-logo,
   body.site-app .site-app-logo {
-    position: relative !important;
-    left: 0 !important;
+    position: absolute !important;
+    left: 50% !important;
     right: auto !important;
-    top: auto !important;
+    top: 50% !important;
     bottom: auto !important;
-    transform: none !important;
+    transform: translate(-50%, -50%) !important;
     margin: 0 !important;
     padding: 0 !important;
     width: auto !important;
-    max-width: 260px !important;
-    height: var(--site-nav-logo-h, 40px) !important;
+    max-width: none !important;
+    height: auto !important;
     z-index: 2;
     display: inline-flex !important;
     align-items: center !important;
@@ -240,8 +239,9 @@ body.site-app .hub-header {
   body.site-app .home-logo .bymy-logo-img--nav,
   body.site-app .site-app-logo .bymy-logo-img--nav,
   body.site-app .bymy-logo-img--nav {
-    height: var(--site-nav-logo-h, 40px) !important;
-    max-width: var(--site-nav-logo-max-w, 180px) !important;
+    height: var(--site-nav-logo-h, 56px) !important;
+    max-width: none !important;
+    max-height: var(--site-nav-logo-h, 56px) !important;
     width: auto !important;
     object-fit: contain !important;
   }

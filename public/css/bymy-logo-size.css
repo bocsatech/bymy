@@ -12,8 +12,8 @@
   body.site-app .home-logo .bymy-logo-img--nav,
   body.site-app .hub-logo .bymy-logo-img--nav,
   body.site-app .site-app-logo .bymy-logo-img--nav {
-    height: 40px !important;
-    max-width: 180px !important;
+    height: 56px !important;
+    max-width: none !important;
     width: auto !important;
     object-fit: contain !important;
   }
@@ -26,15 +26,15 @@
   }
 }
 
-@media (min-width: 1400px) {
+@media (min-width: 1200px) {
   .bymy-logo-img--nav,
   .home-logo .bymy-logo-img--nav,
   body.site-app .bymy-logo-img--nav,
   body.site-app .home-logo .bymy-logo-img--nav,
   body.site-app .hub-logo .bymy-logo-img--nav,
   body.site-app .site-app-logo .bymy-logo-img--nav {
-    height: 48px !important;
-    max-width: 220px !important;
+    height: 68px !important;
+    max-width: none !important;
     width: auto !important;
     object-fit: contain !important;
   }

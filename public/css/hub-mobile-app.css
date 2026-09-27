@@ -76,10 +76,6 @@
     display: none !important;
   }
 
-  body.hub-page--feed .hub-sell {
-    display: none;
-  }
-
   body.site-app .mw-app-top {
     --mw-logo-h: calc(100vw * 415 / 958);
     --mw-logo-gap: 1.5cm;
@@ -368,11 +364,6 @@
   body.hub-page--feed .hub-feed {
     padding-top: 0.5rem !important;
     padding-bottom: 1rem !important;
-  }
-
-  body.hub-page--feed .hub-intro > .hub-sell {
-    margin-left: 0 !important;
-    margin-right: 0 !important;
   }
 
   body.hub-page--feed .hf-head,

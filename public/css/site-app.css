@@ -6308,8 +6308,7 @@ html[data-theme="dark"] body.site-app .login-card,
 html[data-theme="dark"] body.site-app .home-grid-card,
 html[data-theme="dark"] body.site-app .hf-card,
 html[data-theme="dark"] body.site-app .hf-card--listing,
-html[data-theme="dark"] body.site-app .hub-promo,
-html[data-theme="dark"] body.site-app .hub-sell {
+html[data-theme="dark"] body.site-app .hub-promo {
   background: #fff;
   color: #111;
   border-color: #d4d4d4;
@@ -6328,7 +6327,6 @@ html[data-theme="dark"] body.site-app .home-grid-card-spec,
 html[data-theme="dark"] body.site-app .home-grid-card-body,
 html[data-theme="dark"] body.site-app .hf-card-label,
 html[data-theme="dark"] body.site-app .hf-card-price,
-html[data-theme="dark"] body.site-app .hub-sell h2,
 html[data-theme="dark"] body.site-app .hub-promo__title,
 html[data-theme="dark"] body.site-app .hub-promo__kicker {
   color: #111 !important;
@@ -6336,7 +6334,6 @@ html[data-theme="dark"] body.site-app .hub-promo__kicker {
 
 html[data-theme="dark"] body.site-app .home-grid-card-sub,
 html[data-theme="dark"] body.site-app .hf-card-sub,
-html[data-theme="dark"] body.site-app .hub-sell p,
 html[data-theme="dark"] body.site-app .hub-promo__text {
   color: #6b7280 !important;
 }
@@ -7089,7 +7086,6 @@ html[data-theme="dark"] body.site-app :is(
   .hf-card--listing,
   .home-grid-card,
   .hub-promo,
-  .hub-sell,
   .login-card
 ) :is(a, strong, b, p, span, label, li, h1, h2, h3, h4, small, em, div, button),
 html[data-theme="dark"] body.site-app :is(
@@ -7097,7 +7093,6 @@ html[data-theme="dark"] body.site-app :is(
   .hf-card--listing,
   .home-grid-card,
   .hub-promo,
-  .hub-sell,
   .login-card
 ) {
   color: #111 !important;
@@ -7108,7 +7103,6 @@ html[data-theme="dark"] body.site-app :is(
   .hf-card--listing,
   .home-grid-card,
   .hub-promo,
-  .hub-sell,
   .login-card
 ) :is(input, select, textarea) {
   color: #111 !important;

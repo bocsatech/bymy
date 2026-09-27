@@ -55,11 +55,11 @@
       href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="/css/style.css?v=noScroll1" />    <link rel="stylesheet" href="/css/hub.css?v=promoFit8" />
+    <link rel="stylesheet" href="/css/style.css?v=noScroll1" />    <link rel="stylesheet" href="/css/hub.css?v=logoLeft1" />
 
-    <link rel="stylesheet" href="/css/site-app.css?v=promoFit8" />
+    <link rel="stylesheet" href="/css/site-app.css?v=logoLeft1" />
     <link rel="stylesheet" href="/css/site-side.css?v=mwPostDesk1" />
-    <link rel="stylesheet" href="/css/hub-mobile-app.css?v=promoFit8" />
+    <link rel="stylesheet" href="/css/hub-mobile-app.css?v=logoLeft1" />
     <link rel="stylesheet" href="/css/home.css?v=mobFix8" />
     <link rel="stylesheet" href="/css/auto-hero.css?v=kivitelFix1" />
     <link rel="stylesheet" href="/css/auto-desk-layout.css?v=whHdr1" />
@@ -105,66 +105,7 @@
         display: block !important;
       }
       
-      @media (min-width: 901px) {
-        body.home-page.site-app:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-header-inner,
-        body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-header-inner {
-          display: grid !important;
-          grid-template-columns: 260px max-content minmax(0, 1fr) !important;
-          grid-template-areas: "logo nav actions" !important;
-          align-items: center !important;
-          column-gap: 24px !important;
-          row-gap: 0 !important;
-          gap: 0 24px !important;
-          max-width: 1440px !important;
-          margin: 0 auto !important;
-          padding: 0 24px !important;
-          min-height: 80px !important;
-          height: 80px !important;
-          max-height: 80px !important;
-          flex-direction: row !important;
-        }
-        body.home-page.site-app:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-logo,
-        body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-logo {
-          grid-area: logo !important;
-          justify-self: start !important;
-          position: relative !important;
-          left: auto !important;
-          right: auto !important;
-          top: auto !important;
-          bottom: auto !important;
-          transform: none !important;
-          z-index: 2 !important;
-        }
-        body.home-page.site-app:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav,
-        body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav {
-          grid-area: nav !important;
-          justify-self: start !important;
-          position: static !important;
-          left: auto !important;
-          right: auto !important;
-          top: auto !important;
-          bottom: auto !important;
-          transform: none !important;
-          display: flex !important;
-          align-items: center !important;
-          gap: 22px !important;
-          width: max-content !important;
-          margin: 0 !important;
-          padding: 0 !important;
-          pointer-events: auto !important;
-        }
-        body.home-page.site-app:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-header-top,
-        body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-header-top {
-          grid-area: actions !important;
-          justify-self: end !important;
-          width: auto !important;
-          min-height: 0 !important;
-          height: 36px !important;
-          padding: 0 !important;
-          display: flex !important;
-          align-items: center !important;
-        }
-      }
+      /* Desk header: logo balra (site-desk-header) — ne írd felül 1-soros logo|nav|actions griddel */
       
       @media (min-width: 901px) {
         html:has(body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"])),
@@ -310,8 +251,8 @@ body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-m
         max-width: 100% !important;
       }
     </style>
-    <link rel="stylesheet" href="/css/bymy-logo-size.css?v=promoFit8" />
-      <link rel="stylesheet" href="/css/site-desk-header.css?v=promoFit8" />
+    <link rel="stylesheet" href="/css/bymy-logo-size.css?v=logoLeft1" />
+      <link rel="stylesheet" href="/css/site-desk-header.css?v=logoLeft1" />
 </head>
   <body class="home-page site-page site-app auto-desk-gyors" data-site-page="auto">
     <script>
@@ -326,7 +267,7 @@ body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-m
         }
       } catch (e) {}
     </script>
-    <script src="/js/mw-app-shell.js?v=promoFit8"></script>
+    <script src="/js/mw-app-shell.js?v=logoLeft1"></script>
 <header class="hub-header home-header">
       <div class="hub-header-inner">
         <a class="hub-logo" href="/" aria-label="Bymy">

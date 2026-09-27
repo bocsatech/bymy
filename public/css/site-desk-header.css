@@ -1,5 +1,5 @@
 /* Willhaben-szerű két-soros desk fejléc (≥801px; ≤800 = mobil mw-app-top)
-   1. sor: logo középen, akciók jobbra
+   1. sor: logo balra, akciók jobbra
    2. sor: szöveges menü
    ≤1199px: akciók ikon-kompakt */
 @media (min-width: 801px) {
@@ -81,13 +81,15 @@
   body.site-app .site-app-logo,
   body.home-page .hub-logo,
   body.site-app .hub-header-top > .hub-logo,
-  body.home-page .hub-header-top > .hub-logo {
-    position: absolute !important;
-    left: 50% !important;
+  body.home-page .hub-header-top > .hub-logo,
+  body.site-app .hub-header-inner > .hub-logo,
+  body.home-page .hub-header-inner > .hub-logo {
+    position: relative !important;
+    left: auto !important;
     right: auto !important;
-    top: 50% !important;
+    top: auto !important;
     bottom: auto !important;
-    transform: translate(-50%, -50%) !important;
+    transform: none !important;
     width: auto !important;
     max-width: none !important;
     height: auto !important;
@@ -96,9 +98,11 @@
     flex: 0 0 auto !important;
     display: inline-flex !important;
     align-items: center !important;
-    justify-content: center !important;
+    justify-content: flex-start !important;
+    justify-self: start !important;
     line-height: 0 !important;
     z-index: 2 !important;
+    order: 0 !important;
   }
 
   body.site-app .hub-logo .bymy-logo-img--nav,

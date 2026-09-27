@@ -219,12 +219,12 @@ body.site-app .hub-header {
   body.site-app .hub-logo,
   body.site-app .home-logo,
   body.site-app .site-app-logo {
-    position: absolute !important;
-    left: 50% !important;
+    position: relative !important;
+    left: auto !important;
     right: auto !important;
-    top: 50% !important;
+    top: auto !important;
     bottom: auto !important;
-    transform: translate(-50%, -50%) !important;
+    transform: none !important;
     margin: 0 !important;
     padding: 0 !important;
     width: auto !important;
@@ -233,6 +233,9 @@ body.site-app .hub-header {
     z-index: 2;
     display: inline-flex !important;
     align-items: center !important;
+    justify-content: flex-start !important;
+    justify-self: start !important;
+    flex: 0 0 auto !important;
   }
 
   body.site-app .hub-logo .bymy-logo-img--nav,

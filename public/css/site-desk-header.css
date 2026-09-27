@@ -367,3 +367,71 @@ html[data-theme="dark"] body.site-app .hub-nav-band,
 html[data-theme="dark"] body.home-page .hub-nav-band {
   border-top-color: #2a313c !important;
 }
+
+/* Autó / Teherautó: menü vissza egy sorba — logo | nav | actions (logo balra) */
+@media (min-width: 901px) {
+  body.home-page.site-app:is([data-site-page="auto"], [data-site-page="teherauto"]) {
+    --desk-header-h: 80px;
+    --site-fixed-header-h: 80px;
+  }
+
+  body.home-page.site-app:is([data-site-page="auto"], [data-site-page="teherauto"]) > .hub-header[data-site-desk-header],
+  body.home-page.site-app:is([data-site-page="auto"], [data-site-page="teherauto"]) > .hub-header {
+    height: 80px !important;
+    min-height: 80px !important;
+    max-height: 80px !important;
+  }
+
+  body.home-page.site-app:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-header-inner {
+    display: grid !important;
+    flex-direction: row !important;
+    grid-template-columns: auto minmax(0, 1fr) auto !important;
+    grid-template-areas: "logo nav actions" !important;
+    align-items: center !important;
+    column-gap: 24px !important;
+    row-gap: 0 !important;
+    gap: 0 24px !important;
+    max-width: 1440px !important;
+    height: 80px !important;
+    min-height: 80px !important;
+    max-height: 80px !important;
+  }
+
+  body.home-page.site-app:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-header-top {
+    display: contents !important;
+  }
+
+  body.home-page.site-app:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-logo {
+    grid-area: logo !important;
+    justify-self: start !important;
+    position: relative !important;
+    left: auto !important;
+    top: auto !important;
+    transform: none !important;
+  }
+
+  body.home-page.site-app:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-band {
+    grid-area: nav !important;
+    display: flex !important;
+    align-items: center !important;
+    width: auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    border-top: 0 !important;
+    flex: 0 0 auto !important;
+  }
+
+  body.home-page.site-app:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav {
+    justify-content: flex-start !important;
+    gap: 22px !important;
+    width: max-content !important;
+    max-width: 100% !important;
+  }
+
+  body.home-page.site-app:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-header-actions {
+    grid-area: actions !important;
+    justify-self: end !important;
+    margin: 0 !important;
+  }
+}

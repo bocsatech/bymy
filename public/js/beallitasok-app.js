@@ -352,14 +352,6 @@ function clearSection() {
   document.querySelectorAll(".mm-nav-group").forEach((group) => collapseSettingsSubnav(group));
 }
 
-function escapeHtml(value) {
-  return String(value ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
-
 function formatRatingDate(raw) {
   const s = String(raw || "").trim();
   if (!s) return "—";

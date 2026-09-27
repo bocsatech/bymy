@@ -12,10 +12,9 @@
   body.site-app .home-logo .bymy-logo-img--nav,
   body.site-app .hub-logo .bymy-logo-img--nav,
   body.site-app .site-app-logo .bymy-logo-img--nav {
-    height: 56px !important;
+    height: 72px !important;
+    max-width: min(260px, 29vw) !important;
     width: auto !important;
-    max-width: 100px !important;
-    object-fit: contain !important;
   }
 
   /* Ne tolja szét a közös 80px desk savot */

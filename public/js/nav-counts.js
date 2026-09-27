@@ -16,9 +16,7 @@ function formatCount(n) {
 }
 
 function ensureCountEl(link) {
-  let el =
-    link.querySelector(".hub-nav-tile-count") ||
-    link.querySelector(".nav-count");
+  let el = link.querySelector(".nav-count");
   if (!el) {
     el = document.createElement("span");
     el.className = "nav-count";

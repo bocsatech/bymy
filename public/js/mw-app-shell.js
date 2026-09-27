@@ -271,12 +271,12 @@
     if (document.querySelector('link[href*="bymy-logo-size.css"]')) return;
     var link = document.createElement("link");
     link.rel = "stylesheet";
-    link.href = "/css/bymy-logo-size.css?v=logoAlign1";
+    link.href = "/css/bymy-logo-size.css?v=textNav1";
     document.head.appendChild(link);
   }
 
   function ensureDeskHeaderCss() {
-    var href = "/css/site-desk-header.css?v=logoAlign1";
+    var href = "/css/site-desk-header.css?v=textNav1";
     if (document.querySelector("link[data-site-desk-header-css], link[href*='site-desk-header.css']")) return;
     var link = document.createElement("link");
     link.rel = "stylesheet";
@@ -345,91 +345,60 @@
     /* Mindig ugyanaz a DOM — különben oldalanként elcsúszik a sav */
     removeExistingDeskHeaders();
 
+    var msgSvg =
+      '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 6.8h9.5a2.2 2.2 0 0 1 2.2 2.2v4.2a2.2 2.2 0 0 1-2.2 2.2H10l-3.2 2.4V15.2H5A2.2 2.2 0 0 1 2.8 13V9a2.2 2.2 0 0 1 2.2-2.2Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M14.2 8.2h4A2.2 2.2 0 0 1 20.4 10.4v3.4a2.2 2.2 0 0 1-2.2 2.2h-.7v1.7l-2.2-1.7" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>';
+
     var counts = readNavCountsSync();
-    var msgActive = page === "uzenetek" ? " active" : "";
-    var fiokActive = page === "fiok" || page === "beallitasok" ? " active" : "";
 
     var html =
       '<header class="hub-header" data-site-desk-header aria-label="Bymy">' +
       '<div class="hub-header-inner">' +
       '<a class="hub-logo" href="/" aria-label="Bymy">' +
-      '<img class="bymy-logo-img bymy-logo-img--nav" src="/images/bymy-logo-nav.png?v=logoTileWhite1" alt="Bymy.hu" width="108" height="64" decoding="async" />' +
+      '<img class="bymy-logo-img bymy-logo-img--nav" src="/images/bymy-logo.png?v=logoUpload1" alt="Bymy.hu" width="190" height="48" decoding="async" />' +
       "</a>" +
       '<nav class="hub-nav" aria-label="Főmenü">' +
-      '<a class="hub-nav-link hub-nav-link--kezdolap' +
+      '<a class="hub-nav-link' +
       navActiveClass("hub") +
-      '" href="/" aria-label="Kezdőlap">' +
-      '<span class="hub-nav-tile">' +
-      '<img class="hub-nav-kezdolap-img" src="/images/kezdolap-nav.png?v=logoTile1" alt="" width="108" height="64" decoding="async" />' +
-      "</span>" +
-      "</a>" +
-      '<a class="hub-nav-link hub-nav-link--auto' +
+      '" href="/">Kezdőlap</a>' +
+      '<a class="hub-nav-link' +
       navActiveClass("auto") +
-      '" href="/auto.html" aria-label="Autó">' +
-      '<span class="hub-nav-tile">' +
-      '<img class="hub-nav-auto-img" src="/images/auto-nav.png?v=logoTile1" alt="" width="108" height="64" decoding="async" />' +
-      '<span class="hub-nav-tile-count nav-count" aria-hidden="true">' +
-      formatNavCount(counts.auto) +
-      "</span>" +
-      "</span>" +
+      '" href="/auto.html">Autó ' +
+      navCountHtml("auto", counts) +
       "</a>" +
-      '<a class="hub-nav-link hub-nav-link--teherauto' +
+      '<a class="hub-nav-link' +
       navActiveClass("teherauto") +
-      '" href="/teherauto.html" aria-label="Teherautó">' +
-      '<span class="hub-nav-tile">' +
-      '<img class="hub-nav-teherauto-img" src="/images/teherauto-nav.png?v=logoTile1" alt="" width="108" height="64" decoding="async" />' +
-      '<span class="hub-nav-tile-count nav-count" aria-hidden="true">' +
-      formatNavCount(counts.teher) +
-      "</span>" +
-      "</span>" +
+      '" href="/teherauto.html">Teherautó ' +
+      navCountHtml("teher", counts) +
       "</a>" +
-      '<a class="hub-nav-link hub-nav-link--ingatlan' +
+      '<a class="hub-nav-link' +
       navActiveClass("ingatlan") +
-      '" href="/ingatlan.html" aria-label="Ingatlan">' +
-      '<span class="hub-nav-tile">' +
-      '<img class="hub-nav-ingatlan-img" src="/images/ingatlan-nav.png?v=logoTile1" alt="" width="108" height="64" decoding="async" />' +
-      '<span class="hub-nav-tile-count nav-count" aria-hidden="true">' +
-      formatNavCount(counts.ingatlan) +
-      "</span>" +
-      "</span>" +
+      '" href="/ingatlan.html">Ingatlan ' +
+      navCountHtml("ingatlan", counts) +
       "</a>" +
-      '<a class="hub-nav-link hub-nav-link--ajanlasok' +
+      '<a class="hub-nav-link' +
       navActiveClass("ajanlasok") +
       '" href="' +
       ajanlasokHref() +
-      '" aria-label="Ajánlások">' +
-      '<span class="hub-nav-tile">' +
-      '<img class="hub-nav-ajanlasok-img" src="/images/ajanlasok-nav.png?v=logoTile1" alt="" width="108" height="64" decoding="async" />' +
-      "</span>" +
-      "</a>" +
-      '<a class="hub-nav-link hub-nav-link--uzenetek hub-header-msg hub-header-msg--tile' +
-      msgActive +
-      '" href="/uzenetek.html" aria-label="Üzenetek" data-auth-member hidden>' +
-      '<span class="hub-nav-tile">' +
-      '<img class="hub-nav-uzenetek-img" src="/images/uzenetek-nav.png?v=uzenetekNav1" alt="" width="108" height="64" decoding="async" />' +
-      '<span class="hub-nav-tile-count site-message-badge" data-nav-msg-count hidden aria-label="Olvasatlan üzenetek"></span>' +
-      "</span>" +
-      "</a>" +
-      '<div class="site-header-avatar-wrap hub-nav-fiok-wrap" data-avatar-menu data-auth-member hidden>' +
-      '<button type="button" class="hub-nav-link hub-nav-link--fiok site-header-profile site-header-profile--tile' +
-      fiokActive +
-      '" data-auth-avatar data-avatar-toggle aria-expanded="false" aria-label="Fiók" title="Fiók">' +
-      '<span class="hub-nav-tile">' +
-      '<img class="hub-nav-fiok-img" src="/images/fiok-nav.png?v=fiokNav1" alt="" width="108" height="64" decoding="async" />' +
-      "</span>" +
-      '<span class="site-header-avatar" hidden aria-hidden="true">' +
-      '<span data-avatar-letter>A</span>' +
-      '<img data-avatar-img alt="" hidden width="44" height="44" />' +
-      "</span>" +
-      '<span class="site-header-firstname" data-auth-firstname hidden></span>' +
-      "</button></div>" +
+      '">Ajánlások</a>' +
       "</nav>" +
       '<div class="hub-header-top">' +
       '<div class="hub-header-actions site-header-actions">' +
+      '<a class="hub-header-msg" href="/uzenetek.html" data-auth-member hidden>' +
+      msgSvg +
+      "<span>Üzenetek</span></a>" +
       '<div class="site-header-auth-row" data-auth-guest>' +
       '<a class="hub-btn hub-btn--ghost" href="/belepes.html" data-auth-login>Belépés</a>' +
       '<a class="hub-btn hub-btn--ghost" href="/regisztracio.html" data-auth-register>Regisztráció</a>' +
       "</div>" +
+      '<div class="site-header-avatar-wrap" data-avatar-menu data-auth-member hidden>' +
+      '<button type="button" class="site-header-profile" data-auth-avatar data-avatar-toggle aria-expanded="false" aria-label="Fiók" title="Fiók">' +
+      '<span class="site-header-avatar">' +
+      '<span data-avatar-letter>A</span>' +
+      '<img data-avatar-img alt="" hidden width="44" height="44" />' +
+      "</span>" +
+      '<span class="site-header-firstname" data-auth-firstname></span>' +
+      '<svg class="site-header-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+      "</button></div>" +
       '<a class="hub-btn hub-btn--post" href="' +
       postAdHref() +
       '" data-auth-guard>+ Hirdetésfeladás</a>' +
@@ -447,78 +416,8 @@
     if (document.readyState === "loading") {
       document.addEventListener("DOMContentLoaded", pruneForeignHeaders);
     }
-    bindDeskNavScroll();
     syncAuthCache();
     ensureDeskHeaderDeps();
-  }
-
-  function bindDeskNavScroll() {
-    var nav = document.querySelector("header[data-site-desk-header] .hub-nav");
-    if (!nav || nav.getAttribute("data-desk-nav-scroll") === "1") return;
-    nav.setAttribute("data-desk-nav-scroll", "1");
-
-    nav.addEventListener(
-      "wheel",
-      function (e) {
-        if (nav.scrollWidth <= nav.clientWidth + 1) return;
-        var dx = e.deltaX;
-        var dy = e.deltaY;
-        if (Math.abs(dx) > Math.abs(dy)) {
-          if (dx === 0) return;
-          e.preventDefault();
-          nav.scrollLeft += dx;
-          return;
-        }
-        if (dy === 0) return;
-        var atStart = nav.scrollLeft <= 0;
-        var atEnd = nav.scrollLeft + nav.clientWidth >= nav.scrollWidth - 1;
-        if ((dy < 0 && atStart) || (dy > 0 && atEnd)) return;
-        e.preventDefault();
-        nav.scrollLeft += dy;
-      },
-      { passive: false }
-    );
-
-    var dragging = false;
-    var moved = false;
-    var blockClick = false;
-    var startX = 0;
-    var startLeft = 0;
-    nav.addEventListener("pointerdown", function (e) {
-      if (e.pointerType === "mouse" && e.button !== 0) return;
-      if (nav.scrollWidth <= nav.clientWidth + 1) return;
-      dragging = true;
-      moved = false;
-      startX = e.clientX;
-      startLeft = nav.scrollLeft;
-      try {
-        nav.setPointerCapture(e.pointerId);
-      } catch (err) {}
-    });
-    nav.addEventListener("pointermove", function (e) {
-      if (!dragging) return;
-      var dx = e.clientX - startX;
-      if (!moved && Math.abs(dx) < 6) return;
-      moved = true;
-      blockClick = true;
-      nav.scrollLeft = startLeft - dx;
-    });
-    function endDrag() {
-      dragging = false;
-      moved = false;
-    }
-    nav.addEventListener("pointerup", endDrag);
-    nav.addEventListener("pointercancel", endDrag);
-    nav.addEventListener(
-      "click",
-      function (e) {
-        if (!blockClick) return;
-        blockClick = false;
-        e.preventDefault();
-        e.stopPropagation();
-      },
-      true
-    );
   }
 
   function ensureDeskHeaderDeps() {

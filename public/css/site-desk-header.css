@@ -80,12 +80,12 @@
   body.site-app .home-logo,
   body.site-app .site-app-logo,
   body.home-page .hub-logo {
-    position: relative !important;
-    left: auto !important;
+    position: absolute !important;
+    left: 50% !important;
     right: auto !important;
-    top: auto !important;
+    top: 50% !important;
     bottom: auto !important;
-    transform: none !important;
+    transform: translate(-50%, -50%) !important;
     width: auto !important;
     max-width: 200px !important;
     height: var(--desk-logo-h) !important;
@@ -95,6 +95,7 @@
     display: inline-flex !important;
     align-items: center !important;
     line-height: 0 !important;
+    z-index: 1 !important;
   }
 
   body.site-app .hub-logo .bymy-logo-img--nav,
@@ -245,6 +246,9 @@
     justify-content: center !important;
     border-radius: 8px !important;
     white-space: nowrap !important;
+    background: #f0c52c !important;
+    border-color: #f0c52c !important;
+    color: #000 !important;
   }
 
   body.site-app .hub-btn--post .hub-post-compact,

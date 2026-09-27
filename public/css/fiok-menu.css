@@ -7,7 +7,12 @@ body.fiok-page {
 }
 
 body.fiok-page .fiok-top {
-  display: grid;
+  display: none !important;
+}
+
+/* Ha még nincs mw-app-top (JS előtt): ideiglenes vissza-sáv */
+body.fiok-page:not(:has(.mw-app-top)) .fiok-top {
+  display: grid !important;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
   min-height: 3.25rem;
@@ -48,8 +53,8 @@ body.fiok-page .fiok-main {
   margin: 0 auto;
 }
 
-/* Desk: ugyanaz a felső sav, mint a kezdőlapon — a mobil fiok-top eltűnik */
-@media (min-width: 901px) {
+/* Desk: közös willhaben fejléc; fiok-top mindig rejtve */
+@media (min-width: 801px) {
   body.fiok-page .fiok-top {
     display: none !important;
   }

@@ -16,6 +16,9 @@ const DESK_ALAP_FALLBACK = [
   { field: "allapot", label: "Állapot" },
 ];
 
+/** These are owned by mountAutoBrandModelPicker — never mount as plain selects in gyors. */
+const BRAND_MODEL_DESK_KEYS = new Set(["gyartmany", "modell", "tipus"]);
+
 const DESK_MUSZAKI_FALLBACK = [
   { field: "km", label: "Futott km", range: true },
   { field: "teljesitmeny_le", label: "Teljesítmény", range: true },
@@ -248,6 +251,13 @@ export function arrangeAutoDeskDemoFields(form = document.getElementById("home-q
   const mainHost = document.getElementById("qs-layout-main");
   const moreHost = document.getElementById("qs-more-layout");
 
+  /* host.innerHTML wipe destroys pickers — allow remount after rearrange */
+  delete form.dataset.brandModelPicker;
+  delete form.dataset.fuelPicker;
+  delete form.dataset.kivitelPicker;
+  delete form.dataset.allapotPicker;
+  form.querySelectorAll(".auto-bm-panel").forEach((el) => el.remove());
+
   const quickKeys = new Set((form.dataset.deskQuickKeys || "").split(",").filter(Boolean));
   if (!quickKeys.size) {
     ["gyartmany", "modell", "uzemanyag", "gyartasi_ev", "vetelar", "kivitel", "allapot"].forEach((k) => quickKeys.add(k));
@@ -270,20 +280,28 @@ export function arrangeAutoDeskDemoFields(form = document.getElementById("home-q
 
   const used = new Set();
   const mountOpts = { quickKeys, used };
-  const order = deskOrderFromAdminLayout(mainHost).filter((item) => quickKeys.has(item.field));
-  const fieldOrder = order.length ? order : DESK_ALAP_FALLBACK;
+  const order = deskOrderFromAdminLayout(mainHost).filter(
+    (item) => quickKeys.has(item.field) && !BRAND_MODEL_DESK_KEYS.has(item.field)
+  );
+  const fieldOrder = order.length
+    ? order
+    : DESK_ALAP_FALLBACK.filter((item) => !BRAND_MODEL_DESK_KEYS.has(item.field));
 
   for (const item of fieldOrder) {
     mountDeskField(host, item, form, mountOpts);
   }
-  /* Layout API empty / failed → always show the classic gyors row set */
-  if (host.children.length < 3) {
+  /* Layout API empty / failed → always show the classic gyors row set (sans brand/model) */
+  if (host.children.length < 2) {
     host.innerHTML = "";
     used.clear();
-    for (const item of DESK_ALAP_FALLBACK) {
+    for (const item of DESK_ALAP_FALLBACK.filter((item) => !BRAND_MODEL_DESK_KEYS.has(item.field))) {
       mountDeskField(host, item, form, mountOpts);
     }
   }
+  /* Prevent admin "tipus" / stray brand selects from reappearing next to the picker */
+  used.add("gyartmany");
+  used.add("modell");
+  used.add("tipus");
 
   if (!used.has("kivitel")) {
     mountDeskField(host, { field: "kivitel", label: "Kivitel" }, form, mountOpts);

@@ -43,10 +43,6 @@ export async function mountAutoBrandModelPicker(form) {
   const alapHost = form.querySelector(".auto-desk-fields[data-desk-alap]");
   if (!alapHost) return;
 
-  const brandField = alapHost.querySelector('[data-desk-field="gyartmany"]');
-  const modelField = alapHost.querySelector('[data-desk-field="modell"]');
-  if (!brandField && !modelField) return;
-
   let catalog;
   try {
     catalog = await fetchVehicleCatalog();
@@ -60,8 +56,13 @@ export async function mountAutoBrandModelPicker(form) {
   );
   const modelsByBrand = catalog.modellek || {};
 
-  brandField?.remove();
-  modelField?.remove();
+  /* Drop every plain Gyártmány / Modell / Típus row — picker is the only brand UI. */
+  alapHost
+    .querySelectorAll(
+      '[data-desk-field="gyartmany"], [data-desk-field="modell"], [data-desk-field="tipus"], .auto-bm-pair'
+    )
+    .forEach((el) => el.remove());
+  form.querySelectorAll(".auto-bm-panel").forEach((el) => el.remove());
 
   const brandsInput = document.createElement("input");
   brandsInput.type = "hidden";

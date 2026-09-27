@@ -7,7 +7,7 @@ import {
   resetDetailedSearch,
 } from "./auto-detailed-search.js?v=fogyNum1";
 import { readWheel } from "./ingatlan-wheels.js?v=mobFix8";
-import { readBrandModelFilterValues, mountAutoBrandModelPicker } from "./auto-brand-model-picker.js?v=bmDoneClose1";
+import { readBrandModelFilterValues, mountAutoBrandModelPicker } from "./auto-brand-model-picker.js?v=deskDup1";
 import { readFuelFilterValues, mountAutoFuelPicker } from "./auto-fuel-picker.js?v=fuelMatch1";
 import { readKivitelFilterValues, mountAutoKivitelPicker } from "./auto-kivitel-picker.js?v=kivitelFix1";
 import { readAllapotFilterValues, mountAutoAllapotPicker } from "./auto-allapot-picker.js?v=allapotFlat1";
@@ -18,7 +18,7 @@ import {
   initAutoDeskSearch,
   updateAutoDeskAccSummaries,
   arrangeAutoDeskDemoFields,
-} from "./auto-desk-search.js?v=bootFix2";
+} from "./auto-desk-search.js?v=deskDup1";
 
 prefetchAutoSearchBoot();
 const MOBILE_MQ = "(max-width: 900px)";
@@ -211,7 +211,8 @@ export function initHomeQuickSearch({ onSearch = () => {}, onDeskSortChange, onR
     if (!form.classList.contains("is-qs-ready")) {
       console.warn("Kereső boot timeout — feloldom a formot.");
       try {
-        if (vehicleDesk()) arrangeAutoDeskDemoFields(form);
+        if (vehicleDesk()) void mountDeskFilterMenu(form);
+        else arrangeAutoDeskDemoFields(form);
       } catch {
         /* ignore */
       }
@@ -333,14 +334,8 @@ export function initHomeQuickSearch({ onSearch = () => {}, onDeskSortChange, onR
             }
           }
         } else {
-          arrangeAutoDeskDemoFields(form);
-          refillAutoSearchRangeSelects(form);
-          await mountSafe(mountAutoBrandModelPicker, "Gyártmány/Modell picker:");
-          await Promise.all([
-            mountSafe(mountAutoFuelPicker, "Üzemanyag picker:"),
-            mountSafe(mountAutoKivitelPicker, "Kivitel picker:"),
-            mountSafe(mountAutoAllapotPicker, "Állapot picker:"),
-          ]);
+          /* Single path with onDeskLayout — avoids double Gyártmány/Modell (+ Típus) rows. */
+          await mountDeskFilterMenu(form);
         }
         // Empty "success" (poisoned session cache) — one forced remount before giving up.
         if (!qsHasFields() && !deskAuto) {
@@ -379,14 +374,7 @@ export function initHomeQuickSearch({ onSearch = () => {}, onDeskSortChange, onR
       if (!recovered && deskAuto) {
         try {
           await applyAutoSearchLayout(form, { force: true }).catch(() => null);
-          arrangeAutoDeskDemoFields(form);
-          refillAutoSearchRangeSelects(form);
-          await mountSafe(mountAutoBrandModelPicker, "Gyártmány/Modell picker:");
-          await Promise.all([
-            mountSafe(mountAutoFuelPicker, "Üzemanyag picker:"),
-            mountSafe(mountAutoKivitelPicker, "Kivitel picker:"),
-            mountSafe(mountAutoAllapotPicker, "Állapot picker:"),
-          ]);
+          await mountDeskFilterMenu(form);
           recovered = qsHasFields();
         } catch (deskError) {
           console.warn("Desk fallback kereső:", deskError);

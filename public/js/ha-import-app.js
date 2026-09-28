@@ -106,6 +106,106 @@ async function copyBookmarkletLink() {
   }
 }
 
+function isApplePlatform() {
+  const ua = String(navigator.userAgent || "");
+  const platform = String(navigator.platform || "");
+  return /Mac|iPhone|iPad|iPod/i.test(platform) || /Mac OS X/i.test(ua);
+}
+
+function kbd(label) {
+  return `<span class="ha-imp-kbd">${label}</span>`;
+}
+
+function detectHaBrowser() {
+  const ua = String(navigator.userAgent || "");
+  if (/Edg\//i.test(ua) || /EdgiOS\//i.test(ua)) return "edge";
+  if (/Firefox\//i.test(ua) || /FxiOS\//i.test(ua)) return "firefox";
+  if (/Safari\//i.test(ua) && !/Chrome\//i.test(ua) && !/Chromium\//i.test(ua) && !/Edg\//i.test(ua)) {
+    return "safari";
+  }
+  if (/Chrome\//i.test(ua) || /CriOS\//i.test(ua) || /Chromium\//i.test(ua)) return "chrome";
+  return isApplePlatform() ? "safari" : "chrome";
+}
+
+function browserInstallGuide(browser) {
+  const mac = isApplePlatform();
+  const mod = mac ? "Cmd" : "Ctrl";
+  const titles = {
+    chrome: "Chrome",
+    edge: "Edge",
+    firefox: "Firefox",
+    safari: "Safari",
+  };
+  const title = titles[browser] || "Chrome";
+  let steps = [];
+  if (browser === "safari") {
+    steps = mac
+      ? [
+          `${kbd("Cmd")} + ${kbd("Shift")} + ${kbd("B")} — könyvjelzősáv`,
+          `${kbd("Cmd")} + ${kbd("D")} — új könyvjelző`,
+          `A cím / URL mezőbe ${kbd("Cmd")} + ${kbd("V")}`,
+          "Mentés",
+        ]
+      : [
+          "Nézet → Kedvencek sáv megjelenítése",
+          `${kbd("Ctrl")} + ${kbd("D")} — új kedvenc`,
+          `A cím mezőbe ${kbd("Ctrl")} + ${kbd("V")}`,
+          "Hozzáadás",
+        ];
+  } else {
+    steps = [
+      `${kbd(mod)} + ${kbd("Shift")} + ${kbd("B")} — könyvjelzősáv`,
+      `${kbd(mod)} + ${kbd("D")} — új könyvjelző`,
+      `A cím mezőbe ${kbd(mod)} + ${kbd("V")} (már a vágólapon)`,
+      "Mentés",
+    ];
+  }
+  return { title, steps };
+}
+
+function renderBrowserInstall(browser) {
+  const id = ["chrome", "edge", "firefox", "safari"].includes(browser) ? browser : "chrome";
+  document.querySelectorAll("[data-ha-browser]").forEach((btn) => {
+    const on = btn.getAttribute("data-ha-browser") === id;
+    btn.classList.toggle("is-active", on);
+    btn.setAttribute("aria-selected", on ? "true" : "false");
+  });
+  const guide = browserInstallGuide(id);
+  const titleEl = document.querySelector("[data-ha-install-title]");
+  const stepsEl = document.querySelector("[data-ha-install-steps]");
+  if (titleEl) titleEl.textContent = guide.title;
+  if (stepsEl) {
+    stepsEl.innerHTML = guide.steps.map((step) => `<li>${step}</li>`).join("");
+  }
+  try {
+    sessionStorage.setItem("bymy-ha-install-browser", id);
+  } catch {
+  }
+}
+
+async function selectBrowserAndCopy(browser) {
+  renderBrowserInstall(browser);
+  await copyBookmarkletLink();
+  const name = browserInstallGuide(browser).title;
+  setStatus(`${name}: könyvjelző a vágólapon — kövesd a lépéseket alább.`);
+}
+
+function initBrowserInstallUi() {
+  if (!document.querySelector("[data-ha-install]")) return;
+  let initial = detectHaBrowser();
+  try {
+    const saved = sessionStorage.getItem("bymy-ha-install-browser");
+    if (saved && ["chrome", "edge", "firefox", "safari"].includes(saved)) initial = saved;
+  } catch {
+  }
+  renderBrowserInstall(initial);
+  document.querySelectorAll("[data-ha-browser]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      void selectBrowserAndCopy(btn.getAttribute("data-ha-browser") || "chrome");
+    });
+  });
+}
+
 function renderMode() {
   const mode = currentMode();
   const cfg = MODES[mode];
@@ -663,6 +763,7 @@ export async function initHaImportPage() {
     bindAccountNav();
   }
   renderMode();
+  initBrowserInstallUi();
 
   document.querySelectorAll("[data-ha-mode]").forEach((btn) => {
     btn.addEventListener("click", () => setMode(btn.getAttribute("data-ha-mode")));

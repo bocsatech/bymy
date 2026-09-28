@@ -57,7 +57,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/css/style.css?v=noScroll1" />
-    <link rel="stylesheet" href="/css/site-app.css?v=navRow1" />
+    <link rel="stylesheet" href="/css/site-app.css?v=haBrowse1" />
         <link rel="stylesheet" href="/css/site-desk-header.css?v=navRow1" />
 <link rel="stylesheet" href="/css/mm-nav-c.css?v=mmNavC3" />
       <link rel="stylesheet" href="/css/hub.css?v=navRow1" />
@@ -331,10 +331,24 @@
               <a class="ha-imp-bookmark" id="ha-imp-bookmark" href="#">Hirdetés importálása</a>
               <button type="button" class="settings-btn-secondary" id="ha-imp-bookmark-copy">Könyvjelző másolása</button>
             </div>
-            <p class="ha-imp-bookmark-hint">
-              Húzd a sárga gombot a könyvjelzősávra, <strong>vagy</strong> másold a könyvjelzőt, majd a böngészőben: Új könyvjelző → illeszd be a cím mezőbe.
-              A hasznaltauto oldalon (belépés + járműlista / Módosítás) kattints a könyvjelzőre.
-            </p>
+
+            <div class="ha-imp-install" data-ha-install>
+              <p class="ha-imp-install-label">Könyvjelző telepítése böngésző szerint</p>
+              <div class="ha-imp-browsers" role="tablist" aria-label="Böngésző">
+                <button type="button" class="ha-imp-browser" data-ha-browser="chrome" role="tab" aria-selected="false">Chrome</button>
+                <button type="button" class="ha-imp-browser" data-ha-browser="edge" role="tab" aria-selected="false">Edge</button>
+                <button type="button" class="ha-imp-browser" data-ha-browser="firefox" role="tab" aria-selected="false">Firefox</button>
+                <button type="button" class="ha-imp-browser" data-ha-browser="safari" role="tab" aria-selected="false">Safari</button>
+              </div>
+              <div class="ha-imp-install-help" data-ha-install-help>
+                <strong data-ha-install-title>Chrome</strong>
+                <ol data-ha-install-steps></ol>
+              </div>
+              <p class="ha-imp-bookmark-hint">
+                Húzni nem kell: válassz böngészőt → a gomb bemásolja a könyvjelzőt → kövesd a lépéseket.
+                A hasznaltauto oldalon (belépés + lista) futtasd a könyvjelzőt.
+              </p>
+            </div>
           </div>
 
           <div class="ha-imp-url-row" data-ha-url-row>
@@ -793,7 +807,7 @@
     </main>
 
     <script src="/js/site-avatar-menu.js?v=settingsHome1" type="module"></script>
-    <script src="/js/ha-import-app.js?v=haImportAck2" type="module"></script>
+    <script src="/js/ha-import-app.js?v=haImportBrowsers1" type="module"></script>
     <script src="/js/beallitasok-app.js?v=notifyOn1" type="module"></script>
     <script>
       

@@ -6096,26 +6096,32 @@ html[data-theme="dark"] body.site-app.hub-page--feed .site-side-card {
 }
 
 body.site-app .ha-imp-panel {
-  background: #fff;
-  border: 1px solid #dfe3ea;
-  border-radius: 14px;
-  padding: 1.15rem 1.2rem 1.35rem;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
 }
 
 body.site-app .ha-imp-panel .ha-imp-lead {
   display: none;
 }
 
-body.site-app .ha-imp-step-cell {
-  margin: 0.95rem 0 0;
-  padding: 1rem 1.05rem 1.1rem;
-  border: 1px solid #d0d5dd;
-  border-radius: 12px;
-  background: #f8fafc;
+body.site-app .ha-imp-panel > .mm-panel-head {
+  margin-bottom: 0.85rem;
 }
 
-/* 1. lépés: külön fehér box, sötétkék keret (chat-bubble stílus) */
+/* Alap: 2. lépés ne legyen külön szürke kártya */
+body.site-app .ha-imp-step-cell {
+  margin: 0.95rem 0 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+/* Csak az 1. lépés: fehér box, sötétkék keret — mint a demó */
 body.site-app .ha-imp-step-cell[data-ha-step="1"] {
+  padding: 1.1rem 1.15rem 1.15rem;
   background: #fff;
   border: 1.5px solid #1e4d7b;
   border-radius: 14px;
@@ -6250,6 +6256,10 @@ body.site-app .ha-imp-bookmark {
   color: #111;
   font-weight: 650;
   text-decoration: none;
+}
+
+body.site-app .ha-imp-bookmark[hidden] {
+  display: none !important;
 }
 
 @media (max-width: 640px) {
@@ -6423,8 +6433,8 @@ body.site-app .ha-imp-safari-drag-link {
 }
 
 html[data-theme="dark"] body.site-app .ha-imp-step-cell {
-  border-color: #3a4254;
-  background: #1a2230;
+  border-color: transparent;
+  background: transparent;
 }
 
 html[data-theme="dark"] body.site-app .ha-imp-step-cell[data-ha-step="1"] {
@@ -6580,7 +6590,11 @@ body.site-app .ha-imp-footer {
   }
 }
 
-html[data-theme="dark"] body.site-app .ha-imp-panel,
+html[data-theme="dark"] body.site-app .ha-imp-panel {
+  background: transparent;
+  border-color: transparent;
+}
+
 html[data-theme="dark"] body.site-app .ha-imp-result {
   background: #1a1f26;
   border-color: #2a313c;
@@ -7087,8 +7101,18 @@ html[data-theme="dark"] body.site-app.settings-page .settings-wheel-opt.is-activ
   color: #f3f4f6;
 }
 
-html[data-theme="dark"] body.site-app.settings-page .mm-panel,
-html[data-theme="dark"] body.site-app.settings-page .ha-imp-panel,
+html[data-theme="dark"] body.site-app.settings-page .ha-imp-panel {
+  background: transparent !important;
+  border-color: transparent !important;
+}
+
+html[data-theme="dark"] body.site-app.settings-page .ha-imp-step-cell[data-ha-step="1"] {
+  background: #1f2430 !important;
+  border-color: #6ea8d8 !important;
+  color: #e8eaed !important;
+}
+
+html[data-theme="dark"] body.site-app.settings-page .mm-panel:not(.ha-imp-panel),
 html[data-theme="dark"] body.site-app.settings-page .ha-imp-result,
 html[data-theme="dark"] body.site-app.settings-page .mm-ad-box,
 html[data-theme="dark"] body.site-app.settings-page .hero-settings,

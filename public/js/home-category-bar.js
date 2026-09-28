@@ -1,3 +1,5 @@
+import { fuelValueMatches } from "./auto-fuel-picker.js?v=fuelMatch2";
+
 export const HOME_CATEGORY_IDS = [
   "uj",
   "benzin",
@@ -60,21 +62,32 @@ export function renderHomeCategoryBar(root) {
   root.appendChild(track);
 }
 
-function haystack(item) {
-  const preview = item.preview ?? {};
-  return [preview.title, preview.leiras, preview.specLine, ...(preview.badges ?? [])]
-    .join(" ")
+function fuelOf(item) {
+  return item.preview?.filter?.uzemanyag ?? item.form?.uzemanyag ?? "";
+}
+
+function alkategoriaOf(item) {
+  return String(
+    item.preview?.filter?.hirdetes_alkategoria ?? item.form?.hirdetes_alkategoria ?? ""
+  )
+    .trim()
     .toLowerCase();
 }
 
-function fuelOf(item) {
-  return item.preview?.filter?.uzemanyag ?? "";
+function isBerelhetoListing(item) {
+  const raw =
+    item.preview?.filter?.berelheto ??
+    item.form?.berelheto ??
+    item.preview?.filter?.berelheto_e ??
+    "";
+  if (raw === true || raw === 1) return true;
+  const v = String(raw).trim().toLowerCase();
+  return v === "1" || v === "igen" || v === "true" || v === "on" || v === "yes";
 }
 
 function matchesCategory(item, categoryId) {
   const f = item.preview?.filter ?? {};
   const fuel = fuelOf(item);
-  const text = haystack(item);
   const year = f.gyartasi_ev;
   const km = item.preview?.kmNum;
   const allapot = (f.allapot ?? "").toLowerCase();
@@ -88,26 +101,22 @@ function matchesCategory(item, categoryId) {
         (year != null && year >= currentYear - 1)
       );
     case "benzin":
-      return fuel === "Benzin";
+      // Csak tiszta benzin — hibrid almenük nem
+      return fuelValueMatches(fuel, ["Benzin"]) && !fuelValueMatches(fuel, ["Hibrid"]);
     case "diesel":
-      return fuel === "Diesel" || fuel === "Dízel";
+      return fuelValueMatches(fuel, ["Dízel"]) && !fuelValueMatches(fuel, ["Hibrid"]);
     case "elektromos":
-      return fuel === "Elektromos";
+      return fuelValueMatches(fuel, ["Elektromos"]);
     case "hybrid":
-      return (
-        (/elektromos/i.test(fuel) && fuel !== "Elektromos") ||
-        /hibrid|hybrid/i.test(fuel) ||
-        /hibrid|hybrid/i.test(text)
-      );
+      // Üzemanyag hibrid + almenük (Benzin/elektromos, Dízel/elektromos, …). Cím NEM.
+      return fuelValueMatches(fuel, ["Hibrid"]);
     case "leasing":
-      return /leasing|lízing|lizing|hitel\/leasing|operatív/i.test(text);
+      return alkategoriaOf(item) === "leasing";
     case "berelheto":
-      return /bérelhet|berelhet|kölcsön|kolcson|rent/i.test(text);
+      return isBerelhetoListing(item);
     case "ot":
-      return (
-        (year != null && year <= 1990) ||
-        /oldtimer|veterán|veteran|klasszik|antik/i.test(text)
-      );
+      // Később — egyelőre ne töltsön be autókat
+      return false;
     default:
       return true;
   }

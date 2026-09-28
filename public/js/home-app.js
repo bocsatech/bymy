@@ -18,7 +18,7 @@ import {
   initIngatlanSearch,
 } from "./ingatlan-search.js?v=mobFix8";
 import { normalizeIngatlanUzletag } from "./ingatlan-fields.js?v=immoEladoDefault1";
-import { filterByCategory, initHomeCategoryBar, renderHomeCategoryBar } from "./home-category-bar.js?v=catLabel1";
+import { filterByCategory, initHomeCategoryBar, renderHomeCategoryBar } from "./home-category-bar.js?v=catFuel1";
 import { initHomeUnifiedScroll } from "./home-unified-scroll.js";
 import { initHomeStatsBar } from "./home-stats-bar.js?v=mapPostal2";
 import { buildNearbyFilter, readNearbyPrefs } from "./nearby-search.js?v=mapCity1";

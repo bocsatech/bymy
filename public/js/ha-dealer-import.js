@@ -1,6 +1,7 @@
 /**
- * Kereskedői Autóimport — csak CDN thumb → HQ URL → Bymy API.
- * Szándékosan rövid: nincs sor-DOM, nincs lapozás-fetch, nincs opener kényszer.
+ * Kereskedői Autóimport — CDN thumb → HQ URL → Bymy mentés.
+ * Preferált út: postMessage a Bymy Autóimport fülre (same-origin mentés).
+ * Fallback: közvetlen POST /api/import/extracted (CORS) — ha van token.
  */
 (function (root) {
   const MAX = 200;
@@ -485,7 +486,73 @@
     }
   }
 
-  async function saveOne(origin, token, page, index, total) {
+  function resolveBymyTarget() {
+    if (window.opener && !window.opener.closed) {
+      try {
+        window.opener.focus();
+      } catch {
+      }
+      return window.opener;
+    }
+    return null;
+  }
+
+  function deliverOneAwait(target, body) {
+    return new Promise((resolve) => {
+      let acked = false;
+      const onAck = (event) => {
+        const data = event?.data;
+        if (!data || data.type !== "bymy-ha-import-ack") return;
+        if (data.importId && data.importId !== body.importId) return;
+        acked = true;
+        try {
+          window.removeEventListener("message", onAck);
+        } catch {
+        }
+        resolve(true);
+      };
+      try {
+        window.addEventListener("message", onAck);
+      } catch {
+      }
+      const send = () => {
+        if (!target || target.closed) return false;
+        try {
+          target.postMessage(body, "*");
+          return true;
+        } catch {
+          return false;
+        }
+      };
+      if (!send()) {
+        try {
+          window.removeEventListener("message", onAck);
+        } catch {
+        }
+        resolve(false);
+        return;
+      }
+      let n = 0;
+      const timer = setInterval(() => {
+        if (acked) {
+          clearInterval(timer);
+          return;
+        }
+        n += 1;
+        send();
+        if (n >= 90) {
+          clearInterval(timer);
+          try {
+            window.removeEventListener("message", onAck);
+          } catch {
+          }
+          resolve(false);
+        }
+      }, 500);
+    });
+  }
+
+  async function saveOneDirect(origin, token, page, index, total) {
     const res = await fetch(`${origin}/api/import/extracted`, {
       method: "POST",
       headers: {
@@ -522,9 +589,11 @@
       alert("Nyisd meg az admin.hasznaltauto.hu Járműlista / Hirdetéseim oldalát, majd futtasd újra.");
       return;
     }
-    if (!token) {
+
+    const target = resolveBymyTarget();
+    if (!target && !token) {
       alert(
-        "Nincs Bymy session token a könyvjelzőben.\n\n1) Frissítsd a Bymy Autóimport lapot\n2) Másold újra a könyvjelzőt\n3) Futtasd a listán"
+        "Nincs meg a Bymy Autóimport lap.\n\n1) Nyisd meg a Bymy Autóimportot (kereskedői mód)\n2) Onnan: admin.hasznaltauto.hu megnyitása\n3) A listán futtasd a könyvjelzőt\n\nNe zárd be az Autóimport lapot — így megy át a mentés Windows 7-en is."
       );
       return;
     }
@@ -540,6 +609,7 @@
       return;
     }
 
+    const batchId = `ha-batch-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
     let ok = 0;
     let fail = 0;
     const errors = [];
@@ -547,11 +617,37 @@
       showProgress(i + 1, cars.length, `mentés ${i + 1}/${cars.length}`);
       try {
         const car = await ensureCarDescription(cars[i]);
-        const result = await saveOne(origin, token, car, i + 1, cars.length);
-        if ((result.savedCount || 0) > 0 || result.ok !== false) ok += 1;
+        let saved = false;
+        if (target && !target.closed) {
+          saved = await deliverOneAwait(target, {
+            type: "bymy-ha-import",
+            v: 1,
+            mode: "dealer",
+            photoOnly: true,
+            listUrl: location.href,
+            batchId,
+            index: i + 1,
+            total: cars.length,
+            importId: `${batchId}-${i + 1}`,
+            pages: [car],
+          });
+        }
+        if (!saved && token) {
+          showProgress(i + 1, cars.length, `közvetlen mentés ${i + 1}/${cars.length}`);
+          const result = await saveOneDirect(origin, token, car, i + 1, cars.length);
+          saved = (result.savedCount || 0) > 0 || result.ok !== false;
+          if (!saved) errors.push(result.errors?.[0]?.message || "mentés 0");
+        }
+        if (saved) ok += 1;
         else {
           fail += 1;
-          errors.push(result.errors?.[0]?.message || "mentés 0");
+          if (!errors.length) {
+            errors.push(
+              target
+                ? "A Bymy lap nem fogadta — ne zárd be az Autóimportot"
+                : "Failed to fetch — nyisd az admin oldalt a Bymy Autóimportból"
+            );
+          }
         }
       } catch (e) {
         fail += 1;

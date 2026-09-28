@@ -27,9 +27,9 @@ const MODES = {
   dealer: {
     title: "Kereskedői import",
     startURL: "https://admin.hasznaltauto.hu/",
-    steps: "1. Admin megnyitása  ·  2. Járműlista (thumbök látszanak)  ·  3. Friss könyvjelző másolása / futtatása",
+    steps: "1. Ebből a lapból nyisd az admint  ·  2. Járműlista (thumbök)  ·  3. Könyvjelző a listán",
     action: "Lista → csak első kép (CDN)",
-    footer: "CDN lista → ID. A könyvjelző rövid élettartamú import tokent kap (nem a teljes belépés) — másold újra, ha lejárt (~4 óra).",
+    footer: "Fontos: az admin oldalt EBBŐL a lapból nyisd (ne külön böngészőből) — így a mentés a Bymy fülön megy, Windows 7-en is. Könyvjelző token ~4 óra.",
     openLabel: "admin.hasznaltauto.hu megnyitása",
   },
 };
@@ -60,7 +60,7 @@ function bookmarkletHref(mode) {
   const origin = location.origin;
   const isDealer = mode === "dealer";
   const src = isDealer
-    ? `${origin}/js/ha-dealer-import.js?v=haCdn10`
+    ? `${origin}/js/ha-dealer-import.js?v=haCdn11`
     : `${origin}/js/ha-import-bookmarklet.js?v=haDealerPhoto15`;
   const token = getAuthToken() || "";
   const runner = isDealer ? "BymyHaDealerImport" : "BymyHaImport";

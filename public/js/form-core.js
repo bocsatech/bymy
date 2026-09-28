@@ -14,7 +14,7 @@ import { EGYEB_INFO_OPTIONS } from "./egyeb-info-data.js?v=egyebInfoFix2";
 
 let renderEgyebInfoHook = null;
 window.addEventListener("ad-form-render-egyeb-info", () => renderEgyebInfoHook?.());
-import { initVehicleCatalogSelects } from "./vehicle-catalog-client.js";
+import { initVehicleCatalogSelects } from "./vehicle-catalog-client.js?v=teherStrict3";
 import { compressListingPhoto, MAX_LISTING_PHOTOS } from "./listing-photo-compress.js?v=myAds2";
 import { uploadImage } from "./upload-image.js?v=supabaseUpload1";
 import { applyListingAddressFromProfileSync } from "./ad-location-profile.js?v=postalFill1";
@@ -23,7 +23,7 @@ import {
   DEFAULT_PHOTO_OVERLAY_ID,
   renderListingPhotoOverlay,
 } from "./listing-photo-overlay.js?v=photoOverlayIcons3";
-import { refreshAdFormBmPickers, applyAdFormBmFieldValues } from "./ad-form-bm-pickers.js?v=bmTree1";
+import { refreshAdFormBmPickers, applyAdFormBmFieldValues } from "./ad-form-bm-pickers.js?v=teherStrict3";
 import { applyAdFormDesk, isAdFormDesk } from "./ad-form-desk.js?v=immoTipusPick1";
 import { initKmInput, parseKmDigits, setKmInputValue } from "./km-input.js?v=kmFmt1";
 import {
@@ -2010,10 +2010,10 @@ fillYearSelect(gyartasiEv);
 fillYearSelect(muszakiEv, { maxYear: YEAR_SELECT_MAX });
 fillYearSelect(forgalombaHelyezesEv);
 initVehicleCatalogSelects({
-  kind: isKisteherAd() ? "kisteher" : "szemelyauto",
+  kind: isKisteherAd() || isTeher35Ad() ? "kisteher" : "szemelyauto",
   brandSelect: gyartmany,
   modelSelect: modell,
-  tipusSelect: isKisteherAd() ? null : tipus,
+  tipusSelect: isKisteherAd() || isTeher35Ad() ? null : tipus,
   yearSelect: gyartasiEv,
   yearFromCatalog: false,
   brandEmptyLabel: "Válasszon",

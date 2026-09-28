@@ -484,7 +484,7 @@ async function fetchCatalogQuick() {
   const kind = catalogKindForDrums();
   const staticUrl =
     kind === "kisteher"
-      ? "/data/vehicle-catalog-kisteher.json?v=teherStrict2"
+      ? "/data/vehicle-catalog-kisteher.json?v=teherStrict3"
       : "/data/vehicle-catalog.json";
   try {
     const res = await fetch(staticUrl, { cache: kind === "kisteher" ? "no-store" : "force-cache" });
@@ -493,7 +493,7 @@ async function fetchCatalogQuick() {
   } catch {
     /* fallback API */
   }
-  const { fetchVehicleCatalog } = await import("./vehicle-catalog-client.js?v=teherStrict2");
+  const { fetchVehicleCatalog } = await import("./vehicle-catalog-client.js?v=teherStrict3");
   return fetchVehicleCatalog({ kind });
 }
 

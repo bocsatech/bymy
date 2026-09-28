@@ -6,7 +6,7 @@ import {
   UZEMANYAG_CATEGORIES,
 } from "./equipment-data.js?v=allapotFlat1";
 import { KIVITEL_OPTIONS } from "./kivitel-options.js?v=kivitel1";
-import { fetchVehicleCatalog } from "./vehicle-catalog-client.js?v=teherStrict2";
+import { fetchVehicleCatalog } from "./vehicle-catalog-client.js?v=teherStrict3";
 import { bindAutoBmDismiss, autoBmPanelIsOpen } from "./auto-bm-dismiss.js?v=bmDismiss1";
 import {
   VEHICLE_KARPIT_OPTIONS,
@@ -210,7 +210,10 @@ function adFormSubtype(form) {
 }
 
 function catalogKindForAdForm(form) {
-  return adFormSubtype(form) === "kisteher" ? "kisteher" : "szemelyauto";
+  const subtype = adFormSubtype(form);
+  // 3,5-ig és 3,5-tól: soha személyautó márkalista (kisteher JSON, amíg nincs nehéz teher katalógus).
+  if (subtype === "kisteher" || subtype === "teherauto") return "kisteher";
+  return "szemelyauto";
 }
 
 export function isBmPickerAdForm(form) {

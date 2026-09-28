@@ -340,8 +340,8 @@
         if (window.matchMedia("(min-width: 901px)").matches) {
           document.body.classList.add("auto-desk-active");
           fetch("/api/level1/form-layout?category=teherauto-search", { credentials: "same-origin" }).catch(function () {});
-          var catalogQs = kat === "35-alatt" ? "?kind=kisteher" : "";
-          fetch("/api/vehicle-catalog" + catalogQs, { credentials: "same-origin" }).catch(function () {});
+          // Mindig kisteher — 35-felett se melegítsen személyautó katalógust.
+          fetch("/api/vehicle-catalog?kind=kisteher", { credentials: "same-origin" }).catch(function () {});
         }
       } catch (e) {}
     </script>
@@ -590,7 +590,7 @@
         form.classList.add("is-qs-ready");
       }, 5500);
     </script>
-    <script src="/js/home-app.js?v=teherStrict2" type="module"></script>
+    <script src="/js/home-app.js?v=teherStrict3" type="module"></script>
     <script src="/js/auto-hero.js?v=searchCollapse1" type="module"></script>
     <script src="/js/site-avatar-menu.js?v=avatarSync1" type="module"></script>
 

@@ -1,4 +1,4 @@
-import { initVehicleCatalogSelects, shortTypeName } from "./vehicle-catalog-client.js";
+import { initVehicleCatalogSelects, shortTypeName } from "./vehicle-catalog-client.js?v=teherStrict3";
 import { kivitelMatches } from "./kivitel-options.js?v=kivitel1";
 import { fuelValueMatches } from "./auto-fuel-picker.js?v=fuelMatch1";
 import { kivitelListMatches } from "./auto-kivitel-picker.js?v=teherKivitel35e";

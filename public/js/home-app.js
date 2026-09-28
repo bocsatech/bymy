@@ -8,7 +8,7 @@ import {
   initHomeSearchSidebar,
   initHomeFilterCatalog,
 } from "./home-search-filter.js?v=valto3";
-import { initHomeQuickSearch } from "./home-quicksearch.js?v=searchBack7";
+import { initHomeQuickSearch } from "./home-quicksearch.js?v=searchBack8";
 import { decodeSavedSearchParam, encodeSavedSearchParam } from "./saved-search.js?v=savedSearch5";
 import { matchDetailedSearch, hasActiveDetailedSearch } from "./auto-detailed-search.js?v=autoDesk16";
 import { updateAutoDeskResultCount } from "./auto-desk-search.js?v=teherStrict3";
@@ -33,7 +33,7 @@ import {
   shouldRestoreVehicleSearch,
   peekMapOpenOnReturn,
   consumeMapOpenOnReturn,
-} from "./listing-return.js?v=searchBack7";
+} from "./listing-return.js?v=searchBack8";
 import { normalizeKivitel } from "./kivitel-options.js?v=kivitel1";
 import { featuredListingIdSet, pickFeaturedListings } from "./home-featured-slots.js?v=featuredNoAuto1";
 import { mountSellerInventory, updateSellerInventoryCount } from "./seller-inventory.js?v=sellerInv30";
@@ -202,6 +202,22 @@ let browseFeaturedItems = [];
 const PAGE = document.body?.getAttribute("data-site-page") || "";
 if (gridTrack) bindListingOpen(gridTrack);
 window.addEventListener("bymy-listing-open", () => {
+  // Térkép / lista: mentsük a form aktuális szűrőit akkor is, ha még nem nyomtak
+  // „Találatok mutatása”-t (csak előnézet / térkép szűrés).
+  try {
+    const values = quickSearchApi?.readQuickSearchValues?.() || {};
+    const { detailed, ...sidebarValues } = values;
+    const merged = { ...quickSearchFilters, ...sidebarValues };
+    const has =
+      hasActiveSidebarFilters(merged) ||
+      (detailed && typeof hasActiveDetailedSearch === "function" && hasActiveDetailedSearch(detailed));
+    if (has) {
+      searchResultsCommitted = true;
+      quickSearchFilters = { ...emptyFilters(), ...merged };
+      if (detailed) detailedFilters = detailed;
+    }
+  } catch {
+  }
   persistCommittedSearch();
 });
 
@@ -890,7 +906,7 @@ initHomeUnifiedScroll();
 if (PAGE === "auto" || PAGE === "teherauto") {
   ensureMapModule = () => {
     if (!mapModulePromise) {
-      mapModulePromise = import("./search-results-map.js?v=searchBack7")
+      mapModulePromise = import("./search-results-map.js?v=searchBack8")
         .then((mod) => {
           updateSearchMapButtonLabels = mod.updateSearchMapButtonLabels;
           closeSearchResultsMapFn = mod.closeSearchResultsMap;

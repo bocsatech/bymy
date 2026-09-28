@@ -588,7 +588,28 @@ export async function mountAutoBrandModelPicker(form) {
     });
   });
 
+  form.addEventListener("bymy-saved-search-applied", (event) => {
+    const detail = event?.detail && typeof event.detail === "object" ? event.detail : {};
+    const brands = Array.isArray(detail.gyartmanyok)
+      ? detail.gyartmanyok.map((v) => String(v)).filter(Boolean)
+      : parseJsonList(brandsInput.value);
+    const models = Array.isArray(detail.modellek)
+      ? detail.modellek.map((v) => String(v)).filter(Boolean)
+      : parseJsonList(modelsInput.value);
+    selectedBrands = [...brands].sort((a, b) => a.localeCompare(b, "hu", { sensitivity: "base" }));
+    selectedModels = [...models].sort((a, b) => a.localeCompare(b, "hu", { sensitivity: "base" }));
+    pruneModels();
+    syncHidden();
+    if (!panel.hidden) {
+      if (modelBrand && selectedBrands.includes(modelBrand)) renderModelList(modelBrand);
+      else renderBrandList();
+    }
+  });
+
   form.dataset.brandModelPicker = "1";
+  // Ha a mentett keresés a mount előtt került a hidden inputba, vedd át.
+  selectedBrands = parseJsonList(brandsInput.value);
+  selectedModels = parseJsonList(modelsInput.value);
   syncHidden();
 }
 

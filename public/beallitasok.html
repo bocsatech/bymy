@@ -315,75 +315,105 @@
         <section class="mm-panel ha-imp-panel" data-mm-panel="import" hidden>
           <header class="mm-panel-head">
             <h2 class="mm-panel-title" data-ha-title>Használtautó import</h2>
-            <p class="mm-panel-lead ha-imp-lead">Hirdetéseid átvétele a hasznaltauto.hu-ról — lista vagy egyedi hirdetés. A hasznaltauto jelszavadat nem tároljuk. Mentéshez Bymy belépés kell.</p>
+            <p class="mm-panel-lead ha-imp-overview">
+              A hasznaltauto.hu hirdetéseidet átveszed a Bymy-ra: először válaszd ki, magánszemélyként vagy kereskedőként importálsz,
+              majd nyisd meg a megfelelő hasznaltauto oldalt. A jelszavadat nem tároljuk — a mentés a Bymy fiókodba kerül.
+            </p>
           </header>
 
-          <div class="ha-imp-modes" role="tablist">
-            <button type="button" class="ha-imp-mode is-active" data-ha-mode="standard">Használtautó import</button>
-            <button type="button" class="ha-imp-mode" data-ha-mode="dealer">Kereskedői import</button>
-          </div>
-
-          <p class="ha-imp-steps" data-ha-steps>1. Jelentkezz be  ·  2. Járműlista → Módosítás (teljes hirdetés)  ·  3. Importálás</p>
-
-          <div class="ha-imp-actions">
-            <div class="ha-imp-top-actions">
-              <button type="button" class="ha-imp-btn-open" data-ha-open>
-                <span class="ha-imp-btn-ico" aria-hidden="true">↗</span>
-                <span data-ha-open-label>hasznaltauto.hu megnyitása</span>
+          <div class="ha-imp-step-cell" data-ha-step="1">
+            <div class="ha-imp-step-head">
+              <span class="ha-imp-step-num" aria-hidden="true">1</span>
+              <div>
+                <h3 class="ha-imp-step-title">Válaszd ki a profilod típusát</h3>
+                <p class="ha-imp-step-desc">Ettől függ, melyik hasznaltauto oldalt nyitjuk meg, és hogyan olvassuk ki a hirdetéseket.</p>
+              </div>
+            </div>
+            <div class="ha-imp-modes" role="tablist" aria-label="Profil típusa">
+              <button type="button" class="ha-imp-mode is-active" data-ha-mode="standard">
+                <span class="ha-imp-mode-label">Privát felhasználó</span>
+                <span class="ha-imp-mode-sub">saját hirdetés / lista</span>
               </button>
-              <button type="button" class="ha-imp-btn-copy" id="ha-imp-bookmark-copy">
-                <span class="ha-imp-btn-ico" aria-hidden="true">⧉</span>
-                Másolás
+              <button type="button" class="ha-imp-mode" data-ha-mode="dealer">
+                <span class="ha-imp-mode-label">Kereskedő</span>
+                <span class="ha-imp-mode-sub">admin járműlista</span>
               </button>
             </div>
-            <a class="ha-imp-bookmark" id="ha-imp-bookmark" href="#" hidden>Hirdetés importálása</a>
+          </div>
 
-            <div class="ha-imp-install" data-ha-install>
-              <p class="ha-imp-install-label">Könyvjelző telepítése böngésző szerint</p>
-              <div class="ha-imp-browsers" role="tablist" aria-label="Böngésző">
-                <button type="button" class="ha-imp-browser" data-ha-browser="chrome" role="tab" aria-selected="false">
-                  <span class="ha-imp-browser-ico ha-imp-browser-ico--chrome" aria-hidden="true"></span>
-                  Chrome
-                </button>
-                <button type="button" class="ha-imp-browser" data-ha-browser="edge" role="tab" aria-selected="false">
-                  <span class="ha-imp-browser-ico ha-imp-browser-ico--edge" aria-hidden="true"></span>
-                  Edge
-                </button>
-                <button type="button" class="ha-imp-browser" data-ha-browser="firefox" role="tab" aria-selected="false">
-                  <span class="ha-imp-browser-ico ha-imp-browser-ico--firefox" aria-hidden="true"></span>
-                  Firefox
-                </button>
-                <button type="button" class="ha-imp-browser" data-ha-browser="safari" role="tab" aria-selected="false">
-                  <span class="ha-imp-browser-ico ha-imp-browser-ico--safari" aria-hidden="true"></span>
-                  Safari
+          <div class="ha-imp-step-cell" data-ha-step="2">
+            <div class="ha-imp-step-head">
+              <span class="ha-imp-step-num" aria-hidden="true">2</span>
+              <div>
+                <h3 class="ha-imp-step-title">Használtautó oldal megnyitása</h3>
+                <p class="ha-imp-step-desc" data-ha-step2-desc>Jelentkezz be a hasznaltauto.hu-n, és nyisd meg a listát vagy a hirdetést.</p>
+              </div>
+            </div>
+            <button type="button" class="ha-imp-btn-open" data-ha-open>
+              <span class="ha-imp-btn-ico" aria-hidden="true">↗</span>
+              <span data-ha-open-label>hasznaltauto.hu megnyitása</span>
+            </button>
+          </div>
+
+          <div class="ha-imp-rest" data-ha-rest>
+            <p class="ha-imp-steps" data-ha-steps hidden>1. Jelentkezz be  ·  2. Nyisd meg a listát vagy egy hirdetést  ·  3. Importálás</p>
+
+            <div class="ha-imp-actions">
+              <div class="ha-imp-top-actions">
+                <button type="button" class="ha-imp-btn-copy" id="ha-imp-bookmark-copy">
+                  <span class="ha-imp-btn-ico" aria-hidden="true">⧉</span>
+                  Másolás
                 </button>
               </div>
-              <div class="ha-imp-install-help" data-ha-install-help>
-                <strong data-ha-install-title>Chrome / Edge</strong>
-                <ol data-ha-install-steps></ol>
+              <a class="ha-imp-bookmark" id="ha-imp-bookmark" href="#" hidden>Hirdetés importálása</a>
+
+              <div class="ha-imp-install" data-ha-install>
+                <p class="ha-imp-install-label">Könyvjelző telepítése böngésző szerint</p>
+                <div class="ha-imp-browsers" role="tablist" aria-label="Böngésző">
+                  <button type="button" class="ha-imp-browser" data-ha-browser="chrome" role="tab" aria-selected="false">
+                    <span class="ha-imp-browser-ico ha-imp-browser-ico--chrome" aria-hidden="true"></span>
+                    Chrome
+                  </button>
+                  <button type="button" class="ha-imp-browser" data-ha-browser="edge" role="tab" aria-selected="false">
+                    <span class="ha-imp-browser-ico ha-imp-browser-ico--edge" aria-hidden="true"></span>
+                    Edge
+                  </button>
+                  <button type="button" class="ha-imp-browser" data-ha-browser="firefox" role="tab" aria-selected="false">
+                    <span class="ha-imp-browser-ico ha-imp-browser-ico--firefox" aria-hidden="true"></span>
+                    Firefox
+                  </button>
+                  <button type="button" class="ha-imp-browser" data-ha-browser="safari" role="tab" aria-selected="false">
+                    <span class="ha-imp-browser-ico ha-imp-browser-ico--safari" aria-hidden="true"></span>
+                    Safari
+                  </button>
+                </div>
+                <div class="ha-imp-install-help" data-ha-install-help>
+                  <strong data-ha-install-title>Chrome / Edge</strong>
+                  <ol data-ha-install-steps></ol>
+                </div>
+                <p class="ha-imp-bookmark-hint" data-ha-install-hint>
+                  <span class="ha-imp-hint-ico" aria-hidden="true">i</span>
+                  Húzni nem kell — gomb + billentyűkombináció.
+                </p>
+                <p class="ha-imp-safari-drag" data-ha-safari-drag hidden>
+                  Safari: húzd ide a sávra →
+                  <a class="ha-imp-safari-drag-link" id="ha-imp-bookmark-safari" href="#">Lista / hirdetés importálása</a>
+                </p>
               </div>
-              <p class="ha-imp-bookmark-hint" data-ha-install-hint>
-                <span class="ha-imp-hint-ico" aria-hidden="true">i</span>
-                Húzni nem kell — gomb + billentyűkombináció.
-              </p>
-              <p class="ha-imp-safari-drag" data-ha-safari-drag hidden>
-                Safari: húzd ide a sávra →
-                <a class="ha-imp-safari-drag-link" id="ha-imp-bookmark-safari" href="#">Lista / hirdetés importálása</a>
-              </p>
             </div>
-          </div>
 
-          <div class="ha-imp-url-row" data-ha-url-row>
-            <label for="ha-imp-url" data-ha-url-label>Vagy illeszd be a nyilvános hirdetés URL-jét</label>
-            <div class="ha-imp-url-fields">
-              <input id="ha-imp-url" type="url" placeholder="https://www.hasznaltauto.hu/szemelyauto/…" autocomplete="off" />
-              <button type="button" class="ha-imp-go" id="ha-imp-start" data-ha-action>Hirdetés importálása</button>
+            <div class="ha-imp-url-row" data-ha-url-row>
+              <label for="ha-imp-url" data-ha-url-label>Vagy illeszd be a nyilvános hirdetés URL-jét</label>
+              <div class="ha-imp-url-fields">
+                <input id="ha-imp-url" type="url" placeholder="https://www.hasznaltauto.hu/szemelyauto/…" autocomplete="off" />
+                <button type="button" class="ha-imp-go" id="ha-imp-start" data-ha-action>Hirdetés importálása</button>
+              </div>
             </div>
-          </div>
 
-          <p id="ha-imp-status" class="ha-imp-status" hidden></p>
-          <div id="ha-imp-result" class="ha-imp-result" hidden></div>
-          <p class="ha-imp-footer" data-ha-footer>A jelszavadat nem tároljuk — csak a megnyitott oldal adatait olvassuk ki.</p>
+            <p id="ha-imp-status" class="ha-imp-status" hidden></p>
+            <div id="ha-imp-result" class="ha-imp-result" hidden></div>
+            <p class="ha-imp-footer" data-ha-footer>A jelszavadat nem tároljuk — csak a megnyitott oldal adatait olvassuk ki.</p>
+          </div>
         </section>
 
         

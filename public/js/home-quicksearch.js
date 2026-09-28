@@ -438,7 +438,7 @@ export function initHomeQuickSearch({ onSearch = () => {}, onFilterPreview, onDe
     await applySavedSearchFilters(form, filters || {});
     updateAutoDeskAccSummaries(form);
     // A mentett payload a forrás — ne a form újraolvasása (picker race miatt üres lehet).
-    onSearch({ ...(filters || {}) });
+    await onSearch({ ...(filters || {}) });
   }
 
   return {

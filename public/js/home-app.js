@@ -8,7 +8,7 @@ import {
   initHomeSearchSidebar,
   initHomeFilterCatalog,
 } from "./home-search-filter.js?v=valto3";
-import { initHomeQuickSearch } from "./home-quicksearch.js?v=searchBack3";
+import { initHomeQuickSearch } from "./home-quicksearch.js?v=searchBack5";
 import { decodeSavedSearchParam, encodeSavedSearchParam } from "./saved-search.js?v=savedSearch5";
 import { matchDetailedSearch, hasActiveDetailedSearch } from "./auto-detailed-search.js?v=autoDesk16";
 import { updateAutoDeskResultCount } from "./auto-desk-search.js?v=teherStrict3";
@@ -33,7 +33,7 @@ import {
   shouldRestoreVehicleSearch,
   peekMapOpenOnReturn,
   consumeMapOpenOnReturn,
-} from "./listing-return.js?v=searchBack4";
+} from "./listing-return.js?v=searchBack5";
 import { normalizeKivitel } from "./kivitel-options.js?v=kivitel1";
 import { featuredListingIdSet, pickFeaturedListings } from "./home-featured-slots.js?v=featuredNoAuto1";
 import { mountSellerInventory, updateSellerInventoryCount } from "./seller-inventory.js?v=sellerInv30";
@@ -46,16 +46,24 @@ let ensureMapModule = null;
 
 async function reopenMapAfterReturn() {
   if (!peekMapOpenOnReturn()) return;
-  consumeMapOpenOnReturn();
   if (typeof ensureMapModule !== "function") return;
   try {
-    await ensureMapModule();
-    const btn = document.querySelector("[data-search-map-open]");
-    if (!btn) return;
-    // Ha már nyitva, ne toggle-ölje be.
-    const root = document.getElementById("search-map-modal");
-    if (root && !root.hidden) return;
-    btn.click();
+    const mod = await ensureMapModule();
+    // Várjuk meg a szűrt lista feltöltését, különben üres térkép / elvesző találatok.
+    if (typeof fillFilteredResults === "function") {
+      await fillFilteredResults();
+    }
+    const items = currentFilteredListings();
+    const filtered = hasActiveClientFilters();
+    await mod.openSearchResultsMap(items, {
+      mode: filtered ? "filtered" : "browse",
+      preferHomeZoom: !filtered,
+    });
+    consumeMapOpenOnReturn();
+    try {
+      document.getElementById("search-map-modal")?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    } catch {
+    }
   } catch (error) {
     console.warn("Térkép visszaállítás:", error);
   }
@@ -734,7 +742,8 @@ function previewFilterCountsOnly() {
 function applyFilters({ commit = false } = {}) {
   if (commit && isVehicleSearchPage() && !isSellerMode()) {
     searchResultsCommitted = true;
-    closeSearchMapDom();
+    // Vissza gomb: térkép újra nyílik — ne csukjuk be / ne versenyezzünk vele.
+    if (!peekMapOpenOnReturn()) closeSearchMapDom();
   }
 
   if (isFeaturedBrowseMode()) {
@@ -870,7 +879,7 @@ initHomeUnifiedScroll();
 if (PAGE === "auto" || PAGE === "teherauto") {
   ensureMapModule = () => {
     if (!mapModulePromise) {
-      mapModulePromise = import("./search-results-map.js?v=searchBack4")
+      mapModulePromise = import("./search-results-map.js?v=searchBack5")
         .then((mod) => {
           updateSearchMapButtonLabels = mod.updateSearchMapButtonLabels;
           closeSearchResultsMapFn = mod.closeSearchResultsMap;
@@ -1093,9 +1102,14 @@ if (PAGE === "ingatlan") {
         if (!filters || !Object.keys(filters).length) return;
         applyRestoredFiltersToState(filters);
         await quickSearchApi.applySavedFilters(filters);
+        await fillFilteredResults();
         consumeVehicleSearchRestorePending(PAGE);
         scrollToListings();
         await reopenMapAfterReturn();
+        // Lista újra, ha a térkép async betöltése közben üresre futott volna
+        if (searchResultsCommitted && hasActiveClientFilters()) {
+          renderListings(allItems);
+        }
       } catch (error) {
         console.warn("Keresés visszaállítás:", error);
       }

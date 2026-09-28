@@ -6303,11 +6303,18 @@ body.site-app .ha-imp-install-help {
   color: #344054;
 }
 
-body.site-app .ha-imp-install-help strong {
+body.site-app .ha-imp-install-help > strong {
   display: block;
   margin-bottom: 0.45rem;
   font-size: 0.95rem;
   color: #1a2330;
+}
+
+body.site-app .ha-imp-install-help ol strong {
+  display: inline;
+  margin: 0;
+  font-size: inherit;
+  color: inherit;
 }
 
 body.site-app .ha-imp-install-help ol {

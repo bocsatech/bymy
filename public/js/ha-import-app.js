@@ -136,7 +136,7 @@ function browserInstallGuide(browser) {
     title = "Safari";
     steps = mac
       ? [
-          `Legegyszerűbb: húzd a <strong>sárga</strong> gombot a Kedvencek sávra (lent)`,
+          `Legegyszerűbb: húzd a sárga gombot a Kedvencek sávra (lent)`,
           `Vagy: ${kbd("Cmd")} + ${kbd("D")} — mentsd az oldalt (bármilyen név)`,
           `${kbd("Option")} + ${kbd("Cmd")} + ${kbd("B")} — Kedvencek szerkesztése`,
           `URL szerkesztése → ${kbd("Cmd")} + ${kbd("V")} → Kész`,

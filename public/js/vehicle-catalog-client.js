@@ -23,7 +23,7 @@ export function normalizeCatalogKind(kind) {
 
 function staticCatalogUrl(kind) {
   return normalizeCatalogKind(kind) === "kisteher"
-    ? "/data/vehicle-catalog-kisteher.json"
+    ? "/data/vehicle-catalog-kisteher.json?v=teherStrict1"
     : "/data/vehicle-catalog.json";
 }
 
@@ -31,11 +31,23 @@ async function fetchStaticCatalog(kind = "szemelyauto") {
   const key = normalizeCatalogKind(kind);
   let promise = staticCatalogPromiseByKind.get(key);
   if (!promise) {
-    promise = fetch(staticCatalogUrl(key), { cache: "force-cache" })
+    // Kisteher: no-store + cache-bust — régi személyautó dump ne ragadjon a böngészőben.
+    const cacheMode = key === "kisteher" ? "no-store" : "force-cache";
+    promise = fetch(staticCatalogUrl(key), { cache: cacheMode })
       .then(async (response) => {
         const data = await response.json().catch(() => ({}));
         if (!response.ok || !data?.gyartmanyok?.length) {
           throw new Error(data.error ?? "Statikus járműkatalógus nem elérhető.");
+        }
+        if (
+          key === "kisteher" &&
+          (data.gyartmanyok.includes("FERRARI") ||
+            data.gyartmanyok.includes("BMW") ||
+            data.gyartmanyok.includes("HONDA") ||
+            data.gyartmanyok.includes("JAGUAR") ||
+            (data.count_brands || data.gyartmanyok.length) > 80)
+        ) {
+          throw new Error("Kisteher katalógus személyautó listát tartalmaz — elvetve.");
         }
         return data;
       })

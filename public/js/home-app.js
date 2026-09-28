@@ -8,10 +8,10 @@ import {
   initHomeSearchSidebar,
   initHomeFilterCatalog,
 } from "./home-search-filter.js?v=allapotFlat1";
-import { initHomeQuickSearch } from "./home-quicksearch.js?v=teherClean2";
+import { initHomeQuickSearch } from "./home-quicksearch.js?v=teherStrict1";
 import { decodeSavedSearchParam } from "./saved-search.js?v=savedSearch5";
 import { matchDetailedSearch, hasActiveDetailedSearch } from "./auto-detailed-search.js?v=autoDesk16";
-import { updateAutoDeskResultCount } from "./auto-desk-search.js?v=teherClean2";
+import { updateAutoDeskResultCount } from "./auto-desk-search.js?v=teherStrict1";
 import {
   emptyIngatlanFilters,
   filterListingsByIngatlan,

@@ -1,5 +1,5 @@
 
-import { fetchVehicleCatalog } from "./vehicle-catalog-client.js?v=teherClean2";
+import { fetchVehicleCatalog } from "./vehicle-catalog-client.js?v=teherStrict1";
 import { bindAutoBmDismiss, autoBmPanelIsOpen } from "./auto-bm-dismiss.js?v=bmDismiss1";
 
 function truckKategoria() {
@@ -12,9 +12,9 @@ function truckKategoria() {
 }
 
 function catalogKindForPage() {
-  // Teherautó oldal: 3,5-ig mindig kishaszon katalógus (soha személyautó / Ferrari…).
+  // Teherautó oldal: soha személyautó katalógus (Ferrari / BMW…).
   if (document.body?.getAttribute("data-site-page") === "teherauto") {
-    return truckKategoria() === "35-felett" ? "szemelyauto" : "kisteher";
+    return "kisteher";
   }
   return "szemelyauto";
 }
@@ -55,20 +55,41 @@ function isAutoDesk() {
 }
 
 export async function mountAutoBrandModelPicker(form) {
-  if (!form || !isAutoDesk() || form.dataset.brandModelPicker === "1") return;
+  if (!form || !isAutoDesk()) return;
+
+  const wantKind = catalogKindForPage();
+  // Remount if kind changed (e.g. wrong személyautó catalog was cached into the picker).
+  if (form.dataset.brandModelPicker === "1" && form.dataset.brandModelCatalogKind === wantKind) return;
+  if (form.dataset.brandModelPicker === "1") {
+    form.querySelectorAll(".auto-bm-pair, .auto-bm-field").forEach((el) => el.remove());
+    document.querySelectorAll(".auto-bm-panel.auto-brand-panel, .auto-bm-panel.auto-model-panel").forEach((el) => el.remove());
+    delete form.dataset.brandModelPicker;
+  }
 
   const alapHost = form.querySelector(".auto-desk-fields[data-desk-alap]");
   if (!alapHost) return;
 
   let catalog;
   try {
-    const kind = catalogKindForPage();
-    catalog = await fetchVehicleCatalog({ kind });
-    // Guard: teher 3,5-ig soha ne személyautó listát mutasson (Ferrari / 160+ márka).
+    if (wantKind === "kisteher") {
+      // Always load public kisteher JSON (bypass any személyautó API / module cache).
+      const res = await fetch(`/data/vehicle-catalog-kisteher.json?v=teherStrict1`, { cache: "no-store" });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data?.gyartmanyok?.length) {
+        catalog = await fetchVehicleCatalog({ kind: "kisteher" });
+      } else {
+        catalog = data;
+      }
+    } else {
+      catalog = await fetchVehicleCatalog({ kind: wantKind });
+    }
     if (
-      kind === "kisteher" &&
+      wantKind === "kisteher" &&
       (catalog?.gyartmanyok?.includes?.("FERRARI") ||
-        (catalog?.count_brands || catalog?.gyartmanyok?.length || 0) > 90)
+        catalog?.gyartmanyok?.includes?.("BMW") ||
+        catalog?.gyartmanyok?.includes?.("HONDA") ||
+        catalog?.gyartmanyok?.includes?.("JAGUAR") ||
+        (catalog?.count_brands || catalog?.gyartmanyok?.length || 0) > 80)
     ) {
       console.warn("Kisteher picker: személyautó katalógus detektálva, elvetve.");
       return;
@@ -77,6 +98,8 @@ export async function mountAutoBrandModelPicker(form) {
     console.warn("Gyártmány picker katalógus:", error);
     return;
   }
+
+  form.dataset.brandModelCatalogKind = wantKind;
 
   const brands = [...(catalog.gyartmanyok || [])].sort((a, b) =>
     a.localeCompare(b, "hu", { sensitivity: "base" })

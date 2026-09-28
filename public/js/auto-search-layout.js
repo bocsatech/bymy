@@ -1,5 +1,5 @@
 
-import { initVehicleCatalogSelects, fillSelect } from "./vehicle-catalog-client.js?v=teherClean2";
+import { initVehicleCatalogSelects, fillSelect } from "./vehicle-catalog-client.js?v=teherStrict1";
 import { KIVITEL_OPTIONS } from "./kivitel-options.js?v=kivitel1";
 import { wirePostalCityAutofill as wireSharedPostalCityAutofill } from "./postal-city-autofill.js?v=postalFill1";
 import {
@@ -318,7 +318,7 @@ export function prefetchAutoSearchBoot() {
   }
   void fetchAutoSearchLayout({ force: false }).catch(() => {});
   const kind = page === "teherauto" ? "kisteher" : "szemelyauto";
-  void import("./vehicle-catalog-client.js?v=teherClean2")
+  void import("./vehicle-catalog-client.js?v=teherStrict1")
     .then((m) => m.fetchVehicleCatalog?.({ kind }))
     .catch(() => {});
 }

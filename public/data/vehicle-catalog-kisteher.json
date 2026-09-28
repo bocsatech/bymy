@@ -1,32 +1,24 @@
 {
   "source": "api.hasznaltauto.hu/v2/tomb",
   "category": "kisteher",
-  "imported_at": "2026-09-28T05:31:56.651Z",
-  "count_rows": 156,
-  "count_brands": 54,
-  "count_models": 140,
+  "imported_at": "2026-09-28T05:36:53.959Z",
+  "count_rows": 129,
+  "count_brands": 37,
+  "count_models": 113,
   "count_model_children": 16,
   "count_groups_with_children": 8,
   "gyartmanyok": [
-    "AIXAM",
-    "AUSTIN",
     "BARKAS",
-    "BEDFORD",
     "BYD",
     "CENNTRO",
     "CHEVROLET",
     "CITROEN",
     "DAEWOO",
-    "DFSK",
-    "DODGE",
     "DONGFENG (DFSK)",
-    "EGYÉB",
-    "ELECTROAUTO",
     "FARIZON",
     "FIAT",
     "FORD",
     "FOTON",
-    "GAZ",
     "GOUPIL",
     "HYUNDAI",
     "ISUZU",
@@ -35,46 +27,28 @@
     "KIA",
     "KUBA",
     "LEVC",
-    "LIGIER",
-    "MAHINDRA",
     "MAN",
     "MAXUS",
     "MAZDA",
-    "MELEX",
     "MERCEDES-BENZ",
-    "MICRO-VETT",
     "MITSUBISHI",
     "MULTICAR",
     "NISSAN",
     "OPEL",
-    "OTOSAN",
     "PEUGEOT",
     "PIAGGIO",
     "RENAULT",
     "SEAT",
     "SKODA",
-    "STEYR",
     "STREETSCOOTER",
-    "TAM",
     "TATA",
     "TOYOTA",
     "VAUXHALL",
-    "VICTORY",
-    "VOLKSWAGEN",
-    "ZSUK"
+    "VOLKSWAGEN"
   ],
   "modellek": {
-    "AIXAM": [
-      "EGYÉB"
-    ],
-    "AUSTIN": [
-      "GIPSY"
-    ],
     "BARKAS": [
       "B1000"
-    ],
-    "BEDFORD": [
-      "EGYÉB"
     ],
     "BYD": [
       "ETP3"
@@ -89,31 +63,17 @@
     "CITROEN": [
       "BERLINGO",
       "C25",
-      "HY",
       "JUMPER",
       "JUMPY",
       "NEMO"
     ],
     "DAEWOO": [
-      "FSO",
       "LUBLIN"
-    ],
-    "DFSK": [
-      "EGYÉB"
-    ],
-    "DODGE": [
-      "EGYÉB"
     ],
     "DONGFENG (DFSK)": [
       "DF6",
       "EGYÉB",
       "Z9"
-    ],
-    "EGYÉB": [
-      "EGYÉB"
-    ],
-    "ELECTROAUTO": [
-      "CFI48"
     ],
     "FARIZON": [
       "EGYÉB",
@@ -138,12 +98,8 @@
       "TRANSIT"
     ],
     "FOTON": [
-      "ETOANO",
       "TUNLAND",
       "TUNLAND V9"
-    ],
-    "GAZ": [
-      "ELLA"
     ],
     "GOUPIL": [
       "EGYÉB",
@@ -182,12 +138,6 @@
     "LEVC": [
       "VN5"
     ],
-    "LIGIER": [
-      "PULSE 4"
-    ],
-    "MAHINDRA": [
-      "GOA"
-    ],
     "MAN": [
       "TGE"
     ],
@@ -197,14 +147,10 @@
       "E-DELIVER 5",
       "E-DELIVER 7",
       "E-DELIVER 9",
-      "EGYÉB",
-      "T60 MAX"
+      "EGYÉB"
     ],
     "MAZDA": [
       "E 2200",
-      "EGYÉB"
-    ],
-    "MELEX": [
       "EGYÉB"
     ],
     "MERCEDES-BENZ": [
@@ -216,9 +162,6 @@
       "VARIO",
       "VITO"
     ],
-    "MICRO-VETT": [
-      "EGYÉB"
-    ],
     "MITSUBISHI": [
       "CANTER",
       "CANTER 35",
@@ -226,9 +169,7 @@
     ],
     "MULTICAR": [
       "FUMO",
-      "M 25",
-      "TREMO",
-      "UX 100"
+      "TREMO"
     ],
     "NISSAN": [
       "ATLEON",
@@ -251,9 +192,6 @@
       "CORSA COMBO",
       "MOVANO",
       "VIVARO"
-    ],
-    "OTOSAN": [
-      "EGYÉB"
     ],
     "PEUGEOT": [
       "BIPPER",
@@ -283,14 +221,8 @@
       "PICK-UP",
       "PRAKTIK"
     ],
-    "STEYR": [
-      "EGYÉB"
-    ],
     "STREETSCOOTER": [
       "WORK"
-    ],
-    "TAM": [
-      "EGYÉB"
     ],
     "TATA": [
       "TELCOLINE"
@@ -302,9 +234,6 @@
     ],
     "VAUXHALL": [
       "VIVARO"
-    ],
-    "VICTORY": [
-      "E200"
     ],
     "VOLKSWAGEN": [
       "AMAROK",
@@ -319,48 +248,14 @@
       "TRANSPORTER T4",
       "TRANSPORTER T5",
       "TRANSPORTER T6",
-      "TRANSPORTER T7",
-      "TYP 4"
-    ],
-    "ZSUK": [
-      "A 06",
-      "A 11",
-      "A 15",
-      "EGYÉB"
+      "TRANSPORTER T7"
     ]
   },
   "modellekTree": {
-    "AIXAM": [
-      {
-        "id": "12932",
-        "name": "EGYÉB",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      }
-    ],
-    "AUSTIN": [
-      {
-        "id": "27983",
-        "name": "GIPSY",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      }
-    ],
     "BARKAS": [
       {
         "id": "156",
         "name": "B1000",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      }
-    ],
-    "BEDFORD": [
-      {
-        "id": "13011",
-        "name": "EGYÉB",
         "searchSelectable": true,
         "postRequiresChild": false,
         "children": []
@@ -416,13 +311,6 @@
         "children": []
       },
       {
-        "id": "25829",
-        "name": "HY",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
         "id": "321",
         "name": "JUMPER",
         "searchSelectable": true,
@@ -446,33 +334,8 @@
     ],
     "DAEWOO": [
       {
-        "id": "352",
-        "name": "FSO",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
         "id": "358",
         "name": "LUBLIN",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      }
-    ],
-    "DFSK": [
-      {
-        "id": "29065",
-        "name": "EGYÉB",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      }
-    ],
-    "DODGE": [
-      {
-        "id": "13166",
-        "name": "EGYÉB",
         "searchSelectable": true,
         "postRequiresChild": false,
         "children": []
@@ -496,24 +359,6 @@
       {
         "id": "28925",
         "name": "Z9",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      }
-    ],
-    "EGYÉB": [
-      {
-        "id": "13199",
-        "name": "EGYÉB",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      }
-    ],
-    "ELECTROAUTO": [
-      {
-        "id": "4326",
-        "name": "CFI48",
         "searchSelectable": true,
         "postRequiresChild": false,
         "children": []
@@ -640,13 +485,6 @@
     ],
     "FOTON": [
       {
-        "id": "28947",
-        "name": "ETOANO",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
         "id": "28855",
         "name": "TUNLAND",
         "searchSelectable": true,
@@ -660,15 +498,6 @@
             "children": []
           }
         ]
-      }
-    ],
-    "GAZ": [
-      {
-        "id": "582",
-        "name": "ELLA",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
       }
     ],
     "GOUPIL": [
@@ -835,24 +664,6 @@
         "children": []
       }
     ],
-    "LIGIER": [
-      {
-        "id": "28846",
-        "name": "PULSE 4",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      }
-    ],
-    "MAHINDRA": [
-      {
-        "id": "887",
-        "name": "GOA",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      }
-    ],
     "MAN": [
       {
         "id": "26038",
@@ -904,13 +715,6 @@
         "searchSelectable": true,
         "postRequiresChild": false,
         "children": []
-      },
-      {
-        "id": "28662",
-        "name": "T60 MAX",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
       }
     ],
     "MAZDA": [
@@ -923,15 +727,6 @@
       },
       {
         "id": "13514",
-        "name": "EGYÉB",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      }
-    ],
-    "MELEX": [
-      {
-        "id": "28968",
         "name": "EGYÉB",
         "searchSelectable": true,
         "postRequiresChild": false,
@@ -989,15 +784,6 @@
         "children": []
       }
     ],
-    "MICRO-VETT": [
-      {
-        "id": "29011",
-        "name": "EGYÉB",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      }
-    ],
     "MITSUBISHI": [
       {
         "id": "1018",
@@ -1031,22 +817,8 @@
         "children": []
       },
       {
-        "id": "2118",
-        "name": "M 25",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
         "id": "4646",
         "name": "TREMO",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "4647",
-        "name": "UX 100",
         "searchSelectable": true,
         "postRequiresChild": false,
         "children": []
@@ -1178,15 +950,6 @@
       {
         "id": "1167",
         "name": "VIVARO",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      }
-    ],
-    "OTOSAN": [
-      {
-        "id": "13614",
-        "name": "EGYÉB",
         "searchSelectable": true,
         "postRequiresChild": false,
         "children": []
@@ -1329,28 +1092,10 @@
         "children": []
       }
     ],
-    "STEYR": [
-      {
-        "id": "13776",
-        "name": "EGYÉB",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      }
-    ],
     "STREETSCOOTER": [
       {
         "id": "26828",
         "name": "WORK",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      }
-    ],
-    "TAM": [
-      {
-        "id": "13796",
-        "name": "EGYÉB",
         "searchSelectable": true,
         "postRequiresChild": false,
         "children": []
@@ -1392,15 +1137,6 @@
       {
         "id": "5561",
         "name": "VIVARO",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      }
-    ],
-    "VICTORY": [
-      {
-        "id": "28342",
-        "name": "E200",
         "searchSelectable": true,
         "postRequiresChild": false,
         "children": []
@@ -1499,43 +1235,6 @@
             "children": []
           }
         ]
-      },
-      {
-        "id": "1886",
-        "name": "TYP 4",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      }
-    ],
-    "ZSUK": [
-      {
-        "id": "2134",
-        "name": "A 06",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "2122",
-        "name": "A 11",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "2123",
-        "name": "A 15",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "13934",
-        "name": "EGYÉB",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
       }
     ]
   },
@@ -1550,7 +1249,25 @@
     "post": "ha postRequiresChild=true, feladáskor gyermek kötelező",
     "tombUrl": "https://api.hasznaltauto.hu/v2/tomb/markakKishaszonjarmuFilter,modellekKishaszonjarmuFilter",
     "haCategory": "kishaszonjarmu",
-    "cleaned": "removed személyautó-overlapping / passenger models",
-    "removed_brands": []
+    "cleaned": "strict commercial model whitelist — no passenger leftover brands/models",
+    "removed_brands": [
+      "AIXAM",
+      "AUSTIN",
+      "BEDFORD",
+      "DFSK",
+      "DODGE",
+      "EGYÉB",
+      "ELECTROAUTO",
+      "GAZ",
+      "LIGIER",
+      "MAHINDRA",
+      "MELEX",
+      "MICRO-VETT",
+      "OTOSAN",
+      "STEYR",
+      "TAM",
+      "VICTORY",
+      "ZSUK"
+    ]
   }
 }

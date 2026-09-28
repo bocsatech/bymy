@@ -12,6 +12,7 @@ import { listingDetailHref } from "./listing-return.js?v=scrollTop1";
 import { listingTileTitle, listingTilePrice } from "./listing-tile.js?v=listThumb1";
 import { getAuthUser } from "./site-auth.js?v=bootFix2";
 import { fetchListingsPage } from "./db-client.js?v=ownerBoost6";
+import { buildNearbyFilter, readNearbyPrefs } from "./nearby-search.js?v=korzetFix3";
 
 const HU_CENTER = [47.1625, 19.5033];
 const HU_ZOOM = 7;
@@ -20,6 +21,9 @@ const JITTER_DEG = 0.0035;
 const OSRM_URL = "https://router.project-osrm.org/route/v1/driving";
 const LABEL_BROWSE = "Keresés a térképen";
 const LABEL_FILTERED = "Találatok a térképen";
+/** Böngésző térkép: lakhely körüli sugar (km), csoportosítva. */
+const MAP_BROWSE_RADIUS_KM = 10;
+const MAP_BROWSE_MAX_PAGES = 25;
 
 let cityIndexPromise = null;
 let postalIndexPromise = null;
@@ -94,6 +98,55 @@ async function fetchAllVerticalListings(vertical) {
     offset += batch.length;
   }
   return out;
+}
+
+/** Körzetes térkép-böngészés: csak ~10 km, nem az egész ország. */
+async function fetchVerticalListingsInRadius(vertical, { postal, radiusKm = MAP_BROWSE_RADIUS_KM } = {}) {
+  const code = String(postal || "")
+    .replace(/\D/g, "")
+    .slice(0, 4);
+  if (code.length !== 4) {
+    return { items: [], error: "Nincs lakhely / irányítószám a körzetes térképhez." };
+  }
+  const out = [];
+  const seen = new Set();
+  let offset = 0;
+  let origin = null;
+  for (let pageNo = 0; pageNo < MAP_BROWSE_MAX_PAGES; pageNo += 1) {
+    const page = await fetchListingsPage({
+      limit: 100,
+      offset,
+      status: "feladott",
+      vertical: vertical || null,
+      tile: true,
+    });
+    const batch = page.listings || [];
+    if (!batch.length) break;
+    try {
+      const nearby = await buildNearbyFilter({
+        items: batch,
+        postal: code,
+        radiusKm,
+      });
+      origin = nearby.origin || origin;
+      for (const item of batch) {
+        const id = Number(item.id);
+        if (!Number.isFinite(id) || seen.has(id)) continue;
+        const ids = nearby.listingIds;
+        if (ids && !(ids.has(id) || ids.has(item.id) || ids.has(String(id)))) continue;
+        if (!ids) continue;
+        seen.add(id);
+        out.push(item);
+      }
+    } catch (error) {
+      return { items: [], error: error?.message || "Körzetes szűrés sikertelen." };
+    }
+    if (!page.hasMore) break;
+    offset += batch.length;
+    // Elég marker a klaszterhez — ne húzzuk végig a teljes feedet.
+    if (out.length >= 200) break;
+  }
+  return { items: out, origin, radiusKm };
 }
 
 export function updateSearchMapButtonLabels(hasFilters) {
@@ -903,7 +956,10 @@ export function closeSearchResultsMap() {
   mapSideEl = null;
 }
 
-export async function openSearchResultsMap(items, { mode = "filtered" } = {}) {
+export async function openSearchResultsMap(
+  items,
+  { mode = "filtered", emptyHint = "", preferHomeZoom = false, radiusKm = MAP_BROWSE_RADIUS_KM } = {}
+) {
   mapMode = mode === "browse" ? "browse" : "filtered";
   const list = Array.isArray(items) ? items : [];
   const root = ensureMapPanel();
@@ -927,6 +983,8 @@ export async function openSearchResultsMap(items, { mode = "filtered" } = {}) {
   } catch {
   }
 
+  const homeZoom = preferHomeZoom || mapMode === "browse" ? 11 : 10;
+
   try {
     const [L, cityIndex, postalIndex] = await Promise.all([
       loadLeaflet(),
@@ -939,12 +997,17 @@ export async function openSearchResultsMap(items, { mode = "filtered" } = {}) {
       setMapStats({ empty: true, homeLabel: homeOrigin?.label || "" });
       await ensureBaseMap(L);
       placeHomeMarker(L);
-      if (homeOrigin) mapInstance?.setView([homeOrigin.lat, homeOrigin.lon], 10);
+      if (homeOrigin) mapInstance?.setView([homeOrigin.lat, homeOrigin.lon], homeZoom);
       if (side) {
         const homeNote = homeOrigin
-          ? `<p class="search-map-modal__route-note">Lakhely: ${escapeHtml(homeOrigin.label)}</p>`
+          ? `<p class="search-map-modal__route-note">Lakhely: ${escapeHtml(homeOrigin.label)} · ${Number(radiusKm) || MAP_BROWSE_RADIUS_KM} km</p>`
           : "";
-        side.innerHTML = `<div class="search-map-modal__side-pin">${homeNote}<p class="search-map-modal__hint">Nincs autó a találati listában. Állíts más szűrőt, vagy várj a lista betöltésére.</p></div>`;
+        const hint =
+          emptyHint ||
+          (mapMode === "browse"
+            ? `Nincs autó ${Number(radiusKm) || MAP_BROWSE_RADIUS_KM} km-es körzetben. Állíts be lakhelyet a profilban, vagy szűrj és használd a „Találatok a térképen” gombot.`
+            : "Nincs autó a találati listában. Állíts más szűrőt, vagy várj a lista betöltésére.");
+        side.innerHTML = `<div class="search-map-modal__side-pin">${homeNote}<p class="search-map-modal__hint">${escapeHtml(hint)}</p></div>`;
       }
       return;
     }
@@ -958,7 +1021,7 @@ export async function openSearchResultsMap(items, { mode = "filtered" } = {}) {
     if (!pins.length) {
       await ensureBaseMap(L);
       placeHomeMarker(L);
-      if (homeOrigin) mapInstance?.setView([homeOrigin.lat, homeOrigin.lon], 10);
+      if (homeOrigin) mapInstance?.setView([homeOrigin.lat, homeOrigin.lon], homeZoom);
       if (side) {
         const homeNote = homeOrigin
           ? `<p class="search-map-modal__route-note">Lakhely: ${escapeHtml(homeOrigin.label)}</p>`
@@ -968,6 +1031,9 @@ export async function openSearchResultsMap(items, { mode = "filtered" } = {}) {
       return;
     }
     paintMap(L, pins, side);
+    if ((preferHomeZoom || mapMode === "browse") && homeOrigin) {
+      mapInstance?.setView([homeOrigin.lat, homeOrigin.lon], homeZoom);
+    }
   } catch (error) {
     setMapStats({ error: error?.message || "Térkép betöltési hiba." });
     try {
@@ -1018,9 +1084,29 @@ export function initSearchResultsMapButtons({
         } else {
           const vertical = typeof getVertical === "function" ? getVertical() : null;
           if (btn) btn.textContent = "Térkép betöltése…";
-          items = await fetchAllVerticalListings(vertical);
-          if (!items.length) items = await resolveMapItems(getItems);
-          await openSearchResultsMap(items, { mode: "browse" });
+          const prefs = readNearbyPrefs(getAuthUser()?.profile ?? null);
+          const radiusKm = MAP_BROWSE_RADIUS_KM;
+          const nearby = await fetchVerticalListingsInRadius(vertical, {
+            postal: prefs.postal,
+            radiusKm,
+          });
+          if (nearby.error) {
+            items = [];
+            await openSearchResultsMap(items, {
+              mode: "browse",
+              emptyHint: nearby.error,
+            });
+          } else {
+            items = nearby.items || [];
+            if (!items.length) {
+              items = await resolveMapItems(getItems);
+            }
+            await openSearchResultsMap(items, {
+              mode: "browse",
+              preferHomeZoom: true,
+              radiusKm,
+            });
+          }
           syncLabel();
         }
       } finally {

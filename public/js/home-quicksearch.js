@@ -25,7 +25,7 @@ prefetchAutoSearchBoot();
 const MOBILE_MQ = "(max-width: 900px)";
 const DESK_MQ = "(min-width: 901px)";
 
-export function initHomeQuickSearch({ onSearch = () => {}, onDeskSortChange, onReady } = {}) {
+export function initHomeQuickSearch({ onSearch = () => {}, onFilterPreview, onDeskSortChange, onReady } = {}) {
   const form = document.getElementById("home-qs-form");
   if (!form) return null;
 
@@ -134,28 +134,36 @@ export function initHomeQuickSearch({ onSearch = () => {}, onDeskSortChange, onR
     onSearch(readQuickSearchValues());
   }
 
+  function triggerPreviewFromForm() {
+    if (typeof onFilterPreview === "function") {
+      onFilterPreview(readQuickSearchValues());
+      return;
+    }
+    triggerSearchFromForm();
+  }
+
   form.addEventListener("submit", (event) => {
     event.preventDefault();
     triggerSearchFromForm();
   });
 
-  function scheduleSearchFromForm({ scroll = false } = {}) {
+  function schedulePreviewFromForm({ scroll = false } = {}) {
     clearTimeout(wheelSearchTimer);
     wheelSearchTimer = setTimeout(() => {
       if (!form.classList.contains("is-qs-ready")) return;
-      triggerSearchFromForm();
+      triggerPreviewFromForm();
       if (scroll) scrollToListingsAfterSearch();
     }, 120);
   }
 
   form.addEventListener("immo-wheel-change", () => {
-    scheduleSearchFromForm({ scroll: mobile() });
+    schedulePreviewFromForm({ scroll: mobile() });
   });
 
   form.addEventListener("change", (event) => {
     if (!form.classList.contains("is-qs-ready")) return;
     if (!event.target?.closest?.("#home-qs-form")) return;
-    scheduleSearchFromForm({ scroll: false });
+    schedulePreviewFromForm({ scroll: false });
   });
 
   document.addEventListener(
@@ -163,7 +171,7 @@ export function initHomeQuickSearch({ onSearch = () => {}, onDeskSortChange, onR
     (event) => {
       const wheel = event.target?.closest?.("[data-wheel]");
       if (!wheel || !form.contains(wheel)) return;
-      scheduleSearchFromForm({ scroll: mobile() });
+      schedulePreviewFromForm({ scroll: mobile() });
     },
     true
   );

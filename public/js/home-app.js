@@ -8,7 +8,7 @@ import {
   initHomeSearchSidebar,
   initHomeFilterCatalog,
 } from "./home-search-filter.js?v=valto3";
-import { initHomeQuickSearch } from "./home-quicksearch.js?v=perfNav1";
+import { initHomeQuickSearch } from "./home-quicksearch.js?v=listFlash1";
 import { decodeSavedSearchParam, encodeSavedSearchParam } from "./saved-search.js?v=savedSearch5";
 import { matchDetailedSearch, hasActiveDetailedSearch } from "./auto-detailed-search.js?v=autoDesk16";
 import { updateAutoDeskResultCount } from "./auto-desk-search.js?v=teherStrict3";
@@ -33,7 +33,7 @@ import {
   shouldRestoreVehicleSearch,
   peekMapOpenOnReturn,
   consumeMapOpenOnReturn,
-} from "./listing-return.js?v=perfNav1";
+} from "./listing-return.js?v=listFlash1";
 import { normalizeKivitel } from "./kivitel-options.js?v=kivitel1";
 import { featuredListingIdSet, pickFeaturedListings } from "./home-featured-slots.js?v=featuredNoAuto1";
 import { mountSellerInventory, updateSellerInventoryCount } from "./seller-inventory.js?v=sellerInv30";
@@ -43,6 +43,8 @@ let closeSearchResultsMapFn = null;
 let mapModulePromise = null;
 /** Lazy map loader — set for auto/teher pages. */
 let ensureMapModule = null;
+/** Utolsó lista DOM fingerprint — vissza/restore ne törölje ugyanazt a rácsot. */
+let lastListingsRenderKey = "";
 /** Vissza gomb: térkép ne csukódjon be restore közben / után. */
 let suppressMapClose = false;
 /** Vissza gomb: szűrő preview / üres onSearch ne törölje a restore-t. */
@@ -323,6 +325,7 @@ window.addEventListener("bymy-listing-open", () => {
     if (ss) {
       const decoded = decodeSavedSearchParam(ss);
       if (decoded?.filters && Object.keys(decoded.filters).length) {
+        searchRestoreInProgress = true;
         applyRestoredFiltersToState(decoded.filters);
         return;
       }
@@ -330,6 +333,7 @@ window.addEventListener("bymy-listing-open", () => {
     if (!shouldRestoreVehicleSearch(PAGE)) return;
     const state = readVehicleSearchState();
     if (state?.filters && Object.keys(state.filters).length) {
+      searchRestoreInProgress = true;
       applyRestoredFiltersToState(state.filters);
       if (state.deskSort) deskSort = state.deskSort;
     }
@@ -547,16 +551,34 @@ function currentFilteredListings() {
   return applyOwnerBoostSort(filtered);
 }
 
-function renderListings(items, { bypassFilters = false } = {}) {
+function renderListings(items, { bypassFilters = false, force = false } = {}) {
   if (!gridTrack) return;
-
-  gridTrack.innerHTML = "";
 
   const filtered = bypassFilters
     ? [...(items || [])]
     : PAGE === "auto" || PAGE === "teherauto"
       ? sortDeskListings(filterItems(items))
       : applyOwnerBoostSort(filterItems(items));
+
+  const renderKey = `${bypassFilters ? "b" : "f"}:${deskSort}:${searchResultsCommitted ? 1 : 0}:${filtered
+    .map((item) => String(item?.id ?? ""))
+    .join(",")}`;
+  if (
+    !force &&
+    renderKey === lastListingsRenderKey &&
+    gridTrack.childElementCount === filtered.length &&
+    filtered.length > 0
+  ) {
+    if (PAGE === "auto" || PAGE === "teherauto") {
+      if (bypassFilters || isFeaturedBrowseMode()) updateDeskResultCount(filterItems(allItems));
+      else updateDeskResultCount(filtered);
+    }
+    return;
+  }
+
+  gridTrack.innerHTML = "";
+  lastListingsRenderKey = renderKey;
+
   emptyEl.hidden = filtered.length > 0;
   if (!filtered.length && bypassFilters && isFeaturedBrowseMode()) {
     emptyEl.hidden = false;
@@ -704,7 +726,7 @@ async function loadListings() {
       await loadMoreListings({ silent: true });
       if (allItems.length === before) break;
     }
-    renderFeaturedBrowse();
+    if (!searchRestoreInProgress) renderFeaturedBrowse();
   } else {
     renderListings(allItems);
   }
@@ -715,10 +737,10 @@ async function loadListings() {
   await applyNearbyFromUrl();
   applyFeaturedFromUrl();
   if (searchResultsCommitted && hasActiveClientFilters()) {
-    await fillFilteredResults();
-    renderListings(allItems);
+    const grew = await fillFilteredResults();
+    if (grew || searchRestoreInProgress) renderListings(allItems);
   }
-  await refreshOpenMapPins();
+  if (!searchRestoreInProgress) await refreshOpenMapPins();
   };
   listingsReadyPromise = run();
   return listingsReadyPromise;
@@ -843,6 +865,7 @@ function updateDeskResultCount(filtered) {
 async function fillFilteredResults() {
   if (!searchResultsCommitted && isVehicleSearchPage()) return;
   let guard = 0;
+  let grew = false;
   while (
     hasActiveClientFilters() &&
     listingsHasMore &&
@@ -851,9 +874,11 @@ async function fillFilteredResults() {
   ) {
     guard += 1;
     const before = allItems.length;
-    await loadMoreListings();
+    await loadMoreListings({ silent: true });
     if (allItems.length === before) break;
+    grew = true;
   }
+  return grew;
 }
 
 function previewFilterCountsOnly() {
@@ -867,6 +892,10 @@ function previewFilterCountsOnly() {
 }
 
 function applyFilters({ commit = false } = {}) {
+  if (searchRestoreInProgress && !commit) {
+    previewFilterCountsOnly();
+    return;
+  }
   if (commit && isVehicleSearchPage() && !isSellerMode()) {
     searchResultsCommitted = true;
     closeSearchMapDom();
@@ -884,7 +913,11 @@ function applyFilters({ commit = false } = {}) {
   if (PAGE === "auto" || PAGE === "teherauto") {
     updateSearchMapButtonLabels(hasActiveClientFilters());
   }
-  if (hasActiveClientFilters()) void fillFilteredResults();
+  if (hasActiveClientFilters()) {
+    void fillFilteredResults().then((grew) => {
+      if (grew) renderListings(allItems);
+    });
+  }
   if (commit) persistCommittedSearch();
 }
 
@@ -1005,7 +1038,7 @@ initHomeUnifiedScroll();
 if (PAGE === "auto" || PAGE === "teherauto") {
   ensureMapModule = () => {
     if (!mapModulePromise) {
-      mapModulePromise = import("./search-results-map.js?v=perfNav1")
+      mapModulePromise = import("./search-results-map.js?v=listFlash1")
         .then((mod) => {
           updateSearchMapButtonLabels = mod.updateSearchMapButtonLabels;
           closeSearchResultsMapFn = mod.closeSearchResultsMap;
@@ -1168,6 +1201,12 @@ if (PAGE === "ingatlan") {
         return;
       }
 
+      // Restore: szűrőállapot megvan, ne rendereljünk / zárjuk a térképet külön.
+      if (searchRestoreInProgress) {
+        searchResultsCommitted = true;
+        return;
+      }
+
       applyFilters({ commit: true });
       scrollToListings();
     },
@@ -1238,6 +1277,12 @@ if (PAGE === "ingatlan") {
         // Preview race után újra a mentett szűrők legyenek a forrás.
         applyRestoredFiltersToState(filters);
         searchResultsCommitted = true;
+        if (listingsReadyPromise) {
+          try {
+            await listingsReadyPromise;
+          } catch {
+          }
+        }
         renderListings(allItems);
         updateSearchMapButtonLabels(hasActiveClientFilters());
         // URL + session — ne a form-olvasás döntsön restore közben
@@ -1250,12 +1295,12 @@ if (PAGE === "ingatlan") {
         syncCommittedSearchUrl(filters);
         consumeVehicleSearchRestorePending(PAGE);
         scrollToListings();
-        // Térkép + további lapok háttérben — ne blokkolják a listát.
+        // Térkép + további lapok háttérben — ne blokkolják / villogtassák a listát.
         void reopenMapAfterReturn();
         void (async () => {
           try {
-            await fillFilteredResults();
-            renderListings(allItems);
+            const grew = await fillFilteredResults();
+            if (grew) renderListings(allItems);
             applyRestoredFiltersToState(filters);
             await refreshOpenMapPins();
           } catch (error) {
@@ -1323,6 +1368,7 @@ if (PAGE !== "ingatlan") {
   }
 
   initHomeFilterCatalog(() => {
+    if (searchRestoreInProgress) return;
     // A hero gyorskereső szűrőit ne írjuk felül, amikor a katalógus később betölt.
     if (!hasActiveSidebarFilters(sidebarFilters)) {
       sidebarFilters = readSidebarFilters?.() ?? emptyFilters();
@@ -1365,36 +1411,41 @@ window.addEventListener("pageshow", (event) => {
     Boolean(document.getElementById("search-map-modal")) &&
     document.getElementById("search-map-modal")?.hidden === false;
   if (mapWasOpen || peekMapOpenOnReturn()) suppressMapClose = true;
+  // bfcache: a lista DOM megvan — ne töröljük újra loadListings-szel.
+  const hasCards = Boolean(gridTrack?.querySelector("[data-listing-id]"));
+  const softRefresh = async () => {
+    if (searchResultsCommitted) {
+      updateDeskResultCount(filterItems(allItems));
+      updateFilterResultCount();
+    }
+    if (peekMapOpenOnReturn()) {
+      void reopenMapAfterReturn();
+      return;
+    }
+    if (mapWasOpen && typeof ensureMapModule === "function") {
+      try {
+        await refreshOpenMapPins();
+      } catch (error) {
+        console.warn("Térkép bfcache frissítés:", error);
+      } finally {
+        window.setTimeout(() => {
+          suppressMapClose = false;
+        }, 2500);
+      }
+    } else {
+      suppressMapClose = false;
+    }
+  };
+  if (hasCards) {
+    softRefresh().catch(() => {
+      suppressMapClose = false;
+    });
+    return;
+  }
   loadListings()
     .then(async () => {
       if (searchResultsCommitted) applyFilters({ commit: true });
-      if (peekMapOpenOnReturn()) {
-        void reopenMapAfterReturn();
-        return;
-      }
-      if (mapWasOpen && typeof ensureMapModule === "function") {
-        try {
-          const mod = await ensureMapModule();
-          const items =
-            currentFilteredListings().length > 0
-              ? currentFilteredListings()
-              : [...document.querySelectorAll("#home-grid-track [data-listing-id]")]
-                  .map((el) => el.__bymyListing)
-                  .filter(Boolean);
-          void mod.openSearchResultsMap(items, {
-            mode: searchResultsCommitted || hasActiveClientFilters() || items.length ? "filtered" : "browse",
-            preferHomeZoom: false,
-          });
-        } catch (error) {
-          console.warn("Térkép bfcache frissítés:", error);
-        } finally {
-          window.setTimeout(() => {
-            suppressMapClose = false;
-          }, 2500);
-        }
-      } else {
-        suppressMapClose = false;
-      }
+      await softRefresh();
     })
     .catch(() => {
       suppressMapClose = false;
@@ -1404,5 +1455,7 @@ window.addEventListener("pageshow", (event) => {
 document.addEventListener("visibilitychange", () => {
   if (document.visibilityState !== "visible") return;
   if (Date.now() - listingsLastFetchAt < LISTINGS_VISIBLE_REFRESH_MS) return;
+  // Vissza / restore közben ne indítsunk párhuzamos újratöltést (villogás).
+  if (searchRestoreInProgress || suppressMapClose) return;
   loadListings().catch(() => {});
 });

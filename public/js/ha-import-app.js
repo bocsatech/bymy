@@ -139,18 +139,19 @@ function browserInstallGuide(browser) {
   const title = titles[browser] || "Chrome";
   let steps = [];
   if (browser === "safari") {
+    // Safari Cmd+D nem engedi a javascript: URL beillesztését — szerkesztés vagy húzás kell
     steps = mac
       ? [
-          `${kbd("Cmd")} + ${kbd("Shift")} + ${kbd("B")} — könyvjelzősáv`,
-          `${kbd("Cmd")} + ${kbd("D")} — új könyvjelző`,
-          `A cím / URL mezőbe ${kbd("Cmd")} + ${kbd("V")}`,
-          "Mentés",
+          `Legegyszerűbb: húzd a <strong>sárga</strong> „importálása” gombot a Kedvencek sávra`,
+          `Vagy: ${kbd("Cmd")} + ${kbd("D")} — mentsd az oldalt (bármilyen név)`,
+          `${kbd("Option")} + ${kbd("Cmd")} + ${kbd("B")} — Kedvencek szerkesztése`,
+          `A könyvjelzőn: cím / URL szerkesztése → ${kbd("Cmd")} + ${kbd("V")} → Kész`,
         ]
       : [
-          "Nézet → Kedvencek sáv megjelenítése",
-          `${kbd("Ctrl")} + ${kbd("D")} — új kedvenc`,
-          `A cím mezőbe ${kbd("Ctrl")} + ${kbd("V")}`,
-          "Hozzáadás",
+          "Legegyszerűbb: húzd a sárga import gombot a Kedvencek sávra",
+          "Vagy: Kedvencek → Kedvencek szerkesztése",
+          "Új / meglévő elem címének szerkesztése → beillesztés (Ctrl+V)",
+          "Kész — a hasznaltauto oldalon futtasd",
         ];
   } else {
     steps = [
@@ -173,9 +174,16 @@ function renderBrowserInstall(browser) {
   const guide = browserInstallGuide(id);
   const titleEl = document.querySelector("[data-ha-install-title]");
   const stepsEl = document.querySelector("[data-ha-install-steps]");
+  const hintEl = document.querySelector("[data-ha-install] .ha-imp-bookmark-hint");
   if (titleEl) titleEl.textContent = guide.title;
   if (stepsEl) {
     stepsEl.innerHTML = guide.steps.map((step) => `<li>${step}</li>`).join("");
+  }
+  if (hintEl) {
+    hintEl.innerHTML =
+      id === "safari"
+        ? "Safari: a <strong>Cmd+D</strong> nem fogadja a javascript: címet. Húzd a sárga gombot a sávra, vagy szerkeszd a kedvenc URL-jét (Option+Cmd+B)."
+        : "Húzni nem kell: válassz böngészőt → a gomb bemásolja a könyvjelzőt → kövesd a lépéseket. A hasznaltauto oldalon (belépés + lista) futtasd a könyvjelzőt.";
   }
   try {
     sessionStorage.setItem("bymy-ha-install-browser", id);
@@ -187,7 +195,13 @@ async function selectBrowserAndCopy(browser) {
   renderBrowserInstall(browser);
   await copyBookmarkletLink();
   const name = browserInstallGuide(browser).title;
-  setStatus(`${name}: könyvjelző a vágólapon — kövesd a lépéseket alább.`);
+  if (browser === "safari") {
+    setStatus(
+      "Safari: vágólapon a kód. Húzd a sárga gombot a Kedvencek sávra — vagy Option+Cmd+B → URL szerkesztése → Cmd+V."
+    );
+  } else {
+    setStatus(`${name}: könyvjelző a vágólapon — kövesd a lépéseket alább.`);
+  }
 }
 
 function initBrowserInstallUi() {

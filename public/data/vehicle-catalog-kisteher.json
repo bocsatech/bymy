@@ -1,12 +1,12 @@
 {
   "source": "api.hasznaltauto.hu/v2/tomb",
   "category": "kisteher",
-  "imported_at": "2026-09-28T05:28:18.042Z",
-  "count_rows": 159,
+  "imported_at": "2026-09-28T05:31:56.651Z",
+  "count_rows": 156,
   "count_brands": 54,
-  "count_models": 141,
-  "count_model_children": 18,
-  "count_groups_with_children": 10,
+  "count_models": 140,
+  "count_model_children": 16,
+  "count_groups_with_children": 8,
   "gyartmanyok": [
     "AIXAM",
     "AUSTIN",
@@ -89,8 +89,6 @@
     "CITROEN": [
       "BERLINGO",
       "C25",
-      "C3",
-      "AIRCROSS",
       "HY",
       "JUMPER",
       "JUMPY",
@@ -203,7 +201,6 @@
       "T60 MAX"
     ],
     "MAZDA": [
-      "E-SOROZAT",
       "E 2200",
       "EGYÉB"
     ],
@@ -417,21 +414,6 @@
         "searchSelectable": true,
         "postRequiresChild": false,
         "children": []
-      },
-      {
-        "id": "305",
-        "name": "C3",
-        "searchSelectable": true,
-        "postRequiresChild": true,
-        "children": [
-          {
-            "id": "28656",
-            "name": "AIRCROSS",
-            "searchSelectable": true,
-            "postRequiresChild": false,
-            "children": []
-          }
-        ]
       },
       {
         "id": "25829",
@@ -933,19 +915,11 @@
     ],
     "MAZDA": [
       {
-        "id": "937",
-        "name": "E-SOROZAT",
+        "id": "7304",
+        "name": "E 2200",
         "searchSelectable": true,
-        "postRequiresChild": true,
-        "children": [
-          {
-            "id": "7304",
-            "name": "E 2200",
-            "searchSelectable": true,
-            "postRequiresChild": false,
-            "children": []
-          }
-        ]
+        "postRequiresChild": false,
+        "children": []
       },
       {
         "id": "13514",
@@ -1576,23 +1550,7 @@
     "post": "ha postRequiresChild=true, feladáskor gyermek kötelező",
     "tombUrl": "https://api.hasznaltauto.hu/v2/tomb/markakKishaszonjarmuFilter,modellekKishaszonjarmuFilter",
     "haCategory": "kishaszonjarmu",
-    "cleaned": "removed személyautó-overlapping / passenger models from HA kishaszon dump",
-    "removed_brands": [
-      "AUDI",
-      "BMW",
-      "CHRYSLER",
-      "DACIA",
-      "HONDA",
-      "INEOS",
-      "JAGUAR",
-      "JEEP",
-      "LADA",
-      "LAND ROVER",
-      "NYSA",
-      "SSANGYONG",
-      "SUZUKI",
-      "UAZ",
-      "VOLVO"
-    ]
+    "cleaned": "removed személyautó-overlapping / passenger models",
+    "removed_brands": []
   }
 }

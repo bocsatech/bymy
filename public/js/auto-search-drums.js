@@ -494,7 +494,7 @@ async function fetchCatalogQuick() {
   } catch {
     /* fallback API */
   }
-  const { fetchVehicleCatalog } = await import("./vehicle-catalog-client.js?v=teherClean1");
+  const { fetchVehicleCatalog } = await import("./vehicle-catalog-client.js?v=teherClean2");
   return fetchVehicleCatalog({ kind });
 }
 

@@ -1,5 +1,5 @@
 
-import { fetchVehicleCatalog } from "./vehicle-catalog-client.js?v=teherClean1";
+import { fetchVehicleCatalog } from "./vehicle-catalog-client.js?v=teherClean2";
 import { bindAutoBmDismiss, autoBmPanelIsOpen } from "./auto-bm-dismiss.js?v=bmDismiss1";
 
 function truckKategoria() {
@@ -62,7 +62,17 @@ export async function mountAutoBrandModelPicker(form) {
 
   let catalog;
   try {
-    catalog = await fetchVehicleCatalog({ kind: catalogKindForPage() });
+    const kind = catalogKindForPage();
+    catalog = await fetchVehicleCatalog({ kind });
+    // Guard: teher 3,5-ig soha ne személyautó listát mutasson (Ferrari / 160+ márka).
+    if (
+      kind === "kisteher" &&
+      (catalog?.gyartmanyok?.includes?.("FERRARI") ||
+        (catalog?.count_brands || catalog?.gyartmanyok?.length || 0) > 90)
+    ) {
+      console.warn("Kisteher picker: személyautó katalógus detektálva, elvetve.");
+      return;
+    }
   } catch (error) {
     console.warn("Gyártmány picker katalógus:", error);
     return;

@@ -8,8 +8,8 @@ import {
   initHomeSearchSidebar,
   initHomeFilterCatalog,
 } from "./home-search-filter.js?v=valto3";
-import { initHomeQuickSearch } from "./home-quicksearch.js?v=searchGate1";
-import { decodeSavedSearchParam } from "./saved-search.js?v=savedSearch5";
+import { initHomeQuickSearch } from "./home-quicksearch.js?v=searchBack2";
+import { decodeSavedSearchParam, encodeSavedSearchParam } from "./saved-search.js?v=savedSearch5";
 import { matchDetailedSearch, hasActiveDetailedSearch } from "./auto-detailed-search.js?v=autoDesk16";
 import { updateAutoDeskResultCount } from "./auto-desk-search.js?v=teherStrict3";
 import {
@@ -30,7 +30,7 @@ import {
   readVehicleSearchState,
   clearVehicleSearchState,
   shouldRestoreVehicleSearch,
-} from "./listing-return.js?v=searchBack1";
+} from "./listing-return.js?v=searchBack2";
 import { normalizeKivitel } from "./kivitel-options.js?v=kivitel1";
 import { featuredListingIdSet, pickFeaturedListings } from "./home-featured-slots.js?v=featuredNoAuto1";
 import { mountSellerInventory, updateSellerInventoryCount } from "./seller-inventory.js?v=sellerInv30";
@@ -61,10 +61,24 @@ function closeSearchMapDom() {
   });
 }
 
+function syncCommittedSearchUrl(filters) {
+  try {
+    const url = new URL(window.location.href);
+    const encoded = filters ? encodeSavedSearchParam(PAGE, filters) : "";
+    if (encoded) url.searchParams.set("ss", encoded);
+    else url.searchParams.delete("ss");
+    const next = `${url.pathname}${url.search}${url.hash}`;
+    const cur = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+    if (next !== cur) history.replaceState(history.state, "", next);
+  } catch {
+  }
+}
+
 function persistCommittedSearch() {
   if (!isVehicleSearchPage() || isSellerMode()) return;
   if (!searchResultsCommitted) {
     clearVehicleSearchState();
+    syncCommittedSearchUrl(null);
     return;
   }
   const filters = quickSearchApi?.readQuickSearchValues?.() || null;
@@ -75,6 +89,7 @@ function persistCommittedSearch() {
     filters,
     deskSort: deskSort || "newest",
   });
+  syncCommittedSearchUrl(filters);
 }
 
 const gridTrack = document.getElementById("home-grid-track");
@@ -935,6 +950,7 @@ if (PAGE === "ingatlan") {
         searchResultsCommitted = false;
         quickRadiusFilter = null;
         clearVehicleSearchState();
+        syncCommittedSearchUrl(null);
         closeSearchMapDom();
         applyFilters();
         return;
@@ -981,6 +997,7 @@ if (PAGE === "ingatlan") {
   });
 
   const savedParam = new URLSearchParams(window.location.search).get("ss");
+  const restoreFromSession = !savedParam && shouldRestoreVehicleSearch(PAGE);
   if (savedParam && quickSearchApi) {
     quickSearchApi.whenReady.then(async () => {
       const decoded = decodeSavedSearchParam(savedParam);
@@ -988,7 +1005,7 @@ if (PAGE === "ingatlan") {
       await quickSearchApi.applySavedFilters(decoded.filters);
       scrollToListings();
     });
-  } else if (quickSearchApi && shouldRestoreVehicleSearch(PAGE)) {
+  } else if (restoreFromSession && quickSearchApi) {
     quickSearchApi.whenReady.then(async () => {
       const state = readVehicleSearchState();
       if (!state?.filters || !Object.keys(state.filters).length) return;

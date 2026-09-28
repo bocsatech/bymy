@@ -1,5 +1,6 @@
 const RETURN_KEY = "bymy-listing-return";
 const SEARCH_STATE_KEY = "bymy-vehicle-search-state";
+const RESTORE_FLAG_KEY = "bymy-vehicle-search-restore";
 const RETURN_TTL_MS = 45 * 60 * 1000;
 
 function readReturn() {
@@ -69,6 +70,32 @@ export function clearVehicleSearchState() {
   }
 }
 
+/** Hirdetés megnyitásakor: vissza navigációnál keresés visszaállítás jele. */
+export function markVehicleSearchRestorePending() {
+  try {
+    sessionStorage.setItem(RESTORE_FLAG_KEY, "1");
+  } catch {
+  }
+}
+
+export function consumeVehicleSearchRestorePending() {
+  try {
+    const on = sessionStorage.getItem(RESTORE_FLAG_KEY) === "1";
+    if (on) sessionStorage.removeItem(RESTORE_FLAG_KEY);
+    return on;
+  } catch {
+    return false;
+  }
+}
+
+function peekVehicleSearchRestorePending() {
+  try {
+    return sessionStorage.getItem(RESTORE_FLAG_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
 function referrerIsListingDetail() {
   try {
     const ref = document.referrer ? new URL(document.referrer) : null;
@@ -85,10 +112,16 @@ function referrerIsListingDetail() {
 function navigationIsBackForward() {
   try {
     const nav = performance.getEntriesByType?.("navigation")?.[0];
-    return nav?.type === "back_forward";
+    if (nav?.type === "back_forward") return true;
   } catch {
-    return false;
   }
+  try {
+    if (typeof performance !== "undefined" && performance.navigation) {
+      return performance.navigation.type === 2;
+    }
+  } catch {
+  }
+  return false;
 }
 
 /** Böngésző vissza / hirdetésről listára — keresés visszaállítandó. */
@@ -96,12 +129,17 @@ export function shouldRestoreVehicleSearch(page) {
   const state = readVehicleSearchState();
   if (!state?.committed) return false;
   if (page && state.page && state.page !== page) return false;
-  if (referrerIsListingDetail()) return true;
-  if (navigationIsBackForward()) return true;
-  const data = readReturn();
-  if (data?.listingId && data.at && Date.now() - data.at < RETURN_TTL_MS && referrerIsListingDetail()) {
+
+  const fromDetail = referrerIsListingDetail();
+  const backNav = navigationIsBackForward();
+  const pending = peekVehicleSearchRestorePending();
+
+  if (fromDetail || backNav) {
+    consumeVehicleSearchRestorePending();
     return true;
   }
+  // Ne restore-oljunk menüből érkező friss /auto.html megnyitáskor.
+  if (pending) consumeVehicleSearchRestorePending();
   return false;
 }
 
@@ -118,6 +156,7 @@ export function rememberListingOpen(listingId, cardEl, root = document) {
     cardTop: rect ? rect.top + window.scrollY : null,
     at: Date.now(),
   });
+  markVehicleSearchRestorePending();
 }
 
 export function listingReturnHref(fallback = "/auto.html") {
@@ -161,14 +200,18 @@ export function touchListingReturnId(listingId) {
   const data = readReturn();
   if (!data) {
     writeReturn({ href: listingReturnHref(), listingId: id, listingIds: [id], at: Date.now() });
+    markVehicleSearchRestorePending();
     return;
   }
   writeReturn({ ...data, listingId: id, at: Date.now() });
+  markVehicleSearchRestorePending();
 }
 
 export function bindListingOpen(root = document) {
   root.addEventListener("click", (event) => {
-    if (event.target.closest(".home-grid-card-media")) return;
+    if (event.target.closest(".home-grid-card-save")) return;
+    if (event.target.closest(".home-grid-card-photo-nav")) return;
+    if (event.target.closest(".home-grid-card-photo-hit")) return;
     const el = event.target.closest("[data-listing-id]");
     if (!el || !root.contains(el)) return;
     const id = el.getAttribute("data-listing-id");
@@ -177,6 +220,13 @@ export function bindListingOpen(root = document) {
     try {
       window.dispatchEvent(new CustomEvent("bymy-listing-open", { detail: { id } }));
     } catch {
+    }
+    const anchor = event.target.closest("a[href]");
+    if (anchor && root.contains(anchor) && anchor.getAttribute("href")) return;
+    if (event.target.closest(".home-grid-card-media")) {
+      event.preventDefault();
+      window.location.href = listingDetailHref(id);
+      return;
     }
     if (el.tagName === "A" && el.getAttribute("href")) return;
     event.preventDefault();
@@ -190,7 +240,8 @@ export function restoreListingReturn() {
 
   const fromDetail = referrerIsListingDetail();
   const backNav = navigationIsBackForward();
-  if (!fromDetail && !backNav) {
+  const pending = peekVehicleSearchRestorePending();
+  if (!fromDetail && !backNav && !pending) {
     sessionStorage.removeItem(RETURN_KEY);
     return false;
   }

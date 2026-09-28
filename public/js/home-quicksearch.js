@@ -437,7 +437,18 @@ export function initHomeQuickSearch({ onSearch = () => {}, onFilterPreview, onDe
     const { applySavedSearchFilters } = await import("./saved-search.js?v=savedSearch1");
     await applySavedSearchFilters(form, filters);
     updateAutoDeskAccSummaries(form);
-    onSearch(readQuickSearchValues());
+    const read = readQuickSearchValues();
+    const merged = { ...read };
+    for (const [key, value] of Object.entries(filters || {})) {
+      if (key === "detailed") {
+        if (value) merged.detailed = value;
+        continue;
+      }
+      if (value == null || value === "") continue;
+      if (Array.isArray(value) && !value.length) continue;
+      merged[key] = value;
+    }
+    onSearch(merged);
   }
 
   return {

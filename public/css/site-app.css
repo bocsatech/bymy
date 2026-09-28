@@ -6119,8 +6119,9 @@ body.site-app .ha-imp-step-cell {
   background: transparent;
 }
 
-/* Csak az 1. lépés: fehér box, sötétkék keret — mint a demó */
-body.site-app .ha-imp-step-cell[data-ha-step="1"] {
+/* 1. és 2. lépés: fehér box, sötétkék keret */
+body.site-app .ha-imp-step-cell[data-ha-step="1"],
+body.site-app .ha-imp-step-cell[data-ha-step="2"] {
   padding: 1.1rem 1.15rem 1.15rem;
   background: #fff;
   border: 2px solid #1e4d7b;
@@ -6437,7 +6438,8 @@ html[data-theme="dark"] body.site-app .ha-imp-step-cell {
   background: transparent;
 }
 
-html[data-theme="dark"] body.site-app .ha-imp-step-cell[data-ha-step="1"] {
+html[data-theme="dark"] body.site-app .ha-imp-step-cell[data-ha-step="1"],
+html[data-theme="dark"] body.site-app .ha-imp-step-cell[data-ha-step="2"] {
   background: #1f2430;
   border-color: #6ea8d8;
 }
@@ -7106,7 +7108,8 @@ html[data-theme="dark"] body.site-app.settings-page .ha-imp-panel {
   border-color: transparent !important;
 }
 
-html[data-theme="dark"] body.site-app.settings-page .ha-imp-step-cell[data-ha-step="1"] {
+html[data-theme="dark"] body.site-app.settings-page .ha-imp-step-cell[data-ha-step="1"],
+html[data-theme="dark"] body.site-app.settings-page .ha-imp-step-cell[data-ha-step="2"] {
   background: #1f2430 !important;
   border-color: #6ea8d8 !important;
   color: #e8eaed !important;

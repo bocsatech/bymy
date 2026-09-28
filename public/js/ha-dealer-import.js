@@ -608,7 +608,7 @@
     });
   }
 
-  const SAVE_CHUNK = 5;
+  const SAVE_CHUNK = 3;
 
   /** Win7-barát: text/plain + token a body-ban → nincs CORS preflight (Authorization nélkül). */
   async function savePagesDirect(origin, token, pages, doneCount, total) {
@@ -640,19 +640,24 @@
     return data.result || {};
   }
 
-  /** Ha a fetch CSP/CORS miatt elhasal: form POST popup ablakba (nincs preflight). */
+  /** Ha a fetch CSP/CORS miatt elhasal: rejtett iframe + form POST (popup/COOP nélkül). */
   function savePagesFormBridge(origin, token, pages, chunkIndex) {
     return new Promise((resolve, reject) => {
       const list = Array.isArray(pages) ? pages : [];
       const bridgeId = `bymy_ha_br_${Date.now()}_${chunkIndex}`;
-      const winName = "bymy_ha_bridge_win";
+      const frameName = `bymy_ha_br_fr_${chunkIndex}_${Date.now()}`;
       let settled = false;
+      let iframe = null;
       const finish = (fn, value) => {
         if (settled) return;
         settled = true;
         clearTimeout(timer);
         try {
           window.removeEventListener("message", onMsg);
+        } catch {
+        }
+        try {
+          if (iframe && iframe.parentNode) iframe.parentNode.removeChild(iframe);
         } catch {
         }
         fn(value);
@@ -668,16 +673,21 @@
         window.addEventListener("message", onMsg);
       } catch {
       }
-      // 5 autó / batch — hosszabb várakozás
       const timer = setTimeout(() => finish(reject, new Error("bridge timeout")), 90000);
       try {
-        window.open("about:blank", winName);
-      } catch {
+        iframe = document.createElement("iframe");
+        iframe.name = frameName;
+        iframe.setAttribute("title", "bymy-import");
+        iframe.style.cssText = "position:fixed;width:1px;height:1px;left:-100px;top:-100px;opacity:0;border:0;";
+        (document.body || document.documentElement).appendChild(iframe);
+      } catch (error) {
+        finish(reject, error);
+        return;
       }
       const form = document.createElement("form");
       form.method = "POST";
       form.action = `${origin}/api/import/ha-bridge`;
-      form.target = winName;
+      form.target = frameName;
       form.acceptCharset = "UTF-8";
       const fields = {
         bridgeId,

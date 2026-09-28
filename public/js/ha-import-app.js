@@ -60,7 +60,7 @@ function bookmarkletHref(mode) {
   const origin = location.origin;
   const isDealer = mode === "dealer";
   const src = isDealer
-    ? `${origin}/js/ha-dealer-import.js?v=haCdn16`
+    ? `${origin}/js/ha-dealer-import.js?v=haCdn17`
     : `${origin}/js/ha-import-bookmarklet.js?v=haDealerPhoto17`;
   const token = getAuthToken() || "";
   const runner = isDealer ? "BymyHaDealerImport" : "BymyHaImport";
@@ -504,7 +504,7 @@ async function runMessageImport(data) {
   const index = Math.max(1, Number(data.index) || 1);
   const total = Math.max(1, Number(data.total) || pages.length);
   const batch = ensureDealerBatch(data);
-  const SAVE_BATCH = data.mode === "dealer" || data.photoOnly === true ? 5 : 1;
+  const SAVE_BATCH = data.mode === "dealer" || data.photoOnly === true ? 3 : 1;
   const abortMs = SAVE_BATCH > 1 ? 60000 : 25000;
   setStatus(`Mentés: ${index} / ${total}…`);
 

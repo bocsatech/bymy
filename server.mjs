@@ -440,14 +440,39 @@ function sendJson(res, status, data, headers = {}) {
 
 function haImportCorsHeaders(req) {
   const origin = String(req.headers.origin ?? "").trim();
-  if (!HA_IMPORT_ORIGINS.has(origin)) return {};
-  return {
-    "Access-Control-Allow-Origin": origin,
+  const base = {
     "Access-Control-Allow-Methods": "POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization",
     "Access-Control-Max-Age": "86400",
-    Vary: "Origin",
   };
+  if (HA_IMPORT_ORIGINS.has(origin)) {
+    return {
+      ...base,
+      "Access-Control-Allow-Origin": origin,
+      Vary: "Origin",
+    };
+  }
+  // Referer fallback (néhány régi böngésző / Win7)
+  const referer = String(req.headers.referer ?? req.headers.referrer ?? "").trim();
+  try {
+    const refOrigin = new URL(referer).origin;
+    if (HA_IMPORT_ORIGINS.has(refOrigin)) {
+      return {
+        ...base,
+        "Access-Control-Allow-Origin": refOrigin,
+        Vary: "Origin",
+      };
+    }
+  } catch {
+  }
+  // Credential nélküli import (token a body-ban): * — különben Failed to fetch Origin nélkül
+  if (!origin) {
+    return {
+      ...base,
+      "Access-Control-Allow-Origin": "*",
+    };
+  }
+  return {};
 }
 
 async function serveStatic(path, res, req = null) {
@@ -894,10 +919,9 @@ async function handleImportExtracted(req, res) {
   }
 }
 
-/** HA könyvjelző form+popup híd (Win7): nincs CORS fetch, HTML válasz postMessage-dzel. */
+/** HA könyvjelző form+iframe híd (Win7): nincs CORS fetch; a válasz postMessage a parentnek. */
 async function handleImportHaBridge(req, res) {
   const sendBridgeHtml = (bridgeId, payload) => {
-    applySecurityHeaders(res);
     const safe = JSON.stringify(payload).replace(/</g, "\\u003c");
     const id = JSON.stringify(String(bridgeId || ""));
     const html = `<!doctype html><meta charset="utf-8"><title>Bymy import</title>
@@ -907,15 +931,20 @@ async function handleImportHaBridge(req, res) {
   var payload=${safe};
   payload.bridgeId=id;
   payload.type="bymy-ha-bridge-result";
+  try{ if(window.parent&&window.parent!==window) window.parent.postMessage(payload,"*"); }catch(e){}
   try{ if(window.opener&&!window.opener.closed) window.opener.postMessage(payload,"*"); }catch(e){}
-  try{ window.close(); }catch(e){}
-  setTimeout(function(){ document.body.textContent=payload.ok?"Mentve — ablak bezárható.":(payload.error||"Hiba"); },50);
+  try{ document.body.textContent=payload.ok?"OK":(payload.error||"Hiba"); }catch(e){}
 })();
 </script>`;
+    // Ne COOP / X-Frame-Options DENY — iframe a HA oldalról; különben bridge timeout
     res.writeHead(200, {
       "Content-Type": "text/html; charset=utf-8",
       "Cache-Control": "no-store",
-      // Popup top-level — ne DENY frame (nem iframe)
+      "X-Content-Type-Options": "nosniff",
+      "Content-Security-Policy":
+        "default-src 'none'; script-src 'unsafe-inline'; base-uri 'none'; " +
+        "frame-ancestors https://admin.hasznaltauto.hu https://www.hasznaltauto.hu https://hasznaltauto.hu",
+      "Referrer-Policy": "no-referrer",
     });
     res.end(html);
   };

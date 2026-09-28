@@ -9,7 +9,11 @@ import {
   resolveCityCoords,
   resolveListingCoords,
 } from "./listing-radius.js?v=mapCity1";
-import { listingDetailHref } from "./listing-return.js?v=searchBack3";
+import {
+  listingDetailHref,
+  rememberListingOpen,
+  markMapOpenOnReturn,
+} from "./listing-return.js?v=searchBack4";
 import { listingTileTitle, listingTilePrice } from "./listing-tile.js?v=listThumb1";
 import { getAuthUser, loadProfileFromServer } from "./site-auth.js?v=bootFix2";
 import { fetchListingsPage } from "./db-client.js?v=ownerBoost6";
@@ -319,6 +323,28 @@ function findListingsHost() {
   );
 }
 
+function rememberMapListingNavigation(event, root) {
+  const link = event.target?.closest?.("a[href]");
+  if (!link || !root?.contains?.(link)) return;
+  let id = "";
+  try {
+    const u = new URL(link.getAttribute("href") || "", window.location.origin);
+    if (/\/hirdetes\.html$/i.test(u.pathname)) id = String(u.searchParams.get("id") || "").trim();
+  } catch {
+  }
+  if (!id) return;
+  const pinIds = lastPins.map((p) => String(p.item?.id || "")).filter(Boolean);
+  rememberListingOpen(id, link, document.getElementById("home-grid-track") || document, "", {
+    fromMap: true,
+    listingIds: pinIds.length ? pinIds : undefined,
+  });
+  markMapOpenOnReturn(true);
+  try {
+    window.dispatchEvent(new CustomEvent("bymy-listing-open", { detail: { id, fromMap: true } }));
+  } catch {
+  }
+}
+
 function ensureMapPanel() {
   let root = document.getElementById("search-map-modal");
   const markup = `
@@ -347,6 +373,7 @@ function ensureMapPanel() {
     } else {
       document.body.appendChild(root);
     }
+    root.dataset.mapNavBound = "1";
     root.addEventListener("click", (event) => {
       if (event.target?.closest?.("[data-search-map-back]")) {
         showAllResults();
@@ -357,12 +384,17 @@ function ensureMapPanel() {
         const id = String(pick.getAttribute("data-search-map-pick") || "");
         const pin = lastPins.find((p) => String(p.item?.id) === id);
         if (pin && lastLeaflet) showRouteToPin(lastLeaflet, pin, root.querySelector("[data-search-map-side]"));
+        return;
       }
+      rememberMapListingNavigation(event, root);
     });
     document.addEventListener("keydown", (event) => {
       if (event.key === "Escape" && !root.hidden) {
         if (selectedPinId != null) showAllResults();
-        else closeSearchResultsMap();
+        else {
+          markMapOpenOnReturn(false);
+          closeSearchResultsMap();
+        }
       }
     });
     return root;
@@ -384,6 +416,23 @@ function ensureMapPanel() {
     host.insertBefore(root, grid);
   } else if (host && grid && root.nextElementSibling !== grid) {
     host.insertBefore(root, grid);
+  }
+  if (root.dataset.mapNavBound !== "1") {
+    root.dataset.mapNavBound = "1";
+    root.addEventListener("click", (event) => {
+      if (event.target?.closest?.("[data-search-map-back]")) {
+        showAllResults();
+        return;
+      }
+      const pick = event.target?.closest?.("[data-search-map-pick]");
+      if (pick) {
+        const id = String(pick.getAttribute("data-search-map-pick") || "");
+        const pin = lastPins.find((p) => String(p.item?.id) === id);
+        if (pin && lastLeaflet) showRouteToPin(lastLeaflet, pin, root.querySelector("[data-search-map-side]"));
+        return;
+      }
+      rememberMapListingNavigation(event, root);
+    });
   }
   return root;
 }
@@ -1098,6 +1147,7 @@ export function initSearchResultsMapButtons({
     btn.addEventListener("click", async () => {
       const root = document.getElementById("search-map-modal");
       if (root && !root.hidden) {
+        markMapOpenOnReturn(false);
         closeSearchResultsMap();
         return;
       }

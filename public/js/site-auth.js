@@ -1204,6 +1204,7 @@ if (typeof document !== "undefined") {
       const page = document.body?.dataset?.sitePage || "";
       if (page && page !== "auto" && page !== "teherauto" && page !== "hirdetes") {
         sessionStorage.removeItem("bymy-vehicle-search-restore");
+        sessionStorage.removeItem("bymy-vehicle-map-open");
       }
     } catch {
     }

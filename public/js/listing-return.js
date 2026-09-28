@@ -1,6 +1,7 @@
 const RETURN_KEY = "bymy-listing-return";
 const SEARCH_STATE_KEY = "bymy-vehicle-search-state";
 const RESTORE_FLAG_KEY = "bymy-vehicle-search-restore";
+const MAP_OPEN_KEY = "bymy-vehicle-map-open";
 const RETURN_TTL_MS = 45 * 60 * 1000;
 
 function readReturn() {
@@ -80,6 +81,39 @@ export function markVehicleSearchRestorePending(page) {
   }
 }
 
+/** Térképről nyitott hirdetés — visszaérkezéskor térkép újra nyíljon. */
+export function markMapOpenOnReturn(open = true) {
+  try {
+    if (open) sessionStorage.setItem(MAP_OPEN_KEY, JSON.stringify({ at: Date.now() }));
+    else sessionStorage.removeItem(MAP_OPEN_KEY);
+  } catch {
+  }
+}
+
+export function peekMapOpenOnReturn() {
+  try {
+    const raw = sessionStorage.getItem(MAP_OPEN_KEY);
+    if (!raw) return false;
+    const data = JSON.parse(raw);
+    if (data?.at && Date.now() - data.at > RETURN_TTL_MS) {
+      sessionStorage.removeItem(MAP_OPEN_KEY);
+      return false;
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function consumeMapOpenOnReturn() {
+  const on = peekMapOpenOnReturn();
+  try {
+    sessionStorage.removeItem(MAP_OPEN_KEY);
+  } catch {
+  }
+  return on;
+}
+
 export function consumeVehicleSearchRestorePending(page) {
   try {
     const raw = sessionStorage.getItem(RESTORE_FLAG_KEY);
@@ -131,6 +165,7 @@ export function sweepVehicleSearchRestoreFlag() {
     const page = document.body?.dataset?.sitePage || "";
     if (!page || page === "auto" || page === "teherauto" || page === "hirdetes") return;
     sessionStorage.removeItem(RESTORE_FLAG_KEY);
+    sessionStorage.removeItem(MAP_OPEN_KEY);
   } catch {
   }
 }
@@ -178,7 +213,7 @@ export function shouldRestoreVehicleSearch(page) {
   return false;
 }
 
-export function rememberListingOpen(listingId, cardEl, root = document, page = "") {
+export function rememberListingOpen(listingId, cardEl, root = document, page = "", extra = {}) {
   const id = String(listingId ?? "").trim();
   if (!id) return;
   const rect = cardEl?.getBoundingClientRect?.();
@@ -187,16 +222,23 @@ export function rememberListingOpen(listingId, cardEl, root = document, page = "
     page ||
     document.body?.getAttribute("data-site-page") ||
     "";
+  const fromIds = Array.isArray(extra.listingIds)
+    ? extra.listingIds.map((x) => String(x)).filter(Boolean)
+    : [];
+  const collected = collectListingIds(scope);
+  const listingIds = fromIds.length ? fromIds : collected;
   writeReturn({
     href: currentListHref(),
     listingId: id,
-    listingIds: collectListingIds(scope),
+    listingIds,
     scrollY: window.scrollY,
     cardTop: rect ? rect.top + window.scrollY : null,
     at: Date.now(),
     page: sitePage,
+    fromMap: Boolean(extra.fromMap),
   });
   markVehicleSearchRestorePending(sitePage);
+  if (extra.fromMap) markMapOpenOnReturn(true);
 }
 
 export function listingReturnHref(fallback = "/auto.html") {

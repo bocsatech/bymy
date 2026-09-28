@@ -31,7 +31,9 @@ import {
   clearVehicleSearchState,
   consumeVehicleSearchRestorePending,
   shouldRestoreVehicleSearch,
-} from "./listing-return.js?v=searchBack3";
+  peekMapOpenOnReturn,
+  consumeMapOpenOnReturn,
+} from "./listing-return.js?v=searchBack4";
 import { normalizeKivitel } from "./kivitel-options.js?v=kivitel1";
 import { featuredListingIdSet, pickFeaturedListings } from "./home-featured-slots.js?v=featuredNoAuto1";
 import { mountSellerInventory, updateSellerInventoryCount } from "./seller-inventory.js?v=sellerInv30";
@@ -39,6 +41,25 @@ import { mountSellerInventory, updateSellerInventoryCount } from "./seller-inven
 /** Map module is optional — only loaded when the user clicks the map button. */
 let closeSearchResultsMapFn = null;
 let mapModulePromise = null;
+/** Lazy map loader — set for auto/teher pages. */
+let ensureMapModule = null;
+
+async function reopenMapAfterReturn() {
+  if (!peekMapOpenOnReturn()) return;
+  consumeMapOpenOnReturn();
+  if (typeof ensureMapModule !== "function") return;
+  try {
+    await ensureMapModule();
+    const btn = document.querySelector("[data-search-map-open]");
+    if (!btn) return;
+    // Ha már nyitva, ne toggle-ölje be.
+    const root = document.getElementById("search-map-modal");
+    if (root && !root.hidden) return;
+    btn.click();
+  } catch (error) {
+    console.warn("Térkép visszaállítás:", error);
+  }
+}
 
 const MAP_LABEL_BROWSE = "Keresés a térképen";
 const MAP_LABEL_FILTERED = "Találatok a térképen";
@@ -847,9 +868,9 @@ function hasActiveSidebarFilters(filters) {
 initHomeUnifiedScroll();
 
 if (PAGE === "auto" || PAGE === "teherauto") {
-  const ensureMapModule = () => {
+  ensureMapModule = () => {
     if (!mapModulePromise) {
-      mapModulePromise = import("./search-results-map.js?v=mapLazy1")
+      mapModulePromise = import("./search-results-map.js?v=searchBack4")
         .then((mod) => {
           updateSearchMapButtonLabels = mod.updateSearchMapButtonLabels;
           closeSearchResultsMapFn = mod.closeSearchResultsMap;
@@ -1074,10 +1095,18 @@ if (PAGE === "ingatlan") {
         await quickSearchApi.applySavedFilters(filters);
         consumeVehicleSearchRestorePending(PAGE);
         scrollToListings();
+        await reopenMapAfterReturn();
       } catch (error) {
         console.warn("Keresés visszaállítás:", error);
       }
     });
+  } else if (PAGE === "auto" || PAGE === "teherauto") {
+    // Szűrő nélkül is: térképről nyitott hirdetés vissza → térkép újra
+    if (peekMapOpenOnReturn()) {
+      loadListings()
+        .then(() => reopenMapAfterReturn())
+        .catch(() => {});
+    }
   }
 }
 

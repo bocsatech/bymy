@@ -1,11 +1,12 @@
 import {
   getAuthUser,
   getAuthToken,
+  getBookmarkletToken,
   getDisplayName,
   requireAuthForPage,
   initSiteAuth,
   ensureBookmarkletToken,
-} from "./site-auth.js?v=secAuth2";
+} from "./site-auth.js?v=secAuth3";
 
 const HA_POSTMESSAGE_ORIGINS = new Set([
   "https://www.hasznaltauto.hu",
@@ -36,9 +37,11 @@ const MODES = {
 
 function authHeaders() {
   const token = getAuthToken();
+  // imp1 csak a HA könyvjelzőnek — same-origin mentéshez session cookie elég
+  const useBearer = token && !String(token).startsWith("imp1.");
   return {
     "Content-Type": "application/json",
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...(useBearer ? { Authorization: `Bearer ${token}` } : {}),
   };
 }
 
@@ -60,25 +63,25 @@ function bookmarkletHref(mode) {
   const origin = location.origin;
   const isDealer = mode === "dealer";
   const src = isDealer
-    ? `${origin}/js/ha-dealer-import.js?v=haCdn18`
+    ? `${origin}/js/ha-dealer-import.js?v=haCdn19`
     : `${origin}/js/ha-import-bookmarklet.js?v=haDealerPhoto17`;
-  const token = getAuthToken() || "";
+  const token = getBookmarkletToken() || getAuthToken() || "";
   const runner = isDealer ? "BymyHaDealerImport" : "BymyHaImport";
   return `javascript:void(function(){var o=${JSON.stringify(origin)};var m=${JSON.stringify(mode)};var t=${JSON.stringify(token)};var src=${JSON.stringify(src)}+"&t="+Date.now();function go(){try{window.${runner}.run({origin:o,mode:m,authToken:t});}catch(e){alert((e&&e.message)||e);}}try{delete window.${runner};}catch(e){window.${runner}=undefined;}var s=document.createElement("script");s.src=src;s.onload=go;s.onerror=function(){alert("A hasznaltauto.hu blokkolta a Bymy scriptet.");};(document.documentElement||document.body).appendChild(s);})();`;
 }
 
 async function copyBookmarkletLink() {
   renderMode();
+  await ensureBookmarkletToken();
   const bookmark = document.getElementById("ha-imp-bookmark");
+  // Friss href a külön import tokennel
+  if (bookmark) bookmark.setAttribute("href", bookmarkletHref(currentMode()));
   const href = bookmark?.getAttribute("href") || bookmarkletHref(currentMode());
   if (!href || href === "#") {
     setStatus("A könyvjelző link most nem elérhető.", "err");
     return;
   }
-  if (!getAuthToken()) {
-    await ensureBookmarkletToken();
-  }
-  if (!getAuthToken()) {
+  if (!getBookmarkletToken() && !getAuthToken()) {
     setStatus("Nincs bejelentkezési token — frissítsd az oldalt, majd másold újra a könyvjelzőt.", "err");
     return;
   }
@@ -382,12 +385,16 @@ function acceptHaImportMessage(event) {
   return data;
 }
 
-function ackHaImport(eventOrSource, data, targetOrigin = "*") {
+function ackHaImport(eventOrSource, data, targetOrigin = "*", result = null) {
   const source = eventOrSource?.source ?? eventOrSource;
   const origin =
     typeof targetOrigin === "string" && targetOrigin
       ? targetOrigin
       : eventOrSource?.origin || "*";
+  const savedCount = result ? Number(result.savedCount || 0) : null;
+  const skippedCount = result ? Number(result.skippedCount || 0) : null;
+  const errorCount = result ? Number(result.errorCount || 0) : null;
+  const ok = result == null ? true : savedCount > 0 || skippedCount > 0;
   try {
     source?.postMessage(
       {
@@ -396,6 +403,11 @@ function ackHaImport(eventOrSource, data, targetOrigin = "*") {
         pages: Array.isArray(data?.pages) ? data.pages.length : 0,
         index: data?.index || null,
         total: data?.total || null,
+        ok,
+        savedCount,
+        skippedCount,
+        errorCount,
+        error: result?.errors?.[0]?.message || null,
       },
       origin
     );
@@ -452,8 +464,9 @@ window.addEventListener("message", (event) => {
   );
 
   const key = haImportKey(data);
+  // Kereskedői: ne ack-eljük a retry üzeneteket mentés nélkül (hamis siker)
   if (seenHaImportKeys.has(key) || (importBusy && key === currentHaImportKey)) {
-    if (deferAck) ackHaImport(event, data, event.origin);
+    if (!deferAck) ackHaImport(event, data, event.origin);
     return;
   }
   try {
@@ -505,15 +518,16 @@ async function runMessageImport(data) {
   const total = Math.max(1, Number(data.total) || pages.length);
   const batch = ensureDealerBatch(data);
   const SAVE_BATCH = data.mode === "dealer" || data.photoOnly === true ? 3 : 1;
-  const abortMs = SAVE_BATCH > 1 ? 60000 : 25000;
+  const abortMs = SAVE_BATCH > 1 ? 90000 : 45000;
   setStatus(`Mentés: ${index} / ${total}…`);
 
+  let savedCount = 0;
+  let skippedCount = 0;
+  let errorCount = 0;
+  const items = [];
+  const errors = [];
+
   try {
-    let savedCount = 0;
-    let skippedCount = 0;
-    let errorCount = 0;
-    const items = [];
-    const errors = [];
     for (let offset = 0; offset < pages.length; offset += SAVE_BATCH) {
       const chunk = pages.slice(offset, offset + SAVE_BATCH);
       setStatus(`Mentés: ${index} / ${total}…`);
@@ -546,7 +560,15 @@ async function runMessageImport(data) {
       batch.errors.push(...errors);
       const done = index >= batch.total;
       if (done) {
-        setStatus("");
+        setStatus(
+          batch.savedCount > 0
+            ? `Kész: ${batch.savedCount} mentve` +
+              (batch.skippedCount ? `, ${batch.skippedCount} kihagyva` : "") +
+              (batch.errorCount ? `, ${batch.errorCount} hiba` : "")
+            : batch.skippedCount
+              ? `Kész: 0 mentve, ${batch.skippedCount} kihagyva (más fiók)`
+              : `Mentés sikertelen${batch.errors[0]?.message ? ` — ${batch.errors[0].message}` : ""}`
+        );
         renderResult(batch);
         dealerBatchState = null;
       } else {
@@ -570,6 +592,8 @@ async function runMessageImport(data) {
     }
   } catch (error) {
     setStatus(error.message ?? "Import sikertelen.", "err");
+    errors.push({ url: "", message: error.message ?? "Import sikertelen." });
+    errorCount += 1;
   } finally {
     // Előbb szabadítsuk a busy flaget, aztán ack — ne ragadjon a következő autó
     importBusy = false;
@@ -578,7 +602,14 @@ async function runMessageImport(data) {
       pendingHaImports.shift();
     }
     const next = pendingHaImports.length ? pendingHaImports.shift() : null;
-    if (data.__ackSource) ackHaImport(data.__ackSource, data, data.__ackOrigin);
+    if (data.__ackSource) {
+      ackHaImport(data.__ackSource, data, data.__ackOrigin, {
+        savedCount,
+        skippedCount,
+        errorCount,
+        errors,
+      });
+    }
     if (next) queueMicrotask(() => runMessageImport(next));
   }
 }

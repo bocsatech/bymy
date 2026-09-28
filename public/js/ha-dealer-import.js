@@ -498,7 +498,13 @@
           window.removeEventListener("message", onAck);
         } catch {
         }
-        resolve(true);
+        resolve({
+          ok: data.ok !== false && (Number(data.savedCount || 0) > 0 || Number(data.skippedCount || 0) > 0 || data.savedCount == null),
+          savedCount: data.savedCount == null ? null : Number(data.savedCount || 0),
+          skippedCount: Number(data.skippedCount || 0),
+          errorCount: Number(data.errorCount || 0),
+          error: data.error || "",
+        });
       };
       try {
         window.addEventListener("message", onAck);
@@ -518,11 +524,11 @@
           window.removeEventListener("message", onAck);
         } catch {
         }
-        resolve(false);
+        resolve(null);
         return;
       }
       let n = 0;
-      const tries = Math.max(4, Math.min(90, Number(maxTries) || 16));
+      const tries = Math.max(4, Math.min(120, Number(maxTries) || 16));
       const timer = setInterval(() => {
         if (acked) {
           clearInterval(timer);
@@ -536,7 +542,7 @@
             window.removeEventListener("message", onAck);
           } catch {
           }
-          resolve(false);
+          resolve(null);
         }
       }, 500);
     });
@@ -791,7 +797,7 @@
         let saved = false;
         let result = null;
         if (target && !target.closed) {
-          saved = await deliverOneAwait(
+          const ack = await deliverOneAwait(
             target,
             {
               type: "bymy-ha-import",
@@ -805,8 +811,20 @@
               importId: `${batchId}-c${chunkIndex}`,
               pages: chunk,
             },
-            chunkIndex === 1 ? 50 : 30
+            chunkIndex === 1 ? 70 : 50
           );
+          if (ack) {
+            if (ack.savedCount != null) {
+              ok += Number(ack.savedCount || 0);
+              skipped += Number(ack.skippedCount || 0);
+              fail += Number(ack.errorCount || 0);
+              if (ack.error) errors.push(ack.error);
+              saved = Boolean(ack.ok);
+            } else if (ack.ok) {
+              ok += chunk.length;
+              saved = true;
+            }
+          }
         }
         if (!saved && token) {
           usedDirect = true;
@@ -827,7 +845,7 @@
           }
           saved = savedN > 0 || skippedN > 0;
         } else if (saved) {
-          ok += chunk.length;
+          // postMessage ack már növelte az ok/skipped számlálókat
         }
         if (!saved) {
           if (!token || (target && target.closed)) fail += chunk.length;

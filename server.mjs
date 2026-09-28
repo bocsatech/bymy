@@ -476,8 +476,15 @@ function haImportCorsHeaders(req) {
 }
 
 async function serveStatic(path, res, req = null) {
-  applySecurityHeaders(res);
   const rel = path === "/" ? "index.html" : path.replace(/^\//, "");
+  // HA Autóimport postMessage: COOP ne vágja el az opener/ack kapcsolatot (Win7)
+  if (rel === "beallitasok.html" || rel === "import.html" || rel === "fiok.html") {
+    try {
+      res.setHeader("Cross-Origin-Opener-Policy", "unsafe-none");
+    } catch {
+    }
+  }
+  applySecurityHeaders(res);
 
   // Saját képtár (BYMY_IMAGE_ROOT): /media/img/listing-images/…
   if (rel.startsWith("media/img/")) {

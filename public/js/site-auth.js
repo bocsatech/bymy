@@ -109,8 +109,20 @@ export async function ensureBookmarkletToken() {
     const response = await fetch("/api/auth/bookmarklet-token", { credentials: "same-origin" });
     const data = await response.json().catch(() => ({}));
     if (!response.ok || !data.token) return "";
-    setStoredToken(data.token);
+    // NE írd felül a session tokent imp1-gyel — a same-origin mentés a session/cookie-t használja
+    try {
+      sessionStorage.setItem("bymy-import-bookmark-token", String(data.token));
+    } catch {
+    }
     return data.token;
+  } catch {
+    return "";
+  }
+}
+
+export function getBookmarkletToken() {
+  try {
+    return sessionStorage.getItem("bymy-import-bookmark-token") || "";
   } catch {
     return "";
   }

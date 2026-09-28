@@ -774,6 +774,7 @@
     const batchId = `ha-batch-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
     let ok = 0;
     let fail = 0;
+    let skipped = 0;
     const errors = [];
     let chunkIndex = 0;
     for (let offset = 0; offset < prepared.length; offset += SAVE_CHUNK) {
@@ -808,20 +809,22 @@
           const savedN = Number(result?.savedCount || 0);
           const skippedN = Number(result?.skippedCount || 0);
           const errN = Number(result?.errorCount || 0);
+          const skipMsg = (result?.items || []).find((it) => it?.skipped && it?.message)?.message;
           if (result?.errors?.[0]?.message) errors.push(result.errors[0].message);
+          else if (skipMsg) errors.push(skipMsg);
           ok += savedN;
+          skipped += skippedN;
           fail += errN;
-          // kihagyott (már megvan) nem hiba
           if (savedN === 0 && skippedN === 0 && errN === 0) {
             fail += chunk.length;
             if (!errors.length) errors.push("mentés 0");
           }
-          saved = savedN > 0 || skippedN > 0 || errN < chunk.length;
+          saved = savedN > 0 || skippedN > 0;
         } else if (saved) {
           ok += chunk.length;
         }
         if (!saved) {
-          if (fail < chunk.length && !token) fail += chunk.length;
+          if (!token) fail += chunk.length;
           if (!errors.length) {
             errors.push(
               target
@@ -836,10 +839,14 @@
       }
     }
 
+    const parts = [];
+    if (ok) parts.push(`${ok} mentve`);
+    if (skipped) parts.push(`${skipped} kihagyva (más fiók / már megvan)`);
+    if (fail) parts.push(`${fail} hiba`);
     hideProgress(
-      fail === 0
-        ? `Kész: ${ok} autó mentve`
-        : `Kész: ${ok} ok, ${fail} hiba${errors[0] ? ` — ${errors[0]}` : ""}`
+      parts.length
+        ? `Kész: ${parts.join(", ")}${errors[0] && (fail || skipped) ? ` — ${errors[0]}` : ""}`
+        : `Kész: semmi nem mentődött${errors[0] ? ` — ${errors[0]}` : ""}`
     );
   }
 

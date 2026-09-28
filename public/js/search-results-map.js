@@ -6,13 +6,14 @@ import {
   buildPostalIndex,
   haversineKm,
   listingCityName,
+  resolveCityCoords,
   resolveListingCoords,
-} from "./listing-radius.js?v=mapPostal3";
+} from "./listing-radius.js?v=mapCity1";
 import { listingDetailHref } from "./listing-return.js?v=scrollTop1";
 import { listingTileTitle, listingTilePrice } from "./listing-tile.js?v=listThumb1";
 import { getAuthUser } from "./site-auth.js?v=bootFix2";
 import { fetchListingsPage } from "./db-client.js?v=ownerBoost6";
-import { buildNearbyFilter, readNearbyPrefs } from "./nearby-search.js?v=korzetFix3";
+import { buildNearbyFilter, readNearbyPrefs } from "./nearby-search.js?v=mapCity1";
 
 const HU_CENTER = [47.1625, 19.5033];
 const HU_ZOOM = 7;
@@ -100,13 +101,14 @@ async function fetchAllVerticalListings(vertical) {
   return out;
 }
 
-/** Körzetes térkép-böngészés: csak ~10 km, nem az egész ország. */
-async function fetchVerticalListingsInRadius(vertical, { postal, radiusKm = MAP_BROWSE_RADIUS_KM } = {}) {
+/** Körzetes térkép-böngészés: helységnév alapján (~10 km), nem országos. */
+async function fetchVerticalListingsInRadius(vertical, { postal, city, radiusKm = MAP_BROWSE_RADIUS_KM } = {}) {
+  const cityName = String(city || "").trim();
   const code = String(postal || "")
     .replace(/\D/g, "")
     .slice(0, 4);
-  if (code.length !== 4) {
-    return { items: [], error: "Nincs lakhely / irányítószám a körzetes térképhez." };
+  if (!cityName && code.length !== 4) {
+    return { items: [], error: "Nincs lakhely / település a körzetes térképhez." };
   }
   const out = [];
   const seen = new Set();
@@ -126,6 +128,7 @@ async function fetchVerticalListingsInRadius(vertical, { postal, radiusKm = MAP_
       const nearby = await buildNearbyFilter({
         items: batch,
         postal: code,
+        city: cityName,
         radiusKm,
       });
       origin = nearby.origin || origin;
@@ -143,7 +146,6 @@ async function fetchVerticalListingsInRadius(vertical, { postal, radiusKm = MAP_
     }
     if (!page.hasMore) break;
     offset += batch.length;
-    // Elég marker a klaszterhez — ne húzzuk végig a teljes feedet.
     if (out.length >= 200) break;
   }
   return { items: out, origin, radiusKm };
@@ -183,16 +185,28 @@ function profileHomeBits(profile = null) {
   const postal = String(p.postalCode || p.companyPostalCode || "")
     .replace(/\D/g, "")
     .slice(0, 4);
-  const cityName = String(p.city || p.companyCity || "").trim();
-  const street = String(p.street || p.companyStreet || "").trim();
-  return { postal, cityName, street };
+  let cityName = String(p.city || p.companyCity || "").trim();
+  const street = String(p.street || p.companyStreet || p.companyAddress || "").trim();
+
+  /* Utca/cím mezőben gyakran „7083 Tolnanémedi” van — településnév kinyerése. */
+  if (!cityName && street) {
+    const m = street.match(/\b\d{4}\s+([A-Za-záéíóöőúüűÁÉÍÓÖŐÚÜŰ][\wáéíóöőúüűÁÉÍÓÖŐÚÜŰ\-]*(?:\s+[A-Za-záéíóöőúüűÁÉÍÓÖŐÚÜŰ][\wáéíóöőúüűÁÉÍÓÖŐÚÜŰ\-]*){0,3})/);
+    if (m?.[1]) cityName = m[1].trim();
+    else if (!/^\d{4}$/.test(street) && !/\d/.test(street.slice(0, 2))) cityName = street.split(",")[0].trim();
+  }
+
+  /* „Tolnanémedi Tolna” megye-végződés levágása a címkéhez / egyezéshez */
+  const cityCore = cityName.replace(/\s+(megye|vármegye)$/i, "").trim();
+
+  return { postal, cityName: cityCore || cityName, street };
 }
 
 async function resolveHomeOrigin(cityIndex, postalIndex = null) {
   const user = getAuthUser();
   let profile = user?.profile ?? null;
-  /* Session cache can lag behind /api/auth/me — refresh once if address fields are missing. */
-  if (user?.email && !profileHomeBits(profile).postal && !profileHomeBits(profile).cityName) {
+
+  /* Mindig friss profil a térképhez — a session cache gyakran üres címmezőket tart. */
+  if (user?.email) {
     try {
       const res = await fetch("/api/auth/me", { credentials: "same-origin" });
       const data = await res.json().catch(() => ({}));
@@ -203,12 +217,26 @@ async function resolveHomeOrigin(cityIndex, postalIndex = null) {
   }
 
   const bits = profileHomeBits(profile);
-  /* Profile address wins for the home pin — stats/nearby localStorage must not move lakhely. */
   const postal = String(bits.postal || "")
     .replace(/\D/g, "")
     .slice(0, 4);
   const cityName = bits.cityName;
 
+  /* 1) Helységnév — ez a fő út (nem irányítószám). */
+  if (cityName && cityIndex) {
+    const hit = resolveCityCoords(cityName, cityIndex);
+    if (hit) {
+      return {
+        lat: hit.lat,
+        lon: hit.lon,
+        label: hit.city || cityName,
+        postal: postal || "",
+        city: hit.city || cityName,
+      };
+    }
+  }
+
+  /* 2) Mentés: irányítószám, ha a településnév nem oldható. */
   if (postal.length === 4) {
     try {
       const res = await fetch(`/api/postal-codes/lookup?postal_code=${encodeURIComponent(postal)}`);
@@ -217,8 +245,9 @@ async function resolveHomeOrigin(cityIndex, postalIndex = null) {
         return {
           lat: Number(data.lat),
           lon: Number(data.lon),
-          label: [data.city || cityName, postal].filter(Boolean).join(" · ") || postal,
+          label: data.city || cityName || postal,
           postal,
+          city: data.city || cityName || "",
         };
       }
     } catch {
@@ -229,45 +258,33 @@ async function resolveHomeOrigin(cityIndex, postalIndex = null) {
       return {
         lat: fromIndex.lat,
         lon: fromIndex.lon,
-        label: [fromIndex.city || cityName, postal].filter(Boolean).join(" · ") || postal,
+        label: fromIndex.city || cityName || postal,
         postal,
+        city: fromIndex.city || cityName || "",
       };
     }
   }
 
-  if (cityName && cityIndex) {
-    const hit = resolveListingCoords(
-      { preview: { filter: { telepules: cityName, iranyitoszam: postal } } },
-      cityIndex,
-      postalIndex
-    );
-    if (hit) {
-      return { lat: hit.lat, lon: hit.lon, label: hit.city || cityName, postal: postal || hit.postal || "" };
-    }
-  }
-
-  /* Street-level fallback (Nominatim via our API). */
-  if (postal.length === 4 || cityName || bits.street) {
+  /* 3) Nominatim / geocode fallback helységnévvel. */
+  if (cityName || bits.street) {
     try {
-      const lines = [bits.street, [postal, cityName].filter(Boolean).join(" ")].filter(Boolean);
-      const q = lines.join(", ") || `${postal} ${cityName}`.trim();
-      const res = await fetch(
-        `/api/geocode?q=${encodeURIComponent(q)}&lines=${encodeURIComponent(lines.join("|"))}`,
-        { credentials: "same-origin" }
-      );
+      const q = [cityName, "Magyarország"].filter(Boolean).join(", ");
+      const res = await fetch(`/api/geocode?q=${encodeURIComponent(q)}`, { credentials: "same-origin" });
       const data = await res.json().catch(() => ({}));
       if (res.ok && data.lat != null && data.lon != null) {
         return {
           lat: Number(data.lat),
           lon: Number(data.lon),
-          label: [cityName, postal].filter(Boolean).join(" · ") || data.label || q,
+          label: cityName || data.label || q,
           postal: postal || "",
+          city: cityName || "",
         };
       }
     } catch {
       /* ignore */
     }
   }
+
   return null;
 }
 
@@ -1085,9 +1102,14 @@ export function initSearchResultsMapButtons({
           const vertical = typeof getVertical === "function" ? getVertical() : null;
           if (btn) btn.textContent = "Térkép betöltése…";
           const prefs = readNearbyPrefs(getAuthUser()?.profile ?? null);
+          const profile = getAuthUser()?.profile ?? null;
+          const city =
+            String(profile?.city || profile?.companyCity || "").trim() ||
+            String(prefs.city || "").trim();
           const radiusKm = MAP_BROWSE_RADIUS_KM;
           const nearby = await fetchVerticalListingsInRadius(vertical, {
             postal: prefs.postal,
+            city,
             radiusKm,
           });
           if (nearby.error) {

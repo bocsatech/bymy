@@ -21,7 +21,7 @@ import { normalizeIngatlanUzletag } from "./ingatlan-fields.js?v=immoEladoDefaul
 import { filterByCategory, initHomeCategoryBar, renderHomeCategoryBar } from "./home-category-bar.js?v=catLabel1";
 import { initHomeUnifiedScroll } from "./home-unified-scroll.js";
 import { initHomeStatsBar } from "./home-stats-bar.js?v=mapPostal2";
-import { buildNearbyFilter, readNearbyPrefs } from "./nearby-search.js?v=korzetFix3";
+import { buildNearbyFilter, readNearbyPrefs } from "./nearby-search.js?v=mapCity1";
 import { getAuthUser } from "./site-auth.js?v=bootFix2";
 import { bindListingOpen, restoreListingReturn } from "./listing-return.js?v=searchNav1";
 import { normalizeKivitel } from "./kivitel-options.js?v=kivitel1";
@@ -726,7 +726,7 @@ function hasActiveSidebarFilters(filters) {
 initHomeUnifiedScroll();
 
 if (PAGE === "auto" || PAGE === "teherauto") {
-  import("./search-results-map.js?v=searchGate1")
+  import("./search-results-map.js?v=mapCity1")
     .then((mod) => {
       updateSearchMapButtonLabels = mod.updateSearchMapButtonLabels;
       initSearchResultsMapButtons = mod.initSearchResultsMapButtons;

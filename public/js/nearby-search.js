@@ -2,10 +2,12 @@ import {
   buildCityIndex,
   filterListingsInRadius,
   filterListingsRecentInRadius,
-} from "./listing-radius.js?v=mapPostal3";
+  resolveCityCoords,
+} from "./listing-radius.js?v=mapCity1";
 
 export const STORAGE_POSTAL = "bymy_stats_postal";
 export const STORAGE_RADIUS = "bymy_stats_radius_km";
+export const STORAGE_CITY = "bymy_stats_city";
 
 const MODE_ALL = "all";
 const MODE_RECENT24H = "recent24h";
@@ -42,11 +44,14 @@ function profilePostalCode(profile = null) {
 
 export function readNearbyPrefs(profile = null) {
   let postal = profilePostalCode(profile);
+  let city = String(profile?.city || profile?.companyCity || "").trim();
   let radiusKm = Number(profile?.searchRadiusKm ?? 30);
   try {
     const savedPostal = localStorage.getItem(STORAGE_POSTAL);
     const savedRadius = localStorage.getItem(STORAGE_RADIUS);
+    const savedCity = localStorage.getItem(STORAGE_CITY);
     if (savedPostal) postal = savedPostal.replace(/\D/g, "").slice(0, 4);
+    if (savedCity) city = String(savedCity).trim() || city;
     if (savedRadius) {
       radiusKm = Number(savedRadius.replace(/[^\d.,]/g, "").replace(",", "."));
     } else if (Number.isFinite(Number(profile?.searchRadiusKm)) && Number(profile.searchRadiusKm) > 0) {
@@ -55,8 +60,9 @@ export function readNearbyPrefs(profile = null) {
   } catch {
   }
   if (postal.length !== 4) postal = profilePostalCode(profile);
+  if (!city) city = String(profile?.city || profile?.companyCity || "").trim();
   if (!Number.isFinite(radiusKm) || radiusKm <= 0) radiusKm = 30;
-  return { postal, radiusKm };
+  return { postal, city, radiusKm };
 }
 
 /** Profil irányítószám → localStorage, ha a keresési körzet még nincs elmentve. */
@@ -100,17 +106,36 @@ export async function buildNearbyFilter({
   postal,
   radiusKm,
   mode = MODE_ALL,
+  city = "",
 }) {
-  const postal_code = String(postal ?? "").replace(/\D/g, "").slice(0, 4);
   const radius = Number(radiusKm);
-  if (postal_code.length !== 4) {
-    throw new Error("Adj meg érvényes 4 számjegyű irányítószámot.");
-  }
   if (!Number.isFinite(radius) || radius <= 0) {
     throw new Error("Add meg a keresési sugarat km-ben.");
   }
-  const origin = await fetchPostalLookup(postal_code);
+
+  const cityName = String(city || "").trim();
   const cityIndex = await getCityIndex();
+
+  /* Helységnév elsőbbség — irányítószám csak tartalék. */
+  if (cityName) {
+    const hit = resolveCityCoords(cityName, cityIndex);
+    if (hit) {
+      const origin = {
+        lat: hit.lat,
+        lon: hit.lon,
+        city: hit.city,
+        postal_code: String(postal || "").replace(/\D/g, "").slice(0, 4),
+      };
+      const filtered = filterItemsForMode(mode, items ?? [], origin, radius, cityIndex);
+      return buildNearbyFilterState(mode, origin, radius, filtered);
+    }
+  }
+
+  const postal_code = String(postal ?? "").replace(/\D/g, "").slice(0, 4);
+  if (postal_code.length !== 4) {
+    throw new Error(cityName ? `Ismeretlen település: ${cityName}` : "Adj meg települést vagy irányítószámot.");
+  }
+  const origin = await fetchPostalLookup(postal_code);
   const filtered = filterItemsForMode(mode, items ?? [], origin, radius, cityIndex);
   return buildNearbyFilterState(mode, origin, radius, filtered);
 }

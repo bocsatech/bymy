@@ -70,29 +70,56 @@ export function buildPostalIndex(postals) {
   return byCode;
 }
 
-export function resolveListingCoords(item, cityIndex, postalIndex = null) {
-  const postal = listingPostalCode(item);
-  if (postal && postalIndex?.has(postal)) {
-    const hit = postalIndex.get(postal);
-    if (hit && !isDummyCoord(hit.lat, hit.lon)) {
-      return { city: hit.city || listingCityName(item), lat: hit.lat, lon: hit.lon, postal: hit.postal };
-    }
-  }
-  const name = listingCityName(item);
-  const norm = normalizePlace(name);
-  if (!norm || !cityIndex) return null;
+export function resolveCityCoords(cityName, cityIndex) {
+  const raw = String(cityName ?? "").trim();
+  if (!raw || !cityIndex) return null;
+  const norm = normalizePlace(raw);
+  if (!norm) return null;
+
   if (cityIndex.has(norm)) {
     const hit = cityIndex.get(norm);
     if (hit && !isDummyCoord(hit.lat, hit.lon)) {
-      return { city: hit.city, lat: hit.lat, lon: hit.lon, postal: postal || "" };
+      return { city: hit.city, lat: hit.lat, lon: hit.lon };
     }
   }
+
+  /* „Tolnanémedi Tolna” → település előbb, megye nélkül */
+  const parts = norm.split(" ").filter(Boolean);
+  for (let n = parts.length; n >= 1; n -= 1) {
+    const slice = parts.slice(0, n).join(" ");
+    if (!cityIndex.has(slice)) continue;
+    const hit = cityIndex.get(slice);
+    if (hit && !isDummyCoord(hit.lat, hit.lon)) {
+      return { city: hit.city, lat: hit.lat, lon: hit.lon };
+    }
+  }
+
   for (const [key, coords] of cityIndex) {
-    if (norm.includes(key) || key.includes(norm)) {
-      if (isDummyCoord(coords.lat, coords.lon)) continue;
-      return { city: coords.city, lat: coords.lat, lon: coords.lon, postal: postal || "" };
+    if (!(key.startsWith(norm) || norm.startsWith(key) || norm.includes(key) || key.includes(norm))) {
+      continue;
+    }
+    if (isDummyCoord(coords.lat, coords.lon)) continue;
+    return { city: coords.city, lat: coords.lat, lon: coords.lon };
+  }
+
+  return null;
+}
+
+export function resolveListingCoords(item, cityIndex, postalIndex = null) {
+  const postal = listingPostalCode(item);
+  const name = listingCityName(item);
+  const byCity = resolveCityCoords(name, cityIndex);
+  if (byCity) {
+    return { city: byCity.city, lat: byCity.lat, lon: byCity.lon, postal: postal || "" };
+  }
+
+  if (postal && postalIndex?.has(postal)) {
+    const hit = postalIndex.get(postal);
+    if (hit && !isDummyCoord(hit.lat, hit.lon)) {
+      return { city: hit.city || name, lat: hit.lat, lon: hit.lon, postal: hit.postal };
     }
   }
+
   return null;
 }
 

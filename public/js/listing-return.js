@@ -70,29 +70,68 @@ export function clearVehicleSearchState() {
   }
 }
 
-/** Hirdetés megnyitásakor: vissza navigációnál keresés visszaállítás jele. */
-export function markVehicleSearchRestorePending() {
+export function markVehicleSearchRestorePending(page) {
   try {
-    sessionStorage.setItem(RESTORE_FLAG_KEY, "1");
+    sessionStorage.setItem(
+      RESTORE_FLAG_KEY,
+      JSON.stringify({ page: page || "", at: Date.now() })
+    );
   } catch {
   }
 }
 
-export function consumeVehicleSearchRestorePending() {
+export function consumeVehicleSearchRestorePending(page) {
   try {
-    const on = sessionStorage.getItem(RESTORE_FLAG_KEY) === "1";
-    if (on) sessionStorage.removeItem(RESTORE_FLAG_KEY);
-    return on;
+    const raw = sessionStorage.getItem(RESTORE_FLAG_KEY);
+    if (!raw) return false;
+    let data = null;
+    try {
+      data = JSON.parse(raw);
+    } catch {
+      data = raw === "1" ? { page: "", at: Date.now() } : null;
+    }
+    if (!data || typeof data !== "object") {
+      sessionStorage.removeItem(RESTORE_FLAG_KEY);
+      return false;
+    }
+    if (data.at && Date.now() - data.at > RETURN_TTL_MS) {
+      sessionStorage.removeItem(RESTORE_FLAG_KEY);
+      return false;
+    }
+    if (page && data.page && data.page !== page) return false;
+    sessionStorage.removeItem(RESTORE_FLAG_KEY);
+    return true;
   } catch {
     return false;
   }
 }
 
-function peekVehicleSearchRestorePending() {
+function peekVehicleSearchRestorePending(page) {
   try {
-    return sessionStorage.getItem(RESTORE_FLAG_KEY) === "1";
+    const raw = sessionStorage.getItem(RESTORE_FLAG_KEY);
+    if (!raw) return false;
+    let data = null;
+    try {
+      data = JSON.parse(raw);
+    } catch {
+      return raw === "1";
+    }
+    if (!data || typeof data !== "object") return false;
+    if (data.at && Date.now() - data.at > RETURN_TTL_MS) return false;
+    if (page && data.page && data.page !== page) return false;
+    return true;
   } catch {
     return false;
+  }
+}
+
+/** Hub / más oldal: ne maradjon fent a visszaállító flag. */
+export function sweepVehicleSearchRestoreFlag() {
+  try {
+    const page = document.body?.dataset?.sitePage || "";
+    if (!page || page === "auto" || page === "teherauto" || page === "hirdetes") return;
+    sessionStorage.removeItem(RESTORE_FLAG_KEY);
+  } catch {
   }
 }
 
@@ -124,30 +163,30 @@ function navigationIsBackForward() {
   return false;
 }
 
-/** Böngésző vissza / hirdetésről listára — keresés visszaállítandó. */
+/**
+ * Vissza gomb / hirdetésről listára.
+ * A pending flag a legmegbízhatóbb (referrer gyakran üres vissza gombnál).
+ */
 export function shouldRestoreVehicleSearch(page) {
   const state = readVehicleSearchState();
   if (!state?.committed) return false;
   if (page && state.page && state.page !== page) return false;
 
-  const fromDetail = referrerIsListingDetail();
-  const backNav = navigationIsBackForward();
-  const pending = peekVehicleSearchRestorePending();
-
-  if (fromDetail || backNav) {
-    consumeVehicleSearchRestorePending();
-    return true;
-  }
-  // Ne restore-oljunk menüből érkező friss /auto.html megnyitáskor.
-  if (pending) consumeVehicleSearchRestorePending();
+  if (peekVehicleSearchRestorePending(page)) return true;
+  if (referrerIsListingDetail()) return true;
+  if (navigationIsBackForward()) return true;
   return false;
 }
 
-export function rememberListingOpen(listingId, cardEl, root = document) {
+export function rememberListingOpen(listingId, cardEl, root = document, page = "") {
   const id = String(listingId ?? "").trim();
   if (!id) return;
   const rect = cardEl?.getBoundingClientRect?.();
   const scope = root?.querySelectorAll ? root : document;
+  const sitePage =
+    page ||
+    document.body?.getAttribute("data-site-page") ||
+    "";
   writeReturn({
     href: currentListHref(),
     listingId: id,
@@ -155,8 +194,9 @@ export function rememberListingOpen(listingId, cardEl, root = document) {
     scrollY: window.scrollY,
     cardTop: rect ? rect.top + window.scrollY : null,
     at: Date.now(),
+    page: sitePage,
   });
-  markVehicleSearchRestorePending();
+  markVehicleSearchRestorePending(sitePage);
 }
 
 export function listingReturnHref(fallback = "/auto.html") {
@@ -198,13 +238,14 @@ export function touchListingReturnId(listingId) {
   const id = String(listingId ?? "").trim();
   if (!id) return;
   const data = readReturn();
+  const page = document.body?.getAttribute("data-site-page") || data?.page || "";
   if (!data) {
-    writeReturn({ href: listingReturnHref(), listingId: id, listingIds: [id], at: Date.now() });
-    markVehicleSearchRestorePending();
+    writeReturn({ href: listingReturnHref(), listingId: id, listingIds: [id], at: Date.now(), page });
+    markVehicleSearchRestorePending(page);
     return;
   }
   writeReturn({ ...data, listingId: id, at: Date.now() });
-  markVehicleSearchRestorePending();
+  markVehicleSearchRestorePending(data.page || page);
 }
 
 export function bindListingOpen(root = document) {
@@ -240,7 +281,7 @@ export function restoreListingReturn() {
 
   const fromDetail = referrerIsListingDetail();
   const backNav = navigationIsBackForward();
-  const pending = peekVehicleSearchRestorePending();
+  const pending = peekVehicleSearchRestorePending(data.page || "");
   if (!fromDetail && !backNav && !pending) {
     sessionStorage.removeItem(RETURN_KEY);
     return false;

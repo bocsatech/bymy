@@ -8,7 +8,7 @@ import {
   initHomeSearchSidebar,
   initHomeFilterCatalog,
 } from "./home-search-filter.js?v=valto3";
-import { initHomeQuickSearch } from "./home-quicksearch.js?v=searchBack2";
+import { initHomeQuickSearch } from "./home-quicksearch.js?v=searchBack3";
 import { decodeSavedSearchParam, encodeSavedSearchParam } from "./saved-search.js?v=savedSearch5";
 import { matchDetailedSearch, hasActiveDetailedSearch } from "./auto-detailed-search.js?v=autoDesk16";
 import { updateAutoDeskResultCount } from "./auto-desk-search.js?v=teherStrict3";
@@ -29,8 +29,9 @@ import {
   saveVehicleSearchState,
   readVehicleSearchState,
   clearVehicleSearchState,
+  consumeVehicleSearchRestorePending,
   shouldRestoreVehicleSearch,
-} from "./listing-return.js?v=searchBack2";
+} from "./listing-return.js?v=searchBack3";
 import { normalizeKivitel } from "./kivitel-options.js?v=kivitel1";
 import { featuredListingIdSet, pickFeaturedListings } from "./home-featured-slots.js?v=featuredNoAuto1";
 import { mountSellerInventory, updateSellerInventoryCount } from "./seller-inventory.js?v=sellerInv30";
@@ -81,15 +82,47 @@ function persistCommittedSearch() {
     syncCommittedSearchUrl(null);
     return;
   }
-  const filters = quickSearchApi?.readQuickSearchValues?.() || null;
-  if (!filters) return;
+  const fromForm = quickSearchApi?.readQuickSearchValues?.() || {};
+  const { detailed: formDetailed, ...formRest } = fromForm;
+  const filters = {
+    ...quickSearchFilters,
+    ...formRest,
+    detailed: formDetailed || detailedFilters || undefined,
+  };
+  if (!filters.gyartmanyok?.length && quickSearchFilters?.gyartmanyok?.length) {
+    filters.gyartmanyok = quickSearchFilters.gyartmanyok;
+  }
+  if (!filters.modellek?.length && quickSearchFilters?.modellek?.length) {
+    filters.modellek = quickSearchFilters.modellek;
+  }
+  const encoded = encodeSavedSearchParam(PAGE, filters);
+  const cleaned = encoded ? decodeSavedSearchParam(encoded)?.filters : null;
+  if (!cleaned || !Object.keys(cleaned).length) {
+    saveVehicleSearchState({
+      page: PAGE,
+      committed: true,
+      filters,
+      deskSort: deskSort || "newest",
+    });
+    syncCommittedSearchUrl(filters);
+    return;
+  }
   saveVehicleSearchState({
     page: PAGE,
     committed: true,
-    filters,
+    filters: cleaned,
     deskSort: deskSort || "newest",
   });
-  syncCommittedSearchUrl(filters);
+  syncCommittedSearchUrl(cleaned);
+}
+
+function applyRestoredFiltersToState(filters) {
+  if (!filters || typeof filters !== "object") return false;
+  const { detailed, ...sidebarValues } = filters;
+  quickSearchFilters = { ...emptyFilters(), ...sidebarValues };
+  detailedFilters = detailed ?? null;
+  searchResultsCommitted = true;
+  return true;
 }
 
 const gridTrack = document.getElementById("home-grid-track");
@@ -131,6 +164,28 @@ if (gridTrack) bindListingOpen(gridTrack);
 window.addEventListener("bymy-listing-open", () => {
   persistCommittedSearch();
 });
+
+/** Vissza gomb: szűrők azonnal a memóriában, még a lista-betöltés előtt. */
+(function applyEarlySearchRestore() {
+  if (PAGE !== "auto" && PAGE !== "teherauto") return;
+  try {
+    const ss = new URLSearchParams(window.location.search).get("ss");
+    if (ss) {
+      const decoded = decodeSavedSearchParam(ss);
+      if (decoded?.filters && Object.keys(decoded.filters).length) {
+        applyRestoredFiltersToState(decoded.filters);
+        return;
+      }
+    }
+    if (!shouldRestoreVehicleSearch(PAGE)) return;
+    const state = readVehicleSearchState();
+    if (state?.filters && Object.keys(state.filters).length) {
+      applyRestoredFiltersToState(state.filters);
+      if (state.deskSort) deskSort = state.deskSort;
+    }
+  } catch {
+  }
+})();
 
 function sellerFromId() {
   return String(new URLSearchParams(window.location.search).get("hirdeto") || "").trim();
@@ -998,20 +1053,26 @@ if (PAGE === "ingatlan") {
 
   const savedParam = new URLSearchParams(window.location.search).get("ss");
   const restoreFromSession = !savedParam && shouldRestoreVehicleSearch(PAGE);
-  if (savedParam && quickSearchApi) {
+  if ((savedParam || restoreFromSession || searchResultsCommitted) && quickSearchApi) {
     quickSearchApi.whenReady.then(async () => {
-      const decoded = decodeSavedSearchParam(savedParam);
-      if (!decoded?.filters || !Object.keys(decoded.filters).length) return;
-      await quickSearchApi.applySavedFilters(decoded.filters);
-      scrollToListings();
-    });
-  } else if (restoreFromSession && quickSearchApi) {
-    quickSearchApi.whenReady.then(async () => {
-      const state = readVehicleSearchState();
-      if (!state?.filters || !Object.keys(state.filters).length) return;
       try {
-        if (state.deskSort) deskSort = state.deskSort;
-        await quickSearchApi.applySavedFilters(state.filters);
+        let filters = null;
+        if (savedParam) {
+          filters = decodeSavedSearchParam(savedParam)?.filters || null;
+        }
+        if (!filters || !Object.keys(filters).length) {
+          filters = readVehicleSearchState()?.filters || null;
+        }
+        if (!filters || !Object.keys(filters).length) {
+          // Memória (early restore) — form UI-ra is kell
+          if (searchResultsCommitted && hasActiveSidebarFilters(quickSearchFilters)) {
+            filters = { ...quickSearchFilters, detailed: detailedFilters };
+          }
+        }
+        if (!filters || !Object.keys(filters).length) return;
+        applyRestoredFiltersToState(filters);
+        await quickSearchApi.applySavedFilters(filters);
+        consumeVehicleSearchRestorePending(PAGE);
         scrollToListings();
       } catch (error) {
         console.warn("Keresés visszaállítás:", error);
@@ -1100,8 +1161,11 @@ loadListings()
 
 window.addEventListener("pageshow", (event) => {
   if (!event.persisted) return;
-  // bfcache: ne veszítsük el a commitolt keresést — soft refresh
-  loadListings().catch(() => {});
+  loadListings()
+    .then(() => {
+      if (searchResultsCommitted) applyFilters({ commit: true });
+    })
+    .catch(() => {});
 });
 
 document.addEventListener("visibilitychange", () => {

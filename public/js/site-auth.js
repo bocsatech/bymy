@@ -1200,6 +1200,13 @@ if (typeof document !== "undefined") {
     if (typeof window !== "undefined") window.__bymySiteAuthDomBooted = true;
     if (document.body?.dataset?.authInit !== "manual") initSiteAuth();
     enforceClientMembersGate();
+    try {
+      const page = document.body?.dataset?.sitePage || "";
+      if (page && page !== "auto" && page !== "teherauto" && page !== "hirdetes") {
+        sessionStorage.removeItem("bymy-vehicle-search-restore");
+      }
+    } catch {
+    }
   };
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", bootAuth);

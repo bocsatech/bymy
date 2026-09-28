@@ -6138,10 +6138,16 @@ body.site-app .ha-imp-step-title {
 }
 
 body.site-app .ha-imp-step-desc {
-  margin: 0 0 0.75rem;
-  color: #667085;
-  font-size: 0.88rem;
+  margin: 0 0 0.85rem;
+  color: #344054;
+  font-size: 0.9rem;
   line-height: 1.45;
+}
+
+body.site-app .ha-imp-mode-label,
+body.site-app .ha-imp-mode-sub {
+  display: block;
+  width: 100%;
 }
 
 body.site-app .ha-imp-step-cell .ha-imp-modes {

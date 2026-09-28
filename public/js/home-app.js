@@ -8,7 +8,7 @@ import {
   initHomeSearchSidebar,
   initHomeFilterCatalog,
 } from "./home-search-filter.js?v=valto3";
-import { initHomeQuickSearch } from "./home-quicksearch.js?v=searchBack8";
+import { initHomeQuickSearch } from "./home-quicksearch.js?v=searchBack9";
 import { decodeSavedSearchParam, encodeSavedSearchParam } from "./saved-search.js?v=savedSearch5";
 import { matchDetailedSearch, hasActiveDetailedSearch } from "./auto-detailed-search.js?v=autoDesk16";
 import { updateAutoDeskResultCount } from "./auto-desk-search.js?v=teherStrict3";
@@ -33,7 +33,7 @@ import {
   shouldRestoreVehicleSearch,
   peekMapOpenOnReturn,
   consumeMapOpenOnReturn,
-} from "./listing-return.js?v=searchBack8";
+} from "./listing-return.js?v=searchBack9";
 import { normalizeKivitel } from "./kivitel-options.js?v=kivitel1";
 import { featuredListingIdSet, pickFeaturedListings } from "./home-featured-slots.js?v=featuredNoAuto1";
 import { mountSellerInventory, updateSellerInventoryCount } from "./seller-inventory.js?v=sellerInv30";
@@ -47,31 +47,116 @@ let ensureMapModule = null;
 let suppressMapClose = false;
 /** Vissza gomb: szűrő preview / üres onSearch ne törölje a restore-t. */
 let searchRestoreInProgress = false;
+/** Utolsó loadListings promise — térkép vissza ne fusson üres listával. */
+let listingsReadyPromise = null;
+
+function listingsForMap() {
+  let items = [];
+  try {
+    items = currentFilteredListings();
+  } catch {
+    items = [];
+  }
+  if (items.length) return items;
+  if (allItems?.length) {
+    try {
+      const filtered = filterItems(allItems);
+      if (filtered.length) return filtered;
+    } catch {
+    }
+  }
+  return [...document.querySelectorAll("#home-grid-track [data-listing-id]")]
+    .map((el) => el.__bymyListing)
+    .filter(Boolean);
+}
+
+async function waitForListingsForMap(maxMs = 8000) {
+  const start = Date.now();
+  while (Date.now() - start < maxMs) {
+    if (listingsReadyPromise) {
+      try {
+        await listingsReadyPromise;
+      } catch {
+      }
+    }
+    if (typeof fillFilteredResults === "function") {
+      try {
+        await fillFilteredResults();
+      } catch {
+      }
+    }
+    const items = listingsForMap();
+    if (items.length) return items;
+    await new Promise((r) => setTimeout(r, 200));
+  }
+  return listingsForMap();
+}
+
+/** Nyitott térkép pinek frissítése, ha a lista később töltődött be. */
+async function refreshOpenMapPins() {
+  const root = document.getElementById("search-map-modal");
+  if (!root || root.hidden) return;
+  if (typeof ensureMapModule !== "function") return;
+  const items = listingsForMap();
+  if (!items.length) return;
+  try {
+    const mod = await ensureMapModule();
+    await mod.refreshOpenSearchResultsMap(items, {
+      mode: "filtered",
+      preferHomeZoom: false,
+    });
+  } catch (error) {
+    console.warn("Térkép pin frissítés:", error);
+  }
+}
 
 async function reopenMapAfterReturn() {
   if (!peekMapOpenOnReturn() && !suppressMapClose) return;
   suppressMapClose = true;
   if (typeof ensureMapModule !== "function") return;
+
   try {
-    const mod = await ensureMapModule();
-    if (typeof fillFilteredResults === "function") {
-      await fillFilteredResults();
+    if (listingsReadyPromise) {
+      try {
+        await listingsReadyPromise;
+      } catch {
+      }
     }
-    const items = currentFilteredListings();
-    const filtered = hasActiveClientFilters();
-    await mod.openSearchResultsMap(items, {
-      mode: filtered ? "filtered" : "browse",
-      preferHomeZoom: !filtered,
-    });
+    const mod = await ensureMapModule();
+    let items = await waitForListingsForMap(8000);
+    let result = null;
+    for (let attempt = 0; attempt < 4; attempt += 1) {
+      const useFiltered = Boolean(
+        searchResultsCommitted || hasActiveClientFilters() || items.length
+      );
+      result = await mod.openSearchResultsMap(items, {
+        mode: useFiltered ? "filtered" : "browse",
+        preferHomeZoom: false,
+      });
+      if (!result?.stale && (result?.pins || 0) > 0) break;
+      if (!result?.stale && items.length && (result?.pins || 0) === 0) {
+        // Lista megvan, de nincs koordináta — nincs értelme tovább próbálni.
+        break;
+      }
+      await new Promise((r) => setTimeout(r, 400 + attempt * 250));
+      if (listingsReadyPromise) {
+        try {
+          await listingsReadyPromise;
+        } catch {
+        }
+      }
+      items = await waitForListingsForMap(3000);
+    }
     consumeMapOpenOnReturn();
     try {
-      document.getElementById("search-map-modal")?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      document
+        .getElementById("search-map-modal")
+        ?.scrollIntoView({ behavior: "smooth", block: "nearest" });
     } catch {
     }
   } catch (error) {
     console.warn("Térkép visszaállítás:", error);
   } finally {
-    // Késői applyFilters / catalog ne zárja be a frissen visszaállított térképet.
     window.setTimeout(() => {
       suppressMapClose = false;
     }, 2500);
@@ -556,6 +641,7 @@ async function loadSellerListings(fromId) {
 }
 
 async function loadListings() {
+  const run = async () => {
   const sellerFrom = sellerFromId();
   if (sellerFrom) {
     await loadSellerListings(sellerFrom);
@@ -621,8 +707,13 @@ async function loadListings() {
   await applyNearbyFromUrl();
   applyFeaturedFromUrl();
   if (searchResultsCommitted && hasActiveClientFilters()) {
-    void fillFilteredResults();
+    await fillFilteredResults();
+    renderListings(allItems);
   }
+  await refreshOpenMapPins();
+  };
+  listingsReadyPromise = run();
+  return listingsReadyPromise;
 }
 
 function mergeListings(existing, incoming) {
@@ -906,7 +997,7 @@ initHomeUnifiedScroll();
 if (PAGE === "auto" || PAGE === "teherauto") {
   ensureMapModule = () => {
     if (!mapModulePromise) {
-      mapModulePromise = import("./search-results-map.js?v=searchBack8")
+      mapModulePromise = import("./search-results-map.js?v=searchBack9")
         .then((mod) => {
           updateSearchMapButtonLabels = mod.updateSearchMapButtonLabels;
           closeSearchResultsMapFn = mod.closeSearchResultsMap;
@@ -1270,9 +1361,15 @@ window.addEventListener("pageshow", (event) => {
       if (mapWasOpen && typeof ensureMapModule === "function") {
         try {
           const mod = await ensureMapModule();
-          await mod.openSearchResultsMap(currentFilteredListings(), {
-            mode: hasActiveClientFilters() ? "filtered" : "browse",
-            preferHomeZoom: !hasActiveClientFilters(),
+          const items =
+            currentFilteredListings().length > 0
+              ? currentFilteredListings()
+              : [...document.querySelectorAll("#home-grid-track [data-listing-id]")]
+                  .map((el) => el.__bymyListing)
+                  .filter(Boolean);
+          await mod.openSearchResultsMap(items, {
+            mode: searchResultsCommitted || hasActiveClientFilters() || items.length ? "filtered" : "browse",
+            preferHomeZoom: false,
           });
         } catch (error) {
           console.warn("Térkép bfcache frissítés:", error);

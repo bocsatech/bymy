@@ -13,7 +13,7 @@ import {
   listingDetailHref,
   rememberListingOpen,
   markMapOpenOnReturn,
-} from "./listing-return.js?v=searchBack8";
+} from "./listing-return.js?v=searchBack9";
 import { listingTileTitle, listingTilePrice } from "./listing-tile.js?v=listThumb1";
 import { getAuthUser, loadProfileFromServer } from "./site-auth.js?v=bootFix2";
 import { fetchListingsPage } from "./db-client.js?v=ownerBoost6";
@@ -43,6 +43,7 @@ let lastPins = [];
 let lastLeaflet = null;
 let selectedPinId = null;
 let mapMode = "filtered"; /* browse | filtered */
+let lastPreferHomeZoom = false;
 let mapSideEl = null;
 let moveRefreshBound = false;
 
@@ -938,14 +939,16 @@ function paintMap(L, pins, side) {
   markersLayer = L.layerGroup().addTo(mapInstance);
   bindMapViewportRefresh();
 
-  if (mapMode === "browse") {
-    if (homeOrigin) mapInstance.setView([homeOrigin.lat, homeOrigin.lon], 10);
-    else mapInstance.setView(HU_CENTER, HU_ZOOM);
+  if (mapMode === "browse" && lastPreferHomeZoom && homeOrigin) {
+    mapInstance.setView([homeOrigin.lat, homeOrigin.lon], 10);
   } else {
     const bounds = pins.map((p) => [p.lat, p.lon]);
-    if (homeOrigin) bounds.push([homeOrigin.lat, homeOrigin.lon]);
+    if (homeOrigin && mapMode === "browse") bounds.push([homeOrigin.lat, homeOrigin.lon]);
+    else if (homeOrigin && mapMode === "filtered") bounds.push([homeOrigin.lat, homeOrigin.lon]);
     if (bounds.length === 1) mapInstance.setView(bounds[0], 11);
     else if (bounds.length > 1) mapInstance.fitBounds(bounds, { padding: [40, 40], maxZoom: 12 });
+    else if (homeOrigin) mapInstance.setView([homeOrigin.lat, homeOrigin.lon], 10);
+    else mapInstance.setView(HU_CENTER, HU_ZOOM);
   }
 
   refreshVisibleMarkers();
@@ -1033,11 +1036,15 @@ export function closeSearchResultsMap() {
   mapSideEl = null;
 }
 
+let mapOpenGeneration = 0;
+
 export async function openSearchResultsMap(
   items,
   { mode = "filtered", emptyHint = "", preferHomeZoom = false, radiusKm = MAP_BROWSE_RADIUS_KM } = {}
 ) {
+  const gen = ++mapOpenGeneration;
   mapMode = mode === "browse" ? "browse" : "filtered";
+  lastPreferHomeZoom = Boolean(preferHomeZoom);
   const list = Array.isArray(items) ? items : [];
   const root = ensureMapPanel();
   const side = root.querySelector("[data-search-map-side]");
@@ -1068,11 +1075,14 @@ export async function openSearchResultsMap(
       getCityIndex(),
       getPostalIndex().catch(() => null),
     ]);
+    if (gen !== mapOpenGeneration) return { pins: 0, skipped: 0, stale: true };
     homeOrigin = await resolveHomeOrigin(cityIndex, postalIndex);
+    if (gen !== mapOpenGeneration) return { pins: 0, skipped: 0, stale: true };
 
     if (!list.length) {
       setMapStats({ empty: true, homeLabel: homeOrigin?.label || "" });
       await ensureBaseMap(L);
+      if (gen !== mapOpenGeneration) return { pins: 0, skipped: 0, stale: true };
       placeHomeMarker(L);
       if (homeOrigin) mapInstance?.setView([homeOrigin.lat, homeOrigin.lon], homeZoom);
       if (side) {
@@ -1086,10 +1096,11 @@ export async function openSearchResultsMap(
             : "Nincs autó a találati listában. Állíts más szűrőt, vagy várj a lista betöltésére.");
         side.innerHTML = `<div class="search-map-modal__side-pin">${homeNote}<p class="search-map-modal__hint">${escapeHtml(hint)}</p></div>`;
       }
-      return;
+      return { pins: 0, skipped: 0, stale: false };
     }
 
     const { pins, skipped } = placeListings(list, cityIndex, postalIndex);
+    if (gen !== mapOpenGeneration) return { pins: 0, skipped: 0, stale: true };
     setMapStats({
       pins: pins.length,
       skipped,
@@ -1097,6 +1108,7 @@ export async function openSearchResultsMap(
     });
     if (!pins.length) {
       await ensureBaseMap(L);
+      if (gen !== mapOpenGeneration) return { pins: 0, skipped: 0, stale: true };
       placeHomeMarker(L);
       if (homeOrigin) mapInstance?.setView([homeOrigin.lat, homeOrigin.lon], homeZoom);
       if (side) {
@@ -1105,13 +1117,17 @@ export async function openSearchResultsMap(
           : "";
         side.innerHTML = `<div class="search-map-modal__side-pin">${homeNote}<p class="search-map-modal__hint">Nincs irányítószám / település a találatokhoz — a térkép üres. (${skipped} kihagyva)</p></div>`;
       }
-      return;
+      return { pins: 0, skipped, stale: false };
     }
     paintMap(L, pins, side);
-    if ((preferHomeZoom || mapMode === "browse") && homeOrigin) {
+    if (gen !== mapOpenGeneration) return { pins: 0, skipped: 0, stale: true };
+    // Visszaállításkor / szűrt listánál mindig a pinekre illeszkedjen, ne csak a lakhelyre.
+    if (preferHomeZoom && mapMode === "browse" && homeOrigin && !pins.length) {
       mapInstance?.setView([homeOrigin.lat, homeOrigin.lon], homeZoom);
     }
+    return { pins: pins.length, skipped, stale: false };
   } catch (error) {
+    if (gen !== mapOpenGeneration) return { pins: 0, skipped: 0, stale: true };
     setMapStats({ error: error?.message || "Térkép betöltési hiba." });
     try {
       const L = await loadLeaflet();
@@ -1122,7 +1138,19 @@ export async function openSearchResultsMap(
     if (side) {
       side.innerHTML = `<p class="search-map-modal__hint">${escapeHtml(error?.message || "Térkép betöltési hiba.")}</p>`;
     }
+    return { pins: 0, skipped: 0, stale: false, error: error?.message };
   }
+}
+
+/** Aktuális találatok újrarajzolása a nyitott térképen. */
+export async function refreshOpenSearchResultsMap(items, opts = {}) {
+  const root = document.getElementById("search-map-modal");
+  if (!root || root.hidden) return null;
+  return openSearchResultsMap(items, {
+    mode: opts.mode || mapMode || "filtered",
+    preferHomeZoom: false,
+    ...opts,
+  });
 }
 
 export function initSearchResultsMapButtons({

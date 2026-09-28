@@ -130,34 +130,37 @@ function detectHaBrowser() {
 function browserInstallGuide(browser) {
   const mac = isApplePlatform();
   const mod = mac ? "Cmd" : "Ctrl";
-  const titles = {
-    chrome: "Chrome",
-    edge: "Edge",
-    firefox: "Firefox",
-    safari: "Safari",
-  };
-  const title = titles[browser] || "Chrome";
+  let title = "Chrome";
   let steps = [];
   if (browser === "safari") {
-    // Safari Cmd+D nem engedi a javascript: URL beillesztését — szerkesztés vagy húzás kell
+    title = "Safari";
     steps = mac
       ? [
-          `Legegyszerűbb: húzd a <strong>sárga</strong> „importálása” gombot a Kedvencek sávra`,
+          `Legegyszerűbb: húzd a <strong>sárga</strong> gombot a Kedvencek sávra (lent)`,
           `Vagy: ${kbd("Cmd")} + ${kbd("D")} — mentsd az oldalt (bármilyen név)`,
           `${kbd("Option")} + ${kbd("Cmd")} + ${kbd("B")} — Kedvencek szerkesztése`,
-          `A könyvjelzőn: cím / URL szerkesztése → ${kbd("Cmd")} + ${kbd("V")} → Kész`,
+          `URL szerkesztése → ${kbd("Cmd")} + ${kbd("V")} → Kész`,
         ]
       : [
-          "Legegyszerűbb: húzd a sárga import gombot a Kedvencek sávra",
+          "Legegyszerűbb: húzd a sárga gombot a Kedvencek sávra (lent)",
           "Vagy: Kedvencek → Kedvencek szerkesztése",
-          "Új / meglévő elem címének szerkesztése → beillesztés (Ctrl+V)",
-          "Kész — a hasznaltauto oldalon futtasd",
+          "Cím szerkesztése → beillesztés (Ctrl+V)",
+          "Kész",
         ];
-  } else {
+  } else if (browser === "firefox") {
+    title = "Firefox";
     steps = [
-      `${kbd(mod)} + ${kbd("Shift")} + ${kbd("B")} — könyvjelzősáv`,
+      `${kbd(mod)} + ${kbd("Shift")} + ${kbd("B")} — könyvjelzősáv megjelenítése`,
       `${kbd(mod)} + ${kbd("D")} — új könyvjelző`,
-      `A cím mezőbe ${kbd(mod)} + ${kbd("V")} (már a vágólapon)`,
+      `A cím mezőbe ${kbd(mod)} + ${kbd("V")} (már a vágólapon van)`,
+      "Mentés",
+    ];
+  } else {
+    title = "Chrome / Edge";
+    steps = [
+      `${kbd(mod)} + ${kbd("Shift")} + ${kbd("B")} — könyvjelzősáv megjelenítése`,
+      `${kbd(mod)} + ${kbd("D")} — új könyvjelző`,
+      `A cím mezőbe ${kbd(mod)} + ${kbd("V")} (már a vágólapon van)`,
       "Mentés",
     ];
   }
@@ -174,7 +177,8 @@ function renderBrowserInstall(browser) {
   const guide = browserInstallGuide(id);
   const titleEl = document.querySelector("[data-ha-install-title]");
   const stepsEl = document.querySelector("[data-ha-install-steps]");
-  const hintEl = document.querySelector("[data-ha-install] .ha-imp-bookmark-hint");
+  const hintEl = document.querySelector("[data-ha-install-hint]");
+  const safariDrag = document.querySelector("[data-ha-safari-drag]");
   if (titleEl) titleEl.textContent = guide.title;
   if (stepsEl) {
     stepsEl.innerHTML = guide.steps.map((step) => `<li>${step}</li>`).join("");
@@ -182,9 +186,10 @@ function renderBrowserInstall(browser) {
   if (hintEl) {
     hintEl.innerHTML =
       id === "safari"
-        ? "Safari: a <strong>Cmd+D</strong> nem fogadja a javascript: címet. Húzd a sárga gombot a sávra, vagy szerkeszd a kedvenc URL-jét (Option+Cmd+B)."
-        : "Húzni nem kell: válassz böngészőt → a gomb bemásolja a könyvjelzőt → kövesd a lépéseket. A hasznaltauto oldalon (belépés + lista) futtasd a könyvjelzőt.";
+        ? `<span class="ha-imp-hint-ico" aria-hidden="true">i</span> Safari: a Cmd+D nem fogadja a javascript: címet — húzd a sárga gombot, vagy szerkeszd a kedvenc URL-jét.`
+        : `<span class="ha-imp-hint-ico" aria-hidden="true">i</span> Húzni nem kell — gomb + billentyűkombináció.`;
   }
+  if (safariDrag) safariDrag.hidden = id !== "safari";
   try {
     sessionStorage.setItem("bymy-ha-install-browser", id);
   } catch {
@@ -231,15 +236,24 @@ function renderMode() {
   const footer = document.querySelector("[data-ha-footer]");
   const action = document.querySelector("[data-ha-action]");
   const openBtn = document.querySelector("[data-ha-open]");
+  const openLabel = document.querySelector("[data-ha-open-label]");
   const bookmark = document.getElementById("ha-imp-bookmark");
+  const bookmarkSafari = document.getElementById("ha-imp-bookmark-safari");
   if (title) title.textContent = cfg.title;
   if (steps) steps.textContent = cfg.steps;
   if (footer) footer.textContent = cfg.footer;
   if (action) action.textContent = cfg.action;
-  if (openBtn) openBtn.textContent = cfg.openLabel;
+  if (openLabel) openLabel.textContent = cfg.openLabel;
+  else if (openBtn) openBtn.textContent = cfg.openLabel;
+  const href = bookmarkletHref(mode);
+  const label = mode === "dealer" ? "Lista importálása" : "Hirdetés importálása";
   if (bookmark) {
-    bookmark.href = bookmarkletHref(mode);
-    bookmark.textContent = mode === "dealer" ? "Lista importálása" : "Hirdetés importálása";
+    bookmark.href = href;
+    bookmark.textContent = label;
+  }
+  if (bookmarkSafari) {
+    bookmarkSafari.href = href;
+    bookmarkSafari.textContent = label;
   }
   const urlHint = document.querySelector("[data-ha-url-label]");
   if (urlHint) {

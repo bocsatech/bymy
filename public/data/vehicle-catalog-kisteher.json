@@ -1,25 +1,21 @@
 {
   "source": "api.hasznaltauto.hu/v2/tomb",
   "category": "kisteher",
-  "imported_at": "2026-09-27T21:46:09.906Z",
-  "count_rows": 314,
-  "count_brands": 69,
-  "count_models": 260,
-  "count_model_children": 54,
-  "count_groups_with_children": 26,
+  "imported_at": "2026-09-28T05:28:18.042Z",
+  "count_rows": 159,
+  "count_brands": 54,
+  "count_models": 141,
+  "count_model_children": 18,
+  "count_groups_with_children": 10,
   "gyartmanyok": [
     "AIXAM",
-    "AUDI",
     "AUSTIN",
     "BARKAS",
     "BEDFORD",
-    "BMW",
     "BYD",
     "CENNTRO",
     "CHEVROLET",
-    "CHRYSLER",
     "CITROEN",
-    "DACIA",
     "DAEWOO",
     "DFSK",
     "DODGE",
@@ -32,18 +28,12 @@
     "FOTON",
     "GAZ",
     "GOUPIL",
-    "HONDA",
     "HYUNDAI",
-    "INEOS",
     "ISUZU",
     "IVECO",
-    "JAGUAR",
-    "JEEP",
     "KGM (SSANGYONG)",
     "KIA",
     "KUBA",
-    "LADA",
-    "LAND ROVER",
     "LEVC",
     "LIGIER",
     "MAHINDRA",
@@ -56,7 +46,6 @@
     "MITSUBISHI",
     "MULTICAR",
     "NISSAN",
-    "NYSA",
     "OPEL",
     "OTOSAN",
     "PEUGEOT",
@@ -64,26 +53,19 @@
     "RENAULT",
     "SEAT",
     "SKODA",
-    "SSANGYONG",
     "STEYR",
     "STREETSCOOTER",
-    "SUZUKI",
     "TAM",
     "TATA",
     "TOYOTA",
-    "UAZ",
     "VAUXHALL",
     "VICTORY",
     "VOLKSWAGEN",
-    "VOLVO",
     "ZSUK"
   ],
   "modellek": {
     "AIXAM": [
       "EGYÉB"
-    ],
-    "AUDI": [
-      "A6"
     ],
     "AUSTIN": [
       "GIPSY"
@@ -93,12 +75,6 @@
     ],
     "BEDFORD": [
       "EGYÉB"
-    ],
-    "BMW": [
-      "3-AS SOROZAT",
-      "320D",
-      "X SOROZAT",
-      "X3"
     ],
     "BYD": [
       "ETP3"
@@ -110,29 +86,15 @@
     "CHEVROLET": [
       "SILVERADO"
     ],
-    "CHRYSLER": [
-      "GRAND VOYAGER",
-      "VOYAGER"
-    ],
     "CITROEN": [
-      "AIRCROSS",
       "BERLINGO",
-      "C-ZERO",
-      "C2",
       "C25",
       "C3",
-      "C4",
-      "C4 CACTUS",
-      "C4 PICASSO",
+      "AIRCROSS",
       "HY",
       "JUMPER",
       "JUMPY",
       "NEMO"
-    ],
-    "DACIA": [
-      "DOKKER",
-      "DUSTER",
-      "LOGAN"
     ],
     "DAEWOO": [
       "FSO",
@@ -142,8 +104,7 @@
       "EGYÉB"
     ],
     "DODGE": [
-      "EGYÉB",
-      "RAM"
+      "EGYÉB"
     ],
     "DONGFENG (DFSK)": [
       "DF6",
@@ -162,34 +123,20 @@
       "V6E"
     ],
     "FIAT": [
-      "500",
       "DOBLO",
       "DUCATO",
       "FIORINO",
-      "FULLBACK",
-      "GRANDE PUNTO",
-      "PANDA",
-      "PUNTO",
       "SCUDO",
-      "SEICENTO",
-      "STRADA",
-      "TALENTO",
-      "TIPO"
+      "TALENTO"
     ],
     "FORD": [
-      "C-MAX",
       "CONNECT",
       "COURIER",
       "ECONOLINE",
+      "F SERIES",
       "F 150",
       "F 250",
-      "F SERIES",
-      "FIESTA",
-      "FOCUS",
-      "KUGA",
-      "MONDEO",
       "RANGER",
-      "S-MAX",
       "TRANSIT"
     ],
     "FOTON": [
@@ -204,72 +151,35 @@
       "EGYÉB",
       "G3"
     ],
-    "HONDA": [
-      "FR-V"
-    ],
     "HYUNDAI": [
       "H 100",
       "H 350",
-      "H-1",
-      "I20",
-      "PORTER",
-      "TERRACAN"
-    ],
-    "INEOS": [
-      "GRENADIER"
+      "PORTER"
     ],
     "ISUZU": [
       "D-MAX",
       "EGYÉB",
-      "M21",
       "N-SZÉRIA"
     ],
     "IVECO": [
-      "29",
-      "30",
-      "35",
-      "40",
-      "45",
-      "49",
-      "50",
-      "65",
-      "75",
       "DAILY",
       "EGYÉB",
       "MASSIF"
-    ],
-    "JAGUAR": [
-      "E-PACE"
-    ],
-    "JEEP": [
-      "CHEROKEE",
-      "GLADIATOR"
     ],
     "KGM (SSANGYONG)": [
       "EGYÉB",
       "MUSSO GRAND"
     ],
     "KIA": [
-      "CEE'D",
       "EGYÉB",
       "K SERIES",
       "K2500",
       "K2700",
       "K2900",
-      "PREGIO",
-      "PV5",
-      "SPORTAGE"
+      "PREGIO"
     ],
     "KUBA": [
       "E-PICKUP"
-    ],
-    "LADA": [
-      "NIVA"
-    ],
-    "LAND ROVER": [
-      "DEFENDER",
-      "DISCOVERY",
-      "RANGE ROVER"
     ],
     "LEVC": [
       "VN5"
@@ -290,45 +200,24 @@
       "E-DELIVER 7",
       "E-DELIVER 9",
       "EGYÉB",
-      "EV80",
       "T60 MAX"
     ],
     "MAZDA": [
-      "B 2500",
-      "B-SOROZAT",
-      "BT-50",
-      "CX-5",
-      "E 2200",
       "E-SOROZAT",
+      "E 2200",
       "EGYÉB"
     ],
     "MELEX": [
       "EGYÉB"
     ],
     "MERCEDES-BENZ": [
-      "207",
-      "208",
-      "300",
-      "308",
-      "310",
-      "316",
-      "410",
-      "412",
       "CITAN",
-      "E 250",
-      "E-OSZTÁLY",
       "EGYÉB",
-      "G-OSZTÁLY",
       "MB100",
-      "ML 270",
-      "ML-OSZTÁLY",
       "SPRINTER",
       "T1/TN",
-      "VANEO",
       "VARIO",
-      "VIANO",
-      "VITO",
-      "X-OSZTÁLY"
+      "VITO"
     ],
     "MICRO-VETT": [
       "EGYÉB"
@@ -336,10 +225,7 @@
     "MITSUBISHI": [
       "CANTER",
       "CANTER 35",
-      "EGYÉB",
-      "L 200",
-      "L 300",
-      "PAJERO"
+      "EGYÉB"
     ],
     "MULTICAR": [
       "FUMO",
@@ -352,7 +238,6 @@
       "CABSTAR",
       "EGYÉB",
       "INTERSTAR",
-      "JUKE",
       "NAVARA",
       "NP300",
       "NP300 PICKUP",
@@ -360,54 +245,20 @@
       "NV250",
       "NV300",
       "NV400",
-      "PICK UP",
       "PRIMASTAR",
-      "QASHQAI",
-      "TERRANO",
       "TOWNSTAR",
-      "TRADE",
-      "VANETTE",
-      "X-TRAIL"
-    ],
-    "NYSA": [
-      "522"
+      "TRADE"
     ],
     "OPEL": [
-      "ANTARA",
-      "ASTRA",
-      "ASTRA G",
-      "ASTRA H",
-      "ASTRA J",
-      "ASTRA K",
-      "CAMPO",
       "COMBO",
-      "CORSA",
-      "CORSA C",
       "CORSA COMBO",
-      "CORSA D",
-      "CORSA E",
-      "CORSA F",
-      "CROSSLAND X",
-      "MERIVA",
       "MOVANO",
-      "OMEGA",
-      "SENATOR",
-      "VIVARO",
-      "ZAFIRA"
+      "VIVARO"
     ],
     "OTOSAN": [
       "EGYÉB"
     ],
     "PEUGEOT": [
-      "106",
-      "2008",
-      "206",
-      "207",
-      "208",
-      "3008",
-      "307",
-      "308",
-      "807",
       "BIPPER",
       "BOXER",
       "EXPERT",
@@ -420,53 +271,26 @@
       "PORTER"
     ],
     "RENAULT": [
-      "CLIO",
-      "ESPACE",
       "EXPRESS",
-      "GRAND SCENIC",
-      "KADJAR",
       "KANGOO",
       "MASCOTT",
       "MASTER",
       "MAXITY",
-      "MEGANE",
-      "SCENIC",
-      "TRAFIC",
-      "TWINGO",
-      "ZOE"
+      "TRAFIC"
     ],
     "SEAT": [
-      "IBIZA",
-      "INCA",
-      "LEON",
-      "MII"
+      "INCA"
     ],
     "SKODA": [
       "EGYÉB",
-      "FABIA",
-      "FELICIA",
-      "OCTAVIA",
       "PICK-UP",
-      "PRAKTIK",
-      "ROOMSTER"
-    ],
-    "SSANGYONG": [
-      "KORANDO",
-      "MUSSO",
-      "REXTON"
+      "PRAKTIK"
     ],
     "STEYR": [
       "EGYÉB"
     ],
     "STREETSCOOTER": [
       "WORK"
-    ],
-    "SUZUKI": [
-      "CARRY",
-      "GRAND VITARA",
-      "JIMNY",
-      "SJ SAMURAI",
-      "VITARA"
     ],
     "TAM": [
       "EGYÉB"
@@ -475,20 +299,9 @@
       "TELCOLINE"
     ],
     "TOYOTA": [
-      "COROLLA",
-      "COROLLA VERSO",
       "DYNA",
-      "HIACE",
       "HILUX",
-      "LAND CRUISER",
-      "PROACE",
-      "TUNDRA",
-      "VERSO",
-      "YARIS",
-      "YARIS VERSO"
-    ],
-    "UAZ": [
-      "452"
+      "PROACE"
     ],
     "VAUXHALL": [
       "VIVARO"
@@ -497,20 +310,12 @@
       "E200"
     ],
     "VOLKSWAGEN": [
-      "411",
       "AMAROK",
       "CADDY",
       "CADDY MAXI",
       "CRAFTER",
       "EGYÉB",
-      "GOLF",
-      "ID. BUZZ",
-      "LT",
       "MULTIVAN",
-      "POLO",
-      "TIGUAN",
-      "TOUAREG",
-      "TOURAN",
       "TRANSPORTER",
       "TRANSPORTER T2",
       "TRANSPORTER T3",
@@ -518,12 +323,7 @@
       "TRANSPORTER T5",
       "TRANSPORTER T6",
       "TRANSPORTER T7",
-      "TYP 4",
-      "UP"
-    ],
-    "VOLVO": [
-      "V60",
-      "XC60"
+      "TYP 4"
     ],
     "ZSUK": [
       "A 06",
@@ -537,15 +337,6 @@
       {
         "id": "12932",
         "name": "EGYÉB",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      }
-    ],
-    "AUDI": [
-      {
-        "id": "104",
-        "name": "A6",
         "searchSelectable": true,
         "postRequiresChild": false,
         "children": []
@@ -576,38 +367,6 @@
         "searchSelectable": true,
         "postRequiresChild": false,
         "children": []
-      }
-    ],
-    "BMW": [
-      {
-        "id": "147",
-        "name": "3-AS SOROZAT",
-        "searchSelectable": true,
-        "postRequiresChild": true,
-        "children": [
-          {
-            "id": "28099",
-            "name": "320D",
-            "searchSelectable": true,
-            "postRequiresChild": false,
-            "children": []
-          }
-        ]
-      },
-      {
-        "id": "154",
-        "name": "X SOROZAT",
-        "searchSelectable": true,
-        "postRequiresChild": true,
-        "children": [
-          {
-            "id": "8517",
-            "name": "X3",
-            "searchSelectable": true,
-            "postRequiresChild": false,
-            "children": []
-          }
-        ]
       }
     ],
     "BYD": [
@@ -644,41 +403,10 @@
         "children": []
       }
     ],
-    "CHRYSLER": [
-      {
-        "id": "295",
-        "name": "VOYAGER",
-        "searchSelectable": true,
-        "postRequiresChild": true,
-        "children": [
-          {
-            "id": "7811",
-            "name": "GRAND VOYAGER",
-            "searchSelectable": true,
-            "postRequiresChild": false,
-            "children": []
-          }
-        ]
-      }
-    ],
     "CITROEN": [
       {
         "id": "300",
         "name": "BERLINGO",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "2171",
-        "name": "C-ZERO",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "304",
-        "name": "C2",
         "searchSelectable": true,
         "postRequiresChild": false,
         "children": []
@@ -706,27 +434,6 @@
         ]
       },
       {
-        "id": "306",
-        "name": "C4",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "11088",
-        "name": "C4 CACTUS",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "307",
-        "name": "C4 PICASSO",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
         "id": "25829",
         "name": "HY",
         "searchSelectable": true,
@@ -750,29 +457,6 @@
       {
         "id": "325",
         "name": "NEMO",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      }
-    ],
-    "DACIA": [
-      {
-        "id": "5669",
-        "name": "DOKKER",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "2005",
-        "name": "DUSTER",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "343",
-        "name": "LOGAN",
         "searchSelectable": true,
         "postRequiresChild": false,
         "children": []
@@ -807,13 +491,6 @@
       {
         "id": "13166",
         "name": "EGYÉB",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "418",
-        "name": "RAM",
         "searchSelectable": true,
         "postRequiresChild": false,
         "children": []
@@ -885,13 +562,6 @@
     ],
     "FIAT": [
       {
-        "id": "476",
-        "name": "500",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
         "id": "492",
         "name": "DOBLO",
         "searchSelectable": true,
@@ -913,51 +583,8 @@
         "children": []
       },
       {
-        "id": "25540",
-        "name": "FULLBACK",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "501",
-        "name": "PANDA",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "502",
-        "name": "PUNTO",
-        "searchSelectable": true,
-        "postRequiresChild": true,
-        "children": [
-          {
-            "id": "7838",
-            "name": "GRANDE PUNTO",
-            "searchSelectable": true,
-            "postRequiresChild": false,
-            "children": []
-          }
-        ]
-      },
-      {
         "id": "505",
         "name": "SCUDO",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "507",
-        "name": "SEICENTO",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "511",
-        "name": "STRADA",
         "searchSelectable": true,
         "postRequiresChild": false,
         "children": []
@@ -968,23 +595,9 @@
         "searchSelectable": true,
         "postRequiresChild": false,
         "children": []
-      },
-      {
-        "id": "514",
-        "name": "TIPO",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
       }
     ],
     "FORD": [
-      {
-        "id": "1949",
-        "name": "C-MAX",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
       {
         "id": "522",
         "name": "CONNECT",
@@ -1029,43 +642,8 @@
         ]
       },
       {
-        "id": "540",
-        "name": "FIESTA",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "541",
-        "name": "FOCUS",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "548",
-        "name": "KUGA",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "550",
-        "name": "MONDEO",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
         "id": "556",
         "name": "RANGER",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "558",
-        "name": "S-MAX",
         "searchSelectable": true,
         "postRequiresChild": false,
         "children": []
@@ -1127,15 +705,6 @@
         "children": []
       }
     ],
-    "HONDA": [
-      {
-        "id": "635",
-        "name": "FR-V",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      }
-    ],
     "HYUNDAI": [
       {
         "id": "677",
@@ -1152,38 +721,8 @@
         "children": []
       },
       {
-        "id": "676",
-        "name": "H-1",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "681",
-        "name": "I20",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
         "id": "2124",
         "name": "PORTER",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "693",
-        "name": "TERRACAN",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      }
-    ],
-    "INEOS": [
-      {
-        "id": "27669",
-        "name": "GRENADIER",
         "searchSelectable": true,
         "postRequiresChild": false,
         "children": []
@@ -1205,13 +744,6 @@
         "children": []
       },
       {
-        "id": "27435",
-        "name": "M21",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
         "id": "710",
         "name": "N-SZÉRIA",
         "searchSelectable": true,
@@ -1224,72 +756,8 @@
         "id": "2115",
         "name": "DAILY",
         "searchSelectable": true,
-        "postRequiresChild": true,
-        "children": [
-          {
-            "id": "7065",
-            "name": "29",
-            "searchSelectable": true,
-            "postRequiresChild": false,
-            "children": []
-          },
-          {
-            "id": "7066",
-            "name": "30",
-            "searchSelectable": true,
-            "postRequiresChild": false,
-            "children": []
-          },
-          {
-            "id": "7067",
-            "name": "35",
-            "searchSelectable": true,
-            "postRequiresChild": false,
-            "children": []
-          },
-          {
-            "id": "7068",
-            "name": "40",
-            "searchSelectable": true,
-            "postRequiresChild": false,
-            "children": []
-          },
-          {
-            "id": "7073",
-            "name": "45",
-            "searchSelectable": true,
-            "postRequiresChild": false,
-            "children": []
-          },
-          {
-            "id": "7071",
-            "name": "49",
-            "searchSelectable": true,
-            "postRequiresChild": false,
-            "children": []
-          },
-          {
-            "id": "7069",
-            "name": "50",
-            "searchSelectable": true,
-            "postRequiresChild": false,
-            "children": []
-          },
-          {
-            "id": "7070",
-            "name": "65",
-            "searchSelectable": true,
-            "postRequiresChild": false,
-            "children": []
-          },
-          {
-            "id": "7072",
-            "name": "75",
-            "searchSelectable": true,
-            "postRequiresChild": false,
-            "children": []
-          }
-        ]
+        "postRequiresChild": false,
+        "children": []
       },
       {
         "id": "13371",
@@ -1301,31 +769,6 @@
       {
         "id": "2114",
         "name": "MASSIF",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      }
-    ],
-    "JAGUAR": [
-      {
-        "id": "25925",
-        "name": "E-PACE",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      }
-    ],
-    "JEEP": [
-      {
-        "id": "731",
-        "name": "CHEROKEE",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "26884",
-        "name": "GLADIATOR",
         "searchSelectable": true,
         "postRequiresChild": false,
         "children": []
@@ -1348,13 +791,6 @@
       }
     ],
     "KIA": [
-      {
-        "id": "757",
-        "name": "CEE'D",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
       {
         "id": "13423",
         "name": "EGYÉB",
@@ -1397,58 +833,12 @@
         "searchSelectable": true,
         "postRequiresChild": false,
         "children": []
-      },
-      {
-        "id": "28768",
-        "name": "PV5",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "776",
-        "name": "SPORTAGE",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
       }
     ],
     "KUBA": [
       {
         "id": "28171",
         "name": "E-PICKUP",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      }
-    ],
-    "LADA": [
-      {
-        "id": "788",
-        "name": "NIVA",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      }
-    ],
-    "LAND ROVER": [
-      {
-        "id": "832",
-        "name": "DEFENDER",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "833",
-        "name": "DISCOVERY",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "2157",
-        "name": "RANGE ROVER",
         "searchSelectable": true,
         "postRequiresChild": false,
         "children": []
@@ -1534,13 +924,6 @@
         "children": []
       },
       {
-        "id": "27030",
-        "name": "EV80",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
         "id": "28662",
         "name": "T60 MAX",
         "searchSelectable": true,
@@ -1549,35 +932,6 @@
       }
     ],
     "MAZDA": [
-      {
-        "id": "933",
-        "name": "B-SOROZAT",
-        "searchSelectable": true,
-        "postRequiresChild": true,
-        "children": [
-          {
-            "id": "7151",
-            "name": "B 2500",
-            "searchSelectable": true,
-            "postRequiresChild": false,
-            "children": []
-          }
-        ]
-      },
-      {
-        "id": "934",
-        "name": "BT-50",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "4547",
-        "name": "CX-5",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
       {
         "id": "937",
         "name": "E-SOROZAT",
@@ -1612,20 +966,6 @@
     ],
     "MERCEDES-BENZ": [
       {
-        "id": "962",
-        "name": "300",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "25681",
-        "name": "316",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
         "id": "5723",
         "name": "CITAN",
         "searchSelectable": true,
@@ -1633,30 +973,8 @@
         "children": []
       },
       {
-        "id": "974",
-        "name": "E-OSZTÁLY",
-        "searchSelectable": true,
-        "postRequiresChild": true,
-        "children": [
-          {
-            "id": "8700",
-            "name": "E 250",
-            "searchSelectable": true,
-            "postRequiresChild": false,
-            "children": []
-          }
-        ]
-      },
-      {
         "id": "13524",
         "name": "EGYÉB",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "975",
-        "name": "G-OSZTÁLY",
         "searchSelectable": true,
         "postRequiresChild": false,
         "children": []
@@ -1669,21 +987,6 @@
         "children": []
       },
       {
-        "id": "978",
-        "name": "ML-OSZTÁLY",
-        "searchSelectable": true,
-        "postRequiresChild": true,
-        "children": [
-          {
-            "id": "9098",
-            "name": "ML 270",
-            "searchSelectable": true,
-            "postRequiresChild": false,
-            "children": []
-          }
-        ]
-      },
-      {
         "id": "986",
         "name": "SPRINTER",
         "searchSelectable": true,
@@ -1693,56 +996,6 @@
       {
         "id": "2082",
         "name": "T1/TN",
-        "searchSelectable": true,
-        "postRequiresChild": true,
-        "children": [
-          {
-            "id": "9634",
-            "name": "207",
-            "searchSelectable": true,
-            "postRequiresChild": false,
-            "children": []
-          },
-          {
-            "id": "9635",
-            "name": "208",
-            "searchSelectable": true,
-            "postRequiresChild": false,
-            "children": []
-          },
-          {
-            "id": "9637",
-            "name": "308",
-            "searchSelectable": true,
-            "postRequiresChild": false,
-            "children": []
-          },
-          {
-            "id": "9639",
-            "name": "310",
-            "searchSelectable": true,
-            "postRequiresChild": false,
-            "children": []
-          },
-          {
-            "id": "9640",
-            "name": "410",
-            "searchSelectable": true,
-            "postRequiresChild": false,
-            "children": []
-          },
-          {
-            "id": "25688",
-            "name": "412",
-            "searchSelectable": true,
-            "postRequiresChild": false,
-            "children": []
-          }
-        ]
-      },
-      {
-        "id": "987",
-        "name": "VANEO",
         "searchSelectable": true,
         "postRequiresChild": false,
         "children": []
@@ -1755,22 +1008,8 @@
         "children": []
       },
       {
-        "id": "989",
-        "name": "VIANO",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
         "id": "990",
         "name": "VITO",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "25996",
-        "name": "X-OSZTÁLY",
         "searchSelectable": true,
         "postRequiresChild": false,
         "children": []
@@ -1804,27 +1043,6 @@
       {
         "id": "13543",
         "name": "EGYÉB",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "1031",
-        "name": "L 200",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "1032",
-        "name": "L 300",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "1037",
-        "name": "PAJERO",
         "searchSelectable": true,
         "postRequiresChild": false,
         "children": []
@@ -1890,13 +1108,6 @@
         "children": []
       },
       {
-        "id": "2019",
-        "name": "JUKE",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
         "id": "1089",
         "name": "NAVARA",
         "searchSelectable": true,
@@ -1947,29 +1158,8 @@
         "children": []
       },
       {
-        "id": "1095",
-        "name": "PICK UP",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
         "id": "1097",
         "name": "PRIMASTAR",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "1099",
-        "name": "QASHQAI",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "1108",
-        "name": "TERRANO",
         "searchSelectable": true,
         "postRequiresChild": false,
         "children": []
@@ -1987,82 +1177,9 @@
         "searchSelectable": true,
         "postRequiresChild": false,
         "children": []
-      },
-      {
-        "id": "1113",
-        "name": "VANETTE",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "1114",
-        "name": "X-TRAIL",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      }
-    ],
-    "NYSA": [
-      {
-        "id": "3705",
-        "name": "522",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
       }
     ],
     "OPEL": [
-      {
-        "id": "1135",
-        "name": "ANTARA",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "1138",
-        "name": "ASTRA",
-        "searchSelectable": true,
-        "postRequiresChild": true,
-        "children": [
-          {
-            "id": "7084",
-            "name": "ASTRA G",
-            "searchSelectable": true,
-            "postRequiresChild": false,
-            "children": []
-          },
-          {
-            "id": "7085",
-            "name": "ASTRA H",
-            "searchSelectable": true,
-            "postRequiresChild": false,
-            "children": []
-          },
-          {
-            "id": "7086",
-            "name": "ASTRA J",
-            "searchSelectable": true,
-            "postRequiresChild": false,
-            "children": []
-          },
-          {
-            "id": "21429",
-            "name": "ASTRA K",
-            "searchSelectable": true,
-            "postRequiresChild": false,
-            "children": []
-          }
-        ]
-      },
-      {
-        "id": "1141",
-        "name": "CAMPO",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
       {
         "id": "1142",
         "name": "COMBO",
@@ -2071,58 +1188,8 @@
         "children": []
       },
       {
-        "id": "1144",
-        "name": "CORSA",
-        "searchSelectable": true,
-        "postRequiresChild": true,
-        "children": [
-          {
-            "id": "7379",
-            "name": "CORSA C",
-            "searchSelectable": true,
-            "postRequiresChild": false,
-            "children": []
-          },
-          {
-            "id": "7380",
-            "name": "CORSA COMBO",
-            "searchSelectable": true,
-            "postRequiresChild": false,
-            "children": []
-          },
-          {
-            "id": "7381",
-            "name": "CORSA D",
-            "searchSelectable": true,
-            "postRequiresChild": false,
-            "children": []
-          },
-          {
-            "id": "11278",
-            "name": "CORSA E",
-            "searchSelectable": true,
-            "postRequiresChild": false,
-            "children": []
-          },
-          {
-            "id": "26528",
-            "name": "CORSA F",
-            "searchSelectable": true,
-            "postRequiresChild": false,
-            "children": []
-          }
-        ]
-      },
-      {
-        "id": "25828",
-        "name": "CROSSLAND X",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "1152",
-        "name": "MERIVA",
+        "id": "7380",
+        "name": "CORSA COMBO",
         "searchSelectable": true,
         "postRequiresChild": false,
         "children": []
@@ -2135,29 +1202,8 @@
         "children": []
       },
       {
-        "id": "1157",
-        "name": "OMEGA",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "1159",
-        "name": "SENATOR",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
         "id": "1167",
         "name": "VIVARO",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "1168",
-        "name": "ZAFIRA",
         "searchSelectable": true,
         "postRequiresChild": false,
         "children": []
@@ -2173,69 +1219,6 @@
       }
     ],
     "PEUGEOT": [
-      {
-        "id": "1180",
-        "name": "106",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "5706",
-        "name": "2008",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "1187",
-        "name": "206",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "1188",
-        "name": "207",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "4599",
-        "name": "208",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "1214",
-        "name": "3008",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "1195",
-        "name": "307",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "1196",
-        "name": "308",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "1212",
-        "name": "807",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
       {
         "id": "1216",
         "name": "BIPPER",
@@ -2298,29 +1281,8 @@
     ],
     "RENAULT": [
       {
-        "id": "1309",
-        "name": "CLIO",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "1311",
-        "name": "ESPACE",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
         "id": "1312",
         "name": "EXPRESS",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "11248",
-        "name": "KADJAR",
         "searchSelectable": true,
         "postRequiresChild": false,
         "children": []
@@ -2354,44 +1316,8 @@
         "children": []
       },
       {
-        "id": "1323",
-        "name": "MEGANE",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "1349",
-        "name": "SCENIC",
-        "searchSelectable": true,
-        "postRequiresChild": true,
-        "children": [
-          {
-            "id": "8019",
-            "name": "GRAND SCENIC",
-            "searchSelectable": true,
-            "postRequiresChild": false,
-            "children": []
-          }
-        ]
-      },
-      {
         "id": "1352",
         "name": "TRAFIC",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "1353",
-        "name": "TWINGO",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "11165",
-        "name": "ZOE",
         "searchSelectable": true,
         "postRequiresChild": false,
         "children": []
@@ -2399,29 +1325,8 @@
     ],
     "SEAT": [
       {
-        "id": "1390",
-        "name": "IBIZA",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
         "id": "1391",
         "name": "INCA",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "1392",
-        "name": "LEON",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "5670",
-        "name": "MII",
         "searchSelectable": true,
         "postRequiresChild": false,
         "children": []
@@ -2436,27 +1341,6 @@
         "children": []
       },
       {
-        "id": "1459",
-        "name": "FABIA",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "1461",
-        "name": "FELICIA",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "1463",
-        "name": "OCTAVIA",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
         "id": "1464",
         "name": "PICK-UP",
         "searchSelectable": true,
@@ -2466,36 +1350,6 @@
       {
         "id": "1466",
         "name": "PRAKTIK",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "1468",
-        "name": "ROOMSTER",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      }
-    ],
-    "SSANGYONG": [
-      {
-        "id": "1485",
-        "name": "KORANDO",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "1487",
-        "name": "MUSSO",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "1489",
-        "name": "REXTON",
         "searchSelectable": true,
         "postRequiresChild": false,
         "children": []
@@ -2519,44 +1373,6 @@
         "children": []
       }
     ],
-    "SUZUKI": [
-      {
-        "id": "1534",
-        "name": "CARRY",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "1539",
-        "name": "JIMNY",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "1546",
-        "name": "SJ SAMURAI",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "1552",
-        "name": "VITARA",
-        "searchSelectable": true,
-        "postRequiresChild": true,
-        "children": [
-          {
-            "id": "7534",
-            "name": "GRAND VITARA",
-            "searchSelectable": true,
-            "postRequiresChild": false,
-            "children": []
-          }
-        ]
-      }
-    ],
     "TAM": [
       {
         "id": "13796",
@@ -2577,30 +1393,8 @@
     ],
     "TOYOTA": [
       {
-        "id": "1588",
-        "name": "COROLLA",
-        "searchSelectable": true,
-        "postRequiresChild": true,
-        "children": [
-          {
-            "id": "7294",
-            "name": "COROLLA VERSO",
-            "searchSelectable": true,
-            "postRequiresChild": false,
-            "children": []
-          }
-        ]
-      },
-      {
         "id": "1591",
         "name": "DYNA",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "1592",
-        "name": "HIACE",
         "searchSelectable": true,
         "postRequiresChild": false,
         "children": []
@@ -2613,53 +1407,8 @@
         "children": []
       },
       {
-        "id": "1594",
-        "name": "LAND CRUISER",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
         "id": "5456",
         "name": "PROACE",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "1612",
-        "name": "TUNDRA",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "1613",
-        "name": "VERSO",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "1614",
-        "name": "YARIS",
-        "searchSelectable": true,
-        "postRequiresChild": true,
-        "children": [
-          {
-            "id": "7812",
-            "name": "YARIS VERSO",
-            "searchSelectable": true,
-            "postRequiresChild": false,
-            "children": []
-          }
-        ]
-      }
-    ],
-    "UAZ": [
-      {
-        "id": "1631",
-        "name": "452",
         "searchSelectable": true,
         "postRequiresChild": false,
         "children": []
@@ -2721,57 +1470,8 @@
         "children": []
       },
       {
-        "id": "1679",
-        "name": "GOLF",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "27456",
-        "name": "ID. BUZZ",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "1683",
-        "name": "LT",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
         "id": "1685",
         "name": "MULTIVAN",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "1689",
-        "name": "POLO",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "1695",
-        "name": "TIGUAN",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "1696",
-        "name": "TOUAREG",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "1697",
-        "name": "TOURAN",
         "searchSelectable": true,
         "postRequiresChild": false,
         "children": []
@@ -2830,37 +1530,6 @@
         "id": "1886",
         "name": "TYP 4",
         "searchSelectable": true,
-        "postRequiresChild": true,
-        "children": [
-          {
-            "id": "8659",
-            "name": "411",
-            "searchSelectable": true,
-            "postRequiresChild": false,
-            "children": []
-          }
-        ]
-      },
-      {
-        "id": "4291",
-        "name": "UP",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      }
-    ],
-    "VOLVO": [
-      {
-        "id": "2126",
-        "name": "V60",
-        "searchSelectable": true,
-        "postRequiresChild": false,
-        "children": []
-      },
-      {
-        "id": "1716",
-        "name": "XC60",
-        "searchSelectable": true,
         "postRequiresChild": false,
         "children": []
       }
@@ -2906,6 +1575,24 @@
     "search": "csoport (modell) önmagában is szűrhető",
     "post": "ha postRequiresChild=true, feladáskor gyermek kötelező",
     "tombUrl": "https://api.hasznaltauto.hu/v2/tomb/markakKishaszonjarmuFilter,modellekKishaszonjarmuFilter",
-    "haCategory": "kishaszonjarmu"
+    "haCategory": "kishaszonjarmu",
+    "cleaned": "removed személyautó-overlapping / passenger models from HA kishaszon dump",
+    "removed_brands": [
+      "AUDI",
+      "BMW",
+      "CHRYSLER",
+      "DACIA",
+      "HONDA",
+      "INEOS",
+      "JAGUAR",
+      "JEEP",
+      "LADA",
+      "LAND ROVER",
+      "NYSA",
+      "SSANGYONG",
+      "SUZUKI",
+      "UAZ",
+      "VOLVO"
+    ]
   }
 }

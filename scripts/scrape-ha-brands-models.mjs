@@ -19,7 +19,10 @@ import {
   normalizeBrand,
   saveVehicleCatalogForKind,
   normalizeVehicleCatalogKind,
+  loadVehicleCatalog,
+  vehicleCatalogPaths,
 } from "../lib/vehicle-catalog.mjs";
+import { cleanKisteherCatalog } from "../lib/kisteher-catalog-clean.mjs";
 
 const WWW = "https://www.hasznaltauto.hu";
 const API = "https://api.hasznaltauto.hu";
@@ -246,7 +249,7 @@ async function main() {
     );
   }
 
-  const catalog = {
+  let catalog = {
     source: "api.hasznaltauto.hu/v2/tomb",
     category: KIND,
     imported_at: new Date().toISOString(),
@@ -267,6 +270,16 @@ async function main() {
       haCategory: tombCfg.haCategory,
     },
   };
+
+  if (KIND === "kisteher") {
+    const szemely = loadVehicleCatalog(vehicleCatalogPaths("szemelyauto").public)
+      || loadVehicleCatalog(vehicleCatalogPaths("szemelyauto").data);
+    const before = catalog.count_brands;
+    catalog = cleanKisteherCatalog(catalog, szemely);
+    console.log(
+      `Kisteher tisztítás: ${before} → ${catalog.count_brands} márka (kidobva: ${(catalog.meta?.removed_brands || []).join(", ") || "—"})`
+    );
+  }
 
   mkdirSync(dirname(RAW_OUT), { recursive: true });
   writeFileSync(

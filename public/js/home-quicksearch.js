@@ -1,5 +1,5 @@
 
-import { applyAutoSearchLayout, readLayoutFilterValues, refillAutoSearchRangeSelects, prefetchAutoSearchBoot } from "./auto-search-layout.js?v=teherNoAuto1";
+import { applyAutoSearchLayout, readLayoutFilterValues, refillAutoSearchRangeSelects, prefetchAutoSearchBoot } from "./auto-search-layout.js?v=teherClean1";
 import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums } from "./auto-search-drums.js?v=mobFix8";
 import {
   mountDetailedSearch,
@@ -7,7 +7,7 @@ import {
   resetDetailedSearch,
 } from "./auto-detailed-search.js?v=fogyNum1";
 import { readWheel } from "./ingatlan-wheels.js?v=mobFix8";
-import { readBrandModelFilterValues, mountAutoBrandModelPicker } from "./auto-brand-model-picker.js?v=teherCatalog2";
+import { readBrandModelFilterValues, mountAutoBrandModelPicker } from "./auto-brand-model-picker.js?v=teherClean1";
 import { readFuelFilterValues, mountAutoFuelPicker } from "./auto-fuel-picker.js?v=fuelMatch1";
 import { readKivitelFilterValues, mountAutoKivitelPicker } from "./auto-kivitel-picker.js?v=kisteherHa1";
 import { readAllapotFilterValues, mountAutoAllapotPicker } from "./auto-allapot-picker.js?v=allapotFlat1";

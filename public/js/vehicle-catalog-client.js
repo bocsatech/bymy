@@ -71,23 +71,41 @@ export function fetchVehicleCatalog(options) {
   );
   let promise = catalogPromiseByKind.get(kind);
   if (!promise) {
-    const qs = kind === "kisteher" ? "?kind=kisteher" : "";
-    promise = fetch(`/api/vehicle-catalog${qs}`, { credentials: "same-origin" })
-      .then(async (response) => {
-        const data = await response.json().catch(() => ({}));
-        if (!response.ok) throw new Error(catalogErrorMessage(data, response.status));
-        return data;
-      })
-      .catch(async (apiError) => {
-        try {
-          const full = await fetchStaticCatalog(kind);
-          console.warn("Járműkatalógus API hiba, statikus fallback:", apiError.message);
-          return summaryFromCatalog(full, kind);
-        } catch {
-          catalogPromiseByKind.delete(kind);
-          throw apiError;
-        }
-      });
+    // Kisteher: Vercelen a data/ gyakran hiányzik → először a publikus JSON (soha ne személyautó).
+    if (kind === "kisteher") {
+      promise = fetchStaticCatalog("kisteher")
+        .then((full) => summaryFromCatalog(full, "kisteher"))
+        .catch(async (staticError) => {
+          const qs = "?kind=kisteher";
+          try {
+            const response = await fetch(`/api/vehicle-catalog${qs}`, { credentials: "same-origin" });
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok) throw new Error(catalogErrorMessage(data, response.status));
+            return data;
+          } catch (apiError) {
+            catalogPromiseByKind.delete(kind);
+            throw staticError;
+          }
+        });
+    } else {
+      const qs = "";
+      promise = fetch(`/api/vehicle-catalog${qs}`, { credentials: "same-origin" })
+        .then(async (response) => {
+          const data = await response.json().catch(() => ({}));
+          if (!response.ok) throw new Error(catalogErrorMessage(data, response.status));
+          return data;
+        })
+        .catch(async (apiError) => {
+          try {
+            const full = await fetchStaticCatalog(kind);
+            console.warn("Járműkatalógus API hiba, statikus fallback:", apiError.message);
+            return summaryFromCatalog(full, kind);
+          } catch {
+            catalogPromiseByKind.delete(kind);
+            throw apiError;
+          }
+        });
+    }
     catalogPromiseByKind.set(kind, promise);
   }
   return promise;

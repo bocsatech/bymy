@@ -1,5 +1,5 @@
 
-import { fetchVehicleCatalog } from "./vehicle-catalog-client.js?v=bmKisteher1";
+import { fetchVehicleCatalog } from "./vehicle-catalog-client.js?v=teherClean1";
 import { bindAutoBmDismiss, autoBmPanelIsOpen } from "./auto-bm-dismiss.js?v=bmDismiss1";
 
 function truckKategoria() {

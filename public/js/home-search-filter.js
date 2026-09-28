@@ -3,7 +3,7 @@ import { kivitelMatches } from "./kivitel-options.js?v=kivitel1";
 import { fuelValueMatches } from "./auto-fuel-picker.js?v=fuelMatch1";
 import { kivitelListMatches } from "./auto-kivitel-picker.js?v=teherKivitel35e";
 import { allapotValueMatches } from "./auto-allapot-picker.js?v=allapotFlat1";
-import { sebessegvaltoListMatches } from "./auto-sebessegvalto-picker.js?v=fogyNum1";
+import { sebessegvaltoListMatches } from "./auto-sebessegvalto-picker.js?v=valto3";
 import { okmanyListMatches } from "./auto-okmany-picker.js?v=fogyNum1";
 import { toltoListMatches } from "./auto-tolto-picker.js?v=fogyNum1";
 

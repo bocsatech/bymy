@@ -9,7 +9,7 @@ import {
   AC_TOLTO_CSATLAKOZAS_OPTIONS,
   TEHER_KISTEHER_KIVITEL,
   flattenTeher35KivitelOptions,
-} from "./equipment-data.js?v=kisteherHa1";
+} from "./equipment-data.js?v=valto3";
 
 function searchLayoutCategory() {
   return document.body?.getAttribute("data-site-page") === "teherauto"

@@ -11,7 +11,7 @@ import { readBrandModelFilterValues, mountAutoBrandModelPicker } from "./auto-br
 import { readFuelFilterValues, mountAutoFuelPicker } from "./auto-fuel-picker.js?v=fuelMatch1";
 import { readKivitelFilterValues, mountAutoKivitelPicker } from "./auto-kivitel-picker.js?v=kisteherHa1";
 import { readAllapotFilterValues, mountAutoAllapotPicker } from "./auto-allapot-picker.js?v=allapotFlat1";
-import { readSebessegvaltoFilterValues, mountAutoSebessegvaltoPicker } from "./auto-sebessegvalto-picker.js?v=noHint2";
+import { readSebessegvaltoFilterValues, mountAutoSebessegvaltoPicker } from "./auto-sebessegvalto-picker.js?v=valto3";
 import { readOkmanyFilterValues, mountAutoOkmanyPicker } from "./auto-okmany-picker.js?v=noHint2";
 import { readToltoFilterValues, mountAutoToltoPickers } from "./auto-tolto-picker.js?v=noHint2";
 import {

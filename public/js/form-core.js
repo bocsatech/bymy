@@ -8,7 +8,7 @@ import {
   TEHER_KISTEHER_KIVITEL,
   TEHER_35_KIVITEL_CATEGORIES,
   normalizeOkmanyJelleg,
-} from "./equipment-data.js?v=kisteherHa1";
+} from "./equipment-data.js?v=valto3";
 import { KIVITEL_OPTIONS, normalizeKivitel } from "./kivitel-options.js?v=kivitel1";
 import { EGYEB_INFO_OPTIONS } from "./egyeb-info-data.js?v=egyebInfoFix2";
 

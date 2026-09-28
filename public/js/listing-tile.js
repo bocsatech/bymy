@@ -109,7 +109,11 @@ export function listingTileSubtitle(item) {
   const gear = pickFilter(preview, form, "sebessegvalto");
   const gearShort = gear
     .replace(/^Fokozatmentes\s+automata$/iu, "Automata")
-    .replace(/^Fokozatmentes$/iu, "Automata");
+    .replace(/^Fokozatmentes$/iu, "Automata")
+    .replace(/^Automata\s*\([^)]*\)(?:\s*sebességváltó)?$/iu, "Automata")
+    .replace(/^Manuális\s*\([^)]*\)$/iu, "Manuális")
+    .replace(/^Szekvenciális(?:\s*\([^)]*\))?$/iu, "Félautomata")
+    .replace(/^Tiptronic$/iu, "Automata");
   return [fuel, gearShort].filter(Boolean).join(", ");
 }
 

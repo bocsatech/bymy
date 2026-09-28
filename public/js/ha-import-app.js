@@ -60,7 +60,7 @@ function bookmarkletHref(mode) {
   const origin = location.origin;
   const isDealer = mode === "dealer";
   const src = isDealer
-    ? `${origin}/js/ha-dealer-import.js?v=haCdn14`
+    ? `${origin}/js/ha-dealer-import.js?v=haCdn15`
     : `${origin}/js/ha-import-bookmarklet.js?v=haDealerPhoto17`;
   const token = getAuthToken() || "";
   const runner = isDealer ? "BymyHaDealerImport" : "BymyHaImport";
@@ -208,9 +208,10 @@ function renderResult(result, { partial = false, index = 0, total = 0 } = {}) {
   }
 }
 
-async function postExtracted(payload) {
+async function postExtracted(payload, timeoutMs = 25000) {
   const controller = typeof AbortController !== "undefined" ? new AbortController() : null;
-  const timer = controller ? setTimeout(() => controller.abort(), 25000) : null;
+  const wait = Math.max(10000, Number(timeoutMs) || 25000);
+  const timer = controller ? setTimeout(() => controller.abort(), wait) : null;
   let response;
   try {
     response = await fetch("/api/import/extracted", {
@@ -223,7 +224,9 @@ async function postExtracted(payload) {
   } catch (error) {
     if (timer) clearTimeout(timer);
     const err = new Error(
-      error?.name === "AbortError" ? "Mentés időtúllépés (25s) — ugrok a következőre." : error.message || "Hálózati hiba."
+      error?.name === "AbortError"
+        ? `Mentés időtúllépés (${Math.round(wait / 1000)}s) — ugrok a következő csomagra.`
+        : error.message || "Hálózati hiba."
     );
     err.status = 504;
     throw err;
@@ -264,13 +267,17 @@ async function postExtractedResilient(pages, meta = {}) {
     meta.photoOnly === true ||
     meta.mode === "dealer" ||
     list.every((p) => p?.photoOnly);
+  const timeoutMs = meta.timeoutMs;
   try {
-    return await postExtracted({
-      pages: list,
-      listUrl: meta.listUrl,
-      mode: meta.mode,
-      photoOnly,
-    });
+    return await postExtracted(
+      {
+        pages: list,
+        listUrl: meta.listUrl,
+        mode: meta.mode,
+        photoOnly,
+      },
+      timeoutMs
+    );
   } catch (error) {
     if (list.length === 1 || ![502, 504, 413].includes(Number(error.status))) throw error;
     let savedCount = 0;
@@ -280,12 +287,15 @@ async function postExtractedResilient(pages, meta = {}) {
     const errors = [];
     for (const page of list) {
       try {
-        const result = await postExtracted({
-          pages: [page],
-          listUrl: meta.listUrl,
-          mode: meta.mode,
-          photoOnly,
-        });
+        const result = await postExtracted(
+          {
+            pages: [page],
+            listUrl: meta.listUrl,
+            mode: meta.mode,
+            photoOnly,
+          },
+          timeoutMs
+        );
         savedCount += result?.savedCount ?? 0;
         skippedCount += result?.skippedCount ?? 0;
         errorCount += result?.errorCount ?? 0;
@@ -494,7 +504,8 @@ async function runMessageImport(data) {
   const index = Math.max(1, Number(data.index) || 1);
   const total = Math.max(1, Number(data.total) || pages.length);
   const batch = ensureDealerBatch(data);
-  const SAVE_BATCH = 1;
+  const SAVE_BATCH = data.mode === "dealer" || data.photoOnly === true ? 5 : 1;
+  const abortMs = SAVE_BATCH > 1 ? 60000 : 25000;
   setStatus(`Mentés: ${index} / ${total}…`);
 
   try {
@@ -511,6 +522,7 @@ async function runMessageImport(data) {
           listUrl: data.listUrl,
           mode: data.mode || currentMode(),
           photoOnly: data.photoOnly === true || data.mode === "dealer",
+          timeoutMs: abortMs,
         });
         savedCount += result?.savedCount ?? 0;
         skippedCount += result?.skippedCount ?? 0;

@@ -608,14 +608,17 @@
     });
   }
 
+  const SAVE_CHUNK = 5;
+
   /** Win7-barát: text/plain + token a body-ban → nincs CORS preflight (Authorization nélkül). */
-  async function saveOneDirect(origin, token, page, index, total) {
+  async function savePagesDirect(origin, token, pages, doneCount, total) {
+    const list = Array.isArray(pages) ? pages : [];
     const payload = {
       authToken: token,
       photoOnly: true,
       mode: "dealer",
       listUrl: location.href,
-      pages: [page],
+      pages: list,
     };
     const res = await fetch(`${origin}/api/import/extracted`, {
       method: "POST",
@@ -632,15 +635,16 @@
     } catch {
     }
     if (!res.ok) {
-      throw new Error(data.error || `HTTP ${res.status} (#${index}/${total})`);
+      throw new Error(data.error || `HTTP ${res.status} (${doneCount}/${total})`);
     }
     return data.result || {};
   }
 
   /** Ha a fetch CSP/CORS miatt elhasal: form POST popup ablakba (nincs preflight). */
-  function saveOneFormBridge(origin, token, page, index) {
+  function savePagesFormBridge(origin, token, pages, chunkIndex) {
     return new Promise((resolve, reject) => {
-      const bridgeId = `bymy_ha_br_${Date.now()}_${index}`;
+      const list = Array.isArray(pages) ? pages : [];
+      const bridgeId = `bymy_ha_br_${Date.now()}_${chunkIndex}`;
       const winName = "bymy_ha_bridge_win";
       let settled = false;
       const finish = (fn, value) => {
@@ -664,7 +668,8 @@
         window.addEventListener("message", onMsg);
       } catch {
       }
-      const timer = setTimeout(() => finish(reject, new Error("bridge timeout")), 28000);
+      // 5 autó / batch — hosszabb várakozás
+      const timer = setTimeout(() => finish(reject, new Error("bridge timeout")), 90000);
       try {
         window.open("about:blank", winName);
       } catch {
@@ -681,7 +686,7 @@
           photoOnly: true,
           mode: "dealer",
           listUrl: location.href,
-          pages: [page],
+          pages: list,
         }),
       };
       Object.keys(fields).forEach((key) => {
@@ -704,14 +709,14 @@
     });
   }
 
-  async function saveOneWithFallback(origin, token, page, index, total) {
+  async function savePagesWithFallback(origin, token, pages, doneCount, total, chunkIndex) {
     try {
-      return await saveOneDirect(origin, token, page, index, total);
+      return await savePagesDirect(origin, token, pages, doneCount, total);
     } catch (error) {
       const msg = String(error?.message || error || "");
-      if (!/failed to fetch|networkerror|load failed/i.test(msg)) throw error;
-      showProgress(index, total, `form mentés ${index}/${total}`);
-      return saveOneFormBridge(origin, token, page, index);
+      if (!/failed to fetch|networkerror|load failed|timeout|időtúllépés/i.test(msg)) throw error;
+      showProgress(doneCount, total, `form mentés ${doneCount}/${total}`);
+      return savePagesFormBridge(origin, token, pages, chunkIndex);
     }
   }
 
@@ -756,15 +761,29 @@
       return;
     }
 
+    const prepared = [];
+    for (let i = 0; i < cars.length; i += 1) {
+      showProgress(i + 1, cars.length, `előkészítés ${i + 1}/${cars.length}`);
+      try {
+        prepared.push(await ensureCarDescription(cars[i]));
+      } catch {
+        prepared.push(cars[i]);
+      }
+    }
+
     const batchId = `ha-batch-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
     let ok = 0;
     let fail = 0;
     const errors = [];
-    for (let i = 0; i < cars.length; i += 1) {
-      showProgress(i + 1, cars.length, `mentés ${i + 1}/${cars.length}`);
+    let chunkIndex = 0;
+    for (let offset = 0; offset < prepared.length; offset += SAVE_CHUNK) {
+      const chunk = prepared.slice(offset, offset + SAVE_CHUNK);
+      const doneCount = Math.min(offset + chunk.length, prepared.length);
+      chunkIndex += 1;
+      showProgress(doneCount, prepared.length, `mentés ${doneCount}/${prepared.length} (${chunk.length}-ös csomag)`);
       try {
-        const car = await ensureCarDescription(cars[i]);
         let saved = false;
+        let result = null;
         if (target && !target.closed) {
           saved = await deliverOneAwait(
             target,
@@ -775,23 +794,34 @@
               photoOnly: true,
               listUrl: location.href,
               batchId,
-              index: i + 1,
-              total: cars.length,
-              importId: `${batchId}-${i + 1}`,
-              pages: [car],
+              index: doneCount,
+              total: prepared.length,
+              importId: `${batchId}-c${chunkIndex}`,
+              pages: chunk,
             },
-            token ? 12 : 60
+            token ? 20 : 90
           );
         }
         if (!saved && token) {
-          showProgress(i + 1, cars.length, `közvetlen mentés ${i + 1}/${cars.length}`);
-          const result = await saveOneWithFallback(origin, token, car, i + 1, cars.length);
-          saved = (result.savedCount || 0) > 0 || result.ok !== false;
-          if (!saved) errors.push(result.errors?.[0]?.message || "mentés 0");
+          showProgress(doneCount, prepared.length, `közvetlen mentés ${doneCount}/${prepared.length}`);
+          result = await savePagesWithFallback(origin, token, chunk, doneCount, prepared.length, chunkIndex);
+          const savedN = Number(result?.savedCount || 0);
+          const skippedN = Number(result?.skippedCount || 0);
+          const errN = Number(result?.errorCount || 0);
+          if (result?.errors?.[0]?.message) errors.push(result.errors[0].message);
+          ok += savedN;
+          fail += errN;
+          // kihagyott (már megvan) nem hiba
+          if (savedN === 0 && skippedN === 0 && errN === 0) {
+            fail += chunk.length;
+            if (!errors.length) errors.push("mentés 0");
+          }
+          saved = savedN > 0 || skippedN > 0 || errN < chunk.length;
+        } else if (saved) {
+          ok += chunk.length;
         }
-        if (saved) ok += 1;
-        else {
-          fail += 1;
+        if (!saved) {
+          if (fail < chunk.length && !token) fail += chunk.length;
           if (!errors.length) {
             errors.push(
               target
@@ -801,7 +831,7 @@
           }
         }
       } catch (e) {
-        fail += 1;
+        fail += chunk.length;
         errors.push(e.message || String(e));
       }
     }

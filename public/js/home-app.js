@@ -23,14 +23,59 @@ import { initHomeUnifiedScroll } from "./home-unified-scroll.js";
 import { initHomeStatsBar } from "./home-stats-bar.js?v=mapPostal2";
 import { buildNearbyFilter, readNearbyPrefs } from "./nearby-search.js?v=mapCity1";
 import { getAuthUser } from "./site-auth.js?v=bootFix2";
-import { bindListingOpen, restoreListingReturn } from "./listing-return.js?v=searchNav1";
+import {
+  bindListingOpen,
+  restoreListingReturn,
+  saveVehicleSearchState,
+  readVehicleSearchState,
+  clearVehicleSearchState,
+  shouldRestoreVehicleSearch,
+} from "./listing-return.js?v=searchBack1";
 import { normalizeKivitel } from "./kivitel-options.js?v=kivitel1";
 import { featuredListingIdSet, pickFeaturedListings } from "./home-featured-slots.js?v=featuredNoAuto1";
 import { mountSellerInventory, updateSellerInventoryCount } from "./seller-inventory.js?v=sellerInv30";
 
-/** Map module is optional — a broken/cached import must not blank the desk filter menu. */
-let updateSearchMapButtonLabels = () => {};
-let initSearchResultsMapButtons = () => {};
+/** Map module is optional — only loaded when the user clicks the map button. */
+let closeSearchResultsMapFn = null;
+let mapModulePromise = null;
+
+const MAP_LABEL_BROWSE = "Keresés a térképen";
+const MAP_LABEL_FILTERED = "Találatok a térképen";
+
+function setMapButtonLabelsLocal(hasFilters) {
+  const label = hasFilters ? MAP_LABEL_FILTERED : MAP_LABEL_BROWSE;
+  document.querySelectorAll("[data-search-map-open]").forEach((btn) => {
+    btn.textContent = label;
+  });
+}
+
+let updateSearchMapButtonLabels = setMapButtonLabelsLocal;
+
+function closeSearchMapDom() {
+  closeSearchResultsMapFn?.();
+  const root = document.getElementById("search-map-modal");
+  if (root) root.hidden = true;
+  document.body.classList.remove("search-map-open");
+  document.querySelectorAll("[data-search-map-open]").forEach((btn) => {
+    btn.setAttribute("aria-expanded", "false");
+  });
+}
+
+function persistCommittedSearch() {
+  if (!isVehicleSearchPage() || isSellerMode()) return;
+  if (!searchResultsCommitted) {
+    clearVehicleSearchState();
+    return;
+  }
+  const filters = quickSearchApi?.readQuickSearchValues?.() || null;
+  if (!filters) return;
+  saveVehicleSearchState({
+    page: PAGE,
+    committed: true,
+    filters,
+    deskSort: deskSort || "newest",
+  });
+}
 
 const gridTrack = document.getElementById("home-grid-track");
 const emptyEl = document.getElementById("home-empty");
@@ -68,6 +113,9 @@ let browseFeaturedItems = [];
 
 const PAGE = document.body?.getAttribute("data-site-page") || "";
 if (gridTrack) bindListingOpen(gridTrack);
+window.addEventListener("bymy-listing-open", () => {
+  persistCommittedSearch();
+});
 
 function sellerFromId() {
   return String(new URLSearchParams(window.location.search).get("hirdeto") || "").trim();
@@ -595,11 +643,13 @@ function previewFilterCountsOnly() {
 function applyFilters({ commit = false } = {}) {
   if (commit && isVehicleSearchPage() && !isSellerMode()) {
     searchResultsCommitted = true;
+    closeSearchMapDom();
   }
 
   if (isFeaturedBrowseMode()) {
     previewFilterCountsOnly();
     renderFeaturedBrowse();
+    if (commit) persistCommittedSearch();
     return;
   }
 
@@ -609,6 +659,7 @@ function applyFilters({ commit = false } = {}) {
     updateSearchMapButtonLabels(hasActiveClientFilters());
   }
   if (hasActiveClientFilters()) void fillFilteredResults();
+  if (commit) persistCommittedSearch();
 }
 
 function bindListingsInfiniteScroll() {
@@ -726,20 +777,54 @@ function hasActiveSidebarFilters(filters) {
 initHomeUnifiedScroll();
 
 if (PAGE === "auto" || PAGE === "teherauto") {
-  import("./search-results-map.js?v=mapCity2")
-    .then((mod) => {
-      updateSearchMapButtonLabels = mod.updateSearchMapButtonLabels;
-      initSearchResultsMapButtons = mod.initSearchResultsMapButtons;
-      initSearchResultsMapButtons({
-        getItems: currentFilteredListings,
-        hasActiveFilters: () => hasActiveClientFilters(),
-        getVertical: () => pageVerticalParam(),
-      });
-      updateSearchMapButtonLabels(hasActiveClientFilters());
-    })
-    .catch((error) => console.warn("Térkép modul:", error));
+  const ensureMapModule = () => {
+    if (!mapModulePromise) {
+      mapModulePromise = import("./search-results-map.js?v=mapLazy1")
+        .then((mod) => {
+          updateSearchMapButtonLabels = mod.updateSearchMapButtonLabels;
+          closeSearchResultsMapFn = mod.closeSearchResultsMap;
+          mod.initSearchResultsMapButtons({
+            getItems: currentFilteredListings,
+            hasActiveFilters: () => hasActiveClientFilters(),
+            getVertical: () => pageVerticalParam(),
+          });
+          updateSearchMapButtonLabels(hasActiveClientFilters());
+          return mod;
+        })
+        .catch((error) => {
+          mapModulePromise = null;
+          console.warn("Térkép modul:", error);
+          throw error;
+        });
+    }
+    return mapModulePromise;
+  };
+
+  document.querySelectorAll("[data-search-map-open]").forEach((btn) => {
+    btn.addEventListener(
+      "click",
+      async (event) => {
+        if (btn.dataset.searchMapBound === "1") return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        btn.disabled = true;
+        try {
+          await ensureMapModule();
+          btn.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+        } catch {
+          setMapButtonLabelsLocal(hasActiveClientFilters());
+        } finally {
+          btn.disabled = false;
+        }
+      },
+      true
+    );
+  });
+
+  setMapButtonLabelsLocal(hasActiveClientFilters());
   document.getElementById("home-qs-form")?.addEventListener("change", () => {
-    updateSearchMapButtonLabels(hasActiveClientFilters());
+    if (mapModulePromise) updateSearchMapButtonLabels(hasActiveClientFilters());
+    else setMapButtonLabelsLocal(hasActiveClientFilters());
   });
 }
 
@@ -849,6 +934,8 @@ if (PAGE === "ingatlan") {
       if (empty && isVehicleSearchPage()) {
         searchResultsCommitted = false;
         quickRadiusFilter = null;
+        clearVehicleSearchState();
+        closeSearchMapDom();
         applyFilters();
         return;
       }
@@ -900,6 +987,18 @@ if (PAGE === "ingatlan") {
       if (!decoded?.filters || !Object.keys(decoded.filters).length) return;
       await quickSearchApi.applySavedFilters(decoded.filters);
       scrollToListings();
+    });
+  } else if (quickSearchApi && shouldRestoreVehicleSearch(PAGE)) {
+    quickSearchApi.whenReady.then(async () => {
+      const state = readVehicleSearchState();
+      if (!state?.filters || !Object.keys(state.filters).length) return;
+      try {
+        if (state.deskSort) deskSort = state.deskSort;
+        await quickSearchApi.applySavedFilters(state.filters);
+        scrollToListings();
+      } catch (error) {
+        console.warn("Keresés visszaállítás:", error);
+      }
     });
   }
 }
@@ -972,7 +1071,8 @@ loadListings()
       fromDetail = false;
     }
     const qs = new URLSearchParams(window.location.search);
-    if (!fromDetail && !qs.has("nearby") && !qs.has("kiemelt")) {
+    const restoring = shouldRestoreVehicleSearch(PAGE);
+    if (!fromDetail && !restoring && !qs.has("nearby") && !qs.has("kiemelt")) {
       window.scrollTo(0, 0);
     }
   })
@@ -982,7 +1082,9 @@ loadListings()
 });
 
 window.addEventListener("pageshow", (event) => {
-  if (event.persisted) loadListings().catch(() => {});
+  if (!event.persisted) return;
+  // bfcache: ne veszítsük el a commitolt keresést — soft refresh
+  loadListings().catch(() => {});
 });
 
 document.addEventListener("visibilitychange", () => {

@@ -1,4 +1,6 @@
 const RETURN_KEY = "bymy-listing-return";
+const SEARCH_STATE_KEY = "bymy-vehicle-search-state";
+const RETURN_TTL_MS = 45 * 60 * 1000;
 
 function readReturn() {
   try {
@@ -35,6 +37,74 @@ function collectListingIds(root) {
   return ids;
 }
 
+export function saveVehicleSearchState(state) {
+  if (!state || typeof state !== "object") return;
+  try {
+    sessionStorage.setItem(
+      SEARCH_STATE_KEY,
+      JSON.stringify({ ...state, at: Date.now() })
+    );
+  } catch {
+  }
+}
+
+export function readVehicleSearchState() {
+  try {
+    const data = JSON.parse(sessionStorage.getItem(SEARCH_STATE_KEY) || "null");
+    if (!data || typeof data !== "object") return null;
+    if (data.at && Date.now() - data.at > RETURN_TTL_MS) {
+      sessionStorage.removeItem(SEARCH_STATE_KEY);
+      return null;
+    }
+    return data;
+  } catch {
+    return null;
+  }
+}
+
+export function clearVehicleSearchState() {
+  try {
+    sessionStorage.removeItem(SEARCH_STATE_KEY);
+  } catch {
+  }
+}
+
+function referrerIsListingDetail() {
+  try {
+    const ref = document.referrer ? new URL(document.referrer) : null;
+    return !!(
+      ref &&
+      ref.origin === window.location.origin &&
+      /\/hirdetes\.html$/i.test(ref.pathname)
+    );
+  } catch {
+    return false;
+  }
+}
+
+function navigationIsBackForward() {
+  try {
+    const nav = performance.getEntriesByType?.("navigation")?.[0];
+    return nav?.type === "back_forward";
+  } catch {
+    return false;
+  }
+}
+
+/** Böngésző vissza / hirdetésről listára — keresés visszaállítandó. */
+export function shouldRestoreVehicleSearch(page) {
+  const state = readVehicleSearchState();
+  if (!state?.committed) return false;
+  if (page && state.page && state.page !== page) return false;
+  if (referrerIsListingDetail()) return true;
+  if (navigationIsBackForward()) return true;
+  const data = readReturn();
+  if (data?.listingId && data.at && Date.now() - data.at < RETURN_TTL_MS && referrerIsListingDetail()) {
+    return true;
+  }
+  return false;
+}
+
 export function rememberListingOpen(listingId, cardEl, root = document) {
   const id = String(listingId ?? "").trim();
   if (!id) return;
@@ -46,6 +116,7 @@ export function rememberListingOpen(listingId, cardEl, root = document) {
     listingIds: collectListingIds(scope),
     scrollY: window.scrollY,
     cardTop: rect ? rect.top + window.scrollY : null,
+    at: Date.now(),
   });
 }
 
@@ -89,10 +160,10 @@ export function touchListingReturnId(listingId) {
   if (!id) return;
   const data = readReturn();
   if (!data) {
-    writeReturn({ href: listingReturnHref(), listingId: id, listingIds: [id] });
+    writeReturn({ href: listingReturnHref(), listingId: id, listingIds: [id], at: Date.now() });
     return;
   }
-  writeReturn({ ...data, listingId: id });
+  writeReturn({ ...data, listingId: id, at: Date.now() });
 }
 
 export function bindListingOpen(root = document) {
@@ -103,6 +174,10 @@ export function bindListingOpen(root = document) {
     const id = el.getAttribute("data-listing-id");
     if (!id) return;
     rememberListingOpen(id, el, root);
+    try {
+      window.dispatchEvent(new CustomEvent("bymy-listing-open", { detail: { id } }));
+    } catch {
+    }
     if (el.tagName === "A" && el.getAttribute("href")) return;
     event.preventDefault();
     window.location.href = listingDetailHref(id);
@@ -111,37 +186,44 @@ export function bindListingOpen(root = document) {
 
 export function restoreListingReturn() {
   const data = readReturn();
-  if (!data?.listingId) return;
+  if (!data?.listingId) return false;
 
-  let fromDetail = false;
-  try {
-    const ref = document.referrer ? new URL(document.referrer) : null;
-    fromDetail = !!(ref && ref.origin === window.location.origin && /\/hirdetes\.html$/i.test(ref.pathname));
-  } catch {
-    fromDetail = false;
-  }
-  if (!fromDetail) {
+  const fromDetail = referrerIsListingDetail();
+  const backNav = navigationIsBackForward();
+  if (!fromDetail && !backNav) {
     sessionStorage.removeItem(RETURN_KEY);
-    return;
+    return false;
   }
 
   const here = currentListHref();
   if (data.href && data.href !== here) {
-    sessionStorage.removeItem(RETURN_KEY);
-    return;
+    try {
+      const a = new URL(data.href, window.location.origin);
+      const b = new URL(here, window.location.origin);
+      if (a.pathname !== b.pathname) {
+        sessionStorage.removeItem(RETURN_KEY);
+        return false;
+      }
+    } catch {
+      sessionStorage.removeItem(RETURN_KEY);
+      return false;
+    }
   }
-
-  sessionStorage.removeItem(RETURN_KEY);
 
   const card = document.querySelector(`[data-listing-id="${CSS.escape(String(data.listingId))}"]`);
   if (card) {
     card.classList.add("is-return-target");
     card.scrollIntoView({ block: "center" });
-    return;
+    sessionStorage.removeItem(RETURN_KEY);
+    return true;
   }
   if (Number.isFinite(data.cardTop)) {
     window.scrollTo(0, Math.max(0, data.cardTop - 120));
-  } else if (Number.isFinite(data.scrollY)) {
-    window.scrollTo(0, data.scrollY);
+    return false;
   }
+  if (Number.isFinite(data.scrollY)) {
+    window.scrollTo(0, data.scrollY);
+    return false;
+  }
+  return false;
 }

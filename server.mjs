@@ -789,19 +789,21 @@ async function handleImportExtracted(req, res) {
     res.end();
     return;
   }
-  const user = await requestImportUser(req);
-  if (!user) {
-    const hint = haOriginRequiresImportToken(req)
-      ? "Frissítsd a könyvjelzőt a Bymy Autóimport oldalon (Másolás gomb), majd futtasd újra."
-      : "Az importhoz be kell jelentkezned a Bymy fiókodba.";
-    sendJson(res, 401, { error: hint, code: "AUTH_REQUIRED" }, cors);
-    return;
-  }
   let body;
   try {
     body = await readBody(req);
   } catch {
     sendJson(res, 400, { error: "Érvénytelen JSON." }, cors);
+    return;
+  }
+  // HA bookmarklet (Win7): token a body-ban + text/plain — nincs CORS preflight
+  const bodyToken = String(body?.authToken || body?.token || "").trim();
+  const user = await requestImportUser(req, bodyToken);
+  if (!user) {
+    const hint = haOriginRequiresImportToken(req) || bodyToken
+      ? "Frissítsd a könyvjelzőt a Bymy Autóimport oldalon (Másolás gomb), majd futtasd újra."
+      : "Az importhoz be kell jelentkezned a Bymy fiókodba.";
+    sendJson(res, 401, { error: hint, code: "AUTH_REQUIRED" }, cors);
     return;
   }
 
@@ -889,6 +891,101 @@ async function handleImportExtracted(req, res) {
       return;
     }
     sendJson(res, 400, { error: error.message ?? String(error) }, cors);
+  }
+}
+
+/** HA könyvjelző form+popup híd (Win7): nincs CORS fetch, HTML válasz postMessage-dzel. */
+async function handleImportHaBridge(req, res) {
+  const sendBridgeHtml = (bridgeId, payload) => {
+    applySecurityHeaders(res);
+    const safe = JSON.stringify(payload).replace(/</g, "\\u003c");
+    const id = JSON.stringify(String(bridgeId || ""));
+    const html = `<!doctype html><meta charset="utf-8"><title>Bymy import</title>
+<script>
+(function(){
+  var id=${id};
+  var payload=${safe};
+  payload.bridgeId=id;
+  payload.type="bymy-ha-bridge-result";
+  try{ if(window.opener&&!window.opener.closed) window.opener.postMessage(payload,"*"); }catch(e){}
+  try{ window.close(); }catch(e){}
+  setTimeout(function(){ document.body.textContent=payload.ok?"Mentve — ablak bezárható.":(payload.error||"Hiba"); },50);
+})();
+</script>`;
+    res.writeHead(200, {
+      "Content-Type": "text/html; charset=utf-8",
+      "Cache-Control": "no-store",
+      // Popup top-level — ne DENY frame (nem iframe)
+    });
+    res.end(html);
+  };
+
+  if (req.method !== "POST") {
+    sendBridgeHtml("", { ok: false, error: "POST kell." });
+    return;
+  }
+
+  let form = {};
+  try {
+    const raw = await readRawBody(req);
+    form = parseFormBody(raw);
+  } catch {
+    sendBridgeHtml("", { ok: false, error: "Érvénytelen form." });
+    return;
+  }
+
+  const bridgeId = String(form.bridgeId || "");
+  const token = String(form.token || form.authToken || "").trim();
+  let payload = {};
+  try {
+    payload = form.payload ? JSON.parse(String(form.payload)) : {};
+  } catch {
+    sendBridgeHtml(bridgeId, { ok: false, error: "Érvénytelen payload." });
+    return;
+  }
+
+  if (!token || !isImportScopedToken(token)) {
+    sendBridgeHtml(bridgeId, {
+      ok: false,
+      error: "Frissítsd a könyvjelzőt a Bymy Autóimporton (Másolás).",
+    });
+    return;
+  }
+  const user = await getUserByImportToken(token);
+  if (!user) {
+    sendBridgeHtml(bridgeId, { ok: false, error: "Lejárt import token — másold újra." });
+    return;
+  }
+
+  const pages = [];
+  if (Array.isArray(payload.pages)) pages.push(...payload.pages);
+  if (payload.page && typeof payload.page === "object") pages.push(payload.page);
+  if (!pages.length) {
+    sendBridgeHtml(bridgeId, { ok: false, error: "Nincs importálandó oldal." });
+    return;
+  }
+
+  const quota = consumeImportSaveQuota(user.id, Math.max(1, pages.length));
+  if (!quota.ok) {
+    sendBridgeHtml(bridgeId, { ok: false, error: "Import limit — próbáld később." });
+    return;
+  }
+
+  try {
+    const { saveDealerPhotoImportPages } = await import("./lib/ha-dealer-photo-import.mjs");
+    const { MAX_IMPORT_BATCH } = await import("./lib/ha-import-save.mjs");
+    const result = await saveDealerPhotoImportPages({
+      pages,
+      userId: user.id,
+      limit: payload.limit ?? MAX_IMPORT_BATCH,
+    });
+    sendBridgeHtml(bridgeId, { ok: true, result });
+  } catch (error) {
+    sendBridgeHtml(bridgeId, {
+      ok: false,
+      error: error.message ?? String(error),
+      result: error.importResult || null,
+    });
   }
 }
 
@@ -980,8 +1077,9 @@ async function requestUser(req) {
   return getUserBySessionToken(getSessionTokenFromRequest(req));
 }
 
-async function requestImportUser(req) {
-  const token = getSessionTokenFromRequest(req);
+async function requestImportUser(req, bodyToken = "") {
+  const headerToken = getSessionTokenFromRequest(req);
+  const token = String(headerToken || bodyToken || "").trim();
   if (!token) return null;
   if (haOriginRequiresImportToken(req)) {
     if (!isImportScopedToken(token)) return null;
@@ -3088,6 +3186,11 @@ export async function handleHttpRequest(req, res) {
 
   if (pathname === "/api/import/extracted" && (req.method === "POST" || req.method === "OPTIONS")) {
     await handleImportExtracted(req, res);
+    return;
+  }
+
+  if (pathname === "/api/import/ha-bridge" && req.method === "POST") {
+    await handleImportHaBridge(req, res);
     return;
   }
 

@@ -488,8 +488,7 @@
 
   /**
    * Autóimport fül: opener VAGY window.name = "bymy-ha-import".
-   * Win7 / login redirect után az opener gyakran null — a névvel még megvan.
-   * Üres új tabot ne hagyjunk: about:blank → close.
+   * Win7: opener gyakran null; üres open() helyett teljes URL-lel fókuszolunk.
    */
   function resolveBymyTarget(origin) {
     if (window.opener && !window.opener.closed) {
@@ -499,45 +498,61 @@
       }
       return window.opener;
     }
+    const importUrl = `${String(origin || "").replace(/\/$/, "")}/beallitasok.html?szekcio=import&mode=dealer`;
     let named = null;
     try {
       named = window.open("", "bymy-ha-import");
     } catch {
       named = null;
     }
-    if (!named || named === window || named.closed) return null;
-    try {
-      const href = String(named.location.href || "");
-      if (!href || /^about:(blank|newtab)$/i.test(href)) {
+    if (named && named !== window && !named.closed) {
+      try {
+        const href = String(named.location.href || "");
+        if (!href || /^about:(blank|newtab)$/i.test(href)) {
+          try {
+            named.location.href = importUrl;
+          } catch {
+          }
+          try {
+            named.focus();
+          } catch {
+          }
+          return named;
+        }
+        if (origin && href.indexOf(String(origin).replace(/\/$/, "")) === 0) {
+          try {
+            named.focus();
+          } catch {
+          }
+          return named;
+        }
         try {
           named.close();
         } catch {
         }
-        return null;
-      }
-      if (origin && href.indexOf(String(origin).replace(/\/$/, "")) === 0) {
+      } catch {
         try {
           named.focus();
         } catch {
         }
         return named;
       }
-      try {
-        named.close();
-      } catch {
-      }
-      return null;
-    } catch {
-      // Cross-origin → létező Autóimport fül (HA → Bymy)
-      try {
-        named.focus();
-      } catch {
-      }
-      return named;
     }
+    try {
+      named = window.open(importUrl, "bymy-ha-import");
+      if (named && named !== window && !named.closed) {
+        try {
+          named.focus();
+        } catch {
+        }
+        return named;
+      }
+    } catch {
+    }
+    return null;
   }
 
-  function deliverOneAwait(target, body) {
+  function deliverOneAwait(target, body, maxTries = 16) {
     return new Promise((resolve) => {
       let acked = false;
       const onAck = (event) => {
@@ -573,6 +588,7 @@
         return;
       }
       let n = 0;
+      const tries = Math.max(4, Math.min(90, Number(maxTries) || 16));
       const timer = setInterval(() => {
         if (acked) {
           clearInterval(timer);
@@ -580,7 +596,7 @@
         }
         n += 1;
         send();
-        if (n >= 90) {
+        if (n >= tries) {
           clearInterval(timer);
           try {
             window.removeEventListener("message", onAck);
@@ -592,19 +608,22 @@
     });
   }
 
+  /** Win7-barát: text/plain + token a body-ban → nincs CORS preflight (Authorization nélkül). */
   async function saveOneDirect(origin, token, page, index, total) {
+    const payload = {
+      authToken: token,
+      photoOnly: true,
+      mode: "dealer",
+      listUrl: location.href,
+      pages: [page],
+    };
     const res = await fetch(`${origin}/api/import/extracted`, {
       method: "POST",
+      mode: "cors",
       headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+        "Content-Type": "text/plain;charset=UTF-8",
       },
-      body: JSON.stringify({
-        photoOnly: true,
-        mode: "dealer",
-        listUrl: location.href,
-        pages: [page],
-      }),
+      body: JSON.stringify(payload),
     });
     const raw = await res.text();
     let data = {};
@@ -616,6 +635,84 @@
       throw new Error(data.error || `HTTP ${res.status} (#${index}/${total})`);
     }
     return data.result || {};
+  }
+
+  /** Ha a fetch CSP/CORS miatt elhasal: form POST popup ablakba (nincs preflight). */
+  function saveOneFormBridge(origin, token, page, index) {
+    return new Promise((resolve, reject) => {
+      const bridgeId = `bymy_ha_br_${Date.now()}_${index}`;
+      const winName = "bymy_ha_bridge_win";
+      let settled = false;
+      const finish = (fn, value) => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        try {
+          window.removeEventListener("message", onMsg);
+        } catch {
+        }
+        fn(value);
+      };
+      const onMsg = (event) => {
+        const data = event?.data;
+        if (!data || data.type !== "bymy-ha-bridge-result") return;
+        if (data.bridgeId && data.bridgeId !== bridgeId) return;
+        if (data.ok) finish(resolve, data.result || {});
+        else finish(reject, new Error(data.error || "bridge hiba"));
+      };
+      try {
+        window.addEventListener("message", onMsg);
+      } catch {
+      }
+      const timer = setTimeout(() => finish(reject, new Error("bridge timeout")), 28000);
+      try {
+        window.open("about:blank", winName);
+      } catch {
+      }
+      const form = document.createElement("form");
+      form.method = "POST";
+      form.action = `${origin}/api/import/ha-bridge`;
+      form.target = winName;
+      form.acceptCharset = "UTF-8";
+      const fields = {
+        bridgeId,
+        token,
+        payload: JSON.stringify({
+          photoOnly: true,
+          mode: "dealer",
+          listUrl: location.href,
+          pages: [page],
+        }),
+      };
+      Object.keys(fields).forEach((key) => {
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = key;
+        input.value = fields[key];
+        form.appendChild(input);
+      });
+      (document.body || document.documentElement).appendChild(form);
+      try {
+        form.submit();
+      } catch (error) {
+        finish(reject, error);
+      }
+      try {
+        form.remove();
+      } catch {
+      }
+    });
+  }
+
+  async function saveOneWithFallback(origin, token, page, index, total) {
+    try {
+      return await saveOneDirect(origin, token, page, index, total);
+    } catch (error) {
+      const msg = String(error?.message || error || "");
+      if (!/failed to fetch|networkerror|load failed/i.test(msg)) throw error;
+      showProgress(index, total, `form mentés ${index}/${total}`);
+      return saveOneFormBridge(origin, token, page, index);
+    }
   }
 
   async function run(opts) {
@@ -630,10 +727,20 @@
       return;
     }
 
-    const target = resolveBymyTarget(origin);
+    // Win7: opener gyakran nincs → ne várjunk postMessage-re, azonnal text/plain / form híd
+    let target = null;
+    if (window.opener && !window.opener.closed) {
+      try {
+        window.opener.focus();
+      } catch {
+      }
+      target = window.opener;
+    } else if (!token) {
+      target = resolveBymyTarget(origin);
+    }
     if (!target && !token) {
       alert(
-        "Nincs meg a Bymy Autóimport lap.\n\n1) Nyisd meg a Bymy Autóimportot (kereskedői mód) — hagyd nyitva\n2) Onnan: admin.hasznaltauto.hu megnyitása\n3) A listán futtasd a könyvjelzőt\n\nWin7-en a közvetlen mentés gyakran Failed to fetch — az Autóimport fül kell."
+        "Nincs meg a Bymy Autóimport lap.\n\n1) Nyisd meg a Bymy Autóimportot (kereskedői mód) — hagyd nyitva\n2) Onnan: admin.hasznaltauto.hu megnyitása\n3) Másold újra a könyvjelzőt (friss token), futtasd a listán"
       );
       return;
     }
@@ -659,22 +766,26 @@
         const car = await ensureCarDescription(cars[i]);
         let saved = false;
         if (target && !target.closed) {
-          saved = await deliverOneAwait(target, {
-            type: "bymy-ha-import",
-            v: 1,
-            mode: "dealer",
-            photoOnly: true,
-            listUrl: location.href,
-            batchId,
-            index: i + 1,
-            total: cars.length,
-            importId: `${batchId}-${i + 1}`,
-            pages: [car],
-          });
+          saved = await deliverOneAwait(
+            target,
+            {
+              type: "bymy-ha-import",
+              v: 1,
+              mode: "dealer",
+              photoOnly: true,
+              listUrl: location.href,
+              batchId,
+              index: i + 1,
+              total: cars.length,
+              importId: `${batchId}-${i + 1}`,
+              pages: [car],
+            },
+            token ? 12 : 60
+          );
         }
         if (!saved && token) {
           showProgress(i + 1, cars.length, `közvetlen mentés ${i + 1}/${cars.length}`);
-          const result = await saveOneDirect(origin, token, car, i + 1, cars.length);
+          const result = await saveOneWithFallback(origin, token, car, i + 1, cars.length);
           saved = (result.savedCount || 0) > 0 || result.ok !== false;
           if (!saved) errors.push(result.errors?.[0]?.message || "mentés 0");
         }
@@ -685,7 +796,7 @@
             errors.push(
               target
                 ? "A Bymy lap nem fogadta — ne zárd be az Autóimportot"
-                : "Failed to fetch — nyisd az admin oldalt a Bymy Autóimportból"
+                : "Mentés sikertelen — másold újra a könyvjelzőt a Bymy Autóimporton"
             );
           }
         }

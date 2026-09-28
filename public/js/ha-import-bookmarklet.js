@@ -1653,11 +1653,12 @@
     try {
       const res = await fetch(`${String(origin).replace(/\/$/, "")}/api/import/extracted`, {
         method: "POST",
+        mode: "cors",
         headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          "Content-Type": "text/plain;charset=UTF-8",
         },
         body: JSON.stringify({
+          authToken: token,
           pages: payload.pages || [],
           mode: payload.mode || "dealer",
           photoOnly: payload.photoOnly !== false,

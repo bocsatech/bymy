@@ -8,7 +8,7 @@ import {
   initHomeSearchSidebar,
   initHomeFilterCatalog,
 } from "./home-search-filter.js?v=valto3";
-import { initHomeQuickSearch } from "./home-quicksearch.js?v=searchBack6";
+import { initHomeQuickSearch } from "./home-quicksearch.js?v=searchBack7";
 import { decodeSavedSearchParam, encodeSavedSearchParam } from "./saved-search.js?v=savedSearch5";
 import { matchDetailedSearch, hasActiveDetailedSearch } from "./auto-detailed-search.js?v=autoDesk16";
 import { updateAutoDeskResultCount } from "./auto-desk-search.js?v=teherStrict3";
@@ -33,7 +33,7 @@ import {
   shouldRestoreVehicleSearch,
   peekMapOpenOnReturn,
   consumeMapOpenOnReturn,
-} from "./listing-return.js?v=searchBack6";
+} from "./listing-return.js?v=searchBack7";
 import { normalizeKivitel } from "./kivitel-options.js?v=kivitel1";
 import { featuredListingIdSet, pickFeaturedListings } from "./home-featured-slots.js?v=featuredNoAuto1";
 import { mountSellerInventory, updateSellerInventoryCount } from "./seller-inventory.js?v=sellerInv30";
@@ -45,6 +45,8 @@ let mapModulePromise = null;
 let ensureMapModule = null;
 /** Vissza gomb: térkép ne csukódjon be restore közben / után. */
 let suppressMapClose = false;
+/** Vissza gomb: szűrő preview / üres onSearch ne törölje a restore-t. */
+let searchRestoreInProgress = false;
 
 async function reopenMapAfterReturn() {
   if (!peekMapOpenOnReturn() && !suppressMapClose) return;
@@ -113,6 +115,7 @@ function syncCommittedSearchUrl(filters) {
 }
 
 function persistCommittedSearch() {
+  if (searchRestoreInProgress) return;
   if (!isVehicleSearchPage() || isSellerMode()) return;
   if (!searchResultsCommitted) {
     clearVehicleSearchState();
@@ -887,7 +890,7 @@ initHomeUnifiedScroll();
 if (PAGE === "auto" || PAGE === "teherauto") {
   ensureMapModule = () => {
     if (!mapModulePromise) {
-      mapModulePromise = import("./search-results-map.js?v=searchBack6")
+      mapModulePromise = import("./search-results-map.js?v=searchBack7")
         .then((mod) => {
           updateSearchMapButtonLabels = mod.updateSearchMapButtonLabels;
           closeSearchResultsMapFn = mod.closeSearchResultsMap;
@@ -1040,6 +1043,7 @@ if (PAGE === "ingatlan") {
           !Object.keys(values).filter((k) => k !== "detailed").length &&
           !detailed);
       if (empty && isVehicleSearchPage()) {
+        if (searchRestoreInProgress) return;
         searchResultsCommitted = false;
         quickRadiusFilter = null;
         clearVehicleSearchState();
@@ -1053,6 +1057,7 @@ if (PAGE === "ingatlan") {
       scrollToListings();
     },
     onFilterPreview: async (values) => {
+      if (searchRestoreInProgress) return;
       if (isSellerMode() || !isVehicleSearchPage()) return;
       const { detailed, ...sidebarValues } = values ?? {};
       quickSearchFilters = { ...emptyFilters(), ...sidebarValues };
@@ -1102,24 +1107,47 @@ if (PAGE === "ingatlan") {
           filters = readVehicleSearchState()?.filters || null;
         }
         if (!filters || !Object.keys(filters).length) {
-          // Memória (early restore) — form UI-ra is kell
           if (searchResultsCommitted && hasActiveSidebarFilters(quickSearchFilters)) {
             filters = { ...quickSearchFilters, detailed: detailedFilters };
           }
         }
-        if (!filters || !Object.keys(filters).length) return;
+        if (!filters || !Object.keys(filters).length) {
+          if (peekMapOpenOnReturn()) await reopenMapAfterReturn();
+          return;
+        }
+
+        searchRestoreInProgress = true;
+        if (peekMapOpenOnReturn()) suppressMapClose = true;
         applyRestoredFiltersToState(filters);
         await quickSearchApi.applySavedFilters(filters);
+        // Preview race után újra a mentett szűrők legyenek a forrás.
+        applyRestoredFiltersToState(filters);
+        searchResultsCommitted = true;
+        renderListings(allItems);
         await fillFilteredResults();
+        renderListings(allItems);
+        updateSearchMapButtonLabels(hasActiveClientFilters());
+        // URL + session — ne a form-olvasás döntsön restore közben
+        saveVehicleSearchState({
+          page: PAGE,
+          committed: true,
+          filters,
+          deskSort: deskSort || "newest",
+        });
+        syncCommittedSearchUrl(filters);
         consumeVehicleSearchRestorePending(PAGE);
         scrollToListings();
         await reopenMapAfterReturn();
-        // Lista újra, ha a térkép async betöltése közben üresre futott volna
+        applyRestoredFiltersToState(filters);
         if (searchResultsCommitted && hasActiveClientFilters()) {
           renderListings(allItems);
         }
       } catch (error) {
         console.warn("Keresés visszaállítás:", error);
+      } finally {
+        window.setTimeout(() => {
+          searchRestoreInProgress = false;
+        }, 3000);
       }
     });
   } else if (PAGE === "auto" || PAGE === "teherauto") {

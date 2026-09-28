@@ -13,7 +13,7 @@ import {
   listingDetailHref,
   rememberListingOpen,
   markMapOpenOnReturn,
-} from "./listing-return.js?v=searchBack6";
+} from "./listing-return.js?v=searchBack7";
 import { listingTileTitle, listingTilePrice } from "./listing-tile.js?v=listThumb1";
 import { getAuthUser, loadProfileFromServer } from "./site-auth.js?v=bootFix2";
 import { fetchListingsPage } from "./db-client.js?v=ownerBoost6";

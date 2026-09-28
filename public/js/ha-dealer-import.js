@@ -486,7 +486,12 @@
     }
   }
 
-  function resolveBymyTarget() {
+  /**
+   * Autóimport fül: opener VAGY window.name = "bymy-ha-import".
+   * Win7 / login redirect után az opener gyakran null — a névvel még megvan.
+   * Üres új tabot ne hagyjunk: about:blank → close.
+   */
+  function resolveBymyTarget(origin) {
     if (window.opener && !window.opener.closed) {
       try {
         window.opener.focus();
@@ -494,7 +499,42 @@
       }
       return window.opener;
     }
-    return null;
+    let named = null;
+    try {
+      named = window.open("", "bymy-ha-import");
+    } catch {
+      named = null;
+    }
+    if (!named || named === window || named.closed) return null;
+    try {
+      const href = String(named.location.href || "");
+      if (!href || /^about:(blank|newtab)$/i.test(href)) {
+        try {
+          named.close();
+        } catch {
+        }
+        return null;
+      }
+      if (origin && href.indexOf(String(origin).replace(/\/$/, "")) === 0) {
+        try {
+          named.focus();
+        } catch {
+        }
+        return named;
+      }
+      try {
+        named.close();
+      } catch {
+      }
+      return null;
+    } catch {
+      // Cross-origin → létező Autóimport fül (HA → Bymy)
+      try {
+        named.focus();
+      } catch {
+      }
+      return named;
+    }
   }
 
   function deliverOneAwait(target, body) {
@@ -590,10 +630,10 @@
       return;
     }
 
-    const target = resolveBymyTarget();
+    const target = resolveBymyTarget(origin);
     if (!target && !token) {
       alert(
-        "Nincs meg a Bymy Autóimport lap.\n\n1) Nyisd meg a Bymy Autóimportot (kereskedői mód)\n2) Onnan: admin.hasznaltauto.hu megnyitása\n3) A listán futtasd a könyvjelzőt\n\nNe zárd be az Autóimport lapot — így megy át a mentés Windows 7-en is."
+        "Nincs meg a Bymy Autóimport lap.\n\n1) Nyisd meg a Bymy Autóimportot (kereskedői mód) — hagyd nyitva\n2) Onnan: admin.hasznaltauto.hu megnyitása\n3) A listán futtasd a könyvjelzőt\n\nWin7-en a közvetlen mentés gyakran Failed to fetch — az Autóimport fül kell."
       );
       return;
     }

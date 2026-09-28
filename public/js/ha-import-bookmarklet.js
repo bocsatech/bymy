@@ -1486,8 +1486,8 @@
     }
   }
 
-  function resolveBymyTarget() {
-    // CSAK az Autóimport lap (opener) — soha ne nyissunk új Bymy tabot
+  function resolveBymyTarget(origin) {
+    // Autóimport: opener, vagy window.name = "bymy-ha-import" (Win7: opener gyakran elvész)
     if (window.opener && !window.opener.closed) {
       try {
         window.opener.focus();
@@ -1495,7 +1495,41 @@
       }
       return window.opener;
     }
-    return null;
+    let named = null;
+    try {
+      named = window.open("", "bymy-ha-import");
+    } catch {
+      named = null;
+    }
+    if (!named || named === window || named.closed) return null;
+    try {
+      const href = String(named.location.href || "");
+      if (!href || /^about:(blank|newtab)$/i.test(href)) {
+        try {
+          named.close();
+        } catch {
+        }
+        return null;
+      }
+      if (origin && href.indexOf(String(origin).replace(/\/$/, "")) === 0) {
+        try {
+          named.focus();
+        } catch {
+        }
+        return named;
+      }
+      try {
+        named.close();
+      } catch {
+      }
+      return null;
+    } catch {
+      try {
+        named.focus();
+      } catch {
+      }
+      return named;
+    }
   }
 
   function noOpenerAlert(mode) {
@@ -1550,7 +1584,7 @@
       }, 500);
     };
 
-    const target = resolveBymyTarget();
+    const target = resolveBymyTarget(origin);
     if (!target) {
       noOpenerAlert(payload.mode);
       return false;
@@ -1651,7 +1685,7 @@
     const pages = Array.isArray(payload.pages) ? payload.pages : [];
     if (!pages.length) return false;
 
-    const target = resolveBymyTarget();
+    const target = resolveBymyTarget(origin);
     const token = String(authToken || "").trim();
     if (!target && !token) {
       noOpenerAlert("dealer");

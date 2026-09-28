@@ -60,8 +60,8 @@ function bookmarkletHref(mode) {
   const origin = location.origin;
   const isDealer = mode === "dealer";
   const src = isDealer
-    ? `${origin}/js/ha-dealer-import.js?v=haCdn11`
-    : `${origin}/js/ha-import-bookmarklet.js?v=haDealerPhoto15`;
+    ? `${origin}/js/ha-dealer-import.js?v=haCdn12`
+    : `${origin}/js/ha-import-bookmarklet.js?v=haDealerPhoto16`;
   const token = getAuthToken() || "";
   const runner = isDealer ? "BymyHaDealerImport" : "BymyHaImport";
   return `javascript:void(function(){var o=${JSON.stringify(origin)};var m=${JSON.stringify(mode)};var t=${JSON.stringify(token)};var src=${JSON.stringify(src)}+"&t="+Date.now();function go(){try{window.${runner}.run({origin:o,mode:m,authToken:t});}catch(e){alert((e&&e.message)||e);}}try{delete window.${runner};}catch(e){window.${runner}=undefined;}var s=document.createElement("script");s.src=src;s.onload=go;s.onerror=function(){alert("A hasznaltauto.hu blokkolta a Bymy scriptet.");};(document.documentElement||document.body).appendChild(s);})();`;
@@ -636,7 +636,7 @@ export async function initHaImportPage() {
     void copyBookmarkletLink().then(() => {
       setStatus(
         currentMode() === "dealer"
-          ? "Friss könyvjelző a vágólapon. Az admin Járműlista fülön illeszd be könyvjelzőként / futtasd. (Opener nélkül is ment.)"
+          ? "Friss könyvjelző a vágólapon. Az admin Járműlista fülön futtasd — az Autóimport lap maradjon nyitva."
           : "Friss könyvjelző a vágólapon. A hasznaltauto fülön futtasd."
       );
     });

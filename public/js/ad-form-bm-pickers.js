@@ -4,7 +4,8 @@ import {
   KLIM_OPTIONS,
   OKMANY_JELLEG_OPTIONS,
   UZEMANYAG_CATEGORIES,
-} from "./equipment-data.js?v=valto3";
+  flattenSebessegvaltoOptions,
+} from "./equipment-data.js?v=valto3b";
 import { KIVITEL_OPTIONS } from "./kivitel-options.js?v=kivitel1";
 import { fetchVehicleCatalog } from "./vehicle-catalog-client.js?v=teherStrict3";
 import { bindAutoBmDismiss, autoBmPanelIsOpen } from "./auto-bm-dismiss.js?v=bmDismiss1";
@@ -71,6 +72,24 @@ function ensureSelectOptions(select, values) {
     select.appendChild(option);
     seen.add(value);
   }
+}
+
+/** Replace all non-empty options (drops stale hardcoded HTML values). */
+function replaceSelectOptions(select, values, emptyLabel = "—") {
+  if (!select || select.tagName !== "SELECT") return;
+  const prev = String(select.value || "").trim();
+  select.innerHTML = "";
+  const empty = document.createElement("option");
+  empty.value = "";
+  empty.textContent = emptyLabel;
+  select.appendChild(empty);
+  for (const value of values) {
+    const option = document.createElement("option");
+    option.value = value;
+    option.textContent = value;
+    select.appendChild(option);
+  }
+  if (prev && values.includes(prev)) select.value = prev;
 }
 
 function ensureYearSelectFilled(select, maxYear = new Date().getFullYear()) {
@@ -2186,6 +2205,7 @@ export async function mountAdFormBmPickers(form, catalog = null) {
   ensureSelectOptions(document.getElementById("karpit2"), VEHICLE_KARPIT_OPTIONS);
   ensureSelectOptions(document.getElementById("tetto"), VEHICLE_TETTO_OPTIONS);
   ensureSelectOptions(document.getElementById("klima"), KLIM_OPTIONS);
+  replaceSelectOptions(document.getElementById("sebessegvalto"), flattenSebessegvaltoOptions());
   for (const spec of AD_BM_SINGLE_DROPDOWN_SPECS) {
     mountAdSingleDropdown(spec);
   }

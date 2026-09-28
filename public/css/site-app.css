@@ -6106,14 +6106,6 @@ body.site-app .ha-imp-panel .ha-imp-lead {
   display: none;
 }
 
-body.site-app .ha-imp-overview {
-  margin: 0.35rem 0 0;
-  color: #475467;
-  font-size: 0.95rem;
-  line-height: 1.5;
-  max-width: 42rem;
-}
-
 body.site-app .ha-imp-step-cell {
   margin: 0.95rem 0 0;
   padding: 1rem 1.05rem 1.1rem;
@@ -6472,10 +6464,6 @@ body.site-app .ha-imp-safari-drag-link {
   body.site-app .ha-imp-browsers {
     grid-template-columns: 1fr 1fr;
   }
-}
-
-html[data-theme="dark"] body.site-app .ha-imp-overview {
-  color: #98a2b3;
 }
 
 html[data-theme="dark"] body.site-app .ha-imp-step-cell {

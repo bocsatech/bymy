@@ -6123,7 +6123,7 @@ body.site-app .ha-imp-step-cell {
 body.site-app .ha-imp-step-cell[data-ha-step="1"] {
   padding: 1.1rem 1.15rem 1.15rem;
   background: #fff;
-  border: 1.5px solid #1e4d7b;
+  border: 2px solid #1e4d7b;
   border-radius: 14px;
 }
 

@@ -6,13 +6,14 @@ import {
   revealListingContact,
   recordListingView,
   deleteListingFromDb,
-} from "./db-client.js?v=secReveal1";
+} from "./db-client.js?v=perfNav1";
 import { getAuthUser, getDisplayName, getProfile } from "./site-auth.js?v=authMembersOnly1";
 import { mountTurnstile } from "./turnstile-ui.js?v=turnstile11";
 import { startConversation } from "./messages-api.js?v=msgLive2";
 import { openListingMessage } from "./start-listing-message.js?v=msgLive3";
 import { getParkplatz, addParkplatzItem, removeParkplatzItem } from "./fok-data.js?v=parkThumb1";
-import { listingReturnHref, listingDetailHref, rememberListingOpen } from "./listing-return.js?v=navFast1";
+import { listingReturnHref, listingDetailHref, rememberListingOpen } from "./listing-return.js?v=perfNav1";
+import { takePrefetchedListing, storePrefetchedListing } from "./listing-prefetch.js?v=perfNav1";
 
 const root = document.getElementById("hd-root");
 const ICON = {
@@ -1141,7 +1142,12 @@ async function init() {
     return;
   }
   try {
-    const listing = await fetchListing(id, { view: "detail" });
+    let listing = takePrefetchedListing(id);
+    if (!listing?.detail) {
+      listing = await fetchListing(id, { view: "detail" });
+    } else {
+      storePrefetchedListing(id, listing);
+    }
     if (!listing) throw new Error("Nincs ilyen hirdetés.");
     const view = listing.detail;
     if (!view) throw new Error("A hirdetés adatai hiányosak.");

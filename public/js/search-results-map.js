@@ -13,7 +13,7 @@ import {
   listingDetailHref,
   rememberListingOpen,
   markMapOpenOnReturn,
-} from "./listing-return.js?v=navFast1";
+} from "./listing-return.js?v=perfNav1";
 import { listingTileTitle, listingTilePrice } from "./listing-tile.js?v=listThumb1";
 import { getAuthUser, loadProfileFromServer } from "./site-auth.js?v=bootFix2";
 import { fetchListingsPage } from "./db-client.js?v=ownerBoost6";
@@ -389,6 +389,24 @@ function ensureMapPanel() {
       }
       rememberMapListingNavigation(event, root);
     });
+    root.addEventListener(
+      "pointerenter",
+      (event) => {
+        const a = event.target?.closest?.("a[href*='hirdetes.html']");
+        if (!a) return;
+        try {
+          const u = new URL(a.getAttribute("href"), location.origin);
+          const id = u.searchParams.get("id");
+          if (id) {
+            import("./listing-prefetch.js?v=perfNav1")
+              .then((m) => m.prefetchListingDetail(id))
+              .catch(() => {});
+          }
+        } catch {
+        }
+      },
+      true
+    );
     document.addEventListener("keydown", (event) => {
       if (event.key === "Escape" && !root.hidden) {
         if (selectedPinId != null) showAllResults();

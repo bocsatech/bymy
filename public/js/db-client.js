@@ -99,13 +99,30 @@ export async function fetchLatestListing() {
 }
 
 export async function fetchListing(id, { view } = {}) {
+  const key = String(id ?? "").trim();
+  if (view === "detail" && key) {
+    try {
+      const { takePrefetchedListing } = await import("./listing-prefetch.js?v=perfNav1");
+      const warm = takePrefetchedListing(key);
+      if (warm?.detail) return warm;
+    } catch {
+    }
+  }
   const params = view ? `?view=${encodeURIComponent(view)}` : "";
   const response = await fetch(`/api/listings/${id}${params}`, {
     credentials: "same-origin",
     headers: authHeaders(),
   });
   const data = await parseJson(response);
-  return data.listing ?? null;
+  const listing = data.listing ?? null;
+  if (listing && view === "detail" && key) {
+    try {
+      const { storePrefetchedListing } = await import("./listing-prefetch.js?v=perfNav1");
+      storePrefetchedListing(key, listing);
+    } catch {
+    }
+  }
+  return listing;
 }
 
 export async function fetchRelatedListings(listingId, { limit = 24, includeSelf = false } = {}) {

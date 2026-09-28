@@ -291,6 +291,10 @@ export function touchListingReturnId(listingId) {
 }
 
 export function bindListingOpen(root = document) {
+  try {
+    import("./listing-prefetch.js?v=perfNav1").then((m) => m.bindListingPrefetch(root)).catch(() => {});
+  } catch {
+  }
   root.addEventListener("click", (event) => {
     if (event.target.closest(".home-grid-card-save")) return;
     if (event.target.closest(".home-grid-card-photo-nav")) return;
@@ -299,6 +303,10 @@ export function bindListingOpen(root = document) {
     if (!el || !root.contains(el)) return;
     const id = el.getAttribute("data-listing-id");
     if (!id) return;
+    try {
+      import("./listing-prefetch.js?v=perfNav1").then((m) => m.prefetchListingDetail(id)).catch(() => {});
+    } catch {
+    }
     rememberListingOpen(id, el, root);
     try {
       window.dispatchEvent(new CustomEvent("bymy-listing-open", { detail: { id } }));

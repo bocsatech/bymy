@@ -27,7 +27,7 @@ async function main() {
     await page.waitForTimeout(2000);
 
     const openInfo = await page.evaluate(async () => {
-      const mod = await import("/js/search-results-map.js?v=navFast1");
+      const mod = await import("/js/search-results-map.js?v=perfNav1");
       const real = [...document.querySelectorAll("#home-grid-track [data-listing-id]")]
         .map((el) => el.__bymyListing)
         .filter(Boolean);

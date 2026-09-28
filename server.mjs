@@ -935,6 +935,10 @@ async function assertNewListingAllowed(req, res, user, formData) {
   return true;
 }
 
+/** Boost feed rövid cache — owner-scan ne fusson minden lista-kérésnél. */
+const boostFeedMemo = new Map();
+const BOOST_FEED_TTL_MS = Math.max(5_000, Number(process.env.BYMY_BOOST_FEED_TTL_MS) || 20_000);
+
 async function handleListingsApi(req, res, pathname) {
   const latestMatch = pathname === "/api/listings/latest";
   const listMatch = pathname === "/api/listings";
@@ -1095,28 +1099,35 @@ async function handleListingsApi(req, res, pathname) {
         const want = String(vertical || "")
           .trim()
           .toLowerCase();
-        const chunks = await Promise.all(
-          [...boostSet].map((oid) =>
-            listListingsByOwner({
-              userId: oid,
-              limit: 120,
-              status: status || "feladott",
-            })
-          )
-        );
-        const seen = new Set();
-        for (const rows of chunks) {
-          for (const item of rows || []) {
-            const id = Number(item.id);
-            if (!Number.isFinite(id) || id <= 0 || seen.has(id)) continue;
-            if (want === "auto" || want === "teher" || want === "ingatlan") {
-              if (resolveListingVertical(item) !== want) continue;
+        const boostCacheKey = `boost:${status || "feladott"}:${want}:${deskSort}:${[...boostSet].sort((a, b) => a - b).join(",")}`;
+        const boostHit = boostFeedMemo.get(boostCacheKey);
+        if (boostHit && Date.now() - boostHit.at < BOOST_FEED_TTL_MS) {
+          boostedRows = boostHit.rows;
+        } else {
+          const chunks = await Promise.all(
+            [...boostSet].map((oid) =>
+              listListingsByOwner({
+                userId: oid,
+                limit: 120,
+                status: status || "feladott",
+              })
+            )
+          );
+          const seen = new Set();
+          for (const rows of chunks) {
+            for (const item of rows || []) {
+              const id = Number(item.id);
+              if (!Number.isFinite(id) || id <= 0 || seen.has(id)) continue;
+              if (want === "auto" || want === "teher" || want === "ingatlan") {
+                if (resolveListingVertical(item) !== want) continue;
+              }
+              seen.add(id);
+              boostedRows.push({ ...item, ownerBoost: true });
             }
-            seen.add(id);
-            boostedRows.push({ ...item, ownerBoost: true });
           }
+          boostedRows.sort(boostDeskCompare);
+          boostFeedMemo.set(boostCacheKey, { at: Date.now(), rows: boostedRows });
         }
-        boostedRows.sort(boostDeskCompare);
       } catch (error) {
         console.warn("Boost feed:", error?.message || error);
         boostedRows = [];
@@ -1206,9 +1217,8 @@ async function handleListingsApi(req, res, pathname) {
         hasMore,
       },
       {
-        "Cache-Control": "private, no-store",
-        "CDN-Cache-Control": "no-store",
-        "Cloudflare-CDN-Cache-Control": "no-store",
+        // Rövid böngésző-cache: vissza / prefetch ne verje újra a szervert.
+        "Cache-Control": "private, max-age=20, stale-while-revalidate=60",
         Vary: "Cookie, Accept-Encoding",
       }
     );
@@ -1568,7 +1578,20 @@ async function handleListingsApi(req, res, pathname) {
       }
     }
     const access = await listingAccessFlags(req);
-    sendJson(res, 200, { listing: applyListingAccessPolicy(listing, access) });
+    const payload = { listing: applyListingAccessPolicy(listing, access) };
+    const privateView = Boolean(access?.isAdmin || canManageListing(listing, access?.user));
+    const isPublicFeladott = listing.status === "feladott" && !privateView;
+    sendJson(
+      res,
+      200,
+      payload,
+      isPublicFeladott
+        ? {
+            "Cache-Control": "private, max-age=30, stale-while-revalidate=90",
+            Vary: "Cookie, Accept-Encoding",
+          }
+        : { "Cache-Control": "private, no-store", Vary: "Cookie, Accept-Encoding" }
+    );
     return;
   }
 

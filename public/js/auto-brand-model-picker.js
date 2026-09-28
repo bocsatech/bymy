@@ -1,5 +1,5 @@
 
-import { fetchVehicleCatalog } from "./vehicle-catalog-client.js?v=teherStrict1";
+import { fetchVehicleCatalog } from "./vehicle-catalog-client.js?v=teherStrict2";
 import { bindAutoBmDismiss, autoBmPanelIsOpen } from "./auto-bm-dismiss.js?v=bmDismiss1";
 
 function truckKategoria() {
@@ -73,7 +73,7 @@ export async function mountAutoBrandModelPicker(form) {
   try {
     if (wantKind === "kisteher") {
       // Always load public kisteher JSON (bypass any személyautó API / module cache).
-      const res = await fetch(`/data/vehicle-catalog-kisteher.json?v=teherStrict1`, { cache: "no-store" });
+      const res = await fetch(`/data/vehicle-catalog-kisteher.json?v=teherStrict2`, { cache: "no-store" });
       const data = await res.json().catch(() => ({}));
       if (!res.ok || !data?.gyartmanyok?.length) {
         catalog = await fetchVehicleCatalog({ kind: "kisteher" });

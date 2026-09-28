@@ -23,7 +23,7 @@ export function normalizeCatalogKind(kind) {
 
 function staticCatalogUrl(kind) {
   return normalizeCatalogKind(kind) === "kisteher"
-    ? "/data/vehicle-catalog-kisteher.json?v=teherStrict1"
+    ? "/data/vehicle-catalog-kisteher.json?v=teherStrict2"
     : "/data/vehicle-catalog.json";
 }
 

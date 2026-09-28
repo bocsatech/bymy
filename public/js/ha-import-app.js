@@ -21,7 +21,6 @@ const MODES = {
     title: "Használtautó import",
     startURL: "https://www.hasznaltauto.hu/",
     steps: "1. Jelentkezz be  ·  2. Nyisd meg a listát vagy egy hirdetést  ·  3. Importálás",
-    step2Desc: "Jelentkezz be a hasznaltauto.hu-n, és nyisd meg a listát vagy a hirdetést.",
     action: "Hirdetés / lista importálása",
     footer: "Listánál a háttérben végigmegyünk a hirdetéseken (max. 50). A jelszavadat nem tároljuk.",
     openLabel: "hasznaltauto.hu megnyitása",
@@ -30,7 +29,6 @@ const MODES = {
     title: "Használtautó import",
     startURL: "https://admin.hasznaltauto.hu/",
     steps: "1. Autóimport nyitva  ·  2. Engedd a felugrót / admin ebből  ·  3. Friss könyvjelző a listán",
-    step2Desc: "Jelentkezz be az admin.hasznaltauto.hu-n, majd nyisd meg a járműlistát.",
     action: "Lista → csak első kép (CDN)",
     footer: "A mentés a Bymy fülön történik (a HA oldal gyakran blokkolja a közvetlen mentést). Autóimport maradjon nyitva; Win7-en engedd a felugró ablakot.",
     openLabel: "admin.hasznaltauto.hu megnyitása",
@@ -235,7 +233,6 @@ function renderMode() {
   });
   const title = document.querySelector("[data-ha-title]");
   const steps = document.querySelector("[data-ha-steps]");
-  const step2Desc = document.querySelector("[data-ha-step2-desc]");
   const footer = document.querySelector("[data-ha-footer]");
   const action = document.querySelector("[data-ha-action]");
   const openBtn = document.querySelector("[data-ha-open]");
@@ -244,7 +241,6 @@ function renderMode() {
   const bookmarkSafari = document.getElementById("ha-imp-bookmark-safari");
   if (title) title.textContent = cfg.title;
   if (steps) steps.textContent = cfg.steps;
-  if (step2Desc) step2Desc.textContent = cfg.step2Desc;
   if (footer) footer.textContent = cfg.footer;
   if (action) action.textContent = cfg.action;
   if (openLabel) openLabel.textContent = cfg.openLabel;

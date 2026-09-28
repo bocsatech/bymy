@@ -521,12 +521,14 @@ async function serveStatic(path, res, req = null) {
     }
     res.writeHead(200, {
       "Content-Type": MIME[".html"],
-      "Cache-Control": "no-store, no-cache, must-revalidate",
+      // private + max-age=0: friss HTML, de bfcache (vissza gomb) megengedett.
+      // no-store tiltja a bfcache-t → lista/detail navigáció lassú visszalépés.
+      "Cache-Control": "private, max-age=0, must-revalidate",
     });
     res.end(html);
     return;
   }
-  // JS/CSS/?v=… — böngésző cache (HTML mindig friss, a query version bust).
+  // JS/CSS/?v=… — böngésző cache (HTML: private max-age=0, bfcache OK).
   const longLived =
     ext === ".js" ||
     ext === ".css" ||
@@ -547,7 +549,9 @@ async function serveStatic(path, res, req = null) {
     "Content-Type": MIME[ext] ?? "application/octet-stream",
     "Cache-Control": longLived
       ? "public, max-age=604800, stale-while-revalidate=86400"
-      : "no-store, no-cache, must-revalidate",
+      : ext === ".html"
+        ? "private, max-age=0, must-revalidate"
+        : "no-store, no-cache, must-revalidate",
   });
   res.end(readFileSync(filePath));
 }

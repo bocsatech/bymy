@@ -6,14 +6,29 @@ import {
   revealListingContact,
   recordListingView,
   deleteListingFromDb,
-} from "./db-client.js?v=perfNav1";
+} from "./db-client.js?v=detailBoot1";
 import { getAuthUser, getDisplayName, getProfile } from "./site-auth.js?v=authMembersOnly1";
 import { mountTurnstile } from "./turnstile-ui.js?v=turnstile11";
 import { startConversation } from "./messages-api.js?v=msgLive2";
 import { openListingMessage } from "./start-listing-message.js?v=msgLive3";
 import { getParkplatz, addParkplatzItem, removeParkplatzItem } from "./fok-data.js?v=parkThumb1";
-import { listingReturnHref, listingDetailHref, rememberListingOpen } from "./listing-return.js?v=perfNav1";
-import { takePrefetchedListing, storePrefetchedListing } from "./listing-prefetch.js?v=perfNav1";
+import { listingReturnHref, listingDetailHref, rememberListingOpen } from "./listing-return.js?v=detailBoot1";
+import { takePrefetchedListing, storePrefetchedListing } from "./listing-prefetch.js?v=detailBoot1";
+
+function readBootListing() {
+  try {
+    if (window.__BYMY_LISTING_BOOT__?.detail) return window.__BYMY_LISTING_BOOT__;
+    const el = document.getElementById("bymy-listing-boot");
+    if (!el?.textContent) return null;
+    const listing = JSON.parse(el.textContent);
+    if (listing?.detail) {
+      window.__BYMY_LISTING_BOOT__ = listing;
+      return listing;
+    }
+  } catch {
+  }
+  return null;
+}
 
 const root = document.getElementById("hd-root");
 const ICON = {
@@ -1142,7 +1157,8 @@ async function init() {
     return;
   }
   try {
-    let listing = takePrefetchedListing(id);
+    let listing = readBootListing() || takePrefetchedListing(id);
+    const fromBoot = Boolean(listing?.detail);
     if (!listing?.detail) {
       listing = await fetchListing(id, { view: "detail" });
     } else {
@@ -1155,6 +1171,18 @@ async function init() {
     recordListingView(id, "web").catch(() => {});
     void loadRelatedListings(id, view);
     void loadSellerRating(id);
+    // Boot / prefetch után háttérben frissítés (telefon-mask stb.).
+    if (fromBoot) {
+      void fetchListing(id, { view: "detail", bypassCache: true })
+        .then((fresh) => {
+          if (!fresh?.detail || !root?.dataset?.listingId) return;
+          if (String(root.dataset.listingId) !== String(id)) return;
+          storePrefetchedListing(id, fresh);
+          render(fresh.detail, fresh, []);
+          void loadRelatedListings(id, fresh.detail);
+        })
+        .catch(() => {});
+    }
   } catch (error) {
     root.innerHTML = `<p class="hd-empty">${escapeHtml(error.message ?? "A hirdetés nem tölthető be.")}</p>`;
   }

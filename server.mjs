@@ -164,6 +164,7 @@ import {
   injectOpenGraphIntoHtml,
   isSocialShareCrawler,
 } from "./lib/listing-og.mjs";
+import { injectListingBootIntoHtml } from "./lib/listing-html-boot.mjs";
 import { saveListingPhotos } from "./lib/listing-photos.mjs";
 import {
   dataUrlToBuffer,
@@ -238,6 +239,80 @@ async function listingAccessFlags(req) {
   const user = await requestUser(req);
   const admin = await getLevel1AdminBySession(getLevel1TokenFromRequest(req));
   return { user, isAdmin: Boolean(admin) };
+}
+
+/** Rövid cache a hirdetés HTML boot-hoz — TTFB ne várjon minden kattintáskor Supabase-re. */
+const htmlBootListingMemo = new Map();
+const HTML_BOOT_TTL_MS = Math.max(5_000, Number(process.env.BYMY_HTML_BOOT_TTL_MS) || 20_000);
+
+/** Hirdetés HTML: publikus detail + partner (ugyanaz, mint a detail API). */
+async function loadListingForHtmlBoot(req, listingId) {
+  const id = Number(listingId);
+  if (!Number.isFinite(id) || id <= 0) return null;
+  const access = await listingAccessFlags(req);
+  const cacheKey = `${id}:${access?.user?.id || 0}:${access?.isAdmin ? 1 : 0}`;
+  const hit = htmlBootListingMemo.get(cacheKey);
+  if (hit && Date.now() - hit.at < HTML_BOOT_TTL_MS) return hit.listing;
+
+  const listing = await getListing(id, { mode: "detail" });
+  if (!listing || listing.status !== "feladott") return null;
+  if (listing.detail) {
+    listing.detail = await attachSellerProfile(listing.detail, listing.user_id);
+  }
+  if (listing.user_id) {
+    try {
+      listing.partner = await getPublicPartnerProfileByUserId(listing.user_id);
+    } catch {
+      listing.partner = null;
+    }
+  }
+  const pub = slimListingForHtmlBoot(applyListingAccessPolicy(listing, access));
+  htmlBootListingMemo.set(cacheKey, { at: Date.now(), listing: pub });
+  return pub;
+}
+
+/** Ne küldjünk data: URL / óriás mezőket az első HTML-ben. */
+function slimListingForHtmlBoot(listing) {
+  if (!listing || typeof listing !== "object") return listing;
+  const next = JSON.parse(JSON.stringify(listing));
+  if (next.detail && typeof next.detail === "object") {
+    const av = String(next.detail.sellerAvatarUrl || "");
+    if (av.startsWith("data:")) next.detail.sellerAvatarUrl = "";
+    if (typeof next.detail.description === "string" && next.detail.description.length > 4000) {
+      next.detail.description = `${next.detail.description.slice(0, 4000)}…`;
+    }
+  }
+  return next;
+}
+
+async function serveHirdetesHtml(req, res) {
+  const filePath = join(PUBLIC, "hirdetes.html");
+  let html = readFileSync(filePath, "utf8");
+  const url = new URL(req.url ?? "", `http://${HOST}`);
+  const listingId = Number(url.searchParams.get("id"));
+  let listing = null;
+  if (Number.isFinite(listingId) && listingId > 0) {
+    try {
+      listing = await loadListingForHtmlBoot(req, listingId);
+    } catch (error) {
+      console.warn("Hirdetés HTML boot:", error?.message || error);
+    }
+  }
+  if (listing) {
+    html = injectListingBootIntoHtml(html, listing);
+    if (isSocialShareCrawler(req)) {
+      const og = buildListingOpenGraph({
+        listing,
+        baseUrl: publicBaseUrl(req),
+      });
+      html = injectOpenGraphIntoHtml(html, og);
+    }
+  }
+  res.writeHead(200, {
+    "Content-Type": MIME[".html"],
+    "Cache-Control": "private, max-age=0, must-revalidate",
+  });
+  res.end(html);
 }
 
 function adminBypassBlockedIp(pathname) {
@@ -501,22 +576,26 @@ async function serveStatic(path, res, req = null) {
         readFileSync(join(PUBLIC, "partials", "site-side-controls.html"), "utf8")
       );
     }
-    if (rel === "hirdetes.html" && req && isSocialShareCrawler(req)) {
-      try {
-        const url = new URL(req.url ?? "", `http://${HOST}`);
-        const listingId = Number(url.searchParams.get("id"));
-        if (Number.isFinite(listingId) && listingId > 0) {
-          const listing = await getListing(listingId, { mode: "detail" });
-          if (listing?.status === "feladott") {
-            const og = buildListingOpenGraph({
-              listing,
-              baseUrl: publicBaseUrl(req),
-            });
-            html = injectOpenGraphIntoHtml(html, og);
-          }
+    if (rel === "hirdetes.html" && req) {
+      const url = new URL(req.url ?? "", `http://${HOST}`);
+      const listingId = Number(url.searchParams.get("id"));
+      let listing = null;
+      if (Number.isFinite(listingId) && listingId > 0) {
+        try {
+          listing = await loadListingForHtmlBoot(req, listingId);
+        } catch (error) {
+          console.warn("Hirdetés HTML boot:", error?.message || error);
         }
-      } catch {
-        /* OG nélkül is kiszolgáljuk az oldalt */
+      }
+      if (listing) {
+        html = injectListingBootIntoHtml(html, listing);
+        if (isSocialShareCrawler(req)) {
+          const og = buildListingOpenGraph({
+            listing,
+            baseUrl: publicBaseUrl(req),
+          });
+          html = injectOpenGraphIntoHtml(html, og);
+        }
       }
     }
     res.writeHead(200, {
@@ -3155,6 +3234,18 @@ export async function handleHttpRequest(req, res) {
 
   if (pathname.startsWith("/api/partners") || pathname.startsWith("/api/partner-profiles") || pathname.startsWith("/api/postal-codes")) {
     await handlePartnersApi(req, res, pathname);
+    return;
+  }
+
+  if (pathname === "/api/hirdetes-page" && req.method === "GET") {
+    try {
+      await serveHirdetesHtml(req, res);
+    } catch (error) {
+      console.warn("Hirdetés page API:", error?.message || error);
+      if (!res.headersSent) {
+        sendJson(res, 500, { error: error.message ?? "Szerver hiba." });
+      }
+    }
     return;
   }
 

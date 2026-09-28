@@ -53,7 +53,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/css/style.css?v=noScroll1" />
     <link rel="stylesheet" href="/css/site-app.css?v=navRow1" />
-    <link rel="stylesheet" href="/css/hirdetes-detail.css?v=hdPriceHint1" />
+    <link rel="stylesheet" href="/css/hirdetes-detail.css?v=detailBoot1" />
     <link rel="stylesheet" href="/css/listing-photo-cover.css?v=tileAllPages1" />
       <link rel="stylesheet" href="/css/hub.css?v=navRow1" />
 </head>
@@ -104,17 +104,19 @@
     <main class="hd-wrap" id="hd-root">
       <p class="hd-empty" id="hd-boot">Hirdetés betöltése…</p>
     </main>
+    <!--BYMY_LISTING_BOOT-->
 
     <script type="module">
       const boot = document.getElementById("hd-boot");
       const root = document.getElementById("hd-root");
       window.setTimeout(() => {
         if (!root || root.dataset.listingId || !boot || !root.contains(boot)) return;
+        if (window.__BYMY_LISTING_BOOT__?.detail) return;
         boot.textContent =
           "A hirdetés nem töltődött be. Hard refresh: Cmd+Shift+R (Windows: Ctrl+Shift+R).";
       }, 12000);
     </script>
-    <script src="/js/hirdetes-detail.js?v=perfNav1" type="module"></script>
+    <script src="/js/hirdetes-detail.js?v=detailBoot1" type="module"></script>
     <script src="/js/site-avatar-menu.js?v=settingsOpen1" type="module"></script>
     <script src="/js/theme.js?v=willhabenHdr1" type="module"></script>
     <script src="/js/site-auth.js?v=bootFix2" type="module"></script>

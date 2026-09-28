@@ -3,6 +3,7 @@
   "buildCommand": "node scripts/embed-ad-form.mjs",
   "regions": ["fra1"],
   "rewrites": [
+    { "source": "/hirdetes.html", "destination": "/api/hirdetes-page" },
     { "source": "/api/(.*)", "destination": "/api" },
     { "source": "/partner/:slug", "destination": "/partner-profil.html?slug=:slug" }
   ],

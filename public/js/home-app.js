@@ -8,7 +8,7 @@ import {
   initHomeSearchSidebar,
   initHomeFilterCatalog,
 } from "./home-search-filter.js?v=valto3";
-import { initHomeQuickSearch } from "./home-quicksearch.js?v=searchBack5";
+import { initHomeQuickSearch } from "./home-quicksearch.js?v=searchBack6";
 import { decodeSavedSearchParam, encodeSavedSearchParam } from "./saved-search.js?v=savedSearch5";
 import { matchDetailedSearch, hasActiveDetailedSearch } from "./auto-detailed-search.js?v=autoDesk16";
 import { updateAutoDeskResultCount } from "./auto-desk-search.js?v=teherStrict3";
@@ -33,7 +33,7 @@ import {
   shouldRestoreVehicleSearch,
   peekMapOpenOnReturn,
   consumeMapOpenOnReturn,
-} from "./listing-return.js?v=searchBack5";
+} from "./listing-return.js?v=searchBack6";
 import { normalizeKivitel } from "./kivitel-options.js?v=kivitel1";
 import { featuredListingIdSet, pickFeaturedListings } from "./home-featured-slots.js?v=featuredNoAuto1";
 import { mountSellerInventory, updateSellerInventoryCount } from "./seller-inventory.js?v=sellerInv30";
@@ -43,13 +43,15 @@ let closeSearchResultsMapFn = null;
 let mapModulePromise = null;
 /** Lazy map loader — set for auto/teher pages. */
 let ensureMapModule = null;
+/** Vissza gomb: térkép ne csukódjon be restore közben / után. */
+let suppressMapClose = false;
 
 async function reopenMapAfterReturn() {
-  if (!peekMapOpenOnReturn()) return;
+  if (!peekMapOpenOnReturn() && !suppressMapClose) return;
+  suppressMapClose = true;
   if (typeof ensureMapModule !== "function") return;
   try {
     const mod = await ensureMapModule();
-    // Várjuk meg a szűrt lista feltöltését, különben üres térkép / elvesző találatok.
     if (typeof fillFilteredResults === "function") {
       await fillFilteredResults();
     }
@@ -66,6 +68,11 @@ async function reopenMapAfterReturn() {
     }
   } catch (error) {
     console.warn("Térkép visszaállítás:", error);
+  } finally {
+    // Késői applyFilters / catalog ne zárja be a frissen visszaállított térképet.
+    window.setTimeout(() => {
+      suppressMapClose = false;
+    }, 2500);
   }
 }
 
@@ -82,6 +89,7 @@ function setMapButtonLabelsLocal(hasFilters) {
 let updateSearchMapButtonLabels = setMapButtonLabelsLocal;
 
 function closeSearchMapDom() {
+  if (suppressMapClose || peekMapOpenOnReturn()) return;
   closeSearchResultsMapFn?.();
   const root = document.getElementById("search-map-modal");
   if (root) root.hidden = true;
@@ -198,6 +206,7 @@ window.addEventListener("bymy-listing-open", () => {
 (function applyEarlySearchRestore() {
   if (PAGE !== "auto" && PAGE !== "teherauto") return;
   try {
+    if (peekMapOpenOnReturn()) suppressMapClose = true;
     const ss = new URLSearchParams(window.location.search).get("ss");
     if (ss) {
       const decoded = decodeSavedSearchParam(ss);
@@ -742,8 +751,7 @@ function previewFilterCountsOnly() {
 function applyFilters({ commit = false } = {}) {
   if (commit && isVehicleSearchPage() && !isSellerMode()) {
     searchResultsCommitted = true;
-    // Vissza gomb: térkép újra nyílik — ne csukjuk be / ne versenyezzünk vele.
-    if (!peekMapOpenOnReturn()) closeSearchMapDom();
+    closeSearchMapDom();
   }
 
   if (isFeaturedBrowseMode()) {
@@ -879,7 +887,7 @@ initHomeUnifiedScroll();
 if (PAGE === "auto" || PAGE === "teherauto") {
   ensureMapModule = () => {
     if (!mapModulePromise) {
-      mapModulePromise = import("./search-results-map.js?v=searchBack5")
+      mapModulePromise = import("./search-results-map.js?v=searchBack6")
         .then((mod) => {
           updateSearchMapButtonLabels = mod.updateSearchMapButtonLabels;
           closeSearchResultsMapFn = mod.closeSearchResultsMap;
@@ -1204,11 +1212,38 @@ loadListings()
 
 window.addEventListener("pageshow", (event) => {
   if (!event.persisted) return;
+  const mapWasOpen =
+    Boolean(document.getElementById("search-map-modal")) &&
+    document.getElementById("search-map-modal")?.hidden === false;
+  if (mapWasOpen || peekMapOpenOnReturn()) suppressMapClose = true;
   loadListings()
-    .then(() => {
+    .then(async () => {
       if (searchResultsCommitted) applyFilters({ commit: true });
+      if (peekMapOpenOnReturn()) {
+        await reopenMapAfterReturn();
+        return;
+      }
+      if (mapWasOpen && typeof ensureMapModule === "function") {
+        try {
+          const mod = await ensureMapModule();
+          await mod.openSearchResultsMap(currentFilteredListings(), {
+            mode: hasActiveClientFilters() ? "filtered" : "browse",
+            preferHomeZoom: !hasActiveClientFilters(),
+          });
+        } catch (error) {
+          console.warn("Térkép bfcache frissítés:", error);
+        } finally {
+          window.setTimeout(() => {
+            suppressMapClose = false;
+          }, 2500);
+        }
+      } else {
+        suppressMapClose = false;
+      }
     })
-    .catch(() => {});
+    .catch(() => {
+      suppressMapClose = false;
+    });
 });
 
 document.addEventListener("visibilitychange", () => {

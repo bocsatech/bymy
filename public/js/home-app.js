@@ -18,7 +18,7 @@ import {
   initIngatlanSearch,
 } from "./ingatlan-search.js?v=mobFix8";
 import { normalizeIngatlanUzletag } from "./ingatlan-fields.js?v=immoEladoDefault1";
-import { filterByCategory, initHomeCategoryBar, renderHomeCategoryBar } from "./home-category-bar.js?v=catFuel1";
+import { filterByCategory, initHomeCategoryBar, renderHomeCategoryBar } from "./home-category-bar.js?v=catFix2";
 import { initHomeUnifiedScroll } from "./home-unified-scroll.js";
 import { initHomeStatsBar } from "./home-stats-bar.js?v=mapPostal2";
 import { buildNearbyFilter, readNearbyPrefs } from "./nearby-search.js?v=mapCity1";
@@ -320,6 +320,10 @@ window.addEventListener("bymy-listing-open", () => {
 (function applyEarlySearchRestore() {
   if (PAGE !== "auto" && PAGE !== "teherauto") return;
   try {
+    // Kategória csempe (?cat=) elsőbbség — ne írja felül a mentett keresés.
+    if (new URLSearchParams(window.location.search).get("cat") || new URLSearchParams(window.location.search).get("category")) {
+      return;
+    }
     if (peekMapOpenOnReturn()) suppressMapClose = true;
     const ss = new URLSearchParams(window.location.search).get("ss");
     if (ss) {
@@ -1102,6 +1106,11 @@ if (PAGE !== "ingatlan") {
   categoryUi = initHomeCategoryBar({
     onChange: (category) => {
       categoryFilter = category;
+      if (category) {
+        quickSearchFilters = emptyFilters();
+        detailedFilters = null;
+        sidebarFilters = emptyFilters();
+      }
       applyFilters({ commit: Boolean(category) });
       if (category) scrollToListings();
     },
@@ -1158,12 +1167,26 @@ if (PAGE === "ingatlan") {
       const { detailed, ...sidebarValues } = values ?? {};
       quickSearchFilters = { ...emptyFilters(), ...sidebarValues };
       detailedFilters = detailed ?? null;
-      categoryUi?.clear();
-      categoryFilter = null;
-      const url = new URL(window.location.href);
-      if (url.searchParams.has("cat")) {
-        url.searchParams.delete("cat");
-        history.replaceState(null, "", url);
+
+      const empty =
+        !values ||
+        (typeof values === "object" &&
+          !Object.keys(values).filter((k) => k !== "detailed").length &&
+          !detailed);
+      const hasSidebar =
+        hasActiveSidebarFilters(sidebarValues) ||
+        (detailed && hasActiveDetailedSearch(detailed));
+
+      // Desk / gyorskereső indítás: csak valódi szűrőnél kapcsoljuk ki a kategória csempét.
+      // Üres onSearch({}) (form boot / zaj) ne törölje a ?cat= szűrőt.
+      if (hasSidebar) {
+        categoryUi?.clear();
+        categoryFilter = null;
+        const url = new URL(window.location.href);
+        if (url.searchParams.has("cat")) {
+          url.searchParams.delete("cat");
+          history.replaceState(null, "", url);
+        }
       }
 
       const postal = String(values.iranyitoszam || "")
@@ -1185,13 +1208,13 @@ if (PAGE === "ingatlan") {
         quickRadiusFilter = null;
       }
 
-      const empty =
-        !values ||
-        (typeof values === "object" &&
-          !Object.keys(values).filter((k) => k !== "detailed").length &&
-          !detailed);
       if (empty && isVehicleSearchPage()) {
         if (searchRestoreInProgress) return;
+        // Aktív kategória (?cat= / csempe): maradjon a szűrt lista.
+        if (categoryFilter) {
+          applyFilters({ commit: true });
+          return;
+        }
         searchResultsCommitted = false;
         quickRadiusFilter = null;
         clearVehicleSearchState();
@@ -1249,8 +1272,9 @@ if (PAGE === "ingatlan") {
   });
 
   const savedParam = new URLSearchParams(window.location.search).get("ss");
-  const restoreFromSession = !savedParam && shouldRestoreVehicleSearch(PAGE);
-  if ((savedParam || restoreFromSession || searchResultsCommitted) && quickSearchApi) {
+  const urlCategory = initialCategoryFromUrl();
+  const restoreFromSession = !savedParam && !urlCategory && shouldRestoreVehicleSearch(PAGE);
+  if ((savedParam || restoreFromSession || (searchResultsCommitted && !urlCategory)) && quickSearchApi) {
     quickSearchApi.whenReady.then(async () => {
       try {
         let filters = null;

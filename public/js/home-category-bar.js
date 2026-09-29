@@ -147,10 +147,22 @@ export function initHomeCategoryBar({ onChange, getForm, initialCategory = null 
     }
     const form = getForm?.();
     if (form && activeCategory) {
-      form.reset();
-      const fuelQuick = form.querySelector("#filter-uzemanyag-quick");
-      if (fuelQuick) fuelQuick.value = "";
-      form.querySelectorAll("[data-fuel-quick]").forEach((btn) => btn.classList.remove("is-active"));
+      // form.reset() async onSearch({}) törölné a frissen beállított kategóriát —
+      // csak a gyors üzemanyag UI-t nullázzuk, reset esemény nélkül.
+      form.dataset.haCategoryReset = "1";
+      try {
+        const fuelQuick = form.querySelector("#filter-uzemanyag-quick");
+        if (fuelQuick) fuelQuick.value = "";
+        form.querySelectorAll("[data-fuel-quick]").forEach((btn) => btn.classList.remove("is-active"));
+        form.querySelectorAll("select, input").forEach((el) => {
+          if (el.type === "hidden" || el.type === "submit" || el.type === "button") return;
+          if (el.matches("[data-keep-on-category]")) return;
+          if (el.type === "checkbox" || el.type === "radio") el.checked = false;
+          else el.value = "";
+        });
+      } finally {
+        delete form.dataset.haCategoryReset;
+      }
     }
     syncButtons();
     if (syncUrl) {

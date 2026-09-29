@@ -1174,14 +1174,21 @@ export async function refreshOpenSearchResultsMap(items, opts = {}) {
 export function initSearchResultsMapButtons({
   getItems,
   hasActiveFilters,
+  useListResults,
+  ensureAllListingsLoaded,
   getVertical,
 } = {}) {
   const buttons = document.querySelectorAll("[data-search-map-open]");
   if (!buttons.length) return;
 
+  /** Lista eredmény (szűrő VAGY „Találatok mutatása”) → ne a lakhely 10 km-e. */
+  const shouldUseList = () => {
+    if (typeof useListResults === "function") return Boolean(useListResults());
+    return typeof hasActiveFilters === "function" ? Boolean(hasActiveFilters()) : false;
+  };
+
   const syncLabel = () => {
-    const filtered = typeof hasActiveFilters === "function" ? Boolean(hasActiveFilters()) : false;
-    updateSearchMapButtonLabels(filtered);
+    updateSearchMapButtonLabels(shouldUseList());
   };
   syncLabel();
 
@@ -1200,9 +1207,17 @@ export function initSearchResultsMapButtons({
       btn.disabled = true;
       try {
         syncLabel();
-        const filtered = typeof hasActiveFilters === "function" ? Boolean(hasActiveFilters()) : false;
+        const fromList = shouldUseList();
         let items;
-        if (filtered) {
+        if (fromList) {
+          if (btn) btn.textContent = "Térkép betöltése…";
+          if (typeof ensureAllListingsLoaded === "function") {
+            try {
+              await ensureAllListingsLoaded();
+            } catch (error) {
+              console.warn("Térkép lista betöltés:", error);
+            }
+          }
           items = await resolveMapItems(getItems);
           await openSearchResultsMap(items, { mode: "filtered" });
         } else {
@@ -1244,8 +1259,8 @@ export function initSearchResultsMapButtons({
               });
             }
           }
-          syncLabel();
         }
+        syncLabel();
       } finally {
         btn.disabled = false;
         syncLabel();

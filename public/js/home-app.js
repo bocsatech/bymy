@@ -637,7 +637,7 @@ function renderFeaturedBrowse() {
   featuredListingIds = featuredListingIdSet(allItems);
   renderListings(browseFeaturedItems, { bypassFilters: true });
   updateFilterResultCount();
-  updateSearchMapButtonLabels(hasActiveClientFilters());
+  updateSearchMapButtonLabels(searchResultsCommitted || hasActiveClientFilters());
 }
 
 function pageVerticalParam() {
@@ -737,6 +737,7 @@ async function loadListings() {
 
   updateFilterResultCount();
   statsUi?.refreshActiveCount?.();
+  updateSearchMapButtonLabels(searchResultsCommitted || hasActiveClientFilters());
   bindListingsInfiniteScroll();
   bindListingsScrollHide();
   await applyNearbyFromUrl();
@@ -818,6 +819,7 @@ async function loadMoreListings({ silent = false } = {}) {
         updateFilterResultCount();
         statsUi?.refreshActiveCount?.();
       }
+      void refreshOpenMapPins();
       break;
     }
   } catch (error) {
@@ -889,7 +891,7 @@ async function fillFilteredResults() {
 function previewFilterCountsOnly() {
   updateDeskResultCount(filterItems(allItems));
   updateFilterResultCount();
-  updateSearchMapButtonLabels(hasActiveClientFilters());
+  updateSearchMapButtonLabels(searchResultsCommitted || hasActiveClientFilters());
   if (isFeaturedBrowseMode()) {
     browseFeaturedItems = pickFeaturedListings(allItems);
     featuredListingIds = featuredListingIdSet(allItems);
@@ -916,7 +918,7 @@ function applyFilters({ commit = false } = {}) {
   renderListings(allItems);
   updateFilterResultCount();
   if (PAGE === "auto" || PAGE === "teherauto") {
-    updateSearchMapButtonLabels(hasActiveClientFilters());
+    updateSearchMapButtonLabels(searchResultsCommitted || hasActiveClientFilters());
   }
   if (hasActiveClientFilters()) {
     void fillFilteredResults().then((grew) => {
@@ -1098,19 +1100,34 @@ function hasActiveSidebarFilters(filters) {
 
 initHomeUnifiedScroll();
 
+async function ensureAllListingsLoadedForMap() {
+  if (!searchResultsCommitted && isVehicleSearchPage()) return;
+  let guard = 0;
+  while (listingsHasMore && guard < 80) {
+    guard += 1;
+    const before = allItems.length;
+    await loadMoreListings({ silent: true });
+    if (allItems.length === before) break;
+  }
+  if (!isFeaturedBrowseMode()) renderListings(allItems);
+  updateFilterResultCount();
+}
+
 if (PAGE === "auto" || PAGE === "teherauto") {
   ensureMapModule = () => {
     if (!mapModulePromise) {
-      mapModulePromise = import("./search-results-map.js?v=listFlash1")
+      mapModulePromise = import("./search-results-map.js?v=mapList1")
         .then((mod) => {
           updateSearchMapButtonLabels = mod.updateSearchMapButtonLabels;
           closeSearchResultsMapFn = mod.closeSearchResultsMap;
           mod.initSearchResultsMapButtons({
             getItems: currentFilteredListings,
             hasActiveFilters: () => hasActiveClientFilters(),
+            useListResults: () => searchResultsCommitted || hasActiveClientFilters(),
+            ensureAllListingsLoaded: ensureAllListingsLoadedForMap,
             getVertical: () => pageVerticalParam(),
           });
-          updateSearchMapButtonLabels(hasActiveClientFilters());
+          updateSearchMapButtonLabels(searchResultsCommitted || hasActiveClientFilters());
           return mod;
         })
         .catch((error) => {
@@ -1143,10 +1160,11 @@ if (PAGE === "auto" || PAGE === "teherauto") {
     );
   });
 
-  setMapButtonLabelsLocal(hasActiveClientFilters());
+  setMapButtonLabelsLocal(searchResultsCommitted || hasActiveClientFilters());
   document.getElementById("home-qs-form")?.addEventListener("change", () => {
-    if (mapModulePromise) updateSearchMapButtonLabels(hasActiveClientFilters());
-    else setMapButtonLabelsLocal(hasActiveClientFilters());
+    const useList = searchResultsCommitted || hasActiveClientFilters();
+    if (mapModulePromise) updateSearchMapButtonLabels(useList);
+    else setMapButtonLabelsLocal(useList);
   });
 }
 
@@ -1365,7 +1383,7 @@ if (PAGE === "ingatlan") {
           }
         }
         renderListings(allItems);
-        updateSearchMapButtonLabels(hasActiveClientFilters());
+        updateSearchMapButtonLabels(searchResultsCommitted || hasActiveClientFilters());
         // URL + session — ne a form-olvasás döntsön restore közben
         saveVehicleSearchState({
           page: PAGE,

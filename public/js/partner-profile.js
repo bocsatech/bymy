@@ -336,7 +336,7 @@ export async function renderPartnerManage(mountRoot) {
         <div class="partner-form-title"><div><h2>${isCompany ? "4" : "2"}. Publikus partnerprofil</h2></div></div>
         <div class="partner-form-grid">
           <label>Publikus profilcím *<span class="partner-slug"><span>bymy.hu/partner/</span><input name="slug" value="${esc(profile.slug)}" maxlength="100" required /></span></label>
-          <label>Jutalék *<input name="commission" value="${esc(profile.commission)}" maxlength="80" required placeholder="pl. bruttó 2–4%" /></label>
+          <label>Jutalék * (csak ingatlan kereskedők)<input name="commission" value="${esc(profile.commission)}" maxlength="80" required placeholder="pl. bruttó 2–4%" /></label>
           <label>Weboldal<input name="website" type="url" value="${esc(profile.website)}" placeholder="https://…" maxlength="300" /></label>
           <label>Profilkép URL<input name="logoUrl" type="url" value="${esc(profile.logo_url)}" placeholder="https://…" /></label>
           <label>Borítókép URL<input name="coverUrl" type="url" value="${esc(profile.cover_url)}" placeholder="https://…" /></label>

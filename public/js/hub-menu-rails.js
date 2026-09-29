@@ -1,4 +1,4 @@
-import { HOME_CATEGORIES, autoCategoryHref } from "./home-category-bar.js?v=dizelHu1";
+import { HOME_CATEGORIES, autoCategoryHref } from "./home-category-bar.js?v=catFuel1";
 import {
   categoriesForVertical,
   partnerCategoryImageUrl,

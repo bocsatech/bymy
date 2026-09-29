@@ -18,7 +18,7 @@ import {
   initIngatlanSearch,
 } from "./ingatlan-search.js?v=mobFix8";
 import { normalizeIngatlanUzletag } from "./ingatlan-fields.js?v=immoEladoDefault1";
-import { filterByCategory, initHomeCategoryBar, renderHomeCategoryBar } from "./home-category-bar.js?v=dizelHu1";
+import { filterByCategory, initHomeCategoryBar, renderHomeCategoryBar, HOME_CATEGORY_IDS } from "./home-category-bar.js?v=catFuel1";
 import { initHomeUnifiedScroll } from "./home-unified-scroll.js";
 import { initHomeStatsBar } from "./home-stats-bar.js?v=mapPostal2";
 import { buildNearbyFilter, readNearbyPrefs } from "./nearby-search.js?v=mapCity1";
@@ -373,6 +373,21 @@ let truckSubtypeFilter = initialTruckSubtypeFromUrl();
 function initialCategoryFromUrl() {
   const params = new URLSearchParams(window.location.search);
   return params.get("cat") || params.get("category") || null;
+}
+
+function resolveCategoryFromUrl() {
+  const raw = String(initialCategoryFromUrl() || "").trim();
+  if (!raw) return null;
+  return HOME_CATEGORY_IDS.includes(raw) ? raw : null;
+}
+
+/** Kezdőoldal csempe → auto.html?cat=… — azonnal szűrt lista (ne a kiemelt böngésző). */
+if (PAGE === "auto" || PAGE === "teherauto") {
+  const fromUrl = resolveCategoryFromUrl();
+  if (fromUrl) {
+    categoryFilter = fromUrl;
+    searchResultsCommitted = true;
+  }
 }
 
 function scrollToListings() {
@@ -1185,7 +1200,7 @@ if ("scrollRestoration" in history) {
 }
 window.scrollTo(0, 0);
 
-const initialCategory = PAGE === "teherauto" ? initialCategoryFromUrl() : null;
+const initialCategory = PAGE === "teherauto" ? categoryFilter : null;
 
 if (PAGE === "teherauto") {
   renderHomeCategoryBar(document.getElementById("home-category-bar"));

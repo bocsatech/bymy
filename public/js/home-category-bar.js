@@ -101,12 +101,21 @@ function matchesCategory(item, categoryId) {
         (year != null && year >= currentYear - 1)
       );
     case "benzin":
-      // Csak tiszta benzin — hibrid almenük nem
-      return fuelValueMatches(fuel, ["Benzin"]) && !fuelValueMatches(fuel, ["Hibrid"]);
+      // Csak tiszta benzin — dízel / elektromos / hibrid tilos.
+      return (
+        fuelValueMatches(fuel, ["Benzin"]) &&
+        !fuelValueMatches(fuel, ["Hibrid"]) &&
+        !fuelValueMatches(fuel, ["Dízel"]) &&
+        !fuelValueMatches(fuel, ["Elektromos"])
+      );
     case "diesel":
-      return fuelValueMatches(fuel, ["Dízel"]) && !fuelValueMatches(fuel, ["Hibrid"]);
+      return (
+        fuelValueMatches(fuel, ["Dízel"]) &&
+        !fuelValueMatches(fuel, ["Hibrid"]) &&
+        !fuelValueMatches(fuel, ["Elektromos"])
+      );
     case "elektromos":
-      return fuelValueMatches(fuel, ["Elektromos"]);
+      return fuelValueMatches(fuel, ["Elektromos"]) && !fuelValueMatches(fuel, ["Hibrid"]);
     case "hybrid":
       // Üzemanyag hibrid + almenük (Benzin/elektromos, Dízel/elektromos, …). Cím NEM.
       return fuelValueMatches(fuel, ["Hibrid"]);

@@ -6,7 +6,7 @@ import {
   loadProfileFromServer,
   saveProfile,
   initSiteAuth,
-} from "./site-auth.js?v=coName1";
+} from "./site-auth.js?v=coKind1";
 import {
   getDeviceIdentity,
   identityForAccountKind,

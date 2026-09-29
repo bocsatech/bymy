@@ -12,7 +12,9 @@ import {
   initSiteAuth,
   isPrivateAccount,
   isPrivateProfileComplete,
-} from "./site-auth.js?v=coName1";
+  resolveAccountKind,
+  applyAccountKindToDocument,
+} from "./site-auth.js?v=coKind1";
 import { wirePostalCityAutofill } from "./postal-city-autofill.js?v=postalFill2";
 import {
   getParkplatz,
@@ -1007,14 +1009,21 @@ function accountTypeSidebarLabel(type) {
 function syncSidebarAccountType(type) {
   const el = document.querySelector("[data-mm-account-type]");
   const settingsNav = document.querySelector("[data-mm-settings-nav]");
-  const fromDb = type === "business" || type === "dealer" ? type : "private";
-  const companyType = isCompanyAccount(fromDb);
-  /* Láthatóság / sorrend: HTML + CSS (data-mm-account-kind). Ne hidden/prepend. */
-  document.documentElement.setAttribute("data-mm-account-kind", companyType ? "company" : "private");
-  try {
-    localStorage.setItem("bymy-account-kind", companyType ? "company" : "private");
-  } catch {
+  const raw = String(type || "").trim().toLowerCase();
+  let fromDb = "private";
+  let companyType = false;
+  if (raw === "business" || raw === "dealer") {
+    fromDb = raw;
+    companyType = true;
+    applyAccountKindToDocument("company");
+  } else if (raw === "private") {
+    applyAccountKindToDocument("private");
+  } else {
+    const kind = applyAccountKindToDocument(resolveAccountKind(getAuthUser()));
+    companyType = kind === "company";
+    fromDb = companyType ? "business" : "private";
   }
+  /* Láthatóság / sorrend: HTML + CSS (data-mm-account-kind). */
   if (el) {
     el.textContent = accountTypeSidebarLabel(fromDb);
     el.hidden = false;

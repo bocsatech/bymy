@@ -152,7 +152,14 @@
     </main>
 
     <script type="module">
-      import { initSiteAuth, getAuthUser, getProfile } from "/js/site-auth.js?v=fiokWebMenu1";
+      import {
+        initSiteAuth,
+        getAuthUser,
+        getProfile,
+        loadProfileFromServer,
+        resolveAccountKind,
+        applyAccountKindToDocument,
+      } from "/js/site-auth.js?v=coKind1";
 
       initSiteAuth();
 
@@ -173,12 +180,9 @@
         const hello = document.querySelector("[data-mm-hello]");
         if (hello) hello.textContent = firstName(user) || "—";
 
-        const type = String(profile.accountType || "").trim();
-        const isCompany = type === "business" || type === "dealer";
-        document.documentElement.setAttribute("data-mm-account-kind", isCompany ? "company" : "private");
-        try {
-          localStorage.setItem("bymy-account-kind", isCompany ? "company" : "private");
-        } catch (e) {}
+        const kind = applyAccountKindToDocument(resolveAccountKind(user));
+        const isCompany = kind === "company";
+        const type = String(user?.profile?.accountType || profile.accountType || "").trim();
         const typeEl = document.querySelector("[data-mm-account-type]");
         if (typeEl) {
           if (isCompany) {
@@ -193,6 +197,10 @@
 
       syncSidebar();
       window.addEventListener("bymy-auth-changed", syncSidebar);
+      window.addEventListener("site-auth-ready", syncSidebar);
+      loadProfileFromServer()
+        .then(() => syncSidebar())
+        .catch(() => {});
     </script>
   </body>
 </html>

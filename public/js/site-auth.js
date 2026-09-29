@@ -85,11 +85,42 @@ function setCachedUser(user) {
     }
     return null;
   }
+  let profile = user.profile || null;
+  try {
+    const prevRaw = sessionStorage.getItem(AUTH_KEY);
+    const prev = prevRaw ? JSON.parse(prevRaw) : null;
+    if (prev?.email === user.email && prev?.profile && profile) {
+      const incomingType = String(profile.accountType || "").toLowerCase();
+      const prevType = String(prev.profile.accountType || "").toLowerCase();
+      const incomingLooksEmpty =
+        !String(profile.company || "").trim() &&
+        !String(profile.companyTaxId || "").trim() &&
+        !String(profile.firstName || "").trim() &&
+        !String(profile.postalCode || "").trim();
+      /* Light /api/auth/me ne írja felül a céges accountType-ot üres private profillal. */
+      if (
+        incomingLooksEmpty &&
+        (incomingType === "private" || !incomingType) &&
+        (prevType === "business" || prevType === "dealer")
+      ) {
+        profile = {
+          ...prev.profile,
+          ...profile,
+          accountType: prev.profile.accountType,
+          company: prev.profile.company || profile.company,
+          companyListingName: prev.profile.companyListingName || profile.companyListingName,
+        };
+      } else if (prev.profile && incomingType) {
+        profile = { ...prev.profile, ...profile };
+      }
+    }
+  } catch {
+  }
   const cached = {
     id: user.id,
     email: user.email,
     displayName: user.displayName || null,
-    profile: user.profile || null,
+    profile,
     loggedInAt: Date.now(),
   };
   try {
@@ -464,6 +495,39 @@ export function getProfile() {
   return { ...EMPTY_PROFILE, ...(user.profile || {}) };
 }
 
+/** Fiók menü: company vs private — raw profile, ne az EMPTY default. */
+export function resolveAccountKind(user = getAuthUser()) {
+  const raw = String(user?.profile?.accountType || "").trim().toLowerCase();
+  if (raw === "business" || raw === "dealer") return "company";
+  if (raw === "private") return "private";
+  const p = user?.profile || {};
+  if (
+    String(p.company || "").trim() ||
+    String(p.companyTaxId || "").trim() ||
+    String(p.companyListingName || "").trim()
+  ) {
+    return "company";
+  }
+  try {
+    if (localStorage.getItem("bymy-account-kind") === "company") return "company";
+  } catch {
+  }
+  return "private";
+}
+
+export function applyAccountKindToDocument(kind = resolveAccountKind()) {
+  const next = kind === "company" ? "company" : "private";
+  try {
+    document.documentElement.setAttribute("data-mm-account-kind", next);
+  } catch {
+  }
+  try {
+    localStorage.setItem("bymy-account-kind", next);
+  } catch {
+  }
+  return next;
+}
+
 function profileSaveLooksOk(profile) {
   if (!profile) return false;
   if (profile.accountType === "business" || profile.accountType === "dealer") {
@@ -621,6 +685,8 @@ function updateHeaderAuthUi() {
   lastNameEls.forEach((el) => {
     el.textContent = lastName || "";
   });
+
+  applyAccountKindToDocument(loggedIn ? resolveAccountKind(user) : "private");
 
   window.dispatchEvent(new CustomEvent("bymy-auth-changed"));
 }

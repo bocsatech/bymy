@@ -24,7 +24,7 @@ const HU_ZOOM = 7;
 const CLUSTER_ZOOM = 11;
 const JITTER_DEG = 0.0035;
 const OSRM_URL = "https://router.project-osrm.org/route/v1/driving";
-const LABEL_BROWSE = "Keresés a térképen";
+const LABEL_BROWSE = "Autók a Közelben";
 const LABEL_FILTERED = "Találatok a térképen";
 /** Böngésző térkép: lakhely körüli sugar (km), csoportosítva. */
 const MAP_BROWSE_RADIUS_KM = 10;

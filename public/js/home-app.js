@@ -173,7 +173,7 @@ async function reopenMapAfterReturn() {
   }
 }
 
-const MAP_LABEL_BROWSE = "Keresés a térképen";
+const MAP_LABEL_BROWSE = "Autók a Közelben";
 const MAP_LABEL_FILTERED = "Találatok a térképen";
 
 function setMapButtonLabelsLocal(hasFilters) {
@@ -1116,7 +1116,7 @@ async function ensureAllListingsLoadedForMap() {
 if (PAGE === "auto" || PAGE === "teherauto") {
   ensureMapModule = () => {
     if (!mapModulePromise) {
-      mapModulePromise = import("./search-results-map.js?v=mapList4")
+      mapModulePromise = import("./search-results-map.js?v=mapNear1")
         .then((mod) => {
           updateSearchMapButtonLabels = mod.updateSearchMapButtonLabels;
           closeSearchResultsMapFn = mod.closeSearchResultsMap;

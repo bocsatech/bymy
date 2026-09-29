@@ -1116,12 +1116,20 @@ async function ensureAllListingsLoadedForMap() {
 if (PAGE === "auto" || PAGE === "teherauto") {
   ensureMapModule = () => {
     if (!mapModulePromise) {
-      mapModulePromise = import("./search-results-map.js?v=mapList1")
+      mapModulePromise = import("./search-results-map.js?v=mapList2")
         .then((mod) => {
           updateSearchMapButtonLabels = mod.updateSearchMapButtonLabels;
           closeSearchResultsMapFn = mod.closeSearchResultsMap;
           mod.initSearchResultsMapButtons({
-            getItems: currentFilteredListings,
+            getItems: () => {
+              try {
+                const filtered = currentFilteredListings();
+                if (filtered.length) return filtered;
+              } catch {
+              }
+              if (allItems?.length) return filterItems(allItems);
+              return [];
+            },
             hasActiveFilters: () => hasActiveClientFilters(),
             useListResults: () => searchResultsCommitted || hasActiveClientFilters(),
             ensureAllListingsLoaded: ensureAllListingsLoadedForMap,

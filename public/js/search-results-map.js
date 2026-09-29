@@ -9,7 +9,7 @@ import {
   normalizePlace,
   resolveCityCoords,
   resolveListingCoords,
-} from "./listing-radius.js?v=mapCity3";
+} from "./listing-radius.js?v=mapCity4";
 import {
   listingDetailHref,
   rememberListingOpen,
@@ -18,7 +18,7 @@ import {
 import { listingTileTitle, listingTilePrice } from "./listing-tile.js?v=listThumb1";
 import { getAuthUser, loadProfileFromServer } from "./site-auth.js?v=bootFix2";
 import { fetchListingsPage } from "./db-client.js?v=ownerBoost6";
-import { buildNearbyFilter, readNearbyPrefs } from "./nearby-search.js?v=mapCity3";
+import { buildNearbyFilter, readNearbyPrefs } from "./nearby-search.js?v=mapCity4";
 
 const HU_CENTER = [47.1625, 19.5033];
 const HU_ZOOM = 7;
@@ -484,9 +484,11 @@ function placeListings(items, cityIndex, postalIndex = null) {
     }
     const city = String(coords.city || listingCityName(item) || "").trim() || "Ismeretlen";
     const postal = String(coords.postal || "").replace(/\D/g, "").slice(0, 4);
-    const cityNorm = normalizePlace(city);
-    /* Csoportosítás településnév szerint — ne irányítószám szerint. */
-    const key = cityNorm ? `c:${cityNorm}` : `ll:${coords.lat.toFixed(4)},${coords.lon.toFixed(4)}`;
+    /* Pin helye: irsz / pontos koord. Csoport csak azonos pontra (jitter). */
+    const key =
+      postal.length === 4
+        ? `p:${postal}`
+        : `ll:${Number(coords.lat).toFixed(4)},${Number(coords.lon).toFixed(4)}`;
     if (!byKey.has(key)) {
       byKey.set(key, {
         city,
@@ -495,6 +497,8 @@ function placeListings(items, cityIndex, postalIndex = null) {
         baseLon: coords.lon,
         items: [],
       });
+    } else if (!byKey.get(key).city || byKey.get(key).city === "Ismeretlen") {
+      byKey.get(key).city = city;
     }
     byKey.get(key).items.push(item);
   }

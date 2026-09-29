@@ -128,25 +128,38 @@ export function resolveListingCoords(item, cityIndex, postalIndex = null) {
   const postal = listingPostalCode(item);
   const name = listingCityName(item);
 
-  /* 1) Településnév — térkép / körzet mindig helység alapján. */
-  const byCity = resolveCityCoords(name, cityIndex);
-  if (byCity) {
-    return { city: byCity.city, lat: byCity.lat, lon: byCity.lon, postal: postal || "" };
+  /* Településnév: melyik helységhez tartozik a hirdetés. */
+  let cityHit = resolveCityCoords(name, cityIndex);
+  let postalHit = null;
+  if (postal && postalIndex?.has(postal)) {
+    postalHit = postalIndex.get(postal);
+    if (!cityHit) {
+      const cityFromPostal = String(postalHit?.city || "").trim();
+      if (cityFromPostal) cityHit = resolveCityCoords(cityFromPostal, cityIndex);
+    }
   }
 
-  /* 2) Irsz → településnév, majd a település középpontja (ne az irsz-pin). */
-  if (postal && postalIndex?.has(postal)) {
-    const hit = postalIndex.get(postal);
-    const cityFromPostal = String(hit?.city || name || "").trim();
-    if (cityFromPostal) {
-      const viaCity = resolveCityCoords(cityFromPostal, cityIndex);
-      if (viaCity) {
-        return { city: viaCity.city, lat: viaCity.lat, lon: viaCity.lon, postal };
-      }
-    }
-    if (hit && !isDummyCoord(hit.lat, hit.lon)) {
-      return { city: cityFromPostal || name, lat: hit.lat, lon: hit.lon, postal: hit.postal };
-    }
+  const city =
+    cityHit?.city ||
+    String(postalHit?.city || name || "").trim() ||
+    "";
+
+  /* Pin: pontos irsz-koordináta, ha van; különben a település középpontja. */
+  if (postalHit && !isDummyCoord(postalHit.lat, postalHit.lon)) {
+    return {
+      city: city || postalHit.city || name,
+      lat: postalHit.lat,
+      lon: postalHit.lon,
+      postal: postalHit.postal || postal || "",
+    };
+  }
+  if (cityHit) {
+    return {
+      city: cityHit.city,
+      lat: cityHit.lat,
+      lon: cityHit.lon,
+      postal: postal || "",
+    };
   }
 
   return null;

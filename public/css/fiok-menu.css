@@ -48,7 +48,7 @@ body.fiok-page .fiok-top-spacer {
 }
 
 body.fiok-page .fiok-main {
-  padding: 0.25rem 1rem max(1.5rem, env(safe-area-inset-bottom, 0px));
+  padding: 0.25rem 1rem max(5.5rem, calc(4.25rem + env(safe-area-inset-bottom, 0px)));
   max-width: 420px;
   margin: 0 auto;
 }

@@ -172,8 +172,8 @@ const SETTINGS_SECTIONS = new Set([
   "notify",
   "megjelenes",
 ]);
-/** Cégadatok almenü alatt megjelenő szekciók (Cégadatok kattintás NEM ezek közé tartozik). */
-const COMPANY_SUB_SECTIONS = new Set(["partner-profil", "keresesi-korzet", "jelszo", "notify"]);
+/** Cégadatok almenü: csak cég-specifikus pontok (személyes beállítások a Beállítások alatt maradnak). */
+const COMPANY_SUB_SECTIONS = new Set(["partner-profil"]);
 const LEGACY_ACC_TO_SECTION = {
   personal: "szemelyes",
   searchArea: "keresesi-korzet",
@@ -1016,11 +1016,10 @@ function syncSidebarAccountType(type) {
     el.hidden = false;
   }
   if (companyWrap) companyWrap.hidden = !companyType;
-  if (settingsNav) settingsNav.hidden = companyType;
+  /* Beállítások (Személyes adatok stb.) mindkét fióktípusnál az Üzenetek után marad. */
+  if (settingsNav) settingsNav.hidden = false;
   const section = currentSection();
   if (!companyType && (section === "partner-profil" || section === "cegadatok")) {
-    clearSection();
-  } else if (companyType && (section === "fiok" || section === "szemelyes" || section === "megjelenes" || section === "ajanlasok-korzet")) {
     clearSection();
   } else {
     syncSettingsSubnav();

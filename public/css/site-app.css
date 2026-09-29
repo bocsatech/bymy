@@ -96,8 +96,9 @@ html[data-mm-account-kind="company"] body.settings-page [data-mm-company-nav-wra
   display: block !important;
 }
 
+/* Céges fióknál is legyen Beállítások / Személyes adatok az Üzenetek után (ne csak a Cégadatok alatt). */
 html[data-mm-account-kind="company"] body.settings-page [data-mm-settings-nav] {
-  display: none !important;
+  display: block !important;
 }
 
 body.site-app.settings-page .mm-boot-error {

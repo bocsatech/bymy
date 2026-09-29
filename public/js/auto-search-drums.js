@@ -6,7 +6,7 @@ import {
   syncDrumWheelDisplay,
   closeAllInlineDrums,
 } from "./immo-drum-picker.js?v=immoClear1";
-import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=brandDrum3";
+import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=brandDrum4";
 import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=priceSuggest1";
 
 const MOBILE_MQ = "(max-width: 900px)";
@@ -483,20 +483,22 @@ function catalogKindForDrums() {
   return "szemelyauto";
 }
 
+const CATALOG_STATIC_BUST = "brandCatalog4";
+
 async function fetchCatalogQuick() {
   const kind = catalogKindForDrums();
   const staticUrl =
     kind === "kisteher"
-      ? "/data/vehicle-catalog-kisteher.json?v=teherStrict3"
-      : "/data/vehicle-catalog.json";
+      ? `/data/vehicle-catalog-kisteher.json?v=${CATALOG_STATIC_BUST}`
+      : `/data/vehicle-catalog.json?v=${CATALOG_STATIC_BUST}`;
   try {
-    const res = await fetch(staticUrl, { cache: kind === "kisteher" ? "no-store" : "force-cache" });
+    const res = await fetch(staticUrl, { cache: "no-store" });
     const data = await res.json();
     if (data?.gyartmanyok?.length) return data;
   } catch {
     /* fallback API */
   }
-  const { fetchVehicleCatalog } = await import("./vehicle-catalog-client.js?v=teherStrict3");
+  const { fetchVehicleCatalog } = await import(`./vehicle-catalog-client.js?v=${CATALOG_STATIC_BUST}`);
   return fetchVehicleCatalog({ kind });
 }
 
@@ -540,7 +542,7 @@ function ensureBrandModelDrumCells(form) {
 
 async function mountBrandModelCatalogDrums(form) {
   ensureBrandModelDrumCells(form);
-  if (!form.querySelector('[data-wheel="gyartmany"]') || !form.querySelector('[data-wheel="modell"]')) return;
+  if (!form.querySelector('[data-wheel="gyartmany"]')) return;
 
   const brandWrap = form.querySelector('[data-wheel="gyartmany"]')?.closest(".immo-wheel-wrap");
   const brandTrigger = brandWrap?.querySelector(".immo-wheel-trigger");
@@ -587,10 +589,12 @@ async function mountBrandModelCatalogDrums(form) {
     rebindWheel(form, "modell", models);
   };
 
-  fillModels([]);
-  brandWheel.addEventListener("immo-wheel-change", () => {
-    fillModels(readWheelList(form.querySelector('[data-wheel="gyartmany"]')));
-  });
+  if (form.querySelector('[data-wheel="modell"]')) {
+    fillModels([]);
+    brandWheel.addEventListener("immo-wheel-change", () => {
+      fillModels(readWheelList(form.querySelector('[data-wheel="gyartmany"]')));
+    });
+  }
 }
 
 export async function mountAutoSearchDrums(form = document.getElementById("home-qs-form")) {

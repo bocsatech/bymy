@@ -163,7 +163,23 @@ function positionPortal(stage, trigger) {
   stage.style.top = "48%";
 }
 
+/** @typedef {{ value: string, label: string }} DrumSheetItem */
+
+/** @param {HTMLElement[] | DrumSheetItem[]} opts */
+function normalizeSheetItems(opts, emptyLabel) {
+  if (!opts?.length) return [{ value: "", label: emptyLabel }];
+  const first = opts[0];
+  if (first && typeof first === "object" && "value" in first && !("dataset" in first)) {
+    return /** @type {DrumSheetItem[]} */ (opts);
+  }
+  return opts.map((btn) => ({
+    value: btn.dataset?.value ?? "",
+    label: (btn.textContent || "").trim() || emptyLabel,
+  }));
+}
+
 function openMultiSwitchSheet(wheel, trigger, wrap, emptyLabel, opts) {
+  const items = normalizeSheetItems(opts, emptyLabel);
   const selected = readWheelList(wheel);
   const root = document.createElement("div");
   root.className = "auto-drum-portal auto-drum-portal--multi";
@@ -188,10 +204,8 @@ function openMultiSwitchSheet(wheel, trigger, wrap, emptyLabel, opts) {
   const ring = root.querySelector(".auto-drum-portal__ring");
   const scrollEl = root.querySelector(".auto-drum-portal__scroll");
 
-  scrollEl.innerHTML = opts
-    .map((btn) => {
-      const value = btn.dataset.value ?? "";
-      const label = (btn.textContent || "").trim() || emptyLabel;
+  scrollEl.innerHTML = items
+    .map(({ value, label }) => {
       return `<div class="immo-drum-inline-item auto-drum-inline-item--switch" role="option" data-value="${escapeHtml(
         value
       )}">
@@ -266,39 +280,53 @@ function openMultiSwitchSheet(wheel, trigger, wrap, emptyLabel, opts) {
   });
 }
 
-async function refreshGyartmanyWheelIfNeeded(wheel, form) {
-  if (!wheel || wheel.getAttribute("data-wheel") !== "gyartmany") return;
-  const count = wheel.querySelectorAll(".immo-wheel-opt").length;
-  if (count > 15) return;
+const CATALOG_STATIC_BUST = "brandCatalog4";
+
+async function loadGyartmanyCatalog(form) {
   let catalog = form?._autoDrumCatalog;
-  if (!catalog?.gyartmanyok?.length) {
-    try {
-      const page = document.body?.getAttribute("data-site-page");
-      const kind = page === "teherauto" ? "kisteher" : "szemelyauto";
-      const staticUrl =
-        kind === "kisteher"
-          ? "/data/vehicle-catalog-kisteher.json?v=teherStrict3"
-          : "/data/vehicle-catalog.json";
-      const res = await fetch(staticUrl, { cache: kind === "kisteher" ? "no-store" : "force-cache" });
-      const data = await res.json();
-      if (data?.gyartmanyok?.length) catalog = data;
-      else {
-        const { fetchVehicleCatalog } = await import("./vehicle-catalog-client.js?v=teherStrict3");
-        catalog = await fetchVehicleCatalog({ kind });
-      }
-      if (form) form._autoDrumCatalog = catalog;
-    } catch {
-      return;
+  if (catalog?.gyartmanyok?.length > 20) return catalog;
+  try {
+    const page = document.body?.getAttribute("data-site-page");
+    const kind = page === "teherauto" ? "kisteher" : "szemelyauto";
+    const staticUrl =
+      kind === "kisteher"
+        ? `/data/vehicle-catalog-kisteher.json?v=${CATALOG_STATIC_BUST}`
+        : `/data/vehicle-catalog.json?v=${CATALOG_STATIC_BUST}`;
+    const res = await fetch(staticUrl, { cache: "no-store" });
+    const data = await res.json();
+    if (data?.gyartmanyok?.length) catalog = data;
+    else {
+      const { fetchVehicleCatalog } = await import(`./vehicle-catalog-client.js?v=${CATALOG_STATIC_BUST}`);
+      catalog = await fetchVehicleCatalog({ kind });
     }
+    if (form) form._autoDrumCatalog = catalog;
+    return catalog;
+  } catch {
+    return catalog?.gyartmanyok?.length ? catalog : null;
   }
-  const brands = (catalog?.gyartmanyok || []).map((b) => ({ value: b, label: b }));
-  if (!brands.length) return;
-  fillWheel(wheel, brands, { emptyLabel: "Mindegy" });
-  wheel.dataset.multiple = "1";
-  syncDrumWheelDisplay(wheel);
 }
 
-export function openAutoDrumSheet(wheel, trigger) {
+async function refreshGyartmanyWheelIfNeeded(wheel, form) {
+  if (!wheel || wheel.getAttribute("data-wheel") !== "gyartmany") return null;
+  const catalog = await loadGyartmanyCatalog(form);
+  const brands = (catalog?.gyartmanyok || []).map((b) => ({ value: b, label: b }));
+  if (brands.length) {
+    fillWheel(wheel, brands, { emptyLabel: "Mindegy" });
+    wheel.dataset.multiple = "1";
+    syncDrumWheelDisplay(wheel);
+  }
+  return catalog;
+}
+
+function gyartmanySheetItems(form, wheel, emptyLabel) {
+  const catalog = form?._autoDrumCatalog;
+  if (catalog?.gyartmanyok?.length) {
+    return [{ value: "", label: emptyLabel }, ...catalog.gyartmanyok.map((b) => ({ value: b, label: b }))];
+  }
+  return normalizeSheetItems([...wheel.querySelectorAll(".immo-wheel-opt")], emptyLabel);
+}
+
+export function openAutoDrumSheet(wheel, trigger, { sheetItems = null } = {}) {
   if (!wheel || !trigger) return;
   closeAutoDrumSheet(false);
   closeAllInlineDrums(false);
@@ -313,7 +341,8 @@ export function openAutoDrumSheet(wheel, trigger) {
   const opts = [...wheel.querySelectorAll(".immo-wheel-opt")];
 
   if (multiple) {
-    openMultiSwitchSheet(wheel, trigger, wrap, emptyLabel, opts);
+    const items = sheetItems ?? normalizeSheetItems(opts, emptyLabel);
+    openMultiSwitchSheet(wheel, trigger, wrap, emptyLabel, items);
     return;
   }
 
@@ -429,9 +458,12 @@ export function bindAutoDrumSheet(wheel) {
       (name && host.querySelector?.(`[data-wheel="${name}"]`)) ||
       next.closest(".immo-wheel-wrap")?.querySelector("[data-wheel]");
     if (!current) return;
+    let sheetItems = null;
     if (name === "gyartmany") {
       await refreshGyartmanyWheelIfNeeded(current, host);
+      const emptyLabel = next.dataset.emptyLabel || "Mindegy";
+      sheetItems = gyartmanySheetItems(host, current, emptyLabel);
     }
-    openAutoDrumSheet(current, next);
+    openAutoDrumSheet(current, next, { sheetItems });
   });
 }

@@ -3,7 +3,7 @@ import {
   filterListingsInRadius,
   filterListingsRecentInRadius,
   resolveCityCoords,
-} from "./listing-radius.js?v=mapCity4";
+} from "./listing-radius.js?v=mapCity5";
 
 export const STORAGE_POSTAL = "bymy_stats_postal";
 export const STORAGE_RADIUS = "bymy_stats_radius_km";
@@ -74,6 +74,10 @@ export function ensureNearbyPrefsStored(profile = null) {
     if (postal.length === 4 && !localStorage.getItem(STORAGE_POSTAL)) {
       localStorage.setItem(STORAGE_POSTAL, postal);
     }
+    const city = String(p.city || p.companyCity || "").trim();
+    if (city && !localStorage.getItem(STORAGE_CITY)) {
+      localStorage.setItem(STORAGE_CITY, city);
+    }
     const radius = Number(p.searchRadiusKm);
     if (Number.isFinite(radius) && radius > 0 && !localStorage.getItem(STORAGE_RADIUS)) {
       localStorage.setItem(STORAGE_RADIUS, String(radius));
@@ -93,7 +97,7 @@ function filterItemsForMode(mode, items, origin, radiusKm, cityIndex) {
 export function buildNearbyFilterState(mode, origin, radiusKm, filtered) {
   return {
     mode,
-    postal_code: origin.postal_code,
+    postal_code: origin.postal_code || "",
     radiusKm,
     origin,
     listingIds: new Set(filtered.map((item) => item.id)),
@@ -101,6 +105,10 @@ export function buildNearbyFilterState(mode, origin, radiusKm, filtered) {
   };
 }
 
+/**
+ * Körzetes keresés CSAK településnév alapján.
+ * Az irányítószám legfeljebb a településnév feloldására szolgál — soha nem a keresési középpont.
+ */
 export async function buildNearbyFilter({
   items,
   postal,
@@ -113,7 +121,6 @@ export async function buildNearbyFilter({
     throw new Error("Add meg a keresési sugarat km-ben.");
   }
 
-  /* Helységnév kötelező a körzethez — irsz csak a településnév feloldásához. */
   let cityName = String(city || "").trim();
   const postal_code = String(postal ?? "").replace(/\D/g, "").slice(0, 4);
   const cityIndex = await getCityIndex();
@@ -127,35 +134,34 @@ export async function buildNearbyFilter({
     }
   }
 
-  if (cityName) {
-    const hit = resolveCityCoords(cityName, cityIndex);
-    if (hit) {
-      const origin = {
-        lat: hit.lat,
-        lon: hit.lon,
-        city: hit.city,
-        postal_code,
-      };
-      const filtered = filterItemsForMode(mode, items ?? [], origin, radius, cityIndex);
-      return buildNearbyFilterState(mode, origin, radius, filtered);
-    }
+  if (!cityName) {
+    throw new Error("Adj meg települést a térképes / körzetes kereséshez.");
   }
 
-  if (postal_code.length !== 4) {
-    throw new Error(cityName ? `Ismeretlen település: ${cityName}` : "Adj meg települést a térképes kereséshez.");
+  const hit = resolveCityCoords(cityName, cityIndex);
+  if (!hit) {
+    throw new Error(`Ismeretlen település: ${cityName}`);
   }
-  const origin = await fetchPostalLookup(postal_code);
-  if (!origin.city && cityName) origin.city = cityName;
+
+  const origin = {
+    lat: hit.lat,
+    lon: hit.lon,
+    city: hit.city,
+    postal_code,
+  };
   const filtered = filterItemsForMode(mode, items ?? [], origin, radius, cityIndex);
   return buildNearbyFilterState(mode, origin, radius, filtered);
 }
 
-export function autoNearbyHref(postal, radiusKm) {
+export function autoNearbyHref(postal, radiusKm, city = "") {
   const params = new URLSearchParams({
     nearby: "1",
-    postal: String(postal ?? "").replace(/\D/g, "").slice(0, 4),
     radius: String(radiusKm ?? 30),
   });
+  const code = String(postal ?? "").replace(/\D/g, "").slice(0, 4);
+  if (code.length === 4) params.set("postal", code);
+  const cityName = String(city || "").trim();
+  if (cityName) params.set("city", cityName);
   return `/auto.html?${params}`;
 }
 
@@ -223,12 +229,15 @@ export function filterIngatlanListings(items, { uzletag = "", tipus = "" } = {})
   });
 }
 
-export function ingatlanNearbyHref(postal, radiusKm, { uzletag = "", tipus = "" } = {}) {
+export function ingatlanNearbyHref(postal, radiusKm, { uzletag = "", tipus = "", city = "" } = {}) {
   const params = new URLSearchParams({
     nearby: "1",
-    postal: String(postal ?? "").replace(/\D/g, "").slice(0, 4),
     radius: String(radiusKm ?? 30),
   });
+  const code = String(postal ?? "").replace(/\D/g, "").slice(0, 4);
+  if (code.length === 4) params.set("postal", code);
+  const cityName = String(city || "").trim();
+  if (cityName) params.set("city", cityName);
   if (uzletag) params.set("uzletag", normalizeUzletag(uzletag));
   if (tipus) params.set("kat", String(tipus).trim().toLowerCase());
   return `/ingatlan.html?${params}`;

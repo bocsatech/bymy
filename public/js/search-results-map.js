@@ -9,7 +9,7 @@ import {
   normalizePlace,
   resolveCityCoords,
   resolveListingCoords,
-} from "./listing-radius.js?v=mapCity4";
+} from "./listing-radius.js?v=mapCity5";
 import {
   listingDetailHref,
   rememberListingOpen,
@@ -18,7 +18,7 @@ import {
 import { listingTileTitle, listingTilePrice } from "./listing-tile.js?v=listThumb1";
 import { getAuthUser, loadProfileFromServer } from "./site-auth.js?v=bootFix2";
 import { fetchListingsPage } from "./db-client.js?v=ownerBoost6";
-import { buildNearbyFilter, readNearbyPrefs } from "./nearby-search.js?v=mapCity4";
+import { buildNearbyFilter, readNearbyPrefs } from "./nearby-search.js?v=mapCity5";
 
 const HU_CENTER = [47.1625, 19.5033];
 const HU_ZOOM = 7;
@@ -114,7 +114,7 @@ async function fetchVerticalListingsInRadius(vertical, { postal, city, radiusKm 
     .replace(/\D/g, "")
     .slice(0, 4);
   if (!cityName && code.length !== 4) {
-    return { items: [], error: "Nincs lakhely / település a körzetes térképhez." };
+    return { items: [], error: "Nincs település a körzetes térképhez." };
   }
   const out = [];
   const seen = new Set();
@@ -227,7 +227,7 @@ async function resolveHomeOrigin(cityIndex, postalIndex = null) {
     .slice(0, 4);
   let cityName = bits.cityName || String(prefs.city || "").trim();
 
-  /* Ha csak irsz van, településnév a postal lookupból (majd helységnévvel megyünk tovább). */
+  /* Irsz csak a településnév feloldásához — a középpont SOHA nem az irsz-pin. */
   if (!cityName && postal.length === 4) {
     try {
       const res = await fetch(`/api/postal-codes/lookup?postal_code=${encodeURIComponent(postal)}`);
@@ -236,9 +236,11 @@ async function resolveHomeOrigin(cityIndex, postalIndex = null) {
     } catch {
       /* ignore */
     }
+    if (!cityName && postalIndex?.has?.(postal)) {
+      cityName = String(postalIndex.get(postal).city || "").trim();
+    }
   }
 
-  /* 1) Helységnév — fő út. */
   if (cityName && cityIndex) {
     const hit = resolveCityCoords(cityName, cityIndex);
     if (hit) {
@@ -252,37 +254,6 @@ async function resolveHomeOrigin(cityIndex, postalIndex = null) {
     }
   }
 
-  /* 2) Mentés: irányítószám koordináta. */
-  if (postal.length === 4) {
-    try {
-      const res = await fetch(`/api/postal-codes/lookup?postal_code=${encodeURIComponent(postal)}`);
-      const data = await res.json().catch(() => ({}));
-      if (res.ok && data.lat != null && data.lon != null) {
-        const labelCity = data.city || cityName || postal;
-        return {
-          lat: Number(data.lat),
-          lon: Number(data.lon),
-          label: labelCity,
-          postal,
-          city: data.city || cityName || "",
-        };
-      }
-    } catch {
-      /* fall through */
-    }
-    const fromIndex = postalIndex?.get?.(postal);
-    if (fromIndex) {
-      return {
-        lat: fromIndex.lat,
-        lon: fromIndex.lon,
-        label: fromIndex.city || cityName || postal,
-        postal,
-        city: fromIndex.city || cityName || "",
-      };
-    }
-  }
-
-  /* 3) Geocode helységnévvel. */
   if (cityName) {
     try {
       const q = `${cityName}, Magyarország`;
@@ -1235,8 +1206,8 @@ async function openSearchMapForButton(btn, {
       const [cityIndex] = await Promise.all([getCityIndex()]);
       const home = await resolveHomeOrigin(cityIndex, null);
       const radiusKm = MAP_BROWSE_RADIUS_KM;
-      if (!home?.city && !home?.postal) {
-        // Nincs lakhely: ne üres térkép — mutasd a listát / összes autót.
+      if (!home?.city) {
+        // Nincs település: ne üres térkép — mutasd a listát / összes autót.
         items = await resolveMapItems(getItems);
         if (!items.length) {
           try {

@@ -3,12 +3,13 @@ import {
   buildNearbyFilterState,
   STORAGE_POSTAL,
   STORAGE_RADIUS,
-} from "./nearby-search.js?v=korzetFix2";
+  STORAGE_CITY,
+} from "./nearby-search.js?v=mapCity5";
 import {
   buildCityIndex,
   filterListingsInRadius,
   filterListingsRecentInRadius,
-} from "./listing-radius.js?v=mapCity4";
+} from "./listing-radius.js?v=mapCity5";
 
 const MODE_ALL = "all";
 const MODE_RECENT24H = "recent24h";
@@ -164,9 +165,17 @@ export function initHomeStatsBar({ onChange, getItems }) {
     }
 
     try {
+      let cityName = "";
+      try {
+        const looked = await fetchPostalLookup(postal_code);
+        cityName = String(looked?.city || "").trim();
+      } catch {
+        /* buildNearbyFilter also looks up */
+      }
       activeFilter = await buildNearbyFilter({
         items: getItems(),
         postal: postal_code,
+        city: cityName,
         radiusKm,
         mode,
       });
@@ -177,6 +186,9 @@ export function initHomeStatsBar({ onChange, getItems }) {
       try {
         localStorage.setItem(STORAGE_POSTAL, postal_code);
         localStorage.setItem(STORAGE_RADIUS, String(radiusKm));
+        if (activeFilter?.origin?.city) {
+          localStorage.setItem(STORAGE_CITY, String(activeFilter.origin.city));
+        }
       } catch {
       }
 
@@ -266,9 +278,15 @@ export function initHomeStatsBar({ onChange, getItems }) {
       onChange?.(null);
     },
     refreshActiveCount,
-    applyNearby: async ({ postal, radiusKm, mode = MODE_ALL } = {}) => {
+    applyNearby: async ({ postal, city, radiusKm, mode = MODE_ALL } = {}) => {
       if (postal) postalInput.value = String(postal).replace(/\D/g, "").slice(0, 4);
       if (radiusKm != null) radiusInput.value = String(radiusKm);
+      if (city) {
+        try {
+          localStorage.setItem(STORAGE_CITY, String(city).trim());
+        } catch {
+        }
+      }
       return applyFilter(mode);
     },
   };

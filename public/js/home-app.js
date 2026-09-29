@@ -21,7 +21,7 @@ import { normalizeIngatlanUzletag } from "./ingatlan-fields.js?v=immoEladoDefaul
 import { filterByCategory, initHomeCategoryBar, renderHomeCategoryBar, HOME_CATEGORY_IDS, searchFiltersForCategory } from "./home-category-bar.js?v=catMenu1";
 import { initHomeUnifiedScroll } from "./home-unified-scroll.js";
 import { initHomeStatsBar } from "./home-stats-bar.js?v=mapPostal2";
-import { buildNearbyFilter, readNearbyPrefs } from "./nearby-search.js?v=mapCity4";
+import { buildNearbyFilter, readNearbyPrefs } from "./nearby-search.js?v=mapCity5";
 import { getAuthUser } from "./site-auth.js?v=bootFix2";
 import {
   bindListingOpen,
@@ -1057,17 +1057,19 @@ async function applyNearbyFromUrl() {
 
   const prefs = readNearbyPrefs(getAuthUser()?.profile ?? null);
   const postal = (params.get("postal") || prefs.postal).replace(/\D/g, "").slice(0, 4);
+  const city = String(params.get("city") || prefs.city || "").trim();
   const radiusKm = Number(params.get("radius") || prefs.radiusKm);
-  if (postal.length !== 4 || !Number.isFinite(radiusKm) || radiusKm <= 0) return;
+  if ((!city && postal.length !== 4) || !Number.isFinite(radiusKm) || radiusKm <= 0) return;
 
   try {
     if (statsUi?.applyNearby) {
-      await statsUi.applyNearby({ postal, radiusKm });
+      await statsUi.applyNearby({ postal, city, radiusKm });
       return;
     }
     statsFilter = await buildNearbyFilter({
       items: allItems,
       postal,
+      city,
       radiusKm,
     });
     categoryUi?.clear();
@@ -1152,7 +1154,7 @@ async function ensureAllListingsLoadedForMap() {
 if (PAGE === "auto" || PAGE === "teherauto") {
   ensureMapModule = () => {
     if (!mapModulePromise) {
-      mapModulePromise = import("./search-results-map.js?v=mapCity4")
+      mapModulePromise = import("./search-results-map.js?v=mapCity5")
         .then((mod) => {
           updateSearchMapButtonLabels = mod.updateSearchMapButtonLabels;
           closeSearchResultsMapFn = mod.closeSearchResultsMap;
@@ -1316,12 +1318,14 @@ if (PAGE === "ingatlan") {
       const postal = String(values.iranyitoszam || "")
         .replace(/\D/g, "")
         .slice(0, 4);
+      const city = String(values.telepules || "").trim();
       const radiusKm = Number(values.keresesi_korzet);
-      if (postal.length === 4 && Number.isFinite(radiusKm) && radiusKm > 0) {
+      if ((city || postal.length === 4) && Number.isFinite(radiusKm) && radiusKm > 0) {
         try {
           quickRadiusFilter = await buildNearbyFilter({
             items: allItems,
             postal,
+            city,
             radiusKm,
           });
           sidebarFilters = { ...sidebarFilters, _locationByRadius: true };
@@ -1370,12 +1374,14 @@ if (PAGE === "ingatlan") {
       const postal = String(values?.iranyitoszam || "")
         .replace(/\D/g, "")
         .slice(0, 4);
+      const city = String(values?.telepules || "").trim();
       const radiusKm = Number(values?.keresesi_korzet);
-      if (postal.length === 4 && Number.isFinite(radiusKm) && radiusKm > 0) {
+      if ((city || postal.length === 4) && Number.isFinite(radiusKm) && radiusKm > 0) {
         try {
           quickRadiusFilter = await buildNearbyFilter({
             items: allItems,
             postal,
+            city,
             radiusKm,
           });
         } catch {

@@ -334,17 +334,20 @@
   font-weight: 800;
 }
 
-.search-map-postal-cluster {
+.search-map-postal-cluster,
+.search-map-city-cluster {
   background: transparent;
   border: 0;
 }
 
-.search-map-postal-cluster__dot {
+.search-map-postal-cluster__dot,
+.search-map-city-cluster__dot {
   display: inline-flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   min-width: 52px;
+  max-width: 76px;
   padding: 0.2rem 0.45rem;
   border-radius: 999px;
   background: #111;
@@ -353,13 +356,19 @@
   line-height: 1.05;
 }
 
-.search-map-postal-cluster__dot strong {
-  font-size: 0.72rem;
+.search-map-postal-cluster__dot strong,
+.search-map-city-cluster__dot strong {
+  font-size: 0.68rem;
   font-weight: 800;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 68px;
 }
 
-.search-map-postal-cluster__dot em {
+.search-map-postal-cluster__dot em,
+.search-map-city-cluster__dot em {
   font-style: normal;
   font-size: 0.68rem;
   font-weight: 700;

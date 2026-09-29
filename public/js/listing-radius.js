@@ -127,15 +127,25 @@ export function resolveCityCoords(cityName, cityIndex) {
 export function resolveListingCoords(item, cityIndex, postalIndex = null) {
   const postal = listingPostalCode(item);
   const name = listingCityName(item);
+
+  /* 1) Településnév — térkép / körzet mindig helység alapján. */
   const byCity = resolveCityCoords(name, cityIndex);
   if (byCity) {
     return { city: byCity.city, lat: byCity.lat, lon: byCity.lon, postal: postal || "" };
   }
 
+  /* 2) Irsz → településnév, majd a település középpontja (ne az irsz-pin). */
   if (postal && postalIndex?.has(postal)) {
     const hit = postalIndex.get(postal);
+    const cityFromPostal = String(hit?.city || name || "").trim();
+    if (cityFromPostal) {
+      const viaCity = resolveCityCoords(cityFromPostal, cityIndex);
+      if (viaCity) {
+        return { city: viaCity.city, lat: viaCity.lat, lon: viaCity.lon, postal };
+      }
+    }
     if (hit && !isDummyCoord(hit.lat, hit.lon)) {
-      return { city: hit.city || name, lat: hit.lat, lon: hit.lon, postal: hit.postal };
+      return { city: cityFromPostal || name, lat: hit.lat, lon: hit.lon, postal: hit.postal };
     }
   }
 

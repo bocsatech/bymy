@@ -3,7 +3,7 @@ import {
   filterListingsInRadius,
   filterListingsRecentInRadius,
   resolveCityCoords,
-} from "./listing-radius.js?v=mapCity2";
+} from "./listing-radius.js?v=mapCity3";
 
 export const STORAGE_POSTAL = "bymy_stats_postal";
 export const STORAGE_RADIUS = "bymy_stats_radius_km";
@@ -113,10 +113,20 @@ export async function buildNearbyFilter({
     throw new Error("Add meg a keresési sugarat km-ben.");
   }
 
-  const cityName = String(city || "").trim();
+  /* Helységnév kötelező a körzethez — irsz csak a településnév feloldásához. */
+  let cityName = String(city || "").trim();
+  const postal_code = String(postal ?? "").replace(/\D/g, "").slice(0, 4);
   const cityIndex = await getCityIndex();
 
-  /* Helységnév elsőbbség — irányítószám csak tartalék. */
+  if (!cityName && postal_code.length === 4) {
+    try {
+      const looked = await fetchPostalLookup(postal_code);
+      cityName = String(looked?.city || "").trim();
+    } catch {
+      /* ignore */
+    }
+  }
+
   if (cityName) {
     const hit = resolveCityCoords(cityName, cityIndex);
     if (hit) {
@@ -124,18 +134,18 @@ export async function buildNearbyFilter({
         lat: hit.lat,
         lon: hit.lon,
         city: hit.city,
-        postal_code: String(postal || "").replace(/\D/g, "").slice(0, 4),
+        postal_code,
       };
       const filtered = filterItemsForMode(mode, items ?? [], origin, radius, cityIndex);
       return buildNearbyFilterState(mode, origin, radius, filtered);
     }
   }
 
-  const postal_code = String(postal ?? "").replace(/\D/g, "").slice(0, 4);
   if (postal_code.length !== 4) {
-    throw new Error(cityName ? `Ismeretlen település: ${cityName}` : "Adj meg települést vagy irányítószámot.");
+    throw new Error(cityName ? `Ismeretlen település: ${cityName}` : "Adj meg települést a térképes kereséshez.");
   }
   const origin = await fetchPostalLookup(postal_code);
+  if (!origin.city && cityName) origin.city = cityName;
   const filtered = filterItemsForMode(mode, items ?? [], origin, radius, cityIndex);
   return buildNearbyFilterState(mode, origin, radius, filtered);
 }

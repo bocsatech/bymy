@@ -6,9 +6,10 @@ import {
   buildPostalIndex,
   haversineKm,
   listingCityName,
+  normalizePlace,
   resolveCityCoords,
   resolveListingCoords,
-} from "./listing-radius.js?v=mapCity2";
+} from "./listing-radius.js?v=mapCity3";
 import {
   listingDetailHref,
   rememberListingOpen,
@@ -17,7 +18,7 @@ import {
 import { listingTileTitle, listingTilePrice } from "./listing-tile.js?v=listThumb1";
 import { getAuthUser, loadProfileFromServer } from "./site-auth.js?v=bootFix2";
 import { fetchListingsPage } from "./db-client.js?v=ownerBoost6";
-import { buildNearbyFilter, readNearbyPrefs } from "./nearby-search.js?v=mapCity1";
+import { buildNearbyFilter, readNearbyPrefs } from "./nearby-search.js?v=mapCity3";
 
 const HU_CENTER = [47.1625, 19.5033];
 const HU_ZOOM = 7;
@@ -481,11 +482,14 @@ function placeListings(items, cityIndex, postalIndex = null) {
       skipped += 1;
       continue;
     }
+    const city = String(coords.city || listingCityName(item) || "").trim() || "Ismeretlen";
     const postal = String(coords.postal || "").replace(/\D/g, "").slice(0, 4);
-    const key = postal.length === 4 ? `p:${postal}` : `${coords.lat.toFixed(4)},${coords.lon.toFixed(4)}`;
+    const cityNorm = normalizePlace(city);
+    /* Csoportosítás településnév szerint — ne irányítószám szerint. */
+    const key = cityNorm ? `c:${cityNorm}` : `ll:${coords.lat.toFixed(4)},${coords.lon.toFixed(4)}`;
     if (!byKey.has(key)) {
       byKey.set(key, {
-        city: coords.city || listingCityName(item) || "Ismeretlen",
+        city,
         postal,
         baseLat: coords.lat,
         baseLon: coords.lon,
@@ -514,25 +518,29 @@ function placeListings(items, cityIndex, postalIndex = null) {
   return { pins, skipped };
 }
 
-function getPostalClusterIcon(L, postal, count) {
-  const label = escapeHtml(postal || "?");
+function getCityClusterIcon(L, city, count) {
+  const raw = String(city || "—").trim() || "—";
+  const short = raw.length > 14 ? `${raw.slice(0, 12)}…` : raw;
+  const label = escapeHtml(short);
   const n = Number(count) || 0;
   return L.divIcon({
-    className: "search-map-postal-cluster",
-    html: `<span class="search-map-postal-cluster__dot" aria-hidden="true"><strong>${label}</strong><em>${n}</em></span>`,
-    iconSize: [54, 36],
-    iconAnchor: [27, 18],
+    className: "search-map-city-cluster",
+    html: `<span class="search-map-city-cluster__dot" aria-hidden="true"><strong>${label}</strong><em>${n}</em></span>`,
+    iconSize: [64, 36],
+    iconAnchor: [32, 18],
   });
 }
 
-function groupPinsByPostal(pins) {
+function groupPinsByCity(pins) {
   const groups = new Map();
   for (const pin of pins) {
-    const key = pin.postal?.length === 4 ? pin.postal : `${pin.baseLat?.toFixed(4)},${pin.baseLon?.toFixed(4)}`;
+    const city = String(pin.city || "").trim();
+    const cityNorm = normalizePlace(city);
+    const key = cityNorm || `${pin.baseLat?.toFixed(4)},${pin.baseLon?.toFixed(4)}`;
     if (!groups.has(key)) {
       groups.set(key, {
+        city: city || "Ismeretlen",
         postal: pin.postal || "",
-        city: pin.city || "",
         lat: pin.baseLat ?? pin.lat,
         lon: pin.baseLon ?? pin.lon,
         pins: [],
@@ -557,24 +565,24 @@ function refreshVisibleMarkers() {
   const useClusters = mapMode === "browse" && zoom < CLUSTER_ZOOM;
 
   if (useClusters) {
-    const groups = groupPinsByPostal(lastPins).filter((g) => bounds.contains([g.lat, g.lon]));
+    const groups = groupPinsByCity(lastPins).filter((g) => bounds.contains([g.lat, g.lon]));
     for (const group of groups) {
       const marker = L.marker([group.lat, group.lon], {
-        title: `${group.postal || group.city} · ${group.pins.length} autó`,
-        icon: getPostalClusterIcon(L, group.postal || group.city, group.pins.length),
+        title: `${group.city} · ${group.pins.length} autó`,
+        icon: getCityClusterIcon(L, group.city, group.pins.length),
         zIndexOffset: 200,
       });
-      marker.bindTooltip(
-        `${group.postal || "—"}${group.city ? ` · ${group.city}` : ""} · ${group.pins.length} autó`,
-        { direction: "top", offset: [0, -8] }
-      );
+      marker.bindTooltip(`${group.city} · ${group.pins.length} autó`, {
+        direction: "top",
+        offset: [0, -8],
+      });
       marker.on("click", () => {
         mapInstance.setView([group.lat, group.lon], Math.max(CLUSTER_ZOOM, zoom + 2));
       });
       marker.addTo(markersLayer);
     }
     if (side && selectedPinId == null) {
-      side.innerHTML = `<div class="search-map-modal__side-pin"><p class="search-map-modal__hint">Irányítószám-csoportok a látható területen. Nagyíts, vagy kattints egy csoportra — kibontja az autókat.</p></div>`;
+      side.innerHTML = `<div class="search-map-modal__side-pin"><p class="search-map-modal__hint">Település-csoportok a látható területen. Nagyíts, vagy kattints egy településre — kibontja az autókat.</p></div>`;
     }
     return;
   }
@@ -588,10 +596,7 @@ function refreshVisibleMarkers() {
       riseOnHover: true,
     });
     pin.marker = marker;
-    const tip =
-      mapMode === "browse" && pin.postal
-        ? `${pin.postal}${pin.city ? ` · ${pin.city}` : ""}`
-        : `${title}${pin.city ? ` · ${pin.city}` : ""}`;
+    const tip = pin.city ? `${title} · ${pin.city}` : title;
     marker.bindTooltip(tip, { direction: "top", offset: [0, -10] });
     marker.on("click", () => {
       showRouteToPin(L, pin, side);
@@ -1133,7 +1138,7 @@ export async function openSearchResultsMap(
         const homeNote = homeOrigin
           ? `<p class="search-map-modal__route-note">Lakhely: ${escapeHtml(homeOrigin.label)}</p>`
           : "";
-        side.innerHTML = `<div class="search-map-modal__side-pin">${homeNote}<p class="search-map-modal__hint">Nincs irányítószám / település a találatokhoz — a térkép üres. (${skipped} kihagyva)</p></div>`;
+        side.innerHTML = `<div class="search-map-modal__side-pin">${homeNote}<p class="search-map-modal__hint">Nincs település a találatokhoz — a térkép üres. (${skipped} kihagyva)</p></div>`;
       }
       return { pins: 0, skipped, stale: false };
     }

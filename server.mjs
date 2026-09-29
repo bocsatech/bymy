@@ -76,7 +76,6 @@ import {
   upsertPostalCodes,
 } from "./lib/partners.mjs";
 import { geocodeHungaryAddress } from "./lib/geocode.mjs";
-import { getGoogleMapsApiKey } from "./lib/google-maps-key.mjs";
 import {
   PARTNER_CATEGORIES,
   categoriesForVertical,
@@ -2346,14 +2345,6 @@ async function handlePartnersApi(req, res, pathname) {
         return;
       }
       sendJson(res, 200, origin);
-      return;
-    }
-
-    if (pathname === "/api/maps-config" && req.method === "GET") {
-      sendJson(res, 200, {
-        googleMapsApiKey: getGoogleMapsApiKey(),
-        provider: "google",
-      });
       return;
     }
 

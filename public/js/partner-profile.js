@@ -14,7 +14,7 @@ import {
   isNativeApp,
   setDeviceIdentity,
 } from "./device-contract-identity.js?v=contractKind1";
-import { wirePostalCityAutofill } from "./postal-city-autofill.js?v=postalFill1";
+import { wirePostalCityAutofill } from "./postal-city-autofill.js?v=postalFill2";
 import { fillCountrySelect, PHONE_COUNTRIES } from "./phone-lang-ui.js?v=settingsPhone1";
 
 const pageRoot = () => document.getElementById("partner-root");

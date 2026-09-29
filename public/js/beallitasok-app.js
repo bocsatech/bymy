@@ -13,7 +13,7 @@ import {
   isPrivateAccount,
   isPrivateProfileComplete,
 } from "./site-auth.js?v=privReq1";
-import { wirePostalCityAutofill } from "./postal-city-autofill.js?v=postalFill1";
+import { wirePostalCityAutofill } from "./postal-city-autofill.js?v=postalFill2";
 import {
   getParkplatz,
   addParkplatzItem,

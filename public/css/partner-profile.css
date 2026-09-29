@@ -386,6 +386,20 @@ body.partner-manage-page.mm-page {
   border-top: 1px solid var(--partner-line);
 }
 
+.partner-form-section + .partner-form-section {
+  margin-top: 1.75rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--partner-line);
+}
+
+.partner-form-section .partner-form-title {
+  margin: 0;
+}
+
+.partner-form-section .partner-form-grid {
+  margin-top: 1rem;
+}
+
 .partner-activities-label {
   display: block;
   font-size: 0.85rem;

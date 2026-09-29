@@ -190,59 +190,93 @@ export async function renderPartnerManage(mountRoot) {
       <div>
         <p class="partner-eyebrow">CÉGADATOK · PARTNERI PROFIL</p>
         <h1>Partneri profil</h1>
-        <p>Publikus partneradatok és a cég egyedi mezői egy helyen. Név, telefon és e-mail csak egyszer szerepel.</p>
+        <p>Egy helyen: cégadatok, elérhetőség, publikus profil és szerződéses mezők — duplikáció nélkül.</p>
       </div>
     </header>
     ${statusBox(profile)}
     <form class="partner-form" id="partner-form">
-      <div class="partner-form-title"><div><h2>Publikus partneradatok</h2><p>A csillaggal jelölt mezők kötelezőek. Ezek jelennek meg a partneroldalon.</p></div></div>
-      <div class="partner-form-grid">
-        <label>Cég / iroda neve *<input name="displayName" value="${esc(profile.display_name)}" maxlength="100" required /></label>
-        <label>Publikus profilcím *<span class="partner-slug"><span>bymy.hu/partner/</span><input name="slug" value="${esc(profile.slug)}" maxlength="100" required /></span></label>
-        <label>Kapcsolattartó neve<input name="contactPerson" value="${esc(profile.contact_person)}" maxlength="160" /></label>
-        <label>Telefonszám *<input name="phone" type="tel" value="${esc(profile.phone)}" maxlength="40" required placeholder="+36 30 123 4567" /></label>
-        <label>E-mail cím *<input name="email" type="email" value="${esc(profile.email)}" maxlength="320" required /></label>
-        <label>Jutalék *<input name="commission" value="${esc(profile.commission)}" maxlength="80" required placeholder="pl. bruttó 2–4%" /></label>
-        <label>Weboldal<input name="website" type="url" value="${esc(profile.website)}" placeholder="https://…" maxlength="300" /></label>
-        <label>Profilkép URL<input name="logoUrl" type="url" value="${esc(profile.logo_url)}" placeholder="https://…" /></label>
-        <label>Borítókép URL<input name="coverUrl" type="url" value="${esc(profile.cover_url)}" placeholder="https://…" /></label>
-        <label class="partner-form-wide">Kerület / értékesítési területek *<input name="serviceAreas" value="${esc(profile.service_areas)}" placeholder="Például: Budapest XI., Budaörs, Érd" maxlength="1000" required /></label>
-        <label class="partner-form-wide">Bemutatkozás<textarea name="description" maxlength="4000" placeholder="Mutasd be az irodát és a szakterületedet.">${esc(profile.description)}</textarea></label>
-        <label class="partner-check partner-form-wide"><input type="checkbox" name="isPublic" ${profile.is_public !== false ? "checked" : ""} /><span>A jóváhagyás után legyen nyilvános a profilom</span></label>
-      </div>
+      ${
+        isCompany
+          ? `
+      <section class="partner-form-section">
+        <div class="partner-form-title"><div><h2>1. Cég azonosító</h2><p>Ki a cég — név, adószám, tevékenység.</p></div></div>
+        <div class="partner-form-grid">
+          <label>Cég / iroda neve *<input name="displayName" value="${esc(profile.display_name)}" maxlength="100" required /></label>
+          <label>Cég adószáma<input name="companyTaxId" value="${esc(account.companyTaxId)}" inputmode="numeric" autocomplete="off" /></label>
+          <div class="partner-form-wide partner-activities">
+            <span class="partner-activities-label">Cég tevékenysége</span>
+            <div class="partner-activities-row">${activityChecks}</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="partner-form-section">
+        <div class="partner-form-title"><div><h2>2. Cég címe</h2><p>Hivatalos székhely / telephely a hirdetésekhez és ügyféleléréshez.</p></div></div>
+        <div class="partner-form-grid">
+          <label class="partner-form-wide">Utca, házszám<input name="companyStreet" value="${esc(account.companyStreet || account.companyAddress)}" autocomplete="street-address" placeholder="pl. Váci út 1." /></label>
+          <label>Irányítószám<input name="companyPostalCode" value="${esc(account.companyPostalCode)}" inputmode="numeric" maxlength="4" autocomplete="postal-code" data-postal-lookup data-company-postal /></label>
+          <label>Település<input name="companyCity" value="${esc(account.companyCity)}" autocomplete="address-level2" placeholder="automatikus" data-company-city /></label>
+          <label>Ország<input name="companyCountry" value="${esc(account.companyCountry || "Magyarország")}" autocomplete="country-name" /></label>
+        </div>
+      </section>
+
+      <section class="partner-form-section">
+        <div class="partner-form-title"><div><h2>3. Kapcsolat</h2><p>Telefon és e-mail egyszer; második elérhetőség opcionális.</p></div></div>
+        <div class="partner-form-grid">
+          <label>Kapcsolattartó neve<input name="contactPerson" value="${esc(profile.contact_person)}" maxlength="160" /></label>
+          <label>Értékesítő neve<input name="salespersonName" value="${esc(account.salespersonName)}" autocomplete="name" /></label>
+          <label>Telefonszám *<input name="phone" type="tel" value="${esc(profile.phone)}" maxlength="40" required placeholder="+36 30 123 4567" /></label>
+          <label>E-mail cím *<input name="email" type="email" value="${esc(profile.email)}" maxlength="320" required /></label>
+          <label>Második telefonszám<input name="companyPhone2" type="tel" value="${esc(account.companyPhone2)}" maxlength="40" placeholder="+36 …" /></label>
+          <label>Második e-mail<input name="companyEmail2" type="email" value="${esc(account.companyEmail2)}" maxlength="320" /></label>
+          <label>Értékesítő neve (2)<input name="salespersonName2" value="${esc(account.salespersonName2)}" autocomplete="name" /></label>
+        </div>
+      </section>
+      `
+          : `
+      <section class="partner-form-section">
+        <div class="partner-form-title"><div><h2>1. Alapadatok</h2><p>Név és elérhetőség.</p></div></div>
+        <div class="partner-form-grid">
+          <label>Partner / iroda neve *<input name="displayName" value="${esc(profile.display_name)}" maxlength="100" required /></label>
+          <label>Kapcsolattartó neve<input name="contactPerson" value="${esc(profile.contact_person)}" maxlength="160" /></label>
+          <label>Telefonszám *<input name="phone" type="tel" value="${esc(profile.phone)}" maxlength="40" required placeholder="+36 30 123 4567" /></label>
+          <label>E-mail cím *<input name="email" type="email" value="${esc(profile.email)}" maxlength="320" required /></label>
+        </div>
+      </section>
+      `
+      }
+
+      <section class="partner-form-section">
+        <div class="partner-form-title"><div><h2>${isCompany ? "4" : "2"}. Publikus partnerprofil</h2><p>Ez jelenik meg a bymy.hu/partner/ oldalon.</p></div></div>
+        <div class="partner-form-grid">
+          <label>Publikus profilcím *<span class="partner-slug"><span>bymy.hu/partner/</span><input name="slug" value="${esc(profile.slug)}" maxlength="100" required /></span></label>
+          <label>Jutalék *<input name="commission" value="${esc(profile.commission)}" maxlength="80" required placeholder="pl. bruttó 2–4%" /></label>
+          <label>Weboldal<input name="website" type="url" value="${esc(profile.website)}" placeholder="https://…" maxlength="300" /></label>
+          <label>Profilkép URL<input name="logoUrl" type="url" value="${esc(profile.logo_url)}" placeholder="https://…" /></label>
+          <label>Borítókép URL<input name="coverUrl" type="url" value="${esc(profile.cover_url)}" placeholder="https://…" /></label>
+          <label class="partner-form-wide">Kerület / értékesítési területek *<input name="serviceAreas" value="${esc(profile.service_areas)}" placeholder="Például: Budapest XI., Budaörs, Érd" maxlength="1000" required /></label>
+          <label class="partner-form-wide">Bemutatkozás<textarea name="description" maxlength="4000" placeholder="Mutasd be az irodát és a szakterületedet.">${esc(profile.description)}</textarea></label>
+          <label class="partner-check partner-form-wide"><input type="checkbox" name="isPublic" ${profile.is_public !== false ? "checked" : ""} /><span>A jóváhagyás után legyen nyilvános a profilom</span></label>
+        </div>
+      </section>
 
       ${
         isCompany
           ? `
-      <div class="partner-form-title partner-form-title--spaced"><div><h2>Cég címe és azonosítók</h2><p>Ezek nem ismétlik a fenti név / telefon / e-mail mezőket — csak a hiányzó cégadatokat.</p></div></div>
-      <div class="partner-form-grid">
-        <label>Cég adószáma<input name="companyTaxId" value="${esc(account.companyTaxId)}" inputmode="numeric" autocomplete="off" /></label>
-        <div class="partner-form-wide partner-activities">
-          <span class="partner-activities-label">Cég tevékenysége</span>
-          <div class="partner-activities-row">${activityChecks}</div>
+      <section class="partner-form-section">
+        <div class="partner-form-title"><div><h2>5. Szerződéses adatok</h2><p>Adásvételi szerződéshez. <strong>Csak a mobilalkalmazásban</strong> tárolódnak.</p></div></div>
+        ${
+          native
+            ? ""
+            : `<p class="partner-contract-web-hint">Böngészőben nem szerkeszthető — nyisd meg a Bymy appot a telefonodon.</p>`
+        }
+        <div class="partner-form-grid">
+          <label>Cég neve (szerződés)<input name="local_companyName" value="${esc(native ? contractCompanyName : "")}" ${native ? "" : "readonly"} placeholder="${native ? "" : "Csak a mobilalkalmazásban"}" autocomplete="organization" /></label>
+          <label class="partner-form-wide">Székhely<input name="local_companySeat" value="${esc(native ? contractSeat : "")}" ${native ? "" : "readonly"} placeholder="${native ? "pl. 1051 Budapest, …" : "Csak a mobilalkalmazásban"}" autocomplete="street-address" /></label>
+          <label>Cégjegyzék / nyilvántartási szám<input name="local_companyRegistry" value="${esc(native ? contractRegistry : "")}" ${native ? "" : "readonly"} placeholder="${native ? "" : "Csak a mobilalkalmazásban"}" autocomplete="off" /></label>
+          <label>Képviselő neve<input name="local_representative" value="${esc(native ? contractRep : "")}" ${native ? "" : "readonly"} placeholder="${native ? "" : "Csak a mobilalkalmazásban"}" autocomplete="name" /></label>
         </div>
-        <label class="partner-form-wide">Utca, házszám (cégcím)<input name="companyStreet" value="${esc(account.companyStreet || account.companyAddress)}" autocomplete="street-address" placeholder="pl. Váci út 1." /></label>
-        <label>Irányítószám<input name="companyPostalCode" value="${esc(account.companyPostalCode)}" inputmode="numeric" maxlength="4" autocomplete="postal-code" data-postal-lookup data-company-postal /></label>
-        <label>Település<input name="companyCity" value="${esc(account.companyCity)}" autocomplete="address-level2" placeholder="automatikus" data-company-city /></label>
-        <label>Ország<input name="companyCountry" value="${esc(account.companyCountry || "Magyarország")}" autocomplete="country-name" /></label>
-        <label>Második telefonszám<input name="companyPhone2" type="tel" value="${esc(account.companyPhone2)}" maxlength="40" placeholder="+36 …" /></label>
-        <label>Második e-mail<input name="companyEmail2" type="email" value="${esc(account.companyEmail2)}" maxlength="320" /></label>
-        <label>Értékesítő neve<input name="salespersonName" value="${esc(account.salespersonName)}" autocomplete="name" /></label>
-        <label>Értékesítő neve (2)<input name="salespersonName2" value="${esc(account.salespersonName2)}" autocomplete="name" /></label>
-      </div>
-
-      <div class="partner-form-title partner-form-title--spaced"><div><h2>Szerződéses adatok</h2><p>Adásvételi szerződéshez. <strong>Csak a mobilalkalmazásban</strong> tárolódnak, a Bymy szerverre nem kerülnek.</p></div></div>
-      ${
-        native
-          ? ""
-          : `<p class="partner-contract-web-hint">Böngészőben nem szerkeszthető — nyisd meg a Bymy appot a telefonodon.</p>`
-      }
-      <div class="partner-form-grid">
-        <label>Cég neve (szerződés)<input name="local_companyName" value="${esc(native ? contractCompanyName : "")}" ${native ? "" : "readonly"} placeholder="${native ? "" : "Csak a mobilalkalmazásban"}" autocomplete="organization" /></label>
-        <label class="partner-form-wide">Székhely<input name="local_companySeat" value="${esc(native ? contractSeat : "")}" ${native ? "" : "readonly"} placeholder="${native ? "pl. 1051 Budapest, …" : "Csak a mobilalkalmazásban"}" autocomplete="street-address" /></label>
-        <label>Cégjegyzék / nyilvántartási szám<input name="local_companyRegistry" value="${esc(native ? contractRegistry : "")}" ${native ? "" : "readonly"} placeholder="${native ? "" : "Csak a mobilalkalmazásban"}" autocomplete="off" /></label>
-        <label>Képviselő neve<input name="local_representative" value="${esc(native ? contractRep : "")}" ${native ? "" : "readonly"} placeholder="${native ? "" : "Csak a mobilalkalmazásban"}" autocomplete="name" /></label>
-      </div>
+      </section>
       `
           : ""
       }

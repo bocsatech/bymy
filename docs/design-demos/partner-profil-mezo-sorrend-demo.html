@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="hu">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Demo — Partneri profil mezők (logikus sorrend)</title>
+  <style>
+    :root {
+      --bg: #f3f5f8;
+      --card: #fff;
+      --line: #e4e7ec;
+      --text: #111827;
+      --muted: #6b7280;
+      --accent: #e8bb20;
+      --ink: #1f2937;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 28px;
+    }
+    .wrap { max-width: 920px; margin: 0 auto; }
+    .eyebrow {
+      margin: 0 0 6px;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      font-weight: 700;
+      color: #9a7b00;
+      text-transform: uppercase;
+    }
+    h1 { margin: 0 0 8px; font-size: 28px; }
+    .lead { margin: 0 0 22px; color: var(--muted); font-size: 14px; }
+    .form {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 26px;
+    }
+    .section + .section {
+      margin-top: 22px;
+      padding-top: 20px;
+      border-top: 1px solid var(--line);
+    }
+    .section h2 {
+      margin: 0;
+      font-size: 17px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .num {
+      display: inline-grid;
+      place-items: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 999px;
+      background: var(--accent);
+      color: #111;
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .section p {
+      margin: 6px 0 14px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    .wide { grid-column: 1 / -1; }
+    label {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink);
+    }
+    input, textarea {
+      font: inherit;
+      font-weight: 400;
+      border: 1px solid #d5d9e0;
+      border-radius: 10px;
+      padding: 10px 12px;
+      background: #fff;
+    }
+    textarea { min-height: 72px; resize: vertical; }
+    .acts {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      font-weight: 500;
+      font-size: 13px;
+    }
+    .acts span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fafafa;
+    }
+    .hint {
+      margin: 0 0 12px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: #fff8e1;
+      border: 1px solid #f0d56a;
+      font-size: 12px;
+      color: #6b5200;
+    }
+    .actions {
+      margin-top: 22px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    .btn {
+      border: 0;
+      border-radius: 10px;
+      padding: 11px 18px;
+      background: var(--accent);
+      font-weight: 700;
+      cursor: default;
+    }
+    .note {
+      margin-top: 18px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <p class="eyebrow">Cégadatok · Partneri profil — mezősorrend demó</p>
+    <h1>Logikus mezősorrend</h1>
+    <p class="lead">1 azonosító → 2 cím → 3 kapcsolat → 4 publikus profil → 5 szerződéses. Név / telefon / e-mail csak egyszer.</p>
+
+    <div class="form">
+      <section class="section">
+        <h2><span class="num">1</span> Cég azonosító</h2>
+        <p>Ki a cég — név, adószám, tevékenység.</p>
+        <div class="grid">
+          <label>Cég / iroda neve *<input value="Bocsa Autó Kft." readonly /></label>
+          <label>Cég adószáma<input value="12345678-1-41" readonly /></label>
+          <div class="wide">
+            <div style="font-size:13px;font-weight:600;margin-bottom:8px">Cég tevékenysége</div>
+            <div class="acts">
+              <span>☑ Autó</span>
+              <span>☐ Teherautó</span>
+              <span>☐ Ingatlan</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2><span class="num">2</span> Cég címe</h2>
+        <p>Hivatalos székhely / telephely.</p>
+        <div class="grid">
+          <label class="wide">Utca, házszám<input value="Váci út 1." readonly /></label>
+          <label>Irányítószám<input value="1052" readonly /></label>
+          <label>Település<input value="Budapest" readonly /></label>
+          <label>Ország<input value="Magyarország" readonly /></label>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2><span class="num">3</span> Kapcsolat</h2>
+        <p>Telefon és e-mail egyszer; második elérhetőség opcionális.</p>
+        <div class="grid">
+          <label>Kapcsolattartó neve<input value="Kovács Anna" readonly /></label>
+          <label>Értékesítő neve<input value="Nagy Péter" readonly /></label>
+          <label>Telefonszám *<input value="+36 30 123 4567" readonly /></label>
+          <label>E-mail cím *<input value="info@bocsaauto.hu" readonly /></label>
+          <label>Második telefonszám<input value="" placeholder="+36 …" readonly /></label>
+          <label>Második e-mail<input value="" readonly /></label>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2><span class="num">4</span> Publikus partnerprofil</h2>
+        <p>Ez jelenik meg a bymy.hu/partner/ oldalon.</p>
+        <div class="grid">
+          <label>Publikus profilcím *<input value="bymy.hu/partner/bocsa-auto" readonly /></label>
+          <label>Jutalék *<input value="bruttó 2–4%" readonly /></label>
+          <label>Weboldal<input value="https://bocsaauto.hu" readonly /></label>
+          <label>Profilkép URL<input value="" readonly /></label>
+          <label class="wide">Kerület / értékesítési területek *<input value="Budapest XI., Budaörs" readonly /></label>
+          <label class="wide">Bemutatkozás<textarea readonly>Autókereskedés 15 éve.</textarea></label>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2><span class="num">5</span> Szerződéses adatok</h2>
+        <p>Adásvételi szerződéshez — csak mobilappban tárolva.</p>
+        <div class="hint">Böngészőben nem szerkeszthető — nyisd meg a Bymy appot a telefonodon.</div>
+        <div class="grid">
+          <label>Cég neve (szerződés)<input value="" placeholder="Csak a mobilalkalmazásban" readonly /></label>
+          <label class="wide">Székhely<input value="" placeholder="Csak a mobilalkalmazásban" readonly /></label>
+          <label>Cégjegyzék / nyilvántartási szám<input value="" placeholder="Csak a mobilalkalmazásban" readonly /></label>
+          <label>Képviselő neve<input value="" placeholder="Csak a mobilalkalmazásban" readonly /></label>
+        </div>
+      </section>
+
+      <div class="actions"><button class="btn" type="button">Mentés</button></div>
+    </div>
+    <p class="note">Demo mockup — éles UI: Fiókom → Cégadatok → Partneri profil</p>
+  </div>
+</body>
+</html>

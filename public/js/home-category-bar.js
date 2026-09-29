@@ -14,7 +14,7 @@ export const HOME_CATEGORY_IDS = [
 export const HOME_CATEGORIES = [
   { id: "uj", label: "Új", icon: "✨", image: "uj.png" },
   { id: "benzin", label: "Benzin", icon: "⛽", image: "benzin.png" },
-  { id: "diesel", label: "Dizel", icon: "🛢", image: "diesel.png" },
+  { id: "diesel", label: "Dízel", icon: "🛢", image: "diesel.png" },
   { id: "elektromos", label: "Elektromos", icon: "⚡", image: "elektromos.png" },
   { id: "hybrid", label: "Hybrid", icon: "🔋", image: "hybrid.png" },
   { id: "leasing", label: "Leasing", icon: "📄", image: "leasing.png" },

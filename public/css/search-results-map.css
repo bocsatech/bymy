@@ -103,6 +103,12 @@
   background: #1e293b;
 }
 
+/* Google Places Autocomplete dropdown above the map */
+.pac-container {
+  z-index: 10000 !important;
+  font-family: inherit;
+}
+
 .search-map-modal__city-search .telepules-suggest {
   position: absolute;
   z-index: 600;

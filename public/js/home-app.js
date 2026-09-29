@@ -21,7 +21,7 @@ import { normalizeIngatlanUzletag } from "./ingatlan-fields.js?v=immoEladoDefaul
 import { filterByCategory, initHomeCategoryBar, renderHomeCategoryBar, HOME_CATEGORY_IDS, searchFiltersForCategory } from "./home-category-bar.js?v=catMenu1";
 import { initHomeUnifiedScroll } from "./home-unified-scroll.js";
 import { initHomeStatsBar } from "./home-stats-bar.js?v=mapPostal2";
-import { buildNearbyFilter, readNearbyPrefs } from "./nearby-search.js?v=mapCity7";
+import { buildNearbyFilter, readNearbyPrefs } from "./nearby-search.js?v=mapG1";
 import { getAuthUser } from "./site-auth.js?v=bootFix2";
 import {
   bindListingOpen,
@@ -1154,7 +1154,7 @@ async function ensureAllListingsLoadedForMap() {
 if (PAGE === "auto" || PAGE === "teherauto") {
   ensureMapModule = () => {
     if (!mapModulePromise) {
-      mapModulePromise = import("./search-results-map.js?v=mapCity7")
+      mapModulePromise = import("./search-results-map.js?v=mapG1")
         .then((mod) => {
           updateSearchMapButtonLabels = mod.updateSearchMapButtonLabels;
           closeSearchResultsMapFn = mod.closeSearchResultsMap;

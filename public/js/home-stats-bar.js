@@ -4,12 +4,12 @@ import {
   STORAGE_POSTAL,
   STORAGE_RADIUS,
   STORAGE_CITY,
-} from "./nearby-search.js?v=mapCity7";
+} from "./nearby-search.js?v=mapG1";
 import {
   buildCityIndex,
   filterListingsInRadius,
   filterListingsRecentInRadius,
-} from "./listing-radius.js?v=mapCity7";
+} from "./listing-radius.js?v=mapG1";
 
 const MODE_ALL = "all";
 const MODE_RECENT24H = "recent24h";

@@ -1808,6 +1808,15 @@ body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-n
   transition: box-shadow 0.15s, transform 0.15s, border-color 0.15s;
 }
 
+@media (prefers-reduced-motion: no-preference) {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).is-listings-scrolling
+    #home-grid-track
+    .home-grid-card {
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
 .home-grid-card:hover {
   border-color: #cfd4dc;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);

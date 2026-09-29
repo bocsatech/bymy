@@ -738,6 +738,7 @@ async function loadListings() {
   updateFilterResultCount();
   statsUi?.refreshActiveCount?.();
   bindListingsInfiniteScroll();
+  bindListingsScrollHide();
   await applyNearbyFromUrl();
   applyFeaturedFromUrl();
   if (searchResultsCommitted && hasActiveClientFilters()) {
@@ -951,6 +952,28 @@ function bindListingsInfiniteScroll() {
   document.querySelector(".home-listings-panel")?.addEventListener("scroll", onScroll, {
     passive: true,
   });
+  window.addEventListener("scroll", onScroll, { passive: true });
+}
+
+/** Görgetés közben a hirdetés-csempék elrejtése — megálláskor visszajönnek. */
+function bindListingsScrollHide() {
+  if (bindListingsScrollHide.bound) return;
+  if (PAGE !== "auto" && PAGE !== "teherauto") return;
+  if (typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    return;
+  }
+  bindListingsScrollHide.bound = true;
+
+  let stopTimer = 0;
+  const onScroll = () => {
+    document.body.classList.add("is-listings-scrolling");
+    window.clearTimeout(stopTimer);
+    stopTimer = window.setTimeout(() => {
+      document.body.classList.remove("is-listings-scrolling");
+    }, 140);
+  };
+
+  document.querySelector(".home-listings-panel")?.addEventListener("scroll", onScroll, { passive: true });
   window.addEventListener("scroll", onScroll, { passive: true });
 }
 

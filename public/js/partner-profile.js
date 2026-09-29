@@ -288,7 +288,7 @@ export async function renderPartnerManage(mountRoot) {
         isCompany
           ? `
       <section class="partner-form-section">
-        <div class="partner-form-title"><div><h2>1. Cég azonosító</h2><p>Ki a cég — név, adószám, tevékenység.</p></div></div>
+        <div class="partner-form-title"><div><h2>1. Cég azonosító</h2></div></div>
         <div class="partner-form-grid">
           <label>Cég neve *<input name="displayName" value="${esc(profile.display_name)}" maxlength="100" required /></label>
           <label>Cég adószáma<input name="companyTaxId" value="${esc(account.companyTaxId)}" inputmode="numeric" autocomplete="off" /></label>
@@ -300,7 +300,7 @@ export async function renderPartnerManage(mountRoot) {
       </section>
 
       <section class="partner-form-section">
-        <div class="partner-form-title"><div><h2>2. Cég címe</h2><p>Hivatalos székhely / telephely a hirdetésekhez és ügyféleléréshez.</p></div></div>
+        <div class="partner-form-title"><div><h2>2. Cég címe</h2></div></div>
         <div class="partner-form-grid">
           <label class="partner-form-wide">Utca, házszám<input name="companyStreet" value="${esc(account.companyStreet || account.companyAddress)}" autocomplete="street-address" placeholder="pl. Váci út 1." /></label>
           <label>Irányítószám<input name="companyPostalCode" value="${esc(account.companyPostalCode)}" inputmode="numeric" maxlength="4" autocomplete="postal-code" data-postal-lookup data-company-postal /></label>
@@ -310,7 +310,7 @@ export async function renderPartnerManage(mountRoot) {
       </section>
 
       <section class="partner-form-section">
-        <div class="partner-form-title"><div><h2>3. Kapcsolat</h2><p>Telefon és e-mail egyszer; második elérhetőség opcionális.</p></div></div>
+        <div class="partner-form-title"><div><h2>3. Kapcsolat</h2></div></div>
         <div class="partner-form-grid">
           <label>Kapcsolattartó neve<input name="contactPerson" value="${esc(profile.contact_person)}" maxlength="160" /></label>
           <label>Értékesítő neve<input name="salespersonName" value="${esc(account.salespersonName)}" autocomplete="name" /></label>
@@ -330,7 +330,7 @@ export async function renderPartnerManage(mountRoot) {
       `
           : `
       <section class="partner-form-section">
-        <div class="partner-form-title"><div><h2>1. Alapadatok</h2><p>Név és elérhetőség.</p></div></div>
+        <div class="partner-form-title"><div><h2>1. Alapadatok</h2></div></div>
         <div class="partner-form-grid">
           <label>Partner / iroda neve *<input name="displayName" value="${esc(profile.display_name)}" maxlength="100" required /></label>
           <label>Kapcsolattartó neve<input name="contactPerson" value="${esc(profile.contact_person)}" maxlength="160" /></label>
@@ -345,7 +345,7 @@ export async function renderPartnerManage(mountRoot) {
       }
 
       <section class="partner-form-section">
-        <div class="partner-form-title"><div><h2>${isCompany ? "4" : "2"}. Publikus partnerprofil</h2><p>Ez jelenik meg a bymy.hu/partner/ oldalon.</p></div></div>
+        <div class="partner-form-title"><div><h2>${isCompany ? "4" : "2"}. Publikus partnerprofil</h2></div></div>
         <div class="partner-form-grid">
           <label>Publikus profilcím *<span class="partner-slug"><span>bymy.hu/partner/</span><input name="slug" value="${esc(profile.slug)}" maxlength="100" required /></span></label>
           <label>Jutalék *<input name="commission" value="${esc(profile.commission)}" maxlength="80" required placeholder="pl. bruttó 2–4%" /></label>
@@ -362,7 +362,7 @@ export async function renderPartnerManage(mountRoot) {
         isCompany
           ? `
       <section class="partner-form-section">
-        <div class="partner-form-title"><div><h2>5. Szerződéses adatok</h2><p>Adásvételi szerződéshez. <strong>Csak a mobilalkalmazásban</strong> tárolódnak.</p></div></div>
+        <div class="partner-form-title"><div><h2>5. Szerződéses adatok</h2></div></div>
         ${
           native
             ? ""

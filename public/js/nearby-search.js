@@ -1,9 +1,10 @@
 import {
   buildCityIndex,
+  buildPostalIndex,
   filterListingsInRadius,
   filterListingsRecentInRadius,
   resolveCityCoords,
-} from "./listing-radius.js?v=mapCity5";
+} from "./listing-radius.js?v=mapCity6";
 
 export const STORAGE_POSTAL = "bymy_stats_postal";
 export const STORAGE_RADIUS = "bymy_stats_radius_km";
@@ -23,6 +24,7 @@ async function fetchPostalLookup(postalCode) {
 }
 
 let cityIndexPromise = null;
+let postalIndexPromise = null;
 
 function getCityIndex() {
   if (!cityIndexPromise) {
@@ -34,6 +36,22 @@ function getCityIndex() {
       });
   }
   return cityIndexPromise;
+}
+
+function getPostalIndex() {
+  if (!postalIndexPromise) {
+    postalIndexPromise = fetch("/api/postal-codes/index", { credentials: "same-origin" })
+      .then((res) => res.json().catch(() => ({})))
+      .then((data) => {
+        if (!Array.isArray(data.postals)) return null;
+        return buildPostalIndex(data.postals);
+      })
+      .catch(() => {
+        postalIndexPromise = null;
+        return null;
+      });
+  }
+  return postalIndexPromise;
 }
 
 function profilePostalCode(profile = null) {
@@ -86,12 +104,21 @@ export function ensureNearbyPrefsStored(profile = null) {
   }
 }
 
-function filterItemsForMode(mode, items, origin, radiusKm, cityIndex) {
+function filterItemsForMode(mode, items, origin, radiusKm, cityIndex, postalIndex = null) {
   const originCity = origin?.city || "";
   if (mode === MODE_RECENT24H) {
-    return filterListingsRecentInRadius(items, origin.lat, origin.lon, radiusKm, cityIndex, 24, originCity);
+    return filterListingsRecentInRadius(
+      items,
+      origin.lat,
+      origin.lon,
+      radiusKm,
+      cityIndex,
+      24,
+      originCity,
+      postalIndex
+    );
   }
-  return filterListingsInRadius(items, origin.lat, origin.lon, radiusKm, cityIndex, originCity);
+  return filterListingsInRadius(items, origin.lat, origin.lon, radiusKm, cityIndex, originCity, postalIndex);
 }
 
 export function buildNearbyFilterState(mode, origin, radiusKm, filtered) {
@@ -123,7 +150,7 @@ export async function buildNearbyFilter({
 
   let cityName = String(city || "").trim();
   const postal_code = String(postal ?? "").replace(/\D/g, "").slice(0, 4);
-  const cityIndex = await getCityIndex();
+  const [cityIndex, postalIndex] = await Promise.all([getCityIndex(), getPostalIndex()]);
 
   if (!cityName && postal_code.length === 4) {
     try {
@@ -149,7 +176,7 @@ export async function buildNearbyFilter({
     city: hit.city,
     postal_code,
   };
-  const filtered = filterItemsForMode(mode, items ?? [], origin, radius, cityIndex);
+  const filtered = filterItemsForMode(mode, items ?? [], origin, radius, cityIndex, postalIndex);
   return buildNearbyFilterState(mode, origin, radius, filtered);
 }
 

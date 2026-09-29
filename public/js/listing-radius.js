@@ -165,12 +165,20 @@ export function resolveListingCoords(item, cityIndex, postalIndex = null) {
   return null;
 }
 
-export function filterListingsInRadius(items, originLat, originLon, radiusKm, cityIndex, originCity = "") {
+export function filterListingsInRadius(
+  items,
+  originLat,
+  originLon,
+  radiusKm,
+  cityIndex,
+  originCity = "",
+  postalIndex = null
+) {
   const radius = Number(radiusKm);
   if (!Number.isFinite(radius) || radius <= 0) return [];
   const originNorm = normalizePlace(originCity);
   return (items ?? []).filter((item) => {
-    const coords = resolveListingCoords(item, cityIndex);
+    const coords = resolveListingCoords(item, cityIndex, postalIndex);
     if (coords) {
       return haversineKm(originLat, originLon, coords.lat, coords.lon) <= radius;
     }
@@ -180,8 +188,8 @@ export function filterListingsInRadius(items, originLat, originLon, radiusKm, ci
   });
 }
 
-export function countListingsInRadius(items, originLat, originLon, radiusKm, cityIndex) {
-  return filterListingsInRadius(items, originLat, originLon, radiusKm, cityIndex).length;
+export function countListingsInRadius(items, originLat, originLon, radiusKm, cityIndex, postalIndex = null) {
+  return filterListingsInRadius(items, originLat, originLon, radiusKm, cityIndex, "", postalIndex).length;
 }
 
 export function listingTimestamp(item) {
@@ -205,8 +213,17 @@ export function filterListingsRecentInRadius(
   radiusKm,
   cityIndex,
   hours = 24,
-  originCity = ""
+  originCity = "",
+  postalIndex = null
 ) {
-  const inRadius = filterListingsInRadius(items, originLat, originLon, radiusKm, cityIndex, originCity);
+  const inRadius = filterListingsInRadius(
+    items,
+    originLat,
+    originLon,
+    radiusKm,
+    cityIndex,
+    originCity,
+    postalIndex
+  );
   return inRadius.filter((item) => isListingWithinHours(item, hours));
 }

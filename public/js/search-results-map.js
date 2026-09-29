@@ -9,7 +9,7 @@ import {
   normalizePlace,
   resolveCityCoords,
   resolveListingCoords,
-} from "./listing-radius.js?v=mapCity5";
+} from "./listing-radius.js?v=mapCity6";
 import {
   listingDetailHref,
   rememberListingOpen,
@@ -18,7 +18,8 @@ import {
 import { listingTileTitle, listingTilePrice } from "./listing-tile.js?v=listThumb1";
 import { getAuthUser, loadProfileFromServer } from "./site-auth.js?v=bootFix2";
 import { fetchListingsPage } from "./db-client.js?v=ownerBoost6";
-import { buildNearbyFilter, readNearbyPrefs } from "./nearby-search.js?v=mapCity5";
+import { buildNearbyFilter, readNearbyPrefs } from "./nearby-search.js?v=mapCity6";
+import { wireTelepulesSuggest } from "./telepules-suggest.js?v=telSug1";
 
 const HU_CENTER = [47.1625, 19.5033];
 const HU_ZOOM = 7;
@@ -323,7 +324,23 @@ function ensureMapPanel() {
   const markup = `
     <div class="search-map-modal__panel" role="region" aria-label="Találatok a térképen">
       <div class="search-map-modal__body">
-        <div id="search-map-canvas" class="search-map-modal__canvas" aria-label="Térkép"></div>
+        <div class="search-map-modal__canvas-wrap">
+          <form class="search-map-modal__city-search" data-search-map-city-form autocomplete="off">
+            <label class="search-map-modal__city-search-lab" for="search-map-city-input">Település</label>
+            <input
+              id="search-map-city-input"
+              class="search-map-modal__city-input"
+              type="search"
+              name="map_telepules"
+              data-search-map-city
+              placeholder="Település neve…"
+              autocomplete="off"
+              enterkeyhint="search"
+            />
+            <button type="submit" class="search-map-modal__city-go">Keres</button>
+          </form>
+          <div id="search-map-canvas" class="search-map-modal__canvas" aria-label="Térkép"></div>
+        </div>
         <aside class="search-map-modal__side" data-search-map-side>
           <p class="search-map-modal__hint">Kattints egy autó ikonra — megmutatjuk az utat a lakhelyedtől.</p>
         </aside>
@@ -388,6 +405,7 @@ function ensureMapPanel() {
         }
       }
     });
+    bindMapCitySearch(root);
     return root;
   }
 
@@ -397,11 +415,13 @@ function ensureMapPanel() {
   if (
     root.querySelector(".search-map-modal__head") ||
     root.querySelector(".search-map-modal__backdrop") ||
-    !root.querySelector("[data-search-map-side]")
+    !root.querySelector("[data-search-map-side]") ||
+    !root.querySelector("[data-search-map-city]")
   ) {
     const wasHidden = root.hidden;
     root.innerHTML = markup;
     root.hidden = wasHidden;
+    delete root.dataset.mapCityBound;
   }
   if (host && grid && root.parentElement !== host) {
     host.insertBefore(root, grid);
@@ -425,7 +445,136 @@ function ensureMapPanel() {
       rememberMapListingNavigation(event, root);
     });
   }
+  bindMapCitySearch(root);
   return root;
+}
+
+function setMapCitySearchValue(cityName) {
+  const input = document.querySelector("#search-map-modal [data-search-map-city]");
+  if (!input) return;
+  const name = String(cityName || "").trim();
+  if (name) input.value = name;
+}
+
+async function resolveCityOriginByName(cityName, cityIndex = null, postal = "") {
+  const name = String(cityName || "").trim();
+  if (!name) return null;
+  const index = cityIndex || (await getCityIndex());
+  const hit = resolveCityCoords(name, index);
+  if (hit) {
+    return {
+      lat: hit.lat,
+      lon: hit.lon,
+      label: hit.city || name,
+      postal: String(postal || "").replace(/\D/g, "").slice(0, 4),
+      city: hit.city || name,
+    };
+  }
+  try {
+    const q = `${name}, Magyarország`;
+    const res = await fetch(`/api/geocode?q=${encodeURIComponent(q)}`, { credentials: "same-origin" });
+    const data = await res.json().catch(() => ({}));
+    if (res.ok && data.lat != null && data.lon != null) {
+      return {
+        lat: Number(data.lat),
+        lon: Number(data.lon),
+        label: name,
+        postal: String(postal || "").replace(/\D/g, "").slice(0, 4),
+        city: name,
+      };
+    }
+  } catch {
+    /* ignore */
+  }
+  return null;
+}
+
+/** Egy jel a településen + keresőmező frissítése. */
+function placeOnlyHomeMarker(L) {
+  if (!mapInstance || !markersLayer || !L || !homeOrigin) return;
+  markersLayer.clearLayers();
+  for (const pin of lastPins) pin.marker = null;
+  placeHomeMarker(L);
+  mapInstance.setView([homeOrigin.lat, homeOrigin.lon], 11);
+}
+
+async function applyMapCitySearch(cityName) {
+  const name = String(cityName || "").trim();
+  if (!name) return;
+  setMapCitySearchValue(name);
+  try {
+    localStorage.setItem("bymy_stats_city", name);
+  } catch {
+  }
+  const cityIndex = await getCityIndex();
+  const origin = await resolveCityOriginByName(name, cityIndex, homeOrigin?.postal || "");
+  if (!origin) {
+    const side = mapSideEl || document.querySelector("[data-search-map-side]");
+    if (side) {
+      side.innerHTML = `<div class="search-map-modal__side-pin"><p class="search-map-modal__hint">Ismeretlen település: ${escapeHtml(name)}</p></div>`;
+    }
+    return;
+  }
+  homeOrigin = origin;
+  setMapCitySearchValue(origin.label);
+  const L = lastLeaflet || (await loadLeaflet());
+  lastLeaflet = L;
+  if (!mapInstance) await ensureBaseMap(L);
+  placeOnlyHomeMarker(L);
+  setMapStats({ empty: true, homeLabel: origin.label });
+  const side = mapSideEl || document.querySelector("[data-search-map-side]");
+  if (side) {
+    side.innerHTML = `<div class="search-map-modal__side-pin"><p class="search-map-modal__route-note">Lakhely: ${escapeHtml(origin.label)}</p><p class="search-map-modal__hint">1 jel a településen. Autók betöltése…</p></div>`;
+  }
+  try {
+    const vertical = document.body?.dataset?.vertical || "auto";
+    const nearby = await fetchVerticalListingsInRadius(vertical, {
+      postal: origin.postal || "",
+      city: origin.city || origin.label,
+      radiusKm: MAP_BROWSE_RADIUS_KM,
+    });
+    const items = nearby.items || [];
+    if (!items.length) {
+      if (side) {
+        side.innerHTML = `<div class="search-map-modal__side-pin"><p class="search-map-modal__route-note">Lakhely: ${escapeHtml(origin.label)} · ${MAP_BROWSE_RADIUS_KM} km</p><p class="search-map-modal__hint">Nincs autó ${MAP_BROWSE_RADIUS_KM} km-es körzetben.</p></div>`;
+      }
+      return;
+    }
+    const postalIndex = await getPostalIndex().catch(() => null);
+    const { pins, skipped } = placeListings(items, cityIndex, postalIndex);
+    mapMode = "browse";
+    lastPreferHomeZoom = true;
+    setMapStats({ pins: pins.length, skipped, homeLabel: origin.label });
+    if (!pins.length) {
+      placeOnlyHomeMarker(L);
+      if (side) {
+        side.innerHTML = `<div class="search-map-modal__side-pin"><p class="search-map-modal__route-note">Lakhely: ${escapeHtml(origin.label)}</p><p class="search-map-modal__hint">Nincs település a találatokhoz.</p></div>`;
+      }
+      return;
+    }
+    paintMap(L, pins, side);
+  } catch (error) {
+    if (side) {
+      side.innerHTML = `<div class="search-map-modal__side-pin"><p class="search-map-modal__route-note">Lakhely: ${escapeHtml(origin.label)}</p><p class="search-map-modal__hint">${escapeHtml(error?.message || "Hiba")}</p></div>`;
+    }
+  }
+}
+
+function bindMapCitySearch(root) {
+  if (!root || root.dataset.mapCityBound === "1") return;
+  const form = root.querySelector("[data-search-map-city-form]");
+  const input = root.querySelector("[data-search-map-city]");
+  if (!form || !input) return;
+  root.dataset.mapCityBound = "1";
+  wireTelepulesSuggest(input, {
+    onPick: (name) => {
+      void applyMapCitySearch(name);
+    },
+  });
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    void applyMapCitySearch(input.value);
+  });
 }
 
 function hashId(id) {
@@ -1076,6 +1225,7 @@ export async function openSearchResultsMap(
     if (gen !== mapOpenGeneration) return { pins: 0, skipped: 0, stale: true };
     homeOrigin = await resolveHomeOrigin(cityIndex, postalIndex);
     if (gen !== mapOpenGeneration) return { pins: 0, skipped: 0, stale: true };
+    setMapCitySearchValue(homeOrigin?.label || homeOrigin?.city || "");
 
     if (!list.length) {
       setMapStats({ empty: true, homeLabel: homeOrigin?.label || "" });
@@ -1090,7 +1240,7 @@ export async function openSearchResultsMap(
         const hint =
           emptyHint ||
           (mapMode === "browse"
-            ? `Nincs autó ${Number(radiusKm) || MAP_BROWSE_RADIUS_KM} km-es körzetben. Állíts be lakhelyet a profilban, vagy szűrj és használd a „Találatok a térképen” gombot.`
+            ? `Nincs autó ${Number(radiusKm) || MAP_BROWSE_RADIUS_KM} km-es körzetben. Írd be a települést a térkép keresőjébe.`
             : "Nincs autó a találati listában. Állíts más szűrőt, vagy várj a lista betöltésére.");
         side.innerHTML = `<div class="search-map-modal__side-pin">${homeNote}<p class="search-map-modal__hint">${escapeHtml(hint)}</p></div>`;
       }
@@ -1237,18 +1387,26 @@ async function openSearchMapForButton(btn, {
           await openSearchResultsMap(items, {
             mode: "browse",
             emptyHint: nearby.error,
+            preferHomeZoom: true,
             radiusKm,
           });
         } else {
           items = nearby.items || [];
-          if (!items.length) {
-            items = await resolveMapItems(getItems);
+          if (items.length) {
+            await openSearchResultsMap(items, {
+              mode: "browse",
+              preferHomeZoom: true,
+              radiusKm,
+            });
+          } else {
+            /* Üres körzet: ne országos listát dump-oljunk browse+homeZoom-mal (láthatatlan pinek). */
+            await openSearchResultsMap([], {
+              mode: "browse",
+              preferHomeZoom: true,
+              emptyHint: `Nincs autó ${radiusKm} km-es körzetben (${home.city || home.label}). Írd be másik települést a térkép keresőjébe.`,
+              radiusKm,
+            });
           }
-          await openSearchResultsMap(items, {
-            mode: "browse",
-            preferHomeZoom: true,
-            radiusKm,
-          });
         }
       }
     }

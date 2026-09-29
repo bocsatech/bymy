@@ -2175,7 +2175,15 @@ html[data-theme="dark"] body.site-app > .auto-price-suggest .auto-price-suggest_
   }
 }
 
-/* Görgetés: hirdetés-csempék elrejtése (desk + mobil) */
+/* Görgetés: hirdetés-csempék elrejtése (desk + mobil) — inline style a JS-ben a fő út */
+body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).is-listings-scrolling
+  #home-grid-track,
+body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"])
+  #home-grid-track.is-listings-scrolling {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
 body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).is-listings-scrolling
   #home-grid-track
   .home-grid-card,

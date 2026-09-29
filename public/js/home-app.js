@@ -962,26 +962,45 @@ function bindListingsScrollHide() {
   bindListingsScrollHide.bound = true;
 
   let stopTimer = 0;
-  const setScrolling = (on) => {
+  let scrolling = false;
+
+  const applyHide = (on) => {
+    if (scrolling === on) return;
+    scrolling = on;
     document.body.classList.toggle("is-listings-scrolling", on);
-    document.getElementById("home-grid-track")?.classList.toggle("is-listings-scrolling", on);
+    const track = document.getElementById("home-grid-track");
+    track?.classList.toggle("is-listings-scrolling", on);
+    if (!track) return;
+    if (on) {
+      track.style.setProperty("opacity", "0", "important");
+      track.style.setProperty("pointer-events", "none", "important");
+    } else {
+      track.style.removeProperty("opacity");
+      track.style.removeProperty("pointer-events");
+    }
   };
-  const onScroll = () => {
-    setScrolling(true);
+
+  const onScrollActivity = () => {
+    applyHide(true);
     window.clearTimeout(stopTimer);
-    stopTimer = window.setTimeout(() => setScrolling(false), 160);
+    stopTimer = window.setTimeout(() => applyHide(false), 180);
   };
 
   const panel = document.querySelector(".home-listings-panel");
-  panel?.addEventListener("scroll", onScroll, { passive: true });
-  window.addEventListener("scroll", onScroll, { passive: true, capture: true });
+  const targets = [panel, window, document].filter(Boolean);
+  for (const t of targets) {
+    t.addEventListener("scroll", onScrollActivity, { passive: true, capture: true });
+  }
+  // Wheel/touch gyakran a scroll esemény előtt jön — azonnal rejtsük.
+  panel?.addEventListener("wheel", onScrollActivity, { passive: true });
+  panel?.addEventListener("touchmove", onScrollActivity, { passive: true });
   document.addEventListener(
     "scroll",
     (event) => {
       const t = event.target;
-      if (t === document || t === document.documentElement || t === document.body) return;
-      if (t instanceof Element && (t === panel || t.closest?.(".home-listings-panel") || t.id === "home-grid-track")) {
-        onScroll();
+      if (!(t instanceof Element)) return;
+      if (t.classList?.contains("home-listings-panel") || t.id === "home-grid-track" || t.closest?.(".home-listings-panel")) {
+        onScrollActivity();
       }
     },
     { passive: true, capture: true }

@@ -1,5 +1,5 @@
 
-import { readWheel, readWheelList, setWheelValue } from "./ingatlan-wheels.js?v=immoClearAll1";
+import { readWheel, readWheelList, setWheelValue, fillWheel } from "./ingatlan-wheels.js?v=immoClearAll1";
 import { closeAllInlineDrums, syncDrumWheelDisplay } from "./immo-drum-picker.js?v=immoAdFormMenu1";
 
 const ITEM_H = 52;
@@ -266,6 +266,38 @@ function openMultiSwitchSheet(wheel, trigger, wrap, emptyLabel, opts) {
   });
 }
 
+async function refreshGyartmanyWheelIfNeeded(wheel, form) {
+  if (!wheel || wheel.getAttribute("data-wheel") !== "gyartmany") return;
+  const count = wheel.querySelectorAll(".immo-wheel-opt").length;
+  if (count > 15) return;
+  let catalog = form?._autoDrumCatalog;
+  if (!catalog?.gyartmanyok?.length) {
+    try {
+      const page = document.body?.getAttribute("data-site-page");
+      const kind = page === "teherauto" ? "kisteher" : "szemelyauto";
+      const staticUrl =
+        kind === "kisteher"
+          ? "/data/vehicle-catalog-kisteher.json?v=teherStrict3"
+          : "/data/vehicle-catalog.json";
+      const res = await fetch(staticUrl, { cache: kind === "kisteher" ? "no-store" : "force-cache" });
+      const data = await res.json();
+      if (data?.gyartmanyok?.length) catalog = data;
+      else {
+        const { fetchVehicleCatalog } = await import("./vehicle-catalog-client.js?v=teherStrict3");
+        catalog = await fetchVehicleCatalog({ kind });
+      }
+      if (form) form._autoDrumCatalog = catalog;
+    } catch {
+      return;
+    }
+  }
+  const brands = (catalog?.gyartmanyok || []).map((b) => ({ value: b, label: b }));
+  if (!brands.length) return;
+  fillWheel(wheel, brands, { emptyLabel: "Mindegy" });
+  wheel.dataset.multiple = "1";
+  syncDrumWheelDisplay(wheel);
+}
+
 export function openAutoDrumSheet(wheel, trigger) {
   if (!wheel || !trigger) return;
   closeAutoDrumSheet(false);
@@ -273,7 +305,9 @@ export function openAutoDrumSheet(wheel, trigger) {
 
   const wrap = wheel.closest(".immo-wheel-wrap");
   const emptyLabel = trigger.dataset.emptyLabel || "Mindegy";
-  const multiple = wheel.dataset.multiple === "1";
+  const wheelKey = wheel.getAttribute("data-wheel") || "";
+  const multiple = wheel.dataset.multiple === "1" || wheelKey === "gyartmany";
+  if (multiple) wheel.dataset.multiple = "1";
   const current = String(readWheel(wheel) ?? "");
   const selected = readWheelList(wheel);
   const opts = [...wheel.querySelectorAll(".immo-wheel-opt")];
@@ -383,7 +417,7 @@ export function bindAutoDrumSheet(wheel) {
   next.dataset.sheetBound = "1";
   trigger.replaceWith(next);
 
-  next.addEventListener("click", (event) => {
+  next.addEventListener("click", async (event) => {
     event.preventDefault();
     event.stopPropagation();
     if (activePortal) {
@@ -394,6 +428,10 @@ export function bindAutoDrumSheet(wheel) {
     const current =
       (name && host.querySelector?.(`[data-wheel="${name}"]`)) ||
       next.closest(".immo-wheel-wrap")?.querySelector("[data-wheel]");
-    if (current) openAutoDrumSheet(current, next);
+    if (!current) return;
+    if (name === "gyartmany") {
+      await refreshGyartmanyWheelIfNeeded(current, host);
+    }
+    openAutoDrumSheet(current, next);
   });
 }

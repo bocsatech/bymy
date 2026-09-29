@@ -6,11 +6,12 @@ import {
   syncDrumWheelDisplay,
   closeAllInlineDrums,
 } from "./immo-drum-picker.js?v=immoClear1";
-import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=brandDrum2";
+import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=brandDrum3";
 import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=priceSuggest1";
 
 const MOBILE_MQ = "(max-width: 900px)";
 const TYPEAHEAD_CLEAR_MS = 2500;
+const CATALOG_DRUM_KEYS = new Set(["gyartmany", "modell"]);
 
 const DUAL_RANGES = [
   {
@@ -370,6 +371,8 @@ function convertSimpleField(wrap) {
     wrap.remove();
     return;
   }
+  /* Gyártmány/modell: teljes katalógussal, multi dobkerékkel — mountBrandModelCatalogDrums. */
+  if (CATALOG_DRUM_KEYS.has(filterKey)) return;
   const label =
     wrap.querySelector(".home-qs-label")?.textContent?.trim() ||
     select.getAttribute("aria-label") ||
@@ -515,19 +518,53 @@ function rebindWheel(form, wheelName, options, emptyLabel = "Mindegy", { multipl
   return live;
 }
 
-async function wireCatalogDrums(form) {
+function ensureBrandModelDrumCells(form) {
+  for (const filterKey of ["gyartmany", "modell"]) {
+    const wrap = form.querySelector(`[data-qs-field="${filterKey}"]`);
+    if (!wrap || wrap.querySelector("[data-wheel]")) continue;
+    const select = wrap.querySelector("select.home-qs-control");
+    if (!select) continue;
+    const label =
+      wrap.querySelector(".home-qs-label")?.textContent?.trim() ||
+      (filterKey === "modell" ? "Modell" : "Gyártmány");
+    const cell = buildWheelCell({
+      filterKey,
+      wheelName: filterKey,
+      label,
+      options: [],
+      emptyLabel: "Mindegy",
+    });
+    wrap.replaceWith(cell);
+  }
+}
+
+async function mountBrandModelCatalogDrums(form) {
+  ensureBrandModelDrumCells(form);
   if (!form.querySelector('[data-wheel="gyartmany"]') || !form.querySelector('[data-wheel="modell"]')) return;
+
+  const brandWrap = form.querySelector('[data-wheel="gyartmany"]')?.closest(".immo-wheel-wrap");
+  const brandTrigger = brandWrap?.querySelector(".immo-wheel-trigger");
+  if (brandTrigger) {
+    brandTrigger.disabled = true;
+    brandTrigger.textContent = "Betöltés…";
+  }
 
   let catalog;
   try {
     catalog = await fetchCatalogQuick();
   } catch (error) {
     console.warn("Dobkerék katalógus:", error);
+    if (brandTrigger) {
+      brandTrigger.disabled = false;
+      brandTrigger.textContent = "Mindegy";
+    }
     return;
   }
 
+  form._autoDrumCatalog = catalog;
   const brands = (catalog.gyartmanyok || []).map((b) => ({ value: b, label: b }));
   const brandWheel = rebindWheel(form, "gyartmany", brands, "Mindegy", { multiple: true });
+  if (brandTrigger) brandTrigger.disabled = false;
   if (!brandWheel) return;
 
   const fillModels = (brandList) => {
@@ -583,6 +620,7 @@ export async function mountAutoSearchDrums(form = document.getElementById("home-
     if (wrap.closest(".immo-dual-range-block")) return;
     const key = wrap.getAttribute("data-qs-field");
     if (dualKeys.has(key) || SEARCH_OMIT_FIELDS.has(key)) return;
+    if (CATALOG_DRUM_KEYS.has(key)) return;
     if (key === "vetelar") return;
     if (wrap.querySelector("input.home-qs-control--price, input.home-qs-control[type='text'][data-filter-key^='ar_']")) {
       return;
@@ -595,8 +633,12 @@ export async function mountAutoSearchDrums(form = document.getElementById("home-
     if (wrap.querySelector("select.home-qs-control")) convertSimpleField(wrap);
   });
 
+  try {
+    await mountBrandModelCatalogDrums(form);
+  } catch (error) {
+    console.warn("Dobkerék katalógus:", error);
+  }
   form.dataset.drumsMounted = "1";
-  wireCatalogDrums(form).catch((error) => console.warn("Dobkerék katalógus:", error));
   return true;
 }
 

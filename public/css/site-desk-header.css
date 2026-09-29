@@ -1,24 +1,28 @@
-/* Willhaben-szerű két-soros desk fejléc (≥801px; ≤800 = mobil mw-app-top)
-   1. sor: logo balra, akciók jobbra
-   2. sor: szöveges menü
-   ≤1199px: akciók ikon-kompakt */
+/* Desk fejléc — minden oldalon azonos: egy sor, 80px (≥801px; ≤800 = mobil mw-app-top)
+   logo | menü | akciók */
 @media (min-width: 801px) {
-  body.site-app {
+  body.site-app,
+  body.home-page.site-app {
     --desk-nav-font: "DM Sans", system-ui, -apple-system, sans-serif;
     --desk-nav-size: 14px;
     --desk-nav-weight: 600;
     --desk-count-size: 13px;
     --desk-action-size: 14px;
     --desk-cta-size: 13px;
-    --desk-top-h: 64px;
-    --desk-nav-h: 48px;
-    --desk-header-h: calc(var(--desk-top-h) + var(--desk-nav-h));
+    --desk-header-h: 80px;
     --desk-logo-h: 56px;
     --desk-pad-x: 24px;
-    --desk-gap: 16px;
-    --desk-nav-gap: 0;
+    --desk-gap: 24px;
     --desk-cta-h: 36px;
-    --desk-max: 1280px;
+    --desk-max: 1440px;
+    --site-fixed-header-h: 80px;
+  }
+
+  @media (min-width: 1200px) {
+    body.site-app,
+    body.home-page.site-app {
+      --desk-logo-h: 68px;
+    }
   }
 
   body.site-app > .hub-header,
@@ -39,11 +43,15 @@
   body.site-app .site-app-header-inner,
   body.home-page .hub-header-inner,
   body.home-page .home-header-inner {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: stretch !important;
-    justify-content: flex-start !important;
-    gap: 0 !important;
+    display: grid !important;
+    flex-direction: row !important;
+    grid-template-columns: auto minmax(0, 1fr) auto !important;
+    grid-template-areas: "logo nav actions" !important;
+    align-items: center !important;
+    justify-content: stretch !important;
+    column-gap: var(--desk-gap) !important;
+    row-gap: 0 !important;
+    gap: 0 var(--desk-gap) !important;
     max-width: var(--desk-max) !important;
     margin: 0 auto !important;
     padding: 0 var(--desk-pad-x) !important;
@@ -52,28 +60,20 @@
     max-height: var(--desk-header-h) !important;
     box-sizing: border-box !important;
     position: relative !important;
-    grid-template-columns: none !important;
-    grid-template-areas: none !important;
   }
 
-  /* 1. sor: logo | akciók */
+  /* Shell DOM: top wraps logo+actions — flatten into parent grid */
   body.site-app .hub-header-top,
   body.site-app .site-header-top,
   body.home-page .hub-header-top {
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    gap: var(--desk-gap) !important;
-    width: 100% !important;
-    height: var(--desk-top-h) !important;
-    min-height: var(--desk-top-h) !important;
-    max-height: var(--desk-top-h) !important;
+    display: contents !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
     margin: 0 !important;
     padding: 0 !important;
-    position: relative !important;
     transform: none !important;
-    flex: 0 0 var(--desk-top-h) !important;
+    flex: none !important;
   }
 
   body.site-app .hub-logo,
@@ -84,6 +84,8 @@
   body.home-page .hub-header-top > .hub-logo,
   body.site-app .hub-header-inner > .hub-logo,
   body.home-page .hub-header-inner > .hub-logo {
+    grid-area: logo !important;
+    justify-self: start !important;
     position: relative !important;
     left: auto !important;
     right: auto !important;
@@ -98,8 +100,6 @@
     flex: 0 0 auto !important;
     display: inline-flex !important;
     align-items: center !important;
-    justify-content: flex-start !important;
-    justify-self: start !important;
     line-height: 0 !important;
     z-index: 2 !important;
     order: 0 !important;
@@ -120,43 +120,36 @@
     aspect-ratio: auto !important;
   }
 
-  /* Széles desk: még nagyobb logo */
-  @media (min-width: 1200px) {
-    body.site-app,
-    body.home-page.site-app {
-      --desk-logo-h: 68px;
-      --desk-top-h: 76px;
-      --desk-header-h: calc(var(--desk-top-h) + var(--desk-nav-h));
-    }
-  }
-
   body.site-app .hub-header-actions,
   body.site-app .site-header-actions,
   body.home-page .hub-header-actions {
+    grid-area: actions !important;
     display: flex !important;
     align-items: center !important;
     justify-content: flex-end !important;
+    justify-self: end !important;
     gap: 0.75rem !important;
     height: var(--desk-cta-h) !important;
-    margin: 0 0 0 auto !important;
+    margin: 0 !important;
     flex: 0 0 auto !important;
+    width: auto !important;
   }
 
-  /* 2. sor: menü */
   body.site-app .hub-nav-band,
   body.home-page .hub-nav-band {
+    grid-area: nav !important;
     display: flex !important;
     align-items: center !important;
-    width: 100% !important;
-    height: var(--desk-nav-h) !important;
-    min-height: var(--desk-nav-h) !important;
-    max-height: var(--desk-nav-h) !important;
+    width: auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
     margin: 0 !important;
     padding: 0 !important;
-    border-top: 1px solid #e5e7eb !important;
+    border-top: 0 !important;
     border-bottom: 0 !important;
     box-sizing: border-box !important;
-    flex: 0 0 var(--desk-nav-h) !important;
+    flex: 0 0 auto !important;
   }
 
   body.site-app .hub-nav,
@@ -166,9 +159,9 @@
   body.home-page .hub-nav {
     display: flex !important;
     align-items: center !important;
-    justify-content: space-between !important;
-    gap: 1rem !important;
-    width: 100% !important;
+    justify-content: flex-start !important;
+    gap: 22px !important;
+    width: max-content !important;
     max-width: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
@@ -176,7 +169,7 @@
     transform: none !important;
     left: auto !important;
     right: auto !important;
-    height: 100% !important;
+    height: auto !important;
     overflow: visible !important;
   }
 
@@ -198,7 +191,8 @@
     padding: 0 !important;
     border: 0 !important;
     border-bottom: 3px solid transparent !important;
-    height: 100% !important;
+    height: auto !important;
+    min-height: 2rem !important;
     display: inline-flex !important;
     align-items: center !important;
     gap: 0.35rem !important;
@@ -294,13 +288,13 @@
   }
 }
 
-/* Szűkített desk (willhaben kompakt): szöveg elrejtve, ikonok maradnak */
+/* Szűkített desk: szöveg elrejtve, ikonok maradnak */
 @media (min-width: 801px) and (max-width: 1199px) {
-  body.site-app {
+  body.site-app,
+  body.home-page.site-app {
     --desk-pad-x: 16px;
     --desk-logo-h: 48px;
-    --desk-top-h: 58px;
-    --desk-header-h: calc(var(--desk-top-h) + var(--desk-nav-h));
+    --desk-gap: 16px;
   }
 
   body.site-app .hub-header-msg > span:not(.site-message-badge),
@@ -365,73 +359,5 @@
 
 html[data-theme="dark"] body.site-app .hub-nav-band,
 html[data-theme="dark"] body.home-page .hub-nav-band {
-  border-top-color: #2a313c !important;
-}
-
-/* Autó / Teherautó: menü vissza egy sorba — logo | nav | actions (logo balra) */
-@media (min-width: 901px) {
-  body.home-page.site-app:is([data-site-page="auto"], [data-site-page="teherauto"]) {
-    --desk-header-h: 80px;
-    --site-fixed-header-h: 80px;
-  }
-
-  body.home-page.site-app:is([data-site-page="auto"], [data-site-page="teherauto"]) > .hub-header[data-site-desk-header],
-  body.home-page.site-app:is([data-site-page="auto"], [data-site-page="teherauto"]) > .hub-header {
-    height: 80px !important;
-    min-height: 80px !important;
-    max-height: 80px !important;
-  }
-
-  body.home-page.site-app:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-header-inner {
-    display: grid !important;
-    flex-direction: row !important;
-    grid-template-columns: auto minmax(0, 1fr) auto !important;
-    grid-template-areas: "logo nav actions" !important;
-    align-items: center !important;
-    column-gap: 24px !important;
-    row-gap: 0 !important;
-    gap: 0 24px !important;
-    max-width: 1440px !important;
-    height: 80px !important;
-    min-height: 80px !important;
-    max-height: 80px !important;
-  }
-
-  body.home-page.site-app:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-header-top {
-    display: contents !important;
-  }
-
-  body.home-page.site-app:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-logo {
-    grid-area: logo !important;
-    justify-self: start !important;
-    position: relative !important;
-    left: auto !important;
-    top: auto !important;
-    transform: none !important;
-  }
-
-  body.home-page.site-app:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-band {
-    grid-area: nav !important;
-    display: flex !important;
-    align-items: center !important;
-    width: auto !important;
-    height: auto !important;
-    min-height: 0 !important;
-    max-height: none !important;
-    border-top: 0 !important;
-    flex: 0 0 auto !important;
-  }
-
-  body.home-page.site-app:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav {
-    justify-content: flex-start !important;
-    gap: 22px !important;
-    width: max-content !important;
-    max-width: 100% !important;
-  }
-
-  body.home-page.site-app:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-header-actions {
-    grid-area: actions !important;
-    justify-self: end !important;
-    margin: 0 !important;
-  }
+  border-top-color: transparent !important;
 }

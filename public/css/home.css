@@ -565,17 +565,6 @@ body.home-page .local-banner {
   border-bottom-color: #9ca3af;
 }
 
-body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-header-inner,
-body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-header-inner {
-  display: flex;
-  flex-direction: column;
-}
-
-body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav,
-body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-nav {
-  justify-content: center;
-}
-
 .home-search-wrap {
   max-width: 1320px;
   margin: 0 auto;

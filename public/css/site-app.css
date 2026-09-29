@@ -133,14 +133,14 @@ body.site-app .hub-header {
     --site-nav-logo-h: 56px;
     --site-nav-logo-max-w: none;
     --site-nav-logo-col: auto;
-    --site-fixed-header-h: 112px;
+    --site-fixed-header-h: 80px;
     padding-top: var(--site-fixed-header-h);
   }
 
   @media (min-width: 1200px) {
     body.site-app {
       --site-nav-logo-h: 68px;
-      --site-fixed-header-h: 124px;
+      --site-fixed-header-h: 80px;
     }
   }
 
@@ -185,35 +185,35 @@ body.site-app .hub-header {
   body.site-app .hub-header-inner,
   body.site-app .home-header-inner,
   body.site-app .site-app-header-inner {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: stretch !important;
-    justify-content: flex-start !important;
-    gap: 0 !important;
-    max-width: 1280px !important;
+    display: grid !important;
+    grid-template-columns: auto minmax(0, 1fr) auto !important;
+    grid-template-areas: "logo nav actions" !important;
+    align-items: center !important;
+    justify-content: stretch !important;
+    gap: 0 24px !important;
+    max-width: 1440px !important;
     margin: 0 auto !important;
     padding: 0 24px !important;
     height: 100% !important;
     min-height: var(--site-fixed-header-h) !important;
     max-height: var(--site-fixed-header-h) !important;
     box-sizing: border-box !important;
-    grid-template-columns: none !important;
-    grid-template-areas: none !important;
   }
 
   body.site-app .hub-nav-band,
   body.site-app .site-nav-band {
     display: flex !important;
     align-items: center !important;
-    width: 100% !important;
-    height: 48px !important;
-    min-height: 48px !important;
-    max-height: 48px !important;
-    border-top: 1px solid #e5e7eb !important;
+    width: auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    border-top: 0 !important;
     border-bottom: 0 !important;
     padding: 0 !important;
     margin: 0 !important;
     box-sizing: border-box !important;
+    grid-area: nav !important;
   }
 
   body.site-app .hub-logo,
@@ -236,6 +236,7 @@ body.site-app .hub-header {
     justify-content: flex-start !important;
     justify-self: start !important;
     flex: 0 0 auto !important;
+    grid-area: logo !important;
   }
 
   body.site-app .hub-logo .bymy-logo-img--nav,
@@ -251,14 +252,10 @@ body.site-app .hub-header {
 
   body.site-app .hub-header-top,
   body.site-app .site-header-top {
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    width: 100% !important;
-    height: 56px !important;
-    min-height: 56px !important;
-    max-height: 56px !important;
+    display: contents !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
     margin: 0 !important;
     padding: 0 !important;
   }
@@ -275,13 +272,13 @@ body.site-app .hub-header {
     transform: none !important;
     display: flex !important;
     align-items: center !important;
-    justify-content: space-between !important;
-    gap: 1rem !important;
-    width: 100% !important;
+    justify-content: flex-start !important;
+    gap: 22px !important;
+    width: max-content !important;
     max-width: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
-    height: 100% !important;
+    height: auto !important;
     pointer-events: auto !important;
     overflow: visible !important;
     border: 0 !important;
@@ -370,7 +367,7 @@ body.site-app .site-header-top {
   z-index: 4;
 }
 
-/* 801–900: a site-desk-header két-soros sav érvényes; ne toljuk balra/apróra a logót */
+/* 801–900: site-desk-header kezeli a logót */
 
 body.site-app .bymy-logo-img,
 body.site-app .home-logo .bymy-logo-img,
@@ -502,9 +499,12 @@ body.home-page .site-layout {
 
   body.site-app .site-header-actions,
   body.site-app .hub-header-actions {
-    gap: 0.35rem;
+    grid-area: actions !important;
+    justify-self: end !important;
+    gap: 0.75rem;
     max-width: 100%;
     flex-wrap: nowrap;
+    margin: 0 !important;
   }
 
   body.site-app .hub-btn,

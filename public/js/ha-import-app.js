@@ -246,7 +246,7 @@ function renderMode() {
   if (openLabel) openLabel.textContent = cfg.openLabel;
   else if (openBtn) openBtn.textContent = cfg.openLabel;
   const href = bookmarkletHref(mode);
-  const label = mode === "dealer" ? "Lista importálása" : "Hirdetés importálása";
+  const label = "húzd a könyvjelzősávra";
   if (bookmark) {
     bookmark.href = href;
     bookmark.textContent = label;
@@ -463,8 +463,8 @@ function promptHaBookmark(url) {
   if (url) window.open(url, "bymy-ha-site");
   setStatus(
     currentMode() === "dealer"
-      ? "Az admin / járműlista oldalt a szerver nem látja. A megnyílt hasznaltauto fülön kattints a „Lista importálása” könyvjelzőre."
-      : "A megnyitott hirdetést a szerver nem látja. A hasznaltauto fülön kattints a „Hirdetés importálása” könyvjelzőre.",
+      ? "Az admin / járműlista oldalt a szerver nem látja. A megnyílt hasznaltauto fülön kattints a „húzd a könyvjelzősávra” könyvjelzőre."
+      : "A megnyitott hirdetést a szerver nem látja. A hasznaltauto fülön kattints a „húzd a könyvjelzősávra” könyvjelzőre.",
     "err"
   );
 }

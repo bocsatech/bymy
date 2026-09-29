@@ -8,20 +8,20 @@ body.site-app .mm-side-head {
   margin: 0 0 0.85rem;
   padding: 0.85rem 0.75rem;
   border-radius: 12px;
-  background: linear-gradient(135deg, #1a2b3a 0%, #243949 100%);
-  color: #fff;
+  background: #f0c52c;
+  color: #111;
 }
 
 body.site-app .mm-side-head .mm-side-kicker {
   margin: 0;
-  color: #b8c5d1;
+  color: rgba(17, 17, 17, 0.62);
 }
 
 body.site-app .mm-side-head .mm-side-title {
   margin: 0.15rem 0 0;
   font-size: 1.12rem;
   font-weight: 800;
-  color: #fff;
+  color: #111;
 }
 
 body.site-app .mm-nav {
@@ -181,7 +181,16 @@ body.site-app .mm-side-logout:hover {
 }
 
 html[data-theme="dark"] body.site-app .mm-side-head {
-  background: linear-gradient(135deg, #0f1720 0%, #1a2430 100%);
+  background: #f0c52c;
+  color: #111;
+}
+
+html[data-theme="dark"] body.site-app .mm-side-head .mm-side-kicker {
+  color: rgba(17, 17, 17, 0.62);
+}
+
+html[data-theme="dark"] body.site-app .mm-side-head .mm-side-title {
+  color: #111;
 }
 
 html[data-theme="dark"] body.site-app .mm-nav-link.is-active {

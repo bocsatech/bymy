@@ -6994,6 +6994,10 @@ html[data-theme="dark"] body.site-app.settings-page .mm-nav-plain {
   background: transparent !important;
 }
 
+html[data-theme="dark"] body.site-app.settings-page .mm-side-head .mm-side-kicker {
+  color: rgba(17, 17, 17, 0.62) !important;
+}
+
 html[data-theme="dark"] body.site-app.settings-page .mm-nav-plain span {
   color: #9ca3af !important;
   background: #243044 !important;
@@ -7013,6 +7017,10 @@ html[data-theme="dark"] body.site-app.settings-page .settings-title,
 html[data-theme="dark"] body.site-app.settings-page .settings-card-title,
 html[data-theme="dark"] body.site-app.settings-page .settings-profile-header-meta > strong {
   color: #f3f4f6 !important;
+}
+
+html[data-theme="dark"] body.site-app.settings-page .mm-side-head .mm-side-title {
+  color: #111 !important;
 }
 
 html[data-theme="dark"] body.site-app.settings-page .mm-nav-link,

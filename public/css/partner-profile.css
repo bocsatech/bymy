@@ -380,6 +380,31 @@ body.partner-manage-page.mm-page {
   font-size: 12px;
 }
 
+.partner-form-title--spaced {
+  margin-top: 2rem;
+  padding-top: 1.4rem;
+  border-top: 1px solid var(--partner-line);
+}
+
+.partner-activities-label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 0.45rem;
+}
+
+.partner-activities-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.1rem;
+}
+
+.partner-contract-web-hint {
+  margin: 0.75rem 0 0;
+  font-size: 0.85rem;
+  color: var(--partner-muted);
+}
+
 .partner-form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;

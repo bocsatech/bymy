@@ -4,10 +4,34 @@ import {
   getProfile,
   getDisplayName,
   loadProfileFromServer,
+  saveProfile,
   initSiteAuth,
 } from "./site-auth.js?v=publicPartner1";
+import {
+  getDeviceIdentity,
+  identityForAccountKind,
+  identityFromFormData,
+  isNativeApp,
+  setDeviceIdentity,
+} from "./device-contract-identity.js?v=contractKind1";
+import { wirePostalCityAutofill } from "./postal-city-autofill.js?v=postalFill1";
 
 const pageRoot = () => document.getElementById("partner-root");
+
+const ACTIVITY_LABELS = { auto: "Autó", teherauto: "Teherautó", ingatlan: "Ingatlan" };
+
+function parseActivities(raw) {
+  if (Array.isArray(raw)) return raw.map((v) => String(v || "").trim()).filter((id) => ACTIVITY_LABELS[id]);
+  if (typeof raw === "string" && raw.trim()) {
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parseActivities(parsed);
+    } catch {
+      return raw.split(/[,|;]/).map((s) => s.trim()).filter((id) => ACTIVITY_LABELS[id]);
+    }
+  }
+  return [];
+}
 
 function esc(value) {
   return String(value ?? "")
@@ -84,7 +108,7 @@ export function syncManageSidebar(accountType) {
   if (hello) hello.textContent = getDisplayName() || user?.email?.split("@")[0] || "—";
 }
 
-/** Partneri profil szerkesztő — beágyazható a Fiókom panelbe is. */
+/** Partneri profil szerkesztő — cég + partner egy helyen, duplikáció nélkül. */
 export async function renderPartnerManage(mountRoot) {
   const root = mountRoot || pageRoot();
   if (!root) return;
@@ -96,6 +120,7 @@ export async function renderPartnerManage(mountRoot) {
   } catch {
   }
   syncManageSidebar(accountType);
+  const isCompany = accountType === "business" || accountType === "dealer";
 
   root.innerHTML = `<div class="partner-loading">Partneri profil betöltése…</div>`;
 
@@ -121,6 +146,31 @@ export async function renderPartnerManage(mountRoot) {
     const full = [account.firstName, account.lastName].filter(Boolean).join(" ").trim();
     profile.contact_person = full || String(account.salespersonName || "").trim();
   }
+
+  const activities = parseActivities(account.companyActivities);
+  const activityChecks = Object.entries(ACTIVITY_LABELS)
+    .map(
+      ([id, label]) =>
+        `<label class="partner-check"><input type="checkbox" name="companyActivity" value="${esc(id)}" ${activities.includes(id) ? "checked" : ""} /><span>${esc(label)}</span></label>`
+    )
+    .join("");
+
+  const native = isNativeApp();
+  const user = getAuthUser();
+  const identity = native ? await getDeviceIdentity(user?.email || "") : null;
+  const seatFallback = [account.companyPostalCode, account.companyCity, account.companyStreet]
+    .map((v) => String(v || "").trim())
+    .filter(Boolean)
+    .join(", ");
+  const contractCompanyName = identity?.companyName || account.company || profile.display_name || "";
+  const contractSeat = identity?.companySeat || seatFallback;
+  const contractRegistry = identity?.companyRegistry || "";
+  const contractRep =
+    identity?.representative ||
+    account.salespersonName ||
+    [account.lastName, account.firstName].filter(Boolean).join(" ") ||
+    "";
+
   const listings = (listingsResult.listings || []).filter((listing) => {
     const vertical = String(
       listing.vertical ||
@@ -133,34 +183,72 @@ export async function renderPartnerManage(mountRoot) {
   });
   const ownListings = listings.length ? listings : listingsResult.listings || [];
   const listingsTitle = listings.length ? "Ingatlanhirdetéseim" : "Saját hirdetéseim";
-  const listingsEmpty = listings.length
-    ? ""
-    : ownListings.length
-      ? ""
-      : '<p class="partner-empty">Még nincs saját hirdetésed.</p>';
+  const listingsEmpty = ownListings.length ? "" : '<p class="partner-empty">Még nincs saját hirdetésed.</p>';
+
   root.innerHTML = `
     <header class="partner-manage-head">
-      <div><p class="partner-eyebrow">BYMY INGATLANOS PARTNERPROGRAM</p><h1>Partneri profil</h1><p>Itt adhatod meg a publikus profilodon látható cég- és partneradatokat. Egy helyen, duplikáció nélkül.</p></div>
+      <div>
+        <p class="partner-eyebrow">CÉGADATOK · PARTNERI PROFIL</p>
+        <h1>Partneri profil</h1>
+        <p>Publikus partneradatok és a cég egyedi mezői egy helyen. Név, telefon és e-mail csak egyszer szerepel.</p>
+      </div>
     </header>
     ${statusBox(profile)}
     <form class="partner-form" id="partner-form">
-      <div class="partner-form-title"><div><h2>Partner / cég adatai</h2><p>A csillaggal jelölt mezők kitöltése kötelező.</p></div></div>
+      <div class="partner-form-title"><div><h2>Publikus partneradatok</h2><p>A csillaggal jelölt mezők kötelezőek. Ezek jelennek meg a partneroldalon.</p></div></div>
       <div class="partner-form-grid">
-        <label>Partner vagy iroda neve *<input name="displayName" value="${esc(profile.display_name)}" maxlength="100" required /></label>
+        <label>Cég / iroda neve *<input name="displayName" value="${esc(profile.display_name)}" maxlength="100" required /></label>
         <label>Publikus profilcím *<span class="partner-slug"><span>bymy.hu/partner/</span><input name="slug" value="${esc(profile.slug)}" maxlength="100" required /></span></label>
         <label>Kapcsolattartó neve<input name="contactPerson" value="${esc(profile.contact_person)}" maxlength="160" /></label>
         <label>Telefonszám *<input name="phone" type="tel" value="${esc(profile.phone)}" maxlength="40" required placeholder="+36 30 123 4567" /></label>
         <label>E-mail cím *<input name="email" type="email" value="${esc(profile.email)}" maxlength="320" required /></label>
         <label>Jutalék *<input name="commission" value="${esc(profile.commission)}" maxlength="80" required placeholder="pl. bruttó 2–4%" /></label>
         <label>Weboldal<input name="website" type="url" value="${esc(profile.website)}" placeholder="https://…" maxlength="300" /></label>
-        <label>Profilkép URL<input name="logoUrl" type="url" value="${esc(profile.logo_url)}" placeholder="https://… (fénykép a kártyához)" /></label>
+        <label>Profilkép URL<input name="logoUrl" type="url" value="${esc(profile.logo_url)}" placeholder="https://…" /></label>
         <label>Borítókép URL<input name="coverUrl" type="url" value="${esc(profile.cover_url)}" placeholder="https://…" /></label>
         <label class="partner-form-wide">Kerület / értékesítési területek *<input name="serviceAreas" value="${esc(profile.service_areas)}" placeholder="Például: Budapest XI., Budaörs, Érd" maxlength="1000" required /></label>
-        <label class="partner-form-wide">Bemutatkozás<textarea name="description" maxlength="4000" placeholder="Mutasd be az irodát, a szakterületedet és azt, miben tudsz segíteni.">${esc(profile.description)}</textarea></label>
+        <label class="partner-form-wide">Bemutatkozás<textarea name="description" maxlength="4000" placeholder="Mutasd be az irodát és a szakterületedet.">${esc(profile.description)}</textarea></label>
         <label class="partner-check partner-form-wide"><input type="checkbox" name="isPublic" ${profile.is_public !== false ? "checked" : ""} /><span>A jóváhagyás után legyen nyilvános a profilom</span></label>
       </div>
+
+      ${
+        isCompany
+          ? `
+      <div class="partner-form-title partner-form-title--spaced"><div><h2>Cég címe és azonosítók</h2><p>Ezek nem ismétlik a fenti név / telefon / e-mail mezőket — csak a hiányzó cégadatokat.</p></div></div>
+      <div class="partner-form-grid">
+        <label>Cég adószáma<input name="companyTaxId" value="${esc(account.companyTaxId)}" inputmode="numeric" autocomplete="off" /></label>
+        <div class="partner-form-wide partner-activities">
+          <span class="partner-activities-label">Cég tevékenysége</span>
+          <div class="partner-activities-row">${activityChecks}</div>
+        </div>
+        <label class="partner-form-wide">Utca, házszám (cégcím)<input name="companyStreet" value="${esc(account.companyStreet || account.companyAddress)}" autocomplete="street-address" placeholder="pl. Váci út 1." /></label>
+        <label>Irányítószám<input name="companyPostalCode" value="${esc(account.companyPostalCode)}" inputmode="numeric" maxlength="4" autocomplete="postal-code" data-postal-lookup data-company-postal /></label>
+        <label>Település<input name="companyCity" value="${esc(account.companyCity)}" autocomplete="address-level2" placeholder="automatikus" data-company-city /></label>
+        <label>Ország<input name="companyCountry" value="${esc(account.companyCountry || "Magyarország")}" autocomplete="country-name" /></label>
+        <label>Második telefonszám<input name="companyPhone2" type="tel" value="${esc(account.companyPhone2)}" maxlength="40" placeholder="+36 …" /></label>
+        <label>Második e-mail<input name="companyEmail2" type="email" value="${esc(account.companyEmail2)}" maxlength="320" /></label>
+        <label>Értékesítő neve<input name="salespersonName" value="${esc(account.salespersonName)}" autocomplete="name" /></label>
+        <label>Értékesítő neve (2)<input name="salespersonName2" value="${esc(account.salespersonName2)}" autocomplete="name" /></label>
+      </div>
+
+      <div class="partner-form-title partner-form-title--spaced"><div><h2>Szerződéses adatok</h2><p>Adásvételi szerződéshez. <strong>Csak a mobilalkalmazásban</strong> tárolódnak, a Bymy szerverre nem kerülnek.</p></div></div>
+      ${
+        native
+          ? ""
+          : `<p class="partner-contract-web-hint">Böngészőben nem szerkeszthető — nyisd meg a Bymy appot a telefonodon.</p>`
+      }
+      <div class="partner-form-grid">
+        <label>Cég neve (szerződés)<input name="local_companyName" value="${esc(native ? contractCompanyName : "")}" ${native ? "" : "readonly"} placeholder="${native ? "" : "Csak a mobilalkalmazásban"}" autocomplete="organization" /></label>
+        <label class="partner-form-wide">Székhely<input name="local_companySeat" value="${esc(native ? contractSeat : "")}" ${native ? "" : "readonly"} placeholder="${native ? "pl. 1051 Budapest, …" : "Csak a mobilalkalmazásban"}" autocomplete="street-address" /></label>
+        <label>Cégjegyzék / nyilvántartási szám<input name="local_companyRegistry" value="${esc(native ? contractRegistry : "")}" ${native ? "" : "readonly"} placeholder="${native ? "" : "Csak a mobilalkalmazásban"}" autocomplete="off" /></label>
+        <label>Képviselő neve<input name="local_representative" value="${esc(native ? contractRep : "")}" ${native ? "" : "readonly"} placeholder="${native ? "" : "Csak a mobilalkalmazásban"}" autocomplete="name" /></label>
+      </div>
+      `
+          : ""
+      }
+
       <div class="partner-form-actions">
-        <button type="submit">Profil mentése</button>
+        <button type="submit">Mentés</button>
         ${profile.application_status === "approved" && profile.slug ? `<a href="/partner/${encodeURIComponent(profile.slug)}" target="_blank" rel="noopener">Publikus profil megnyitása</a>` : ""}
         <p data-status role="status"></p>
       </div>
@@ -170,33 +258,82 @@ export async function renderPartnerManage(mountRoot) {
       <div class="partner-own-list">${ownListings.length ? ownListings.map((listing) => `<div class="partner-own-row"><div><strong>${esc(listing.preview?.title || listing.hirdetes_cime || `Hirdetés #${listing.id}`)}</strong><span>${esc(listing.preview?.price || "")}</span></div><span class="partner-own-status">${esc(listing.status || "")}</span><div><a href="/hirdetes.html?id=${listing.id}">Megnyitás</a><a href="/hirdetesfeladas.html?id=${listing.id}">Szerkesztés</a></div></div>`).join("") : listingsEmpty}</div>
     </section>`;
 
+  try {
+    wirePostalCityAutofill(root);
+  } catch {
+  }
+
   root.querySelector("#partner-form")?.addEventListener("submit", async (event) => {
     event.preventDefault();
     const form = event.currentTarget;
     const status = form.querySelector("[data-status]");
     const submit = form.querySelector('button[type="submit"]');
     status.textContent = "";
+    status.className = "";
     submit.disabled = true;
     submit.textContent = "Mentés…";
-    const payload = Object.fromEntries(new FormData(form));
-    payload.isPublic = form.elements.isPublic.checked;
+    const raw = Object.fromEntries(new FormData(form).entries());
+    const activityIds = [...form.querySelectorAll('input[name="companyActivity"]:checked')].map((el) => el.value);
+    const partnerPayload = {
+      displayName: String(raw.displayName || "").trim(),
+      slug: String(raw.slug || "").trim(),
+      contactPerson: String(raw.contactPerson || "").trim(),
+      phone: String(raw.phone || "").trim(),
+      email: String(raw.email || "").trim(),
+      commission: String(raw.commission || "").trim(),
+      website: String(raw.website || "").trim(),
+      logoUrl: String(raw.logoUrl || "").trim(),
+      coverUrl: String(raw.coverUrl || "").trim(),
+      serviceAreas: String(raw.serviceAreas || "").trim(),
+      description: String(raw.description || "").trim(),
+      isPublic: Boolean(form.elements.isPublic?.checked),
+    };
     try {
       const result = await jsonFetch("/api/partner-profiles/mine", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(partnerPayload),
       });
+
+      if (isCompany) {
+        const companyStreet = String(raw.companyStreet || "").trim();
+        const companyPostalCode = String(raw.companyPostalCode || "").replace(/\D/g, "").slice(0, 4);
+        const companyCity = String(raw.companyCity || "").trim();
+        await saveProfile({
+          ...getProfile(),
+          company: partnerPayload.displayName,
+          companyTaxId: String(raw.companyTaxId || "").trim(),
+          companyActivities: activityIds,
+          companyStreet,
+          companyAddress: companyStreet,
+          companyPostalCode,
+          companyCity,
+          companyCountry: String(raw.companyCountry || "Magyarország").trim() || "Magyarország",
+          companyPhone: partnerPayload.phone,
+          companyPhone2: String(raw.companyPhone2 || "").trim(),
+          companyEmail: partnerPayload.email,
+          companyEmail2: String(raw.companyEmail2 || "").trim(),
+          salespersonName: String(raw.salespersonName || "").trim(),
+          salespersonName2: String(raw.salespersonName2 || "").trim(),
+        });
+
+        if (native && user?.email) {
+          const deviceIdentity = identityForAccountKind(identityFromFormData(raw), { company: true });
+          await setDeviceIdentity(user.email, deviceIdentity);
+        }
+      }
+
       status.textContent =
         result.profile.application_status === "approved"
-          ? "A profil mentve."
-          : "A jelentkezés mentve, jóváhagyásra vár.";
+          ? "Mentve."
+          : "Mentve — a partnerjelentkezés jóváhagyásra vár.";
       status.className = "is-success";
     } catch (error) {
       status.textContent = error.message;
       status.className = "is-error";
     } finally {
       submit.disabled = false;
-      submit.textContent = "Profil mentése";
+      submit.textContent = "Mentés";
     }
   });
 }

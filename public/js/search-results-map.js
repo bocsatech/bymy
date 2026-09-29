@@ -9,7 +9,7 @@ import {
   normalizePlace,
   resolveCityCoords,
   resolveListingCoords,
-} from "./listing-radius.js?v=mapCity7";
+} from "./listing-radius.js?v=mapOsm1";
 import {
   listingDetailHref,
   rememberListingOpen,
@@ -18,7 +18,7 @@ import {
 import { listingTileTitle, listingTilePrice } from "./listing-tile.js?v=listThumb1";
 import { getAuthUser, loadProfileFromServer } from "./site-auth.js?v=bootFix2";
 import { fetchListingsPage } from "./db-client.js?v=ownerBoost6";
-import { buildNearbyFilter, readNearbyPrefs } from "./nearby-search.js?v=mapCity7";
+import { buildNearbyFilter, readNearbyPrefs } from "./nearby-search.js?v=mapOsm1";
 import { wireTelepulesSuggest } from "./telepules-suggest.js?v=telSug1";
 
 const HU_CENTER = [47.1625, 19.5033];

@@ -215,10 +215,7 @@ export async function renderPartnerManage(mountRoot) {
 
   root.innerHTML = `<div class="partner-loading">Partneri profil betöltése…</div>`;
 
-  const [profileResult, listingsResult] = await Promise.all([
-    jsonFetch("/api/partner-profiles/mine"),
-    jsonFetch("/api/listings/mine?limit=200").catch(() => ({ listings: [] })),
-  ]);
+  const profileResult = await jsonFetch("/api/partner-profiles/mine");
   const profile = profileResult.profile || {};
   const account = getProfile() || {};
   if (!String(profile.phone || "").trim()) {
@@ -261,20 +258,6 @@ export async function renderPartnerManage(mountRoot) {
     account.salespersonName ||
     [account.lastName, account.firstName].filter(Boolean).join(" ") ||
     "";
-
-  const listings = (listingsResult.listings || []).filter((listing) => {
-    const vertical = String(
-      listing.vertical ||
-        listing.preview?.filter?.hirdetes_vertical ||
-        listing.preview?.filter?.vertical ||
-        listing.form?.hirdetes_vertical ||
-        ""
-    ).toLowerCase();
-    return vertical === "ingatlan";
-  });
-  const ownListings = listings.length ? listings : listingsResult.listings || [];
-  const listingsTitle = listings.length ? "Ingatlanhirdetéseim" : "Saját hirdetéseim";
-  const listingsEmpty = ownListings.length ? "" : '<p class="partner-empty">Még nincs saját hirdetésed.</p>';
 
   root.innerHTML = `
     <header class="partner-manage-head">
@@ -389,11 +372,7 @@ export async function renderPartnerManage(mountRoot) {
         ${profile.application_status === "approved" && profile.slug ? `<a href="/partner/${encodeURIComponent(profile.slug)}" target="_blank" rel="noopener">Publikus profil megnyitása</a>` : ""}
         <p data-status role="status"></p>
       </div>
-    </form>
-    <section class="partner-own-listings">
-      <div class="partner-section-head"><div><p class="partner-eyebrow">SAJÁT HIRDETÉSEK</p><h2>${listingsTitle}</h2></div><a class="partner-primary-link" href="/hirdetesfeladas.html?vertical=ingatlan&subtype=ingatlan&start=1">+ Új hirdetés</a></div>
-      <div class="partner-own-list">${ownListings.length ? ownListings.map((listing) => `<div class="partner-own-row"><div><strong>${esc(listing.preview?.title || listing.hirdetes_cime || `Hirdetés #${listing.id}`)}</strong><span>${esc(listing.preview?.price || "")}</span></div><span class="partner-own-status">${esc(listing.status || "")}</span><div><a href="/hirdetes.html?id=${listing.id}">Megnyitás</a><a href="/hirdetesfeladas.html?id=${listing.id}">Szerkesztés</a></div></div>`).join("") : listingsEmpty}</div>
-    </section>`;
+    </form>`;
 
   try {
     wirePostalCityAutofill(root);

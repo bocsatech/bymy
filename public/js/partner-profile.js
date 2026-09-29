@@ -323,7 +323,11 @@ export async function renderPartnerManage(mountRoot) {
             <span class="partner-phone-label">Értékesítő telefonszáma</span>
             ${phoneRowHtml({ name: "companyPhone2" })}
           </div>
-          <label class="partner-form-wide">Értékesítő neve (2)<input name="salespersonName2" value="${esc(account.salespersonName2)}" autocomplete="name" /></label>
+          <label>Értékesítő neve (2)<input name="salespersonName2" value="${esc(account.salespersonName2)}" autocomplete="name" /></label>
+          <div class="partner-phone-field">
+            <span class="partner-phone-label">Értékesítő telefonszáma (2)</span>
+            ${phoneRowHtml({ name: "companyPhone3" })}
+          </div>
           <label>E-mail cím *<input name="email" type="email" value="${esc(profile.email)}" maxlength="320" required /></label>
           <label>Második e-mail<input name="companyEmail2" type="email" value="${esc(account.companyEmail2)}" maxlength="320" /></label>
         </div>
@@ -398,6 +402,7 @@ export async function renderPartnerManage(mountRoot) {
   initPartnerPhoneRows(root, {
     phone: profile.phone,
     companyPhone2: account.companyPhone2,
+    companyPhone3: account.companyPhone3,
   });
 
   root.querySelector("#partner-form")?.addEventListener("submit", async (event) => {
@@ -457,6 +462,7 @@ export async function renderPartnerManage(mountRoot) {
           companyCountry: String(raw.companyCountry || "Magyarország").trim() || "Magyarország",
           companyPhone: partnerPayload.phone,
           companyPhone2: String(phones.companyPhone2 || "").trim(),
+          companyPhone3: String(phones.companyPhone3 || "").trim(),
           companyEmail: partnerPayload.email,
           companyEmail2: String(raw.companyEmail2 || "").trim(),
           salespersonName: String(raw.salespersonName || "").trim(),

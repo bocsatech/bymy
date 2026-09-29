@@ -436,6 +436,7 @@ const EMPTY_PROFILE = {
   companyAddress: "",
   companyPhone: "",
   companyPhone2: "",
+  companyPhone3: "",
   companyEmail: "",
   companyEmail2: "",
   salespersonName: "",

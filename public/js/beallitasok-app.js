@@ -42,7 +42,7 @@ import {
   stripDeviceIdentityFormFields,
 } from "./device-contract-identity.js?v=contractKind1";
 import { fillCountrySelect, PHONE_COUNTRIES } from "./phone-lang-ui.js?v=settingsPhone1";
-import { renderPartnerManage } from "./partner-profile.js?v=coNav9";
+import { renderPartnerManage } from "./partner-profile.js?v=coNav10";
 
 const PHOTO_KEY = "bymy-avatar-photos";
 const NOTIFY_KEY = "bymy-notify-prefs";
@@ -1299,7 +1299,7 @@ function applyCompanyPhonesToForm(form, data) {
 }
 
 function syncCompanyPhonesFromForm(form) {
-  const out = { companyPhone: "", companyPhone2: "" };
+  const out = { companyPhone: "", companyPhone2: "", companyPhone3: "" };
   if (!form) return out;
   form.querySelectorAll("[data-settings-phone][data-phone-name]").forEach((row) => {
     const key = row.getAttribute("data-phone-name");
@@ -1334,6 +1334,7 @@ function applyProfileToForm(profile) {
     "companyAddress",
     "companyPhone",
     "companyPhone2",
+    "companyPhone3",
     "companyEmail",
     "companyEmail2",
     "salespersonName",
@@ -1942,6 +1943,7 @@ function bindCompanyFormEarly() {
         companyCountry: String(data.companyCountry || "Magyarország").trim() || "Magyarország",
         companyPhone: phones.companyPhone,
         companyPhone2: phones.companyPhone2,
+        companyPhone3: phones.companyPhone3,
         companyEmail: String(data.companyEmail || "").trim(),
         companyEmail2: String(data.companyEmail2 || "").trim(),
         salespersonName: String(data.salespersonName || "").trim(),

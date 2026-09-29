@@ -6,7 +6,7 @@ import {
   loadProfileFromServer,
   saveProfile,
   initSiteAuth,
-} from "./site-auth.js?v=publicPartner1";
+} from "./site-auth.js?v=coName1";
 import {
   getDeviceIdentity,
   identityForAccountKind,
@@ -454,6 +454,7 @@ export async function renderPartnerManage(mountRoot) {
         }
       }
 
+      syncManageSidebar(accountType);
       status.textContent =
         result.profile.application_status === "approved"
           ? "Mentve."

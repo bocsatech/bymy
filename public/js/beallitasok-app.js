@@ -12,7 +12,7 @@ import {
   initSiteAuth,
   isPrivateAccount,
   isPrivateProfileComplete,
-} from "./site-auth.js?v=privReq1";
+} from "./site-auth.js?v=coName1";
 import { wirePostalCityAutofill } from "./postal-city-autofill.js?v=postalFill2";
 import {
   getParkplatz,
@@ -44,7 +44,7 @@ import {
   stripDeviceIdentityFormFields,
 } from "./device-contract-identity.js?v=contractKind1";
 import { fillCountrySelect, PHONE_COUNTRIES } from "./phone-lang-ui.js?v=settingsPhone1";
-import { renderPartnerManage } from "./partner-profile.js?v=coBox3";
+import { renderPartnerManage } from "./partner-profile.js?v=coName1";
 
 const PHOTO_KEY = "bymy-avatar-photos";
 const NOTIFY_KEY = "bymy-notify-prefs";
@@ -1990,6 +1990,8 @@ function bindCompanyFormEarly() {
       applyProfileToForm(saved);
       const user = getAuthUser();
       if (user) fillProfileForm(user, saved);
+      const hello = document.querySelector("[data-mm-hello]");
+      if (hello) hello.textContent = getDisplayName() || user?.email?.split("@")[0] || "—";
       window.dispatchEvent(new CustomEvent("bymy-auth-changed"));
       showFlash(flash, "Cégadatok mentve.", true);
     } catch (error) {

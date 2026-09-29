@@ -374,10 +374,17 @@ export async function changePassword(currentPassword, newPassword, newPasswordCo
 export function getDisplayName() {
   const user = getAuthUser();
   if (!user?.email) return "";
-  if (user.displayName) return String(user.displayName);
-  const profile = user.profile;
-  const fromProfile = [profile?.firstName, profile?.lastName].filter(Boolean).join(" ");
+  const profile = user.profile || {};
+  const type = String(profile.accountType || "").toLowerCase();
+  if (type === "business" || type === "dealer") {
+    const company = String(profile.company || "").trim();
+    if (company) return company;
+    const listing = String(profile.companyListingName || "").trim();
+    if (listing) return listing;
+  }
+  const fromProfile = [profile.firstName, profile.lastName].filter(Boolean).join(" ");
   if (fromProfile) return fromProfile;
+  if (user.displayName) return String(user.displayName);
   const local = user.email.split("@")[0] || user.email;
   return local.charAt(0).toUpperCase() + local.slice(1);
 }
@@ -513,10 +520,16 @@ export async function saveProfile(profile) {
     const user = getAuthUser();
     if (user) {
       user.profile = data.profile;
+      const type = String(data.profile?.accountType || "").toLowerCase();
+      const companyName =
+        String(data.profile?.company || "").trim() ||
+        String(data.profile?.companyListingName || "").trim();
       user.displayName =
-        [data.profile.firstName, data.profile.lastName].filter(Boolean).join(" ") ||
-        String(data.profile.company || "").trim() ||
-        user.displayName;
+        (type === "business" || type === "dealer") && companyName
+          ? companyName
+          : [data.profile.firstName, data.profile.lastName].filter(Boolean).join(" ") ||
+            companyName ||
+            user.displayName;
       setCachedUser(user);
     }
   }

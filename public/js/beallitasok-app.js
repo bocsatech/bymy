@@ -1155,23 +1155,67 @@ function composeSettingsPhone(orszag, korzet, szam) {
 
 function applyPhonePartsToForm(form, phone) {
   if (!form) return;
+  const row = form.querySelector("[data-settings-phone]:not([data-phone-name])");
+  if (row) applyPhonePartsToRow(row, phone);
+  else {
+    const parts = parseSettingsPhone(phone);
+    const country = form.elements.namedItem("phoneCountry");
+    const area = form.elements.namedItem("phoneArea");
+    const local = form.elements.namedItem("phoneLocal");
+    const hidden = form.elements.namedItem("phone");
+    if (country instanceof HTMLSelectElement) {
+      fillCountrySelect(country, parts.orszag || "+36");
+    }
+    if (area instanceof HTMLInputElement) area.value = parts.korzet;
+    if (local instanceof HTMLInputElement) local.value = parts.szam;
+    if (hidden instanceof HTMLInputElement) {
+      hidden.value = composeSettingsPhone(parts.orszag, parts.korzet, parts.szam);
+    }
+  }
+}
+
+function phoneRowParts(row) {
+  if (!row) return null;
+  return {
+    country: row.querySelector("select.phone-country"),
+    area: row.querySelector("input.phone-part:not(.wide)"),
+    local: row.querySelector("input.phone-part.wide"),
+    hidden: row.querySelector('input[type="hidden"]'),
+  };
+}
+
+function applyPhonePartsToRow(row, phone) {
+  const partsEl = phoneRowParts(row);
+  if (!partsEl) return;
   const parts = parseSettingsPhone(phone);
-  const country = form.elements.namedItem("phoneCountry");
-  const area = form.elements.namedItem("phoneArea");
-  const local = form.elements.namedItem("phoneLocal");
-  const hidden = form.elements.namedItem("phone");
-  if (country instanceof HTMLSelectElement) {
-    fillCountrySelect(country, parts.orszag || "+36");
+  if (partsEl.country instanceof HTMLSelectElement) {
+    fillCountrySelect(partsEl.country, parts.orszag || "+36");
   }
-  if (area instanceof HTMLInputElement) area.value = parts.korzet;
-  if (local instanceof HTMLInputElement) local.value = parts.szam;
-  if (hidden instanceof HTMLInputElement) {
-    hidden.value = composeSettingsPhone(parts.orszag, parts.korzet, parts.szam);
+  if (partsEl.area instanceof HTMLInputElement) partsEl.area.value = parts.korzet;
+  if (partsEl.local instanceof HTMLInputElement) partsEl.local.value = parts.szam;
+  if (partsEl.hidden instanceof HTMLInputElement) {
+    partsEl.hidden.value = composeSettingsPhone(parts.orszag, parts.korzet, parts.szam);
   }
+}
+
+function syncPhoneRowHidden(row) {
+  const partsEl = phoneRowParts(row);
+  if (!partsEl) return "";
+  const value = composeSettingsPhone(
+    partsEl.country instanceof HTMLSelectElement ? partsEl.country.value : "+36",
+    partsEl.area instanceof HTMLInputElement ? partsEl.area.value : "",
+    partsEl.local instanceof HTMLInputElement ? partsEl.local.value : ""
+  );
+  if (partsEl.hidden instanceof HTMLInputElement) partsEl.hidden.value = value;
+  return value;
 }
 
 function syncSettingsPhoneHidden(form) {
   if (!form) return "";
+  const row =
+    form.querySelector("[data-settings-phone]:not([data-phone-name])") ||
+    form.querySelector("[data-settings-phone]");
+  if (row) return syncPhoneRowHidden(row);
   const country = form.elements.namedItem("phoneCountry");
   const area = form.elements.namedItem("phoneArea");
   const local = form.elements.namedItem("phoneLocal");
@@ -1185,17 +1229,42 @@ function syncSettingsPhoneHidden(form) {
   return value;
 }
 
+function initSettingsPhoneRows(root) {
+  if (!root) return;
+  root.querySelectorAll("[data-settings-phone]").forEach((row) => {
+    if (row.dataset.phoneBound === "1") return;
+    row.dataset.phoneBound = "1";
+    const country = row.querySelector("select.phone-country");
+    if (country instanceof HTMLSelectElement) fillCountrySelect(country, "+36");
+    const sync = () => syncPhoneRowHidden(row);
+    row.addEventListener("input", sync);
+    row.addEventListener("change", sync);
+    sync();
+  });
+}
+
 function initSettingsPhoneRow(form) {
-  if (!form || form.dataset.phoneBound === "1") return;
-  const row = form.querySelector("[data-settings-phone]");
-  if (!row) return;
-  form.dataset.phoneBound = "1";
-  const country = form.elements.namedItem("phoneCountry");
-  if (country instanceof HTMLSelectElement) fillCountrySelect(country, "+36");
-  const sync = () => syncSettingsPhoneHidden(form);
-  row.addEventListener("input", sync);
-  row.addEventListener("change", sync);
-  sync();
+  initSettingsPhoneRows(form);
+}
+
+function applyCompanyPhonesToForm(form, data) {
+  if (!form) return;
+  form.querySelectorAll("[data-settings-phone][data-phone-name]").forEach((row) => {
+    const key = row.getAttribute("data-phone-name");
+    if (!key) return;
+    applyPhonePartsToRow(row, data?.[key] || "");
+  });
+}
+
+function syncCompanyPhonesFromForm(form) {
+  const out = { companyPhone: "", companyPhone2: "" };
+  if (!form) return out;
+  form.querySelectorAll("[data-settings-phone][data-phone-name]").forEach((row) => {
+    const key = row.getAttribute("data-phone-name");
+    if (!key) return;
+    out[key] = syncPhoneRowHidden(row);
+  });
+  return out;
 }
 
 function applyProfileToForm(profile) {
@@ -1238,6 +1307,9 @@ function applyProfileToForm(profile) {
   initCompanyActivitiesDropdown(document.getElementById("mm-company-form"));
   initSettingsPhoneRow(form);
   applyPhonePartsToForm(form, data.phone);
+  const companyForm = document.getElementById("mm-company-form");
+  initSettingsPhoneRows(companyForm);
+  applyCompanyPhonesToForm(companyForm, data);
   updateProfileSummary(data, getAuthUser());
   void hydrateDeviceContractFields(form, data, getAuthUser());
 }
@@ -1792,12 +1864,14 @@ function bindCompanyFormEarly() {
   if (!form || form.dataset.bound === "1") return;
   form.dataset.bound = "1";
   initCompanyActivitiesDropdown(form);
+  initSettingsPhoneRows(form);
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
     event.stopPropagation();
     const flash = document.getElementById("settings-company-flash");
     const btn = document.getElementById("mm-company-save");
     const data = Object.fromEntries(new FormData(form).entries());
+    const phones = syncCompanyPhonesFromForm(form);
     if (btn) btn.disabled = true;
     try {
       const saved = await saveProfile({
@@ -1811,8 +1885,8 @@ function bindCompanyFormEarly() {
           .slice(0, 4),
         companyCity: String(data.companyCity || "").trim(),
         companyCountry: String(data.companyCountry || "Magyarország").trim() || "Magyarország",
-        companyPhone: String(data.companyPhone || "").trim(),
-        companyPhone2: String(data.companyPhone2 || "").trim(),
+        companyPhone: phones.companyPhone,
+        companyPhone2: phones.companyPhone2,
         companyEmail: String(data.companyEmail || "").trim(),
         companyEmail2: String(data.companyEmail2 || "").trim(),
         salespersonName: String(data.salespersonName || "").trim(),

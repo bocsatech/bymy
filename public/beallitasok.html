@@ -57,7 +57,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/css/style.css?v=noScroll1" />
-    <link rel="stylesheet" href="/css/site-app.css?v=mmHeadYel1" />
+    <link rel="stylesheet" href="/css/site-app.css?v=coPhone1" />
         <link rel="stylesheet" href="/css/site-desk-header.css?v=navOneRow1" />
 <link rel="stylesheet" href="/css/mm-nav-c.css?v=mmHeadYel1" />
       <link rel="stylesheet" href="/css/hub.css?v=navRow1" />
@@ -276,15 +276,63 @@
               <span class="login-label">Ország</span>
               <input type="text" name="companyCountry" value="Magyarország" autocomplete="country-name" />
             </label>
-            <div class="mm-grid-2">
-              <label class="login-field">
-                <span class="login-label">Telefonszám</span>
-                <input type="tel" name="companyPhone" autocomplete="tel" />
-              </label>
-              <label class="login-field">
-                <span class="login-label">Telefonszám</span>
-                <input type="tel" name="companyPhone2" autocomplete="tel" />
-              </label>
+            <div class="login-field">
+              <span class="login-label">Telefonszám</span>
+              <div class="settings-phone-row" data-settings-phone data-phone-name="companyPhone">
+                <select class="phone-country" name="companyPhoneCountry" aria-label="Országkód"></select>
+                <span aria-hidden="true">-</span>
+                <input
+                  type="tel"
+                  name="companyPhoneArea"
+                  class="phone-part"
+                  inputmode="numeric"
+                  maxlength="4"
+                  autocomplete="tel-national"
+                  placeholder="30"
+                  aria-label="Körzetszám"
+                />
+                <span aria-hidden="true">/</span>
+                <input
+                  type="tel"
+                  name="companyPhoneLocal"
+                  class="phone-part wide"
+                  inputmode="numeric"
+                  maxlength="12"
+                  autocomplete="tel-national"
+                  placeholder="1234567"
+                  aria-label="Telefonszám"
+                />
+                <input type="hidden" name="companyPhone" value="" />
+              </div>
+            </div>
+            <div class="login-field">
+              <span class="login-label">Telefonszám</span>
+              <div class="settings-phone-row" data-settings-phone data-phone-name="companyPhone2">
+                <select class="phone-country" name="companyPhone2Country" aria-label="Országkód"></select>
+                <span aria-hidden="true">-</span>
+                <input
+                  type="tel"
+                  name="companyPhone2Area"
+                  class="phone-part"
+                  inputmode="numeric"
+                  maxlength="4"
+                  autocomplete="tel-national"
+                  placeholder="30"
+                  aria-label="Körzetszám"
+                />
+                <span aria-hidden="true">/</span>
+                <input
+                  type="tel"
+                  name="companyPhone2Local"
+                  class="phone-part wide"
+                  inputmode="numeric"
+                  maxlength="12"
+                  autocomplete="tel-national"
+                  placeholder="1234567"
+                  aria-label="Telefonszám"
+                />
+                <input type="hidden" name="companyPhone2" value="" />
+              </div>
             </div>
             <div class="mm-grid-2">
               <label class="login-field">
@@ -840,7 +888,7 @@
 
     <script src="/js/site-avatar-menu.js?v=settingsHome1" type="module"></script>
     <script src="/js/ha-import-app.js?v=haBmDrag1" type="module"></script>
-    <script src="/js/beallitasok-app.js?v=notifyOn1" type="module"></script>
+    <script src="/js/beallitasok-app.js?v=coPhone1" type="module"></script>
     <script>
       
       setTimeout(function () {

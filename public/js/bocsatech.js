@@ -2689,38 +2689,46 @@ function formatProfileFieldValue(value) {
 function profileFields(profile) {
   const labels = {
     accountType: "Fiók típus",
+    salutation: "Megszólítás",
     firstName: "Keresztnév",
     lastName: "Vezetéknév",
-    street: "Utca, házszám",
-    postalCode: "Irányítószám",
-    city: "Város",
-    country: "Ország",
-    phone: "Telefon",
-    company: "Cégnév",
-    companyTaxId: "Adószám",
+    street: "Utca, házszám (magán)",
+    postalCode: "Irányítószám (magán)",
+    city: "Város (magán)",
+    country: "Ország (magán)",
+    phone: "Telefon (magán)",
+    company: "Cég neve",
+    companyTaxId: "Cég adószáma",
+    companyListingName: "Hirdetésben megjelenő cégnév",
     companyActivities: "Cég tevékenysége",
-    companyStreet: "Cég — utca, házszám",
-    companyPostalCode: "Cég — irányítószám",
-    companyCity: "Cég — település",
-    companyCountry: "Cég — ország",
+    companyEmail: "E-mail cím",
+    companyStreet: "Utca, házszám",
+    companyPostalCode: "Irányítószám",
+    companyCity: "Település",
+    companyCountry: "Ország",
     companyAddress: "Cég cím (összesített)",
-    companyPhone: "Cég telefon",
-    companyPhone2: "Cég telefon 2",
-    companyPhone3: "Cég telefon 3",
-    companyEmail: "Cég email",
-    companyEmail2: "Cég email 2",
-    salespersonName: "Kapcsolattartó",
-    salespersonName2: "Kapcsolattartó 2",
+    companyPhone: "Kapcsolattartó telefonszáma",
+    salespersonName: "Értékesítő neve",
+    companyPhone2: "Értékesítő telefonszáma",
+    salespersonName2: "Értékesítő neve (2)",
+    companyPhone3: "Értékesítő telefonszáma (2)",
+    companyEmail2: "Második e-mail",
+    searchRadiusKm: "Keresési körzet (km)",
+    recommendationsRadiusKm: "Ajánlások körzete (km)",
+    notifyMessages: "Értesítés: üzenetek",
+    notifyFavorites: "Értesítés: kedvencek",
+    notifyInterests: "Értesítés: érdeklődések",
+    notifyNewsletter: "Hírlevél",
   };
   const keys = Object.keys(labels);
-  const extra = Object.keys(profile).filter(
+  const extra = Object.keys(profile || {}).filter(
     (k) => !keys.includes(k) && !shouldSkipProfileField(k, profile[k])
   );
   return [...keys, ...extra]
-    .filter((key) => !shouldSkipProfileField(key, profile[key]))
+    .filter((key) => !shouldSkipProfileField(key, profile?.[key]))
     .map((key) => {
       const label = labels[key] || key;
-      const value = formatProfileFieldValue(profile[key]);
+      const value = formatProfileFieldValue(profile?.[key]);
       return { key, label, value };
     });
 }
@@ -2756,7 +2764,7 @@ function userEditView() {
       return "md";
     }
     if (
-      ["companyAddress", "street", "companyStreet", "companyEmail", "companyEmail2", "companyActivities", "company", "email"].includes(key) ||
+      ["companyAddress", "street", "companyStreet", "companyEmail", "companyEmail2", "companyActivities", "company", "companyListingName", "email"].includes(key) ||
       /address|street|email|activities|cégnév|company$/i.test(key)
     ) {
       return "wide";
@@ -2774,6 +2782,7 @@ function userEditView() {
             ? `<select class="edit-profile-field" data-key="accountType">
                 <option value="private" ${String(f.value) === "private" ? "selected" : ""}>magán</option>
                 <option value="business" ${String(f.value) === "business" ? "selected" : ""}>céges</option>
+                <option value="dealer" ${String(f.value) === "dealer" ? "selected" : ""}>kereskedő</option>
               </select>`
             : `<input class="edit-profile-field" data-key="${esc(f.key)}" type="text" value="${esc(f.value)}" />`
         }

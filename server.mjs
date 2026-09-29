@@ -2963,6 +2963,15 @@ async function handleAuthApi(req, res, pathname) {
       }
       const saved = await saveUserProfile(currentUser.id, body.profile ?? body);
       const { _savedTo, ...profile } = saved;
+      try {
+        const { syncCompanyContactToOwnerListings } = await import("./lib/sync-company-profile-to-listings.mjs");
+        const sync = await syncCompanyContactToOwnerListings(currentUser.id, profile);
+        if (sync?.updated) {
+          console.log(`Cégadatok → ${sync.updated}/${sync.total || sync.updated} hirdetés frissítve | ${currentUser.email}`);
+        }
+      } catch (syncError) {
+        console.warn("Cégadatok→hirdetések sync:", syncError?.message || syncError);
+      }
       const user = await getUserById(currentUser.id);
       const p = user?.profile;
       const savedOk =

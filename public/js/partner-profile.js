@@ -15,10 +15,112 @@ import {
   setDeviceIdentity,
 } from "./device-contract-identity.js?v=contractKind1";
 import { wirePostalCityAutofill } from "./postal-city-autofill.js?v=postalFill1";
+import { fillCountrySelect, PHONE_COUNTRIES } from "./phone-lang-ui.js?v=settingsPhone1";
 
 const pageRoot = () => document.getElementById("partner-root");
 
 const ACTIVITY_LABELS = { auto: "Autó", teherauto: "Teherautó", ingatlan: "Ingatlan" };
+
+function parsePhoneParts(phone) {
+  const raw = String(phone || "").trim();
+  if (!raw) return { orszag: "+36", korzet: "", szam: "" };
+  let compact = raw.replace(/[^\d+]/g, "");
+  if (/^\+?06\d/.test(compact)) {
+    compact = `+36${compact.replace(/^\+?06/, "")}`;
+  }
+  const countries = [...PHONE_COUNTRIES].sort((a, b) => b.value.length - a.value.length);
+  let orszag = "+36";
+  let rest = compact.startsWith("+") ? compact.slice(1) : compact;
+  for (const item of countries) {
+    const code = item.value.replace(/^\+/, "");
+    if (compact.startsWith(item.value) || rest.startsWith(code)) {
+      orszag = item.value;
+      rest = compact.startsWith(item.value)
+        ? compact.slice(item.value.length)
+        : rest.slice(code.length);
+      break;
+    }
+  }
+  rest = String(rest).replace(/\D/g, "");
+  if (!rest) return { orszag, korzet: "", szam: "" };
+  let korzetLen = 2;
+  if (orszag === "+36" && rest.startsWith("1") && rest.length >= 7) korzetLen = 1;
+  else if (rest.length >= 10) korzetLen = 3;
+  else if (rest.length <= 7) korzetLen = Math.min(2, Math.max(1, rest.length - 5));
+  const korzet = rest.slice(0, Math.min(korzetLen, Math.max(0, rest.length - 4)));
+  const szam = rest.slice(korzet.length);
+  return { orszag, korzet, szam };
+}
+
+function composePhone(orszag, korzet, szam) {
+  const o = String(orszag || "+36").trim() || "+36";
+  const k = String(korzet || "").replace(/\D/g, "");
+  const s = String(szam || "").replace(/\D/g, "");
+  if (!k && !s) return "";
+  return [o, k, s].filter(Boolean).join(" ");
+}
+
+function phoneRowHtml({ name, required = false } = {}) {
+  const req = required ? " required" : "";
+  return `<div class="settings-phone-row" data-settings-phone data-phone-name="${esc(name)}">
+    <select class="phone-country" name="${esc(name)}Country" aria-label="Országkód"></select>
+    <span aria-hidden="true">-</span>
+    <input type="tel" name="${esc(name)}Area" class="phone-part" inputmode="numeric" maxlength="4" autocomplete="tel-national" placeholder="30" aria-label="Körzetszám" />
+    <span aria-hidden="true">/</span>
+    <input type="tel" name="${esc(name)}Local" class="phone-part wide" inputmode="numeric" maxlength="12" autocomplete="tel-national" placeholder="1234567" aria-label="Telefonszám" />
+    <input type="hidden" name="${esc(name)}" value=""${req} />
+  </div>`;
+}
+
+function initPartnerPhoneRows(root, values = {}) {
+  if (!root) return;
+  root.querySelectorAll("[data-settings-phone]").forEach((row) => {
+    if (row.dataset.phoneBound === "1") return;
+    row.dataset.phoneBound = "1";
+    const key = row.getAttribute("data-phone-name") || "phone";
+    const country = row.querySelector("select.phone-country");
+    const area = row.querySelector("input.phone-part:not(.wide)");
+    const local = row.querySelector("input.phone-part.wide");
+    const hidden = row.querySelector('input[type="hidden"]');
+    const parts = parsePhoneParts(values[key] || "");
+    if (country instanceof HTMLSelectElement) fillCountrySelect(country, parts.orszag || "+36");
+    if (area instanceof HTMLInputElement) area.value = parts.korzet;
+    if (local instanceof HTMLInputElement) local.value = parts.szam;
+    const sync = () => {
+      const value = composePhone(
+        country instanceof HTMLSelectElement ? country.value : "+36",
+        area instanceof HTMLInputElement ? area.value : "",
+        local instanceof HTMLInputElement ? local.value : ""
+      );
+      if (hidden instanceof HTMLInputElement) hidden.value = value;
+      return value;
+    };
+    row.addEventListener("input", sync);
+    row.addEventListener("change", sync);
+    sync();
+  });
+}
+
+function syncPartnerPhoneRows(form) {
+  const out = {};
+  if (!form) return out;
+  form.querySelectorAll("[data-settings-phone]").forEach((row) => {
+    const key = row.getAttribute("data-phone-name");
+    if (!key) return;
+    const country = row.querySelector("select.phone-country");
+    const area = row.querySelector("input.phone-part:not(.wide)");
+    const local = row.querySelector("input.phone-part.wide");
+    const hidden = row.querySelector('input[type="hidden"]');
+    const value = composePhone(
+      country instanceof HTMLSelectElement ? country.value : "+36",
+      area instanceof HTMLInputElement ? area.value : "",
+      local instanceof HTMLInputElement ? local.value : ""
+    );
+    if (hidden instanceof HTMLInputElement) hidden.value = value;
+    out[key] = value;
+  });
+  return out;
+}
 
 function parseActivities(raw) {
   if (Array.isArray(raw)) return raw.map((v) => String(v || "").trim()).filter((id) => ACTIVITY_LABELS[id]);
@@ -212,9 +314,15 @@ export async function renderPartnerManage(mountRoot) {
         <div class="partner-form-grid">
           <label>Kapcsolattartó neve<input name="contactPerson" value="${esc(profile.contact_person)}" maxlength="160" /></label>
           <label>Értékesítő neve<input name="salespersonName" value="${esc(account.salespersonName)}" autocomplete="name" /></label>
-          <label>Telefonszám *<input name="phone" type="tel" value="${esc(profile.phone)}" maxlength="40" required placeholder="+36 30 123 4567" /></label>
+          <div class="partner-phone-field partner-form-wide">
+            <span class="partner-phone-label">Telefonszám *</span>
+            ${phoneRowHtml({ name: "phone", required: true })}
+          </div>
           <label>E-mail cím *<input name="email" type="email" value="${esc(profile.email)}" maxlength="320" required /></label>
-          <label>Második telefonszám<input name="companyPhone2" type="tel" value="${esc(account.companyPhone2)}" maxlength="40" placeholder="+36 …" /></label>
+          <div class="partner-phone-field partner-form-wide">
+            <span class="partner-phone-label">Második telefonszám</span>
+            ${phoneRowHtml({ name: "companyPhone2" })}
+          </div>
           <label>Második e-mail<input name="companyEmail2" type="email" value="${esc(account.companyEmail2)}" maxlength="320" /></label>
           <label>Értékesítő neve (2)<input name="salespersonName2" value="${esc(account.salespersonName2)}" autocomplete="name" /></label>
         </div>
@@ -226,7 +334,10 @@ export async function renderPartnerManage(mountRoot) {
         <div class="partner-form-grid">
           <label>Partner / iroda neve *<input name="displayName" value="${esc(profile.display_name)}" maxlength="100" required /></label>
           <label>Kapcsolattartó neve<input name="contactPerson" value="${esc(profile.contact_person)}" maxlength="160" /></label>
-          <label>Telefonszám *<input name="phone" type="tel" value="${esc(profile.phone)}" maxlength="40" required placeholder="+36 30 123 4567" /></label>
+          <div class="partner-phone-field partner-form-wide">
+            <span class="partner-phone-label">Telefonszám *</span>
+            ${phoneRowHtml({ name: "phone", required: true })}
+          </div>
           <label>E-mail cím *<input name="email" type="email" value="${esc(profile.email)}" maxlength="320" required /></label>
         </div>
       </section>
@@ -283,6 +394,10 @@ export async function renderPartnerManage(mountRoot) {
     wirePostalCityAutofill(root);
   } catch {
   }
+  initPartnerPhoneRows(root, {
+    phone: profile.phone,
+    companyPhone2: account.companyPhone2,
+  });
 
   root.querySelector("#partner-form")?.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -293,13 +408,14 @@ export async function renderPartnerManage(mountRoot) {
     status.className = "";
     submit.disabled = true;
     submit.textContent = "Mentés…";
+    const phones = syncPartnerPhoneRows(form);
     const raw = Object.fromEntries(new FormData(form).entries());
     const activityIds = [...form.querySelectorAll('input[name="companyActivity"]:checked')].map((el) => el.value);
     const partnerPayload = {
       displayName: String(raw.displayName || "").trim(),
       slug: String(raw.slug || "").trim(),
       contactPerson: String(raw.contactPerson || "").trim(),
-      phone: String(raw.phone || "").trim(),
+      phone: String(phones.phone || raw.phone || "").trim(),
       email: String(raw.email || "").trim(),
       commission: String(raw.commission || "").trim(),
       website: String(raw.website || "").trim(),
@@ -309,6 +425,13 @@ export async function renderPartnerManage(mountRoot) {
       description: String(raw.description || "").trim(),
       isPublic: Boolean(form.elements.isPublic?.checked),
     };
+    if (!partnerPayload.phone) {
+      status.textContent = "Telefonszám kötelező.";
+      status.className = "is-error";
+      submit.disabled = false;
+      submit.textContent = "Mentés";
+      return;
+    }
     try {
       const result = await jsonFetch("/api/partner-profiles/mine", {
         method: "PUT",
@@ -331,7 +454,7 @@ export async function renderPartnerManage(mountRoot) {
           companyCity,
           companyCountry: String(raw.companyCountry || "Magyarország").trim() || "Magyarország",
           companyPhone: partnerPayload.phone,
-          companyPhone2: String(raw.companyPhone2 || "").trim(),
+          companyPhone2: String(phones.companyPhone2 || "").trim(),
           companyEmail: partnerPayload.email,
           companyEmail2: String(raw.companyEmail2 || "").trim(),
           salespersonName: String(raw.salespersonName || "").trim(),

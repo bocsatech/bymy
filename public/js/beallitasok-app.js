@@ -42,7 +42,7 @@ import {
   stripDeviceIdentityFormFields,
 } from "./device-contract-identity.js?v=contractKind1";
 import { fillCountrySelect, PHONE_COUNTRIES } from "./phone-lang-ui.js?v=settingsPhone1";
-import { renderPartnerManage } from "./partner-profile.js?v=coNav5";
+import { renderPartnerManage } from "./partner-profile.js?v=coNav6";
 
 const PHOTO_KEY = "bymy-avatar-photos";
 const NOTIFY_KEY = "bymy-notify-prefs";

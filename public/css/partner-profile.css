@@ -668,22 +668,24 @@ body.partner-manage-page.mm-page {
 .partner-phone-field {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: 7px;
+  min-width: 0;
 }
 
 .partner-phone-label {
-  font-size: 13px;
-  font-weight: 600;
-  color: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  color: #334b58;
 }
 
 .partner-form .settings-phone-row {
   display: flex;
   flex-flow: row nowrap;
   align-items: center;
-  gap: 0.4rem;
-  width: max-content;
+  gap: 0.35rem;
+  width: 100%;
   max-width: 100%;
+  min-width: 0;
 }
 
 .partner-form .settings-phone-row > span {
@@ -714,22 +716,26 @@ body.partner-manage-page.mm-page {
 }
 
 .partner-form .settings-phone-row select.phone-country {
-  width: 6.75rem;
-  padding-right: 1.85rem;
+  width: 5.75rem;
+  flex: 0 0 auto;
+  padding-right: 1.6rem;
   cursor: pointer;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%236b7280' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 0.65rem center;
+  background-position: right 0.5rem center;
   background-size: 0.7rem;
 }
 
 .partner-form .settings-phone-row input.phone-part {
-  width: 3.75rem;
+  width: 3.25rem;
+  flex: 0 0 auto;
   text-align: center;
 }
 
 .partner-form .settings-phone-row input.phone-part.wide {
-  width: 8.25rem;
+  width: auto;
+  flex: 1 1 auto;
+  min-width: 4.5rem;
   text-align: left;
 }
 

@@ -314,18 +314,18 @@ export async function renderPartnerManage(mountRoot) {
         <div class="partner-form-title"><div><h2>3. Kapcsolat</h2></div></div>
         <div class="partner-form-grid">
           <label>Kapcsolattartó neve<input name="contactPerson" value="${esc(profile.contact_person)}" maxlength="160" /></label>
-          <label>Értékesítő neve<input name="salespersonName" value="${esc(account.salespersonName)}" autocomplete="name" /></label>
-          <div class="partner-phone-field partner-form-wide">
-            <span class="partner-phone-label">Telefonszám *</span>
+          <div class="partner-phone-field">
+            <span class="partner-phone-label">Kapcsolattartó telefonszáma *</span>
             ${phoneRowHtml({ name: "phone", required: true })}
           </div>
-          <label>E-mail cím *<input name="email" type="email" value="${esc(profile.email)}" maxlength="320" required /></label>
-          <div class="partner-phone-field partner-form-wide">
-            <span class="partner-phone-label">Második telefonszám</span>
+          <label>Értékesítő neve<input name="salespersonName" value="${esc(account.salespersonName)}" autocomplete="name" /></label>
+          <div class="partner-phone-field">
+            <span class="partner-phone-label">Értékesítő telefonszáma</span>
             ${phoneRowHtml({ name: "companyPhone2" })}
           </div>
+          <label class="partner-form-wide">Értékesítő neve (2)<input name="salespersonName2" value="${esc(account.salespersonName2)}" autocomplete="name" /></label>
+          <label>E-mail cím *<input name="email" type="email" value="${esc(profile.email)}" maxlength="320" required /></label>
           <label>Második e-mail<input name="companyEmail2" type="email" value="${esc(account.companyEmail2)}" maxlength="320" /></label>
-          <label>Értékesítő neve (2)<input name="salespersonName2" value="${esc(account.salespersonName2)}" autocomplete="name" /></label>
         </div>
       </section>
       `

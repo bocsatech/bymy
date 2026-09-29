@@ -282,6 +282,38 @@ export async function mountAutoFuelPicker(form) {
     });
   });
 
+  form.addEventListener("bymy-saved-search-applied", () => {
+    const values = parseJsonList(fuelsInput.value);
+    openMains.clear();
+    selected.clear();
+    for (const raw of values) {
+      const want = String(raw || "").trim();
+      if (!want) continue;
+      for (const cat of UZEMANYAG_CATEGORIES) {
+        if (cat.value && cat.value === want) {
+          openMains.add(cat.id);
+          selected.add(want);
+          break;
+        }
+        if (cat.children?.some((c) => c.value === want)) {
+          openMains.add(cat.id);
+          selected.add(want);
+          break;
+        }
+        if (cat.label === want) {
+          openMains.add(cat.id);
+          if (cat.value) selected.add(cat.value);
+          break;
+        }
+      }
+    }
+    if (summaryEl) {
+      const labels = selectedLabels();
+      summaryEl.textContent = labels.length ? labelList(labels) : "Mindegy";
+    }
+    if (!panel.hidden) renderList();
+  });
+
   form.dataset.fuelPicker = "1";
   syncHidden();
 }

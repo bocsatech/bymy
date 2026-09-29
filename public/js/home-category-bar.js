@@ -1,4 +1,4 @@
-import { fuelValueMatches } from "./auto-fuel-picker.js?v=fuelMatch2";
+import { fuelValueMatches } from "./auto-fuel-picker.js?v=catMenu1";
 
 export const HOME_CATEGORY_IDS = [
   "uj",
@@ -134,6 +134,27 @@ function matchesCategory(item, categoryId) {
 export function filterByCategory(items, categoryId) {
   if (!categoryId) return items;
   return items.filter((item) => matchesCategory(item, categoryId));
+}
+
+/**
+ * Kezdőoldal csempe → autó keresőmenü mezők (Üzemanyag stb.).
+ * Üres objektum: nincs 1:1 mező (leasing / bérelhető / OT).
+ */
+export function searchFiltersForCategory(categoryId) {
+  switch (categoryId) {
+    case "benzin":
+      return { uzemanyagok: ["Benzin"], uzemanyagQuick: "Benzin", uzemanyag: "Benzin" };
+    case "diesel":
+      return { uzemanyagok: ["Dízel"], uzemanyagQuick: "Dízel", uzemanyag: "Dízel" };
+    case "elektromos":
+      return { uzemanyagok: ["Elektromos"], uzemanyagQuick: "Elektromos", uzemanyag: "Elektromos" };
+    case "hybrid":
+      return { uzemanyagok: ["Hibrid"], uzemanyagQuick: "Hibrid", uzemanyag: "Hibrid" };
+    case "uj":
+      return { allapotok: ["Újszerű"], allapot: "Újszerű" };
+    default:
+      return {};
+  }
 }
 
 export function initHomeCategoryBar({ onChange, getForm, initialCategory = null }) {

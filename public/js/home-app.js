@@ -11,14 +11,14 @@ import {
 import { initHomeQuickSearch } from "./home-quicksearch.js?v=accTop1";
 import { decodeSavedSearchParam, encodeSavedSearchParam } from "./saved-search.js?v=savedSearch5";
 import { matchDetailedSearch, hasActiveDetailedSearch } from "./auto-detailed-search.js?v=accTop1";
-import { updateAutoDeskResultCount } from "./auto-desk-search.js?v=teherStrict3";
+import { updateAutoDeskResultCount, updateAutoDeskAccSummaries } from "./auto-desk-search.js?v=catMenu1";
 import {
   emptyIngatlanFilters,
   filterListingsByIngatlan,
   initIngatlanSearch,
 } from "./ingatlan-search.js?v=mobFix8";
 import { normalizeIngatlanUzletag } from "./ingatlan-fields.js?v=immoEladoDefault1";
-import { filterByCategory, initHomeCategoryBar, renderHomeCategoryBar, HOME_CATEGORY_IDS } from "./home-category-bar.js?v=catFuel1";
+import { filterByCategory, initHomeCategoryBar, renderHomeCategoryBar, HOME_CATEGORY_IDS, searchFiltersForCategory } from "./home-category-bar.js?v=catMenu1";
 import { initHomeUnifiedScroll } from "./home-unified-scroll.js";
 import { initHomeStatsBar } from "./home-stats-bar.js?v=mapPostal2";
 import { buildNearbyFilter, readNearbyPrefs } from "./nearby-search.js?v=mapCity1";
@@ -387,6 +387,27 @@ if (PAGE === "auto" || PAGE === "teherauto") {
   if (fromUrl) {
     categoryFilter = fromUrl;
     searchResultsCommitted = true;
+  }
+}
+
+/** Kezdőoldal csempe → keresőmenü mezők (Üzemanyag stb.) megjelenítése. */
+async function syncCategoryToSearchMenu(categoryId) {
+  if (!categoryId || !isVehicleSearchPage()) return;
+  const filters = searchFiltersForCategory(categoryId);
+  if (!filters || !Object.keys(filters).length) return;
+  const form = document.getElementById("home-qs-form") || filterForm;
+  if (!form) return;
+  try {
+    if (quickSearchApi?.whenReady) await quickSearchApi.whenReady;
+    const { applySavedSearchFilters } = await import("./saved-search.js?v=catMenu1");
+    await applySavedSearchFilters(form, filters);
+    updateAutoDeskAccSummaries(form);
+    quickSearchFilters = { ...emptyFilters(), ...filters };
+    form.querySelectorAll('[data-desk-field="uzemanyag"], [data-filter-key="uzemanyagok"]').forEach((el) => {
+      el.closest?.(".auto-desk-field")?.classList.add("is-set");
+    });
+  } catch (error) {
+    console.warn("Kategória → keresőmenü:", error);
   }
 }
 
@@ -1211,6 +1232,7 @@ if (PAGE === "teherauto") {
         quickSearchFilters = emptyFilters();
         detailedFilters = null;
         sidebarFilters = emptyFilters();
+        void syncCategoryToSearchMenu(category);
       }
       applyFilters({ commit: Boolean(category) });
       if (category) scrollToListings();
@@ -1312,8 +1334,12 @@ if (PAGE === "ingatlan") {
 
       if (empty && isVehicleSearchPage()) {
         if (searchRestoreInProgress) return;
-        // Aktív kategória (?cat= / csempe): maradjon a szűrt lista.
+        // Aktív kategória (?cat= / csempe): maradjon a szűrt lista + keresőmenü mező.
         if (categoryFilter) {
+          const catFilters = searchFiltersForCategory(categoryFilter);
+          if (catFilters && Object.keys(catFilters).length) {
+            quickSearchFilters = { ...emptyFilters(), ...catFilters };
+          }
           applyFilters({ commit: true });
           return;
         }
@@ -1443,6 +1469,9 @@ if (PAGE === "ingatlan") {
       }
     });
   } else if (PAGE === "auto" || PAGE === "teherauto") {
+    if (categoryFilter) {
+      void syncCategoryToSearchMenu(categoryFilter);
+    }
     // Szűrő nélkül is: térképről nyitott hirdetés vissza → térkép újra
     if (peekMapOpenOnReturn()) {
       loadListings()

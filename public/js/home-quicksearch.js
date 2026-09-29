@@ -157,7 +157,8 @@ export function initHomeQuickSearch({ onSearch = () => {}, onFilterPreview, onDe
   }
 
   form.addEventListener("immo-wheel-change", () => {
-    schedulePreviewFromForm({ scroll: mobile() });
+    // Mobil: ne ugorjon a találatokhoz — a felhasználó még szűrőket állít.
+    schedulePreviewFromForm({ scroll: false });
   });
 
   form.addEventListener("change", (event) => {
@@ -171,7 +172,7 @@ export function initHomeQuickSearch({ onSearch = () => {}, onFilterPreview, onDe
     (event) => {
       const wheel = event.target?.closest?.("[data-wheel]");
       if (!wheel || !form.contains(wheel)) return;
-      schedulePreviewFromForm({ scroll: mobile() });
+      schedulePreviewFromForm({ scroll: false });
     },
     true
   );

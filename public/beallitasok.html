@@ -16,7 +16,16 @@
           var user = raw ? JSON.parse(raw) : null;
           var loggedIn = !!(user && user.email);
           document.documentElement.setAttribute("data-auth", loggedIn ? "member" : "guest");
-          var accountType = String((user && user.profile && user.profile.accountType) || "private");
+          var accountType = String((user && user.profile && user.profile.accountType) || "");
+          if (!accountType || accountType === "private") {
+            try {
+              var bak = JSON.parse(localStorage.getItem("bymy-profile-backup") || "null");
+              if (bak && (bak.accountType === "business" || bak.accountType === "dealer")) {
+                accountType = String(bak.accountType);
+              }
+            } catch (e2) {}
+          }
+          if (!accountType) accountType = "private";
           document.documentElement.setAttribute(
             "data-mm-account-kind",
             accountType === "business" || accountType === "dealer" ? "company" : "private"
@@ -48,6 +57,18 @@
         }
       })();
     </script>
+    <style>
+      /* Cégadatok FOUC: céges fióknál az első festésnél is látszódjon, Autóimport előtt. */
+      html[data-mm-account-kind="company"] body.site-app .mm-nav {
+        display: flex;
+        flex-direction: column;
+      }
+      html[data-mm-account-kind="company"] body.site-app .mm-nav > [data-mm-company-nav-wrap],
+      html[data-mm-account-kind="company"] body.site-app .mm-nav > [data-mm-company-nav-wrap][hidden] {
+        display: grid !important;
+        order: -100 !important;
+      }
+    </style>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext x='16' y='22' text-anchor='middle' font-size='14' font-family='system-ui,sans-serif' font-weight='700'%3EB%3C/text%3E%3C/svg%3E" type="image/svg+xml" />
@@ -57,9 +78,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/css/style.css?v=noScroll1" />
-    <link rel="stylesheet" href="/css/site-app.css?v=coFirst1" />
+    <link rel="stylesheet" href="/css/site-app.css?v=coFirst2" />
         <link rel="stylesheet" href="/css/site-desk-header.css?v=navOneRow1" />
-<link rel="stylesheet" href="/css/mm-nav-c.css?v=coFirst1" />
+<link rel="stylesheet" href="/css/mm-nav-c.css?v=coFirst2" />
       <link rel="stylesheet" href="/css/hub.css?v=navRow1" />
     <link rel="stylesheet" href="/css/partner-profile.css?v=coBox1" />
     <link rel="stylesheet" href="/css/messages-enhancements.css?v=msgImprove1" />
@@ -131,6 +152,22 @@
               </a>
             </div>
           </div>
+          <script>
+            (function () {
+              var wrap = document.currentScript && document.currentScript.previousElementSibling;
+              if (!wrap || !wrap.hasAttribute("data-mm-company-nav-wrap")) return;
+              if (document.documentElement.getAttribute("data-mm-account-kind") !== "company") return;
+              wrap.hidden = false;
+              wrap.style.display = "grid";
+              wrap.style.order = "-100";
+              var nav = wrap.parentElement;
+              if (nav) {
+                nav.style.display = "flex";
+                nav.style.flexDirection = "column";
+                if (nav.firstElementChild !== wrap) nav.insertBefore(wrap, nav.firstChild);
+              }
+            })();
+          </script>
           <a class="mm-nav-link" href="?szekcio=import" data-mm-nav="import">
             <span class="mm-nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4 16l4-8h8l4 8H4Z" stroke="currentColor" stroke-width="1.7"/><circle cx="8" cy="17" r="1.5" fill="currentColor"/><circle cx="16" cy="17" r="1.5" fill="currentColor"/></svg></span>
             <span class="mm-nav-text">Autóimport</span>
@@ -738,7 +775,7 @@
 
     <script src="/js/site-avatar-menu.js?v=settingsHome1" type="module"></script>
     <script src="/js/ha-import-app.js?v=haBmDrag1" type="module"></script>
-    <script src="/js/beallitasok-app.js?v=coFirst1" type="module"></script>
+    <script src="/js/beallitasok-app.js?v=coFirst2" type="module"></script>
     <script>
       
       setTimeout(function () {

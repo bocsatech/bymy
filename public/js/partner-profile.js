@@ -192,12 +192,16 @@ export function syncManageSidebar(accountType) {
   const companyWrap = document.querySelector("[data-mm-company-nav-wrap]");
   const settingsNav = document.querySelector("[data-mm-settings-nav]");
   if (companyWrap) {
-    companyWrap.hidden = !company;
     if (company) {
+      companyWrap.hidden = false;
       document.querySelectorAll(".mm-nav").forEach((nav) => {
         const wrap = nav.querySelector("[data-mm-company-nav-wrap]");
         if (wrap && nav.firstElementChild !== wrap) nav.prepend(wrap);
       });
+    } else {
+      companyWrap.hidden = true;
+      companyWrap.style.removeProperty("display");
+      companyWrap.style.removeProperty("order");
     }
   }
   if (settingsNav) settingsNav.hidden = false;

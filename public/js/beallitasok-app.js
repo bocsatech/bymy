@@ -44,7 +44,7 @@ import {
   stripDeviceIdentityFormFields,
 } from "./device-contract-identity.js?v=contractKind1";
 import { fillCountrySelect, PHONE_COUNTRIES } from "./phone-lang-ui.js?v=settingsPhone1";
-import { renderPartnerManage } from "./partner-profile.js?v=coFirst1";
+import { renderPartnerManage } from "./partner-profile.js?v=coFirst2";
 
 const PHOTO_KEY = "bymy-avatar-photos";
 const NOTIFY_KEY = "bymy-notify-prefs";
@@ -1016,13 +1016,17 @@ function syncSidebarAccountType(type) {
     el.hidden = false;
   }
   if (companyWrap) {
-    companyWrap.hidden = !companyType;
-    /* Cégadatok mindig az első menüpont (minden nézetben). */
     if (companyType) {
+      companyWrap.hidden = false;
+      /* Cégadatok mindig az első menüpont (minden nézetben). */
       document.querySelectorAll(".mm-nav").forEach((nav) => {
         const wrap = nav.querySelector("[data-mm-company-nav-wrap]");
         if (wrap && nav.firstElementChild !== wrap) nav.prepend(wrap);
       });
+    } else {
+      companyWrap.hidden = true;
+      companyWrap.style.removeProperty("display");
+      companyWrap.style.removeProperty("order");
     }
   }
   /* Beállítások (Személyes adatok stb.) mindkét fióktípusnál az Üzenetek után marad. */

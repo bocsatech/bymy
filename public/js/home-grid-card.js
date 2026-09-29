@@ -124,7 +124,14 @@ export function createHomeGridCard(item, { featured = false, topOffer = false, c
   const km = String(preview.km || "").trim();
   const power = formatPower(preview, form);
   const subtitle = cardSubtitle(preview, form);
-  const city = String(preview.telepules || form.telepules || preview.city || "").trim();
+  const city = String(
+    preview.filter?.telepules ||
+      form.telepules ||
+      preview.telepules ||
+      preview.city ||
+      String(preview.location || "").split(",")[0] ||
+      ""
+  ).trim();
   const email = getAuthUser()?.email;
   const favOn = Boolean(
     email && getParkplatz(email).some((row) => String(row.id) === String(item.id))

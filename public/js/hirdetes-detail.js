@@ -323,9 +323,9 @@ function paintSellerRating(rating, listingId) {
 async function loadSellerRating(listingId) {
   try {
     const rating = await fetchSellerRating(listingId);
-    paintSellerRating(rating, listingId);
+    paintSellerRating(rating || { average: null, count: 0 }, listingId);
   } catch {
-    /* értékelés opcionális */
+    paintSellerRating({ average: null, count: 0, canRate: false, loggedIn: false }, listingId);
   }
 }
 
@@ -1180,6 +1180,7 @@ async function init() {
           storePrefetchedListing(id, fresh);
           render(fresh.detail, fresh, []);
           void loadRelatedListings(id, fresh.detail);
+          void loadSellerRating(id);
         })
         .catch(() => {});
     }

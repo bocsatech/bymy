@@ -93,7 +93,9 @@ function metaLine(item) {
   const f = item.preview?.filter || {};
   const form = item.form || {};
   if (isImmo(item)) {
-    const city = String(form.telepules || f.telepules || item.preview?.telepules || "").trim();
+    const city = String(
+    form.telepules || f.telepules || item.preview?.filter?.telepules || item.preview?.telepules || ""
+  ).trim();
     const kat = String(form.ingatlan_tipus || f.ingatlan_tipus || form.tipus || "").trim();
     return [city, kat].filter(Boolean).join(" • ");
   }
@@ -106,7 +108,9 @@ function metaLine(item) {
 function locationLine(item) {
   const form = item.form || {};
   const f = item.preview?.filter || {};
-  const city = String(form.telepules || f.telepules || item.preview?.telepules || "").trim();
+  const city = String(
+    form.telepules || f.telepules || item.preview?.filter?.telepules || item.preview?.telepules || ""
+  ).trim();
   const street = String(form.cim || form.utca || f.cim || "").trim();
   if (street && city) return `${city}, ${street}`;
   return city || street || `#${item.id}`;

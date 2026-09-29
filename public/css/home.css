@@ -695,6 +695,11 @@ body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-n
 .home-category-bar {
   width: 100%;
   margin-bottom: 0.85rem;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid #2a3340;
+  border-radius: 999px;
+  background: #f4f6f8;
+  box-sizing: border-box;
 }
 
 .home-stats-bar {
@@ -1135,9 +1140,9 @@ body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-n
   display: flex;
   flex-direction: column;
   min-width: 0;
-  border: 1px solid #e3e6ea;
+  border: 1px solid #d8dde5;
   border-radius: 16px;
-  background: #f4f6f8;
+  background: #fff;
   padding: 0;
   cursor: pointer;
   text-align: left;
@@ -1295,6 +1300,8 @@ body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-n
 @media (max-width: 800px) {
   .home-category-bar {
     margin-bottom: 0.75rem;
+    padding: 0.45rem 0.55rem;
+    border-radius: 1.75rem;
   }
 
   .home-category-track {
@@ -1305,7 +1312,7 @@ body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-n
     grid-template-columns: none;
     overflow-x: auto;
     overflow-y: hidden;
-    padding: 0 0.15rem 0.35rem;
+    padding: 0.1rem 0.05rem 0.25rem;
     scroll-snap-type: x proximity;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-x: contain;

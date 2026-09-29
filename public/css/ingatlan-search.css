@@ -1440,6 +1440,121 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   touch-action: pan-y;
 }
 
+/* Gyártmány stb.: nagyobb kapcsolós multi-select lista (~10 sor) */
+.auto-drum-portal--multi .auto-drum-portal__stage--multi {
+  width: min(22.5rem, 92vw);
+}
+
+.auto-drum-portal--multi .auto-drum-portal__panel {
+  width: 100%;
+  height: calc(var(--auto-drum-multi-rows, 10) * var(--auto-drum-multi-row-h, 49px));
+  max-height: min(70vh, 32rem);
+  border-radius: 1.15rem;
+  border: 1.5px solid #64748b;
+  background: #fff;
+  box-shadow: 0 12px 36px rgba(15, 23, 42, 0.24);
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.auto-drum-portal__scroll--switches {
+  position: relative;
+  inset: auto;
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  padding: 0.2rem 0;
+  box-sizing: border-box;
+}
+
+.auto-drum-switch-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  width: 100%;
+  min-height: var(--auto-drum-multi-row-h, 49px);
+  height: var(--auto-drum-multi-row-h, 49px);
+  margin: 0;
+  padding: 0 0.9rem;
+  border: 0;
+  border-bottom: 1px solid #eef2f6;
+  background: transparent;
+  color: #0f172a;
+  font: 600 1.05rem/1.2 Inter, system-ui, sans-serif;
+  text-align: left;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.auto-drum-switch-row:last-child {
+  border-bottom: 0;
+}
+
+.auto-drum-switch-row__label {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.auto-drum-switch {
+  position: relative;
+  flex: 0 0 auto;
+  width: 2.7rem;
+  height: 1.55rem;
+  border-radius: 999px;
+  background: #d0d5dd;
+  transition: background 0.15s ease;
+}
+
+.auto-drum-switch__knob {
+  position: absolute;
+  top: 0.15rem;
+  left: 0.15rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.25);
+  transition: transform 0.15s ease;
+}
+
+.auto-drum-switch-row.is-selected .auto-drum-switch {
+  background: #1565c0;
+}
+
+.auto-drum-switch-row.is-selected .auto-drum-switch__knob {
+  transform: translateX(1.15rem);
+}
+
+.auto-drum-switch-row[data-value=""].is-selected .auto-drum-switch {
+  background: #64748b;
+}
+
+[data-theme="dark"] .auto-drum-portal--multi .auto-drum-portal__panel {
+  background: #1a222c;
+  border-color: #4b5563;
+}
+
+[data-theme="dark"] .auto-drum-switch-row {
+  color: #e8eaed;
+  border-bottom-color: #2a3441;
+}
+
+[data-theme="dark"] .auto-drum-switch {
+  background: #4b5563;
+}
+
+[data-theme="dark"] .auto-drum-switch-row.is-selected .auto-drum-switch {
+  background: #3b82f6;
+}
+
 .auto-drum-portal .immo-drum-inline-item {
   display: flex;
   align-items: center;

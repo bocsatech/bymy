@@ -1,12 +1,12 @@
 
-import { fillWheel, setWheelValue, readWheel } from "./ingatlan-wheels.js?v=immoClear1";
+import { fillWheel, setWheelValue, readWheel, readWheelList } from "./ingatlan-wheels.js?v=immoClear1";
 import {
   initDrumWheel,
   applyDrumModeClass,
   syncDrumWheelDisplay,
   closeAllInlineDrums,
 } from "./immo-drum-picker.js?v=immoClear1";
-import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=mobFix8";
+import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=brandSwitch1";
 import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=priceSuggest1";
 
 const MOBILE_MQ = "(max-width: 900px)";
@@ -107,10 +107,10 @@ function emptyLabelFromOptions(options) {
   return empty?.label || "Mindegy";
 }
 
-function finishWheel(cell, emptyLabel) {
+function finishWheel(cell, emptyLabel, { multiple = false } = {}) {
   const wheel = cell.querySelector("[data-wheel]");
   if (isMobile()) {
-    initDrumWheel(wheel, { emptyLabel, openMode: "portal" });
+    initDrumWheel(wheel, { emptyLabel, openMode: "portal", multiple });
     const live = cell.querySelector("[data-wheel]");
     setWheelValue(live, "");
     syncDrumWheelDisplay(live);
@@ -497,12 +497,12 @@ async function fetchCatalogQuick() {
   return fetchVehicleCatalog({ kind });
 }
 
-function rebindWheel(form, wheelName, options, emptyLabel = "Mindegy") {
+function rebindWheel(form, wheelName, options, emptyLabel = "Mindegy", { multiple = false } = {}) {
   const wheel = form.querySelector(`[data-wheel="${wheelName}"]`);
   if (!wheel) return null;
   fillWheel(wheel, options, { emptyLabel });
   if (isMobile()) {
-    initDrumWheel(wheel, { emptyLabel, openMode: "portal" });
+    initDrumWheel(wheel, { emptyLabel, openMode: "portal", multiple });
     const live = form.querySelector(`[data-wheel="${wheelName}"]`);
     setWheelValue(live, "");
     syncDrumWheelDisplay(live);
@@ -527,18 +527,32 @@ async function wireCatalogDrums(form) {
   }
 
   const brands = (catalog.gyartmanyok || []).map((b) => ({ value: b, label: b }));
-  const brandWheel = rebindWheel(form, "gyartmany", brands);
+  const brandWheel = rebindWheel(form, "gyartmany", brands, "Mindegy", { multiple: true });
   if (!brandWheel) return;
 
-  const fillModels = (brand) => {
-    const list = brand ? catalog.modellek?.[brand] ?? [] : [];
+  const fillModels = (brandList) => {
+    const brandsSelected = Array.isArray(brandList)
+      ? brandList.filter(Boolean)
+      : brandList
+        ? [String(brandList)]
+        : [];
+    let list = [];
+    if (brandsSelected.length === 1) {
+      list = catalog.modellek?.[brandsSelected[0]] ?? [];
+    } else if (brandsSelected.length > 1) {
+      const set = new Set();
+      brandsSelected.forEach((brand) => {
+        (catalog.modellek?.[brand] || []).forEach((model) => set.add(model));
+      });
+      list = [...set].sort((a, b) => a.localeCompare(b, "hu", { sensitivity: "base" }));
+    }
     const models = list.map((m) => ({ value: m, label: m }));
     rebindWheel(form, "modell", models);
   };
 
-  fillModels("");
+  fillModels([]);
   brandWheel.addEventListener("immo-wheel-change", () => {
-    fillModels(readWheel(form.querySelector('[data-wheel="gyartmany"]')) || "");
+    fillModels(readWheelList(form.querySelector('[data-wheel="gyartmany"]')));
   });
 }
 
@@ -608,6 +622,25 @@ export function readAutoDrumFilterValues(form) {
     return Number.isFinite(n) ? n : null;
   };
   const seen = new Set();
+
+  form.querySelectorAll("[data-wheel][data-filter-key]").forEach((wheel) => {
+    const key = wheel.getAttribute("data-filter-key");
+    if (!key || seen.has(key)) return;
+    if (wheel.dataset.multiple === "1") {
+      const list = readWheelList(wheel);
+      if (!list.length) return;
+      seen.add(key);
+      if (key === "gyartmany") out.gyartmanyok = list;
+      else if (key === "modell") out.modellek = list;
+      else out[key] = list;
+      return;
+    }
+    const raw = String(readWheel(wheel) ?? "").trim();
+    if (!raw) return;
+    seen.add(key);
+    if (key.endsWith("_tol") || key.endsWith("_ig")) out[key] = numOrNull(raw);
+    else out[key] = raw;
+  });
 
   form.querySelectorAll("[data-filter-key]").forEach((el) => {
     const key = el.getAttribute("data-filter-key");

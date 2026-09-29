@@ -1116,7 +1116,7 @@ async function ensureAllListingsLoadedForMap() {
 if (PAGE === "auto" || PAGE === "teherauto") {
   ensureMapModule = () => {
     if (!mapModulePromise) {
-      mapModulePromise = import("./search-results-map.js?v=mapList3")
+      mapModulePromise = import("./search-results-map.js?v=mapList4")
         .then((mod) => {
           updateSearchMapButtonLabels = mod.updateSearchMapButtonLabels;
           closeSearchResultsMapFn = mod.closeSearchResultsMap;
@@ -1159,16 +1159,14 @@ if (PAGE === "auto" || PAGE === "teherauto") {
         btn.disabled = true;
         btn.textContent = "Térkép betöltése…";
         try {
-          await ensureMapModule();
+          const mod = await ensureMapModule();
+          btn.disabled = false;
+          await mod.openSearchMapNow(btn);
         } catch {
           btn.textContent = prevLabel;
           setMapButtonLabelsLocal(searchResultsCommitted || hasActiveClientFilters());
           btn.disabled = false;
-          return;
         }
-        // disabled gombra a programozott click elnyelődik — előbb engedélyezzük.
-        btn.disabled = false;
-        btn.click();
       },
       true
     );

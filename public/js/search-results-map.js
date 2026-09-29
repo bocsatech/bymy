@@ -1171,6 +1171,126 @@ export async function refreshOpenSearchResultsMap(items, opts = {}) {
   });
 }
 
+/** Lista eredmény (szűrő VAGY „Találatok mutatása”) → ne a lakhely 10 km-e. */
+function shouldUseListResults({ useListResults, hasActiveFilters, btn } = {}) {
+  if (btn?.dataset?.mapMode === "filtered") return true;
+  if (typeof useListResults === "function") return Boolean(useListResults());
+  return typeof hasActiveFilters === "function" ? Boolean(hasActiveFilters()) : false;
+}
+
+async function openSearchMapForButton(btn, {
+  getItems,
+  hasActiveFilters,
+  useListResults,
+  ensureAllListingsLoaded,
+  getVertical,
+} = {}) {
+  const root = document.getElementById("search-map-modal");
+  if (root && !root.hidden) {
+    markMapOpenOnReturn(false);
+    closeSearchResultsMap();
+    return;
+  }
+  const syncLabel = () => {
+    updateSearchMapButtonLabels(
+      shouldUseListResults({ useListResults, hasActiveFilters, btn })
+    );
+  };
+  btn.disabled = true;
+  try {
+    syncLabel();
+    const fromList = shouldUseListResults({ useListResults, hasActiveFilters, btn });
+    let items;
+    if (fromList) {
+      btn.textContent = "Térkép betöltése…";
+      if (typeof ensureAllListingsLoaded === "function") {
+        try {
+          await ensureAllListingsLoaded();
+        } catch (error) {
+          console.warn("Térkép lista betöltés:", error);
+        }
+      }
+      items = await resolveMapItems(getItems);
+      if (!items.length) {
+        const vertical = typeof getVertical === "function" ? getVertical() : null;
+        try {
+          items = await fetchAllVerticalListings(vertical);
+        } catch (error) {
+          console.warn("Térkép API lista:", error);
+        }
+      }
+      await openSearchResultsMap(items, { mode: "filtered" });
+    } else {
+      const vertical = typeof getVertical === "function" ? getVertical() : null;
+      btn.textContent = "Térkép betöltése…";
+      const [cityIndex] = await Promise.all([getCityIndex()]);
+      const home = await resolveHomeOrigin(cityIndex, null);
+      const radiusKm = MAP_BROWSE_RADIUS_KM;
+      if (!home?.city && !home?.postal) {
+        // Nincs lakhely: ne üres térkép — mutasd a listát / összes autót.
+        items = await resolveMapItems(getItems);
+        if (!items.length) {
+          try {
+            items = await fetchAllVerticalListings(vertical);
+          } catch (error) {
+            console.warn("Térkép API lista:", error);
+          }
+        }
+        if (items.length) {
+          await openSearchResultsMap(items, { mode: "filtered" });
+        } else {
+          await openSearchResultsMap([], {
+            mode: "browse",
+            emptyHint:
+              "Nincs lakhely a profilban. Állíts be települést a Beállításokban, hogy a térkép a körzetedet mutassa.",
+            radiusKm,
+          });
+        }
+      } else {
+        const nearby = await fetchVerticalListingsInRadius(vertical, {
+          postal: home.postal || "",
+          city: home.city || home.label || "",
+          radiusKm,
+        });
+        if (nearby.error) {
+          items = [];
+          await openSearchResultsMap(items, {
+            mode: "browse",
+            emptyHint: nearby.error,
+            radiusKm,
+          });
+        } else {
+          items = nearby.items || [];
+          if (!items.length) {
+            items = await resolveMapItems(getItems);
+          }
+          await openSearchResultsMap(items, {
+            mode: "browse",
+            preferHomeZoom: true,
+            radiusKm,
+          });
+        }
+      }
+    }
+    syncLabel();
+  } finally {
+    btn.disabled = false;
+    syncLabel();
+  }
+}
+
+let mapButtonOpts = null;
+
+/** Lazy-load után közvetlen nyitás (ne disabled-gombos szintetikus click). */
+export async function openSearchMapNow(btn) {
+  const target =
+    btn ||
+    document.querySelector("[data-search-map-open]") ||
+    null;
+  if (!target || !mapButtonOpts) return;
+  await openSearchMapForButton(target, mapButtonOpts);
+}
+
 export function initSearchResultsMapButtons({
   getItems,
   hasActiveFilters,
@@ -1181,14 +1301,18 @@ export function initSearchResultsMapButtons({
   const buttons = document.querySelectorAll("[data-search-map-open]");
   if (!buttons.length) return;
 
-  /** Lista eredmény (szűrő VAGY „Találatok mutatása”) → ne a lakhely 10 km-e. */
-  const shouldUseList = () => {
-    if (typeof useListResults === "function") return Boolean(useListResults());
-    return typeof hasActiveFilters === "function" ? Boolean(hasActiveFilters()) : false;
+  mapButtonOpts = {
+    getItems,
+    hasActiveFilters,
+    useListResults,
+    ensureAllListingsLoaded,
+    getVertical,
   };
 
   const syncLabel = () => {
-    updateSearchMapButtonLabels(shouldUseList());
+    updateSearchMapButtonLabels(
+      shouldUseListResults({ useListResults, hasActiveFilters })
+    );
   };
   syncLabel();
 
@@ -1198,81 +1322,7 @@ export function initSearchResultsMapButtons({
     btn.setAttribute("aria-controls", "search-map-modal");
     btn.setAttribute("aria-expanded", "false");
     btn.addEventListener("click", async () => {
-      const root = document.getElementById("search-map-modal");
-      if (root && !root.hidden) {
-        markMapOpenOnReturn(false);
-        closeSearchResultsMap();
-        return;
-      }
-      btn.disabled = true;
-      try {
-        syncLabel();
-        const fromList = shouldUseList();
-        let items;
-        if (fromList) {
-          if (btn) btn.textContent = "Térkép betöltése…";
-          if (typeof ensureAllListingsLoaded === "function") {
-            try {
-              await ensureAllListingsLoaded();
-            } catch (error) {
-              console.warn("Térkép lista betöltés:", error);
-            }
-          }
-          items = await resolveMapItems(getItems);
-          if (!items.length) {
-            const vertical = typeof getVertical === "function" ? getVertical() : null;
-            try {
-              items = await fetchAllVerticalListings(vertical);
-            } catch (error) {
-              console.warn("Térkép API lista:", error);
-            }
-          }
-          await openSearchResultsMap(items, { mode: "filtered" });
-        } else {
-          const vertical = typeof getVertical === "function" ? getVertical() : null;
-          if (btn) btn.textContent = "Térkép betöltése…";
-          const [cityIndex] = await Promise.all([getCityIndex()]);
-          const home = await resolveHomeOrigin(cityIndex, null);
-          const radiusKm = MAP_BROWSE_RADIUS_KM;
-          if (!home?.city && !home?.postal) {
-            items = [];
-            await openSearchResultsMap(items, {
-              mode: "browse",
-              emptyHint:
-                "Nincs lakhely a profilban. Állíts be települést a Beállításokban, hogy a térkép a körzetedet mutassa.",
-              radiusKm,
-            });
-          } else {
-            const nearby = await fetchVerticalListingsInRadius(vertical, {
-              postal: home.postal || "",
-              city: home.city || home.label || "",
-              radiusKm,
-            });
-            if (nearby.error) {
-              items = [];
-              await openSearchResultsMap(items, {
-                mode: "browse",
-                emptyHint: nearby.error,
-                radiusKm,
-              });
-            } else {
-              items = nearby.items || [];
-              if (!items.length) {
-                items = await resolveMapItems(getItems);
-              }
-              await openSearchResultsMap(items, {
-                mode: "browse",
-                preferHomeZoom: true,
-                radiusKm,
-              });
-            }
-          }
-        }
-        syncLabel();
-      } finally {
-        btn.disabled = false;
-        syncLabel();
-      }
+      await openSearchMapForButton(btn, mapButtonOpts);
     });
   });
 }

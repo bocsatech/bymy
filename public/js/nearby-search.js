@@ -4,7 +4,7 @@ import {
   filterListingsInRadius,
   filterListingsRecentInRadius,
   resolveCityCoords,
-} from "./listing-radius.js?v=mapCity6";
+} from "./listing-radius.js?v=mapCity7";
 
 export const STORAGE_POSTAL = "bymy_stats_postal";
 export const STORAGE_RADIUS = "bymy_stats_radius_km";
@@ -165,7 +165,22 @@ export async function buildNearbyFilter({
     throw new Error("Adj meg települést a térképes / körzetes kereséshez.");
   }
 
-  const hit = resolveCityCoords(cityName, cityIndex);
+  let hit = resolveCityCoords(cityName, cityIndex);
+  if (!hit) {
+    /* Kis falvak: seedben gyakran nincs valódi koord → Nominatim. */
+    try {
+      const res = await fetch(
+        `/api/geocode?q=${encodeURIComponent(`${cityName}, Magyarország`)}`,
+        { credentials: "same-origin" }
+      );
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.lat != null && data.lon != null) {
+        hit = { city: cityName, lat: Number(data.lat), lon: Number(data.lon) };
+      }
+    } catch {
+      /* ignore */
+    }
+  }
   if (!hit) {
     throw new Error(`Ismeretlen település: ${cityName}`);
   }

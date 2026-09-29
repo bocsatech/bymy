@@ -23,6 +23,7 @@ export function buildCityIndex(cities) {
   for (const row of cities ?? []) {
     const city = String(row.city ?? "").trim();
     if (!city || row.lat == null || row.lon == null) continue;
+    if (isDummyCoord(row.lat, row.lon)) continue;
     const key = normalizePlace(city);
     if (!key || byNorm.has(key)) continue;
     byNorm.set(key, { city, lat: Number(row.lat), lon: Number(row.lon) });

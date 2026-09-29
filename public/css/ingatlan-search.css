@@ -1317,8 +1317,8 @@ input.immo-wheel-custom.immo-wheel-trigger {
     box-sizing: border-box;
     z-index: 60;
   }
+}
 
-  
 body[data-site-page="ingatlan"] .immo-search-form .immo-wheel-trigger:focus,
 body[data-site-page="ingatlan"] .immo-search-form .immo-wheel-trigger:focus-visible,
 body[data-site-page="ingatlan"] .immo-search-form .immo-control:focus,

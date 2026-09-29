@@ -276,6 +276,7 @@ export async function renderPartnerManage(mountRoot) {
           <label>Cég neve *<input name="displayName" value="${esc(profile.display_name || account.company)}" maxlength="100" required /></label>
           <label>Cég adószáma<input name="companyTaxId" value="${esc(account.companyTaxId)}" inputmode="numeric" autocomplete="off" /></label>
           <label>Hirdetésben megjelenő cégnév<input name="companyListingName" value="${esc(account.companyListingName)}" maxlength="100" placeholder="pl. Fehérvár Ingatlan" autocomplete="organization" /></label>
+          <label>E-mail cím *<input name="email" type="email" value="${esc(profile.email)}" maxlength="320" required /></label>
           <div class="partner-form-wide partner-activities">
             <span class="partner-activities-label">Cég tevékenysége</span>
             <div class="partner-activities-row">${activityChecks}</div>
@@ -311,7 +312,6 @@ export async function renderPartnerManage(mountRoot) {
             <span class="partner-phone-label">Értékesítő telefonszáma (2)</span>
             ${phoneRowHtml({ name: "companyPhone3" })}
           </div>
-          <label>E-mail cím *<input name="email" type="email" value="${esc(profile.email)}" maxlength="320" required /></label>
           <label>Második e-mail<input name="companyEmail2" type="email" value="${esc(account.companyEmail2)}" maxlength="320" /></label>
         </div>
       </section>

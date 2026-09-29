@@ -7,7 +7,7 @@ import {
   initSiteAuth,
 } from "./site-auth.js?v=publicPartner1";
 
-const root = document.getElementById("partner-root");
+const pageRoot = () => document.getElementById("partner-root");
 
 function esc(value) {
   return String(value ?? "")
@@ -66,7 +66,7 @@ async function jsonFetch(url, options = {}) {
   return data;
 }
 
-function syncManageSidebar(accountType) {
+export function syncManageSidebar(accountType) {
   const company = accountType === "business" || accountType === "dealer";
   document.documentElement.setAttribute("data-mm-account-kind", company ? "company" : "private");
   const typeEl = document.querySelector("[data-mm-account-type]");
@@ -82,44 +82,13 @@ function syncManageSidebar(accountType) {
   const hello = document.querySelector("[data-mm-hello]");
   const user = getAuthUser();
   if (hello) hello.textContent = getDisplayName() || user?.email?.split("@")[0] || "—";
-
-  if (company && companyWrap) {
-    const sub = companyWrap.querySelector("[data-mm-sub]");
-    const btn = companyWrap.querySelector("[data-mm-subtoggle]");
-    if (sub) sub.hidden = false;
-    if (btn) {
-      btn.setAttribute("aria-expanded", "true");
-      btn.classList.add("is-active");
-    }
-  }
-
-  document.querySelectorAll("[data-mm-subtoggle]").forEach((btn) => {
-    if (btn.dataset.partnerSubBound === "1") return;
-    btn.dataset.partnerSubBound = "1";
-    btn.addEventListener("click", () => {
-      const group = btn.closest(".mm-nav-group");
-      const sub = group?.querySelector("[data-mm-sub]");
-      if (!sub) return;
-      const open = sub.hidden;
-      document.querySelectorAll(".mm-nav-group [data-mm-sub]").forEach((el) => {
-        el.hidden = true;
-      });
-      document.querySelectorAll("[data-mm-subtoggle]").forEach((el) => {
-        el.setAttribute("aria-expanded", "false");
-        el.classList.remove("is-active");
-      });
-      if (open) {
-        sub.hidden = false;
-        btn.setAttribute("aria-expanded", "true");
-        btn.classList.add("is-active");
-      }
-    });
-  });
 }
 
-async function manage() {
-  if (!(await requireAuthForPage())) return;
-  initSiteAuth();
+/** Partneri profil szerkesztő — beágyazható a Fiókom panelbe is. */
+export async function renderPartnerManage(mountRoot) {
+  const root = mountRoot || pageRoot();
+  if (!root) return;
+
   let accountType = String(getProfile()?.accountType || "private");
   try {
     const loaded = await loadProfileFromServer();
@@ -127,6 +96,8 @@ async function manage() {
   } catch {
   }
   syncManageSidebar(accountType);
+
+  root.innerHTML = `<div class="partner-loading">Partneri profil betöltése…</div>`;
 
   const [profileResult, listingsResult] = await Promise.all([
     jsonFetch("/api/partner-profiles/mine"),
@@ -143,6 +114,13 @@ async function manage() {
   if (!String(profile.email || "").trim()) {
     profile.email = String(account.companyEmail || getAuthUser()?.email || "").trim();
   }
+  if (!String(profile.display_name || "").trim()) {
+    profile.display_name = String(account.company || "").trim();
+  }
+  if (!String(profile.contact_person || "").trim()) {
+    const full = [account.firstName, account.lastName].filter(Boolean).join(" ").trim();
+    profile.contact_person = full || String(account.salespersonName || "").trim();
+  }
   const listings = (listingsResult.listings || []).filter((listing) => {
     const vertical = String(
       listing.vertical ||
@@ -151,12 +129,9 @@ async function manage() {
         listing.form?.hirdetes_vertical ||
         ""
     ).toLowerCase();
-    // Partner oldal: elsősorban ingatlan; ha nincs, mutassuk a többi saját hirdetést is.
     return vertical === "ingatlan";
   });
-  const ownListings = listings.length
-    ? listings
-    : listingsResult.listings || [];
+  const ownListings = listings.length ? listings : listingsResult.listings || [];
   const listingsTitle = listings.length ? "Ingatlanhirdetéseim" : "Saját hirdetéseim";
   const listingsEmpty = listings.length
     ? ""
@@ -164,13 +139,12 @@ async function manage() {
       ? ""
       : '<p class="partner-empty">Még nincs saját hirdetésed.</p>';
   root.innerHTML = `
-    <nav class="partner-breadcrumb"><a href="/ingatlan.html">Ingatlan</a><span>›</span><span>Partnerprofil kezelése</span></nav>
     <header class="partner-manage-head">
-      <div><p class="partner-eyebrow">BYMY INGATLANOS PARTNERPROGRAM</p><h1>Partnerprofil kezelése</h1><p>Itt adhatod meg a publikus profilodon látható adatokat, és kezelheted saját hirdetéseidet.</p></div>
+      <div><p class="partner-eyebrow">BYMY INGATLANOS PARTNERPROGRAM</p><h1>Partneri profil</h1><p>Itt adhatod meg a publikus profilodon látható cég- és partneradatokat. Egy helyen, duplikáció nélkül.</p></div>
     </header>
     ${statusBox(profile)}
     <form class="partner-form" id="partner-form">
-      <div class="partner-form-title"><div><h2>Partner adatai</h2><p>A csillaggal jelölt mezők kitöltése kötelező.</p></div></div>
+      <div class="partner-form-title"><div><h2>Partner / cég adatai</h2><p>A csillaggal jelölt mezők kitöltése kötelező.</p></div></div>
       <div class="partner-form-grid">
         <label>Partner vagy iroda neve *<input name="displayName" value="${esc(profile.display_name)}" maxlength="100" required /></label>
         <label>Publikus profilcím *<span class="partner-slug"><span>bymy.hu/partner/</span><input name="slug" value="${esc(profile.slug)}" maxlength="100" required /></span></label>
@@ -196,7 +170,7 @@ async function manage() {
       <div class="partner-own-list">${ownListings.length ? ownListings.map((listing) => `<div class="partner-own-row"><div><strong>${esc(listing.preview?.title || listing.hirdetes_cime || `Hirdetés #${listing.id}`)}</strong><span>${esc(listing.preview?.price || "")}</span></div><span class="partner-own-status">${esc(listing.status || "")}</span><div><a href="/hirdetes.html?id=${listing.id}">Megnyitás</a><a href="/hirdetesfeladas.html?id=${listing.id}">Szerkesztés</a></div></div>`).join("") : listingsEmpty}</div>
     </section>`;
 
-  root.querySelector("#partner-form").addEventListener("submit", async (event) => {
+  root.querySelector("#partner-form")?.addEventListener("submit", async (event) => {
     event.preventDefault();
     const form = event.currentTarget;
     const status = form.querySelector("[data-status]");
@@ -212,7 +186,10 @@ async function manage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      status.textContent = result.profile.application_status === "approved" ? "A profil mentve." : "A jelentkezés mentve, jóváhagyásra vár.";
+      status.textContent =
+        result.profile.application_status === "approved"
+          ? "A profil mentve."
+          : "A jelentkezés mentve, jóváhagyásra vár.";
       status.className = "is-success";
     } catch (error) {
       status.textContent = error.message;
@@ -224,7 +201,16 @@ async function manage() {
   });
 }
 
+async function manageStandalone() {
+  if (!(await requireAuthForPage())) return;
+  initSiteAuth();
+  // Régi URL → egységes Fiókom / Partneri profil panel
+  window.location.replace("/beallitasok.html?szekcio=partner-profil");
+}
+
 async function view() {
+  const root = pageRoot();
+  if (!root) return;
   const slug = new URLSearchParams(location.search).get("slug") || location.pathname.match(/^\/partner\/([^/]+)\/?$/)?.[1];
   if (!slug) throw new Error("Hiányzó partnerazonosító.");
   const { profile, listings = [] } = await jsonFetch(`/api/partner-profiles/${encodeURIComponent(slug)}`);
@@ -279,10 +265,14 @@ async function view() {
 
 async function init() {
   try {
-    if (location.pathname.endsWith("partner-profil-kezelese.html")) await manage();
+    if (location.pathname.endsWith("partner-profil-kezelese.html")) await manageStandalone();
+    else if (document.body?.dataset?.sitePage === "beallitasok") return;
     else await view();
   } catch (error) {
-    root.innerHTML = `<div class="partner-error"><strong>A partnerprofil nem tölthető be.</strong><p>${esc(error.message)}</p><a href="/ingatlan.html">Vissza az Ingatlan oldalra</a></div>`;
+    const root = pageRoot();
+    if (root) {
+      root.innerHTML = `<div class="partner-error"><strong>A partnerprofil nem tölthető be.</strong><p>${esc(error.message)}</p><a href="/ingatlan.html">Vissza az Ingatlan oldalra</a></div>`;
+    }
   }
 }
 

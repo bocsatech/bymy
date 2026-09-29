@@ -42,6 +42,7 @@ import {
   stripDeviceIdentityFormFields,
 } from "./device-contract-identity.js?v=contractKind1";
 import { fillCountrySelect, PHONE_COUNTRIES } from "./phone-lang-ui.js?v=settingsPhone1";
+import { renderPartnerManage } from "./partner-profile.js?v=coNav1";
 
 const PHOTO_KEY = "bymy-avatar-photos";
 const NOTIFY_KEY = "bymy-notify-prefs";
@@ -140,7 +141,7 @@ const HERO_MAX_BYTES = 8 * 1024 * 1024;
 const AVATAR_SIZE = 256;
 const SECTIONS = [
   "attekintes",
-  "cegadatok",
+  "partner-profil",
   "import",
   "nyomtatasok",
   "ertekelesek",
@@ -169,12 +170,15 @@ const SETTINGS_SECTIONS = new Set([
   "notify",
   "megjelenes",
 ]);
+/** Cégadatok almenü alatt megjelenő szekciók (Cégadatok kattintás NEM ezek közé tartozik). */
+const COMPANY_SUB_SECTIONS = new Set(["partner-profil", "keresesi-korzet", "jelszo", "notify"]);
 const LEGACY_ACC_TO_SECTION = {
   personal: "szemelyes",
   searchArea: "keresesi-korzet",
   recommendationsArea: "ajanlasok-korzet",
   password: "jelszo",
   notify: "notify",
+  cegadatok: "partner-profil",
 };
 
 let lastLookedUpPostal = "";
@@ -319,8 +323,7 @@ function currentSection() {
     return null;
   }
   if (raw === "fiok") return "szemelyes";
-  const hash = String(window.location.hash || "").replace(/^#/, "");
-  if (LEGACY_ACC_TO_SECTION[hash]) return LEGACY_ACC_TO_SECTION[hash];
+  if (LEGACY_ACC_TO_SECTION[raw]) return LEGACY_ACC_TO_SECTION[raw];
   return SECTIONS.includes(raw) ? raw : null;
 }
 
@@ -348,7 +351,7 @@ function syncSettingsSublinkActive() {
   const section = currentSection();
   document.querySelectorAll("[data-mm-settings-nav] [data-mm-nav], [data-mm-company-nav-wrap] [data-mm-nav]").forEach((link) => {
     const nav = link.getAttribute("data-mm-nav");
-    if (!SETTINGS_SECTIONS.has(nav) && nav !== "cegadatok") return;
+    if (!SETTINGS_SECTIONS.has(nav) && !COMPANY_SUB_SECTIONS.has(nav)) return;
     link.classList.toggle("is-active", Boolean(section) && nav === section);
   });
 }
@@ -356,7 +359,7 @@ function syncSettingsSublinkActive() {
 function syncSettingsSubnav() {
   const section = currentSection();
   const openForSettings = Boolean(section) && SETTINGS_SECTIONS.has(section);
-  const openForCompany = section === "cegadatok" || openForSettings;
+  const openForCompany = Boolean(section) && COMPANY_SUB_SECTIONS.has(section);
 
   document.querySelectorAll("[data-mm-settings-nav]").forEach((group) => {
     if (group.hidden) return;
@@ -371,6 +374,29 @@ function syncSettingsSubnav() {
   });
 
   syncSettingsSublinkActive();
+}
+
+function clearPanelsKeepCompanyNav(group) {
+  const url = new URL(window.location.href);
+  url.searchParams.delete("szekcio");
+  url.hash = "";
+  window.history.replaceState({}, "", url);
+  document.querySelectorAll("[data-mm-panel]").forEach((panel) => {
+    panel.hidden = true;
+  });
+  document.querySelectorAll("[data-mm-nav]").forEach((link) => {
+    if (link.hasAttribute("data-mm-subtoggle")) return;
+    link.classList.remove("is-active");
+  });
+  document.body.classList.toggle("mm-messages-open", false);
+  document.body.classList.toggle("mm-inbox-inline", false);
+  document.title = "Fiókom — bymy";
+  const partnerRoot = document.getElementById("partner-root");
+  if (partnerRoot) partnerRoot.innerHTML = "";
+  if (group) {
+    expandSettingsSubnav(group);
+    group.querySelector("[data-mm-subtoggle]")?.classList.add("is-active");
+  }
 }
 
 function openSettingsAccordion(accId) {
@@ -501,7 +527,7 @@ function setSection(section) {
   document.title =
     {
       attekintes: "Áttekintés",
-      cegadatok: "Cégadatok",
+      "partner-profil": "Partneri profil",
       import: "Autóimport",
       nyomtatasok: "Nyomtatások",
       ertekelesek: "Értékelések",
@@ -518,6 +544,22 @@ function setSection(section) {
       uzenetek: "Üzenetek",
     }[next] + " — Fiókom";
   syncSettingsSubnav();
+  if (next === "partner-profil") {
+    void ensurePartnerProfilPanel();
+  }
+}
+
+let partnerProfilLoadSeq = 0;
+async function ensurePartnerProfilPanel() {
+  const root = document.getElementById("partner-root");
+  if (!root) return;
+  const seq = ++partnerProfilLoadSeq;
+  try {
+    await renderPartnerManage(root);
+  } catch (error) {
+    if (seq !== partnerProfilLoadSeq) return;
+    root.innerHTML = `<div class="partner-error"><strong>A partnerprofil nem tölthető be.</strong><p>${String(error?.message || error)}</p></div>`;
+  }
 }
 
 function authHeaders() {
@@ -974,7 +1016,7 @@ function syncSidebarAccountType(type) {
   if (companyWrap) companyWrap.hidden = !companyType;
   if (settingsNav) settingsNav.hidden = companyType;
   const section = currentSection();
-  if (!companyType && section === "cegadatok") {
+  if (!companyType && (section === "partner-profil" || section === "cegadatok")) {
     clearSection();
   } else if (companyType && (section === "fiok" || section === "szemelyes" || section === "megjelenes" || section === "ajanlasok-korzet")) {
     clearSection();
@@ -1308,8 +1350,10 @@ function applyProfileToForm(profile) {
   initSettingsPhoneRow(form);
   applyPhonePartsToForm(form, data.phone);
   const companyForm = document.getElementById("mm-company-form");
-  initSettingsPhoneRows(companyForm);
-  applyCompanyPhonesToForm(companyForm, data);
+  if (companyForm) {
+    initSettingsPhoneRows(companyForm);
+    applyCompanyPhonesToForm(companyForm, data);
+  }
   updateProfileSummary(data, getAuthUser());
   void hydrateDeviceContractFields(form, data, getAuthUser());
 }
@@ -1667,7 +1711,7 @@ export async function initSettingsPage() {
       if (!SECTIONS.includes(next)) return;
       event.preventDefault();
       setSection(next);
-      if (SETTINGS_SECTIONS.has(next) || next === "cegadatok") {
+      if (SETTINGS_SECTIONS.has(next) || COMPANY_SUB_SECTIONS.has(next)) {
         expandSettingsSubnav(link.closest(".mm-nav-group"));
       }
       applyNavSideEffects(next);
@@ -1686,13 +1730,25 @@ export async function initSettingsPage() {
       });
       document.querySelectorAll("[data-mm-subtoggle]").forEach((el) => {
         el.setAttribute("aria-expanded", "false");
+        el.classList.remove("is-active");
       });
-      if (!willOpen) return;
+      if (!willOpen) {
+        // Cégadatok bezárás: jobb oldal is üres maradjon
+        if (!next && group?.hasAttribute("data-mm-company-nav-wrap")) {
+          clearPanelsKeepCompanyNav(null);
+          collapseSettingsSubnav(group);
+        }
+        return;
+      }
       sub.hidden = false;
       btn.setAttribute("aria-expanded", "true");
+      btn.classList.add("is-active");
       if (next && SECTIONS.includes(next)) {
         setSection(next);
         applyNavSideEffects(next);
+      } else if (group?.hasAttribute("data-mm-company-nav-wrap")) {
+        // Cégadatok: csak almenü, jobb oldal üres
+        clearPanelsKeepCompanyNav(group);
       }
     });
   });
@@ -1815,9 +1871,7 @@ function bindProfileFormEarly() {
       showFlash(flash, "Keresztnév és vezetéknév kötelező.", false);
       return;
     }
-    data.company = String(
-      document.querySelector("#mm-company-form [name=company]")?.value ?? data.company ?? ""
-    ).trim();
+    data.company = String(data.company || getProfile().company || "").trim();
     const accountType = String(data.accountType || getProfile().accountType || "private").toLowerCase();
     const isCompany = isCompanyAccount(accountType);
     const deviceIdentity = identityForAccountKind(identityFromFormData(data), { company: isCompany });

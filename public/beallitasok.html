@@ -57,10 +57,11 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/css/style.css?v=noScroll1" />
-    <link rel="stylesheet" href="/css/site-app.css?v=coPhone1" />
+    <link rel="stylesheet" href="/css/site-app.css?v=coNav1" />
         <link rel="stylesheet" href="/css/site-desk-header.css?v=navOneRow1" />
 <link rel="stylesheet" href="/css/mm-nav-c.css?v=mmHeadYel1" />
       <link rel="stylesheet" href="/css/hub.css?v=navRow1" />
+    <link rel="stylesheet" href="/css/partner-profile.css?v=coNav1" />
     <link rel="stylesheet" href="/css/messages-enhancements.css?v=msgImprove1" />
 </head>
   <body class="site-app settings-page mm-page" data-site-page="beallitasok" data-auth-init="manual">
@@ -118,13 +119,13 @@
         </div>
         <nav class="mm-nav">
           <div class="mm-nav-group" data-mm-company-nav-wrap hidden>
-            <button type="button" class="mm-nav-link mm-nav-toggle" data-mm-subtoggle data-mm-nav="cegadatok" aria-expanded="false">
+            <button type="button" class="mm-nav-link mm-nav-toggle" data-mm-subtoggle aria-expanded="false">
               <span class="mm-nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4 20V10l8-6 8 6v10H4Z" stroke="currentColor" stroke-width="1.7"/></svg></span>
               <span class="mm-nav-text">Cégadatok</span>
               <svg class="mm-nav-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </button>
             <div class="mm-nav-sub" data-mm-sub hidden>
-              <a class="mm-nav-sublink" href="/partner-profil-kezelese.html">
+              <a class="mm-nav-sublink" href="?szekcio=partner-profil" data-mm-nav="partner-profil">
                 <span class="mm-nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M8 20v-7h8v7M4 10l8-6 8 6" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg></span>
                 <span class="mm-nav-text">Partneri profil</span>
               </a>
@@ -214,149 +215,10 @@
       </aside>
 
       <div class="mm-main">
-        <section class="mm-panel" data-mm-panel="cegadatok" hidden>
-          <header class="mm-panel-head">
-            <h2 class="mm-panel-title">Cégadatok</h2>
-            <p class="mm-panel-lead">A céges fiókhoz tartozó adatok. A fióktípus regisztrációkor rögzül.</p>
-          </header>
-          <form id="mm-company-form" class="settings-form" action="#" method="post" onsubmit="return false;">
-            <label class="login-field">
-              <span class="login-label">Cégnév/név</span>
-              <input type="text" name="company" autocomplete="organization" />
-            </label>
-            <div class="login-field settings-multi-dropdown" data-company-activities>
-              <span class="login-label">Cég tevékenysége</span>
-              <input type="hidden" name="companyActivities" value="" />
-              <div class="settings-multi-dropdown__wrap">
-                <button
-                  type="button"
-                  class="settings-multi-dropdown__trigger"
-                  data-company-activities-trigger
-                  aria-haspopup="listbox"
-                  aria-expanded="false"
-                >
-                  <span data-company-activities-summary>Válassz tevékenységet…</span>
-                  <span class="settings-multi-dropdown__chev" aria-hidden="true">▾</span>
-                </button>
-                <div class="settings-multi-dropdown__panel" data-company-activities-panel hidden role="listbox">
-                  <label class="settings-multi-dropdown__option">
-                    <input type="checkbox" value="auto" data-company-activity-cb />
-                    <span>Autó</span>
-                  </label>
-                  <label class="settings-multi-dropdown__option">
-                    <input type="checkbox" value="teherauto" data-company-activity-cb />
-                    <span>Teherautó</span>
-                  </label>
-                  <label class="settings-multi-dropdown__option">
-                    <input type="checkbox" value="ingatlan" data-company-activity-cb />
-                    <span>Ingatlan</span>
-                  </label>
-                </div>
-              </div>
-            </div>
-            <label class="login-field">
-              <span class="login-label">Cég adószáma</span>
-              <input type="text" name="companyTaxId" autocomplete="off" inputmode="numeric" />
-            </label>
-            <label class="login-field">
-              <span class="login-label">Utca, házszám</span>
-              <input type="text" name="companyStreet" autocomplete="street-address" />
-            </label>
-            <div class="settings-postal-row">
-              <label class="login-field settings-postal-field">
-                <span class="login-label">Irányítószám</span>
-                <input type="text" name="companyPostalCode" inputmode="numeric" maxlength="4" autocomplete="postal-code" data-postal-lookup data-company-postal />
-              </label>
-              <label class="login-field settings-city-field">
-                <span class="login-label">Település <span class="settings-city-busy" data-city-busy hidden>…</span></span>
-                <input type="text" name="companyCity" autocomplete="address-level2" placeholder="automatikus" data-company-city />
-              </label>
-            </div>
-            <label class="login-field">
-              <span class="login-label">Ország</span>
-              <input type="text" name="companyCountry" value="Magyarország" autocomplete="country-name" />
-            </label>
-            <div class="login-field">
-              <span class="login-label">Telefonszám</span>
-              <div class="settings-phone-row" data-settings-phone data-phone-name="companyPhone">
-                <select class="phone-country" name="companyPhoneCountry" aria-label="Országkód"></select>
-                <span aria-hidden="true">-</span>
-                <input
-                  type="tel"
-                  name="companyPhoneArea"
-                  class="phone-part"
-                  inputmode="numeric"
-                  maxlength="4"
-                  autocomplete="tel-national"
-                  placeholder="30"
-                  aria-label="Körzetszám"
-                />
-                <span aria-hidden="true">/</span>
-                <input
-                  type="tel"
-                  name="companyPhoneLocal"
-                  class="phone-part wide"
-                  inputmode="numeric"
-                  maxlength="12"
-                  autocomplete="tel-national"
-                  placeholder="1234567"
-                  aria-label="Telefonszám"
-                />
-                <input type="hidden" name="companyPhone" value="" />
-              </div>
-            </div>
-            <div class="login-field">
-              <span class="login-label">Telefonszám</span>
-              <div class="settings-phone-row" data-settings-phone data-phone-name="companyPhone2">
-                <select class="phone-country" name="companyPhone2Country" aria-label="Országkód"></select>
-                <span aria-hidden="true">-</span>
-                <input
-                  type="tel"
-                  name="companyPhone2Area"
-                  class="phone-part"
-                  inputmode="numeric"
-                  maxlength="4"
-                  autocomplete="tel-national"
-                  placeholder="30"
-                  aria-label="Körzetszám"
-                />
-                <span aria-hidden="true">/</span>
-                <input
-                  type="tel"
-                  name="companyPhone2Local"
-                  class="phone-part wide"
-                  inputmode="numeric"
-                  maxlength="12"
-                  autocomplete="tel-national"
-                  placeholder="1234567"
-                  aria-label="Telefonszám"
-                />
-                <input type="hidden" name="companyPhone2" value="" />
-              </div>
-            </div>
-            <div class="mm-grid-2">
-              <label class="login-field">
-                <span class="login-label">E-mailcím</span>
-                <input type="email" name="companyEmail" autocomplete="email" />
-              </label>
-              <label class="login-field">
-                <span class="login-label">E-mailcím</span>
-                <input type="email" name="companyEmail2" autocomplete="email" />
-              </label>
-            </div>
-            <div class="mm-grid-2">
-              <label class="login-field">
-                <span class="login-label">Értékesítő neve</span>
-                <input type="text" name="salespersonName" autocomplete="name" />
-              </label>
-              <label class="login-field">
-                <span class="login-label">Értékesítő neve</span>
-                <input type="text" name="salespersonName2" autocomplete="name" />
-              </label>
-            </div>
-            <p id="settings-company-flash" class="settings-flash" role="status" hidden></p>
-            <button type="submit" class="settings-btn-primary" id="mm-company-save">Cégadatok mentése</button>
-          </form>
+        <section class="mm-panel mm-panel--partner" data-mm-panel="partner-profil" hidden>
+          <div id="partner-root" class="partner-main partner-main--in-mm" aria-live="polite">
+            <div class="partner-loading">Partneri profil betöltése…</div>
+          </div>
         </section>
 
         
@@ -888,7 +750,7 @@
 
     <script src="/js/site-avatar-menu.js?v=settingsHome1" type="module"></script>
     <script src="/js/ha-import-app.js?v=haBmDrag1" type="module"></script>
-    <script src="/js/beallitasok-app.js?v=coPhone1" type="module"></script>
+    <script src="/js/beallitasok-app.js?v=coNav1" type="module"></script>
     <script>
       
       setTimeout(function () {

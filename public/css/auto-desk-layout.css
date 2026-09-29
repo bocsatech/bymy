@@ -2174,3 +2174,15 @@ html[data-theme="dark"] body.site-app > .auto-price-suggest .auto-price-suggest_
     color: var(--ad-muted);
   }
 }
+
+/* Görgetés: hirdetés-csempék elrejtése (desk + mobil) */
+body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).is-listings-scrolling
+  #home-grid-track
+  .home-grid-card,
+body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"])
+  #home-grid-track.is-listings-scrolling
+  .home-grid-card {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}

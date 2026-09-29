@@ -959,22 +959,33 @@ function bindListingsInfiniteScroll() {
 function bindListingsScrollHide() {
   if (bindListingsScrollHide.bound) return;
   if (PAGE !== "auto" && PAGE !== "teherauto") return;
-  if (typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-    return;
-  }
   bindListingsScrollHide.bound = true;
 
   let stopTimer = 0;
+  const setScrolling = (on) => {
+    document.body.classList.toggle("is-listings-scrolling", on);
+    document.getElementById("home-grid-track")?.classList.toggle("is-listings-scrolling", on);
+  };
   const onScroll = () => {
-    document.body.classList.add("is-listings-scrolling");
+    setScrolling(true);
     window.clearTimeout(stopTimer);
-    stopTimer = window.setTimeout(() => {
-      document.body.classList.remove("is-listings-scrolling");
-    }, 140);
+    stopTimer = window.setTimeout(() => setScrolling(false), 160);
   };
 
-  document.querySelector(".home-listings-panel")?.addEventListener("scroll", onScroll, { passive: true });
-  window.addEventListener("scroll", onScroll, { passive: true });
+  const panel = document.querySelector(".home-listings-panel");
+  panel?.addEventListener("scroll", onScroll, { passive: true });
+  window.addEventListener("scroll", onScroll, { passive: true, capture: true });
+  document.addEventListener(
+    "scroll",
+    (event) => {
+      const t = event.target;
+      if (t === document || t === document.documentElement || t === document.body) return;
+      if (t instanceof Element && (t === panel || t.closest?.(".home-listings-panel") || t.id === "home-grid-track")) {
+        onScroll();
+      }
+    },
+    { passive: true, capture: true }
+  );
 }
 
 async function applyNearbyFromUrl() {
@@ -1140,6 +1151,7 @@ if (PAGE !== "ingatlan") {
     getForm: () => filterForm,
     initialCategory,
   });
+  bindListingsScrollHide();
 }
 
 if (PAGE === "ingatlan") {

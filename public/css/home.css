@@ -1811,9 +1811,13 @@ body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-n
 @media (prefers-reduced-motion: no-preference) {
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).is-listings-scrolling
     #home-grid-track
+    .home-grid-card,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"])
+    #home-grid-track.is-listings-scrolling
     .home-grid-card {
-    opacity: 0;
-    pointer-events: none;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
   }
 }
 

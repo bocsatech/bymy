@@ -25,7 +25,15 @@ body.site-app .mm-side-head .mm-side-title {
 }
 
 body.site-app .mm-nav {
+  display: flex;
+  flex-direction: column;
   gap: 0.2rem;
+}
+
+html[data-mm-account-kind="company"] body.site-app .mm-nav > .mm-nav-group[data-mm-company-nav-wrap],
+html[data-mm-account-kind="company"] body.site-app .mm-nav > .mm-nav-group[data-mm-company-nav-wrap][hidden] {
+  display: grid !important;
+  order: -100;
 }
 
 body.site-app .mm-nav-link {

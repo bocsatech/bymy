@@ -92,10 +92,6 @@ body.site-app .site-message-badge[hidden] {
   display: none !important;
 }
 
-html[data-mm-account-kind="company"] body.settings-page [data-mm-company-nav-wrap] {
-  display: block !important;
-}
-
 /* Céges fióknál is legyen Beállítások / Személyes adatok az Üzenetek után (ne csak a Cégadatok alatt). */
 html[data-mm-account-kind="company"] body.settings-page [data-mm-settings-nav] {
   display: block !important;
@@ -3987,7 +3983,8 @@ body.site-app .mm-side-title {
 }
 
 body.site-app .mm-nav {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 0.2rem;
 }
 
@@ -4042,6 +4039,13 @@ body.site-app .mm-nav-group {
 
 body.site-app .mm-nav-group[hidden] {
   display: none !important;
+}
+
+/* Cégadatok: céges fióknál mindig első menü (minden méretben), [hidden] ellenére is. */
+html[data-mm-account-kind="company"] body.site-app .mm-nav > .mm-nav-group[data-mm-company-nav-wrap],
+html[data-mm-account-kind="company"] body.site-app .mm-nav > .mm-nav-group[data-mm-company-nav-wrap][hidden] {
+  display: grid !important;
+  order: -100;
 }
 
 body.site-app .mm-nav-toggle[aria-expanded="true"] {

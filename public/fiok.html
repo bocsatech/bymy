@@ -14,6 +14,11 @@
           var raw = sessionStorage.getItem("bymy-auth-user");
           var user = raw ? JSON.parse(raw) : null;
           var loggedIn = !!(user && user.email);
+          var accountType = String((user && user.profile && user.profile.accountType) || "private");
+          document.documentElement.setAttribute(
+            "data-mm-account-kind",
+            accountType === "business" || accountType === "dealer" ? "company" : "private"
+          );
           document.documentElement.setAttribute("data-auth", loggedIn ? "member" : "guest");
           if (!loggedIn) {
             window.location.replace("/belepes.html?next=" + encodeURIComponent("/fiok.html"));
@@ -29,10 +34,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="/css/site-app.css?v=mmHeadYel1" />
+    <link rel="stylesheet" href="/css/site-app.css?v=coFirst1" />
     <link rel="stylesheet" href="/css/listing-photo-cover.css?v=tileAllPages1" />
-    <link rel="stylesheet" href="/css/mm-nav-c.css?v=mmHeadYel1" />
-    <link rel="stylesheet" href="/css/fiok-menu.css?v=coNav2" />
+    <link rel="stylesheet" href="/css/mm-nav-c.css?v=coFirst1" />
+    <link rel="stylesheet" href="/css/fiok-menu.css?v=coFirst1" />
     <link rel="stylesheet" href="/css/hub-mobile-app.css?v=navRow1" />
     <link rel="stylesheet" href="/css/bymy-logo-size.css?v=navOneRow1" />
       <link rel="stylesheet" href="/css/site-desk-header.css?v=navOneRow1" />
@@ -57,13 +62,9 @@
         </div>
         <nav class="mm-nav">
           <div class="mm-nav-group" data-mm-company-nav-wrap hidden>
-            <a class="mm-nav-link" href="/beallitasok.html">
+            <a class="mm-nav-link" href="/beallitasok.html?szekcio=partner-profil" data-mm-nav="partner-profil">
               <span class="mm-nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4 20V10l8-6 8 6v10H4Z" stroke="currentColor" stroke-width="1.7"/></svg></span>
               <span class="mm-nav-text">Cégadatok</span>
-            </a>
-            <a class="mm-nav-link" href="/beallitasok.html?szekcio=partner-profil">
-              <span class="mm-nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M8 20v-7h8v7M4 10l8-6 8 6" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg></span>
-              <span class="mm-nav-text">Partneri profil</span>
             </a>
           </div>
           <a class="mm-nav-link" href="/beallitasok.html?szekcio=import" data-mm-nav="import">
@@ -153,6 +154,7 @@
 
         const type = String(profile.accountType || "").trim();
         const isCompany = type === "business" || type === "dealer";
+        document.documentElement.setAttribute("data-mm-account-kind", isCompany ? "company" : "private");
         const typeEl = document.querySelector("[data-mm-account-type]");
         if (typeEl) {
           if (isCompany) {
@@ -165,6 +167,10 @@
         }
         document.querySelectorAll("[data-mm-company-nav-wrap]").forEach((el) => {
           el.hidden = !isCompany;
+          if (isCompany) {
+            const nav = el.closest(".mm-nav");
+            if (nav && nav.firstElementChild !== el) nav.prepend(el);
+          }
         });
       }
 

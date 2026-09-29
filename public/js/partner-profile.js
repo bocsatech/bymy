@@ -191,8 +191,16 @@ export function syncManageSidebar(accountType) {
   }
   const companyWrap = document.querySelector("[data-mm-company-nav-wrap]");
   const settingsNav = document.querySelector("[data-mm-settings-nav]");
-  if (companyWrap) companyWrap.hidden = !company;
-  if (settingsNav) settingsNav.hidden = company;
+  if (companyWrap) {
+    companyWrap.hidden = !company;
+    if (company) {
+      document.querySelectorAll(".mm-nav").forEach((nav) => {
+        const wrap = nav.querySelector("[data-mm-company-nav-wrap]");
+        if (wrap && nav.firstElementChild !== wrap) nav.prepend(wrap);
+      });
+    }
+  }
+  if (settingsNav) settingsNav.hidden = false;
 
   const hello = document.querySelector("[data-mm-hello]");
   const user = getAuthUser();

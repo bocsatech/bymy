@@ -8,7 +8,7 @@ import {
   listingCityName,
   resolveCityCoords,
   resolveListingCoords,
-} from "./listing-radius.js?v=mapCity1";
+} from "./listing-radius.js?v=mapCity2";
 import {
   listingDetailHref,
   rememberListingOpen,

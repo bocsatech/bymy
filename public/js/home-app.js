@@ -1,5 +1,5 @@
 import { fetchListings, fetchListingsPage, fetchRelatedListings } from "./db-client.js?v=ownerBoost6";
-import { createHomeGridCard, initHomeGridCardPhotos } from "./home-grid-card.js?v=cardCity2";
+import { createHomeGridCard, initHomeGridCardPhotos } from "./home-grid-card.js?v=cardCity3";
 import { promoKiemeltActive, promoTopAjanlatActive } from "./listing-promo.js?v=promo1";
 import {
   emptyFilters,

@@ -8,7 +8,7 @@ import {
   buildCityIndex,
   filterListingsInRadius,
   filterListingsRecentInRadius,
-} from "./listing-radius.js?v=mapPostal3";
+} from "./listing-radius.js?v=mapCity2";
 
 const MODE_ALL = "all";
 const MODE_RECENT24H = "recent24h";

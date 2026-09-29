@@ -33,9 +33,28 @@ export function buildCityIndex(cities) {
 export function listingCityName(item) {
   const filter = item.preview?.filter ?? {};
   const form = item.form ?? {};
-  const fromFilter = filter.telepules || form.telepules || "";
-  const fromLocation = item.preview?.location || "";
-  return String(fromFilter || fromLocation.split(",")[0] || "").trim();
+  const candidates = [
+    filter.telepules,
+    form.telepules,
+    String(item.preview?.location || "").split(",")[0],
+  ];
+  for (const raw of candidates) {
+    const name = String(raw ?? "").trim();
+    if (!name) continue;
+    // Megye név (pl. Fejér) nem település — térképen / sugaras szűrőben ne használjuk.
+    const key = normalizePlace(name).replace(/\s+/g, "");
+    if (
+      key &&
+      key !== "budapest" &&
+      /^(pest|fejer|gyormosonsopron|komaromesztergom|veszprem|baranya|bacskiskun|bekes|borsodabaujzemplen|csongradcsanad|hajdubihar|heves|jasznagykunszolnok|nograd|somogy|szabolcsszatmarbereg|tolna|vas|zala)$/.test(
+        key
+      )
+    ) {
+      continue;
+    }
+    return name;
+  }
+  return "";
 }
 
 export function listingPostalCode(item) {

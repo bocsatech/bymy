@@ -14,6 +14,69 @@ import {
 import { listingFeaturedUnderPhotoHtml } from "./listing-featured-decor.js?v=featured4";
 import { listingShowsKiemeltDecor, promoTopAjanlatActive } from "./listing-promo.js?v=promo1";
 
+const HU_COUNTY_KEYS = new Set(
+  [
+    "budapest",
+    "pest",
+    "fejer",
+    "gyormosonsopron",
+    "komaromesztergom",
+    "veszprem",
+    "baranya",
+    "bacskiskun",
+    "bekes",
+    "borsodabaujzemplen",
+    "csongradcsanad",
+    "hajdubihar",
+    "heves",
+    "jasznagykunszolnok",
+    "nograd",
+    "somogy",
+    "szabolcsszatmarbereg",
+    "tolna",
+    "vas",
+    "zala",
+  ]
+);
+
+function countyKey(value) {
+  return String(value ?? "")
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/\p{M}/gu, "")
+    .replace(/[^a-z0-9]+/g, "");
+}
+
+function isCountyLabel(value) {
+  const key = countyKey(value);
+  if (!key || key === "budapest") return false;
+  return HU_COUNTY_KEYS.has(key);
+}
+
+/** Kártyán csak település — megyenév / üres soha. */
+function listingCardCity(item) {
+  const preview = item?.preview || {};
+  const form = item?.form || {};
+  const filter = preview.filter || {};
+  const candidates = [
+    filter.telepules,
+    form.telepules,
+    preview.telepules,
+    preview.city,
+  ];
+  for (const raw of candidates) {
+    const v = String(raw ?? "").trim();
+    if (v && !isCountyLabel(v)) return v;
+  }
+  const loc = String(preview.location || "").trim();
+  if (loc) {
+    const first = loc.split(",")[0].trim();
+    if (first && !isCountyLabel(first)) return first;
+  }
+  return "";
+}
+
 function upgradeHaThumbClient(url) {
   let s = String(url || "").trim();
   if (!s) return "";
@@ -124,14 +187,7 @@ export function createHomeGridCard(item, { featured = false, topOffer = false, c
   const km = String(preview.km || "").trim();
   const power = formatPower(preview, form);
   const subtitle = cardSubtitle(preview, form);
-  const city = String(
-    preview.filter?.telepules ||
-      form.telepules ||
-      preview.telepules ||
-      preview.city ||
-      String(preview.location || "").split(",")[0] ||
-      ""
-  ).trim();
+  const city = listingCardCity(item);
   const email = getAuthUser()?.email;
   const favOn = Boolean(
     email && getParkplatz(email).some((row) => String(row.id) === String(item.id))

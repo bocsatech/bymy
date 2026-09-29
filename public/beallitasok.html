@@ -488,11 +488,11 @@
           <form id="mm-profile-form" class="settings-form" action="#" method="post" onsubmit="return false;">
             <div class="mm-grid-2">
               <label class="login-field">
-                <span class="login-label">Vezetéknév</span>
+                <span class="login-label">Vezetéknév *</span>
                 <input type="text" name="lastName" required autocomplete="family-name" />
               </label>
               <label class="login-field">
-                <span class="login-label">Keresztnév</span>
+                <span class="login-label">Keresztnév *</span>
                 <input type="text" name="firstName" required autocomplete="given-name" />
               </label>
             </div>
@@ -505,12 +505,12 @@
             </label>
             <div class="settings-postal-row">
               <label class="login-field settings-postal-field">
-                <span class="login-label">Irányítószám</span>
-                <input type="text" name="postalCode" inputmode="numeric" maxlength="4" autocomplete="postal-code" data-postal-lookup />
+                <span class="login-label">Irányítószám *</span>
+                <input type="text" name="postalCode" inputmode="numeric" maxlength="4" autocomplete="postal-code" data-postal-lookup required />
               </label>
               <label class="login-field settings-city-field">
-                <span class="login-label">Település <span class="settings-city-busy" data-city-busy hidden>…</span></span>
-                <input type="text" name="city" autocomplete="address-level2" placeholder="automatikus" />
+                <span class="login-label">Település * <span class="settings-city-busy" data-city-busy hidden>…</span></span>
+                <input type="text" name="city" autocomplete="address-level2" placeholder="automatikus" required />
               </label>
             </div>
             <label class="login-field">
@@ -518,7 +518,7 @@
               <input type="text" name="country" value="Magyarország" autocomplete="country-name" />
             </label>
             <div class="login-field">
-              <span class="login-label">Telefon</span>
+              <span class="login-label">Telefon *</span>
               <div class="settings-phone-row" data-settings-phone>
                 <select class="phone-country" name="phoneCountry" aria-label="Országkód"></select>
                 <span aria-hidden="true">-</span>
@@ -750,7 +750,7 @@
 
     <script src="/js/site-avatar-menu.js?v=settingsHome1" type="module"></script>
     <script src="/js/ha-import-app.js?v=haBmDrag1" type="module"></script>
-    <script src="/js/beallitasok-app.js?v=coBox3" type="module"></script>
+    <script src="/js/beallitasok-app.js?v=privReq1" type="module"></script>
     <script>
       
       setTimeout(function () {

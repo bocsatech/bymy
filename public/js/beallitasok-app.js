@@ -10,7 +10,9 @@ import {
   deleteAccount,
   requireAuthForPage,
   initSiteAuth,
-} from "./site-auth.js?v=privateStreet1";
+  isPrivateAccount,
+  isPrivateProfileComplete,
+} from "./site-auth.js?v=privReq1";
 import { wirePostalCityAutofill } from "./postal-city-autofill.js?v=postalFill1";
 import {
   getParkplatz,
@@ -1392,6 +1394,13 @@ async function hydrateDeviceContractFields(form, profile, user) {
     streetInput.value = "";
   }
 
+  // Privát: név + irsz + település kötelező. Cégnél a személyes blokk mezői nem kötelezők.
+  for (const name of ["lastName", "firstName", "postalCode", "city"]) {
+    const el = form.elements.namedItem(name);
+    if (!(el instanceof HTMLInputElement)) continue;
+    el.required = !isCompany;
+  }
+
   const identity = native ? await getDeviceIdentity(user?.email || "") : null;
   const map = {
     local_fullName: identity?.fullName,
@@ -1632,6 +1641,17 @@ export async function initSettingsPage() {
   syncSidebarAccountType((loadedProfile || getProfile())?.accountType);
   const hello = document.querySelector("[data-mm-hello]");
   if (hello) hello.textContent = getDisplayName() || user.email.split("@")[0];
+
+  const profileNow = loadedProfile || getProfile();
+  if (isPrivateAccount(profileNow) && !isPrivateProfileComplete(profileNow)) {
+    const url = new URL(window.location.href);
+    if (url.searchParams.get("szekcio") !== "szemelyes") {
+      url.searchParams.set("szekcio", "szemelyes");
+      history.replaceState(null, "", url);
+    }
+    const flash = document.getElementById("settings-profile-flash");
+    showFlash(flash, "Töltsd ki a kötelező adatokat: név, irányítószám, település, telefon.", false);
+  }
 
   const accHash = settingsAccordionHash();
   if (accHash) {
@@ -1876,6 +1896,24 @@ function bindProfileFormEarly() {
     data.company = String(data.company || getProfile().company || "").trim();
     const accountType = String(data.accountType || getProfile().accountType || "private").toLowerCase();
     const isCompany = isCompanyAccount(accountType);
+    if (!isCompany) {
+      const postal = String(data.postalCode || "").replace(/\D/g, "").slice(0, 4);
+      const city = String(data.city || "").trim();
+      const phone = String(data.phone || "").trim();
+      if (postal.length !== 4) {
+        showFlash(flash, "Az irányítószám kötelező (4 számjegy).", false);
+        return;
+      }
+      if (!city) {
+        showFlash(flash, "A település kötelező.", false);
+        return;
+      }
+      if (!phone) {
+        showFlash(flash, "A telefonszám kötelező.", false);
+        return;
+      }
+      data.postalCode = postal;
+    }
     const deviceIdentity = identityForAccountKind(identityFromFormData(data), { company: isCompany });
     Object.assign(data, stripDeviceIdentityFormFields(data));
     if (!isCompany) {

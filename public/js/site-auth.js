@@ -459,7 +459,7 @@ export function getProfile() {
 
 function profileSaveLooksOk(profile) {
   if (!profile) return false;
-  if (profile.accountType === "business") {
+  if (profile.accountType === "business" || profile.accountType === "dealer") {
     return Boolean(
       String(profile.company || "").trim() ||
         String(profile.companyTaxId || "").trim() ||
@@ -468,7 +468,35 @@ function profileSaveLooksOk(profile) {
         String(profile.firstName || "").trim()
     );
   }
-  return Boolean(String(profile.firstName || "").trim());
+  return isPrivateProfileComplete(profile);
+}
+
+/** Privát fiók: személyes adatok (név, irsz, település, telefon) kitöltve. */
+export function isPrivateAccount(profile = getProfile()) {
+  const type = String(profile?.accountType || "private").toLowerCase();
+  return type !== "business" && type !== "dealer";
+}
+
+export function isPrivateProfileComplete(profile = getProfile()) {
+  if (!isPrivateAccount(profile)) return true;
+  const first = String(profile?.firstName || "").trim();
+  const last = String(profile?.lastName || "").trim();
+  const postal = String(profile?.postalCode || "").replace(/\D/g, "").slice(0, 4);
+  const city = String(profile?.city || "").trim();
+  const phone = String(profile?.phone || "").trim();
+  return Boolean(first && last && postal.length === 4 && city && phone);
+}
+
+export function privateProfileSetupPath() {
+  return "/beallitasok.html?szekcio=szemelyes";
+}
+
+/** Belépés / regisztráció után: privát hiányos profil → személyes adatok. */
+export function afterAuthLandingPath(profile, preferredNext = "/") {
+  if (isPrivateAccount(profile) && !isPrivateProfileComplete(profile)) {
+    return privateProfileSetupPath();
+  }
+  return safeInternalPath(preferredNext, "/");
 }
 
 export async function saveProfile(profile) {
@@ -816,6 +844,11 @@ export function initRegisterPage() {
     next: "/",
     requireAccountType: true,
     getAccountType: selectedAccountType,
+    getNext: () => {
+      const type = selectedAccountType();
+      if (type === "business" || type === "dealer") return "/beallitasok.html?szekcio=partner-profil";
+      return privateProfileSetupPath();
+    },
     onMissingAccountType: () => {
       if (errorEl) {
         errorEl.hidden = false;
@@ -868,7 +901,11 @@ export function initRegisterPage() {
           "Regisztráció sikeres — a fiók aktiválva, be is léptél.\n\n" +
             "Aktiváló email most nincs beállítva a szerveren, ezért mail nélkül is kész a fiók."
         );
-        window.location.href = "/";
+        const type = String(accountType || getProfile()?.accountType || "private").toLowerCase();
+        window.location.href =
+          type === "business" || type === "dealer"
+            ? "/beallitasok.html?szekcio=partner-profil"
+            : privateProfileSetupPath();
         return;
       }
 
@@ -877,7 +914,11 @@ export function initRegisterPage() {
         ? `\n\nHa a leveleződ nem tölti be a képeket, nyisd meg:\n${result.activationLink}`
         : "\n\nNyisd meg az aktiváló emailt (spam mappa is) — a megnyitás aktiválja a fiókot.";
       window.alert(`${msg}${extra}`);
-      window.location.href = "/belepes.html";
+      const loginNext =
+        String(accountType || "").toLowerCase() === "business" || String(accountType || "").toLowerCase() === "dealer"
+          ? "/beallitasok.html?szekcio=partner-profil"
+          : privateProfileSetupPath();
+      window.location.href = `/belepes.html?next=${encodeURIComponent(loginNext)}`;
     } catch (error) {
       turnstile.reset();
       if (errorEl) {
@@ -924,7 +965,7 @@ export function initLoginPage() {
   }
 
   refreshAuthSession().then((user) => {
-    if (user?.email) window.location.replace(next);
+    if (user?.email) window.location.replace(afterAuthLandingPath(getProfile(), next));
   });
 
   initOAuthButtons({ next });
@@ -943,7 +984,7 @@ export function initLoginPage() {
         ? await turnstile.getToken({ waitMs: 10000 })
         : "";
       await login(email, data.get("password"), turnstileToken);
-      window.location.href = next;
+      window.location.href = afterAuthLandingPath(getProfile(), next);
     } catch (error) {
       turnstile.reset();
       errorEl.hidden = false;
@@ -982,6 +1023,7 @@ export async function initOAuthButtons({
   next = "/hirdetesfeladas.html",
   requireAccountType = false,
   getAccountType = null,
+  getNext = null,
   onMissingAccountType = null,
 } = {}) {
   const root = document.querySelector("[data-oauth-buttons]");
@@ -1026,7 +1068,9 @@ export async function initOAuthButtons({
         if (typeof onMissingAccountType === "function") onMissingAccountType();
         return;
       }
-      const safeNext = safeInternalPath(next, "/hirdetesfeladas.html");
+      const preferred =
+        typeof getNext === "function" ? String(getNext() || "").trim() || next : next;
+      const safeNext = safeInternalPath(preferred, "/hirdetesfeladas.html");
       const params = new URLSearchParams({ next: safeNext });
       if (accountType === "private" || accountType === "business") {
         params.set("accountType", accountType);
@@ -1162,8 +1206,8 @@ export function initActivatePage() {
     statusEl.textContent = "Aktiválás…";
     try {
       await activateAccount(tok);
-      statusEl.textContent = "Fiók aktiválva. Átirányítás a belépéshez…";
-      window.location.href = "/belepes.html?activated=1";
+      statusEl.textContent = "Fiók aktiválva. Átirányítás…";
+      window.location.href = afterAuthLandingPath(getProfile(), privateProfileSetupPath());
     } catch (error) {
       statusEl.textContent = error.message ?? "Aktiválás sikertelen.";
     }

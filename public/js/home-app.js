@@ -955,10 +955,11 @@ function bindListingsInfiniteScroll() {
   window.addEventListener("scroll", onScroll, { passive: true });
 }
 
-/** Görgetés közben a kategória-csempék (Új/Benzin/…) elrejtése — a hirdetések maradnak. */
+/** Görgetés közben a kategória-csempék elrejtése — a hirdetések maradnak. */
 function bindListingsScrollHide() {
   if (bindListingsScrollHide.bound) return;
-  if (PAGE !== "auto" && PAGE !== "teherauto") return;
+  if (PAGE !== "teherauto") return;
+  if (!document.getElementById("home-category-bar")) return;
   bindListingsScrollHide.bound = true;
 
   let stopTimer = 0;
@@ -1154,13 +1155,10 @@ if ("scrollRestoration" in history) {
 }
 window.scrollTo(0, 0);
 
-if (PAGE !== "ingatlan") {
+const initialCategory = PAGE === "teherauto" ? initialCategoryFromUrl() : null;
+
+if (PAGE === "teherauto") {
   renderHomeCategoryBar(document.getElementById("home-category-bar"));
-}
-
-const initialCategory = PAGE === "ingatlan" ? null : initialCategoryFromUrl();
-
-if (PAGE !== "ingatlan") {
   categoryUi = initHomeCategoryBar({
     onChange: (category) => {
       categoryFilter = category;

@@ -2175,11 +2175,9 @@ html[data-theme="dark"] body.site-app > .auto-price-suggest .auto-price-suggest_
   }
 }
 
-/* Görgetés: csak a kategória-csempék (Új/Benzin/…) — hirdetések NEM */
-body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).is-cat-scrolling
-  #home-category-bar,
-body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"])
-  #home-category-bar.is-cat-scrolling {
+/* Görgetés: csak a kategória-csempék — hirdetések NEM */
+body.home-page[data-site-page="teherauto"].is-cat-scrolling #home-category-bar,
+body.home-page[data-site-page="teherauto"] #home-category-bar.is-cat-scrolling {
   opacity: 0 !important;
   pointer-events: none !important;
 }

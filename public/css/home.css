@@ -1816,10 +1816,8 @@ body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-n
   transition: box-shadow 0.15s, transform 0.15s, border-color 0.15s;
 }
 
-body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).is-cat-scrolling
-  #home-category-bar,
-body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"])
-  #home-category-bar.is-cat-scrolling {
+body.home-page[data-site-page="teherauto"].is-cat-scrolling #home-category-bar,
+body.home-page[data-site-page="teherauto"] #home-category-bar.is-cat-scrolling {
   opacity: 0 !important;
   pointer-events: none !important;
 }

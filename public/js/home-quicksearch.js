@@ -5,7 +5,7 @@ import {
   mountDetailedSearch,
   readDetailedSearchValues,
   resetDetailedSearch,
-} from "./auto-detailed-search.js?v=fogyNum1";
+} from "./auto-detailed-search.js?v=accTop1";
 import { readWheel } from "./ingatlan-wheels.js?v=mobFix8";
 import { readBrandModelFilterValues, mountAutoBrandModelPicker } from "./auto-brand-model-picker.js?v=searchBack8";
 import { readFuelFilterValues, mountAutoFuelPicker } from "./auto-fuel-picker.js?v=fuelMatch1";
@@ -449,4 +449,4 @@ export function initHomeQuickSearch({ onSearch = () => {}, onFilterPreview, onDe
   };
 }
 
-export { readDetailedSearchValues } from "./auto-detailed-search.js?v=autoDesk16";
+export { readDetailedSearchValues } from "./auto-detailed-search.js?v=accTop1";

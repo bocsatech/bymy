@@ -248,6 +248,15 @@ function bindExclusiveAccordions(host) {
         });
       }
       acc.open = willOpen;
+      if (!willOpen) return;
+      // Lenytáskor a fejléc tetején maradjon a nézet (ne a lista alján).
+      const pinSummaryTop = () => {
+        summary.scrollIntoView({ block: "start", behavior: "auto", inline: "nearest" });
+      };
+      requestAnimationFrame(() => {
+        pinSummaryTop();
+        requestAnimationFrame(pinSummaryTop);
+      });
     });
   });
 }

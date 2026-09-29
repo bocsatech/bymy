@@ -6237,9 +6237,9 @@ body.site-app .ha-imp-btn-copy {
 }
 
 body.site-app .ha-imp-btn-open {
-  border: 1.5px solid #1e4d7b;
-  background: #fff;
-  color: #1e4d7b;
+  border: 1.5px solid #f0c52c;
+  background: #f0c52c;
+  color: #111;
 }
 
 body.site-app .ha-imp-btn-copy {
@@ -6488,9 +6488,9 @@ html[data-theme="dark"] body.site-app .ha-imp-mode.is-active {
 }
 
 html[data-theme="dark"] body.site-app .ha-imp-btn-open {
-  background: #1f2430;
-  border-color: #6ea8d8;
-  color: #d7ebff;
+  background: #f0c52c;
+  border-color: #f0c52c;
+  color: #111;
 }
 
 html[data-theme="dark"] body.site-app .ha-imp-browser {

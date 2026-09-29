@@ -427,6 +427,7 @@ const EMPTY_PROFILE = {
   country: "Magyarország",
   phone: "",
   company: "",
+  companyListingName: "",
   companyTaxId: "",
   companyStreet: "",
   companyPostalCode: "",

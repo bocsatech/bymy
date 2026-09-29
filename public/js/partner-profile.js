@@ -290,8 +290,9 @@ export async function renderPartnerManage(mountRoot) {
       <section class="partner-form-section">
         <div class="partner-form-title"><div><h2>1. Cég azonosító</h2></div></div>
         <div class="partner-form-grid">
-          <label>Cég neve *<input name="displayName" value="${esc(profile.display_name)}" maxlength="100" required /></label>
+          <label>Cég neve *<input name="displayName" value="${esc(profile.display_name || account.company)}" maxlength="100" required /></label>
           <label>Cég adószáma<input name="companyTaxId" value="${esc(account.companyTaxId)}" inputmode="numeric" autocomplete="off" /></label>
+          <label>Hirdetésben megjelenő cégnév<input name="companyListingName" value="${esc(account.companyListingName)}" maxlength="100" placeholder="pl. Fehérvár Ingatlan" autocomplete="organization" /></label>
           <div class="partner-form-wide partner-activities">
             <span class="partner-activities-label">Cég tevékenysége</span>
             <div class="partner-activities-row">${activityChecks}</div>
@@ -446,6 +447,7 @@ export async function renderPartnerManage(mountRoot) {
         await saveProfile({
           ...getProfile(),
           company: partnerPayload.displayName,
+          companyListingName: String(raw.companyListingName || "").trim(),
           companyTaxId: String(raw.companyTaxId || "").trim(),
           companyActivities: activityIds,
           companyStreet,

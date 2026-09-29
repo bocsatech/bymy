@@ -44,7 +44,7 @@ import {
   stripDeviceIdentityFormFields,
 } from "./device-contract-identity.js?v=contractKind1";
 import { fillCountrySelect, PHONE_COUNTRIES } from "./phone-lang-ui.js?v=settingsPhone1";
-import { renderPartnerManage } from "./partner-profile.js?v=coFirst2";
+import { renderPartnerManage } from "./partner-profile.js?v=coOrder1";
 
 const PHOTO_KEY = "bymy-avatar-photos";
 const NOTIFY_KEY = "bymy-notify-prefs";
@@ -370,7 +370,7 @@ function syncSettingsSubnav() {
   });
 
   document.querySelectorAll("[data-mm-company-nav-wrap]").forEach((group) => {
-    if (group.hidden) return;
+    if (document.documentElement.getAttribute("data-mm-account-kind") !== "company") return;
     if (openForCompany) expandSettingsSubnav(group);
     else collapseSettingsSubnav(group);
   });
@@ -1006,28 +1006,18 @@ function accountTypeSidebarLabel(type) {
 
 function syncSidebarAccountType(type) {
   const el = document.querySelector("[data-mm-account-type]");
-  const companyWrap = document.querySelector("[data-mm-company-nav-wrap]");
   const settingsNav = document.querySelector("[data-mm-settings-nav]");
   const fromDb = type === "business" || type === "dealer" ? type : "private";
   const companyType = isCompanyAccount(fromDb);
+  /* Láthatóság / sorrend: HTML + CSS (data-mm-account-kind). Ne hidden/prepend. */
   document.documentElement.setAttribute("data-mm-account-kind", companyType ? "company" : "private");
+  try {
+    localStorage.setItem("bymy-account-kind", companyType ? "company" : "private");
+  } catch {
+  }
   if (el) {
     el.textContent = accountTypeSidebarLabel(fromDb);
     el.hidden = false;
-  }
-  if (companyWrap) {
-    if (companyType) {
-      companyWrap.hidden = false;
-      /* Cégadatok mindig az első menüpont (minden nézetben). */
-      document.querySelectorAll(".mm-nav").forEach((nav) => {
-        const wrap = nav.querySelector("[data-mm-company-nav-wrap]");
-        if (wrap && nav.firstElementChild !== wrap) nav.prepend(wrap);
-      });
-    } else {
-      companyWrap.hidden = true;
-      companyWrap.style.removeProperty("display");
-      companyWrap.style.removeProperty("order");
-    }
   }
   /* Beállítások (Személyes adatok stb.) mindkét fióktípusnál az Üzenetek után marad. */
   if (settingsNav) settingsNav.hidden = false;

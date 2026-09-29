@@ -4041,11 +4041,13 @@ body.site-app .mm-nav-group[hidden] {
   display: none !important;
 }
 
-/* Cégadatok: céges fióknál mindig első menü (minden méretben), [hidden] ellenére is. */
-html[data-mm-account-kind="company"] body.site-app .mm-nav > .mm-nav-group[data-mm-company-nav-wrap],
-html[data-mm-account-kind="company"] body.site-app .mm-nav > .mm-nav-group[data-mm-company-nav-wrap][hidden] {
+/* Cégadatok: DOM-ban első; láthatóság csak account-kind CSS-sel (ne hidden + JS). */
+body.site-app .mm-nav > .mm-nav-group[data-mm-company-nav-wrap] {
+  display: none !important;
+}
+
+html[data-mm-account-kind="company"] body.site-app .mm-nav > .mm-nav-group[data-mm-company-nav-wrap] {
   display: grid !important;
-  order: -100;
 }
 
 body.site-app .mm-nav-toggle[aria-expanded="true"] {

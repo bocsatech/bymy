@@ -184,26 +184,16 @@ async function jsonFetch(url, options = {}) {
 export function syncManageSidebar(accountType) {
   const company = accountType === "business" || accountType === "dealer";
   document.documentElement.setAttribute("data-mm-account-kind", company ? "company" : "private");
+  try {
+    localStorage.setItem("bymy-account-kind", company ? "company" : "private");
+  } catch {
+  }
   const typeEl = document.querySelector("[data-mm-account-type]");
   if (typeEl) {
     typeEl.textContent = company ? "céges fiók" : "magán fiók";
     typeEl.hidden = false;
   }
-  const companyWrap = document.querySelector("[data-mm-company-nav-wrap]");
   const settingsNav = document.querySelector("[data-mm-settings-nav]");
-  if (companyWrap) {
-    if (company) {
-      companyWrap.hidden = false;
-      document.querySelectorAll(".mm-nav").forEach((nav) => {
-        const wrap = nav.querySelector("[data-mm-company-nav-wrap]");
-        if (wrap && nav.firstElementChild !== wrap) nav.prepend(wrap);
-      });
-    } else {
-      companyWrap.hidden = true;
-      companyWrap.style.removeProperty("display");
-      companyWrap.style.removeProperty("order");
-    }
-  }
   if (settingsNav) settingsNav.hidden = false;
 
   const hello = document.querySelector("[data-mm-hello]");

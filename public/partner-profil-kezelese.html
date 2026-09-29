@@ -25,24 +25,25 @@
             } catch (e2) {}
           }
           if (!accountType) accountType = "private";
-          document.documentElement.setAttribute(
-            "data-mm-account-kind",
-            accountType === "business" || accountType === "dealer" ? "company" : "private"
-          );
+          var kind = accountType === "business" || accountType === "dealer" ? "company" : "private";
+          if (kind === "private") {
+            try {
+              if (localStorage.getItem("bymy-account-kind") === "company") kind = "company";
+            } catch (e3) {}
+          }
+          document.documentElement.setAttribute("data-mm-account-kind", kind);
+          try { localStorage.setItem("bymy-account-kind", kind); } catch (e4) {}
         } catch (e) {
           document.documentElement.setAttribute("data-auth", "guest");
+          document.documentElement.setAttribute("data-mm-account-kind", "private");
         }
       })();
     </script>
     <style>
-      html[data-mm-account-kind="company"] body.site-app .mm-nav {
-        display: flex;
-        flex-direction: column;
-      }
-      html[data-mm-account-kind="company"] body.site-app .mm-nav > [data-mm-company-nav-wrap],
-      html[data-mm-account-kind="company"] body.site-app .mm-nav > [data-mm-company-nav-wrap][hidden] {
+      body.site-app .mm-nav { display: flex; flex-direction: column; }
+      body.site-app .mm-nav > [data-mm-company-nav-wrap] { display: none !important; }
+      html[data-mm-account-kind="company"] body.site-app .mm-nav > [data-mm-company-nav-wrap] {
         display: grid !important;
-        order: -100 !important;
       }
     </style>
     <meta charset="utf-8" />
@@ -52,8 +53,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/css/style.css?v=noScroll1" />
-    <link rel="stylesheet" href="/css/site-app.css?v=coFirst2" />
-    <link rel="stylesheet" href="/css/mm-nav-c.css?v=coFirst2" />
+    <link rel="stylesheet" href="/css/site-app.css?v=coOrder1" />
+    <link rel="stylesheet" href="/css/mm-nav-c.css?v=coOrder1" />
     <link rel="stylesheet" href="/css/hub.css?v=navRow1" />
     <link rel="stylesheet" href="/css/partner-profile.css?v=coBox1" />
     <link rel="stylesheet" href="/css/bymy-logo-size.css?v=navOneRow1" />
@@ -109,7 +110,7 @@
           <h1 class="mm-side-title">Üdv, <span data-mm-hello>—</span></h1>
         </div>
         <nav class="mm-nav">
-          <div class="mm-nav-group" data-mm-company-nav-wrap hidden>
+          <div class="mm-nav-group" data-mm-company-nav-wrap>
             <button type="button" class="mm-nav-link mm-nav-toggle is-active" data-mm-subtoggle aria-expanded="true">
               <span class="mm-nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4 20V10l8-6 8 6v10H4Z" stroke="currentColor" stroke-width="1.7"/></svg></span>
               <span class="mm-nav-text">Cégadatok</span>
@@ -122,22 +123,6 @@
               </a>
             </div>
           </div>
-          <script>
-            (function () {
-              var wrap = document.currentScript && document.currentScript.previousElementSibling;
-              if (!wrap || !wrap.hasAttribute("data-mm-company-nav-wrap")) return;
-              if (document.documentElement.getAttribute("data-mm-account-kind") !== "company") return;
-              wrap.hidden = false;
-              wrap.style.display = "grid";
-              wrap.style.order = "-100";
-              var nav = wrap.parentElement;
-              if (nav) {
-                nav.style.display = "flex";
-                nav.style.flexDirection = "column";
-                if (nav.firstElementChild !== wrap) nav.insertBefore(wrap, nav.firstChild);
-              }
-            })();
-          </script>
           <a class="mm-nav-link" href="/beallitasok.html?szekcio=import">
             <span class="mm-nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4 16l4-8h8l4 8H4Z" stroke="currentColor" stroke-width="1.7"/><circle cx="8" cy="17" r="1.5" fill="currentColor"/><circle cx="16" cy="17" r="1.5" fill="currentColor"/></svg></span>
             <span class="mm-nav-text">Autóimport</span>
@@ -215,7 +200,7 @@
       </div>
     </main>
 
-    <script type="module" src="/js/partner-profile.js?v=coFirst2"></script>
+    <script type="module" src="/js/partner-profile.js?v=coOrder1"></script>
     <script src="/js/site-avatar-menu.js?v=settingsHome1" type="module"></script>
     <script src="/js/theme.js?v=willhabenHdr1" type="module"></script>
   </body>

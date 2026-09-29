@@ -955,7 +955,7 @@ function bindListingsInfiniteScroll() {
   window.addEventListener("scroll", onScroll, { passive: true });
 }
 
-/** Görgetés közben a hirdetés-csempék elrejtése — megálláskor visszajönnek. */
+/** Görgetés közben a kategória-csempék (Új/Benzin/…) elrejtése — a hirdetések maradnak. */
 function bindListingsScrollHide() {
   if (bindListingsScrollHide.bound) return;
   if (PAGE !== "auto" && PAGE !== "teherauto") return;
@@ -967,16 +967,16 @@ function bindListingsScrollHide() {
   const applyHide = (on) => {
     if (scrolling === on) return;
     scrolling = on;
-    document.body.classList.toggle("is-listings-scrolling", on);
-    const track = document.getElementById("home-grid-track");
-    track?.classList.toggle("is-listings-scrolling", on);
-    if (!track) return;
+    document.body.classList.toggle("is-cat-scrolling", on);
+    const bar = document.getElementById("home-category-bar");
+    bar?.classList.toggle("is-cat-scrolling", on);
+    if (!bar) return;
     if (on) {
-      track.style.setProperty("opacity", "0", "important");
-      track.style.setProperty("pointer-events", "none", "important");
+      bar.style.setProperty("opacity", "0", "important");
+      bar.style.setProperty("pointer-events", "none", "important");
     } else {
-      track.style.removeProperty("opacity");
-      track.style.removeProperty("pointer-events");
+      bar.style.removeProperty("opacity");
+      bar.style.removeProperty("pointer-events");
     }
   };
 
@@ -987,19 +987,24 @@ function bindListingsScrollHide() {
   };
 
   const panel = document.querySelector(".home-listings-panel");
-  const targets = [panel, window, document].filter(Boolean);
-  for (const t of targets) {
+  for (const t of [panel, window, document].filter(Boolean)) {
     t.addEventListener("scroll", onScrollActivity, { passive: true, capture: true });
   }
-  // Wheel/touch gyakran a scroll esemény előtt jön — azonnal rejtsük.
   panel?.addEventListener("wheel", onScrollActivity, { passive: true });
   panel?.addEventListener("touchmove", onScrollActivity, { passive: true });
+  document.getElementById("home-category-bar")?.addEventListener("wheel", onScrollActivity, { passive: true });
   document.addEventListener(
     "scroll",
     (event) => {
       const t = event.target;
       if (!(t instanceof Element)) return;
-      if (t.classList?.contains("home-listings-panel") || t.id === "home-grid-track" || t.closest?.(".home-listings-panel")) {
+      if (
+        t.classList?.contains("home-listings-panel") ||
+        t.classList?.contains("home-category-track") ||
+        t.id === "home-category-bar" ||
+        t.closest?.(".home-listings-panel") ||
+        t.closest?.(".home-category-bar")
+      ) {
         onScrollActivity();
       }
     },

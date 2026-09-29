@@ -1808,22 +1808,11 @@ body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-n
   transition: box-shadow 0.15s, transform 0.15s, border-color 0.15s;
 }
 
-body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).is-listings-scrolling
-  #home-grid-track,
+body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).is-cat-scrolling
+  #home-category-bar,
 body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"])
-  #home-grid-track.is-listings-scrolling {
+  #home-category-bar.is-cat-scrolling {
   opacity: 0 !important;
-  pointer-events: none !important;
-}
-
-body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).is-listings-scrolling
-  #home-grid-track
-  .home-grid-card,
-body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"])
-  #home-grid-track.is-listings-scrolling
-  .home-grid-card {
-  opacity: 0 !important;
-  visibility: hidden !important;
   pointer-events: none !important;
 }
 

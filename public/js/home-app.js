@@ -1116,7 +1116,7 @@ async function ensureAllListingsLoadedForMap() {
 if (PAGE === "auto" || PAGE === "teherauto") {
   ensureMapModule = () => {
     if (!mapModulePromise) {
-      mapModulePromise = import("./search-results-map.js?v=mapList2")
+      mapModulePromise = import("./search-results-map.js?v=mapList3")
         .then((mod) => {
           updateSearchMapButtonLabels = mod.updateSearchMapButtonLabels;
           closeSearchResultsMapFn = mod.closeSearchResultsMap;
@@ -1151,18 +1151,24 @@ if (PAGE === "auto" || PAGE === "teherauto") {
     btn.addEventListener(
       "click",
       async (event) => {
+        // Modul már felkötötte a buborékoló handlert — ne állítsuk meg.
         if (btn.dataset.searchMapBound === "1") return;
         event.preventDefault();
         event.stopImmediatePropagation();
+        const prevLabel = btn.textContent;
         btn.disabled = true;
+        btn.textContent = "Térkép betöltése…";
         try {
           await ensureMapModule();
-          btn.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
         } catch {
-          setMapButtonLabelsLocal(hasActiveClientFilters());
-        } finally {
+          btn.textContent = prevLabel;
+          setMapButtonLabelsLocal(searchResultsCommitted || hasActiveClientFilters());
           btn.disabled = false;
+          return;
         }
+        // disabled gombra a programozott click elnyelődik — előbb engedélyezzük.
+        btn.disabled = false;
+        btn.click();
       },
       true
     );

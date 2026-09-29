@@ -1219,6 +1219,14 @@ export function initSearchResultsMapButtons({
             }
           }
           items = await resolveMapItems(getItems);
+          if (!items.length) {
+            const vertical = typeof getVertical === "function" ? getVertical() : null;
+            try {
+              items = await fetchAllVerticalListings(vertical);
+            } catch (error) {
+              console.warn("Térkép API lista:", error);
+            }
+          }
           await openSearchResultsMap(items, { mode: "filtered" });
         } else {
           const vertical = typeof getVertical === "function" ? getVertical() : null;

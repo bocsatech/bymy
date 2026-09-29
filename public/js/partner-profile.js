@@ -188,7 +188,7 @@ export async function renderPartnerManage(mountRoot) {
       <section class="partner-form-section">
         <div class="partner-form-title"><div><h2>1. Cég azonosító</h2><p>Ki a cég — név, adószám, tevékenység.</p></div></div>
         <div class="partner-form-grid">
-          <label>Cég / iroda neve *<input name="displayName" value="${esc(profile.display_name)}" maxlength="100" required /></label>
+          <label>Cég neve *<input name="displayName" value="${esc(profile.display_name)}" maxlength="100" required /></label>
           <label>Cég adószáma<input name="companyTaxId" value="${esc(account.companyTaxId)}" inputmode="numeric" autocomplete="off" /></label>
           <div class="partner-form-wide partner-activities">
             <span class="partner-activities-label">Cég tevékenysége</span>

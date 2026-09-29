@@ -72,17 +72,6 @@ function profileInitial(profile) {
   return esc(String(profile.display_name || "P").trim().slice(0, 1).toUpperCase());
 }
 
-function statusBox(profile) {
-  const status = profile?.application_status || "pending";
-  if (status === "approved") {
-    return `<div class="partner-status is-approved"><strong>Jóváhagyott partnerprofil</strong><span>A profilod nyilvános, hirdetéseiden megjelenik az ellenőrzött partnerjelvény.</span></div>`;
-  }
-  if (status === "rejected") {
-    return `<div class="partner-status is-rejected"><strong>A jelentkezés jelenleg nincs jóváhagyva</strong><span>Az adatokat módosíthatod, majd az adminisztrátor ismét ellenőrizheti a profilod.</span></div>`;
-  }
-  return `<div class="partner-status is-pending"><strong>Jóváhagyásra vár</strong><span>A profil mentése után a Bymy adminisztrátora ellenőrzi a jelentkezést. Addig nem jelenik meg a partnerkeresőben.</span></div>`;
-}
-
 async function jsonFetch(url, options = {}) {
   const response = await fetch(url, { credentials: "same-origin", cache: "no-store", ...options });
   const data = await response.json().catch(() => ({}));
@@ -190,10 +179,8 @@ export async function renderPartnerManage(mountRoot) {
       <div>
         <p class="partner-eyebrow">CÉGADATOK · PARTNERI PROFIL</p>
         <h1>Partneri profil</h1>
-        <p>Egy helyen: cégadatok, elérhetőség, publikus profil és szerződéses mezők — duplikáció nélkül.</p>
       </div>
     </header>
-    ${statusBox(profile)}
     <form class="partner-form" id="partner-form">
       ${
         isCompany

@@ -81,8 +81,15 @@ function paintPortal(scrollEl, ring, wheel) {
       const t = Math.min(dist / (ITEM_H * 1.15), 1);
       const v = item.dataset.value ?? "";
       const isSel = v === "" ? selected.size === 0 : selected.has(v);
-      item.style.opacity = String(Math.max(0.38, 1 - t * 0.55));
-      item.style.fontWeight = dist < ITEM_H * 0.42 || isSel ? "650" : "500";
+      if (multiple) {
+        /* Lista + kapcsoló: nincs dobkerék-fade / pipa — fekete szöveg. */
+        item.style.opacity = "1";
+        item.style.fontWeight = isSel ? "700" : "500";
+        item.style.color = "#000";
+      } else {
+        item.style.opacity = String(Math.max(0.38, 1 - t * 0.55));
+        item.style.fontWeight = dist < ITEM_H * 0.42 || isSel ? "650" : "500";
+      }
       item.classList.toggle("is-in-cell", inCell);
       item.classList.toggle("is-selected", isSel);
       item.setAttribute("aria-selected", isSel ? "true" : "false");
@@ -254,7 +261,7 @@ function openMultiSwitchSheet(wheel, trigger, wrap, emptyLabel, opts) {
   root.querySelector(".auto-drum-portal__done")?.addEventListener("click", () => closeAutoDrumSheet(true));
 
   scrollEl.addEventListener("scroll", () => paintPortal(scrollEl, ring, wheel), { passive: true });
-  bindPortalNativeScroll(scrollEl, ring, wheel);
+  /* Multi lista: szabad görgetés, nincs középre snap (az okozta a nagy üres tetejét). */
 
   document.body.appendChild(root);
   document.body.classList.add("auto-drum-portal-open");
@@ -270,12 +277,15 @@ function openMultiSwitchSheet(wheel, trigger, wrap, emptyLabel, opts) {
     (selected.length
       ? [...scrollEl.querySelectorAll(".immo-drum-inline-item")].find((el) => selected.includes(el.dataset.value ?? ""))
       : null) ||
-    scrollEl.querySelector('.immo-drum-inline-item[data-value=""]') ||
     scrollEl.querySelector(".immo-drum-inline-item");
 
   requestAnimationFrame(() => {
     ring.style.setProperty("--immo-drum-ring-w", `${Math.min(340, Math.floor(window.innerWidth * 0.9))}px`);
-    scrollToPortalItem(scrollEl, ring, start);
+    if (start && selected.length) {
+      start.scrollIntoView({ block: "nearest" });
+    } else {
+      scrollEl.scrollTop = 0;
+    }
     paintPortal(scrollEl, ring, wheel);
   });
 }

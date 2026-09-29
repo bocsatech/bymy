@@ -1440,7 +1440,7 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   touch-action: pan-y;
 }
 
-/* Gyártmány: nagyobb dobkerék (~10 sor) + kapcsolók, többválasztás */
+/* Gyártmány: magas lista + kapcsolók (nem középre igazított dobkerék) */
 .auto-drum-portal--multi .auto-drum-portal__stage--multi {
   width: min(22.5rem, 92vw);
 }
@@ -1453,21 +1453,42 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
 }
 
 .auto-drum-portal--multi .auto-drum-portal__scroll {
-  padding: calc(var(--auto-drum-multi-h, 520px) / 2 - var(--auto-drum-item-h, 52px) / 2) 0.55rem;
+  padding: 0.35rem 0.2rem 0.35rem 0.55rem !important;
+  scroll-snap-type: none !important;
 }
 
-.auto-drum-portal--multi .immo-drum-inline-item {
+.auto-drum-portal--multi .immo-drum-inline-item,
+.auto-drum-portal--multi .auto-drum-inline-item--switch {
   height: var(--auto-drum-item-h, 52px);
   font-size: 1.2rem;
-  gap: 0.65rem;
+  gap: 0.5rem;
+  padding: 0 0.35rem 0 0.55rem !important;
+  color: #000 !important;
+  opacity: 1 !important;
+  scroll-snap-align: none;
+}
+
+.auto-drum-portal--multi .immo-drum-inline-text {
+  color: #000 !important;
+  flex: 1 1 auto;
 }
 
 .auto-drum-portal--multi .immo-drum-inline-highlight {
-  height: var(--auto-drum-item-h, 52px);
+  display: none !important;
 }
 
-.auto-drum-portal--multi .immo-drum-inline-item.is-selected::after {
-  content: none;
+.auto-drum-portal--multi .immo-drum-inline-item.is-selected::after,
+.auto-drum-portal--multi .auto-drum-inline-item--switch.is-selected::after {
+  content: none !important;
+  display: none !important;
+  width: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.auto-drum-portal--multi .auto-drum-switch {
+  margin-left: auto;
+  margin-right: 0;
 }
 
 .auto-drum-inline-item--switch .auto-drum-switch {
@@ -1547,6 +1568,11 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   font-size: 1.15rem;
   color: #111;
   line-height: 1;
+}
+
+.auto-drum-portal--multi .immo-drum-inline-item.is-selected::after {
+  content: none !important;
+  display: none !important;
 }
 
 [data-theme="dark"] .auto-drum-portal .immo-drum-inline-item.is-selected::after {

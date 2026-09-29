@@ -1430,6 +1430,11 @@ body[data-site-page="teherauto"] .auto-search-tabs {
   line-height: 1;
 }
 
+.auto-drum-portal--multi .immo-drum-inline-item.is-selected::after {
+  content: none !important;
+  display: none !important;
+}
+
 [data-theme="dark"] .auto-drum-portal .immo-drum-inline-item.is-selected::after {
   color: #f8fafc;
 }

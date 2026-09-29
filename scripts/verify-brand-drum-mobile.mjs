@@ -64,19 +64,31 @@ async function main() {
     const portal = await page.evaluate(() => {
       const root = document.querySelector(".auto-drum-portal--multi");
       const scroll = root?.querySelector(".auto-drum-portal__scroll");
-      const items = scroll?.querySelectorAll(".immo-drum-inline-item") ?? [];
+      const items = [...(scroll?.querySelectorAll(".immo-drum-inline-item") ?? [])];
       const switches = scroll?.querySelectorAll(".auto-drum-switch") ?? [];
       const ring = root?.querySelector(".auto-drum-portal__ring--multi");
       const ringRect = ring?.getBoundingClientRect();
-      const firstItems = [...items].slice(0, 12).map((el) => el.querySelector(".immo-drum-inline-text")?.textContent?.trim());
-      const style = ring ? getComputedStyle(ring) : null;
-      const multiH = root?.style.getPropertyValue("--auto-drum-multi-h") || style?.height;
+      const first = items[0];
+      const firstRect = first?.getBoundingClientRect();
+      const firstText = first?.querySelector(".immo-drum-inline-text");
+      const firstCs = firstText ? getComputedStyle(firstText) : null;
+      const firstItemCs = first ? getComputedStyle(first) : null;
+      const afterContent = first ? getComputedStyle(first, "::after").content : null;
+      const sw = first?.querySelector(".auto-drum-switch");
+      const swRect = sw?.getBoundingClientRect();
+      const padTop = scroll ? parseFloat(getComputedStyle(scroll).paddingTop) : null;
+      const firstItems = items.slice(0, 12).map((el) => el.querySelector(".immo-drum-inline-text")?.textContent?.trim());
       return {
         itemCount: items.length,
         switchCount: switches.length,
         hasDone: Boolean(root?.querySelector(".auto-drum-portal__done")),
         ringHeight: ringRect?.height,
-        multiHVar: multiH,
+        padTop,
+        topGap: firstRect && ringRect ? firstRect.top - ringRect.top : null,
+        textColor: firstCs?.color,
+        opacity: firstItemCs?.opacity,
+        afterContent,
+        switchRightGap: swRect && ringRect ? ringRect.right - swRect.right : null,
         firstItems,
         isMultiClass: root?.classList.contains("auto-drum-portal--multi"),
       };
@@ -87,13 +99,37 @@ async function main() {
     log("Kész button", portal.hasDone === true, portal.hasDone);
     log("ring tall (~10 rows)", (portal.ringHeight ?? 0) >= 400, {
       ringHeight: portal.ringHeight,
-      multiHVar: portal.multiHVar,
     });
+    log("no large empty top", (portal.padTop ?? 999) < 40 && (portal.topGap ?? 999) < 40, {
+      padTop: portal.padTop,
+      topGap: portal.topGap,
+    });
+    log("text black", /^(rgb\(0,\s*0,\s*0\)|#000)/i.test(portal.textColor || ""), portal.textColor);
+    log("no checkmark ::after", !portal.afterContent || portal.afterContent === "none" || portal.afterContent === '""', portal.afterContent);
+    log("switch near right edge", (portal.switchRightGap ?? 99) < 24, portal.switchRightGap);
     log("first labels look like brands", portal.firstItems?.[0] === "Mindegy" && portal.firstItems?.length > 5, portal.firstItems);
 
     // Toggle two brands
     await page.locator('.auto-drum-portal--multi .immo-drum-inline-item[data-value="BMW"]').click();
     await page.locator('.auto-drum-portal--multi .immo-drum-inline-item[data-value="AUDI"]').click();
+
+    const selectedUi = await page.evaluate(() => {
+      const item = document.querySelector('.auto-drum-portal--multi .immo-drum-inline-item[data-value="BMW"]');
+      const ring = document.querySelector(".auto-drum-portal__ring--multi");
+      const sw = item?.querySelector(".auto-drum-switch");
+      const after = item ? getComputedStyle(item, "::after").content : null;
+      const swRect = sw?.getBoundingClientRect();
+      const ringRect = ring?.getBoundingClientRect();
+      return {
+        after,
+        switchRightGap: swRect && ringRect ? ringRect.right - swRect.right : null,
+        textColor: item ? getComputedStyle(item.querySelector(".immo-drum-inline-text")).color : null,
+      };
+    });
+    log("selected row no pipa", !selectedUi.after || selectedUi.after === "none" || selectedUi.after === '""', selectedUi.after);
+    log("selected switch still at edge", (selectedUi.switchRightGap ?? 99) < 24, selectedUi.switchRightGap);
+    log("selected text black", /^(rgb\(0,\s*0,\s*0\)|#000)/i.test(selectedUi.textColor || ""), selectedUi.textColor);
+
     await page.locator(".auto-drum-portal__done").click();
     await page.waitForSelector(".auto-drum-portal--multi", { state: "hidden", timeout: 5000 });
 

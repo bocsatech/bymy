@@ -4,13 +4,12 @@ import {
   applyStep1SearchDomOrder,
   isVehicleStep1Canvas,
   stackVehicleCanvasSingleColumn,
-  wrapAlapScoutCard,
-} from "./ad-form-desk-pinned-blocks.js?v=bmSheet28";
+} from "./ad-form-desk-pinned-blocks.js?v=bmSheet27";
 
 const DESK_MQ = "(min-width: 901px)";
 
 const ACCORDIONS = [
-  { id: "alap", step: 1, label: "Alapadatok" },
+  { id: "alap", step: 1, label: "Alap adatok" },
   { id: "muszaki", step: 2, label: "Műszaki adatok" },
   { id: "extrak", step: 3, label: "Extrák" },
   { id: "kepek", step: 4, label: "Képek", shell: false },
@@ -173,50 +172,51 @@ function openSubAccordionInExtrak(form, activeAcc) {
   }
 }
 
-/** Kategória / Alapadatok megnyitás: mint a demó — kártya nyitva, gyártmány felette, oldal teteje. */
-function prepareAlapCategoryOpen(form) {
-  if (!form) return;
-  const canvas =
-    form.querySelector('[data-desk-acc="alap"] .ad-layout-canvas') ||
-    form.querySelector('.step-panel[data-step="1"] .ad-layout-canvas');
-  if (canvas && isVehicleStep1Canvas(canvas)) {
-    wrapAlapScoutCard(canvas);
-  }
-  form.querySelectorAll(".ad-form-alap-card.is-collapsed").forEach((card) => {
-    card.classList.remove("is-collapsed");
-    const title = card.querySelector(".ad-form-alap-card__title");
-    title?.setAttribute("aria-expanded", "true");
+function scrollAdFormPageTop() {
+  const top = () => {
+    window.scrollTo(0, 0);
+    if (document.scrollingElement) document.scrollingElement.scrollTop = 0;
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+    document
+      .querySelectorAll?.(
+        "#ad-wizard-shell, .ad-form-desk-shell, .site-app-main, main, .mw-app-content, .ad-layout-canvas"
+      )
+      ?.forEach?.((el) => {
+        if (el && el.scrollTop) el.scrollTop = 0;
+      });
+  };
+  top();
+  requestAnimationFrame(() => {
+    top();
+    requestAnimationFrame(top);
   });
+  window.setTimeout(top, 50);
+  window.setTimeout(top, 150);
+  window.setTimeout(top, 320);
 }
 
-function scrollAdFormToPageTop() {
-  window.scrollTo({ top: 0, left: 0, behavior: "auto" });
-  document.documentElement.scrollTop = 0;
-  document.body.scrollTop = 0;
-  const shell = document.getElementById("ad-wizard-shell");
-  const cat = document.getElementById("wizard-category-wheel-wrap");
-  const target = cat || shell;
-  if (!target) return;
-  /* Ha a sticky fejléc eltakarja a Kategória mezőt, igazítsunk a mező tetejére */
-  const header = document.querySelector(".site-app-header, .site-header, .mw-app-topbar");
-  const offset = Math.round(header?.getBoundingClientRect().height ?? 0);
-  const y = target.getBoundingClientRect().top + window.scrollY - offset;
-  if (y > 2) {
-    window.scrollTo({ top: Math.max(0, y), left: 0, behavior: "auto" });
-  }
-}
-
+/** Fő kategória megnyitás: mindig a képernyőkép szerinti oldal-teteje (menü + Kategória + Alapadatok). */
 function scrollDeskMainAccordionToStart(form, accId) {
   const acc = form?.querySelector?.(`[data-desk-acc="${accId}"]:not(.auto-desk-acc--sub)`);
   if (accId && acc && !acc.classList.contains("is-open")) return;
-  if (accId === "alap") prepareAlapCategoryOpen(form);
-  scrollAdFormToPageTop();
+  try {
+    document.activeElement?.blur?.();
+  } catch {
+    /* ignore */
+  }
+  scrollAdFormPageTop();
 }
 
 /** Extrák almenü: szintén az oldal teteje. */
 function scrollDeskExtrakSubAccordionToStart(subAcc) {
   if (subAcc && !subAcc.classList.contains("is-open")) return;
-  scrollAdFormToPageTop();
+  try {
+    document.activeElement?.blur?.();
+  } catch {
+    /* ignore */
+  }
+  scrollAdFormPageTop();
 }
 
 /** Középső útmutató keret vízszintesen a nyitott fő accordion fejlécével egy magasságban (Extrák stb.). */
@@ -611,7 +611,6 @@ function applyAdFormDesk({ openStep = null, scrollToAccordion = null } = {}) {
   let accId = openStep != null ? accordionForStep(openStep) : preserved;
   if (!accId) accId = "alap";
   openAccordion(form, accId);
-  if (accId === "alap") prepareAlapCategoryOpen(form);
   mountExtrakSubAccordions(form);
   window.dispatchEvent(new Event("ad-form-render-egyeb-info"));
   mountExtrakSubAccordions(form);
@@ -632,18 +631,16 @@ function applyAdFormDesk({ openStep = null, scrollToAccordion = null } = {}) {
   }
   const scrollId = scrollToAccordion || null;
   if (scrollId) {
+    scrollDeskMainAccordionToStart(form, scrollId);
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        if (scrollId === "alap") prepareAlapCategoryOpen(form);
         scrollDeskMainAccordionToStart(form, scrollId);
         afterDeskGuideAlign(form, scrollId);
-        window.setTimeout(() => {
-          if (scrollId === "alap") prepareAlapCategoryOpen(form);
-          scrollDeskMainAccordionToStart(form, scrollId);
-        }, 50);
-        window.setTimeout(() => scrollDeskMainAccordionToStart(form, scrollId), 200);
       });
     });
+  } else {
+    /* Desk frissítés / kategória indítás: mindig a felső nézet */
+    scrollAdFormPageTop();
   }
 }
 
@@ -668,11 +665,11 @@ function bindDeskEvents() {
       if (opening) {
         showDeskGuideSlot("extrak", { photoFocus: false });
         afterDeskGuideAlign(form, "extrak");
+        scrollDeskExtrakSubAccordionToStart(subAcc);
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
             scrollDeskExtrakSubAccordionToStart(subAcc);
             afterDeskGuideAlign(form, "extrak");
-            window.setTimeout(() => scrollDeskExtrakSubAccordionToStart(subAcc), 50);
           });
         });
       }
@@ -686,24 +683,25 @@ function bindDeskEvents() {
     const id = acc?.getAttribute("data-desk-acc");
     if (!id) return;
     const open = acc.classList.contains("is-open");
+    try {
+      toggle.blur();
+      document.activeElement?.blur?.();
+    } catch {
+      /* ignore */
+    }
     openAccordion(form, open ? "" : id);
     if (open) {
       refreshAdFormDeskGuide(form);
       return;
     }
-    if (id === "alap") prepareAlapCategoryOpen(form);
     showDeskGuideSlot(id, { photoFocus: false });
     refreshAdFormDeskGuide(form);
     afterDeskGuideAlign(form, id);
+    scrollDeskMainAccordionToStart(form, id);
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         scrollDeskMainAccordionToStart(form, id);
         afterDeskGuideAlign(form, id);
-        window.setTimeout(() => {
-          if (id === "alap") prepareAlapCategoryOpen(form);
-          scrollDeskMainAccordionToStart(form, id);
-        }, 50);
-        window.setTimeout(() => scrollDeskMainAccordionToStart(form, id), 200);
       });
     });
   });
@@ -735,11 +733,11 @@ function bindDeskEvents() {
     if (accId) {
       showDeskGuideSlot(accId, { photoFocus: false });
       afterDeskGuideAlign(form, accId);
+      scrollDeskMainAccordionToStart(form, accId);
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           scrollDeskMainAccordionToStart(form, accId);
           afterDeskGuideAlign(form, accId);
-          window.setTimeout(() => scrollDeskMainAccordionToStart(form, accId), 50);
         });
       });
     }
@@ -794,5 +792,6 @@ export {
   isAdFormDesk,
   isDeskVehicleAdForm,
   isDeskVehicleSubtype,
+  scrollAdFormPageTop,
   isSzemelyautoAdForm,
 };

@@ -11,7 +11,7 @@ import { applyImportedVehicleToSelects } from "./vehicle-catalog-client.js?v=imp
 import { initTireSizes } from "./tire-sizes-ui.js";
 import { initPhoneLanguages } from "./phone-lang-ui.js";
 import { initCategoryPicker } from "./category-picker.js?v=pickerBoot4";
-import { applyAdFormDesk, clearAdFormEditBoot, isDeskVehicleSubtype } from "./ad-form-desk.js?v=bmSheet28";
+import { applyAdFormDesk, clearAdFormEditBoot, isDeskVehicleSubtype, scrollAdFormPageTop } from "./ad-form-desk.js?v=bmSheet27";
 import {
   requireAuthForPage,
   getAuthUser,
@@ -180,6 +180,7 @@ function showWizardShell() {
   if (isDeskVehicleSubtype(subtype)) stepsBar?.setAttribute("hidden", "");
   else stepsBar?.removeAttribute("hidden");
   applyAdFormDesk({ openStep: 1, scrollToAccordion: "alap" });
+  scrollAdFormPageTop();
 }
 
 function ensureFormReady() {
@@ -298,6 +299,7 @@ const categoryPicker = initCategoryPicker({
       window.dispatchEvent(new Event("ad-form-sync-location"));
       window.dispatchEvent(new Event("ad-form-layout-refresh"));
       applyAdFormDesk({ openStep: 1, scrollToAccordion: "alap" });
+      scrollAdFormPageTop();
     } catch (error) {
       console.error("Űrlap indítás hiba:", error);
     }

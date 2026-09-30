@@ -942,7 +942,7 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-suffix-unit {
   width: 100% !important;
   max-width: 100% !important;
   min-width: 0 !important;
-  gap: 0 !important;
+  gap: 0.35rem !important;
   flex: none !important;
   align-self: stretch !important;
   box-sizing: border-box !important;
@@ -952,7 +952,7 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-suffix-unit {
   border: 1.5px solid #111 !important;
   border-radius: 0.55rem !important;
   background: #fff !important;
-  padding: 0 0.65rem 0 0 !important;
+  padding: 0 0.95rem 0 0 !important;
   box-shadow: none !important;
 }
 
@@ -969,7 +969,7 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .suffix-field > input.a
   border-radius: 0 !important;
   background: transparent !important;
   box-shadow: none !important;
-  padding: 0 0.65rem !important;
+  padding: 0 0.45rem 0 0.75rem !important;
   field-sizing: fixed !important;
 }
 
@@ -979,13 +979,20 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .muszaki-grid .suffix-f
   width: auto !important;
   max-width: none !important;
   margin: 0 !important;
-  padding: 0 0.15rem 0 0 !important;
+  padding: 0 0.1rem 0 0 !important;
   color: #666 !important;
   font-size: 0.82rem !important;
   line-height: 1 !important;
   white-space: nowrap !important;
   border: 0 !important;
   background: transparent !important;
+}
+
+/* Km: egység ne csússzon a lekerekített szélre */
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .suffix-field:has(#km),
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-suffix-unit:has(#km) {
+  padding-right: 1.05rem !important;
+  gap: 0.4rem !important;
 }
 
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .field-stack--leiras textarea,
@@ -1093,14 +1100,14 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-
   box-sizing: border-box !important;
   display: flex !important;
   align-items: center !important;
-  gap: 0 !important;
+  gap: 0.35rem !important;
   height: 44px !important;
   min-height: 44px !important;
   max-height: 44px !important;
   border: 1.5px solid #111 !important;
   border-radius: 0.55rem !important;
   background: #fff !important;
-  padding: 0 0.65rem 0 0 !important;
+  padding: 0 0.95rem 0 0 !important;
   box-shadow: none !important;
 }
 
@@ -1117,20 +1124,26 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-
   border-radius: 0 !important;
   background: transparent !important;
   box-shadow: none !important;
-  padding: 0 0.65rem !important;
+  padding: 0 0.45rem 0 0.75rem !important;
   field-sizing: fixed !important;
 }
 
 body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .suffix-field > span:not(.hint-inline):not(.power-hint):not(.price-market-hint):not(.price-market-label) {
   flex: 0 0 auto !important;
   margin: 0 !important;
-  padding: 0 0.15rem 0 0 !important;
+  padding: 0 0.1rem 0 0 !important;
   color: #666 !important;
   font-size: 0.82rem !important;
   line-height: 1 !important;
   white-space: nowrap !important;
   border: 0 !important;
   background: transparent !important;
+}
+
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .suffix-field:has(#km),
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-suffix-unit:has(#km) {
+  padding-right: 1.05rem !important;
+  gap: 0.4rem !important;
 }
 
 html[data-theme="dark"] body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .suffix-field,
@@ -1426,6 +1439,20 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__bod
   box-shadow: none !important;
   min-height: 2.65rem !important;
   height: auto !important;
+  max-height: none !important;
+}
+
+/* Alapadatok km: dobozos cella, egységnek hely a jobb szélen */
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body .suffix-field:has(#km) {
+  border: 1.5px solid #111 !important;
+  border-bottom: 1.5px solid #111 !important;
+  border-radius: 0.55rem !important;
+  background: #fff !important;
+  height: 44px !important;
+  min-height: 44px !important;
+  max-height: 44px !important;
+  padding: 0 1.05rem 0 0 !important;
+  gap: 0.4rem !important;
 }
 
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body .ad-form-split-ym__dual,

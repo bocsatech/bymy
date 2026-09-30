@@ -456,11 +456,13 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form .in
 
 body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form .ad-layout-item {
   width: 100% !important;
-  max-width: none !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
   min-height: 0 !important;
   flex: 0 0 auto;
   position: relative !important;
   grid-column: 1 / -1 !important;
+  box-sizing: border-box !important;
 }
 
 /* Páros HTML sorok is egymás alatt — mint az autókereső Gyors. */

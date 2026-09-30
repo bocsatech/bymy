@@ -2694,6 +2694,11 @@ body.site-app #ad-form .ad-layout-item {
   align-self: start;
 }
 
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-layout-item {
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
 body.site-app #ad-form .ad-layout-item.md-outlined,
 body.site-app #ad-form .ad-layout-item.labeled-field,
 body.site-app #ad-form .ad-layout-item.field-stack {

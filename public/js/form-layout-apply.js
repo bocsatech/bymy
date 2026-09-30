@@ -1,7 +1,7 @@
 import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=immoTipusPick1";
-import { refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=bmSheet33";
+import { refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=bmSheet34";
 import { initTireSizes } from "./tire-sizes-ui.js?v=tireFill1";
-import { applyAdFormDesk } from "./ad-form-desk.js?v=bmSheet33";
+import { applyAdFormDesk } from "./ad-form-desk.js?v=bmSheet34";
 import { markImmoPostViewReady } from "./category-picker.js?v=pickerBoot4";
 import {
   DESK_MUSZAKI_CORE_FIELD_KEYS,
@@ -13,7 +13,7 @@ import {
   applyStep1SearchDomOrder,
   isVehicleStep1Canvas,
   stackVehicleCanvasSingleColumn,
-} from "./ad-form-desk-pinned-blocks.js?v=bmSheet33";
+} from "./ad-form-desk-pinned-blocks.js?v=bmSheet34";
 
 function cssEscape(value) {
   if (window.CSS?.escape) return window.CSS.escape(value);
@@ -292,10 +292,10 @@ function applyDeskSidebarControlWidth(el) {
 function applyDeskControlWidth(el, fullWidth) {
   if (fullWidth) {
     el.style.setProperty("width", "100%", "important");
-    el.style.setProperty("max-width", "none", "important");
+    el.style.setProperty("max-width", "100%", "important");
+    el.style.setProperty("min-width", "0", "important");
     el.style.setProperty("flex", "1 1 0%", "important");
     el.style.setProperty("field-sizing", "fixed", "important");
-    el.style.removeProperty("min-width");
     return;
   }
   if (isInlinePairDeskControl(el)) {

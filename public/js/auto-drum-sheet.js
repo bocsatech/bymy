@@ -743,9 +743,6 @@ export function openBrandModelCatalogSheet(brandWheel, trigger, wrap, emptyLabel
           <div class="auto-drum-portal__scroll immo-drum-inline-scroll" data-sheet-list></div>
         </div>
       </div>
-      <footer class="auto-drum-portal__sheet-foot">
-        <span class="auto-drum-portal__count" data-sheet-count>0 kiválasztva</span>
-      </footer>
     </div>`;
 
   const stage = root.querySelector(".auto-drum-portal__stage");
@@ -756,29 +753,10 @@ export function openBrandModelCatalogSheet(brandWheel, trigger, wrap, emptyLabel
   const subEl = root.querySelector(".auto-drum-portal__sub");
   const doneBtn = root.querySelector(".auto-drum-portal__done");
   const closeBtn = root.querySelector(".auto-drum-portal__close");
-  const countEl = root.querySelector("[data-sheet-count]");
   const toolbarEl = root.querySelector(".auto-drum-portal__toolbar--sheet");
 
   let view = "brands";
   let modelBrand = null;
-
-  function updateCount() {
-    if (!countEl) return;
-    const brandN = singleSelect
-      ? String(readWheel(brandWheel) ?? "").trim()
-        ? 1
-        : 0
-      : readWheelList(brandWheel).length;
-    const modelN = modelWheel
-      ? singleSelect
-        ? String(readWheel(modelWheel) ?? "").trim()
-          ? 1
-          : 0
-        : readWheelList(modelWheel).length
-      : 0;
-    const n = view === "models" ? Math.max(brandN, modelN) : brandN;
-    countEl.textContent = `${n} kiválasztva`;
-  }
 
   function syncModelWheelFromCatalog(brands) {
     if (!modelWheel || !catalog) return;
@@ -839,7 +817,6 @@ export function openBrandModelCatalogSheet(brandWheel, trigger, wrap, emptyLabel
         }
         syncDrumWheelDisplay(brandWheel);
         paintSwitchList(scrollEl, brandWheel);
-        updateCount();
         return;
       }
       if (singleSelect) {
@@ -852,7 +829,6 @@ export function openBrandModelCatalogSheet(brandWheel, trigger, wrap, emptyLabel
           syncDrumWheelDisplay(modelWheel);
         }
         syncModelWheelFromCatalog([value]);
-        updateCount();
         renderModels(value);
         return;
       }
@@ -863,7 +839,6 @@ export function openBrandModelCatalogSheet(brandWheel, trigger, wrap, emptyLabel
       setWheelValue(brandWheel, [...cur]);
       syncDrumWheelDisplay(brandWheel);
       syncModelWheelFromCatalog([...cur]);
-      updateCount();
       if (turningOn) {
         renderModels(value);
         return;
@@ -878,7 +853,6 @@ export function openBrandModelCatalogSheet(brandWheel, trigger, wrap, emptyLabel
       el?.scrollIntoView({ block: "nearest" });
     }
     paintSwitchList(scrollEl, brandWheel);
-    updateCount();
   }
 
   function renderModels(brand) {
@@ -902,7 +876,6 @@ export function openBrandModelCatalogSheet(brandWheel, trigger, wrap, emptyLabel
         modelWheel.dataset.multiple = "0";
         syncDrumWheelDisplay(modelWheel);
         paintSwitchList(scrollEl, modelWheel);
-        updateCount();
         return;
       }
       if (value === "") {
@@ -915,11 +888,9 @@ export function openBrandModelCatalogSheet(brandWheel, trigger, wrap, emptyLabel
       }
       syncDrumWheelDisplay(modelWheel);
       paintSwitchList(scrollEl, modelWheel);
-      updateCount();
     });
     scrollEl.scrollTop = 0;
     paintSwitchList(scrollEl, modelWheel);
-    updateCount();
   }
 
   backBtn.addEventListener("click", (event) => {
@@ -960,7 +931,6 @@ export function openBrandModelCatalogSheet(brandWheel, trigger, wrap, emptyLabel
   renderBrands();
   requestAnimationFrame(() => {
     ring.style.setProperty("--immo-drum-ring-w", `${Math.min(420, Math.floor(window.innerWidth - 32))}px`);
-    updateCount();
   });
 }
 

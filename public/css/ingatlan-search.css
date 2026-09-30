@@ -1450,6 +1450,10 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   max-width: min(22rem, 92vw) !important;
   height: var(--auto-drum-multi-h, 520px) !important;
   max-height: min(72vh, 34rem);
+  border-width: 3px !important;
+  border-color: #475569 !important;
+  display: flex;
+  flex-direction: column;
 }
 
 .auto-drum-portal--multi .auto-drum-portal__scroll {
@@ -1491,46 +1495,74 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   margin-right: 0;
 }
 
-.auto-drum-portal--bm .auto-drum-portal__head {
+.auto-drum-portal--bm .auto-drum-portal__ring--multi {
+  height: auto !important;
+  max-height: min(78vh, 36rem);
+  min-height: min(var(--auto-drum-multi-h, 520px), 70vh);
+}
+
+.auto-drum-portal--bm .auto-drum-portal__toolbar {
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
-  gap: 0.45rem;
+  justify-content: space-between;
+  gap: 0.5rem;
   width: 100%;
-  padding: 0 0.15rem 0.35rem;
   box-sizing: border-box;
+  padding: 0.55rem 0.65rem 0.45rem;
+  border-bottom: 1px solid #e2e8f0;
+  background: #fff;
+}
+
+.auto-drum-portal--bm .auto-drum-portal__back,
+.auto-drum-portal--bm .auto-drum-portal__done {
+  flex: 0 0 auto;
+  appearance: none;
+  border: 0;
+  border-radius: 999px;
+  font: 650 0.95rem/1 system-ui, sans-serif;
+  padding: 0.5rem 0.95rem;
+  cursor: pointer;
 }
 
 .auto-drum-portal--bm .auto-drum-portal__back {
-  flex: 0 0 auto;
-  width: 2.2rem;
-  height: 2.2rem;
-  border: 0;
-  border-radius: 999px;
   background: #f1f5f9;
   color: #000;
-  font: 700 1.45rem/1 system-ui, sans-serif;
-  cursor: pointer;
 }
 
 .auto-drum-portal--bm .auto-drum-portal__back[hidden] {
   display: none !important;
 }
 
-.auto-drum-portal--bm .auto-drum-portal__titles {
-  min-width: 0;
-  flex: 1 1 auto;
-}
-
-.auto-drum-portal--bm .auto-drum-portal__title {
-  margin: 0;
-  font: 700 1.05rem/1.2 system-ui, sans-serif;
-  color: #000;
+.auto-drum-portal--bm .auto-drum-portal__done {
+  margin-left: auto;
+  background: #111;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.18);
 }
 
 .auto-drum-portal--bm .auto-drum-portal__sub {
-  margin: 0.1rem 0 0;
-  font: 500 0.88rem/1.2 system-ui, sans-serif;
-  color: #334155;
+  margin: 0;
+  min-width: 0;
+  flex: 1 1 auto;
+  text-align: center;
+  font: 650 0.92rem/1.2 system-ui, sans-serif;
+  color: #000;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.auto-drum-portal--bm .auto-drum-portal__sub[hidden] {
+  display: none !important;
+}
+
+.auto-drum-portal--bm .auto-drum-portal__scroll {
+  position: relative !important;
+  inset: auto !important;
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: none;
 }
 
 .auto-drum-portal--bm .auto-drum-inline-item--child {

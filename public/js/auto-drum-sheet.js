@@ -287,25 +287,22 @@ function openBrandModelCatalogSheet(brandWheel, trigger, wrap, emptyLabel, form)
   root.innerHTML = `
     <button type="button" class="auto-drum-portal__backdrop" aria-label="Bezárás"></button>
     <div class="auto-drum-portal__stage auto-drum-portal__stage--multi">
-      <div class="auto-drum-portal__head">
-        <button type="button" class="auto-drum-portal__back" hidden aria-label="Vissza">‹</button>
-        <div class="auto-drum-portal__titles">
-          <p class="auto-drum-portal__title">Gyártmány</p>
-          <p class="auto-drum-portal__sub" hidden></p>
-        </div>
-      </div>
       <div class="immo-drum-wheel-ring auto-drum-portal__ring auto-drum-portal__ring--multi">
+        <div class="auto-drum-portal__toolbar">
+          <button type="button" class="auto-drum-portal__back" hidden>Vissza</button>
+          <p class="auto-drum-portal__sub" hidden></p>
+          <button type="button" class="auto-drum-portal__done">Kész</button>
+        </div>
         <div class="auto-drum-portal__scroll immo-drum-inline-scroll" tabindex="-1"></div>
       </div>
-      <button type="button" class="auto-drum-portal__done">Kész</button>
     </div>`;
 
   const stage = root.querySelector(".auto-drum-portal__stage");
   const ring = root.querySelector(".auto-drum-portal__ring");
   const scrollEl = root.querySelector(".auto-drum-portal__scroll");
   const backBtn = root.querySelector(".auto-drum-portal__back");
-  const titleEl = root.querySelector(".auto-drum-portal__title");
   const subEl = root.querySelector(".auto-drum-portal__sub");
+  const doneBtn = root.querySelector(".auto-drum-portal__done");
 
   let view = "brands";
   let modelBrand = null;
@@ -334,7 +331,7 @@ function openBrandModelCatalogSheet(brandWheel, trigger, wrap, emptyLabel, form)
   function renderBrands() {
     view = "brands";
     modelBrand = null;
-    titleEl.textContent = "Gyártmány";
+    ring.dataset.view = "brands";
     subEl.hidden = true;
     subEl.textContent = "";
     backBtn.hidden = true;
@@ -379,7 +376,7 @@ function openBrandModelCatalogSheet(brandWheel, trigger, wrap, emptyLabel, form)
   function renderModels(brand) {
     view = "models";
     modelBrand = brand;
-    titleEl.textContent = "Modell";
+    ring.dataset.view = "models";
     subEl.hidden = false;
     subEl.textContent = brand;
     backBtn.hidden = false;
@@ -411,7 +408,7 @@ function openBrandModelCatalogSheet(brandWheel, trigger, wrap, emptyLabel, form)
   });
 
   root.querySelector(".auto-drum-portal__backdrop")?.addEventListener("click", () => closeAutoDrumSheet(true));
-  root.querySelector(".auto-drum-portal__done")?.addEventListener("click", () => closeAutoDrumSheet(true));
+  doneBtn?.addEventListener("click", () => closeAutoDrumSheet(true));
   scrollEl.addEventListener(
     "scroll",
     () => paintSwitchList(scrollEl, view === "models" ? modelWheel : brandWheel),

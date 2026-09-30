@@ -78,20 +78,25 @@ async function main() {
       const sw = first?.querySelector(".auto-drum-switch");
       const swRect = sw?.getBoundingClientRect();
       const padTop = scroll ? parseFloat(getComputedStyle(scroll).paddingTop) : null;
+      const scrollRect = scroll?.getBoundingClientRect();
       const firstItems = items.slice(0, 12).map((el) => el.querySelector(".immo-drum-inline-text")?.textContent?.trim());
+      const toolbar = root?.querySelector(".auto-drum-portal__toolbar");
       return {
         itemCount: items.length,
         switchCount: switches.length,
-        hasDone: Boolean(root?.querySelector(".auto-drum-portal__done")),
+        hasDone: Boolean(root?.querySelector(".auto-drum-portal__toolbar .auto-drum-portal__done") || root?.querySelector(".auto-drum-portal__done")),
         ringHeight: ringRect?.height,
+        borderWidth: ring ? getComputedStyle(ring).borderTopWidth : null,
         padTop,
-        topGap: firstRect && ringRect ? firstRect.top - ringRect.top : null,
+        topGap: firstRect && scrollRect ? firstRect.top - scrollRect.top : null,
         textColor: firstCs?.color,
         opacity: firstItemCs?.opacity,
         afterContent,
         switchRightGap: swRect && ringRect ? ringRect.right - swRect.right : null,
         firstItems,
         isMultiClass: root?.classList.contains("auto-drum-portal--multi"),
+        hasToolbar: Boolean(toolbar),
+        backHiddenOnBrands: root?.querySelector(".auto-drum-portal__back")?.hidden,
       };
     });
     log("portal is multi sheet", portal.isMultiClass === true, portal.isMultiClass);
@@ -105,6 +110,12 @@ async function main() {
       padTop: portal.padTop,
       topGap: portal.topGap,
     });
+    log("thicker border", parseFloat(portal.borderWidth || "0") >= 2.5, portal.borderWidth);
+    log("top toolbar with Kész", portal.hasToolbar === true && portal.hasDone === true, {
+      hasToolbar: portal.hasToolbar,
+      hasDone: portal.hasDone,
+    });
+    log("Vissza hidden on brand list", portal.backHiddenOnBrands === true, portal.backHiddenOnBrands);
     log("text black", /^(rgb\(0,\s*0,\s*0\)|#000)/i.test(portal.textColor || ""), portal.textColor);
     log("no checkmark ::after", !portal.afterContent || portal.afterContent === "none" || portal.afterContent === '""', portal.afterContent);
     log("switch near right edge", (portal.switchRightGap ?? 99) < 24, portal.switchRightGap);
@@ -116,25 +127,43 @@ async function main() {
 
     const afterBrandOn = await page.evaluate(() => {
       const root = document.querySelector(".auto-drum-portal--bm, .auto-drum-portal--multi");
-      const title = root?.querySelector(".auto-drum-portal__title")?.textContent?.trim();
+      const view = root?.querySelector(".auto-drum-portal__ring")?.dataset?.view;
       const sub = root?.querySelector(".auto-drum-portal__sub")?.textContent?.trim();
-      const backHidden = root?.querySelector(".auto-drum-portal__back")?.hidden;
+      const back = root?.querySelector(".auto-drum-portal__back");
+      const done = root?.querySelector(".auto-drum-portal__toolbar .auto-drum-portal__done");
       const items = [...(root?.querySelectorAll(".immo-drum-inline-item") ?? [])].map((el) =>
         el.querySelector(".immo-drum-inline-text")?.textContent?.trim()
       );
-      return { title, sub, backHidden, itemCount: items.length, sample: items.slice(0, 8) };
+      return {
+        view,
+        sub,
+        backText: back?.textContent?.trim(),
+        backHidden: back?.hidden,
+        topDone: Boolean(done),
+        itemCount: items.length,
+        sample: items.slice(0, 8),
+      };
     });
-    log("same portal switches to Modell", afterBrandOn.title === "Modell" && afterBrandOn.sub === "BMW", afterBrandOn);
+    log(
+      "same portal switches to Modell",
+      afterBrandOn.view === "models" && afterBrandOn.sub === "BMW",
+      afterBrandOn
+    );
     log("model rows from catalog", (afterBrandOn.itemCount ?? 0) > 5, afterBrandOn.sample);
-    log("back visible on model view", afterBrandOn.backHidden === false, afterBrandOn.backHidden);
+    log("Vissza visible on model view", afterBrandOn.backHidden === false && afterBrandOn.backText === "Vissza", {
+      backText: afterBrandOn.backText,
+      backHidden: afterBrandOn.backHidden,
+    });
+    log("Kész in top toolbar", afterBrandOn.topDone === true, afterBrandOn.topDone);
 
     await page.locator(".auto-drum-portal__back").click();
     await page.waitForTimeout(150);
     const backToBrands = await page.evaluate(() => ({
-      title: document.querySelector(".auto-drum-portal__title")?.textContent?.trim(),
+      view: document.querySelector(".auto-drum-portal__ring")?.dataset?.view,
       first: document.querySelector(".immo-drum-inline-text")?.textContent?.trim(),
+      backHidden: document.querySelector(".auto-drum-portal__back")?.hidden,
     }));
-    log("back returns to Gyártmány", backToBrands.title === "Gyártmány", backToBrands);
+    log("back returns to Gyártmány", backToBrands.view === "brands" && backToBrands.backHidden === true, backToBrands);
 
     await page.locator(".auto-drum-portal__done").click();
     await page.waitForSelector(".auto-drum-portal--multi", { state: "hidden", timeout: 5000 });

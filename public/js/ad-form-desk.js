@@ -1,6 +1,6 @@
 import { initAdFormDeskGuide, refreshAdFormDeskGuide, showDeskGuideSlot } from "./ad-form-desk-guide.js?v=adDeskGuide7";
 import { markImmoPostViewReady } from "./category-picker.js?v=pickerBoot4";
-import { applyStep1SearchDomOrder } from "./ad-form-desk-pinned-blocks.js?v=alapOrder3";
+import { applyStep1SearchDomOrder } from "./ad-form-desk-pinned-blocks.js?v=stackCol1";
 
 const DESK_MQ = "(min-width: 901px)";
 
@@ -324,8 +324,13 @@ function restackCanvasItems(form) {
     });
     for (const item of items) {
       canvas.appendChild(item);
-      if (item.matches(".ad-layout-item")) {
-        item.style.removeProperty("grid-column");
+      if (item.matches(".ad-layout-item, .ad-desk-pinned-block")) {
+        if (!isImmo) {
+          item.style.setProperty("grid-column", "1 / span 12", "important");
+          item.style.setProperty("width", "100%", "important");
+        } else {
+          item.style.removeProperty("grid-column");
+        }
         item.style.removeProperty("grid-row");
       }
     }

@@ -1,7 +1,7 @@
 import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=immoTipusPick1";
 import { refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=gyartFix1";
 import { initTireSizes } from "./tire-sizes-ui.js?v=tireFill1";
-import { applyAdFormDesk } from "./ad-form-desk.js?v=alapOrder3";
+import { applyAdFormDesk } from "./ad-form-desk.js?v=stackCol1";
 import { markImmoPostViewReady } from "./category-picker.js?v=pickerBoot4";
 import {
   DESK_MUSZAKI_CORE_FIELD_KEYS,
@@ -11,7 +11,7 @@ import {
   layoutRowForPinnedBlock,
   placeElectricBlockAfterFuel,
   applyStep1SearchDomOrder,
-} from "./ad-form-desk-pinned-blocks.js?v=alapOrder3";
+} from "./ad-form-desk-pinned-blocks.js?v=stackCol1";
 
 function cssEscape(value) {
   if (window.CSS?.escape) return window.CSS.escape(value);
@@ -304,8 +304,10 @@ function applyDeskControlWidth(el, fullWidth) {
 }
 
 function placeWrap(wrap, cell) {
-  const col = clamp(cell.col, 1, 12);
-  const span = clamp(cell.colSpan || 6, 1, 13 - col);
+  const isImmo = currentLayoutCategory(document.getElementById("ad-form")) === "ingatlan";
+  /* Autókereső minta: egy oszlop, teljes szélesség — ne 2 mező egymás mellett. */
+  const col = isImmo ? clamp(cell.col, 1, 12) : 1;
+  const span = isImmo ? clamp(cell.colSpan || 6, 1, 13 - col) : 12;
   const row = clamp(cell.row || 1, 1, 80);
   wrap.classList.add("ad-layout-item");
   wrap.hidden = false;
@@ -637,10 +639,9 @@ function syncCanvasOrderFromLayoutCells(form, cells) {
     const cell = id ? lookup.get(id) : null;
     if (!cell || cell.hidden) return;
     const row = clamp(Number(cell.row) || 1, 1, 80);
-    const col = clamp(Number(cell.col) || 1, 1, 12);
-    const span = clamp(Number(cell.colSpan) || 6, 1, 13 - col);
+    /* Jármű: mindig teljes sor — mint az autókereső. */
     wrap.dataset.layoutRow = String(row);
-    wrap.style.setProperty("grid-column", `${col} / span ${span}`, "important");
+    wrap.style.setProperty("grid-column", "1 / span 12", "important");
     wrap.style.setProperty("grid-row", String(row), "important");
   });
 

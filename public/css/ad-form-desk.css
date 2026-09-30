@@ -373,8 +373,33 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form .ad
   max-width: none !important;
   min-height: 0 !important;
   flex: 0 0 auto;
-  grid-column: unset !important;
-  grid-row: unset !important;
+  grid-column: 1 / -1 !important;
+  grid-row: auto !important;
+}
+
+/* Páros HTML sorok is egymás alatt — mint az autókereső Gyors. */
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form .field-row.full.field-row--vehicle-ident,
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form .field-row.full.field-row--year-km,
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form .field-row.full.field-row--pair,
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form .field-row.full.field-row--tipus-egyeb,
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form .field-row.full.field-row--vehicle-dates {
+  display: flex !important;
+  flex-direction: column !important;
+  flex-flow: column nowrap !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  align-items: stretch !important;
+  gap: var(--ad-cell-gap, 8px) !important;
+  width: 100% !important;
+}
+
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form .field-row.full.field-row--vehicle-ident .labeled-field,
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form .field-row.full.field-row--year-km .labeled-field,
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form .field-row.full.field-row--pair .labeled-field,
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form .field-row.full.field-row--tipus-egyeb .labeled-field,
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form .field-row.full.field-row--vehicle-dates .labeled-field {
+  flex: 0 0 auto !important;
+  width: 100% !important;
+  max-width: none !important;
 }
 
 body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form .card-body:has(.ad-layout-canvas .ad-layout-item:not(.ad-layout-hidden)) > .form-grid {

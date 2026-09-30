@@ -95,7 +95,10 @@ export function applyStep1SearchDomOrder(canvas) {
   items.forEach((el, index) => {
     const row = index + 1;
     el.dataset.layoutRow = String(row);
+    el.style.setProperty("grid-column", "1 / span 12", "important");
     el.style.setProperty("grid-row", String(row), "important");
+    el.style.setProperty("width", "100%", "important");
+    el.style.setProperty("max-width", "none", "important");
     canvas.appendChild(el);
   });
 }

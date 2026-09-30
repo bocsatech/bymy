@@ -2285,7 +2285,7 @@ async function mountAdSelectDrum(select, {
   select.dataset.adBmDrum = "1";
 
   const { fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=immoClearAll1");
-  const { openStandaloneSwitchSheet, bindAutoDrumSheet } = await import("./auto-drum-sheet.js?v=adFormSplitYm1");
+  const { openStandaloneSwitchSheet, bindAutoDrumSheet } = await import("./auto-drum-sheet.js?v=adFormSplitYm2");
   const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
 
   const wrap = document.createElement("div");
@@ -2499,7 +2499,7 @@ async function mountAdSplitYmDrum({
   }
 
   const { fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=immoClearAll1");
-  const { openAutoDrumSheet, bindAutoDrumSheet } = await import("./auto-drum-sheet.js?v=adFormSplitYm1");
+  const { openAutoDrumSheet } = await import("./auto-drum-sheet.js?v=adFormSplitYm2");
   const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
 
   ev.dataset.adSplitYm = "1";
@@ -2545,7 +2545,6 @@ async function mountAdSplitYmDrum({
     let live = initDrumWheel(wheel, { emptyLabel, openMode: "portal", multiple: false });
     setWheelValue(live, select.value || "");
     syncDrumWheelDisplay(live);
-    bindAutoDrumSheet(live);
     live = half.querySelector("[data-wheel]") || live;
     const trigger = half.querySelector(".immo-wheel-trigger");
     if (trigger) {
@@ -2553,32 +2552,47 @@ async function mountAdSplitYmDrum({
       if (!select.value) trigger.textContent = emptyLabel;
     }
     live.addEventListener("immo-wheel-change", () => {
-      syncSelectToValue(select, readWheel(live));
-      syncDrumWheelDisplay(live);
+      const w = half.querySelector("[data-wheel]") || live;
+      syncSelectToValue(select, readWheel(w));
+      syncDrumWheelDisplay(w);
     });
     select.addEventListener("change", () => {
-      setWheelValue(half.querySelector("[data-wheel]") || live, select.value || "");
-      syncDrumWheelDisplay(half.querySelector("[data-wheel]") || live);
+      const w = half.querySelector("[data-wheel]") || live;
+      setWheelValue(w, select.value || "");
+      syncDrumWheelDisplay(w);
     });
-    return half;
+    return { half, wheel: () => half.querySelector("[data-wheel]") || live };
   }
 
-  dual.appendChild(makeHalf("min", ev, yearOpts, emptyYear));
+  const minHalf = makeHalf("min", ev, yearOpts, emptyYear);
   const sep = document.createElement("span");
   sep.className = "immo-dual-range__sep";
   sep.setAttribute("aria-hidden", "true");
   sep.textContent = "–";
+  const maxHalf = makeHalf("max", honap, monthOpts, emptyMonth);
+  dual.appendChild(minHalf.half);
   dual.appendChild(sep);
-  dual.appendChild(makeHalf("max", honap, monthOpts, emptyMonth));
+  dual.appendChild(maxHalf.half);
   block.appendChild(dual);
 
   const inline = field.querySelector(".inline-2");
   if (inline) inline.replaceWith(block);
   else field.appendChild(block);
 
-  /* Rejtett címke a dual title mellett — a form label maradhat, de a dual title a kereső mintája. */
-  const nativeLabel = field.querySelector(`label[for="${evId}"], label[for="${honapId}"]`);
-  if (nativeLabel) nativeLabel.classList.add("ad-form-split-ym__native-label");
+  /* Mindig osztott portal (év|hó együtt), ne külön single dob. */
+  [minHalf, maxHalf].forEach((part) => {
+    const trigger = part.half.querySelector(".immo-wheel-trigger");
+    if (!trigger) return;
+    const next = trigger.cloneNode(true);
+    next.dataset.sheetBound = "1";
+    trigger.replaceWith(next);
+    next.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      const yWheel = minHalf.wheel();
+      openAutoDrumSheet(yWheel, next);
+    });
+  });
 }
 
 /**
@@ -2595,8 +2609,8 @@ async function mountMuszakiDateTripleDrum(form) {
   const nap = ensureMuszakiNapSelect(honap);
 
   const { fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=immoClearAll1");
-  const { openAutoDrumSheet, syncMuszakiDateSummary, bindAutoDrumSheet } = await import(
-    "./auto-drum-sheet.js?v=adFormSplitYm1"
+  const { openAutoDrumSheet, bindAutoDrumSheet } = await import(
+    "./auto-drum-sheet.js?v=adFormSplitYm2"
   );
   const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
 

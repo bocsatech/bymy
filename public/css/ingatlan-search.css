@@ -1957,9 +1957,7 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   max-width: 100%;
 }
 
-/* Hirdetésfeladás: osztott év/hó (gyártási, forgalomba) + műszaki 3 oszlop */
-#ad-form .ad-form-split-ym__native-label,
-#ad-form .labeled-field:has(.ad-form-split-ym) > label,
+/* Hirdetésfeladás: osztott év/hó + műszaki 3 oszlop */
 #ad-form .labeled-field:has(.ad-form-muszaki-date) > label {
   position: absolute;
   width: 1px;
@@ -1975,8 +1973,8 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
 #ad-form .ad-form-split-ym,
 #ad-form .ad-form-muszaki-date {
   width: 100%;
-  margin-top: 0.35rem;
-  padding-top: 0.42rem;
+  margin-top: 0.15rem;
+  padding-top: 0;
   box-sizing: border-box;
 }
 
@@ -1993,9 +1991,14 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   max-height: none !important;
   padding: 0 !important;
   box-shadow: none !important;
+  position: relative;
 }
 
-#ad-form .ad-form-split-ym__dual .immo-dual-range__title,
+/* Gyártási / forgalomba: a form label marad — a dual floating title ne jelenjen meg */
+#ad-form .ad-form-split-ym__dual .immo-dual-range__title {
+  display: none !important;
+}
+
 #ad-form .ad-form-muszaki-date__triple .immo-triple-date__title {
   position: absolute;
   top: -0.52rem;
@@ -2024,6 +2027,12 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   background: #fff !important;
   overflow: hidden;
   box-sizing: border-box;
+}
+
+#ad-form .field-row--year-km .labeled-field > .ad-form-split-ym,
+#ad-form .field-row--year-km .labeled-field > .ad-form-split-ym__dual {
+  width: 100% !important;
+  max-width: 100% !important;
 }
 
 #ad-form .ad-form-split-ym__dual .immo-wheel-wrap,

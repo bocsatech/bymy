@@ -1827,6 +1827,106 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   }
 }
 
+/* Ad-form év|hó sheet: gyártmány chrome + 2 oszlopos dobkerék */
+.auto-drum-portal--sheet.auto-drum-portal--ym .auto-drum-portal__ring--sheet {
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+}
+
+.auto-drum-portal--sheet.auto-drum-portal--ym .auto-drum-ym__chips {
+  flex: 0 0 auto;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.45rem;
+  padding: 0.65rem 0.85rem 0.45rem;
+  border-bottom: 1px solid #e2e8f0;
+  background: #fff;
+}
+
+.auto-drum-portal--sheet.auto-drum-portal--ym .auto-drum-ym__heads {
+  flex: 0 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 0.35rem 0.35rem 0.25rem;
+  text-align: center;
+  font: 650 0.78rem/1.2 system-ui, sans-serif;
+  color: #64748b;
+  border-bottom: 1px solid #e2e8f0;
+  background: #fff;
+}
+
+.auto-drum-portal--sheet.auto-drum-portal--ym .auto-drum-ym__body {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 16rem;
+  overflow: hidden;
+  background: #fff;
+}
+
+.auto-drum-portal--sheet.auto-drum-portal--ym .auto-drum-ym__highlight {
+  position: absolute;
+  left: 0.4rem;
+  right: 0.4rem;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 2.75rem;
+  border-radius: 8px;
+  background: rgba(148, 163, 184, 0.22);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.auto-drum-portal--sheet.auto-drum-portal--ym .auto-drum-ym__cols {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  height: 100%;
+}
+
+.auto-drum-portal--sheet.auto-drum-portal--ym .auto-drum-split__col {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+}
+
+.auto-drum-portal--sheet.auto-drum-portal--ym .auto-drum-split__col + .auto-drum-split__col {
+  border-left: 1px solid #f1f5f9;
+}
+
+.auto-drum-portal--sheet.auto-drum-portal--ym .auto-drum-split__scroll {
+  position: absolute !important;
+  inset: 0 !important;
+  flex: none !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+  padding: calc(50% - 1.375rem) 0.25rem !important;
+  box-sizing: border-box !important;
+  scroll-snap-type: none !important;
+  z-index: 2;
+}
+
+.auto-drum-portal--sheet.auto-drum-portal--ym .auto-drum-split__scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.auto-drum-portal--sheet.auto-drum-portal--ym .auto-drum-split__scroll .immo-drum-inline-item {
+  height: 2.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0.35rem !important;
+  text-align: center;
+  font: 500 1.05rem/1 system-ui, sans-serif;
+}
+
 @media (max-width: 900px) {
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-toggle input:checked + .auto-bm-switch {
     background: #16a34a !important;

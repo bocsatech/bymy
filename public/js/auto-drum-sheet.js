@@ -376,9 +376,39 @@ export function closeAutoDrumSheet(commit = false) {
     monthScroll,
     dayScroll,
   } = activePortal;
-  if (!wheel && kind !== "split" && kind !== "date3") {
+  if (!wheel && kind !== "split" && kind !== "date3" && kind !== "ym-sheet") {
     /* Standalone sheet — done handler already owns commit. */
     wrap?.classList.remove("is-open", "has-drum-open");
+    trigger?.setAttribute("aria-expanded", "false");
+    root.remove();
+    activePortal = null;
+    document.body.classList.remove("auto-drum-portal-open", "auto-drum-sheet-open");
+    return;
+  }
+  if (kind === "ym-sheet") {
+    if (commit && yearWheel && monthWheel && yearScroll && monthScroll && ring) {
+      let y = nearestPortalItem(yearScroll, ring)?.dataset.value ?? "";
+      let m = nearestPortalItem(monthScroll, ring)?.dataset.value ?? "";
+      if (!y) m = "";
+      else if (!m) {
+        const firstMonth = [...monthWheel.querySelectorAll(".immo-wheel-opt")]
+          .map((o) => o.dataset.value ?? "")
+          .find((v) => v !== "");
+        m = firstMonth || "";
+      }
+      if (m) m = matchWheelOptionValue(monthWheel, m);
+      setWheelValue(yearWheel, y);
+      setWheelValue(monthWheel, m);
+      syncDrumWheelDisplay(yearWheel);
+      syncDrumWheelDisplay(monthWheel);
+      yearWheel.dispatchEvent(new CustomEvent("immo-wheel-change", { bubbles: true, detail: { value: y } }));
+      monthWheel.dispatchEvent(new CustomEvent("immo-wheel-change", { bubbles: true, detail: { value: m } }));
+    }
+    wrap?.classList.remove("is-open", "has-drum-open");
+    wrap?.closest(".immo-dual-range, .ad-form-split-ym, .immo-triple-date")?.classList.remove("has-drum-open");
+    document
+      .querySelectorAll(".immo-dual-range__half.is-drum-active, .immo-triple-date__half.is-drum-active")
+      .forEach((el) => el.classList.remove("is-drum-active"));
     trigger?.setAttribute("aria-expanded", "false");
     root.remove();
     activePortal = null;
@@ -765,6 +795,209 @@ function mountSheetPortalChrome(root, { stage, wrap, trigger, ring }) {
   applySheetStageLayout(stage);
   requestAnimationFrame(() => {
     ring?.style.setProperty("--immo-drum-ring-w", `${Math.min(420, Math.floor(window.innerWidth - 32))}px`);
+  });
+}
+
+function ymOptionRows(wheel, emptyLabel) {
+  const rows = wheelOptionRows(wheel, emptyLabel).filter((r) => String(r.value ?? "") !== "" || r.label);
+  const filled = rows.filter((r) => String(r.value ?? "") !== "");
+  return [{ value: "", label: emptyLabel }, ...filled];
+}
+
+/**
+ * Ad-form év|hó: gyártmány sheet chrome + kereső-stílusú 2 oszlopos dobkerék (nap nélkül).
+ */
+export function openYmDualSheet(yearWheel, monthWheel, trigger, { title = null } = {}) {
+  if (!yearWheel || !monthWheel || !trigger) return;
+  closeAutoDrumSheet(false);
+  closeAllInlineDrums(false);
+
+  const dual =
+    yearWheel.closest(".immo-dual-range, .ad-form-split-ym, .immo-triple-date") ||
+    monthWheel.closest(".immo-dual-range, .ad-form-split-ym, .immo-triple-date");
+  const wrap = yearWheel.closest(".immo-wheel-wrap") || monthWheel.closest(".immo-wheel-wrap");
+  const sheetTitle =
+    title ||
+    dual?.querySelector(".immo-dual-range__title, .immo-triple-date__title, .immo-label")?.textContent?.trim() ||
+    trigger.getAttribute("aria-label") ||
+    "Dátum";
+  const yearEmpty =
+    dual?.querySelector(".immo-dual-range__half--min .immo-wheel-trigger, .immo-triple-date__half--year .immo-wheel-trigger")
+      ?.dataset.emptyLabel || "év";
+  const monthEmpty =
+    dual?.querySelector(".immo-dual-range__half--max .immo-wheel-trigger, .immo-triple-date__half--month .immo-wheel-trigger")
+      ?.dataset.emptyLabel || "hó";
+
+  let pendingY = String(readWheel(yearWheel) ?? "");
+  let pendingM = String(readWheel(monthWheel) ?? "");
+
+  const { root, stage, ring, sheetScroll, doneBtn, closeBtn } = createSheetPortalShell(sheetTitle);
+  root.classList.add("auto-drum-portal--ym");
+  document.body.classList.add("auto-drum-sheet-open");
+
+  ring.innerHTML = `
+    <div class="auto-drum-ym__chips">
+      <button type="button" class="auto-drum-split__chip auto-drum-ym__chip" aria-label="Dátum">
+        <span class="auto-drum-split__chip-label"></span>
+        <span class="auto-drum-split__chip-clear" hidden aria-hidden="true">×</span>
+      </button>
+    </div>
+    <div class="auto-drum-ym__heads" aria-hidden="true"><span>Év</span><span>Hó</span></div>
+    <div class="auto-drum-ym__body">
+      <div class="immo-drum-inline-highlight auto-drum-ym__highlight" aria-hidden="true"></div>
+      <div class="auto-drum-ym__cols">
+        <div class="auto-drum-split__col" data-half="year">
+          <div class="auto-drum-portal__scroll auto-drum-split__scroll immo-drum-inline-scroll" tabindex="-1"></div>
+        </div>
+        <div class="auto-drum-split__col" data-half="month">
+          <div class="auto-drum-portal__scroll auto-drum-split__scroll immo-drum-inline-scroll" tabindex="-1"></div>
+        </div>
+      </div>
+    </div>`;
+
+  if (sheetScroll) {
+    sheetScroll.style.overflow = "hidden";
+    sheetScroll.scrollTop = 0;
+  }
+  ring.style.overflow = "hidden";
+
+  const highlight = root.querySelector(".auto-drum-ym__highlight");
+  const yearScroll = root.querySelector('.auto-drum-split__col[data-half="year"] .auto-drum-split__scroll');
+  const monthScroll = root.querySelector('.auto-drum-split__col[data-half="month"] .auto-drum-split__scroll');
+  const chip = root.querySelector(".auto-drum-ym__chip");
+
+  function itemHtml(row) {
+    return `<div class="immo-drum-inline-item" data-value="${escapeHtml(row.value)}"><span class="immo-drum-inline-text">${escapeHtml(row.label)}</span></div>`;
+  }
+
+  yearScroll.innerHTML = ymOptionRows(yearWheel, yearEmpty).map(itemHtml).join("");
+  monthScroll.innerHTML = ymOptionRows(monthWheel, monthEmpty).map(itemHtml).join("");
+
+  function syncChip() {
+    const label = chip.querySelector(".auto-drum-split__chip-label");
+    const clear = chip.querySelector(".auto-drum-split__chip-clear");
+    if (!pendingY) {
+      label.textContent = yearEmpty;
+      clear.hidden = true;
+    } else {
+      const mLabel = pendingM ? pad2(pendingM) || pendingM : "—";
+      label.textContent = `${pendingY}. ${mLabel}`;
+      clear.hidden = false;
+    }
+    clear.setAttribute("aria-hidden", clear.hidden ? "true" : "false");
+  }
+
+  function paintBoth() {
+    cancelAnimationFrame(paintFrame);
+    paintFrame = requestAnimationFrame(() => {
+      paintSplitColSync(yearScroll, highlight);
+      paintSplitColSync(monthScroll, highlight);
+      pendingY = nearestPortalItem(yearScroll, highlight)?.dataset.value ?? "";
+      pendingM = nearestPortalItem(monthScroll, highlight)?.dataset.value ?? "";
+      syncChip();
+    });
+  }
+
+  function scrollHalfToValue(scrollEl, value) {
+    const start =
+      [...scrollEl.querySelectorAll(".immo-drum-inline-item")].find((el) => (el.dataset.value ?? "") === value) ||
+      scrollEl.querySelector('.immo-drum-inline-item[data-value=""]') ||
+      scrollEl.querySelector(".immo-drum-inline-item");
+    scrollToPortalItem(scrollEl, highlight, start);
+  }
+
+  function bindCol(scrollEl) {
+    scrollEl.addEventListener("scroll", () => paintBoth(), { passive: true });
+    let startY = 0;
+    let moved = false;
+    scrollEl.addEventListener(
+      "touchstart",
+      (event) => {
+        startY = event.touches?.[0]?.clientY ?? 0;
+        moved = false;
+      },
+      { passive: true }
+    );
+    scrollEl.addEventListener(
+      "touchmove",
+      (event) => {
+        const y = event.touches?.[0]?.clientY ?? startY;
+        if (Math.abs(y - startY) > 4) moved = true;
+      },
+      { passive: true }
+    );
+    const snapEnd = () => {
+      if (!moved) return;
+      const snap = nearestPortalItem(scrollEl, highlight);
+      if (snap) scrollToPortalItem(scrollEl, highlight, snap);
+      paintBoth();
+    };
+    scrollEl.addEventListener("touchend", snapEnd);
+    scrollEl.addEventListener("touchcancel", snapEnd);
+    scrollEl.querySelectorAll(".immo-drum-inline-item").forEach((item) => {
+      let tapStart = null;
+      item.addEventListener(
+        "pointerdown",
+        (event) => {
+          tapStart = { x: event.clientX, y: event.clientY };
+        },
+        { passive: true }
+      );
+      item.addEventListener("click", (event) => {
+        event.stopPropagation();
+        if (tapStart) {
+          const dx = Math.abs(event.clientX - tapStart.x);
+          const dy = Math.abs(event.clientY - tapStart.y);
+          if (dx > 10 || dy > 10) return;
+        }
+        scrollToPortalItem(scrollEl, highlight, item);
+        paintBoth();
+      });
+    });
+  }
+
+  bindCol(yearScroll);
+  bindCol(monthScroll);
+
+  chip.addEventListener("click", (event) => {
+    if (!event.target.closest(".auto-drum-split__chip-clear")) return;
+    event.preventDefault();
+    event.stopPropagation();
+    pendingY = "";
+    pendingM = "";
+    scrollHalfToValue(yearScroll, "");
+    scrollHalfToValue(monthScroll, "");
+    paintBoth();
+  });
+
+  root.querySelector(".auto-drum-portal__backdrop")?.addEventListener("click", () => closeAutoDrumSheet(false));
+  closeBtn?.addEventListener("click", () => closeAutoDrumSheet(false));
+  doneBtn?.addEventListener("click", () => closeAutoDrumSheet(true));
+
+  mountSheetPortalChrome(root, { stage, wrap, trigger, ring });
+  dual?.classList.add("has-drum-open");
+  dual
+    ?.querySelectorAll?.(".immo-dual-range__half, .immo-triple-date__half, .immo-schema-cell")
+    ?.forEach?.((half) => half.classList.add("is-drum-active"));
+
+  activePortal = {
+    kind: "ym-sheet",
+    root,
+    wheel: yearWheel,
+    yearWheel,
+    monthWheel,
+    yearScroll,
+    monthScroll,
+    scrollEl: yearScroll,
+    ring: highlight,
+    wrap,
+    trigger,
+  };
+
+  requestAnimationFrame(() => {
+    scrollHalfToValue(yearScroll, pendingY);
+    scrollHalfToValue(monthScroll, pendingM);
+    paintBoth();
   });
 }
 

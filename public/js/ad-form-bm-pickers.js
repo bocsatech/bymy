@@ -2380,7 +2380,7 @@ async function mountAdBrandModelCombined(form, catalog) {
   }
 
   const { fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=immoClearAll1");
-  const { openBrandModelCatalogSheet } = await import("./auto-drum-sheet.js?v=bmSheet17");
+  const { openBrandModelCatalogSheet } = await import("./auto-drum-sheet.js?v=bmSheet18");
   const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
 
   const brands = [...(catalog?.gyartmanyok || [])].sort((a, b) =>
@@ -2543,7 +2543,7 @@ async function mountAdSelectDrum(select, {
   select.dataset.adBmDrum = "1";
 
   const { fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=immoClearAll1");
-  const { openStandaloneSwitchSheet, bindAutoDrumSheet } = await import("./auto-drum-sheet.js?v=bmSheet17");
+  const { openStandaloneSwitchSheet, bindAutoDrumSheet } = await import("./auto-drum-sheet.js?v=bmSheet18");
   const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
 
   const wrap = document.createElement("div");
@@ -2762,7 +2762,7 @@ async function mountAdSplitYmDrum({
   }
 
   const { fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=immoClearAll1");
-  const { openStandaloneSwitchSheet } = await import("./auto-drum-sheet.js?v=bmSheet17");
+  const { openYmDualSheet } = await import("./auto-drum-sheet.js?v=bmSheet18");
   const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
 
   const yearOpts = optionsFromSelect(ev, emptyYear);
@@ -2848,11 +2848,11 @@ async function mountAdSplitYmDrum({
   ev.dataset.adBmPicker = "1";
   honap.dataset.adBmPicker = "1";
 
-  /* Kapcsolós sheet (mint gyártmány) — év és hónap külön */
-  [
-    { part: minHalf, select: ev, options: yearOpts, emptyLabel: emptyYear, sheetTitle: `${title} — év` },
-    { part: maxHalf, select: honap, options: monthOpts, emptyLabel: emptyMonth, sheetTitle: `${title} — hónap` },
-  ].forEach(({ part, select, options, emptyLabel, sheetTitle }) => {
+  /* Egy közös év|hó sheet (gyártmány chrome) — bármelyik cella nyitja */
+  const openShared = (triggerBtn) => {
+    openYmDualSheet(minHalf.wheel(), maxHalf.wheel(), triggerBtn, { title });
+  };
+  [minHalf, maxHalf].forEach((part) => {
     const trigger = part.half.querySelector(".immo-wheel-trigger");
     if (!trigger) return;
     const next = trigger.cloneNode(true);
@@ -2863,182 +2863,36 @@ async function mountAdSplitYmDrum({
     next.addEventListener("click", (event) => {
       event.preventDefault();
       event.stopPropagation();
-      const live = part.wheel();
-      const current = String(readWheel(live) ?? "").trim();
-      openStandaloneSwitchSheet({
-        trigger: next,
-        title: sheetTitle,
-        emptyLabel,
-        items: options.filter((o) => o.value !== ""),
-        initialSelected: current ? [current] : [],
-        onDone: (list) => {
-          const value = list?.length ? String(list[list.length - 1]) : "";
-          setWheelValue(live, value);
-          syncSelectToValue(select, value);
-          syncDrumWheelDisplay(live);
-        },
-      });
+      openShared(next);
     });
   });
 }
 
 /**
- * Műszaki érvényesség: kereső-stílusú 3 oszlopos osztott dobkerék.
- * Év/hó/nap opciók a meglévő selectekből — tartalom nem módosul.
+ * Műszaki érvényesség: ugyanaz az év|hó osztott sheet, nap nélkül.
  */
 async function mountMuszakiDateTripleDrum(form) {
   const ev = document.getElementById("muszaki_ev");
   const honap = document.getElementById("muszaki_honap");
-  if (!form || !ev || !honap || ev.dataset.adMuszakiDate === "1") return;
+  if (!form || !ev || !honap || ev.dataset.adMuszakiDate === "1" || ev.dataset.adSplitYm === "1") return;
   if (!isBmPickerAdForm(form)) return;
 
-  const field = ev.closest(".labeled-field, .md-outlined, .ad-layout-item") || ev.parentElement;
-  if (!field) return;
-  if (field.querySelector(".ad-form-muszaki-date")) {
+  ensureYearSelectFilled(ev, YEAR_SELECT_MAX);
+  await mountAdSplitYmDrum({
+    evId: "muszaki_ev",
+    honapId: "muszaki_honap",
+    title: "Műszaki érvényesség",
+    emptyYear: "év",
+    emptyMonth: "hó",
+    yearMax: YEAR_SELECT_MAX,
+  });
+  if (ev.dataset.adSplitYm === "1") {
     ev.dataset.adMuszakiDate = "1";
     honap.dataset.adMuszakiDate = "1";
-    return;
+    const field = ev.closest(".labeled-field, .md-outlined, .ad-layout-item");
+    const nativeLabel = field?.querySelector('label[for="muszaki_ev"], label[for="muszaki_honap"]');
+    if (nativeLabel) nativeLabel.classList.add("ad-form-split-ym__native-label");
   }
-
-  ensureYearSelectFilled(ev, YEAR_SELECT_MAX);
-  const nap = ensureMuszakiNapSelect(honap);
-
-  const { fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=immoClearAll1");
-  const { openStandaloneSwitchSheet } = await import("./auto-drum-sheet.js?v=bmSheet17");
-  const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
-
-  const emptyYear = "év";
-  const emptyMonth = "hó";
-  const emptyDay = "nap";
-  const yearOpts = optionsFromSelect(ev, emptyYear);
-  const monthOpts = optionsFromSelect(honap, emptyMonth);
-  const dayOpts = optionsFromSelect(nap, emptyDay);
-
-  const block = document.createElement("div");
-  block.className = "immo-triple-date-block ad-form-muszaki-date ad-form-split-ym";
-  block.dataset.range = "muszaki";
-  block.dataset.evId = "muszaki_ev";
-  block.dataset.honapId = "muszaki_honap";
-
-  const triple = document.createElement("div");
-  triple.className = "immo-triple-date ad-form-muszaki-date__triple";
-  triple.dataset.range = "muszaki";
-  triple.setAttribute("aria-label", "Műszaki érvényesség");
-
-  const title = document.createElement("span");
-  title.className = "immo-label immo-triple-date__title";
-  title.textContent = "Műszaki érvényesség";
-  triple.appendChild(title);
-
-  function makeHalf(name, filterKey, options, empty, halfClass) {
-    const half = document.createElement("div");
-    half.className = `immo-triple-date__half immo-schema-cell ${halfClass}`;
-    half.innerHTML = `<div class="immo-wheel-wrap">
-      <div class="immo-wheel" data-wheel="${name}" data-filter-key="${filterKey}" role="listbox" aria-label="${empty}"></div>
-    </div>`;
-    const wheel = half.querySelector("[data-wheel]");
-    fillWheel(
-      wheel,
-      options.filter((o) => o.value !== ""),
-      { emptyLabel: empty }
-    );
-    let live = initDrumWheel(wheel, { emptyLabel: empty, openMode: "portal", multiple: false });
-    syncDrumWheelDisplay(live);
-    live = half.querySelector("[data-wheel]") || live;
-    const trigger = half.querySelector(".immo-wheel-trigger");
-    if (trigger) {
-      trigger.dataset.emptyLabel = empty;
-      trigger.hidden = false;
-      trigger.removeAttribute("aria-hidden");
-    }
-    return { half, wheel: () => half.querySelector("[data-wheel]") || live, options, empty };
-  }
-
-  const y = makeHalf("muszaki_ev", "muszaki_ev", yearOpts, emptyYear, "immo-triple-date__half--year");
-  const m = makeHalf("muszaki_honap", "muszaki_honap", monthOpts, emptyMonth, "immo-triple-date__half--month");
-  const d = makeHalf("muszaki_nap", "muszaki_nap", dayOpts, emptyDay, "immo-triple-date__half--day");
-  triple.appendChild(y.half);
-  triple.appendChild(m.half);
-  triple.appendChild(d.half);
-  block.appendChild(triple);
-
-  hideNativeSelect(ev);
-  hideNativeSelect(honap);
-  hideNativeSelect(nap);
-  stashNativeSelect(ev, block);
-  stashNativeSelect(honap, block);
-  stashNativeSelect(nap, block);
-  field.classList.add("ad-form-bm-anchor");
-
-  const inline = field.querySelector(".inline-2");
-  if (inline) inline.replaceWith(block);
-  else field.appendChild(block);
-
-  ev.dataset.adMuszakiDate = "1";
-  honap.dataset.adMuszakiDate = "1";
-  nap.dataset.adMuszakiDate = "1";
-
-  if (ev.value) setWheelValue(y.wheel(), ev.value);
-  if (honap.value) setWheelValue(m.wheel(), honap.value);
-  if (nap.value) setWheelValue(d.wheel(), nap.value);
-  [y, m, d].forEach((part) => syncDrumWheelDisplay(part.wheel()));
-
-  const syncOut = () => {
-    syncSelectToValue(ev, readWheel(y.wheel()));
-    syncSelectToValue(honap, readWheel(m.wheel()));
-    syncSelectToValue(nap, readWheel(d.wheel()));
-  };
-
-  [y, m, d].forEach((part) => {
-    part.wheel().addEventListener("immo-wheel-change", syncOut);
-  });
-
-  /* Kapcsolós sheet (mint gyártmány) — év / hónap / nap külön */
-  [
-    { part: y, select: ev, sheetTitle: "Műszaki érvényesség — év" },
-    { part: m, select: honap, sheetTitle: "Műszaki érvényesség — hónap" },
-    { part: d, select: nap, sheetTitle: "Műszaki érvényesség — nap" },
-  ].forEach(({ part, select, sheetTitle }) => {
-    const trigger = part.half.querySelector(".immo-wheel-trigger");
-    if (!trigger) return;
-    const next = trigger.cloneNode(true);
-    next.dataset.sheetBound = "1";
-    next.hidden = false;
-    next.removeAttribute("aria-hidden");
-    trigger.replaceWith(next);
-    next.addEventListener("click", (event) => {
-      event.preventDefault();
-      event.stopPropagation();
-      const live = part.wheel();
-      const current = String(readWheel(live) ?? "").trim();
-      openStandaloneSwitchSheet({
-        trigger: next,
-        title: sheetTitle,
-        emptyLabel: part.empty,
-        items: part.options.filter((o) => o.value !== ""),
-        initialSelected: current ? [current] : [],
-        onDone: (list) => {
-          const value = list?.length ? String(list[list.length - 1]) : "";
-          setWheelValue(live, value);
-          syncSelectToValue(select, value);
-          syncDrumWheelDisplay(live);
-        },
-      });
-    });
-  });
-
-  const onExternal = () => {
-    setWheelValue(y.wheel(), ev.value || "");
-    setWheelValue(m.wheel(), honap.value || "");
-    setWheelValue(d.wheel(), nap.value || "");
-    [y, m, d].forEach((part) => syncDrumWheelDisplay(part.wheel()));
-  };
-  ev.addEventListener("change", onExternal);
-  honap.addEventListener("change", onExternal);
-  nap.addEventListener("change", onExternal);
-
-  const nativeLabel = field.querySelector('label[for="muszaki_ev"], label[for="muszaki_honap"]');
-  if (nativeLabel) nativeLabel.classList.add("ad-form-split-ym__native-label");
 }
 
 export async function mountAdFormBmPickers(form, catalog = null) {

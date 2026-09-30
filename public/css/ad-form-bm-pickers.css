@@ -702,11 +702,25 @@ body.site-app[data-site-page="hirdetesfeladas"] .ad-form-toggle-list .auto-bm-to
   transform: translateX(18px);
 }
 
-/* === Egységes cella (168px = városi fogyasztás); .ad-form-cell osztály a JS-ből === */
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .labeled-field,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-layout-item.labeled-field,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .md-outlined.labeled-field {
-  align-items: flex-start !important;
+/* Gyártmány+modell: egy dobkerék — a külön modell mező rejtve.
+   site-app .ad-layout-item.labeled-field { display:grid !important } felülírja a gyengébb szabályt. */
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .labeled-field.ad-form-bm-modell-nested,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-layout-item.ad-form-bm-modell-nested,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-layout-item.labeled-field.ad-form-bm-modell-nested {
+  display: none !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  border: 0 !important;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field--brand-model {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  flex: 1 1 auto !important;
 }
 
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-cell {

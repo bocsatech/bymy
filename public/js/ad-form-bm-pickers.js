@@ -2141,19 +2141,51 @@ export function unmountAdFormBmPickers(form) {
 
 function unmountAdBrandModelCombined(form) {
   const root = form || document;
+  const wraps = [...(root.querySelectorAll?.(".ad-form-bm-field--brand-model") || [])];
+  const gyartmany =
+    document.getElementById("gyartmany") ||
+    wraps.map((w) => w.querySelector?.("#gyartmany")).find(Boolean) ||
+    null;
   const modell = document.getElementById("modell");
   const modellField = modell?.closest(".labeled-field, .md-outlined, .ad-layout-item");
   modellField?.classList.remove("ad-form-bm-modell-nested");
-  root.querySelectorAll?.(".ad-form-bm-field--brand-model").forEach((el) => el.remove());
+
+  /* A native #gyartmany a wrapban van (stash) — wrap.remove() előtt vissza kell tenni, különben eltűnik. */
+  if (gyartmany) {
+    const field =
+      gyartmany.closest(".labeled-field, .md-outlined, .ad-layout-item") ||
+      wraps[0]?.closest(".labeled-field, .md-outlined, .ad-layout-item") ||
+      fieldHost(gyartmany);
+    if (typeof gyartmany._adBmClose === "function") {
+      try {
+        gyartmany._adBmClose();
+      } catch {
+        /* ignore */
+      }
+    }
+    delete gyartmany._adBmClose;
+    delete gyartmany._adBmPanel;
+    delete gyartmany._adBmRefreshSummary;
+    releaseNativeSelect(gyartmany, field);
+    showNativeSelect(gyartmany);
+    restoreHiddenInput(gyartmany);
+    delete gyartmany.dataset.adBmPicker;
+    delete gyartmany.dataset.adBmDrum;
+    delete gyartmany.dataset.adBrandModelCombined;
+  }
+
   if (modell) {
+    delete modell._adBmPanel;
+    delete modell._adBmRefreshSummary;
+    showNativeSelect(modell);
+    restoreHiddenInput(modell);
     delete modell.dataset.adBmPicker;
     delete modell.dataset.adBmDrum;
     delete modell.dataset.adBrandModelNested;
   }
-  const gyartmany = document.getElementById("gyartmany");
-  if (gyartmany) {
-    delete gyartmany.dataset.adBrandModelCombined;
-  }
+
+  wraps.forEach((el) => el.remove());
+  root.querySelectorAll?.(".ad-form-bm-field--brand-model").forEach((el) => el.remove());
 }
 
 function unmountAdSplitYmDrums(form) {
@@ -2282,8 +2314,24 @@ function labelFromHierarchy(categories, value) {
 /**
  * Gyártmány + modell egy dobkeréken (mint a kereső), de csak 1-1 választható.
  */
+function ensureGyartmanySelectInForm(form) {
+  let gyartmany = document.getElementById("gyartmany");
+  if (gyartmany) return gyartmany;
+  const field =
+    form?.querySelector?.('label[for="gyartmany"]')?.closest(".labeled-field, .md-outlined, .ad-layout-item") ||
+    form?.querySelector?.(".field-row--vehicle-ident .labeled-field");
+  if (!field) return null;
+  gyartmany = document.createElement("select");
+  gyartmany.id = "gyartmany";
+  gyartmany.name = "gyartmany";
+  gyartmany.required = true;
+  gyartmany.innerHTML = '<option value="">Válasszon</option>';
+  field.appendChild(gyartmany);
+  return gyartmany;
+}
+
 async function mountAdBrandModelCombined(form, catalog) {
-  const gyartmany = document.getElementById("gyartmany");
+  const gyartmany = ensureGyartmanySelectInForm(form);
   const modell = document.getElementById("modell");
   if (!form || !gyartmany || !modell) return;
   if (gyartmany.dataset.adBrandModelCombined === "1") return;

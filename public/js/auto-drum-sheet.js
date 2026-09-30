@@ -785,14 +785,30 @@ function applySheetStageLayout(stage) {
   stage.style.transform = "translateX(-50%)";
 }
 
-function mountSheetPortalChrome(root, { stage, wrap, trigger, ring }) {
+function mountSheetPortalChrome(root, { stage, wrap, trigger, ring, sheetScroll }) {
   document.body.appendChild(root);
-  document.body.classList.add("auto-drum-portal-open");
+  document.body.classList.add("auto-drum-portal-open", "auto-drum-sheet-open");
   wrap?.classList.add("is-open", "has-drum-open");
   wrap?.closest(".immo-dual-range")?.classList.add("has-drum-open");
   (wrap?.closest(".immo-dual-range__half") || wrap?.closest(".immo-schema-cell"))?.classList.add("is-drum-active");
   trigger?.setAttribute("aria-expanded", "true");
   applySheetStageLayout(stage);
+  const scroll = sheetScroll || root.querySelector?.("[data-sheet-scroll]");
+  if (scroll) {
+    scroll.style.overflow = "hidden";
+    scroll.scrollTop = 0;
+    scroll.addEventListener(
+      "touchmove",
+      (event) => {
+        /* Külső kék ne mozogjon — csak a fehér ring / oszlopok görgessenek */
+        if (event.target?.closest?.(".auto-drum-portal__ring, .auto-drum-split__scroll, .immo-drum-inline-scroll, [data-sheet-list]")) {
+          return;
+        }
+        event.preventDefault();
+      },
+      { passive: false }
+    );
+  }
   requestAnimationFrame(() => {
     ring?.style.setProperty("--immo-drum-ring-w", `${Math.min(420, Math.floor(window.innerWidth - 32))}px`);
   });

@@ -1595,8 +1595,9 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   background: #e8eef3;
   border-radius: 0;
   box-shadow: none;
-  overflow: hidden;
+  overflow: hidden !important;
   position: absolute;
+  touch-action: manipulation;
 }
 
 .auto-drum-portal--sheet .auto-drum-portal__sheet-head {
@@ -1663,32 +1664,35 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   justify-self: end;
 }
 
-/* Külső görgetés: hely a címnek elmegy; utána a fehér a tetején ragad */
+/* Külső terület NEM görget — kék + X/Kész fixen marad; lista a fehér ringben görög */
 .auto-drum-portal--sheet .auto-drum-portal__sheet-scroll {
   position: absolute;
-  inset: 0;
+  left: 0;
+  right: 0;
+  top: var(--sheet-head-h);
+  bottom: 0;
   z-index: 1;
-  overflow-x: hidden;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
+  overflow: hidden !important;
+  overscroll-behavior: none;
   margin: 0;
   padding: 0 1rem;
   box-sizing: border-box;
   background: transparent;
+  touch-action: pan-y;
 }
 
 .auto-drum-portal--sheet .auto-drum-portal__sheet-top-space {
-  height: var(--sheet-head-h);
+  display: none !important;
+  height: 0 !important;
   width: 100%;
   pointer-events: none;
 }
 
-/* Fehér: felcsúszik a kék tetejére, ott sticky; lista bent görög */
+/* Fehér panel: a fejléc alatt fix, bent görög a lista */
 .auto-drum-portal--sheet .auto-drum-portal__ring--sheet,
 .auto-drum-portal--sheet .auto-drum-portal__ring--multi {
-  position: sticky !important;
-  top: 0 !important;
+  position: relative !important;
+  top: auto !important;
   z-index: 2;
   width: 100% !important;
   max-width: 100% !important;
@@ -1699,7 +1703,7 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   margin: 0 !important;
   padding: 0 0 var(--sheet-foot-h) !important;
   border: 0 !important;
-  border-radius: 1.15rem 1.15rem 0 0 !important;
+  border-radius: 1.15rem !important;
   background: #fff !important;
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06) !important;
   overflow-x: hidden !important;
@@ -1733,7 +1737,7 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
 }
 
 .auto-drum-portal--sheet[data-sheet-view="models"] .auto-drum-portal__ring--sheet {
-  border-radius: 1.15rem 1.15rem 0 0 !important;
+  border-radius: 1.15rem !important;
 }
 
 .auto-drum-portal--sheet .auto-drum-portal__toolbar .auto-drum-portal__back,
@@ -1824,6 +1828,12 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
     max-height: 86vh !important;
     border-radius: 1.35rem;
     box-shadow: 0 12px 36px rgba(15, 23, 42, 0.18);
+    overflow: hidden !important;
+  }
+
+  .auto-drum-portal--sheet .auto-drum-portal__sheet-head {
+    position: absolute !important;
+    top: 0 !important;
   }
 }
 

@@ -1,7 +1,7 @@
 import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=immoTipusPick1";
-import { refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=gyartFix1";
+import { refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=dateDrum2";
 import { initTireSizes } from "./tire-sizes-ui.js?v=tireFill1";
-import { applyAdFormDesk } from "./ad-form-desk.js?v=cellAll1";
+import { applyAdFormDesk } from "./ad-form-desk.js?v=dateDrum2";
 import { markImmoPostViewReady } from "./category-picker.js?v=pickerBoot4";
 import {
   DESK_MUSZAKI_CORE_FIELD_KEYS,
@@ -11,8 +11,9 @@ import {
   layoutRowForPinnedBlock,
   placeElectricBlockAfterFuel,
   applyStep1SearchDomOrder,
+  isVehicleStep1Canvas,
   stackVehicleCanvasSingleColumn,
-} from "./ad-form-desk-pinned-blocks.js?v=cellAll1";
+} from "./ad-form-desk-pinned-blocks.js?v=dateDrum2";
 
 function cssEscape(value) {
   if (window.CSS?.escape) return window.CSS.escape(value);
@@ -647,8 +648,7 @@ function syncCanvasOrderFromLayoutCells(form, cells) {
   });
 
   form.querySelectorAll(".ad-layout-canvas").forEach((canvas) => {
-    const step = Number(canvas.closest(".step-panel")?.dataset?.step);
-    stackVehicleCanvasSingleColumn(canvas, { canonicalStep1: step === 1 });
+    stackVehicleCanvasSingleColumn(canvas, { canonicalStep1: isVehicleStep1Canvas(canvas) });
   });
 
   const tireRow = layoutRowForPinnedBlock(cells, TIRE_LAYOUT_GROUP_KEYS);
@@ -1135,8 +1135,7 @@ async function applyAdFormLayout() {
     applyAdFormDesk();
     if (!isImmo) {
       form.querySelectorAll(".ad-layout-canvas").forEach((canvas) => {
-        const step = Number(canvas.closest(".step-panel")?.dataset?.step);
-        stackVehicleCanvasSingleColumn(canvas, { canonicalStep1: step === 1 });
+        stackVehicleCanvasSingleColumn(canvas, { canonicalStep1: isVehicleStep1Canvas(canvas) });
       });
       window.setTimeout(() => {
         stackVehicleCanvasSingleColumn(canvasForStep(form, 1), { canonicalStep1: true });

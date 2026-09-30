@@ -57,10 +57,23 @@ export function deskStep1CanonicalRank(fieldKey) {
   return 900 + (STEP1_RANK.size || 0);
 }
 
+/** Step 1 canvas: data-step, vagy alapadatok mezők (desk reparent után is). */
+export function isVehicleStep1Canvas(canvas) {
+  if (!canvas) return false;
+  const step = Number(canvas.closest?.(".step-panel")?.dataset?.step);
+  if (step === 1) return true;
+  return Boolean(
+    canvas.querySelector?.(
+      "#gyartmany, [data-ad-bm-for='gyartmany'], #gyartasi_ev, .ad-form-split-ym[data-ev-id='gyartasi_ev'], label[for='gyartmany'], label[for='gyartasi_ev']"
+    )
+  );
+}
+
 /** Jármű canvas: 1 oszlop, egyedi sor — közös admin row + span 12 = címke-átfedés. */
 export function stackVehicleCanvasSingleColumn(canvas, { canonicalStep1 = false } = {}) {
   if (!canvas) return;
-  if (canonicalStep1) {
+  const useCanonical = canonicalStep1 || isVehicleStep1Canvas(canvas);
+  if (useCanonical) {
     applyStep1SearchDomOrder(canvas);
   } else {
     const items = [...canvas.children].filter((el) => {

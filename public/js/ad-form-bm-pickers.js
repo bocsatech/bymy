@@ -2190,21 +2190,29 @@ function unmountAdBrandModelCombined(form) {
 
 function unmountAdSplitYmDrums(form) {
   const root = form || document;
-  root.querySelectorAll?.(".ad-form-split-ym").forEach((block) => {
+  root.querySelectorAll?.(".ad-form-split-ym:not(.ad-form-muszaki-date)").forEach((block) => {
     const field = block.closest(".labeled-field, .md-outlined, .ad-layout-item");
     const evId = block.dataset.evId;
     const honapId = block.dataset.honapId;
-    const ev = evId ? document.getElementById(evId) : null;
-    const honap = honapId ? document.getElementById(honapId) : null;
+    const ev =
+      (evId ? document.getElementById(evId) : null) ||
+      block.querySelector?.(`#${CSS.escape?.(evId) || evId}`) ||
+      null;
+    const honap =
+      (honapId ? document.getElementById(honapId) : null) ||
+      block.querySelector?.(`#${CSS.escape?.(honapId) || honapId}`) ||
+      null;
     const inline = document.createElement("div");
     inline.className = "inline-2";
     if (ev) {
+      releaseNativeSelect(ev, field);
       showNativeSelect(ev);
       delete ev.dataset.adBmPicker;
       delete ev.dataset.adSplitYm;
       inline.appendChild(ev);
     }
     if (honap) {
+      releaseNativeSelect(honap, field);
       showNativeSelect(honap);
       delete honap.dataset.adBmPicker;
       delete honap.dataset.adSplitYm;
@@ -2218,25 +2226,31 @@ function unmountAdSplitYmDrums(form) {
 function unmountMuszakiDateTriple(form) {
   const root = form || document;
   const block = root.querySelector?.(".ad-form-muszaki-date");
-  const ev = document.getElementById("muszaki_ev");
-  const honap = document.getElementById("muszaki_honap");
-  const nap = document.getElementById("muszaki_nap");
+  const ev =
+    document.getElementById("muszaki_ev") || block?.querySelector?.("#muszaki_ev") || null;
+  const honap =
+    document.getElementById("muszaki_honap") || block?.querySelector?.("#muszaki_honap") || null;
+  const nap =
+    document.getElementById("muszaki_nap") || block?.querySelector?.("#muszaki_nap") || null;
   if (block) {
     const field = block.closest(".labeled-field, .md-outlined, .ad-layout-item");
     const inline = document.createElement("div");
     inline.className = "inline-2";
     if (ev) {
+      releaseNativeSelect(ev, field);
       showNativeSelect(ev);
       delete ev.dataset.adMuszakiDate;
       inline.appendChild(ev);
     }
     if (honap) {
+      releaseNativeSelect(honap, field);
       showNativeSelect(honap);
       delete honap.dataset.adMuszakiDate;
       inline.appendChild(honap);
     }
     block.replaceWith(inline);
     if (nap) {
+      releaseNativeSelect(nap, field);
       showNativeSelect(nap);
       delete nap.dataset.adMuszakiDate;
       nap.setAttribute("hidden", "");
@@ -2720,6 +2734,11 @@ async function mountAdSplitYmDrum({
 
   const field = ev.closest(".labeled-field, .md-outlined, .ad-layout-item") || ev.parentElement;
   if (!field) return;
+  if (field.querySelector(`.ad-form-split-ym[data-ev-id="${evId}"]`)) {
+    ev.dataset.adSplitYm = "1";
+    honap.dataset.adSplitYm = "1";
+    return;
+  }
 
   if (yearMax !== undefined) {
     ensureYearSelectFilled(ev, yearMax == null ? new Date().getFullYear() : yearMax);
@@ -2730,14 +2749,6 @@ async function mountAdSplitYmDrum({
   const { fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=immoClearAll1");
   const { openAutoDrumSheet } = await import("./auto-drum-sheet.js?v=adFormBmSingle1");
   const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
-
-  ev.dataset.adSplitYm = "1";
-  honap.dataset.adSplitYm = "1";
-  ev.dataset.adBmPicker = "1";
-  honap.dataset.adBmPicker = "1";
-  hideNativeSelect(ev);
-  hideNativeSelect(honap);
-  field.classList.add("ad-form-bm-anchor");
 
   const yearOpts = optionsFromSelect(ev, emptyYear);
   const monthOpts = optionsFromSelect(honap, emptyMonth);
@@ -2779,6 +2790,8 @@ async function mountAdSplitYmDrum({
     if (trigger) {
       trigger.dataset.emptyLabel = emptyLabel;
       if (!select.value) trigger.textContent = emptyLabel;
+      trigger.hidden = false;
+      trigger.removeAttribute("aria-hidden");
     }
     live.addEventListener("immo-wheel-change", () => {
       const w = half.querySelector("[data-wheel]") || live;
@@ -2804,9 +2817,21 @@ async function mountAdSplitYmDrum({
   dual.appendChild(maxHalf.half);
   block.appendChild(dual);
 
+  /* Selecteket előbb stash — inline.replaceWith ne törölje ki a DOM-ból (remount üres címkét hagy). */
+  hideNativeSelect(ev);
+  hideNativeSelect(honap);
+  stashNativeSelect(ev, block);
+  stashNativeSelect(honap, block);
+  field.classList.add("ad-form-bm-anchor");
+
   const inline = field.querySelector(".inline-2");
   if (inline) inline.replaceWith(block);
   else field.appendChild(block);
+
+  ev.dataset.adSplitYm = "1";
+  honap.dataset.adSplitYm = "1";
+  ev.dataset.adBmPicker = "1";
+  honap.dataset.adBmPicker = "1";
 
   /* Mindig osztott portal (év|hó együtt), ne külön single dob. */
   [minHalf, maxHalf].forEach((part) => {
@@ -2814,6 +2839,8 @@ async function mountAdSplitYmDrum({
     if (!trigger) return;
     const next = trigger.cloneNode(true);
     next.dataset.sheetBound = "1";
+    next.hidden = false;
+    next.removeAttribute("aria-hidden");
     trigger.replaceWith(next);
     next.addEventListener("click", (event) => {
       event.preventDefault();
@@ -2834,6 +2861,14 @@ async function mountMuszakiDateTripleDrum(form) {
   if (!form || !ev || !honap || ev.dataset.adMuszakiDate === "1") return;
   if (!isBmPickerAdForm(form)) return;
 
+  const field = ev.closest(".labeled-field, .md-outlined, .ad-layout-item") || ev.parentElement;
+  if (!field) return;
+  if (field.querySelector(".ad-form-muszaki-date")) {
+    ev.dataset.adMuszakiDate = "1";
+    honap.dataset.adMuszakiDate = "1";
+    return;
+  }
+
   ensureYearSelectFilled(ev, YEAR_SELECT_MAX);
   const nap = ensureMuszakiNapSelect(honap);
 
@@ -2842,17 +2877,6 @@ async function mountMuszakiDateTripleDrum(form) {
     "./auto-drum-sheet.js?v=adFormBmSingle1"
   );
   const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
-
-  const field = ev.closest(".labeled-field, .md-outlined, .ad-layout-item") || ev.parentElement;
-  if (!field) return;
-
-  ev.dataset.adMuszakiDate = "1";
-  honap.dataset.adMuszakiDate = "1";
-  nap.dataset.adMuszakiDate = "1";
-  hideNativeSelect(ev);
-  hideNativeSelect(honap);
-  hideNativeSelect(nap);
-  field.classList.add("ad-form-bm-anchor");
 
   const emptyYear = "év";
   const emptyMonth = "hó";
@@ -2864,6 +2888,8 @@ async function mountMuszakiDateTripleDrum(form) {
   const block = document.createElement("div");
   block.className = "immo-triple-date-block ad-form-muszaki-date ad-form-split-ym";
   block.dataset.range = "muszaki";
+  block.dataset.evId = "muszaki_ev";
+  block.dataset.honapId = "muszaki_honap";
 
   const triple = document.createElement("div");
   triple.className = "immo-triple-date ad-form-muszaki-date__triple";
@@ -2908,9 +2934,21 @@ async function mountMuszakiDateTripleDrum(form) {
   triple.appendChild(d.half);
   block.appendChild(triple);
 
+  hideNativeSelect(ev);
+  hideNativeSelect(honap);
+  hideNativeSelect(nap);
+  stashNativeSelect(ev, block);
+  stashNativeSelect(honap, block);
+  stashNativeSelect(nap, block);
+  field.classList.add("ad-form-bm-anchor");
+
   const inline = field.querySelector(".inline-2");
   if (inline) inline.replaceWith(block);
   else field.appendChild(block);
+
+  ev.dataset.adMuszakiDate = "1";
+  honap.dataset.adMuszakiDate = "1";
+  nap.dataset.adMuszakiDate = "1";
 
   if (ev.value) setWheelValue(y.wheel, ev.value);
   if (honap.value) setWheelValue(m.wheel, honap.value);
@@ -2933,6 +2971,8 @@ async function mountMuszakiDateTripleDrum(form) {
     if (!trigger) return;
     const next = trigger.cloneNode(true);
     next.dataset.sheetBound = "1";
+    next.hidden = false;
+    next.removeAttribute("aria-hidden");
     trigger.replaceWith(next);
     next.addEventListener("click", (event) => {
       event.preventDefault();

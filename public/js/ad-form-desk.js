@@ -1,6 +1,10 @@
 import { initAdFormDeskGuide, refreshAdFormDeskGuide, showDeskGuideSlot } from "./ad-form-desk-guide.js?v=adDeskGuide7";
 import { markImmoPostViewReady } from "./category-picker.js?v=pickerBoot4";
-import { applyStep1SearchDomOrder, stackVehicleCanvasSingleColumn } from "./ad-form-desk-pinned-blocks.js?v=cellAll1";
+import {
+  applyStep1SearchDomOrder,
+  isVehicleStep1Canvas,
+  stackVehicleCanvasSingleColumn,
+} from "./ad-form-desk-pinned-blocks.js?v=dateDrum2";
 
 const DESK_MQ = "(min-width: 901px)";
 
@@ -302,9 +306,8 @@ function restackCanvasItems(form) {
   const isImmo =
     form.classList.contains("ad-form--ingatlan") || document.body.classList.contains("ad-vertical-ingatlan");
   form.querySelectorAll(".ad-layout-canvas").forEach((canvas) => {
-    const step = Number(canvas.closest(".step-panel")?.dataset?.step);
     if (!isImmo) {
-      stackVehicleCanvasSingleColumn(canvas, { canonicalStep1: step === 1 });
+      stackVehicleCanvasSingleColumn(canvas, { canonicalStep1: isVehicleStep1Canvas(canvas) });
       return;
     }
     const items = [...canvas.children].filter((el) => {

@@ -7,7 +7,7 @@ const root = process.cwd();
 const PUBLIC = path.join(root, "public");
 const MIME = { ".html":"text/html",".js":"text/javascript",".css":"text/css",".mjs":"text/javascript" };
 const html = `<!DOCTYPE html><html><head>
-<link rel="stylesheet" href="/css/ingatlan-search.css?v=bmSheet3" />
+<link rel="stylesheet" href="/css/ingatlan-search.css?v=bmSheet4" />
 <style>body{margin:0;background:#ddd;font-family:system-ui}</style>
 </head><body class="site-app" data-site-page="hirdetesfeladas">
 <button id="t" class="immo-wheel-trigger">Gyártmány / Modell</button>
@@ -17,7 +17,7 @@ const html = `<!DOCTYPE html><html><head>
 </div>
 <form id="f"></form>
 <script type="module">
-import { openBrandModelCatalogSheet } from "/js/auto-drum-sheet.js?v=bmSheet3";
+import { openBrandModelCatalogSheet } from "/js/auto-drum-sheet.js?v=bmSheet4";
 import { setWheelValue } from "/js/ingatlan-wheels.js?v=immoClearAll1";
 const form = document.getElementById("f");
 form._autoDrumCatalog = { gyartmanyok: ["BMW","Audi","Mercedes-Benz"], modellek: { BMW:["320","X5"], Audi:["A4"] } };

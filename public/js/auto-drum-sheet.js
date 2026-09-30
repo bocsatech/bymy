@@ -828,7 +828,10 @@ export function openBrandModelCatalogSheet(brandWheel, trigger, wrap, emptyLabel
     syncToolbarChrome();
     if (sectionEl) sectionEl.textContent = "Népszerű gyártmányok";
     root.setAttribute("aria-label", "Gyártmány / Modell");
-    if (sheetScroll) sheetScroll.scrollTop = 0;
+    if (sheetScroll) {
+      sheetScroll.scrollTop = 0;
+      root.classList.remove("is-scrolled");
+    }
     const selected = singleSelect
       ? (() => {
           const v = String(readWheel(brandWheel) ?? "").trim();
@@ -898,7 +901,10 @@ export function openBrandModelCatalogSheet(brandWheel, trigger, wrap, emptyLabel
     syncToolbarChrome();
     if (sectionEl) sectionEl.textContent = "Modellek";
     root.setAttribute("aria-label", `Modell — ${brand}`);
-    if (sheetScroll) sheetScroll.scrollTop = 0;
+    if (sheetScroll) {
+      sheetScroll.scrollTop = 0;
+      root.classList.remove("is-scrolled");
+    }
     const emptyRow = { value: "", label: singleSelect ? "—" : "Mindegy" };
     const rows = [emptyRow, ...modelsForBrandFromCatalog(catalog, brand)];
     scrollEl.innerHTML = rows.map((row) => switchRowHtml(row)).join("");
@@ -941,7 +947,10 @@ export function openBrandModelCatalogSheet(brandWheel, trigger, wrap, emptyLabel
   doneBtn?.addEventListener("click", () => closeAutoDrumSheet(true));
   sheetScroll?.addEventListener(
     "scroll",
-    () => paintSwitchList(scrollEl, view === "models" ? modelWheel : brandWheel),
+    () => {
+      root.classList.toggle("is-scrolled", (sheetScroll.scrollTop || 0) > 10);
+      paintSwitchList(scrollEl, view === "models" ? modelWheel : brandWheel);
+    },
     { passive: true }
   );
 

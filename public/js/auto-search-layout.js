@@ -62,6 +62,12 @@ const AKKU_PCT_STEPS = (() => {
   for (let pct = 1; pct <= 100; pct += 1) values.push(pct);
   return values;
 })();
+const DC_KW_STEPS = (() => {
+  const values = [];
+  for (let kw = 10; kw <= 300; kw += 10) values.push(kw);
+  for (let kw = 350; kw <= 1000; kw += 50) values.push(kw);
+  return values;
+})();
 
 const FREE_NUMBER_FIELDS = new Set([
   "fogyasztas_varosi",
@@ -452,6 +458,9 @@ export function optionsForAutoFilterKey(filterKey, emptyLabel = "Mindegy") {
   }
   if (key === "jelenlegi_akkukapacitas_tol" || key === "jelenlegi_akkukapacitas_ig") {
     return withEmpty(AKKU_PCT_STEPS.map((n) => ({ value: String(n), label: `${n} %` })));
+  }
+  if (key === "dc_toltesi_teljesitmeny_tol" || key === "dc_toltesi_teljesitmeny_ig") {
+    return withEmpty(DC_KW_STEPS.map((n) => ({ value: String(n), label: `${n} kW` })));
   }
   if (key === "uzemanyagQuick" || key === "uzemanyag") {
     return withEmpty(flattenUzemanyagOptions().map((v) => ({ value: v, label: v })));

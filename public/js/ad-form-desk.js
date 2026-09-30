@@ -173,16 +173,19 @@ function openSubAccordionInExtrak(form, activeAcc) {
 }
 
 function scrollDeskMainAccordionToStart(form, accId) {
-  const acc = form.querySelector(`[data-desk-acc="${accId}"]:not(.auto-desk-acc--sub)`);
-  if (!acc?.classList.contains("is-open")) return;
-  /* Mindig az oldal tetejét mutassa kategória nyitáskor */
-  window.scrollTo({ top: 0, behavior: "smooth" });
+  const acc = form?.querySelector?.(`[data-desk-acc="${accId}"]:not(.auto-desk-acc--sub)`);
+  if (accId && acc && !acc.classList.contains("is-open")) return;
+  window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  document.documentElement.scrollTop = 0;
+  document.body.scrollTop = 0;
 }
 
-/** Extrák almenü lenyitás: szintén az oldal tetejére. */
+/** Extrák almenü: szintén az oldal teteje. */
 function scrollDeskExtrakSubAccordionToStart(subAcc) {
-  if (!subAcc?.classList.contains("is-open")) return;
-  window.scrollTo({ top: 0, behavior: "smooth" });
+  if (subAcc && !subAcc.classList.contains("is-open")) return;
+  window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  document.documentElement.scrollTop = 0;
+  document.body.scrollTop = 0;
 }
 
 /** Középső útmutató keret vízszintesen a nyitott fő accordion fejlécével egy magasságban (Extrák stb.). */
@@ -601,6 +604,7 @@ function applyAdFormDesk({ openStep = null, scrollToAccordion = null } = {}) {
       requestAnimationFrame(() => {
         scrollDeskMainAccordionToStart(form, scrollId);
         afterDeskGuideAlign(form, scrollId);
+        window.setTimeout(() => scrollDeskMainAccordionToStart(form, scrollId), 50);
       });
     });
   }
@@ -631,6 +635,7 @@ function bindDeskEvents() {
           requestAnimationFrame(() => {
             scrollDeskExtrakSubAccordionToStart(subAcc);
             afterDeskGuideAlign(form, "extrak");
+            window.setTimeout(() => scrollDeskExtrakSubAccordionToStart(subAcc), 50);
           });
         });
       }
@@ -656,6 +661,7 @@ function bindDeskEvents() {
       requestAnimationFrame(() => {
         scrollDeskMainAccordionToStart(form, id);
         afterDeskGuideAlign(form, id);
+        window.setTimeout(() => scrollDeskMainAccordionToStart(form, id), 50);
       });
     });
   });
@@ -691,6 +697,7 @@ function bindDeskEvents() {
         requestAnimationFrame(() => {
           scrollDeskMainAccordionToStart(form, accId);
           afterDeskGuideAlign(form, accId);
+          window.setTimeout(() => scrollDeskMainAccordionToStart(form, accId), 50);
         });
       });
     }

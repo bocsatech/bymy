@@ -6,8 +6,8 @@ import {
   syncDrumWheelDisplay,
   closeAllInlineDrums,
 } from "./immo-drum-picker.js?v=immoClear1";
-import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=brandDrum19";
-import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=dcKwDrum1";
+import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=brandDrum20";
+import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=hatotavDrum1";
 
 const MOBILE_MQ = "(max-width: 900px)";
 const TYPEAHEAD_CLEAR_MS = 2500;
@@ -147,6 +147,15 @@ const DUAL_RANGES = [
     tol: "dc_toltesi_teljesitmeny_tol",
     ig: "dc_toltesi_teljesitmeny_ig",
     unit: "kW",
+  },
+  {
+    fieldKey: "hatotav",
+    id: "hatotav",
+    title: "WLTP hatótáv",
+    ariaLabel: "WLTP hatótáv tartomány",
+    tol: "hatotav_tol",
+    ig: "hatotav_ig",
+    unit: "km",
   },
 ];
 

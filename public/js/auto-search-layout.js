@@ -68,6 +68,8 @@ const DC_KW_STEPS = (() => {
   for (let kw = 350; kw <= 1000; kw += 50) values.push(kw);
   return values;
 })();
+/** 10…300 /10, majd 350…1000 /50 — DC kW, WLTP km, stb. */
+const STEPS_10_300_50_1000 = DC_KW_STEPS;
 
 const FREE_NUMBER_FIELDS = new Set([
   "fogyasztas_varosi",
@@ -461,6 +463,9 @@ export function optionsForAutoFilterKey(filterKey, emptyLabel = "Mindegy") {
   }
   if (key === "dc_toltesi_teljesitmeny_tol" || key === "dc_toltesi_teljesitmeny_ig") {
     return withEmpty(DC_KW_STEPS.map((n) => ({ value: String(n), label: `${n} kW` })));
+  }
+  if (key === "hatotav_tol" || key === "hatotav_ig") {
+    return withEmpty(STEPS_10_300_50_1000.map((n) => ({ value: String(n), label: `${n} km` })));
   }
   if (key === "uzemanyagQuick" || key === "uzemanyag") {
     return withEmpty(flattenUzemanyagOptions().map((v) => ({ value: v, label: v })));

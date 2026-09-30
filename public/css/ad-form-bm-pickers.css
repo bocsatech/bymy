@@ -1095,41 +1095,72 @@ body.site-app[data-site-page="hirdetesfeladas"] #tire-sizes-card .tire-row selec
 }
 
 
-/* === Demó-pontos Alapadatok (Használt autók / Gebrauchtwagen felirat nélkül) === */
+/* === Demó-pontos Alapadatok: EGY világoskék felület (nincs szürke/fehér/kék sáv) === */
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-layout-canvas:has(> .ad-form-alap-card),
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-layout-canvas:has(> .ad-form-alap-brand-block) {
   gap: 1.35rem !important;
-  padding: 0.25rem 0 0.5rem !important;
-  background: transparent !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  background: #e8eef3 !important;
 }
 
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .auto-desk-acc[data-desk-acc="alap"] {
+/* Desk accordion: ne legyen fehér panel / keret / rés a kék felett */
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .auto-desk-acc[data-desk-acc="alap"],
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .auto-desk-acc[data-desk-acc="alap"].is-open {
   border: 0 !important;
-  background: transparent !important;
+  background: #e8eef3 !important;
   border-radius: 0 !important;
   box-shadow: none !important;
+  margin: 0 !important;
+  overflow: hidden !important;
 }
 
 body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .auto-desk-acc[data-desk-acc="alap"] > .auto-desk-acc__head {
   display: none !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: 0 !important;
 }
 
-/* Világoskék demó háttér — desk accordion ÉS mobil step1 */
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .auto-desk-acc[data-desk-acc="alap"].is-open > .auto-desk-acc__body,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="1"]:has(.ad-form-alap-card),
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="1"]:has(.ad-form-alap-brand-block) {
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .auto-desk-acc[data-desk-acc="alap"].is-open > .auto-desk-acc__body {
+  display: flex !important;
+  flex-direction: column !important;
   background: #e8eef3 !important;
   padding: 1rem 1rem 1.25rem !important;
+  margin: 0 !important;
+  gap: 0 !important;
+  border: 0 !important;
+}
+
+/* Step1 + fehér .card héj is ugyanaz a kék — ne legyen középső fehér sáv */
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="1"]:has(.ad-form-alap-card),
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="1"]:has(.ad-form-alap-brand-block),
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="1"]:has(.ad-form-alap-card) > .card,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="1"]:has(.ad-form-alap-brand-block) > .card,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="1"]:has(.ad-form-alap-card) > .card > .card-body,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="1"]:has(.ad-form-alap-brand-block) > .card > .card-body {
+  background: #e8eef3 !important;
+  border: 0 !important;
+  box-shadow: none !important;
   border-radius: 0 !important;
+  margin: 0 !important;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="1"]:has(.ad-form-alap-card),
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="1"]:has(.ad-form-alap-brand-block) {
+  padding: 0 !important;
+  gap: 0 !important;
 }
 
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="1"] > .import-step-label {
   display: none !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="1"] .ad-layout-canvas:has(> .ad-form-alap-card),
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="1"] .ad-layout-canvas:has(> .ad-form-alap-brand-block) {
-  background: transparent !important;
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="1"]:has(.ad-form-alap-card) > .card > .card-body,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="1"]:has(.ad-form-alap-brand-block) > .card > .card-body {
+  padding: 0 !important;
 }
 
 /* Gyártmány pill a világoskék hátteren */

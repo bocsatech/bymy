@@ -19,22 +19,29 @@ const fixtureHtml = `<!DOCTYPE html>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="/css/ingatlan-search.css" />
-  <link rel="stylesheet" href="/css/ad-form-bm-pickers.css?v=demoExact2" />
-  <link rel="stylesheet" href="/css/ad-form-desk.css?v=demoExact2" />
+  <link rel="stylesheet" href="/css/ad-form-bm-pickers.css?v=demoExact3" />
+  <link rel="stylesheet" href="/css/ad-form-desk.css?v=demoExact3" />
   <style>
-    body { margin: 0; padding: 12px; background: #dbe3ea; font-family: system-ui, sans-serif; }
+    body { margin: 0; padding: 12px; background: #f3f3f3; font-family: system-ui, sans-serif; }
     #ad-form { width: min(390px, 100%); margin: 0 auto; }
+    .ad-form-desk-shell { display:flex; flex-direction:column; gap:8px; }
+    .auto-desk-acc { background:#fff; border:1px solid #d4d4d4; border-radius:8px; }
+    .card { background:#fff; border-radius:8px; padding:0; }
+    .card-body { padding:0; }
     .labeled-field { display: grid; gap: 6px; margin: 0 0 12px; }
     label { font-size: 13px; font-weight: 600; }
     select, input { min-height: 44px; width: 100%; }
   </style>
 </head>
-<body class="site-app ad-form-desk-active" data-site-page="hirdetesfeladas">
+<body class="site-app ad-form-desk-active" data-site-page="hirdetesfeladas" style="--ad-bg:#f3f3f3;--ad-panel:#fff;--ad-line:#d4d4d4;">
 <form id="ad-form" class="ad-form-desk-layout">
+  <div class="ad-form-desk-shell">
   <div class="auto-desk-acc is-open" data-desk-acc="alap">
     <button type="button" class="auto-desk-acc__head">Alap adatok <span>▲</span></button>
     <div class="auto-desk-acc__body">
       <div class="step-panel" data-step="1">
+        <h2 class="import-step-label">Alapadatok</h2>
+        <div class="card"><div class="card-body">
         <div class="ad-layout-canvas ad-layout-on" id="canvas">
           <div class="ad-layout-item labeled-field" data-layout-row="1">
             <label for="gyartmany">Gyártmány &amp; Modell: *</label>
@@ -68,13 +75,15 @@ const fixtureHtml = `<!DOCTYPE html>
             <input id="km" name="km" class="ad-form-cell" />
           </div>
         </div>
+        </div></div>
       </div>
     </div>
   </div>
+  </div>
 </form>
 <script type="module">
-  import { stackVehicleCanvasSingleColumn } from "/js/ad-form-desk-pinned-blocks.js?v=demoExact2";
-  import { refreshAdFormBmPickers } from "/js/ad-form-bm-pickers.js?v=demoExact2";
+  import { stackVehicleCanvasSingleColumn } from "/js/ad-form-desk-pinned-blocks.js?v=demoExact3";
+  import { refreshAdFormBmPickers } from "/js/ad-form-bm-pickers.js?v=demoExact3";
   const form = document.getElementById("ad-form");
   const canvas = document.getElementById("canvas");
   await refreshAdFormBmPickers(form, { gyartmanyok: ["BMW","Audi"], modellek: { BMW:["320"] } });
@@ -152,6 +161,51 @@ page.on("pageerror", (e) => console.error("ERR", e.message));
 await page.goto(`http://127.0.0.1:${port}/`, { waitUntil: "networkidle" });
 await page.waitForFunction(() => window.__R__, null, { timeout: 20000 });
 const r = await page.evaluate(() => window.__R__);
+const bands = await page.evaluate(() => {
+  const acc = document.querySelector('.auto-desk-acc[data-desk-acc="alap"]');
+  const brand = document.querySelector('.ad-form-alap-brand-block');
+  const card = document.querySelector('.ad-form-alap-card');
+  if (!acc || !brand) return { err: 'missing' };
+  const ar = acc.getBoundingClientRect();
+  const br = brand.getBoundingClientRect();
+  const cr = card?.getBoundingClientRect();
+  const samples = [];
+  // sample vertical strip inside accordion, left of content (background only)
+  const x = Math.round(ar.left + 8);
+  for (let y = Math.round(ar.top); y < Math.round(br.top + 4); y += 2) {
+    // use elementFromPoint + computed bg chain
+    const el = document.elementFromPoint(x, y);
+    let node = el;
+    let bg = 'transparent';
+    while (node && node !== document.documentElement) {
+      const c = getComputedStyle(node).backgroundColor;
+      if (c && c !== 'rgba(0, 0, 0, 0)' && c !== 'transparent') { bg = c; break; }
+      node = node.parentElement;
+    }
+    samples.push({ y: y - Math.round(ar.top), bg, tag: el?.className?.toString?.().slice(0,40) || el?.tagName });
+  }
+  // unique backgrounds in the top strip before pill
+  const uniq = [...new Set(samples.map(s => s.bg))];
+  const isBlue = (c) => {
+    const m = String(c).match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+    if (!m) return false;
+    const [r,g,b] = m.slice(1).map(Number);
+    // #e8eef3 = 232,238,243
+    return Math.abs(r-232)<12 && Math.abs(g-238)<12 && Math.abs(b-243)<12;
+  };
+  const allBlue = uniq.length > 0 && uniq.every(isBlue);
+  return {
+    uniq,
+    allBlue,
+    brandTop: Math.round(br.top - ar.top),
+    cardBg: card ? getComputedStyle(card).backgroundColor : null,
+    accBg: getComputedStyle(acc).backgroundColor,
+    bodyBg: getComputedStyle(acc.querySelector('.auto-desk-acc__body')).backgroundColor,
+    cardElBg: cr ? getComputedStyle(card).backgroundColor : null,
+  };
+});
+r.bands = bands;
+r.ok = Boolean(r.ok && bands.allBlue && !r.hasHasznalt);
 await page.screenshot({ path: root + "/test-results/alap-demo-verify.png", fullPage: true });
 console.log(JSON.stringify(r, null, 2));
 await browser.close();

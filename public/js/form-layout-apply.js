@@ -1,7 +1,7 @@
 import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=immoTipusPick1";
 import { refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=gyartFix1";
 import { initTireSizes } from "./tire-sizes-ui.js?v=tireFill1";
-import { applyAdFormDesk } from "./ad-form-desk.js?v=evAfterFuel1";
+import { applyAdFormDesk } from "./ad-form-desk.js?v=immoTipusPick1";
 import { markImmoPostViewReady } from "./category-picker.js?v=pickerBoot4";
 import {
   DESK_MUSZAKI_CORE_FIELD_KEYS,
@@ -9,8 +9,8 @@ import {
   TIRE_LAYOUT_GROUP_KEYS,
   insertPinnedDomBlock,
   layoutRowForPinnedBlock,
-  placeElectricFieldsAfterFuel,
-} from "./ad-form-desk-pinned-blocks.js?v=evAfterFuel1";
+  placeElectricBlockAfterFuel,
+} from "./ad-form-desk-pinned-blocks.js?v=fuelTop1";
 
 function cssEscape(value) {
   if (window.CSS?.escape) return window.CSS.escape(value);
@@ -648,9 +648,23 @@ function syncCanvasOrderFromLayoutCells(form, cells) {
   if (tire && !tire.classList.contains("ad-layout-hidden")) {
     tire.dataset.layoutRow = String(tireRow);
   }
+  const evRow = (() => {
+    const fuelRow = Math.max(
+      ...["uzemanyag", "hengerurtartalom", "teljesitmeny_le", "teljesitmeny_kw"].map((key) => {
+        const cell = lookup.get(key);
+        return cell && !cell.hidden ? Number(cell.row) || 0 : 0;
+      }),
+      0
+    );
+    const raw = layoutRowForPinnedBlock(cells, EV_LAYOUT_GROUP_KEYS);
+    return raw <= fuelRow ? fuelRow + 1 : raw;
+  })();
   const ev = document.getElementById("electric-fields-block");
   if (ev && !ev.classList.contains("ad-layout-hidden") && !ev.hidden) {
-    placeElectricFieldsAfterFuel(form, cells);
+    ev.dataset.layoutRow = String(evRow);
+    ev.style.setProperty("grid-row", String(evRow), "important");
+    const canvas = canvasForStep(form, 2);
+    if (canvas) placeElectricBlockAfterFuel(form, canvas, ev, cells);
   }
 }
 
@@ -683,7 +697,7 @@ function pinElectricFields(form, layoutCells) {
   const block = document.getElementById("electric-fields-block");
   const canvas = canvasForStep(form, 2);
   if (!block || !canvas) return;
-  placeElectricFieldsAfterFuel(form, layoutCells);
+  placeElectricBlockAfterFuel(form, canvas, block, layoutCells);
   block.classList.remove("ad-immo-orphan", "ad-layout-hidden");
   block.querySelectorAll(".labeled-field").forEach((el) => {
     el.classList.remove("ad-layout-hidden", "ad-immo-orphan");

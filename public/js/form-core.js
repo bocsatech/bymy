@@ -24,7 +24,8 @@ import {
   renderListingPhotoOverlay,
 } from "./listing-photo-overlay.js?v=photoOverlayIcons3";
 import { refreshAdFormBmPickers, applyAdFormBmFieldValues } from "./ad-form-bm-pickers.js?v=gyartFix1";
-import { applyAdFormDesk, isAdFormDesk } from "./ad-form-desk.js?v=evAfterFuel1";
+import { applyAdFormDesk, isAdFormDesk } from "./ad-form-desk.js?v=immoTipusPick1";
+import { placeElectricBlockAfterFuel } from "./ad-form-desk-pinned-blocks.js?v=fuelTop1";
 import { initKmInput, parseKmDigits, setKmInputValue } from "./km-input.js?v=kmFmt1";
 import {
   EV_FUEL_FIELD_IDS,
@@ -33,7 +34,6 @@ import {
   normalizeAdFuelValue,
   readAdFormFuelValue,
 } from "./ad-form-fuel-profile.js?v=fuelProfile3";
-import { placeElectricFieldsAfterFuel } from "./ad-form-desk-pinned-blocks.js?v=evAfterFuel1";
 
 export function createAdForm(options = {}) {
   const mode = options.mode ?? "wizard";
@@ -719,8 +719,12 @@ function syncFuelDependentFields() {
         el.removeAttribute("hidden");
         el.style.removeProperty("display");
       });
-      /* Hibrid/EV mezők az üzemanyag alatt maradjanak (ne ugorjanak a lista tetejére). */
-      placeElectricFieldsAfterFuel(form);
+      const formEl = evBlock.closest("form") || document.getElementById("ad-form");
+      const canvas =
+        formEl?.querySelector?.('.step-panel[data-step="2"] .ad-layout-canvas') ||
+        formEl?.querySelector?.(".ad-layout-canvas") ||
+        evBlock.parentElement;
+      if (formEl && canvas) placeElectricBlockAfterFuel(formEl, canvas, evBlock);
     }
   }
   document.querySelectorAll(".fuel-combustion-only").forEach((el) => {
@@ -2125,6 +2129,22 @@ window.addEventListener("ad-form-sync-fuel-fields", () => {
   bindFuelPickerSync();
   syncFuelDependentFields();
   applyAdFormDesk();
+  // Desk apply után is: üzemanyag maradjon felül, EV blokk utána.
+  const formEl = document.getElementById("ad-form");
+  const evBlock = document.getElementById("electric-fields-block");
+  const canvas =
+    formEl?.querySelector?.('.step-panel[data-step="2"] .ad-layout-canvas') ||
+    formEl?.querySelector?.(".ad-layout-canvas");
+  if (
+    formEl &&
+    evBlock &&
+    canvas &&
+    !evBlock.hidden &&
+    !evBlock.classList.contains("hidden") &&
+    !evBlock.classList.contains("ad-layout-hidden")
+  ) {
+    placeElectricBlockAfterFuel(formEl, canvas, evBlock);
+  }
   stampAdFormUniformCells(form);
 });
 

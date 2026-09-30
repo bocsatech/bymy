@@ -263,54 +263,35 @@ export function insertPinnedDomBlock(canvas, blockEl, layoutRow) {
   else canvas.appendChild(blockEl);
 }
 
-/** Üzemanyag mező host a Műszaki canvasen (layout item vagy tech-top sor). */
-export function fuelFieldLayoutAnchor(form) {
-  const fuel = document.getElementById("uzemanyag");
-  if (!fuel) return null;
-  const root = form || document;
-  const item = fuel.closest(".ad-layout-item");
-  if (item && (!root.contains || root.contains(item))) return item;
-  const techRow = fuel.closest(".field-row--tech-top");
-  if (techRow) return techRow;
-  return fuel.closest(".labeled-field, .md-outlined");
-}
-
 /**
- * EV/hibrid blokk mindig az üzemanyag után — ne ugorjon a lista tetejére választáskor.
+ * Elektromos/hibrid blokk: mindig az üzemanyag UTÁN (mobil flex: DOM-sorrend).
+ * Így hibrid választáskor sem ugrik a tetejére a menü — mint a keresőben.
  */
-export function resolveElectricBlockLayoutRow(form, cells) {
-  const fromCells = layoutRowForPinnedBlock(cells, EV_LAYOUT_GROUP_KEYS);
-  const canonical = deskStep2CanonicalRank("__desk_electric_block__") + 1;
-  let row = Math.max(fromCells || 0, canonical);
-  const fuelAnchor = fuelFieldLayoutAnchor(form);
-  const fuelRow = Number(fuelAnchor?.dataset?.layoutRow);
-  if (Number.isFinite(fuelRow) && fuelRow > 0) {
-    row = Math.max(row, fuelRow + 1);
+export function placeElectricBlockAfterFuel(form, canvas, blockEl, layoutCells = null) {
+  if (!form || !canvas || !blockEl) return;
+  const fuelInput =
+    document.getElementById("uzemanyag") || form.querySelector('[name="uzemanyag"]');
+  const fuelWrap =
+    fuelInput?.closest?.(".ad-layout-item, .labeled-field, .md-outlined") || null;
+
+  let row = layoutRowForPinnedBlock(layoutCells, EV_LAYOUT_GROUP_KEYS);
+  const fuelCell = (layoutCells || []).find((c) => c.field_key === "uzemanyag" && !c.hidden);
+  const fuelRow = Math.max(
+    Number(fuelCell?.row) || 0,
+    Number(fuelWrap?.dataset?.layoutRow) || 0,
+    deskStep2CanonicalRank("uzemanyag") + 1
+  );
+  if (!Number.isFinite(row) || row <= fuelRow) {
+    row = Math.max(fuelRow + 1, deskStep2CanonicalRank("__desk_electric_block__") + 1);
   }
-  return { row, fuelAnchor };
-}
 
-export function placeElectricFieldsAfterFuel(form, cells = null) {
-  const block = document.getElementById("electric-fields-block");
-  if (!block) return;
-  const canvas =
-    block.closest(".ad-layout-canvas") ||
-    form?.querySelector?.('.step-panel[data-step="2"] .ad-layout-canvas') ||
-    form?.querySelector?.(".ad-layout-canvas");
-  if (!canvas) return;
+  blockEl.classList.add("ad-desk-pinned-block");
+  blockEl.dataset.layoutRow = String(row);
+  blockEl.style.setProperty("grid-row", String(row), "important");
 
-  const { row, fuelAnchor } = resolveElectricBlockLayoutRow(form, cells);
-  block.classList.add("ad-desk-pinned-block");
-  block.dataset.layoutRow = String(row);
-
-  let anchor = fuelAnchor && canvas.contains(fuelAnchor) ? fuelAnchor : null;
-  if (!anchor) {
-    const fuel = document.getElementById("uzemanyag");
-    anchor = [...canvas.children].find((el) => el !== block && fuel && el.contains(fuel)) || null;
-  }
-  if (anchor) {
-    if (anchor.nextElementSibling !== block) anchor.after(block);
+  if (fuelWrap && canvas.contains(fuelWrap)) {
+    if (fuelWrap.nextSibling !== blockEl) fuelWrap.after(blockEl);
     return;
   }
-  insertPinnedDomBlock(canvas, block, row);
+  insertPinnedDomBlock(canvas, blockEl, row);
 }

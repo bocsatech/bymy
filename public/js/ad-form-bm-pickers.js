@@ -2380,14 +2380,20 @@ async function mountAdBrandModelCombined(form, catalog) {
   const brands = [...(catalog?.gyartmanyok || [])].sort((a, b) =>
     a.localeCompare(b, "hu", { sensitivity: "base" })
   );
-  const emptyLabel = PLACEHOLDER;
+  /* AutoScout-stílus: „Gyártmány / Modell” üres trigger; label „Gyártmány & Modell”. */
+  const emptyLabel = "Gyártmány / Modell";
+  const brandLabel = field.querySelector('label[for="gyartmany"]');
+  if (brandLabel && !brandLabel.dataset.adBmBrandLabel) {
+    brandLabel.dataset.adBmBrandLabel = "1";
+    brandLabel.innerHTML = 'Gyártmány &amp; Modell: <span class="req">*</span>';
+  }
 
   const wrap = document.createElement("div");
   wrap.className =
     "ad-form-bm-field ad-form-bm-field--drum ad-form-bm-field--brand-model auto-bm-field ad-form-cell";
   wrap.dataset.adBmFor = "gyartmany";
   wrap.innerHTML = `<div class="immo-wheel-wrap ad-form-drum-wrap">
-    <div class="immo-wheel" data-wheel="gyartmany" data-filter-key="gyartmany" role="listbox" aria-label="Gyártmány"></div>
+    <div class="immo-wheel" data-wheel="gyartmany" data-filter-key="gyartmany" role="listbox" aria-label="Gyártmány és modell"></div>
     <div class="immo-wheel" data-wheel="modell" data-filter-key="modell" role="listbox" aria-label="Modell" hidden></div>
   </div>`;
   gyartmany.insertAdjacentElement("beforebegin", wrap);
@@ -2433,12 +2439,15 @@ async function mountAdBrandModelCombined(form, catalog) {
   function refreshSummary() {
     const trigger = brandWheelHost.querySelector(".immo-wheel-trigger");
     const text = summaryText();
+    const empty = text === emptyLabel;
     if (trigger) {
       trigger.textContent = text;
       trigger.dataset.emptyLabel = emptyLabel;
       trigger.setAttribute("aria-label", "Gyártmány és modell");
+      trigger.classList.toggle("is-placeholder", empty);
     }
-    wrap.classList.toggle("has-value", text !== emptyLabel);
+    wrap.classList.toggle("has-value", !empty);
+    brandWheelHost?.classList.toggle("has-value", !empty);
   }
 
   function syncSelectsFromWheels() {

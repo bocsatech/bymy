@@ -2080,6 +2080,43 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   width: 100%;
 }
 
+#ad-form .ad-form-bm-field--brand-model > .ad-form-drum-wrap {
+  position: relative;
+  border-radius: 999px;
+  border: 1px solid #d0d5dd;
+  background: #fff;
+  box-shadow: none;
+  min-height: 2.75rem;
+  align-items: center;
+}
+
+#ad-form .ad-form-bm-field--brand-model .ad-form-drum-wrap > .immo-wheel-trigger {
+  font-weight: 500;
+  color: #667085;
+  padding: 0.55rem 2.35rem 0.55rem 1.05rem;
+  border-radius: 999px;
+}
+
+#ad-form .ad-form-bm-field--brand-model.has-value .ad-form-drum-wrap > .immo-wheel-trigger {
+  color: #0f172a;
+  font-weight: 600;
+}
+
+#ad-form .ad-form-bm-field--brand-model > .ad-form-drum-wrap::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 1.05rem;
+  width: 0.42rem;
+  height: 0.42rem;
+  margin-top: -0.22rem;
+  border-top: 1.5px solid #667085;
+  border-right: 1.5px solid #667085;
+  transform: rotate(45deg);
+  pointer-events: none;
+  z-index: 1;
+}
+
 /* Hirdetésfeladás: kereső-stílusú dobkerék trigger a selectek helyett */
 #ad-form .ad-form-bm-field--drum {
   width: 100%;

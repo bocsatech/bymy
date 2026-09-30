@@ -724,6 +724,67 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field--bran
   min-width: 0 !important;
   max-width: 100% !important;
   flex: 1 1 auto !important;
+  min-height: 2.75rem !important;
+}
+
+/* Gyártmány & Modell: AutoScout-szerű pill + chevron (méret változatlan) */
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field--brand-model > .ad-form-drum-wrap,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field--brand-model > .immo-wheel-wrap {
+  position: relative !important;
+  border-radius: 999px !important;
+  border: 1px solid #d0d5dd !important;
+  background: #fff !important;
+  box-shadow: none !important;
+  min-height: 2.75rem !important;
+  align-items: center !important;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field--brand-model .immo-wheel-trigger {
+  font-weight: 500 !important;
+  color: #667085 !important;
+  padding: 0.55rem 2.35rem 0.55rem 1.05rem !important;
+  border-radius: 999px !important;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field--brand-model.has-value .immo-wheel-trigger,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field--brand-model .immo-wheel-trigger:not(.is-placeholder) {
+  color: #0f172a !important;
+  font-weight: 600 !important;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field--brand-model > .ad-form-drum-wrap::after,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field--brand-model > .immo-wheel-wrap::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 1.05rem;
+  width: 0.42rem;
+  height: 0.42rem;
+  margin-top: -0.22rem;
+  border-top: 1.5px solid #667085;
+  border-right: 1.5px solid #667085;
+  transform: rotate(45deg);
+  pointer-events: none;
+  z-index: 1;
+}
+
+html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field--brand-model > .ad-form-drum-wrap,
+html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field--brand-model > .immo-wheel-wrap {
+  background: #1d1d1d !important;
+  border-color: #4b5563 !important;
+}
+
+html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field--brand-model .immo-wheel-trigger {
+  color: #9ca3af !important;
+}
+
+html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field--brand-model.has-value .immo-wheel-trigger {
+  color: #f9fafb !important;
+}
+
+html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field--brand-model > .ad-form-drum-wrap::after,
+html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field--brand-model > .immo-wheel-wrap::after {
+  border-color: #9ca3af;
 }
 
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field {

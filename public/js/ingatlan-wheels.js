@@ -401,10 +401,11 @@ export function syncHostClearButton(host, { hasValue, onClear } = {}) {
     clear.addEventListener("click", (event) => {
       event.preventDefault();
       event.stopPropagation();
-      onClear();
+      clear._immoOnClear?.();
     });
     host.appendChild(clear);
   }
+  clear._immoOnClear = onClear;
   host.classList.add("has-wheel-clear");
 }
 

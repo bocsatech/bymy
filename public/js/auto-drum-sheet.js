@@ -1,5 +1,5 @@
 
-import { readWheel, readWheelList, setWheelValue, fillWheel } from "./ingatlan-wheels.js?v=immoClearAll1";
+import { readWheel, readWheelList, setWheelValue, fillWheel } from "./ingatlan-wheels.js?v=immoClearAll2";
 import { closeAllInlineDrums, syncDrumWheelDisplay } from "./immo-drum-picker.js?v=immoAdFormMenu1";
 import { UZEMANYAG_CATEGORIES, flattenUzemanyagOptions, ALLAPOT_CATEGORIES, flattenAllapotOptions } from "./equipment-data.js";
 

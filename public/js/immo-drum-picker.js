@@ -1,5 +1,5 @@
 
-import { readWheel, readWheelList, setWheelValue, lockPageScroll, unlockPageScroll, syncWheelClearButton } from "./ingatlan-wheels.js?v=immoClearAll1";
+import { readWheel, readWheelList, setWheelValue, lockPageScroll, unlockPageScroll, syncWheelClearButton } from "./ingatlan-wheels.js?v=immoClearAll2";
 
 const ITEM_H = 40;
 const VISIBLE_ROWS = 3;

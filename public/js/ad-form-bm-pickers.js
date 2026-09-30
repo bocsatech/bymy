@@ -2379,8 +2379,8 @@ async function mountAdBrandModelCombined(form, catalog) {
     modellField.classList.remove("ad-form-bm-modell-nested");
   }
 
-  const { fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=immoClearAll1");
-  const { openBrandModelCatalogSheet } = await import("./auto-drum-sheet.js?v=bmSheet29");
+  const { fillWheel, setWheelValue, readWheel, syncHostClearButton } = await import("./ingatlan-wheels.js?v=immoClearAll2");
+  const { openBrandModelCatalogSheet } = await import("./auto-drum-sheet.js?v=bmSheet30");
   const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
 
   const brands = [...(catalog?.gyartmanyok || [])].sort((a, b) =>
@@ -2442,6 +2442,38 @@ async function mountAdBrandModelCombined(form, catalog) {
     return m ? `${b} · ${m}` : b;
   }
 
+  function clearBrandAndModel() {
+    if (wrap.dataset.adBmClearing === "1") return;
+    wrap.dataset.adBmClearing = "1";
+    try {
+      const liveBrand = wrap.querySelector('[data-wheel="gyartmany"]') || brandWheel;
+      const liveModel = wrap.querySelector('[data-wheel="modell"]') || modelWheel;
+      setWheelValue(liveBrand, "");
+      setWheelValue(liveModel, "");
+      writePlainValue(gyartmany, "");
+      writePlainValue(modell, "");
+      const tipus = form.querySelector?.("#tipus") || document.getElementById("tipus");
+      const egyebTipus = form.querySelector?.("#egyeb_tipus") || document.getElementById("egyeb_tipus");
+      if (tipus) {
+        if (tipus.tagName === "SELECT") writePlainValue(tipus, "");
+        else {
+          tipus.value = "";
+          tipus.dispatchEvent(new Event("input", { bubbles: true }));
+          tipus.dispatchEvent(new Event("change", { bubbles: true }));
+        }
+        tipus._adBmRefreshSummary?.();
+      }
+      if (egyebTipus) {
+        egyebTipus.value = "";
+        egyebTipus.dispatchEvent(new Event("input", { bubbles: true }));
+        egyebTipus.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+      refreshSummary();
+    } finally {
+      delete wrap.dataset.adBmClearing;
+    }
+  }
+
   function refreshSummary() {
     const trigger = brandWheelHost.querySelector(".immo-wheel-trigger");
     const text = summaryText();
@@ -2454,6 +2486,11 @@ async function mountAdBrandModelCombined(form, catalog) {
     }
     wrap.classList.toggle("has-value", !empty);
     brandWheelHost?.classList.toggle("has-value", !empty);
+    /* X: gyártmány + modell (+ típus) egyszerre — ne csak a márkát törölje */
+    syncHostClearButton(brandWheelHost, {
+      hasValue: !empty,
+      onClear: clearBrandAndModel,
+    });
   }
 
   function syncSelectsFromWheels() {
@@ -2466,6 +2503,7 @@ async function mountAdBrandModelCombined(form, catalog) {
 
   brandWheel.addEventListener("immo-wheel-change", syncSelectsFromWheels);
   modelWheel.addEventListener("immo-wheel-change", syncSelectsFromWheels);
+  brandWheel.addEventListener("immo-wheel-clear", clearBrandAndModel);
 
   const openSheet = (event) => {
     event?.preventDefault?.();
@@ -2542,8 +2580,8 @@ async function mountAdSelectDrum(select, {
   select.dataset.adBmPicker = "1";
   select.dataset.adBmDrum = "1";
 
-  const { fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=immoClearAll1");
-  const { openStandaloneSwitchSheet, bindAutoDrumSheet } = await import("./auto-drum-sheet.js?v=bmSheet29");
+  const { fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=immoClearAll2");
+  const { openStandaloneSwitchSheet, bindAutoDrumSheet } = await import("./auto-drum-sheet.js?v=bmSheet30");
   const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
 
   const wrap = document.createElement("div");
@@ -2765,8 +2803,8 @@ async function mountAdSplitYmDrum({
     ensureYearSelectFilled(ev);
   }
 
-  const { fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=immoClearAll1");
-  const { openYmDualSheet } = await import("./auto-drum-sheet.js?v=bmSheet29");
+  const { fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=immoClearAll2");
+  const { openYmDualSheet } = await import("./auto-drum-sheet.js?v=bmSheet30");
   const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
 
   const yearOpts = optionsFromSelect(ev, emptyYear);

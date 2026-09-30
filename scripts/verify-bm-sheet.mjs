@@ -7,7 +7,7 @@ const root = process.cwd();
 const PUBLIC = path.join(root, "public");
 const MIME = { ".html":"text/html",".js":"text/javascript",".css":"text/css",".mjs":"text/javascript" };
 const html = `<!DOCTYPE html><html><head>
-<link rel="stylesheet" href="/css/ingatlan-search.css?v=bmSheet2" />
+<link rel="stylesheet" href="/css/ingatlan-search.css?v=bmSheet3" />
 <style>body{margin:0;background:#ddd;font-family:system-ui}</style>
 </head><body class="site-app" data-site-page="hirdetesfeladas">
 <button id="t" class="immo-wheel-trigger">Gyártmány / Modell</button>
@@ -17,7 +17,7 @@ const html = `<!DOCTYPE html><html><head>
 </div>
 <form id="f"></form>
 <script type="module">
-import { openBrandModelCatalogSheet } from "/js/auto-drum-sheet.js?v=bmSheet2";
+import { openBrandModelCatalogSheet } from "/js/auto-drum-sheet.js?v=bmSheet3";
 import { setWheelValue } from "/js/ingatlan-wheels.js?v=immoClearAll1";
 const form = document.getElementById("f");
 form._autoDrumCatalog = { gyartmanyok: ["BMW","Audi","Mercedes-Benz"], modellek: { BMW:["320","X5"], Audi:["A4"] } };
@@ -35,14 +35,14 @@ const csRing = ring ? getComputedStyle(ring) : null;
 const csItem = item ? getComputedStyle(item) : null;
 const csDone = done ? getComputedStyle(done) : null;
 const fs = parseFloat(csItem?.fontSize || "0");
-const sticky = portal?.querySelector(".auto-drum-portal__sheet-sticky");
+const sticky = portal?.querySelector(".auto-drum-portal__sheet-lead");
 const sheetScroll = portal?.querySelector("[data-sheet-scroll]");
 const section = portal?.querySelector("[data-sheet-section]");
 // jump to models via BMW row
 const bmw = [...(portal?.querySelectorAll(".immo-drum-inline-item")||[])].find(el => (el.dataset.value||"")==="BMW");
 bmw?.click();
 await new Promise(r => setTimeout(r, 50));
-const stickyAfter = portal?.querySelector(".auto-drum-portal__sheet-sticky");
+const stickyAfter = portal?.querySelector(".auto-drum-portal__sheet-lead");
 const sectionTxt = portal?.querySelector("[data-sheet-section]")?.textContent || "";
 const toolbarVis = portal?.querySelector(".auto-drum-portal__toolbar--sheet")?.classList.contains("is-visible");
 const stickyPos = stickyAfter ? getComputedStyle(stickyAfter).position : "";
@@ -65,7 +65,7 @@ window.__R__ = {
   hasSheetScroll: Boolean(sheetScroll),
   ok: false,
 };
-window.__R__.ok = window.__R__.hasSheet && window.__R__.noThickBlack && window.__R__.itemFs > 0 && window.__R__.itemFs <= 16 && Number(window.__R__.itemFw) <= 600 && /Modell/i.test(window.__R__.title||"") && window.__R__.sectionTxt === "Modellek" && window.__R__.toolbarVis && window.__R__.stickyPos === "sticky" && window.__R__.hasSheetScroll;
+window.__R__.ok = window.__R__.hasSheet && window.__R__.noThickBlack && window.__R__.itemFs > 0 && window.__R__.itemFs <= 16 && Number(window.__R__.itemFw) <= 600 && /Modell/i.test(window.__R__.title||"") && window.__R__.sectionTxt === "Modellek" && window.__R__.toolbarVis && window.__R__.stickyPos === "static" && window.__R__.hasSheetScroll;
 </script></body></html>`;
 
 const server = await new Promise((resolve) => {

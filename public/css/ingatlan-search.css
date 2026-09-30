@@ -1647,13 +1647,11 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   scrollbar-width: thin;
 }
 
-/* Modellek + Vissza/márka együtt görög, majd a cím alatt ragad */
-.auto-drum-portal--sheet .auto-drum-portal__sheet-sticky {
-  position: sticky;
-  top: 0;
-  z-index: 5;
+/* Szekció + Vissza/márka a listával együtt görög (nem ragad); cím és Kész fix */
+.auto-drum-portal--sheet .auto-drum-portal__sheet-lead {
+  position: static;
   flex: 0 0 auto;
-  background: #e8eef3;
+  background: transparent;
   padding: 0 0 0.35rem;
   margin: 0;
 }
@@ -1664,7 +1662,7 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   padding: 0.15rem 0.15rem 0;
   font: 500 0.82rem/1.2 system-ui, sans-serif;
   color: #4b5563;
-  background: #e8eef3;
+  background: transparent;
 }
 
 .auto-drum-portal--sheet .auto-drum-portal__toolbar--sheet {
@@ -1687,7 +1685,7 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   display: flex !important;
 }
 
-.auto-drum-portal--sheet .auto-drum-portal__sheet-sticky.has-toolbar .auto-drum-portal__sheet-section {
+.auto-drum-portal--sheet .auto-drum-portal__sheet-lead.has-toolbar .auto-drum-portal__sheet-section {
   margin-bottom: 0.35rem;
 }
 
@@ -1709,13 +1707,12 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   display: block !important;
 }
 
-/* Modellek nézet: a fehér kártya a sticky toolbar alá simul (egy egység) */
 .auto-drum-portal--sheet[data-sheet-view="models"] .auto-drum-portal__ring--sheet {
   border-radius: 0 0 1.15rem 1.15rem !important;
   margin-top: 0;
 }
 
-.auto-drum-portal--sheet[data-sheet-view="models"] .auto-drum-portal__sheet-sticky.has-toolbar {
+.auto-drum-portal--sheet[data-sheet-view="models"] .auto-drum-portal__sheet-lead.has-toolbar {
   padding-bottom: 0;
 }
 
@@ -1794,8 +1791,11 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-  margin-top: 0.85rem;
-  padding: 0 0.1rem;
+  margin-top: 0.55rem;
+  padding: 0.55rem 0.1rem 0.15rem;
+  background: #e8eef3;
+  position: relative;
+  z-index: 2;
 }
 
 .auto-drum-portal--sheet .auto-drum-portal__count {

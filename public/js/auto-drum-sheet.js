@@ -734,7 +734,7 @@ export function openBrandModelCatalogSheet(brandWheel, trigger, wrap, emptyLabel
         <span class="auto-drum-portal__sheet-head-spacer" aria-hidden="true"></span>
       </header>
       <div class="auto-drum-portal__sheet-scroll" data-sheet-scroll tabindex="-1">
-        <div class="auto-drum-portal__sheet-sticky">
+        <div class="auto-drum-portal__sheet-lead">
           <p class="auto-drum-portal__sheet-section" data-sheet-section>Népszerű gyártmányok</p>
           <div class="auto-drum-portal__toolbar auto-drum-portal__toolbar--sheet">
             <button type="button" class="auto-drum-portal__back" hidden>Vissza</button>
@@ -761,7 +761,7 @@ export function openBrandModelCatalogSheet(brandWheel, trigger, wrap, emptyLabel
   const closeBtn = root.querySelector(".auto-drum-portal__close");
   const sectionEl = root.querySelector("[data-sheet-section]");
   const countEl = root.querySelector("[data-sheet-count]");
-  const stickyEl = root.querySelector(".auto-drum-portal__sheet-sticky");
+  const stickyEl = root.querySelector(".auto-drum-portal__sheet-lead");
   const toolbarEl = root.querySelector(".auto-drum-portal__toolbar--sheet");
 
   let view = "brands";

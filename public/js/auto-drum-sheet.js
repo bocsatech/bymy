@@ -734,6 +734,7 @@ export function openBrandModelCatalogSheet(brandWheel, trigger, wrap, emptyLabel
         <span class="auto-drum-portal__sheet-head-spacer" aria-hidden="true"></span>
       </header>
       <div class="auto-drum-portal__sheet-scroll" data-sheet-scroll tabindex="-1">
+        <div class="auto-drum-portal__sheet-top-space" aria-hidden="true"></div>
         <p class="auto-drum-portal__sheet-section" data-sheet-section>Népszerű gyártmányok</p>
         <div class="immo-drum-wheel-ring auto-drum-portal__ring auto-drum-portal__ring--multi auto-drum-portal__ring--sheet">
           <div class="auto-drum-portal__toolbar auto-drum-portal__toolbar--sheet">

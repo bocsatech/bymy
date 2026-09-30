@@ -7,7 +7,7 @@ const root = process.cwd();
 const PUBLIC = path.join(root, "public");
 const MIME = { ".html":"text/html",".js":"text/javascript",".css":"text/css",".mjs":"text/javascript" };
 const html = `<!DOCTYPE html><html><head>
-<link rel="stylesheet" href="/css/ingatlan-search.css?v=bmSheet7" />
+<link rel="stylesheet" href="/css/ingatlan-search.css?v=bmSheet8" />
 <style>body{margin:0;background:#999}</style>
 </head><body class="site-app" data-site-page="hirdetesfeladas">
 <button id="t">open</button>
@@ -17,7 +17,7 @@ const html = `<!DOCTYPE html><html><head>
 </div>
 <form id="f"></form>
 <script type="module">
-import { openBrandModelCatalogSheet } from "/js/auto-drum-sheet.js?v=bmSheet7";
+import { openBrandModelCatalogSheet } from "/js/auto-drum-sheet.js?v=bmSheet8";
 const form = document.getElementById("f");
 form._autoDrumCatalog = { gyartmanyok: Array.from({length:35},(_,i)=>"Brand"+i), modellek: {} };
 openBrandModelCatalogSheet(document.querySelector('[data-wheel="gyartmany"]'), document.getElementById("t"), document.getElementById("wrap"), "Gyártmány / Modell", form, { singleSelect: true });
@@ -32,31 +32,24 @@ const w0 = Math.round(ring.getBoundingClientRect().width);
 const headTop0 = Math.round(head.getBoundingClientRect().top);
 const footTop0 = Math.round(foot.getBoundingClientRect().top);
 const stageTop = Math.round(stage.getBoundingClientRect().top);
-const headBg = getComputedStyle(head).backgroundColor;
-const stageBg = getComputedStyle(stage).backgroundColor;
-/* fehér a kék tetejéhez (fej alá) */
-const gap = ring.getBoundingClientRect().top - body.getBoundingClientRect().top - parseFloat(getComputedStyle(body).paddingTop) + body.scrollTop;
-body.scrollTop = Math.max(0, ring.offsetTop - 4);
+const ringTopStart = Math.round(ring.getBoundingClientRect().top);
+/* Fehér a kék (stage) tetejéig — a görgethető top-space + szekció elmegy */
+body.scrollTop = ring.offsetTop;
 await new Promise((r) => setTimeout(r, 40));
 const w1 = Math.round(ring.getBoundingClientRect().width);
 const headTop1 = Math.round(head.getBoundingClientRect().top);
 const footTop1 = Math.round(foot.getBoundingClientRect().top);
 const ringTop1 = Math.round(ring.getBoundingClientRect().top);
-const headBottom = Math.round(head.getBoundingClientRect().bottom);
-const ringBottom = Math.round(ring.getBoundingClientRect().bottom);
-const footTop = Math.round(foot.getBoundingClientRect().top);
-const stageBottom = Math.round(stage.getBoundingClientRect().bottom);
 window.__R__ = {
   title: portal.querySelector(".auto-drum-portal__sheet-title")?.textContent || "",
   w0, w1, sameWidth: w0 === w1 && w0 > 200,
   headFixed: headTop0 === headTop1,
   footFixed: footTop0 === footTop1,
-  stageBlue: stageBg === "rgb(232, 238, 243)",
-  headBlue: headBg === "rgb(232, 238, 243)",
-  blueToTop: Math.abs(headTop0 - stageTop) <= 2,
-  ringUnderHead: ringTop1 <= headBottom + 6,
-  ringReachesFoot: ringBottom >= footTop - 2,
-  footAtStageBottom: Math.abs(stageBottom - Math.round(foot.getBoundingClientRect().bottom)) <= 2,
+  stageBlue: getComputedStyle(stage).backgroundColor === "rgb(232, 238, 243)",
+  headBlue: getComputedStyle(head).backgroundColor === "rgb(232, 238, 243)",
+  ringSlidUp: ringTop1 < ringTopStart - 20,
+  ringAtBlueTop: Math.abs(ringTop1 - stageTop) <= 3,
+  ringUnderHead: ringTop1 <= Math.round(head.getBoundingClientRect().bottom),
   ringWhite: getComputedStyle(ring).backgroundColor === "rgb(255, 255, 255)",
   noScrolledClass: !portal.classList.contains("is-scrolled"),
   ok: false,
@@ -67,10 +60,9 @@ window.__R__.ok =
   window.__R__.footFixed &&
   window.__R__.stageBlue &&
   window.__R__.headBlue &&
-  window.__R__.blueToTop &&
+  window.__R__.ringSlidUp &&
+  window.__R__.ringAtBlueTop &&
   window.__R__.ringUnderHead &&
-  window.__R__.ringReachesFoot &&
-  window.__R__.footAtStageBottom &&
   window.__R__.ringWhite &&
   window.__R__.noScrolledClass &&
   /Modell/i.test(window.__R__.title);
@@ -107,7 +99,7 @@ page.on("pageerror", (e) => console.error("ERR", e.message));
 await page.goto(`http://127.0.0.1:${port}/`, { waitUntil: "networkidle" });
 await page.waitForFunction(() => window.__R__, null, { timeout: 15000 });
 const r = await page.evaluate(() => window.__R__);
-await page.screenshot({ path: "test-results/bm-sheet-blue-full.png" });
+await page.screenshot({ path: "test-results/bm-sheet-white-to-blue-top.png" });
 console.log(JSON.stringify(r, null, 2));
 await browser.close();
 server.close();

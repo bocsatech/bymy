@@ -1644,7 +1644,7 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   height: 2.35rem;
 }
 
-/* Teljes kék stage fölött görög — a fehér felcsúszik / leér a lábléc alá */
+/* Teljes kék stage fölött görög — induláskor hely a címnek, görgetve fehér a kék tetejéig */
 .auto-drum-portal--sheet .auto-drum-portal__sheet-scroll {
   position: absolute;
   inset: 0;
@@ -1658,9 +1658,17 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   align-items: stretch;
   gap: 0;
   margin: 0;
-  padding: var(--sheet-head-h) 1rem 0;
+  padding: 0 1rem 0;
   box-sizing: border-box;
   background: transparent;
+}
+
+/* Görgethető hely: cím/X alatt indul a tartalom; elmegy, így a fehér felér a kék tetejére */
+.auto-drum-portal--sheet .auto-drum-portal__sheet-top-space {
+  flex: 0 0 auto;
+  height: var(--sheet-head-h);
+  width: 100%;
+  pointer-events: none;
 }
 
 .auto-drum-portal--sheet .auto-drum-portal__sheet-section {
@@ -1672,7 +1680,7 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   background: transparent;
 }
 
-/* Fehér: állandó szélesség, kitölti a kéket fentről le a lábléc alá */
+/* Fehér: állandó szélesség; felcsúszhat a stage tetejéig (cím alá), le a lábléc alá */
 .auto-drum-portal--sheet .auto-drum-portal__ring--sheet,
 .auto-drum-portal--sheet .auto-drum-portal__ring--multi {
   width: 100% !important;

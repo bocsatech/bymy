@@ -1,6 +1,6 @@
 import { initAdFormDeskGuide, refreshAdFormDeskGuide, showDeskGuideSlot } from "./ad-form-desk-guide.js?v=adDeskGuide7";
 import { markImmoPostViewReady } from "./category-picker.js?v=pickerBoot4";
-import { applyStep1SearchDomOrder, stackVehicleCanvasSingleColumn } from "./ad-form-desk-pinned-blocks.js?v=labelOverlap1";
+import { applyStep1SearchDomOrder, stackVehicleCanvasSingleColumn } from "./ad-form-desk-pinned-blocks.js?v=cellAll1";
 
 const DESK_MQ = "(min-width: 901px)";
 

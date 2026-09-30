@@ -1,7 +1,7 @@
 import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=immoTipusPick1";
 import { refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=gyartFix1";
 import { initTireSizes } from "./tire-sizes-ui.js?v=tireFill1";
-import { applyAdFormDesk } from "./ad-form-desk.js?v=labelOverlap1";
+import { applyAdFormDesk } from "./ad-form-desk.js?v=cellAll1";
 import { markImmoPostViewReady } from "./category-picker.js?v=pickerBoot4";
 import {
   DESK_MUSZAKI_CORE_FIELD_KEYS,
@@ -12,7 +12,7 @@ import {
   placeElectricBlockAfterFuel,
   applyStep1SearchDomOrder,
   stackVehicleCanvasSingleColumn,
-} from "./ad-form-desk-pinned-blocks.js?v=labelOverlap1";
+} from "./ad-form-desk-pinned-blocks.js?v=cellAll1";
 
 function cssEscape(value) {
   if (window.CSS?.escape) return window.CSS.escape(value);
@@ -270,7 +270,7 @@ function isInlinePairDeskControl(el) {
   return Boolean(el.closest(".inline-2, .inline-2-labeled"));
 }
 
-const AD_FORM_DESK_ROW_WIDTH = "calc(100% - 1.5cm)";
+const AD_FORM_DESK_ROW_WIDTH = "100%";
 
 function applyDeskSidebarRowWidth(el) {
   el.style.setProperty("width", AD_FORM_DESK_ROW_WIDTH, "important");
@@ -1134,17 +1134,14 @@ async function applyAdFormLayout() {
     window.dispatchEvent(new Event("ad-form-sync-fuel-fields"));
     applyAdFormDesk();
     if (!isImmo) {
-      applyStep1SearchDomOrder(canvasForStep(form, 1));
       form.querySelectorAll(".ad-layout-canvas").forEach((canvas) => {
         const step = Number(canvas.closest(".step-panel")?.dataset?.step);
         stackVehicleCanvasSingleColumn(canvas, { canonicalStep1: step === 1 });
       });
       window.setTimeout(() => {
-        applyStep1SearchDomOrder(canvasForStep(form, 1));
         stackVehicleCanvasSingleColumn(canvasForStep(form, 1), { canonicalStep1: true });
       }, 160);
       window.setTimeout(() => {
-        applyStep1SearchDomOrder(canvasForStep(form, 1));
         stackVehicleCanvasSingleColumn(canvasForStep(form, 1), { canonicalStep1: true });
       }, 500);
     }

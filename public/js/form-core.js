@@ -24,8 +24,8 @@ import {
   renderListingPhotoOverlay,
 } from "./listing-photo-overlay.js?v=photoOverlayIcons3";
 import { refreshAdFormBmPickers, applyAdFormBmFieldValues } from "./ad-form-bm-pickers.js?v=gyartFix1";
-import { applyAdFormDesk, isAdFormDesk } from "./ad-form-desk.js?v=stackCol1";
-import { placeElectricBlockAfterFuel } from "./ad-form-desk-pinned-blocks.js?v=stackCol1";
+import { applyAdFormDesk, isAdFormDesk } from "./ad-form-desk.js?v=labelOverlap1";
+import { placeElectricBlockAfterFuel } from "./ad-form-desk-pinned-blocks.js?v=labelOverlap1";
 import { initKmInput, parseKmDigits, setKmInputValue } from "./km-input.js?v=kmFmt1";
 import {
   EV_FUEL_FIELD_IDS,

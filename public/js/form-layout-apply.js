@@ -1,7 +1,7 @@
 import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=immoTipusPick1";
 import { refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=gyartFix1";
 import { initTireSizes } from "./tire-sizes-ui.js?v=tireFill1";
-import { applyAdFormDesk } from "./ad-form-desk.js?v=stackCol1";
+import { applyAdFormDesk } from "./ad-form-desk.js?v=labelOverlap1";
 import { markImmoPostViewReady } from "./category-picker.js?v=pickerBoot4";
 import {
   DESK_MUSZAKI_CORE_FIELD_KEYS,
@@ -11,7 +11,8 @@ import {
   layoutRowForPinnedBlock,
   placeElectricBlockAfterFuel,
   applyStep1SearchDomOrder,
-} from "./ad-form-desk-pinned-blocks.js?v=stackCol1";
+  stackVehicleCanvasSingleColumn,
+} from "./ad-form-desk-pinned-blocks.js?v=labelOverlap1";
 
 function cssEscape(value) {
   if (window.CSS?.escape) return window.CSS.escape(value);
@@ -639,10 +640,15 @@ function syncCanvasOrderFromLayoutCells(form, cells) {
     const cell = id ? lookup.get(id) : null;
     if (!cell || cell.hidden) return;
     const row = clamp(Number(cell.row) || 1, 1, 80);
-    /* Jármű: mindig teljes sor — mint az autókereső. */
+    /* Teljes szélesség: admin row csak sort kulcs — ne írjunk közös grid-row-t (átfedés!). */
     wrap.dataset.layoutRow = String(row);
     wrap.style.setProperty("grid-column", "1 / span 12", "important");
-    wrap.style.setProperty("grid-row", String(row), "important");
+    wrap.style.removeProperty("grid-row");
+  });
+
+  form.querySelectorAll(".ad-layout-canvas").forEach((canvas) => {
+    const step = Number(canvas.closest(".step-panel")?.dataset?.step);
+    stackVehicleCanvasSingleColumn(canvas, { canonicalStep1: step === 1 });
   });
 
   const tireRow = layoutRowForPinnedBlock(cells, TIRE_LAYOUT_GROUP_KEYS);
@@ -1129,9 +1135,18 @@ async function applyAdFormLayout() {
     applyAdFormDesk();
     if (!isImmo) {
       applyStep1SearchDomOrder(canvasForStep(form, 1));
-      /* Desk restack / késleltetett applyAdFormDesk után is kereső-sorrend. */
-      window.setTimeout(() => applyStep1SearchDomOrder(canvasForStep(form, 1)), 160);
-      window.setTimeout(() => applyStep1SearchDomOrder(canvasForStep(form, 1)), 500);
+      form.querySelectorAll(".ad-layout-canvas").forEach((canvas) => {
+        const step = Number(canvas.closest(".step-panel")?.dataset?.step);
+        stackVehicleCanvasSingleColumn(canvas, { canonicalStep1: step === 1 });
+      });
+      window.setTimeout(() => {
+        applyStep1SearchDomOrder(canvasForStep(form, 1));
+        stackVehicleCanvasSingleColumn(canvasForStep(form, 1), { canonicalStep1: true });
+      }, 160);
+      window.setTimeout(() => {
+        applyStep1SearchDomOrder(canvasForStep(form, 1));
+        stackVehicleCanvasSingleColumn(canvasForStep(form, 1), { canonicalStep1: true });
+      }, 500);
     }
     if (
       isImmo &&

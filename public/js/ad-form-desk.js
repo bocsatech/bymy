@@ -1,6 +1,6 @@
 import { initAdFormDeskGuide, refreshAdFormDeskGuide, showDeskGuideSlot } from "./ad-form-desk-guide.js?v=adDeskGuide7";
 import { markImmoPostViewReady } from "./category-picker.js?v=pickerBoot4";
-import { applyStep1SearchDomOrder } from "./ad-form-desk-pinned-blocks.js?v=stackCol1";
+import { applyStep1SearchDomOrder, stackVehicleCanvasSingleColumn } from "./ad-form-desk-pinned-blocks.js?v=labelOverlap1";
 
 const DESK_MQ = "(min-width: 901px)";
 
@@ -303,9 +303,8 @@ function restackCanvasItems(form) {
     form.classList.contains("ad-form--ingatlan") || document.body.classList.contains("ad-vertical-ingatlan");
   form.querySelectorAll(".ad-layout-canvas").forEach((canvas) => {
     const step = Number(canvas.closest(".step-panel")?.dataset?.step);
-    /* Alapadatok: autókereső sorrend (gyártmány első) — ne az admin layoutRow. */
-    if (!isImmo && step === 1) {
-      applyStep1SearchDomOrder(canvas);
+    if (!isImmo) {
+      stackVehicleCanvasSingleColumn(canvas, { canonicalStep1: step === 1 });
       return;
     }
     const items = [...canvas.children].filter((el) => {
@@ -324,13 +323,8 @@ function restackCanvasItems(form) {
     });
     for (const item of items) {
       canvas.appendChild(item);
-      if (item.matches(".ad-layout-item, .ad-desk-pinned-block")) {
-        if (!isImmo) {
-          item.style.setProperty("grid-column", "1 / span 12", "important");
-          item.style.setProperty("width", "100%", "important");
-        } else {
-          item.style.removeProperty("grid-column");
-        }
+      if (item.matches(".ad-layout-item")) {
+        item.style.removeProperty("grid-column");
         item.style.removeProperty("grid-row");
       }
     }

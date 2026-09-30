@@ -373,8 +373,8 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form .ad
   max-width: none !important;
   min-height: 0 !important;
   flex: 0 0 auto;
+  position: relative !important;
   grid-column: 1 / -1 !important;
-  grid-row: auto !important;
 }
 
 /* Páros HTML sorok is egymás alatt — mint az autókereső Gyors. */

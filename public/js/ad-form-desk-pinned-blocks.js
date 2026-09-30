@@ -57,6 +57,40 @@ export function deskStep1CanonicalRank(fieldKey) {
   return 900 + (STEP1_RANK.size || 0);
 }
 
+/** Jármű canvas: 1 oszlop, egyedi sor — közös admin row + span 12 = címke-átfedés. */
+export function stackVehicleCanvasSingleColumn(canvas, { canonicalStep1 = false } = {}) {
+  if (!canvas) return;
+  if (canonicalStep1) {
+    applyStep1SearchDomOrder(canvas);
+  } else {
+    const items = [...canvas.children].filter((el) => {
+      if (!el || el.hidden || el.classList?.contains("ad-layout-hidden")) return false;
+      if (el.matches?.(".ad-layout-item, .ad-desk-pinned-block")) return true;
+      if (el.matches?.(".ad-form-bm-field--brand-model, .ad-form-split-ym, .ad-form-muszaki-date")) return true;
+      return false;
+    });
+    items.sort(
+      (a, b) =>
+        (Number(a.dataset?.layoutRow) || 0) - (Number(b.dataset?.layoutRow) || 0) ||
+        (Number(String(a.style?.getPropertyValue?.("grid-column") || "").match(/^(\d+)/)?.[1]) || 0) -
+          (Number(String(b.style?.getPropertyValue?.("grid-column") || "").match(/^(\d+)/)?.[1]) || 0)
+    );
+    items.forEach((el, index) => {
+      const row = index + 1;
+      el.dataset.layoutRow = String(row);
+      el.style.setProperty("grid-column", "1 / span 12", "important");
+      el.style.setProperty("grid-row", String(row), "important");
+      el.style.setProperty("width", "100%", "important");
+      el.style.setProperty("max-width", "none", "important");
+      el.style.setProperty("position", "relative", "important");
+      canvas.appendChild(el);
+    });
+  }
+  canvas.style.setProperty("display", "flex", "important");
+  canvas.style.setProperty("flex-direction", "column", "important");
+  canvas.style.setProperty("grid-template-columns", "none", "important");
+}
+
 /** Mobil flex canvas: alapadatok DOM-sorrend = autókereső minta. */
 export function applyStep1SearchDomOrder(canvas) {
   if (!canvas) return;
@@ -66,7 +100,16 @@ export function applyStep1SearchDomOrder(canvas) {
     if (el.matches?.(".ad-form-bm-field--brand-model, .ad-form-split-ym, .ad-form-muszaki-date")) return true;
     return false;
   });
-  if (items.length < 2) return;
+  if (items.length < 2) {
+    items.forEach((el, index) => {
+      const row = index + 1;
+      el.dataset.layoutRow = String(row);
+      el.style.setProperty("grid-column", "1 / span 12", "important");
+      el.style.setProperty("grid-row", String(row), "important");
+      el.style.setProperty("width", "100%", "important");
+    });
+    return;
+  }
 
   const keyOf = (el) => {
     const fromBm =
@@ -99,8 +142,12 @@ export function applyStep1SearchDomOrder(canvas) {
     el.style.setProperty("grid-row", String(row), "important");
     el.style.setProperty("width", "100%", "important");
     el.style.setProperty("max-width", "none", "important");
+    el.style.setProperty("position", "relative", "important");
     canvas.appendChild(el);
   });
+  canvas.style.setProperty("display", "flex", "important");
+  canvas.style.setProperty("flex-direction", "column", "important");
+  canvas.style.setProperty("grid-template-columns", "none", "important");
 }
 
 /** Használtautó desk „Műszaki adatok” — admin stack és éles canvas ugyanilyen sorrendben. */

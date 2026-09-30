@@ -344,7 +344,7 @@ export function openAutoDrumSheet(wheel, trigger, { sheetItems = null } = {}) {
   const wrap = wheel.closest(".immo-wheel-wrap");
   const emptyLabel = trigger.dataset.emptyLabel || "Mindegy";
   const wheelKey = wheel.getAttribute("data-wheel") || "";
-  const multiple = wheel.dataset.multiple === "1" || wheelKey === "gyartmany";
+  const multiple = wheel.dataset.multiple === "1" || wheelKey === "gyartmany" || wheelKey === "modell";
   if (multiple) wheel.dataset.multiple = "1";
   const current = String(readWheel(wheel) ?? "");
   const selected = readWheelList(wheel);

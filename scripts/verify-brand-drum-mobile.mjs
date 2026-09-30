@@ -131,26 +131,39 @@ async function main() {
     log("selected text black", /^(rgb\(0,\s*0,\s*0\)|#000)/i.test(selectedUi.textColor || ""), selectedUi.textColor);
 
     await page.locator(".auto-drum-portal__done").click();
+    await page.waitForSelector(".auto-drum-portal--multi", { state: "hidden", timeout: 5000 }).catch(() => {});
+
+    // Brand Done → model sheet opens from catalog
+    await page.waitForSelector(".auto-drum-portal--multi", { state: "visible", timeout: 8000 });
+    const modelPortal = await page.evaluate(() => {
+      const root = document.querySelector(".auto-drum-portal--multi");
+      const wheel = root && document.querySelector('[data-wheel="modell"]');
+      const items = [...(root?.querySelectorAll(".immo-drum-inline-item") ?? [])].map((el) =>
+        el.querySelector(".immo-drum-inline-text")?.textContent?.trim()
+      );
+      return {
+        open: Boolean(root),
+        itemCount: items.length,
+        sample: items.slice(0, 8),
+        hasSeries: items.some((t) => /^[1-8]$|^X[1-7]$|^Z4$/i.test(String(t))),
+      };
+    });
+    log("model sheet opens after brand Done", modelPortal.open === true, modelPortal);
+    log("model list from catalog (BMW)", (modelPortal.itemCount ?? 0) > 5 && modelPortal.hasSeries, {
+      itemCount: modelPortal.itemCount,
+      sample: modelPortal.sample,
+    });
+
+    await page.locator(".auto-drum-portal__done").click();
     await page.waitForSelector(".auto-drum-portal--multi", { state: "hidden", timeout: 5000 });
 
     const after = await page.evaluate(() => {
       const form = document.getElementById("home-qs-form");
       const wheel = form?.querySelector('[data-wheel="gyartmany"]');
       const trigger = wheel?.closest(".immo-wheel-wrap")?.querySelector(".immo-wheel-trigger");
-      const { readWheelList } = window;
-      let list = [];
-      try {
-        const hidden = wheel?.closest(".immo-wheel-wrap")?.querySelector('input[type="hidden"]');
-        const raw = hidden?.value ?? "";
-        if (raw.startsWith("[")) list = JSON.parse(raw);
-        else if (raw) list = [raw];
-      } catch {
-        /* */
-      }
       return {
         triggerText: trigger?.textContent?.trim(),
         hiddenValue: wheel?.closest(".immo-wheel-wrap")?.querySelector('input[type="hidden"]')?.value,
-        list,
       };
     });
     log("multi select persisted", /2 kiválasztva|BMW|AUDI/i.test(after.triggerText || ""), after);

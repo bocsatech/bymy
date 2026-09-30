@@ -1,7 +1,7 @@
 
 import { readWheel, readWheelList, setWheelValue, fillWheel } from "./ingatlan-wheels.js?v=immoClearAll1";
 import { closeAllInlineDrums, syncDrumWheelDisplay } from "./immo-drum-picker.js?v=immoAdFormMenu1";
-import { UZEMANYAG_CATEGORIES, flattenUzemanyagOptions } from "./equipment-data.js";
+import { UZEMANYAG_CATEGORIES, flattenUzemanyagOptions, ALLAPOT_CATEGORIES, flattenAllapotOptions } from "./equipment-data.js";
 
 const ITEM_H = 52;
 const MULTI_VISIBLE = 10;
@@ -1029,6 +1029,44 @@ function openSplitRangeDrumSheet(minWheel, maxWheel, trigger) {
   });
 }
 
+/**
+ * Kategória + almenü kapcsolós dobkerék (üzemanyag, állapot).
+ * @param {HTMLElement} wheel
+ * @param {HTMLElement} trigger
+ * @param {string} emptyLabel
+ * @param {{ id: string, label: string, value?: string, children?: { label: string, value: string }[] }[]} categories
+ * @param {() => string[]} flattenFn
+ */
+function openHierarchyCategorySheet(wheel, trigger, emptyLabel, categories, flattenFn) {
+  const flat = flattenFn().map((v) => ({ value: v, label: v }));
+  fillWheel(wheel, flat, { emptyLabel });
+  wheel.dataset.multiple = "1";
+  openStandaloneSwitchSheet({
+    trigger,
+    emptyLabel,
+    items: categories.map((c) => ({
+      value: c.children?.length ? c.id : c.value || c.id,
+      label: c.label,
+    })),
+    initialSelected: readWheelList(wheel),
+    getChildren: (mainValue) => {
+      const cat = categories.find(
+        (c) => c.id === mainValue || c.value === mainValue || c.label === mainValue
+      );
+      if (!cat?.children?.length) return null;
+      return cat.children.map((ch) => ({ value: ch.value, label: ch.label }));
+    },
+    onDone: (list) => {
+      const values = [...new Set((list || []).map(String).filter(Boolean))];
+      setWheelValue(wheel, values);
+      syncDrumWheelDisplay(wheel);
+      wheel.dispatchEvent(
+        new CustomEvent("immo-wheel-change", { bubbles: true, detail: { value: readWheel(wheel) } })
+      );
+    },
+  });
+}
+
 export function openAutoDrumSheet(wheel, trigger, { sheetItems = null, form = null } = {}) {
   if (!wheel || !trigger) return;
   closeAutoDrumSheet(false);
@@ -1059,33 +1097,12 @@ export function openAutoDrumSheet(wheel, trigger, { sheetItems = null, form = nu
   }
 
   if (multiple && (wheelKey === "uzemanyag" || wheelKey === "uzemanyagQuick")) {
-    const flat = flattenUzemanyagOptions().map((v) => ({ value: v, label: v }));
-    fillWheel(wheel, flat, { emptyLabel });
-    wheel.dataset.multiple = "1";
-    openStandaloneSwitchSheet({
-      trigger,
-      emptyLabel,
-      items: UZEMANYAG_CATEGORIES.map((c) => ({
-        value: c.children?.length ? c.id : c.value || c.id,
-        label: c.label,
-      })),
-      initialSelected: readWheelList(wheel),
-      getChildren: (mainValue) => {
-        const cat = UZEMANYAG_CATEGORIES.find(
-          (c) => c.id === mainValue || c.value === mainValue || c.label === mainValue
-        );
-        if (!cat?.children?.length) return null;
-        return cat.children.map((ch) => ({ value: ch.value, label: ch.label }));
-      },
-      onDone: (list) => {
-        const values = [...new Set((list || []).map(String).filter(Boolean))];
-        setWheelValue(wheel, values);
-        syncDrumWheelDisplay(wheel);
-        wheel.dispatchEvent(
-          new CustomEvent("immo-wheel-change", { bubbles: true, detail: { value: readWheel(wheel) } })
-        );
-      },
-    });
+    openHierarchyCategorySheet(wheel, trigger, emptyLabel, UZEMANYAG_CATEGORIES, flattenUzemanyagOptions);
+    return;
+  }
+
+  if (multiple && wheelKey === "allapot") {
+    openHierarchyCategorySheet(wheel, trigger, emptyLabel, ALLAPOT_CATEGORIES, flattenAllapotOptions);
     return;
   }
 

@@ -69,6 +69,81 @@ export function isVehicleStep1Canvas(canvas) {
   );
 }
 
+function step1FieldKey(el) {
+  const fromBm =
+    el.dataset?.adBmFor ||
+    el.querySelector?.("[data-ad-bm-for]")?.getAttribute("data-ad-bm-for") ||
+    "";
+  if (fromBm) return fromBm;
+  const fromSplit =
+    el.dataset?.evId ||
+    el.querySelector?.(".ad-form-split-ym, .ad-form-muszaki-date")?.dataset?.evId ||
+    "";
+  if (fromSplit) return fromSplit;
+  const labeled = el.querySelector?.("label[for]");
+  if (labeled?.htmlFor) return labeled.htmlFor;
+  const ctrl = el.querySelector?.("select[id], input[id]:not([type=hidden]), textarea[id]");
+  if (ctrl?.id) return ctrl.id;
+  return el.querySelector?.("[name]")?.name || "";
+}
+
+function isStep1BrandRow(el) {
+  if (!el) return false;
+  if (el.matches?.(".ad-form-bm-field--brand-model, .ad-form-alap-brand-row")) return true;
+  if (el.querySelector?.(".ad-form-bm-field--brand-model, [data-ad-bm-for='gyartmany']")) return true;
+  const key = step1FieldKey(el);
+  return key === "gyartmany" || key === "modell";
+}
+
+function unwrapAlapScoutCard(canvas) {
+  const card = canvas?.querySelector?.(":scope > .ad-form-alap-card");
+  if (!card) return;
+  [...card.children].forEach((child) => {
+    if (child.classList?.contains("ad-form-alap-card__title")) {
+      child.remove();
+      return;
+    }
+    canvas.appendChild(child);
+  });
+  card.remove();
+}
+
+/** AutoScout-minta: gyártmány pill fölül, többi mező fehér Alapadatok kártyában. */
+export function wrapAlapScoutCard(canvas) {
+  if (!canvas || !isVehicleStep1Canvas(canvas)) return;
+  unwrapAlapScoutCard(canvas);
+
+  const items = [...canvas.children].filter((el) => {
+    if (!el || el.hidden || el.classList?.contains("ad-layout-hidden")) return false;
+    if (el.matches?.(".ad-form-alap-card")) return false;
+    if (el.matches?.(".ad-layout-item, .ad-desk-pinned-block")) return true;
+    if (el.matches?.(".ad-form-bm-field--brand-model, .ad-form-split-ym, .ad-form-muszaki-date")) return true;
+    return false;
+  });
+
+  const brand = items.filter(isStep1BrandRow);
+  const rest = items.filter((el) => !isStep1BrandRow(el));
+
+  brand.forEach((el) => {
+    el.classList.add("ad-form-alap-brand-row");
+    canvas.appendChild(el);
+  });
+
+  if (!rest.length) return;
+
+  const card = document.createElement("div");
+  card.className = "ad-form-alap-card";
+  const title = document.createElement("div");
+  title.className = "ad-form-alap-card__title";
+  title.textContent = "Alapadatok";
+  card.appendChild(title);
+  rest.forEach((el) => {
+    el.classList.remove("ad-form-alap-brand-row");
+    card.appendChild(el);
+  });
+  canvas.appendChild(card);
+}
+
 /** Jármű canvas: 1 oszlop, egyedi sor — közös admin row + span 12 = címke-átfedés. */
 export function stackVehicleCanvasSingleColumn(canvas, { canonicalStep1 = false } = {}) {
   if (!canvas) return;
@@ -76,6 +151,7 @@ export function stackVehicleCanvasSingleColumn(canvas, { canonicalStep1 = false 
   if (useCanonical) {
     applyStep1SearchDomOrder(canvas);
   } else {
+    unwrapAlapScoutCard(canvas);
     const items = [...canvas.children].filter((el) => {
       if (!el || el.hidden || el.classList?.contains("ad-layout-hidden")) return false;
       if (el.matches?.(".ad-layout-item, .ad-desk-pinned-block")) return true;
@@ -107,6 +183,7 @@ export function stackVehicleCanvasSingleColumn(canvas, { canonicalStep1 = false 
 /** Mobil flex canvas: alapadatok DOM-sorrend = autókereső minta. */
 export function applyStep1SearchDomOrder(canvas) {
   if (!canvas) return;
+  unwrapAlapScoutCard(canvas);
   const items = [...canvas.children].filter((el) => {
     if (!el || el.hidden || el.classList?.contains("ad-layout-hidden")) return false;
     if (el.matches?.(".ad-layout-item, .ad-desk-pinned-block")) return true;
@@ -121,26 +198,11 @@ export function applyStep1SearchDomOrder(canvas) {
       el.style.setProperty("grid-row", String(row), "important");
       el.style.setProperty("width", "100%", "important");
     });
+    wrapAlapScoutCard(canvas);
     return;
   }
 
-  const keyOf = (el) => {
-    const fromBm =
-      el.dataset?.adBmFor ||
-      el.querySelector?.("[data-ad-bm-for]")?.getAttribute("data-ad-bm-for") ||
-      "";
-    if (fromBm) return fromBm;
-    const fromSplit =
-      el.dataset?.evId ||
-      el.querySelector?.(".ad-form-split-ym, .ad-form-muszaki-date")?.dataset?.evId ||
-      "";
-    if (fromSplit) return fromSplit;
-    const labeled = el.querySelector?.("label[for]");
-    if (labeled?.htmlFor) return labeled.htmlFor;
-    const ctrl = el.querySelector?.("select[id], input[id]:not([type=hidden]), textarea[id]");
-    if (ctrl?.id) return ctrl.id;
-    return el.querySelector?.("[name]")?.name || "";
-  };
+  const keyOf = step1FieldKey;
 
   items.sort(
     (a, b) =>
@@ -161,6 +223,7 @@ export function applyStep1SearchDomOrder(canvas) {
   canvas.style.setProperty("display", "flex", "important");
   canvas.style.setProperty("flex-direction", "column", "important");
   canvas.style.setProperty("grid-template-columns", "none", "important");
+  wrapAlapScoutCard(canvas);
 }
 
 /** Használtautó desk „Műszaki adatok” — admin stack és éles canvas ugyanilyen sorrendben. */

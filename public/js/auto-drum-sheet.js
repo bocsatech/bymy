@@ -733,17 +733,13 @@ export function openBrandModelCatalogSheet(brandWheel, trigger, wrap, emptyLabel
         <h2 class="auto-drum-portal__sheet-title">Gyártmány / Modell</h2>
         <span class="auto-drum-portal__sheet-head-spacer" aria-hidden="true"></span>
       </header>
-      <div class="auto-drum-portal__sheet-scroll" data-sheet-scroll tabindex="-1">
-        <div class="auto-drum-portal__sheet-lead">
-          <p class="auto-drum-portal__sheet-section" data-sheet-section>Népszerű gyártmányok</p>
-          <div class="auto-drum-portal__toolbar auto-drum-portal__toolbar--sheet">
-            <button type="button" class="auto-drum-portal__back" hidden>Vissza</button>
-            <p class="auto-drum-portal__sub" hidden></p>
-          </div>
+      <p class="auto-drum-portal__sheet-section" data-sheet-section>Népszerű gyártmányok</p>
+      <div class="immo-drum-wheel-ring auto-drum-portal__ring auto-drum-portal__ring--multi auto-drum-portal__ring--sheet" data-sheet-scroll tabindex="-1">
+        <div class="auto-drum-portal__toolbar auto-drum-portal__toolbar--sheet">
+          <button type="button" class="auto-drum-portal__back" hidden>Vissza</button>
+          <p class="auto-drum-portal__sub" hidden></p>
         </div>
-        <div class="immo-drum-wheel-ring auto-drum-portal__ring auto-drum-portal__ring--multi auto-drum-portal__ring--sheet">
-          <div class="auto-drum-portal__scroll immo-drum-inline-scroll" data-sheet-list></div>
-        </div>
+        <div class="auto-drum-portal__scroll immo-drum-inline-scroll" data-sheet-list></div>
       </div>
       <footer class="auto-drum-portal__sheet-foot">
         <span class="auto-drum-portal__count" data-sheet-count>0 kiválasztva</span>
@@ -761,7 +757,6 @@ export function openBrandModelCatalogSheet(brandWheel, trigger, wrap, emptyLabel
   const closeBtn = root.querySelector(".auto-drum-portal__close");
   const sectionEl = root.querySelector("[data-sheet-section]");
   const countEl = root.querySelector("[data-sheet-count]");
-  const stickyEl = root.querySelector(".auto-drum-portal__sheet-lead");
   const toolbarEl = root.querySelector(".auto-drum-portal__toolbar--sheet");
 
   let view = "brands";
@@ -814,7 +809,6 @@ export function openBrandModelCatalogSheet(brandWheel, trigger, wrap, emptyLabel
   function syncToolbarChrome() {
     const showBar = view === "models";
     toolbarEl?.classList.toggle("is-visible", showBar);
-    stickyEl?.classList.toggle("has-toolbar", showBar);
     root.dataset.sheetView = view;
   }
 
@@ -828,10 +822,7 @@ export function openBrandModelCatalogSheet(brandWheel, trigger, wrap, emptyLabel
     syncToolbarChrome();
     if (sectionEl) sectionEl.textContent = "Népszerű gyártmányok";
     root.setAttribute("aria-label", "Gyártmány / Modell");
-    if (sheetScroll) {
-      sheetScroll.scrollTop = 0;
-      root.classList.remove("is-scrolled");
-    }
+    if (sheetScroll) sheetScroll.scrollTop = 0;
     const selected = singleSelect
       ? (() => {
           const v = String(readWheel(brandWheel) ?? "").trim();
@@ -901,10 +892,7 @@ export function openBrandModelCatalogSheet(brandWheel, trigger, wrap, emptyLabel
     syncToolbarChrome();
     if (sectionEl) sectionEl.textContent = "Modellek";
     root.setAttribute("aria-label", `Modell — ${brand}`);
-    if (sheetScroll) {
-      sheetScroll.scrollTop = 0;
-      root.classList.remove("is-scrolled");
-    }
+    if (sheetScroll) sheetScroll.scrollTop = 0;
     const emptyRow = { value: "", label: singleSelect ? "—" : "Mindegy" };
     const rows = [emptyRow, ...modelsForBrandFromCatalog(catalog, brand)];
     scrollEl.innerHTML = rows.map((row) => switchRowHtml(row)).join("");
@@ -947,10 +935,7 @@ export function openBrandModelCatalogSheet(brandWheel, trigger, wrap, emptyLabel
   doneBtn?.addEventListener("click", () => closeAutoDrumSheet(true));
   sheetScroll?.addEventListener(
     "scroll",
-    () => {
-      root.classList.toggle("is-scrolled", (sheetScroll.scrollTop || 0) > 10);
-      paintSwitchList(scrollEl, view === "models" ? modelWheel : brandWheel);
-    },
+    () => paintSwitchList(scrollEl, view === "models" ? modelWheel : brandWheel),
     { passive: true }
   );
 

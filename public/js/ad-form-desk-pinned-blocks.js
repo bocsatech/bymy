@@ -98,7 +98,9 @@ function isStep1BrandRow(el) {
 function unwrapAlapScoutCard(canvas) {
   const card = canvas?.querySelector?.(":scope > .ad-form-alap-card");
   if (!card) return;
-  [...card.children].forEach((child) => {
+  const body = card.querySelector(":scope > .ad-form-alap-card__body");
+  const source = body || card;
+  [...source.children].forEach((child) => {
     if (child.classList?.contains("ad-form-alap-card__title")) {
       child.remove();
       return;
@@ -133,14 +135,24 @@ export function wrapAlapScoutCard(canvas) {
 
   const card = document.createElement("div");
   card.className = "ad-form-alap-card";
-  const title = document.createElement("div");
+  const title = document.createElement("button");
+  title.type = "button";
   title.className = "ad-form-alap-card__title";
-  title.textContent = "Alapadatok";
+  title.setAttribute("aria-expanded", "true");
+  title.innerHTML =
+    '<span class="ad-form-alap-card__title-text">Alapadatok</span><span class="ad-form-alap-card__chev" aria-hidden="true">▼</span>';
+  title.addEventListener("click", () => {
+    const closed = card.classList.toggle("is-collapsed");
+    title.setAttribute("aria-expanded", closed ? "false" : "true");
+  });
   card.appendChild(title);
+  const body = document.createElement("div");
+  body.className = "ad-form-alap-card__body";
   rest.forEach((el) => {
     el.classList.remove("ad-form-alap-brand-row");
-    card.appendChild(el);
+    body.appendChild(el);
   });
+  card.appendChild(body);
   canvas.appendChild(card);
 }
 

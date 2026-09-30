@@ -389,14 +389,14 @@ export function closeAutoDrumSheet(commit = false) {
     if (commit && yearWheel && monthWheel && yearScroll && monthScroll && ring) {
       let y = nearestPortalItem(yearScroll, ring)?.dataset.value ?? "";
       let m = nearestPortalItem(monthScroll, ring)?.dataset.value ?? "";
+      if (activePortal?.pendingY != null) y = String(activePortal.pendingY);
+      if (activePortal?.pendingM != null) m = String(activePortal.pendingM);
       if (!y) m = "";
       else if (!m) {
-        const firstMonth = [...monthWheel.querySelectorAll(".immo-wheel-opt")]
-          .map((o) => o.dataset.value ?? "")
-          .find((v) => v !== "");
-        m = firstMonth || "";
+        /* év megvan, hónap üres — így hagyjuk (nem force-olunk első hónapot) */
       }
-      if (m) m = matchWheelOptionValue(monthWheel, m);
+      if (m) m = matchWheelOptionValue(monthWheel, m) || m;
+      if (y) y = matchWheelOptionValue(yearWheel, y) || y;
       setWheelValue(yearWheel, y);
       setWheelValue(monthWheel, m);
       syncDrumWheelDisplay(yearWheel);
@@ -894,19 +894,28 @@ export function openYmDualSheet(yearWheel, monthWheel, trigger, { title = null }
       paintSplitColSync(monthScroll, highlight);
       pendingY = nearestPortalItem(yearScroll, highlight)?.dataset.value ?? "";
       pendingM = nearestPortalItem(monthScroll, highlight)?.dataset.value ?? "";
+      if (activePortal?.kind === "ym-sheet") {
+        activePortal.pendingY = pendingY;
+        activePortal.pendingM = pendingM;
+      }
       syncChip();
     });
   }
 
   function scrollHalfToValue(scrollEl, value) {
+    const want = String(value ?? "");
+    const items = [...scrollEl.querySelectorAll(".immo-drum-inline-item")];
     const start =
-      [...scrollEl.querySelectorAll(".immo-drum-inline-item")].find((el) => (el.dataset.value ?? "") === value) ||
+      items.find((el) => (el.dataset.value ?? "") === want) ||
+      (want
+        ? items.find((el) => Number(el.dataset.value) === Number(want.replace(/\D/g, "")))
+        : null) ||
       scrollEl.querySelector('.immo-drum-inline-item[data-value=""]') ||
       scrollEl.querySelector(".immo-drum-inline-item");
     scrollToPortalItem(scrollEl, highlight, start);
   }
 
-  function bindCol(scrollEl) {
+  function bindCol(scrollEl, half) {
     scrollEl.addEventListener("scroll", () => paintBoth(), { passive: true });
     let startY = 0;
     let moved = false;
@@ -944,20 +953,29 @@ export function openYmDualSheet(yearWheel, monthWheel, trigger, { title = null }
         { passive: true }
       );
       item.addEventListener("click", (event) => {
+        event.preventDefault();
         event.stopPropagation();
         if (tapStart) {
           const dx = Math.abs(event.clientX - tapStart.x);
           const dy = Math.abs(event.clientY - tapStart.y);
           if (dx > 10 || dy > 10) return;
         }
+        const value = item.dataset.value ?? "";
+        if (half === "year") pendingY = value;
+        if (half === "month") pendingM = value;
+        if (activePortal?.kind === "ym-sheet") {
+          activePortal.pendingY = pendingY;
+          activePortal.pendingM = pendingM;
+        }
+        syncChip();
         scrollToPortalItem(scrollEl, highlight, item);
-        paintBoth();
+        requestAnimationFrame(() => paintBoth());
       });
     });
   }
 
-  bindCol(yearScroll);
-  bindCol(monthScroll);
+  bindCol(yearScroll, "year");
+  bindCol(monthScroll, "month");
 
   chip.addEventListener("click", (event) => {
     if (!event.target.closest(".auto-drum-split__chip-clear")) return;
@@ -970,7 +988,8 @@ export function openYmDualSheet(yearWheel, monthWheel, trigger, { title = null }
     paintBoth();
   });
 
-  root.querySelector(".auto-drum-portal__backdrop")?.addEventListener("click", () => closeAutoDrumSheet(false));
+  /* Kész + háttér: ment; X: eldob */
+  root.querySelector(".auto-drum-portal__backdrop")?.addEventListener("click", () => closeAutoDrumSheet(true));
   closeBtn?.addEventListener("click", () => closeAutoDrumSheet(false));
   doneBtn?.addEventListener("click", () => closeAutoDrumSheet(true));
 
@@ -992,12 +1011,16 @@ export function openYmDualSheet(yearWheel, monthWheel, trigger, { title = null }
     ring: highlight,
     wrap,
     trigger,
+    pendingY,
+    pendingM,
   };
 
   requestAnimationFrame(() => {
-    scrollHalfToValue(yearScroll, pendingY);
-    scrollHalfToValue(monthScroll, pendingM);
-    paintBoth();
+    requestAnimationFrame(() => {
+      scrollHalfToValue(yearScroll, pendingY);
+      scrollHalfToValue(monthScroll, pendingM);
+      paintBoth();
+    });
   });
 }
 

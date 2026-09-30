@@ -1870,7 +1870,9 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   background: #fff;
 }
 
-.auto-drum-portal--sheet.auto-drum-portal--ym .auto-drum-ym__highlight {
+.auto-drum-portal--sheet.auto-drum-portal--ym .auto-drum-ym__highlight,
+.auto-drum-portal--sheet.auto-drum-portal--ym .immo-drum-inline-highlight {
+  display: block !important;
   position: absolute;
   left: 0.4rem;
   right: 0.4rem;

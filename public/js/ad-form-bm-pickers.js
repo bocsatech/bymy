@@ -2130,12 +2130,30 @@ export function unmountAdFormBmPickers(form) {
   if (!form) return;
   unmountMuszakiDateTriple(form);
   unmountAdSplitYmDrums(form);
+  unmountAdBrandModelCombined(form);
   AD_BM_PICKER_IDS.forEach((id) => {
     const select = document.getElementById(id);
     if (select?._adBmClose) select._adBmClose();
     unmountPicker(select);
   });
   delete form?.dataset.adBmPickers;
+}
+
+function unmountAdBrandModelCombined(form) {
+  const root = form || document;
+  const modell = document.getElementById("modell");
+  const modellField = modell?.closest(".labeled-field, .md-outlined, .ad-layout-item");
+  modellField?.classList.remove("ad-form-bm-modell-nested");
+  root.querySelectorAll?.(".ad-form-bm-field--brand-model").forEach((el) => el.remove());
+  if (modell) {
+    delete modell.dataset.adBmPicker;
+    delete modell.dataset.adBmDrum;
+    delete modell.dataset.adBrandModelNested;
+  }
+  const gyartmany = document.getElementById("gyartmany");
+  if (gyartmany) {
+    delete gyartmany.dataset.adBrandModelCombined;
+  }
 }
 
 function unmountAdSplitYmDrums(form) {
@@ -2262,6 +2280,169 @@ function labelFromHierarchy(categories, value) {
 }
 
 /**
+ * Gyártmány + modell egy dobkeréken (mint a kereső), de csak 1-1 választható.
+ */
+async function mountAdBrandModelCombined(form, catalog) {
+  const gyartmany = document.getElementById("gyartmany");
+  const modell = document.getElementById("modell");
+  if (!form || !gyartmany || !modell) return;
+  if (gyartmany.dataset.adBrandModelCombined === "1") return;
+  if (gyartmany.tagName !== "SELECT" || modell.tagName !== "SELECT") return;
+
+  const field = anchorField(gyartmany);
+  if (!field) return;
+
+  form._autoDrumCatalog = catalog;
+  form._adFormVehicleCatalog = catalog;
+
+  unmountPicker(gyartmany);
+  unmountPicker(modell);
+  hideNativeSelect(gyartmany);
+  hideNativeSelect(modell);
+  ensurePlainHiddenInput(gyartmany);
+  ensurePlainHiddenInput(modell);
+  gyartmany.dataset.adBmPicker = "1";
+  gyartmany.dataset.adBmDrum = "1";
+  gyartmany.dataset.adBrandModelCombined = "1";
+  modell.dataset.adBmPicker = "1";
+  modell.dataset.adBmDrum = "1";
+  modell.dataset.adBrandModelNested = "1";
+
+  const modellField = modell.closest(".labeled-field, .md-outlined, .ad-layout-item");
+  modellField?.classList.add("ad-form-bm-modell-nested");
+
+  const { fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=immoClearAll1");
+  const { openBrandModelCatalogSheet } = await import("./auto-drum-sheet.js?v=adFormBmSingle1");
+  const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
+
+  const brands = [...(catalog?.gyartmanyok || [])].sort((a, b) =>
+    a.localeCompare(b, "hu", { sensitivity: "base" })
+  );
+  const emptyLabel = PLACEHOLDER;
+
+  const wrap = document.createElement("div");
+  wrap.className =
+    "ad-form-bm-field ad-form-bm-field--drum ad-form-bm-field--brand-model auto-bm-field ad-form-cell";
+  wrap.dataset.adBmFor = "gyartmany";
+  wrap.innerHTML = `<div class="immo-wheel-wrap ad-form-drum-wrap">
+    <div class="immo-wheel" data-wheel="gyartmany" data-filter-key="gyartmany" role="listbox" aria-label="Gyártmány"></div>
+    <div class="immo-wheel" data-wheel="modell" data-filter-key="modell" role="listbox" aria-label="Modell" hidden></div>
+  </div>`;
+  gyartmany.insertAdjacentElement("beforebegin", wrap);
+  stashNativeSelect(gyartmany, wrap);
+
+  const brandWheelHost = wrap.querySelector(".immo-wheel-wrap");
+  let brandWheel = wrap.querySelector('[data-wheel="gyartmany"]');
+  let modelWheel = wrap.querySelector('[data-wheel="modell"]');
+
+  fillWheel(
+    brandWheel,
+    brands.map((b) => ({ value: b, label: b })),
+    { emptyLabel }
+  );
+  fillWheel(modelWheel, [], { emptyLabel: "—" });
+
+  brandWheel = initDrumWheel(brandWheel, { emptyLabel, openMode: "portal", multiple: false });
+  modelWheel = wrap.querySelector('[data-wheel="modell"]') || modelWheel;
+  modelWheel.dataset.multiple = "0";
+  modelWheel.classList.add("immo-wheel--drum-source");
+  modelWheel.setAttribute("hidden", "");
+
+  const brandVal = String(gyartmany.value || "").trim();
+  const modelVal = String(modell.value || "").trim();
+  if (brandVal) setWheelValue(brandWheel, brandVal);
+  if (brandVal && catalog?.modellek?.[brandVal]) {
+    fillWheel(
+      modelWheel,
+      (catalog.modellek[brandVal] || []).map((m) => ({ value: m, label: m })),
+      { emptyLabel: "—" }
+    );
+  }
+  if (modelVal) setWheelValue(modelWheel, modelVal);
+  syncDrumWheelDisplay(brandWheel);
+
+  function summaryText() {
+    const b = String(readWheel(wrap.querySelector('[data-wheel="gyartmany"]') || brandWheel) ?? "").trim();
+    const m = String(readWheel(wrap.querySelector('[data-wheel="modell"]') || modelWheel) ?? "").trim();
+    if (!b) return emptyLabel;
+    return m ? `${b} · ${m}` : b;
+  }
+
+  function refreshSummary() {
+    const trigger = brandWheelHost.querySelector(".immo-wheel-trigger");
+    const text = summaryText();
+    if (trigger) {
+      trigger.textContent = text;
+      trigger.dataset.emptyLabel = emptyLabel;
+      trigger.setAttribute("aria-label", "Gyártmány és modell");
+    }
+    wrap.classList.toggle("has-value", text !== emptyLabel);
+  }
+
+  function syncSelectsFromWheels() {
+    const b = String(readWheel(wrap.querySelector('[data-wheel="gyartmany"]') || brandWheel) ?? "").trim();
+    const m = String(readWheel(wrap.querySelector('[data-wheel="modell"]') || modelWheel) ?? "").trim();
+    writePlainValue(gyartmany, b);
+    writePlainValue(modell, m);
+    refreshSummary();
+  }
+
+  brandWheel.addEventListener("immo-wheel-change", syncSelectsFromWheels);
+  modelWheel.addEventListener("immo-wheel-change", syncSelectsFromWheels);
+
+  const openSheet = (event) => {
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
+    const trigger = brandWheelHost.querySelector(".immo-wheel-trigger");
+    if (!trigger) return;
+    const liveBrand = wrap.querySelector('[data-wheel="gyartmany"]') || brandWheel;
+    openBrandModelCatalogSheet(liveBrand, trigger, brandWheelHost, emptyLabel, form, {
+      singleSelect: true,
+    });
+  };
+
+  const trigger = brandWheelHost.querySelector(".immo-wheel-trigger");
+  if (trigger) {
+    const next = trigger.cloneNode(true);
+    next.dataset.sheetBound = "1";
+    trigger.replaceWith(next);
+    next.addEventListener("click", openSheet);
+  }
+
+  const onPortalGone = () => {
+    if (document.body.classList.contains("auto-drum-portal-open")) return;
+    syncSelectsFromWheels();
+  };
+  const portalObserver = new MutationObserver(onPortalGone);
+  portalObserver.observe(document.body, { attributes: true, attributeFilter: ["class"] });
+  gyartmany._adBmClose = () => portalObserver.disconnect();
+
+  gyartmany._adBmRefreshSummary = refreshSummary;
+  gyartmany._adBmPanel = wrap;
+  modell._adBmRefreshSummary = refreshSummary;
+  modell._adBmPanel = wrap;
+  refreshSummary();
+
+  gyartmany.addEventListener("change", () => {
+    const b = String(gyartmany.value || "").trim();
+    const live = wrap.querySelector('[data-wheel="gyartmany"]') || brandWheel;
+    setWheelValue(live, b);
+    if (b && catalog?.modellek?.[b]) {
+      fillWheel(
+        wrap.querySelector('[data-wheel="modell"]') || modelWheel,
+        (catalog.modellek[b] || []).map((m) => ({ value: m, label: m })),
+        { emptyLabel: "—" }
+      );
+    }
+    refreshSummary();
+  });
+  modell.addEventListener("change", () => {
+    setWheelValue(wrap.querySelector('[data-wheel="modell"]') || modelWheel, String(modell.value || ""));
+    refreshSummary();
+  });
+}
+
+/**
  * Hirdetésfeladás select → kereső-stílusú dobkerék.
  * Opciók mindig a meglévő selectből (tartalom nem módosul).
  */
@@ -2285,7 +2466,7 @@ async function mountAdSelectDrum(select, {
   select.dataset.adBmDrum = "1";
 
   const { fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=immoClearAll1");
-  const { openStandaloneSwitchSheet, bindAutoDrumSheet } = await import("./auto-drum-sheet.js?v=adFormSplitYm2");
+  const { openStandaloneSwitchSheet, bindAutoDrumSheet } = await import("./auto-drum-sheet.js?v=adFormBmSingle1");
   const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
 
   const wrap = document.createElement("div");
@@ -2499,7 +2680,7 @@ async function mountAdSplitYmDrum({
   }
 
   const { fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=immoClearAll1");
-  const { openAutoDrumSheet } = await import("./auto-drum-sheet.js?v=adFormSplitYm2");
+  const { openAutoDrumSheet } = await import("./auto-drum-sheet.js?v=adFormBmSingle1");
   const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
 
   ev.dataset.adSplitYm = "1";
@@ -2610,7 +2791,7 @@ async function mountMuszakiDateTripleDrum(form) {
 
   const { fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=immoClearAll1");
   const { openAutoDrumSheet, bindAutoDrumSheet } = await import(
-    "./auto-drum-sheet.js?v=adFormSplitYm2"
+    "./auto-drum-sheet.js?v=adFormBmSingle1"
   );
   const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
 
@@ -2737,8 +2918,6 @@ export async function mountAdFormBmPickers(form, catalog = null) {
   const kivitel = document.getElementById("kivitel");
   const okmany = document.getElementById("okmany_jelleg");
   const uzemanyag = document.getElementById("uzemanyag");
-  const gyartmany = document.getElementById("gyartmany");
-  const modell = document.getElementById("modell");
 
   /* Meglévő select-tartalom kiegészítése (nem cseréljük a kereső listáira). */
   ensureSelectOptions(document.getElementById("dc_tolto_csatlakozas"), DC_TOLTO_OPTIONS);
@@ -2831,51 +3010,8 @@ export async function mountAdFormBmPickers(form, catalog = null) {
   try {
     const cat = catalog || (await fetchVehicleCatalog({ kind: catalogKindForAdForm(form) }));
     form._adFormVehicleCatalog = cat;
-    const brands = [...(cat?.gyartmanyok || [])].sort((a, b) =>
-      a.localeCompare(b, "hu", { sensitivity: "base" })
-    );
-    if (gyartmany?.tagName === "SELECT" && gyartmany.dataset.adBmPicker !== "1") {
-      await mountAdSelectDrum(gyartmany, {
-        title: "Gyártmány",
-        mode: "switch",
-        resolveItems: () => brands.map((b) => ({ value: b, label: b })),
-        onChange: () => {
-          if (!modell) return;
-          writePlainValue(modell, "");
-          modell._adBmFillWheel?.("");
-          modell._adBmRefreshSummary?.();
-        },
-      });
-    }
-    if (modell?.tagName === "SELECT" && modell.dataset.adBmPicker !== "1") {
-      await mountAdSelectDrum(modell, {
-        title: "Modell",
-        mode: "switch",
-        resolveItems: () => {
-          const brand = readSingleStoredValue(gyartmany?._adBmHidden?.value ?? gyartmany?.value ?? "")
-            .toUpperCase();
-          if (!brand) return [];
-          const tree = cat?.modellekTree?.[brand];
-          if (Array.isArray(tree) && tree.length) {
-            const rows = [];
-            for (const node of tree) {
-              if (!node?.name) continue;
-              if (node.children?.length) {
-                for (const child of node.children) {
-                  if (child?.name) rows.push({ value: child.name, label: `${node.name} · ${child.name}` });
-                }
-              } else {
-                rows.push({ value: node.name, label: node.name });
-              }
-            }
-            return rows.sort((a, b) => a.label.localeCompare(b.label, "hu", { sensitivity: "base" }));
-          }
-          return [...(cat?.modellek?.[brand] || [])]
-            .sort((a, b) => a.localeCompare(b, "hu", { sensitivity: "base" }))
-            .map((name) => ({ value: name, label: name }));
-        },
-      });
-    }
+    form._autoDrumCatalog = cat;
+    await mountAdBrandModelCombined(form, cat);
   } catch (error) {
     console.warn("Gyártmány/modell dobkerék:", error);
   }

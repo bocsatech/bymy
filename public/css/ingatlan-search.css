@@ -2070,6 +2070,16 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   display: none !important;
 }
 
+/* Gyártmány+modell: egy dobkerék — a külön modell mező rejtve */
+#ad-form .labeled-field.ad-form-bm-modell-nested,
+#ad-form .ad-layout-item.ad-form-bm-modell-nested {
+  display: none !important;
+}
+
+#ad-form .ad-form-bm-field--brand-model {
+  width: 100%;
+}
+
 /* Hirdetésfeladás: kereső-stílusú dobkerék trigger a selectek helyett */
 #ad-form .ad-form-bm-field--drum {
   width: 100%;

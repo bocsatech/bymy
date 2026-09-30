@@ -462,13 +462,14 @@ export function closeAutoDrumSheet(commit = false) {
     return;
   }
   const multiple = wheel?.dataset?.multiple === "1";
-  if (commit && scrollEl && ring && wheel && !multiple) {
+  const isBmPortal = Boolean(modelWheel);
+  if (commit && scrollEl && ring && wheel && !multiple && !isBmPortal) {
     const item = nearestPortalItem(scrollEl, ring);
     const value = item?.dataset.value ?? "";
     setWheelValue(wheel, value);
     syncDrumWheelDisplay(wheel);
     wheel.dispatchEvent(new CustomEvent("immo-wheel-change", { bubbles: true, detail: { value } }));
-  } else if (commit && multiple && wheel) {
+  } else if (commit && (multiple || isBmPortal) && wheel) {
     syncDrumWheelDisplay(wheel);
     if (modelWheel) syncDrumWheelDisplay(modelWheel);
     wheel.dispatchEvent(
@@ -703,8 +704,8 @@ function modelsForBrandFromCatalog(catalog, brand) {
  * Desk flow a mobilon: ugyanazon a panelen Gyártmány → Modell váltás.
  * Márka bekapcsolásakor a lista a modellekre vált (katalógusból).
  */
-function openBrandModelCatalogSheet(brandWheel, trigger, wrap, emptyLabel, form) {
-  const catalog = form?._autoDrumCatalog;
+export function openBrandModelCatalogSheet(brandWheel, trigger, wrap, emptyLabel, form, { singleSelect = false } = {}) {
+  const catalog = form?._autoDrumCatalog || form?._adFormVehicleCatalog;
   const modelWheel =
     form?.querySelector?.('[data-wheel="modell"]') ||
     brandWheel.closest("form")?.querySelector('[data-wheel="modell"]');
@@ -757,11 +758,16 @@ function openBrandModelCatalogSheet(brandWheel, trigger, wrap, emptyLabel, form)
     fillWheel(
       modelWheel,
       list.map((m) => ({ value: m, label: m })),
-      { emptyLabel: "Mindegy" }
+      { emptyLabel: singleSelect ? "—" : "Mindegy" }
     );
-    modelWheel.dataset.multiple = "1";
-    const keep = list.filter((m) => prev.has(m));
-    setWheelValue(modelWheel, keep);
+    modelWheel.dataset.multiple = singleSelect ? "0" : "1";
+    if (singleSelect) {
+      const cur = String(readWheel(modelWheel) ?? "");
+      setWheelValue(modelWheel, list.includes(cur) ? cur : "");
+    } else {
+      const keep = list.filter((m) => prev.has(m));
+      setWheelValue(modelWheel, keep);
+    }
     syncDrumWheelDisplay(modelWheel);
   }
 
@@ -773,7 +779,12 @@ function openBrandModelCatalogSheet(brandWheel, trigger, wrap, emptyLabel, form)
     subEl.textContent = "";
     backBtn.hidden = true;
     root.setAttribute("aria-label", "Gyártmány");
-    const selected = readWheelList(brandWheel);
+    const selected = singleSelect
+      ? (() => {
+          const v = String(readWheel(brandWheel) ?? "").trim();
+          return v ? [v] : [];
+        })()
+      : readWheelList(brandWheel);
     scrollEl.innerHTML = brandItems.map((row) => switchRowHtml(row)).join("");
     bindSwitchRowClicks(scrollEl, (item) => {
       const value = item.dataset.value ?? "";
@@ -785,6 +796,19 @@ function openBrandModelCatalogSheet(brandWheel, trigger, wrap, emptyLabel, form)
         }
         syncDrumWheelDisplay(brandWheel);
         paintSwitchList(scrollEl, brandWheel);
+        return;
+      }
+      if (singleSelect) {
+        const prev = String(readWheel(brandWheel) ?? "");
+        setWheelValue(brandWheel, value);
+        brandWheel.dataset.multiple = "0";
+        syncDrumWheelDisplay(brandWheel);
+        if (prev !== value && modelWheel) {
+          setWheelValue(modelWheel, "");
+          syncDrumWheelDisplay(modelWheel);
+        }
+        syncModelWheelFromCatalog([value]);
+        renderModels(value);
         return;
       }
       const cur = new Set(readWheelList(brandWheel));
@@ -818,11 +842,19 @@ function openBrandModelCatalogSheet(brandWheel, trigger, wrap, emptyLabel, form)
     subEl.textContent = brand;
     backBtn.hidden = false;
     root.setAttribute("aria-label", `Modell — ${brand}`);
-    const rows = [{ value: "", label: "Mindegy" }, ...modelsForBrandFromCatalog(catalog, brand)];
+    const emptyRow = { value: "", label: singleSelect ? "—" : "Mindegy" };
+    const rows = [emptyRow, ...modelsForBrandFromCatalog(catalog, brand)];
     scrollEl.innerHTML = rows.map((row) => switchRowHtml(row)).join("");
     bindSwitchRowClicks(scrollEl, (item) => {
       if (!modelWheel) return;
       const value = item.dataset.value ?? "";
+      if (singleSelect) {
+        setWheelValue(modelWheel, value);
+        modelWheel.dataset.multiple = "0";
+        syncDrumWheelDisplay(modelWheel);
+        paintSwitchList(scrollEl, modelWheel);
+        return;
+      }
       if (value === "") {
         setWheelValue(modelWheel, "");
       } else {

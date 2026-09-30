@@ -2070,9 +2070,9 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   display: none !important;
 }
 
-/* Gyártmány+modell: egy dobkerék — a külön modell mező rejtve */
-#ad-form .labeled-field.ad-form-bm-modell-nested,
-#ad-form .ad-layout-item.ad-form-bm-modell-nested {
+/* Gyártmány+modell: egy dobkerék — a külön modell mező rejtve (ne a brand sort) */
+#ad-form .labeled-field.ad-form-bm-modell-nested:not(.ad-form-alap-brand-row):not(:has(.ad-form-bm-field--brand-model)),
+#ad-form .ad-layout-item.ad-form-bm-modell-nested:not(.ad-form-alap-brand-row):not(:has(.ad-form-bm-field--brand-model)) {
   display: none !important;
 }
 

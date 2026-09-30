@@ -2371,7 +2371,13 @@ async function mountAdBrandModelCombined(form, catalog) {
   modell.dataset.adBrandModelNested = "1";
 
   const modellField = modell.closest(".labeled-field, .md-outlined, .ad-layout-item");
-  modellField?.classList.add("ad-form-bm-modell-nested");
+  /* Soha ne rejtsük el a gyártmány sort — csak a külön modell mezőt. */
+  if (modellField && modellField !== field) {
+    modellField.classList.add("ad-form-bm-modell-nested");
+  } else if (modellField && modellField === field) {
+    /* modell a gyartmany mezőben van: ne nesteljünk, a native #modell amúgy is hidden. */
+    modellField.classList.remove("ad-form-bm-modell-nested");
+  }
 
   const { fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=immoClearAll1");
   const { openBrandModelCatalogSheet } = await import("./auto-drum-sheet.js?v=adFormBmSingle1");

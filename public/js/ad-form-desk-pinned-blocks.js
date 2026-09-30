@@ -89,10 +89,11 @@ function step1FieldKey(el) {
 
 function isStep1BrandRow(el) {
   if (!el) return false;
-  if (el.matches?.(".ad-form-bm-field--brand-model, .ad-form-alap-brand-row")) return true;
+  /* Csak a kombinált gyártmány-pill — a külön #modell sort a nested CSS rejti, ne a brand blokkba. */
+  if (el.matches?.(".ad-form-bm-field--brand-model")) return true;
   if (el.querySelector?.(".ad-form-bm-field--brand-model, [data-ad-bm-for='gyartmany']")) return true;
   const key = step1FieldKey(el);
-  return key === "gyartmany" || key === "modell";
+  return key === "gyartmany";
 }
 
 function unwrapAlapScoutCard(canvas) {

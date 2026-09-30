@@ -706,10 +706,11 @@ body.site-app[data-site-page="hirdetesfeladas"] .ad-form-toggle-list .auto-bm-to
 }
 
 /* Gyártmány+modell: egy dobkerék — a külön modell mező rejtve.
-   site-app .ad-layout-item.labeled-field { display:grid !important } felülírja a gyengébb szabályt. */
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .labeled-field.ad-form-bm-modell-nested,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-layout-item.ad-form-bm-modell-nested,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-layout-item.labeled-field.ad-form-bm-modell-nested {
+   site-app .ad-layout-item.labeled-field { display:grid !important } felülírja a gyengébb szabályt.
+   NE rejtsük el a brand sort (ha tévedésből kapna nested class-t). */
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .labeled-field.ad-form-bm-modell-nested:not(.ad-form-alap-brand-row):not(:has(.ad-form-bm-field--brand-model)),
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-layout-item.ad-form-bm-modell-nested:not(.ad-form-alap-brand-row):not(:has(.ad-form-bm-field--brand-model)),
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-layout-item.labeled-field.ad-form-bm-modell-nested:not(.ad-form-alap-brand-row):not(:has(.ad-form-bm-field--brand-model)) {
   display: none !important;
   height: 0 !important;
   min-height: 0 !important;
@@ -717,6 +718,18 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-layout-item.labeled
   padding: 0 !important;
   overflow: hidden !important;
   border: 0 !important;
+}
+
+/* Brand sor (gyártmány-pill) mindig látszik — a nested #modell továbbra is rejtve marad */
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-brand-row:not(.ad-form-bm-modell-nested),
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-brand-block > .ad-layout-item:not(.ad-form-bm-modell-nested),
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-brand-block .ad-form-bm-field--brand-model {
+  display: grid !important;
+  height: auto !important;
+  min-height: 0 !important;
+  overflow: visible !important;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field--brand-model {
@@ -1082,11 +1095,12 @@ body.site-app[data-site-page="hirdetesfeladas"] #tire-sizes-card .tire-row selec
 }
 
 
-/* === Demó-pontos Alapadatok (Használt autók nélkül) === */
+/* === Demó-pontos Alapadatok (Használt autók / Gebrauchtwagen felirat nélkül) === */
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-layout-canvas:has(> .ad-form-alap-card),
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-layout-canvas:has(> .ad-form-alap-brand-block) {
   gap: 1.35rem !important;
   padding: 0.25rem 0 0.5rem !important;
+  background: transparent !important;
 }
 
 body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .auto-desk-acc[data-desk-acc="alap"] {
@@ -1100,13 +1114,22 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .auto-desk-a
   display: none !important;
 }
 
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .auto-desk-acc[data-desk-acc="alap"].is-open > .auto-desk-acc__body {
+/* Világoskék demó háttér — desk accordion ÉS mobil step1 */
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .auto-desk-acc[data-desk-acc="alap"].is-open > .auto-desk-acc__body,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="1"]:has(.ad-form-alap-card),
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="1"]:has(.ad-form-alap-brand-block) {
   background: #e8eef3 !important;
   padding: 1rem 1rem 1.25rem !important;
+  border-radius: 0 !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="1"] .ad-layout-canvas:has(> .ad-form-alap-card) {
-  background: transparent;
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="1"] > .import-step-label {
+  display: none !important;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="1"] .ad-layout-canvas:has(> .ad-form-alap-card),
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="1"] .ad-layout-canvas:has(> .ad-form-alap-brand-block) {
+  background: transparent !important;
 }
 
 /* Gyártmány pill a világoskék hátteren */

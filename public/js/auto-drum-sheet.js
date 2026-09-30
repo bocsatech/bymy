@@ -702,6 +702,72 @@ function modelsForBrandFromCatalog(catalog, brand) {
   return (catalog?.modellek?.[brand] || []).map((m) => ({ value: m, label: m, child: false }));
 }
 
+function createSheetPortalShell(title) {
+  const root = document.createElement("div");
+  root.className = "auto-drum-portal auto-drum-portal--multi auto-drum-portal--sheet";
+  root.setAttribute("role", "dialog");
+  root.setAttribute("aria-modal", "true");
+  root.setAttribute("aria-label", title);
+  root.style.setProperty("--auto-drum-multi-h", `${ITEM_H * MULTI_VISIBLE}px`);
+  root.style.setProperty("--auto-drum-item-h", `44px`);
+  root.innerHTML = `
+    <button type="button" class="auto-drum-portal__backdrop" aria-label="Bezárás"></button>
+    <div class="auto-drum-portal__stage auto-drum-portal__stage--multi auto-drum-portal__stage--sheet">
+      <header class="auto-drum-portal__sheet-head">
+        <button type="button" class="auto-drum-portal__close" aria-label="Bezárás">×</button>
+        <h2 class="auto-drum-portal__sheet-title"></h2>
+        <button type="button" class="auto-drum-portal__done auto-drum-portal__done--sheet-top">Kész</button>
+      </header>
+      <div class="auto-drum-portal__sheet-scroll" data-sheet-scroll tabindex="-1">
+        <div class="auto-drum-portal__sheet-top-space" aria-hidden="true"></div>
+        <div class="immo-drum-wheel-ring auto-drum-portal__ring auto-drum-portal__ring--multi auto-drum-portal__ring--sheet">
+          <div class="auto-drum-portal__toolbar auto-drum-portal__toolbar--sheet">
+            <button type="button" class="auto-drum-portal__back" hidden>Vissza</button>
+            <p class="auto-drum-portal__sub" hidden></p>
+          </div>
+          <div class="auto-drum-portal__scroll immo-drum-inline-scroll" data-sheet-list></div>
+        </div>
+      </div>
+    </div>`;
+  const titleEl = root.querySelector(".auto-drum-portal__sheet-title");
+  if (titleEl) titleEl.textContent = title;
+  return {
+    root,
+    stage: root.querySelector(".auto-drum-portal__stage"),
+    ring: root.querySelector(".auto-drum-portal__ring"),
+    scrollEl: root.querySelector("[data-sheet-list]"),
+    sheetScroll: root.querySelector("[data-sheet-scroll]"),
+    backBtn: root.querySelector(".auto-drum-portal__back"),
+    subEl: root.querySelector(".auto-drum-portal__sub"),
+    doneBtn: root.querySelector(".auto-drum-portal__done"),
+    closeBtn: root.querySelector(".auto-drum-portal__close"),
+    toolbarEl: root.querySelector(".auto-drum-portal__toolbar--sheet"),
+  };
+}
+
+function applySheetStageLayout(stage) {
+  if (!stage) return;
+  stage.style.left = "50%";
+  stage.style.right = "auto";
+  stage.style.top = "0";
+  stage.style.bottom = "0";
+  stage.style.height = "100%";
+  stage.style.transform = "translateX(-50%)";
+}
+
+function mountSheetPortalChrome(root, { stage, wrap, trigger, ring }) {
+  document.body.appendChild(root);
+  document.body.classList.add("auto-drum-portal-open");
+  wrap?.classList.add("is-open", "has-drum-open");
+  wrap?.closest(".immo-dual-range")?.classList.add("has-drum-open");
+  (wrap?.closest(".immo-dual-range__half") || wrap?.closest(".immo-schema-cell"))?.classList.add("is-drum-active");
+  trigger?.setAttribute("aria-expanded", "true");
+  applySheetStageLayout(stage);
+  requestAnimationFrame(() => {
+    ring?.style.setProperty("--immo-drum-ring-w", `${Math.min(420, Math.floor(window.innerWidth - 32))}px`);
+  });
+}
+
 /**
  * Desk flow a mobilon: ugyanazon a panelen Gyártmány → Modell váltás.
  * Márka bekapcsolásakor a lista a modellekre vált (katalógusból).
@@ -716,44 +782,9 @@ export function openBrandModelCatalogSheet(brandWheel, trigger, wrap, emptyLabel
     ? [{ value: "", label: emptyLabel }, ...catalog.gyartmanyok.map((b) => ({ value: b, label: b }))]
     : normalizeSheetItems([...brandWheel.querySelectorAll(".immo-wheel-opt")], emptyLabel);
 
-  const root = document.createElement("div");
-  root.className = "auto-drum-portal auto-drum-portal--multi auto-drum-portal--bm auto-drum-portal--sheet";
-  root.setAttribute("role", "dialog");
-  root.setAttribute("aria-modal", "true");
-  root.setAttribute("aria-label", "Gyártmány / Modell");
-  const drumH = ITEM_H * MULTI_VISIBLE;
-  root.style.setProperty("--auto-drum-multi-h", `${drumH}px`);
-  root.style.setProperty("--auto-drum-item-h", `44px`);
-
-  root.innerHTML = `
-    <button type="button" class="auto-drum-portal__backdrop" aria-label="Bezárás"></button>
-    <div class="auto-drum-portal__stage auto-drum-portal__stage--multi auto-drum-portal__stage--sheet">
-      <header class="auto-drum-portal__sheet-head">
-        <button type="button" class="auto-drum-portal__close" aria-label="Bezárás">×</button>
-        <h2 class="auto-drum-portal__sheet-title">Gyártmány / Modell</h2>
-        <button type="button" class="auto-drum-portal__done auto-drum-portal__done--sheet-top">Kész</button>
-      </header>
-      <div class="auto-drum-portal__sheet-scroll" data-sheet-scroll tabindex="-1">
-        <div class="auto-drum-portal__sheet-top-space" aria-hidden="true"></div>
-        <div class="immo-drum-wheel-ring auto-drum-portal__ring auto-drum-portal__ring--multi auto-drum-portal__ring--sheet">
-          <div class="auto-drum-portal__toolbar auto-drum-portal__toolbar--sheet">
-            <button type="button" class="auto-drum-portal__back" hidden>Vissza</button>
-            <p class="auto-drum-portal__sub" hidden></p>
-          </div>
-          <div class="auto-drum-portal__scroll immo-drum-inline-scroll" data-sheet-list></div>
-        </div>
-      </div>
-    </div>`;
-
-  const stage = root.querySelector(".auto-drum-portal__stage");
-  const ring = root.querySelector(".auto-drum-portal__ring");
-  const scrollEl = root.querySelector("[data-sheet-list]");
-  const sheetScroll = root.querySelector("[data-sheet-scroll]");
-  const backBtn = root.querySelector(".auto-drum-portal__back");
-  const subEl = root.querySelector(".auto-drum-portal__sub");
-  const doneBtn = root.querySelector(".auto-drum-portal__done");
-  const closeBtn = root.querySelector(".auto-drum-portal__close");
-  const toolbarEl = root.querySelector(".auto-drum-portal__toolbar--sheet");
+  const { root, stage, ring, scrollEl, sheetScroll, backBtn, subEl, doneBtn, closeBtn, toolbarEl } =
+    createSheetPortalShell("Gyártmány / Modell");
+  root.classList.add("auto-drum-portal--bm");
 
   let view = "brands";
   let modelBrand = null;
@@ -913,56 +944,21 @@ export function openBrandModelCatalogSheet(brandWheel, trigger, wrap, emptyLabel
     { passive: true }
   );
 
-  document.body.appendChild(root);
-  document.body.classList.add("auto-drum-portal-open");
-  wrap?.classList.add("is-open", "has-drum-open");
-  wrap?.closest(".immo-dual-range")?.classList.add("has-drum-open");
-  (wrap?.closest(".immo-dual-range__half") || wrap?.closest(".immo-schema-cell"))?.classList.add("is-drum-active");
-  trigger.setAttribute("aria-expanded", "true");
-
-  stage.style.left = "50%";
-  stage.style.right = "auto";
-  stage.style.top = "0";
-  stage.style.bottom = "0";
-  stage.style.height = "100%";
-  stage.style.transform = "translateX(-50%)";
+  mountSheetPortalChrome(root, { stage, wrap, trigger, ring });
   activePortal = { root, wheel: brandWheel, scrollEl, ring, wrap, trigger, modelWheel };
 
   renderBrands();
-  requestAnimationFrame(() => {
-    ring.style.setProperty("--immo-drum-ring-w", `${Math.min(420, Math.floor(window.innerWidth - 32))}px`);
-  });
 }
 
 function openMultiSwitchSheet(wheel, trigger, wrap, emptyLabel, opts) {
   const items = normalizeSheetItems(opts, emptyLabel);
   const selected = readWheelList(wheel);
-  const root = document.createElement("div");
-  root.className = "auto-drum-portal auto-drum-portal--multi";
-  root.setAttribute("role", "dialog");
-  root.setAttribute("aria-modal", "true");
-  root.setAttribute("aria-label", emptyLabel);
-  const drumH = ITEM_H * MULTI_VISIBLE;
-  root.style.setProperty("--auto-drum-multi-h", `${drumH}px`);
-  root.style.setProperty("--auto-drum-item-h", `${ITEM_H}px`);
-
-  root.innerHTML = `
-    <button type="button" class="auto-drum-portal__backdrop" aria-label="Bezárás"></button>
-    <div class="auto-drum-portal__stage auto-drum-portal__stage--multi">
-      <div class="immo-drum-wheel-ring auto-drum-portal__ring auto-drum-portal__ring--multi">
-        <div class="auto-drum-portal__toolbar">
-          <button type="button" class="auto-drum-portal__back" hidden>Vissza</button>
-          <p class="auto-drum-portal__sub" hidden></p>
-          <button type="button" class="auto-drum-portal__done">Kész</button>
-        </div>
-        <div class="auto-drum-portal__scroll immo-drum-inline-scroll" tabindex="-1"></div>
-      </div>
-    </div>`;
-
-  const stage = root.querySelector(".auto-drum-portal__stage");
-  const ring = root.querySelector(".auto-drum-portal__ring");
-  const scrollEl = root.querySelector(".auto-drum-portal__scroll");
-  const doneBtn = root.querySelector(".auto-drum-portal__done");
+  const title =
+    wrap?.querySelector(".immo-label")?.textContent?.trim() ||
+    wheel.getAttribute("aria-label") ||
+    emptyLabel ||
+    "Választás";
+  const { root, stage, ring, scrollEl, sheetScroll, doneBtn, closeBtn } = createSheetPortalShell(title);
 
   scrollEl.innerHTML = items.map((row) => switchRowHtml(row)).join("");
 
@@ -981,30 +977,22 @@ function openMultiSwitchSheet(wheel, trigger, wrap, emptyLabel, opts) {
   });
 
   root.querySelector(".auto-drum-portal__backdrop")?.addEventListener("click", () => closeAutoDrumSheet(true));
+  closeBtn?.addEventListener("click", () => closeAutoDrumSheet(true));
   doneBtn?.addEventListener("click", () => closeAutoDrumSheet(true));
+  const repaint = () => paintSwitchList(scrollEl, wheel);
+  sheetScroll?.addEventListener("scroll", repaint, { passive: true });
+  ring?.addEventListener("scroll", repaint, { passive: true });
 
-  scrollEl.addEventListener("scroll", () => paintSwitchList(scrollEl, wheel), { passive: true });
-
-  document.body.appendChild(root);
-  document.body.classList.add("auto-drum-portal-open");
-  wrap?.classList.add("is-open", "has-drum-open");
-  wrap?.closest(".immo-dual-range")?.classList.add("has-drum-open");
-  (wrap?.closest(".immo-dual-range__half") || wrap?.closest(".immo-schema-cell"))?.classList.add("is-drum-active");
-  trigger.setAttribute("aria-expanded", "true");
-
-  positionPortal(stage, trigger);
+  mountSheetPortalChrome(root, { stage, wrap, trigger, ring });
   activePortal = { root, wheel, scrollEl, ring, wrap, trigger };
 
   requestAnimationFrame(() => {
-    ring.style.setProperty("--immo-drum-ring-w", `${Math.min(340, Math.floor(window.innerWidth * 0.9))}px`);
     if (selected.length) {
       const start = [...scrollEl.querySelectorAll(".immo-drum-inline-item")].find((el) =>
         selected.includes(el.dataset.value ?? "")
       );
       start?.scrollIntoView({ block: "nearest" });
-    } else {
-      scrollEl.scrollTop = 0;
-    }
+    } else if (sheetScroll) sheetScroll.scrollTop = 0;
     paintSwitchList(scrollEl, wheel);
   });
 }
@@ -1020,40 +1008,22 @@ export function openStandaloneSwitchSheet({
   initialSelected = [],
   onDone,
   getChildren = null,
+  title = null,
 } = {}) {
   if (!trigger) return;
   closeAutoDrumSheet(false);
   closeAllInlineDrums(false);
 
   const selected = new Set((initialSelected || []).map(String).filter(Boolean));
-  const root = document.createElement("div");
-  root.className = "auto-drum-portal auto-drum-portal--multi";
-  root.setAttribute("role", "dialog");
-  root.setAttribute("aria-modal", "true");
-  const drumH = ITEM_H * MULTI_VISIBLE;
-  root.style.setProperty("--auto-drum-multi-h", `${drumH}px`);
-  root.style.setProperty("--auto-drum-item-h", `${ITEM_H}px`);
-
-  root.innerHTML = `
-    <button type="button" class="auto-drum-portal__backdrop" aria-label="Bezárás"></button>
-    <div class="auto-drum-portal__stage auto-drum-portal__stage--multi">
-      <div class="immo-drum-wheel-ring auto-drum-portal__ring auto-drum-portal__ring--multi">
-        <div class="auto-drum-portal__toolbar">
-          <button type="button" class="auto-drum-portal__back" hidden>Vissza</button>
-          <p class="auto-drum-portal__sub" hidden></p>
-          <button type="button" class="auto-drum-portal__done">Kész</button>
-        </div>
-        <div class="auto-drum-portal__scroll immo-drum-inline-scroll" tabindex="-1"></div>
-      </div>
-    </div>`;
-
-  const stage = root.querySelector(".auto-drum-portal__stage");
-  const ring = root.querySelector(".auto-drum-portal__ring");
-  const scrollEl = root.querySelector(".auto-drum-portal__scroll");
-  const backBtn = root.querySelector(".auto-drum-portal__back");
-  const subEl = root.querySelector(".auto-drum-portal__sub");
-  const doneBtn = root.querySelector(".auto-drum-portal__done");
-  const wrap = trigger.closest(".immo-wheel-wrap, .auto-desk-field, .auto-kivitel-field") || trigger.parentElement;
+  const sheetTitle =
+    title ||
+    trigger.getAttribute("aria-label") ||
+    trigger.closest(".auto-desk-field, .ad-form-bm-field, .immo-schema-cell")?.querySelector("label, .immo-label, .auto-desk-label")?.textContent?.trim() ||
+    emptyLabel ||
+    "Választás";
+  const { root, stage, ring, scrollEl, sheetScroll, backBtn, subEl, doneBtn, closeBtn, toolbarEl } =
+    createSheetPortalShell(sheetTitle);
+  const wrap = trigger.closest(".immo-wheel-wrap, .auto-desk-field, .auto-kivitel-field, .ad-form-bm-field") || trigger.parentElement;
 
   let view = "main";
   let parentValue = null;
@@ -1067,7 +1037,13 @@ export function openStandaloneSwitchSheet({
     }
   }
 
-  function paintStandalone(listRows) {
+  function syncToolbar() {
+    const show = view === "kids";
+    toolbarEl?.classList.toggle("is-visible", show);
+    root.dataset.sheetView = view;
+  }
+
+  function paintStandalone() {
     cancelAnimationFrame(paintFrame);
     paintFrame = requestAnimationFrame(() => {
       scrollEl.querySelectorAll(".immo-drum-inline-item").forEach((item) => {
@@ -1077,8 +1053,9 @@ export function openStandaloneSwitchSheet({
         else if (view === "main" && getChildren) isSel = openMains.has(v) || selected.has(v);
         else isSel = selected.has(v);
         item.style.opacity = "1";
-        item.style.fontWeight = isSel ? "700" : "500";
-        item.style.color = "#000";
+        item.style.fontWeight = isSel ? "500" : "400";
+        item.style.fontSize = "0.9375rem";
+        item.style.color = "#1f2937";
         item.classList.toggle("is-selected", isSel);
         item.querySelector(".auto-drum-switch")?.setAttribute("aria-checked", isSel ? "true" : "false");
       });
@@ -1090,6 +1067,7 @@ export function openStandaloneSwitchSheet({
     parentValue = null;
     backBtn.hidden = true;
     subEl.hidden = true;
+    syncToolbar();
     const rows = [{ value: "", label: emptyLabel }, ...items];
     scrollEl.innerHTML = rows.map((row) => switchRowHtml(row)).join("");
     bindSwitchRowClicks(scrollEl, (item) => {
@@ -1119,7 +1097,8 @@ export function openStandaloneSwitchSheet({
       else selected.add(value);
       paintStandalone();
     });
-    scrollEl.scrollTop = 0;
+    if (sheetScroll) sheetScroll.scrollTop = 0;
+    if (ring) ring.scrollTop = 0;
     paintStandalone();
   }
 
@@ -1129,6 +1108,7 @@ export function openStandaloneSwitchSheet({
     backBtn.hidden = false;
     subEl.hidden = false;
     subEl.textContent = items.find((i) => i.value === parent)?.label || parent;
+    syncToolbar();
     const rows = [{ value: "", label: emptyLabel }, ...kids];
     scrollEl.innerHTML = rows.map((row) => switchRowHtml(row)).join("");
     bindSwitchRowClicks(scrollEl, (item) => {
@@ -1145,7 +1125,8 @@ export function openStandaloneSwitchSheet({
       }
       paintStandalone();
     });
-    scrollEl.scrollTop = 0;
+    if (sheetScroll) sheetScroll.scrollTop = 0;
+    if (ring) ring.scrollTop = 0;
     paintStandalone();
   }
 
@@ -1159,13 +1140,12 @@ export function openStandaloneSwitchSheet({
         }
       }
     }
-    const list = commit ? [...selected] : [...initialSelected];
     wrap?.classList.remove("is-open", "has-drum-open");
     trigger.setAttribute("aria-expanded", "false");
     root.remove();
     activePortal = null;
     document.body.classList.remove("auto-drum-portal-open", "auto-drum-sheet-open");
-    if (commit && typeof onDone === "function") onDone(list, [...openMains]);
+    if (commit && typeof onDone === "function") onDone([...selected], [...openMains]);
   }
 
   backBtn.addEventListener("click", (event) => {
@@ -1173,19 +1153,14 @@ export function openStandaloneSwitchSheet({
     renderMain();
   });
   root.querySelector(".auto-drum-portal__backdrop")?.addEventListener("click", () => finish(true));
+  closeBtn?.addEventListener("click", () => finish(true));
   doneBtn?.addEventListener("click", () => finish(true));
+  sheetScroll?.addEventListener("scroll", () => paintStandalone(), { passive: true });
+  ring?.addEventListener("scroll", () => paintStandalone(), { passive: true });
 
-  document.body.appendChild(root);
-  document.body.classList.add("auto-drum-portal-open");
-  wrap?.classList.add("is-open", "has-drum-open");
-  trigger.setAttribute("aria-expanded", "true");
-  positionPortal(stage, trigger);
+  mountSheetPortalChrome(root, { stage, wrap, trigger, ring });
   activePortal = { root, wheel: null, scrollEl, ring, wrap, trigger };
-
-  requestAnimationFrame(() => {
-    ring.style.setProperty("--immo-drum-ring-w", `${Math.min(340, Math.floor(window.innerWidth * 0.9))}px`);
-    renderMain();
-  });
+  renderMain();
 }
 
 const CATALOG_STATIC_BUST = "brandCatalog4";

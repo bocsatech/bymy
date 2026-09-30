@@ -1491,6 +1491,53 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   margin-right: 0;
 }
 
+.auto-drum-portal--bm .auto-drum-portal__head {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  width: 100%;
+  padding: 0 0.15rem 0.35rem;
+  box-sizing: border-box;
+}
+
+.auto-drum-portal--bm .auto-drum-portal__back {
+  flex: 0 0 auto;
+  width: 2.2rem;
+  height: 2.2rem;
+  border: 0;
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: #000;
+  font: 700 1.45rem/1 system-ui, sans-serif;
+  cursor: pointer;
+}
+
+.auto-drum-portal--bm .auto-drum-portal__back[hidden] {
+  display: none !important;
+}
+
+.auto-drum-portal--bm .auto-drum-portal__titles {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.auto-drum-portal--bm .auto-drum-portal__title {
+  margin: 0;
+  font: 700 1.05rem/1.2 system-ui, sans-serif;
+  color: #000;
+}
+
+.auto-drum-portal--bm .auto-drum-portal__sub {
+  margin: 0.1rem 0 0;
+  font: 500 0.88rem/1.2 system-ui, sans-serif;
+  color: #334155;
+}
+
+.auto-drum-portal--bm .auto-drum-inline-item--child {
+  padding-left: 1.35rem !important;
+  font-size: 1.05rem;
+}
+
 .auto-drum-inline-item--switch .auto-drum-switch {
   position: relative;
   flex: 0 0 auto;

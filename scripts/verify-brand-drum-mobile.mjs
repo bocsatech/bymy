@@ -60,6 +60,7 @@ async function main() {
     const trigger = page.locator('[data-qs-field="gyartmany"] .immo-wheel-trigger').first();
     await trigger.click();
     await page.waitForSelector(".auto-drum-portal--multi", { state: "visible", timeout: 15000 });
+    await page.waitForSelector(".auto-drum-portal--multi .immo-drum-inline-item", { state: "attached", timeout: 5000 });
 
     const portal = await page.evaluate(() => {
       const root = document.querySelector(".auto-drum-portal--multi");
@@ -109,50 +110,31 @@ async function main() {
     log("switch near right edge", (portal.switchRightGap ?? 99) < 24, portal.switchRightGap);
     log("first labels look like brands", portal.firstItems?.[0] === "Mindegy" && portal.firstItems?.length > 5, portal.firstItems);
 
-    // Toggle two brands
+    // Toggle BMW → same portal switches to Modell list
     await page.locator('.auto-drum-portal--multi .immo-drum-inline-item[data-value="BMW"]').click();
-    await page.locator('.auto-drum-portal--multi .immo-drum-inline-item[data-value="AUDI"]').click();
+    await page.waitForTimeout(200);
 
-    const selectedUi = await page.evaluate(() => {
-      const item = document.querySelector('.auto-drum-portal--multi .immo-drum-inline-item[data-value="BMW"]');
-      const ring = document.querySelector(".auto-drum-portal__ring--multi");
-      const sw = item?.querySelector(".auto-drum-switch");
-      const after = item ? getComputedStyle(item, "::after").content : null;
-      const swRect = sw?.getBoundingClientRect();
-      const ringRect = ring?.getBoundingClientRect();
-      return {
-        after,
-        switchRightGap: swRect && ringRect ? ringRect.right - swRect.right : null,
-        textColor: item ? getComputedStyle(item.querySelector(".immo-drum-inline-text")).color : null,
-      };
-    });
-    log("selected row no pipa", !selectedUi.after || selectedUi.after === "none" || selectedUi.after === '""', selectedUi.after);
-    log("selected switch still at edge", (selectedUi.switchRightGap ?? 99) < 24, selectedUi.switchRightGap);
-    log("selected text black", /^(rgb\(0,\s*0,\s*0\)|#000)/i.test(selectedUi.textColor || ""), selectedUi.textColor);
-
-    await page.locator(".auto-drum-portal__done").click();
-    await page.waitForSelector(".auto-drum-portal--multi", { state: "hidden", timeout: 5000 }).catch(() => {});
-
-    // Brand Done → model sheet opens from catalog
-    await page.waitForSelector(".auto-drum-portal--multi", { state: "visible", timeout: 8000 });
-    const modelPortal = await page.evaluate(() => {
-      const root = document.querySelector(".auto-drum-portal--multi");
-      const wheel = root && document.querySelector('[data-wheel="modell"]');
+    const afterBrandOn = await page.evaluate(() => {
+      const root = document.querySelector(".auto-drum-portal--bm, .auto-drum-portal--multi");
+      const title = root?.querySelector(".auto-drum-portal__title")?.textContent?.trim();
+      const sub = root?.querySelector(".auto-drum-portal__sub")?.textContent?.trim();
+      const backHidden = root?.querySelector(".auto-drum-portal__back")?.hidden;
       const items = [...(root?.querySelectorAll(".immo-drum-inline-item") ?? [])].map((el) =>
         el.querySelector(".immo-drum-inline-text")?.textContent?.trim()
       );
-      return {
-        open: Boolean(root),
-        itemCount: items.length,
-        sample: items.slice(0, 8),
-        hasSeries: items.some((t) => /^[1-8]$|^X[1-7]$|^Z4$/i.test(String(t))),
-      };
+      return { title, sub, backHidden, itemCount: items.length, sample: items.slice(0, 8) };
     });
-    log("model sheet opens after brand Done", modelPortal.open === true, modelPortal);
-    log("model list from catalog (BMW)", (modelPortal.itemCount ?? 0) > 5 && modelPortal.hasSeries, {
-      itemCount: modelPortal.itemCount,
-      sample: modelPortal.sample,
-    });
+    log("same portal switches to Modell", afterBrandOn.title === "Modell" && afterBrandOn.sub === "BMW", afterBrandOn);
+    log("model rows from catalog", (afterBrandOn.itemCount ?? 0) > 5, afterBrandOn.sample);
+    log("back visible on model view", afterBrandOn.backHidden === false, afterBrandOn.backHidden);
+
+    await page.locator(".auto-drum-portal__back").click();
+    await page.waitForTimeout(150);
+    const backToBrands = await page.evaluate(() => ({
+      title: document.querySelector(".auto-drum-portal__title")?.textContent?.trim(),
+      first: document.querySelector(".immo-drum-inline-text")?.textContent?.trim(),
+    }));
+    log("back returns to Gyártmány", backToBrands.title === "Gyártmány", backToBrands);
 
     await page.locator(".auto-drum-portal__done").click();
     await page.waitForSelector(".auto-drum-portal--multi", { state: "hidden", timeout: 5000 });
@@ -166,7 +148,7 @@ async function main() {
         hiddenValue: wheel?.closest(".immo-wheel-wrap")?.querySelector('input[type="hidden"]')?.value,
       };
     });
-    log("multi select persisted", /2 kiválasztva|BMW|AUDI/i.test(after.triggerText || ""), after);
+    log("brand selection persisted", /BMW/i.test(after.triggerText || "") || /BMW/i.test(after.hiddenValue || ""), after);
 
     await page.screenshot({ path: "test-results/brand-drum-mobile-verify.png", fullPage: false });
 

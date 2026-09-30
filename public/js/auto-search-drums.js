@@ -6,7 +6,7 @@ import {
   syncDrumWheelDisplay,
   closeAllInlineDrums,
 } from "./immo-drum-picker.js?v=immoClear1";
-import { bindAutoDrumSheet, openAutoDrumSheet } from "./auto-drum-sheet.js?v=brandDrum7";
+import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=brandDrum8";
 import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=priceSuggest1";
 
 const MOBILE_MQ = "(max-width: 900px)";
@@ -586,39 +586,26 @@ async function mountBrandModelCatalogDrums(form) {
       list = [...set].sort((a, b) => a.localeCompare(b, "hu", { sensitivity: "base" }));
     }
     const models = list.map((m) => ({ value: m, label: m }));
-    /* Modell is multi + kapcsoló, mint a gyártmány (desk flow). */
-    return rebindWheel(form, "modell", models, "Mindegy", { multiple: true });
-  };
-
-  const openModellSheet = () => {
-    if (!isMobile()) return;
     const modelWheel = form.querySelector('[data-wheel="modell"]');
-    const trigger = modelWheel?.closest(".immo-wheel-wrap")?.querySelector(".immo-wheel-trigger");
-    if (!modelWheel || !trigger) return;
-    if (modelWheel.querySelectorAll(".immo-wheel-opt").length <= 1) return;
-    const emptyLabel = trigger.dataset.emptyLabel || "Mindegy";
-    const sheetItems = [
-      { value: "", label: emptyLabel },
-      ...[...modelWheel.querySelectorAll(".immo-wheel-opt")]
-        .map((btn) => ({
-          value: btn.dataset.value ?? "",
-          label: (btn.textContent || "").trim() || emptyLabel,
-        }))
-        .filter((o) => o.value !== ""),
-    ];
-    openAutoDrumSheet(modelWheel, trigger, { sheetItems });
+    /* BM portal már kitölti a modell kereket — ne wipe-oljuk rebind-del. */
+    if (modelWheel?.dataset?.drumBound === "1") {
+      const prev = readWheelList(modelWheel);
+      fillWheel(modelWheel, models, { emptyLabel: "Mindegy" });
+      modelWheel.dataset.multiple = "1";
+      setWheelValue(
+        modelWheel,
+        prev.filter((m) => list.includes(m))
+      );
+      syncDrumWheelDisplay(modelWheel);
+      return modelWheel;
+    }
+    return rebindWheel(form, "modell", models, "Mindegy", { multiple: true });
   };
 
   if (form.querySelector('[data-wheel="modell"]')) {
     fillModels([]);
     brandWheel.addEventListener("immo-wheel-change", () => {
-      const brands = readWheelList(form.querySelector('[data-wheel="gyartmany"]'));
-      fillModels(brands);
-      /* Desk: márka után rögtön modell. Mobil: Kész után nyílik a modell dob. */
-      if (!brands.length) return;
-      requestAnimationFrame(() => {
-        requestAnimationFrame(openModellSheet);
-      });
+      fillModels(readWheelList(form.querySelector('[data-wheel="gyartmany"]')));
     });
   }
 }

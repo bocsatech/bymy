@@ -23,7 +23,7 @@ function escapeHtml(value) {
 
 export function closeAutoDrumSheet(commit = false) {
   if (!activePortal) return;
-  const { root, wheel, scrollEl, ring, wrap, trigger } = activePortal;
+  const { root, wheel, scrollEl, ring, wrap, trigger, modelWheel } = activePortal;
   const multiple = wheel?.dataset?.multiple === "1";
   if (commit && scrollEl && ring && wheel && !multiple) {
     const item = nearestPortalItem(scrollEl, ring);
@@ -33,8 +33,12 @@ export function closeAutoDrumSheet(commit = false) {
     wheel.dispatchEvent(new CustomEvent("immo-wheel-change", { bubbles: true, detail: { value } }));
   } else if (commit && multiple && wheel) {
     syncDrumWheelDisplay(wheel);
+    if (modelWheel) syncDrumWheelDisplay(modelWheel);
     wheel.dispatchEvent(
       new CustomEvent("immo-wheel-change", { bubbles: true, detail: { value: readWheel(wheel) } })
+    );
+    modelWheel?.dispatchEvent(
+      new CustomEvent("immo-wheel-change", { bubbles: true, detail: { value: readWheel(modelWheel) } })
     );
   }
   wrap?.classList.remove("is-open", "has-drum-open");
@@ -185,6 +189,251 @@ function normalizeSheetItems(opts, emptyLabel) {
   }));
 }
 
+function paintSwitchList(scrollEl, selectionWheel) {
+  cancelAnimationFrame(paintFrame);
+  paintFrame = requestAnimationFrame(() => {
+    const selected = new Set(selectionWheel ? readWheelList(selectionWheel) : []);
+    scrollEl.querySelectorAll(".immo-drum-inline-item").forEach((item) => {
+      const v = item.dataset.value ?? "";
+      const isSel = v === "" ? selected.size === 0 : selected.has(v);
+      item.style.opacity = "1";
+      item.style.fontWeight = isSel ? "700" : "500";
+      item.style.color = "#000";
+      item.classList.toggle("is-selected", isSel);
+      item.setAttribute("aria-selected", isSel ? "true" : "false");
+      item.setAttribute("aria-checked", isSel ? "true" : "false");
+      const sw = item.querySelector(".auto-drum-switch");
+      if (sw) sw.setAttribute("aria-checked", isSel ? "true" : "false");
+    });
+  });
+}
+
+function bindSwitchRowClicks(scrollEl, onToggle) {
+  scrollEl.querySelectorAll(".immo-drum-inline-item").forEach((item) => {
+    let tapStart = null;
+    item.addEventListener(
+      "pointerdown",
+      (event) => {
+        tapStart = { x: event.clientX, y: event.clientY };
+      },
+      { passive: true }
+    );
+    item.addEventListener("click", (event) => {
+      event.stopPropagation();
+      if (tapStart) {
+        const dx = Math.abs(event.clientX - tapStart.x);
+        const dy = Math.abs(event.clientY - tapStart.y);
+        if (dx > 10 || dy > 10) return;
+      }
+      onToggle(item);
+    });
+  });
+}
+
+function switchRowHtml({ value, label, child = false }) {
+  return `<div class="immo-drum-inline-item auto-drum-inline-item--switch${
+    child ? " auto-drum-inline-item--child" : ""
+  }" role="option" data-value="${escapeHtml(value)}">
+    <span class="immo-drum-inline-text">${escapeHtml(label)}</span>
+    <span class="auto-drum-switch" aria-hidden="true"><span class="auto-drum-switch__knob"></span></span>
+  </div>`;
+}
+
+function modelsForBrandFromCatalog(catalog, brand) {
+  const tree = catalog?.modellekTree?.[brand];
+  if (Array.isArray(tree) && tree.length) {
+    const rows = [];
+    const sorted = [...tree].sort((a, b) =>
+      String(a.name || "").localeCompare(String(b.name || ""), "hu", { sensitivity: "base" })
+    );
+    for (const node of sorted) {
+      if (!node?.name) continue;
+      rows.push({ value: node.name, label: node.name, child: false });
+      const kids = [...(node.children || [])].sort((a, b) =>
+        String(a.name || "").localeCompare(String(b.name || ""), "hu", { sensitivity: "base" })
+      );
+      for (const child of kids) {
+        if (!child?.name) continue;
+        rows.push({ value: child.name, label: child.name, child: true });
+      }
+    }
+    return rows;
+  }
+  return (catalog?.modellek?.[brand] || []).map((m) => ({ value: m, label: m, child: false }));
+}
+
+/**
+ * Desk flow a mobilon: ugyanazon a panelen Gyártmány → Modell váltás.
+ * Márka bekapcsolásakor a lista a modellekre vált (katalógusból).
+ */
+function openBrandModelCatalogSheet(brandWheel, trigger, wrap, emptyLabel, form) {
+  const catalog = form?._autoDrumCatalog;
+  const modelWheel =
+    form?.querySelector?.('[data-wheel="modell"]') ||
+    brandWheel.closest("form")?.querySelector('[data-wheel="modell"]');
+  const brandItems = catalog?.gyartmanyok?.length
+    ? [{ value: "", label: emptyLabel }, ...catalog.gyartmanyok.map((b) => ({ value: b, label: b }))]
+    : normalizeSheetItems([...brandWheel.querySelectorAll(".immo-wheel-opt")], emptyLabel);
+
+  const root = document.createElement("div");
+  root.className = "auto-drum-portal auto-drum-portal--multi auto-drum-portal--bm";
+  root.setAttribute("role", "dialog");
+  root.setAttribute("aria-modal", "true");
+  root.setAttribute("aria-label", "Gyártmány");
+  const drumH = ITEM_H * MULTI_VISIBLE;
+  root.style.setProperty("--auto-drum-multi-h", `${drumH}px`);
+  root.style.setProperty("--auto-drum-item-h", `${ITEM_H}px`);
+
+  root.innerHTML = `
+    <button type="button" class="auto-drum-portal__backdrop" aria-label="Bezárás"></button>
+    <div class="auto-drum-portal__stage auto-drum-portal__stage--multi">
+      <div class="auto-drum-portal__head">
+        <button type="button" class="auto-drum-portal__back" hidden aria-label="Vissza">‹</button>
+        <div class="auto-drum-portal__titles">
+          <p class="auto-drum-portal__title">Gyártmány</p>
+          <p class="auto-drum-portal__sub" hidden></p>
+        </div>
+      </div>
+      <div class="immo-drum-wheel-ring auto-drum-portal__ring auto-drum-portal__ring--multi">
+        <div class="auto-drum-portal__scroll immo-drum-inline-scroll" tabindex="-1"></div>
+      </div>
+      <button type="button" class="auto-drum-portal__done">Kész</button>
+    </div>`;
+
+  const stage = root.querySelector(".auto-drum-portal__stage");
+  const ring = root.querySelector(".auto-drum-portal__ring");
+  const scrollEl = root.querySelector(".auto-drum-portal__scroll");
+  const backBtn = root.querySelector(".auto-drum-portal__back");
+  const titleEl = root.querySelector(".auto-drum-portal__title");
+  const subEl = root.querySelector(".auto-drum-portal__sub");
+
+  let view = "brands";
+  let modelBrand = null;
+
+  function syncModelWheelFromCatalog(brands) {
+    if (!modelWheel || !catalog) return;
+    let list = [];
+    if (brands.length === 1) list = catalog.modellek?.[brands[0]] ?? [];
+    else if (brands.length > 1) {
+      const set = new Set();
+      brands.forEach((b) => (catalog.modellek?.[b] || []).forEach((m) => set.add(m)));
+      list = [...set].sort((a, b) => a.localeCompare(b, "hu", { sensitivity: "base" }));
+    }
+    const prev = new Set(readWheelList(modelWheel));
+    fillWheel(
+      modelWheel,
+      list.map((m) => ({ value: m, label: m })),
+      { emptyLabel: "Mindegy" }
+    );
+    modelWheel.dataset.multiple = "1";
+    const keep = list.filter((m) => prev.has(m));
+    setWheelValue(modelWheel, keep);
+    syncDrumWheelDisplay(modelWheel);
+  }
+
+  function renderBrands() {
+    view = "brands";
+    modelBrand = null;
+    titleEl.textContent = "Gyártmány";
+    subEl.hidden = true;
+    subEl.textContent = "";
+    backBtn.hidden = true;
+    root.setAttribute("aria-label", "Gyártmány");
+    const selected = readWheelList(brandWheel);
+    scrollEl.innerHTML = brandItems.map((row) => switchRowHtml(row)).join("");
+    bindSwitchRowClicks(scrollEl, (item) => {
+      const value = item.dataset.value ?? "";
+      if (value === "") {
+        setWheelValue(brandWheel, "");
+        if (modelWheel) {
+          setWheelValue(modelWheel, "");
+          syncDrumWheelDisplay(modelWheel);
+        }
+        syncDrumWheelDisplay(brandWheel);
+        paintSwitchList(scrollEl, brandWheel);
+        return;
+      }
+      const cur = new Set(readWheelList(brandWheel));
+      const turningOn = !cur.has(value);
+      if (turningOn) cur.add(value);
+      else cur.delete(value);
+      setWheelValue(brandWheel, [...cur]);
+      syncDrumWheelDisplay(brandWheel);
+      syncModelWheelFromCatalog([...cur]);
+      if (turningOn) {
+        renderModels(value);
+        return;
+      }
+      paintSwitchList(scrollEl, brandWheel);
+    });
+    scrollEl.scrollTop = 0;
+    if (selected.length) {
+      const el = [...scrollEl.querySelectorAll(".immo-drum-inline-item")].find((n) =>
+        selected.includes(n.dataset.value ?? "")
+      );
+      el?.scrollIntoView({ block: "nearest" });
+    }
+    paintSwitchList(scrollEl, brandWheel);
+  }
+
+  function renderModels(brand) {
+    view = "models";
+    modelBrand = brand;
+    titleEl.textContent = "Modell";
+    subEl.hidden = false;
+    subEl.textContent = brand;
+    backBtn.hidden = false;
+    root.setAttribute("aria-label", `Modell — ${brand}`);
+    const rows = [{ value: "", label: "Mindegy" }, ...modelsForBrandFromCatalog(catalog, brand)];
+    scrollEl.innerHTML = rows.map((row) => switchRowHtml(row)).join("");
+    bindSwitchRowClicks(scrollEl, (item) => {
+      if (!modelWheel) return;
+      const value = item.dataset.value ?? "";
+      if (value === "") {
+        setWheelValue(modelWheel, "");
+      } else {
+        const cur = new Set(readWheelList(modelWheel));
+        if (cur.has(value)) cur.delete(value);
+        else cur.add(value);
+        setWheelValue(modelWheel, [...cur]);
+      }
+      syncDrumWheelDisplay(modelWheel);
+      paintSwitchList(scrollEl, modelWheel);
+    });
+    scrollEl.scrollTop = 0;
+    paintSwitchList(scrollEl, modelWheel);
+  }
+
+  backBtn.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    renderBrands();
+  });
+
+  root.querySelector(".auto-drum-portal__backdrop")?.addEventListener("click", () => closeAutoDrumSheet(true));
+  root.querySelector(".auto-drum-portal__done")?.addEventListener("click", () => closeAutoDrumSheet(true));
+  scrollEl.addEventListener(
+    "scroll",
+    () => paintSwitchList(scrollEl, view === "models" ? modelWheel : brandWheel),
+    { passive: true }
+  );
+
+  document.body.appendChild(root);
+  document.body.classList.add("auto-drum-portal-open");
+  wrap?.classList.add("is-open", "has-drum-open");
+  wrap?.closest(".immo-dual-range")?.classList.add("has-drum-open");
+  (wrap?.closest(".immo-dual-range__half") || wrap?.closest(".immo-schema-cell"))?.classList.add("is-drum-active");
+  trigger.setAttribute("aria-expanded", "true");
+
+  positionPortal(stage, trigger);
+  activePortal = { root, wheel: brandWheel, scrollEl, ring, wrap, trigger, modelWheel };
+
+  renderBrands();
+  requestAnimationFrame(() => {
+    ring.style.setProperty("--immo-drum-ring-w", `${Math.min(340, Math.floor(window.innerWidth * 0.9))}px`);
+  });
+}
+
 function openMultiSwitchSheet(wheel, trigger, wrap, emptyLabel, opts) {
   const items = normalizeSheetItems(opts, emptyLabel);
   const selected = readWheelList(wheel);
@@ -211,19 +460,9 @@ function openMultiSwitchSheet(wheel, trigger, wrap, emptyLabel, opts) {
   const ring = root.querySelector(".auto-drum-portal__ring");
   const scrollEl = root.querySelector(".auto-drum-portal__scroll");
 
-  scrollEl.innerHTML = items
-    .map(({ value, label }) => {
-      return `<div class="immo-drum-inline-item auto-drum-inline-item--switch" role="option" data-value="${escapeHtml(
-        value
-      )}">
-        <span class="immo-drum-inline-text">${escapeHtml(label)}</span>
-        <span class="auto-drum-switch" aria-hidden="true"><span class="auto-drum-switch__knob"></span></span>
-      </div>`;
-    })
-    .join("");
+  scrollEl.innerHTML = items.map((row) => switchRowHtml(row)).join("");
 
-  function toggleItem(item) {
-    if (!item) return;
+  bindSwitchRowClicks(scrollEl, (item) => {
     const value = item.dataset.value ?? "";
     if (value === "") {
       setWheelValue(wheel, "");
@@ -234,34 +473,13 @@ function openMultiSwitchSheet(wheel, trigger, wrap, emptyLabel, opts) {
       setWheelValue(wheel, [...cur]);
     }
     syncDrumWheelDisplay(wheel);
-    paintPortal(scrollEl, ring, wheel);
-  }
-
-  scrollEl.querySelectorAll(".immo-drum-inline-item").forEach((item) => {
-    let tapStart = null;
-    item.addEventListener(
-      "pointerdown",
-      (event) => {
-        tapStart = { x: event.clientX, y: event.clientY };
-      },
-      { passive: true }
-    );
-    item.addEventListener("click", (event) => {
-      event.stopPropagation();
-      if (tapStart) {
-        const dx = Math.abs(event.clientX - tapStart.x);
-        const dy = Math.abs(event.clientY - tapStart.y);
-        if (dx > 10 || dy > 10) return;
-      }
-      toggleItem(item);
-    });
+    paintSwitchList(scrollEl, wheel);
   });
 
   root.querySelector(".auto-drum-portal__backdrop")?.addEventListener("click", () => closeAutoDrumSheet(true));
   root.querySelector(".auto-drum-portal__done")?.addEventListener("click", () => closeAutoDrumSheet(true));
 
-  scrollEl.addEventListener("scroll", () => paintPortal(scrollEl, ring, wheel), { passive: true });
-  /* Multi lista: szabad görgetés, nincs középre snap (az okozta a nagy üres tetejét). */
+  scrollEl.addEventListener("scroll", () => paintSwitchList(scrollEl, wheel), { passive: true });
 
   document.body.appendChild(root);
   document.body.classList.add("auto-drum-portal-open");
@@ -273,20 +491,17 @@ function openMultiSwitchSheet(wheel, trigger, wrap, emptyLabel, opts) {
   positionPortal(stage, trigger);
   activePortal = { root, wheel, scrollEl, ring, wrap, trigger };
 
-  const start =
-    (selected.length
-      ? [...scrollEl.querySelectorAll(".immo-drum-inline-item")].find((el) => selected.includes(el.dataset.value ?? ""))
-      : null) ||
-    scrollEl.querySelector(".immo-drum-inline-item");
-
   requestAnimationFrame(() => {
     ring.style.setProperty("--immo-drum-ring-w", `${Math.min(340, Math.floor(window.innerWidth * 0.9))}px`);
-    if (start && selected.length) {
-      start.scrollIntoView({ block: "nearest" });
+    if (selected.length) {
+      const start = [...scrollEl.querySelectorAll(".immo-drum-inline-item")].find((el) =>
+        selected.includes(el.dataset.value ?? "")
+      );
+      start?.scrollIntoView({ block: "nearest" });
     } else {
       scrollEl.scrollTop = 0;
     }
-    paintPortal(scrollEl, ring, wheel);
+    paintSwitchList(scrollEl, wheel);
   });
 }
 
@@ -336,7 +551,7 @@ function gyartmanySheetItems(form, wheel, emptyLabel) {
   return normalizeSheetItems([...wheel.querySelectorAll(".immo-wheel-opt")], emptyLabel);
 }
 
-export function openAutoDrumSheet(wheel, trigger, { sheetItems = null } = {}) {
+export function openAutoDrumSheet(wheel, trigger, { sheetItems = null, form = null } = {}) {
   if (!wheel || !trigger) return;
   closeAutoDrumSheet(false);
   closeAllInlineDrums(false);
@@ -344,11 +559,16 @@ export function openAutoDrumSheet(wheel, trigger, { sheetItems = null } = {}) {
   const wrap = wheel.closest(".immo-wheel-wrap");
   const emptyLabel = trigger.dataset.emptyLabel || "Mindegy";
   const wheelKey = wheel.getAttribute("data-wheel") || "";
+  const host = form || wheel.closest("form") || document.getElementById("home-qs-form");
   const multiple = wheel.dataset.multiple === "1" || wheelKey === "gyartmany" || wheelKey === "modell";
   if (multiple) wheel.dataset.multiple = "1";
   const current = String(readWheel(wheel) ?? "");
-  const selected = readWheelList(wheel);
   const opts = [...wheel.querySelectorAll(".immo-wheel-opt")];
+
+  if (wheelKey === "gyartmany" && host?._autoDrumCatalog?.gyartmanyok?.length) {
+    openBrandModelCatalogSheet(wheel, trigger, wrap, emptyLabel, host);
+    return;
+  }
 
   if (multiple) {
     const items = sheetItems ?? normalizeSheetItems(opts, emptyLabel);
@@ -474,6 +694,6 @@ export function bindAutoDrumSheet(wheel) {
       const emptyLabel = next.dataset.emptyLabel || "Mindegy";
       sheetItems = gyartmanySheetItems(host, current, emptyLabel);
     }
-    openAutoDrumSheet(current, next, { sheetItems });
+    openAutoDrumSheet(current, next, { sheetItems, form: host });
   });
 }

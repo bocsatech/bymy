@@ -731,7 +731,7 @@ export function openBrandModelCatalogSheet(brandWheel, trigger, wrap, emptyLabel
       <header class="auto-drum-portal__sheet-head">
         <button type="button" class="auto-drum-portal__close" aria-label="Bezárás">×</button>
         <h2 class="auto-drum-portal__sheet-title">Gyártmány / Modell</h2>
-        <span class="auto-drum-portal__sheet-head-spacer" aria-hidden="true"></span>
+        <button type="button" class="auto-drum-portal__done auto-drum-portal__done--sheet-top">Kész</button>
       </header>
       <div class="auto-drum-portal__sheet-scroll" data-sheet-scroll tabindex="-1">
         <div class="auto-drum-portal__sheet-top-space" aria-hidden="true"></div>
@@ -745,7 +745,6 @@ export function openBrandModelCatalogSheet(brandWheel, trigger, wrap, emptyLabel
       </div>
       <footer class="auto-drum-portal__sheet-foot">
         <span class="auto-drum-portal__count" data-sheet-count>0 kiválasztva</span>
-        <button type="button" class="auto-drum-portal__done">Kész</button>
       </footer>
     </div>`;
 

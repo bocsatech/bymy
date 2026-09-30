@@ -1606,7 +1606,7 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   right: 0;
   z-index: 3;
   display: grid;
-  grid-template-columns: 2.5rem 1fr 2.5rem;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 0.5rem;
   margin: 0;
@@ -1616,7 +1616,8 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   pointer-events: none;
 }
 
-.auto-drum-portal--sheet .auto-drum-portal__sheet-head .auto-drum-portal__close {
+.auto-drum-portal--sheet .auto-drum-portal__sheet-head .auto-drum-portal__close,
+.auto-drum-portal--sheet .auto-drum-portal__sheet-head .auto-drum-portal__done {
   pointer-events: auto;
 }
 
@@ -1646,6 +1647,20 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
 .auto-drum-portal--sheet .auto-drum-portal__sheet-head-spacer {
   width: 2.35rem;
   height: 2.35rem;
+}
+
+.auto-drum-portal--sheet .auto-drum-portal__done--sheet-top {
+  flex: 0 0 auto;
+  min-width: 0;
+  border: 0;
+  border-radius: 999px;
+  background: #f5c518;
+  color: #111;
+  font: 600 0.9rem/1 system-ui, sans-serif;
+  padding: 0.55rem 1.1rem;
+  box-shadow: 0 2px 8px rgba(245, 197, 24, 0.35);
+  cursor: pointer;
+  justify-self: end;
 }
 
 /* Külső görgetés: hely a címnek elmegy; utána a fehér a tetején ragad */
@@ -1798,7 +1813,7 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   z-index: 4;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 0.75rem;
   margin: 0;
   padding: 0.65rem 1rem calc(0.65rem + env(safe-area-inset-bottom, 0px));
@@ -1809,19 +1824,6 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
 .auto-drum-portal--sheet .auto-drum-portal__count {
   font: 500 0.875rem/1.2 system-ui, sans-serif;
   color: #6b7280;
-}
-
-.auto-drum-portal--sheet .auto-drum-portal__sheet-foot .auto-drum-portal__done {
-  flex: 0 0 auto;
-  min-width: 7.5rem;
-  border: 0;
-  border-radius: 999px;
-  background: #2563eb;
-  color: #fff;
-  font: 600 0.95rem/1 system-ui, sans-serif;
-  padding: 0.7rem 1.35rem;
-  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.28);
-  cursor: pointer;
 }
 
 .auto-drum-portal--sheet .auto-drum-switch {

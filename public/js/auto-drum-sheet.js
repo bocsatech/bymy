@@ -35,14 +35,38 @@ function pad2(value) {
   return String(n).padStart(2, "0");
 }
 
+function matchWheelOptionValue(wheel, raw) {
+  const want = String(raw ?? "").trim();
+  if (!want || !wheel) return "";
+  const opts = [...wheel.querySelectorAll(".immo-wheel-opt")].map((o) => o.dataset.value ?? "");
+  if (opts.includes(want)) return want;
+  const n = Number(want.replace(/\D/g, ""));
+  if (!Number.isFinite(n) || n < 1) return want;
+  const asNum = String(n);
+  if (opts.includes(asNum)) return asNum;
+  const asPad = asNum.padStart(2, "0");
+  if (opts.includes(asPad)) return asPad;
+  return want;
+}
+
+function matchDayOptionValue(raw, maxDay) {
+  const n = Number(String(raw ?? "").replace(/\D/g, ""));
+  if (!Number.isFinite(n) || n < 1) return "1";
+  const clamped = Math.min(n, maxDay || 31);
+  return String(clamped);
+}
+
 export function syncMuszakiDateSummary(block) {
   if (!block) return;
   const y = String(readWheel(block.querySelector('[data-wheel="muszaki_ev"]')) ?? "");
-  const m = pad2(readWheel(block.querySelector('[data-wheel="muszaki_honap"]')));
-  const d = pad2(readWheel(block.querySelector('[data-wheel="muszaki_nap"]')));
+  const mRaw = String(readWheel(block.querySelector('[data-wheel="muszaki_honap"]')) ?? "");
+  const dRaw = String(readWheel(block.querySelector('[data-wheel="muszaki_nap"]')) ?? "");
+  const m = mRaw ? pad2(mRaw) || mRaw : "";
+  const d = dRaw ? pad2(dRaw) || dRaw : "";
   const summary = block.querySelector("[data-muszaki-summary]");
   if (!summary) return;
-  summary.textContent = y ? `${y}. ${m || "—"}. ${d || "—"}` : "Mindegy";
+  const emptyLabel = summary.dataset.emptyLabel || "Mindegy";
+  summary.textContent = y ? `${y}. ${m || "—"}. ${d || "—"}` : emptyLabel;
 }
 
 function muszakiYearOptions() {
@@ -80,10 +104,16 @@ function openTripleDateDrumSheet(yearWheel, monthWheel, dayWheel, trigger) {
   const wrap = yearWheel.closest(".immo-wheel-wrap") || trigger.closest(".immo-wheel-wrap");
   const sheetTitle =
     block?.querySelector(".immo-triple-date__title")?.textContent?.trim() || "Műszaki érvényesség";
-  const emptyLabel = "Mindegy";
+  const emptyLabel =
+    trigger?.dataset?.emptyLabel ||
+    [...yearWheel.querySelectorAll(".immo-wheel-opt")].find((o) => (o.dataset.value ?? "") === "")?.textContent?.trim() ||
+    "Mindegy";
   let pendingY = String(readWheel(yearWheel) ?? "");
-  let pendingM = pad2(readWheel(monthWheel)) || String(readWheel(monthWheel) ?? "");
-  let pendingD = pad2(readWheel(dayWheel)) || String(readWheel(dayWheel) ?? "");
+  let pendingM = String(readWheel(monthWheel) ?? "");
+  let pendingD = String(readWheel(dayWheel) ?? "");
+  if (pendingM && !pendingM.includes("") && Number(pendingM)) {
+    /* keep select value as stored on wheel */
+  }
 
   const root = document.createElement("div");
   root.className = "auto-drum-portal auto-drum-portal--multi auto-drum-portal--split auto-drum-portal--date3";
@@ -264,8 +294,8 @@ function openTripleDateDrumSheet(yearWheel, monthWheel, dayWheel, trigger) {
     scrollEl.addEventListener("touchcancel", snapEnd);
   }
 
-  fillCol(yearScroll, muszakiYearOptions());
-  fillCol(monthScroll, muszakiMonthOptions());
+  fillCol(yearScroll, wheelOptionRows(yearWheel, emptyLabel));
+  fillCol(monthScroll, wheelOptionRows(monthWheel, emptyLabel));
   fillCol(dayScroll, muszakiDayOptions(pendingY, pendingM));
   bindColClicks(yearScroll);
   bindColClicks(monthScroll);
@@ -364,13 +394,20 @@ export function closeAutoDrumSheet(commit = false) {
         m = "";
         d = "";
       } else {
-        if (!m) m = "01";
+        if (!m) {
+          const firstMonth = [...monthWheel.querySelectorAll(".immo-wheel-opt")]
+            .map((o) => o.dataset.value ?? "")
+            .find((v) => v !== "");
+          m = firstMonth || "1";
+        }
         const maxDay = daysInMonth(y, m);
         const dayN = Number(d) || 0;
-        if (!d || dayN < 1) d = "01";
-        else if (dayN > maxDay) d = String(maxDay).padStart(2, "0");
-        else d = String(dayN).padStart(2, "0");
-        m = String(Number(m) || 1).padStart(2, "0");
+        if (!d || dayN < 1) d = "1";
+        else if (dayN > maxDay) d = String(maxDay);
+        else d = String(dayN);
+        /* Match existing wheel option formatting (1 vs 01). */
+        m = matchWheelOptionValue(monthWheel, m);
+        d = matchWheelOptionValue(dayWheel, d) || matchDayOptionValue(d, maxDay);
       }
       setWheelValue(yearWheel, y);
       setWheelValue(monthWheel, m);

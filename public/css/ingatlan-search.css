@@ -1957,6 +1957,59 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   max-width: 100%;
 }
 
+/* Hirdetésfeladás: kereső-stílusú dobkerék trigger a selectek helyett */
+#ad-form .ad-form-bm-field--drum {
+  width: 100%;
+  margin: 0;
+}
+
+#ad-form .ad-form-drum-wrap {
+  width: 100%;
+  min-height: 2.75rem;
+  border: 1.5px solid #111;
+  border-radius: 0.55rem;
+  background: #fff;
+  display: flex;
+  align-items: stretch;
+  box-sizing: border-box;
+}
+
+#ad-form .ad-form-drum-wrap > .immo-wheel-trigger {
+  flex: 1;
+  width: 100%;
+  min-height: 2.75rem;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  border-radius: 0.55rem;
+  padding: 0.55rem 0.85rem;
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #0f172a;
+  text-align: left;
+  cursor: pointer;
+}
+
+#ad-form .ad-form-bm-field--drum.has-value .ad-form-drum-wrap > .immo-wheel-trigger {
+  color: #000;
+}
+
+#ad-form .ad-form-drum-wrap.has-drum-open,
+#ad-form .ad-form-drum-wrap.is-open {
+  border-color: #111;
+  box-shadow: 0 0 0 1px #111;
+}
+
+[data-theme="dark"] #ad-form .ad-form-drum-wrap {
+  background: #111827;
+  border-color: #e5e7eb;
+}
+
+[data-theme="dark"] #ad-form .ad-form-drum-wrap > .immo-wheel-trigger {
+  color: #f9fafb;
+}
+
 .auto-drum-portal--date3 .auto-drum-portal__stage--date3 {
   width: min(22.5rem, 94vw);
 }

@@ -465,8 +465,11 @@ function unmountPicker(select) {
   delete select._adBmPanel;
   delete select._adBmClose;
   delete select._adBmRefreshDropdown;
+  delete select._adBmRefreshSummary;
   delete select._adBmOnBrandChange;
+  delete select._adBmFillWheel;
   delete select.dataset.adBmPicker;
+  delete select.dataset.adBmDrum;
 }
 
 function closeAdBmPicker(select) {
@@ -2088,11 +2091,13 @@ export function applyAdFormBmFieldValues(data) {
       const normalized =
         id === "gyartmany" ? value.toUpperCase() : id === "uzemanyag" ? normalizePrimaryValue(select, value) : value;
       writePlainValue(select, normalized);
+      select._adBmFillWheel?.(normalized);
+      select._adBmRefreshSummary?.();
       const summary =
         id === "allapot" ? allapotLabelForValue(normalized) || PLACEHOLDER : normalized || PLACEHOLDER;
       if (select._adBmPanel?.classList.contains("ad-form-bm-dropdown")) {
         updateBmSearchTrigger(select, summary === PLACEHOLDER ? "" : summary, Boolean(normalized));
-      } else {
+      } else if (!select.dataset.adBmDrum) {
         updateBmSummary(select, summary === PLACEHOLDER ? "" : summary, Boolean(normalized));
       }
     } else if (select._adBmHidden) {
@@ -2197,6 +2202,209 @@ function optionsFromSelect(select, emptyLabel = "—") {
     return [{ value: "", label: emptyLabel }, ...rows.filter((r) => r.value !== "")];
   }
   return rows;
+}
+
+function filledOptionsFromSelect(select) {
+  if (!select) return [];
+  return [...select.options]
+    .filter((opt) => opt.value !== "")
+    .map((opt) => ({
+      value: opt.value,
+      label: (opt.textContent || "").trim() || opt.value,
+    }));
+}
+
+function hierarchyItemsFromCategories(categories) {
+  return (categories || []).map((cat) => ({
+    value: cat.children?.length ? cat.id : cat.value || cat.id,
+    label: cat.label,
+    children: (cat.children || []).map((ch) => ({ value: ch.value, label: ch.label })),
+  }));
+}
+
+function labelFromHierarchy(categories, value) {
+  const v = String(value ?? "").trim();
+  if (!v) return "";
+  for (const cat of categories || []) {
+    if (cat.value === v || cat.id === v) return cat.label;
+    const child = cat.children?.find((c) => c.value === v);
+    if (child) return child.label;
+  }
+  return v;
+}
+
+/**
+ * Hirdetésfeladás select → kereső-stílusú dobkerék.
+ * Opciók mindig a meglévő selectből (tartalom nem módosul).
+ */
+async function mountAdSelectDrum(select, {
+  title,
+  emptyLabel = PLACEHOLDER,
+  mode = "single",
+  categories = null,
+  resolveItems = null,
+  labelForValue = null,
+  onChange = null,
+} = {}) {
+  if (!select || select.tagName !== "SELECT" || select.dataset.adBmPicker === "1") return;
+  const field = anchorField(select);
+  if (!field) return;
+
+  unmountPicker(select);
+  hideNativeSelect(select);
+  ensurePlainHiddenInput(select);
+  select.dataset.adBmPicker = "1";
+  select.dataset.adBmDrum = "1";
+
+  const { fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=immoClearAll1");
+  const { openStandaloneSwitchSheet, bindAutoDrumSheet } = await import("./auto-drum-sheet.js?v=brandDrum24");
+  const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
+
+  const wrap = document.createElement("div");
+  wrap.className = "ad-form-bm-field ad-form-bm-field--drum auto-bm-field ad-form-cell";
+  wrap.dataset.adBmFor = select.id;
+  wrap.innerHTML = `<div class="immo-wheel-wrap ad-form-drum-wrap">
+    <div class="immo-wheel" data-wheel="${escapeAttr(select.id)}" data-filter-key="${escapeAttr(select.id)}" role="listbox" aria-label="${escapeAttr(title)}"></div>
+  </div>`;
+  select.insertAdjacentElement("beforebegin", wrap);
+  stashNativeSelect(select, wrap);
+
+  const wheelHost = wrap.querySelector(".immo-wheel-wrap");
+  let wheel = wrap.querySelector("[data-wheel]");
+
+  function currentItems() {
+    if (typeof resolveItems === "function") return resolveItems() || [];
+    return filledOptionsFromSelect(select);
+  }
+
+  function displayLabel(value) {
+    const v = String(value ?? "").trim();
+    if (!v) return emptyLabel;
+    if (typeof labelForValue === "function") {
+      const custom = labelForValue(v);
+      if (custom) return custom;
+    }
+    if (categories) {
+      const fromCat = labelFromHierarchy(categories, v);
+      if (fromCat) return fromCat;
+    }
+    const opt = currentItems().find((row) => row.value === v);
+    return opt?.label || v;
+  }
+
+  function triggerEl() {
+    return wheelHost?.querySelector(".immo-wheel-trigger");
+  }
+
+  function refreshSummary() {
+    const value = readSingleStoredValue(select._adBmHidden?.value ?? select.value);
+    const trigger = triggerEl();
+    if (trigger) {
+      trigger.textContent = displayLabel(value);
+      trigger.dataset.emptyLabel = emptyLabel;
+      trigger.setAttribute("aria-label", title);
+    }
+    wrap.classList.toggle("has-value", Boolean(value));
+  }
+
+  function fillFromSelect(preferredValue) {
+    wheel = wrap.querySelector("[data-wheel]") || wheel;
+    const items = currentItems();
+    fillWheel(
+      wheel,
+      items.filter((r) => r.value !== ""),
+      { emptyLabel }
+    );
+    const value =
+      preferredValue != null
+        ? String(preferredValue)
+        : readSingleStoredValue(select._adBmHidden?.value ?? select.value);
+    setWheelValue(wheel, value || "");
+    syncDrumWheelDisplay(wheel);
+    refreshSummary();
+  }
+
+  fillFromSelect();
+  wheel = initDrumWheel(wheel, { emptyLabel, openMode: "portal", multiple: false });
+  fillFromSelect();
+
+  wheel.addEventListener("immo-wheel-change", () => {
+    const live = wrap.querySelector("[data-wheel]") || wheel;
+    const value = String(readWheel(live) ?? "");
+    writePlainValue(select, value);
+    refreshSummary();
+    if (typeof onChange === "function") onChange(value);
+  });
+
+  function openHierarchySheet() {
+    const trigger = triggerEl();
+    if (!trigger) return;
+    const cats = hierarchyItemsFromCategories(categories || []);
+    const current = readSingleStoredValue(select._adBmHidden?.value ?? select.value);
+    openStandaloneSwitchSheet({
+      trigger,
+      emptyLabel,
+      items: cats.map((c) => ({ value: c.value, label: c.label })),
+      initialSelected: current ? [current] : [],
+      getChildren: (mainValue) => {
+        const cat = cats.find((c) => c.value === mainValue);
+        return cat?.children?.length ? cat.children : null;
+      },
+      onDone: (list) => {
+        const value = list?.length ? String(list[list.length - 1]) : "";
+        writePlainValue(select, value);
+        setWheelValue(wrap.querySelector("[data-wheel]") || wheel, value);
+        syncDrumWheelDisplay(wrap.querySelector("[data-wheel]") || wheel);
+        refreshSummary();
+        if (typeof onChange === "function") onChange(value);
+      },
+    });
+  }
+
+  function openSwitchSheet() {
+    const trigger = triggerEl();
+    if (!trigger) return;
+    const items = currentItems();
+    const current = readSingleStoredValue(select._adBmHidden?.value ?? select.value);
+    openStandaloneSwitchSheet({
+      trigger,
+      emptyLabel,
+      items,
+      initialSelected: current ? [current] : [],
+      onDone: (list) => {
+        const value = list?.length ? String(list[list.length - 1]) : "";
+        writePlainValue(select, value);
+        setWheelValue(wrap.querySelector("[data-wheel]") || wheel, value);
+        syncDrumWheelDisplay(wrap.querySelector("[data-wheel]") || wheel);
+        refreshSummary();
+        if (typeof onChange === "function") onChange(value);
+      },
+    });
+  }
+
+  if (mode === "hierarchy" || mode === "switch") {
+    const trigger = triggerEl();
+    if (trigger) {
+      const next = trigger.cloneNode(true);
+      next.dataset.sheetBound = "1";
+      trigger.replaceWith(next);
+      next.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        fillFromSelect();
+        if (mode === "hierarchy" && categories?.length) openHierarchySheet();
+        else openSwitchSheet();
+      });
+    }
+  } else {
+    bindAutoDrumSheet(wheel);
+  }
+
+  select._adBmClose = () => {};
+  select._adBmRefreshSummary = refreshSummary;
+  select._adBmFillWheel = fillFromSelect;
+  select._adBmPanel = wrap;
+  refreshSummary();
 }
 
 function ensureMuszakiNapSelect(honapSelect) {
@@ -2375,59 +2583,142 @@ export async function mountAdFormBmPickers(form, catalog = null) {
   const gyartmany = document.getElementById("gyartmany");
   const modell = document.getElementById("modell");
 
-  if (allapot?.tagName === "SELECT" && allapot.dataset.adBmPicker !== "1") {
-    mountAllapotPicker(allapot);
-  }
-  if (kivitel?.tagName === "SELECT" && kivitel.dataset.adBmPicker !== "1") {
-    mountFlatPicker(kivitel, "Kivitel", KIVITEL_OPTIONS, "ad-form-kivitel-panel", "data-ad-bm-kivitel-open");
-  }
-  if (okmany?.tagName === "SELECT" && okmany.dataset.adBmPicker !== "1") {
-    mountSearchFlatPicker(
-      okmany,
-      "Okmányok jellege",
-      OKMANY_JELLEG_OPTIONS,
-      "ad-form-okmany-panel",
-      "db"
-    );
-  }
-  if (uzemanyag?.tagName === "SELECT" && uzemanyag.dataset.adBmPicker !== "1") mountFuelPicker(uzemanyag);
-
-  const forgalombaEv = document.getElementById("forgalomba_helyezes_ev");
-  const forgalombaHonap = document.getElementById("forgalomba_helyezes_honap");
-  if (forgalombaEv?.tagName === "SELECT" && forgalombaEv.dataset.adBmPicker !== "1") {
-    ensureYearSelectFilled(forgalombaEv);
-    mountSingleSelectDropdown(forgalombaEv, {
-      title: "Forgalomba helyezés éve",
-      panelClass: "ad-form-year-panel",
-      placeholder: "év",
-    });
-  }
-  if (forgalombaHonap?.tagName === "SELECT" && forgalombaHonap.dataset.adBmPicker !== "1") {
-    mountSingleSelectDropdown(forgalombaHonap, {
-      title: "Forgalomba helyezés hónapja",
-      panelClass: "ad-form-month-panel",
-      placeholder: "hó",
-    });
-  }
-
+  /* Meglévő select-tartalom kiegészítése (nem cseréljük a kereső listáira). */
   ensureSelectOptions(document.getElementById("dc_tolto_csatlakozas"), DC_TOLTO_OPTIONS);
   ensureSelectOptions(document.getElementById("szin"), VEHICLE_SZIN_OPTIONS);
   ensureSelectOptions(document.getElementById("karpit1"), VEHICLE_KARPIT_OPTIONS);
   ensureSelectOptions(document.getElementById("karpit2"), VEHICLE_KARPIT_OPTIONS);
   ensureSelectOptions(document.getElementById("tetto"), VEHICLE_TETTO_OPTIONS);
   ensureSelectOptions(document.getElementById("klima"), KLIM_OPTIONS);
-  replaceSelectOptions(document.getElementById("sebessegvalto"), flattenSebessegvaltoOptions());
+  if (document.getElementById("sebessegvalto") && !filledOptionsFromSelect(document.getElementById("sebessegvalto")).length) {
+    replaceSelectOptions(document.getElementById("sebessegvalto"), flattenSebessegvaltoOptions());
+  }
+  if (kivitel && !filledOptionsFromSelect(kivitel).length) {
+    ensureSelectOptions(kivitel, KIVITEL_OPTIONS);
+  }
+  if (okmany && !filledOptionsFromSelect(okmany).length) {
+    ensureSelectOptions(okmany, OKMANY_JELLEG_OPTIONS);
+  }
+
+  if (allapot?.tagName === "SELECT" && allapot.dataset.adBmPicker !== "1") {
+    await mountAdSelectDrum(allapot, {
+      title: "Állapot",
+      mode: "hierarchy",
+      categories: ALLAPOT_CATEGORIES,
+      labelForValue: allapotLabelForValue,
+    });
+  }
+  if (kivitel?.tagName === "SELECT" && kivitel.dataset.adBmPicker !== "1") {
+    await mountAdSelectDrum(kivitel, { title: "Kivitel", mode: "switch" });
+  }
+  if (okmany?.tagName === "SELECT" && okmany.dataset.adBmPicker !== "1") {
+    await mountAdSelectDrum(okmany, { title: "Okmányok jellege", mode: "switch" });
+  }
+  if (uzemanyag?.tagName === "SELECT" && uzemanyag.dataset.adBmPicker !== "1") {
+    await mountAdSelectDrum(uzemanyag, {
+      title: "Üzemanyag",
+      mode: "hierarchy",
+      categories: UZEMANYAG_CATEGORIES,
+      onChange: () => window.dispatchEvent(new Event("ad-form-sync-fuel-fields")),
+    });
+  }
+
+  const forgalombaEv = document.getElementById("forgalomba_helyezes_ev");
+  const forgalombaHonap = document.getElementById("forgalomba_helyezes_honap");
+  if (forgalombaEv?.tagName === "SELECT" && forgalombaEv.dataset.adBmPicker !== "1") {
+    ensureYearSelectFilled(forgalombaEv);
+    await mountAdSelectDrum(forgalombaEv, {
+      title: "Forgalomba helyezés éve",
+      emptyLabel: "év",
+      mode: "single",
+    });
+  }
+  if (forgalombaHonap?.tagName === "SELECT" && forgalombaHonap.dataset.adBmPicker !== "1") {
+    await mountAdSelectDrum(forgalombaHonap, {
+      title: "Forgalomba helyezés hónapja",
+      emptyLabel: "hó",
+      mode: "single",
+    });
+  }
+
   await mountMuszakiDateTripleDrum(form);
+
   for (const spec of AD_BM_SINGLE_DROPDOWN_SPECS) {
-    mountAdSingleDropdown(spec);
+    if (spec.skipSingleMount) continue;
+    const select = document.getElementById(spec.id);
+    if (!select || select.tagName !== "SELECT" || select.dataset.adBmPicker === "1") continue;
+    if (spec.yearMax !== undefined) {
+      ensureYearSelectFilled(select, spec.yearMax == null ? new Date().getFullYear() : spec.yearMax);
+    }
+    const switchIds = new Set([
+      "szin",
+      "karpit1",
+      "karpit2",
+      "tetto",
+      "klima",
+      "sebessegvalto",
+      "hajtas",
+      "ac_tolto_csatlakozas",
+      "dc_tolto_csatlakozas",
+      "tolto_csatlakozas",
+    ]);
+    await mountAdSelectDrum(select, {
+      title: spec.title,
+      emptyLabel: spec.placeholder ?? PLACEHOLDER,
+      mode: switchIds.has(spec.id) ? "switch" : "single",
+    });
   }
 
   try {
     const cat = catalog || (await fetchVehicleCatalog({ kind: catalogKindForAdForm(form) }));
-    if (gyartmany?.tagName === "SELECT" && gyartmany.dataset.adBmPicker !== "1") mountBrandPicker(gyartmany, cat);
-    if (modell?.tagName === "SELECT" && modell.dataset.adBmPicker !== "1") mountModelPicker(modell, cat);
+    form._adFormVehicleCatalog = cat;
+    const brands = [...(cat?.gyartmanyok || [])].sort((a, b) =>
+      a.localeCompare(b, "hu", { sensitivity: "base" })
+    );
+    if (gyartmany?.tagName === "SELECT" && gyartmany.dataset.adBmPicker !== "1") {
+      await mountAdSelectDrum(gyartmany, {
+        title: "Gyártmány",
+        mode: "switch",
+        resolveItems: () => brands.map((b) => ({ value: b, label: b })),
+        onChange: () => {
+          if (!modell) return;
+          writePlainValue(modell, "");
+          modell._adBmFillWheel?.("");
+          modell._adBmRefreshSummary?.();
+        },
+      });
+    }
+    if (modell?.tagName === "SELECT" && modell.dataset.adBmPicker !== "1") {
+      await mountAdSelectDrum(modell, {
+        title: "Modell",
+        mode: "switch",
+        resolveItems: () => {
+          const brand = readSingleStoredValue(gyartmany?._adBmHidden?.value ?? gyartmany?.value ?? "")
+            .toUpperCase();
+          if (!brand) return [];
+          const tree = cat?.modellekTree?.[brand];
+          if (Array.isArray(tree) && tree.length) {
+            const rows = [];
+            for (const node of tree) {
+              if (!node?.name) continue;
+              if (node.children?.length) {
+                for (const child of node.children) {
+                  if (child?.name) rows.push({ value: child.name, label: `${node.name} · ${child.name}` });
+                }
+              } else {
+                rows.push({ value: node.name, label: node.name });
+              }
+            }
+            return rows.sort((a, b) => a.label.localeCompare(b.label, "hu", { sensitivity: "base" }));
+          }
+          return [...(cat?.modellek?.[brand] || [])]
+            .sort((a, b) => a.localeCompare(b, "hu", { sensitivity: "base" }))
+            .map((name) => ({ value: name, label: name }));
+        },
+      });
+    }
   } catch (error) {
-    console.warn("Gyártmány/modell kapcsolós panel:", error);
+    console.warn("Gyártmány/modell dobkerék:", error);
   }
 
   form.dataset.adBmPickers = "1";

@@ -6,8 +6,8 @@ import {
   syncDrumWheelDisplay,
   closeAllInlineDrums,
 } from "./immo-drum-picker.js?v=immoClear1";
-import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=brandDrum16";
-import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=acKwDrum1";
+import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=brandDrum17";
+import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=akkuDrum1";
 
 const MOBILE_MQ = "(max-width: 900px)";
 const TYPEAHEAD_CLEAR_MS = 2500;
@@ -120,6 +120,15 @@ const DUAL_RANGES = [
     tol: "ac_toltesi_teljesitmeny_tol",
     ig: "ac_toltesi_teljesitmeny_ig",
     unit: "kW",
+  },
+  {
+    fieldKey: "akkumulator_kwh",
+    id: "akkumulator_kwh",
+    title: "Akkumulátor kapacitás",
+    ariaLabel: "Akkumulátor kapacitás tartomány",
+    tol: "akkumulator_kwh_tol",
+    ig: "akkumulator_kwh_ig",
+    unit: "kWh",
   },
 ];
 

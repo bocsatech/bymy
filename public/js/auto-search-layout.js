@@ -51,6 +51,12 @@ const AC_KW_STEPS = (() => {
   for (let kw = 10; kw <= 400; kw += 10) values.push(kw);
   return values;
 })();
+const AKKU_KWH_STEPS = (() => {
+  const values = [];
+  for (let kwh = 10; kwh <= 300; kwh += 10) values.push(kwh);
+  for (let kwh = 350; kwh <= 1000; kwh += 50) values.push(kwh);
+  return values;
+})();
 
 const FREE_NUMBER_FIELDS = new Set([
   "fogyasztas_varosi",
@@ -435,6 +441,9 @@ export function optionsForAutoFilterKey(filterKey, emptyLabel = "Mindegy") {
   }
   if (key === "ac_toltesi_teljesitmeny_tol" || key === "ac_toltesi_teljesitmeny_ig") {
     return withEmpty(AC_KW_STEPS.map((n) => ({ value: String(n), label: `${n} kW` })));
+  }
+  if (key === "akkumulator_kwh_tol" || key === "akkumulator_kwh_ig") {
+    return withEmpty(AKKU_KWH_STEPS.map((n) => ({ value: String(n), label: `${n} kWh` })));
   }
   if (key === "uzemanyagQuick" || key === "uzemanyag") {
     return withEmpty(flattenUzemanyagOptions().map((v) => ({ value: v, label: v })));

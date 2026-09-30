@@ -1174,12 +1174,25 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .auto-desk-a
 }
 
 body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .auto-desk-acc[data-desk-acc="alap"]:not(.is-open) {
-  border: 1px solid var(--ad-line, #e2e8f0) !important;
-  background: var(--ad-panel, #fff) !important;
-  border-radius: 8px !important;
-  box-shadow: none !important;
+  border: 0 !important;
+  background: #fff !important;
+  border-radius: 1.375rem !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05) !important;
   margin: 0 !important;
-  overflow: visible !important;
+  overflow: hidden !important;
+}
+
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .auto-desk-acc[data-desk-acc="alap"]:not(.is-open) > .auto-desk-acc__head {
+  display: flex !important;
+  height: auto !important;
+  min-height: 3.25rem !important;
+  padding: 0.95rem 1.15rem !important;
+  margin: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  font: 800 1.125rem/1.2 system-ui, sans-serif !important;
+  letter-spacing: -0.02em;
+  color: #111 !important;
 }
 
 body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .auto-desk-acc[data-desk-acc="alap"].is-open > .auto-desk-acc__head {
@@ -1189,16 +1202,6 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .auto-desk-a
   padding: 0 !important;
   margin: 0 !important;
   border: 0 !important;
-}
-
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .auto-desk-acc[data-desk-acc="alap"]:not(.is-open) > .auto-desk-acc__head {
-  display: flex !important;
-  height: auto !important;
-  min-height: 0 !important;
-  padding: 13px 14px !important;
-  margin: 0 !important;
-  border: 0 !important;
-  background: transparent !important;
 }
 
 body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .auto-desk-acc[data-desk-acc="alap"].is-open > .auto-desk-acc__body {

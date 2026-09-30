@@ -241,7 +241,7 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .automax-mai
 body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .ad-form-desk-shell {
   display: flex;
   flex-direction: column;
-  gap: var(--ad-cell-gap);
+  gap: 0.75rem;
   width: 100%;
   min-height: 0;
 }
@@ -252,6 +252,55 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .auto-desk-a
   background: var(--ad-panel);
   margin-bottom: 0;
   flex: 0 0 auto;
+}
+
+/* Összecsukva: fehér pill (mint Alapadatok) — Műszaki / Extrák / Hirdetés / Alapadatok */
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"]
+  .ad-form-desk-shell
+  > .auto-desk-acc:not(.auto-desk-acc--sub):not(.is-open) {
+  border: 0 !important;
+  border-radius: 1.375rem !important;
+  background: #fff !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05) !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+}
+
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"]
+  .ad-form-desk-shell
+  > .auto-desk-acc:not(.auto-desk-acc--sub):not(.is-open)
+  > .auto-desk-acc__head {
+  display: flex !important;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-height: 3.25rem;
+  padding: 0.95rem 1.15rem !important;
+  border: 0 !important;
+  background: transparent !important;
+  font: 800 1.125rem/1.2 system-ui, sans-serif !important;
+  letter-spacing: -0.02em;
+  color: #111 !important;
+}
+
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"]
+  .ad-form-desk-shell
+  > .auto-desk-acc:not(.auto-desk-acc--sub):not(.is-open)
+  > .auto-desk-acc__head
+  .auto-desk-acc__sum {
+  display: none !important;
+}
+
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"]
+  .ad-form-desk-shell
+  > .auto-desk-acc:not(.auto-desk-acc--sub):not(.is-open)
+  > .auto-desk-acc__head
+  .auto-desk-acc__chev {
+  flex: 0 0 auto;
+  color: #64748b !important;
+  font-size: 0.65rem !important;
+  line-height: 1;
+  transform: none !important;
 }
 
 body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .auto-desk-acc.is-open {

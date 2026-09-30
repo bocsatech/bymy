@@ -5,7 +5,7 @@ import {
   isVehicleStep1Canvas,
   stackVehicleCanvasSingleColumn,
   wrapAlapScoutCard,
-} from "./ad-form-desk-pinned-blocks.js?v=bmSheet27";
+} from "./ad-form-desk-pinned-blocks.js?v=bmSheet28";
 
 const DESK_MQ = "(min-width: 901px)";
 

@@ -198,7 +198,7 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form:has(#ingatlan-fields) .
 
 html:not([data-theme="dark"]) body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"],
 html[data-theme="light"] body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] {
-  --ad-bg: #f3f3f3;
+  --ad-bg: #e8eef3;
   --ad-panel: #ffffff;
   --ad-line: #d4d4d4;
   --ad-text: #111111;
@@ -223,6 +223,33 @@ html[data-theme="dark"] body.site-app.ad-form-desk-active[data-site-page="hirdet
   --ad-filter-w: 320px;
   --ad-tips-w: 280px;
   --ad-cell-gap: 8px;
+}
+
+/* Teljes oldal háttér = Alapadatok kék (#e8eef3), ne szürke / #eef0f3 */
+html:not([data-theme="dark"]) body.site-app[data-site-page="hirdetesfeladas"],
+html[data-theme="light"] body.site-app[data-site-page="hirdetesfeladas"] {
+  background: #e8eef3 !important;
+  background-color: #e8eef3 !important;
+}
+
+html:not([data-theme="dark"]) body.site-app[data-site-page="hirdetesfeladas"] .page,
+html:not([data-theme="dark"]) body.site-app[data-site-page="hirdetesfeladas"] .home-main,
+html:not([data-theme="dark"]) body.site-app[data-site-page="hirdetesfeladas"] main,
+html:not([data-theme="dark"]) body.site-app[data-site-page="hirdetesfeladas"] .site-layout,
+html:not([data-theme="dark"]) body.site-app[data-site-page="hirdetesfeladas"] .automax-main,
+html:not([data-theme="dark"]) body.site-app[data-site-page="hirdetesfeladas"] #ad-wizard-shell,
+html:not([data-theme="dark"]) body.site-app[data-site-page="hirdetesfeladas"] #ad-form,
+html:not([data-theme="dark"]) body.site-app[data-site-page="hirdetesfeladas"] .ad-form-desk-shell,
+html[data-theme="light"] body.site-app[data-site-page="hirdetesfeladas"] .page,
+html[data-theme="light"] body.site-app[data-site-page="hirdetesfeladas"] .home-main,
+html[data-theme="light"] body.site-app[data-site-page="hirdetesfeladas"] main,
+html[data-theme="light"] body.site-app[data-site-page="hirdetesfeladas"] .site-layout,
+html[data-theme="light"] body.site-app[data-site-page="hirdetesfeladas"] .automax-main,
+html[data-theme="light"] body.site-app[data-site-page="hirdetesfeladas"] #ad-wizard-shell,
+html[data-theme="light"] body.site-app[data-site-page="hirdetesfeladas"] #ad-form,
+html[data-theme="light"] body.site-app[data-site-page="hirdetesfeladas"] .ad-form-desk-shell {
+  background: #e8eef3 !important;
+  background-color: #e8eef3 !important;
 }
 
 body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .site-layout--wide .site-center--automax {
@@ -862,7 +889,7 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-
 @media (min-width: 901px) {
   html:not([data-theme="dark"]) body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"],
   html[data-theme="light"] body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] {
-    --ad-bg: #f3f3f3;
+    --ad-bg: #e8eef3;
     --ad-panel: #ffffff;
     --ad-line: #d4d4d4;
     --ad-text: #111111;

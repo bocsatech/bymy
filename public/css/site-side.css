@@ -21,7 +21,7 @@ body[data-site-page="hirdetesfeladas"] .site-layout--wide .site-center--automax 
   grid-template-columns: minmax(0, 1fr) minmax(260px, 32%);
   gap: 1rem;
   padding: 1rem 1rem 2rem;
-  background: #e8edf3;
+  background: #e8eef3;
 }
 
 body[data-site-page="hirdetesfeladas"] .automax-main {

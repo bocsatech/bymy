@@ -5,6 +5,7 @@ import { wirePostalCityAutofill as wireSharedPostalCityAutofill } from "./postal
 import {
   flattenAllapotOptions,
   flattenSebessegvaltoOptions,
+  flattenUzemanyagOptions,
   OKMANY_JELLEG_OPTIONS,
   AC_TOLTO_CSATLAKOZAS_OPTIONS,
   TEHER_KISTEHER_KIVITEL,
@@ -413,11 +414,7 @@ export function optionsForAutoFilterKey(filterKey, emptyLabel = "Mindegy") {
     return withEmpty(CCM_STEPS.map((n) => ({ value: String(n), label: `${n.toLocaleString("hu-HU")} cm³` })));
   }
   if (key === "uzemanyagQuick" || key === "uzemanyag") {
-    return withEmpty(
-      SELECT_OPTIONS.uzemanyag.map((opt) =>
-        typeof opt === "string" ? { value: opt, label: opt } : { value: opt.value, label: opt.label }
-      )
-    );
+    return withEmpty(flattenUzemanyagOptions().map((v) => ({ value: v, label: v })));
   }
   const selectOpts = selectOptionsFor(key);
   if (selectOpts) {

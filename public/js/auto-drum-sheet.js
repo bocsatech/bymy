@@ -1,6 +1,7 @@
 
 import { readWheel, readWheelList, setWheelValue, fillWheel } from "./ingatlan-wheels.js?v=immoClearAll1";
 import { closeAllInlineDrums, syncDrumWheelDisplay } from "./immo-drum-picker.js?v=immoAdFormMenu1";
+import { UZEMANYAG_CATEGORIES, flattenUzemanyagOptions } from "./equipment-data.js";
 
 const ITEM_H = 52;
 const MULTI_VISIBLE = 10;
@@ -597,6 +598,14 @@ export function openStandaloneSwitchSheet({
   let view = "main";
   let parentValue = null;
   const openMains = new Set();
+  /* Korábbi gyerek-választás → fő kategória kapcsolója bekapcsolva legyen. */
+  if (typeof getChildren === "function") {
+    for (const item of items) {
+      const kids = getChildren(item.value);
+      if (!kids?.length) continue;
+      if (kids.some((k) => selected.has(String(k.value)))) openMains.add(item.value);
+    }
+  }
 
   function paintStandalone(listRows) {
     cancelAnimationFrame(paintFrame);
@@ -681,6 +690,15 @@ export function openStandaloneSwitchSheet({
   }
 
   function finish(commit) {
+    if (commit && typeof getChildren === "function") {
+      for (const main of [...openMains]) {
+        const kids = getChildren(main);
+        if (!kids?.length) continue;
+        if (!kids.some((k) => selected.has(String(k.value)))) {
+          kids.forEach((k) => selected.add(String(k.value)));
+        }
+      }
+    }
     const list = commit ? [...selected] : [...initialSelected];
     wrap?.classList.remove("is-open", "has-drum-open");
     trigger.setAttribute("aria-expanded", "false");
@@ -1037,6 +1055,37 @@ export function openAutoDrumSheet(wheel, trigger, { sheetItems = null, form = nu
 
   if (wheelKey === "gyartmany" && host?._autoDrumCatalog?.gyartmanyok?.length) {
     openBrandModelCatalogSheet(wheel, trigger, wrap, emptyLabel, host);
+    return;
+  }
+
+  if (multiple && (wheelKey === "uzemanyag" || wheelKey === "uzemanyagQuick")) {
+    const flat = flattenUzemanyagOptions().map((v) => ({ value: v, label: v }));
+    fillWheel(wheel, flat, { emptyLabel });
+    wheel.dataset.multiple = "1";
+    openStandaloneSwitchSheet({
+      trigger,
+      emptyLabel,
+      items: UZEMANYAG_CATEGORIES.map((c) => ({
+        value: c.children?.length ? c.id : c.value || c.id,
+        label: c.label,
+      })),
+      initialSelected: readWheelList(wheel),
+      getChildren: (mainValue) => {
+        const cat = UZEMANYAG_CATEGORIES.find(
+          (c) => c.id === mainValue || c.value === mainValue || c.label === mainValue
+        );
+        if (!cat?.children?.length) return null;
+        return cat.children.map((ch) => ({ value: ch.value, label: ch.label }));
+      },
+      onDone: (list) => {
+        const values = [...new Set((list || []).map(String).filter(Boolean))];
+        setWheelValue(wheel, values);
+        syncDrumWheelDisplay(wheel);
+        wheel.dispatchEvent(
+          new CustomEvent("immo-wheel-change", { bubbles: true, detail: { value: readWheel(wheel) } })
+        );
+      },
+    });
     return;
   }
 

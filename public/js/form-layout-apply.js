@@ -1,7 +1,7 @@
 import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=immoTipusPick1";
 import { refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=gyartFix1";
 import { initTireSizes } from "./tire-sizes-ui.js?v=tireFill1";
-import { applyAdFormDesk } from "./ad-form-desk.js?v=immoTipusPick1";
+import { applyAdFormDesk } from "./ad-form-desk.js?v=alapOrder3";
 import { markImmoPostViewReady } from "./category-picker.js?v=pickerBoot4";
 import {
   DESK_MUSZAKI_CORE_FIELD_KEYS,
@@ -11,7 +11,7 @@ import {
   layoutRowForPinnedBlock,
   placeElectricBlockAfterFuel,
   applyStep1SearchDomOrder,
-} from "./ad-form-desk-pinned-blocks.js?v=alapOrder1";
+} from "./ad-form-desk-pinned-blocks.js?v=alapOrder3";
 
 function cssEscape(value) {
   if (window.CSS?.escape) return window.CSS.escape(value);
@@ -1128,6 +1128,9 @@ async function applyAdFormLayout() {
     applyAdFormDesk();
     if (!isImmo) {
       applyStep1SearchDomOrder(canvasForStep(form, 1));
+      /* Desk restack / késleltetett applyAdFormDesk után is kereső-sorrend. */
+      window.setTimeout(() => applyStep1SearchDomOrder(canvasForStep(form, 1)), 160);
+      window.setTimeout(() => applyStep1SearchDomOrder(canvasForStep(form, 1)), 500);
     }
     if (
       isImmo &&

@@ -24,18 +24,18 @@ export const EV_LAYOUT_GROUP_KEYS = new Set([
   "zold_rendszam",
 ]);
 
-/** Használtautó desk „Alapadatok” — autókereső minta (gyártmány először, nem évjárat). */
+/** Használtautó desk „Alapadatok” — autókereső Gyors minta (évjárat NEM az első). */
 export const DESK_STEP1_CANONICAL_STACK = [
   "gyartmany",
   "modell",
   "tipus",
   "egyeb_tipus",
   "egyeb_modell",
+  "kivitel",
+  "allapot",
   "gyartasi_ev",
   "gyartasi_honap",
   "km",
-  "kivitel",
-  "allapot",
   "tulajdonosok_szama",
   "forgalomba_helyezes_ev",
   "forgalomba_helyezes_honap",
@@ -60,22 +60,31 @@ export function deskStep1CanonicalRank(fieldKey) {
 /** Mobil flex canvas: alapadatok DOM-sorrend = autókereső minta. */
 export function applyStep1SearchDomOrder(canvas) {
   if (!canvas) return;
-  const items = [...canvas.children].filter(
-    (el) =>
-      el.matches?.(".ad-layout-item, .ad-desk-pinned-block, .ad-form-bm-field--brand-model, .ad-form-split-ym, .ad-form-muszaki-date") &&
-      !el.classList.contains("ad-layout-hidden") &&
-      !el.hidden
-  );
+  const items = [...canvas.children].filter((el) => {
+    if (!el || el.hidden || el.classList?.contains("ad-layout-hidden")) return false;
+    if (el.matches?.(".ad-layout-item, .ad-desk-pinned-block")) return true;
+    if (el.matches?.(".ad-form-bm-field--brand-model, .ad-form-split-ym, .ad-form-muszaki-date")) return true;
+    return false;
+  });
   if (items.length < 2) return;
 
-  const keyOf = (el) =>
-    el.dataset?.adBmFor ||
-    el.dataset?.evId ||
-    el.querySelector?.(".ad-form-split-ym, .ad-form-muszaki-date")?.dataset?.evId ||
-    el.querySelector?.("[data-ad-bm-for]")?.dataset?.adBmFor ||
-    el.querySelector?.("input:not([type=hidden]), select, textarea")?.id ||
-    el.querySelector?.("[name]")?.name ||
-    "";
+  const keyOf = (el) => {
+    const fromBm =
+      el.dataset?.adBmFor ||
+      el.querySelector?.("[data-ad-bm-for]")?.getAttribute("data-ad-bm-for") ||
+      "";
+    if (fromBm) return fromBm;
+    const fromSplit =
+      el.dataset?.evId ||
+      el.querySelector?.(".ad-form-split-ym, .ad-form-muszaki-date")?.dataset?.evId ||
+      "";
+    if (fromSplit) return fromSplit;
+    const labeled = el.querySelector?.("label[for]");
+    if (labeled?.htmlFor) return labeled.htmlFor;
+    const ctrl = el.querySelector?.("select[id], input[id]:not([type=hidden]), textarea[id]");
+    if (ctrl?.id) return ctrl.id;
+    return el.querySelector?.("[name]")?.name || "";
+  };
 
   items.sort(
     (a, b) =>

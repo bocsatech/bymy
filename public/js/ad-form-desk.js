@@ -1,5 +1,6 @@
 import { initAdFormDeskGuide, refreshAdFormDeskGuide, showDeskGuideSlot } from "./ad-form-desk-guide.js?v=adDeskGuide7";
 import { markImmoPostViewReady } from "./category-picker.js?v=pickerBoot4";
+import { applyStep1SearchDomOrder } from "./ad-form-desk-pinned-blocks.js?v=alapOrder3";
 
 const DESK_MQ = "(min-width: 901px)";
 
@@ -298,7 +299,15 @@ function accordionForStep(step) {
 }
 
 function restackCanvasItems(form) {
+  const isImmo =
+    form.classList.contains("ad-form--ingatlan") || document.body.classList.contains("ad-vertical-ingatlan");
   form.querySelectorAll(".ad-layout-canvas").forEach((canvas) => {
+    const step = Number(canvas.closest(".step-panel")?.dataset?.step);
+    /* Alapadatok: autókereső sorrend (gyártmány első) — ne az admin layoutRow. */
+    if (!isImmo && step === 1) {
+      applyStep1SearchDomOrder(canvas);
+      return;
+    }
     const items = [...canvas.children].filter((el) => {
       if (el.matches(".ad-layout-hidden") || el.hidden) return false;
       if (el.matches(".ad-layout-item:not(.ad-layout-hidden)")) return true;
@@ -318,19 +327,6 @@ function restackCanvasItems(form) {
       if (item.matches(".ad-layout-item")) {
         item.style.removeProperty("grid-column");
         item.style.removeProperty("grid-row");
-      }
-    }
-    /* Biztosíték: EV/hibrid blokk soha ne kerüljön az üzemanyag fölé. */
-    const fuel = document.getElementById("uzemanyag");
-    const ev = canvas.querySelector("#electric-fields-block");
-    if (fuel && ev && canvas.contains(ev) && !ev.hidden && !ev.classList.contains("ad-layout-hidden")) {
-      const fuelHost =
-        [...canvas.children].find((el) => el !== ev && el.contains(fuel)) ||
-        fuel.closest(".ad-layout-item, .field-row--tech-top");
-      if (fuelHost && canvas.contains(fuelHost) && fuelHost.compareDocumentPosition(ev) & Node.DOCUMENT_POSITION_PRECEDING) {
-        const fuelRow = Number(fuelHost.dataset.layoutRow) || 0;
-        if (fuelRow > 0) ev.dataset.layoutRow = String(Math.max(Number(ev.dataset.layoutRow) || 0, fuelRow + 1));
-        fuelHost.after(ev);
       }
     }
   });

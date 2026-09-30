@@ -1829,6 +1829,87 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   display: block !important;
 }
 
+/* Egyszerű egyoszlopos dobkerék (pl. Személyek, Ajtók) */
+.auto-drum-portal--single .auto-drum-portal__stage--single {
+  width: min(20rem, 90vw);
+}
+
+.auto-drum-portal--single .auto-drum-portal__ring--single {
+  width: var(--immo-drum-ring-w, min(18rem, 88vw)) !important;
+  max-width: min(20rem, 90vw) !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  border-width: 3px !important;
+  border-color: #475569 !important;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.auto-drum-portal--single .auto-drum-portal__toolbar .auto-drum-portal__sub {
+  display: block;
+}
+
+.auto-drum-single__body {
+  position: relative;
+  flex: 0 0 auto;
+  height: var(--auto-drum-single-h, 13.5rem);
+  background: #fff;
+}
+
+.auto-drum-single__highlight {
+  left: 0.4rem !important;
+  right: 0.4rem !important;
+  height: 3rem;
+  z-index: 3;
+}
+
+.auto-drum-portal--single .auto-drum-single__scroll {
+  position: absolute !important;
+  inset: 0 !important;
+  flex: none !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow-x: hidden;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory !important;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+  padding: calc((var(--auto-drum-single-h, 13.5rem) - 3rem) / 2) 0.55rem !important;
+  box-sizing: border-box;
+  z-index: 2;
+}
+
+.auto-drum-portal--single .auto-drum-single__scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.auto-drum-portal--single .immo-drum-inline-item {
+  height: 3rem;
+  font-size: 1.4rem;
+  scroll-snap-align: center;
+  justify-content: center;
+  padding: 0 0.35rem !important;
+  color: #0f172a !important;
+}
+
+.auto-drum-portal--single .immo-drum-inline-text {
+  flex: 0 1 auto;
+  text-align: center;
+}
+
+.auto-drum-portal--single .immo-drum-inline-item.is-selected::after {
+  content: none !important;
+  display: none !important;
+}
+
+.auto-drum-portal--single .immo-drum-inline-highlight {
+  display: block !important;
+}
+
 .auto-drum-portal__scroll {
   position: absolute;
   inset: 0;

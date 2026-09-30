@@ -1112,25 +1112,38 @@ export function openAutoDrumSheet(wheel, trigger, { sheetItems = null, form = nu
     return;
   }
 
+  const sheetTitle =
+    wrap?.querySelector(".immo-label")?.textContent?.trim() ||
+    wheel.getAttribute("aria-label") ||
+    emptyLabel;
   const root = document.createElement("div");
-  root.className = "auto-drum-portal";
+  root.className = "auto-drum-portal auto-drum-portal--multi auto-drum-portal--single";
   root.setAttribute("role", "dialog");
   root.setAttribute("aria-modal", "true");
-  root.setAttribute("aria-label", emptyLabel);
+  root.setAttribute("aria-label", sheetTitle);
+  root.style.setProperty("--auto-drum-single-h", "13.5rem");
+  root.style.setProperty("--auto-drum-item-h", `${ITEM_H}px`);
 
   root.innerHTML = `
     <button type="button" class="auto-drum-portal__backdrop" aria-label="Bezárás"></button>
-    <div class="auto-drum-portal__stage">
-      <div class="immo-drum-wheel-ring auto-drum-portal__ring">
-        <div class="immo-drum-inline-highlight" aria-hidden="true"></div>
-        <div class="auto-drum-portal__scroll immo-drum-inline-scroll" tabindex="-1"></div>
+    <div class="auto-drum-portal__stage auto-drum-portal__stage--multi auto-drum-portal__stage--single">
+      <div class="immo-drum-wheel-ring auto-drum-portal__ring auto-drum-portal__ring--multi auto-drum-portal__ring--single">
+        <div class="auto-drum-portal__toolbar">
+          <button type="button" class="auto-drum-portal__back" hidden>Vissza</button>
+          <p class="auto-drum-portal__sub">${escapeHtml(sheetTitle)}</p>
+          <button type="button" class="auto-drum-portal__done">Kész</button>
+        </div>
+        <div class="auto-drum-single__body">
+          <div class="immo-drum-inline-highlight auto-drum-single__highlight" aria-hidden="true"></div>
+          <div class="auto-drum-portal__scroll auto-drum-single__scroll immo-drum-inline-scroll" tabindex="-1"></div>
+        </div>
       </div>
-      <button type="button" class="auto-drum-portal__done">Kész</button>
     </div>`;
 
   const stage = root.querySelector(".auto-drum-portal__stage");
-  const ring = root.querySelector(".auto-drum-portal__ring");
-  const scrollEl = root.querySelector(".auto-drum-portal__scroll");
+  const ring = root.querySelector(".auto-drum-single__highlight");
+  const scrollEl = root.querySelector(".auto-drum-single__scroll");
+  const outerRing = root.querySelector(".auto-drum-portal__ring--single");
 
   scrollEl.innerHTML = opts
     .map((btn) => {
@@ -1142,15 +1155,6 @@ export function openAutoDrumSheet(wheel, trigger, { sheetItems = null, form = nu
 
   root.querySelector(".auto-drum-portal__backdrop")?.addEventListener("click", () => closeAutoDrumSheet(true));
   root.querySelector(".auto-drum-portal__done")?.addEventListener("click", () => closeAutoDrumSheet(true));
-
-  function selectPortalItem(item) {
-    if (!item) return;
-    const value = item.dataset.value ?? "";
-    setWheelValue(wheel, value);
-    syncDrumWheelDisplay(wheel);
-    wheel.dispatchEvent(new CustomEvent("immo-wheel-change", { bubbles: true, detail: { value } }));
-    closeAutoDrumSheet(false);
-  }
 
   scrollEl.querySelectorAll(".immo-drum-inline-item").forEach((item) => {
     let tapStart = null;
@@ -1168,7 +1172,8 @@ export function openAutoDrumSheet(wheel, trigger, { sheetItems = null, form = nu
         const dy = Math.abs(event.clientY - tapStart.y);
         if (dx > 10 || dy > 10) return;
       }
-      selectPortalItem(item);
+      scrollToPortalItem(scrollEl, ring, item);
+      paintPortal(scrollEl, ring, wheel);
     });
   });
 
@@ -1190,7 +1195,10 @@ export function openAutoDrumSheet(wheel, trigger, { sheetItems = null, form = nu
     scrollEl.querySelector(".immo-drum-inline-item");
 
   requestAnimationFrame(() => {
-    syncRingWidth(ring, scrollEl);
+    outerRing?.style.setProperty(
+      "--immo-drum-ring-w",
+      `${Math.min(320, Math.floor(window.innerWidth * 0.88))}px`
+    );
     scrollToPortalItem(scrollEl, ring, start);
     paintPortal(scrollEl, ring, wheel);
   });

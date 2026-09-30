@@ -1829,32 +1829,52 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   display: block !important;
 }
 
-/* Műszaki érvényesség: év / hó / nap */
+/* Műszaki érvényesség: év / hó / nap — ugyanaz a cella-stílus, mint a dual-range */
 .immo-triple-date-block {
-  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  width: auto;
+  box-sizing: border-box;
+  padding-top: 0.42rem;
+  position: relative;
+  grid-column: 1 / -1 !important;
+  grid-row: auto !important;
 }
 
 .immo-triple-date {
   position: relative;
   display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
+  align-items: center;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  height: 3rem;
+  min-height: 3rem;
+  max-height: 3rem;
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+  background: #f8fafc;
+  overflow: visible;
+  z-index: 0;
   box-sizing: border-box;
-  padding: 0.55rem 0.7rem 0.6rem;
-  border: 1px solid #d7dbe1;
-  border-radius: 10px;
-  background: #fff;
+  padding: 0;
+  gap: 0;
+  flex-direction: row;
 }
 
 .immo-triple-date__title {
   position: absolute;
-  top: -0.55rem;
-  left: 0.65rem;
-  padding: 0 0.25rem;
-  background: #fff;
-  font: 600 0.78rem/1 system-ui, sans-serif;
-  color: #64748b;
+  top: -0.52rem;
+  left: 0.6rem;
+  padding: 0 0.28rem;
+  background: var(--hub-card, #fff);
+  font-size: 0.68rem;
+  font-weight: 600;
+  font-family: inherit;
+  line-height: 1;
+  color: #667085;
+  white-space: nowrap;
+  z-index: 2;
 }
 
 .immo-triple-date__summary {
@@ -1862,16 +1882,56 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   border: 0;
   background: transparent;
   margin: 0;
-  padding: 0.15rem 0;
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+  min-height: 3rem;
+  height: 3rem;
+  padding: 0 0.75rem;
   text-align: left;
-  font: 500 1rem/1.3 system-ui, sans-serif;
-  color: #0f172a;
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: #64748b;
   cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   -webkit-tap-highlight-color: transparent;
 }
 
-.immo-triple-date.has-drum-open {
-  border-color: #64748b;
+.immo-triple-date.has-drum-open,
+.immo-triple-date:focus-within {
+  border-color: #111;
+  box-shadow: 0 0 0 2px rgba(17, 24, 39, 0.08);
+  background: #fff;
+  z-index: 50;
+}
+
+.immo-triple-date.has-drum-open .immo-triple-date__title,
+.immo-triple-date:focus-within .immo-triple-date__title {
+  color: #111;
+}
+
+[data-theme="dark"] .immo-triple-date {
+  background: #1f2937;
+  border-color: #4b5563;
+}
+
+[data-theme="dark"] .immo-triple-date__title {
+  color: #9ca3af;
+  background: var(--hub-card, #111827);
+}
+
+[data-theme="dark"] .immo-triple-date__summary {
+  color: #d1d5db;
+}
+
+[data-theme="dark"] .immo-triple-date.has-drum-open,
+[data-theme="dark"] .immo-triple-date:focus-within {
+  background: #111827;
+  border-color: #f3f4f6;
 }
 
 .auto-drum-portal--date3 .auto-drum-portal__stage--date3 {

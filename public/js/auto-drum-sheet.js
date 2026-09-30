@@ -24,6 +24,15 @@ function escapeHtml(value) {
 export function closeAutoDrumSheet(commit = false) {
   if (!activePortal) return;
   const { root, wheel, scrollEl, ring, wrap, trigger, modelWheel } = activePortal;
+  if (!wheel) {
+    /* Standalone sheet — done handler already owns commit. */
+    wrap?.classList.remove("is-open", "has-drum-open");
+    trigger?.setAttribute("aria-expanded", "false");
+    root.remove();
+    activePortal = null;
+    document.body.classList.remove("auto-drum-portal-open", "auto-drum-sheet-open");
+    return;
+  }
   const multiple = wheel?.dataset?.multiple === "1";
   if (commit && scrollEl && ring && wheel && !multiple) {
     const item = nearestPortalItem(scrollEl, ring);
@@ -447,15 +456,19 @@ function openMultiSwitchSheet(wheel, trigger, wrap, emptyLabel, opts) {
     <button type="button" class="auto-drum-portal__backdrop" aria-label="Bezárás"></button>
     <div class="auto-drum-portal__stage auto-drum-portal__stage--multi">
       <div class="immo-drum-wheel-ring auto-drum-portal__ring auto-drum-portal__ring--multi">
-        <div class="immo-drum-inline-highlight" aria-hidden="true"></div>
+        <div class="auto-drum-portal__toolbar">
+          <button type="button" class="auto-drum-portal__back" hidden>Vissza</button>
+          <p class="auto-drum-portal__sub" hidden></p>
+          <button type="button" class="auto-drum-portal__done">Kész</button>
+        </div>
         <div class="auto-drum-portal__scroll immo-drum-inline-scroll" tabindex="-1"></div>
       </div>
-      <button type="button" class="auto-drum-portal__done">Kész</button>
     </div>`;
 
   const stage = root.querySelector(".auto-drum-portal__stage");
   const ring = root.querySelector(".auto-drum-portal__ring");
   const scrollEl = root.querySelector(".auto-drum-portal__scroll");
+  const doneBtn = root.querySelector(".auto-drum-portal__done");
 
   scrollEl.innerHTML = items.map((row) => switchRowHtml(row)).join("");
 
@@ -474,7 +487,7 @@ function openMultiSwitchSheet(wheel, trigger, wrap, emptyLabel, opts) {
   });
 
   root.querySelector(".auto-drum-portal__backdrop")?.addEventListener("click", () => closeAutoDrumSheet(true));
-  root.querySelector(".auto-drum-portal__done")?.addEventListener("click", () => closeAutoDrumSheet(true));
+  doneBtn?.addEventListener("click", () => closeAutoDrumSheet(true));
 
   scrollEl.addEventListener("scroll", () => paintSwitchList(scrollEl, wheel), { passive: true });
 
@@ -499,6 +512,168 @@ function openMultiSwitchSheet(wheel, trigger, wrap, emptyLabel, opts) {
       scrollEl.scrollTop = 0;
     }
     paintSwitchList(scrollEl, wheel);
+  });
+}
+
+/**
+ * Önálló kapcsolós dobkerék (nincs immo-wheel) — pl. mobil kivitel picker.
+ * getChildren(value) → almenü sorok; ha van, Vissza gombbal vissza.
+ */
+export function openStandaloneSwitchSheet({
+  trigger,
+  emptyLabel = "Mindegy",
+  items = [],
+  initialSelected = [],
+  onDone,
+  getChildren = null,
+} = {}) {
+  if (!trigger) return;
+  closeAutoDrumSheet(false);
+  closeAllInlineDrums(false);
+
+  const selected = new Set((initialSelected || []).map(String).filter(Boolean));
+  const root = document.createElement("div");
+  root.className = "auto-drum-portal auto-drum-portal--multi";
+  root.setAttribute("role", "dialog");
+  root.setAttribute("aria-modal", "true");
+  const drumH = ITEM_H * MULTI_VISIBLE;
+  root.style.setProperty("--auto-drum-multi-h", `${drumH}px`);
+  root.style.setProperty("--auto-drum-item-h", `${ITEM_H}px`);
+
+  root.innerHTML = `
+    <button type="button" class="auto-drum-portal__backdrop" aria-label="Bezárás"></button>
+    <div class="auto-drum-portal__stage auto-drum-portal__stage--multi">
+      <div class="immo-drum-wheel-ring auto-drum-portal__ring auto-drum-portal__ring--multi">
+        <div class="auto-drum-portal__toolbar">
+          <button type="button" class="auto-drum-portal__back" hidden>Vissza</button>
+          <p class="auto-drum-portal__sub" hidden></p>
+          <button type="button" class="auto-drum-portal__done">Kész</button>
+        </div>
+        <div class="auto-drum-portal__scroll immo-drum-inline-scroll" tabindex="-1"></div>
+      </div>
+    </div>`;
+
+  const stage = root.querySelector(".auto-drum-portal__stage");
+  const ring = root.querySelector(".auto-drum-portal__ring");
+  const scrollEl = root.querySelector(".auto-drum-portal__scroll");
+  const backBtn = root.querySelector(".auto-drum-portal__back");
+  const subEl = root.querySelector(".auto-drum-portal__sub");
+  const doneBtn = root.querySelector(".auto-drum-portal__done");
+  const wrap = trigger.closest(".immo-wheel-wrap, .auto-desk-field, .auto-kivitel-field") || trigger.parentElement;
+
+  let view = "main";
+  let parentValue = null;
+  const openMains = new Set();
+
+  function paintStandalone(listRows) {
+    cancelAnimationFrame(paintFrame);
+    paintFrame = requestAnimationFrame(() => {
+      scrollEl.querySelectorAll(".immo-drum-inline-item").forEach((item) => {
+        const v = item.dataset.value ?? "";
+        let isSel = false;
+        if (v === "") isSel = selected.size === 0 && openMains.size === 0;
+        else if (view === "main" && getChildren) isSel = openMains.has(v) || selected.has(v);
+        else isSel = selected.has(v);
+        item.style.opacity = "1";
+        item.style.fontWeight = isSel ? "700" : "500";
+        item.style.color = "#000";
+        item.classList.toggle("is-selected", isSel);
+        item.querySelector(".auto-drum-switch")?.setAttribute("aria-checked", isSel ? "true" : "false");
+      });
+    });
+  }
+
+  function renderMain() {
+    view = "main";
+    parentValue = null;
+    backBtn.hidden = true;
+    subEl.hidden = true;
+    const rows = [{ value: "", label: emptyLabel }, ...items];
+    scrollEl.innerHTML = rows.map((row) => switchRowHtml(row)).join("");
+    bindSwitchRowClicks(scrollEl, (item) => {
+      const value = item.dataset.value ?? "";
+      if (value === "") {
+        selected.clear();
+        openMains.clear();
+        paintStandalone();
+        return;
+      }
+      if (typeof getChildren === "function") {
+        const kids = getChildren(value);
+        if (kids?.length) {
+          const turningOn = !openMains.has(value);
+          if (turningOn) {
+            openMains.add(value);
+            renderKids(value, kids);
+            return;
+          }
+          openMains.delete(value);
+          kids.forEach((k) => selected.delete(k.value));
+          paintStandalone();
+          return;
+        }
+      }
+      if (selected.has(value)) selected.delete(value);
+      else selected.add(value);
+      paintStandalone();
+    });
+    scrollEl.scrollTop = 0;
+    paintStandalone();
+  }
+
+  function renderKids(parent, kids) {
+    view = "kids";
+    parentValue = parent;
+    backBtn.hidden = false;
+    subEl.hidden = false;
+    subEl.textContent = items.find((i) => i.value === parent)?.label || parent;
+    const rows = [{ value: "", label: emptyLabel }, ...kids];
+    scrollEl.innerHTML = rows.map((row) => switchRowHtml(row)).join("");
+    bindSwitchRowClicks(scrollEl, (item) => {
+      const value = item.dataset.value ?? "";
+      if (value === "") {
+        kids.forEach((k) => selected.delete(k.value));
+        paintStandalone();
+        return;
+      }
+      if (selected.has(value)) selected.delete(value);
+      else {
+        selected.add(value);
+        openMains.add(parent);
+      }
+      paintStandalone();
+    });
+    scrollEl.scrollTop = 0;
+    paintStandalone();
+  }
+
+  function finish(commit) {
+    const list = commit ? [...selected] : [...initialSelected];
+    wrap?.classList.remove("is-open", "has-drum-open");
+    trigger.setAttribute("aria-expanded", "false");
+    root.remove();
+    activePortal = null;
+    document.body.classList.remove("auto-drum-portal-open", "auto-drum-sheet-open");
+    if (commit && typeof onDone === "function") onDone(list, [...openMains]);
+  }
+
+  backBtn.addEventListener("click", (event) => {
+    event.preventDefault();
+    renderMain();
+  });
+  root.querySelector(".auto-drum-portal__backdrop")?.addEventListener("click", () => finish(true));
+  doneBtn?.addEventListener("click", () => finish(true));
+
+  document.body.appendChild(root);
+  document.body.classList.add("auto-drum-portal-open");
+  wrap?.classList.add("is-open", "has-drum-open");
+  trigger.setAttribute("aria-expanded", "true");
+  positionPortal(stage, trigger);
+  activePortal = { root, wheel: null, scrollEl, ring, wrap, trigger };
+
+  requestAnimationFrame(() => {
+    ring.style.setProperty("--immo-drum-ring-w", `${Math.min(340, Math.floor(window.innerWidth * 0.9))}px`);
+    renderMain();
   });
 }
 

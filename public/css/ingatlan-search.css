@@ -1495,13 +1495,13 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   margin-right: 0;
 }
 
-.auto-drum-portal--bm .auto-drum-portal__ring--multi {
+.auto-drum-portal--multi .auto-drum-portal__ring--multi {
   height: auto !important;
   max-height: min(78vh, 36rem);
   min-height: min(var(--auto-drum-multi-h, 520px), 70vh);
 }
 
-.auto-drum-portal--bm .auto-drum-portal__toolbar {
+.auto-drum-portal--multi .auto-drum-portal__toolbar {
   flex: 0 0 auto;
   display: flex;
   align-items: center;
@@ -1514,8 +1514,8 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   background: #fff;
 }
 
-.auto-drum-portal--bm .auto-drum-portal__back,
-.auto-drum-portal--bm .auto-drum-portal__done {
+.auto-drum-portal--multi .auto-drum-portal__toolbar .auto-drum-portal__back,
+.auto-drum-portal--multi .auto-drum-portal__toolbar .auto-drum-portal__done {
   flex: 0 0 auto;
   appearance: none;
   border: 0;
@@ -1525,23 +1525,23 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   cursor: pointer;
 }
 
-.auto-drum-portal--bm .auto-drum-portal__back {
+.auto-drum-portal--multi .auto-drum-portal__toolbar .auto-drum-portal__back {
   background: #f1f5f9;
   color: #000;
 }
 
-.auto-drum-portal--bm .auto-drum-portal__back[hidden] {
+.auto-drum-portal--multi .auto-drum-portal__toolbar .auto-drum-portal__back[hidden] {
   display: none !important;
 }
 
-.auto-drum-portal--bm .auto-drum-portal__done {
+.auto-drum-portal--multi .auto-drum-portal__toolbar .auto-drum-portal__done {
   margin-left: auto;
   background: #111;
   color: #fff;
   box-shadow: 0 2px 8px rgba(15, 23, 42, 0.18);
 }
 
-.auto-drum-portal--bm .auto-drum-portal__sub {
+.auto-drum-portal--multi .auto-drum-portal__toolbar .auto-drum-portal__sub {
   margin: 0;
   min-width: 0;
   flex: 1 1 auto;
@@ -1553,11 +1553,11 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   white-space: nowrap;
 }
 
-.auto-drum-portal--bm .auto-drum-portal__sub[hidden] {
+.auto-drum-portal--multi .auto-drum-portal__toolbar .auto-drum-portal__sub[hidden] {
   display: none !important;
 }
 
-.auto-drum-portal--bm .auto-drum-portal__scroll {
+.auto-drum-portal--multi .auto-drum-portal__scroll {
   position: relative !important;
   inset: auto !important;
   flex: 1 1 auto;
@@ -1568,6 +1568,12 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
 .auto-drum-portal--bm .auto-drum-inline-item--child {
   padding-left: 1.35rem !important;
   font-size: 1.05rem;
+}
+
+@media (max-width: 900px) {
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-toggle input:checked + .auto-bm-switch {
+    background: #16a34a !important;
+  }
 }
 
 .auto-drum-inline-item--switch .auto-drum-switch {
@@ -1593,7 +1599,7 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
 }
 
 .auto-drum-inline-item--switch.is-selected .auto-drum-switch {
-  background: #1565c0;
+  background: #16a34a;
 }
 
 .auto-drum-inline-item--switch.is-selected .auto-drum-switch__knob {
@@ -1609,7 +1615,7 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
 }
 
 [data-theme="dark"] .auto-drum-inline-item--switch.is-selected .auto-drum-switch {
-  background: #3b82f6;
+  background: #22c55e;
 }
 
 .auto-drum-portal .immo-drum-inline-item {

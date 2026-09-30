@@ -6,12 +6,47 @@ import {
   syncDrumWheelDisplay,
   closeAllInlineDrums,
 } from "./immo-drum-picker.js?v=immoClear1";
-import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=brandDrum9";
+import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=brandDrum10";
 import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=priceSuggest1";
 
 const MOBILE_MQ = "(max-width: 900px)";
 const TYPEAHEAD_CLEAR_MS = 2500;
 const CATALOG_DRUM_KEYS = new Set(["gyartmany", "modell"]);
+
+/** Mobilon kapcsolós dobkerék (nem tartomány). */
+const MULTI_SWITCH_KEYS = new Set([
+  "uzemanyag",
+  "uzemanyagQuick",
+  "kivitel",
+  "allapot",
+  "sebessegvalto",
+  "okmany_jelleg",
+  "hajtas",
+  "klima",
+  "szin",
+  "teto",
+  "csomagtarto",
+  "tolto_csatlakozas",
+  "ac_tolto_csatlakozas",
+  "dc_tolto_csatlakozas",
+  "villamtoltes",
+  "zold_rendszam",
+  "alkudhato",
+  "csere",
+  "nem_dohanyzo",
+  "holgy_tulajdonos",
+]);
+
+const MULTI_FILTER_KEY = {
+  gyartmany: "gyartmanyok",
+  modell: "modellek",
+  uzemanyag: "uzemanyagok",
+  uzemanyagQuick: "uzemanyagok",
+  kivitel: "kivitelek",
+  allapot: "allapotok",
+  sebessegvalto: "sebessegvaltok",
+  okmany_jelleg: "okmany_jellegek",
+};
 
 const DUAL_RANGES = [
   {
@@ -346,7 +381,7 @@ function prefixHighlightHtml(label, typedPrefix) {
   )}</span>`;
 }
 
-function buildWheelCell({ filterKey, wheelName, label, options, halfClass = "", emptyLabel: emptyOverride } = {}) {
+function buildWheelCell({ filterKey, wheelName, label, options, halfClass = "", emptyLabel: emptyOverride, multiple = false } = {}) {
   const emptyLabel = emptyOverride || emptyLabelFromOptions(options);
   const opts = options.filter((o) => o.value !== "");
   const cell = document.createElement("div");
@@ -359,7 +394,7 @@ function buildWheelCell({ filterKey, wheelName, label, options, halfClass = "", 
   </div>`;
   const wheel = cell.querySelector("[data-wheel]");
   fillWheel(wheel, opts, { emptyLabel });
-  finishWheel(cell, emptyLabel);
+  finishWheel(cell, emptyLabel, { multiple: multiple || (isMobile() && MULTI_SWITCH_KEYS.has(filterKey)) });
   return cell;
 }
 
@@ -689,9 +724,10 @@ export function readAutoDrumFilterValues(form) {
       const list = readWheelList(wheel);
       if (!list.length) return;
       seen.add(key);
-      if (key === "gyartmany") out.gyartmanyok = list;
-      else if (key === "modell") out.modellek = list;
-      else out[key] = list;
+      const outKey = MULTI_FILTER_KEY[key] || key;
+      if (outKey === "gyartmanyok") out.gyartmanyok = list;
+      else if (outKey === "modellek") out.modellek = list;
+      else out[outKey] = list;
       return;
     }
     const raw = String(readWheel(wheel) ?? "").trim();

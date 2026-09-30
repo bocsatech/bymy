@@ -327,13 +327,61 @@ export async function mountAutoKivitelPicker(form) {
     else renderFlat();
   }
 
-  function openPanel() {
-    panel.hidden = false;
-    panel.style.setProperty("display", "flex", "important");
-    panel.classList.remove("is-closed");
-    document.body.classList.add("auto-bm-open");
-    renderList();
+function isMobileViewport() {
+  return typeof window !== "undefined" && window.matchMedia("(max-width: 900px)").matches;
+}
+
+function openPanel() {
+  if (isMobileViewport()) {
+    void openMobileDrum();
+    return;
   }
+  panel.hidden = false;
+  panel.style.setProperty("display", "flex", "important");
+  panel.classList.remove("is-closed");
+  document.body.classList.add("auto-bm-open");
+  renderList();
+}
+
+async function openMobileDrum() {
+  const { openStandaloneSwitchSheet } = await import("./auto-drum-sheet.js?v=brandDrum10");
+  if (hierarchical) {
+    openStandaloneSwitchSheet({
+      trigger: openBtn,
+      emptyLabel: "Mindegy",
+      items: categories.map((c) => ({ value: c.id, label: c.label })),
+      initialSelected: [...selected],
+      getChildren: (id) => {
+        const cat = categories.find((c) => c.id === id);
+        if (!cat?.children?.length) return null;
+        return cat.children.map((c) => ({ value: c.value, label: c.label }));
+      },
+      onDone: (list, mains) => {
+        selected.clear();
+        list.forEach((v) => selected.add(v));
+        openMains.clear();
+        (mains || []).forEach((id) => openMains.add(id));
+        /* Ha fő kategória be van kapcsolva gyerek nélkül: effektív értékek a syncHidden-ben. */
+        for (const cat of categories) {
+          if (openMains.has(cat.id) && !cat.children?.length && cat.value) selected.add(cat.value);
+        }
+        syncHidden();
+      },
+    });
+    return;
+  }
+  openStandaloneSwitchSheet({
+    trigger: openBtn,
+    emptyLabel: "Mindegy",
+    items: (flatOptions || []).map((opt) => ({ value: opt, label: opt })),
+    initialSelected: [...selected],
+    onDone: (list) => {
+      selected.clear();
+      list.forEach((v) => selected.add(v));
+      syncHidden();
+    },
+  });
+}
 
   function closePanel() {
     panel.hidden = true;

@@ -2380,7 +2380,7 @@ async function mountAdBrandModelCombined(form, catalog) {
   }
 
   const { fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=immoClearAll1");
-  const { openBrandModelCatalogSheet } = await import("./auto-drum-sheet.js?v=bmSheet15");
+  const { openBrandModelCatalogSheet } = await import("./auto-drum-sheet.js?v=bmSheet16");
   const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
 
   const brands = [...(catalog?.gyartmanyok || [])].sort((a, b) =>
@@ -2543,7 +2543,7 @@ async function mountAdSelectDrum(select, {
   select.dataset.adBmDrum = "1";
 
   const { fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=immoClearAll1");
-  const { openStandaloneSwitchSheet, bindAutoDrumSheet } = await import("./auto-drum-sheet.js?v=bmSheet15");
+  const { openStandaloneSwitchSheet, bindAutoDrumSheet } = await import("./auto-drum-sheet.js?v=bmSheet16");
   const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
 
   const wrap = document.createElement("div");
@@ -2762,7 +2762,7 @@ async function mountAdSplitYmDrum({
   }
 
   const { fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=immoClearAll1");
-  const { openStandaloneSwitchSheet } = await import("./auto-drum-sheet.js?v=bmSheet15");
+  const { openStandaloneSwitchSheet } = await import("./auto-drum-sheet.js?v=bmSheet16");
   const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
 
   const yearOpts = optionsFromSelect(ev, emptyYear);
@@ -2904,9 +2904,7 @@ async function mountMuszakiDateTripleDrum(form) {
   const nap = ensureMuszakiNapSelect(honap);
 
   const { fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=immoClearAll1");
-  const { openAutoDrumSheet, bindAutoDrumSheet } = await import(
-    "./auto-drum-sheet.js?v=bmSheet15"
-  );
+  const { openStandaloneSwitchSheet } = await import("./auto-drum-sheet.js?v=bmSheet16");
   const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
 
   const emptyYear = "év";
@@ -2946,7 +2944,6 @@ async function mountMuszakiDateTripleDrum(form) {
     );
     let live = initDrumWheel(wheel, { emptyLabel: empty, openMode: "portal", multiple: false });
     syncDrumWheelDisplay(live);
-    bindAutoDrumSheet(live);
     live = half.querySelector("[data-wheel]") || live;
     const trigger = half.querySelector(".immo-wheel-trigger");
     if (trigger) {
@@ -2954,7 +2951,7 @@ async function mountMuszakiDateTripleDrum(form) {
       trigger.hidden = false;
       trigger.removeAttribute("aria-hidden");
     }
-    return { half, wheel: live };
+    return { half, wheel: () => half.querySelector("[data-wheel]") || live, options, empty };
   }
 
   const y = makeHalf("muszaki_ev", "muszaki_ev", yearOpts, emptyYear, "immo-triple-date__half--year");
@@ -2981,23 +2978,27 @@ async function mountMuszakiDateTripleDrum(form) {
   honap.dataset.adMuszakiDate = "1";
   nap.dataset.adMuszakiDate = "1";
 
-  if (ev.value) setWheelValue(y.wheel, ev.value);
-  if (honap.value) setWheelValue(m.wheel, honap.value);
-  if (nap.value) setWheelValue(d.wheel, nap.value);
-  [y, m, d].forEach((part) => syncDrumWheelDisplay(part.wheel));
+  if (ev.value) setWheelValue(y.wheel(), ev.value);
+  if (honap.value) setWheelValue(m.wheel(), honap.value);
+  if (nap.value) setWheelValue(d.wheel(), nap.value);
+  [y, m, d].forEach((part) => syncDrumWheelDisplay(part.wheel()));
 
   const syncOut = () => {
-    syncSelectToValue(ev, readWheel(y.wheel));
-    syncSelectToValue(honap, readWheel(m.wheel));
-    syncSelectToValue(nap, readWheel(d.wheel));
+    syncSelectToValue(ev, readWheel(y.wheel()));
+    syncSelectToValue(honap, readWheel(m.wheel()));
+    syncSelectToValue(nap, readWheel(d.wheel()));
   };
 
-  [y.wheel, m.wheel, d.wheel].forEach((wheel) => {
-    wheel.addEventListener("immo-wheel-change", syncOut);
+  [y, m, d].forEach((part) => {
+    part.wheel().addEventListener("immo-wheel-change", syncOut);
   });
 
-  /* Bármelyik félre kattintva a 3 oszlopos osztott portal nyílik (openAutoDrumSheet → triple). */
-  [y, m, d].forEach((part) => {
+  /* Kapcsolós sheet (mint gyártmány) — év / hónap / nap külön */
+  [
+    { part: y, select: ev, sheetTitle: "Műszaki érvényesség — év" },
+    { part: m, select: honap, sheetTitle: "Műszaki érvényesség — hónap" },
+    { part: d, select: nap, sheetTitle: "Műszaki érvényesség — nap" },
+  ].forEach(({ part, select, sheetTitle }) => {
     const trigger = part.half.querySelector(".immo-wheel-trigger");
     if (!trigger) return;
     const next = trigger.cloneNode(true);
@@ -3008,15 +3009,29 @@ async function mountMuszakiDateTripleDrum(form) {
     next.addEventListener("click", (event) => {
       event.preventDefault();
       event.stopPropagation();
-      openAutoDrumSheet(y.wheel, next);
+      const live = part.wheel();
+      const current = String(readWheel(live) ?? "").trim();
+      openStandaloneSwitchSheet({
+        trigger: next,
+        title: sheetTitle,
+        emptyLabel: part.empty,
+        items: part.options.filter((o) => o.value !== ""),
+        initialSelected: current ? [current] : [],
+        onDone: (list) => {
+          const value = list?.length ? String(list[list.length - 1]) : "";
+          setWheelValue(live, value);
+          syncSelectToValue(select, value);
+          syncDrumWheelDisplay(live);
+        },
+      });
     });
   });
 
   const onExternal = () => {
-    setWheelValue(y.wheel, ev.value || "");
-    setWheelValue(m.wheel, honap.value || "");
-    setWheelValue(d.wheel, nap.value || "");
-    [y, m, d].forEach((part) => syncDrumWheelDisplay(part.wheel));
+    setWheelValue(y.wheel(), ev.value || "");
+    setWheelValue(m.wheel(), honap.value || "");
+    setWheelValue(d.wheel(), nap.value || "");
+    [y, m, d].forEach((part) => syncDrumWheelDisplay(part.wheel()));
   };
   ev.addEventListener("change", onExternal);
   honap.addEventListener("change", onExternal);

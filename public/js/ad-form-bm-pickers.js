@@ -2380,7 +2380,7 @@ async function mountAdBrandModelCombined(form, catalog) {
   }
 
   const { fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=immoClearAll1");
-  const { openBrandModelCatalogSheet } = await import("./auto-drum-sheet.js?v=bmSheet24");
+  const { openBrandModelCatalogSheet } = await import("./auto-drum-sheet.js?v=bmSheet25");
   const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
 
   const brands = [...(catalog?.gyartmanyok || [])].sort((a, b) =>
@@ -2543,7 +2543,7 @@ async function mountAdSelectDrum(select, {
   select.dataset.adBmDrum = "1";
 
   const { fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=immoClearAll1");
-  const { openStandaloneSwitchSheet, bindAutoDrumSheet } = await import("./auto-drum-sheet.js?v=bmSheet24");
+  const { openStandaloneSwitchSheet, bindAutoDrumSheet } = await import("./auto-drum-sheet.js?v=bmSheet25");
   const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
 
   const wrap = document.createElement("div");
@@ -2766,7 +2766,7 @@ async function mountAdSplitYmDrum({
   }
 
   const { fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=immoClearAll1");
-  const { openYmDualSheet } = await import("./auto-drum-sheet.js?v=bmSheet24");
+  const { openYmDualSheet } = await import("./auto-drum-sheet.js?v=bmSheet25");
   const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
 
   const yearOpts = optionsFromSelect(ev, emptyYear);

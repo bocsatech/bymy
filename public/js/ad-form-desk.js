@@ -4,7 +4,7 @@ import {
   applyStep1SearchDomOrder,
   isVehicleStep1Canvas,
   stackVehicleCanvasSingleColumn,
-} from "./ad-form-desk-pinned-blocks.js?v=bmSheet24";
+} from "./ad-form-desk-pinned-blocks.js?v=bmSheet25";
 
 const DESK_MQ = "(min-width: 901px)";
 
@@ -172,29 +172,17 @@ function openSubAccordionInExtrak(form, activeAcc) {
   }
 }
 
-function deskScrollOffsetTop() {
-  const header = document.querySelector(".site-app-header, .site-header");
-  return (header?.getBoundingClientRect().height ?? 64) + 12;
-}
-
 function scrollDeskMainAccordionToStart(form, accId) {
   const acc = form.querySelector(`[data-desk-acc="${accId}"]:not(.auto-desk-acc--sub)`);
   if (!acc?.classList.contains("is-open")) return;
-  const head = acc.querySelector(".auto-desk-acc__head");
-  const target = head || acc;
-  const offset = deskScrollOffsetTop();
-  const top = target.getBoundingClientRect().top + window.scrollY - offset;
-  window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+  /* Mindig az oldal tetejét mutassa kategória nyitáskor */
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-/** Extrák almenü lenyitás: az almenü fejléc kerül felülre (mint a képen). */
+/** Extrák almenü lenyitás: szintén az oldal tetejére. */
 function scrollDeskExtrakSubAccordionToStart(subAcc) {
   if (!subAcc?.classList.contains("is-open")) return;
-  const head = subAcc.querySelector(".auto-desk-acc__head");
-  const target = head || subAcc;
-  const offset = deskScrollOffsetTop();
-  const top = target.getBoundingClientRect().top + window.scrollY - offset;
-  window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 /** Középső útmutató keret vízszintesen a nyitott fő accordion fejlécével egy magasságban (Extrák stb.). */

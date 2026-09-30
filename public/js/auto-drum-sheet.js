@@ -735,7 +735,6 @@ export function openBrandModelCatalogSheet(brandWheel, trigger, wrap, emptyLabel
       </header>
       <div class="auto-drum-portal__sheet-scroll" data-sheet-scroll tabindex="-1">
         <div class="auto-drum-portal__sheet-top-space" aria-hidden="true"></div>
-        <p class="auto-drum-portal__sheet-section" data-sheet-section>Népszerű gyártmányok</p>
         <div class="immo-drum-wheel-ring auto-drum-portal__ring auto-drum-portal__ring--multi auto-drum-portal__ring--sheet">
           <div class="auto-drum-portal__toolbar auto-drum-portal__toolbar--sheet">
             <button type="button" class="auto-drum-portal__back" hidden>Vissza</button>
@@ -758,7 +757,6 @@ export function openBrandModelCatalogSheet(brandWheel, trigger, wrap, emptyLabel
   const subEl = root.querySelector(".auto-drum-portal__sub");
   const doneBtn = root.querySelector(".auto-drum-portal__done");
   const closeBtn = root.querySelector(".auto-drum-portal__close");
-  const sectionEl = root.querySelector("[data-sheet-section]");
   const countEl = root.querySelector("[data-sheet-count]");
   const toolbarEl = root.querySelector(".auto-drum-portal__toolbar--sheet");
 
@@ -823,7 +821,6 @@ export function openBrandModelCatalogSheet(brandWheel, trigger, wrap, emptyLabel
     subEl.textContent = "";
     backBtn.hidden = true;
     syncToolbarChrome();
-    if (sectionEl) sectionEl.textContent = "Népszerű gyártmányok";
     root.setAttribute("aria-label", "Gyártmány / Modell");
     if (sheetScroll) sheetScroll.scrollTop = 0;
     const selected = singleSelect
@@ -893,7 +890,6 @@ export function openBrandModelCatalogSheet(brandWheel, trigger, wrap, emptyLabel
     subEl.textContent = brand;
     backBtn.hidden = false;
     syncToolbarChrome();
-    if (sectionEl) sectionEl.textContent = "Modellek";
     root.setAttribute("aria-label", `Modell — ${brand}`);
     if (sheetScroll) sheetScroll.scrollTop = 0;
     const emptyRow = { value: "", label: singleSelect ? "—" : "Mindegy" };

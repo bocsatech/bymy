@@ -1648,7 +1648,7 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   height: 2.35rem;
 }
 
-/* Külső görgetés: hely + „Népszerű” elmegy; utána a fehér a tetején ragad */
+/* Külső görgetés: hely a címnek elmegy; utána a fehér a tetején ragad */
 .auto-drum-portal--sheet .auto-drum-portal__sheet-scroll {
   position: absolute;
   inset: 0;
@@ -1667,14 +1667,6 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   height: var(--sheet-head-h);
   width: 100%;
   pointer-events: none;
-}
-
-.auto-drum-portal--sheet .auto-drum-portal__sheet-section {
-  margin: 0 0 0.45rem;
-  padding: 0 0.1rem;
-  font: 500 0.82rem/1.2 system-ui, sans-serif;
-  color: #4b5563;
-  background: transparent;
 }
 
 /* Fehér: felcsúszik a kék tetejére, ott sticky; lista bent görög */

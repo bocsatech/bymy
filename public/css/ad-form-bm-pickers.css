@@ -1161,8 +1161,9 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-layout-canvas:has(>
   background: #e8eef3 !important;
 }
 
-/* Desk accordion: ne legyen fehér panel / keret / rés a kék felett */
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .auto-desk-acc[data-desk-acc="alap"],
+/* Desk accordion Alapadatok:
+   - nyitva: külső head rejtve (a fehér kártya címe látszik)
+   - zárva: külső head LÁTSZIK, mint a többi kategória — különben eltűnik */
 body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .auto-desk-acc[data-desk-acc="alap"].is-open {
   border: 0 !important;
   background: #e8eef3 !important;
@@ -1172,13 +1173,32 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .auto-desk-a
   overflow: hidden !important;
 }
 
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .auto-desk-acc[data-desk-acc="alap"] > .auto-desk-acc__head {
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .auto-desk-acc[data-desk-acc="alap"]:not(.is-open) {
+  border: 1px solid var(--ad-line, #e2e8f0) !important;
+  background: var(--ad-panel, #fff) !important;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+  margin: 0 !important;
+  overflow: visible !important;
+}
+
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .auto-desk-acc[data-desk-acc="alap"].is-open > .auto-desk-acc__head {
   display: none !important;
   height: 0 !important;
   min-height: 0 !important;
   padding: 0 !important;
   margin: 0 !important;
   border: 0 !important;
+}
+
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .auto-desk-acc[data-desk-acc="alap"]:not(.is-open) > .auto-desk-acc__head {
+  display: flex !important;
+  height: auto !important;
+  min-height: 0 !important;
+  padding: 13px 14px !important;
+  margin: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
 }
 
 body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .auto-desk-acc[data-desk-acc="alap"].is-open > .auto-desk-acc__body {

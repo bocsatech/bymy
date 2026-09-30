@@ -97,11 +97,16 @@ function isStep1BrandRow(el) {
 
 function unwrapAlapScoutCard(canvas) {
   const card = canvas?.querySelector?.(":scope > .ad-form-alap-card");
-  if (!card) return;
-  const brandBlock = card.querySelector(":scope > .ad-form-alap-brand-block");
+  const brandBlock = canvas?.querySelector?.(":scope > .ad-form-alap-brand-block");
   if (brandBlock) {
     [...brandBlock.children].forEach((child) => canvas.appendChild(child));
     brandBlock.remove();
+  }
+  if (!card) return;
+  const innerBrand = card.querySelector(":scope > .ad-form-alap-brand-block");
+  if (innerBrand) {
+    [...innerBrand.children].forEach((child) => canvas.appendChild(child));
+    innerBrand.remove();
   }
   const body = card.querySelector(":scope > .ad-form-alap-card__body");
   const source = body || card;
@@ -116,14 +121,14 @@ function unwrapAlapScoutCard(canvas) {
   card.remove();
 }
 
-/** Egy fehér egység a világoskék háttéren: gyártmány felül, Alapadatok összecsukható. */
+/** Demó megjelenés: gyártmány pill a világoskék hátteren, Alapadatok fehér kártyában. */
 export function wrapAlapScoutCard(canvas) {
   if (!canvas || !isVehicleStep1Canvas(canvas)) return;
   unwrapAlapScoutCard(canvas);
 
   const items = [...canvas.children].filter((el) => {
     if (!el || el.hidden || el.classList?.contains("ad-layout-hidden")) return false;
-    if (el.matches?.(".ad-form-alap-card, .ad-form-alap-shell")) return false;
+    if (el.matches?.(".ad-form-alap-card, .ad-form-alap-brand-block, .ad-form-alap-shell")) return false;
     if (el.matches?.(".ad-layout-item, .ad-desk-pinned-block")) return true;
     if (el.matches?.(".ad-form-bm-field--brand-model, .ad-form-split-ym, .ad-form-muszaki-date")) return true;
     return false;
@@ -133,9 +138,6 @@ export function wrapAlapScoutCard(canvas) {
   const brand = items.filter(isStep1BrandRow);
   const rest = items.filter((el) => !isStep1BrandRow(el));
 
-  const card = document.createElement("div");
-  card.className = "ad-form-alap-card";
-
   if (brand.length) {
     const brandBlock = document.createElement("div");
     brandBlock.className = "ad-form-alap-brand-block";
@@ -143,30 +145,31 @@ export function wrapAlapScoutCard(canvas) {
       el.classList.add("ad-form-alap-brand-row");
       brandBlock.appendChild(el);
     });
-    card.appendChild(brandBlock);
+    canvas.appendChild(brandBlock);
   }
 
-  if (rest.length) {
-    const title = document.createElement("button");
-    title.type = "button";
-    title.className = "ad-form-alap-card__title";
-    title.setAttribute("aria-expanded", "true");
-    title.innerHTML =
-      '<span class="ad-form-alap-card__title-text">Alapadatok</span><span class="ad-form-alap-card__chev" aria-hidden="true">▼</span>';
-    title.addEventListener("click", () => {
-      const closed = card.classList.toggle("is-collapsed");
-      title.setAttribute("aria-expanded", closed ? "false" : "true");
-    });
-    card.appendChild(title);
-    const body = document.createElement("div");
-    body.className = "ad-form-alap-card__body";
-    rest.forEach((el) => {
-      el.classList.remove("ad-form-alap-brand-row");
-      body.appendChild(el);
-    });
-    card.appendChild(body);
-  }
+  if (!rest.length) return;
 
+  const card = document.createElement("div");
+  card.className = "ad-form-alap-card";
+  const title = document.createElement("button");
+  title.type = "button";
+  title.className = "ad-form-alap-card__title";
+  title.setAttribute("aria-expanded", "true");
+  title.innerHTML =
+    '<span class="ad-form-alap-card__title-text">Alapadatok</span><span class="ad-form-alap-card__chev" aria-hidden="true">▼</span>';
+  title.addEventListener("click", () => {
+    const closed = card.classList.toggle("is-collapsed");
+    title.setAttribute("aria-expanded", closed ? "false" : "true");
+  });
+  card.appendChild(title);
+  const body = document.createElement("div");
+  body.className = "ad-form-alap-card__body";
+  rest.forEach((el) => {
+    el.classList.remove("ad-form-alap-brand-row");
+    body.appendChild(el);
+  });
+  card.appendChild(body);
   canvas.appendChild(card);
 }
 

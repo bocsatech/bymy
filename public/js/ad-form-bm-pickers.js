@@ -2380,7 +2380,7 @@ async function mountAdBrandModelCombined(form, catalog) {
   }
 
   const { fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=immoClearAll1");
-  const { openBrandModelCatalogSheet } = await import("./auto-drum-sheet.js?v=bmSheet14");
+  const { openBrandModelCatalogSheet } = await import("./auto-drum-sheet.js?v=bmSheet15");
   const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
 
   const brands = [...(catalog?.gyartmanyok || [])].sort((a, b) =>
@@ -2543,7 +2543,7 @@ async function mountAdSelectDrum(select, {
   select.dataset.adBmDrum = "1";
 
   const { fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=immoClearAll1");
-  const { openStandaloneSwitchSheet, bindAutoDrumSheet } = await import("./auto-drum-sheet.js?v=bmSheet14");
+  const { openStandaloneSwitchSheet, bindAutoDrumSheet } = await import("./auto-drum-sheet.js?v=bmSheet15");
   const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
 
   const wrap = document.createElement("div");
@@ -2762,7 +2762,7 @@ async function mountAdSplitYmDrum({
   }
 
   const { fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=immoClearAll1");
-  const { openAutoDrumSheet } = await import("./auto-drum-sheet.js?v=bmSheet14");
+  const { openStandaloneSwitchSheet } = await import("./auto-drum-sheet.js?v=bmSheet15");
   const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
 
   const yearOpts = optionsFromSelect(ev, emptyYear);
@@ -2848,8 +2848,11 @@ async function mountAdSplitYmDrum({
   ev.dataset.adBmPicker = "1";
   honap.dataset.adBmPicker = "1";
 
-  /* Mindig osztott portal (év|hó együtt), ne külön single dob. */
-  [minHalf, maxHalf].forEach((part) => {
+  /* Kapcsolós sheet (mint gyártmány) — év és hónap külön */
+  [
+    { part: minHalf, select: ev, options: yearOpts, emptyLabel: emptyYear, sheetTitle: `${title} — év` },
+    { part: maxHalf, select: honap, options: monthOpts, emptyLabel: emptyMonth, sheetTitle: `${title} — hónap` },
+  ].forEach(({ part, select, options, emptyLabel, sheetTitle }) => {
     const trigger = part.half.querySelector(".immo-wheel-trigger");
     if (!trigger) return;
     const next = trigger.cloneNode(true);
@@ -2860,8 +2863,21 @@ async function mountAdSplitYmDrum({
     next.addEventListener("click", (event) => {
       event.preventDefault();
       event.stopPropagation();
-      const yWheel = minHalf.wheel();
-      openAutoDrumSheet(yWheel, next);
+      const live = part.wheel();
+      const current = String(readWheel(live) ?? "").trim();
+      openStandaloneSwitchSheet({
+        trigger: next,
+        title: sheetTitle,
+        emptyLabel,
+        items: options.filter((o) => o.value !== ""),
+        initialSelected: current ? [current] : [],
+        onDone: (list) => {
+          const value = list?.length ? String(list[list.length - 1]) : "";
+          setWheelValue(live, value);
+          syncSelectToValue(select, value);
+          syncDrumWheelDisplay(live);
+        },
+      });
     });
   });
 }
@@ -2889,7 +2905,7 @@ async function mountMuszakiDateTripleDrum(form) {
 
   const { fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=immoClearAll1");
   const { openAutoDrumSheet, bindAutoDrumSheet } = await import(
-    "./auto-drum-sheet.js?v=bmSheet14"
+    "./auto-drum-sheet.js?v=bmSheet15"
   );
   const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
 

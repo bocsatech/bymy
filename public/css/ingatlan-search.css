@@ -1875,9 +1875,9 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
 .auto-drum-portal--sheet.auto-drum-portal--ym .auto-drum-ym__body {
   position: relative;
   flex: 0 0 auto;
-  height: 10.5rem;
-  min-height: 10.5rem;
-  max-height: 10.5rem;
+  height: 12rem;
+  min-height: 12rem;
+  max-height: 12rem;
   overflow: hidden;
   background: #fff;
 }
@@ -1890,8 +1890,8 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   right: 0.4rem;
   top: 50%;
   transform: translateY(-50%);
-  height: 2.75rem;
-  border-radius: 8px;
+  height: 3.35rem;
+  border-radius: 10px;
   background: rgba(148, 163, 184, 0.22);
   pointer-events: none;
   z-index: 1;
@@ -1926,7 +1926,7 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
   scrollbar-width: none;
-  padding: calc((10.5rem - 2.75rem) / 2) 0.25rem !important;
+  padding: calc((12rem - 3.35rem) / 2) 0.25rem !important;
   box-sizing: border-box !important;
   scroll-snap-type: none !important;
   z-index: 2;
@@ -1937,13 +1937,13 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
 }
 
 .auto-drum-portal--sheet.auto-drum-portal--ym .auto-drum-split__scroll .immo-drum-inline-item {
-  height: 2.75rem;
+  height: 3.35rem;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0 0.35rem !important;
   text-align: center;
-  font: 500 1.05rem/1 system-ui, sans-serif;
+  font: 500 1.12rem/1 system-ui, sans-serif;
 }
 
 @media (max-width: 900px) {
@@ -2131,14 +2131,14 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
 .auto-drum-split__body {
   position: relative;
   flex: 0 0 auto;
-  height: 10.5rem;
+  height: 12rem;
   background: #fff;
 }
 
 .auto-drum-split__highlight {
   left: 0.35rem !important;
   right: 0.35rem !important;
-  height: 3rem;
+  height: 3.35rem;
   z-index: 3;
 }
 
@@ -2173,7 +2173,7 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   touch-action: pan-y;
   overscroll-behavior: contain;
   scrollbar-width: none;
-  padding: calc((10.5rem - 3rem) / 2) 0.4rem !important;
+  padding: calc((12rem - 3.35rem) / 2) 0.4rem !important;
   box-sizing: border-box;
   z-index: 2;
 }
@@ -2183,7 +2183,7 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
 }
 
 .auto-drum-portal--split .immo-drum-inline-item {
-  height: 3rem;
+  height: 3.35rem;
   font-size: 1.35rem;
   scroll-snap-align: center;
   justify-content: center;
@@ -2576,7 +2576,7 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
 }
 
 .auto-drum-date3__body {
-  height: 10.5rem;
+  height: 12rem;
 }
 
 /* Egyszerű egyoszlopos dobkerék (pl. Személyek, Ajtók) */

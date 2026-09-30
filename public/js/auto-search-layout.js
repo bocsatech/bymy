@@ -39,6 +39,13 @@ const KM_STEP = 10_000;
 const KM_MAX = 500_000;
 const LE_STEPS = [50, 75, 100, 125, 150, 175, 200, 225, 250, 300, 350, 400, 500, 600, 800];
 const CCM_STEPS = [600, 800, 1000, 1200, 1400, 1600, 1800, 2000, 2200, 2500, 3000, 3500, 4000, 5000, 6000];
+const KG_STEPS = (() => {
+  const values = [];
+  for (let kg = 500; kg <= 3500; kg += 100) values.push(kg);
+  for (let kg = 4000; kg <= 10000; kg += 500) values.push(kg);
+  for (const kg of [12000, 15000, 18000, 20000, 25000, 30000, 35000, 40000]) values.push(kg);
+  return values;
+})();
 
 const FREE_NUMBER_FIELDS = new Set([
   "fogyasztas_varosi",
@@ -412,6 +419,14 @@ export function optionsForAutoFilterKey(filterKey, emptyLabel = "Mindegy") {
   }
   if (key === "ccm_tol" || key === "ccm_ig") {
     return withEmpty(CCM_STEPS.map((n) => ({ value: String(n), label: `${n.toLocaleString("hu-HU")} cm³` })));
+  }
+  if (
+    key === "sajat_tomeg_tol" ||
+    key === "sajat_tomeg_ig" ||
+    key === "ossztomeg_tol" ||
+    key === "ossztomeg_ig"
+  ) {
+    return withEmpty(KG_STEPS.map((n) => ({ value: String(n), label: `${n.toLocaleString("hu-HU")} kg` })));
   }
   if (key === "uzemanyagQuick" || key === "uzemanyag") {
     return withEmpty(flattenUzemanyagOptions().map((v) => ({ value: v, label: v })));

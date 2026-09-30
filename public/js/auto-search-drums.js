@@ -6,8 +6,8 @@ import {
   syncDrumWheelDisplay,
   closeAllInlineDrums,
 } from "./immo-drum-picker.js?v=immoClear1";
-import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=brandDrum14";
-import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=priceSuggest1";
+import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=brandDrum15";
+import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=kgDrum1";
 
 const MOBILE_MQ = "(max-width: 900px)";
 const TYPEAHEAD_CLEAR_MS = 2500;
@@ -93,6 +93,24 @@ const DUAL_RANGES = [
     tol: "ccm_tol",
     ig: "ccm_ig",
     unit: "cm³",
+  },
+  {
+    fieldKey: "sajat_tomeg",
+    id: "sajat_tomeg",
+    title: "Saját tömeg",
+    ariaLabel: "Saját tömeg tartomány",
+    tol: "sajat_tomeg_tol",
+    ig: "sajat_tomeg_ig",
+    unit: "kg",
+  },
+  {
+    fieldKey: "ossztomeg",
+    id: "ossztomeg",
+    title: "Össztömeg",
+    ariaLabel: "Össztömeg tartomány",
+    tol: "ossztomeg_tol",
+    ig: "ossztomeg_ig",
+    unit: "kg",
   },
 ];
 

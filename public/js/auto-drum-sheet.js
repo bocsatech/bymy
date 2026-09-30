@@ -1211,20 +1211,23 @@ function openSplitRangeDrumSheet(minWheel, maxWheel, trigger) {
     trigger.getAttribute("aria-label") ||
     "Tartomány";
   const unit = dual?.querySelector(".immo-dual-range__unit")?.textContent?.trim() || "";
-  const isYearMonth = dual?.classList.contains("ad-form-year-month-dual");
-  const sheetTitle = isYearMonth
-    ? title
-    : unit
-      ? `${title} (-tól -ig) · ${unit}`
-      : `${title} (-tól -ig)`;
-  const emptyLabel = isYearMonth
-    ? minWheel.closest(".immo-wheel-wrap")?.querySelector(".immo-wheel-trigger")?.dataset.emptyLabel || "—"
-    : "Mindegy";
-  const emptyLabelMax = isYearMonth
-    ? maxWheel.closest(".immo-wheel-wrap")?.querySelector(".immo-wheel-trigger")?.dataset.emptyLabel || "—"
-    : emptyLabel;
-  const minItems = wheelOptionRows(minWheel, emptyLabel);
-  const maxItems = wheelOptionRows(maxWheel, emptyLabelMax);
+  const splitKind = dual?.dataset.splitKind || "";
+  const sheetTitle =
+    splitKind === "ym"
+      ? title
+      : unit
+        ? `${title} (-tól -ig) · ${unit}`
+        : `${title} (-tól -ig)`;
+  const emptyLabel =
+    splitKind === "ym"
+      ? trigger.dataset.emptyLabel || "—"
+      : "Mindegy";
+  const minEmpty =
+    dual?.querySelector(".immo-dual-range__half--min .immo-wheel-trigger")?.dataset.emptyLabel || emptyLabel;
+  const maxEmpty =
+    dual?.querySelector(".immo-dual-range__half--max .immo-wheel-trigger")?.dataset.emptyLabel || emptyLabel;
+  const minItems = wheelOptionRows(minWheel, minEmpty);
+  const maxItems = wheelOptionRows(maxWheel, maxEmpty);
   let pendingMin = String(readWheel(minWheel) ?? "");
   let pendingMax = String(readWheel(maxWheel) ?? "");
 
@@ -1244,11 +1247,11 @@ function openSplitRangeDrumSheet(minWheel, maxWheel, trigger) {
           <button type="button" class="auto-drum-portal__done">Kész</button>
         </div>
         <div class="auto-drum-split__chips">
-          <button type="button" class="auto-drum-split__chip" data-half="min" aria-label="Érték -tól">
+          <button type="button" class="auto-drum-split__chip" data-half="min" aria-label="${escapeHtml(splitKind === "ym" ? minEmpty : "Érték -tól")}">
             <span class="auto-drum-split__chip-label"></span>
             <span class="auto-drum-split__chip-clear" hidden aria-hidden="true">×</span>
           </button>
-          <button type="button" class="auto-drum-split__chip" data-half="max" aria-label="Érték -ig">
+          <button type="button" class="auto-drum-split__chip" data-half="max" aria-label="${escapeHtml(splitKind === "ym" ? maxEmpty : "Érték -ig")}">
             <span class="auto-drum-split__chip-label"></span>
             <span class="auto-drum-split__chip-clear" hidden aria-hidden="true">×</span>
           </button>
@@ -1283,8 +1286,8 @@ function openSplitRangeDrumSheet(minWheel, maxWheel, trigger) {
   maxScroll.innerHTML = maxItems.map(itemHtml).join("");
 
   function syncChips() {
-    const minLabel = labelForWheelValue(minWheel, pendingMin, emptyLabel);
-    const maxLabel = labelForWheelValue(maxWheel, pendingMax, emptyLabelMax);
+    const minLabel = labelForWheelValue(minWheel, pendingMin, minEmpty);
+    const maxLabel = labelForWheelValue(maxWheel, pendingMax, maxEmpty);
     chipMin.querySelector(".auto-drum-split__chip-label").textContent = minLabel;
     chipMax.querySelector(".auto-drum-split__chip-label").textContent = maxLabel;
     const clearMin = chipMin.querySelector(".auto-drum-split__chip-clear");

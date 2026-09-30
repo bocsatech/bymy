@@ -467,6 +467,9 @@ export function optionsForAutoFilterKey(filterKey, emptyLabel = "Mindegy") {
   if (key === "hatotav_tol" || key === "hatotav_ig") {
     return withEmpty(STEPS_10_300_50_1000.map((n) => ({ value: String(n), label: `${n} km` })));
   }
+  if (key === "autopalya_hatotav_tol" || key === "autopalya_hatotav_ig") {
+    return withEmpty(STEPS_10_300_50_1000.map((n) => ({ value: String(n), label: `${n} km` })));
+  }
   if (key === "uzemanyagQuick" || key === "uzemanyag") {
     return withEmpty(flattenUzemanyagOptions().map((v) => ({ value: v, label: v })));
   }

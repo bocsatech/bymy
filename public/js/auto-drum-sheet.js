@@ -1211,10 +1211,20 @@ function openSplitRangeDrumSheet(minWheel, maxWheel, trigger) {
     trigger.getAttribute("aria-label") ||
     "Tartomány";
   const unit = dual?.querySelector(".immo-dual-range__unit")?.textContent?.trim() || "";
-  const sheetTitle = unit ? `${title} (-tól -ig) · ${unit}` : `${title} (-tól -ig)`;
-  const emptyLabel = "Mindegy";
+  const isYearMonth = dual?.classList.contains("ad-form-year-month-dual");
+  const sheetTitle = isYearMonth
+    ? title
+    : unit
+      ? `${title} (-tól -ig) · ${unit}`
+      : `${title} (-tól -ig)`;
+  const emptyLabel = isYearMonth
+    ? minWheel.closest(".immo-wheel-wrap")?.querySelector(".immo-wheel-trigger")?.dataset.emptyLabel || "—"
+    : "Mindegy";
+  const emptyLabelMax = isYearMonth
+    ? maxWheel.closest(".immo-wheel-wrap")?.querySelector(".immo-wheel-trigger")?.dataset.emptyLabel || "—"
+    : emptyLabel;
   const minItems = wheelOptionRows(minWheel, emptyLabel);
-  const maxItems = wheelOptionRows(maxWheel, emptyLabel);
+  const maxItems = wheelOptionRows(maxWheel, emptyLabelMax);
   let pendingMin = String(readWheel(minWheel) ?? "");
   let pendingMax = String(readWheel(maxWheel) ?? "");
 
@@ -1274,7 +1284,7 @@ function openSplitRangeDrumSheet(minWheel, maxWheel, trigger) {
 
   function syncChips() {
     const minLabel = labelForWheelValue(minWheel, pendingMin, emptyLabel);
-    const maxLabel = labelForWheelValue(maxWheel, pendingMax, emptyLabel);
+    const maxLabel = labelForWheelValue(maxWheel, pendingMax, emptyLabelMax);
     chipMin.querySelector(".auto-drum-split__chip-label").textContent = minLabel;
     chipMax.querySelector(".auto-drum-split__chip-label").textContent = maxLabel;
     const clearMin = chipMin.querySelector(".auto-drum-split__chip-clear");

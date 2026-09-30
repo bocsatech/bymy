@@ -296,6 +296,45 @@ body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field--drum .immo-wh
   overflow: visible !important;
 }
 
+/* Év|hó osztott (műszaki / forgalomba stílus) — ne örökölje a kereső dual-range rácsát */
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-year-month-dual {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  grid-column: unset !important;
+  grid-row: unset !important;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-year-month-dual > .immo-dual-range__title {
+  display: none !important;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-year-month-dual > .inline-2 {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+  gap: var(--ad-cell-gap, 0.5rem) !important;
+  width: 100% !important;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-year-month-dual .immo-dual-range__half {
+  display: flex !important;
+  width: 100% !important;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .labeled-field:has(.ad-form-year-month-dual) > label[for="muszaki_ev"],
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .labeled-field:has(.ad-form-year-month-dual) > label[for="muszaki_honap"] {
+  position: static;
+  width: auto;
+  height: auto;
+  clip: auto;
+  overflow: visible;
+}
+
 html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field--drum > .ad-form-drum-wrap,
 html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field--drum > .immo-wheel-wrap {
   background: #1d1d1d !important;

@@ -2140,9 +2140,28 @@ export function unmountAdFormBmPickers(form) {
 function unmountMuszakiDateTriple(form) {
   const root = form || document;
   const block = root.querySelector?.(".ad-form-muszaki-date");
+  const dual = root.querySelector?.(".ad-form-year-month-dual[data-range=\"muszaki_ev\"]");
   const ev = document.getElementById("muszaki_ev");
   const honap = document.getElementById("muszaki_honap");
   const nap = document.getElementById("muszaki_nap");
+
+  if (dual) {
+    const field = dual.closest(".labeled-field, .md-outlined, .ad-layout-item");
+    const inline = dual.querySelector(".inline-2") || document.createElement("div");
+    if (!inline.classList.contains("inline-2")) inline.className = "inline-2";
+    /* Unmount pickers separately; restore select hosts into inline. */
+    dual.replaceWith(inline);
+    if (ev && !inline.contains(ev)) {
+      showNativeSelect(ev);
+      inline.appendChild(ev);
+    }
+    if (honap && !inline.contains(honap)) {
+      showNativeSelect(honap);
+      inline.appendChild(honap);
+    }
+    if (field && inline.parentElement !== field) field.appendChild(inline);
+  }
+
   if (block) {
     const field = block.closest(".labeled-field, .md-outlined, .ad-layout-item");
     const inline = document.createElement("div");
@@ -2257,7 +2276,7 @@ async function mountAdSelectDrum(select, {
   select.dataset.adBmDrum = "1";
 
   const { fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=immoClearAll1");
-  const { openStandaloneSwitchSheet, bindAutoDrumSheet } = await import("./auto-drum-sheet.js?v=brandDrum24");
+  const { openStandaloneSwitchSheet, bindAutoDrumSheet } = await import("./auto-drum-sheet.js?v=brandDrum25");
   const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
 
   const wrap = document.createElement("div");
@@ -2445,128 +2464,131 @@ function syncSelectToValue(select, value) {
 }
 
 /**
- * Műszaki érvényesség: ugyanaz a 3 oszlopos dobkerék, mint a keresőben.
- * Év/hó opciók a meglévő selectekből — tartalom nem módosul.
+ * Év|hó osztott menü (mint gyártási év / forgalomba / kereső dual).
+ * Opciók a meglévő selectekből — tartalom nem módosul.
+ * Kattintásra mindkét oszlop együtt nyílik (split portal).
  */
-async function mountMuszakiDateTripleDrum(form) {
-  const ev = document.getElementById("muszaki_ev");
-  const honap = document.getElementById("muszaki_honap");
-  if (!form || !ev || !honap || ev.dataset.adMuszakiDate === "1") return;
-  if (!isBmPickerAdForm(form)) return;
-
-  ensureYearSelectFilled(ev, YEAR_SELECT_MAX);
-  const nap = ensureMuszakiNapSelect(honap);
-
-  const { fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=immoClearAll1");
-  const { openAutoDrumSheet, syncMuszakiDateSummary } = await import("./auto-drum-sheet.js?v=brandDrum24");
+async function mountAdYearMonthSplitDrums({
+  yearId,
+  monthId,
+  title,
+  yearEmpty = "év",
+  monthEmpty = "hó",
+  yearMax = null,
+} = {}) {
+  const ev = document.getElementById(yearId);
+  const honap = document.getElementById(monthId);
+  if (!ev || !honap || ev.tagName !== "SELECT" || honap.tagName !== "SELECT") return;
+  if (ev.dataset.adBmPicker === "1" || honap.dataset.adBmPicker === "1") return;
 
   const field = ev.closest(".labeled-field, .md-outlined, .ad-layout-item") || ev.parentElement;
   if (!field) return;
 
-  ev.dataset.adMuszakiDate = "1";
-  honap.dataset.adMuszakiDate = "1";
-  nap.dataset.adMuszakiDate = "1";
-  hideNativeSelect(ev);
-  hideNativeSelect(honap);
-  hideNativeSelect(nap);
-
-  const emptyLabel = "—";
-  const yearOpts = optionsFromSelect(ev, emptyLabel);
-  const monthOpts = optionsFromSelect(honap, emptyLabel);
-  const dayOpts = optionsFromSelect(nap, emptyLabel);
-
-  const block = document.createElement("div");
-  block.className = "immo-triple-date-block ad-form-muszaki-date";
-  block.dataset.range = "muszaki";
-
-  const triple = document.createElement("div");
-  triple.className = "immo-triple-date";
-  triple.dataset.range = "muszaki";
-  triple.setAttribute("aria-label", "Műszaki érvényesség");
-
-  const title = document.createElement("span");
-  title.className = "immo-label immo-triple-date__title";
-  title.textContent = "Műszaki érvényesség";
-  triple.appendChild(title);
-
-  const summary = document.createElement("button");
-  summary.type = "button";
-  summary.className = "immo-triple-date__summary";
-  summary.dataset.muszakiSummary = "1";
-  summary.dataset.emptyLabel = emptyLabel;
-  summary.setAttribute("aria-haspopup", "listbox");
-  summary.setAttribute("aria-expanded", "false");
-  summary.textContent = emptyLabel;
-  triple.appendChild(summary);
-
-  function makeWheel(name, filterKey, options) {
-    const half = document.createElement("div");
-    half.className = `immo-triple-date__half immo-schema-cell`;
-    half.hidden = true;
-    half.innerHTML = `<div class="immo-wheel-wrap">
-      <div class="immo-wheel" data-wheel="${name}" data-filter-key="${filterKey}" role="listbox"></div>
-      <button type="button" class="immo-wheel-trigger" data-empty-label="${emptyLabel}" hidden aria-hidden="true"></button>
-    </div>`;
-    const wheel = half.querySelector("[data-wheel]");
-    fillWheel(
-      wheel,
-      options.filter((o) => o.value !== ""),
-      { emptyLabel }
-    );
-    return { half, wheel };
+  if (yearMax !== undefined) {
+    ensureYearSelectFilled(ev, yearMax == null ? new Date().getFullYear() : yearMax);
   }
 
-  const y = makeWheel("muszaki_ev", "muszaki_ev", yearOpts);
-  const m = makeWheel("muszaki_honap", "muszaki_honap", monthOpts);
-  const d = makeWheel("muszaki_nap", "muszaki_nap", dayOpts);
-  triple.appendChild(y.half);
-  triple.appendChild(m.half);
-  triple.appendChild(d.half);
-  block.appendChild(triple);
-
-  const inline = field.querySelector(".inline-2");
-  if (inline) {
-    inline.replaceWith(block);
-  } else {
-    field.appendChild(block);
+  let inline = field.querySelector(".inline-2");
+  if (!inline) {
+    inline = document.createElement("div");
+    inline.className = "inline-2";
+    field.appendChild(inline);
   }
+  /* Selectek az inline-2-ben legyenek a mount előtt. */
+  if (ev.parentElement !== inline) inline.appendChild(ev);
+  if (honap.parentElement !== inline) inline.appendChild(honap);
 
-  /* Meglévő értékek — select tartalom változatlan, csak megjelenítés. */
-  if (ev.value) setWheelValue(y.wheel, ev.value);
-  if (honap.value) setWheelValue(m.wheel, honap.value);
-  if (nap.value) setWheelValue(d.wheel, nap.value);
-  syncMuszakiDateSummary(triple);
+  inline.classList.add("ad-form-year-month-split");
+  inline.dataset.adYearMonth = yearId;
 
-  const syncOut = () => {
-    syncSelectToValue(ev, readWheel(y.wheel));
-    syncSelectToValue(honap, readWheel(m.wheel));
-    syncSelectToValue(nap, readWheel(d.wheel));
-    syncMuszakiDateSummary(triple);
-  };
-
-  [y.wheel, m.wheel, d.wheel].forEach((wheel) => {
-    wheel.addEventListener("immo-wheel-change", syncOut);
+  await mountAdSelectDrum(ev, {
+    title: `${title} – év`,
+    emptyLabel: yearEmpty,
+    mode: "single",
+  });
+  await mountAdSelectDrum(honap, {
+    title: `${title} – hónap`,
+    emptyLabel: monthEmpty,
+    mode: "single",
   });
 
-  const openSheet = (event) => {
-    event.preventDefault();
-    event.stopPropagation();
-    const trigger = y.wheel.closest(".immo-wheel-wrap")?.querySelector(".immo-wheel-trigger") || summary;
-    trigger.dataset.emptyLabel = emptyLabel;
-    openAutoDrumSheet(y.wheel, trigger);
-  };
-  summary.addEventListener("click", openSheet);
+  const yearWrap = ev._adBmPanel;
+  const monthWrap = honap._adBmPanel;
+  const yearWheel = yearWrap?.querySelector("[data-wheel]");
+  const monthWheel = monthWrap?.querySelector("[data-wheel]");
+  if (!yearWheel || !monthWheel) return;
 
-  /* Külső value sync (pl. import) */
-  const onExternal = () => {
-    setWheelValue(y.wheel, ev.value || "");
-    setWheelValue(m.wheel, honap.value || "");
-    setWheelValue(d.wheel, nap.value || "");
-    syncMuszakiDateSummary(triple);
-  };
-  ev.addEventListener("change", onExternal);
-  honap.addEventListener("change", onExternal);
-  nap.addEventListener("change", onExternal);
+  /* Dual-range marker: openAutoDrumSheet → split portal (év|hó egyszerre). */
+  const dual = document.createElement("div");
+  dual.className = "immo-dual-range ad-form-year-month-dual";
+  dual.dataset.range = yearId;
+  dual.setAttribute("aria-label", title);
+  dual.hidden = true;
+  const titleEl = document.createElement("span");
+  titleEl.className = "immo-label immo-dual-range__title";
+  titleEl.textContent = title;
+  titleEl.hidden = true;
+  dual.appendChild(titleEl);
+  /* A wheel-eket nem mozgatjuk — csak marker a portal routinghoz; a wrap-eket linkeljük. */
+  yearWheel.closest(".immo-wheel-wrap")?.classList.add("immo-dual-range__half", "immo-dual-range__half--min");
+  monthWheel.closest(".immo-wheel-wrap")?.classList.add("immo-dual-range__half", "immo-dual-range__half--max");
+  /* Hogy a closest('.immo-dual-range') megtalálja: tegyük a dual-t az inline köré. */
+  inline.parentElement?.insertBefore(dual, inline);
+  dual.appendChild(inline);
+  dual.hidden = false;
+  dual.classList.add("ad-form-year-month-dual--visible");
+
+  const { openAutoDrumSheet } = await import("./auto-drum-sheet.js?v=brandDrum25");
+
+  function bindSplitOpen(wrap, wheel) {
+    const trigger = wrap?.querySelector(".immo-wheel-trigger");
+    if (!trigger || trigger.dataset.adSplitBound === "1") return;
+    const next = trigger.cloneNode(true);
+    next.dataset.adSplitBound = "1";
+    next.dataset.sheetBound = "1";
+    trigger.replaceWith(next);
+    next.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      ev._adBmFillWheel?.();
+      honap._adBmFillWheel?.();
+      const y = yearWrap?.querySelector("[data-wheel]") || yearWheel;
+      const t = next;
+      t.dataset.emptyLabel = yearEmpty;
+      openAutoDrumSheet(y, t);
+    });
+  }
+
+  bindSplitOpen(yearWrap, yearWheel);
+  bindSplitOpen(monthWrap, monthWheel);
+}
+
+/**
+ * Műszaki érvényesség: év|hó osztott menü (mint forgalomba / gyártási év).
+ * Tartalom a meglévő selectekből.
+ */
+async function mountMuszakiYearMonthSplit(form) {
+  if (!form || !isBmPickerAdForm(form)) return;
+  unmountMuszakiDateTriple(form);
+  const ev = document.getElementById("muszaki_ev");
+  const honap = document.getElementById("muszaki_honap");
+  if (!ev || !honap) return;
+  delete ev.dataset.adMuszakiDate;
+  delete honap.dataset.adMuszakiDate;
+  const nap = document.getElementById("muszaki_nap");
+  if (nap) {
+    delete nap.dataset.adMuszakiDate;
+    nap.setAttribute("hidden", "");
+    nap.style.display = "none";
+  }
+  await mountAdYearMonthSplitDrums({
+    yearId: "muszaki_ev",
+    monthId: "muszaki_honap",
+    title: "Műszaki érvényesség",
+    yearEmpty: "év",
+    monthEmpty: "hó",
+    yearMax: YEAR_SELECT_MAX,
+  });
 }
 
 export async function mountAdFormBmPickers(form, catalog = null) {
@@ -2641,7 +2663,7 @@ export async function mountAdFormBmPickers(form, catalog = null) {
     });
   }
 
-  await mountMuszakiDateTripleDrum(form);
+  await mountMuszakiYearMonthSplit(form);
 
   for (const spec of AD_BM_SINGLE_DROPDOWN_SPECS) {
     if (spec.skipSingleMount) continue;

@@ -7,7 +7,7 @@ const root = process.cwd();
 const PUBLIC = path.join(root, "public");
 const MIME = { ".html":"text/html",".js":"text/javascript",".css":"text/css",".mjs":"text/javascript" };
 const html = `<!DOCTYPE html><html><head>
-<link rel="stylesheet" href="/css/ingatlan-search.css?v=bmSheet8" />
+<link rel="stylesheet" href="/css/ingatlan-search.css?v=bmSheet9" />
 <style>body{margin:0;background:#999}</style>
 </head><body class="site-app" data-site-page="hirdetesfeladas">
 <button id="t">open</button>
@@ -17,7 +17,7 @@ const html = `<!DOCTYPE html><html><head>
 </div>
 <form id="f"></form>
 <script type="module">
-import { openBrandModelCatalogSheet } from "/js/auto-drum-sheet.js?v=bmSheet8";
+import { openBrandModelCatalogSheet } from "/js/auto-drum-sheet.js?v=bmSheet9";
 const form = document.getElementById("f");
 form._autoDrumCatalog = { gyartmanyok: Array.from({length:35},(_,i)=>"Brand"+i), modellek: {} };
 openBrandModelCatalogSheet(document.querySelector('[data-wheel="gyartmany"]'), document.getElementById("t"), document.getElementById("wrap"), "Gyártmány / Modell", form, { singleSelect: true });
@@ -46,7 +46,7 @@ window.__R__ = {
   headFixed: headTop0 === headTop1,
   footFixed: footTop0 === footTop1,
   stageBlue: getComputedStyle(stage).backgroundColor === "rgb(232, 238, 243)",
-  headBlue: getComputedStyle(head).backgroundColor === "rgb(232, 238, 243)",
+  headTransparent: getComputedStyle(head).backgroundColor === "rgba(0, 0, 0, 0)" || getComputedStyle(head).backgroundColor === "transparent",
   ringSlidUp: ringTop1 < ringTopStart - 20,
   ringAtBlueTop: Math.abs(ringTop1 - stageTop) <= 3,
   ringUnderHead: ringTop1 <= Math.round(head.getBoundingClientRect().bottom),
@@ -59,7 +59,7 @@ window.__R__.ok =
   window.__R__.headFixed &&
   window.__R__.footFixed &&
   window.__R__.stageBlue &&
-  window.__R__.headBlue &&
+  window.__R__.headTransparent &&
   window.__R__.ringSlidUp &&
   window.__R__.ringAtBlueTop &&
   window.__R__.ringUnderHead &&

@@ -1613,7 +1613,12 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   margin: 0;
   padding: 0.75rem 1rem 0.55rem;
   box-sizing: border-box;
-  background: #e8eef3;
+  background: transparent;
+  pointer-events: none;
+}
+
+.auto-drum-portal--sheet .auto-drum-portal__sheet-head .auto-drum-portal__close {
+  pointer-events: auto;
 }
 
 .auto-drum-portal--sheet .auto-drum-portal__close {

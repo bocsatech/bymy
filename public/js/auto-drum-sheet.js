@@ -1272,6 +1272,7 @@ function openMultiSwitchSheet(wheel, trigger, wrap, emptyLabel, opts) {
 /**
  * Önálló kapcsolós dobkerék (nincs immo-wheel) — pl. mobil kivitel picker.
  * getChildren(value) → almenü sorok; ha van, Vissza gombbal vissza.
+ * singleSelect: csak 1 érték lehet bekapcsolva (hirdetésfeladás Alapadatok).
  */
 export function openStandaloneSwitchSheet({
   trigger,
@@ -1281,12 +1282,20 @@ export function openStandaloneSwitchSheet({
   onDone,
   getChildren = null,
   title = null,
+  singleSelect = false,
 } = {}) {
   if (!trigger) return;
   closeAutoDrumSheet(false);
   closeAllInlineDrums(false);
 
-  const selected = new Set((initialSelected || []).map(String).filter(Boolean));
+  const selected = new Set(
+    singleSelect
+      ? (() => {
+          const first = (initialSelected || []).map(String).filter(Boolean)[0];
+          return first ? [first] : [];
+        })()
+      : (initialSelected || []).map(String).filter(Boolean)
+  );
   const sheetTitle =
     title ||
     trigger.getAttribute("aria-label") ||
@@ -1334,6 +1343,12 @@ export function openStandaloneSwitchSheet({
     });
   }
 
+  function selectOnly(value) {
+    selected.clear();
+    openMains.clear();
+    if (value) selected.add(value);
+  }
+
   function renderMain() {
     view = "main";
     parentValue = null;
@@ -1353,6 +1368,17 @@ export function openStandaloneSwitchSheet({
       if (typeof getChildren === "function") {
         const kids = getChildren(value);
         if (kids?.length) {
+          if (singleSelect) {
+            /* Más kategória gyerekeit töröljük; ebbe belépünk */
+            const keep = new Set(kids.map((k) => String(k.value)));
+            [...selected].forEach((v) => {
+              if (!keep.has(v)) selected.delete(v);
+            });
+            openMains.clear();
+            openMains.add(value);
+            renderKids(value, kids);
+            return;
+          }
           const turningOn = !openMains.has(value);
           if (turningOn) {
             openMains.add(value);
@@ -1364,6 +1390,12 @@ export function openStandaloneSwitchSheet({
           paintStandalone();
           return;
         }
+      }
+      if (singleSelect) {
+        if (selected.has(value) && selected.size === 1) selectOnly("");
+        else selectOnly(value);
+        paintStandalone();
+        return;
       }
       if (selected.has(value)) selected.delete(value);
       else selected.add(value);
@@ -1386,7 +1418,25 @@ export function openStandaloneSwitchSheet({
     bindSwitchRowClicks(scrollEl, (item) => {
       const value = item.dataset.value ?? "";
       if (value === "") {
-        kids.forEach((k) => selected.delete(k.value));
+        if (singleSelect) {
+          selected.clear();
+          openMains.clear();
+        } else {
+          kids.forEach((k) => selected.delete(k.value));
+        }
+        paintStandalone();
+        return;
+      }
+      if (singleSelect) {
+        if (selected.has(value) && selected.size === 1) {
+          selected.clear();
+          openMains.clear();
+        } else {
+          selected.clear();
+          selected.add(value);
+          openMains.clear();
+          openMains.add(parent);
+        }
         paintStandalone();
         return;
       }
@@ -1403,7 +1453,7 @@ export function openStandaloneSwitchSheet({
   }
 
   function finish(commit) {
-    if (commit && typeof getChildren === "function") {
+    if (commit && !singleSelect && typeof getChildren === "function") {
       for (const main of [...openMains]) {
         const kids = getChildren(main);
         if (!kids?.length) continue;
@@ -1417,7 +1467,15 @@ export function openStandaloneSwitchSheet({
     root.remove();
     activePortal = null;
     document.body.classList.remove("auto-drum-portal-open", "auto-drum-sheet-open");
-    if (commit && typeof onDone === "function") onDone([...selected], [...openMains]);
+    if (commit && typeof onDone === "function") {
+      const list = singleSelect
+        ? (() => {
+            const only = [...selected].filter(Boolean)[0];
+            return only ? [only] : [];
+          })()
+        : [...selected];
+      onDone(list, [...openMains]);
+    }
   }
 
   backBtn.addEventListener("click", (event) => {

@@ -2380,7 +2380,7 @@ async function mountAdBrandModelCombined(form, catalog) {
   }
 
   const { fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=immoClearAll1");
-  const { openBrandModelCatalogSheet } = await import("./auto-drum-sheet.js?v=bmSheet22");
+  const { openBrandModelCatalogSheet } = await import("./auto-drum-sheet.js?v=bmSheet23");
   const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
 
   const brands = [...(catalog?.gyartmanyok || [])].sort((a, b) =>
@@ -2543,7 +2543,7 @@ async function mountAdSelectDrum(select, {
   select.dataset.adBmDrum = "1";
 
   const { fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=immoClearAll1");
-  const { openStandaloneSwitchSheet, bindAutoDrumSheet } = await import("./auto-drum-sheet.js?v=bmSheet22");
+  const { openStandaloneSwitchSheet, bindAutoDrumSheet } = await import("./auto-drum-sheet.js?v=bmSheet23");
   const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
 
   const wrap = document.createElement("div");
@@ -2629,9 +2629,11 @@ async function mountAdSelectDrum(select, {
     const current = readSingleStoredValue(select._adBmHidden?.value ?? select.value);
     openStandaloneSwitchSheet({
       trigger,
+      title,
       emptyLabel,
       items: cats.map((c) => ({ value: c.value, label: c.label })),
       initialSelected: current ? [current] : [],
+      singleSelect: true,
       getChildren: (mainValue) => {
         const cat = cats.find((c) => c.value === mainValue);
         return cat?.children?.length ? cat.children : null;
@@ -2654,9 +2656,11 @@ async function mountAdSelectDrum(select, {
     const current = readSingleStoredValue(select._adBmHidden?.value ?? select.value);
     openStandaloneSwitchSheet({
       trigger,
+      title,
       emptyLabel,
       items,
       initialSelected: current ? [current] : [],
+      singleSelect: true,
       onDone: (list) => {
         const value = list?.length ? String(list[list.length - 1]) : "";
         writePlainValue(select, value);
@@ -2762,7 +2766,7 @@ async function mountAdSplitYmDrum({
   }
 
   const { fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=immoClearAll1");
-  const { openYmDualSheet } = await import("./auto-drum-sheet.js?v=bmSheet22");
+  const { openYmDualSheet } = await import("./auto-drum-sheet.js?v=bmSheet23");
   const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
 
   const yearOpts = optionsFromSelect(ev, emptyYear);

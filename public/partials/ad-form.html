@@ -5,7 +5,35 @@
               <input type="hidden" id="hirdetes_cime" name="hirdetes_cime" />
 
               <div class="form-grid">
-                <div class="field-row full field-row--vehicle-top">
+                <div class="field-row full field-row--vehicle-ident">
+                  <div class="labeled-field">
+                    <label for="gyartmany">Gyártmány: <span class="req">*</span></label>
+                    <select id="gyartmany" name="gyartmany" required>
+                      <option value="">Válasszon</option>
+                    </select>
+                  </div>
+                  <div class="labeled-field">
+                    <label for="modell">Modell: <span class="req">*</span></label>
+                    <select id="modell" name="modell" required>
+                      <option value="">Először válassz gyártmányt</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="field-row full field-row--pair field-row--tipus-egyeb">
+                  <div class="labeled-field">
+                    <label for="tipus">Típus:</label>
+                    <select id="tipus" name="tipus">
+                      <option value="">Először válassz modellt</option>
+                    </select>
+                  </div>
+                  <div class="labeled-field">
+                    <label for="egyeb_tipus">Egyéb típus:</label>
+                    <input id="egyeb_tipus" name="egyeb_tipus" type="text" />
+                  </div>
+                </div>
+
+                <div class="field-row full field-row--vehicle-year field-row--year-km">
                   <div class="labeled-field">
                     <label for="gyartasi_ev">Gyártási év: <span class="req">*</span></label>
                     <div class="inline-2">
@@ -19,28 +47,36 @@
                     </div>
                   </div>
                   <div class="labeled-field">
-                    <label for="forgalomba_helyezes_ev">Első magyarországi forgalomba helyezés:</label>
-                    <div class="inline-2">
-                      <select id="forgalomba_helyezes_ev" name="forgalomba_helyezes_ev"></select>
-                      <select id="forgalomba_helyezes_honap" name="forgalomba_helyezes_honap">
-                        <option value="">hó</option>
-                        <option>1</option><option>2</option><option>3</option><option>4</option>
-                        <option>5</option><option>6</option><option>7</option><option>8</option>
-                        <option>9</option><option>10</option><option>11</option><option>12</option>
-                      </select>
+                    <label for="km">Km. óra állás: <span class="req">*</span></label>
+                    <div class="suffix-field">
+                      <input id="km" name="km" type="text" inputmode="numeric" autocomplete="off" placeholder="pl. 125 000" required />
+                      <span>km</span>
                     </div>
                   </div>
+                </div>
+
+                <div class="field-row full field-row--pair">
                   <div class="labeled-field">
-                    <label for="muszaki_ev">Műszaki vizsga érvényes:</label>
-                    <div class="inline-2">
-                      <select id="muszaki_ev" name="muszaki_ev"></select>
-                      <select id="muszaki_honap" name="muszaki_honap">
-                        <option value="">hó</option>
-                        <option>1</option><option>2</option><option>3</option><option>4</option>
-                        <option>5</option><option>6</option><option>7</option><option>8</option>
-                        <option>9</option><option>10</option><option>11</option><option>12</option>
-                      </select>
-                    </div>
+                    <label for="kivitel">Kivitel: <span class="req">*</span> <a href="#" class="help-link">Segítség</a></label>
+                    <select id="kivitel" name="kivitel" required>
+                      <option value="">Válasszon</option>
+                      <option>Pickup</option>
+                      <option>Terepjáró</option>
+                      <option>Buggy</option>
+                      <option>Cabrio</option>
+                      <option>Coupe</option>
+                      <option>Egyterű</option>
+                      <option>Ferdehátú</option>
+                      <option>Hot rod</option>
+                      <option>Kisbusz</option>
+                      <option>Kombi</option>
+                      <option>Lépcsőshátú</option>
+                      <option>Mopedautó</option>
+                      <option>Sedan</option>
+                      <option>Sport</option>
+                      <option>Városi terepjáró (crossover)</option>
+                      <option>Egyéb</option>
+                    </select>
                   </div>
                 </div>
 
@@ -71,56 +107,30 @@
                   </div>
                 </div>
 
-                <div class="field-row full">
+                <div class="field-row full field-row--vehicle-dates">
                   <div class="labeled-field">
-                    <label for="gyartmany">Gyártmány: <span class="req">*</span></label>
-                    <select id="gyartmany" name="gyartmany" required>
-                      <option value="">Válasszon</option>
-                    </select>
+                    <label for="forgalomba_helyezes_ev">Első magyarországi forgalomba helyezés:</label>
+                    <div class="inline-2">
+                      <select id="forgalomba_helyezes_ev" name="forgalomba_helyezes_ev"></select>
+                      <select id="forgalomba_helyezes_honap" name="forgalomba_helyezes_honap">
+                        <option value="">hó</option>
+                        <option>1</option><option>2</option><option>3</option><option>4</option>
+                        <option>5</option><option>6</option><option>7</option><option>8</option>
+                        <option>9</option><option>10</option><option>11</option><option>12</option>
+                      </select>
+                    </div>
                   </div>
                   <div class="labeled-field">
-                    <label for="modell">Modell: <span class="req">*</span></label>
-                    <select id="modell" name="modell" required>
-                      <option value="">Először válassz gyártmányt</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div class="field-row full field-row--pair">
-                  <div class="labeled-field">
-                    <label for="tipus">Típus:</label>
-                    <select id="tipus" name="tipus">
-                      <option value="">Először válassz modellt</option>
-                    </select>
-                  </div>
-                  <div class="labeled-field">
-                    <label for="egyeb_tipus">Egyéb típus:</label>
-                    <input id="egyeb_tipus" name="egyeb_tipus" type="text" />
-                  </div>
-                </div>
-
-                <div class="field-row full field-row--pair">
-                  <div class="labeled-field">
-                    <label for="kivitel">Kivitel: <span class="req">*</span> <a href="#" class="help-link">Segítség</a></label>
-                    <select id="kivitel" name="kivitel" required>
-                      <option value="">Válasszon</option>
-                      <option>Pickup</option>
-                      <option>Terepjáró</option>
-                      <option>Buggy</option>
-                      <option>Cabrio</option>
-                      <option>Coupe</option>
-                      <option>Egyterű</option>
-                      <option>Ferdehátú</option>
-                      <option>Hot rod</option>
-                      <option>Kisbusz</option>
-                      <option>Kombi</option>
-                      <option>Lépcsőshátú</option>
-                      <option>Mopedautó</option>
-                      <option>Sedan</option>
-                      <option>Sport</option>
-                      <option>Városi terepjáró (crossover)</option>
-                      <option>Egyéb</option>
-                    </select>
+                    <label for="muszaki_ev">Műszaki vizsga érvényes:</label>
+                    <div class="inline-2">
+                      <select id="muszaki_ev" name="muszaki_ev"></select>
+                      <select id="muszaki_honap" name="muszaki_honap">
+                        <option value="">hó</option>
+                        <option>1</option><option>2</option><option>3</option><option>4</option>
+                        <option>5</option><option>6</option><option>7</option><option>8</option>
+                        <option>9</option><option>10</option><option>11</option><option>12</option>
+                      </select>
+                    </div>
                   </div>
                 </div>
 
@@ -157,16 +167,6 @@
                       <option>Érvényes magyar okmányokkal</option>
                       <option>Érvényes külföldi okmányokkal</option>
                     </select>
-                  </div>
-                </div>
-
-                <div class="field-row full field-row--km">
-                  <div class="labeled-field">
-                    <label for="km">Km. óra állás: <span class="req">*</span></label>
-                    <div class="suffix-field">
-                      <input id="km" name="km" type="text" inputmode="numeric" autocomplete="off" placeholder="pl. 125 000" required />
-                      <span>km</span>
-                    </div>
                   </div>
                 </div>
 

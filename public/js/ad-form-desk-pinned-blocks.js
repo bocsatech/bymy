@@ -24,6 +24,73 @@ export const EV_LAYOUT_GROUP_KEYS = new Set([
   "zold_rendszam",
 ]);
 
+/** Használtautó desk „Alapadatok” — autókereső minta (gyártmány először, nem évjárat). */
+export const DESK_STEP1_CANONICAL_STACK = [
+  "gyartmany",
+  "modell",
+  "tipus",
+  "egyeb_tipus",
+  "egyeb_modell",
+  "gyartasi_ev",
+  "gyartasi_honap",
+  "km",
+  "kivitel",
+  "allapot",
+  "tulajdonosok_szama",
+  "forgalomba_helyezes_ev",
+  "forgalomba_helyezes_honap",
+  "muszaki_ev",
+  "muszaki_honap",
+  "muszaki_nap",
+  "ajtok",
+  "szemelyek",
+  "okmany_jelleg",
+  "alvazszam",
+  "rendszam",
+];
+
+const STEP1_RANK = new Map(DESK_STEP1_CANONICAL_STACK.map((key, index) => [key, index]));
+
+export function deskStep1CanonicalRank(fieldKey) {
+  const key = String(fieldKey || "");
+  if (STEP1_RANK.has(key)) return STEP1_RANK.get(key);
+  return 900 + (STEP1_RANK.size || 0);
+}
+
+/** Mobil flex canvas: alapadatok DOM-sorrend = autókereső minta. */
+export function applyStep1SearchDomOrder(canvas) {
+  if (!canvas) return;
+  const items = [...canvas.children].filter(
+    (el) =>
+      el.matches?.(".ad-layout-item, .ad-desk-pinned-block, .ad-form-bm-field--brand-model, .ad-form-split-ym, .ad-form-muszaki-date") &&
+      !el.classList.contains("ad-layout-hidden") &&
+      !el.hidden
+  );
+  if (items.length < 2) return;
+
+  const keyOf = (el) =>
+    el.dataset?.adBmFor ||
+    el.dataset?.evId ||
+    el.querySelector?.(".ad-form-split-ym, .ad-form-muszaki-date")?.dataset?.evId ||
+    el.querySelector?.("[data-ad-bm-for]")?.dataset?.adBmFor ||
+    el.querySelector?.("input:not([type=hidden]), select, textarea")?.id ||
+    el.querySelector?.("[name]")?.name ||
+    "";
+
+  items.sort(
+    (a, b) =>
+      deskStep1CanonicalRank(keyOf(a)) - deskStep1CanonicalRank(keyOf(b)) ||
+      (Number(a.dataset?.layoutRow) || 0) - (Number(b.dataset?.layoutRow) || 0)
+  );
+
+  items.forEach((el, index) => {
+    const row = index + 1;
+    el.dataset.layoutRow = String(row);
+    el.style.setProperty("grid-row", String(row), "important");
+    canvas.appendChild(el);
+  });
+}
+
 /** Használtautó desk „Műszaki adatok” — admin stack és éles canvas ugyanilyen sorrendben. */
 export const DESK_MUSZAKI_CORE_FIELD_KEYS = ["uzemanyag", "hengerurtartalom", "teljesitmeny_kw"];
 

@@ -10,7 +10,8 @@ import {
   insertPinnedDomBlock,
   layoutRowForPinnedBlock,
   placeElectricBlockAfterFuel,
-} from "./ad-form-desk-pinned-blocks.js?v=fuelTop1";
+  applyStep1SearchDomOrder,
+} from "./ad-form-desk-pinned-blocks.js?v=alapOrder1";
 
 function cssEscape(value) {
   if (window.CSS?.escape) return window.CSS.escape(value);
@@ -1125,6 +1126,9 @@ async function applyAdFormLayout() {
     initTireSizes(form);
     window.dispatchEvent(new Event("ad-form-sync-fuel-fields"));
     applyAdFormDesk();
+    if (!isImmo) {
+      applyStep1SearchDomOrder(canvasForStep(form, 1));
+    }
     if (
       isImmo &&
       document.documentElement.classList.contains("immo-ad-wizard-boot")

@@ -630,13 +630,15 @@ function normalizeSheetItems(opts, emptyLabel) {
 function paintSwitchList(scrollEl, selectionWheel) {
   cancelAnimationFrame(paintFrame);
   paintFrame = requestAnimationFrame(() => {
+    const soft = Boolean(scrollEl?.closest?.(".auto-drum-portal--sheet"));
     const selected = new Set(selectionWheel ? readWheelList(selectionWheel) : []);
     scrollEl.querySelectorAll(".immo-drum-inline-item").forEach((item) => {
       const v = item.dataset.value ?? "";
       const isSel = v === "" ? selected.size === 0 : selected.has(v);
       item.style.opacity = "1";
-      item.style.fontWeight = isSel ? "700" : "500";
-      item.style.color = "#000";
+      item.style.fontWeight = soft ? (isSel ? "500" : "400") : isSel ? "700" : "500";
+      item.style.fontSize = soft ? "0.9375rem" : "";
+      item.style.color = soft ? "#1f2937" : "#000";
       item.classList.toggle("is-selected", isSel);
       item.setAttribute("aria-selected", isSel ? "true" : "false");
       item.setAttribute("aria-checked", isSel ? "true" : "false");
@@ -703,6 +705,7 @@ function modelsForBrandFromCatalog(catalog, brand) {
 /**
  * Desk flow a mobilon: ugyanazon a panelen Gyártmány → Modell váltás.
  * Márka bekapcsolásakor a lista a modellekre vált (katalógusból).
+ * AutoScout-stílusú teljes sheet (#e8eef3, fehér kártya, nincs vastag keret).
  */
 export function openBrandModelCatalogSheet(brandWheel, trigger, wrap, emptyLabel, form, { singleSelect = false } = {}) {
   const catalog = form?._autoDrumCatalog || form?._adFormVehicleCatalog;
@@ -714,25 +717,34 @@ export function openBrandModelCatalogSheet(brandWheel, trigger, wrap, emptyLabel
     : normalizeSheetItems([...brandWheel.querySelectorAll(".immo-wheel-opt")], emptyLabel);
 
   const root = document.createElement("div");
-  root.className = "auto-drum-portal auto-drum-portal--multi auto-drum-portal--bm";
+  root.className = "auto-drum-portal auto-drum-portal--multi auto-drum-portal--bm auto-drum-portal--sheet";
   root.setAttribute("role", "dialog");
   root.setAttribute("aria-modal", "true");
-  root.setAttribute("aria-label", "Gyártmány");
+  root.setAttribute("aria-label", "Gyártmány / Modell");
   const drumH = ITEM_H * MULTI_VISIBLE;
   root.style.setProperty("--auto-drum-multi-h", `${drumH}px`);
-  root.style.setProperty("--auto-drum-item-h", `${ITEM_H}px`);
+  root.style.setProperty("--auto-drum-item-h", `44px`);
 
   root.innerHTML = `
     <button type="button" class="auto-drum-portal__backdrop" aria-label="Bezárás"></button>
-    <div class="auto-drum-portal__stage auto-drum-portal__stage--multi">
-      <div class="immo-drum-wheel-ring auto-drum-portal__ring auto-drum-portal__ring--multi">
+    <div class="auto-drum-portal__stage auto-drum-portal__stage--multi auto-drum-portal__stage--sheet">
+      <header class="auto-drum-portal__sheet-head">
+        <button type="button" class="auto-drum-portal__close" aria-label="Bezárás">×</button>
+        <h2 class="auto-drum-portal__sheet-title">Gyártmány / Modell</h2>
+        <span class="auto-drum-portal__sheet-head-spacer" aria-hidden="true"></span>
+      </header>
+      <p class="auto-drum-portal__sheet-section" data-sheet-section>Népszerű gyártmányok</p>
+      <div class="immo-drum-wheel-ring auto-drum-portal__ring auto-drum-portal__ring--multi auto-drum-portal__ring--sheet">
         <div class="auto-drum-portal__toolbar">
           <button type="button" class="auto-drum-portal__back" hidden>Vissza</button>
           <p class="auto-drum-portal__sub" hidden></p>
-          <button type="button" class="auto-drum-portal__done">Kész</button>
         </div>
         <div class="auto-drum-portal__scroll immo-drum-inline-scroll" tabindex="-1"></div>
       </div>
+      <footer class="auto-drum-portal__sheet-foot">
+        <span class="auto-drum-portal__count" data-sheet-count>0 kiválasztva</span>
+        <button type="button" class="auto-drum-portal__done">Kész</button>
+      </footer>
     </div>`;
 
   const stage = root.querySelector(".auto-drum-portal__stage");
@@ -741,9 +753,30 @@ export function openBrandModelCatalogSheet(brandWheel, trigger, wrap, emptyLabel
   const backBtn = root.querySelector(".auto-drum-portal__back");
   const subEl = root.querySelector(".auto-drum-portal__sub");
   const doneBtn = root.querySelector(".auto-drum-portal__done");
+  const closeBtn = root.querySelector(".auto-drum-portal__close");
+  const sectionEl = root.querySelector("[data-sheet-section]");
+  const countEl = root.querySelector("[data-sheet-count]");
 
   let view = "brands";
   let modelBrand = null;
+
+  function updateCount() {
+    if (!countEl) return;
+    const brandN = singleSelect
+      ? String(readWheel(brandWheel) ?? "").trim()
+        ? 1
+        : 0
+      : readWheelList(brandWheel).length;
+    const modelN = modelWheel
+      ? singleSelect
+        ? String(readWheel(modelWheel) ?? "").trim()
+          ? 1
+          : 0
+        : readWheelList(modelWheel).length
+      : 0;
+    const n = view === "models" ? Math.max(brandN, modelN) : brandN;
+    countEl.textContent = `${n} kiválasztva`;
+  }
 
   function syncModelWheelFromCatalog(brands) {
     if (!modelWheel || !catalog) return;
@@ -778,7 +811,8 @@ export function openBrandModelCatalogSheet(brandWheel, trigger, wrap, emptyLabel
     subEl.hidden = true;
     subEl.textContent = "";
     backBtn.hidden = true;
-    root.setAttribute("aria-label", "Gyártmány");
+    if (sectionEl) sectionEl.textContent = "Népszerű gyártmányok";
+    root.setAttribute("aria-label", "Gyártmány / Modell");
     const selected = singleSelect
       ? (() => {
           const v = String(readWheel(brandWheel) ?? "").trim();
@@ -796,6 +830,7 @@ export function openBrandModelCatalogSheet(brandWheel, trigger, wrap, emptyLabel
         }
         syncDrumWheelDisplay(brandWheel);
         paintSwitchList(scrollEl, brandWheel);
+        updateCount();
         return;
       }
       if (singleSelect) {
@@ -808,6 +843,7 @@ export function openBrandModelCatalogSheet(brandWheel, trigger, wrap, emptyLabel
           syncDrumWheelDisplay(modelWheel);
         }
         syncModelWheelFromCatalog([value]);
+        updateCount();
         renderModels(value);
         return;
       }
@@ -818,6 +854,7 @@ export function openBrandModelCatalogSheet(brandWheel, trigger, wrap, emptyLabel
       setWheelValue(brandWheel, [...cur]);
       syncDrumWheelDisplay(brandWheel);
       syncModelWheelFromCatalog([...cur]);
+      updateCount();
       if (turningOn) {
         renderModels(value);
         return;
@@ -832,6 +869,7 @@ export function openBrandModelCatalogSheet(brandWheel, trigger, wrap, emptyLabel
       el?.scrollIntoView({ block: "nearest" });
     }
     paintSwitchList(scrollEl, brandWheel);
+    updateCount();
   }
 
   function renderModels(brand) {
@@ -841,6 +879,7 @@ export function openBrandModelCatalogSheet(brandWheel, trigger, wrap, emptyLabel
     subEl.hidden = false;
     subEl.textContent = brand;
     backBtn.hidden = false;
+    if (sectionEl) sectionEl.textContent = "Modellek";
     root.setAttribute("aria-label", `Modell — ${brand}`);
     const emptyRow = { value: "", label: singleSelect ? "—" : "Mindegy" };
     const rows = [emptyRow, ...modelsForBrandFromCatalog(catalog, brand)];
@@ -853,6 +892,7 @@ export function openBrandModelCatalogSheet(brandWheel, trigger, wrap, emptyLabel
         modelWheel.dataset.multiple = "0";
         syncDrumWheelDisplay(modelWheel);
         paintSwitchList(scrollEl, modelWheel);
+        updateCount();
         return;
       }
       if (value === "") {
@@ -865,9 +905,11 @@ export function openBrandModelCatalogSheet(brandWheel, trigger, wrap, emptyLabel
       }
       syncDrumWheelDisplay(modelWheel);
       paintSwitchList(scrollEl, modelWheel);
+      updateCount();
     });
     scrollEl.scrollTop = 0;
     paintSwitchList(scrollEl, modelWheel);
+    updateCount();
   }
 
   backBtn.addEventListener("click", (event) => {
@@ -877,6 +919,7 @@ export function openBrandModelCatalogSheet(brandWheel, trigger, wrap, emptyLabel
   });
 
   root.querySelector(".auto-drum-portal__backdrop")?.addEventListener("click", () => closeAutoDrumSheet(true));
+  closeBtn?.addEventListener("click", () => closeAutoDrumSheet(true));
   doneBtn?.addEventListener("click", () => closeAutoDrumSheet(true));
   scrollEl.addEventListener(
     "scroll",
@@ -891,12 +934,16 @@ export function openBrandModelCatalogSheet(brandWheel, trigger, wrap, emptyLabel
   (wrap?.closest(".immo-dual-range__half") || wrap?.closest(".immo-schema-cell"))?.classList.add("is-drum-active");
   trigger.setAttribute("aria-expanded", "true");
 
-  positionPortal(stage, trigger);
+  stage.style.left = "50%";
+  stage.style.top = "auto";
+  stage.style.bottom = "0";
+  stage.style.transform = "translateX(-50%)";
   activePortal = { root, wheel: brandWheel, scrollEl, ring, wrap, trigger, modelWheel };
 
   renderBrands();
   requestAnimationFrame(() => {
-    ring.style.setProperty("--immo-drum-ring-w", `${Math.min(340, Math.floor(window.innerWidth * 0.9))}px`);
+    ring.style.setProperty("--immo-drum-ring-w", `${Math.min(420, Math.floor(window.innerWidth - 32))}px`);
+    updateCount();
   });
 }
 

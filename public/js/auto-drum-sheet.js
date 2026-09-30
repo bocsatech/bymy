@@ -22,13 +22,370 @@ function escapeHtml(value) {
     .replace(/"/g, "&quot;");
 }
 
+function daysInMonth(year, month) {
+  const y = Number(year);
+  const m = Number(month);
+  if (!Number.isFinite(y) || !Number.isFinite(m) || m < 1 || m > 12) return 31;
+  return new Date(y, m, 0).getDate();
+}
+
+function pad2(value) {
+  const n = Number(String(value ?? "").replace(/\D/g, ""));
+  if (!Number.isFinite(n) || n < 1) return "";
+  return String(n).padStart(2, "0");
+}
+
+export function syncMuszakiDateSummary(block) {
+  if (!block) return;
+  const y = String(readWheel(block.querySelector('[data-wheel="muszaki_ev"]')) ?? "");
+  const m = pad2(readWheel(block.querySelector('[data-wheel="muszaki_honap"]')));
+  const d = pad2(readWheel(block.querySelector('[data-wheel="muszaki_nap"]')));
+  const summary = block.querySelector("[data-muszaki-summary]");
+  if (!summary) return;
+  summary.textContent = y ? `${y}. ${m || "—"}. ${d || "—"}` : "Mindegy";
+}
+
+function muszakiYearOptions() {
+  const start = new Date().getFullYear();
+  const out = [{ value: "", label: "Mindegy" }];
+  for (let y = start; y <= start + 5; y += 1) out.push({ value: String(y), label: String(y) });
+  return out;
+}
+
+function muszakiMonthOptions() {
+  const out = [{ value: "", label: "Mindegy" }];
+  for (let m = 1; m <= 12; m += 1) {
+    const v = String(m).padStart(2, "0");
+    out.push({ value: v, label: v });
+  }
+  return out;
+}
+
+function muszakiDayOptions(year, month) {
+  const out = [{ value: "", label: "Mindegy" }];
+  const max = daysInMonth(year, month);
+  for (let d = 1; d <= max; d += 1) {
+    const v = String(d).padStart(2, "0");
+    out.push({ value: v, label: v });
+  }
+  return out;
+}
+
+function openTripleDateDrumSheet(yearWheel, monthWheel, dayWheel, trigger) {
+  if (!yearWheel || !monthWheel || !dayWheel || !trigger) return;
+  closeAutoDrumSheet(false);
+  closeAllInlineDrums(false);
+
+  const block = yearWheel.closest(".immo-triple-date");
+  const wrap = yearWheel.closest(".immo-wheel-wrap") || trigger.closest(".immo-wheel-wrap");
+  const sheetTitle =
+    block?.querySelector(".immo-triple-date__title")?.textContent?.trim() || "Műszaki érvényesség";
+  const emptyLabel = "Mindegy";
+  let pendingY = String(readWheel(yearWheel) ?? "");
+  let pendingM = pad2(readWheel(monthWheel)) || String(readWheel(monthWheel) ?? "");
+  let pendingD = pad2(readWheel(dayWheel)) || String(readWheel(dayWheel) ?? "");
+
+  const root = document.createElement("div");
+  root.className = "auto-drum-portal auto-drum-portal--multi auto-drum-portal--split auto-drum-portal--date3";
+  root.setAttribute("role", "dialog");
+  root.setAttribute("aria-modal", "true");
+  root.setAttribute("aria-label", sheetTitle);
+
+  root.innerHTML = `
+    <button type="button" class="auto-drum-portal__backdrop" aria-label="Bezárás"></button>
+    <div class="auto-drum-portal__stage auto-drum-portal__stage--multi auto-drum-portal__stage--split auto-drum-portal__stage--date3">
+      <div class="immo-drum-wheel-ring auto-drum-portal__ring auto-drum-portal__ring--multi auto-drum-portal__ring--split auto-drum-portal__ring--date3">
+        <div class="auto-drum-portal__toolbar">
+          <button type="button" class="auto-drum-portal__back" hidden>Vissza</button>
+          <p class="auto-drum-portal__sub">${escapeHtml(sheetTitle)}</p>
+          <button type="button" class="auto-drum-portal__done">Kész</button>
+        </div>
+        <div class="auto-drum-split__chips auto-drum-date3__chips">
+          <button type="button" class="auto-drum-split__chip auto-drum-date3__chip" aria-label="Dátum">
+            <span class="auto-drum-split__chip-label"></span>
+            <span class="auto-drum-split__chip-clear" hidden aria-hidden="true">×</span>
+          </button>
+        </div>
+        <div class="auto-drum-date3__heads" aria-hidden="true">
+          <span>Év</span><span>Hó</span><span>Nap</span>
+        </div>
+        <div class="auto-drum-split__body auto-drum-date3__body">
+          <div class="immo-drum-inline-highlight auto-drum-split__highlight" aria-hidden="true"></div>
+          <div class="auto-drum-split__cols auto-drum-date3__cols">
+            <div class="auto-drum-split__col" data-half="year">
+              <div class="auto-drum-portal__scroll auto-drum-split__scroll immo-drum-inline-scroll" tabindex="-1"></div>
+            </div>
+            <div class="auto-drum-split__col" data-half="month">
+              <div class="auto-drum-portal__scroll auto-drum-split__scroll immo-drum-inline-scroll" tabindex="-1"></div>
+            </div>
+            <div class="auto-drum-split__col" data-half="day">
+              <div class="auto-drum-portal__scroll auto-drum-split__scroll immo-drum-inline-scroll" tabindex="-1"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+
+  const stage = root.querySelector(".auto-drum-portal__stage");
+  const ring = root.querySelector(".auto-drum-split__highlight");
+  const yearScroll = root.querySelector('.auto-drum-split__col[data-half="year"] .auto-drum-split__scroll');
+  const monthScroll = root.querySelector('.auto-drum-split__col[data-half="month"] .auto-drum-split__scroll');
+  const dayScroll = root.querySelector('.auto-drum-split__col[data-half="day"] .auto-drum-split__scroll');
+  const chip = root.querySelector(".auto-drum-date3__chip");
+  const doneBtn = root.querySelector(".auto-drum-portal__done");
+
+  function itemHtml(row) {
+    return `<div class="immo-drum-inline-item" data-value="${escapeHtml(row.value)}"><span class="immo-drum-inline-text">${escapeHtml(row.label)}</span></div>`;
+  }
+
+  function fillCol(scrollEl, rows) {
+    scrollEl.innerHTML = rows.map(itemHtml).join("");
+  }
+
+  function syncChip() {
+    const label = chip.querySelector(".auto-drum-split__chip-label");
+    const clear = chip.querySelector(".auto-drum-split__chip-clear");
+    if (!pendingY) {
+      label.textContent = emptyLabel;
+      clear.hidden = true;
+    } else {
+      label.textContent = `${pendingY}. ${pendingM || "—"}. ${pendingD || "—"}`;
+      clear.hidden = false;
+    }
+    clear.setAttribute("aria-hidden", clear.hidden ? "true" : "false");
+  }
+
+  function rebuildDayCol(keepScroll = true) {
+    const prev = pendingD;
+    const rows = muszakiDayOptions(pendingY, pendingM);
+    fillCol(dayScroll, rows);
+    bindColClicks(dayScroll);
+    const max = daysInMonth(pendingY, pendingM);
+    const dayN = Number(prev) || 0;
+    if (!pendingY || !pendingM) pendingD = "";
+    else if (dayN > max) pendingD = String(max).padStart(2, "0");
+    else if (dayN >= 1) pendingD = String(dayN).padStart(2, "0");
+    requestAnimationFrame(() => {
+      scrollHalfToValue(dayScroll, pendingD);
+      paintBoth();
+    });
+    void keepScroll;
+  }
+
+  function paintBoth() {
+    cancelAnimationFrame(paintFrame);
+    paintFrame = requestAnimationFrame(() => {
+      paintSplitColSync(yearScroll, ring);
+      paintSplitColSync(monthScroll, ring);
+      paintSplitColSync(dayScroll, ring);
+      pendingY = nearestPortalItem(yearScroll, ring)?.dataset.value ?? "";
+      pendingM = nearestPortalItem(monthScroll, ring)?.dataset.value ?? "";
+      pendingD = nearestPortalItem(dayScroll, ring)?.dataset.value ?? "";
+      syncChip();
+    });
+  }
+
+  function scrollHalfToValue(scrollEl, value) {
+    const start =
+      [...scrollEl.querySelectorAll(".immo-drum-inline-item")].find((el) => (el.dataset.value ?? "") === value) ||
+      scrollEl.querySelector('.immo-drum-inline-item[data-value=""]') ||
+      scrollEl.querySelector(".immo-drum-inline-item");
+    scrollToPortalItem(scrollEl, ring, start);
+  }
+
+  function bindColClicks(scrollEl) {
+    scrollEl.querySelectorAll(".immo-drum-inline-item").forEach((item) => {
+      let tapStart = null;
+      item.addEventListener(
+        "pointerdown",
+        (event) => {
+          tapStart = { x: event.clientX, y: event.clientY };
+        },
+        { passive: true }
+      );
+      item.addEventListener("click", (event) => {
+        event.stopPropagation();
+        if (tapStart) {
+          const dx = Math.abs(event.clientX - tapStart.x);
+          const dy = Math.abs(event.clientY - tapStart.y);
+          if (dx > 10 || dy > 10) return;
+        }
+        scrollToPortalItem(scrollEl, ring, item);
+        const half = scrollEl.closest("[data-half]")?.dataset.half;
+        if (half === "year" || half === "month") {
+          pendingY = nearestPortalItem(yearScroll, ring)?.dataset.value ?? "";
+          pendingM = nearestPortalItem(monthScroll, ring)?.dataset.value ?? "";
+          rebuildDayCol();
+        } else {
+          paintBoth();
+        }
+      });
+    });
+  }
+
+  function bindColScroll(scrollEl) {
+    let startY = 0;
+    let moved = false;
+    scrollEl.addEventListener(
+      "scroll",
+      () => {
+        paintBoth();
+      },
+      { passive: true }
+    );
+    scrollEl.addEventListener(
+      "touchstart",
+      (event) => {
+        startY = event.touches?.[0]?.clientY ?? 0;
+        moved = false;
+      },
+      { passive: true }
+    );
+    scrollEl.addEventListener(
+      "touchmove",
+      (event) => {
+        const y = event.touches?.[0]?.clientY ?? startY;
+        if (Math.abs(y - startY) > 4) moved = true;
+      },
+      { passive: true }
+    );
+    const snapEnd = () => {
+      if (!moved) return;
+      const snap = nearestPortalItem(scrollEl, ring);
+      if (snap) scrollToPortalItem(scrollEl, ring, snap);
+      const half = scrollEl.closest("[data-half]")?.dataset.half;
+      pendingY = nearestPortalItem(yearScroll, ring)?.dataset.value ?? "";
+      pendingM = nearestPortalItem(monthScroll, ring)?.dataset.value ?? "";
+      pendingD = nearestPortalItem(dayScroll, ring)?.dataset.value ?? "";
+      if (half === "year" || half === "month") rebuildDayCol();
+      else paintBoth();
+    };
+    scrollEl.addEventListener("touchend", snapEnd);
+    scrollEl.addEventListener("touchcancel", snapEnd);
+  }
+
+  fillCol(yearScroll, muszakiYearOptions());
+  fillCol(monthScroll, muszakiMonthOptions());
+  fillCol(dayScroll, muszakiDayOptions(pendingY, pendingM));
+  bindColClicks(yearScroll);
+  bindColClicks(monthScroll);
+  bindColClicks(dayScroll);
+  bindColScroll(yearScroll);
+  bindColScroll(monthScroll);
+  bindColScroll(dayScroll);
+
+  chip.addEventListener("click", (event) => {
+    if (!event.target.closest(".auto-drum-split__chip-clear")) return;
+    event.preventDefault();
+    event.stopPropagation();
+    pendingY = "";
+    pendingM = "";
+    pendingD = "";
+    scrollHalfToValue(yearScroll, "");
+    scrollHalfToValue(monthScroll, "");
+    rebuildDayCol();
+  });
+
+  root.querySelector(".auto-drum-portal__backdrop")?.addEventListener("click", () => closeAutoDrumSheet(true));
+  doneBtn?.addEventListener("click", () => closeAutoDrumSheet(true));
+
+  document.body.appendChild(root);
+  document.body.classList.add("auto-drum-portal-open");
+  wrap?.classList.add("is-open", "has-drum-open");
+  block?.classList.add("has-drum-open");
+  block?.querySelectorAll(".immo-triple-date__half").forEach((half) => half.classList.add("is-drum-active"));
+  trigger.setAttribute("aria-expanded", "true");
+
+  positionPortal(stage, trigger);
+  activePortal = {
+    kind: "date3",
+    root,
+    wheel: yearWheel,
+    yearWheel,
+    monthWheel,
+    dayWheel,
+    yearScroll,
+    monthScroll,
+    dayScroll,
+    scrollEl: yearScroll,
+    ring,
+    wrap,
+    trigger,
+  };
+
+  requestAnimationFrame(() => {
+    root
+      .querySelector(".auto-drum-portal__ring--date3")
+      ?.style.setProperty("--immo-drum-ring-w", `${Math.min(360, Math.floor(window.innerWidth * 0.92))}px`);
+    scrollHalfToValue(yearScroll, pendingY);
+    scrollHalfToValue(monthScroll, pendingM);
+    scrollHalfToValue(dayScroll, pendingD);
+    paintBoth();
+  });
+}
+
 export function closeAutoDrumSheet(commit = false) {
   if (!activePortal) return;
-  const { root, wheel, scrollEl, ring, wrap, trigger, modelWheel, kind, minWheel, maxWheel, minScroll, maxScroll } =
-    activePortal;
-  if (!wheel && kind !== "split") {
+  const {
+    root,
+    wheel,
+    scrollEl,
+    ring,
+    wrap,
+    trigger,
+    modelWheel,
+    kind,
+    minWheel,
+    maxWheel,
+    minScroll,
+    maxScroll,
+    yearWheel,
+    monthWheel,
+    dayWheel,
+    yearScroll,
+    monthScroll,
+    dayScroll,
+  } = activePortal;
+  if (!wheel && kind !== "split" && kind !== "date3") {
     /* Standalone sheet — done handler already owns commit. */
     wrap?.classList.remove("is-open", "has-drum-open");
+    trigger?.setAttribute("aria-expanded", "false");
+    root.remove();
+    activePortal = null;
+    document.body.classList.remove("auto-drum-portal-open", "auto-drum-sheet-open");
+    return;
+  }
+  if (kind === "date3") {
+    if (commit && yearWheel && monthWheel && dayWheel && yearScroll && monthScroll && dayScroll && ring) {
+      let y = nearestPortalItem(yearScroll, ring)?.dataset.value ?? "";
+      let m = nearestPortalItem(monthScroll, ring)?.dataset.value ?? "";
+      let d = nearestPortalItem(dayScroll, ring)?.dataset.value ?? "";
+      if (!y) {
+        m = "";
+        d = "";
+      } else {
+        if (!m) m = "01";
+        const maxDay = daysInMonth(y, m);
+        const dayN = Number(d) || 0;
+        if (!d || dayN < 1) d = "01";
+        else if (dayN > maxDay) d = String(maxDay).padStart(2, "0");
+        else d = String(dayN).padStart(2, "0");
+        m = String(Number(m) || 1).padStart(2, "0");
+      }
+      setWheelValue(yearWheel, y);
+      setWheelValue(monthWheel, m);
+      setWheelValue(dayWheel, d);
+      syncDrumWheelDisplay(yearWheel);
+      syncDrumWheelDisplay(monthWheel);
+      syncDrumWheelDisplay(dayWheel);
+      syncMuszakiDateSummary(yearWheel.closest(".immo-triple-date"));
+      yearWheel.dispatchEvent(new CustomEvent("immo-wheel-change", { bubbles: true, detail: { value: y } }));
+      monthWheel.dispatchEvent(new CustomEvent("immo-wheel-change", { bubbles: true, detail: { value: m } }));
+      dayWheel.dispatchEvent(new CustomEvent("immo-wheel-change", { bubbles: true, detail: { value: d } }));
+    }
+    wrap?.classList.remove("is-open", "has-drum-open");
+    wrap?.closest(".immo-triple-date")?.classList.remove("has-drum-open");
+    document.querySelectorAll(".immo-triple-date__half.is-drum-active").forEach((el) => el.classList.remove("is-drum-active"));
     trigger?.setAttribute("aria-expanded", "false");
     root.remove();
     activePortal = null;
@@ -1087,6 +1444,17 @@ export function openAutoDrumSheet(wheel, trigger, { sheetItems = null, form = nu
     const maxW = dual.querySelector(".immo-dual-range__half--max [data-wheel]");
     if (minW && maxW) {
       openSplitRangeDrumSheet(minW, maxW, trigger);
+      return;
+    }
+  }
+
+  const triple = wheel.closest(".immo-triple-date");
+  if (triple && !multiple) {
+    const yW = triple.querySelector('[data-wheel="muszaki_ev"]');
+    const mW = triple.querySelector('[data-wheel="muszaki_honap"]');
+    const dW = triple.querySelector('[data-wheel="muszaki_nap"]');
+    if (yW && mW && dW) {
+      openTripleDateDrumSheet(yW, mW, dW, trigger);
       return;
     }
   }

@@ -6,7 +6,7 @@ import {
   syncDrumWheelDisplay,
   closeAllInlineDrums,
 } from "./immo-drum-picker.js?v=immoClear1";
-import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=brandDrum21";
+import { bindAutoDrumSheet, openAutoDrumSheet } from "./auto-drum-sheet.js?v=brandDrum22";
 import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=autoHatotav1";
 
 const MOBILE_MQ = "(max-width: 900px)";
@@ -722,6 +722,113 @@ async function mountBrandModelCatalogDrums(form) {
   }
 }
 
+function convertMuszakiToDateTriple(wrap) {
+  if (!wrap) return;
+  const yearStart = new Date().getFullYear();
+  const yearOpts = [{ value: "", label: "Mindegy" }];
+  for (let y = yearStart; y <= yearStart + 5; y += 1) {
+    yearOpts.push({ value: String(y), label: String(y) });
+  }
+  const monthOpts = [{ value: "", label: "Mindegy" }];
+  for (let m = 1; m <= 12; m += 1) {
+    const v = String(m).padStart(2, "0");
+    monthOpts.push({ value: v, label: v });
+  }
+  const dayOpts = [{ value: "", label: "Mindegy" }];
+  for (let d = 1; d <= 31; d += 1) {
+    const v = String(d).padStart(2, "0");
+    dayOpts.push({ value: v, label: v });
+  }
+
+  const prevYear =
+    wrap.querySelector('[data-filter-key="muszaki_ev"]')?.value ||
+    wrap.querySelector("select")?.value ||
+    "";
+
+  const block = document.createElement("div");
+  block.className = "immo-triple-date-block";
+  block.dataset.range = "muszaki";
+
+  const triple = document.createElement("div");
+  triple.className = "immo-triple-date";
+  triple.dataset.range = "muszaki";
+  triple.setAttribute("aria-label", "Műszaki érvényesség");
+
+  const title = document.createElement("span");
+  title.className = "immo-label immo-triple-date__title";
+  title.textContent = "Műszaki érvényesség";
+  triple.appendChild(title);
+
+  const summary = document.createElement("button");
+  summary.type = "button";
+  summary.className = "immo-triple-date__summary";
+  summary.dataset.muszakiSummary = "1";
+  summary.setAttribute("aria-haspopup", "listbox");
+  summary.setAttribute("aria-expanded", "false");
+  summary.textContent = "Mindegy";
+  triple.appendChild(summary);
+
+  const yearCell = buildWheelCell({
+    filterKey: "muszaki_ev",
+    wheelName: "muszaki_ev",
+    label: "",
+    options: yearOpts,
+    emptyLabel: "Mindegy",
+    halfClass: "immo-triple-date__half immo-triple-date__half--year",
+  });
+  const monthCell = buildWheelCell({
+    filterKey: "muszaki_honap",
+    wheelName: "muszaki_honap",
+    label: "",
+    options: monthOpts,
+    emptyLabel: "Mindegy",
+    halfClass: "immo-triple-date__half immo-triple-date__half--month",
+  });
+  const dayCell = buildWheelCell({
+    filterKey: "muszaki_nap",
+    wheelName: "muszaki_nap",
+    label: "",
+    options: dayOpts,
+    emptyLabel: "Mindegy",
+    halfClass: "immo-triple-date__half immo-triple-date__half--day",
+  });
+
+  yearCell.hidden = true;
+  monthCell.hidden = true;
+  dayCell.hidden = true;
+
+  triple.appendChild(yearCell);
+  triple.appendChild(monthCell);
+  triple.appendChild(dayCell);
+  block.appendChild(triple);
+  wrap.replaceWith(block);
+
+  const yWheel = yearCell.querySelector("[data-wheel]");
+  const mWheel = monthCell.querySelector("[data-wheel]");
+  const dWheel = dayCell.querySelector("[data-wheel]");
+  if (prevYear) setWheelValue(yWheel, String(prevYear));
+
+  function refreshSummary() {
+    const y = String(readWheel(yWheel) ?? "");
+    const m = String(readWheel(mWheel) ?? "");
+    const d = String(readWheel(dWheel) ?? "");
+    summary.textContent = y ? `${y}. ${m || "—"}. ${d || "—"}` : "Mindegy";
+  }
+  refreshSummary();
+
+  const openSheet = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    const fakeTrigger = yWheel.closest(".immo-wheel-wrap")?.querySelector(".immo-wheel-trigger") || summary;
+    openAutoDrumSheet(yWheel, fakeTrigger);
+  };
+  summary.addEventListener("click", openSheet);
+
+  [yWheel, mWheel, dWheel].forEach((w) => {
+    w?.addEventListener("immo-wheel-change", refreshSummary);
+  });
+}
+
 export async function mountAutoSearchDrums(form = document.getElementById("home-qs-form")) {
   if (!form || form.dataset.drumsMounted === "1") return form.dataset.drumsMounted === "1";
   const page = document.body?.getAttribute("data-site-page") || "";
@@ -744,10 +851,15 @@ export async function mountAutoSearchDrums(form = document.getElementById("home-
     if (wrap) convertRangePairToDual(wrap, cfg);
   }
 
+  const muszakiWrap = form.querySelector('[data-qs-field="muszaki_ev"]');
+  if (muszakiWrap) convertMuszakiToDateTriple(muszakiWrap);
+
   form.querySelectorAll("[data-qs-field]").forEach((wrap) => {
     if (wrap.closest(".immo-dual-range-block")) return;
+    if (wrap.closest(".immo-triple-date-block")) return;
     const key = wrap.getAttribute("data-qs-field");
     if (dualKeys.has(key) || SEARCH_OMIT_FIELDS.has(key)) return;
+    if (key === "muszaki_ev" || key === "muszaki_nap") return;
     if (CATALOG_DRUM_KEYS.has(key)) return;
     if (wrap.querySelector("input.home-qs-control--price, input.home-qs-control[type='text'][data-filter-key^='ar_']")) {
       return;

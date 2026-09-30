@@ -11,7 +11,7 @@ import { applyImportedVehicleToSelects } from "./vehicle-catalog-client.js?v=imp
 import { initTireSizes } from "./tire-sizes-ui.js";
 import { initPhoneLanguages } from "./phone-lang-ui.js";
 import { initCategoryPicker } from "./category-picker.js?v=pickerBoot4";
-import { applyAdFormDesk, clearAdFormEditBoot, isDeskVehicleSubtype, scrollAdFormPageTop } from "./ad-form-desk.js?v=bmSheet28";
+import { applyAdFormDesk, clearAdFormEditBoot, isDeskVehicleSubtype, scrollAdFormPageTop } from "./ad-form-desk.js?v=bmSheet29";
 import {
   requireAuthForPage,
   getAuthUser,

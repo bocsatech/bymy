@@ -226,6 +226,8 @@ html[data-theme="dark"] body.site-app.ad-form-desk-active[data-site-page="hirdet
 }
 
 /* Teljes oldal háttér = Alapadatok kék (#e8eef3), ne szürke / #eef0f3 */
+html:has(body.site-app[data-site-page="hirdetesfeladas"]):not([data-theme="dark"]),
+html[data-theme="light"]:has(body.site-app[data-site-page="hirdetesfeladas"]),
 html:not([data-theme="dark"]) body.site-app[data-site-page="hirdetesfeladas"],
 html[data-theme="light"] body.site-app[data-site-page="hirdetesfeladas"] {
   background: #e8eef3 !important;
@@ -236,18 +238,26 @@ html:not([data-theme="dark"]) body.site-app[data-site-page="hirdetesfeladas"] .p
 html:not([data-theme="dark"]) body.site-app[data-site-page="hirdetesfeladas"] .home-main,
 html:not([data-theme="dark"]) body.site-app[data-site-page="hirdetesfeladas"] main,
 html:not([data-theme="dark"]) body.site-app[data-site-page="hirdetesfeladas"] .site-layout,
+html:not([data-theme="dark"]) body.site-app[data-site-page="hirdetesfeladas"] .site-center,
+html:not([data-theme="dark"]) body.site-app[data-site-page="hirdetesfeladas"] .site-center--automax,
 html:not([data-theme="dark"]) body.site-app[data-site-page="hirdetesfeladas"] .automax-main,
 html:not([data-theme="dark"]) body.site-app[data-site-page="hirdetesfeladas"] #ad-wizard-shell,
 html:not([data-theme="dark"]) body.site-app[data-site-page="hirdetesfeladas"] #ad-form,
 html:not([data-theme="dark"]) body.site-app[data-site-page="hirdetesfeladas"] .ad-form-desk-shell,
+html:not([data-theme="dark"]) body.site-app[data-site-page="hirdetesfeladas"] #ad-desk-center-col,
+html:not([data-theme="dark"]) body.site-app[data-site-page="hirdetesfeladas"] #ad-desk-tips-col,
 html[data-theme="light"] body.site-app[data-site-page="hirdetesfeladas"] .page,
 html[data-theme="light"] body.site-app[data-site-page="hirdetesfeladas"] .home-main,
 html[data-theme="light"] body.site-app[data-site-page="hirdetesfeladas"] main,
 html[data-theme="light"] body.site-app[data-site-page="hirdetesfeladas"] .site-layout,
+html[data-theme="light"] body.site-app[data-site-page="hirdetesfeladas"] .site-center,
+html[data-theme="light"] body.site-app[data-site-page="hirdetesfeladas"] .site-center--automax,
 html[data-theme="light"] body.site-app[data-site-page="hirdetesfeladas"] .automax-main,
 html[data-theme="light"] body.site-app[data-site-page="hirdetesfeladas"] #ad-wizard-shell,
 html[data-theme="light"] body.site-app[data-site-page="hirdetesfeladas"] #ad-form,
-html[data-theme="light"] body.site-app[data-site-page="hirdetesfeladas"] .ad-form-desk-shell {
+html[data-theme="light"] body.site-app[data-site-page="hirdetesfeladas"] .ad-form-desk-shell,
+html[data-theme="light"] body.site-app[data-site-page="hirdetesfeladas"] #ad-desk-center-col,
+html[data-theme="light"] body.site-app[data-site-page="hirdetesfeladas"] #ad-desk-tips-col {
   background: #e8eef3 !important;
   background-color: #e8eef3 !important;
 }
@@ -1440,6 +1450,13 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-
 @media (max-width: 900px) {
   body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .site-layout--wide .site-center--automax {
     padding: 12px 12px 2rem;
+  }
+
+  /* Mobil: üres desk-guide keretek ne legyenek fehér szaggatott dobozok a kék háttéren */
+  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout #ad-desk-center-col,
+  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout #ad-desk-tips-col,
+  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .ad-desk-guide-frame:not(.has-image) {
+    display: none !important;
   }
 
   body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .ad-desk-guide-frame {

@@ -941,6 +941,11 @@ export function openBrandModelCatalogSheet(brandWheel, trigger, wrap, emptyLabel
     () => paintSwitchList(scrollEl, view === "models" ? modelWheel : brandWheel),
     { passive: true }
   );
+  ring?.addEventListener(
+    "scroll",
+    () => paintSwitchList(scrollEl, view === "models" ? modelWheel : brandWheel),
+    { passive: true }
+  );
 
   document.body.appendChild(root);
   document.body.classList.add("auto-drum-portal-open");
@@ -950,8 +955,10 @@ export function openBrandModelCatalogSheet(brandWheel, trigger, wrap, emptyLabel
   trigger.setAttribute("aria-expanded", "true");
 
   stage.style.left = "50%";
-  stage.style.top = "auto";
+  stage.style.right = "auto";
+  stage.style.top = "0";
   stage.style.bottom = "0";
+  stage.style.height = "100%";
   stage.style.transform = "translateX(-50%)";
   activePortal = { root, wheel: brandWheel, scrollEl, ring, wrap, trigger, modelWheel };
 

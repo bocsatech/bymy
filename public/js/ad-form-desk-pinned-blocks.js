@@ -93,7 +93,8 @@ function isStep1BrandRow(el) {
   if (el.matches?.(".ad-form-bm-field--brand-model")) return true;
   if (el.querySelector?.(".ad-form-bm-field--brand-model, [data-ad-bm-for='gyartmany']")) return true;
   const key = step1FieldKey(el);
-  return key === "gyartmany";
+  /* Egyéb típus a gyártmány/modell fehér boxában, közvetlenül alatta. */
+  return key === "gyartmany" || key === "egyeb_tipus";
 }
 
 function unwrapAlapScoutCard(canvas) {
@@ -142,10 +143,20 @@ export function wrapAlapScoutCard(canvas) {
   if (brand.length) {
     const brandBlock = document.createElement("div");
     brandBlock.className = "ad-form-alap-brand-block";
-    brand.forEach((el) => {
-      el.classList.add("ad-form-alap-brand-row");
-      brandBlock.appendChild(el);
-    });
+    brand
+      .slice()
+      .sort(
+        (a, b) =>
+          deskStep1CanonicalRank(step1FieldKey(a)) - deskStep1CanonicalRank(step1FieldKey(b)) ||
+          (Number(a.dataset?.layoutRow) || 0) - (Number(b.dataset?.layoutRow) || 0)
+      )
+      .forEach((el) => {
+        el.classList.add("ad-form-alap-brand-row");
+        if (step1FieldKey(el) === "egyeb_tipus") {
+          el.classList.add("ad-form-alap-brand-row--egyeb-tipus");
+        }
+        brandBlock.appendChild(el);
+      });
     canvas.appendChild(brandBlock);
   }
 

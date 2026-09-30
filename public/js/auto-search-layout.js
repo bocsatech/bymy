@@ -46,6 +46,11 @@ const KG_STEPS = (() => {
   for (const kg of [12000, 15000, 18000, 20000, 25000, 30000, 35000, 40000]) values.push(kg);
   return values;
 })();
+const AC_KW_STEPS = (() => {
+  const values = [];
+  for (let kw = 10; kw <= 400; kw += 10) values.push(kw);
+  return values;
+})();
 
 const FREE_NUMBER_FIELDS = new Set([
   "fogyasztas_varosi",
@@ -427,6 +432,9 @@ export function optionsForAutoFilterKey(filterKey, emptyLabel = "Mindegy") {
     key === "ossztomeg_ig"
   ) {
     return withEmpty(KG_STEPS.map((n) => ({ value: String(n), label: `${n.toLocaleString("hu-HU")} kg` })));
+  }
+  if (key === "ac_toltesi_teljesitmeny_tol" || key === "ac_toltesi_teljesitmeny_ig") {
+    return withEmpty(AC_KW_STEPS.map((n) => ({ value: String(n), label: `${n} kW` })));
   }
   if (key === "uzemanyagQuick" || key === "uzemanyag") {
     return withEmpty(flattenUzemanyagOptions().map((v) => ({ value: v, label: v })));

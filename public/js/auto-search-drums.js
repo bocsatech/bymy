@@ -6,8 +6,8 @@ import {
   syncDrumWheelDisplay,
   closeAllInlineDrums,
 } from "./immo-drum-picker.js?v=immoClear1";
-import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=brandDrum15";
-import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=kgDrum1";
+import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=brandDrum16";
+import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=acKwDrum1";
 
 const MOBILE_MQ = "(max-width: 900px)";
 const TYPEAHEAD_CLEAR_MS = 2500;
@@ -111,6 +111,15 @@ const DUAL_RANGES = [
     tol: "ossztomeg_tol",
     ig: "ossztomeg_ig",
     unit: "kg",
+  },
+  {
+    fieldKey: "ac_toltesi_teljesitmeny",
+    id: "ac_toltesi_teljesitmeny",
+    title: "AC töltő teljesítménye",
+    ariaLabel: "AC töltő teljesítmény tartomány",
+    tol: "ac_toltesi_teljesitmeny_tol",
+    ig: "ac_toltesi_teljesitmeny_ig",
+    unit: "kW",
   },
 ];
 

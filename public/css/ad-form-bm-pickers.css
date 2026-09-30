@@ -845,6 +845,63 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-muszaki-date__
   opacity: 1 !important;
   min-width: 0 !important;
   flex: 1 1 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  height: auto !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+}
+
+/* Osztott év/hó/nap: ugyanaz a dobozos trigger, mint a kivitel (ad-form-bm-field--drum) */
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-split-ym__dual .immo-wheel-wrap,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-muszaki-date__triple .immo-wheel-wrap {
+  display: flex !important;
+  width: 100% !important;
+  min-height: 2.75rem !important;
+  height: auto !important;
+  position: relative !important;
+  overflow: visible !important;
+  border: 1.5px solid #111 !important;
+  border-radius: 0.55rem !important;
+  background: #fff !important;
+  box-shadow: none !important;
+  box-sizing: border-box !important;
+  align-items: stretch !important;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-split-ym__dual .immo-wheel-trigger,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-muszaki-date__triple .immo-wheel-trigger {
+  display: block !important;
+  flex: 1 1 auto !important;
+  width: 100% !important;
+  min-height: 2.75rem !important;
+  height: auto !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  border-radius: 0.55rem !important;
+  padding: 0.55rem 0.85rem !important;
+  margin: 0 !important;
+  font: inherit;
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  color: #0f172a !important;
+  text-align: left !important;
+  cursor: pointer;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-split-ym__dual .immo-wheel-wrap,
+html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-muszaki-date__triple .immo-wheel-wrap {
+  background: #1d1d1d !important;
+  border-color: #e5e7eb !important;
+}
+
+html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-split-ym__dual .immo-wheel-trigger,
+html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-muszaki-date__triple .immo-wheel-trigger {
+  color: #f9fafb !important;
 }
 
 /* Címmezők: teljes sor szélesség, ne a 168px cella */
@@ -1315,23 +1372,34 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__bod
   border: 0 !important;
 }
 
+/* Osztott dátum: ne aláhúzás — kivitel-stílusú dobozos cellák */
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body .ad-form-split-ym__dual .immo-dual-range__half,
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body .ad-form-muszaki-date__triple .immo-triple-date__half {
   border: 0 !important;
-  border-bottom: 1.5px solid #cfd6dd !important;
+  border-bottom: 0 !important;
   border-radius: 0 !important;
   background: transparent !important;
   box-shadow: none !important;
-  height: 2.65rem !important;
-  min-height: 2.65rem !important;
+  height: auto !important;
+  min-height: 0 !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body .immo-wheel-trigger,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body .ad-form-drum-wrap > .immo-wheel-trigger {
-  color: #6b7280 !important;
-  font-weight: 500 !important;
-  padding-left: 0.15rem !important;
-  padding-right: 0.15rem !important;
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body .ad-form-split-ym__dual .immo-wheel-wrap,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body .ad-form-muszaki-date__triple .immo-wheel-wrap {
+  border: 1.5px solid #111 !important;
+  border-bottom: 1.5px solid #111 !important;
+  border-radius: 0.55rem !important;
+  background: #fff !important;
+  box-shadow: none !important;
+  min-height: 2.75rem !important;
+  height: auto !important;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body .ad-form-split-ym__dual .immo-wheel-trigger,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body .ad-form-muszaki-date__triple .immo-wheel-trigger {
+  color: #0f172a !important;
+  font-weight: 600 !important;
+  padding: 0.55rem 0.85rem !important;
 }
 
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body .ad-form-bm-field--drum.has-value .immo-wheel-trigger {

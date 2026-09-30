@@ -1570,7 +1570,8 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   font-size: 1.05rem;
 }
 
-/* AutoScout-stílusú gyártmány sheet: fix fejléc + kék lábléc, középen fix szélességű fehér kártya görög */
+/* AutoScout-stílusú gyártmány sheet: fix fejléc + kék lábléc;
+   középen a fehér kártya a kék felett csúszik fel a tetejéig — szélesség állandó */
 .auto-drum-portal--sheet .auto-drum-portal__backdrop {
   background: rgba(15, 23, 42, 0.22);
 }
@@ -1605,7 +1606,7 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   grid-template-columns: 2.5rem 1fr 2.5rem;
   align-items: center;
   gap: 0.5rem;
-  margin: 0 0 0.55rem;
+  margin: 0 0 0.45rem;
   padding: 0.15rem 0 0;
   background: transparent;
 }
@@ -1638,6 +1639,23 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   height: 2.35rem;
 }
 
+/* Középső kék zóna: ez görög — a fehér kártya itt csúszik a kék tetejéig */
+.auto-drum-portal--sheet .auto-drum-portal__sheet-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+  padding: 0 0 0.35rem;
+  box-sizing: border-box;
+  background: transparent;
+}
+
 .auto-drum-portal--sheet .auto-drum-portal__sheet-section {
   flex: 0 0 auto;
   margin: 0 0 0.45rem;
@@ -1647,7 +1665,7 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   background: transparent;
 }
 
-/* Fehér kártya: állandó szélesség, csak ez görög a kék felett */
+/* Fehér kártya: állandó szélesség, tartalom magasság — nem belső scroll */
 .auto-drum-portal--sheet .auto-drum-portal__ring--sheet,
 .auto-drum-portal--sheet .auto-drum-portal__ring--multi {
   width: 100% !important;
@@ -1656,15 +1674,12 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   min-height: 0 !important;
   height: auto !important;
   max-height: none !important;
-  flex: 1 1 auto !important;
+  flex: 0 0 auto !important;
   border: 0 !important;
   border-radius: 1.15rem !important;
   background: #fff !important;
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06) !important;
-  overflow-x: hidden !important;
-  overflow-y: auto !important;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
+  overflow: hidden !important;
   display: flex !important;
   flex-direction: column !important;
   box-sizing: border-box !important;

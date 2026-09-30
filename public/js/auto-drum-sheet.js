@@ -733,13 +733,15 @@ export function openBrandModelCatalogSheet(brandWheel, trigger, wrap, emptyLabel
         <h2 class="auto-drum-portal__sheet-title">Gyártmány / Modell</h2>
         <span class="auto-drum-portal__sheet-head-spacer" aria-hidden="true"></span>
       </header>
-      <p class="auto-drum-portal__sheet-section" data-sheet-section>Népszerű gyártmányok</p>
-      <div class="immo-drum-wheel-ring auto-drum-portal__ring auto-drum-portal__ring--multi auto-drum-portal__ring--sheet" data-sheet-scroll tabindex="-1">
-        <div class="auto-drum-portal__toolbar auto-drum-portal__toolbar--sheet">
-          <button type="button" class="auto-drum-portal__back" hidden>Vissza</button>
-          <p class="auto-drum-portal__sub" hidden></p>
+      <div class="auto-drum-portal__sheet-scroll" data-sheet-scroll tabindex="-1">
+        <p class="auto-drum-portal__sheet-section" data-sheet-section>Népszerű gyártmányok</p>
+        <div class="immo-drum-wheel-ring auto-drum-portal__ring auto-drum-portal__ring--multi auto-drum-portal__ring--sheet">
+          <div class="auto-drum-portal__toolbar auto-drum-portal__toolbar--sheet">
+            <button type="button" class="auto-drum-portal__back" hidden>Vissza</button>
+            <p class="auto-drum-portal__sub" hidden></p>
+          </div>
+          <div class="auto-drum-portal__scroll immo-drum-inline-scroll" data-sheet-list></div>
         </div>
-        <div class="auto-drum-portal__scroll immo-drum-inline-scroll" data-sheet-list></div>
       </div>
       <footer class="auto-drum-portal__sheet-foot">
         <span class="auto-drum-portal__count" data-sheet-count>0 kiválasztva</span>

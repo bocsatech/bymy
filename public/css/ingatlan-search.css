@@ -1633,12 +1633,62 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   height: 2.35rem;
 }
 
+.auto-drum-portal--sheet .auto-drum-portal__sheet-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 0;
+  scrollbar-width: thin;
+}
+
+/* Modellek + Vissza/márka együtt görög, majd a cím alatt ragad */
+.auto-drum-portal--sheet .auto-drum-portal__sheet-sticky {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  flex: 0 0 auto;
+  background: #e8eef3;
+  padding: 0 0 0.35rem;
+  margin: 0;
+}
+
 .auto-drum-portal--sheet .auto-drum-portal__sheet-section {
   flex: 0 0 auto;
-  margin: 0 0 0.55rem;
-  padding: 0 0.15rem;
+  margin: 0 0 0.45rem;
+  padding: 0.15rem 0.15rem 0;
   font: 500 0.82rem/1.2 system-ui, sans-serif;
   color: #4b5563;
+  background: #e8eef3;
+}
+
+.auto-drum-portal--sheet .auto-drum-portal__toolbar--sheet {
+  display: none;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.55rem 0.75rem 0.35rem;
+  margin: 0;
+  border: 0 !important;
+  border-radius: 1.15rem 1.15rem 0 0;
+  background: #fff !important;
+  box-shadow: none;
+}
+
+.auto-drum-portal--sheet .auto-drum-portal__toolbar--sheet.is-visible {
+  display: flex !important;
+}
+
+.auto-drum-portal--sheet .auto-drum-portal__sheet-sticky.has-toolbar .auto-drum-portal__sheet-section {
+  margin-bottom: 0.35rem;
 }
 
 .auto-drum-portal--sheet .auto-drum-portal__ring--sheet,
@@ -1648,24 +1698,25 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   min-height: 0 !important;
   height: auto !important;
   max-height: none !important;
-  flex: 1 1 auto !important;
+  flex: 0 0 auto !important;
   border: 0 !important;
   border-width: 0 !important;
   border-color: transparent !important;
   border-radius: 1.15rem !important;
   background: #fff !important;
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06) !important;
-  overflow: hidden;
+  overflow: visible;
+  display: block !important;
 }
 
-.auto-drum-portal--sheet .auto-drum-portal__toolbar {
-  border-bottom: 0 !important;
-  background: transparent !important;
-  padding: 0.45rem 0.75rem 0 !important;
+/* Modellek nézet: a fehér kártya a sticky toolbar alá simul (egy egység) */
+.auto-drum-portal--sheet[data-sheet-view="models"] .auto-drum-portal__ring--sheet {
+  border-radius: 0 0 1.15rem 1.15rem !important;
+  margin-top: 0;
 }
 
-.auto-drum-portal--sheet .auto-drum-portal__toolbar:has(.auto-drum-portal__back[hidden]):has(.auto-drum-portal__sub[hidden]) {
-  display: none !important;
+.auto-drum-portal--sheet[data-sheet-view="models"] .auto-drum-portal__sheet-sticky.has-toolbar {
+  padding-bottom: 0;
 }
 
 .auto-drum-portal--sheet .auto-drum-portal__toolbar .auto-drum-portal__back,
@@ -1678,10 +1729,37 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   background: #f1f5f9 !important;
   color: #334155 !important;
   padding: 0.4rem 0.8rem !important;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
 }
 
-.auto-drum-portal--sheet .auto-drum-portal__scroll {
-  padding: 0.2rem 0.35rem 0.55rem 0.65rem !important;
+.auto-drum-portal--sheet .auto-drum-portal__toolbar .auto-drum-portal__sub {
+  margin: 0;
+  min-width: 0;
+  flex: 1 1 auto;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #111;
+}
+
+.auto-drum-portal--sheet .auto-drum-portal__toolbar .auto-drum-portal__back[hidden],
+.auto-drum-portal--sheet .auto-drum-portal__toolbar .auto-drum-portal__sub[hidden] {
+  display: none !important;
+}
+
+.auto-drum-portal--sheet .auto-drum-portal__scroll,
+.auto-drum-portal--sheet [data-sheet-list] {
+  position: relative !important;
+  inset: auto !important;
+  flex: none !important;
+  min-height: 0;
+  max-height: none !important;
+  overflow: visible !important;
+  padding: 0.15rem 0.35rem 0.65rem 0.65rem !important;
+  scroll-snap-type: none !important;
 }
 
 .auto-drum-portal--sheet .immo-drum-inline-item,

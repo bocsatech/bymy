@@ -320,6 +320,19 @@ function restackCanvasItems(form) {
         item.style.removeProperty("grid-row");
       }
     }
+    /* Biztosíték: EV/hibrid blokk soha ne kerüljön az üzemanyag fölé. */
+    const fuel = document.getElementById("uzemanyag");
+    const ev = canvas.querySelector("#electric-fields-block");
+    if (fuel && ev && canvas.contains(ev) && !ev.hidden && !ev.classList.contains("ad-layout-hidden")) {
+      const fuelHost =
+        [...canvas.children].find((el) => el !== ev && el.contains(fuel)) ||
+        fuel.closest(".ad-layout-item, .field-row--tech-top");
+      if (fuelHost && canvas.contains(fuelHost) && fuelHost.compareDocumentPosition(ev) & Node.DOCUMENT_POSITION_PRECEDING) {
+        const fuelRow = Number(fuelHost.dataset.layoutRow) || 0;
+        if (fuelRow > 0) ev.dataset.layoutRow = String(Math.max(Number(ev.dataset.layoutRow) || 0, fuelRow + 1));
+        fuelHost.after(ev);
+      }
+    }
   });
 }
 

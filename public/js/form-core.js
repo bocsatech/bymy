@@ -24,7 +24,7 @@ import {
   renderListingPhotoOverlay,
 } from "./listing-photo-overlay.js?v=photoOverlayIcons3";
 import { refreshAdFormBmPickers, applyAdFormBmFieldValues } from "./ad-form-bm-pickers.js?v=gyartFix1";
-import { applyAdFormDesk, isAdFormDesk } from "./ad-form-desk.js?v=immoTipusPick1";
+import { applyAdFormDesk, isAdFormDesk } from "./ad-form-desk.js?v=evAfterFuel1";
 import { initKmInput, parseKmDigits, setKmInputValue } from "./km-input.js?v=kmFmt1";
 import {
   EV_FUEL_FIELD_IDS,
@@ -33,6 +33,7 @@ import {
   normalizeAdFuelValue,
   readAdFormFuelValue,
 } from "./ad-form-fuel-profile.js?v=fuelProfile3";
+import { placeElectricFieldsAfterFuel } from "./ad-form-desk-pinned-blocks.js?v=evAfterFuel1";
 
 export function createAdForm(options = {}) {
   const mode = options.mode ?? "wizard";
@@ -718,6 +719,8 @@ function syncFuelDependentFields() {
         el.removeAttribute("hidden");
         el.style.removeProperty("display");
       });
+      /* Hibrid/EV mezők az üzemanyag alatt maradjanak (ne ugorjanak a lista tetejére). */
+      placeElectricFieldsAfterFuel(form);
     }
   }
   document.querySelectorAll(".fuel-combustion-only").forEach((el) => {

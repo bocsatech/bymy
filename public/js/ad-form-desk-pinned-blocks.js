@@ -262,3 +262,55 @@ export function insertPinnedDomBlock(canvas, blockEl, layoutRow) {
   if (insertBefore) canvas.insertBefore(blockEl, insertBefore);
   else canvas.appendChild(blockEl);
 }
+
+/** Üzemanyag mező host a Műszaki canvasen (layout item vagy tech-top sor). */
+export function fuelFieldLayoutAnchor(form) {
+  const fuel = document.getElementById("uzemanyag");
+  if (!fuel) return null;
+  const root = form || document;
+  const item = fuel.closest(".ad-layout-item");
+  if (item && (!root.contains || root.contains(item))) return item;
+  const techRow = fuel.closest(".field-row--tech-top");
+  if (techRow) return techRow;
+  return fuel.closest(".labeled-field, .md-outlined");
+}
+
+/**
+ * EV/hibrid blokk mindig az üzemanyag után — ne ugorjon a lista tetejére választáskor.
+ */
+export function resolveElectricBlockLayoutRow(form, cells) {
+  const fromCells = layoutRowForPinnedBlock(cells, EV_LAYOUT_GROUP_KEYS);
+  const canonical = deskStep2CanonicalRank("__desk_electric_block__") + 1;
+  let row = Math.max(fromCells || 0, canonical);
+  const fuelAnchor = fuelFieldLayoutAnchor(form);
+  const fuelRow = Number(fuelAnchor?.dataset?.layoutRow);
+  if (Number.isFinite(fuelRow) && fuelRow > 0) {
+    row = Math.max(row, fuelRow + 1);
+  }
+  return { row, fuelAnchor };
+}
+
+export function placeElectricFieldsAfterFuel(form, cells = null) {
+  const block = document.getElementById("electric-fields-block");
+  if (!block) return;
+  const canvas =
+    block.closest(".ad-layout-canvas") ||
+    form?.querySelector?.('.step-panel[data-step="2"] .ad-layout-canvas') ||
+    form?.querySelector?.(".ad-layout-canvas");
+  if (!canvas) return;
+
+  const { row, fuelAnchor } = resolveElectricBlockLayoutRow(form, cells);
+  block.classList.add("ad-desk-pinned-block");
+  block.dataset.layoutRow = String(row);
+
+  let anchor = fuelAnchor && canvas.contains(fuelAnchor) ? fuelAnchor : null;
+  if (!anchor) {
+    const fuel = document.getElementById("uzemanyag");
+    anchor = [...canvas.children].find((el) => el !== block && fuel && el.contains(fuel)) || null;
+  }
+  if (anchor) {
+    if (anchor.nextElementSibling !== block) anchor.after(block);
+    return;
+  }
+  insertPinnedDomBlock(canvas, block, row);
+}

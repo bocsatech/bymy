@@ -23,10 +23,43 @@ function escapeHtml(value) {
 
 export function closeAutoDrumSheet(commit = false) {
   if (!activePortal) return;
-  const { root, wheel, scrollEl, ring, wrap, trigger, modelWheel } = activePortal;
-  if (!wheel) {
+  const { root, wheel, scrollEl, ring, wrap, trigger, modelWheel, kind, minWheel, maxWheel, minScroll, maxScroll } =
+    activePortal;
+  if (!wheel && kind !== "split") {
     /* Standalone sheet — done handler already owns commit. */
     wrap?.classList.remove("is-open", "has-drum-open");
+    trigger?.setAttribute("aria-expanded", "false");
+    root.remove();
+    activePortal = null;
+    document.body.classList.remove("auto-drum-portal-open", "auto-drum-sheet-open");
+    return;
+  }
+  if (kind === "split") {
+    if (commit && minWheel && maxWheel && minScroll && maxScroll && ring) {
+      let minVal = nearestPortalItem(minScroll, ring)?.dataset.value ?? "";
+      let maxVal = nearestPortalItem(maxScroll, ring)?.dataset.value ?? "";
+      const minN = minVal === "" ? null : Number(String(minVal).replace(/\D/g, ""));
+      const maxN = maxVal === "" ? null : Number(String(maxVal).replace(/\D/g, ""));
+      if (minN != null && maxN != null && Number.isFinite(minN) && Number.isFinite(maxN) && minN > maxN) {
+        const tmp = minVal;
+        minVal = maxVal;
+        maxVal = tmp;
+      }
+      setWheelValue(minWheel, minVal);
+      setWheelValue(maxWheel, maxVal);
+      syncDrumWheelDisplay(minWheel);
+      syncDrumWheelDisplay(maxWheel);
+      minWheel.dispatchEvent(new CustomEvent("immo-wheel-change", { bubbles: true, detail: { value: minVal } }));
+      maxWheel.dispatchEvent(new CustomEvent("immo-wheel-change", { bubbles: true, detail: { value: maxVal } }));
+    }
+    wrap?.classList.remove("is-open", "has-drum-open");
+    wrap?.closest(".immo-dual-range")?.classList.remove("has-drum-open");
+    wrap?.closest(".immo-schema-cell")?.classList.remove("is-drum-active");
+    wrap?.closest(".immo-dual-range__half")?.classList.remove("is-drum-active");
+    root.querySelectorAll(".immo-dual-range__half.is-drum-active").forEach((el) => el.classList.remove("is-drum-active"));
+    document.querySelectorAll(".immo-dual-range.has-drum-open").forEach((el) => {
+      if (el.contains(minWheel) || el.contains(maxWheel)) el.classList.remove("has-drum-open");
+    });
     trigger?.setAttribute("aria-expanded", "false");
     root.remove();
     activePortal = null;
@@ -723,6 +756,261 @@ function gyartmanySheetItems(form, wheel, emptyLabel) {
   return normalizeSheetItems([...wheel.querySelectorAll(".immo-wheel-opt")], emptyLabel);
 }
 
+function paintSplitColSync(scrollEl, ring) {
+  if (!scrollEl || !ring) return;
+  const ringRect = ring.getBoundingClientRect();
+  const centerY = ringRect.top + ringRect.height / 2;
+  const nearest = nearestPortalItem(scrollEl, ring);
+  scrollEl.querySelectorAll(".immo-drum-inline-item").forEach((item) => {
+    const r = item.getBoundingClientRect();
+    const mid = r.top + r.height / 2;
+    const dist = Math.abs(mid - centerY);
+    const t = Math.min(dist / (ITEM_H * 1.15), 1);
+    const isSel = item === nearest;
+    item.style.opacity = String(Math.max(0.38, 1 - t * 0.55));
+    item.style.fontWeight = dist < ITEM_H * 0.42 || isSel ? "650" : "500";
+    item.style.color = "#0f172a";
+    item.classList.toggle("is-in-cell", isSel);
+    item.classList.toggle("is-selected", isSel);
+    item.setAttribute("aria-selected", isSel ? "true" : "false");
+  });
+}
+
+function wheelOptionRows(wheel, emptyLabel = "Mindegy") {
+  return normalizeSheetItems([...wheel.querySelectorAll(".immo-wheel-opt")], emptyLabel);
+}
+
+function labelForWheelValue(wheel, value, emptyLabel = "Mindegy") {
+  const v = String(value ?? "");
+  if (v === "") return emptyLabel;
+  const row = wheelOptionRows(wheel, emptyLabel).find((r) => String(r.value) === v);
+  return row?.label || v;
+}
+
+function openSplitRangeDrumSheet(minWheel, maxWheel, trigger) {
+  if (!minWheel || !maxWheel || !trigger) return;
+  closeAutoDrumSheet(false);
+  closeAllInlineDrums(false);
+
+  const dual = minWheel.closest(".immo-dual-range") || maxWheel.closest(".immo-dual-range");
+  const wrap = minWheel.closest(".immo-wheel-wrap") || maxWheel.closest(".immo-wheel-wrap");
+  const title =
+    dual?.querySelector(".immo-dual-range__title")?.textContent?.trim() ||
+    trigger.getAttribute("aria-label") ||
+    "Tartomány";
+  const unit = dual?.querySelector(".immo-dual-range__unit")?.textContent?.trim() || "";
+  const sheetTitle = unit ? `${title} (-tól -ig) · ${unit}` : `${title} (-tól -ig)`;
+  const emptyLabel = "Mindegy";
+  const minItems = wheelOptionRows(minWheel, emptyLabel);
+  const maxItems = wheelOptionRows(maxWheel, emptyLabel);
+  let pendingMin = String(readWheel(minWheel) ?? "");
+  let pendingMax = String(readWheel(maxWheel) ?? "");
+
+  const root = document.createElement("div");
+  root.className = "auto-drum-portal auto-drum-portal--multi auto-drum-portal--split";
+  root.setAttribute("role", "dialog");
+  root.setAttribute("aria-modal", "true");
+  root.setAttribute("aria-label", sheetTitle);
+
+  root.innerHTML = `
+    <button type="button" class="auto-drum-portal__backdrop" aria-label="Bezárás"></button>
+    <div class="auto-drum-portal__stage auto-drum-portal__stage--multi auto-drum-portal__stage--split">
+      <div class="immo-drum-wheel-ring auto-drum-portal__ring auto-drum-portal__ring--multi auto-drum-portal__ring--split">
+        <div class="auto-drum-portal__toolbar">
+          <button type="button" class="auto-drum-portal__back" hidden>Vissza</button>
+          <p class="auto-drum-portal__sub">${escapeHtml(sheetTitle)}</p>
+          <button type="button" class="auto-drum-portal__done">Kész</button>
+        </div>
+        <div class="auto-drum-split__chips">
+          <button type="button" class="auto-drum-split__chip" data-half="min" aria-label="Érték -tól">
+            <span class="auto-drum-split__chip-label"></span>
+            <span class="auto-drum-split__chip-clear" hidden aria-hidden="true">×</span>
+          </button>
+          <button type="button" class="auto-drum-split__chip" data-half="max" aria-label="Érték -ig">
+            <span class="auto-drum-split__chip-label"></span>
+            <span class="auto-drum-split__chip-clear" hidden aria-hidden="true">×</span>
+          </button>
+        </div>
+        <div class="auto-drum-split__body">
+          <div class="immo-drum-inline-highlight auto-drum-split__highlight" aria-hidden="true"></div>
+          <div class="auto-drum-split__cols">
+            <div class="auto-drum-split__col" data-half="min">
+              <div class="auto-drum-portal__scroll auto-drum-split__scroll immo-drum-inline-scroll" tabindex="-1"></div>
+            </div>
+            <div class="auto-drum-split__col" data-half="max">
+              <div class="auto-drum-portal__scroll auto-drum-split__scroll immo-drum-inline-scroll" tabindex="-1"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+
+  const stage = root.querySelector(".auto-drum-portal__stage");
+  const ring = root.querySelector(".auto-drum-split__highlight");
+  const minScroll = root.querySelector('.auto-drum-split__col[data-half="min"] .auto-drum-split__scroll');
+  const maxScroll = root.querySelector('.auto-drum-split__col[data-half="max"] .auto-drum-split__scroll');
+  const chipMin = root.querySelector('.auto-drum-split__chip[data-half="min"]');
+  const chipMax = root.querySelector('.auto-drum-split__chip[data-half="max"]');
+  const doneBtn = root.querySelector(".auto-drum-portal__done");
+
+  function itemHtml(row) {
+    return `<div class="immo-drum-inline-item" data-value="${escapeHtml(row.value)}"><span class="immo-drum-inline-text">${escapeHtml(row.label)}</span></div>`;
+  }
+
+  minScroll.innerHTML = minItems.map(itemHtml).join("");
+  maxScroll.innerHTML = maxItems.map(itemHtml).join("");
+
+  function syncChips() {
+    const minLabel = labelForWheelValue(minWheel, pendingMin, emptyLabel);
+    const maxLabel = labelForWheelValue(maxWheel, pendingMax, emptyLabel);
+    chipMin.querySelector(".auto-drum-split__chip-label").textContent = minLabel;
+    chipMax.querySelector(".auto-drum-split__chip-label").textContent = maxLabel;
+    const clearMin = chipMin.querySelector(".auto-drum-split__chip-clear");
+    const clearMax = chipMax.querySelector(".auto-drum-split__chip-clear");
+    clearMin.hidden = pendingMin === "";
+    clearMax.hidden = pendingMax === "";
+    clearMin.setAttribute("aria-hidden", pendingMin === "" ? "true" : "false");
+    clearMax.setAttribute("aria-hidden", pendingMax === "" ? "true" : "false");
+  }
+
+  function readPendingFromScrolls() {
+    pendingMin = nearestPortalItem(minScroll, ring)?.dataset.value ?? "";
+    pendingMax = nearestPortalItem(maxScroll, ring)?.dataset.value ?? "";
+    syncChips();
+  }
+
+  function paintBoth() {
+    cancelAnimationFrame(paintFrame);
+    paintFrame = requestAnimationFrame(() => {
+      paintSplitColSync(minScroll, ring);
+      paintSplitColSync(maxScroll, ring);
+      const minItem = nearestPortalItem(minScroll, ring);
+      const maxItem = nearestPortalItem(maxScroll, ring);
+      if (minItem) pendingMin = minItem.dataset.value ?? "";
+      if (maxItem) pendingMax = maxItem.dataset.value ?? "";
+      syncChips();
+    });
+  }
+
+  function scrollHalfToValue(scrollEl, value) {
+    const start =
+      [...scrollEl.querySelectorAll(".immo-drum-inline-item")].find((el) => (el.dataset.value ?? "") === value) ||
+      scrollEl.querySelector('.immo-drum-inline-item[data-value=""]') ||
+      scrollEl.querySelector(".immo-drum-inline-item");
+    scrollToPortalItem(scrollEl, ring, start);
+  }
+
+  function bindCol(scrollEl) {
+    scrollEl.addEventListener("scroll", () => paintBoth(), { passive: true });
+    let startY = 0;
+    let moved = false;
+    scrollEl.addEventListener(
+      "touchstart",
+      (event) => {
+        startY = event.touches?.[0]?.clientY ?? 0;
+        moved = false;
+      },
+      { passive: true }
+    );
+    scrollEl.addEventListener(
+      "touchmove",
+      (event) => {
+        const y = event.touches?.[0]?.clientY ?? startY;
+        if (Math.abs(y - startY) > 4) moved = true;
+      },
+      { passive: true }
+    );
+    const snapEnd = () => {
+      if (!moved) return;
+      const snap = nearestPortalItem(scrollEl, ring);
+      if (snap) scrollToPortalItem(scrollEl, ring, snap);
+      paintBoth();
+    };
+    scrollEl.addEventListener("touchend", snapEnd);
+    scrollEl.addEventListener("touchcancel", snapEnd);
+    scrollEl.querySelectorAll(".immo-drum-inline-item").forEach((item) => {
+      let tapStart = null;
+      item.addEventListener(
+        "pointerdown",
+        (event) => {
+          tapStart = { x: event.clientX, y: event.clientY };
+        },
+        { passive: true }
+      );
+      item.addEventListener("click", (event) => {
+        event.stopPropagation();
+        if (tapStart) {
+          const dx = Math.abs(event.clientX - tapStart.x);
+          const dy = Math.abs(event.clientY - tapStart.y);
+          if (dx > 10 || dy > 10) return;
+        }
+        scrollToPortalItem(scrollEl, ring, item);
+        paintBoth();
+      });
+    });
+  }
+
+  bindCol(minScroll);
+  bindCol(maxScroll);
+
+  function onChipClear(half, event) {
+    event.preventDefault();
+    event.stopPropagation();
+    if (half === "min") {
+      pendingMin = "";
+      scrollHalfToValue(minScroll, "");
+    } else {
+      pendingMax = "";
+      scrollHalfToValue(maxScroll, "");
+    }
+    paintBoth();
+  }
+
+  chipMin.addEventListener("click", (event) => {
+    if (event.target.closest(".auto-drum-split__chip-clear")) onChipClear("min", event);
+  });
+  chipMax.addEventListener("click", (event) => {
+    if (event.target.closest(".auto-drum-split__chip-clear")) onChipClear("max", event);
+  });
+
+  root.querySelector(".auto-drum-portal__backdrop")?.addEventListener("click", () => closeAutoDrumSheet(true));
+  doneBtn?.addEventListener("click", () => {
+    readPendingFromScrolls();
+    closeAutoDrumSheet(true);
+  });
+
+  document.body.appendChild(root);
+  document.body.classList.add("auto-drum-portal-open");
+  wrap?.classList.add("is-open", "has-drum-open");
+  dual?.classList.add("has-drum-open");
+  dual?.querySelectorAll(".immo-dual-range__half").forEach((half) => half.classList.add("is-drum-active"));
+  trigger.setAttribute("aria-expanded", "true");
+
+  positionPortal(stage, trigger);
+  activePortal = {
+    kind: "split",
+    root,
+    wheel: minWheel,
+    minWheel,
+    maxWheel,
+    minScroll,
+    maxScroll,
+    scrollEl: minScroll,
+    ring,
+    wrap,
+    trigger,
+  };
+
+  requestAnimationFrame(() => {
+    root
+      .querySelector(".auto-drum-portal__ring--split")
+      ?.style.setProperty("--immo-drum-ring-w", `${Math.min(360, Math.floor(window.innerWidth * 0.92))}px`);
+    scrollHalfToValue(minScroll, pendingMin);
+    scrollHalfToValue(maxScroll, pendingMax);
+    paintBoth();
+  });
+}
+
 export function openAutoDrumSheet(wheel, trigger, { sheetItems = null, form = null } = {}) {
   if (!wheel || !trigger) return;
   closeAutoDrumSheet(false);
@@ -736,6 +1024,16 @@ export function openAutoDrumSheet(wheel, trigger, { sheetItems = null, form = nu
   if (multiple) wheel.dataset.multiple = "1";
   const current = String(readWheel(wheel) ?? "");
   const opts = [...wheel.querySelectorAll(".immo-wheel-opt")];
+
+  const dual = wheel.closest(".immo-dual-range");
+  if (dual && !multiple) {
+    const minW = dual.querySelector(".immo-dual-range__half--min [data-wheel]");
+    const maxW = dual.querySelector(".immo-dual-range__half--max [data-wheel]");
+    if (minW && maxW) {
+      openSplitRangeDrumSheet(minW, maxW, trigger);
+      return;
+    }
+  }
 
   if (wheelKey === "gyartmany" && host?._autoDrumCatalog?.gyartmanyok?.length) {
     openBrandModelCatalogSheet(wheel, trigger, wrap, emptyLabel, host);

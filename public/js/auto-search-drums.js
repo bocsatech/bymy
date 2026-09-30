@@ -6,7 +6,7 @@ import {
   syncDrumWheelDisplay,
   closeAllInlineDrums,
 } from "./immo-drum-picker.js?v=immoClear1";
-import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=brandDrum10";
+import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=brandDrum11";
 import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=priceSuggest1";
 
 const MOBILE_MQ = "(max-width: 900px)";
@@ -426,14 +426,19 @@ function convertSimpleField(wrap) {
 }
 
 function convertRangePairToDual(wrap, cfg) {
-  const tolSelect = wrap.querySelector(`[data-filter-key="${cfg.tol}"]`);
-  const igSelect = wrap.querySelector(`[data-filter-key="${cfg.ig}"]`);
-  if (!tolSelect || !igSelect) return;
+  const tolEl = wrap.querySelector(`[data-filter-key="${cfg.tol}"]`);
+  const igEl = wrap.querySelector(`[data-filter-key="${cfg.ig}"]`);
+  if (!tolEl || !igEl) return;
 
-  const tolOpts = resolveOptions(cfg.tol, tolSelect, "-tól");
-  const igOpts = resolveOptions(cfg.ig, igSelect, "-ig");
-  const tolVal = tolSelect.value;
-  const igVal = igSelect.value;
+  const isSelect = tolEl.tagName === "SELECT";
+  const tolOpts = isSelect
+    ? resolveOptions(cfg.tol, tolEl, "Mindegy")
+    : optionsForAutoFilterKey(cfg.tol, "Mindegy");
+  const igOpts = isSelect
+    ? resolveOptions(cfg.ig, igEl, "Mindegy")
+    : optionsForAutoFilterKey(cfg.ig, "Mindegy");
+  const tolVal = isSelect ? tolEl.value : String(tolEl.value || "").replace(/\D/g, "");
+  const igVal = isSelect ? igEl.value : String(igEl.value || "").replace(/\D/g, "");
 
   const block = document.createElement("div");
   block.className = "immo-dual-range-block";
@@ -663,7 +668,6 @@ export async function mountAutoSearchDrums(form = document.getElementById("home-
   const dualKeys = new Set(DUAL_RANGES.map((d) => d.fieldKey));
 
   for (const cfg of DUAL_RANGES) {
-    if (cfg.fieldKey === "vetelar") continue;
     const wrap = form.querySelector(`[data-qs-field="${cfg.fieldKey}"]`);
     if (wrap) convertRangePairToDual(wrap, cfg);
   }
@@ -673,7 +677,6 @@ export async function mountAutoSearchDrums(form = document.getElementById("home-
     const key = wrap.getAttribute("data-qs-field");
     if (dualKeys.has(key) || SEARCH_OMIT_FIELDS.has(key)) return;
     if (CATALOG_DRUM_KEYS.has(key)) return;
-    if (key === "vetelar") return;
     if (wrap.querySelector("input.home-qs-control--price, input.home-qs-control[type='text'][data-filter-key^='ar_']")) {
       return;
     }

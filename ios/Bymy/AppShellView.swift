@@ -37,6 +37,9 @@ struct AppShellView: View {
                 ChatScreen(conversation: conv)
                     .toolbar(.visible, for: .navigationBar)
             }
+            .navigationDestination(item: $router.openFiokSection) { section in
+                FiokSectionScreen(section: section)
+            }
         }
     }
 

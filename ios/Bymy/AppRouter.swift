@@ -61,12 +61,14 @@ final class AppRouter: ObservableObject {
     /// Push a NavigationStack-en (nem sheet).
     @Published var openListingId: String?
     @Published var openChat: MessagesAPI.Conversation?
+    @Published var openFiokSection: FiokSection?
 
     /// Alsó tab választás — igazodik a mobil web linkjeihez.
     func selectBottom(_ tab: BottomTab, isLoggedIn: Bool) {
         // Tab váltás = vissza a listához (mint weben új oldal)
         openListingId = nil
         openChat = nil
+        openFiokSection = nil
 
         switch tab {
         case .home:
@@ -95,6 +97,7 @@ final class AppRouter: ObservableObject {
     func selectTop(_ page: TopPage) {
         openListingId = nil
         openChat = nil
+        openFiokSection = nil
         topPage = page
         switch page {
         case .ajanlasok:
@@ -110,7 +113,17 @@ final class AppRouter: ObservableObject {
 
     func openListing(_ id: String) {
         openChat = nil
+        openFiokSection = nil
         openListingId = id
+    }
+
+    func openFiokSection(_ section: FiokSection?) {
+        openListingId = nil
+        openChat = nil
+        openFiokSection = section
+        if section != nil {
+            bottomTab = .account
+        }
     }
 
     func openMessage(for detail: ListingsAPI.Detail, token: String?) async {
@@ -147,16 +160,20 @@ final class AppRouter: ObservableObject {
         }
     }
 
-    /// Hirdetés / chat nézetben nincs felső menü + alsó tab (mint a webes hirdetés.html).
+    /// Hirdetés / chat / fiók-aloldal nézetben nincs felső menü + alsó tab.
     var showsTopChrome: Bool {
         openListingId == nil
             && openChat == nil
+            && openFiokSection == nil
             && bottomTab != .post
             && bottomTab != .account
             && bottomTab != .search
     }
 
     var showsBottomChrome: Bool {
-        openListingId == nil && openChat == nil && bottomTab != .post
+        openListingId == nil
+            && openChat == nil
+            && openFiokSection == nil
+            && bottomTab != .post
     }
 }

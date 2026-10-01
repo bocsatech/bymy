@@ -652,6 +652,88 @@ function ensureBrandModelDrumCells(form) {
   }
 }
 
+function labelListShort(items, unit) {
+  if (!items.length) return "";
+  if (items.length === 1) return items[0];
+  if (items.length <= 3) return items.join(", ");
+  return `${items.length} ${unit}`;
+}
+
+/** Mobil: egy „Gyártmány & Modell” pill (mint a hirdetésfeladás), külön Modell mező elrejtve. */
+function combineBrandModelOnMobile(form) {
+  if (!isMobile() || !form || form.dataset.bmCombinedMobile === "1") return;
+  const brandCell = form.querySelector('[data-qs-field="gyartmany"]');
+  const modelCell = form.querySelector('[data-qs-field="modell"]');
+  const brandWrap = form.querySelector('[data-wheel="gyartmany"]')?.closest(".immo-wheel-wrap");
+  const brandWheel = form.querySelector('[data-wheel="gyartmany"]');
+  const modelWheel = form.querySelector('[data-wheel="modell"]');
+  if (!brandCell || !brandWrap || !brandWheel) return;
+
+  const emptyCombined = "Gyártmány / Modell";
+  form.dataset.bmCombinedMobile = "1";
+  brandCell.classList.add("auto-search-bm-combined");
+  brandWrap.classList.add("auto-search-bm-combined__wrap");
+
+  const hideHost = modelCell?.closest(".home-qs-grid-cell") || modelCell;
+  if (hideHost) {
+    hideHost.classList.add("auto-search-bm-modell-nested");
+    hideHost.setAttribute("hidden", "");
+    hideHost.style.setProperty("display", "none", "important");
+  }
+
+  let labelEl = brandWrap.querySelector(".immo-label");
+  if (labelEl) {
+    labelEl.textContent = "Gyártmány & Modell";
+    if (labelEl.parentElement === brandWrap) {
+      brandCell.insertBefore(labelEl, brandWrap);
+    }
+  } else {
+    labelEl = document.createElement("span");
+    labelEl.className = "immo-label";
+    labelEl.textContent = "Gyártmány & Modell";
+    brandCell.insertBefore(labelEl, brandWrap);
+  }
+
+  function combinedSummary() {
+    const brands = readWheelList(brandWheel);
+    const models = modelWheel ? readWheelList(modelWheel) : [];
+    if (!brands.length) return emptyCombined;
+    const bPart = labelListShort(brands, "márka");
+    if (!models.length) return bPart;
+    return `${bPart} · ${labelListShort(models, "modell")}`;
+  }
+
+  function refreshCombined() {
+    const trigger = brandWrap.querySelector(".immo-wheel-trigger");
+    if (!trigger) return;
+    const text = combinedSummary();
+    trigger.textContent = text;
+    trigger.dataset.emptyLabel = emptyCombined;
+    trigger.setAttribute("aria-label", "Gyártmány és modell");
+    trigger.classList.toggle("is-placeholder", text === emptyCombined);
+    brandCell.classList.toggle("has-value", text !== emptyCombined);
+    brandWrap.classList.toggle("has-value", text !== emptyCombined);
+  }
+
+  brandWheel.addEventListener("immo-wheel-change", () => {
+    requestAnimationFrame(refreshCombined);
+  });
+  modelWheel?.addEventListener("immo-wheel-change", () => {
+    requestAnimationFrame(refreshCombined);
+  });
+
+  const onPortalGone = () => {
+    if (document.body.classList.contains("auto-drum-portal-open")) return;
+    refreshCombined();
+  };
+  new MutationObserver(onPortalGone).observe(document.body, {
+    attributes: true,
+    attributeFilter: ["class"],
+  });
+
+  refreshCombined();
+}
+
 async function mountBrandModelCatalogDrums(form) {
   ensureBrandModelDrumCells(form);
   if (!form.querySelector('[data-wheel="gyartmany"]')) return;
@@ -677,7 +759,8 @@ async function mountBrandModelCatalogDrums(form) {
 
   form._autoDrumCatalog = catalog;
   const brands = (catalog.gyartmanyok || []).map((b) => ({ value: b, label: b }));
-  const brandWheel = rebindWheel(form, "gyartmany", brands, "Mindegy", { multiple: true });
+  const brandEmpty = isMobile() ? "Gyártmány / Modell" : "Mindegy";
+  const brandWheel = rebindWheel(form, "gyartmany", brands, brandEmpty, { multiple: true });
   if (brandTrigger) brandTrigger.disabled = false;
   if (!brandWheel) return;
 
@@ -720,6 +803,8 @@ async function mountBrandModelCatalogDrums(form) {
       fillModels(readWheelList(form.querySelector('[data-wheel="gyartmany"]')));
     });
   }
+
+  combineBrandModelOnMobile(form);
 }
 
 function convertMuszakiToDateTriple(wrap) {

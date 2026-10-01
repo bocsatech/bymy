@@ -1055,15 +1055,20 @@ export function openYmDualSheet(yearWheel, monthWheel, trigger, { title = null }
   if (sheetScroll) {
     sheetScroll.style.overflow = "hidden";
     sheetScroll.scrollTop = 0;
-    sheetScroll.style.setProperty("padding-left", "0", "important");
-    sheetScroll.style.setProperty("padding-right", "0", "important");
+    sheetScroll.style.setProperty("padding-left", "1rem", "important");
+    sheetScroll.style.setProperty("padding-right", "1rem", "important");
     sheetScroll.style.setProperty("width", "100%", "important");
+    sheetScroll.style.setProperty("margin-left", "auto", "important");
+    sheetScroll.style.setProperty("margin-right", "auto", "important");
+    sheetScroll.style.setProperty("align-items", "center", "important");
   }
   ring.style.overflow = "hidden";
   ring.style.setProperty("width", "100%", "important");
   ring.style.setProperty("max-width", "100%", "important");
-  ring.style.setProperty("margin-left", "0", "important");
-  ring.style.setProperty("margin-right", "0", "important");
+  ring.style.setProperty("margin-left", "auto", "important");
+  ring.style.setProperty("margin-right", "auto", "important");
+  ring.style.setProperty("left", "0", "important");
+  ring.style.setProperty("right", "0", "important");
   ring.style.setProperty("transform", "none", "important");
 
   const highlight = root.querySelector(".auto-drum-ym__highlight");

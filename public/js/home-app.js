@@ -8,9 +8,9 @@ import {
   initHomeSearchSidebar,
   initHomeFilterCatalog,
 } from "./home-search-filter.js?v=valto3";
-import { initHomeQuickSearch } from "./home-quicksearch.js?v=bmSearch22";
+import { initHomeQuickSearch } from "./home-quicksearch.js?v=bmSearch23";
 import { decodeSavedSearchParam, encodeSavedSearchParam } from "./saved-search.js?v=savedSearch5";
-import { matchDetailedSearch, hasActiveDetailedSearch } from "./auto-detailed-search.js?v=bmSearch22";
+import { matchDetailedSearch, hasActiveDetailedSearch } from "./auto-detailed-search.js?v=bmSearch23";
 import { updateAutoDeskResultCount, updateAutoDeskAccSummaries } from "./auto-desk-search.js?v=catMenu1";
 import {
   emptyIngatlanFilters,
@@ -1226,23 +1226,26 @@ window.scrollTo(0, 0);
 const initialCategory = PAGE === "teherauto" ? categoryFilter : null;
 
 if (PAGE === "teherauto") {
-  renderHomeCategoryBar(document.getElementById("home-category-bar"));
-  categoryUi = initHomeCategoryBar({
-    onChange: (category) => {
-      categoryFilter = category;
-      if (category) {
-        quickSearchFilters = emptyFilters();
-        detailedFilters = null;
-        sidebarFilters = emptyFilters();
-        void syncCategoryToSearchMenu(category);
-      }
-      applyFilters({ commit: Boolean(category) });
-      if (category) scrollToListings();
-    },
-    getForm: () => filterForm,
-    initialCategory,
-  });
-  bindListingsScrollHide();
+  const teherCatBar = document.getElementById("home-category-bar");
+  if (teherCatBar) {
+    renderHomeCategoryBar(teherCatBar);
+    categoryUi = initHomeCategoryBar({
+      onChange: (category) => {
+        categoryFilter = category;
+        if (category) {
+          quickSearchFilters = emptyFilters();
+          detailedFilters = null;
+          sidebarFilters = emptyFilters();
+          void syncCategoryToSearchMenu(category);
+        }
+        applyFilters({ commit: Boolean(category) });
+        if (category) scrollToListings();
+      },
+      getForm: () => filterForm,
+      initialCategory,
+    });
+    bindListingsScrollHide();
+  }
 }
 
 if (PAGE === "ingatlan") {

@@ -7,7 +7,7 @@ import {
   closeAllInlineDrums,
 } from "./immo-drum-picker.js?v=immoClear1";
 import { bindAutoDrumSheet, openAutoDrumSheet } from "./auto-drum-sheet.js?v=brandDrum29";
-import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=bmSearch22";
+import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=bmSearch23";
 
 const MOBILE_MQ = "(max-width: 900px)";
 const TYPEAHEAD_CLEAR_MS = 2500;

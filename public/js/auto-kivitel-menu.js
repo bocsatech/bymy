@@ -30,6 +30,7 @@ function categoryHref(kategoriaKey) {
 
 function syncCategoryTabs(root) {
   const kat = currentKategoria();
+  document.body?.setAttribute("data-auto-kategoria", kat);
   root.querySelectorAll("[data-auto-kat]").forEach((link) => {
     const key = link.getAttribute("data-auto-kat") || "";
     const active = CATEGORY_TABS.find((t) => t.key === key)?.match(kat);

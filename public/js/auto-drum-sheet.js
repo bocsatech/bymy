@@ -22,6 +22,11 @@ function escapeHtml(value) {
     .replace(/"/g, "&quot;");
 }
 
+/** Auto oldal tartomány/osztott sheet: hirdetésfeladás chrome csak mobilon. */
+function isMobileDrumSheet() {
+  return !window.matchMedia("(min-width: 901px)").matches;
+}
+
 function daysInMonth(year, month) {
   const y = Number(year);
   const m = Number(month);
@@ -115,13 +120,59 @@ function openTripleDateDrumSheet(yearWheel, monthWheel, dayWheel, trigger) {
     /* keep select value as stored on wheel */
   }
 
-  const root = document.createElement("div");
-  root.className = "auto-drum-portal auto-drum-portal--multi auto-drum-portal--split auto-drum-portal--date3";
-  root.setAttribute("role", "dialog");
-  root.setAttribute("aria-modal", "true");
-  root.setAttribute("aria-label", sheetTitle);
+  const useSheet = isMobileDrumSheet();
+  let root;
+  let stage;
+  let ring;
+  let yearScroll;
+  let monthScroll;
+  let dayScroll;
+  let chip;
+  let doneBtn;
+  let closeBtn;
+  let sheetScroll = null;
+  let ringEl = null;
 
-  root.innerHTML = `
+  if (useSheet) {
+    ({ root, stage, ring: ringEl, sheetScroll, doneBtn, closeBtn } = createSheetPortalShell(sheetTitle));
+    root.classList.add("auto-drum-portal--ym", "auto-drum-portal--date3");
+    ringEl.innerHTML = `
+        <div class="auto-drum-split__chips auto-drum-date3__chips auto-drum-ym__chips">
+          <button type="button" class="auto-drum-split__chip auto-drum-date3__chip" aria-label="Dátum">
+            <span class="auto-drum-split__chip-label"></span>
+            <span class="auto-drum-split__chip-clear" hidden aria-hidden="true">×</span>
+          </button>
+        </div>
+        <div class="auto-drum-date3__heads auto-drum-ym__heads" aria-hidden="true">
+          <span>Év</span><span>Hó</span><span>Nap</span>
+        </div>
+        <div class="auto-drum-split__body auto-drum-date3__body auto-drum-ym__body" style="width:100%;max-width:100%;box-sizing:border-box;">
+          <div class="immo-drum-inline-highlight auto-drum-split__highlight auto-drum-ym__highlight" aria-hidden="true" style="left:0.4rem;right:0.4rem;width:auto;transform:translateY(-50%);"></div>
+          <div class="auto-drum-split__cols auto-drum-date3__cols auto-drum-ym__cols" style="width:100%;max-width:100%;">
+            <div class="auto-drum-split__col" data-half="year">
+              <div class="auto-drum-portal__scroll auto-drum-split__scroll immo-drum-inline-scroll" tabindex="-1"></div>
+            </div>
+            <div class="auto-drum-split__col" data-half="month">
+              <div class="auto-drum-portal__scroll auto-drum-split__scroll immo-drum-inline-scroll" tabindex="-1"></div>
+            </div>
+            <div class="auto-drum-split__col" data-half="day">
+              <div class="auto-drum-portal__scroll auto-drum-split__scroll immo-drum-inline-scroll" tabindex="-1"></div>
+            </div>
+          </div>
+        </div>`;
+    ring = root.querySelector(".auto-drum-split__highlight");
+    yearScroll = root.querySelector('.auto-drum-split__col[data-half="year"] .auto-drum-split__scroll');
+    monthScroll = root.querySelector('.auto-drum-split__col[data-half="month"] .auto-drum-split__scroll');
+    dayScroll = root.querySelector('.auto-drum-split__col[data-half="day"] .auto-drum-split__scroll');
+    chip = root.querySelector(".auto-drum-date3__chip");
+  } else {
+    root = document.createElement("div");
+    root.className = "auto-drum-portal auto-drum-portal--multi auto-drum-portal--split auto-drum-portal--date3";
+    root.setAttribute("role", "dialog");
+    root.setAttribute("aria-modal", "true");
+    root.setAttribute("aria-label", sheetTitle);
+
+    root.innerHTML = `
     <button type="button" class="auto-drum-portal__backdrop" aria-label="Bezárás"></button>
     <div class="auto-drum-portal__stage auto-drum-portal__stage--multi auto-drum-portal__stage--split auto-drum-portal__stage--date3">
       <div class="immo-drum-wheel-ring auto-drum-portal__ring auto-drum-portal__ring--multi auto-drum-portal__ring--split auto-drum-portal__ring--date3">
@@ -156,13 +207,14 @@ function openTripleDateDrumSheet(yearWheel, monthWheel, dayWheel, trigger) {
       </div>
     </div>`;
 
-  const stage = root.querySelector(".auto-drum-portal__stage");
-  const ring = root.querySelector(".auto-drum-split__highlight");
-  const yearScroll = root.querySelector('.auto-drum-split__col[data-half="year"] .auto-drum-split__scroll');
-  const monthScroll = root.querySelector('.auto-drum-split__col[data-half="month"] .auto-drum-split__scroll');
-  const dayScroll = root.querySelector('.auto-drum-split__col[data-half="day"] .auto-drum-split__scroll');
-  const chip = root.querySelector(".auto-drum-date3__chip");
-  const doneBtn = root.querySelector(".auto-drum-portal__done");
+    stage = root.querySelector(".auto-drum-portal__stage");
+    ring = root.querySelector(".auto-drum-split__highlight");
+    yearScroll = root.querySelector('.auto-drum-split__col[data-half="year"] .auto-drum-split__scroll');
+    monthScroll = root.querySelector('.auto-drum-split__col[data-half="month"] .auto-drum-split__scroll');
+    dayScroll = root.querySelector('.auto-drum-split__col[data-half="day"] .auto-drum-split__scroll');
+    chip = root.querySelector(".auto-drum-date3__chip");
+    doneBtn = root.querySelector(".auto-drum-portal__done");
+  }
 
   function itemHtml(row) {
     return `<div class="immo-drum-inline-item" data-value="${escapeHtml(row.value)}"><span class="immo-drum-inline-text">${escapeHtml(row.label)}</span></div>`;
@@ -317,16 +369,27 @@ function openTripleDateDrumSheet(yearWheel, monthWheel, dayWheel, trigger) {
   });
 
   root.querySelector(".auto-drum-portal__backdrop")?.addEventListener("click", () => closeAutoDrumSheet(true));
+  closeBtn?.addEventListener("click", () => closeAutoDrumSheet(false));
   doneBtn?.addEventListener("click", () => closeAutoDrumSheet(true));
 
-  document.body.appendChild(root);
-  document.body.classList.add("auto-drum-portal-open");
-  wrap?.classList.add("is-open", "has-drum-open");
-  block?.classList.add("has-drum-open");
-  block?.querySelectorAll(".immo-triple-date__half").forEach((half) => half.classList.add("is-drum-active"));
-  trigger.setAttribute("aria-expanded", "true");
+  if (useSheet) {
+    if (sheetScroll) {
+      sheetScroll.style.overflow = "hidden";
+      sheetScroll.scrollTop = 0;
+    }
+    mountSheetPortalChrome(root, { stage, wrap, trigger, ring: ringEl, sheetScroll });
+    block?.classList.add("has-drum-open");
+    block?.querySelectorAll(".immo-triple-date__half").forEach((half) => half.classList.add("is-drum-active"));
+  } else {
+    document.body.appendChild(root);
+    document.body.classList.add("auto-drum-portal-open");
+    wrap?.classList.add("is-open", "has-drum-open");
+    block?.classList.add("has-drum-open");
+    block?.querySelectorAll(".immo-triple-date__half").forEach((half) => half.classList.add("is-drum-active"));
+    trigger.setAttribute("aria-expanded", "true");
+    positionPortal(stage, trigger);
+  }
 
-  positionPortal(stage, trigger);
   activePortal = {
     kind: "date3",
     root,
@@ -344,9 +407,11 @@ function openTripleDateDrumSheet(yearWheel, monthWheel, dayWheel, trigger) {
   };
 
   requestAnimationFrame(() => {
-    root
-      .querySelector(".auto-drum-portal__ring--date3")
-      ?.style.setProperty("--immo-drum-ring-w", `${Math.min(360, Math.floor(window.innerWidth * 0.92))}px`);
+    if (!useSheet) {
+      root
+        .querySelector(".auto-drum-portal__ring--date3")
+        ?.style.setProperty("--immo-drum-ring-w", `${Math.min(360, Math.floor(window.innerWidth * 0.92))}px`);
+    }
     scrollHalfToValue(yearScroll, pendingY);
     scrollHalfToValue(monthScroll, pendingM);
     scrollHalfToValue(dayScroll, pendingD);
@@ -2167,13 +2232,60 @@ function openSplitRangeDrumSheet(minWheel, maxWheel, trigger) {
   let pendingMin = String(readWheel(minWheel) ?? "");
   let pendingMax = String(readWheel(maxWheel) ?? "");
 
-  const root = document.createElement("div");
-  root.className = "auto-drum-portal auto-drum-portal--multi auto-drum-portal--split";
-  root.setAttribute("role", "dialog");
-  root.setAttribute("aria-modal", "true");
-  root.setAttribute("aria-label", sheetTitle);
+  const headMin = splitKind === "ym" ? minEmpty : "tól";
+  const headMax = splitKind === "ym" ? maxEmpty : "ig";
+  const useSheet = isMobileDrumSheet();
+  let root;
+  let stage;
+  let ring;
+  let minScroll;
+  let maxScroll;
+  let chipMin;
+  let chipMax;
+  let doneBtn;
+  let closeBtn;
+  let sheetScroll = null;
+  let ringEl = null;
 
-  root.innerHTML = `
+  if (useSheet) {
+    ({ root, stage, ring: ringEl, sheetScroll, doneBtn, closeBtn } = createSheetPortalShell(sheetTitle));
+    root.classList.add("auto-drum-portal--ym", "auto-drum-portal--range-sheet");
+    ringEl.innerHTML = `
+        <div class="auto-drum-split__chips auto-drum-ym__chips auto-drum-range__chips">
+          <button type="button" class="auto-drum-split__chip" data-half="min" aria-label="${escapeHtml(splitKind === "ym" ? minEmpty : "Érték -tól")}">
+            <span class="auto-drum-split__chip-label"></span>
+            <span class="auto-drum-split__chip-clear" hidden aria-hidden="true">×</span>
+          </button>
+          <button type="button" class="auto-drum-split__chip" data-half="max" aria-label="${escapeHtml(splitKind === "ym" ? maxEmpty : "Érték -ig")}">
+            <span class="auto-drum-split__chip-label"></span>
+            <span class="auto-drum-split__chip-clear" hidden aria-hidden="true">×</span>
+          </button>
+        </div>
+        <div class="auto-drum-ym__heads" aria-hidden="true"><span>${escapeHtml(headMin)}</span><span>${escapeHtml(headMax)}</span></div>
+        <div class="auto-drum-ym__body" style="width:100%;max-width:100%;box-sizing:border-box;">
+          <div class="immo-drum-inline-highlight auto-drum-split__highlight auto-drum-ym__highlight" aria-hidden="true" style="left:0.4rem;right:0.4rem;width:auto;transform:translateY(-50%);"></div>
+          <div class="auto-drum-ym__cols" style="width:100%;max-width:100%;">
+            <div class="auto-drum-split__col" data-half="min">
+              <div class="auto-drum-portal__scroll auto-drum-split__scroll immo-drum-inline-scroll" tabindex="-1"></div>
+            </div>
+            <div class="auto-drum-split__col" data-half="max">
+              <div class="auto-drum-portal__scroll auto-drum-split__scroll immo-drum-inline-scroll" tabindex="-1"></div>
+            </div>
+          </div>
+        </div>`;
+    ring = root.querySelector(".auto-drum-split__highlight");
+    minScroll = root.querySelector('.auto-drum-split__col[data-half="min"] .auto-drum-split__scroll');
+    maxScroll = root.querySelector('.auto-drum-split__col[data-half="max"] .auto-drum-split__scroll');
+    chipMin = root.querySelector('.auto-drum-split__chip[data-half="min"]');
+    chipMax = root.querySelector('.auto-drum-split__chip[data-half="max"]');
+  } else {
+    root = document.createElement("div");
+    root.className = "auto-drum-portal auto-drum-portal--multi auto-drum-portal--split";
+    root.setAttribute("role", "dialog");
+    root.setAttribute("aria-modal", "true");
+    root.setAttribute("aria-label", sheetTitle);
+
+    root.innerHTML = `
     <button type="button" class="auto-drum-portal__backdrop" aria-label="Bezárás"></button>
     <div class="auto-drum-portal__stage auto-drum-portal__stage--multi auto-drum-portal__stage--split">
       <div class="immo-drum-wheel-ring auto-drum-portal__ring auto-drum-portal__ring--multi auto-drum-portal__ring--split">
@@ -2206,13 +2318,14 @@ function openSplitRangeDrumSheet(minWheel, maxWheel, trigger) {
       </div>
     </div>`;
 
-  const stage = root.querySelector(".auto-drum-portal__stage");
-  const ring = root.querySelector(".auto-drum-split__highlight");
-  const minScroll = root.querySelector('.auto-drum-split__col[data-half="min"] .auto-drum-split__scroll');
-  const maxScroll = root.querySelector('.auto-drum-split__col[data-half="max"] .auto-drum-split__scroll');
-  const chipMin = root.querySelector('.auto-drum-split__chip[data-half="min"]');
-  const chipMax = root.querySelector('.auto-drum-split__chip[data-half="max"]');
-  const doneBtn = root.querySelector(".auto-drum-portal__done");
+    stage = root.querySelector(".auto-drum-portal__stage");
+    ring = root.querySelector(".auto-drum-split__highlight");
+    minScroll = root.querySelector('.auto-drum-split__col[data-half="min"] .auto-drum-split__scroll');
+    maxScroll = root.querySelector('.auto-drum-split__col[data-half="max"] .auto-drum-split__scroll');
+    chipMin = root.querySelector('.auto-drum-split__chip[data-half="min"]');
+    chipMax = root.querySelector('.auto-drum-split__chip[data-half="max"]');
+    doneBtn = root.querySelector(".auto-drum-portal__done");
+  }
 
   function itemHtml(row) {
     return `<div class="immo-drum-inline-item" data-value="${escapeHtml(row.value)}"><span class="immo-drum-inline-text">${escapeHtml(row.label)}</span></div>`;
@@ -2335,19 +2448,30 @@ function openSplitRangeDrumSheet(minWheel, maxWheel, trigger) {
   });
 
   root.querySelector(".auto-drum-portal__backdrop")?.addEventListener("click", () => closeAutoDrumSheet(true));
+  closeBtn?.addEventListener("click", () => closeAutoDrumSheet(false));
   doneBtn?.addEventListener("click", () => {
     readPendingFromScrolls();
     closeAutoDrumSheet(true);
   });
 
-  document.body.appendChild(root);
-  document.body.classList.add("auto-drum-portal-open");
-  wrap?.classList.add("is-open", "has-drum-open");
-  dual?.classList.add("has-drum-open");
-  dual?.querySelectorAll(".immo-dual-range__half").forEach((half) => half.classList.add("is-drum-active"));
-  trigger.setAttribute("aria-expanded", "true");
+  if (useSheet) {
+    if (sheetScroll) {
+      sheetScroll.style.overflow = "hidden";
+      sheetScroll.scrollTop = 0;
+    }
+    mountSheetPortalChrome(root, { stage, wrap, trigger, ring: ringEl, sheetScroll });
+    dual?.classList.add("has-drum-open");
+    dual?.querySelectorAll(".immo-dual-range__half").forEach((half) => half.classList.add("is-drum-active"));
+  } else {
+    document.body.appendChild(root);
+    document.body.classList.add("auto-drum-portal-open");
+    wrap?.classList.add("is-open", "has-drum-open");
+    dual?.classList.add("has-drum-open");
+    dual?.querySelectorAll(".immo-dual-range__half").forEach((half) => half.classList.add("is-drum-active"));
+    trigger.setAttribute("aria-expanded", "true");
+    positionPortal(stage, trigger);
+  }
 
-  positionPortal(stage, trigger);
   activePortal = {
     kind: "split",
     root,
@@ -2363,9 +2487,11 @@ function openSplitRangeDrumSheet(minWheel, maxWheel, trigger) {
   };
 
   requestAnimationFrame(() => {
-    root
-      .querySelector(".auto-drum-portal__ring--split")
-      ?.style.setProperty("--immo-drum-ring-w", `${Math.min(360, Math.floor(window.innerWidth * 0.92))}px`);
+    if (!useSheet) {
+      root
+        .querySelector(".auto-drum-portal__ring--split")
+        ?.style.setProperty("--immo-drum-ring-w", `${Math.min(360, Math.floor(window.innerWidth * 0.92))}px`);
+    }
     scrollHalfToValue(minScroll, pendingMin);
     scrollHalfToValue(maxScroll, pendingMax);
     paintBoth();

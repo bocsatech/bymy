@@ -10,11 +10,43 @@ enum ListingsAPI {
         let badge: String?
         var brand: String? = nil
         var model: String? = nil
+        var ownerBoost: Bool = false
+        var ownerUserId: Int? = nil
+        var priceNum: Int? = nil
+        var kmNum: Int? = nil
+        var updatedAt: String? = nil
+        var promoKiemelt: Bool = false
+    }
+
+    struct Page: Equatable {
+        var listings: [Listing]
+        var boostOwnerIds: Set<Int>
+        var boostListingIds: Set<Int>
+    }
+
+    enum DeskSort: String, CaseIterable, Identifiable {
+        case newest
+        case priceAsc = "price-asc"
+        case priceDesc = "price-desc"
+        case kmAsc = "km-asc"
+
+        var id: String { rawValue }
+
+        var label: String {
+            switch self {
+            case .newest: return "Legfrissebbek elöl"
+            case .priceAsc: return "Ár szerint növekvő"
+            case .priceDesc: return "Ár szerint csökkenő"
+            case .kmAsc: return "Km szerint növekvő"
+            }
+        }
     }
 
     private struct Envelope: Decodable {
         let listings: [RemoteListing]?
         let items: [RemoteListing]?
+        let boostOwnerIds: [FlexibleID]?
+        let boostListingIds: [FlexibleID]?
         let error: String?
     }
 
@@ -25,6 +57,17 @@ enum ListingsAPI {
         let status: String?
         let preview: RemotePreview?
         let user_id: Int?
+        let ownerBoost: Bool?
+        let updated_at: String?
+        let created_at: String?
+        let form: RemoteForm?
+    }
+
+    private struct RemoteForm: Decodable {
+        let owner_user_id: Int?
+        let promo_kiemelt: String?
+        let km: FlexibleNumber?
+        let vetelar: FlexibleNumber?
     }
 
     private struct RemotePreview: Decodable {
@@ -32,10 +75,16 @@ enum ListingsAPI {
         let price: String?
         let priceNum: Int?
         let km: String?
+        let kmNum: Int?
         let specLine: String?
         let imageUrl: String?
         let imageUrls: [String]?
         let filter: RemoteFilter?
+        let promo: RemotePromo?
+    }
+
+    private struct RemotePromo: Decodable {
+        let kiemelt: Bool?
     }
 
     private struct RemoteFilter: Decodable {
@@ -43,6 +92,7 @@ enum ListingsAPI {
         let gyartasi_ev: FlexibleNumber?
         let gyartmany: String?
         let modell: String?
+        let owner_user_id: Int?
     }
 
     struct FlexibleID: Decodable {
@@ -71,22 +121,63 @@ enum ListingsAPI {
     }
 
     static func fetchHome(limit: Int = 40, token: String? = nil) async throws -> [Listing] {
-        try await fetch(path: "api/listings", query: [
+        try await fetchPage(path: "api/listings", query: [
             "limit": String(limit),
             "status": "feladott",
-        ], token: token)
+        ], token: token).listings
     }
 
     static func fetchCategory(_ kind: String, limit: Int = 40, token: String? = nil) async throws -> [Listing] {
+        try await fetchCategoryPage(kind, limit: limit, token: token).listings
+    }
+
+    static func fetchCategoryPage(_ kind: String, limit: Int = 40, token: String? = nil) async throws -> Page {
         let vertical = kind == "teherauto" ? "teher" : kind
-        return try await fetch(path: "api/listings", query: [
+        return try await fetchPage(path: "api/listings", query: [
             "limit": String(limit),
             "status": "feladott",
             "vertical": vertical,
         ], token: token)
     }
 
+    /// Boostolt hirdetések elöl — mint weben `applyOwnerBoostSort`.
+    static func applyBoostSort(_ items: [Listing], sort: DeskSort = .newest, boostListingIds: Set<Int> = [], boostOwnerIds: Set<Int> = []) -> [Listing] {
+        let marked = items.map { item -> Listing in
+            var copy = item
+            if isBoosted(item, boostListingIds: boostListingIds, boostOwnerIds: boostOwnerIds) {
+                copy.ownerBoost = true
+            }
+            return copy
+        }
+        return marked.sorted { a, b in
+            let aB = a.ownerBoost ? 0 : 1
+            let bB = b.ownerBoost ? 0 : 1
+            if aB != bB { return aB < bB }
+            switch sort {
+            case .priceAsc:
+                return (a.priceNum ?? Int.max) < (b.priceNum ?? Int.max)
+            case .priceDesc:
+                return (a.priceNum ?? -1) > (b.priceNum ?? -1)
+            case .kmAsc:
+                return (a.kmNum ?? Int.max) < (b.kmNum ?? Int.max)
+            case .newest:
+                return (a.updatedAt ?? "") > (b.updatedAt ?? "")
+            }
+        }
+    }
+
+    static func isBoosted(_ item: Listing, boostListingIds: Set<Int>, boostOwnerIds: Set<Int>) -> Bool {
+        if item.ownerBoost { return true }
+        if let id = Int(item.id), boostListingIds.contains(id) { return true }
+        if let oid = item.ownerUserId, oid > 0, boostOwnerIds.contains(oid) { return true }
+        return false
+    }
+
     static func fetch(path: String, query: [String: String], token: String? = nil) async throws -> [Listing] {
+        try await fetchPage(path: path, query: query, token: token).listings
+    }
+
+    static func fetchPage(path: String, query: [String: String], token: String? = nil) async throws -> Page {
         var comps = URLComponents(url: APIBase.url(path), resolvingAgainstBaseURL: false)!
         comps.queryItems = query.map { URLQueryItem(name: $0.key, value: $0.value) }
         var req = URLRequest(url: comps.url!)
@@ -103,12 +194,13 @@ enum ListingsAPI {
             throw APIClient.APIError.unauthorized(err ?? "Belépés szükséges.")
         }
 
-        // Robust path: if Codable fails on unknown fields, still try JSONSerialization
         if let decoded = try? JSONDecoder().decode(Envelope.self, from: data), http.statusCode < 400 {
             let rows = decoded.listings ?? decoded.items ?? []
-            let mapped = rows.map(mapRemote)
+            let boostOwners = Set((decoded.boostOwnerIds ?? []).compactMap { Int($0.value) }.filter { $0 > 0 })
+            let boostListings = Set((decoded.boostListingIds ?? []).compactMap { Int($0.value) }.filter { $0 > 0 })
+            let mapped = rows.map { mapRemote($0, boostOwnerIds: boostOwners, boostListingIds: boostListings) }
             if !mapped.isEmpty || rows.isEmpty {
-                return mapped
+                return Page(listings: mapped, boostOwnerIds: boostOwners, boostListingIds: boostListings)
             }
         }
 
@@ -117,15 +209,17 @@ enum ListingsAPI {
             throw APIClient.APIError.server(err ?? "Hirdetések betöltése sikertelen.")
         }
 
-        // Fallback: dictionary parse (preview nested)
         guard let root = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
             throw APIClient.APIError.decoding
         }
+        let boostOwners = Set(((root["boostOwnerIds"] as? [Any]) ?? []).compactMap { intAny($0) }.filter { $0 > 0 })
+        let boostListings = Set(((root["boostListingIds"] as? [Any]) ?? []).compactMap { intAny($0) }.filter { $0 > 0 })
         let arr = (root["listings"] as? [[String: Any]]) ?? (root["items"] as? [[String: Any]]) ?? []
-        return arr.compactMap(mapDict)
+        let mapped = arr.compactMap { mapDict($0, boostOwnerIds: boostOwners, boostListingIds: boostListings) }
+        return Page(listings: mapped, boostOwnerIds: boostOwners, boostListingIds: boostListings)
     }
 
-    private static func mapRemote(_ row: RemoteListing) -> Listing {
+    private static func mapRemote(_ row: RemoteListing, boostOwnerIds: Set<Int>, boostListingIds: Set<Int>) -> Listing {
         let preview = row.preview
         var title = (preview?.title ?? row.hirdetes_cime ?? "Hirdetés #\(row.id.value)")
             .trimmingCharacters(in: .whitespacesAndNewlines)
@@ -134,12 +228,16 @@ enum ListingsAPI {
         }
         if title.isEmpty { title = "Hirdetés #\(row.id.value)" }
 
-        let price = (preview?.price).flatMap { $0.isEmpty ? nil : $0 } ?? formatPrice(preview?.priceNum)
+        let priceNum = preview?.priceNum ?? row.form?.vetelar?.value
+        let price = (preview?.price).flatMap { $0.isEmpty ? nil : $0 } ?? formatPrice(priceNum)
         let year: String = {
             if let y = preview?.filter?.gyartasi_ev?.value, y > 1900 { return String(y) }
             return "—"
         }()
-        let km = (preview?.km).flatMap { $0.isEmpty ? nil : $0 } ?? "—"
+        let kmNum = preview?.kmNum ?? row.form?.km?.value
+        let km = (preview?.km).flatMap { $0.isEmpty ? nil : $0 }
+            ?? kmNum.map { "\(formatNumber($0)) km" }
+            ?? "—"
         let fuel = (preview?.filter?.uzemanyag).flatMap { $0.isEmpty ? nil : $0 } ?? "—"
         let meta = [year, km, fuel].joined(separator: " · ")
 
@@ -148,19 +246,34 @@ enum ListingsAPI {
             ?? absoluteImageURL(preview?.imageUrl)
             ?? preview?.imageUrls?.compactMap(absoluteImageURL).first
 
+        let ownerId = row.form?.owner_user_id ?? preview?.filter?.owner_user_id ?? row.user_id
+        let idNum = Int(row.id.value)
+        let boosted = row.ownerBoost == true
+            || (idNum.map { boostListingIds.contains($0) } ?? false)
+            || (ownerId.map { boostOwnerIds.contains($0) } ?? false)
+
+        let promo = preview?.promo?.kiemelt == true
+            || row.form?.promo_kiemelt == "1"
+
         return Listing(
             id: row.id.value,
             title: title,
             priceLabel: price,
             meta: meta,
             imageURL: imageURL,
-            badge: nil,
+            badge: boosted ? "Előresorolt" : (promo ? "Kiemelt" : nil),
             brand: preview?.filter?.gyartmany,
-            model: preview?.filter?.modell
+            model: preview?.filter?.modell,
+            ownerBoost: boosted,
+            ownerUserId: ownerId,
+            priceNum: priceNum,
+            kmNum: kmNum,
+            updatedAt: row.updated_at ?? row.created_at,
+            promoKiemelt: promo
         )
     }
 
-    private static func mapDict(_ row: [String: Any]) -> Listing? {
+    private static func mapDict(_ row: [String: Any], boostOwnerIds: Set<Int>, boostListingIds: Set<Int>) -> Listing? {
         let id = stringAny(row["id"]) ?? UUID().uuidString
         let preview = row["preview"] as? [String: Any] ?? [:]
         let form = row["form"] as? [String: Any] ?? [:]
@@ -171,12 +284,13 @@ enum ListingsAPI {
         if title.lowercased().hasPrefix("eladó ") {
             title = String(title.dropFirst(6))
         }
-        let price = stringAny(preview["price"])
-            ?? formatPrice(intAny(preview["priceNum"]) ?? intAny(form["vetelar"]))
+        let priceNum = intAny(preview["priceNum"]) ?? intAny(form["vetelar"])
+        let price = stringAny(preview["price"]) ?? formatPrice(priceNum)
         let filter = preview["filter"] as? [String: Any] ?? [:]
         let year = stringAny(filter["gyartasi_ev"]) ?? stringAny(form["gyartasi_ev"]) ?? "—"
+        let kmNum = intAny(preview["kmNum"]) ?? intAny(form["km"])
         let km = stringAny(preview["km"]) ?? {
-            if let n = intAny(form["km"]) { return "\(formatNumber(n)) km" }
+            if let n = kmNum { return "\(formatNumber(n)) km" }
             return "—"
         }()
         let fuel = stringAny(filter["uzemanyag"]) ?? stringAny(form["uzemanyag"]) ?? "—"
@@ -185,15 +299,29 @@ enum ListingsAPI {
             ?? absoluteImageURL(stringAny(preview["imageUrl"]))
             ?? (preview["imageUrls"] as? [Any])?.compactMap { absoluteImageURL(stringAny($0)) }.first
 
+        let ownerId = intAny(form["owner_user_id"]) ?? intAny(filter["owner_user_id"]) ?? intAny(row["user_id"])
+        let idNum = Int(id)
+        let boosted = (row["ownerBoost"] as? Bool) == true
+            || (idNum.map { boostListingIds.contains($0) } ?? false)
+            || (ownerId.map { boostOwnerIds.contains($0) } ?? false)
+        let promoObj = preview["promo"] as? [String: Any]
+        let promo = (promoObj?["kiemelt"] as? Bool) == true || stringAny(form["promo_kiemelt"]) == "1"
+
         return Listing(
             id: id,
             title: title,
             priceLabel: price,
             meta: [year, km, fuel].joined(separator: " · "),
             imageURL: imageURL,
-            badge: nil,
+            badge: boosted ? "Előresorolt" : (promo ? "Kiemelt" : nil),
             brand: stringAny(filter["gyartmany"]),
-            model: stringAny(filter["modell"])
+            model: stringAny(filter["modell"]),
+            ownerBoost: boosted,
+            ownerUserId: ownerId,
+            priceNum: priceNum,
+            kmNum: kmNum,
+            updatedAt: stringAny(row["updated_at"]) ?? stringAny(row["created_at"]),
+            promoKiemelt: promo
         )
     }
 

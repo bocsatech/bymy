@@ -75,7 +75,9 @@ final class AppRouter: ObservableObject {
             bottomTab = .home
             topPage = .hub
         case .search:
-            bottomTab = .search
+            // Web: Keresés tab → /auto.html (ugyanaz a keresőmenü)
+            bottomTab = .home
+            topPage = .auto
         case .post:
             if isLoggedIn {
                 bottomTab = .post
@@ -167,7 +169,6 @@ final class AppRouter: ObservableObject {
             && openFiokSection == nil
             && bottomTab != .post
             && bottomTab != .account
-            && bottomTab != .search
     }
 
     var showsBottomChrome: Bool {

@@ -144,26 +144,7 @@ struct RecommendationsScreen: View {
 }
 
 struct SearchScreen: View {
-    @EnvironmentObject private var auth: AuthStore
-    @State private var query = ""
-
     var body: some View {
-        VStack(spacing: 0) {
-            HStack(spacing: 10) {
-                Image(systemName: "magnifyingglass")
-                    .foregroundStyle(AppTheme.textSecondary)
-                TextField("Keresés…", text: $query)
-                    .textInputAutocapitalization(.never)
-                    .autocorrectionDisabled()
-            }
-            .padding(12)
-            .background(AppTheme.avatarBg)
-            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-            .padding(14)
-
-            ListingsFeedView(title: "Keresés") {
-                try await ListingsAPI.fetchHome(limit: 50, token: auth.token)
-            }
-        }
+        CategorySearchScreen(title: "Autó", category: "auto")
     }
 }

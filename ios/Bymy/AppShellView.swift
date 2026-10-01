@@ -49,7 +49,8 @@ struct AppShellView: View {
         case .home, .feed:
             TopPagesPager()
         case .search:
-            SearchScreen()
+            // Legacy fallback — a tab Autóra irányít
+            CategorySearchScreen(title: "Autó", category: "auto")
         case .post:
             PostAdScreen()
         case .account:

@@ -846,14 +846,16 @@ function applySheetStageLayout(stage) {
   if (!stage) return;
   const desk = window.matchMedia("(min-width: 901px)").matches;
   if (desk) {
-    stage.style.left = "50%";
+    /* Desk: flex középre a CSS-ben — ne left%/translate (elcsúszhat). */
+    stage.style.left = "auto";
     stage.style.right = "auto";
-    stage.style.top = "50%";
+    stage.style.top = "auto";
     stage.style.bottom = "auto";
     stage.style.width = "";
     stage.style.maxWidth = "";
     stage.style.height = "";
-    stage.style.transform = "translate(-50%, -50%)";
+    stage.style.transform = "none";
+    stage.style.position = "";
     return;
   }
   /* Mobil: inset 0 — ne 100vw/translate, az elcsúsztatta a Kész gombot. */
@@ -867,14 +869,30 @@ function applySheetStageLayout(stage) {
   stage.style.transform = "none";
 }
 
-function mountSheetPortalChrome(root, { stage, wrap, trigger, ring, sheetScroll }) {
+function lockSheetPageAxes() {
   try {
-    window.scrollTo(0, window.scrollY || window.pageYOffset || 0);
+    const y = window.scrollY || window.pageYOffset || 0;
+    window.scrollTo(0, y);
     document.documentElement.scrollLeft = 0;
     document.body.scrollLeft = 0;
+    if (window.visualViewport) {
+      /* iOS: ha a visualViewport el van tolva, a fixed overlay is „csúszik”. */
+      document.documentElement.scrollLeft = 0;
+      document.body.scrollLeft = 0;
+    }
   } catch {
     /* ignore */
   }
+}
+
+function mountSheetPortalChrome(root, { stage, wrap, trigger, ring, sheetScroll }) {
+  lockSheetPageAxes();
+  root.style.setProperty("left", "0", "important");
+  root.style.setProperty("right", "0", "important");
+  root.style.setProperty("top", "0", "important");
+  root.style.setProperty("bottom", "0", "important");
+  root.style.setProperty("width", "100%", "important");
+  root.style.setProperty("transform", "none", "important");
   document.body.appendChild(root);
   document.body.classList.add("auto-drum-portal-open", "auto-drum-sheet-open");
   wrap?.classList.add("is-open", "has-drum-open");
@@ -882,6 +900,7 @@ function mountSheetPortalChrome(root, { stage, wrap, trigger, ring, sheetScroll 
   (wrap?.closest(".immo-dual-range__half") || wrap?.closest(".immo-schema-cell"))?.classList.add("is-drum-active");
   trigger?.setAttribute("aria-expanded", "true");
   applySheetStageLayout(stage);
+  lockSheetPageAxes();
   const scroll = sheetScroll || root.querySelector?.("[data-sheet-scroll]");
   if (scroll) {
     scroll.style.overflow = "hidden";

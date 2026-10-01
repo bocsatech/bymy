@@ -151,22 +151,15 @@ export async function mountAutoBrandModelPicker(form) {
   modelsInput.dataset.filterKey = "modellek";
   modelsInput.setAttribute("data-filter-key", "modellek");
 
+  const emptyCombinedLabel = "Gyártmány / Modell";
   const wrap = document.createElement("div");
-  wrap.className = "auto-bm-pair";
+  wrap.className = "auto-bm-pair auto-bm-brand-block";
   wrap.dataset.deskQuick = "1";
   wrap.innerHTML = `
-    <div class="auto-desk-field auto-bm-field" data-desk-field="gyartmany" data-desk-quick="1">
-      <span class="auto-desk-field__label">Gyártmány</span>
-      <button type="button" class="auto-bm-trigger" data-auto-bm-open="brand">
-        <span data-auto-bm-brand-summary>Mindegy</span>
-        <span class="auto-bm-trigger__chev" aria-hidden="true">⌄</span>
-      </button>
-    </div>
-    <div class="auto-desk-field auto-bm-field" data-desk-field="modell" data-desk-quick="1">
-      <span class="auto-desk-field__label">Modell</span>
-      <button type="button" class="auto-bm-trigger" data-auto-bm-open="model">
-        <span data-auto-bm-model-summary>Mindegy</span>
-        <span class="auto-bm-trigger__chev" aria-hidden="true">⌄</span>
+    <div class="auto-desk-field auto-bm-field auto-bm-field--combined" data-desk-field="gyartmany" data-desk-quick="1">
+      <span class="auto-desk-field__label">Gyártmány &amp; Modell</span>
+      <button type="button" class="auto-bm-trigger auto-bm-trigger--pill" data-auto-bm-open="brand" aria-label="Gyártmány és modell">
+        <span data-auto-bm-combined-summary class="is-placeholder">${emptyCombinedLabel}</span>
       </button>
     </div>
   `;
@@ -174,10 +167,8 @@ export async function mountAutoBrandModelPicker(form) {
   wrap.appendChild(modelsInput);
   alapHost.insertBefore(wrap, alapHost.firstChild);
 
-  const brandSummaryEl = wrap.querySelector("[data-auto-bm-brand-summary]");
-  const modelSummaryEl = wrap.querySelector("[data-auto-bm-model-summary]");
+  const combinedSummaryEl = wrap.querySelector("[data-auto-bm-combined-summary]");
   const openBrandBtn = wrap.querySelector('[data-auto-bm-open="brand"]');
-  const openModelBtn = wrap.querySelector('[data-auto-bm-open="model"]');
 
   let selectedBrands = [];
   let selectedModels = [];
@@ -230,11 +221,25 @@ export async function mountAutoBrandModelPicker(form) {
     selectedModels = selectedModels.filter((m) => allowed.has(m));
   }
 
+  function combinedSummaryText() {
+    if (!selectedBrands.length) return emptyCombinedLabel;
+    const bPart =
+      selectedBrands.length === 1 ? selectedBrands[0] : labelList(selectedBrands, "márka");
+    if (!selectedModels.length) return bPart;
+    const mPart =
+      selectedModels.length === 1 ? selectedModels[0] : labelList(selectedModels, "modell");
+    return `${bPart} · ${mPart}`;
+  }
+
   function syncHidden() {
     writeJsonList(brandsInput, selectedBrands);
     writeJsonList(modelsInput, selectedModels);
-    if (brandSummaryEl) brandSummaryEl.textContent = labelList(selectedBrands, "márka");
-    if (modelSummaryEl) modelSummaryEl.textContent = labelList(selectedModels, "modell");
+    if (combinedSummaryEl) {
+      const text = combinedSummaryText();
+      combinedSummaryEl.textContent = text;
+      combinedSummaryEl.classList.toggle("is-placeholder", text === emptyCombinedLabel);
+      openBrandBtn?.classList.toggle("has-value", text !== emptyCombinedLabel);
+    }
   }
 
   function modelLabelFor(brand) {
@@ -447,7 +452,6 @@ export async function mountAutoBrandModelPicker(form) {
   }
 
   openBrandBtn?.addEventListener("click", () => toggleOpen("brand"));
-  openModelBtn?.addEventListener("click", () => toggleOpen("model"));
 
   bindAutoBmDismiss({
     panel,

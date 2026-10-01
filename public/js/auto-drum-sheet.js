@@ -845,18 +845,25 @@ function createSheetPortalShell(title) {
 function applySheetStageLayout(stage) {
   if (!stage) return;
   const desk = window.matchMedia("(min-width: 901px)").matches;
+  const ym = Boolean(stage.closest?.(".auto-drum-portal--ym"));
   if (desk) {
-    /* Desk: inset 0 + margin:auto a CSS-ben — ne left%/translate/flex. */
+    /* Desk: inset + margin:auto. YM: fit-content magasság (top+bottom:0 + height:auto kitöltené a viewportot). */
     stage.style.left = "0";
     stage.style.right = "0";
     stage.style.top = "0";
-    stage.style.bottom = "0";
+    stage.style.bottom = ym ? "auto" : "0";
     stage.style.width = "";
     stage.style.maxWidth = "";
-    stage.style.height = "";
+    stage.style.height = ym ? "fit-content" : "";
     stage.style.transform = "none";
     stage.style.margin = "auto";
     stage.style.position = "";
+    if (ym) {
+      /* Függőleges közép translateY-jal — vízszintes translate tilos. */
+      stage.style.top = "50%";
+      stage.style.bottom = "auto";
+      stage.style.transform = "translateY(-50%)";
+    }
     return;
   }
   /* Mobil: inset 0 — ne 100vw/translate, az elcsúsztatta a Kész gombot. */

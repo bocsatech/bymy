@@ -1879,8 +1879,15 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
 
   /* Év|hó: stage a tartalom magasságára zsugorodik, nem ül felül a nagy kék dobozban */
   .auto-drum-portal--sheet.auto-drum-portal--ym .auto-drum-portal__stage--sheet {
-    height: auto !important;
+    height: fit-content !important;
     max-height: min(86vh, 48rem) !important;
+    top: 50% !important;
+    bottom: auto !important;
+    transform: translateY(-50%) !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
   }
 
   .auto-drum-portal--sheet.auto-drum-portal--ym .auto-drum-portal__sheet-head {

@@ -1796,6 +1796,10 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .ad-form-drum-wrap > .immo-wheel-trigger,
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .immo-wheel-wrap > .immo-wheel-trigger,
 body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .step-panel[data-step="2"] .immo-wheel-trigger {
+  appearance: none !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
   border: 0 !important;
   border-radius: 0 !important;
   background: transparent !important;
@@ -1803,14 +1807,32 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-
   padding: 0.45rem 0.1rem 0.5rem !important;
   min-height: 2.5rem !important;
   height: auto !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  font: 500 1rem/1.35 system-ui, sans-serif !important;
   font-weight: 500 !important;
   color: #0f172a !important;
+  text-align: left !important;
+  cursor: pointer !important;
+  position: relative !important;
+  z-index: 2 !important;
 }
 
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .ad-form-bm-field--drum:not(.has-value) .immo-wheel-trigger,
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .immo-wheel-trigger.is-placeholder {
-  color: #667085 !important;
+  color: #64748b !important;
   font-weight: 500 !important;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .ad-form-bm-field--drum,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .ad-form-bm-field--drum > .ad-form-drum-wrap,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .ad-form-bm-field--drum > .immo-wheel-wrap {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  min-height: 2.65rem !important;
+  width: 100% !important;
+  max-width: 100% !important;
 }
 
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .suffix-field > input,

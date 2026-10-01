@@ -5,6 +5,8 @@ import {
   OKMANY_JELLEG_OPTIONS,
   UZEMANYAG_CATEGORIES,
   flattenSebessegvaltoOptions,
+  flattenUzemanyagOptions,
+  flattenAllapotOptions,
 } from "./equipment-data.js?v=valto3b";
 import { KIVITEL_OPTIONS } from "./kivitel-options.js?v=kivitel1";
 import { fetchVehicleCatalog } from "./vehicle-catalog-client.js?v=teherStrict3";
@@ -2386,7 +2388,7 @@ async function mountAdBrandModelCombined(form, catalog) {
   }
 
   const { fillWheel, setWheelValue, readWheel, syncHostClearButton } = await import("./ingatlan-wheels.js?v=immoClearAll2");
-  const { openBrandModelCatalogSheet } = await import("./auto-drum-sheet.js?v=bmSheet44");
+  const { openBrandModelCatalogSheet } = await import("./auto-drum-sheet.js?v=bmSheet45");
   const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
 
   const brands = [...(catalog?.gyartmanyok || [])].sort((a, b) =>
@@ -2576,19 +2578,54 @@ async function mountAdSelectDrum(select, {
   labelForValue = null,
   onChange = null,
 } = {}) {
-  if (!select || select.tagName !== "SELECT" || select.dataset.adBmPicker === "1") return;
+  if (!select || select.tagName !== "SELECT") return;
   const field = anchorField(select);
   if (!field) return;
+
+  const existingWrap =
+    field.querySelector(`.ad-form-bm-field--drum[data-ad-bm-for="${CSS.escape?.(select.id) || select.id}"]`) ||
+    document.querySelector(`.ad-form-bm-field--drum[data-ad-bm-for="${CSS.escape?.(select.id) || select.id}"]`);
+  const existingTrigger = existingWrap?.querySelector?.(".immo-wheel-trigger");
+  if (select.dataset.adBmPicker === "1" && existingTrigger) {
+    if (!String(existingTrigger.textContent || "").trim()) {
+      existingTrigger.textContent = emptyLabel;
+      existingTrigger.classList.add("is-placeholder");
+    }
+    existingTrigger.style.removeProperty("display");
+    existingTrigger.style.removeProperty("visibility");
+    existingTrigger.style.removeProperty("opacity");
+    existingWrap?.classList.remove("ad-layout-hidden");
+    existingWrap && (existingWrap.hidden = false);
+    return;
+  }
+  /* Félkész mount: flag megvan, UI nincs — takarítsunk, majd újra. */
+  if (select.dataset.adBmPicker === "1") {
+    delete select.dataset.adBmPicker;
+    delete select.dataset.adBmDrum;
+    existingWrap?.remove();
+    showNativeSelect(select);
+  }
 
   unmountPicker(select);
   hideNativeSelect(select);
   ensurePlainHiddenInput(select);
-  select.dataset.adBmPicker = "1";
-  select.dataset.adBmDrum = "1";
 
-  const { fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=immoClearAll2");
-  const { openStandaloneSwitchSheet, bindAutoDrumSheet } = await import("./auto-drum-sheet.js?v=bmSheet44");
-  const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
+  let fillWheel;
+  let setWheelValue;
+  let readWheel;
+  let openStandaloneSwitchSheet;
+  let bindAutoDrumSheet;
+  let initDrumWheel;
+  let syncDrumWheelDisplay;
+  try {
+    ({ fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=immoClearAll2"));
+    ({ openStandaloneSwitchSheet, bindAutoDrumSheet } = await import("./auto-drum-sheet.js?v=bmSheet45"));
+    ({ initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1"));
+  } catch (error) {
+    console.warn("Dobkerék betöltés:", title || select.id, error);
+    showNativeSelect(select);
+    return;
+  }
 
   const wrap = document.createElement("div");
   wrap.className = "ad-form-bm-field ad-form-bm-field--drum auto-bm-field ad-form-cell";
@@ -2630,9 +2667,10 @@ async function mountAdSelectDrum(select, {
     const value = readSingleStoredValue(select._adBmHidden?.value ?? select.value);
     const trigger = triggerEl();
     if (trigger) {
-      trigger.textContent = displayLabel(value);
+      trigger.textContent = displayLabel(value) || emptyLabel;
       trigger.dataset.emptyLabel = emptyLabel;
       trigger.setAttribute("aria-label", title);
+      trigger.classList.toggle("is-placeholder", !value);
     }
     wrap.classList.toggle("has-value", Boolean(value));
   }
@@ -2656,6 +2694,12 @@ async function mountAdSelectDrum(select, {
 
   fillFromSelect();
   wheel = initDrumWheel(wheel, { emptyLabel, openMode: "portal", multiple: false });
+  if (!wheel || !triggerEl()) {
+    console.warn("Dobkerék trigger hiányzik:", title || select.id);
+    wrap.remove();
+    showNativeSelect(select);
+    return;
+  }
   fillFromSelect();
 
   wheel.addEventListener("immo-wheel-change", () => {
@@ -2721,6 +2765,7 @@ async function mountAdSelectDrum(select, {
     if (trigger) {
       const next = trigger.cloneNode(true);
       next.dataset.sheetBound = "1";
+      if (!String(next.textContent || "").trim()) next.textContent = emptyLabel;
       trigger.replaceWith(next);
       next.addEventListener("click", (event) => {
         event.preventDefault();
@@ -2734,6 +2779,8 @@ async function mountAdSelectDrum(select, {
     bindAutoDrumSheet(wheel);
   }
 
+  select.dataset.adBmPicker = "1";
+  select.dataset.adBmDrum = "1";
   select._adBmClose = () => {};
   select._adBmRefreshSummary = refreshSummary;
   select._adBmFillWheel = fillFromSelect;
@@ -2810,7 +2857,7 @@ async function mountAdSplitYmDrum({
   }
 
   const { fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=immoClearAll2");
-  const { openYmDualSheet } = await import("./auto-drum-sheet.js?v=bmSheet44");
+  const { openYmDualSheet } = await import("./auto-drum-sheet.js?v=bmSheet45");
   const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
 
   const yearOpts = optionsFromSelect(ev, emptyYear);
@@ -3017,8 +3064,14 @@ export async function mountAdFormBmPickers(form, catalog = null) {
   if (okmany && !filledOptionsFromSelect(okmany).length) {
     ensureSelectOptions(okmany, OKMANY_JELLEG_OPTIONS);
   }
+  if (uzemanyag && !filledOptionsFromSelect(uzemanyag).length) {
+    ensureSelectOptions(uzemanyag, flattenUzemanyagOptions());
+  }
+  if (allapot && !filledOptionsFromSelect(allapot).length) {
+    ensureSelectOptions(allapot, flattenAllapotOptions());
+  }
 
-  if (allapot?.tagName === "SELECT" && allapot.dataset.adBmPicker !== "1") {
+  if (allapot?.tagName === "SELECT") {
     await mountAdSelectDrum(allapot, {
       title: "Állapot",
       mode: "hierarchy",
@@ -3026,17 +3079,18 @@ export async function mountAdFormBmPickers(form, catalog = null) {
       labelForValue: allapotLabelForValue,
     });
   }
-  if (kivitel?.tagName === "SELECT" && kivitel.dataset.adBmPicker !== "1") {
+  if (kivitel?.tagName === "SELECT") {
     await mountAdSelectDrum(kivitel, { title: "Kivitel", mode: "switch" });
   }
-  if (okmany?.tagName === "SELECT" && okmany.dataset.adBmPicker !== "1") {
+  if (okmany?.tagName === "SELECT") {
     await mountAdSelectDrum(okmany, { title: "Okmányok jellege", mode: "switch" });
   }
-  if (uzemanyag?.tagName === "SELECT" && uzemanyag.dataset.adBmPicker !== "1") {
+  if (uzemanyag?.tagName === "SELECT") {
     await mountAdSelectDrum(uzemanyag, {
       title: "Üzemanyag",
       mode: "hierarchy",
       categories: UZEMANYAG_CATEGORIES,
+      labelForValue: (value) => labelFromHierarchy(UZEMANYAG_CATEGORIES, value),
       onChange: () => window.dispatchEvent(new Event("ad-form-sync-fuel-fields")),
     });
   }
@@ -3154,7 +3208,7 @@ export async function mountTireSizeSwitchPickers(form) {
 
   try {
     const { fillTireSelect } = await import("./tire-sizes-ui.js?v=tireYm4");
-    const { openTireTripleSheet } = await import("./auto-drum-sheet.js?v=bmSheet44");
+    const { openTireTripleSheet } = await import("./auto-drum-sheet.js?v=bmSheet45");
     const blocks = [...grid.querySelectorAll(":scope > .tire-block")];
 
     for (let index = 0; index < TIRE_ROW_SPECS.length; index += 1) {

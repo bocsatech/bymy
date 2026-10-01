@@ -2380,7 +2380,7 @@ async function mountAdBrandModelCombined(form, catalog) {
   }
 
   const { fillWheel, setWheelValue, readWheel, syncHostClearButton } = await import("./ingatlan-wheels.js?v=immoClearAll2");
-  const { openBrandModelCatalogSheet } = await import("./auto-drum-sheet.js?v=bmSheet34");
+  const { openBrandModelCatalogSheet } = await import("./auto-drum-sheet.js?v=bmSheet35");
   const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
 
   const brands = [...(catalog?.gyartmanyok || [])].sort((a, b) =>
@@ -2581,7 +2581,7 @@ async function mountAdSelectDrum(select, {
   select.dataset.adBmDrum = "1";
 
   const { fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=immoClearAll2");
-  const { openStandaloneSwitchSheet, bindAutoDrumSheet } = await import("./auto-drum-sheet.js?v=bmSheet34");
+  const { openStandaloneSwitchSheet, bindAutoDrumSheet } = await import("./auto-drum-sheet.js?v=bmSheet35");
   const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
 
   const wrap = document.createElement("div");
@@ -2804,7 +2804,7 @@ async function mountAdSplitYmDrum({
   }
 
   const { fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=immoClearAll2");
-  const { openYmDualSheet } = await import("./auto-drum-sheet.js?v=bmSheet34");
+  const { openYmDualSheet } = await import("./auto-drum-sheet.js?v=bmSheet35");
   const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
 
   const yearOpts = optionsFromSelect(ev, emptyYear);
@@ -2826,6 +2826,12 @@ async function mountAdSplitYmDrum({
   titleEl.className = "immo-label immo-dual-range__title";
   titleEl.textContent = title;
   dual.appendChild(titleEl);
+
+  function padMonth(raw) {
+    const n = Number(String(raw ?? "").replace(/\D/g, ""));
+    if (!Number.isFinite(n) || n < 1) return String(raw ?? "").trim();
+    return String(n).padStart(2, "0");
+  }
 
   function makeHalf(kind, select, options, emptyLabel) {
     const half = document.createElement("div");
@@ -2854,11 +2860,13 @@ async function mountAdSplitYmDrum({
       const w = half.querySelector("[data-wheel]") || live;
       syncSelectToValue(select, readWheel(w));
       syncDrumWheelDisplay(w);
+      refreshSummary();
     });
     select.addEventListener("change", () => {
       const w = half.querySelector("[data-wheel]") || live;
       setWheelValue(w, select.value || "");
       syncDrumWheelDisplay(w);
+      refreshSummary();
     });
     return { half, wheel: () => half.querySelector("[data-wheel]") || live };
   }
@@ -2872,6 +2880,23 @@ async function mountAdSplitYmDrum({
   dual.appendChild(minHalf.half);
   dual.appendChild(sep);
   dual.appendChild(maxHalf.half);
+
+  /* Csukott megjelenés: egy vonal — „év 2020 hó 05” */
+  const summary = document.createElement("button");
+  summary.type = "button";
+  summary.className = "ad-form-split-ym__summary";
+  summary.setAttribute("aria-label", title);
+
+  function refreshSummary() {
+    const y = String(readWheel(minHalf.wheel()) ?? "").trim() || String(ev.value || "").trim();
+    const mRaw = String(readWheel(maxHalf.wheel()) ?? "").trim() || String(honap.value || "").trim();
+    const m = mRaw ? padMonth(mRaw) : "";
+    summary.textContent = `év ${y || "—"}  hó ${m || "—"}`;
+    block.classList.toggle("has-value", Boolean(y || m));
+    summary.classList.toggle("is-placeholder", !y && !m);
+  }
+
+  block.appendChild(summary);
   block.appendChild(dual);
 
   /* Selecteket előbb stash — inline.replaceWith ne törölje ki a DOM-ból (remount üres címkét hagy). */
@@ -2890,10 +2915,15 @@ async function mountAdSplitYmDrum({
   ev.dataset.adBmPicker = "1";
   honap.dataset.adBmPicker = "1";
 
-  /* Egy közös év|hó sheet (gyártmány chrome) — bármelyik cella nyitja */
+  /* Egy közös év|hó sheet (gyártmány chrome) — summary vagy cella nyitja */
   const openShared = (triggerBtn) => {
     openYmDualSheet(minHalf.wheel(), maxHalf.wheel(), triggerBtn, { title });
   };
+  summary.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    openShared(summary);
+  });
   [minHalf, maxHalf].forEach((part) => {
     const trigger = part.half.querySelector(".immo-wheel-trigger");
     if (!trigger) return;
@@ -2905,9 +2935,17 @@ async function mountAdSplitYmDrum({
     next.addEventListener("click", (event) => {
       event.preventDefault();
       event.stopPropagation();
-      openShared(next);
+      openShared(summary);
     });
   });
+
+  const onPortalGone = () => {
+    if (document.body.classList.contains("auto-drum-portal-open")) return;
+    refreshSummary();
+  };
+  const portalObserver = new MutationObserver(onPortalGone);
+  portalObserver.observe(document.body, { attributes: true, attributeFilter: ["class"] });
+  refreshSummary();
 }
 
 /**

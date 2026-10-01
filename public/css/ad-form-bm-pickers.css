@@ -1474,8 +1474,61 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__bod
   border: 0 !important;
 }
 
-/* Osztott dátum: ne aláhúzás — kivitel-stílusú dobozos cellák */
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body .ad-form-split-ym__dual .immo-dual-range__half,
+/* Csukott év|hó: egy vonal „év 2020  hó 05” — a két doboz rejtve (sheet továbbra is dual) */
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-split-ym {
+  position: relative !important;
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-split-ym__summary {
+  appearance: none;
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0.45rem 0.1rem 0.5rem !important;
+  border: 0 !important;
+  border-bottom: 1.5px solid #cfd6dd !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  box-sizing: border-box !important;
+  text-align: left !important;
+  font: 600 1rem/1.35 system-ui, sans-serif !important;
+  color: #0f172a !important;
+  cursor: pointer;
+  min-height: 2.65rem !important;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-split-ym__summary.is-placeholder {
+  color: #64748b !important;
+  font-weight: 500 !important;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-split-ym__summary:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-split-ym .ad-form-split-ym__dual {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Műszaki triple (ha még van): dobozos cellák maradhatnak */
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body .ad-form-muszaki-date__triple .immo-triple-date__half {
   border: 0 !important;
   border-bottom: 0 !important;
@@ -1486,7 +1539,6 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__bod
   min-height: 0 !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body .ad-form-split-ym__dual .immo-wheel-wrap,
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body .ad-form-muszaki-date__triple .immo-wheel-wrap {
   border: 1.5px solid #111 !important;
   border-bottom: 1.5px solid #111 !important;
@@ -1497,7 +1549,6 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__bod
   height: auto !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body .ad-form-split-ym__dual .immo-wheel-trigger,
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body .ad-form-muszaki-date__triple .immo-wheel-trigger {
   color: #0f172a !important;
   font-weight: 600 !important;

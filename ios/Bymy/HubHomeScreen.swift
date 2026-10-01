@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 /// Web hub kezdőlap: promo + vízszintes csempe-sínek (jobbra/balra csúsztatható).
 struct HubHomeScreen: View {
@@ -16,6 +17,7 @@ struct HubHomeScreen: View {
     private let gutter: CGFloat = 16
     private let tileWidth: CGFloat = 200
 
+    /// Web `HOME_CATEGORIES` + `/images/categories/list/{id}.jpg`
     private let autoCategories: [(id: String, label: String)] = [
         ("uj", "Új"),
         ("benzin", "Benzin"),
@@ -26,6 +28,12 @@ struct HubHomeScreen: View {
         ("berelheto", "Bérelhető"),
         ("ot", "OT"),
     ]
+
+    /// Mobil web: ~2 csempe látszik a sínben.
+    private var categoryTileWidth: CGFloat {
+        let screen = UIScreen.main.bounds.width
+        return max(140, (screen - (2 * gutter) - 10) / 2)
+    }
 
     var body: some View {
         ScrollView {
@@ -156,53 +164,26 @@ struct HubHomeScreen: View {
         .buttonStyle(.plain)
     }
 
-    // MARK: - Category rail
+    // MARK: - Category rail (web `hf-card--kategoria`)
 
     private var categoryRail: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 10) {
+        let w = categoryTileWidth
+        return ScrollView(.horizontal, showsIndicators: false) {
+            HStack(alignment: .top, spacing: 10) {
                 ForEach(autoCategories, id: \.id) { cat in
                     Button {
                         router.selectTop(.auto)
                     } label: {
-                        VStack(spacing: 8) {
-                            ZStack {
-                                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                    .fill(Color.white)
-                                Image(systemName: categoryIcon(cat.id))
-                                    .font(.system(size: 22, weight: .semibold))
-                                    .foregroundStyle(AppTheme.accent)
-                            }
-                            .frame(width: 110, height: 72)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                    .stroke(AppTheme.border, lineWidth: 1)
-                            )
-
-                            Text(cat.label)
-                                .font(.system(size: 12, weight: .semibold))
-                                .foregroundStyle(AppTheme.text)
-                                .lineLimit(1)
-                        }
-                        .frame(width: 110)
+                        AutoCategoryTile(
+                            label: cat.label,
+                            imageURL: URL(string: "https://bymy.hu/images/categories/list/\(cat.id).jpg?v=menuRails1"),
+                            width: w
+                        )
                     }
                     .buttonStyle(.plain)
                 }
             }
             .padding(.horizontal, gutter)
-        }
-    }
-
-    private func categoryIcon(_ id: String) -> String {
-        switch id {
-        case "elektromos": return "bolt.car.fill"
-        case "hybrid": return "leaf.fill"
-        case "diesel", "benzin": return "fuelpump.fill"
-        case "leasing": return "doc.text.fill"
-        case "berelheto": return "key.fill"
-        case "ot": return "building.columns.fill"
-        case "uj": return "sparkles"
-        default: return "car.fill"
         }
     }
 
@@ -268,6 +249,51 @@ struct HubHomeScreen: View {
         } catch {
             errorText = error.localizedDescription
         }
+    }
+}
+
+/// Web `hf-card hf-card--kategoria` — fotó + címke.
+struct AutoCategoryTile: View {
+    let label: String
+    let imageURL: URL?
+    var width: CGFloat = 170
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            ZStack {
+                Color.white
+                AsyncImage(url: imageURL) { phase in
+                    switch phase {
+                    case .success(let image):
+                        image
+                            .resizable()
+                            .scaledToFit()
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 10)
+                    default:
+                        ProgressView()
+                    }
+                }
+            }
+            .frame(width: width, height: width * 10 / 16)
+            .clipped()
+
+            Text(label)
+                .font(.system(size: 15, weight: .heavy))
+                .foregroundStyle(AppTheme.text)
+                .lineLimit(1)
+                .padding(.horizontal, 10)
+                .padding(.top, 8)
+                .padding(.bottom, 10)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .frame(width: width)
+        .background(Color.white)
+        .overlay(
+            RoundedRectangle(cornerRadius: 9, style: .continuous)
+                .stroke(Color(red: 0.83, green: 0.83, blue: 0.83), lineWidth: 1)
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 9, style: .continuous))
     }
 }
 

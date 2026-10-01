@@ -7,7 +7,7 @@ import {
   closeAllInlineDrums,
 } from "./immo-drum-picker.js?v=immoClear1";
 import { bindAutoDrumSheet, openAutoDrumSheet } from "./auto-drum-sheet.js?v=brandDrum29";
-import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=autoHatotav2";
+import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=bmSearch11";
 
 const MOBILE_MQ = "(max-width: 900px)";
 const TYPEAHEAD_CLEAR_MS = 2500;
@@ -174,6 +174,9 @@ const SEARCH_OMIT_FIELDS = new Set([
   "forgalomba_helyezes_honap",
   "muszaki_honap",
   "keresesi_korzet",
+  // Feladás-only kép overlay — nem vevőszűrő
+  "photo_overlay_template_id",
+  "photo_overlay_base_url",
 ]);
 
 function isMobile() {

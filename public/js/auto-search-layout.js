@@ -84,6 +84,9 @@ const SEARCH_OMIT_FIELDS = new Set([
   "forgalomba_helyezes_honap",
   "muszaki_honap",
   "keresesi_korzet",
+  // Feladás-only kép overlay — nem vevőszűrő
+  "photo_overlay_template_id",
+  "photo_overlay_base_url",
 ]);
 
 /** Autó-only mezők — teher keresőben soha. */

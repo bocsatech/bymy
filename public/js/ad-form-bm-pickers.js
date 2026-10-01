@@ -2380,7 +2380,7 @@ async function mountAdBrandModelCombined(form, catalog) {
   }
 
   const { fillWheel, setWheelValue, readWheel, syncHostClearButton } = await import("./ingatlan-wheels.js?v=immoClearAll2");
-  const { openBrandModelCatalogSheet } = await import("./auto-drum-sheet.js?v=bmSheet35");
+  const { openBrandModelCatalogSheet } = await import("./auto-drum-sheet.js?v=bmSheet36");
   const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
 
   const brands = [...(catalog?.gyartmanyok || [])].sort((a, b) =>
@@ -2581,7 +2581,7 @@ async function mountAdSelectDrum(select, {
   select.dataset.adBmDrum = "1";
 
   const { fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=immoClearAll2");
-  const { openStandaloneSwitchSheet, bindAutoDrumSheet } = await import("./auto-drum-sheet.js?v=bmSheet35");
+  const { openStandaloneSwitchSheet, bindAutoDrumSheet } = await import("./auto-drum-sheet.js?v=bmSheet36");
   const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
 
   const wrap = document.createElement("div");
@@ -2804,7 +2804,7 @@ async function mountAdSplitYmDrum({
   }
 
   const { fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=immoClearAll2");
-  const { openYmDualSheet } = await import("./auto-drum-sheet.js?v=bmSheet35");
+  const { openYmDualSheet } = await import("./auto-drum-sheet.js?v=bmSheet36");
   const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
 
   const yearOpts = optionsFromSelect(ev, emptyYear);
@@ -2891,7 +2891,15 @@ async function mountAdSplitYmDrum({
     const y = String(readWheel(minHalf.wheel()) ?? "").trim() || String(ev.value || "").trim();
     const mRaw = String(readWheel(maxHalf.wheel()) ?? "").trim() || String(honap.value || "").trim();
     const m = mRaw ? padMonth(mRaw) : "";
-    summary.textContent = `év ${y || "—"}  hó ${m || "—"}`;
+    if (!y && !m) {
+      summary.textContent = "—";
+    } else if (y && !m) {
+      summary.textContent = `${y}.`;
+    } else if (!y && m) {
+      summary.textContent = `—. ${m}`;
+    } else {
+      summary.textContent = `${y}. ${m}`;
+    }
     block.classList.toggle("has-value", Boolean(y || m));
     summary.classList.toggle("is-placeholder", !y && !m);
   }

@@ -12,12 +12,6 @@
     "allowMixedContent": false,
     "backgroundColor": "#ffffff"
   },
-  "ios": {
-    "path": "ios-capacitor",
-    "contentInset": "automatic",
-    "backgroundColor": "#ffffff",
-    "preferredContentMode": "mobile"
-  },
   "plugins": {
     "SplashScreen": {
       "launchShowDuration": 1200,

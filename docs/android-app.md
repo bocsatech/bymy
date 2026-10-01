@@ -99,7 +99,6 @@ bymy/
 |---|-----|---------|
 | Technológia | Natív SwiftUI (`ios/`) | Capacitor + web (`android/`) |
 | Éles API / web | bymy.hu API | bymy.hu web |
-| Opcionális web-héj | `ios-capacitor/` | — |
 | Bundle ID | hu.bymy.app | hu.bymy.app |
 
 ---

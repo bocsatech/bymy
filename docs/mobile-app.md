@@ -1,36 +1,28 @@
-# iOS mobil app — natív SwiftUI
+# iOS mobil app — natív SwiftUI (v2)
 
-Az **iOS app** natív SwiftUI program: `ios/Bymy.xcodeproj`.  
-Nem böngészős „asztalra mentett” oldal — saját UI, az API-t hívja: **`https://bymy.hu`**.
-
-Opcionális web-héj (Capacitor, mint az Android): `ios-capacitor/` — ez szándékosan a weboldalt tölti.
+Az **iOS app** natív SwiftUI: `ios/Bymy.xcodeproj`.  
+Kinézet és menük = **mobil web 1:1**. Backend: **`https://bymy.hu`**.
 
 **Android:** Capacitor web héj — [`docs/android-app.md`](android-app.md).
 
-## Első indítás (natív app)
+## Indítás
 
 ```bash
 cd /Users/rbocsa/bymy
 npm run ios
 ```
 
-Vagy Xcode: nyisd meg `ios/Bymy.xcodeproj` → telefon / szimulátor → **Run** (⌘R).
+Xcode: `ios/Bymy.xcodeproj` → saját iPhone → **Run** (⌘R).
 
-## Mit tud a natív app
+## Mit tud (váz)
 
-- Belépés / regisztráció / OAuth a `bymy.hu` API-ra
-- Hirdetések, keresés, üzenetek, beállítások (SwiftUI)
-- **Szerződéses adatok** csak a telefonon (`DeviceContractIdentityStore`)
-- Magán utca/lakcím nem megy a szerverre
-
-## Capacitor web-héj (opcionális)
-
-```bash
-npm run ios:capacitor
-```
-
-Ez a `https://bymy.hu` weboldalt jeleníti meg — kinézetre web, nem külön natív felület.
+- Felső menüsáv + iOS oldal-lapozás: Kezdőlap / Autó / Teherautó / Ingatlan / Ajánlások
+- Alsó tab: Főoldal / Keresés / Feladás / Hírfolyam / Fiók
+- Belépés / regisztráció a `bymy.hu` API-ra
+- Hirdetéslisták a `/api/listings` végpontról
+- Online-only (nincs offline cache, nincs push első körben)
+- HA / autoimport: **nincs** (telefonon nem)
 
 ## Bundle ID
 
-`hu.bymy.app`
+`hu.bymy.app` · verzió **2.0.0**

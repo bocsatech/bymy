@@ -807,17 +807,18 @@ function createSheetPortalShell(title) {
   root.setAttribute("aria-label", title);
   root.style.setProperty("--auto-drum-multi-h", `${ITEM_H * MULTI_VISIBLE}px`);
   root.style.setProperty("--auto-drum-item-h", `44px`);
+  /* Szélesség HTML-ben: kék stage fix; fehér ring 100% — nincs left%/translateX. */
   root.innerHTML = `
     <button type="button" class="auto-drum-portal__backdrop" aria-label="Bezárás"></button>
-    <div class="auto-drum-portal__stage auto-drum-portal__stage--multi auto-drum-portal__stage--sheet">
-      <header class="auto-drum-portal__sheet-head">
+    <div class="auto-drum-portal__stage auto-drum-portal__stage--multi auto-drum-portal__stage--sheet" style="left:0;right:0;top:0;bottom:0;width:100%;max-width:100%;margin:0;transform:none;box-sizing:border-box;">
+      <header class="auto-drum-portal__sheet-head" style="position:absolute;top:0;left:0;right:0;width:100%;max-width:100%;z-index:5;">
         <button type="button" class="auto-drum-portal__close" aria-label="Bezárás">×</button>
         <h2 class="auto-drum-portal__sheet-title"></h2>
         <button type="button" class="auto-drum-portal__done auto-drum-portal__done--sheet-top">Kész</button>
       </header>
-      <div class="auto-drum-portal__sheet-scroll" data-sheet-scroll tabindex="-1">
+      <div class="auto-drum-portal__sheet-scroll" data-sheet-scroll tabindex="-1" style="left:0;right:0;width:100%;max-width:100%;box-sizing:border-box;overflow-x:hidden;">
         <div class="auto-drum-portal__sheet-top-space" aria-hidden="true"></div>
-        <div class="immo-drum-wheel-ring auto-drum-portal__ring auto-drum-portal__ring--multi auto-drum-portal__ring--sheet">
+        <div class="immo-drum-wheel-ring auto-drum-portal__ring auto-drum-portal__ring--multi auto-drum-portal__ring--sheet" style="width:100%;max-width:100%;min-width:0;margin-left:0;margin-right:0;left:0;right:auto;transform:none;box-sizing:border-box;">
           <div class="auto-drum-portal__toolbar auto-drum-portal__toolbar--sheet">
             <button type="button" class="auto-drum-portal__back" hidden>Vissza</button>
             <p class="auto-drum-portal__sub" hidden></p>
@@ -842,40 +843,100 @@ function createSheetPortalShell(title) {
   };
 }
 
+function lockSheetWhiteToBlue(root, stage) {
+  if (!root || !stage) return;
+  const scroll = root.querySelector?.("[data-sheet-scroll]");
+  const ring = root.querySelector?.(".auto-drum-portal__ring--sheet");
+  const head = root.querySelector?.(".auto-drum-portal__sheet-head");
+  const ym = Boolean(root?.classList?.contains("auto-drum-portal--ym"));
+  const desk = window.matchMedia("(min-width: 901px)").matches;
+  /* Fehér = kék szélesség (YM): 100%, 0 oldalsó padding/margin, nincs translateX. */
+  stage.style.setProperty("left", "0", "important");
+  stage.style.setProperty("right", "0", "important");
+  stage.style.setProperty("margin-left", desk ? "auto" : "0", "important");
+  stage.style.setProperty("margin-right", desk ? "auto" : "0", "important");
+  if (scroll) {
+    scroll.style.setProperty("left", "0", "important");
+    scroll.style.setProperty("right", "0", "important");
+    scroll.style.setProperty("width", "100%", "important");
+    scroll.style.setProperty("max-width", "100%", "important");
+    scroll.style.setProperty("margin-left", "0", "important");
+    scroll.style.setProperty("margin-right", "0", "important");
+    scroll.style.setProperty("overflow-x", "hidden", "important");
+    if (ym) {
+      scroll.style.setProperty("padding-left", "0", "important");
+      scroll.style.setProperty("padding-right", "0", "important");
+    }
+  }
+  if (ring) {
+    ring.style.setProperty("width", "100%", "important");
+    ring.style.setProperty("max-width", "100%", "important");
+    ring.style.setProperty("min-width", "0", "important");
+    ring.style.setProperty("margin-left", "0", "important");
+    ring.style.setProperty("margin-right", "0", "important");
+    ring.style.setProperty("left", "0", "important");
+    ring.style.setProperty("right", "auto", "important");
+    ring.style.setProperty("transform", "none", "important");
+  }
+  /* Felső menü mindig látszik a kék tetején. */
+  if (head) {
+    if (desk && ym) {
+      /* Desk YM: fej a kék flow tetején — nem abszolút, így a stage fit-content nem takarja. */
+      head.style.setProperty("position", "relative", "important");
+      head.style.setProperty("top", "auto", "important");
+    } else {
+      head.style.setProperty("position", "absolute", "important");
+      head.style.setProperty("top", "0", "important");
+    }
+    head.style.setProperty("left", "0", "important");
+    head.style.setProperty("right", "0", "important");
+    head.style.setProperty("width", "100%", "important");
+    head.style.setProperty("max-width", "100%", "important");
+    head.style.setProperty("z-index", "5", "important");
+  }
+}
+
 function applySheetStageLayout(stage) {
   if (!stage) return;
+  const root = stage.closest?.(".auto-drum-portal--sheet") || stage.parentElement;
   const desk = window.matchMedia("(min-width: 901px)").matches;
-  const ym = Boolean(stage.closest?.(".auto-drum-portal--ym"));
+  const ym = Boolean(root?.classList?.contains("auto-drum-portal--ym"));
   if (desk) {
-    /* Desk: inset + margin:auto. YM: fit-content magasság (top+bottom:0 + height:auto kitöltené a viewportot). */
-    stage.style.left = "0";
-    stage.style.right = "0";
-    stage.style.top = "0";
-    stage.style.bottom = ym ? "auto" : "0";
-    stage.style.width = "";
-    stage.style.maxWidth = "";
-    stage.style.height = ym ? "fit-content" : "";
-    stage.style.transform = "none";
-    stage.style.margin = "auto";
-    stage.style.position = "";
+    const deskW = "min(28rem, calc(100% - 2rem))";
+    /* Desk: kék stage fix szélesség HTML/inline-ban — nincs left%/translateX. */
+    stage.style.setProperty("left", "0", "important");
+    stage.style.setProperty("right", "0", "important");
+    stage.style.setProperty("width", deskW, "important");
+    stage.style.setProperty("max-width", deskW, "important");
+    stage.style.setProperty("margin-left", "auto", "important");
+    stage.style.setProperty("margin-right", "auto", "important");
+    stage.style.setProperty("transform", "none", "important");
     if (ym) {
-      /* Függőleges közép translateY-jal — vízszintes translate tilos. */
-      stage.style.top = "50%";
-      stage.style.bottom = "auto";
-      stage.style.transform = "translateY(-50%)";
+      stage.style.setProperty("top", "50%", "important");
+      stage.style.setProperty("bottom", "auto", "important");
+      stage.style.setProperty("height", "fit-content", "important");
+      stage.style.setProperty("transform", "translateY(-50%)", "important");
+    } else {
+      stage.style.setProperty("top", "0", "important");
+      stage.style.setProperty("bottom", "0", "important");
+      stage.style.setProperty("height", "min(86vh, 48rem)", "important");
+      stage.style.setProperty("margin-top", "auto", "important");
+      stage.style.setProperty("margin-bottom", "auto", "important");
     }
+    lockSheetWhiteToBlue(root, stage);
     return;
   }
-  /* Mobil: inset 0 — ne 100vw/translate, az elcsúsztatta a Kész gombot. */
-  stage.style.left = "0";
-  stage.style.right = "0";
-  stage.style.top = "0";
-  stage.style.bottom = "0";
-  stage.style.width = "100%";
-  stage.style.maxWidth = "100%";
-  stage.style.height = "100%";
-  stage.style.transform = "none";
-  stage.style.margin = "0";
+  /* Mobil: kék full-bleed, fehér ugyanakkora szélesség. */
+  stage.style.setProperty("left", "0", "important");
+  stage.style.setProperty("right", "0", "important");
+  stage.style.setProperty("top", "0", "important");
+  stage.style.setProperty("bottom", "0", "important");
+  stage.style.setProperty("width", "100%", "important");
+  stage.style.setProperty("max-width", "100%", "important");
+  stage.style.setProperty("height", "100%", "important");
+  stage.style.setProperty("transform", "none", "important");
+  stage.style.setProperty("margin", "0", "important");
+  lockSheetWhiteToBlue(root, stage);
 }
 
 function lockSheetPageAxes() {
@@ -976,9 +1037,9 @@ export function openYmDualSheet(yearWheel, monthWheel, trigger, { title = null }
       </button>
     </div>
     <div class="auto-drum-ym__heads" aria-hidden="true"><span>Év</span><span>Hó</span></div>
-    <div class="auto-drum-ym__body">
-      <div class="immo-drum-inline-highlight auto-drum-ym__highlight" aria-hidden="true"></div>
-      <div class="auto-drum-ym__cols">
+    <div class="auto-drum-ym__body" style="width:100%;max-width:100%;box-sizing:border-box;">
+      <div class="immo-drum-inline-highlight auto-drum-ym__highlight" aria-hidden="true" style="left:0.4rem;right:0.4rem;width:auto;transform:translateY(-50%);"></div>
+      <div class="auto-drum-ym__cols" style="width:100%;max-width:100%;">
         <div class="auto-drum-split__col" data-half="year">
           <div class="auto-drum-portal__scroll auto-drum-split__scroll immo-drum-inline-scroll" tabindex="-1"></div>
         </div>
@@ -991,8 +1052,16 @@ export function openYmDualSheet(yearWheel, monthWheel, trigger, { title = null }
   if (sheetScroll) {
     sheetScroll.style.overflow = "hidden";
     sheetScroll.scrollTop = 0;
+    sheetScroll.style.setProperty("padding-left", "0", "important");
+    sheetScroll.style.setProperty("padding-right", "0", "important");
+    sheetScroll.style.setProperty("width", "100%", "important");
   }
   ring.style.overflow = "hidden";
+  ring.style.setProperty("width", "100%", "important");
+  ring.style.setProperty("max-width", "100%", "important");
+  ring.style.setProperty("margin-left", "0", "important");
+  ring.style.setProperty("margin-right", "0", "important");
+  ring.style.setProperty("transform", "none", "important");
 
   const highlight = root.querySelector(".auto-drum-ym__highlight");
   const yearScroll = root.querySelector('.auto-drum-split__col[data-half="year"] .auto-drum-split__scroll');

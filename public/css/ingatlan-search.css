@@ -1690,9 +1690,12 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   bottom: 0;
   z-index: 1;
   overflow: hidden !important;
+  overflow-x: hidden !important;
   overscroll-behavior: none;
   margin: 0;
   padding: 0 1rem;
+  width: 100%;
+  max-width: 100%;
   box-sizing: border-box;
   background: transparent;
   touch-action: pan-y;
@@ -1898,27 +1901,44 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   .auto-drum-portal--sheet.auto-drum-portal--ym .auto-drum-portal__sheet-scroll {
     position: relative !important;
     top: auto !important;
-    left: auto !important;
-    right: auto !important;
+    left: 0 !important;
+    right: 0 !important;
     bottom: auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
     height: auto !important;
     max-height: none !important;
     overflow: visible !important;
+    overflow-x: hidden !important;
     padding: 0 0 0.85rem !important;
   }
 }
 
 /* Ad-form év|hó sheet: gyártmány chrome + 2 oszlopos dobkerék */
+.auto-drum-portal--sheet.auto-drum-portal--ym .auto-drum-portal__sheet-scroll {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  left: 0 !important;
+  right: 0 !important;
+  overflow-x: hidden !important;
+}
+
 .auto-drum-portal--sheet.auto-drum-portal--ym .auto-drum-portal__ring--sheet {
   display: flex !important;
   flex-direction: column !important;
+  width: 100% !important;
+  max-width: 100% !important;
   height: auto !important;
   max-height: none !important;
   min-height: 0 !important;
   overflow: hidden !important;
   padding: 0 !important;
   border-radius: 1.15rem !important;
-  margin-bottom: 1rem !important;
+  margin: 0 0 1rem 0 !important;
+  left: 0 !important;
+  transform: none !important;
 }
 
 .auto-drum-portal--sheet.auto-drum-portal--ym .auto-drum-ym__chips {
@@ -1956,12 +1976,14 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
 .auto-drum-portal--sheet.auto-drum-portal--ym .auto-drum-ym__highlight,
 .auto-drum-portal--sheet.auto-drum-portal--ym .immo-drum-inline-highlight {
   display: block !important;
-  position: absolute;
-  left: 0.4rem;
-  right: 0.4rem;
-  top: 50%;
-  transform: translateY(-50%);
-  height: 3.35rem;
+  position: absolute !important;
+  left: 0.4rem !important;
+  right: 0.4rem !important;
+  width: auto !important;
+  top: 50% !important;
+  /* Csak függőleges — vízszintes translate tilos, a highlight nem csúszhat. */
+  transform: translateY(-50%) !important;
+  height: 3.35rem !important;
   border-radius: 10px;
   background: rgba(148, 163, 184, 0.22);
   pointer-events: none;

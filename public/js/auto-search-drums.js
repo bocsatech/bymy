@@ -7,7 +7,7 @@ import {
   closeAllInlineDrums,
 } from "./immo-drum-picker.js?v=immoClear1";
 import { bindAutoDrumSheet, openAutoDrumSheet } from "./auto-drum-sheet.js?v=brandDrum27";
-import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=autoHatotav1";
+import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=autoHatotav2";
 
 const MOBILE_MQ = "(max-width: 900px)";
 const TYPEAHEAD_CLEAR_MS = 2500;
@@ -735,13 +735,33 @@ function combineBrandModelOnMobile(form) {
 }
 
 /** Megjelenés: BM kívül, többi mező fehér Alapadatok kártyában (mint hirdetésfeladás). */
+function liftAutoSearchFieldLabels(scope) {
+  if (!scope) return;
+  scope
+    .querySelectorAll(".immo-schema-cell, .immo-dual-range-block, .immo-triple-date-block, .home-qs-field, .immo-field")
+    .forEach((cell) => {
+      const wrap = cell.querySelector(
+        ":scope > .immo-wheel-wrap, :scope > .immo-dual-range, :scope > .immo-triple-date"
+      );
+      if (!wrap) return;
+      const label = wrap.querySelector(
+        ":scope > .immo-label, :scope > .immo-dual-range__title, :scope > .immo-triple-date__title"
+      );
+      if (!label) return;
+      if (label.parentElement === wrap) {
+        cell.insertBefore(label, wrap);
+      }
+    });
+}
+
 function styleAutoSearchAlapCard(form) {
-  if (!isMobile() || !form || form.dataset.alapCardStyled === "1") return;
+  if (!isMobile() || !form) return;
   const host =
     form.querySelector("#qs-layout-main") ||
     form.querySelector(".home-qs-layout-main") ||
     form.querySelector(".auto-desk-fields[data-desk-alap]");
   if (!host) return;
+  if (host.querySelector(":scope > .auto-search-alap-card")) return;
 
   const bm = host.querySelector(".auto-search-bm-combined");
   const bmHost =
@@ -772,15 +792,33 @@ function styleAutoSearchAlapCard(form) {
   else if (bmHost) host.appendChild(card);
   else host.insertBefore(card, host.firstChild);
 
-  body.querySelectorAll(".immo-schema-cell, .immo-dual-range-block, .immo-triple-date-block, .home-qs-field, .immo-field").forEach((cell) => {
-    const wrap = cell.querySelector(":scope > .immo-wheel-wrap, :scope > .immo-dual-range, :scope > .immo-triple-date");
-    if (!wrap) return;
-    const label = wrap.querySelector(":scope > .immo-label, :scope > .immo-dual-range__title, :scope > .immo-triple-date__title");
-    if (!label) return;
-    if (label.parentElement === wrap) {
-      cell.insertBefore(label, wrap);
-    }
+  liftAutoSearchFieldLabels(body);
+}
+
+/** Több szűrő: ugyanaz a fehér kártya + aláhúzás, mint Alapadatok (csak kinézet). */
+function styleAutoSearchMoreCard(form) {
+  if (!isMobile() || !form) return;
+  const host = form.querySelector("#qs-more-layout") || form.querySelector(".home-qs-more-layout");
+  if (!host) return;
+  if (host.querySelector(":scope > .auto-search-alap-card")) return;
+
+  const kids = [...host.children].filter((el) => {
+    if (el.classList.contains("auto-search-alap-card")) return false;
+    if (el.classList.contains("home-qs-static-legacy")) return false;
+    if (el.hasAttribute("hidden")) return false;
+    if (el.style?.display === "none") return false;
+    return true;
   });
+  if (!kids.length) return;
+
+  form.dataset.moreCardStyled = "1";
+  const card = document.createElement("div");
+  card.className = "auto-search-alap-card auto-search-more-card";
+  card.innerHTML = `<div class="auto-search-alap-card__body"></div>`;
+  const body = card.querySelector(".auto-search-alap-card__body");
+  kids.forEach((el) => body.appendChild(el));
+  host.appendChild(card);
+  liftAutoSearchFieldLabels(body);
 }
 
 async function mountBrandModelCatalogDrums(form) {
@@ -855,6 +893,7 @@ async function mountBrandModelCatalogDrums(form) {
 
   combineBrandModelOnMobile(form);
   styleAutoSearchAlapCard(form);
+  styleAutoSearchMoreCard(form);
 }
 
 function convertMuszakiToDateTriple(wrap) {
@@ -1013,6 +1052,7 @@ export async function mountAutoSearchDrums(form = document.getElementById("home-
     console.warn("Dobkerék katalógus:", error);
   }
   styleAutoSearchAlapCard(form);
+  styleAutoSearchMoreCard(form);
   form.dataset.drumsMounted = "1";
   return true;
 }

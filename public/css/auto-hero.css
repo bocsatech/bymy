@@ -1959,6 +1959,14 @@ body[data-site-page="teherauto"] .auto-search-tabs {
   body:is([data-site-page="auto"], [data-site-page="teherauto"])
     .auto-search-panel
     .auto-qs-drums
+    .home-qs-more-layout
+    > .auto-search-more-card {
+    margin-top: 0 !important;
+  }
+
+  body:is([data-site-page="auto"], [data-site-page="teherauto"])
+    .auto-search-panel
+    .auto-qs-drums
     .home-qs-row--actions {
     background: linear-gradient(to top, #e8eef3 78%, rgba(232, 238, 243, 0.94) 100%) !important;
     box-shadow: none !important;

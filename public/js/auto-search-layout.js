@@ -985,6 +985,8 @@ export async function applyAutoSearchLayout(form = document.getElementById("home
 
     // Remount after a failed boot: clear drum flag so converters can run again.
     delete form.dataset.drumsMounted;
+    delete form.dataset.alapCardStyled;
+    delete form.dataset.moreCardStyled;
     form.classList.remove("auto-qs-drums", "auto-qs-drums--mobile", "auto-qs-drums--desktop");
 
     hideLegacy(form);

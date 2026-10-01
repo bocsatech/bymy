@@ -1,6 +1,6 @@
 
-import { applyAutoSearchLayout, readLayoutFilterValues, refillAutoSearchRangeSelects, prefetchAutoSearchBoot } from "./auto-search-layout.js?v=teherStrict3";
-import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums } from "./auto-search-drums.js?v=bmSearch5";
+import { applyAutoSearchLayout, readLayoutFilterValues, refillAutoSearchRangeSelects, prefetchAutoSearchBoot } from "./auto-search-layout.js?v=teherStrict4";
+import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums } from "./auto-search-drums.js?v=bmSearch6";
 import {
   mountDetailedSearch,
   readDetailedSearchValues,
@@ -19,7 +19,7 @@ import {
   updateAutoDeskAccSummaries,
   arrangeAutoDeskDemoFields,
   deskFilterMenuReady,
-} from "./auto-desk-search.js?v=teherStrict3";
+} from "./auto-desk-search.js?v=teherStrict4";
 
 prefetchAutoSearchBoot();
 const MOBILE_MQ = "(max-width: 900px)";

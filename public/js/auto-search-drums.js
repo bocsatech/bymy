@@ -734,6 +734,55 @@ function combineBrandModelOnMobile(form) {
   refreshCombined();
 }
 
+/** Megjelenés: BM kívül, többi mező fehér Alapadatok kártyában (mint hirdetésfeladás). */
+function styleAutoSearchAlapCard(form) {
+  if (!isMobile() || !form || form.dataset.alapCardStyled === "1") return;
+  const host =
+    form.querySelector("#qs-layout-main") ||
+    form.querySelector(".home-qs-layout-main") ||
+    form.querySelector(".auto-desk-fields[data-desk-alap]");
+  if (!host) return;
+
+  const bm = host.querySelector(".auto-search-bm-combined");
+  const bmHost =
+    bm &&
+    (() => {
+      const grid = bm.closest(".home-qs-grid-cell");
+      return grid && host.contains(grid) ? grid : bm;
+    })();
+
+  const kids = [...host.children].filter((el) => {
+    if (el.classList.contains("auto-search-alap-card")) return false;
+    if (bmHost && (el === bmHost || el.contains?.(bm))) return false;
+    if (el.classList.contains("auto-search-bm-modell-nested")) return false;
+    if (el.hasAttribute("hidden")) return false;
+    if (el.style?.display === "none") return false;
+    return true;
+  });
+  if (!kids.length) return;
+
+  form.dataset.alapCardStyled = "1";
+  const card = document.createElement("div");
+  card.className = "auto-search-alap-card";
+  card.innerHTML = `<p class="auto-search-alap-card__title">Alapadatok</p><div class="auto-search-alap-card__body"></div>`;
+  const body = card.querySelector(".auto-search-alap-card__body");
+  kids.forEach((el) => body.appendChild(el));
+
+  if (bmHost?.nextSibling) host.insertBefore(card, bmHost.nextSibling);
+  else if (bmHost) host.appendChild(card);
+  else host.insertBefore(card, host.firstChild);
+
+  body.querySelectorAll(".immo-schema-cell, .immo-dual-range-block, .immo-triple-date-block, .home-qs-field, .immo-field").forEach((cell) => {
+    const wrap = cell.querySelector(":scope > .immo-wheel-wrap, :scope > .immo-dual-range, :scope > .immo-triple-date");
+    if (!wrap) return;
+    const label = wrap.querySelector(":scope > .immo-label, :scope > .immo-dual-range__title, :scope > .immo-triple-date__title");
+    if (!label) return;
+    if (label.parentElement === wrap) {
+      cell.insertBefore(label, wrap);
+    }
+  });
+}
+
 async function mountBrandModelCatalogDrums(form) {
   ensureBrandModelDrumCells(form);
   if (!form.querySelector('[data-wheel="gyartmany"]')) return;
@@ -805,6 +854,7 @@ async function mountBrandModelCatalogDrums(form) {
   }
 
   combineBrandModelOnMobile(form);
+  styleAutoSearchAlapCard(form);
 }
 
 function convertMuszakiToDateTriple(wrap) {
@@ -962,6 +1012,7 @@ export async function mountAutoSearchDrums(form = document.getElementById("home-
   } catch (error) {
     console.warn("Dobkerék katalógus:", error);
   }
+  styleAutoSearchAlapCard(form);
   form.dataset.drumsMounted = "1";
   return true;
 }

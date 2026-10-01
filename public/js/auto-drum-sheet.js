@@ -2190,7 +2190,9 @@ function paintSplitColSync(scrollEl, ring) {
 }
 
 function wheelOptionRows(wheel, emptyLabel = "Mindegy") {
-  return normalizeSheetItems([...wheel.querySelectorAll(".immo-wheel-opt")], emptyLabel);
+  return normalizeSheetItems([...wheel.querySelectorAll(".immo-wheel-opt")], emptyLabel).map((row) =>
+    String(row.value ?? "") === "" ? { value: "", label: emptyLabel } : row
+  );
 }
 
 function labelForWheelValue(wheel, value, emptyLabel = "Mindegy") {
@@ -2219,21 +2221,22 @@ function openSplitRangeDrumSheet(minWheel, maxWheel, trigger) {
       : unit
         ? `${title} (-tól -ig) · ${unit}`
         : `${title} (-tól -ig)`;
-  const emptyLabel =
-    splitKind === "ym"
-      ? trigger.dataset.emptyLabel || "—"
-      : "Mindegy";
-  const minEmpty =
-    dual?.querySelector(".immo-dual-range__half--min .immo-wheel-trigger")?.dataset.emptyLabel || emptyLabel;
-  const maxEmpty =
-    dual?.querySelector(".immo-dual-range__half--max .immo-wheel-trigger")?.dataset.emptyLabel || emptyLabel;
-  const minItems = wheelOptionRows(minWheel, minEmpty);
-  const maxItems = wheelOptionRows(maxWheel, maxEmpty);
+  const chipMinEmpty =
+    dual?.querySelector(".immo-dual-range__half--min .immo-wheel-trigger")?.dataset.emptyLabel ||
+    (splitKind === "ym" ? "év" : "tól");
+  const chipMaxEmpty =
+    dual?.querySelector(".immo-dual-range__half--max .immo-wheel-trigger")?.dataset.emptyLabel ||
+    (splitKind === "ym" ? "hó" : "ig");
+  /* Kerék üres sora: ne „tól/ig” legyen a kiválasztott érték — mint a feladás sheet. */
+  const wheelMinEmpty = splitKind === "ym" ? chipMinEmpty : "—";
+  const wheelMaxEmpty = splitKind === "ym" ? chipMaxEmpty : "—";
+  const minItems = wheelOptionRows(minWheel, wheelMinEmpty);
+  const maxItems = wheelOptionRows(maxWheel, wheelMaxEmpty);
   let pendingMin = String(readWheel(minWheel) ?? "");
   let pendingMax = String(readWheel(maxWheel) ?? "");
 
-  const headMin = splitKind === "ym" ? minEmpty : "tól";
-  const headMax = splitKind === "ym" ? maxEmpty : "ig";
+  const headMin = splitKind === "ym" ? chipMinEmpty : "tól";
+  const headMax = splitKind === "ym" ? chipMaxEmpty : "ig";
   const useSheet = isMobileDrumSheet();
   let root;
   let stage;
@@ -2242,6 +2245,7 @@ function openSplitRangeDrumSheet(minWheel, maxWheel, trigger) {
   let maxScroll;
   let chipMin;
   let chipMax;
+  let chipSummary = null;
   let doneBtn;
   let closeBtn;
   let sheetScroll = null;
@@ -2250,13 +2254,10 @@ function openSplitRangeDrumSheet(minWheel, maxWheel, trigger) {
   if (useSheet) {
     ({ root, stage, ring: ringEl, sheetScroll, doneBtn, closeBtn } = createSheetPortalShell(sheetTitle));
     root.classList.add("auto-drum-portal--ym", "auto-drum-portal--range-sheet");
+    /* Feladás év|hó mintája: 1 chip + oszlopfejek + 2 dob */
     ringEl.innerHTML = `
-        <div class="auto-drum-split__chips auto-drum-ym__chips auto-drum-range__chips">
-          <button type="button" class="auto-drum-split__chip" data-half="min" aria-label="${escapeHtml(splitKind === "ym" ? minEmpty : "Érték -tól")}">
-            <span class="auto-drum-split__chip-label"></span>
-            <span class="auto-drum-split__chip-clear" hidden aria-hidden="true">×</span>
-          </button>
-          <button type="button" class="auto-drum-split__chip" data-half="max" aria-label="${escapeHtml(splitKind === "ym" ? maxEmpty : "Érték -ig")}">
+        <div class="auto-drum-ym__chips">
+          <button type="button" class="auto-drum-split__chip auto-drum-ym__chip auto-drum-range__chip" aria-label="${escapeHtml(sheetTitle)}">
             <span class="auto-drum-split__chip-label"></span>
             <span class="auto-drum-split__chip-clear" hidden aria-hidden="true">×</span>
           </button>
@@ -2276,8 +2277,9 @@ function openSplitRangeDrumSheet(minWheel, maxWheel, trigger) {
     ring = root.querySelector(".auto-drum-split__highlight");
     minScroll = root.querySelector('.auto-drum-split__col[data-half="min"] .auto-drum-split__scroll');
     maxScroll = root.querySelector('.auto-drum-split__col[data-half="max"] .auto-drum-split__scroll');
-    chipMin = root.querySelector('.auto-drum-split__chip[data-half="min"]');
-    chipMax = root.querySelector('.auto-drum-split__chip[data-half="max"]');
+    chipSummary = root.querySelector(".auto-drum-range__chip");
+    chipMin = null;
+    chipMax = null;
   } else {
     root = document.createElement("div");
     root.className = "auto-drum-portal auto-drum-portal--multi auto-drum-portal--split";
@@ -2295,11 +2297,11 @@ function openSplitRangeDrumSheet(minWheel, maxWheel, trigger) {
           <button type="button" class="auto-drum-portal__done">Kész</button>
         </div>
         <div class="auto-drum-split__chips">
-          <button type="button" class="auto-drum-split__chip" data-half="min" aria-label="${escapeHtml(splitKind === "ym" ? minEmpty : "Érték -tól")}">
+          <button type="button" class="auto-drum-split__chip" data-half="min" aria-label="${escapeHtml(splitKind === "ym" ? chipMinEmpty : "Érték -tól")}">
             <span class="auto-drum-split__chip-label"></span>
             <span class="auto-drum-split__chip-clear" hidden aria-hidden="true">×</span>
           </button>
-          <button type="button" class="auto-drum-split__chip" data-half="max" aria-label="${escapeHtml(splitKind === "ym" ? maxEmpty : "Érték -ig")}">
+          <button type="button" class="auto-drum-split__chip" data-half="max" aria-label="${escapeHtml(splitKind === "ym" ? chipMaxEmpty : "Érték -ig")}">
             <span class="auto-drum-split__chip-label"></span>
             <span class="auto-drum-split__chip-clear" hidden aria-hidden="true">×</span>
           </button>
@@ -2335,8 +2337,20 @@ function openSplitRangeDrumSheet(minWheel, maxWheel, trigger) {
   maxScroll.innerHTML = maxItems.map(itemHtml).join("");
 
   function syncChips() {
-    const minLabel = labelForWheelValue(minWheel, pendingMin, minEmpty);
-    const maxLabel = labelForWheelValue(maxWheel, pendingMax, maxEmpty);
+    const minLabel = labelForWheelValue(minWheel, pendingMin, chipMinEmpty);
+    const maxLabel = labelForWheelValue(maxWheel, pendingMax, chipMaxEmpty);
+    if (chipSummary) {
+      const hasAny = pendingMin !== "" || pendingMax !== "";
+      const summary =
+        !hasAny
+          ? "—"
+          : `${pendingMin !== "" ? minLabel : chipMinEmpty} – ${pendingMax !== "" ? maxLabel : chipMaxEmpty}`;
+      chipSummary.querySelector(".auto-drum-split__chip-label").textContent = summary;
+      const clearSum = chipSummary.querySelector(".auto-drum-split__chip-clear");
+      clearSum.hidden = !hasAny;
+      clearSum.setAttribute("aria-hidden", hasAny ? "false" : "true");
+      return;
+    }
     chipMin.querySelector(".auto-drum-split__chip-label").textContent = minLabel;
     chipMax.querySelector(".auto-drum-split__chip-label").textContent = maxLabel;
     const clearMin = chipMin.querySelector(".auto-drum-split__chip-clear");
@@ -2440,12 +2454,25 @@ function openSplitRangeDrumSheet(minWheel, maxWheel, trigger) {
     paintBoth();
   }
 
-  chipMin.addEventListener("click", (event) => {
-    if (event.target.closest(".auto-drum-split__chip-clear")) onChipClear("min", event);
-  });
-  chipMax.addEventListener("click", (event) => {
-    if (event.target.closest(".auto-drum-split__chip-clear")) onChipClear("max", event);
-  });
+  if (chipSummary) {
+    chipSummary.addEventListener("click", (event) => {
+      if (!event.target.closest(".auto-drum-split__chip-clear")) return;
+      event.preventDefault();
+      event.stopPropagation();
+      pendingMin = "";
+      pendingMax = "";
+      scrollHalfToValue(minScroll, "");
+      scrollHalfToValue(maxScroll, "");
+      paintBoth();
+    });
+  } else {
+    chipMin.addEventListener("click", (event) => {
+      if (event.target.closest(".auto-drum-split__chip-clear")) onChipClear("min", event);
+    });
+    chipMax.addEventListener("click", (event) => {
+      if (event.target.closest(".auto-drum-split__chip-clear")) onChipClear("max", event);
+    });
+  }
 
   root.querySelector(".auto-drum-portal__backdrop")?.addEventListener("click", () => closeAutoDrumSheet(true));
   closeBtn?.addEventListener("click", () => closeAutoDrumSheet(false));

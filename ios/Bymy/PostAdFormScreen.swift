@@ -16,7 +16,8 @@ struct PostAdFormScreen: View {
     @State private var year = ""
     @State private var km = ""
     @State private var price = ""
-    @State private var fuel = PostAdCatalog.fuels[0]
+    @State private var fuel = ""
+    @State private var bodyType = ""
     @State private var transmission = ""
     @State private var condition = ""
     @State private var title = ""
@@ -33,6 +34,8 @@ struct PostAdFormScreen: View {
     @State private var posting = false
     @State private var toast: String?
     @State private var postedId: Int?
+    @State private var sheet: SearchSheet?
+    @StateObject private var catalog = VehicleCatalogStore()
 
     private var isVehicle: Bool { category.vertical != "ingatlan" }
     private let pageBg = Color(red: 0.949, green: 0.957, blue: 0.969)
@@ -57,7 +60,22 @@ struct PostAdFormScreen: View {
             }
         }
         .background(pageBg.ignoresSafeArea())
+        .task {
+            if isVehicle {
+                await catalog.load(kind: category.subtype == "kisteher" || category.subtype == "teherauto" ? "kisteher" : "szemelyauto")
+            }
+        }
         .onAppear { prefillContact() }
+        .sheet(item: $sheet) { item in
+            SearchPickerSheet(item: item) { value in
+                applySheet(item, value: value)
+                sheet = nil
+            } onDismiss: {
+                sheet = nil
+            }
+            .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.visible)
+        }
         .onChange(of: libraryItems) { _, items in
             guard !items.isEmpty else { return }
             Task { await importLibraryItems(items) }
@@ -192,46 +210,154 @@ struct PostAdFormScreen: View {
     }
 
     private var vehicleFields: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(spacing: 0) {
             sectionTitle("Alapadatok")
-            field("Gyártmány", text: $brand, placeholder: "pl. Mercedes-Benz")
-            field("Modell", text: $model, placeholder: "pl. E 250")
-            HStack(spacing: 10) {
-                field("Évjárat", text: $year, placeholder: "2018", keyboard: .numberPad)
-                field("Km", text: $km, placeholder: "120000", keyboard: .numberPad)
+                .padding(.horizontal, 14)
+                .padding(.top, 14)
+                .padding(.bottom, 8)
+
+            sheetRow("Gyártmány", value: brand.isEmpty ? "Mindegy" : brand) {
+                sheet = .list(title: "Gyártmány", options: catalog.brands, selected: brand)
             }
-            field("Vételár (Ft)", text: $price, placeholder: "4500000", keyboard: .numberPad)
-            pickerRow("Üzemanyag", selection: $fuel, options: PostAdCatalog.fuels)
-            optionalPicker("Váltó", selection: $transmission, options: PostAdCatalog.transmissions)
-            optionalPicker("Állapot", selection: $condition, options: PostAdCatalog.conditions)
+            rowDivider
+            sheetRow("Modell", value: model.isEmpty ? "Mindegy" : model) {
+                let models = catalog.models(for: brand)
+                if models.isEmpty {
+                    sheet = .text(title: "Modell", current: model)
+                } else {
+                    sheet = .list(title: "Modell", options: models, selected: model)
+                }
+            }
+            rowDivider
+            sheetRow("Évjárat", value: year.isEmpty ? "Mindegy" : year) {
+                sheet = .list(title: "Évjárat", options: SearchCatalog.yearOptions(), selected: year)
+            }
+            rowDivider
+            fieldInline("Km", text: $km, placeholder: "pl. 120000", keyboard: .numberPad)
+            rowDivider
+            fieldInline("Vételár (Ft)", text: $price, placeholder: "pl. 4500000", keyboard: .numberPad)
+            rowDivider
+            sheetRow("Üzemanyag", value: fuel.isEmpty ? "Mindegy" : fuel) {
+                sheet = .list(title: "Üzemanyag", options: PostAdCatalog.fuels, selected: fuel)
+            }
+            rowDivider
+            sheetRow("Kivitel", value: bodyType.isEmpty ? "Mindegy" : bodyType) {
+                sheet = .list(title: "Kivitel", options: PostAdCatalog.kivitels, selected: bodyType)
+            }
+            rowDivider
+            sheetRow("Sebességváltó", value: transmission.isEmpty ? "Mindegy" : transmission) {
+                sheet = .list(title: "Sebességváltó", options: PostAdCatalog.transmissions, selected: transmission)
+            }
+            rowDivider
+            sheetRow("Állapot", value: condition.isEmpty ? "Mindegy" : condition) {
+                sheet = .list(title: "Állapot", options: PostAdCatalog.conditions, selected: condition)
+            }
         }
-        .padding(14)
+        .padding(.bottom, 8)
         .background(Color.white)
         .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
     }
 
+    private var rowDivider: some View {
+        Divider().padding(.leading, 14)
+    }
+
+    private func sheetRow(_ title: String, value: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack {
+                Text(title)
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(AppTheme.text)
+                Spacer()
+                Text(value)
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundStyle(value == "Mindegy" ? AppTheme.textSecondary : AppTheme.text)
+                    .lineLimit(1)
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(AppTheme.tabInactive)
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 14)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func fieldInline(
+        _ title: String,
+        text: Binding<String>,
+        placeholder: String,
+        keyboard: UIKeyboardType = .default
+    ) -> some View {
+        HStack {
+            Text(title)
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundStyle(AppTheme.text)
+            Spacer()
+            TextField(placeholder, text: text)
+                .keyboardType(keyboard)
+                .multilineTextAlignment(.trailing)
+                .font(.system(size: 15, weight: .medium))
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
+    }
+
+    private func applySheet(_ item: SearchSheet, value: SearchSheetValue) {
+        switch item {
+        case .list(let title, _, _):
+            let v = value.single
+            switch title {
+            case "Gyártmány":
+                brand = v
+                if !v.isEmpty { model = "" }
+            case "Modell": model = v
+            case "Évjárat": year = v
+            case "Üzemanyag": fuel = v
+            case "Kivitel": bodyType = v
+            case "Sebességváltó": transmission = v
+            case "Állapot": condition = v
+            case "Kategória":
+                immoCategory = PostAdCatalog.immoKategoriak.first(where: { $0.label == v })?.id ?? ""
+            default: break
+            }
+        case .text(let title, _):
+            if title == "Modell" { model = value.single }
+        default:
+            break
+        }
+    }
+
     private var immoFields: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(spacing: 0) {
             sectionTitle("Ingatlan adatok")
-            field("Cím / megnevezés", text: $title, placeholder: "pl. 3 szobás lakás")
-            Menu {
-                ForEach(PostAdCatalog.immoKategoriak, id: \.id) { item in
-                    Button(item.label) { immoCategory = item.id }
-                }
-            } label: {
-                formValueRow(
+                .padding(.horizontal, 14)
+                .padding(.top, 14)
+                .padding(.bottom, 8)
+
+            fieldInline("Cím / megnevezés", text: $title, placeholder: "pl. 3 szobás lakás")
+            rowDivider
+            sheetRow(
+                "Kategória",
+                value: PostAdCatalog.immoKategoriak.first(where: { $0.id == immoCategory })?.label ?? "Válassz"
+            ) {
+                sheet = .list(
                     title: "Kategória",
-                    value: PostAdCatalog.immoKategoriak.first(where: { $0.id == immoCategory })?.label ?? "Válassz"
+                    options: PostAdCatalog.immoKategoriak.map(\.label),
+                    selected: PostAdCatalog.immoKategoriak.first(where: { $0.id == immoCategory })?.label ?? ""
                 )
             }
-            field("Vételár / bérleti díj (Ft)", text: $price, placeholder: "65000000", keyboard: .numberPad)
-            HStack(spacing: 10) {
-                field("Irányítószám", text: $postalCode, placeholder: "1051", keyboard: .numberPad)
-                field("Település", text: $city, placeholder: "Budapest")
-            }
-            field("Utca, házszám", text: $street, placeholder: "opcionális")
+            rowDivider
+            fieldInline("Vételár / bérleti díj (Ft)", text: $price, placeholder: "65000000", keyboard: .numberPad)
+            rowDivider
+            fieldInline("Irányítószám", text: $postalCode, placeholder: "1051", keyboard: .numberPad)
+            rowDivider
+            fieldInline("Település", text: $city, placeholder: "Budapest")
+            rowDivider
+            fieldInline("Utca, házszám", text: $street, placeholder: "opcionális")
         }
-        .padding(14)
+        .padding(.bottom, 8)
         .background(Color.white)
         .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
     }
@@ -454,7 +580,8 @@ struct PostAdFormScreen: View {
             let kmDigits = km.filter(\.isNumber)
             if !kmDigits.isEmpty { form["km"] = kmDigits }
 
-            form["uzemanyag"] = fuel
+            if !fuel.isEmpty { form["uzemanyag"] = fuel }
+            if !bodyType.isEmpty { form["kivitel"] = bodyType }
             if !transmission.isEmpty { form["sebessegvalto"] = transmission }
             if !condition.isEmpty { form["allapot"] = condition }
 

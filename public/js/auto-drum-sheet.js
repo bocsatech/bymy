@@ -811,7 +811,7 @@ function createSheetPortalShell(title) {
   root.innerHTML = `
     <button type="button" class="auto-drum-portal__backdrop" aria-label="Bezárás"></button>
     <div class="auto-drum-portal__stage auto-drum-portal__stage--multi auto-drum-portal__stage--sheet" style="left:0;right:0;top:0;bottom:0;width:100%;max-width:100%;margin:0;transform:none;box-sizing:border-box;">
-      <header class="auto-drum-portal__sheet-head" style="position:absolute;top:0;left:0;right:0;width:100%;max-width:100%;z-index:5;">
+      <header class="auto-drum-portal__sheet-head" style="position:absolute;top:0;left:0;right:0;width:100%;max-width:100%;z-index:30;background:#e8eef3;display:grid;visibility:visible;opacity:1;">
         <button type="button" class="auto-drum-portal__close" aria-label="Bezárás">×</button>
         <h2 class="auto-drum-portal__sheet-title"></h2>
         <button type="button" class="auto-drum-portal__done auto-drum-portal__done--sheet-top">Kész</button>
@@ -878,21 +878,22 @@ function lockSheetWhiteToBlue(root, stage) {
     ring.style.setProperty("right", "auto", "important");
     ring.style.setProperty("transform", "none", "important");
   }
-  /* Felső menü mindig látszik a kék tetején. */
+  /* Felső gombsor MINDIG a kék tetején, abszolút, átlátszatlan — nem csúszhat el / nem takarodhat. */
   if (head) {
-    if (desk && ym) {
-      /* Desk YM: fej a kék flow tetején — nem abszolút, így a stage fit-content nem takarja. */
-      head.style.setProperty("position", "relative", "important");
-      head.style.setProperty("top", "auto", "important");
-    } else {
-      head.style.setProperty("position", "absolute", "important");
-      head.style.setProperty("top", "0", "important");
-    }
+    head.style.setProperty("position", "absolute", "important");
+    head.style.setProperty("top", "0", "important");
     head.style.setProperty("left", "0", "important");
     head.style.setProperty("right", "0", "important");
     head.style.setProperty("width", "100%", "important");
     head.style.setProperty("max-width", "100%", "important");
-    head.style.setProperty("z-index", "5", "important");
+    head.style.setProperty("z-index", "30", "important");
+    head.style.setProperty("background", "#e8eef3", "important");
+    head.style.setProperty("display", "grid", "important");
+    head.style.setProperty("visibility", "visible", "important");
+    head.style.setProperty("opacity", "1", "important");
+  }
+  if (ym && desk && stage) {
+    stage.style.setProperty("padding-top", "var(--sheet-head-h)", "important");
   }
 }
 

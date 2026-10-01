@@ -1588,7 +1588,7 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
 
 .auto-drum-portal--sheet .auto-drum-portal__stage--sheet {
   /* Ne 100vw + left:50% — iOS-on / túlcsorduló body-nál elcsúszik, a Kész leesik. */
-  --sheet-head-h: 3.65rem;
+  --sheet-head-h: calc(3.65rem + env(safe-area-inset-top, 0px));
   --sheet-foot-h: 0.75rem;
   left: 0 !important;
   right: 0 !important;
@@ -1611,23 +1611,25 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
 }
 
 .auto-drum-portal--sheet .auto-drum-portal__sheet-head {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 3;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 30 !important;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 0.5rem;
   margin: 0;
-  padding: 0.75rem 1rem 0.55rem;
+  padding: max(0.75rem, env(safe-area-inset-top, 0px)) 1rem 0.55rem;
+  min-height: var(--sheet-head-h);
   box-sizing: border-box;
-  background: transparent;
+  /* Átlátszatlan kék — X/Kész/cím mindig olvasható a fehér felett */
+  background: #e8eef3 !important;
   pointer-events: none;
   width: 100%;
   max-width: 100%;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .auto-drum-portal--sheet .auto-drum-portal__sheet-head .auto-drum-portal__close,
@@ -1880,7 +1882,7 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
     justify-self: start;
   }
 
-  /* Év|hó: stage a tartalom magasságára zsugorodik, nem ül felül a nagy kék dobozban */
+  /* Év|hó: stage a tartalom magasságára zsugorodik; fej ABSOLUTE a kék tetején */
   .auto-drum-portal--sheet.auto-drum-portal--ym .auto-drum-portal__stage--sheet {
     height: fit-content !important;
     max-height: min(86vh, 48rem) !important;
@@ -1891,11 +1893,17 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
     margin-right: auto !important;
     margin-top: 0 !important;
     margin-bottom: 0 !important;
+    /* Hely a fix fejnek — a fehér ne menjen a gombsor alá */
+    padding-top: var(--sheet-head-h) !important;
   }
 
   .auto-drum-portal--sheet.auto-drum-portal--ym .auto-drum-portal__sheet-head {
-    position: relative !important;
-    top: auto !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 30 !important;
+    background: #e8eef3 !important;
   }
 
   .auto-drum-portal--sheet.auto-drum-portal--ym .auto-drum-portal__sheet-scroll {
@@ -1915,6 +1923,18 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
 }
 
 /* Ad-form év|hó sheet: gyártmány chrome + 2 oszlopos dobkerék */
+.auto-drum-portal--sheet.auto-drum-portal--ym .auto-drum-portal__sheet-head {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 30 !important;
+  background: #e8eef3 !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  display: grid !important;
+}
+
 .auto-drum-portal--sheet.auto-drum-portal--ym .auto-drum-portal__sheet-scroll {
   padding-left: 0 !important;
   padding-right: 0 !important;
@@ -1922,6 +1942,7 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   max-width: 100% !important;
   left: 0 !important;
   right: 0 !important;
+  top: var(--sheet-head-h) !important;
   overflow-x: hidden !important;
 }
 

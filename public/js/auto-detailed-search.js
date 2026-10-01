@@ -5,7 +5,6 @@ import {
 } from "./auto-detailed-search-catalog.js?v=toltoPick1";
 
 const FORM_FLAG_KEYS = new Set(["villamtoltes", "zold_rendszam"]);
-const EMPTY_EXTRA_LABEL = "Mindegy";
 
 const EXTRA_ALIASES = new Map([
   ["könnyűfém felni", ["alufelni", "aluminium felni", "könnyűfém"]],
@@ -217,11 +216,18 @@ function renderToggle(toggle) {
     </label>`;
 }
 
-function renderHiddenToggle(toggle) {
+function renderExtraToggleRow(toggle) {
   const isFlag = FORM_FLAG_KEYS.has(toggle.id);
   const extraAttr = isFlag ? "" : ` data-extra="${escapeHtml(toggle.label)}"`;
   const filterAttr = isFlag ? ` data-filter-key="${toggle.id}"` : "";
-  return `<input type="checkbox" hidden${filterAttr}${extraAttr} value="1" data-toggle-id="${escapeHtml(toggle.id)}" />`;
+  return `
+    <div class="qs-extra-toggle-row">
+      <label class="qs-extra-toggle">
+        <span class="qs-extra-toggle__text">${escapeHtml(toggle.label)}</span>
+        <input type="checkbox" role="switch"${filterAttr}${extraAttr} value="1" data-toggle-id="${escapeHtml(toggle.id)}" />
+        <span class="qs-extra-toggle__switch" aria-hidden="true"></span>
+      </label>
+    </div>`;
 }
 
 function isToggleOnlySection(section) {
@@ -245,24 +251,27 @@ function syncSheetFieldSummary(field) {
   const summary = field?.querySelector("[data-detailed-summary]");
   const checks = field?.querySelector("[data-detailed-checks]");
   const trigger = field?.querySelector("[data-detailed-trigger]");
+  const title = field?.querySelector(".qs-detailed-extra-pill__title")?.textContent?.trim() || "";
   if (!summary || !checks) return;
   const text = summaryTextForChecks(checks);
   summary.textContent = text;
   summary.hidden = !text;
   field.classList.toggle("has-value", Boolean(text));
-  trigger?.setAttribute("aria-label", text ? `${field.querySelector(".qs-detailed-extra-pill__title")?.textContent || ""}: ${text}` : (field.querySelector(".qs-detailed-extra-pill__title")?.textContent || ""));
+  trigger?.setAttribute("aria-label", text ? `${title}: ${text}` : title);
 }
 
 function renderToggleSheetField(section) {
-  const checks = (section.toggles || []).map(renderHiddenToggle).join("");
+  const rows = (section.toggles || []).map(renderExtraToggleRow).join("");
   return `
-    <div class="qs-detailed-extra-pill" data-detailed-section="${escapeHtml(section.id)}" data-detailed-sheet="1">
-      <button type="button" class="qs-detailed-extra-pill__head" data-detailed-trigger aria-label="${escapeHtml(section.title)}">
+    <div class="qs-detailed-extra-pill" data-detailed-section="${escapeHtml(section.id)}" data-detailed-extra="1">
+      <button type="button" class="qs-detailed-extra-pill__head" data-detailed-trigger aria-expanded="false" aria-label="${escapeHtml(section.title)}">
         <span class="qs-detailed-extra-pill__title">${escapeHtml(section.title)}</span>
         <span class="qs-detailed-extra-pill__sum" data-detailed-summary hidden></span>
         <span class="qs-detailed-extra-pill__chev" aria-hidden="true">▾</span>
       </button>
-      <div class="qs-detailed-extra-pill__checks" data-detailed-checks hidden>${checks}</div>
+      <div class="qs-detailed-extra-pill__body" data-detailed-checks hidden>
+        <div class="qs-detailed-extra-pill__list">${rows}</div>
+      </div>
     </div>`;
 }
 
@@ -300,10 +309,10 @@ function bindExclusiveAccordions(host) {
         host.querySelectorAll(".qs-detailed-acc").forEach((other) => {
           if (other !== acc) other.open = false;
         });
+        closeAllExtraPills(host);
       }
       acc.open = willOpen;
       if (!willOpen) return;
-      // Lenytáskor a fejléc tetején maradjon a nézet (ne a lista alján).
       const pinSummaryTop = () => {
         summary.scrollIntoView({ block: "start", behavior: "auto", inline: "nearest" });
       };
@@ -315,57 +324,51 @@ function bindExclusiveAccordions(host) {
   });
 }
 
-async function openDetailedToggleSheet(field) {
-  const trigger = field.querySelector("[data-detailed-trigger]");
-  const checks = field.querySelector("[data-detailed-checks]");
-  if (!trigger || !checks) return;
-
-  const inputs = [...checks.querySelectorAll('input[type="checkbox"]')];
-  const items = inputs.map((el) => {
-    const label = el.getAttribute("data-extra") || el.getAttribute("data-filter-key") || "";
-    const value = el.getAttribute("data-toggle-id") || label;
-    return { value, label };
-  }).filter((row) => row.value && row.label);
-
-  const initialSelected = inputs
-    .filter((el) => el.checked)
-    .map((el) => el.getAttribute("data-toggle-id") || el.getAttribute("data-extra") || "")
-    .filter(Boolean);
-
-  const title =
-    field.querySelector(".qs-detailed-extra-pill__title")?.textContent?.trim() ||
-    trigger.getAttribute("aria-label") ||
-    "Extrák";
-
-  const { openStandaloneSwitchSheet } = await import("./auto-drum-sheet.js?v=brandDrum29");
-  openStandaloneSwitchSheet({
-    trigger,
-    title,
-    emptyLabel: EMPTY_EXTRA_LABEL,
-    items,
-    initialSelected,
-    onDone: (list) => {
-      const selected = new Set((list || []).map(String).filter(Boolean));
-      inputs.forEach((el) => {
-        const id = el.getAttribute("data-toggle-id") || el.getAttribute("data-extra") || "";
-        el.checked = selected.has(id);
-      });
-      syncSheetFieldSummary(field);
-    },
+function closeAllExtraPills(host, except = null) {
+  host.querySelectorAll("[data-detailed-extra]").forEach((pill) => {
+    if (pill === except) return;
+    pill.classList.remove("is-open");
+    const trigger = pill.querySelector("[data-detailed-trigger]");
+    const body = pill.querySelector("[data-detailed-checks]");
+    if (trigger) trigger.setAttribute("aria-expanded", "false");
+    if (body) body.hidden = true;
   });
 }
 
-function bindDetailedSheetFields(host) {
-  host.querySelectorAll("[data-detailed-sheet]").forEach((field) => {
-    syncSheetFieldSummary(field);
-    const trigger = field.querySelector("[data-detailed-trigger]");
-    if (!trigger || trigger.dataset.sheetBound === "1") return;
-    trigger.dataset.sheetBound = "1";
+function setExtraPillOpen(pill, open) {
+  if (!pill) return;
+  const trigger = pill.querySelector("[data-detailed-trigger]");
+  const body = pill.querySelector("[data-detailed-checks]");
+  pill.classList.toggle("is-open", open);
+  trigger?.setAttribute("aria-expanded", open ? "true" : "false");
+  if (body) body.hidden = !open;
+  if (open) {
+    const pin = () => trigger?.scrollIntoView({ block: "start", behavior: "auto", inline: "nearest" });
+    requestAnimationFrame(() => {
+      pin();
+      requestAnimationFrame(pin);
+    });
+  }
+}
+
+function bindDetailedExtraPills(host) {
+  host.querySelectorAll("[data-detailed-extra]").forEach((pill) => {
+    syncSheetFieldSummary(pill);
+    const trigger = pill.querySelector("[data-detailed-trigger]");
+    const body = pill.querySelector("[data-detailed-checks]");
+    if (!trigger || trigger.dataset.extraBound === "1") return;
+    trigger.dataset.extraBound = "1";
     trigger.addEventListener("click", (event) => {
       event.preventDefault();
       event.stopPropagation();
-      openDetailedToggleSheet(field);
+      const willOpen = !pill.classList.contains("is-open");
+      closeAllExtraPills(host, willOpen ? pill : null);
+      host.querySelectorAll(".qs-detailed-acc").forEach((acc) => {
+        acc.open = false;
+      });
+      setExtraPillOpen(pill, willOpen);
     });
+    body?.addEventListener("change", () => syncSheetFieldSummary(pill));
   });
 }
 
@@ -406,7 +409,7 @@ export async function mountDetailedSearch(form = document.getElementById("home-q
   const sections = buildDetailedSections(akkuLoad);
   host.innerHTML = sections.map((s, index) => renderSection(s, index === 0 && !isToggleOnlySection(s))).join("");
   bindExclusiveAccordions(host);
-  bindDetailedSheetFields(host);
+  bindDetailedExtraPills(host);
   host.dataset.detailedMounted = "1";
   host.dataset.detailedLive = akkuLoad.live ? "1" : "0";
   host.dataset.detailedSource = akkuLoad.source || "";
@@ -469,7 +472,7 @@ export function resetDetailedSearch(form = document.getElementById("home-qs-form
     if (el.type === "checkbox") el.checked = false;
     else el.value = "";
   });
-  panel.querySelectorAll("[data-detailed-sheet]").forEach((field) => syncSheetFieldSummary(field));
+  panel.querySelectorAll("[data-detailed-extra]").forEach((field) => syncSheetFieldSummary(field));
 }
 
 export function hasActiveDetailedSearch(detailed) {

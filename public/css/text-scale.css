@@ -1,13 +1,40 @@
-/* Szövegméret: csak a tartalom (main), felső menüsáv érintetlen. */
-html[data-text-scale="105"] body.site-app > main {
+/* Szövegméret: tartalom + body-portál menük; felső menüsáv érintetlen. */
+html[data-text-scale="105"] body.site-app > :is(
+  main,
+  .wizard-context-bar,
+  .auto-drum-portal,
+  .wizard-cat-portal,
+  .cp-sheet,
+  .cp-sheet-backdrop,
+  .ad-form-bm-panel.ad-form-bm-dropdown--portaled,
+  .auto-price-suggest
+) {
   zoom: 1.05;
 }
 
-html[data-text-scale="110"] body.site-app > main {
+html[data-text-scale="110"] body.site-app > :is(
+  main,
+  .wizard-context-bar,
+  .auto-drum-portal,
+  .wizard-cat-portal,
+  .cp-sheet,
+  .cp-sheet-backdrop,
+  .ad-form-bm-panel.ad-form-bm-dropdown--portaled,
+  .auto-price-suggest
+) {
   zoom: 1.1;
 }
 
-html[data-text-scale="120"] body.site-app > main {
+html[data-text-scale="120"] body.site-app > :is(
+  main,
+  .wizard-context-bar,
+  .auto-drum-portal,
+  .wizard-cat-portal,
+  .cp-sheet,
+  .cp-sheet-backdrop,
+  .ad-form-bm-panel.ad-form-bm-dropdown--portaled,
+  .auto-price-suggest
+) {
   zoom: 1.2;
 }
 

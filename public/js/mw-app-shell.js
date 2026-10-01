@@ -19,7 +19,7 @@
     if (!document.querySelector('link[href*="text-scale.css"]')) {
       var ts = document.createElement("link");
       ts.rel = "stylesheet";
-      ts.href = "/css/text-scale.css?v=textScale1";
+      ts.href = "/css/text-scale.css?v=textScale2";
       document.head.appendChild(ts);
     }
   }

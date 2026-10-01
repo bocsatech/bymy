@@ -2845,14 +2845,8 @@ body.auto-drum-sheet-open {
   overflow: hidden !important;
   overflow-x: hidden !important;
   overscroll-behavior: none;
+  /* position:fixed CSAK JS lockSheetPageAxes-ben — CSS-ben bent maradva nem lehetett görgetni sheet után */
   touch-action: none;
-  /* iOS: position:fixed + left:0 — kattintáskor ne csússzon jobbra a viewport */
-  position: fixed !important;
-  left: 0 !important;
-  right: 0 !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  margin: 0 !important;
 }
 
 html:has(body.auto-drum-portal-open),

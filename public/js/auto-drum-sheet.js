@@ -981,17 +981,25 @@ function lockSheetPageAxes() {
 
 function unlockSheetPageAxes() {
   try {
-    document.body.style.removeProperty("position");
-    document.body.style.removeProperty("top");
-    document.body.style.removeProperty("left");
-    document.body.style.removeProperty("right");
-    document.body.style.removeProperty("width");
-    document.body.style.removeProperty("max-width");
-    document.body.style.removeProperty("margin-left");
-    document.body.style.removeProperty("margin-right");
-    document.body.style.removeProperty("overflow");
-    document.body.style.removeProperty("overflow-x");
-    document.documentElement.style.removeProperty("overflow-x");
+    const clear = (el, props) => {
+      if (!el) return;
+      for (const p of props) el.style.removeProperty(p);
+    };
+    clear(document.body, [
+      "position",
+      "top",
+      "left",
+      "right",
+      "width",
+      "max-width",
+      "margin-left",
+      "margin-right",
+      "overflow",
+      "overflow-x",
+      "touch-action",
+    ]);
+    clear(document.documentElement, ["overflow", "overflow-x"]);
+    document.body.classList.remove("auto-drum-portal-open", "auto-drum-sheet-open");
     const y = sheetScrollLockY || 0;
     window.scrollTo(0, y);
     document.documentElement.scrollLeft = 0;
@@ -1990,6 +1998,8 @@ export function openStandaloneSwitchSheet({
     root.remove();
     activePortal = null;
     document.body.classList.remove("auto-drum-portal-open", "auto-drum-sheet-open");
+    unlockSheetPageAxes();
+    requestAnimationFrame(() => unlockSheetPageAxes());
     if (commit && typeof onDone === "function") {
       const list = singleSelect
         ? (() => {

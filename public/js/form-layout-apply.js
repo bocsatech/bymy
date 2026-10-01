@@ -1,7 +1,7 @@
 import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=immoTipusPick1";
-import { refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=bmSheet39";
-import { initTireSizes } from "./tire-sizes-ui.js?v=tireYm1";
-import { applyAdFormDesk } from "./ad-form-desk.js?v=bmSheet39";
+import { refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=bmSheet40";
+import { initTireSizes } from "./tire-sizes-ui.js?v=tireYm2";
+import { applyAdFormDesk } from "./ad-form-desk.js?v=bmSheet40";
 import { markImmoPostViewReady } from "./category-picker.js?v=pickerBoot4";
 import {
   DESK_MUSZAKI_CORE_FIELD_KEYS,
@@ -13,7 +13,7 @@ import {
   applyStep1SearchDomOrder,
   isVehicleStep1Canvas,
   stackVehicleCanvasSingleColumn,
-} from "./ad-form-desk-pinned-blocks.js?v=bmSheet39";
+} from "./ad-form-desk-pinned-blocks.js?v=bmSheet40";
 
 function cssEscape(value) {
   if (window.CSS?.escape) return window.CSS.escape(value);
@@ -558,14 +558,31 @@ function restoreTireSelectsToBlock(form) {
   if (!grid) return;
 
   for (const { rowSelector, names } of TIRE_ROW_SLOTS) {
-    const row = grid.querySelector(rowSelector);
+    let row = grid.querySelector(rowSelector);
+    if (!row) {
+      const prefix = String(names[0] || "").replace(/_szelesseg$/, "");
+      const split = prefix
+        ? grid.querySelector(`.ad-form-tire-split[data-tire-prefix="${prefix}"]`)
+        : null;
+      if (split) {
+        /* Split mount már a helyén van — ne bontsuk szét. */
+        continue;
+      }
+      const block = grid.querySelector(rowSelector.replace(" .tire-row", "")) || null;
+      if (block) {
+        row = document.createElement("div");
+        row.className = "tire-row";
+        block.appendChild(row);
+      }
+    }
     if (!row) continue;
 
     for (let i = 0; i < names.length; i++) {
       const name = names[i];
-      const select = form.querySelector(`select[name="${cssEscape(name)}"]`);
+      const select = form.querySelector(`select[name="${cssEscape(name)}"]`) || document.getElementById(name);
       if (!(select instanceof HTMLSelectElement)) continue;
       if (row.contains(select)) continue;
+      if (select.closest(".ad-form-tire-split")) continue;
 
       const strayWrap = select.closest(".labeled-field, .md-outlined, .ad-layout-item");
       const insertBefore = row.children[i * 2] ?? null;
@@ -689,7 +706,7 @@ function pinTireFields(form, layoutCells) {
   block.removeAttribute("hidden");
   block.style.removeProperty("display");
   cleanupStrayTireLayoutItems(form);
-  block.querySelectorAll(".tire-row").forEach((row) => {
+  block.querySelectorAll(".tire-row, .ad-form-tire-split").forEach((row) => {
     row.style.setProperty("width", AD_FORM_DESK_ROW_WIDTH, "important");
     row.style.setProperty("max-width", AD_FORM_DESK_ROW_WIDTH, "important");
     row.style.setProperty("min-width", "0", "important");

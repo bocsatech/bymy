@@ -1804,9 +1804,14 @@ html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] #ad-form
 /* ——— Gumi méretek: műszaki érvényesség-stílusú summary (aláhúzás) ——— */
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-tire-split,
 body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form #tire-sizes-card .ad-form-tire-split {
+  display: flex !important;
+  flex-direction: column !important;
   width: 100% !important;
   max-width: 100% !important;
   min-width: 0 !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: relative !important;
 }
 
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .tire-block .ad-form-tire-split,
@@ -1814,7 +1819,54 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form #ti
   margin-top: 0.15rem !important;
 }
 
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-tire-split__summary,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-tire-split > .ad-form-split-ym__summary {
+  appearance: none !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0.45rem 0.1rem 0.5rem !important;
+  border: 0 !important;
+  border-bottom: 1.5px solid #cfd6dd !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  box-sizing: border-box !important;
+  text-align: left !important;
+  font: 600 1rem/1.35 system-ui, sans-serif !important;
+  color: #0f172a !important;
+  cursor: pointer !important;
+  min-height: 2.65rem !important;
+  height: auto !important;
+  position: relative !important;
+  z-index: 2 !important;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-tire-split__summary.is-placeholder {
+  color: #64748b !important;
+  font-weight: 500 !important;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-tire-split .ad-form-split-ym__dual,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-tire-split__dual {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+}
+
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-tire-split select.ad-form-bm-native,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-tire-split select[hidden] {
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-tire-split select[hidden],
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-tire-split .ad-form-bm-native-host {
   display: none !important;
 }

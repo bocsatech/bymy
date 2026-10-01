@@ -2386,7 +2386,7 @@ async function mountAdBrandModelCombined(form, catalog) {
   }
 
   const { fillWheel, setWheelValue, readWheel, syncHostClearButton } = await import("./ingatlan-wheels.js?v=immoClearAll2");
-  const { openBrandModelCatalogSheet } = await import("./auto-drum-sheet.js?v=bmSheet39");
+  const { openBrandModelCatalogSheet } = await import("./auto-drum-sheet.js?v=bmSheet40");
   const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
 
   const brands = [...(catalog?.gyartmanyok || [])].sort((a, b) =>
@@ -2587,7 +2587,7 @@ async function mountAdSelectDrum(select, {
   select.dataset.adBmDrum = "1";
 
   const { fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=immoClearAll2");
-  const { openStandaloneSwitchSheet, bindAutoDrumSheet } = await import("./auto-drum-sheet.js?v=bmSheet39");
+  const { openStandaloneSwitchSheet, bindAutoDrumSheet } = await import("./auto-drum-sheet.js?v=bmSheet40");
   const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
 
   const wrap = document.createElement("div");
@@ -2810,7 +2810,7 @@ async function mountAdSplitYmDrum({
   }
 
   const { fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=immoClearAll2");
-  const { openYmDualSheet } = await import("./auto-drum-sheet.js?v=bmSheet39");
+  const { openYmDualSheet } = await import("./auto-drum-sheet.js?v=bmSheet40");
   const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
 
   const yearOpts = optionsFromSelect(ev, emptyYear);
@@ -3104,200 +3104,257 @@ export async function mountAdFormBmPickers(form, catalog = null) {
   window.dispatchEvent(new CustomEvent("ad-form-bm-ready", { detail: { form } }));
 }
 
+function resolveFormSelect(form, name) {
+  if (!form || !name) return null;
+  const card = form.querySelector("#tire-sizes-card, .tire-sizes-grid");
+  const fromCard =
+    card?.querySelector?.(`select#${CSS.escape?.(name) || name}`) ||
+    card?.querySelector?.(`select[name="${CSS.escape?.(name) || name}"]`) ||
+    null;
+  if (fromCard instanceof HTMLSelectElement) return fromCard;
+  const byId = document.getElementById(name);
+  if (byId instanceof HTMLSelectElement) return byId;
+  const byName = form.querySelector(`select[name="${CSS.escape?.(name) || name}"]`);
+  if (byName instanceof HTMLSelectElement) return byName;
+  const named = form.elements?.namedItem?.(name);
+  if (named instanceof HTMLSelectElement) return named;
+  if (named && typeof named.length === "number") {
+    return [...named].find((el) => el instanceof HTMLSelectElement) || null;
+  }
+  return null;
+}
+
 /** Gumi méret: műszaki érvényesség-stílusú summary + 3 oszlopos sheet. */
 export async function mountTireSizeSwitchPickers(form) {
   if (!form || !isBmPickerAdForm(form)) return;
-  const { fillTireSelect } = await import("./tire-sizes-ui.js?v=tireYm1");
-  const { fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=immoClearAll2");
-  const { openTireTripleSheet } = await import("./auto-drum-sheet.js?v=bmSheet39");
-  const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
+  try {
+    const { fillTireSelect } = await import("./tire-sizes-ui.js?v=tireYm2");
+    const { fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=immoClearAll2");
+    const { openTireTripleSheet } = await import("./auto-drum-sheet.js?v=bmSheet40");
+    const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
 
-  for (const spec of TIRE_ROW_SPECS) {
-    const widthName = `${spec.prefix}_szelesseg`;
-    const aspectName = `${spec.prefix}_magassag`;
-    const rimName = `${spec.prefix}_atmero`;
-    const width =
-      form.elements.namedItem(widthName) ||
-      document.getElementById(widthName);
-    const aspect =
-      form.elements.namedItem(aspectName) ||
-      document.getElementById(aspectName);
-    const rim =
-      form.elements.namedItem(rimName) ||
-      document.getElementById(rimName);
-    if (
-      !(width instanceof HTMLSelectElement) ||
-      !(aspect instanceof HTMLSelectElement) ||
-      !(rim instanceof HTMLSelectElement)
-    ) {
-      continue;
-    }
-    if (width.dataset.adTireSplit === "1") continue;
-    if (!width.id) width.id = widthName;
-    if (!aspect.id) aspect.id = aspectName;
-    if (!rim.id) rim.id = rimName;
+    for (const spec of TIRE_ROW_SPECS) {
+      try {
+        const widthName = `${spec.prefix}_szelesseg`;
+        const aspectName = `${spec.prefix}_magassag`;
+        const rimName = `${spec.prefix}_atmero`;
+        const width = resolveFormSelect(form, widthName);
+        const aspect = resolveFormSelect(form, aspectName);
+        const rim = resolveFormSelect(form, rimName);
+        if (
+          !(width instanceof HTMLSelectElement) ||
+          !(aspect instanceof HTMLSelectElement) ||
+          !(rim instanceof HTMLSelectElement)
+        ) {
+          continue;
+        }
+        if (width.dataset.adTireSplit === "1") continue;
+        if (!width.id) width.id = widthName;
+        if (!aspect.id) aspect.id = aspectName;
+        if (!rim.id) rim.id = rimName;
 
-    fillTireSelect(width);
-    fillTireSelect(aspect);
-    fillTireSelect(rim);
-    [width, aspect, rim].forEach((sel) => {
-      if (!sel.classList.contains("ad-form-cell")) sel.classList.add("ad-form-cell");
-    });
+        /* Lefelé: régi kapcsos dobkerék wrap törlése, ha még ott lenne. */
+        for (const select of [width, aspect, rim]) {
+          if (typeof select._adBmClose === "function") {
+            try {
+              select._adBmClose();
+            } catch {
+              /* ignore */
+            }
+          }
+          const oldWrap = select.closest?.(".ad-form-bm-field--drum");
+          if (oldWrap) {
+            releaseNativeSelect(select, oldWrap.parentElement);
+            showNativeSelect(select);
+            oldWrap.remove();
+          }
+          delete select.dataset.adBmPicker;
+          delete select.dataset.adBmDrum;
+        }
 
-    const tireRow = width.closest(".tire-row");
-    const tireBlock = width.closest(".tire-block") || tireRow?.parentElement;
-    if (!tireRow || !tireBlock) continue;
-    if (tireBlock.querySelector(`.ad-form-tire-split[data-tire-prefix="${spec.prefix}"]`)) {
-      width.dataset.adTireSplit = "1";
-      aspect.dataset.adTireSplit = "1";
-      rim.dataset.adTireSplit = "1";
-      continue;
-    }
+        fillTireSelect(width);
+        fillTireSelect(aspect);
+        fillTireSelect(rim);
+        [width, aspect, rim].forEach((sel) => {
+          if (!sel.classList.contains("ad-form-cell")) sel.classList.add("ad-form-cell");
+        });
 
-    const widthOpts = optionsFromSelect(width, "—");
-    const aspectOpts = optionsFromSelect(aspect, "—");
-    const rimOpts = optionsFromSelect(rim, "—");
+        const tireBlock =
+          width.closest(".tire-block") ||
+          aspect.closest(".tire-block") ||
+          rim.closest(".tire-block") ||
+          form.querySelector(`#tire-sizes-card .tire-block:has([name="${widthName}"]), .tire-sizes-grid .tire-block:has([name="${widthName}"])`);
+        if (!tireBlock) continue;
 
-    const block = document.createElement("div");
-    block.className = "immo-dual-range-block ad-form-split-ym ad-form-tire-split";
-    block.dataset.tirePrefix = spec.prefix;
-    block.dataset.range = spec.prefix;
+        const existing = tireBlock.querySelector(`.ad-form-tire-split[data-tire-prefix="${spec.prefix}"]`);
+        if (existing) {
+          width.dataset.adTireSplit = "1";
+          aspect.dataset.adTireSplit = "1";
+          rim.dataset.adTireSplit = "1";
+          continue;
+        }
 
-    const dual = document.createElement("div");
-    dual.className = "immo-dual-range ad-form-split-ym__dual ad-form-tire-split__dual";
-    dual.dataset.range = spec.prefix;
-    dual.dataset.splitKind = "tire";
-    dual.setAttribute("aria-label", spec.title);
+        const widthOpts = optionsFromSelect(width, "—");
+        const aspectOpts = optionsFromSelect(aspect, "—");
+        const rimOpts = optionsFromSelect(rim, "—");
 
-    const titleEl = document.createElement("span");
-    titleEl.className = "immo-label immo-dual-range__title";
-    titleEl.textContent = spec.title;
-    dual.appendChild(titleEl);
+        const block = document.createElement("div");
+        block.className = "immo-dual-range-block ad-form-split-ym ad-form-tire-split";
+        block.dataset.tirePrefix = spec.prefix;
+        block.dataset.range = spec.prefix;
 
-    function makeHalf(kind, select, options, emptyLabel) {
-      const half = document.createElement("div");
-      half.className = `immo-schema-cell immo-dual-range__half ad-form-tire-split__half ad-form-tire-split__half--${kind}`;
-      half.innerHTML = `<div class="immo-wheel-wrap">
-        <div class="immo-wheel" data-wheel="${select.id}" data-filter-key="${select.id}" role="listbox" aria-label="${emptyLabel}"></div>
-      </div>`;
-      const wheel = half.querySelector("[data-wheel]");
-      fillWheel(
-        wheel,
-        options.filter((o) => o.value !== ""),
-        { emptyLabel }
-      );
-      let live = initDrumWheel(wheel, { emptyLabel, openMode: "portal", multiple: false });
-      setWheelValue(live, select.value || "");
-      syncDrumWheelDisplay(live);
-      live = half.querySelector("[data-wheel]") || live;
-      const trigger = half.querySelector(".immo-wheel-trigger");
-      if (trigger) {
-        trigger.dataset.emptyLabel = emptyLabel;
-        if (!select.value) trigger.textContent = emptyLabel;
-        trigger.hidden = false;
-        trigger.removeAttribute("aria-hidden");
-      }
-      live.addEventListener("immo-wheel-change", () => {
-        const w = half.querySelector("[data-wheel]") || live;
-        syncSelectToValue(select, readWheel(w));
-        syncDrumWheelDisplay(w);
+        const dual = document.createElement("div");
+        dual.className = "immo-dual-range ad-form-split-ym__dual ad-form-tire-split__dual";
+        dual.dataset.range = spec.prefix;
+        dual.dataset.splitKind = "tire";
+        dual.setAttribute("aria-label", spec.title);
+        dual.setAttribute("hidden", "");
+
+        const titleEl = document.createElement("span");
+        titleEl.className = "immo-label immo-dual-range__title";
+        titleEl.textContent = spec.title;
+        dual.appendChild(titleEl);
+
+        function makeHalf(kind, select, options, emptyLabel) {
+          const half = document.createElement("div");
+          half.className = `immo-schema-cell immo-dual-range__half ad-form-tire-split__half ad-form-tire-split__half--${kind}`;
+          half.innerHTML = `<div class="immo-wheel-wrap">
+            <div class="immo-wheel" data-wheel="${select.id}" data-filter-key="${select.id}" role="listbox" aria-label="${emptyLabel}"></div>
+          </div>`;
+          const wheelEl = half.querySelector("[data-wheel]");
+          fillWheel(
+            wheelEl,
+            options.filter((o) => o.value !== ""),
+            { emptyLabel }
+          );
+          let live = initDrumWheel(wheelEl, { emptyLabel, openMode: "portal", multiple: false });
+          if (!live) live = half.querySelector("[data-wheel]") || wheelEl;
+          setWheelValue(live, select.value || "");
+          syncDrumWheelDisplay(live);
+          live = half.querySelector("[data-wheel]") || live;
+          const trigger = half.querySelector(".immo-wheel-trigger");
+          if (trigger) {
+            trigger.dataset.emptyLabel = emptyLabel;
+            if (!select.value) trigger.textContent = emptyLabel;
+            trigger.hidden = false;
+            trigger.removeAttribute("aria-hidden");
+          }
+          live.addEventListener("immo-wheel-change", () => {
+            const w = half.querySelector("[data-wheel]") || live;
+            syncSelectToValue(select, readWheel(w));
+            syncDrumWheelDisplay(w);
+            refreshSummary();
+          });
+          select.addEventListener("change", () => {
+            const w = half.querySelector("[data-wheel]") || live;
+            setWheelValue(w, select.value || "");
+            syncDrumWheelDisplay(w);
+            refreshSummary();
+          });
+          return { half, wheel: () => half.querySelector("[data-wheel]") || live };
+        }
+
+        const widthHalf = makeHalf("width", width, widthOpts, "—");
+        const sep1 = document.createElement("span");
+        sep1.className = "immo-dual-range__sep";
+        sep1.setAttribute("aria-hidden", "true");
+        sep1.textContent = "/";
+        const aspectHalf = makeHalf("aspect", aspect, aspectOpts, "—");
+        const sep2 = document.createElement("span");
+        sep2.className = "immo-dual-range__sep";
+        sep2.setAttribute("aria-hidden", "true");
+        sep2.textContent = "R";
+        const rimHalf = makeHalf("rim", rim, rimOpts, "—");
+        dual.appendChild(widthHalf.half);
+        dual.appendChild(sep1);
+        dual.appendChild(aspectHalf.half);
+        dual.appendChild(sep2);
+        dual.appendChild(rimHalf.half);
+
+        const summary = document.createElement("button");
+        summary.type = "button";
+        summary.className = "ad-form-split-ym__summary ad-form-tire-split__summary";
+        summary.setAttribute("aria-label", spec.title);
+        summary.setAttribute("aria-haspopup", "dialog");
+
+        function refreshSummary() {
+          const w = String(readWheel(widthHalf.wheel()) ?? "").trim() || String(width.value || "").trim();
+          const a = String(readWheel(aspectHalf.wheel()) ?? "").trim() || String(aspect.value || "").trim();
+          const r = String(readWheel(rimHalf.wheel()) ?? "").trim() || String(rim.value || "").trim();
+          if (!w && !a && !r) {
+            summary.textContent = "—";
+          } else {
+            summary.textContent = `${w || "—"} / ${a || "—"} R ${r || "—"}`;
+          }
+          block.classList.toggle("has-value", Boolean(w || a || r));
+          summary.classList.toggle("is-placeholder", !w && !a && !r);
+        }
+
+        block.appendChild(summary);
+        block.appendChild(dual);
+
+        hideNativeSelect(width);
+        hideNativeSelect(aspect);
+        hideNativeSelect(rim);
+        stashNativeSelect(width, block);
+        stashNativeSelect(aspect, block);
+        stashNativeSelect(rim, block);
+
+        const tireRow = tireBlock.querySelector(".tire-row");
+        if (tireRow) tireRow.replaceWith(block);
+        else {
+          const label = tireBlock.querySelector(".tire-block-label");
+          if (label?.nextSibling) label.after(block);
+          else tireBlock.appendChild(block);
+        }
+
+        width.dataset.adTireSplit = "1";
+        aspect.dataset.adTireSplit = "1";
+        rim.dataset.adTireSplit = "1";
+        width.dataset.adBmPicker = "1";
+        aspect.dataset.adBmPicker = "1";
+        rim.dataset.adBmPicker = "1";
+
+        const openShared = (triggerBtn) => {
+          dual.removeAttribute("hidden");
+          openTireTripleSheet(widthHalf.wheel(), aspectHalf.wheel(), rimHalf.wheel(), triggerBtn, {
+            title: spec.title,
+          });
+        };
+        summary.addEventListener("click", (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          openShared(summary);
+        });
+        [widthHalf, aspectHalf, rimHalf].forEach((part) => {
+          const trigger = part.half.querySelector(".immo-wheel-trigger");
+          if (!trigger) return;
+          const next = trigger.cloneNode(true);
+          next.dataset.sheetBound = "1";
+          next.hidden = false;
+          next.removeAttribute("aria-hidden");
+          trigger.replaceWith(next);
+          next.addEventListener("click", (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            openShared(summary);
+          });
+        });
+
+        const onPortalGone = () => {
+          if (document.body.classList.contains("auto-drum-portal-open")) return;
+          dual.setAttribute("hidden", "");
+          refreshSummary();
+        };
+        const portalObserver = new MutationObserver(onPortalGone);
+        portalObserver.observe(document.body, { attributes: true, attributeFilter: ["class"] });
         refreshSummary();
-      });
-      select.addEventListener("change", () => {
-        const w = half.querySelector("[data-wheel]") || live;
-        setWheelValue(w, select.value || "");
-        syncDrumWheelDisplay(w);
-        refreshSummary();
-      });
-      return { half, wheel: () => half.querySelector("[data-wheel]") || live };
-    }
-
-    const widthHalf = makeHalf("width", width, widthOpts, "—");
-    const sep1 = document.createElement("span");
-    sep1.className = "immo-dual-range__sep";
-    sep1.setAttribute("aria-hidden", "true");
-    sep1.textContent = "/";
-    const aspectHalf = makeHalf("aspect", aspect, aspectOpts, "—");
-    const sep2 = document.createElement("span");
-    sep2.className = "immo-dual-range__sep";
-    sep2.setAttribute("aria-hidden", "true");
-    sep2.textContent = "R";
-    const rimHalf = makeHalf("rim", rim, rimOpts, "—");
-    dual.appendChild(widthHalf.half);
-    dual.appendChild(sep1);
-    dual.appendChild(aspectHalf.half);
-    dual.appendChild(sep2);
-    dual.appendChild(rimHalf.half);
-
-    const summary = document.createElement("button");
-    summary.type = "button";
-    summary.className = "ad-form-split-ym__summary";
-    summary.setAttribute("aria-label", spec.title);
-
-    function refreshSummary() {
-      const w = String(readWheel(widthHalf.wheel()) ?? "").trim() || String(width.value || "").trim();
-      const a = String(readWheel(aspectHalf.wheel()) ?? "").trim() || String(aspect.value || "").trim();
-      const r = String(readWheel(rimHalf.wheel()) ?? "").trim() || String(rim.value || "").trim();
-      if (!w && !a && !r) {
-        summary.textContent = "—";
-      } else {
-        summary.textContent = `${w || "—"} / ${a || "—"} R ${r || "—"}`;
+      } catch (rowError) {
+        console.warn("Gumi méret menü:", spec.title, rowError);
       }
-      block.classList.toggle("has-value", Boolean(w || a || r));
-      summary.classList.toggle("is-placeholder", !w && !a && !r);
     }
-
-    block.appendChild(summary);
-    block.appendChild(dual);
-
-    hideNativeSelect(width);
-    hideNativeSelect(aspect);
-    hideNativeSelect(rim);
-    stashNativeSelect(width, block);
-    stashNativeSelect(aspect, block);
-    stashNativeSelect(rim, block);
-
-    tireRow.replaceWith(block);
-
-    width.dataset.adTireSplit = "1";
-    aspect.dataset.adTireSplit = "1";
-    rim.dataset.adTireSplit = "1";
-    width.dataset.adBmPicker = "1";
-    aspect.dataset.adBmPicker = "1";
-    rim.dataset.adBmPicker = "1";
-
-    const openShared = (triggerBtn) => {
-      openTireTripleSheet(widthHalf.wheel(), aspectHalf.wheel(), rimHalf.wheel(), triggerBtn, {
-        title: spec.title,
-      });
-    };
-    summary.addEventListener("click", (event) => {
-      event.preventDefault();
-      event.stopPropagation();
-      openShared(summary);
-    });
-    [widthHalf, aspectHalf, rimHalf].forEach((part) => {
-      const trigger = part.half.querySelector(".immo-wheel-trigger");
-      if (!trigger) return;
-      const next = trigger.cloneNode(true);
-      next.dataset.sheetBound = "1";
-      next.hidden = false;
-      next.removeAttribute("aria-hidden");
-      trigger.replaceWith(next);
-      next.addEventListener("click", (event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        openShared(summary);
-      });
-    });
-
-    const onPortalGone = () => {
-      if (document.body.classList.contains("auto-drum-portal-open")) return;
-      refreshSummary();
-    };
-    const portalObserver = new MutationObserver(onPortalGone);
-    portalObserver.observe(document.body, { attributes: true, attributeFilter: ["class"] });
-    refreshSummary();
+  } catch (error) {
+    console.warn("Gumi méret menük:", error);
   }
 }
 
@@ -3309,19 +3366,13 @@ function unmountTireSizeSplitPickers(form) {
       ? [`${prefix}_szelesseg`, `${prefix}_magassag`, `${prefix}_atmero`]
       : [];
     const selects = names
-      .map(
-        (name) =>
-          document.getElementById(name) ||
-          block.querySelector?.(`#${CSS.escape?.(name) || name}`) ||
-          form?.elements?.namedItem?.(name) ||
-          null
-      )
+      .map((name) => resolveFormSelect(form || root, name) || block.querySelector?.(`#${CSS.escape?.(name) || name}`))
       .filter((el) => el instanceof HTMLSelectElement);
     const row = document.createElement("div");
     row.className = "tire-row";
     const seps = ["/", "R"];
     selects.forEach((select, index) => {
-      releaseNativeSelect(select, block.closest(".tire-block, .ad-layout-item, .labeled-field"));
+      releaseNativeSelect(select, block.closest(".tire-block, .ad-layout-item, .labeled-field") || block.parentElement);
       showNativeSelect(select);
       delete select.dataset.adTireSplit;
       delete select.dataset.adBmPicker;

@@ -236,9 +236,8 @@ function summaryTextForChecks(checksHost) {
   const labels = [...(checksHost?.querySelectorAll('input[type="checkbox"]:checked') || [])]
     .map((el) => el.getAttribute("data-extra") || el.getAttribute("data-filter-key") || "")
     .filter(Boolean);
-  if (!labels.length) return EMPTY_EXTRA_LABEL;
+  if (!labels.length) return "";
   if (labels.length === 1) return labels[0];
-  if (labels.length === 2) return labels.join(", ");
   return `${labels.length} kiválasztva`;
 }
 
@@ -249,19 +248,21 @@ function syncSheetFieldSummary(field) {
   if (!summary || !checks) return;
   const text = summaryTextForChecks(checks);
   summary.textContent = text;
-  field.classList.toggle("has-value", text !== EMPTY_EXTRA_LABEL);
-  trigger?.classList.toggle("is-placeholder", text === EMPTY_EXTRA_LABEL);
+  summary.hidden = !text;
+  field.classList.toggle("has-value", Boolean(text));
+  trigger?.setAttribute("aria-label", text ? `${field.querySelector(".qs-detailed-extra-pill__title")?.textContent || ""}: ${text}` : (field.querySelector(".qs-detailed-extra-pill__title")?.textContent || ""));
 }
 
 function renderToggleSheetField(section) {
   const checks = (section.toggles || []).map(renderHiddenToggle).join("");
   return `
-    <div class="qs-detailed-sheet-field" data-detailed-section="${escapeHtml(section.id)}" data-detailed-sheet="1">
-      <span class="qs-detailed-sheet-field__label">${escapeHtml(section.title)}</span>
-      <button type="button" class="qs-detailed-sheet-field__trigger is-placeholder" data-detailed-trigger aria-label="${escapeHtml(section.title)}">
-        <span data-detailed-summary>${EMPTY_EXTRA_LABEL}</span>
+    <div class="qs-detailed-extra-pill" data-detailed-section="${escapeHtml(section.id)}" data-detailed-sheet="1">
+      <button type="button" class="qs-detailed-extra-pill__head" data-detailed-trigger aria-label="${escapeHtml(section.title)}">
+        <span class="qs-detailed-extra-pill__title">${escapeHtml(section.title)}</span>
+        <span class="qs-detailed-extra-pill__sum" data-detailed-summary hidden></span>
+        <span class="qs-detailed-extra-pill__chev" aria-hidden="true">▾</span>
       </button>
-      <div class="qs-detailed-sheet-field__checks" data-detailed-checks hidden>${checks}</div>
+      <div class="qs-detailed-extra-pill__checks" data-detailed-checks hidden>${checks}</div>
     </div>`;
 }
 
@@ -332,7 +333,7 @@ async function openDetailedToggleSheet(field) {
     .filter(Boolean);
 
   const title =
-    field.querySelector(".qs-detailed-sheet-field__label")?.textContent?.trim() ||
+    field.querySelector(".qs-detailed-extra-pill__title")?.textContent?.trim() ||
     trigger.getAttribute("aria-label") ||
     "Extrák";
 

@@ -613,6 +613,66 @@ body[data-site-page="teherauto"] .auto-search-tabs {
   margin-top: 0;
 }
 
+/* Extrák pill — mint hirdetésfeladás Extrák almenü */
+.qs-detailed-extra-pill {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin: 0;
+  border: 0;
+  border-radius: 1.375rem;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.qs-detailed-extra-pill__head {
+  appearance: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  width: 100%;
+  min-height: 3.25rem;
+  margin: 0;
+  padding: 0.95rem 1.15rem;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.qs-detailed-extra-pill__title {
+  flex: 1 1 auto;
+  min-width: 0;
+  font: 800 1.05rem/1.25 system-ui, sans-serif;
+  letter-spacing: -0.02em;
+  color: #111;
+}
+
+.qs-detailed-extra-pill__sum {
+  flex: 0 1 auto;
+  max-width: 42%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: 600 0.82rem/1.2 system-ui, sans-serif;
+  color: #64748b;
+}
+
+.qs-detailed-extra-pill.has-value .qs-detailed-extra-pill__sum {
+  color: #0f172a;
+}
+
+.qs-detailed-extra-pill__chev {
+  flex: 0 0 auto;
+  color: #64748b;
+  font-size: 0.65rem;
+  line-height: 1;
+}
+
 .qs-detailed-sheet-field {
   display: flex;
   flex-direction: column;
@@ -1587,42 +1647,67 @@ body[data-site-page="teherauto"] .auto-search-tabs {
     .home-qs-detailed.is-open {
     display: flex !important;
     flex-direction: column !important;
-    gap: 1.05rem !important;
+    gap: 0.75rem !important;
     margin-top: 0.65rem !important;
-    padding: 1.1rem 1.1rem 1.35rem !important;
+    padding: 0 !important;
     border-top: 0 !important;
-    background: #fff !important;
-    border-radius: 1.375rem !important;
-    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05) !important;
+    background: transparent !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
     max-height: none !important;
   }
 
   body:is([data-site-page="auto"], [data-site-page="teherauto"])
     .auto-search-panel
     .auto-qs-drums
-    .qs-detailed-sheet-field__label {
-    color: #64748b !important;
-    font-size: 0.78rem !important;
-    font-weight: 650 !important;
+    .qs-detailed-extra-pill {
+    border: 0 !important;
+    border-radius: 1.375rem !important;
+    background: #fff !important;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05) !important;
+  }
+
+  body:is([data-site-page="auto"], [data-site-page="teherauto"])
+    .auto-search-panel
+    .auto-qs-drums
+    .qs-detailed-extra-pill__head {
+    min-height: 3.25rem !important;
+    padding: 0.95rem 1.15rem !important;
+    background: transparent !important;
+  }
+
+  body:is([data-site-page="auto"], [data-site-page="teherauto"])
+    .auto-search-panel
+    .auto-qs-drums
+    .qs-detailed-extra-pill__title {
+    font: 800 1.05rem/1.25 system-ui, sans-serif !important;
+    letter-spacing: -0.02em !important;
+    color: #111 !important;
     text-shadow: none !important;
   }
 
   body:is([data-site-page="auto"], [data-site-page="teherauto"])
     .auto-search-panel
     .auto-qs-drums
-    .qs-detailed-sheet-field__trigger {
-    border-bottom: 1px solid #cbd5e1 !important;
-    color: #0f172a !important;
-    padding: 0.35rem 0 0.55rem !important;
-    font-size: 0.95rem !important;
+    .qs-detailed-extra-pill__sum {
+    color: #64748b !important;
+    font: 600 0.82rem/1.2 system-ui, sans-serif !important;
   }
 
   body:is([data-site-page="auto"], [data-site-page="teherauto"])
     .auto-search-panel
     .auto-qs-drums
-    .qs-detailed-sheet-field__trigger.is-placeholder {
-    color: #94a3b8 !important;
-    font-weight: 400 !important;
+    .qs-detailed-extra-pill.has-value
+    .qs-detailed-extra-pill__sum {
+    color: #0f172a !important;
+  }
+
+  body:is([data-site-page="auto"], [data-site-page="teherauto"])
+    .auto-search-panel
+    .auto-qs-drums
+    .qs-detailed-extra-pill__chev {
+    color: #64748b !important;
+    font-size: 0.65rem !important;
   }
 
   body:is([data-site-page="auto"], [data-site-page="teherauto"])
@@ -1630,20 +1715,23 @@ body[data-site-page="teherauto"] .auto-search-tabs {
     .auto-qs-drums
     .qs-detailed-acc {
     border: 0 !important;
-    background: transparent !important;
-    border-radius: 0 !important;
+    background: #fff !important;
+    border-radius: 1.375rem !important;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05) !important;
+    overflow: hidden !important;
   }
 
   body:is([data-site-page="auto"], [data-site-page="teherauto"])
     .auto-search-panel
     .auto-qs-drums
     .qs-detailed-acc__summary {
-    padding: 0.35rem 0 0.55rem !important;
-    min-height: 0 !important;
-    color: #0f172a !important;
+    padding: 0.95rem 1.15rem !important;
+    min-height: 3.25rem !important;
+    color: #111 !important;
     text-shadow: none !important;
-    border-bottom: 1px solid #cbd5e1 !important;
-    font-weight: 650 !important;
+    border-bottom: 0 !important;
+    font: 800 1.05rem/1.25 system-ui, sans-serif !important;
+    letter-spacing: -0.02em !important;
   }
 
   body:is([data-site-page="auto"], [data-site-page="teherauto"])

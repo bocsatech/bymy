@@ -8,9 +8,9 @@ import {
   initHomeSearchSidebar,
   initHomeFilterCatalog,
 } from "./home-search-filter.js?v=valto3";
-import { initHomeQuickSearch } from "./home-quicksearch.js?v=bmSearch17";
+import { initHomeQuickSearch } from "./home-quicksearch.js?v=bmSearch18";
 import { decodeSavedSearchParam, encodeSavedSearchParam } from "./saved-search.js?v=savedSearch5";
-import { matchDetailedSearch, hasActiveDetailedSearch } from "./auto-detailed-search.js?v=bmSearch17";
+import { matchDetailedSearch, hasActiveDetailedSearch } from "./auto-detailed-search.js?v=bmSearch18";
 import { updateAutoDeskResultCount, updateAutoDeskAccSummaries } from "./auto-desk-search.js?v=catMenu1";
 import {
   emptyIngatlanFilters,

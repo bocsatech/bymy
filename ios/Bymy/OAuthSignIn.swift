@@ -12,6 +12,14 @@ enum SocialAuthProvider: String, CaseIterable {
         case .facebook: return "Folytatás Facebookkal"
         }
     }
+
+    var iconLabel: String {
+        switch self {
+        case .apple: return ""
+        case .google: return "G"
+        case .facebook: return "f"
+        }
+    }
 }
 
 enum SocialAuthError: LocalizedError, Equatable {
@@ -101,19 +109,26 @@ enum WebAuthSession {
 }
 
 struct SocialAuthButtons: View {
+    enum Style { case plain, gate }
+
     @EnvironmentObject private var auth: AuthStore
+    var style: Style = .plain
     var onSuccess: () -> Void = {}
 
     @State private var busyProvider: SocialAuthProvider?
     @State private var errorText: String?
 
+    /// Web sorrend: Google, Apple, Facebook
+    private let order: [SocialAuthProvider] = [.google, .apple, .facebook]
+
     var body: some View {
-        VStack(spacing: 10) {
-            ForEach(SocialAuthProvider.allCases, id: \.rawValue) { provider in
+        VStack(spacing: 9) {
+            ForEach(order, id: \.rawValue) { provider in
                 Button {
                     Task { await run(provider) }
                 } label: {
-                    HStack {
+                    HStack(spacing: 10) {
+                        icon(for: provider)
                         if busyProvider == provider {
                             ProgressView()
                         } else {
@@ -124,11 +139,11 @@ struct SocialAuthButtons: View {
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 12)
                     .foregroundStyle(AppTheme.text)
-                    .background(AppTheme.avatarBg)
-                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    .background(Color.white)
+                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                     .overlay(
-                        RoundedRectangle(cornerRadius: 12, style: .continuous)
-                            .stroke(AppTheme.border, lineWidth: 1)
+                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                            .stroke(Color(red: 0.835, green: 0.851, blue: 0.878), lineWidth: 1)
                     )
                 }
                 .buttonStyle(.plain)
@@ -138,7 +153,35 @@ struct SocialAuthButtons: View {
                 Text(errorText)
                     .font(.system(size: 13))
                     .foregroundStyle(.red)
+                    .multilineTextAlignment(.center)
             }
+        }
+    }
+
+    @ViewBuilder
+    private func icon(for provider: SocialAuthProvider) -> some View {
+        ZStack {
+            Circle()
+                .fill(iconBg(provider))
+                .overlay(Circle().stroke(provider == .google ? AppTheme.border : Color.clear, lineWidth: 1))
+            if provider == .apple {
+                Image(systemName: "apple.logo")
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundStyle(.white)
+            } else {
+                Text(provider.iconLabel)
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundStyle(provider == .google ? Color(red: 0.26, green: 0.52, blue: 0.96) : .white)
+            }
+        }
+        .frame(width: 22, height: 22)
+    }
+
+    private func iconBg(_ provider: SocialAuthProvider) -> Color {
+        switch provider {
+        case .google: return .white
+        case .apple: return .black
+        case .facebook: return Color(red: 0.094, green: 0.467, blue: 0.949)
         }
     }
 

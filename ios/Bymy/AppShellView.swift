@@ -61,11 +61,11 @@ struct TopPagesPager: View {
         case .hub:
             HubHomeScreen()
         case .auto:
-            CategoryListScreen(title: "Autó", category: "auto")
+            CategorySearchScreen(title: "Autó", category: "auto")
         case .teherauto:
-            CategoryListScreen(title: "Teherautó", category: "teherauto")
+            CategorySearchScreen(title: "Teherautó", category: "teherauto")
         case .ingatlan:
-            CategoryListScreen(title: "Ingatlan", category: "ingatlan")
+            CategorySearchScreen(title: "Ingatlan", category: "ingatlan")
         case .ajanlasok:
             RecommendationsScreen()
         }

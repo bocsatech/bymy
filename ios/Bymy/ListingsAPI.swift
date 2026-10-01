@@ -8,32 +8,41 @@ enum ListingsAPI {
         let meta: String
         let imageURL: URL?
         let badge: String?
+        var brand: String? = nil
+        var model: String? = nil
     }
 
-    struct Envelope: Decodable {
-        let ok: Bool?
-        let listings: [Raw]?
-        let items: [Raw]?
+    private struct Envelope: Decodable {
+        let listings: [RemoteListing]?
+        let items: [RemoteListing]?
         let error: String?
     }
 
-    struct Raw: Decodable {
-        let id: FlexibleID?
-        let title: String?
-        let cim: String?
-        let price: FlexibleNumber?
-        let ar: FlexibleNumber?
-        let priceLabel: String?
-        let ar_label: String?
-        let year: FlexibleNumber?
-        let gyartasi_ev: FlexibleNumber?
-        let km: FlexibleNumber?
-        let kilometerora_allasa: FlexibleNumber?
+    private struct RemoteListing: Decodable {
+        let id: FlexibleID
+        let hirdetes_cime: String?
         let fo_kep: String?
-        let image: String?
-        let imageUrl: String?
-        let badge: String?
         let status: String?
+        let preview: RemotePreview?
+        let user_id: Int?
+    }
+
+    private struct RemotePreview: Decodable {
+        let title: String?
+        let price: String?
+        let priceNum: Int?
+        let km: String?
+        let specLine: String?
+        let imageUrl: String?
+        let imageUrls: [String]?
+        let filter: RemoteFilter?
+    }
+
+    private struct RemoteFilter: Decodable {
+        let uzemanyag: String?
+        let gyartasi_ev: FlexibleNumber?
+        let gyartmany: String?
+        let modell: String?
     }
 
     struct FlexibleID: Decodable {
@@ -88,42 +97,131 @@ enum ListingsAPI {
         }
         let (data, response) = try await URLSession.shared.data(for: req)
         guard let http = response as? HTTPURLResponse else { throw APIClient.APIError.unreachable }
-        let decoded = try JSONDecoder().decode(Envelope.self, from: data)
+
         if http.statusCode == 401 {
-            throw APIClient.APIError.unauthorized(decoded.error ?? "Belépés szükséges.")
+            let err = (try? JSONDecoder().decode(Envelope.self, from: data))?.error
+            throw APIClient.APIError.unauthorized(err ?? "Belépés szükséges.")
         }
+
+        // Robust path: if Codable fails on unknown fields, still try JSONSerialization
+        if let decoded = try? JSONDecoder().decode(Envelope.self, from: data), http.statusCode < 400 {
+            let rows = decoded.listings ?? decoded.items ?? []
+            let mapped = rows.map(mapRemote)
+            if !mapped.isEmpty || rows.isEmpty {
+                return mapped
+            }
+        }
+
         guard http.statusCode < 400 else {
-            throw APIClient.APIError.server(decoded.error ?? "Hirdetések betöltése sikertelen.")
+            let err = (try? JSONDecoder().decode(Envelope.self, from: data))?.error
+            throw APIClient.APIError.server(err ?? "Hirdetések betöltése sikertelen.")
         }
-        let raw = decoded.listings ?? decoded.items ?? []
-        return raw.compactMap(map)
+
+        // Fallback: dictionary parse (preview nested)
+        guard let root = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            throw APIClient.APIError.decoding
+        }
+        let arr = (root["listings"] as? [[String: Any]]) ?? (root["items"] as? [[String: Any]]) ?? []
+        return arr.compactMap(mapDict)
     }
 
-    static func map(_ raw: Raw) -> Listing? {
-        let id = raw.id?.value ?? UUID().uuidString
-        let title = (raw.title ?? raw.cim ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !title.isEmpty else { return nil }
-        let priceFt = raw.price?.value ?? raw.ar?.value
-        let priceLabel = raw.priceLabel ?? raw.ar_label ?? formatPrice(priceFt)
-        let year = raw.year?.value ?? raw.gyartasi_ev?.value
-        let km = raw.km?.value ?? raw.kilometerora_allasa?.value
-        var metaParts: [String] = []
-        if let year { metaParts.append(String(year)) }
-        if let km { metaParts.append("\(formatNumber(km)) km") }
-        let imageStr = raw.fo_kep ?? raw.imageUrl ?? raw.image
-        let imageURL = imageStr.flatMap { absoluteImageURL($0) }
+    private static func mapRemote(_ row: RemoteListing) -> Listing {
+        let preview = row.preview
+        var title = (preview?.title ?? row.hirdetes_cime ?? "Hirdetés #\(row.id.value)")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        if title.lowercased().hasPrefix("eladó ") {
+            title = String(title.dropFirst(6))
+        }
+        if title.isEmpty { title = "Hirdetés #\(row.id.value)" }
+
+        let price = (preview?.price).flatMap { $0.isEmpty ? nil : $0 } ?? formatPrice(preview?.priceNum)
+        let year: String = {
+            if let y = preview?.filter?.gyartasi_ev?.value, y > 1900 { return String(y) }
+            return "—"
+        }()
+        let km = (preview?.km).flatMap { $0.isEmpty ? nil : $0 } ?? "—"
+        let fuel = (preview?.filter?.uzemanyag).flatMap { $0.isEmpty ? nil : $0 } ?? "—"
+        let meta = [year, km, fuel].joined(separator: " · ")
+
+        let imageURL =
+            absoluteImageURL(row.fo_kep)
+            ?? absoluteImageURL(preview?.imageUrl)
+            ?? preview?.imageUrls?.compactMap(absoluteImageURL).first
+
         return Listing(
-            id: id,
+            id: row.id.value,
             title: title,
-            priceLabel: priceLabel,
-            meta: metaParts.joined(separator: " · "),
+            priceLabel: price,
+            meta: meta,
             imageURL: imageURL,
-            badge: raw.badge
+            badge: nil,
+            brand: preview?.filter?.gyartmany,
+            model: preview?.filter?.modell
         )
     }
 
-    static func absoluteImageURL(_ raw: String) -> URL? {
+    private static func mapDict(_ row: [String: Any]) -> Listing? {
+        let id = stringAny(row["id"]) ?? UUID().uuidString
+        let preview = row["preview"] as? [String: Any] ?? [:]
+        let form = row["form"] as? [String: Any] ?? [:]
+        var title = (stringAny(preview["title"])
+            ?? stringAny(row["hirdetes_cime"])
+            ?? stringAny(form["hirdetes_cime"])
+            ?? "Hirdetés #\(id)")
+        if title.lowercased().hasPrefix("eladó ") {
+            title = String(title.dropFirst(6))
+        }
+        let price = stringAny(preview["price"])
+            ?? formatPrice(intAny(preview["priceNum"]) ?? intAny(form["vetelar"]))
+        let filter = preview["filter"] as? [String: Any] ?? [:]
+        let year = stringAny(filter["gyartasi_ev"]) ?? stringAny(form["gyartasi_ev"]) ?? "—"
+        let km = stringAny(preview["km"]) ?? {
+            if let n = intAny(form["km"]) { return "\(formatNumber(n)) km" }
+            return "—"
+        }()
+        let fuel = stringAny(filter["uzemanyag"]) ?? stringAny(form["uzemanyag"]) ?? "—"
+        let imageURL =
+            absoluteImageURL(stringAny(row["fo_kep"]))
+            ?? absoluteImageURL(stringAny(preview["imageUrl"]))
+            ?? (preview["imageUrls"] as? [Any])?.compactMap { absoluteImageURL(stringAny($0)) }.first
+
+        return Listing(
+            id: id,
+            title: title,
+            priceLabel: price,
+            meta: [year, km, fuel].joined(separator: " · "),
+            imageURL: imageURL,
+            badge: nil,
+            brand: stringAny(filter["gyartmany"]),
+            model: stringAny(filter["modell"])
+        )
+    }
+
+    private static func stringAny(_ any: Any?) -> String? {
+        guard let any else { return nil }
+        if let s = any as? String {
+            let t = s.trimmingCharacters(in: .whitespacesAndNewlines)
+            return t.isEmpty ? nil : t
+        }
+        if let n = any as? NSNumber { return n.stringValue }
+        if let i = any as? Int { return String(i) }
+        return nil
+    }
+
+    private static func intAny(_ any: Any?) -> Int? {
+        if let i = any as? Int { return i }
+        if let n = any as? NSNumber { return n.intValue }
+        if let s = any as? String {
+            let d = s.filter(\.isNumber)
+            return d.isEmpty ? nil : Int(d)
+        }
+        return nil
+    }
+
+    static func absoluteImageURL(_ raw: String?) -> URL? {
+        guard let raw else { return nil }
         let s = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !s.isEmpty else { return nil }
         if s.hasPrefix("http://") || s.hasPrefix("https://") { return URL(string: s) }
         if s.hasPrefix("/") { return URL(string: s, relativeTo: APIBase.current)?.absoluteURL }
         return URL(string: s, relativeTo: APIBase.current)?.absoluteURL
@@ -167,7 +265,6 @@ enum ListingsAPI {
         let error: String?
     }
 
-    /// `POST /api/listings` — ugyanaz, mint a webes feladás.
     @discardableResult
     static func saveListing(
         form: [String: Any],

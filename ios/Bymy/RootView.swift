@@ -10,6 +10,8 @@ struct RootView: View {
                 ProgressView("Betöltés…")
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .background(AppTheme.bg)
+            } else if !auth.isLoggedIn {
+                LoginScreen(mode: router.showRegister ? .register : .login, isGate: true)
             } else {
                 AppShellView()
             }

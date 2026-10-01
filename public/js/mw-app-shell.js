@@ -19,7 +19,7 @@
     if (!document.querySelector('link[href*="text-scale.css"]')) {
       var ts = document.createElement("link");
       ts.rel = "stylesheet";
-      ts.href = "/css/text-scale.css?v=textScale2";
+      ts.href = "/css/text-scale.css?v=textScale3";
       document.head.appendChild(ts);
     }
   }
@@ -439,7 +439,7 @@
       document.body.appendChild(s);
     }
     addModule("/js/theme.js?v=willhabenHdr1");
-    addModule("/js/text-scale.js?v=textScale1");
+    addModule("/js/text-scale.js?v=textScale3");
     addModule("/js/site-avatar-menu.js?v=settingsHome1");
     addModule("/js/nav-counts.js?v=bootFix2");
   }

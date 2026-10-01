@@ -1,9 +1,12 @@
 const STORAGE_KEY = "bymy-text-scale";
-const LEVELS = new Set(["100", "105", "110", "120"]);
+const LEVELS = new Set(["100", "110", "120", "130", "140", "150"]);
 
 function normalizeScale(value) {
   const raw = String(value || "").trim();
-  return LEVELS.has(raw) ? raw : "100";
+  if (LEVELS.has(raw)) return raw;
+  /* régi +5% → +10% */
+  if (raw === "105") return "110";
+  return "100";
 }
 
 function preferredScale() {

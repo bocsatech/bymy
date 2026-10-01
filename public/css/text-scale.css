@@ -1,41 +1,36 @@
-/* Szövegméret: tartalom + body-portál menük; felső menüsáv érintetlen. */
-html[data-text-scale="105"] body.site-app > :is(
-  main,
-  .wizard-context-bar,
-  .auto-drum-portal,
-  .wizard-cat-portal,
-  .cp-sheet,
-  .cp-sheet-backdrop,
-  .ad-form-bm-panel.ad-form-bm-dropdown--portaled,
-  .auto-price-suggest
-) {
-  zoom: 1.05;
+/* Szövegméret: minden nagyítva, felső menüsáv visszaállítva eredetire. */
+html[data-text-scale="110"] {
+  --bymy-text-zoom: 1.1;
+}
+html[data-text-scale="120"] {
+  --bymy-text-zoom: 1.2;
+}
+html[data-text-scale="130"] {
+  --bymy-text-zoom: 1.3;
+}
+html[data-text-scale="140"] {
+  --bymy-text-zoom: 1.4;
+}
+html[data-text-scale="150"] {
+  --bymy-text-zoom: 1.5;
 }
 
-html[data-text-scale="110"] body.site-app > :is(
-  main,
-  .wizard-context-bar,
-  .auto-drum-portal,
-  .wizard-cat-portal,
-  .cp-sheet,
-  .cp-sheet-backdrop,
-  .ad-form-bm-panel.ad-form-bm-dropdown--portaled,
-  .auto-price-suggest
-) {
-  zoom: 1.1;
+html[data-text-scale]:not([data-text-scale="100"]) body.site-app {
+  zoom: var(--bymy-text-zoom);
 }
 
-html[data-text-scale="120"] body.site-app > :is(
-  main,
-  .wizard-context-bar,
-  .auto-drum-portal,
-  .wizard-cat-portal,
-  .cp-sheet,
-  .cp-sheet-backdrop,
-  .ad-form-bm-panel.ad-form-bm-dropdown--portaled,
-  .auto-price-suggest
+/* Felső menüsáv: ellensúlyozzuk a body zoomot → változatlan méret */
+html[data-text-scale]:not([data-text-scale="100"]) body.site-app > :is(
+  .mw-app-top,
+  .hub-header,
+  [data-site-desk-header],
+  .home-header,
+  .site-header,
+  header.site-app-header,
+  .site-app-header,
+  .fiok-top
 ) {
-  zoom: 1.2;
+  zoom: calc(1 / var(--bymy-text-zoom));
 }
 
 /* Beállítások — szövegméret választó */

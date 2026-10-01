@@ -75,9 +75,8 @@ final class AppRouter: ObservableObject {
             bottomTab = .home
             topPage = .hub
         case .search:
-            // Web: Keresés tab → /auto.html (ugyanaz a keresőmenü)
-            bottomTab = .home
-            topPage = .auto
+            // Web: Keresés tab → /kereses.html (kategória henger)
+            bottomTab = .search
         case .post:
             if isLoggedIn {
                 bottomTab = .post
@@ -106,10 +105,9 @@ final class AppRouter: ObservableObject {
             bottomTab = .feed
         case .hub:
             bottomTab = .home
-        default:
-            if bottomTab == .post || bottomTab == .account {
-                bottomTab = .home
-            }
+        case .auto, .teherauto, .ingatlan:
+            // Web: vertical pages → Keresés tab active family
+            bottomTab = .home
         }
     }
 
@@ -162,13 +160,13 @@ final class AppRouter: ObservableObject {
         }
     }
 
-    /// Hirdetés / chat / fiók-aloldal nézetben nincs felső menü + alsó tab.
+    /// Hirdetés / chat / fiók-aloldal / feladás: web szerint nincs top inject a wizardon;
+    /// Fiók megtartja a felső sávot (mint `mw-app-top` a fiok.html-en).
     var showsTopChrome: Bool {
         openListingId == nil
             && openChat == nil
             && openFiokSection == nil
             && bottomTab != .post
-            && bottomTab != .account
     }
 
     var showsBottomChrome: Bool {

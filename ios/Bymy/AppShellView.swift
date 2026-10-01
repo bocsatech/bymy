@@ -50,7 +50,7 @@ struct AppShellView: View {
         case .feed:
             NativeWebPage(page: .ajanlasok)
         case .search:
-            NativeWebPage(page: .auto)
+            NativeWebPage(page: .kereses)
         case .post:
             if auth.isLoggedIn {
                 NativeWebPage(page: .post)
@@ -99,17 +99,10 @@ struct TopPagesPager: View {
     @EnvironmentObject private var router: AppRouter
 
     var body: some View {
-        TabView(selection: Binding(
-            get: { router.topPage.index },
-            set: { router.selectTop(TopPage.from(index: $0)) }
-        )) {
-            ForEach(Array(TopPage.allCases.enumerated()), id: \.element.id) { index, page in
-                pageView(page)
-                    .tag(index)
-            }
-        }
-        .tabViewStyle(.page(indexDisplayMode: .never))
-        .animation(.easeInOut(duration: 0.2), value: router.topPage)
+        // Web: nincs swipe a felső menü oldalai között — csak explicit navigáció.
+        pageView(router.topPage)
+            .id(router.topPage.id)
+            .animation(.easeInOut(duration: 0.2), value: router.topPage)
     }
 
     @ViewBuilder

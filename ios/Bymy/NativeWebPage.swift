@@ -10,6 +10,7 @@ struct NativeWebPage: View {
         case ingatlan = "ingatlan.html"
         case ajanlasok = "ajanlasok.html"
         case post = "hirdetesfeladas.html"
+        case kereses = "kereses.html"
     }
 
     let page: Page

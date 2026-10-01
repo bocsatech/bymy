@@ -75,11 +75,12 @@ struct MobileTabBar: View {
     private func isActive(_ tab: BottomTab) -> Bool {
         switch tab {
         case .home:
-            // Autó = Keresés tab; Főoldal csak Kezdőlapnál
             return router.bottomTab == .home && router.topPage == .hub
         case .search:
-            // Web: Keresés = Autó oldal
-            return router.bottomTab == .home && router.topPage == .auto
+            // Web: Keresés aktív kereses.html-en ÉS auto/teher/ingatlan oldalakon
+            if router.bottomTab == .search { return true }
+            return router.bottomTab == .home
+                && (router.topPage == .auto || router.topPage == .teherauto || router.topPage == .ingatlan)
         case .post:
             return router.bottomTab == .post
         case .feed:

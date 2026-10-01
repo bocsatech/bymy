@@ -139,7 +139,10 @@ struct AccountScreen: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            fiokHeader
+            // Web: `.fiok-top` rejtve, ha van `mw-app-top` — a natív MobileTopBar helyettesíti.
+            if !router.showsTopChrome {
+                fiokHeader
+            }
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 12) {

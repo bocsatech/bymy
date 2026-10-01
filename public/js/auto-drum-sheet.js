@@ -2210,7 +2210,9 @@ function openSplitRangeDrumSheet(minWheel, maxWheel, trigger) {
   const dual = minWheel.closest(".immo-dual-range") || maxWheel.closest(".immo-dual-range");
   const wrap = minWheel.closest(".immo-wheel-wrap") || maxWheel.closest(".immo-wheel-wrap");
   const title =
+    dual?.closest(".immo-dual-range-block")?.querySelector(":scope > .immo-dual-range__title")?.textContent?.trim() ||
     dual?.querySelector(".immo-dual-range__title")?.textContent?.trim() ||
+    dual?.getAttribute("aria-label")?.replace(/\s*tartomány\s*$/i, "").trim() ||
     trigger.getAttribute("aria-label") ||
     "Tartomány";
   const unit = dual?.querySelector(".immo-dual-range__unit")?.textContent?.trim() || "";

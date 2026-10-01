@@ -627,7 +627,8 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #tire-sizes-
   max-width: none !important;
   padding-left: 6px !important;
   padding-right: 22px !important;
-  font-size: 13px !important;
+  /* ≥16px: iOS ne zoomoljon billentyűzet / natív picker nyitáskor */
+  font-size: 16px !important;
   field-sizing: fixed !important;
   box-sizing: border-box !important;
 }

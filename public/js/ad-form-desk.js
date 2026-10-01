@@ -4,7 +4,7 @@ import {
   applyStep1SearchDomOrder,
   isVehicleStep1Canvas,
   stackVehicleCanvasSingleColumn,
-} from "./ad-form-desk-pinned-blocks.js?v=bmSheet61";
+} from "./ad-form-desk-pinned-blocks.js?v=bmSheet62";
 
 const DESK_MQ = "(min-width: 901px)";
 

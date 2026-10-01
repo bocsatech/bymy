@@ -1793,20 +1793,41 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .field-row.full.field-r
   min-width: 0 !important;
 }
 
-/* iOS: <16px input fókusz = automatikus zoom + billentyűzet → oldal jobbra csúszik */
+/* iOS: <16px fókusz = zoom + billentyűzet → oldal elcsúszik.
+   Minden kézi mező (type=number is!) + összes accordion/menü — nem csak #km. */
 @media (max-width: 900px) {
-  body.site-app[data-site-page="hirdetesfeladas"] #ad-form input#km,
-  body.site-app[data-site-page="hirdetesfeladas"] #ad-form .suffix-field:has(#km) > input#km,
-  body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-layout-item:has(#km) .suffix-field > input#km,
-  body.site-app[data-site-page="hirdetesfeladas"] #ad-form .labeled-field:has(#km) .suffix-field > input#km,
-  body.site-app[data-site-page="hirdetesfeladas"] #ad-form input[inputmode="numeric"],
-  body.site-app[data-site-page="hirdetesfeladas"] #ad-form input[inputmode="decimal"],
-  body.site-app[data-site-page="hirdetesfeladas"] #ad-form input[inputmode="tel"],
+  body.site-app[data-site-page="hirdetesfeladas"] #ad-form
+    input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="hidden"]):not([type="button"]):not([type="submit"]):not([type="reset"]),
   body.site-app[data-site-page="hirdetesfeladas"] #ad-form textarea,
-  body.site-app[data-site-page="hirdetesfeladas"] #ad-form select:not(.ad-form-bm-native),
-  body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-search-trigger {
+  body.site-app[data-site-page="hirdetesfeladas"] #ad-form select,
+  body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-search-trigger,
+  body.site-app[data-site-page="hirdetesfeladas"] #ad-form .suffix-field > input,
+  body.site-app[data-site-page="hirdetesfeladas"] #ad-form .muszaki-grid input,
+  body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ev-tech-grid input,
+  body.site-app[data-site-page="hirdetesfeladas"] #ad-form .field-row--tech-top input,
+  body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] input,
+  body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="1"] input,
+  body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="4"] input,
+  body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="4"] textarea,
+  body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="5"] input,
+  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form #tire-sizes-card .tire-row select,
+  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form #tire-sizes-card .tire-row select.ad-form-cell {
     font-size: 16px !important;
   }
+}
+
+/* Billentyűzet nyitva: ne lehessen oldalra görgetni / csúszni */
+html.ad-form-kb-open,
+html.ad-form-kb-open body,
+body.ad-form-kb-open,
+body.site-app.ad-form-kb-open[data-site-page="hirdetesfeladas"],
+body.site-app.ad-form-kb-open[data-site-page="hirdetesfeladas"] #ad-form,
+body.site-app.ad-form-kb-open[data-site-page="hirdetesfeladas"] .ad-form-desk-shell,
+body.site-app.ad-form-kb-open[data-site-page="hirdetesfeladas"] .step-panel,
+body.site-app.ad-form-kb-open[data-site-page="hirdetesfeladas"] .muszaki-grid,
+body.site-app.ad-form-kb-open[data-site-page="hirdetesfeladas"] .ev-tech-grid {
+  overflow-x: hidden !important;
+  max-width: 100% !important;
 }
 
 /* Drum / underline mezők: ne lógjanak ki a kártyából */
@@ -1919,6 +1940,7 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-
   border: 0 !important;
   background: transparent !important;
   box-shadow: none !important;
+  font-size: 16px !important;
 }
 
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .suffix-field > span:not(.hint-inline):not(.power-hint):not(.price-market-hint):not(.price-market-label),

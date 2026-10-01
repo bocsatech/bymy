@@ -1,3 +1,5 @@
+import { lockAdFormPageX } from "./ad-form-keyboard-guard.js?v=kbGuard1";
+
 export function parseKmDigits(value) {
   return String(value ?? "").replace(/\D/g, "");
 }
@@ -17,24 +19,8 @@ export function initKmInput(input) {
   input.inputMode = "numeric";
   input.autocomplete = "off";
   if (!input.placeholder) input.placeholder = "pl. 125 000";
-
-  const lockPageX = () => {
-    try {
-      document.documentElement.scrollLeft = 0;
-      document.body.scrollLeft = 0;
-      window.scrollTo({ left: 0, top: window.scrollY || window.pageYOffset || 0, behavior: "auto" });
-      /* Billentyűzet / iOS zoom után a visualViewport offset is nullázandó. */
-      if (window.visualViewport && window.visualViewport.offsetLeft) {
-        window.scrollTo(window.visualViewport.offsetLeft, window.scrollY || 0);
-        document.documentElement.scrollLeft = 0;
-        document.body.scrollLeft = 0;
-      }
-    } catch {
-      /* ignore */
-    }
-  };
-
-  const onViewportShift = () => lockPageX();
+  /* iOS zoom elkerülés: a globális keyboard-guard is 16px-et kényszerít. */
+  input.style.setProperty("font-size", "16px", "important");
 
   const sync = () => {
     const digits = parseKmDigits(input.value);
@@ -56,21 +42,17 @@ export function initKmInput(input) {
     }
     const formatted = formatKmDigits(digits);
     if (input.value !== formatted) input.value = formatted;
-    lockPageX();
+    lockAdFormPageX();
   });
 
   input.addEventListener("focus", () => {
-    lockPageX();
-    requestAnimationFrame(lockPageX);
-    window.visualViewport?.addEventListener("resize", onViewportShift);
-    window.visualViewport?.addEventListener("scroll", onViewportShift);
+    lockAdFormPageX();
+    requestAnimationFrame(lockAdFormPageX);
   });
   input.addEventListener("blur", () => {
     sync();
-    lockPageX();
-    requestAnimationFrame(lockPageX);
-    window.visualViewport?.removeEventListener("resize", onViewportShift);
-    window.visualViewport?.removeEventListener("scroll", onViewportShift);
+    lockAdFormPageX();
+    requestAnimationFrame(lockAdFormPageX);
   });
   if (input.value) sync();
   return input;

@@ -1,0 +1,29 @@
+---
+description: iOS natív app = mobil web 1:1 (100% parity)
+alwaysApply: true
+---
+
+# iOS app = mobil web 100%
+
+A **natív iOS app** (`ios/Bymy`) kinézete és működése **100%-ban ugyanaz**, mint a **mobil web** (`bymy.hu`, mobil viewport / `mw-app-*`).
+
+## Kötelező
+
+- UI, menük, csempék, sorrend, szövegek, színek, gombok: másold a mobil webről (`public/*.html`, `public/css/*`, `public/js/*`).
+- Ne találj ki „egyszerűsített” / „natívabb” alternatívát, ha a weben már van minta.
+- Új képernyő / javítás előtt nézd meg a webes megfelelőt (HTML + CSS + JS).
+- Ha eltérés van: a **web a forrásigazság** — az iOS-t igazítsd hozzá.
+
+## Ne
+
+- Más menüszerkezet, más csempelista, más gombfelirat
+- Placeholder UI, ha a weben kész a felület
+- Capacitor / teljes WebView-csere csak ha a felhasználó külön kéri (alap: natív SwiftUI, webes 1:1)
+
+## Referencia
+
+- Héj: `mw-app-shell.js`, `hub-mobile-app.css`
+- Kezdőlap: `index.html` + `hub-*.js`
+- Autó kereső: `auto.html` + `auto-search-*` / `home-app.js`
+- Feladás: `hirdetesfeladas.html` + `category-picker.*`
+- Fiók: `fiok.html` / `beallitasok.html`

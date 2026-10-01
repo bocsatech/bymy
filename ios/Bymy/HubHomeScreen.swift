@@ -1,23 +1,21 @@
 import SwiftUI
 import UIKit
 
-/// Web hub kezdőlap: promo + vízszintes csempe-sínek (jobbra/balra csúsztatható).
+/// Web `index.html` hub-feed — szekciók és sínek 1:1.
 struct HubHomeScreen: View {
     @EnvironmentObject private var auth: AuthStore
     @EnvironmentObject private var router: AppRouter
 
     @State private var featured: [ListingsAPI.Listing] = []
-    @State private var autos: [ListingsAPI.Listing] = []
-    @State private var trucks: [ListingsAPI.Listing] = []
-    @State private var homes: [ListingsAPI.Listing] = []
+    @State private var nearbyAutos: [ListingsAPI.Listing] = []
+    @State private var nearbyFlats: [ListingsAPI.Listing] = []
+    @State private var nearbyHouses: [ListingsAPI.Listing] = []
     @State private var loading = true
     @State private var errorText: String?
 
     private let pageBg = Color(red: 0.973, green: 0.976, blue: 0.980)
     private let gutter: CGFloat = 16
-    private let tileWidth: CGFloat = 200
 
-    /// Web `HOME_CATEGORIES` + `/images/categories/list/{id}.jpg`
     private let autoCategories: [(id: String, label: String)] = [
         ("uj", "Új"),
         ("benzin", "Benzin"),
@@ -29,10 +27,40 @@ struct HubHomeScreen: View {
         ("ot", "OT"),
     ]
 
-    /// Mobil web: ~2 csempe látszik a sínben.
+    private let ajanlasAuto: [(id: String, label: String, image: String)] = [
+        ("atiras_ugyintezes", "Átírás ügyintézés", "ajanlas-atiras"),
+        ("eredetvizsga", "Eredetvizsga", "ajanlas-eredet"),
+        ("muszakivizsga", "Műszaki vizsga", "ajanlas-muszaki"),
+        ("autoatvizsgalas", "Autoátvizsgálás", "ajanlas-atvizsgalas"),
+        ("autoszerelo", "Autószerelő", "ajanlas-szerelo"),
+        ("gumiszerelo", "Gumiszerelő", "ajanlas-gumi"),
+        ("lakatos", "Lakatos", "ajanlas-lakatos"),
+        ("klimaszerelo", "Klímaszerelő", "ajanlas-klima"),
+        ("autokozmetika", "Autókozmetika", "ajanlas-kozmetika"),
+        ("autovillamossag", "Autóvillamosság", "ajanlas-villamos"),
+    ]
+
+    private let ajanlasImmo: [(id: String, label: String, image: String)] = [
+        ("ertekesites", "Értékesítés", "ajanlas-ertekesites"),
+        ("ertekbecsles", "Értékbecslés", "ajanlas-ertekbecsles"),
+        ("energetikai_tanusitvany", "Energetikai tanúsítvány", "ajanlas-energetikai"),
+        ("szerkezeti_vizsgalat", "Szerkezeti vizsgálat", "ajanlas-szerkezeti"),
+        ("hitelugyintezes", "Hitelügyintézés", "ajanlas-hitel"),
+        ("foldmeres", "Földmérés", "ajanlas-foldmeres"),
+        ("tervezok", "Tervezők", "ajanlas-tervezok"),
+        ("lakberendezo", "Lakberendező", "ajanlas-lakberendezo"),
+        ("kertepito", "Kertépítő", "ajanlas-kertepito"),
+        ("ugyvedek", "Ügyvédek", "ajanlas-ugyvedek"),
+        ("kozjegyzok", "Közjegyzők", "ajanlas-kozjegyzok"),
+    ]
+
     private var categoryTileWidth: CGFloat {
         let screen = UIScreen.main.bounds.width
         return max(140, (screen - (2 * gutter) - 10) / 2)
+    }
+
+    private var listingTileWidth: CGFloat {
+        categoryTileWidth
     }
 
     var body: some View {
@@ -40,10 +68,9 @@ struct HubHomeScreen: View {
             VStack(alignment: .leading, spacing: 22) {
                 promoRail
 
-                railHeader(title: "Autó kategóriák") {
-                    router.selectTop(.auto)
-                }
-                categoryRail
+                // Autó kategóriák
+                railHeader(title: "Autó kategóriák") { router.selectTop(.auto) }
+                categoryRail(items: autoCategories)
 
                 if let errorText {
                     Text(errorText)
@@ -52,25 +79,47 @@ struct HubHomeScreen: View {
                         .padding(.horizontal, gutter)
                 }
 
-                railHeader(title: "Kiemelt hirdetések") {
-                    router.selectTop(.auto)
+                // Kiemelt — weben csak ha van
+                if !featured.isEmpty {
+                    railHeader(title: "Kiemelt hirdetések") { router.selectTop(.auto) }
+                    listingRail(items: featured)
                 }
-                listingRail(items: featured, empty: loading ? "Betöltés…" : "Még nincs kiemelt hirdetés")
 
-                railHeader(title: "Autók") {
-                    router.selectTop(.auto)
-                }
-                listingRail(items: autos, empty: loading ? "Betöltés…" : "Nincs autó hirdetés")
+                // Autók a közelben
+                railHeader(title: "Autók a közelben") { router.selectTop(.auto) }
+                listingRail(
+                    items: nearbyAutos,
+                    empty: loading ? "Betöltés…" : "Nincs autó a közelben."
+                )
 
-                railHeader(title: "Teherautók") {
-                    router.selectTop(.teherauto)
-                }
-                listingRail(items: trucks, empty: loading ? "Betöltés…" : "Nincs teherautó hirdetés")
+                // Eladó lakások a közelben
+                railHeader(title: "Eladó lakások a közelben") { router.selectTop(.ingatlan) }
+                listingRail(
+                    items: nearbyFlats,
+                    empty: loading ? "Betöltés…" : "Nincs lakás a közelben."
+                )
 
-                railHeader(title: "Eladó ingatlanok") {
-                    router.selectTop(.ingatlan)
-                }
-                listingRail(items: homes, empty: loading ? "Betöltés…" : "Nincs ingatlan hirdetés")
+                // Eladó házak a közelben
+                railHeader(title: "Eladó házak a közelben") { router.selectTop(.ingatlan) }
+                listingRail(
+                    items: nearbyHouses,
+                    empty: loading ? "Betöltés…" : "Nincs ház a közelben."
+                )
+
+                // Ajánlások ingatlan
+                railHeader(title: "Ajánlások ingatlan") { router.selectTop(.ajanlasok) }
+                ajanlasRail(items: ajanlasImmo)
+
+                // Szolgáltatások
+                railHeader(title: "Szolgáltatások") { router.selectTop(.ajanlasok) }
+                Text("A szolgáltatók az Ajánlások oldalon érthetők el.")
+                    .font(.system(size: 14))
+                    .foregroundStyle(AppTheme.textSecondary)
+                    .padding(.horizontal, gutter)
+
+                // Ajánlások autó
+                railHeader(title: "Ajánlások autó") { router.selectTop(.ajanlasok) }
+                ajanlasRail(items: ajanlasAuto)
 
                 Color.clear.frame(height: 12)
             }
@@ -82,7 +131,7 @@ struct HubHomeScreen: View {
         .refreshable { await load() }
     }
 
-    // MARK: - Promo (Autó / Ingatlan) — vízszintes lapozás
+    // MARK: - Promo
 
     private var promoRail: some View {
         ScrollView(.horizontal, showsIndicators: false) {
@@ -91,23 +140,21 @@ struct HubHomeScreen: View {
                     kicker: "Autó és teherautó",
                     titleTop: "Autók és",
                     titleBottom: "teherautók",
+                    text: "Vétel és bérlés egy átlátható felületen.",
                     cta: "Járművek keresése →",
-                    imageURL: URL(string: "https://bymy.hu/images/hub-auto-photo.jpg"),
+                    imageURL: URL(string: "https://bymy.hu/images/hub-auto-photo.jpg?v=hubHeroDemo1"),
                     tint: Color(red: 0.12, green: 0.35, blue: 0.72)
-                ) {
-                    router.selectTop(.auto)
-                }
+                ) { router.selectTop(.auto) }
 
                 promoCard(
                     kicker: "Ingatlan",
                     titleTop: "Házak és",
                     titleBottom: "lakások",
+                    text: "Vétel és bérlés egy átlátható felületen.",
                     cta: "Ingatlan keresése →",
-                    imageURL: URL(string: "https://bymy.hu/images/hub-ingatlan-photo.jpg"),
+                    imageURL: URL(string: "https://bymy.hu/images/hub-ingatlan-photo.jpg?v=hubHeroDemo1"),
                     tint: Color(red: 0.12, green: 0.45, blue: 0.32)
-                ) {
-                    router.selectTop(.ingatlan)
-                }
+                ) { router.selectTop(.ingatlan) }
             }
             .padding(.horizontal, gutter)
         }
@@ -117,6 +164,7 @@ struct HubHomeScreen: View {
         kicker: String,
         titleTop: String,
         titleBottom: String,
+        text: String,
         cta: String,
         imageURL: URL?,
         tint: Color,
@@ -141,7 +189,7 @@ struct HubHomeScreen: View {
                     endPoint: .top
                 )
 
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: 3) {
                     Text(kicker.uppercased())
                         .font(.system(size: 11, weight: .bold))
                         .foregroundStyle(.white.opacity(0.9))
@@ -151,29 +199,35 @@ struct HubHomeScreen: View {
                     Text(titleBottom)
                         .font(.system(size: 22, weight: .bold))
                         .foregroundStyle(.white)
+                    Text(text)
+                        .font(.system(size: 12))
+                        .foregroundStyle(.white.opacity(0.85))
+                        .lineLimit(2)
                     Text(cta)
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundStyle(.white)
-                        .padding(.top, 4)
+                        .padding(.top, 2)
                 }
                 .padding(14)
             }
             .frame(width: 300, height: 170)
-            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: 9, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 9, style: .continuous)
+                    .stroke(Color(red: 0.83, green: 0.83, blue: 0.83), lineWidth: 1)
+            )
         }
         .buttonStyle(.plain)
     }
 
-    // MARK: - Category rail (web `hf-card--kategoria`)
+    // MARK: - Rails
 
-    private var categoryRail: some View {
+    private func categoryRail(items: [(id: String, label: String)]) -> some View {
         let w = categoryTileWidth
         return ScrollView(.horizontal, showsIndicators: false) {
             HStack(alignment: .top, spacing: 10) {
-                ForEach(autoCategories, id: \.id) { cat in
-                    Button {
-                        router.selectTop(.auto)
-                    } label: {
+                ForEach(items, id: \.id) { cat in
+                    Button { router.selectTop(.auto) } label: {
                         AutoCategoryTile(
                             label: cat.label,
                             imageURL: URL(string: "https://bymy.hu/images/categories/list/\(cat.id).jpg?v=menuRails1"),
@@ -187,7 +241,24 @@ struct HubHomeScreen: View {
         }
     }
 
-    // MARK: - Listing rails
+    private func ajanlasRail(items: [(id: String, label: String, image: String)]) -> some View {
+        let w = categoryTileWidth
+        return ScrollView(.horizontal, showsIndicators: false) {
+            HStack(alignment: .top, spacing: 10) {
+                ForEach(items, id: \.id) { cat in
+                    Button { router.selectTop(.ajanlasok) } label: {
+                        AutoCategoryTile(
+                            label: cat.label,
+                            imageURL: URL(string: "https://bymy.hu/images/ajanlas/list/\(cat.image).jpg?v=menuRails1"),
+                            width: w
+                        )
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(.horizontal, gutter)
+        }
+    }
 
     private func railHeader(title: String, allAction: @escaping () -> Void) -> some View {
         HStack {
@@ -202,21 +273,21 @@ struct HubHomeScreen: View {
         .padding(.horizontal, gutter)
     }
 
-    private func listingRail(items: [ListingsAPI.Listing], empty: String) -> some View {
+    private func listingRail(items: [ListingsAPI.Listing], empty: String? = nil) -> some View {
         Group {
             if items.isEmpty {
-                Text(empty)
-                    .font(.system(size: 13))
-                    .foregroundStyle(AppTheme.textSecondary)
-                    .padding(.horizontal, gutter)
+                if let empty {
+                    Text(empty)
+                        .font(.system(size: 13))
+                        .foregroundStyle(AppTheme.textSecondary)
+                        .padding(.horizontal, gutter)
+                }
             } else {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(alignment: .top, spacing: 10) {
                         ForEach(items) { item in
-                            Button {
-                                router.openListing(item.id)
-                            } label: {
-                                ListingTileCard(listing: item, width: tileWidth)
+                            Button { router.openListing(item.id) } label: {
+                                ListingTileCard(listing: item, width: listingTileWidth)
                             }
                             .buttonStyle(.plain)
                         }
@@ -237,15 +308,35 @@ struct HubHomeScreen: View {
         errorText = nil
         defer { loading = false }
         do {
-            async let a = ListingsAPI.fetchCategory("auto", limit: 24, token: auth.token)
-            async let t = ListingsAPI.fetchCategory("teherauto", limit: 16, token: auth.token)
-            async let i = ListingsAPI.fetchCategory("ingatlan", limit: 16, token: auth.token)
-            let (autoList, truckList, homeList) = try await (a, t, i)
-            autos = autoList
-            trucks = truckList
-            homes = homeList
-            // Kiemelt: első autók (a szerver promo mezője később pontosítható)
-            featured = Array(autoList.prefix(12))
+            async let a = ListingsAPI.fetchCategoryPage("auto", limit: 40, token: auth.token)
+            async let i = ListingsAPI.fetchCategory("ingatlan", limit: 40, token: auth.token)
+            let (autoPage, immoList) = try await (a, i)
+
+            let autos = ListingsAPI.applyBoostSort(
+                autoPage.listings,
+                sort: .newest,
+                boostListingIds: autoPage.boostListingIds,
+                boostOwnerIds: autoPage.boostOwnerIds
+            )
+
+            // Kiemelt: promo / boost (web pickFeaturedListings)
+            featured = Array(autos.filter { $0.promoKiemelt || $0.ownerBoost }.prefix(12))
+            nearbyAutos = Array(autos.prefix(16))
+
+            // Ingatlan: egyszerű szétválasztás cím alapján (web nearby később GPS-sel)
+            nearbyFlats = Array(immoList.filter {
+                $0.title.localizedCaseInsensitiveContains("lakás")
+                    || $0.title.localizedCaseInsensitiveContains("lakas")
+            }.prefix(12))
+            nearbyHouses = Array(immoList.filter {
+                $0.title.localizedCaseInsensitiveContains("ház")
+                    || $0.title.localizedCaseInsensitiveContains("haz")
+                    || $0.title.localizedCaseInsensitiveContains("családi")
+            }.prefix(12))
+            if nearbyFlats.isEmpty { nearbyFlats = Array(immoList.prefix(8)) }
+            if nearbyHouses.isEmpty {
+                nearbyHouses = Array(immoList.filter { !nearbyFlats.map(\.id).contains($0.id) }.prefix(8))
+            }
         } catch {
             errorText = error.localizedDescription
         }
@@ -281,11 +372,11 @@ struct AutoCategoryTile: View {
             Text(label)
                 .font(.system(size: 15, weight: .heavy))
                 .foregroundStyle(AppTheme.text)
-                .lineLimit(1)
+                .lineLimit(2)
                 .padding(.horizontal, 10)
                 .padding(.top, 8)
                 .padding(.bottom, 10)
-                .frame(maxWidth: .infinity, alignment: .leading)
+                .frame(maxWidth: .infinity, minHeight: 40, alignment: .topLeading)
         }
         .frame(width: width)
         .background(Color.white)
@@ -316,6 +407,11 @@ struct ListingTileCard: View {
             .clipped()
 
             VStack(alignment: .leading, spacing: 4) {
+                if let badge = listing.badge, !badge.isEmpty {
+                    Text(badge.uppercased())
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundStyle(AppTheme.accent)
+                }
                 Text(listing.title)
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(AppTheme.text)

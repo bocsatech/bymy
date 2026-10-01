@@ -16,6 +16,10 @@ const HA_POSTMESSAGE_ORIGINS = new Set([
 
 const CAT_STORAGE_KEY = "bymy-hirdetes-category";
 const CAT_STORAGE_VERSION = 2;
+const MODE_STORAGE_KEY = "bymy-ha-import-mode";
+const BROWSER_STORAGE_KEY = "bymy-ha-install-browser";
+const PENDING_STORAGE_KEY = "bymy-ha-import-pending";
+const DEALER_BATCH_KEY = "bymy-ha-dealer-batch";
 const MODES = {
   standard: {
     title: "Használtautó import",
@@ -47,11 +51,21 @@ function authHeaders() {
 
 function currentMode() {
   const q = new URLSearchParams(location.search).get("mode");
-  return q === "dealer" ? "dealer" : "standard";
+  if (q === "dealer" || q === "standard") return q;
+  try {
+    const saved = localStorage.getItem(MODE_STORAGE_KEY);
+    if (saved === "dealer" || saved === "standard") return saved;
+  } catch {
+  }
+  return "standard";
 }
 
 function setMode(mode) {
   const next = mode === "dealer" ? "dealer" : "standard";
+  try {
+    localStorage.setItem(MODE_STORAGE_KEY, next);
+  } catch {
+  }
   const url = new URL(location.href);
   if (next === "dealer") url.searchParams.set("mode", "dealer");
   else url.searchParams.delete("mode");
@@ -59,11 +73,21 @@ function setMode(mode) {
   renderMode();
 }
 
+function syncModeToUrl() {
+  const mode = currentMode();
+  const url = new URL(location.href);
+  const now = url.searchParams.get("mode") === "dealer" ? "dealer" : "standard";
+  if (mode === now) return;
+  if (mode === "dealer") url.searchParams.set("mode", "dealer");
+  else url.searchParams.delete("mode");
+  history.replaceState({}, "", url);
+}
+
 function bookmarkletHref(mode) {
   const origin = location.origin;
   const isDealer = mode === "dealer";
   const src = isDealer
-    ? `${origin}/js/ha-dealer-import.js?v=haCdn19`
+    ? `${origin}/js/ha-dealer-import.js?v=haResume1`
     : `${origin}/js/ha-import-bookmarklet.js?v=haDealerPhoto17`;
   const token = getBookmarkletToken() || getAuthToken() || "";
   const runner = isDealer ? "BymyHaDealerImport" : "BymyHaImport";
@@ -191,7 +215,8 @@ function renderBrowserInstall(browser) {
   }
   if (safariDrag) safariDrag.hidden = id !== "safari";
   try {
-    sessionStorage.setItem("bymy-ha-install-browser", id);
+    localStorage.setItem(BROWSER_STORAGE_KEY, id);
+    sessionStorage.setItem(BROWSER_STORAGE_KEY, id);
   } catch {
   }
 }
@@ -213,7 +238,8 @@ function initBrowserInstallUi() {
   if (!document.querySelector("[data-ha-install]")) return;
   let initial = detectHaBrowser();
   try {
-    const saved = sessionStorage.getItem("bymy-ha-install-browser");
+    const saved =
+      localStorage.getItem(BROWSER_STORAGE_KEY) || sessionStorage.getItem(BROWSER_STORAGE_KEY);
     if (saved && ["chrome", "edge", "firefox", "safari"].includes(saved)) initial = saved;
   } catch {
   }
@@ -556,7 +582,7 @@ function ensureDealerBatch(data) {
   const total = Math.max(1, Number(data?.total) || 1);
   if (!batchId) return null;
   if (!dealerBatchState || dealerBatchState.batchId !== batchId) {
-    dealerBatchState = {
+    dealerBatchState = loadDealerBatch(batchId) || {
       batchId,
       total,
       savedCount: 0,
@@ -567,7 +593,92 @@ function ensureDealerBatch(data) {
     };
   }
   dealerBatchState.total = Math.max(dealerBatchState.total, total);
+  persistDealerBatch(dealerBatchState);
   return dealerBatchState;
+}
+
+function loadDealerBatch(batchId) {
+  try {
+    const raw = localStorage.getItem(DEALER_BATCH_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed || parsed.batchId !== batchId) return null;
+    return {
+      batchId: parsed.batchId,
+      total: Math.max(1, Number(parsed.total) || 1),
+      lastIndex: Math.max(0, Number(parsed.lastIndex) || 0),
+      savedCount: Number(parsed.savedCount) || 0,
+      skippedCount: Number(parsed.skippedCount) || 0,
+      errorCount: Number(parsed.errorCount) || 0,
+      items: Array.isArray(parsed.items) ? parsed.items : [],
+      errors: Array.isArray(parsed.errors) ? parsed.errors : [],
+    };
+  } catch {
+    return null;
+  }
+}
+
+function persistDealerBatch(batch, lastIndex = 0) {
+  try {
+    if (!batch) {
+      localStorage.removeItem(DEALER_BATCH_KEY);
+      return;
+    }
+    // Ne tároljunk óriási image base64-et — csak meta a folytatáshoz
+    const light = {
+      batchId: batch.batchId,
+      total: batch.total,
+      lastIndex: Math.max(0, Number(lastIndex) || Number(batch.lastIndex) || 0),
+      savedCount: batch.savedCount,
+      skippedCount: batch.skippedCount,
+      errorCount: batch.errorCount,
+      items: (batch.items || []).map((item) => ({
+        id: item?.id,
+        title: item?.title || item?.hirdetes_cime,
+        url: item?.url,
+      })),
+      errors: (batch.errors || []).slice(0, 20),
+    };
+    batch.lastIndex = light.lastIndex;
+    localStorage.setItem(DEALER_BATCH_KEY, JSON.stringify(light));
+  } catch {
+  }
+}
+
+function restoreDealerBatchUi() {
+  try {
+    const raw = localStorage.getItem(DEALER_BATCH_KEY);
+    if (!raw) return;
+    const parsed = JSON.parse(raw);
+    if (!parsed?.batchId) return;
+    const total = Math.max(1, Number(parsed.total) || 1);
+    const lastIndex = Math.max(0, Number(parsed.lastIndex) || 0);
+    if (lastIndex >= total) {
+      localStorage.removeItem(DEALER_BATCH_KEY);
+      return;
+    }
+    dealerBatchState = {
+      batchId: parsed.batchId,
+      total,
+      lastIndex,
+      savedCount: Number(parsed.savedCount) || 0,
+      skippedCount: Number(parsed.skippedCount) || 0,
+      errorCount: Number(parsed.errorCount) || 0,
+      items: Array.isArray(parsed.items) ? parsed.items : [],
+      errors: Array.isArray(parsed.errors) ? parsed.errors : [],
+    };
+    if (currentMode() !== "dealer") setMode("dealer");
+    const idx = lastIndex || dealerBatchState.savedCount + dealerBatchState.skippedCount;
+    setStatus(
+      idx > 0
+        ? `Folyamatban: ${idx} / ${total} — Autóimport nyitva maradt. A listán futtasd újra a könyvjelzőt a folytatáshoz.`
+        : `Kereskedői import várakozik (${total} autó). A listán futtasd a könyvjelzőt.`
+    );
+    if (idx > 0) {
+      renderResult(dealerBatchState, { partial: true, index: idx, total });
+    }
+  } catch {
+  }
 }
 
 window.addEventListener("message", (event) => {
@@ -606,7 +717,8 @@ window.addEventListener("message", (event) => {
         imageJpegBase64: "",
       })),
     };
-    sessionStorage.setItem("bymy-ha-import-pending", JSON.stringify(light));
+    sessionStorage.setItem(PENDING_STORAGE_KEY, JSON.stringify(light));
+    localStorage.setItem(PENDING_STORAGE_KEY, JSON.stringify(light));
   } catch {
   }
   if (!haImportReady) {
@@ -686,6 +798,7 @@ async function runMessageImport(data) {
       batch.errorCount += errorCount;
       batch.items.push(...items);
       batch.errors.push(...errors);
+      batch.lastIndex = index;
       const done = index >= batch.total;
       if (done) {
         setStatus(
@@ -699,9 +812,11 @@ async function runMessageImport(data) {
         );
         renderResult(batch);
         dealerBatchState = null;
+        persistDealerBatch(null);
       } else {
         setStatus(`Mentés: ${index} / ${batch.total} kész — várom a következőt…`);
         renderResult(batch, { partial: true, index, total: batch.total });
+        persistDealerBatch(batch, index);
       }
     } else {
       setStatus("");
@@ -715,7 +830,8 @@ async function runMessageImport(data) {
       });
     }
     try {
-      sessionStorage.removeItem("bymy-ha-import-pending");
+      sessionStorage.removeItem(PENDING_STORAGE_KEY);
+      localStorage.removeItem(PENDING_STORAGE_KEY);
     } catch {
     }
   } catch (error) {
@@ -790,8 +906,10 @@ export async function initHaImportPage() {
   if (document.body.classList.contains("ha-import-page")) {
     bindAccountNav();
   }
+  syncModeToUrl();
   renderMode();
   initBrowserInstallUi();
+  restoreDealerBatchUi();
 
   document.querySelectorAll("[data-ha-mode]").forEach((btn) => {
     btn.addEventListener("click", () => setMode(btn.getAttribute("data-ha-mode")));
@@ -828,10 +946,21 @@ export async function initHaImportPage() {
 
   haImportReady = true;
   try {
-    const raw = sessionStorage.getItem("bymy-ha-import-pending");
+    const raw =
+      localStorage.getItem(PENDING_STORAGE_KEY) || sessionStorage.getItem(PENDING_STORAGE_KEY);
     if (raw) {
-      sessionStorage.removeItem("bymy-ha-import-pending");
-      pendingHaImports.push(JSON.parse(raw));
+      localStorage.removeItem(PENDING_STORAGE_KEY);
+      sessionStorage.removeItem(PENDING_STORAGE_KEY);
+      const pending = JSON.parse(raw);
+      const pages = Array.isArray(pending?.pages) ? pending.pages : [];
+      // Csak akkor futtatjuk újra, ha van értelmes adat (ne üres base64-es újraindítás)
+      const usable = pages.some(
+        (p) =>
+          (p?.url && String(p.url).length > 8) ||
+          (p?.imageUrl && String(p.imageUrl).length > 8) ||
+          (p?.imageJpegBase64 && String(p.imageJpegBase64).length > 32)
+      );
+      if (usable) pendingHaImports.push(pending);
     }
   } catch {
   }

@@ -515,6 +515,16 @@ function setSection(section) {
   const url = new URL(window.location.href);
   url.searchParams.set("szekcio", next);
   if (next !== "uzenetek") url.searchParams.delete("c");
+  if (next === "import") {
+    try {
+      const mode = localStorage.getItem("bymy-ha-import-mode");
+      if (mode === "dealer") url.searchParams.set("mode", "dealer");
+      else url.searchParams.delete("mode");
+    } catch {
+    }
+  } else {
+    url.searchParams.delete("mode");
+  }
   url.hash = "";
   window.history.replaceState({}, "", url);
   document.querySelectorAll("[data-mm-panel]").forEach((panel) => {

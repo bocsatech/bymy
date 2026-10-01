@@ -549,6 +549,57 @@
   }
 
   const SAVE_CHUNK = 3;
+  const PROGRESS_KEY = "bymy-ha-dealer-progress";
+
+  function listProgressKey() {
+    try {
+      return `${location.pathname}?${location.search || ""}`.replace(/\?$/, "");
+    } catch {
+      return location.href || "";
+    }
+  }
+
+  function loadDealerProgress(total) {
+    try {
+      const raw = sessionStorage.getItem(PROGRESS_KEY);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (!parsed || parsed.listKey !== listProgressKey()) return null;
+      const offset = Math.max(0, Number(parsed.offset) || 0);
+      if (!parsed.batchId || offset <= 0 || offset >= total) return null;
+      return {
+        batchId: String(parsed.batchId),
+        offset,
+        ok: Number(parsed.ok) || 0,
+        fail: Number(parsed.fail) || 0,
+        skipped: Number(parsed.skipped) || 0,
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  function saveDealerProgress(state) {
+    try {
+      if (!state) {
+        sessionStorage.removeItem(PROGRESS_KEY);
+        return;
+      }
+      sessionStorage.setItem(
+        PROGRESS_KEY,
+        JSON.stringify({
+          listKey: listProgressKey(),
+          batchId: state.batchId,
+          offset: state.offset,
+          ok: state.ok,
+          fail: state.fail,
+          skipped: state.skipped,
+          total: state.total,
+        })
+      );
+    } catch {
+    }
+  }
 
   /** Win7-barát: text/plain + token a body-ban → nincs CORS preflight (Authorization nélkül). */
   async function savePagesDirect(origin, token, pages, doneCount, total) {
@@ -781,14 +832,21 @@
       }
     }
 
-    const batchId = `ha-batch-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
-    let ok = 0;
-    let fail = 0;
-    let skipped = 0;
+    const resumed = loadDealerProgress(prepared.length);
+    const batchId =
+      resumed?.batchId || `ha-batch-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+    let ok = resumed?.ok || 0;
+    let fail = resumed?.fail || 0;
+    let skipped = resumed?.skipped || 0;
+    const startOffset = resumed?.offset || 0;
     const errors = [];
-    let chunkIndex = 0;
+    let chunkIndex = Math.floor(startOffset / SAVE_CHUNK);
     let usedDirect = false;
-    for (let offset = 0; offset < prepared.length; offset += SAVE_CHUNK) {
+    let stoppedEarly = false;
+    if (startOffset > 0) {
+      showProgress(startOffset, prepared.length, `folytatás ${startOffset}/${prepared.length}`);
+    }
+    for (let offset = startOffset; offset < prepared.length; offset += SAVE_CHUNK) {
       const chunk = prepared.slice(offset, offset + SAVE_CHUNK);
       const doneCount = Math.min(offset + chunk.length, prepared.length);
       chunkIndex += 1;
@@ -856,12 +914,42 @@
                 : "A hasznaltauto.hu blokkolja a közvetlen mentést — nyisd a Bymy Autóimportot és engedd a felugró ablakot"
             );
           }
+          saveDealerProgress({
+            batchId,
+            offset,
+            ok,
+            fail,
+            skipped,
+            total: prepared.length,
+          });
+          stoppedEarly = true;
+          break;
         }
+        saveDealerProgress({
+          batchId,
+          offset: doneCount,
+          ok,
+          fail,
+          skipped,
+          total: prepared.length,
+        });
       } catch (e) {
         fail += chunk.length;
         errors.push(e.message || String(e));
+        saveDealerProgress({
+          batchId,
+          offset,
+          ok,
+          fail,
+          skipped,
+          total: prepared.length,
+        });
+        stoppedEarly = true;
+        break;
       }
     }
+
+    if (!stoppedEarly) saveDealerProgress(null);
 
     const parts = [];
     if (ok) parts.push(`${ok} mentve`);
@@ -870,6 +958,9 @@
     let msg = parts.length
       ? `Kész: ${parts.join(", ")}${errors[0] && (fail || skipped) ? ` — ${errors[0]}` : ""}`
       : `Kész: semmi nem mentődött${errors[0] ? ` — ${errors[0]}` : ""}`;
+    if (stoppedEarly && ok + skipped > 0) {
+      msg = `Megszakítva ${ok + skipped + fail}/${prepared.length} után — futtasd újra a könyvjelzőt a folytatáshoz`;
+    }
     if (usedDirect && fail && !ok) {
       msg += " · Nyisd a Bymy Autóimportot, engedd a felugrót, futtasd újra";
     }

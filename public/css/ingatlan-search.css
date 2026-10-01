@@ -1942,7 +1942,6 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   max-width: 100% !important;
   left: 0 !important;
   right: 0 !important;
-  top: var(--sheet-head-h) !important;
   overflow-x: hidden !important;
 }
 

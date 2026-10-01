@@ -2386,7 +2386,7 @@ async function mountAdBrandModelCombined(form, catalog) {
   }
 
   const { fillWheel, setWheelValue, readWheel, syncHostClearButton } = await import("./ingatlan-wheels.js?v=immoClearAll2");
-  const { openBrandModelCatalogSheet } = await import("./auto-drum-sheet.js?v=bmSheet41");
+  const { openBrandModelCatalogSheet } = await import("./auto-drum-sheet.js?v=bmSheet42");
   const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
 
   const brands = [...(catalog?.gyartmanyok || [])].sort((a, b) =>
@@ -2587,7 +2587,7 @@ async function mountAdSelectDrum(select, {
   select.dataset.adBmDrum = "1";
 
   const { fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=immoClearAll2");
-  const { openStandaloneSwitchSheet, bindAutoDrumSheet } = await import("./auto-drum-sheet.js?v=bmSheet41");
+  const { openStandaloneSwitchSheet, bindAutoDrumSheet } = await import("./auto-drum-sheet.js?v=bmSheet42");
   const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
 
   const wrap = document.createElement("div");
@@ -2810,7 +2810,7 @@ async function mountAdSplitYmDrum({
   }
 
   const { fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=immoClearAll2");
-  const { openYmDualSheet } = await import("./auto-drum-sheet.js?v=bmSheet41");
+  const { openYmDualSheet } = await import("./auto-drum-sheet.js?v=bmSheet42");
   const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
 
   const yearOpts = optionsFromSelect(ev, emptyYear);
@@ -3124,36 +3124,69 @@ function resolveFormSelect(form, name) {
   return null;
 }
 
-/** Gumi méret: műszaki érvényesség-stílusú summary + 3 oszlopos sheet (select alapú). */
+function ensureTireSelectInBlock(form, host, name, ariaLabel) {
+  let select =
+    (host?.querySelector?.(`select[name="${CSS.escape?.(name) || name}"]`) ||
+      resolveFormSelect(form, name) ||
+      null);
+  if (!(select instanceof HTMLSelectElement)) {
+    select = document.createElement("select");
+    select.name = name;
+    select.setAttribute("aria-label", ariaLabel || name);
+  }
+  if (!select.id) select.id = name;
+  return select;
+}
+
+/** Gumi méret: műszaki érvényesség-stílusú summary + 3 oszlopos sheet (tire-block alapú). */
 export async function mountTireSizeSwitchPickers(form) {
   if (!form || !isBmPickerAdForm(form)) return;
-  try {
-    const { fillTireSelect } = await import("./tire-sizes-ui.js?v=tireYm3");
-    const { openTireTripleSheet } = await import("./auto-drum-sheet.js?v=bmSheet41");
+  const card = form.querySelector("#tire-sizes-card") || form.querySelector(".tire-sizes-grid")?.closest(".card");
+  const grid = card?.querySelector(".tire-sizes-grid") || form.querySelector(".tire-sizes-grid");
+  if (!grid) return;
 
-    for (const spec of TIRE_ROW_SPECS) {
+  if (card) {
+    card.hidden = false;
+    card.classList.remove("ad-immo-orphan", "ad-layout-hidden");
+    card.removeAttribute("hidden");
+    card.style.removeProperty("display");
+  }
+
+  try {
+    const { fillTireSelect } = await import("./tire-sizes-ui.js?v=tireYm4");
+    const { openTireTripleSheet } = await import("./auto-drum-sheet.js?v=bmSheet42");
+    const blocks = [...grid.querySelectorAll(":scope > .tire-block")];
+
+    for (let index = 0; index < TIRE_ROW_SPECS.length; index += 1) {
+      const spec = TIRE_ROW_SPECS[index];
       try {
+        let host = blocks[index] || null;
+        if (!host) {
+          host = document.createElement("div");
+          host.className = "tire-block";
+          const label = document.createElement("span");
+          label.className = "tire-block-label";
+          label.textContent = `${spec.title}:`;
+          host.appendChild(label);
+          grid.appendChild(host);
+        }
+
         const widthName = `${spec.prefix}_szelesseg`;
         const aspectName = `${spec.prefix}_magassag`;
         const rimName = `${spec.prefix}_atmero`;
-        const width = resolveFormSelect(form, widthName);
-        const aspect = resolveFormSelect(form, aspectName);
-        const rim = resolveFormSelect(form, rimName);
+        const width = ensureTireSelectInBlock(form, host, widthName, `${spec.title} szélesség`);
+        const aspect = ensureTireSelectInBlock(form, host, aspectName, `${spec.title} magasság`);
+        const rim = ensureTireSelectInBlock(form, host, rimName, `${spec.title} átmérő`);
+
+        const existing = host.querySelector(`.ad-form-tire-split[data-tire-prefix="${spec.prefix}"]`);
         if (
-          !(width instanceof HTMLSelectElement) ||
-          !(aspect instanceof HTMLSelectElement) ||
-          !(rim instanceof HTMLSelectElement)
+          existing?.querySelector(".ad-form-tire-split__summary") &&
+          width.dataset.adTireSplit === "1" &&
+          host.contains(existing) &&
+          existing.contains(width)
         ) {
           continue;
         }
-        if (width.dataset.adTireSplit === "1") {
-          const existing = form.querySelector(`.ad-form-tire-split[data-tire-prefix="${spec.prefix}"]`);
-          if (existing?.querySelector(".ad-form-tire-split__summary")) continue;
-          delete width.dataset.adTireSplit;
-        }
-        if (!width.id) width.id = widthName;
-        if (!aspect.id) aspect.id = aspectName;
-        if (!rim.id) rim.id = rimName;
 
         for (const select of [width, aspect, rim]) {
           if (typeof select._adBmClose === "function") {
@@ -3171,25 +3204,15 @@ export async function mountTireSizeSwitchPickers(form) {
           }
           delete select.dataset.adBmPicker;
           delete select.dataset.adBmDrum;
+          delete select.dataset.adTireSplit;
         }
 
         fillTireSelect(width);
         fillTireSelect(aspect);
         fillTireSelect(rim);
 
-        const tireBlock =
-          width.closest(".tire-block") ||
-          aspect.closest(".tire-block") ||
-          rim.closest(".tire-block") ||
-          form.querySelector(`#tire-sizes-card .tire-block`) ||
-          null;
-        const host =
-          tireBlock ||
-          width.closest(".tire-row")?.parentElement ||
-          width.parentElement;
-        if (!host) continue;
-
-        host.querySelector(`.ad-form-tire-split[data-tire-prefix="${spec.prefix}"]`)?.remove();
+        host.querySelectorAll(`.ad-form-tire-split[data-tire-prefix="${spec.prefix}"]`).forEach((el) => el.remove());
+        host.querySelectorAll(".tire-row").forEach((row) => row.remove());
 
         const block = document.createElement("div");
         block.className = "ad-form-split-ym ad-form-tire-split";
@@ -3211,7 +3234,6 @@ export async function mountTireSizeSwitchPickers(form) {
         }
 
         block.appendChild(summary);
-
         hideNativeSelect(width);
         hideNativeSelect(aspect);
         hideNativeSelect(rim);
@@ -3219,13 +3241,9 @@ export async function mountTireSizeSwitchPickers(form) {
         stashNativeSelect(aspect, block);
         stashNativeSelect(rim, block);
 
-        const tireRow = host.querySelector(".tire-row") || width.closest(".tire-row");
-        if (tireRow && host.contains(tireRow)) tireRow.replaceWith(block);
-        else {
-          const label = host.querySelector?.(".tire-block-label");
-          if (label) label.after(block);
-          else host.appendChild(block);
-        }
+        const label = host.querySelector(".tire-block-label");
+        if (label) label.after(block);
+        else host.appendChild(block);
 
         width.dataset.adTireSplit = "1";
         aspect.dataset.adTireSplit = "1";
@@ -3233,6 +3251,9 @@ export async function mountTireSizeSwitchPickers(form) {
         width.dataset.adBmPicker = "1";
         aspect.dataset.adBmPicker = "1";
         rim.dataset.adBmPicker = "1";
+        width._adBmRefreshSummary = refreshSummary;
+        aspect._adBmRefreshSummary = refreshSummary;
+        rim._adBmRefreshSummary = refreshSummary;
 
         summary.addEventListener("click", (event) => {
           event.preventDefault();
@@ -3268,16 +3289,23 @@ function unmountTireSizeSplitPickers(form) {
       ? [`${prefix}_szelesseg`, `${prefix}_magassag`, `${prefix}_atmero`]
       : [];
     const selects = names
-      .map((name) => resolveFormSelect(form || root, name) || block.querySelector?.(`#${CSS.escape?.(name) || name}`))
+      .map(
+        (name) =>
+          block.querySelector?.(`select[name="${CSS.escape?.(name) || name}"]`) ||
+          block.querySelector?.(`#${CSS.escape?.(name) || name}`) ||
+          resolveFormSelect(form || root, name)
+      )
       .filter((el) => el instanceof HTMLSelectElement);
+    const host = block.closest(".tire-block") || block.parentElement;
     const row = document.createElement("div");
     row.className = "tire-row";
     const seps = ["/", "R"];
     selects.forEach((select, index) => {
-      releaseNativeSelect(select, block.closest(".tire-block, .ad-layout-item, .labeled-field") || block.parentElement);
+      releaseNativeSelect(select, host);
       showNativeSelect(select);
       delete select.dataset.adTireSplit;
       delete select.dataset.adBmPicker;
+      delete select._adBmRefreshSummary;
       row.appendChild(select);
       if (index < seps.length) {
         const sep = document.createElement("span");
@@ -3285,6 +3313,11 @@ function unmountTireSizeSplitPickers(form) {
         row.appendChild(sep);
       }
     });
+    /* Üres sorral ne cseréljük a summary-t — különben címke alatt semmi nem marad. */
+    if (!selects.length) {
+      block.remove();
+      return;
+    }
     block.replaceWith(row);
   });
   root.querySelectorAll?.(".tire-row--kapcsol")?.forEach((row) => row.classList.remove("tire-row--kapcsol"));

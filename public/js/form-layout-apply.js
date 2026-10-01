@@ -1,7 +1,7 @@
 import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=immoTipusPick1";
-import { refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=bmSheet41";
-import { initTireSizes } from "./tire-sizes-ui.js?v=tireYm3";
-import { applyAdFormDesk } from "./ad-form-desk.js?v=bmSheet41";
+import { refreshAdFormBmPickers, mountTireSizeSwitchPickers } from "./ad-form-bm-pickers.js?v=bmSheet42";
+import { initTireSizes } from "./tire-sizes-ui.js?v=tireYm4";
+import { applyAdFormDesk } from "./ad-form-desk.js?v=bmSheet42";
 import { markImmoPostViewReady } from "./category-picker.js?v=pickerBoot4";
 import {
   DESK_MUSZAKI_CORE_FIELD_KEYS,
@@ -13,7 +13,7 @@ import {
   applyStep1SearchDomOrder,
   isVehicleStep1Canvas,
   stackVehicleCanvasSingleColumn,
-} from "./ad-form-desk-pinned-blocks.js?v=bmSheet41";
+} from "./ad-form-desk-pinned-blocks.js?v=bmSheet42";
 
 function cssEscape(value) {
   if (window.CSS?.escape) return window.CSS.escape(value);
@@ -167,21 +167,25 @@ function hideUnplacedVehicleChrome(form, placed) {
 
   form.querySelectorAll(".step-panel .card").forEach((card) => {
     if (card.id === "success-panel") return;
+    /* Pinned desk blokkok: gumi/EV selectjei hidden native-ként élnek a summary alatt. */
+    if (card.id === "tire-sizes-card" || card.id === "electric-fields-block") return;
     if (hideStreet && card.dataset.adPostalCard === "1") return;
     if (card.classList.contains("card--photos") || card.classList.contains("card--leiras")) return;
     if (card.querySelector(".packages, .phone-lang-grid, .photo-list, #upload-zone, #photo-grid, .photo-upload-bar")) {
       return;
     }
     if (card.querySelector(".ad-layout-canvas .ad-layout-item:not(.ad-layout-hidden)")) return;
-    const visible = [...card.querySelectorAll("input, select, textarea, .labeled-field, .field-stack, .md-outlined")].some(
-      (el) => {
-        if (el.type === "hidden") return false;
-        if (placed.has(el)) return true;
-        if (el.hidden || el.classList.contains("ad-layout-hidden")) return false;
-        if (el.closest(".ad-layout-hidden, .ad-immo-orphan, [hidden]")) return false;
-        return true;
-      }
-    );
+    const visible = [
+      ...card.querySelectorAll(
+        "input, select, textarea, .labeled-field, .field-stack, .md-outlined, .ad-form-tire-split, .ad-form-split-ym__summary"
+      ),
+    ].some((el) => {
+      if (el.type === "hidden") return false;
+      if (placed.has(el)) return true;
+      if (el.hidden || el.classList.contains("ad-layout-hidden")) return false;
+      if (el.closest(".ad-layout-hidden, .ad-immo-orphan, [hidden]")) return false;
+      return true;
+    });
     if (!visible) {
       card.style.setProperty("display", "none", "important");
       card.classList.add("ad-immo-orphan");
@@ -1154,6 +1158,11 @@ async function applyAdFormLayout() {
     });
     window.dispatchEvent(new Event("ad-form-sync-fuel-fields"));
     applyAdFormDesk();
+    /* Desk után is: a gumi summary ne vesszen el a layout/hide körökben. */
+    await mountTireSizeSwitchPickers(form);
+    window.setTimeout(() => {
+      mountTireSizeSwitchPickers(form).catch(() => {});
+    }, 400);
     if (!isImmo) {
       form.querySelectorAll(".ad-layout-canvas").forEach((canvas) => {
         stackVehicleCanvasSingleColumn(canvas, { canonicalStep1: isVehicleStep1Canvas(canvas) });

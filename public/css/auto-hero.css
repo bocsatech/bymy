@@ -1682,6 +1682,29 @@ body[data-site-page="teherauto"] .auto-search-tabs {
     max-width: none !important;
   }
 
+  /* Label full-width row so input + suffix can sit on the next row */
+  body:is([data-site-page="auto"], [data-site-page="teherauto"])
+    .auto-search-panel
+    .auto-qs-drums
+    :is(.auto-search-alap-card, .home-qs-more-layout)
+    .home-qs-field--text
+    > .home-qs-label,
+  body:is([data-site-page="auto"], [data-site-page="teherauto"])
+    .auto-search-panel
+    .auto-qs-drums
+    :is(.auto-search-alap-card, .home-qs-more-layout)
+    .home-qs-field:has(input.home-qs-control)
+    > .home-qs-label,
+  body:is([data-site-page="auto"], [data-site-page="teherauto"])
+    .auto-search-panel
+    .auto-qs-drums
+    :is(.auto-search-alap-card, .home-qs-more-layout)
+    .immo-field.home-qs-field--text
+    > .immo-label {
+    flex: 0 0 100% !important;
+    width: 100% !important;
+  }
+
   body:is([data-site-page="auto"], [data-site-page="teherauto"])
     .auto-search-panel
     .auto-qs-drums
@@ -1726,9 +1749,11 @@ body[data-site-page="teherauto"] .auto-search-tabs {
     .immo-field.home-qs-field--text {
     position: relative !important;
     display: flex !important;
-    flex-direction: column !important;
-    align-items: stretch !important;
-    gap: 0.45rem !important;
+    /* row + wrap: label (100%) above, input + .home-qs-suffix on one underlined row */
+    flex-flow: row wrap !important;
+    align-items: flex-end !important;
+    column-gap: 0.35rem !important;
+    row-gap: 0.45rem !important;
     width: 100% !important;
     min-height: 0 !important;
     height: auto !important;
@@ -1739,6 +1764,33 @@ body[data-site-page="teherauto"] .auto-search-tabs {
     border-radius: 0 !important;
     background: transparent !important;
     box-shadow: none !important;
+  }
+
+  /* home-qs-pair (WLTP / number ranges): tól|ig side by side, bottoms aligned */
+  body:is([data-site-page="auto"], [data-site-page="teherauto"])
+    .auto-search-panel
+    .auto-qs-drums
+    :is(.auto-search-alap-card, .home-qs-more-layout)
+    .home-qs-pair {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: flex-end !important;
+    gap: 0.4rem !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  body:is([data-site-page="auto"], [data-site-page="teherauto"])
+    .auto-search-panel
+    .auto-qs-drums
+    :is(.auto-search-alap-card, .home-qs-more-layout)
+    .home-qs-pair
+    > .home-qs-field {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+    width: auto !important;
   }
 
   body:is([data-site-page="auto"], [data-site-page="teherauto"])
@@ -1759,7 +1811,9 @@ body[data-site-page="teherauto"] .auto-search-tabs {
     :is(.auto-search-alap-card, .home-qs-more-layout)
     .immo-field.home-qs-field--text
     .immo-control {
-    width: 100% !important;
+    flex: 1 1 0 !important;
+    width: auto !important;
+    min-width: 0 !important;
     min-height: 2.5rem !important;
     margin: 0 !important;
     padding: 0.45rem 0.1rem 0.5rem !important;
@@ -2049,9 +2103,17 @@ body[data-site-page="teherauto"] .auto-search-tabs {
     .auto-qs-drums
     :is(.auto-search-alap-card, .home-qs-more-layout)
     .home-qs-suffix {
+    flex: 0 0 auto !important;
+    align-self: stretch !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    margin: 0 !important;
+    padding: 0.45rem 0.05rem 0.5rem !important;
     color: #2563eb !important;
-    font-weight: 700 !important;
+    font: 700 0.9rem/1 system-ui, sans-serif !important;
+    white-space: nowrap !important;
     border: 0 !important;
+    border-bottom: 1.5px solid #cfd6dd !important;
     background: transparent !important;
   }
 

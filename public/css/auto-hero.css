@@ -1960,17 +1960,31 @@ body[data-site-page="teherauto"] .auto-search-tabs {
     .auto-search-panel
     .auto-qs-drums
     :is(.auto-search-alap-card, .home-qs-more-layout)
-    .immo-control,
+    .immo-control {
+    width: 100% !important;
+    min-height: 2.5rem !important;
+    height: auto !important;
+    padding: 0.45rem 0.1rem 0.5rem !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: #111 !important;
+    font: 500 1rem/1.3 system-ui, sans-serif !important;
+    text-align: left !important;
+  }
+
   body:is([data-site-page="auto"], [data-site-page="teherauto"])
     .auto-search-panel
     .auto-qs-drums
     :is(.auto-search-alap-card, .home-qs-more-layout)
     .immo-triple-date__summary {
     width: 100% !important;
-    min-height: 2.5rem !important;
+    min-height: 2.65rem !important;
     height: auto !important;
     padding: 0.45rem 0.1rem 0.5rem !important;
     border: 0 !important;
+    border-bottom: 1.5px solid #cfd6dd !important;
     border-radius: 0 !important;
     background: transparent !important;
     box-shadow: none !important;

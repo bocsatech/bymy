@@ -1,8 +1,7 @@
 import SwiftUI
 import WebKit
 
-/// Hitelesített beágyazás: a webes `beallitasok.html?szekcio=` panel 1:1 funkcióval.
-/// A natív héj (vissza gomb) megmarad; a webes oldalsáv / tabbar elrejtve.
+/// Hitelesített beágyazás: webes `beallitasok.html?szekcio=` — cookie + auth inject.
 struct FiokWebEmbed: UIViewRepresentable {
     let szekcio: String
     let token: String
@@ -60,9 +59,11 @@ struct FiokWebEmbed: UIViewRepresentable {
         web.navigationDelegate = context.coordinator
         web.scrollView.contentInsetAdjustmentBehavior = .automatic
         web.allowsBackForwardNavigationGestures = true
+        web.isOpaque = false
+        web.backgroundColor = .white
 
         let url = URL(string: "https://bymy.hu/beallitasok.html?szekcio=\(szekcio.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? szekcio)&native=1")!
-        web.load(URLRequest(url: url))
+        context.coordinator.load(url: url, token: token, in: web)
         return web
     }
 
@@ -74,16 +75,26 @@ struct FiokWebEmbed: UIViewRepresentable {
     }
 
     final class Coordinator: NSObject, WKNavigationDelegate {
+        private var didLoad = false
+
+        func load(url: URL, token: String, in web: WKWebView) {
+            Task { @MainActor in
+                await BymyWebSession.syncCookie(token: token)
+                guard !didLoad else { return }
+                didLoad = true
+                web.load(URLRequest(url: url))
+            }
+        }
+
         func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
             guard let url = navigationAction.request.url else {
                 decisionHandler(.allow)
                 return
             }
-            // Külső linkek / hirdetés → Safari, hogy ne szálljon ki a fiók panelből véletlenül
             let host = url.host?.lowercased() ?? ""
             if navigationAction.navigationType == .linkActivated,
-               host.contains("bymy.hu") == false,
-               host.isEmpty == false {
+               !host.isEmpty,
+               !host.contains("bymy.hu") {
                 UIApplication.shared.open(url)
                 decisionHandler(.cancel)
                 return
@@ -96,6 +107,7 @@ struct FiokWebEmbed: UIViewRepresentable {
 struct FiokWebPanelScreen: View {
     let szekcio: String
     @EnvironmentObject private var auth: AuthStore
+    @State private var ready = false
 
     private var userJSON: String {
         guard let user = auth.user,
@@ -108,13 +120,19 @@ struct FiokWebPanelScreen: View {
 
     var body: some View {
         Group {
-            if let token = auth.token, !token.isEmpty {
+            if let token = auth.token, !token.isEmpty, ready {
                 FiokWebEmbed(szekcio: szekcio, token: token, userJSON: userJSON)
                     .ignoresSafeArea(edges: .bottom)
-            } else {
+            } else if auth.token == nil {
                 Text("Belépés szükséges.")
                     .foregroundStyle(AppTheme.textSecondary)
+            } else {
+                ProgressView("Betöltés…")
             }
+        }
+        .task {
+            await BymyWebSession.syncCookie(token: auth.token)
+            ready = true
         }
     }
 }

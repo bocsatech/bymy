@@ -10,8 +10,10 @@ struct RootView: View {
                 ProgressView("Betöltés…")
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .background(AppTheme.bg)
+            } else if !auth.isLoggedIn {
+                // Éles site membersOnly — HTML + API belépés nélkül nem szolgál ki tartalmat.
+                LoginScreen(mode: router.showRegister ? .register : .login, isGate: true)
             } else {
-                // Web: vendég is böngészhet; belépés csak védett műveleteknél (sheet).
                 AppShellView()
             }
         }
@@ -27,32 +29,11 @@ struct RootView: View {
         }
         .sheet(isPresented: $router.showMessages) {
             NavigationStack {
-                Group {
-                    if auth.isLoggedIn {
-                        FiokWebPanelScreen(szekcio: "uzenetek")
-                    } else {
-                        VStack(spacing: 12) {
-                            Text("Az üzenetekhez be kell jelentkezned.")
-                                .multilineTextAlignment(.center)
-                            Button("Belépés") {
-                                router.showMessages = false
-                                router.showLogin = true
-                            }
-                            .fontWeight(.semibold)
-                            .foregroundStyle(AppTheme.accent)
-                        }
-                        .padding()
-                    }
-                }
-                .navigationTitle("Üzenetek")
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button("Kész") { router.showMessages = false }
-                    }
-                }
-                .environmentObject(auth)
+                MessagesInboxScreen()
             }
+        }
+        .task(id: auth.token) {
+            await BymyWebSession.syncCookie(token: auth.token)
         }
     }
 }

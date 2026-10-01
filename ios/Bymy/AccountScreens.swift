@@ -342,34 +342,37 @@ struct FiokSectionScreen: View {
         Group {
             switch section {
             case .szemelyes:
-                FiokWebPanelScreen(szekcio: "szemelyes")
+                PersonalDataScreen()
             case .jelszo:
-                FiokWebPanelScreen(szekcio: "jelszo")
+                PasswordChangeScreen()
             case .notify:
-                FiokWebPanelScreen(szekcio: "notify")
+                NotifyPrefsScreen()
             case .keresesiKorzet:
-                FiokWebPanelScreen(szekcio: "keresesi-korzet")
+                RadiusSettingsScreen(kind: .search)
             case .ajanlasokKorzet:
-                FiokWebPanelScreen(szekcio: "ajanlasok-korzet")
+                RadiusSettingsScreen(kind: .recommendations)
             case .megjelenes:
-                // Web: PKW/LKW háttérfeltöltés + téma — teljes panel
                 FiokWebPanelScreen(szekcio: "megjelenes")
             case .sajatHirdetesek:
-                FiokWebPanelScreen(szekcio: "hirdetes")
+                MyAdsScreen()
             case .kedvencek:
-                FiokWebPanelScreen(szekcio: "parkolo")
+                FavoritesScreen()
             case .mentettKeresesek:
-                FiokWebPanelScreen(szekcio: "keresesek")
+                SavedSearchesScreen()
             case .ertekelesek:
-                FiokWebPanelScreen(szekcio: "ertekelesek")
+                RatingsScreen()
             case .nyomtatasok:
-                FiokWebPanelScreen(szekcio: "nyomtatasok")
+                FiokInfoScreen(
+                    title: "Nyomtatások",
+                    lead: "Ártábla és adásvételi szerződés nyomtatása. A funkció hamarosan elérhető.",
+                    empty: "Ez a menüpont előkészületben van."
+                )
             case .autoImport:
                 FiokWebPanelScreen(szekcio: "import")
             case .partnerProfil:
                 FiokWebPanelScreen(szekcio: "partner-profil")
             case .uzenetek:
-                FiokWebPanelScreen(szekcio: "uzenetek")
+                MessagesInboxScreen()
             }
         }
         .navigationTitle(section.title)

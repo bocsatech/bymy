@@ -25,9 +25,9 @@ import {
   DEFAULT_PHOTO_OVERLAY_ID,
   renderListingPhotoOverlay,
 } from "./listing-photo-overlay.js?v=photoOverlayIcons3";
-import { refreshAdFormBmPickers, applyAdFormBmFieldValues } from "./ad-form-bm-pickers.js?v=bmSheet74";
-import { applyAdFormDesk, isAdFormDesk } from "./ad-form-desk.js?v=bmSheet74";
-import { placeElectricBlockAfterFuel } from "./ad-form-desk-pinned-blocks.js?v=bmSheet74";
+import { refreshAdFormBmPickers, applyAdFormBmFieldValues } from "./ad-form-bm-pickers.js?v=bmSheet75";
+import { applyAdFormDesk, isAdFormDesk } from "./ad-form-desk.js?v=bmSheet75";
+import { placeElectricBlockAfterFuel } from "./ad-form-desk-pinned-blocks.js?v=bmSheet75";
 import { initKmInput, parseKmDigits, setKmInputValue } from "./km-input.js?v=kmFmt4";
 import { bindAdFormKeyboardGuard } from "./ad-form-keyboard-guard.js?v=kbGuard1";
 import {
@@ -499,23 +499,31 @@ function renderEgyebInfo() {
   }
 }
 
-function deskExtrakSubAccordionsMounted() {
-  if (!equipmentRoot || !isAdFormDesk(form)) return false;
-  return Boolean(equipmentRoot.querySelector(":scope > [data-desk-sub-acc]"));
+function liveEquipmentRoot() {
+  const live = document.getElementById("equipment-sections");
+  if (live?.isConnected) return live;
+  return equipmentRoot?.isConnected ? equipmentRoot : null;
+}
+
+function deskExtrakSubAccordionsMounted(root = liveEquipmentRoot()) {
+  if (!root || !isAdFormDesk(form)) return false;
+  /* Csak akkor skip, ha az ÉLŐ hostban tényleg vannak kapcsolók — ne egy leválasztott node miatt. */
+  return Boolean(root.querySelector(':scope > [data-desk-sub-acc] input[name="felszereltseg"]'));
 }
 
 function renderEquipment() {
-  if (!equipmentRoot) return;
+  const root = liveEquipmentRoot();
+  if (!root) return;
   const checked = new Set(
     [...form.querySelectorAll('input[name="felszereltseg"]:checked')].map((el) => el.value)
   );
 
-  if (deskExtrakSubAccordionsMounted() && !isKisteherAd()) {
+  if (deskExtrakSubAccordionsMounted(root) && !isKisteherAd()) {
     window.dispatchEvent(new Event("ad-form-equipment-rendered"));
     return;
   }
 
-  equipmentRoot.querySelectorAll(":scope > .equipment-block, :scope > [data-desk-sub-acc]").forEach((el) => {
+  root.querySelectorAll(":scope > .equipment-block, :scope > [data-desk-sub-acc]").forEach((el) => {
     el.remove();
   });
 
@@ -537,7 +545,7 @@ function renderEquipment() {
         });
       }
       block.appendChild(grid);
-      equipmentRoot.appendChild(block);
+      root.appendChild(block);
     }
     window.dispatchEvent(new Event("ad-form-equipment-rendered"));
     return;
@@ -560,7 +568,7 @@ function renderEquipment() {
       });
     }
     block.appendChild(grid);
-    equipmentRoot.appendChild(block);
+    root.appendChild(block);
   }
   window.dispatchEvent(new Event("ad-form-equipment-rendered"));
 }
@@ -2064,10 +2072,10 @@ renderFuelDropdown();
 renderAllapotDropdown();
 renderFuelSelector();
 renderKlimaOptions();
-renderEgyebInfo();
 renderEgyebInfoHook = renderEgyebInfo;
-renderEquipment();
 renderEquipmentHook = renderEquipment;
+renderEgyebInfo();
+renderEquipment();
 wrapMdOutlinedFields();
 bindFuelPickerSync();
 syncFuelDependentFields();

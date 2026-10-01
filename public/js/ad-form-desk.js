@@ -4,7 +4,7 @@ import {
   applyStep1SearchDomOrder,
   isVehicleStep1Canvas,
   stackVehicleCanvasSingleColumn,
-} from "./ad-form-desk-pinned-blocks.js?v=bmSheet74";
+} from "./ad-form-desk-pinned-blocks.js?v=bmSheet75";
 
 const DESK_MQ = "(min-width: 901px)";
 
@@ -321,10 +321,12 @@ function mountExtrakSubAccordions(form) {
   window.dispatchEvent(new Event("ad-form-render-egyeb-info"));
 
   const equipmentRoot = form.querySelector("#equipment-sections");
-  if (
-    equipmentRoot &&
-    !equipmentRoot.querySelector(":scope > .equipment-block, :scope > [data-desk-sub-acc]")
-  ) {
+  const hasExtrakToggles = Boolean(
+    equipmentRoot?.querySelector(
+      ':scope > .equipment-block input[name="felszereltseg"], :scope > [data-desk-sub-acc] input[name="felszereltseg"]'
+    )
+  );
+  if (equipmentRoot && !hasExtrakToggles) {
     window.dispatchEvent(new Event("ad-form-render-equipment"));
   }
 

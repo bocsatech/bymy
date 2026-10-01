@@ -2622,18 +2622,44 @@ export function openAutoDrumSheet(wheel, trigger, { sheetItems = null, form = nu
   }
 
   const sheetTitle =
+    wrap?.closest(".immo-schema-cell, .immo-dual-range-block, .home-qs-field")?.querySelector(
+      ":scope > .immo-label, :scope > .home-qs-label, :scope > .immo-dual-range__title"
+    )?.textContent?.trim() ||
     wrap?.querySelector(".immo-label")?.textContent?.trim() ||
     wheel.getAttribute("aria-label") ||
     emptyLabel;
-  const root = document.createElement("div");
-  root.className = "auto-drum-portal auto-drum-portal--multi auto-drum-portal--single";
-  root.setAttribute("role", "dialog");
-  root.setAttribute("aria-modal", "true");
-  root.setAttribute("aria-label", sheetTitle);
-  root.style.setProperty("--auto-drum-single-h", "13.5rem");
-  root.style.setProperty("--auto-drum-item-h", `${ITEM_H}px`);
+  const useSheet = isMobileDrumSheet();
+  let root;
+  let stage;
+  let ring;
+  let scrollEl;
+  let outerRing;
+  let doneBtn;
+  let closeBtn;
+  let sheetScroll = null;
 
-  root.innerHTML = `
+  if (useSheet) {
+    ({ root, stage, ring: outerRing, sheetScroll, doneBtn, closeBtn } = createSheetPortalShell(sheetTitle));
+    root.classList.add("auto-drum-portal--single", "auto-drum-portal--single-sheet");
+    root.style.setProperty("--auto-drum-single-h", "13.5rem");
+    root.style.setProperty("--auto-drum-item-h", `${ITEM_H}px`);
+    outerRing.innerHTML = `
+        <div class="auto-drum-single__body" style="width:100%;max-width:100%;box-sizing:border-box;">
+          <div class="immo-drum-inline-highlight auto-drum-single__highlight" aria-hidden="true" style="left:0.4rem;right:0.4rem;width:auto;transform:translateY(-50%);"></div>
+          <div class="auto-drum-portal__scroll auto-drum-single__scroll immo-drum-inline-scroll" tabindex="-1"></div>
+        </div>`;
+    ring = root.querySelector(".auto-drum-single__highlight");
+    scrollEl = root.querySelector(".auto-drum-single__scroll");
+  } else {
+    root = document.createElement("div");
+    root.className = "auto-drum-portal auto-drum-portal--multi auto-drum-portal--single";
+    root.setAttribute("role", "dialog");
+    root.setAttribute("aria-modal", "true");
+    root.setAttribute("aria-label", sheetTitle);
+    root.style.setProperty("--auto-drum-single-h", "13.5rem");
+    root.style.setProperty("--auto-drum-item-h", `${ITEM_H}px`);
+
+    root.innerHTML = `
     <button type="button" class="auto-drum-portal__backdrop" aria-label="Bezárás"></button>
     <div class="auto-drum-portal__stage auto-drum-portal__stage--multi auto-drum-portal__stage--single">
       <div class="immo-drum-wheel-ring auto-drum-portal__ring auto-drum-portal__ring--multi auto-drum-portal__ring--single">
@@ -2649,10 +2675,12 @@ export function openAutoDrumSheet(wheel, trigger, { sheetItems = null, form = nu
       </div>
     </div>`;
 
-  const stage = root.querySelector(".auto-drum-portal__stage");
-  const ring = root.querySelector(".auto-drum-single__highlight");
-  const scrollEl = root.querySelector(".auto-drum-single__scroll");
-  const outerRing = root.querySelector(".auto-drum-portal__ring--single");
+    stage = root.querySelector(".auto-drum-portal__stage");
+    ring = root.querySelector(".auto-drum-single__highlight");
+    scrollEl = root.querySelector(".auto-drum-single__scroll");
+    outerRing = root.querySelector(".auto-drum-portal__ring--single");
+    doneBtn = root.querySelector(".auto-drum-portal__done");
+  }
 
   scrollEl.innerHTML = opts
     .map((btn) => {
@@ -2663,7 +2691,8 @@ export function openAutoDrumSheet(wheel, trigger, { sheetItems = null, form = nu
     .join("");
 
   root.querySelector(".auto-drum-portal__backdrop")?.addEventListener("click", () => closeAutoDrumSheet(true));
-  root.querySelector(".auto-drum-portal__done")?.addEventListener("click", () => closeAutoDrumSheet(true));
+  closeBtn?.addEventListener("click", () => closeAutoDrumSheet(false));
+  doneBtn?.addEventListener("click", () => closeAutoDrumSheet(true));
 
   scrollEl.querySelectorAll(".immo-drum-inline-item").forEach((item) => {
     let tapStart = null;
@@ -2689,25 +2718,35 @@ export function openAutoDrumSheet(wheel, trigger, { sheetItems = null, form = nu
   scrollEl.addEventListener("scroll", () => paintPortal(scrollEl, ring, wheel), { passive: true });
   bindPortalNativeScroll(scrollEl, ring, wheel);
 
-  document.body.appendChild(root);
-  document.body.classList.add("auto-drum-portal-open");
-  wrap?.classList.add("is-open", "has-drum-open");
-  wrap?.closest(".immo-dual-range")?.classList.add("has-drum-open");
-  (wrap?.closest(".immo-dual-range__half") || wrap?.closest(".immo-schema-cell"))?.classList.add("is-drum-active");
-  trigger.setAttribute("aria-expanded", "true");
+  if (useSheet) {
+    if (sheetScroll) {
+      sheetScroll.style.overflow = "hidden";
+      sheetScroll.scrollTop = 0;
+    }
+    mountSheetPortalChrome(root, { stage, wrap, trigger, ring: outerRing, sheetScroll });
+  } else {
+    document.body.appendChild(root);
+    document.body.classList.add("auto-drum-portal-open");
+    wrap?.classList.add("is-open", "has-drum-open");
+    wrap?.closest(".immo-dual-range")?.classList.add("has-drum-open");
+    (wrap?.closest(".immo-dual-range__half") || wrap?.closest(".immo-schema-cell"))?.classList.add("is-drum-active");
+    trigger.setAttribute("aria-expanded", "true");
+    positionPortal(stage, trigger);
+  }
 
-  positionPortal(stage, trigger);
-  activePortal = { root, wheel, scrollEl, ring, wrap, trigger };
+  activePortal = { kind: "single", root, wheel, scrollEl, ring, wrap, trigger };
 
   const start =
     [...scrollEl.querySelectorAll(".immo-drum-inline-item")].find((el) => (el.dataset.value ?? "") === current) ||
     scrollEl.querySelector(".immo-drum-inline-item");
 
   requestAnimationFrame(() => {
-    outerRing?.style.setProperty(
-      "--immo-drum-ring-w",
-      `${Math.min(320, Math.floor(window.innerWidth * 0.88))}px`
-    );
+    if (!useSheet) {
+      outerRing?.style.setProperty(
+        "--immo-drum-ring-w",
+        `${Math.min(320, Math.floor(window.innerWidth * 0.88))}px`
+      );
+    }
     scrollToPortalItem(scrollEl, ring, start);
     paintPortal(scrollEl, ring, wheel);
   });

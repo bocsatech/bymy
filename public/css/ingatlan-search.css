@@ -2760,6 +2760,32 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   .auto-drum-portal--sheet.auto-drum-portal--range-sheet .auto-drum-split__chip {
     min-width: 0 !important;
   }
+
+  .auto-drum-portal--sheet.auto-drum-portal--single-sheet .auto-drum-portal__ring--sheet {
+    overflow: hidden !important;
+  }
+
+  .auto-drum-portal--sheet.auto-drum-portal--single-sheet .auto-drum-single__body {
+    position: relative !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: var(--auto-drum-single-h, 13.5rem) !important;
+    background: #fff !important;
+  }
+
+  .auto-drum-portal--sheet.auto-drum-portal--single-sheet .auto-drum-single__highlight {
+    left: 0.4rem !important;
+    right: 0.4rem !important;
+    width: auto !important;
+    height: 3rem !important;
+    z-index: 3 !important;
+  }
+
+  .auto-drum-portal--sheet.auto-drum-portal--single-sheet .auto-drum-single__scroll {
+    height: 100% !important;
+    padding: calc((var(--auto-drum-single-h, 13.5rem) - 3rem) / 2) 0.55rem !important;
+    box-sizing: border-box !important;
+  }
 }
 
 /* Egyszerű egyoszlopos dobkerék (pl. Személyek, Ajtók) */

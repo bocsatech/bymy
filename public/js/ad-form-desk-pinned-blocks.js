@@ -147,6 +147,10 @@ export function wrapAlapScoutCard(canvas) {
     );
     const brandBlock = document.createElement("div");
     brandBlock.className = "ad-form-alap-brand-block";
+    brandBlock.setAttribute(
+      "style",
+      "width:100%;max-width:100%;min-width:0;box-sizing:border-box;margin-left:0;margin-right:0;"
+    );
     brand.forEach((el) => {
       el.classList.add("ad-form-alap-brand-row");
       brandBlock.appendChild(el);
@@ -158,10 +162,15 @@ export function wrapAlapScoutCard(canvas) {
 
   const card = document.createElement("div");
   card.className = "ad-form-alap-card";
+  card.setAttribute(
+    "style",
+    "width:100%;max-width:100%;min-width:0;box-sizing:border-box;margin-left:0;margin-right:0;"
+  );
   const title = document.createElement("button");
   title.type = "button";
   title.className = "ad-form-alap-card__title";
   title.setAttribute("aria-expanded", "true");
+  title.setAttribute("style", "width:100%;max-width:100%;box-sizing:border-box;");
   title.innerHTML =
     '<span class="ad-form-alap-card__title-text">Alapadatok</span><span class="ad-form-alap-card__chev" aria-hidden="true">▼</span>';
   title.addEventListener("click", () => {
@@ -171,6 +180,7 @@ export function wrapAlapScoutCard(canvas) {
   card.appendChild(title);
   const body = document.createElement("div");
   body.className = "ad-form-alap-card__body";
+  body.setAttribute("style", "width:100%;max-width:100%;box-sizing:border-box;");
   rest.forEach((el) => {
     el.classList.remove("ad-form-alap-brand-row");
     body.appendChild(el);

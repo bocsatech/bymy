@@ -4,7 +4,7 @@ import {
   applyStep1SearchDomOrder,
   isVehicleStep1Canvas,
   stackVehicleCanvasSingleColumn,
-} from "./ad-form-desk-pinned-blocks.js?v=bmSheet36";
+} from "./ad-form-desk-pinned-blocks.js?v=bmSheet61";
 
 const DESK_MQ = "(min-width: 901px)";
 
@@ -363,19 +363,28 @@ function ensureDeskShell(form) {
   shell = document.createElement("div");
   shell.id = "ad-form-desk-shell";
   shell.className = "ad-form-desk-shell";
+  shell.setAttribute(
+    "style",
+    "width:100%;max-width:100%;min-width:0;box-sizing:border-box;display:flex;flex-direction:column;gap:0.75rem;"
+  );
   shell.hidden = true;
 
   for (const { id, label } of shellAccordions()) {
     const acc = document.createElement("div");
     acc.className = "auto-desk-acc";
     acc.dataset.deskAcc = id;
+    /* Egyforma szélesség minden fehér accordion boxnak — HTML-ben rögzítve. */
+    acc.setAttribute(
+      "style",
+      "width:100%;max-width:100%;min-width:0;box-sizing:border-box;align-self:stretch;margin-left:0;margin-right:0;"
+    );
     acc.innerHTML = `
-      <button type="button" class="auto-desk-acc__head" data-desk-acc-toggle aria-expanded="false">
+      <button type="button" class="auto-desk-acc__head" data-desk-acc-toggle aria-expanded="false" style="width:100%;max-width:100%;box-sizing:border-box;">
         <span>${label}</span>
         <span class="auto-desk-acc__sum" data-desk-acc-sum></span>
         <span class="auto-desk-acc__chev" aria-hidden="true">▼</span>
       </button>
-      <div class="auto-desk-acc__body"></div>
+      <div class="auto-desk-acc__body" style="width:100%;max-width:100%;box-sizing:border-box;"></div>
     `;
     shell.appendChild(acc);
   }

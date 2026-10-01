@@ -307,6 +307,11 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .auto-desk-a
   background: var(--ad-panel);
   margin-bottom: 0;
   flex: 0 0 auto;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  align-self: stretch !important;
 }
 
 /* Összecsukva: fehér pill (mint Alapadatok) — Műszaki / Extrák / Hirdetés / Alapadatok */

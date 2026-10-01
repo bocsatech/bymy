@@ -462,7 +462,12 @@ function unmountPicker(select) {
   showNativeSelect(select);
   restoreHiddenInput(select);
   field?.classList.remove("ad-form-bm-anchor", "is-open");
-  field?.querySelector(`.ad-form-bm-field[data-ad-bm-for="${select.id}"]`)?.remove();
+  const id = select.id;
+  if (id) {
+    document.querySelectorAll(`.ad-form-bm-field[data-ad-bm-for="${CSS.escape?.(id) || id}"]`).forEach((el) => el.remove());
+  } else {
+    field?.querySelector(`.ad-form-bm-field[data-ad-bm-for="${select.id}"]`)?.remove();
+  }
   select._adBmPanel?.remove();
   delete select._adBmPanel;
   delete select._adBmClose;
@@ -472,6 +477,7 @@ function unmountPicker(select) {
   delete select._adBmFillWheel;
   delete select.dataset.adBmPicker;
   delete select.dataset.adBmDrum;
+  delete select.dataset.adBmMode;
 }
 
 function closeAdBmPicker(select) {
@@ -2394,7 +2400,7 @@ async function mountAdBrandModelCombined(form, catalog) {
   }
 
   const { fillWheel, setWheelValue, readWheel, syncHostClearButton } = await import("./ingatlan-wheels.js?v=immoClearAll2");
-  const { openBrandModelCatalogSheet } = await import("./auto-drum-sheet.js?v=bmSheet65");
+  const { openBrandModelCatalogSheet } = await import("./auto-drum-sheet.js?v=bmSheet66");
   const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
 
   const brands = [...(catalog?.gyartmanyok || [])].sort((a, b) =>
@@ -2588,11 +2594,21 @@ async function mountAdSelectDrum(select, {
   const field = anchorField(select);
   if (!field) return;
 
+  const wantMode = mode || "single";
   const existingWrap =
     field.querySelector(`.ad-form-bm-field--drum[data-ad-bm-for="${CSS.escape?.(select.id) || select.id}"]`) ||
     document.querySelector(`.ad-form-bm-field--drum[data-ad-bm-for="${CSS.escape?.(select.id) || select.id}"]`);
   const existingTrigger = existingWrap?.querySelector?.(".immo-wheel-trigger");
-  if (select.dataset.adBmPicker === "1" && existingTrigger) {
+  const haveMode = String(select.dataset.adBmMode || existingWrap?.dataset?.adBmMode || "").trim();
+  /* Régi single dob → switch (vagy fordítva / hiányzó módjelölés): kötelező újra mount. */
+  if (select.dataset.adBmPicker === "1" && existingTrigger && haveMode !== wantMode) {
+    delete select.dataset.adBmPicker;
+    delete select.dataset.adBmDrum;
+    delete select.dataset.adBmMode;
+    existingWrap?.remove();
+    showNativeSelect(select);
+    restoreHiddenInput(select);
+  } else if (select.dataset.adBmPicker === "1" && existingTrigger) {
     const cur = String(existingTrigger.textContent || "").trim();
     const value = readSingleStoredValue(select._adBmHidden?.value ?? select.value);
     if (!value && (!cur || cur === "—" || cur === "-" || cur === "–")) {
@@ -2611,6 +2627,7 @@ async function mountAdSelectDrum(select, {
   if (select.dataset.adBmPicker === "1") {
     delete select.dataset.adBmPicker;
     delete select.dataset.adBmDrum;
+    delete select.dataset.adBmMode;
     existingWrap?.remove();
     showNativeSelect(select);
   }
@@ -2628,7 +2645,7 @@ async function mountAdSelectDrum(select, {
   let syncDrumWheelDisplay;
   try {
     ({ fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=immoClearAll2"));
-    ({ openStandaloneSwitchSheet, bindAutoDrumSheet } = await import("./auto-drum-sheet.js?v=bmSheet65"));
+    ({ openStandaloneSwitchSheet, bindAutoDrumSheet } = await import("./auto-drum-sheet.js?v=bmSheet66"));
     ({ initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1"));
   } catch (error) {
     console.warn("Dobkerék betöltés:", title || select.id, error);
@@ -2639,6 +2656,7 @@ async function mountAdSelectDrum(select, {
   const wrap = document.createElement("div");
   wrap.className = "ad-form-bm-field ad-form-bm-field--drum auto-bm-field ad-form-cell";
   wrap.dataset.adBmFor = select.id;
+  wrap.dataset.adBmMode = wantMode;
   wrap.innerHTML = `<div class="immo-wheel-wrap ad-form-drum-wrap">
     <div class="immo-wheel" data-wheel="${escapeAttr(select.id)}" data-filter-key="${escapeAttr(select.id)}" role="listbox" aria-label="${escapeAttr(title)}"></div>
   </div>`;
@@ -2790,6 +2808,7 @@ async function mountAdSelectDrum(select, {
 
   select.dataset.adBmPicker = "1";
   select.dataset.adBmDrum = "1";
+  select.dataset.adBmMode = wantMode;
   select._adBmClose = () => {};
   select._adBmRefreshSummary = refreshSummary;
   select._adBmFillWheel = fillFromSelect;
@@ -2866,7 +2885,7 @@ async function mountAdSplitYmDrum({
   }
 
   const { fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=immoClearAll2");
-  const { openYmDualSheet } = await import("./auto-drum-sheet.js?v=bmSheet65");
+  const { openYmDualSheet } = await import("./auto-drum-sheet.js?v=bmSheet66");
   const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
 
   const yearOpts = optionsFromSelect(ev, emptyYear);
@@ -3051,6 +3070,10 @@ export async function mountAdFormBmPickers(form, catalog = null) {
     unmountAdFormBmPickers(form);
     return;
   }
+  /* Mindig tiszta mount — különben a régi single dob bent maradhat (pl. Tulajdonosok). */
+  if (form.dataset.adBmPickers === "1") {
+    unmountAdFormBmPickers(form);
+  }
 
   const allapot = document.getElementById("allapot");
   const kivitel = document.getElementById("kivitel");
@@ -3221,7 +3244,7 @@ export async function mountTireSizeSwitchPickers(form) {
 
   try {
     const { fillTireSelect } = await import("./tire-sizes-ui.js?v=tireYm4");
-    const { openTireTripleSheet } = await import("./auto-drum-sheet.js?v=bmSheet65");
+    const { openTireTripleSheet } = await import("./auto-drum-sheet.js?v=bmSheet66");
     const blocks = [...grid.querySelectorAll(":scope > .tire-block")];
 
     for (let index = 0; index < TIRE_ROW_SPECS.length; index += 1) {

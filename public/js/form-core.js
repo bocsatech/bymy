@@ -14,6 +14,8 @@ import { EGYEB_INFO_OPTIONS } from "./egyeb-info-data.js?v=egyebInfoFix2";
 
 let renderEgyebInfoHook = null;
 window.addEventListener("ad-form-render-egyeb-info", () => renderEgyebInfoHook?.());
+let renderEquipmentHook = null;
+window.addEventListener("ad-form-render-equipment", () => renderEquipmentHook?.());
 import { initVehicleCatalogSelects } from "./vehicle-catalog-client.js?v=teherStrict3";
 import { compressListingPhoto, MAX_LISTING_PHOTOS } from "./listing-photo-compress.js?v=myAds2";
 import { uploadImage } from "./upload-image.js?v=supabaseUpload1";
@@ -23,9 +25,9 @@ import {
   DEFAULT_PHOTO_OVERLAY_ID,
   renderListingPhotoOverlay,
 } from "./listing-photo-overlay.js?v=photoOverlayIcons3";
-import { refreshAdFormBmPickers, applyAdFormBmFieldValues } from "./ad-form-bm-pickers.js?v=bmSheet73";
-import { applyAdFormDesk, isAdFormDesk } from "./ad-form-desk.js?v=bmSheet73";
-import { placeElectricBlockAfterFuel } from "./ad-form-desk-pinned-blocks.js?v=bmSheet73";
+import { refreshAdFormBmPickers, applyAdFormBmFieldValues } from "./ad-form-bm-pickers.js?v=bmSheet74";
+import { applyAdFormDesk, isAdFormDesk } from "./ad-form-desk.js?v=bmSheet74";
+import { placeElectricBlockAfterFuel } from "./ad-form-desk-pinned-blocks.js?v=bmSheet74";
 import { initKmInput, parseKmDigits, setKmInputValue } from "./km-input.js?v=kmFmt4";
 import { bindAdFormKeyboardGuard } from "./ad-form-keyboard-guard.js?v=kbGuard1";
 import {
@@ -2065,6 +2067,7 @@ renderKlimaOptions();
 renderEgyebInfo();
 renderEgyebInfoHook = renderEgyebInfo;
 renderEquipment();
+renderEquipmentHook = renderEquipment;
 wrapMdOutlinedFields();
 bindFuelPickerSync();
 syncFuelDependentFields();

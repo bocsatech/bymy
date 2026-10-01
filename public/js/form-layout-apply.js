@@ -1,7 +1,7 @@
 import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=immoTipusPick1";
-import { refreshAdFormBmPickers, mountTireSizeSwitchPickers } from "./ad-form-bm-pickers.js?v=bmSheet73";
+import { refreshAdFormBmPickers, mountTireSizeSwitchPickers } from "./ad-form-bm-pickers.js?v=bmSheet74";
 import { initTireSizes } from "./tire-sizes-ui.js?v=tireYm4";
-import { applyAdFormDesk } from "./ad-form-desk.js?v=bmSheet73";
+import { applyAdFormDesk } from "./ad-form-desk.js?v=bmSheet74";
 import { markImmoPostViewReady } from "./category-picker.js?v=pickerBoot4";
 import {
   DESK_MUSZAKI_CORE_FIELD_KEYS,
@@ -13,7 +13,7 @@ import {
   applyStep1SearchDomOrder,
   isVehicleStep1Canvas,
   stackVehicleCanvasSingleColumn,
-} from "./ad-form-desk-pinned-blocks.js?v=bmSheet73";
+} from "./ad-form-desk-pinned-blocks.js?v=bmSheet74";
 
 function cssEscape(value) {
   if (window.CSS?.escape) return window.CSS.escape(value);
@@ -167,6 +167,8 @@ function hideUnplacedVehicleChrome(form, placed) {
 
   form.querySelectorAll(".step-panel .card").forEach((card) => {
     if (card.id === "success-panel") return;
+    /* Extrák felszereltség: a checkboxok később töltődnek — ne rejtsük üresként. */
+    if (card.querySelector("#equipment-sections, #egyeb-info-sections")) return;
     /* Pinned desk blokkok: gumi/EV selectjei hidden native-ként élnek a summary alatt. */
     if (card.id === "tire-sizes-card" || card.id === "electric-fields-block") return;
     if (hideStreet && card.dataset.adPostalCard === "1") return;

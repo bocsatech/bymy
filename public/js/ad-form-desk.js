@@ -4,7 +4,7 @@ import {
   applyStep1SearchDomOrder,
   isVehicleStep1Canvas,
   stackVehicleCanvasSingleColumn,
-} from "./ad-form-desk-pinned-blocks.js?v=bmSheet73";
+} from "./ad-form-desk-pinned-blocks.js?v=bmSheet74";
 
 const DESK_MQ = "(min-width: 901px)";
 
@@ -295,12 +295,39 @@ function isEgyebInfoHiddenForForm(form) {
   return subtype === "kisteher";
 }
 
+function revealExtrakHosts(form) {
+  for (const id of ["equipment-sections", "egyeb-info-sections"]) {
+    const el = form.querySelector(`#${id}`);
+    if (!el) continue;
+    el.hidden = false;
+    el.removeAttribute("hidden");
+    el.style.removeProperty("display");
+    el.classList.remove("ad-immo-orphan", "ad-layout-hidden", "hidden");
+    const card = el.closest(".card");
+    if (!card) continue;
+    /* Egyéb info külön kártyája: ha már sub-accordionban van, maradhat rejtve. */
+    if (id === "egyeb-info-sections" && form.querySelector('[data-desk-sub-acc="egyeb-info"]')) continue;
+    card.hidden = false;
+    card.removeAttribute("hidden");
+    card.style.removeProperty("display");
+    card.classList.remove("ad-immo-orphan", "ad-layout-hidden", "hidden");
+  }
+}
+
 function mountExtrakSubAccordions(form) {
   if (!form || !isAdFormDesk(form)) return;
 
+  revealExtrakHosts(form);
   window.dispatchEvent(new Event("ad-form-render-egyeb-info"));
 
   const equipmentRoot = form.querySelector("#equipment-sections");
+  if (
+    equipmentRoot &&
+    !equipmentRoot.querySelector(":scope > .equipment-block, :scope > [data-desk-sub-acc]")
+  ) {
+    window.dispatchEvent(new Event("ad-form-render-equipment"));
+  }
+
   if (equipmentRoot) {
     [...equipmentRoot.querySelectorAll(".equipment-block")].forEach((block, index) => {
       const label = block.querySelector("h3")?.textContent?.trim() || `Felszereltség ${index + 1}`;
@@ -341,6 +368,7 @@ function openAccordion(form, id) {
     const btn = el.querySelector("[data-desk-acc-toggle]");
     if (btn) btn.setAttribute("aria-expanded", on ? "true" : "false");
   });
+  if (id === "extrak") mountExtrakSubAccordions(form);
 }
 
 function accordionForStep(step) {

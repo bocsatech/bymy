@@ -4,7 +4,7 @@ import {
   applyStep1SearchDomOrder,
   isVehicleStep1Canvas,
   stackVehicleCanvasSingleColumn,
-} from "./ad-form-desk-pinned-blocks.js?v=bmSheet67";
+} from "./ad-form-desk-pinned-blocks.js?v=bmSheet68";
 
 const DESK_MQ = "(min-width: 901px)";
 
@@ -647,10 +647,8 @@ function applyAdFormDesk({ openStep = null, scrollToAccordion = null } = {}) {
         afterDeskGuideAlign(form, scrollId);
       });
     });
-  } else {
-    /* Desk frissítés / kategória indítás: mindig a felső nézet */
-    scrollAdFormPageTop();
   }
+  /* Egyéb desk frissítés: NE ugorjon a tetejére — a sheet Kész után is megmarad a pozíció. */
 }
 
 function bindDeskEvents() {

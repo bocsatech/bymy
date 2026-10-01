@@ -377,12 +377,18 @@ export function closeAutoDrumSheet(commit = false) {
     dayScroll,
   } = activePortal;
   const resetPageAfterClose = () => {
+    const restoreY = sheetScrollLockY || 0;
     document.body.classList.remove("auto-drum-portal-open", "auto-drum-sheet-open");
     unlockSheetPageAxes();
-    requestAnimationFrame(() => {
-      unlockSheetPageAxes();
+    const stick = () => {
+      window.scrollTo(0, restoreY);
       document.documentElement.scrollLeft = 0;
       document.body.scrollLeft = 0;
+    };
+    stick();
+    requestAnimationFrame(() => {
+      unlockSheetPageAxes();
+      stick();
     });
   };
   if (!wheel && kind !== "split" && kind !== "date3" && kind !== "ym-sheet" && kind !== "tire-sheet") {
@@ -952,11 +958,16 @@ function applySheetStageLayout(stage) {
 }
 
 let sheetScrollLockY = 0;
+let sheetScrollLocked = false;
 
 function lockSheetPageAxes() {
   try {
-    const y = window.scrollY || window.pageYOffset || 0;
-    sheetScrollLockY = y;
+    /* Ha már locked, NE írd felül a mentett Y-t — a második hívás (rAF) scrollY=0 lenne. */
+    if (!sheetScrollLocked) {
+      sheetScrollLockY = window.scrollY || window.pageYOffset || 0;
+      sheetScrollLocked = true;
+    }
+    const y = sheetScrollLockY;
     document.documentElement.scrollLeft = 0;
     document.body.scrollLeft = 0;
     /* iOS/Android: body fixed + left:0 — menü nyitáskor ne csússzon jobbra. */
@@ -1001,11 +1012,12 @@ function unlockSheetPageAxes() {
     clear(document.documentElement, ["overflow", "overflow-x"]);
     document.body.classList.remove("auto-drum-portal-open", "auto-drum-sheet-open");
     const y = sheetScrollLockY || 0;
+    sheetScrollLocked = false;
     window.scrollTo(0, y);
     document.documentElement.scrollLeft = 0;
     document.body.scrollLeft = 0;
   } catch {
-    /* ignore */
+    sheetScrollLocked = false;
   }
 }
 
@@ -2006,8 +2018,8 @@ export function openStandaloneSwitchSheet({
     root.remove();
     activePortal = null;
     document.body.classList.remove("auto-drum-portal-open", "auto-drum-sheet-open");
+    const restoreY = sheetScrollLockY || 0;
     unlockSheetPageAxes();
-    requestAnimationFrame(() => unlockSheetPageAxes());
     if (commit && typeof onDone === "function") {
       const list = singleSelect
         ? (() => {
@@ -2017,6 +2029,18 @@ export function openStandaloneSwitchSheet({
         : [...selected];
       onDone(list, [...openMains]);
     }
+    /* Kész után maradj ugyanott — ne ugorjon a lap tetejére. */
+    const stick = () => {
+      window.scrollTo(0, restoreY);
+      document.documentElement.scrollLeft = 0;
+      document.body.scrollLeft = 0;
+    };
+    stick();
+    requestAnimationFrame(() => {
+      stick();
+      unlockSheetPageAxes();
+      stick();
+    });
   }
 
   backBtn.addEventListener("click", (event) => {

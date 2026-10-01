@@ -1767,6 +1767,22 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .field-row.full.field-r
   min-width: 0 !important;
 }
 
+/* iOS: <16px input fókusz = automatikus zoom + billentyűzet → oldal jobbra csúszik */
+@media (max-width: 900px) {
+  body.site-app[data-site-page="hirdetesfeladas"] #ad-form input#km,
+  body.site-app[data-site-page="hirdetesfeladas"] #ad-form .suffix-field:has(#km) > input#km,
+  body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-layout-item:has(#km) .suffix-field > input#km,
+  body.site-app[data-site-page="hirdetesfeladas"] #ad-form .labeled-field:has(#km) .suffix-field > input#km,
+  body.site-app[data-site-page="hirdetesfeladas"] #ad-form input[inputmode="numeric"],
+  body.site-app[data-site-page="hirdetesfeladas"] #ad-form input[inputmode="decimal"],
+  body.site-app[data-site-page="hirdetesfeladas"] #ad-form input[inputmode="tel"],
+  body.site-app[data-site-page="hirdetesfeladas"] #ad-form textarea,
+  body.site-app[data-site-page="hirdetesfeladas"] #ad-form select:not(.ad-form-bm-native),
+  body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-search-trigger {
+    font-size: 16px !important;
+  }
+}
+
 /* Drum / underline mezők: ne lógjanak ki a kártyából */
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body .ad-form-bm-field,
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body .ad-form-drum-wrap,

@@ -20,16 +20,21 @@ export function initKmInput(input) {
 
   const lockPageX = () => {
     try {
-      window.scrollTo(window.scrollX || 0, window.scrollY || window.pageYOffset || 0);
       document.documentElement.scrollLeft = 0;
       document.body.scrollLeft = 0;
-      if (typeof window.scrollTo === "function") {
-        window.scrollTo({ left: 0, top: window.scrollY || window.pageYOffset || 0, behavior: "instant" in window ? "instant" : "auto" });
+      window.scrollTo({ left: 0, top: window.scrollY || window.pageYOffset || 0, behavior: "auto" });
+      /* Billentyűzet / iOS zoom után a visualViewport offset is nullázandó. */
+      if (window.visualViewport && window.visualViewport.offsetLeft) {
+        window.scrollTo(window.visualViewport.offsetLeft, window.scrollY || 0);
+        document.documentElement.scrollLeft = 0;
+        document.body.scrollLeft = 0;
       }
     } catch {
       /* ignore */
     }
   };
+
+  const onViewportShift = () => lockPageX();
 
   const sync = () => {
     const digits = parseKmDigits(input.value);
@@ -57,11 +62,15 @@ export function initKmInput(input) {
   input.addEventListener("focus", () => {
     lockPageX();
     requestAnimationFrame(lockPageX);
+    window.visualViewport?.addEventListener("resize", onViewportShift);
+    window.visualViewport?.addEventListener("scroll", onViewportShift);
   });
   input.addEventListener("blur", () => {
     sync();
     lockPageX();
     requestAnimationFrame(lockPageX);
+    window.visualViewport?.removeEventListener("resize", onViewportShift);
+    window.visualViewport?.removeEventListener("scroll", onViewportShift);
   });
   if (input.value) sync();
   return input;

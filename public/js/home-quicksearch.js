@@ -1,11 +1,11 @@
 
-import { applyAutoSearchLayout, readLayoutFilterValues, refillAutoSearchRangeSelects, prefetchAutoSearchBoot } from "./auto-search-layout.js?v=bmSearch21";
-import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums, styleAutoSearchMoreCard } from "./auto-search-drums.js?v=bmSearch21";
+import { applyAutoSearchLayout, readLayoutFilterValues, refillAutoSearchRangeSelects, prefetchAutoSearchBoot } from "./auto-search-layout.js?v=bmSearch22";
+import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums, styleAutoSearchMoreCard } from "./auto-search-drums.js?v=bmSearch22";
 import {
   mountDetailedSearch,
   readDetailedSearchValues,
   resetDetailedSearch,
-} from "./auto-detailed-search.js?v=bmSearch21";
+} from "./auto-detailed-search.js?v=bmSearch22";
 import { readWheel } from "./ingatlan-wheels.js?v=mobFix8";
 import { readBrandModelFilterValues, mountAutoBrandModelPicker } from "./auto-brand-model-picker.js?v=bmSearch1";
 import { readFuelFilterValues, mountAutoFuelPicker } from "./auto-fuel-picker.js?v=catMenu1";
@@ -450,4 +450,4 @@ export function initHomeQuickSearch({ onSearch = () => {}, onFilterPreview, onDe
   };
 }
 
-export { readDetailedSearchValues } from "./auto-detailed-search.js?v=bmSearch21";
+export { readDetailedSearchValues } from "./auto-detailed-search.js?v=bmSearch22";

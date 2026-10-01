@@ -1520,14 +1520,25 @@ body[data-site-page="teherauto"] .auto-search-tabs {
     font-weight: 600 !important;
   }
 
-  /* Ne legyen chevron / üres trail — teljes aláhúzás */
+  /* Gyártmány: ugyanaz a trail slot, mint feladáson — NEM teljes szélesség */
   body:is([data-site-page="auto"], [data-site-page="teherauto"])
     .auto-search-panel
     .auto-qs-drums
     .immo-schema-cell.auto-search-bm-combined
     > .immo-wheel-wrap.auto-search-bm-combined__wrap:not(.has-wheel-clear)::after {
-    content: none !important;
-    display: none !important;
+    content: "" !important;
+    display: block !important;
+    position: static !important;
+    top: auto !important;
+    right: auto !important;
+    transform: none !important;
+    margin: 0 !important;
+    border: 0 !important;
+    flex: 0 0 var(--ad-form-trail-slot, 1.75rem) !important;
+    width: var(--ad-form-trail-slot, 1.75rem) !important;
+    min-width: var(--ad-form-trail-slot, 1.75rem) !important;
+    height: 1px !important;
+    pointer-events: none !important;
   }
 
   body:is([data-site-page="auto"], [data-site-page="teherauto"])
@@ -2083,11 +2094,11 @@ body[data-site-page="teherauto"] .auto-search-tabs {
     width: 100% !important;
   }
 
-  /* Menü/summary vonal: teljes tartalomszélesség. Egység (LE/kg) külön marad. */
+  /* Trail slot: vonalszélesség PONT mint feladás — NEM teljes szélesség */
   body:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .auto-qs-drums {
     --ad-form-trail-slot: 1.75rem;
     --ad-form-trail-gap: 0.55rem;
-    --ad-form-trail-reserve: 0px;
+    --ad-form-trail-reserve: calc(var(--ad-form-trail-slot) + var(--ad-form-trail-gap));
   }
 
   body:is([data-site-page="auto"], [data-site-page="teherauto"])
@@ -2135,15 +2146,20 @@ body[data-site-page="teherauto"] .auto-search-tabs {
     height: auto !important;
   }
 
-  /* Üres menü: ne tarts jobb oszlopot — a vonal menjen végig (keresőn nincs LE/X oszlop) */
+  /* Üres menü: jobb oszlop mint feladás LE/X — vonal NEM teljes szélesség */
   body:is([data-site-page="auto"], [data-site-page="teherauto"])
     .auto-search-panel
     .auto-qs-drums
     :is(.auto-search-alap-card, .home-qs-more-layout)
     .immo-schema-cell:not(.immo-dual-range__half)
     > .immo-wheel-wrap:not(.has-wheel-clear)::after {
-    content: none !important;
-    display: none !important;
+    content: "" !important;
+    display: block !important;
+    flex: 0 0 var(--ad-form-trail-slot) !important;
+    width: var(--ad-form-trail-slot) !important;
+    min-width: var(--ad-form-trail-slot) !important;
+    height: 1px !important;
+    pointer-events: none !important;
   }
 
   body:is([data-site-page="auto"], [data-site-page="teherauto"])

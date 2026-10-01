@@ -2239,7 +2239,7 @@ body[data-site-page="teherauto"] .auto-search-tabs {
     white-space: nowrap !important;
   }
 
-  /* home-qs-pair (WLTP / number ranges): tól|ig side by side, bottoms aligned */
+  /* home-qs-pair (WLTP / number ranges): tól|ig + egy folytonos aláhúzás */
   body:is([data-site-page="auto"], [data-site-page="teherauto"])
     .auto-search-panel
     .auto-qs-drums
@@ -2253,6 +2253,12 @@ body[data-site-page="teherauto"] .auto-search-tabs {
     width: 100% !important;
     max-width: 100% !important;
     min-width: 0 !important;
+    min-height: 2.65rem !important;
+    border: 0 !important;
+    border-bottom: 1.5px solid #cfd6dd !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
   }
 
   body:is([data-site-page="auto"], [data-site-page="teherauto"])
@@ -2264,6 +2270,21 @@ body[data-site-page="teherauto"] .auto-search-tabs {
     flex: 1 1 0 !important;
     min-width: 0 !important;
     width: auto !important;
+  }
+
+  body:is([data-site-page="auto"], [data-site-page="teherauto"])
+    .auto-search-panel
+    .auto-qs-drums
+    :is(.auto-search-alap-card, .home-qs-more-layout)
+    .home-qs-pair
+    .home-qs-control,
+  body:is([data-site-page="auto"], [data-site-page="teherauto"])
+    .auto-search-panel
+    .auto-qs-drums
+    :is(.auto-search-alap-card, .home-qs-more-layout)
+    .home-qs-pair
+    .immo-control {
+    border-bottom: 0 !important;
   }
 
   body:is([data-site-page="auto"], [data-site-page="teherauto"])
@@ -2370,7 +2391,7 @@ body[data-site-page="teherauto"] .auto-search-tabs {
     text-align: left !important;
   }
 
-  /* Dual range: cím felett, két aláhúzott fél egymás mellett (ne stackeljen) */
+  /* Dual range: cím + egy összefoglaló vonal (mint feladás); sheet továbbra is dual */
   body:is([data-site-page="auto"], [data-site-page="teherauto"])
     .auto-search-panel
     .auto-qs-drums
@@ -2461,10 +2482,9 @@ body[data-site-page="teherauto"] .auto-search-tabs {
     .immo-dual-range {
     position: relative !important;
     display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: nowrap !important;
-    align-items: flex-end !important;
-    gap: 0.4rem !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.45rem !important;
     width: 100% !important;
     max-width: 100% !important;
     height: auto !important;
@@ -2489,6 +2509,51 @@ body[data-site-page="teherauto"] .auto-search-tabs {
     grid-column: auto !important;
     background: transparent !important;
     padding: 0 !important;
+    margin: 0 !important;
+    font: 700 0.875rem/1.2 system-ui, sans-serif !important;
+    color: #111 !important;
+  }
+
+  body:is([data-site-page="auto"], [data-site-page="teherauto"])
+    .auto-search-panel
+    .auto-qs-drums
+    :is(.auto-search-alap-card, .home-qs-more-layout)
+    .immo-dual-range__summary {
+    appearance: none;
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0.45rem 0.1rem 0.5rem !important;
+    border: 0 !important;
+    border-bottom: 1.5px solid #cfd6dd !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    box-sizing: border-box !important;
+    text-align: left !important;
+    font: 500 1rem/1.35 system-ui, sans-serif !important;
+    color: #0f172a !important;
+    cursor: pointer;
+    min-height: 2.65rem !important;
+  }
+
+  body:is([data-site-page="auto"], [data-site-page="teherauto"])
+    .auto-search-panel
+    .auto-qs-drums
+    :is(.auto-search-alap-card, .home-qs-more-layout)
+    .immo-dual-range__summary.is-placeholder {
+    color: #64748b !important;
+    font-weight: 500 !important;
+  }
+
+  body:is([data-site-page="auto"], [data-site-page="teherauto"])
+    .auto-search-panel
+    .auto-qs-drums
+    :is(.auto-search-alap-card, .home-qs-more-layout)
+    .immo-dual-range__summary:focus-visible {
+    outline: 2px solid #2563eb;
+    outline-offset: 2px;
   }
 
   body:is([data-site-page="auto"], [data-site-page="teherauto"])
@@ -2501,104 +2566,28 @@ body[data-site-page="teherauto"] .auto-search-tabs {
     .auto-search-panel
     .auto-qs-drums
     :is(.auto-search-alap-card, .home-qs-more-layout)
-    .immo-schema-cell.immo-dual-range__half {
-    display: flex !important;
-    flex-direction: column !important;
-    flex: 1 1 0 !important;
-    gap: 0 !important;
-    width: auto !important;
-    min-width: 0 !important;
-    max-width: none !important;
-    height: auto !important;
-    min-height: 0 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    border: 0 !important;
-    background: transparent !important;
-    /* Override mobil .immo-schema-cell { grid-column: 1 / -1 } — ez stackelte a feleket */
-    grid-column: auto !important;
-    grid-row: auto !important;
-  }
-
+    .immo-schema-cell.immo-dual-range__half,
   body:is([data-site-page="auto"], [data-site-page="teherauto"])
     .auto-search-panel
     .auto-qs-drums
     :is(.auto-search-alap-card, .home-qs-more-layout)
-    .immo-dual-range__half
-    > .immo-label {
-    display: none !important;
-  }
-
-  body:is([data-site-page="auto"], [data-site-page="teherauto"])
-    .auto-search-panel
-    .auto-qs-drums
-    :is(.auto-search-alap-card, .home-qs-more-layout)
-    .immo-dual-range__half
-    > .immo-wheel-wrap {
-    display: flex !important;
-    align-items: center !important;
-    width: 100% !important;
-    min-width: 0 !important;
-    min-height: 2.65rem !important;
-    height: auto !important;
-    max-height: none !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    border: 0 !important;
-    border-bottom: 1.5px solid #cfd6dd !important;
-    border-radius: 0 !important;
-    background: transparent !important;
-    box-shadow: none !important;
-  }
-
-  body:is([data-site-page="auto"], [data-site-page="teherauto"])
-    .auto-search-panel
-    .auto-qs-drums
-    :is(.auto-search-alap-card, .home-qs-more-layout)
-    .immo-dual-range__half
-    .immo-wheel-trigger {
-    width: 100% !important;
-    min-width: 0 !important;
-    padding: 0.45rem 0.1rem 0.5rem !important;
-    border: 0 !important;
-    background: transparent !important;
-    font: 500 1rem/1.3 system-ui, sans-serif !important;
-    color: #64748b !important;
-    text-align: left !important;
-  }
-
-  body:is([data-site-page="auto"], [data-site-page="teherauto"])
-    .auto-search-panel
-    .auto-qs-drums
-    :is(.auto-search-alap-card, .home-qs-more-layout)
-    .immo-dual-range__sep {
-    flex: 0 0 auto !important;
-    align-self: center !important;
-    padding: 0 0.05rem 0.35rem !important;
-    margin: 0 !important;
-    color: #94a3b8 !important;
-    border: 0 !important;
-    background: transparent !important;
-    font-size: 1rem !important;
-    line-height: 1 !important;
-    grid-column: auto !important;
-  }
-
+    .immo-dual-range__sep,
   body:is([data-site-page="auto"], [data-site-page="teherauto"])
     .auto-search-panel
     .auto-qs-drums
     :is(.auto-search-alap-card, .home-qs-more-layout)
     .immo-dual-range__unit {
-    flex: 0 0 auto !important;
-    align-self: center !important;
-    padding: 0 0 0.4rem 0.1rem !important;
-    margin: 0 !important;
+    /* Csukott formán rejtve — a sheet a DOM kerekekből dolgozik */
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
     border: 0 !important;
-    border-left: 0 !important;
-    background: transparent !important;
-    color: #2563eb !important;
-    font: 700 0.9rem/1 system-ui, sans-serif !important;
-    grid-column: auto !important;
+    pointer-events: none !important;
   }
 
   body:is([data-site-page="auto"], [data-site-page="teherauto"])
@@ -2972,6 +2961,25 @@ body.auto-drum-portal-open {
 
     overflow: visible;
     box-sizing: border-box;
+  }
+
+  /* Desktop: summary helyett a két fél látszik */
+  .auto-search-panel .auto-qs-drums--desktop .immo-dual-range__summary {
+    display: none !important;
+  }
+
+  .auto-search-panel .auto-qs-drums--desktop .immo-dual-range > .immo-dual-range__half,
+  .auto-search-panel .auto-qs-drums--desktop .immo-dual-range__sep,
+  .auto-search-panel .auto-qs-drums--desktop .immo-dual-range__unit {
+    position: static !important;
+    width: auto !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    clip: auto !important;
+    white-space: normal !important;
+    pointer-events: auto !important;
   }
 
   .auto-search-panel .auto-qs-drums--desktop .immo-dual-range:focus-within {

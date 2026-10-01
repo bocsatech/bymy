@@ -7,7 +7,7 @@ import {
   closeAllInlineDrums,
 } from "./immo-drum-picker.js?v=immoClear1";
 import { bindAutoDrumSheet, openAutoDrumSheet } from "./auto-drum-sheet.js?v=brandDrum29";
-import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=bmSearch18";
+import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=bmSearch19";
 
 const MOBILE_MQ = "(max-width: 900px)";
 const TYPEAHEAD_CLEAR_MS = 2500;
@@ -529,6 +529,17 @@ function convertRangePairToDual(wrap, cfg) {
   title.textContent = cfg.title;
   dual.appendChild(title);
 
+  /* Csukott: egy vonal + összefoglaló (mint feladás / műszaki) — sheet továbbra is dual */
+  const summary = document.createElement("button");
+  summary.type = "button";
+  summary.className = "immo-dual-range__summary";
+  summary.dataset.dualRangeSummary = "1";
+  summary.setAttribute("aria-haspopup", "listbox");
+  summary.setAttribute("aria-expanded", "false");
+  summary.setAttribute("aria-label", cfg.title);
+  summary.textContent = "Mindegy";
+  dual.appendChild(summary);
+
   const minCell = buildWheelCell({
     filterKey: cfg.tol,
     wheelName: cfg.tol,
@@ -566,8 +577,39 @@ function convertRangePairToDual(wrap, cfg) {
   block.appendChild(dual);
   wrap.replaceWith(block);
 
-  if (tolVal) setWheelValue(minCell.querySelector("[data-wheel]"), tolVal);
-  if (igVal) setWheelValue(maxCell.querySelector("[data-wheel]"), igVal);
+  const minWheel = minCell.querySelector("[data-wheel]");
+  const maxWheel = maxCell.querySelector("[data-wheel]");
+  if (tolVal) setWheelValue(minWheel, tolVal);
+  if (igVal) setWheelValue(maxWheel, igVal);
+
+  function refreshSummary() {
+    const min = String(readWheel(minWheel) ?? "").trim();
+    const max = String(readWheel(maxWheel) ?? "").trim();
+    const unit = cfg.unit ? ` ${cfg.unit}` : "";
+    if (!min && !max) {
+      summary.textContent = "Mindegy";
+      summary.classList.add("is-placeholder");
+      return;
+    }
+    summary.classList.remove("is-placeholder");
+    if (min && max) summary.textContent = `${min} – ${max}${unit}`;
+    else if (min) summary.textContent = `${min} –${unit}`;
+    else summary.textContent = `– ${max}${unit}`;
+  }
+  refreshSummary();
+
+  const openSheet = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    const fakeTrigger =
+      minWheel.closest(".immo-wheel-wrap")?.querySelector(".immo-wheel-trigger") || summary;
+    openAutoDrumSheet(minWheel, fakeTrigger);
+  };
+  summary.addEventListener("click", openSheet);
+
+  [minWheel, maxWheel].forEach((w) => {
+    w?.addEventListener("immo-wheel-change", refreshSummary);
+  });
 }
 
 function convertRangePairToTwoDrums(wrap) {

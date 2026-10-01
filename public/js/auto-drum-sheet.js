@@ -846,15 +846,16 @@ function applySheetStageLayout(stage) {
   if (!stage) return;
   const desk = window.matchMedia("(min-width: 901px)").matches;
   if (desk) {
-    /* Desk: flex középre a CSS-ben — ne left%/translate (elcsúszhat). */
-    stage.style.left = "auto";
-    stage.style.right = "auto";
-    stage.style.top = "auto";
-    stage.style.bottom = "auto";
+    /* Desk: inset 0 + margin:auto a CSS-ben — ne left%/translate/flex. */
+    stage.style.left = "0";
+    stage.style.right = "0";
+    stage.style.top = "0";
+    stage.style.bottom = "0";
     stage.style.width = "";
     stage.style.maxWidth = "";
     stage.style.height = "";
     stage.style.transform = "none";
+    stage.style.margin = "auto";
     stage.style.position = "";
     return;
   }
@@ -867,6 +868,7 @@ function applySheetStageLayout(stage) {
   stage.style.maxWidth = "100%";
   stage.style.height = "100%";
   stage.style.transform = "none";
+  stage.style.margin = "0";
 }
 
 function lockSheetPageAxes() {

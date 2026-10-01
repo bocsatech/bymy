@@ -1837,22 +1837,20 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
 }
 
 @media (min-width: 901px) {
-  /* Flex középre — soha ne left:50% + translate, az elcsúszhat jobbra/balra. */
+  /* inset 0 + margin:auto + fix méret — középen, translate/flex nélkül */
   .auto-drum-portal.auto-drum-portal--sheet {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
+    display: block !important;
   }
 
   .auto-drum-portal--sheet .auto-drum-portal__stage--sheet {
-    position: relative !important;
-    inset: auto !important;
-    left: auto !important;
-    right: auto !important;
-    top: auto !important;
-    bottom: auto !important;
+    position: absolute !important;
+    inset: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    top: 0 !important;
+    bottom: 0 !important;
     transform: none !important;
-    margin: 0 !important;
+    margin: auto !important;
     width: min(28rem, calc(100% - 2rem)) !important;
     max-width: min(28rem, calc(100% - 2rem)) !important;
     height: min(86vh, 48rem) !important;
@@ -1860,7 +1858,6 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
     border-radius: 1.35rem;
     box-shadow: 0 12px 36px rgba(15, 23, 42, 0.18);
     overflow: hidden !important;
-    flex: 0 0 auto;
   }
 
   .auto-drum-portal--sheet .auto-drum-portal__sheet-head {
@@ -1868,6 +1865,39 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
     top: 0 !important;
     left: 0 !important;
     right: 0 !important;
+    /* Egyenlő oldalsávok — cím középen marad X/Kész különböző szélessége mellett */
+    grid-template-columns: 4.75rem minmax(0, 1fr) 4.75rem !important;
+  }
+
+  .auto-drum-portal--sheet .auto-drum-portal__done--sheet-top {
+    justify-self: end;
+  }
+
+  .auto-drum-portal--sheet .auto-drum-portal__close {
+    justify-self: start;
+  }
+
+  /* Év|hó: stage a tartalom magasságára zsugorodik, nem ül felül a nagy kék dobozban */
+  .auto-drum-portal--sheet.auto-drum-portal--ym .auto-drum-portal__stage--sheet {
+    height: auto !important;
+    max-height: min(86vh, 48rem) !important;
+  }
+
+  .auto-drum-portal--sheet.auto-drum-portal--ym .auto-drum-portal__sheet-head {
+    position: relative !important;
+    top: auto !important;
+  }
+
+  .auto-drum-portal--sheet.auto-drum-portal--ym .auto-drum-portal__sheet-scroll {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    padding: 0 0 0.85rem !important;
   }
 }
 

@@ -1,7 +1,7 @@
 import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=immoTipusPick1";
-import { refreshAdFormBmPickers, mountTireSizeSwitchPickers } from "./ad-form-bm-pickers.js?v=bmSheet56";
+import { refreshAdFormBmPickers, mountTireSizeSwitchPickers } from "./ad-form-bm-pickers.js?v=bmSheet57";
 import { initTireSizes } from "./tire-sizes-ui.js?v=tireYm4";
-import { applyAdFormDesk } from "./ad-form-desk.js?v=bmSheet56";
+import { applyAdFormDesk } from "./ad-form-desk.js?v=bmSheet57";
 import { markImmoPostViewReady } from "./category-picker.js?v=pickerBoot4";
 import {
   DESK_MUSZAKI_CORE_FIELD_KEYS,
@@ -13,7 +13,7 @@ import {
   applyStep1SearchDomOrder,
   isVehicleStep1Canvas,
   stackVehicleCanvasSingleColumn,
-} from "./ad-form-desk-pinned-blocks.js?v=bmSheet56";
+} from "./ad-form-desk-pinned-blocks.js?v=bmSheet57";
 
 function cssEscape(value) {
   if (window.CSS?.escape) return window.CSS.escape(value);
@@ -333,10 +333,11 @@ function placeWrap(wrap, cell) {
     el.style.setProperty("max-width", AD_FORM_DESK_ROW_WIDTH, "important");
     el.style.setProperty("box-sizing", "border-box", "important");
     if (isKm) {
-      /* Hely a „km” egységnek: ne vágja le a clip / 100% szélesség. */
-      el.style.setProperty("padding-right", "1.85rem", "important");
-      el.style.setProperty("gap", "0.65rem", "important");
-      el.style.setProperty("overflow", "visible", "important");
+      /* Km egység flexben — ne overflow:visible / extra padding (az oldalt elcsúsztatta). */
+      el.style.setProperty("padding-right", "0.35rem", "important");
+      el.style.setProperty("gap", "0.55rem", "important");
+      el.style.setProperty("overflow-x", "clip", "important");
+      el.style.setProperty("overflow-y", "visible", "important");
     }
   });
   wrap.querySelectorAll(".suffix-field > input").forEach((el) => {
@@ -344,7 +345,7 @@ function placeWrap(wrap, cell) {
     if (el.id === "km") {
       el.style.setProperty("width", "auto", "important");
       el.style.setProperty("min-width", "0", "important");
-      el.style.setProperty("max-width", "calc(100% - 2.75rem)", "important");
+      el.style.setProperty("max-width", "100%", "important");
       el.style.setProperty("flex", "1 1 0%", "important");
       el.style.setProperty("border-bottom", "1.5px solid #cfd6dd", "important");
       return;

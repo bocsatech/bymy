@@ -1,5 +1,5 @@
 /** Vételár melletti piaci árjelző (sávok + Kevés / Jó ár / Sok). */
-import { parseKmDigits } from "./km-input.js?v=kmFmt1";
+import { parseKmDigits } from "./km-input.js?v=kmFmt2";
 
 const DEBOUNCE_MS = 400;
 

@@ -376,13 +376,18 @@ export function closeAutoDrumSheet(commit = false) {
     monthScroll,
     dayScroll,
   } = activePortal;
+  const resetPageAfterClose = () => {
+    document.body.classList.remove("auto-drum-portal-open", "auto-drum-sheet-open");
+    lockSheetPageAxes();
+    requestAnimationFrame(() => lockSheetPageAxes());
+  };
   if (!wheel && kind !== "split" && kind !== "date3" && kind !== "ym-sheet" && kind !== "tire-sheet") {
     /* Standalone sheet — done handler already owns commit. */
     wrap?.classList.remove("is-open", "has-drum-open");
     trigger?.setAttribute("aria-expanded", "false");
     root.remove();
     activePortal = null;
-    document.body.classList.remove("auto-drum-portal-open", "auto-drum-sheet-open");
+    resetPageAfterClose();
     return;
   }
   if (kind === "ym-sheet") {
@@ -412,7 +417,7 @@ export function closeAutoDrumSheet(commit = false) {
     trigger?.setAttribute("aria-expanded", "false");
     root.remove();
     activePortal = null;
-    document.body.classList.remove("auto-drum-portal-open", "auto-drum-sheet-open");
+    resetPageAfterClose();
     return;
   }
   if (kind === "tire-sheet") {
@@ -479,7 +484,7 @@ export function closeAutoDrumSheet(commit = false) {
     trigger?.setAttribute("aria-expanded", "false");
     root.remove();
     activePortal = null;
-    document.body.classList.remove("auto-drum-portal-open", "auto-drum-sheet-open");
+    resetPageAfterClose();
     return;
   }
   if (kind === "date3") {
@@ -523,7 +528,7 @@ export function closeAutoDrumSheet(commit = false) {
     trigger?.setAttribute("aria-expanded", "false");
     root.remove();
     activePortal = null;
-    document.body.classList.remove("auto-drum-portal-open", "auto-drum-sheet-open");
+    resetPageAfterClose();
     return;
   }
   if (kind === "split") {
@@ -555,7 +560,7 @@ export function closeAutoDrumSheet(commit = false) {
     trigger?.setAttribute("aria-expanded", "false");
     root.remove();
     activePortal = null;
-    document.body.classList.remove("auto-drum-portal-open", "auto-drum-sheet-open");
+    resetPageAfterClose();
     return;
   }
   const multiple = wheel?.dataset?.multiple === "1";
@@ -583,7 +588,7 @@ export function closeAutoDrumSheet(commit = false) {
   trigger?.setAttribute("aria-expanded", "false");
   root.remove();
   activePortal = null;
-  document.body.classList.remove("auto-drum-portal-open", "auto-drum-sheet-open");
+  resetPageAfterClose();
 }
 
 function nearestPortalItem(scrollEl, ring) {

@@ -18,6 +18,19 @@ export function initKmInput(input) {
   input.autocomplete = "off";
   if (!input.placeholder) input.placeholder = "pl. 125 000";
 
+  const lockPageX = () => {
+    try {
+      window.scrollTo(window.scrollX || 0, window.scrollY || window.pageYOffset || 0);
+      document.documentElement.scrollLeft = 0;
+      document.body.scrollLeft = 0;
+      if (typeof window.scrollTo === "function") {
+        window.scrollTo({ left: 0, top: window.scrollY || window.pageYOffset || 0, behavior: "instant" in window ? "instant" : "auto" });
+      }
+    } catch {
+      /* ignore */
+    }
+  };
+
   const sync = () => {
     const digits = parseKmDigits(input.value);
     input.dataset.kmDigits = digits;
@@ -38,9 +51,18 @@ export function initKmInput(input) {
     }
     const formatted = formatKmDigits(digits);
     if (input.value !== formatted) input.value = formatted;
+    lockPageX();
   });
 
-  input.addEventListener("blur", sync);
+  input.addEventListener("focus", () => {
+    lockPageX();
+    requestAnimationFrame(lockPageX);
+  });
+  input.addEventListener("blur", () => {
+    sync();
+    lockPageX();
+    requestAnimationFrame(lockPageX);
+  });
   if (input.value) sync();
   return input;
 }

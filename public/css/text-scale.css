@@ -1,36 +1,77 @@
-/* Szövegméret: minden nagyítva, felső menüsáv visszaállítva eredetire. */
+/* Szövegméret: minden nő (kezdőlap, csempék, hirdetések, menük), felső sáv nem. */
+
+html {
+  --bymy-text-zoom: 1;
+}
+
 html[data-text-scale="110"] {
   --bymy-text-zoom: 1.1;
+  font-size: 110%;
 }
 html[data-text-scale="120"] {
   --bymy-text-zoom: 1.2;
+  font-size: 120%;
 }
 html[data-text-scale="130"] {
   --bymy-text-zoom: 1.3;
+  font-size: 130%;
 }
 html[data-text-scale="140"] {
   --bymy-text-zoom: 1.4;
+  font-size: 140%;
 }
 html[data-text-scale="150"] {
   --bymy-text-zoom: 1.5;
+  font-size: 150%;
 }
 
-html[data-text-scale]:not([data-text-scale="100"]) body.site-app {
-  zoom: var(--bymy-text-zoom);
-}
-
-/* Felső menüsáv: ellensúlyozzuk a body zoomot → változatlan méret */
+/* Felső menüsáv (mobil rem-alapú): ellensúlyozzuk a html font-size növelést.
+   Az asztali fejléc px-ben van — azt nem zoomoljuk vissza. */
 html[data-text-scale]:not([data-text-scale="100"]) body.site-app > :is(
   .mw-app-top,
-  .hub-header,
-  [data-site-desk-header],
-  .home-header,
-  .site-header,
-  header.site-app-header,
-  .site-app-header,
   .fiok-top
 ) {
   zoom: calc(1 / var(--bymy-text-zoom));
+}
+
+/* Kezdőlap mobil csempék / hirdetéskártyák — vw méret is nőjön */
+@media (max-width: 800px) {
+  html[data-text-scale]:not([data-text-scale="100"]) body.hub-page--feed .hf-card,
+  html[data-text-scale]:not([data-text-scale="100"]) body.hub-page--feed .hf-card--kategoria,
+  html[data-text-scale]:not([data-text-scale="100"]) body.hub-page--feed .hf-card--ajanlas,
+  html[data-text-scale]:not([data-text-scale="100"]) body.hub-page--feed .hf-card--listing,
+  html[data-text-scale]:not([data-text-scale="100"]) body.hub-page--feed .hf-card--featured {
+    --hf-card-w: calc(
+      ((100vw - (2 * var(--hf-gutter)) - var(--hf-rail-gap)) / 2) * var(--bymy-text-zoom)
+    );
+  }
+
+  html[data-text-scale]:not([data-text-scale="100"]) body.hub-page--feed .hub-promo__title {
+    /* rem már nő a html font-size-zal; a vw részt külön szorozzuk */
+    font-size: clamp(0.68rem, calc(3.2vw * var(--bymy-text-zoom)), 0.88rem) !important;
+  }
+
+  html[data-text-scale]:not([data-text-scale="100"]) body.hub-page--feed .hub-promo__text {
+    font-size: 0.52rem !important;
+  }
+
+  html[data-text-scale]:not([data-text-scale="100"]) body.hub-page--feed .hub-promo__cta {
+    font-size: 0.55rem !important;
+  }
+}
+
+/* Desktop hub sínek fix px kártyái */
+@media (min-width: 801px) {
+  html[data-text-scale]:not([data-text-scale="100"]) body.hub-page--feed .hf-card,
+  html[data-text-scale]:not([data-text-scale="100"]) body.hub-page--feed .hf-card--listing,
+  html[data-text-scale]:not([data-text-scale="100"]) body.hub-page--feed .hf-card--kategoria,
+  html[data-text-scale]:not([data-text-scale="100"]) body.hub-page--feed .hf-card--ajanlas,
+  html[data-text-scale]:not([data-text-scale="100"]) body.hub-page--feed .hf-card--featured {
+    flex-basis: calc(220px * var(--bymy-text-zoom)) !important;
+    flex: 0 0 calc(220px * var(--bymy-text-zoom)) !important;
+    width: calc(220px * var(--bymy-text-zoom)) !important;
+    max-width: calc(220px * var(--bymy-text-zoom)) !important;
+  }
 }
 
 /* Beállítások — szövegméret választó */

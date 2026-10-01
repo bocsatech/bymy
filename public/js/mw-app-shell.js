@@ -19,8 +19,14 @@
     if (!document.querySelector('link[href*="text-scale.css"]')) {
       var ts = document.createElement("link");
       ts.rel = "stylesheet";
-      ts.href = "/css/text-scale.css?v=textScale3";
+      ts.href = "/css/text-scale.css?v=textScale4";
       document.head.appendChild(ts);
+    }
+    if (!document.querySelector('script[src*="text-scale.js"]')) {
+      var tsJs = document.createElement("script");
+      tsJs.type = "module";
+      tsJs.src = "/js/text-scale.js?v=textScale4";
+      document.body.appendChild(tsJs);
     }
   }
 
@@ -439,7 +445,7 @@
       document.body.appendChild(s);
     }
     addModule("/js/theme.js?v=willhabenHdr1");
-    addModule("/js/text-scale.js?v=textScale3");
+    addModule("/js/text-scale.js?v=textScale4");
     addModule("/js/site-avatar-menu.js?v=settingsHome1");
     addModule("/js/nav-counts.js?v=bootFix2");
   }

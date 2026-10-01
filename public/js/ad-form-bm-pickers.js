@@ -2386,7 +2386,7 @@ async function mountAdBrandModelCombined(form, catalog) {
   }
 
   const { fillWheel, setWheelValue, readWheel, syncHostClearButton } = await import("./ingatlan-wheels.js?v=immoClearAll2");
-  const { openBrandModelCatalogSheet } = await import("./auto-drum-sheet.js?v=bmSheet40");
+  const { openBrandModelCatalogSheet } = await import("./auto-drum-sheet.js?v=bmSheet41");
   const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
 
   const brands = [...(catalog?.gyartmanyok || [])].sort((a, b) =>
@@ -2587,7 +2587,7 @@ async function mountAdSelectDrum(select, {
   select.dataset.adBmDrum = "1";
 
   const { fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=immoClearAll2");
-  const { openStandaloneSwitchSheet, bindAutoDrumSheet } = await import("./auto-drum-sheet.js?v=bmSheet40");
+  const { openStandaloneSwitchSheet, bindAutoDrumSheet } = await import("./auto-drum-sheet.js?v=bmSheet41");
   const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
 
   const wrap = document.createElement("div");
@@ -2810,7 +2810,7 @@ async function mountAdSplitYmDrum({
   }
 
   const { fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=immoClearAll2");
-  const { openYmDualSheet } = await import("./auto-drum-sheet.js?v=bmSheet40");
+  const { openYmDualSheet } = await import("./auto-drum-sheet.js?v=bmSheet41");
   const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
 
   const yearOpts = optionsFromSelect(ev, emptyYear);
@@ -3124,14 +3124,12 @@ function resolveFormSelect(form, name) {
   return null;
 }
 
-/** Gumi méret: műszaki érvényesség-stílusú summary + 3 oszlopos sheet. */
+/** Gumi méret: műszaki érvényesség-stílusú summary + 3 oszlopos sheet (select alapú). */
 export async function mountTireSizeSwitchPickers(form) {
   if (!form || !isBmPickerAdForm(form)) return;
   try {
-    const { fillTireSelect } = await import("./tire-sizes-ui.js?v=tireYm2");
-    const { fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=immoClearAll2");
-    const { openTireTripleSheet } = await import("./auto-drum-sheet.js?v=bmSheet40");
-    const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
+    const { fillTireSelect } = await import("./tire-sizes-ui.js?v=tireYm3");
+    const { openTireTripleSheet } = await import("./auto-drum-sheet.js?v=bmSheet41");
 
     for (const spec of TIRE_ROW_SPECS) {
       try {
@@ -3148,12 +3146,15 @@ export async function mountTireSizeSwitchPickers(form) {
         ) {
           continue;
         }
-        if (width.dataset.adTireSplit === "1") continue;
+        if (width.dataset.adTireSplit === "1") {
+          const existing = form.querySelector(`.ad-form-tire-split[data-tire-prefix="${spec.prefix}"]`);
+          if (existing?.querySelector(".ad-form-tire-split__summary")) continue;
+          delete width.dataset.adTireSplit;
+        }
         if (!width.id) width.id = widthName;
         if (!aspect.id) aspect.id = aspectName;
         if (!rim.id) rim.id = rimName;
 
-        /* Lefelé: régi kapcsos dobkerék wrap törlése, ha még ott lenne. */
         for (const select of [width, aspect, rim]) {
           if (typeof select._adBmClose === "function") {
             try {
@@ -3175,101 +3176,24 @@ export async function mountTireSizeSwitchPickers(form) {
         fillTireSelect(width);
         fillTireSelect(aspect);
         fillTireSelect(rim);
-        [width, aspect, rim].forEach((sel) => {
-          if (!sel.classList.contains("ad-form-cell")) sel.classList.add("ad-form-cell");
-        });
 
         const tireBlock =
           width.closest(".tire-block") ||
           aspect.closest(".tire-block") ||
           rim.closest(".tire-block") ||
-          form.querySelector(`#tire-sizes-card .tire-block:has([name="${widthName}"]), .tire-sizes-grid .tire-block:has([name="${widthName}"])`);
-        if (!tireBlock) continue;
+          form.querySelector(`#tire-sizes-card .tire-block`) ||
+          null;
+        const host =
+          tireBlock ||
+          width.closest(".tire-row")?.parentElement ||
+          width.parentElement;
+        if (!host) continue;
 
-        const existing = tireBlock.querySelector(`.ad-form-tire-split[data-tire-prefix="${spec.prefix}"]`);
-        if (existing) {
-          width.dataset.adTireSplit = "1";
-          aspect.dataset.adTireSplit = "1";
-          rim.dataset.adTireSplit = "1";
-          continue;
-        }
-
-        const widthOpts = optionsFromSelect(width, "—");
-        const aspectOpts = optionsFromSelect(aspect, "—");
-        const rimOpts = optionsFromSelect(rim, "—");
+        host.querySelector(`.ad-form-tire-split[data-tire-prefix="${spec.prefix}"]`)?.remove();
 
         const block = document.createElement("div");
-        block.className = "immo-dual-range-block ad-form-split-ym ad-form-tire-split";
+        block.className = "ad-form-split-ym ad-form-tire-split";
         block.dataset.tirePrefix = spec.prefix;
-        block.dataset.range = spec.prefix;
-
-        const dual = document.createElement("div");
-        dual.className = "immo-dual-range ad-form-split-ym__dual ad-form-tire-split__dual";
-        dual.dataset.range = spec.prefix;
-        dual.dataset.splitKind = "tire";
-        dual.setAttribute("aria-label", spec.title);
-        dual.setAttribute("hidden", "");
-
-        const titleEl = document.createElement("span");
-        titleEl.className = "immo-label immo-dual-range__title";
-        titleEl.textContent = spec.title;
-        dual.appendChild(titleEl);
-
-        function makeHalf(kind, select, options, emptyLabel) {
-          const half = document.createElement("div");
-          half.className = `immo-schema-cell immo-dual-range__half ad-form-tire-split__half ad-form-tire-split__half--${kind}`;
-          half.innerHTML = `<div class="immo-wheel-wrap">
-            <div class="immo-wheel" data-wheel="${select.id}" data-filter-key="${select.id}" role="listbox" aria-label="${emptyLabel}"></div>
-          </div>`;
-          const wheelEl = half.querySelector("[data-wheel]");
-          fillWheel(
-            wheelEl,
-            options.filter((o) => o.value !== ""),
-            { emptyLabel }
-          );
-          let live = initDrumWheel(wheelEl, { emptyLabel, openMode: "portal", multiple: false });
-          if (!live) live = half.querySelector("[data-wheel]") || wheelEl;
-          setWheelValue(live, select.value || "");
-          syncDrumWheelDisplay(live);
-          live = half.querySelector("[data-wheel]") || live;
-          const trigger = half.querySelector(".immo-wheel-trigger");
-          if (trigger) {
-            trigger.dataset.emptyLabel = emptyLabel;
-            if (!select.value) trigger.textContent = emptyLabel;
-            trigger.hidden = false;
-            trigger.removeAttribute("aria-hidden");
-          }
-          live.addEventListener("immo-wheel-change", () => {
-            const w = half.querySelector("[data-wheel]") || live;
-            syncSelectToValue(select, readWheel(w));
-            syncDrumWheelDisplay(w);
-            refreshSummary();
-          });
-          select.addEventListener("change", () => {
-            const w = half.querySelector("[data-wheel]") || live;
-            setWheelValue(w, select.value || "");
-            syncDrumWheelDisplay(w);
-            refreshSummary();
-          });
-          return { half, wheel: () => half.querySelector("[data-wheel]") || live };
-        }
-
-        const widthHalf = makeHalf("width", width, widthOpts, "—");
-        const sep1 = document.createElement("span");
-        sep1.className = "immo-dual-range__sep";
-        sep1.setAttribute("aria-hidden", "true");
-        sep1.textContent = "/";
-        const aspectHalf = makeHalf("aspect", aspect, aspectOpts, "—");
-        const sep2 = document.createElement("span");
-        sep2.className = "immo-dual-range__sep";
-        sep2.setAttribute("aria-hidden", "true");
-        sep2.textContent = "R";
-        const rimHalf = makeHalf("rim", rim, rimOpts, "—");
-        dual.appendChild(widthHalf.half);
-        dual.appendChild(sep1);
-        dual.appendChild(aspectHalf.half);
-        dual.appendChild(sep2);
-        dual.appendChild(rimHalf.half);
 
         const summary = document.createElement("button");
         summary.type = "button";
@@ -3278,20 +3202,15 @@ export async function mountTireSizeSwitchPickers(form) {
         summary.setAttribute("aria-haspopup", "dialog");
 
         function refreshSummary() {
-          const w = String(readWheel(widthHalf.wheel()) ?? "").trim() || String(width.value || "").trim();
-          const a = String(readWheel(aspectHalf.wheel()) ?? "").trim() || String(aspect.value || "").trim();
-          const r = String(readWheel(rimHalf.wheel()) ?? "").trim() || String(rim.value || "").trim();
-          if (!w && !a && !r) {
-            summary.textContent = "—";
-          } else {
-            summary.textContent = `${w || "—"} / ${a || "—"} R ${r || "—"}`;
-          }
+          const w = String(width.value || "").trim();
+          const a = String(aspect.value || "").trim();
+          const r = String(rim.value || "").trim();
+          summary.textContent = !w && !a && !r ? "—" : `${w || "—"} / ${a || "—"} R ${r || "—"}`;
           block.classList.toggle("has-value", Boolean(w || a || r));
           summary.classList.toggle("is-placeholder", !w && !a && !r);
         }
 
         block.appendChild(summary);
-        block.appendChild(dual);
 
         hideNativeSelect(width);
         hideNativeSelect(aspect);
@@ -3300,12 +3219,12 @@ export async function mountTireSizeSwitchPickers(form) {
         stashNativeSelect(aspect, block);
         stashNativeSelect(rim, block);
 
-        const tireRow = tireBlock.querySelector(".tire-row");
-        if (tireRow) tireRow.replaceWith(block);
+        const tireRow = host.querySelector(".tire-row") || width.closest(".tire-row");
+        if (tireRow && host.contains(tireRow)) tireRow.replaceWith(block);
         else {
-          const label = tireBlock.querySelector(".tire-block-label");
-          if (label?.nextSibling) label.after(block);
-          else tireBlock.appendChild(block);
+          const label = host.querySelector?.(".tire-block-label");
+          if (label) label.after(block);
+          else host.appendChild(block);
         }
 
         width.dataset.adTireSplit = "1";
@@ -3315,35 +3234,18 @@ export async function mountTireSizeSwitchPickers(form) {
         aspect.dataset.adBmPicker = "1";
         rim.dataset.adBmPicker = "1";
 
-        const openShared = (triggerBtn) => {
-          dual.removeAttribute("hidden");
-          openTireTripleSheet(widthHalf.wheel(), aspectHalf.wheel(), rimHalf.wheel(), triggerBtn, {
-            title: spec.title,
-          });
-        };
         summary.addEventListener("click", (event) => {
           event.preventDefault();
           event.stopPropagation();
-          openShared(summary);
+          openTireTripleSheet(width, aspect, rim, summary, { title: spec.title });
         });
-        [widthHalf, aspectHalf, rimHalf].forEach((part) => {
-          const trigger = part.half.querySelector(".immo-wheel-trigger");
-          if (!trigger) return;
-          const next = trigger.cloneNode(true);
-          next.dataset.sheetBound = "1";
-          next.hidden = false;
-          next.removeAttribute("aria-hidden");
-          trigger.replaceWith(next);
-          next.addEventListener("click", (event) => {
-            event.preventDefault();
-            event.stopPropagation();
-            openShared(summary);
-          });
-        });
+        block.addEventListener("ad-tire-change", () => refreshSummary());
+        width.addEventListener("change", refreshSummary);
+        aspect.addEventListener("change", refreshSummary);
+        rim.addEventListener("change", refreshSummary);
 
         const onPortalGone = () => {
           if (document.body.classList.contains("auto-drum-portal-open")) return;
-          dual.setAttribute("hidden", "");
           refreshSummary();
         };
         const portalObserver = new MutationObserver(onPortalGone);

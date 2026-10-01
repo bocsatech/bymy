@@ -420,29 +420,56 @@ export function closeAutoDrumSheet(commit = false) {
       widthWheel,
       aspectWheel,
       rimWheel,
+      widthSelect,
+      aspectSelect,
+      rimSelect,
       widthScroll,
       aspectScroll,
       rimScroll,
     } = activePortal;
-    if (commit && widthWheel && aspectWheel && rimWheel && widthScroll && aspectScroll && rimScroll && ring) {
+    if (commit && widthScroll && aspectScroll && rimScroll && ring) {
       let w = nearestPortalItem(widthScroll, ring)?.dataset.value ?? "";
       let a = nearestPortalItem(aspectScroll, ring)?.dataset.value ?? "";
       let r = nearestPortalItem(rimScroll, ring)?.dataset.value ?? "";
       if (activePortal?.pendingW != null) w = String(activePortal.pendingW);
       if (activePortal?.pendingA != null) a = String(activePortal.pendingA);
       if (activePortal?.pendingR != null) r = String(activePortal.pendingR);
-      if (w) w = matchWheelOptionValue(widthWheel, w) || w;
-      if (a) a = matchWheelOptionValue(aspectWheel, a) || a;
-      if (r) r = matchWheelOptionValue(rimWheel, r) || r;
-      setWheelValue(widthWheel, w);
-      setWheelValue(aspectWheel, a);
-      setWheelValue(rimWheel, r);
-      syncDrumWheelDisplay(widthWheel);
-      syncDrumWheelDisplay(aspectWheel);
-      syncDrumWheelDisplay(rimWheel);
-      widthWheel.dispatchEvent(new CustomEvent("immo-wheel-change", { bubbles: true, detail: { value: w } }));
-      aspectWheel.dispatchEvent(new CustomEvent("immo-wheel-change", { bubbles: true, detail: { value: a } }));
-      rimWheel.dispatchEvent(new CustomEvent("immo-wheel-change", { bubbles: true, detail: { value: r } }));
+      if (widthSelect || aspectSelect || rimSelect) {
+        const writeSelect = (select, value) => {
+          if (!(select instanceof HTMLSelectElement)) return;
+          const v = String(value ?? "");
+          if (v && ![...select.options].some((o) => o.value === v)) {
+            const opt = document.createElement("option");
+            opt.value = v;
+            opt.textContent = v;
+            select.appendChild(opt);
+          }
+          if (select.value !== v) {
+            select.value = v;
+            select.dispatchEvent(new Event("input", { bubbles: true }));
+            select.dispatchEvent(new Event("change", { bubbles: true }));
+          }
+        };
+        writeSelect(widthSelect, w);
+        writeSelect(aspectSelect, a);
+        writeSelect(rimSelect, r);
+        widthSelect?.closest?.(".ad-form-tire-split")?.dispatchEvent?.(
+          new CustomEvent("ad-tire-change", { bubbles: true, detail: { w, a, r } })
+        );
+      } else if (widthWheel && aspectWheel && rimWheel) {
+        if (w) w = matchWheelOptionValue(widthWheel, w) || w;
+        if (a) a = matchWheelOptionValue(aspectWheel, a) || a;
+        if (r) r = matchWheelOptionValue(rimWheel, r) || r;
+        setWheelValue(widthWheel, w);
+        setWheelValue(aspectWheel, a);
+        setWheelValue(rimWheel, r);
+        syncDrumWheelDisplay(widthWheel);
+        syncDrumWheelDisplay(aspectWheel);
+        syncDrumWheelDisplay(rimWheel);
+        widthWheel.dispatchEvent(new CustomEvent("immo-wheel-change", { bubbles: true, detail: { value: w } }));
+        aspectWheel.dispatchEvent(new CustomEvent("immo-wheel-change", { bubbles: true, detail: { value: a } }));
+        rimWheel.dispatchEvent(new CustomEvent("immo-wheel-change", { bubbles: true, detail: { value: r } }));
+      }
     }
     wrap?.classList.remove("is-open", "has-drum-open");
     wrap?.closest(".ad-form-split-ym, .ad-form-tire-split")?.classList.remove("has-drum-open");
@@ -1081,36 +1108,55 @@ export function openYmDualSheet(yearWheel, monthWheel, trigger, { title = null }
 }
 
 /**
- * Gumi méret: műszaki érvényesség sheet chrome + 3 oszlop (szélesség / magasság R átmérő).
+ * Gumi méret: műszaki érvényesség sheet chrome + 3 oszlop.
+ * Fogad selecteket VAGY meglévő wheel elemeket.
  */
-export function openTireTripleSheet(widthWheel, aspectWheel, rimWheel, trigger, { title = null } = {}) {
-  if (!widthWheel || !aspectWheel || !rimWheel || !trigger) return;
+export function openTireTripleSheet(widthSrc, aspectSrc, rimSrc, trigger, { title = null } = {}) {
+  if (!widthSrc || !aspectSrc || !rimSrc || !trigger) return;
   closeAutoDrumSheet(false);
   closeAllInlineDrums(false);
 
-  const dual =
-    widthWheel.closest(".ad-form-split-ym, .ad-form-tire-split") ||
-    aspectWheel.closest(".ad-form-split-ym, .ad-form-tire-split") ||
-    rimWheel.closest(".ad-form-split-ym, .ad-form-tire-split");
-  const wrap =
-    widthWheel.closest(".immo-wheel-wrap") ||
-    aspectWheel.closest(".immo-wheel-wrap") ||
-    rimWheel.closest(".immo-wheel-wrap");
+  const widthIsSelect = widthSrc instanceof HTMLSelectElement;
+  const aspectIsSelect = aspectSrc instanceof HTMLSelectElement;
+  const rimIsSelect = rimSrc instanceof HTMLSelectElement;
+
+  function rowsFromSelect(select, emptyLabel) {
+    const rows = [...(select?.options || [])].map((opt) => ({
+      value: opt.value,
+      label: (opt.textContent || "").trim() || opt.value || emptyLabel,
+    }));
+    const filled = rows.filter((r) => String(r.value ?? "") !== "");
+    return [{ value: "", label: emptyLabel }, ...filled];
+  }
+
+  const dual = widthIsSelect
+    ? widthSrc.closest(".ad-form-tire-split, .tire-block")
+    : widthSrc.closest(".ad-form-split-ym, .ad-form-tire-split") ||
+      aspectSrc.closest(".ad-form-split-ym, .ad-form-tire-split") ||
+      rimSrc.closest(".ad-form-split-ym, .ad-form-tire-split");
+  const wrap = widthIsSelect
+    ? trigger.closest(".ad-form-tire-split") || dual
+    : widthSrc.closest(".immo-wheel-wrap") ||
+      aspectSrc.closest(".immo-wheel-wrap") ||
+      rimSrc.closest(".immo-wheel-wrap");
   const sheetTitle =
     title ||
-    dual?.querySelector(".immo-dual-range__title, .immo-label")?.textContent?.trim() ||
+    dual?.querySelector(".immo-dual-range__title, .immo-label, .tire-block-label")?.textContent?.trim() ||
     trigger.getAttribute("aria-label") ||
     "Gumi méret";
-  const widthEmpty =
-    dual?.querySelector(".ad-form-tire-split__half--width .immo-wheel-trigger")?.dataset.emptyLabel || "—";
-  const aspectEmpty =
-    dual?.querySelector(".ad-form-tire-split__half--aspect .immo-wheel-trigger")?.dataset.emptyLabel || "—";
-  const rimEmpty =
-    dual?.querySelector(".ad-form-tire-split__half--rim .immo-wheel-trigger")?.dataset.emptyLabel || "—";
+  const widthEmpty = "—";
+  const aspectEmpty = "—";
+  const rimEmpty = "—";
 
-  let pendingW = String(readWheel(widthWheel) ?? "");
-  let pendingA = String(readWheel(aspectWheel) ?? "");
-  let pendingR = String(readWheel(rimWheel) ?? "");
+  let pendingW = widthIsSelect
+    ? String(widthSrc.value ?? "")
+    : String(readWheel(widthSrc) ?? "");
+  let pendingA = aspectIsSelect
+    ? String(aspectSrc.value ?? "")
+    : String(readWheel(aspectSrc) ?? "");
+  let pendingR = rimIsSelect
+    ? String(rimSrc.value ?? "")
+    : String(readWheel(rimSrc) ?? "");
 
   const { root, stage, ring, sheetScroll, doneBtn, closeBtn } = createSheetPortalShell(sheetTitle);
   root.classList.add("auto-drum-portal--ym", "auto-drum-portal--tire");
@@ -1155,9 +1201,17 @@ export function openTireTripleSheet(widthWheel, aspectWheel, rimWheel, trigger, 
     return `<div class="immo-drum-inline-item" data-value="${escapeHtml(row.value)}"><span class="immo-drum-inline-text">${escapeHtml(row.label)}</span></div>`;
   }
 
-  widthScroll.innerHTML = ymOptionRows(widthWheel, widthEmpty).map(itemHtml).join("");
-  aspectScroll.innerHTML = ymOptionRows(aspectWheel, aspectEmpty).map(itemHtml).join("");
-  rimScroll.innerHTML = ymOptionRows(rimWheel, rimEmpty).map(itemHtml).join("");
+  const widthRows = widthIsSelect
+    ? rowsFromSelect(widthSrc, widthEmpty)
+    : ymOptionRows(widthSrc, widthEmpty);
+  const aspectRows = aspectIsSelect
+    ? rowsFromSelect(aspectSrc, aspectEmpty)
+    : ymOptionRows(aspectSrc, aspectEmpty);
+  const rimRows = rimIsSelect ? rowsFromSelect(rimSrc, rimEmpty) : ymOptionRows(rimSrc, rimEmpty);
+
+  widthScroll.innerHTML = widthRows.map(itemHtml).join("");
+  aspectScroll.innerHTML = aspectRows.map(itemHtml).join("");
+  rimScroll.innerHTML = rimRows.map(itemHtml).join("");
 
   function formatTireChip(w, a, r) {
     if (!w && !a && !r) return widthEmpty;
@@ -1285,25 +1339,25 @@ export function openTireTripleSheet(widthWheel, aspectWheel, rimWheel, trigger, 
   closeBtn?.addEventListener("click", () => closeAutoDrumSheet(false));
   doneBtn?.addEventListener("click", () => closeAutoDrumSheet(true));
 
-  mountSheetPortalChrome(root, { stage, wrap, trigger, ring });
+  mountSheetPortalChrome(root, { stage, wrap: wrap || trigger, trigger, ring });
   dual?.classList.add("has-drum-open");
-  dual
-    ?.querySelectorAll?.(".ad-form-tire-split__half, .immo-dual-range__half")
-    ?.forEach?.((half) => half.classList.add("is-drum-active"));
 
   activePortal = {
     kind: "tire-sheet",
     root,
-    wheel: widthWheel,
-    widthWheel,
-    aspectWheel,
-    rimWheel,
+    wheel: widthIsSelect ? null : widthSrc,
+    widthWheel: widthIsSelect ? null : widthSrc,
+    aspectWheel: aspectIsSelect ? null : aspectSrc,
+    rimWheel: rimIsSelect ? null : rimSrc,
+    widthSelect: widthIsSelect ? widthSrc : null,
+    aspectSelect: aspectIsSelect ? aspectSrc : null,
+    rimSelect: rimIsSelect ? rimSrc : null,
     widthScroll,
     aspectScroll,
     rimScroll,
     scrollEl: widthScroll,
     ring: highlight,
-    wrap,
+    wrap: wrap || trigger,
     trigger,
     pendingW,
     pendingA,

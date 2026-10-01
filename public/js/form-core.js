@@ -25,6 +25,7 @@ import {
   DEFAULT_PHOTO_OVERLAY_ID,
   renderListingPhotoOverlay,
 } from "./listing-photo-overlay.js?v=photoOverlayIcons3";
+import { openListingPhotoEditor } from "./listing-photo-edit.js?v=photoEdit1";
 import { refreshAdFormBmPickers, applyAdFormBmFieldValues } from "./ad-form-bm-pickers.js?v=bmSheet75";
 import { applyAdFormDesk, isAdFormDesk } from "./ad-form-desk.js?v=bmSheet75";
 import { placeElectricBlockAfterFuel } from "./ad-form-desk-pinned-blocks.js?v=bmSheet75";
@@ -1426,6 +1427,54 @@ function isPhotoFile(file) {
 
 function revokePhotoPreview(item) {
   if (item?.previewUrl?.startsWith("blob:")) URL.revokeObjectURL(item.previewUrl);
+  if (
+    item?.basePreviewUrl?.startsWith("blob:") &&
+    item.basePreviewUrl !== item.previewUrl
+  ) {
+    URL.revokeObjectURL(item.basePreviewUrl);
+  }
+}
+
+function applyEditedPhoto(item, file) {
+  if (!item || !file) return;
+  clearPhotoOverlay(item);
+  revokePhotoPreview(item);
+  item.file = file;
+  item.previewUrl = URL.createObjectURL(file);
+  item.basePreviewUrl = item.previewUrl;
+  item.url = null;
+  item.dataUrl = null;
+  item.status = "pending";
+  item.error = "";
+  item.overlayTemplateId = null;
+  item.overlayDataUrl = null;
+  renderPhotoPreview();
+  void uploadPendingPhotos();
+}
+
+async function editPhotoItem(item) {
+  if (!item || photoBusy || item.status === "uploading") return;
+  const source =
+    item.file ||
+    item.overlayDataUrl ||
+    item.dataUrl ||
+    item.basePreviewUrl ||
+    item.url ||
+    item.previewUrl;
+  if (!source) {
+    alert("Nincs szerkeszthető kép.");
+    return;
+  }
+  try {
+    const file = await openListingPhotoEditor({
+      source,
+      fileName: item.file?.name || "photo.jpg",
+    });
+    if (!file) return;
+    applyEditedPhoto(item, file);
+  } catch (error) {
+    alert(error?.message || "A szerkesztés sikertelen.");
+  }
 }
 
 function clearPhotoItems() {
@@ -1660,11 +1709,21 @@ function paintPhotoGrid(photoGrid) {
     }
     const actions = document.createElement("div");
     actions.className = "photo-slot-actions";
+    const canEdit = item.status !== "uploading";
     actions.innerHTML = `
       <button type="button" data-photo-up="${item.id}" ${index === 0 ? "disabled" : ""}>↑</button>
       <button type="button" data-photo-down="${item.id}" ${index === photoItems.length - 1 ? "disabled" : ""}>↓</button>
       <button type="button" data-photo-del="${item.id}">×</button>
     `;
+    const editBtn = document.createElement("button");
+    editBtn.type = "button";
+    editBtn.className = "photo-slot-edit";
+    editBtn.dataset.photoEdit = item.id;
+    editBtn.setAttribute("aria-label", "Kép szerkesztése");
+    editBtn.title = "Kép szerkesztése";
+    editBtn.textContent = "✎";
+    editBtn.disabled = !canEdit;
+    slot.appendChild(editBtn);
     slot.appendChild(actions);
     photoGrid.appendChild(slot);
   });
@@ -1979,9 +2038,15 @@ photoOverlayClearBtn?.addEventListener("click", () => {
 });
 form.addEventListener("click", (event) => {
   if (!event.target.closest("#photo-grid, #ad-desk-photo-preview")) return;
+  const edit = event.target.closest("[data-photo-edit]");
   const up = event.target.closest("[data-photo-up]");
   const down = event.target.closest("[data-photo-down]");
   const del = event.target.closest("[data-photo-del]");
+  if (edit) {
+    const item = photoItems.find((p) => p.id === edit.dataset.photoEdit);
+    void editPhotoItem(item);
+    return;
+  }
   if (up) {
     const i = photoItems.findIndex((item) => item.id === up.dataset.photoUp);
     if (i > 0) {

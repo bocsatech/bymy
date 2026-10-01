@@ -2306,12 +2306,18 @@ function optionsFromSelect(select, emptyLabel = "—") {
 
 function filledOptionsFromSelect(select) {
   if (!select) return [];
-  return [...select.options]
-    .filter((opt) => opt.value !== "")
-    .map((opt) => ({
-      value: opt.value,
-      label: (opt.textContent || "").trim() || opt.value,
-    }));
+  const seen = new Set();
+  const out = [];
+  for (const opt of select.options) {
+    const value = String(opt.value ?? "").trim();
+    if (!value || seen.has(value)) continue;
+    seen.add(value);
+    out.push({
+      value,
+      label: (opt.textContent || "").trim() || value,
+    });
+  }
+  return out;
 }
 
 function hierarchyItemsFromCategories(categories) {
@@ -2388,7 +2394,7 @@ async function mountAdBrandModelCombined(form, catalog) {
   }
 
   const { fillWheel, setWheelValue, readWheel, syncHostClearButton } = await import("./ingatlan-wheels.js?v=immoClearAll2");
-  const { openBrandModelCatalogSheet } = await import("./auto-drum-sheet.js?v=bmSheet63");
+  const { openBrandModelCatalogSheet } = await import("./auto-drum-sheet.js?v=bmSheet64");
   const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
 
   const brands = [...(catalog?.gyartmanyok || [])].sort((a, b) =>
@@ -2622,7 +2628,7 @@ async function mountAdSelectDrum(select, {
   let syncDrumWheelDisplay;
   try {
     ({ fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=immoClearAll2"));
-    ({ openStandaloneSwitchSheet, bindAutoDrumSheet } = await import("./auto-drum-sheet.js?v=bmSheet63"));
+    ({ openStandaloneSwitchSheet, bindAutoDrumSheet } = await import("./auto-drum-sheet.js?v=bmSheet64"));
     ({ initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1"));
   } catch (error) {
     console.warn("Dobkerék betöltés:", title || select.id, error);
@@ -2860,7 +2866,7 @@ async function mountAdSplitYmDrum({
   }
 
   const { fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=immoClearAll2");
-  const { openYmDualSheet } = await import("./auto-drum-sheet.js?v=bmSheet63");
+  const { openYmDualSheet } = await import("./auto-drum-sheet.js?v=bmSheet64");
   const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
 
   const yearOpts = optionsFromSelect(ev, emptyYear);
@@ -3057,7 +3063,8 @@ export async function mountAdFormBmPickers(form, catalog = null) {
   ensureSelectOptions(document.getElementById("karpit1"), VEHICLE_KARPIT_OPTIONS);
   ensureSelectOptions(document.getElementById("karpit2"), VEHICLE_KARPIT_OPTIONS);
   ensureSelectOptions(document.getElementById("tetto"), VEHICLE_TETTO_OPTIONS);
-  ensureSelectOptions(document.getElementById("klima"), KLIM_OPTIONS);
+  /* Klíma: mindig cseréljük (ne append), különben duplán jelenik meg a listában. */
+  replaceSelectOptions(document.getElementById("klima"), KLIM_OPTIONS, "Válasszon");
   if (document.getElementById("sebessegvalto") && !filledOptionsFromSelect(document.getElementById("sebessegvalto")).length) {
     replaceSelectOptions(document.getElementById("sebessegvalto"), flattenSebessegvaltoOptions());
   }
@@ -3211,7 +3218,7 @@ export async function mountTireSizeSwitchPickers(form) {
 
   try {
     const { fillTireSelect } = await import("./tire-sizes-ui.js?v=tireYm4");
-    const { openTireTripleSheet } = await import("./auto-drum-sheet.js?v=bmSheet63");
+    const { openTireTripleSheet } = await import("./auto-drum-sheet.js?v=bmSheet64");
     const blocks = [...grid.querySelectorAll(":scope > .tire-block")];
 
     for (let index = 0; index < TIRE_ROW_SPECS.length; index += 1) {

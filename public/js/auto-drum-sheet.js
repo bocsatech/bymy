@@ -1886,7 +1886,15 @@ export function openStandaloneSwitchSheet({
     backBtn.hidden = true;
     subEl.hidden = true;
     syncToolbar();
-    const rows = [{ value: "", label: emptyLabel }, ...items];
+    const seen = new Set();
+    const uniqueItems = [];
+    for (const row of items || []) {
+      const value = String(row?.value ?? "");
+      if (value !== "" && seen.has(value)) continue;
+      if (value !== "") seen.add(value);
+      uniqueItems.push(row);
+    }
+    const rows = [{ value: "", label: emptyLabel }, ...uniqueItems.filter((r) => String(r?.value ?? "") !== "")];
     scrollEl.innerHTML = rows.map((row) => switchRowHtml(row)).join("");
     bindSwitchRowClicks(scrollEl, (item) => {
       const value = item.dataset.value ?? "";

@@ -1820,8 +1820,30 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-
 
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .ad-form-bm-field--drum:not(.has-value) .immo-wheel-trigger,
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .immo-wheel-trigger.is-placeholder {
-  color: #64748b !important;
-  font-weight: 500 !important;
+  color: #475569 !important;
+  font-weight: 600 !important;
+  opacity: 1 !important;
+}
+
+/* Üzemanyag / váltó / hajtás: a placeholder sosem lehet üres fehér */
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field--drum[data-ad-bm-for="uzemanyag"] .immo-wheel-trigger,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field--drum[data-ad-bm-for="sebessegvalto"] .immo-wheel-trigger,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field--drum[data-ad-bm-for="hajtas"] .immo-wheel-trigger,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field--drum[data-ad-bm-for="klima"] .immo-wheel-trigger,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field--drum[data-ad-bm-for="allapot"] .immo-wheel-trigger,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field--drum[data-ad-bm-for="kivitel"] .immo-wheel-trigger {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  min-height: 2.5rem !important;
+  color: #0f172a !important;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field--drum[data-ad-bm-for="uzemanyag"]:not(.has-value) .immo-wheel-trigger,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field--drum[data-ad-bm-for="sebessegvalto"]:not(.has-value) .immo-wheel-trigger,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field--drum[data-ad-bm-for="hajtas"]:not(.has-value) .immo-wheel-trigger,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field--drum[data-ad-bm-for="klima"]:not(.has-value) .immo-wheel-trigger {
+  color: #475569 !important;
 }
 
 body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .ad-form-bm-field--drum,

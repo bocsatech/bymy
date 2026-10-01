@@ -46,9 +46,9 @@ const AD_BM_SINGLE_DROPDOWN_SPECS = [
   { id: "karpit1", title: "Kárpit színe (1)", panelClass: "ad-form-karpit-panel", placeholder: "—" },
   { id: "karpit2", title: "Kárpit színe (2)", panelClass: "ad-form-karpit-panel", placeholder: "—" },
   { id: "tetto", title: "Tető", panelClass: "ad-form-tetto-panel", placeholder: "—" },
-  { id: "klima", title: "Klíma", panelClass: "ad-form-klima-panel", placeholder: "—" },
-  { id: "sebessegvalto", title: "Sebességváltó", panelClass: "ad-form-sebesseg-panel", placeholder: "—" },
-  { id: "hajtas", title: "Hajtás", panelClass: "ad-form-hajtas-panel", placeholder: "—" },
+  { id: "klima", title: "Klíma", panelClass: "ad-form-klima-panel", placeholder: "Válasszon" },
+  { id: "sebessegvalto", title: "Sebességváltó", panelClass: "ad-form-sebesseg-panel", placeholder: "Válasszon" },
+  { id: "hajtas", title: "Hajtás", panelClass: "ad-form-hajtas-panel", placeholder: "Válasszon" },
   { id: "ac_tolto_csatlakozas", title: "AC töltőcsatlakozó típusa", panelClass: "ad-form-ac-tolto-panel" },
   { id: "dc_tolto_csatlakozas", title: "DC töltőcsatlakozó típusa", panelClass: "ad-form-dc-tolto-panel" },
   { id: "tolto_csatlakozas", title: "Töltőcsatlakozó", panelClass: "ad-form-tolto-panel" },
@@ -2388,7 +2388,7 @@ async function mountAdBrandModelCombined(form, catalog) {
   }
 
   const { fillWheel, setWheelValue, readWheel, syncHostClearButton } = await import("./ingatlan-wheels.js?v=immoClearAll2");
-  const { openBrandModelCatalogSheet } = await import("./auto-drum-sheet.js?v=bmSheet45");
+  const { openBrandModelCatalogSheet } = await import("./auto-drum-sheet.js?v=bmSheet46");
   const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
 
   const brands = [...(catalog?.gyartmanyok || [])].sort((a, b) =>
@@ -2587,15 +2587,18 @@ async function mountAdSelectDrum(select, {
     document.querySelector(`.ad-form-bm-field--drum[data-ad-bm-for="${CSS.escape?.(select.id) || select.id}"]`);
   const existingTrigger = existingWrap?.querySelector?.(".immo-wheel-trigger");
   if (select.dataset.adBmPicker === "1" && existingTrigger) {
-    if (!String(existingTrigger.textContent || "").trim()) {
+    const cur = String(existingTrigger.textContent || "").trim();
+    const value = readSingleStoredValue(select._adBmHidden?.value ?? select.value);
+    if (!value && (!cur || cur === "—" || cur === "-" || cur === "–")) {
       existingTrigger.textContent = emptyLabel;
+      existingTrigger.dataset.emptyLabel = emptyLabel;
       existingTrigger.classList.add("is-placeholder");
     }
     existingTrigger.style.removeProperty("display");
     existingTrigger.style.removeProperty("visibility");
     existingTrigger.style.removeProperty("opacity");
     existingWrap?.classList.remove("ad-layout-hidden");
-    existingWrap && (existingWrap.hidden = false);
+    if (existingWrap) existingWrap.hidden = false;
     return;
   }
   /* Félkész mount: flag megvan, UI nincs — takarítsunk, majd újra. */
@@ -2619,7 +2622,7 @@ async function mountAdSelectDrum(select, {
   let syncDrumWheelDisplay;
   try {
     ({ fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=immoClearAll2"));
-    ({ openStandaloneSwitchSheet, bindAutoDrumSheet } = await import("./auto-drum-sheet.js?v=bmSheet45"));
+    ({ openStandaloneSwitchSheet, bindAutoDrumSheet } = await import("./auto-drum-sheet.js?v=bmSheet46"));
     ({ initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1"));
   } catch (error) {
     console.warn("Dobkerék betöltés:", title || select.id, error);
@@ -2857,7 +2860,7 @@ async function mountAdSplitYmDrum({
   }
 
   const { fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=immoClearAll2");
-  const { openYmDualSheet } = await import("./auto-drum-sheet.js?v=bmSheet45");
+  const { openYmDualSheet } = await import("./auto-drum-sheet.js?v=bmSheet46");
   const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
 
   const yearOpts = optionsFromSelect(ev, emptyYear);
@@ -3120,7 +3123,7 @@ export async function mountAdFormBmPickers(form, catalog = null) {
   for (const spec of AD_BM_SINGLE_DROPDOWN_SPECS) {
     if (spec.skipSingleMount) continue;
     const select = document.getElementById(spec.id);
-    if (!select || select.tagName !== "SELECT" || select.dataset.adBmPicker === "1") continue;
+    if (!select || select.tagName !== "SELECT") continue;
     if (spec.yearMax !== undefined) {
       ensureYearSelectFilled(select, spec.yearMax == null ? new Date().getFullYear() : spec.yearMax);
     }
@@ -3208,7 +3211,7 @@ export async function mountTireSizeSwitchPickers(form) {
 
   try {
     const { fillTireSelect } = await import("./tire-sizes-ui.js?v=tireYm4");
-    const { openTireTripleSheet } = await import("./auto-drum-sheet.js?v=bmSheet45");
+    const { openTireTripleSheet } = await import("./auto-drum-sheet.js?v=bmSheet46");
     const blocks = [...grid.querySelectorAll(":scope > .tire-block")];
 
     for (let index = 0; index < TIRE_ROW_SPECS.length; index += 1) {

@@ -17,6 +17,7 @@ body.site-app[data-site-page="hirdetesfeladas"] {
   /* Jobb oszlop: LE / kg / X / üres — vonalak azonos hosszúságúak */
   --ad-form-trail-slot: 1.75rem;
   --ad-form-trail-gap: 0.55rem;
+  --ad-form-trail-reserve: calc(var(--ad-form-trail-slot) + var(--ad-form-trail-gap));
   --ad-desk-cell-trim: 0px;
   --ad-desk-cell-span: 100%;
 }
@@ -2248,4 +2249,23 @@ html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] #ad-form
 html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body .ad-form-bm-field--drum .immo-wheel-clear,
 html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .ad-form-bm-field--drum .immo-wheel-clear {
   color: #60a5fa !important;
+}
+
+/* Év/hó, gumi summary, sima szövegmezők: ugyanaz a vonalszélesség (trail slot) */
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-split-ym__summary,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-tire-split__summary,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-tire-split > .ad-form-split-ym__summary,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body .labeled-field > input.ad-form-cell,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body .ad-layout-item > input.ad-form-cell,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .labeled-field > input.ad-form-cell,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .ad-layout-item > input.ad-form-cell,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form #rendszam,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form #alvazszam,
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-split-ym__summary,
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-tire-split__summary,
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell #rendszam,
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell #alvazszam {
+  width: calc(100% - var(--ad-form-trail-reserve)) !important;
+  max-width: calc(100% - var(--ad-form-trail-reserve)) !important;
+  box-sizing: border-box !important;
 }

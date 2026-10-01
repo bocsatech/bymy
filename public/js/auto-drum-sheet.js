@@ -844,15 +844,37 @@ function createSheetPortalShell(title) {
 
 function applySheetStageLayout(stage) {
   if (!stage) return;
-  stage.style.left = "50%";
-  stage.style.right = "auto";
+  const desk = window.matchMedia("(min-width: 901px)").matches;
+  if (desk) {
+    stage.style.left = "50%";
+    stage.style.right = "auto";
+    stage.style.top = "50%";
+    stage.style.bottom = "auto";
+    stage.style.width = "";
+    stage.style.maxWidth = "";
+    stage.style.height = "";
+    stage.style.transform = "translate(-50%, -50%)";
+    return;
+  }
+  /* Mobil: inset 0 — ne 100vw/translate, az elcsúsztatta a Kész gombot. */
+  stage.style.left = "0";
+  stage.style.right = "0";
   stage.style.top = "0";
   stage.style.bottom = "0";
+  stage.style.width = "100%";
+  stage.style.maxWidth = "100%";
   stage.style.height = "100%";
-  stage.style.transform = "translateX(-50%)";
+  stage.style.transform = "none";
 }
 
 function mountSheetPortalChrome(root, { stage, wrap, trigger, ring, sheetScroll }) {
+  try {
+    window.scrollTo(0, window.scrollY || window.pageYOffset || 0);
+    document.documentElement.scrollLeft = 0;
+    document.body.scrollLeft = 0;
+  } catch {
+    /* ignore */
+  }
   document.body.appendChild(root);
   document.body.classList.add("auto-drum-portal-open", "auto-drum-sheet-open");
   wrap?.classList.add("is-open", "has-drum-open");

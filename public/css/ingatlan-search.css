@@ -1401,6 +1401,11 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
 .auto-drum-portal {
   position: fixed;
   inset: 0;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
   z-index: 11000;
 }
 
@@ -1578,15 +1583,16 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
 }
 
 .auto-drum-portal--sheet .auto-drum-portal__stage--sheet {
+  /* Ne 100vw + left:50% — iOS-on / túlcsorduló body-nál elcsúszik, a Kész leesik. */
   --sheet-head-h: 3.65rem;
   --sheet-foot-h: 0.75rem;
-  left: 50% !important;
-  right: auto !important;
+  left: 0 !important;
+  right: 0 !important;
   top: 0 !important;
   bottom: 0 !important;
-  transform: translateX(-50%) !important;
-  width: min(28rem, 100vw) !important;
-  max-width: 100vw !important;
+  transform: none !important;
+  width: 100% !important;
+  max-width: 100% !important;
   height: 100% !important;
   max-height: none !important;
   display: block !important;
@@ -1821,9 +1827,13 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
 
 @media (min-width: 901px) {
   .auto-drum-portal--sheet .auto-drum-portal__stage--sheet {
+    left: 50% !important;
+    right: auto !important;
     top: 50% !important;
     bottom: auto !important;
     transform: translate(-50%, -50%) !important;
+    width: min(28rem, 100%) !important;
+    max-width: min(28rem, calc(100% - 2rem)) !important;
     height: min(86vh, 48rem) !important;
     max-height: 86vh !important;
     border-radius: 1.35rem;
@@ -2701,8 +2711,18 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   cursor: pointer;
 }
 
-body.auto-drum-portal-open {
-  overflow: hidden;
+body.auto-drum-portal-open,
+body.auto-drum-sheet-open {
+  overflow: hidden !important;
+  overflow-x: hidden !important;
+  overscroll-behavior: none;
+  touch-action: none;
+}
+
+html:has(body.auto-drum-portal-open),
+html:has(body.auto-drum-sheet-open) {
+  overflow: hidden !important;
+  overflow-x: hidden !important;
 }
 
 @media (max-width: 900px) {

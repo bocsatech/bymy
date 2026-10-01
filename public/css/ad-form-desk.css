@@ -280,7 +280,25 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .ad-form-des
   flex-direction: column;
   gap: 0.75rem;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   min-height: 0;
+  box-sizing: border-box;
+  overflow-x: clip;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] .site-layout,
+body.site-app[data-site-page="hirdetesfeladas"] .site-center,
+body.site-app[data-site-page="hirdetesfeladas"] .automax-main,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form {
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] {
+  overflow-x: hidden;
+  max-width: 100%;
 }
 
 body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .auto-desk-acc {

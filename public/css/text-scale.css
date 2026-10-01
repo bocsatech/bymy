@@ -1,0 +1,87 @@
+/* Szövegméret: csak a tartalom (main), felső menüsáv érintetlen. */
+html[data-text-scale="105"] body.site-app > main {
+  zoom: 1.05;
+}
+
+html[data-text-scale="110"] body.site-app > main {
+  zoom: 1.1;
+}
+
+html[data-text-scale="120"] body.site-app > main {
+  zoom: 1.2;
+}
+
+/* Beállítások — szövegméret választó */
+body.site-app .text-scale-box {
+  margin-bottom: 1.25rem;
+}
+
+body.site-app .text-scale-title {
+  margin: 0 0 0.35rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #111;
+}
+
+body.site-app .text-scale-hint {
+  margin: 0 0 0.85rem;
+  font-size: 0.92rem;
+  line-height: 1.45;
+  color: #5f6368;
+}
+
+body.site-app .text-scale-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+body.site-app .text-scale-option {
+  appearance: none;
+  border: 1px solid #d0d5dd;
+  background: #fff;
+  color: #202124;
+  border-radius: 10px;
+  padding: 0.55rem 0.85rem;
+  font: inherit;
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  line-height: 1.2;
+}
+
+body.site-app .text-scale-option:hover {
+  border-color: #9aa0a6;
+}
+
+body.site-app .text-scale-option.is-selected,
+body.site-app .text-scale-option[aria-checked="true"] {
+  border-color: #111;
+  background: #111;
+  color: #fff;
+}
+
+html[data-theme="dark"] body.site-app .text-scale-title {
+  color: #e8eaed;
+}
+
+html[data-theme="dark"] body.site-app .text-scale-hint {
+  color: #9aa3ad;
+}
+
+html[data-theme="dark"] body.site-app .text-scale-option {
+  background: #1a1f27;
+  border-color: #3a4350;
+  color: #e8eaed;
+}
+
+html[data-theme="dark"] body.site-app .text-scale-option:hover {
+  border-color: #6b7480;
+}
+
+html[data-theme="dark"] body.site-app .text-scale-option.is-selected,
+html[data-theme="dark"] body.site-app .text-scale-option[aria-checked="true"] {
+  background: #e8eaed;
+  border-color: #e8eaed;
+  color: #111;
+}

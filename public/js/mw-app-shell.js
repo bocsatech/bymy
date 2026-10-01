@@ -10,11 +10,18 @@
   var CSS_HREF = "/css/hub-mobile-app.css?v=navRow1";
 
   function ensureCss() {
-    if (document.querySelector('link[href*="hub-mobile-app.css"]')) return;
-    var link = document.createElement("link");
-    link.rel = "stylesheet";
-    link.href = CSS_HREF;
-    document.head.appendChild(link);
+    if (!document.querySelector('link[href*="hub-mobile-app.css"]')) {
+      var link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.href = CSS_HREF;
+      document.head.appendChild(link);
+    }
+    if (!document.querySelector('link[href*="text-scale.css"]')) {
+      var ts = document.createElement("link");
+      ts.rel = "stylesheet";
+      ts.href = "/css/text-scale.css?v=textScale1";
+      document.head.appendChild(ts);
+    }
   }
 
   function isActivePage(id) {
@@ -432,6 +439,7 @@
       document.body.appendChild(s);
     }
     addModule("/js/theme.js?v=willhabenHdr1");
+    addModule("/js/text-scale.js?v=textScale1");
     addModule("/js/site-avatar-menu.js?v=settingsHome1");
     addModule("/js/nav-counts.js?v=bootFix2");
   }

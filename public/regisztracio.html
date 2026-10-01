@@ -10,6 +10,11 @@
           }
           document.documentElement.setAttribute("data-theme", t);
         } catch (e) {}
+        try {
+          var ts = localStorage.getItem("bymy-text-scale");
+          if (ts !== "100" && ts !== "105" && ts !== "110" && ts !== "120") ts = "100";
+          document.documentElement.setAttribute("data-text-scale", ts);
+        } catch (eTs) {}
       })();
     </script>
     <meta charset="utf-8" />

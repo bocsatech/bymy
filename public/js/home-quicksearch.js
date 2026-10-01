@@ -1,11 +1,11 @@
 
-import { applyAutoSearchLayout, readLayoutFilterValues, refillAutoSearchRangeSelects, prefetchAutoSearchBoot } from "./auto-search-layout.js?v=bmSearch23";
-import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums, styleAutoSearchMoreCard } from "./auto-search-drums.js?v=bmSearch23";
+import { applyAutoSearchLayout, readLayoutFilterValues, refillAutoSearchRangeSelects, prefetchAutoSearchBoot } from "./auto-search-layout.js?v=bmSearch24";
+import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums, styleAutoSearchMoreCard } from "./auto-search-drums.js?v=bmSearch24";
 import {
   mountDetailedSearch,
   readDetailedSearchValues,
   resetDetailedSearch,
-} from "./auto-detailed-search.js?v=bmSearch23";
+} from "./auto-detailed-search.js?v=bmSearch24";
 import { readWheel } from "./ingatlan-wheels.js?v=mobFix8";
 import { readBrandModelFilterValues, mountAutoBrandModelPicker } from "./auto-brand-model-picker.js?v=bmSearch1";
 import { readFuelFilterValues, mountAutoFuelPicker } from "./auto-fuel-picker.js?v=catMenu1";
@@ -361,13 +361,6 @@ export function initHomeQuickSearch({ onSearch = () => {}, onFilterPreview, onDe
           } catch (drumError) {
             console.warn("Kereső dobkerék:", drumError);
           }
-          if (page === "teherauto") {
-            try {
-              await mountAutoKivitelPicker(form);
-            } catch (kivitelError) {
-              console.warn("Kivitel picker:", kivitelError);
-            }
-          }
         } else {
           /* Single path with onDeskLayout — avoids double Gyártmány/Modell (+ Típus) rows. */
           await mountDeskFilterMenu(form);
@@ -418,7 +411,6 @@ export function initHomeQuickSearch({ onSearch = () => {}, onFilterPreview, onDe
         try {
           await applyAutoSearchLayout(form, { force: true }).catch(() => null);
           await mountAutoSearchDrums(form);
-          if (page === "teherauto") await mountAutoKivitelPicker(form);
           recovered = qsHasFields();
           if (!recovered) {
             form.querySelectorAll(".home-qs-static-legacy").forEach((el) => {
@@ -450,4 +442,4 @@ export function initHomeQuickSearch({ onSearch = () => {}, onFilterPreview, onDe
   };
 }
 
-export { readDetailedSearchValues } from "./auto-detailed-search.js?v=bmSearch23";
+export { readDetailedSearchValues } from "./auto-detailed-search.js?v=bmSearch24";

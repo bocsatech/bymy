@@ -1,7 +1,14 @@
 
 import { readWheel, readWheelList, setWheelValue, fillWheel } from "./ingatlan-wheels.js?v=immoClearAll2";
 import { closeAllInlineDrums, syncDrumWheelDisplay } from "./immo-drum-picker.js?v=immoAdFormMenu1";
-import { UZEMANYAG_CATEGORIES, flattenUzemanyagOptions, ALLAPOT_CATEGORIES, flattenAllapotOptions } from "./equipment-data.js";
+import {
+  UZEMANYAG_CATEGORIES,
+  flattenUzemanyagOptions,
+  ALLAPOT_CATEGORIES,
+  flattenAllapotOptions,
+  TEHER_35_KIVITEL_CATEGORIES,
+  flattenTeher35KivitelOptions,
+} from "./equipment-data.js?v=kisteherHa1";
 
 const ITEM_H = 52;
 const MULTI_VISIBLE = 10;
@@ -2613,6 +2620,28 @@ export function openAutoDrumSheet(wheel, trigger, { sheetItems = null, form = nu
   if (multiple && wheelKey === "allapot") {
     openHierarchyCategorySheet(wheel, trigger, emptyLabel, ALLAPOT_CATEGORIES, flattenAllapotOptions);
     return;
+  }
+
+  if (
+    multiple &&
+    wheelKey === "kivitel" &&
+    document.body?.getAttribute("data-site-page") === "teherauto"
+  ) {
+    const truckKat =
+      document.body?.dataset?.truckKategoria ||
+      document.querySelector("[data-truck-tab].is-active")?.getAttribute("data-truck-tab") ||
+      new URLSearchParams(window.location.search).get("kategoria") ||
+      "35-alatt";
+    if (truckKat === "35-alatt" || truckKat === "35-ig") {
+      openHierarchyCategorySheet(
+        wheel,
+        trigger,
+        emptyLabel,
+        TEHER_35_KIVITEL_CATEGORIES,
+        flattenTeher35KivitelOptions
+      );
+      return;
+    }
   }
 
   if (multiple) {

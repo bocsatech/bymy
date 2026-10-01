@@ -58,9 +58,8 @@ function useKisteherKivitelCategories() {
 }
 
 function shouldMountKivitelPicker() {
-  if (!isVehicleSearchPage()) return false;
-  if (useKisteherKivitelCategories()) return true;
-  return isAutoDesk();
+  /* Desk BM panel only — mobile uses drum/switch sheet (same open chrome as személyautó). */
+  return isVehicleSearchPage() && isAutoDesk();
 }
 
 function flatOptionsForPage() {
@@ -344,7 +343,7 @@ function openPanel() {
 }
 
 async function openMobileDrum() {
-  const { openStandaloneSwitchSheet } = await import("./auto-drum-sheet.js?v=brandDrum29");
+  const { openStandaloneSwitchSheet } = await import("./auto-drum-sheet.js?v=brandDrum30");
   if (hierarchical) {
     openStandaloneSwitchSheet({
       trigger: openBtn,

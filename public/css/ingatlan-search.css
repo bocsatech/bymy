@@ -1430,8 +1430,17 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   flex-direction: column;
   align-items: center;
   gap: 0.55rem;
-  transform: translate(-50%, -50%);
+  /* Nincs alap translate(-50%) — sheetnél jobbra/balra csúsztatott. Centerezés csak non-sheet osztályon. */
+  transform: none;
   pointer-events: auto;
+}
+
+.auto-drum-portal__stage--split,
+.auto-drum-portal__stage--single,
+.auto-drum-portal__stage--date3 {
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .auto-drum-portal .immo-drum-wheel-ring,
@@ -1590,11 +1599,13 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   /* Ne 100vw + left:50% — iOS-on / túlcsorduló body-nál elcsúszik, a Kész leesik. */
   --sheet-head-h: calc(3.65rem + env(safe-area-inset-top, 0px));
   --sheet-foot-h: 0.75rem;
+  position: fixed !important;
   left: 0 !important;
   right: 0 !important;
   top: 0 !important;
   bottom: 0 !important;
   transform: none !important;
+  margin: 0 !important;
   width: 100% !important;
   max-width: 100% !important;
   height: 100% !important;
@@ -1606,7 +1617,6 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   border-radius: 0;
   box-shadow: none;
   overflow: hidden !important;
-  position: absolute;
   touch-action: manipulation;
 }
 
@@ -2836,6 +2846,13 @@ body.auto-drum-sheet-open {
   overflow-x: hidden !important;
   overscroll-behavior: none;
   touch-action: none;
+  /* iOS: position:fixed + left:0 — kattintáskor ne csússzon jobbra a viewport */
+  position: fixed !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
 }
 
 html:has(body.auto-drum-portal-open),

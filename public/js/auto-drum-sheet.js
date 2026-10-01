@@ -378,8 +378,12 @@ export function closeAutoDrumSheet(commit = false) {
   } = activePortal;
   const resetPageAfterClose = () => {
     document.body.classList.remove("auto-drum-portal-open", "auto-drum-sheet-open");
-    lockSheetPageAxes();
-    requestAnimationFrame(() => lockSheetPageAxes());
+    unlockSheetPageAxes();
+    requestAnimationFrame(() => {
+      unlockSheetPageAxes();
+      document.documentElement.scrollLeft = 0;
+      document.body.scrollLeft = 0;
+    });
   };
   if (!wheel && kind !== "split" && kind !== "date3" && kind !== "ym-sheet" && kind !== "tire-sheet") {
     /* Standalone sheet — done handler already owns commit. */
@@ -947,17 +951,51 @@ function applySheetStageLayout(stage) {
   lockSheetWhiteToBlue(root, stage);
 }
 
+let sheetScrollLockY = 0;
+
 function lockSheetPageAxes() {
   try {
     const y = window.scrollY || window.pageYOffset || 0;
+    sheetScrollLockY = y;
+    document.documentElement.scrollLeft = 0;
+    document.body.scrollLeft = 0;
+    /* iOS/Android: body fixed + left:0 — menü nyitáskor ne csússzon jobbra. */
+    document.body.style.setProperty("position", "fixed", "important");
+    document.body.style.setProperty("top", `-${y}px`, "important");
+    document.body.style.setProperty("left", "0", "important");
+    document.body.style.setProperty("right", "0", "important");
+    document.body.style.setProperty("width", "100%", "important");
+    document.body.style.setProperty("max-width", "100%", "important");
+    document.body.style.setProperty("margin-left", "0", "important");
+    document.body.style.setProperty("margin-right", "0", "important");
+    document.body.style.setProperty("overflow", "hidden", "important");
+    document.body.style.setProperty("overflow-x", "hidden", "important");
+    document.documentElement.style.setProperty("overflow-x", "hidden", "important");
+    window.scrollTo(0, 0);
+    document.documentElement.scrollLeft = 0;
+    document.body.scrollLeft = 0;
+  } catch {
+    /* ignore */
+  }
+}
+
+function unlockSheetPageAxes() {
+  try {
+    document.body.style.removeProperty("position");
+    document.body.style.removeProperty("top");
+    document.body.style.removeProperty("left");
+    document.body.style.removeProperty("right");
+    document.body.style.removeProperty("width");
+    document.body.style.removeProperty("max-width");
+    document.body.style.removeProperty("margin-left");
+    document.body.style.removeProperty("margin-right");
+    document.body.style.removeProperty("overflow");
+    document.body.style.removeProperty("overflow-x");
+    document.documentElement.style.removeProperty("overflow-x");
+    const y = sheetScrollLockY || 0;
     window.scrollTo(0, y);
     document.documentElement.scrollLeft = 0;
     document.body.scrollLeft = 0;
-    if (window.visualViewport) {
-      /* iOS: ha a visualViewport el van tolva, a fixed overlay is „csúszik”. */
-      document.documentElement.scrollLeft = 0;
-      document.body.scrollLeft = 0;
-    }
   } catch {
     /* ignore */
   }
@@ -965,11 +1003,14 @@ function lockSheetPageAxes() {
 
 function mountSheetPortalChrome(root, { stage, wrap, trigger, ring, sheetScroll }) {
   lockSheetPageAxes();
+  root.style.setProperty("position", "fixed", "important");
   root.style.setProperty("left", "0", "important");
   root.style.setProperty("right", "0", "important");
   root.style.setProperty("top", "0", "important");
   root.style.setProperty("bottom", "0", "important");
   root.style.setProperty("width", "100%", "important");
+  root.style.setProperty("max-width", "100%", "important");
+  root.style.setProperty("margin", "0", "important");
   root.style.setProperty("transform", "none", "important");
   document.body.appendChild(root);
   document.body.classList.add("auto-drum-portal-open", "auto-drum-sheet-open");
@@ -978,7 +1019,23 @@ function mountSheetPortalChrome(root, { stage, wrap, trigger, ring, sheetScroll 
   (wrap?.closest(".immo-dual-range__half") || wrap?.closest(".immo-schema-cell"))?.classList.add("is-drum-active");
   trigger?.setAttribute("aria-expanded", "true");
   applySheetStageLayout(stage);
+  if (stage) {
+    const ym = Boolean(stage.closest?.(".auto-drum-portal--ym"));
+    const desk = window.matchMedia("(min-width: 901px)").matches;
+    stage.style.setProperty("position", desk ? "absolute" : "fixed", "important");
+    stage.style.setProperty("left", "0", "important");
+    stage.style.setProperty("right", "0", "important");
+    if (!(ym && desk)) {
+      stage.style.setProperty("transform", "none", "important");
+      stage.style.setProperty("margin-left", desk ? "auto" : "0", "important");
+      stage.style.setProperty("margin-right", desk ? "auto" : "0", "important");
+    }
+  }
   lockSheetPageAxes();
+  requestAnimationFrame(() => {
+    applySheetStageLayout(stage);
+    lockSheetPageAxes();
+  });
   const scroll = sheetScroll || root.querySelector?.("[data-sheet-scroll]");
   if (scroll) {
     scroll.style.overflow = "hidden";

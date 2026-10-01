@@ -1,7 +1,7 @@
 import Foundation
 
 enum AuthAPI {
-    struct RemoteUser: Decodable, Equatable {
+    struct RemoteUser: Codable, Equatable {
         let id: Int
         let email: String
         let displayName: String
@@ -109,6 +109,18 @@ enum AuthAPI {
         // Ha csak profile jön vissza, frissítsük a meglévő me-t
         let me = try await me(token: token)
         return me
+    }
+
+    static func deleteAccount(token: String) async throws {
+        let (data, http) = try await APIClient.request("api/auth/account", method: "DELETE", token: token)
+        struct DeleteResponse: Decodable { let ok: Bool?; let error: String? }
+        let decoded = try? JSONDecoder().decode(DeleteResponse.self, from: data)
+        if http.statusCode == 401 {
+            throw APIClient.APIError.unauthorized(decoded?.error ?? "Nem vagy bejelentkezve.")
+        }
+        guard http.statusCode < 400 else {
+            throw APIClient.APIError.server(decoded?.error ?? "Fiók törlése sikertelen.")
+        }
     }
 
     static func changePassword(

@@ -1,4 +1,6 @@
+import PhotosUI
 import SwiftUI
+import UIKit
 
 // MARK: - Saját hirdetések
 
@@ -696,6 +698,7 @@ struct PartnerProfileScreen: View {
 
 struct PersonalDataScreen: View {
     @EnvironmentObject private var auth: AuthStore
+    @EnvironmentObject private var router: AppRouter
 
     @State private var firstName = ""
     @State private var lastName = ""
@@ -704,43 +707,168 @@ struct PersonalDataScreen: View {
     @State private var city = ""
     @State private var country = "Magyarország"
     @State private var phone = ""
+
+    @State private var localFullName = ""
+    @State private var localBirthName = ""
+    @State private var localBirthPlace = ""
+    @State private var localBirthDate = ""
+    @State private var localMotherName = ""
+    @State private var localIdDocType = ""
+    @State private var localIdDocNumber = ""
+    @State private var localHomeAddress = ""
+    @State private var localCitizenship = ""
+    @State private var localCompanyName = ""
+    @State private var localCompanySeat = ""
+    @State private var localCompanyRegistry = ""
+    @State private var localRepresentative = ""
+
+    @State private var avatarPickerItem: PhotosPickerItem?
+    @State private var avatarBusy = false
+    @State private var avatarFlash = ""
+    @State private var avatarFlashOk = false
+
     @State private var busy = false
     @State private var flash = ""
     @State private var flashOk = false
 
+    @State private var confirmDelete = false
+    @State private var deleteBusy = false
+    @State private var deleteError = ""
+    @State private var showDeleteWebFallback = false
+
+    private var isCompany: Bool {
+        BymyAccountTypeLabels.isCompany(auth.user?.profile.accountType)
+    }
+
+    private var avatarDataURL: String? {
+        auth.user?.profile.avatarDataUrl
+    }
+
+    private var hasAvatar: Bool {
+        guard let raw = avatarDataURL?.trimmingCharacters(in: .whitespacesAndNewlines), !raw.isEmpty else {
+            return false
+        }
+        return true
+    }
+
     var body: some View {
         Form {
             Section {
-                HStack(spacing: 14) {
+                HStack(alignment: .top, spacing: 14) {
                     ProfileAvatarView(
                         letter: auth.avatarLetter,
-                        dataURL: auth.user?.profile.avatarDataUrl,
-                        size: 64
+                        dataURL: avatarDataURL,
+                        size: 72
                     )
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(auth.user?.email ?? "")
-                            .font(.system(size: 14, weight: .semibold))
-                        Text("A fióktípus regisztrációkor rögzül.")
-                            .font(.system(size: 12))
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(profileSummary)
+                            .font(.system(size: 15, weight: .bold))
+                        Text("Töltsd ki a neved, majd Mentés.")
+                            .font(.system(size: 13))
                             .foregroundStyle(AppTheme.textSecondary)
+                        HStack(spacing: 12) {
+                            PhotosPicker(selection: $avatarPickerItem, matching: .images) {
+                                Text(hasAvatar ? "Csere" : "Feltöltés")
+                                    .font(.system(size: 14, weight: .bold))
+                                    .foregroundStyle(AppTheme.accent)
+                            }
+                            .disabled(avatarBusy)
+                            if hasAvatar {
+                                Button("Törlés") {
+                                    Task { await removeAvatar() }
+                                }
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundStyle(.red)
+                                .disabled(avatarBusy)
+                            }
+                        }
+                        if avatarBusy {
+                            ProgressView().scaleEffect(0.85)
+                        }
+                        if !avatarFlash.isEmpty {
+                            Text(avatarFlash)
+                                .font(.system(size: 12))
+                                .foregroundStyle(avatarFlashOk ? .green : .red)
+                        }
                     }
                 }
             }
 
             Section("Név") {
-                TextField("Vezetéknév", text: $lastName)
-                TextField("Keresztnév", text: $firstName)
+                TextField("Vezetéknév *", text: $lastName)
+                TextField("Keresztnév *", text: $firstName)
             }
-            Section("Cím") {
-                TextField("Utca, házszám", text: $street)
-                TextField("Irányítószám", text: $postalCode)
-                    .keyboardType(.numberPad)
-                TextField("Település", text: $city)
-                TextField("Ország", text: $country)
+
+            if isCompany {
+                Section("Cím") {
+                    TextField("Utca, házszám", text: $street)
+                    TextField("Irányítószám", text: $postalCode)
+                        .keyboardType(.numberPad)
+                    TextField("Település", text: $city)
+                    TextField("Ország", text: $country)
+                }
+            } else {
+                Section {
+                    Text("Magánfióknál az utca a lenti szerződéses lakcímben mentődik a telefonra.")
+                        .font(.system(size: 12))
+                        .foregroundStyle(AppTheme.textSecondary)
+                }
+                Section("Cím") {
+                    TextField("Irányítószám *", text: $postalCode)
+                        .keyboardType(.numberPad)
+                    TextField("Település *", text: $city)
+                    TextField("Ország", text: $country)
+                }
             }
+
             Section("Elérhetőség") {
-                TextField("Telefon", text: $phone)
+                TextField("Telefon *", text: $phone)
                     .keyboardType(.phonePad)
+                HStack {
+                    Text("Email")
+                    Spacer()
+                    Text(auth.user?.email ?? "")
+                        .foregroundStyle(AppTheme.textSecondary)
+                        .multilineTextAlignment(.trailing)
+                }
+            }
+
+            Section("Fióktípus") {
+                Text(BymyAccountTypeLabels.lockedLabel(auth.user?.profile.accountType))
+                    .foregroundStyle(AppTheme.text)
+                Text("A fióktípus regisztrációkor rögzül, később nem módosítható.")
+                    .font(.system(size: 12))
+                    .foregroundStyle(AppTheme.textSecondary)
+            }
+
+            Section {
+                Text("Szerződéses adatok")
+                    .font(.headline)
+                Text("Adásvételi szerződéshez. Ezek az adatok csak a mobilalkalmazásban tárolódnak, a Bymy szerverre nem kerülnek.")
+                    .font(.system(size: 12))
+                    .foregroundStyle(AppTheme.textSecondary)
+            }
+
+            if isCompany {
+                Section("Cég") {
+                    TextField("Név", text: $localCompanyName)
+                    TextField("Székhely", text: $localCompanySeat)
+                    TextField("Cégjegyzék vagy nyilvántartási szám", text: $localCompanyRegistry)
+                    TextField("Képviselő neve", text: $localRepresentative)
+                }
+            } else {
+                Section("Magánszemély") {
+                    TextField("Név (családi és utónév)", text: $localFullName)
+                    TextField("Születéskori név (családi és utónév)", text: $localBirthName)
+                    TextField("Születési hely", text: $localBirthPlace)
+                    TextField("Születési idő", text: $localBirthDate)
+                        .keyboardType(.numbersAndPunctuation)
+                    TextField("Anyja neve (családi és utónév)", text: $localMotherName)
+                    TextField("Személyi okmány típusa", text: $localIdDocType, prompt: Text("pl. személyi igazolvány"))
+                    TextField("Okmány száma", text: $localIdDocNumber)
+                    TextField("Lakcíme", text: $localHomeAddress)
+                    TextField("Állampolgársága", text: $localCitizenship, prompt: Text("magyar"))
+                }
             }
 
             if !flash.isEmpty {
@@ -753,12 +881,67 @@ struct PersonalDataScreen: View {
                 Button {
                     Task { await save() }
                 } label: {
-                    if busy { ProgressView() } else { Text("Mentés").fontWeight(.semibold) }
+                    if busy {
+                        ProgressView()
+                    } else {
+                        Text("Adatok mentése").fontWeight(.semibold)
+                    }
                 }
                 .disabled(busy)
             }
+
+            Section {
+                Button(role: .destructive) {
+                    confirmDelete = true
+                } label: {
+                    if deleteBusy {
+                        ProgressView()
+                    } else {
+                        Text("Fiók törlése")
+                            .frame(maxWidth: .infinity, alignment: .center)
+                    }
+                }
+                .disabled(deleteBusy)
+            }
         }
         .onAppear(perform: load)
+        .onChange(of: avatarPickerItem) { _, item in
+            guard let item else { return }
+            Task {
+                await uploadAvatar(from: item)
+                avatarPickerItem = nil
+            }
+        }
+        .confirmationDialog(
+            "Biztosan törölni szeretnéd a fiókodat?",
+            isPresented: $confirmDelete,
+            titleVisibility: .visible
+        ) {
+            Button("Fiók törlése", role: .destructive) {
+                Task { await deleteAccount() }
+            }
+            Button("Mégse", role: .cancel) {}
+        } message: {
+            Text("Ez véglegesen törli a fiókodat.")
+        }
+        .alert("Törlés a weben", isPresented: $showDeleteWebFallback) {
+            Button("Megnyitás") {
+                if let url = URL(string: "https://bymy.hu/beallitasok.html?szekcio=szemelyes") {
+                    UIApplication.shared.open(url)
+                }
+            }
+            Button("Mégse", role: .cancel) {}
+        } message: {
+            Text(deleteError.isEmpty ? "A fióktörlés most nem érhető el az appban." : deleteError)
+        }
+    }
+
+    private var profileSummary: String {
+        let ln = lastName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let fn = firstName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let composed = [ln, fn].filter { !$0.isEmpty }.joined(separator: " ")
+        if !composed.isEmpty { return composed }
+        return auth.user?.email.split(separator: "@").first.map(String.init) ?? "Fiók"
     }
 
     private func load() {
@@ -770,29 +953,187 @@ struct PersonalDataScreen: View {
         city = p?.city ?? ""
         country = (p?.country?.isEmpty == false) ? (p?.country ?? "Magyarország") : "Magyarország"
         phone = p?.phone ?? ""
+
+        guard let email = auth.user?.email else { return }
+        let identity = DeviceContractIdentityStore.load(email: email)
+        localFullName = identity.fullName
+        localBirthName = identity.birthName
+        localBirthPlace = identity.birthPlace
+        localBirthDate = identity.birthDate
+        localMotherName = identity.motherName
+        localIdDocType = identity.idDocType
+        localIdDocNumber = identity.idDocNumber
+        localHomeAddress = identity.homeAddress
+        localCitizenship = identity.citizenship
+        localCompanyName = identity.companyName
+        localCompanySeat = identity.companySeat
+        localCompanyRegistry = identity.companyRegistry
+        localRepresentative = identity.representative
+
+        if isCompany {
+            if localCompanyName.isEmpty, let company = p?.company?.trimmingCharacters(in: .whitespacesAndNewlines), !company.isEmpty {
+                localCompanyName = company
+            }
+            if localRepresentative.isEmpty {
+                let composed = [p?.lastName, p?.firstName]
+                    .compactMap { $0?.trimmingCharacters(in: .whitespacesAndNewlines) }
+                    .filter { !$0.isEmpty }
+                    .joined(separator: " ")
+                if !composed.isEmpty { localRepresentative = composed }
+            }
+        } else if localFullName.isEmpty {
+            let composed = [p?.lastName, p?.firstName]
+                .compactMap { $0?.trimmingCharacters(in: .whitespacesAndNewlines) }
+                .filter { !$0.isEmpty }
+                .joined(separator: " ")
+            if !composed.isEmpty { localFullName = composed }
+        }
+    }
+
+    private func deviceIdentityFromForm() -> DeviceContractIdentity {
+        var id = DeviceContractIdentity(
+            fullName: localFullName,
+            birthName: localBirthName,
+            birthPlace: localBirthPlace,
+            birthDate: localBirthDate,
+            motherName: localMotherName,
+            idDocType: localIdDocType,
+            idDocNumber: localIdDocNumber,
+            homeAddress: localHomeAddress,
+            citizenship: localCitizenship,
+            companyName: localCompanyName,
+            companySeat: localCompanySeat,
+            companyRegistry: localCompanyRegistry,
+            representative: localRepresentative,
+            street: localHomeAddress
+        )
+        id.normalize()
+        return DeviceContractIdentityStore.forAccountKind(id, company: isCompany)
     }
 
     private func save() async {
-        guard let token = auth.token else { return }
+        guard let token = auth.token, let email = auth.user?.email else { return }
+
+        let fn = firstName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let ln = lastName.trimmingCharacters(in: .whitespacesAndNewlines)
+        if fn.isEmpty || ln.isEmpty {
+            flash = "Keresztnév és vezetéknév kötelező."
+            flashOk = false
+            return
+        }
+
+        var postal = postalCode.filter(\.isNumber)
+        if postal.count > 4 { postal = String(postal.prefix(4)) }
+
+        if !isCompany {
+            let cityTrim = city.trimmingCharacters(in: .whitespacesAndNewlines)
+            let phoneTrim = phone.trimmingCharacters(in: .whitespacesAndNewlines)
+            if postal.count != 4 {
+                flash = "Az irányítószám kötelező (4 számjegy)."
+                flashOk = false
+                return
+            }
+            if cityTrim.isEmpty {
+                flash = "A település kötelező."
+                flashOk = false
+                return
+            }
+            if phoneTrim.isEmpty {
+                flash = "A telefonszám kötelező."
+                flashOk = false
+                return
+            }
+        }
+
         busy = true
         flash = ""
         defer { busy = false }
+
+        DeviceContractIdentityStore.save(email: email, identity: deviceIdentityFromForm())
+
         do {
             var profile = auth.user?.profile ?? AuthAPI.RemoteProfile()
-            profile.firstName = firstName.trimmingCharacters(in: .whitespacesAndNewlines)
-            profile.lastName = lastName.trimmingCharacters(in: .whitespacesAndNewlines)
-            profile.street = street.trimmingCharacters(in: .whitespacesAndNewlines)
-            profile.postalCode = postalCode.trimmingCharacters(in: .whitespacesAndNewlines)
+            profile.firstName = fn
+            profile.lastName = ln
+            profile.postalCode = postal
             profile.city = city.trimmingCharacters(in: .whitespacesAndNewlines)
             profile.country = country.trimmingCharacters(in: .whitespacesAndNewlines)
             profile.phone = phone.trimmingCharacters(in: .whitespacesAndNewlines)
+            if isCompany {
+                profile.street = street.trimmingCharacters(in: .whitespacesAndNewlines)
+            } else {
+                profile.street = ""
+            }
             let user = try await AuthAPI.saveProfile(token: token, profile: profile)
             auth.apply(token: token, user: user)
-            flash = "Mentve."
+            flash = "Adatok mentve: \(ln) \(fn). Szerződéses adatok a telefonon mentve."
             flashOk = true
         } catch {
             flash = error.localizedDescription
             flashOk = false
+        }
+    }
+
+    private func uploadAvatar(from item: PhotosPickerItem) async {
+        guard let token = auth.token else { return }
+        avatarBusy = true
+        avatarFlash = ""
+        defer { avatarBusy = false }
+        do {
+            guard let data = try await item.loadTransferable(type: Data.self),
+                  let image = UIImage(data: data) else {
+                avatarFlash = "A képet nem sikerült beolvasni."
+                avatarFlashOk = false
+                return
+            }
+            guard let dataUrl = AvatarImageProcessing.jpegDataURL(from: image) else {
+                avatarFlash = "A képet nem sikerült feldolgozni."
+                avatarFlashOk = false
+                return
+            }
+            var profile = auth.user?.profile ?? AuthAPI.RemoteProfile()
+            profile.avatarDataUrl = dataUrl
+            let user = try await AuthAPI.saveProfile(token: token, profile: profile)
+            auth.apply(token: token, user: user)
+            avatarFlash = "Profilkép feltöltve."
+            avatarFlashOk = true
+        } catch {
+            avatarFlash = error.localizedDescription
+            avatarFlashOk = false
+        }
+    }
+
+    private func removeAvatar() async {
+        guard let token = auth.token else { return }
+        avatarBusy = true
+        avatarFlash = ""
+        defer { avatarBusy = false }
+        do {
+            var profile = auth.user?.profile ?? AuthAPI.RemoteProfile()
+            profile.avatarDataUrl = ""
+            let user = try await AuthAPI.saveProfile(token: token, profile: profile)
+            auth.apply(token: token, user: user)
+            avatarFlash = "Profilkép törölve."
+            avatarFlashOk = true
+        } catch {
+            avatarFlash = error.localizedDescription
+            avatarFlashOk = false
+        }
+    }
+
+    private func deleteAccount() async {
+        guard let token = auth.token else { return }
+        deleteBusy = true
+        deleteError = ""
+        defer { deleteBusy = false }
+        do {
+            try await AuthAPI.deleteAccount(token: token)
+            auth.clearSession()
+            router.openFiokSection(nil)
+            router.selectBottom(.home, isLoggedIn: false)
+        } catch {
+            deleteError = error.localizedDescription
+            showDeleteWebFallback = true
         }
     }
 }

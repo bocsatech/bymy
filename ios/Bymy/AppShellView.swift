@@ -1,7 +1,7 @@
 import SwiftUI
 
-/// Mobil web héj: felső sáv + iOS lapozás + alsó tab.
-/// Hirdetés = ugyanazon a stacken push (nem külön ablak / sheet).
+/// Mobil web héj: felső sáv + lapozás + alsó tab.
+/// Tartalomoldalak = webes HTML 1:1 (native embed), hirdetés push a stacken.
 struct AppShellView: View {
     @EnvironmentObject private var auth: AuthStore
     @EnvironmentObject private var router: AppRouter
@@ -28,10 +28,8 @@ struct AppShellView: View {
                 get: { router.openListingId.map(ListingNavID.init(id:)) },
                 set: { router.openListingId = $0?.id }
             )) { item in
-                ListingDetailScreen(listingId: item.id) { detail in
-                    Task { await router.openMessage(for: detail, token: auth.token) }
-                }
-                .toolbar(.visible, for: .navigationBar)
+                ListingWebDetailScreen(listingId: item.id)
+                    .toolbar(.visible, for: .navigationBar)
             }
             .navigationDestination(item: $router.openChat) { conv in
                 ChatScreen(conversation: conv)
@@ -39,6 +37,7 @@ struct AppShellView: View {
             }
             .navigationDestination(item: $router.openFiokSection) { section in
                 FiokSectionScreen(section: section)
+                    .environmentObject(auth)
             }
         }
     }
@@ -46,15 +45,48 @@ struct AppShellView: View {
     @ViewBuilder
     private var mainContent: some View {
         switch router.bottomTab {
-        case .home, .feed:
+        case .home:
             TopPagesPager()
+        case .feed:
+            NativeWebPage(page: .ajanlasok)
         case .search:
-            // Legacy fallback — a tab Autóra irányít
-            CategorySearchScreen(title: "Autó", category: "auto")
+            NativeWebPage(page: .auto)
         case .post:
-            PostAdScreen()
+            if auth.isLoggedIn {
+                NativeWebPage(page: .post)
+            } else {
+                VStack(spacing: 14) {
+                    Text("A feladáshoz be kell jelentkezned.")
+                        .multilineTextAlignment(.center)
+                        .foregroundStyle(AppTheme.textSecondary)
+                    Button("Belépés") { router.showLogin = true }
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 24)
+                        .padding(.vertical, 12)
+                        .background(AppTheme.accent)
+                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
         case .account:
-            AccountScreen()
+            if auth.isLoggedIn {
+                AccountScreen()
+            } else {
+                VStack(spacing: 14) {
+                    Text("A fiókhoz be kell jelentkezned.")
+                        .multilineTextAlignment(.center)
+                        .foregroundStyle(AppTheme.textSecondary)
+                    Button("Belépés") { router.showLogin = true }
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 24)
+                        .padding(.vertical, 12)
+                        .background(AppTheme.accent)
+                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
         }
     }
 }
@@ -84,15 +116,15 @@ struct TopPagesPager: View {
     private func pageView(_ page: TopPage) -> some View {
         switch page {
         case .hub:
-            HubHomeScreen()
+            NativeWebPage(page: .hub)
         case .auto:
-            CategorySearchScreen(title: "Autó", category: "auto")
+            NativeWebPage(page: .auto)
         case .teherauto:
-            CategorySearchScreen(title: "Teherautó", category: "teherauto")
+            NativeWebPage(page: .teherauto)
         case .ingatlan:
-            CategorySearchScreen(title: "Ingatlan", category: "ingatlan")
+            NativeWebPage(page: .ingatlan)
         case .ajanlasok:
-            RecommendationsScreen()
+            NativeWebPage(page: .ajanlasok)
         }
     }
 }

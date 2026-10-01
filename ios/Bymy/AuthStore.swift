@@ -62,6 +62,10 @@ final class AuthStore: ObservableObject {
         if let token {
             await AuthAPI.logout(token: token)
         }
+        clearSession()
+    }
+
+    func clearSession() {
         UserDefaults.standard.removeObject(forKey: Self.tokenKey)
         token = nil
         user = nil

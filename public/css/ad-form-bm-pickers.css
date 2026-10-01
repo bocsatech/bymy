@@ -1801,68 +1801,20 @@ html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] #ad-form
   color: #f9fafb !important;
 }
 
-/* ——— Gumi méretek: osztott kapcsos menük (aláhúzás, nem cella) ——— */
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .tire-row.tire-row--kapcsol,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form #tire-sizes-card .tire-row.tire-row--kapcsol {
-  display: flex !important;
-  flex-flow: row nowrap !important;
-  align-items: flex-end !important;
-  gap: 0.35rem !important;
+/* ——— Gumi méretek: műszaki érvényesség-stílusú summary (aláhúzás) ——— */
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-tire-split,
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form #tire-sizes-card .ad-form-tire-split {
   width: 100% !important;
   max-width: 100% !important;
   min-width: 0 !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .tire-row.tire-row--kapcsol > .ad-form-bm-field--drum,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form #tire-sizes-card .tire-row.tire-row--kapcsol > .ad-form-bm-field--drum {
-  flex: 1 1 0 !important;
-  width: auto !important;
-  min-width: 0 !important;
-  max-width: none !important;
-  margin: 0 !important;
-  padding: 0 !important;
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .tire-block .ad-form-tire-split,
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form #tire-sizes-card .tire-block .ad-form-tire-split {
+  margin-top: 0.15rem !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .tire-row.tire-row--kapcsol > span,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form #tire-sizes-card .tire-row.tire-row--kapcsol > span {
-  flex: 0 0 auto !important;
-  padding: 0 0.1rem 0.45rem !important;
-  color: #64748b !important;
-  font: 600 0.95rem/1 system-ui, sans-serif !important;
-}
-
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .tire-row.tire-row--kapcsol .ad-form-drum-wrap,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .tire-row.tire-row--kapcsol .immo-wheel-wrap,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form #tire-sizes-card .tire-row.tire-row--kapcsol .ad-form-drum-wrap,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form #tire-sizes-card .tire-row.tire-row--kapcsol .immo-wheel-wrap {
-  border: 0 !important;
-  border-bottom: 1.5px solid #cfd6dd !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
-  min-height: 2.65rem !important;
-  height: auto !important;
-  padding: 0 !important;
-}
-
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .tire-row.tire-row--kapcsol .immo-wheel-trigger,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form #tire-sizes-card .tire-row.tire-row--kapcsol .immo-wheel-trigger {
-  border: 0 !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
-  padding: 0.45rem 0.1rem 0.5rem !important;
-  min-height: 2.5rem !important;
-  font: 500 1rem/1.3 system-ui, sans-serif !important;
-  color: #0f172a !important;
-  text-align: center !important;
-}
-
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .tire-row.tire-row--kapcsol .ad-form-bm-field--drum:not(.has-value) .immo-wheel-trigger {
-  color: #667085 !important;
-}
-
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .tire-row.tire-row--kapcsol select.ad-form-bm-native,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .tire-row.tire-row--kapcsol select[hidden] {
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-tire-split select.ad-form-bm-native,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-tire-split select[hidden] {
   display: none !important;
 }

@@ -1946,6 +1946,15 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   font: 500 1.12rem/1 system-ui, sans-serif;
 }
 
+/* Gumi: YM sheet chrome + 3 oszlop */
+.auto-drum-portal--sheet.auto-drum-portal--ym.auto-drum-portal--tire .auto-drum-ym__heads.auto-drum-tire__heads {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.auto-drum-portal--sheet.auto-drum-portal--ym.auto-drum-portal--tire .auto-drum-ym__cols.auto-drum-tire__cols {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
 @media (max-width: 900px) {
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-toggle input:checked + .auto-bm-switch {
     background: #16a34a !important;

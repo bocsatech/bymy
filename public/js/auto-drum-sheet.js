@@ -376,7 +376,7 @@ export function closeAutoDrumSheet(commit = false) {
     monthScroll,
     dayScroll,
   } = activePortal;
-  if (!wheel && kind !== "split" && kind !== "date3" && kind !== "ym-sheet") {
+  if (!wheel && kind !== "split" && kind !== "date3" && kind !== "ym-sheet" && kind !== "tire-sheet") {
     /* Standalone sheet — done handler already owns commit. */
     wrap?.classList.remove("is-open", "has-drum-open");
     trigger?.setAttribute("aria-expanded", "false");
@@ -408,6 +408,46 @@ export function closeAutoDrumSheet(commit = false) {
     wrap?.closest(".immo-dual-range, .ad-form-split-ym, .immo-triple-date")?.classList.remove("has-drum-open");
     document
       .querySelectorAll(".immo-dual-range__half.is-drum-active, .immo-triple-date__half.is-drum-active")
+      .forEach((el) => el.classList.remove("is-drum-active"));
+    trigger?.setAttribute("aria-expanded", "false");
+    root.remove();
+    activePortal = null;
+    document.body.classList.remove("auto-drum-portal-open", "auto-drum-sheet-open");
+    return;
+  }
+  if (kind === "tire-sheet") {
+    const {
+      widthWheel,
+      aspectWheel,
+      rimWheel,
+      widthScroll,
+      aspectScroll,
+      rimScroll,
+    } = activePortal;
+    if (commit && widthWheel && aspectWheel && rimWheel && widthScroll && aspectScroll && rimScroll && ring) {
+      let w = nearestPortalItem(widthScroll, ring)?.dataset.value ?? "";
+      let a = nearestPortalItem(aspectScroll, ring)?.dataset.value ?? "";
+      let r = nearestPortalItem(rimScroll, ring)?.dataset.value ?? "";
+      if (activePortal?.pendingW != null) w = String(activePortal.pendingW);
+      if (activePortal?.pendingA != null) a = String(activePortal.pendingA);
+      if (activePortal?.pendingR != null) r = String(activePortal.pendingR);
+      if (w) w = matchWheelOptionValue(widthWheel, w) || w;
+      if (a) a = matchWheelOptionValue(aspectWheel, a) || a;
+      if (r) r = matchWheelOptionValue(rimWheel, r) || r;
+      setWheelValue(widthWheel, w);
+      setWheelValue(aspectWheel, a);
+      setWheelValue(rimWheel, r);
+      syncDrumWheelDisplay(widthWheel);
+      syncDrumWheelDisplay(aspectWheel);
+      syncDrumWheelDisplay(rimWheel);
+      widthWheel.dispatchEvent(new CustomEvent("immo-wheel-change", { bubbles: true, detail: { value: w } }));
+      aspectWheel.dispatchEvent(new CustomEvent("immo-wheel-change", { bubbles: true, detail: { value: a } }));
+      rimWheel.dispatchEvent(new CustomEvent("immo-wheel-change", { bubbles: true, detail: { value: r } }));
+    }
+    wrap?.classList.remove("is-open", "has-drum-open");
+    wrap?.closest(".ad-form-split-ym, .ad-form-tire-split")?.classList.remove("has-drum-open");
+    document
+      .querySelectorAll(".immo-dual-range__half.is-drum-active, .ad-form-tire-split__half.is-drum-active")
       .forEach((el) => el.classList.remove("is-drum-active"));
     trigger?.setAttribute("aria-expanded", "false");
     root.remove();
@@ -1036,6 +1076,246 @@ export function openYmDualSheet(yearWheel, monthWheel, trigger, { title = null }
       scrollHalfToValue(yearScroll, pendingY);
       scrollHalfToValue(monthScroll, pendingM);
       paintBoth();
+    });
+  });
+}
+
+/**
+ * Gumi méret: műszaki érvényesség sheet chrome + 3 oszlop (szélesség / magasság R átmérő).
+ */
+export function openTireTripleSheet(widthWheel, aspectWheel, rimWheel, trigger, { title = null } = {}) {
+  if (!widthWheel || !aspectWheel || !rimWheel || !trigger) return;
+  closeAutoDrumSheet(false);
+  closeAllInlineDrums(false);
+
+  const dual =
+    widthWheel.closest(".ad-form-split-ym, .ad-form-tire-split") ||
+    aspectWheel.closest(".ad-form-split-ym, .ad-form-tire-split") ||
+    rimWheel.closest(".ad-form-split-ym, .ad-form-tire-split");
+  const wrap =
+    widthWheel.closest(".immo-wheel-wrap") ||
+    aspectWheel.closest(".immo-wheel-wrap") ||
+    rimWheel.closest(".immo-wheel-wrap");
+  const sheetTitle =
+    title ||
+    dual?.querySelector(".immo-dual-range__title, .immo-label")?.textContent?.trim() ||
+    trigger.getAttribute("aria-label") ||
+    "Gumi méret";
+  const widthEmpty =
+    dual?.querySelector(".ad-form-tire-split__half--width .immo-wheel-trigger")?.dataset.emptyLabel || "—";
+  const aspectEmpty =
+    dual?.querySelector(".ad-form-tire-split__half--aspect .immo-wheel-trigger")?.dataset.emptyLabel || "—";
+  const rimEmpty =
+    dual?.querySelector(".ad-form-tire-split__half--rim .immo-wheel-trigger")?.dataset.emptyLabel || "—";
+
+  let pendingW = String(readWheel(widthWheel) ?? "");
+  let pendingA = String(readWheel(aspectWheel) ?? "");
+  let pendingR = String(readWheel(rimWheel) ?? "");
+
+  const { root, stage, ring, sheetScroll, doneBtn, closeBtn } = createSheetPortalShell(sheetTitle);
+  root.classList.add("auto-drum-portal--ym", "auto-drum-portal--tire");
+  document.body.classList.add("auto-drum-sheet-open");
+
+  ring.innerHTML = `
+    <div class="auto-drum-ym__chips">
+      <button type="button" class="auto-drum-split__chip auto-drum-ym__chip" aria-label="Gumi méret">
+        <span class="auto-drum-split__chip-label"></span>
+        <span class="auto-drum-split__chip-clear" hidden aria-hidden="true">×</span>
+      </button>
+    </div>
+    <div class="auto-drum-ym__heads auto-drum-tire__heads" aria-hidden="true"><span>Szél.</span><span>Mag.</span><span>Átm.</span></div>
+    <div class="auto-drum-ym__body">
+      <div class="immo-drum-inline-highlight auto-drum-ym__highlight" aria-hidden="true"></div>
+      <div class="auto-drum-ym__cols auto-drum-tire__cols">
+        <div class="auto-drum-split__col" data-half="width">
+          <div class="auto-drum-portal__scroll auto-drum-split__scroll immo-drum-inline-scroll" tabindex="-1"></div>
+        </div>
+        <div class="auto-drum-split__col" data-half="aspect">
+          <div class="auto-drum-portal__scroll auto-drum-split__scroll immo-drum-inline-scroll" tabindex="-1"></div>
+        </div>
+        <div class="auto-drum-split__col" data-half="rim">
+          <div class="auto-drum-portal__scroll auto-drum-split__scroll immo-drum-inline-scroll" tabindex="-1"></div>
+        </div>
+      </div>
+    </div>`;
+
+  if (sheetScroll) {
+    sheetScroll.style.overflow = "hidden";
+    sheetScroll.scrollTop = 0;
+  }
+  ring.style.overflow = "hidden";
+
+  const highlight = root.querySelector(".auto-drum-ym__highlight");
+  const widthScroll = root.querySelector('.auto-drum-split__col[data-half="width"] .auto-drum-split__scroll');
+  const aspectScroll = root.querySelector('.auto-drum-split__col[data-half="aspect"] .auto-drum-split__scroll');
+  const rimScroll = root.querySelector('.auto-drum-split__col[data-half="rim"] .auto-drum-split__scroll');
+  const chip = root.querySelector(".auto-drum-ym__chip");
+
+  function itemHtml(row) {
+    return `<div class="immo-drum-inline-item" data-value="${escapeHtml(row.value)}"><span class="immo-drum-inline-text">${escapeHtml(row.label)}</span></div>`;
+  }
+
+  widthScroll.innerHTML = ymOptionRows(widthWheel, widthEmpty).map(itemHtml).join("");
+  aspectScroll.innerHTML = ymOptionRows(aspectWheel, aspectEmpty).map(itemHtml).join("");
+  rimScroll.innerHTML = ymOptionRows(rimWheel, rimEmpty).map(itemHtml).join("");
+
+  function formatTireChip(w, a, r) {
+    if (!w && !a && !r) return widthEmpty;
+    return `${w || "—"} / ${a || "—"} R ${r || "—"}`;
+  }
+
+  function syncChip() {
+    const label = chip.querySelector(".auto-drum-split__chip-label");
+    const clear = chip.querySelector(".auto-drum-split__chip-clear");
+    label.textContent = formatTireChip(pendingW, pendingA, pendingR);
+    clear.hidden = !(pendingW || pendingA || pendingR);
+    clear.setAttribute("aria-hidden", clear.hidden ? "true" : "false");
+  }
+
+  function paintAll() {
+    cancelAnimationFrame(paintFrame);
+    paintFrame = requestAnimationFrame(() => {
+      paintSplitColSync(widthScroll, highlight);
+      paintSplitColSync(aspectScroll, highlight);
+      paintSplitColSync(rimScroll, highlight);
+      pendingW = nearestPortalItem(widthScroll, highlight)?.dataset.value ?? "";
+      pendingA = nearestPortalItem(aspectScroll, highlight)?.dataset.value ?? "";
+      pendingR = nearestPortalItem(rimScroll, highlight)?.dataset.value ?? "";
+      if (activePortal?.kind === "tire-sheet") {
+        activePortal.pendingW = pendingW;
+        activePortal.pendingA = pendingA;
+        activePortal.pendingR = pendingR;
+      }
+      syncChip();
+    });
+  }
+
+  function scrollHalfToValue(scrollEl, value) {
+    const want = String(value ?? "");
+    const items = [...scrollEl.querySelectorAll(".immo-drum-inline-item")];
+    const start =
+      items.find((el) => (el.dataset.value ?? "") === want) ||
+      (want
+        ? items.find((el) => Number(el.dataset.value) === Number(want.replace(/\D/g, "")))
+        : null) ||
+      scrollEl.querySelector('.immo-drum-inline-item[data-value=""]') ||
+      scrollEl.querySelector(".immo-drum-inline-item");
+    scrollToPortalItem(scrollEl, highlight, start);
+  }
+
+  function bindCol(scrollEl, half) {
+    scrollEl.addEventListener("scroll", () => paintAll(), { passive: true });
+    let startY = 0;
+    let moved = false;
+    scrollEl.addEventListener(
+      "touchstart",
+      (event) => {
+        startY = event.touches?.[0]?.clientY ?? 0;
+        moved = false;
+      },
+      { passive: true }
+    );
+    scrollEl.addEventListener(
+      "touchmove",
+      (event) => {
+        const y = event.touches?.[0]?.clientY ?? startY;
+        if (Math.abs(y - startY) > 4) moved = true;
+      },
+      { passive: true }
+    );
+    const snapEnd = () => {
+      if (!moved) return;
+      const snap = nearestPortalItem(scrollEl, highlight);
+      if (snap) scrollToPortalItem(scrollEl, highlight, snap);
+      paintAll();
+    };
+    scrollEl.addEventListener("touchend", snapEnd);
+    scrollEl.addEventListener("touchcancel", snapEnd);
+    scrollEl.querySelectorAll(".immo-drum-inline-item").forEach((item) => {
+      let tapStart = null;
+      item.addEventListener(
+        "pointerdown",
+        (event) => {
+          tapStart = { x: event.clientX, y: event.clientY };
+        },
+        { passive: true }
+      );
+      item.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        if (tapStart) {
+          const dx = Math.abs(event.clientX - tapStart.x);
+          const dy = Math.abs(event.clientY - tapStart.y);
+          if (dx > 10 || dy > 10) return;
+        }
+        const value = item.dataset.value ?? "";
+        if (half === "width") pendingW = value;
+        if (half === "aspect") pendingA = value;
+        if (half === "rim") pendingR = value;
+        if (activePortal?.kind === "tire-sheet") {
+          activePortal.pendingW = pendingW;
+          activePortal.pendingA = pendingA;
+          activePortal.pendingR = pendingR;
+        }
+        syncChip();
+        scrollToPortalItem(scrollEl, highlight, item);
+        requestAnimationFrame(() => paintAll());
+      });
+    });
+  }
+
+  bindCol(widthScroll, "width");
+  bindCol(aspectScroll, "aspect");
+  bindCol(rimScroll, "rim");
+
+  chip.addEventListener("click", (event) => {
+    if (!event.target.closest(".auto-drum-split__chip-clear")) return;
+    event.preventDefault();
+    event.stopPropagation();
+    pendingW = "";
+    pendingA = "";
+    pendingR = "";
+    scrollHalfToValue(widthScroll, "");
+    scrollHalfToValue(aspectScroll, "");
+    scrollHalfToValue(rimScroll, "");
+    paintAll();
+  });
+
+  root.querySelector(".auto-drum-portal__backdrop")?.addEventListener("click", () => closeAutoDrumSheet(true));
+  closeBtn?.addEventListener("click", () => closeAutoDrumSheet(false));
+  doneBtn?.addEventListener("click", () => closeAutoDrumSheet(true));
+
+  mountSheetPortalChrome(root, { stage, wrap, trigger, ring });
+  dual?.classList.add("has-drum-open");
+  dual
+    ?.querySelectorAll?.(".ad-form-tire-split__half, .immo-dual-range__half")
+    ?.forEach?.((half) => half.classList.add("is-drum-active"));
+
+  activePortal = {
+    kind: "tire-sheet",
+    root,
+    wheel: widthWheel,
+    widthWheel,
+    aspectWheel,
+    rimWheel,
+    widthScroll,
+    aspectScroll,
+    rimScroll,
+    scrollEl: widthScroll,
+    ring: highlight,
+    wrap,
+    trigger,
+    pendingW,
+    pendingA,
+    pendingR,
+  };
+
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      scrollHalfToValue(widthScroll, pendingW);
+      scrollHalfToValue(aspectScroll, pendingA);
+      scrollHalfToValue(rimScroll, pendingR);
+      paintAll();
     });
   });
 }

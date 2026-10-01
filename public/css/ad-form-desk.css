@@ -641,24 +641,97 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #egyeb-info-
 body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #equipment-sections {
   display: flex;
   flex-direction: column;
-  gap: var(--ad-cell-gap);
+  gap: 0.75rem;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 0;
+  border: 0;
+  background: transparent;
 }
 
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .auto-desk-acc--sub {
-  border: 1px solid var(--ad-line);
-  border-radius: 8px;
-  background: var(--ad-panel);
+/* Extrák nyitva: mint Alap — kék háttér, fehér pill almenük */
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"]
+  .ad-form-desk-shell
+  > .auto-desk-acc[data-desk-acc="extrak"].is-open {
+  border: 0 !important;
+  background: #e8eef3 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  margin: 0 !important;
+  overflow: visible !important;
 }
 
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .auto-desk-acc--sub .auto-desk-acc__head {
-  font-size: 13px;
-  padding: 11px 12px;
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"]
+  .ad-form-desk-shell
+  > .auto-desk-acc[data-desk-acc="extrak"].is-open
+  > .auto-desk-acc__head {
+  border: 0 !important;
+  border-bottom: 0 !important;
+  background: transparent !important;
+  padding: 0.85rem 0.15rem 0.55rem !important;
+  font: 800 1.125rem/1.2 system-ui, sans-serif !important;
+  letter-spacing: -0.02em;
+  color: #111 !important;
+}
+
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"]
+  .ad-form-desk-shell
+  > .auto-desk-acc[data-desk-acc="extrak"].is-open
+  > .auto-desk-acc__body {
+  padding: 0 0 0.85rem !important;
+  gap: 0.75rem !important;
+  background: transparent !important;
+  border: 0 !important;
+}
+
+/* Extrák almenük: fehér pill — mint Műszaki / Hirdetés összecsukva */
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .auto-desk-acc--sub,
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .ad-form-desk-shell [data-desk-sub-acc].auto-desk-acc--sub {
+  border: 0 !important;
+  border-radius: 1.375rem !important;
+  background: #fff !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05) !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .auto-desk-acc--sub > .auto-desk-acc__head,
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .ad-form-desk-shell [data-desk-sub-acc] > .auto-desk-acc__head {
+  display: flex !important;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-height: 3.25rem;
+  padding: 0.95rem 1.15rem !important;
+  border: 0 !important;
+  background: transparent !important;
+  font: 800 1.05rem/1.25 system-ui, sans-serif !important;
+  letter-spacing: -0.02em;
+  color: #111 !important;
+}
+
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .auto-desk-acc--sub > .auto-desk-acc__head .auto-desk-acc__sum {
+  display: none !important;
+}
+
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .auto-desk-acc--sub > .auto-desk-acc__head .auto-desk-acc__chev {
+  flex: 0 0 auto;
+  color: #64748b !important;
+  font-size: 0.65rem !important;
+  line-height: 1;
+  transform: none !important;
 }
 
 body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .auto-desk-acc--sub > .auto-desk-acc__body {
   display: none;
-  padding: var(--ad-cell-gap);
-  gap: var(--ad-cell-gap);
+  padding: 0 1.05rem 1.05rem !important;
+  gap: 0.55rem !important;
+  background: #fff !important;
+  border: 0 !important;
 }
 
 body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .auto-desk-acc--sub.is-open > .auto-desk-acc__body {
@@ -669,7 +742,7 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .auto-desk-a
 }
 
 body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .auto-desk-acc--sub.is-open > .auto-desk-acc__head .auto-desk-acc__chev {
-  transform: rotate(180deg);
+  transform: rotate(180deg) !important;
 }
 
 body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .ad-form-desk-shell [data-desk-sub-acc] > .auto-desk-acc__head {

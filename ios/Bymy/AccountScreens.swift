@@ -339,37 +339,34 @@ struct FiokSectionScreen: View {
         Group {
             switch section {
             case .szemelyes:
-                PersonalDataScreen()
+                FiokWebPanelScreen(szekcio: "szemelyes")
             case .jelszo:
-                PasswordChangeScreen()
+                FiokWebPanelScreen(szekcio: "jelszo")
             case .notify:
-                NotifyPrefsScreen()
+                FiokWebPanelScreen(szekcio: "notify")
             case .keresesiKorzet:
-                RadiusSettingsScreen(kind: .search)
+                FiokWebPanelScreen(szekcio: "keresesi-korzet")
             case .ajanlasokKorzet:
-                RadiusSettingsScreen(kind: .recommendations)
+                FiokWebPanelScreen(szekcio: "ajanlasok-korzet")
             case .megjelenes:
-                AppearanceScreen()
+                // Web: PKW/LKW háttérfeltöltés + téma — teljes panel
+                FiokWebPanelScreen(szekcio: "megjelenes")
             case .sajatHirdetesek:
-                MyAdsScreen()
+                FiokWebPanelScreen(szekcio: "hirdetes")
             case .kedvencek:
-                FavoritesScreen()
+                FiokWebPanelScreen(szekcio: "parkolo")
             case .mentettKeresesek:
-                SavedSearchesScreen()
+                FiokWebPanelScreen(szekcio: "keresesek")
             case .ertekelesek:
-                RatingsScreen()
+                FiokWebPanelScreen(szekcio: "ertekelesek")
             case .nyomtatasok:
-                FiokInfoScreen(
-                    title: "Nyomtatások",
-                    lead: "Ártábla és adásvételi szerződés nyomtatása. A funkció hamarosan elérhető.",
-                    empty: "Ez a menüpont előkészületben van."
-                )
+                FiokWebPanelScreen(szekcio: "nyomtatasok")
             case .autoImport:
-                AutoImportScreen()
+                FiokWebPanelScreen(szekcio: "import")
             case .partnerProfil:
-                PartnerProfileScreen()
+                FiokWebPanelScreen(szekcio: "partner-profil")
             case .uzenetek:
-                MessagesInboxScreen()
+                FiokWebPanelScreen(szekcio: "uzenetek")
             }
         }
         .navigationTitle(section.title)

@@ -1,6 +1,6 @@
 
 import { applyAutoSearchLayout, readLayoutFilterValues, refillAutoSearchRangeSelects, prefetchAutoSearchBoot } from "./auto-search-layout.js?v=teherStrict4";
-import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums } from "./auto-search-drums.js?v=bmSearch6";
+import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums, styleAutoSearchMoreCard } from "./auto-search-drums.js?v=bmSearch7";
 import {
   mountDetailedSearch,
   readDetailedSearchValues,
@@ -111,6 +111,7 @@ export function initHomeQuickSearch({ onSearch = () => {}, onFilterPreview, onDe
     hero?.classList.toggle("is-more-open", open);
     syncDetailedButton(open);
     if (!open) setDetailedOpen(false);
+    if (open) styleAutoSearchMoreCard(form);
   }
 
   function setDetailedOpen(open) {

@@ -796,29 +796,43 @@ function styleAutoSearchAlapCard(form) {
 }
 
 /** Több szűrő: ugyanaz a fehér kártya + aláhúzás, mint Alapadatok (csak kinézet). */
-function styleAutoSearchMoreCard(form) {
+export function styleAutoSearchMoreCard(form) {
   if (!isMobile() || !form) return;
   const host = form.querySelector("#qs-more-layout") || form.querySelector(".home-qs-more-layout");
   if (!host) return;
-  if (host.querySelector(":scope > .auto-search-alap-card")) return;
 
-  const kids = [...host.children].filter((el) => {
-    if (el.classList.contains("auto-search-alap-card")) return false;
-    if (el.classList.contains("home-qs-static-legacy")) return false;
-    if (el.hasAttribute("hidden")) return false;
-    if (el.style?.display === "none") return false;
-    return true;
-  });
-  if (!kids.length) return;
+  let card = host.querySelector(":scope > .auto-search-alap-card");
+  let body = card?.querySelector(".auto-search-alap-card__body");
+  if (!card || !body) {
+    const kids = [...host.children].filter((el) => {
+      if (el.classList.contains("auto-search-alap-card")) return false;
+      if (el.classList.contains("home-qs-static-legacy")) return false;
+      if (el.hasAttribute("hidden")) return false;
+      if (el.style?.display === "none") return false;
+      return true;
+    });
+    if (!kids.length) return;
+    card = document.createElement("div");
+    card.className = "auto-search-alap-card auto-search-more-card";
+    card.innerHTML = `<div class="auto-search-alap-card__body"></div>`;
+    body = card.querySelector(".auto-search-alap-card__body");
+    kids.forEach((el) => body.appendChild(el));
+    host.appendChild(card);
+  } else {
+    [...host.children]
+      .filter(
+        (el) =>
+          el !== card &&
+          !el.classList.contains("home-qs-static-legacy") &&
+          !el.hasAttribute("hidden") &&
+          el.style?.display !== "none"
+      )
+      .forEach((el) => body.appendChild(el));
+  }
 
   form.dataset.moreCardStyled = "1";
-  const card = document.createElement("div");
-  card.className = "auto-search-alap-card auto-search-more-card";
-  card.innerHTML = `<div class="auto-search-alap-card__body"></div>`;
-  const body = card.querySelector(".auto-search-alap-card__body");
-  kids.forEach((el) => body.appendChild(el));
-  host.appendChild(card);
   liftAutoSearchFieldLabels(body);
+  liftAutoSearchFieldLabels(host);
 }
 
 async function mountBrandModelCatalogDrums(form) {

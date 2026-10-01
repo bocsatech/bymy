@@ -39,19 +39,19 @@ const AD_BM_SINGLE_DROPDOWN_SPECS = [
   { id: "muszaki_honap", title: "Műszaki vizsga érvényes – hónap", panelClass: "ad-form-month-panel", placeholder: "hó", skipSingleMount: true },
   { id: "forgalomba_helyezes_ev", title: "Forgalomba helyezés éve", panelClass: "ad-form-year-panel", placeholder: "év", skipSingleMount: true },
   { id: "forgalomba_helyezes_honap", title: "Forgalomba helyezés hónapja", panelClass: "ad-form-month-panel", placeholder: "hó", skipSingleMount: true },
-  { id: "tulajdonosok_szama", title: "Tulajdonosok száma", panelClass: "ad-form-tulaj-panel", placeholder: "—" },
-  { id: "ajtok", title: "Ajtók száma", panelClass: "ad-form-ajtok-panel", placeholder: "—" },
-  { id: "szemelyek", title: "Szállítható személyek száma", panelClass: "ad-form-szemelyek-panel", placeholder: "—" },
-  { id: "szin", title: "Szín", panelClass: "ad-form-szin-panel", placeholder: "—" },
-  { id: "karpit1", title: "Kárpit színe (1)", panelClass: "ad-form-karpit-panel", placeholder: "—" },
-  { id: "karpit2", title: "Kárpit színe (2)", panelClass: "ad-form-karpit-panel", placeholder: "—" },
-  { id: "tetto", title: "Tető", panelClass: "ad-form-tetto-panel", placeholder: "—" },
+  { id: "tulajdonosok_szama", title: "Tulajdonosok száma", panelClass: "ad-form-tulaj-panel", placeholder: "Válasszon" },
+  { id: "ajtok", title: "Ajtók száma", panelClass: "ad-form-ajtok-panel", placeholder: "Válasszon" },
+  { id: "szemelyek", title: "Szállítható személyek száma", panelClass: "ad-form-szemelyek-panel", placeholder: "Válasszon" },
+  { id: "szin", title: "Szín", panelClass: "ad-form-szin-panel", placeholder: "Válasszon" },
+  { id: "karpit1", title: "Kárpit színe (1)", panelClass: "ad-form-karpit-panel", placeholder: "Válasszon" },
+  { id: "karpit2", title: "Kárpit színe (2)", panelClass: "ad-form-karpit-panel", placeholder: "Válasszon" },
+  { id: "tetto", title: "Tető", panelClass: "ad-form-tetto-panel", placeholder: "Válasszon" },
   { id: "klima", title: "Klíma", panelClass: "ad-form-klima-panel", placeholder: "Válasszon" },
   { id: "sebessegvalto", title: "Sebességváltó", panelClass: "ad-form-sebesseg-panel", placeholder: "Válasszon" },
   { id: "hajtas", title: "Hajtás", panelClass: "ad-form-hajtas-panel", placeholder: "Válasszon" },
-  { id: "ac_tolto_csatlakozas", title: "AC töltőcsatlakozó típusa", panelClass: "ad-form-ac-tolto-panel" },
-  { id: "dc_tolto_csatlakozas", title: "DC töltőcsatlakozó típusa", panelClass: "ad-form-dc-tolto-panel" },
-  { id: "tolto_csatlakozas", title: "Töltőcsatlakozó", panelClass: "ad-form-tolto-panel" },
+  { id: "ac_tolto_csatlakozas", title: "AC töltőcsatlakozó típusa", panelClass: "ad-form-ac-tolto-panel", placeholder: "Válasszon" },
+  { id: "dc_tolto_csatlakozas", title: "DC töltőcsatlakozó típusa", panelClass: "ad-form-dc-tolto-panel", placeholder: "Válasszon" },
+  { id: "tolto_csatlakozas", title: "Töltőcsatlakozó", panelClass: "ad-form-tolto-panel", placeholder: "Válasszon" },
 ];
 
 const AD_BM_PICKER_IDS = [
@@ -2394,7 +2394,7 @@ async function mountAdBrandModelCombined(form, catalog) {
   }
 
   const { fillWheel, setWheelValue, readWheel, syncHostClearButton } = await import("./ingatlan-wheels.js?v=immoClearAll2");
-  const { openBrandModelCatalogSheet } = await import("./auto-drum-sheet.js?v=bmSheet64");
+  const { openBrandModelCatalogSheet } = await import("./auto-drum-sheet.js?v=bmSheet65");
   const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
 
   const brands = [...(catalog?.gyartmanyok || [])].sort((a, b) =>
@@ -2628,7 +2628,7 @@ async function mountAdSelectDrum(select, {
   let syncDrumWheelDisplay;
   try {
     ({ fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=immoClearAll2"));
-    ({ openStandaloneSwitchSheet, bindAutoDrumSheet } = await import("./auto-drum-sheet.js?v=bmSheet64"));
+    ({ openStandaloneSwitchSheet, bindAutoDrumSheet } = await import("./auto-drum-sheet.js?v=bmSheet65"));
     ({ initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1"));
   } catch (error) {
     console.warn("Dobkerék betöltés:", title || select.id, error);
@@ -2866,7 +2866,7 @@ async function mountAdSplitYmDrum({
   }
 
   const { fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=immoClearAll2");
-  const { openYmDualSheet } = await import("./auto-drum-sheet.js?v=bmSheet64");
+  const { openYmDualSheet } = await import("./auto-drum-sheet.js?v=bmSheet65");
   const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
 
   const yearOpts = optionsFromSelect(ev, emptyYear);
@@ -3135,6 +3135,9 @@ export async function mountAdFormBmPickers(form, catalog = null) {
       ensureYearSelectFilled(select, spec.yearMax == null ? new Date().getFullYear() : spec.yearMax);
     }
     const switchIds = new Set([
+      "tulajdonosok_szama",
+      "ajtok",
+      "szemelyek",
       "szin",
       "karpit1",
       "karpit2",
@@ -3218,7 +3221,7 @@ export async function mountTireSizeSwitchPickers(form) {
 
   try {
     const { fillTireSelect } = await import("./tire-sizes-ui.js?v=tireYm4");
-    const { openTireTripleSheet } = await import("./auto-drum-sheet.js?v=bmSheet64");
+    const { openTireTripleSheet } = await import("./auto-drum-sheet.js?v=bmSheet65");
     const blocks = [...grid.querySelectorAll(":scope > .tire-block")];
 
     for (let index = 0; index < TIRE_ROW_SPECS.length; index += 1) {

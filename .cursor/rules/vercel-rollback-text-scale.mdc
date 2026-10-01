@@ -1,0 +1,13 @@
+---
+description: Vercel rollback pont — szövegméret kísérlet (2026-10-01)
+alwaysApply: true
+---
+
+# Vercel rollback: szövegméret kísérlet
+
+Ha a **szövegméret** (Beállítások → Megjelenés) Vercel változás rossz, ide kell visszaállítani:
+
+- **Jó pont (szövegméret ELŐTT):** `1416f07` — `Fix Extrák empty by rendering into the live equipment host.`
+- **Szövegméret commit:** `9b13423` — `Add adjustable text scale that leaves the top nav unchanged.`
+
+Visszaállítás (csak ha a felhasználó kéri): Vercelen a `1416f07` állapot (revert / reset + push a megállapodott módon). Éles (S1) továbbra is tilos, amíg külön nem kéri.

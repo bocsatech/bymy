@@ -11,7 +11,7 @@ struct MobileTabBar: View {
             tab(.search, systemImage: "magnifyingglass")
             fab
             tab(.feed, systemImage: "heart")
-            tab(.account, systemImage: "person")
+            tab(.account, systemImage: "person.crop.circle")
         }
         .padding(.horizontal, 6)
         .padding(.top, 8)

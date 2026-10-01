@@ -50,15 +50,11 @@ struct MobileTopBar: View {
                         Button {
                             router.selectBottom(.account, isLoggedIn: true)
                         } label: {
-                            ZStack {
-                                Circle()
-                                    .fill(AppTheme.avatarBg)
-                                Text(auth.avatarLetter)
-                                    .font(.system(size: 13, weight: .bold))
-                                    .foregroundStyle(AppTheme.text)
-                            }
-                            .frame(width: 32, height: 32)
-                            .overlay(Circle().stroke(AppTheme.border, lineWidth: 1.5))
+                            ProfileAvatarView(
+                                letter: auth.avatarLetter,
+                                dataURL: auth.user?.profile.avatarDataUrl,
+                                size: 32
+                            )
                         }
                         .buttonStyle(.plain)
                         .accessibilityLabel("Fiók")
@@ -66,8 +62,8 @@ struct MobileTopBar: View {
                         Button {
                             router.showLogin = true
                         } label: {
-                            Image(systemName: "person")
-                                .font(.system(size: 16, weight: .semibold))
+                            Image(systemName: "person.crop.circle")
+                                .font(.system(size: 22, weight: .regular))
                                 .foregroundStyle(AppTheme.textSecondary)
                                 .frame(width: 34, height: 34)
                         }

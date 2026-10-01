@@ -10,12 +10,6 @@
           }
           document.documentElement.setAttribute("data-theme", t);
         } catch (e) {}
-        try {
-          var ts = localStorage.getItem("bymy-text-scale");
-          if (ts === "105") ts = "110";
-          if (ts !== "100" && ts !== "110" && ts !== "120" && ts !== "130" && ts !== "140" && ts !== "150") ts = "100";
-          document.documentElement.setAttribute("data-text-scale", ts);
-        } catch (eTs) {}
                 
         try {
           var raw = sessionStorage.getItem("bymy-auth-user");
@@ -91,7 +85,6 @@
       <link rel="stylesheet" href="/css/hub.css?v=navRow1" />
     <link rel="stylesheet" href="/css/partner-profile.css?v=coBox1" />
     <link rel="stylesheet" href="/css/messages-enhancements.css?v=msgImprove1" />
-    <link rel="stylesheet" href="/css/text-scale.css?v=textScale4" />
 </head>
   <body class="site-app settings-page mm-page" data-site-page="beallitasok" data-auth-init="manual">
     <script src="/js/mw-app-shell.js?v=navOneRow1"></script>
@@ -422,21 +415,8 @@
         <section class="mm-panel" data-mm-panel="megjelenes" hidden>
           <header class="mm-panel-head">
             <h2 class="mm-panel-title">Megjelenés</h2>
-            <p class="mm-panel-lead">Szövegméret és háttérképek. A felső menüsáv mérete nem változik.</p>
+            <p class="mm-panel-lead">Külön háttérkép az Autó (PKW) és a Teherautó (LKW) oldalnak. A kiválasztott kép minden látogatónál megjelenik.</p>
           </header>
-
-          <div class="mm-ad-box text-scale-box">
-            <h3 class="text-scale-title">Szövegméret</h3>
-            <p class="text-scale-hint">Próbáld ki a fokozatokat (max. +50%): kezdőlap, csempék, hirdetések, űrlapmenük — minden nő, a felső menüsáv változatlan. A választás ezen a böngészőn megmarad.</p>
-            <div class="text-scale-options" role="radiogroup" aria-label="Szövegméret">
-              <button type="button" class="text-scale-option" data-text-scale-option="100" role="radio" aria-checked="true">Normál</button>
-              <button type="button" class="text-scale-option" data-text-scale-option="110" role="radio" aria-checked="false">+10%</button>
-              <button type="button" class="text-scale-option" data-text-scale-option="120" role="radio" aria-checked="false">+20%</button>
-              <button type="button" class="text-scale-option" data-text-scale-option="130" role="radio" aria-checked="false">+30%</button>
-              <button type="button" class="text-scale-option" data-text-scale-option="140" role="radio" aria-checked="false">+40%</button>
-              <button type="button" class="text-scale-option" data-text-scale-option="150" role="radio" aria-checked="false">+50%</button>
-            </div>
-          </div>
 
           <div class="mm-ad-box hero-settings" data-hero-kind="pkw">
             <h3 class="hero-settings-kind-title">PKW — Autó oldal</h3>
@@ -779,7 +759,6 @@
     </main>
 
     <script src="/js/site-avatar-menu.js?v=settingsHome1" type="module"></script>
-    <script src="/js/text-scale.js?v=textScale4" type="module"></script>
     <script src="/js/ha-import-app.js?v=haBmDrag1" type="module"></script>
     <script src="/js/beallitasok-app.js?v=coKind1" type="module"></script>
     <script>

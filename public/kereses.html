@@ -11,12 +11,6 @@
           document.documentElement.setAttribute("data-theme", t);
         } catch (e) {}
         try {
-          var ts = localStorage.getItem("bymy-text-scale");
-          if (ts === "105") ts = "110";
-          if (ts !== "100" && ts !== "110" && ts !== "120" && ts !== "130" && ts !== "140" && ts !== "150") ts = "100";
-          document.documentElement.setAttribute("data-text-scale", ts);
-        } catch (eTs) {}
-        try {
           var raw = sessionStorage.getItem("bymy-auth-user");
           var user = raw ? JSON.parse(raw) : null;
           var loggedIn = !!(user && user.email);

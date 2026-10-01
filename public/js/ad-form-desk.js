@@ -4,7 +4,7 @@ import {
   applyStep1SearchDomOrder,
   isVehicleStep1Canvas,
   stackVehicleCanvasSingleColumn,
-} from "./ad-form-desk-pinned-blocks.js?v=bmSheet72";
+} from "./ad-form-desk-pinned-blocks.js?v=bmSheet73";
 
 const DESK_MQ = "(min-width: 901px)";
 
@@ -208,15 +208,39 @@ function scrollDeskMainAccordionToStart(form, accId) {
   scrollAdFormPageTop();
 }
 
-/** Extrák almenü: szintén az oldal teteje. */
+/** Extrák almenü: a megnyitott lista teteje a viewport tetején (fix fejléc alatt). */
 function scrollDeskExtrakSubAccordionToStart(subAcc) {
-  if (subAcc && !subAcc.classList.contains("is-open")) return;
+  if (!subAcc?.classList.contains("is-open")) return;
   try {
     document.activeElement?.blur?.();
   } catch {
     /* ignore */
   }
-  scrollAdFormPageTop();
+  const head = subAcc.querySelector(".auto-desk-acc__head") || subAcc;
+  const scrollToSub = () => {
+    const fixedHeader =
+      document.querySelector("header[data-site-desk-header]") ||
+      document.querySelector("body.site-app > header") ||
+      null;
+    const headerH = Math.max(
+      0,
+      Number.parseFloat(
+        getComputedStyle(document.documentElement).getPropertyValue("--site-fixed-header-h")
+      ) || 0,
+      fixedHeader?.getBoundingClientRect?.().height || 0
+    );
+    const y = window.scrollY + head.getBoundingClientRect().top - headerH - 6;
+    window.scrollTo(0, Math.max(0, Math.round(y)));
+    if (document.scrollingElement) document.scrollingElement.scrollTop = Math.max(0, Math.round(y));
+  };
+  scrollToSub();
+  requestAnimationFrame(() => {
+    scrollToSub();
+    requestAnimationFrame(scrollToSub);
+  });
+  window.setTimeout(scrollToSub, 50);
+  window.setTimeout(scrollToSub, 160);
+  window.setTimeout(scrollToSub, 320);
 }
 
 /** Középső útmutató keret vízszintesen a nyitott fő accordion fejlécével egy magasságban (Extrák stb.). */

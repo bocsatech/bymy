@@ -1827,6 +1827,76 @@ body[data-site-page="teherauto"] .auto-search-tabs {
     padding: 0 !important;
   }
 
+  /* Műszaki érvényesség: ne keretes box, hanem label + aláhúzás (mint Személyek) */
+  body:is([data-site-page="auto"], [data-site-page="teherauto"])
+    .auto-search-panel
+    .auto-qs-drums
+    :is(.auto-search-alap-card, .home-qs-more-layout)
+    .immo-triple-date-block {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.45rem !important;
+    width: 100% !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: 0 !important;
+  }
+
+  body:is([data-site-page="auto"], [data-site-page="teherauto"])
+    .auto-search-panel
+    .auto-qs-drums
+    :is(.auto-search-alap-card, .home-qs-more-layout)
+    .immo-triple-date {
+    position: relative !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.45rem !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+  }
+
+  body:is([data-site-page="auto"], [data-site-page="teherauto"])
+    .auto-search-panel
+    .auto-qs-drums
+    :is(.auto-search-alap-card, .home-qs-more-layout)
+    .immo-triple-date.has-drum-open,
+  body:is([data-site-page="auto"], [data-site-page="teherauto"])
+    .auto-search-panel
+    .auto-qs-drums
+    :is(.auto-search-alap-card, .home-qs-more-layout)
+    .immo-triple-date:focus-within {
+    border: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+  }
+
+  body:is([data-site-page="auto"], [data-site-page="teherauto"])
+    .auto-search-panel
+    .auto-qs-drums
+    :is(.auto-search-alap-card, .home-qs-more-layout)
+    .immo-triple-date__title {
+    position: static !important;
+    top: auto !important;
+    left: auto !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: transparent !important;
+    font: 700 0.875rem/1.2 system-ui, sans-serif !important;
+    color: #111 !important;
+    white-space: normal !important;
+  }
+
   body:is([data-site-page="auto"], [data-site-page="teherauto"])
     .auto-search-panel
     .auto-qs-drums

@@ -1039,8 +1039,8 @@ input.immo-wheel-custom.immo-wheel-trigger {
     box-sizing: border-box;
     z-index: 60;
   }
+}
 
-  
 @media (max-width: 420px) {
   .immo-schema-grid {
     grid-template-columns: 1fr !important;

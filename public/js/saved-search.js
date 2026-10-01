@@ -252,7 +252,7 @@ async function applyDetailedFilters(form, detailed) {
   if (!detailed || typeof detailed !== "object") return;
   const panel = form.querySelector("#qs-detailed-panel");
   if (!panel || panel.dataset.detailedMounted !== "1") {
-    const { mountDetailedSearch } = await import("./auto-detailed-search.js?v=bmSearch15");
+    const { mountDetailedSearch } = await import("./auto-detailed-search.js?v=bmSearch16");
     await mountDetailedSearch(form, { force: true });
   }
 

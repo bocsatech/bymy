@@ -121,16 +121,6 @@ struct ListingsFeedView: View {
     }
 }
 
-struct HubHomeScreen: View {
-    @EnvironmentObject private var auth: AuthStore
-
-    var body: some View {
-        ListingsFeedView(title: "Kezdőlap") {
-            try await ListingsAPI.fetchHome(token: auth.token)
-        }
-    }
-}
-
 struct CategoryListScreen: View {
     let title: String
     let category: String

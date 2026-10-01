@@ -593,7 +593,24 @@ struct ListingDetailScreen: View {
 
     private func toggleFavorite(_ id: String) {
         var set = Set(UserDefaults.standard.stringArray(forKey: "bymy.favorites") ?? [])
-        if set.contains(id) { set.remove(id) } else { set.insert(id) }
+        if set.contains(id) {
+            set.remove(id)
+            FavoriteStore.remove(email: auth.user?.email, ids: [id])
+        } else {
+            set.insert(id)
+            if let d = detail {
+                FavoriteStore.add(
+                    email: auth.user?.email,
+                    FavoriteItem(
+                        id: id,
+                        listingId: id,
+                        title: d.title,
+                        price: d.priceLabel,
+                        imageURL: d.imageURLs.first
+                    )
+                )
+            }
+        }
         UserDefaults.standard.set(Array(set), forKey: "bymy.favorites")
         isFavorite = set.contains(id)
     }

@@ -1,13 +1,16 @@
 import SwiftUI
 import UIKit
 
+/// Mobil web `fiok.html` / `beallitasok.html?szekcio=` menüpontok.
 enum FiokSection: String, Hashable, Identifiable {
     case partnerProfil
+    case autoImport
     case nyomtatasok
     case ertekelesek
     case kedvencek
     case sajatHirdetesek
     case mentettKeresesek
+    case uzenetek
     case szemelyes
     case keresesiKorzet
     case ajanlasokKorzet
@@ -19,18 +22,39 @@ enum FiokSection: String, Hashable, Identifiable {
 
     var title: String {
         switch self {
-        case .partnerProfil: return "Partneri profil"
+        case .partnerProfil: return "Cégadatok"
+        case .autoImport: return "Autóimport"
         case .nyomtatasok: return "Nyomtatások"
         case .ertekelesek: return "Értékelések"
         case .kedvencek: return "Kedvencek"
         case .sajatHirdetesek: return "Saját hirdetések"
         case .mentettKeresesek: return "Mentett kereséseim"
+        case .uzenetek: return "Üzenetek"
         case .szemelyes: return "Személyes adatok"
         case .keresesiKorzet: return "Keresési körzet"
         case .ajanlasokKorzet: return "Ajánlások körzete"
         case .jelszo: return "Jelszó módosítása"
         case .notify: return "Hírlevél és értesítések"
         case .megjelenes: return "Megjelenés"
+        }
+    }
+
+    var systemImage: String {
+        switch self {
+        case .partnerProfil: return "building.2"
+        case .autoImport: return "car.side"
+        case .nyomtatasok: return "doc.text"
+        case .ertekelesek: return "star"
+        case .kedvencek: return "heart"
+        case .sajatHirdetesek: return "rectangle.stack"
+        case .mentettKeresesek: return "magnifyingglass"
+        case .uzenetek: return "envelope"
+        case .szemelyes: return "person"
+        case .keresesiKorzet: return "circle.dotted"
+        case .ajanlasokKorzet: return "mappin.and.ellipse"
+        case .jelszo: return "lock"
+        case .notify: return "bell"
+        case .megjelenes: return "circle.lefthalf.filled"
         }
     }
 }
@@ -77,12 +101,12 @@ struct ProfileAvatarView: View {
     }
 }
 
+/// Mobil web `fiok.html` — sárga fejléc + flat `mm-nav` sorok.
 struct AccountScreen: View {
     @EnvironmentObject private var auth: AuthStore
     @EnvironmentObject private var router: AppRouter
 
-    @State private var companyExpanded = true
-    @State private var settingsExpanded = true
+    @State private var unreadMessages = 0
 
     private let pageBg = Color(red: 0.949, green: 0.957, blue: 0.969)
 
@@ -91,119 +115,98 @@ struct AccountScreen: View {
         return t == "business" || t == "dealer"
     }
 
+    private var menuItems: [FiokMenuItem] {
+        var items: [FiokMenuItem] = []
+        if isCompany {
+            items.append(.link(.partnerProfil))
+        }
+        items.append(.link(.autoImport))
+        items.append(.link(.nyomtatasok))
+        items.append(.link(.ertekelesek))
+        items.append(.soon(title: "Kiemelések", systemImage: "plus.square"))
+        items.append(.link(.kedvencek))
+        items.append(.link(.sajatHirdetesek))
+        items.append(.link(.mentettKeresesek))
+        items.append(.link(.uzenetek, badge: unreadMessages > 0 ? unreadMessages : nil))
+        items.append(.link(.szemelyes))
+        items.append(.link(.keresesiKorzet))
+        items.append(.link(.ajanlasokKorzet))
+        items.append(.link(.jelszo))
+        items.append(.link(.notify))
+        items.append(.link(.megjelenes))
+        return items
+    }
+
     var body: some View {
         VStack(spacing: 0) {
             fiokHeader
 
             ScrollView {
-                VStack(alignment: .leading, spacing: 0) {
-                    profileHead
-                    menuCard
+                VStack(alignment: .leading, spacing: 12) {
+                    sideHead
+                    navCard
                     logoutButton
                 }
+                .padding(.horizontal, 12)
+                .padding(.top, 12)
+                .padding(.bottom, 28)
             }
         }
         .background(pageBg.ignoresSafeArea())
+        .task { await refreshUnread() }
     }
 
-    private var profileHead: some View {
-        HStack(spacing: 14) {
-            ProfileAvatarView(
-                letter: auth.avatarLetter,
-                dataURL: auth.user?.profile.avatarDataUrl,
-                size: 56
-            )
-
-            VStack(alignment: .leading, spacing: 4) {
+    private var sideHead: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 8) {
                 Text("Fiókom")
                     .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(AppTheme.textSecondary)
-                Text("Üdv, \(auth.displayFirstName)")
-                    .font(.system(size: 22, weight: .bold))
-                    .foregroundStyle(AppTheme.text)
+                    .foregroundStyle(Color.black.opacity(0.62))
                 if isCompany {
                     Text(auth.user?.profile.accountType == "dealer" ? "Kereskedő" : "Cég")
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundStyle(AppTheme.accent)
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundStyle(Color.black.opacity(0.75))
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 3)
+                        .background(Color.white.opacity(0.55))
+                        .clipShape(Capsule())
                 }
             }
-            Spacer(minLength: 0)
+            Text("Üdv, \(auth.displayFirstName)")
+                .font(.system(size: 20, weight: .heavy))
+                .foregroundStyle(Color.black)
         }
-        .padding(16)
-        .background(Color.white)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 14)
+        .background(AppTheme.brandYellow)
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
 
-    private var menuCard: some View {
-        VStack(spacing: 0) {
-            if isCompany {
-                expandRow(
-                    icon: "building.2.fill",
-                    title: "Cégadatok",
-                    expanded: companyExpanded
-                ) {
-                    companyExpanded.toggle()
-                }
-                if companyExpanded {
-                    subRow(icon: "house.fill", title: "Partneri profil") {
-                        router.openFiokSection(.partnerProfil)
+    private var navCard: some View {
+        VStack(spacing: 2) {
+            ForEach(Array(menuItems.enumerated()), id: \.offset) { _, item in
+                switch item {
+                case .link(let section, let badge):
+                    menuRow(section: section, badge: badge) {
+                        open(section)
                     }
-                }
-            }
-
-            // Autóimport: spec szerint nincs telefonon
-            menuRow(icon: "doc.text.fill", title: "Nyomtatások") {
-                router.openFiokSection(.nyomtatasok)
-            }
-            menuRow(icon: "star.fill", title: "Értékelések") {
-                router.openFiokSection(.ertekelesek)
-            }
-            soonRow(icon: "plus.square.fill", title: "Kiemelések")
-            menuRow(icon: "heart.fill", title: "Kedvencek") {
-                router.openFiokSection(.kedvencek)
-            }
-            menuRow(icon: "rectangle.stack.fill", title: "Saját hirdetések") {
-                router.openFiokSection(.sajatHirdetesek)
-            }
-            menuRow(icon: "magnifyingglass", title: "Mentett kereséseim") {
-                router.openFiokSection(.mentettKeresesek)
-            }
-            menuRow(icon: "bubble.left.and.bubble.right.fill", title: "Üzenetek") {
-                router.showMessages = true
-            }
-
-            expandRow(
-                icon: "gearshape.fill",
-                title: "Beállítások",
-                expanded: settingsExpanded
-            ) {
-                settingsExpanded.toggle()
-            }
-
-            if settingsExpanded {
-                subRow(icon: "person.fill", title: "Személyes adatok") {
-                    router.openFiokSection(.szemelyes)
-                }
-                subRow(icon: "circle.dotted", title: "Keresési körzet") {
-                    router.openFiokSection(.keresesiKorzet)
-                }
-                subRow(icon: "mappin.and.ellipse", title: "Ajánlások körzete") {
-                    router.openFiokSection(.ajanlasokKorzet)
-                }
-                subRow(icon: "lock.fill", title: "Jelszó módosítása") {
-                    router.openFiokSection(.jelszo)
-                }
-                subRow(icon: "bell.fill", title: "Hírlevél és értesítések") {
-                    router.openFiokSection(.notify)
-                }
-                subRow(icon: "circle.lefthalf.filled", title: "Megjelenés") {
-                    router.openFiokSection(.megjelenes)
+                case .soon(let title, let systemImage):
+                    soonRow(title: title, systemImage: systemImage)
                 }
             }
         }
+        .padding(8)
         .background(Color.white)
         .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-        .padding(.horizontal, 16)
-        .padding(.top, 12)
+    }
+
+    private func open(_ section: FiokSection) {
+        if section == .uzenetek {
+            router.showMessages = true
+            return
+        }
+        router.openFiokSection(section)
     }
 
     private var logoutButton: some View {
@@ -222,9 +225,6 @@ struct AccountScreen: View {
                 .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
         }
         .buttonStyle(.plain)
-        .padding(.horizontal, 16)
-        .padding(.top, 12)
-        .padding(.bottom, 28)
     }
 
     private var fiokHeader: some View {
@@ -260,66 +260,37 @@ struct AccountScreen: View {
         }
     }
 
-    private func menuRow(icon: String, title: String, action: @escaping () -> Void) -> some View {
+    private func menuRow(section: FiokSection, badge: Int?, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            HStack(spacing: 14) {
-                iconBadge(icon)
-                Text(title)
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundStyle(AppTheme.text)
-                Spacer()
-                chevron
-            }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 12)
-            .overlay(alignment: .bottom) { rowDivider }
-        }
-        .buttonStyle(.plain)
-    }
-
-    private func expandRow(icon: String, title: String, expanded: Bool, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            HStack(spacing: 14) {
-                iconBadge(icon)
-                Text(title)
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundStyle(AppTheme.text)
-                Spacer()
-                Image(systemName: expanded ? "chevron.up" : "chevron.down")
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(AppTheme.tabInactive)
-            }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 12)
-            .overlay(alignment: .bottom) { rowDivider }
-        }
-        .buttonStyle(.plain)
-    }
-
-    private func subRow(icon: String, title: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            HStack(spacing: 14) {
-                iconBadge(icon, small: true)
-                Text(title)
+            HStack(spacing: 10) {
+                iconBadge(section.systemImage)
+                Text(section.title)
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundStyle(AppTheme.text)
-                Spacer()
-                chevron
+                    .lineLimit(1)
+                Spacer(minLength: 0)
+                if let badge, badge > 0 {
+                    Text("\(badge)")
+                        .font(.system(size: 12, weight: .heavy))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 7)
+                        .padding(.vertical, 3)
+                        .background(AppTheme.accent)
+                        .clipShape(Capsule())
+                }
             }
-            .padding(.leading, 28)
-            .padding(.trailing, 14)
-            .padding(.vertical, 11)
-            .background(Color(red: 0.973, green: 0.976, blue: 0.98))
-            .overlay(alignment: .bottom) { rowDivider.padding(.leading, 78) }
+            .padding(.horizontal, 10)
+            .padding(.vertical, 10)
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
     }
 
-    private func soonRow(icon: String, title: String) -> some View {
-        HStack(spacing: 14) {
-            iconBadge(icon)
+    private func soonRow(title: String, systemImage: String) -> some View {
+        HStack(spacing: 10) {
+            iconBadge(systemImage)
             Text(title)
-                .font(.system(size: 16, weight: .semibold))
+                .font(.system(size: 15, weight: .semibold))
                 .foregroundStyle(AppTheme.tabInactive)
             Spacer()
             Text("Hamarosan")
@@ -330,35 +301,35 @@ struct AccountScreen: View {
                 .background(Color(red: 0.949, green: 0.957, blue: 0.969))
                 .clipShape(Capsule())
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 12)
-        .overlay(alignment: .bottom) { rowDivider }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 10)
     }
 
-    private func iconBadge(_ icon: String, small: Bool = false) -> some View {
-        let size: CGFloat = small ? 30 : 36
-        return ZStack {
-            RoundedRectangle(cornerRadius: small ? 8 : 10, style: .continuous)
-                .fill(AppTheme.accent.opacity(0.1))
+    private func iconBadge(_ icon: String) -> some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 9, style: .continuous)
+                .fill(Color(red: 0.949, green: 0.957, blue: 0.969))
             Image(systemName: icon)
-                .font(.system(size: small ? 13 : 15, weight: .semibold))
-                .foregroundStyle(AppTheme.accent)
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(Color(red: 0.278, green: 0.329, blue: 0.404))
         }
-        .frame(width: size, height: size)
+        .frame(width: 32, height: 32)
     }
 
-    private var chevron: some View {
-        Image(systemName: "chevron.right")
-            .font(.system(size: 13, weight: .semibold))
-            .foregroundStyle(AppTheme.tabInactive)
-    }
-
-    private var rowDivider: some View {
-        Rectangle().fill(AppTheme.border).frame(height: 1).padding(.leading, 64)
+    private func refreshUnread() async {
+        guard let token = auth.token else { return }
+        if let list = try? await MessagesAPI.listConversations(token: token) {
+            unreadMessages = list.reduce(0) { $0 + $1.unread }
+        }
     }
 }
 
-// MARK: - Section screens
+private enum FiokMenuItem {
+    case link(FiokSection, badge: Int? = nil)
+    case soon(title: String, systemImage: String)
+}
+
+// MARK: - Section router
 
 struct FiokSectionScreen: View {
     let section: FiokSection
@@ -379,8 +350,26 @@ struct FiokSectionScreen: View {
                 RadiusSettingsScreen(kind: .recommendations)
             case .megjelenes:
                 AppearanceScreen()
-            default:
-                FiokPlaceholderScreen(title: section.title)
+            case .sajatHirdetesek:
+                MyAdsScreen()
+            case .kedvencek:
+                FavoritesScreen()
+            case .mentettKeresesek:
+                SavedSearchesScreen()
+            case .ertekelesek:
+                RatingsScreen()
+            case .nyomtatasok:
+                FiokInfoScreen(
+                    title: "Nyomtatások",
+                    lead: "Ártábla és adásvételi szerződés nyomtatása. A funkció hamarosan elérhető.",
+                    empty: "Ez a menüpont előkészületben van."
+                )
+            case .autoImport:
+                AutoImportScreen()
+            case .partnerProfil:
+                PartnerProfileScreen()
+            case .uzenetek:
+                MessagesInboxScreen()
             }
         }
         .navigationTitle(section.title)
@@ -401,367 +390,27 @@ struct FiokSectionScreen: View {
     }
 }
 
-struct FiokPlaceholderScreen: View {
+struct FiokInfoScreen: View {
     let title: String
+    let lead: String
+    let empty: String
 
     var body: some View {
-        VStack(spacing: 12) {
-            Image(systemName: "rectangle.stack")
-                .font(.system(size: 36))
-                .foregroundStyle(AppTheme.tabInactive)
-            Text(title)
-                .font(.system(size: 18, weight: .bold))
-            Text("Ez a rész hamarosan elérhető az appban.")
-                .font(.system(size: 14))
-                .foregroundStyle(AppTheme.textSecondary)
-                .multilineTextAlignment(.center)
-        }
-        .padding(24)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(AppTheme.bg)
-    }
-}
-
-struct PersonalDataScreen: View {
-    @EnvironmentObject private var auth: AuthStore
-
-    @State private var firstName = ""
-    @State private var lastName = ""
-    @State private var street = ""
-    @State private var postalCode = ""
-    @State private var city = ""
-    @State private var country = "Magyarország"
-    @State private var phone = ""
-    @State private var busy = false
-    @State private var flash = ""
-    @State private var flashOk = false
-
-    var body: some View {
-        Form {
-            Section {
-                HStack(spacing: 14) {
-                    ProfileAvatarView(
-                        letter: auth.avatarLetter,
-                        dataURL: auth.user?.profile.avatarDataUrl,
-                        size: 64
-                    )
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(auth.user?.email ?? "")
-                            .font(.system(size: 14, weight: .semibold))
-                        Text("A fióktípus regisztrációkor rögzül.")
-                            .font(.system(size: 12))
-                            .foregroundStyle(AppTheme.textSecondary)
-                    }
-                }
-            }
-
-            Section("Név") {
-                TextField("Vezetéknév", text: $lastName)
-                TextField("Keresztnév", text: $firstName)
-            }
-            Section("Cím") {
-                TextField("Utca, házszám", text: $street)
-                TextField("Irányítószám", text: $postalCode)
-                    .keyboardType(.numberPad)
-                TextField("Település", text: $city)
-                TextField("Ország", text: $country)
-            }
-            Section("Elérhetőség") {
-                TextField("Telefon", text: $phone)
-                    .keyboardType(.phonePad)
-            }
-
-            if !flash.isEmpty {
-                Section {
-                    Text(flash)
-                        .foregroundStyle(flashOk ? .green : .red)
-                }
-            }
-
-            Section {
-                Button {
-                    Task { await save() }
-                } label: {
-                    if busy {
-                        ProgressView()
-                    } else {
-                        Text("Mentés")
-                            .fontWeight(.semibold)
-                    }
-                }
-                .disabled(busy)
-            }
-        }
-        .onAppear(perform: load)
-    }
-
-    private func load() {
-        let p = auth.user?.profile
-        firstName = p?.firstName ?? ""
-        lastName = p?.lastName ?? ""
-        street = p?.street ?? ""
-        postalCode = p?.postalCode ?? ""
-        city = p?.city ?? ""
-        country = (p?.country?.isEmpty == false) ? (p?.country ?? "Magyarország") : "Magyarország"
-        phone = p?.phone ?? ""
-    }
-
-    private func save() async {
-        guard let token = auth.token else { return }
-        busy = true
-        flash = ""
-        defer { busy = false }
-        do {
-            var profile = auth.user?.profile ?? AuthAPI.RemoteProfile()
-            profile.firstName = firstName.trimmingCharacters(in: .whitespacesAndNewlines)
-            profile.lastName = lastName.trimmingCharacters(in: .whitespacesAndNewlines)
-            profile.street = street.trimmingCharacters(in: .whitespacesAndNewlines)
-            profile.postalCode = postalCode.trimmingCharacters(in: .whitespacesAndNewlines)
-            profile.city = city.trimmingCharacters(in: .whitespacesAndNewlines)
-            profile.country = country.trimmingCharacters(in: .whitespacesAndNewlines)
-            profile.phone = phone.trimmingCharacters(in: .whitespacesAndNewlines)
-            let user = try await AuthAPI.saveProfile(token: token, profile: profile)
-            auth.apply(token: token, user: user)
-            flash = "Mentve."
-            flashOk = true
-        } catch {
-            flash = error.localizedDescription
-            flashOk = false
-        }
-    }
-}
-
-struct PasswordChangeScreen: View {
-    @EnvironmentObject private var auth: AuthStore
-
-    @State private var current = ""
-    @State private var newPass = ""
-    @State private var confirm = ""
-    @State private var busy = false
-    @State private var flash = ""
-    @State private var flashOk = false
-
-    var body: some View {
-        Form {
-            Section {
-                SecureField("Jelenlegi jelszó", text: $current)
-                SecureField("Új jelszó", text: $newPass)
-                SecureField("Új jelszó megerősítése", text: $confirm)
-            }
-            if !flash.isEmpty {
-                Section {
-                    Text(flash).foregroundStyle(flashOk ? .green : .red)
-                }
-            }
-            Section {
-                Button {
-                    Task { await save() }
-                } label: {
-                    if busy { ProgressView() } else { Text("Jelszó mentése").fontWeight(.semibold) }
-                }
-                .disabled(busy)
-            }
-        }
-    }
-
-    private func save() async {
-        guard let token = auth.token else { return }
-        busy = true
-        flash = ""
-        defer { busy = false }
-        do {
-            try await AuthAPI.changePassword(
-                token: token,
-                currentPassword: current,
-                newPassword: newPass,
-                newPasswordConfirm: confirm
-            )
-            current = ""
-            newPass = ""
-            confirm = ""
-            flash = "Jelszó frissítve."
-            flashOk = true
-        } catch {
-            flash = error.localizedDescription
-            flashOk = false
-        }
-    }
-}
-
-struct NotifyPrefsScreen: View {
-    @EnvironmentObject private var auth: AuthStore
-
-    @State private var messages = true
-    @State private var favorites = true
-    @State private var interests = true
-    @State private var newsletter = true
-    @State private var busy = false
-    @State private var flash = ""
-
-    var body: some View {
-        Form {
-            Section {
-                Toggle("Üzenetek", isOn: $messages)
-                Toggle("Kedvencek", isOn: $favorites)
-                Toggle("Érdeklődések", isOn: $interests)
-                Toggle("Hírlevél", isOn: $newsletter)
-            }
-            if !flash.isEmpty {
-                Section { Text(flash).foregroundStyle(AppTheme.accent) }
-            }
-            Section {
-                Button {
-                    Task { await save() }
-                } label: {
-                    if busy { ProgressView() } else { Text("Mentés").fontWeight(.semibold) }
-                }
-                .disabled(busy)
-            }
-        }
-        .onAppear {
-            let p = auth.user?.profile
-            messages = p?.notifyMessages ?? true
-            favorites = p?.notifyFavorites ?? true
-            interests = p?.notifyInterests ?? true
-            newsletter = p?.notifyNewsletter ?? true
-        }
-    }
-
-    private func save() async {
-        guard let token = auth.token else { return }
-        busy = true
-        defer { busy = false }
-        do {
-            var profile = auth.user?.profile ?? AuthAPI.RemoteProfile()
-            profile.notifyMessages = messages
-            profile.notifyFavorites = favorites
-            profile.notifyInterests = interests
-            profile.notifyNewsletter = newsletter
-            let user = try await AuthAPI.saveProfile(token: token, profile: profile)
-            auth.apply(token: token, user: user)
-            flash = "Mentve."
-        } catch {
-            flash = error.localizedDescription
-        }
-    }
-}
-
-struct RadiusSettingsScreen: View {
-    enum Kind { case search, recommendations }
-
-    let kind: Kind
-    @EnvironmentObject private var auth: AuthStore
-
-    @State private var postalCode = ""
-    @State private var city = ""
-    @State private var radiusKm = 30
-    @State private var busy = false
-    @State private var flash = ""
-
-    private var options: [Int] {
-        kind == .search ? [5, 10, 15, 20, 30, 50, 75, 100] : [5, 10, 15, 20, 30]
-    }
-
-    var body: some View {
-        Form {
-            Section("Helyszín") {
-                TextField("Irányítószám", text: $postalCode)
-                    .keyboardType(.numberPad)
-                TextField("Település", text: $city)
-            }
-            Section("Sugár") {
-                Picker("Km", selection: $radiusKm) {
-                    ForEach(options, id: \.self) { km in
-                        Text("\(km) km").tag(km)
-                    }
-                }
-                .pickerStyle(.wheel)
-                .frame(height: 120)
-            }
-            if !flash.isEmpty {
-                Section { Text(flash).foregroundStyle(AppTheme.accent) }
-            }
-            Section {
-                Button {
-                    Task { await save() }
-                } label: {
-                    if busy { ProgressView() } else { Text("Mentés").fontWeight(.semibold) }
-                }
-                .disabled(busy)
-            }
-        }
-        .onAppear {
-            let p = auth.user?.profile
-            postalCode = p?.postalCode ?? ""
-            city = p?.city ?? ""
-            if kind == .search {
-                radiusKm = p?.searchRadiusKm ?? 30
-            } else {
-                radiusKm = min(p?.recommendationsRadiusKm ?? 30, 30)
-            }
-            if !options.contains(radiusKm) {
-                radiusKm = kind == .search ? 30 : 30
-            }
-        }
-    }
-
-    private func save() async {
-        guard let token = auth.token else { return }
-        busy = true
-        defer { busy = false }
-        do {
-            var profile = auth.user?.profile ?? AuthAPI.RemoteProfile()
-            profile.postalCode = postalCode.trimmingCharacters(in: .whitespacesAndNewlines)
-            profile.city = city.trimmingCharacters(in: .whitespacesAndNewlines)
-            if kind == .search {
-                profile.searchRadiusKm = radiusKm
-            } else {
-                profile.recommendationsRadiusKm = radiusKm
-            }
-            let user = try await AuthAPI.saveProfile(token: token, profile: profile)
-            auth.apply(token: token, user: user)
-            flash = "Mentve."
-        } catch {
-            flash = error.localizedDescription
-        }
-    }
-}
-
-struct AppearanceScreen: View {
-    @AppStorage("bymy.textScale") private var textScale = 100
-    @AppStorage("bymy.theme") private var theme = "light"
-
-    var body: some View {
-        Form {
-            Section("Téma") {
-                Picker("Megjelenés", selection: $theme) {
-                    Text("Világos").tag("light")
-                    Text("Sötét").tag("dark")
-                    Text("Rendszer").tag("system")
-                }
-                .pickerStyle(.segmented)
-            }
-            Section("Szövegméret") {
-                Picker("Méret", selection: $textScale) {
-                    Text("100%").tag(100)
-                    Text("110%").tag(110)
-                    Text("120%").tag(120)
-                    Text("130%").tag(130)
-                    Text("140%").tag(140)
-                    Text("150%").tag(150)
-                }
-            }
-            Section {
-                Text("A szövegméret a tartalomra vonatkozik; a felső menü változatlan marad (mint weben).")
-                    .font(.system(size: 13))
+        ScrollView {
+            VStack(alignment: .leading, spacing: 12) {
+                Text(title)
+                    .font(.system(size: 22, weight: .bold))
+                Text(lead)
+                    .font(.system(size: 14))
                     .foregroundStyle(AppTheme.textSecondary)
+                Text(empty)
+                    .font(.system(size: 14))
+                    .foregroundStyle(AppTheme.tabInactive)
+                    .padding(.top, 8)
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(20)
         }
-    }
-}
-
-struct MessagesPlaceholderScreen: View {
-    var body: some View {
-        MessagesInboxScreen()
+        .background(AppTheme.bg)
     }
 }

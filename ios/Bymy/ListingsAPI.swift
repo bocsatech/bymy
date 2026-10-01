@@ -16,6 +16,7 @@ enum ListingsAPI {
         var kmNum: Int? = nil
         var updatedAt: String? = nil
         var promoKiemelt: Bool = false
+        var status: String? = nil
     }
 
     struct Page: Equatable {
@@ -177,6 +178,18 @@ enum ListingsAPI {
         try await fetchPage(path: path, query: query, token: token).listings
     }
 
+    /// Web `fetchMyListings` — GET `/api/listings/mine`.
+    static func fetchMine(token: String?, limit: Int = 200) async throws -> [Listing] {
+        guard let token, !token.isEmpty else {
+            throw APIClient.APIError.unauthorized("Belépés szükséges.")
+        }
+        return try await fetch(
+            path: "api/listings/mine",
+            query: ["limit": String(limit)],
+            token: token
+        )
+    }
+
     static func fetchPage(path: String, query: [String: String], token: String? = nil) async throws -> Page {
         var comps = URLComponents(url: APIBase.url(path), resolvingAgainstBaseURL: false)!
         comps.queryItems = query.map { URLQueryItem(name: $0.key, value: $0.value) }
@@ -269,7 +282,8 @@ enum ListingsAPI {
             priceNum: priceNum,
             kmNum: kmNum,
             updatedAt: row.updated_at ?? row.created_at,
-            promoKiemelt: promo
+            promoKiemelt: promo,
+            status: row.status
         )
     }
 
@@ -321,7 +335,8 @@ enum ListingsAPI {
             priceNum: priceNum,
             kmNum: kmNum,
             updatedAt: stringAny(row["updated_at"]) ?? stringAny(row["created_at"]),
-            promoKiemelt: promo
+            promoKiemelt: promo,
+            status: stringAny(row["status"])
         )
     }
 

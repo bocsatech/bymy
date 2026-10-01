@@ -807,18 +807,18 @@ function createSheetPortalShell(title) {
   root.setAttribute("aria-label", title);
   root.style.setProperty("--auto-drum-multi-h", `${ITEM_H * MULTI_VISIBLE}px`);
   root.style.setProperty("--auto-drum-item-h", `44px`);
-  /* Szélesség HTML-ben: kék stage fix; fehér ring 100% — nincs left%/translateX. */
+  /* Fehér ring középen a kéken — margin:auto, nincs translateX / right:auto. */
   root.innerHTML = `
     <button type="button" class="auto-drum-portal__backdrop" aria-label="Bezárás"></button>
-    <div class="auto-drum-portal__stage auto-drum-portal__stage--multi auto-drum-portal__stage--sheet" style="left:0;right:0;top:0;bottom:0;width:100%;max-width:100%;margin:0;transform:none;box-sizing:border-box;">
+    <div class="auto-drum-portal__stage auto-drum-portal__stage--multi auto-drum-portal__stage--sheet" style="left:0;right:0;top:0;bottom:0;width:100%;max-width:100%;margin-left:auto;margin-right:auto;transform:none;box-sizing:border-box;">
       <header class="auto-drum-portal__sheet-head" style="position:absolute;top:0;left:0;right:0;width:100%;max-width:100%;z-index:30;background:#e8eef3;display:grid;visibility:visible;opacity:1;">
         <button type="button" class="auto-drum-portal__close" aria-label="Bezárás">×</button>
         <h2 class="auto-drum-portal__sheet-title"></h2>
         <button type="button" class="auto-drum-portal__done auto-drum-portal__done--sheet-top">Kész</button>
       </header>
-      <div class="auto-drum-portal__sheet-scroll" data-sheet-scroll tabindex="-1" style="left:0;right:0;width:100%;max-width:100%;box-sizing:border-box;overflow-x:hidden;">
+      <div class="auto-drum-portal__sheet-scroll" data-sheet-scroll tabindex="-1" style="left:0;right:0;width:100%;max-width:100%;margin-left:auto;margin-right:auto;padding-left:1rem;padding-right:1rem;box-sizing:border-box;overflow-x:hidden;display:flex;flex-direction:column;align-items:center;">
         <div class="auto-drum-portal__sheet-top-space" aria-hidden="true"></div>
-        <div class="immo-drum-wheel-ring auto-drum-portal__ring auto-drum-portal__ring--multi auto-drum-portal__ring--sheet" style="width:100%;max-width:100%;min-width:0;margin-left:0;margin-right:0;left:0;right:auto;transform:none;box-sizing:border-box;">
+        <div class="immo-drum-wheel-ring auto-drum-portal__ring auto-drum-portal__ring--multi auto-drum-portal__ring--sheet" style="width:100%;max-width:100%;min-width:0;margin-left:auto;margin-right:auto;left:0;right:0;transform:none;box-sizing:border-box;">
           <div class="auto-drum-portal__toolbar auto-drum-portal__toolbar--sheet">
             <button type="button" class="auto-drum-portal__back" hidden>Vissza</button>
             <p class="auto-drum-portal__sub" hidden></p>
@@ -850,32 +850,34 @@ function lockSheetWhiteToBlue(root, stage) {
   const head = root.querySelector?.(".auto-drum-portal__sheet-head");
   const ym = Boolean(root?.classList?.contains("auto-drum-portal--ym"));
   const desk = window.matchMedia("(min-width: 901px)").matches;
-  /* Fehér = kék szélesség (YM): 100%, 0 oldalsó padding/margin, nincs translateX. */
+  /* Kék stage középen; fehér ring a kéken belül mindig középen — nincs left-only / translateX. */
   stage.style.setProperty("left", "0", "important");
   stage.style.setProperty("right", "0", "important");
-  stage.style.setProperty("margin-left", desk ? "auto" : "0", "important");
-  stage.style.setProperty("margin-right", desk ? "auto" : "0", "important");
+  stage.style.setProperty("margin-left", "auto", "important");
+  stage.style.setProperty("margin-right", "auto", "important");
   if (scroll) {
     scroll.style.setProperty("left", "0", "important");
     scroll.style.setProperty("right", "0", "important");
     scroll.style.setProperty("width", "100%", "important");
     scroll.style.setProperty("max-width", "100%", "important");
-    scroll.style.setProperty("margin-left", "0", "important");
-    scroll.style.setProperty("margin-right", "0", "important");
+    scroll.style.setProperty("margin-left", "auto", "important");
+    scroll.style.setProperty("margin-right", "auto", "important");
     scroll.style.setProperty("overflow-x", "hidden", "important");
-    if (ym) {
-      scroll.style.setProperty("padding-left", "0", "important");
-      scroll.style.setProperty("padding-right", "0", "important");
-    }
+    scroll.style.setProperty("display", "flex", "important");
+    scroll.style.setProperty("flex-direction", "column", "important");
+    scroll.style.setProperty("align-items", "center", "important");
+    /* Egyenlő oldalsó padding = fehér középen a kéken */
+    scroll.style.setProperty("padding-left", "1rem", "important");
+    scroll.style.setProperty("padding-right", "1rem", "important");
   }
   if (ring) {
     ring.style.setProperty("width", "100%", "important");
     ring.style.setProperty("max-width", "100%", "important");
     ring.style.setProperty("min-width", "0", "important");
-    ring.style.setProperty("margin-left", "0", "important");
-    ring.style.setProperty("margin-right", "0", "important");
+    ring.style.setProperty("margin-left", "auto", "important");
+    ring.style.setProperty("margin-right", "auto", "important");
     ring.style.setProperty("left", "0", "important");
-    ring.style.setProperty("right", "auto", "important");
+    ring.style.setProperty("right", "0", "important");
     ring.style.setProperty("transform", "none", "important");
   }
   /* Felső gombsor MINDIG a kék tetején, abszolút, átlátszatlan — nem csúszhat el / nem takarodhat. */

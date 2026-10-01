@@ -114,7 +114,7 @@ struct CategorySearchScreen: View {
 
                     ForEach(listings) { item in
                         Button {
-                            router.openListingId = item.id
+                            router.openListing(item.id)
                         } label: {
                             ListingCardView(listing: item)
                         }

@@ -5,7 +5,6 @@ struct ListingDetailScreen: View {
     var onMessage: ((ListingsAPI.Detail) -> Void)? = nil
 
     @EnvironmentObject private var auth: AuthStore
-    @Environment(\.dismiss) private var dismiss
 
     @State private var detail: ListingsAPI.Detail?
     @State private var loading = true
@@ -34,11 +33,7 @@ struct ListingDetailScreen: View {
         .background(AppTheme.bg)
         .navigationTitle("Hirdetés")
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button("Kész") { dismiss() }
-            }
-        }
+        .navigationBarBackButtonHidden(false)
         .task { await load() }
         .safeAreaInset(edge: .bottom) {
             if let detail {

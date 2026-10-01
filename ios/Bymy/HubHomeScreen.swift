@@ -233,7 +233,7 @@ struct HubHomeScreen: View {
                     HStack(alignment: .top, spacing: 10) {
                         ForEach(items) { item in
                             Button {
-                                router.openListingId = item.id
+                                router.openListing(item.id)
                             } label: {
                                 ListingTileCard(listing: item, width: tileWidth)
                             }

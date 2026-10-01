@@ -58,11 +58,16 @@ final class AppRouter: ObservableObject {
     @Published var showLogin = false
     @Published var showMessages = false
     @Published var showRegister = false
+    /// Push a NavigationStack-en (nem sheet).
     @Published var openListingId: String?
     @Published var openChat: MessagesAPI.Conversation?
 
     /// Alsó tab választás — igazodik a mobil web linkjeihez.
     func selectBottom(_ tab: BottomTab, isLoggedIn: Bool) {
+        // Tab váltás = vissza a listához (mint weben új oldal)
+        openListingId = nil
+        openChat = nil
+
         switch tab {
         case .home:
             bottomTab = .home
@@ -88,6 +93,8 @@ final class AppRouter: ObservableObject {
     }
 
     func selectTop(_ page: TopPage) {
+        openListingId = nil
+        openChat = nil
         topPage = page
         switch page {
         case .ajanlasok:
@@ -95,18 +102,61 @@ final class AppRouter: ObservableObject {
         case .hub:
             bottomTab = .home
         default:
-            // Autó / Teherautó / Ingatlan = keresés jellegű
             if bottomTab == .post || bottomTab == .account {
                 bottomTab = .home
             }
         }
     }
 
+    func openListing(_ id: String) {
+        openChat = nil
+        openListingId = id
+    }
+
+    func openMessage(for detail: ListingsAPI.Detail, token: String?) async {
+        guard let token, !token.isEmpty else {
+            showLogin = true
+            return
+        }
+        do {
+            let conv = try await MessagesAPI.startConversation(
+                token: token,
+                listingId: detail.id,
+                title: detail.title,
+                priceLabel: detail.priceLabel,
+                meta: detail.meta,
+                sellerId: detail.ownerUserId
+            )
+            openChat = conv
+        } catch {
+            openChat = MessagesAPI.Conversation(
+                id: 0,
+                listing: .init(
+                    id: detail.id,
+                    title: detail.title,
+                    priceLabel: detail.priceLabel,
+                    code: "BYMY-\(detail.id)",
+                    meta: detail.meta
+                ),
+                peer: .init(id: detail.ownerUserId ?? 0, email: "", displayName: detail.sellerName),
+                role: "buyer",
+                unread: 0,
+                updatedAt: "",
+                lastMessage: nil
+            )
+        }
+    }
+
+    /// Hirdetés / chat nézetben nincs felső menü + alsó tab (mint a webes hirdetés.html).
     var showsTopChrome: Bool {
-        bottomTab != .post && bottomTab != .account && bottomTab != .search
+        openListingId == nil
+            && openChat == nil
+            && bottomTab != .post
+            && bottomTab != .account
+            && bottomTab != .search
     }
 
     var showsBottomChrome: Bool {
-        bottomTab != .post
+        openListingId == nil && openChat == nil && bottomTab != .post
     }
 }

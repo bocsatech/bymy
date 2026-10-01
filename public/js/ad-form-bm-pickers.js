@@ -263,7 +263,7 @@ function unregisterOpenPanel(close) {
 }
 
 function fieldHost(select) {
-  return select?.closest(".labeled-field, .md-outlined, .ad-layout-item");
+  return select?.closest(".labeled-field, .md-outlined, .ad-layout-item, .tire-row, .tire-block");
 }
 
 function bmWrap(select) {
@@ -2126,6 +2126,15 @@ export function applyAdFormBmFieldValues(data) {
 
 let cachedVehicleCatalog = null;
 
+const TIRE_SWITCH_SPECS = [
+  { name: "nyari_gumi_szelesseg", title: "Nyári gumi szélesség" },
+  { name: "nyari_gumi_magassag", title: "Nyári gumi magasság" },
+  { name: "nyari_gumi_atmero", title: "Nyári gumi átmérő" },
+  { name: "teli_gumi_szelesseg", title: "Téli gumi szélesség" },
+  { name: "teli_gumi_magassag", title: "Téli gumi magasság" },
+  { name: "teli_gumi_atmero", title: "Téli gumi átmérő" },
+];
+
 export function unmountAdFormBmPickers(form) {
   if (!form) return;
   unmountMuszakiDateTriple(form);
@@ -2136,6 +2145,17 @@ export function unmountAdFormBmPickers(form) {
     if (select?._adBmClose) select._adBmClose();
     unmountPicker(select);
   });
+  for (const spec of TIRE_SWITCH_SPECS) {
+    const select =
+      document.getElementById(spec.name) ||
+      form.elements?.namedItem?.(spec.name) ||
+      null;
+    if (select instanceof HTMLSelectElement) {
+      if (select._adBmClose) select._adBmClose();
+      unmountPicker(select);
+    }
+  }
+  form.querySelectorAll?.(".tire-row--kapcsol")?.forEach((row) => row.classList.remove("tire-row--kapcsol"));
   delete form?.dataset.adBmPickers;
 }
 
@@ -2581,7 +2601,7 @@ async function mountAdSelectDrum(select, {
   select.dataset.adBmDrum = "1";
 
   const { fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=immoClearAll2");
-  const { openStandaloneSwitchSheet, bindAutoDrumSheet } = await import("./auto-drum-sheet.js?v=bmSheet36");
+  const { openStandaloneSwitchSheet, bindAutoDrumSheet } = await import("./auto-drum-sheet.js?v=bmSheet38");
   const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
 
   const wrap = document.createElement("div");
@@ -3092,7 +3112,30 @@ export async function mountAdFormBmPickers(form, catalog = null) {
     console.warn("Gyártmány/modell dobkerék:", error);
   }
 
+  await mountTireSizeSwitchPickers(form);
+
   form.dataset.adBmPickers = "1";
   window.dispatchEvent(new CustomEvent("ad-form-bm-ready", { detail: { form } }));
+}
+
+/** Gumi méret: osztott kapcsos menük (meglévő select opciókkal). */
+export async function mountTireSizeSwitchPickers(form) {
+  if (!form || !isBmPickerAdForm(form)) return;
+  const { fillTireSelect } = await import("./tire-sizes-ui.js?v=tireKapcsol1");
+  for (const spec of TIRE_SWITCH_SPECS) {
+    const select = form.elements.namedItem(spec.name);
+    if (!(select instanceof HTMLSelectElement)) continue;
+    if (!select.id) select.id = spec.name;
+    fillTireSelect(select);
+    if (!select.classList.contains("ad-form-cell")) select.classList.add("ad-form-cell");
+    await mountAdSelectDrum(select, {
+      title: spec.title,
+      emptyLabel: "—",
+      mode: "switch",
+    });
+  }
+  form.querySelectorAll(".tire-row").forEach((row) => {
+    row.classList.add("tire-row--kapcsol");
+  });
 }
 

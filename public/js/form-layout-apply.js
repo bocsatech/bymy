@@ -1,7 +1,7 @@
 import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=immoTipusPick1";
-import { refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=bmSheet36";
-import { initTireSizes } from "./tire-sizes-ui.js?v=tireFill1";
-import { applyAdFormDesk } from "./ad-form-desk.js?v=bmSheet36";
+import { refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=bmSheet38";
+import { initTireSizes } from "./tire-sizes-ui.js?v=tireKapcsol1";
+import { applyAdFormDesk } from "./ad-form-desk.js?v=bmSheet38";
 import { markImmoPostViewReady } from "./category-picker.js?v=pickerBoot4";
 import {
   DESK_MUSZAKI_CORE_FIELD_KEYS,
@@ -13,7 +13,7 @@ import {
   applyStep1SearchDomOrder,
   isVehicleStep1Canvas,
   stackVehicleCanvasSingleColumn,
-} from "./ad-form-desk-pinned-blocks.js?v=bmSheet36";
+} from "./ad-form-desk-pinned-blocks.js?v=bmSheet38";
 
 function cssEscape(value) {
   if (window.CSS?.escape) return window.CSS.escape(value);
@@ -1131,6 +1131,10 @@ async function applyAdFormLayout() {
     window.dispatchEvent(new Event("ad-form-sync-location"));
     await refreshAdFormBmPickers(form);
     initTireSizes(form);
+    form.querySelectorAll('select[name*="_gumi_"]').forEach((select) => {
+      if (typeof select._adBmFillWheel === "function") select._adBmFillWheel();
+      else if (typeof select._adBmRefreshSummary === "function") select._adBmRefreshSummary();
+    });
     window.dispatchEvent(new Event("ad-form-sync-fuel-fields"));
     applyAdFormDesk();
     if (!isImmo) {

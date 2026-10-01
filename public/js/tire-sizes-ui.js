@@ -45,6 +45,8 @@ function fillTireSelect(select) {
   else if (name.endsWith("_atmero")) fillSelect(select, TIRE_RIMS);
 }
 
+export { fillTireSelect, tireSelectsIn };
+
 function syncRearGroup(form, group) {
   const checkbox = form.elements.namedItem(group.checkboxName);
   if (!(checkbox instanceof HTMLInputElement)) return;

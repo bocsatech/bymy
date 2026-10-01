@@ -1695,3 +1695,108 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-brand-blo
   min-width: 0 !important;
   box-sizing: border-box !important;
 }
+
+/* ——— Műszaki adatok (step 2): alsó vonal, ne cella — mint a Kivitel / Alapadatok ——— */
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .ad-form-drum-wrap,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .ad-form-bm-field--drum > .ad-form-drum-wrap,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .ad-form-bm-field--drum > .immo-wheel-wrap,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .suffix-field,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .ad-form-suffix-unit,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] input.ad-form-cell,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] select.ad-form-cell:not(.ad-form-bm-native),
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .step-panel[data-step="2"] .suffix-field,
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .step-panel[data-step="2"] .ad-form-suffix-unit,
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .step-panel[data-step="2"] .ad-form-drum-wrap,
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .step-panel[data-step="2"] .immo-wheel-wrap {
+  border: 0 !important;
+  border-bottom: 1.5px solid #cfd6dd !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  min-height: 2.65rem !important;
+  height: auto !important;
+  max-height: none !important;
+  padding: 0 !important;
+  gap: 0.35rem !important;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .ad-form-drum-wrap > .immo-wheel-trigger,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .immo-wheel-wrap > .immo-wheel-trigger,
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .step-panel[data-step="2"] .immo-wheel-trigger {
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0.45rem 0.1rem 0.5rem !important;
+  min-height: 2.5rem !important;
+  height: auto !important;
+  font-weight: 500 !important;
+  color: #0f172a !important;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .ad-form-bm-field--drum:not(.has-value) .immo-wheel-trigger,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .immo-wheel-trigger.is-placeholder {
+  color: #667085 !important;
+  font-weight: 500 !important;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .suffix-field > input,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .suffix-field > input.ad-form-cell,
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .step-panel[data-step="2"] .suffix-field > input {
+  padding: 0.45rem 0.35rem 0.45rem 0 !important;
+  height: auto !important;
+  min-height: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .suffix-field > span:not(.hint-inline):not(.power-hint):not(.price-market-hint):not(.price-market-label),
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .step-panel[data-step="2"] .suffix-field > span:not(.hint-inline):not(.power-hint):not(.price-market-hint):not(.price-market-label) {
+  padding: 0 0.15rem 0 0 !important;
+  color: #666 !important;
+  background: transparent !important;
+  border: 0 !important;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .ad-form-drum-wrap.has-drum-open,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .ad-form-drum-wrap.is-open,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .immo-wheel-wrap.has-drum-open,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .immo-wheel-wrap.is-open,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .immo-wheel-wrap:focus-within {
+  border-color: transparent !important;
+  border-bottom-color: #111 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] input.ad-form-cell:focus,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] select.ad-form-cell:not(.ad-form-bm-native):focus {
+  border-bottom-color: #111 !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Gumi / EV blokkok a műszaki lépésben is vonal */
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] #tire-sizes-card .tire-row select.ad-form-cell,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .ad-desk-pinned-block select.ad-form-cell:not(.ad-form-bm-native),
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .ad-desk-pinned-block input.ad-form-cell {
+  border: 0 !important;
+  border-bottom: 1.5px solid #cfd6dd !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .ad-form-drum-wrap,
+html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .immo-wheel-wrap,
+html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .suffix-field,
+html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] input.ad-form-cell,
+html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] select.ad-form-cell:not(.ad-form-bm-native) {
+  background: transparent !important;
+  border-bottom-color: #4b5563 !important;
+}
+
+html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .immo-wheel-trigger {
+  color: #f9fafb !important;
+}

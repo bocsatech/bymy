@@ -2269,3 +2269,64 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-
   max-width: calc(100% - var(--ad-form-trail-reserve)) !important;
   box-sizing: border-box !important;
 }
+
+/* Suffix (Teljesítmény, kg…): label–vonal távolság mint a menüknél */
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body .suffix-field,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body .ad-form-suffix-unit,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .suffix-field,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .ad-form-suffix-unit,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="5"] .suffix-field,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="5"] .ad-form-suffix-unit,
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-alap-card__body .suffix-field,
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .step-panel[data-step="2"] .suffix-field,
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .step-panel[data-step="5"] .suffix-field,
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .field-row--tech-top .suffix-field,
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .muszaki-grid .suffix-field {
+  min-height: 0 !important;
+  height: auto !important;
+  max-height: none !important;
+  align-items: flex-end !important;
+  gap: var(--ad-form-trail-gap) !important;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body .suffix-field > input,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body .suffix-field > input.ad-form-cell,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .suffix-field > input,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .suffix-field > input.ad-form-cell,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="5"] .suffix-field > input,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="5"] .suffix-field > input.ad-form-cell,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .field-row--tech-top .suffix-field > input,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .field-row--tech-top .suffix-field--power > input#teljesitmeny_le,
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .field-row--tech-top .suffix-field--power > input#teljesitmeny_kw,
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .step-panel[data-step="2"] .suffix-field > input,
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .field-row--tech-top .suffix-field > input,
+body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .field-row--tech-top .suffix-field--power > input#teljesitmeny_le {
+  flex: 1 1 0% !important;
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  min-height: 0 !important;
+  height: auto !important;
+  max-height: none !important;
+  padding: 0.15rem 0.1rem 0.35rem 0 !important;
+  line-height: 1.35 !important;
+  font-size: 16px !important;
+  box-sizing: border-box !important;
+}
+
+/* Üres kW hint ne nyújtsa / ne tolja szét a sort */
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .suffix-field--power > .power-hint:empty {
+  display: none !important;
+}
+
+body.site-app[data-site-page="hirdetesfeladas"] #ad-form .suffix-field--power > .power-hint {
+  flex: 0 0 auto !important;
+  width: auto !important;
+  max-width: 40% !important;
+  min-width: 0 !important;
+  align-self: flex-end !important;
+  padding-bottom: 0.35rem !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}

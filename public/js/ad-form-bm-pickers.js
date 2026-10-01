@@ -2386,7 +2386,7 @@ async function mountAdBrandModelCombined(form, catalog) {
   }
 
   const { fillWheel, setWheelValue, readWheel, syncHostClearButton } = await import("./ingatlan-wheels.js?v=immoClearAll2");
-  const { openBrandModelCatalogSheet } = await import("./auto-drum-sheet.js?v=bmSheet43");
+  const { openBrandModelCatalogSheet } = await import("./auto-drum-sheet.js?v=bmSheet44");
   const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
 
   const brands = [...(catalog?.gyartmanyok || [])].sort((a, b) =>
@@ -2587,7 +2587,7 @@ async function mountAdSelectDrum(select, {
   select.dataset.adBmDrum = "1";
 
   const { fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=immoClearAll2");
-  const { openStandaloneSwitchSheet, bindAutoDrumSheet } = await import("./auto-drum-sheet.js?v=bmSheet43");
+  const { openStandaloneSwitchSheet, bindAutoDrumSheet } = await import("./auto-drum-sheet.js?v=bmSheet44");
   const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
 
   const wrap = document.createElement("div");
@@ -2810,7 +2810,7 @@ async function mountAdSplitYmDrum({
   }
 
   const { fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=immoClearAll2");
-  const { openYmDualSheet } = await import("./auto-drum-sheet.js?v=bmSheet43");
+  const { openYmDualSheet } = await import("./auto-drum-sheet.js?v=bmSheet44");
   const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
 
   const yearOpts = optionsFromSelect(ev, emptyYear);
@@ -3154,7 +3154,7 @@ export async function mountTireSizeSwitchPickers(form) {
 
   try {
     const { fillTireSelect } = await import("./tire-sizes-ui.js?v=tireYm4");
-    const { openTireTripleSheet } = await import("./auto-drum-sheet.js?v=bmSheet43");
+    const { openTireTripleSheet } = await import("./auto-drum-sheet.js?v=bmSheet44");
     const blocks = [...grid.querySelectorAll(":scope > .tire-block")];
 
     for (let index = 0; index < TIRE_ROW_SPECS.length; index += 1) {

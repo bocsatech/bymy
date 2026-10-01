@@ -531,7 +531,7 @@ function convertRangePairToDual(wrap, cfg) {
     wheelName: cfg.tol,
     label: "",
     options: tolOpts,
-    emptyLabel: "Mindegy",
+    emptyLabel: "tól",
     halfClass: "immo-dual-range__half immo-dual-range__half--min",
   });
   const maxCell = buildWheelCell({
@@ -539,7 +539,7 @@ function convertRangePairToDual(wrap, cfg) {
     wheelName: cfg.ig,
     label: "",
     options: igOpts,
-    emptyLabel: "Mindegy",
+    emptyLabel: "ig",
     halfClass: "immo-dual-range__half immo-dual-range__half--max",
   });
 

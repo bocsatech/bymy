@@ -31,7 +31,7 @@ struct AppShellView: View {
         case .search:
             SearchScreen()
         case .post:
-            PostAdPlaceholderScreen()
+            PostAdScreen()
         case .account:
             AccountScreen()
         }

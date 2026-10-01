@@ -67,36 +67,6 @@ struct AccountScreen: View {
     }
 }
 
-struct PostAdPlaceholderScreen: View {
-    @EnvironmentObject private var router: AppRouter
-
-    var body: some View {
-        VStack(spacing: 16) {
-            HStack {
-                Button("Bezárás") {
-                    router.selectBottom(.home, isLoggedIn: true)
-                }
-                .foregroundStyle(AppTheme.accent)
-                Spacer()
-            }
-            .padding(.horizontal, 16)
-            .padding(.top, 12)
-
-            Spacer()
-            Text("Hirdetés feladás")
-                .font(.system(size: 22, weight: .bold))
-            Text("A feladási űrlap a következő lépésben épül be — ugyanaz, mint a mobil weben.")
-                .font(.system(size: 14))
-                .foregroundStyle(AppTheme.textSecondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 28)
-            Spacer()
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(AppTheme.bg)
-    }
-}
-
 struct MessagesPlaceholderScreen: View {
     @Environment(\.dismiss) private var dismiss
 

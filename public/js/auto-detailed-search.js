@@ -216,18 +216,11 @@ function renderToggle(toggle) {
     </label>`;
 }
 
-function renderExtraToggleRow(toggle) {
+function renderHiddenExtraToggle(toggle) {
   const isFlag = FORM_FLAG_KEYS.has(toggle.id);
   const extraAttr = isFlag ? "" : ` data-extra="${escapeHtml(toggle.label)}"`;
   const filterAttr = isFlag ? ` data-filter-key="${toggle.id}"` : "";
-  return `
-    <div class="qs-extra-toggle-row">
-      <label class="qs-extra-toggle">
-        <span class="qs-extra-toggle__text">${escapeHtml(toggle.label)}</span>
-        <input type="checkbox" role="switch"${filterAttr}${extraAttr} value="1" data-toggle-id="${escapeHtml(toggle.id)}" />
-        <span class="qs-extra-toggle__switch" aria-hidden="true"></span>
-      </label>
-    </div>`;
+  return `<input type="checkbox" hidden${filterAttr}${extraAttr} value="1" data-toggle-id="${escapeHtml(toggle.id)}" />`;
 }
 
 function isToggleOnlySection(section) {
@@ -261,17 +254,15 @@ function syncSheetFieldSummary(field) {
 }
 
 function renderToggleSheetField(section) {
-  const rows = (section.toggles || []).map(renderExtraToggleRow).join("");
+  const checks = (section.toggles || []).map(renderHiddenExtraToggle).join("");
   return `
-    <div class="qs-detailed-extra-pill" data-detailed-section="${escapeHtml(section.id)}" data-detailed-extra="1">
-      <button type="button" class="qs-detailed-extra-pill__head" data-detailed-trigger aria-expanded="false" aria-label="${escapeHtml(section.title)}">
+    <div class="qs-detailed-extra-pill" data-detailed-section="${escapeHtml(section.id)}" data-detailed-extra="1" data-detailed-sheet="1">
+      <button type="button" class="qs-detailed-extra-pill__head" data-detailed-trigger aria-haspopup="dialog" aria-label="${escapeHtml(section.title)}">
         <span class="qs-detailed-extra-pill__title">${escapeHtml(section.title)}</span>
         <span class="qs-detailed-extra-pill__sum" data-detailed-summary hidden></span>
         <span class="qs-detailed-extra-pill__chev" aria-hidden="true">▾</span>
       </button>
-      <div class="qs-detailed-extra-pill__body" data-detailed-checks hidden>
-        <div class="qs-detailed-extra-pill__list">${rows}</div>
-      </div>
+      <div class="qs-detailed-extra-pill__checks" data-detailed-checks hidden>${checks}</div>
     </div>`;
 }
 
@@ -324,51 +315,71 @@ function bindExclusiveAccordions(host) {
   });
 }
 
-function closeAllExtraPills(host, except = null) {
+function closeAllExtraPills(host) {
   host.querySelectorAll("[data-detailed-extra]").forEach((pill) => {
-    if (pill === except) return;
     pill.classList.remove("is-open");
     const trigger = pill.querySelector("[data-detailed-trigger]");
-    const body = pill.querySelector("[data-detailed-checks]");
     if (trigger) trigger.setAttribute("aria-expanded", "false");
-    if (body) body.hidden = true;
   });
 }
 
-function setExtraPillOpen(pill, open) {
-  if (!pill) return;
-  const trigger = pill.querySelector("[data-detailed-trigger]");
-  const body = pill.querySelector("[data-detailed-checks]");
-  pill.classList.toggle("is-open", open);
-  trigger?.setAttribute("aria-expanded", open ? "true" : "false");
-  if (body) body.hidden = !open;
-  if (open) {
-    const pin = () => trigger?.scrollIntoView({ block: "start", behavior: "auto", inline: "nearest" });
-    requestAnimationFrame(() => {
-      pin();
-      requestAnimationFrame(pin);
-    });
-  }
+async function openDetailedToggleSheet(field) {
+  const trigger = field.querySelector("[data-detailed-trigger]");
+  const checks = field.querySelector("[data-detailed-checks]");
+  if (!trigger || !checks) return;
+
+  const inputs = [...checks.querySelectorAll('input[type="checkbox"]')];
+  const items = inputs
+    .map((el) => {
+      const label = el.getAttribute("data-extra") || el.getAttribute("data-filter-key") || "";
+      const value = el.getAttribute("data-toggle-id") || label;
+      return { value, label };
+    })
+    .filter((row) => row.value && row.label);
+
+  const initialSelected = inputs
+    .filter((el) => el.checked)
+    .map((el) => el.getAttribute("data-toggle-id") || el.getAttribute("data-extra") || "")
+    .filter(Boolean);
+
+  const title =
+    field.querySelector(".qs-detailed-extra-pill__title")?.textContent?.trim() ||
+    trigger.getAttribute("aria-label") ||
+    "Extrák";
+
+  const { openStandaloneSwitchSheet } = await import("./auto-drum-sheet.js?v=brandDrum31");
+  openStandaloneSwitchSheet({
+    trigger,
+    title,
+    emptyLabel: "Mindegy",
+    items,
+    initialSelected,
+    onDone: (list) => {
+      const selected = new Set((list || []).map(String).filter(Boolean));
+      inputs.forEach((el) => {
+        const id = el.getAttribute("data-toggle-id") || el.getAttribute("data-extra") || "";
+        el.checked = selected.has(id);
+      });
+      syncSheetFieldSummary(field);
+    },
+  });
 }
 
 function bindDetailedExtraPills(host) {
   host.querySelectorAll("[data-detailed-extra]").forEach((pill) => {
     syncSheetFieldSummary(pill);
     const trigger = pill.querySelector("[data-detailed-trigger]");
-    const body = pill.querySelector("[data-detailed-checks]");
     if (!trigger || trigger.dataset.extraBound === "1") return;
     trigger.dataset.extraBound = "1";
     trigger.addEventListener("click", (event) => {
       event.preventDefault();
       event.stopPropagation();
-      const willOpen = !pill.classList.contains("is-open");
-      closeAllExtraPills(host, willOpen ? pill : null);
       host.querySelectorAll(".qs-detailed-acc").forEach((acc) => {
         acc.open = false;
       });
-      setExtraPillOpen(pill, willOpen);
+      closeAllExtraPills(host);
+      void openDetailedToggleSheet(pill);
     });
-    body?.addEventListener("change", () => syncSheetFieldSummary(pill));
   });
 }
 

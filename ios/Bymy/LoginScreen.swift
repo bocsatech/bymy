@@ -57,6 +57,12 @@ struct LoginScreen: View {
                 .disabled(busy || email.isEmpty || password.isEmpty)
             }
 
+            Section("Vagy social belépés") {
+                SocialAuthButtons {
+                    dismiss()
+                }
+            }
+
             Section {
                 if mode == .login {
                     Button("Nincs fiókod? Regisztráció") {

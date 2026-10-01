@@ -68,18 +68,7 @@ struct AccountScreen: View {
 }
 
 struct MessagesPlaceholderScreen: View {
-    @Environment(\.dismiss) private var dismiss
-
     var body: some View {
-        List {
-            Text("Még nincs üzeneted.")
-                .foregroundStyle(AppTheme.textSecondary)
-        }
-        .navigationTitle("Üzenetek")
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button("Kész") { dismiss() }
-            }
-        }
+        MessagesInboxScreen()
     }
 }

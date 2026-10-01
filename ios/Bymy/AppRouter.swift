@@ -58,6 +58,8 @@ final class AppRouter: ObservableObject {
     @Published var showLogin = false
     @Published var showMessages = false
     @Published var showRegister = false
+    @Published var openListingId: String?
+    @Published var openChat: MessagesAPI.Conversation?
 
     /// Alsó tab választás — igazodik a mobil web linkjeihez.
     func selectBottom(_ tab: BottomTab, isLoggedIn: Bool) {

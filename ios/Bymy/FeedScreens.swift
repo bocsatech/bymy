@@ -51,6 +51,9 @@ struct ListingsFeedView: View {
     let title: String
     let loader: () async throws -> [ListingsAPI.Listing]
 
+    @EnvironmentObject private var auth: AuthStore
+    @EnvironmentObject private var router: AppRouter
+
     @State private var listings: [ListingsAPI.Listing] = []
     @State private var loading = true
     @State private var errorText: String?
@@ -66,6 +69,11 @@ struct ListingsFeedView: View {
                         .font(.system(size: 14))
                         .foregroundStyle(AppTheme.textSecondary)
                         .multilineTextAlignment(.center)
+                    if errorText.localizedCaseInsensitiveContains("Belépés") {
+                        Button("Belépés") { router.showLogin = true }
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundStyle(AppTheme.accent)
+                    }
                     Button("Újra") { Task { await load() } }
                         .font(.system(size: 15, weight: .semibold))
                         .foregroundStyle(AppTheme.accent)
@@ -82,7 +90,12 @@ struct ListingsFeedView: View {
                             .padding(.horizontal, 4)
 
                         ForEach(listings) { item in
-                            ListingCardView(listing: item)
+                            Button {
+                                router.openListingId = item.id
+                            } label: {
+                                ListingCardView(listing: item)
+                            }
+                            .buttonStyle(.plain)
                         }
                     }
                     .padding(.horizontal, 14)
@@ -93,7 +106,7 @@ struct ListingsFeedView: View {
             }
         }
         .background(AppTheme.bg)
-        .task { await load() }
+        .task(id: auth.token) { await load() }
     }
 
     private func load() async {
@@ -109,9 +122,11 @@ struct ListingsFeedView: View {
 }
 
 struct HubHomeScreen: View {
+    @EnvironmentObject private var auth: AuthStore
+
     var body: some View {
         ListingsFeedView(title: "Kezdőlap") {
-            try await ListingsAPI.fetchHome()
+            try await ListingsAPI.fetchHome(token: auth.token)
         }
     }
 }
@@ -119,23 +134,27 @@ struct HubHomeScreen: View {
 struct CategoryListScreen: View {
     let title: String
     let category: String
+    @EnvironmentObject private var auth: AuthStore
 
     var body: some View {
         ListingsFeedView(title: title) {
-            try await ListingsAPI.fetchCategory(category)
+            try await ListingsAPI.fetchCategory(category, token: auth.token)
         }
     }
 }
 
 struct RecommendationsScreen: View {
+    @EnvironmentObject private var auth: AuthStore
+
     var body: some View {
         ListingsFeedView(title: "Ajánlások") {
-            try await ListingsAPI.fetchHome(limit: 30)
+            try await ListingsAPI.fetchHome(limit: 30, token: auth.token)
         }
     }
 }
 
 struct SearchScreen: View {
+    @EnvironmentObject private var auth: AuthStore
     @State private var query = ""
 
     var body: some View {
@@ -153,7 +172,7 @@ struct SearchScreen: View {
             .padding(14)
 
             ListingsFeedView(title: "Keresés") {
-                try await ListingsAPI.fetchHome(limit: 50)
+                try await ListingsAPI.fetchHome(limit: 50, token: auth.token)
             }
         }
     }

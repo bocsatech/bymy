@@ -367,15 +367,95 @@
     outline: none !important;
   }
 
+  /* Osztott tartomány (Évjárat / Vételár / km): egy összefoglaló vonal — mint feladás */
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
-    .ad-form-alap-card
-    .auto-desk-range {
-    display: grid !important;
-    grid-template-columns: 1fr 1fr !important;
-    gap: 0.65rem !important;
+    .auto-desk-field
+    .immo-dual-range-block,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-desk-shell
+    .auto-desk-field
+    .immo-dual-range {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    gap: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
     border: 0 !important;
     background: transparent !important;
+    box-shadow: none !important;
+    position: relative !important;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-desk-shell
+    .auto-desk-field
+    .immo-dual-range__summary {
+    appearance: none !important;
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0.45rem 0 !important;
+    border: 0 !important;
+    border-bottom: 1.5px solid #cfd6dd !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    box-sizing: border-box !important;
+    text-align: left !important;
+    font: 500 1rem/1.25 system-ui, sans-serif !important;
+    color: #0f172a !important;
+    cursor: pointer !important;
+    min-height: 2.65rem !important;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-desk-shell
+    .auto-desk-field
+    .immo-dual-range__summary.is-placeholder {
+    color: #64748b !important;
+    font-weight: 500 !important;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-desk-shell
+    .auto-desk-field
+    .immo-dual-range__summary:focus-visible {
+    outline: 2px solid #2563eb;
+    outline-offset: 2px;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-desk-shell
+    .auto-desk-field
+    .immo-dual-range
+    > .immo-dual-range__half,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-desk-shell
+    .auto-desk-field
+    .immo-dual-range__sep,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-desk-shell
+    .auto-desk-field
+    .immo-dual-range__unit,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-desk-shell
+    .auto-desk-field
+    .immo-dual-range__title {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+    pointer-events: none !important;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active

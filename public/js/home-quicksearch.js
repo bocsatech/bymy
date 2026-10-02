@@ -1,6 +1,6 @@
 
 import { applyAutoSearchLayout, readLayoutFilterValues, refillAutoSearchRangeSelects, prefetchAutoSearchBoot } from "./auto-search-layout.js?v=90daaf5812";
-import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums, styleAutoSearchMoreCard } from "./auto-search-drums.js?v=2f34c79109";
+import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums, styleAutoSearchMoreCard, enhanceDeskDualRanges } from "./auto-search-drums.js?v=deskDual1";
 import {
   mountDetailedSearch,
   readDetailedSearchValues,
@@ -20,7 +20,7 @@ import {
   arrangeAutoDeskDemoFields,
   deskFilterMenuReady,
   syncAutoSearchAccShell,
-} from "./auto-desk-search.js?v=alapFields1";
+} from "./auto-desk-search.js?v=deskDual1";
 
 prefetchAutoSearchBoot();
 const MOBILE_MQ = "(max-width: 900px)";
@@ -324,6 +324,7 @@ export function initHomeQuickSearch({ onSearch = () => {}, onFilterPreview, onDe
     if (deskFilterMenuReady(f)) {
       arrangeAutoDeskDemoFields(f);
       try {
+        enhanceDeskDualRanges(f);
         syncAutoSearchAccShell(f);
         updateAutoDeskAccSummaries(f);
       } catch {
@@ -337,6 +338,11 @@ export function initHomeQuickSearch({ onSearch = () => {}, onFilterPreview, onDe
     deskMenuMountPromise = (async () => {
       arrangeAutoDeskDemoFields(f);
       refillAutoSearchRangeSelects(f);
+      try {
+        enhanceDeskDualRanges(f);
+      } catch (dualError) {
+        console.warn("Desk osztott tartomány:", dualError);
+      }
       const mountSafe = (fn, label) =>
         fn(f).catch((error) => {
           console.warn(label, error);

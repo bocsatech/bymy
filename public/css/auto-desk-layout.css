@@ -447,6 +447,7 @@
 
   /* Értékbecslő: a Vételár szűrő helyén a becsült ár jelenik meg */
   body.home-page[data-site-page="auto"].auto-desk-ertekbecslo [data-desk-field="vetelar"] > .auto-desk-range,
+  body.home-page[data-site-page="auto"].auto-desk-ertekbecslo [data-desk-field="vetelar"] > .immo-dual-range-block,
   body.home-page[data-site-page="auto"].auto-desk-ertekbecslo [data-desk-field="vetelar"] > select,
   body.home-page[data-site-page="auto"].auto-desk-ertekbecslo [data-desk-field="vetelar"] > input {
     display: none !important;

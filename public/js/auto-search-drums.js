@@ -229,11 +229,12 @@ function usePortalDrums(form) {
   return isMobile() || isErtekDrumsForm(form);
 }
 
-function finishWheel(cell, emptyLabel, { multiple = false } = {}) {
+function finishWheel(cell, emptyLabel, { multiple = false, forcePortal = false } = {}) {
   const wheel = cell.querySelector("[data-wheel]");
   if (!wheel) return null;
   const form = cell.closest("form");
-  if (usePortalDrums(form)) {
+  /* Osztott tartomány: mindig portal + összefoglaló sheet (mint feladás), ne cell-drum. */
+  if (forcePortal || usePortalDrums(form)) {
     initDrumWheel(wheel, { emptyLabel, openMode: "portal", multiple });
     const live = cell.querySelector("[data-wheel]");
     setWheelValue(live, "");
@@ -469,7 +470,16 @@ function prefixHighlightHtml(label, typedPrefix) {
   )}</span>`;
 }
 
-function buildWheelCell({ filterKey, wheelName, label, options, halfClass = "", emptyLabel: emptyOverride, multiple = false } = {}) {
+function buildWheelCell({
+  filterKey,
+  wheelName,
+  label,
+  options,
+  halfClass = "",
+  emptyLabel: emptyOverride,
+  multiple = false,
+  forcePortal = false,
+} = {}) {
   const emptyLabel = emptyOverride || emptyLabelFromOptions(options);
   const opts = options.filter((o) => o.value !== "");
   const cell = document.createElement("div");
@@ -482,7 +492,10 @@ function buildWheelCell({ filterKey, wheelName, label, options, halfClass = "", 
   </div>`;
   const wheel = cell.querySelector("[data-wheel]");
   fillWheel(wheel, opts, { emptyLabel });
-  finishWheel(cell, emptyLabel, { multiple: multiple || (isMobile() && MULTI_SWITCH_KEYS.has(filterKey)) });
+  finishWheel(cell, emptyLabel, {
+    multiple: multiple || (isMobile() && MULTI_SWITCH_KEYS.has(filterKey)),
+    forcePortal,
+  });
   return cell;
 }
 
@@ -560,6 +573,7 @@ function convertRangePairToDual(wrap, cfg) {
     options: tolOpts,
     emptyLabel: "tól",
     halfClass: "immo-dual-range__half immo-dual-range__half--min",
+    forcePortal: true,
   });
   const maxCell = buildWheelCell({
     filterKey: cfg.ig,
@@ -568,6 +582,7 @@ function convertRangePairToDual(wrap, cfg) {
     options: igOpts,
     emptyLabel: "ig",
     halfClass: "immo-dual-range__half immo-dual-range__half--max",
+    forcePortal: true,
   });
 
   const sep = document.createElement("span");
@@ -1137,6 +1152,39 @@ export async function mountAutoSearchDrums(form = document.getElementById("home-
   styleAutoSearchMoreCard(form);
   form.dataset.drumsMounted = "1";
   return true;
+}
+
+/**
+ * Desk gyors/részletes: a két külön -tól/-ig select helyett feladás-szerű osztott menü
+ * (egy összefoglaló sor + sheet).
+ */
+export function enhanceDeskDualRanges(form = document.getElementById("home-qs-form")) {
+  if (!form) return 0;
+  applyDrumModeClass();
+  form.classList.add("immo-search-form", "auto-qs-drums");
+  let converted = 0;
+  const byField = new Map(DUAL_RANGES.map((cfg) => [cfg.fieldKey, cfg]));
+
+  form.querySelectorAll(".auto-desk-field[data-desk-field] > .auto-desk-range").forEach((range) => {
+    const field = range.closest(".auto-desk-field");
+    const fieldKey = field?.getAttribute("data-desk-field");
+    const cfg = fieldKey ? byField.get(fieldKey) : null;
+    if (!cfg) return;
+    const tolEl =
+      range.querySelector(`[data-filter-key="${cfg.tol}"]`) ||
+      range.querySelector("select, input");
+    const igEl =
+      range.querySelector(`[data-filter-key="${cfg.ig}"]`) ||
+      [...range.querySelectorAll("select, input")].find((el) => el !== tolEl);
+    if (!tolEl || !igEl) return;
+    /* convertRangePairToDual a wrap-et cseréli — a range a wrap */
+    convertRangePairToDual(range, cfg);
+    /* Desk mezőnek már van címkéje — a dual title duplikálna */
+    field?.querySelector(".immo-dual-range__title")?.remove();
+    converted += 1;
+  });
+
+  return converted;
 }
 
 export function resetAutoSearchDrums(form = document.getElementById("home-qs-form")) {

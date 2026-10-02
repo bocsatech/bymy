@@ -36,7 +36,7 @@ struct MobileTabBar: View {
                     .font(.system(size: 10, weight: .semibold))
                     .lineLimit(1)
             }
-            .foregroundStyle(active ? AppTheme.accent : AppTheme.tabInactive)
+            .foregroundStyle(active ? AppTheme.brandYellow : AppTheme.tabInactive)
             .frame(maxWidth: .infinity)
         }
         .buttonStyle(.plain)

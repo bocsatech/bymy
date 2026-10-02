@@ -870,12 +870,12 @@
   }
 
   body.site-app .mw-app-tab.is-active {
-    color: #2563eb;
+    color: #f0c52c;
   }
 
   body.site-app .mw-app-tab.is-active .mw-app-tab__icon {
     background: transparent;
-    color: #2563eb;
+    color: #f0c52c;
   }
 
   body.site-app .mw-app-tab--fab {

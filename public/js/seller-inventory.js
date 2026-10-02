@@ -6,6 +6,7 @@ import { getAuthUser } from "./site-auth.js?v=aad32d7596";
 import { openListingMessage, canMessageListing } from "./start-listing-message.js?v=d9c12be306";
 import { getParkplatz, addParkplatzItem, removeParkplatzItem } from "./fok-data.js?v=653bb89787";
 import { listingDetailHref } from "./listing-return.js?v=1911f0cb28";
+import { qrBlockHtml, withQrSource } from "./qr-display.js?v=qr1";
 
 function esc(value) {
   return String(value ?? "")
@@ -26,6 +27,13 @@ function injectStylesheet() {
   link.href = "/css/seller-inventory.css?v=sellerInv30";
   link.dataset.sellerInvCss = "1";
   document.head.appendChild(link);
+  if (!document.querySelector('link[data-ertek-qr-css]')) {
+    const qr = document.createElement("link");
+    qr.rel = "stylesheet";
+    qr.href = "/css/ertekbecslo-qr.css?v=qr1";
+    qr.dataset.ertekQrCss = "1";
+    document.head.appendChild(qr);
+  }
 }
 
 function ensureHost() {
@@ -313,6 +321,7 @@ function sellerMenuHtml(contact, rating, count, fromId) {
           <button type="button" class="seller-inv__btn seller-inv__btn--icon seller-inv__btn--fb" data-si-share-fb aria-label="Megosztás Facebookon" title="Facebook">${ICON.facebook}</button>
           <button type="button" class="seller-inv__btn seller-inv__btn--icon" data-si-print aria-label="Nyomtatás" title="Nyomtatás">${ICON.print}</button>
         </div>
+        ${qrBlockHtml({ url: withQrSource(pageShareUrl()), label: "QR — összes jármű", size: 140 })}
         <div class="seller-inv__phone-wrap" data-si-phone-col>
           ${maskedPhonesHtml(masked, hasPhone)}
         </div>

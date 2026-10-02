@@ -83,6 +83,7 @@ import {
 } from "./lib/partner-categories.mjs";
 import { estimateValuation, valuationOptions } from "./lib/valuation.mjs";
 import { estimateMarketValuation, marketDataAvailable } from "./lib/market-valuation.mjs";
+import { isAllowedQrTarget, resolveQrTargetUrl, qrPngBuffer } from "./lib/qr.mjs";
 import {
   ensureVehicleCatalog,
   getVehicleCatalog,
@@ -2216,6 +2217,7 @@ async function handleValuationApi(req, res, pathname) {
         gyartasi_ev: url.searchParams.get("gyartasi_ev"),
         km: url.searchParams.get("km"),
         ar: url.searchParams.get("ar"),
+        requireCore: url.searchParams.get("require") === "1",
       };
       const result = useMarket
         ? estimateMarketValuation(params)
@@ -2229,6 +2231,39 @@ async function handleValuationApi(req, res, pathname) {
     }
 
     sendJson(res, 404, { error: "Ismeretlen értékbecslő API." });
+  } catch (error) {
+    sendJson(res, 500, { error: error.message ?? String(error) });
+  }
+}
+
+async function handleQrApi(req, res, pathname) {
+  if (pathname !== "/api/qr.png" || req.method !== "GET") {
+    sendJson(res, 404, { error: "Ismeretlen QR API." });
+    return;
+  }
+  try {
+    const url = new URL(req.url ?? "", `http://${HOST}`);
+    const raw = url.searchParams.get("u") || url.searchParams.get("url") || "";
+    const hostHeader = String(req.headers.host || "");
+    const proto = String(req.headers["x-forwarded-proto"] || "http").split(",")[0].trim() || "http";
+    const origin = `${proto}://${hostHeader}`;
+    if (!isAllowedQrTarget(raw, { requestHost: hostHeader })) {
+      sendJson(res, 400, { error: "Érvénytelen QR cél." });
+      return;
+    }
+    const target = resolveQrTargetUrl(raw, { origin });
+    if (!target) {
+      sendJson(res, 400, { error: "Érvénytelen QR cél." });
+      return;
+    }
+    const size = Number(url.searchParams.get("size") || 240);
+    const buf = await qrPngBuffer(target, { size });
+    res.writeHead(200, {
+      "Content-Type": "image/png",
+      "Cache-Control": "public, max-age=86400",
+      "Content-Length": buf.length,
+    });
+    res.end(buf);
   } catch (error) {
     sendJson(res, 500, { error: error.message ?? String(error) });
   }
@@ -3389,6 +3424,11 @@ export async function handleHttpRequest(req, res) {
 
   if (pathname.startsWith("/api/valuation")) {
     await handleValuationApi(req, res, pathname);
+    return;
+  }
+
+  if (pathname.startsWith("/api/qr")) {
+    await handleQrApi(req, res, pathname);
     return;
   }
 

@@ -5,6 +5,7 @@ import UIKit
 enum FiokSection: String, Hashable, Identifiable {
     case partnerProfil
     case autoImport
+    case ertekbecslo
     case nyomtatasok
     case ertekelesek
     case kedvencek
@@ -24,6 +25,7 @@ enum FiokSection: String, Hashable, Identifiable {
         switch self {
         case .partnerProfil: return "Cégadatok"
         case .autoImport: return "Autóimport"
+        case .ertekbecslo: return "Értékbecslő"
         case .nyomtatasok: return "Nyomtatások"
         case .ertekelesek: return "Értékelések"
         case .kedvencek: return "Kedvencek"
@@ -43,6 +45,7 @@ enum FiokSection: String, Hashable, Identifiable {
         switch self {
         case .partnerProfil: return "building.2"
         case .autoImport: return "car.side"
+        case .ertekbecslo: return "chart.bar"
         case .nyomtatasok: return "doc.text"
         case .ertekelesek: return "star"
         case .kedvencek: return "heart"
@@ -115,12 +118,19 @@ struct AccountScreen: View {
         return t == "business" || t == "dealer"
     }
 
+    private var isDealer: Bool {
+        (auth.user?.profile.accountType ?? "").lowercased() == "dealer"
+    }
+
     private var menuItems: [FiokMenuItem] {
         var items: [FiokMenuItem] = []
         if isCompany {
             items.append(.link(.partnerProfil))
         }
         items.append(.link(.autoImport))
+        if isDealer {
+            items.append(.link(.ertekbecslo))
+        }
         items.append(.link(.nyomtatasok))
         items.append(.link(.ertekelesek))
         items.append(.soon(title: "Kiemelések", systemImage: "plus.square"))
@@ -369,6 +379,8 @@ struct FiokSectionScreen: View {
                 )
             case .autoImport:
                 FiokWebPanelScreen(szekcio: "import")
+            case .ertekbecslo:
+                FiokWebPanelScreen(szekcio: "ertekbecslo")
             case .partnerProfil:
                 FiokWebPanelScreen(szekcio: "partner-profil")
             case .uzenetek:

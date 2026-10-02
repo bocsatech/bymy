@@ -31,6 +31,7 @@ import { savedSearchHref, summarizeSavedSearchFilters } from "./saved-search.js?
 import { initMessagesUi } from "./messages-ui.js?v=78e9d9204f";
 import { listConversations } from "./messages-api.js?v=5cf6493dc9";
 import { initMyAdsPanel } from "./my-ads.js?v=55f5d422a3";
+import { initErtekbecsloPanel } from "./ertekbecslo-app.js?v=ertek1";
 import {
   consumeSettingsReturn,
   hasSettingsReturn,
@@ -147,6 +148,7 @@ const SECTIONS = [
   "attekintes",
   "partner-profil",
   "import",
+  "ertekbecslo",
   "nyomtatasok",
   "ertekelesek",
   "parkolo",
@@ -512,6 +514,12 @@ function setSection(section) {
     clearSection();
     return;
   }
+  if (next === "ertekbecslo") {
+    const type = String(getProfile()?.accountType || getAuthUser()?.profile?.accountType || "").toLowerCase();
+    if (type !== "dealer") {
+      next = "hirdetes";
+    }
+  }
   const url = new URL(window.location.href);
   url.searchParams.set("szekcio", next);
   if (next !== "uzenetek") url.searchParams.delete("c");
@@ -543,6 +551,7 @@ function setSection(section) {
       attekintes: "Áttekintés",
       "partner-profil": "Partneri profil",
       import: "Autóimport",
+      ertekbecslo: "Értékbecslő",
       nyomtatasok: "Nyomtatások",
       ertekelesek: "Értékelések",
       parkolo: "Kedvencek",
@@ -560,6 +569,9 @@ function setSection(section) {
   syncSettingsSubnav();
   if (next === "partner-profil") {
     void ensurePartnerProfilPanel();
+  }
+  if (next === "ertekbecslo") {
+    void initErtekbecsloPanel();
   }
 }
 
@@ -1032,6 +1044,11 @@ function syncSidebarAccountType(type) {
     const kind = applyAccountKindToDocument(resolveAccountKind(getAuthUser()));
     companyType = kind === "company";
     fromDb = companyType ? "business" : "private";
+  }
+  try {
+    document.documentElement.setAttribute("data-bymy-account-type", fromDb);
+  } catch {
+    /* ignore */
   }
   /* Láthatóság / sorrend: HTML + CSS (data-mm-account-kind). */
   if (el) {

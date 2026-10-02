@@ -34,6 +34,11 @@
           }
           document.documentElement.setAttribute("data-mm-account-kind", kind);
           try { localStorage.setItem("bymy-account-kind", kind); } catch (e4) {}
+          if (accountType === "dealer" || accountType === "business" || accountType === "private") {
+            document.documentElement.setAttribute("data-bymy-account-type", accountType);
+          } else {
+            document.documentElement.setAttribute("data-bymy-account-type", kind === "company" ? "business" : "private");
+          }
           var first = "";
           if (user) {
             first = String((user.profile && user.profile.firstName) || "").trim();
@@ -69,6 +74,10 @@
       html[data-mm-account-kind="company"] body.site-app .mm-nav > [data-mm-company-nav-wrap] {
         display: grid !important;
       }
+      body.site-app .mm-nav > [data-mm-dealer-nav-wrap] { display: none !important; }
+      html[data-bymy-account-type="dealer"] body.site-app .mm-nav > [data-mm-dealer-nav-wrap] {
+        display: grid !important;
+      }
     </style>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -85,6 +94,7 @@
       <link rel="stylesheet" href="/css/hub.css?v=e6bf27b3c3" />
     <link rel="stylesheet" href="/css/partner-profile.css?v=6ba04596fa" />
     <link rel="stylesheet" href="/css/messages-enhancements.css?v=9dc1a2d8c2" />
+    <link rel="stylesheet" href="/css/ertekbecslo-qr.css?v=qr1" />
 </head>
   <body class="site-app settings-page mm-page" data-site-page="beallitasok" data-auth-init="manual">
     <script src="/js/mw-app-shell.js?v=fead9b4cb5"></script>
@@ -157,6 +167,12 @@
             <span class="mm-nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4 16l4-8h8l4 8H4Z" stroke="currentColor" stroke-width="1.7"/><circle cx="8" cy="17" r="1.5" fill="currentColor"/><circle cx="16" cy="17" r="1.5" fill="currentColor"/></svg></span>
             <span class="mm-nav-text">Autóimport</span>
           </a>
+          <div class="mm-nav-group" data-mm-dealer-nav-wrap>
+            <a class="mm-nav-link" href="?szekcio=ertekbecslo" data-mm-nav="ertekbecslo">
+              <span class="mm-nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4 19h16M7 16V9m5 7V5m5 11v-6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span>
+              <span class="mm-nav-text">Értékbecslő</span>
+            </a>
+          </div>
           <a class="mm-nav-link" href="?szekcio=nyomtatasok" data-mm-nav="nyomtatasok">
             <span class="mm-nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M7 8h10M7 12h10M7 16h6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span>
             <span class="mm-nav-text">Nyomtatások</span>
@@ -398,6 +414,32 @@
             <p class="mm-panel-lead">Ártábla és adásvételi szerződés nyomtatása. A funkció hamarosan elérhető.</p>
           </header>
           <p class="mm-empty">Ez a menüpont előkészületben van.</p>
+        </section>
+
+        <section class="mm-panel" data-mm-panel="ertekbecslo" data-ertekbecslo hidden>
+          <header class="mm-panel-head">
+            <h2 class="mm-panel-title">Értékbecslő</h2>
+            <p class="mm-panel-lead">Személyautó piaci sáv a minta alapján. Kötelező: gyártmány, modell, évjárat, km. A típus finomítja az ajánlatot.</p>
+          </header>
+          <p class="ertek-msg" data-ertek-status role="status"></p>
+          <form class="ertek-form" data-ertek-form onsubmit="return false">
+            <label>Gyártmány
+              <select data-ertek-gyartmany required></select>
+            </label>
+            <label>Modell
+              <select data-ertek-modell required></select>
+            </label>
+            <label>Típus
+              <select data-ertek-tipus></select>
+            </label>
+            <label>Évjárat
+              <select data-ertek-ev required></select>
+            </label>
+            <label>Km
+              <input type="text" inputmode="numeric" data-ertek-km placeholder="pl. 120000" autocomplete="off" required />
+            </label>
+          </form>
+          <div class="ertek-out" data-ertek-out></div>
         </section>
 
         

@@ -1,0 +1,124 @@
+/* Listing / seller QR */
+.bymy-qr {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin: 10px 0 4px;
+  padding: 10px 12px;
+  border: 1px solid color-mix(in srgb, var(--border, #d0d5dd) 100%, transparent);
+  border-radius: 10px;
+  background: #fff;
+}
+
+.bymy-qr__img {
+  display: block;
+  width: 140px;
+  height: 140px;
+  image-rendering: pixelated;
+}
+
+.bymy-qr__label {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
+  text-align: center;
+}
+
+html[data-theme="dark"] .bymy-qr {
+  background: #0f172a;
+  border-color: #334155;
+}
+
+html[data-theme="dark"] .bymy-qr__label {
+  color: #94a3b8;
+}
+
+/* Értékbecslő panel */
+.ertek-form {
+  display: grid;
+  gap: 12px;
+  max-width: 420px;
+}
+
+.ertek-form label {
+  display: grid;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.ertek-form select,
+.ertek-form input {
+  font: inherit;
+  font-weight: 500;
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.ertek-out {
+  margin-top: 16px;
+  max-width: 420px;
+}
+
+.ertek-msg {
+  margin: 0;
+  font-size: 14px;
+  color: #64748b;
+}
+
+.ertek-msg--err {
+  color: #b91c1c;
+}
+
+.ertek-result__price {
+  margin: 0 0 6px;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #0f172a;
+}
+
+.ertek-result__band {
+  margin: 0 0 4px;
+  font-size: 15px;
+  color: #334155;
+}
+
+.ertek-result__meta {
+  margin: 0;
+  font-size: 13px;
+  color: #64748b;
+}
+
+html[data-theme="dark"] .ertek-form label {
+  color: #e2e8f0;
+}
+
+html[data-theme="dark"] .ertek-form select,
+html[data-theme="dark"] .ertek-form input {
+  background: #0f172a;
+  border-color: #334155;
+  color: #e2e8f0;
+}
+
+html[data-theme="dark"] .ertek-result__price {
+  color: #f8fafc;
+}
+
+html[data-theme="dark"] .ertek-result__band {
+  color: #cbd5e1;
+}
+
+/* Dealer-only nav */
+body.site-app .mm-nav > [data-mm-dealer-nav-wrap] {
+  display: none !important;
+}
+
+html[data-bymy-account-type="dealer"] body.site-app .mm-nav > [data-mm-dealer-nav-wrap] {
+  display: grid !important;
+}

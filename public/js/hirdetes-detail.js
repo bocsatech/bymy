@@ -14,6 +14,7 @@ import { openListingMessage } from "./start-listing-message.js?v=d9c12be306";
 import { getParkplatz, addParkplatzItem, removeParkplatzItem } from "./fok-data.js?v=653bb89787";
 import { listingReturnHref, listingDetailHref, rememberListingOpen } from "./listing-return.js?v=1911f0cb28";
 import { takePrefetchedListing, storePrefetchedListing } from "./listing-prefetch.js?v=67ac871172";
+import { qrBlockHtml, withQrSource } from "./qr-display.js?v=qr1";
 
 function readBootListing() {
   try {
@@ -660,6 +661,7 @@ function render(view, listing, related = []) {
           <button type="button" class="hd-btn hd-btn--outline hd-btn--icon hd-btn--fb" data-hd-share-fb aria-label="Megosztás Facebookon" title="Facebook">${ICON.facebook}</button>
           <button type="button" class="hd-btn hd-btn--outline hd-btn--icon" data-hd-print aria-label="Nyomtatás" title="Nyomtatás">${ICON.print}</button>
         </div>
+        ${qrBlockHtml({ url: withQrSource(window.location.href), label: "QR — ez a hirdetés", size: 140 })}
         ${
           view.hasPhone || view.phone
             ? `<button type="button" class="hd-btn hd-btn--soft" data-hd-phone>${ICON.phone} ${escapeHtml(view.phoneMasked || "Telefonszám")} mutatása</button>`

@@ -18,6 +18,7 @@
     "scrape:ha-brands-models": "node scripts/scrape-ha-brands-models.mjs",
     "scrape:ha-brands-models:kisteher": "HA_KIND=kisteher node scripts/scrape-ha-brands-models.mjs kisteher",
     "scrape:ha-dealers": "node scripts/scrape-hasznaltauto-dealers.mjs",
+    "ha:price-plan": "node scripts/ha-price-download.mjs",
     "login:hasznaltauto": "node scripts/save-hasznaltauto-session.mjs",
     "prestart": "node scripts/embed-ad-form.mjs && node scripts/asset-fingerprint.mjs",
     "fingerprint": "node scripts/asset-fingerprint.mjs",
@@ -42,10 +43,12 @@
     "@supabase/supabase-js": "^2.112.3",
     "nodemailer": "^6.10.1",
     "pg": "^8.23.0",
+    "qrcode": "^1.5.4",
     "sharp": "^0.33.5",
     "ws": "^8.18.3"
   },
   "devDependencies": {
+    "@types/qrcode": "^1.5.6",
     "exceljs": "^4.4.0",
     "playwright": "^1.52.0"
   }

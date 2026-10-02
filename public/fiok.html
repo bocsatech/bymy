@@ -32,6 +32,11 @@
           }
           document.documentElement.setAttribute("data-mm-account-kind", kind);
           try { localStorage.setItem("bymy-account-kind", kind); } catch (e4) {}
+          if (accountType === "dealer" || accountType === "business" || accountType === "private") {
+            document.documentElement.setAttribute("data-bymy-account-type", accountType);
+          } else {
+            document.documentElement.setAttribute("data-bymy-account-type", kind === "company" ? "business" : "private");
+          }
           document.documentElement.setAttribute("data-auth", loggedIn ? "member" : "guest");
           if (!loggedIn) {
             window.location.replace("/belepes.html?next=" + encodeURIComponent("/fiok.html"));
@@ -46,6 +51,10 @@
       body.site-app .mm-nav { display: flex; flex-direction: column; }
       body.site-app .mm-nav > [data-mm-company-nav-wrap] { display: none !important; }
       html[data-mm-account-kind="company"] body.site-app .mm-nav > [data-mm-company-nav-wrap] {
+        display: grid !important;
+      }
+      body.site-app .mm-nav > [data-mm-dealer-nav-wrap] { display: none !important; }
+      html[data-bymy-account-type="dealer"] body.site-app .mm-nav > [data-mm-dealer-nav-wrap] {
         display: grid !important;
       }
     </style>
@@ -92,6 +101,12 @@
             <span class="mm-nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4 16l4-8h8l4 8H4Z" stroke="currentColor" stroke-width="1.7"/><circle cx="8" cy="17" r="1.5" fill="currentColor"/><circle cx="16" cy="17" r="1.5" fill="currentColor"/></svg></span>
             <span class="mm-nav-text">Autóimport</span>
           </a>
+          <div class="mm-nav-group" data-mm-dealer-nav-wrap>
+            <a class="mm-nav-link" href="/beallitasok.html?szekcio=ertekbecslo" data-mm-nav="ertekbecslo">
+              <span class="mm-nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4 19h16M7 16V9m5 7V5m5 11v-6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span>
+              <span class="mm-nav-text">Értékbecslő</span>
+            </a>
+          </div>
           <a class="mm-nav-link" href="/beallitasok.html?szekcio=nyomtatasok" data-mm-nav="nyomtatasok">
             <span class="mm-nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M7 8h10M7 12h10M7 16h6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span>
             <span class="mm-nav-text">Nyomtatások</span>
@@ -182,7 +197,15 @@
 
         const kind = applyAccountKindToDocument(resolveAccountKind(user));
         const isCompany = kind === "company";
-        const type = String(user?.profile?.accountType || profile.accountType || "").trim();
+        const type = String(user?.profile?.accountType || profile.accountType || "").trim().toLowerCase();
+        try {
+          document.documentElement.setAttribute(
+            "data-bymy-account-type",
+            type === "dealer" || type === "business" || type === "private" ? type : isCompany ? "business" : "private"
+          );
+        } catch {
+          /* ignore */
+        }
         const typeEl = document.querySelector("[data-mm-account-type]");
         if (typeEl) {
           if (isCompany) {

@@ -1,0 +1,175 @@
+# Használtautó ár-letöltés — gyártmány szabályok
+# Forrás: docs/Munkafüzet1.xlsx + public/data/vehicle-catalog.json
+#
+# Szabályok:
+#   B=n  vagy üres B+C → csak alap (minden gyártási év)
+#   C="r YYYY" → alap minden évre; részletes csak gyártási év >= YYYY
+#   Az évszám = gyártási év (nem feladás dátuma)
+#
+# Mezők:
+#   gyartmany | letolt:igen | alap:igen | reszletes:nem|ev:YYYY | prioritas: | megjegyzes:
+#
+# ---
+BARTH | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+AC | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+ACURA | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+ADLER | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+AIWAYS | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+AIXAM | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+ALFA ROMEO | letolt:igen | alap:igen | reszletes:ev:2014 | prioritas:1 | megjegyzes:alap minden; reszletes gyartasi_ev>=2014
+ALPINA | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+ALPINE | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+ARO | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+ASTON MARTIN | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+AUDI | letolt:igen | alap:igen | reszletes:ev:2014 | prioritas:1 | megjegyzes:alap minden; reszletes gyartasi_ev>=2014
+AUSTIN | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+AUSTIN-HEALEY | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+AUTO UNION | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+BAIC | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+BAW | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+BENTLEY | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+BERTONE | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+BLUECAR | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+BMW | letolt:igen | alap:igen | reszletes:ev:2014 | prioritas:1 | megjegyzes:alap minden; reszletes gyartasi_ev>=2014
+BORGWARD | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+BRILLIANCE (ZHONGHUA) | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+BUICK | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+BYD | letolt:igen | alap:igen | reszletes:ev:2023 | prioritas:1 | megjegyzes:alap minden; reszletes gyartasi_ev>=2023
+CADILLAC | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+CATERHAM | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+CHATENET | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+CHERY | letolt:igen | alap:igen | reszletes:ev:2025 | prioritas:1 | megjegyzes:alap minden; reszletes gyartasi_ev>=2025
+CHEVROLET | letolt:igen | alap:igen | reszletes:ev:2014 | prioritas:1 | megjegyzes:alap minden; reszletes gyartasi_ev>=2014
+CHRYSLER | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+CITROEN | letolt:igen | alap:igen | reszletes:ev:2014 | prioritas:1 | megjegyzes:alap minden; reszletes gyartasi_ev>=2014
+CUPRA | letolt:igen | alap:igen | reszletes:ev:2022 | prioritas:1 | megjegyzes:alap minden; reszletes gyartasi_ev>=2022
+DACIA | letolt:igen | alap:igen | reszletes:ev:2014 | prioritas:1 | megjegyzes:alap minden; reszletes gyartasi_ev>=2014
+DAEWOO | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+DAIHATSU | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+DAIMLER | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+DATSUN | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+DE LOREAN | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+DENZA | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+DODGE | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+DONGFENG (DFSK) | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+DR | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+DS | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+E.GO | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+EGYEDI | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+ELARIS | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+ELECTROAUTO | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+ELI | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+EXCALIBUR | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+FERRARI | letolt:igen | alap:igen | reszletes:ev:2014 | prioritas:1 | megjegyzes:alap minden; reszletes gyartasi_ev>=2014
+FIAT | letolt:igen | alap:igen | reszletes:ev:2014 | prioritas:1 | megjegyzes:alap minden; reszletes gyartasi_ev>=2014
+FISKER | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+FORD | letolt:igen | alap:igen | reszletes:ev:2014 | prioritas:1 | megjegyzes:alap minden; reszletes gyartasi_ev>=2014
+FORD (USA) | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+FORTHING | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+FOTON | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+GAZ | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+GEELY | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+GENESIS | letolt:igen | alap:igen | reszletes:ev:2014 | prioritas:1 | megjegyzes:alap minden; reszletes gyartasi_ev>=2014
+GEO | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+GMC | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+GREAT WALL | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+HONDA | letolt:igen | alap:igen | reszletes:ev:2014 | prioritas:1 | megjegyzes:alap minden; reszletes gyartasi_ev>=2014
+HONGQI | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+HUAWEI | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+HUMMER | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+HYUNDAI | letolt:igen | alap:igen | reszletes:ev:2014 | prioritas:1 | megjegyzes:alap minden; reszletes gyartasi_ev>=2014
+INEOS | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+INFINITI | letolt:igen | alap:igen | reszletes:ev:2014 | prioritas:1 | megjegyzes:alap minden; reszletes gyartasi_ev>=2014
+ISUZU | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+IVECO | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+JAC | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+JAECOO | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+JAGUAR | letolt:igen | alap:igen | reszletes:ev:2014 | prioritas:1 | megjegyzes:alap minden; reszletes gyartasi_ev>=2014
+JEEP | letolt:igen | alap:igen | reszletes:ev:2014 | prioritas:1 | megjegyzes:alap minden; reszletes gyartasi_ev>=2014
+JETOUR | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+KGM (SSANGYONG) | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+KIA | letolt:igen | alap:igen | reszletes:ev:2014 | prioritas:1 | megjegyzes:alap minden; reszletes gyartasi_ev>=2014
+LADA | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+LAMBORGHINI | letolt:igen | alap:igen | reszletes:ev:2014 | prioritas:1 | megjegyzes:alap minden; reszletes gyartasi_ev>=2014
+LANCIA | letolt:igen | alap:igen | reszletes:ev:2014 | prioritas:1 | megjegyzes:alap minden; reszletes gyartasi_ev>=2014
+LAND ROVER | letolt:igen | alap:igen | reszletes:ev:2014 | prioritas:1 | megjegyzes:alap minden; reszletes gyartasi_ev>=2014
+LEAPMOTOR | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+LEXUS | letolt:igen | alap:igen | reszletes:ev:2014 | prioritas:1 | megjegyzes:alap minden; reszletes gyartasi_ev>=2014
+LINCOLN | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+LINKTOUR | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+LOTUS | letolt:igen | alap:igen | reszletes:ev:2014 | prioritas:1 | megjegyzes:alap minden; reszletes gyartasi_ev>=2014
+LUCID | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+LYNK & CO | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+MARCOS | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+MARUTI | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+MASERATI | letolt:igen | alap:igen | reszletes:ev:2014 | prioritas:1 | megjegyzes:alap minden; reszletes gyartasi_ev>=2014
+MAXUS | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+MAYBACH | letolt:igen | alap:igen | reszletes:ev:2014 | prioritas:1 | megjegyzes:alap minden; reszletes gyartasi_ev>=2014
+MAZDA | letolt:igen | alap:igen | reszletes:ev:2014 | prioritas:1 | megjegyzes:alap minden; reszletes gyartasi_ev>=2014
+MCLAREN | letolt:igen | alap:igen | reszletes:ev:2014 | prioritas:1 | megjegyzes:alap minden; reszletes gyartasi_ev>=2014
+MERCEDES-AMG | letolt:igen | alap:igen | reszletes:ev:2014 | prioritas:1 | megjegyzes:alap minden; reszletes gyartasi_ev>=2014
+MERCEDES-BENZ | letolt:igen | alap:igen | reszletes:ev:2014 | prioritas:1 | megjegyzes:alap minden; reszletes gyartasi_ev>=2014
+MERCEDES-MAYBACH | letolt:igen | alap:igen | reszletes:ev:2014 | prioritas:1 | megjegyzes:alap minden; reszletes gyartasi_ev>=2014
+MERCURY | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+MG | letolt:igen | alap:igen | reszletes:ev:2014 | prioritas:1 | megjegyzes:alap minden; reszletes gyartasi_ev>=2014
+MICRO | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+MICROCAR | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+MINI | letolt:igen | alap:igen | reszletes:ev:2014 | prioritas:1 | megjegyzes:alap minden; reszletes gyartasi_ev>=2014
+MINI-EL | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+MITSUBISHI | letolt:igen | alap:igen | reszletes:ev:2014 | prioritas:1 | megjegyzes:alap minden; reszletes gyartasi_ev>=2014
+MORGAN | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+MORRIS | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+MOSZKVICS | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+NIO | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+NISSAN | letolt:igen | alap:igen | reszletes:ev:2014 | prioritas:1 | megjegyzes:alap minden; reszletes gyartasi_ev>=2014
+NSU | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+NYSA | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+OLDSMOBILE | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+OMODA | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+OPEL | letolt:igen | alap:igen | reszletes:ev:2014 | prioritas:1 | megjegyzes:alap minden; reszletes gyartasi_ev>=2014
+PACKARD | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+PEUGEOT | letolt:igen | alap:igen | reszletes:ev:2014 | prioritas:1 | megjegyzes:alap minden; reszletes gyartasi_ev>=2014
+PLYMOUTH | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+POLESTAR | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+POLSKI FIAT | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+PONTIAC | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+PORSCHE | letolt:igen | alap:igen | reszletes:ev:2014 | prioritas:1 | megjegyzes:alap minden; reszletes gyartasi_ev>=2014
+RELIVE | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+RENAULT | letolt:igen | alap:igen | reszletes:ev:2014 | prioritas:1 | megjegyzes:alap minden; reszletes gyartasi_ev>=2014
+REPLIKA | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+ROLLS-ROYCE | letolt:igen | alap:igen | reszletes:ev:2014 | prioritas:1 | megjegyzes:alap minden; reszletes gyartasi_ev>=2014
+ROVER | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+SAAB | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+SANTANA | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+SEAT | letolt:igen | alap:igen | reszletes:ev:2014 | prioritas:1 | megjegyzes:alap minden; reszletes gyartasi_ev>=2014
+SIMCA | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+SKODA | letolt:igen | alap:igen | reszletes:ev:2014 | prioritas:1 | megjegyzes:alap minden; reszletes gyartasi_ev>=2014
+SKYWELL | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+SMART | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+SSANGYONG | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+SUBARU | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+SUDA | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+SUZUKI | letolt:igen | alap:igen | reszletes:ev:2014 | prioritas:1 | megjegyzes:alap minden; reszletes gyartasi_ev>=2014
+TALBOT | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+TATA | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+TATRA | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+TESLA | letolt:igen | alap:igen | reszletes:ev:2014 | prioritas:1 | megjegyzes:alap minden; reszletes gyartasi_ev>=2014
+TOYOTA | letolt:igen | alap:igen | reszletes:ev:2014 | prioritas:1 | megjegyzes:alap minden; reszletes gyartasi_ev>=2014
+TRABANT | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+TRIUMPH | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+UAZ | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+VELOREX | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+VERSENYAUTÓ | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+VOLGA | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+VOLKSWAGEN | letolt:igen | alap:igen | reszletes:ev:2014 | prioritas:1 | megjegyzes:alap minden; reszletes gyartasi_ev>=2014
+VOLVO | letolt:igen | alap:igen | reszletes:ev:2014 | prioritas:1 | megjegyzes:alap minden; reszletes gyartasi_ev>=2014
+VOYAH | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+WARTBURG | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+XEV | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+XIAOMI | letolt:igen | alap:igen | reszletes:ev:2014 | prioritas:1 | megjegyzes:alap minden; reszletes gyartasi_ev>=2014
+XPENG | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+YAMAHA | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+ZAPOROZSEC | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+ZASTAVA | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+ZEEKR | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap
+ZTECH | letolt:igen | alap:igen | reszletes:nem | prioritas:3 | megjegyzes:csak alap

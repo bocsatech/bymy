@@ -19,7 +19,7 @@ import {
   updateAutoDeskAccSummaries,
   arrangeAutoDeskDemoFields,
   deskFilterMenuReady,
-} from "./auto-desk-search.js?v=ertekMode2";
+} from "./auto-desk-search.js?v=ertekMode3";
 
 prefetchAutoSearchBoot();
 const MOBILE_MQ = "(max-width: 900px)";
@@ -171,6 +171,7 @@ export function initHomeQuickSearch({ onSearch = () => {}, onFilterPreview, onDe
       "";
     out.hidden = false;
     if (!brand || !model || !year || !km) {
+      out.dataset.hasResult = "";
       out.innerHTML =
         '<p class="ertek-msg">Kötelező: gyártmány, modell, évjárat (-tól), km (-tól).</p>';
       return;
@@ -190,10 +191,12 @@ export function initHomeQuickSearch({ onSearch = () => {}, onFilterPreview, onDe
       const res = await fetch(`/api/valuation/estimate?${q}`, { credentials: "same-origin" });
       const data = await res.json().catch(() => ({}));
       if (data.error) {
+        delete out.dataset.hasResult;
         out.innerHTML = `<p class="ertek-msg ertek-msg--err">${escapeErtekHtml(data.error)}</p>`;
         return;
       }
       if (data.count === 0) {
+        delete out.dataset.hasResult;
         out.innerHTML = `<p class="ertek-msg">${escapeErtekHtml(data.message || "Nincs egyező adat a mintában.")}</p>`;
         return;
       }
@@ -201,13 +204,16 @@ export function initHomeQuickSearch({ onSearch = () => {}, onFilterPreview, onDe
       const from = data.good_price_from_formatted || data.min_price_formatted || "—";
       const to = data.good_price_to_formatted || data.max_price_formatted || "—";
       const n = data.count ?? 0;
+      out.dataset.hasResult = "1";
       out.innerHTML = `
         <div class="ertek-result" aria-live="polite">
           <p class="ertek-result__price">${escapeErtekHtml(recom)}</p>
           <p class="ertek-result__band">Jó ár: <strong>${escapeErtekHtml(from)}</strong> – <strong>${escapeErtekHtml(to)}</strong></p>
           <p class="ertek-result__meta">${n} hasonló a mintában${data.source ? ` · ${escapeErtekHtml(data.source)}` : ""}</p>
         </div>`;
+      out.scrollIntoView({ block: "nearest", behavior: "smooth" });
     } catch (err) {
+      delete out.dataset.hasResult;
       out.innerHTML = `<p class="ertek-msg ertek-msg--err">${escapeErtekHtml(err?.message || "Hiba")}</p>`;
     }
   }

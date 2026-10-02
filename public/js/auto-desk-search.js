@@ -104,12 +104,83 @@ function setMode(mode) {
   if (submitBtn) {
     submitBtn.textContent = next === "ertekbecslo" ? "Értékbecslés" : "Találatok mutatása";
   }
-  const out = document.querySelector("[data-auto-ertek-out]");
-  if (out && next !== "ertekbecslo") {
+  const form = document.getElementById("home-qs-form");
+  syncGyorsFieldVisibility(form);
+  syncErtekModeChrome(form);
+  return next;
+}
+
+/** Értékbecslő: a Vételár helyére kerül a becsült ár; km látszik (kötelező). */
+function syncErtekModeChrome(form = document.getElementById("home-qs-form")) {
+  if (!form) return;
+  const ertek = document.body.classList.contains("auto-desk-ertekbecslo");
+  const alapHost = form.querySelector(".auto-desk-fields[data-desk-alap]");
+  const vetelar = form.querySelector('[data-desk-field="vetelar"]');
+  let out = form.querySelector("[data-auto-ertek-out]");
+  if (!out) {
+    out = document.createElement("div");
+    out.className = "auto-ertek-out ertek-out";
+    out.setAttribute("data-auto-ertek-out", "");
+  }
+
+  if (vetelar) {
+    const label = vetelar.querySelector(".auto-desk-field__label");
+    if (ertek) {
+      if (label) {
+        if (!vetelar.dataset.ertekLabelOrig) {
+          vetelar.dataset.ertekLabelOrig = label.textContent || "Vételár";
+        }
+        label.textContent = "Becsült ár";
+      }
+      vetelar.hidden = false;
+      vetelar.dataset.deskQuick = "1";
+      if (!vetelar.contains(out)) vetelar.appendChild(out);
+      out.hidden = false;
+      if (!out.dataset.hasResult && !out.querySelector(".ertek-result")) {
+        out.innerHTML =
+          '<p class="ertek-msg">Itt jelenik meg a becsült ár az Értékbecslés gomb után.</p>';
+      }
+    } else if (label && vetelar.dataset.ertekLabelOrig) {
+      label.textContent = vetelar.dataset.ertekLabelOrig;
+    }
+  }
+
+  let km = form.querySelector('[data-desk-field="km"]');
+  if (ertek && alapHost) {
+    if (km && !km.dataset.ertekParked) {
+      km.dataset.ertekParked = "1";
+      km._ertekHomeParent = km.parentElement;
+      km._ertekHomeNext = km.nextSibling;
+    }
+    if (km && km.parentElement !== alapHost) {
+      alapHost.appendChild(km);
+    }
+    if (km) {
+      km.hidden = false;
+      km.dataset.deskQuick = "1";
+      const kmLabel = km.querySelector(".auto-desk-field__label");
+      if (kmLabel) kmLabel.textContent = "Km";
+    }
+  } else if (km?.dataset.ertekParked === "1") {
+    const parent = km._ertekHomeParent;
+    const next = km._ertekHomeNext;
+    if (parent) {
+      if (next && next.parentElement === parent) parent.insertBefore(km, next);
+      else parent.appendChild(km);
+    }
+    delete km.dataset.ertekParked;
+    km.hidden = document.body.classList.contains("auto-desk-gyors");
+  }
+
+  if (!ertek && out) {
+    const actions = form.querySelector(".home-qs-row--actions");
+    if (actions?.parentElement && out.parentElement !== actions.parentElement) {
+      actions.parentElement.insertBefore(out, actions.nextSibling);
+    }
     out.hidden = true;
     out.innerHTML = "";
+    delete out.dataset.hasResult;
   }
-  return next;
 }
 
 function openAccordion(id) {
@@ -414,10 +485,17 @@ export function arrangeAutoDeskDemoFields(form = document.getElementById("home-q
 function syncGyorsFieldVisibility(form = document.getElementById("home-qs-form")) {
   if (!form) return;
   const gyors = document.body.classList.contains("auto-desk-gyors");
+  const ertek = document.body.classList.contains("auto-desk-ertekbecslo");
   form.querySelectorAll(".auto-desk-fields[data-desk-alap] .auto-desk-field").forEach((el) => {
+    const key = el.getAttribute("data-desk-field");
+    if (ertek && (key === "vetelar" || key === "km")) {
+      el.hidden = false;
+      return;
+    }
     const isQuick = el.getAttribute("data-desk-quick") === "1";
     el.hidden = gyors && !isQuick;
   });
+  if (ertek) syncErtekModeChrome(form);
 }
 
 export function updateAutoDeskAccSummaries(form = document.getElementById("home-qs-form")) {

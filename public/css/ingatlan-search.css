@@ -1693,9 +1693,10 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   justify-self: end;
 }
 
-/* Egyválasztós + tartomány sheet (Kivitel, Üzemanyag, Hengerűrtartalom desk, stb.): fekete Kész — mint a HA referencia */
+/* Egyválasztós + tartomány + dátum3 sheet: fekete Kész — mint a HA referencia */
 .auto-drum-portal--sheet.auto-drum-portal--single-sheet .auto-drum-portal__done--sheet-top,
-.auto-drum-portal--sheet.auto-drum-portal--range-sheet .auto-drum-portal__done--sheet-top {
+.auto-drum-portal--sheet.auto-drum-portal--range-sheet .auto-drum-portal__done--sheet-top,
+.auto-drum-portal--sheet.auto-drum-portal--date3 .auto-drum-portal__done--sheet-top {
   background: #111;
   color: #fff;
   box-shadow: 0 2px 8px rgba(15, 23, 42, 0.2);

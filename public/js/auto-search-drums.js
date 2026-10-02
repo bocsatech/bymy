@@ -832,7 +832,9 @@ function styleAutoSearchAlapCard(form) {
   form.dataset.alapCardStyled = "1";
   const card = document.createElement("div");
   card.className = "auto-search-alap-card";
-  card.innerHTML = `<p class="auto-search-alap-card__title">Alapadatok</p><div class="auto-search-alap-card__body"></div>`;
+  card.innerHTML = form.hasAttribute("data-ertek-drums")
+    ? `<div class="auto-search-alap-card__body"></div>`
+    : `<p class="auto-search-alap-card__title">Alapadatok</p><div class="auto-search-alap-card__body"></div>`;
   const body = card.querySelector(".auto-search-alap-card__body");
   kids.forEach((el) => body.appendChild(el));
 

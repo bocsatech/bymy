@@ -96,7 +96,7 @@
       <link rel="stylesheet" href="/css/hub.css?v=e6bf27b3c3" />
     <link rel="stylesheet" href="/css/partner-profile.css?v=6ba04596fa" />
     <link rel="stylesheet" href="/css/messages-enhancements.css?v=9dc1a2d8c2" />
-    <link rel="stylesheet" href="/css/ertekbecslo-qr.css?v=ertek4" />
+    <link rel="stylesheet" href="/css/ertekbecslo-qr.css?v=ertek5" />
 </head>
   <body class="site-app settings-page mm-page" data-site-page="beallitasok" data-auth-init="manual">
     <script src="/js/mw-app-shell.js?v=fead9b4cb5"></script>
@@ -424,8 +424,9 @@
             <p class="mm-panel-lead">Személyautó piaci sáv a minta alapján. Kötelező: gyártmány, modell, évjárat, km. Az üzemanyag és a típus finomítja az ajánlatot.</p>
           </header>
           <p class="ertek-msg" data-ertek-status role="status"></p>
-          <div class="auto-search-panel ertek-search-panel">
-            <form class="ertek-form home-qs-form" data-ertek-form data-ertek-drums data-force-drums onsubmit="return false">
+          <div class="ertek-search-panel">
+            <form class="ertek-form home-qs-form immo-search-form" data-ertek-form data-ertek-drums data-force-drums onsubmit="return false">
+              <div class="home-qs-layout-main" data-ertek-layout>
               <div class="home-qs-field" data-qs-field="gyartmany">
                 <span class="home-qs-label">Gyártmány</span>
                 <select class="home-qs-control" data-filter-key="gyartmany" aria-label="Gyártmány"></select>
@@ -455,6 +456,7 @@
               <div class="home-qs-field ertek-km-field" data-qs-field="km">
                 <span class="home-qs-label">Km</span>
                 <input class="home-qs-control" type="text" inputmode="numeric" data-ertek-km placeholder="pl. 120000" autocomplete="off" />
+              </div>
               </div>
             </form>
           </div>
@@ -821,7 +823,7 @@
 
     <script src="/js/site-avatar-menu.js?v=4c911388e7" type="module"></script>
     <script src="/js/ha-import-app.js?v=fecf9318ef" type="module"></script>
-    <script src="/js/beallitasok-app.js?v=ertek4" type="module"></script>
+    <script src="/js/beallitasok-app.js?v=ertek5" type="module"></script>
     <script>
       
       setTimeout(function () {

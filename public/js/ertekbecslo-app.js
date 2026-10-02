@@ -6,7 +6,7 @@ import { flattenUzemanyagOptions } from "./equipment-data.js?v=ertek4";
 import {
   mountAutoSearchDrums,
   readAutoDrumFilterValues,
-} from "./auto-search-drums.js?v=ertek4";
+} from "./auto-search-drums.js?v=ertek5";
 import { fillWheel, setWheelValue, readWheel } from "./ingatlan-wheels.js?v=6952ba469c";
 import { syncDrumWheelDisplay } from "./immo-drum-picker.js?v=c4c7ac29a2";
 

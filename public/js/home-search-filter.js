@@ -1,7 +1,7 @@
 import { initVehicleCatalogSelects, shortTypeName } from "./vehicle-catalog-client.js?v=5004d33efa";
 import { kivitelMatches } from "./kivitel-options.js?v=be03aefc2e";
 import { fuelValueMatches } from "./auto-fuel-picker.js?v=b7569cba37";
-import { kivitelListMatches } from "./auto-kivitel-picker.js?v=4c04d8ea09";
+import { kivitelListMatches } from "./auto-kivitel-picker.js?v=6dc6ba4eb5";
 import { allapotValueMatches } from "./auto-allapot-picker.js?v=d31f4ab31d";
 import { sebessegvaltoListMatches } from "./auto-sebessegvalto-picker.js?v=960574ad87";
 import { okmanyListMatches } from "./auto-okmany-picker.js?v=b931011338";

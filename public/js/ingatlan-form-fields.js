@@ -3,7 +3,7 @@ import { normalizeIngatlanUzletag, INGATLAN_LAKAS_TIPUS, INGATLAN_LAKAS_TIPUS_AI
 import {
   initIngatlanSearch,
   readIngatlanSearchForm,
-} from "./ingatlan-search.js?v=3c39cebd77";
+} from "./ingatlan-search.js?v=1ceac6a01b";
 import { fetchIngatlanWheelSchema } from "./ingatlan-wheel-schema.js?v=bb1c930359";
 import { wireTelepulesSuggestIn } from "./telepules-suggest.js?v=0a40829ec5";
 

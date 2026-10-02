@@ -343,7 +343,7 @@ function openPanel() {
 }
 
 async function openMobileDrum() {
-  const { openStandaloneSwitchSheet } = await import("./auto-drum-sheet.js?v=8a910acde0");
+  const { openStandaloneSwitchSheet } = await import("./auto-drum-sheet.js?v=9ebba008fe");
   if (hierarchical) {
     openStandaloneSwitchSheet({
       trigger: openBtn,

@@ -17,6 +17,9 @@ const cmds = [
   `node "${root}/scripts/asset-fingerprint.mjs"`,
   `rsync -az --delete "${root}/public/" ${host}:${appDir}/public/`,
   `rsync -az --delete "${root}/lib/" ${host}:${appDir}/lib/`,
+  // data/ katalógus: ensureVehicleCatalog() public-ra synceli induláskor — a régi 20MB dump ne jöjjön vissza.
+  `rsync -az "${root}/data/vehicle-catalog.json" ${host}:${appDir}/data/vehicle-catalog.json`,
+  `rsync -az "${root}/data/vehicle-catalog-kisteher.json" ${host}:${appDir}/data/vehicle-catalog-kisteher.json`,
   `rsync -az "${root}/server.mjs" ${host}:${appDir}/server.mjs`,
   `rsync -az "${root}/ecosystem.config.cjs" ${host}:${appDir}/ecosystem.config.cjs`,
   `ssh ${host} "cd ${appDir} && (pm2 startOrReload ecosystem.config.cjs --update-env 2>/dev/null || pm2 restart bymy 2>/dev/null || true); pm2 scale bymy 4 >/dev/null 2>&1 || true; pm2 save >/dev/null 2>&1 || true"`,

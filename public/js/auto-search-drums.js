@@ -6,7 +6,7 @@ import {
   syncDrumWheelDisplay,
   closeAllInlineDrums,
 } from "./immo-drum-picker.js?v=c4c7ac29a2";
-import { bindAutoDrumSheet, openAutoDrumSheet } from "./auto-drum-sheet.js?v=8a910acde0";
+import { bindAutoDrumSheet, openAutoDrumSheet } from "./auto-drum-sheet.js?v=9ebba008fe";
 import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=90daaf5812";
 
 const MOBILE_MQ = "(max-width: 900px)";
@@ -642,7 +642,7 @@ function catalogKindForDrums() {
   return "szemelyauto";
 }
 
-const CATALOG_STATIC_BUST = "brandCatalog4";
+const CATALOG_STATIC_BUST = "brandCatalog5";
 
 async function fetchCatalogQuick() {
   const kind = catalogKindForDrums();
@@ -651,7 +651,8 @@ async function fetchCatalogQuick() {
       ? `/data/vehicle-catalog-kisteher.json?v=${CATALOG_STATIC_BUST}`
       : `/data/vehicle-catalog.json?v=${CATALOG_STATIC_BUST}`;
   try {
-    const res = await fetch(staticUrl, { cache: "no-store" });
+    // HTTP Cache-Control (1 nap) — no-store minden megnyitáskor újra húzná a JSON-t.
+    const res = await fetch(staticUrl, { cache: "force-cache" });
     const data = await res.json();
     if (data?.gyartmanyok?.length) return data;
   } catch {

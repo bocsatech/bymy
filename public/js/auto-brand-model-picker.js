@@ -73,7 +73,7 @@ export async function mountAutoBrandModelPicker(form) {
   try {
     if (wantKind === "kisteher") {
       // Always load public kisteher JSON (bypass any személyautó API / module cache).
-      const res = await fetch(`/data/vehicle-catalog-kisteher.json?v=teherStrict3`, { cache: "no-store" });
+      const res = await fetch(`/data/vehicle-catalog-kisteher.json?v=teherStrict4`, { cache: "force-cache" });
       const data = await res.json().catch(() => ({}));
       if (!res.ok || !data?.gyartmanyok?.length) {
         catalog = await fetchVehicleCatalog({ kind: "kisteher" });

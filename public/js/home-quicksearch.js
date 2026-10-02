@@ -1,15 +1,15 @@
 
 import { applyAutoSearchLayout, readLayoutFilterValues, refillAutoSearchRangeSelects, prefetchAutoSearchBoot } from "./auto-search-layout.js?v=90daaf5812";
-import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums, styleAutoSearchMoreCard } from "./auto-search-drums.js?v=5073314ef1";
+import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums, styleAutoSearchMoreCard } from "./auto-search-drums.js?v=2f34c79109";
 import {
   mountDetailedSearch,
   readDetailedSearchValues,
   resetDetailedSearch,
-} from "./auto-detailed-search.js?v=4a6bc02dce";
+} from "./auto-detailed-search.js?v=18415b7f87";
 import { readWheel } from "./ingatlan-wheels.js?v=6952ba469c";
-import { readBrandModelFilterValues, mountAutoBrandModelPicker } from "./auto-brand-model-picker.js?v=636b450f0c";
+import { readBrandModelFilterValues, mountAutoBrandModelPicker } from "./auto-brand-model-picker.js?v=67b731c621";
 import { readFuelFilterValues, mountAutoFuelPicker } from "./auto-fuel-picker.js?v=b7569cba37";
-import { readKivitelFilterValues, mountAutoKivitelPicker } from "./auto-kivitel-picker.js?v=4c04d8ea09";
+import { readKivitelFilterValues, mountAutoKivitelPicker } from "./auto-kivitel-picker.js?v=6dc6ba4eb5";
 import { readAllapotFilterValues, mountAutoAllapotPicker } from "./auto-allapot-picker.js?v=d31f4ab31d";
 import { readSebessegvaltoFilterValues, mountAutoSebessegvaltoPicker } from "./auto-sebessegvalto-picker.js?v=960574ad87";
 import { readOkmanyFilterValues, mountAutoOkmanyPicker } from "./auto-okmany-picker.js?v=b931011338";
@@ -428,7 +428,7 @@ export function initHomeQuickSearch({ onSearch = () => {}, onFilterPreview, onDe
     });
 
   async function applySavedFilters(filters) {
-    const { applySavedSearchFilters } = await import("./saved-search.js?v=a2bd48196d");
+    const { applySavedSearchFilters } = await import("./saved-search.js?v=ae250042e8");
     await applySavedSearchFilters(form, filters || {});
     updateAutoDeskAccSummaries(form);
     // A mentett payload a forrás — ne a form újraolvasása (picker race miatt üres lehet).
@@ -442,4 +442,4 @@ export function initHomeQuickSearch({ onSearch = () => {}, onFilterPreview, onDe
   };
 }
 
-export { readDetailedSearchValues } from "./auto-detailed-search.js?v=4a6bc02dce";
+export { readDetailedSearchValues } from "./auto-detailed-search.js?v=18415b7f87";

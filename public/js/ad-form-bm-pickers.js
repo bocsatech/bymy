@@ -2400,7 +2400,7 @@ async function mountAdBrandModelCombined(form, catalog) {
   }
 
   const { fillWheel, setWheelValue, readWheel, syncHostClearButton } = await import("./ingatlan-wheels.js?v=6952ba469c");
-  const { openBrandModelCatalogSheet } = await import("./auto-drum-sheet.js?v=8a910acde0");
+  const { openBrandModelCatalogSheet } = await import("./auto-drum-sheet.js?v=9ebba008fe");
   const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=c4c7ac29a2");
 
   const brands = [...(catalog?.gyartmanyok || [])].sort((a, b) =>
@@ -2645,7 +2645,7 @@ async function mountAdSelectDrum(select, {
   let syncDrumWheelDisplay;
   try {
     ({ fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=6952ba469c"));
-    ({ openStandaloneSwitchSheet, bindAutoDrumSheet } = await import("./auto-drum-sheet.js?v=8a910acde0"));
+    ({ openStandaloneSwitchSheet, bindAutoDrumSheet } = await import("./auto-drum-sheet.js?v=9ebba008fe"));
     ({ initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=c4c7ac29a2"));
   } catch (error) {
     console.warn("Dobkerék betöltés:", title || select.id, error);
@@ -2885,7 +2885,7 @@ async function mountAdSplitYmDrum({
   }
 
   const { fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=6952ba469c");
-  const { openYmDualSheet } = await import("./auto-drum-sheet.js?v=8a910acde0");
+  const { openYmDualSheet } = await import("./auto-drum-sheet.js?v=9ebba008fe");
   const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=c4c7ac29a2");
 
   const yearOpts = optionsFromSelect(ev, emptyYear);
@@ -3244,7 +3244,7 @@ export async function mountTireSizeSwitchPickers(form) {
 
   try {
     const { fillTireSelect } = await import("./tire-sizes-ui.js?v=d01f914c82");
-    const { openTireTripleSheet } = await import("./auto-drum-sheet.js?v=8a910acde0");
+    const { openTireTripleSheet } = await import("./auto-drum-sheet.js?v=9ebba008fe");
     const blocks = [...grid.querySelectorAll(":scope > .tire-block")];
 
     for (let index = 0; index < TIRE_ROW_SPECS.length; index += 1) {

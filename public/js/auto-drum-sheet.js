@@ -2130,7 +2130,7 @@ export function openStandaloneSwitchSheet({
   renderMain();
 }
 
-const CATALOG_STATIC_BUST = "brandCatalog4";
+const CATALOG_STATIC_BUST = "brandCatalog5";
 
 async function loadGyartmanyCatalog(form) {
   let catalog = form?._autoDrumCatalog;
@@ -2142,7 +2142,7 @@ async function loadGyartmanyCatalog(form) {
       kind === "kisteher"
         ? `/data/vehicle-catalog-kisteher.json?v=${CATALOG_STATIC_BUST}`
         : `/data/vehicle-catalog.json?v=${CATALOG_STATIC_BUST}`;
-    const res = await fetch(staticUrl, { cache: "no-store" });
+    const res = await fetch(staticUrl, { cache: "force-cache" });
     const data = await res.json();
     if (data?.gyartmanyok?.length) catalog = data;
     else {

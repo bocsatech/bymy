@@ -251,10 +251,33 @@
     padding: 0 !important;
   }
 
+  /* Alapadatok kártya mezői mindig látszanak nyitva */
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
-    .ad-form-alap-card.is-collapsed
-    > .ad-form-alap-card__body {
-    display: none !important;
+    .ad-form-alap-card:not(.is-collapsed)
+    .ad-form-alap-card__body
+    .auto-desk-fields[data-desk-alap] {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 1.05rem !important;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-desk-shell
+    .ad-form-alap-card:not(.is-collapsed)
+    .auto-desk-field[data-desk-quick="1"],
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-desk-shell
+    .ad-form-alap-card:not(.is-collapsed)
+    .auto-fuel-field,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-desk-shell
+    .ad-form-alap-card:not(.is-collapsed)
+    .auto-kivitel-field,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-desk-shell
+    .ad-form-alap-card:not(.is-collapsed)
+    .auto-allapot-field {
+    display: flex !important;
   }
 }

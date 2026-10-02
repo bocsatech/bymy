@@ -507,31 +507,55 @@ export function syncAutoSearchAccShell(form = document.getElementById("home-qs-f
   if (!shell || !alap) return;
 
   const brand = form.querySelector(".auto-bm-brand-block");
-  if (brand && brand.parentElement !== shell) {
-    shell.insertBefore(brand, alap);
-  } else if (brand && brand.nextElementSibling !== alap) {
+  if (brand && (brand.parentElement !== shell || brand.nextElementSibling !== alap)) {
     shell.insertBefore(brand, alap);
   }
 
   const alapBody = alap.querySelector(":scope > .auto-desk-acc__body");
-  const host = alapBody?.querySelector(".auto-desk-fields[data-desk-alap]");
-  if (!alapBody || !host) return;
-  if (alapBody.querySelector(":scope > .ad-form-alap-card")) return;
+  let host = form.querySelector(".auto-desk-fields[data-desk-alap]");
+  if (!alapBody) return;
 
-  const card = document.createElement("div");
-  card.className = "ad-form-alap-card";
-  card.innerHTML =
-    '<button type="button" class="ad-form-alap-card__title" aria-expanded="true"><span class="ad-form-alap-card__title-text">Alapadatok</span><span class="ad-form-alap-card__chev" aria-hidden="true">▼</span></button><div class="ad-form-alap-card__body"></div>';
+  if (!host) {
+    host = document.createElement("div");
+    host.className = "auto-desk-fields";
+    host.dataset.deskAlap = "1";
+  }
+
+  let card = alapBody.querySelector(":scope > .ad-form-alap-card");
+  if (!card) {
+    card = document.createElement("div");
+    card.className = "ad-form-alap-card";
+    card.innerHTML =
+      '<button type="button" class="ad-form-alap-card__title" aria-expanded="true"><span class="ad-form-alap-card__title-text">Alapadatok</span><span class="ad-form-alap-card__chev" aria-hidden="true">▼</span></button><div class="ad-form-alap-card__body"></div>';
+    const title = card.querySelector(".ad-form-alap-card__title");
+    title.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      const closed = card.classList.toggle("is-collapsed");
+      title.setAttribute("aria-expanded", closed ? "false" : "true");
+    });
+    alapBody.insertBefore(card, alapBody.firstChild);
+  }
+
   const cardBody = card.querySelector(".ad-form-alap-card__body");
-  const title = card.querySelector(".ad-form-alap-card__title");
-  cardBody.appendChild(host);
-  alapBody.insertBefore(card, alapBody.firstChild);
-  title.addEventListener("click", (event) => {
-    event.preventDefault();
-    event.stopPropagation();
-    const closed = card.classList.toggle("is-collapsed");
-    title.setAttribute("aria-expanded", closed ? "false" : "true");
+  if (host.parentElement !== cardBody) cardBody.appendChild(host);
+
+  /* Üzemanyag / Kivitel / Állapot / Évjárat / Vételár az Alapadatok kártyában marad. */
+  const quickFieldKeys = ["uzemanyag", "kivitel", "allapot", "gyartasi_ev", "vetelar", "km"];
+  quickFieldKeys.forEach((key) => {
+    const el = form.querySelector(`[data-desk-field="${key}"]`);
+    if (!el) return;
+    if (el.closest(".auto-bm-brand-block")) return;
+    if (!host.contains(el)) host.appendChild(el);
+    el.dataset.deskQuick = "1";
+    el.hidden = false;
+    el.style.removeProperty("display");
   });
+
+  card.classList.remove("is-collapsed");
+  card.querySelector(".ad-form-alap-card__title")?.setAttribute("aria-expanded", "true");
+  alap.classList.add("is-open");
+  alap.querySelector("[data-desk-acc-toggle]")?.setAttribute("aria-expanded", "true");
 }
 
 export function updateAutoDeskAccSummaries(form = document.getElementById("home-qs-form")) {

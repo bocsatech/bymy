@@ -29,9 +29,14 @@ function escapeHtml(value) {
     .replace(/"/g, "&quot;");
 }
 
-/** Auto oldal: sheet chrome mobilon; desk split tartomány külön mindig sheet (lásd openSplitRangeDrumSheet). */
+/**
+ * Mobil sheet chrome (X + Kész fejléc + fehér lista).
+ * Auto/teher desk: ugyanaz 1:1 — ne a régi középső dobkerék-popup.
+ */
 function isMobileDrumSheet() {
-  return !window.matchMedia("(min-width: 901px)").matches;
+  if (!window.matchMedia("(min-width: 901px)").matches) return true;
+  const page = document.body?.getAttribute("data-site-page") || "";
+  return page === "auto" || page === "teherauto";
 }
 
 function daysInMonth(year, month) {

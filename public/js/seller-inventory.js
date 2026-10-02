@@ -24,7 +24,7 @@ function injectStylesheet() {
   if (document.querySelector('link[data-seller-inv-css]')) return;
   const link = document.createElement("link");
   link.rel = "stylesheet";
-  link.href = "/css/seller-inventory.css?v=sellerInv30";
+  link.href = "/css/seller-inventory.css?v=sellerInv31";
   link.dataset.sellerInvCss = "1";
   document.head.appendChild(link);
   if (!document.querySelector('link[data-ertek-qr-css]')) {
@@ -308,6 +308,7 @@ function sellerMenuHtml(contact, rating, count, fromId) {
           </div>
         </div>
         ${addressHtml(lines)}
+        ${qrBlockHtml({ url: withQrSource(pageShareUrl()), label: "QR — összes jármű", size: 140 })}
       </div>
       <div class="seller-inv__menu-actions">
         ${
@@ -321,7 +322,6 @@ function sellerMenuHtml(contact, rating, count, fromId) {
           <button type="button" class="seller-inv__btn seller-inv__btn--icon seller-inv__btn--fb" data-si-share-fb aria-label="Megosztás Facebookon" title="Facebook">${ICON.facebook}</button>
           <button type="button" class="seller-inv__btn seller-inv__btn--icon" data-si-print aria-label="Nyomtatás" title="Nyomtatás">${ICON.print}</button>
         </div>
-        ${qrBlockHtml({ url: withQrSource(pageShareUrl()), label: "QR — összes jármű", size: 140 })}
         <div class="seller-inv__phone-wrap" data-si-phone-col>
           ${maskedPhonesHtml(masked, hasPhone)}
         </div>

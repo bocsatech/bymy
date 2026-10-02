@@ -442,6 +442,12 @@ html[data-theme="dark"] .seller-inv__btn--soft:hover {
   line-height: 1.4;
 }
 
+.seller-inv__menu-identity .bymy-qr {
+  align-self: flex-start;
+  margin: 0.35rem 0 0;
+  max-width: 100%;
+}
+
 .seller-inv__menu .seller-inv__phone-wrap {
   display: flex;
   flex-direction: column;

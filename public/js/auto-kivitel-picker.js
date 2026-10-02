@@ -1,14 +1,16 @@
-
 import { KIVITEL_OPTIONS, normalizeKivitel } from "./kivitel-options.js?v=be03aefc2e";
 import {
   TEHER_KISTEHER_KIVITEL,
   TEHER_35_KIVITEL_CATEGORIES,
   flattenTeher35KivitelOptions,
 } from "./equipment-data.js?v=5a39cb5ba3";
-import { bindAutoBmDismiss, autoBmPanelIsOpen } from "./auto-bm-dismiss.js?v=89aa460931";
+import { openStandaloneSwitchSheet, closeAutoDrumSheet } from "./auto-drum-sheet.js?v=kivitelSheet1";
+
+const EMPTY_LABEL = "Válasszon";
+const SUMMARY_EMPTY = "Mindegy";
 
 function labelList(items) {
-  if (!items.length) return "Mindegy";
+  if (!items.length) return SUMMARY_EMPTY;
   if (items.length === 1) return items[0];
   if (items.length <= 3) return items.join(", ");
   return `${items.length} kivitel`;
@@ -58,7 +60,6 @@ function useKisteherKivitelCategories() {
 }
 
 function shouldMountKivitelPicker() {
-  /* Desk BM panel only — mobile uses drum/switch sheet (same open chrome as személyautó). */
   return isVehicleSearchPage() && isAutoDesk();
 }
 
@@ -66,23 +67,6 @@ function flatOptionsForPage() {
   if (document.body?.getAttribute("data-site-page") !== "teherauto") return KIVITEL_OPTIONS;
   if (useKisteherKivitelCategories()) return flattenTeher35KivitelOptions();
   return TEHER_KISTEHER_KIVITEL;
-}
-
-function categoryValues(cat) {
-  if (cat.children?.length) return cat.children.map((c) => c.value);
-  return cat.value ? [cat.value] : [];
-}
-
-function escapeHtml(value) {
-  return String(value ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
-
-function escapeAttr(value) {
-  return escapeHtml(value).replace(/'/g, "&#39;");
 }
 
 function normKey(value) {
@@ -94,7 +78,13 @@ function normKey(value) {
 }
 
 export async function mountAutoKivitelPicker(form) {
-  if (!form || !shouldMountKivitelPicker() || form.dataset.kivitelPicker === "1") return;
+  if (!form || !shouldMountKivitelPicker()) return;
+
+  if (form.dataset.kivitelPicker === "1") {
+    form.querySelectorAll(".auto-kivitel-field, .auto-kivitel-panel").forEach((el) => el.remove());
+    document.querySelectorAll(".auto-kivitel-panel").forEach((el) => el.remove());
+    delete form.dataset.kivitelPicker;
+  }
 
   let alapHost = form.querySelector(".auto-desk-fields[data-desk-alap]");
   const muszakiHost = form.querySelector(".auto-desk-fields[data-desk-muszaki]");
@@ -119,13 +109,11 @@ export async function mountAutoKivitelPicker(form) {
   form.querySelectorAll('[data-qs-field="kivitel"]').forEach((el) => el.remove());
   form.querySelector("#qs-kivitel")?.remove();
   form.querySelector('[data-wheel="kivitel"]')?.closest(".immo-schema-cell, .home-qs-drum-cell, .auto-cell-drum")?.remove();
+  document.querySelectorAll(".auto-kivitel-panel").forEach((el) => el.remove());
 
   const hierarchical = useKisteherKivitelCategories();
   const categories = hierarchical ? TEHER_35_KIVITEL_CATEGORIES : null;
   const flatOptions = hierarchical ? null : flatOptionsForPage();
-
-  const openMains = new Set();
-  const selected = new Set();
 
   const hidden = document.createElement("input");
   hidden.type = "hidden";
@@ -139,9 +127,8 @@ export async function mountAutoKivitelPicker(form) {
   wrap.hidden = false;
   wrap.innerHTML = `
     <span class="auto-desk-field__label">Kivitel</span>
-    <button type="button" class="auto-bm-trigger" data-auto-kivitel-open>
-      <span data-auto-kivitel-summary>Mindegy</span>
-      <span class="auto-bm-trigger__chev" aria-hidden="true">⌄</span>
+    <button type="button" class="auto-bm-trigger" data-auto-kivitel-open aria-label="Kivitel">
+      <span data-auto-kivitel-summary>${SUMMARY_EMPTY}</span>
     </button>
   `;
   wrap.appendChild(hidden);
@@ -160,6 +147,23 @@ export async function mountAutoKivitelPicker(form) {
     insertHost.appendChild(wrap);
   }
 
+  const summaryEl = wrap.querySelector("[data-auto-kivitel-summary]");
+  const openBtn = wrap.querySelector("[data-auto-kivitel-open]");
+
+  function syncSummary(list) {
+    if (!summaryEl) return;
+    const text = labelList(list);
+    summaryEl.textContent = text;
+    summaryEl.classList.toggle("is-placeholder", !list.length);
+    openBtn?.classList.toggle("has-value", Boolean(list.length));
+  }
+
+  function applyList(list) {
+    const clean = [...new Set((list || []).map((v) => String(v).trim()).filter(Boolean))];
+    writeJsonList(hidden, clean);
+    syncSummary(clean);
+  }
+
   const urlKivitel = String(new URLSearchParams(window.location.search).get("kivitel") || "").trim();
   if (urlKivitel) {
     if (hierarchical && categories) {
@@ -169,305 +173,81 @@ export async function mountAutoKivitelPicker(form) {
           c.label === urlKivitel ||
           c.children?.some((ch) => ch.value === urlKivitel)
       );
-      if (cat) {
-        openMains.add(cat.id);
-        if (cat.children?.length) {
-          const child = cat.children.find((ch) => ch.value === urlKivitel);
-          if (child) selected.add(child.value);
-          else cat.children.forEach((ch) => selected.add(ch.value));
-        } else if (cat.value) {
-          selected.add(cat.value);
-        }
+      if (cat?.children?.length) {
+        const child = cat.children.find((ch) => ch.value === urlKivitel);
+        applyList(child ? [child.value] : cat.children.map((ch) => ch.value));
+      } else if (cat?.value) {
+        applyList([cat.value]);
       } else {
-        selected.add(urlKivitel);
+        applyList([urlKivitel]);
       }
     } else {
-      selected.add(normalizeKivitel(urlKivitel) || urlKivitel);
+      applyList([normalizeKivitel(urlKivitel) || urlKivitel]);
     }
+  } else {
+    syncSummary(parseJsonList(hidden.value));
   }
 
-  const summaryEl = wrap.querySelector("[data-auto-kivitel-summary]");
-  const openBtn = wrap.querySelector("[data-auto-kivitel-open]");
-
-  const panel = document.createElement("div");
-  panel.className = "auto-bm-panel auto-kivitel-panel";
-  panel.hidden = true;
-  panel.innerHTML = `
-    <div class="auto-bm-panel__chrome">
-      <button type="button" class="auto-bm-panel__back" data-auto-kivitel-back aria-label="Vissza">‹</button>
-      <div class="auto-bm-panel__titles">
-        <p class="auto-bm-panel__title">Kivitel</p>
-      </div>
-    </div>
-    <div class="auto-bm-panel__body" data-auto-kivitel-body></div>
-  `;
-  const hero = document.querySelector(".auto-search-hero") || form.closest(".auto-search-hero") || form;
-  hero.appendChild(panel);
-  const bodyEl = panel.querySelector("[data-auto-kivitel-body]");
-
-  function selectedLabelsHierarchical() {
-    const labels = [];
-    for (const cat of categories) {
-      if (!openMains.has(cat.id)) continue;
-      if (cat.children?.length) {
-        const kids = cat.children.filter((c) => selected.has(c.value));
-        if (kids.length) labels.push(...kids.map((c) => c.label));
-        else labels.push(cat.label);
-      } else if (cat.value && selected.has(cat.value)) {
-        labels.push(cat.label);
-      }
+  function openSheet() {
+    if (document.querySelector(".auto-drum-portal--sheet")) {
+      closeAutoDrumSheet(true);
+      return;
     }
-    return labels;
-  }
-
-  function effectiveSelectedValues() {
-    if (!hierarchical) return [...selected];
-    const values = new Set();
-    for (const cat of categories) {
-      if (!openMains.has(cat.id)) continue;
-      if (cat.children?.length) {
-        const kids = cat.children.filter((c) => selected.has(c.value));
-        if (kids.length) kids.forEach((c) => values.add(c.value));
-        else {
-          cat.children.forEach((c) => values.add(c.value));
-          values.add(cat.label);
-        }
-      } else if (cat.value && selected.has(cat.value)) {
-        values.add(cat.value);
-      }
+    if (hierarchical && categories) {
+      openStandaloneSwitchSheet({
+        trigger: openBtn,
+        title: "Kivitel",
+        emptyLabel: EMPTY_LABEL,
+        items: categories.map((c) => ({ value: c.id, label: c.label })),
+        initialSelected: parseJsonList(hidden.value),
+        getChildren: (id) => {
+          const cat = categories.find((c) => c.id === id);
+          if (!cat?.children?.length) return null;
+          return cat.children.map((c) => ({ value: c.value, label: c.label }));
+        },
+        onDone: (list, mains) => {
+          const selected = new Set((list || []).map(String).filter(Boolean));
+          const openMains = new Set((mains || []).map(String).filter(Boolean));
+          for (const cat of categories) {
+            if (openMains.has(cat.id) && !cat.children?.length && cat.value) selected.add(cat.value);
+            if (openMains.has(cat.id) && cat.children?.length) {
+              const kids = cat.children.map((c) => c.value);
+              if (!kids.some((v) => selected.has(v))) kids.forEach((v) => selected.add(v));
+            }
+          }
+          applyList([...selected]);
+        },
+      });
+      return;
     }
-    return [...values];
-  }
-
-  function syncHidden() {
-    const list = hierarchical ? effectiveSelectedValues() : [...selected];
-    writeJsonList(hidden, list);
-    if (summaryEl) {
-      summaryEl.textContent = labelList(hierarchical ? selectedLabelsHierarchical() : list);
-    }
-  }
-
-  function turnMainOn(cat) {
-    openMains.add(cat.id);
-    if (!cat.children?.length && cat.value) selected.add(cat.value);
-  }
-
-  function turnMainOff(cat) {
-    openMains.delete(cat.id);
-    for (const v of categoryValues(cat)) selected.delete(v);
-  }
-
-  function renderHierarchical() {
-    const rows = categories
-      .map((cat) => {
-        const on = openMains.has(cat.id);
-        const hasKids = Boolean(cat.children?.length);
-        let kidsHtml = "";
-        if (hasKids && on) {
-          kidsHtml = `<div class="auto-fuel-children">
-            ${cat.children
-              .map((child) => {
-                const childOn = selected.has(child.value);
-                return `<div class="auto-bm-row auto-fuel-child-row">
-                  <label class="auto-bm-toggle">
-                    <span>${escapeHtml(child.label)}</span>
-                    <input type="checkbox" data-auto-kivitel-child="${escapeAttr(child.value)}" data-auto-kivitel-parent="${escapeAttr(cat.id)}" ${childOn ? "checked" : ""} />
-                    <span class="auto-bm-switch" aria-hidden="true"></span>
-                  </label>
-                </div>`;
-              })
-              .join("")}
-          </div>`;
-        }
-        return `<div class="auto-bm-row auto-fuel-main-row" data-auto-kivitel-main="${escapeAttr(cat.id)}">
-          <label class="auto-bm-toggle auto-fuel-main-toggle">
-            <span class="auto-fuel-main-label">${escapeHtml(cat.label)}</span>
-            <input type="checkbox" data-auto-kivitel-main-toggle="${escapeAttr(cat.id)}" ${on ? "checked" : ""} />
-            <span class="auto-bm-switch" aria-hidden="true"></span>
-          </label>
-          ${kidsHtml}
-        </div>`;
-      })
-      .join("");
-
-    bodyEl.innerHTML = `
-      <div class="auto-bm-actions">
-      <button type="button" class="auto-bm-btn auto-bm-btn--clear" data-auto-kivitel-clear>Összes kikapcsolása</button>
-      <button type="button" class="auto-bm-btn auto-bm-btn--done" data-auto-kivitel-done>Kész</button>
-    </div>
-      <div class="auto-bm-group">${rows}</div>
-    `;
-  }
-
-  function renderFlat() {
-    const rows = flatOptions
-      .map((opt) => {
-        const on = selected.has(opt);
-        return `<div class="auto-bm-row">
-          <label class="auto-bm-toggle">
-            <span>${escapeHtml(opt)}</span>
-            <input type="checkbox" data-auto-kivitel-opt="${escapeAttr(opt)}" ${on ? "checked" : ""} />
-            <span class="auto-bm-switch" aria-hidden="true"></span>
-          </label>
-        </div>`;
-      })
-      .join("");
-    bodyEl.innerHTML = `
-      <div class="auto-bm-actions">
-      <button type="button" class="auto-bm-btn auto-bm-btn--clear" data-auto-kivitel-clear>Összes kikapcsolása</button>
-      <button type="button" class="auto-bm-btn auto-bm-btn--done" data-auto-kivitel-done>Kész</button>
-    </div>
-      <div class="auto-bm-group">${rows}</div>
-    `;
-  }
-
-  function renderList() {
-    if (hierarchical) renderHierarchical();
-    else renderFlat();
-  }
-
-function isMobileViewport() {
-  return typeof window !== "undefined" && window.matchMedia("(max-width: 900px)").matches;
-}
-
-function openPanel() {
-  if (isMobileViewport()) {
-    void openMobileDrum();
-    return;
-  }
-  panel.hidden = false;
-  panel.style.setProperty("display", "flex", "important");
-  panel.classList.remove("is-closed");
-  document.body.classList.add("auto-bm-open");
-  renderList();
-}
-
-async function openMobileDrum() {
-  const { openStandaloneSwitchSheet } = await import("./auto-drum-sheet.js?v=9ebba008fe");
-  if (hierarchical) {
     openStandaloneSwitchSheet({
       trigger: openBtn,
-      emptyLabel: "Mindegy",
-      items: categories.map((c) => ({ value: c.id, label: c.label })),
-      initialSelected: [...selected],
-      getChildren: (id) => {
-        const cat = categories.find((c) => c.id === id);
-        if (!cat?.children?.length) return null;
-        return cat.children.map((c) => ({ value: c.value, label: c.label }));
-      },
-      onDone: (list, mains) => {
-        selected.clear();
-        list.forEach((v) => selected.add(v));
-        openMains.clear();
-        (mains || []).forEach((id) => openMains.add(id));
-        /* Ha fő kategória be van kapcsolva gyerek nélkül: effektív értékek a syncHidden-ben. */
-        for (const cat of categories) {
-          if (openMains.has(cat.id) && !cat.children?.length && cat.value) selected.add(cat.value);
-        }
-        syncHidden();
-      },
+      title: "Kivitel",
+      emptyLabel: EMPTY_LABEL,
+      items: (flatOptions || []).map((opt) => ({ value: opt, label: opt })),
+      initialSelected: parseJsonList(hidden.value),
+      onDone: (list) => applyList(list || []),
     });
-    return;
-  }
-  openStandaloneSwitchSheet({
-    trigger: openBtn,
-    emptyLabel: "Mindegy",
-    items: (flatOptions || []).map((opt) => ({ value: opt, label: opt })),
-    initialSelected: [...selected],
-    onDone: (list) => {
-      selected.clear();
-      list.forEach((v) => selected.add(v));
-      syncHidden();
-    },
-  });
-}
-
-  function closePanel() {
-    panel.hidden = true;
-    panel.style.setProperty("display", "none", "important");
-    panel.classList.add("is-closed");
-    document.body.classList.remove("auto-bm-open");
-    if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
-    syncHidden();
   }
 
-  openBtn?.addEventListener("click", () => {
-    if (!panel.hidden && !panel.classList.contains("is-closed")) closePanel();
-    else openPanel();
-  });
-
-  bindAutoBmDismiss({
-    panel,
-    roots: [wrap],
-    isOpen: () => autoBmPanelIsOpen(panel),
-    close: closePanel,
-  });
-
-  panel.querySelector("[data-auto-kivitel-back]")?.addEventListener("click", closePanel);
-  // done handled in body click (data-auto-kivitel-done)
-
-  bodyEl.addEventListener("change", (event) => {
-    const mainToggle = event.target.closest("[data-auto-kivitel-main-toggle]");
-    if (mainToggle && hierarchical) {
-      const id = mainToggle.getAttribute("data-auto-kivitel-main-toggle");
-      const cat = categories.find((c) => c.id === id);
-      if (!cat) return;
-      if (mainToggle.checked) turnMainOn(cat);
-      else turnMainOff(cat);
-      renderList();
-      syncHidden();
-      return;
-    }
-
-    const child = event.target.closest("[data-auto-kivitel-child]");
-    if (child && hierarchical) {
-      const value = child.getAttribute("data-auto-kivitel-child");
-      const parentId = child.getAttribute("data-auto-kivitel-parent");
-      if (child.checked) {
-        selected.add(value);
-        if (parentId) openMains.add(parentId);
-      } else {
-        selected.delete(value);
-      }
-      renderList();
-      syncHidden();
-      return;
-    }
-
-    const opt = event.target.closest("[data-auto-kivitel-opt]");
-    if (!opt) return;
-    const value = opt.getAttribute("data-auto-kivitel-opt");
-    if (opt.checked) selected.add(value);
-    else selected.delete(value);
-    syncHidden();
-  });
-
-  bodyEl.addEventListener("click", (event) => {
-    if (!event.target.closest("[data-auto-kivitel-clear]")) return;
-    selected.clear();
-    openMains.clear();
-    renderList();
-    syncHidden();
-  });
-
-  bodyEl.addEventListener("click", (event) => {
-    if (event.target.closest("[data-auto-kivitel-done]")) {
-      closePanel();
-      return;
-    }
+  openBtn?.addEventListener("click", (event) => {
+    event.preventDefault();
+    openSheet();
   });
 
   form.addEventListener("reset", () => {
-    requestAnimationFrame(() => {
-      selected.clear();
-      openMains.clear();
-      syncHidden();
-      if (!panel.hidden) renderList();
-    });
+    requestAnimationFrame(() => applyList([]));
+  });
+
+  form.addEventListener("bymy-saved-search-applied", (event) => {
+    const detail = event?.detail && typeof event.detail === "object" ? event.detail : {};
+    const list = Array.isArray(detail.kivitelek)
+      ? detail.kivitelek.map((v) => String(v)).filter(Boolean)
+      : parseJsonList(hidden.value);
+    applyList(list);
   });
 
   form.dataset.kivitelPicker = "1";
-  syncHidden();
 }
 
 export function readKivitelFilterValues(form) {

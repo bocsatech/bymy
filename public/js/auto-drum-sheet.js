@@ -1119,7 +1119,7 @@ function mountSheetPortalChrome(root, { stage, wrap, trigger, ring, sheetScroll 
       trigger?.closest?.(".auto-search-panel, .auto-search-desk-shell") ||
         document.body.classList.contains("auto-desk-active")
     );
-    stage.style.setProperty("position", desk ? "absolute" : "fixed", "important");
+    stage.style.setProperty("position", "fixed", "important");
     if (!overSearch) {
       stage.style.setProperty("left", "0", "important");
       stage.style.setProperty("right", "0", "important");

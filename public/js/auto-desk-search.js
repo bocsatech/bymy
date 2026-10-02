@@ -412,7 +412,7 @@ function syncGyorsFieldVisibility(form = document.getElementById("home-qs-form")
   syncAutoSearchAccShell(form);
 }
 
-/** Feladás-szerű héj: brand + mobil layout menü (qs-layout-main + qs-more) 1:1. */
+/** Mobil HTML 1:1: qs-layout-main + qs-more egymás alatt, egy scrollban — nincs Műszaki darabolás. */
 export function syncAutoSearchAccShell(form = document.getElementById("home-qs-form")) {
   if (!form || !isAutoDesk()) return;
   const shell = form.querySelector("#auto-search-desk-shell");
@@ -433,7 +433,6 @@ export function syncAutoSearchAccShell(form = document.getElementById("home-qs-f
   const more = form.querySelector("#qs-more");
   const moreLayout = form.querySelector("#qs-more-layout");
 
-  /* Alapadatok = mobil qs-layout-main (teljes step-1 menü) */
   if (main && main.parentElement !== alapBody) {
     alapBody.insertBefore(main, alapBody.firstChild);
   }
@@ -444,10 +443,12 @@ export function syncAutoSearchAccShell(form = document.getElementById("home-qs-f
     main.style.removeProperty("overflow");
   }
 
-  /* Műszaki = mobil qs-more (Több szűrő tartalom) — mindig nyitva desken */
-  const muszakiBody = muszaki?.querySelector(":scope > .auto-desk-acc__body");
-  if (more && muszakiBody) {
-    if (more.parentElement !== muszakiBody) muszakiBody.appendChild(more);
+  /* qs-more közvetlenül a main után — mint a mobil HTML, ne külön Műszaki accordionba */
+  if (more) {
+    if (more.parentElement !== alapBody || more.previousElementSibling !== main) {
+      if (main?.nextSibling) alapBody.insertBefore(more, main.nextSibling);
+      else alapBody.appendChild(more);
+    }
     more.hidden = false;
     more.classList.add("is-open");
     more.style.removeProperty("display");
@@ -457,12 +458,20 @@ export function syncAutoSearchAccShell(form = document.getElementById("home-qs-f
       moreLayout.hidden = false;
       moreLayout.style.removeProperty("display");
     }
-    muszaki.classList.add("is-open");
-    muszaki.querySelector("[data-desk-acc-toggle]")?.setAttribute("aria-expanded", "true");
+  }
+
+  /* Műszaki accordion üres héj — a tartalom a mobil more-ban van */
+  if (muszaki) {
+    muszaki.hidden = true;
+    muszaki.classList.remove("is-open");
+    muszaki.setAttribute("aria-hidden", "true");
   }
 
   alap.classList.add("is-open");
+  alap.hidden = false;
   alap.querySelector("[data-desk-acc-toggle]")?.setAttribute("aria-expanded", "true");
+  /* Accordion fej elrejtve: a mobil Alapadatok kártyacím elég */
+  alap.querySelector(".auto-desk-acc__head")?.setAttribute("hidden", "");
 }
 
 export function updateAutoDeskAccSummaries(form = document.getElementById("home-qs-form")) {

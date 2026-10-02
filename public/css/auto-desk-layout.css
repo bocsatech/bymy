@@ -677,10 +677,61 @@
 
   /* Legacy gyerekek rejtve — a mobil layout (#qs-layout-main / #qs-more) LÁTSZIK */
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
-    [data-desk-acc="alap"] .auto-desk-acc__body > :not(#qs-layout-main, .home-qs-layout-main, .auto-desk-fields, .ad-form-alap-card),
+    [data-desk-acc="alap"] .auto-desk-acc__body > :not(#qs-layout-main, .home-qs-layout-main, #qs-more, .home-qs-more, .auto-desk-fields, .ad-form-alap-card),
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
-    [data-desk-acc="muszaki"] .auto-desk-acc__body > :not(#qs-more, .home-qs-more, .auto-desk-fields) {
+    [data-desk-acc="muszaki"] {
     display: none !important;
+  }
+
+  /* Egy folyamatos mobil menü: qs-more az Alapadatok body-ban */
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    [data-desk-acc="alap"]
+    .auto-desk-acc__body
+    > #qs-more {
+    display: flex !important;
+    flex-direction: column !important;
+    visibility: visible !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  /* Accordion fej ne legyen — a mobil Alapadatok kártya a cím */
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    [data-desk-acc="alap"]
+    > .auto-desk-acc__head {
+    display: none !important;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    [data-desk-acc="alap"].is-open
+    > .auto-desk-acc__body {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.85rem;
+    overflow: visible !important;
+  }
+
+  /* Sheet mindig a viewport tetején, ne vágja le a sidebar overflow */
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active.auto-drum-portal-open
+    .auto-search-hero,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active.auto-drum-portal-open
+    .auto-search-hero__stage,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active.auto-drum-portal-open
+    .auto-search-hero__content,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active.auto-drum-portal-open
+    .auto-search-panel {
+    overflow: visible !important;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active .auto-drum-portal {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 12000 !important;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active .auto-drum-portal__stage {
+    position: fixed !important;
+    z-index: 12001 !important;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .home-qs-static-legacy,

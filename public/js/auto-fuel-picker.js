@@ -1,4 +1,4 @@
-import { openStandaloneSwitchSheet, closeAutoDrumSheet } from "./auto-drum-sheet.js?v=fuelSheet1";
+import { openStandaloneSwitchSheet, closeAutoDrumSheet } from "./auto-drum-sheet.js?v=mwParity1";
 
 const FUEL_OPTIONS = [
   { value: "Benzin", label: "Benzin" },
@@ -12,7 +12,7 @@ const FUEL_OPTIONS = [
   { value: "Gáz", label: "Gáz" },
 ];
 
-const EMPTY_LABEL = "Válasszon";
+const EMPTY_LABEL = "Mindegy";
 const SUMMARY_EMPTY = "Mindegy";
 
 function labelList(items) {

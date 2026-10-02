@@ -1,6 +1,6 @@
 import { fetchVehicleCatalog } from "./vehicle-catalog-client.js?v=5004d33efa";
 import { fillWheel, setWheelValue, readWheelList } from "./ingatlan-wheels.js?v=6952ba469c";
-import { openBrandModelCatalogSheet, closeAutoDrumSheet } from "./auto-drum-sheet.js?v=bmSheet2";
+import { openBrandModelCatalogSheet, closeAutoDrumSheet } from "./auto-drum-sheet.js?v=mwParity1";
 
 function catalogKindForPage() {
   if (document.body?.getAttribute("data-site-page") === "teherauto") {

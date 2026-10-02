@@ -1157,35 +1157,9 @@ function mountSheetPortalChrome(root, { stage, wrap, trigger, ring, sheetScroll 
   });
 }
 
-/** Desk autó kereső: a sheet a bal keresőpanel fölött nyílik, ne a listák közepén. */
+/** Desk autó kereső: ne szűkítsük a sheetet a bal panelre — ugyanaz a chrome mint mobil weben. */
 function positionSheetOverSearchPanel(stage, trigger) {
-  if (!stage || !window.matchMedia("(min-width: 901px)").matches) return;
-  const panel =
-    trigger?.closest?.(".auto-search-panel") ||
-    document.querySelector("body.auto-desk-active .auto-search-panel");
-  if (!panel) return;
-  const r = panel.getBoundingClientRect();
-  if (r.width < 180) return;
-  const pad = 10;
-  const width = Math.max(260, Math.round(r.width - pad * 2));
-  const left = Math.round(r.left + pad);
-  const top = Math.round(Math.max(12, r.top + 8));
-  const maxH = Math.max(280, Math.round(Math.min(r.bottom - top - 12, window.innerHeight - top - 16)));
-  stage.style.setProperty("position", "fixed", "important");
-  stage.style.setProperty("left", `${left}px`, "important");
-  stage.style.setProperty("right", "auto", "important");
-  stage.style.setProperty("width", `${width}px`, "important");
-  stage.style.setProperty("max-width", `${width}px`, "important");
-  stage.style.setProperty("margin-left", "0", "important");
-  stage.style.setProperty("margin-right", "0", "important");
-  stage.style.setProperty("top", `${top}px`, "important");
-  stage.style.setProperty("bottom", "auto", "important");
-  /* Explicit height — head + sheet-scroll are absolute; fit-content collapses to 0. */
-  stage.style.setProperty("height", `${maxH}px`, "important");
-  stage.style.setProperty("max-height", `${maxH}px`, "important");
-  stage.style.setProperty("transform", "none", "important");
-  stage.style.setProperty("border-radius", "1.35rem", "important");
-  stage.style.setProperty("overflow", "hidden", "important");
+  return;
 }
 
 function ymOptionRows(wheel, emptyLabel) {

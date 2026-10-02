@@ -7,13 +7,11 @@ function isVehicleDeskPage() {
 }
 
 const DESK_ALAP_FALLBACK = [
-  { field: "gyartmany", label: "Gyártmány" },
-  { field: "modell", label: "Modell" },
-  { field: "gyartasi_ev", label: "Évjárat", range: true },
-  { field: "vetelar", label: "Vételár", range: true },
-  { field: "uzemanyag", label: "Üzemanyag" },
   { field: "kivitel", label: "Kivitel" },
-  { field: "allapot", label: "Állapot" },
+  { field: "uzemanyag", label: "Üzemanyag" },
+  { field: "gyartasi_ev", label: "Gyártási év", range: true },
+  { field: "km", label: "Km óra állás", range: true },
+  { field: "vetelar", label: "Vételár", range: true },
 ];
 
 /** These are owned by mountAutoBrandModelPicker — never mount as plain selects in gyors. */
@@ -37,11 +35,10 @@ export function deskFilterMenuReady(form = document.getElementById("home-qs-form
 }
 
 const DESK_MUSZAKI_FALLBACK = [
-  { field: "km", label: "Futott km", range: true },
   { field: "teljesitmeny_le", label: "Teljesítmény", range: true },
-  { field: "kivitel", label: "Kivitel" },
   { field: "sebessegvalto", label: "Sebességváltó" },
   { field: "hajtas", label: "Hajtás" },
+  { field: "allapot", label: "Állapot" },
 ];
 
 const LEGACY_FIELD_IDS = {
@@ -353,7 +350,7 @@ export function arrangeAutoDeskDemoFields(form = document.getElementById("home-q
 
   const quickKeys = new Set((form.dataset.deskQuickKeys || "").split(",").filter(Boolean));
   if (!quickKeys.size) {
-    ["gyartmany", "modell", "uzemanyag", "gyartasi_ev", "vetelar", "kivitel", "allapot"].forEach((k) => quickKeys.add(k));
+    ["kivitel", "uzemanyag", "gyartasi_ev", "km", "vetelar"].forEach((k) => quickKeys.add(k));
     form.dataset.deskQuickKeys = [...quickKeys].join(",");
   }
 
@@ -540,17 +537,28 @@ export function syncAutoSearchAccShell(form = document.getElementById("home-qs-f
   const cardBody = card.querySelector(".ad-form-alap-card__body");
   if (host.parentElement !== cardBody) cardBody.appendChild(host);
 
-  /* Üzemanyag / Kivitel / Állapot / Évjárat / Vételár az Alapadatok kártyában marad. */
-  const quickFieldKeys = ["uzemanyag", "kivitel", "allapot", "gyartasi_ev", "vetelar", "km"];
+  /* Mobil web Alapadatok sorrend: Kivitel → Üzemanyag → Gyártási év → Km → Vételár */
+  const quickFieldKeys = ["kivitel", "uzemanyag", "gyartasi_ev", "km", "vetelar"];
   quickFieldKeys.forEach((key) => {
     const el = form.querySelector(`[data-desk-field="${key}"]`);
     if (!el) return;
     if (el.closest(".auto-bm-brand-block")) return;
-    if (!host.contains(el)) host.appendChild(el);
+    host.appendChild(el);
     el.dataset.deskQuick = "1";
     el.hidden = false;
     el.style.removeProperty("display");
+    const label = el.querySelector(".auto-desk-field__label");
+    if (label && key === "km") label.textContent = "Km óra állás";
+    if (label && key === "gyartasi_ev") label.textContent = "Gyártási év";
   });
+  /* Állapot ne legyen a gyors Alapadatokban — mobil weben lentebb van. */
+  const allapot = form.querySelector('[data-desk-field="allapot"]');
+  if (allapot && host.contains(allapot)) {
+    const muszakiHost =
+      form.querySelector(".auto-desk-fields[data-desk-muszaki]") ||
+      form.querySelector('[data-desk-acc="muszaki"] .auto-desk-acc__body');
+    if (muszakiHost && muszakiHost !== host) muszakiHost.appendChild(allapot);
+  }
 
   card.classList.remove("is-collapsed");
   card.querySelector(".ad-form-alap-card__title")?.setAttribute("aria-expanded", "true");

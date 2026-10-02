@@ -2727,16 +2727,21 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   height: 12rem;
 }
 
+/* Desk + mobil: tartomány sheet = feladás év|hó chrome (1 chip + tól|ig fejek) */
+.auto-drum-portal--sheet.auto-drum-portal--range-sheet .auto-drum-ym__chips {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 0.45rem !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.auto-drum-portal--sheet.auto-drum-portal--range-sheet .auto-drum-split__chip {
+  min-width: 0 !important;
+}
+
 /* Auto mobil: tartomány / 3-oszlopos sheet = hirdetésfeladás chrome */
 @media (max-width: 900px) {
-  .auto-drum-portal--sheet.auto-drum-portal--range-sheet .auto-drum-ym__chips {
-    display: grid !important;
-    grid-template-columns: 1fr !important;
-    gap: 0.45rem !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
-  }
-
   .auto-drum-portal--sheet.auto-drum-portal--date3 .auto-drum-date3__heads,
   .auto-drum-portal--sheet.auto-drum-portal--date3 .auto-drum-ym__heads.auto-drum-date3__heads {
     display: grid !important;
@@ -2756,8 +2761,7 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
     width: 100% !important;
   }
 
-  .auto-drum-portal--sheet.auto-drum-portal--date3 .auto-drum-date3__chips,
-  .auto-drum-portal--sheet.auto-drum-portal--range-sheet .auto-drum-split__chip {
+  .auto-drum-portal--sheet.auto-drum-portal--date3 .auto-drum-date3__chips {
     min-width: 0 !important;
   }
 

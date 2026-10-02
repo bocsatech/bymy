@@ -1,6 +1,6 @@
 
 import { applyAutoSearchLayout, readLayoutFilterValues, refillAutoSearchRangeSelects, prefetchAutoSearchBoot } from "./auto-search-layout.js?v=90daaf5812";
-import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums, styleAutoSearchMoreCard, enhanceDeskDualRanges } from "./auto-search-drums.js?v=deskDual2";
+import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums, styleAutoSearchMoreCard, enhanceDeskDualRanges } from "./auto-search-drums.js?v=rangeSheet1";
 import {
   mountDetailedSearch,
   readDetailedSearchValues,
@@ -20,7 +20,7 @@ import {
   arrangeAutoDeskDemoFields,
   deskFilterMenuReady,
   syncAutoSearchAccShell,
-} from "./auto-desk-search.js?v=deskDual2";
+} from "./auto-desk-search.js?v=rangeSheet1";
 
 prefetchAutoSearchBoot();
 const MOBILE_MQ = "(max-width: 900px)";

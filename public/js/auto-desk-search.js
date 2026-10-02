@@ -465,6 +465,7 @@ export function syncAutoSearchAccShell(form = document.getElementById("home-qs-f
     muszaki.hidden = true;
     muszaki.classList.remove("is-open");
     muszaki.setAttribute("aria-hidden", "true");
+    muszaki.style.setProperty("display", "none", "important");
   }
 
   alap.classList.add("is-open");

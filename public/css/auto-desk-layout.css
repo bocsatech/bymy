@@ -679,7 +679,9 @@
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     [data-desk-acc="alap"] .auto-desk-acc__body > :not(#qs-layout-main, .home-qs-layout-main, #qs-more, .home-qs-more, .auto-desk-fields, .ad-form-alap-card),
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
-    [data-desk-acc="muszaki"] {
+    [data-desk-acc="muszaki"],
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    [data-desk-acc="muszaki"][hidden] {
     display: none !important;
   }
 

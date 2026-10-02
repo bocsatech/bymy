@@ -623,11 +623,11 @@ export function initAutoDeskSearch({
         morePanel.classList.remove("is-open");
       }
       openAccordion("alap");
-      /* Menüpillök mindig látszanak — részletes tartalom előkészítése Extrákhoz is. */
+      /* Részletes tartalom előkészítése; Műszaki/Extrák csak Részletes módban látszik. */
       try {
         await mountDetailed?.(form);
         if (detailedPanel) {
-          detailedPanel.hidden = false;
+          detailedPanel.hidden = next !== "reszletes";
           detailedPanel.classList.toggle("is-open", next === "reszletes");
         }
       } catch (error) {

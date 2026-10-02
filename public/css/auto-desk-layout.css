@@ -544,10 +544,20 @@
     display: block;
   }
 
-  /* Gyors / Értékbecslő: kevesebb mező az Alapadatokban — a menüpillök maradnak */
+  /* Gyors / Értékbecslő: kevesebb mező az Alapadatokban */
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-gyors:not(.auto-desk-reszletes)
     .auto-desk-fields[data-desk-alap]
     .auto-desk-field[data-desk-quick="0"] {
+    display: none !important;
+  }
+
+  /* Gyors / Értékbecslő: Műszaki + Extrák menü nincs — csak Részletesben */
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-gyors:not(.auto-desk-reszletes)
+    .auto-search-desk-shell
+    > .auto-desk-acc[data-desk-acc="muszaki"],
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-gyors:not(.auto-desk-reszletes)
+    .auto-search-desk-shell
+    > .auto-desk-acc[data-desk-acc="extrak"] {
     display: none !important;
   }
 

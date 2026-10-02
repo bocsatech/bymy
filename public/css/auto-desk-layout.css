@@ -638,7 +638,7 @@
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-panel
     #qs-more-layout
-    .home-qs-field:not([hidden]),
+    .home-qs-field:not([hidden]):not(.home-qs-field--number):not(:has(> .home-qs-suffix)),
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-panel
     #qs-more-layout
@@ -646,7 +646,7 @@
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-panel
     #qs-more-layout
-    [data-qs-field]:not([hidden]) {
+    [data-qs-field]:not([hidden]):not(.home-qs-field--number):not(:has(> .home-qs-suffix)) {
     display: flex !important;
     flex-direction: column;
     gap: 6px;
@@ -677,14 +677,14 @@
     display: none !important;
   }
 
-  /* Szám mezők: cím felül, input + egység egy sorban — az egység NEM a 1.75rem trail slotba préselve */
+  /* Szám mezők (fogyasztás…): HA-szerű — cím fent, input + kék l/100 km jobbra; #qs-more flex ne törje */
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-panel
-    .auto-qs-drums
+    :is(#qs-more-layout, .home-qs-more-layout, .auto-qs-drums)
     .home-qs-field--number,
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-panel
-    .auto-qs-drums
+    :is(#qs-more-layout, .home-qs-more-layout, .auto-qs-drums)
     .home-qs-field:has(> .home-qs-suffix) {
     display: grid !important;
     grid-template-columns: minmax(0, 1fr) auto !important;
@@ -692,14 +692,17 @@
     align-items: end !important;
     column-gap: 0.55rem !important;
     row-gap: 0.45rem !important;
+    flex-direction: unset !important;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-panel
+    :is(#qs-more-layout, .home-qs-more-layout, .auto-qs-drums)
     .home-qs-field--number
     > .home-qs-label,
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-panel
+    :is(#qs-more-layout, .home-qs-more-layout, .auto-qs-drums)
     .home-qs-field:has(> .home-qs-suffix)
     > .home-qs-label {
     grid-column: 1 / -1 !important;
@@ -710,10 +713,12 @@
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-panel
+    :is(#qs-more-layout, .home-qs-more-layout, .auto-qs-drums)
     .home-qs-field--number
     > .home-qs-control,
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-panel
+    :is(#qs-more-layout, .home-qs-more-layout, .auto-qs-drums)
     .home-qs-field:has(> .home-qs-suffix)
     > .home-qs-control {
     grid-column: 1 !important;
@@ -724,19 +729,38 @@
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-panel
+    :is(#qs-more-layout, .home-qs-more-layout, .auto-qs-drums)
+    .home-qs-field--number
+    > .home-qs-suffix,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-panel
+    :is(#qs-more-layout, .home-qs-more-layout, .auto-qs-drums)
+    .home-qs-field:has(> .home-qs-suffix)
+    > .home-qs-suffix {
+    display: inline-flex !important;
+    grid-column: 2 !important;
+    grid-row: 2 !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    width: auto !important;
+    min-width: auto !important;
+    max-width: none !important;
+    white-space: nowrap !important;
+    flex: 0 0 auto !important;
+    color: #2563eb !important;
+    font: 700 0.9rem/1 system-ui, sans-serif !important;
+  }
+
+  /* Ne rejtsd el a fogyasztás egységet desk-en (HA: kék l/100 km) */
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-panel
     .home-qs-field--number
     > .home-qs-suffix,
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-panel
     .home-qs-field:has(> .home-qs-suffix)
     > .home-qs-suffix {
-    grid-column: 2 !important;
-    grid-row: 2 !important;
-    width: auto !important;
-    min-width: auto !important;
-    max-width: none !important;
-    white-space: nowrap !important;
-    flex: none !important;
+    display: inline-flex !important;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active

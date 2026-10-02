@@ -2243,7 +2243,7 @@ body[data-site-page="teherauto"] .auto-search-tabs {
     box-shadow: none !important;
   }
 
-  /* Fogyasztás / egységes számmező: cím fent, input + egység egy aláhúzott sorban */
+  /* Fogyasztás / egységes számmező: cím fent, input + egység egy aláhúzott sorban (egység auto — ne 1.75rem trail) */
   body:is([data-site-page="auto"], [data-site-page="teherauto"])
     .auto-search-panel
     .auto-qs-drums
@@ -2256,10 +2256,10 @@ body[data-site-page="teherauto"] .auto-search-tabs {
     .home-qs-field:has(> .home-qs-suffix):not(.home-qs-pair > .home-qs-field) {
     position: relative !important;
     display: grid !important;
-    grid-template-columns: minmax(0, 1fr) var(--ad-form-trail-slot) !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
     grid-template-rows: auto auto !important;
     align-items: end !important;
-    column-gap: var(--ad-form-trail-gap) !important;
+    column-gap: 0.55rem !important;
     row-gap: 0.45rem !important;
     width: 100% !important;
     flex: 0 0 auto !important;
@@ -2373,9 +2373,10 @@ body[data-site-page="teherauto"] .auto-search-tabs {
     color: #2563eb !important;
     font: 700 0.9rem/1 system-ui, sans-serif !important;
     white-space: nowrap !important;
-    width: var(--ad-form-trail-slot) !important;
-    min-width: var(--ad-form-trail-slot) !important;
-    max-width: var(--ad-form-trail-slot) !important;
+    width: auto !important;
+    min-width: auto !important;
+    max-width: none !important;
+    flex: 0 0 auto !important;
     box-sizing: border-box !important;
   }
 

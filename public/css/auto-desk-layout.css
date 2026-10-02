@@ -622,37 +622,106 @@
     width: 100%;
   }
 
-  /* Desk: layout mezők oszlopban, mint mobil */
+  /* Desk: layout mezők oszlopban, mint mobil — NE töröld a [hidden]-et */
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-panel
     #qs-layout-main
-    .home-qs-field,
+    .home-qs-field:not([hidden]),
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-panel
     #qs-layout-main
-    .home-qs-pair,
+    .home-qs-pair:not([hidden]),
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-panel
     #qs-layout-main
-    [data-qs-field],
+    [data-qs-field]:not([hidden]),
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-panel
     #qs-more-layout
-    .home-qs-field,
+    .home-qs-field:not([hidden]),
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-panel
     #qs-more-layout
-    .home-qs-pair,
+    .home-qs-pair:not([hidden]),
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-panel
     #qs-more-layout
-    [data-qs-field] {
+    [data-qs-field]:not([hidden]) {
     display: flex !important;
     flex-direction: column;
     gap: 6px;
     width: 100%;
     min-width: 0;
     margin: 0;
+  }
+
+  /* rejtett év/hó/nap félmezők (műszaki) — a display:flex ne írja felül */
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-panel
+    [hidden],
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-panel
+    .immo-triple-date__half[hidden],
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-panel
+    [data-qs-field][hidden],
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-panel
+    .immo-schema-cell[hidden],
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-panel
+    .immo-wheel[hidden],
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-panel
+    .immo-wheel--drum-source {
+    display: none !important;
+  }
+
+  /* Szám mezők: cím felül, input + egység egy sorban (ne törjön „00 km”-re) */
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-panel
+    .home-qs-field--number,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-panel
+    .home-qs-field:has(> .home-qs-suffix) {
+    display: flex !important;
+    flex-flow: row wrap !important;
+    align-items: center !important;
+    gap: 0.35rem 0.55rem !important;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-panel
+    .home-qs-field--number
+    > .home-qs-label,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-panel
+    .home-qs-field:has(> .home-qs-suffix)
+    > .home-qs-label {
+    flex: 0 0 100% !important;
+    width: 100% !important;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-panel
+    .home-qs-field--number
+    > .home-qs-control,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-panel
+    .home-qs-field:has(> .home-qs-suffix)
+    > .home-qs-control {
+    flex: 1 1 0% !important;
+    min-width: 0 !important;
+    width: auto !important;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-panel
+    .home-qs-suffix {
+    flex: 0 0 auto !important;
+    width: auto !important;
+    max-width: none !important;
+    white-space: nowrap !important;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active

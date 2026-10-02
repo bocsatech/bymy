@@ -1693,6 +1693,13 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   justify-self: end;
 }
 
+/* Egyválasztós sheet (Kivitel, Üzemanyag desk, stb.): fekete Kész — mint a mobil/HA referencia */
+.auto-drum-portal--sheet.auto-drum-portal--single-sheet .auto-drum-portal__done--sheet-top {
+  background: #111;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.2);
+}
+
 /* Külső terület NEM görget — kék + X/Kész fixen marad; lista a fehér ringben görög */
 .auto-drum-portal--sheet .auto-drum-portal__sheet-scroll {
   position: absolute;

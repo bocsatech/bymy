@@ -123,11 +123,46 @@ export function fetchVehicleCatalog(options) {
   return promise;
 }
 
+function foldKey(value) {
+  return String(value ?? "")
+    .trim()
+    .toLocaleUpperCase("hu-HU")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, " ");
+}
+
+/** Gyártmány → modellek (kis/nagybetű mindegy). */
+export function modelsForBrand(catalog, brandRaw) {
+  const brand = matchCatalogBrand(catalog, brandRaw);
+  if (!brand || !catalog?.modellek) return [];
+  if (Array.isArray(catalog.modellek[brand])) return catalog.modellek[brand];
+  const want = foldKey(brand);
+  for (const [key, models] of Object.entries(catalog.modellek)) {
+    if (foldKey(key) === want && Array.isArray(models)) return models;
+  }
+  return [];
+}
+
 function typesFromStaticCatalog(catalog, gyartmany, modell) {
-  const key = `${String(gyartmany ?? "").trim().toUpperCase()}|${String(modell ?? "").trim()}`;
-  const altKey = `${String(gyartmany ?? "").trim()}|${String(modell ?? "").trim()}`;
-  const entries = catalog?.tipusok?.[key] ?? catalog?.tipusok?.[altKey] ?? [];
-  return entries.map((entry) => {
+  const brand = matchCatalogBrand(catalog, gyartmany) || String(gyartmany ?? "").trim().toUpperCase();
+  const models = modelsForBrand(catalog, brand);
+  const modelCanon =
+    models.find((m) => foldKey(m) === foldKey(modell)) || String(modell ?? "").trim();
+  const key = `${brand}|${modelCanon}`;
+  let entries = catalog?.tipusok?.[key];
+  if (!entries?.length && catalog?.tipusok) {
+    const want = foldKey(key);
+    const wantLoose = foldKey(`${brand}|${modell}`);
+    for (const [k, v] of Object.entries(catalog.tipusok)) {
+      const folded = foldKey(k);
+      if (folded === want || folded === wantLoose) {
+        entries = v;
+        break;
+      }
+    }
+  }
+  return (entries ?? []).map((entry) => {
     if (typeof entry === "string") return { nev: entry, evTol: null, evIg: null };
     return {
       nev: entry.nev,
@@ -229,18 +264,18 @@ function guessCatalogModel(models, modell, tipus) {
   const t = String(tipus ?? "").trim();
   if (!m) return "";
   const list = Array.isArray(models) ? models : [];
-  if (list.includes(m)) return m;
+  const exact = list.find((name) => foldKey(name) === foldKey(m));
+  if (exact) return exact;
   const firstTip = t.split(/\s+/).find(Boolean) || "";
   if (firstTip) {
     const combo = `${m} ${firstTip}`;
-    if (list.includes(combo)) return combo;
-    const prefixHit = list.find((name) => name.toUpperCase().startsWith(`${combo.toUpperCase()}`));
+    const comboHit = list.find((name) => foldKey(name) === foldKey(combo));
+    if (comboHit) return comboHit;
+    const prefixHit = list.find((name) => foldKey(name).startsWith(`${foldKey(combo)}`));
     if (prefixHit) return prefixHit;
   }
   const loose = list.find(
-    (name) =>
-      name.toUpperCase() === m.toUpperCase() ||
-      name.toUpperCase().startsWith(`${m.toUpperCase()} `)
+    (name) => foldKey(name) === foldKey(m) || foldKey(name).startsWith(`${foldKey(m)} `)
   );
   return loose || m;
 }
@@ -395,7 +430,7 @@ export function bindCatalogSelects({
 
   function refreshModels() {
     const brand = brandSelect.value;
-    const models = brand ? catalog.modellek[brand] ?? [] : [];
+    const models = brand ? modelsForBrand(catalog, brand) : [];
     fillSelect(modelSelect, models, modelEmptyLabel);
   }
 

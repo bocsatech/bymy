@@ -961,6 +961,23 @@ async function mountBrandModelCatalogDrums(form) {
   if (brandTrigger) brandTrigger.disabled = false;
   if (!brandWheel) return;
 
+  const foldBrand = (v) =>
+    String(v ?? "")
+      .trim()
+      .toLocaleUpperCase("hu-HU")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/\s+/g, " ");
+  const modelsForBrand = (brand) => {
+    if (!brand) return [];
+    if (Array.isArray(catalog.modellek?.[brand])) return catalog.modellek[brand];
+    const want = foldBrand(brand);
+    for (const [key, models] of Object.entries(catalog.modellek || {})) {
+      if (foldBrand(key) === want && Array.isArray(models)) return models;
+    }
+    return [];
+  };
+
   const fillModels = (brandList) => {
     const brandsSelected = Array.isArray(brandList)
       ? brandList.filter(Boolean)
@@ -969,11 +986,11 @@ async function mountBrandModelCatalogDrums(form) {
         : [];
     let list = [];
     if (brandsSelected.length === 1) {
-      list = catalog.modellek?.[brandsSelected[0]] ?? [];
+      list = modelsForBrand(brandsSelected[0]);
     } else if (brandsSelected.length > 1) {
       const set = new Set();
       brandsSelected.forEach((brand) => {
-        (catalog.modellek?.[brand] || []).forEach((model) => set.add(model));
+        modelsForBrand(brand).forEach((model) => set.add(model));
       });
       list = [...set].sort((a, b) => a.localeCompare(b, "hu", { sensitivity: "base" }));
     }
@@ -982,11 +999,12 @@ async function mountBrandModelCatalogDrums(form) {
     /* BM portal már kitölti a modell kereket — ne wipe-oljuk rebind-del. */
     if (modelWheel?.dataset?.drumBound === "1") {
       const prev = readWheelList(modelWheel);
+      const listFold = new Set(list.map(foldBrand));
       fillWheel(modelWheel, models, { emptyLabel: "Mindegy" });
       modelWheel.dataset.multiple = "1";
       setWheelValue(
         modelWheel,
-        prev.filter((m) => list.includes(m))
+        prev.filter((m) => list.includes(m) || listFold.has(foldBrand(m)))
       );
       syncDrumWheelDisplay(modelWheel);
       return modelWheel;

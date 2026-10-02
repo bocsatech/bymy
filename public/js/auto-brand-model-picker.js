@@ -115,6 +115,13 @@ export async function mountAutoBrandModelPicker(form) {
   const brands = [...(catalog.gyartmanyok || [])].sort((a, b) =>
     a.localeCompare(b, "hu", { sensitivity: "base" })
   );
+  const fold = (v) =>
+    String(v ?? "")
+      .trim()
+      .toLocaleUpperCase("hu-HU")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/\s+/g, " ");
   const modelsByBrand = {};
   for (const brand of brands) {
     const tree = catalog.modellekTree?.[brand];
@@ -130,6 +137,9 @@ export async function mountAutoBrandModelPicker(form) {
     } else {
       modelsByBrand[brand] = [...(catalog.modellek?.[brand] || [])];
     }
+    /* Alias: kisbetűs / eltérő casing kulcs is ugyanarra a listára mutasson. */
+    const folded = fold(brand);
+    if (folded && folded !== brand) modelsByBrand[folded] = modelsByBrand[brand];
   }
 
   alapHost
@@ -179,12 +189,17 @@ export async function mountAutoBrandModelPicker(form) {
   const combinedSummaryEl = wrap.querySelector("[data-auto-bm-combined-summary]");
   const openBrandBtn = wrap.querySelector('[data-auto-bm-open="brand"]');
 
+  function modelsOf(brand) {
+    return modelsByBrand[brand] || modelsByBrand[fold(brand)] || [];
+  }
+
   function pruneModels(selectedBrands, selectedModels) {
     const allowed = new Set();
     for (const b of selectedBrands) {
-      for (const m of modelsByBrand[b] || []) allowed.add(m);
+      for (const m of modelsOf(b)) allowed.add(m);
     }
-    return selectedModels.filter((m) => allowed.has(m));
+    const allowedFold = new Set([...allowed].map(fold));
+    return selectedModels.filter((m) => allowed.has(m) || allowedFold.has(fold(m)));
   }
 
   function combinedSummaryText(selectedBrands, selectedModels) {
@@ -223,7 +238,7 @@ export async function mountAutoBrandModelPicker(form) {
     const modelOpts = [];
     const seen = new Set();
     for (const b of selectedBrands) {
-      for (const m of modelsByBrand[b] || []) {
+      for (const m of modelsOf(b)) {
         if (seen.has(m)) continue;
         seen.add(m);
         modelOpts.push({ value: m, label: m });

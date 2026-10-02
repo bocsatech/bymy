@@ -868,8 +868,28 @@ function switchRowHtml({ value, label, child = false }) {
   </div>`;
 }
 
+function foldCatalogKey(value) {
+  return String(value ?? "")
+    .trim()
+    .toLocaleUpperCase("hu-HU")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, " ");
+}
+
+function resolveCatalogBrandKey(catalog, brand) {
+  const want = foldCatalogKey(brand);
+  if (!want) return "";
+  if (catalog?.modellek?.[brand] || catalog?.modellekTree?.[brand]) return brand;
+  for (const key of catalog?.gyartmanyok || Object.keys(catalog?.modellek || {})) {
+    if (foldCatalogKey(key) === want) return key;
+  }
+  return brand;
+}
+
 function modelsForBrandFromCatalog(catalog, brand) {
-  const tree = catalog?.modellekTree?.[brand];
+  const resolved = resolveCatalogBrandKey(catalog, brand);
+  const tree = catalog?.modellekTree?.[resolved] || catalog?.modellekTree?.[brand];
   if (Array.isArray(tree) && tree.length) {
     const rows = [];
     const sorted = [...tree].sort((a, b) =>
@@ -888,7 +908,8 @@ function modelsForBrandFromCatalog(catalog, brand) {
     }
     return rows;
   }
-  return (catalog?.modellek?.[brand] || []).map((m) => ({ value: m, label: m, child: false }));
+  const list = catalog?.modellek?.[resolved] || catalog?.modellek?.[brand] || [];
+  return list.map((m) => ({ value: m, label: m, child: false }));
 }
 
 function createSheetPortalShell(title) {
@@ -1701,13 +1722,15 @@ export function openBrandModelCatalogSheet(brandWheel, trigger, wrap, emptyLabel
   function syncModelWheelFromCatalog(brands) {
     if (!modelWheel || !catalog) return;
     let list = [];
-    if (brands.length === 1) list = catalog.modellek?.[brands[0]] ?? [];
-    else if (brands.length > 1) {
+    if (brands.length === 1) {
+      list = modelsForBrandFromCatalog(catalog, brands[0]).map((r) => r.value);
+    } else if (brands.length > 1) {
       const set = new Set();
-      brands.forEach((b) => (catalog.modellek?.[b] || []).forEach((m) => set.add(m)));
+      brands.forEach((b) => modelsForBrandFromCatalog(catalog, b).forEach((r) => set.add(r.value)));
       list = [...set].sort((a, b) => a.localeCompare(b, "hu", { sensitivity: "base" }));
     }
     const prev = new Set(readWheelList(modelWheel));
+    const prevFold = new Set([...prev].map(foldCatalogKey));
     fillWheel(
       modelWheel,
       list.map((m) => ({ value: m, label: m })),
@@ -1716,9 +1739,10 @@ export function openBrandModelCatalogSheet(brandWheel, trigger, wrap, emptyLabel
     modelWheel.dataset.multiple = singleSelect ? "0" : "1";
     if (singleSelect) {
       const cur = String(readWheel(modelWheel) ?? "");
-      setWheelValue(modelWheel, list.includes(cur) ? cur : "");
+      const hit = list.find((m) => foldCatalogKey(m) === foldCatalogKey(cur));
+      setWheelValue(modelWheel, hit || "");
     } else {
-      const keep = list.filter((m) => prev.has(m));
+      const keep = list.filter((m) => prev.has(m) || prevFold.has(foldCatalogKey(m)));
       setWheelValue(modelWheel, keep);
     }
     syncDrumWheelDisplay(modelWheel);

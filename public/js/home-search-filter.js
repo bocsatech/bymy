@@ -196,16 +196,22 @@ export function filterListingsBySidebar(items, filters) {
       const got = normalizeForMatch(f.gyartmany || "");
       const title = normalizeForMatch(preview.title || "");
       if (!brands.some((b) => got.includes(b) || title.includes(b) || b.includes(got))) return false;
-    } else if (filters.gyartmany && f.gyartmany !== filters.gyartmany) {
-      return false;
+    } else if (filters.gyartmany) {
+      const want = normalizeForMatch(filters.gyartmany);
+      const got = normalizeForMatch(f.gyartmany || "");
+      const title = normalizeForMatch(preview.title || "");
+      if (!want || !(got.includes(want) || title.includes(want) || want.includes(got))) return false;
     }
     if (filters.modellek?.length) {
       const models = filters.modellek.map((m) => normalizeForMatch(m)).filter(Boolean);
       const got = normalizeForMatch(f.modell || "");
       const title = normalizeForMatch(preview.title || preview.specLine || "");
       if (!models.some((m) => got.includes(m) || title.includes(m) || m.includes(got))) return false;
-    } else if (filters.modell && f.modell !== filters.modell) {
-      return false;
+    } else if (filters.modell) {
+      const want = normalizeForMatch(filters.modell);
+      const got = normalizeForMatch(f.modell || "");
+      const title = normalizeForMatch(preview.title || preview.specLine || "");
+      if (!want || !(got.includes(want) || title.includes(want) || want.includes(got))) return false;
     }
     if (filters.kivitelek?.length) {
       if (!kivitelListMatches(f.kivitel, filters.kivitelek)) return false;

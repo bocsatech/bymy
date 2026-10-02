@@ -986,7 +986,7 @@ function lockSheetWhiteToBlue(root, stage) {
     head.style.setProperty("visibility", "visible", "important");
     head.style.setProperty("opacity", "1", "important");
   }
-  if (ym && desk && stage) {
+  if ((ym || root?.classList?.contains("auto-drum-portal--single-sheet")) && desk && stage) {
     stage.style.setProperty("padding-top", "var(--sheet-head-h)", "important");
   }
 }
@@ -996,6 +996,9 @@ function applySheetStageLayout(stage) {
   const root = stage.closest?.(".auto-drum-portal--sheet") || stage.parentElement;
   const desk = window.matchMedia("(min-width: 901px)").matches;
   const ym = Boolean(root?.classList?.contains("auto-drum-portal--ym"));
+  /* Egyválasztós desk (Okmányok, Kivitel…): HA-szerű kompakt kártya, ne 86vh üres fehér. */
+  const compactDesk =
+    ym || Boolean(root?.classList?.contains("auto-drum-portal--single-sheet"));
   if (desk) {
     const deskW = "min(28rem, calc(100% - 2rem))";
     /* Desk: kék stage fix szélesség HTML/inline-ban — nincs left%/translateX. */
@@ -1006,7 +1009,7 @@ function applySheetStageLayout(stage) {
     stage.style.setProperty("margin-left", "auto", "important");
     stage.style.setProperty("margin-right", "auto", "important");
     stage.style.setProperty("transform", "none", "important");
-    if (ym) {
+    if (compactDesk) {
       stage.style.setProperty("top", "50%", "important");
       stage.style.setProperty("bottom", "auto", "important");
       stage.style.setProperty("height", "fit-content", "important");
@@ -1119,6 +1122,7 @@ function mountSheetPortalChrome(root, { stage, wrap, trigger, ring, sheetScroll 
   positionSheetOverSearchPanel(stage, trigger);
   if (stage) {
     const ym = Boolean(stage.closest?.(".auto-drum-portal--ym"));
+    const single = Boolean(stage.closest?.(".auto-drum-portal--single-sheet"));
     const desk = window.matchMedia("(min-width: 901px)").matches;
     const overSearch = Boolean(
       trigger?.closest?.(".auto-search-panel, .auto-search-desk-shell") ||
@@ -1128,7 +1132,7 @@ function mountSheetPortalChrome(root, { stage, wrap, trigger, ring, sheetScroll 
     if (!overSearch) {
       stage.style.setProperty("left", "0", "important");
       stage.style.setProperty("right", "0", "important");
-      if (!(ym && desk)) {
+      if (!((ym || single) && desk)) {
         stage.style.setProperty("transform", "none", "important");
         stage.style.setProperty("margin-left", desk ? "auto" : "0", "important");
         stage.style.setProperty("margin-right", desk ? "auto" : "0", "important");

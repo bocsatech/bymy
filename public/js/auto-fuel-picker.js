@@ -1,9 +1,22 @@
+import { openStandaloneSwitchSheet, closeAutoDrumSheet } from "./auto-drum-sheet.js?v=fuelSheet1";
 
-import { UZEMANYAG_CATEGORIES } from "./equipment-data.js?v=5a39cb5ba3";
-import { bindAutoBmDismiss, autoBmPanelIsOpen } from "./auto-bm-dismiss.js?v=89aa460931";
+const FUEL_OPTIONS = [
+  { value: "Benzin", label: "Benzin" },
+  { value: "Dízel", label: "Dízel" },
+  { value: "Benzin/Gáz", label: "Benzin/Gáz" },
+  { value: "Dízel/Gáz", label: "Dízel/Gáz" },
+  { value: "Hibrid", label: "Hibrid" },
+  { value: "Elektromos", label: "Elektromos" },
+  { value: "Etanol", label: "Etanol" },
+  { value: "Biodízel", label: "Biodízel" },
+  { value: "Gáz", label: "Gáz" },
+];
+
+const EMPTY_LABEL = "Válasszon";
+const SUMMARY_EMPTY = "Mindegy";
 
 function labelList(items) {
-  if (!items.length) return "Mindegy";
+  if (!items.length) return SUMMARY_EMPTY;
   if (items.length === 1) return items[0];
   if (items.length <= 3) return items.join(", ");
   return `${items.length} üzemanyag`;
@@ -37,36 +50,21 @@ function isAutoDesk() {
   );
 }
 
-function categoryValues(cat) {
-  if (cat.children?.length) return cat.children.map((c) => c.value);
-  return cat.value ? [cat.value] : [];
-}
-
-function escapeHtml(value) {
-  return String(value ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
-
-function escapeAttr(value) {
-  return escapeHtml(value).replace(/'/g, "&#39;");
-}
-
 export async function mountAutoFuelPicker(form) {
-  if (!form || !isAutoDesk() || form.dataset.fuelPicker === "1") return;
+  if (!form || !isAutoDesk()) return;
+
+  if (form.dataset.fuelPicker === "1") {
+    form.querySelectorAll(".auto-fuel-field, .auto-fuel-panel").forEach((el) => el.remove());
+    document.querySelectorAll(".auto-fuel-panel").forEach((el) => el.remove());
+    delete form.dataset.fuelPicker;
+  }
 
   const alapHost = form.querySelector(".auto-desk-fields[data-desk-alap]");
   if (!alapHost) return;
 
   const fuelField = alapHost.querySelector('[data-desk-field="uzemanyag"]');
-  if (!fuelField) return;
-
-  fuelField.remove();
-
-  const openMains = new Set();
-  const selected = new Set();
+  if (fuelField) fuelField.remove();
+  form.querySelectorAll(".auto-fuel-panel").forEach((el) => el.remove());
 
   const fuelsInput = document.createElement("input");
   fuelsInput.type = "hidden";
@@ -79,14 +77,13 @@ export async function mountAutoFuelPicker(form) {
   wrap.dataset.deskQuick = "1";
   wrap.innerHTML = `
     <span class="auto-desk-field__label">Üzemanyag</span>
-    <button type="button" class="auto-bm-trigger" data-auto-fuel-open>
-      <span data-auto-fuel-summary>Mindegy</span>
-      <span class="auto-bm-trigger__chev" aria-hidden="true">⌄</span>
+    <button type="button" class="auto-bm-trigger" data-auto-fuel-open aria-label="Üzemanyag">
+      <span data-auto-fuel-summary>${SUMMARY_EMPTY}</span>
     </button>
   `;
   wrap.appendChild(fuelsInput);
 
-  const bmPair = alapHost.querySelector(".auto-bm-pair");
+  const bmPair = alapHost.querySelector(".auto-bm-pair, .auto-bm-brand-block");
   if (bmPair?.nextSibling) alapHost.insertBefore(wrap, bmPair.nextSibling);
   else if (bmPair) alapHost.appendChild(wrap);
   else alapHost.insertBefore(wrap, alapHost.firstChild);
@@ -94,228 +91,57 @@ export async function mountAutoFuelPicker(form) {
   const summaryEl = wrap.querySelector("[data-auto-fuel-summary]");
   const openBtn = wrap.querySelector("[data-auto-fuel-open]");
 
-  const panel = document.createElement("div");
-  panel.className = "auto-bm-panel auto-fuel-panel";
-  panel.hidden = true;
-  panel.innerHTML = `
-    <div class="auto-bm-panel__chrome">
-      <button type="button" class="auto-bm-panel__back" data-auto-fuel-back aria-label="Vissza">‹</button>
-      <div class="auto-bm-panel__titles">
-        <p class="auto-bm-panel__title">Üzemanyag</p>
-      </div>
-    </div>
-    <div class="auto-bm-panel__body" data-auto-fuel-body></div>
-  `;
-  const hero = document.querySelector(".auto-search-hero") || form.closest(".auto-search-hero") || form;
-  hero.appendChild(panel);
-
-  const bodyEl = panel.querySelector("[data-auto-fuel-body]");
-
-  function selectedLabels() {
-    const labels = [];
-    for (const cat of UZEMANYAG_CATEGORIES) {
-      if (!openMains.has(cat.id)) continue;
-      if (cat.children?.length) {
-        const kids = cat.children.filter((c) => selected.has(c.value));
-        if (kids.length) labels.push(...kids.map((c) => c.label));
-        else labels.push(cat.label);
-      } else if (cat.value && selected.has(cat.value)) {
-        labels.push(cat.label);
-      }
-    }
-    return labels;
+  function syncSummary(list) {
+    if (!summaryEl) return;
+    const text = labelList(list);
+    summaryEl.textContent = text;
+    summaryEl.classList.toggle("is-placeholder", !list.length);
+    openBtn?.classList.toggle("has-value", Boolean(list.length));
   }
 
-  function effectiveSelectedValues() {
-    const values = new Set();
-    for (const cat of UZEMANYAG_CATEGORIES) {
-      if (!openMains.has(cat.id)) continue;
-      if (cat.children?.length) {
-        const kids = cat.children.filter((c) => selected.has(c.value));
-        if (kids.length) kids.forEach((c) => values.add(c.value));
-        else {
-          cat.children.forEach((c) => values.add(c.value));
-          values.add(cat.label);
-        }
-      } else if (cat.value && selected.has(cat.value)) {
-        values.add(cat.value);
-      }
-    }
-    return [...values];
+  function applyList(list) {
+    const clean = [...new Set((list || []).map((v) => String(v).trim()).filter(Boolean))];
+    writeJsonList(fuelsInput, clean);
+    syncSummary(clean);
   }
 
-  function syncHidden() {
-    writeJsonList(fuelsInput, effectiveSelectedValues());
-    if (summaryEl) summaryEl.textContent = labelList(selectedLabels());
-  }
-
-  function turnMainOn(cat) {
-    openMains.add(cat.id);
-    if (cat.children?.length) {
-    } else if (cat.value) {
-      selected.add(cat.value);
-    }
-  }
-
-  function turnMainOff(cat) {
-    openMains.delete(cat.id);
-    for (const v of categoryValues(cat)) selected.delete(v);
-  }
-
-  function renderList() {
-    const rows = UZEMANYAG_CATEGORIES.map((cat) => {
-      const on = openMains.has(cat.id);
-      const hasKids = Boolean(cat.children?.length);
-      let kidsHtml = "";
-      if (hasKids && on) {
-        kidsHtml = `<div class="auto-fuel-children">
-          ${cat.children
-            .map((child) => {
-              const childOn = selected.has(child.value);
-              return `<div class="auto-bm-row auto-fuel-child-row">
-                <label class="auto-bm-toggle">
-                  <span>${escapeHtml(child.label)}</span>
-                  <input type="checkbox" data-auto-fuel-child="${escapeAttr(child.value)}" data-auto-fuel-parent="${escapeAttr(cat.id)}" ${childOn ? "checked" : ""} />
-                  <span class="auto-bm-switch" aria-hidden="true"></span>
-                </label>
-              </div>`;
-            })
-            .join("")}
-        </div>`;
-      }
-      return `<div class="auto-bm-row auto-fuel-main-row" data-auto-fuel-main="${escapeAttr(cat.id)}">
-        <label class="auto-bm-toggle auto-fuel-main-toggle">
-          <span class="auto-fuel-main-label">${escapeHtml(cat.label)}</span>
-          <input type="checkbox" data-auto-fuel-main-toggle="${escapeAttr(cat.id)}" ${on ? "checked" : ""} />
-          <span class="auto-bm-switch" aria-hidden="true"></span>
-        </label>
-        ${kidsHtml}
-      </div>`;
-    }).join("");
-
-    bodyEl.innerHTML = `
-      <div class="auto-bm-actions">
-      <button type="button" class="auto-bm-btn auto-bm-btn--clear" data-auto-fuel-clear>Összes kikapcsolása</button>
-      <button type="button" class="auto-bm-btn auto-bm-btn--done" data-auto-fuel-done>Kész</button>
-    </div>
-      <div class="auto-bm-group">${rows}</div>
-    `;
-  }
-
-  function openPanel() {
-    panel.hidden = false;
-    panel.style.removeProperty("display");
-    panel.classList.remove("is-closed");
-    document.body.classList.add("auto-bm-open");
-    renderList();
-  }
-
-  function closePanel() {
-    panel.hidden = true;
-    panel.style.setProperty("display", "none", "important");
-    panel.classList.add("is-closed");
-    document.body.classList.remove("auto-bm-open");
-    if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
-    syncHidden();
-  }
-
-  openBtn?.addEventListener("click", () => {
-    if (!panel.hidden && !panel.classList.contains("is-closed")) closePanel();
-    else openPanel();
-  });
-
-  bindAutoBmDismiss({
-    panel,
-    roots: [wrap],
-    isOpen: () => autoBmPanelIsOpen(panel),
-    close: closePanel,
-  });
-
-  panel.querySelector("[data-auto-fuel-back]")?.addEventListener("click", closePanel);
-  // done handled in body click (data-auto-fuel-done)
-
-  bodyEl.addEventListener("change", (event) => {
-    const mainEl = event.target.closest("[data-auto-fuel-main-toggle]");
-    if (mainEl) {
-      const id = mainEl.getAttribute("data-auto-fuel-main-toggle");
-      const cat = UZEMANYAG_CATEGORIES.find((c) => c.id === id);
-      if (!cat) return;
-      if (mainEl.checked) turnMainOn(cat);
-      else turnMainOff(cat);
-      renderList();
-      syncHidden();
+  function openSheet() {
+    if (document.querySelector(".auto-drum-portal--sheet")) {
+      closeAutoDrumSheet(true);
       return;
     }
-    const childEl = event.target.closest("[data-auto-fuel-child]");
-    if (childEl) {
-      const value = childEl.getAttribute("data-auto-fuel-child");
-      const parentId = childEl.getAttribute("data-auto-fuel-parent");
-      if (childEl.checked) {
-        selected.add(value);
-        if (parentId) openMains.add(parentId);
-      } else {
-        selected.delete(value);
-      }
-      syncHidden();
-    }
-  });
+    openStandaloneSwitchSheet({
+      trigger: openBtn,
+      title: "Üzemanyag",
+      emptyLabel: EMPTY_LABEL,
+      items: FUEL_OPTIONS,
+      initialSelected: parseJsonList(fuelsInput.value),
+      singleSelect: false,
+      onDone: (selected) => {
+        applyList(selected || []);
+      },
+    });
+  }
 
-  bodyEl.addEventListener("click", (event) => {
-    if (event.target.closest("[data-auto-fuel-done]")) {
-      closePanel();
-      return;
-    }
-    if (event.target.closest("[data-auto-fuel-clear]")) {
-      openMains.clear();
-      selected.clear();
-      renderList();
-      syncHidden();
-    }
+  openBtn?.addEventListener("click", (event) => {
+    event.preventDefault();
+    openSheet();
   });
 
   form.addEventListener("reset", () => {
-    requestAnimationFrame(() => {
-      openMains.clear();
-      selected.clear();
-      syncHidden();
-      if (!panel.hidden) renderList();
-    });
+    requestAnimationFrame(() => applyList([]));
   });
 
-  form.addEventListener("bymy-saved-search-applied", () => {
-    const values = parseJsonList(fuelsInput.value);
-    openMains.clear();
-    selected.clear();
-    for (const raw of values) {
-      const want = String(raw || "").trim();
-      if (!want) continue;
-      for (const cat of UZEMANYAG_CATEGORIES) {
-        if (cat.value && cat.value === want) {
-          openMains.add(cat.id);
-          selected.add(want);
-          break;
-        }
-        if (cat.children?.some((c) => c.value === want)) {
-          openMains.add(cat.id);
-          selected.add(want);
-          break;
-        }
-        if (cat.label === want) {
-          openMains.add(cat.id);
-          if (cat.value) selected.add(cat.value);
-          break;
-        }
-      }
-    }
-    if (summaryEl) {
-      const labels = selectedLabels();
-      summaryEl.textContent = labels.length ? labelList(labels) : "Mindegy";
-    }
-    if (!panel.hidden) renderList();
+  form.addEventListener("bymy-saved-search-applied", (event) => {
+    const detail = event?.detail && typeof event.detail === "object" ? event.detail : {};
+    const list = Array.isArray(detail.uzemanyagok)
+      ? detail.uzemanyagok.map((v) => String(v)).filter(Boolean)
+      : parseJsonList(fuelsInput.value);
+    applyList(list);
   });
 
   form.dataset.fuelPicker = "1";
-  syncHidden();
+  syncSummary(parseJsonList(fuelsInput.value));
 }
 
 export function readFuelFilterValues(form) {
@@ -355,7 +181,6 @@ const HYBRID_FUELS = new Set([
 function isHybridFuel(normalized) {
   if (!normalized) return false;
   if (HYBRID_FUELS.has(normalized)) return true;
-  // „Benzin/elektromos”, „… hibrid …”, de nem tiszta Elektromos / Hidrogén
   if (normalized === "elektromos" || normalized.startsWith("hidrogen")) return false;
   return /elektromos/.test(normalized) || /\bhibrid\b|\bhybrid\b/.test(normalized);
 }
@@ -395,4 +220,3 @@ function fuelsCompatible(got, want) {
   const list = aliases[want] || [want];
   return list.some((a) => got === a);
 }
-

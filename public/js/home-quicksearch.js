@@ -217,6 +217,15 @@ export function initHomeQuickSearch({ onSearch = () => {}, onFilterPreview, onDe
     triggerSearchFromForm();
   });
 
+  function triggerPreviewFromForm() {
+    if (document.body.classList.contains("auto-desk-ertekbecslo")) return;
+    if (typeof onFilterPreview === "function") {
+      onFilterPreview(readQuickSearchValues());
+      return;
+    }
+    triggerSearchFromForm();
+  }
+
   function schedulePreviewFromForm({ scroll = false } = {}) {
     clearTimeout(wheelSearchTimer);
     wheelSearchTimer = setTimeout(() => {

@@ -397,7 +397,7 @@ export function arrangeAutoDeskDemoFields(form = document.getElementById("home-q
   form.classList.add("auto-desk-native");
   form.dataset.deskFullMenu = "1";
   syncGyorsFieldVisibility(form);
-  openAccordions(["alap", "muszaki"]);
+  openAccordions(["alap", "muszaki", "extrak"]);
 }
 
 function syncGyorsFieldVisibility(form = document.getElementById("home-qs-form")) {
@@ -513,8 +513,21 @@ export function initAutoDeskSearch({
   const detailedBtn = document.getElementById("qs-detailed");
   let deskLayoutGen = 0;
 
+  async function ensureDetailedOnDesk() {
+    if (!isAutoDesk()) return;
+    try {
+      await mountDetailed?.(form);
+      if (detailedPanel) {
+        detailedPanel.hidden = false;
+        detailedPanel.classList.add("is-open");
+      }
+    } catch (error) {
+      console.warn("Extrák panel:", error);
+    }
+  }
+
   setMode("gyors");
-  openAccordions(["alap", "muszaki"]);
+  openAccordions(["alap", "muszaki", "extrak"]);
   updateAutoDeskAccSummaries(form);
 
   if (isAutoDesk()) {
@@ -522,12 +535,9 @@ export function initAutoDeskSearch({
       morePanel.hidden = false;
       morePanel.classList.add("is-open");
     }
-    if (detailedPanel) {
-      detailedPanel.hidden = true;
-      detailedPanel.classList.remove("is-open");
-    }
-    openAccordions(["alap", "muszaki"]);
+    openAccordions(["alap", "muszaki", "extrak"]);
     syncGyorsFieldVisibility(form);
+    void ensureDetailedOnDesk();
   }
 
   document.querySelectorAll("[data-desk-mode]").forEach((btn) => {
@@ -540,17 +550,9 @@ export function initAutoDeskSearch({
         morePanel.hidden = false;
         morePanel.classList.add("is-open");
       }
-      openAccordions(["alap", "muszaki"]);
-      /* Részletes tartalom előkészítése; Extrák csak Részletes módban. */
-      try {
-        await mountDetailed?.(form);
-        if (detailedPanel) {
-          detailedPanel.hidden = next !== "reszletes";
-          detailedPanel.classList.toggle("is-open", next === "reszletes");
-        }
-      } catch (error) {
-        console.warn("Részletes panel:", error);
-      }
+      openAccordions(["alap", "muszaki", "extrak"]);
+      /* Gyors + Részletes: Extrák pill-ek mindig a görgetésben (mint mobil). */
+      await ensureDetailedOnDesk();
       updateAutoDeskAccSummaries(form);
       onModeChange?.(next);
     });
@@ -642,12 +644,7 @@ export function initAutoDeskSearch({
         morePanel.hidden = false;
         morePanel.classList.add("is-open");
       }
-      if (detailedPanel) {
-        const reszletes = document.body.classList.contains("auto-desk-reszletes");
-        detailedPanel.hidden = !reszletes;
-        detailedPanel.classList.toggle("is-open", reszletes);
-      }
-      openAccordions(["alap", "muszaki"]);
+      openAccordions(["alap", "muszaki", "extrak"]);
       /* After resize into desk (or empty sidebar): rebuild filter rows */
       const enteredDesk = fromChange && !wasDesk;
       const emptyDesk = deskFieldsMounted() === false;
@@ -663,6 +660,7 @@ export function initAutoDeskSearch({
       } else {
         syncGyorsFieldVisibility(form);
       }
+      await ensureDetailedOnDesk();
       updateAutoDeskAccSummaries(form);
     } else {
       if (advancedBtn) advancedBtn.hidden = false;

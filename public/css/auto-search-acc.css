@@ -203,6 +203,56 @@
     padding: 0 1.1rem 1.2rem !important;
   }
 
+  /* Extrák: mindig a görgetésben (5 pill), szülő fejléc nélkül — mint mobil */
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-desk-shell
+    > .auto-desk-acc[data-desk-acc="extrak"],
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-desk-shell
+    > .auto-desk-acc[data-desk-acc="extrak"]:not(.is-open),
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-desk-shell
+    > .auto-desk-acc[data-desk-acc="extrak"].is-open {
+    display: block !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    overflow: visible !important;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-desk-shell
+    > .auto-desk-acc[data-desk-acc="extrak"]
+    > .auto-desk-acc__head,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-desk-shell
+    > .auto-desk-acc[data-desk-acc="extrak"]:not(.is-open)
+    > .auto-desk-acc__head,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-desk-shell
+    > .auto-desk-acc[data-desk-acc="extrak"].is-open
+    > .auto-desk-acc__head {
+    display: none !important;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-desk-shell
+    > .auto-desk-acc[data-desk-acc="extrak"]
+    > .auto-desk-acc__body,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-desk-shell
+    > .auto-desk-acc[data-desk-acc="extrak"]:not(.is-open)
+    > .auto-desk-acc__body,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-desk-shell
+    > .auto-desk-acc[data-desk-acc="extrak"].is-open
+    > .auto-desk-acc__body {
+    display: block !important;
+    padding: 0 !important;
+  }
+
   /* Fehér Alapadatok kártya — mint feladás */
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell

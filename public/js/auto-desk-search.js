@@ -594,31 +594,20 @@ export function initAutoDeskSearch({
       const mode = btn.getAttribute("data-desk-mode") || "gyors";
       const next = setMode(mode);
       syncGyorsFieldVisibility(form);
-      if (next === "gyors" || next === "ertekbecslo") {
-        if (morePanel) {
-          morePanel.hidden = true;
-          morePanel.classList.remove("is-open");
-        }
+      if (morePanel) {
+        morePanel.hidden = true;
+        morePanel.classList.remove("is-open");
+      }
+      openAccordion("alap");
+      /* Menüpillök mindig látszanak — részletes tartalom előkészítése Extrákhoz is. */
+      try {
+        await mountDetailed?.(form);
         if (detailedPanel) {
-          detailedPanel.hidden = true;
-          detailedPanel.classList.remove("is-open");
+          detailedPanel.hidden = false;
+          detailedPanel.classList.toggle("is-open", next === "reszletes");
         }
-        openAccordion("alap");
-      } else {
-        if (morePanel) {
-          morePanel.hidden = true;
-          morePanel.classList.remove("is-open");
-        }
-        openAccordion("alap");
-        try {
-          await mountDetailed?.(form);
-          if (detailedPanel) {
-            detailedPanel.hidden = false;
-            detailedPanel.classList.add("is-open");
-          }
-        } catch (error) {
-          console.warn("Részletes panel:", error);
-        }
+      } catch (error) {
+        console.warn("Részletes panel:", error);
       }
       updateAutoDeskAccSummaries(form);
       onModeChange?.(next);
@@ -626,15 +615,28 @@ export function initAutoDeskSearch({
   });
 
   document.querySelectorAll("[data-desk-acc-toggle]").forEach((btn) => {
-    btn.addEventListener("click", () => {
+    btn.addEventListener("click", async () => {
       if (!isAutoDesk()) return;
       const acc = btn.closest("[data-desk-acc]");
       const id = acc?.getAttribute("data-desk-acc");
       if (!id) return;
-      /* Gyors / Értékbecslő / Részletes: ugyanaz az összecsuk–kinyit */
       const wasOpen = acc.classList.contains("is-open");
       const scrollY = window.scrollY;
       openAccordion(wasOpen ? "" : id);
+      if (!wasOpen && id === "extrak") {
+        try {
+          await mountDetailed?.(form);
+          if (detailedPanel) {
+            detailedPanel.hidden = false;
+            detailedPanel.classList.add("is-open");
+          }
+        } catch (error) {
+          console.warn("Extrák panel:", error);
+        }
+      }
+      if (!wasOpen && id === "muszaki") {
+        onModeChange?.("muszaki-open");
+      }
       window.scrollTo(0, scrollY);
       requestAnimationFrame(() => {
         window.scrollTo(0, scrollY);

@@ -257,14 +257,4 @@
     > .ad-form-alap-card__body {
     display: none !important;
   }
-
-  /* Gyors / Értékbecslő: Műszaki + Extrák pill elrejtve */
-  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-gyors:not(.auto-desk-reszletes)
-    .auto-search-desk-shell
-    > [data-desk-acc="muszaki"],
-  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-gyors:not(.auto-desk-reszletes)
-    .auto-search-desk-shell
-    > [data-desk-acc="extrak"] {
-    display: none !important;
-  }
 }

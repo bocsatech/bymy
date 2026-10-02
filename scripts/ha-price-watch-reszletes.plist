@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>Label</key>
+    <string>hu.bymy.ha-price-reszletes</string>
+    <key>ProgramArguments</key>
+    <array>
+      <string>/usr/bin/caffeinate</string>
+      <string>-dims</string>
+      <string>/bin/bash</string>
+      <string>/Users/rbocsa/bymy/scripts/ha-price-watch-reszletes.sh</string>
+    </array>
+    <key>EnvironmentVariables</key>
+    <dict>
+      <key>HA_PRICE_CAFFEINATED</key>
+      <string>1</string>
+      <key>PATH</key>
+      <string>/usr/local/bin:/usr/bin:/bin:/opt/homebrew/bin</string>
+    </dict>
+    <key>WorkingDirectory</key>
+    <string>/Users/rbocsa/bymy</string>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <dict>
+      <key>SuccessfulExit</key>
+      <false/>
+    </dict>
+    <key>StandardOutPath</key>
+    <string>/Users/rbocsa/bymy/data/ha-prices/launchd-reszletes-out.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/rbocsa/bymy/data/ha-prices/launchd-reszletes-err.log</string>
+    <key>ProcessType</key>
+    <string>Interactive</string>
+  </dict>
+</plist>

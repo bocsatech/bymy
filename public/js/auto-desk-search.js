@@ -189,6 +189,17 @@ function openAccordion(id) {
   });
 }
 
+/** Több accordion egyszerre nyitva (mobil teljes menü desken). */
+function openAccordions(ids = []) {
+  const want = new Set(ids.filter(Boolean));
+  document.querySelectorAll("[data-desk-acc]").forEach((el) => {
+    const on = want.has(el.getAttribute("data-desk-acc"));
+    el.classList.toggle("is-open", on);
+    const btn = el.querySelector("[data-desk-acc-toggle]");
+    if (btn) btn.setAttribute("aria-expanded", on ? "true" : "false");
+  });
+}
+
 function filledControl(el) {
   if (!el) return false;
   if (el.type === "checkbox" || el.type === "radio") return el.checked;
@@ -481,87 +492,65 @@ export function arrangeAutoDeskDemoFields(form = document.getElementById("home-q
 
 function syncGyorsFieldVisibility(form = document.getElementById("home-qs-form")) {
   if (!form) return;
-  const gyors = document.body.classList.contains("auto-desk-gyors");
   const ertek = document.body.classList.contains("auto-desk-ertekbecslo");
+  /* Mobil 1:1 — minden layout mező látszik; gyors mód nem rejt. */
   form.querySelectorAll(".auto-desk-fields[data-desk-alap] .auto-desk-field").forEach((el) => {
-    const key = el.getAttribute("data-desk-field");
-    if (ertek && (key === "vetelar" || key === "km")) {
-      el.hidden = false;
-      return;
-    }
-    const isQuick = el.getAttribute("data-desk-quick") === "1";
-    el.hidden = gyors && !isQuick;
+    el.hidden = false;
+    el.style.removeProperty("display");
   });
   if (ertek) syncErtekModeChrome(form);
   syncAutoSearchAccShell(form);
 }
 
-/** Feladás-szerű héj: brand kártya a shellben, Alapadatok fehér kártya + pill menük. */
+/** Feladás-szerű héj: brand + mobil layout menü (qs-layout-main + qs-more) 1:1. */
 export function syncAutoSearchAccShell(form = document.getElementById("home-qs-form")) {
   if (!form || !isAutoDesk()) return;
   const shell = form.querySelector("#auto-search-desk-shell");
   const alap = form.querySelector('#auto-search-desk-shell > [data-desk-acc="alap"], [data-desk-acc="alap"]');
+  const muszaki = form.querySelector('#auto-search-desk-shell > [data-desk-acc="muszaki"], [data-desk-acc="muszaki"]');
   if (!shell || !alap) return;
 
-  const brand = form.querySelector(".auto-bm-brand-block");
-  if (brand && (brand.parentElement !== shell || brand.nextElementSibling !== alap)) {
+  const brand = form.querySelector(".auto-bm-brand-block, .auto-search-bm-combined")?.closest(".auto-bm-brand-block, .immo-schema-cell, .auto-search-bm-combined")
+    || form.querySelector(".auto-bm-brand-block");
+  if (brand && brand.classList.contains("auto-bm-brand-block") && (brand.parentElement !== shell || brand.nextElementSibling !== alap)) {
     shell.insertBefore(brand, alap);
   }
 
   const alapBody = alap.querySelector(":scope > .auto-desk-acc__body");
-  let host = form.querySelector(".auto-desk-fields[data-desk-alap]");
   if (!alapBody) return;
 
-  if (!host) {
-    host = document.createElement("div");
-    host.className = "auto-desk-fields";
-    host.dataset.deskAlap = "1";
+  const main = form.querySelector("#qs-layout-main");
+  const more = form.querySelector("#qs-more");
+  const moreLayout = form.querySelector("#qs-more-layout");
+
+  /* Alapadatok = mobil qs-layout-main (teljes step-1 menü) */
+  if (main && main.parentElement !== alapBody) {
+    alapBody.insertBefore(main, alapBody.firstChild);
+  }
+  if (main) {
+    main.hidden = false;
+    main.style.removeProperty("display");
+    main.style.removeProperty("height");
+    main.style.removeProperty("overflow");
   }
 
-  let card = alapBody.querySelector(":scope > .ad-form-alap-card");
-  if (!card) {
-    card = document.createElement("div");
-    card.className = "ad-form-alap-card";
-    card.innerHTML =
-      '<button type="button" class="ad-form-alap-card__title" aria-expanded="true"><span class="ad-form-alap-card__title-text">Alapadatok</span><span class="ad-form-alap-card__chev" aria-hidden="true">▼</span></button><div class="ad-form-alap-card__body"></div>';
-    const title = card.querySelector(".ad-form-alap-card__title");
-    title.addEventListener("click", (event) => {
-      event.preventDefault();
-      event.stopPropagation();
-      const closed = card.classList.toggle("is-collapsed");
-      title.setAttribute("aria-expanded", closed ? "false" : "true");
-    });
-    alapBody.insertBefore(card, alapBody.firstChild);
+  /* Műszaki = mobil qs-more (Több szűrő tartalom) — mindig nyitva desken */
+  const muszakiBody = muszaki?.querySelector(":scope > .auto-desk-acc__body");
+  if (more && muszakiBody) {
+    if (more.parentElement !== muszakiBody) muszakiBody.appendChild(more);
+    more.hidden = false;
+    more.classList.add("is-open");
+    more.style.removeProperty("display");
+    more.style.removeProperty("height");
+    more.style.removeProperty("overflow");
+    if (moreLayout) {
+      moreLayout.hidden = false;
+      moreLayout.style.removeProperty("display");
+    }
+    muszaki.classList.add("is-open");
+    muszaki.querySelector("[data-desk-acc-toggle]")?.setAttribute("aria-expanded", "true");
   }
 
-  const cardBody = card.querySelector(".ad-form-alap-card__body");
-  if (host.parentElement !== cardBody) cardBody.appendChild(host);
-
-  /* Mobil web Alapadatok sorrend: Kivitel → Üzemanyag → Gyártási év → Km → Vételár */
-  const quickFieldKeys = ["kivitel", "uzemanyag", "gyartasi_ev", "km", "vetelar"];
-  quickFieldKeys.forEach((key) => {
-    const el = form.querySelector(`[data-desk-field="${key}"]`);
-    if (!el) return;
-    if (el.closest(".auto-bm-brand-block")) return;
-    host.appendChild(el);
-    el.dataset.deskQuick = "1";
-    el.hidden = false;
-    el.style.removeProperty("display");
-    const label = el.querySelector(".auto-desk-field__label");
-    if (label && key === "km") label.textContent = "Km óra állás";
-    if (label && key === "gyartasi_ev") label.textContent = "Gyártási év";
-  });
-  /* Állapot ne legyen a gyors Alapadatokban — mobil weben lentebb van. */
-  const allapot = form.querySelector('[data-desk-field="allapot"]');
-  if (allapot && host.contains(allapot)) {
-    const muszakiHost =
-      form.querySelector(".auto-desk-fields[data-desk-muszaki]") ||
-      form.querySelector('[data-desk-acc="muszaki"] .auto-desk-acc__body');
-    if (muszakiHost && muszakiHost !== host) muszakiHost.appendChild(allapot);
-  }
-
-  card.classList.remove("is-collapsed");
-  card.querySelector(".ad-form-alap-card__title")?.setAttribute("aria-expanded", "true");
   alap.classList.add("is-open");
   alap.querySelector("[data-desk-acc-toggle]")?.setAttribute("aria-expanded", "true");
 }
@@ -605,18 +594,19 @@ export function initAutoDeskSearch({
   let deskLayoutGen = 0;
 
   setMode("gyors");
-  openAccordion("alap");
+  openAccordions(["alap", "muszaki"]);
   updateAutoDeskAccSummaries(form);
 
   if (isAutoDesk()) {
     if (morePanel) {
-      morePanel.hidden = true;
-      morePanel.classList.remove("is-open");
+      morePanel.hidden = false;
+      morePanel.classList.add("is-open");
     }
     if (detailedPanel) {
       detailedPanel.hidden = true;
       detailedPanel.classList.remove("is-open");
     }
+    openAccordions(["alap", "muszaki"]);
     syncGyorsFieldVisibility(form);
   }
 
@@ -627,11 +617,11 @@ export function initAutoDeskSearch({
       const next = setMode(mode);
       syncGyorsFieldVisibility(form);
       if (morePanel) {
-        morePanel.hidden = true;
-        morePanel.classList.remove("is-open");
+        morePanel.hidden = false;
+        morePanel.classList.add("is-open");
       }
-      openAccordion("alap");
-      /* Részletes tartalom előkészítése; Műszaki/Extrák csak Részletes módban látszik. */
+      openAccordions(["alap", "muszaki"]);
+      /* Részletes tartalom előkészítése; Extrák csak Részletes módban. */
       try {
         await mountDetailed?.(form);
         if (detailedPanel) {

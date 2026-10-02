@@ -526,25 +526,34 @@
     display: block;
   }
 
-  /* Gyors / Értékbecslő: kevesebb mező az Alapadatokban */
+  /* Gyors: teljes menü (mint mobil) — ne rejtsünk mezőket / Műszaki blokkot */
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-gyors:not(.auto-desk-reszletes)
     .auto-desk-fields[data-desk-alap]
     .auto-desk-field[data-desk-quick="0"] {
-    display: none !important;
+    display: flex !important;
   }
 
-  /* Gyors / Értékbecslő: Műszaki + Extrák menü nincs — csak Részletesben */
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-gyors:not(.auto-desk-reszletes)
     .auto-search-desk-shell
-    > .auto-desk-acc[data-desk-acc="muszaki"],
+    > .auto-desk-acc[data-desk-acc="muszaki"] {
+    display: block !important;
+  }
+
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-gyors:not(.auto-desk-reszletes)
     .auto-search-desk-shell
     > .auto-desk-acc[data-desk-acc="extrak"] {
     display: none !important;
   }
 
+  /* Mobil menüszerkezet: qs-layout-main + qs-more látszik desken is */
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active .auto-search-panel #qs-more {
-    display: none !important;
+    display: flex !important;
+    flex-direction: column !important;
+    height: auto !important;
+    overflow: visible !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    visibility: visible !important;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-reszletes #qs-detailed-panel {
@@ -646,13 +655,24 @@
     grid-column: auto !important;
   }
 
+  /* Desk: ugyanaz a layout grid mint mobil — ne rejtsük el */
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active .auto-search-panel #qs-more-layout,
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active .auto-search-panel #qs-layout-main {
-    display: none !important;
-    height: 0 !important;
-    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+    height: auto !important;
+    overflow: visible !important;
     margin: 0 !important;
     padding: 0 !important;
+    visibility: visible !important;
+    gap: 12px;
+    width: 100%;
+  }
+
+  /* A régi szűkített desk-field lista ne duplikáljon a layout menüvel */
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-desk-fields[data-desk-alap]:not([data-desk-full-menu="1"]) {
+    display: none !important;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-fields[data-desk-muszaki],

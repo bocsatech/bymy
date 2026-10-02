@@ -677,17 +677,21 @@
     display: none !important;
   }
 
-  /* Szám mezők: cím felül, input + egység egy sorban (ne törjön „00 km”-re) */
+  /* Szám mezők: cím felül, input + egység egy sorban — az egység NEM a 1.75rem trail slotba préselve */
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-panel
+    .auto-qs-drums
     .home-qs-field--number,
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-panel
+    .auto-qs-drums
     .home-qs-field:has(> .home-qs-suffix) {
-    display: flex !important;
-    flex-flow: row wrap !important;
-    align-items: center !important;
-    gap: 0.35rem 0.55rem !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    grid-template-rows: auto auto !important;
+    align-items: end !important;
+    column-gap: 0.55rem !important;
+    row-gap: 0.45rem !important;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
@@ -698,7 +702,9 @@
     .auto-search-panel
     .home-qs-field:has(> .home-qs-suffix)
     > .home-qs-label {
-    flex: 0 0 100% !important;
+    grid-column: 1 / -1 !important;
+    grid-row: 1 !important;
+    flex: none !important;
     width: 100% !important;
   }
 
@@ -710,18 +716,27 @@
     .auto-search-panel
     .home-qs-field:has(> .home-qs-suffix)
     > .home-qs-control {
-    flex: 1 1 0% !important;
+    grid-column: 1 !important;
+    grid-row: 2 !important;
+    width: 100% !important;
     min-width: 0 !important;
-    width: auto !important;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-panel
-    .home-qs-suffix {
-    flex: 0 0 auto !important;
+    .home-qs-field--number
+    > .home-qs-suffix,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-panel
+    .home-qs-field:has(> .home-qs-suffix)
+    > .home-qs-suffix {
+    grid-column: 2 !important;
+    grid-row: 2 !important;
     width: auto !important;
+    min-width: auto !important;
     max-width: none !important;
     white-space: nowrap !important;
+    flex: none !important;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active

@@ -36,7 +36,10 @@ const FIRST_YEAR = 1950;
 const PRICE_STEP = 500_000;
 const PRICE_MAX = 50_000_000;
 const KM_STEP = 10_000;
-const KM_MAX = 500_000;
+const KM_MAX = 400_000;
+/** Km dobkerék: 400e után csak ez — tól: ≥400 001, ig: nincs felső határ. */
+const KM_OVER_VALUE = "400001";
+const KM_OVER_LABEL = "400e felett";
 const LE_STEPS = [50, 75, 100, 125, 150, 175, 200, 225, 250, 300, 350, 400, 500, 600, 800];
 const CCM_STEPS = [600, 800, 1000, 1200, 1400, 1600, 1800, 2000, 2200, 2500, 3000, 3500, 4000, 5000, 6000];
 const KG_STEPS = (() => {
@@ -377,6 +380,28 @@ function kmOptions() {
   return values;
 }
 
+function kmFilterOptions(emptyLabel = "Mindegy") {
+  return [
+    { value: "", label: emptyLabel },
+    ...kmOptions().map((n) => ({
+      value: String(n),
+      label: `${n.toLocaleString("hu-HU")} km`,
+    })),
+    { value: KM_OVER_VALUE, label: KM_OVER_LABEL },
+  ];
+}
+
+function fillKmSelect(select, emptyLabel) {
+  if (!select) return;
+  select.innerHTML = "";
+  for (const opt of kmFilterOptions(emptyLabel)) {
+    const el = document.createElement("option");
+    el.value = opt.value;
+    el.textContent = opt.label;
+    select.appendChild(el);
+  }
+}
+
 function fillNumberSelect(select, values, emptyLabel, format = (n) => n.toLocaleString("hu-HU")) {
   if (!select) return;
   select.innerHTML = `<option value="">${emptyLabel}</option>`;
@@ -437,9 +462,7 @@ export function optionsForAutoFilterKey(filterKey, emptyLabel = "Mindegy") {
     );
   }
   if (key === "km_tol" || key === "km_ig") {
-    return withEmpty(
-      kmOptions().map((n) => ({ value: String(n), label: `${n.toLocaleString("hu-HU")} km` }))
-    );
+    return kmFilterOptions(emptyLabel);
   }
   if (key === "le_tol" || key === "le_ig") {
     return withEmpty(LE_STEPS.map((n) => ({ value: String(n), label: `${n} LE` })));
@@ -813,13 +836,8 @@ function wireRangeSelects(root) {
 
   wirePriceInputs(root);
 
-  const kms = kmOptions();
-  root.querySelectorAll('[data-filter-key="km_tol"]').forEach((el) =>
-    fillNumberSelect(el, kms, "-tól", (n) => `${n.toLocaleString("hu-HU")} km`)
-  );
-  root.querySelectorAll('[data-filter-key="km_ig"]').forEach((el) =>
-    fillNumberSelect(el, kms, "-ig", (n) => `${n.toLocaleString("hu-HU")} km`)
-  );
+  root.querySelectorAll('[data-filter-key="km_tol"]').forEach((el) => fillKmSelect(el, "-tól"));
+  root.querySelectorAll('[data-filter-key="km_ig"]').forEach((el) => fillKmSelect(el, "-ig"));
 
   root.querySelectorAll('[data-filter-key="le_tol"]').forEach((el) =>
     fillNumberSelect(el, LE_STEPS, "-tól", (n) => `${n} LE`)
@@ -1040,6 +1058,12 @@ export function readLayoutFilterValues(form) {
     const n = Number(String(value).replace(/\D/g, ""));
     return Number.isFinite(n) ? n : null;
   };
+  const kmBound = (key, raw) => {
+    const s = String(raw ?? "").trim();
+    if (!s) return null;
+    if (s === "400001") return key === "km_ig" ? null : 400001;
+    return numOrNull(s);
+  };
   const floatOrNull = (value) => {
     if (value == null || value === "") return null;
     const n = Number(String(value).replace(",", ".").replace(/[^\d.-]/g, ""));
@@ -1056,7 +1080,9 @@ export function readLayoutFilterValues(form) {
     seen.add(key);
     const raw = String(el.value ?? "").trim();
     if (!raw) return;
-    if (key.endsWith("_tol") || key.endsWith("_ig")) {
+    if (key === "km_tol" || key === "km_ig") {
+      out[key] = kmBound(key, raw);
+    } else if (key.endsWith("_tol") || key.endsWith("_ig")) {
       out[key] = numOrNull(raw);
     } else if (FREE_NUMBER_FIELDS.has(key)) {
       out[key] = floatOrNull(raw);

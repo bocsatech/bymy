@@ -7,7 +7,7 @@ import {
   closeAllInlineDrums,
 } from "./immo-drum-picker.js?v=c4c7ac29a2";
 import { bindAutoDrumSheet, openAutoDrumSheet } from "./auto-drum-sheet.js?v=rangeSheet1";
-import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=90daaf5812";
+import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=kmOver1";
 
 const MOBILE_MQ = "(max-width: 900px)";
 const TYPEAHEAD_CLEAR_MS = 2500;
@@ -614,15 +614,24 @@ function convertRangePairToDual(wrap, cfg) {
     const min = String(readWheel(minWheel) ?? "").trim();
     const max = String(readWheel(maxWheel) ?? "").trim();
     const unit = cfg.unit ? ` ${cfg.unit}` : "";
+    const labelOf = (wheel, value) => {
+      if (!value) return "";
+      const opt = [...(wheel?.querySelectorAll(".immo-wheel-opt") || [])].find(
+        (o) => String(o.dataset.value ?? "") === value
+      );
+      return (opt?.textContent || "").trim() || value;
+    };
     if (!min && !max) {
       summary.textContent = "Mindegy";
       summary.classList.add("is-placeholder");
       return;
     }
     summary.classList.remove("is-placeholder");
-    if (min && max) summary.textContent = `${min} – ${max}${unit}`;
-    else if (min) summary.textContent = `${min} –${unit}`;
-    else summary.textContent = `– ${max}${unit}`;
+    const minL = labelOf(minWheel, min);
+    const maxL = labelOf(maxWheel, max);
+    if (min && max) summary.textContent = `${minL} – ${maxL}`;
+    else if (min) summary.textContent = `${minL} –`;
+    else summary.textContent = `– ${maxL}${unit && !maxL.includes(cfg.unit) ? unit : ""}`;
   }
   refreshSummary();
 
@@ -1215,6 +1224,12 @@ export function readAutoDrumFilterValues(form) {
     const n = Number(String(value).replace(/\D/g, ""));
     return Number.isFinite(n) ? n : null;
   };
+  const kmBound = (key, raw) => {
+    const s = String(raw ?? "").trim();
+    if (!s) return null;
+    if (s === "400001") return key === "km_ig" ? null : 400001;
+    return numOrNull(s);
+  };
   const seen = new Set();
 
   form.querySelectorAll("[data-wheel][data-filter-key]").forEach((wheel) => {
@@ -1233,7 +1248,8 @@ export function readAutoDrumFilterValues(form) {
     const raw = String(readWheel(wheel) ?? "").trim();
     if (!raw) return;
     seen.add(key);
-    if (key.endsWith("_tol") || key.endsWith("_ig")) out[key] = numOrNull(raw);
+    if (key === "km_tol" || key === "km_ig") out[key] = kmBound(key, raw);
+    else if (key.endsWith("_tol") || key.endsWith("_ig")) out[key] = numOrNull(raw);
     else out[key] = raw;
   });
 
@@ -1247,7 +1263,9 @@ export function readAutoDrumFilterValues(form) {
     seen.add(key);
     const raw = String(el.value ?? "").trim();
     if (!raw) return;
-    if (key.endsWith("_tol") || key.endsWith("_ig")) {
+    if (key === "km_tol" || key === "km_ig") {
+      out[key] = kmBound(key, raw);
+    } else if (key.endsWith("_tol") || key.endsWith("_ig")) {
       out[key] = numOrNull(raw);
     } else {
       out[key] = raw;

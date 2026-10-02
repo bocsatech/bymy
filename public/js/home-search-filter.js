@@ -133,8 +133,8 @@ function readFilters(form) {
     ar_tol: numOrNull(data.get("ar_tol")),
     ar_ig: numOrNull(data.get("ar_ig")),
     tipus: data.get("tipus")?.toString().trim() ?? "",
-    km_tol: numOrNull(data.get("km_tol")),
-    km_ig: numOrNull(data.get("km_ig")),
+    km_tol: kmBoundOrNull("km_tol", data.get("km_tol")),
+    km_ig: kmBoundOrNull("km_ig", data.get("km_ig")),
     le_tol: numOrNull(data.get("le_tol")),
     le_ig: numOrNull(data.get("le_ig")),
     sebessegvalto: data.get("sebessegvalto")?.toString() ?? "",
@@ -153,6 +153,16 @@ function numOrNull(value) {
   if (value == null || value === "") return null;
   const n = Number(String(value).replace(/\D/g, ""));
   return Number.isFinite(n) ? n : null;
+}
+
+/** Km „400e felett”: tól → 400001+, ig → nincs felső határ. */
+function kmBoundOrNull(key, raw) {
+  const s = String(raw ?? "").trim();
+  if (!s) return null;
+  if (s === "400001" || /^400e\b/i.test(s)) {
+    return key === "km_ig" ? null : 400001;
+  }
+  return numOrNull(s);
 }
 
 function inRange(value, min, max) {

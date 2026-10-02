@@ -1,6 +1,6 @@
 
-import { applyAutoSearchLayout, readLayoutFilterValues, refillAutoSearchRangeSelects, prefetchAutoSearchBoot } from "./auto-search-layout.js?v=90daaf5812";
-import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums, styleAutoSearchMoreCard, enhanceDeskDualRanges } from "./auto-search-drums.js?v=rangeSheet1";
+import { applyAutoSearchLayout, readLayoutFilterValues, refillAutoSearchRangeSelects, prefetchAutoSearchBoot } from "./auto-search-layout.js?v=kmOver1";
+import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums, styleAutoSearchMoreCard, enhanceDeskDualRanges } from "./auto-search-drums.js?v=kmOver1";
 import {
   mountDetailedSearch,
   readDetailedSearchValues,

@@ -89,15 +89,24 @@ function isAutoDesk() {
 }
 
 function setMode(mode) {
-  const gyors = mode !== "reszletes";
-  document.body.classList.toggle("auto-desk-gyors", gyors);
-  document.body.classList.toggle("auto-desk-reszletes", !gyors);
+  const next =
+    mode === "reszletes" ? "reszletes" : mode === "ertekbecslo" ? "ertekbecslo" : "gyors";
+  document.body.classList.toggle("auto-desk-gyors", next === "gyors");
+  document.body.classList.toggle("auto-desk-reszletes", next === "reszletes");
+  document.body.classList.toggle("auto-desk-ertekbecslo", next === "ertekbecslo");
   document.querySelectorAll("[data-desk-mode]").forEach((btn) => {
-    const on = btn.getAttribute("data-desk-mode") === (gyors ? "gyors" : "reszletes");
+    const on = btn.getAttribute("data-desk-mode") === next;
     btn.classList.toggle("is-active", on);
     btn.setAttribute("aria-selected", on ? "true" : "false");
   });
-  return gyors;
+  const ertekPanel = document.querySelector("[data-auto-ertekbecslo]");
+  if (ertekPanel) ertekPanel.hidden = next !== "ertekbecslo";
+  const title = document.getElementById("auto-search-title");
+  if (title) {
+    title.textContent =
+      next === "ertekbecslo" ? "Mennyi az autó piaci értéke?" : "Melyik járművet keresed?";
+  }
+  return next;
 }
 
 function openAccordion(id) {
@@ -465,10 +474,15 @@ export function initAutoDeskSearch({
   document.querySelectorAll("[data-desk-mode]").forEach((btn) => {
     btn.addEventListener("click", async () => {
       if (!isAutoDesk()) return;
-      const mode = btn.getAttribute("data-desk-mode");
-      const gyors = setMode(mode);
+      const mode = btn.getAttribute("data-desk-mode") || "gyors";
+      const next = setMode(mode);
+      if (next === "ertekbecslo") {
+        openAccordion("alap");
+        onModeChange?.("ertekbecslo");
+        return;
+      }
       syncGyorsFieldVisibility(form);
-      if (gyors) {
+      if (next === "gyors") {
         if (morePanel) {
           morePanel.hidden = true;
           morePanel.classList.remove("is-open");
@@ -495,7 +509,7 @@ export function initAutoDeskSearch({
         }
       }
       updateAutoDeskAccSummaries(form);
-      onModeChange?.(gyors ? "gyors" : "reszletes");
+      onModeChange?.(next);
     });
   });
 
@@ -555,7 +569,11 @@ export function initAutoDeskSearch({
     if (desk) {
       if (advancedBtn) advancedBtn.hidden = true;
       if (detailedBtn) detailedBtn.hidden = true;
-      if (!document.body.classList.contains("auto-desk-gyors") && !document.body.classList.contains("auto-desk-reszletes")) {
+      if (
+        !document.body.classList.contains("auto-desk-gyors") &&
+        !document.body.classList.contains("auto-desk-reszletes") &&
+        !document.body.classList.contains("auto-desk-ertekbecslo")
+      ) {
         setMode("gyors");
       }
       if (document.body.classList.contains("auto-desk-gyors")) {
@@ -587,7 +605,9 @@ export function initAutoDeskSearch({
       updateAutoDeskAccSummaries(form);
     } else {
       if (advancedBtn) advancedBtn.hidden = false;
-      document.body.classList.remove("auto-desk-gyors", "auto-desk-reszletes");
+      document.body.classList.remove("auto-desk-gyors", "auto-desk-reszletes", "auto-desk-ertekbecslo");
+      const ertekPanel = document.querySelector("[data-auto-ertekbecslo]");
+      if (ertekPanel) ertekPanel.hidden = true;
     }
   }
 

@@ -19,7 +19,7 @@ import {
   updateAutoDeskAccSummaries,
   arrangeAutoDeskDemoFields,
   deskFilterMenuReady,
-} from "./auto-desk-search.js?v=d7cd7a8c20";
+} from "./auto-desk-search.js?v=ertekMode1";
 
 prefetchAutoSearchBoot();
 const MOBILE_MQ = "(max-width: 900px)";
@@ -283,6 +283,11 @@ export function initHomeQuickSearch({ onSearch = () => {}, onFilterPreview, onDe
     onDeskLayout: mountDeskFilterMenu,
     onModeChange: (mode) => {
       if (mode === "reszletes") void mountMuszakiPickersLazy();
+      if (mode === "ertekbecslo") {
+        void import("./ertekbecslo-app.js?v=ertekMode1").then((mod) => {
+          mod.initErtekbecsloPanel(document);
+        });
+      }
     },
   });
 

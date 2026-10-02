@@ -402,6 +402,10 @@
     flex: 0 0 auto;
   }
 
+  body.home-page[data-site-page="auto"] .auto-desk-mode {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-mode__btn {
     -webkit-appearance: none;
     appearance: none;
@@ -428,6 +432,10 @@
     background: transparent;
   }
 
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-mode__btn + .auto-desk-mode__btn {
+    border-left: 1px solid var(--ad-line);
+  }
+
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-mode__btn:first-child {
     border-radius: 7px 0 0 7px;
   }
@@ -439,6 +447,33 @@
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-mode__btn.is-active {
     background: var(--ad-yellow);
     color: var(--ad-yellow-ink);
+  }
+
+  /* Értékbecslő mód: kereső mezők elrejtve, értékbecslő panel látszik */
+  body.home-page[data-site-page="auto"].auto-desk-ertekbecslo #home-qs-form > :not(.auto-desk-mode) {
+    display: none !important;
+  }
+
+  body.home-page[data-site-page="auto"] .auto-ertek-wrap {
+    display: none;
+    margin: 0 0 8px;
+  }
+
+  body.home-page[data-site-page="auto"].auto-desk-ertekbecslo .auto-ertek-wrap {
+    display: block !important;
+  }
+
+  body.home-page[data-site-page="auto"] .auto-ertek-wrap__lead {
+    margin: 0 0 12px;
+    font-size: 13px;
+    line-height: 1.45;
+    color: #64748b;
+  }
+
+  body.home-page[data-site-page="auto"].auto-desk-ertekbecslo .auto-desk-results-bar,
+  body.home-page[data-site-page="auto"].auto-desk-ertekbecslo .home-listings-panel {
+    opacity: 0.35;
+    pointer-events: none;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-acc {

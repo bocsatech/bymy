@@ -8,10 +8,10 @@ import {
   initHomeSearchSidebar,
   initHomeFilterCatalog,
 } from "./home-search-filter.js?v=7751b5454d";
-import { initHomeQuickSearch } from "./home-quicksearch.js?v=822a4e5435";
+import { initHomeQuickSearch } from "./home-quicksearch.js?v=ertekMode1";
 import { decodeSavedSearchParam, encodeSavedSearchParam } from "./saved-search.js?v=ae250042e8";
 import { matchDetailedSearch, hasActiveDetailedSearch } from "./auto-detailed-search.js?v=18415b7f87";
-import { updateAutoDeskResultCount, updateAutoDeskAccSummaries } from "./auto-desk-search.js?v=d7cd7a8c20";
+import { updateAutoDeskResultCount, updateAutoDeskAccSummaries } from "./auto-desk-search.js?v=ertekMode1";
 import {
   emptyIngatlanFilters,
   filterListingsByIngatlan,

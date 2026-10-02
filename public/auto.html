@@ -63,7 +63,8 @@
     <link rel="stylesheet" href="/css/hub-mobile-app.css?v=tabYellow1" />
     <link rel="stylesheet" href="/css/home.css?v=ddb902d835" />
     <link rel="stylesheet" href="/css/auto-hero.css?v=8bcaaf719a" />
-    <link rel="stylesheet" href="/css/auto-desk-layout.css?v=8d9414b169" />
+    <link rel="stylesheet" href="/css/auto-desk-layout.css?v=ertekMode1" />
+    <link rel="stylesheet" href="/css/ertekbecslo-qr.css?v=ertekMode1" />
     <link rel="stylesheet" href="/css/listing-photo-cover.css?v=70dce08b86" />
     <link rel="stylesheet" href="/css/listing-featured.css?v=c00be8ab90" />
     <link rel="stylesheet" href="/css/ingatlan-search.css?v=c0792b12cf" />
@@ -369,6 +370,7 @@ body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-m
               <div class="auto-desk-mode" role="tablist" aria-label="Kereső mód">
                 <button type="button" class="auto-desk-mode__btn is-active" role="tab" data-desk-mode="gyors" aria-selected="true">Gyors</button>
                 <button type="button" class="auto-desk-mode__btn" role="tab" data-desk-mode="reszletes" aria-selected="false">Részletes</button>
+                <button type="button" class="auto-desk-mode__btn" role="tab" data-desk-mode="ertekbecslo" aria-selected="false">Értékbecslő</button>
               </div>
 
               <div class="auto-desk-acc is-open" data-desk-acc="alap">
@@ -467,6 +469,46 @@ body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-m
                 </div>
               </div>
             </form>
+
+            <div class="auto-ertek-wrap ertek-search-panel" data-auto-ertekbecslo data-ertekbecslo hidden>
+              <p class="mm-panel-lead auto-ertek-wrap__lead">Személyautó piaci sáv a minta alapján. Kötelező: gyártmány, modell, évjárat, km.</p>
+              <p class="ertek-msg" data-ertek-status role="status"></p>
+              <form class="ertek-form home-qs-form immo-search-form" data-ertek-form data-ertek-drums data-force-drums onsubmit="return false">
+                <div class="home-qs-layout-main" data-ertek-layout>
+                  <div class="home-qs-field" data-qs-field="gyartmany">
+                    <span class="home-qs-label">Gyártmány</span>
+                    <select class="home-qs-control" data-filter-key="gyartmany" aria-label="Gyártmány"></select>
+                  </div>
+                  <div class="home-qs-field" data-qs-field="modell">
+                    <span class="home-qs-label">Modell</span>
+                    <select class="home-qs-control" data-filter-key="modell" aria-label="Modell"></select>
+                  </div>
+                  <div class="home-qs-field" data-qs-field="tipus">
+                    <span class="home-qs-label">Típus</span>
+                    <select class="home-qs-control" data-filter-key="tipus" aria-label="Típus">
+                      <option value="">Típus (opcionális)</option>
+                    </select>
+                  </div>
+                  <div class="home-qs-field" data-qs-field="uzemanyag">
+                    <span class="home-qs-label">Üzemanyag</span>
+                    <select class="home-qs-control" data-filter-key="uzemanyag" aria-label="Üzemanyag">
+                      <option value="">Mindegy</option>
+                    </select>
+                  </div>
+                  <div class="home-qs-field" data-qs-field="gyartasi_ev">
+                    <span class="home-qs-label">Évjárat</span>
+                    <select class="home-qs-control" data-filter-key="gyartasi_ev" data-ertek-year aria-label="Évjárat">
+                      <option value="">Évjárat</option>
+                    </select>
+                  </div>
+                  <div class="home-qs-field ertek-km-field" data-qs-field="km">
+                    <span class="home-qs-label">Km</span>
+                    <input class="home-qs-control" type="text" inputmode="numeric" data-ertek-km placeholder="pl. 120000" autocomplete="off" />
+                  </div>
+                </div>
+              </form>
+              <div class="ertek-out" data-ertek-out></div>
+            </div>
             </div>
             </article>
           </div>
@@ -543,7 +585,7 @@ body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-m
         form.classList.add("is-qs-ready");
       }, 5500);
     </script>
-    <script src="/js/home-app.js?v=siQrAddr1" type="module"></script>
+    <script src="/js/home-app.js?v=ertekMode1" type="module"></script>
     <script src="/js/auto-hero.js?v=04bb0cefdd" type="module"></script>
     <script src="/js/auto-kivitel-menu.js?v=c1a69e2167" type="module"></script>
     <script src="/js/site-avatar-menu.js?v=4c911388e7" type="module"></script>

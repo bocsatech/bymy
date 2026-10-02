@@ -102,7 +102,7 @@ export async function fetchListing(id, { view, bypassCache = false } = {}) {
   const key = String(id ?? "").trim();
   if (!bypassCache && view === "detail" && key) {
     try {
-      const { takePrefetchedListing } = await import("./listing-prefetch.js?v=detailBoot1");
+      const { takePrefetchedListing } = await import("./listing-prefetch.js?v=67ac871172");
       const warm = takePrefetchedListing(key);
       if (warm?.detail) return warm;
     } catch {
@@ -117,7 +117,7 @@ export async function fetchListing(id, { view, bypassCache = false } = {}) {
   const listing = data.listing ?? null;
   if (listing && view === "detail" && key) {
     try {
-      const { storePrefetchedListing } = await import("./listing-prefetch.js?v=detailBoot1");
+      const { storePrefetchedListing } = await import("./listing-prefetch.js?v=67ac871172");
       storePrefetchedListing(key, listing);
     } catch {
     }

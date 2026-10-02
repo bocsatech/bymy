@@ -8,36 +8,36 @@ import {
   TEHER_KISTEHER_KIVITEL,
   TEHER_35_KIVITEL_CATEGORIES,
   normalizeOkmanyJelleg,
-} from "./equipment-data.js?v=valto3";
-import { KIVITEL_OPTIONS, normalizeKivitel } from "./kivitel-options.js?v=kivitel1";
-import { EGYEB_INFO_OPTIONS } from "./egyeb-info-data.js?v=egyebInfoFix2";
+} from "./equipment-data.js?v=5a39cb5ba3";
+import { KIVITEL_OPTIONS, normalizeKivitel } from "./kivitel-options.js?v=be03aefc2e";
+import { EGYEB_INFO_OPTIONS } from "./egyeb-info-data.js?v=6bf3a280b1";
 
 let renderEgyebInfoHook = null;
 window.addEventListener("ad-form-render-egyeb-info", () => renderEgyebInfoHook?.());
 let renderEquipmentHook = null;
 window.addEventListener("ad-form-render-equipment", () => renderEquipmentHook?.());
-import { initVehicleCatalogSelects } from "./vehicle-catalog-client.js?v=teherStrict3";
-import { compressListingPhoto, MAX_LISTING_PHOTOS } from "./listing-photo-compress.js?v=myAds2";
-import { uploadImage } from "./upload-image.js?v=supabaseUpload1";
-import { applyListingAddressFromProfileSync } from "./ad-location-profile.js?v=postalFill1";
-import { syncIngatlanFormVisibility } from "./ingatlan-form-fields.js?v=immoUiParity1";
+import { initVehicleCatalogSelects } from "./vehicle-catalog-client.js?v=5004d33efa";
+import { compressListingPhoto, MAX_LISTING_PHOTOS } from "./listing-photo-compress.js?v=4e3ffaa60f";
+import { uploadImage } from "./upload-image.js?v=3b023aae7a";
+import { applyListingAddressFromProfileSync } from "./ad-location-profile.js?v=d0127f4d2c";
+import { syncIngatlanFormVisibility } from "./ingatlan-form-fields.js?v=f1c7a48353";
 import {
   DEFAULT_PHOTO_OVERLAY_ID,
   renderListingPhotoOverlay,
-} from "./listing-photo-overlay.js?v=photoOverlayIcons3";
-import { openListingPhotoEditor } from "./listing-photo-edit.js?v=photoEdit1";
-import { refreshAdFormBmPickers, applyAdFormBmFieldValues } from "./ad-form-bm-pickers.js?v=bmSheet75";
-import { applyAdFormDesk, isAdFormDesk } from "./ad-form-desk.js?v=bmSheet75";
-import { placeElectricBlockAfterFuel } from "./ad-form-desk-pinned-blocks.js?v=bmSheet75";
-import { initKmInput, parseKmDigits, setKmInputValue } from "./km-input.js?v=kmFmt4";
-import { bindAdFormKeyboardGuard } from "./ad-form-keyboard-guard.js?v=kbGuard1";
+} from "./listing-photo-overlay.js?v=1a522e09d6";
+import { openListingPhotoEditor } from "./listing-photo-edit.js?v=6d19665b36";
+import { refreshAdFormBmPickers, applyAdFormBmFieldValues } from "./ad-form-bm-pickers.js?v=fa89cb1f7d";
+import { applyAdFormDesk, isAdFormDesk } from "./ad-form-desk.js?v=004fdc722d";
+import { placeElectricBlockAfterFuel } from "./ad-form-desk-pinned-blocks.js?v=b59c112e44";
+import { initKmInput, parseKmDigits, setKmInputValue } from "./km-input.js?v=30e4feeab0";
+import { bindAdFormKeyboardGuard } from "./ad-form-keyboard-guard.js?v=e753f1b604";
 import {
   EV_FUEL_FIELD_IDS,
   fuelFieldVisibility,
   fuelProfile,
   normalizeAdFuelValue,
   readAdFormFuelValue,
-} from "./ad-form-fuel-profile.js?v=fuelProfile3";
+} from "./ad-form-fuel-profile.js?v=db063fec6a";
 
 export function createAdForm(options = {}) {
   const mode = options.mode ?? "wizard";

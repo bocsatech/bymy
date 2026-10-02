@@ -1,11 +1,11 @@
 /** „Több ettől a hirdetőtől” — kereskedő készlet (demo A), bymy menüsáv érintetlen. */
 
-import { fetchSellerContact, revealListingContact, fetchSellerRating, submitSellerRating } from "./db-client.js?v=sellerInv15";
-import { mountTurnstile } from "./turnstile-ui.js?v=turnstile10";
-import { getAuthUser } from "./site-auth.js?v=authMembersOnly1";
-import { openListingMessage, canMessageListing } from "./start-listing-message.js?v=msgLive3";
-import { getParkplatz, addParkplatzItem, removeParkplatzItem } from "./fok-data.js?v=parkThumb1";
-import { listingDetailHref } from "./listing-return.js?v=searchNav1";
+import { fetchSellerContact, revealListingContact, fetchSellerRating, submitSellerRating } from "./db-client.js?v=658bac0c0e";
+import { mountTurnstile } from "./turnstile-ui.js?v=f0cc231f94";
+import { getAuthUser } from "./site-auth.js?v=aad32d7596";
+import { openListingMessage, canMessageListing } from "./start-listing-message.js?v=d9c12be306";
+import { getParkplatz, addParkplatzItem, removeParkplatzItem } from "./fok-data.js?v=653bb89787";
+import { listingDetailHref } from "./listing-return.js?v=1911f0cb28";
 
 function esc(value) {
   return String(value ?? "")

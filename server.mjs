@@ -639,8 +639,9 @@ async function serveStatic(path, res, req = null) {
     res.end(html);
     return;
   }
-  // JS/CSS/?v=… — böngésző cache (HTML: private max-age=0, bfcache OK).
-  const longLived =
+  // Fingerprintelt JS/CSS/font/kép: hosszú immutable. JSON katalógus: 1 nap + SWR.
+  // HTML: private max-age=0 (bfcache OK).
+  const immutableAsset =
     ext === ".js" ||
     ext === ".css" ||
     ext === ".woff" ||
@@ -654,15 +655,17 @@ async function serveStatic(path, res, req = null) {
     ext === ".webp" ||
     ext === ".gif" ||
     ext === ".ico" ||
-    ext === ".map" ||
-    ext === ".json";
+    ext === ".map";
+  const catalogJson = ext === ".json";
   res.writeHead(200, {
     "Content-Type": MIME[ext] ?? "application/octet-stream",
-    "Cache-Control": longLived
-      ? "public, max-age=604800, stale-while-revalidate=86400"
-      : ext === ".html"
-        ? "private, max-age=0, must-revalidate"
-        : "no-store, no-cache, must-revalidate",
+    "Cache-Control": immutableAsset
+      ? "public, max-age=31536000, immutable"
+      : catalogJson
+        ? "public, max-age=86400, stale-while-revalidate=604800"
+        : ext === ".html"
+          ? "private, max-age=0, must-revalidate"
+          : "no-store, no-cache, must-revalidate",
   });
   res.end(readFileSync(filePath));
 }
@@ -1431,9 +1434,11 @@ async function handleListingsApi(req, res, pathname) {
         hasMore,
       },
       {
-        // Rövid böngésző-cache: vissza / prefetch ne verje újra a szervert.
-        "Cache-Control": "private, max-age=20, stale-while-revalidate=60",
-        Vary: "Cookie, Accept-Encoding",
+        // Publikus feladott feed — auth-mentes payload, rövid CDN cache (mint nav/counts).
+        "Cache-Control": "public, max-age=20, s-maxage=45, stale-while-revalidate=120",
+        "CDN-Cache-Control": "public, max-age=45, stale-while-revalidate=120",
+        "Cloudflare-CDN-Cache-Control": "public, max-age=45, stale-while-revalidate=120",
+        Vary: "Accept-Encoding",
       }
     );
     return;
@@ -1462,7 +1467,12 @@ async function handleListingsApi(req, res, pathname) {
       excludeId: includeSelf ? null : listingId,
       status: "feladott",
     });
-    sendJson(res, 200, { listings: sanitizeListingList(listings) });
+    sendJson(res, 200, { listings: sanitizeListingList(listings) }, {
+      "Cache-Control": "public, max-age=20, s-maxage=45, stale-while-revalidate=120",
+      "CDN-Cache-Control": "public, max-age=45, stale-while-revalidate=120",
+      "Cloudflare-CDN-Cache-Control": "public, max-age=45, stale-while-revalidate=120",
+      Vary: "Accept-Encoding",
+    });
     return;
   }
 

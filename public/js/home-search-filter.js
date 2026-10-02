@@ -1,11 +1,11 @@
-import { initVehicleCatalogSelects, shortTypeName } from "./vehicle-catalog-client.js?v=teherStrict3";
-import { kivitelMatches } from "./kivitel-options.js?v=kivitel1";
-import { fuelValueMatches } from "./auto-fuel-picker.js?v=catMenu1";
-import { kivitelListMatches } from "./auto-kivitel-picker.js?v=teherKivitel35e";
-import { allapotValueMatches } from "./auto-allapot-picker.js?v=allapotFlat1";
-import { sebessegvaltoListMatches } from "./auto-sebessegvalto-picker.js?v=valto3";
-import { okmanyListMatches } from "./auto-okmany-picker.js?v=fogyNum1";
-import { toltoListMatches } from "./auto-tolto-picker.js?v=fogyNum1";
+import { initVehicleCatalogSelects, shortTypeName } from "./vehicle-catalog-client.js?v=5004d33efa";
+import { kivitelMatches } from "./kivitel-options.js?v=be03aefc2e";
+import { fuelValueMatches } from "./auto-fuel-picker.js?v=b7569cba37";
+import { kivitelListMatches } from "./auto-kivitel-picker.js?v=4c04d8ea09";
+import { allapotValueMatches } from "./auto-allapot-picker.js?v=d31f4ab31d";
+import { sebessegvaltoListMatches } from "./auto-sebessegvalto-picker.js?v=960574ad87";
+import { okmanyListMatches } from "./auto-okmany-picker.js?v=b931011338";
+import { toltoListMatches } from "./auto-tolto-picker.js?v=3cc657260b";
 
 const FUEL_QUICK_FILTERS = [
   { id: "benzin", label: "Benzin", match: (value) => value === "Benzin" },

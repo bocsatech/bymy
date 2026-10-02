@@ -1,8 +1,8 @@
-import { HOME_CATEGORIES, autoCategoryHref } from "./home-category-bar.js?v=catMenu1";
+import { HOME_CATEGORIES, autoCategoryHref } from "./home-category-bar.js?v=933743b739";
 import {
   categoriesForVertical,
   partnerCategoryImageUrl,
-} from "./partner-categories-data.js?v=menuRails1";
+} from "./partner-categories-data.js?v=b826a00c74";
 
 const IMG_V = "menuRails1";
 const INITIAL_COUNT = 5;

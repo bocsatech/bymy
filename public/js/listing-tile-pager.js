@@ -1,7 +1,7 @@
 /**
  * Listacsemepe lapozás: első 20, majd +10 — teljes hirdetés nélkül.
  */
-import { fetchListingsPage } from "./db-client.js?v=listPage1";
+import { fetchListingsPage } from "./db-client.js?v=658bac0c0e";
 
 export const TILE_PAGE_INITIAL = 20;
 export const TILE_PAGE_MORE = 10;

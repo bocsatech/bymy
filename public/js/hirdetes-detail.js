@@ -6,14 +6,14 @@ import {
   revealListingContact,
   recordListingView,
   deleteListingFromDb,
-} from "./db-client.js?v=detailBoot1";
-import { getAuthUser, getDisplayName, getProfile } from "./site-auth.js?v=authMembersOnly1";
-import { mountTurnstile } from "./turnstile-ui.js?v=turnstile11";
-import { startConversation } from "./messages-api.js?v=msgLive2";
-import { openListingMessage } from "./start-listing-message.js?v=msgLive3";
-import { getParkplatz, addParkplatzItem, removeParkplatzItem } from "./fok-data.js?v=parkThumb1";
-import { listingReturnHref, listingDetailHref, rememberListingOpen } from "./listing-return.js?v=detailBoot1";
-import { takePrefetchedListing, storePrefetchedListing } from "./listing-prefetch.js?v=detailBoot1";
+} from "./db-client.js?v=658bac0c0e";
+import { getAuthUser, getDisplayName, getProfile } from "./site-auth.js?v=aad32d7596";
+import { mountTurnstile } from "./turnstile-ui.js?v=f0cc231f94";
+import { startConversation } from "./messages-api.js?v=5cf6493dc9";
+import { openListingMessage } from "./start-listing-message.js?v=d9c12be306";
+import { getParkplatz, addParkplatzItem, removeParkplatzItem } from "./fok-data.js?v=653bb89787";
+import { listingReturnHref, listingDetailHref, rememberListingOpen } from "./listing-return.js?v=1911f0cb28";
+import { takePrefetchedListing, storePrefetchedListing } from "./listing-prefetch.js?v=67ac871172";
 
 function readBootListing() {
   try {

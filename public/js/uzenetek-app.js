@@ -1,5 +1,5 @@
-import { requireAuthForPage, initSiteAuth } from "./site-auth.js";
-import { initMessagesUi } from "./messages-ui.js?v=inboxInline1";
+import { requireAuthForPage, initSiteAuth } from "./site-auth.js?v=aad32d7596";
+import { initMessagesUi } from "./messages-ui.js?v=78e9d9204f";
 
 if (!(await requireAuthForPage())) {
   throw new Error("Belépés szükséges");

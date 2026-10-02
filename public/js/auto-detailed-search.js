@@ -2,7 +2,7 @@
 import {
   DETAILED_SEARCH_SECTIONS,
   AKKU_SEARCH_SECTION_EMPTY,
-} from "./auto-detailed-search-catalog.js?v=toltoPick1";
+} from "./auto-detailed-search-catalog.js?v=d5317952ac";
 
 const FORM_FLAG_KEYS = new Set(["villamtoltes", "zold_rendszam"]);
 
@@ -347,7 +347,7 @@ async function openDetailedToggleSheet(field) {
     trigger.getAttribute("aria-label") ||
     "Extrák";
 
-  const { openStandaloneSwitchSheet } = await import("./auto-drum-sheet.js?v=brandDrum31");
+  const { openStandaloneSwitchSheet } = await import("./auto-drum-sheet.js?v=8a910acde0");
   openStandaloneSwitchSheet({
     trigger,
     title,

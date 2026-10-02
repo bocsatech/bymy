@@ -1,8 +1,8 @@
-import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=immoTipusPick1";
-import { refreshAdFormBmPickers, mountTireSizeSwitchPickers } from "./ad-form-bm-pickers.js?v=bmSheet75";
-import { initTireSizes } from "./tire-sizes-ui.js?v=tireYm4";
-import { applyAdFormDesk } from "./ad-form-desk.js?v=bmSheet75";
-import { markImmoPostViewReady } from "./category-picker.js?v=pickerBoot4";
+import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=f1c7a48353";
+import { refreshAdFormBmPickers, mountTireSizeSwitchPickers } from "./ad-form-bm-pickers.js?v=fa89cb1f7d";
+import { initTireSizes } from "./tire-sizes-ui.js?v=d01f914c82";
+import { applyAdFormDesk } from "./ad-form-desk.js?v=004fdc722d";
+import { markImmoPostViewReady } from "./category-picker.js?v=5d45536b6e";
 import {
   DESK_MUSZAKI_CORE_FIELD_KEYS,
   EV_LAYOUT_GROUP_KEYS,
@@ -13,7 +13,7 @@ import {
   applyStep1SearchDomOrder,
   isVehicleStep1Canvas,
   stackVehicleCanvasSingleColumn,
-} from "./ad-form-desk-pinned-blocks.js?v=bmSheet75";
+} from "./ad-form-desk-pinned-blocks.js?v=b59c112e44";
 
 function cssEscape(value) {
   if (window.CSS?.escape) return window.CSS.escape(value);

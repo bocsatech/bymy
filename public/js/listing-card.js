@@ -1,4 +1,4 @@
-import { listingImgFallbackAttr } from "./image-variants.js?v=imgVar1";
+import { listingImgFallbackAttr, listingImgSrcsetAttrs, listCardImageUrl } from "./image-variants.js?v=82833209fb";
 
 const STATUS_BADGES = {
   mentett: { label: "MENTETT", mod: "mentett" },
@@ -137,8 +137,10 @@ export function createListingCard(item, { selected = false, formatDate = (v) => 
   const desc = sanitizeListingDescription(preview.leiras || "");
   const updated = formatDate(item.updated_at);
   const imageUrl = preview.imageUrl || item.fo_kep || "";
+  const src = listCardImageUrl(imageUrl) || imageUrl;
+  const ss = imageUrl ? listingImgSrcsetAttrs(imageUrl, { sizes: "(max-width: 768px) 100vw, 400px" }) : "";
   const photoInner = imageUrl
-    ? `<img class="ha-card-photo-img" src="${escapeHtml(imageUrl)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" ${listingImgFallbackAttr()} />`
+    ? `<img class="ha-card-photo-img" src="${escapeHtml(src)}" alt="" width="400" height="300" loading="lazy" decoding="async" referrerpolicy="no-referrer" ${ss} ${listingImgFallbackAttr()} />`
     : `<div class="ha-card-photo-empty" aria-hidden="true">
           <span class="ha-card-photo-icon" aria-hidden="true">
             <svg width="22" height="18" viewBox="0 0 22 18" fill="none" xmlns="http://www.w3.org/2000/svg">

@@ -9,16 +9,16 @@ import {
   normalizePlace,
   resolveCityCoords,
   resolveListingCoords,
-} from "./listing-radius.js?v=mapOsm2";
+} from "./listing-radius.js?v=9eab9e5218";
 import {
   listingDetailHref,
   rememberListingOpen,
   markMapOpenOnReturn,
-} from "./listing-return.js?v=perfNav1";
-import { listingTileTitle, listingTilePrice } from "./listing-tile.js?v=imgVar1";
-import { getAuthUser, loadProfileFromServer } from "./site-auth.js?v=bootFix2";
-import { fetchListingsPage } from "./db-client.js?v=ownerBoost6";
-import { buildNearbyFilter, readNearbyPrefs } from "./nearby-search.js?v=mapOsm2";
+} from "./listing-return.js?v=1911f0cb28";
+import { listingTileTitle, listingTilePrice } from "./listing-tile.js?v=0633cb6729";
+import { getAuthUser, loadProfileFromServer } from "./site-auth.js?v=aad32d7596";
+import { fetchListingsPage } from "./db-client.js?v=658bac0c0e";
+import { buildNearbyFilter, readNearbyPrefs } from "./nearby-search.js?v=0efee20d13";
 
 const HU_CENTER = [47.1625, 19.5033];
 const HU_ZOOM = 7;
@@ -370,7 +370,7 @@ function ensureMapPanel() {
           const u = new URL(a.getAttribute("href"), location.origin);
           const id = u.searchParams.get("id");
           if (id) {
-            import("./listing-prefetch.js?v=perfNav1")
+            import("./listing-prefetch.js?v=67ac871172")
               .then((m) => m.prefetchListingDetail(id))
               .catch(() => {});
           }

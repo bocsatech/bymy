@@ -1,7 +1,7 @@
 
-import { initVehicleCatalogSelects, fillSelect } from "./vehicle-catalog-client.js?v=teherStrict3";
-import { KIVITEL_OPTIONS } from "./kivitel-options.js?v=kivitel1";
-import { wirePostalCityAutofill as wireSharedPostalCityAutofill } from "./postal-city-autofill.js?v=postalFill1";
+import { initVehicleCatalogSelects, fillSelect } from "./vehicle-catalog-client.js?v=5004d33efa";
+import { KIVITEL_OPTIONS } from "./kivitel-options.js?v=be03aefc2e";
+import { wirePostalCityAutofill as wireSharedPostalCityAutofill } from "./postal-city-autofill.js?v=14f1f30116";
 import {
   flattenAllapotOptions,
   flattenSebessegvaltoOptions,
@@ -10,7 +10,7 @@ import {
   AC_TOLTO_CSATLAKOZAS_OPTIONS,
   TEHER_KISTEHER_KIVITEL,
   flattenTeher35KivitelOptions,
-} from "./equipment-data.js?v=valto3";
+} from "./equipment-data.js?v=5a39cb5ba3";
 
 function searchLayoutCategory() {
   return document.body?.getAttribute("data-site-page") === "teherauto"
@@ -353,7 +353,7 @@ export function prefetchAutoSearchBoot() {
   }
   void fetchAutoSearchLayout({ force: false }).catch(() => {});
   const kind = page === "teherauto" ? "kisteher" : "szemelyauto";
-  void import("./vehicle-catalog-client.js?v=teherStrict3")
+  void import("./vehicle-catalog-client.js?v=5004d33efa")
     .then((m) => m.fetchVehicleCatalog?.({ kind }))
     .catch(() => {});
 }

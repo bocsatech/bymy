@@ -7,7 +7,7 @@ import {
   INGATLAN_DUAL_RANGE_GROUPS,
   syncDualRangeCells,
   dualGroupForField,
-} from "./ingatlan-wheel-schema.js?v=immoUiParity1";
+} from "./ingatlan-wheel-schema.js?v=bb1c930359";
 
 const COLS = WHEEL_COLS;
 const ROW_PX = 72;

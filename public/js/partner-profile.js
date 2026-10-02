@@ -6,16 +6,16 @@ import {
   loadProfileFromServer,
   saveProfile,
   initSiteAuth,
-} from "./site-auth.js?v=coKind1";
+} from "./site-auth.js?v=aad32d7596";
 import {
   getDeviceIdentity,
   identityForAccountKind,
   identityFromFormData,
   isNativeApp,
   setDeviceIdentity,
-} from "./device-contract-identity.js?v=contractKind1";
-import { wirePostalCityAutofill } from "./postal-city-autofill.js?v=postalFill2";
-import { fillCountrySelect, PHONE_COUNTRIES } from "./phone-lang-ui.js?v=settingsPhone1";
+} from "./device-contract-identity.js?v=cdac1e6ebc";
+import { wirePostalCityAutofill } from "./postal-city-autofill.js?v=14f1f30116";
+import { fillCountrySelect, PHONE_COUNTRIES } from "./phone-lang-ui.js?v=bc55c36aef";
 
 const pageRoot = () => document.getElementById("partner-root");
 

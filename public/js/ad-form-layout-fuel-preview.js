@@ -1,5 +1,5 @@
-import { fuelFieldVisibility } from "./ad-form-fuel-profile.js?v=fuelProfile3";
-import { EV_LAYOUT_GROUP_KEYS } from "./ad-form-desk-pinned-blocks.js?v=layoutFromKv1";
+import { fuelFieldVisibility } from "./ad-form-fuel-profile.js?v=db063fec6a";
+import { EV_LAYOUT_GROUP_KEYS } from "./ad-form-desk-pinned-blocks.js?v=b59c112e44";
 
 const COMBUSTION_ONLY_FIELD_KEYS = new Set([
   "fogyasztas_varosi",

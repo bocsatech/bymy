@@ -292,7 +292,7 @@ export function touchListingReturnId(listingId) {
 
 export function bindListingOpen(root = document) {
   try {
-    import("./listing-prefetch.js?v=perfNav1").then((m) => m.bindListingPrefetch(root)).catch(() => {});
+    import("./listing-prefetch.js?v=67ac871172").then((m) => m.bindListingPrefetch(root)).catch(() => {});
   } catch {
   }
   root.addEventListener("click", (event) => {
@@ -304,7 +304,7 @@ export function bindListingOpen(root = document) {
     const id = el.getAttribute("data-listing-id");
     if (!id) return;
     try {
-      import("./listing-prefetch.js?v=perfNav1").then((m) => m.prefetchListingDetail(id)).catch(() => {});
+      import("./listing-prefetch.js?v=67ac871172").then((m) => m.prefetchListingDetail(id)).catch(() => {});
     } catch {
     }
     rememberListingOpen(id, el, root);

@@ -1,11 +1,11 @@
 
-import { KIVITEL_OPTIONS, normalizeKivitel } from "./kivitel-options.js?v=kivitel1";
+import { KIVITEL_OPTIONS, normalizeKivitel } from "./kivitel-options.js?v=be03aefc2e";
 import {
   TEHER_KISTEHER_KIVITEL,
   TEHER_35_KIVITEL_CATEGORIES,
   flattenTeher35KivitelOptions,
-} from "./equipment-data.js?v=kisteherHa1";
-import { bindAutoBmDismiss, autoBmPanelIsOpen } from "./auto-bm-dismiss.js?v=bmDismiss1";
+} from "./equipment-data.js?v=5a39cb5ba3";
+import { bindAutoBmDismiss, autoBmPanelIsOpen } from "./auto-bm-dismiss.js?v=89aa460931";
 
 function labelList(items) {
   if (!items.length) return "Mindegy";
@@ -343,7 +343,7 @@ function openPanel() {
 }
 
 async function openMobileDrum() {
-  const { openStandaloneSwitchSheet } = await import("./auto-drum-sheet.js?v=brandDrum31");
+  const { openStandaloneSwitchSheet } = await import("./auto-drum-sheet.js?v=8a910acde0");
   if (hierarchical) {
     openStandaloneSwitchSheet({
       trigger: openBtn,

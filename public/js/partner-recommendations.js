@@ -1,7 +1,7 @@
 import {
   PARTNER_CATEGORIES,
   partnerCategoryImageUrl,
-} from "./partner-categories-data.js?v=noAllapot1";
+} from "./partner-categories-data.js?v=b826a00c74";
 
 const STORAGE_KEY = "bymy_partner_postal_code";
 const LEGACY_STORAGE_KEY = "autosweb_partner_postal_code";

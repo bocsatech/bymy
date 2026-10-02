@@ -1,5 +1,5 @@
 
-import { KIVITEL_OPTIONS, kivitelMenuHref, normalizeKivitel } from "./kivitel-options.js?v=kivitel1";
+import { KIVITEL_OPTIONS, kivitelMenuHref, normalizeKivitel } from "./kivitel-options.js?v=be03aefc2e";
 
 const CATEGORY_TABS = [
   { key: "", label: "Személyautók", match: (k) => !k },

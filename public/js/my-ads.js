@@ -4,19 +4,19 @@ import {
   patchListingFieldsInDb,
   saveListingPhotosOrder,
   deleteListingFromDb,
-} from "./db-client.js?v=myAdsPatch1";
+} from "./db-client.js?v=658bac0c0e";
 import {
   DEFAULT_PHOTO_OVERLAY_ID,
   detectBymyPhotoOverlay,
   renderListingPhotoOverlay,
-} from "./listing-photo-overlay.js?v=photoOverlayDetect1";
-import { compressListingPhotos } from "./listing-photo-compress.js?v=myAds1";
-import { bindListingOpen, restoreListingReturn } from "./listing-return.js?v=scrollTop1";
+} from "./listing-photo-overlay.js?v=1a522e09d6";
+import { compressListingPhotos } from "./listing-photo-compress.js?v=4e3ffaa60f";
+import { bindListingOpen, restoreListingReturn } from "./listing-return.js?v=1911f0cb28";
 import {
   promoKiemeltActive,
   promoTopAjanlatActive,
   listingShowsKiemeltDecor,
-} from "./listing-promo.js?v=promo1";
+} from "./listing-promo.js?v=a2c84c124b";
 
 const ICON_CAM = `<svg class="myads-ico" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="13.5" r="3" stroke="currentColor" stroke-width="1.6"/><path d="M8 7 9.5 5h5L15 7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>`;
 const ICON_PIN = `<svg class="myads-ico" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 21s7-5.2 7-11a7 7 0 1 0-14 0c0 5.8 7 11 7 11Z" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="10" r="2.2" stroke="currentColor" stroke-width="1.5"/></svg>`;

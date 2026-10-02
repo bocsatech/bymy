@@ -450,7 +450,7 @@
     ensureDeskHeaderCss();
   }
 
-  import("/js/hub-promo.js?v=promoSwap1")
+  import("/js/hub-promo.js?v=cd36c971ed")
     .then(function (mod) {
       if (mod && typeof mod.mountHubPromos === "function") return mod.mountHubPromos();
     })

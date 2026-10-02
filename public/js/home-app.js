@@ -1,28 +1,28 @@
-import { fetchListings, fetchListingsPage, fetchRelatedListings } from "./db-client.js?v=ownerBoost6";
-import { createHomeGridCard, initHomeGridCardPhotos } from "./home-grid-card.js?v=cardCity5";
-import { promoKiemeltActive, promoTopAjanlatActive } from "./listing-promo.js?v=promo1";
+import { fetchListings, fetchListingsPage, fetchRelatedListings } from "./db-client.js?v=658bac0c0e";
+import { createHomeGridCard, initHomeGridCardPhotos } from "./home-grid-card.js?v=599b557038";
+import { promoKiemeltActive, promoTopAjanlatActive } from "./listing-promo.js?v=a2c84c124b";
 import {
   emptyFilters,
   filterListingsBySidebar,
   populateFilterOptions,
   initHomeSearchSidebar,
   initHomeFilterCatalog,
-} from "./home-search-filter.js?v=valto3";
-import { initHomeQuickSearch } from "./home-quicksearch.js?v=bmSearch25";
-import { decodeSavedSearchParam, encodeSavedSearchParam } from "./saved-search.js?v=savedSearch5";
-import { matchDetailedSearch, hasActiveDetailedSearch } from "./auto-detailed-search.js?v=bmSearch25";
-import { updateAutoDeskResultCount, updateAutoDeskAccSummaries } from "./auto-desk-search.js?v=catMenu1";
+} from "./home-search-filter.js?v=ee749a107c";
+import { initHomeQuickSearch } from "./home-quicksearch.js?v=fe7d531576";
+import { decodeSavedSearchParam, encodeSavedSearchParam } from "./saved-search.js?v=a2bd48196d";
+import { matchDetailedSearch, hasActiveDetailedSearch } from "./auto-detailed-search.js?v=4a6bc02dce";
+import { updateAutoDeskResultCount, updateAutoDeskAccSummaries } from "./auto-desk-search.js?v=d7cd7a8c20";
 import {
   emptyIngatlanFilters,
   filterListingsByIngatlan,
   initIngatlanSearch,
-} from "./ingatlan-search.js?v=mobFix8";
-import { normalizeIngatlanUzletag } from "./ingatlan-fields.js?v=immoEladoDefault1";
-import { filterByCategory, initHomeCategoryBar, renderHomeCategoryBar, HOME_CATEGORY_IDS, searchFiltersForCategory } from "./home-category-bar.js?v=catMenu1";
-import { initHomeUnifiedScroll } from "./home-unified-scroll.js";
-import { initHomeStatsBar } from "./home-stats-bar.js?v=mapPostal2";
-import { buildNearbyFilter, readNearbyPrefs } from "./nearby-search.js?v=mapOsm2";
-import { getAuthUser } from "./site-auth.js?v=bootFix2";
+} from "./ingatlan-search.js?v=3c39cebd77";
+import { normalizeIngatlanUzletag } from "./ingatlan-fields.js?v=3a43e30b61";
+import { filterByCategory, initHomeCategoryBar, renderHomeCategoryBar, HOME_CATEGORY_IDS, searchFiltersForCategory } from "./home-category-bar.js?v=933743b739";
+import { initHomeUnifiedScroll } from "./home-unified-scroll.js?v=19bcc2aeb6";
+import { initHomeStatsBar } from "./home-stats-bar.js?v=84ac6f75c1";
+import { buildNearbyFilter, readNearbyPrefs } from "./nearby-search.js?v=0efee20d13";
+import { getAuthUser } from "./site-auth.js?v=aad32d7596";
 import {
   bindListingOpen,
   restoreListingReturn,
@@ -33,10 +33,10 @@ import {
   shouldRestoreVehicleSearch,
   peekMapOpenOnReturn,
   consumeMapOpenOnReturn,
-} from "./listing-return.js?v=listFlash1";
-import { normalizeKivitel } from "./kivitel-options.js?v=kivitel1";
-import { featuredListingIdSet, pickFeaturedListings } from "./home-featured-slots.js?v=featuredNoAuto1";
-import { mountSellerInventory, updateSellerInventoryCount } from "./seller-inventory.js?v=sellerInv30";
+} from "./listing-return.js?v=1911f0cb28";
+import { normalizeKivitel } from "./kivitel-options.js?v=be03aefc2e";
+import { featuredListingIdSet, pickFeaturedListings } from "./home-featured-slots.js?v=58203b249c";
+import { mountSellerInventory, updateSellerInventoryCount } from "./seller-inventory.js?v=a22f247e20";
 
 /** Map module is optional — only loaded when the user clicks the map button. */
 let closeSearchResultsMapFn = null;
@@ -399,7 +399,7 @@ async function syncCategoryToSearchMenu(categoryId) {
   if (!form) return;
   try {
     if (quickSearchApi?.whenReady) await quickSearchApi.whenReady;
-    const { applySavedSearchFilters } = await import("./saved-search.js?v=catMenu1");
+    const { applySavedSearchFilters } = await import("./saved-search.js?v=a2bd48196d");
     await applySavedSearchFilters(form, filters);
     updateAutoDeskAccSummaries(form);
     quickSearchFilters = { ...emptyFilters(), ...filters };
@@ -1154,7 +1154,7 @@ async function ensureAllListingsLoadedForMap() {
 if (PAGE === "auto" || PAGE === "teherauto") {
   ensureMapModule = () => {
     if (!mapModulePromise) {
-      mapModulePromise = import("./search-results-map.js?v=mapOsm2")
+      mapModulePromise = import("./search-results-map.js?v=04ea9bf4b6")
         .then((mod) => {
           updateSearchMapButtonLabels = mod.updateSearchMapButtonLabels;
           closeSearchResultsMapFn = mod.closeSearchResultsMap;
@@ -1279,7 +1279,7 @@ if (PAGE === "ingatlan") {
     const form = document.getElementById("immo-search-form");
     const wheel = form?.querySelector?.('[data-wheel="ingatlan_lakas_tipus"]');
     if (!wheel) return;
-    import("./ingatlan-wheels.js?v=immoSearchMenu1")
+    import("./ingatlan-wheels.js?v=6952ba469c")
       .then(({ setWheelValue }) => {
         setWheelValue(wheel, katParam);
         wheel.dispatchEvent(new CustomEvent("immo-wheel-change", { bubbles: true }));
@@ -1545,7 +1545,7 @@ if (PAGE !== "ingatlan") {
   }).catch((error) => console.error("Járműkatalógus (szűrő):", error));
 }
 
-import("./site-side-content.js")
+import("./site-side-content.js?v=7853b0f379")
   .then((mod) => mod.initSiteSideContent())
   .catch((error) => console.error("Oldalsáv betöltés:", error));
 

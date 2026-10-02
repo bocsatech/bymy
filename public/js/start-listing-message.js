@@ -1,5 +1,5 @@
-import { getAuthUser, loginUrl } from "./site-auth.js?v=authMembersOnly1";
-import { findConversationForListing } from "./messages-api.js?v=msgLive2";
+import { getAuthUser, loginUrl } from "./site-auth.js?v=aad32d7596";
+import { findConversationForListing } from "./messages-api.js?v=5cf6493dc9";
 
 export function isOwnListing(sellerId) {
   const me = Number(getAuthUser()?.id);

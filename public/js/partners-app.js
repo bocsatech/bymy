@@ -2,8 +2,8 @@ import {
   deletePartner,
   fetchPartnerRecommendations,
   loadSavedPostalCode,
-} from "./partners-client.js";
-import { PARTNER_CATEGORIES } from "./partner-categories-data.js";
+} from "./partners-client.js?v=9b94173b1a";
+import { PARTNER_CATEGORIES } from "./partner-categories-data.js?v=b826a00c74";
 
 const statsEl = document.getElementById("partners-stats");
 const listEl = document.getElementById("partners-list");

@@ -1,10 +1,10 @@
-import { initAdFormDeskGuide, refreshAdFormDeskGuide, showDeskGuideSlot } from "./ad-form-desk-guide.js?v=adDeskGuide7";
-import { markImmoPostViewReady } from "./category-picker.js?v=pickerBoot4";
+import { initAdFormDeskGuide, refreshAdFormDeskGuide, showDeskGuideSlot } from "./ad-form-desk-guide.js?v=f5cc36c931";
+import { markImmoPostViewReady } from "./category-picker.js?v=5d45536b6e";
 import {
   applyStep1SearchDomOrder,
   isVehicleStep1Canvas,
   stackVehicleCanvasSingleColumn,
-} from "./ad-form-desk-pinned-blocks.js?v=bmSheet75";
+} from "./ad-form-desk-pinned-blocks.js?v=b59c112e44";
 
 const DESK_MQ = "(min-width: 901px)";
 

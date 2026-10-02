@@ -1,6 +1,6 @@
 
-import { UZEMANYAG_CATEGORIES } from "./equipment-data.js";
-import { bindAutoBmDismiss, autoBmPanelIsOpen } from "./auto-bm-dismiss.js?v=bmDismiss1";
+import { UZEMANYAG_CATEGORIES } from "./equipment-data.js?v=5a39cb5ba3";
+import { bindAutoBmDismiss, autoBmPanelIsOpen } from "./auto-bm-dismiss.js?v=89aa460931";
 
 function labelList(items) {
   if (!items.length) return "Mindegy";

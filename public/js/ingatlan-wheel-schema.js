@@ -1,5 +1,5 @@
 
-import { escapeHtml, escapeAttr, wheelFieldHtml } from "./ingatlan-wheels.js?v=scrollLock4";
+import { escapeHtml, escapeAttr, wheelFieldHtml } from "./ingatlan-wheels.js?v=6952ba469c";
 
 export const WHEEL_COLS = 12;
 

@@ -2,12 +2,12 @@ import {
   categoriesForVertical,
   normalizePartnerVertical,
   partnerCategoryImageUrl,
-} from "./partner-categories-data.js?v=noAllapot1";
+} from "./partner-categories-data.js?v=b826a00c74";
 import {
   fetchPartnerRecommendations,
   loadSavedPostalCode,
   savePostalCode,
-} from "./partner-recommendations.js?v=noAllapot1";
+} from "./partner-recommendations.js?v=fc822e523f";
 
 const RADIUS_KEY = "bymy_partner_radius_km";
 const UI_V = "ingatlanDemoImg1";

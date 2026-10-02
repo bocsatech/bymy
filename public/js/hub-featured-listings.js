@@ -1,11 +1,11 @@
-import { pickFeaturedListings } from "./home-featured-slots.js?v=featuredNoAuto1";
-import { createListingTileCard, slimListingTile } from "./listing-tile.js?v=imgVar1";
-import { bindListingOpen, restoreListingReturn } from "./listing-return.js?v=scrollTop1";
+import { pickFeaturedListings } from "./home-featured-slots.js?v=58203b249c";
+import { createListingTileCard, slimListingTile } from "./listing-tile.js?v=0633cb6729";
+import { bindListingOpen, restoreListingReturn } from "./listing-return.js?v=1911f0cb28";
 import {
   TILE_PAGE_INITIAL,
   TILE_PAGE_MORE,
   fetchTilePagesUntil,
-} from "./listing-tile-pager.js?v=tilePage1";
+} from "./listing-tile-pager.js?v=c8e2dddffb";
 
 const SECTION = document.querySelector('[data-hf="kiemelt"]');
 const RAIL = document.getElementById("hub-featured-rail");

@@ -1,15 +1,15 @@
-import { mountLayoutBoard } from "./bocsatech-layout.js?v=deskFuelPrev5";
+import { mountLayoutBoard } from "./bocsatech-layout.js?v=9412292d69";
 import {
   DESK_FUEL_PREVIEW_PROFILES,
   deskFuelPreviewFromLayoutIntent,
-} from "./ad-form-layout-fuel-preview.js?v=deskFuelPrev5";
-import { mountIngatlanWheelBoard } from "./bocsatech-ingatlan-wheels.js?v=immoUiParity1";
+} from "./ad-form-layout-fuel-preview.js?v=a8c49f2954";
+import { mountIngatlanWheelBoard } from "./bocsatech-ingatlan-wheels.js?v=4c5f8ba7cd";
 import {
   isIngatlanWheelAdminCategory,
   normalizeIngatlanWheelVariant,
   INGATLAN_TIPUS_LAYOUTS,
-} from "./ingatlan-wheel-schema.js?v=immoUiParity1";
-import { INGATLAN_LAKAS_TIPUS, fieldKeysVisibleForTipus } from "./ingatlan-fields.js?v=immoUiParity1";
+} from "./ingatlan-wheel-schema.js?v=bb1c930359";
+import { INGATLAN_LAKAS_TIPUS, fieldKeysVisibleForTipus } from "./ingatlan-fields.js?v=3a43e30b61";
 
 const app = document.getElementById("app");
 
@@ -526,7 +526,7 @@ function h(html) {
       if (typeof actions[act] === "function") actions[act](event, el);
     });
   });
-  import("./postal-city-autofill.js?v=postalFill1")
+  import("./postal-city-autofill.js?v=14f1f30116")
     .then((m) => m.wirePostalCityAutofill(app))
     .catch(() => {});
 }

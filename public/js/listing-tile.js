@@ -1,10 +1,10 @@
-import { formatListingDisplayTitle } from "./listing-card.js";
-import { listingDetailHref } from "./listing-return.js?v=scrollTop1";
-import { createListingFeaturedUnderPhotoStrip } from "./listing-featured-decor.js?v=featured4";
-import { listingShowsKiemeltDecor, promoTopAjanlatActive } from "./listing-promo.js?v=promo1";
-import { listCardImageUrl, bindListingImgFallback } from "./image-variants.js?v=imgVar1";
+import { formatListingDisplayTitle } from "./listing-card.js?v=3e8a4a3fe2";
+import { listingDetailHref } from "./listing-return.js?v=1911f0cb28";
+import { createListingFeaturedUnderPhotoStrip } from "./listing-featured-decor.js?v=e831c3517c";
+import { listingShowsKiemeltDecor, promoTopAjanlatActive } from "./listing-promo.js?v=a2c84c124b";
+import { listCardImageUrl, applyListingImgSrcset } from "./image-variants.js?v=82833209fb";
 
-export { listCardImageUrl } from "./image-variants.js?v=imgVar1";
+export { listCardImageUrl } from "./image-variants.js?v=82833209fb";
 
 const ICON_YEAR = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M3 10h18M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>`;
 const ICON_KM = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 18 12 6l8 12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M7.5 18h9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>`;
@@ -204,13 +204,14 @@ export function createListingTileCard(
   if (imageUrl) {
     const img = document.createElement("img");
     img.className = "hf-card-media-img";
-    img.src = imageUrl;
     img.alt = title;
+    img.width = 240;
+    img.height = 180;
     img.loading = eager ? "eager" : "lazy";
     img.decoding = "async";
     if (eager) img.fetchPriority = "high";
     img.referrerPolicy = "no-referrer";
-    bindListingImgFallback(img);
+    applyListingImgSrcset(img, imageUrl, { sizes: "(max-width: 640px) 45vw, 180px" });
     media.appendChild(img);
   }
   const label = document.createElement("span");

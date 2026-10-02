@@ -1,5 +1,5 @@
 
-import { getAuthUser } from "./site-auth.js?v=auth20260805localdb9";
+import { getAuthUser } from "./site-auth.js?v=aad32d7596";
 import {
   listConversations,
   listMessages,
@@ -11,7 +11,7 @@ import {
   reportConversation,
   blockUser,
   fileToAttachment,
-} from "./messages-api.js?v=msgLive2";
+} from "./messages-api.js?v=5cf6493dc9";
 
 const ICONS = {
   unread: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4.8 7.2h11.2A2.4 2.4 0 0 1 18.4 9.6v5.6a2.4 2.4 0 0 1-2.4 2.4H9.2L6 20v-2.4H4.8A2.4 2.4 0 0 1 2.4 15.2V9.6A2.4 2.4 0 0 1 4.8 7.2Z" stroke="currentColor" stroke-width="1.6"/><path d="M7 11.2h7.2M7 14h4.6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>`,

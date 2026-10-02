@@ -1,10 +1,10 @@
-import { fetchListing } from "./db-client.js?v=contract1";
-import { getAuthUser, getProfile, requireAuthForPage } from "./site-auth.js?v=privateStreet1";
-import { emptyPerson, isBusinessProfile, personFromProfile, vehicleFromListing } from "./adasveteli-data.js?v=contractId1";
+import { fetchListing } from "./db-client.js?v=658bac0c0e";
+import { getAuthUser, getProfile, requireAuthForPage } from "./site-auth.js?v=aad32d7596";
+import { emptyPerson, isBusinessProfile, personFromProfile, vehicleFromListing } from "./adasveteli-data.js?v=4cf411f416";
 import {
   applyDeviceIdentityToPerson,
   getDeviceIdentity,
-} from "./device-contract-identity.js?v=contractKind1";
+} from "./device-contract-identity.js?v=cdac1e6ebc";
 
 const root = document.getElementById("contract-root");
 const state = { role: "seller", listing: null, vehicle: null, own: null, other: emptyPerson("person") };

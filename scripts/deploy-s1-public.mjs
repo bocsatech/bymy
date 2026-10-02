@@ -13,6 +13,8 @@ const host = process.env.BYMY_S1_HOST || "bymy-app";
 const appDir = process.env.BYMY_S1_APP || "/var/www/bymy";
 
 const cmds = [
+  `node "${root}/scripts/embed-ad-form.mjs"`,
+  `node "${root}/scripts/asset-fingerprint.mjs"`,
   `rsync -az --delete "${root}/public/" ${host}:${appDir}/public/`,
   `rsync -az --delete "${root}/lib/" ${host}:${appDir}/lib/`,
   `rsync -az "${root}/server.mjs" ${host}:${appDir}/server.mjs`,

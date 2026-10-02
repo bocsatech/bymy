@@ -6,7 +6,7 @@ import {
   requireAuthForPage,
   initSiteAuth,
   ensureBookmarkletToken,
-} from "./site-auth.js?v=secAuth3";
+} from "./site-auth.js?v=aad32d7596";
 
 const HA_POSTMESSAGE_ORIGINS = new Set([
   "https://www.hasznaltauto.hu",

@@ -1,6 +1,6 @@
 
-import { fetchVehicleCatalog } from "./vehicle-catalog-client.js?v=teherStrict3";
-import { bindAutoBmDismiss, autoBmPanelIsOpen } from "./auto-bm-dismiss.js?v=bmDismiss1";
+import { fetchVehicleCatalog } from "./vehicle-catalog-client.js?v=5004d33efa";
+import { bindAutoBmDismiss, autoBmPanelIsOpen } from "./auto-bm-dismiss.js?v=89aa460931";
 
 function truckKategoria() {
   const fromBody = document.body?.dataset?.truckKategoria;

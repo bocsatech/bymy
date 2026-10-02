@@ -1,5 +1,5 @@
 
-import { lockPageScroll, unlockPageScroll } from "./ingatlan-wheels.js?v=scrollLock7";
+import { lockPageScroll, unlockPageScroll } from "./ingatlan-wheels.js?v=6952ba469c";
 
 const FALLBACK_ITEMS = [
   {

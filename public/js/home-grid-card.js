@@ -1,19 +1,19 @@
-import { escapeHtml } from "./listing-card.js";
-import { listingDetailHref } from "./listing-return.js?v=scrollTop1";
+import { escapeHtml } from "./listing-card.js?v=3e8a4a3fe2";
+import { listingDetailHref } from "./listing-return.js?v=1911f0cb28";
 import {
   listingTileMeta,
   listingTilePrice,
   listingTileTitle,
-} from "./listing-tile.js?v=imgVar1";
-import { getAuthUser } from "./site-auth.js?v=cegAdatok1";
+} from "./listing-tile.js?v=0633cb6729";
+import { getAuthUser } from "./site-auth.js?v=aad32d7596";
 import {
   getParkplatz,
   addParkplatzItem,
   removeParkplatzItem,
-} from "./fok-data.js?v=parkThumb1";
-import { listingFeaturedUnderPhotoHtml } from "./listing-featured-decor.js?v=featured4";
-import { listingShowsKiemeltDecor, promoTopAjanlatActive } from "./listing-promo.js?v=promo1";
-import { listingImgFallbackAttr } from "./image-variants.js?v=imgVar1";
+} from "./fok-data.js?v=653bb89787";
+import { listingFeaturedUnderPhotoHtml } from "./listing-featured-decor.js?v=e831c3517c";
+import { listingShowsKiemeltDecor, promoTopAjanlatActive } from "./listing-promo.js?v=a2c84c124b";
+import { listingImgFallbackAttr, listingImgSrcsetAttrs, listCardImageUrl } from "./image-variants.js?v=82833209fb";
 
 const HU_COUNTY_KEYS = new Set(
   [
@@ -147,14 +147,18 @@ function buildPhotoMarkup(urls) {
   if (!urls.length) {
     return `<div class="home-grid-card-photo" aria-hidden="true"></div>`;
   }
+  const sizes = "(max-width: 768px) 100vw, 640px";
   if (urls.length === 1) {
-    return `<div class="home-grid-card-photo" aria-hidden="true"><img class="home-grid-card-photo-img" src="${escapeHtml(urls[0])}" alt="" width="640" height="400" loading="lazy" decoding="async" referrerpolicy="no-referrer" ${fb} /></div>`;
+    const src = listCardImageUrl(urls[0]) || urls[0];
+    const ss = listingImgSrcsetAttrs(urls[0], { sizes });
+    return `<div class="home-grid-card-photo" aria-hidden="true"><img class="home-grid-card-photo-img" src="${escapeHtml(src)}" alt="" width="640" height="400" loading="lazy" decoding="async" referrerpolicy="no-referrer" ${ss} ${fb} /></div>`;
   }
   const slides = urls
-    .map(
-      (url) =>
-        `<div class="home-grid-card-photo-slide"><img class="home-grid-card-photo-img" src="${escapeHtml(url)}" alt="" width="640" height="400" loading="lazy" decoding="async" referrerpolicy="no-referrer" ${fb} /></div>`
-    )
+    .map((url) => {
+      const src = listCardImageUrl(url) || url;
+      const ss = listingImgSrcsetAttrs(url, { sizes });
+      return `<div class="home-grid-card-photo-slide"><img class="home-grid-card-photo-img" src="${escapeHtml(src)}" alt="" width="640" height="400" loading="lazy" decoding="async" referrerpolicy="no-referrer" ${ss} ${fb} /></div>`;
+    })
     .join("");
   return `<div class="home-grid-card-photo-track is-multi" tabindex="0" role="group" aria-label="Hirdetés képei">${slides}</div>`;
 }

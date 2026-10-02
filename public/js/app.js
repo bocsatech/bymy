@@ -4,14 +4,14 @@ import {
   fetchListing,
   saveListingPhotosOrder,
   getStoredListingId,
-} from "./db-client.js?v=wizardSave1";
-import { createAdForm } from "./form-core.js?v=photoEdit1";
-import { initPriceMarketHint } from "./price-market-hint.js?v=priceHint5";
-import { applyImportedVehicleToSelects } from "./vehicle-catalog-client.js?v=importVehicle1";
-import { initTireSizes } from "./tire-sizes-ui.js";
-import { initPhoneLanguages } from "./phone-lang-ui.js";
-import { initCategoryPicker } from "./category-picker.js?v=pickerBoot4";
-import { applyAdFormDesk, clearAdFormEditBoot, isDeskVehicleSubtype, scrollAdFormPageTop } from "./ad-form-desk.js?v=bmSheet75";
+} from "./db-client.js?v=658bac0c0e";
+import { createAdForm } from "./form-core.js?v=2d3f07b362";
+import { initPriceMarketHint } from "./price-market-hint.js?v=ee49eb1a56";
+import { applyImportedVehicleToSelects } from "./vehicle-catalog-client.js?v=5004d33efa";
+import { initTireSizes } from "./tire-sizes-ui.js?v=d01f914c82";
+import { initPhoneLanguages } from "./phone-lang-ui.js?v=bc55c36aef";
+import { initCategoryPicker } from "./category-picker.js?v=5d45536b6e";
+import { applyAdFormDesk, clearAdFormEditBoot, isDeskVehicleSubtype, scrollAdFormPageTop } from "./ad-form-desk.js?v=004fdc722d";
 import {
   requireAuthForPage,
   getAuthUser,
@@ -19,14 +19,14 @@ import {
   loginUrl,
   initSiteAuth,
   loadProfileFromServer,
-} from "./site-auth.js?v=pickerBoot2";
+} from "./site-auth.js?v=aad32d7596";
 import {
   applyListingAddressFromProfile,
   applyListingAddressFromProfileSync,
   initAdLocationProfile,
   getListingAddressFromProfile,
-} from "./ad-location-profile.js?v=postalFill1";
-import { initImproveDescription } from "./improve-description.js?v=descAi2";
+} from "./ad-location-profile.js?v=d0127f4d2c";
+import { initImproveDescription } from "./improve-description.js?v=2b630f62a0";
 
 initSiteAuth();
 /** Ne blokkolja a kategóriaválasztót — sessionStorage alapján azonnal kattintható; háttérben /api/auth/me. */
@@ -360,6 +360,6 @@ if (editing) {
   }
 }
 
-import("./site-side-content.js")
+import("./site-side-content.js?v=7853b0f379")
   .then((mod) => mod.initSiteSideContent())
   .catch((error) => console.error("Oldalsáv betöltés:", error));

@@ -1,11 +1,11 @@
 
-import { normalizeIngatlanUzletag, INGATLAN_LAKAS_TIPUS, INGATLAN_LAKAS_TIPUS_AIRBNB } from "./ingatlan-fields.js?v=immoUiParity1";
+import { normalizeIngatlanUzletag, INGATLAN_LAKAS_TIPUS, INGATLAN_LAKAS_TIPUS_AIRBNB } from "./ingatlan-fields.js?v=3a43e30b61";
 import {
   initIngatlanSearch,
   readIngatlanSearchForm,
-} from "./ingatlan-search.js?v=immoTipusPick1";
-import { fetchIngatlanWheelSchema } from "./ingatlan-wheel-schema.js?v=immoPostNum1";
-import { wireTelepulesSuggestIn } from "./telepules-suggest.js?v=telepClose1";
+} from "./ingatlan-search.js?v=3c39cebd77";
+import { fetchIngatlanWheelSchema } from "./ingatlan-wheel-schema.js?v=bb1c930359";
+import { wireTelepulesSuggestIn } from "./telepules-suggest.js?v=0a40829ec5";
 
 function removeIngatlanFormFields(form) {
   form?.querySelector("#ingatlan-fields")?.remove();

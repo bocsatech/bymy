@@ -1,6 +1,6 @@
 
-import { readWheel, readWheelList, setWheelValue, fillWheel } from "./ingatlan-wheels.js?v=immoClearAll2";
-import { closeAllInlineDrums, syncDrumWheelDisplay } from "./immo-drum-picker.js?v=immoAdFormMenu1";
+import { readWheel, readWheelList, setWheelValue, fillWheel } from "./ingatlan-wheels.js?v=6952ba469c";
+import { closeAllInlineDrums, syncDrumWheelDisplay } from "./immo-drum-picker.js?v=c4c7ac29a2";
 import {
   UZEMANYAG_CATEGORIES,
   flattenUzemanyagOptions,
@@ -8,7 +8,7 @@ import {
   flattenAllapotOptions,
   TEHER_35_KIVITEL_CATEGORIES,
   flattenTeher35KivitelOptions,
-} from "./equipment-data.js?v=kisteherHa1";
+} from "./equipment-data.js?v=5a39cb5ba3";
 
 const ITEM_H = 52;
 const MULTI_VISIBLE = 10;

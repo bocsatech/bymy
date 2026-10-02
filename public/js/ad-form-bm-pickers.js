@@ -7,15 +7,15 @@ import {
   flattenSebessegvaltoOptions,
   flattenUzemanyagOptions,
   flattenAllapotOptions,
-} from "./equipment-data.js?v=valto3b";
-import { KIVITEL_OPTIONS } from "./kivitel-options.js?v=kivitel1";
-import { fetchVehicleCatalog } from "./vehicle-catalog-client.js?v=teherStrict3";
-import { bindAutoBmDismiss, autoBmPanelIsOpen } from "./auto-bm-dismiss.js?v=bmDismiss1";
+} from "./equipment-data.js?v=5a39cb5ba3";
+import { KIVITEL_OPTIONS } from "./kivitel-options.js?v=be03aefc2e";
+import { fetchVehicleCatalog } from "./vehicle-catalog-client.js?v=5004d33efa";
+import { bindAutoBmDismiss, autoBmPanelIsOpen } from "./auto-bm-dismiss.js?v=89aa460931";
 import {
   VEHICLE_KARPIT_OPTIONS,
   VEHICLE_SZIN_OPTIONS,
   VEHICLE_TETTO_OPTIONS,
-} from "./vehicle-appearance-options.js?v=appearanceBm1";
+} from "./vehicle-appearance-options.js?v=0b7c078fa5";
 
 const PLACEHOLDER = "Válasszon";
 const DROPDOWN_VISIBLE_ROWS = 7;
@@ -2399,9 +2399,9 @@ async function mountAdBrandModelCombined(form, catalog) {
     modellField.classList.remove("ad-form-bm-modell-nested");
   }
 
-  const { fillWheel, setWheelValue, readWheel, syncHostClearButton } = await import("./ingatlan-wheels.js?v=immoClearAll2");
-  const { openBrandModelCatalogSheet } = await import("./auto-drum-sheet.js?v=brandDrum31");
-  const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
+  const { fillWheel, setWheelValue, readWheel, syncHostClearButton } = await import("./ingatlan-wheels.js?v=6952ba469c");
+  const { openBrandModelCatalogSheet } = await import("./auto-drum-sheet.js?v=8a910acde0");
+  const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=c4c7ac29a2");
 
   const brands = [...(catalog?.gyartmanyok || [])].sort((a, b) =>
     a.localeCompare(b, "hu", { sensitivity: "base" })
@@ -2644,9 +2644,9 @@ async function mountAdSelectDrum(select, {
   let initDrumWheel;
   let syncDrumWheelDisplay;
   try {
-    ({ fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=immoClearAll2"));
-    ({ openStandaloneSwitchSheet, bindAutoDrumSheet } = await import("./auto-drum-sheet.js?v=brandDrum31"));
-    ({ initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1"));
+    ({ fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=6952ba469c"));
+    ({ openStandaloneSwitchSheet, bindAutoDrumSheet } = await import("./auto-drum-sheet.js?v=8a910acde0"));
+    ({ initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=c4c7ac29a2"));
   } catch (error) {
     console.warn("Dobkerék betöltés:", title || select.id, error);
     showNativeSelect(select);
@@ -2884,9 +2884,9 @@ async function mountAdSplitYmDrum({
     ensureYearSelectFilled(ev);
   }
 
-  const { fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=immoClearAll2");
-  const { openYmDualSheet } = await import("./auto-drum-sheet.js?v=brandDrum31");
-  const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=immoClear1");
+  const { fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=6952ba469c");
+  const { openYmDualSheet } = await import("./auto-drum-sheet.js?v=8a910acde0");
+  const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=c4c7ac29a2");
 
   const yearOpts = optionsFromSelect(ev, emptyYear);
   const monthOpts = optionsFromSelect(honap, emptyMonth);
@@ -3243,8 +3243,8 @@ export async function mountTireSizeSwitchPickers(form) {
   }
 
   try {
-    const { fillTireSelect } = await import("./tire-sizes-ui.js?v=tireYm4");
-    const { openTireTripleSheet } = await import("./auto-drum-sheet.js?v=brandDrum31");
+    const { fillTireSelect } = await import("./tire-sizes-ui.js?v=d01f914c82");
+    const { openTireTripleSheet } = await import("./auto-drum-sheet.js?v=8a910acde0");
     const blocks = [...grid.querySelectorAll(":scope > .tire-block")];
 
     for (let index = 0; index < TIRE_ROW_SPECS.length; index += 1) {

@@ -1,8 +1,8 @@
-import { fetchListings, fetchListing, deleteListingFromDb, deleteAllListingsFromDb, fetchDbStats, saveListingToDb, recordListingView } from "./db-client.js?v=hdView1";
-import { renderListingCells } from "./cells-view.js";
-import { createListingCard, formatListingDisplayTitle } from "./listing-card.js";
-import { getAuthUser } from "./site-auth.js?v=auth20260805localdb9";
-import { listingDetailHref, rememberListingOpen, restoreListingReturn } from "./listing-return.js?v=scrollTop1";
+import { fetchListings, fetchListing, deleteListingFromDb, deleteAllListingsFromDb, fetchDbStats, saveListingToDb, recordListingView } from "./db-client.js?v=658bac0c0e";
+import { renderListingCells } from "./cells-view.js?v=8237c0fee4";
+import { createListingCard, formatListingDisplayTitle } from "./listing-card.js?v=3e8a4a3fe2";
+import { getAuthUser } from "./site-auth.js?v=aad32d7596";
+import { listingDetailHref, rememberListingOpen, restoreListingReturn } from "./listing-return.js?v=1911f0cb28";
 
 const listEl = document.getElementById("listings-list");
 const detailEl = document.getElementById("listings-detail");
@@ -218,7 +218,7 @@ if (Number.isFinite(openId) && openId > 0) {
   window.location.replace(listingDetailHref(openId));
 } else {
   setActiveFilter("all");
-  import("./site-side-content.js")
+  import("./site-side-content.js?v=7853b0f379")
     .then((mod) => mod.initSiteSideContent())
     .catch((error) => console.error("Oldalsáv betöltés:", error));
   refreshStats().catch(console.error);

@@ -8,4 +8,4 @@ export {
   setDeviceIdentity,
   setPrivateStreet,
   stripDeviceIdentityFormFields,
-} from "./device-contract-identity.js";
+} from "./device-contract-identity.js?v=cdac1e6ebc";

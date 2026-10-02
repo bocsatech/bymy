@@ -1,4 +1,4 @@
-import { buildYouTubeEmbedHtml } from "./youtube-embed.js";
+import { buildYouTubeEmbedHtml } from "./youtube-embed.js?v=56b3cb2219";
 
 const SIDE_KEYS = ["left", "right"];
 const VIDEO_COUNT = 3;

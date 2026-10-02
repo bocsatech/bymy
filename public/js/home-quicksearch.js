@@ -324,6 +324,7 @@ export function initHomeQuickSearch({ onSearch = () => {}, onFilterPreview, onDe
     if (deskFilterMenuReady(f)) {
       arrangeAutoDeskDemoFields(f);
       try {
+        syncAutoSearchAccShell(f);
         updateAutoDeskAccSummaries(f);
       } catch {
         /* ignore */

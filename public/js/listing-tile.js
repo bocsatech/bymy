@@ -2,6 +2,9 @@ import { formatListingDisplayTitle } from "./listing-card.js";
 import { listingDetailHref } from "./listing-return.js?v=scrollTop1";
 import { createListingFeaturedUnderPhotoStrip } from "./listing-featured-decor.js?v=featured4";
 import { listingShowsKiemeltDecor, promoTopAjanlatActive } from "./listing-promo.js?v=promo1";
+import { listCardImageUrl, bindListingImgFallback } from "./image-variants.js?v=imgVar1";
+
+export { listCardImageUrl } from "./image-variants.js?v=imgVar1";
 
 const ICON_YEAR = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M3 10h18M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>`;
 const ICON_KM = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 18 12 6l8 12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M7.5 18h9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>`;
@@ -66,31 +69,6 @@ function softTitleCase(value) {
   return s
     .toLocaleLowerCase("hu-HU")
     .replace(/(^|[\s\-_/])(\p{L})/gu, (_, sep, ch) => `${sep}${ch.toLocaleUpperCase("hu-HU")}`);
-}
-
-/** Lista-kártya: HA CDN HQ → 640x480 (böngésző ne töltsön 2K képet a mozaikra). */
-export function listCardImageUrl(src) {
-  const raw = String(src ?? "").trim();
-  if (!raw) return "";
-  try {
-    const u = new URL(raw.startsWith("//") ? `https:${raw}` : raw, "https://bymy.local");
-    const host = u.hostname.replace(/^www\./, "").toLowerCase();
-    if (host === "hasznaltautocdn.com" || host.endsWith(".hasznaltautocdn.com")) {
-      const m = u.pathname.match(/\/(\d{5,12})\/(\d{5,12})\.(jpe?g|png|webp)$/i);
-      if (m) {
-        const ext = m[3].toLowerCase().replace("jpeg", "jpg");
-        return `https://img.hasznaltautocdn.com/640x480/${m[1]}/${m[2]}.${ext}`;
-      }
-      if (/\/\d{2,4}x\d{2,4}\//i.test(u.pathname)) {
-        u.pathname = u.pathname.replace(/\/\d{2,4}x\d{2,4}\//i, "/640x480/");
-        u.search = "";
-        return u.href;
-      }
-    }
-  } catch {
-    /* keep raw */
-  }
-  return raw;
 }
 
 export function listingTilePrice(item) {
@@ -232,6 +210,7 @@ export function createListingTileCard(
     img.decoding = "async";
     if (eager) img.fetchPriority = "high";
     img.referrerPolicy = "no-referrer";
+    bindListingImgFallback(img);
     media.appendChild(img);
   }
   const label = document.createElement("span");

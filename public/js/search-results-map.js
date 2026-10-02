@@ -15,7 +15,7 @@ import {
   rememberListingOpen,
   markMapOpenOnReturn,
 } from "./listing-return.js?v=perfNav1";
-import { listingTileTitle, listingTilePrice } from "./listing-tile.js?v=listThumb1";
+import { listingTileTitle, listingTilePrice } from "./listing-tile.js?v=imgVar1";
 import { getAuthUser, loadProfileFromServer } from "./site-auth.js?v=bootFix2";
 import { fetchListingsPage } from "./db-client.js?v=ownerBoost6";
 import { buildNearbyFilter, readNearbyPrefs } from "./nearby-search.js?v=mapOsm2";

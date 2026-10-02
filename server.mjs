@@ -755,6 +755,7 @@ async function handleImageUploadApi(req, res) {
       url: uploaded.publicUrl,
       publicUrl: uploaded.publicUrl,
       path: uploaded.path,
+      variants: uploaded.variants || null,
       asset,
     });
   } catch (error) {

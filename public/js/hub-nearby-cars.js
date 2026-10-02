@@ -1,6 +1,6 @@
 import { getAuthUser, isLoggedIn, refreshAuthSession } from "./site-auth.js?v=bootFix2";
 import { restoreListingReturn } from "./listing-return.js?v=scrollTop1";
-import { slimListingTile } from "./listing-tile.js?v=listThumb1";
+import { slimListingTile } from "./listing-tile.js?v=imgVar1";
 import {
   autoNearbyHref,
   buildNearbyFilter,

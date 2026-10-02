@@ -1,5 +1,5 @@
 import { pickFeaturedListings } from "./home-featured-slots.js?v=featuredNoAuto1";
-import { createListingTileCard, slimListingTile } from "./listing-tile.js?v=listThumb1";
+import { createListingTileCard, slimListingTile } from "./listing-tile.js?v=imgVar1";
 import { bindListingOpen, restoreListingReturn } from "./listing-return.js?v=scrollTop1";
 import {
   TILE_PAGE_INITIAL,

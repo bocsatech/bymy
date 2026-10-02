@@ -4,7 +4,7 @@ import {
   listingTileMeta,
   listingTilePrice,
   listingTileTitle,
-} from "./listing-tile.js?v=listThumb1";
+} from "./listing-tile.js?v=imgVar1";
 import { getAuthUser } from "./site-auth.js?v=cegAdatok1";
 import {
   getParkplatz,
@@ -13,6 +13,7 @@ import {
 } from "./fok-data.js?v=parkThumb1";
 import { listingFeaturedUnderPhotoHtml } from "./listing-featured-decor.js?v=featured4";
 import { listingShowsKiemeltDecor, promoTopAjanlatActive } from "./listing-promo.js?v=promo1";
+import { listingImgFallbackAttr } from "./image-variants.js?v=imgVar1";
 
 const HU_COUNTY_KEYS = new Set(
   [
@@ -142,16 +143,17 @@ function cardSubtitle(preview, form) {
 }
 
 function buildPhotoMarkup(urls) {
+  const fb = listingImgFallbackAttr();
   if (!urls.length) {
     return `<div class="home-grid-card-photo" aria-hidden="true"></div>`;
   }
   if (urls.length === 1) {
-    return `<div class="home-grid-card-photo" aria-hidden="true"><img class="home-grid-card-photo-img" src="${escapeHtml(urls[0])}" alt="" width="640" height="400" loading="lazy" decoding="async" referrerpolicy="no-referrer" /></div>`;
+    return `<div class="home-grid-card-photo" aria-hidden="true"><img class="home-grid-card-photo-img" src="${escapeHtml(urls[0])}" alt="" width="640" height="400" loading="lazy" decoding="async" referrerpolicy="no-referrer" ${fb} /></div>`;
   }
   const slides = urls
     .map(
       (url) =>
-        `<div class="home-grid-card-photo-slide"><img class="home-grid-card-photo-img" src="${escapeHtml(url)}" alt="" width="640" height="400" loading="lazy" decoding="async" referrerpolicy="no-referrer" /></div>`
+        `<div class="home-grid-card-photo-slide"><img class="home-grid-card-photo-img" src="${escapeHtml(url)}" alt="" width="640" height="400" loading="lazy" decoding="async" referrerpolicy="no-referrer" ${fb} /></div>`
     )
     .join("");
   return `<div class="home-grid-card-photo-track is-multi" tabindex="0" role="group" aria-label="Hirdetés képei">${slides}</div>`;

@@ -1,3 +1,5 @@
+import { listingImgFallbackAttr } from "./image-variants.js?v=imgVar1";
+
 const STATUS_BADGES = {
   mentett: { label: "MENTETT", mod: "mentett" },
   feladott: { label: "FELADOTT", mod: "feladott" },
@@ -136,7 +138,7 @@ export function createListingCard(item, { selected = false, formatDate = (v) => 
   const updated = formatDate(item.updated_at);
   const imageUrl = preview.imageUrl || item.fo_kep || "";
   const photoInner = imageUrl
-    ? `<img class="ha-card-photo-img" src="${escapeHtml(imageUrl)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" />`
+    ? `<img class="ha-card-photo-img" src="${escapeHtml(imageUrl)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" ${listingImgFallbackAttr()} />`
     : `<div class="ha-card-photo-empty" aria-hidden="true">
           <span class="ha-card-photo-icon" aria-hidden="true">
             <svg width="22" height="18" viewBox="0 0 22 18" fill="none" xmlns="http://www.w3.org/2000/svg">

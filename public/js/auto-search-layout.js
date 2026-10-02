@@ -392,7 +392,7 @@ function kmFilterOptions(emptyLabel = "Mindegy") {
 }
 
 function fillKmSelect(select, emptyLabel) {
-  if (!select) return;
+  if (!select || select.tagName !== "SELECT") return;
   select.innerHTML = "";
   for (const opt of kmFilterOptions(emptyLabel)) {
     const el = document.createElement("option");
@@ -403,7 +403,7 @@ function fillKmSelect(select, emptyLabel) {
 }
 
 function fillNumberSelect(select, values, emptyLabel, format = (n) => n.toLocaleString("hu-HU")) {
-  if (!select) return;
+  if (!select || select.tagName !== "SELECT") return;
   select.innerHTML = `<option value="">${emptyLabel}</option>`;
   for (const value of values) {
     const opt = document.createElement("option");

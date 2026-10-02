@@ -79,6 +79,8 @@ html[data-theme="dark"] .bymy-qr__label {
   position: relative;
   display: flex;
   align-items: center;
+  /* Autókereső wheel-trigger magasság / tap */
+  min-height: 48px;
 }
 
 .ertek-field__trigger [data-ertek-summary].is-empty {

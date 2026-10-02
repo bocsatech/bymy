@@ -1,8 +1,8 @@
-/** Kereskedői értékbecslő — autókereső-szerű mezők + üzemanyag. */
+/** Kereskedői értékbecslő — ugyanaz a dobkerék / sheet, mint az autókeresőn. */
 
-import { fetchVehicleCatalog, fetchModelTypes } from "./vehicle-catalog-client.js?v=ertek2";
+import { fetchVehicleCatalog, fetchModelTypes } from "./vehicle-catalog-client.js?v=ertek3";
 import { parseKmDigits } from "./km-input.js?v=30e4feeab0";
-import { UZEMANYAG_CATEGORIES } from "./equipment-data.js?v=ertek2";
+import { UZEMANYAG_CATEGORIES } from "./equipment-data.js?v=ertek3";
 
 const DEBOUNCE_MS = 350;
 const EMPTY = {
@@ -35,14 +35,13 @@ function yearOptions(fromApi) {
   return out;
 }
 
-function toItems(list, { emptyLabel } = {}) {
+function toItems(list) {
   const items = [];
-  if (emptyLabel != null) items.push({ value: "", label: emptyLabel });
   for (const item of list || []) {
     if (typeof item === "string") {
       if (!item) continue;
       items.push({ value: item, label: item });
-    } else if (item?.value != null) {
+    } else if (item?.value != null && String(item.value)) {
       items.push({ value: String(item.value), label: String(item.label || item.value) });
     }
   }
@@ -50,13 +49,10 @@ function toItems(list, { emptyLabel } = {}) {
 }
 
 function fuelMainItems() {
-  return [
-    { value: "", label: EMPTY.uzemanyag },
-    ...UZEMANYAG_CATEGORIES.map((cat) => ({
-      value: cat.value || cat.id,
-      label: cat.label,
-    })),
-  ];
+  return UZEMANYAG_CATEGORIES.map((cat) => ({
+    value: cat.value || cat.id,
+    label: cat.label,
+  }));
 }
 
 function fuelChildren(value) {
@@ -83,13 +79,19 @@ function formatResult(data) {
     </div>`;
 }
 
-function ensureDrumCss() {
-  if (document.querySelector('link[data-ertek-drum-css]')) return;
+function ensureLink(href, marker) {
+  if (document.querySelector(`link[${marker}]`)) return;
   const link = document.createElement("link");
   link.rel = "stylesheet";
-  link.href = "/css/auto-hero.css?v=ertekDrum1";
-  link.dataset.ertekDrumCss = "1";
+  link.href = href;
+  link.setAttribute(marker, "1");
   document.head.appendChild(link);
+}
+
+function ensureDrumCss() {
+  /* Ugyanaz a sheet CSS, mint auto.html-en — enélkül a portal összecsuklik. */
+  ensureLink("/css/ingatlan-search.css?v=ertekDrum2", "data-ertek-immo-css");
+  ensureLink("/css/auto-hero.css?v=ertekDrum2", "data-ertek-hero-css");
 }
 
 function setField(panel, key, value, label) {
@@ -106,6 +108,16 @@ function readField(panel, key) {
   return String(el(`[data-ertek-${key}]`, panel)?.value || "").trim();
 }
 
+function labelForFuel(value) {
+  for (const cat of UZEMANYAG_CATEGORIES) {
+    if ((cat.value || cat.id) === value) return cat.label;
+    for (const child of cat.children || []) {
+      if (child.value === value) return child.label;
+    }
+  }
+  return value;
+}
+
 export async function initErtekbecsloPanel(root = document) {
   const panel = el('[data-mm-panel="ertekbecslo"]', root) || el("[data-ertekbecslo]", root);
   if (!panel || panel.dataset.ertekReady === "1") return;
@@ -119,7 +131,7 @@ export async function initErtekbecsloPanel(root = document) {
 
   let catalog = null;
   let typeItems = [];
-  let yearItems = toItems(yearOptions(), { emptyLabel: EMPTY.ev });
+  let yearItems = toItems(yearOptions());
   let timer = null;
   let openStandaloneSwitchSheet = null;
 
@@ -133,37 +145,34 @@ export async function initErtekbecsloPanel(root = document) {
   }
 
   try {
-    ({ openStandaloneSwitchSheet } = await import("./auto-drum-sheet.js?v=ertekDrum1"));
+    ({ openStandaloneSwitchSheet } = await import("./auto-drum-sheet.js?v=9ebba008fe"));
   } catch (err) {
     console.warn("Értékbecslő sheet:", err);
   }
 
   function brandItems() {
-    return toItems([...(catalog.gyartmanyok || [])].sort((a, b) => a.localeCompare(b, "hu")), {
-      emptyLabel: EMPTY.gyartmany,
-    });
+    return toItems([...(catalog.gyartmanyok || [])].sort((a, b) => a.localeCompare(b, "hu")));
   }
 
   function modelItems(brand) {
-    const models = brand ? catalog.modellek?.[brand] || [] : [];
-    return toItems(models, { emptyLabel: EMPTY.modell });
+    return toItems(brand ? catalog.modellek?.[brand] || [] : []);
   }
 
   async function refreshTypesAndYears() {
     const brand = readField(panel, "gyartmany");
     const modell = readField(panel, "modell");
     if (!brand || !modell) {
-      typeItems = toItems([], { emptyLabel: EMPTY.tipus });
-      yearItems = toItems(yearOptions(), { emptyLabel: EMPTY.ev });
+      typeItems = [];
+      yearItems = toItems(yearOptions());
       return;
     }
     try {
       const data = await fetchModelTypes(brand, modell, { kind: "szemelyauto" });
-      typeItems = toItems(data?.tipusok || [], { emptyLabel: EMPTY.tipus });
-      yearItems = toItems(yearOptions(data?.evek), { emptyLabel: EMPTY.ev });
+      typeItems = toItems(data?.tipusok || []);
+      yearItems = toItems(yearOptions(data?.evek));
     } catch {
-      typeItems = toItems([], { emptyLabel: EMPTY.tipus });
-      yearItems = toItems(yearOptions(), { emptyLabel: EMPTY.ev });
+      typeItems = [];
+      yearItems = toItems(yearOptions());
     }
   }
 
@@ -216,10 +225,12 @@ export async function initErtekbecsloPanel(root = document) {
     let items = [];
     let getChildren = null;
     let title = EMPTY[key] || key;
+    let emptyLabel = "Mindegy";
 
     if (key === "gyartmany") {
       items = brandItems();
       title = "Gyártmány";
+      emptyLabel = "Mindegy";
     } else if (key === "modell") {
       const brand = readField(panel, "gyartmany");
       if (!brand) {
@@ -229,9 +240,19 @@ export async function initErtekbecsloPanel(root = document) {
       items = modelItems(brand);
       title = "Modell";
     } else if (key === "tipus") {
+      const brand = readField(panel, "gyartmany");
+      const modell = readField(panel, "modell");
+      if (!brand || !modell) {
+        out.innerHTML = '<p class="ertek-msg">Előbb válassz gyártmányt és modellt.</p>';
+        return;
+      }
       await refreshTypesAndYears();
       items = typeItems;
       title = "Típus";
+      if (!items.length) {
+        out.innerHTML = '<p class="ertek-msg">Ehhez a modellhez nincs külön típus a katalógusban.</p>';
+        return;
+      }
     } else if (key === "uzemanyag") {
       items = fuelMainItems();
       getChildren = fuelChildren;
@@ -240,12 +261,19 @@ export async function initErtekbecsloPanel(root = document) {
       await refreshTypesAndYears();
       items = yearItems;
       title = "Évjárat";
+      emptyLabel = "Évjárat";
+    }
+
+    /* Autókereső: a trigger köré immo-wheel-wrap — a sheet head pozíció ehhez igazodik. */
+    let wrap = trigger.closest(".immo-wheel-wrap, .auto-desk-field, .ertek-field");
+    if (wrap && !wrap.classList.contains("immo-wheel-wrap")) {
+      wrap.classList.add("immo-wheel-wrap");
     }
 
     openStandaloneSwitchSheet({
       trigger,
       title,
-      emptyLabel: EMPTY[key] || "—",
+      emptyLabel,
       items,
       initialSelected: [readField(panel, key)].filter(Boolean),
       singleSelect: true,
@@ -254,11 +282,7 @@ export async function initErtekbecsloPanel(root = document) {
         const value = Array.isArray(selected) ? selected[0] || "" : String(selected || "");
         const label =
           items.find((it) => it.value === value)?.label ||
-          (getChildren
-            ? UZEMANYAG_CATEGORIES.flatMap((c) => c.children || [c]).find((c) => c.value === value)
-                ?.label
-            : null) ||
-          value;
+          (key === "uzemanyag" ? labelForFuel(value) : value);
         setField(panel, key, value, label);
 
         if (key === "gyartmany") {

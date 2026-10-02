@@ -8,11 +8,39 @@
  * R2 vagy filesystem backend. HA CDN URL-eket kihagyja (ott a CDN méretezi).
  */
 
-import { listListings } from "../lib/db.mjs";
-import { isBymyManagedImageUrl, stripImageVariantSuffix } from "../lib/image-variants.mjs";
-import { getImageStorageBackend } from "../lib/image-storage-backend.mjs";
-import { IMAGE_MEDIA_URL_PREFIX } from "../lib/filesystem-image-storage.mjs";
-import { r2PublicBaseUrl } from "../lib/r2-image-storage.mjs";
+import { readFileSync, existsSync } from "fs";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
+
+const root = join(dirname(fileURLToPath(import.meta.url)), "..");
+
+function loadEnv(path) {
+  if (!existsSync(path)) return;
+  for (const line of readFileSync(path, "utf8").split("\n")) {
+    const t = line.trim();
+    if (!t || t.startsWith("#")) continue;
+    const i = t.indexOf("=");
+    if (i < 1) continue;
+    const key = t.slice(0, i).trim();
+    let val = t.slice(i + 1).trim();
+    if (
+      (val.startsWith('"') && val.endsWith('"')) ||
+      (val.startsWith("'") && val.endsWith("'"))
+    ) {
+      val = val.slice(1, -1);
+    }
+    if (!process.env[key]) process.env[key] = val;
+  }
+}
+
+loadEnv(join(root, ".env"));
+loadEnv(join(root, ".env.local"));
+
+const { listListings } = await import("../lib/db.mjs");
+const { isBymyManagedImageUrl, stripImageVariantSuffix } = await import("../lib/image-variants.mjs");
+const { getImageStorageBackend } = await import("../lib/image-storage-backend.mjs");
+const { IMAGE_MEDIA_URL_PREFIX } = await import("../lib/filesystem-image-storage.mjs");
+const { r2PublicBaseUrl } = await import("../lib/r2-image-storage.mjs");
 
 function objectKeyFromPublicUrl(url) {
   const raw = stripImageVariantSuffix(String(url || "").trim());
@@ -55,17 +83,58 @@ async function main() {
   const backend = getImageStorageBackend();
   console.log(`Backend: ${backend}`);
 
-  const all = listListings({ limit: 2000, status: "feladott" });
   const targets = [];
   const seen = new Set();
-  for (const row of all) {
-    const fo = String(row.fo_kep || "").trim();
-    if (!fo || !isBymyManagedImageUrl(fo)) continue;
-    const key = objectKeyFromPublicUrl(fo);
-    if (!key || seen.has(key)) continue;
-    seen.add(key);
-    targets.push(fo);
-    if (targets.length >= limit) break;
+
+  // 1) Listing fo_kep (bymy-kezelt URL-ek)
+  try {
+    const all = listListings({ limit: 2000, status: "feladott" });
+    const rows = Array.isArray(all) ? all : await all;
+    for (const row of rows || []) {
+      const fo = String(row.fo_kep || "").trim();
+      if (!fo || !isBymyManagedImageUrl(fo)) continue;
+      const key = objectKeyFromPublicUrl(fo);
+      if (!key || seen.has(key)) continue;
+      // /uploads/listings → nem R2 kulcs; R2 scan kezeli a valódi objecteket
+      if (key.startsWith("uploads/")) continue;
+      seen.add(key);
+      targets.push(fo.startsWith("http") || fo.startsWith("/") ? fo : key);
+      if (targets.length >= limit) break;
+    }
+  } catch (error) {
+    console.warn("listing fo_kep scan:", error.message ?? error);
+  }
+
+  // 2) R2 bucket scan: listing-images/**/*.webp full (nem _card/_thumb)
+  if (backend === "r2" && targets.length < limit) {
+    try {
+      const { ListObjectsV2Command } = await import("@aws-sdk/client-s3");
+      const { getR2S3Client, r2BucketName, publicUrlForR2ObjectKey } = await import(
+        "../lib/r2-image-storage.mjs"
+      );
+      let token;
+      do {
+        const page = await getR2S3Client().send(
+          new ListObjectsV2Command({
+            Bucket: r2BucketName(),
+            Prefix: "listing-images/",
+            ContinuationToken: token,
+            MaxKeys: 500,
+          })
+        );
+        for (const obj of page.Contents || []) {
+          const key = String(obj.Key || "");
+          if (!/\.webp$/i.test(key) || /_(card|thumb)\.webp$/i.test(key)) continue;
+          if (seen.has(key)) continue;
+          seen.add(key);
+          targets.push(publicUrlForR2ObjectKey(key));
+          if (targets.length >= limit) break;
+        }
+        token = page.IsTruncated ? page.NextContinuationToken : undefined;
+      } while (token && targets.length < limit);
+    } catch (error) {
+      console.warn("R2 scan:", error.message ?? error);
+    }
   }
 
   if (!targets.length) {

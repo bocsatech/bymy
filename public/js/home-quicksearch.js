@@ -20,7 +20,7 @@ import {
   arrangeAutoDeskDemoFields,
   deskFilterMenuReady,
   syncAutoSearchAccShell,
-} from "./auto-desk-search.js?v=fullMenu1";
+} from "./auto-desk-search.js?v=fullMenu2";
 
 prefetchAutoSearchBoot();
 const MOBILE_MQ = "(max-width: 900px)";

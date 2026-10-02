@@ -605,10 +605,63 @@
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .home-qs-grid,
-  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .home-qs-layout-main,
-  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .home-qs-more-layout,
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .home-qs-grid-cell {
     display: contents;
+  }
+
+  /* Desk: layout hostok oszlopban — ne display:contents (elhúzza a gyerekeket) */
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-panel
+    .home-qs-layout-main,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-panel
+    .home-qs-more-layout {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px;
+    width: 100%;
+  }
+
+  /* Desk: layout mezők oszlopban, mint mobil */
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-panel
+    #qs-layout-main
+    .home-qs-field,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-panel
+    #qs-layout-main
+    .home-qs-pair,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-panel
+    #qs-layout-main
+    [data-qs-field],
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-panel
+    #qs-more-layout
+    .home-qs-field,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-panel
+    #qs-more-layout
+    .home-qs-pair,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-panel
+    #qs-more-layout
+    [data-qs-field] {
+    display: flex !important;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+    min-width: 0;
+    margin: 0;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-panel
+    #qs-more-layout
+    .home-qs-pair {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-fields .home-qs-field,
@@ -622,11 +675,11 @@
     min-width: 0;
   }
 
-  /* Ne rejtsd a fehér Alapadatok kártyát — csak a legacy közvetlen gyerekeket */
+  /* Legacy gyerekek rejtve — a mobil layout (#qs-layout-main / #qs-more) LÁTSZIK */
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
-    [data-desk-acc="alap"] .auto-desk-acc__body > :not(.auto-desk-fields, .ad-form-alap-card),
+    [data-desk-acc="alap"] .auto-desk-acc__body > :not(#qs-layout-main, .home-qs-layout-main, .auto-desk-fields, .ad-form-alap-card),
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
-    [data-desk-acc="muszaki"] .auto-desk-acc__body > :not(.auto-desk-fields) {
+    [data-desk-acc="muszaki"] .auto-desk-acc__body > :not(#qs-more, .home-qs-more, .auto-desk-fields) {
     display: none !important;
   }
 

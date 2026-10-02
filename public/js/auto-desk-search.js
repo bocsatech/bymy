@@ -30,8 +30,12 @@ function stripStrayBrandModelFields(host) {
 export function deskFilterMenuReady(form = document.getElementById("home-qs-form")) {
   if (!form?.classList.contains("auto-desk-native")) return false;
   if (form.dataset.brandModelPicker !== "1") return false;
-  const host = form.querySelector(".auto-desk-fields[data-desk-alap]");
-  return Boolean(host?.querySelector(".auto-bm-pair"));
+  /* Teljes menü: layout hostokban van a picker (nem slim auto-desk-fields). */
+  return Boolean(
+    form.querySelector(
+      "#qs-layout-main .auto-bm-pair, #qs-layout-main .auto-bm-brand-block, .auto-bm-brand-block .auto-bm-pair, .auto-bm-pair"
+    )
+  );
 }
 
 const DESK_MUSZAKI_FALLBACK = [
@@ -350,144 +354,51 @@ function ensureDeskSelectPlaceholders(wrap, range) {
   });
 }
 
+/**
+ * Desk = mobil menüszerkezet 1:1.
+ * NE töröld / NE másold slim auto-desk-fields-be a qs-layout-main / qs-more tartalmát.
+ */
 export function arrangeAutoDeskDemoFields(form = document.getElementById("home-qs-form")) {
   if (!form || !isAutoDesk()) return;
-  const alapBody = form.querySelector('[data-desk-acc="alap"] .auto-desk-acc__body');
-  const muszakiBody = form.querySelector('[data-desk-acc="muszaki"] .auto-desk-acc__body');
-  if (!alapBody) return;
 
   const mainHost = document.getElementById("qs-layout-main");
   const moreHost = document.getElementById("qs-more-layout");
-
-  const quickKeys = new Set((form.dataset.deskQuickKeys || "").split(",").filter(Boolean));
-  if (!quickKeys.size) {
-    ["kivitel", "uzemanyag", "gyartasi_ev", "km", "vetelar"].forEach((k) => quickKeys.add(k));
-    form.dataset.deskQuickKeys = [...quickKeys].join(",");
-  }
-
-  let host = alapBody.querySelector(".auto-desk-fields[data-desk-alap]");
-  if (!host) {
-    host = document.createElement("div");
-    host.className = "auto-desk-fields";
-    host.dataset.deskAlap = "1";
-    alapBody.insertBefore(host, alapBody.firstChild);
-  }
-
-  /* Already built once: keep pickers, only drop stray plain Gyártmány/Modell/Típus. */
-  if (deskFilterMenuReady(form)) {
-    stripStrayBrandModelFields(host);
-    form.classList.add("auto-desk-native");
-    syncGyorsFieldVisibility(form);
-    return;
-  }
-
-  host.innerHTML = "";
+  const moreWrap = document.getElementById("qs-more");
 
   form.querySelectorAll(".home-qs-static-legacy").forEach((el) => {
     el.hidden = true;
     el.style.setProperty("display", "none", "important");
   });
 
-  const used = new Set();
-  const mountOpts = { quickKeys, used };
-  const order = deskOrderFromAdminLayout(mainHost).filter(
-    (item) => quickKeys.has(item.field) && !BRAND_MODEL_DESK_KEYS.has(item.field)
-  );
-  const fieldOrder = order.length
-    ? order
-    : DESK_ALAP_FALLBACK.filter((item) => !BRAND_MODEL_DESK_KEYS.has(item.field));
-
-  for (const item of fieldOrder) {
-    mountDeskField(host, item, form, mountOpts);
-  }
-  /* Layout API empty / failed → always show the classic gyors row set (sans brand/model) */
-  if (host.children.length < 2) {
-    host.innerHTML = "";
-    used.clear();
-    for (const item of DESK_ALAP_FALLBACK.filter((item) => !BRAND_MODEL_DESK_KEYS.has(item.field))) {
-      mountDeskField(host, item, form, mountOpts);
-    }
-  }
-  /* Prevent admin "tipus" / stray brand selects from reappearing next to the picker */
-  used.add("gyartmany");
-  used.add("modell");
-  used.add("tipus");
-  const isTeherDesk = document.body?.getAttribute("data-site-page") === "teherauto";
-  if (isTeherDesk) {
-    for (const k of ["tipus", "csomagtarto", "tetto", "karpit1", "karpit2", "egyeb_tipus", "egyeb_modell"]) {
-      used.add(k);
-    }
-  }
-
-  if (!used.has("kivitel")) {
-    mountDeskField(host, { field: "kivitel", label: "Kivitel" }, form, mountOpts);
-  }
-  host.querySelector('[data-desk-field="kivitel"]')?.setAttribute("data-desk-quick", "1");
-  used.add("kivitel");
-  form.dataset.deskQuickKeys = [...new Set([...(form.dataset.deskQuickKeys || "").split(",").filter(Boolean), "kivitel"])].join(",");
-
-  if (muszakiBody) {
-    let muszakiHost = muszakiBody.querySelector(".auto-desk-fields[data-desk-muszaki]");
-    if (!muszakiHost) {
-      muszakiHost = document.createElement("div");
-      muszakiHost.className = "auto-desk-fields";
-      muszakiHost.dataset.deskMuszaki = "1";
-      muszakiBody.insertBefore(muszakiHost, muszakiBody.firstChild);
-    }
-    muszakiHost.innerHTML = "";
-
-    const moreOrder = deskOrderFromAdminLayout(moreHost);
-    const muszakiOrder = moreOrder.length ? moreOrder : DESK_MUSZAKI_FALLBACK;
-
-    for (const item of muszakiOrder) {
-      if (used.has(item.field)) continue;
-      if (isTeherDesk && ["tipus", "csomagtarto", "tetto", "karpit1", "karpit2"].includes(item.field)) continue;
-      mountDeskField(muszakiHost, item, form, mountOpts);
-    }
-
-    if (moreHost) {
-      moreHost.querySelectorAll("[data-qs-field]").forEach((el) => {
-        const key = el.getAttribute("data-qs-field");
-        if (!key || used.has(key)) return;
-        const label =
-          el.querySelector(".home-qs-label, .immo-label")?.textContent?.trim() || key;
-        const range =
-          el.classList.contains("home-qs-pair") ||
-          el.querySelectorAll("select.home-qs-control").length >= 2;
-        mountDeskField(muszakiHost, { field: key, label, range }, form, mountOpts);
-      });
-    }
-
-    muszakiHost.querySelectorAll('[data-desk-field="kivitel"]').forEach((el) => {
-      el.dataset.deskQuick = "1";
-      host.appendChild(el);
-    });
-
-    let moreWrap = muszakiBody.querySelector("#qs-more");
-    if (moreWrap) {
-      moreWrap.hidden = true;
-      moreWrap.classList.remove("is-open");
-      moreWrap.querySelectorAll(".home-qs-static-legacy, #qs-more-layout").forEach((el) => {
-        el.hidden = true;
-        el.style.setProperty("display", "none", "important");
-        if (el.id === "qs-more-layout") el.innerHTML = "";
-      });
-    }
-  }
+  /* Régi slim desk lista — ne takarja a mobil layoutot */
+  form.querySelectorAll(
+    ".auto-desk-fields[data-desk-alap], .auto-desk-fields[data-desk-muszaki], .auto-desk-fields[data-desk-more-rest]"
+  ).forEach((el) => el.remove());
 
   if (mainHost) {
-    mainHost.innerHTML = "";
-    mainHost.hidden = true;
+    mainHost.hidden = false;
+    mainHost.style.removeProperty("display");
+    mainHost.style.removeProperty("height");
+    mainHost.style.removeProperty("overflow");
   }
   if (moreHost) {
-    moreHost.innerHTML = "";
-    moreHost.hidden = true;
-    moreHost.removeAttribute("style");
+    moreHost.hidden = false;
+    moreHost.style.removeProperty("display");
+    moreHost.style.removeProperty("height");
+    moreHost.style.removeProperty("overflow");
+  }
+  if (moreWrap) {
+    moreWrap.hidden = false;
+    moreWrap.classList.add("is-open");
+    moreWrap.style.removeProperty("display");
+    moreWrap.style.removeProperty("height");
+    moreWrap.style.removeProperty("overflow");
   }
 
   form.classList.add("auto-desk-native");
+  form.dataset.deskFullMenu = "1";
   syncGyorsFieldVisibility(form);
-
+  openAccordions(["alap", "muszaki"]);
 }
 
 function syncGyorsFieldVisibility(form = document.getElementById("home-qs-form")) {
@@ -696,7 +607,11 @@ export function initAutoDeskSearch({
   });
 
   function deskFieldsMounted() {
-    return Boolean(form?.querySelector(".auto-desk-fields[data-desk-alap] .auto-desk-field, .auto-desk-fields[data-desk-alap] [data-desk-field]"));
+    return Boolean(
+      form?.querySelector(
+        "#qs-layout-main [data-qs-field], #qs-more-layout [data-qs-field], .auto-bm-brand-block, .auto-bm-pair"
+      )
+    );
   }
 
   async function syncChrome({ fromChange = false } = {}) {
@@ -713,17 +628,17 @@ export function initAutoDeskSearch({
       ) {
         setMode("gyors");
       }
-      if (document.body.classList.contains("auto-desk-gyors")) {
-        if (morePanel) {
-          morePanel.hidden = true;
-          morePanel.classList.remove("is-open");
-        }
-        if (detailedPanel) {
-          detailedPanel.hidden = true;
-          detailedPanel.classList.remove("is-open");
-        }
+      /* Gyors / Részletes: teljes mobil menü (qs-layout-main + qs-more) mindig látszik */
+      if (morePanel) {
+        morePanel.hidden = false;
+        morePanel.classList.add("is-open");
       }
-      openAccordion("alap");
+      if (detailedPanel) {
+        const reszletes = document.body.classList.contains("auto-desk-reszletes");
+        detailedPanel.hidden = !reszletes;
+        detailedPanel.classList.toggle("is-open", reszletes);
+      }
+      openAccordions(["alap", "muszaki"]);
       /* After resize into desk (or empty sidebar): rebuild filter rows */
       const enteredDesk = fromChange && !wasDesk;
       const emptyDesk = deskFieldsMounted() === false;

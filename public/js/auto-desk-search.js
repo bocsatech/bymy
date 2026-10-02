@@ -591,10 +591,11 @@ export function initAutoDeskSearch({
 
   document.querySelectorAll("[data-desk-acc-toggle]").forEach((btn) => {
     btn.addEventListener("click", () => {
-      if (!isAutoDesk() || document.body.classList.contains("auto-desk-gyors")) return;
+      if (!isAutoDesk()) return;
       const acc = btn.closest("[data-desk-acc]");
       const id = acc?.getAttribute("data-desk-acc");
       if (!id) return;
+      /* Gyors / Értékbecslő / Részletes: ugyanaz az összecsuk–kinyit */
       const wasOpen = acc.classList.contains("is-open");
       const scrollY = window.scrollY;
       openAccordion(wasOpen ? "" : id);

@@ -19,7 +19,7 @@ import {
   updateAutoDeskAccSummaries,
   arrangeAutoDeskDemoFields,
   deskFilterMenuReady,
-} from "./auto-desk-search.js?v=ertekMode3";
+} from "./auto-desk-search.js?v=accPill1";
 
 prefetchAutoSearchBoot();
 const MOBILE_MQ = "(max-width: 900px)";

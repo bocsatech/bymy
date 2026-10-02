@@ -35,81 +35,60 @@ html[data-theme="dark"] .bymy-qr__label {
   color: #94a3b8;
 }
 
-/* Értékbecslő panel — autókereső desk mezőkhez igazítva */
-.ertek-form {
+/* Értékbecslő — autókereső dobkerék mezők */
+.ertek-search-panel {
+  max-width: 420px;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+.ertek-search-panel .ertek-form,
+.ertek-search-panel .home-qs-form {
   display: grid;
   gap: 12px;
   max-width: 420px;
 }
 
-.ertek-field {
+.ertek-search-panel .home-qs-field,
+.ertek-search-panel .home-qs-drum-cell,
+.ertek-search-panel .immo-schema-cell {
   display: flex;
   flex-direction: column;
   gap: 6px;
   min-width: 0;
+  width: 100%;
 }
 
-.ertek-field__label {
+.ertek-search-panel .home-qs-label,
+.ertek-search-panel .immo-label {
   margin: 0;
   font-size: 13px;
   font-weight: 600;
   color: #334155;
 }
 
-.ertek-field__trigger,
-.ertek-field__input {
+.ertek-search-panel .home-qs-control,
+.ertek-search-panel select.home-qs-control,
+.ertek-search-panel input.home-qs-control {
   appearance: none;
   -webkit-appearance: none;
   width: 100%;
   box-sizing: border-box;
   min-height: 40px;
-  padding: 0 36px 0 12px;
+  padding: 0 12px;
   border: 1px solid #d4d4d4;
   border-radius: 6px;
-  background-color: #fff;
+  background: #fff;
   color: #111;
   font: inherit;
   font-size: 14px;
-  font-weight: 400;
-  text-align: left;
-  cursor: pointer;
 }
 
-.ertek-field__trigger {
-  position: relative;
-  display: flex;
-  align-items: center;
-  /* Autókereső wheel-trigger magasság / tap */
-  min-height: 48px;
-}
-
-.ertek-field__trigger [data-ertek-summary].is-empty {
-  color: #6b7280;
-}
-
-.ertek-field__chev {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  width: 12px;
-  height: 8px;
-  transform: translateY(-50%);
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%239a9a9c' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
-    center / contain no-repeat;
-  pointer-events: none;
-}
-
-.ertek-field__input {
-  cursor: text;
-  background-image: none;
-  padding-right: 12px;
-}
-
-.ertek-field__trigger:focus-visible,
-.ertek-field__input:focus {
-  outline: none;
-  border-color: #111;
-  box-shadow: 0 0 0 2px rgba(17, 24, 39, 0.08);
+.ertek-search-panel .immo-wheel-wrap {
+  width: 100%;
 }
 
 .ertek-out {
@@ -147,19 +126,15 @@ html[data-theme="dark"] .bymy-qr__label {
   color: #64748b;
 }
 
-html[data-theme="dark"] .ertek-field__label {
+html[data-theme="dark"] .ertek-search-panel .home-qs-label,
+html[data-theme="dark"] .ertek-search-panel .immo-label {
   color: #e2e8f0;
 }
 
-html[data-theme="dark"] .ertek-field__trigger,
-html[data-theme="dark"] .ertek-field__input {
+html[data-theme="dark"] .ertek-search-panel .home-qs-control {
   background: #0f172a;
   border-color: #334155;
   color: #e2e8f0;
-}
-
-html[data-theme="dark"] .ertek-field__trigger [data-ertek-summary].is-empty {
-  color: #94a3b8;
 }
 
 html[data-theme="dark"] .ertek-result__price {

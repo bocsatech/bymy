@@ -31,7 +31,7 @@ import { savedSearchHref, summarizeSavedSearchFilters } from "./saved-search.js?
 import { initMessagesUi } from "./messages-ui.js?v=78e9d9204f";
 import { listConversations } from "./messages-api.js?v=5cf6493dc9";
 import { initMyAdsPanel } from "./my-ads.js?v=55f5d422a3";
-import { initErtekbecsloPanel } from "./ertekbecslo-app.js?v=ertek3";
+import { initErtekbecsloPanel } from "./ertekbecslo-app.js?v=ertek4";
 import {
   consumeSettingsReturn,
   hasSettingsReturn,

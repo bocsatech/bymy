@@ -1,17 +1,16 @@
-/** Kereskedői értékbecslő — ugyanaz a dobkerék / sheet, mint az autókeresőn. */
+/** Kereskedői értékbecslő — ugyanaz a dobkerék, mint az autókeresőn (mountAutoSearchDrums). */
 
-import { fetchVehicleCatalog, fetchModelTypes } from "./vehicle-catalog-client.js?v=ertek3";
+import { fetchModelTypes } from "./vehicle-catalog-client.js?v=ertek4";
 import { parseKmDigits } from "./km-input.js?v=30e4feeab0";
-import { UZEMANYAG_CATEGORIES } from "./equipment-data.js?v=ertek3";
+import { flattenUzemanyagOptions } from "./equipment-data.js?v=ertek4";
+import {
+  mountAutoSearchDrums,
+  readAutoDrumFilterValues,
+} from "./auto-search-drums.js?v=ertek4";
+import { fillWheel, setWheelValue, readWheel } from "./ingatlan-wheels.js?v=6952ba469c";
+import { syncDrumWheelDisplay } from "./immo-drum-picker.js?v=c4c7ac29a2";
 
 const DEBOUNCE_MS = 350;
-const EMPTY = {
-  gyartmany: "Gyártmány",
-  modell: "Modell",
-  tipus: "Típus (opcionális)",
-  uzemanyag: "Üzemanyag (opcionális)",
-  ev: "Évjárat",
-};
 
 function el(sel, root = document) {
   return root.querySelector(sel);
@@ -25,7 +24,7 @@ function escapeHtml(value) {
     .replace(/"/g, "&quot;");
 }
 
-function yearOptions(fromApi) {
+function yearList(fromApi) {
   if (Array.isArray(fromApi) && fromApi.length) {
     return fromApi.map((y) => String(y)).sort((a, b) => Number(b) - Number(a));
   }
@@ -35,30 +34,46 @@ function yearOptions(fromApi) {
   return out;
 }
 
-function toItems(list) {
-  const items = [];
-  for (const item of list || []) {
-    if (typeof item === "string") {
-      if (!item) continue;
-      items.push({ value: item, label: item });
-    } else if (item?.value != null && String(item.value)) {
-      items.push({ value: String(item.value), label: String(item.label || item.value) });
-    }
+function fillSelectYears(select, years) {
+  if (!select) return;
+  const prev = select.value;
+  select.innerHTML = "";
+  const empty = document.createElement("option");
+  empty.value = "";
+  empty.textContent = "Évjárat";
+  select.appendChild(empty);
+  for (const y of years) {
+    const o = document.createElement("option");
+    o.value = y;
+    o.textContent = y;
+    select.appendChild(o);
   }
-  return items;
+  if (prev && [...select.options].some((o) => o.value === prev)) select.value = prev;
 }
 
-function fuelMainItems() {
-  return UZEMANYAG_CATEGORIES.map((cat) => ({
-    value: cat.value || cat.id,
-    label: cat.label,
-  }));
+function fillSelectFuel(select) {
+  if (!select || select.options.length > 1) return;
+  for (const v of flattenUzemanyagOptions()) {
+    const o = document.createElement("option");
+    o.value = v;
+    o.textContent = v;
+    select.appendChild(o);
+  }
 }
 
-function fuelChildren(value) {
-  const cat = UZEMANYAG_CATEGORIES.find((c) => (c.value || c.id) === value);
-  if (!cat?.children?.length) return null;
-  return cat.children.map((c) => ({ value: c.value, label: c.label }));
+function ensureLink(href, marker) {
+  if (document.querySelector(`link[${marker}]`)) return;
+  const link = document.createElement("link");
+  link.rel = "stylesheet";
+  link.href = href;
+  link.setAttribute(marker, "1");
+  document.head.appendChild(link);
+}
+
+function ensureDrumCss() {
+  ensureLink("/css/ingatlan-search.css?v=ertekDrum4", "data-ertek-immo-css");
+  ensureLink("/css/auto-hero.css?v=ertekDrum4", "data-ertek-hero-css");
+  ensureLink("/css/auto-desk-layout.css?v=ertekDrum4", "data-ertek-desk-css");
 }
 
 function formatResult(data) {
@@ -79,43 +94,35 @@ function formatResult(data) {
     </div>`;
 }
 
-function ensureLink(href, marker) {
-  if (document.querySelector(`link[${marker}]`)) return;
-  const link = document.createElement("link");
-  link.rel = "stylesheet";
-  link.href = href;
-  link.setAttribute(marker, "1");
-  document.head.appendChild(link);
+function readErtekFilters(form) {
+  const drums = readAutoDrumFilterValues(form) || {};
+  const brandList = drums.gyartmanyok || (drums.gyartmany ? [drums.gyartmany] : []);
+  const modelList = drums.modellek || (drums.modell ? [drums.modell] : []);
+  const fuelList = drums.uzemanyagok || (drums.uzemanyag ? [drums.uzemanyag] : []);
+  const tipusWheel = form.querySelector('[data-wheel="tipus"]');
+  const yearWheel = form.querySelector('[data-wheel="gyartasi_ev"]');
+  return {
+    gyartmany: brandList[0] || String(readWheel(form.querySelector('[data-wheel="gyartmany"]')) || "").trim(),
+    modell: modelList[0] || String(readWheel(form.querySelector('[data-wheel="modell"]')) || "").trim(),
+    tipus: String(readWheel(tipusWheel) || drums.tipus || "").trim(),
+    uzemanyag: fuelList[0] || "",
+    gyartasi_ev: String(readWheel(yearWheel) || drums.gyartasi_ev || "").trim(),
+  };
 }
 
-function ensureDrumCss() {
-  /* Ugyanaz a sheet CSS, mint auto.html-en — enélkül a portal összecsuklik. */
-  ensureLink("/css/ingatlan-search.css?v=ertekDrum2", "data-ertek-immo-css");
-  ensureLink("/css/auto-hero.css?v=ertekDrum2", "data-ertek-hero-css");
-}
-
-function setField(panel, key, value, label) {
-  const input = el(`[data-ertek-${key}]`, panel);
-  const summary = el(`[data-ertek-summary="${key}"]`, panel);
-  if (input) input.value = value || "";
-  if (summary) {
-    summary.textContent = value ? label || value : EMPTY[key] || "—";
-    summary.classList.toggle("is-empty", !value);
-  }
-}
-
-function readField(panel, key) {
-  return String(el(`[data-ertek-${key}]`, panel)?.value || "").trim();
-}
-
-function labelForFuel(value) {
-  for (const cat of UZEMANYAG_CATEGORIES) {
-    if ((cat.value || cat.id) === value) return cat.label;
-    for (const child of cat.children || []) {
-      if (child.value === value) return child.label;
-    }
-  }
-  return value;
+function refillWheel(form, wheelName, values, emptyLabel) {
+  const wheel = form.querySelector(`[data-wheel="${wheelName}"]`);
+  if (!wheel) return;
+  const opts = (values || []).map((v) =>
+    typeof v === "string" ? { value: v, label: v } : { value: v.value, label: v.label || v.value }
+  );
+  const cur = String(readWheel(wheel) || "");
+  fillWheel(wheel, opts, { emptyLabel });
+  if (cur && opts.some((o) => o.value === cur)) setWheelValue(wheel, cur);
+  else setWheelValue(wheel, "");
+  syncDrumWheelDisplay(wheel);
+  const wrap = wheel.closest(".immo-wheel-wrap");
+  wrap?._desktopCellDrum?.refresh?.("");
 }
 
 export async function initErtekbecsloPanel(root = document) {
@@ -124,84 +131,65 @@ export async function initErtekbecsloPanel(root = document) {
   panel.dataset.ertekReady = "1";
   ensureDrumCss();
 
+  const form = el("[data-ertek-form]", panel);
   const kmInput = el("[data-ertek-km]", panel);
   const out = el("[data-ertek-out]", panel);
   const status = el("[data-ertek-status]", panel);
-  if (!kmInput || !out) return;
+  if (!form || !kmInput || !out) return;
 
-  let catalog = null;
-  let typeItems = [];
-  let yearItems = toItems(yearOptions());
-  let timer = null;
-  let openStandaloneSwitchSheet = null;
+  fillSelectFuel(form.querySelector('[data-filter-key="uzemanyag"]'));
+  fillSelectYears(form.querySelector("[data-ertek-year]"), yearList());
 
+  if (status) status.textContent = "Menü betöltése…";
   try {
-    if (status) status.textContent = "Katalógus betöltése…";
-    catalog = await fetchVehicleCatalog({ kind: "szemelyauto" });
+    const ok = await mountAutoSearchDrums(form);
+    if (!ok && form.dataset.drumsMounted !== "1") {
+      throw new Error("A keresőmenü nem indult el.");
+    }
     if (status) status.textContent = "";
   } catch (err) {
-    if (status) status.textContent = err?.message || "Katalógus nem elérhető.";
+    if (status) status.textContent = err?.message || "Menü nem elérhető.";
     return;
   }
 
-  try {
-    ({ openStandaloneSwitchSheet } = await import("./auto-drum-sheet.js?v=9ebba008fe"));
-  } catch (err) {
-    console.warn("Értékbecslő sheet:", err);
-  }
-
-  function brandItems() {
-    return toItems([...(catalog.gyartmanyok || [])].sort((a, b) => a.localeCompare(b, "hu")));
-  }
-
-  function modelItems(brand) {
-    return toItems(brand ? catalog.modellek?.[brand] || [] : []);
-  }
+  let timer = null;
 
   async function refreshTypesAndYears() {
-    const brand = readField(panel, "gyartmany");
-    const modell = readField(panel, "modell");
-    if (!brand || !modell) {
-      typeItems = [];
-      yearItems = toItems(yearOptions());
+    const { gyartmany, modell } = readErtekFilters(form);
+    if (!gyartmany || !modell) {
+      refillWheel(form, "tipus", [], "Típus (opcionális)");
+      refillWheel(form, "gyartasi_ev", yearList(), "Évjárat");
       return;
     }
     try {
-      const data = await fetchModelTypes(brand, modell, { kind: "szemelyauto" });
-      typeItems = toItems(data?.tipusok || []);
-      yearItems = toItems(yearOptions(data?.evek));
+      const data = await fetchModelTypes(gyartmany, modell, { kind: "szemelyauto" });
+      refillWheel(form, "tipus", data?.tipusok || [], "Típus (opcionális)");
+      refillWheel(form, "gyartasi_ev", yearList(data?.evek), "Évjárat");
     } catch {
-      typeItems = [];
-      yearItems = toItems(yearOptions());
+      refillWheel(form, "tipus", [], "Típus (opcionális)");
+      refillWheel(form, "gyartasi_ev", yearList(), "Évjárat");
     }
   }
 
   async function estimate() {
-    const gyartmany = readField(panel, "gyartmany");
-    const modell = readField(panel, "modell");
-    const tipus = readField(panel, "tipus");
-    const uzemanyag = readField(panel, "uzemanyag");
-    const gyartasi_ev = readField(panel, "ev");
+    const f = readErtekFilters(form);
     const km = parseKmDigits(kmInput.value || "") || "";
-
-    if (!gyartmany || !modell || !gyartasi_ev || !km) {
+    if (!f.gyartmany || !f.modell || !f.gyartasi_ev || !km) {
       out.innerHTML =
         '<p class="ertek-msg">Kötelező: gyártmány, modell, évjárat, km.</p>';
       return;
     }
-
     out.innerHTML = '<p class="ertek-msg">Számolás…</p>';
     const q = new URLSearchParams({
-      gyartmany,
-      modell,
-      gyartasi_ev,
+      gyartmany: f.gyartmany,
+      modell: f.modell,
+      gyartasi_ev: f.gyartasi_ev,
       km: String(km),
       require: "1",
       source: "market",
     });
-    if (tipus) q.set("tipus", tipus);
-    if (uzemanyag) q.set("uzemanyag", uzemanyag);
-
+    if (f.tipus) q.set("tipus", f.tipus);
+    if (f.uzemanyag) q.set("uzemanyag", f.uzemanyag);
     try {
       const res = await fetch(`/api/valuation/estimate?${q}`, { credentials: "same-origin" });
       const data = await res.json().catch(() => ({}));
@@ -218,93 +206,15 @@ export async function initErtekbecsloPanel(root = document) {
     }, DEBOUNCE_MS);
   }
 
-  async function openField(key) {
-    const trigger = el(`[data-ertek-open="${key}"]`, panel);
-    if (!trigger || !openStandaloneSwitchSheet) return;
-
-    let items = [];
-    let getChildren = null;
-    let title = EMPTY[key] || key;
-    let emptyLabel = "Mindegy";
-
-    if (key === "gyartmany") {
-      items = brandItems();
-      title = "Gyártmány";
-      emptyLabel = "Mindegy";
-    } else if (key === "modell") {
-      const brand = readField(panel, "gyartmany");
-      if (!brand) {
-        out.innerHTML = '<p class="ertek-msg">Előbb válassz gyártmányt.</p>';
-        return;
-      }
-      items = modelItems(brand);
-      title = "Modell";
-    } else if (key === "tipus") {
-      const brand = readField(panel, "gyartmany");
-      const modell = readField(panel, "modell");
-      if (!brand || !modell) {
-        out.innerHTML = '<p class="ertek-msg">Előbb válassz gyártmányt és modellt.</p>';
-        return;
-      }
-      await refreshTypesAndYears();
-      items = typeItems;
-      title = "Típus";
-      if (!items.length) {
-        out.innerHTML = '<p class="ertek-msg">Ehhez a modellhez nincs külön típus a katalógusban.</p>';
-        return;
-      }
-    } else if (key === "uzemanyag") {
-      items = fuelMainItems();
-      getChildren = fuelChildren;
-      title = "Üzemanyag";
-    } else if (key === "ev") {
-      await refreshTypesAndYears();
-      items = yearItems;
-      title = "Évjárat";
-      emptyLabel = "Évjárat";
+  form.addEventListener("immo-wheel-change", (event) => {
+    const wheel = event.target?.closest?.("[data-wheel]") || event.target;
+    const key = wheel?.getAttribute?.("data-wheel") || wheel?.getAttribute?.("data-filter-key") || "";
+    if (key === "gyartmany" || key === "modell") {
+      void refreshTypesAndYears().then(schedule);
+      return;
     }
-
-    /* Autókereső: a trigger köré immo-wheel-wrap — a sheet head pozíció ehhez igazodik. */
-    let wrap = trigger.closest(".immo-wheel-wrap, .auto-desk-field, .ertek-field");
-    if (wrap && !wrap.classList.contains("immo-wheel-wrap")) {
-      wrap.classList.add("immo-wheel-wrap");
-    }
-
-    openStandaloneSwitchSheet({
-      trigger,
-      title,
-      emptyLabel,
-      items,
-      initialSelected: [readField(panel, key)].filter(Boolean),
-      singleSelect: true,
-      getChildren,
-      onDone: (selected) => {
-        const value = Array.isArray(selected) ? selected[0] || "" : String(selected || "");
-        const label =
-          items.find((it) => it.value === value)?.label ||
-          (key === "uzemanyag" ? labelForFuel(value) : value);
-        setField(panel, key, value, label);
-
-        if (key === "gyartmany") {
-          setField(panel, "modell", "");
-          setField(panel, "tipus", "");
-          setField(panel, "ev", "");
-        } else if (key === "modell") {
-          setField(panel, "tipus", "");
-          setField(panel, "ev", "");
-          void refreshTypesAndYears();
-        }
-        schedule();
-      },
-    });
-  }
-
-  panel.querySelectorAll("[data-ertek-open]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      void openField(btn.getAttribute("data-ertek-open") || "");
-    });
+    schedule();
   });
+  form.addEventListener("change", schedule);
   kmInput.addEventListener("input", schedule);
-
-  Object.keys(EMPTY).forEach((key) => setField(panel, key, ""));
 }

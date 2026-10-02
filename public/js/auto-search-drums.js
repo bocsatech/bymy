@@ -1068,7 +1068,8 @@ function convertMuszakiToDateTriple(wrap) {
 export async function mountAutoSearchDrums(form = document.getElementById("home-qs-form")) {
   if (!form || form.dataset.drumsMounted === "1") return form.dataset.drumsMounted === "1";
   const page = document.body?.getAttribute("data-site-page") || "";
-  if (page !== "auto" && page !== "teherauto") return false;
+  const force = form.hasAttribute("data-force-drums") || form.hasAttribute("data-ertek-drums");
+  if (!force && page !== "auto" && page !== "teherauto") return false;
 
   applyDrumModeClass();
   form.classList.add("immo-search-form", "auto-qs-drums");

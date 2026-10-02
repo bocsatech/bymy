@@ -220,9 +220,20 @@ function emptyLabelFromOptions(options) {
   return empty?.label || "Mindegy";
 }
 
+function isErtekDrumsForm(form) {
+  return Boolean(form?.hasAttribute?.("data-ertek-drums"));
+}
+
+/** Értékbecslő: mindig mobil portal sheet UI (aláhúzás + sheet), soha cell-drum lista. */
+function usePortalDrums(form) {
+  return isMobile() || isErtekDrumsForm(form);
+}
+
 function finishWheel(cell, emptyLabel, { multiple = false } = {}) {
   const wheel = cell.querySelector("[data-wheel]");
-  if (isMobile()) {
+  if (!wheel) return null;
+  const form = cell.closest("form");
+  if (usePortalDrums(form)) {
     initDrumWheel(wheel, { emptyLabel, openMode: "portal", multiple });
     const live = cell.querySelector("[data-wheel]");
     setWheelValue(live, "");
@@ -666,7 +677,7 @@ function rebindWheel(form, wheelName, options, emptyLabel = "Mindegy", { multipl
   const wheel = form.querySelector(`[data-wheel="${wheelName}"]`);
   if (!wheel) return null;
   fillWheel(wheel, options, { emptyLabel });
-  if (isMobile()) {
+  if (usePortalDrums(form)) {
     initDrumWheel(wheel, { emptyLabel, openMode: "portal", multiple });
     const live = form.querySelector(`[data-wheel="${wheelName}"]`);
     setWheelValue(live, "");
@@ -707,9 +718,10 @@ function labelListShort(items, unit) {
   return `${items.length} ${unit}`;
 }
 
-/** Mobil: egy „Gyártmány & Modell” pill (mint a hirdetésfeladás), külön Modell mező elrejtve. */
+/** Mobil / Értékbecslő: egy „Gyártmány & Modell” mező, külön Modell elrejtve. */
 function combineBrandModelOnMobile(form) {
-  if (!isMobile() || !form || form.dataset.bmCombinedMobile === "1") return;
+  if (!form || form.dataset.bmCombinedMobile === "1") return;
+  if (!usePortalDrums(form)) return;
   const brandCell = form.querySelector('[data-qs-field="gyartmany"]');
   const modelCell = form.querySelector('[data-qs-field="modell"]');
   const brandWrap = form.querySelector('[data-wheel="gyartmany"]')?.closest(".immo-wheel-wrap");
@@ -803,7 +815,8 @@ function liftAutoSearchFieldLabels(scope) {
 }
 
 function styleAutoSearchAlapCard(form) {
-  if (!isMobile() || !form) return;
+  if (!form) return;
+  if (!usePortalDrums(form)) return;
   const host =
     form.querySelector("#qs-layout-main") ||
     form.querySelector(".home-qs-layout-main") ||
@@ -910,7 +923,7 @@ async function mountBrandModelCatalogDrums(form) {
 
   form._autoDrumCatalog = catalog;
   const brands = (catalog.gyartmanyok || []).map((b) => ({ value: b, label: b }));
-  const brandEmpty = isMobile() ? "Gyártmány / Modell" : "Mindegy";
+  const brandEmpty = usePortalDrums(form) ? "Gyártmány / Modell" : "Mindegy";
   const brandWheel = rebindWheel(form, "gyartmany", brands, brandEmpty, { multiple: true });
   if (brandTrigger) brandTrigger.disabled = false;
   if (!brandWheel) return;
@@ -1075,8 +1088,12 @@ export async function mountAutoSearchDrums(form = document.getElementById("home-
 
   applyDrumModeClass();
   form.classList.add("immo-search-form", "auto-qs-drums");
-  form.classList.toggle("auto-qs-drums--desktop", !isMobile());
-  form.classList.toggle("auto-qs-drums--mobile", isMobile());
+  const portalUi = usePortalDrums(form);
+  form.classList.toggle("auto-qs-drums--desktop", !portalUi);
+  form.classList.toggle("auto-qs-drums--mobile", portalUi);
+  if (isErtekDrumsForm(form)) {
+    form.classList.add("auto-qs-drums--ertek");
+  }
 
   form.querySelectorAll("[data-qs-field]").forEach((wrap) => {
     const key = wrap.getAttribute("data-qs-field");

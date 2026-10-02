@@ -1,5 +1,41 @@
-/* Értékbecslő — ugyanaz a mező/aláhúzás kinézet, mint Autó kereső Alapadatok */
+/* Listing / seller QR */
+.bymy-qr {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin: 10px 0 4px;
+  padding: 10px 12px;
+  border: 1px solid color-mix(in srgb, var(--border, #d0d5dd) 100%, transparent);
+  border-radius: 10px;
+  background: #fff;
+}
 
+.bymy-qr__img {
+  display: block;
+  width: 140px;
+  height: 140px;
+  image-rendering: pixelated;
+}
+
+.bymy-qr__label {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
+  text-align: center;
+}
+
+html[data-theme="dark"] .bymy-qr {
+  background: #0f172a;
+  border-color: #334155;
+}
+
+html[data-theme="dark"] .bymy-qr__label {
+  color: #94a3b8;
+}
+
+/* Értékbecslő — Autó kereső Alapadatok mezők + portal sheet */
 .ertek-search-panel {
   max-width: 420px;
   margin: 0;
@@ -15,6 +51,34 @@
   margin: 0;
   padding: 0;
   background: transparent;
+}
+
+/* Nyers opciólista / cell-drum soha ne jelenjen meg a lapon */
+.ertek-search-panel .immo-wheel,
+.ertek-search-panel .immo-wheel--drum-source,
+.ertek-search-panel .immo-wheel[hidden],
+.ertek-search-panel .auto-cell-drum__viewport,
+.ertek-search-panel .auto-cell-drum__scroll,
+.ertek-search-panel .auto-cell-drum__item,
+.ertek-search-panel .immo-wheel-opt {
+  display: none !important;
+  visibility: hidden !important;
+  position: absolute !important;
+  width: 0 !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  pointer-events: none !important;
+  border: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.ertek-search-panel .immo-wheel-wrap.auto-cell-drum {
+  min-height: 0 !important;
+  height: auto !important;
+  overflow: visible !important;
 }
 
 .ertek-search-panel .auto-search-alap-card {
@@ -44,7 +108,6 @@
   --ad-form-trail-reserve: calc(var(--ad-form-trail-slot) + var(--ad-form-trail-gap));
 }
 
-/* Label a mező felett — nem floating a boxon */
 .ertek-search-panel .immo-label,
 .ertek-search-panel .home-qs-label {
   position: static !important;
@@ -57,6 +120,7 @@
   color: #111 !important;
   white-space: normal !important;
   max-width: none !important;
+  display: block !important;
 }
 
 .ertek-search-panel .immo-schema-cell,
@@ -92,17 +156,13 @@
   overflow: visible !important;
 }
 
-.ertek-search-panel .immo-schema-cell:not(.immo-dual-range__half) > .immo-wheel-wrap > .immo-label {
-  /* liftAutoSearchFieldLabels kihúzza a wrapből — ha bent marad, felette legyen */
-  position: static !important;
-}
-
 .ertek-search-panel .immo-wheel-trigger {
   flex: 1 1 0% !important;
   width: auto !important;
   min-width: 0 !important;
   max-width: 100% !important;
   appearance: none !important;
+  display: block !important;
   border: 0 !important;
   border-bottom: 1.5px solid #cfd6dd !important;
   border-radius: 0 !important;
@@ -151,7 +211,6 @@
   opacity: 1 !important;
 }
 
-/* Mobil kombinált gyártmány/modell — mint autókereső */
 .ertek-search-panel .immo-schema-cell.auto-search-bm-combined {
   display: flex !important;
   flex-direction: column !important;

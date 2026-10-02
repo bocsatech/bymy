@@ -6,7 +6,7 @@ import { flattenUzemanyagOptions } from "./equipment-data.js?v=ertek4";
 import {
   mountAutoSearchDrums,
   readAutoDrumFilterValues,
-} from "./auto-search-drums.js?v=ertek5";
+} from "./auto-search-drums.js?v=ertek7";
 import { fillWheel, setWheelValue, readWheel } from "./ingatlan-wheels.js?v=6952ba469c";
 import { syncDrumWheelDisplay } from "./immo-drum-picker.js?v=c4c7ac29a2";
 
@@ -71,9 +71,9 @@ function ensureLink(href, marker) {
 }
 
 function ensureDrumCss() {
-  ensureLink("/css/ingatlan-search.css?v=ertekDrum4", "data-ertek-immo-css");
-  ensureLink("/css/auto-hero.css?v=ertekDrum4", "data-ertek-hero-css");
-  ensureLink("/css/auto-desk-layout.css?v=ertekDrum4", "data-ertek-desk-css");
+  ensureLink("/css/ingatlan-search.css?v=ertekDrum7", "data-ertek-immo-css");
+  ensureLink("/css/auto-hero.css?v=ertekDrum7", "data-ertek-hero-css");
+  ensureLink("/css/auto-desk-layout.css?v=ertekDrum7", "data-ertek-desk-css");
 }
 
 function formatResult(data) {

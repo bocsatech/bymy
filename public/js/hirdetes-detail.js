@@ -644,6 +644,7 @@ function render(view, listing, related = []) {
             : ""
         }
         ${addressLines.length ? `<p class="hd-seller-addr">${addressLines.map(escapeHtml).join("<br>")}</p>` : ""}
+        ${qrBlockHtml({ url: withQrSource(window.location.href), label: "QR — ez a hirdetés", size: 140 })}
         ${
           canMsg
             ? `<button type="button" class="hd-btn hd-btn--primary" data-hd-message>${ICON.mail} Üzenet küldése</button>`
@@ -661,7 +662,6 @@ function render(view, listing, related = []) {
           <button type="button" class="hd-btn hd-btn--outline hd-btn--icon hd-btn--fb" data-hd-share-fb aria-label="Megosztás Facebookon" title="Facebook">${ICON.facebook}</button>
           <button type="button" class="hd-btn hd-btn--outline hd-btn--icon" data-hd-print aria-label="Nyomtatás" title="Nyomtatás">${ICON.print}</button>
         </div>
-        ${qrBlockHtml({ url: withQrSource(window.location.href), label: "QR — ez a hirdetés", size: 140 })}
         ${
           view.hasPhone || view.phone
             ? `<button type="button" class="hd-btn hd-btn--soft" data-hd-phone>${ICON.phone} ${escapeHtml(view.phoneMasked || "Telefonszám")} mutatása</button>`

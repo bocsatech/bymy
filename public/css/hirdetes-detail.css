@@ -1064,6 +1064,12 @@ html[data-theme="dark"] body.hd-page .hd-tool--fb {
   line-height: 1.45;
 }
 
+.hd-side .bymy-qr {
+  align-self: flex-start;
+  margin: 0.35rem 0 0;
+  max-width: 100%;
+}
+
 .hd-web {
   color: #1565c0;
   font-weight: 700;

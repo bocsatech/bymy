@@ -29,16 +29,10 @@ function stripStrayBrandModelFields(host) {
 /** Desk filter already has mobil dobkerék menü. */
 export function deskFilterMenuReady(form = document.getElementById("home-qs-form")) {
   if (!form?.classList.contains("auto-desk-native")) return false;
-  if (form.dataset.drumsMounted === "1") {
-    return Boolean(
-      form.querySelector(
-        "#qs-layout-main .immo-wheel-trigger, #qs-layout-main .auto-search-bm-combined, #qs-layout-main [data-qs-field]"
-      )
-    );
-  }
+  /* Csak akkor „kész”, ha tényleg vannak sheet triggerek — ne a üres drumsMounted flag. */
   return Boolean(
     form.querySelector(
-      "#qs-layout-main .auto-bm-pair, #qs-layout-main .auto-bm-brand-block, .auto-bm-brand-block .auto-bm-pair, .auto-bm-pair"
+      "#qs-layout-main .immo-wheel-trigger, #qs-layout-main .auto-search-bm-combined, #qs-more-layout .immo-wheel-trigger"
     )
   );
 }

@@ -1,6 +1,6 @@
 
 import { applyAutoSearchLayout, readLayoutFilterValues, refillAutoSearchRangeSelects, prefetchAutoSearchBoot } from "./auto-search-layout.js?v=kmFill1";
-import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums, styleAutoSearchMoreCard, enhanceDeskDualRanges } from "./auto-search-drums.js?v=mwCopy3";
+import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums, styleAutoSearchMoreCard, enhanceDeskDualRanges } from "./auto-search-drums.js?v=mwCopy4";
 import {
   mountDetailedSearch,
   readDetailedSearchValues,
@@ -20,7 +20,7 @@ import {
   arrangeAutoDeskDemoFields,
   deskFilterMenuReady,
   syncAutoSearchAccShell,
-} from "./auto-desk-search.js?v=mwCopy3";
+} from "./auto-desk-search.js?v=mwCopy4";
 
 prefetchAutoSearchBoot();
 const MOBILE_MQ = "(max-width: 900px)";
@@ -321,7 +321,7 @@ export function initHomeQuickSearch({ onSearch = () => {}, onFilterPreview, onDe
 
   async function mountDeskFilterMenu(f) {
     /* Desk = mobil dobkerék/sheet menü 1:1 (ne slim select lista). */
-    if (deskFilterMenuReady(f) && f?.dataset?.drumsMounted === "1") {
+    if (deskFilterMenuReady(f)) {
       arrangeAutoDeskDemoFields(f);
       try {
         syncAutoSearchAccShell(f);
@@ -334,8 +334,14 @@ export function initHomeQuickSearch({ onSearch = () => {}, onFilterPreview, onDe
     if (deskMenuMountPromise) return deskMenuMountPromise;
 
     deskMenuMountPromise = (async () => {
+      /* Layout nélkül ne mountoljunk — különben drumsMounted=1 üresen ragad. */
+      if (!f?.querySelector("#qs-layout-main [data-qs-field], #qs-more-layout [data-qs-field]")) {
+        return;
+      }
       arrangeAutoDeskDemoFields(f);
       try {
+        delete f.dataset.drumsMounted;
+        f.classList.remove("auto-qs-drums", "auto-qs-drums--mobile", "auto-qs-drums--desktop");
         await mountAutoSearchDrums(f);
       } catch (drumError) {
         console.warn("Desk kereső dobkerék:", drumError);

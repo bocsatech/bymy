@@ -352,33 +352,10 @@
     overflow: hidden !important;
   }
 
-  /* Gyors: nyitott Alapadatok görget, összecsukva csak a pill */
+  /* Gyors + Részletes: a teljes form sáv görget (Gyártmány & Modell együtt az Alapadatokkal) */
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-gyors
     .auto-search-panel
-    .auto-desk-acc[data-desk-acc="alap"] {
-    flex: 0 0 auto !important;
-    min-height: 0 !important;
-    overflow: hidden !important;
-  }
-
-  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-gyors
-    .auto-search-panel
-    .auto-desk-acc[data-desk-acc="alap"].is-open {
-    flex: 1 1 auto !important;
-    overflow-x: hidden !important;
-    overflow-y: auto !important;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain;
-  }
-
-  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-gyors
-    .auto-search-panel
-    .auto-desk-acc[data-desk-acc="alap"]
-    .auto-desk-acc__body {
-    overflow: visible;
-  }
-
-  /* Részletes: az egész form görget, gombok sticky alul */
+    .home-qs-form,
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-reszletes
     .auto-search-panel
     .home-qs-form {
@@ -388,6 +365,10 @@
     overscroll-behavior: contain;
   }
 
+  /* Nyitott menük természetes magasság — ne külön scrollerbe zsugorodjanak */
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-gyors
+    .auto-search-panel
+    .auto-desk-acc,
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-reszletes
     .auto-search-panel
     .auto-desk-acc {

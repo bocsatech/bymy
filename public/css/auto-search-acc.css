@@ -25,15 +25,9 @@
     background: #e8eef3 !important;
   }
 
-  /* Gyors: a shell kitölti a sávot, Alapadatok belül görget */
+  /* Gyors + Részletes: shell természetes magasság — a form sáv görget mindent együtt */
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active.auto-desk-gyors
-    .auto-search-desk-shell {
-    flex: 1 1 auto !important;
-    min-height: 0 !important;
-    overflow: hidden !important;
-  }
-
-  /* Részletes: a shell természetes magasságú — a teljes form sáv görget */
+    .auto-search-desk-shell,
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active.auto-desk-reszletes
     .auto-search-desk-shell {
     flex: 0 0 auto !important;
@@ -56,7 +50,7 @@
     box-sizing: border-box !important;
   }
 
-  /* Összecsukva: fehér pill — a shell alján marad, Alapadatok görgetésén kívül */
+  /* Összecsukva: fehér pill */
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     > .auto-desk-acc:not(.is-open) {
@@ -113,6 +107,17 @@
     display: none !important;
   }
 
+  /* Nyitott Alapadatok / Műszaki / Extrák: természetes magasság — a form sáv görget */
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-desk-shell
+    > .auto-desk-acc[data-desk-acc="alap"].is-open,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-desk-shell
+    > .auto-desk-acc:not([data-desk-acc="alap"]).is-open {
+    flex: 0 0 auto !important;
+    overflow: visible !important;
+  }
+
   /* Alapadatok nyitva: külső head rejtve, kék héj + fehér kártya */
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
@@ -122,26 +127,6 @@
     border-radius: 0 !important;
     box-shadow: none !important;
     margin: 0 !important;
-  }
-
-  /* Gyors: Alapadatok belül görget, Műszaki/Extrák pill lent */
-  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active.auto-desk-gyors
-    .auto-search-desk-shell
-    > .auto-desk-acc[data-desk-acc="alap"].is-open {
-    flex: 1 1 auto !important;
-    min-height: 0 !important;
-    overflow-x: hidden !important;
-    overflow-y: auto !important;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain;
-  }
-
-  /* Részletes: Alapadatok nem zsugorodik — a teljes sáv görget */
-  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active.auto-desk-reszletes
-    .auto-search-desk-shell
-    > .auto-desk-acc[data-desk-acc="alap"].is-open {
-    flex: 0 0 auto !important;
-    overflow: visible !important;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
@@ -175,26 +160,6 @@
     background: #fff !important;
     box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05) !important;
     margin: 0 !important;
-  }
-
-  /* Gyors: nyitott Műszaki/Extrák belül görget */
-  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active.auto-desk-gyors
-    .auto-search-desk-shell
-    > .auto-desk-acc:not([data-desk-acc="alap"]).is-open {
-    flex: 1 1 auto !important;
-    min-height: 0 !important;
-    overflow-x: hidden !important;
-    overflow-y: auto !important;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain;
-  }
-
-  /* Részletes: nyitott menük természetes magasság — a teljes sáv görget */
-  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active.auto-desk-reszletes
-    .auto-search-desk-shell
-    > .auto-desk-acc:not([data-desk-acc="alap"]).is-open {
-    flex: 0 0 auto !important;
-    overflow: visible !important;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active

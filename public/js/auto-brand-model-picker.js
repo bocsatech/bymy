@@ -1,18 +1,8 @@
-
 import { fetchVehicleCatalog } from "./vehicle-catalog-client.js?v=5004d33efa";
-import { bindAutoBmDismiss, autoBmPanelIsOpen } from "./auto-bm-dismiss.js?v=89aa460931";
-
-function truckKategoria() {
-  const fromBody = document.body?.dataset?.truckKategoria;
-  if (fromBody === "35-felett" || fromBody === "35-alatt") return fromBody;
-  const activeTab = document.querySelector("[data-truck-tab].is-active");
-  const fromTab = activeTab?.getAttribute("data-truck-tab");
-  if (fromTab === "35-felett" || fromTab === "35-alatt") return fromTab;
-  return new URLSearchParams(window.location.search).get("kategoria") || "35-alatt";
-}
+import { fillWheel, setWheelValue, readWheelList } from "./ingatlan-wheels.js?v=6952ba469c";
+import { openBrandModelCatalogSheet, closeAutoDrumSheet } from "./auto-drum-sheet.js?v=bmSheet1";
 
 function catalogKindForPage() {
-  // Teherautó oldal: soha személyautó katalógus (Ferrari / BMW…).
   if (document.body?.getAttribute("data-site-page") === "teherauto") {
     return "kisteher";
   }
@@ -54,15 +44,32 @@ function isAutoDesk() {
   );
 }
 
+function ensureHiddenWheel(host, name, { multiple = true } = {}) {
+  let wrap = host.querySelector(`.auto-bm-wheel-host[data-wheel-host="${name}"]`);
+  if (!wrap) {
+    wrap = document.createElement("div");
+    wrap.className = "auto-bm-wheel-host";
+    wrap.dataset.wheelHost = name;
+    wrap.hidden = true;
+    wrap.setAttribute("aria-hidden", "true");
+    wrap.innerHTML = `<div class="immo-wheel-wrap">
+      <div class="immo-wheel" data-wheel="${name}" data-filter-key="${name}" role="listbox"></div>
+    </div>`;
+    host.appendChild(wrap);
+  }
+  const wheel = wrap.querySelector("[data-wheel]");
+  if (multiple) wheel.dataset.multiple = "1";
+  return wheel;
+}
+
 export async function mountAutoBrandModelPicker(form) {
   if (!form || !isAutoDesk()) return;
 
   const wantKind = catalogKindForPage();
-  // Remount if kind changed (e.g. wrong személyautó catalog was cached into the picker).
   if (form.dataset.brandModelPicker === "1" && form.dataset.brandModelCatalogKind === wantKind) return;
   if (form.dataset.brandModelPicker === "1") {
-    form.querySelectorAll(".auto-bm-pair, .auto-bm-field").forEach((el) => el.remove());
-    document.querySelectorAll(".auto-bm-panel.auto-brand-panel, .auto-bm-panel.auto-model-panel").forEach((el) => el.remove());
+    form.querySelectorAll(".auto-bm-pair, .auto-bm-field, .auto-bm-wheel-host").forEach((el) => el.remove());
+    document.querySelectorAll(".auto-bm-panel").forEach((el) => el.remove());
     delete form.dataset.brandModelPicker;
   }
 
@@ -72,7 +79,6 @@ export async function mountAutoBrandModelPicker(form) {
   let catalog;
   try {
     if (wantKind === "kisteher") {
-      // Always load public kisteher JSON (bypass any személyautó API / module cache).
       const res = await fetch(`/data/vehicle-catalog-kisteher.json?v=teherStrict4`, { cache: "force-cache" });
       const data = await res.json().catch(() => ({}));
       if (!res.ok || !data?.gyartmanyok?.length) {
@@ -100,14 +106,18 @@ export async function mountAutoBrandModelPicker(form) {
   }
 
   form.dataset.brandModelCatalogKind = wantKind;
+  form._autoDrumCatalog = {
+    gyartmanyok: [...(catalog.gyartmanyok || [])],
+    modellek: catalog.modellek || {},
+    modellekTree: catalog.modellekTree || {},
+  };
 
   const brands = [...(catalog.gyartmanyok || [])].sort((a, b) =>
     a.localeCompare(b, "hu", { sensitivity: "base" })
   );
-  const treeByBrand = catalog.modellekTree || {};
   const modelsByBrand = {};
   for (const brand of brands) {
-    const tree = treeByBrand[brand];
+    const tree = catalog.modellekTree?.[brand];
     if (Array.isArray(tree) && tree.length) {
       const names = [];
       for (const node of tree) {
@@ -122,18 +132,6 @@ export async function mountAutoBrandModelPicker(form) {
     }
   }
 
-  function treeFor(brand) {
-    const tree = treeByBrand[brand];
-    if (Array.isArray(tree) && tree.length) return tree;
-    return (modelsByBrand[brand] || []).map((name) => ({
-      name,
-      children: [],
-      searchSelectable: true,
-      postRequiresChild: false,
-    }));
-  }
-
-  /* Drop every plain Gyártmány / Modell / Típus row — picker is the only brand UI. */
   alapHost
     .querySelectorAll(
       '[data-desk-field="gyartmany"], [data-desk-field="modell"], [data-desk-field="tipus"], .auto-bm-pair'
@@ -167,61 +165,29 @@ export async function mountAutoBrandModelPicker(form) {
   wrap.appendChild(modelsInput);
   alapHost.insertBefore(wrap, alapHost.firstChild);
 
+  const brandWheel = ensureHiddenWheel(wrap, "gyartmany", { multiple: true });
+  const modelWheel = ensureHiddenWheel(wrap, "modell", { multiple: true });
+  fillWheel(
+    brandWheel,
+    brands.map((b) => ({ value: b, label: b })),
+    { emptyLabel: emptyCombinedLabel }
+  );
+  fillWheel(modelWheel, [], { emptyLabel: "Mindegy" });
+  brandWheel.dataset.multiple = "1";
+  modelWheel.dataset.multiple = "1";
+
   const combinedSummaryEl = wrap.querySelector("[data-auto-bm-combined-summary]");
   const openBrandBtn = wrap.querySelector('[data-auto-bm-open="brand"]');
 
-  let selectedBrands = [];
-  let selectedModels = [];
-  let modelBrand = null;
-  /** Open model group (almenü), e.g. ML-OSZTÁLY */
-  let modelGroup = null;
-  let brandQuery = "";
-
-  const panel = document.createElement("div");
-  panel.className = "auto-bm-panel";
-  panel.hidden = true;
-  panel.innerHTML = `
-    <div class="auto-bm-panel__chrome">
-      <button type="button" class="auto-bm-panel__back" data-auto-bm-back aria-label="Vissza">‹</button>
-      <div class="auto-bm-panel__titles">
-        <p class="auto-bm-panel__title" data-auto-bm-title>Gyártmány</p>
-        <p class="auto-bm-panel__sub" data-auto-bm-sub hidden></p>
-      </div>
-    </div>
-    <div class="auto-bm-panel__search" data-auto-bm-search-wrap>
-      <input
-        type="text"
-        class="auto-bm-panel__search-input"
-        data-auto-bm-search
-        placeholder="Keresés…"
-        autocomplete="off"
-        autocorrect="off"
-        autocapitalize="off"
-        spellcheck="false"
-        inputmode="search"
-        enterkeyhint="search"
-      />
-    </div>
-    <div class="auto-bm-panel__body" data-auto-bm-body></div>
-  `;
-  const hero = document.querySelector(".auto-search-hero") || form.closest(".auto-search-hero") || form;
-  hero.appendChild(panel);
-
-  const titleEl = panel.querySelector("[data-auto-bm-title]");
-  const subEl = panel.querySelector("[data-auto-bm-sub]");
-  const bodyEl = panel.querySelector("[data-auto-bm-body]");
-  const searchWrap = panel.querySelector("[data-auto-bm-search-wrap]");
-  const searchInput = panel.querySelector("[data-auto-bm-search]");
-
-  function pruneModels() {
+  function pruneModels(selectedBrands, selectedModels) {
     const allowed = new Set();
     for (const b of selectedBrands) {
       for (const m of modelsByBrand[b] || []) allowed.add(m);
     }
-    selectedModels = selectedModels.filter((m) => allowed.has(m));
+    return selectedModels.filter((m) => allowed.has(m));
   }
 
-  function combinedSummaryText() {
+  function combinedSummaryText(selectedBrands, selectedModels) {
     if (!selectedBrands.length) return emptyCombinedLabel;
     const bPart =
       selectedBrands.length === 1 ? selectedBrands[0] : labelList(selectedBrands, "márka");
@@ -231,402 +197,92 @@ export async function mountAutoBrandModelPicker(form) {
     return `${bPart} · ${mPart}`;
   }
 
-  function syncHidden() {
+  function syncHiddenFromWheels() {
+    const selectedBrands = readWheelList(brandWheel);
+    let selectedModels = readWheelList(modelWheel);
+    selectedModels = pruneModels(selectedBrands, selectedModels);
     writeJsonList(brandsInput, selectedBrands);
     writeJsonList(modelsInput, selectedModels);
     if (combinedSummaryEl) {
-      const text = combinedSummaryText();
+      const text = combinedSummaryText(selectedBrands, selectedModels);
       combinedSummaryEl.textContent = text;
       combinedSummaryEl.classList.toggle("is-placeholder", text === emptyCombinedLabel);
       openBrandBtn?.classList.toggle("has-value", text !== emptyCombinedLabel);
     }
   }
 
-  function modelLabelFor(brand) {
-    const allowed = new Set(modelsByBrand[brand] || []);
-    const list = selectedModels.filter((m) => allowed.has(m));
-    return labelList(list, "modell");
-  }
-
-  function brandsMatchingQuery(query) {
-    const q = String(query ?? "")
-      .trim()
-      .toLocaleLowerCase("hu");
-    if (!q) return brands;
-    return brands.filter((b) => b.toLocaleLowerCase("hu").startsWith(q));
-  }
-
-  function actionsHtml({ clearAttr, clearLabel = "Összes kikapcsolása" }) {
-    return `<div class="auto-bm-actions">
-      <button type="button" class="auto-bm-btn auto-bm-btn--clear" ${clearAttr}>${clearLabel}</button>
-      <button type="button" class="auto-bm-btn auto-bm-btn--done" data-auto-bm-done>Kész</button>
-    </div>`;
-  }
-
-  function renderBrandRowsOnly() {
-    const filtered = brandsMatchingQuery(brandQuery);
-    const group = bodyEl.querySelector(".auto-bm-group");
-    const rows = filtered
-      .map((brand) => {
-        const on = selectedBrands.includes(brand);
-        const modelRow = on
-          ? `<button type="button" class="auto-bm-subrow" data-auto-bm-open-models="${escapeAttr(brand)}">
-              <span>${escapeHtml(brand)} — modell</span>
-              <span class="auto-bm-subrow__val">${escapeHtml(modelLabelFor(brand))}</span>
-            </button>`
-          : "";
-        return `<div class="auto-bm-row" data-auto-bm-brand-row="${escapeAttr(brand)}">
-          <label class="auto-bm-toggle">
-            <span>${escapeHtml(brand)}</span>
-            <input type="checkbox" data-auto-bm-brand="${escapeAttr(brand)}" ${on ? "checked" : ""} />
-            <span class="auto-bm-switch" aria-hidden="true"></span>
-          </label>
-          ${modelRow}
-        </div>`;
-      })
-      .join("");
-    const html = rows || `<p class="auto-bm-empty">Nincs találat.</p>`;
-    if (group) {
-      group.innerHTML = html;
-    } else {
-      bodyEl.innerHTML = `
-        ${actionsHtml({ clearAttr: 'data-auto-bm-clear-brands' })}
-        <div class="auto-bm-group">${html}</div>
-      `;
-    }
-    bodyEl.scrollTop = 0;
-  }
-
-  function renderBrandList() {
-    modelBrand = null;
-    titleEl.textContent = "Gyártmány";
-    subEl.hidden = true;
-    searchWrap.hidden = false;
-    if (searchInput && searchInput.value !== brandQuery) searchInput.value = brandQuery;
-    bodyEl.innerHTML = `
-      ${actionsHtml({ clearAttr: 'data-auto-bm-clear-brands' })}
-      <div class="auto-bm-group"></div>
-    `;
-    renderBrandRowsOnly();
-  }
-
-  function renderModelList(brand) {
-    modelBrand = brand;
-    modelGroup = null;
-    titleEl.textContent = "Modell";
-    subEl.hidden = false;
-    subEl.textContent = brand;
-    searchWrap.hidden = true;
-    const models = [...treeFor(brand)].sort((a, b) =>
-      a.name.localeCompare(b.name, "hu", { sensitivity: "base" })
+  function applyListsToWheels(brandsList, modelsList) {
+    const selectedBrands = [...brandsList].sort((a, b) =>
+      a.localeCompare(b, "hu", { sensitivity: "base" })
     );
-    const rows = models
-      .map((node) => {
-        const model = node.name;
-        const on = selectedModels.includes(model);
-        const kids = [...(node.children || [])].sort((a, b) =>
-          a.name.localeCompare(b.name, "hu", { sensitivity: "base" })
-        );
-        /* Gyerekek (pl. A3 CABRIO) rögtön látszanak — nem kell „Almenü” kattintás */
-        const kidsHtml =
-          kids.length > 0
-            ? `<div class="auto-fuel-children">
-                ${kids
-                  .map((child) => {
-                    const name = child.name;
-                    const childOn = selectedModels.includes(name);
-                    return `<div class="auto-bm-row">
-                      <label class="auto-bm-toggle">
-                        <span>${escapeHtml(name)}</span>
-                        <input type="checkbox" data-auto-bm-model="${escapeAttr(name)}" ${
-                          childOn ? "checked" : ""
-                        } />
-                        <span class="auto-bm-switch" aria-hidden="true"></span>
-                      </label>
-                    </div>`;
-                  })
-                  .join("")}
-              </div>`
-            : "";
-        return `<div class="auto-bm-row" data-auto-bm-model-row="${escapeAttr(model)}">
-          <label class="auto-bm-toggle">
-            <span>${escapeHtml(model)}</span>
-            <input type="checkbox" data-auto-bm-model="${escapeAttr(model)}" ${on ? "checked" : ""} />
-            <span class="auto-bm-switch" aria-hidden="true"></span>
-          </label>
-          ${kidsHtml}
-        </div>`;
-      })
-      .join("");
-
-    bodyEl.innerHTML = `
-      ${actionsHtml({ clearAttr: 'data-auto-bm-clear-models' })}
-      <div class="auto-bm-group">${
-        rows || `<p class="auto-bm-empty">Nincs modell ehhez a gyártmányhoz.</p>`
-      }</div>
-    `;
-    /* Márka lista scroll pozícióját ne örökölje — mindig az első modellnél */
-    bodyEl.scrollTop = 0;
-    panel.scrollTop = 0;
-  }
-
-  function renderModelGroupList(brand, groupName) {
-    modelBrand = brand;
-    modelGroup = groupName;
-    const group = treeFor(brand).find((n) => n.name === groupName);
-    const kids = [...(group?.children || [])].sort((a, b) =>
-      a.name.localeCompare(b.name, "hu", { sensitivity: "base" })
+    let selectedModels = pruneModels(
+      selectedBrands,
+      [...modelsList].sort((a, b) => a.localeCompare(b, "hu", { sensitivity: "base" }))
     );
-    titleEl.textContent = groupName;
-    subEl.hidden = false;
-    subEl.textContent = brand;
-    searchWrap.hidden = true;
-    const rows = kids
-      .map((child) => {
-        const model = child.name;
-        const on = selectedModels.includes(model);
-        return `<div class="auto-bm-row">
-          <label class="auto-bm-toggle">
-            <span>${escapeHtml(model)}</span>
-            <input type="checkbox" data-auto-bm-model="${escapeAttr(model)}" ${on ? "checked" : ""} />
-            <span class="auto-bm-switch" aria-hidden="true"></span>
-          </label>
-        </div>`;
-      })
-      .join("");
-    bodyEl.innerHTML = `
-      ${actionsHtml({ clearAttr: 'data-auto-bm-clear-group-models' })}
-      <div class="auto-bm-group">${
-        rows || `<p class="auto-bm-empty">Nincs altípus ebben az almenüben.</p>`
-      }</div>
-    `;
-    bodyEl.scrollTop = 0;
-    panel.scrollTop = 0;
+    setWheelValue(brandWheel, selectedBrands);
+    const modelOpts = [];
+    const seen = new Set();
+    for (const b of selectedBrands) {
+      for (const m of modelsByBrand[b] || []) {
+        if (seen.has(m)) continue;
+        seen.add(m);
+        modelOpts.push({ value: m, label: m });
+      }
+    }
+    fillWheel(modelWheel, modelOpts, { emptyLabel: "Mindegy" });
+    modelWheel.dataset.multiple = "1";
+    setWheelValue(modelWheel, selectedModels);
+    syncHiddenFromWheels();
   }
 
-  function openPanel(mode = "brand") {
-    panel.hidden = false;
-    panel.style.removeProperty("display");
-    panel.classList.remove("is-closed");
-    document.body.classList.add("auto-bm-open");
-    brandQuery = "";
-    if (searchInput) searchInput.value = "";
-    if (mode === "model") {
-      if (selectedBrands.length === 1) {
-        renderModelList(selectedBrands[0]);
-      } else if (selectedBrands.length > 1) {
-        renderBrandList();
-      } else {
-        renderBrandList();
-      }
-    } else {
-      renderBrandList();
-    }
-    if (!modelBrand) {
-      requestAnimationFrame(() => searchInput?.focus());
-    }
+  function openSheet() {
+    applyListsToWheels(parseJsonList(brandsInput.value), parseJsonList(modelsInput.value));
+    openBrandModelCatalogSheet(brandWheel, openBrandBtn, wrap, emptyCombinedLabel, form, {
+      singleSelect: false,
+    });
+    const portal = document.querySelector(".auto-drum-portal--bm");
+    const sync = () => syncHiddenFromWheels();
+    brandWheel.addEventListener("immo-wheel-change", sync);
+    modelWheel.addEventListener("immo-wheel-change", sync);
+    const stop = () => {
+      brandWheel.removeEventListener("immo-wheel-change", sync);
+      modelWheel.removeEventListener("immo-wheel-change", sync);
+      syncHiddenFromWheels();
+    };
+    portal?.querySelector(".auto-drum-portal__done")?.addEventListener("click", stop, { once: true });
+    portal?.querySelector(".auto-drum-portal__close")?.addEventListener("click", stop, { once: true });
+    portal?.querySelector(".auto-drum-portal__backdrop")?.addEventListener("click", stop, { once: true });
   }
 
-  function closePanel() {
-    panel.hidden = true;
-    panel.style.setProperty("display", "none", "important");
-    panel.classList.add("is-closed");
-    document.body.classList.remove("auto-bm-open");
-    modelBrand = null;
-    modelGroup = null;
-    brandQuery = "";
-    if (searchInput) searchInput.value = "";
-    if (document.activeElement instanceof HTMLElement) {
-      document.activeElement.blur();
-    }
-    syncHidden();
-  }
-
-  function toggleOpen(mode) {
-    const open = !panel.hidden && !panel.classList.contains("is-closed");
-    if (open) {
-      closePanel();
+  openBrandBtn?.addEventListener("click", (event) => {
+    event.preventDefault();
+    if (document.querySelector(".auto-drum-portal--bm")) {
+      closeAutoDrumSheet(true);
+      syncHiddenFromWheels();
       return;
     }
-    openPanel(mode);
-  }
-
-  openBrandBtn?.addEventListener("click", () => toggleOpen("brand"));
-
-  bindAutoBmDismiss({
-    panel,
-    roots: [wrap],
-    isOpen: () => autoBmPanelIsOpen(panel),
-    close: closePanel,
-  });
-
-  panel.querySelector("[data-auto-bm-back]")?.addEventListener("click", () => {
-    if (modelGroup && modelBrand) {
-      renderModelList(modelBrand);
-      return;
-    }
-    if (modelBrand) {
-      renderBrandList();
-      requestAnimationFrame(() => searchInput?.focus());
-    } else closePanel();
-  });
-
-  function onDoneClick() {
-    closePanel();
-  }
-
-  searchInput?.addEventListener("mousedown", (event) => {
-    event.stopPropagation();
-  });
-  searchInput?.addEventListener("click", (event) => {
-    event.stopPropagation();
-    searchInput.focus();
-  });
-  searchInput?.addEventListener("keydown", (event) => {
-    event.stopPropagation();
-    if (event.key === "Escape") {
-      event.preventDefault();
-      if (brandQuery) {
-        brandQuery = "";
-        searchInput.value = "";
-        renderBrandRowsOnly();
-      } else {
-        closePanel();
-      }
-      return;
-    }
-    if (event.key === "Enter") {
-      event.preventDefault();
-    }
-  });
-  searchInput?.addEventListener("input", () => {
-    brandQuery = searchInput.value || "";
-    if (modelBrand) return;
-    renderBrandRowsOnly();
-  });
-
-  bodyEl.addEventListener("change", (event) => {
-    const brandEl = event.target.closest("[data-auto-bm-brand]");
-    if (brandEl) {
-      const brand = brandEl.getAttribute("data-auto-bm-brand");
-      const on = brandEl.checked;
-      if (on) {
-        if (!selectedBrands.includes(brand)) selectedBrands.push(brand);
-      } else {
-        selectedBrands = selectedBrands.filter((b) => b !== brand);
-      }
-      selectedBrands.sort((a, b) => a.localeCompare(b, "hu", { sensitivity: "base" }));
-      pruneModels();
-      syncHidden();
-      /* Márka bekapcsolásakor rögtön a modell (típus) lista — tetején */
-      if (on && brand) {
-        if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
-        renderModelList(brand);
-        requestAnimationFrame(() => {
-          bodyEl.scrollTop = 0;
-          panel.scrollTop = 0;
-        });
-      } else {
-        renderBrandList();
-      }
-      return;
-    }
-    const modelEl = event.target.closest("[data-auto-bm-model]");
-    if (modelEl) {
-      const model = modelEl.getAttribute("data-auto-bm-model");
-      const on = modelEl.checked;
-      if (on) {
-        if (!selectedModels.includes(model)) selectedModels.push(model);
-      } else {
-        selectedModels = selectedModels.filter((m) => m !== model);
-      }
-      selectedModels.sort((a, b) => a.localeCompare(b, "hu", { sensitivity: "base" }));
-      syncHidden();
-    }
-  });
-
-  bodyEl.addEventListener("click", (event) => {
-    if (event.target.closest("[data-auto-bm-done]")) {
-      onDoneClick();
-      return;
-    }
-    const openModels = event.target.closest("[data-auto-bm-open-models]");
-    if (openModels) {
-      renderModelList(openModels.getAttribute("data-auto-bm-open-models"));
-      return;
-    }
-    const openGroup = event.target.closest("[data-auto-bm-open-group]");
-    if (openGroup && modelBrand) {
-      renderModelGroupList(modelBrand, openGroup.getAttribute("data-auto-bm-open-group"));
-      return;
-    }
-    if (event.target.closest("[data-auto-bm-clear-brands]")) {
-      selectedBrands = [];
-      selectedModels = [];
-      renderBrandList();
-      syncHidden();
-      return;
-    }
-    if (event.target.closest("[data-auto-bm-clear-group-models]") && modelBrand && modelGroup) {
-      const group = treeFor(modelBrand).find((n) => n.name === modelGroup);
-      const allowed = new Set((group?.children || []).map((c) => c.name));
-      selectedModels = selectedModels.filter((m) => !allowed.has(m));
-      renderModelGroupList(modelBrand, modelGroup);
-      syncHidden();
-      return;
-    }
-    if (event.target.closest("[data-auto-bm-clear-models]") && modelBrand) {
-      const allowed = new Set(modelsByBrand[modelBrand] || []);
-      selectedModels = selectedModels.filter((m) => !allowed.has(m));
-      renderModelList(modelBrand);
-      syncHidden();
-    }
+    openSheet();
   });
 
   form.addEventListener("reset", () => {
     requestAnimationFrame(() => {
-      selectedBrands = [];
-      selectedModels = [];
-      syncHidden();
-      if (!panel.hidden) renderBrandList();
+      applyListsToWheels([], []);
     });
   });
 
   form.addEventListener("bymy-saved-search-applied", (event) => {
     const detail = event?.detail && typeof event.detail === "object" ? event.detail : {};
-    const brands = Array.isArray(detail.gyartmanyok)
+    const brandsList = Array.isArray(detail.gyartmanyok)
       ? detail.gyartmanyok.map((v) => String(v)).filter(Boolean)
       : parseJsonList(brandsInput.value);
-    const models = Array.isArray(detail.modellek)
+    const modelsList = Array.isArray(detail.modellek)
       ? detail.modellek.map((v) => String(v)).filter(Boolean)
       : parseJsonList(modelsInput.value);
-    selectedBrands = [...brands].sort((a, b) => a.localeCompare(b, "hu", { sensitivity: "base" }));
-    selectedModels = [...models].sort((a, b) => a.localeCompare(b, "hu", { sensitivity: "base" }));
-    pruneModels();
-    syncHidden();
-    if (!panel.hidden) {
-      if (modelBrand && selectedBrands.includes(modelBrand)) renderModelList(modelBrand);
-      else renderBrandList();
-    }
+    applyListsToWheels(brandsList, modelsList);
   });
 
   form.dataset.brandModelPicker = "1";
-  // Ha a mentett keresés a mount előtt került a hidden inputba, vedd át.
-  selectedBrands = parseJsonList(brandsInput.value);
-  selectedModels = parseJsonList(modelsInput.value);
-  syncHidden();
-}
-
-function escapeHtml(value) {
-  return String(value ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
-
-function escapeAttr(value) {
-  return escapeHtml(value).replace(/'/g, "&#39;");
+  applyListsToWheels(parseJsonList(brandsInput.value), parseJsonList(modelsInput.value));
 }
 
 export function readBrandModelFilterValues(form) {

@@ -1180,9 +1180,12 @@ function positionSheetOverSearchPanel(stage, trigger) {
   stage.style.setProperty("margin-right", "0", "important");
   stage.style.setProperty("top", `${top}px`, "important");
   stage.style.setProperty("bottom", "auto", "important");
-  stage.style.setProperty("height", "fit-content", "important");
+  /* Explicit height — head + sheet-scroll are absolute; fit-content collapses to 0. */
+  stage.style.setProperty("height", `${maxH}px`, "important");
   stage.style.setProperty("max-height", `${maxH}px`, "important");
   stage.style.setProperty("transform", "none", "important");
+  stage.style.setProperty("border-radius", "1.35rem", "important");
+  stage.style.setProperty("overflow", "hidden", "important");
 }
 
 function ymOptionRows(wheel, emptyLabel) {

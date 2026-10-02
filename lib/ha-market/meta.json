@@ -1,5 +1,6 @@
 {
-  "count": 108633,
-  "source": "lista_ar.xlsx",
-  "effective": "akcios||ar"
+  "count": 196130,
+  "source": "ha-price-download+merge",
+  "effective": "lista_ar",
+  "updated_at": "2026-10-02T21:19:46.178Z"
 }

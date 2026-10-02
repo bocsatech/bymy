@@ -26,11 +26,16 @@ function stripStrayBrandModelFields(host) {
     .forEach((el) => el.remove());
 }
 
-/** Desk filter already has pickers — avoid wiping/remounting (catalog fetch + DOM rebuild). */
+/** Desk filter already has mobil dobkerék menü. */
 export function deskFilterMenuReady(form = document.getElementById("home-qs-form")) {
   if (!form?.classList.contains("auto-desk-native")) return false;
-  if (form.dataset.brandModelPicker !== "1") return false;
-  /* Teljes menü: layout hostokban van a picker (nem slim auto-desk-fields). */
+  if (form.dataset.drumsMounted === "1") {
+    return Boolean(
+      form.querySelector(
+        "#qs-layout-main .immo-wheel-trigger, #qs-layout-main .auto-search-bm-combined, #qs-layout-main [data-qs-field]"
+      )
+    );
+  }
   return Boolean(
     form.querySelector(
       "#qs-layout-main .auto-bm-pair, #qs-layout-main .auto-bm-brand-block, .auto-bm-brand-block .auto-bm-pair, .auto-bm-pair"

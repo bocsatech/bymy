@@ -224,9 +224,18 @@ function isErtekDrumsForm(form) {
   return Boolean(form?.hasAttribute?.("data-ertek-drums"));
 }
 
-/** Értékbecslő: mindig mobil portal sheet UI (aláhúzás + sheet), soha cell-drum lista. */
+/** Értékbecslő + autó/teher desk: ugyanaz a mobil portal sheet UI. */
 function usePortalDrums(form) {
-  return isMobile() || isErtekDrumsForm(form);
+  if (isMobile() || isErtekDrumsForm(form)) return true;
+  const page = document.body?.getAttribute("data-site-page") || "";
+  if (
+    (page === "auto" || page === "teherauto") &&
+    typeof window !== "undefined" &&
+    window.matchMedia("(min-width: 901px)").matches
+  ) {
+    return true;
+  }
+  return false;
 }
 
 function finishWheel(cell, emptyLabel, { multiple = false, forcePortal = false } = {}) {
@@ -884,7 +893,7 @@ function styleAutoSearchAlapCard(form) {
 
 /** Több szűrő: ugyanaz a fehér kártya + aláhúzás, mint Alapadatok (csak kinézet). */
 export function styleAutoSearchMoreCard(form) {
-  if (!isMobile() || !form) return;
+  if (!form || !usePortalDrums(form)) return;
   const host = form.querySelector("#qs-more-layout") || form.querySelector(".home-qs-more-layout");
   if (!host) return;
 

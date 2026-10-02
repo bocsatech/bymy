@@ -1228,8 +1228,8 @@ body[data-site-page="teherauto"] .auto-search-tabs {
   }
 }
 
-@media (max-width: 900px) {
-
+/* Mobil + desk: ugyanaz a dobkerék / sheet menüszerkezet (auto/teher). */
+@media (max-width: 900px), (min-width: 901px) {
   body[data-site-page="auto"].immo-scroll-locked .auto-search-hero,
   body[data-site-page="auto"].immo-drum-active .auto-search-hero,
   body[data-site-page="auto"].auto-drum-open .auto-search-hero,

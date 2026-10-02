@@ -1,6 +1,6 @@
 
 import { applyAutoSearchLayout, readLayoutFilterValues, refillAutoSearchRangeSelects, prefetchAutoSearchBoot } from "./auto-search-layout.js?v=kmFill1";
-import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums, styleAutoSearchMoreCard, enhanceDeskDualRanges } from "./auto-search-drums.js?v=mwParity1";
+import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums, styleAutoSearchMoreCard, enhanceDeskDualRanges } from "./auto-search-drums.js?v=mwCopy3";
 import {
   mountDetailedSearch,
   readDetailedSearchValues,
@@ -20,7 +20,7 @@ import {
   arrangeAutoDeskDemoFields,
   deskFilterMenuReady,
   syncAutoSearchAccShell,
-} from "./auto-desk-search.js?v=fullMenu2";
+} from "./auto-desk-search.js?v=mwCopy3";
 
 prefetchAutoSearchBoot();
 const MOBILE_MQ = "(max-width: 900px)";
@@ -320,11 +320,10 @@ export function initHomeQuickSearch({ onSearch = () => {}, onFilterPreview, onDe
   let deskMenuMountPromise = null;
 
   async function mountDeskFilterMenu(f) {
-    /* Second call (layout + syncChrome): keep existing pickers — no catalog re-fetch. */
-    if (deskFilterMenuReady(f)) {
+    /* Desk = mobil dobkerék/sheet menü 1:1 (ne slim select lista). */
+    if (deskFilterMenuReady(f) && f?.dataset?.drumsMounted === "1") {
       arrangeAutoDeskDemoFields(f);
       try {
-        enhanceDeskDualRanges(f);
         syncAutoSearchAccShell(f);
         updateAutoDeskAccSummaries(f);
       } catch {
@@ -332,37 +331,18 @@ export function initHomeQuickSearch({ onSearch = () => {}, onFilterPreview, onDe
       }
       return;
     }
-    /* Coalesce concurrent boots — wait for the in-flight mount instead of no-op. */
     if (deskMenuMountPromise) return deskMenuMountPromise;
 
     deskMenuMountPromise = (async () => {
       arrangeAutoDeskDemoFields(f);
-      refillAutoSearchRangeSelects(f);
       try {
-        enhanceDeskDualRanges(f);
-      } catch (dualError) {
-        console.warn("Desk osztott tartomány:", dualError);
+        await mountAutoSearchDrums(f);
+      } catch (drumError) {
+        console.warn("Desk kereső dobkerék:", drumError);
       }
-      const mountSafe = (fn, label) =>
-        fn(f).catch((error) => {
-          console.warn(label, error);
-        });
-      await mountSafe(mountAutoBrandModelPicker, "Gyártmány/Modell picker:");
-      await Promise.all([
-        mountSafe(mountAutoFuelPicker, "Üzemanyag picker:"),
-        mountSafe(mountAutoKivitelPicker, "Kivitel picker:"),
-        mountSafe(mountAutoAllapotPicker, "Állapot picker:"),
-      ]);
       try {
+        refillAutoSearchRangeSelects(f);
         syncAutoSearchAccShell(f);
-      } catch {
-        /* ignore */
-      }
-      /* Muszaki pickers: only when Részletes can show them — skip on gyors-only first paint. */
-      if (!document.body.classList.contains("auto-desk-gyors")) {
-        await mountMuszakiPickersLazy();
-      }
-      try {
         updateAutoDeskAccSummaries(f);
       } catch {
         /* ignore */

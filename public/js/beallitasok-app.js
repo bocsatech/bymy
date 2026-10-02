@@ -516,7 +516,8 @@ function setSection(section) {
   }
   if (next === "ertekbecslo") {
     const type = String(getProfile()?.accountType || getAuthUser()?.profile?.accountType || "").toLowerCase();
-    if (type !== "dealer") {
+    const kind = document.documentElement.getAttribute("data-mm-account-kind") || "";
+    if (type !== "dealer" && type !== "business" && kind !== "company") {
       next = "hirdetes";
     }
   }

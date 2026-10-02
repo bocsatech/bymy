@@ -128,7 +128,7 @@ struct AccountScreen: View {
             items.append(.link(.partnerProfil))
         }
         items.append(.link(.autoImport))
-        if isDealer {
+        if isCompany {
             items.append(.link(.ertekbecslo))
         }
         items.append(.link(.nyomtatasok))

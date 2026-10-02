@@ -75,7 +75,9 @@
         display: grid !important;
       }
       body.site-app .mm-nav > [data-mm-dealer-nav-wrap] { display: none !important; }
-      html[data-bymy-account-type="dealer"] body.site-app .mm-nav > [data-mm-dealer-nav-wrap] {
+      html[data-bymy-account-type="dealer"] body.site-app .mm-nav > [data-mm-dealer-nav-wrap],
+      html[data-bymy-account-type="business"] body.site-app .mm-nav > [data-mm-dealer-nav-wrap],
+      html[data-mm-account-kind="company"] body.site-app .mm-nav > [data-mm-dealer-nav-wrap] {
         display: grid !important;
       }
     </style>

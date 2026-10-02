@@ -19,7 +19,7 @@ import {
   updateAutoDeskAccSummaries,
   arrangeAutoDeskDemoFields,
   deskFilterMenuReady,
-} from "./auto-desk-search.js?v=ertekMode1";
+} from "./auto-desk-search.js?v=ertekMode2";
 
 prefetchAutoSearchBoot();
 const MOBILE_MQ = "(max-width: 900px)";
@@ -132,15 +132,84 @@ export function initHomeQuickSearch({ onSearch = () => {}, onFilterPreview, onDe
   let wheelSearchTimer = null;
 
   function triggerSearchFromForm() {
+    if (document.body.classList.contains("auto-desk-ertekbecslo")) {
+      void runDeskValuation();
+      return;
+    }
     onSearch(readQuickSearchValues());
   }
 
-  function triggerPreviewFromForm() {
-    if (typeof onFilterPreview === "function") {
-      onFilterPreview(readQuickSearchValues());
+  function escapeErtekHtml(value) {
+    return String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  async function runDeskValuation() {
+    const out = form.querySelector("[data-auto-ertek-out]") || document.querySelector("[data-auto-ertek-out]");
+    if (!out) return;
+    const values = readQuickSearchValues() || {};
+    const brand =
+      (Array.isArray(values.gyartmanyok) && values.gyartmanyok[0]) ||
+      values.gyartmany ||
+      "";
+    const model =
+      (Array.isArray(values.modellek) && values.modellek[0]) ||
+      values.modell ||
+      "";
+    const year =
+      values.ev_tol ||
+      values.gyartasi_ev_tol ||
+      values.gyartasi_ev ||
+      "";
+    const km = values.km_tol || values.km || "";
+    const fuel =
+      (Array.isArray(values.uzemanyagok) && values.uzemanyagok[0]) ||
+      values.uzemanyag ||
+      "";
+    out.hidden = false;
+    if (!brand || !model || !year || !km) {
+      out.innerHTML =
+        '<p class="ertek-msg">Kötelező: gyártmány, modell, évjárat (-tól), km (-tól).</p>';
       return;
     }
-    triggerSearchFromForm();
+    out.innerHTML = '<p class="ertek-msg">Számolás…</p>';
+    const q = new URLSearchParams({
+      gyartmany: String(brand),
+      modell: String(model),
+      gyartasi_ev: String(year),
+      km: String(km),
+      require: "1",
+      source: "market",
+    });
+    if (fuel) q.set("uzemanyag", String(fuel));
+    if (values.tipus) q.set("tipus", String(values.tipus));
+    try {
+      const res = await fetch(`/api/valuation/estimate?${q}`, { credentials: "same-origin" });
+      const data = await res.json().catch(() => ({}));
+      if (data.error) {
+        out.innerHTML = `<p class="ertek-msg ertek-msg--err">${escapeErtekHtml(data.error)}</p>`;
+        return;
+      }
+      if (data.count === 0) {
+        out.innerHTML = `<p class="ertek-msg">${escapeErtekHtml(data.message || "Nincs egyező adat a mintában.")}</p>`;
+        return;
+      }
+      const recom = data.recommended_formatted || data.average_price_formatted || "—";
+      const from = data.good_price_from_formatted || data.min_price_formatted || "—";
+      const to = data.good_price_to_formatted || data.max_price_formatted || "—";
+      const n = data.count ?? 0;
+      out.innerHTML = `
+        <div class="ertek-result" aria-live="polite">
+          <p class="ertek-result__price">${escapeErtekHtml(recom)}</p>
+          <p class="ertek-result__band">Jó ár: <strong>${escapeErtekHtml(from)}</strong> – <strong>${escapeErtekHtml(to)}</strong></p>
+          <p class="ertek-result__meta">${n} hasonló a mintában${data.source ? ` · ${escapeErtekHtml(data.source)}` : ""}</p>
+        </div>`;
+    } catch (err) {
+      out.innerHTML = `<p class="ertek-msg ertek-msg--err">${escapeErtekHtml(err?.message || "Hiba")}</p>`;
+    }
   }
 
   form.addEventListener("submit", (event) => {
@@ -283,11 +352,6 @@ export function initHomeQuickSearch({ onSearch = () => {}, onFilterPreview, onDe
     onDeskLayout: mountDeskFilterMenu,
     onModeChange: (mode) => {
       if (mode === "reszletes") void mountMuszakiPickersLazy();
-      if (mode === "ertekbecslo") {
-        void import("./ertekbecslo-app.js?v=ertekMode1").then((mod) => {
-          mod.initErtekbecsloPanel(document);
-        });
-      }
     },
   });
 

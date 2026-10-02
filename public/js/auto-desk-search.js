@@ -91,7 +91,8 @@ function isAutoDesk() {
 function setMode(mode) {
   const next =
     mode === "reszletes" ? "reszletes" : mode === "ertekbecslo" ? "ertekbecslo" : "gyors";
-  document.body.classList.toggle("auto-desk-gyors", next === "gyors");
+  /* Értékbecslő = ugyanaz a Gyors menü, csak más a submit működés. */
+  document.body.classList.toggle("auto-desk-gyors", next === "gyors" || next === "ertekbecslo");
   document.body.classList.toggle("auto-desk-reszletes", next === "reszletes");
   document.body.classList.toggle("auto-desk-ertekbecslo", next === "ertekbecslo");
   document.querySelectorAll("[data-desk-mode]").forEach((btn) => {
@@ -99,12 +100,14 @@ function setMode(mode) {
     btn.classList.toggle("is-active", on);
     btn.setAttribute("aria-selected", on ? "true" : "false");
   });
-  const ertekPanel = document.querySelector("[data-auto-ertekbecslo]");
-  if (ertekPanel) ertekPanel.hidden = next !== "ertekbecslo";
-  const title = document.getElementById("auto-search-title");
-  if (title) {
-    title.textContent =
-      next === "ertekbecslo" ? "Mennyi az autó piaci értéke?" : "Melyik járművet keresed?";
+  const submitBtn = document.querySelector("#home-qs-form .home-qs-submit");
+  if (submitBtn) {
+    submitBtn.textContent = next === "ertekbecslo" ? "Értékbecslés" : "Találatok mutatása";
+  }
+  const out = document.querySelector("[data-auto-ertek-out]");
+  if (out && next !== "ertekbecslo") {
+    out.hidden = true;
+    out.innerHTML = "";
   }
   return next;
 }
@@ -476,13 +479,8 @@ export function initAutoDeskSearch({
       if (!isAutoDesk()) return;
       const mode = btn.getAttribute("data-desk-mode") || "gyors";
       const next = setMode(mode);
-      if (next === "ertekbecslo") {
-        openAccordion("alap");
-        onModeChange?.("ertekbecslo");
-        return;
-      }
       syncGyorsFieldVisibility(form);
-      if (next === "gyors") {
+      if (next === "gyors" || next === "ertekbecslo") {
         if (morePanel) {
           morePanel.hidden = true;
           morePanel.classList.remove("is-open");
@@ -606,8 +604,8 @@ export function initAutoDeskSearch({
     } else {
       if (advancedBtn) advancedBtn.hidden = false;
       document.body.classList.remove("auto-desk-gyors", "auto-desk-reszletes", "auto-desk-ertekbecslo");
-      const ertekPanel = document.querySelector("[data-auto-ertekbecslo]");
-      if (ertekPanel) ertekPanel.hidden = true;
+      const submitBtn = document.querySelector("#home-qs-form .home-qs-submit");
+      if (submitBtn) submitBtn.textContent = "Találatok mutatása";
     }
   }
 

@@ -19,7 +19,8 @@ import {
   updateAutoDeskAccSummaries,
   arrangeAutoDeskDemoFields,
   deskFilterMenuReady,
-} from "./auto-desk-search.js?v=accPill1";
+  syncAutoSearchAccShell,
+} from "./auto-desk-search.js?v=accMatch1";
 
 prefetchAutoSearchBoot();
 const MOBILE_MQ = "(max-width: 900px)";
@@ -345,6 +346,11 @@ export function initHomeQuickSearch({ onSearch = () => {}, onFilterPreview, onDe
         mountSafe(mountAutoKivitelPicker, "Kivitel picker:"),
         mountSafe(mountAutoAllapotPicker, "Állapot picker:"),
       ]);
+      try {
+        syncAutoSearchAccShell(f);
+      } catch {
+        /* ignore */
+      }
       /* Muszaki pickers: only when Részletes can show them — skip on gyors-only first paint. */
       if (!document.body.classList.contains("auto-desk-gyors")) {
         await mountMuszakiPickersLazy();

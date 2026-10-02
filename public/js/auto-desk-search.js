@@ -496,6 +496,42 @@ function syncGyorsFieldVisibility(form = document.getElementById("home-qs-form")
     el.hidden = gyors && !isQuick;
   });
   if (ertek) syncErtekModeChrome(form);
+  syncAutoSearchAccShell(form);
+}
+
+/** Feladás-szerű héj: brand kártya a shellben, Alapadatok fehér kártya + pill menük. */
+export function syncAutoSearchAccShell(form = document.getElementById("home-qs-form")) {
+  if (!form || !isAutoDesk()) return;
+  const shell = form.querySelector("#auto-search-desk-shell");
+  const alap = form.querySelector('#auto-search-desk-shell > [data-desk-acc="alap"], [data-desk-acc="alap"]');
+  if (!shell || !alap) return;
+
+  const brand = form.querySelector(".auto-bm-brand-block");
+  if (brand && brand.parentElement !== shell) {
+    shell.insertBefore(brand, alap);
+  } else if (brand && brand.nextElementSibling !== alap) {
+    shell.insertBefore(brand, alap);
+  }
+
+  const alapBody = alap.querySelector(":scope > .auto-desk-acc__body");
+  const host = alapBody?.querySelector(".auto-desk-fields[data-desk-alap]");
+  if (!alapBody || !host) return;
+  if (alapBody.querySelector(":scope > .ad-form-alap-card")) return;
+
+  const card = document.createElement("div");
+  card.className = "ad-form-alap-card";
+  card.innerHTML =
+    '<button type="button" class="ad-form-alap-card__title" aria-expanded="true"><span class="ad-form-alap-card__title-text">Alapadatok</span><span class="ad-form-alap-card__chev" aria-hidden="true">▼</span></button><div class="ad-form-alap-card__body"></div>';
+  const cardBody = card.querySelector(".ad-form-alap-card__body");
+  const title = card.querySelector(".ad-form-alap-card__title");
+  cardBody.appendChild(host);
+  alapBody.insertBefore(card, alapBody.firstChild);
+  title.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    const closed = card.classList.toggle("is-collapsed");
+    title.setAttribute("aria-expanded", closed ? "false" : "true");
+  });
 }
 
 export function updateAutoDeskAccSummaries(form = document.getElementById("home-qs-form")) {

@@ -621,8 +621,9 @@
     min-width: 0;
   }
 
+  /* Ne rejtsd a fehér Alapadatok kártyát — csak a legacy közvetlen gyerekeket */
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
-    [data-desk-acc="alap"] .auto-desk-acc__body > :not(.auto-desk-fields),
+    [data-desk-acc="alap"] .auto-desk-acc__body > :not(.auto-desk-fields, .ad-form-alap-card),
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     [data-desk-acc="muszaki"] .auto-desk-acc__body > :not(.auto-desk-fields) {
     display: none !important;

@@ -2209,6 +2209,7 @@ async function handleValuationApi(req, res, pathname) {
         gyartmany: url.searchParams.get("gyartmany"),
         modell: url.searchParams.get("modell"),
         tipus: url.searchParams.get("tipus"),
+        uzemanyag: url.searchParams.get("uzemanyag"),
         modell_tipus:
           url.searchParams.get("modell_tipus") ||
           [url.searchParams.get("modell"), url.searchParams.get("tipus")]

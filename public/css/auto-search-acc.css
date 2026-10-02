@@ -15,17 +15,30 @@
     .auto-search-desk-shell {
     display: flex !important;
     flex-direction: column !important;
-    flex: 1 1 auto !important;
     gap: 0.75rem !important;
     width: 100% !important;
     max-width: 100% !important;
     min-width: 0 !important;
-    min-height: 0 !important;
     box-sizing: border-box !important;
     margin: 0 0 0.75rem !important;
     padding: 0 !important;
     background: #e8eef3 !important;
+  }
+
+  /* Gyors: a shell kitölti a sávot, Alapadatok belül görget */
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active.auto-desk-gyors
+    .auto-search-desk-shell {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
     overflow: hidden !important;
+  }
+
+  /* Részletes: a shell természetes magasságú — a teljes form sáv görget */
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active.auto-desk-reszletes
+    .auto-search-desk-shell {
+    flex: 0 0 auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
   }
 
   /* Brand block: fehér kártya a kék héjon (mint feladás) */
@@ -100,7 +113,7 @@
     display: none !important;
   }
 
-  /* Alapadatok nyitva: külső head rejtve, kék héj + fehér kártya — tartalom görgethető */
+  /* Alapadatok nyitva: külső head rejtve, kék héj + fehér kártya */
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     > .auto-desk-acc[data-desk-acc="alap"].is-open {
@@ -109,12 +122,26 @@
     border-radius: 0 !important;
     box-shadow: none !important;
     margin: 0 !important;
+  }
+
+  /* Gyors: Alapadatok belül görget, Műszaki/Extrák pill lent */
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active.auto-desk-gyors
+    .auto-search-desk-shell
+    > .auto-desk-acc[data-desk-acc="alap"].is-open {
     flex: 1 1 auto !important;
     min-height: 0 !important;
     overflow-x: hidden !important;
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
+  }
+
+  /* Részletes: Alapadatok nem zsugorodik — a teljes sáv görget */
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active.auto-desk-reszletes
+    .auto-search-desk-shell
+    > .auto-desk-acc[data-desk-acc="alap"].is-open {
+    flex: 0 0 auto !important;
+    overflow: visible !important;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
@@ -139,7 +166,7 @@
     overflow: visible !important;
   }
 
-  /* Műszaki / Extrák nyitva: fehér kártya + head — tartalom görgethető */
+  /* Műszaki / Extrák nyitva: fehér kártya + head */
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     > .auto-desk-acc:not([data-desk-acc="alap"]).is-open {
@@ -148,12 +175,26 @@
     background: #fff !important;
     box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05) !important;
     margin: 0 !important;
+  }
+
+  /* Gyors: nyitott Műszaki/Extrák belül görget */
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active.auto-desk-gyors
+    .auto-search-desk-shell
+    > .auto-desk-acc:not([data-desk-acc="alap"]).is-open {
     flex: 1 1 auto !important;
     min-height: 0 !important;
     overflow-x: hidden !important;
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
+  }
+
+  /* Részletes: nyitott menük természetes magasság — a teljes sáv görget */
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active.auto-desk-reszletes
+    .auto-search-desk-shell
+    > .auto-desk-acc:not([data-desk-acc="alap"]).is-open {
+    flex: 0 0 auto !important;
+    overflow: visible !important;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active

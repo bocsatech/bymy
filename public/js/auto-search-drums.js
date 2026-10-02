@@ -1156,7 +1156,7 @@ export async function mountAutoSearchDrums(form = document.getElementById("home-
 
 /**
  * Desk gyors/részletes: a két külön -tól/-ig select helyett feladás-szerű osztott menü
- * (egy összefoglaló sor + sheet).
+ * (egy összefoglaló sor + sheet). Alapadatok + Műszaki + Extrák.
  */
 export function enhanceDeskDualRanges(form = document.getElementById("home-qs-form")) {
   if (!form) return 0;
@@ -1164,22 +1164,29 @@ export function enhanceDeskDualRanges(form = document.getElementById("home-qs-fo
   form.classList.add("immo-search-form", "auto-qs-drums");
   let converted = 0;
   const byField = new Map(DUAL_RANGES.map((cfg) => [cfg.fieldKey, cfg]));
+  const byTol = new Map(DUAL_RANGES.map((cfg) => [cfg.tol, cfg]));
 
   form.querySelectorAll(".auto-desk-field[data-desk-field] > .auto-desk-range").forEach((range) => {
+    if (range.closest(".immo-dual-range-block")) return;
     const field = range.closest(".auto-desk-field");
     const fieldKey = field?.getAttribute("data-desk-field");
-    const cfg = fieldKey ? byField.get(fieldKey) : null;
+    let cfg = fieldKey ? byField.get(fieldKey) : null;
+    const controls = [...range.querySelectorAll("select, input")];
+    if (!cfg && controls[0]) {
+      const tolKey = controls[0].getAttribute("data-filter-key") || "";
+      cfg = byTol.get(tolKey) || null;
+    }
     if (!cfg) return;
     const tolEl =
       range.querySelector(`[data-filter-key="${cfg.tol}"]`) ||
-      range.querySelector("select, input");
+      controls[0] ||
+      null;
     const igEl =
       range.querySelector(`[data-filter-key="${cfg.ig}"]`) ||
-      [...range.querySelectorAll("select, input")].find((el) => el !== tolEl);
+      controls.find((el) => el !== tolEl) ||
+      null;
     if (!tolEl || !igEl) return;
-    /* convertRangePairToDual a wrap-et cseréli — a range a wrap */
     convertRangePairToDual(range, cfg);
-    /* Desk mezőnek már van címkéje — a dual title duplikálna */
     field?.querySelector(".immo-dual-range__title")?.remove();
     converted += 1;
   });

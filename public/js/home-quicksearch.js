@@ -1,6 +1,6 @@
 
 import { applyAutoSearchLayout, readLayoutFilterValues, refillAutoSearchRangeSelects, prefetchAutoSearchBoot } from "./auto-search-layout.js?v=90daaf5812";
-import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums, styleAutoSearchMoreCard, enhanceDeskDualRanges } from "./auto-search-drums.js?v=deskDual1";
+import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums, styleAutoSearchMoreCard, enhanceDeskDualRanges } from "./auto-search-drums.js?v=deskDual2";
 import {
   mountDetailedSearch,
   readDetailedSearchValues,
@@ -20,7 +20,7 @@ import {
   arrangeAutoDeskDemoFields,
   deskFilterMenuReady,
   syncAutoSearchAccShell,
-} from "./auto-desk-search.js?v=deskDual1";
+} from "./auto-desk-search.js?v=deskDual2";
 
 prefetchAutoSearchBoot();
 const MOBILE_MQ = "(max-width: 900px)";
@@ -379,7 +379,17 @@ export function initHomeQuickSearch({ onSearch = () => {}, onFilterPreview, onDe
     onSortChange: (sort) => onDeskSortChange?.(sort),
     onDeskLayout: mountDeskFilterMenu,
     onModeChange: (mode) => {
-      if (mode === "reszletes" || mode === "muszaki-open") void mountMuszakiPickersLazy();
+      if (mode === "reszletes" || mode === "muszaki-open") {
+        void mountMuszakiPickersLazy().then(() => {
+          try {
+            refillAutoSearchRangeSelects(form);
+            enhanceDeskDualRanges(form);
+            updateAutoDeskAccSummaries(form);
+          } catch {
+            /* ignore */
+          }
+        });
+      }
     },
   });
 
@@ -434,6 +444,8 @@ export function initHomeQuickSearch({ onSearch = () => {}, onFilterPreview, onDe
       mountSafe(mountAutoToltoPickers, "Töltőcsatlakozó picker:"),
     ]).then(() => {
       try {
+        refillAutoSearchRangeSelects(form);
+        enhanceDeskDualRanges(form);
         updateAutoDeskAccSummaries(form);
       } catch {
         /* ignore */

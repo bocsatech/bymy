@@ -304,17 +304,15 @@
     display: flex !important;
   }
 
-  /* Alapadatok mezők: feladás-szerű aláhúzás (nem doboz) */
+  /* Desk mezők (Alapadatok + Műszaki + Extrák): feladás-szerű aláhúzás (nem doboz) */
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
-    .ad-form-alap-card
     .auto-desk-field {
     gap: 0.45rem !important;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
-    .ad-form-alap-card
     .auto-desk-field__label {
     font-size: 0.94rem !important;
     font-weight: 700 !important;
@@ -324,17 +322,22 @@
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
-    .ad-form-alap-card
+    .auto-desk-field
     .auto-bm-trigger,
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
-    .ad-form-alap-card
+    .auto-desk-field
     select.home-qs-control,
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
-    .ad-form-alap-card
-    input.home-qs-control {
+    .auto-desk-field
+    input.home-qs-control,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-desk-shell
+    .auto-desk-field
+    select {
     appearance: none !important;
+    -webkit-appearance: none !important;
     display: flex !important;
     align-items: center !important;
     width: 100% !important;
@@ -346,6 +349,7 @@
     border-bottom: 1.5px solid #cfd6dd !important;
     border-radius: 0 !important;
     background: transparent !important;
+    background-image: none !important;
     box-shadow: none !important;
     color: #111 !important;
     font: 500 1rem/1.25 system-ui, sans-serif !important;
@@ -353,21 +357,33 @@
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
-    .ad-form-alap-card
+    .auto-desk-field
     .auto-bm-trigger:hover,
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
-    .ad-form-alap-card
+    .auto-desk-field
     select.home-qs-control:focus,
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
-    .ad-form-alap-card
-    input.home-qs-control:focus {
+    .auto-desk-field
+    input.home-qs-control:focus,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-desk-shell
+    .auto-desk-field
+    select:focus {
     border-bottom-color: #111 !important;
     outline: none !important;
   }
 
-  /* Osztott tartomány (Évjárat / Vételár / km): egy összefoglaló vonal — mint feladás */
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-desk-shell
+    .auto-desk-field
+    .auto-bm-trigger__chev {
+    color: #64748b !important;
+    font-size: 0.65rem !important;
+  }
+
+  /* Osztott tartomány (Évjárat / Vételár / km / Teljesítmény…): egy összefoglaló vonal — mint feladás */
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     .auto-desk-field
@@ -458,12 +474,16 @@
     pointer-events: none !important;
   }
 
+  /* Ha még nem konvertált tartomány: ne mutasson két dobozos -tól/-ig-et */
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
-    .ad-form-alap-card
-    .auto-bm-trigger__chev {
-    color: #64748b !important;
-    font-size: 0.65rem !important;
+    .auto-desk-field
+    .auto-desk-range {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 0.75rem !important;
+    border: 0 !important;
+    background: transparent !important;
   }
 
   /* Gyártmány & Modell: ugyanaz az aláhúzás a brand kártyában */

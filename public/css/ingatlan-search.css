@@ -1861,20 +1861,20 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
 }
 
 @media (min-width: 901px) {
-  /* inset 0 + margin:auto + fix méret — középen, translate/flex nélkül */
+  /* Desk: kapcsolós sheet balra (kereső oldalsávnál), nem viewport-közép */
   .auto-drum-portal.auto-drum-portal--sheet {
     display: block !important;
   }
 
   .auto-drum-portal--sheet .auto-drum-portal__stage--sheet {
     position: absolute !important;
-    inset: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
+    inset: auto !important;
+    left: 1.5rem !important;
+    right: auto !important;
     top: 0 !important;
     bottom: 0 !important;
     transform: none !important;
-    margin: auto !important;
+    margin: auto 0 auto 0 !important;
     width: min(28rem, calc(100% - 2rem)) !important;
     max-width: min(28rem, calc(100% - 2rem)) !important;
     height: min(86vh, 48rem) !important;
@@ -1882,6 +1882,22 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
     border-radius: 1.35rem;
     box-shadow: 0 12px 36px rgba(15, 23, 42, 0.18);
     overflow: hidden !important;
+  }
+
+  body:is([data-site-page="auto"], [data-site-page="teherauto"])
+    .auto-drum-portal--sheet
+    .auto-drum-inline-item--switch,
+  body:is([data-site-page="auto"], [data-site-page="teherauto"])
+    .auto-drum-portal--sheet
+    .immo-drum-inline-item {
+    justify-content: flex-start !important;
+    text-align: left !important;
+  }
+
+  body:is([data-site-page="auto"], [data-site-page="teherauto"])
+    .auto-drum-portal--sheet
+    .immo-drum-inline-text {
+    text-align: left !important;
   }
 
   .auto-drum-portal--sheet .auto-drum-portal__sheet-head {
@@ -1901,15 +1917,17 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
     justify-self: start;
   }
 
-  /* Év|hó + egyválasztós (Okmányok, Kivitel…): stage tartalomra zsugorodik — HA kompakt kártya */
+  /* Év|hó + egyválasztós: kompakt kártya, szintén balra */
   .auto-drum-portal--sheet.auto-drum-portal--ym .auto-drum-portal__stage--sheet,
   .auto-drum-portal--sheet.auto-drum-portal--single-sheet .auto-drum-portal__stage--sheet {
     height: fit-content !important;
     max-height: min(86vh, 48rem) !important;
     top: 50% !important;
     bottom: auto !important;
+    left: 1.5rem !important;
+    right: auto !important;
     transform: translateY(-50%) !important;
-    margin-left: auto !important;
+    margin-left: 0 !important;
     margin-right: auto !important;
     margin-top: 0 !important;
     margin-bottom: 0 !important;

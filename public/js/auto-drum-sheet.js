@@ -963,25 +963,31 @@ function lockSheetWhiteToBlue(root, stage) {
   const head = root.querySelector?.(".auto-drum-portal__sheet-head");
   const ym = Boolean(root?.classList?.contains("auto-drum-portal--ym"));
   const desk = window.matchMedia("(min-width: 901px)").matches;
-  /* Kék stage középen; fehér ring a kéken belül mindig középen — nincs left-only / translateX. */
-  stage.style.setProperty("left", "0", "important");
-  stage.style.setProperty("right", "0", "important");
-  stage.style.setProperty("margin-left", "auto", "important");
-  stage.style.setProperty("margin-right", "auto", "important");
+  /* Desk: stage balra (kereső oldalsáv mellett); mobilon full-bleed. */
+  if (desk) {
+    stage.style.setProperty("left", "1.5rem", "important");
+    stage.style.setProperty("right", "auto", "important");
+    stage.style.setProperty("margin-left", "0", "important");
+    stage.style.setProperty("margin-right", "auto", "important");
+  } else {
+    stage.style.setProperty("left", "0", "important");
+    stage.style.setProperty("right", "0", "important");
+    stage.style.setProperty("margin-left", "0", "important");
+    stage.style.setProperty("margin-right", "0", "important");
+  }
   if (scroll) {
     scroll.style.setProperty("left", "0", "important");
     scroll.style.setProperty("right", "0", "important");
     scroll.style.setProperty("width", "100%", "important");
     scroll.style.setProperty("max-width", "100%", "important");
-    scroll.style.setProperty("margin-left", "auto", "important");
-    scroll.style.setProperty("margin-right", "auto", "important");
+    scroll.style.setProperty("margin-left", "0", "important");
+    scroll.style.setProperty("margin-right", "0", "important");
     scroll.style.setProperty("overflow-x", "hidden", "important");
     scroll.style.setProperty("display", "flex", "important");
     scroll.style.setProperty("flex-direction", "column", "important");
-    scroll.style.setProperty("align-items", "center", "important");
-    /* Egyenlő oldalsó padding = fehér középen a kéken */
-    scroll.style.setProperty("padding-left", "1rem", "important");
-    scroll.style.setProperty("padding-right", "1rem", "important");
+    scroll.style.setProperty("align-items", "stretch", "important");
+    scroll.style.setProperty("padding-left", "0.75rem", "important");
+    scroll.style.setProperty("padding-right", "0.75rem", "important");
   }
   if (ring) {
     ring.style.setProperty("width", "100%", "important");
@@ -1022,12 +1028,12 @@ function applySheetStageLayout(stage) {
     ym || Boolean(root?.classList?.contains("auto-drum-portal--single-sheet"));
   if (desk) {
     const deskW = "min(28rem, calc(100% - 2rem))";
-    /* Desk: kék stage fix szélesség HTML/inline-ban — nincs left%/translateX. */
-    stage.style.setProperty("left", "0", "important");
-    stage.style.setProperty("right", "0", "important");
+    /* Desk: kapcsolós sheet balra igazítva (nem viewport-közép). */
+    stage.style.setProperty("left", "1.5rem", "important");
+    stage.style.setProperty("right", "auto", "important");
     stage.style.setProperty("width", deskW, "important");
     stage.style.setProperty("max-width", deskW, "important");
-    stage.style.setProperty("margin-left", "auto", "important");
+    stage.style.setProperty("margin-left", "0", "important");
     stage.style.setProperty("margin-right", "auto", "important");
     stage.style.setProperty("transform", "none", "important");
     if (compactDesk) {

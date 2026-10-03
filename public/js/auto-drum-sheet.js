@@ -1730,7 +1730,7 @@ export function openBrandModelCatalogSheet(brandWheel, trigger, wrap, emptyLabel
 
   const { root, stage, ring, scrollEl, sheetScroll, backBtn, subEl, doneBtn, closeBtn, toolbarEl } =
     createSheetPortalShell("Gyártmány / Modell");
-  root.classList.add("auto-drum-portal--bm");
+  root.classList.add("auto-drum-portal--bm", "auto-drum-portal--choice");
 
   let view = "brands";
   let modelBrand = null;
@@ -1908,6 +1908,7 @@ function openMultiSwitchSheet(wheel, trigger, wrap, emptyLabel, opts) {
     emptyLabel ||
     "Választás";
   const { root, stage, ring, scrollEl, sheetScroll, doneBtn, closeBtn } = createSheetPortalShell(title);
+  root.classList.add("auto-drum-portal--choice");
 
   scrollEl.innerHTML = items.map((row) => switchRowHtml(row)).join("");
 

@@ -1989,7 +1989,7 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   }
 
   .auto-drum-portal--choice .auto-drum-switch {
-    display: inline-block !important;
+    display: block !important;
   }
 
   .auto-drum-portal--choice .auto-drum-inline-item--switch,
@@ -2229,7 +2229,7 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
 
 @media (max-width: 900px) {
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-toggle input:checked + .auto-bm-switch {
-    background: #16a34a !important;
+    background: #64748b !important;
   }
 }
 
@@ -2255,8 +2255,9 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   transition: transform 0.15s ease;
 }
 
+/* Kapcsoló BE: slate (mint a Kivitel design) — ne zöld */
 .auto-drum-inline-item--switch.is-selected .auto-drum-switch {
-  background: #16a34a;
+  background: #64748b;
 }
 
 .auto-drum-inline-item--switch.is-selected .auto-drum-switch__knob {
@@ -2265,6 +2266,11 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
 
 .auto-drum-inline-item--switch[data-value=""].is-selected .auto-drum-switch {
   background: #64748b;
+}
+
+.auto-drum-portal--choice .auto-drum-inline-item--switch.is-selected .auto-drum-switch,
+.auto-drum-portal--sheet .auto-drum-inline-item--switch.is-selected .auto-drum-switch {
+  background: #64748b !important;
 }
 
 [data-theme="dark"] .auto-drum-inline-item--switch .auto-drum-switch {

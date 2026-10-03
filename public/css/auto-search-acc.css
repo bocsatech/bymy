@@ -576,4 +576,57 @@
     right: 0.15rem !important;
     border-color: #64748b !important;
   }
+
+  /*
+   * Desk oldal layout marad (2 oszlop), de a KERESŐ oldalsáv = mobil menü UX:
+   * nincs accordion pill / összecsukás — lapos scroll + mobil kártyák / sheet triggerek.
+   */
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    #home-qs-form.auto-desk-native
+    .auto-search-desk-shell
+    > .auto-desk-acc {
+    flex: 0 0 auto !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+    margin: 0 !important;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    #home-qs-form.auto-desk-native
+    .auto-search-desk-shell
+    > .auto-desk-acc
+    > .auto-desk-acc__head,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    #home-qs-form.auto-desk-native
+    .auto-search-desk-shell
+    > .auto-desk-acc
+    .auto-desk-acc__sum,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    #home-qs-form.auto-desk-native
+    .auto-search-desk-shell
+    > .auto-desk-acc
+    .auto-desk-acc__chev {
+    display: none !important;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    #home-qs-form.auto-desk-native
+    .auto-search-desk-shell
+    > .auto-desk-acc
+    > .auto-desk-acc__body,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    #home-qs-form.auto-desk-native
+    .auto-search-desk-shell
+    > .auto-desk-acc:not(.is-open)
+    > .auto-desk-acc__body {
+    display: block !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    background: transparent !important;
+  }
 }

@@ -561,6 +561,8 @@ export function initAutoDeskSearch({
   document.querySelectorAll("[data-desk-acc-toggle]").forEach((btn) => {
     btn.addEventListener("click", async () => {
       if (!isAutoDesk()) return;
+      /* Native desk kereső = mobil lapos menü — ne accordionozzon. */
+      if (form.classList.contains("auto-desk-native")) return;
       const acc = btn.closest("[data-desk-acc]");
       const id = acc?.getAttribute("data-desk-acc");
       if (!id) return;

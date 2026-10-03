@@ -983,11 +983,22 @@ function lockSheetWhiteToBlue(root, stage) {
     scroll.style.setProperty("margin-left", "0", "important");
     scroll.style.setProperty("margin-right", "0", "important");
     scroll.style.setProperty("overflow-x", "hidden", "important");
+    scroll.style.setProperty("overflow-y", "visible", "important");
     scroll.style.setProperty("display", "flex", "important");
     scroll.style.setProperty("flex-direction", "column", "important");
     scroll.style.setProperty("align-items", "stretch", "important");
-    scroll.style.setProperty("padding-left", "0.75rem", "important");
-    scroll.style.setProperty("padding-right", "0.75rem", "important");
+    scroll.style.setProperty("padding-left", "0.85rem", "important");
+    scroll.style.setProperty("padding-right", "0.85rem", "important");
+    /* Alsó rés: fehér kártya alsó sarkai is látszanak (ne ragadjon a stage aljához). */
+    scroll.style.setProperty("padding-bottom", "0.85rem", "important");
+    if (desk) {
+      scroll.style.setProperty("position", "relative", "important");
+      scroll.style.setProperty("top", "auto", "important");
+      scroll.style.setProperty("bottom", "auto", "important");
+      scroll.style.setProperty("height", "auto", "important");
+      scroll.style.setProperty("max-height", "none", "important");
+      scroll.style.setProperty("flex", "0 1 auto", "important");
+    }
   }
   if (ring) {
     ring.style.setProperty("width", "100%", "important");
@@ -998,6 +1009,12 @@ function lockSheetWhiteToBlue(root, stage) {
     ring.style.setProperty("left", "0", "important");
     ring.style.setProperty("right", "0", "important");
     ring.style.setProperty("transform", "none", "important");
+    ring.style.setProperty("border-radius", "1.15rem", "important");
+    if (desk) {
+      ring.style.setProperty("height", "auto", "important");
+      ring.style.setProperty("max-height", "min(62vh, 34rem)", "important");
+      ring.style.setProperty("flex", "0 1 auto", "important");
+    }
   }
   /* Felső gombsor MINDIG a kék tetején, abszolút, átlátszatlan — nem csúszhat el / nem takarodhat. */
   if (head) {
@@ -1013,8 +1030,11 @@ function lockSheetWhiteToBlue(root, stage) {
     head.style.setProperty("visibility", "visible", "important");
     head.style.setProperty("opacity", "1", "important");
   }
-  if ((ym || root?.classList?.contains("auto-drum-portal--single-sheet")) && desk && stage) {
+  if (desk && stage) {
     stage.style.setProperty("padding-top", "var(--sheet-head-h)", "important");
+    stage.style.setProperty("display", "flex", "important");
+    stage.style.setProperty("flex-direction", "column", "important");
+    stage.style.setProperty("overflow", "hidden", "important");
   }
 }
 
@@ -1023,9 +1043,7 @@ function applySheetStageLayout(stage) {
   const root = stage.closest?.(".auto-drum-portal--sheet") || stage.parentElement;
   const desk = window.matchMedia("(min-width: 901px)").matches;
   const ym = Boolean(root?.classList?.contains("auto-drum-portal--ym"));
-  /* Egyválasztós desk (Okmányok, Kivitel…): HA-szerű kompakt kártya, ne 86vh üres fehér. */
-  const compactDesk =
-    ym || Boolean(root?.classList?.contains("auto-drum-portal--single-sheet"));
+  /* Desk: minden sheet (kapcsolós / BM / single / ym) kompakt kártya — ne 86vh üres fehér. */
   if (desk) {
     const deskW = "min(28rem, calc(100% - 2rem))";
     /* Desk: kapcsolós sheet balra igazítva (nem viewport-közép). */
@@ -1035,19 +1053,11 @@ function applySheetStageLayout(stage) {
     stage.style.setProperty("max-width", deskW, "important");
     stage.style.setProperty("margin-left", "0", "important");
     stage.style.setProperty("margin-right", "auto", "important");
-    stage.style.setProperty("transform", "none", "important");
-    if (compactDesk) {
-      stage.style.setProperty("top", "50%", "important");
-      stage.style.setProperty("bottom", "auto", "important");
-      stage.style.setProperty("height", "fit-content", "important");
-      stage.style.setProperty("transform", "translateY(-50%)", "important");
-    } else {
-      stage.style.setProperty("top", "0", "important");
-      stage.style.setProperty("bottom", "0", "important");
-      stage.style.setProperty("height", "min(86vh, 48rem)", "important");
-      stage.style.setProperty("margin-top", "auto", "important");
-      stage.style.setProperty("margin-bottom", "auto", "important");
-    }
+    stage.style.setProperty("top", "50%", "important");
+    stage.style.setProperty("bottom", "auto", "important");
+    stage.style.setProperty("height", "fit-content", "important");
+    stage.style.setProperty("max-height", "min(86vh, 48rem)", "important");
+    stage.style.setProperty("transform", "translateY(-50%)", "important");
     lockSheetWhiteToBlue(root, stage);
     return;
   }

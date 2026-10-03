@@ -1679,27 +1679,19 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   height: 2.35rem;
 }
 
+/* Minden sheet: fekete Kész pill — mint a design minta (Kivitel / Üzemanyag) */
 .auto-drum-portal--sheet .auto-drum-portal__done--sheet-top {
   flex: 0 0 auto;
   min-width: 0;
   border: 0;
   border-radius: 999px;
-  background: #f5c518;
-  color: #111;
-  font: 600 0.9rem/1 system-ui, sans-serif;
-  padding: 0.55rem 1.1rem;
-  box-shadow: 0 2px 8px rgba(245, 197, 24, 0.35);
-  cursor: pointer;
-  justify-self: end;
-}
-
-/* Egyválasztós + tartomány + dátum3 sheet: fekete Kész — mint a HA referencia */
-.auto-drum-portal--sheet.auto-drum-portal--single-sheet .auto-drum-portal__done--sheet-top,
-.auto-drum-portal--sheet.auto-drum-portal--range-sheet .auto-drum-portal__done--sheet-top,
-.auto-drum-portal--sheet.auto-drum-portal--date3 .auto-drum-portal__done--sheet-top {
   background: #111;
   color: #fff;
+  font: 600 0.9rem/1 system-ui, sans-serif;
+  padding: 0.55rem 1.1rem;
   box-shadow: 0 2px 8px rgba(15, 23, 42, 0.2);
+  cursor: pointer;
+  justify-self: end;
 }
 
 /* Külső terület NEM görget — kék + X/Kész fixen marad; lista a fehér ringben görög */
@@ -1714,7 +1706,8 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   overflow-x: hidden !important;
   overscroll-behavior: none;
   margin: 0;
-  padding: 0 1rem;
+  /* Alsó padding: fehér kártya alsó sarkai is lekerekítve látszanak */
+  padding: 0 0.85rem 0.85rem;
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
@@ -1729,7 +1722,7 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   pointer-events: none;
 }
 
-/* Fehér panel: a fejléc alatt fix, bent görög a lista */
+/* Fehér panel: mind a 4 sarok lekerekítve; lista belül görög */
 .auto-drum-portal--sheet .auto-drum-portal__ring--sheet,
 .auto-drum-portal--sheet .auto-drum-portal__ring--multi {
   position: relative !important;
@@ -1742,9 +1735,13 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   max-height: 100% !important;
   min-height: 0 !important;
   margin: 0 !important;
-  padding: 0 0 var(--sheet-foot-h) !important;
+  padding: 0.35rem 0.35rem calc(var(--sheet-foot-h) + 0.2rem) !important;
   border: 0 !important;
   border-radius: 1.15rem !important;
+  border-top-left-radius: 1.15rem !important;
+  border-top-right-radius: 1.15rem !important;
+  border-bottom-left-radius: 1.15rem !important;
+  border-bottom-right-radius: 1.15rem !important;
   background: #fff !important;
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06) !important;
   overflow-x: hidden !important;
@@ -1831,12 +1828,16 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   font-size: 0.9375rem !important;
   font-weight: 400 !important;
   color: #1f2937 !important;
-  padding: 0 0.45rem 0 0.35rem !important;
+  padding: 0 0.55rem 0 0.7rem !important;
+  justify-content: space-between !important;
+  text-align: left !important;
+  border-radius: 0.7rem !important;
 }
 
 .auto-drum-portal--sheet .immo-drum-inline-item.is-selected,
 .auto-drum-portal--sheet .auto-drum-inline-item--switch.is-selected {
   font-weight: 500 !important;
+  background: #eef1f5 !important;
 }
 
 .auto-drum-portal--sheet .immo-drum-inline-text {
@@ -1866,38 +1867,61 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
     display: block !important;
   }
 
+  /* Minden desk sheet: kompakt szürke kártya + fehér lista mind a 4 sarkon lekerekítve */
   .auto-drum-portal--sheet .auto-drum-portal__stage--sheet {
     position: absolute !important;
     inset: auto !important;
     left: 1.5rem !important;
     right: auto !important;
-    top: 0 !important;
-    bottom: 0 !important;
-    transform: none !important;
-    margin: auto 0 auto 0 !important;
+    top: 50% !important;
+    bottom: auto !important;
+    transform: translateY(-50%) !important;
+    margin: 0 !important;
     width: min(28rem, calc(100% - 2rem)) !important;
     max-width: min(28rem, calc(100% - 2rem)) !important;
-    height: min(86vh, 48rem) !important;
-    max-height: 86vh !important;
+    height: fit-content !important;
+    max-height: min(86vh, 48rem) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    padding-top: var(--sheet-head-h) !important;
     border-radius: 1.35rem;
     box-shadow: 0 12px 36px rgba(15, 23, 42, 0.18);
     overflow: hidden !important;
   }
 
-  body:is([data-site-page="auto"], [data-site-page="teherauto"])
-    .auto-drum-portal--sheet
-    .auto-drum-inline-item--switch,
-  body:is([data-site-page="auto"], [data-site-page="teherauto"])
-    .auto-drum-portal--sheet
-    .immo-drum-inline-item {
-    justify-content: flex-start !important;
+  .auto-drum-portal--sheet .auto-drum-portal__sheet-scroll {
+    position: relative !important;
+    top: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+    right: auto !important;
+    flex: 0 1 auto !important;
+    height: auto !important;
+    max-height: none !important;
+    padding: 0 0.85rem 0.85rem !important;
+  }
+
+  .auto-drum-portal--sheet .auto-drum-portal__ring--sheet,
+  .auto-drum-portal--sheet .auto-drum-portal__ring--multi {
+    height: auto !important;
+    max-height: min(62vh, 34rem) !important;
+    flex: 0 1 auto !important;
+    border-radius: 1.15rem !important;
+    border-top-left-radius: 1.15rem !important;
+    border-top-right-radius: 1.15rem !important;
+    border-bottom-left-radius: 1.15rem !important;
+    border-bottom-right-radius: 1.15rem !important;
+  }
+
+  .auto-drum-portal--sheet .auto-drum-inline-item--switch,
+  .auto-drum-portal--sheet .immo-drum-inline-item {
+    justify-content: space-between !important;
     text-align: left !important;
   }
 
-  body:is([data-site-page="auto"], [data-site-page="teherauto"])
-    .auto-drum-portal--sheet
-    .immo-drum-inline-text {
+  .auto-drum-portal--sheet .immo-drum-inline-text {
     text-align: left !important;
+    flex: 1 1 auto !important;
   }
 
   .auto-drum-portal--sheet .auto-drum-portal__sheet-head {
@@ -1917,7 +1941,7 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
     justify-self: start;
   }
 
-  /* Év|hó + egyválasztós: kompakt kártya, szintén balra */
+  /* Év|hó + egyválasztós: ugyanaz a kompakt balra igazított héj */
   .auto-drum-portal--sheet.auto-drum-portal--ym .auto-drum-portal__stage--sheet,
   .auto-drum-portal--sheet.auto-drum-portal--single-sheet .auto-drum-portal__stage--sheet {
     height: fit-content !important;

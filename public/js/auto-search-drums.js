@@ -13,7 +13,7 @@ const MOBILE_MQ = "(max-width: 900px)";
 const TYPEAHEAD_CLEAR_MS = 2500;
 const CATALOG_DRUM_KEYS = new Set(["gyartmany", "modell"]);
 
-/** Mobilon kapcsolós dobkerék (nem tartomány). */
+/** Kapcsolós dobkerék mezők (mobil + autó/teher desk — nem tartomány). */
 const MULTI_SWITCH_KEYS = new Set([
   "uzemanyag",
   "uzemanyagQuick",
@@ -502,7 +502,8 @@ function buildWheelCell({
   const wheel = cell.querySelector("[data-wheel]");
   fillWheel(wheel, opts, { emptyLabel });
   finishWheel(cell, emptyLabel, {
-    multiple: multiple || (isMobile() && MULTI_SWITCH_KEYS.has(filterKey)),
+    /* Desk autó/teher: ugyanaz a kapcsolós sheet, mint mobilon (ne single-list legyen). */
+    multiple: multiple || MULTI_SWITCH_KEYS.has(filterKey),
     forcePortal,
   });
   return cell;

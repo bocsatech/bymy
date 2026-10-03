@@ -66,15 +66,28 @@ export async function mountAutoBrandModelPicker(form) {
   if (!form || !isAutoDesk()) return;
 
   const wantKind = catalogKindForPage();
-  if (form.dataset.brandModelPicker === "1" && form.dataset.brandModelCatalogKind === wantKind) return;
-  if (form.dataset.brandModelPicker === "1") {
-    form.querySelectorAll(".auto-bm-pair, .auto-bm-field, .auto-bm-wheel-host").forEach((el) => el.remove());
+  const existingBrand = form.querySelector(".auto-bm-brand-block");
+  if (
+    form.dataset.brandModelPicker === "1" &&
+    form.dataset.brandModelCatalogKind === wantKind &&
+    existingBrand
+  ) {
+    return;
+  }
+  if (form.dataset.brandModelPicker === "1" || existingBrand) {
+    form.querySelectorAll(".auto-bm-pair, .auto-bm-field, .auto-bm-wheel-host, .auto-bm-brand-block").forEach((el) => el.remove());
     document.querySelectorAll(".auto-bm-panel").forEach((el) => el.remove());
     delete form.dataset.brandModelPicker;
   }
 
-  const alapHost = form.querySelector(".auto-desk-fields[data-desk-alap]");
-  if (!alapHost) return;
+  /* Flat desk menü: a fehér kártya a shell tetején él (nem a törölt data-desk-alap hostban). */
+  const shell = form.querySelector("#auto-search-desk-shell");
+  const alapAcc = shell?.querySelector(':scope > [data-desk-acc="alap"]');
+  let insertHost = form.querySelector(".auto-desk-fields[data-desk-alap]");
+  if (!insertHost && shell) {
+    insertHost = shell;
+  }
+  if (!insertHost) return;
 
   let catalog;
   try {
@@ -142,12 +155,14 @@ export async function mountAutoBrandModelPicker(form) {
     if (folded && folded !== brand) modelsByBrand[folded] = modelsByBrand[brand];
   }
 
-  alapHost
-    .querySelectorAll(
-      '[data-desk-field="gyartmany"], [data-desk-field="modell"], [data-desk-field="tipus"], .auto-bm-pair'
-    )
-    .forEach((el) => el.remove());
-  form.querySelectorAll(".auto-bm-panel").forEach((el) => el.remove());
+  if (insertHost !== shell) {
+    insertHost
+      .querySelectorAll(
+        '[data-desk-field="gyartmany"], [data-desk-field="modell"], [data-desk-field="tipus"], .auto-bm-pair'
+      )
+      .forEach((el) => el.remove());
+  }
+  form.querySelectorAll(".auto-bm-panel, .auto-bm-brand-block").forEach((el) => el.remove());
 
   const brandsInput = document.createElement("input");
   brandsInput.type = "hidden";
@@ -173,7 +188,11 @@ export async function mountAutoBrandModelPicker(form) {
   `;
   wrap.appendChild(brandsInput);
   wrap.appendChild(modelsInput);
-  alapHost.insertBefore(wrap, alapHost.firstChild);
+  if (insertHost === shell && alapAcc) {
+    shell.insertBefore(wrap, alapAcc);
+  } else {
+    insertHost.insertBefore(wrap, insertHost.firstChild);
+  }
 
   const brandWheel = ensureHiddenWheel(wrap, "gyartmany", { multiple: true });
   const modelWheel = ensureHiddenWheel(wrap, "modell", { multiple: true });

@@ -1693,8 +1693,7 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   justify-self: end;
 }
 
-/* Listás választó (Kivitel, Üzemanyag, Állapot, Okmány, Sebességváltó) + tartomány: fekete Kész */
-.auto-drum-portal--sheet.auto-drum-portal--choice .auto-drum-portal__done--sheet-top,
+/* Tartomány / egyválasztós dob: fekete Kész — a kapcsolós (--choice) sárga marad */
 .auto-drum-portal--sheet.auto-drum-portal--single-sheet .auto-drum-portal__done--sheet-top,
 .auto-drum-portal--sheet.auto-drum-portal--range-sheet .auto-drum-portal__done--sheet-top,
 .auto-drum-portal--sheet.auto-drum-portal--date3 .auto-drum-portal__done--sheet-top {
@@ -1703,28 +1702,47 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   box-shadow: 0 2px 8px rgba(15, 23, 42, 0.2);
 }
 
-/* Listás sheet design: nincs kapcsoló, balra szöveg, szürke kijelölő sáv */
+/* Kapcsolós sheet (Kivitel, Üzemanyag, Állapot, Okmány, Sebességváltó): sárga Kész + kapcsolók */
+.auto-drum-portal--choice .auto-drum-portal__done--sheet-top {
+  background: #f5c518 !important;
+  color: #111 !important;
+  box-shadow: 0 2px 8px rgba(245, 197, 24, 0.35) !important;
+}
+
 .auto-drum-portal--choice .auto-drum-switch {
-  display: none !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: relative !important;
+  flex: 0 0 auto !important;
+  width: 2.6rem !important;
+  height: 1.5rem !important;
+  border-radius: 999px !important;
+}
+
+.auto-drum-portal--choice .auto-drum-inline-item--switch {
+  display: flex !important;
+  align-items: center !important;
 }
 
 .auto-drum-portal--choice .immo-drum-inline-item,
 .auto-drum-portal--choice .auto-drum-inline-item--switch {
-  justify-content: flex-start !important;
+  justify-content: space-between !important;
   text-align: left !important;
-  border-radius: 0.75rem !important;
-  padding: 0 0.85rem !important;
+  border-radius: 0 !important;
+  padding: 0 0.55rem 0 0.7rem !important;
   background: transparent !important;
 }
 
 .auto-drum-portal--choice .immo-drum-inline-text {
   text-align: left !important;
   flex: 1 1 auto !important;
+  min-width: 0 !important;
 }
 
 .auto-drum-portal--choice .immo-drum-inline-item.is-selected,
 .auto-drum-portal--choice .auto-drum-inline-item--switch.is-selected {
-  background: #eef1f5 !important;
+  background: transparent !important;
   font-weight: 500 !important;
 }
 
@@ -1965,14 +1983,18 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   }
 
   .auto-drum-portal--choice .auto-drum-portal__done--sheet-top {
-    background: #111 !important;
-    color: #fff !important;
-    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.2) !important;
+    background: #f5c518 !important;
+    color: #111 !important;
+    box-shadow: 0 2px 8px rgba(245, 197, 24, 0.35) !important;
+  }
+
+  .auto-drum-portal--choice .auto-drum-switch {
+    display: inline-block !important;
   }
 
   .auto-drum-portal--choice .auto-drum-inline-item--switch,
   .auto-drum-portal--choice .immo-drum-inline-item {
-    justify-content: flex-start !important;
+    justify-content: space-between !important;
     text-align: left !important;
   }
 

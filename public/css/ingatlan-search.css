@@ -1679,19 +1679,28 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   height: 2.35rem;
 }
 
-/* Minden sheet: fekete Kész pill — mint a design minta (Kivitel / Üzemanyag) */
+/* Kapcsolós sheet: sárga Kész pill — mint a design minta (Állapot) */
 .auto-drum-portal--sheet .auto-drum-portal__done--sheet-top {
   flex: 0 0 auto;
   min-width: 0;
   border: 0;
   border-radius: 999px;
-  background: #111;
-  color: #fff;
+  background: #f5c518;
+  color: #111;
   font: 600 0.9rem/1 system-ui, sans-serif;
   padding: 0.55rem 1.1rem;
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.2);
+  box-shadow: 0 2px 8px rgba(245, 197, 24, 0.35);
   cursor: pointer;
   justify-self: end;
+}
+
+/* Egyválasztós / tartomány / dátum: fekete Kész */
+.auto-drum-portal--sheet.auto-drum-portal--single-sheet .auto-drum-portal__done--sheet-top,
+.auto-drum-portal--sheet.auto-drum-portal--range-sheet .auto-drum-portal__done--sheet-top,
+.auto-drum-portal--sheet.auto-drum-portal--date3 .auto-drum-portal__done--sheet-top {
+  background: #111;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.2);
 }
 
 /* Külső terület NEM görget — kék + X/Kész fixen marad; lista a fehér ringben görög */
@@ -1831,13 +1840,14 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   padding: 0 0.55rem 0 0.7rem !important;
   justify-content: space-between !important;
   text-align: left !important;
-  border-radius: 0.7rem !important;
+  border-radius: 0 !important;
+  background: transparent !important;
 }
 
 .auto-drum-portal--sheet .immo-drum-inline-item.is-selected,
 .auto-drum-portal--sheet .auto-drum-inline-item--switch.is-selected {
   font-weight: 500 !important;
-  background: #eef1f5 !important;
+  background: transparent !important;
 }
 
 .auto-drum-portal--sheet .immo-drum-inline-text {
@@ -1903,7 +1913,9 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
 
   .auto-drum-portal--sheet .auto-drum-portal__ring--sheet,
   .auto-drum-portal--sheet .auto-drum-portal__ring--multi {
+    /* Design: magas fehér kártya, alul is lekerekítve + üres hely a lista alatt */
     height: auto !important;
+    min-height: min(52vh, 28rem) !important;
     max-height: min(62vh, 34rem) !important;
     flex: 0 1 auto !important;
     border-radius: 1.15rem !important;
@@ -1911,6 +1923,15 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
     border-top-right-radius: 1.15rem !important;
     border-bottom-left-radius: 1.15rem !important;
     border-bottom-right-radius: 1.15rem !important;
+    padding-bottom: 1.25rem !important;
+  }
+
+  /* Kapcsolós (multi) sheet: sárga Kész mindig */
+  .auto-drum-portal--sheet.auto-drum-portal--multi:not(.auto-drum-portal--single-sheet)
+    .auto-drum-portal__done--sheet-top {
+    background: #f5c518 !important;
+    color: #111 !important;
+    box-shadow: 0 2px 8px rgba(245, 197, 24, 0.35) !important;
   }
 
   .auto-drum-portal--sheet .auto-drum-inline-item--switch,

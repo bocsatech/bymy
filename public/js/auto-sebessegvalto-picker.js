@@ -1,6 +1,5 @@
-
 import { SEBESSEGVALTO_CATEGORIES } from "./equipment-data.js?v=5a39cb5ba3";
-import { bindAutoBmDismiss, autoBmPanelIsOpen } from "./auto-bm-dismiss.js?v=89aa460931";
+import { openStandaloneSwitchSheet, closeAutoDrumSheet } from "./auto-drum-sheet.js?v=sheetSample1";
 
 function labelList(items) {
   if (!items.length) return "Mindegy";
@@ -37,40 +36,20 @@ function isAutoDesk() {
   );
 }
 
-function categoryValues(cat) {
-  if (cat.children?.length) return cat.children.map((c) => c.value);
-  return cat.value ? [cat.value] : [];
-}
-
-function escapeHtml(value) {
-  return String(value ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
-
-function escapeAttr(value) {
-  return escapeHtml(value).replace(/'/g, "&#39;");
-}
-
 export async function mountAutoSebessegvaltoPicker(form) {
   if (!form || !isAutoDesk() || form.dataset.sebessegvaltoPicker === "1") return;
 
-  const field = form.querySelector('[data-desk-field="sebessegvalto"]');
-  if (!field) return;
-
+  const existing = form.querySelector('[data-desk-field="sebessegvalto"], .auto-sebessegvalto-field');
   const host =
-    field.closest(".auto-desk-fields") ||
-    form.querySelector(".auto-desk-fields[data-desk-muszaki]") ||
-    form.querySelector(".auto-desk-fields[data-desk-alap]");
+    existing?.closest(".auto-desk-fields") ||
+    form.querySelector("#qs-more-layout") ||
+    form.querySelector("#qs-layout-main") ||
+    form.querySelector("#auto-search-desk-shell");
   if (!host) return;
 
-  const deskQuick = field.dataset.deskQuick || "0";
-  field.remove();
-
-  const openMains = new Set();
-  const selected = new Set();
+  const deskQuick = existing?.dataset?.deskQuick || "0";
+  existing?.remove();
+  form.querySelectorAll(".auto-sebessegvalto-field").forEach((el) => el.remove());
 
   const hidden = document.createElement("input");
   hidden.type = "hidden";
@@ -83,9 +62,8 @@ export async function mountAutoSebessegvaltoPicker(form) {
   wrap.dataset.deskQuick = deskQuick;
   wrap.innerHTML = `
     <span class="auto-desk-field__label">Sebességváltó</span>
-    <button type="button" class="auto-bm-trigger" data-auto-valto-open>
+    <button type="button" class="auto-bm-trigger" data-auto-valto-open aria-label="Sebességváltó">
       <span data-auto-valto-summary>Mindegy</span>
-      <span class="auto-bm-trigger__chev" aria-hidden="true">⌄</span>
     </button>
   `;
   wrap.appendChild(hidden);
@@ -94,194 +72,57 @@ export async function mountAutoSebessegvaltoPicker(form) {
   const summaryEl = wrap.querySelector("[data-auto-valto-summary]");
   const openBtn = wrap.querySelector("[data-auto-valto-open]");
 
-  const panel = document.createElement("div");
-  panel.className = "auto-bm-panel auto-sebessegvalto-panel";
-  panel.hidden = true;
-  panel.innerHTML = `
-    <div class="auto-bm-panel__chrome">
-      <button type="button" class="auto-bm-panel__back" data-auto-valto-back aria-label="Vissza">‹</button>
-      <div class="auto-bm-panel__titles">
-        <p class="auto-bm-panel__title">Sebességváltó</p>
-      </div>
-    </div>
-    <div class="auto-bm-panel__body" data-auto-valto-body></div>
-  `;
-  const hero = document.querySelector(".auto-search-hero") || form.closest(".auto-search-hero") || form;
-  hero.appendChild(panel);
-  const bodyEl = panel.querySelector("[data-auto-valto-body]");
-
-  function selectedLabels() {
-    const labels = [];
-    for (const cat of SEBESSEGVALTO_CATEGORIES) {
-      if (!openMains.has(cat.id)) continue;
-      if (cat.children?.length) {
-        const kids = cat.children.filter((c) => selected.has(c.value));
-        if (kids.length) labels.push(...kids.map((c) => c.label));
-        else labels.push(cat.label);
-      } else if (cat.value && selected.has(cat.value)) {
-        labels.push(cat.label);
-      }
-    }
-    return labels;
+  function syncSummary(list) {
+    if (!summaryEl) return;
+    const text = labelList(list);
+    summaryEl.textContent = text;
+    summaryEl.classList.toggle("is-placeholder", !list.length);
+    openBtn?.classList.toggle("has-value", Boolean(list.length));
   }
 
-  function effectiveSelectedValues() {
-    const values = new Set();
-    for (const cat of SEBESSEGVALTO_CATEGORIES) {
-      if (!openMains.has(cat.id)) continue;
-      if (cat.children?.length) {
-        const kids = cat.children.filter((c) => selected.has(c.value));
-        if (kids.length) kids.forEach((c) => values.add(c.value));
-        else {
-          cat.children.forEach((c) => values.add(c.value));
-          values.add(cat.label);
-        }
-      } else if (cat.value && selected.has(cat.value)) {
-        values.add(cat.value);
-      }
-    }
-    return [...values];
+  function applyList(list) {
+    const clean = [...new Set((list || []).map((v) => String(v).trim()).filter(Boolean))];
+    writeJsonList(hidden, clean);
+    syncSummary(clean);
   }
 
-  function syncHidden() {
-    writeJsonList(hidden, effectiveSelectedValues());
-    if (summaryEl) summaryEl.textContent = labelList(selectedLabels());
-  }
-
-  function turnMainOn(cat) {
-    openMains.add(cat.id);
-    if (!cat.children?.length && cat.value) selected.add(cat.value);
-  }
-
-  function turnMainOff(cat) {
-    openMains.delete(cat.id);
-    for (const v of categoryValues(cat)) selected.delete(v);
-  }
-
-  function renderList() {
-    const rows = SEBESSEGVALTO_CATEGORIES.map((cat) => {
-      const on = openMains.has(cat.id);
-      const hasKids = Boolean(cat.children?.length);
-      let kidsHtml = "";
-      if (hasKids && on) {
-        kidsHtml = `<div class="auto-fuel-children">
-          ${cat.children
-            .map((child) => {
-              const childOn = selected.has(child.value);
-              return `<div class="auto-bm-row auto-fuel-child-row">
-                <label class="auto-bm-toggle">
-                  <span>${escapeHtml(child.label)}</span>
-                  <input type="checkbox" data-auto-valto-child="${escapeAttr(child.value)}" data-auto-valto-parent="${escapeAttr(cat.id)}" ${childOn ? "checked" : ""} />
-                  <span class="auto-bm-switch" aria-hidden="true"></span>
-                </label>
-              </div>`;
-            })
-            .join("")}
-        </div>`;
-      }
-      return `<div class="auto-bm-row auto-fuel-main-row" data-auto-valto-main="${escapeAttr(cat.id)}">
-        <label class="auto-bm-toggle auto-fuel-main-toggle">
-          <span class="auto-fuel-main-label">${escapeHtml(cat.label)}</span>
-          <input type="checkbox" data-auto-valto-main-toggle="${escapeAttr(cat.id)}" ${on ? "checked" : ""} />
-          <span class="auto-bm-switch" aria-hidden="true"></span>
-        </label>
-        ${kidsHtml}
-      </div>`;
-    }).join("");
-
-    bodyEl.innerHTML = `
-      <div class="auto-bm-actions">
-      <button type="button" class="auto-bm-btn auto-bm-btn--clear" data-auto-valto-clear>Összes kikapcsolása</button>
-      <button type="button" class="auto-bm-btn auto-bm-btn--done" data-auto-valto-done>Kész</button>
-    </div>
-      <div class="auto-bm-group">${rows}</div>
-    `;
-  }
-
-  function openPanel() {
-    panel.hidden = false;
-    panel.style.removeProperty("display");
-    panel.classList.remove("is-closed");
-    document.body.classList.add("auto-bm-open");
-    renderList();
-  }
-
-  function closePanel() {
-    panel.hidden = true;
-    panel.style.setProperty("display", "none", "important");
-    panel.classList.add("is-closed");
-    document.body.classList.remove("auto-bm-open");
-    if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
-    syncHidden();
-  }
-
-  openBtn?.addEventListener("click", () => {
-    if (!panel.hidden && !panel.classList.contains("is-closed")) closePanel();
-    else openPanel();
-  });
-
-  bindAutoBmDismiss({
-    panel,
-    roots: [wrap],
-    isOpen: () => autoBmPanelIsOpen(panel),
-    close: closePanel,
-  });
-
-  panel.querySelector("[data-auto-valto-back]")?.addEventListener("click", closePanel);
-  // done handled in body click (data-auto-valto-done)
-
-  bodyEl.addEventListener("change", (event) => {
-    const mainEl = event.target.closest("[data-auto-valto-main-toggle]");
-    if (mainEl) {
-      const id = mainEl.getAttribute("data-auto-valto-main-toggle");
-      const cat = SEBESSEGVALTO_CATEGORIES.find((c) => c.id === id);
-      if (!cat) return;
-      if (mainEl.checked) turnMainOn(cat);
-      else turnMainOff(cat);
-      renderList();
-      syncHidden();
+  function openSheet() {
+    if (document.querySelector(".auto-drum-portal--sheet")) {
+      closeAutoDrumSheet(true);
       return;
     }
-    const childEl = event.target.closest("[data-auto-valto-child]");
-    if (childEl) {
-      const value = childEl.getAttribute("data-auto-valto-child");
-      const parentId = childEl.getAttribute("data-auto-valto-parent");
-      if (childEl.checked) {
-        selected.add(value);
-        if (parentId) openMains.add(parentId);
-      } else {
-        selected.delete(value);
-      }
-      syncHidden();
-    }
-  });
+    openStandaloneSwitchSheet({
+      trigger: openBtn,
+      title: "Sebességváltó",
+      emptyLabel: "Mindegy",
+      items: SEBESSEGVALTO_CATEGORIES.map((c) => ({
+        value: c.value || c.id,
+        label: c.label,
+      })),
+      initialSelected: parseJsonList(hidden.value),
+      onDone: (list) => applyList(list || []),
+    });
+  }
 
-  bodyEl.addEventListener("click", (event) => {
-    if (!event.target.closest("[data-auto-valto-clear]")) return;
-    openMains.clear();
-    selected.clear();
-    renderList();
-    syncHidden();
-  });
-
-  bodyEl.addEventListener("click", (event) => {
-    if (event.target.closest("[data-auto-valto-done]")) {
-      closePanel();
-      return;
-    }
+  openBtn?.addEventListener("click", (event) => {
+    event.preventDefault();
+    openSheet();
   });
 
   form.addEventListener("reset", () => {
-    requestAnimationFrame(() => {
-      openMains.clear();
-      selected.clear();
-      syncHidden();
-      if (!panel.hidden) renderList();
-    });
+    requestAnimationFrame(() => applyList([]));
+  });
+
+  form.addEventListener("bymy-saved-search-applied", (event) => {
+    const detail = event?.detail && typeof event.detail === "object" ? event.detail : {};
+    const list = Array.isArray(detail.sebessegvaltok)
+      ? detail.sebessegvaltok.map((v) => String(v)).filter(Boolean)
+      : parseJsonList(hidden.value);
+    applyList(list);
   });
 
   form.dataset.sebessegvaltoPicker = "1";
-  syncHidden();
+  syncSummary(parseJsonList(hidden.value));
 }
 
 export function readSebessegvaltoFilterValues(form) {

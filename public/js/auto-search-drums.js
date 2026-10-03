@@ -1,20 +1,54 @@
-/**
- * Autó / teherautó kereső dobkerék.
- * Mobil: portált gyűrű. Asztali: helyben görgethető inline dob + dupla kattintás = kézi érték.
- */
 
-import { fillWheel, setWheelValue, readWheel } from "./ingatlan-wheels.js?v=immoClear1";
+import { fillWheel, setWheelValue, readWheel, readWheelList } from "./ingatlan-wheels.js?v=6952ba469c";
 import {
   initDrumWheel,
   applyDrumModeClass,
   syncDrumWheelDisplay,
   closeAllInlineDrums,
-} from "./immo-drum-picker.js?v=immoClear1";
-import { bindAutoDrumSheet } from "./auto-drum-sheet.js?v=sheetRoundAll1";
-import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=autoDesk18";
+} from "./immo-drum-picker.js?v=c4c7ac29a2";
+import { bindAutoDrumSheet, openAutoDrumSheet } from "./auto-drum-sheet.js?v=sheetRoundAll1";
+import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=kmFill1";
 
 const MOBILE_MQ = "(max-width: 900px)";
 const TYPEAHEAD_CLEAR_MS = 2500;
+const CATALOG_DRUM_KEYS = new Set(["gyartmany", "modell"]);
+
+/** Mobilon kapcsolós dobkerék (nem tartomány). */
+const MULTI_SWITCH_KEYS = new Set([
+  "uzemanyag",
+  "uzemanyagQuick",
+  "kivitel",
+  "allapot",
+  "sebessegvalto",
+  "okmany_jelleg",
+  "hajtas",
+  "ajtok",
+  "szemelyek",
+  "klima",
+  "szin",
+  "teto",
+  "csomagtarto",
+  "tolto_csatlakozas",
+  "ac_tolto_csatlakozas",
+  "dc_tolto_csatlakozas",
+  "villamtoltes",
+  "zold_rendszam",
+  "alkudhato",
+  "csere",
+  "nem_dohanyzo",
+  "holgy_tulajdonos",
+]);
+
+const MULTI_FILTER_KEY = {
+  gyartmany: "gyartmanyok",
+  modell: "modellek",
+  uzemanyag: "uzemanyagok",
+  uzemanyagQuick: "uzemanyagok",
+  kivitel: "kivitelek",
+  allapot: "allapotok",
+  sebessegvalto: "sebessegvaltok",
+  okmany_jelleg: "okmany_jellegek",
+};
 
 const DUAL_RANGES = [
   {
@@ -62,12 +96,89 @@ const DUAL_RANGES = [
     ig: "ccm_ig",
     unit: "cm³",
   },
+  {
+    fieldKey: "sajat_tomeg",
+    id: "sajat_tomeg",
+    title: "Saját tömeg",
+    ariaLabel: "Saját tömeg tartomány",
+    tol: "sajat_tomeg_tol",
+    ig: "sajat_tomeg_ig",
+    unit: "kg",
+  },
+  {
+    fieldKey: "ossztomeg",
+    id: "ossztomeg",
+    title: "Össztömeg",
+    ariaLabel: "Össztömeg tartomány",
+    tol: "ossztomeg_tol",
+    ig: "ossztomeg_ig",
+    unit: "kg",
+  },
+  {
+    fieldKey: "ac_toltesi_teljesitmeny",
+    id: "ac_toltesi_teljesitmeny",
+    title: "AC töltő teljesítménye",
+    ariaLabel: "AC töltő teljesítmény tartomány",
+    tol: "ac_toltesi_teljesitmeny_tol",
+    ig: "ac_toltesi_teljesitmeny_ig",
+    unit: "kW",
+  },
+  {
+    fieldKey: "akkumulator_kwh",
+    id: "akkumulator_kwh",
+    title: "Akkumulátor kapacitás",
+    ariaLabel: "Akkumulátor kapacitás tartomány",
+    tol: "akkumulator_kwh_tol",
+    ig: "akkumulator_kwh_ig",
+    unit: "kWh",
+  },
+  {
+    fieldKey: "jelenlegi_akkukapacitas",
+    id: "jelenlegi_akkukapacitas",
+    title: "Jelenlegi kapacitás",
+    ariaLabel: "Jelenlegi akkumulátor kapacitás tartomány",
+    tol: "jelenlegi_akkukapacitas_tol",
+    ig: "jelenlegi_akkukapacitas_ig",
+    unit: "%",
+  },
+  {
+    fieldKey: "dc_toltesi_teljesitmeny",
+    id: "dc_toltesi_teljesitmeny",
+    title: "DC töltő teljesítménye",
+    ariaLabel: "DC töltő teljesítmény tartomány",
+    tol: "dc_toltesi_teljesitmeny_tol",
+    ig: "dc_toltesi_teljesitmeny_ig",
+    unit: "kW",
+  },
+  {
+    fieldKey: "hatotav",
+    id: "hatotav",
+    title: "WLTP hatótáv",
+    ariaLabel: "WLTP hatótáv tartomány",
+    tol: "hatotav_tol",
+    ig: "hatotav_ig",
+    unit: "km",
+  },
+  {
+    fieldKey: "autopalya_hatotav",
+    id: "autopalya_hatotav",
+    title: "Autópálya hatótáv",
+    ariaLabel: "Autópálya hatótáv tartomány",
+    tol: "autopalya_hatotav_tol",
+    ig: "autopalya_hatotav_ig",
+    unit: "km",
+  },
 ];
 
 const SEARCH_OMIT_FIELDS = new Set([
   "gyartasi_honap",
+  "forgalomba_helyezes_ev",
   "forgalomba_helyezes_honap",
   "muszaki_honap",
+  "keresesi_korzet",
+  // Feladás-only kép overlay — nem vevőszűrő
+  "photo_overlay_template_id",
+  "photo_overlay_base_url",
 ]);
 
 function isMobile() {
@@ -109,10 +220,31 @@ function emptyLabelFromOptions(options) {
   return empty?.label || "Mindegy";
 }
 
-function finishWheel(cell, emptyLabel) {
+function isErtekDrumsForm(form) {
+  return Boolean(form?.hasAttribute?.("data-ertek-drums"));
+}
+
+/** Értékbecslő + autó/teher desk: ugyanaz a mobil portal sheet UI. */
+function usePortalDrums(form) {
+  if (isMobile() || isErtekDrumsForm(form)) return true;
+  const page = document.body?.getAttribute("data-site-page") || "";
+  if (
+    (page === "auto" || page === "teherauto") &&
+    typeof window !== "undefined" &&
+    window.matchMedia("(min-width: 901px)").matches
+  ) {
+    return true;
+  }
+  return false;
+}
+
+function finishWheel(cell, emptyLabel, { multiple = false, forcePortal = false } = {}) {
   const wheel = cell.querySelector("[data-wheel]");
-  if (isMobile()) {
-    initDrumWheel(wheel, { emptyLabel, openMode: "portal" });
+  if (!wheel) return null;
+  const form = cell.closest("form");
+  /* Osztott tartomány: mindig portal + összefoglaló sheet (mint feladás), ne cell-drum. */
+  if (forcePortal || usePortalDrums(form)) {
+    initDrumWheel(wheel, { emptyLabel, openMode: "portal", multiple });
     const live = cell.querySelector("[data-wheel]");
     setWheelValue(live, "");
     syncDrumWheelDisplay(live);
@@ -124,10 +256,6 @@ function finishWheel(cell, emptyLabel) {
   return wheel;
 }
 
-/**
- * Asztali: a mező cellájában görgethető lista (nincs lenyíló menü).
- * Gépelés: prefixre ugrik; a beírt rész éles, a többi halvány.
- */
 function mountDesktopCellDrum(wrap, wheel, emptyLabel = "Mindegy") {
   if (!wrap || !wheel) return;
   closeAllInlineDrums(false);
@@ -266,7 +394,6 @@ function mountDesktopCellDrum(wrap, wheel, emptyLabel = "Mindegy") {
   scroll.addEventListener(
     "wheel",
     (event) => {
-      /* maradjon a cellában — ne görgessen az oldal */
       event.stopPropagation();
     },
     { passive: true }
@@ -352,7 +479,16 @@ function prefixHighlightHtml(label, typedPrefix) {
   )}</span>`;
 }
 
-function buildWheelCell({ filterKey, wheelName, label, options, halfClass = "", emptyLabel: emptyOverride } = {}) {
+function buildWheelCell({
+  filterKey,
+  wheelName,
+  label,
+  options,
+  halfClass = "",
+  emptyLabel: emptyOverride,
+  multiple = false,
+  forcePortal = false,
+} = {}) {
   const emptyLabel = emptyOverride || emptyLabelFromOptions(options);
   const opts = options.filter((o) => o.value !== "");
   const cell = document.createElement("div");
@@ -365,7 +501,10 @@ function buildWheelCell({ filterKey, wheelName, label, options, halfClass = "", 
   </div>`;
   const wheel = cell.querySelector("[data-wheel]");
   fillWheel(wheel, opts, { emptyLabel });
-  finishWheel(cell, emptyLabel);
+  finishWheel(cell, emptyLabel, {
+    multiple: multiple || (isMobile() && MULTI_SWITCH_KEYS.has(filterKey)),
+    forcePortal,
+  });
   return cell;
 }
 
@@ -377,6 +516,8 @@ function convertSimpleField(wrap) {
     wrap.remove();
     return;
   }
+  /* Gyártmány/modell: teljes katalógussal, multi dobkerékkel — mountBrandModelCatalogDrums. */
+  if (CATALOG_DRUM_KEYS.has(filterKey)) return;
   const label =
     wrap.querySelector(".home-qs-label")?.textContent?.trim() ||
     select.getAttribute("aria-label") ||
@@ -386,7 +527,7 @@ function convertSimpleField(wrap) {
   const current = select.value;
   const cell = buildWheelCell({
     filterKey,
-    wheelName: filterKey === "uzemanyagQuick" ? "uzemanyag" : filterKey,
+    wheelName: filterKey,
     label,
     options,
   });
@@ -395,14 +536,19 @@ function convertSimpleField(wrap) {
 }
 
 function convertRangePairToDual(wrap, cfg) {
-  const tolSelect = wrap.querySelector(`[data-filter-key="${cfg.tol}"]`);
-  const igSelect = wrap.querySelector(`[data-filter-key="${cfg.ig}"]`);
-  if (!tolSelect || !igSelect) return;
+  const tolEl = wrap.querySelector(`[data-filter-key="${cfg.tol}"]`);
+  const igEl = wrap.querySelector(`[data-filter-key="${cfg.ig}"]`);
+  if (!tolEl || !igEl) return;
 
-  const tolOpts = resolveOptions(cfg.tol, tolSelect, "-tól");
-  const igOpts = resolveOptions(cfg.ig, igSelect, "-ig");
-  const tolVal = tolSelect.value;
-  const igVal = igSelect.value;
+  const isSelect = tolEl.tagName === "SELECT";
+  const tolOpts = isSelect
+    ? resolveOptions(cfg.tol, tolEl, "Mindegy")
+    : optionsForAutoFilterKey(cfg.tol, "Mindegy");
+  const igOpts = isSelect
+    ? resolveOptions(cfg.ig, igEl, "Mindegy")
+    : optionsForAutoFilterKey(cfg.ig, "Mindegy");
+  const tolVal = isSelect ? tolEl.value : String(tolEl.value || "").replace(/\D/g, "");
+  const igVal = isSelect ? igEl.value : String(igEl.value || "").replace(/\D/g, "");
 
   const block = document.createElement("div");
   block.className = "immo-dual-range-block";
@@ -418,21 +564,34 @@ function convertRangePairToDual(wrap, cfg) {
   title.textContent = cfg.title;
   dual.appendChild(title);
 
+  /* Csukott: egy vonal + összefoglaló (mint feladás / műszaki) — sheet továbbra is dual */
+  const summary = document.createElement("button");
+  summary.type = "button";
+  summary.className = "immo-dual-range__summary";
+  summary.dataset.dualRangeSummary = "1";
+  summary.setAttribute("aria-haspopup", "listbox");
+  summary.setAttribute("aria-expanded", "false");
+  summary.setAttribute("aria-label", cfg.title);
+  summary.textContent = "Mindegy";
+  dual.appendChild(summary);
+
   const minCell = buildWheelCell({
     filterKey: cfg.tol,
     wheelName: cfg.tol,
     label: "",
     options: tolOpts,
-    emptyLabel: "Mindegy",
+    emptyLabel: "tól",
     halfClass: "immo-dual-range__half immo-dual-range__half--min",
+    forcePortal: true,
   });
   const maxCell = buildWheelCell({
     filterKey: cfg.ig,
     wheelName: cfg.ig,
     label: "",
     options: igOpts,
-    emptyLabel: "Mindegy",
+    emptyLabel: "ig",
     halfClass: "immo-dual-range__half immo-dual-range__half--max",
+    forcePortal: true,
   });
 
   const sep = document.createElement("span");
@@ -455,8 +614,48 @@ function convertRangePairToDual(wrap, cfg) {
   block.appendChild(dual);
   wrap.replaceWith(block);
 
-  if (tolVal) setWheelValue(minCell.querySelector("[data-wheel]"), tolVal);
-  if (igVal) setWheelValue(maxCell.querySelector("[data-wheel]"), igVal);
+  const minWheel = minCell.querySelector("[data-wheel]");
+  const maxWheel = maxCell.querySelector("[data-wheel]");
+  if (tolVal) setWheelValue(minWheel, tolVal);
+  if (igVal) setWheelValue(maxWheel, igVal);
+
+  function refreshSummary() {
+    const min = String(readWheel(minWheel) ?? "").trim();
+    const max = String(readWheel(maxWheel) ?? "").trim();
+    const unit = cfg.unit ? ` ${cfg.unit}` : "";
+    const labelOf = (wheel, value) => {
+      if (!value) return "";
+      const opt = [...(wheel?.querySelectorAll(".immo-wheel-opt") || [])].find(
+        (o) => String(o.dataset.value ?? "") === value
+      );
+      return (opt?.textContent || "").trim() || value;
+    };
+    if (!min && !max) {
+      summary.textContent = "Mindegy";
+      summary.classList.add("is-placeholder");
+      return;
+    }
+    summary.classList.remove("is-placeholder");
+    const minL = labelOf(minWheel, min);
+    const maxL = labelOf(maxWheel, max);
+    if (min && max) summary.textContent = `${minL} – ${maxL}`;
+    else if (min) summary.textContent = `${minL} –`;
+    else summary.textContent = `– ${maxL}${unit && !maxL.includes(cfg.unit) ? unit : ""}`;
+  }
+  refreshSummary();
+
+  const openSheet = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    const fakeTrigger =
+      minWheel.closest(".immo-wheel-wrap")?.querySelector(".immo-wheel-trigger") || summary;
+    openAutoDrumSheet(minWheel, fakeTrigger);
+  };
+  summary.addEventListener("click", openSheet);
+
+  [minWheel, maxWheel].forEach((w) => {
+    w?.addEventListener("immo-wheel-change", refreshSummary);
+  });
 }
 
 function convertRangePairToTwoDrums(wrap) {
@@ -481,24 +680,38 @@ function convertRangePairToTwoDrums(wrap) {
   wrap.replaceWith(frag);
 }
 
+function catalogKindForDrums() {
+  // Teherautó: soha személyautó katalógus.
+  if (document.body?.getAttribute("data-site-page") === "teherauto") return "kisteher";
+  return "szemelyauto";
+}
+
+const CATALOG_STATIC_BUST = "brandCatalog5";
+
 async function fetchCatalogQuick() {
+  const kind = catalogKindForDrums();
+  const staticUrl =
+    kind === "kisteher"
+      ? `/data/vehicle-catalog-kisteher.json?v=${CATALOG_STATIC_BUST}`
+      : `/data/vehicle-catalog.json?v=${CATALOG_STATIC_BUST}`;
   try {
-    const res = await fetch("/data/vehicle-catalog.json", { cache: "force-cache" });
+    // HTTP Cache-Control (1 nap) — no-store minden megnyitáskor újra húzná a JSON-t.
+    const res = await fetch(staticUrl, { cache: "force-cache" });
     const data = await res.json();
     if (data?.gyartmanyok?.length) return data;
   } catch {
-    /* fallback below */
+    /* fallback API */
   }
-  const { fetchVehicleCatalog } = await import("./vehicle-catalog-client.js");
-  return fetchVehicleCatalog();
+  const { fetchVehicleCatalog } = await import(`./vehicle-catalog-client.js?v=${CATALOG_STATIC_BUST}`);
+  return fetchVehicleCatalog({ kind });
 }
 
-function rebindWheel(form, wheelName, options, emptyLabel = "Mindegy") {
+function rebindWheel(form, wheelName, options, emptyLabel = "Mindegy", { multiple = false } = {}) {
   const wheel = form.querySelector(`[data-wheel="${wheelName}"]`);
   if (!wheel) return null;
   fillWheel(wheel, options, { emptyLabel });
-  if (isMobile()) {
-    initDrumWheel(wheel, { emptyLabel, openMode: "portal" });
+  if (usePortalDrums(form)) {
+    initDrumWheel(wheel, { emptyLabel, openMode: "portal", multiple });
     const live = form.querySelector(`[data-wheel="${wheelName}"]`);
     setWheelValue(live, "");
     syncDrumWheelDisplay(live);
@@ -511,46 +724,427 @@ function rebindWheel(form, wheelName, options, emptyLabel = "Mindegy") {
   return live;
 }
 
-async function wireCatalogDrums(form) {
-  if (!form.querySelector('[data-wheel="gyartmany"]') || !form.querySelector('[data-wheel="modell"]')) return;
+function ensureBrandModelDrumCells(form) {
+  for (const filterKey of ["gyartmany", "modell"]) {
+    const wrap = form.querySelector(`[data-qs-field="${filterKey}"]`);
+    if (!wrap || wrap.querySelector("[data-wheel]")) continue;
+    const select = wrap.querySelector("select.home-qs-control");
+    if (!select) continue;
+    const label =
+      wrap.querySelector(".home-qs-label")?.textContent?.trim() ||
+      (filterKey === "modell" ? "Modell" : "Gyártmány");
+    const cell = buildWheelCell({
+      filterKey,
+      wheelName: filterKey,
+      label,
+      options: [],
+      emptyLabel: "Mindegy",
+    });
+    wrap.replaceWith(cell);
+  }
+}
+
+function labelListShort(items, unit) {
+  if (!items.length) return "";
+  if (items.length === 1) return items[0];
+  if (items.length <= 3) return items.join(", ");
+  return `${items.length} ${unit}`;
+}
+
+/** Mobil / Értékbecslő: egy „Gyártmány & Modell” mező, külön Modell elrejtve. */
+function combineBrandModelOnMobile(form) {
+  if (!form || form.dataset.bmCombinedMobile === "1") return;
+  if (!usePortalDrums(form)) return;
+  const brandCell = form.querySelector('[data-qs-field="gyartmany"]');
+  const modelCell = form.querySelector('[data-qs-field="modell"]');
+  const brandWrap = form.querySelector('[data-wheel="gyartmany"]')?.closest(".immo-wheel-wrap");
+  const brandWheel = form.querySelector('[data-wheel="gyartmany"]');
+  const modelWheel = form.querySelector('[data-wheel="modell"]');
+  if (!brandCell || !brandWrap || !brandWheel) return;
+
+  const emptyCombined = "Gyártmány / Modell";
+  form.dataset.bmCombinedMobile = "1";
+  brandCell.classList.add("auto-search-bm-combined");
+  brandWrap.classList.add("auto-search-bm-combined__wrap");
+
+  const hideHost = modelCell?.closest(".home-qs-grid-cell") || modelCell;
+  if (hideHost) {
+    hideHost.classList.add("auto-search-bm-modell-nested");
+    hideHost.setAttribute("hidden", "");
+    hideHost.style.setProperty("display", "none", "important");
+  }
+
+  let labelEl = brandWrap.querySelector(".immo-label");
+  if (labelEl) {
+    labelEl.textContent = "Gyártmány & Modell";
+    if (labelEl.parentElement === brandWrap) {
+      brandCell.insertBefore(labelEl, brandWrap);
+    }
+  } else {
+    labelEl = document.createElement("span");
+    labelEl.className = "immo-label";
+    labelEl.textContent = "Gyártmány & Modell";
+    brandCell.insertBefore(labelEl, brandWrap);
+  }
+
+  function combinedSummary() {
+    const brands = readWheelList(brandWheel);
+    const models = modelWheel ? readWheelList(modelWheel) : [];
+    if (!brands.length) return emptyCombined;
+    const bPart = labelListShort(brands, "márka");
+    if (!models.length) return bPart;
+    return `${bPart} · ${labelListShort(models, "modell")}`;
+  }
+
+  function refreshCombined() {
+    const trigger = brandWrap.querySelector(".immo-wheel-trigger");
+    if (!trigger) return;
+    const text = combinedSummary();
+    trigger.textContent = text;
+    trigger.dataset.emptyLabel = emptyCombined;
+    trigger.setAttribute("aria-label", "Gyártmány és modell");
+    trigger.classList.toggle("is-placeholder", text === emptyCombined);
+    brandCell.classList.toggle("has-value", text !== emptyCombined);
+    brandWrap.classList.toggle("has-value", text !== emptyCombined);
+  }
+
+  brandWheel.addEventListener("immo-wheel-change", () => {
+    requestAnimationFrame(refreshCombined);
+  });
+  modelWheel?.addEventListener("immo-wheel-change", () => {
+    requestAnimationFrame(refreshCombined);
+  });
+
+  const onPortalGone = () => {
+    if (document.body.classList.contains("auto-drum-portal-open")) return;
+    refreshCombined();
+  };
+  new MutationObserver(onPortalGone).observe(document.body, {
+    attributes: true,
+    attributeFilter: ["class"],
+  });
+
+  refreshCombined();
+}
+
+/** Megjelenés: BM kívül, többi mező fehér Alapadatok kártyában (mint hirdetésfeladás). */
+function liftAutoSearchFieldLabels(scope) {
+  if (!scope) return;
+  scope
+    .querySelectorAll(".immo-schema-cell, .immo-dual-range-block, .immo-triple-date-block, .home-qs-field, .immo-field")
+    .forEach((cell) => {
+      const wrap = cell.querySelector(
+        ":scope > .immo-wheel-wrap, :scope > .immo-dual-range, :scope > .immo-triple-date"
+      );
+      if (!wrap) return;
+      const label = wrap.querySelector(
+        ":scope > .immo-label, :scope > .immo-dual-range__title, :scope > .immo-triple-date__title"
+      );
+      if (!label) return;
+      if (label.parentElement === wrap) {
+        cell.insertBefore(label, wrap);
+      }
+    });
+}
+
+function styleAutoSearchAlapCard(form) {
+  if (!form) return;
+  if (!usePortalDrums(form)) return;
+  const host =
+    form.querySelector("#qs-layout-main") ||
+    form.querySelector(".home-qs-layout-main") ||
+    form.querySelector(".auto-desk-fields[data-desk-alap]");
+  if (!host) return;
+  if (host.querySelector(":scope > .auto-search-alap-card")) return;
+
+  const bm = host.querySelector(".auto-search-bm-combined");
+  const bmHost =
+    bm &&
+    (() => {
+      const grid = bm.closest(".home-qs-grid-cell");
+      return grid && host.contains(grid) ? grid : bm;
+    })();
+
+  const kids = [...host.children].filter((el) => {
+    if (el.classList.contains("auto-search-alap-card")) return false;
+    if (bmHost && (el === bmHost || el.contains?.(bm))) return false;
+    if (el.classList.contains("auto-search-bm-modell-nested")) return false;
+    if (el.hasAttribute("hidden")) return false;
+    if (el.style?.display === "none") return false;
+    return true;
+  });
+  if (!kids.length) return;
+
+  form.dataset.alapCardStyled = "1";
+  const card = document.createElement("div");
+  card.className = "auto-search-alap-card";
+  card.innerHTML = form.hasAttribute("data-ertek-drums")
+    ? `<div class="auto-search-alap-card__body"></div>`
+    : `<p class="auto-search-alap-card__title">Alapadatok</p><div class="auto-search-alap-card__body"></div>`;
+  const body = card.querySelector(".auto-search-alap-card__body");
+  kids.forEach((el) => body.appendChild(el));
+
+  if (bmHost?.nextSibling) host.insertBefore(card, bmHost.nextSibling);
+  else if (bmHost) host.appendChild(card);
+  else host.insertBefore(card, host.firstChild);
+
+  liftAutoSearchFieldLabels(body);
+}
+
+/** Több szűrő: ugyanaz a fehér kártya + aláhúzás, mint Alapadatok (csak kinézet). */
+export function styleAutoSearchMoreCard(form) {
+  if (!form || !usePortalDrums(form)) return;
+  const host = form.querySelector("#qs-more-layout") || form.querySelector(".home-qs-more-layout");
+  if (!host) return;
+
+  let card = host.querySelector(":scope > .auto-search-alap-card");
+  let body = card?.querySelector(".auto-search-alap-card__body");
+  if (!card || !body) {
+    const kids = [...host.children].filter((el) => {
+      if (el.classList.contains("auto-search-alap-card")) return false;
+      if (el.classList.contains("home-qs-static-legacy")) return false;
+      if (el.hasAttribute("hidden")) return false;
+      if (el.style?.display === "none") return false;
+      return true;
+    });
+    if (!kids.length) return;
+    card = document.createElement("div");
+    card.className = "auto-search-alap-card auto-search-more-card";
+    card.innerHTML = `<div class="auto-search-alap-card__body"></div>`;
+    body = card.querySelector(".auto-search-alap-card__body");
+    kids.forEach((el) => body.appendChild(el));
+    host.appendChild(card);
+  } else {
+    [...host.children]
+      .filter(
+        (el) =>
+          el !== card &&
+          !el.classList.contains("home-qs-static-legacy") &&
+          !el.hasAttribute("hidden") &&
+          el.style?.display !== "none"
+      )
+      .forEach((el) => body.appendChild(el));
+  }
+
+  form.dataset.moreCardStyled = "1";
+  liftAutoSearchFieldLabels(body);
+  liftAutoSearchFieldLabels(host);
+}
+
+async function mountBrandModelCatalogDrums(form) {
+  ensureBrandModelDrumCells(form);
+  if (!form.querySelector('[data-wheel="gyartmany"]')) return;
+
+  const brandWrap = form.querySelector('[data-wheel="gyartmany"]')?.closest(".immo-wheel-wrap");
+  const brandTrigger = brandWrap?.querySelector(".immo-wheel-trigger");
+  if (brandTrigger) {
+    brandTrigger.disabled = true;
+    brandTrigger.textContent = "Betöltés…";
+  }
 
   let catalog;
   try {
     catalog = await fetchCatalogQuick();
   } catch (error) {
     console.warn("Dobkerék katalógus:", error);
+    if (brandTrigger) {
+      brandTrigger.disabled = false;
+      brandTrigger.textContent = "Mindegy";
+    }
     return;
   }
 
+  form._autoDrumCatalog = catalog;
   const brands = (catalog.gyartmanyok || []).map((b) => ({ value: b, label: b }));
-  const brandWheel = rebindWheel(form, "gyartmany", brands);
+  const brandEmpty = usePortalDrums(form) ? "Gyártmány / Modell" : "Mindegy";
+  const brandWheel = rebindWheel(form, "gyartmany", brands, brandEmpty, { multiple: true });
+  if (brandTrigger) brandTrigger.disabled = false;
   if (!brandWheel) return;
 
-  const fillModels = (brand) => {
-    const list = brand ? catalog.modellek?.[brand] ?? [] : [];
-    const models = list.map((m) => ({ value: m, label: m }));
-    rebindWheel(form, "modell", models);
+  const foldBrand = (v) =>
+    String(v ?? "")
+      .trim()
+      .toLocaleUpperCase("hu-HU")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/\s+/g, " ");
+  const modelsForBrand = (brand) => {
+    if (!brand) return [];
+    if (Array.isArray(catalog.modellek?.[brand])) return catalog.modellek[brand];
+    const want = foldBrand(brand);
+    for (const [key, models] of Object.entries(catalog.modellek || {})) {
+      if (foldBrand(key) === want && Array.isArray(models)) return models;
+    }
+    return [];
   };
 
-  fillModels("");
-  brandWheel.addEventListener("immo-wheel-change", () => {
-    fillModels(readWheel(form.querySelector('[data-wheel="gyartmany"]')) || "");
+  const fillModels = (brandList) => {
+    const brandsSelected = Array.isArray(brandList)
+      ? brandList.filter(Boolean)
+      : brandList
+        ? [String(brandList)]
+        : [];
+    let list = [];
+    if (brandsSelected.length === 1) {
+      list = modelsForBrand(brandsSelected[0]);
+    } else if (brandsSelected.length > 1) {
+      const set = new Set();
+      brandsSelected.forEach((brand) => {
+        modelsForBrand(brand).forEach((model) => set.add(model));
+      });
+      list = [...set].sort((a, b) => a.localeCompare(b, "hu", { sensitivity: "base" }));
+    }
+    const models = list.map((m) => ({ value: m, label: m }));
+    const modelWheel = form.querySelector('[data-wheel="modell"]');
+    /* BM portal már kitölti a modell kereket — ne wipe-oljuk rebind-del. */
+    if (modelWheel?.dataset?.drumBound === "1") {
+      const prev = readWheelList(modelWheel);
+      const listFold = new Set(list.map(foldBrand));
+      fillWheel(modelWheel, models, { emptyLabel: "Mindegy" });
+      modelWheel.dataset.multiple = "1";
+      setWheelValue(
+        modelWheel,
+        prev.filter((m) => list.includes(m) || listFold.has(foldBrand(m)))
+      );
+      syncDrumWheelDisplay(modelWheel);
+      return modelWheel;
+    }
+    return rebindWheel(form, "modell", models, "Mindegy", { multiple: true });
+  };
+
+  if (form.querySelector('[data-wheel="modell"]')) {
+    fillModels([]);
+    brandWheel.addEventListener("immo-wheel-change", () => {
+      fillModels(readWheelList(form.querySelector('[data-wheel="gyartmany"]')));
+    });
+  }
+
+  combineBrandModelOnMobile(form);
+  styleAutoSearchAlapCard(form);
+  styleAutoSearchMoreCard(form);
+}
+
+function convertMuszakiToDateTriple(wrap) {
+  if (!wrap) return;
+  const yearStart = new Date().getFullYear();
+  const yearOpts = [{ value: "", label: "Mindegy" }];
+  for (let y = yearStart; y <= yearStart + 5; y += 1) {
+    yearOpts.push({ value: String(y), label: String(y) });
+  }
+  const monthOpts = [{ value: "", label: "Mindegy" }];
+  for (let m = 1; m <= 12; m += 1) {
+    const v = String(m).padStart(2, "0");
+    monthOpts.push({ value: v, label: v });
+  }
+  const dayOpts = [{ value: "", label: "Mindegy" }];
+  for (let d = 1; d <= 31; d += 1) {
+    const v = String(d).padStart(2, "0");
+    dayOpts.push({ value: v, label: v });
+  }
+
+  const prevYear =
+    wrap.querySelector('[data-filter-key="muszaki_ev"]')?.value ||
+    wrap.querySelector("select")?.value ||
+    "";
+
+  const block = document.createElement("div");
+  block.className = "immo-triple-date-block";
+  block.dataset.range = "muszaki";
+
+  const triple = document.createElement("div");
+  triple.className = "immo-triple-date";
+  triple.dataset.range = "muszaki";
+  triple.setAttribute("aria-label", "Műszaki érvényesség");
+
+  const title = document.createElement("span");
+  title.className = "immo-label immo-triple-date__title";
+  title.textContent = "Műszaki érvényesség";
+  triple.appendChild(title);
+
+  const summary = document.createElement("button");
+  summary.type = "button";
+  summary.className = "immo-triple-date__summary";
+  summary.dataset.muszakiSummary = "1";
+  summary.setAttribute("aria-haspopup", "listbox");
+  summary.setAttribute("aria-expanded", "false");
+  summary.textContent = "Mindegy";
+  triple.appendChild(summary);
+
+  const yearCell = buildWheelCell({
+    filterKey: "muszaki_ev",
+    wheelName: "muszaki_ev",
+    label: "",
+    options: yearOpts,
+    emptyLabel: "Mindegy",
+    halfClass: "immo-triple-date__half immo-triple-date__half--year",
+  });
+  const monthCell = buildWheelCell({
+    filterKey: "muszaki_honap",
+    wheelName: "muszaki_honap",
+    label: "",
+    options: monthOpts,
+    emptyLabel: "Mindegy",
+    halfClass: "immo-triple-date__half immo-triple-date__half--month",
+  });
+  const dayCell = buildWheelCell({
+    filterKey: "muszaki_nap",
+    wheelName: "muszaki_nap",
+    label: "",
+    options: dayOpts,
+    emptyLabel: "Mindegy",
+    halfClass: "immo-triple-date__half immo-triple-date__half--day",
+  });
+
+  yearCell.hidden = true;
+  monthCell.hidden = true;
+  dayCell.hidden = true;
+
+  triple.appendChild(yearCell);
+  triple.appendChild(monthCell);
+  triple.appendChild(dayCell);
+  block.appendChild(triple);
+  wrap.replaceWith(block);
+
+  const yWheel = yearCell.querySelector("[data-wheel]");
+  const mWheel = monthCell.querySelector("[data-wheel]");
+  const dWheel = dayCell.querySelector("[data-wheel]");
+  if (prevYear) setWheelValue(yWheel, String(prevYear));
+
+  function refreshSummary() {
+    const y = String(readWheel(yWheel) ?? "");
+    const m = String(readWheel(mWheel) ?? "");
+    const d = String(readWheel(dWheel) ?? "");
+    summary.textContent = y ? `${y}. ${m || "—"}. ${d || "—"}` : "Mindegy";
+  }
+  refreshSummary();
+
+  const openSheet = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    const fakeTrigger = yWheel.closest(".immo-wheel-wrap")?.querySelector(".immo-wheel-trigger") || summary;
+    openAutoDrumSheet(yWheel, fakeTrigger);
+  };
+  summary.addEventListener("click", openSheet);
+
+  [yWheel, mWheel, dWheel].forEach((w) => {
+    w?.addEventListener("immo-wheel-change", refreshSummary);
   });
 }
 
-/**
- * Select mezők → dobkerék (mobil: portál, asztali: inline + kézi szerkesztés).
- * @returns {Promise<boolean>}
- */
 export async function mountAutoSearchDrums(form = document.getElementById("home-qs-form")) {
   if (!form || form.dataset.drumsMounted === "1") return form.dataset.drumsMounted === "1";
   const page = document.body?.getAttribute("data-site-page") || "";
-  if (page !== "auto" && page !== "teherauto") return false;
+  const force = form.hasAttribute("data-force-drums") || form.hasAttribute("data-ertek-drums");
+  if (!force && page !== "auto" && page !== "teherauto") return false;
 
   applyDrumModeClass();
   form.classList.add("immo-search-form", "auto-qs-drums");
-  form.classList.toggle("auto-qs-drums--desktop", !isMobile());
-  form.classList.toggle("auto-qs-drums--mobile", isMobile());
+  const portalUi = usePortalDrums(form);
+  form.classList.toggle("auto-qs-drums--desktop", !portalUi);
+  form.classList.toggle("auto-qs-drums--mobile", portalUi);
+  if (isErtekDrumsForm(form)) {
+    form.classList.add("auto-qs-drums--ertek");
+  }
 
   form.querySelectorAll("[data-qs-field]").forEach((wrap) => {
     const key = wrap.getAttribute("data-qs-field");
@@ -564,10 +1158,19 @@ export async function mountAutoSearchDrums(form = document.getElementById("home-
     if (wrap) convertRangePairToDual(wrap, cfg);
   }
 
+  const muszakiWrap = form.querySelector('[data-qs-field="muszaki_ev"]');
+  if (muszakiWrap) convertMuszakiToDateTriple(muszakiWrap);
+
   form.querySelectorAll("[data-qs-field]").forEach((wrap) => {
     if (wrap.closest(".immo-dual-range-block")) return;
+    if (wrap.closest(".immo-triple-date-block")) return;
     const key = wrap.getAttribute("data-qs-field");
     if (dualKeys.has(key) || SEARCH_OMIT_FIELDS.has(key)) return;
+    if (key === "muszaki_ev" || key === "muszaki_nap") return;
+    if (CATALOG_DRUM_KEYS.has(key)) return;
+    if (wrap.querySelector("input.home-qs-control--price, input.home-qs-control[type='text'][data-filter-key^='ar_']")) {
+      return;
+    }
     if (wrap.querySelector("input.home-qs-control[type='text'], input.immo-control[type='text']")) return;
     if (wrap.querySelectorAll("select.home-qs-control").length >= 2) {
       convertRangePairToTwoDrums(wrap);
@@ -576,9 +1179,55 @@ export async function mountAutoSearchDrums(form = document.getElementById("home-
     if (wrap.querySelector("select.home-qs-control")) convertSimpleField(wrap);
   });
 
+  try {
+    await mountBrandModelCatalogDrums(form);
+  } catch (error) {
+    console.warn("Dobkerék katalógus:", error);
+  }
+  styleAutoSearchAlapCard(form);
+  styleAutoSearchMoreCard(form);
   form.dataset.drumsMounted = "1";
-  wireCatalogDrums(form).catch((error) => console.warn("Dobkerék katalógus:", error));
   return true;
+}
+
+/**
+ * Desk gyors/részletes: a két külön -tól/-ig select helyett feladás-szerű osztott menü
+ * (egy összefoglaló sor + sheet). Alapadatok + Műszaki + Extrák.
+ */
+export function enhanceDeskDualRanges(form = document.getElementById("home-qs-form")) {
+  if (!form) return 0;
+  applyDrumModeClass();
+  form.classList.add("immo-search-form", "auto-qs-drums");
+  let converted = 0;
+  const byField = new Map(DUAL_RANGES.map((cfg) => [cfg.fieldKey, cfg]));
+  const byTol = new Map(DUAL_RANGES.map((cfg) => [cfg.tol, cfg]));
+
+  form.querySelectorAll(".auto-desk-field[data-desk-field] > .auto-desk-range").forEach((range) => {
+    if (range.closest(".immo-dual-range-block")) return;
+    const field = range.closest(".auto-desk-field");
+    const fieldKey = field?.getAttribute("data-desk-field");
+    let cfg = fieldKey ? byField.get(fieldKey) : null;
+    const controls = [...range.querySelectorAll("select, input")];
+    if (!cfg && controls[0]) {
+      const tolKey = controls[0].getAttribute("data-filter-key") || "";
+      cfg = byTol.get(tolKey) || null;
+    }
+    if (!cfg) return;
+    const tolEl =
+      range.querySelector(`[data-filter-key="${cfg.tol}"]`) ||
+      controls[0] ||
+      null;
+    const igEl =
+      range.querySelector(`[data-filter-key="${cfg.ig}"]`) ||
+      controls.find((el) => el !== tolEl) ||
+      null;
+    if (!tolEl || !igEl) return;
+    convertRangePairToDual(range, cfg);
+    field?.querySelector(".immo-dual-range__title")?.remove();
+    converted += 1;
+  });
+
+  return converted;
 }
 
 export function resetAutoSearchDrums(form = document.getElementById("home-qs-form")) {
@@ -602,9 +1251,35 @@ export function readAutoDrumFilterValues(form) {
     const n = Number(String(value).replace(/\D/g, ""));
     return Number.isFinite(n) ? n : null;
   };
+  const kmBound = (key, raw) => {
+    const s = String(raw ?? "").trim();
+    if (!s) return null;
+    if (s === "400001") return key === "km_ig" ? null : 400001;
+    return numOrNull(s);
+  };
   const seen = new Set();
 
-  /* Dob: hidden; Település / irányítószám: megmaradt text input */
+  form.querySelectorAll("[data-wheel][data-filter-key]").forEach((wheel) => {
+    const key = wheel.getAttribute("data-filter-key");
+    if (!key || seen.has(key)) return;
+    if (wheel.dataset.multiple === "1") {
+      const list = readWheelList(wheel);
+      if (!list.length) return;
+      seen.add(key);
+      const outKey = MULTI_FILTER_KEY[key] || key;
+      if (outKey === "gyartmanyok") out.gyartmanyok = list;
+      else if (outKey === "modellek") out.modellek = list;
+      else out[outKey] = list;
+      return;
+    }
+    const raw = String(readWheel(wheel) ?? "").trim();
+    if (!raw) return;
+    seen.add(key);
+    if (key === "km_tol" || key === "km_ig") out[key] = kmBound(key, raw);
+    else if (key.endsWith("_tol") || key.endsWith("_ig")) out[key] = numOrNull(raw);
+    else out[key] = raw;
+  });
+
   form.querySelectorAll("[data-filter-key]").forEach((el) => {
     const key = el.getAttribute("data-filter-key");
     if (!key || seen.has(key)) return;
@@ -615,7 +1290,9 @@ export function readAutoDrumFilterValues(form) {
     seen.add(key);
     const raw = String(el.value ?? "").trim();
     if (!raw) return;
-    if (key.endsWith("_tol") || key.endsWith("_ig")) {
+    if (key === "km_tol" || key === "km_ig") {
+      out[key] = kmBound(key, raw);
+    } else if (key.endsWith("_tol") || key.endsWith("_ig")) {
       out[key] = numOrNull(raw);
     } else {
       out[key] = raw;

@@ -938,8 +938,8 @@
 }
 
 @media (min-width: 801px) {
-  body:not(.auto-force-mobile) .mw-app-top,
-  body:not(.auto-force-mobile) .mw-app-tabbar {
+  .mw-app-top,
+  .mw-app-tabbar {
     display: none !important;
   }
 }

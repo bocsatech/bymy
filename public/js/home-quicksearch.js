@@ -1,26 +1,26 @@
 
 import { applyAutoSearchLayout, readLayoutFilterValues, refillAutoSearchRangeSelects, prefetchAutoSearchBoot } from "./auto-search-layout.js?v=kmFill1";
-import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums, styleAutoSearchMoreCard, enhanceDeskDualRanges } from "./auto-search-drums.js?v=forceMob4";
+import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums, styleAutoSearchMoreCard, enhanceDeskDualRanges } from "./auto-search-drums.js?v=compactSingle1";
 import {
   mountDetailedSearch,
   readDetailedSearchValues,
   resetDetailedSearch,
 } from "./auto-detailed-search.js?v=18415b7f87";
 import { readWheel } from "./ingatlan-wheels.js?v=6952ba469c";
-import { readBrandModelFilterValues, mountAutoBrandModelPicker } from "./auto-brand-model-picker.js?v=forceMob4";
-import { readFuelFilterValues, mountAutoFuelPicker } from "./auto-fuel-picker.js?v=forceMob4";
-import { readKivitelFilterValues, mountAutoKivitelPicker } from "./auto-kivitel-picker.js?v=forceMob4";
-import { readAllapotFilterValues, mountAutoAllapotPicker } from "./auto-allapot-picker.js?v=forceMob4";
-import { readSebessegvaltoFilterValues, mountAutoSebessegvaltoPicker } from "./auto-sebessegvalto-picker.js?v=forceMob4";
-import { readOkmanyFilterValues, mountAutoOkmanyPicker } from "./auto-okmany-picker.js?v=forceMob4";
-import { readToltoFilterValues, mountAutoToltoPickers } from "./auto-tolto-picker.js?v=forceMob4";
+import { readBrandModelFilterValues, mountAutoBrandModelPicker } from "./auto-brand-model-picker.js?v=mwParity1";
+import { readFuelFilterValues, mountAutoFuelPicker } from "./auto-fuel-picker.js?v=mwParity1";
+import { readKivitelFilterValues, mountAutoKivitelPicker } from "./auto-kivitel-picker.js?v=mwParity1";
+import { readAllapotFilterValues, mountAutoAllapotPicker } from "./auto-allapot-picker.js?v=d31f4ab31d";
+import { readSebessegvaltoFilterValues, mountAutoSebessegvaltoPicker } from "./auto-sebessegvalto-picker.js?v=960574ad87";
+import { readOkmanyFilterValues, mountAutoOkmanyPicker } from "./auto-okmany-picker.js?v=b931011338";
+import { readToltoFilterValues, mountAutoToltoPickers } from "./auto-tolto-picker.js?v=3cc657260b";
 import {
   initAutoDeskSearch,
   updateAutoDeskAccSummaries,
   arrangeAutoDeskDemoFields,
   deskFilterMenuReady,
   syncAutoSearchAccShell,
-} from "./auto-desk-search.js?v=forceMob4";
+} from "./auto-desk-search.js?v=extrakPills1";
 
 prefetchAutoSearchBoot();
 const MOBILE_MQ = "(max-width: 900px)";
@@ -41,11 +41,8 @@ export function initHomeQuickSearch({ onSearch = () => {}, onFilterPreview, onDe
   const detailedPanel = document.getElementById("qs-detailed-panel");
   const detailedBtn = document.getElementById("qs-detailed");
   const statusEl = document.getElementById("home-qs-status");
-  const mobile = () =>
-    document.body?.classList?.contains("auto-force-mobile") === true ||
-    window.matchMedia(MOBILE_MQ).matches;
+  const mobile = () => window.matchMedia(MOBILE_MQ).matches;
   const vehicleDesk = () => {
-    if (document.body?.classList?.contains("auto-force-mobile")) return false;
     const page = document.body?.getAttribute("data-site-page");
     return (page === "auto" || page === "teherauto") && window.matchMedia(DESK_MQ).matches;
   };
@@ -446,7 +443,6 @@ export function initHomeQuickSearch({ onSearch = () => {}, onFilterPreview, onDe
     .then(async () => {
       const page = document.body?.getAttribute("data-site-page");
       const deskAuto =
-        !document.body?.classList?.contains("auto-force-mobile") &&
         (page === "auto" || page === "teherauto") &&
         window.matchMedia(DESK_MQ).matches;
       const mountSafe = (fn, label) =>
@@ -491,7 +487,6 @@ export function initHomeQuickSearch({ onSearch = () => {}, onFilterPreview, onDe
       console.warn("Kereső elrendezés:", error);
       const page = document.body?.getAttribute("data-site-page");
       const deskAuto =
-        !document.body?.classList?.contains("auto-force-mobile") &&
         (page === "auto" || page === "teherauto") &&
         window.matchMedia(DESK_MQ).matches;
       const mountSafe = (fn, label) =>

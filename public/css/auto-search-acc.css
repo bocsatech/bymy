@@ -1,17 +1,17 @@
 /* Autó kereső menük — 1:1 a hirdetésfeladás desk accordion / Alapadatok pill designnal */
 
 @media (min-width: 901px) {
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-panel,
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-body,
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     #home-qs-form {
     background: #e8eef3 !important;
     background-color: #e8eef3 !important;
   }
 
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell {
     display: flex !important;
     flex-direction: column !important;
@@ -26,9 +26,9 @@
   }
 
   /* Gyors + Részletes: shell természetes magasság — a form sáv görget mindent együtt */
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active.auto-desk-gyors
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active.auto-desk-gyors
     .auto-search-desk-shell,
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active.auto-desk-reszletes
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active.auto-desk-reszletes
     .auto-search-desk-shell {
     flex: 0 0 auto !important;
     min-height: 0 !important;
@@ -36,7 +36,7 @@
   }
 
   /* Brand block: fehér kártya a kék héjon (mint feladás) */
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     > .auto-bm-brand-block {
     flex: 0 0 auto !important;
@@ -51,7 +51,7 @@
   }
 
   /* Összecsukva: fehér pill */
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     > .auto-desk-acc:not(.is-open) {
     flex: 0 0 auto !important;
@@ -63,7 +63,7 @@
     margin: 0 !important;
   }
 
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     > .auto-desk-acc:not(.is-open)
     > .auto-desk-acc__head {
@@ -80,7 +80,7 @@
     color: #111 !important;
   }
 
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     > .auto-desk-acc:not(.is-open)
     > .auto-desk-acc__head
@@ -88,7 +88,7 @@
     display: none !important;
   }
 
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     > .auto-desk-acc:not(.is-open)
     > .auto-desk-acc__head
@@ -100,7 +100,7 @@
     transform: none !important;
   }
 
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     > .auto-desk-acc:not(.is-open)
     > .auto-desk-acc__body {
@@ -108,10 +108,10 @@
   }
 
   /* Nyitott Alapadatok / Műszaki / Extrák: természetes magasság — a form sáv görget */
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     > .auto-desk-acc[data-desk-acc="alap"].is-open,
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     > .auto-desk-acc:not([data-desk-acc="alap"]).is-open {
     flex: 0 0 auto !important;
@@ -119,7 +119,7 @@
   }
 
   /* Alapadatok nyitva: külső head rejtve, kék héj + fehér kártya */
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     > .auto-desk-acc[data-desk-acc="alap"].is-open {
     border: 0 !important;
@@ -129,14 +129,14 @@
     margin: 0 !important;
   }
 
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     > .auto-desk-acc[data-desk-acc="alap"].is-open
     > .auto-desk-acc__head {
     display: none !important;
   }
 
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     > .auto-desk-acc[data-desk-acc="alap"].is-open
     > .auto-desk-acc__body {
@@ -152,7 +152,7 @@
   }
 
   /* Műszaki / Extrák nyitva: fehér kártya + head */
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     > .auto-desk-acc:not([data-desk-acc="alap"]).is-open {
     border: 0 !important;
@@ -162,7 +162,7 @@
     margin: 0 !important;
   }
 
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     > .auto-desk-acc:not([data-desk-acc="alap"]).is-open
     > .auto-desk-acc__head {
@@ -177,7 +177,7 @@
     color: #111 !important;
   }
 
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     > .auto-desk-acc:not([data-desk-acc="alap"]).is-open
     > .auto-desk-acc__head
@@ -185,7 +185,7 @@
     display: none !important;
   }
 
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     > .auto-desk-acc:not([data-desk-acc="alap"]).is-open
     > .auto-desk-acc__head
@@ -195,7 +195,7 @@
     font-size: 0.65rem !important;
   }
 
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     > .auto-desk-acc:not([data-desk-acc="alap"]).is-open
     > .auto-desk-acc__body {
@@ -204,13 +204,13 @@
   }
 
   /* Extrák: mindig a görgetésben (5 pill), szülő fejléc nélkül — mint mobil */
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     > .auto-desk-acc[data-desk-acc="extrak"],
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     > .auto-desk-acc[data-desk-acc="extrak"]:not(.is-open),
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     > .auto-desk-acc[data-desk-acc="extrak"].is-open {
     display: block !important;
@@ -222,30 +222,30 @@
     overflow: visible !important;
   }
 
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     > .auto-desk-acc[data-desk-acc="extrak"]
     > .auto-desk-acc__head,
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     > .auto-desk-acc[data-desk-acc="extrak"]:not(.is-open)
     > .auto-desk-acc__head,
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     > .auto-desk-acc[data-desk-acc="extrak"].is-open
     > .auto-desk-acc__head {
     display: none !important;
   }
 
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     > .auto-desk-acc[data-desk-acc="extrak"]
     > .auto-desk-acc__body,
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     > .auto-desk-acc[data-desk-acc="extrak"]:not(.is-open)
     > .auto-desk-acc__body,
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     > .auto-desk-acc[data-desk-acc="extrak"].is-open
     > .auto-desk-acc__body {
@@ -254,7 +254,7 @@
   }
 
   /* Fehér Alapadatok kártya — mint feladás */
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     .ad-form-alap-card {
     display: flex !important;
@@ -270,7 +270,7 @@
     box-sizing: border-box !important;
   }
 
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     .ad-form-alap-card__title {
     appearance: none;
@@ -290,7 +290,7 @@
     cursor: pointer;
   }
 
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     .ad-form-alap-card__chev {
     flex: 0 0 auto;
@@ -301,21 +301,21 @@
     transition: transform 0.15s ease;
   }
 
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     .ad-form-alap-card.is-collapsed
     .ad-form-alap-card__chev {
     transform: rotate(0deg);
   }
 
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     .ad-form-alap-card.is-collapsed
     .ad-form-alap-card__title {
     margin-bottom: 0 !important;
   }
 
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     .ad-form-alap-card__body {
     display: flex !important;
@@ -325,7 +325,7 @@
   }
 
   /* Alapadatok kártya mezői mindig látszanak nyitva */
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     .ad-form-alap-card:not(.is-collapsed)
     .ad-form-alap-card__body
@@ -335,19 +335,19 @@
     gap: 1.05rem !important;
   }
 
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     .ad-form-alap-card:not(.is-collapsed)
     .auto-desk-field[data-desk-quick="1"],
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     .ad-form-alap-card:not(.is-collapsed)
     .auto-fuel-field,
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     .ad-form-alap-card:not(.is-collapsed)
     .auto-kivitel-field,
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     .ad-form-alap-card:not(.is-collapsed)
     .auto-allapot-field {
@@ -355,13 +355,13 @@
   }
 
   /* Desk mezők (Alapadatok + Műszaki + Extrák): feladás-szerű aláhúzás (nem doboz) */
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     .auto-desk-field {
     gap: 0.45rem !important;
   }
 
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     .auto-desk-field__label {
     font-size: 0.94rem !important;
@@ -370,19 +370,19 @@
     margin: 0 !important;
   }
 
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     .auto-desk-field
     .auto-bm-trigger,
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     .auto-desk-field
     select.home-qs-control,
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     .auto-desk-field
     input.home-qs-control,
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     .auto-desk-field
     select {
@@ -405,19 +405,19 @@
     font: 500 1rem/1.25 system-ui, sans-serif !important;
   }
 
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     .auto-desk-field
     .auto-bm-trigger:hover,
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     .auto-desk-field
     select.home-qs-control:focus,
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     .auto-desk-field
     input.home-qs-control:focus,
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     .auto-desk-field
     select:focus {
@@ -425,7 +425,7 @@
     outline: none !important;
   }
 
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     .auto-desk-field
     .auto-bm-trigger__chev {
@@ -434,11 +434,11 @@
   }
 
   /* Osztott tartomány (Évjárat / Vételár / km / Teljesítmény…): egy összefoglaló vonal — mint feladás */
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     .auto-desk-field
     .immo-dual-range-block,
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     .auto-desk-field
     .immo-dual-range {
@@ -456,7 +456,7 @@
     position: relative !important;
   }
 
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     .auto-desk-field
     .immo-dual-range__summary {
@@ -479,7 +479,7 @@
     min-height: 2.65rem !important;
   }
 
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     .auto-desk-field
     .immo-dual-range__summary.is-placeholder {
@@ -487,7 +487,7 @@
     font-weight: 500 !important;
   }
 
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     .auto-desk-field
     .immo-dual-range__summary:focus-visible {
@@ -495,20 +495,20 @@
     outline-offset: 2px;
   }
 
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     .auto-desk-field
     .immo-dual-range
     > .immo-dual-range__half,
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     .auto-desk-field
     .immo-dual-range__sep,
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     .auto-desk-field
     .immo-dual-range__unit,
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     .auto-desk-field
     .immo-dual-range__title {
@@ -525,7 +525,7 @@
   }
 
   /* Ha még nem konvertált tartomány: ne mutasson két dobozos -tól/-ig-et */
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     .auto-desk-field
     .auto-desk-range {
@@ -537,11 +537,11 @@
   }
 
   /* Gyártmány & Modell: ugyanaz az aláhúzás a brand kártyában */
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     > .auto-bm-brand-block
     .auto-bm-trigger--pill,
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     > .auto-bm-brand-block
     .auto-bm-trigger {
@@ -557,11 +557,11 @@
     font: 500 1rem/1.25 system-ui, sans-serif !important;
   }
 
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     > .auto-bm-brand-block
     .auto-bm-trigger--pill.has-value,
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     > .auto-bm-brand-block
     .auto-bm-trigger--pill:not(:has(.is-placeholder)) {
@@ -569,7 +569,7 @@
     font-weight: 600 !important;
   }
 
-  body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     > .auto-bm-brand-block
     .auto-bm-trigger--pill::after {

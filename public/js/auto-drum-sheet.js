@@ -33,12 +33,7 @@ function escapeHtml(value) {
  * Mobil sheet chrome (X + Kész fejléc + fehér lista).
  * Auto/teher desk: ugyanaz 1:1 — ne a régi középső dobkerék-popup.
  */
-function forceAutoMobileUi() {
-  return document.body?.classList?.contains("auto-force-mobile") === true;
-}
-
 function isMobileDrumSheet() {
-  if (forceAutoMobileUi()) return true;
   if (!window.matchMedia("(min-width: 901px)").matches) return true;
   const page = document.body?.getAttribute("data-site-page") || "";
   return page === "auto" || page === "teherauto";
@@ -967,15 +962,12 @@ function lockSheetWhiteToBlue(root, stage) {
   const ring = root.querySelector?.(".auto-drum-portal__ring--sheet");
   const head = root.querySelector?.(".auto-drum-portal__sheet-head");
   const ym = Boolean(root?.classList?.contains("auto-drum-portal--ym"));
-  const desk = !forceAutoMobileUi() && window.matchMedia("(min-width: 901px)").matches;
-  /* Force-mobile: a stage left/transform-jét az applySheetStageLayout állítja (menusáv szélesség). */
-  if (!forceAutoMobileUi()) {
-    /* Kék stage középen; fehér ring a kéken belül mindig középen — nincs left-only / translateX. */
-    stage.style.setProperty("left", "0", "important");
-    stage.style.setProperty("right", "0", "important");
-    stage.style.setProperty("margin-left", "auto", "important");
-    stage.style.setProperty("margin-right", "auto", "important");
-  }
+  const desk = window.matchMedia("(min-width: 901px)").matches;
+  /* Kék stage középen; fehér ring a kéken belül mindig középen — nincs left-only / translateX. */
+  stage.style.setProperty("left", "0", "important");
+  stage.style.setProperty("right", "0", "important");
+  stage.style.setProperty("margin-left", "auto", "important");
+  stage.style.setProperty("margin-right", "auto", "important");
   if (scroll) {
     scroll.style.setProperty("left", "0", "important");
     scroll.style.setProperty("right", "0", "important");
@@ -1023,8 +1015,7 @@ function lockSheetWhiteToBlue(root, stage) {
 function applySheetStageLayout(stage) {
   if (!stage) return;
   const root = stage.closest?.(".auto-drum-portal--sheet") || stage.parentElement;
-  const forceMobile = forceAutoMobileUi();
-  const desk = !forceMobile && window.matchMedia("(min-width: 901px)").matches;
+  const desk = window.matchMedia("(min-width: 901px)").matches;
   const ym = Boolean(root?.classList?.contains("auto-drum-portal--ym"));
   /* Egyválasztós desk (Okmányok, Kivitel…): HA-szerű kompakt kártya, ne 86vh üres fehér. */
   const compactDesk =
@@ -1051,22 +1042,6 @@ function applySheetStageLayout(stage) {
       stage.style.setProperty("margin-top", "auto", "important");
       stage.style.setProperty("margin-bottom", "auto", "important");
     }
-    lockSheetWhiteToBlue(root, stage);
-    return;
-  }
-  if (forceMobile) {
-    /* Asztali=mobil: stage = menusáv szélesség, menusáv fölött. */
-    const phoneW = "min(22.75rem, calc(100% - 1.35rem))";
-    const bottom = "calc(3.55rem + 0.4rem + 0.55rem + env(safe-area-inset-bottom, 0px))";
-    stage.style.setProperty("left", "50%", "important");
-    stage.style.setProperty("right", "auto", "important");
-    stage.style.setProperty("transform", "translateX(-50%)", "important");
-    stage.style.setProperty("width", phoneW, "important");
-    stage.style.setProperty("max-width", phoneW, "important");
-    stage.style.setProperty("top", "max(0.35rem, env(safe-area-inset-top, 0px))", "important");
-    stage.style.setProperty("bottom", bottom, "important");
-    stage.style.setProperty("height", "auto", "important");
-    stage.style.setProperty("margin", "0", "important");
     lockSheetWhiteToBlue(root, stage);
     return;
   }
@@ -1169,13 +1144,13 @@ function mountSheetPortalChrome(root, { stage, wrap, trigger, ring, sheetScroll 
   if (stage) {
     const ym = Boolean(stage.closest?.(".auto-drum-portal--ym"));
     const single = Boolean(stage.closest?.(".auto-drum-portal--single-sheet"));
-    const desk = !forceAutoMobileUi() && window.matchMedia("(min-width: 901px)").matches;
+    const desk = window.matchMedia("(min-width: 901px)").matches;
     const overSearch = Boolean(
       trigger?.closest?.(".auto-search-panel, .auto-search-desk-shell") ||
         document.body.classList.contains("auto-desk-active")
     );
     stage.style.setProperty("position", "fixed", "important");
-    if (!overSearch && !forceAutoMobileUi()) {
+    if (!overSearch) {
       stage.style.setProperty("left", "0", "important");
       stage.style.setProperty("right", "0", "important");
       if (!((ym || single) && desk)) {

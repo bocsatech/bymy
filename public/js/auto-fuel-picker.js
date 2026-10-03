@@ -1,4 +1,4 @@
-import { openStandaloneSwitchSheet, closeAutoDrumSheet } from "./auto-drum-sheet.js?v=forceMob4";
+import { openStandaloneSwitchSheet, closeAutoDrumSheet } from "./auto-drum-sheet.js?v=mwParity1";
 
 const FUEL_OPTIONS = [
   { value: "Benzin", label: "Benzin" },
@@ -43,7 +43,6 @@ function writeJsonList(input, list) {
 }
 
 function isAutoDesk() {
-  if (document.body?.classList?.contains("auto-force-mobile")) return false;
   return (
     (document.body?.getAttribute("data-site-page") === "auto" ||
       document.body?.getAttribute("data-site-page") === "teherauto") &&

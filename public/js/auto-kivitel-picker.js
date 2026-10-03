@@ -4,7 +4,7 @@ import {
   TEHER_35_KIVITEL_CATEGORIES,
   flattenTeher35KivitelOptions,
 } from "./equipment-data.js?v=5a39cb5ba3";
-import { openStandaloneSwitchSheet, closeAutoDrumSheet } from "./auto-drum-sheet.js?v=forceMob4";
+import { openStandaloneSwitchSheet, closeAutoDrumSheet } from "./auto-drum-sheet.js?v=mwParity1";
 
 const EMPTY_LABEL = "Mindegy";
 const SUMMARY_EMPTY = "Mindegy";
@@ -42,7 +42,6 @@ function isVehicleSearchPage() {
 }
 
 function isAutoDesk() {
-  if (document.body?.classList?.contains("auto-force-mobile")) return false;
   return isVehicleSearchPage() && window.matchMedia("(min-width: 901px)").matches;
 }
 

@@ -3044,15 +3044,15 @@ body.auto-drum-portal-open {
     --auto-qs-field-h: 2.4rem;
   }
 
-  body:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .auto-qs-drums--desktop,
-  body:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .auto-qs-drums--desktop .immo-schema-cell,
-  body:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .auto-qs-drums--desktop .immo-dual-range-block,
-  body:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .auto-qs-drums--desktop .immo-dual-range,
-  body:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .auto-qs-drums--desktop .immo-wheel-wrap,
-  body:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .auto-qs-drums--desktop .auto-cell-drum,
-  body:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .auto-qs-drums--desktop .auto-cell-drum__viewport,
-  body:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .auto-qs-drums--desktop .auto-cell-drum__scroll,
-  body:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .auto-qs-drums--desktop .auto-cell-drum__item {
+  body:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .auto-qs-drums--desktop,
+  body:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .auto-qs-drums--desktop .immo-schema-cell,
+  body:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .auto-qs-drums--desktop .immo-dual-range-block,
+  body:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .auto-qs-drums--desktop .immo-dual-range,
+  body:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .auto-qs-drums--desktop .immo-wheel-wrap,
+  body:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .auto-qs-drums--desktop .auto-cell-drum,
+  body:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .auto-qs-drums--desktop .auto-cell-drum__viewport,
+  body:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .auto-qs-drums--desktop .auto-cell-drum__scroll,
+  body:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .auto-qs-drums--desktop .auto-cell-drum__item {
     background: transparent !important;
     background-color: transparent !important;
     box-shadow: none !important;

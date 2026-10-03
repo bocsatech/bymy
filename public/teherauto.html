@@ -61,16 +61,13 @@
     <link rel="stylesheet" href="/css/site-app.css?v=c0d2bfab87" />
     <link rel="stylesheet" href="/css/site-side.css?v=6f9f0965f1" />
     <link rel="stylesheet" href="/css/hub-mobile-app.css?v=tabYellow1" />
-    <link rel="stylesheet" href="/css/hub-mobile-app-force-desk.css?v=forceMob2" />
     <link rel="stylesheet" href="/css/home.css?v=ddb902d835" />
-    <link rel="stylesheet" href="/css/auto-hero.css?v=forceMob2" />
-    <link rel="stylesheet" href="/css/auto-hero-force-desk.css?v=forceMob2" />
-    <link rel="stylesheet" href="/css/auto-desk-layout.css?v=forceMob2" />
+    <link rel="stylesheet" href="/css/auto-hero.css?v=8bcaaf719a" />
+    <link rel="stylesheet" href="/css/auto-desk-layout.css?v=accPill1" />
     <link rel="stylesheet" href="/css/listing-photo-cover.css?v=70dce08b86" />
     <link rel="stylesheet" href="/css/listing-featured.css?v=c00be8ab90" />
     <link rel="stylesheet" href="/css/ingatlan-search.css?v=c0792b12cf" />
     <link rel="stylesheet" href="/css/search-results-map.css?v=f530477e8b" />
-    <link rel="stylesheet" href="/css/auto-force-mobile.css?v=forceMob4" />
     <style id="home-scroll-fix">
       
       html:has(body.home-page) {
@@ -112,13 +109,13 @@
       /* Desk layout rules only — header sizing is global in site-desk-header.css */
       
       @media (min-width: 901px) {
-        html:has(body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"])),
-        body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]) {
+        html:has(body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"])),
+        body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) {
           height: 100% !important;
           max-height: 100% !important;
           overflow: hidden !important;
         }
-        body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main {
+        body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main {
           display: grid !important;
           grid-template-columns: 320px minmax(0, 1fr) !important;
           grid-template-rows: auto minmax(0, 1fr) !important;
@@ -135,7 +132,7 @@
           min-height: 0 !important;
           overflow: hidden !important;
         }
-        body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main > .auto-search-tabs {
+        body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main > .auto-search-tabs {
           display: grid !important;
           grid-column: 1 / -1 !important;
           grid-row: 1 / 2 !important;
@@ -145,10 +142,10 @@
           border-radius: 8px;
           overflow: hidden;
         }
-        body.home-page:not(.auto-force-mobile)[data-site-page="teherauto"] .home-main.auto-desk-main > .auto-search-tabs {
+        body.home-page[data-site-page="teherauto"] .home-main.auto-desk-main > .auto-search-tabs {
           grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
         }
-        body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main > .auto-search-hero {
+        body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main > .auto-search-hero {
           grid-column: 1 / 2 !important;
           grid-row: 2 / 3 !important;
           width: 320px !important;
@@ -160,8 +157,8 @@
           max-height: 100% !important;
           overflow: hidden !important;
         }
-        body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main > .home-layout.site-layout,
-        body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main > .site-layout {
+        body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main > .home-layout.site-layout,
+        body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main > .site-layout {
           grid-column: 2 / 3 !important;
           grid-row: 2 / 3 !important;
           width: auto !important;
@@ -174,8 +171,8 @@
           max-height: 100% !important;
           overflow: hidden !important;
         }
-        body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main .home-center,
-        body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main .site-center {
+        body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main .home-center,
+        body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main .site-center {
           display: flex !important;
           flex-direction: column !important;
           flex: 1 1 auto !important;
@@ -185,21 +182,21 @@
           min-height: 0 !important;
           overflow: hidden !important;
         }
-        body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main .home-listings-panel,
-        body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main #home-grid-track {
+        body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main .home-listings-panel,
+        body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main #home-grid-track {
           width: 100% !important;
           max-width: none !important;
           box-sizing: border-box !important;
         }
-        body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main .home-listings-panel {
+        body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main .home-listings-panel {
           flex: 1 1 auto !important;
           min-height: 0 !important;
           overflow-x: hidden !important;
           overflow-y: auto !important;
           max-height: none !important;
         }
-        body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main .home-layout,
-        body.home-page:not(.auto-force-mobile):is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main .home-center {
+        body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main .home-layout,
+        body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main .home-center {
           overflow-y: hidden !important;
         }
 
@@ -258,7 +255,7 @@
     <link rel="stylesheet" href="/css/bymy-logo-size.css?v=f14985a2ca" />
       <link rel="stylesheet" href="/css/site-desk-header.css?v=09d6bf801f" />
 </head>
-  <body class="home-page site-page site-app auto-desk-gyors auto-force-mobile" data-site-page="teherauto">
+  <body class="home-page site-page site-app auto-desk-gyors" data-site-page="teherauto">
     <script>
       try {
         if (new URLSearchParams(window.location.search).get("hirdeto")) {
@@ -266,10 +263,12 @@
         }
         var kat = new URLSearchParams(window.location.search).get("kategoria") || "35-alatt";
         document.body.setAttribute("data-truck-kategoria", kat);
-        document.body.classList.remove("auto-desk-active");
-        fetch("/api/level1/form-layout?category=teherauto-search", { credentials: "same-origin" }).catch(function () {});
-        // Mindig kisteher — 35-felett se melegítsen személyautó katalógust.
-        fetch("/api/vehicle-catalog?kind=kisteher", { credentials: "same-origin" }).catch(function () {});
+        if (window.matchMedia("(min-width: 901px)").matches) {
+          document.body.classList.add("auto-desk-active");
+          fetch("/api/level1/form-layout?category=teherauto-search", { credentials: "same-origin" }).catch(function () {});
+          // Mindig kisteher — 35-felett se melegítsen személyautó katalógust.
+          fetch("/api/vehicle-catalog?kind=kisteher", { credentials: "same-origin" }).catch(function () {});
+        }
       } catch (e) {}
     </script>
     <script src="/js/mw-app-shell.js?v=fead9b4cb5"></script>
@@ -516,7 +515,7 @@
         form.classList.add("is-qs-ready");
       }, 5500);
     </script>
-    <script src="/js/home-app.js?v=forceMob5" type="module"></script>
+    <script src="/js/home-app.js?v=siQrAddr1" type="module"></script>
     <script src="/js/auto-hero.js?v=04bb0cefdd" type="module"></script>
     <script src="/js/site-avatar-menu.js?v=4c911388e7" type="module"></script>
 

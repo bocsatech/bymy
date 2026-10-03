@@ -6,7 +6,7 @@ import {
   syncDrumWheelDisplay,
   closeAllInlineDrums,
 } from "./immo-drum-picker.js?v=c4c7ac29a2";
-import { bindAutoDrumSheet, openAutoDrumSheet } from "./auto-drum-sheet.js?v=forceMob4";
+import { bindAutoDrumSheet, openAutoDrumSheet } from "./auto-drum-sheet.js?v=compactSingle1";
 import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=kmFill1";
 
 const MOBILE_MQ = "(max-width: 900px)";
@@ -182,9 +182,7 @@ const SEARCH_OMIT_FIELDS = new Set([
 ]);
 
 function isMobile() {
-  if (typeof window === "undefined") return false;
-  if (document.body?.classList?.contains("auto-force-mobile")) return true;
-  return window.matchMedia(MOBILE_MQ).matches;
+  return typeof window !== "undefined" && window.matchMedia(MOBILE_MQ).matches;
 }
 
 function escapeHtml(value) {

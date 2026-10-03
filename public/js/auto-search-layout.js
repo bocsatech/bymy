@@ -1,10 +1,16 @@
-/**
- * Autó / teherautó kereső — mentett admin-elrendezés
- * (szemelyauto-search | teherauto-search).
- */
 
-import { initVehicleCatalogSelects, fillSelect } from "./vehicle-catalog-client.js";
-import { KIVITEL_OPTIONS } from "./kivitel-options.js?v=kivitel1";
+import { initVehicleCatalogSelects, fillSelect } from "./vehicle-catalog-client.js?v=5004d33efa";
+import { KIVITEL_OPTIONS } from "./kivitel-options.js?v=be03aefc2e";
+import { wirePostalCityAutofill as wireSharedPostalCityAutofill } from "./postal-city-autofill.js?v=14f1f30116";
+import {
+  flattenAllapotOptions,
+  flattenSebessegvaltoOptions,
+  flattenUzemanyagOptions,
+  OKMANY_JELLEG_OPTIONS,
+  AC_TOLTO_CSATLAKOZAS_OPTIONS,
+  TEHER_KISTEHER_KIVITEL,
+  flattenTeher35KivitelOptions,
+} from "./equipment-data.js?v=5a39cb5ba3";
 
 function searchLayoutCategory() {
   return document.body?.getAttribute("data-site-page") === "teherauto"
@@ -12,35 +18,98 @@ function searchLayoutCategory() {
     : "szemelyauto-search";
 }
 
+function teherKategoria() {
+  return new URLSearchParams(window.location.search).get("kategoria") || "35-alatt";
+}
+
+function teherKivitelOptions() {
+  return teherKategoria() === "35-alatt"
+    ? flattenTeher35KivitelOptions()
+    : TEHER_KISTEHER_KIVITEL;
+}
+
 function layoutUrl() {
   return `/api/level1/form-layout?category=${encodeURIComponent(searchLayoutCategory())}`;
 }
 
 const FIRST_YEAR = 1950;
-const LAST_YEAR = 2035;
 const PRICE_STEP = 500_000;
 const PRICE_MAX = 50_000_000;
 const KM_STEP = 10_000;
-const KM_MAX = 500_000;
+const KM_MAX = 400_000;
+/** Km dobkerék: 400e után csak ez — tól: ≥400 001, ig: nincs felső határ. */
+const KM_OVER_VALUE = "400001";
+const KM_OVER_LABEL = "400e felett";
 const LE_STEPS = [50, 75, 100, 125, 150, 175, 200, 225, 250, 300, 350, 400, 500, 600, 800];
 const CCM_STEPS = [600, 800, 1000, 1200, 1400, 1600, 1800, 2000, 2200, 2500, 3000, 3500, 4000, 5000, 6000];
+const KG_STEPS = (() => {
+  const values = [];
+  for (let kg = 500; kg <= 3500; kg += 100) values.push(kg);
+  for (let kg = 4000; kg <= 10000; kg += 500) values.push(kg);
+  for (const kg of [12000, 15000, 18000, 20000, 25000, 30000, 35000, 40000]) values.push(kg);
+  return values;
+})();
+const AC_KW_STEPS = (() => {
+  const values = [];
+  for (let kw = 10; kw <= 400; kw += 10) values.push(kw);
+  return values;
+})();
+const AKKU_KWH_STEPS = (() => {
+  const values = [];
+  for (let kwh = 10; kwh <= 300; kwh += 10) values.push(kwh);
+  for (let kwh = 350; kwh <= 1000; kwh += 50) values.push(kwh);
+  return values;
+})();
+const AKKU_PCT_STEPS = (() => {
+  const values = [];
+  for (let pct = 1; pct <= 100; pct += 1) values.push(pct);
+  return values;
+})();
+const DC_KW_STEPS = (() => {
+  const values = [];
+  for (let kw = 10; kw <= 300; kw += 10) values.push(kw);
+  for (let kw = 350; kw <= 1000; kw += 50) values.push(kw);
+  return values;
+})();
+/** 10…300 /10, majd 350…1000 /50 — DC kW, WLTP km, stb. */
+const STEPS_10_300_50_1000 = DC_KW_STEPS;
 
-/** Keresőben soha ne jelenjen meg (feladás-specifikus / felesleges). */
-const SEARCH_OMIT_FIELDS = new Set([
-  "gyartasi_honap",
-  "forgalomba_helyezes_honap",
-  "muszaki_honap",
-  // Egyéb típus csak a feladáson használható.
-  "egyeb_tipus",
-  "egyeb_modell",
-  // Helyszín: irányítószám → település; megye nem kell a keresőben.
-  "megye",
+const FREE_NUMBER_FIELDS = new Set([
+  "fogyasztas_varosi",
+  "fogyasztas_orszaguti",
+  "fogyasztas_kombinalt",
+  "co2_kibocsatas",
 ]);
 
-/** Új keresőmezők: élő layoutban is jelenjenek meg (ne maradjanak rejtve). */
-const SEARCH_FORCE_VISIBLE = new Set(["keresesi_korzet"]);
+const SEARCH_OMIT_FIELDS = new Set([
+  "gyartasi_honap",
+  "forgalomba_helyezes_ev",
+  "forgalomba_helyezes_honap",
+  "muszaki_honap",
+  "keresesi_korzet",
+  // Feladás-only kép overlay — nem vevőszűrő
+  "photo_overlay_template_id",
+  "photo_overlay_base_url",
+]);
 
-/** Admin mező → kereső filter kulcs / widget. */
+/** Autó-only mezők — teher keresőben soha. */
+const TEHER_SEARCH_AUTO_ONLY = new Set([
+  "tipus",
+  "egyeb_tipus",
+  "egyeb_modell",
+  "csomagtarto",
+  "tetto",
+  "karpit1",
+  "karpit2",
+]);
+
+const FREE_NUMBER_SUFFIX = {
+  fogyasztas_varosi: "l/100 km",
+  fogyasztas_orszaguti: "l/100 km",
+  fogyasztas_kombinalt: "l/100 km",
+  co2_kibocsatas: "g/km",
+};
+
 const RANGE_SPECS = {
   gyartasi_ev: { tol: "ev_tol", ig: "ev_ig", kind: "year" },
   vetelar: { tol: "ar_tol", ig: "ar_ig", kind: "price" },
@@ -59,39 +128,40 @@ const RANGE_SPECS = {
   teli_hatotav: { tol: "teli_hatotav_tol", ig: "teli_hatotav_ig", kind: "number" },
 };
 
-const TEHER_KIVITEL = ["Kisteher", "Dobozos", "Platós", "Ponyvás", "Hűtős", "Billenős", "Alváz"];
-
-/** Keresési körzet: 10 km-es lépés, 200 km-ig. */
 export const KERESESI_KORZET_OPTIONS = Array.from({ length: 20 }, (_, i) => {
   const km = (i + 1) * 10;
   return { value: String(km), label: `${km} km` };
 });
 
 const SELECT_OPTIONS = {
-  allapot: ["Normál", "Újszerű", "Sérülésmentes", "Sérült"],
+  allapot: flattenAllapotOptions(),
   kivitel: [...KIVITEL_OPTIONS],
   keresesi_korzet: KERESESI_KORZET_OPTIONS,
   ajtok: ["2", "3", "4", "5"],
   szemelyek: ["1", "2", "3", "4", "5", "6", "7", "8", "9"],
-  sebessegvalto: ["Manuális", "Automata"],
+  sebessegvalto: flattenSebessegvaltoOptions(),
   hajtas: ["Első kerék", "Hátsó kerék", "Összkerék"],
   uzemanyag: [
-    { value: "benzin", label: "Benzin" },
-    { value: "diesel", label: "Dízel" },
-    { value: "hybrid", label: "Hibrid" },
-    { value: "benzin-gaz", label: "Benzin/Gáz" },
-    { value: "elektromos", label: "Elektromos" },
+    { value: "Benzin", label: "Benzin" },
+    { value: "Dízel", label: "Dízel" },
+    { value: "Benzin/Gáz", label: "Benzin/Gáz" },
+    { value: "Dízel/Gáz", label: "Dízel/Gáz" },
+    { value: "Hibrid", label: "Hibrid" },
+    { value: "Elektromos", label: "Elektromos" },
+    { value: "Etanol", label: "Etanol" },
+    { value: "Biodízel", label: "Biodízel" },
+    { value: "Gáz", label: "Gáz" },
   ],
   klima: ["Nincs", "Manuális", "Digitális", "Digitális, 2 zónás", "Digitális, 3 zónás", "Digitális, 4 zónás"],
   szin: ["Fehér", "Fekete", "Szürke", "Ezüst", "Kék", "Piros", "Zöld", "Barna", "Sárga", "Narancs", "Bézs"],
   teto: ["Normál", "Nyitható", "Panoráma", "Hardtop"],
   csomagtarto: ["Normál", "Nagy"],
-  tolto_csatlakozas: ["Type 2", "CCS", "CHAdeMO"],
-  ac_tolto_csatlakozas: ["Type 2", "CCS", "CHAdeMO", "Egyéb"],
-  dc_tolto_csatlakozas: ["CCS", "CHAdeMO", "Type 2", "Egyéb"],
+  tolto_csatlakozas: [...AC_TOLTO_CSATLAKOZAS_OPTIONS],
+  ac_tolto_csatlakozas: [...AC_TOLTO_CSATLAKOZAS_OPTIONS],
+  dc_tolto_csatlakozas: ["CCS", "CHAdeMO", "Egyéb"],
   villamtoltes: ["Igen", "Nem"],
   zold_rendszam: ["Igen", "Nem"],
-  okmany_jelleg: ["Érvényes magyar okmányokkal", "Érvényes külföldi okmányokkal"],
+  okmany_jelleg: [...OKMANY_JELLEG_OPTIONS],
   tulajdonosok_szama: ["1", "2", "3", "4+"],
   nem_dohanyzo: ["Igen", "Nem"],
   holgy_tulajdonos: ["Igen", "Nem"],
@@ -123,12 +193,11 @@ const SELECT_OPTIONS = {
 
 function selectOptionsFor(key) {
   if (key === "kivitel" && searchLayoutCategory() === "teherauto-search") {
-    return TEHER_KIVITEL;
+    return teherKivitelOptions();
   }
   return SELECT_OPTIONS[key];
 }
 
-/** Rövid megjelenő címke a keresőben (a hosszú admin-címke helyett). */
 const SEARCH_LABEL_SHORT = {
   szemelyek: "Személyek",
   megye: "Megye",
@@ -139,7 +208,6 @@ const SEARCH_LABEL_SHORT = {
 
 const NARROW_FIELD_KEYS = new Set(["szemelyek", "megye", "ajtok", "telepules", "iranyitoszam", "keresesi_korzet"]);
 
-/** Szabad szöveges keresőmezők — ne legyenek dobkerék. */
 const TEXT_FIELD_KEYS = new Set(["telepules", "iranyitoszam"]);
 
 const LAYOUT_COLS = 12;
@@ -169,20 +237,134 @@ function wrapGridCell(cell, innerHtml, rowOverride = null) {
 }
 let cachedLayout = null;
 let cachedLayoutCategory = "";
+let layoutNetworkPromise = null;
+
+function layoutSessionKey(category) {
+  return `bymy-search-layout:v2:${category}`;
+}
+
+function layoutHasCells(layout) {
+  return Array.isArray(layout?.cells) && layout.cells.length > 0;
+}
+
+function readLayoutSession(category) {
+  try {
+    const raw = sessionStorage.getItem(layoutSessionKey(category));
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed?.layout || typeof parsed.layout !== "object") return null;
+    if (!layoutHasCells(parsed.layout)) {
+      sessionStorage.removeItem(layoutSessionKey(category));
+      return null;
+    }
+    return parsed.layout;
+  } catch {
+    return null;
+  }
+}
+
+function writeLayoutSession(category, layout) {
+  if (!layoutHasCells(layout)) return;
+  try {
+    sessionStorage.setItem(
+      layoutSessionKey(category),
+      JSON.stringify({ savedAt: Date.now(), layout })
+    );
+  } catch {
+    /* quota / private mode */
+  }
+}
+
+async function refreshLayoutFromNetwork(category) {
+  if (layoutNetworkPromise && cachedLayoutCategory === category) return layoutNetworkPromise;
+  layoutNetworkPromise = (async () => {
+    try {
+      const res = await fetch(layoutUrl(), { credentials: "same-origin" });
+      const data = await res.json().catch(() => ({}));
+      const next = data.layout && typeof data.layout === "object" ? data.layout : null;
+      if (!res.ok || !layoutHasCells(next)) {
+        // Keep a previous good cache; never poison session with empty/error payloads.
+        if (cachedLayout && cachedLayoutCategory === category && layoutHasCells(cachedLayout)) {
+          return cachedLayout;
+        }
+        const fromSession = readLayoutSession(category);
+        if (fromSession) {
+          cachedLayout = fromSession;
+          cachedLayoutCategory = category;
+          return fromSession;
+        }
+        cachedLayout = { version: 2, category, cells: [] };
+        cachedLayoutCategory = category;
+        return cachedLayout;
+      }
+      cachedLayout = next;
+      cachedLayoutCategory = category;
+      writeLayoutSession(category, cachedLayout);
+      return cachedLayout;
+    } catch (error) {
+      console.warn("Kereső layout hálózat:", error);
+      const fallback =
+        cachedLayout && cachedLayoutCategory === category && layoutHasCells(cachedLayout)
+          ? cachedLayout
+          : readLayoutSession(category) || { version: 2, category, cells: [] };
+      cachedLayout = fallback;
+      cachedLayoutCategory = category;
+      return fallback;
+    }
+  })().finally(() => {
+    layoutNetworkPromise = null;
+  });
+  return layoutNetworkPromise;
+}
 
 export async function fetchAutoSearchLayout({ force = false } = {}) {
   const category = searchLayoutCategory();
-  if (cachedLayout && !force && cachedLayoutCategory === category) return cachedLayout;
-  const res = await fetch(layoutUrl(), { credentials: "same-origin", cache: "no-store" });
-  const data = await res.json().catch(() => ({}));
-  cachedLayout = data.layout || { version: 2, category, cells: [] };
-  cachedLayoutCategory = category;
-  return cachedLayout;
+  if (cachedLayout && !force && cachedLayoutCategory === category && layoutHasCells(cachedLayout)) {
+    return cachedLayout;
+  }
+
+  if (!force) {
+    const fromSession = readLayoutSession(category);
+    if (fromSession) {
+      cachedLayout = fromSession;
+      cachedLayoutCategory = category;
+      void refreshLayoutFromNetwork(category).catch(() => {});
+      return cachedLayout;
+    }
+  }
+
+  return refreshLayoutFromNetwork(category);
+}
+
+/** Warm layout + catalog while the page shell paints (desk auto/teher). */
+export function prefetchAutoSearchBoot() {
+  if (typeof window === "undefined") return;
+  const page = document.body?.getAttribute("data-site-page");
+  if (page !== "auto" && page !== "teherauto") return;
+  // Drop legacy empty v1 session caches that blanked the mobile search.
+  try {
+    for (const key of Object.keys(sessionStorage)) {
+      if (!key.startsWith("bymy-search-layout:")) continue;
+      const raw = sessionStorage.getItem(key);
+      const parsed = raw ? JSON.parse(raw) : null;
+      if (!Array.isArray(parsed?.layout?.cells) || !parsed.layout.cells.length) {
+        sessionStorage.removeItem(key);
+      }
+    }
+  } catch {
+    /* private mode */
+  }
+  void fetchAutoSearchLayout({ force: false }).catch(() => {});
+  const kind = page === "teherauto" ? "kisteher" : "szemelyauto";
+  void import("./vehicle-catalog-client.js?v=5004d33efa")
+    .then((m) => m.fetchVehicleCatalog?.({ kind }))
+    .catch(() => {});
 }
 
 function yearOptions() {
+  const lastYear = new Date().getFullYear();
   const years = [];
-  for (let year = LAST_YEAR; year >= FIRST_YEAR; year -= 1) years.push(String(year));
+  for (let year = lastYear; year >= FIRST_YEAR; year -= 1) years.push(String(year));
   return years;
 }
 
@@ -198,8 +380,30 @@ function kmOptions() {
   return values;
 }
 
+function kmFilterOptions(emptyLabel = "Mindegy") {
+  return [
+    { value: "", label: emptyLabel },
+    ...kmOptions().map((n) => ({
+      value: String(n),
+      label: `${n.toLocaleString("hu-HU")} km`,
+    })),
+    { value: KM_OVER_VALUE, label: KM_OVER_LABEL },
+  ];
+}
+
+function fillKmSelect(select, emptyLabel) {
+  if (!select || select.tagName !== "SELECT") return;
+  select.innerHTML = "";
+  for (const opt of kmFilterOptions(emptyLabel)) {
+    const el = document.createElement("option");
+    el.value = opt.value;
+    el.textContent = opt.label;
+    select.appendChild(el);
+  }
+}
+
 function fillNumberSelect(select, values, emptyLabel, format = (n) => n.toLocaleString("hu-HU")) {
-  if (!select) return;
+  if (!select || select.tagName !== "SELECT") return;
   select.innerHTML = `<option value="">${emptyLabel}</option>`;
   for (const value of values) {
     const opt = document.createElement("option");
@@ -210,7 +414,7 @@ function fillNumberSelect(select, values, emptyLabel, format = (n) => n.toLocale
 }
 
 function fillOptionsSelect(select, options) {
-  if (!select) return;
+  if (!select || select.tagName !== "SELECT") return;
   select.innerHTML = `<option value="">Mindegy</option>`;
   for (const opt of options) {
     const el = document.createElement("option");
@@ -228,7 +432,9 @@ function fillOptionsSelect(select, options) {
 function isSearchCellVisible(cell) {
   if (!cell) return false;
   if (SEARCH_OMIT_FIELDS.has(cell.field_key)) return false;
-  if (SEARCH_FORCE_VISIBLE.has(cell.field_key)) return true;
+  if (searchLayoutCategory() === "teherauto-search" && TEHER_SEARCH_AUTO_ONLY.has(cell.field_key)) {
+    return false;
+  }
   if (cell.hidden) return false;
   return true;
 }
@@ -239,7 +445,10 @@ function cellsForStep(layout, step) {
     .sort((a, b) => (a.row - b.row) || (a.col - b.col));
 }
 
-/** Dobkerék / select közös opciólista egy filter kulcshoz. */
+export function quickSearchFieldKeysFromLayout(layout) {
+  return cellsForStep(layout, 1).map((c) => c.field_key).filter(Boolean);
+}
+
 export function optionsForAutoFilterKey(filterKey, emptyLabel = "Mindegy") {
   const key = String(filterKey || "");
   const withEmpty = (list) => [{ value: "", label: emptyLabel }, ...list];
@@ -253,9 +462,7 @@ export function optionsForAutoFilterKey(filterKey, emptyLabel = "Mindegy") {
     );
   }
   if (key === "km_tol" || key === "km_ig") {
-    return withEmpty(
-      kmOptions().map((n) => ({ value: String(n), label: `${n.toLocaleString("hu-HU")} km` }))
-    );
+    return kmFilterOptions(emptyLabel);
   }
   if (key === "le_tol" || key === "le_ig") {
     return withEmpty(LE_STEPS.map((n) => ({ value: String(n), label: `${n} LE` })));
@@ -263,12 +470,34 @@ export function optionsForAutoFilterKey(filterKey, emptyLabel = "Mindegy") {
   if (key === "ccm_tol" || key === "ccm_ig") {
     return withEmpty(CCM_STEPS.map((n) => ({ value: String(n), label: `${n.toLocaleString("hu-HU")} cm³` })));
   }
+  if (
+    key === "sajat_tomeg_tol" ||
+    key === "sajat_tomeg_ig" ||
+    key === "ossztomeg_tol" ||
+    key === "ossztomeg_ig"
+  ) {
+    return withEmpty(KG_STEPS.map((n) => ({ value: String(n), label: `${n.toLocaleString("hu-HU")} kg` })));
+  }
+  if (key === "ac_toltesi_teljesitmeny_tol" || key === "ac_toltesi_teljesitmeny_ig") {
+    return withEmpty(AC_KW_STEPS.map((n) => ({ value: String(n), label: `${n} kW` })));
+  }
+  if (key === "akkumulator_kwh_tol" || key === "akkumulator_kwh_ig") {
+    return withEmpty(AKKU_KWH_STEPS.map((n) => ({ value: String(n), label: `${n} kWh` })));
+  }
+  if (key === "jelenlegi_akkukapacitas_tol" || key === "jelenlegi_akkukapacitas_ig") {
+    return withEmpty(AKKU_PCT_STEPS.map((n) => ({ value: String(n), label: `${n} %` })));
+  }
+  if (key === "dc_toltesi_teljesitmeny_tol" || key === "dc_toltesi_teljesitmeny_ig") {
+    return withEmpty(DC_KW_STEPS.map((n) => ({ value: String(n), label: `${n} kW` })));
+  }
+  if (key === "hatotav_tol" || key === "hatotav_ig") {
+    return withEmpty(STEPS_10_300_50_1000.map((n) => ({ value: String(n), label: `${n} km` })));
+  }
+  if (key === "autopalya_hatotav_tol" || key === "autopalya_hatotav_ig") {
+    return withEmpty(STEPS_10_300_50_1000.map((n) => ({ value: String(n), label: `${n} km` })));
+  }
   if (key === "uzemanyagQuick" || key === "uzemanyag") {
-    return withEmpty(
-      SELECT_OPTIONS.uzemanyag.map((opt) =>
-        typeof opt === "string" ? { value: opt, label: opt } : { value: opt.value, label: opt.label }
-      )
-    );
+    return withEmpty(flattenUzemanyagOptions().map((v) => ({ value: v, label: v })));
   }
   const selectOpts = selectOptionsFor(key);
   if (selectOpts) {
@@ -292,16 +521,48 @@ function groupByRow(cells) {
 }
 
 function fieldWidthClass(_cell) {
-  /* Szélességet a 12 oszlopos grid (colSpan) adja — ne flex wide/narrow. */
   return "";
 }
 
 function rangeHtml(cell, spec) {
-  const label = cell.label || cell.field_key;
-  const suffix =
-    spec.kind === "price" ? '<span class="home-qs-suffix" aria-hidden="true">Ft</span>' :
-    spec.kind === "le" ? '<span class="home-qs-suffix" aria-hidden="true">LE</span>' :
-    spec.kind === "km" ? "" : "";
+  const label = SEARCH_LABEL_SHORT[cell.field_key] || cell.label || cell.field_key;
+  const freeNumber = spec.kind === "number";
+  const NUMBER_SUFFIX = {
+    sajat_tomeg: "kg",
+    ossztomeg: "kg",
+    nyomatek_nm: "Nm",
+    hatotav: "km",
+    autopalya_hatotav: "km",
+    teli_hatotav: "km",
+    akkumulator_kwh: "kWh",
+    jelenlegi_akkukapacitas: "%",
+    ac_toltesi_teljesitmeny: "kW",
+    dc_toltesi_teljesitmeny: "kW",
+  };
+  const unit =
+    NUMBER_SUFFIX[cell.field_key] ||
+    (spec.kind === "price" ? "Ft" : spec.kind === "le" ? "LE" : "");
+  const suffix = unit ? `<span class="home-qs-suffix" aria-hidden="true">${unit}</span>` : "";
+
+  if (freeNumber || spec.kind === "price") {
+    const isPrice = spec.kind === "price";
+    const inputType = isPrice ? "text" : "number";
+    const inputMode = isPrice ? "numeric" : "numeric";
+    const step = isPrice ? "" : ' step="1"';
+    const extraClass = isPrice ? " home-qs-control--price" : " home-qs-control--number";
+    return `<div class="home-qs-pair${isPrice ? " home-qs-pair--price" : " home-qs-pair--number"}" data-qs-field="${cell.field_key}">
+    <label class="home-qs-field">
+      <span class="home-qs-label">${label}</span>
+      <input class="home-qs-control${extraClass}" type="${inputType}" inputmode="${inputMode}" min="0"${step} placeholder="-tól" data-filter-key="${spec.tol}" aria-label="${label} -tól" autocomplete="off" data-lpignore="true" data-1p-ignore="true" data-form-type="other" />
+      ${suffix}
+    </label>
+    <label class="home-qs-field">
+      <input class="home-qs-control${extraClass}" type="${inputType}" inputmode="${inputMode}" min="0"${step} placeholder="-ig" data-filter-key="${spec.ig}" aria-label="${label} -ig" autocomplete="off" data-lpignore="true" data-1p-ignore="true" data-form-type="other" />
+      ${suffix}
+    </label>
+  </div>`;
+  }
+
   return `<div class="home-qs-pair" data-qs-field="${cell.field_key}">
     <label class="home-qs-field">
       <span class="home-qs-label">${label}</span>
@@ -333,6 +594,7 @@ function fieldHtml(cell) {
     </label>`;
   }
   if (key === "tipus") {
+    if (searchLayoutCategory() === "teherauto-search") return "";
     return `<label class="home-qs-field" data-qs-field="${key}">
       <span class="home-qs-label">Típus</span>
       <select class="home-qs-control" id="qs-tipus" data-filter-key="tipus"></select>
@@ -350,7 +612,15 @@ function fieldHtml(cell) {
       <select class="home-qs-control" data-filter-key="${key}"></select>
     </label>`;
   }
-  /* Település / irányítószám: szövegmező (ingatlan immo-field kinézet), nem dobkerék */
+  if (FREE_NUMBER_FIELDS.has(key)) {
+    const unit = FREE_NUMBER_SUFFIX[key] || "";
+    const suffix = unit ? `<span class="home-qs-suffix" aria-hidden="true">${unit}</span>` : "";
+    return `<label class="home-qs-field home-qs-field--number" data-qs-field="${key}">
+      <span class="home-qs-label">${label}</span>
+      <input class="home-qs-control home-qs-control--number" type="number" inputmode="decimal" min="0" step="0.1" placeholder="" data-filter-key="${key}" aria-label="${label}" />
+      ${suffix}
+    </label>`;
+  }
   const attrs =
     key === "iranyitoszam"
       ? 'inputmode="numeric" maxlength="4" autocomplete="postal-code"'
@@ -386,30 +656,228 @@ function renderStep(host, layout, step) {
   renderGrid(host, cellsForStep(layout, step));
 }
 
+function formatPriceInputValue(raw) {
+  const digits = String(raw ?? "").replace(/\D/g, "");
+  if (!digits) return "";
+  const n = Number(digits);
+  if (!Number.isFinite(n) || n <= 0) return "";
+  return n.toLocaleString("hu-HU");
+}
+
+function upgradePriceSelectToInput(select, emptyLabel) {
+  if (!select || select.tagName !== "SELECT") return select;
+  const key = select.getAttribute("data-filter-key") || "";
+  const prev = String(select.value || "").trim();
+  const input = document.createElement("input");
+  input.type = "text";
+  input.inputMode = "numeric";
+  input.autocomplete = "off";
+  input.setAttribute("data-lpignore", "true");
+  input.setAttribute("data-1p-ignore", "true");
+  input.setAttribute("data-form-type", "other");
+  input.className = `${select.className} home-qs-control--price`.trim();
+  input.placeholder = emptyLabel || "";
+  if (select.id) input.id = select.id;
+  const aria = select.getAttribute("aria-label");
+  if (aria) input.setAttribute("aria-label", aria);
+  if (key) input.setAttribute("data-filter-key", key);
+  if (prev) input.value = formatPriceInputValue(prev);
+  select.replaceWith(input);
+  return input;
+}
+
+function closeAutoPriceSuggest() {
+  document.querySelectorAll(".auto-price-suggest").forEach((el) => el.remove());
+  document.querySelectorAll(".home-qs-control--price.is-suggest-open").forEach((el) => {
+    el.classList.remove("is-suggest-open");
+  });
+}
+
+function positionAutoPriceSuggest(menu, input) {
+  const rect = input.getBoundingClientRect();
+  const width = Math.max(140, Math.round(rect.width));
+  const left = Math.max(8, Math.min(Math.round(rect.left), window.innerWidth - width - 8));
+  const top = Math.min(Math.round(rect.bottom + 6), window.innerHeight - 16);
+  menu.style.left = `${left}px`;
+  menu.style.top = `${top}px`;
+  menu.style.width = `${width}px`;
+}
+
+function openAutoPriceSuggest(input) {
+  if (!input || input.tagName !== "INPUT") return;
+  closeAutoPriceSuggest();
+  const typed = String(input.value || "").replace(/\D/g, "");
+  const options = priceOptions()
+    .map((n) => ({
+      value: String(n),
+      label: `${n.toLocaleString("hu-HU")} Ft`,
+    }))
+    .filter((opt) => !typed || opt.value.startsWith(typed) || opt.label.replace(/\s/g, "").includes(typed));
+
+  const menu = document.createElement("div");
+  menu.className = "auto-price-suggest";
+  menu.setAttribute("role", "listbox");
+  menu.innerHTML = options
+    .slice(0, 40)
+    .map(
+      (opt) =>
+        `<button type="button" class="auto-price-suggest__opt" role="option" data-value="${opt.value}">${opt.label}</button>`
+    )
+    .join("");
+  if (!menu.children.length) {
+    menu.innerHTML = `<p class="auto-price-suggest__empty">Írd be az árat Ft-ban</p>`;
+  }
+  document.body.appendChild(menu);
+  input.classList.add("is-suggest-open");
+  positionAutoPriceSuggest(menu, input);
+
+  menu.addEventListener("mousedown", (event) => {
+    const btn = event.target.closest(".auto-price-suggest__opt");
+    if (!btn) return;
+    event.preventDefault();
+    input.value = formatPriceInputValue(btn.getAttribute("data-value") || "");
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+    closeAutoPriceSuggest();
+    input.blur();
+  });
+}
+
+function bindAutoPriceSuggest(input) {
+  if (!input || input.dataset.priceSuggestBound === "1") return;
+  input.dataset.priceSuggestBound = "1";
+  input.removeAttribute("list");
+  input.autocomplete = "off";
+  input.setAttribute("data-lpignore", "true");
+  input.setAttribute("data-1p-ignore", "true");
+  input.setAttribute("data-form-type", "other");
+  input.setAttribute("autoCorrect", "off");
+  input.setAttribute("spellcheck", "false");
+  // Chrome contact-autofill icon: unlock only on focus.
+  if (!input.readOnly) {
+    input.readOnly = true;
+    input.addEventListener(
+      "focus",
+      () => {
+        input.readOnly = false;
+      },
+      { once: true }
+    );
+  }
+
+  input.addEventListener("focus", () => openAutoPriceSuggest(input));
+  input.addEventListener("input", () => {
+    if (document.activeElement === input) openAutoPriceSuggest(input);
+  });
+  input.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") closeAutoPriceSuggest();
+  });
+  input.addEventListener("blur", () => {
+    window.setTimeout(() => {
+      if (document.activeElement === input) return;
+      closeAutoPriceSuggest();
+    }, 120);
+  });
+}
+
+if (typeof window !== "undefined" && !window.__bymyPriceSuggestBound) {
+  window.__bymyPriceSuggestBound = 1;
+  document.addEventListener(
+    "scroll",
+    () => {
+      const open = document.querySelector(".home-qs-control--price.is-suggest-open");
+      const menu = document.querySelector(".auto-price-suggest");
+      if (open && menu) positionAutoPriceSuggest(menu, open);
+      else closeAutoPriceSuggest();
+    },
+    true
+  );
+  window.addEventListener("resize", () => closeAutoPriceSuggest());
+  document.addEventListener("mousedown", (event) => {
+    if (event.target.closest?.(".auto-price-suggest")) return;
+    if (event.target.closest?.(".home-qs-control--price")) return;
+    closeAutoPriceSuggest();
+  });
+}
+
+function bindPriceInput(input) {
+  if (!input || input.dataset.priceBound === "1") return;
+  input.dataset.priceBound = "1";
+  bindAutoPriceSuggest(input);
+  input.addEventListener("blur", () => {
+    input.value = formatPriceInputValue(input.value);
+  });
+  input.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      input.value = formatPriceInputValue(input.value);
+    }
+  });
+}
+
+function wirePriceInputs(root) {
+  if (!root) return;
+  root.querySelectorAll('[data-filter-key="ar_tol"]').forEach((el) => {
+    const input = el.tagName === "SELECT" ? upgradePriceSelectToInput(el, "-tól") : el;
+    if (input?.tagName === "INPUT") bindPriceInput(input);
+  });
+  root.querySelectorAll('[data-filter-key="ar_ig"]').forEach((el) => {
+    const input = el.tagName === "SELECT" ? upgradePriceSelectToInput(el, "-ig") : el;
+    if (input?.tagName === "INPUT") bindPriceInput(input);
+  });
+  // Drop leftover native datalists — they look wrong and fight our custom menu.
+  root.querySelectorAll('datalist[id^="qs-datalist-ar_"]').forEach((el) => el.remove());
+}
+
 function wireRangeSelects(root) {
+  if (!root) return;
+  const years = yearOptions();
+  root.querySelectorAll('[data-filter-key="ev_tol"]').forEach((el) => fillSelectYears(el, years, "-tól"));
+  root.querySelectorAll('[data-filter-key="ev_ig"]').forEach((el) => fillSelectYears(el, years, "-ig"));
+
+  wirePriceInputs(root);
+
+  root.querySelectorAll('[data-filter-key="km_tol"]').forEach((el) => fillKmSelect(el, "-tól"));
+  root.querySelectorAll('[data-filter-key="km_ig"]').forEach((el) => fillKmSelect(el, "-ig"));
+
+  root.querySelectorAll('[data-filter-key="le_tol"]').forEach((el) =>
+    fillNumberSelect(el, LE_STEPS, "-tól", (n) => `${n} LE`)
+  );
+  root.querySelectorAll('[data-filter-key="le_ig"]').forEach((el) =>
+    fillNumberSelect(el, LE_STEPS, "-ig", (n) => `${n} LE`)
+  );
+
+  root.querySelectorAll('[data-filter-key="ccm_tol"]').forEach((el) =>
+    fillNumberSelect(el, CCM_STEPS, "-tól", (n) => `${n.toLocaleString("hu-HU")} cm³`)
+  );
+  root.querySelectorAll('[data-filter-key="ccm_ig"]').forEach((el) =>
+    fillNumberSelect(el, CCM_STEPS, "-ig", (n) => `${n.toLocaleString("hu-HU")} cm³`)
+  );
+
+  // Szabad szám / layout párok (data-qs-field) — régi út is megmarad.
   for (const [fieldKey, spec] of Object.entries(RANGE_SPECS)) {
+    if (spec.kind !== "number") continue;
     const wrap = root.querySelector(`[data-qs-field="${fieldKey}"]`);
     if (!wrap) continue;
-    const tol = wrap.querySelector(`[data-filter-key="${spec.tol}"]`);
-    const ig = wrap.querySelector(`[data-filter-key="${spec.ig}"]`);
-    if (spec.kind === "year") {
-      const years = yearOptions();
-      fillSelect(tol, years, "-tól");
-      fillSelect(ig, years, "-ig");
-    } else if (spec.kind === "price") {
-      fillNumberSelect(tol, priceOptions(), "-tól");
-      fillNumberSelect(ig, priceOptions(), "-ig");
-    } else if (spec.kind === "km") {
-      fillNumberSelect(tol, kmOptions(), "-tól", (n) => `${n.toLocaleString("hu-HU")} km`);
-      fillNumberSelect(ig, kmOptions(), "-ig", (n) => `${n.toLocaleString("hu-HU")} km`);
-    } else if (spec.kind === "le") {
-      fillNumberSelect(tol, LE_STEPS, "-tól", (n) => `${n} LE`);
-      fillNumberSelect(ig, LE_STEPS, "-ig", (n) => `${n} LE`);
-    } else if (spec.kind === "ccm") {
-      fillNumberSelect(tol, CCM_STEPS, "-tól", (n) => `${n.toLocaleString("hu-HU")} cm³`);
-      fillNumberSelect(ig, CCM_STEPS, "-ig", (n) => `${n.toLocaleString("hu-HU")} cm³`);
-    }
+    // number inputs: nincs option-lista
   }
+}
+
+function fillSelectYears(select, years, emptyLabel) {
+  if (!select || select.tagName !== "SELECT") return;
+  const prev = String(select.value || "");
+  select.innerHTML = `<option value="">${emptyLabel}</option>`;
+  for (const year of years) {
+    const opt = document.createElement("option");
+    opt.value = year;
+    opt.textContent = year;
+    select.appendChild(opt);
+  }
+  if (prev && [...select.options].some((o) => o.value === prev)) select.value = prev;
+}
+
+/** Desk átrendezés után is újra kell tölteni (legacy selectek üresen maradhatnak). */
+export function refillAutoSearchRangeSelects(form = document.getElementById("home-qs-form")) {
+  wireRangeSelects(form);
 }
 
 function wireSelectOptions(root) {
@@ -432,11 +900,13 @@ async function wireCatalog(form) {
   const modelSelect = form.querySelector("#qs-modell");
   const typeSelect = form.querySelector("#qs-tipus");
   if (!brandSelect || !modelSelect) return;
+  const kind = searchLayoutCategory() === "teherauto-search" ? "kisteher" : "szemelyauto";
   try {
     await initVehicleCatalogSelects({
+      kind,
       brandSelect,
       modelSelect,
-      tipusSelect: typeSelect,
+      tipusSelect: kind === "kisteher" ? null : typeSelect,
       brandEmptyLabel: "Mindegy",
       modelEmptyLabel: "Mindegy",
       yearFromCatalog: false,
@@ -460,57 +930,22 @@ function setFieldValue(input, value) {
   input.dispatchEvent(new Event("change", { bubbles: true }));
 }
 
-/**
- * Irányítószám ↔ település autofill (/api/postal-codes/lookup).
- */
 function wirePostalCityAutofill(form) {
-  if (!form || form.dataset.postalCityBound === "1") return;
+  if (!form) return;
+  wireSharedPostalCityAutofill(form);
+  if (form.dataset.postalCityBound === "1") return;
   const postalInput = form.querySelector('[data-filter-key="iranyitoszam"]');
   const cityInput = form.querySelector('[data-filter-key="telepules"]');
   if (!postalInput || postalInput.tagName !== "INPUT") return;
-  if (!cityInput || cityInput.tagName !== "INPUT") {
-    // Csak IRSZ → település, ha nincs szöveges településmező
-  }
+  if (!cityInput || cityInput.tagName !== "INPUT") return;
 
   form.dataset.postalCityBound = "1";
   let lastPostalLookedUp = "";
   let lastCityLookedUp = "";
   let busy = false;
-  /** 'postal' | 'city' — ne írjuk felül egymást visszacsatoláskor */
   let fillSource = "";
 
-  async function lookupFromPostal() {
-    const digits = String(postalInput.value ?? "")
-      .replace(/\D/g, "")
-      .slice(0, 4);
-    if (postalInput.value !== digits) postalInput.value = digits;
-    if (digits.length !== 4) return;
-    if (digits === lastPostalLookedUp || busy) return;
-    if (fillSource === "city") return;
-    busy = true;
-    fillSource = "postal";
-    try {
-      const params = new URLSearchParams({ postal_code: digits });
-      const res = await fetch(`/api/postal-codes/lookup?${params}`, { credentials: "same-origin" });
-      const data = await res.json().catch(() => ({}));
-      lastPostalLookedUp = digits;
-      if (res.ok && data.city) {
-        lastCityLookedUp = String(data.city).trim();
-        setFieldValue(cityInput, data.city);
-      } else if (cityInput) {
-        lastCityLookedUp = "";
-        setFieldValue(cityInput, "");
-      }
-    } catch {
-      lastPostalLookedUp = digits;
-    } finally {
-      busy = false;
-      fillSource = "";
-    }
-  }
-
   async function lookupFromCity() {
-    if (!cityInput) return;
     const city = String(cityInput.value ?? "").trim();
     if (city.length < 2) return;
     if (city === lastCityLookedUp || busy) return;
@@ -538,88 +973,82 @@ function wirePostalCityAutofill(form) {
     }
   }
 
-  postalInput.addEventListener("input", () => {
-    const digits = String(postalInput.value ?? "").replace(/\D/g, "").slice(0, 4);
-    if (digits.length < 4) lastPostalLookedUp = "";
-    lookupFromPostal();
+  cityInput.addEventListener("change", () => {
+    void lookupFromCity();
   });
-  postalInput.addEventListener("change", lookupFromPostal);
-  postalInput.addEventListener("blur", lookupFromPostal);
-
-  if (cityInput) {
-    let cityTimer = 0;
-    cityInput.addEventListener("input", () => {
-      lastCityLookedUp = "";
-      window.clearTimeout(cityTimer);
-      cityTimer = window.setTimeout(() => lookupFromCity(), 350);
-    });
-    cityInput.addEventListener("change", lookupFromCity);
-    cityInput.addEventListener("blur", lookupFromCity);
-  }
+  cityInput.addEventListener("blur", () => {
+    void lookupFromCity();
+  });
 }
 
-export async function applyAutoSearchLayout(form = document.getElementById("home-qs-form")) {
+export async function applyAutoSearchLayout(form = document.getElementById("home-qs-form"), { force = false } = {}) {
   if (!form) return null;
-  const layout = await fetchAutoSearchLayout({ force: true });
-  const dependencyOrder = ["gyartmany", "modell", "tipus"];
-  const dependencyCells = dependencyOrder
-    .map((key) => layout.cells?.find((cell) => cell.field_key === key))
-    .filter(Boolean);
-  dependencyCells.forEach((cell, index) => {
-    cell.hidden = false;
-    cell.step = 1;
-    cell.row = index + 1;
-  });
-  const mainHost = document.getElementById("qs-layout-main");
-  const moreHost = document.getElementById("qs-more-layout");
-
-  // Élő layout: új keresőmezők (pl. körzet) mindig látszanak.
-  for (const cell of layout.cells || []) {
-    if (!SEARCH_FORCE_VISIBLE.has(cell.field_key)) continue;
-    cell.hidden = false;
-    if (Number(cell.step) < 2) cell.step = 5;
-  }
-
-  const visible = (layout.cells || []).filter((c) => isSearchCellVisible(c));
-
-  if (!visible.length) {
-    hideLegacy(form);
-    return layout;
-  }
-
-  hideLegacy(form);
-  renderStep(mainHost, layout, 1);
-
-  if (moreHost) {
-    const moreCells = (layout.cells || [])
-      .filter((c) => isSearchCellVisible(c) && Number(c.step) >= 2 && Number(c.step) <= 5)
-      .sort((a, b) => (a.step - b.step) || (a.row - b.row) || (a.col - b.col));
-    // Saját grid: lépésenként folyamatos sorok (ne *40 eltolás — az üres grid-sorokat hagyott).
-    let rowOffset = 0;
-    const withRows = [];
-    for (let step = 2; step <= 5; step += 1) {
-      const stepCells = moreCells.filter((c) => Number(c.step) === step);
-      if (!stepCells.length) continue;
-      let maxRow = 1;
-      for (const c of stepCells) {
-        const r = Math.max(1, Number(c.row) || 1);
-        maxRow = Math.max(maxRow, r);
-        withRows.push({ ...c, row: rowOffset + r });
-      }
-      rowOffset += maxRow;
+  try {
+    let layout = await fetchAutoSearchLayout({ force });
+    let visible = (layout.cells || []).filter((c) => isSearchCellVisible(c));
+    // Empty session/memory cache used to "succeed" and skip network — force one real fetch.
+    if (!visible.length && !force) {
+      layout = await fetchAutoSearchLayout({ force: true });
+      visible = (layout.cells || []).filter((c) => isSearchCellVisible(c));
     }
-    renderGrid(moreHost, withRows);
-  }
+    let quickKeys = quickSearchFieldKeysFromLayout(layout);
+    if (searchLayoutCategory() === "teherauto-search" && !quickKeys.includes("kivitel")) {
+      quickKeys = [...quickKeys, "kivitel"];
+    }
+    form.dataset.deskQuickKeys = quickKeys.join(",");
+    const mainHost = document.getElementById("qs-layout-main");
+    const moreHost = document.getElementById("qs-more-layout");
 
-  wireRangeSelects(form);
-  wireSelectOptions(form);
-  wirePostalCityAutofill(form);
-  /* Mobil: katalógus a dob/sheet háttérben tölt — ne várakoztassa a keresőt */
-  if (typeof window !== "undefined" && window.matchMedia("(max-width: 900px)").matches) {
+    if (!visible.length) {
+      hideLegacy(form);
+      return layout;
+    }
+
+    // Remount after a failed boot: clear drum flag so converters can run again.
+    delete form.dataset.drumsMounted;
+    delete form.dataset.alapCardStyled;
+    delete form.dataset.moreCardStyled;
+    form.classList.remove("auto-qs-drums", "auto-qs-drums--mobile", "auto-qs-drums--desktop");
+
+    hideLegacy(form);
+    const step1 = cellsForStep(layout, 1).map((cell, index) => ({
+      ...cell,
+      row: index + 1,
+      col: 1,
+      colSpan: 12,
+    }));
+    renderGrid(mainHost, step1);
+
+    if (moreHost) {
+      const moreCells = (layout.cells || [])
+        .filter((c) => isSearchCellVisible(c) && Number(c.step) >= 2 && Number(c.step) <= 5)
+        .sort((a, b) => (a.step - b.step) || (a.row - b.row) || (a.col - b.col));
+      const withRows = moreCells.map((cell, index) => ({
+        ...cell,
+        row: index + 1,
+        col: 1,
+        colSpan: 12,
+      }));
+      renderGrid(moreHost, withRows);
+    }
+
+    wireRangeSelects(form);
+    wireSelectOptions(form);
+    wirePostalCityAutofill(form);
+    if (typeof window !== "undefined" && window.matchMedia("(max-width: 900px)").matches) {
+      return layout;
+    }
+    // Desk auto/teher: brand/model pickers own the catalog — skip duplicate wait.
+    const page = document.body?.getAttribute("data-site-page");
+    if (page === "auto" || page === "teherauto") {
+      return layout;
+    }
+    await wireCatalog(form);
     return layout;
+  } catch (error) {
+    console.warn("applyAutoSearchLayout:", error);
+    return cachedLayout || { version: 2, category: searchLayoutCategory(), cells: [] };
   }
-  await wireCatalog(form);
-  return layout;
 }
 
 export function readLayoutFilterValues(form) {
@@ -629,11 +1058,21 @@ export function readLayoutFilterValues(form) {
     const n = Number(String(value).replace(/\D/g, ""));
     return Number.isFinite(n) ? n : null;
   };
+  const kmBound = (key, raw) => {
+    const s = String(raw ?? "").trim();
+    if (!s) return null;
+    if (s === "400001") return key === "km_ig" ? null : 400001;
+    return numOrNull(s);
+  };
+  const floatOrNull = (value) => {
+    if (value == null || value === "") return null;
+    const n = Number(String(value).replace(",", ".").replace(/[^\d.-]/g, ""));
+    return Number.isFinite(n) ? n : null;
+  };
   const seen = new Set();
   form.querySelectorAll("[data-filter-key]").forEach((el) => {
     const key = el.getAttribute("data-filter-key");
     if (!key || seen.has(key)) return;
-    // Dobkerék: a hidden input a forrás (select már nincs / mellőzve)
     if (el.tagName === "SELECT" && form.querySelector(`input[type="hidden"][data-filter-key="${key}"]`)) {
       return;
     }
@@ -641,8 +1080,12 @@ export function readLayoutFilterValues(form) {
     seen.add(key);
     const raw = String(el.value ?? "").trim();
     if (!raw) return;
-    if (key.endsWith("_tol") || key.endsWith("_ig")) {
+    if (key === "km_tol" || key === "km_ig") {
+      out[key] = kmBound(key, raw);
+    } else if (key.endsWith("_tol") || key.endsWith("_ig")) {
       out[key] = numOrNull(raw);
+    } else if (FREE_NUMBER_FIELDS.has(key)) {
+      out[key] = floatOrNull(raw);
     } else {
       out[key] = raw;
     }

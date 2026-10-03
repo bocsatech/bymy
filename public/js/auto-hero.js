@@ -37,19 +37,26 @@ if (hero) {
 
 const MOBILE_MQ = "(max-width: 900px)";
 
+function isAutoMobileCollapse() {
+  return (
+    document.body?.classList?.contains("auto-force-mobile") === true ||
+    window.matchMedia(MOBILE_MQ).matches
+  );
+}
+
 function initAutoSearchCollapse() {
   const panel = document.querySelector("[data-auto-search-panel]");
   const toggle = document.getElementById("auto-search-toggle");
   if (!panel || !toggle) return;
 
   function syncDesktop() {
-    if (window.matchMedia(MOBILE_MQ).matches) return;
+    if (isAutoMobileCollapse()) return;
     panel.classList.add("is-open");
     toggle.setAttribute("aria-expanded", "true");
   }
 
   toggle.addEventListener("click", () => {
-    if (!window.matchMedia(MOBILE_MQ).matches) return;
+    if (!isAutoMobileCollapse()) return;
     const open = panel.classList.toggle("is-open");
     toggle.setAttribute("aria-expanded", open ? "true" : "false");
   });

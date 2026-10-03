@@ -1,0 +1,193 @@
+/**
+ * Autó / teher: asztali nézet = mobil UI 1:1
+ * body.auto-force-mobile
+ */
+body.auto-force-mobile.site-app {
+  --mw-phone-w: min(22.75rem, calc(100% - 1.35rem));
+  --mw-tabbar-h: 3.55rem;
+  --mw-tabbar-gap: 0.4rem;
+  --mw-sheet-bottom: calc(
+    var(--mw-tabbar-h) + var(--mw-tabbar-gap) + 0.55rem + env(safe-area-inset-bottom, 0px)
+  );
+  padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px)) !important;
+  overflow-x: hidden !important;
+}
+
+/* Desk grid / oldaloszlop tiltás — mindig mobil stack */
+body.auto-force-mobile.home-page .home-main,
+body.auto-force-mobile.home-page .home-main.auto-desk-main,
+body.auto-force-mobile.site-app .home-main.auto-desk-main {
+  display: block !important;
+  height: auto !important;
+  max-height: none !important;
+  grid-template-columns: none !important;
+  grid-template-rows: none !important;
+  grid-template-areas: none !important;
+}
+
+body.auto-force-mobile .home-main.auto-desk-main > .home-layout.site-layout,
+body.auto-force-mobile .home-main.auto-desk-main > .site-layout,
+body.auto-force-mobile .home-main.auto-desk-main .home-layout,
+body.auto-force-mobile .home-main.auto-desk-main .home-center,
+body.auto-force-mobile .home-main.auto-desk-main .site-center,
+body.auto-force-mobile .home-main .home-layout.site-layout,
+body.auto-force-mobile .home-main .site-layout {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
+  grid-template-columns: none !important;
+}
+
+/* Desk sidebar / results grid ne jelenjen meg külön oszlopként */
+body.auto-force-mobile .auto-search-side,
+body.auto-force-mobile .home-side,
+body.auto-force-mobile aside.home-side {
+  width: 100% !important;
+  max-width: 100% !important;
+  position: static !important;
+}
+
+body.auto-force-mobile .auto-desk-mode,
+body.auto-force-mobile .auto-desk-acc__head {
+  display: none !important;
+}
+
+/* Telefon-oszlop középen (menusáv szélesség) */
+body.auto-force-mobile .mw-app-top,
+body.auto-force-mobile.home-page .home-main,
+body.auto-force-mobile.site-app .home-main,
+body.auto-force-mobile .home-main,
+body.auto-force-mobile .site-main {
+  width: var(--mw-phone-w) !important;
+  max-width: var(--mw-phone-w) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  box-sizing: border-box;
+}
+
+/* Mobil fejléc + alsó menusáv asztalin is */
+body.auto-force-mobile.site-app .mw-app-top {
+  display: flex !important;
+  flex-direction: column !important;
+  position: relative !important;
+  z-index: 1;
+  background: #fff;
+  border-bottom: 0;
+}
+
+body.auto-force-mobile.site-app .mw-app-tabbar {
+  display: flex !important;
+  align-items: flex-end;
+  justify-content: space-around;
+  position: fixed !important;
+  left: 50% !important;
+  bottom: var(--mw-tabbar-gap) !important;
+  transform: translateX(-50%) !important;
+  z-index: 10050 !important;
+  width: var(--mw-phone-w) !important;
+  max-width: var(--mw-phone-w) !important;
+  min-height: var(--mw-tabbar-h);
+  padding: 0.4rem 0.55rem 0.45rem;
+  box-sizing: border-box;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.12);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+html[data-theme="dark"] body.auto-force-mobile.site-app .mw-app-tabbar {
+  background: rgba(18, 22, 28, 0.94);
+  border-color: #2a313c;
+}
+
+/* Desk hub header el — mw-app-top a forrásigazság */
+body.auto-force-mobile.site-app > .hub-header,
+body.auto-force-mobile.site-app > .site-header,
+body.auto-force-mobile.site-app > .home-header,
+body.auto-force-mobile.site-app > header.site-app-header,
+body.auto-force-mobile.site-app > .site-app-header {
+  display: none !important;
+}
+
+body.auto-force-mobile.site-app .site-content-bar {
+  display: none !important;
+}
+
+/* Sheet / osztó / kapcsoló menü: menusáv fölött, ugyanakkora szélesség */
+body.auto-force-mobile .auto-drum-portal {
+  z-index: 11000 !important;
+}
+
+body.auto-force-mobile .auto-drum-portal__stage,
+body.auto-force-mobile .auto-drum-portal .auto-drum-portal__stage,
+body.auto-force-mobile .auto-drum-portal--sheet .auto-drum-portal__stage--sheet,
+body.auto-force-mobile .auto-drum-portal--multi .auto-drum-portal__stage--multi,
+body.auto-force-mobile .auto-drum-portal--split .auto-drum-portal__stage--split,
+body.auto-force-mobile .auto-drum-portal--single .auto-drum-portal__stage--single,
+body.auto-force-mobile .auto-drum-portal--date3 .auto-drum-portal__stage--date3,
+body.auto-force-mobile .auto-drum-portal--sheet.auto-drum-portal--ym .auto-drum-portal__stage--sheet,
+body.auto-force-mobile .auto-drum-portal--sheet.auto-drum-portal--single-sheet .auto-drum-portal__stage--sheet {
+  left: 50% !important;
+  right: auto !important;
+  inset: auto !important;
+  transform: translateX(-50%) !important;
+  width: var(--mw-phone-w) !important;
+  max-width: var(--mw-phone-w) !important;
+  top: max(0.35rem, env(safe-area-inset-top, 0px)) !important;
+  bottom: var(--mw-sheet-bottom) !important;
+  height: auto !important;
+  max-height: none !important;
+  margin: 0 !important;
+  border-radius: 1.1rem !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+}
+
+/* Menüsáv marad látható sheet alatt (ne csússzon el) */
+body.auto-force-mobile.site-app.auto-drum-portal-open .mw-app-tabbar,
+body.auto-force-mobile.site-app.auto-bm-open .mw-app-tabbar,
+body.auto-force-mobile.site-app.immo-scroll-locked .mw-app-tabbar,
+body.auto-force-mobile.site-app.immo-drum-active .mw-app-tabbar,
+body.auto-force-mobile.site-app.search-map-open .mw-app-tabbar {
+  transform: translateX(-50%) !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+/* Backdrop sem nyúljon túl a telefon-oszlopon (opcionális: full dim OK) */
+body.auto-force-mobile .auto-drum-portal__backdrop {
+  /* teljes képernyő dim — stage viszont phone szélesség */
+}
+
+/* Kereső collapse asztalin is mobil mód */
+body.auto-force-mobile .auto-search-panel:not(.is-open) {
+  /* auto-hero mobile rules apply via MQ; reinforce stack */
+}
+
+body.auto-force-mobile .auto-search-desk-shell {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* Brand/model és egyéb sheet stage — ugyanaz a phone-oszlop */
+body.auto-force-mobile .auto-bm-portal,
+body.auto-force-mobile .auto-bm-sheet,
+body.auto-force-mobile [class*="portal__stage"] {
+  z-index: 11000;
+}
+
+body.auto-force-mobile .mw-app-pages {
+  display: flex !important;
+}
+
+/* Desk tabs a hero fölött: mobil sáv */
+body.auto-force-mobile .auto-search-tabs {
+  width: 100%;
+}

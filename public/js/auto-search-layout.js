@@ -1035,7 +1035,11 @@ export async function applyAutoSearchLayout(form = document.getElementById("home
     wireRangeSelects(form);
     wireSelectOptions(form);
     wirePostalCityAutofill(form);
-    if (typeof window !== "undefined" && window.matchMedia("(max-width: 900px)").matches) {
+    if (
+      typeof window !== "undefined" &&
+      (document.body?.classList?.contains("auto-force-mobile") ||
+        window.matchMedia("(max-width: 900px)").matches)
+    ) {
       return layout;
     }
     // Desk auto/teher: brand/model pickers own the catalog — skip duplicate wait.

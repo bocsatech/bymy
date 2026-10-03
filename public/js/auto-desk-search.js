@@ -1,6 +1,10 @@
 
 const DESK_MQ = "(min-width: 901px)";
 
+function forceAutoMobileUi() {
+  return document.body?.classList?.contains("auto-force-mobile") === true;
+}
+
 function isVehicleDeskPage() {
   const page = document.body?.getAttribute("data-site-page");
   return page === "auto" || page === "teherauto";
@@ -85,6 +89,7 @@ function deskOrderFromAdminLayout(mainHost) {
 }
 
 function isAutoDesk() {
+  if (forceAutoMobileUi()) return false;
   return isVehicleDeskPage() && window.matchMedia(DESK_MQ).matches;
 }
 
@@ -626,9 +631,19 @@ export function initAutoDeskSearch({
   }
 
   async function syncChrome({ fromChange = false } = {}) {
-    const desk = isAutoDesk();
+    const forced = forceAutoMobileUi();
+    const desk = !forced && isAutoDesk();
     const wasDesk = document.body.classList.contains("auto-desk-active");
-    document.body.classList.toggle("auto-desk-active", desk);
+    if (forced) {
+      document.body.classList.remove(
+        "auto-desk-active",
+        "auto-desk-gyors",
+        "auto-desk-reszletes",
+        "auto-desk-ertekbecslo"
+      );
+    } else {
+      document.body.classList.toggle("auto-desk-active", desk);
+    }
     if (desk) {
       if (advancedBtn) advancedBtn.hidden = true;
       if (detailedBtn) detailedBtn.hidden = true;

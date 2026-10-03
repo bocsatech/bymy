@@ -30,6 +30,7 @@ function writeJsonList(input, list) {
 }
 
 function isAutoDesk() {
+  if (document.body?.classList?.contains("auto-force-mobile")) return false;
   return (
     (document.body?.getAttribute("data-site-page") === "auto" ||
       document.body?.getAttribute("data-site-page") === "teherauto") &&

@@ -7,7 +7,7 @@ import {
   resetDetailedSearch,
 } from "./auto-detailed-search.js?v=18415b7f87";
 import { readWheel } from "./ingatlan-wheels.js?v=6952ba469c";
-import { readBrandModelFilterValues, mountAutoBrandModelPicker } from "./auto-brand-model-picker.js?v=sheetLeft1";
+import { readBrandModelFilterValues, mountAutoBrandModelPicker } from "./auto-brand-model-picker.js?v=bmPillCard1";
 import { readFuelFilterValues, mountAutoFuelPicker } from "./auto-fuel-picker.js?v=sheetLeft1";
 import { readKivitelFilterValues, mountAutoKivitelPicker } from "./auto-kivitel-picker.js?v=sheetLeft1";
 import { readAllapotFilterValues, mountAutoAllapotPicker } from "./auto-allapot-picker.js?v=d31f4ab31d";
@@ -324,6 +324,9 @@ export function initHomeQuickSearch({ onSearch = () => {}, onFilterPreview, onDe
     if (deskFilterMenuReady(f)) {
       arrangeAutoDeskDemoFields(f);
       try {
+        if (f.dataset.brandModelPicker !== "1") {
+          await mountAutoBrandModelPicker(f);
+        }
         syncAutoSearchAccShell(f);
         updateAutoDeskAccSummaries(f);
       } catch {
@@ -345,6 +348,19 @@ export function initHomeQuickSearch({ onSearch = () => {}, onFilterPreview, onDe
         await mountAutoSearchDrums(f);
       } catch (drumError) {
         console.warn("Desk kereső dobkerék:", drumError);
+      }
+      /* Önálló fehér Gyártmány & Modell kártya (pill) — ne duplikálja a drums sort. */
+      try {
+        await mountAutoBrandModelPicker(f);
+        f.querySelectorAll(
+          '#qs-layout-main [data-qs-field="gyartmany"], #qs-layout-main [data-qs-field="modell"], #qs-layout-main [data-qs-field="tipus"], #qs-layout-main [data-wheel="gyartmany"], #qs-layout-main [data-wheel="modell"]'
+        ).forEach((el) => {
+          const cell = el.closest(".home-qs-grid-cell, .immo-schema-cell, .immo-dual-range-block") || el;
+          cell.hidden = true;
+          cell.style.setProperty("display", "none", "important");
+        });
+      } catch (bmError) {
+        console.warn("Gyártmány/Modell picker:", bmError);
       }
       try {
         refillAutoSearchRangeSelects(f);

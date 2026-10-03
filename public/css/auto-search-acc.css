@@ -35,19 +35,48 @@
     overflow: visible !important;
   }
 
-  /* Brand block: fehér kártya a kék héjon (mint feladás) */
+  /* Brand block: fehér kártya — mind a 4 sarok lekerekítve (mint feladás) */
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
-    > .auto-bm-brand-block {
+    > .auto-bm-brand-block,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    #home-qs-form.auto-desk-native
+    .auto-search-desk-shell
+    .auto-bm-brand-block {
     flex: 0 0 auto !important;
+    display: block !important;
     width: 100% !important;
-    margin: 0 !important;
+    margin: 0 0 0.75rem !important;
     padding: 1.1rem 1.15rem 1.25rem !important;
     background: #fff !important;
     border-radius: 1.375rem !important;
+    border-top-left-radius: 1.375rem !important;
+    border-top-right-radius: 1.375rem !important;
+    border-bottom-left-radius: 1.375rem !important;
+    border-bottom-right-radius: 1.375rem !important;
     border: 0 !important;
     box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05) !important;
     box-sizing: border-box !important;
+    overflow: visible !important;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-desk-shell
+    .auto-bm-brand-block
+    .auto-desk-field__label {
+    display: block !important;
+    margin: 0 0 0.65rem !important;
+    font: 700 0.94rem/1.25 system-ui, sans-serif !important;
+    color: #111 !important;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-desk-shell
+    .auto-bm-brand-block
+    .auto-desk-field__label
+    .req {
+    color: #e11d48 !important;
+    font-weight: 700 !important;
   }
 
   /* Összecsukva: fehér pill */
@@ -536,45 +565,76 @@
     background: transparent !important;
   }
 
-  /* Gyártmány & Modell: ugyanaz az aláhúzás a brand kártyában */
+  /* Gyártmány & Modell: AutoScout-szerű pill + chevron (feladás 1:1) */
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
-    > .auto-bm-brand-block
+    .auto-bm-brand-block
     .auto-bm-trigger--pill,
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
-    > .auto-bm-brand-block
+    .auto-bm-brand-block
     .auto-bm-trigger {
+    position: relative !important;
+    display: flex !important;
+    align-items: center !important;
+    width: 100% !important;
     height: auto !important;
-    min-height: 2.65rem !important;
-    padding: 0.45rem 1.4rem 0.45rem 0 !important;
-    border: 0 !important;
-    border-bottom: 1.5px solid #cfd6dd !important;
-    border-radius: 0 !important;
-    background: transparent !important;
+    min-height: 2.75rem !important;
+    padding: 0.55rem 2.35rem 0.55rem 1.05rem !important;
+    border: 1px solid #d0d5dd !important;
+    border-bottom: 1px solid #d0d5dd !important;
+    border-radius: 999px !important;
+    background: #fff !important;
     box-shadow: none !important;
-    color: #6b7280 !important;
+    color: #667085 !important;
     font: 500 1rem/1.25 system-ui, sans-serif !important;
+    text-align: left !important;
+    box-sizing: border-box !important;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
-    > .auto-bm-brand-block
+    .auto-bm-brand-block
     .auto-bm-trigger--pill.has-value,
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
-    > .auto-bm-brand-block
-    .auto-bm-trigger--pill:not(:has(.is-placeholder)) {
-    color: #111 !important;
+    .auto-bm-brand-block
+    .auto-bm-trigger--pill:not(:has(.is-placeholder)),
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-desk-shell
+    .auto-bm-brand-block
+    .auto-bm-trigger--pill
+    :not(.is-placeholder) {
+    color: #0f172a !important;
     font-weight: 600 !important;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
-    > .auto-bm-brand-block
+    .auto-bm-brand-block
+    .auto-bm-trigger--pill
+    .is-placeholder {
+    color: #667085 !important;
+    font-weight: 500 !important;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-desk-shell
+    .auto-bm-brand-block
     .auto-bm-trigger--pill::after {
-    right: 0.15rem !important;
-    border-color: #64748b !important;
+    content: "" !important;
+    position: absolute !important;
+    top: 50% !important;
+    right: 1.05rem !important;
+    width: 0.42rem !important;
+    height: 0.42rem !important;
+    margin-top: -0.22rem !important;
+    border-top: 1.5px solid #667085 !important;
+    border-right: 1.5px solid #667085 !important;
+    border-bottom: 0 !important;
+    border-left: 0 !important;
+    transform: rotate(45deg) !important;
+    pointer-events: none !important;
   }
 
   /*

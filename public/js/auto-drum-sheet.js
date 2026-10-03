@@ -1981,6 +1981,8 @@ export function openStandaloneSwitchSheet({
     "Választás";
   const { root, stage, ring, scrollEl, sheetScroll, backBtn, subEl, doneBtn, closeBtn, toolbarEl } =
     createSheetPortalShell(sheetTitle);
+  /* Kivitel / Üzemanyag / Állapot / Okmány / Sebességváltó: listás design (fekete Kész, kijelölő sáv). */
+  root.classList.add("auto-drum-portal--choice");
   const wrap = trigger.closest(".immo-wheel-wrap, .auto-desk-field, .auto-kivitel-field, .ad-form-bm-field") || trigger.parentElement;
 
   let view = "main";

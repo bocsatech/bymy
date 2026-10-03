@@ -1679,7 +1679,6 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   height: 2.35rem;
 }
 
-/* Kapcsolós sheet: sárga Kész pill — mint a design minta (Állapot) */
 .auto-drum-portal--sheet .auto-drum-portal__done--sheet-top {
   flex: 0 0 auto;
   min-width: 0;
@@ -1694,13 +1693,48 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   justify-self: end;
 }
 
-/* Egyválasztós / tartomány / dátum: fekete Kész */
+/* Listás választó (Kivitel, Üzemanyag, Állapot, Okmány, Sebességváltó) + tartomány: fekete Kész */
+.auto-drum-portal--sheet.auto-drum-portal--choice .auto-drum-portal__done--sheet-top,
 .auto-drum-portal--sheet.auto-drum-portal--single-sheet .auto-drum-portal__done--sheet-top,
 .auto-drum-portal--sheet.auto-drum-portal--range-sheet .auto-drum-portal__done--sheet-top,
 .auto-drum-portal--sheet.auto-drum-portal--date3 .auto-drum-portal__done--sheet-top {
   background: #111;
   color: #fff;
   box-shadow: 0 2px 8px rgba(15, 23, 42, 0.2);
+}
+
+/* Listás sheet design: nincs kapcsoló, balra szöveg, szürke kijelölő sáv */
+.auto-drum-portal--choice .auto-drum-switch {
+  display: none !important;
+}
+
+.auto-drum-portal--choice .immo-drum-inline-item,
+.auto-drum-portal--choice .auto-drum-inline-item--switch {
+  justify-content: flex-start !important;
+  text-align: left !important;
+  border-radius: 0.75rem !important;
+  padding: 0 0.85rem !important;
+  background: transparent !important;
+}
+
+.auto-drum-portal--choice .immo-drum-inline-text {
+  text-align: left !important;
+  flex: 1 1 auto !important;
+}
+
+.auto-drum-portal--choice .immo-drum-inline-item.is-selected,
+.auto-drum-portal--choice .auto-drum-inline-item--switch.is-selected {
+  background: #eef1f5 !important;
+  font-weight: 500 !important;
+}
+
+.auto-drum-portal--choice .auto-drum-portal__ring--sheet,
+.auto-drum-portal--choice .auto-drum-portal__ring--multi {
+  border-radius: 1.15rem !important;
+  border-top-left-radius: 1.15rem !important;
+  border-top-right-radius: 1.15rem !important;
+  border-bottom-left-radius: 1.15rem !important;
+  border-bottom-right-radius: 1.15rem !important;
 }
 
 /* Külső terület NEM görget — kék + X/Kész fixen marad; lista a fehér ringben görög */
@@ -1913,9 +1947,7 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
 
   .auto-drum-portal--sheet .auto-drum-portal__ring--sheet,
   .auto-drum-portal--sheet .auto-drum-portal__ring--multi {
-    /* Design: magas fehér kártya, alul is lekerekítve + üres hely a lista alatt */
     height: auto !important;
-    min-height: min(52vh, 28rem) !important;
     max-height: min(62vh, 34rem) !important;
     flex: 0 1 auto !important;
     border-radius: 1.15rem !important;
@@ -1923,24 +1955,28 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
     border-top-right-radius: 1.15rem !important;
     border-bottom-left-radius: 1.15rem !important;
     border-bottom-right-radius: 1.15rem !important;
+  }
+
+  /* Csak listás választók (képek): magasabb fehér kártya, alul is lekerekítve */
+  .auto-drum-portal--choice .auto-drum-portal__ring--sheet,
+  .auto-drum-portal--choice .auto-drum-portal__ring--multi {
+    min-height: min(52vh, 28rem) !important;
     padding-bottom: 1.25rem !important;
   }
 
-  /* Kapcsolós (multi) sheet: sárga Kész mindig */
-  .auto-drum-portal--sheet.auto-drum-portal--multi:not(.auto-drum-portal--single-sheet)
-    .auto-drum-portal__done--sheet-top {
-    background: #f5c518 !important;
-    color: #111 !important;
-    box-shadow: 0 2px 8px rgba(245, 197, 24, 0.35) !important;
+  .auto-drum-portal--choice .auto-drum-portal__done--sheet-top {
+    background: #111 !important;
+    color: #fff !important;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.2) !important;
   }
 
-  .auto-drum-portal--sheet .auto-drum-inline-item--switch,
-  .auto-drum-portal--sheet .immo-drum-inline-item {
-    justify-content: space-between !important;
+  .auto-drum-portal--choice .auto-drum-inline-item--switch,
+  .auto-drum-portal--choice .immo-drum-inline-item {
+    justify-content: flex-start !important;
     text-align: left !important;
   }
 
-  .auto-drum-portal--sheet .immo-drum-inline-text {
+  .auto-drum-portal--choice .immo-drum-inline-text {
     text-align: left !important;
     flex: 1 1 auto !important;
   }

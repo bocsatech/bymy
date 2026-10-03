@@ -1693,16 +1693,12 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   justify-self: end;
 }
 
-/* Tartomány / egyválasztós dob: fekete Kész — a kapcsolós (--choice) sárga marad */
+/* Minden sheet Kész: sárga (Gyártási év / km / ár / kapcsolós — ugyanaz a chrome) */
+.auto-drum-portal--sheet .auto-drum-portal__done--sheet-top,
 .auto-drum-portal--sheet.auto-drum-portal--single-sheet .auto-drum-portal__done--sheet-top,
 .auto-drum-portal--sheet.auto-drum-portal--range-sheet .auto-drum-portal__done--sheet-top,
-.auto-drum-portal--sheet.auto-drum-portal--date3 .auto-drum-portal__done--sheet-top {
-  background: #111;
-  color: #fff;
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.2);
-}
-
-/* Kapcsolós sheet (Kivitel, Üzemanyag, Állapot, Okmány, Sebességváltó): sárga Kész + kapcsolók */
+.auto-drum-portal--sheet.auto-drum-portal--date3 .auto-drum-portal__done--sheet-top,
+.auto-drum-portal--sheet.auto-drum-portal--ym .auto-drum-portal__done--sheet-top,
 .auto-drum-portal--choice .auto-drum-portal__done--sheet-top {
   background: #f5c518 !important;
   color: #111 !important;
@@ -1982,10 +1978,30 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
     padding-bottom: 1.25rem !important;
   }
 
-  .auto-drum-portal--choice .auto-drum-portal__done--sheet-top {
+  .auto-drum-portal--sheet .auto-drum-portal__done--sheet-top,
+  .auto-drum-portal--choice .auto-drum-portal__done--sheet-top,
+  .auto-drum-portal--sheet.auto-drum-portal--ym .auto-drum-portal__done--sheet-top,
+  .auto-drum-portal--sheet.auto-drum-portal--range-sheet .auto-drum-portal__done--sheet-top {
     background: #f5c518 !important;
     color: #111 !important;
     box-shadow: 0 2px 8px rgba(245, 197, 24, 0.35) !important;
+  }
+
+  /* Tartomány (év/km/ár): fehér kártya alul is lekerekítve, ne vágja le a dobot */
+  .auto-drum-portal--sheet.auto-drum-portal--ym .auto-drum-portal__ring--sheet,
+  .auto-drum-portal--sheet.auto-drum-portal--range-sheet .auto-drum-portal__ring--sheet {
+    max-height: none !important;
+    overflow: hidden !important;
+    border-radius: 1.15rem !important;
+    border-bottom-left-radius: 1.15rem !important;
+    border-bottom-right-radius: 1.15rem !important;
+    margin-bottom: 0.85rem !important;
+  }
+
+  .auto-drum-portal--sheet.auto-drum-portal--ym .auto-drum-ym__body {
+    height: 14rem !important;
+    min-height: 14rem !important;
+    max-height: 14rem !important;
   }
 
   .auto-drum-portal--choice .auto-drum-switch {

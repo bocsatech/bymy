@@ -74,7 +74,7 @@
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .hub-nav-link.active {
     color: var(--ad-text) !important;
-    font-weight: 700 !important;
+    font-weight: 600 !important;
     border-bottom-color: #111 !important;
     padding-bottom: 0 !important;
   }

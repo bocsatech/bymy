@@ -6,7 +6,7 @@
     --desk-nav-font: "DM Sans", system-ui, -apple-system, sans-serif;
     --desk-nav-size: 14px;
     --desk-nav-weight: 600;
-    --desk-count-size: 13px;
+    --desk-count-size: 14px;
     --desk-action-size: 14px;
     --desk-cta-size: 13px;
     --desk-header-h: 80px;
@@ -207,7 +207,7 @@
   body.home-page .hub-nav-link.active {
     font-family: var(--desk-nav-font) !important;
     font-size: var(--desk-nav-size) !important;
-    font-weight: 700 !important;
+    font-weight: var(--desk-nav-weight) !important;
     border-bottom-color: #111 !important;
     color: #111 !important;
   }
@@ -217,7 +217,7 @@
   body.home-page .hub-nav-link .nav-count {
     font-family: var(--desk-nav-font) !important;
     font-size: var(--desk-count-size) !important;
-    font-weight: 500 !important;
+    font-weight: var(--desk-nav-weight) !important;
     font-variant-numeric: tabular-nums !important;
     letter-spacing: 0 !important;
     line-height: 1 !important;
@@ -348,12 +348,12 @@
 
   body.site-app .hub-nav-link,
   body.home-page .hub-nav-link {
-    font-size: 13px !important;
+    font-size: var(--desk-nav-size) !important;
   }
 
   body.site-app .nav-count,
   body.home-page .hub-nav-link .nav-count {
-    font-size: 12px !important;
+    font-size: var(--desk-count-size) !important;
   }
 }
 

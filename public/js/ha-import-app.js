@@ -87,7 +87,7 @@ function bookmarkletHref(mode) {
   const origin = location.origin;
   const isDealer = mode === "dealer";
   const src = isDealer
-    ? `${origin}/js/ha-dealer-import.js?v=haCdn20`
+    ? `${origin}/js/ha-dealer-import.js?v=copyOwn1`
     : `${origin}/js/ha-import-bookmarklet.js?v=haDealerPhoto18`;
   const token = getBookmarkletToken() || getAuthToken() || "";
   const runner = isDealer ? "BymyHaDealerImport" : "BymyHaImport";
@@ -307,9 +307,6 @@ function renderResult(result, { partial = false, index = 0, total = 0 } = {}) {
   const items = result?.items ?? [];
   const updated = items.filter((item) => item?.updated).length;
   const created = Math.max(0, saved - updated);
-  const otherOwner = items.filter(
-    (item) => item?.skipped && /más Bymy fiók/i.test(String(item.message || ""))
-  ).length;
   let summary = "";
   if (partial && total > 0) {
     summary = `Folyamatban: ${index} / ${total}. eddig ${saved} mentve`;
@@ -317,8 +314,6 @@ function renderResult(result, { partial = false, index = 0, total = 0 } = {}) {
     summary += "…";
   } else if (saved === 0 && errors === 0 && skipped === 0) {
     summary = "Nem került be új / frissített hirdetés.";
-  } else if (saved === 0 && otherOwner > 0 && errors === 0) {
-    summary = `${otherOwner} hirdetés már más Bymy fiókhoz tartozik — mentés kihagyva.`;
   } else {
     const parts = [];
     if (created > 0) parts.push(`${created} új`);
@@ -327,10 +322,8 @@ function renderResult(result, { partial = false, index = 0, total = 0 } = {}) {
     if (total > 1) summary = `${total}-ből ${summary}`;
     if (errors > 0) summary += ` ${errors} hiba.`;
   }
-  if (skipped > 0 && otherOwner !== skipped) {
+  if (skipped > 0) {
     summary += ` ${skipped} kihagyva.`;
-  } else if (skipped > 0 && saved > 0 && otherOwner > 0) {
-    summary += ` ${otherOwner} más fióké (kihagyva).`;
   }
   box.hidden = false;
   box.innerHTML = `<p>${summary}</p>`;
@@ -807,7 +800,7 @@ async function runMessageImport(data) {
               (batch.skippedCount ? `, ${batch.skippedCount} kihagyva` : "") +
               (batch.errorCount ? `, ${batch.errorCount} hiba` : "")
             : batch.skippedCount
-              ? `Kész: 0 mentve, ${batch.skippedCount} kihagyva (más fiók)`
+              ? `Kész: 0 mentve, ${batch.skippedCount} kihagyva`
               : `Mentés sikertelen${batch.errors[0]?.message ? ` — ${batch.errors[0].message}` : ""}`
         );
         renderResult(batch);

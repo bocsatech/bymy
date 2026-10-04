@@ -682,15 +682,25 @@
 
   function extractCarsFromPage() {
     const byId = new Map();
-    for (const doc of docsInScope()) {
-      for (const car of extractCarsFromCdnDom(doc)) {
-        if (!car.listingId || !car.visibleImage) continue;
-        const prev = byId.get(car.listingId);
-        if (!prev) byId.set(car.listingId, car);
-        else if (!prev.visibleTitle && car.visibleTitle) {
-          byId.set(car.listingId, { ...prev, ...car, visibleImage: prev.visibleImage || car.visibleImage });
-        }
+    const merge = (car) => {
+      const id = String(car?.listingId || "").replace(/\D/g, "");
+      if (id.length < 5) return;
+      const prev = byId.get(id);
+      if (!prev) {
+        byId.set(id, { ...car, listingId: id });
+        return;
       }
+      byId.set(id, {
+        ...prev,
+        ...car,
+        listingId: id,
+        visibleImage: car.visibleImage || prev.visibleImage || "",
+        visibleTitle: car.visibleTitle || prev.visibleTitle || "",
+      });
+    };
+    for (const doc of docsInScope()) {
+      for (const car of extractCarsFromCdnDom(doc)) merge(car);
+      for (const car of extractCarsFromListingRows(doc)) merge(car);
     }
     return [...byId.values()].slice(0, MAX);
   }
@@ -1092,15 +1102,11 @@
 
     showProgress(0, 1, "képek keresése");
     await quickScrollThumbs();
-    const cars = extractCarsFromPage().filter((car) => {
-      const listingId = recoverHaId(car);
-      const image = hqFromSrc(car.visibleImage || car.imageUrl || "");
-      return Boolean(listingId && image);
-    });
+    const cars = extractCarsFromPage().filter((car) => recoverHaId(car));
     if (!cars.length) {
       hideProgress();
       alert(
-        "Nem találtunk hasznaltautocdn képet a listán.\nGörgess le, amíg látszanak a thumbök, majd futtasd újra."
+        "Nem találtunk autót a listán.\nGörgess le a járművekig, majd futtasd újra."
       );
       return;
     }
@@ -1289,7 +1295,7 @@
 
     const parts = [];
     if (ok) parts.push(`${ok} mentve`);
-    if (skipped) parts.push(`${skipped} kihagyva (más fiók / már megvan)`);
+    if (skipped) parts.push(`${skipped} kihagyva`);
     if (fail) parts.push(`${fail} hiba`);
     let msg = parts.length
       ? `Kész: ${parts.join(", ")}${errors[0] && (fail || skipped) ? ` — ${errors[0]}` : ""}`

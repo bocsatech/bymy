@@ -15,9 +15,8 @@ import {
   deleteListing,
   dbStats,
   listFieldDefs,
-  listingSourceExists,
   listingIdsExist,
-  findListingBySource,
+  findOwnerListingByHaId,
   updateListingFoKep,
   updateListingPhotoUrls,
   clearListingPhotos,
@@ -37,7 +36,6 @@ import {
   isBusinessAccount,
   verticalFromForm,
 } from "./lib/listing-quota.mjs";
-import { assertCanImportExistingListing } from "./lib/listing-import-guard.mjs";
 import { getSiteBlocks, saveSiteBlocks } from "./lib/site-blocks.mjs";
 import {
   getSiteHero,
@@ -1873,28 +1871,16 @@ async function handleListingsApi(req, res, pathname) {
         skippedCount += 1;
         continue;
       }
-      const sourceUrl = String(formData.forras_url || "").trim();
       const hasznaltautoId = String(formData.hasznaltauto_hirdetes_id || "").trim();
       let existing = null;
-      if (sourceUrl || hasznaltautoId) {
+      if (hasznaltautoId) {
         try {
-          existing = await findListingBySource({ sourceUrl, hasznaltautoId });
+          existing = await findOwnerListingByHaId(user.id, hasznaltautoId);
         } catch {
           existing = null;
         }
       }
       if (existing?.id) {
-        const ownerGuard = assertCanImportExistingListing(existing, user);
-        if (!ownerGuard.ok) {
-          results.push({
-            skipped: true,
-            reason: "other_owner",
-            error: ownerGuard.message,
-            forras_url: sourceUrl,
-          });
-          skippedCount += 1;
-          continue;
-        }
         const saved = await saveListing(formData, existing.id, { status, userId: user.id });
         results.push({ skipped: false, listing: saved, updated: true });
         savedCount += 1;
@@ -1962,11 +1948,11 @@ async function handleListingsApi(req, res, pathname) {
           sendJson(res, 401, { error: "Csak regisztrált felhasználók adhatnak fel hirdetést.", code: "AUTH_REQUIRED" });
           return;
         }
-        const sourceUrl = String(formData.forras_url || "").trim();
         const hasznaltautoId = String(formData.hasznaltauto_hirdetes_id || "").trim();
-        if (sourceUrl || hasznaltautoId) {
-          if (await listingSourceExists({ sourceUrl, hasznaltautoId })) {
-            sendJson(res, 409, { error: "Ez a hirdetés már bent van." });
+        if (hasznaltautoId) {
+          const mine = await findOwnerListingByHaId(user.id, hasznaltautoId);
+          if (mine?.id) {
+            sendJson(res, 409, { error: "Ez a hirdetés már bent van a fiókodban." });
             return;
           }
         }

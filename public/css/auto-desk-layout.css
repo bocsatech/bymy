@@ -564,8 +564,8 @@
     display: flex !important;
     flex-direction: column !important;
     height: auto !important;
-    overflow: visible !important;
-    margin: 0 !important;
+    overflow: hidden !important;
+    margin: 0.75rem 0 0 !important;
     padding: 0 !important;
     visibility: visible !important;
     width: 100% !important;
@@ -889,8 +889,7 @@
     grid-column: auto !important;
   }
 
-  /* Desk: ugyanaz a layout grid mint mobil — ne rejtsük el */
-  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active .auto-search-panel #qs-more-layout,
+  /* Desk: Alapadatok host — a fehér kártya belül van, itt ne legyen extra padding */
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active .auto-search-panel #qs-layout-main {
     display: flex !important;
     flex-direction: column !important;
@@ -906,7 +905,33 @@
     box-sizing: border-box !important;
   }
 
-  /* Részletes = Alapadatok szélesség: a qs-more ne nőjön szélesebbre a hosszú címkéktől */
+  /* Műszaki: ugyanakkora fehér kártya, mint Alapadatok — padding bent marad */
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-panel
+    #qs-more-layout,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-panel
+    .home-qs-more.is-open
+    #qs-more-layout {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 1.05rem !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 1.1rem 1.1rem 1.35rem !important;
+    background: #fff !important;
+    border-radius: 1.375rem !important;
+    border: 0 !important;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05) !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+    overflow-y: visible !important;
+    visibility: visible !important;
+    height: auto !important;
+  }
+
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-panel
     :is(#qs-more, #qs-more-layout, #qs-more-layout .auto-search-alap-card, #qs-more-layout .auto-search-more-card, #qs-detailed-panel) {
@@ -919,12 +944,21 @@
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-panel
     #qs-more-layout
-    :is(.home-qs-grid-cell, [data-qs-field], .immo-schema-cell, .immo-dual-range-block, .immo-wheel-wrap, .home-qs-field, .home-qs-pair) {
+    :is(.home-qs-grid-cell, [data-qs-field], .immo-schema-cell, .immo-dual-range-block, .immo-wheel-wrap, .home-qs-field, .home-qs-pair, .immo-label, .home-qs-label) {
     width: 100% !important;
     max-width: 100% !important;
     min-width: 0 !important;
     grid-column: 1 / -1 !important;
     box-sizing: border-box !important;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-panel
+    #qs-more-layout
+    :is(.immo-label, .home-qs-label, .immo-dual-range__title) {
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+    white-space: normal !important;
   }
 
   /* A régi szűkített desk-field lista ne duplikáljon a layout menüvel */

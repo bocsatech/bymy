@@ -437,36 +437,6 @@
     color: var(--ad-yellow-ink);
   }
 
-  body.home-page[data-site-page="auto"] .auto-ertek-out {
-    margin: 10px 0 4px;
-  }
-
-  body.home-page[data-site-page="auto"].auto-desk-ertekbecslo .home-qs-action--map {
-    display: none !important;
-  }
-
-  /* Értékbecslő: a Vételár szűrő helyén a becsült ár jelenik meg */
-  body.home-page[data-site-page="auto"].auto-desk-ertekbecslo [data-desk-field="vetelar"] > .auto-desk-range,
-  body.home-page[data-site-page="auto"].auto-desk-ertekbecslo [data-desk-field="vetelar"] > .immo-dual-range-block,
-  body.home-page[data-site-page="auto"].auto-desk-ertekbecslo [data-desk-field="vetelar"] > select,
-  body.home-page[data-site-page="auto"].auto-desk-ertekbecslo [data-desk-field="vetelar"] > input {
-    display: none !important;
-  }
-
-  body.home-page[data-site-page="auto"].auto-desk-ertekbecslo [data-desk-field="vetelar"] > [data-auto-ertek-out] {
-    display: block !important;
-    margin: 0;
-    padding: 0.35rem 0 0.15rem;
-  }
-
-  body.home-page[data-site-page="auto"].auto-desk-ertekbecslo [data-desk-field="vetelar"] .ertek-result__price {
-    margin: 0 0 4px;
-    font-size: 1.55rem;
-    font-weight: 800;
-    letter-spacing: -0.02em;
-    color: #0f172a;
-  }
-
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-acc {
     border: 0 !important;
     border-radius: 1.375rem !important;

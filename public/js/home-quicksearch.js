@@ -20,7 +20,7 @@ import {
   arrangeAutoDeskDemoFields,
   deskFilterMenuReady,
   syncAutoSearchAccShell,
-} from "./auto-desk-search.js?v=noDupValto1";
+} from "./auto-desk-search.js?v=noErtek1";
 
 prefetchAutoSearchBoot();
 const MOBILE_MQ = "(max-width: 900px)";
@@ -133,90 +133,7 @@ export function initHomeQuickSearch({ onSearch = () => {}, onFilterPreview, onDe
   let wheelSearchTimer = null;
 
   function triggerSearchFromForm() {
-    if (document.body.classList.contains("auto-desk-ertekbecslo")) {
-      void runDeskValuation();
-      return;
-    }
     onSearch(readQuickSearchValues());
-  }
-
-  function escapeErtekHtml(value) {
-    return String(value ?? "")
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;");
-  }
-
-  async function runDeskValuation() {
-    const out = form.querySelector("[data-auto-ertek-out]") || document.querySelector("[data-auto-ertek-out]");
-    if (!out) return;
-    const values = readQuickSearchValues() || {};
-    const brand =
-      (Array.isArray(values.gyartmanyok) && values.gyartmanyok[0]) ||
-      values.gyartmany ||
-      "";
-    const model =
-      (Array.isArray(values.modellek) && values.modellek[0]) ||
-      values.modell ||
-      "";
-    const year =
-      values.ev_tol ||
-      values.gyartasi_ev_tol ||
-      values.gyartasi_ev ||
-      "";
-    const km = values.km_tol || values.km || "";
-    const fuel =
-      (Array.isArray(values.uzemanyagok) && values.uzemanyagok[0]) ||
-      values.uzemanyag ||
-      "";
-    out.hidden = false;
-    if (!brand || !model || !year || !km) {
-      out.dataset.hasResult = "";
-      out.innerHTML =
-        '<p class="ertek-msg">Kötelező: gyártmány, modell, évjárat (-tól), km (-tól).</p>';
-      return;
-    }
-    out.innerHTML = '<p class="ertek-msg">Számolás…</p>';
-    const q = new URLSearchParams({
-      gyartmany: String(brand),
-      modell: String(model),
-      gyartasi_ev: String(year),
-      km: String(km),
-      require: "1",
-      source: "market",
-    });
-    if (fuel) q.set("uzemanyag", String(fuel));
-    if (values.tipus) q.set("tipus", String(values.tipus));
-    try {
-      const res = await fetch(`/api/valuation/estimate?${q}`, { credentials: "same-origin" });
-      const data = await res.json().catch(() => ({}));
-      if (data.error) {
-        delete out.dataset.hasResult;
-        out.innerHTML = `<p class="ertek-msg ertek-msg--err">${escapeErtekHtml(data.error)}</p>`;
-        return;
-      }
-      if (data.count === 0) {
-        delete out.dataset.hasResult;
-        out.innerHTML = `<p class="ertek-msg">${escapeErtekHtml(data.message || "Nincs egyező adat a mintában.")}</p>`;
-        return;
-      }
-      const recom = data.recommended_formatted || data.average_price_formatted || "—";
-      const from = data.good_price_from_formatted || data.min_price_formatted || "—";
-      const to = data.good_price_to_formatted || data.max_price_formatted || "—";
-      const n = data.count ?? 0;
-      out.dataset.hasResult = "1";
-      out.innerHTML = `
-        <div class="ertek-result" aria-live="polite">
-          <p class="ertek-result__price">${escapeErtekHtml(recom)}</p>
-          <p class="ertek-result__band">Jó ár: <strong>${escapeErtekHtml(from)}</strong> – <strong>${escapeErtekHtml(to)}</strong></p>
-          <p class="ertek-result__meta">${n} hasonló a mintában${data.source ? ` · ${escapeErtekHtml(data.source)}` : ""}</p>
-        </div>`;
-      out.scrollIntoView({ block: "nearest", behavior: "smooth" });
-    } catch (err) {
-      delete out.dataset.hasResult;
-      out.innerHTML = `<p class="ertek-msg ertek-msg--err">${escapeErtekHtml(err?.message || "Hiba")}</p>`;
-    }
   }
 
   form.addEventListener("submit", (event) => {
@@ -225,7 +142,6 @@ export function initHomeQuickSearch({ onSearch = () => {}, onFilterPreview, onDe
   });
 
   function triggerPreviewFromForm() {
-    if (document.body.classList.contains("auto-desk-ertekbecslo")) return;
     if (typeof onFilterPreview === "function") {
       onFilterPreview(readQuickSearchValues());
       return;

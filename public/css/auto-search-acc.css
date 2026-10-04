@@ -700,15 +700,15 @@
     gap: 0.75rem !important;
   }
 
-  /* Gyors / Értékbecslő: csak Alapadatok — qs-more + Extrák rejtve */
-  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active:is(.auto-desk-gyors, .auto-desk-ertekbecslo):not(.auto-desk-reszletes)
+  /* Gyors: csak Alapadatok — qs-more + Extrák rejtve */
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active.auto-desk-gyors:not(.auto-desk-reszletes)
     #qs-more,
-  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active:is(.auto-desk-gyors, .auto-desk-ertekbecslo):not(.auto-desk-reszletes)
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active.auto-desk-gyors:not(.auto-desk-reszletes)
     #qs-more-layout,
-  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active:is(.auto-desk-gyors, .auto-desk-ertekbecslo):not(.auto-desk-reszletes)
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active.auto-desk-gyors:not(.auto-desk-reszletes)
     .auto-search-desk-shell
     > .auto-desk-acc[data-desk-acc="extrak"],
-  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active:is(.auto-desk-gyors, .auto-desk-ertekbecslo):not(.auto-desk-reszletes)
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active.auto-desk-gyors:not(.auto-desk-reszletes)
     #qs-detailed-panel {
     display: none !important;
   }

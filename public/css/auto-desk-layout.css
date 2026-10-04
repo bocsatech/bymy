@@ -18,7 +18,7 @@
     --ad-muted: #6b6b6b;
     --ad-yellow: #f0c52c;
     --ad-yellow-ink: #111111;
-    --ad-filter-w: 320px;
+    --ad-filter-w: 400px;
     --ad-surface-2: #f0f0f0;
     --ad-surface-3: #e8e8e8;
     background: var(--ad-bg) !important;
@@ -40,7 +40,7 @@
     --ad-muted: #9a9a9c;
     --ad-yellow: #f0c52c;
     --ad-yellow-ink: #111111;
-    --ad-filter-w: 320px;
+    --ad-filter-w: 400px;
     --ad-surface-2: #242424;
     --ad-surface-3: #2a2a2a;
     background: var(--ad-bg) !important;
@@ -132,7 +132,7 @@
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main {
     display: grid !important;
-    grid-template-columns: 320px minmax(0, 1fr) !important;
+    grid-template-columns: var(--ad-filter-w, 400px) minmax(0, 1fr) !important;
     grid-template-rows: auto minmax(0, 1fr) !important;
     gap: 12px 28px !important;
     align-items: stretch !important;
@@ -188,8 +188,8 @@
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-main.auto-desk-main > .auto-search-hero {
     grid-column: 1 / 2 !important;
     grid-row: 2 / 3 !important;
-    width: 320px !important;
-    max-width: 320px !important;
+    width: var(--ad-filter-w, 400px) !important;
+    max-width: var(--ad-filter-w, 400px) !important;
     margin: 0 !important;
     position: relative !important;
     top: auto !important;

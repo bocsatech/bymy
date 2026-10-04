@@ -571,10 +571,16 @@
 
   function pickTitleFromRow(row) {
     const near = pickTitleNearImg(row?.querySelector?.("img") || row);
-    if (near) return near;
-    for (const line of String(row?.innerText || "").split("\n").map(clean).filter(Boolean)) {
+    if (near && !/^(módosítás|törlés|ártábla|kiemelés|címlap|képkezelés|top)$/i.test(near)) return near;
+    const text = String(row?.innerText || "");
+    const parenTitle = text.match(/([A-Za-záéíóöőúüűÁÉÍÓÖŐÚÜŰ0-9][^\n]{3,90}?)\s*\((\d{5,12})\)/);
+    if (parenTitle) {
+      const t = clean(parenTitle[1]);
+      if (t.length >= 6 && !/módosítás|törlés|ártábla|kiemelés/i.test(t)) return t;
+    }
+    for (const line of text.split("\n").map(clean).filter(Boolean)) {
       if (/^(módosítás|törlés|ártábla|kiemelés|címlap|képkezelés|top)$/i.test(line)) continue;
-      if (line.length >= 8 && /[A-Za-záéíóöőúüűÁÉÍÓÖŐÚÜŰ]/.test(line)) return line;
+      if (line.length >= 8 && /[A-Za-záéíóöőúüűÁÉÍÓÖŐÚÜŰ]/.test(line) && !/módosítás|törlés/i.test(line)) return line;
     }
     return "";
   }
@@ -801,21 +807,30 @@
       const text = String(val ?? "").trim();
       if (text && text.length < 200) map[key] = text;
     }
+    const visibleImage =
+      hqFromSrc(page.visibleImage || page.imageUrl || page.fo_kep || "") ||
+      clean(page.visibleImage || page.imageUrl || page.fo_kep || "");
+    const html = String(page.html || page.gyorsnezetHtml || "").slice(0, 45000);
     return {
       url: page.url || page.adminUrl || page.clickUrl || page.publicUrl || `https://admin.hasznaltauto.hu/hirdetesfeladas/szemelyauto?id=${listingId}`,
       listingId,
+      hasznaltauto_hirdetes_id: listingId,
       visibleTitle: page.visibleTitle || page.title || "",
+      visibleImage,
+      imageUrl: visibleImage,
+      fo_kep: visibleImage,
       visibleDescription: String(page.visibleDescription || page.description || page.leiras || "").slice(0, 2000),
       clickUrl: page.clickUrl || "",
       adminUrl: page.adminUrl || "",
       publicUrl: page.publicUrl || "",
       photoOnly: true,
-      gyartmany: page.gyartmany || "",
-      modell: page.modell || "",
+      gyartmany: page.gyartmany || page.brand || "",
+      modell: page.modell || page.model || "",
       tipus: page.tipus || "",
       km: page.km || "",
       map,
       felszereltseg: Array.isArray(page.felszereltseg) ? page.felszereltseg.slice(0, 80) : [],
+      html: html.length > 400 ? html : "",
     };
   }
   const PROGRESS_KEY = "bymy-ha-dealer-progress";
@@ -1083,10 +1098,13 @@
         return listingId ? { ...car, listingId } : car;
       })
       .filter((car) => {
+        const listingId = recoverHaId(car);
+        if (!listingId) return false;
         const title = clean(car.visibleTitle || car.title || "");
-        const img = clean(car.visibleImage || car.imageUrl || "");
-        if (/szerződésmódosítás|tájékoztató|^kilépés$/i.test(title) && !car.listingId) return false;
-        return Boolean(car.listingId || title.length >= 6 || img);
+        if (/^(módosítás|törlés|ártábla|kiemelés|címlap|képkezelés|top|szerződésmódosítás|tájékoztató|kilépés)$/i.test(title)) {
+          car.visibleTitle = "";
+        }
+        return true;
       });
     if (!cars.length) {
       hideProgress("Nincs másolható autó a listán");

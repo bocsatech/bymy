@@ -701,11 +701,22 @@
       return {
         url: page.url || page.clickUrl || "",
         listingId: page.listingId || "",
+        hasznaltauto_hirdetes_id: page.listingId || "",
+        visibleTitle: page.visibleTitle || page.title || "",
         visibleImage,
+        imageUrl: visibleImage,
+        fo_kep: visibleImage,
         imageJpegBase64: "",
         clickUrl: page.clickUrl || page.url || "",
         adminUrl: page.adminUrl || "",
         publicUrl: page.publicUrl || "",
+        brand: page.brand || "",
+        model: page.model || "",
+        gyartmany: page.gyartmany || page.brand || "",
+        modell: page.modell || page.model || "",
+        price: page.price || "",
+        km: page.km || "",
+        year: page.year || "",
         photoOnly: true,
       };
     }
@@ -1225,7 +1236,17 @@
 
     if (typeof onProgress === "function") onProgress(0, 1, "lista görgetés");
     await ensureListThumbsVisible();
-    merge(extractDealerListPages(document));
+    const docs = [document];
+    try {
+      for (const frame of document.querySelectorAll("iframe, frame")) {
+        try {
+          if (frame.contentDocument) docs.push(frame.contentDocument);
+        } catch {
+        }
+      }
+    } catch {
+    }
+    for (const doc of docs) merge(extractDealerListPages(doc));
     let found = Object.keys(byId).length;
     if (typeof onProgress === "function") {
       onProgress(found, Math.max(found, 1), found ? `lista: ${found} autó` : "lista keresés");
@@ -1794,10 +1815,18 @@
           pages.push({
             url: card.adminUrl || card.clickUrl || card.url || "",
             listingId: card.listingId,
+            visibleTitle: card.visibleTitle || "",
             visibleImage: imageUrl,
             clickUrl: card.clickUrl || card.url || "",
             adminUrl: card.adminUrl || "",
             publicUrl: card.publicUrl || "",
+            brand: card.brand || "",
+            model: card.model || "",
+            gyartmany: card.gyartmany || card.brand || "",
+            modell: card.modell || card.model || "",
+            price: card.price || "",
+            km: card.km || "",
+            year: card.year || "",
             photoOnly: true,
           });
           if (i % 5 === 0 || i === base.length - 1) showProgress(i + 1, base.length, "kép URL");

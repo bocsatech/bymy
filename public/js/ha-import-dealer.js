@@ -683,12 +683,12 @@
   function extractCarsFromPage() {
     const byId = new Map();
     for (const doc of docsInScope()) {
-      for (const car of extractCarsFromListingRows(doc)) byId.set(car.listingId, car);
       for (const car of extractCarsFromCdnDom(doc)) {
+        if (!car.listingId || !car.visibleImage) continue;
         const prev = byId.get(car.listingId);
         if (!prev) byId.set(car.listingId, car);
-        else if (!prev.visibleImage && car.visibleImage) {
-          byId.set(car.listingId, { ...prev, visibleImage: car.visibleImage });
+        else if (!prev.visibleTitle && car.visibleTitle) {
+          byId.set(car.listingId, { ...prev, ...car, visibleImage: prev.visibleImage || car.visibleImage });
         }
       }
     }
@@ -1090,39 +1090,28 @@
       return;
     }
 
-    showProgress(0, 1, "lista ellenőrzése");
+    showProgress(0, 1, "képek keresése");
     await quickScrollThumbs();
-    const cars = extractCarsFromPage()
-      .map((car) => {
-        const listingId = recoverHaId(car);
-        return listingId ? { ...car, listingId } : car;
-      })
-      .filter((car) => {
-        const listingId = recoverHaId(car);
-        if (!listingId) return false;
-        const title = clean(car.visibleTitle || car.title || "");
-        if (/^(módosítás|törlés|ártábla|kiemelés|címlap|képkezelés|top|szerződésmódosítás|tájékoztató|kilépés)$/i.test(title)) {
-          car.visibleTitle = "";
-        }
-        return true;
-      });
+    const cars = extractCarsFromPage().filter((car) => {
+      const listingId = recoverHaId(car);
+      const image = hqFromSrc(car.visibleImage || car.imageUrl || "");
+      return Boolean(listingId && image);
+    });
     if (!cars.length) {
-      hideProgress("Nincs másolható autó a listán");
+      hideProgress();
+      alert(
+        "Nem találtunk hasznaltautocdn képet a listán.\nGörgess le, amíg látszanak a thumbök, majd futtasd újra."
+      );
       return;
     }
 
-    let preparedDone = 0;
-    const prepared = await mapPool(cars, 6, async (car) => {
-      let next = car;
-      try {
-        if (car.listingId) next = await ensureCarDescription(car);
-      } catch {
-        next = car;
-      }
-      preparedDone += 1;
-      showProgress(preparedDone, cars.length, `másolás ${preparedDone}/${cars.length}`);
-      return slimDealerPage(next);
-    });
+    const prepared = cars.map((car) =>
+      slimDealerPage({
+        ...car,
+        listingId: recoverHaId(car),
+        visibleImage: hqFromSrc(car.visibleImage || car.imageUrl || "") || car.visibleImage,
+      })
+    );
     if (!prepared.length) {
       hideProgress("Nincs másolható autó a listán");
       return;

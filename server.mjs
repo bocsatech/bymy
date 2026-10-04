@@ -2514,7 +2514,7 @@ async function sendActivationEmail(email, activationToken, baseUrl) {
   try {
     await sendMail({
       to: email,
-      subject: "Add el autod.hu — fiók aktiválása",
+      subject: "Bymy — fiók aktiválása",
       text: `Szia!\n\nAktiváld a fiókodat ezen a linken (24 óráig érvényes):\n${link}\n\nHa nem te regisztráltál, hagyd figyelmen kívül ezt a levelet.\n`,
       html: `<p>Szia!</p><p>Aktiváld a fiókodat (24 óráig érvényes):</p><p><a href="${link}">${link}</a></p><p>Ha nem te regisztráltál, hagyd figyelmen kívül.</p>`,
     });

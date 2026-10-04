@@ -232,17 +232,42 @@
     return map;
   }
 
+  async function mapPool(items, concurrency, worker) {
+    const list = Array.isArray(items) ? items : [];
+    const out = new Array(list.length);
+    let next = 0;
+    const limit = Math.max(1, Math.min(concurrency, list.length || 1));
+    async function slot() {
+      while (next < list.length) {
+        const index = next;
+        next += 1;
+        try {
+          out[index] = await worker(list[index], index);
+        } catch {
+          out[index] = list[index];
+        }
+      }
+    }
+    await Promise.all(Array.from({ length: limit }, () => slot()));
+    return out;
+  }
+
   async function fetchGyorsnezetHtml(listingId) {
     const id = clean(listingId);
     if (!id) return "";
+    const controller = typeof AbortController !== "undefined" ? new AbortController() : null;
+    const timer = controller ? setTimeout(() => controller.abort(), 8000) : null;
     try {
       const res = await fetch(`https://admin.hasznaltauto.hu/gyorsnezet/szemelyauto/${id}`, {
         credentials: "include",
+        signal: controller?.signal,
       });
       if (!res.ok) return "";
       return await res.text();
     } catch {
       return "";
+    } finally {
+      if (timer) clearTimeout(timer);
     }
   }
 
@@ -548,7 +573,28 @@
     });
   }
 
-  const SAVE_CHUNK = 3;
+  const SAVE_CHUNK = 25;
+
+  function slimDealerPage(car) {
+    const page = car || {};
+    return {
+      url: page.url || page.adminUrl || page.clickUrl || page.publicUrl || "",
+      listingId: page.listingId || "",
+      visibleImage: page.visibleImage || page.imageUrl || "",
+      visibleTitle: page.visibleTitle || page.title || "",
+      visibleDescription: page.visibleDescription || page.description || page.leiras || "",
+      clickUrl: page.clickUrl || "",
+      adminUrl: page.adminUrl || "",
+      publicUrl: page.publicUrl || "",
+      photoOnly: true,
+      gyartmany: page.gyartmany || "",
+      modell: page.modell || "",
+      tipus: page.tipus || "",
+      km: page.km || "",
+      map: page.map && typeof page.map === "object" ? page.map : {},
+      felszereltseg: Array.isArray(page.felszereltseg) ? page.felszereltseg : [],
+    };
+  }
   const PROGRESS_KEY = "bymy-ha-dealer-progress";
 
   function listProgressKey() {
@@ -822,15 +868,18 @@
       return;
     }
 
-    const prepared = [];
-    for (let i = 0; i < cars.length; i += 1) {
-      showProgress(i + 1, cars.length, `előkészítés ${i + 1}/${cars.length}`);
+    let preparedDone = 0;
+    const prepared = await mapPool(cars, 6, async (car) => {
+      let next = car;
       try {
-        prepared.push(await ensureCarDescription(cars[i]));
+        next = await ensureCarDescription(car);
       } catch {
-        prepared.push(cars[i]);
+        next = car;
       }
-    }
+      preparedDone += 1;
+      showProgress(preparedDone, cars.length, `előkészítés ${preparedDone}/${cars.length}`);
+      return slimDealerPage(next);
+    });
 
     const resumed = loadDealerProgress(prepared.length);
     const batchId =

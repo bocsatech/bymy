@@ -87,8 +87,8 @@ function bookmarkletHref(mode) {
   const origin = location.origin;
   const isDealer = mode === "dealer";
   const src = isDealer
-    ? `${origin}/js/ha-dealer-import.js?v=haResume1`
-    : `${origin}/js/ha-import-bookmarklet.js?v=haDealerPhoto17`;
+    ? `${origin}/js/ha-dealer-import.js?v=haResume2`
+    : `${origin}/js/ha-import-bookmarklet.js?v=haDealerPhoto18`;
   const token = getBookmarkletToken() || getAuthToken() || "";
   const runner = isDealer ? "BymyHaDealerImport" : "BymyHaImport";
   return `javascript:void(function(){var o=${JSON.stringify(origin)};var m=${JSON.stringify(mode)};var t=${JSON.stringify(token)};var src=${JSON.stringify(src)}+"&t="+Date.now();function go(){try{window.${runner}.run({origin:o,mode:m,authToken:t});}catch(e){alert((e&&e.message)||e);}}try{delete window.${runner};}catch(e){window.${runner}=undefined;}var s=document.createElement("script");s.src=src;s.onload=go;s.onerror=function(){alert("A hasznaltauto.hu blokkolta a Bymy scriptet.");};(document.documentElement||document.body).appendChild(s);})();`;
@@ -684,18 +684,14 @@ function restoreDealerBatchUi() {
 window.addEventListener("message", (event) => {
   const data = acceptHaImportMessage(event);
   if (!data) return;
-  const deferAck = data.photoOnly === true || data.mode === "dealer";
-  // Kereskedői: ack csak mentés után — így a bookmarklet nem küldi egyszerre az összes nagy képet
-  if (!deferAck) ackHaImport(event, data, event.origin);
-  else {
-    data.__ackSource = event.source;
-    data.__ackOrigin = event.origin;
-  }
+  data.__ackSource = event.source;
+  data.__ackOrigin = event.origin;
+  ackHaImport(event, data, event.origin);
 
   const index = Math.max(1, Number(data.index) || 1);
   const total = Math.max(1, Number(data.total) || (Array.isArray(data.pages) ? data.pages.length : 1) || 1);
   setStatus(
-    total > 1 || deferAck
+    total > 1
       ? `Érkezett: ${index} / ${total} — mentés indul…`
       : Array.isArray(data.pages) && data.pages.length
         ? `Érkezett: ${data.pages.length} tétel a hasznaltauto.hu-ról…`
@@ -703,9 +699,7 @@ window.addEventListener("message", (event) => {
   );
 
   const key = haImportKey(data);
-  // Kereskedői: ne ack-eljük a retry üzeneteket mentés nélkül (hamis siker)
   if (seenHaImportKeys.has(key) || (importBusy && key === currentHaImportKey)) {
-    if (!deferAck) ackHaImport(event, data, event.origin);
     return;
   }
   try {
@@ -757,7 +751,7 @@ async function runMessageImport(data) {
   const index = Math.max(1, Number(data.index) || 1);
   const total = Math.max(1, Number(data.total) || pages.length);
   const batch = ensureDealerBatch(data);
-  const SAVE_BATCH = data.mode === "dealer" || data.photoOnly === true ? 3 : 1;
+  const SAVE_BATCH = data.mode === "dealer" || data.photoOnly === true ? 25 : 1;
   const abortMs = SAVE_BATCH > 1 ? 90000 : 45000;
   setStatus(`Mentés: ${index} / ${total}…`);
 

@@ -767,11 +767,11 @@
     max-width: none !important;
     white-space: nowrap !important;
     flex: 0 0 auto !important;
-    color: #2563eb !important;
+    color: #111 !important;
     font: 700 0.9rem/1 system-ui, sans-serif !important;
   }
 
-  /* Ne rejtsd el a fogyasztás egységet desk-en (HA: kék l/100 km) */
+  /* Ne rejtsd el a fogyasztás egységet desk-en (l/100 km) */
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-panel
     .home-qs-field--number

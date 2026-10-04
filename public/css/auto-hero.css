@@ -2370,7 +2370,7 @@ body[data-site-page="teherauto"] .auto-search-tabs {
     border: 0 !important;
     border-bottom: 0 !important;
     background: transparent !important;
-    color: #2563eb !important;
+    color: #111 !important;
     font: 700 0.9rem/1 system-ui, sans-serif !important;
     white-space: nowrap !important;
     width: auto !important;
@@ -2775,7 +2775,7 @@ body[data-site-page="teherauto"] .auto-search-tabs {
     justify-content: flex-end !important;
     margin: 0 !important;
     padding: 0.45rem 0 0.5rem !important;
-    color: #2563eb !important;
+    color: #111 !important;
     font: 700 0.9rem/1 system-ui, sans-serif !important;
     white-space: nowrap !important;
     border: 0 !important;

@@ -879,25 +879,11 @@
       return;
     }
 
-    showProgress(0, 1, "Bymy Autóimport keresése");
-    const target = await ensureBymyTarget(origin);
-    if (!target && !token) {
-      alert(
-        "Nem nyílt meg a Bymy Autóimport.\n\n1) Engedd a felugró ablakokat\n2) Nyisd meg kézzel: Bymy → Autóimport (kereskedői)\n3) Onnan: admin megnyitása → könyvjelző"
-      );
-      hideProgress();
-      return;
-    }
-    if (!target) {
-      showProgress(0, 1, "nincs Bymy fül — próbálkozás közvetlen mentéssel");
-    }
-
-    showProgress(0, 1, "képek keresése");
+    showProgress(0, 1, "lista ellenőrzése");
     await quickScrollThumbs();
     const cars = extractCarsFromPage();
     if (!cars.length) {
-      hideProgress();
-      alert("A listán nincs hirdetés — nincs mit importálni.");
+      hideProgress("Nincs hirdetés a listán");
       return;
     }
 
@@ -915,9 +901,21 @@
     });
     const prepared = preparedAll.filter((page) => /^\d{5,12}$/.test(String(page?.listingId || "")));
     if (!prepared.length) {
-      hideProgress();
-      alert("A listán nincs hirdetés — nincs mit importálni.");
+      hideProgress("Nincs hirdetés a listán");
       return;
+    }
+
+    let target = null;
+    if (!token) {
+      showProgress(0, 1, "Bymy Autóimport keresése");
+      target = await ensureBymyTarget(origin);
+      if (!target) {
+        alert(
+          "Nem nyílt meg a Bymy Autóimport.\n\n1) Engedd a felugró ablakokat\n2) Nyisd meg kézzel: Bymy → Autóimport (kereskedői)\n3) Onnan: admin megnyitása → könyvjelző"
+        );
+        hideProgress();
+        return;
+      }
     }
 
     const resumed = loadDealerProgress(prepared.length);

@@ -11,32 +11,21 @@ import {
   getLatestListing,
   listListingsWithPreview,
   countNavListings,
-  countListingsPublic,
   deleteListing,
   dbStats,
   listFieldDefs,
   listingSourceExists,
-  findListingBySource,
+  listingIdsExist,
   updateListingFoKep,
   updateListingPhotoUrls,
   clearListingPhotos,
   recordListingView,
   listMyListings,
-  listListingsByOwner,
-  getListingOwnerMeta,
   updateListingStatus,
-  patchListingFormFields,
   getDbPath,
   closeDb,
 } from "./lib/db-store.mjs";
 import { isSupabaseBackend } from "./lib/supabase/client.mjs";
-import {
-  assertBusinessVerticalAllowed,
-  assertCanCreateListing,
-  isBusinessAccount,
-  verticalFromForm,
-} from "./lib/listing-quota.mjs";
-import { assertCanImportExistingListing } from "./lib/listing-import-guard.mjs";
 import { getSiteBlocks, saveSiteBlocks } from "./lib/site-blocks.mjs";
 import {
   getSiteHero,
@@ -47,10 +36,6 @@ import {
   ensureServerImageDirs,
 } from "./lib/site-hero.mjs";
 import { getHubPromoPublic, resolveHubPromoFile } from "./lib/hub-promo.mjs";
-import {
-  getAdFormDeskGuidePublic,
-  resolveAdFormDeskGuideFile,
-} from "./lib/ad-form-desk-guide.mjs";
 import {
   deleteQuery,
   listFugvenyLists,
@@ -70,25 +55,15 @@ import {
   importPartners,
   listPartners,
   listPostalCities,
-  listPostalCodes,
   partnerStats,
   savePartner,
   upsertPostalCodes,
 } from "./lib/partners.mjs";
-import { geocodeHungaryAddress } from "./lib/geocode.mjs";
-import {
-  PARTNER_CATEGORIES,
-  categoriesForVertical,
-  normalizePartnerVertical,
-} from "./lib/partner-categories.mjs";
+import { PARTNER_CATEGORIES } from "./lib/partner-categories.mjs";
 import { estimateValuation, valuationOptions } from "./lib/valuation.mjs";
-import { estimateMarketValuation, marketDataAvailable } from "./lib/market-valuation.mjs";
-import { isAllowedQrTarget, resolveQrTargetUrl, qrPngBuffer } from "./lib/qr.mjs";
 import {
   ensureVehicleCatalog,
   getVehicleCatalog,
-  getVehicleCatalogForKind,
-  normalizeVehicleCatalogKind,
   catalogSummary,
   listModelTypes,
   listModelYears,
@@ -118,14 +93,8 @@ import {
   sessionCookieHeader,
   setUserDisplayName,
 } from "./lib/web-users-store.mjs";
-import { isSupabaseSchemaMissingError, friendlyAuthErrorMessage } from "./lib/supabase/users.mjs";
-import {
-  ensureSmtpExample,
-  isSmtpConfigured,
-  mailTransportStatus,
-  sendMailSmtp,
-  smtpConfigPath,
-} from "./lib/mail.mjs";
+import { isSupabaseSchemaMissingError } from "./lib/supabase/users.mjs";
+import { ensureSmtpExample, isSmtpConfigured, sendMail, smtpConfigPath } from "./lib/mail.mjs";
 import {
   appleNameFromForm,
   buildAuthorizeUrl,
@@ -142,30 +111,6 @@ import {
   verifyAppleIdentityToken,
 } from "./lib/oauth.mjs";
 import { listingImageDir, resolveListingImageFile, fetchRemoteListingImage, clearListingImageFiles } from "./lib/listing-image.mjs";
-import { resolveFilesystemImageMediaFile, imageStorageRoot } from "./lib/filesystem-image-storage.mjs";
-import { getImageStorageBackend } from "./lib/image-storage-backend.mjs";
-import {
-  HA_IMPORT_ORIGINS,
-  createImportToken,
-  getUserByImportToken,
-  haOriginRequiresImportToken,
-  isImportScopedToken,
-  consumeImportSaveQuota,
-  importTokenTtlMs,
-  importRateLimitPerHour,
-} from "./lib/import-auth.mjs";
-import { attachSellerProfile, getSellerInventoryContactForUserId, publicSellerInventoryContact } from "./lib/listing-detail-seller.mjs";
-import {
-  getSellerRatingSummary,
-  listReceivedSellerRatings,
-  submitSellerRating,
-} from "./lib/seller-ratings.mjs";
-import {
-  buildListingOpenGraph,
-  injectOpenGraphIntoHtml,
-  isSocialShareCrawler,
-} from "./lib/listing-og.mjs";
-import { injectListingBootIntoHtml } from "./lib/listing-html-boot.mjs";
 import { saveListingPhotos } from "./lib/listing-photos.mjs";
 import {
   dataUrlToBuffer,
@@ -175,7 +120,6 @@ import {
   validateImageBuffer,
 } from "./lib/supabase/image-storage.mjs";
 import { canManageListing } from "./lib/listing-meta.mjs";
-import { improveListingDescription } from "./lib/improve-listing-description.mjs";
 import {
   getOwnPartnerProfile,
   getPublicPartnerProfile,
@@ -189,16 +133,10 @@ import { getLevel1TokenFromRequest, getLevel1AdminBySession } from "./lib/level1
 import { safeInternalPath } from "./lib/safe-path.mjs";
 import { rateLimit, clientIp } from "./lib/rate-limit.mjs";
 import { applySecurityHeaders } from "./lib/security-headers.mjs";
-import { turnstilePublicConfig, turnstileHealthStatus, verifyTurnstileToken } from "./lib/turnstile.mjs";
 import { recordPageVisit, visitorCookieHeader } from "./lib/site-visitors.mjs";
 import { isIpBlocked } from "./lib/site-ip-blocks.mjs";
-import { enforceMembersGate, isMembersOnlySite } from "./lib/site-gate.mjs";
+import { enforceMembersGate } from "./lib/site-gate.mjs";
 import { readJsonBody } from "./lib/read-json-body.mjs";
-import {
-  applyListingAccessPolicy,
-  sanitizeListingList,
-} from "./lib/listing-api-access.mjs";
-import { withOptionalSessionToken } from "./lib/auth-client-token.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 loadEnvFiles(__dirname);
@@ -219,101 +157,6 @@ function assertAuthRate(req, res, bucket, { limit = 12, windowMs = 15 * 60 * 100
     return false;
   }
   return true;
-}
-
-function assertPublicListingRate(req, res, bucket, { limit = 60, windowMs = 15 * 60 * 1000 } = {}) {
-  const ip = clientIp(req);
-  const result = rateLimit(`${bucket}:${ip}`, { limit, windowMs });
-  if (!result.ok) {
-    sendJson(
-      res,
-      429,
-      { error: "Túl sok kérés. Próbáld újra később." },
-      { "Retry-After": String(result.retryAfterSec || 60) }
-    );
-    return false;
-  }
-  return true;
-}
-
-async function listingAccessFlags(req) {
-  const user = await requestUser(req);
-  const admin = await getLevel1AdminBySession(getLevel1TokenFromRequest(req));
-  return { user, isAdmin: Boolean(admin) };
-}
-
-/** Rövid cache a hirdetés HTML boot-hoz — TTFB ne várjon minden kattintáskor Supabase-re. */
-const htmlBootListingMemo = new Map();
-const HTML_BOOT_TTL_MS = Math.max(5_000, Number(process.env.BYMY_HTML_BOOT_TTL_MS) || 20_000);
-
-/** Hirdetés HTML: publikus detail + partner (ugyanaz, mint a detail API). */
-async function loadListingForHtmlBoot(req, listingId) {
-  const id = Number(listingId);
-  if (!Number.isFinite(id) || id <= 0) return null;
-  const access = await listingAccessFlags(req);
-  const cacheKey = `${id}:${access?.user?.id || 0}:${access?.isAdmin ? 1 : 0}`;
-  const hit = htmlBootListingMemo.get(cacheKey);
-  if (hit && Date.now() - hit.at < HTML_BOOT_TTL_MS) return hit.listing;
-
-  const listing = await getListing(id, { mode: "detail" });
-  if (!listing || listing.status !== "feladott") return null;
-  if (listing.detail) {
-    listing.detail = await attachSellerProfile(listing.detail, listing.user_id);
-  }
-  if (listing.user_id) {
-    try {
-      listing.partner = await getPublicPartnerProfileByUserId(listing.user_id);
-    } catch {
-      listing.partner = null;
-    }
-  }
-  const pub = slimListingForHtmlBoot(applyListingAccessPolicy(listing, access));
-  htmlBootListingMemo.set(cacheKey, { at: Date.now(), listing: pub });
-  return pub;
-}
-
-/** Ne küldjünk data: URL / óriás mezőket az első HTML-ben. */
-function slimListingForHtmlBoot(listing) {
-  if (!listing || typeof listing !== "object") return listing;
-  const next = JSON.parse(JSON.stringify(listing));
-  if (next.detail && typeof next.detail === "object") {
-    const av = String(next.detail.sellerAvatarUrl || "");
-    if (av.startsWith("data:")) next.detail.sellerAvatarUrl = "";
-    if (typeof next.detail.description === "string" && next.detail.description.length > 4000) {
-      next.detail.description = `${next.detail.description.slice(0, 4000)}…`;
-    }
-  }
-  return next;
-}
-
-async function serveHirdetesHtml(req, res) {
-  const filePath = join(PUBLIC, "hirdetes.html");
-  let html = readFileSync(filePath, "utf8");
-  const url = new URL(req.url ?? "", `http://${HOST}`);
-  const listingId = Number(url.searchParams.get("id"));
-  let listing = null;
-  if (Number.isFinite(listingId) && listingId > 0) {
-    try {
-      listing = await loadListingForHtmlBoot(req, listingId);
-    } catch (error) {
-      console.warn("Hirdetés HTML boot:", error?.message || error);
-    }
-  }
-  if (listing) {
-    html = injectListingBootIntoHtml(html, listing);
-    if (isSocialShareCrawler(req)) {
-      const og = buildListingOpenGraph({
-        listing,
-        baseUrl: publicBaseUrl(req),
-      });
-      html = injectOpenGraphIntoHtml(html, og);
-    }
-  }
-  res.writeHead(200, {
-    "Content-Type": MIME[".html"],
-    "Cache-Control": "private, max-age=0, must-revalidate",
-  });
-  res.end(html);
 }
 
 function adminBypassBlockedIp(pathname) {
@@ -395,34 +238,18 @@ function sendRedirect(res, location, headers = {}) {
 async function handleMediaProxy(req, res) {
   try {
     const urlObj = new URL(req.url ?? "", `http://${HOST}:${PORT}`);
-    let target = urlObj.searchParams.get("url");
+    const target = urlObj.searchParams.get("url");
     if (!target) {
       sendJson(res, 400, { error: "Hiányzó url paraméter." });
       return;
     }
-    const { upgradeHaImageUrl, haImageUrlCandidates, fetchRemoteListingImage } = await import(
-      "./lib/listing-image.mjs"
-    );
-    target = upgradeHaImageUrl(target) || target;
-    let lastErr = null;
-    for (const candidate of haImageUrlCandidates(target)) {
-      try {
-        const { buffer, contentType } = await fetchRemoteListingImage(candidate);
-        if (buffer?.length >= 500) {
-          res.writeHead(200, {
-            "Content-Type": contentType,
-            "Cache-Control": "public, max-age=86400",
-            "Content-Length": String(buffer.length),
-          });
-          res.end(buffer);
-          return;
-        }
-      } catch (error) {
-        lastErr = error;
-      }
-    }
-    const status = lastErr?.code === "FORBIDDEN_IMAGE" ? 403 : 502;
-    sendJson(res, status, { error: lastErr?.message ?? "Kép proxy hiba." });
+    const { buffer, contentType } = await fetchRemoteListingImage(target);
+    res.writeHead(200, {
+      "Content-Type": contentType,
+      "Cache-Control": "public, max-age=86400",
+      "Content-Length": String(buffer.length),
+    });
+    res.end(buffer);
   } catch (error) {
     const status = error.code === "FORBIDDEN_IMAGE" ? 403 : 502;
     sendJson(res, status, { error: error.message ?? "Kép proxy hiba." });
@@ -439,67 +266,27 @@ function sendJson(res, status, data, headers = {}) {
   res.end(JSON.stringify(data));
 }
 
+const HA_IMPORT_ORIGINS = new Set([
+  "https://www.hasznaltauto.hu",
+  "https://hasznaltauto.hu",
+  "https://admin.hasznaltauto.hu",
+]);
+
 function haImportCorsHeaders(req) {
   const origin = String(req.headers.origin ?? "").trim();
-  const base = {
+  if (!HA_IMPORT_ORIGINS.has(origin)) return {};
+  return {
+    "Access-Control-Allow-Origin": origin,
     "Access-Control-Allow-Methods": "POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization",
     "Access-Control-Max-Age": "86400",
+    Vary: "Origin",
   };
-  if (HA_IMPORT_ORIGINS.has(origin)) {
-    return {
-      ...base,
-      "Access-Control-Allow-Origin": origin,
-      Vary: "Origin",
-    };
-  }
-  // Referer fallback (néhány régi böngésző / Win7)
-  const referer = String(req.headers.referer ?? req.headers.referrer ?? "").trim();
-  try {
-    const refOrigin = new URL(referer).origin;
-    if (HA_IMPORT_ORIGINS.has(refOrigin)) {
-      return {
-        ...base,
-        "Access-Control-Allow-Origin": refOrigin,
-        Vary: "Origin",
-      };
-    }
-  } catch {
-  }
-  // Credential nélküli import (token a body-ban): * — különben Failed to fetch Origin nélkül
-  if (!origin) {
-    return {
-      ...base,
-      "Access-Control-Allow-Origin": "*",
-    };
-  }
-  return {};
 }
 
-async function serveStatic(path, res, req = null) {
-  const rel = path === "/" ? "index.html" : path.replace(/^\//, "");
-  // HA Autóimport postMessage: COOP ne vágja el az opener/ack kapcsolatot (Win7)
-  if (rel === "beallitasok.html" || rel === "import.html" || rel === "fiok.html") {
-    try {
-      res.setHeader("Cross-Origin-Opener-Policy", "unsafe-none");
-    } catch {
-    }
-  }
+function serveStatic(path, res) {
   applySecurityHeaders(res);
-
-  // Saját képtár (BYMY_IMAGE_ROOT): /media/img/listing-images/…
-  if (rel.startsWith("media/img/")) {
-    const mediaFile = resolveFilesystemImageMediaFile(`/${rel}`);
-    if (mediaFile) {
-      const ext = extname(mediaFile);
-      res.writeHead(200, {
-        "Content-Type": MIME[ext] ?? "application/octet-stream",
-        "Cache-Control": "public, max-age=31536000, immutable",
-      });
-      res.end(readFileSync(mediaFile));
-      return;
-    }
-  }
+  const rel = path === "/" ? "index.html" : path.replace(/^\//, "");
 
   // Hirdetésképek: ~/.autosweb/uploads (túléli a frissítést)
   if (rel.startsWith("uploads/listings/")) {
@@ -518,19 +305,6 @@ async function serveStatic(path, res, req = null) {
   // Hub promo (kezdőlap téglalapok)
   if (rel.startsWith("uploads/hub-promo/")) {
     const uploadFile = resolveHubPromoFile(`/${rel}`);
-    if (uploadFile) {
-      const ext = extname(uploadFile);
-      res.writeHead(200, {
-        "Content-Type": MIME[ext] ?? "application/octet-stream",
-        "Cache-Control": "public, max-age=86400",
-      });
-      res.end(readFileSync(uploadFile));
-      return;
-    }
-  }
-
-  if (rel.startsWith("uploads/ad-form-desk-guide/")) {
-    const uploadFile = resolveAdFormDeskGuideFile(`/${rel}`);
     if (uploadFile) {
       const ext = extname(uploadFile);
       res.writeHead(200, {
@@ -609,64 +383,16 @@ async function serveStatic(path, res, req = null) {
         readFileSync(join(PUBLIC, "partials", "site-side-controls.html"), "utf8")
       );
     }
-    if (rel === "hirdetes.html" && req) {
-      const url = new URL(req.url ?? "", `http://${HOST}`);
-      const listingId = Number(url.searchParams.get("id"));
-      let listing = null;
-      if (Number.isFinite(listingId) && listingId > 0) {
-        try {
-          listing = await loadListingForHtmlBoot(req, listingId);
-        } catch (error) {
-          console.warn("Hirdetés HTML boot:", error?.message || error);
-        }
-      }
-      if (listing) {
-        html = injectListingBootIntoHtml(html, listing);
-        if (isSocialShareCrawler(req)) {
-          const og = buildListingOpenGraph({
-            listing,
-            baseUrl: publicBaseUrl(req),
-          });
-          html = injectOpenGraphIntoHtml(html, og);
-        }
-      }
-    }
     res.writeHead(200, {
       "Content-Type": MIME[".html"],
-      // private + max-age=0: friss HTML, de bfcache (vissza gomb) megengedett.
-      // no-store tiltja a bfcache-t → lista/detail navigáció lassú visszalépés.
-      "Cache-Control": "private, max-age=0, must-revalidate",
+      "Cache-Control": "no-store, no-cache, must-revalidate",
     });
     res.end(html);
     return;
   }
-  // Fingerprintelt JS/CSS/font/kép: hosszú immutable. JSON katalógus: 1 nap + SWR.
-  // HTML: private max-age=0 (bfcache OK).
-  const immutableAsset =
-    ext === ".js" ||
-    ext === ".css" ||
-    ext === ".woff" ||
-    ext === ".woff2" ||
-    ext === ".ttf" ||
-    ext === ".otf" ||
-    ext === ".svg" ||
-    ext === ".png" ||
-    ext === ".jpg" ||
-    ext === ".jpeg" ||
-    ext === ".webp" ||
-    ext === ".gif" ||
-    ext === ".ico" ||
-    ext === ".map";
-  const catalogJson = ext === ".json";
   res.writeHead(200, {
     "Content-Type": MIME[ext] ?? "application/octet-stream",
-    "Cache-Control": immutableAsset
-      ? "public, max-age=31536000, immutable"
-      : catalogJson
-        ? "public, max-age=86400, stale-while-revalidate=604800"
-        : ext === ".html"
-          ? "private, max-age=0, must-revalidate"
-          : "no-store, no-cache, must-revalidate",
+    "Cache-Control": "no-store, no-cache, must-revalidate",
   });
   res.end(readFileSync(filePath));
 }
@@ -733,33 +459,26 @@ async function handleImageUploadApi(req, res) {
       },
     });
 
-    let asset = null;
-    try {
-      asset = await saveImageAssetMetadata({
-        bucket,
-        path: uploaded.path,
-        publicUrl: uploaded.publicUrl,
-        entityType,
-        entityId,
-        uploadedByUserId: user.id,
-        originalName: fileName,
-        contentType: uploaded.format ? `image/${uploaded.format}` : 'image/webp',
-        width: uploaded.width,
-        height: uploaded.height,
-        fileSize: uploaded.size,
-        processingStatus: 'ready',
-      });
-    } catch (metaError) {
-      console.warn("[uploads] image_assets metadata skipped:", metaError?.message ?? metaError);
-    }
+    const asset = await saveImageAssetMetadata({
+      bucket,
+      path: uploaded.path,
+      publicUrl: uploaded.publicUrl,
+      entityType,
+      entityId,
+      uploadedByUserId: user.id,
+      originalName: fileName,
+      contentType: uploaded.format ? `image/${uploaded.format}` : 'image/webp',
+      width: uploaded.width,
+      height: uploaded.height,
+      fileSize: uploaded.size,
+      processingStatus: 'ready',
+    });
 
     sendJson(res, 200, {
       ok: true,
       bucket,
       url: uploaded.publicUrl,
-      publicUrl: uploaded.publicUrl,
       path: uploaded.path,
-      variants: uploaded.variants || null,
       asset,
     });
   } catch (error) {
@@ -768,7 +487,6 @@ async function handleImageUploadApi(req, res) {
 }
 
 async function handleOpenChrome(req, res) {
-  if (!(await requireLevel1Admin(req, res))) return;
   let body;
   try {
     body = await readBody(req);
@@ -796,11 +514,6 @@ async function handleOpenChrome(req, res) {
 }
 
 async function handleImportDiscover(req, res) {
-  const user = await requestUser(req);
-  if (!user) {
-    sendJson(res, 401, { error: "Csak regisztrált felhasználók importálhatnak.", code: "AUTH_REQUIRED" });
-    return;
-  }
   let body;
   try {
     body = await readBody(req);
@@ -826,6 +539,11 @@ async function handleImportExtracted(req, res) {
     res.end();
     return;
   }
+  const user = await requestUser(req);
+  if (!user) {
+    sendJson(res, 401, { error: "Az importhoz be kell jelentkezned a Bymy fiókodba." }, cors);
+    return;
+  }
   let body;
   try {
     body = await readBody(req);
@@ -833,68 +551,8 @@ async function handleImportExtracted(req, res) {
     sendJson(res, 400, { error: "Érvénytelen JSON." }, cors);
     return;
   }
-  // HA bookmarklet (Win7): token a body-ban + text/plain — nincs CORS preflight
-  const bodyToken = String(body?.authToken || body?.token || "").trim();
-  const user = await requestImportUser(req, bodyToken);
-  if (!user) {
-    const hint = haOriginRequiresImportToken(req) || bodyToken
-      ? "Frissítsd a könyvjelzőt a Bymy Autóimport oldalon (Másolás gomb), majd futtasd újra."
-      : "Az importhoz be kell jelentkezned a Bymy fiókodba.";
-    sendJson(res, 401, { error: hint, code: "AUTH_REQUIRED" }, cors);
-    return;
-  }
-
-  const urlCount = [
-    ...(Array.isArray(body.urls) ? body.urls : []),
-    body.url ? body.url : "",
-  ]
-    .map((item) => String(item ?? "").trim())
-    .filter(Boolean).length;
-  const pageCount = Math.min(
-    500,
-    (Array.isArray(body.pages) ? body.pages.length : 0) +
-      (body.page && typeof body.page === "object" ? 1 : 0) +
-      urlCount
-  );
-  const quota = consumeImportSaveQuota(user.id, Math.max(1, pageCount));
-  if (!quota.ok) {
-    sendJson(
-      res,
-      429,
-      {
-        error: `Import limit (${importRateLimitPerHour()} hirdetés / óra / fiók). Próbáld később.`,
-        code: "IMPORT_RATE_LIMIT",
-      },
-      { ...cors, "Retry-After": String(quota.retryAfterSec || 300) }
-    );
-    return;
-  }
 
   try {
-    const photoOnly =
-      body.photoOnly === true ||
-      body.mode === "dealer" ||
-      (Array.isArray(body.pages) && body.pages.length > 0 && body.pages.every((p) => p?.photoOnly));
-
-    if (photoOnly) {
-      const { saveDealerPhotoImportPages } = await import("./lib/ha-dealer-photo-import.mjs");
-      const { MAX_IMPORT_BATCH } = await import("./lib/ha-import-save.mjs");
-      const pages = [];
-      if (Array.isArray(body.pages)) pages.push(...body.pages);
-      if (body.page && typeof body.page === "object") pages.push(body.page);
-      if (!pages.length) {
-        sendJson(res, 400, { error: "Nincs importálandó oldal (kép)." }, cors);
-        return;
-      }
-      const result = await saveDealerPhotoImportPages({
-        pages,
-        userId: user.id,
-        limit: body.limit ?? MAX_IMPORT_BATCH,
-      });
-      sendJson(res, 200, { ok: true, result }, cors);
-      return;
-    }
-
     const { pageFromPublicUrl, saveExtractedPages, MAX_IMPORT_BATCH } = await import("./lib/ha-import-save.mjs");
     const pages = [];
     if (Array.isArray(body.pages)) pages.push(...body.pages);
@@ -931,111 +589,7 @@ async function handleImportExtracted(req, res) {
   }
 }
 
-/** HA könyvjelző form+iframe híd (Win7): nincs CORS fetch; a válasz postMessage a parentnek. */
-async function handleImportHaBridge(req, res) {
-  const sendBridgeHtml = (bridgeId, payload) => {
-    const safe = JSON.stringify(payload).replace(/</g, "\\u003c");
-    const id = JSON.stringify(String(bridgeId || ""));
-    const html = `<!doctype html><meta charset="utf-8"><title>Bymy import</title>
-<script>
-(function(){
-  var id=${id};
-  var payload=${safe};
-  payload.bridgeId=id;
-  payload.type="bymy-ha-bridge-result";
-  try{ if(window.parent&&window.parent!==window) window.parent.postMessage(payload,"*"); }catch(e){}
-  try{ if(window.opener&&!window.opener.closed) window.opener.postMessage(payload,"*"); }catch(e){}
-  try{ document.body.textContent=payload.ok?"OK":(payload.error||"Hiba"); }catch(e){}
-})();
-</script>`;
-    // Ne COOP / X-Frame-Options DENY — iframe a HA oldalról; különben bridge timeout
-    res.writeHead(200, {
-      "Content-Type": "text/html; charset=utf-8",
-      "Cache-Control": "no-store",
-      "X-Content-Type-Options": "nosniff",
-      "Content-Security-Policy":
-        "default-src 'none'; script-src 'unsafe-inline'; base-uri 'none'; " +
-        "frame-ancestors https://admin.hasznaltauto.hu https://www.hasznaltauto.hu https://hasznaltauto.hu",
-      "Referrer-Policy": "no-referrer",
-    });
-    res.end(html);
-  };
-
-  if (req.method !== "POST") {
-    sendBridgeHtml("", { ok: false, error: "POST kell." });
-    return;
-  }
-
-  let form = {};
-  try {
-    const raw = await readRawBody(req);
-    form = parseFormBody(raw);
-  } catch {
-    sendBridgeHtml("", { ok: false, error: "Érvénytelen form." });
-    return;
-  }
-
-  const bridgeId = String(form.bridgeId || "");
-  const token = String(form.token || form.authToken || "").trim();
-  let payload = {};
-  try {
-    payload = form.payload ? JSON.parse(String(form.payload)) : {};
-  } catch {
-    sendBridgeHtml(bridgeId, { ok: false, error: "Érvénytelen payload." });
-    return;
-  }
-
-  if (!token || !isImportScopedToken(token)) {
-    sendBridgeHtml(bridgeId, {
-      ok: false,
-      error: "Frissítsd a könyvjelzőt a Bymy Autóimporton (Másolás).",
-    });
-    return;
-  }
-  const user = await getUserByImportToken(token);
-  if (!user) {
-    sendBridgeHtml(bridgeId, { ok: false, error: "Lejárt import token — másold újra." });
-    return;
-  }
-
-  const pages = [];
-  if (Array.isArray(payload.pages)) pages.push(...payload.pages);
-  if (payload.page && typeof payload.page === "object") pages.push(payload.page);
-  if (!pages.length) {
-    sendBridgeHtml(bridgeId, { ok: false, error: "Nincs importálandó oldal." });
-    return;
-  }
-
-  const quota = consumeImportSaveQuota(user.id, Math.max(1, pages.length));
-  if (!quota.ok) {
-    sendBridgeHtml(bridgeId, { ok: false, error: "Import limit — próbáld később." });
-    return;
-  }
-
-  try {
-    const { saveDealerPhotoImportPages } = await import("./lib/ha-dealer-photo-import.mjs");
-    const { MAX_IMPORT_BATCH } = await import("./lib/ha-import-save.mjs");
-    const result = await saveDealerPhotoImportPages({
-      pages,
-      userId: user.id,
-      limit: payload.limit ?? MAX_IMPORT_BATCH,
-    });
-    sendBridgeHtml(bridgeId, { ok: true, result });
-  } catch (error) {
-    sendBridgeHtml(bridgeId, {
-      ok: false,
-      error: error.message ?? String(error),
-      result: error.importResult || null,
-    });
-  }
-}
-
 async function handleImportClient(req, res) {
-  const user = await requestUser(req);
-  if (!user) {
-    sendJson(res, 401, { error: "Csak regisztrált felhasználók importálhatnak.", code: "AUTH_REQUIRED" });
-    return;
-  }
   let body;
   try {
     body = await readBody(req);
@@ -1046,7 +600,6 @@ async function handleImportClient(req, res) {
   try {
     const { importFromClient } = await import("./lib/import-client.mjs");
     const result = await importFromClient({
-      userId: user.id,
       listHtml: body.listHtml,
       listUrl: body.listUrl,
       listings: body.listings,
@@ -1063,11 +616,6 @@ async function handleImportClient(req, res) {
 }
 
 async function handleImport(req, res) {
-  const user = await requestUser(req);
-  if (!user) {
-    sendJson(res, 401, { error: "Csak regisztrált felhasználók importálhatnak.", code: "AUTH_REQUIRED" });
-    return;
-  }
   if (importRunning) {
     sendJson(res, 409, { error: "Már fut egy import." });
     return;
@@ -1118,84 +666,11 @@ async function requestUser(req) {
   return getUserBySessionToken(getSessionTokenFromRequest(req));
 }
 
-async function requestImportUser(req, bodyToken = "") {
-  const headerToken = getSessionTokenFromRequest(req);
-  const token = String(headerToken || bodyToken || "").trim();
-  if (!token) return null;
-  if (haOriginRequiresImportToken(req)) {
-    if (!isImportScopedToken(token)) return null;
-    return getUserByImportToken(token);
-  }
-  if (isImportScopedToken(token)) return getUserByImportToken(token);
-  return getUserBySessionToken(token);
-}
-
-function allowDevSecretsInResponse() {
-  return String(process.env.ALLOW_DEV_SECRETS ?? "").trim() === "1";
-}
-
-async function requireLevel1Admin(req, res) {
-  const admin = await getLevel1AdminBySession(getLevel1TokenFromRequest(req));
-  if (!admin) {
-    sendJson(res, 401, { error: "Admin belépés szükséges (Bocsatech)." });
-    return null;
-  }
-  return admin;
-}
-
-async function assertNewListingAllowed(req, res, user, formData) {
-  const mine = await listMyListings({ userId: user.id, limit: 500 });
-  const check = assertCanCreateListing({ user, formData, existingListings: mine });
-  if (!check.ok) {
-    sendJson(res, check.status || 403, { error: check.error, code: check.code });
-    return false;
-  }
-  return true;
-}
-
-/** Boost feed rövid cache — owner-scan ne fusson minden lista-kérésnél. */
-const boostFeedMemo = new Map();
-const BOOST_FEED_TTL_MS = Math.max(5_000, Number(process.env.BYMY_BOOST_FEED_TTL_MS) || 20_000);
-
 async function handleListingsApi(req, res, pathname) {
   const latestMatch = pathname === "/api/listings/latest";
   const listMatch = pathname === "/api/listings";
   const batchMatch = pathname === "/api/listings/batch";
   const idMatch = pathname.match(/^\/api\/listings\/(\d+)$/);
-
-  if (pathname === "/api/listings/improve-description" && req.method === "POST") {
-    const user = await requestUser(req);
-    if (!user) {
-      sendJson(res, 401, { error: "Nem vagy bejelentkezve." });
-      return;
-    }
-    const rl = rateLimit(`improve-desc:${user.id}`, { limit: 20, windowMs: 60 * 60 * 1000 });
-    if (!rl.ok) {
-      sendJson(res, 429, {
-        error: `Túl sok AI kérés. Próbáld újra ${rl.retryAfterSec} mp múlva.`,
-        code: "RATE_LIMIT",
-      });
-      return;
-    }
-    let body;
-    try {
-      body = await readBody(req);
-    } catch {
-      sendJson(res, 400, { error: "Érvénytelen JSON." });
-      return;
-    }
-    const result = await improveListingDescription({
-      draft: body.draft ?? body.leiras ?? "",
-      form: body.form ?? body.fields ?? {},
-    });
-    if (!result.ok) {
-      const status = result.code === "NOT_CONFIGURED" ? 503 : result.code === "TOO_SHORT" ? 400 : 502;
-      sendJson(res, status, { error: result.error, code: result.code });
-      return;
-    }
-    sendJson(res, 200, { text: result.text });
-    return;
-  }
 
   if (pathname === "/api/db/stats" && req.method === "GET") {
     sendJson(res, 200, await dbStats());
@@ -1208,11 +683,17 @@ async function handleListingsApi(req, res, pathname) {
   }
 
   if (latestMatch && req.method === "GET") {
-    const latest = await getLatestListing();
-    const access = await listingAccessFlags(req);
-    sendJson(res, 200, {
-      listing: latest ? applyListingAccessPolicy(latest, access) : null,
-    });
+    sendJson(res, 200, { listing: await getLatestListing() });
+    return;
+  }
+
+  if (pathname === "/api/listings/exists" && req.method === "GET") {
+    const url = new URL(req.url ?? "", `http://${HOST}`);
+    const ids = String(url.searchParams.get("ids") || "")
+      .split(",")
+      .map((id) => Number(id.trim()))
+      .filter((n) => Number.isFinite(n) && n > 0);
+    sendJson(res, 200, { ids: await listingIdsExist(ids) });
     return;
   }
 
@@ -1233,381 +714,10 @@ async function handleListingsApi(req, res, pathname) {
 
   if (listMatch && req.method === "GET") {
     const url = new URL(req.url ?? "", `http://${HOST}`);
+    const limit = Math.min(Math.max(Number(url.searchParams.get("limit") ?? 50), 1), 50);
     const status = url.searchParams.get("status");
     const vertical = url.searchParams.get("vertical");
-    const owner = url.searchParams.get("owner") || url.searchParams.get("userId");
-    if (owner) {
-      const access = await listingAccessFlags(req);
-      const ownerId = Number(owner);
-      if (!access.isAdmin && (!access.user || access.user.id !== ownerId)) {
-        sendJson(res, 403, { error: "Nincs jogosultság ehhez a listához." });
-        return;
-      }
-      const limit = Math.min(Math.max(Number(url.searchParams.get("limit") ?? 200), 1), 500);
-      const excludeId = url.searchParams.get("exclude");
-      const listings = await listListingsByOwner({
-        userId: owner,
-        limit,
-        excludeId,
-        status: status || "feladott",
-      });
-      sendJson(res, 200, { listings });
-      return;
-    }
-    // Opcionális bot-védő — alapból ki (CF + cache véd). Bekapcsolás: LISTINGS_PUBLIC_RATE_PER_MIN=2400
-    const listRatePerMin = Number(process.env.LISTINGS_PUBLIC_RATE_PER_MIN);
-    const listRate =
-      Number.isFinite(listRatePerMin) && listRatePerMin > 0 ? Math.floor(listRatePerMin) : 0;
-    if (
-      listRate > 0 &&
-      !assertPublicListingRate(req, res, "listing-list", { limit: listRate, windowMs: 60 * 1000 })
-    ) {
-      return;
-    }
-    const limit = Math.min(Math.max(Number(url.searchParams.get("limit") ?? 20), 1), 100);
-    const offset = Math.max(0, Math.floor(Number(url.searchParams.get("offset") ?? 0)));
-    const deskSort = String(url.searchParams.get("sort") || "newest").trim().toLowerCase();
-    const tileMode =
-      url.searchParams.get("tile") === "1" ||
-      url.searchParams.get("mode") === "tile" ||
-      !url.searchParams.get("full");
-
-    const boostPriceNum = (item) => {
-      const fromNum = Number(item?.preview?.priceNum);
-      if (Number.isFinite(fromNum) && fromNum > 0) return fromNum;
-      const raw = String(item?.preview?.price ?? item?.form?.vetelar ?? "").replace(/\D/g, "");
-      const n = Number(raw);
-      return Number.isFinite(n) && n > 0 ? n : null;
-    };
-    const boostKmNum = (item) => {
-      const fromNum = Number(item?.preview?.kmNum);
-      if (Number.isFinite(fromNum) && fromNum >= 0) return fromNum;
-      const raw = String(item?.preview?.km ?? item?.form?.km ?? "").replace(/\D/g, "");
-      const n = Number(raw);
-      return Number.isFinite(n) ? n : null;
-    };
-    const boostNewestFirst = (a, b) => {
-      const ta = new Date(a.updated_at ?? a.created_at ?? 0).getTime();
-      const tb = new Date(b.updated_at ?? b.created_at ?? 0).getTime();
-      return tb - ta;
-    };
-    const boostDeskCompare =
-      deskSort === "price-asc"
-        ? (a, b) => (boostPriceNum(a) ?? Infinity) - (boostPriceNum(b) ?? Infinity)
-        : deskSort === "price-desc"
-          ? (a, b) => (boostPriceNum(b) ?? -1) - (boostPriceNum(a) ?? -1)
-          : deskSort === "km-asc"
-            ? (a, b) => (boostKmNum(a) ?? Infinity) - (boostKmNum(b) ?? Infinity)
-            : boostNewestFirst;
-
-    let boostOwnerIds = [];
-    try {
-      const { listBoostOwnerIds } = await import("./lib/boost-owners.mjs");
-      boostOwnerIds = await listBoostOwnerIds();
-    } catch {
-      boostOwnerIds = [];
-    }
-    const boostSet = new Set(boostOwnerIds.map(Number).filter((n) => n > 0));
-
-    /** Boostolt userek hirdetései — a kombinált lista elején (desk sort a blokkon belül). */
-    let boostedRows = [];
-    if (boostSet.size) {
-      try {
-        const { resolveListingVertical } = await import("./lib/listing-vertical.mjs");
-        const want = String(vertical || "")
-          .trim()
-          .toLowerCase();
-        const boostCacheKey = `boost:${status || "feladott"}:${want}:${deskSort}:${[...boostSet].sort((a, b) => a - b).join(",")}`;
-        const boostHit = boostFeedMemo.get(boostCacheKey);
-        if (boostHit && Date.now() - boostHit.at < BOOST_FEED_TTL_MS) {
-          boostedRows = boostHit.rows;
-        } else {
-          const chunks = await Promise.all(
-            [...boostSet].map((oid) =>
-              listListingsByOwner({
-                userId: oid,
-                limit: 120,
-                status: status || "feladott",
-              })
-            )
-          );
-          const seen = new Set();
-          for (const rows of chunks) {
-            for (const item of rows || []) {
-              const id = Number(item.id);
-              if (!Number.isFinite(id) || id <= 0 || seen.has(id)) continue;
-              if (want === "auto" || want === "teher" || want === "ingatlan") {
-                if (resolveListingVertical(item) !== want) continue;
-              }
-              seen.add(id);
-              boostedRows.push({ ...item, ownerBoost: true });
-            }
-          }
-          boostedRows.sort(boostDeskCompare);
-          boostFeedMemo.set(boostCacheKey, { at: Date.now(), rows: boostedRows });
-        }
-      } catch (error) {
-        console.warn("Boost feed:", error?.message || error);
-        boostedRows = [];
-      }
-    }
-    const boostedIds = new Set(boostedRows.map((row) => Number(row.id)));
-
-    async function fetchNonBoostedPage({ skip, take }) {
-      const out = [];
-      let skipped = 0;
-      let feedOffset = 0;
-      const chunk = Math.min(Math.max(take * 4, 40), 100);
-      for (let guard = 0; guard < 50 && out.length < take; guard += 1) {
-        const batch = await listListingsWithPreview({
-          limit: chunk,
-          offset: feedOffset,
-          status,
-          vertical,
-        });
-        if (!batch?.length) break;
-        feedOffset += batch.length;
-        for (const item of batch) {
-          const id = Number(item.id);
-          if (boostedIds.has(id)) continue;
-          if (skipped < skip) {
-            skipped += 1;
-            continue;
-          }
-          out.push({
-            ...item,
-            ownerBoost: false,
-          });
-          if (out.length >= take) break;
-        }
-        if (batch.length < chunk) break;
-      }
-      return out;
-    }
-
-    let listings = [];
-    if (!boostedRows.length) {
-      listings = (await listListingsWithPreview({ limit, offset, status, vertical })).map((item) => {
-        const oid = Number(item?.form?.owner_user_id ?? item?.user_id ?? 0);
-        return {
-          ...item,
-          ownerBoost: Boolean(oid && boostSet.has(oid)),
-        };
-      });
-    } else if (offset < boostedRows.length) {
-      // Kombinált lista: [boostoltak…][többi…]
-      const fromBoost = boostedRows.slice(offset, offset + limit);
-      const need = Math.max(0, limit - fromBoost.length);
-      const nonBoost = need > 0 ? await fetchNonBoostedPage({ skip: 0, take: need }) : [];
-      listings = [...fromBoost, ...nonBoost];
-    } else {
-      const skipNon = offset - boostedRows.length;
-      listings = await fetchNonBoostedPage({ skip: skipNon, take: limit });
-    }
-
-    let total = null;
-    try {
-      total = await countListingsPublic({ status: status || "feladott", vertical });
-    } catch {
-      total = offset + listings.length;
-    }
-    const hasMore =
-      typeof total === "number"
-        ? offset + listings.length < total
-        : listings.length >= limit;
-
-    const stamped = listings;
-    // Teljes boost ID lista — kliens szűrés után is megtalálja őket.
-    const boostListingIds = boostedRows.map((row) => Number(row.id)).filter((id) => id > 0);
-    sendJson(
-      res,
-      200,
-      {
-        listings: sanitizeListingList(stamped, { tile: tileMode }).map((item, i) => ({
-          ...item,
-          ownerBoost: stamped[i]?.ownerBoost === true,
-        })),
-        boostOwnerIds,
-        boostListingIds,
-        total,
-        offset,
-        limit,
-        hasMore,
-      },
-      {
-        // Publikus feladott feed — auth-mentes payload, rövid CDN cache (mint nav/counts).
-        "Cache-Control": "public, max-age=20, s-maxage=45, stale-while-revalidate=120",
-        "CDN-Cache-Control": "public, max-age=45, stale-while-revalidate=120",
-        "Cloudflare-CDN-Cache-Control": "public, max-age=45, stale-while-revalidate=120",
-        Vary: "Accept-Encoding",
-      }
-    );
-    return;
-  }
-
-  const relatedMatch = pathname.match(/^\/api\/listings\/(\d+)\/related$/);
-  if (relatedMatch && req.method === "GET") {
-    if (!assertPublicListingRate(req, res, "listing-related", { limit: 120, windowMs: 15 * 60 * 1000 })) {
-      return;
-    }
-    const listingId = Number(relatedMatch[1]);
-    const url = new URL(req.url ?? "", `http://${HOST}`);
-    const includeSelf =
-      url.searchParams.get("includeSelf") === "1" || url.searchParams.get("all") === "1";
-    const limit = Math.min(Math.max(Number(url.searchParams.get("limit") ?? 24), 1), 500);
-    const meta = await getListingOwnerMeta(listingId);
-    const ownerId = Number(meta?.user_id || 0);
-    if (!meta || !Number.isFinite(ownerId) || ownerId <= 0) {
-      sendJson(res, 404, { error: "Nincs ilyen hirdetés." });
-      return;
-    }
-    // Seed lehet nem feladott — a készletben csak feladottakat adunk vissza.
-    const listings = await listListingsByOwner({
-      userId: ownerId,
-      limit,
-      excludeId: includeSelf ? null : listingId,
-      status: "feladott",
-    });
-    sendJson(res, 200, { listings: sanitizeListingList(listings) }, {
-      "Cache-Control": "public, max-age=20, s-maxage=45, stale-while-revalidate=120",
-      "CDN-Cache-Control": "public, max-age=45, stale-while-revalidate=120",
-      "Cloudflare-CDN-Cache-Control": "public, max-age=45, stale-while-revalidate=120",
-      Vary: "Accept-Encoding",
-    });
-    return;
-  }
-
-  const sellerContactMatch = pathname.match(/^\/api\/listings\/(\d+)\/seller-contact$/);
-  if (sellerContactMatch && req.method === "GET") {
-    if (!assertPublicListingRate(req, res, "listing-seller-contact", { limit: 80, windowMs: 15 * 60 * 1000 })) {
-      return;
-    }
-    const listingId = Number(sellerContactMatch[1]);
-    const meta = await getListingOwnerMeta(listingId);
-    if (!meta?.user_id || meta.status !== "feladott") {
-      sendJson(res, 404, { error: "Nincs ilyen hirdetés." });
-      return;
-    }
-    const contact = await getSellerInventoryContactForUserId(meta.user_id);
-    if (!contact) {
-      sendJson(res, 404, { error: "Nincs megjeleníthető kapcsolat." });
-      return;
-    }
-    sendJson(res, 200, { contact: publicSellerInventoryContact(contact) });
-    return;
-  }
-
-  const sellerRatingMatch = pathname.match(/^\/api\/listings\/(\d+)\/seller-rating$/);
-  if (sellerRatingMatch && req.method === "GET") {
-    if (!assertPublicListingRate(req, res, "listing-seller-rating", { limit: 120, windowMs: 15 * 60 * 1000 })) {
-      return;
-    }
-    const listingId = Number(sellerRatingMatch[1]);
-    const meta = await getListingOwnerMeta(listingId);
-    const ownerId = Number(meta?.user_id || 0);
-    if (!meta || !Number.isFinite(ownerId) || ownerId <= 0) {
-      sendJson(res, 404, { error: "Nincs ilyen hirdetés." });
-      return;
-    }
-    const viewer = await requestUser(req);
-    const rating = await getSellerRatingSummary({
-      sellerUserId: ownerId,
-      viewerUserId: viewer?.id ?? null,
-    });
-    sendJson(res, 200, { rating });
-    return;
-  }
-  if (sellerRatingMatch && req.method === "POST") {
-    const user = await requestUser(req);
-    if (!user) {
-      sendJson(res, 401, { error: "Jelentkezz be az értékeléshez." });
-      return;
-    }
-    if (!assertPublicListingRate(req, res, "listing-seller-rating-post", { limit: 40, windowMs: 60 * 60 * 1000 })) {
-      return;
-    }
-    let body = {};
-    try {
-      body = await readBody(req);
-    } catch {
-      body = {};
-    }
-    const listingId = Number(sellerRatingMatch[1]);
-    const meta = await getListingOwnerMeta(listingId);
-    const ownerId = Number(meta?.user_id || 0);
-    if (!meta || !Number.isFinite(ownerId) || ownerId <= 0) {
-      sendJson(res, 404, { error: "Nincs ilyen hirdetés." });
-      return;
-    }
-    try {
-      const rating = await submitSellerRating({
-        sellerUserId: ownerId,
-        raterUserId: user.id,
-        score: body.score,
-      });
-      sendJson(res, 200, { rating });
-    } catch (err) {
-      sendJson(res, err.status || 500, { error: err.message || "Nem sikerült az értékelés." });
-    }
-    return;
-  }
-
-  const revealContactMatch = pathname.match(/^\/api\/listings\/(\d+)\/reveal-contact$/);
-  if (revealContactMatch && req.method === "POST") {
-    let revealBody = {};
-    try {
-      revealBody = await readBody(req);
-    } catch {
-      revealBody = {};
-    }
-    const turnstileReveal = await verifyTurnstileToken(
-      revealBody.turnstileToken ?? revealBody["cf-turnstile-response"],
-      req
-    );
-    if (!turnstileReveal.ok) {
-      sendJson(res, 400, { error: turnstileReveal.error });
-      return;
-    }
-    if (!assertPublicListingRate(req, res, "listing-reveal", { limit: 40, windowMs: 60 * 60 * 1000 })) {
-      return;
-    }
-    const listingId = Number(revealContactMatch[1]);
-    const perListing = rateLimit(`listing-reveal:${clientIp(req)}:${listingId}`, {
-      limit: 8,
-      windowMs: 60 * 60 * 1000,
-    });
-    if (!perListing.ok) {
-      sendJson(
-        res,
-        429,
-        { error: "Túl sok kérés ehhez a hirdetéshez. Próbáld később." },
-        { "Retry-After": String(perListing.retryAfterSec || 60) }
-      );
-      return;
-    }
-    const listing = await getListing(listingId, { mode: "detail" });
-    if (!listing || listing.status !== "feladott") {
-      sendJson(res, 404, { error: "Nincs ilyen hirdetés." });
-      return;
-    }
-    let phone = String(listing.detail?.phone ?? "").trim();
-    let addressLines = Array.isArray(listing.detail?.addressLines)
-      ? listing.detail.addressLines.map((line) => String(line ?? "").trim()).filter(Boolean)
-      : [];
-    let phones = phone ? [phone] : [];
-    if (listing.user_id) {
-      const seller = await getSellerInventoryContactForUserId(listing.user_id);
-      if (seller?.phones?.length) phones = seller.phones;
-      if (!phone && phones[0]) phone = phones[0];
-      if ((!addressLines.length) && seller?.addressLines?.length) {
-        addressLines = seller.addressLines;
-      }
-    }
-    if (!phones.length && !addressLines.length) {
-      sendJson(res, 404, { error: "Ehhez a hirdetéshez nincs megadott elérhetőség." });
-      return;
-    }
-    sendJson(res, 200, { phone: phone || phones[0] || "", phones, addressLines });
+    sendJson(res, 200, { listings: await listListingsWithPreview({ limit, status, vertical }) });
     return;
   }
 
@@ -1739,47 +849,6 @@ async function handleListingsApi(req, res, pathname) {
       sendJson(res, 200, { listing: updated });
       return;
     }
-    if (body.fields && typeof body.fields === "object" && !Array.isArray(body.fields)) {
-      const allowed = new Set([
-        "promo_kiemelt",
-        "promo_top_ajanlat",
-        "photo_overlay_template_id",
-        "photo_overlay_base_url",
-      ]);
-      const fields = {};
-      for (const [key, value] of Object.entries(body.fields)) {
-        if (!allowed.has(key)) continue;
-        fields[key] = value;
-      }
-      if (!Object.keys(fields).length) {
-        sendJson(res, 400, { error: "Nincs módosítható mező." });
-        return;
-      }
-      try {
-        const { adminFlagsFromProfile } = await import("./lib/user-admin-flags.mjs");
-        const flags = adminFlagsFromProfile(user?.profile || {});
-        if ("promo_kiemelt" in fields && !flags.canPromoKiemelt) {
-          sendJson(res, 403, { error: "A kiemelés nincs engedélyezve ehhez a fiókhoz.", code: "PROMO_DENIED" });
-          return;
-        }
-        if ("promo_top_ajanlat" in fields && !flags.canPromoTop) {
-          sendJson(res, 403, { error: "A TOP ajánlat nincs engedélyezve ehhez a fiókhoz.", code: "PROMO_DENIED" });
-          return;
-        }
-        if (
-          ("photo_overlay_template_id" in fields || "photo_overlay_base_url" in fields) &&
-          !flags.canPhotoSablon
-        ) {
-          sendJson(res, 403, { error: "A sablon nincs engedélyezve ehhez a fiókhoz.", code: "PROMO_DENIED" });
-          return;
-        }
-      } catch {
-        /* ignore privilege check failure → deny nothing if module missing */
-      }
-      const updated = await patchListingFormFields(listing.id, fields);
-      sendJson(res, 200, { listing: updated });
-      return;
-    }
     sendJson(res, 400, { error: "Nincs módosítható mező." });
     return;
   }
@@ -1792,9 +861,6 @@ async function handleListingsApi(req, res, pathname) {
       sendJson(res, 404, { error: "Nincs ilyen hirdetés." });
       return;
     }
-    if (listing.detail) {
-      listing.detail = await attachSellerProfile(listing.detail, listing.user_id);
-    }
     if (listing.user_id) {
       try {
         listing.partner = await getPublicPartnerProfileByUserId(listing.user_id);
@@ -1802,30 +868,11 @@ async function handleListingsApi(req, res, pathname) {
         listing.partner = null;
       }
     }
-    const access = await listingAccessFlags(req);
-    const payload = { listing: applyListingAccessPolicy(listing, access) };
-    const privateView = Boolean(access?.isAdmin || canManageListing(listing, access?.user));
-    const isPublicFeladott = listing.status === "feladott" && !privateView;
-    sendJson(
-      res,
-      200,
-      payload,
-      isPublicFeladott
-        ? {
-            "Cache-Control": "private, max-age=30, stale-while-revalidate=90",
-            Vary: "Cookie, Accept-Encoding",
-          }
-        : { "Cache-Control": "private, no-store", Vary: "Cookie, Accept-Encoding" }
-    );
+    sendJson(res, 200, { listing });
     return;
   }
 
   if (batchMatch && req.method === "POST") {
-    const user = await requestUser(req);
-    if (!user) {
-      sendJson(res, 401, { error: "Csak regisztrált felhasználók adhatnak fel hirdetést.", code: "AUTH_REQUIRED" });
-      return;
-    }
     let body;
     try {
       body = await readBody(req);
@@ -1848,7 +895,6 @@ async function handleListingsApi(req, res, pathname) {
     const results = [];
     let savedCount = 0;
     let skippedCount = 0;
-    let mine = await listMyListings({ userId: user.id, limit: 500 });
 
     for (const formData of forms) {
       if (!formData || typeof formData !== "object") {
@@ -1858,41 +904,14 @@ async function handleListingsApi(req, res, pathname) {
       }
       const sourceUrl = String(formData.forras_url || "").trim();
       const hasznaltautoId = String(formData.hasznaltauto_hirdetes_id || "").trim();
-      let existing = null;
-      if (sourceUrl || hasznaltautoId) {
-        try {
-          existing = await findListingBySource({ sourceUrl, hasznaltautoId });
-        } catch {
-          existing = null;
-        }
-      }
-      if (existing?.id) {
-        const ownerGuard = assertCanImportExistingListing(existing, user);
-        if (!ownerGuard.ok) {
-          results.push({
-            skipped: true,
-            reason: "other_owner",
-            error: ownerGuard.message,
-            forras_url: sourceUrl,
-          });
-          skippedCount += 1;
-          continue;
-        }
-        const saved = await saveListing(formData, existing.id, { status, userId: user.id });
-        results.push({ skipped: false, listing: saved, updated: true });
-        savedCount += 1;
-        continue;
-      }
-      const check = assertCanCreateListing({ user, formData, existingListings: mine });
-      if (!check.ok) {
-        results.push({ skipped: true, reason: check.code || "limit", error: check.error });
+      if (await listingSourceExists({ sourceUrl, hasznaltautoId })) {
+        results.push({ skipped: true, reason: "duplicate", forras_url: sourceUrl });
         skippedCount += 1;
         continue;
       }
-      const saved = await saveListing(formData, null, { status, userId: user.id });
+      const saved = await saveListing(formData, null, { status });
       results.push({ skipped: false, listing: saved });
       savedCount += 1;
-      mine = [...mine, saved];
     }
 
     sendJson(res, 200, { savedCount, skippedCount, count: forms.length, results });
@@ -1931,18 +950,9 @@ async function handleListingsApi(req, res, pathname) {
           sendJson(res, 403, { error: "Ezt a hirdetést nem módosíthatod." });
           return;
         }
-        if (isBusinessAccount(user)) {
-          const mine = await listMyListings({ userId: user.id, limit: 500 });
-          const next = verticalFromForm(formData);
-          const vertCheck = assertBusinessVerticalAllowed(user, next, mine);
-          if (!vertCheck.ok) {
-            sendJson(res, vertCheck.status || 403, { error: vertCheck.error, code: vertCheck.code });
-            return;
-          }
-        }
       } else {
         if (!user) {
-          sendJson(res, 401, { error: "Csak regisztrált felhasználók adhatnak fel hirdetést.", code: "AUTH_REQUIRED" });
+          sendJson(res, 401, { error: "Nem vagy bejelentkezve." });
           return;
         }
         const sourceUrl = String(formData.forras_url || "").trim();
@@ -1953,7 +963,6 @@ async function handleListingsApi(req, res, pathname) {
             return;
           }
         }
-        if (!(await assertNewListingAllowed(req, res, user, formData))) return;
       }
       let saved = await saveListing(formData, listingId, {
         status: body.status,
@@ -2050,7 +1059,6 @@ async function handleListingsApi(req, res, pathname) {
 }
 
 async function handleFugvenyApi(req, res, pathname) {
-  if (!(await requireLevel1Admin(req, res))) return;
   try {
     if (pathname === "/api/fugveny/lists" && req.method === "GET") {
       sendJson(res, 200, listFugvenyLists());
@@ -2150,27 +1158,23 @@ async function handleVehicleCatalogApi(req, res, pathname) {
     return;
   }
 
-  const url = new URL(req.url ?? "", `http://${HOST}`);
-  const kind = normalizeVehicleCatalogKind(url.searchParams.get("kind") || url.searchParams.get("category"));
-  const catalog = getVehicleCatalogForKind(kind);
+  const catalog = getVehicleCatalog();
   if (!catalog?.gyartmanyok?.length) {
     sendJson(res, 404, {
-      error:
-        kind === "kisteher"
-          ? "Nincs kisteher katalógus. Futtasd: npm run scrape:ha-brands-models:kisteher"
-          : "Nincs járműkatalógus. Futtasd: npm run import:catalog -- ~/Desktop/lista.csv",
+      error: "Nincs járműkatalógus. Futtasd: npm run import:catalog -- ~/Desktop/lista.csv",
     });
     return;
   }
 
   // Márkák + modellek — a típusok nélkül, hogy az oldal gyorsan induljon.
   if (pathname === "/api/vehicle-catalog") {
-    sendJson(res, 200, { ...catalogSummary(catalog), kind });
+    sendJson(res, 200, catalogSummary(catalog));
     return;
   }
 
   // Egy modell évjáratai és típusai.
   if (pathname === "/api/vehicle-catalog/tipusok") {
+    const url = new URL(req.url ?? "", `http://${HOST}`);
     const gyartmany = url.searchParams.get("gyartmany") ?? "";
     const modell = url.searchParams.get("modell") ?? "";
     const ev = url.searchParams.get("ev");
@@ -2181,7 +1185,6 @@ async function handleVehicleCatalogApi(req, res, pathname) {
     }
 
     sendJson(res, 200, {
-      kind,
       gyartmany,
       modell,
       ev: ev || null,
@@ -2203,26 +1206,12 @@ async function handleValuationApi(req, res, pathname) {
 
     if (pathname === "/api/valuation/estimate" && req.method === "GET") {
       const url = new URL(req.url ?? "", `http://${HOST}`);
-      const useMarket =
-        url.searchParams.get("source") === "market" || marketDataAvailable();
-      const params = {
+      const result = estimateValuation({
         gyartmany: url.searchParams.get("gyartmany"),
-        modell: url.searchParams.get("modell"),
-        tipus: url.searchParams.get("tipus"),
-        uzemanyag: url.searchParams.get("uzemanyag"),
-        modell_tipus:
-          url.searchParams.get("modell_tipus") ||
-          [url.searchParams.get("modell"), url.searchParams.get("tipus")]
-            .filter(Boolean)
-            .join(" "),
+        modell_tipus: url.searchParams.get("modell_tipus"),
         gyartasi_ev: url.searchParams.get("gyartasi_ev"),
         km: url.searchParams.get("km"),
-        ar: url.searchParams.get("ar"),
-        requireCore: url.searchParams.get("require") === "1",
-      };
-      const result = useMarket
-        ? estimateMarketValuation(params)
-        : estimateValuation(params);
+      });
       if (result.error) {
         sendJson(res, 400, result);
         return;
@@ -2232,39 +1221,6 @@ async function handleValuationApi(req, res, pathname) {
     }
 
     sendJson(res, 404, { error: "Ismeretlen értékbecslő API." });
-  } catch (error) {
-    sendJson(res, 500, { error: error.message ?? String(error) });
-  }
-}
-
-async function handleQrApi(req, res, pathname) {
-  if (pathname !== "/api/qr.png" || req.method !== "GET") {
-    sendJson(res, 404, { error: "Ismeretlen QR API." });
-    return;
-  }
-  try {
-    const url = new URL(req.url ?? "", `http://${HOST}`);
-    const raw = url.searchParams.get("u") || url.searchParams.get("url") || "";
-    const hostHeader = String(req.headers.host || "");
-    const proto = String(req.headers["x-forwarded-proto"] || "http").split(",")[0].trim() || "http";
-    const origin = `${proto}://${hostHeader}`;
-    if (!isAllowedQrTarget(raw, { requestHost: hostHeader })) {
-      sendJson(res, 400, { error: "Érvénytelen QR cél." });
-      return;
-    }
-    const target = resolveQrTargetUrl(raw, { origin });
-    if (!target) {
-      sendJson(res, 400, { error: "Érvénytelen QR cél." });
-      return;
-    }
-    const size = Number(url.searchParams.get("size") || 240);
-    const buf = await qrPngBuffer(target, { size });
-    res.writeHead(200, {
-      "Content-Type": "image/png",
-      "Cache-Control": "public, max-age=86400",
-      "Content-Length": buf.length,
-    });
-    res.end(buf);
   } catch (error) {
     sendJson(res, 500, { error: error.message ?? String(error) });
   }
@@ -2320,25 +1276,12 @@ async function handlePartnersApi(req, res, pathname) {
         sendJson(res, 400, { error: "Hiányzó irányítószám." });
         return;
       }
-      const vertical =
-        url.searchParams.get("vertical") ??
-        url.searchParams.get("uzletag") ??
-        url.searchParams.get("vertical_id");
-      sendJson(res, 200, getPartnerRecommendations(postalCode, { vertical }));
+      sendJson(res, 200, getPartnerRecommendations(postalCode));
       return;
     }
 
     if (pathname === "/api/partners/categories" && req.method === "GET") {
-      const url = new URL(req.url ?? "", `http://${HOST}`);
-      const vertical =
-        url.searchParams.get("vertical") ??
-        url.searchParams.get("uzletag") ??
-        url.searchParams.get("vertical_id");
-      const normalized = normalizePartnerVertical(vertical);
-      sendJson(res, 200, {
-        vertical: normalized,
-        categories: normalized ? categoriesForVertical(normalized) : PARTNER_CATEGORIES,
-      });
+      sendJson(res, 200, { categories: PARTNER_CATEGORIES });
       return;
     }
 
@@ -2353,7 +1296,6 @@ async function handlePartnersApi(req, res, pathname) {
     }
 
     if (pathname === "/api/partners/import" && req.method === "POST") {
-      if (!(await requireLevel1Admin(req, res))) return;
       let body;
       try {
         body = await readBody(req);
@@ -2395,42 +1337,12 @@ async function handlePartnersApi(req, res, pathname) {
       return;
     }
 
-    if (pathname === "/api/geocode" && req.method === "GET") {
-      const url = new URL(req.url ?? "", `http://${HOST}`);
-      const q = String(url.searchParams.get("q") || "").trim();
-      const linesRaw = String(url.searchParams.get("lines") || "").trim();
-      const addressLines = linesRaw
-        ? linesRaw.split("|").map((s) => s.trim()).filter(Boolean)
-        : [];
-      if (!q && !addressLines.length) {
-        sendJson(res, 400, { error: "Hiányzó cím (q)." });
-        return;
-      }
-      try {
-        const hit = await geocodeHungaryAddress({ query: q, addressLines });
-        if (!hit) {
-          sendJson(res, 404, { error: "Cím nem található." });
-          return;
-        }
-        sendJson(res, 200, hit);
-      } catch (error) {
-        sendJson(res, 502, { error: error?.message || "Geocode hiba." });
-      }
-      return;
-    }
-
     if (pathname === "/api/postal-codes/cities" && req.method === "GET") {
       sendJson(res, 200, { cities: listPostalCities() });
       return;
     }
 
-    if (pathname === "/api/postal-codes/index" && req.method === "GET") {
-      sendJson(res, 200, { postals: listPostalCodes() });
-      return;
-    }
-
     if (pathname === "/api/postal-codes/import" && req.method === "POST") {
-      if (!(await requireLevel1Admin(req, res))) return;
       let body;
       try {
         body = await readBody(req);
@@ -2460,7 +1372,6 @@ async function handlePartnersApi(req, res, pathname) {
     }
 
     if (pathname === "/api/partners" && req.method === "POST") {
-      if (!(await requireLevel1Admin(req, res))) return;
       let body;
       try {
         body = await readBody(req);
@@ -2483,7 +1394,6 @@ async function handlePartnersApi(req, res, pathname) {
     }
 
     if (idMatch && req.method === "DELETE") {
-      if (!(await requireLevel1Admin(req, res))) return;
       deletePartner(Number(idMatch[1]));
       sendJson(res, 200, { ok: true });
       return;
@@ -2566,27 +1476,6 @@ async function handleAuthApi(req, res, pathname) {
       }
     }
 
-    if (pathname === "/api/auth/bookmarklet-token" && req.method === "GET") {
-      if (!currentUser || !token) {
-        sendJson(res, 401, { error: "Nem vagy bejelentkezve." });
-        return;
-      }
-      if (!assertAuthRate(req, res, "bookmarklet-token", { limit: 30, windowMs: 60 * 60 * 1000 })) {
-        return;
-      }
-      try {
-        const importToken = createImportToken(currentUser.id);
-        sendJson(res, 200, {
-          token: importToken,
-          scope: "import",
-          expiresInMs: importTokenTtlMs(),
-        });
-      } catch (error) {
-        sendJson(res, 500, { error: error.message ?? "Import token nem hozható létre." });
-      }
-      return;
-    }
-
     if (pathname === "/api/auth/db" && req.method === "GET") {
       const admin = await getLevel1AdminBySession(getLevel1TokenFromRequest(req));
       if (!admin) {
@@ -2629,7 +1518,7 @@ async function handleAuthApi(req, res, pathname) {
       try {
         const accountType = urlObj.searchParams.get("accountType") || "";
         const state = createOAuthState(provider, next, undefined, accountType);
-        const authorizeUrl = buildAuthorizeUrl(provider, state, undefined, req);
+        const authorizeUrl = buildAuthorizeUrl(provider, state);
         sendRedirect(res, authorizeUrl);
       } catch (error) {
         const msg = encodeURIComponent(error.message ?? "OAuth indítás sikertelen");
@@ -2688,7 +1577,7 @@ async function handleAuthApi(req, res, pathname) {
         }
 
         const stateInfo = parseOAuthState(params.state, provider);
-        const identity = await exchangeOAuthCode(provider, params.code, undefined, req);
+        const identity = await exchangeOAuthCode(provider, params.code);
         if (provider === "apple") {
           const appleName = appleNameFromForm(params.user);
           if (appleName && !identity.name) identity.name = appleName;
@@ -2710,8 +1599,7 @@ async function handleAuthApi(req, res, pathname) {
         }
         console.log(`OAuth OK (${provider}): ${user.email}`);
       } catch (error) {
-        const safeMsg = friendlyAuthErrorMessage(error, "OAuth sikertelen");
-        const msg = encodeURIComponent(safeMsg);
+        const msg = encodeURIComponent(error.message ?? "OAuth sikertelen");
         let mobile = false;
         try {
           mobile = Boolean(parseOAuthState(params.state).mobile);
@@ -2719,7 +1607,7 @@ async function handleAuthApi(req, res, pathname) {
           mobile = false;
         }
         if (mobile) {
-          sendRedirect(res, mobileOAuthCompleteUrl({ error: safeMsg }));
+          sendRedirect(res, mobileOAuthCompleteUrl({ error: error.message ?? "OAuth sikertelen" }));
         } else {
           sendRedirect(res, `/belepes.html?oauth_error=${msg}`);
         }
@@ -2728,19 +1616,9 @@ async function handleAuthApi(req, res, pathname) {
       return;
     }
 
-    if (pathname === "/api/auth/turnstile-config" && req.method === "GET") {
-      sendJson(res, 200, turnstilePublicConfig());
-      return;
-    }
-
     if (pathname === "/api/auth/register" && req.method === "POST") {
       if (!assertAuthRate(req, res, "register", { limit: 8, windowMs: 60 * 60 * 1000 })) return;
       const body = await readBody(req);
-      const turnstile = await verifyTurnstileToken(body.turnstileToken ?? body["cf-turnstile-response"], req);
-      if (!turnstile.ok) {
-        sendJson(res, 400, { error: turnstile.error });
-        return;
-      }
       const registered = await registerUser(
         body.email,
         body.password,
@@ -2755,17 +1633,14 @@ async function handleAuthApi(req, res, pathname) {
         sendJson(
           res,
           200,
-          withOptionalSessionToken(
-            req,
-            {
-              ok: true,
-              needsActivation: false,
-              email: registered.email,
-              user,
-              message: "Regisztráció sikeres.",
-            },
-            session.token
-          ),
+          {
+            ok: true,
+            needsActivation: false,
+            email: registered.email,
+            user,
+            token: session.token,
+            message: "Regisztráció sikeres.",
+          },
           { "Set-Cookie": sessionCookieHeader(session.token, session.expires) }
         );
         return;
@@ -2787,14 +1662,12 @@ async function handleAuthApi(req, res, pathname) {
         needsActivation: true,
         email: registered.email,
         emailSent: mail.sent,
-        activationLink: mail.sent || !allowDevSecretsInResponse() ? undefined : mail.link,
+        activationLink: mail.sent ? undefined : mail.link,
         message: mail.sent
           ? `Küldtünk aktiváló emailt ide: ${registered.email}`
-          : allowDevSecretsInResponse() && mail.link
-            ? mail.error
-              ? `Regisztráció OK, de az email nem ment ki (${mail.error}). Használd a linket / terminál logot.`
-              : `SMTP nincs beállítva. Aktiváló link (terminálban is): ${mail.link}`
-            : `Regisztráció OK. Ha az aktiváló email nem érkezik meg, nézd a spam mappát, vagy jelezd az adminnak.`,
+          : mail.error
+            ? `Regisztráció OK, de az email nem ment ki (${mail.error}). Használd a linket / terminál logot.`
+            : `SMTP nincs beállítva. Aktiváló link (terminálban is): ${mail.link}`,
       });
       return;
     }
@@ -2805,7 +1678,7 @@ async function handleAuthApi(req, res, pathname) {
       sendJson(
         res,
         200,
-        withOptionalSessionToken(req, { ok: true, user }, session.token),
+        { ok: true, user, token: session.token },
         { "Set-Cookie": sessionCookieHeader(session.token, session.expires) }
       );
       return;
@@ -2826,7 +1699,7 @@ async function handleAuthApi(req, res, pathname) {
         ok: true,
         email: created.email,
         emailSent: mail.sent,
-        activationLink: mail.sent || !allowDevSecretsInResponse() ? undefined : mail.link,
+        activationLink: mail.sent ? undefined : mail.link,
         message: mail.sent
           ? `Új aktiváló emailt küldtünk: ${created.email}`
           : `SMTP nincs beállítva. Link: ${mail.link}`,
@@ -2857,7 +1730,7 @@ async function handleAuthApi(req, res, pathname) {
         ok: true,
         message: mail.sent ? generic : result.resetToken ? `${generic} (SMTP hiba — link a válaszban.)` : generic,
         emailSent: mail.sent,
-        resetLink: mail.sent || !result.resetToken || !allowDevSecretsInResponse() ? undefined : mail.link,
+        resetLink: mail.sent || !result.resetToken ? undefined : mail.link,
       });
       return;
     }
@@ -2881,11 +1754,6 @@ async function handleAuthApi(req, res, pathname) {
       if (!assertAuthRate(req, res, "login", { limit: 15, windowMs: 15 * 60 * 1000 })) return;
       const body = await readBody(req);
       try {
-        const turnstile = await verifyTurnstileToken(body.turnstileToken ?? body["cf-turnstile-response"], req);
-        if (!turnstile.ok) {
-          sendJson(res, 400, { error: turnstile.error });
-          return;
-        }
         const emailKey = String(body.email ?? "").trim().toLowerCase();
         if (emailKey) {
           const emailRl = rateLimit(`login-email:${emailKey}`, { limit: 10, windowMs: 15 * 60 * 1000 });
@@ -2904,35 +1772,15 @@ async function handleAuthApi(req, res, pathname) {
         sendJson(
           res,
           200,
-          withOptionalSessionToken(req, { user }, session.token),
+          { user, token: session.token },
           { "Set-Cookie": sessionCookieHeader(session.token, session.expires) }
         );
       } catch (error) {
         if (error.code === "EMAIL_NOT_VERIFIED") {
-          sendJson(res, 403, {
-            error: friendlyAuthErrorMessage(error),
-            code: "EMAIL_NOT_VERIFIED",
-          });
+          sendJson(res, 403, { error: error.message, code: "EMAIL_NOT_VERIFIED", email: body.email });
           return;
         }
-        if (error.code === "ACCOUNT_NOT_FOUND") {
-          sendJson(res, 401, {
-            error: friendlyAuthErrorMessage(error),
-            code: "ACCOUNT_NOT_FOUND",
-          });
-          return;
-        }
-        if (error.code === "ACCOUNT_INACTIVE") {
-          sendJson(res, 403, {
-            error: friendlyAuthErrorMessage(error),
-            code: "ACCOUNT_INACTIVE",
-          });
-          return;
-        }
-        sendJson(res, 401, {
-          error: friendlyAuthErrorMessage(error, "Sikertelen belépés."),
-          ...(error.code ? { code: error.code } : {}),
-        });
+        throw error;
       }
       return;
     }
@@ -2992,7 +1840,7 @@ async function handleAuthApi(req, res, pathname) {
       const body = await readBody(req);
       const pageLayout = body.pageLayout ?? body.page_layout ?? null;
       const user = await mergeUserProfileJson(currentUser.id, { pageLayout });
-      sendJson(res, 200, { ok: true, user });
+      sendJson(res, 200, { ok: true, user, token });
       return;
     }
 
@@ -3005,7 +1853,7 @@ async function handleAuthApi(req, res, pathname) {
       if (body.displayName !== undefined && body.profile === undefined) {
         const displayName = await setUserDisplayName(currentUser.id, body.displayName);
         const user = await getUserById(currentUser.id);
-        sendJson(res, 200, { displayName, user });
+        sendJson(res, 200, { displayName, user, token });
         return;
       }
       const saved = await saveUserProfile(currentUser.id, body.profile ?? body);
@@ -3026,23 +1874,9 @@ async function handleAuthApi(req, res, pathname) {
       sendJson(res, 200, {
         profile,
         user,
+        token,
         savedTo: _savedTo || getProfilesFilePath(),
       });
-      // Hirdetés-cellák másolása a válasz után — ne tartsa fogva a Mentés gombot.
-      void import("./lib/sync-company-profile-to-listings.mjs")
-        .then(({ syncCompanyContactToOwnerListings }) =>
-          syncCompanyContactToOwnerListings(currentUser.id, profile)
-        )
-        .then((sync) => {
-          if (sync?.updated) {
-            console.log(
-              `Cégadatok → ${sync.updated}/${sync.total || sync.updated} hirdetés frissítve | ${currentUser.email}`
-            );
-          }
-        })
-        .catch((syncError) => {
-          console.warn("Cégadatok→hirdetések sync:", syncError?.message || syncError);
-        });
       return;
     }
 
@@ -3058,7 +1892,7 @@ async function handleAuthApi(req, res, pathname) {
 
     sendJson(res, 404, { error: "Ismeretlen auth API." });
   } catch (error) {
-    const message = friendlyAuthErrorMessage(error, error.message ?? String(error));
+    const message = error.message ?? String(error);
     if (isSupabaseSchemaMissingError(error)) {
       if (!res.headersSent) {
         sendJson(res, 200, { user: null, providers: [] });
@@ -3066,21 +1900,12 @@ async function handleAuthApi(req, res, pathname) {
       return;
     }
     const status =
-      error.code === "ACCOUNT_NOT_FOUND" ||
-      message.includes("bejelentkezve") ||
-      message.includes("Hibás") ||
-      message.includes("Nincs ilyen fiók")
+      message.includes("bejelentkezve") || message.includes("Hibás")
         ? 401
-        : error.code === "EMAIL_ALREADY_REGISTERED" ||
-            message.includes("kötelező") ||
-            message.includes("egyezik") ||
-            message.includes("Regisztráció sikertelen")
+        : message.includes("már regisztrálva") || message.includes("kötelező") || message.includes("egyezik")
           ? 400
           : 400;
-    sendJson(res, status, {
-      error: message,
-      ...(error.code ? { code: error.code } : {}),
-    });
+    sendJson(res, status, { error: message });
   }
 }
 
@@ -3106,68 +1931,14 @@ export async function handleHttpRequest(req, res) {
     sendJson(res, 200, {
       ok: true,
       version: readFileSync(join(PUBLIC, "version.txt"), "utf8").trim(),
-      service: "bymy-autosweb",
-      membersOnly: isMembersOnlySite(),
+      chrome: findChromeExecutable(),
+      dbPath,
+      profilesPath,
+      users,
       backend: isSupabaseBackend() ? "supabase" : "sqlite",
-      imageStorage: getImageStorageBackend(),
-      ...(getImageStorageBackend() === "filesystem" ? { imageRoot: imageStorageRoot() } : {}),
-      ...(getImageStorageBackend() === "r2"
-        ? {
-            r2Bucket: process.env.R2_BUCKET_NAME || process.env.BYMY_R2_BUCKET || "bymy-listings",
-            r2PublicBase: process.env.R2_PUBLIC_BASE_URL || process.env.BYMY_IMAGE_PUBLIC_BASE || "https://img.bymy.hu",
-          }
-        : {}),
-      turnstile: turnstileHealthStatus(),
-      mail: mailTransportStatus(),
-      ...(allowDevSecretsInResponse()
-        ? {
-            chrome: findChromeExecutable(),
-            dbPath,
-            profilesPath,
-            users,
-            listingsMine: true,
-          }
-        : {}),
+      service: "bymy-autosweb",
+      listingsMine: true,
     });
-    return;
-  }
-
-  if (pathname === "/api/internal/mail-relay" && req.method === "POST") {
-    const secret = String(process.env.BYMY_MAIL_RELAY_SECRET ?? "").trim();
-    const auth = String(req.headers.authorization ?? "").trim();
-    if (!secret || auth !== `Bearer ${secret}`) {
-      sendJson(res, 403, { error: "Forbidden." });
-      return;
-    }
-    if (
-      !assertAuthRate(req, res, "mail-relay", {
-        limit: 30,
-        windowMs: 15 * 60 * 1000,
-      })
-    ) {
-      return;
-    }
-    try {
-      const body = await readJsonBody(req);
-      const to = String(body?.to ?? "").trim();
-      const subject = String(body?.subject ?? "").trim();
-      if (!to || !subject) {
-        sendJson(res, 400, { error: "Hiányzó cím vagy tárgy." });
-        return;
-      }
-      const result = await sendMailSmtp({
-        to,
-        subject,
-        text: String(body?.text ?? ""),
-        html: body?.html ? String(body.html) : undefined,
-      });
-      sendJson(res, 200, { ok: true, messageId: result.messageId, from: result.from });
-    } catch (error) {
-      sendJson(res, 502, {
-        error: "SMTP küldés sikertelen.",
-        smtpWarning: String(error?.message ?? error),
-      });
-    }
     return;
   }
 
@@ -3178,7 +1949,6 @@ export async function handleHttpRequest(req, res) {
     getSessionTokenFromRequest,
     sendJson,
     sendRedirect,
-    isSocialShareCrawler,
   });
   if (!gate.allowed) return;
 
@@ -3216,17 +1986,6 @@ export async function handleHttpRequest(req, res) {
     return;
   }
 
-  if (pathname === "/api/ad-form-desk-guide" && req.method === "GET") {
-    try {
-      sendJson(res, 200, await getAdFormDeskGuidePublic(), {
-        "Cache-Control": "public, max-age=60, stale-while-revalidate=300",
-      });
-    } catch (error) {
-      sendJson(res, 500, { error: error.message ?? "Hirdetésfeladás kép hiba." });
-    }
-    return;
-  }
-
   if (pathname.startsWith("/api/level1")) {
     await handleLevel1Api(req, res, pathname);
     return;
@@ -3239,21 +1998,6 @@ export async function handleHttpRequest(req, res) {
 
   if (pathname.startsWith("/api/messages")) {
     await handleMessagesApi(req, res, pathname);
-    return;
-  }
-
-  if (pathname === "/api/me/seller-ratings" && req.method === "GET") {
-    const user = await requestUser(req);
-    if (!user) {
-      sendJson(res, 401, { error: "Jelentkezz be." });
-      return;
-    }
-    try {
-      const ratings = await listReceivedSellerRatings({ sellerUserId: user.id });
-      sendJson(res, 200, { ratings });
-    } catch (err) {
-      sendJson(res, err.status || 500, { error: err.message || "Nem sikerült az értékelések betöltése." });
-    }
     return;
   }
 
@@ -3284,11 +2028,6 @@ export async function handleHttpRequest(req, res) {
 
   if (pathname === "/api/import/extracted" && (req.method === "POST" || req.method === "OPTIONS")) {
     await handleImportExtracted(req, res);
-    return;
-  }
-
-  if (pathname === "/api/import/ha-bridge" && req.method === "POST") {
-    await handleImportHaBridge(req, res);
     return;
   }
 
@@ -3383,15 +2122,9 @@ export async function handleHttpRequest(req, res) {
 
   if (pathname === "/api/nav/counts" && req.method === "GET") {
     try {
-      if (!assertPublicListingRate(req, res, "nav-counts", { limit: 120, windowMs: 60 * 1000 })) {
-        return;
-      }
       sendJson(res, 200, await countNavListings({ status: "feladott" }), {
-        // Publikus számok — rövid CDN cache OK (auth nélkül ugyanaz).
-        "Cache-Control": "public, max-age=30, s-maxage=60, stale-while-revalidate=120",
-        "CDN-Cache-Control": "public, max-age=60, stale-while-revalidate=120",
-        "Cloudflare-CDN-Cache-Control": "public, max-age=60, stale-while-revalidate=120",
-        Vary: "Accept-Encoding",
+        // Auth-kötött válasz — ne a CDN cache-eljen 0-t / régi számot.
+        "Cache-Control": "private, max-age=15, stale-while-revalidate=30",
       });
     } catch (error) {
       console.warn("Nav counts:", error.message ?? error);
@@ -3428,11 +2161,6 @@ export async function handleHttpRequest(req, res) {
     return;
   }
 
-  if (pathname.startsWith("/api/qr")) {
-    await handleQrApi(req, res, pathname);
-    return;
-  }
-
   if (pathname.startsWith("/api/vehicle-catalog")) {
     await handleVehicleCatalogApi(req, res, pathname);
     return;
@@ -3443,29 +2171,17 @@ export async function handleHttpRequest(req, res) {
     return;
   }
 
-  if (pathname === "/api/hirdetes-page" && req.method === "GET") {
-    try {
-      await serveHirdetesHtml(req, res);
-    } catch (error) {
-      console.warn("Hirdetés page API:", error?.message || error);
-      if (!res.headersSent) {
-        sendJson(res, 500, { error: error.message ?? "Szerver hiba." });
-      }
-    }
-    return;
-  }
-
   if (pathname.startsWith("/api/")) {
     sendJson(res, 404, { error: "Ismeretlen API." });
     return;
   }
 
   if (/^\/partner\/[a-z0-9-]+\/?$/.test(pathname)) {
-    await serveStatic("/partner-profil.html", res, req);
+    serveStatic("/partner-profil.html", res);
     return;
   }
 
-  await serveStatic(pathname, res, req);
+  serveStatic(pathname, res);
 }
 
 const server = createServer(handleHttpRequest);

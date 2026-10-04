@@ -1,35 +1,9 @@
-import {
-  fetchListing,
-  fetchRelatedListings,
-  fetchSellerRating,
-  submitSellerRating,
-  revealListingContact,
-  recordListingView,
-  deleteListingFromDb,
-} from "./db-client.js?v=658bac0c0e";
-import { getAuthUser, getDisplayName, getProfile } from "./site-auth.js?v=aad32d7596";
-import { mountTurnstile } from "./turnstile-ui.js?v=f0cc231f94";
-import { startConversation } from "./messages-api.js?v=5cf6493dc9";
-import { openListingMessage } from "./start-listing-message.js?v=d9c12be306";
-import { getParkplatz, addParkplatzItem, removeParkplatzItem } from "./fok-data.js?v=653bb89787";
-import { listingReturnHref, listingDetailHref, rememberListingOpen } from "./listing-return.js?v=1911f0cb28";
-import { takePrefetchedListing, storePrefetchedListing } from "./listing-prefetch.js?v=67ac871172";
-import { qrBlockHtml, withQrSource } from "./qr-display.js?v=qr1";
-
-function readBootListing() {
-  try {
-    if (window.__BYMY_LISTING_BOOT__?.detail) return window.__BYMY_LISTING_BOOT__;
-    const el = document.getElementById("bymy-listing-boot");
-    if (!el?.textContent) return null;
-    const listing = JSON.parse(el.textContent);
-    if (listing?.detail) {
-      window.__BYMY_LISTING_BOOT__ = listing;
-      return listing;
-    }
-  } catch {
-  }
-  return null;
-}
+import { fetchListing, fetchListings, recordListingView, deleteListingFromDb } from "./db-client.js?v=favGone1";
+import { getAuthUser, getDisplayName, getProfile } from "./site-auth.js?v=auth20260805localdb9";
+import { startConversation, sendMessage } from "./messages-api.js?v=msgLive1";
+import { canMessageListing, openListingMessage } from "./start-listing-message.js?v=msgLive1";
+import { getParkplatz, addParkplatzItem, removeParkplatzItem } from "./fok-data.js?v=auth20260805localdb9";
+import { listingReturnHref, listingDetailHref, rememberListingOpen } from "./listing-return.js?v=scrollTop1";
 
 const root = document.getElementById("hd-root");
 const ICON = {
@@ -39,135 +13,10 @@ const ICON = {
   close: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,
   star: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="m12 3.6 2.1 4.4 4.8.5-3.6 3.1 1.1 4.7L12 14.2 7.6 16.3l1.1-4.7-3.6-3.1 4.8-.5L12 3.6Z" stroke="currentColor" stroke-width="1.6"/></svg>`,
   share: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M16 8a3 3 0 1 0-2.8-4M8 12a3 3 0 1 0 0 0.01M16 20a3 3 0 1 0-2.8-4M8.7 13.2l6.6 3.6M15.3 7.2l-6.6 3.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>`,
-  facebook: `<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M14.5 8.5h2.2V5.2H14.3c-2.6 0-4.3 1.6-4.3 4.4v1.9H7.8v3.4h2.2V22h3.5v-7.1h2.5l.5-3.4h-3V9.8c0-1 .3-1.3 1.2-1.3Z"/></svg>`,
   print: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M7 8V5h10v3M6 14h12v5H6v-5Z" stroke="currentColor" stroke-width="1.6"/><path d="M4.8 9h14.4A1.7 1.7 0 0 1 21 10.7v4.2h-3M3 14.9V10.7A1.7 1.7 0 0 1 4.8 9" stroke="currentColor" stroke-width="1.6"/></svg>`,
   mail: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 7h16v10H4V7Z" stroke="currentColor" stroke-width="1.6"/><path d="m4 7 8 6 8-6" stroke="currentColor" stroke-width="1.6"/></svg>`,
   phone: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6.5 4.8h3.2l1.1 3.2-1.8 1.1a12 12 0 0 0 6 6l1.1-1.8 3.2 1.1v3.2A2 2 0 0 1 17.3 20 15 15 0 0 1 4 6.7 2 2 0 0 1 6.5 4.8Z" stroke="currentColor" stroke-width="1.6"/></svg>`,
-  heart: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 20s-7-4.4-7-9.2A3.8 3.8 0 0 1 12 7.2a3.8 3.8 0 0 1 7 3.6C19 15.6 12 20 12 20Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>`,
-  grid: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="6.5" height="6.5" rx="1.2" stroke="currentColor" stroke-width="1.6"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.2" stroke="currentColor" stroke-width="1.6"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.2" stroke="currentColor" stroke-width="1.6"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.2" stroke="currentColor" stroke-width="1.6"/></svg>`,
-  zoom: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="5.5" stroke="currentColor" stroke-width="1.6"/><path d="M16 16l4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>`,
-  pin: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 21s6-5.2 6-10a6 6 0 1 0-12 0c0 4.8 6 10 6 10Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="12" cy="11" r="2.2" stroke="currentColor" stroke-width="1.6"/></svg>`,
 };
-
-const HIGHLIGHT_ICONS = {
-  km: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 18 12 6l8 12" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M7.5 18h9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>`,
-  power: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="13" r="7" stroke="currentColor" stroke-width="1.7"/><path d="M12 13 15.5 8.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M8 10.2a6 6 0 0 1 8 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>`,
-  fuel: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 20V6.5A1.5 1.5 0 0 1 8.5 5h5A1.5 1.5 0 0 1 15 6.5V20" stroke="currentColor" stroke-width="1.7"/><path d="M6 20h10M15 9h2.2A1.8 1.8 0 0 1 19 10.8V16a2 2 0 1 0 2-2v-3.5L18.5 8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>`,
-  gear: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 6v12M16 6v12M8 12h8M8 6h4M16 18h-4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>`,
-  year: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2" stroke="currentColor" stroke-width="1.7"/><path d="M3.5 10h17M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>`,
-  owners: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8.5" r="3.2" stroke="currentColor" stroke-width="1.7"/><path d="M5.5 19.5c1.2-3.4 3.8-5 6.5-5s5.3 1.6 6.5 5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>`,
-  area: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 8.5 12 4l8 4.5V20H4V8.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9.5 20v-6h5v6" stroke="currentColor" stroke-width="1.7"/></svg>`,
-  rooms: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="4" y="5" width="16" height="14" rx="2" stroke="currentColor" stroke-width="1.7"/><path d="M4 12h16M12 5v14" stroke="currentColor" stroke-width="1.7"/></svg>`,
-  condition: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m7 12.5 3.2 3.2L17 8.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.7"/></svg>`,
-  color: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12" r="3.2" fill="currentColor"/></svg>`,
-  generic: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.7"/><path d="M12 8v4.5l2.5 2.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>`,
-};
-
-function specValue(rows, label) {
-  const hit = (rows || []).find((row) => row.label === label);
-  return hit?.value ? String(hit.value) : "";
-}
-
-function shortGear(value) {
-  const raw = String(value || "").trim();
-  if (!raw) return "";
-  if (/automat/i.test(raw)) return "Automata";
-  if (/manuál|manual|kézi/i.test(raw)) return "Manuális";
-  return raw.length > 28 ? `${raw.slice(0, 26)}…` : raw;
-}
-
-function highlightSpecsFromView(view) {
-  if (view.vertical === "ingatlan") {
-    const rows = [
-      { key: "area", label: "Alapterület", value: specValue(view.vehicleSpecs, "Alapterület") || specValue(view.bodyTech, "Alapterület") },
-      { key: "rooms", label: "Szobák", value: specValue(view.vehicleSpecs, "Szobaszám") },
-      { key: "condition", label: "Állapot", value: specValue(view.vehicleSpecs, "Állapot") },
-      { key: "year", label: "Év", value: view.year !== "—" ? view.year : "" },
-      { key: "color", label: "Fűtés", value: specValue(view.vehicleSpecs, "Fűtés") || specValue(view.motorSpecs, "Fűtés") },
-      { key: "generic", label: "Típus", value: specValue(view.vehicleSpecs, "Jármű típusa") || view.typeName },
-    ];
-    return rows.filter((row) => row.value);
-  }
-  return [
-    { key: "km", label: "Kilométeróra", value: view.km !== "—" ? view.km : "" },
-    { key: "power", label: "Teljesítmény", value: view.power !== "—" ? view.power : "" },
-    { key: "fuel", label: "Üzemanyag", value: view.fuel !== "—" ? view.fuel : "" },
-    {
-      key: "gear",
-      label: "Sebességváltó",
-      value: shortGear(specValue(view.motorSpecs, "Sebességváltó")),
-    },
-    {
-      key: "year",
-      label: "Évjárat",
-      value: view.registration !== "—" ? view.registration : view.year !== "—" ? view.year : "",
-    },
-    {
-      key: "owners",
-      label: "Tulajdonosok",
-      value: specValue(view.documentSpecs, "Előző tulajdonosok"),
-    },
-  ].filter((row) => row.value);
-}
-
-function promoBannerText(view) {
-  if (view.vertical === "ingatlan") return "Ingatlan: Végre egyszerű";
-  if (view.vertical === "teher") return "Teherautó: Végre egyszerű";
-  return "Autóvásárlás: Végre egyszerű";
-}
-
-/** Piaci árjelző az ár mellett (Kevés / Jó ár / Sok). */
-function priceMarketRatingHtml(view) {
-  const hint = view?.marketHint;
-  if (!hint?.opinion || !hint?.bars) return "";
-  const level = Math.max(1, Math.min(4, Number(hint.bars) || 0));
-  const label =
-    hint.label ||
-    (hint.opinion === "jó ár" ? "Jó ár" : hint.opinion === "kevés" ? "Kevés" : "Sok");
-  return `<div class="hd-price-rating" data-opinion="${escapeHtml(hint.opinion)}" title="Piaci árjelzés">
-              <span class="hd-price-bars" data-level="${level}" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
-              <span class="hd-price-rating-label">${escapeHtml(label)}</span>
-            </div>`;
-}
-
-function navigationDestination(view) {
-  const lines = Array.isArray(view.addressLines) ? view.addressLines.filter(Boolean) : [];
-  if (lines.length) return lines.join(", ");
-  return String(view.mapQuery || "").trim();
-}
-
-function navigationHref(view) {
-  const dest = navigationDestination(view);
-  if (!dest) return "";
-  return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(dest)}`;
-}
-
-function sideHeadline(view) {
-  if (view.brand && view.typeName) {
-    return { title: view.brand, subtitle: [view.typeName, view.year !== "—" ? view.year : ""].filter(Boolean).join(" · ") };
-  }
-  if (view.brand) {
-    return { title: view.brand, subtitle: view.year !== "—" ? String(view.year) : "" };
-  }
-  return { title: view.title, subtitle: view.year !== "—" ? String(view.year) : "" };
-}
-
-function highlightHtml(items) {
-  if (!items.length) return "";
-  return `<section class="hd-highlights" aria-label="Fő adatok">
-    ${items
-      .map(
-        (item) => `<div class="hd-hi">
-        <span class="hd-hi-icon">${HIGHLIGHT_ICONS[item.key] || HIGHLIGHT_ICONS.generic}</span>
-        <span class="hd-hi-text">
-          <span class="hd-hi-label">${escapeHtml(item.label)}</span>
-          <strong class="hd-hi-value">${escapeHtml(item.value)}</strong>
-        </span>
-      </div>`
-      )
-      .join("")}
-  </section>`;
-}
 
 function escapeHtml(value) {
   return String(value ?? "")
@@ -175,159 +24,6 @@ function escapeHtml(value) {
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
-}
-
-const SELLER_AVATAR_PLACEHOLDER =
-  "data:image/svg+xml," +
-  encodeURIComponent(
-    `<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">` +
-      `<circle cx="24" cy="24" r="24" fill="#e4eaf4"/>` +
-      `<circle cx="24" cy="17.5" r="7.5" fill="#8e9aaf"/>` +
-      `<path fill="#8e9aaf" d="M7.2 42.8C9.2 33.8 15.2 29.5 24 29.5s14.8 4.3 16.8 13.3C36.2 45.6 30.4 47.5 24 47.5S11.8 45.6 7.2 42.8z"/>` +
-      `</svg>`
-  );
-
-function sellerAvatarHtml(view) {
-  const src = String(view.sellerAvatarUrl || "").trim() || SELLER_AVATAR_PLACEHOLDER;
-  return `<span class="hd-seller-avatar" aria-hidden="true"><img src="${escapeHtml(src)}" alt="" width="48" height="48" decoding="async" /></span>`;
-}
-
-function sellerRatingSummaryHtml(rating) {
-  const avg = rating?.average != null ? Number(rating.average) : null;
-  const count = Number(rating?.count) || 0;
-  if (avg == null || count <= 0) {
-    return `<p class="hd-seller-rating hd-seller-rating--empty">Még nincs értékelés</p>`;
-  }
-  const filled = Math.max(0, Math.min(5, Math.round((avg / 10) * 5)));
-  const stars = Array.from({ length: 5 }, (_, i) =>
-    i < filled
-      ? `<span class="hd-seller-star is-on" aria-hidden="true">★</span>`
-      : `<span class="hd-seller-star" aria-hidden="true">☆</span>`
-  ).join("");
-  const avgLabel = Number.isFinite(avg) ? String(avg).replace(".", ",") : String(avg);
-  return `<p class="hd-seller-rating" title="${escapeHtml(avgLabel)} / 10">
-    <span class="hd-seller-stars" role="img" aria-label="Értékelés ${escapeHtml(avgLabel)} / 10">${stars}</span>
-    <strong class="hd-seller-avg">${escapeHtml(avgLabel)}</strong>
-    <span class="hd-seller-scale">/ 10</span>
-    <span class="hd-seller-count">(${count})</span>
-  </p>`;
-}
-
-function sellerRateStarsHtml(selected = 0) {
-  return `<div class="hd-seller-rate-stars" role="group" aria-label="Értékelés 1–10">
-    ${Array.from({ length: 10 }, (_, i) => {
-      const n = i + 1;
-      const on = n <= selected;
-      return `<button type="button" class="hd-seller-rate-star${on ? " is-on" : ""}" data-hd-rate="${n}" aria-label="${n} / 10">${on ? "★" : "☆"}</button>`;
-    }).join("")}
-  </div>`;
-}
-
-function sellerRatingBlockHtml(rating, { interactive = false } = {}) {
-  const myScore = rating?.myScore != null ? Number(rating.myScore) : null;
-  let rateExtra = "";
-  if (interactive) {
-    if (myScore != null) {
-      rateExtra = `<p class="hd-seller-rate-hint">Te értékelésed: <strong>${escapeHtml(String(myScore))} / 10</strong></p>`;
-    } else if (rating?.canRate) {
-      rateExtra = `<div class="hd-seller-rate" data-hd-rate-wrap>
-        <p class="hd-seller-rate-label">Értékeld (1–10):</p>
-        ${sellerRateStarsHtml(0)}
-        <button type="button" class="hd-btn hd-btn--soft hd-seller-rate-save" data-hd-rate-save disabled>Mentés</button>
-        <p class="hd-seller-rate-hint" data-hd-rate-msg hidden></p>
-      </div>`;
-    } else if (!rating?.loggedIn) {
-      const next = encodeURIComponent(location.pathname + location.search);
-      rateExtra = `<p class="hd-seller-rate-hint"><a href="/belepes.html?next=${next}">Jelentkezz be</a> az értékeléshez.</p>`;
-    }
-  }
-  return `<div class="hd-seller-rating-block" data-hd-seller-rating>
-    ${sellerRatingSummaryHtml(rating)}
-    ${rateExtra}
-  </div>`;
-}
-
-function bindSellerRate(block, listingId) {
-  const wrap = block?.querySelector?.("[data-hd-rate-wrap]");
-  if (!wrap || !listingId) return;
-  const stars = [...wrap.querySelectorAll("[data-hd-rate]")];
-  const saveBtn = wrap.querySelector("[data-hd-rate-save]");
-  const msg = wrap.querySelector("[data-hd-rate-msg]");
-  let selected = 0;
-
-  const paint = (n) => {
-    stars.forEach((b) => {
-      const v = Number(b.getAttribute("data-hd-rate"));
-      const on = v <= n;
-      b.classList.toggle("is-on", on);
-      b.textContent = on ? "★" : "☆";
-    });
-  };
-
-  stars.forEach((btn) => {
-    btn.addEventListener("mouseenter", () => paint(Number(btn.getAttribute("data-hd-rate"))));
-    btn.addEventListener("mouseleave", () => paint(selected));
-    btn.addEventListener("click", () => {
-      selected = Number(btn.getAttribute("data-hd-rate"));
-      if (!Number.isFinite(selected) || selected < 1) selected = 0;
-      paint(selected);
-      if (saveBtn) saveBtn.disabled = !(selected >= 1 && selected <= 10);
-      if (msg) {
-        msg.hidden = true;
-        msg.textContent = "";
-      }
-    });
-  });
-
-  saveBtn?.addEventListener("click", async () => {
-    if (!(selected >= 1 && selected <= 10)) {
-      if (msg) {
-        msg.hidden = false;
-        msg.textContent = "Előbb válassz 1–10 csillagot.";
-      }
-      return;
-    }
-    saveBtn.disabled = true;
-    stars.forEach((b) => {
-      b.disabled = true;
-    });
-    try {
-      const rating = await submitSellerRating(listingId, selected);
-      paintSellerRating(rating, listingId);
-    } catch (err) {
-      if (msg) {
-        msg.hidden = false;
-        msg.textContent = err?.message || "Nem sikerült az értékelés.";
-      }
-      stars.forEach((b) => {
-        b.disabled = false;
-      });
-      saveBtn.disabled = false;
-    }
-  });
-}
-
-function paintSellerRating(rating, listingId) {
-  if (!root) return;
-  const slots = [...root.querySelectorAll("[data-hd-seller-rating]")];
-  slots.forEach((el, index) => {
-    const interactive = index === 0;
-    const wrap = document.createElement("div");
-    wrap.innerHTML = sellerRatingBlockHtml(rating, { interactive });
-    const next = wrap.firstElementChild;
-    if (!next) return;
-    el.replaceWith(next);
-    if (interactive) bindSellerRate(next, listingId);
-  });
-}
-
-async function loadSellerRating(listingId) {
-  try {
-    const rating = await fetchSellerRating(listingId);
-    paintSellerRating(rating || { average: null, count: 0 }, listingId);
-  } catch {
-    paintSellerRating({ average: null, count: 0, canRate: false, loggedIn: false }, listingId);
-  }
 }
 
 function formatDate(value) {
@@ -350,61 +46,14 @@ function currentUserId() {
   return Number.isFinite(id) && id > 0 ? id : null;
 }
 
-function isOwnListing(view, listing = null) {
-  const uid = currentUserId();
-  if (!uid) return false;
-  const candidates = [view?.userId, listing?.user_id, listing?.detail?.userId];
-  return candidates.some((value) => {
-    const n = Number(value);
-    return Number.isFinite(n) && n > 0 && n === uid;
-  });
-}
-
-function clearRelatedUi() {
-  if (!root) return;
-  document.getElementById("hd-related")?.remove();
-  root.querySelectorAll("[data-hd-related-link], a[href='#hd-related']").forEach((el) => el.remove());
-}
-
 function kvHtml(rows) {
   if (!rows?.length) return "";
   return `<dl class="hd-grid">${rows
     .map(
       (row) =>
-        `<div class="hd-kv"><dt>${escapeHtml(row.label)}:</dt><dd>${escapeHtml(row.value)}</dd></div>`
+        `<div class="hd-kv"><dt>${escapeHtml(row.label)}</dt><dd>${escapeHtml(row.value)}</dd></div>`
     )
     .join("")}</dl>`;
-}
-
-function specBlockHtml(title, rows) {
-  if (!rows?.length) return "";
-  return `<section class="hd-spec-block"><h2 class="hd-spec-block__title">${escapeHtml(title)}</h2>${kvHtml(rows)}</section>`;
-}
-
-function equipmentGroupsHtml(groups) {
-  if (!groups?.length) return "";
-  const PREVIEW = 5;
-  return `<h2 class="hd-h2">Extrák</h2>${groups
-    .map((group) => {
-      const items = Array.isArray(group.items) ? group.items : [];
-      const list = items
-        .map((item, index) => {
-          const more = index >= PREVIEW ? " hd-extra-item--more" : "";
-          return `<li class="hd-extra-item${more}">${escapeHtml(item)}</li>`;
-        })
-        .join("");
-      const moreBtn =
-        items.length > PREVIEW
-          ? `<button type="button" class="hd-more hd-extra-more-btn" data-hd-extra-more>Több megjelenítése +</button>
-             <button type="button" class="hd-more hd-extra-less-btn" data-hd-extra-less hidden>Kevesebb megjelenítése −</button>`
-          : "";
-      return `<div class="hd-extra-group">
-          <h3 class="hd-h3 hd-h3--extra">${escapeHtml(group.title)}</h3>
-          <ul class="hd-list" data-hd-extra-list>${list}</ul>
-          ${moreBtn}
-        </div>`;
-    })
-    .join("")}`;
 }
 
 function relatedCard(item) {
@@ -424,116 +73,63 @@ function relatedCard(item) {
 }
 
 function applyRelated(view, related) {
-  if (!root) return;
-  if (root.dataset.ownListing === "1" || root.querySelector(".hd-owner") || isOwnListing(view)) {
-    clearRelatedUi();
-    return;
-  }
-  const items = Array.isArray(related) ? related : [];
-  const total = items.length + 1;
-  const label = `Kereskedés többi hirdetései ${total}`;
+  if (!related.length || !root) return;
+
   const aside = root.querySelector(".hd-side") || root.querySelector("aside");
-  let link =
-    aside?.querySelector("[data-hd-related-link]") ||
-    aside?.querySelector('a[href="#hd-related"]');
-  if (aside && !link && items.length) {
-    link = document.createElement("button");
-    link.type = "button";
+  if (aside && !aside.querySelector('a[href="#hd-related"]')) {
+    const link = document.createElement("a");
     link.className = "hd-btn hd-btn--ghost";
-    link.dataset.hdRelatedLink = "";
+    link.href = "#hd-related";
+    link.textContent = `Több ettől a hirdetőtől ${related.length}`;
     const owner = aside.querySelector(".hd-owner");
     if (owner) aside.insertBefore(link, owner);
     else aside.appendChild(link);
   }
-  if (link) {
-    link.textContent = label;
-    link.hidden = false;
-    link.removeAttribute("aria-expanded");
-    link.removeAttribute("aria-controls");
-  }
-  if (!items.length) {
-    document.getElementById("hd-related")?.remove();
-    return;
-  }
 
-  let section = document.getElementById("hd-related");
-  const wasOpen = Boolean(section && !section.hidden);
-  if (!section) {
-    section = document.createElement("section");
-    section.className = "hd-section";
-    section.id = "hd-related";
-    const dealer = root.querySelector(".hd-dealer");
-    if (dealer) root.insertBefore(section, dealer);
-    else root.appendChild(section);
-  }
-  section.hidden = !wasOpen;
+  if (document.getElementById("hd-related")) return;
+
+  const section = document.createElement("section");
+  section.className = "hd-section";
+  section.id = "hd-related";
   section.innerHTML = `
     <div class="hd-related-head">
-      <h2 class="hd-h2">Kereskedés többi hirdetései</h2>
+      <h2 class="hd-h2">Több ettől a hirdetőtől</h2>
+      <a class="hd-more" href="${escapeHtml(view.categoryHref)}">Több megjelenítése</a>
     </div>
-    <div class="hd-related">${items.map(relatedCard).join("")}</div>
+    <div class="hd-related">${related.map(relatedCard).join("")}</div>
   `;
-  if (link) link.removeAttribute("aria-expanded");
+  const dealer = root.querySelector(".hd-dealer");
+  if (dealer) root.insertBefore(section, dealer);
+  else root.appendChild(section);
+
   section.querySelectorAll("a[data-listing-id]").forEach((a) => {
     a.addEventListener("click", () => rememberListingOpen(a.dataset.listingId, a));
   });
 }
 
-function listPageForVertical(vertical) {
-  const v = String(vertical || "").trim().toLowerCase();
-  if (v === "ingatlan") return "/ingatlan.html";
-  if (v === "teher" || v === "teherauto") return "/teherauto.html";
-  return "/auto.html";
-}
-
-function listingVerticalFromView(view) {
-  const explicit = String(view?.vertical || "").trim().toLowerCase();
-  if (explicit === "teher" || explicit === "ingatlan" || explicit === "auto") return explicit;
-  const href = String(view?.categoryHref || "");
-  if (href.includes("ingatlan")) return "ingatlan";
-  if (href.includes("teher")) return "teher";
-  return "auto";
-}
-
-function sellerListHref(listingId, _vertical) {
-  // Egy készletoldal: a kereskedő összes feladott hirdetése (minden vertical).
-  const url = new URL("/auto.html", window.location.origin);
-  url.searchParams.set("hirdeto", String(listingId));
-  return `${url.pathname}${url.search}`;
-}
-
-function revealRelatedListings(event) {
-  const trigger = event?.target?.closest?.("[data-hd-related-link]");
-  if (!trigger || !root?.contains(trigger)) return;
-  if (root.dataset.ownListing === "1" || root.querySelector(".hd-owner")) {
-    clearRelatedUi();
-    return;
-  }
-  event.preventDefault();
-  const listingId = root.dataset.listingId || new URLSearchParams(location.search).get("id");
-  if (!listingId) return;
-  const vertical = root.dataset.listingVertical || "auto";
-  window.location.href = sellerListHref(listingId, vertical);
-}
-
-async function loadRelatedListings(listingId, view) {
-  if (root?.dataset.ownListing === "1" || isOwnListing(view)) return;
+async function loadRelatedInBackground(listingId, view) {
+  if (!view?.userId) return;
+  // Ne versenyezzen a detail API-val — késleltetve, idle-ben.
+  await new Promise((resolve) => setTimeout(resolve, 2500));
   try {
-    const related = await fetchRelatedListings(listingId, { limit: 24 });
+    const all = await fetchListings({ limit: 50 });
+    const related = all
+      .filter((item) => Number(item.user_id) === Number(view.userId) && Number(item.id) !== Number(listingId))
+      .slice(0, 5);
     applyRelated(view, related);
   } catch {
+    /* ignore — a fő tartalom már látszik */
   }
 }
 
-function render(view, listing, related = []) {
-  const images = Array.isArray(view.images) ? view.images : [];
+function render(view, listing, related) {
+  const images = view.images?.length ? view.images : [];
   const first = images[0] || "";
-  const equipmentGroups = Array.isArray(view.equipmentGroups) ? view.equipmentGroups : [];
-  const addressLines = Array.isArray(view.addressLines) ? view.addressLines : [];
-  const perks = Array.isArray(view.perks) ? view.perks : [];
-  const relatedItems = Array.isArray(related) ? related : [];
-  const own = isOwnListing(view, listing);
-  const canMsg = !own;
+  const extras = view.equipment || [];
+  const extrasShort = extras.slice(0, 6);
+  const extrasRest = extras.slice(6);
+  const own = currentUserId() && currentUserId() === Number(view.userId);
+  const canMsg = !own && canMessageListing(view.userId);
   const user = getAuthUser();
   const profile = getProfile() || {};
   const partner = listing?.partner;
@@ -541,22 +137,36 @@ function render(view, listing, related = []) {
     ? `/partner/${encodeURIComponent(partner.slug)}`
     : "";
   const loginNext = `/belepes.html?next=${encodeURIComponent(location.pathname + location.search)}`;
-  root.dataset.listingId = String(view.id);
-  root.dataset.listingVertical = listingVerticalFromView(view);
-  if (own) root.dataset.ownListing = "1";
-  else delete root.dataset.ownListing;
-
-  const highlights = highlightSpecsFromView(view);
-  const headline = sideHeadline(view);
-  const promoText = promoBannerText(view);
-  const navHref = navigationHref(view);
 
   document.title = `${view.title} — Bymy`;
-  document.body.classList.remove("hd-has-msg-bar");
-  if (root) root.dataset.ownListing = own ? "1" : "0";
-  if (own) clearRelatedUi();
+  document.body.classList.toggle("hd-has-msg-bar", canMsg);
 
   root.innerHTML = `
+    <p class="hd-crumbs">
+      <button type="button" class="hd-more" data-hd-back>${ICON.back} Vissza</button>
+      <span>·</span>
+      <a href="/">Kezdőlap</a>
+      <span>›</span>
+      <a href="${escapeHtml(view.categoryHref)}">${escapeHtml(view.categoryLabel)}</a>
+      ${view.brand ? `<span>›</span><span>${escapeHtml(view.brand)}</span>` : ""}
+    </p>
+
+    <div class="hd-head">
+      <h1 class="hd-title">${escapeHtml(view.title)}</h1>
+      <div class="hd-tools">
+        <button type="button" class="hd-tool" data-hd-star aria-label="Mentés">${ICON.star}</button>
+        <button type="button" class="hd-tool" data-hd-share aria-label="Megosztás">${ICON.share}</button>
+        <button type="button" class="hd-tool" data-hd-print aria-label="Nyomtatás">${ICON.print}</button>
+      </div>
+    </div>
+    <div class="hd-specbar">
+      <div class="hd-specbar-main">${view.headerSpecs.map((s) => `<span>${escapeHtml(s)}</span>`).join("")}</div>
+      <div class="hd-specbar-meta">
+        ${view.updatedAt ? `Utoljára módosítva: ${escapeHtml(formatDate(view.updatedAt))}` : ""}
+        ${view.code ? ` · Bymy-kód: ${escapeHtml(view.code)}` : ""}
+      </div>
+    </div>
+
     <div class="hd-hero">
       <div class="hd-gallery">
         <div class="hd-stage">
@@ -569,7 +179,6 @@ function render(view, listing, related = []) {
           }
           <span class="hd-count" data-hd-count>${images.length ? `1 / ${images.length}` : "0 / 0"}</span>
         </div>
-        <div class="hd-promo">${escapeHtml(promoText)}</div>
         ${
           images.length
             ? `<div class="hd-thumbs">
@@ -584,7 +193,6 @@ function render(view, listing, related = []) {
         </div>`
             : ""
         }
-        ${highlightHtml(highlights)}
       </div>
       ${
         images.length
@@ -616,25 +224,11 @@ function render(view, listing, related = []) {
           : ""
       }
       <aside class="hd-side">
-        <div class="hd-side-head">
-          <h1 class="hd-side-title">${escapeHtml(headline.title)}</h1>
-          ${headline.subtitle ? `<p class="hd-side-sub">${escapeHtml(headline.subtitle)}</p>` : ""}
+        <div>
+          <p class="hd-price">${escapeHtml(view.price)}</p>
+          <p class="hd-price-sub">Eladási ár${view.salePrice ? ` · korábbi: ${escapeHtml(view.salePrice)}` : ""}</p>
         </div>
-        <div class="hd-price-box">
-          <div class="hd-price-row">
-            <p class="hd-price">${escapeHtml(view.price)}</p>
-            ${priceMarketRatingHtml(view)}
-          </div>
-          ${view.salePrice ? `<p class="hd-price-old">Korábbi ár: ${escapeHtml(view.salePrice)}</p>` : ""}
-        </div>
-        <div class="hd-seller-card">
-          ${sellerAvatarHtml(view)}
-          <div class="hd-seller-meta">
-            <p class="hd-seller-name">${escapeHtml(view.sellerName)}</p>
-            <p class="hd-seller-rating hd-seller-rating--loading" data-hd-seller-rating>Értékelés betöltése…</p>
-            ${view.sellerSince ? `<p class="hd-seller-since">Felhasználó ezóta: ${escapeHtml(view.sellerSince)}</p>` : ""}
-          </div>
-        </div>
+        <p class="hd-seller-name">${escapeHtml(view.sellerName)}</p>
         ${
           partnerHref
             ? `<a class="hd-partner-badge" href="${partnerHref}">
@@ -643,91 +237,97 @@ function render(view, listing, related = []) {
               </a>`
             : ""
         }
-        ${addressLines.length ? `<p class="hd-seller-addr">${addressLines.map(escapeHtml).join("<br>")}</p>` : ""}
-        ${qrBlockHtml({ url: withQrSource(window.location.href), label: "QR — ez a hirdetés", size: 140 })}
+        ${view.addressLines.length ? `<p class="hd-seller-addr">${view.addressLines.map(escapeHtml).join("<br>")}</p>` : ""}
         ${
           canMsg
-            ? `<button type="button" class="hd-btn hd-btn--primary" data-hd-message>${ICON.mail} Üzenet küldése</button>`
+            ? `<button type="button" class="hd-btn hd-btn--primary" data-hd-message>${ICON.mail} Üzenet</button>`
             : own
               ? ""
               : `<button type="button" class="hd-btn hd-btn--primary" data-hd-goto-form>${ICON.mail} Hirdető kapcsolata</button>`
         }
-        <div class="hd-side-actions${own ? " hd-side-actions--3" : ""}">
-          ${
-            own
-              ? ""
-              : `<button type="button" class="hd-btn hd-btn--outline hd-btn--icon" data-hd-star aria-label="Kedvencekhez adás" aria-pressed="false" title="Kedvenc">${ICON.heart}</button>`
-          }
-          <button type="button" class="hd-btn hd-btn--outline hd-btn--icon" data-hd-share aria-label="Megosztás" title="Megosztás">${ICON.share}</button>
-          <button type="button" class="hd-btn hd-btn--outline hd-btn--icon hd-btn--fb" data-hd-share-fb aria-label="Megosztás Facebookon" title="Facebook">${ICON.facebook}</button>
-          <button type="button" class="hd-btn hd-btn--outline hd-btn--icon" data-hd-print aria-label="Nyomtatás" title="Nyomtatás">${ICON.print}</button>
-        </div>
         ${
-          view.hasPhone || view.phone
-            ? `<button type="button" class="hd-btn hd-btn--soft" data-hd-phone>${ICON.phone} ${escapeHtml(view.phoneMasked || "Telefonszám")} mutatása</button>`
+          view.phone
+            ? `<button type="button" class="hd-btn hd-btn--ghost" data-hd-phone data-full="${escapeHtml(view.phone)}">${ICON.phone} ${escapeHtml(view.phoneMasked)} szám mutatása</button>`
             : ""
         }
+        <a class="hd-btn hd-btn--ghost" href="/adasveteli-szerzodes.html?id=${encodeURIComponent(view.id)}">Adásvételi szerződés</a>
         ${
-          navHref
-            ? `<a class="hd-btn hd-btn--soft" href="${escapeHtml(navHref)}" target="_blank" rel="noopener" data-hd-navigate>${ICON.pin} Navigáció</a>`
+          related.length
+            ? `<a class="hd-btn hd-btn--ghost" href="#hd-related">Több ettől a hirdetőtől ${related.length}</a>`
             : ""
         }
-        ${
-          !own && relatedItems.length
-            ? `<button type="button" class="hd-btn hd-btn--soft" data-hd-related-link>Kereskedés többi hirdetései ${relatedItems.length + 1}</button>`
-            : !own
-              ? `<button type="button" class="hd-btn hd-btn--soft" data-hd-related-link>Kereskedés többi hirdetései …</button>`
-              : ""
-        }
-        <a class="hd-btn hd-btn--soft" href="/adasveteli-szerzodes.html?id=${encodeURIComponent(view.id)}">Adásvételi szerződés</a>
         ${view.website ? `<a class="hd-web" href="${escapeHtml(view.website)}" target="_blank" rel="noopener">Céges weboldal</a>` : ""}
         ${
           own
             ? `<div class="hd-owner">
-                <a class="hd-btn hd-btn--soft" href="/hirdetesfeladas.html?id=${view.id}">Szerkesztés</a>
-                <button type="button" class="hd-btn hd-btn--soft" data-hd-delete>Törlés</button>
+                <a class="hd-btn hd-btn--ghost" href="/hirdetesfeladas.html?id=${view.id}">Szerkesztés</a>
+                <button type="button" class="hd-btn hd-btn--ghost" data-hd-delete>Törlés</button>
               </div>`
             : ""
         }
       </aside>
     </div>
 
-    <div class="hd-specs">
-      ${specBlockHtml("Jármű adatok", view.vehicleSpecs)}
-      ${specBlockHtml("Motor adatok", view.motorSpecs)}
-      ${specBlockHtml("Okmányok", view.documentSpecs)}
-      ${specBlockHtml("Abroncs", view.tireSpecs)}
+    <section class="hd-section">
+      <h2 class="hd-h2">Járműadatok</h2>
+      <h3 class="hd-h3">Alapadatok</h3>
+      ${kvHtml(view.basics)}
+      <h3 class="hd-h3" style="margin-top:1.1rem">Karosszéria és technika</h3>
+      ${kvHtml(view.bodyTech)}
       ${
-        perks.length
-          ? `<section class="hd-spec-block hd-spec-block--perks"><h2 class="hd-spec-block__title">További előnyök</h2>${perks.map((p) => `<span class="hd-check">${escapeHtml(p)}</span>`).join("")}</section>`
+        view.perks.length
+          ? `<h3 class="hd-h3" style="margin-top:1.1rem">További előnyök</h3>${view.perks.map((p) => `<span class="hd-check">${escapeHtml(p)}</span>`).join("")}`
           : ""
       }
-    </div>
+    </section>
 
-    ${
-      equipmentGroups.length
-        ? `<section class="hd-section hd-section--extras hd-textbox">${equipmentGroupsHtml(equipmentGroups)}</section>`
-        : ""
-    }
-
-    <section class="hd-section hd-section--desc hd-textbox">
+    <section class="hd-section">
       <h2 class="hd-h2">Leírás</h2>
       ${view.description ? `<p class="hd-desc is-clip" data-hd-desc>${escapeHtml(view.description)}</p>` : "<p class=\"hd-desc\">Nincs leírás.</p>"}
       ${view.description ? `<button type="button" class="hd-more" data-hd-desc-more>Több megjelenítése +</button>` : ""}
+      ${
+        extras.length
+          ? `<h3 class="hd-h3" style="margin-top:1.1rem">Beépített opciók</h3>
+             <p class="hd-desc">${escapeHtml(extras.join(", "))}</p>
+             <h3 class="hd-h3" style="margin-top:1.1rem">Extrák</h3>
+             <ul class="hd-list" data-hd-extras>${extrasShort.map((x) => `<li>${escapeHtml(x)}</li>`).join("")}</ul>
+             ${extrasRest.length ? `<button type="button" class="hd-more" data-hd-extras-more>Több megjelenítése +</button>` : ""}`
+          : ""
+      }
     </section>
 
     ${
-      !own && relatedItems.length
-        ? `<section class="hd-section" id="hd-related" hidden>
+      related.length
+        ? `<section class="hd-section" id="hd-related">
         <div class="hd-related-head">
-          <h2 class="hd-h2">Kereskedés többi hirdetései</h2>
+          <h2 class="hd-h2">Több ettől a hirdetőtől</h2>
+          <a class="hd-more" href="${escapeHtml(view.categoryHref)}">Több megjelenítése</a>
         </div>
-        <div class="hd-related">${relatedItems.map(relatedCard).join("")}</div>
+        <div class="hd-related">${related.map(relatedCard).join("")}</div>
       </section>`
         : ""
     }
 
     <section class="hd-dealer">
+      <div class="hd-card">
+        <p class="hd-seller-name">${escapeHtml(view.sellerName)}</p>
+        ${
+          partnerHref
+            ? `<a class="hd-partner-profile-link" href="${partnerHref}">
+                ${partner.logo_url ? `<img src="${escapeHtml(partner.logo_url)}" alt="" />` : `<span>${escapeHtml(String(partner.display_name || "P").slice(0, 1))}</span>`}
+                <span><small>Ellenőrzött ingatlanos partner</small><strong>${escapeHtml(partner.display_name)}</strong><em>Partnerprofil megnyitása →</em></span>
+              </a>`
+            : ""
+        }
+        ${view.addressLines.length ? `<p class="hd-seller-addr">${view.addressLines.map(escapeHtml).join("<br>")}</p>` : ""}
+        <p class="hd-seller-addr">Hivatkozási szám: ${escapeHtml(view.code || String(view.id))}</p>
+        ${view.website ? `<p><a class="hd-web" href="${escapeHtml(view.website)}" target="_blank" rel="noopener">Weboldal</a></p>` : ""}
+        ${
+          view.phone
+            ? `<button type="button" class="hd-btn hd-btn--ghost" data-hd-phone data-full="${escapeHtml(view.phone)}">${ICON.phone} ${escapeHtml(view.phoneMasked)} szám mutatása</button>`
+            : ""
+        }
+      </div>
       <div>
         ${
           view.mapQuery
@@ -761,32 +361,27 @@ function render(view, listing, related = []) {
     </section>
 
     <div class="hd-foot">
-      <div class="hd-foot-meta">
-        ${view.updatedAt ? `<span>Utoljára módosítva: ${escapeHtml(formatDate(view.updatedAt))}</span>` : ""}
-        <span>Bymy-kód: ${escapeHtml(view.code || String(view.id))}</span>
-      </div>
+      <span>Bymy-kód: ${escapeHtml(view.code || String(view.id))} ${view.updatedAt ? `| Utoljára módosítva: ${escapeHtml(formatDate(view.updatedAt))}` : ""}</span>
       <a class="hd-report" href="/uzenetek.html">! Hirdetés jelentése</a>
     </div>
     ${
-      view.hasPhone && !view.phone
-        ? `<div class="hd-phone-security" id="hd-phone-security"><div id="hd-phone-turnstile" class="hd-turnstile"></div></div>`
+      canMsg
+        ? `<div class="hd-msg-bar" role="region" aria-label="Üzenet">
+            ${
+              view.phone
+                ? `<button type="button" class="hd-btn hd-btn--primary" data-hd-phone data-full="${escapeHtml(view.phone)}">${ICON.phone} Hívás</button>`
+                : ""
+            }
+            <button type="button" class="hd-btn hd-btn--primary" data-hd-message>${ICON.mail} Üzenet</button>
+          </div>`
         : ""
     }
   `;
 
-  bindUi(view, listing);
+  bindUi(view, listing, extrasRest);
 }
 
-function bindUi(view, listing) {
-  const needPhoneReveal = Boolean(view.hasPhone && !view.phone);
-  let phoneTurnstile = { enabled: false, ready: true, execute: null, getToken: async () => "", reset: () => {} };
-  const phoneTurnstileReady = needPhoneReveal
-    ? mountTurnstile(document.getElementById("hd-phone-turnstile"), { size: "invisible" }).then((widget) => {
-        phoneTurnstile = widget;
-        return widget;
-      })
-    : Promise.resolve(phoneTurnstile);
-
+function bindUi(view, listing, extrasRest) {
   let index = 0;
   const images = view.images || [];
   const main = root.querySelector("[data-hd-main]");
@@ -817,24 +412,8 @@ function bindUi(view, listing) {
     markThumbs("[data-hd-lb-thumb]");
   }
 
-  let lbFullscreen = false;
-
-  function setLbFullscreen(on) {
-    lbFullscreen = Boolean(on);
-    lightbox?.classList.toggle("is-fs", lbFullscreen);
-    const closeBtn = root.querySelector("[data-hd-lb-close]");
-    if (closeBtn) {
-      closeBtn.setAttribute(
-        "aria-label",
-        lbFullscreen ? "Kicsinyítés" : "Bezárás"
-      );
-      closeBtn.setAttribute("title", lbFullscreen ? "Vissza a galériához" : "Bezárás");
-    }
-  }
-
   function openLightbox() {
     if (!lightbox || !images.length) return;
-    setLbFullscreen(false);
     show(index);
     if (typeof lightbox.showModal === "function") lightbox.showModal();
     else lightbox.setAttribute("open", "");
@@ -842,11 +421,13 @@ function bindUi(view, listing) {
 
   function closeLightbox() {
     if (!lightbox) return;
-    setLbFullscreen(false);
     if (typeof lightbox.close === "function" && lightbox.open) lightbox.close();
     else lightbox.removeAttribute("open");
   }
 
+  root.querySelector("[data-hd-back]")?.addEventListener("click", () => {
+    window.location.href = listingReturnHref(view.categoryHref);
+  });
   root.querySelector("[data-hd-prev]")?.addEventListener("click", (event) => {
     event.stopPropagation();
     show(index - 1);
@@ -864,28 +445,13 @@ function bindUi(view, listing) {
   root.querySelectorAll("[data-hd-lb-thumb]").forEach((btn) => {
     btn.addEventListener("click", () => show(Number(btn.dataset.hdLbThumb)));
   });
-  root.querySelector("[data-hd-lb-close]")?.addEventListener("click", () => {
-    if (lbFullscreen) setLbFullscreen(false);
-    else closeLightbox();
-  });
-  const lbStage = root.querySelector(".hd-lb-stage");
-  lbStage?.addEventListener("click", (event) => {
-    if (event.target.closest("[data-hd-lb-prev], [data-hd-lb-next]")) return;
-    if (!lbFullscreen) setLbFullscreen(true);
-  });
-  lbMain?.addEventListener("dblclick", () => {
-    if (lbFullscreen) setLbFullscreen(false);
-  });
+  root.querySelector("[data-hd-lb-close]")?.addEventListener("click", closeLightbox);
   lightbox?.addEventListener("click", (event) => {
-    if (event.target === lightbox) {
-      if (lbFullscreen) setLbFullscreen(false);
-      else closeLightbox();
-    }
+    if (event.target === lightbox) closeLightbox();
   });
   lightbox?.addEventListener("cancel", (event) => {
     event.preventDefault();
-    if (lbFullscreen) setLbFullscreen(false);
-    else closeLightbox();
+    closeLightbox();
   });
   document.addEventListener("keydown", (event) => {
     if (!images.length) return;
@@ -893,23 +459,11 @@ function bindUi(view, listing) {
     if (!open && event.target !== document.body && event.target?.tagName !== "BODY") return;
     if (event.key === "ArrowLeft") show(index - 1);
     if (event.key === "ArrowRight") show(index + 1);
-    if (event.key === "Escape" && open) {
-      if (lbFullscreen) setLbFullscreen(false);
-      else closeLightbox();
-    }
+    if (event.key === "Escape" && open) closeLightbox();
   });
   root.querySelector("[data-hd-print]")?.addEventListener("click", () => window.print());
-  const shareUrl = () => {
-    try {
-      const u = new URL(window.location.href);
-      u.hash = "";
-      return u.toString();
-    } catch {
-      return window.location.href.split("#")[0];
-    }
-  };
   root.querySelector("[data-hd-share]")?.addEventListener("click", async () => {
-    const url = shareUrl();
+    const url = window.location.href;
     try {
       if (navigator.share) await navigator.share({ title: view.title, url });
       else {
@@ -917,34 +471,15 @@ function bindUi(view, listing) {
         window.alert("A link a vágólapra került.");
       }
     } catch {
+      /* cancelled */
     }
   });
-  root.querySelector("[data-hd-share-fb]")?.addEventListener("click", () => {
-    const href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl())}`;
-    window.open(href, "_blank", "noopener,noreferrer,width=640,height=720");
-  });
-  try {
-    document.title = `${view.title} | Bymy`;
-  } catch {
-    /* ignore */
-  }
 
   const star = root.querySelector("[data-hd-star]");
   const email = getAuthUser()?.email;
   const saved = email && getParkplatz(email).some((row) => String(row.id) === String(view.id));
-  function syncFavButton(on) {
-    if (!star) return;
-    star.classList.toggle("is-on", on);
-    star.setAttribute("aria-pressed", on ? "true" : "false");
-    star.setAttribute("aria-label", on ? "Eltávolítás a kedvencekből" : "Kedvencekhez adás");
-    star.title = on ? "Kedvenc" : "Kedvencekhez adás";
-  }
-  if (star && saved) syncFavButton(true);
+  if (star && saved) star.classList.add("is-on");
   star?.addEventListener("click", () => {
-    if (root.dataset.ownListing === "1" || isOwnListing(view, listing)) {
-      clearRelatedUi();
-      return;
-    }
     if (!email) {
       window.location.href = `/belepes.html?next=${encodeURIComponent(location.pathname + location.search)}`;
       return;
@@ -957,89 +492,17 @@ function bindUi(view, listing) {
         title: view.title,
         price: view.price,
         url: listingDetailHref(view.id),
-        imageUrl: view.images?.[0] || "",
       });
     }
-    syncFavButton(!on);
+    star.classList.toggle("is-on", !on);
   });
 
   root.querySelectorAll("[data-hd-phone]").forEach((btn) => {
-    btn.addEventListener("click", async () => {
-      if (btn.dataset.revealed === "1") return;
-      const fullAlready = String(btn.dataset.full || "").trim();
-      if (fullAlready) {
-        const digits = fullAlready.replace(/[^\d+]/g, "");
-        if (digits.length >= 7) window.location.href = `tel:${digits}`;
-        return;
-      }
-      btn.disabled = true;
-      try {
-        let contact;
-        if (view.phone) {
-          contact = { phone: view.phone, addressLines: view.addressLines || [] };
-        } else {
-          await phoneTurnstileReady;
-          if (phoneTurnstile.enabled && phoneTurnstile.ready === false) {
-            alert("A biztonsági ellenőrző most nem elérhető. Frissítsd az oldalt.");
-            return;
-          }
-          let token = "";
-          if (phoneTurnstile.enabled) {
-            token = phoneTurnstile.execute
-              ? await phoneTurnstile.execute({ waitMs: 15000 })
-              : await phoneTurnstile.getToken({ waitMs: 10000 });
-            if (!token) {
-              alert("A biztonsági ellenőrzés sikertelen. Próbáld újra.");
-              phoneTurnstile.reset();
-              return;
-            }
-          }
-          contact = await revealListingContact(view.id, token);
-          phoneTurnstile.reset();
-        }
-        const full = String(contact.phone || "").trim();
-        if (!full) {
-          btn.textContent = "Nincs telefonszám";
-          return;
-        }
-        btn.dataset.revealed = "1";
-        btn.textContent = full;
-        const digits = full.replace(/[^\d+]/g, "");
-        if (digits.length >= 7) window.location.href = `tel:${digits}`;
-        if (contact.addressLines?.length) {
-          view.addressLines = contact.addressLines;
-          if (!view.mapQuery) {
-            view.mapQuery = contact.addressLines.join(", ");
-          }
-          for (const addrEl of root.querySelectorAll(".hd-seller-addr")) {
-            if (!addrEl.textContent?.trim()) {
-              addrEl.innerHTML = contact.addressLines.map(escapeHtml).join("<br>");
-            }
-          }
-          const href = navigationHref(view);
-          let navBtn = root.querySelector("[data-hd-navigate]");
-          if (href && !navBtn) {
-            navBtn = document.createElement("a");
-            navBtn.className = "hd-btn hd-btn--soft";
-            navBtn.dataset.hdNavigate = "";
-            navBtn.target = "_blank";
-            navBtn.rel = "noopener";
-            navBtn.innerHTML = `${ICON.pin} Navigáció`;
-            const tools = root.querySelector(".hd-side-actions");
-            const phoneBtn = root.querySelector(".hd-side [data-hd-phone]");
-            if (phoneBtn) phoneBtn.after(navBtn);
-            else if (tools) tools.after(navBtn);
-            else root.querySelector(".hd-side")?.appendChild(navBtn);
-          }
-          if (navBtn && href) navBtn.href = href;
-        }
-      } catch (error) {
-        btn.textContent = "Nem elérhető";
-        alert(error.message ?? "A telefonszám most nem kérhető le.");
-        phoneTurnstile.reset?.();
-      } finally {
-        btn.disabled = false;
-      }
+    btn.addEventListener("click", () => {
+      const full = btn.getAttribute("data-full") || "";
+      btn.textContent = full;
+      const digits = full.replace(/[^\d+]/g, "");
+      if (digits.length >= 7) window.location.href = `tel:${digits}`;
     });
   });
 
@@ -1058,7 +521,6 @@ function bindUi(view, listing) {
           meta: view.metaLine,
           code: view.code,
           sellerId: view.userId,
-          sellerName: view.sellerName,
         });
       } catch (error) {
         alert(error.message ?? "Az üzenet indítása sikertelen.");
@@ -1073,27 +535,14 @@ function bindUi(view, listing) {
     event.currentTarget.hidden = true;
   });
 
-  root.querySelectorAll("[data-hd-extra-more]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const group = btn.closest(".hd-extra-group");
-      if (!group) return;
-      group.classList.add("is-open");
-      btn.hidden = true;
-      const less = group.querySelector("[data-hd-extra-less]");
-      if (less) less.hidden = false;
+  root.querySelector("[data-hd-extras-more]")?.addEventListener("click", (event) => {
+    const list = root.querySelector("[data-hd-extras]");
+    extrasRest.forEach((item) => {
+      const li = document.createElement("li");
+      li.textContent = item;
+      list?.appendChild(li);
     });
-  });
-
-  root.querySelectorAll("[data-hd-extra-less]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const group = btn.closest(".hd-extra-group");
-      if (!group) return;
-      group.classList.remove("is-open");
-      btn.hidden = true;
-      const more = group.querySelector("[data-hd-extra-more]");
-      if (more) more.hidden = false;
-      group.querySelector(".hd-h3--extra")?.scrollIntoView({ block: "nearest", behavior: "smooth" });
-    });
+    event.currentTarget.hidden = true;
   });
 
   root.querySelector("[data-hd-delete]")?.addEventListener("click", async () => {
@@ -1129,8 +578,8 @@ function bindUi(view, listing) {
         meta: view.metaLine,
         code: view.code,
         sellerId: view.userId,
-        initialBody: parts.join("\n"),
       });
+      await sendMessage(conv.id, { body: parts.join("\n") });
       if (status) {
         status.hidden = false;
         status.textContent = "Az érdeklődés elküldve.";
@@ -1148,8 +597,6 @@ function bindUi(view, listing) {
   root.querySelectorAll("a[data-listing-id]").forEach((a) => {
     a.addEventListener("click", () => rememberListingOpen(a.dataset.listingId, a));
   });
-
-  root.addEventListener("click", revealRelatedListings);
 }
 
 async function init() {
@@ -1159,33 +606,14 @@ async function init() {
     return;
   }
   try {
-    let listing = readBootListing() || takePrefetchedListing(id);
-    const fromBoot = Boolean(listing?.detail);
-    if (!listing?.detail) {
-      listing = await fetchListing(id, { view: "detail" });
-    } else {
-      storePrefetchedListing(id, listing);
-    }
+    const listing = await fetchListing(id, { view: "detail" });
     if (!listing) throw new Error("Nincs ilyen hirdetés.");
     const view = listing.detail;
     if (!view) throw new Error("A hirdetés adatai hiányosak.");
+    // Először rajzolunk — view számláló és „több ettől” ne blokkolja a megnyitást.
     render(view, listing, []);
     recordListingView(id, "web").catch(() => {});
-    void loadRelatedListings(id, view);
-    void loadSellerRating(id);
-    // Boot / prefetch után háttérben frissítés (telefon-mask stb.).
-    if (fromBoot) {
-      void fetchListing(id, { view: "detail", bypassCache: true })
-        .then((fresh) => {
-          if (!fresh?.detail || !root?.dataset?.listingId) return;
-          if (String(root.dataset.listingId) !== String(id)) return;
-          storePrefetchedListing(id, fresh);
-          render(fresh.detail, fresh, []);
-          void loadRelatedListings(id, fresh.detail);
-          void loadSellerRating(id);
-        })
-        .catch(() => {});
-    }
+    loadRelatedInBackground(id, view);
   } catch (error) {
     root.innerHTML = `<p class="hd-empty">${escapeHtml(error.message ?? "A hirdetés nem tölthető be.")}</p>`;
   }

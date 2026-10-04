@@ -1,5 +1,6 @@
 import { getAuthUser, refreshAuthSession } from "./site-auth.js?v=aad32d7596";
-import { getParkplatz, PARKPLATZ_CHANGED } from "./fok-data.js?v=653bb89787";
+import { getParkplatz, pruneParkplatzMissing, PARKPLATZ_CHANGED } from "./fok-data.js?v=favGone1";
+import { fetchExistingListingIds } from "./db-client.js?v=favGone1";
 import {
   createListingTileCard,
   formatListingCountBadge,
@@ -229,7 +230,14 @@ async function initFavoritesRail() {
     }
 
     if (ALL) ALL.href = "/beallitasok.html?szekcio=parkolo";
-    const saved = getParkplatz(email);
+    let saved = getParkplatz(email);
+    if (saved.length) {
+      try {
+        const existing = await fetchExistingListingIds(saved.map((row) => row.id));
+        saved = pruneParkplatzMissing(email, existing);
+      } catch {
+      }
+    }
     if (!saved.length) {
       RAIL.innerHTML = "";
       setCount(0);

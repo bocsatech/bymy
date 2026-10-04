@@ -99,6 +99,36 @@ export function removeParkplatzItem(email, id) {
   return next;
 }
 
+/** Törölt hirdetés: vedd ki minden fiók kedvenceiből ezen a gépen. */
+export function removeParkplatzIdEverywhere(id) {
+  const want = String(id ?? "").trim();
+  if (!want) return;
+  const map = readMap(PARK_KEY);
+  let changed = false;
+  for (const [email, rows] of Object.entries(map)) {
+    if (!Array.isArray(rows)) continue;
+    const next = rows.filter((row) => String(row?.id) !== want);
+    if (next.length !== rows.length) {
+      map[email] = next;
+      changed = true;
+    }
+  }
+  if (changed) {
+    writeMap(PARK_KEY, map);
+    notifyParkplatzChanged();
+  }
+}
+
+export function pruneParkplatzMissing(email, existingIds) {
+  const alive = new Set([...(existingIds || [])].map((id) => String(id)));
+  const list = getParkplatz(email);
+  const next = list.filter((row) => alive.has(String(row.id)));
+  if (next.length === list.length) return list;
+  saveForEmail(PARK_KEY, email, next);
+  notifyParkplatzChanged();
+  return next;
+}
+
 export function updateParkplatzNote(email, id, note) {
   const next = getParkplatz(email).map((row) =>
     String(row.id) === String(id) ? { ...row, note: String(note ?? "") } : row

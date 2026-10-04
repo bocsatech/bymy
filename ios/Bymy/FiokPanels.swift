@@ -237,11 +237,19 @@ struct FavoritesScreen: View {
             }
         }
         .background(AppTheme.bg)
-        .onAppear { reload() }
+        .onAppear { Task { await reload() } }
     }
 
-    private func reload() {
+    private func reload() async {
         items = FavoriteStore.load(email: auth.user?.email)
+        let listingIds = items.compactMap { $0.listingId ?? ($0.id.allSatisfy(\.isNumber) ? $0.id : nil) }
+        guard !listingIds.isEmpty else { return }
+        do {
+            let existing = try await ListingsAPI.existingIds(listingIds)
+            FavoriteStore.pruneMissing(email: auth.user?.email, existingIds: existing)
+            items = FavoriteStore.load(email: auth.user?.email)
+        } catch {
+        }
     }
 
     private func addManual() {
@@ -259,13 +267,13 @@ struct FavoritesScreen: View {
         )
         titleDraft = ""
         priceDraft = ""
-        reload()
+        Task { await reload() }
     }
 
     private func delete(at offsets: IndexSet) {
         let ids = offsets.map { items[$0].id }
         FavoriteStore.remove(email: auth.user?.email, ids: ids)
-        reload()
+        Task { await reload() }
     }
 }
 
@@ -343,6 +351,22 @@ enum FavoriteStore {
 
         var favs = Set(UserDefaults.standard.stringArray(forKey: "bymy.favorites") ?? [])
         for id in ids { favs.remove(id) }
+        UserDefaults.standard.set(Array(favs), forKey: "bymy.favorites")
+    }
+
+    static func pruneMissing(email: String?, existingIds: Set<String>) {
+        let alive = existingIds
+        let loaded = load(email: email)
+        let gone = loaded.compactMap { item -> String? in
+            let lid = item.listingId ?? (item.id.allSatisfy(\.isNumber) ? item.id : nil)
+            guard let lid else { return nil }
+            return alive.contains(lid) ? nil : item.id
+        }
+        if !gone.isEmpty {
+            remove(email: email, ids: gone)
+        }
+        var favs = Set(UserDefaults.standard.stringArray(forKey: "bymy.favorites") ?? [])
+        favs = favs.filter { alive.contains($0) }
         UserDefaults.standard.set(Array(favs), forKey: "bymy.favorites")
     }
 

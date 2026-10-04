@@ -178,6 +178,24 @@ enum ListingsAPI {
         try await fetchPage(path: path, query: query, token: token).listings
     }
 
+    /// Web `fetchExistingListingIds` — GET `/api/listings/exists?ids=`.
+    static func existingIds(_ ids: [String]) async throws -> Set<String> {
+        let unique = Array(Set(ids.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty })).prefix(200)
+        if unique.isEmpty { return [] }
+        var comps = URLComponents(url: APIBase.url("api/listings/exists"), resolvingAgainstBaseURL: false)!
+        comps.queryItems = [URLQueryItem(name: "ids", value: unique.joined(separator: ","))]
+        var req = URLRequest(url: comps.url!)
+        req.setValue("application/json", forHTTPHeaderField: "Accept")
+        req.timeoutInterval = 20
+        let (data, response) = try await URLSession.shared.data(for: req)
+        guard let http = response as? HTTPURLResponse, http.statusCode < 400 else {
+            throw APIClient.APIError.server("Kedvencek ellenőrzése sikertelen.")
+        }
+        struct Envelope: Decodable { let ids: [FlexibleID]? }
+        let decoded = try JSONDecoder().decode(Envelope.self, from: data)
+        return Set((decoded.ids ?? []).map { $0.value })
+    }
+
     /// Web `fetchMyListings` — GET `/api/listings/mine`.
     static func fetchMine(token: String?, limit: Int = 200) async throws -> [Listing] {
         guard let token, !token.isEmpty else {

@@ -4,7 +4,7 @@ import {
   patchListingFieldsInDb,
   saveListingPhotosOrder,
   deleteListingFromDb,
-} from "./db-client.js?v=658bac0c0e";
+} from "./db-client.js?v=favGone1";
 import {
   DEFAULT_PHOTO_OVERLAY_ID,
   detectBymyPhotoOverlay,

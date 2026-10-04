@@ -274,11 +274,28 @@ export async function clearListingPhotosFromDb(id) {
   return parseJson(response);
 }
 
+export async function fetchExistingListingIds(ids = []) {
+  const unique = [...new Set(ids.map((id) => String(id ?? "").trim()).filter(Boolean))].slice(0, 200);
+  if (!unique.length) return [];
+  const params = new URLSearchParams({ ids: unique.join(",") });
+  const response = await fetch(`/api/listings/exists?${params}`, {
+    credentials: "same-origin",
+  });
+  const data = await parseJson(response);
+  return Array.isArray(data.ids) ? data.ids : [];
+}
+
 export async function deleteListingFromDb(id) {
   const response = await fetch(`/api/listings/${id}`, {
     method: "DELETE",
     headers: authHeaders(),
     credentials: "same-origin",
   });
-  return parseJson(response);
+  const data = await parseJson(response);
+  try {
+    const { removeParkplatzIdEverywhere } = await import("./fok-data.js?v=favGone1");
+    removeParkplatzIdEverywhere(id);
+  } catch {
+  }
+  return data;
 }

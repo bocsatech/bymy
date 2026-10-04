@@ -10,35 +10,18 @@
           }
           document.documentElement.setAttribute("data-theme", t);
         } catch (e) {}
-                
+                /* Auth fejléc: ne villanjon vendég gomb → profil a modul / API előtt */
         try {
           var raw = sessionStorage.getItem("bymy-auth-user");
           var user = raw ? JSON.parse(raw) : null;
           var loggedIn = !!(user && user.email);
           document.documentElement.setAttribute("data-auth", loggedIn ? "member" : "guest");
-          var accountType = String((user && user.profile && user.profile.accountType) || "");
-          if (!accountType || accountType === "private") {
-            try {
-              var bak = JSON.parse(localStorage.getItem("bymy-profile-backup") || "null");
-              if (bak && (bak.accountType === "business" || bak.accountType === "dealer")) {
-                accountType = String(bak.accountType);
-              }
-            } catch (e2) {}
-          }
-          if (!accountType) accountType = "private";
-          var kind = accountType === "business" || accountType === "dealer" ? "company" : "private";
-          if (kind === "private") {
-            try {
-              if (localStorage.getItem("bymy-account-kind") === "company") kind = "company";
-            } catch (e3) {}
-          }
-          document.documentElement.setAttribute("data-mm-account-kind", kind);
-          try { localStorage.setItem("bymy-account-kind", kind); } catch (e4) {}
-          if (accountType === "dealer" || accountType === "business" || accountType === "private") {
-            document.documentElement.setAttribute("data-bymy-account-type", accountType);
-          } else {
-            document.documentElement.setAttribute("data-bymy-account-type", kind === "company" ? "business" : "private");
-          }
+          document.documentElement.setAttribute("data-mm-account-pending", "");
+          var accountType = String((user && user.profile && user.profile.accountType) || "private");
+          document.documentElement.setAttribute(
+            "data-mm-account-kind",
+            accountType === "business" || accountType === "dealer" ? "company" : "private"
+          );
           var first = "";
           if (user) {
             first = String((user.profile && user.profile.firstName) || "").trim();
@@ -63,24 +46,9 @@
           }
         } catch (e) {
           document.documentElement.setAttribute("data-auth", "guest");
-          document.documentElement.setAttribute("data-mm-account-kind", "private");
         }
       })();
     </script>
-    <style>
-      /* Menüsorrend fix a HTML-ben; láthatóság csak account-kind szerint (nincs hidden→JS villanás). */
-      body.site-app .mm-nav { display: flex; flex-direction: column; }
-      body.site-app .mm-nav > [data-mm-company-nav-wrap] { display: none !important; }
-      html[data-mm-account-kind="company"] body.site-app .mm-nav > [data-mm-company-nav-wrap] {
-        display: grid !important;
-      }
-      body.site-app .mm-nav > [data-mm-dealer-nav-wrap] { display: none !important; }
-      html[data-bymy-account-type="dealer"] body.site-app .mm-nav > [data-mm-dealer-nav-wrap],
-      html[data-bymy-account-type="business"] body.site-app .mm-nav > [data-mm-dealer-nav-wrap],
-      html[data-mm-account-kind="company"] body.site-app .mm-nav > [data-mm-dealer-nav-wrap] {
-        display: grid !important;
-      }
-    </style>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext x='16' y='22' text-anchor='middle' font-size='14' font-family='system-ui,sans-serif' font-weight='700'%3EB%3C/text%3E%3C/svg%3E" type="image/svg+xml" />
@@ -89,18 +57,14 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="/css/style.css?v=f771974b46" />
-    <link rel="stylesheet" href="/css/site-app.css?v=c0d2bfab87" />
-        <link rel="stylesheet" href="/css/site-desk-header.css?v=09d6bf801f" />
-<link rel="stylesheet" href="/css/mm-nav-c.css?v=7644b31f4c" />
-      <link rel="stylesheet" href="/css/hub.css?v=e6bf27b3c3" />
-    <link rel="stylesheet" href="/css/partner-profile.css?v=6ba04596fa" />
-    <link rel="stylesheet" href="/css/messages-enhancements.css?v=9dc1a2d8c2" />
-    <link rel="stylesheet" href="/css/ertekbecslo-qr.css?v=ertek7" />
+    <link rel="stylesheet" href="/css/style.css?v=auth20260725" />
+    <link rel="stylesheet" href="/css/site-app.css?v=fixedHdr1" />
+      <link rel="stylesheet" href="/css/hub.css?v=hubPromoAdmin1" />
 </head>
   <body class="site-app settings-page mm-page" data-site-page="beallitasok" data-auth-init="manual">
-    <script src="/js/mw-app-shell.js?v=fead9b4cb5"></script>
-<header class="site-header site-app-header">
+    <script src="/js/mw-app-shell.js?v=tabHideScroll1"></script>
+
+    <header class="site-header site-app-header">
       <div class="site-app-header-inner">
         <div class="hub-header-top">
         <div class="hub-header-actions site-header-actions">
@@ -108,13 +72,12 @@
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 6.8h9.5a2.2 2.2 0 0 1 2.2 2.2v4.2a2.2 2.2 0 0 1-2.2 2.2H10l-3.2 2.4V15.2H5A2.2 2.2 0 0 1 2.8 13V9a2.2 2.2 0 0 1 2.2-2.2Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M14.2 8.2h4A2.2 2.2 0 0 1 20.4 10.4v3.4a2.2 2.2 0 0 1-2.2 2.2h-.7v1.7l-2.2-1.7" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
             <span>Üzenetek</span>
           </a>
-
-<div class="site-header-auth-row" data-auth-guest>
+          <div class="site-header-auth-row" data-auth-guest>
             <a class="hub-btn hub-btn--ghost" href="/belepes.html" data-auth-login>Belépés</a>
             <a class="hub-btn hub-btn--ghost" href="/regisztracio.html" data-auth-register>Regisztráció</a>
           </div>
           <div class="site-header-avatar-wrap" data-avatar-menu data-auth-member hidden>
-            <button type="button" class="site-header-profile" data-auth-avatar data-avatar-toggle aria-expanded="false" aria-label="Fiók" title="Fiók">
+            <button type="button" class="site-header-profile" data-auth-avatar data-avatar-toggle aria-expanded="false" aria-haspopup="menu" aria-label="Fiók" title="Fiók">
               <span class="site-header-avatar">
                 <span data-avatar-letter>A</span>
                 <img data-avatar-img alt="" hidden width="44" height="44" />
@@ -122,6 +85,7 @@
               <span class="site-header-firstname" data-auth-firstname></span>
               <svg class="site-header-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </button>
+            <div class="site-avatar-dropdown site-avatar-dropdown--fiok" data-avatar-dropdown role="menu" hidden></div>
           </div>
           <a class="hub-btn hub-btn--post" href="/hirdetesfeladas.html" data-auth-guard>+ Hirdetésfeladás</a>
           <button type="button" class="hub-theme-toggle" data-theme-toggle aria-label="Színmód" title="Színmód"></button>
@@ -129,7 +93,7 @@
         </div>
         <div class="hub-nav-band">
           <a class="site-app-logo" href="/" aria-label="Bymy">
-            <img class="bymy-logo-img bymy-logo-img--nav" src="/images/bymy-logo.png?v=08e46e9d97" alt="Bymy.hu" width="190" height="48" decoding="async" />
+            <img class="bymy-logo-img bymy-logo-img--nav" src="/images/bymy-logo.png?v=logoUpload1" alt="Bymy.hu" width="190" height="48" decoding="async" />
           </a>
         <nav class="import-nav site-app-nav" aria-label="Főmenü">
           <a class="import-nav-link" href="/">Kezdőlap</a>
@@ -142,100 +106,44 @@
       </div>
     </header>
 
+
     <main class="mm-shell">
-      <p class="mm-boot-error" role="alert">
-        A Fiókom felület betöltése sikertelen. Frissítsd az oldalt; ha megmarad, jelezd — valószínű modulhiba.
-      </p>
       <aside class="mm-side" aria-label="Fiók menü">
-        <div class="mm-side-head">
-          <p class="mm-side-kicker">Fiókom <span class="mm-side-account-type" data-mm-account-type hidden></span></p>
-          <h1 class="mm-side-title">Üdv, <span data-mm-hello>—</span></h1>
-        </div>
+        <p class="mm-side-kicker">Fiókom <span class="mm-side-account-type" data-mm-account-type hidden></span></p>
+        <h1 class="mm-side-title">Üdv, <span data-mm-hello>—</span></h1>
         <nav class="mm-nav">
-          <div class="mm-nav-group" data-mm-company-nav-wrap>
-            <button type="button" class="mm-nav-link mm-nav-toggle" data-mm-subtoggle aria-expanded="false">
-              <span class="mm-nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4 20V10l8-6 8 6v10H4Z" stroke="currentColor" stroke-width="1.7"/></svg></span>
-              <span class="mm-nav-text">Cégadatok</span>
+          <div class="mm-nav-group" data-mm-company-nav-wrap hidden>
+            <button type="button" class="mm-nav-link mm-nav-toggle" data-mm-subtoggle data-mm-nav="cegadatok" aria-expanded="false">
+              <span>Cégadatok</span>
               <svg class="mm-nav-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </button>
             <div class="mm-nav-sub" data-mm-sub hidden>
-              <a class="mm-nav-sublink" href="?szekcio=partner-profil" data-mm-nav="partner-profil">
-                <span class="mm-nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M8 20v-7h8v7M4 10l8-6 8 6" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg></span>
-                <span class="mm-nav-text">Partneri profil</span>
-              </a>
+              <a class="mm-nav-sublink" href="/partner-profil-kezelese.html">Partneri profil</a>
+              <a class="mm-nav-sublink" href="?szekcio=keresesi-korzet" data-mm-nav="keresesi-korzet">Keresési körzet</a>
+              <a class="mm-nav-sublink" href="?szekcio=jelszo" data-mm-nav="jelszo">Jelszó módosítása</a>
+              <a class="mm-nav-sublink" href="?szekcio=notify" data-mm-nav="notify">Hírlevél és értesítések</a>
             </div>
           </div>
-          <a class="mm-nav-link" href="?szekcio=import" data-mm-nav="import">
-            <span class="mm-nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4 16l4-8h8l4 8H4Z" stroke="currentColor" stroke-width="1.7"/><circle cx="8" cy="17" r="1.5" fill="currentColor"/><circle cx="16" cy="17" r="1.5" fill="currentColor"/></svg></span>
-            <span class="mm-nav-text">Autóimport</span>
-          </a>
-          <div class="mm-nav-group" data-mm-dealer-nav-wrap>
-            <a class="mm-nav-link" href="?szekcio=ertekbecslo" data-mm-nav="ertekbecslo">
-              <span class="mm-nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4 19h16M7 16V9m5 7V5m5 11v-6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span>
-              <span class="mm-nav-text">Értékbecslő</span>
-            </a>
-          </div>
-          <a class="mm-nav-link" href="?szekcio=nyomtatasok" data-mm-nav="nyomtatasok">
-            <span class="mm-nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M7 8h10M7 12h10M7 16h6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span>
-            <span class="mm-nav-text">Nyomtatások</span>
-          </a>
-          <a class="mm-nav-link" href="?szekcio=ertekelesek" data-mm-nav="ertekelesek">
-            <span class="mm-nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3l2.2 6.5H21l-5.2 3.8 2 6.7L12 16.8 6.2 20l2-6.7L3 9.5h6.8L12 3Z" stroke="currentColor" stroke-width="1.5"/></svg></span>
-            <span class="mm-nav-text">Értékelések</span>
-          </a>
-          <p class="mm-nav-plain">
-            <span class="mm-nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M12 5v14" stroke="currentColor" stroke-width="1.7"/></svg></span>
-            <span class="mm-nav-text">Kiemelések</span>
-            <span>Hamarosan</span>
-          </p>
-          <a class="mm-nav-link" href="?szekcio=parkolo" data-mm-nav="parkolo">
-            <span class="mm-nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 20s-7-4.5-7-10a7 7 0 1 1 14 0c0 5.5-7 10-7 10Z" stroke="currentColor" stroke-width="1.7"/></svg></span>
-            <span class="mm-nav-text">Kedvencek</span>
-          </a>
-          <a class="mm-nav-link" href="?szekcio=hirdetes" data-mm-nav="hirdetes">
-            <span class="mm-nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="4" y="5" width="16" height="14" rx="2" stroke="currentColor" stroke-width="1.7"/><path d="M8 9h8M8 13h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span>
-            <span class="mm-nav-text">Saját hirdetések</span>
-          </a>
-          <a class="mm-nav-link" href="?szekcio=keresesek" data-mm-nav="keresesek">
-            <span class="mm-nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="6" stroke="currentColor" stroke-width="1.7"/><path d="M20 20l-3.5-3.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span>
-            <span class="mm-nav-text">Mentett kereséseim</span>
-          </a>
-          <a class="mm-nav-link" href="?szekcio=uzenetek" data-mm-nav="uzenetek">
-            <span class="mm-nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4 6h16v10H7l-3 3V6Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg></span>
-            <span class="mm-nav-text">Üzenetek</span>
-            <span class="mm-nav-badge" data-mm-msg-count hidden>0</span>
-          </a>
+          <a class="mm-nav-link" href="?szekcio=import" data-mm-nav="import">Autóimport</a>
+          <a class="mm-nav-link" href="?szekcio=nyomtatasok" data-mm-nav="nyomtatasok">Nyomtatások</a>
+          <a class="mm-nav-link" href="?szekcio=ertekelesek" data-mm-nav="ertekelesek">Értékelések</a>
+          <p class="mm-nav-plain">Kiemelések</p>
+          <a class="mm-nav-link" href="?szekcio=parkolo" data-mm-nav="parkolo">Parkoló</a>
+          <a class="mm-nav-link" href="?szekcio=hirdetes" data-mm-nav="hirdetes">Saját hirdetések</a>
+          <a class="mm-nav-link" href="?szekcio=keresesek" data-mm-nav="keresesek">Mentett kereséseim</a>
+          <a class="mm-nav-link" href="/uzenetek.html" data-mm-nav="uzenetek">Üzenetek <span class="mm-nav-badge" data-mm-msg-count hidden>0</span></a>
           <div class="mm-nav-group" data-mm-settings-nav>
             <button type="button" class="mm-nav-link mm-nav-toggle" data-mm-subtoggle aria-expanded="false">
-              <span class="mm-nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.7"/><path d="M12 3.5v2.2M12 18.3v2.2M3.5 12h2.2M18.3 12h2.2M5.6 5.6l1.6 1.6M16.8 16.8l1.6 1.6M5.6 18.4l1.6-1.6M16.8 7.2l1.6-1.6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span>
-              <span class="mm-nav-text">Beállítások</span>
+              <span>Beállítások</span>
               <svg class="mm-nav-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </button>
             <div class="mm-nav-sub" data-mm-sub hidden>
-              <a class="mm-nav-sublink" href="?szekcio=szemelyes" data-mm-nav="szemelyes">
-                <span class="mm-nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.2" stroke="currentColor" stroke-width="1.7"/><path d="M5 19c1.5-3.2 4-4.8 7-4.8S17.5 15.8 19 19" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span>
-                <span class="mm-nav-text">Személyes adatok</span>
-              </a>
-              <a class="mm-nav-sublink" href="?szekcio=keresesi-korzet" data-mm-nav="keresesi-korzet">
-                <span class="mm-nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="7" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12" r="2.5" stroke="currentColor" stroke-width="1.7"/></svg></span>
-                <span class="mm-nav-text">Keresési körzet</span>
-              </a>
-              <a class="mm-nav-sublink" href="?szekcio=ajanlasok-korzet" data-mm-nav="ajanlasok-korzet">
-                <span class="mm-nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 21s7-5.2 7-11a7 7 0 1 0-14 0c0 5.8 7 11 7 11Z" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="10" r="2.2" stroke="currentColor" stroke-width="1.7"/></svg></span>
-                <span class="mm-nav-text">Ajánlások körzete</span>
-              </a>
-              <a class="mm-nav-sublink" href="?szekcio=jelszo" data-mm-nav="jelszo">
-                <span class="mm-nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="5" y="10" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.7"/><path d="M8 10V7a4 4 0 0 1 8 0v3" stroke="currentColor" stroke-width="1.7"/></svg></span>
-                <span class="mm-nav-text">Jelszó módosítása</span>
-              </a>
-              <a class="mm-nav-sublink" href="?szekcio=notify" data-mm-nav="notify">
-                <span class="mm-nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M6 17h12l-1.2-2.2V10a4.8 4.8 0 1 0-9.6 0v4.8L6 17Z" stroke="currentColor" stroke-width="1.7"/><path d="M10 19a2 2 0 0 0 4 0" stroke="currentColor" stroke-width="1.7"/></svg></span>
-                <span class="mm-nav-text">Hírlevél és értesítések</span>
-              </a>
-              <a class="mm-nav-sublink" href="?szekcio=megjelenes" data-mm-nav="megjelenes">
-                <span class="mm-nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.7"/><path d="M12 3v2.2M12 18.8V21M3 12h2.2M18.8 12H21" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span>
-                <span class="mm-nav-text">Megjelenés</span>
-              </a>
+              <a class="mm-nav-sublink" href="?szekcio=szemelyes" data-mm-nav="szemelyes">Személyes adatok</a>
+              <a class="mm-nav-sublink" href="?szekcio=keresesi-korzet" data-mm-nav="keresesi-korzet">Keresési körzet</a>
+              <a class="mm-nav-sublink" href="?szekcio=ajanlasok-korzet" data-mm-nav="ajanlasok-korzet">Ajánlások körzete</a>
+              <a class="mm-nav-sublink" href="?szekcio=jelszo" data-mm-nav="jelszo">Jelszó módosítása</a>
+              <a class="mm-nav-sublink" href="?szekcio=notify" data-mm-nav="notify">Hírlevél és értesítések</a>
+              <a class="mm-nav-sublink" href="?szekcio=megjelenes" data-mm-nav="megjelenes">Megjelenés</a>
             </div>
           </div>
         </nav>
@@ -243,98 +151,107 @@
       </aside>
 
       <div class="mm-main">
-        <section class="mm-panel mm-panel--partner" data-mm-panel="partner-profil" hidden>
-          <div id="partner-root" class="partner-main partner-main--in-mm" aria-live="polite">
-            <div class="partner-loading">Partneri profil betöltése…</div>
-          </div>
+        <section class="mm-panel" data-mm-panel="cegadatok" hidden>
+          <header class="mm-panel-head">
+            <h2 class="mm-panel-title">Cégadatok</h2>
+            <p class="mm-panel-lead">A céges fiókhoz tartozó adatok. A fióktípus regisztrációkor rögzül.</p>
+          </header>
+          <form id="mm-company-form" class="settings-form" action="#" method="post" onsubmit="return false;">
+            <label class="login-field">
+              <span class="login-label">Cégnév/név</span>
+              <input type="text" name="company" autocomplete="organization" />
+            </label>
+            <label class="login-field">
+              <span class="login-label">Cég adószáma</span>
+              <input type="text" name="companyTaxId" autocomplete="off" inputmode="numeric" />
+            </label>
+            <label class="login-field">
+              <span class="login-label">Utca, házszám</span>
+              <input type="text" name="companyStreet" autocomplete="street-address" />
+            </label>
+            <div class="settings-postal-row">
+              <label class="login-field settings-postal-field">
+                <span class="login-label">Irányítószám</span>
+                <input type="text" name="companyPostalCode" inputmode="numeric" maxlength="4" autocomplete="postal-code" data-postal-lookup data-company-postal />
+              </label>
+              <label class="login-field settings-city-field">
+                <span class="login-label">Település <span class="settings-city-busy" data-city-busy hidden>…</span></span>
+                <input type="text" name="companyCity" autocomplete="address-level2" placeholder="automatikus" data-company-city />
+              </label>
+            </div>
+            <label class="login-field">
+              <span class="login-label">Ország</span>
+              <input type="text" name="companyCountry" value="Magyarország" autocomplete="country-name" />
+            </label>
+            <div class="mm-grid-2">
+              <label class="login-field">
+                <span class="login-label">Telefonszám</span>
+                <input type="tel" name="companyPhone" autocomplete="tel" />
+              </label>
+              <label class="login-field">
+                <span class="login-label">Telefonszám</span>
+                <input type="tel" name="companyPhone2" autocomplete="tel" />
+              </label>
+            </div>
+            <div class="mm-grid-2">
+              <label class="login-field">
+                <span class="login-label">E-mailcím</span>
+                <input type="email" name="companyEmail" autocomplete="email" />
+              </label>
+              <label class="login-field">
+                <span class="login-label">E-mailcím</span>
+                <input type="email" name="companyEmail2" autocomplete="email" />
+              </label>
+            </div>
+            <div class="mm-grid-2">
+              <label class="login-field">
+                <span class="login-label">Értékesítő neve</span>
+                <input type="text" name="salespersonName" autocomplete="name" />
+              </label>
+              <label class="login-field">
+                <span class="login-label">Értékesítő neve</span>
+                <input type="text" name="salespersonName2" autocomplete="name" />
+              </label>
+            </div>
+            <p id="settings-company-flash" class="settings-flash" role="status" hidden></p>
+            <button type="submit" class="settings-btn-primary" id="mm-company-save">Cégadatok mentése</button>
+          </form>
         </section>
 
-        
+        <!-- Autóimport -->
         <section class="mm-panel ha-imp-panel" data-mm-panel="import" hidden>
           <header class="mm-panel-head">
             <h2 class="mm-panel-title" data-ha-title>Használtautó import</h2>
+            <p class="mm-panel-lead">Hirdetéseid átvétele a hasznaltauto.hu-ról — lista vagy egyedi hirdetés. A hasznaltauto jelszavadat nem tároljuk. Mentéshez Bymy belépés kell.</p>
           </header>
 
-          <div class="ha-imp-step-cell" data-ha-step="1">
-            <h3 class="ha-imp-step-title">1 Válaszd ki a profilod típusát</h3>
-            <div class="ha-imp-modes" role="tablist" aria-label="Profil típusa">
-              <button type="button" class="ha-imp-mode is-active" data-ha-mode="standard">Privát felhasználó</button>
-              <button type="button" class="ha-imp-mode" data-ha-mode="dealer">Kereskedő</button>
+          <div class="ha-imp-modes" role="tablist">
+            <button type="button" class="ha-imp-mode is-active" data-ha-mode="standard">Használtautó import</button>
+            <button type="button" class="ha-imp-mode" data-ha-mode="dealer">Kereskedői import</button>
+          </div>
+
+          <p class="ha-imp-steps" data-ha-steps>1. Jelentkezz be  ·  2. Nyisd meg EGY autó gyorsnézetét  ·  3. Importálás</p>
+
+          <div class="ha-imp-actions">
+            <button type="button" class="settings-btn-secondary" data-ha-open>hasznaltauto.hu megnyitása</button>
+            <a class="ha-imp-bookmark" id="ha-imp-bookmark" href="#">Hirdetés importálása</a>
+            <p class="ha-imp-bookmark-hint">Húzd ezt a gombot a könyvjelzősávra. A hasznaltauto oldalon (belépés + gyorsnézet) kattints rá.</p>
+          </div>
+
+          <div class="ha-imp-url-row" data-ha-url-row>
+            <label for="ha-imp-url" data-ha-url-label>Vagy illeszd be a nyilvános hirdetés URL-jét</label>
+            <div class="ha-imp-url-fields">
+              <input id="ha-imp-url" type="url" placeholder="https://www.hasznaltauto.hu/szemelyauto/…" autocomplete="off" />
+              <button type="button" class="ha-imp-go" id="ha-imp-start" data-ha-action>Hirdetés importálása</button>
             </div>
           </div>
 
-          <div class="ha-imp-step-cell" data-ha-step="2">
-            <h3 class="ha-imp-step-title">2 Használtautó oldal megnyitása</h3>
-            <button type="button" class="ha-imp-btn-open" data-ha-open>
-              <span class="ha-imp-btn-ico" aria-hidden="true">↗</span>
-              <span data-ha-open-label>hasznaltauto.hu megnyitása</span>
-            </button>
-          </div>
-
-          <div class="ha-imp-step-cell" data-ha-step="3">
-            <h3 class="ha-imp-step-title">3 húzd a könyvjelzősávra vagy kattints a gombra</h3>
-            <p class="ha-imp-step-hint">Próba: a sárga linket húzd a könyvjelzősávra, vagy jobb klikk → Bookmark link / Hivatkozás könyvjelzőzése.</p>
-            <a class="ha-imp-bookmark" id="ha-imp-bookmark" href="#">húzd a könyvjelzősávra</a>
-            <button type="button" class="ha-imp-btn-copy" id="ha-imp-bookmark-copy">
-              <span class="ha-imp-btn-ico" aria-hidden="true">⧉</span>
-              Másolás
-            </button>
-          </div>
-
-          <div class="ha-imp-rest" data-ha-rest>
-            <p class="ha-imp-steps" data-ha-steps hidden>1. Jelentkezz be  ·  2. Nyisd meg a listát vagy egy hirdetést  ·  3. Importálás</p>
-
-            <div class="ha-imp-actions">
-              <div class="ha-imp-install" data-ha-install>
-                <p class="ha-imp-install-label">Könyvjelző telepítése böngésző szerint</p>
-                <div class="ha-imp-browsers" role="tablist" aria-label="Böngésző">
-                  <button type="button" class="ha-imp-browser" data-ha-browser="chrome" role="tab" aria-selected="false">
-                    <span class="ha-imp-browser-ico ha-imp-browser-ico--chrome" aria-hidden="true"></span>
-                    Chrome
-                  </button>
-                  <button type="button" class="ha-imp-browser" data-ha-browser="edge" role="tab" aria-selected="false">
-                    <span class="ha-imp-browser-ico ha-imp-browser-ico--edge" aria-hidden="true"></span>
-                    Edge
-                  </button>
-                  <button type="button" class="ha-imp-browser" data-ha-browser="firefox" role="tab" aria-selected="false">
-                    <span class="ha-imp-browser-ico ha-imp-browser-ico--firefox" aria-hidden="true"></span>
-                    Firefox
-                  </button>
-                  <button type="button" class="ha-imp-browser" data-ha-browser="safari" role="tab" aria-selected="false">
-                    <span class="ha-imp-browser-ico ha-imp-browser-ico--safari" aria-hidden="true"></span>
-                    Safari
-                  </button>
-                </div>
-                <div class="ha-imp-install-help" data-ha-install-help>
-                  <strong data-ha-install-title>Chrome / Edge</strong>
-                  <ol data-ha-install-steps></ol>
-                </div>
-                <p class="ha-imp-bookmark-hint" data-ha-install-hint>
-                  <span class="ha-imp-hint-ico" aria-hidden="true">i</span>
-                  Húzni nem kell — gomb + billentyűkombináció.
-                </p>
-                <p class="ha-imp-safari-drag" data-ha-safari-drag hidden>
-                  Safari: húzd ide a sávra →
-                  <a class="ha-imp-safari-drag-link" id="ha-imp-bookmark-safari" href="#">húzd a könyvjelzősávra</a>
-                </p>
-              </div>
-            </div>
-
-            <div class="ha-imp-url-row" data-ha-url-row>
-              <label for="ha-imp-url" data-ha-url-label>Vagy illeszd be a nyilvános hirdetés URL-jét</label>
-              <div class="ha-imp-url-fields">
-                <input id="ha-imp-url" type="url" placeholder="https://www.hasznaltauto.hu/szemelyauto/…" autocomplete="off" />
-                <button type="button" class="ha-imp-go" id="ha-imp-start" data-ha-action>Hirdetés importálása</button>
-              </div>
-            </div>
-
-            <p id="ha-imp-status" class="ha-imp-status" hidden></p>
-            <div id="ha-imp-result" class="ha-imp-result" hidden></div>
-            <p class="ha-imp-footer" data-ha-footer>A jelszavadat nem tároljuk — csak a megnyitott oldal adatait olvassuk ki.</p>
-          </div>
+          <p id="ha-imp-status" class="ha-imp-status" hidden></p>
+          <div id="ha-imp-result" class="ha-imp-result" hidden></div>
+          <p class="ha-imp-footer" data-ha-footer>A jelszavadat nem tároljuk — csak a megnyitott oldal adatait olvassuk ki.</p>
         </section>
 
-        
+        <!-- Áttekintés -->
         <section class="mm-panel" data-mm-panel="attekintes" hidden>
           <header class="mm-panel-head">
             <h2 class="mm-panel-title">Áttekintés</h2>
@@ -342,14 +259,14 @@
           </header>
           <div class="mm-cards">
             <a class="mm-card" href="?szekcio=parkolo">
-              <strong>Kedvencek</strong>
+              <strong>Parkoló</strong>
               <span data-mm-stat-park>0 jármű</span>
             </a>
             <a class="mm-card" href="?szekcio=keresesek">
               <strong>Mentett keresések</strong>
               <span data-mm-stat-search>0 keresés</span>
             </a>
-            <a class="mm-card" href="?szekcio=uzenetek" data-mm-nav="uzenetek">
+            <a class="mm-card" href="/uzenetek.html">
               <strong>Üzenetek</strong>
               <span data-mm-stat-msg>0 olvasatlan</span>
             </a>
@@ -368,22 +285,22 @@
           </div>
         </section>
 
-        
+        <!-- Parkoló -->
         <section class="mm-panel" data-mm-panel="parkolo" hidden>
           <header class="mm-panel-head">
-            <h2 class="mm-panel-title">Kedvencek</h2>
+            <h2 class="mm-panel-title">Parkoló</h2>
             <p class="mm-panel-lead">Érdekes hirdetések, amelyekkel később foglalkoznál — a kedvenceid.</p>
           </header>
           <form id="mm-park-add" class="mm-inline-form">
             <input type="text" name="title" required placeholder="Pl. BMW 320d 2018" aria-label="Jármű megnevezése" />
             <input type="text" name="price" placeholder="Ár (opcionális)" aria-label="Ár" />
-            <button type="submit" class="site-header-btn site-header-btn--primary">Hozzáadás</button>
+            <button type="submit" class="site-header-btn site-header-btn--primary">Parkolás</button>
           </form>
           <div id="mm-park-list" class="mm-list"></div>
-          <p class="mm-empty" id="mm-park-empty" hidden>Még nincs kedvenced.</p>
+          <p class="mm-empty" id="mm-park-empty" hidden>Még nincs jármű a parkolóban.</p>
         </section>
 
-        
+        <!-- Mentett keresések -->
         <section class="mm-panel" data-mm-panel="keresesek" hidden>
           <header class="mm-panel-head">
             <h2 class="mm-panel-title">Mentett kereséseim</h2>
@@ -399,17 +316,21 @@
           <p class="mm-empty" id="mm-search-empty" hidden>Nincs mentett keresésed.</p>
         </section>
 
-        
+        <!-- Üzenetek — willhaben szerkezet, fehér -->
         <section class="mm-panel mm-panel--messages" data-mm-panel="uzenetek" hidden>
           <div id="mm-msg-root" class="msg-root"></div>
         </section>
 
-        
-        <section class="mm-panel mm-panel--myads" data-mm-panel="hirdetes" hidden>
+        <!-- Hirdetésem -->
+        <section class="mm-panel" data-mm-panel="hirdetes" hidden>
+          <header class="mm-panel-head">
+            <h2 class="mm-panel-title">Saját hirdetések</h2>
+            <p class="mm-panel-lead">Szerkesztés, képkezelés, web- és app-megtekintések.</p>
+          </header>
           <div id="mm-ad-list" class="mm-ad-list"></div>
         </section>
 
-        
+        <!-- Nyomtatások -->
         <section class="mm-panel" data-mm-panel="nyomtatasok" hidden>
           <header class="mm-panel-head">
             <h2 class="mm-panel-title">Nyomtatások</h2>
@@ -418,63 +339,16 @@
           <p class="mm-empty">Ez a menüpont előkészületben van.</p>
         </section>
 
-        <section class="mm-panel" data-mm-panel="ertekbecslo" data-ertekbecslo hidden>
-          <header class="mm-panel-head">
-            <h2 class="mm-panel-title">Értékbecslő</h2>
-            <p class="mm-panel-lead">Személyautó piaci sáv a minta alapján. Kötelező: gyártmány, modell, évjárat, km. Az üzemanyag és a típus finomítja az ajánlatot.</p>
-          </header>
-          <p class="ertek-msg" data-ertek-status role="status"></p>
-          <div class="ertek-search-panel">
-            <form class="ertek-form home-qs-form immo-search-form" data-ertek-form data-ertek-drums data-force-drums onsubmit="return false">
-              <div class="home-qs-layout-main" data-ertek-layout>
-              <div class="home-qs-field" data-qs-field="gyartmany">
-                <span class="home-qs-label">Gyártmány</span>
-                <select class="home-qs-control" data-filter-key="gyartmany" aria-label="Gyártmány"></select>
-              </div>
-              <div class="home-qs-field" data-qs-field="modell">
-                <span class="home-qs-label">Modell</span>
-                <select class="home-qs-control" data-filter-key="modell" aria-label="Modell"></select>
-              </div>
-              <div class="home-qs-field" data-qs-field="tipus">
-                <span class="home-qs-label">Típus</span>
-                <select class="home-qs-control" data-filter-key="tipus" aria-label="Típus">
-                  <option value="">Típus (opcionális)</option>
-                </select>
-              </div>
-              <div class="home-qs-field" data-qs-field="uzemanyag">
-                <span class="home-qs-label">Üzemanyag</span>
-                <select class="home-qs-control" data-filter-key="uzemanyag" aria-label="Üzemanyag">
-                  <option value="">Mindegy</option>
-                </select>
-              </div>
-              <div class="home-qs-field" data-qs-field="gyartasi_ev">
-                <span class="home-qs-label">Évjárat</span>
-                <select class="home-qs-control" data-filter-key="gyartasi_ev" data-ertek-year aria-label="Évjárat">
-                  <option value="">Évjárat</option>
-                </select>
-              </div>
-              <div class="home-qs-field ertek-km-field" data-qs-field="km">
-                <span class="home-qs-label">Km</span>
-                <input class="home-qs-control" type="text" inputmode="numeric" data-ertek-km placeholder="pl. 120000" autocomplete="off" />
-              </div>
-              </div>
-            </form>
-          </div>
-          <div class="ertek-out" data-ertek-out></div>
-        </section>
-
-        
+        <!-- Értékelések -->
         <section class="mm-panel" data-mm-panel="ertekelesek" hidden>
           <header class="mm-panel-head">
             <h2 class="mm-panel-title">Értékelések</h2>
-            <p class="mm-panel-lead">A kapott értékelések — csak pontszám és dátum.</p>
+            <p class="mm-panel-lead">Más felhasználók értékelései az autóinkról és a kereskedésről.</p>
           </header>
-          <p class="mm-empty" data-ratings-empty hidden>Még nincs kapott értékelés.</p>
-          <p class="mm-empty" data-ratings-status role="status">Betöltés…</p>
-          <ul class="mm-ratings-list" data-ratings-list hidden></ul>
+          <p class="mm-empty">Ez a menüpont előkészületben van.</p>
         </section>
 
-        
+        <!-- Megjelenés — autó hero háttér (mindenkinek) -->
         <section class="mm-panel" data-mm-panel="megjelenes" hidden>
           <header class="mm-panel-head">
             <h2 class="mm-panel-title">Megjelenés</h2>
@@ -534,7 +408,7 @@
           </div>
         </section>
 
-        
+        <!-- Beállítások almenük (korábban accordion) -->
         <section class="mm-panel" data-mm-panel="szemelyes" hidden>
           <header class="mm-panel-head">
             <h2 class="mm-panel-title">Személyes adatok</h2>
@@ -561,64 +435,36 @@
           <form id="mm-profile-form" class="settings-form" action="#" method="post" onsubmit="return false;">
             <div class="mm-grid-2">
               <label class="login-field">
-                <span class="login-label">Vezetéknév *</span>
+                <span class="login-label">Vezetéknév</span>
                 <input type="text" name="lastName" required autocomplete="family-name" />
               </label>
               <label class="login-field">
-                <span class="login-label">Keresztnév *</span>
+                <span class="login-label">Keresztnév</span>
                 <input type="text" name="firstName" required autocomplete="given-name" />
               </label>
             </div>
-            <label class="login-field" data-private-street-wrap>
+            <label class="login-field">
               <span class="login-label">Utca, házszám</span>
               <input type="text" name="street" autocomplete="street-address" />
-              <p class="settings-acc-hint" data-private-street-hint hidden>
-                Magánfióknál az utca a lenti szerződéses lakcímben mentődik a telefonra.
-              </p>
             </label>
             <div class="settings-postal-row">
               <label class="login-field settings-postal-field">
-                <span class="login-label">Irányítószám *</span>
-                <input type="text" name="postalCode" inputmode="numeric" maxlength="4" autocomplete="postal-code" data-postal-lookup required />
+                <span class="login-label">Irányítószám</span>
+                <input type="text" name="postalCode" inputmode="numeric" maxlength="4" autocomplete="postal-code" data-postal-lookup />
               </label>
               <label class="login-field settings-city-field">
-                <span class="login-label">Település * <span class="settings-city-busy" data-city-busy hidden>…</span></span>
-                <input type="text" name="city" autocomplete="address-level2" placeholder="automatikus" required />
+                <span class="login-label">Település <span class="settings-city-busy" data-city-busy hidden>…</span></span>
+                <input type="text" name="city" autocomplete="address-level2" placeholder="automatikus" />
               </label>
             </div>
             <label class="login-field">
               <span class="login-label">Ország</span>
               <input type="text" name="country" value="Magyarország" autocomplete="country-name" />
             </label>
-            <div class="login-field">
-              <span class="login-label">Telefon *</span>
-              <div class="settings-phone-row" data-settings-phone>
-                <select class="phone-country" name="phoneCountry" aria-label="Országkód"></select>
-                <span aria-hidden="true">-</span>
-                <input
-                  type="tel"
-                  name="phoneArea"
-                  class="phone-part"
-                  inputmode="numeric"
-                  maxlength="4"
-                  autocomplete="tel-national"
-                  placeholder="30"
-                  aria-label="Körzetszám"
-                />
-                <span aria-hidden="true">/</span>
-                <input
-                  type="tel"
-                  name="phoneLocal"
-                  class="phone-part wide"
-                  inputmode="numeric"
-                  maxlength="12"
-                  autocomplete="tel-national"
-                  placeholder="1234567"
-                  aria-label="Telefonszám"
-                />
-                <input type="hidden" name="phone" value="" />
-              </div>
-            </div>
+            <label class="login-field">
+              <span class="login-label">Telefon</span>
+              <input type="tel" name="phone" autocomplete="tel" placeholder="+36 …" />
+            </label>
             <label class="login-field">
               <span class="login-label">Email</span>
               <input type="email" id="settings-email" value="" readonly tabindex="-1" />
@@ -629,81 +475,6 @@
               <input type="hidden" name="accountType" value="" />
               <p class="settings-acc-hint">A fióktípus regisztrációkor rögzül, később nem módosítható.</p>
             </div>
-
-            <div class="settings-device-contract" data-device-contract>
-              <h3 class="settings-device-contract-title">Szerződéses adatok</h3>
-              <p class="settings-acc-hint">
-                Adásvételi szerződéshez. Ezek az adatok <strong>csak a mobilalkalmazásban</strong> tárolódnak, a Bymy szerverre nem kerülnek.
-              </p>
-              <p class="settings-acc-hint" data-device-contract-web-only hidden>
-                Böngészőben nem szerkeszthető — nyisd meg a Bymy appot a telefonodon.
-              </p>
-
-              <div class="settings-device-contract-block" data-device-contract-person>
-                <p class="settings-device-contract-caption">Magánszemély</p>
-                <label class="login-field">
-                  <span class="login-label">Név (családi és utónév)</span>
-                  <input type="text" name="local_fullName" autocomplete="name" />
-                </label>
-                <label class="login-field">
-                  <span class="login-label">Születéskori név (családi és utónév)</span>
-                  <input type="text" name="local_birthName" autocomplete="off" />
-                </label>
-                <div class="mm-grid-2">
-                  <label class="login-field">
-                    <span class="login-label">Születési hely</span>
-                    <input type="text" name="local_birthPlace" autocomplete="off" />
-                  </label>
-                  <label class="login-field">
-                    <span class="login-label">Születési idő</span>
-                    <input type="date" name="local_birthDate" autocomplete="bday" />
-                  </label>
-                </div>
-                <label class="login-field">
-                  <span class="login-label">Anyja neve (családi és utónév)</span>
-                  <input type="text" name="local_motherName" autocomplete="off" />
-                </label>
-                <div class="mm-grid-2">
-                  <label class="login-field">
-                    <span class="login-label">Személyi okmány típusa</span>
-                    <input type="text" name="local_idDocType" placeholder="pl. személyi igazolvány" autocomplete="off" />
-                  </label>
-                  <label class="login-field">
-                    <span class="login-label">Okmány száma</span>
-                    <input type="text" name="local_idDocNumber" autocomplete="off" />
-                  </label>
-                </div>
-                <label class="login-field">
-                  <span class="login-label">Lakcíme</span>
-                  <input type="text" name="local_homeAddress" autocomplete="street-address" />
-                </label>
-                <label class="login-field">
-                  <span class="login-label">Állampolgársága</span>
-                  <input type="text" name="local_citizenship" value="" placeholder="magyar" autocomplete="off" />
-                </label>
-              </div>
-
-              <div class="settings-device-contract-block" data-device-contract-company hidden>
-                <p class="settings-device-contract-caption">Cég</p>
-                <label class="login-field">
-                  <span class="login-label">Név</span>
-                  <input type="text" name="local_companyName" autocomplete="organization" />
-                </label>
-                <label class="login-field">
-                  <span class="login-label">Székhely</span>
-                  <input type="text" name="local_companySeat" autocomplete="street-address" />
-                </label>
-                <label class="login-field">
-                  <span class="login-label">Cégjegyzék vagy nyilvántartási szám</span>
-                  <input type="text" name="local_companyRegistry" autocomplete="off" />
-                </label>
-                <label class="login-field">
-                  <span class="login-label">Képviselő neve</span>
-                  <input type="text" name="local_representative" autocomplete="name" />
-                </label>
-              </div>
-            </div>
-
             <input type="hidden" name="company" value="" />
             <button type="submit" class="settings-btn-primary" id="mm-profile-save">Adatok mentése</button>
             <button type="button" class="settings-danger-btn settings-danger-btn--block" id="settings-delete-account">Fiók törlése</button>
@@ -808,7 +579,7 @@
           </header>
           <form id="settings-notify-form" class="settings-form">
             <label class="settings-switch"><span>Üzenetek e-mailben</span><input type="checkbox" name="messages" /><span class="settings-switch-ui" aria-hidden="true"></span></label>
-            <label class="settings-switch"><span>Kedvencek: árváltozás</span><input type="checkbox" name="favorites" /><span class="settings-switch-ui" aria-hidden="true"></span></label>
+            <label class="settings-switch"><span>Parkoló: árváltozás</span><input type="checkbox" name="favorites" /><span class="settings-switch-ui" aria-hidden="true"></span></label>
             <label class="settings-switch"><span>Érdeklődések</span><input type="checkbox" name="interests" /><span class="settings-switch-ui" aria-hidden="true"></span></label>
             <label class="settings-switch"><span>Hírlevél / tippek (marketing)</span><input type="checkbox" name="newsletter" /><span class="settings-switch-ui" aria-hidden="true"></span></label>
             <p id="settings-notify-flash" class="settings-flash" role="status" hidden></p>
@@ -816,24 +587,15 @@
           </form>
         </section>
 
-        
+        <!-- legacy alias: fiok → személyes (üres, JS átirányít) -->
         <section class="mm-panel" data-mm-panel="fiok" hidden></section>
       </div>
     </main>
 
-    <script src="/js/site-avatar-menu.js?v=4c911388e7" type="module"></script>
-    <script src="/js/ha-import-app.js?v=fecf9318ef" type="module"></script>
-    <script src="/js/beallitasok-app.js?v=ertek7" type="module"></script>
-    <script>
-      
-      setTimeout(function () {
-        var root = document.documentElement;
-        root.removeAttribute("data-mm-account-pending");
-        if (!root.hasAttribute("data-mm-settings-ready")) {
-          root.setAttribute("data-mm-boot-failed", "");
-        }
-      }, 4000);
-    </script>
+    <script src="/js/site-avatar-menu.js?v=settingsNav2" type="module"></script>
+    <script src="/js/ha-import-app.js?v=fiokPage11" type="module"></script>
+    <script src="/js/beallitasok-app.js?v=favGone1" type="module"></script>
+  
     <script>
       (function () {
         var q = new URLSearchParams(location.search).get("szekcio");
@@ -846,7 +608,7 @@
       })();
     </script>
 
-      <script src="/js/nav-counts.js?v=08dce07726" type="module"></script>
-      <script src="/js/theme.js?v=4fe8a2261f" type="module"></script>
+      <script src="/js/nav-counts.js?v=navCount2" type="module"></script>
+      <script src="/js/theme.js?v=willhabenHdr1" type="module"></script>
 </body>
 </html>

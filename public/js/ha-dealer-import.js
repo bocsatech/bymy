@@ -766,8 +766,32 @@
 
   const SAVE_CHUNK = 25;
 
+  function recoverHaId(page) {
+    const blob = [
+      page?.listingId,
+      page?.hasznaltauto_hirdetes_id,
+      page?.id,
+      page?.url,
+      page?.adminUrl,
+      page?.clickUrl,
+      page?.publicUrl,
+      page?.visibleImage,
+      page?.imageUrl,
+      page?.visibleTitle,
+      page?.title,
+    ]
+      .map((v) => String(v ?? ""))
+      .join("\n");
+    const digits = String(page?.listingId ?? "").replace(/\D/g, "");
+    if (digits.length >= 5 && digits.length <= 12) return digits;
+    const paren = blob.match(/\((\d{5,12})\)/);
+    if (paren) return paren[1];
+    return pickIdFromHref(blob) || blob.match(/hasznaltautocdn\.com\/(?:\d{2,4}x\d{2,4}\/)?(\d{5,12})\//i)?.[1] || "";
+  }
+
   function slimDealerPage(car) {
     const page = car || {};
+    const listingId = recoverHaId(page);
     const mapIn = page.map && typeof page.map === "object" ? page.map : {};
     const map = {};
     for (const [key, val] of Object.entries(mapIn)) {
@@ -778,9 +802,8 @@
       if (text && text.length < 200) map[key] = text;
     }
     return {
-      url: page.url || page.adminUrl || page.clickUrl || page.publicUrl || "",
-      listingId: page.listingId || "",
-      visibleImage: page.visibleImage || page.imageUrl || "",
+      url: page.url || page.adminUrl || page.clickUrl || page.publicUrl || `https://admin.hasznaltauto.hu/hirdetesfeladas/szemelyauto?id=${listingId}`,
+      listingId,
       visibleTitle: page.visibleTitle || page.title || "",
       visibleDescription: String(page.visibleDescription || page.description || page.leiras || "").slice(0, 2000),
       clickUrl: page.clickUrl || "",
@@ -1054,17 +1077,22 @@
 
     showProgress(0, 1, "lista ellenőrzése");
     await quickScrollThumbs();
-    const cars = extractCarsFromPage();
-    if (!cars.length) {
+    const cars = extractCarsFromPage().map((car) => {
+      const listingId = recoverHaId(car);
+      return listingId ? { ...car, listingId } : car;
+    });
+    const withId = cars.filter((car) => /^\d{5,12}$/.test(String(car.listingId || "")));
+    if (!withId.length) {
       let mods = 0;
       const frames = docsInScope().length;
       for (const doc of docsInScope()) mods += countModositasButtons(doc);
-      hideProgress(`Nincs hirdetés (keret: ${frames}, módosít: ${mods})`);
+      const sample = cars[0] ? Object.keys(cars[0]).join(",") : "-";
+      hideProgress(`Nincs ID (talált: ${cars.length}, keret: ${frames}, módosít: ${mods}) ${sample}`);
       return;
     }
 
     let preparedDone = 0;
-    const preparedAll = await mapPool(cars, 6, async (car) => {
+    const prepared = await mapPool(withId, 6, async (car) => {
       let next = car;
       try {
         next = await ensureCarDescription(car);
@@ -1072,10 +1100,9 @@
         next = car;
       }
       preparedDone += 1;
-      showProgress(preparedDone, cars.length, `előkészítés ${preparedDone}/${cars.length}`);
+      showProgress(preparedDone, withId.length, `előkészítés ${preparedDone}/${withId.length}`);
       return slimDealerPage(next);
     });
-    const prepared = preparedAll.filter((page) => /^\d{5,12}$/.test(String(page?.listingId || "")));
     if (!prepared.length) {
       hideProgress("Nincs azonosító a sorokban");
       return;

@@ -568,6 +568,10 @@
     margin: 0 !important;
     padding: 0 !important;
     visibility: visible !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active #qs-detailed-panel,
@@ -897,6 +901,30 @@
     visibility: visible !important;
     gap: 12px;
     width: 100%;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Részletes = Alapadatok szélesség: a qs-more ne nőjön szélesebbre a hosszú címkéktől */
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-panel
+    :is(#qs-more, #qs-more-layout, #qs-more-layout .auto-search-alap-card, #qs-more-layout .auto-search-more-card, #qs-detailed-panel) {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-panel
+    #qs-more-layout
+    :is(.home-qs-grid-cell, [data-qs-field], .immo-schema-cell, .immo-dual-range-block, .immo-wheel-wrap, .home-qs-field, .home-qs-pair) {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    grid-column: 1 / -1 !important;
+    box-sizing: border-box !important;
   }
 
   /* A régi szűkített desk-field lista ne duplikáljon a layout menüvel */

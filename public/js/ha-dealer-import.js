@@ -277,6 +277,12 @@
       const t = clean(String(raw || "").replace(/^[-•·]\s*/, ""));
       if (!t || t.length < 2 || t.length > 90) return;
       if (/^(beltér|műszaki|kültér|multimédia|egyéb|felszereltség|navigáció|leírás)$/i.test(t)) return;
+      if (/^\d{5,}$/.test(t.replace(/[\s./()-]/g, ""))) return;
+      if (/\+36|\(\s*\+?\s*36\s*\)/i.test(t) || /\d{2,}\/\d{6,}/.test(t)) return;
+      if (/\b(kft|bt|zrt|nyrt)\.?\b/i.test(t)) return;
+      if (/keresked[eé]s\s+adatai|t[eé]rk[eé]p\s+megjelen/i.test(t)) return;
+      if (/\d+\s*%/.test(t) && /elvihet/i.test(t)) return;
+      if (/^(székesfehérvár|budapest|debrecen|szeged|pécs|győr|miskolc)$/i.test(t)) return;
       if (/:$/.test(t)) return;
       if (!items.includes(t)) items.push(t);
     };

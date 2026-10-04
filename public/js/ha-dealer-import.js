@@ -479,11 +479,13 @@
 
   function isEmptyDealerList() {
     const text = clean(document.body?.innerText || document.body?.textContent || "");
-    if (!/nincs megjeleníthető hirdetés/i.test(text)) return false;
-    const cards = document.querySelectorAll(
-      ".jarmu-kartya, .listing-card, [class*='jarmu-kartya'], tr[data-id], .hirdetes-kartya"
-    );
-    return cards.length === 0;
+    if (/nincs megjeleníthető hirdetés|nincs megjeleníthet[oő] hirdetés|nincs jármű|nincs találat/i.test(text)) {
+      return true;
+    }
+    if (/\baktív\s*\(\s*0\s*\)/i.test(text) && /\bösszes(?:es)?\s*\(\s*0\s*\)/i.test(text)) {
+      return true;
+    }
+    return false;
   }
 
   function extractCarsFromPage() {
@@ -895,14 +897,12 @@
     const cars = extractCarsFromPage();
     if (!cars.length) {
       hideProgress();
-      alert(
-        "A listán nincs hirdetés.\n\nA hasznaltauto.hu törlés a Bymy-ra nem megy át.\nA korábbi importot a Bymy → Hirdetéseim oldalon kell törölni."
-      );
+      alert("A listán nincs hirdetés — nincs mit importálni.");
       return;
     }
 
     let preparedDone = 0;
-    const prepared = await mapPool(cars, 6, async (car) => {
+    const preparedAll = await mapPool(cars, 6, async (car) => {
       let next = car;
       try {
         next = await ensureCarDescription(car);
@@ -913,6 +913,12 @@
       showProgress(preparedDone, cars.length, `előkészítés ${preparedDone}/${cars.length}`);
       return slimDealerPage(next);
     });
+    const prepared = preparedAll.filter((page) => /^\d{5,12}$/.test(String(page?.listingId || "")));
+    if (!prepared.length) {
+      hideProgress();
+      alert("A listán nincs hirdetés — nincs mit importálni.");
+      return;
+    }
 
     const resumed = loadDealerProgress(prepared.length);
     const batchId =

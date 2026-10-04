@@ -1,8 +1,3 @@
-/**
- * Fiókom — mobile.de Mein mobile / Konto bearbeiten mintára.
- * Szekciók: attekintes | cegadatok | import | nyomtatasok | ertekelesek | parkolo | keresesek |
- *           uzenetek | hirdetes | megjelenes | fiok
- */
 
 import {
   getAuthUser,
@@ -10,33 +5,139 @@ import {
   getProfile,
   loadProfileFromServer,
   saveProfile,
+  saveAvatarPhoto,
   changePassword,
   deleteAccount,
   requireAuthForPage,
   initSiteAuth,
-} from "./site-auth.js?v=cegAdatok1";
+  isPrivateAccount,
+  isPrivateProfileComplete,
+  resolveAccountKind,
+  applyAccountKindToDocument,
+} from "./site-auth.js?v=aad32d7596";
+import { wirePostalCityAutofill } from "./postal-city-autofill.js?v=14f1f30116";
 import {
   getParkplatz,
   pruneParkplatzMissing,
   addParkplatzItem,
   removeParkplatzItem,
   updateParkplatzNote,
+  patchParkplatzItem,
   getSavedSearches,
   addSavedSearch,
   removeSavedSearch,
   toggleSavedSearchNotify,
 } from "./fok-data.js?v=favGone1";
-import { initMessagesUi } from "./messages-ui.js?v=msgLive1";
-import { listConversations } from "./messages-api.js?v=msgLive1";
+import { savedSearchHref, summarizeSavedSearchFilters } from "./saved-search.js?v=ae250042e8";
+import { initMessagesUi } from "./messages-ui.js?v=78e9d9204f";
+import { listConversations } from "./messages-api.js?v=5cf6493dc9";
 import { initMyAdsPanel } from "./my-ads.js?v=favGone1";
+import { initErtekbecsloPanel } from "./ertekbecslo-app.js?v=ertek7";
 import {
   consumeSettingsReturn,
   hasSettingsReturn,
-} from "./site-avatar-menu.js?v=settingsNav2";
-import { fetchExistingListingIds } from "./db-client.js?v=favGone1";
+} from "./site-avatar-menu.js?v=4c911388e7";
+import { fetchListing, fetchExistingListingIds } from "./db-client.js?v=favGone1";
+import {
+  applyDeviceIdentityToPerson,
+  getDeviceIdentity,
+  identityForAccountKind,
+  identityFromFormData,
+  isNativeApp,
+  setDeviceIdentity,
+  stripDeviceIdentityFormFields,
+} from "./device-contract-identity.js?v=cdac1e6ebc";
+import { fillCountrySelect, PHONE_COUNTRIES } from "./phone-lang-ui.js?v=bc55c36aef";
+import { renderPartnerManage } from "./partner-profile.js?v=46ef847b6f";
 
 const PHOTO_KEY = "bymy-avatar-photos";
 const NOTIFY_KEY = "bymy-notify-prefs";
+
+const COMPANY_ACTIVITY_LABELS = {
+  auto: "Autó",
+  teherauto: "Teherautó",
+  ingatlan: "Ingatlan",
+};
+
+function parseCompanyActivities(raw) {
+  if (Array.isArray(raw)) {
+    return raw.map((v) => String(v ?? "").trim()).filter((id) => COMPANY_ACTIVITY_LABELS[id]);
+  }
+  if (typeof raw === "string" && raw.trim()) {
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parseCompanyActivities(parsed);
+    } catch {
+      /* fall through */
+    }
+  }
+  return [];
+}
+
+function updateCompanyActivitiesSummary(form) {
+  const summary = form?.querySelector("[data-company-activities-summary]");
+  if (!summary) return;
+  const ids = [...form.querySelectorAll("[data-company-activity-cb]:checked")].map((el) => el.value);
+  if (!ids.length) {
+    summary.textContent = "Válassz tevékenységet…";
+    return;
+  }
+  summary.textContent = ids.map((id) => COMPANY_ACTIVITY_LABELS[id] || id).join(", ");
+}
+
+function syncCompanyActivitiesHidden(form) {
+  const hidden = form?.querySelector('[name="companyActivities"]');
+  if (!hidden) return;
+  const ids = [...form.querySelectorAll("[data-company-activity-cb]:checked")].map((el) => el.value);
+  hidden.value = ids.length ? JSON.stringify(ids) : "";
+  updateCompanyActivitiesSummary(form);
+}
+
+function applyCompanyActivitiesToForm(profile) {
+  const form = document.getElementById("mm-company-form");
+  if (!form) return;
+  const ids = parseCompanyActivities(profile?.companyActivities);
+  form.querySelectorAll("[data-company-activity-cb]").forEach((cb) => {
+    cb.checked = ids.includes(cb.value);
+  });
+  syncCompanyActivitiesHidden(form);
+}
+
+function readCompanyActivitiesFromForm(form) {
+  return [...form.querySelectorAll("[data-company-activity-cb]:checked")].map((el) => String(el.value || "").trim()).filter(Boolean);
+}
+
+function initCompanyActivitiesDropdown(form) {
+  if (!form || form.dataset.companyActivitiesBound === "1") return;
+  form.dataset.companyActivitiesBound = "1";
+  const trigger = form.querySelector("[data-company-activities-trigger]");
+  const panel = form.querySelector("[data-company-activities-panel]");
+  if (!trigger || !panel) return;
+
+  const setOpen = (open) => {
+    panel.hidden = !open;
+    trigger.setAttribute("aria-expanded", open ? "true" : "false");
+    form.classList.toggle("settings-multi-dropdown--open", open);
+  };
+
+  trigger.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setOpen(panel.hidden);
+  });
+
+  panel.querySelectorAll("[data-company-activity-cb]").forEach((cb) => {
+    cb.addEventListener("change", () => syncCompanyActivitiesHidden(form));
+  });
+
+  document.addEventListener("click", (event) => {
+    if (!form.contains(event.target)) setOpen(false);
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !panel.hidden) setOpen(false);
+  });
+}
 const SEARCH_POSTAL_KEY = "bymy_stats_postal";
 const SEARCH_RADIUS_KEY = "bymy_stats_radius_km";
 const REC_POSTAL_KEY = "bymy_partner_postal_code";
@@ -46,8 +147,9 @@ const HERO_MAX_BYTES = 8 * 1024 * 1024;
 const AVATAR_SIZE = 256;
 const SECTIONS = [
   "attekintes",
-  "cegadatok",
+  "partner-profil",
   "import",
+  "ertekbecslo",
   "nyomtatasok",
   "ertekelesek",
   "parkolo",
@@ -75,12 +177,15 @@ const SETTINGS_SECTIONS = new Set([
   "notify",
   "megjelenes",
 ]);
+/** Cégadatok almenü: csak cég-specifikus pontok (személyes beállítások a Beállítások alatt maradnak). */
+const COMPANY_SUB_SECTIONS = new Set(["partner-profil"]);
 const LEGACY_ACC_TO_SECTION = {
   personal: "szemelyes",
   searchArea: "keresesi-korzet",
   recommendationsArea: "ajanlasok-korzet",
   password: "jelszo",
   notify: "notify",
+  cegadatok: "partner-profil",
 };
 
 let lastLookedUpPostal = "";
@@ -99,18 +204,56 @@ function writePhotos(map) {
   localStorage.setItem(PHOTO_KEY, JSON.stringify(map));
 }
 
-function readNotifyPrefs(email) {
+const DEFAULT_NOTIFY_PREFS = {
+  messages: true,
+  favorites: true,
+  interests: true,
+  newsletter: true,
+};
+
+function notifyPrefsFromProfile(profile) {
+  const p = profile || {};
+  const pick = (key, fallback) => {
+    if (p[key] == null || p[key] === "") return fallback;
+    return Boolean(p[key]);
+  };
+  return {
+    messages: pick("notifyMessages", DEFAULT_NOTIFY_PREFS.messages),
+    favorites: pick("notifyFavorites", DEFAULT_NOTIFY_PREFS.favorites),
+    interests: pick("notifyInterests", DEFAULT_NOTIFY_PREFS.interests),
+    newsletter: pick("notifyNewsletter", DEFAULT_NOTIFY_PREFS.newsletter),
+  };
+}
+
+function readNotifyPrefs(email, profile) {
+  const fromProfile = notifyPrefsFromProfile(profile || getProfile());
   try {
     const all = JSON.parse(localStorage.getItem(NOTIFY_KEY) || "{}");
+    let local = all[email];
+    // Régi alapértelmezés mind ki volt — ha soha nem mentettek szándékosan (v2 nélkül), töröljük.
+    if (
+      local &&
+      typeof local === "object" &&
+      !local._v2 &&
+      !local.messages &&
+      !local.favorites &&
+      !local.interests &&
+      !local.newsletter
+    ) {
+      delete all[email];
+      localStorage.setItem(NOTIFY_KEY, JSON.stringify(all));
+      local = null;
+    }
+    if (!local || typeof local !== "object") return { ...fromProfile };
     return {
-      messages: false,
-      favorites: false,
-      interests: false,
-      newsletter: false,
-      ...(all[email] ?? {}),
+      ...fromProfile,
+      messages: Boolean(local.messages),
+      favorites: Boolean(local.favorites),
+      interests: Boolean(local.interests),
+      newsletter: Boolean(local.newsletter),
     };
   } catch {
-    return { messages: false, favorites: false, interests: false, newsletter: false };
+    return { ...fromProfile };
   }
 }
 
@@ -121,7 +264,13 @@ function writeNotifyPrefs(email, prefs) {
   } catch {
     all = {};
   }
-  all[email] = prefs;
+  all[email] = {
+    _v2: 1,
+    messages: Boolean(prefs.messages),
+    favorites: Boolean(prefs.favorites),
+    interests: Boolean(prefs.interests),
+    newsletter: Boolean(prefs.newsletter),
+  };
   localStorage.setItem(NOTIFY_KEY, JSON.stringify(all));
 }
 
@@ -174,11 +323,15 @@ function resizeImageFile(file) {
 }
 
 function currentSection() {
-  const raw = new URLSearchParams(window.location.search).get("szekcio") || "szemelyes";
+  const raw = new URLSearchParams(window.location.search).get("szekcio");
+  if (!raw) {
+    const hash = String(window.location.hash || "").replace(/^#/, "");
+    if (LEGACY_ACC_TO_SECTION[hash]) return LEGACY_ACC_TO_SECTION[hash];
+    return null;
+  }
   if (raw === "fiok") return "szemelyes";
-  const hash = String(window.location.hash || "").replace(/^#/, "");
-  if (LEGACY_ACC_TO_SECTION[hash]) return LEGACY_ACC_TO_SECTION[hash];
-  return SECTIONS.includes(raw) ? raw : "szemelyes";
+  if (LEGACY_ACC_TO_SECTION[raw]) return LEGACY_ACC_TO_SECTION[raw];
+  return SECTIONS.includes(raw) ? raw : null;
 }
 
 function settingsAccordionHash() {
@@ -205,15 +358,15 @@ function syncSettingsSublinkActive() {
   const section = currentSection();
   document.querySelectorAll("[data-mm-settings-nav] [data-mm-nav], [data-mm-company-nav-wrap] [data-mm-nav]").forEach((link) => {
     const nav = link.getAttribute("data-mm-nav");
-    if (!SETTINGS_SECTIONS.has(nav) && nav !== "cegadatok") return;
-    link.classList.toggle("is-active", nav === section);
+    if (!SETTINGS_SECTIONS.has(nav) && !COMPANY_SUB_SECTIONS.has(nav)) return;
+    link.classList.toggle("is-active", Boolean(section) && nav === section);
   });
 }
 
 function syncSettingsSubnav() {
   const section = currentSection();
-  const openForSettings = SETTINGS_SECTIONS.has(section);
-  const openForCompany = section === "cegadatok" || openForSettings;
+  const openForSettings = Boolean(section) && SETTINGS_SECTIONS.has(section);
+  const openForCompany = Boolean(section) && COMPANY_SUB_SECTIONS.has(section);
 
   document.querySelectorAll("[data-mm-settings-nav]").forEach((group) => {
     if (group.hidden) return;
@@ -222,12 +375,35 @@ function syncSettingsSubnav() {
   });
 
   document.querySelectorAll("[data-mm-company-nav-wrap]").forEach((group) => {
-    if (group.hidden) return;
+    if (document.documentElement.getAttribute("data-mm-account-kind") !== "company") return;
     if (openForCompany) expandSettingsSubnav(group);
     else collapseSettingsSubnav(group);
   });
 
   syncSettingsSublinkActive();
+}
+
+function clearPanelsKeepCompanyNav(group) {
+  const url = new URL(window.location.href);
+  url.searchParams.delete("szekcio");
+  url.hash = "";
+  window.history.replaceState({}, "", url);
+  document.querySelectorAll("[data-mm-panel]").forEach((panel) => {
+    panel.hidden = true;
+  });
+  document.querySelectorAll("[data-mm-nav]").forEach((link) => {
+    if (link.hasAttribute("data-mm-subtoggle")) return;
+    link.classList.remove("is-active");
+  });
+  document.body.classList.toggle("mm-messages-open", false);
+  document.body.classList.toggle("mm-inbox-inline", false);
+  document.title = "Fiókom — bymy";
+  const partnerRoot = document.getElementById("partner-root");
+  if (partnerRoot) partnerRoot.innerHTML = "";
+  if (group) {
+    expandSettingsSubnav(group);
+    group.querySelector("[data-mm-subtoggle]")?.classList.add("is-active");
+  }
 }
 
 function openSettingsAccordion(accId) {
@@ -237,15 +413,128 @@ function openSettingsAccordion(accId) {
   }
 }
 
+function clearSection() {
+  const url = new URL(window.location.href);
+  url.searchParams.delete("szekcio");
+  url.hash = "";
+  window.history.replaceState({}, "", url);
+  document.querySelectorAll("[data-mm-panel]").forEach((panel) => {
+    panel.hidden = true;
+  });
+  document.querySelectorAll("[data-mm-nav]").forEach((link) => {
+    link.classList.remove("is-active");
+  });
+  document.body.classList.toggle("mm-messages-open", false);
+  document.body.classList.toggle("mm-inbox-inline", false);
+  document.title = "Fiókom — bymy";
+  document.querySelectorAll(".mm-nav-group").forEach((group) => collapseSettingsSubnav(group));
+}
+
+function formatRatingDate(raw) {
+  const s = String(raw || "").trim();
+  if (!s) return "—";
+  const d = new Date(s.includes("T") ? s : s.replace(" ", "T") + (s.includes("Z") ? "" : "Z"));
+  if (Number.isNaN(d.getTime())) {
+    const m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (m) return `${m[1]}.${m[2]}.${m[3]}.`;
+    return s.slice(0, 10);
+  }
+  try {
+    return new Intl.DateTimeFormat("hu-HU", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(d);
+  } catch {
+    return d.toISOString().slice(0, 10);
+  }
+}
+
+let ratingsLoadPromise = null;
+
+async function loadReceivedRatings() {
+  const panel = document.querySelector('[data-mm-panel="ertekelesek"]');
+  if (!panel) return;
+  const list = panel.querySelector("[data-ratings-list]");
+  const empty = panel.querySelector("[data-ratings-empty]");
+  const status = panel.querySelector("[data-ratings-status]");
+  if (!list || !empty || !status) return;
+
+  status.hidden = false;
+  status.textContent = "Betöltés…";
+  empty.hidden = true;
+  list.hidden = true;
+  list.innerHTML = "";
+
+  if (!ratingsLoadPromise) {
+    ratingsLoadPromise = fetch("/api/me/seller-ratings", { credentials: "same-origin" })
+      .then(async (res) => {
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || "Nem sikerült az értékelések betöltése.");
+        return Array.isArray(data.ratings) ? data.ratings : [];
+      })
+      .catch((err) => {
+        ratingsLoadPromise = null;
+        throw err;
+      });
+  }
+
+  try {
+    const ratings = await ratingsLoadPromise;
+    status.hidden = true;
+    if (!ratings.length) {
+      empty.hidden = false;
+      return;
+    }
+    list.innerHTML = ratings
+      .map((row) => {
+        const score = Number(row.score);
+        const label = Number.isFinite(score) ? String(score) : "—";
+        const date = formatRatingDate(row.createdAt || row.created_at);
+        return `<li class="mm-ratings-item">
+          <span class="mm-ratings-score">${escapeHtml(label)}<span class="mm-ratings-score-scale">/ 10</span></span>
+          <time class="mm-ratings-date" datetime="${escapeHtml(String(row.createdAt || row.created_at || ""))}">${escapeHtml(date)}</time>
+        </li>`;
+      })
+      .join("");
+    list.hidden = false;
+  } catch (err) {
+    status.hidden = false;
+    status.textContent = err?.message || "Nem sikerült az értékelések betöltése.";
+  }
+}
+
 function setSection(section) {
-  let next = SECTIONS.includes(section) ? section : "szemelyes";
-  if (next === "fiok") next = "szemelyes";
-  if (next === "uzenetek") {
-    window.location.href = "/uzenetek.html";
+  if (!section) {
+    clearSection();
     return;
+  }
+  let next = SECTIONS.includes(section) ? section : null;
+  if (next === "fiok") next = "szemelyes";
+  if (!next) {
+    clearSection();
+    return;
+  }
+  if (next === "ertekbecslo") {
+    const type = String(getProfile()?.accountType || getAuthUser()?.profile?.accountType || "").toLowerCase();
+    const kind = document.documentElement.getAttribute("data-mm-account-kind") || "";
+    if (type !== "dealer" && type !== "business" && kind !== "company") {
+      next = "hirdetes";
+    }
   }
   const url = new URL(window.location.href);
   url.searchParams.set("szekcio", next);
+  if (next !== "uzenetek") url.searchParams.delete("c");
+  if (next === "import") {
+    try {
+      const mode = localStorage.getItem("bymy-ha-import-mode");
+      if (mode === "dealer") url.searchParams.set("mode", "dealer");
+      else url.searchParams.delete("mode");
+    } catch {
+    }
+  } else {
+    url.searchParams.delete("mode");
+  }
   url.hash = "";
   window.history.replaceState({}, "", url);
   document.querySelectorAll("[data-mm-panel]").forEach((panel) => {
@@ -255,14 +544,19 @@ function setSection(section) {
     link.classList.toggle("is-active", link.getAttribute("data-mm-nav") === next);
   });
   document.body.classList.toggle("mm-messages-open", false);
+  document.body.classList.toggle("mm-inbox-inline", next === "uzenetek");
+  if (next === "keresesi-korzet" || next === "ajanlasok-korzet") {
+    fillAreaForms(getProfile());
+  }
   document.title =
     {
       attekintes: "Áttekintés",
-      cegadatok: "Cégadatok",
+      "partner-profil": "Partneri profil",
       import: "Autóimport",
+      ertekbecslo: "Értékbecslő",
       nyomtatasok: "Nyomtatások",
       ertekelesek: "Értékelések",
-      parkolo: "Parkoló",
+      parkolo: "Kedvencek",
       keresesek: "Mentett kereséseim",
       hirdetes: "Saját hirdetések",
       megjelenes: "Megjelenés",
@@ -272,8 +566,28 @@ function setSection(section) {
       "ajanlasok-korzet": "Ajánlások körzete",
       jelszo: "Jelszó módosítása",
       notify: "Hírlevél és értesítések",
+      uzenetek: "Üzenetek",
     }[next] + " — Fiókom";
   syncSettingsSubnav();
+  if (next === "partner-profil") {
+    void ensurePartnerProfilPanel();
+  }
+  if (next === "ertekbecslo") {
+    void initErtekbecsloPanel();
+  }
+}
+
+let partnerProfilLoadSeq = 0;
+async function ensurePartnerProfilPanel() {
+  const root = document.getElementById("partner-root");
+  if (!root) return;
+  const seq = ++partnerProfilLoadSeq;
+  try {
+    await renderPartnerManage(root);
+  } catch (error) {
+    if (seq !== partnerProfilLoadSeq) return;
+    root.innerHTML = `<div class="partner-error"><strong>A partnerprofil nem tölthető be.</strong><p>${String(error?.message || error)}</p></div>`;
+  }
 }
 
 function authHeaders() {
@@ -482,8 +796,18 @@ function renderPark(email) {
   if (empty) empty.hidden = items.length > 0;
   for (const item of items) {
     const row = document.createElement("article");
-    row.className = "mm-list-item";
+    row.className = "mm-list-item mm-list-item--park";
+    const imageUrl = String(item.imageUrl || "").trim();
+    const thumbTag = item.url ? "a" : "div";
+    const thumbHref = item.url ? ` href="${escapeAttr(item.url)}"` : "";
     row.innerHTML = `
+      <${thumbTag} class="mm-park-thumb"${thumbHref} aria-hidden="${imageUrl ? "false" : "true"}">
+        ${
+          imageUrl
+            ? `<img src="${escapeAttr(imageUrl)}" alt="${escapeAttr(item.title || "Autó")}" width="88" height="66" loading="lazy" decoding="async" />`
+            : `<span class="mm-park-thumb-empty">Nincs kép</span>`
+        }
+      </${thumbTag}>
       <div class="mm-list-main">
         <strong>${
           item.url
@@ -493,13 +817,13 @@ function renderPark(email) {
         <span class="mm-list-meta">${escapeHtml(item.price || "Ár nincs megadva")} · ${fmtDate(item.savedAt)}</span>
         <label class="mm-note-field">
           <span>Jegyzet</span>
-          <input type="text" data-park-note value="${escapeAttr(item.note || "")}" />
+          <textarea data-park-note rows="2" maxlength="280">${escapeHtml(item.note || "")}</textarea>
         </label>
       </div>
       <div class="mm-list-actions">
         ${item.url ? `<a class="site-header-btn site-header-btn--outline" href="${escapeAttr(item.url)}">Megnyitás</a>` : ""}
-        <button type="button" class="settings-link-btn" data-park-save>Jegyzet mentése</button>
-        <button type="button" class="settings-danger-btn" data-park-del>Törlés</button>
+        <button type="button" class="site-header-btn site-header-btn--outline" data-park-save>Jegyzet mentése</button>
+        <button type="button" class="site-header-btn site-header-btn--outline" data-park-del>Törlés</button>
       </div>`;
     row.querySelector("[data-park-save]")?.addEventListener("click", () => {
       const note = row.querySelector("[data-park-note]")?.value ?? "";
@@ -514,6 +838,36 @@ function renderPark(email) {
     });
     list.appendChild(row);
   }
+  void enrichParkImages(email, items);
+}
+
+let parkImageEnrichBusy = false;
+
+async function enrichParkImages(email, items) {
+  const missing = items.filter((item) => item.id && !String(item.imageUrl || "").trim());
+  if (!missing.length || parkImageEnrichBusy) return;
+  parkImageEnrichBusy = true;
+  let changed = false;
+  try {
+    for (const item of missing) {
+      try {
+        const listing = await fetchListing(item.id);
+        const imageUrl =
+          listing?.preview?.imageUrl ||
+          listing?.fo_kep ||
+          listing?.detail?.images?.[0] ||
+          listing?.preview?.imageUrls?.[0] ||
+          "";
+        if (!imageUrl) continue;
+        patchParkplatzItem(email, item.id, { imageUrl: String(imageUrl) });
+        changed = true;
+      } catch {
+      }
+    }
+  } finally {
+    parkImageEnrichBusy = false;
+  }
+  if (changed) renderPark(email);
 }
 
 function renderSearches(email) {
@@ -524,16 +878,21 @@ function renderSearches(email) {
   list.innerHTML = "";
   if (empty) empty.hidden = items.length > 0;
   for (const item of items) {
+    const summary =
+      (item.filters && summarizeSavedSearchFilters(item.filters)) ||
+      String(item.query || "").trim() ||
+      "Nincs részletes szűrő";
+    const href = savedSearchHref(item);
     const row = document.createElement("article");
     row.className = "mm-list-item";
     row.innerHTML = `
       <div class="mm-list-main">
         <strong>${escapeHtml(item.name)}</strong>
-        <span class="mm-list-meta">${escapeHtml(item.query || "Nincs részletes szűrő")} · ${fmtDate(item.savedAt)}</span>
+        <span class="mm-list-meta">${escapeHtml(summary)} · ${fmtDate(item.savedAt)}</span>
         <span class="mm-list-meta">Értesítés: ${item.notify ? "be" : "ki"}</span>
       </div>
       <div class="mm-list-actions">
-        <a class="site-header-btn site-header-btn--outline" href="/">Keresés megnyitása</a>
+        <a class="site-header-btn site-header-btn--outline" href="${escapeAttr(href)}">Keresés megnyitása</a>
         <button type="button" class="settings-link-btn" data-search-toggle>Értesítés</button>
         <button type="button" class="settings-danger-btn" data-search-del>Törlés</button>
       </div>`;
@@ -603,7 +962,6 @@ async function lookupCityFromPostal(postalInput, cityInput, busyEl) {
       });
     }
   } catch {
-    /* ignore */
   } finally {
     cityLookupBusy = false;
     if (busyEl) busyEl.hidden = true;
@@ -613,6 +971,7 @@ async function lookupCityFromPostal(postalInput, cityInput, busyEl) {
 function setWheelValue(wheel, km) {
   if (!wheel) return;
   const value = Number(km);
+  if (!Number.isFinite(value)) return;
   wheel.querySelectorAll("[data-km]").forEach((btn) => {
     btn.classList.toggle("is-active", Number(btn.dataset.km) === value);
   });
@@ -620,6 +979,31 @@ function setWheelValue(wheel, km) {
   active?.scrollIntoView({ block: "nearest", behavior: "smooth" });
   const hidden = wheel.parentElement?.querySelector('input[type="hidden"]');
   if (hidden) hidden.value = String(value);
+}
+
+function syncWheelActiveFromScroll(wheel) {
+  if (!wheel) return;
+  const rect = wheel.getBoundingClientRect();
+  const centerY = rect.top + rect.height / 2;
+  let bestBtn = null;
+  let bestDist = Infinity;
+  wheel.querySelectorAll("[data-km]").forEach((btn) => {
+    const r = btn.getBoundingClientRect();
+    const mid = r.top + r.height / 2;
+    const d = Math.abs(mid - centerY);
+    if (d < bestDist) {
+      bestDist = d;
+      bestBtn = btn;
+    }
+  });
+  if (bestBtn) setWheelValue(wheel, bestBtn.dataset.km);
+}
+
+function readRadiusKmFromForm(form) {
+  const wheel = form?.querySelector("[data-wheel]");
+  const active = wheel?.querySelector(".settings-wheel-opt.is-active");
+  if (active?.dataset?.km) return Number(active.dataset.km);
+  return Number(form?.radiusKm?.value || 30);
 }
 
 function initWheel(wheel) {
@@ -630,6 +1014,14 @@ function initWheel(wheel) {
     if (!btn || !wheel.contains(btn)) return;
     setWheelValue(wheel, btn.dataset.km);
   });
+  wheel.addEventListener(
+    "scroll",
+    () => {
+      clearTimeout(wheel._syncScrollT);
+      wheel._syncScrollT = setTimeout(() => syncWheelActiveFromScroll(wheel), 80);
+    },
+    { passive: true }
+  );
 }
 
 function accountTypeLabel(type) {
@@ -651,24 +1043,39 @@ function accountTypeSidebarLabel(type) {
 
 function syncSidebarAccountType(type) {
   const el = document.querySelector("[data-mm-account-type]");
-  const companyWrap = document.querySelector("[data-mm-company-nav-wrap]");
   const settingsNav = document.querySelector("[data-mm-settings-nav]");
-  const fromDb = type === "business" || type === "dealer" ? type : "private";
-  const companyType = isCompanyAccount(fromDb);
-  document.documentElement.setAttribute("data-mm-account-kind", companyType ? "company" : "private");
+  const raw = String(type || "").trim().toLowerCase();
+  let fromDb = "private";
+  let companyType = false;
+  if (raw === "business" || raw === "dealer") {
+    fromDb = raw;
+    companyType = true;
+    applyAccountKindToDocument("company");
+  } else if (raw === "private") {
+    applyAccountKindToDocument("private");
+  } else {
+    const kind = applyAccountKindToDocument(resolveAccountKind(getAuthUser()));
+    companyType = kind === "company";
+    fromDb = companyType ? "business" : "private";
+  }
+  try {
+    document.documentElement.setAttribute("data-bymy-account-type", fromDb);
+  } catch {
+    /* ignore */
+  }
+  /* Láthatóság / sorrend: HTML + CSS (data-mm-account-kind). */
   if (el) {
     el.textContent = accountTypeSidebarLabel(fromDb);
     el.hidden = false;
   }
-  if (companyWrap) companyWrap.hidden = !companyType;
-  if (settingsNav) settingsNav.hidden = companyType;
-  if (!companyType && currentSection() === "cegadatok") {
-    setSection("szemelyes");
+  /* Beállítások (Személyes adatok stb.) mindkét fióktípusnál az Üzenetek után marad. */
+  if (settingsNav) settingsNav.hidden = false;
+  const section = currentSection();
+  if (!companyType && (section === "partner-profil" || section === "cegadatok")) {
+    clearSection();
+  } else {
+    syncSettingsSubnav();
   }
-  if (companyType && (currentSection() === "fiok" || currentSection() === "szemelyes")) {
-    setSection("cegadatok");
-  }
-  syncSettingsSubnav();
 }
 
 function syncCompanyWrap(form) {
@@ -681,22 +1088,9 @@ function syncCompanyWrap(form) {
   if (locked) locked.textContent = accountTypeLabel(type);
 }
 
-function initAccordionExclusive() {
-  /* Accordion megszűnt — a beállítások külön oldalmenü-panelek. */
-}
 
 function initPostalLookups(root = document) {
-  root.querySelectorAll("[data-postal-lookup]").forEach((input) => {
-    if (input.dataset.lookupBound === "1") return;
-    input.dataset.lookupBound = "1";
-    const row = input.closest(".settings-postal-row") || input.closest("form");
-    const cityInput = row?.querySelector("[name=city], [data-search-city], [data-rec-city]");
-    const busyEl = row?.querySelector("[data-city-busy]");
-    input.addEventListener("input", () => {
-      input.value = input.value.replace(/\D/g, "").slice(0, 4);
-      lookupCityFromPostal(input, cityInput, busyEl);
-    });
-  });
+  wirePostalCityAutofill(root);
 }
 
 function fillAreaForms(profile) {
@@ -741,7 +1135,8 @@ function initAreaForms() {
       .replace(/\D/g, "")
       .slice(0, 4);
     const city = String(form.city?.value || "").trim();
-    const radiusKm = Number(form.radiusKm?.value || 30);
+    syncWheelActiveFromScroll(form.querySelector("[data-wheel=search]"));
+    const radiusKm = readRadiusKmFromForm(form);
     if (postal.length !== 4) {
       showFlash(flash, "Adj meg egy 4 jegyű irányítószámot.", false);
       return;
@@ -754,8 +1149,13 @@ function initAreaForms() {
       localStorage.setItem(SEARCH_POSTAL_KEY, postal);
       localStorage.setItem(SEARCH_RADIUS_KEY, String(radiusKm));
       const profile = { ...getProfile(), postalCode: postal, city, searchRadiusKm: radiusKm };
-      await saveProfile(profile).catch(() => null);
-      fillAreaForms(profile);
+      try {
+        await saveProfile(profile);
+      } catch (saveErr) {
+        console.warn("Körzet profil mentés:", saveErr);
+      }
+      fillAreaForms(getProfile());
+      window.dispatchEvent(new CustomEvent("bymy-nearby-prefs-changed"));
       showFlash(flash, "Keresési körzet mentve.", true);
     } catch (error) {
       showFlash(flash, error.message ?? "Mentés sikertelen.", false);
@@ -770,7 +1170,8 @@ function initAreaForms() {
       .replace(/\D/g, "")
       .slice(0, 4);
     const city = String(form.city?.value || "").trim();
-    let radiusKm = Number(form.radiusKm?.value || 30);
+    syncWheelActiveFromScroll(form.querySelector("[data-wheel=rec]"));
+    let radiusKm = readRadiusKmFromForm(form);
     if (radiusKm > 30) radiusKm = 30;
     if (postal.length !== 4) {
       showFlash(flash, "Adj meg egy 4 jegyű irányítószámot.", false);
@@ -789,8 +1190,12 @@ function initAreaForms() {
         city,
         recommendationsRadiusKm: radiusKm,
       };
-      await saveProfile(profile).catch(() => null);
-      fillAreaForms(profile);
+      try {
+        await saveProfile(profile);
+      } catch (saveErr) {
+        console.warn("Ajánlások körzet mentés:", saveErr);
+      }
+      fillAreaForms(getProfile());
       showFlash(flash, "Ajánlások körzete mentve.", true);
     } catch (error) {
       showFlash(flash, error.message ?? "Mentés sikertelen.", false);
@@ -798,8 +1203,163 @@ function initAreaForms() {
   });
 }
 
-async function refreshDbInspect() {
-  /* Fejlesztői DB panel eltávolítva a mobil UI-ból. */
+
+function parseSettingsPhone(phone) {
+  const raw = String(phone || "").trim();
+  if (!raw) return { orszag: "+36", korzet: "", szam: "" };
+  let compact = raw.replace(/[^\d+]/g, "");
+  if (/^\+?06\d/.test(compact)) {
+    compact = `+36${compact.replace(/^\+?06/, "")}`;
+  }
+
+  const countries = [...PHONE_COUNTRIES].sort((a, b) => b.value.length - a.value.length);
+  let orszag = "+36";
+  let rest = compact.startsWith("+") ? compact.slice(1) : compact;
+
+  for (const item of countries) {
+    const code = item.value.replace(/^\+/, "");
+    if (compact.startsWith(item.value) || rest.startsWith(code)) {
+      orszag = item.value;
+      rest = compact.startsWith(item.value)
+        ? compact.slice(item.value.length)
+        : rest.slice(code.length);
+      break;
+    }
+  }
+
+  rest = String(rest).replace(/\D/g, "");
+  if (!rest) return { orszag, korzet: "", szam: "" };
+
+  let korzetLen = 2;
+  if (orszag === "+36" && rest.startsWith("1") && rest.length >= 7) korzetLen = 1;
+  else if (rest.length >= 10) korzetLen = 3;
+  else if (rest.length <= 7) korzetLen = Math.min(2, Math.max(1, rest.length - 5));
+
+  const korzet = rest.slice(0, Math.min(korzetLen, Math.max(0, rest.length - 4)));
+  const szam = rest.slice(korzet.length);
+  return { orszag, korzet, szam };
+}
+
+function composeSettingsPhone(orszag, korzet, szam) {
+  const o = String(orszag || "+36").trim() || "+36";
+  const k = String(korzet || "").replace(/\D/g, "");
+  const s = String(szam || "").replace(/\D/g, "");
+  if (!k && !s) return "";
+  return [o, k, s].filter(Boolean).join(" ");
+}
+
+function applyPhonePartsToForm(form, phone) {
+  if (!form) return;
+  const row = form.querySelector("[data-settings-phone]:not([data-phone-name])");
+  if (row) applyPhonePartsToRow(row, phone);
+  else {
+    const parts = parseSettingsPhone(phone);
+    const country = form.elements.namedItem("phoneCountry");
+    const area = form.elements.namedItem("phoneArea");
+    const local = form.elements.namedItem("phoneLocal");
+    const hidden = form.elements.namedItem("phone");
+    if (country instanceof HTMLSelectElement) {
+      fillCountrySelect(country, parts.orszag || "+36");
+    }
+    if (area instanceof HTMLInputElement) area.value = parts.korzet;
+    if (local instanceof HTMLInputElement) local.value = parts.szam;
+    if (hidden instanceof HTMLInputElement) {
+      hidden.value = composeSettingsPhone(parts.orszag, parts.korzet, parts.szam);
+    }
+  }
+}
+
+function phoneRowParts(row) {
+  if (!row) return null;
+  return {
+    country: row.querySelector("select.phone-country"),
+    area: row.querySelector("input.phone-part:not(.wide)"),
+    local: row.querySelector("input.phone-part.wide"),
+    hidden: row.querySelector('input[type="hidden"]'),
+  };
+}
+
+function applyPhonePartsToRow(row, phone) {
+  const partsEl = phoneRowParts(row);
+  if (!partsEl) return;
+  const parts = parseSettingsPhone(phone);
+  if (partsEl.country instanceof HTMLSelectElement) {
+    fillCountrySelect(partsEl.country, parts.orszag || "+36");
+  }
+  if (partsEl.area instanceof HTMLInputElement) partsEl.area.value = parts.korzet;
+  if (partsEl.local instanceof HTMLInputElement) partsEl.local.value = parts.szam;
+  if (partsEl.hidden instanceof HTMLInputElement) {
+    partsEl.hidden.value = composeSettingsPhone(parts.orszag, parts.korzet, parts.szam);
+  }
+}
+
+function syncPhoneRowHidden(row) {
+  const partsEl = phoneRowParts(row);
+  if (!partsEl) return "";
+  const value = composeSettingsPhone(
+    partsEl.country instanceof HTMLSelectElement ? partsEl.country.value : "+36",
+    partsEl.area instanceof HTMLInputElement ? partsEl.area.value : "",
+    partsEl.local instanceof HTMLInputElement ? partsEl.local.value : ""
+  );
+  if (partsEl.hidden instanceof HTMLInputElement) partsEl.hidden.value = value;
+  return value;
+}
+
+function syncSettingsPhoneHidden(form) {
+  if (!form) return "";
+  const row =
+    form.querySelector("[data-settings-phone]:not([data-phone-name])") ||
+    form.querySelector("[data-settings-phone]");
+  if (row) return syncPhoneRowHidden(row);
+  const country = form.elements.namedItem("phoneCountry");
+  const area = form.elements.namedItem("phoneArea");
+  const local = form.elements.namedItem("phoneLocal");
+  const hidden = form.elements.namedItem("phone");
+  const value = composeSettingsPhone(
+    country instanceof HTMLSelectElement ? country.value : "+36",
+    area instanceof HTMLInputElement ? area.value : "",
+    local instanceof HTMLInputElement ? local.value : ""
+  );
+  if (hidden instanceof HTMLInputElement) hidden.value = value;
+  return value;
+}
+
+function initSettingsPhoneRows(root) {
+  if (!root) return;
+  root.querySelectorAll("[data-settings-phone]").forEach((row) => {
+    if (row.dataset.phoneBound === "1") return;
+    row.dataset.phoneBound = "1";
+    const country = row.querySelector("select.phone-country");
+    if (country instanceof HTMLSelectElement) fillCountrySelect(country, "+36");
+    const sync = () => syncPhoneRowHidden(row);
+    row.addEventListener("input", sync);
+    row.addEventListener("change", sync);
+    sync();
+  });
+}
+
+function initSettingsPhoneRow(form) {
+  initSettingsPhoneRows(form);
+}
+
+function applyCompanyPhonesToForm(form, data) {
+  if (!form) return;
+  form.querySelectorAll("[data-settings-phone][data-phone-name]").forEach((row) => {
+    const key = row.getAttribute("data-phone-name");
+    if (!key) return;
+    applyPhonePartsToRow(row, data?.[key] || "");
+  });
+}
+
+function syncCompanyPhonesFromForm(form) {
+  const out = { companyPhone: "", companyPhone2: "", companyPhone3: "" };
+  if (!form) return out;
+  form.querySelectorAll("[data-settings-phone][data-phone-name]").forEach((row) => {
+    const key = row.getAttribute("data-phone-name");
+    if (!key) return;
+    out[key] = syncPhoneRowHidden(row);
+  });
+  return out;
 }
 
 function applyProfileToForm(profile) {
@@ -817,8 +1377,8 @@ function applyProfileToForm(profile) {
     "postalCode",
     "city",
     "country",
-    "phone",
     "company",
+    "companyListingName",
     "companyTaxId",
     "companyStreet",
     "companyPostalCode",
@@ -827,6 +1387,7 @@ function applyProfileToForm(profile) {
     "companyAddress",
     "companyPhone",
     "companyPhone2",
+    "companyPhone3",
     "companyEmail",
     "companyEmail2",
     "salespersonName",
@@ -839,7 +1400,139 @@ function applyProfileToForm(profile) {
       field.value = value;
     });
   }
+  applyCompanyActivitiesToForm(data);
+  initCompanyActivitiesDropdown(document.getElementById("mm-company-form"));
+  initSettingsPhoneRow(form);
+  applyPhonePartsToForm(form, data.phone);
+  const companyForm = document.getElementById("mm-company-form");
+  if (companyForm) {
+    initSettingsPhoneRows(companyForm);
+    applyCompanyPhonesToForm(companyForm, data);
+  }
   updateProfileSummary(data, getAuthUser());
+  void hydrateDeviceContractFields(form, data, getAuthUser());
+}
+
+async function hydrateDeviceContractFields(form, profile, user) {
+  if (!form) return;
+  const accountType = String(profile?.accountType || form.elements?.namedItem("accountType")?.value || "private").toLowerCase();
+  const isCompany = isCompanyAccount(accountType);
+  const personBlock = document.querySelector("[data-device-contract-person]");
+  const companyBlock = document.querySelector("[data-device-contract-company]");
+  const webOnly = document.querySelector("[data-device-contract-web-only]");
+  const streetWrap = document.querySelector("[data-private-street-wrap]");
+  const streetHint = document.querySelector("[data-private-street-hint]");
+  const streetInput = form.elements.namedItem("street");
+  const native = isNativeApp();
+
+  document.documentElement.setAttribute("data-mm-account-kind", isCompany ? "company" : "private");
+
+  if (personBlock) {
+    personBlock.hidden = isCompany;
+    personBlock.setAttribute("aria-hidden", isCompany ? "true" : "false");
+  }
+  if (companyBlock) {
+    companyBlock.hidden = !isCompany;
+    companyBlock.setAttribute("aria-hidden", isCompany ? "false" : "true");
+  }
+  if (webOnly) webOnly.hidden = native;
+
+  if (streetWrap instanceof HTMLElement) {
+    streetWrap.hidden = !isCompany;
+  }
+  if (streetHint) streetHint.hidden = true;
+  if (streetInput instanceof HTMLInputElement && !isCompany) {
+    streetInput.value = "";
+  }
+
+  // Privát: név + irsz + település kötelező. Cégnél a személyes blokk mezői nem kötelezők.
+  for (const name of ["lastName", "firstName", "postalCode", "city"]) {
+    const el = form.elements.namedItem(name);
+    if (!(el instanceof HTMLInputElement)) continue;
+    el.required = !isCompany;
+  }
+
+  const identity = native ? await getDeviceIdentity(user?.email || "") : null;
+  const map = {
+    local_fullName: identity?.fullName,
+    local_birthName: identity?.birthName,
+    local_birthPlace: identity?.birthPlace,
+    local_birthDate: identity?.birthDate,
+    local_motherName: identity?.motherName,
+    local_idDocType: identity?.idDocType,
+    local_idDocNumber: identity?.idDocNumber,
+    local_homeAddress: identity?.homeAddress || identity?.street,
+    local_citizenship: identity?.citizenship,
+    local_companyName: identity?.companyName,
+    local_companySeat: identity?.companySeat,
+    local_companyRegistry: identity?.companyRegistry,
+    local_representative: identity?.representative,
+  };
+
+  const personKeys = new Set([
+    "local_fullName",
+    "local_birthName",
+    "local_birthPlace",
+    "local_birthDate",
+    "local_motherName",
+    "local_idDocType",
+    "local_idDocNumber",
+    "local_homeAddress",
+    "local_citizenship",
+  ]);
+  const companyKeys = new Set([
+    "local_companyName",
+    "local_companySeat",
+    "local_companyRegistry",
+    "local_representative",
+  ]);
+
+  for (const [name, value] of Object.entries(map)) {
+    const field = form.elements.namedItem(name);
+    if (!(field instanceof HTMLInputElement)) continue;
+    const relevant = isCompany ? companyKeys.has(name) : personKeys.has(name);
+    field.disabled = !relevant;
+    field.readOnly = !native || !relevant;
+    if (!relevant) {
+      field.value = "";
+      field.placeholder = "";
+      continue;
+    }
+    field.value = native ? value || "" : "";
+    if (!native) field.placeholder = "Csak a mobilalkalmazásban";
+    else if (name === "local_citizenship" && !field.value) field.placeholder = "magyar";
+    else if (name === "local_idDocType" && !field.value) field.placeholder = "pl. személyi igazolvány";
+    else field.placeholder = "";
+  }
+
+  if (native && !isCompany) {
+    const fullName = form.elements.namedItem("local_fullName");
+    if (fullName instanceof HTMLInputElement && !fullName.value) {
+      const composed = [profile?.lastName, profile?.firstName].filter(Boolean).join(" ");
+      if (composed) fullName.value = composed;
+    }
+  }
+
+  if (native && isCompany) {
+    const companyName = form.elements.namedItem("local_companyName");
+    if (companyName instanceof HTMLInputElement && !companyName.value && profile?.company) {
+      companyName.value = String(profile.company).trim();
+    }
+    const seat = form.elements.namedItem("local_companySeat");
+    if (seat instanceof HTMLInputElement && !seat.value) {
+      const composed = [profile?.companyPostalCode, profile?.companyCity, profile?.companyStreet]
+        .map((v) => String(v || "").trim())
+        .filter(Boolean)
+        .join(", ");
+      if (composed) seat.value = composed;
+    }
+    const rep = form.elements.namedItem("local_representative");
+    if (rep instanceof HTMLInputElement && !rep.value) {
+      const composed = [profile?.lastName, profile?.firstName].filter(Boolean).join(" ");
+      if (profile?.salespersonName) rep.value = String(profile.salespersonName).trim();
+      else if (composed) rep.value = composed;
+    }
+  }
 }
 
 function fillProfileForm(user, profileOverride = null) {
@@ -857,19 +1550,29 @@ function fillProfileForm(user, profileOverride = null) {
   updateProfileSummary(profile, user);
   fillAreaForms(profile);
 
-  const photo = user?.email ? readPhotos()[user.email] : null;
-  const letterEl = document.getElementById("settings-avatar-letter");
-  const imgEl = document.getElementById("settings-avatar-img");
-  const removeBtn = document.getElementById("settings-avatar-remove");
-  const uploadBtn = document.getElementById("settings-avatar-upload");
-  const letter = (
-    profile?.lastName?.charAt(0) ||
-    profile?.firstName?.charAt(0) ||
-    user?.email?.charAt(0) ||
-    "A"
-  ).toUpperCase();
+  const photo =
+    String(getProfile()?.avatarDataUrl || "").trim() ||
+    (user?.email ? readPhotos()[user.email] : null) ||
+    null;
+  applyAvatarUi({
+    photo,
+    letter:
+      profile?.lastName?.charAt(0) ||
+      profile?.firstName?.charAt(0) ||
+      user?.email?.charAt(0) ||
+      "A",
+    letterEl: document.getElementById("settings-avatar-letter"),
+    imgEl: document.getElementById("settings-avatar-img"),
+    removeBtn: document.getElementById("settings-avatar-remove"),
+    uploadBtn: document.getElementById("settings-avatar-upload"),
+  });
+  fillCompanyAvatarUi(user, profile);
+}
+
+function applyAvatarUi({ photo, letter, letterEl, imgEl, removeBtn, uploadBtn }) {
+  const initial = String(letter || "A").charAt(0).toUpperCase();
   if (letterEl) {
-    letterEl.textContent = letter;
+    letterEl.textContent = initial;
     letterEl.hidden = Boolean(photo);
   }
   if (imgEl) {
@@ -885,54 +1588,137 @@ function fillProfileForm(user, profileOverride = null) {
   if (uploadBtn) uploadBtn.textContent = photo ? "Csere" : "Feltöltés";
 }
 
+function fillCompanyAvatarUi(user, profileOverride = null) {
+  const profile = profileOverride || getProfile();
+  const photo =
+    String(profile?.avatarDataUrl || "").trim() ||
+    (user?.email ? readPhotos()[user.email] : null) ||
+    null;
+  const companyName = String(profile?.company || "").trim();
+  const summary = document.getElementById("settings-company-avatar-summary");
+  if (summary) summary.textContent = companyName || "Cég profilkép";
+  applyAvatarUi({
+    photo,
+    letter: companyName?.charAt(0) || user?.email?.charAt(0) || "C",
+    letterEl: document.getElementById("settings-company-avatar-letter"),
+    imgEl: document.getElementById("settings-company-avatar-img"),
+    removeBtn: document.getElementById("settings-company-avatar-remove"),
+    uploadBtn: document.getElementById("settings-company-avatar-upload"),
+  });
+}
+
+async function removeAvatarPhoto(user, flashEl) {
+  const map = readPhotos();
+  if (user?.email) delete map[user.email];
+  writePhotos(map);
+  try {
+    await saveAvatarPhoto("");
+    fillProfileForm(getAuthUser());
+    window.dispatchEvent(new CustomEvent("bymy-auth-changed"));
+    showFlash(flashEl, "Profilkép törölve.", true);
+  } catch (error) {
+    fillProfileForm(user);
+    showFlash(flashEl, error.message ?? "Törlés sikertelen.", false);
+  }
+}
+
+async function uploadAvatarFromInput(fileInput, user, flashEl) {
+  const file = fileInput?.files?.[0];
+  if (fileInput) fileInput.value = "";
+  if (!file) return;
+  try {
+    const dataUrl = await resizeImageFile(file);
+    const map = readPhotos();
+    if (user?.email) map[user.email] = dataUrl;
+    writePhotos(map);
+    await saveAvatarPhoto(dataUrl);
+    fillProfileForm(getAuthUser());
+    window.dispatchEvent(new CustomEvent("bymy-auth-changed"));
+    showFlash(flashEl, "Profilkép feltöltve.", true);
+  } catch (error) {
+    showFlash(flashEl, error.message ?? "Feltöltés sikertelen.", false);
+  }
+}
+
 function initNotifyForm(email) {
   const form = document.getElementById("settings-notify-form");
-  if (!form) return;
-  const prefs = readNotifyPrefs(email);
+  if (!form || form.dataset.bound === "1") return;
+  form.dataset.bound = "1";
+  const prefs = readNotifyPrefs(email, getProfile());
   for (const [key, value] of Object.entries(prefs)) {
     const input = form.elements.namedItem(key);
     if (input && "checked" in input) input.checked = Boolean(value);
   }
-  form.addEventListener("submit", (event) => {
+  form.addEventListener("submit", async (event) => {
     event.preventDefault();
-    writeNotifyPrefs(email, {
+    const next = {
       messages: Boolean(form.messages?.checked),
       favorites: Boolean(form.favorites?.checked),
       interests: Boolean(form.interests?.checked),
       newsletter: Boolean(form.newsletter?.checked),
-    });
-    showFlash(document.getElementById("settings-notify-flash"), "Értesítési beállítások mentve.", true);
+    };
+    writeNotifyPrefs(email, next);
+    const flash = document.getElementById("settings-notify-flash");
+    const btn = form.querySelector('button[type="submit"]');
+    if (btn) btn.disabled = true;
+    try {
+      await saveProfile({
+        ...getProfile(),
+        notifyMessages: next.messages,
+        notifyFavorites: next.favorites,
+        notifyInterests: next.interests,
+        notifyNewsletter: next.newsletter,
+      });
+      showFlash(flash, "Értesítési beállítások mentve.", true);
+    } catch (error) {
+      showFlash(flash, error.message ?? "Mentés sikertelen.", false);
+    } finally {
+      if (btn) btn.disabled = false;
+    }
   });
 }
 export async function initSettingsPage() {
+  try {
   const ok = await requireAuthForPage();
   if (!ok) return;
   let loadedProfile = null;
   try {
     loadedProfile = await loadProfileFromServer();
   } catch {
-    /* session már ellenőrizve */
   }
   const user = getAuthUser();
   if (!user?.email) return;
 
   syncSidebarAccountType((loadedProfile || getProfile())?.accountType);
-  document.documentElement.removeAttribute("data-mm-account-pending");
-
   const hello = document.querySelector("[data-mm-hello]");
   if (hello) hello.textContent = getDisplayName() || user.email.split("@")[0];
+
+  const profileNow = loadedProfile || getProfile();
+  if (isPrivateAccount(profileNow) && !isPrivateProfileComplete(profileNow)) {
+    const url = new URL(window.location.href);
+    if (url.searchParams.get("szekcio") !== "szemelyes") {
+      url.searchParams.set("szekcio", "szemelyes");
+      history.replaceState(null, "", url);
+    }
+    const flash = document.getElementById("settings-profile-flash");
+    showFlash(flash, "Töltsd ki a kötelező adatokat: név, irányítószám, település, telefon.", false);
+  }
 
   const accHash = settingsAccordionHash();
   if (accHash) {
     openSettingsAccordion(accHash);
   } else {
-    setSection(currentSection());
+    const section = currentSection();
+    if (section) setSection(section);
+    else clearSection();
   }
   await syncParkplatzFromServer(user.email);
   await refreshStats(user.email);
   renderPark(user.email);
   renderSearches(user.email);
+  const openMsgId = Number(new URLSearchParams(window.location.search).get("c"));
   messagesUi = initMessagesUi(document.getElementById("mm-msg-root"), {
+    openConversationId: Number.isFinite(openMsgId) && openMsgId > 0 ? openMsgId : undefined,
     onUnreadChange: (n) => {
       const badge = document.querySelector("[data-mm-msg-count]");
       const msgStat = document.querySelector("[data-mm-stat-msg]");
@@ -945,57 +1731,98 @@ export async function initSettingsPage() {
   });
   fillProfileForm(user, loadedProfile);
   initMyAdsPanel(document.getElementById("mm-ad-list")).reload();
-  // Második kör: ha a panel most vált láthatóra, biztosan kitöltjük.
   requestAnimationFrame(() => fillProfileForm(getAuthUser(), loadedProfile || getProfile()));
+
+  try {
+    const localPhoto = readPhotos()[user.email];
+    const serverPhoto = String((loadedProfile || getProfile())?.avatarDataUrl || "").trim();
+    if (localPhoto && !serverPhoto) {
+      await saveAvatarPhoto(localPhoto);
+      fillProfileForm(getAuthUser(), getProfile());
+    } else if (serverPhoto && user.email) {
+      const map = readPhotos();
+      if (map[user.email] !== serverPhoto) {
+        map[user.email] = serverPhoto;
+        writePhotos(map);
+      }
+    }
+  } catch {
+  }
+
   initNotifyForm(user.email);
-  initAccordionExclusive();
   initPostalLookups();
   initAreaForms();
   initHeroSettings();
   if (currentSection() === "megjelenes") {
     loadHeroSettings();
   }
+  if (currentSection() === "ertekelesek") {
+    loadReceivedRatings();
+  }
+
+  function applyNavSideEffects(next) {
+    if (next === "szemelyes" || next === "fiok") {
+      fillProfileForm(getAuthUser(), getProfile());
+    }
+    if (next === "uzenetek") {
+      messagesUi?.refresh?.();
+    }
+    if (next === "megjelenes") {
+      loadHeroSettings();
+    }
+    if (next === "hirdetes") {
+      initMyAdsPanel(document.getElementById("mm-ad-list")).reload();
+    }
+    if (next === "ertekelesek") {
+      loadReceivedRatings();
+    }
+  }
 
   document.querySelectorAll("[data-mm-nav]").forEach((link) => {
+    if (link.hasAttribute("data-mm-subtoggle")) return;
     link.addEventListener("click", (event) => {
       const next = link.getAttribute("data-mm-nav");
       if (!SECTIONS.includes(next)) return;
       event.preventDefault();
       setSection(next);
-      if (next === "szemelyes" || next === "fiok") {
-        fillProfileForm(getAuthUser(), getProfile());
-      }
-      if (SETTINGS_SECTIONS.has(next) || next === "cegadatok") {
+      if (SETTINGS_SECTIONS.has(next) || COMPANY_SUB_SECTIONS.has(next)) {
         expandSettingsSubnav(link.closest(".mm-nav-group"));
       }
-      if (next === "uzenetek") {
-        messagesUi?.refresh?.();
-      }
-      if (next === "megjelenes") {
-        loadHeroSettings();
-      }
-      if (next === "hirdetes") {
-        initMyAdsPanel(document.getElementById("mm-ad-list")).reload();
-      }
+      applyNavSideEffects(next);
     });
   });
 
   document.querySelectorAll("[data-mm-subtoggle]").forEach((btn) => {
-    if (btn.hasAttribute("data-mm-nav")) return;
     btn.addEventListener("click", () => {
       const group = btn.closest(".mm-nav-group");
       const sub = group?.querySelector("[data-mm-sub]");
       if (!sub) return;
-      const open = sub.hidden;
+      const willOpen = sub.hidden;
+      const next = btn.getAttribute("data-mm-nav");
       document.querySelectorAll("[data-mm-sub]").forEach((el) => {
         el.hidden = true;
       });
       document.querySelectorAll("[data-mm-subtoggle]").forEach((el) => {
         el.setAttribute("aria-expanded", "false");
+        el.classList.remove("is-active");
       });
-      if (open) {
-        sub.hidden = false;
-        btn.setAttribute("aria-expanded", "true");
+      if (!willOpen) {
+        // Cégadatok bezárás: jobb oldal is üres maradjon
+        if (!next && group?.hasAttribute("data-mm-company-nav-wrap")) {
+          clearPanelsKeepCompanyNav(null);
+          collapseSettingsSubnav(group);
+        }
+        return;
+      }
+      sub.hidden = false;
+      btn.setAttribute("aria-expanded", "true");
+      btn.classList.add("is-active");
+      if (next && SECTIONS.includes(next)) {
+        setSection(next);
+        applyNavSideEffects(next);
+      } else if (group?.hasAttribute("data-mm-company-nav-wrap")) {
+        // Cégadatok: csak almenü, jobb oldal üres
+        clearPanelsKeepCompanyNav(group);
       }
     });
   });
@@ -1008,7 +1835,6 @@ export async function initSettingsPage() {
         if (!parsed.v) parsed.v = CAT_STORAGE_VERSION;
         sessionStorage.setItem(CAT_STORAGE_KEY, JSON.stringify(parsed));
       } catch {
-        /* ignore */
       }
     });
   });
@@ -1028,9 +1854,12 @@ export async function initSettingsPage() {
   document.getElementById("mm-search-add")?.addEventListener("submit", (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
+    const query = String(data.get("query") || "").trim();
     addSavedSearch(user.email, {
       name: data.get("name"),
-      query: data.get("query"),
+      query,
+      page: "auto",
+      href: query.startsWith("/") ? query : query ? `/auto.html?q=${encodeURIComponent(query)}` : "/auto.html",
       notify: Boolean(data.get("notify")),
     });
     event.currentTarget.reset();
@@ -1040,8 +1869,6 @@ export async function initSettingsPage() {
 
   const profileForm = document.getElementById("mm-profile-form");
   syncCompanyWrap(profileForm);
-
-  // A submit listener korán kötődik (bindProfileFormEarly) — itt csak a hello frissül mentés után.
 
   document.getElementById("settings-password-form")?.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -1060,29 +1887,19 @@ export async function initSettingsPage() {
   const fileInput = document.getElementById("settings-avatar-file");
   document.getElementById("settings-avatar-upload")?.addEventListener("click", () => fileInput?.click());
   document.getElementById("settings-avatar-remove")?.addEventListener("click", () => {
-    const map = readPhotos();
-    delete map[user.email];
-    writePhotos(map);
-    fillProfileForm(user);
-    window.dispatchEvent(new CustomEvent("bymy-auth-changed"));
-    showFlash(document.getElementById("settings-avatar-flash"), "Profilkép törölve.", true);
+    void removeAvatarPhoto(user, document.getElementById("settings-avatar-flash"));
   });
   fileInput?.addEventListener("change", async () => {
-    const file = fileInput.files?.[0];
-    fileInput.value = "";
-    if (!file) return;
-    const flash = document.getElementById("settings-avatar-flash");
-    try {
-      const dataUrl = await resizeImageFile(file);
-      const map = readPhotos();
-      map[user.email] = dataUrl;
-      writePhotos(map);
-      fillProfileForm(user);
-      window.dispatchEvent(new CustomEvent("bymy-auth-changed"));
-      showFlash(flash, "Profilkép feltöltve.", true);
-    } catch (error) {
-      showFlash(flash, error.message ?? "Feltöltés sikertelen.", false);
-    }
+    await uploadAvatarFromInput(fileInput, user, document.getElementById("settings-avatar-flash"));
+  });
+
+  const companyFileInput = document.getElementById("settings-company-avatar-file");
+  document.getElementById("settings-company-avatar-upload")?.addEventListener("click", () => companyFileInput?.click());
+  document.getElementById("settings-company-avatar-remove")?.addEventListener("click", () => {
+    void removeAvatarPhoto(user, document.getElementById("settings-company-avatar-flash"));
+  });
+  companyFileInput?.addEventListener("change", async () => {
+    await uploadAvatarFromInput(companyFileInput, user, document.getElementById("settings-company-avatar-flash"));
   });
 
   document.getElementById("settings-delete-account")?.addEventListener("click", async () => {
@@ -1096,9 +1913,16 @@ export async function initSettingsPage() {
   });
 
   window.addEventListener("popstate", () => setSection(currentSection()));
+  document.documentElement.setAttribute("data-mm-settings-ready", "1");
+  document.documentElement.removeAttribute("data-mm-boot-failed");
+  } catch (error) {
+    console.error("[beallitasok] init failed", error);
+    document.documentElement.setAttribute("data-mm-boot-failed", "");
+  } finally {
+    document.documentElement.removeAttribute("data-mm-account-pending");
+  }
 }
 
-/** Mentés listener AZONNAL — ne várjon az auth hálózatra (különben natív submit = nincs mentés). */
 function bindProfileFormEarly() {
   const profileForm = document.getElementById("mm-profile-form");
   if (!profileForm || profileForm.dataset.bound === "1") return;
@@ -1113,15 +1937,52 @@ function bindProfileFormEarly() {
     data.postalCode = String(data.postalCode || "")
       .replace(/\D/g, "")
       .slice(0, 4);
+    data.phone = syncSettingsPhoneHidden(profileForm);
+    delete data.phoneCountry;
+    delete data.phoneArea;
+    delete data.phoneLocal;
     if (!String(data.firstName || "").trim() || !String(data.lastName || "").trim()) {
       showFlash(flash, "Keresztnév és vezetéknév kötelező.", false);
       return;
     }
-    data.company = String(
-      document.querySelector("#mm-company-form [name=company]")?.value ?? data.company ?? ""
-    ).trim();
+    data.company = String(data.company || getProfile().company || "").trim();
+    const accountType = String(data.accountType || getProfile().accountType || "private").toLowerCase();
+    const isCompany = isCompanyAccount(accountType);
+    if (!isCompany) {
+      const postal = String(data.postalCode || "").replace(/\D/g, "").slice(0, 4);
+      const city = String(data.city || "").trim();
+      const phone = String(data.phone || "").trim();
+      if (postal.length !== 4) {
+        showFlash(flash, "Az irányítószám kötelező (4 számjegy).", false);
+        return;
+      }
+      if (!city) {
+        showFlash(flash, "A település kötelező.", false);
+        return;
+      }
+      if (!phone) {
+        showFlash(flash, "A telefonszám kötelező.", false);
+        return;
+      }
+      data.postalCode = postal;
+    }
+    const deviceIdentity = identityForAccountKind(identityFromFormData(data), { company: isCompany });
+    Object.assign(data, stripDeviceIdentityFormFields(data));
+    if (!isCompany) {
+      data.street = "";
+    }
     if (btn) btn.disabled = true;
     try {
+      let deviceNote = "";
+      const userForDevice = getAuthUser();
+      if (isNativeApp() && userForDevice?.email) {
+        await setDeviceIdentity(userForDevice.email, deviceIdentity);
+        deviceNote = " Szerződéses adatok a telefonon mentve.";
+      } else if (
+        Object.values(deviceIdentity).some((value) => String(value || "").trim())
+      ) {
+        deviceNote = " A szerződéses adatok csak a mobilalkalmazásban menthetők.";
+      }
       const saved = await saveProfile(data);
       applyProfileToForm(saved);
       const user = getAuthUser();
@@ -1131,7 +1992,7 @@ function bindProfileFormEarly() {
       window.dispatchEvent(new CustomEvent("bymy-auth-changed"));
       showFlash(
         flash,
-        `Adatok mentve: ${saved.lastName} ${saved.firstName}.`.trim(),
+        `Adatok mentve: ${saved.lastName} ${saved.firstName}.${deviceNote}`.trim(),
         true
       );
       flash?.scrollIntoView({ behavior: "smooth", block: "nearest" });
@@ -1148,17 +2009,21 @@ function bindCompanyFormEarly() {
   const form = document.getElementById("mm-company-form");
   if (!form || form.dataset.bound === "1") return;
   form.dataset.bound = "1";
+  initCompanyActivitiesDropdown(form);
+  initSettingsPhoneRows(form);
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
     event.stopPropagation();
     const flash = document.getElementById("settings-company-flash");
     const btn = document.getElementById("mm-company-save");
     const data = Object.fromEntries(new FormData(form).entries());
+    const phones = syncCompanyPhonesFromForm(form);
     if (btn) btn.disabled = true;
     try {
       const saved = await saveProfile({
         ...getProfile(),
         company: String(data.company || "").trim(),
+        companyActivities: readCompanyActivitiesFromForm(form),
         companyTaxId: String(data.companyTaxId || "").trim(),
         companyStreet: String(data.companyStreet || "").trim(),
         companyPostalCode: String(data.companyPostalCode || "")
@@ -1166,8 +2031,9 @@ function bindCompanyFormEarly() {
           .slice(0, 4),
         companyCity: String(data.companyCity || "").trim(),
         companyCountry: String(data.companyCountry || "Magyarország").trim() || "Magyarország",
-        companyPhone: String(data.companyPhone || "").trim(),
-        companyPhone2: String(data.companyPhone2 || "").trim(),
+        companyPhone: phones.companyPhone,
+        companyPhone2: phones.companyPhone2,
+        companyPhone3: phones.companyPhone3,
         companyEmail: String(data.companyEmail || "").trim(),
         companyEmail2: String(data.companyEmail2 || "").trim(),
         salespersonName: String(data.salespersonName || "").trim(),
@@ -1176,6 +2042,8 @@ function bindCompanyFormEarly() {
       applyProfileToForm(saved);
       const user = getAuthUser();
       if (user) fillProfileForm(user, saved);
+      const hello = document.querySelector("[data-mm-hello]");
+      if (hello) hello.textContent = getDisplayName() || user?.email?.split("@")[0] || "—";
       window.dispatchEvent(new CustomEvent("bymy-auth-changed"));
       showFlash(flash, "Cégadatok mentve.", true);
     } catch (error) {

@@ -583,12 +583,21 @@
 
   function slimDealerPage(car) {
     const page = car || {};
+    const mapIn = page.map && typeof page.map === "object" ? page.map : {};
+    const map = {};
+    for (const [key, val] of Object.entries(mapIn)) {
+      if (!/állapot|kivitel|üzemanyag|sebességváltó|hajtás|szín|klíma|okmány|henger|teljesítmény|ajtó|km|évjárat|gyártási/i.test(key)) {
+        continue;
+      }
+      const text = String(val ?? "").trim();
+      if (text && text.length < 200) map[key] = text;
+    }
     return {
       url: page.url || page.adminUrl || page.clickUrl || page.publicUrl || "",
       listingId: page.listingId || "",
       visibleImage: page.visibleImage || page.imageUrl || "",
       visibleTitle: page.visibleTitle || page.title || "",
-      visibleDescription: page.visibleDescription || page.description || page.leiras || "",
+      visibleDescription: String(page.visibleDescription || page.description || page.leiras || "").slice(0, 2000),
       clickUrl: page.clickUrl || "",
       adminUrl: page.adminUrl || "",
       publicUrl: page.publicUrl || "",
@@ -597,8 +606,8 @@
       modell: page.modell || "",
       tipus: page.tipus || "",
       km: page.km || "",
-      map: page.map && typeof page.map === "object" ? page.map : {},
-      felszereltseg: Array.isArray(page.felszereltseg) ? page.felszereltseg : [],
+      map,
+      felszereltseg: Array.isArray(page.felszereltseg) ? page.felszereltseg.slice(0, 80) : [],
     };
   }
   const PROGRESS_KEY = "bymy-ha-dealer-progress";
@@ -685,10 +694,10 @@
       data = raw ? JSON.parse(raw) : {};
     } catch {
     }
-    if (!res.ok) {
-      throw new Error(data.error || `HTTP ${res.status} (${doneCount}/${total})`);
-    }
-    return data.result || {};
+      if (!res.ok && !data.result) {
+        throw new Error(data.error || `HTTP ${res.status} (${doneCount}/${total})`);
+      }
+      return data.result || {};
   }
 
   /** Ha a fetch CSP/CORS miatt elhasal: rejtett iframe + form POST (popup/COOP nélkül). */
@@ -931,20 +940,20 @@
         ok += savedN;
         skipped += skippedN;
         fail += errN;
-        if (savedN === 0 && skippedN === 0 && errN === 0) {
-          fail += rest.length;
-          if (!errors.length) errors.push("mentés 0");
-        } else {
-          saveDealerProgress(null);
-          const parts = [];
-          if (ok) parts.push(`${ok} mentve`);
-          if (skipped) parts.push(`${skipped} kihagyva`);
-          if (fail) parts.push(`${fail} hiba`);
-          hideProgress(parts.length ? `Kész: ${parts.join(", ")}` : `Kész: semmi nem mentődött${errors[0] ? ` — ${errors[0]}` : ""}`);
-          return;
-        }
+        saveDealerProgress(null);
+        const parts = [];
+        if (ok) parts.push(`${ok} mentve`);
+        if (skipped) parts.push(`${skipped} kihagyva`);
+        if (fail) parts.push(`${fail} hiba`);
+        hideProgress(
+          parts.length
+            ? `Kész: ${parts.join(", ")}${errors[0] && fail ? ` — ${errors[0]}` : ""}`
+            : `Mentés sikertelen${errors[0] ? ` — ${errors[0]}` : ""}`
+        );
+        return;
       } catch (error) {
-        errors.push(error.message || String(error));
+        hideProgress(`Mentés sikertelen — ${error.message || error}`);
+        return;
       }
     }
     for (let offset = startOffset; offset < prepared.length; offset += SAVE_CHUNK) {

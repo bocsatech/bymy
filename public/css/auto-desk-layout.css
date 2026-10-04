@@ -390,10 +390,6 @@
     flex: 0 0 auto;
   }
 
-  body.home-page[data-site-page="auto"] .auto-desk-mode {
-    grid-template-columns: 1fr 1fr 1fr;
-  }
-
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-mode__btn {
     -webkit-appearance: none;
     appearance: none;

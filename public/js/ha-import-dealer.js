@@ -682,25 +682,30 @@
 
   function extractCarsFromPage() {
     const byId = new Map();
-    const merge = (car) => {
-      const id = String(car?.listingId || "").replace(/\D/g, "");
-      if (id.length < 5) return;
-      const prev = byId.get(id);
-      if (!prev) {
-        byId.set(id, { ...car, listingId: id });
-        return;
-      }
+    const add = (rawId, extra = {}) => {
+      const id = String(rawId || "").replace(/\D/g, "");
+      if (id.length < 7 || id.length > 10) return;
+      const prev = byId.get(id) || {};
       byId.set(id, {
-        ...prev,
-        ...car,
         listingId: id,
-        visibleImage: car.visibleImage || prev.visibleImage || "",
-        visibleTitle: car.visibleTitle || prev.visibleTitle || "",
+        url: extra.url || prev.url || `https://admin.hasznaltauto.hu/hirdetesfeladas/szemelyauto?id=${id}`,
+        adminUrl: extra.adminUrl || prev.adminUrl || `https://admin.hasznaltauto.hu/hirdetesfeladas/szemelyauto?id=${id}`,
+        visibleImage: extra.visibleImage || prev.visibleImage || "",
+        visibleTitle: extra.visibleTitle || prev.visibleTitle || "",
+        photoOnly: true,
       });
     };
     for (const doc of docsInScope()) {
-      for (const car of extractCarsFromCdnDom(doc)) merge(car);
-      for (const car of extractCarsFromListingRows(doc)) merge(car);
+      for (const car of extractCarsFromCdnDom(doc)) add(car.listingId, car);
+      for (const car of extractCarsFromListingRows(doc)) add(car.listingId, car);
+      const html = String(doc.documentElement?.outerHTML || "");
+      const text = String(doc.body?.innerText || doc.body?.textContent || "");
+      for (const m of text.matchAll(/\((\d{7,10})\)/g)) add(m[1]);
+      for (const m of html.matchAll(/[?&]id=(\d{7,10})\b/g)) add(m[1]);
+      for (const m of html.matchAll(/\/gyorsnezet\/[^/"']+\/(\d{7,10})/g)) add(m[1]);
+      for (const m of html.matchAll(/hasznaltautocdn\.com\/(?:\d{2,4}x\d{2,4}\/)?(\d{7,10})\//gi)) {
+        add(m[1]);
+      }
     }
     return [...byId.values()].slice(0, MAX);
   }

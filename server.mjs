@@ -856,25 +856,27 @@ async function handleImportExtracted(req, res) {
       (body.page && typeof body.page === "object" ? 1 : 0) +
       urlCount
   );
-  const quota = consumeImportSaveQuota(user.id, Math.max(1, pageCount));
-  if (!quota.ok) {
-    sendJson(
-      res,
-      429,
-      {
-        error: `Import limit (${importRateLimitPerHour()} hirdetés / óra / fiók). Próbáld később.`,
-        code: "IMPORT_RATE_LIMIT",
-      },
-      { ...cors, "Retry-After": String(quota.retryAfterSec || 300) }
-    );
-    return;
+  const photoOnly =
+    body.photoOnly === true ||
+    body.mode === "dealer" ||
+    (Array.isArray(body.pages) && body.pages.length > 0 && body.pages.every((p) => p?.photoOnly));
+  if (!photoOnly) {
+    const quota = consumeImportSaveQuota(user.id, Math.max(1, pageCount));
+    if (!quota.ok) {
+      sendJson(
+        res,
+        429,
+        {
+          error: `Import limit (${importRateLimitPerHour()} hirdetés / óra / fiók). Próbáld később.`,
+          code: "IMPORT_RATE_LIMIT",
+        },
+        { ...cors, "Retry-After": String(quota.retryAfterSec || 300) }
+      );
+      return;
+    }
   }
 
   try {
-    const photoOnly =
-      body.photoOnly === true ||
-      body.mode === "dealer" ||
-      (Array.isArray(body.pages) && body.pages.length > 0 && body.pages.every((p) => p?.photoOnly));
 
     if (photoOnly) {
       const { saveDealerPhotoImportPages } = await import("./lib/ha-dealer-photo-import.mjs");
@@ -891,6 +893,9 @@ async function handleImportExtracted(req, res) {
         userId: user.id,
         limit: body.limit ?? MAX_IMPORT_BATCH,
       });
+      console.log(
+        `[import] dealer user=${user.id} pages=${pages.length} saved=${result.savedCount} skipped=${result.skippedCount} err=${result.errorCount}`
+      );
       sendJson(res, 200, { ok: true, result }, cors);
       return;
     }

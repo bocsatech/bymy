@@ -1,28 +1,72 @@
 /**
  * Vercel Edge: csak regisztrált felhasználók (HTML + API cookie ellenőrzés).
- * Nyilvános útvonalak: lib/site-gate.mjs (ugyanaz, mint S1 server.mjs).
+ * Teljes session validáció: api/index.mjs → server.mjs site-gate.
  * Kikapcsolás: SITE_PUBLIC=1
  */
 
-import {
-  isMembersOnlySite,
-  isPublicHtmlPath,
-  isPublicApiPath,
-  isStaticAssetPath,
-} from "./lib/site-gate.mjs";
+const PUBLIC_HTML = new Set([
+  "/belepes.html",
+  "/regisztracio.html",
+  "/aktivalas.html",
+  "/jelszo-elfelejtve.html",
+  "/jelszo-visszaallitas.html",
+  "/partner-profil.html",
+  "/Bocsatech.html",
+]);
 
-function isSocialShareCrawler(request) {
-  const ua = request.headers.get("user-agent") || "";
-  return /facebookexternalhit|Facebot|FacebookBot|Twitterbot|LinkedInBot|Slackbot|WhatsApp|TelegramBot|Discordbot|Pinterest|vkShare|Googlebot/i.test(
-    ua
-  );
+const STATIC_EXT = new Set([
+  ".css",
+  ".js",
+  ".mjs",
+  ".map",
+  ".png",
+  ".jpg",
+  ".jpeg",
+  ".webp",
+  ".svg",
+  ".ico",
+  ".woff",
+  ".woff2",
+  ".txt",
+  ".json",
+]);
+
+function membersOnly() {
+  const pub = String(process.env.SITE_PUBLIC ?? "").trim().toLowerCase();
+  return !(pub === "1" || pub === "true" || pub === "yes");
+}
+
+function extname(pathname) {
+  const i = pathname.lastIndexOf(".");
+  return i >= 0 ? pathname.slice(i).toLowerCase() : "";
+}
+
+function isStaticAsset(pathname) {
+  if (pathname === "/favicon.ico" || pathname === "/robots.txt" || pathname === "/maintenance.html") {
+    return true;
+  }
+  return STATIC_EXT.has(extname(pathname));
+}
+
+function isPublicApi(pathname, method) {
+  if (pathname.startsWith("/api/auth/")) return true;
+  if (pathname === "/api/health" && method === "GET") return true;
+  if (pathname === "/api/partner-profiles" && method === "GET") return true;
+  if (pathname.startsWith("/api/partner-profiles/") && pathname !== "/api/partner-profiles/mine" && method === "GET") return true;
+  // Bocsatech admin saját auth — ne a members gate zárja ki
+  if (pathname.startsWith("/api/level1/")) return true;
+  // Oldalsáv tartalom: GET nyilvános; PUT a szerveren level1 admint ellenőriz
+  if (pathname === "/api/site-blocks") return true;
+  if (pathname === "/api/import/extracted" && (method === "POST" || method === "OPTIONS")) return true;
+  if (pathname === "/api/import/ha-bridge" && method === "POST") return true;
+  return false;
 }
 
 function isPublic(pathname, method) {
-  if (pathname.startsWith("/cdn-cgi/")) return true;
-  if (isPublicHtmlPath(pathname)) return true;
-  if (isStaticAssetPath(pathname)) return true;
-  if (pathname.startsWith("/api/") && isPublicApiPath(pathname, method)) return true;
+  if (PUBLIC_HTML.has(pathname)) return true;
+  if (/^\/partner\/[a-z0-9-]+\/?$/.test(pathname)) return true;
+  if (isStaticAsset(pathname)) return true;
+  if (pathname.startsWith("/api/") && isPublicApi(pathname, method)) return true;
   return false;
 }
 
@@ -32,18 +76,13 @@ function hasSessionCookie(request) {
 }
 
 export default function middleware(request) {
-  if (!isMembersOnlySite()) return;
+  if (!membersOnly()) return;
 
   const url = new URL(request.url);
   const pathname = url.pathname;
   const method = request.method || "GET";
 
   if (isPublic(pathname, method)) return;
-
-  // Facebook / WhatsApp OG előnézet — csak a hirdetés HTML
-  if (method === "GET" && pathname === "/hirdetes.html" && isSocialShareCrawler(request)) {
-    return;
-  }
 
   if (hasSessionCookie(request)) return;
 
@@ -59,5 +98,5 @@ export default function middleware(request) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|cdn-cgi/).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
 };

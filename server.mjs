@@ -951,6 +951,11 @@ async function handleImportHaBridge(req, res) {
 })();
 </script>`;
     // Ne COOP / X-Frame-Options DENY — iframe a HA oldalról; különben bridge timeout
+    try {
+      res.removeHeader("X-Frame-Options");
+      res.removeHeader("Cross-Origin-Opener-Policy");
+    } catch {
+    }
     res.writeHead(200, {
       "Content-Type": "text/html; charset=utf-8",
       "Cache-Control": "no-store",

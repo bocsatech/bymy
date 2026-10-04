@@ -124,6 +124,7 @@ import {
   ensureSmtpExample,
   isSmtpConfigured,
   mailTransportStatus,
+  sendMail,
   sendMailSmtp,
   smtpConfigPath,
 } from "./lib/mail.mjs";

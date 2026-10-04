@@ -75,7 +75,6 @@ async function loadPostingForm() {
 }
 
 const status = document.querySelector("[data-ertek-status]");
-if (status) status.textContent = "Menü betöltése…";
 
 try {
   document.body.classList.add("ad-form-desk-active");
@@ -101,7 +100,9 @@ try {
     placeResult(form);
   });
   await initErtekbecsloPanel(document);
-  if (status) status.textContent = "";
 } catch (err) {
-  if (status) status.textContent = err?.message || "Menü nem elérhető.";
+  if (status) {
+    status.hidden = false;
+    status.textContent = err?.message || "Menü nem elérhető.";
+  }
 }

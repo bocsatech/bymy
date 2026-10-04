@@ -302,7 +302,7 @@ html[data-mm-account-kind="company"] body.site-app .mm-nav > [data-mm-dealer-nav
 }
 
 .ertek-page-main {
-  max-width: 560px;
+  max-width: 880px;
   margin: 0 auto;
   padding: 1.5rem 1rem 4rem;
   box-sizing: border-box;

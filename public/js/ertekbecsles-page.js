@@ -1,3 +1,3 @@
-import { initErtekbecsloPanel } from "./ertekbecslo-app.js?v=ertekNav1";
+import { initErtekbecsloPanel } from "./ertekbecslo-app.js?v=ertekAd1";
 
 initErtekbecsloPanel(document);

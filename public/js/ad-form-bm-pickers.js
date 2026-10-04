@@ -3190,6 +3190,11 @@ export async function mountAdFormBmPickers(form, catalog = null) {
 
   await mountTireSizeSwitchPickers(form);
 
+  const tipus = form.querySelector("#tipus") || document.getElementById("tipus");
+  if (form.hasAttribute("data-ertek-form") && tipus?.tagName === "SELECT") {
+    await mountAdSelectDrum(tipus, { title: "Típus", emptyLabel: PLACEHOLDER, mode: "single" });
+  }
+
   form.dataset.adBmPickers = "1";
   window.dispatchEvent(new CustomEvent("ad-form-bm-ready", { detail: { form } }));
 }

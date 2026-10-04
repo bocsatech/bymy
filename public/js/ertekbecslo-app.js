@@ -1,14 +1,9 @@
-/** Kereskedői értékbecslő — ugyanaz a dobkerék, mint az autókeresőn (mountAutoSearchDrums). */
+/** Értékbecslő — ugyanaz a feladás asztali menürendszer (mountAdFormBmPickers). */
 
-import { fetchModelTypes } from "./vehicle-catalog-client.js?v=ertek4";
+import { fetchModelTypes } from "./vehicle-catalog-client.js?v=ertekAd1";
 import { parseKmDigits } from "./km-input.js?v=30e4feeab0";
-import { flattenUzemanyagOptions } from "./equipment-data.js?v=ertek4";
-import {
-  mountAutoSearchDrums,
-  readAutoDrumFilterValues,
-} from "./auto-search-drums.js?v=ertek7";
-import { fillWheel, setWheelValue, readWheel } from "./ingatlan-wheels.js?v=6952ba469c";
-import { syncDrumWheelDisplay } from "./immo-drum-picker.js?v=c4c7ac29a2";
+import { flattenUzemanyagOptions } from "./equipment-data.js?v=ertekAd1";
+import { mountAdFormBmPickers, refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=ertekAd1";
 
 const DEBOUNCE_MS = 350;
 
@@ -24,43 +19,6 @@ function escapeHtml(value) {
     .replace(/"/g, "&quot;");
 }
 
-function yearList(fromApi) {
-  if (Array.isArray(fromApi) && fromApi.length) {
-    return fromApi.map((y) => String(y)).sort((a, b) => Number(b) - Number(a));
-  }
-  const now = new Date().getFullYear();
-  const out = [];
-  for (let y = now; y >= 1985; y--) out.push(String(y));
-  return out;
-}
-
-function fillSelectYears(select, years) {
-  if (!select) return;
-  const prev = select.value;
-  select.innerHTML = "";
-  const empty = document.createElement("option");
-  empty.value = "";
-  empty.textContent = "Évjárat";
-  select.appendChild(empty);
-  for (const y of years) {
-    const o = document.createElement("option");
-    o.value = y;
-    o.textContent = y;
-    select.appendChild(o);
-  }
-  if (prev && [...select.options].some((o) => o.value === prev)) select.value = prev;
-}
-
-function fillSelectFuel(select) {
-  if (!select || select.options.length > 1) return;
-  for (const v of flattenUzemanyagOptions()) {
-    const o = document.createElement("option");
-    o.value = v;
-    o.textContent = v;
-    select.appendChild(o);
-  }
-}
-
 function ensureLink(href, marker) {
   if (document.querySelector(`link[${marker}]`)) return;
   const link = document.createElement("link");
@@ -70,10 +28,18 @@ function ensureLink(href, marker) {
   document.head.appendChild(link);
 }
 
-function ensureDrumCss() {
-  ensureLink("/css/ingatlan-search.css?v=ertekDrum7", "data-ertek-immo-css");
-  ensureLink("/css/auto-hero.css?v=ertekDrum7", "data-ertek-hero-css");
-  ensureLink("/css/auto-desk-layout.css?v=ertekDrum7", "data-ertek-desk-css");
+function ensureAdFormCss() {
+  ensureLink("/css/ingatlan-search.css?v=ertekAd1", "data-ertek-immo-css");
+  ensureLink("/css/ad-form-desk.css?v=ertekAd1", "data-ertek-desk-css");
+  ensureLink("/css/ad-form-bm-pickers.css?v=ertekAd1", "data-ertek-bm-css");
+  ensureLink("/css/automax.css?v=ertekAd1", "data-ertek-automax-css");
+}
+
+function fieldValue(form, id) {
+  const node = form.querySelector(`#${id}`) || document.getElementById(id);
+  if (!node) return "";
+  const hidden = node._adBmHidden;
+  return String(hidden?.value ?? node.value ?? "").trim();
 }
 
 function formatResult(data) {
@@ -94,58 +60,66 @@ function formatResult(data) {
     </div>`;
 }
 
-function readErtekFilters(form) {
-  const drums = readAutoDrumFilterValues(form) || {};
-  const brandList = drums.gyartmanyok || (drums.gyartmany ? [drums.gyartmany] : []);
-  const modelList = drums.modellek || (drums.modell ? [drums.modell] : []);
-  const fuelList = drums.uzemanyagok || (drums.uzemanyag ? [drums.uzemanyag] : []);
-  const tipusWheel = form.querySelector('[data-wheel="tipus"]');
-  const yearWheel = form.querySelector('[data-wheel="gyartasi_ev"]');
-  return {
-    gyartmany: brandList[0] || String(readWheel(form.querySelector('[data-wheel="gyartmany"]')) || "").trim(),
-    modell: modelList[0] || String(readWheel(form.querySelector('[data-wheel="modell"]')) || "").trim(),
-    tipus: String(readWheel(tipusWheel) || drums.tipus || "").trim(),
-    uzemanyag: fuelList[0] || "",
-    gyartasi_ev: String(readWheel(yearWheel) || drums.gyartasi_ev || "").trim(),
-  };
+function replaceSelectOptions(select, values, emptyLabel) {
+  if (!select || select.tagName !== "SELECT") return;
+  const prev = String(select.value || "").trim();
+  select.innerHTML = "";
+  const empty = document.createElement("option");
+  empty.value = "";
+  empty.textContent = emptyLabel;
+  select.appendChild(empty);
+  for (const raw of values || []) {
+    const value = typeof raw === "string" ? raw : raw?.value;
+    if (!value) continue;
+    const o = document.createElement("option");
+    o.value = value;
+    o.textContent = typeof raw === "string" ? raw : raw.label || value;
+    select.appendChild(o);
+  }
+  if (prev && [...select.options].some((o) => o.value === prev)) select.value = prev;
 }
 
-function refillWheel(form, wheelName, values, emptyLabel) {
-  const wheel = form.querySelector(`[data-wheel="${wheelName}"]`);
-  if (!wheel) return;
-  const opts = (values || []).map((v) =>
-    typeof v === "string" ? { value: v, label: v } : { value: v.value, label: v.label || v.value }
-  );
-  const cur = String(readWheel(wheel) || "");
-  fillWheel(wheel, opts, { emptyLabel });
-  if (cur && opts.some((o) => o.value === cur)) setWheelValue(wheel, cur);
-  else setWheelValue(wheel, "");
-  syncDrumWheelDisplay(wheel);
-  const wrap = wheel.closest(".immo-wheel-wrap");
-  wrap?._desktopCellDrum?.refresh?.("");
+function snapshotForm(form) {
+  return {
+    gyartmany: fieldValue(form, "gyartmany"),
+    modell: fieldValue(form, "modell"),
+    tipus: fieldValue(form, "tipus"),
+    uzemanyag: fieldValue(form, "uzemanyag"),
+    gyartasi_ev: fieldValue(form, "gyartasi_ev"),
+    gyartasi_honap: fieldValue(form, "gyartasi_honap"),
+    km: el("#km", form)?.value || el("[data-ertek-km]", form)?.value || "",
+  };
 }
 
 export async function initErtekbecsloPanel(root = document) {
   const panel = el('[data-mm-panel="ertekbecslo"]', root) || el("[data-ertekbecslo]", root);
   if (!panel || panel.dataset.ertekReady === "1") return;
   panel.dataset.ertekReady = "1";
-  ensureDrumCss();
+  ensureAdFormCss();
 
   const form = el("[data-ertek-form]", panel);
-  const kmInput = el("[data-ertek-km]", panel);
+  const kmInput = el("#km", panel) || el("[data-ertek-km]", panel);
   const out = el("[data-ertek-out]", panel);
   const status = el("[data-ertek-status]", panel);
   if (!form || !kmInput || !out) return;
 
-  fillSelectFuel(form.querySelector('[data-filter-key="uzemanyag"]'));
-  fillSelectYears(form.querySelector("[data-ertek-year]"), yearList());
+  if (document.body?.getAttribute("data-site-page") === "ertekbecsles") {
+    document.body.classList.add("ad-form-desk-active");
+  }
+
+  const fuel = form.querySelector("#uzemanyag");
+  if (fuel && fuel.options.length <= 1) {
+    for (const v of flattenUzemanyagOptions()) {
+      const o = document.createElement("option");
+      o.value = v;
+      o.textContent = v;
+      fuel.appendChild(o);
+    }
+  }
 
   if (status) status.textContent = "Menü betöltése…";
   try {
-    const ok = await mountAutoSearchDrums(form);
-    if (!ok && form.dataset.drumsMounted !== "1") {
-      throw new Error("A keresőmenü nem indult el.");
-    }
+    await mountAdFormBmPickers(form);
     if (status) status.textContent = "";
   } catch (err) {
     if (status) status.textContent = err?.message || "Menü nem elérhető.";
@@ -153,43 +127,66 @@ export async function initErtekbecsloPanel(root = document) {
   }
 
   let timer = null;
+  let refreshingTypes = false;
 
-  async function refreshTypesAndYears() {
-    const { gyartmany, modell } = readErtekFilters(form);
+  async function refreshTypes() {
+    const gyartmany = fieldValue(form, "gyartmany");
+    const modell = fieldValue(form, "modell");
+    const tipus = form.querySelector("#tipus");
+    if (!tipus) return;
     if (!gyartmany || !modell) {
-      refillWheel(form, "tipus", [], "Típus (opcionális)");
-      refillWheel(form, "gyartasi_ev", yearList(), "Évjárat");
+      replaceSelectOptions(tipus, [], "Válasszon");
       return;
     }
     try {
       const data = await fetchModelTypes(gyartmany, modell, { kind: "szemelyauto" });
-      refillWheel(form, "tipus", data?.tipusok || [], "Típus (opcionális)");
-      refillWheel(form, "gyartasi_ev", yearList(data?.evek), "Évjárat");
+      replaceSelectOptions(tipus, data?.tipusok || [], "Válasszon");
     } catch {
-      refillWheel(form, "tipus", [], "Típus (opcionális)");
-      refillWheel(form, "gyartasi_ev", yearList(), "Évjárat");
+      replaceSelectOptions(tipus, [], "Válasszon");
+    }
+    if (refreshingTypes) return;
+    refreshingTypes = true;
+    try {
+      const snap = snapshotForm(form);
+      form._bymyLastFormData = snap;
+      await refreshAdFormBmPickers(form);
+      if (snap.km) kmInput.value = snap.km;
+      if (snap.tipus) {
+        const tipus = form.querySelector("#tipus");
+        if (tipus) {
+          tipus.value = snap.tipus;
+          tipus._adBmFillWheel?.(snap.tipus);
+          tipus._adBmRefreshSummary?.();
+        }
+      }
+    } finally {
+      refreshingTypes = false;
     }
   }
 
   async function estimate() {
-    const f = readErtekFilters(form);
+    const gyartmany = fieldValue(form, "gyartmany");
+    const modell = fieldValue(form, "modell");
+    const tipus = fieldValue(form, "tipus");
+    const uzemanyag = fieldValue(form, "uzemanyag");
+    const gyartasi_ev = fieldValue(form, "gyartasi_ev");
     const km = parseKmDigits(kmInput.value || "") || "";
-    if (!f.gyartmany || !f.modell || !f.gyartasi_ev || !km) {
+    if (!gyartmany || !modell || !gyartasi_ev || !km) {
       out.innerHTML =
         '<p class="ertek-msg">Kötelező: gyártmány, modell, évjárat, km.</p>';
       return;
     }
     out.innerHTML = '<p class="ertek-msg">Számolás…</p>';
     const q = new URLSearchParams({
-      gyartmany: f.gyartmany,
-      modell: f.modell,
-      gyartasi_ev: f.gyartasi_ev,
+      gyartmany,
+      modell,
+      gyartasi_ev,
       km: String(km),
       require: "1",
       source: "market",
     });
-    if (f.tipus) q.set("tipus", f.tipus);
-    if (f.uzemanyag) q.set("uzemanyag", f.uzemanyag);
+    if (tipus) q.set("tipus", tipus);
+    if (uzemanyag) q.set("uzemanyag", uzemanyag);
     try {
       const res = await fetch(`/api/valuation/estimate?${q}`, { credentials: "same-origin" });
       const data = await res.json().catch(() => ({}));
@@ -206,15 +203,22 @@ export async function initErtekbecsloPanel(root = document) {
     }, DEBOUNCE_MS);
   }
 
-  form.addEventListener("immo-wheel-change", (event) => {
-    const wheel = event.target?.closest?.("[data-wheel]") || event.target;
-    const key = wheel?.getAttribute?.("data-wheel") || wheel?.getAttribute?.("data-filter-key") || "";
-    if (key === "gyartmany" || key === "modell") {
-      void refreshTypesAndYears().then(schedule);
+  form.addEventListener("change", (event) => {
+    const id = event.target?.id || event.target?.getAttribute?.("name") || "";
+    if (id === "gyartmany" || id === "modell") {
+      void refreshTypes().then(schedule);
       return;
     }
     schedule();
   });
-  form.addEventListener("change", schedule);
+  form.addEventListener("immo-wheel-change", (event) => {
+    const wheel = event.target?.closest?.("[data-wheel]") || event.target;
+    const key = wheel?.getAttribute?.("data-wheel") || "";
+    if (key === "gyartmany" || key === "modell") {
+      void refreshTypes().then(schedule);
+      return;
+    }
+    schedule();
+  });
   kmInput.addEventListener("input", schedule);
 }

@@ -48,12 +48,16 @@
     <title>Értékbecslés — Bymy</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/css/hub.css?v=e6bf27b3c3" />
     <link rel="stylesheet" href="/css/site-app.css?v=c0d2bfab87" />
+    <link rel="stylesheet" href="/css/automax.css?v=ertekAd1" />
+    <link rel="stylesheet" href="/css/ingatlan-search.css?v=ertekAd1" />
+    <link rel="stylesheet" href="/css/ad-form-desk.css?v=ertekAd1" />
+    <link rel="stylesheet" href="/css/ad-form-bm-pickers.css?v=ertekAd1" />
     <link rel="stylesheet" href="/css/bymy-logo-size.css?v=f14985a2ca" />
     <link rel="stylesheet" href="/css/site-desk-header.css?v=navType1" />
-    <link rel="stylesheet" href="/css/ertekbecslo-qr.css?v=ertekNav1" />
+    <link rel="stylesheet" href="/css/ertekbecslo-qr.css?v=ertekAd1" />
   </head>
   <body class="hub-page site-page site-app ertek-page" data-site-page="ertekbecsles">
     <script src="/js/mw-app-shell.js?v=navType1"></script>
@@ -104,47 +108,66 @@
         <h1 class="ertek-page-title">Értékbecslés</h1>
         <p class="ertek-page-lead">Személyautó piaci sáv a minta alapján. Kötelező: gyártmány, modell, évjárat, km. Az üzemanyag és a típus finomítja az ajánlatot.</p>
         <p class="ertek-msg" data-ertek-status role="status"></p>
-        <div class="ertek-search-panel">
-          <form class="ertek-form home-qs-form immo-search-form" data-ertek-form data-ertek-drums data-force-drums onsubmit="return false">
-            <div class="home-qs-layout-main" data-ertek-layout>
-            <div class="home-qs-field" data-qs-field="gyartmany">
-              <span class="home-qs-label">Gyártmány</span>
-              <select class="home-qs-control" data-filter-key="gyartmany" aria-label="Gyártmány"></select>
+        <form id="ad-form" class="ertek-form" data-ertek-form onsubmit="return false">
+          <input type="hidden" name="hirdetes_vertical" value="auto" />
+          <input type="hidden" name="hirdetes_alkategoria" value="szemelyauto" />
+          <div class="form-grid">
+            <div class="field-row full">
+              <div class="labeled-field">
+                <label for="gyartmany">Gyártmány: <span class="req">*</span></label>
+                <select id="gyartmany" name="gyartmany" required>
+                  <option value="">Válasszon</option>
+                </select>
+              </div>
+              <div class="labeled-field">
+                <label for="modell">Modell: <span class="req">*</span></label>
+                <select id="modell" name="modell" required>
+                  <option value="">Először válassz gyártmányt</option>
+                </select>
+              </div>
             </div>
-            <div class="home-qs-field" data-qs-field="modell">
-              <span class="home-qs-label">Modell</span>
-              <select class="home-qs-control" data-filter-key="modell" aria-label="Modell"></select>
+            <div class="field-row full field-row--pair">
+              <div class="labeled-field">
+                <label for="tipus">Típus:</label>
+                <select id="tipus" name="tipus">
+                  <option value="">Válasszon</option>
+                </select>
+              </div>
+              <div class="labeled-field labeled-field--fuel">
+                <label for="uzemanyag">Üzemanyag:</label>
+                <select id="uzemanyag" name="uzemanyag">
+                  <option value="">Válasszon</option>
+                </select>
+              </div>
             </div>
-            <div class="home-qs-field" data-qs-field="tipus">
-              <span class="home-qs-label">Típus</span>
-              <select class="home-qs-control" data-filter-key="tipus" aria-label="Típus">
-                <option value="">Típus (opcionális)</option>
-              </select>
+            <div class="field-row full field-row--year-km">
+              <div class="labeled-field">
+                <label for="gyartasi_ev">Gyártási év: <span class="req">*</span></label>
+                <div class="inline-2">
+                  <select id="gyartasi_ev" name="gyartasi_ev" required></select>
+                  <select id="gyartasi_honap" name="gyartasi_honap">
+                    <option value="">hó</option>
+                    <option>1</option><option>2</option><option>3</option><option>4</option>
+                    <option>5</option><option>6</option><option>7</option><option>8</option>
+                    <option>9</option><option>10</option><option>11</option><option>12</option>
+                  </select>
+                </div>
+              </div>
+              <div class="labeled-field">
+                <label for="km">Km. óra állás: <span class="req">*</span></label>
+                <div class="suffix-field">
+                  <input id="km" name="km" type="number" min="0" data-ertek-km required />
+                  <span>km</span>
+                </div>
+              </div>
             </div>
-            <div class="home-qs-field" data-qs-field="uzemanyag">
-              <span class="home-qs-label">Üzemanyag</span>
-              <select class="home-qs-control" data-filter-key="uzemanyag" aria-label="Üzemanyag">
-                <option value="">Mindegy</option>
-              </select>
-            </div>
-            <div class="home-qs-field" data-qs-field="gyartasi_ev">
-              <span class="home-qs-label">Évjárat</span>
-              <select class="home-qs-control" data-filter-key="gyartasi_ev" data-ertek-year aria-label="Évjárat">
-                <option value="">Évjárat</option>
-              </select>
-            </div>
-            <div class="home-qs-field ertek-km-field" data-qs-field="km">
-              <span class="home-qs-label">Km</span>
-              <input class="home-qs-control" type="text" inputmode="numeric" data-ertek-km placeholder="pl. 120000" autocomplete="off" />
-            </div>
-            </div>
-          </form>
-        </div>
+          </div>
+        </form>
         <div class="ertek-out" data-ertek-out></div>
       </section>
     </main>
 
-    <script type="module" src="/js/ertekbecsles-page.js?v=ertekNav1"></script>
+    <script type="module" src="/js/ertekbecsles-page.js?v=ertekAd1"></script>
     <script src="/js/nav-counts.js?v=08dce07726" type="module"></script>
     <script src="/js/theme.js?v=4fe8a2261f" type="module"></script>
     <script src="/js/site-auth.js?v=aad32d7596" type="module"></script>

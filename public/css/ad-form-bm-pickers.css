@@ -1,6 +1,6 @@
 
 
-body.site-app[data-site-page="hirdetesfeladas"] {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) {
   --ad-form-bm-panel: #fff;
   --ad-form-bm-line: #d4d4d4;
   --ad-form-bm-text: #111;
@@ -22,37 +22,37 @@ body.site-app[data-site-page="hirdetesfeladas"] {
   --ad-desk-cell-span: 100%;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="hidden"]):not(.ad-form-bm-search-trigger),
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form select:not(.ad-form-bm-native),
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .labeled-field > input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="hidden"]),
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .labeled-field > select:not(.ad-form-bm-native),
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .md-outlined > input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="hidden"]),
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .md-outlined > select:not(.ad-form-bm-native),
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .suffix-field,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .suffix-field > input,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .inline-2 select:not(.ad-form-bm-native),
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .inline-2 input:not(.ad-form-bm-search-trigger),
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field .auto-bm-trigger {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="hidden"]):not(.ad-form-bm-search-trigger),
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form select:not(.ad-form-bm-native),
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .labeled-field > input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="hidden"]),
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .labeled-field > select:not(.ad-form-bm-native),
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .md-outlined > input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="hidden"]),
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .md-outlined > select:not(.ad-form-bm-native),
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .suffix-field,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .suffix-field > input,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .inline-2 select:not(.ad-form-bm-native),
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .inline-2 input:not(.ad-form-bm-search-trigger),
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-bm-field .auto-bm-trigger {
   height: 44px !important;
   min-height: 44px !important;
   max-height: 44px !important;
   box-sizing: border-box;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="hidden"]):not(.ad-form-bm-search-trigger),
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form select:not(.ad-form-bm-native),
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .suffix-field > input {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="hidden"]):not(.ad-form-bm-search-trigger),
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form select:not(.ad-form-bm-native),
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .suffix-field > input {
   line-height: normal !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form textarea {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form textarea {
   height: auto !important;
   min-height: 96px !important;
   max-height: none !important;
   line-height: 1.4 !important;
 }
 
-html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] {
+html[data-theme="dark"] body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) {
   --ad-form-bm-panel: #1d1d1d;
   --ad-form-bm-line: #3a3a3a;
   --ad-form-bm-text: #fff;
@@ -60,22 +60,22 @@ html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] {
   --ad-form-bm-surface: #242424;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-layout-canvas,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-layout-on {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-layout-canvas,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-layout-on {
   overflow: visible;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-anchor {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-anchor {
   position: relative;
   overflow: visible !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-anchor.is-open {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-anchor.is-open {
   z-index: 200;
   overflow: visible !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-anchor .ad-form-bm-panel:not(.ad-form-bm-dropdown) {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-anchor .ad-form-bm-panel:not(.ad-form-bm-dropdown) {
   position: absolute;
   top: 0;
   left: 0;
@@ -94,7 +94,7 @@ body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-anchor .ad-form-bm-p
   box-sizing: border-box;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field--dropdown {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-field--dropdown {
   position: relative;
   z-index: 1;
   overflow: visible;
@@ -106,27 +106,27 @@ body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field--dropdown {
   box-sizing: border-box;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .labeled-field.ad-form-bm-anchor:not(.is-open),
-body.site-app[data-site-page="hirdetesfeladas"] .md-outlined.ad-form-bm-anchor:not(.is-open) {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .labeled-field.ad-form-bm-anchor:not(.is-open),
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .md-outlined.ad-form-bm-anchor:not(.is-open) {
   min-height: 0;
   flex: 0 0 auto;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field--dropdown.is-open {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-field--dropdown.is-open {
   z-index: 201;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field--flat {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-field--flat {
   position: relative;
   z-index: 1;
   overflow: visible;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field--flat.is-open {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-field--flat.is-open {
   z-index: 201;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-input-wrap {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-input-wrap {
   position: relative;
   display: flex;
   align-items: center;
@@ -134,7 +134,7 @@ body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-input-wrap {
   min-width: 0;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field--dropdown .ad-form-bm-search-trigger {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-field--dropdown .ad-form-bm-search-trigger {
   appearance: none !important;
   -webkit-appearance: none !important;
   width: 100% !important;
@@ -156,23 +156,23 @@ body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field--dropdown .ad-
   box-sizing: border-box;
 }
 
-html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field--dropdown .ad-form-bm-search-trigger {
+html[data-theme="dark"] body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-field--dropdown .ad-form-bm-search-trigger {
   background: #2a2a2a;
   border-color: #3a3a3a;
   color: #fff;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field--dropdown .ad-form-bm-search-trigger:focus {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-field--dropdown .ad-form-bm-search-trigger:focus {
   outline: none;
   border-color: var(--ad-form-bm-yellow);
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field--dropdown .ad-form-bm-search-trigger::-webkit-search-cancel-button {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-field--dropdown .ad-form-bm-search-trigger::-webkit-search-cancel-button {
   -webkit-appearance: none;
   appearance: none;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-input-wrap .auto-bm-trigger__chev {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-input-wrap .auto-bm-trigger__chev {
   position: absolute;
   right: 12px;
   top: 50%;
@@ -184,8 +184,8 @@ body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-input-wrap .auto-bm-
   cursor: pointer;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field--dropdown .ad-form-bm-dropdown,
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-dropdown.ad-form-bm-dropdown--portaled {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-field--dropdown .ad-form-bm-dropdown,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-dropdown.ad-form-bm-dropdown--portaled {
   min-height: 0 !important;
   max-height: calc(var(--ad-form-bm-row-h) * var(--ad-form-bm-dropdown-rows)) !important;
   margin: 0;
@@ -203,7 +203,7 @@ body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-dropdown.ad-form-bm-
   isolation: isolate;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field--dropdown .ad-form-bm-dropdown {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-field--dropdown .ad-form-bm-dropdown {
   position: absolute !important;
   top: calc(100% + 4px) !important;
   left: 0 !important;
@@ -212,10 +212,10 @@ body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field--dropdown .ad-
   z-index: 202;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-dropdown[hidden],
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-dropdown.is-closed,
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-panel[hidden],
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-panel.is-closed {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-dropdown[hidden],
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-dropdown.is-closed,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-panel[hidden],
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-panel.is-closed {
   display: none !important;
   height: 0 !important;
   min-height: 0 !important;
@@ -227,9 +227,9 @@ body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-panel.is-closed {
   margin: 0 !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field--dropdown > *:not(.ad-form-bm-input-wrap),
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field--flat > *:not(.auto-bm-trigger),
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field:not(.ad-form-bm-field--dropdown):not(.ad-form-bm-field--flat):not(.ad-form-bm-field--drum) > *:not(.auto-bm-trigger) {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-field--dropdown > *:not(.ad-form-bm-input-wrap),
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-field--flat > *:not(.auto-bm-trigger),
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-field:not(.ad-form-bm-field--dropdown):not(.ad-form-bm-field--flat):not(.ad-form-bm-field--drum) > *:not(.auto-bm-trigger) {
   position: absolute !important;
   width: 0 !important;
   height: 0 !important;
@@ -239,7 +239,7 @@ body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field:not(.ad-form-b
 }
 
 /* Dobkerék mező: csak a trigger wrap látszik, native host rejtve */
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field--drum {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-field--drum {
   display: block !important;
   width: 100% !important;
   max-width: 100% !important;
@@ -249,9 +249,9 @@ body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field--drum {
   flex: 1 1 auto !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field--drum > .ad-form-bm-native-host,
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field--drum > .immo-wheel[hidden],
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field--drum .immo-wheel--drum-source {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-field--drum > .ad-form-bm-native-host,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-field--drum > .immo-wheel[hidden],
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-field--drum .immo-wheel--drum-source {
   position: absolute !important;
   width: 0 !important;
   height: 0 !important;
@@ -262,8 +262,8 @@ body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field--drum .immo-wh
   margin: 0 !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field--drum > .ad-form-drum-wrap,
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field--drum > .immo-wheel-wrap {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-field--drum > .ad-form-drum-wrap,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-field--drum > .immo-wheel-wrap {
   display: flex !important;
   width: 100% !important;
   min-height: 2.75rem !important;
@@ -278,7 +278,7 @@ body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field--drum > .immo-
   align-items: stretch;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field--drum .immo-wheel-trigger {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-field--drum .immo-wheel-trigger {
   display: block !important;
   flex: 1 1 auto !important;
   width: 100% !important;
@@ -303,30 +303,30 @@ body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field--drum .immo-wh
   overflow: visible !important;
 }
 
-html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field--drum > .ad-form-drum-wrap,
-html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field--drum > .immo-wheel-wrap {
+html[data-theme="dark"] body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-field--drum > .ad-form-drum-wrap,
+html[data-theme="dark"] body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-field--drum > .immo-wheel-wrap {
   background: #1d1d1d !important;
   border-color: #e5e7eb !important;
 }
 
-html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field--drum .immo-wheel-trigger {
+html[data-theme="dark"] body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-field--drum .immo-wheel-trigger {
   color: #f9fafb !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-dropdown.ad-form-bm-dropdown--portaled {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-dropdown.ad-form-bm-dropdown--portaled {
   position: fixed !important;
   right: auto !important;
   bottom: auto !important;
   z-index: 10000 !important;
 }
 
-html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field--dropdown .ad-form-bm-dropdown,
-html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-dropdown.ad-form-bm-dropdown--portaled {
+html[data-theme="dark"] body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-field--dropdown .ad-form-bm-dropdown,
+html[data-theme="dark"] body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-dropdown.ad-form-bm-dropdown--portaled {
   background: #1d1d1d !important;
   background-color: #1d1d1d !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-dropdown .ad-form-bm-dropdown__body {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-dropdown .ad-form-bm-dropdown__body {
   flex: 1 1 auto;
   overflow: auto;
   overscroll-behavior: contain;
@@ -335,61 +335,61 @@ body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-dropdown .ad-form-bm
   background: #fff;
 }
 
-html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-dropdown .ad-form-bm-dropdown__body {
+html[data-theme="dark"] body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-dropdown .ad-form-bm-dropdown__body {
   background: #1d1d1d;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-dropdown .auto-bm-group {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-dropdown .auto-bm-group {
   border: 0;
   border-radius: 0;
   background: #fff;
 }
 
-html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-dropdown .auto-bm-group {
+html[data-theme="dark"] body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-dropdown .auto-bm-group {
   background: #1d1d1d;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-dropdown .auto-bm-row {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-dropdown .auto-bm-row {
   min-height: var(--ad-form-bm-row-h);
   background: #fff;
 }
 
-html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-dropdown .auto-bm-row {
+html[data-theme="dark"] body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-dropdown .auto-bm-row {
   background: #1d1d1d;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-dropdown .auto-bm-toggle {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-dropdown .auto-bm-toggle {
   min-height: var(--ad-form-bm-row-h);
   background: inherit;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-dropdown .ad-form-bm-dropdown__spacer {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-dropdown .ad-form-bm-dropdown__spacer {
   width: 100%;
   pointer-events: none;
   background: #fff;
 }
 
-html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-dropdown .ad-form-bm-dropdown__spacer {
+html[data-theme="dark"] body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-dropdown .ad-form-bm-dropdown__spacer {
   background: #1d1d1d;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .field-row,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-layout-canvas,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-layout-item,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .labeled-field.ad-form-bm-anchor {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .field-row,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-layout-canvas,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-layout-item,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .labeled-field.ad-form-bm-anchor {
   overflow: visible !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-anchor .ad-form-bm-panel[hidden],
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-anchor .ad-form-bm-panel.is-closed,
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-dropdown.ad-form-bm-dropdown--portaled[hidden],
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-dropdown.ad-form-bm-dropdown--portaled.is-closed {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-anchor .ad-form-bm-panel[hidden],
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-anchor .ad-form-bm-panel.is-closed,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-dropdown.ad-form-bm-dropdown--portaled[hidden],
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-dropdown.ad-form-bm-dropdown--portaled.is-closed {
   display: none !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-native-host,
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-native-host select,
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-native-host input {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-native-host,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-native-host select,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-native-host input {
   display: none !important;
   width: 0 !important;
   height: 0 !important;
@@ -406,11 +406,11 @@ body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-native-host input {
   -webkit-appearance: none !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .labeled-field > select.ad-form-bm-native,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form select.ad-form-bm-native,
-body.site-app[data-site-page="hirdetesfeladas"] .labeled-field > select.ad-form-bm-native,
-body.site-app[data-site-page="hirdetesfeladas"] .ad-layout-item > select.ad-form-bm-native,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-layout-item select.ad-form-bm-native {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .labeled-field > select.ad-form-bm-native,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form select.ad-form-bm-native,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .labeled-field > select.ad-form-bm-native,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-layout-item > select.ad-form-bm-native,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-layout-item select.ad-form-bm-native {
   display: none !important;
   position: absolute !important;
   top: 0 !important;
@@ -438,53 +438,53 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-layout-item select.
   -webkit-appearance: none !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field--dropdown,
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field,
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-input-wrap {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-field--dropdown,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-field,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-input-wrap {
   border-bottom: 0 !important;
   box-shadow: none;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .labeled-field.ad-form-bm-anchor > select,
-body.site-app[data-site-page="hirdetesfeladas"] .md-outlined.ad-form-bm-anchor > select,
-body.site-app[data-site-page="hirdetesfeladas"] .ad-layout-item.ad-form-bm-anchor > select {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .labeled-field.ad-form-bm-anchor > select,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .md-outlined.ad-form-bm-anchor > select,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-layout-item.ad-form-bm-anchor > select {
   display: none !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-input-wrap,
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-search-trigger {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-input-wrap,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-search-trigger {
   overflow: hidden;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-dropdown .ad-form-bm-dropdown__body,
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-dropdown .auto-bm-panel__body {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-dropdown .ad-form-bm-dropdown__body,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-dropdown .auto-bm-panel__body {
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-dropdown .ad-form-bm-dropdown__body::-webkit-scrollbar,
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-dropdown .auto-bm-panel__body::-webkit-scrollbar {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-dropdown .ad-form-bm-dropdown__body::-webkit-scrollbar,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-dropdown .auto-bm-panel__body::-webkit-scrollbar {
   display: none;
   width: 0;
   height: 0;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-dropdown.ad-form-bm-panel .auto-bm-row + .auto-bm-row {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-dropdown.ad-form-bm-panel .auto-bm-row + .auto-bm-row {
   border-top: 0;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-field {
   display: flex;
   flex-direction: column;
   gap: 0;
   box-sizing: border-box;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .inline-2 {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .inline-2 {
   overflow: visible !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field .auto-bm-trigger {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-field .auto-bm-trigger {
   appearance: none;
   display: flex;
   align-items: center;
@@ -505,45 +505,45 @@ body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field .auto-bm-trigg
   box-shadow: none;
 }
 
-html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field .auto-bm-trigger {
+html[data-theme="dark"] body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-field .auto-bm-trigger {
   background: #2a2a2a;
   border-color: #3a3a3a;
   color: #fff;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field .auto-bm-trigger:hover {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-field .auto-bm-trigger:hover {
   border-color: #98a2b3;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field.has-value .auto-bm-trigger [data-ad-bm-summary] {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-field.has-value .auto-bm-trigger [data-ad-bm-summary] {
   color: var(--ad-form-bm-text);
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-field .auto-bm-trigger__chev {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-field .auto-bm-trigger__chev {
   color: #98a2b3;
   font-size: 18px;
   line-height: 1;
   flex: 0 0 auto;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-panel .auto-bm-panel__body {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-panel .auto-bm-panel__body {
   flex: 1 1 auto;
   overflow: auto;
   padding: 0;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-panel .auto-bm-group {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-panel .auto-bm-group {
   border: 1px solid var(--ad-form-bm-line);
   border-radius: 10px;
   background: var(--ad-form-bm-panel);
   overflow: hidden;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-panel .auto-bm-row + .auto-bm-row {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-panel .auto-bm-row + .auto-bm-row {
   border-top: 1px solid var(--ad-form-bm-line);
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-panel .auto-bm-toggle {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-panel .auto-bm-toggle {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -555,13 +555,13 @@ body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-panel .auto-bm-toggl
   cursor: pointer;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-panel .auto-bm-toggle input {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-panel .auto-bm-toggle input {
   position: absolute;
   opacity: 0;
   pointer-events: none;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-panel .auto-bm-switch {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-panel .auto-bm-switch {
   width: 46px;
   height: 28px;
   border-radius: 999px;
@@ -571,7 +571,7 @@ body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-panel .auto-bm-switc
   transition: background 0.15s;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-panel .auto-bm-switch::after {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-panel .auto-bm-switch::after {
   content: "";
   position: absolute;
   top: 3px;
@@ -583,34 +583,34 @@ body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-panel .auto-bm-switc
   transition: transform 0.15s;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-panel .auto-bm-toggle input:checked + .auto-bm-switch {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-panel .auto-bm-toggle input:checked + .auto-bm-switch {
   background: #34c759;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-panel .auto-bm-toggle input:checked + .auto-bm-switch::after {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-panel .auto-bm-toggle input:checked + .auto-bm-switch::after {
   transform: translateX(18px);
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-panel .auto-fuel-main-label {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-panel .auto-fuel-main-label {
   font-weight: 800;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-panel .auto-fuel-children {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-panel .auto-fuel-children {
   border-top: 1px solid var(--ad-form-bm-line);
   margin-left: 12px;
   padding-left: 4px;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-panel .auto-fuel-child-row .auto-bm-toggle span:first-child {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-panel .auto-fuel-child-row .auto-bm-toggle span:first-child {
   font-weight: 500;
   padding-left: 8px;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-panel .auto-fuel-main-row + .auto-fuel-main-row {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-panel .auto-fuel-main-row + .auto-fuel-main-row {
   border-top: 1px solid var(--ad-form-bm-line);
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-panel .ad-form-bm-search {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-panel .ad-form-bm-search {
   padding: 10px 10px 8px;
   border-bottom: 1px solid var(--ad-form-bm-line);
   background: var(--ad-form-bm-panel);
@@ -619,7 +619,7 @@ body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-panel .ad-form-bm-se
   z-index: 1;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-panel .ad-form-bm-search-input {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-panel .ad-form-bm-search-input {
   width: 100%;
   min-height: 40px;
   padding: 0 12px;
@@ -632,12 +632,12 @@ body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-panel .ad-form-bm-se
   box-sizing: border-box;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-panel .ad-form-bm-search-input:focus {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-panel .ad-form-bm-search-input:focus {
   outline: none;
   border-color: var(--ad-form-bm-yellow);
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-panel .ad-form-bm-empty {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-panel .ad-form-bm-empty {
   margin: 0;
   padding: 16px 14px;
   color: var(--ad-form-bm-muted);
@@ -646,7 +646,7 @@ body.site-app[data-site-page="hirdetesfeladas"] .ad-form-bm-panel .ad-form-bm-em
 }
 
 /* Extrák / egyéb info — ugyanaz a kapcsolós sor, mint a BM panelekben */
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-toggle-list {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-toggle-list {
   display: flex;
   flex-direction: column;
   grid-template-columns: unset;
@@ -657,11 +657,11 @@ body.site-app[data-site-page="hirdetesfeladas"] .ad-form-toggle-list {
   overflow: hidden;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-toggle-list .auto-bm-row + .auto-bm-row {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-toggle-list .auto-bm-row + .auto-bm-row {
   border-top: 1px solid var(--ad-form-bm-line);
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-toggle-list .auto-bm-toggle {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-toggle-list .auto-bm-toggle {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -673,13 +673,13 @@ body.site-app[data-site-page="hirdetesfeladas"] .ad-form-toggle-list .auto-bm-to
   cursor: pointer;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-toggle-list .auto-bm-toggle input {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-toggle-list .auto-bm-toggle input {
   position: absolute;
   opacity: 0;
   pointer-events: none;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-toggle-list .auto-bm-switch {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-toggle-list .auto-bm-switch {
   width: 46px;
   height: 28px;
   border-radius: 999px;
@@ -689,7 +689,7 @@ body.site-app[data-site-page="hirdetesfeladas"] .ad-form-toggle-list .auto-bm-sw
   transition: background 0.15s;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-toggle-list .auto-bm-switch::after {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-toggle-list .auto-bm-switch::after {
   content: "";
   position: absolute;
   top: 3px;
@@ -701,20 +701,20 @@ body.site-app[data-site-page="hirdetesfeladas"] .ad-form-toggle-list .auto-bm-sw
   transition: transform 0.15s;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-toggle-list .auto-bm-toggle input:checked + .auto-bm-switch {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-toggle-list .auto-bm-toggle input:checked + .auto-bm-switch {
   background: #34c759;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-toggle-list .auto-bm-toggle input:checked + .auto-bm-switch::after {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-toggle-list .auto-bm-toggle input:checked + .auto-bm-switch::after {
   transform: translateX(18px);
 }
 
 /* Gyártmány+modell: egy dobkerék — a külön modell mező rejtve.
    site-app .ad-layout-item.labeled-field { display:grid !important } felülírja a gyengébb szabályt.
    NE rejtsük el a brand sort (ha tévedésből kapna nested class-t). */
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .labeled-field.ad-form-bm-modell-nested:not(.ad-form-alap-brand-row):not(:has(.ad-form-bm-field--brand-model)),
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-layout-item.ad-form-bm-modell-nested:not(.ad-form-alap-brand-row):not(:has(.ad-form-bm-field--brand-model)),
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-layout-item.labeled-field.ad-form-bm-modell-nested:not(.ad-form-alap-brand-row):not(:has(.ad-form-bm-field--brand-model)) {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .labeled-field.ad-form-bm-modell-nested:not(.ad-form-alap-brand-row):not(:has(.ad-form-bm-field--brand-model)),
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-layout-item.ad-form-bm-modell-nested:not(.ad-form-alap-brand-row):not(:has(.ad-form-bm-field--brand-model)),
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-layout-item.labeled-field.ad-form-bm-modell-nested:not(.ad-form-alap-brand-row):not(:has(.ad-form-bm-field--brand-model)) {
   display: none !important;
   height: 0 !important;
   min-height: 0 !important;
@@ -725,9 +725,9 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-layout-item.labeled
 }
 
 /* Brand sor (gyártmány-pill) mindig látszik — a nested #modell továbbra is rejtve marad */
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-brand-row:not(.ad-form-bm-modell-nested),
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-brand-block > .ad-layout-item:not(.ad-form-bm-modell-nested),
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-brand-block .ad-form-bm-field--brand-model {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-brand-row:not(.ad-form-bm-modell-nested),
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-brand-block > .ad-layout-item:not(.ad-form-bm-modell-nested),
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-brand-block .ad-form-bm-field--brand-model {
   display: grid !important;
   height: auto !important;
   min-height: 0 !important;
@@ -736,7 +736,7 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-brand-blo
   opacity: 1 !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field--brand-model {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-bm-field--brand-model {
   width: 100% !important;
   min-width: 0 !important;
   max-width: 100% !important;
@@ -745,8 +745,8 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field--bran
 }
 
 /* Gyártmány & Modell: AutoScout-szerű pill + chevron (méret változatlan) */
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field--brand-model > .ad-form-drum-wrap,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field--brand-model > .immo-wheel-wrap {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-bm-field--brand-model > .ad-form-drum-wrap,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-bm-field--brand-model > .immo-wheel-wrap {
   position: relative !important;
   border-radius: 999px !important;
   border: 1px solid #d0d5dd !important;
@@ -756,21 +756,21 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field--bran
   align-items: center !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field--brand-model .immo-wheel-trigger {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-bm-field--brand-model .immo-wheel-trigger {
   font-weight: 500 !important;
   color: #667085 !important;
   padding: 0.55rem 2.35rem 0.55rem 1.05rem !important;
   border-radius: 999px !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field--brand-model.has-value .immo-wheel-trigger,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field--brand-model .immo-wheel-trigger:not(.is-placeholder) {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-bm-field--brand-model.has-value .immo-wheel-trigger,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-bm-field--brand-model .immo-wheel-trigger:not(.is-placeholder) {
   color: #0f172a !important;
   font-weight: 600 !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field--brand-model > .ad-form-drum-wrap::after,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field--brand-model > .immo-wheel-wrap::after {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-bm-field--brand-model > .ad-form-drum-wrap::after,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-bm-field--brand-model > .immo-wheel-wrap::after {
   content: "";
   position: absolute;
   top: 50%;
@@ -785,26 +785,26 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field--bran
   z-index: 1;
 }
 
-html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field--brand-model > .ad-form-drum-wrap,
-html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field--brand-model > .immo-wheel-wrap {
+html[data-theme="dark"] body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-bm-field--brand-model > .ad-form-drum-wrap,
+html[data-theme="dark"] body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-bm-field--brand-model > .immo-wheel-wrap {
   background: #1d1d1d !important;
   border-color: #4b5563 !important;
 }
 
-html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field--brand-model .immo-wheel-trigger {
+html[data-theme="dark"] body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-bm-field--brand-model .immo-wheel-trigger {
   color: #9ca3af !important;
 }
 
-html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field--brand-model.has-value .immo-wheel-trigger {
+html[data-theme="dark"] body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-bm-field--brand-model.has-value .immo-wheel-trigger {
   color: #f9fafb !important;
 }
 
-html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field--brand-model > .ad-form-drum-wrap::after,
-html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field--brand-model > .immo-wheel-wrap::after {
+html[data-theme="dark"] body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-bm-field--brand-model > .ad-form-drum-wrap::after,
+html[data-theme="dark"] body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-bm-field--brand-model > .immo-wheel-wrap::after {
   border-color: #9ca3af;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-bm-field {
   width: 100% !important;
   min-width: 0 !important;
   max-width: 100% !important;
@@ -812,8 +812,8 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field {
   box-sizing: border-box !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .labeled-field > select:not(.ad-form-bm-native),
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .md-outlined > select:not(.ad-form-bm-native) {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .labeled-field > select:not(.ad-form-bm-native),
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .md-outlined > select:not(.ad-form-bm-native) {
   width: 100% !important;
   min-width: 0 !important;
   max-width: 100% !important;
@@ -821,7 +821,7 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .md-outlined > select:n
   box-sizing: border-box !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-cell {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-cell {
   width: 100% !important;
   min-width: 0 !important;
   max-width: 100% !important;
@@ -830,10 +830,10 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-cell {
 }
 
 /* Év/hó / műszaki: mindig látható, teljes sor */
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-split-ym,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-muszaki-date,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-split-ym__dual,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-muszaki-date__triple {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-split-ym,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-muszaki-date,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-split-ym__dual,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-muszaki-date__triple {
   display: flex !important;
   width: 100% !important;
   max-width: 100% !important;
@@ -843,8 +843,8 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-muszaki-date__
   box-sizing: border-box !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-split-ym__dual .immo-dual-range__half,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-muszaki-date__triple .immo-triple-date__half {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-split-ym__dual .immo-dual-range__half,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-muszaki-date__triple .immo-triple-date__half {
   visibility: visible !important;
   opacity: 1 !important;
   min-width: 0 !important;
@@ -858,8 +858,8 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-muszaki-date__
 }
 
 /* Osztott év/hó/nap: ugyanaz a dobozos trigger, mint a kivitel (ad-form-bm-field--drum) */
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-split-ym__dual .immo-wheel-wrap,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-muszaki-date__triple .immo-wheel-wrap {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-split-ym__dual .immo-wheel-wrap,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-muszaki-date__triple .immo-wheel-wrap {
   display: flex !important;
   width: 100% !important;
   min-height: 2.75rem !important;
@@ -874,8 +874,8 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-muszaki-date__
   align-items: stretch !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-split-ym__dual .immo-wheel-trigger,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-muszaki-date__triple .immo-wheel-trigger {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-split-ym__dual .immo-wheel-trigger,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-muszaki-date__triple .immo-wheel-trigger {
   display: block !important;
   flex: 1 1 auto !important;
   width: 100% !important;
@@ -897,35 +897,35 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-muszaki-date__
   visibility: visible !important;
 }
 
-html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-split-ym__dual .immo-wheel-wrap,
-html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-muszaki-date__triple .immo-wheel-wrap {
+html[data-theme="dark"] body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-split-ym__dual .immo-wheel-wrap,
+html[data-theme="dark"] body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-muszaki-date__triple .immo-wheel-wrap {
   background: #1d1d1d !important;
   border-color: #e5e7eb !important;
 }
 
-html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-split-ym__dual .immo-wheel-trigger,
-html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-muszaki-date__triple .immo-wheel-trigger {
+html[data-theme="dark"] body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-split-ym__dual .immo-wheel-trigger,
+html[data-theme="dark"] body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-muszaki-date__triple .immo-wheel-trigger {
   color: #f9fafb !important;
 }
 
 /* Címmezők: teljes sor szélesség, ne a 168px cella */
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-megtalalhato-slot .ad-form-cell,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form input.ad-address-input.ad-form-cell,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-location-fields--postal-only .ad-form-cell {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-megtalalhato-slot .ad-form-cell,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form input.ad-address-input.ad-form-cell,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-location-fields--postal-only .ad-form-cell {
   width: 100% !important;
   min-width: 0 !important;
   max-width: 100% !important;
   flex: none !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field.ad-form-cell .ad-form-bm-input-wrap,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field.ad-form-cell .ad-form-bm-search-trigger {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-bm-field.ad-form-cell .ad-form-bm-input-wrap,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-bm-field.ad-form-cell .ad-form-bm-search-trigger {
   width: 100% !important;
   max-width: 100% !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .inline-2,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .inline-2-labeled {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .inline-2,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .inline-2-labeled {
   display: grid !important;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
   gap: var(--ad-cell-gap, 0.5rem) !important;
@@ -935,12 +935,12 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .inline-2-labeled {
   box-sizing: border-box;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .inline-2 > .ad-form-bm-field.ad-form-cell {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .inline-2 > .ad-form-bm-field.ad-form-cell {
   grid-column: span 1;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .suffix-field,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-suffix-unit {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .suffix-field,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-suffix-unit {
   display: flex !important;
   align-items: center !important;
   width: 100% !important;
@@ -960,8 +960,8 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-suffix-unit {
   box-shadow: none !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .suffix-field > input,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .suffix-field > input.ad-form-cell {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .suffix-field > input,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .suffix-field > input.ad-form-cell {
   flex: 1 1 0 !important;
   width: 100% !important;
   min-width: 0 !important;
@@ -977,8 +977,8 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .suffix-field > input.a
   field-sizing: fixed !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .suffix-field > span:not(.hint-inline):not(.power-hint):not(.price-market-hint):not(.price-market-label),
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .muszaki-grid .suffix-field > span:not(.price-market-hint):not(.price-market-label) {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .suffix-field > span:not(.hint-inline):not(.power-hint):not(.price-market-hint):not(.price-market-label),
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .muszaki-grid .suffix-field > span:not(.price-market-hint):not(.price-market-label) {
   flex: 0 0 auto !important;
   width: auto !important;
   max-width: none !important;
@@ -993,24 +993,24 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .muszaki-grid .suffix-f
 }
 
 /* Km: dobozos mezőknél egységnek hely (Alapadatok vonal-szabály specifikusabb) */
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .suffix-field:has(#km),
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-suffix-unit:has(#km) {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .suffix-field:has(#km),
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-suffix-unit:has(#km) {
   padding-right: 0.4rem !important;
   gap: 0.6rem !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .field-stack--leiras textarea,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form #leiras,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .card--photos,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .card--photos input,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .field-stack--leiras .ad-form-cell {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .field-stack--leiras textarea,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form #leiras,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .card--photos,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .card--photos input,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .field-stack--leiras .ad-form-cell {
   width: 100% !important;
   min-width: 0 !important;
   max-width: 100% !important;
   flex: 1 1 auto !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-bm-field {
   width: 100% !important;
   min-width: 0 !important;
   max-width: 100% !important;
@@ -1018,8 +1018,8 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field {
   box-sizing: border-box !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .labeled-field > select:not(.ad-form-bm-native),
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .md-outlined > select:not(.ad-form-bm-native) {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .labeled-field > select:not(.ad-form-bm-native),
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .md-outlined > select:not(.ad-form-bm-native) {
   width: 100% !important;
   min-width: 0 !important;
   max-width: 100% !important;
@@ -1028,18 +1028,18 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .md-outlined > select:n
 }
 
 /* site-app .ad-layout-item > input { width:100% } + desk placeWrap inline — explicit win */
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-layout-item > input.ad-form-cell,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-layout-item > select.ad-form-cell:not(.ad-form-bm-native),
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .labeled-field > input.ad-form-cell,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .labeled-field > select.ad-form-cell:not(.ad-form-bm-native),
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-layout-item .suffix-field > input.ad-form-cell,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .inline-2 > select:not(.ad-form-bm-native),
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .inline-2 > input:not(.ad-form-bm-search-trigger),
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .inline-2 > .ad-form-bm-field,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .inline-2-labeled > select:not(.ad-form-bm-native),
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .inline-2-labeled > input:not(.ad-form-bm-search-trigger),
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-layout-item .inline-2 > select.ad-form-cell:not(.ad-form-bm-native),
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-layout-item .inline-2 > input.ad-form-cell {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-layout-item > input.ad-form-cell,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-layout-item > select.ad-form-cell:not(.ad-form-bm-native),
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .labeled-field > input.ad-form-cell,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .labeled-field > select.ad-form-cell:not(.ad-form-bm-native),
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-layout-item .suffix-field > input.ad-form-cell,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .inline-2 > select:not(.ad-form-bm-native),
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .inline-2 > input:not(.ad-form-bm-search-trigger),
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .inline-2 > .ad-form-bm-field,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .inline-2-labeled > select:not(.ad-form-bm-native),
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .inline-2-labeled > input:not(.ad-form-bm-search-trigger),
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-layout-item .inline-2 > select.ad-form-cell:not(.ad-form-bm-native),
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-layout-item .inline-2 > input.ad-form-cell {
   width: 100% !important;
   min-width: 0 !important;
   max-width: 100% !important;
@@ -1047,8 +1047,8 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-layout-item .inline
   box-sizing: border-box !important;
 }
 
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .labeled-field,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-layout-item {
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .labeled-field,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-layout-item {
   min-width: 0 !important;
   max-width: 100% !important;
   width: 100% !important;
@@ -1056,19 +1056,19 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-
 }
 
 /* Desk: minden control teljes szélesség (minden kijelzőméret) */
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .inline-2,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .inline-2-labeled,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-cell,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-bm-field,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-bm-field--dropdown,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .suffix-field,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-suffix-unit,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-split-ym,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-muszaki-date,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .labeled-field > input.ad-form-cell,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .labeled-field > select.ad-form-cell:not(.ad-form-bm-native),
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-layout-item > input.ad-form-cell,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-layout-item > select.ad-form-cell:not(.ad-form-bm-native) {
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .inline-2,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .inline-2-labeled,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-cell,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-bm-field,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-bm-field--dropdown,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .suffix-field,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-suffix-unit,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-split-ym,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-muszaki-date,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .labeled-field > input.ad-form-cell,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .labeled-field > select.ad-form-cell:not(.ad-form-bm-native),
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-layout-item > input.ad-form-cell,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-layout-item > select.ad-form-cell:not(.ad-form-bm-native) {
   width: 100% !important;
   min-width: 0 !important;
   max-width: 100% !important;
@@ -1076,26 +1076,26 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-
   box-sizing: border-box !important;
 }
 
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-bm-field .ad-form-drum-wrap,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-bm-field .immo-wheel-wrap {
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-bm-field .ad-form-drum-wrap,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-bm-field .immo-wheel-wrap {
   width: 100% !important;
   max-width: 100% !important;
   min-width: 0 !important;
   box-sizing: border-box !important;
 }
 
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .inline-2 > select:not(.ad-form-bm-native),
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .inline-2 > input:not(.ad-form-bm-search-trigger),
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .inline-2 > .ad-form-bm-field,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .inline-2-labeled > select:not(.ad-form-bm-native),
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .inline-2-labeled > input:not(.ad-form-bm-search-trigger) {
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .inline-2 > select:not(.ad-form-bm-native),
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .inline-2 > input:not(.ad-form-bm-search-trigger),
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .inline-2 > .ad-form-bm-field,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .inline-2-labeled > select:not(.ad-form-bm-native),
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .inline-2-labeled > input:not(.ad-form-bm-search-trigger) {
   width: 100% !important;
   min-width: 0 !important;
   max-width: 100% !important;
 }
 
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .suffix-field,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-suffix-unit {
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .suffix-field,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-suffix-unit {
   width: 100% !important;
   max-width: 100% !important;
   min-width: 0 !important;
@@ -1115,8 +1115,8 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-
   box-shadow: none !important;
 }
 
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .suffix-field > input,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .suffix-field > input.ad-form-cell {
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .suffix-field > input,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .suffix-field > input.ad-form-cell {
   flex: 1 1 0 !important;
   width: 100% !important;
   min-width: 0 !important;
@@ -1132,7 +1132,7 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-
   field-sizing: fixed !important;
 }
 
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .suffix-field > span:not(.hint-inline):not(.power-hint):not(.price-market-hint):not(.price-market-label) {
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .suffix-field > span:not(.hint-inline):not(.power-hint):not(.price-market-hint):not(.price-market-label) {
   flex: 0 0 auto !important;
   margin: 0 !important;
   padding: 0 0.1rem 0 0 !important;
@@ -1144,24 +1144,24 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-
   background: transparent !important;
 }
 
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .suffix-field:has(#km),
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-suffix-unit:has(#km) {
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .suffix-field:has(#km),
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-suffix-unit:has(#km) {
   padding-right: 0.4rem !important;
   gap: 0.6rem !important;
 }
 
-html[data-theme="dark"] body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .suffix-field,
-html[data-theme="dark"] body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-suffix-unit {
+html[data-theme="dark"] body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .suffix-field,
+html[data-theme="dark"] body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-suffix-unit {
   border-color: #3a3a3a !important;
   background: #1d1d1d !important;
 }
 
-html[data-theme="dark"] body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .suffix-field > span:not(.hint-inline):not(.power-hint):not(.price-market-hint):not(.price-market-label) {
+html[data-theme="dark"] body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .suffix-field > span:not(.hint-inline):not(.power-hint):not(.price-market-hint):not(.price-market-label) {
   color: #9a9a9c !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #tire-sizes-card .tire-row select,
-body.site-app[data-site-page="hirdetesfeladas"] #tire-sizes-card .tire-row select.ad-form-cell {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #tire-sizes-card .tire-row select,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #tire-sizes-card .tire-row select.ad-form-cell {
   flex: 1 1 0 !important;
   width: 0 !important;
   min-width: 0 !important;
@@ -1170,8 +1170,8 @@ body.site-app[data-site-page="hirdetesfeladas"] #tire-sizes-card .tire-row selec
 
 
 /* === Demó-pontos Alapadatok: EGY világoskék felület (nincs szürke/fehér/kék sáv) === */
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-layout-canvas:has(> .ad-form-alap-card),
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-layout-canvas:has(> .ad-form-alap-brand-block) {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-layout-canvas:has(> .ad-form-alap-card),
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-layout-canvas:has(> .ad-form-alap-brand-block) {
   gap: 1.35rem !important;
   padding: 0 !important;
   margin: 0 !important;
@@ -1181,7 +1181,7 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-layout-canvas:has(>
 /* Desk accordion Alapadatok:
    - nyitva: külső head rejtve (a fehér kártya címe látszik)
    - zárva: külső head LÁTSZIK, mint a többi kategória — különben eltűnik */
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .auto-desk-acc[data-desk-acc="alap"].is-open {
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .auto-desk-acc[data-desk-acc="alap"].is-open {
   border: 0 !important;
   background: #e8eef3 !important;
   border-radius: 0 !important;
@@ -1190,7 +1190,7 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .auto-desk-a
   overflow: hidden !important;
 }
 
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .auto-desk-acc[data-desk-acc="alap"]:not(.is-open) {
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .auto-desk-acc[data-desk-acc="alap"]:not(.is-open) {
   border: 0 !important;
   background: #fff !important;
   border-radius: 1.375rem !important;
@@ -1199,7 +1199,7 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .auto-desk-a
   overflow: hidden !important;
 }
 
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .auto-desk-acc[data-desk-acc="alap"]:not(.is-open) > .auto-desk-acc__head {
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .auto-desk-acc[data-desk-acc="alap"]:not(.is-open) > .auto-desk-acc__head {
   display: flex !important;
   height: auto !important;
   min-height: 3.25rem !important;
@@ -1212,7 +1212,7 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .auto-desk-a
   color: #111 !important;
 }
 
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .auto-desk-acc[data-desk-acc="alap"].is-open > .auto-desk-acc__head {
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .auto-desk-acc[data-desk-acc="alap"].is-open > .auto-desk-acc__head {
   display: none !important;
   height: 0 !important;
   min-height: 0 !important;
@@ -1221,9 +1221,9 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .auto-desk-a
   border: 0 !important;
 }
 
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .ad-form-desk-shell > .auto-desk-acc:not(.auto-desk-acc--sub),
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .ad-form-desk-shell > .auto-desk-acc:not(.auto-desk-acc--sub).is-open,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .ad-form-desk-shell > .auto-desk-acc:not(.auto-desk-acc--sub):not(.is-open) {
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-desk-shell > .auto-desk-acc:not(.auto-desk-acc--sub),
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-desk-shell > .auto-desk-acc:not(.auto-desk-acc--sub).is-open,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-desk-shell > .auto-desk-acc:not(.auto-desk-acc--sub):not(.is-open) {
   width: 100% !important;
   max-width: 100% !important;
   min-width: 0 !important;
@@ -1234,7 +1234,7 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .ad-form-des
 }
 
 /* Alap nyitva: ne legyen oldalsó padding — a fehér kártya ugyanakkora mint a Műszaki/Extrák/Hirdetés pill */
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .auto-desk-acc[data-desk-acc="alap"].is-open > .auto-desk-acc__body {
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .auto-desk-acc[data-desk-acc="alap"].is-open > .auto-desk-acc__body {
   display: flex !important;
   flex-direction: column !important;
   background: #e8eef3 !important;
@@ -1247,8 +1247,8 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .auto-desk-a
   box-sizing: border-box !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-brand-block {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-card,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-brand-block {
   width: 100% !important;
   max-width: 100% !important;
   min-width: 0 !important;
@@ -1258,12 +1258,12 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-brand-blo
 }
 
 /* Step1 + fehér .card héj is ugyanaz a kék — ne legyen középső fehér sáv */
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="1"]:has(.ad-form-alap-card),
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="1"]:has(.ad-form-alap-brand-block),
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="1"]:has(.ad-form-alap-card) > .card,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="1"]:has(.ad-form-alap-brand-block) > .card,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="1"]:has(.ad-form-alap-card) > .card > .card-body,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="1"]:has(.ad-form-alap-brand-block) > .card > .card-body {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="1"]:has(.ad-form-alap-card),
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="1"]:has(.ad-form-alap-brand-block),
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="1"]:has(.ad-form-alap-card) > .card,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="1"]:has(.ad-form-alap-brand-block) > .card,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="1"]:has(.ad-form-alap-card) > .card > .card-body,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="1"]:has(.ad-form-alap-brand-block) > .card > .card-body {
   background: #e8eef3 !important;
   border: 0 !important;
   box-shadow: none !important;
@@ -1271,23 +1271,23 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="
   margin: 0 !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="1"]:has(.ad-form-alap-card),
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="1"]:has(.ad-form-alap-brand-block) {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="1"]:has(.ad-form-alap-card),
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="1"]:has(.ad-form-alap-brand-block) {
   padding: 0 !important;
   gap: 0 !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="1"] > .import-step-label {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="1"] > .import-step-label {
   display: none !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="1"]:has(.ad-form-alap-card) > .card > .card-body,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="1"]:has(.ad-form-alap-brand-block) > .card > .card-body {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="1"]:has(.ad-form-alap-card) > .card > .card-body,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="1"]:has(.ad-form-alap-brand-block) > .card > .card-body {
   padding: 0 !important;
 }
 
 /* Gyártmány + Egyéb típus: egy fehér box a világoskék hátteren (demó) */
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-brand-block {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-brand-block {
   display: flex !important;
   flex-direction: column !important;
   gap: 1rem !important;
@@ -1301,7 +1301,7 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-brand-blo
   box-sizing: border-box !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-brand-row {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-brand-row {
   margin: 0 !important;
   padding: 0 !important;
   background: transparent !important;
@@ -1312,14 +1312,14 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-brand-row
   width: 100% !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-brand-row > label {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-brand-row > label {
   font: 700 0.94rem/1.2 system-ui, sans-serif !important;
   color: #111 !important;
   margin: 0 !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-brand-block .ad-form-bm-field--brand-model > .ad-form-drum-wrap,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-brand-block .ad-form-bm-field--brand-model > .immo-wheel-wrap {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-brand-block .ad-form-bm-field--brand-model > .ad-form-drum-wrap,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-brand-block .ad-form-bm-field--brand-model > .immo-wheel-wrap {
   height: 3rem !important;
   min-height: 3rem !important;
   border-radius: 999px !important;
@@ -1328,35 +1328,35 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-brand-blo
   box-shadow: none !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-brand-block .ad-form-bm-field--brand-model .immo-wheel-trigger {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-brand-block .ad-form-bm-field--brand-model .immo-wheel-trigger {
   font: 500 1rem/1.2 system-ui, sans-serif !important;
   color: #6b7280 !important;
   padding: 0 2.35rem 0 1.25rem !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-brand-block .ad-form-bm-field--brand-model.has-value .immo-wheel-trigger,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-brand-block .ad-form-bm-field--brand-model .immo-wheel-trigger:not(.is-placeholder) {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-brand-block .ad-form-bm-field--brand-model.has-value .immo-wheel-trigger,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-brand-block .ad-form-bm-field--brand-model .immo-wheel-trigger:not(.is-placeholder) {
   color: #111 !important;
   font-weight: 600 !important;
 }
 
 /* Egyéb típus: aláhúzás a gyártmány boxban */
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-brand-block .ad-layout-item:has(#egyeb_tipus),
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-brand-block .labeled-field:has(#egyeb_tipus),
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-brand-block .ad-form-alap-brand-row:has(#egyeb_tipus) {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-brand-block .ad-layout-item:has(#egyeb_tipus),
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-brand-block .labeled-field:has(#egyeb_tipus),
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-brand-block .ad-form-alap-brand-row:has(#egyeb_tipus) {
   display: grid !important;
   gap: 0.45rem !important;
   margin: 0.15rem 0 0 !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-brand-block :is(.ad-layout-item, .labeled-field, .ad-form-alap-brand-row):has(#egyeb_tipus) > label {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-brand-block :is(.ad-layout-item, .labeled-field, .ad-form-alap-brand-row):has(#egyeb_tipus) > label {
   font: 700 0.94rem/1.2 system-ui, sans-serif !important;
   color: #111 !important;
   margin: 0 !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-brand-block #egyeb_tipus,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-brand-block input#egyeb_tipus.ad-form-cell {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-brand-block #egyeb_tipus,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-brand-block input#egyeb_tipus.ad-form-cell {
   width: 100% !important;
   box-sizing: border-box !important;
   margin: 0 !important;
@@ -1372,13 +1372,13 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-brand-blo
   outline: none !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-brand-block #egyeb_tipus:focus,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-brand-block input#egyeb_tipus.ad-form-cell:focus {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-brand-block #egyeb_tipus:focus,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-brand-block input#egyeb_tipus.ad-form-cell:focus {
   border-bottom-color: #111 !important;
 }
 
 /* Fehér Alapadatok kártya */
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-card {
   display: flex !important;
   flex-direction: column !important;
   gap: 0 !important;
@@ -1394,7 +1394,7 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card {
   overflow-y: visible;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__title {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-card__title {
   appearance: none;
   display: flex !important;
   align-items: center;
@@ -1412,7 +1412,7 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__tit
   cursor: pointer;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__chev {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-card__chev {
   flex: 0 0 auto;
   color: #64748b;
   font-size: 0.65rem;
@@ -1421,27 +1421,27 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__che
   transition: transform 0.15s ease;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card.is-collapsed .ad-form-alap-card__chev {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-card.is-collapsed .ad-form-alap-card__chev {
   transform: rotate(0deg);
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card.is-collapsed .ad-form-alap-card__title {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-card.is-collapsed .ad-form-alap-card__title {
   margin-bottom: 0 !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-card__body {
   display: flex !important;
   flex-direction: column !important;
   gap: 1.05rem !important;
   padding: 0 !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card.is-collapsed > .ad-form-alap-card__body {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-card.is-collapsed > .ad-form-alap-card__body {
   display: none !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body > .ad-layout-item,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body > .labeled-field {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-card__body > .ad-layout-item,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-card__body > .labeled-field {
   margin: 0 !important;
   width: 100% !important;
   max-width: 100% !important;
@@ -1449,19 +1449,19 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__bod
   gap: 0.45rem !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body > .ad-layout-item > label,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body .labeled-field > label {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-card__body > .ad-layout-item > label,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-card__body .labeled-field > label {
   font: 700 0.875rem/1.2 system-ui, sans-serif !important;
   color: #111 !important;
   margin: 0 !important;
 }
 
 /* Demó: alsó vonal a kártya mezőin */
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body .ad-form-drum-wrap,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body .ad-form-bm-field--drum > .ad-form-drum-wrap,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body .ad-form-bm-field--drum > .immo-wheel-wrap,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body input.ad-form-cell,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body select.ad-form-cell:not(.ad-form-bm-native) {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-card__body .ad-form-drum-wrap,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-card__body .ad-form-bm-field--drum > .ad-form-drum-wrap,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-card__body .ad-form-bm-field--drum > .immo-wheel-wrap,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-card__body input.ad-form-cell,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-card__body select.ad-form-cell:not(.ad-form-bm-native) {
   border: 0 !important;
   border-bottom: 1.5px solid #cfd6dd !important;
   border-radius: 0 !important;
@@ -1475,11 +1475,11 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__bod
 }
 
 /* Suffix wrap: ne legyen teljes szélességű alsó vonal (az inputé a vonal) */
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body .suffix-field,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body .ad-form-suffix-unit,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-alap-card__body .suffix-field,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-alap-card__body .ad-form-suffix-unit,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-alap-card__body .suffix-field:has(#km) {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-card__body .suffix-field,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-card__body .ad-form-suffix-unit,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-alap-card__body .suffix-field,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-alap-card__body .ad-form-suffix-unit,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-alap-card__body .suffix-field:has(#km) {
   border: 0 !important;
   border-bottom: 0 !important;
   border-radius: 0 !important;
@@ -1492,10 +1492,10 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-
   gap: 0.55rem !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body .suffix-field > input,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body .suffix-field > input.ad-form-cell,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-alap-card__body .suffix-field > input,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-alap-card__body .suffix-field > input.ad-form-cell {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-card__body .suffix-field > input,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-card__body .suffix-field > input.ad-form-cell,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-alap-card__body .suffix-field > input,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-alap-card__body .suffix-field > input.ad-form-cell {
   padding: 0.45rem 0.1rem 0.45rem 0 !important;
   height: auto !important;
   min-height: 2.65rem !important;
@@ -1506,8 +1506,8 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-
   max-width: calc(100% - 2.1rem) !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body .suffix-field > span:not(.hint-inline):not(.power-hint):not(.price-market-hint):not(.price-market-label),
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-alap-card__body .suffix-field > span:not(.hint-inline):not(.power-hint):not(.price-market-hint):not(.price-market-label) {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-card__body .suffix-field > span:not(.hint-inline):not(.power-hint):not(.price-market-hint):not(.price-market-label),
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-alap-card__body .suffix-field > span:not(.hint-inline):not(.power-hint):not(.price-market-hint):not(.price-market-label) {
   flex: 0 0 auto !important;
   flex-shrink: 0 !important;
   min-width: 1.5rem !important;
@@ -1515,15 +1515,15 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-
   color: #666 !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body .ad-form-split-ym__dual,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body .ad-form-muszaki-date__triple {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-card__body .ad-form-split-ym__dual,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-card__body .ad-form-muszaki-date__triple {
   gap: 0.65rem !important;
   background: transparent !important;
   border: 0 !important;
 }
 
 /* Csukott év|hó: egy vonal „év 2020  hó 05” — a két doboz rejtve (sheet továbbra is dual) */
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-split-ym {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-split-ym {
   position: relative !important;
   display: flex !important;
   flex-direction: column !important;
@@ -1533,7 +1533,7 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-split-ym {
   box-sizing: border-box !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-split-ym__summary {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-split-ym__summary {
   appearance: none;
   display: block !important;
   width: 100% !important;
@@ -1553,17 +1553,17 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-split-ym__summ
   min-height: 2.65rem !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-split-ym__summary.is-placeholder {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-split-ym__summary.is-placeholder {
   color: #64748b !important;
   font-weight: 500 !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-split-ym__summary:focus-visible {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-split-ym__summary:focus-visible {
   outline: 2px solid #2563eb;
   outline-offset: 2px;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-split-ym .ad-form-split-ym__dual {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-split-ym .ad-form-split-ym__dual {
   position: absolute !important;
   width: 1px !important;
   height: 1px !important;
@@ -1577,7 +1577,7 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-split-ym .ad-f
 }
 
 /* Műszaki triple (ha még van): dobozos cellák maradhatnak */
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body .ad-form-muszaki-date__triple .immo-triple-date__half {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-card__body .ad-form-muszaki-date__triple .immo-triple-date__half {
   border: 0 !important;
   border-bottom: 0 !important;
   border-radius: 0 !important;
@@ -1587,7 +1587,7 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__bod
   min-height: 0 !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body .ad-form-muszaki-date__triple .immo-wheel-wrap {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-card__body .ad-form-muszaki-date__triple .immo-wheel-wrap {
   border: 1.5px solid #111 !important;
   border-bottom: 1.5px solid #111 !important;
   border-radius: 0.55rem !important;
@@ -1597,77 +1597,77 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__bod
   height: auto !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body .ad-form-muszaki-date__triple .immo-wheel-trigger {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-card__body .ad-form-muszaki-date__triple .immo-wheel-trigger {
   color: #0f172a !important;
   font-weight: 600 !important;
   padding: 0.55rem 0.85rem !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body .ad-form-bm-field--drum.has-value .immo-wheel-trigger {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-card__body .ad-form-bm-field--drum.has-value .immo-wheel-trigger {
   color: #111 !important;
   font-weight: 600 !important;
 }
 
-html[data-theme="dark"] body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] .auto-desk-acc[data-desk-acc="alap"].is-open > .auto-desk-acc__body {
+html[data-theme="dark"] body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .auto-desk-acc[data-desk-acc="alap"].is-open > .auto-desk-acc__body {
   background: #111827 !important;
 }
 
-html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card,
-html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-brand-block {
+html[data-theme="dark"] body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-card,
+html[data-theme="dark"] body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-brand-block {
   background: #1d1d1d !important;
   box-shadow: none !important;
 }
 
-html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-brand-block .ad-form-bm-field--brand-model > .ad-form-drum-wrap,
-html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-brand-block .ad-form-bm-field--brand-model > .immo-wheel-wrap {
+html[data-theme="dark"] body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-brand-block .ad-form-bm-field--brand-model > .ad-form-drum-wrap,
+html[data-theme="dark"] body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-brand-block .ad-form-bm-field--brand-model > .immo-wheel-wrap {
   background: #111827 !important;
   border-color: #4b5563 !important;
 }
 
-html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__title,
-html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-brand-row > label,
-html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body .labeled-field > label {
+html[data-theme="dark"] body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-card__title,
+html[data-theme="dark"] body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-brand-row > label,
+html[data-theme="dark"] body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-card__body .labeled-field > label {
   color: #f9fafb !important;
 }
 
 /* === Stabil layout: ne csússzon el oldalra, mezők a kártyán belül maradjanak === */
-html:has(body.site-app[data-site-page="hirdetesfeladas"]),
-body.site-app[data-site-page="hirdetesfeladas"] {
+html:has(body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"])),
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) {
   overflow-x: clip !important;
   max-width: 100% !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] .site-layout,
-body.site-app[data-site-page="hirdetesfeladas"] .site-center,
-body.site-app[data-site-page="hirdetesfeladas"] .automax-main,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-wizard-shell,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form,
-body.site-app[data-site-page="hirdetesfeladas"] .ad-form-desk-shell,
-body.site-app[data-site-page="hirdetesfeladas"] .ad-layout-canvas,
-body.site-app[data-site-page="hirdetesfeladas"] .auto-desk-acc,
-body.site-app[data-site-page="hirdetesfeladas"] .auto-desk-acc__body {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .site-layout,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .site-center,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .automax-main,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-wizard-shell,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-desk-shell,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-layout-canvas,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .auto-desk-acc,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .auto-desk-acc__body {
   max-width: 100% !important;
   min-width: 0 !important;
   box-sizing: border-box !important;
   overflow-x: clip !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-layout-item,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .labeled-field,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .suffix-field,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-suffix-unit,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-split-ym,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-split-ym__dual,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .inline-2,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .inline-2-labeled {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-layout-item,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .labeled-field,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-bm-field,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .suffix-field,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-suffix-unit,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-split-ym,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-split-ym__dual,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .inline-2,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .inline-2-labeled {
   max-width: 100% !important;
   min-width: 0 !important;
   box-sizing: border-box !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-brand-block {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-card,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-brand-block {
   overflow-x: clip !important;
   overflow-y: visible !important;
   max-width: 100% !important;
@@ -1675,12 +1675,12 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-brand-blo
 }
 
 /* Km + minden Alapadatok suffix: vonal csak az input alatt, egység kiférjen */
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card .suffix-field,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card .ad-form-suffix-unit,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-layout-item:has(#km) .suffix-field,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .labeled-field:has(#km) .suffix-field,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-alap-card .suffix-field,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-layout-item:has(#km) .suffix-field {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-card .suffix-field,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-card .ad-form-suffix-unit,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-layout-item:has(#km) .suffix-field,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .labeled-field:has(#km) .suffix-field,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-alap-card .suffix-field,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-layout-item:has(#km) .suffix-field {
   display: flex !important;
   align-items: center !important;
   width: 100% !important;
@@ -1701,11 +1701,11 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-
   box-sizing: border-box !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card .suffix-field > input,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-layout-item:has(#km) .suffix-field > input,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .labeled-field:has(#km) .suffix-field > input,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-alap-card .suffix-field > input,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-layout-item:has(#km) .suffix-field > input {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-card .suffix-field > input,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-layout-item:has(#km) .suffix-field > input,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .labeled-field:has(#km) .suffix-field > input,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-alap-card .suffix-field > input,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-layout-item:has(#km) .suffix-field > input {
   flex: 1 1 0% !important;
   width: auto !important;
   min-width: 0 !important;
@@ -1722,10 +1722,10 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-
   box-sizing: border-box !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card .suffix-field > span:not(.hint-inline):not(.power-hint):not(.price-market-hint):not(.price-market-label),
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-layout-item:has(#km) .suffix-field > span:not(.hint-inline):not(.power-hint):not(.price-market-hint):not(.price-market-label),
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-alap-card .suffix-field > span:not(.hint-inline):not(.power-hint):not(.price-market-hint):not(.price-market-label),
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-layout-item:has(#km) .suffix-field > span:not(.hint-inline):not(.power-hint):not(.price-market-hint):not(.price-market-label) {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-card .suffix-field > span:not(.hint-inline):not(.power-hint):not(.price-market-hint):not(.price-market-label),
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-layout-item:has(#km) .suffix-field > span:not(.hint-inline):not(.power-hint):not(.price-market-hint):not(.price-market-label),
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-alap-card .suffix-field > span:not(.hint-inline):not(.power-hint):not(.price-market-hint):not(.price-market-label),
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-layout-item:has(#km) .suffix-field > span:not(.hint-inline):not(.power-hint):not(.price-market-hint):not(.price-market-label) {
   flex: 0 0 auto !important;
   flex-shrink: 0 !important;
   min-width: 1.5rem !important;
@@ -1739,12 +1739,12 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-
 }
 
 /* Km: egység flex-szel férjen el — overflow-x clip, ne csúsztassa az oldalt */
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .suffix-field:has(#km),
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-suffix-unit:has(#km),
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-layout-item:has(#km) .suffix-field,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .labeled-field:has(#km) .suffix-field,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .suffix-field:has(#km),
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-layout-item:has(#km) .suffix-field {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .suffix-field:has(#km),
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-suffix-unit:has(#km),
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-layout-item:has(#km) .suffix-field,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .labeled-field:has(#km) .suffix-field,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .suffix-field:has(#km),
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-layout-item:has(#km) .suffix-field {
   width: 100% !important;
   max-width: 100% !important;
   padding-right: 0.35rem !important;
@@ -1755,11 +1755,11 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-
   box-sizing: border-box !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .suffix-field:has(#km) > input#km,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-layout-item:has(#km) .suffix-field > input#km,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .labeled-field:has(#km) .suffix-field > input#km,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .suffix-field:has(#km) > input#km,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-layout-item:has(#km) .suffix-field > input#km {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .suffix-field:has(#km) > input#km,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-layout-item:has(#km) .suffix-field > input#km,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .labeled-field:has(#km) .suffix-field > input#km,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .suffix-field:has(#km) > input#km,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-layout-item:has(#km) .suffix-field > input#km {
   flex: 1 1 0% !important;
   width: auto !important;
   min-width: 0 !important;
@@ -1768,10 +1768,10 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-
   border-bottom: 1.5px solid #cfd6dd !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .suffix-field:has(#km) > span,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-layout-item:has(#km) .suffix-field > span,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .suffix-field:has(#km) > span,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-layout-item:has(#km) .suffix-field > span {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .suffix-field:has(#km) > span,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-layout-item:has(#km) .suffix-field > span,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .suffix-field:has(#km) > span,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-layout-item:has(#km) .suffix-field > span {
   flex: 0 0 auto !important;
   flex-shrink: 0 !important;
   min-width: 1.35rem !important;
@@ -1781,8 +1781,8 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-
   white-space: nowrap !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-layout-item:has(#km),
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .labeled-field:has(#km) {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-layout-item:has(#km),
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .labeled-field:has(#km) {
   padding-right: 0 !important;
   overflow-x: clip !important;
   overflow-y: visible !important;
@@ -1791,7 +1791,7 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .labeled-field:has(#km)
 }
 
 /* Year+Km sor: ne lógjon ki, ne csúsztasson oldalt */
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .field-row.full.field-row--year-km {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .field-row.full.field-row--year-km {
   overflow-x: clip !important;
   max-width: 100% !important;
   min-width: 0 !important;
@@ -1800,22 +1800,22 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .field-row.full.field-r
 /* iOS: <16px fókusz = zoom + billentyűzet → oldal elcsúszik.
    Minden kézi mező (type=number is!) + összes accordion/menü — nem csak #km. */
 @media (max-width: 900px) {
-  body.site-app[data-site-page="hirdetesfeladas"] #ad-form
+  body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form
     input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="hidden"]):not([type="button"]):not([type="submit"]):not([type="reset"]),
-  body.site-app[data-site-page="hirdetesfeladas"] #ad-form textarea,
-  body.site-app[data-site-page="hirdetesfeladas"] #ad-form select,
-  body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-search-trigger,
-  body.site-app[data-site-page="hirdetesfeladas"] #ad-form .suffix-field > input,
-  body.site-app[data-site-page="hirdetesfeladas"] #ad-form .muszaki-grid input,
-  body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ev-tech-grid input,
-  body.site-app[data-site-page="hirdetesfeladas"] #ad-form .field-row--tech-top input,
-  body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] input,
-  body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="1"] input,
-  body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="4"] input,
-  body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="4"] textarea,
-  body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="5"] input,
-  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form #tire-sizes-card .tire-row select,
-  body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form #tire-sizes-card .tire-row select.ad-form-cell {
+  body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form textarea,
+  body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form select,
+  body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-bm-search-trigger,
+  body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .suffix-field > input,
+  body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .muszaki-grid input,
+  body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ev-tech-grid input,
+  body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .field-row--tech-top input,
+  body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="2"] input,
+  body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="1"] input,
+  body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="4"] input,
+  body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="4"] textarea,
+  body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="5"] input,
+  body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form #tire-sizes-card .tire-row select,
+  body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form #tire-sizes-card .tire-row select.ad-form-cell {
     font-size: 16px !important;
   }
 }
@@ -1835,12 +1835,12 @@ body.site-app.ad-form-kb-open[data-site-page="hirdetesfeladas"] .ev-tech-grid {
 }
 
 /* Drum / underline mezők: ne lógjanak ki a kártyából */
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body .ad-form-bm-field,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body .ad-form-drum-wrap,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body .immo-wheel-wrap,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-brand-block .ad-form-bm-field,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-brand-block .ad-form-drum-wrap,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-brand-block .immo-wheel-wrap {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-card__body .ad-form-bm-field,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-card__body .ad-form-drum-wrap,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-card__body .immo-wheel-wrap,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-brand-block .ad-form-bm-field,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-brand-block .ad-form-drum-wrap,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-brand-block .immo-wheel-wrap {
   width: 100% !important;
   max-width: 100% !important;
   min-width: 0 !important;
@@ -1848,13 +1848,13 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-brand-blo
 }
 
 /* ——— Műszaki adatok (step 2): alsó vonal, ne cella — mint a Kivitel / Alapadatok ——— */
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .ad-form-drum-wrap,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .ad-form-bm-field--drum > .ad-form-drum-wrap,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .ad-form-bm-field--drum > .immo-wheel-wrap,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] input.ad-form-cell,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] select.ad-form-cell:not(.ad-form-bm-native),
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .step-panel[data-step="2"] .ad-form-drum-wrap,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .step-panel[data-step="2"] .immo-wheel-wrap {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="2"] .ad-form-drum-wrap,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="2"] .ad-form-bm-field--drum > .ad-form-drum-wrap,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="2"] .ad-form-bm-field--drum > .immo-wheel-wrap,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="2"] input.ad-form-cell,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="2"] select.ad-form-cell:not(.ad-form-bm-native),
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .step-panel[data-step="2"] .ad-form-drum-wrap,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .step-panel[data-step="2"] .immo-wheel-wrap {
   border: 0 !important;
   border-bottom: 1.5px solid #cfd6dd !important;
   border-radius: 0 !important;
@@ -1868,17 +1868,17 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-
 }
 
 /* Suffix (LE, cm³, kg…): vonal CSAK az input alatt — mint a km, ne fusson az egység alá */
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .suffix-field,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .ad-form-suffix-unit,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="5"] .suffix-field,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="5"] .ad-form-suffix-unit,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .step-panel[data-step="2"] .suffix-field,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .step-panel[data-step="2"] .ad-form-suffix-unit,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .step-panel[data-step="5"] .suffix-field,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .step-panel[data-step="5"] .ad-form-suffix-unit,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .muszaki-grid .suffix-field,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .ev-tech-grid .suffix-field,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .field-row--tech-top .suffix-field {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="2"] .suffix-field,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="2"] .ad-form-suffix-unit,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="5"] .suffix-field,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="5"] .ad-form-suffix-unit,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .step-panel[data-step="2"] .suffix-field,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .step-panel[data-step="2"] .ad-form-suffix-unit,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .step-panel[data-step="5"] .suffix-field,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .step-panel[data-step="5"] .ad-form-suffix-unit,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .muszaki-grid .suffix-field,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .ev-tech-grid .suffix-field,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .field-row--tech-top .suffix-field {
   display: flex !important;
   align-items: center !important;
   width: 100% !important;
@@ -1898,9 +1898,9 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-
   box-sizing: border-box !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .ad-form-drum-wrap > .immo-wheel-trigger,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .immo-wheel-wrap > .immo-wheel-trigger,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .step-panel[data-step="2"] .immo-wheel-trigger {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="2"] .ad-form-drum-wrap > .immo-wheel-trigger,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="2"] .immo-wheel-wrap > .immo-wheel-trigger,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .step-panel[data-step="2"] .immo-wheel-trigger {
   appearance: none !important;
   display: block !important;
   visibility: visible !important;
@@ -1923,20 +1923,20 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-
   z-index: 2 !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .ad-form-bm-field--drum:not(.has-value) .immo-wheel-trigger,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .immo-wheel-trigger.is-placeholder {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="2"] .ad-form-bm-field--drum:not(.has-value) .immo-wheel-trigger,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="2"] .immo-wheel-trigger.is-placeholder {
   color: #475569 !important;
   font-weight: 600 !important;
   opacity: 1 !important;
 }
 
 /* Üzemanyag / váltó / hajtás: a placeholder sosem lehet üres fehér */
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field--drum[data-ad-bm-for="uzemanyag"] .immo-wheel-trigger,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field--drum[data-ad-bm-for="sebessegvalto"] .immo-wheel-trigger,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field--drum[data-ad-bm-for="hajtas"] .immo-wheel-trigger,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field--drum[data-ad-bm-for="klima"] .immo-wheel-trigger,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field--drum[data-ad-bm-for="allapot"] .immo-wheel-trigger,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field--drum[data-ad-bm-for="kivitel"] .immo-wheel-trigger {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-bm-field--drum[data-ad-bm-for="uzemanyag"] .immo-wheel-trigger,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-bm-field--drum[data-ad-bm-for="sebessegvalto"] .immo-wheel-trigger,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-bm-field--drum[data-ad-bm-for="hajtas"] .immo-wheel-trigger,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-bm-field--drum[data-ad-bm-for="klima"] .immo-wheel-trigger,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-bm-field--drum[data-ad-bm-for="allapot"] .immo-wheel-trigger,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-bm-field--drum[data-ad-bm-for="kivitel"] .immo-wheel-trigger {
   display: block !important;
   visibility: visible !important;
   opacity: 1 !important;
@@ -1944,16 +1944,16 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field--drum
   color: #0f172a !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field--drum[data-ad-bm-for="uzemanyag"]:not(.has-value) .immo-wheel-trigger,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field--drum[data-ad-bm-for="sebessegvalto"]:not(.has-value) .immo-wheel-trigger,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field--drum[data-ad-bm-for="hajtas"]:not(.has-value) .immo-wheel-trigger,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-bm-field--drum[data-ad-bm-for="klima"]:not(.has-value) .immo-wheel-trigger {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-bm-field--drum[data-ad-bm-for="uzemanyag"]:not(.has-value) .immo-wheel-trigger,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-bm-field--drum[data-ad-bm-for="sebessegvalto"]:not(.has-value) .immo-wheel-trigger,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-bm-field--drum[data-ad-bm-for="hajtas"]:not(.has-value) .immo-wheel-trigger,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-bm-field--drum[data-ad-bm-for="klima"]:not(.has-value) .immo-wheel-trigger {
   color: #475569 !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .ad-form-bm-field--drum,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .ad-form-bm-field--drum > .ad-form-drum-wrap,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .ad-form-bm-field--drum > .immo-wheel-wrap {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="2"] .ad-form-bm-field--drum,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="2"] .ad-form-bm-field--drum > .ad-form-drum-wrap,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="2"] .ad-form-bm-field--drum > .immo-wheel-wrap {
   display: block !important;
   visibility: visible !important;
   opacity: 1 !important;
@@ -1962,15 +1962,15 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="
   max-width: 100% !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .suffix-field > input,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .suffix-field > input.ad-form-cell,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="5"] .suffix-field > input,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="5"] .suffix-field > input.ad-form-cell,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .step-panel[data-step="2"] .suffix-field > input,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .step-panel[data-step="5"] .suffix-field > input,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .muszaki-grid .suffix-field > input,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .ev-tech-grid .suffix-field > input,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .field-row--tech-top .suffix-field > input {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="2"] .suffix-field > input,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="2"] .suffix-field > input.ad-form-cell,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="5"] .suffix-field > input,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="5"] .suffix-field > input.ad-form-cell,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .step-panel[data-step="2"] .suffix-field > input,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .step-panel[data-step="5"] .suffix-field > input,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .muszaki-grid .suffix-field > input,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .ev-tech-grid .suffix-field > input,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .field-row--tech-top .suffix-field > input {
   flex: 1 1 0% !important;
   width: auto !important;
   min-width: 0 !important;
@@ -1988,19 +1988,19 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-
   box-sizing: border-box !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .suffix-field > input:focus,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="5"] .suffix-field > input:focus,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .step-panel[data-step="2"] .suffix-field > input:focus,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .step-panel[data-step="5"] .suffix-field > input:focus {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="2"] .suffix-field > input:focus,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="5"] .suffix-field > input:focus,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .step-panel[data-step="2"] .suffix-field > input:focus,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .step-panel[data-step="5"] .suffix-field > input:focus {
   border-bottom-color: #111 !important;
   outline: none !important;
   box-shadow: none !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .suffix-field > span:not(.hint-inline):not(.power-hint):not(.price-market-hint):not(.price-market-label),
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="5"] .suffix-field > span:not(.hint-inline):not(.power-hint):not(.price-market-hint):not(.price-market-label),
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .step-panel[data-step="2"] .suffix-field > span:not(.hint-inline):not(.power-hint):not(.price-market-hint):not(.price-market-label),
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .step-panel[data-step="5"] .suffix-field > span:not(.hint-inline):not(.power-hint):not(.price-market-hint):not(.price-market-label) {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="2"] .suffix-field > span:not(.hint-inline):not(.power-hint):not(.price-market-hint):not(.price-market-label),
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="5"] .suffix-field > span:not(.hint-inline):not(.power-hint):not(.price-market-hint):not(.price-market-label),
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .step-panel[data-step="2"] .suffix-field > span:not(.hint-inline):not(.power-hint):not(.price-market-hint):not(.price-market-label),
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .step-panel[data-step="5"] .suffix-field > span:not(.hint-inline):not(.power-hint):not(.price-market-hint):not(.price-market-label) {
   flex: 0 0 auto !important;
   flex-shrink: 0 !important;
   min-width: 1.5rem !important;
@@ -2013,28 +2013,28 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-
   white-space: nowrap !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .ad-form-drum-wrap.has-drum-open,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .ad-form-drum-wrap.is-open,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .immo-wheel-wrap.has-drum-open,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .immo-wheel-wrap.is-open,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .immo-wheel-wrap:focus-within {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="2"] .ad-form-drum-wrap.has-drum-open,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="2"] .ad-form-drum-wrap.is-open,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="2"] .immo-wheel-wrap.has-drum-open,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="2"] .immo-wheel-wrap.is-open,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="2"] .immo-wheel-wrap:focus-within {
   border-color: transparent !important;
   border-bottom-color: #111 !important;
   box-shadow: none !important;
   background: transparent !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] input.ad-form-cell:focus,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] select.ad-form-cell:not(.ad-form-bm-native):focus {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="2"] input.ad-form-cell:focus,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="2"] select.ad-form-cell:not(.ad-form-bm-native):focus {
   border-bottom-color: #111 !important;
   outline: none !important;
   box-shadow: none !important;
 }
 
 /* Gumi / EV blokkok a műszaki lépésben is vonal */
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] #tire-sizes-card .tire-row select.ad-form-cell,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .ad-desk-pinned-block select.ad-form-cell:not(.ad-form-bm-native),
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .ad-desk-pinned-block input.ad-form-cell {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="2"] #tire-sizes-card .tire-row select.ad-form-cell,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="2"] .ad-desk-pinned-block select.ad-form-cell:not(.ad-form-bm-native),
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="2"] .ad-desk-pinned-block input.ad-form-cell {
   border: 0 !important;
   border-bottom: 1.5px solid #cfd6dd !important;
   border-radius: 0 !important;
@@ -2042,28 +2042,28 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="
   box-shadow: none !important;
 }
 
-html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .ad-form-drum-wrap,
-html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .immo-wheel-wrap,
-html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .suffix-field > input,
-html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] input.ad-form-cell,
-html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] select.ad-form-cell:not(.ad-form-bm-native) {
+html[data-theme="dark"] body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="2"] .ad-form-drum-wrap,
+html[data-theme="dark"] body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="2"] .immo-wheel-wrap,
+html[data-theme="dark"] body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="2"] .suffix-field > input,
+html[data-theme="dark"] body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="2"] input.ad-form-cell,
+html[data-theme="dark"] body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="2"] select.ad-form-cell:not(.ad-form-bm-native) {
   background: transparent !important;
   border-bottom-color: #4b5563 !important;
 }
 
-html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .suffix-field,
-html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .ad-form-suffix-unit {
+html[data-theme="dark"] body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="2"] .suffix-field,
+html[data-theme="dark"] body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="2"] .ad-form-suffix-unit {
   background: transparent !important;
   border-bottom: 0 !important;
 }
 
-html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .immo-wheel-trigger {
+html[data-theme="dark"] body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="2"] .immo-wheel-trigger {
   color: #f9fafb !important;
 }
 
 /* ——— Gumi méretek: műszaki érvényesség-stílusú summary (aláhúzás) ——— */
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-tire-split,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form #tire-sizes-card .ad-form-tire-split {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-tire-split,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form #tire-sizes-card .ad-form-tire-split {
   display: flex !important;
   flex-direction: column !important;
   width: 100% !important;
@@ -2074,13 +2074,13 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form #ti
   position: relative !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .tire-block .ad-form-tire-split,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form #tire-sizes-card .tire-block .ad-form-tire-split {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .tire-block .ad-form-tire-split,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form #tire-sizes-card .tire-block .ad-form-tire-split {
   margin-top: 0.15rem !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-tire-split__summary,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-tire-split > .ad-form-split-ym__summary {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-tire-split__summary,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-tire-split > .ad-form-split-ym__summary {
   appearance: none !important;
   display: block !important;
   visibility: visible !important;
@@ -2105,13 +2105,13 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-tire-split > .
   z-index: 2 !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-tire-split__summary.is-placeholder {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-tire-split__summary.is-placeholder {
   color: #64748b !important;
   font-weight: 500 !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-tire-split .ad-form-split-ym__dual,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-tire-split__dual {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-tire-split .ad-form-split-ym__dual,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-tire-split__dual {
   position: absolute !important;
   width: 1px !important;
   height: 1px !important;
@@ -2125,21 +2125,21 @@ body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-tire-split__du
   visibility: hidden !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-tire-split select.ad-form-bm-native,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-tire-split select[hidden],
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-tire-split .ad-form-bm-native-host {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-tire-split select.ad-form-bm-native,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-tire-split select[hidden],
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-tire-split .ad-form-bm-native-host {
   display: none !important;
 }
 
 /* ——— Trail slot: vonal mint Teljesítmény; menü X a vonalon kívül ——— */
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body .ad-form-bm-field--drum > .ad-form-drum-wrap,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body .ad-form-bm-field--drum > .immo-wheel-wrap,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .ad-form-bm-field--drum > .ad-form-drum-wrap,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .ad-form-bm-field--drum > .immo-wheel-wrap,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-alap-card__body .ad-form-bm-field--drum > .ad-form-drum-wrap,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-alap-card__body .ad-form-bm-field--drum > .immo-wheel-wrap,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .step-panel[data-step="2"] .ad-form-bm-field--drum > .ad-form-drum-wrap,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .step-panel[data-step="2"] .ad-form-bm-field--drum > .immo-wheel-wrap {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-card__body .ad-form-bm-field--drum > .ad-form-drum-wrap,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-card__body .ad-form-bm-field--drum > .immo-wheel-wrap,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="2"] .ad-form-bm-field--drum > .ad-form-drum-wrap,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="2"] .ad-form-bm-field--drum > .immo-wheel-wrap,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-alap-card__body .ad-form-bm-field--drum > .ad-form-drum-wrap,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-alap-card__body .ad-form-bm-field--drum > .immo-wheel-wrap,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .step-panel[data-step="2"] .ad-form-bm-field--drum > .ad-form-drum-wrap,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .step-panel[data-step="2"] .ad-form-bm-field--drum > .immo-wheel-wrap {
   display: flex !important;
   align-items: center !important;
   gap: var(--ad-form-trail-gap) !important;
@@ -2154,14 +2154,14 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-
   height: auto !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body .ad-form-bm-field--drum .immo-wheel-trigger,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .ad-form-bm-field--drum .immo-wheel-trigger,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body .ad-form-drum-wrap.has-wheel-clear > .immo-wheel-trigger,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .ad-form-drum-wrap.has-wheel-clear > .immo-wheel-trigger,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body .immo-wheel-wrap.has-wheel-clear > .immo-wheel-trigger,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .immo-wheel-wrap.has-wheel-clear > .immo-wheel-trigger,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-alap-card__body .ad-form-bm-field--drum .immo-wheel-trigger,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .step-panel[data-step="2"] .ad-form-bm-field--drum .immo-wheel-trigger {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-card__body .ad-form-bm-field--drum .immo-wheel-trigger,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="2"] .ad-form-bm-field--drum .immo-wheel-trigger,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-card__body .ad-form-drum-wrap.has-wheel-clear > .immo-wheel-trigger,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="2"] .ad-form-drum-wrap.has-wheel-clear > .immo-wheel-trigger,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-card__body .immo-wheel-wrap.has-wheel-clear > .immo-wheel-trigger,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="2"] .immo-wheel-wrap.has-wheel-clear > .immo-wheel-trigger,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-alap-card__body .ad-form-bm-field--drum .immo-wheel-trigger,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .step-panel[data-step="2"] .ad-form-bm-field--drum .immo-wheel-trigger {
   flex: 1 1 0% !important;
   width: auto !important;
   min-width: 0 !important;
@@ -2177,14 +2177,14 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-
 }
 
 /* Üres menü: tartsd a jobb oszlopot (mint LE), hogy a vonal ne legyen szélesebb */
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body .ad-form-bm-field--drum > .ad-form-drum-wrap:not(.has-wheel-clear)::after,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body .ad-form-bm-field--drum > .immo-wheel-wrap:not(.has-wheel-clear)::after,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .ad-form-bm-field--drum > .ad-form-drum-wrap:not(.has-wheel-clear)::after,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .ad-form-bm-field--drum > .immo-wheel-wrap:not(.has-wheel-clear)::after,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-alap-card__body .ad-form-bm-field--drum > .ad-form-drum-wrap:not(.has-wheel-clear)::after,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-alap-card__body .ad-form-bm-field--drum > .immo-wheel-wrap:not(.has-wheel-clear)::after,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .step-panel[data-step="2"] .ad-form-bm-field--drum > .ad-form-drum-wrap:not(.has-wheel-clear)::after,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .step-panel[data-step="2"] .ad-form-bm-field--drum > .immo-wheel-wrap:not(.has-wheel-clear)::after {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-card__body .ad-form-bm-field--drum > .ad-form-drum-wrap:not(.has-wheel-clear)::after,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-card__body .ad-form-bm-field--drum > .immo-wheel-wrap:not(.has-wheel-clear)::after,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="2"] .ad-form-bm-field--drum > .ad-form-drum-wrap:not(.has-wheel-clear)::after,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="2"] .ad-form-bm-field--drum > .immo-wheel-wrap:not(.has-wheel-clear)::after,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-alap-card__body .ad-form-bm-field--drum > .ad-form-drum-wrap:not(.has-wheel-clear)::after,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-alap-card__body .ad-form-bm-field--drum > .immo-wheel-wrap:not(.has-wheel-clear)::after,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .step-panel[data-step="2"] .ad-form-bm-field--drum > .ad-form-drum-wrap:not(.has-wheel-clear)::after,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .step-panel[data-step="2"] .ad-form-bm-field--drum > .immo-wheel-wrap:not(.has-wheel-clear)::after {
   content: "" !important;
   flex: 0 0 var(--ad-form-trail-slot) !important;
   width: var(--ad-form-trail-slot) !important;
@@ -2194,10 +2194,10 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-
 }
 
 /* Clear X: vonalon kívül, LE/kg oszlopban */
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body .ad-form-bm-field--drum .immo-wheel-clear,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .ad-form-bm-field--drum .immo-wheel-clear,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-alap-card__body .ad-form-bm-field--drum .immo-wheel-clear,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .step-panel[data-step="2"] .ad-form-bm-field--drum .immo-wheel-clear {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-card__body .ad-form-bm-field--drum .immo-wheel-clear,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="2"] .ad-form-bm-field--drum .immo-wheel-clear,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-alap-card__body .ad-form-bm-field--drum .immo-wheel-clear,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .step-panel[data-step="2"] .ad-form-bm-field--drum .immo-wheel-clear {
   position: static !important;
   top: auto !important;
   right: auto !important;
@@ -2216,21 +2216,21 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-
   z-index: 3 !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body .ad-form-bm-field--drum .immo-wheel-clear:hover,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body .ad-form-bm-field--drum .immo-wheel-clear:focus-visible,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .ad-form-bm-field--drum .immo-wheel-clear:hover,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .ad-form-bm-field--drum .immo-wheel-clear:focus-visible {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-card__body .ad-form-bm-field--drum .immo-wheel-clear:hover,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-card__body .ad-form-bm-field--drum .immo-wheel-clear:focus-visible,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="2"] .ad-form-bm-field--drum .immo-wheel-clear:hover,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="2"] .ad-form-bm-field--drum .immo-wheel-clear:focus-visible {
   color: #1d4ed8 !important;
   background: transparent !important;
 }
 
 /* Suffix egység: ugyanaz a jobb oszlop, mint az X */
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body .suffix-field > span:not(.hint-inline):not(.power-hint):not(.price-market-hint):not(.price-market-label),
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .suffix-field > span:not(.hint-inline):not(.power-hint):not(.price-market-hint):not(.price-market-label),
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="5"] .suffix-field > span:not(.hint-inline):not(.power-hint):not(.price-market-hint):not(.price-market-label),
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-alap-card__body .suffix-field > span:not(.hint-inline):not(.power-hint):not(.price-market-hint):not(.price-market-label),
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .step-panel[data-step="2"] .suffix-field > span:not(.hint-inline):not(.power-hint):not(.price-market-hint):not(.price-market-label),
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .step-panel[data-step="5"] .suffix-field > span:not(.hint-inline):not(.power-hint):not(.price-market-hint):not(.price-market-label) {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-card__body .suffix-field > span:not(.hint-inline):not(.power-hint):not(.price-market-hint):not(.price-market-label),
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="2"] .suffix-field > span:not(.hint-inline):not(.power-hint):not(.price-market-hint):not(.price-market-label),
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="5"] .suffix-field > span:not(.hint-inline):not(.power-hint):not(.price-market-hint):not(.price-market-label),
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-alap-card__body .suffix-field > span:not(.hint-inline):not(.power-hint):not(.price-market-hint):not(.price-market-label),
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .step-panel[data-step="2"] .suffix-field > span:not(.hint-inline):not(.power-hint):not(.price-market-hint):not(.price-market-label),
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .step-panel[data-step="5"] .suffix-field > span:not(.hint-inline):not(.power-hint):not(.price-market-hint):not(.price-market-label) {
   flex: 0 0 var(--ad-form-trail-slot) !important;
   width: var(--ad-form-trail-slot) !important;
   min-width: var(--ad-form-trail-slot) !important;
@@ -2241,47 +2241,47 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-
   box-sizing: border-box !important;
 }
 
-html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body .ad-form-bm-field--drum .immo-wheel-trigger,
-html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .ad-form-bm-field--drum .immo-wheel-trigger {
+html[data-theme="dark"] body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-card__body .ad-form-bm-field--drum .immo-wheel-trigger,
+html[data-theme="dark"] body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="2"] .ad-form-bm-field--drum .immo-wheel-trigger {
   border-bottom-color: #4b5563 !important;
 }
 
-html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body .ad-form-bm-field--drum .immo-wheel-clear,
-html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .ad-form-bm-field--drum .immo-wheel-clear {
+html[data-theme="dark"] body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-card__body .ad-form-bm-field--drum .immo-wheel-clear,
+html[data-theme="dark"] body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="2"] .ad-form-bm-field--drum .immo-wheel-clear {
   color: #60a5fa !important;
 }
 
 /* Év/hó, gumi summary, sima szövegmezők: ugyanaz a vonalszélesség (trail slot) */
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-split-ym__summary,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-tire-split__summary,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-tire-split > .ad-form-split-ym__summary,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body .labeled-field > input.ad-form-cell,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body .ad-layout-item > input.ad-form-cell,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .labeled-field > input.ad-form-cell,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .ad-layout-item > input.ad-form-cell,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form #rendszam,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form #alvazszam,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-split-ym__summary,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-tire-split__summary,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell #rendszam,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell #alvazszam {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-split-ym__summary,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-tire-split__summary,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-tire-split > .ad-form-split-ym__summary,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-card__body .labeled-field > input.ad-form-cell,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-card__body .ad-layout-item > input.ad-form-cell,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="2"] .labeled-field > input.ad-form-cell,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="2"] .ad-layout-item > input.ad-form-cell,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form #rendszam,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form #alvazszam,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-split-ym__summary,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-tire-split__summary,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell #rendszam,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell #alvazszam {
   width: calc(100% - var(--ad-form-trail-reserve)) !important;
   max-width: calc(100% - var(--ad-form-trail-reserve)) !important;
   box-sizing: border-box !important;
 }
 
 /* Suffix (Teljesítmény, kg…): label–vonal távolság mint a menüknél */
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body .suffix-field,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body .ad-form-suffix-unit,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .suffix-field,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .ad-form-suffix-unit,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="5"] .suffix-field,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="5"] .ad-form-suffix-unit,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-alap-card__body .suffix-field,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .step-panel[data-step="2"] .suffix-field,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .step-panel[data-step="5"] .suffix-field,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .field-row--tech-top .suffix-field,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .muszaki-grid .suffix-field {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-card__body .suffix-field,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-card__body .ad-form-suffix-unit,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="2"] .suffix-field,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="2"] .ad-form-suffix-unit,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="5"] .suffix-field,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="5"] .ad-form-suffix-unit,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .ad-form-alap-card__body .suffix-field,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .step-panel[data-step="2"] .suffix-field,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .step-panel[data-step="5"] .suffix-field,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .field-row--tech-top .suffix-field,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .muszaki-grid .suffix-field {
   min-height: 0 !important;
   height: auto !important;
   max-height: none !important;
@@ -2289,18 +2289,18 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-
   gap: var(--ad-form-trail-gap) !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body .suffix-field > input,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .ad-form-alap-card__body .suffix-field > input.ad-form-cell,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .suffix-field > input,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="2"] .suffix-field > input.ad-form-cell,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="5"] .suffix-field > input,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .step-panel[data-step="5"] .suffix-field > input.ad-form-cell,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .field-row--tech-top .suffix-field > input,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .field-row--tech-top .suffix-field--power > input#teljesitmeny_le,
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .field-row--tech-top .suffix-field--power > input#teljesitmeny_kw,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .step-panel[data-step="2"] .suffix-field > input,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .field-row--tech-top .suffix-field > input,
-body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-form-desk-layout .ad-form-desk-shell .field-row--tech-top .suffix-field--power > input#teljesitmeny_le {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-card__body .suffix-field > input,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-card__body .suffix-field > input.ad-form-cell,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="2"] .suffix-field > input,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="2"] .suffix-field > input.ad-form-cell,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="5"] .suffix-field > input,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .step-panel[data-step="5"] .suffix-field > input.ad-form-cell,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .field-row--tech-top .suffix-field > input,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .field-row--tech-top .suffix-field--power > input#teljesitmeny_le,
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .field-row--tech-top .suffix-field--power > input#teljesitmeny_kw,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .step-panel[data-step="2"] .suffix-field > input,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .field-row--tech-top .suffix-field > input,
+body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout .ad-form-desk-shell .field-row--tech-top .suffix-field--power > input#teljesitmeny_le {
   flex: 1 1 0% !important;
   width: auto !important;
   min-width: 0 !important;
@@ -2315,11 +2315,11 @@ body.site-app.ad-form-desk-active[data-site-page="hirdetesfeladas"] #ad-form.ad-
 }
 
 /* Üres kW hint ne nyújtsa / ne tolja szét a sort */
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .suffix-field--power > .power-hint:empty {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .suffix-field--power > .power-hint:empty {
   display: none !important;
 }
 
-body.site-app[data-site-page="hirdetesfeladas"] #ad-form .suffix-field--power > .power-hint {
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .suffix-field--power > .power-hint {
   flex: 0 0 auto !important;
   width: auto !important;
   max-width: 40% !important;

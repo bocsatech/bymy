@@ -38,6 +38,10 @@ function isAutoDesk() {
 
 export async function mountAutoOkmanyPicker(form) {
   if (!form || !isAutoDesk() || form.dataset.okmanyPicker === "1") return;
+  if (form.querySelector('[data-qs-field="okmany_jelleg"] .immo-wheel-trigger, [data-wheel="okmany_jelleg"]')) {
+    form.querySelectorAll(".auto-okmany-field").forEach((el) => el.remove());
+    return;
+  }
 
   const existing = form.querySelector('[data-desk-field="okmany_jelleg"], .auto-okmany-field');
   const host =

@@ -11,8 +11,8 @@ import { readBrandModelFilterValues, mountAutoBrandModelPicker } from "./auto-br
 import { readFuelFilterValues, mountAutoFuelPicker } from "./auto-fuel-picker.js?v=switchDesignAll1";
 import { readKivitelFilterValues, mountAutoKivitelPicker } from "./auto-kivitel-picker.js?v=switchDesignAll1";
 import { readAllapotFilterValues, mountAutoAllapotPicker } from "./auto-allapot-picker.js?v=switchDesignAll1";
-import { readSebessegvaltoFilterValues, mountAutoSebessegvaltoPicker } from "./auto-sebessegvalto-picker.js?v=switchDesignAll1";
-import { readOkmanyFilterValues, mountAutoOkmanyPicker } from "./auto-okmany-picker.js?v=switchDesignAll1";
+import { readSebessegvaltoFilterValues, mountAutoSebessegvaltoPicker } from "./auto-sebessegvalto-picker.js?v=noDupValto1";
+import { readOkmanyFilterValues, mountAutoOkmanyPicker } from "./auto-okmany-picker.js?v=noDupValto1";
 import { readToltoFilterValues, mountAutoToltoPickers } from "./auto-tolto-picker.js?v=3cc657260b";
 import {
   initAutoDeskSearch,
@@ -20,7 +20,7 @@ import {
   arrangeAutoDeskDemoFields,
   deskFilterMenuReady,
   syncAutoSearchAccShell,
-} from "./auto-desk-search.js?v=gyorsAlap1";
+} from "./auto-desk-search.js?v=noDupValto1";
 
 prefetchAutoSearchBoot();
 const MOBILE_MQ = "(max-width: 900px)";
@@ -443,13 +443,15 @@ export function initHomeQuickSearch({ onSearch = () => {}, onFilterPreview, onDe
   }
 
   function mountMuszakiPickersLazy() {
+    const hasDrum = (key) =>
+      Boolean(form.querySelector(`[data-qs-field="${key}"] .immo-wheel-trigger, [data-wheel="${key}"]`));
     const mountSafe = (fn, label) =>
       fn(form).catch((error) => {
         console.warn(label, error);
       });
     return Promise.all([
-      mountSafe(mountAutoSebessegvaltoPicker, "Sebességváltó picker:"),
-      mountSafe(mountAutoOkmanyPicker, "Okmány picker:"),
+      hasDrum("sebessegvalto") ? Promise.resolve() : mountSafe(mountAutoSebessegvaltoPicker, "Sebességváltó picker:"),
+      hasDrum("okmany_jelleg") ? Promise.resolve() : mountSafe(mountAutoOkmanyPicker, "Okmány picker:"),
       mountSafe(mountAutoToltoPickers, "Töltőcsatlakozó picker:"),
     ]).then(() => {
       try {

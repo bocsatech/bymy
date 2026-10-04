@@ -38,6 +38,10 @@ function isAutoDesk() {
 
 export async function mountAutoSebessegvaltoPicker(form) {
   if (!form || !isAutoDesk() || form.dataset.sebessegvaltoPicker === "1") return;
+  if (form.querySelector('[data-qs-field="sebessegvalto"] .immo-wheel-trigger, [data-wheel="sebessegvalto"]')) {
+    form.querySelectorAll(".auto-sebessegvalto-field").forEach((el) => el.remove());
+    return;
+  }
 
   const existing = form.querySelector('[data-desk-field="sebessegvalto"], .auto-sebessegvalto-field');
   const host =

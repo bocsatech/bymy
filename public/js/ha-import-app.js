@@ -87,7 +87,7 @@ function bookmarkletHref(mode) {
   const origin = location.origin;
   const isDealer = mode === "dealer";
   const src = isDealer
-    ? `${origin}/js/ha-dealer-import.js?v=haResume3`
+    ? `${origin}/js/ha-dealer-import.js?v=haResume4`
     : `${origin}/js/ha-import-bookmarklet.js?v=haDealerPhoto18`;
   const token = getBookmarkletToken() || getAuthToken() || "";
   const runner = isDealer ? "BymyHaDealerImport" : "BymyHaImport";
@@ -515,6 +515,7 @@ async function runUrlImport() {
 }
 
 let importBusy = false;
+let importBusyAt = 0;
 const pendingHaImports = [];
 let haImportReady = false;
 const seenHaImportKeys = new Set();
@@ -686,7 +687,11 @@ window.addEventListener("message", (event) => {
   if (!data) return;
   data.__ackSource = event.source;
   data.__ackOrigin = event.origin;
-  ackHaImport(event, data, event.origin);
+  if (importBusy && Date.now() - importBusyAt > 45000) {
+    importBusy = false;
+    importBusyAt = 0;
+    currentHaImportKey = "";
+  }
 
   const index = Math.max(1, Number(data.index) || 1);
   const total = Math.max(1, Number(data.total) || (Array.isArray(data.pages) ? data.pages.length : 1) || 1);
@@ -741,6 +746,7 @@ async function runMessageImport(data) {
     return;
   }
   importBusy = true;
+  importBusyAt = Date.now();
   currentHaImportKey = key;
   seenHaImportKeys.add(key);
   if (seenHaImportKeys.size > 80) {
@@ -835,6 +841,7 @@ async function runMessageImport(data) {
   } finally {
     // Előbb szabadítsuk a busy flaget, aztán ack — ne ragadjon a következő autó
     importBusy = false;
+    importBusyAt = 0;
     currentHaImportKey = "";
     while (pendingHaImports.length && seenHaImportKeys.has(haImportKey(pendingHaImports[0]))) {
       pendingHaImports.shift();

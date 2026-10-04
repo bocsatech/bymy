@@ -663,14 +663,22 @@
       listUrl: location.href,
       pages: list,
     };
-    const res = await fetch(`${origin}/api/import/extracted`, {
-      method: "POST",
-      mode: "cors",
-      headers: {
-        "Content-Type": "text/plain;charset=UTF-8",
-      },
-      body: JSON.stringify(payload),
-    });
+    const controller = typeof AbortController !== "undefined" ? new AbortController() : null;
+    const timer = controller ? setTimeout(() => controller.abort(), 60000) : null;
+    let res;
+    try {
+      res = await fetch(`${origin}/api/import/extracted`, {
+        method: "POST",
+        mode: "cors",
+        signal: controller?.signal,
+        headers: {
+          "Content-Type": "text/plain;charset=UTF-8",
+        },
+        body: JSON.stringify(payload),
+      });
+    } finally {
+      if (timer) clearTimeout(timer);
+    }
     const raw = await res.text();
     let data = {};
     try {
@@ -900,6 +908,44 @@
     let stoppedEarly = false;
     if (startOffset > 0) {
       showProgress(startOffset, prepared.length, `folytatás ${startOffset}/${prepared.length}`);
+    }
+    if (token && startOffset < prepared.length) {
+      const rest = prepared.slice(startOffset);
+      showProgress(prepared.length, prepared.length, `mentés ${rest.length} autó`);
+      try {
+        usedDirect = true;
+        const result = await savePagesWithFallback(
+          origin,
+          token,
+          rest,
+          prepared.length,
+          prepared.length,
+          chunkIndex + 1
+        );
+        const savedN = Number(result?.savedCount || 0);
+        const skippedN = Number(result?.skippedCount || 0);
+        const errN = Number(result?.errorCount || 0);
+        const skipMsg = (result?.items || []).find((it) => it?.skipped && it?.message)?.message;
+        if (result?.errors?.[0]?.message) errors.push(result.errors[0].message);
+        else if (skipMsg) errors.push(skipMsg);
+        ok += savedN;
+        skipped += skippedN;
+        fail += errN;
+        if (savedN === 0 && skippedN === 0 && errN === 0) {
+          fail += rest.length;
+          if (!errors.length) errors.push("mentés 0");
+        } else {
+          saveDealerProgress(null);
+          const parts = [];
+          if (ok) parts.push(`${ok} mentve`);
+          if (skipped) parts.push(`${skipped} kihagyva`);
+          if (fail) parts.push(`${fail} hiba`);
+          hideProgress(parts.length ? `Kész: ${parts.join(", ")}` : `Kész: semmi nem mentődött${errors[0] ? ` — ${errors[0]}` : ""}`);
+          return;
+        }
+      } catch (error) {
+        errors.push(error.message || String(error));
+      }
     }
     for (let offset = startOffset; offset < prepared.length; offset += SAVE_CHUNK) {
       const chunk = prepared.slice(offset, offset + SAVE_CHUNK);

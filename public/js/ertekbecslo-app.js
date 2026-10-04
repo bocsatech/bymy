@@ -79,7 +79,7 @@ export async function initErtekbecsloPanel(root = document) {
     const gyartasi_ev = fieldValue(form, "gyartasi_ev");
     const km = parseKmDigits(kmInput.value || "") || "";
     if (!gyartmany || !modell || !gyartasi_ev || !km) {
-      out.innerHTML = '<p class="ertek-msg">Kötelező: gyártmány, modell, évjárat, km.</p>';
+      out.innerHTML = "";
       return;
     }
     out.innerHTML = '<p class="ertek-msg">Számolás…</p>';

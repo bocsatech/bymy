@@ -1,6 +1,6 @@
 import { createAdForm } from "./form-core.js?v=ertekAd4";
 import { mountAdFormBmPickers } from "./ad-form-bm-pickers.js?v=ertekAd4";
-import { initErtekbecsloPanel } from "./ertekbecslo-app.js?v=ertekAd4";
+import { initErtekbecsloPanel } from "./ertekbecslo-app.js?v=ertekAd5";
 
 const CATEGORY = {
   hirdetes_vertical: "auto",
@@ -33,6 +33,7 @@ function hidePublishChrome(form) {
   });
   form.querySelector("#footer-actions")?.setAttribute("hidden", "");
   form.querySelector("#success-panel")?.setAttribute("hidden", "");
+  form.querySelectorAll(".ad-desk-guide-frame, #ad-desk-guide-frame").forEach((el) => el.remove());
 }
 
 function showValuationSteps(form) {

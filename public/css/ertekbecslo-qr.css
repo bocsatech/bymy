@@ -342,7 +342,10 @@ body.ertek-page[data-site-page="ertekbecsles"] #ad-form [data-desk-acc="hirdetes
 body.ertek-page[data-site-page="ertekbecsles"] #ad-form #footer-actions,
 body.ertek-page[data-site-page="ertekbecsles"] #ad-form #success-panel,
 body.ertek-page[data-site-page="ertekbecsles"] #ad-form .step-panel[data-step="4"],
-body.ertek-page[data-site-page="ertekbecsles"] #ad-form .step-panel[data-step="5"] {
+body.ertek-page[data-site-page="ertekbecsles"] #ad-form .step-panel[data-step="5"],
+body.ertek-page[data-site-page="ertekbecsles"] #ad-form .ad-desk-guide-frame,
+body.ertek-page[data-site-page="ertekbecsles"] #ad-form #ad-desk-guide-frame,
+body.ertek-page[data-site-page="ertekbecsles"] #ad-desk-guide-frame {
   display: none !important;
 }
 

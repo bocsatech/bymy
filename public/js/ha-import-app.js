@@ -87,7 +87,7 @@ function bookmarkletHref(mode) {
   const origin = location.origin;
   const isDealer = mode === "dealer";
   const src = isDealer
-    ? `${origin}/js/ha-dealer-import.js?v=rows23`
+    ? `${origin}/js/ha-dealer-import.js?v=table23`
     : `${origin}/js/ha-import-bookmarklet.js?v=haDealerPhoto18`;
   const token = getBookmarkletToken() || getAuthToken() || "";
   const runner = isDealer ? "BymyHaDealerImport" : "BymyHaImport";

@@ -500,9 +500,44 @@
     let n = 0;
     for (const el of document.querySelectorAll("a, button, [onclick], [role='button']")) {
       const t = clean(el.innerText || el.textContent || el.getAttribute("title") || "");
-      if (/m[oó]dos[ií]t/i.test(t)) n += 1;
+      if (/^m[oó]dos[ií]t/i.test(t)) n += 1;
     }
     return n;
+  }
+
+  function pickIdFromRow(row) {
+    if (!row) return "";
+    for (const attr of ["data-id", "data-hirdetesid", "data-hirdetes-id", "data-jarmu-id"]) {
+      const n = String(row.getAttribute?.(attr) || "").replace(/\D/g, "");
+      if (n.length >= 5 && n.length <= 12) return n;
+    }
+    for (const el of row.querySelectorAll?.("input[type='checkbox'], input[type='hidden'], input[name*='id' i]") || []) {
+      const n = String(el.value || el.getAttribute("data-id") || "").replace(/\D/g, "");
+      if (n.length >= 5 && n.length <= 12) return n;
+    }
+    for (const a of row.querySelectorAll?.("a[href], [onclick]") || []) {
+      const id = pickIdFromHref(a.getAttribute("href") || a.href || a.getAttribute("onclick") || "");
+      if (id) return id;
+    }
+    const text = String(row.innerText || row.textContent || "");
+    const paren = text.match(/\((\d{5,12})\)/);
+    if (paren) return paren[1];
+    const html = String(row.innerHTML || "");
+    return (
+      html.match(/[?&]id=(\d{5,12})\b/i)?.[1] ||
+      html.match(/\/gyorsnezet\/[^/]+\/(\d{5,12})/i)?.[1] ||
+      ""
+    );
+  }
+
+  function pickTitleFromRow(row) {
+    const near = pickTitleNearImg(row?.querySelector?.("img") || row);
+    if (near) return near;
+    for (const line of String(row?.innerText || "").split("\n").map(clean).filter(Boolean)) {
+      if (/^(módosítás|törlés|ártábla|kiemelés|címlap|képkezelés|top)$/i.test(line)) continue;
+      if (line.length >= 8 && /[A-Za-záéíóöőúüűÁÉÍÓÖŐÚÜŰ]/.test(line)) return line;
+    }
+    return "";
   }
 
   function extractCarsFromListingRows() {
@@ -522,11 +557,27 @@
       });
     };
 
+    const rowSel =
+      "table tbody tr, table tr, .jarmu-kartya, .listing-card, [class*='jarmu-kartya'], [class*='hirdetes-sor']";
+    for (const row of document.querySelectorAll(rowSel)) {
+      const text = clean(row.innerText || row.textContent || "");
+      if (text.length < 16) continue;
+      if (/szerződésmódosítás|tájékoztató|^kilépés$/i.test(text) && !/\(\d{5,12}\)/.test(text)) continue;
+      if (!/m[oó]dos[ií]t|t[oö]rl[eé]s|[aá]rt[aá]bla|\(\d{5,12}\)/i.test(text)) continue;
+      const id = pickIdFromRow(row);
+      if (!id) continue;
+      const img = row.querySelector("img");
+      add(id, {
+        visibleTitle: pickTitleFromRow(row),
+        visibleImage: hqFromSrc(img?.currentSrc || img?.src || img?.getAttribute("data-src") || ""),
+      });
+    }
+
     for (const el of document.querySelectorAll("[data-id], [data-hirdetes-id], [data-hirdetesid], [data-jarmu-id]")) {
       const id = el.getAttribute("data-id") || el.getAttribute("data-hirdetes-id") || el.getAttribute("data-hirdetesid") || el.getAttribute("data-jarmu-id");
       const img = el.querySelector?.("img");
       add(id, {
-        visibleTitle: pickTitleNearImg(img || el),
+        visibleTitle: pickTitleFromRow(el),
         visibleImage: hqFromSrc(img?.currentSrc || img?.src || img?.getAttribute("data-src") || ""),
       });
     }
@@ -534,21 +585,29 @@
     for (const a of document.querySelectorAll("a[href], [onclick]")) {
       const href = String(a.getAttribute("href") || a.href || a.getAttribute("onclick") || "");
       const label = clean(a.innerText || a.textContent || a.getAttribute("title") || "");
-      const id = pickIdFromHref(href);
-      if (!id) continue;
-      if (!/hirdetesfeladas|gyorsnezet|hasznaltautocdn|hasznaltauto\.hu/i.test(href) && !/m[oó]dos[ií]t/i.test(label)) {
-        continue;
-      }
+      let id = pickIdFromHref(href);
       const row =
         a.closest?.(
-          ".jarmu-kartya, .listing-card, tr, article, li, [class*='jarmu'], [class*='hirdetes'], [class*='listing']"
+          "tr, .jarmu-kartya, .listing-card, article, li, [class*='jarmu'], [class*='hirdetes'], [class*='listing']"
         ) || a.parentElement;
+      if (!id) id = pickIdFromRow(row);
+      if (!id) continue;
+      if (!/hirdetesfeladas|gyorsnezet|hasznaltautocdn|hasznaltauto\.hu/i.test(href) && !/^m[oó]dos[ií]t/i.test(label)) {
+        continue;
+      }
       const img = row?.querySelector?.("img");
       add(id, {
         url: `https://admin.hasznaltauto.hu/hirdetesfeladas/szemelyauto?id=${id}`,
-        visibleTitle: pickTitleNearImg(img || a) || label,
+        visibleTitle: pickTitleFromRow(row) || label,
         visibleImage: hqFromSrc(img?.currentSrc || img?.src || img?.getAttribute("data-src") || ""),
       });
+    }
+
+    if (!byId.size) {
+      const bodyText = String(document.body?.innerText || "");
+      for (const match of bodyText.matchAll(/\((\d{7,10})\)/g)) {
+        add(match[1]);
+      }
     }
 
     return [...byId.values()];
@@ -575,11 +634,20 @@
   }
 
   function extractCarsFromPage() {
-    const rows = extractCarsFromListingRows();
-    if (rows.length) return rows.slice(0, MAX);
+    const byId = new Map();
+    for (const car of extractCarsFromListingRows()) byId.set(car.listingId, car);
     const cdn = extractCarsFromCdnDom();
-    if (cdn.length && countModositasButtons() > 0) return cdn.slice(0, MAX);
-    return [];
+    const allowCdn = byId.size > 0 || countModositasButtons() > 0;
+    if (allowCdn) {
+      for (const car of cdn) {
+        const prev = byId.get(car.listingId);
+        if (!prev) byId.set(car.listingId, car);
+        else if (!prev.visibleImage && car.visibleImage) {
+          byId.set(car.listingId, { ...prev, visibleImage: car.visibleImage });
+        }
+      }
+    }
+    return [...byId.values()].slice(0, MAX);
   }
 
   async function quickScrollThumbs() {

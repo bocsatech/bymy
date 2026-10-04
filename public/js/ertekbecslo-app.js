@@ -3,7 +3,7 @@
 import { fetchModelTypes } from "./vehicle-catalog-client.js?v=ertekAd1";
 import { parseKmDigits } from "./km-input.js?v=30e4feeab0";
 import { flattenUzemanyagOptions } from "./equipment-data.js?v=ertekAd1";
-import { mountAdFormBmPickers, refreshAdFormBmPickers } from "./ad-form-bm-pickers.js?v=ertekAd1";
+import { mountAdFormBmPickers } from "./ad-form-bm-pickers.js?v=ertekAd3";
 
 const DEBOUNCE_MS = 350;
 
@@ -29,10 +29,10 @@ function ensureLink(href, marker) {
 }
 
 function ensureAdFormCss() {
-  ensureLink("/css/ingatlan-search.css?v=ertekAd1", "data-ertek-immo-css");
-  ensureLink("/css/ad-form-desk.css?v=ertekAd1", "data-ertek-desk-css");
-  ensureLink("/css/ad-form-bm-pickers.css?v=ertekAd1", "data-ertek-bm-css");
-  ensureLink("/css/automax.css?v=ertekAd1", "data-ertek-automax-css");
+  ensureLink("/css/ingatlan-search.css?v=ertekAd3", "data-ertek-immo-css");
+  ensureLink("/css/ad-form-desk.css?v=ertekAd3", "data-ertek-desk-css");
+  ensureLink("/css/ad-form-bm-pickers.css?v=ertekAd3", "data-ertek-bm-css");
+  ensureLink("/css/automax.css?v=ertekAd3", "data-ertek-automax-css");
 }
 
 function fieldValue(form, id) {
@@ -79,18 +79,6 @@ function replaceSelectOptions(select, values, emptyLabel) {
   if (prev && [...select.options].some((o) => o.value === prev)) select.value = prev;
 }
 
-function snapshotForm(form) {
-  return {
-    gyartmany: fieldValue(form, "gyartmany"),
-    modell: fieldValue(form, "modell"),
-    tipus: fieldValue(form, "tipus"),
-    uzemanyag: fieldValue(form, "uzemanyag"),
-    gyartasi_ev: fieldValue(form, "gyartasi_ev"),
-    gyartasi_honap: fieldValue(form, "gyartasi_honap"),
-    km: el("#km", form)?.value || el("[data-ertek-km]", form)?.value || "",
-  };
-}
-
 export async function initErtekbecsloPanel(root = document) {
   const panel = el('[data-mm-panel="ertekbecslo"]', root) || el("[data-ertekbecslo]", root);
   if (!panel || panel.dataset.ertekReady === "1") return;
@@ -105,6 +93,15 @@ export async function initErtekbecsloPanel(root = document) {
 
   if (document.body?.getAttribute("data-site-page") === "ertekbecsles") {
     document.body.classList.add("ad-form-desk-active");
+  }
+  const alapTitle = form.querySelector(".ad-form-alap-card__title");
+  const alapCard = form.querySelector(".ad-form-alap-card");
+  if (alapTitle && alapCard && !alapTitle.dataset.ertekBound) {
+    alapTitle.dataset.ertekBound = "1";
+    alapTitle.addEventListener("click", () => {
+      const closed = alapCard.classList.toggle("is-collapsed");
+      alapTitle.setAttribute("aria-expanded", closed ? "false" : "true");
+    });
   }
 
   const fuel = form.querySelector("#uzemanyag");
@@ -127,7 +124,6 @@ export async function initErtekbecsloPanel(root = document) {
   }
 
   let timer = null;
-  let refreshingTypes = false;
 
   async function refreshTypes() {
     const gyartmany = fieldValue(form, "gyartmany");
@@ -136,6 +132,8 @@ export async function initErtekbecsloPanel(root = document) {
     if (!tipus) return;
     if (!gyartmany || !modell) {
       replaceSelectOptions(tipus, [], "Válasszon");
+      tipus._adBmFillWheel?.("");
+      tipus._adBmRefreshSummary?.();
       return;
     }
     try {
@@ -144,24 +142,8 @@ export async function initErtekbecsloPanel(root = document) {
     } catch {
       replaceSelectOptions(tipus, [], "Válasszon");
     }
-    if (refreshingTypes) return;
-    refreshingTypes = true;
-    try {
-      const snap = snapshotForm(form);
-      form._bymyLastFormData = snap;
-      await refreshAdFormBmPickers(form);
-      if (snap.km) kmInput.value = snap.km;
-      if (snap.tipus) {
-        const tipus = form.querySelector("#tipus");
-        if (tipus) {
-          tipus.value = snap.tipus;
-          tipus._adBmFillWheel?.(snap.tipus);
-          tipus._adBmRefreshSummary?.();
-        }
-      }
-    } finally {
-      refreshingTypes = false;
-    }
+    tipus._adBmFillWheel?.(tipus.value || "");
+    tipus._adBmRefreshSummary?.();
   }
 
   async function estimate() {

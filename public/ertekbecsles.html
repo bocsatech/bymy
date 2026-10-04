@@ -57,9 +57,9 @@
     <link rel="stylesheet" href="/css/ad-form-bm-pickers.css?v=ertekAd1" />
     <link rel="stylesheet" href="/css/bymy-logo-size.css?v=f14985a2ca" />
     <link rel="stylesheet" href="/css/site-desk-header.css?v=navType1" />
-    <link rel="stylesheet" href="/css/ertekbecslo-qr.css?v=ertekAd1" />
+    <link rel="stylesheet" href="/css/ertekbecslo-qr.css?v=ertekAd3" />
   </head>
-  <body class="hub-page site-page site-app ertek-page" data-site-page="ertekbecsles">
+  <body class="hub-page site-page site-app ertek-page ad-form-desk-active" data-site-page="ertekbecsles">
     <script src="/js/mw-app-shell.js?v=navType1"></script>
     <header class="hub-header">
       <div class="hub-header-inner">
@@ -111,63 +111,66 @@
         <form id="ad-form" class="ertek-form" data-ertek-form onsubmit="return false">
           <input type="hidden" name="hirdetes_vertical" value="auto" />
           <input type="hidden" name="hirdetes_alkategoria" value="szemelyauto" />
-          <div class="form-grid">
-            <div class="field-row full">
-              <div class="labeled-field">
-                <label for="gyartmany">Gyártmány: <span class="req">*</span></label>
-                <select id="gyartmany" name="gyartmany" required>
-                  <option value="">Válasszon</option>
-                </select>
-              </div>
-              <div class="labeled-field">
-                <label for="modell">Modell: <span class="req">*</span></label>
-                <select id="modell" name="modell" required>
-                  <option value="">Először válassz gyártmányt</option>
-                </select>
-              </div>
-            </div>
-            <div class="field-row full field-row--pair">
-              <div class="labeled-field">
-                <label for="tipus">Típus:</label>
-                <select id="tipus" name="tipus">
-                  <option value="">Válasszon</option>
-                </select>
-              </div>
-              <div class="labeled-field labeled-field--fuel">
-                <label for="uzemanyag">Üzemanyag:</label>
-                <select id="uzemanyag" name="uzemanyag">
-                  <option value="">Válasszon</option>
-                </select>
-              </div>
-            </div>
-            <div class="field-row full field-row--year-km">
-              <div class="labeled-field">
-                <label for="gyartasi_ev">Gyártási év: <span class="req">*</span></label>
-                <div class="inline-2">
-                  <select id="gyartasi_ev" name="gyartasi_ev" required></select>
-                  <select id="gyartasi_honap" name="gyartasi_honap">
-                    <option value="">hó</option>
-                    <option>1</option><option>2</option><option>3</option><option>4</option>
-                    <option>5</option><option>6</option><option>7</option><option>8</option>
-                    <option>9</option><option>10</option><option>11</option><option>12</option>
+          <div class="ad-form-desk-shell">
+            <section class="step-panel" data-step="1">
+              <div class="ad-form-alap-brand-block">
+                <div class="labeled-field ad-form-alap-brand-row">
+                  <label for="gyartmany">Gyártmány &amp; Modell: <span class="req">*</span></label>
+                  <select id="gyartmany" name="gyartmany" required>
+                    <option value="">Válasszon</option>
+                  </select>
+                  <select id="modell" name="modell" required>
+                    <option value="">Először válassz gyártmányt</option>
                   </select>
                 </div>
               </div>
-              <div class="labeled-field">
-                <label for="km">Km. óra állás: <span class="req">*</span></label>
-                <div class="suffix-field">
-                  <input id="km" name="km" type="number" min="0" data-ertek-km required />
-                  <span>km</span>
+              <div class="ad-form-alap-card">
+                <button type="button" class="ad-form-alap-card__title" aria-expanded="true">
+                  <span class="ad-form-alap-card__title-text">Alapadatok</span>
+                  <span class="ad-form-alap-card__chev" aria-hidden="true">▼</span>
+                </button>
+                <div class="ad-form-alap-card__body">
+                  <div class="labeled-field">
+                    <label for="tipus">Típus:</label>
+                    <select id="tipus" name="tipus">
+                      <option value="">Válasszon</option>
+                    </select>
+                  </div>
+                  <div class="labeled-field labeled-field--fuel">
+                    <label for="uzemanyag">Üzemanyag:</label>
+                    <select id="uzemanyag" name="uzemanyag">
+                      <option value="">Válasszon</option>
+                    </select>
+                  </div>
+                  <div class="labeled-field">
+                    <label for="gyartasi_ev">Gyártási év: <span class="req">*</span></label>
+                    <div class="inline-2">
+                      <select id="gyartasi_ev" name="gyartasi_ev" required></select>
+                      <select id="gyartasi_honap" name="gyartasi_honap">
+                        <option value="">hó</option>
+                        <option>1</option><option>2</option><option>3</option><option>4</option>
+                        <option>5</option><option>6</option><option>7</option><option>8</option>
+                        <option>9</option><option>10</option><option>11</option><option>12</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="labeled-field">
+                    <label for="km">Km. óra állás: <span class="req">*</span></label>
+                    <div class="suffix-field">
+                      <input id="km" name="km" class="ad-form-cell" type="number" min="0" inputmode="numeric" data-ertek-km required />
+                      <span>km</span>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
+            </section>
           </div>
         </form>
         <div class="ertek-out" data-ertek-out></div>
       </section>
     </main>
 
-    <script type="module" src="/js/ertekbecsles-page.js?v=ertekAd1"></script>
+    <script type="module" src="/js/ertekbecsles-page.js?v=ertekAd3"></script>
     <script src="/js/nav-counts.js?v=08dce07726" type="module"></script>
     <script src="/js/theme.js?v=4fe8a2261f" type="module"></script>
     <script src="/js/site-auth.js?v=aad32d7596" type="module"></script>

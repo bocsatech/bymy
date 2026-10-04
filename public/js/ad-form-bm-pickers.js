@@ -2973,7 +2973,8 @@ async function mountAdSplitYmDrum({
     const mRaw = String(readWheel(maxHalf.wheel()) ?? "").trim() || String(honap.value || "").trim();
     const m = mRaw ? padMonth(mRaw) : "";
     if (!y && !m) {
-      summary.textContent = "—";
+      const ertekForm = ev.closest("form[data-ertek-form]");
+      summary.textContent = ertekForm ? "Válasszon" : "—";
     } else if (y && !m) {
       summary.textContent = `${y}.`;
     } else if (!y && m) {

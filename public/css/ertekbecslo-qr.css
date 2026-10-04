@@ -302,10 +302,16 @@ html[data-mm-account-kind="company"] body.site-app .mm-nav > [data-mm-dealer-nav
 }
 
 .ertek-page-main {
+  max-width: none;
+  margin: 0;
+  padding: 0 0 4rem;
+  box-sizing: border-box;
+}
+
+.ertek-page-intro {
   max-width: 880px;
   margin: 0 auto;
-  padding: 1.5rem 1rem 4rem;
-  box-sizing: border-box;
+  padding: 1.5rem 1rem 0.5rem;
 }
 
 .ertek-page-title {
@@ -330,136 +336,32 @@ html[data-theme="dark"] .ertek-page-lead {
   color: #94a3b8;
 }
 
-/* Értékbecslés: feladás asztali Alapadatok — pill + aláhúzás, ne doboz / üres vonal */
-body.ertek-page[data-site-page="ertekbecsles"] .ertek-page-main {
-  max-width: 420px;
+/* Értékbecslés: a feladás menüje, feladás/képek nélkül */
+body.ertek-page[data-site-page="ertekbecsles"] #ad-form [data-desk-acc="kepek"],
+body.ertek-page[data-site-page="ertekbecsles"] #ad-form [data-desk-acc="hirdetes"],
+body.ertek-page[data-site-page="ertekbecsles"] #ad-form #footer-actions,
+body.ertek-page[data-site-page="ertekbecsles"] #ad-form #success-panel,
+body.ertek-page[data-site-page="ertekbecsles"] #ad-form .step-panel[data-step="4"],
+body.ertek-page[data-site-page="ertekbecsles"] #ad-form .step-panel[data-step="5"] {
+  display: none !important;
 }
 
-body.ertek-page[data-site-page="ertekbecsles"] #ad-form.ertek-form,
-body.ertek-page[data-site-page="ertekbecsles"] #ad-form .ad-form-desk-shell {
-  width: 100%;
-  max-width: 360px;
+body.ertek-page[data-site-page="ertekbecsles"] #ad-form .ertek-out,
+body.ertek-page[data-site-page="ertekbecsles"] .ertek-out {
+  max-width: none;
+  margin-top: 0;
+  padding: 1rem 0 0;
 }
 
 body.ertek-page[data-site-page="ertekbecsles"] #ad-form .ad-form-bm-modell-nested {
   display: none !important;
 }
 
-body.ertek-page[data-site-page="ertekbecsles"] #ad-form .ad-form-alap-card__body > .labeled-field,
-body.ertek-page[data-site-page="ertekbecsles"] #ad-form .ad-form-alap-card__body > .ad-form-bm-field {
-  display: grid !important;
-  gap: 0.45rem !important;
-  width: 100% !important;
-  margin: 0 !important;
-}
-
-body.ertek-page[data-site-page="ertekbecsles"] #ad-form .ad-form-alap-card__body .ad-form-drum-wrap,
-body.ertek-page[data-site-page="ertekbecsles"] #ad-form .ad-form-alap-card__body .immo-wheel-wrap,
-body.ertek-page[data-site-page="ertekbecsles"] #ad-form .ad-form-alap-card__body select:not(.ad-form-bm-native),
-body.ertek-page[data-site-page="ertekbecsles"] #ad-form .ad-form-alap-card__body .ad-form-split-ym__summary {
-  appearance: none !important;
-  -webkit-appearance: none !important;
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  min-height: 2.65rem !important;
-  height: auto !important;
-  max-height: none !important;
-  margin: 0 !important;
-  padding: 0.45rem 0.1rem 0.5rem !important;
-  border: 0 !important;
-  border-bottom: 1.5px solid #cfd6dd !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
-  color: #0f172a !important;
-  font: 500 1rem/1.35 system-ui, sans-serif !important;
-  text-align: left !important;
-}
-
-body.ertek-page[data-site-page="ertekbecsles"] #ad-form .ad-form-alap-card__body .immo-wheel-trigger {
-  appearance: none !important;
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  width: 100% !important;
-  min-height: 2.5rem !important;
-  padding: 0.45rem 0.1rem 0.5rem !important;
-  border: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
-  color: #0f172a !important;
-  font: 500 1rem/1.35 system-ui, sans-serif !important;
-  text-align: left !important;
-  cursor: pointer !important;
-}
-
-body.ertek-page[data-site-page="ertekbecsles"] #ad-form .ad-form-alap-card__body .immo-wheel-trigger.is-placeholder,
-body.ertek-page[data-site-page="ertekbecsles"] #ad-form .ad-form-alap-card__body .ad-form-split-ym__summary.is-placeholder {
-  color: #64748b !important;
-  font-weight: 500 !important;
-}
-
-body.ertek-page[data-site-page="ertekbecsles"] #ad-form .ad-form-alap-card__body .suffix-field {
-  display: flex !important;
-  align-items: center !important;
-  width: 100% !important;
-  gap: 0.55rem !important;
-  border: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
-  min-height: 2.65rem !important;
-  height: auto !important;
-  max-height: none !important;
-  padding: 0 !important;
-  overflow: visible !important;
-}
-
-body.ertek-page[data-site-page="ertekbecsles"] #ad-form .ad-form-alap-card__body .suffix-field > input#km,
-body.ertek-page[data-site-page="ertekbecsles"] #ad-form input#km {
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  flex: 1 1 auto !important;
-  width: 100% !important;
-  min-width: 4rem !important;
-  max-width: none !important;
-  min-height: 2.65rem !important;
-  height: auto !important;
-  max-height: none !important;
-  margin: 0 !important;
-  padding: 0.45rem 0.1rem !important;
-  border: 0 !important;
-  border-bottom: 1.5px solid #cfd6dd !important;
-  border-radius: 0 !important;
-  background: #fff !important;
-  box-shadow: none !important;
-  color: #111 !important;
-  -webkit-text-fill-color: #111 !important;
-  caret-color: #111 !important;
-  font: 500 1rem/1.35 system-ui, sans-serif !important;
-  outline: none !important;
-}
-
-body.ertek-page[data-site-page="ertekbecsles"] #ad-form .ad-form-alap-card__body .suffix-field > span {
-  flex: 0 0 auto !important;
-  color: #666 !important;
-  visibility: visible !important;
-}
-
-body.ertek-page[data-site-page="ertekbecsles"] #ad-form .ad-form-split-ym {
-  display: block !important;
-  width: 100% !important;
-}
-
-html[data-theme="dark"] body.ertek-page[data-site-page="ertekbecsles"] #ad-form .ad-form-alap-card__body .immo-wheel-trigger,
-html[data-theme="dark"] body.ertek-page[data-site-page="ertekbecsles"] #ad-form .ad-form-alap-card__body .ad-form-split-ym__summary,
-html[data-theme="dark"] body.ertek-page[data-site-page="ertekbecsles"] #ad-form input#km {
-  color: #f8fafc !important;
-  -webkit-text-fill-color: #f8fafc !important;
-  caret-color: #f8fafc !important;
-  background: transparent !important;
-  border-bottom-color: #3a3a3a !important;
+@media (min-width: 901px) {
+  body.ertek-page.ad-form-desk-active[data-site-page="ertekbecsles"] #ad-form.ad-form-desk-layout {
+    grid-template-columns: var(--ad-filter-w, 320px) minmax(0, 1fr) !important;
+  }
+  body.ertek-page[data-site-page="ertekbecsles"] #ad-desk-tips-col {
+    display: none !important;
+  }
 }

@@ -1,11 +1,24 @@
-/** Értékbecslő — ugyanaz a feladás asztali menürendszer (mountAdFormBmPickers). */
+/** Értékbecslő — a feladás teljes asztali menürendszere + piaci sáv. */
 
-import { fetchModelTypes } from "./vehicle-catalog-client.js?v=ertekAd1";
 import { parseKmDigits } from "./km-input.js?v=30e4feeab0";
-import { flattenUzemanyagOptions } from "./equipment-data.js?v=ertekAd1";
-import { mountAdFormBmPickers } from "./ad-form-bm-pickers.js?v=ertekAd3";
 
 const DEBOUNCE_MS = 350;
+
+const DETAIL_FIELDS = [
+  "tipus",
+  "uzemanyag",
+  "kivitel",
+  "allapot",
+  "okmany_jelleg",
+  "sebessegvalto",
+  "hajtas",
+  "szin",
+  "klima",
+  "ajtok",
+  "hengerurtartalom",
+  "teljesitmeny_le",
+  "teljesitmeny_kw",
+];
 
 function el(sel, root = document) {
   return root.querySelector(sel);
@@ -17,22 +30,6 @@ function escapeHtml(value) {
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
-}
-
-function ensureLink(href, marker) {
-  if (document.querySelector(`link[${marker}]`)) return;
-  const link = document.createElement("link");
-  link.rel = "stylesheet";
-  link.href = href;
-  link.setAttribute(marker, "1");
-  document.head.appendChild(link);
-}
-
-function ensureAdFormCss() {
-  ensureLink("/css/ingatlan-search.css?v=ertekAd3", "data-ertek-immo-css");
-  ensureLink("/css/ad-form-desk.css?v=ertekAd3", "data-ertek-desk-css");
-  ensureLink("/css/ad-form-bm-pickers.css?v=ertekAd3", "data-ertek-bm-css");
-  ensureLink("/css/automax.css?v=ertekAd3", "data-ertek-automax-css");
 }
 
 function fieldValue(form, id) {
@@ -60,102 +57,29 @@ function formatResult(data) {
     </div>`;
 }
 
-function replaceSelectOptions(select, values, emptyLabel) {
-  if (!select || select.tagName !== "SELECT") return;
-  const prev = String(select.value || "").trim();
-  select.innerHTML = "";
-  const empty = document.createElement("option");
-  empty.value = "";
-  empty.textContent = emptyLabel;
-  select.appendChild(empty);
-  for (const raw of values || []) {
-    const value = typeof raw === "string" ? raw : raw?.value;
-    if (!value) continue;
-    const o = document.createElement("option");
-    o.value = value;
-    o.textContent = typeof raw === "string" ? raw : raw.label || value;
-    select.appendChild(o);
-  }
-  if (prev && [...select.options].some((o) => o.value === prev)) select.value = prev;
-}
-
 export async function initErtekbecsloPanel(root = document) {
   const panel = el('[data-mm-panel="ertekbecslo"]', root) || el("[data-ertekbecslo]", root);
   if (!panel || panel.dataset.ertekReady === "1") return;
   panel.dataset.ertekReady = "1";
-  ensureAdFormCss();
 
-  const form = el("[data-ertek-form]", panel);
+  const form = el("[data-ertek-form]", panel) || el("#ad-form", panel);
   const kmInput = el("#km", panel) || el("[data-ertek-km]", panel);
-  const out = el("[data-ertek-out]", panel);
-  const status = el("[data-ertek-status]", panel);
+  const out = el("[data-ertek-out]", root) || el("[data-ertek-out]", panel);
   if (!form || !kmInput || !out) return;
 
   if (document.body?.getAttribute("data-site-page") === "ertekbecsles") {
     document.body.classList.add("ad-form-desk-active");
   }
-  const alapTitle = form.querySelector(".ad-form-alap-card__title");
-  const alapCard = form.querySelector(".ad-form-alap-card");
-  if (alapTitle && alapCard && !alapTitle.dataset.ertekBound) {
-    alapTitle.dataset.ertekBound = "1";
-    alapTitle.addEventListener("click", () => {
-      const closed = alapCard.classList.toggle("is-collapsed");
-      alapTitle.setAttribute("aria-expanded", closed ? "false" : "true");
-    });
-  }
-
-  const fuel = form.querySelector("#uzemanyag");
-  if (fuel && fuel.options.length <= 1) {
-    for (const v of flattenUzemanyagOptions()) {
-      const o = document.createElement("option");
-      o.value = v;
-      o.textContent = v;
-      fuel.appendChild(o);
-    }
-  }
-
-  if (status) status.textContent = "Menü betöltése…";
-  try {
-    await mountAdFormBmPickers(form);
-    if (status) status.textContent = "";
-  } catch (err) {
-    if (status) status.textContent = err?.message || "Menü nem elérhető.";
-    return;
-  }
 
   let timer = null;
-
-  async function refreshTypes() {
-    const gyartmany = fieldValue(form, "gyartmany");
-    const modell = fieldValue(form, "modell");
-    const tipus = form.querySelector("#tipus");
-    if (!tipus) return;
-    if (!gyartmany || !modell) {
-      replaceSelectOptions(tipus, [], "Válasszon");
-      tipus._adBmFillWheel?.("");
-      tipus._adBmRefreshSummary?.();
-      return;
-    }
-    try {
-      const data = await fetchModelTypes(gyartmany, modell, { kind: "szemelyauto" });
-      replaceSelectOptions(tipus, data?.tipusok || [], "Válasszon");
-    } catch {
-      replaceSelectOptions(tipus, [], "Válasszon");
-    }
-    tipus._adBmFillWheel?.(tipus.value || "");
-    tipus._adBmRefreshSummary?.();
-  }
 
   async function estimate() {
     const gyartmany = fieldValue(form, "gyartmany");
     const modell = fieldValue(form, "modell");
-    const tipus = fieldValue(form, "tipus");
-    const uzemanyag = fieldValue(form, "uzemanyag");
     const gyartasi_ev = fieldValue(form, "gyartasi_ev");
     const km = parseKmDigits(kmInput.value || "") || "";
     if (!gyartmany || !modell || !gyartasi_ev || !km) {
-      out.innerHTML =
-        '<p class="ertek-msg">Kötelező: gyártmány, modell, évjárat, km.</p>';
+      out.innerHTML = '<p class="ertek-msg">Kötelező: gyártmány, modell, évjárat, km.</p>';
       return;
     }
     out.innerHTML = '<p class="ertek-msg">Számolás…</p>';
@@ -167,8 +91,10 @@ export async function initErtekbecsloPanel(root = document) {
       require: "1",
       source: "market",
     });
-    if (tipus) q.set("tipus", tipus);
-    if (uzemanyag) q.set("uzemanyag", uzemanyag);
+    for (const id of DETAIL_FIELDS) {
+      const value = fieldValue(form, id);
+      if (value) q.set(id, value);
+    }
     try {
       const res = await fetch(`/api/valuation/estimate?${q}`, { credentials: "same-origin" });
       const data = await res.json().catch(() => ({}));
@@ -185,22 +111,7 @@ export async function initErtekbecsloPanel(root = document) {
     }, DEBOUNCE_MS);
   }
 
-  form.addEventListener("change", (event) => {
-    const id = event.target?.id || event.target?.getAttribute?.("name") || "";
-    if (id === "gyartmany" || id === "modell") {
-      void refreshTypes().then(schedule);
-      return;
-    }
-    schedule();
-  });
-  form.addEventListener("immo-wheel-change", (event) => {
-    const wheel = event.target?.closest?.("[data-wheel]") || event.target;
-    const key = wheel?.getAttribute?.("data-wheel") || "";
-    if (key === "gyartmany" || key === "modell") {
-      void refreshTypes().then(schedule);
-      return;
-    }
-    schedule();
-  });
+  form.addEventListener("change", schedule);
+  form.addEventListener("immo-wheel-change", schedule);
   kmInput.addEventListener("input", schedule);
 }

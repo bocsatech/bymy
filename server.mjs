@@ -2227,6 +2227,15 @@ async function handleValuationApi(req, res, pathname) {
         modell: url.searchParams.get("modell"),
         tipus: url.searchParams.get("tipus"),
         uzemanyag: url.searchParams.get("uzemanyag"),
+        kivitel: url.searchParams.get("kivitel"),
+        allapot: url.searchParams.get("allapot"),
+        sebessegvalto: url.searchParams.get("sebessegvalto"),
+        hajtas: url.searchParams.get("hajtas"),
+        szin: url.searchParams.get("szin"),
+        klima: url.searchParams.get("klima"),
+        okmany_jelleg: url.searchParams.get("okmany_jelleg"),
+        hengerurtartalom: url.searchParams.get("hengerurtartalom"),
+        teljesitmeny_le: url.searchParams.get("teljesitmeny_le"),
         modell_tipus:
           url.searchParams.get("modell_tipus") ||
           [url.searchParams.get("modell"), url.searchParams.get("tipus")]

@@ -1,13 +1,14 @@
 import SwiftUI
 import WebKit
 
-/// Fő tartalomoldalak webről (index/auto/teher/ingatlan/ajanlasok) — 100% funkció.
+/// Fő tartalomoldalak webről (index/auto/teher/ingatlan/ertekbecsles/ajanlasok) — 100% funkció.
 struct NativeWebPage: View {
     enum Page: String {
         case hub = "index.html"
         case auto = "auto.html"
         case teherauto = "teherauto.html"
         case ingatlan = "ingatlan.html"
+        case ertekbecsles = "ertekbecsles.html"
         case ajanlasok = "ajanlasok.html"
         case post = "hirdetesfeladas.html"
         case kereses = "kereses.html"

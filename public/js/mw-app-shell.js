@@ -21,6 +21,7 @@
     if (page === id) return true;
     if (id === "hub" && (page === "hub" || page === "" || page === "index")) return true;
     if (id === "search" && (page === "kereses" || page === "auto" || page === "teherauto" || page === "ingatlan")) return true;
+    if (id === "ertekbecsles" && page === "ertekbecsles") return true;
     if (id === "ajanlasok" && page === "ajanlasok") return true;
     if (id === "fiok" && (page === "fiok" || page === "beallitasok" || page === "uzenetek")) return true;
     if (id === "post" && page === "hirdetesfeladas") return true;
@@ -36,6 +37,7 @@
       { id: "auto", href: "/auto.html", label: "Autó" },
       { id: "teherauto", href: "/teherauto.html", label: "Teherautó" },
       { id: "ingatlan", href: "/ingatlan.html", label: "Ingatlan" },
+      { id: "ertekbecsles", href: "/ertekbecsles.html", label: "Értékbecslés" },
       { id: "ajanlasok", href: "/ajanlasok.html", label: "Ajánlások" },
     ];
 
@@ -75,6 +77,16 @@
 
     body.insertAdjacentHTML("afterbegin", html);
     syncAuthCache();
+    scrollActivePagesLink();
+  }
+
+  function scrollActivePagesLink() {
+    var active = document.querySelector(".mw-app-pages-link.is-active");
+    if (active && active.scrollIntoView) {
+      try {
+        active.scrollIntoView({ inline: "center", block: "nearest" });
+      } catch (e) {}
+    }
   }
 
   function syncAuthCache() {
@@ -262,6 +274,7 @@
     if (id === "auto") return page === "auto" ? " active" : "";
     if (id === "teherauto") return page === "teherauto" ? " active" : "";
     if (id === "ingatlan") return page === "ingatlan" ? " active" : "";
+    if (id === "ertekbecsles") return page === "ertekbecsles" ? " active" : "";
     if (id === "ajanlasok") return page === "ajanlasok" ? " active" : "";
     return "";
   }
@@ -402,6 +415,9 @@
       navCountHtml("ingatlan", counts) +
       "</a>" +
       '<a class="hub-nav-link' +
+      navActiveClass("ertekbecsles") +
+      '" href="/ertekbecsles.html">Értékbecslés</a>' +
+      '<a class="hub-nav-link' +
       navActiveClass("ajanlasok") +
       '" href="' +
       ajanlasokHref() +
@@ -441,6 +457,7 @@
   ensureDeskHeaderCss();
   ensureNavFont();
   injectTop();
+  scrollActivePagesLink();
   injectDeskHeader();
   injectTabbar();
   if (!isPostAd) bindScrollHide();

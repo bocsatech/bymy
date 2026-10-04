@@ -10,7 +10,6 @@
           }
           document.documentElement.setAttribute("data-theme", t);
         } catch (e) {}
-                
         try {
           var raw = sessionStorage.getItem("bymy-auth-user");
           var user = raw ? JSON.parse(raw) : null;
@@ -46,32 +45,27 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext x='16' y='22' text-anchor='middle' font-size='14' font-family='system-ui,sans-serif' font-weight='700'%3EB%3C/text%3E%3C/svg%3E" type="image/svg+xml" />
-    <meta name="bymy-version" content="authAcct1" />
-    <title>Hirdetések — Bymy</title>
+    <title>Értékbecslés — Bymy</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="/css/style.css?v=f771974b46" />
-    <link rel="stylesheet" href="/css/listing-photo-cover.css?v=70dce08b86" />
-    <link rel="stylesheet" href="/css/automax.css?v=ebe796dcb2" />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/css/hub.css?v=e6bf27b3c3" />
     <link rel="stylesheet" href="/css/site-app.css?v=c0d2bfab87" />
-    <link rel="stylesheet" href="/css/site-side.css?v=6f9f0965f1" />
-      <link rel="stylesheet" href="/css/hub.css?v=e6bf27b3c3" />
-</head>
-  <body class="site-app import-page listings-page site-page" data-site-page="listings">
+    <link rel="stylesheet" href="/css/bymy-logo-size.css?v=f14985a2ca" />
+    <link rel="stylesheet" href="/css/site-desk-header.css?v=09d6bf801f" />
+    <link rel="stylesheet" href="/css/ertekbecslo-qr.css?v=ertekNav1" />
+  </head>
+  <body class="hub-page site-page site-app ertek-page" data-site-page="ertekbecsles">
     <script src="/js/mw-app-shell.js?v=ertekNav1"></script>
-<div class="local-banner">Bymy — mentett és feladott hirdetések (SQLite)</div>
-
-    <header class="site-header site-app-header">
-      <div class="site-app-header-inner">
+    <header class="hub-header">
+      <div class="hub-header-inner">
         <div class="hub-header-top">
         <div class="hub-header-actions site-header-actions">
           <a class="hub-header-msg" href="/uzenetek.html" data-auth-member hidden>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 6.8h9.5a2.2 2.2 0 0 1 2.2 2.2v4.2a2.2 2.2 0 0 1-2.2 2.2H10l-3.2 2.4V15.2H5A2.2 2.2 0 0 1 2.8 13V9a2.2 2.2 0 0 1 2.2-2.2Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M14.2 8.2h4A2.2 2.2 0 0 1 20.4 10.4v3.4a2.2 2.2 0 0 1-2.2 2.2h-.7v1.7l-2.2-1.7" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
             <span>Üzenetek</span>
           </a>
-
-<div class="site-header-auth-row" data-auth-guest>
+          <div class="site-header-auth-row" data-auth-guest>
             <a class="hub-btn hub-btn--ghost" href="/belepes.html" data-auth-login>Belépés</a>
             <a class="hub-btn hub-btn--ghost" href="/regisztracio.html" data-auth-register>Regisztráció</a>
           </div>
@@ -90,56 +84,70 @@
         </div>
         </div>
         <div class="hub-nav-band">
-          <a class="site-app-logo" href="/" aria-label="Bymy">
+          <a class="hub-logo" href="/" aria-label="Bymy">
             <img class="bymy-logo-img bymy-logo-img--nav" src="/images/bymy-logo.png?v=08e46e9d97" alt="Bymy.hu" width="190" height="48" decoding="async" />
           </a>
-        <nav class="import-nav site-app-nav" aria-label="Főmenü">
-          <a class="import-nav-link" href="/">Kezdőlap</a>
-          <a class="import-nav-link" href="/auto.html">Autó</a>
-          <a class="import-nav-link" href="/teherauto.html">Teherautó</a>
-          <a class="import-nav-link" href="/ingatlan.html">Ingatlan</a>
-          <a class="import-nav-link" href="/ertekbecsles.html">Értékbecslés</a>
-          <a class="import-nav-link" href="/ajanlasok.html">Ajánlások</a>
+          <nav class="hub-nav" aria-label="Főmenü">
+          <a class="hub-nav-link" href="/">Kezdőlap</a>
+          <a class="hub-nav-link" href="/auto.html">Autó</a>
+          <a class="hub-nav-link" href="/teherauto.html">Teherautó</a>
+          <a class="hub-nav-link" href="/ingatlan.html">Ingatlan</a>
+          <a class="hub-nav-link active" href="/ertekbecsles.html">Értékbecslés</a>
+          <a class="hub-nav-link" href="/ajanlasok.html">Ajánlások</a>
         </nav>
         </div>
       </div>
     </header>
 
-    <main class="page page-listings">
-      <div class="site-layout">
-        
-        <div class="site-center">
-      <div class="listings-feed">
-        <div id="listings-list" class="ha-card-feed"></div>
-        <p id="listings-empty" class="listings-empty" hidden>Még nincs mentett hirdetés. Importálj egy autót, majd kattints a „Mentés az adatbázisba” gombra.</p>
-      </div>
-
-      <section class="card listings-detail-card" id="listings-detail" hidden>
-        <div class="card-head listings-detail-head">
-          <div>
-            <h2 id="listings-detail-title" class="listings-detail-title">—</h2>
-            <p id="listings-detail-meta" class="listings-detail-meta"></p>
-          </div>
-          <div class="listings-detail-actions" data-owner-actions hidden>
-              <a class="btn btn-secondary btn-sm" id="listings-edit-btn" href="/beallitasok.html?szekcio=hirdetes">Szerkesztés</a>
-              <button type="button" class="btn btn-secondary btn-sm listings-publish-btn" id="listings-publish-btn" hidden>Közzététel főoldalra</button>
-              <button type="button" class="btn btn-secondary btn-sm listings-delete-btn" id="listings-delete-btn">Törlés</button>
-          </div>
+    <main class="ertek-page-main">
+      <section data-ertekbecslo>
+        <h1 class="ertek-page-title">Értékbecslés</h1>
+        <p class="ertek-page-lead">Személyautó piaci sáv a minta alapján. Kötelező: gyártmány, modell, évjárat, km. Az üzemanyag és a típus finomítja az ajánlatot.</p>
+        <p class="ertek-msg" data-ertek-status role="status"></p>
+        <div class="ertek-search-panel">
+          <form class="ertek-form home-qs-form immo-search-form" data-ertek-form data-ertek-drums data-force-drums onsubmit="return false">
+            <div class="home-qs-layout-main" data-ertek-layout>
+            <div class="home-qs-field" data-qs-field="gyartmany">
+              <span class="home-qs-label">Gyártmány</span>
+              <select class="home-qs-control" data-filter-key="gyartmany" aria-label="Gyártmány"></select>
+            </div>
+            <div class="home-qs-field" data-qs-field="modell">
+              <span class="home-qs-label">Modell</span>
+              <select class="home-qs-control" data-filter-key="modell" aria-label="Modell"></select>
+            </div>
+            <div class="home-qs-field" data-qs-field="tipus">
+              <span class="home-qs-label">Típus</span>
+              <select class="home-qs-control" data-filter-key="tipus" aria-label="Típus">
+                <option value="">Típus (opcionális)</option>
+              </select>
+            </div>
+            <div class="home-qs-field" data-qs-field="uzemanyag">
+              <span class="home-qs-label">Üzemanyag</span>
+              <select class="home-qs-control" data-filter-key="uzemanyag" aria-label="Üzemanyag">
+                <option value="">Mindegy</option>
+              </select>
+            </div>
+            <div class="home-qs-field" data-qs-field="gyartasi_ev">
+              <span class="home-qs-label">Évjárat</span>
+              <select class="home-qs-control" data-filter-key="gyartasi_ev" data-ertek-year aria-label="Évjárat">
+                <option value="">Évjárat</option>
+              </select>
+            </div>
+            <div class="home-qs-field ertek-km-field" data-qs-field="km">
+              <span class="home-qs-label">Km</span>
+              <input class="home-qs-control" type="text" inputmode="numeric" data-ertek-km placeholder="pl. 120000" autocomplete="off" />
+            </div>
+            </div>
+          </form>
         </div>
-        <div class="card-body">
-          <div id="listings-cells" class="import-cells-card"></div>
-        </div>
+        <div class="ertek-out" data-ertek-out></div>
       </section>
-        </div>
-        
-      </div>
     </main>
 
-    <script src="/js/listings-app.js?v=ce3a410974" type="module"></script>
-    <script src="/js/site-avatar-menu.js?v=4c911388e7" type="module"></script>
-
+    <script type="module" src="/js/ertekbecsles-page.js?v=ertekNav1"></script>
     <script src="/js/nav-counts.js?v=08dce07726" type="module"></script>
     <script src="/js/theme.js?v=4fe8a2261f" type="module"></script>
     <script src="/js/site-auth.js?v=aad32d7596" type="module"></script>
-</body>
+    <script src="/js/site-avatar-menu.js?v=4c911388e7" type="module"></script>
+  </body>
 </html>

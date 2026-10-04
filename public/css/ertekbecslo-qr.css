@@ -300,3 +300,32 @@ html[data-bymy-account-type="business"] body.site-app .mm-nav > [data-mm-dealer-
 html[data-mm-account-kind="company"] body.site-app .mm-nav > [data-mm-dealer-nav-wrap] {
   display: grid !important;
 }
+
+.ertek-page-main {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem;
+  box-sizing: border-box;
+}
+
+.ertek-page-title {
+  margin: 0 0 0.4rem;
+  font-size: 1.55rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.ertek-page-lead {
+  margin: 0 0 1.25rem;
+  color: #64748b;
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+.ertek-page-main .ertek-search-panel {
+  max-width: none;
+}
+
+html[data-theme="dark"] .ertek-page-lead {
+  color: #94a3b8;
+}

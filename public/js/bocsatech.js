@@ -145,6 +145,7 @@ const ADMIN_SECTIONS = [
       { id: "pages:auto", label: "Autó", navGroup: "Oldalak" },
       { id: "pages:teherauto", label: "Teherautó", navGroup: "Oldalak" },
       { id: "pages:ingatlan", label: "Ingatlan", navGroup: "Oldalak" },
+      { id: "pages:ertekbecsles", label: "Értékbecslés", navGroup: "Oldalak" },
       { id: "pages:ajanlasok", label: "Ajánlások", navGroup: "Oldalak" },
       { id: "pages:kereses", label: "Keresés", navGroup: "Oldalak" },
       { id: "pages:hirdetesfeladas", label: "Hirdetésfeladás", navGroup: "Oldalak" },
@@ -212,6 +213,13 @@ const PAGE_ADMIN_GUIDES = {
       { tab: "ingatlan:tipus-mezok", label: "Típus → mezők" },
       { tab: "ingatlan:listings", label: "Ingatlanhirdetések" },
     ],
+  },
+  ertekbecsles: {
+    title: "Értékbecslés",
+    href: "/ertekbecsles.html",
+    blocksPage: "ertekbecsles",
+    blurb: "Személyautó piaci értékbecslő.",
+    jumps: [],
   },
   ajanlasok: {
     title: "Ajánlások",

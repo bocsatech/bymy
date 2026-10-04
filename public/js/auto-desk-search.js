@@ -101,7 +101,7 @@ function setMode(mode) {
   const submitBtn = document.querySelector("#home-qs-form .home-qs-submit");
   if (submitBtn) submitBtn.textContent = "Találatok mutatása";
   const form = document.getElementById("home-qs-form");
-  syncGyorsFieldVisibility(form);
+  if (isAutoDesk()) syncGyorsFieldVisibility(form);
   return next;
 }
 
@@ -325,13 +325,31 @@ export function arrangeAutoDeskDemoFields(form = document.getElementById("home-q
 
 function isDeskGyorsOnly() {
   return (
+    isAutoDesk() &&
     document.body.classList.contains("auto-desk-gyors") &&
     !document.body.classList.contains("auto-desk-reszletes")
   );
 }
 
+export function clearDeskGyorsHideStyles(form = document.getElementById("home-qs-form")) {
+  if (!form) return;
+  for (const el of [
+    form.querySelector("#qs-more"),
+    form.querySelector("#qs-more-layout"),
+    form.querySelector("#qs-detailed-panel"),
+    form.querySelector('[data-desk-acc="extrak"]'),
+  ]) {
+    if (!el) continue;
+    el.style.removeProperty("display");
+  }
+}
+
 function syncGyorsFieldVisibility(form = document.getElementById("home-qs-form")) {
   if (!form) return;
+  if (!isAutoDesk()) {
+    clearDeskGyorsHideStyles(form);
+    return;
+  }
   const gyorsOnly = isDeskGyorsOnly();
   form.querySelectorAll(".auto-desk-fields[data-desk-alap] .auto-desk-field").forEach((el) => {
     el.hidden = false;
@@ -505,14 +523,16 @@ export function initAutoDeskSearch({
     }
   }
 
-  setMode("gyors");
-  openAccordions(["alap", "muszaki", "extrak"]);
-  updateAutoDeskAccSummaries(form);
-
   if (isAutoDesk()) {
+    setMode("gyors");
     openAccordions(["alap"]);
     syncGyorsFieldVisibility(form);
+  } else {
+    document.body.classList.remove("auto-desk-gyors", "auto-desk-reszletes", "auto-desk-ertekbecslo");
+    clearDeskGyorsHideStyles(form);
+    openAccordions(["alap", "muszaki", "extrak"]);
   }
+  updateAutoDeskAccSummaries(form);
 
   document.querySelectorAll("[data-desk-mode]").forEach((btn) => {
     btn.addEventListener("click", async () => {
@@ -644,6 +664,7 @@ export function initAutoDeskSearch({
     } else {
       if (advancedBtn) advancedBtn.hidden = false;
       document.body.classList.remove("auto-desk-gyors", "auto-desk-reszletes", "auto-desk-ertekbecslo");
+      clearDeskGyorsHideStyles(form);
       const submitBtn = document.querySelector("#home-qs-form .home-qs-submit");
       if (submitBtn) submitBtn.textContent = "Találatok mutatása";
     }

@@ -20,7 +20,7 @@ import {
   arrangeAutoDeskDemoFields,
   deskFilterMenuReady,
   syncAutoSearchAccShell,
-} from "./auto-desk-search.js?v=noErtek1";
+} from "./auto-desk-search.js?v=mobileMore1";
 
 prefetchAutoSearchBoot();
 const MOBILE_MQ = "(max-width: 900px)";
@@ -107,6 +107,10 @@ export function initHomeQuickSearch({ onSearch = () => {}, onFilterPreview, onDe
     if (!morePanel || !advancedBtn) return;
     morePanel.hidden = !open;
     morePanel.classList.toggle("is-open", open);
+    if (open) {
+      morePanel.style.removeProperty("display");
+      form.querySelector("#qs-more-layout")?.style.removeProperty("display");
+    }
     advancedBtn.setAttribute("aria-expanded", open ? "true" : "false");
     advancedBtn.textContent = open ? "Kevesebb szűrő" : "Több szűrő";
     hero?.classList.toggle("is-more-open", open);
@@ -119,6 +123,7 @@ export function initHomeQuickSearch({ onSearch = () => {}, onFilterPreview, onDe
     if (!detailedPanel || !detailedBtn) return;
     detailedPanel.hidden = !open;
     detailedPanel.classList.toggle("is-open", open);
+    if (open) detailedPanel.style.removeProperty("display");
     detailedBtn.setAttribute("aria-expanded", open ? "true" : "false");
     detailedBtn.textContent = open ? "Kevesebb részletes" : "Részletes keresés";
     hero?.classList.toggle("is-detailed-open", open);

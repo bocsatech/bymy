@@ -478,10 +478,11 @@ function otpSentMessage(data) {
       ? String(data.smtpWarning)
       : "ismeretlen SMTP hiba";
     const host = String(location.hostname || "").toLowerCase();
-    const vercelHint =
-      host.includes("vercel.app") || host.endsWith(".bymy.hu")
-        ? " Vercelen: scripts/sync-vercel-mail-relay.mjs (SMTP relay az éles S1-ről) vagy mac/vercel-smtp-env.command. Ideiglenesen: bymy.hu/Bocsatech.html."
-        : " A Gmail küldő fiók app jelszavát ellenőrizd (~/.autosweb/smtp.json).";
+    const hosted =
+      host.includes("vercel.app") || host === "bymy.hu" || host.endsWith(".bymy.hu");
+    const vercelHint = hosted
+      ? " Próbáld újra a kód küldését. Ha ismét elhasal, az S1 SMTP (Gmail) a küldő."
+      : " A Gmail küldő fiók app jelszavát ellenőrizd (~/.autosweb/smtp.json).";
     return `Az email kód nem ment ki${to}: ${detail}.${vercelHint}`;
   }
   if (data.otpSent !== true) {

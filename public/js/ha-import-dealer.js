@@ -1077,34 +1077,36 @@
 
     showProgress(0, 1, "lista ellenőrzése");
     await quickScrollThumbs();
-    const cars = extractCarsFromPage().map((car) => {
-      const listingId = recoverHaId(car);
-      return listingId ? { ...car, listingId } : car;
-    });
-    const withId = cars.filter((car) => /^\d{5,12}$/.test(String(car.listingId || "")));
-    if (!withId.length) {
-      let mods = 0;
-      const frames = docsInScope().length;
-      for (const doc of docsInScope()) mods += countModositasButtons(doc);
-      const sample = cars[0] ? Object.keys(cars[0]).join(",") : "-";
-      hideProgress(`Nincs ID (talált: ${cars.length}, keret: ${frames}, módosít: ${mods}) ${sample}`);
+    const cars = extractCarsFromPage()
+      .map((car) => {
+        const listingId = recoverHaId(car);
+        return listingId ? { ...car, listingId } : car;
+      })
+      .filter((car) => {
+        const title = clean(car.visibleTitle || car.title || "");
+        const img = clean(car.visibleImage || car.imageUrl || "");
+        if (/szerződésmódosítás|tájékoztató|^kilépés$/i.test(title) && !car.listingId) return false;
+        return Boolean(car.listingId || title.length >= 6 || img);
+      });
+    if (!cars.length) {
+      hideProgress("Nincs másolható autó a listán");
       return;
     }
 
     let preparedDone = 0;
-    const prepared = await mapPool(withId, 6, async (car) => {
+    const prepared = await mapPool(cars, 6, async (car) => {
       let next = car;
       try {
-        next = await ensureCarDescription(car);
+        if (car.listingId) next = await ensureCarDescription(car);
       } catch {
         next = car;
       }
       preparedDone += 1;
-      showProgress(preparedDone, withId.length, `előkészítés ${preparedDone}/${withId.length}`);
+      showProgress(preparedDone, cars.length, `másolás ${preparedDone}/${cars.length}`);
       return slimDealerPage(next);
     });
     if (!prepared.length) {
-      hideProgress("Nincs azonosító a sorokban");
+      hideProgress("Nincs másolható autó a listán");
       return;
     }
 

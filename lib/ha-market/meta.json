@@ -1,6 +1,8 @@
 {
-  "count": 196130,
-  "source": "ha-price-download+merge",
-  "effective": "lista_ar",
-  "updated_at": "2026-10-02T21:19:46.178Z"
+  "count": 111955,
+  "source": "rows.jsonl-osszevont",
+  "effective": "lista_ar+reszletes",
+  "reszletes": 52729,
+  "alap": 59226,
+  "updated_at": "2026-10-04T20:14:17.830Z"
 }

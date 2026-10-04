@@ -22,6 +22,7 @@
  *   lib/ha-market/prices.json.gz  (ha --write-market / --write-market-only)
  */
 import { mkdirSync, writeFileSync, appendFileSync, existsSync, readFileSync } from "node:fs";
+import { execSync } from "node:child_process";
 import { join, resolve } from "node:path";
 import { gzipSync, gunzipSync } from "node:zlib";
 import { chromium } from "playwright";
@@ -32,6 +33,7 @@ import {
   isCdpReady,
   getChromeProfileDir,
 } from "../lib/chrome-launcher.mjs";
+import { mapSebessegvalto } from "../lib/map-tech.mjs";
 
 const ROOT = resolve("data/ha-prices");
 const ROWS_FILE = join(ROOT, "rows.jsonl");
@@ -71,6 +73,7 @@ function parseArgs(argv) {
     max: Number(process.env.MAX || 0) || 0,
     writeMarket: process.env.WRITE_MARKET === "1",
     writeMarketOnly: process.env.WRITE_MARKET_ONLY === "1",
+    mergeMarket: process.env.MERGE_MARKET !== "0",
     reszletes: process.env.RESZLETES === "1",
     planOnly: false,
     resume: process.env.RESUME !== "0",
@@ -87,7 +90,8 @@ function parseArgs(argv) {
     else if (a === "--write-market-only") {
       out.writeMarketOnly = true;
       out.writeMarket = true;
-    } else if (a === "--reszletes") out.reszletes = true;
+    } else if (a === "--no-merge") out.mergeMarket = false;
+    else if (a === "--reszletes") out.reszletes = true;
     else if (a === "--plan") out.planOnly = true;
     else if (a === "--no-resume") out.resume = false;
     else if (a === "--resume") out.resume = true;
@@ -202,11 +206,42 @@ async function ensureChrome() {
   return port;
 }
 
+function stopImportProfileChrome() {
+  const profileDir = getChromeProfileDir();
+  try {
+    execSync(`pkill -f "user-data-dir=${profileDir}" || true`, { stdio: "ignore" });
+  } catch {
+    /* már nem fut */
+  }
+}
+
+async function launchPersistentChrome() {
+  const profileDir = getChromeProfileDir();
+  stopImportProfileChrome();
+  await sleep(1500);
+  const context = await chromium.launchPersistentContext(profileDir, {
+    channel: "chrome",
+    headless: false,
+    viewport: null,
+    ignoreHTTPSErrors: true,
+    args: ["--disable-features=TranslateUI", "--no-first-run", "--no-default-browser-check"],
+  });
+  return { browser: context, context };
+}
+
 async function connect(port) {
-  const browser = await chromium.connectOverCDP(`http://127.0.0.1:${port}`);
-  const context = browser.contexts()[0];
-  if (!context) throw new Error("Nincs Chrome kontextus.");
-  return { browser, context };
+  if (port) {
+    try {
+      const browser = await chromium.connectOverCDP(`http://127.0.0.1:${port}`, { timeout: 20000 });
+      const context = browser.contexts()[0];
+      if (!context) throw new Error("Nincs Chrome kontextus.");
+      return { browser, context };
+    } catch (err) {
+      log(`CDP attach hiba: ${String(err?.message || err).split("\n")[0]}`);
+    }
+  }
+  log("Chrome indítása a mentett profillal (Playwright)…");
+  return launchPersistentChrome();
 }
 
 async function ensureWww(page) {
@@ -348,6 +383,32 @@ function appendRows(rows) {
   appendFileSync(ROWS_FILE, body);
 }
 
+function extrasFromRow(r) {
+  const d = r.detail && typeof r.detail === "object" ? r.detail : {};
+  const extra = {};
+  const fuel = d.uzemanyag || r.fuel || "";
+  const gear = mapSebessegvalto(d.sebessegvalto || r.gear || "");
+  if (r.gyartmany) extra.b = r.gyartmany;
+  if (fuel) extra.f = fuel;
+  if (gear) extra.g = gear;
+  if (d.kivitel) extra.k = d.kivitel;
+  if (d.allapot) extra.a = d.allapot;
+  if (d.hajtas) extra.h = d.hajtas;
+  if (d.szin) extra.s = d.szin;
+  if (d.klima) extra.c = d.klima;
+  if (d.okmany) extra.o = d.okmany;
+  if (d.hengerurtartalom) extra.cc = d.hengerurtartalom;
+  if (d.teljesitmeny || r.power) extra.p = d.teljesitmeny || r.power;
+  if (d.ajtok) extra.d = d.ajtok;
+  return extra;
+}
+
+function toMarketRow(r) {
+  const extra = extrasFromRow(r);
+  const base = [r.title, r.year ?? null, r.km ?? null, r.price];
+  return Object.keys(extra).length ? [...base, extra] : base;
+}
+
 function rebuildMarketGz({ merge = true } = {}) {
   if (!existsSync(ROWS_FILE)) {
     log("Nincs rows.jsonl — market dump kihagyva.");
@@ -369,13 +430,17 @@ function rebuildMarketGz({ merge = true } = {}) {
       log(`Market merge skip: ${err.message}`);
     }
   }
+  let reszletes = 0;
+  let alap = 0;
   for (const line of readFileSync(ROWS_FILE, "utf8").split(/\n/)) {
     if (!line.trim()) continue;
     try {
       const r = JSON.parse(line);
       if (!r?.title || !r?.price) continue;
       const key = r.id ? `id:${r.id}` : `${r.title}|${r.year}|${r.km}|${r.price}`;
-      byKey.set(key, [r.title, r.year ?? null, r.km ?? null, r.price]);
+      byKey.set(key, toMarketRow(r));
+      if (r.level === "reszletes" || r.detail) reszletes += 1;
+      else alap += 1;
     } catch {
       /* ignore */
     }
@@ -388,15 +453,17 @@ function rebuildMarketGz({ merge = true } = {}) {
     JSON.stringify(
       {
         count: rows.length,
-        source: "ha-price-download+merge",
-        effective: "lista_ar",
+        source: merge ? "ha-price-download+merge" : "rows.jsonl-osszevont",
+        effective: "lista_ar+reszletes",
+        reszletes,
+        alap,
         updated_at: new Date().toISOString(),
       },
       null,
       2
     )
   );
-  log(`Market dump: ${rows.length} sor → ${MARKET_GZ}`);
+  log(`Market dump: ${rows.length} sor (reszletes ${reszletes}, alap ${alap}) → ${MARKET_GZ}`);
 }
 
 function foldLabel(value) {
@@ -872,7 +939,12 @@ async function scrapeBrand(page, rule, { maxPages, delayMs, seen, progress, resu
     pagesThisRun += 1;
     const nextPage = p + 1;
     const empty = !(data?.items?.length);
-    const done = empty || p >= lastMaxPage;
+    const reachedEnd = p >= lastMaxPage;
+    // Üres köztes oldal (CF / üres HTML) ne zárja le a márkát — emiatt állt le Ford/Opel/Toyota.
+    if (empty && !reachedEnd) {
+      log(`${brand} p${p}: üres oldal, de maxPage=${lastMaxPage} — nem zárom le, lépek`);
+    }
+    const done = reachedEnd;
     saveBrandProgress(progress, brand, {
       nextPage: done ? p : nextPage,
       maxPage: lastMaxPage,
@@ -928,8 +1000,8 @@ async function main() {
   }
 
   if (opts.writeMarketOnly) {
-    log("Csak market dump (rows.jsonl → prices.json.gz), scrape nélkül.");
-    rebuildMarketGz({ merge: true });
+    log(`Csak market dump (rows.jsonl → prices.json.gz), scrape nélkül. merge=${opts.mergeMarket}`);
+    rebuildMarketGz({ merge: opts.mergeMarket });
     log(`Adatok: ${ROWS_FILE}`);
     return;
   }

@@ -318,7 +318,7 @@
 
   function readNavCountsSync() {
     try {
-      var raw = sessionStorage.getItem("bymy.navCounts.v1");
+      var raw = sessionStorage.getItem("bymy.navCounts.v2") || sessionStorage.getItem("bymy.navCounts.v1");
       if (!raw) return { auto: 0, teher: 0, ingatlan: 0 };
       var parsed = JSON.parse(raw);
       return {
@@ -449,7 +449,7 @@
     }
     addModule("/js/theme.js?v=willhabenHdr1");
     addModule("/js/site-avatar-menu.js?v=settingsHome1");
-    addModule("/js/nav-counts.js?v=bootFix2");
+    addModule("/js/nav-counts.js?v=countZero1");
   }
 
   ensureCss();

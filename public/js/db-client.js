@@ -203,13 +203,23 @@ export async function saveListingsBatchToDb(forms, { status = "feladott" } = {})
   return parseJson(response);
 }
 
+async function forgetNavCounts() {
+  try {
+    sessionStorage.removeItem("bymy.navCounts.v1");
+    sessionStorage.removeItem("bymy.navCounts.v2");
+  } catch {
+  }
+}
+
 export async function deleteAllListingsFromDb() {
   const response = await fetch("/api/listings/all", {
     method: "DELETE",
     headers: authHeaders(),
     credentials: "same-origin",
   });
-  return parseJson(response);
+  const data = await parseJson(response);
+  await forgetNavCounts();
+  return data;
 }
 
 export async function fetchMyListings({ limit = 200 } = {}) {
@@ -292,6 +302,7 @@ export async function deleteListingFromDb(id) {
     credentials: "same-origin",
   });
   const data = await parseJson(response);
+  await forgetNavCounts();
   try {
     const { removeParkplatzIdEverywhere } = await import("./fok-data.js?v=favGone1");
     removeParkplatzIdEverywhere(id);

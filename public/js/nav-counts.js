@@ -7,7 +7,7 @@ const COUNT_BY_HREF = [
   { match: /\/ingatlan\.html(?:$|[?#])/, key: "ingatlan" },
 ];
 
-const STORAGE_KEY = "bymy.navCounts.v1";
+const STORAGE_KEY = "bymy.navCounts.v2";
 const ZERO_COUNTS = { auto: 0, teher: 0, ingatlan: 0 };
 
 function formatCount(n) {
@@ -113,13 +113,6 @@ export async function initNavCounts() {
 
     try {
       const counts = await fetchCountsWithRetry();
-      const prev = readStoredCounts();
-      const apiTotal = counts.auto + counts.teher + counts.ingatlan;
-      const prevTotal = prev ? prev.auto + prev.teher + prev.ingatlan : 0;
-      if (apiTotal === 0 && prevTotal > 0) {
-        paintCounts(prev);
-        return;
-      }
       writeStoredCounts(counts);
       paintCounts(counts);
     } catch {

@@ -477,7 +477,17 @@
     return enrichCarsWithDescriptions(withTitles, raw, pageUrl);
   }
 
+  function isEmptyDealerList() {
+    const text = clean(document.body?.innerText || document.body?.textContent || "");
+    if (!/nincs megjeleníthető hirdetés/i.test(text)) return false;
+    const cards = document.querySelectorAll(
+      ".jarmu-kartya, .listing-card, [class*='jarmu-kartya'], tr[data-id], .hirdetes-kartya"
+    );
+    return cards.length === 0;
+  }
+
   function extractCarsFromPage() {
+    if (isEmptyDealerList()) return [];
     const html = String(document.documentElement?.outerHTML || "");
     const chunks = [html];
     for (const img of document.querySelectorAll("img")) {
@@ -886,7 +896,7 @@
     if (!cars.length) {
       hideProgress();
       alert(
-        "Nem találtunk hasznaltautocdn képet a listán.\nGörgess le, amíg látszanak a thumbök, majd futtasd újra."
+        "A listán nincs hirdetés.\n\nA hasznaltauto.hu törlés a Bymy-ra nem megy át.\nA korábbi importot a Bymy → Hirdetéseim oldalon kell törölni."
       );
       return;
     }

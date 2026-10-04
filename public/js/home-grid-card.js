@@ -99,8 +99,27 @@ function upgradeHaThumbClient(url) {
   return s;
 }
 
+function parseClientPhotoList(value) {
+  const raw = String(value ?? "").trim();
+  if (!raw) return [];
+  if (raw.startsWith("[")) {
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        return parsed.map((item) => String(item ?? "").trim()).filter(Boolean);
+      }
+    } catch {
+    }
+  }
+  return raw
+    .split(/[\n,]+/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
 function collectPhotoUrls(item) {
   const preview = item.preview || {};
+  const form = item.form || {};
   const urls = [...(preview.imageUrls || [])];
   if (preview.imageUrl && !urls.includes(preview.imageUrl)) urls.unshift(preview.imageUrl);
   const fo = String(item.fo_kep || "").trim();
@@ -111,7 +130,10 @@ function collectPhotoUrls(item) {
   ) {
     urls.unshift(fo);
   }
-  return [...new Set(urls.map(upgradeHaThumbClient).filter(Boolean))];
+  for (const extra of parseClientPhotoList(form.fotok)) {
+    if (extra && !urls.includes(extra)) urls.push(extra);
+  }
+  return [...new Set(urls.map(upgradeHaThumbClient).filter(Boolean))].slice(0, 5);
 }
 
 const ICON_YEAR = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M3 10h18M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>`;
@@ -215,8 +237,6 @@ export function createHomeGridCard(item, { featured = false, topOffer = false, c
       ${
         multi
           ? `<span class="home-grid-card-photo-count" aria-live="polite">${ICON_CAMERA}<span>1/${photoUrls.length}</span></span>
-             <button type="button" class="home-grid-card-photo-hit home-grid-card-photo-hit--prev" aria-label="Előző kép"></button>
-             <button type="button" class="home-grid-card-photo-hit home-grid-card-photo-hit--next" aria-label="Következő kép"></button>
              <button type="button" class="home-grid-card-photo-nav home-grid-card-photo-nav--prev" aria-label="Előző kép">${ICON_CHEVRON_LEFT}</button>
              <button type="button" class="home-grid-card-photo-nav home-grid-card-photo-nav--next" aria-label="Következő kép">${ICON_CHEVRON_RIGHT}</button>`
           : ""
@@ -278,8 +298,6 @@ function bindPhotoTrack(track) {
   const counter = media?.querySelector(".home-grid-card-photo-count");
   const prevBtn = media?.querySelector(".home-grid-card-photo-nav--prev");
   const nextBtn = media?.querySelector(".home-grid-card-photo-nav--next");
-  const prevHit = media?.querySelector(".home-grid-card-photo-hit--prev");
-  const nextHit = media?.querySelector(".home-grid-card-photo-hit--next");
   const slides = [...track.querySelectorAll(".home-grid-card-photo-slide")];
 
   function currentIndex() {
@@ -300,8 +318,6 @@ function bindPhotoTrack(track) {
     const atEnd = index >= slides.length - 1;
     if (prevBtn) prevBtn.hidden = atStart;
     if (nextBtn) nextBtn.hidden = atEnd;
-    if (prevHit) prevHit.hidden = atStart;
-    if (nextHit) nextHit.hidden = atEnd;
   }
 
   function scrollToIndex(index, { behavior = "smooth" } = {}) {
@@ -320,14 +336,12 @@ function bindPhotoTrack(track) {
   track.addEventListener("scroll", () => window.requestAnimationFrame(updateUi), { passive: true });
   track.addEventListener("scrollend", updateUi, { passive: true });
 
-  for (const btn of [prevBtn, nextBtn, prevHit, nextHit]) {
+  for (const btn of [prevBtn, nextBtn]) {
     btn?.addEventListener("click", stopCardNav);
   }
 
   prevBtn?.addEventListener("click", () => scrollToIndex(currentIndex() - 1));
-  prevHit?.addEventListener("click", () => scrollToIndex(currentIndex() - 1));
   nextBtn?.addEventListener("click", () => scrollToIndex(currentIndex() + 1));
-  nextHit?.addEventListener("click", () => scrollToIndex(currentIndex() + 1));
 
   track.addEventListener("keydown", (event) => {
     if (event.key === "ArrowLeft") {

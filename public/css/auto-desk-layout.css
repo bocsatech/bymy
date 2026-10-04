@@ -1377,6 +1377,20 @@
     opacity: 0.9;
   }
 
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-grid-card-photo-nav {
+    display: flex !important;
+    opacity: 1 !important;
+    width: 34px !important;
+    height: 34px !important;
+    background: rgba(255, 255, 255, 0.96) !important;
+    color: #111 !important;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.22) !important;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-grid-card-photo-nav[hidden] {
+    display: none !important;
+  }
+
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-grid-card-body {
     min-height: 0;
     padding: 12px 14px 14px !important;

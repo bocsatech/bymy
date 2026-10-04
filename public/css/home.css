@@ -1903,16 +1903,16 @@ body.home-page[data-site-page="teherauto"] #home-category-bar.is-cat-scrolling {
   height: 34px;
   border: none;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.92);
+  background: rgba(255, 255, 255, 0.96);
   color: #222;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.22);
   cursor: pointer;
   z-index: 4;
-  opacity: 0.92;
-  transition: opacity 0.15s, transform 0.15s;
+  opacity: 1;
+  transition: transform 0.15s;
 }
 
 .home-grid-card-photo-hit {
@@ -1943,7 +1943,6 @@ body.home-page[data-site-page="teherauto"] #home-category-bar.is-cat-scrolling {
 
 .home-grid-card-media:hover .home-grid-card-photo-nav,
 .home-grid-card-photo-nav:focus-visible {
-  opacity: 1;
   transform: translateY(-50%) scale(1.04);
 }
 

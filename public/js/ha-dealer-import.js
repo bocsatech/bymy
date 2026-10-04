@@ -477,19 +477,84 @@
     return enrichCarsWithDescriptions(withTitles, raw, pageUrl);
   }
 
-  function isEmptyDealerList() {
-    const text = clean(document.body?.innerText || document.body?.textContent || "");
-    if (/nincs megjeleníthető hirdetés|nincs megjeleníthet[oő] hirdetés|nincs jármű|nincs találat/i.test(text)) {
-      return true;
-    }
-    if (/\baktív\s*\(\s*0\s*\)/i.test(text) && /\bösszes(?:es)?\s*\(\s*0\s*\)/i.test(text)) {
-      return true;
-    }
-    return false;
+  function pickIdFromHref(href) {
+    const s = String(href || "");
+    return (
+      s.match(/[?&]id=(\d{5,12})\b/i)?.[1] ||
+      s.match(/\/gyorsnezet\/[^/]+\/(\d{5,12})/i)?.[1] ||
+      s.match(/\/hirdetesfeladas\/[^/?#]+\/(?:modositas\/)?(\d{5,12})/i)?.[1] ||
+      s.match(/-(\d{5,12})(?:[/?#]|$)/)?.[1] ||
+      ""
+    );
   }
 
-  function extractCarsFromPage() {
-    if (isEmptyDealerList()) return [];
+  function hqFromSrc(src) {
+    const raw = String(src || "");
+    const m = raw.match(/hasznaltautocdn\.com\/(?:\d{2,4}x\d{2,4}\/)?(\d{5,12})\/(\d{5,12})\.(jpe?g|png|webp)/i);
+    if (!m) return raw.startsWith("http") ? raw : "";
+    const ext = String(m[3] || "jpg").toLowerCase().replace("jpeg", "jpg");
+    return `https://img.hasznaltautocdn.com/2048x1536/${m[1]}/${m[2]}.${ext}`;
+  }
+
+  function countModositasButtons() {
+    let n = 0;
+    for (const el of document.querySelectorAll("a, button, [onclick], [role='button']")) {
+      const t = clean(el.innerText || el.textContent || el.getAttribute("title") || "");
+      if (/m[oó]dos[ií]t/i.test(t)) n += 1;
+    }
+    return n;
+  }
+
+  function extractCarsFromListingRows() {
+    const byId = new Map();
+    const add = (listingId, extra = {}) => {
+      const id = String(listingId || "").replace(/\D/g, "");
+      if (id.length < 5 || id.length > 12) return;
+      const prev = byId.get(id) || {};
+      const url = extra.url || prev.url || `https://admin.hasznaltauto.hu/hirdetesfeladas/szemelyauto?id=${id}`;
+      byId.set(id, {
+        listingId: id,
+        url,
+        adminUrl: extra.adminUrl || prev.adminUrl || url,
+        visibleImage: extra.visibleImage || prev.visibleImage || "",
+        visibleTitle: extra.visibleTitle || prev.visibleTitle || "",
+        photoOnly: true,
+      });
+    };
+
+    for (const el of document.querySelectorAll("[data-id], [data-hirdetes-id], [data-hirdetesid], [data-jarmu-id]")) {
+      const id = el.getAttribute("data-id") || el.getAttribute("data-hirdetes-id") || el.getAttribute("data-hirdetesid") || el.getAttribute("data-jarmu-id");
+      const img = el.querySelector?.("img");
+      add(id, {
+        visibleTitle: pickTitleNearImg(img || el),
+        visibleImage: hqFromSrc(img?.currentSrc || img?.src || img?.getAttribute("data-src") || ""),
+      });
+    }
+
+    for (const a of document.querySelectorAll("a[href], [onclick]")) {
+      const href = String(a.getAttribute("href") || a.href || a.getAttribute("onclick") || "");
+      const label = clean(a.innerText || a.textContent || a.getAttribute("title") || "");
+      const id = pickIdFromHref(href);
+      if (!id) continue;
+      if (!/hirdetesfeladas|gyorsnezet|hasznaltautocdn|hasznaltauto\.hu/i.test(href) && !/m[oó]dos[ií]t/i.test(label)) {
+        continue;
+      }
+      const row =
+        a.closest?.(
+          ".jarmu-kartya, .listing-card, tr, article, li, [class*='jarmu'], [class*='hirdetes'], [class*='listing']"
+        ) || a.parentElement;
+      const img = row?.querySelector?.("img");
+      add(id, {
+        url: `https://admin.hasznaltauto.hu/hirdetesfeladas/szemelyauto?id=${id}`,
+        visibleTitle: pickTitleNearImg(img || a) || label,
+        visibleImage: hqFromSrc(img?.currentSrc || img?.src || img?.getAttribute("data-src") || ""),
+      });
+    }
+
+    return [...byId.values()];
+  }
+
+  function extractCarsFromCdnDom() {
     const html = String(document.documentElement?.outerHTML || "");
     const chunks = [html];
     for (const img of document.querySelectorAll("img")) {
@@ -506,25 +571,26 @@
     for (const el of document.querySelectorAll("[style*='hasznaltautocdn'], [style*='url(']")) {
       chunks.push(el.getAttribute("style") || "");
     }
-    for (const ta of document.querySelectorAll("textarea")) {
-      const v = ta.value || "";
-      if (v.length >= 20) {
-        const name = ta.getAttribute("name") || ta.id || "leiras";
-        chunks.push(`<textarea name="${name}">${v}</textarea>`);
-      }
-    }
-    return extractCarsFromHtml(chunks.join("\n"), location.href).slice(0, MAX);
+    return extractCarsFromHtml(chunks.join("\n"), location.href);
+  }
+
+  function extractCarsFromPage() {
+    const rows = extractCarsFromListingRows();
+    if (rows.length) return rows.slice(0, MAX);
+    const cdn = extractCarsFromCdnDom();
+    if (cdn.length && countModositasButtons() > 0) return cdn.slice(0, MAX);
+    return [];
   }
 
   async function quickScrollThumbs() {
     try {
       const step = Math.max(500, Math.floor(window.innerHeight * 0.85) || 600);
-      for (let i = 0; i < 8; i += 1) {
+      for (let i = 0; i < 10; i += 1) {
         window.scrollTo(0, i * step);
-        await sleep(30);
+        await sleep(80);
       }
       window.scrollTo(0, 0);
-      await sleep(40);
+      await sleep(120);
     } catch {
     }
   }

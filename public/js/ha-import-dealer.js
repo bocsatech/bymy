@@ -1203,7 +1203,8 @@
     });
   }
 
-  const SAVE_CHUNK = 10;
+  // postMessage batch; közvetlen/bridge mentés 1-esével (lásd savePagesWithFallback)
+  const SAVE_CHUNK = 5;
 
   function recoverHaId(page) {
     const blob = [
@@ -1250,7 +1251,12 @@
     const weakFuel = /^(plug-?in|hybrid|hibrid|elektromos)$/i.test(fuelSeed);
     if (fuelSeed && !weakFuel && !map["Üzemanyag"]) map["Üzemanyag"] = fuelSeed;
     const visibleImage = hqFromSrc(page.visibleImage || page.imageUrl || page.fo_kep || "");
-    const html = String(page.html || page.gyorsnezetHtml || "").slice(0, 45000);
+    const equip = Array.isArray(page.felszereltseg) ? page.felszereltseg.slice(0, 300) : [];
+    const mapN = Object.keys(map).length;
+    // Ha a map + extrák megvannak, ne küldjünk 45KB HTML-t (Vercel/bridge timeout).
+    const richEnough = mapN >= 8 && (equip.length >= 5 || Boolean(map["Km. óra állás"] || map["Hengerűrtartalom"]));
+    const htmlRaw = String(page.html || page.gyorsnezetHtml || "");
+    const html = richEnough ? "" : htmlRaw.slice(0, 12000);
     return {
       url: page.url || page.adminUrl || page.clickUrl || page.publicUrl || `https://admin.hasznaltauto.hu/hirdetesfeladas/szemelyauto?id=${listingId}`,
       listingId,
@@ -1272,7 +1278,7 @@
       year: page.year || "",
       fuel: page.fuel || "",
       map,
-      felszereltseg: Array.isArray(page.felszereltseg) ? page.felszereltseg.slice(0, 300) : [],
+      felszereltseg: equip,
       html: html.length > 400 ? html : "",
     };
   }
@@ -1339,7 +1345,7 @@
       pages: list,
     };
     const controller = typeof AbortController !== "undefined" ? new AbortController() : null;
-    const timer = controller ? setTimeout(() => controller.abort(), 90000) : null;
+    const timer = controller ? setTimeout(() => controller.abort(), 45000) : null;
     let res;
     try {
       res = await fetch(`${origin}/api/import/extracted`, {
@@ -1399,7 +1405,7 @@
         window.addEventListener("message", onMsg);
       } catch {
       }
-      const timer = setTimeout(() => finish(reject, new Error("bridge timeout")), 90000);
+      const timer = setTimeout(() => finish(reject, new Error("bridge timeout")), 25000);
       try {
         iframe = document.createElement("iframe");
         iframe.name = frameName;
@@ -1445,14 +1451,60 @@
     });
   }
 
+  async function savePagesOneByOne(origin, token, pages, doneCount, total) {
+    const list = Array.isArray(pages) ? pages : [];
+    const merged = {
+      savedCount: 0,
+      skippedCount: 0,
+      errorCount: 0,
+      items: [],
+      errors: [],
+    };
+    for (let i = 0; i < list.length; i += 1) {
+      const n = doneCount - list.length + i + 1;
+      showProgress(Math.max(1, n), total, `közvetlen mentés ${Math.max(1, n)}/${total}`);
+      try {
+        const part = await savePagesDirect(origin, token, [list[i]], Math.max(1, n), total);
+        merged.savedCount += Number(part?.savedCount || 0);
+        merged.skippedCount += Number(part?.skippedCount || 0);
+        merged.errorCount += Number(part?.errorCount || 0);
+        if (Array.isArray(part?.items)) merged.items.push(...part.items);
+        if (Array.isArray(part?.errors)) merged.errors.push(...part.errors);
+      } catch (error) {
+        merged.errorCount += 1;
+        merged.errors.push({
+          url: list[i]?.url || "",
+          message: error?.message || String(error),
+        });
+      }
+    }
+    return merged;
+  }
+
   async function savePagesWithFallback(origin, token, pages, doneCount, total, chunkIndex) {
+    const list = Array.isArray(pages) ? pages : [];
+    // 1 autó / kérés — a 5×45KB bridge Vercelen gyakran timeoutol
+    if (list.length > 1) {
+      return savePagesOneByOne(origin, token, list, doneCount, total);
+    }
     try {
-      return await savePagesDirect(origin, token, pages, doneCount, total);
+      return await savePagesDirect(origin, token, list, doneCount, total);
     } catch (error) {
       const msg = String(error?.message || error || "");
-      if (!/failed to fetch|networkerror|load failed|timeout|időtúllépés/i.test(msg)) throw error;
+      if (!/failed to fetch|networkerror|load failed|timeout|időtúllépés|aborted|abort/i.test(msg)) {
+        throw error;
+      }
       showProgress(doneCount, total, `form mentés ${doneCount}/${total}`);
-      return savePagesFormBridge(origin, token, pages, chunkIndex);
+      try {
+        return await savePagesFormBridge(origin, token, list, chunkIndex);
+      } catch (bridgeErr) {
+        const bmsg = String(bridgeErr?.message || bridgeErr || "");
+        if (/bridge timeout|bridge hiba/i.test(bmsg) && list.length === 1) {
+          // Utolsó esély: még egyszer közvetlen, rövidebb body már slim
+          return savePagesDirect(origin, token, list, doneCount, total);
+        }
+        throw bridgeErr;
+      }
     }
   }
 
@@ -1613,17 +1665,15 @@
       return;
     }
 
-    let target = null;
-    if (!token) {
-      showProgress(0, 1, "Bymy Autóimport keresése");
-      target = await ensureBymyTarget(origin);
-      if (!target) {
-        alert(
-          "Nem nyílt meg a Bymy Autóimport.\n\n1) Engedd a felugró ablakokat\n2) Nyisd meg kézzel: Bymy → Autóimport (kereskedői)\n3) Onnan: admin megnyitása → könyvjelző"
-        );
-        hideProgress();
-        return;
-      }
+    // Token mellett is Autóimport fül — postMessage megbízhatóbb, mint a HA→Vercel bridge
+    showProgress(0, 1, "Bymy Autóimport keresése");
+    let target = await ensureBymyTarget(origin);
+    if (!target && !token) {
+      alert(
+        "Nem nyílt meg a Bymy Autóimport.\n\n1) Engedd a felugró ablakokat\n2) Nyisd meg kézzel: Bymy → Autóimport (kereskedői)\n3) Onnan: admin megnyitása → könyvjelző"
+      );
+      hideProgress();
+      return;
     }
 
     const resumed = loadDealerProgress(prepared.length);

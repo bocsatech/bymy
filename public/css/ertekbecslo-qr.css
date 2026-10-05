@@ -247,6 +247,15 @@ html[data-theme="dark"] .bymy-qr__label {
   color: #b91c1c;
 }
 
+.ertek-result__label {
+  margin: 0 0 2px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
 .ertek-result__price {
   margin: 0 0 6px;
   font-size: 28px;
@@ -358,6 +367,32 @@ body.ertek-page[data-site-page="ertekbecsles"] .ertek-out {
 
 body.ertek-page[data-site-page="ertekbecsles"] #ad-form .ad-form-bm-modell-nested {
   display: none !important;
+}
+
+/* Mobil: az eredmény a tabbar fölé tapadó kártyában, hogy kitöltés közben is látszódjon */
+@media (max-width: 900px) {
+  body.ertek-page[data-site-page="ertekbecsles"] .ertek-out:not(:empty) {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px));
+    z-index: 40;
+    margin: 0 0.75rem;
+    padding: 0.85rem 0.95rem;
+    background: #fff;
+    border: 1px solid #d2d0cc;
+    border-radius: 14px;
+    box-shadow: 0 10px 28px rgba(16, 24, 40, 0.16);
+  }
+
+  html[data-theme="dark"] body.ertek-page[data-site-page="ertekbecsles"] .ertek-out:not(:empty) {
+    background: #1d222a;
+    border-color: #2a313c;
+  }
+
+  body.ertek-page[data-site-page="ertekbecsles"] .ertek-page-main {
+    padding-bottom: 11rem;
+  }
 }
 
 @media (min-width: 901px) {

@@ -51,6 +51,7 @@ function formatResult(data) {
   const n = data.count ?? 0;
   return `
     <div class="ertek-result" aria-live="polite">
+      <p class="ertek-result__label">Becsült piaci érték</p>
       <p class="ertek-result__price">${escapeHtml(recom)}</p>
       <p class="ertek-result__band">Jó ár: <strong>${escapeHtml(from)}</strong> – <strong>${escapeHtml(to)}</strong></p>
       <p class="ertek-result__meta">${n} hasonló a mintában${data.source ? ` · ${escapeHtml(data.source)}` : ""}</p>

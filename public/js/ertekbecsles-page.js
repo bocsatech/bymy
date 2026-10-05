@@ -1,6 +1,6 @@
 import { createAdForm } from "./form-core.js?v=f5c3cfcf0f";
 import { mountAdFormBmPickers } from "./ad-form-bm-pickers.js?v=d33b953bad";
-import { initErtekbecsloPanel } from "./ertekbecslo-app.js?v=b586a4fc80";
+import { initErtekbecsloPanel } from "./ertekbecslo-app.js?v=2a8ab7d2a2";
 
 const CATEGORY = {
   hirdetes_vertical: "auto",
@@ -47,12 +47,19 @@ function showValuationSteps(form) {
   });
 }
 
+/* 901px alatt nincs asztali középső oszlop (display: none), oda nem írhatjuk az eredményt. */
+const DESK_LAYOUT_MQ = window.matchMedia("(min-width: 901px)");
+
 function placeResult(form) {
   const out = document.querySelector("[data-ertek-out]");
-  const center = form.querySelector("#ad-desk-center-col") || document.getElementById("ad-desk-center-col");
-  if (out && center && out.parentElement !== center) {
-    center.prepend(out);
+  if (!out) return;
+  if (DESK_LAYOUT_MQ.matches) {
+    const center = form.querySelector("#ad-desk-center-col") || document.getElementById("ad-desk-center-col");
+    if (center && out.parentElement !== center && !out.contains(center)) center.prepend(out);
+    return;
   }
+  const home = document.querySelector(".automax-main");
+  if (home && out.parentElement !== home && !out.contains(home)) home.appendChild(out);
 }
 
 async function loadPostingForm() {
@@ -104,6 +111,7 @@ try {
     hidePublishChrome(form);
     placeResult(form);
   });
+  DESK_LAYOUT_MQ.addEventListener("change", () => placeResult(form));
   await initErtekbecsloPanel(document);
 } catch (err) {
   if (status) {

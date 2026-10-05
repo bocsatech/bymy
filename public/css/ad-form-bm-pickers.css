@@ -262,6 +262,13 @@ body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsl
   margin: 0 !important;
 }
 
+/* Félkész dob-mount: trigger nélkül maradt üres kerék ne foglaljon 152px-et (min-height: 9.5rem) */
+body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"])
+  .ad-form-drum-wrap:not(:has(.immo-wheel-trigger))
+  > .immo-wheel {
+  display: none !important;
+}
+
 body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-field--drum > .ad-form-drum-wrap,
 body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-form-bm-field--drum > .immo-wheel-wrap {
   display: flex !important;

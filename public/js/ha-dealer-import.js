@@ -252,14 +252,51 @@
     return out.map((item, index) => (item == null ? list[index] : item));
   }
 
-  function isUsefulGyorsnezetHtml(html) {
+  function isUsefulDetailHtml(html) {
     const raw = String(html || "");
     if (raw.length < 800) return false;
-    if (/hiba[!].*javascript|javascript.*hiba|cloudflare/i.test(raw.slice(0, 1200))) return false;
-    return /v[eé]tel[aá]r|fut[aá]steljes|gy[aá]rt[aá]si|üzemanyag|uzemanyag/i.test(raw);
+    if (/hiba[!].*javascript|javascript.*hiba|cloudflare|ügyfél belépés|felhasználónév/i.test(raw.slice(0, 2000))) {
+      return false;
+    }
+    if (/v[eé]tel[aá]r|fut[aá]steljes|gy[aá]rt[aá]si|üzemanyag|uzemanyag|km\.\s*óra/i.test(raw)) return true;
+    return Object.keys(extractMapFromHtml(raw)).length >= 4;
   }
 
-  function fetchGyorsnezetViaIframe(url) {
+  function extractMapFromFormDoc(doc) {
+    const map = {};
+    if (!doc) return map;
+    const labelFor = (el) => {
+      const id = el.getAttribute("id");
+      if (id) {
+        try {
+          const lab = doc.querySelector(`label[for="${CSS.escape(id)}"]`);
+          const t = clean(lab?.innerText || lab?.textContent || "");
+          if (t) return t.replace(/:$/, "");
+        } catch {}
+      }
+      const wrap = el.closest("label, tr, .form-group, .mezo, .field, li, div");
+      const lab2 = wrap?.querySelector?.("label, .bal, .pontos, th, .cimke, .label");
+      return clean(lab2?.innerText || lab2?.textContent || "").replace(/:$/, "");
+    };
+    for (const el of doc.querySelectorAll("input[name], select[name], textarea[name]")) {
+      const type = String(el.getAttribute("type") || el.type || "").toLowerCase();
+      if (type === "hidden" || type === "password" || type === "submit" || type === "button") continue;
+      if ((type === "checkbox" || type === "radio") && !el.checked) continue;
+      let val = "";
+      if (el.tagName === "SELECT") {
+        val = clean(el.options?.[el.selectedIndex]?.text || el.value || "");
+      } else {
+        val = clean(el.value || "");
+      }
+      if (!val || val.length > 500) continue;
+      const key = labelFor(el) || clean(el.getAttribute("name") || "");
+      if (!key || /csrf|token|password|jelszo/i.test(key)) continue;
+      if (!map[key]) map[key] = val;
+    }
+    return map;
+  }
+
+  function fetchDetailViaIframe(url) {
     return new Promise((resolve) => {
       let iframe = null;
       let settled = false;
@@ -273,17 +310,22 @@
         }
         resolve(html || "");
       };
-      const timer = setTimeout(() => finish(""), 14000);
+      const timer = setTimeout(() => finish(""), 16000);
       try {
         iframe = document.createElement("iframe");
-        iframe.setAttribute("title", "bymy-gyorsnezet");
+        iframe.setAttribute("title", "bymy-ha-detail");
         iframe.style.cssText =
-          "position:fixed;width:1px;height:1px;left:-120px;top:-120px;opacity:0;border:0;";
-        iframe.onload = () => {
+          "position:fixed;left:-10000px;top:0;width:960px;height:1400px;opacity:0;pointer-events:none;border:0;";
+        iframe.onload = async () => {
           try {
+            await sleep(1500);
             const doc = iframe.contentDocument;
-            const html = String(doc?.documentElement?.outerHTML || "");
-            finish(isUsefulGyorsnezetHtml(html) ? html : "");
+            if (!doc?.body) {
+              finish("");
+              return;
+            }
+            const html = String(doc.documentElement?.outerHTML || "");
+            finish(isUsefulDetailHtml(html) ? html : "");
           } catch {
             finish("");
           }
@@ -297,31 +339,46 @@
     });
   }
 
-  async function fetchGyorsnezetHtml(listingId) {
+  async function tryFetchHtml(url) {
+    const controller = typeof AbortController !== "undefined" ? new AbortController() : null;
+    const timer = controller ? setTimeout(() => controller.abort(), 8000) : null;
+    try {
+      const res = await fetch(url, {
+        credentials: "include",
+        cache: "no-store",
+        signal: controller?.signal,
+        headers: { Accept: "text/html,application/xhtml+xml" },
+      });
+      if (!res.ok) return "";
+      const html = await res.text();
+      return isUsefulDetailHtml(html) ? html : "";
+    } catch {
+      return "";
+    } finally {
+      if (timer) clearTimeout(timer);
+    }
+  }
+
+  async function fetchDetailHtml(listingId) {
     const id = clean(listingId);
     if (!id) return "";
     const cats = ["szemelyauto", "kishaszongarmu", "motorkerekpar", "lakokocsi", "haszongepjarmu"];
     for (const cat of cats) {
-      const url = `https://admin.hasznaltauto.hu/gyorsnezet/${cat}/${id}`;
-      const controller = typeof AbortController !== "undefined" ? new AbortController() : null;
-      const timer = controller ? setTimeout(() => controller.abort(), 10000) : null;
-      try {
-        const res = await fetch(url, {
-          credentials: "include",
-          signal: controller?.signal,
-          headers: { Accept: "text/html,*/*" },
-        });
-        if (res.ok) {
-          const html = await res.text();
-          if (isUsefulGyorsnezetHtml(html)) return html;
-        }
-      } catch {
-        /* iframe fallback */
-      } finally {
-        if (timer) clearTimeout(timer);
+      const urls = [
+        `https://admin.hasznaltauto.hu/gyorsnezet/${cat}/${id}`,
+        `https://admin.hasznaltauto.hu/hirdetesfeladas/${cat}?id=${id}`,
+        `https://admin.hasznaltauto.hu/hirdetesfeladas/${cat}/modositas/${id}`,
+      ];
+      for (const url of urls) {
+        // Fetch előbb (gyorsabb); iframe csak ha a válasz SPA-üres
+        const viaFetch = await tryFetchHtml(url);
+        if (viaFetch) return viaFetch;
+        const viaFrame = await fetchDetailViaIframe(url);
+        if (viaFrame) return viaFrame;
       }
-      const viaFrame = await fetchGyorsnezetViaIframe(url);
-      if (viaFrame) return viaFrame;
+      // Első kategóriánál ha semmi, még próbáljuk a többit; különben elég a szemelyauto
+      if (cat === "szemelyauto") continue;
+      break;
     }
     return "";
   }
@@ -408,12 +465,24 @@
   async function ensureCarDescription(car) {
     const existingHtml = String(car.html || car.gyorsnezetHtml || "");
     const html =
-      existingHtml.length > 400 ? existingHtml : await fetchGyorsnezetHtml(car.listingId);
+      existingHtml.length > 400 ? existingHtml : await fetchDetailHtml(car.listingId);
     if (!html || html.length <= 400) return car;
     const visibleDescription =
       normalizeImportedLeiras(car.visibleDescription || car.description || car.leiras || "") ||
       findDescriptionInHtml(html);
-    const map = extractMapFromHtml(html);
+    let map = extractMapFromHtml(html);
+    let visibleTitle = clean(car.visibleTitle || "");
+    let visibleImage = car.visibleImage || "";
+    try {
+      const doc = new DOMParser().parseFromString(html, "text/html");
+      map = { ...extractMapFromFormDoc(doc), ...map };
+      const h1 = clean(doc.querySelector("h1")?.innerText || doc.querySelector("h1")?.textContent || "");
+      if (h1.length >= 6 && !/hiba|javascript|gyorsnézet|hirdetés gyorsnézet|belépés/i.test(h1)) {
+        visibleTitle = h1;
+      }
+    } catch {
+    }
+    if (Object.keys(map).length < 3) return { ...car, html, map };
     const felszereltseg = extractEquipmentFromHtml(html);
     const bodyText = html
       .replace(/<script[\s\S]*?<\/script>/gi, " ")
@@ -421,20 +490,18 @@
       .replace(/<br\s*\/?>/gi, "\n")
       .replace(/<[^>]+>/g, "\n")
       .slice(0, 25000);
-    const kmRaw = map["Km. óra állás"] || map["Futásteljesítmény"] || map["Futasteljesitmeny"] || "";
+    const kmRaw =
+      map["Km. óra állás"] ||
+      map["Km. óra állása"] ||
+      map["Futásteljesítmény"] ||
+      map["Futasteljesitmeny"] ||
+      map["Kilométeróra"] ||
+      "";
     const kmDigits = String(kmRaw).replace(/\D/g, "");
-    const priceRaw = map["Vételár"] || map["Ár"] || map["Vetelar"] || map["Ár Ft"] || "";
+    const priceRaw = map["Vételár"] || map["Ár"] || map["Vetelar"] || map["Hirdetési ár"] || "";
     const priceDigits = String(priceRaw).replace(/\D/g, "");
-    let visibleTitle = clean(car.visibleTitle || "");
-    let visibleImage = car.visibleImage || "";
-    try {
-      const doc = new DOMParser().parseFromString(html, "text/html");
-      const h1 = clean(doc.querySelector("h1")?.innerText || doc.querySelector("h1")?.textContent || "");
-      if (h1.length >= 6 && !/hiba|javascript|gyorsnézet|hirdetés gyorsnézet/i.test(h1)) {
-        visibleTitle = h1;
-      }
-    } catch {
-    }
+    const yearRaw = map["Gyártási év"] || map["Évjárat"] || map["Evjarat"] || "";
+    const yearDigits = (String(yearRaw).match(/(19|20)\d{2}/) || [])[0] || "";
     if (!hqFromSrc(visibleImage)) {
       const m = html.match(
         /hasznaltautocdn\.com\/(?:\d{2,4}x\d{2,4}\/)?(\d{5,12})\/(\d{5,12})\.(jpe?g|png|webp)/i
@@ -447,8 +514,8 @@
     }
     return {
       ...car,
-      html,
-      gyorsnezetHtml: html,
+      html: html.slice(0, 45000),
+      gyorsnezetHtml: html.slice(0, 45000),
       visibleTitle: visibleTitle || car.visibleTitle || "",
       visibleImage: hqFromSrc(visibleImage) || "",
       visibleDescription,
@@ -457,6 +524,7 @@
       bodyText,
       price: priceDigits || car.price || "",
       km: kmDigits || car.km || "",
+      year: yearDigits || car.year || "",
     };
   }
 
@@ -960,6 +1028,7 @@
       tipus: page.tipus || "",
       price: page.price || "",
       km: page.km || "",
+      year: page.year || "",
       map,
       felszereltseg: Array.isArray(page.felszereltseg) ? page.felszereltseg.slice(0, 300) : [],
       html: html.length > 400 ? html : "",
@@ -1243,7 +1312,7 @@
     }
 
     let copied = 0;
-    const enriched = await mapPool(cars, 3, async (car) => {
+    const enriched = await mapPool(cars, 1, async (car) => {
       const listingId = recoverHaId(car);
       let next = {
         ...car,
@@ -1259,7 +1328,14 @@
       next.listingId = listingId;
       next.hasznaltauto_hirdetes_id = listingId;
       copied += 1;
-      showProgress(copied, cars.length, `adatok ${copied}/${cars.length}`);
+      const mapN = next.map && typeof next.map === "object" ? Object.keys(next.map).length : 0;
+      showProgress(
+        copied,
+        cars.length,
+        mapN >= 3
+          ? `adatok ${copied}/${cars.length} (${mapN} mező)`
+          : `adatok ${copied}/${cars.length} (lista)`
+      );
       return next;
     });
     const prepared = [];

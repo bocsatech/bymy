@@ -99,7 +99,7 @@
     <link rel="stylesheet" href="/css/ertekbecslo-qr.css?v=ertek7" />
 </head>
   <body class="site-app settings-page mm-page" data-site-page="beallitasok" data-auth-init="manual">
-    <script src="/js/mw-app-shell.js?v=countZero1"></script>
+    <script src="/js/mw-app-shell.js?v=50439ecc01"></script>
 <header class="site-header site-app-header">
       <div class="site-app-header-inner">
         <div class="hub-header-top">
@@ -843,9 +843,45 @@
       </div>
     </main>
 
+    <script>
+      /* Modulok előtt: szekció panel azonnal (ne üres Autóimport első festés). */
+      (function () {
+        try {
+          var q = new URLSearchParams(location.search).get("szekcio") || "";
+          if (!q) return;
+          if (q === "fiok") q = "szemelyes";
+          document.querySelectorAll("[data-mm-panel]").forEach(function (panel) {
+            panel.hidden = panel.getAttribute("data-mm-panel") !== q;
+          });
+          document.querySelectorAll("[data-mm-nav]").forEach(function (link) {
+            if (link.hasAttribute("data-mm-subtoggle")) return;
+            link.classList.toggle("is-active", link.getAttribute("data-mm-nav") === q);
+          });
+          var settingsSecs = {
+            szemelyes: 1,
+            "keresesi-korzet": 1,
+            "ajanlasok-korzet": 1,
+            jelszo: 1,
+            notify: 1,
+            megjelenes: 1,
+          };
+          if (settingsSecs[q]) {
+            var group = document.querySelector("[data-mm-settings-nav]");
+            var sub = group && group.querySelector("[data-mm-sub]");
+            var btn = group && group.querySelector("[data-mm-subtoggle]");
+            if (sub) sub.hidden = false;
+            if (btn) {
+              btn.setAttribute("aria-expanded", "true");
+              btn.classList.add("is-active");
+            }
+          }
+          if (q === "import") document.title = "Autóimport — Fiókom";
+        } catch (e) {}
+      })();
+    </script>
     <script src="/js/site-avatar-menu.js?v=4c911388e7" type="module"></script>
     <script src="/js/ha-import-app.js?v=1a58dcd753" type="module"></script>
-    <script src="/js/beallitasok-app.js?v=6a0ff0fa54" type="module"></script>
+    <script src="/js/beallitasok-app.js?v=f3abd71b1e" type="module"></script>
     <script>
       
       setTimeout(function () {

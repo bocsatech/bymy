@@ -1793,6 +1793,8 @@ export async function initSettingsPage() {
   });
 
   document.querySelectorAll("[data-mm-subtoggle]").forEach((btn) => {
+    if (btn.dataset.mmSubBound === "1") return;
+    btn.dataset.mmSubBound = "1";
     btn.addEventListener("click", () => {
       const group = btn.closest(".mm-nav-group");
       const sub = group?.querySelector("[data-mm-sub]");
@@ -2057,4 +2059,7 @@ function bindCompanyFormEarly() {
 bindProfileFormEarly();
 bindCompanyFormEarly();
 initSiteAuth({ skipRefresh: true });
-initSettingsPage();
+if (!window.__bymySettingsPageBooted) {
+  window.__bymySettingsPageBooted = true;
+  initSettingsPage();
+}

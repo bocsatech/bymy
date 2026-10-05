@@ -440,16 +440,25 @@
   }
 
   function ensureDeskHeaderDeps() {
+    function hasScriptPath(path) {
+      var nodes = document.querySelectorAll("script[src]");
+      for (var i = 0; i < nodes.length; i++) {
+        var href = nodes[i].getAttribute("src") || "";
+        if (href === path || href.indexOf(path + "?") === 0) return true;
+      }
+      return false;
+    }
     function addModule(src) {
-      if (document.querySelector('script[src="' + src + '"]')) return;
+      var path = String(src || "").split("?")[0];
+      if (!path || hasScriptPath(path)) return;
       var s = document.createElement("script");
       s.type = "module";
       s.src = src;
       document.body.appendChild(s);
     }
-    addModule("/js/theme.js?v=willhabenHdr1");
-    addModule("/js/site-avatar-menu.js?v=settingsHome1");
-    addModule("/js/nav-counts.js?v=countZero1");
+    addModule("/js/theme.js?v=4fe8a2261f");
+    addModule("/js/site-avatar-menu.js?v=4c911388e7");
+    addModule("/js/nav-counts.js?v=7613897d1d");
   }
 
   ensureCss();

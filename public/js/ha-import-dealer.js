@@ -534,24 +534,27 @@
     ];
     const onAdmin = /admin\.hasznaltauto\.hu$/i.test(location.hostname || "");
 
-    // 1) Same-origin fetch — ez működött korábban bejelentkezve (gyors)
-    for (const url of primary) {
-      const viaFetch = await tryFetchHtml(url, 8000);
+    // 1) Same-origin gyorsnézet — bejelentkezve ez a gyors út (ne várjunk 8s×3 URL-t)
+    {
+      const viaFetch = await tryFetchHtml(primary[0], 4500);
       if (viaFetch) return viaFetch;
     }
-    // 2) iframe (ha nem XFO-zott)
+    for (const url of primary.slice(1)) {
+      const viaFetch = await tryFetchHtml(url, 4000);
+      if (viaFetch) return viaFetch;
+    }
+    // 2) iframe / megosztott ablak — csak ha a fetch nem jött be
     for (const url of primary) {
       const viaFrame = await fetchDetailViaIframe(url);
       if (viaFrame) return viaFrame;
     }
-    // 3) Egy megosztott ablak (nem 25× új popup)
     {
       const viaWin = await fetchDetailViaSharedWindow(primary[0]);
       if (viaWin) return viaWin;
     }
     for (const cat of ["kishaszongarmu", "motorkerekpar", "lakokocsi", "haszongepjarmu"]) {
       const url = `https://admin.hasznaltauto.hu/gyorsnezet/${cat}/${id}`;
-      const viaFetch = await tryFetchHtml(url, 6000);
+      const viaFetch = await tryFetchHtml(url, 3500);
       if (viaFetch) return viaFetch;
       if (onAdmin) {
         const viaWin = await fetchDetailViaSharedWindow(url);
@@ -559,7 +562,7 @@
       }
     }
     for (const url of collectPublicDetailUrls(id, car)) {
-      const viaFetch = await tryFetchHtml(url, 6000);
+      const viaFetch = await tryFetchHtml(url, 3500);
       if (viaFetch) return viaFetch;
     }
     return "";
@@ -1128,12 +1131,12 @@
   async function quickScrollThumbs() {
     try {
       const step = Math.max(500, Math.floor(window.innerHeight * 0.85) || 600);
-      for (let i = 0; i < 10; i += 1) {
+      for (let i = 0; i < 4; i += 1) {
         window.scrollTo(0, i * step);
-        await sleep(80);
+        await sleep(40);
       }
       window.scrollTo(0, 0);
-      await sleep(120);
+      await sleep(60);
     } catch {
     }
   }
@@ -1200,7 +1203,7 @@
     });
   }
 
-  const SAVE_CHUNK = 5;
+  const SAVE_CHUNK = 10;
 
   function recoverHaId(page) {
     const blob = [
@@ -1552,7 +1555,8 @@
 
     let copied = 0;
     let detailSkipped = 0;
-    const enriched = await mapPool(cars, 1, async (car) => {
+    // Párhuzamos gyorsnézet-fetch (Prototype-safe mapPool) — 1-esével ~20–40s / 20 autó
+    const enriched = await mapPool(cars, 5, async (car) => {
       const listingId = recoverHaId(car);
       let next = {
         ...car,

@@ -2233,6 +2233,8 @@ async function handleValuationApi(req, res, pathname) {
             .filter(Boolean)
             .join(" "),
         gyartasi_ev: url.searchParams.get("gyartasi_ev"),
+        ev_tol: url.searchParams.get("ev_tol"),
+        ev_ig: url.searchParams.get("ev_ig"),
         km: url.searchParams.get("km"),
         ar: url.searchParams.get("ar"),
         requireCore: url.searchParams.get("require") === "1",

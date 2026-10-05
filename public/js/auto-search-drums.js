@@ -6,8 +6,8 @@ import {
   syncDrumWheelDisplay,
   closeAllInlineDrums,
 } from "./immo-drum-picker.js?v=c4c7ac29a2";
-import { bindAutoDrumSheet, openAutoDrumSheet } from "./auto-drum-sheet.js?v=switchDesignAll1";
-import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=kmFill1";
+import { bindAutoDrumSheet, openAutoDrumSheet } from "./auto-drum-sheet.js?v=d030fd6edf";
+import { optionsForAutoFilterKey } from "./auto-search-layout.js?v=967640fe10";
 
 const MOBILE_MQ = "(max-width: 900px)";
 const TYPEAHEAD_CLEAR_MS = 2500;
@@ -657,6 +657,33 @@ function convertRangePairToDual(wrap, cfg) {
   [minWheel, maxWheel].forEach((w) => {
     w?.addEventListener("immo-wheel-change", refreshSummary);
   });
+
+  return block;
+}
+
+/**
+ * Ugyanaz a tól–ig dobkerék, mint a keresőben, de kereső-űrlap nélkül
+ * (értékbecslés). A kész blokkot a hívó teszi a DOM-ba.
+ */
+export function buildDualRangeBlock(fieldKey, { tolValue = "", igValue = "" } = {}) {
+  const cfg = DUAL_RANGES.find((item) => item.fieldKey === fieldKey);
+  if (!cfg) return null;
+  applyDrumModeClass();
+  const holder = document.createElement("div");
+  const wrap = document.createElement("div");
+  wrap.dataset.qsField = cfg.fieldKey;
+  for (const [key, value] of [
+    [cfg.tol, tolValue],
+    [cfg.ig, igValue],
+  ]) {
+    const input = document.createElement("input");
+    input.type = "hidden";
+    input.setAttribute("data-filter-key", key);
+    input.value = value ? String(value) : "";
+    wrap.appendChild(input);
+  }
+  holder.appendChild(wrap);
+  return convertRangePairToDual(wrap, cfg) || null;
 }
 
 function convertRangePairToTwoDrums(wrap) {

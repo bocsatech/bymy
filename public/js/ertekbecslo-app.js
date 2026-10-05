@@ -1,6 +1,7 @@
 /** Értékbecslő — a feladás teljes asztali menürendszere + piaci sáv. */
 
 import { parseKmDigits } from "./km-input.js?v=30e4feeab0";
+import { readEvRange } from "./ertekbecsles-ev-range.js?v=e56b6f04a7";
 
 const DEBOUNCE_MS = 350;
 
@@ -84,9 +85,10 @@ export async function initErtekbecsloPanel(root = document) {
   async function estimate() {
     const gyartmany = fieldValue(form, "gyartmany");
     const modell = fieldValue(form, "modell");
+    const { ev_tol, ev_ig } = readEvRange(form);
     const gyartasi_ev = fieldValue(form, "gyartasi_ev");
     const km = parseKmDigits(kmInput.value || "") || "";
-    if (!gyartmany || !modell || !gyartasi_ev || !km) {
+    if (!gyartmany || !modell || !km || (!gyartasi_ev && !ev_tol && !ev_ig)) {
       out.innerHTML = "";
       return;
     }
@@ -94,11 +96,13 @@ export async function initErtekbecsloPanel(root = document) {
     const q = new URLSearchParams({
       gyartmany,
       modell,
-      gyartasi_ev,
       km: String(km),
       require: "1",
       source: "market",
     });
+    if (gyartasi_ev) q.set("gyartasi_ev", gyartasi_ev);
+    if (ev_tol) q.set("ev_tol", ev_tol);
+    if (ev_ig) q.set("ev_ig", ev_ig);
     for (const id of DETAIL_FIELDS) {
       const value = fieldValue(form, id);
       if (value) q.set(id, value);

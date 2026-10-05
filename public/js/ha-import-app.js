@@ -698,6 +698,15 @@ window.addEventListener("message", (event) => {
 
   const key = haImportKey(data);
   if (seenHaImportKeys.has(key) || (importBusy && key === currentHaImportKey)) {
+    // Ack kötelező: nélküle a dealer script közvetlen mentésre vált → race + listing_cells_pkey
+    const pagesLen = Array.isArray(data.pages) ? data.pages.length : 0;
+    if (data.__ackSource) {
+      ackHaImport(data.__ackSource, data, data.__ackOrigin, {
+        savedCount: 0,
+        skippedCount: Math.max(1, pagesLen),
+        errorCount: 0,
+      });
+    }
     return;
   }
   try {

@@ -9,21 +9,27 @@ import { readWheel } from "./ingatlan-wheels.js?v=6952ba469c";
 const NATIVE_IDS = ["gyartasi_ev", "gyartasi_honap"];
 
 /** A natív select és a hónap a DOM-ban marad (űrlap-mentés, layout), csak rejtve. */
-function stashNatives(form, field) {
-  let host = field.querySelector(".ertek-ev-range__native");
-  if (!host) {
-    host = document.createElement("div");
-    host.className = "ertek-ev-range__native";
-    host.hidden = true;
-    host.style.display = "none";
-    field.appendChild(host);
-  }
+function hideNatives(form, field) {
+  const ev = form.querySelector("#gyartasi_ev") || document.getElementById("gyartasi_ev");
+  if (!ev) return;
   for (const id of NATIVE_IDS) {
-    const select = form.querySelector(`#${id}`) || document.getElementById(id);
-    if (!select || host.contains(select)) continue;
-    select.removeAttribute("required");
-    host.appendChild(select);
+    (form.querySelector(`#${id}`) || document.getElementById(id))?.removeAttribute("required");
   }
+  let holder = ev.closest(".inline-2");
+  if (!holder || holder === field) {
+    holder = field.querySelector(".ertek-ev-range__native");
+    if (!holder) {
+      holder = document.createElement("div");
+      holder.className = "ertek-ev-range__native";
+      field.insertBefore(holder, ev);
+    }
+    for (const id of NATIVE_IDS) {
+      const select = form.querySelector(`#${id}`) || document.getElementById(id);
+      if (select && !holder.contains(select)) holder.appendChild(select);
+    }
+  }
+  holder.hidden = true;
+  holder.style.display = "none";
   /* A split-ym menü maradéka, ha egy korábbi mount már megépítette. */
   field.querySelector('.ad-form-split-ym[data-range="gyartasi_ev"]')?.remove();
 }
@@ -34,7 +40,7 @@ export function mountErtekEvRange(form) {
   const field = anchor?.closest(".labeled-field, .ad-layout-item");
   if (!field) return null;
 
-  stashNatives(form, field);
+  hideNatives(form, field);
 
   let block = field.querySelector(".ertek-ev-range");
   if (!block) {

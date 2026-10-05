@@ -57,7 +57,14 @@
     letter-spacing: -0.02em;
     color: #111;
   }
-  .hf-all { font-size: 0.9rem; font-weight: 600; color: #111; text-decoration: none; }
+  .hf-all {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #111;
+    text-decoration: none;
+    border-bottom: 2px solid #f0c14b;
+    padding-bottom: 1px;
+  }
 
   .hf-rail {
     display: flex;
@@ -139,7 +146,7 @@
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
-  .hf-card-price { display: block; margin: 0.4rem 0.72rem 0; font-size: 1.1rem; font-weight: 800; color: #0d47a1; }
+  .hf-card-price { display: block; margin: 0.4rem 0.72rem 0; font-size: 1.1rem; font-weight: 800; color: #111; }
   .hf-card-specs { display: block; margin: 0.4rem 0.72rem 0.7rem; }
   .hf-card-specs-row { display: flex; flex-wrap: nowrap; align-items: center; gap: 0.5rem; }
   .hf-card-spec {
@@ -154,7 +161,7 @@
   .hf-card-spec svg { width: 12px; height: 12px; flex: 0 0 auto; color: #6b7280; }
 
   /* ---------------- A) Willhaben-stílus: keret nélkül, szürke lap ---------------- */
-  body.v-a { background: #eef1f7; }
+  body.v-a { background: #f1f0ed; }
   body.v-a .feed { padding: 0 0 28px; }
   body.v-a .hf-section {
     background: #fff;
@@ -164,11 +171,11 @@
   body.v-a .hf-head {
     margin-bottom: 0.7rem;
     padding-bottom: 0.65rem;
-    border-bottom: 1px solid #e0e6f0;
+    border-bottom: 1px solid #e7e5e1;
   }
-  body.v-a .hf-all { color: #0b63c4; }
+  body.v-a .hf-title { padding-left: 0.6rem; border-left: 3px solid #f0c14b; }
   body.v-a .hf-card { background: transparent; border: 0; border-radius: 0; }
-  body.v-a .hf-card--kategoria .hf-card-media { background: #f4f6fb; }
+  body.v-a .hf-card--kategoria .hf-card-media { background: #f6f5f2; }
   body.v-a .hf-card-label,
   body.v-a .hf-card-sub,
   body.v-a .hf-card-price,
@@ -176,18 +183,19 @@
   body.v-a .badge-row { margin-left: 0; margin-right: 0; }
   body.v-a .hf-card-label { margin-top: 0.45rem; font-weight: 700; }
   body.v-a .hf-card-sub { color: #6b7280; }
-  body.v-a .hf-card-price { color: #0b63c4; }
+  body.v-a .hf-card-price { color: #111; }
 
   /* ---------------- B) Szekciósáv: a sáv háttere emeli ki a kártyát ---------------- */
   body.v-b { background: #fff; }
   body.v-b .hf-section {
-    background: #f4f6fb;
-    border-top: 1px solid #e6eaf2;
-    border-bottom: 1px solid #e6eaf2;
+    background: #f6f5f2;
+    border-top: 1px solid #e9e7e3;
+    border-bottom: 1px solid #e9e7e3;
     padding: 14px 0 16px;
     margin: 0 0 14px;
   }
-  body.v-b .hf-card { border-color: #dfe3ea; }
+  body.v-b .hf-title { padding-left: 0.6rem; border-left: 3px solid #f0c14b; }
+  body.v-b .hf-card { border-color: #e2dfd9; }
   body.v-b .hf-card--featured { border-color: #f0c14b; }
   body.v-b .hf-card--kategoria .hf-card-media { background: #fff; }
 
@@ -211,11 +219,11 @@
     gap: 12px;
     align-items: start;
     padding: 12px var(--gutter);
-    border-bottom: 1px solid #e0e6f0;
+    border-bottom: 1px solid #e7e5e1;
     text-decoration: none;
     color: #111;
   }
-  body.v-d .list .row:first-child { border-top: 1px solid #e0e6f0; }
+  body.v-d .list .row:first-child { border-top: 1px solid #e7e5e1; }
   body.v-d .list .thumb {
     position: relative;
     aspect-ratio: 4 / 3;
@@ -236,7 +244,7 @@
   }
   body.v-d .list .row-sub { display: block; margin: 2px 0 0; font-size: 0.76rem; color: #6b7280; }
   body.v-d .list .row-specs { margin: 5px 0 0; display: flex; gap: 0.6rem; font-size: 0.74rem; color: #374151; }
-  body.v-d .list .row-price { display: block; margin: 5px 0 0; font-size: 1.05rem; font-weight: 800; color: #0b63c4; }
+  body.v-d .list .row-price { display: block; margin: 5px 0 0; font-size: 1.05rem; font-weight: 800; color: #111; }
   body.v-d .list .badge { display: inline-block; margin: 0 0 4px; }
   body.v-d .hf-head { align-items: center; }
 

@@ -255,15 +255,21 @@
     return map;
   }
 
+  /**
+   * HA admin betölti a Prototype.js-t, ami felülírja az Array#map / gyakran az
+   * Array.from mapFn-t is — a sparse `new Array(n)` + `.map()` üres tömböt ad.
+   * Itt csak sűrű tömb + for-ciklus (natív Promise.all).
+   */
   async function mapPool(items, concurrency, worker) {
     const list = Array.isArray(items) ? items : [];
-    const out = new Array(list.length);
-    let next = 0;
-    const limit = Math.max(1, Math.min(concurrency, list.length || 1));
+    const out = [];
+    for (let i = 0; i < list.length; i += 1) out.push(null);
+    let cursor = 0;
+    const limit = Math.max(1, Math.min(Number(concurrency) || 1, list.length || 1));
     async function slot() {
-      while (next < list.length) {
-        const index = next;
-        next += 1;
+      while (cursor < list.length) {
+        const index = cursor;
+        cursor += 1;
         try {
           out[index] = await worker(list[index], index);
         } catch {
@@ -271,8 +277,14 @@
         }
       }
     }
-    await Promise.all(Array.from({ length: limit }, () => slot()));
-    return out.map((item, index) => (item == null ? list[index] : item));
+    const runners = [];
+    for (let i = 0; i < limit; i += 1) runners.push(slot());
+    await Promise.all(runners);
+    const result = [];
+    for (let i = 0; i < list.length; i += 1) {
+      result.push(out[i] == null ? list[i] : out[i]);
+    }
+    return result;
   }
 
   function isUsefulDetailHtml(html) {
@@ -1591,7 +1603,7 @@
         detailSkipped
           ? sharedDetailPopupBlocked
             ? `Találtunk ${cars.length} autót, de a felugró ablak blokkolva van — így nem jön le a gyorsnézet.\nEngedd a popupot az admin.hasznaltauto.hu-n, majd futtasd újra.`
-            : `Találtunk ${cars.length} autót, de egyiknél sem jött le a gyorsnézet (km / műszaki mezők).\nEngedd a felugró ablakot, maradj bejelentkezve az adminban, majd futtasd újra a könyvjelzőt.\n(Egy ablakban automatikusan lépteti az autókat.)`
+            : `Találtunk ${cars.length} autót, de egyiknél sem jött le a gyorsnézet (km / műszaki mezők).\nMaradj bejelentkezve az adminban, frissítsd az Autóimport oldalt (új könyvjelző), majd futtasd újra.`
           : `Találtunk ${cars.length} autót a listán, de a mentés előtt elveszett az azonosító.\nFrissítsd az oldalt, görgess a lista végére, futtasd újra.`
       );
       return;

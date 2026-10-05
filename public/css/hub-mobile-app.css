@@ -387,11 +387,19 @@
    * 3) sávok (verticals/rail) breakout + ugyanannyi padding → első csempe = cím
    */
   body.hub-page--feed main,
+  /* Szekciósáv: a sáv halvány szürke háttere választja el a csempéket */
   body.hub-page--feed .hf-section {
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-    margin-left: 0 !important;
-    margin-right: 0 !important;
+    padding: 14px var(--hf-gutter) 16px !important;
+    margin: 0 calc(var(--hf-gutter) * -1) 14px !important;
+    background: #f6f5f2;
+    border-top: 1px solid #e9e7e3;
+    border-bottom: 1px solid #e9e7e3;
+  }
+
+  html[data-theme="dark"] body.hub-page--feed .hf-section {
+    background: #1a1f26;
+    border-top-color: rgba(255, 255, 255, 0.08);
+    border-bottom-color: rgba(255, 255, 255, 0.08);
   }
 
   body.hub-page--feed .hub-intro,
@@ -576,16 +584,17 @@
   body.hub-page--feed .hf-title {
     font-size: 1.15rem;
     font-weight: 800;
+    padding-left: 0.6rem;
+    border-left: 3px solid var(--listing-featured-yellow, #f0c14b);
   }
 
   body.hub-page--feed .hf-all {
-    display: none;
-  }
-
-  body.hub-page--feed .hf-section[data-hf="kozelben"] .hf-all {
     display: inline;
     color: #111;
-    font-weight: 600;
+    font-weight: 700;
+    text-decoration: none;
+    border-bottom: 2px solid var(--listing-featured-yellow, #f0c14b);
+    padding-bottom: 1px;
   }
 
   body.hub-page--feed .hf-card,
@@ -610,7 +619,7 @@
     max-width: var(--hf-card-w) !important;
     background: #fff;
     box-shadow: none;
-    border: 1px solid #d4d4d4;
+    border: 1px solid #e2dfd9;
     border-radius: 9px;
     overflow: hidden;
     align-self: stretch;

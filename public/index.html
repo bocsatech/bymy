@@ -60,14 +60,14 @@
       rel="stylesheet"
     />
     <link rel="preload" as="image" href="/images/bymy-logo.png?v=08e46e9d97" fetchpriority="high" />
-    <link rel="preload" as="style" href="/css/hub.css?v=dc2e0cf413" />
+    <link rel="preload" as="style" href="/css/hub.css?v=93f76122c8" />
     <link rel="preload" as="style" href="/css/site-app.css?v=350e5cde0b" />
     <link rel="preload" as="image" href="/images/hub-ingatlan.jpg?v=708928175e" fetchpriority="high" />
     <link rel="preload" as="image" href="/images/hub-auto-motor.jpg?v=bddcbdfe3c" fetchpriority="high" />
-    <link rel="stylesheet" href="/css/hub.css?v=dc2e0cf413" />
+    <link rel="stylesheet" href="/css/hub.css?v=93f76122c8" />
     <link rel="stylesheet" href="/css/listing-photo-cover.css?v=b60e28d793" />
-    <link rel="stylesheet" href="/css/listing-featured.css?v=c00be8ab90" />
-    <link rel="stylesheet" href="/css/hub-mobile-app.css?v=474befee55" />
+    <link rel="stylesheet" href="/css/listing-featured.css?v=49bf39cc29" />
+    <link rel="stylesheet" href="/css/hub-mobile-app.css?v=2f7a4a277f" />
     <link rel="stylesheet" href="/css/site-app.css?v=350e5cde0b" />
     <link rel="manifest" href="/manifest.webmanifest" />
     <meta name="mobile-web-app-capable" content="yes" />
@@ -98,13 +98,17 @@
         body.hub-page--feed .hub-intro {
           overflow-x: visible !important;
         }
-        body.hub-page--feed .hf-section,
         body.hub-page--feed .hf-head,
         body.hub-page--feed .hf-status {
           padding-left: 0 !important;
           padding-right: 0 !important;
           margin-left: 0 !important;
           margin-right: 0 !important;
+        }
+        /* Szekciósáv: teljes szélességű szürke sáv, belül a megszokott 16px inset */
+        body.hub-page--feed .hf-section {
+          padding: 14px var(--hf-gutter) 16px !important;
+          margin: 0 calc(var(--hf-gutter) * -1) 14px !important;
         }
         body.hub-page--feed .hf-rail {
           margin-left: calc(var(--hf-gutter) * -1) !important;

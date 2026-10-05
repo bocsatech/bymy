@@ -29,7 +29,8 @@ body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"])
 
 .hf-card--listing.hf-card--featured .hf-card-price,
 .home-grid-card.home-grid-card--featured .home-grid-card-price {
-  color: #0d47a1;
+  /* Az ár mindig fekete — kiemelt hirdetésnél sem kék */
+  color: #111;
 }
 
 .hf-card--listing.hf-card--featured .hf-card-media::after,

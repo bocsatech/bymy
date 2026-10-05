@@ -1,6 +1,6 @@
-import { createAdForm } from "./form-core.js?v=ertekAd4";
-import { mountAdFormBmPickers } from "./ad-form-bm-pickers.js?v=ertekAd4";
-import { initErtekbecsloPanel } from "./ertekbecslo-app.js?v=ertekAd5";
+import { createAdForm } from "./form-core.js?v=f5c3cfcf0f";
+import { mountAdFormBmPickers } from "./ad-form-bm-pickers.js?v=d33b953bad";
+import { initErtekbecsloPanel } from "./ertekbecslo-app.js?v=b586a4fc80";
 
 const CATEGORY = {
   hirdetes_vertical: "auto",
@@ -84,8 +84,13 @@ try {
     storageKey: "ertekbecsles-draft",
     editing: true,
   });
-  await import("./form-layout-apply.js?v=ertekAd4");
-  await mountAdFormBmPickers(form);
+  await import("./form-layout-apply.js?v=2acac89ddf");
+  try {
+    await mountAdFormBmPickers(form);
+  } catch (pickerErr) {
+    /* Egy választó hibája ne vigye el az egész értékbecslő űrlapot. */
+    console.warn("Értékbecslés: választók mountolása", pickerErr);
+  }
   window.dispatchEvent(new Event("ad-form-layout-refresh"));
   showValuationSteps(form);
   hidePublishChrome(form);

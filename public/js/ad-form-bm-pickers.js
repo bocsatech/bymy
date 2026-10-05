@@ -9,7 +9,7 @@ import {
   flattenAllapotOptions,
 } from "./equipment-data.js?v=5a39cb5ba3";
 import { KIVITEL_OPTIONS } from "./kivitel-options.js?v=be03aefc2e";
-import { fetchVehicleCatalog } from "./vehicle-catalog-client.js?v=5004d33efa";
+import { fetchVehicleCatalog } from "./vehicle-catalog-client.js?v=1d7f7164f8";
 import { bindAutoBmDismiss, autoBmPanelIsOpen } from "./auto-bm-dismiss.js?v=89aa460931";
 import {
   VEHICLE_KARPIT_OPTIONS,
@@ -333,6 +333,14 @@ function showNativeSelect(select) {
 function stashNativeSelect(select, wrap) {
   if (!select || !wrap) return;
   let host = select._adBmNativeHost;
+  /* Újra-mount: a wrap a régi host belsejébe került (a select még ott állt).
+     Ilyenkor a hostot nem lehet a wrapbe tenni — kiemeljük a wrapot és eldobjuk. */
+  if (host && (host === wrap || host.contains(wrap))) {
+    host.parentElement?.insertBefore(wrap, host);
+    host.remove();
+    delete select._adBmNativeHost;
+    host = null;
+  }
   if (!host) {
     host = document.createElement("div");
     host.className = "ad-form-bm-native-host";
@@ -348,7 +356,17 @@ function releaseNativeSelect(select, field) {
   const host = select._adBmNativeHost;
   const wrap = bmWrap(select);
   const parent = wrap?.parentElement || field;
-  if (!parent) return;
+  if (!parent) {
+    /* Nincs hova visszatenni (a wrapot már törölték): a hostot akkor is bontsuk,
+       különben a következő mount a leszakadt hostba építene. */
+    if (host) {
+      host.parentElement?.insertBefore(select, host);
+      if (select._adBmHidden) select.insertAdjacentElement("afterend", select._adBmHidden);
+      host.remove();
+      delete select._adBmNativeHost;
+    }
+    return;
+  }
   if (host) {
     if (wrap) parent.insertBefore(select, wrap.nextSibling);
     else parent.appendChild(select);
@@ -2400,7 +2418,7 @@ async function mountAdBrandModelCombined(form, catalog) {
   }
 
   const { fillWheel, setWheelValue, readWheel, syncHostClearButton } = await import("./ingatlan-wheels.js?v=6952ba469c");
-  const { openBrandModelCatalogSheet } = await import("./auto-drum-sheet.js?v=switchDesignAll1");
+  const { openBrandModelCatalogSheet } = await import("./auto-drum-sheet.js?v=d030fd6edf");
   const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=c4c7ac29a2");
 
   const brands = [...(catalog?.gyartmanyok || [])].sort((a, b) =>
@@ -2645,7 +2663,7 @@ async function mountAdSelectDrum(select, {
   let syncDrumWheelDisplay;
   try {
     ({ fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=6952ba469c"));
-    ({ openStandaloneSwitchSheet, bindAutoDrumSheet } = await import("./auto-drum-sheet.js?v=switchDesignAll1"));
+    ({ openStandaloneSwitchSheet, bindAutoDrumSheet } = await import("./auto-drum-sheet.js?v=d030fd6edf"));
     ({ initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=c4c7ac29a2"));
   } catch (error) {
     console.warn("Dobkerék betöltés:", title || select.id, error);
@@ -2885,7 +2903,7 @@ async function mountAdSplitYmDrum({
   }
 
   const { fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=6952ba469c");
-  const { openYmDualSheet } = await import("./auto-drum-sheet.js?v=switchDesignAll1");
+  const { openYmDualSheet } = await import("./auto-drum-sheet.js?v=d030fd6edf");
   const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=c4c7ac29a2");
 
   const yearOpts = optionsFromSelect(ev, emptyYear);
@@ -3250,7 +3268,7 @@ export async function mountTireSizeSwitchPickers(form) {
 
   try {
     const { fillTireSelect } = await import("./tire-sizes-ui.js?v=d01f914c82");
-    const { openTireTripleSheet } = await import("./auto-drum-sheet.js?v=switchDesignAll1");
+    const { openTireTripleSheet } = await import("./auto-drum-sheet.js?v=d030fd6edf");
     const blocks = [...grid.querySelectorAll(":scope > .tire-block")];
 
     for (let index = 0; index < TIRE_ROW_SPECS.length; index += 1) {

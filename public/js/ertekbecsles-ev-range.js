@@ -29,7 +29,8 @@ function hideNatives(form, field) {
     }
   }
   holder.hidden = true;
-  holder.style.display = "none";
+  /* Az űrlap CSS-e `display: grid !important`, ezért inline !important kell. */
+  holder.style.setProperty("display", "none", "important");
   /* A split-ym menü maradéka, ha egy korábbi mount már megépítette. */
   field.querySelector('.ad-form-split-ym[data-range="gyartasi_ev"]')?.remove();
 }

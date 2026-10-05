@@ -4,7 +4,7 @@ import {
   patchListingFieldsInDb,
   saveListingPhotosOrder,
   deleteListingFromDb,
-} from "./db-client.js?v=favGone1";
+} from "./db-client.js?v=d4237f0b1b";
 import {
   DEFAULT_PHOTO_OVERLAY_ID,
   detectBymyPhotoOverlay,
@@ -241,6 +241,8 @@ export function initMyAdsPanel(root) {
   let filter = "all";
   let sort = "newest";
   let photoState = null;
+  /** Kijelölt hirdetés ID-k (tömeges törléshez). */
+  const selectedIds = new Set();
   /** Főképen beégetett sablon, meta nélkül (régi feladás). */
   const sablonDetectedIds = new Set();
 
@@ -323,14 +325,28 @@ async function reload() {
     return list.sort((a, b) => listingTime(b) - listingTime(a));
   }
 
+  function pruneSelection() {
+    const alive = new Set(items.map((row) => Number(row.id)));
+    for (const id of [...selectedIds]) {
+      if (!alive.has(id)) selectedIds.delete(id);
+    }
+  }
+
   function render() {
+    pruneSelection();
     const c = counts();
     const rows = sorted(filtered());
+    const selectedCount = selectedIds.size;
     root.innerHTML = `
       <div class="myads-shell">
         <div class="myads-topbar">
           <h2 class="myads-page-title">Saját hirdetések</h2>
-          <a class="myads-new-btn" href="/hirdetesfeladas.html" data-auth-guard>+ Új hirdetés <span class="myads-new-caret" aria-hidden="true">▾</span></a>
+          <div class="myads-topbar-actions">
+            <button type="button" class="myads-bulk-delete" data-bulk-delete ${selectedCount ? "" : "disabled"}>
+              ${ICON_TRASH}<span>Kijelöltek törlése${selectedCount ? ` (${selectedCount})` : ""}</span>
+            </button>
+            <a class="myads-new-btn" href="/hirdetesfeladas.html" data-auth-guard>+ Új hirdetés <span class="myads-new-caret" aria-hidden="true">▾</span></a>
+          </div>
         </div>
         <div class="myads-filters-row">
           <div class="myads-pills" role="tablist" aria-label="Szűrés">
@@ -384,10 +400,14 @@ async function reload() {
     const priceSub = priceSecondary(item);
     const badge = isFeatured ? "Kiemelt" : active ? "Aktív" : "Inaktív";
     const badgeClass = isFeatured ? "is-featured" : active ? "is-active" : "is-inactive";
+    const selected = selectedIds.has(Number(item.id));
 
     return `
-      <article class="myads-card${isFeatured ? " myads-card--featured" : ""}" role="listitem" data-id="${item.id}">
+      <article class="myads-card${isFeatured ? " myads-card--featured" : ""}${selected ? " is-selected" : ""}" role="listitem" data-id="${item.id}">
         <div class="myads-card-top">
+          <label class="myads-select">
+            <input type="checkbox" data-select="${item.id}" ${selected ? "checked" : ""} aria-label="Hirdetés kijelölése" />
+          </label>
           <div class="myads-photo-cell">
             <div class="myads-thumb">
               ${thumb ? `<img src="${escapeHtml(thumb)}" alt="" />` : `<span class="myads-thumb-empty">Nincs kép</span>`}
@@ -606,6 +626,49 @@ async function reload() {
     renderPhotoList();
   }
 
+  function updateBulkDeleteButton() {
+    const btn = root.querySelector("[data-bulk-delete]");
+    if (!btn) return;
+    const n = selectedIds.size;
+    btn.disabled = n === 0;
+    const label = btn.querySelector("span");
+    if (label) label.textContent = n ? `Kijelöltek törlése (${n})` : "Kijelöltek törlése";
+  }
+
+  async function deleteSelectedListings() {
+    const ids = [...selectedIds];
+    if (!ids.length) return;
+    const ok = confirm(
+      ids.length === 1
+        ? "Törlöd a kijelölt hirdetést? Ez végleges, az adatbázisból is törlődik."
+        : `Törlöd a kijelölt ${ids.length} hirdetést? Ez végleges, az adatbázisból is törlődnek.`
+    );
+    if (!ok) return;
+    const btn = root.querySelector("[data-bulk-delete]");
+    if (btn) {
+      btn.disabled = true;
+      btn.classList.add("is-busy");
+    }
+    const failed = [];
+    for (const id of ids) {
+      try {
+        await deleteListingFromDb(id);
+        selectedIds.delete(id);
+      } catch {
+        failed.push(id);
+      }
+    }
+    if (btn) btn.classList.remove("is-busy");
+    await reload();
+    if (failed.length) {
+      alert(
+        failed.length === ids.length
+          ? "A kijelöltek törlése sikertelen."
+          : `${failed.length} hirdetés törlése sikertelen, a többi törölve.`
+      );
+    }
+  }
+
   function bind() {
     root.querySelectorAll("[data-filter]").forEach((btn) => {
       btn.addEventListener("click", () => {
@@ -616,6 +679,20 @@ async function reload() {
     root.querySelector("[data-myads-sort]")?.addEventListener("change", (event) => {
       sort = event.target.value;
       render();
+    });
+    root.querySelector("[data-bulk-delete]")?.addEventListener("click", () => {
+      void deleteSelectedListings();
+    });
+    root.querySelectorAll("[data-select]").forEach((box) => {
+      box.addEventListener("change", () => {
+        const id = Number(box.dataset.select);
+        if (!Number.isFinite(id) || id <= 0) return;
+        if (box.checked) selectedIds.add(id);
+        else selectedIds.delete(id);
+        const card = box.closest(".myads-card");
+        card?.classList.toggle("is-selected", box.checked);
+        updateBulkDeleteButton();
+      });
     });
     root.querySelectorAll("[data-photos]").forEach((btn) => {
       btn.addEventListener("click", () => openPhotos(btn.dataset.photos));

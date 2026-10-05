@@ -255,20 +255,27 @@
   async function fetchGyorsnezetHtml(listingId) {
     const id = clean(listingId);
     if (!id) return "";
-    const controller = typeof AbortController !== "undefined" ? new AbortController() : null;
-    const timer = controller ? setTimeout(() => controller.abort(), 15000) : null;
-    try {
-      const res = await fetch(`https://admin.hasznaltauto.hu/gyorsnezet/szemelyauto/${id}`, {
-        credentials: "include",
-        signal: controller?.signal,
-      });
-      if (!res.ok) return "";
-      return await res.text();
-    } catch {
-      return "";
-    } finally {
-      if (timer) clearTimeout(timer);
+    const cats = ["szemelyauto", "kishaszongarmu", "motorkerekpar", "lakokocsi", "haszongepjarmu"];
+    for (const cat of cats) {
+      const controller = typeof AbortController !== "undefined" ? new AbortController() : null;
+      const timer = controller ? setTimeout(() => controller.abort(), 12000) : null;
+      try {
+        const res = await fetch(`https://admin.hasznaltauto.hu/gyorsnezet/${cat}/${id}`, {
+          credentials: "include",
+          signal: controller?.signal,
+        });
+        if (!res.ok) continue;
+        const html = await res.text();
+        if (html.length > 400 && !/hiba[!].*javascript|javascript.*hiba/i.test(html.slice(0, 800))) {
+          return html;
+        }
+      } catch {
+        /* következő kategória */
+      } finally {
+        if (timer) clearTimeout(timer);
+      }
     }
+    return "";
   }
 
   function extractEquipmentFromHtml(html) {
@@ -706,7 +713,7 @@
     const byId = new Map();
     const add = (rawId, extra = {}) => {
       const id = String(rawId || "").replace(/\D/g, "");
-      if (id.length < 7 || id.length > 10) return;
+      if (id.length < 5 || id.length > 12) return;
       const prev = byId.get(id) || {};
       byId.set(id, {
         listingId: id,
@@ -722,11 +729,34 @@
       for (const car of extractCarsFromListingRows(doc)) add(car.listingId, car);
       const html = String(doc.documentElement?.outerHTML || "");
       const text = String(doc.body?.innerText || doc.body?.textContent || "");
-      for (const m of text.matchAll(/\((\d{7,10})\)/g)) add(m[1]);
-      for (const m of html.matchAll(/[?&]id=(\d{7,10})\b/g)) add(m[1]);
-      for (const m of html.matchAll(/\/gyorsnezet\/[^/"']+\/(\d{7,10})/g)) add(m[1]);
-      for (const m of html.matchAll(/hasznaltautocdn\.com\/(?:\d{2,4}x\d{2,4}\/)?(\d{7,10})\//gi)) {
+      for (const m of text.matchAll(/\((\d{5,12})\)/g)) add(m[1]);
+      for (const m of html.matchAll(/[?&]id=(\d{5,12})\b/g)) add(m[1]);
+      for (const m of html.matchAll(/\/gyorsnezet\/[^/"']+\/(\d{5,12})/g)) add(m[1]);
+      for (const m of html.matchAll(/hasznaltautocdn\.com\/(?:\d{2,4}x\d{2,4}\/)?(\d{5,12})\//gi)) {
         add(m[1]);
+      }
+      for (const a of doc.querySelectorAll("a[href], [onclick]")) {
+        const label = clean(a.innerText || a.textContent || a.getAttribute("title") || "");
+        if (!/^m[oó]dos[ií]t/i.test(label) && !/hirdetesfeladas|gyorsnezet/i.test(String(a.getAttribute("href") || a.href || ""))) {
+          continue;
+        }
+        const id =
+          pickIdFromHref(a.getAttribute("href") || a.href || a.getAttribute("onclick") || "") ||
+          pickIdFromRow(
+            a.closest?.("tr, .jarmu-kartya, .listing-card, article, li, [class*='jarmu'], [class*='hirdetes']") ||
+              a.parentElement
+          );
+        if (id) {
+          const row =
+            a.closest?.(
+              "tr, .jarmu-kartya, .listing-card, article, li, [class*='jarmu'], [class*='hirdetes']"
+            ) || a.parentElement;
+          const img = row?.querySelector?.("img");
+          add(id, {
+            visibleTitle: pickTitleFromRow(row),
+            visibleImage: hqFromSrc(img?.currentSrc || img?.src || img?.getAttribute("data-src") || ""),
+          });
+        }
       }
     }
     return [...byId.values()].slice(0, MAX);
@@ -1147,14 +1177,7 @@
       return next;
     });
     const prepared = enriched
-      .filter((car) => {
-        const id = recoverHaId(car);
-        if (!id) return false;
-        const html = String(car.html || car.gyorsnezetHtml || "");
-        const title = clean(car.visibleTitle || car.title || "");
-        const img = hqFromSrc(car.visibleImage || car.imageUrl || "");
-        return html.length > 400 || title.length >= 8 || img;
-      })
+      .filter((car) => recoverHaId(car))
       .map((car) =>
         slimDealerPage({
           ...car,
@@ -1163,7 +1186,10 @@
         })
       );
     if (!prepared.length) {
-      hideProgress("Nincs másolható autó a listán");
+      hideProgress();
+      alert(
+        `Találtunk ${cars.length} sort, de egyikről sem lett hirdetésazonosító.\nGörgess le a járműlistáig (thumbök), majd futtasd újra.`
+      );
       return;
     }
 

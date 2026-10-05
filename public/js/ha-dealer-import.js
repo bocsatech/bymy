@@ -255,10 +255,22 @@
   function isUsefulDetailHtml(html) {
     const raw = String(html || "");
     if (raw.length < 800) return false;
-    if (/hiba[!].*javascript|javascript.*hiba|cloudflare|ügyfél belépés|felhasználónév/i.test(raw.slice(0, 2000))) {
+    const head = raw.slice(0, 2500);
+    if (/attention required|just a moment|challenges\.cloudflare|biztonsági ellenőrzés/i.test(head)) {
       return false;
     }
-    if (/v[eé]tel[aá]r|fut[aá]steljes|gy[aá]rt[aá]si|üzemanyag|uzemanyag|km\.\s*óra/i.test(raw)) return true;
+    // Bejelentkezett admin fejlécében van „Felhasználónév” — az NEM login fal.
+    // Login fal: jelszó mező + belépés, és nincs járműadat.
+    const hasVehicle =
+      /v[eé]tel[aá]r|fut[aá]steljes|gy[aá]rt[aá]si|üzemanyag|uzemanyag|km\.\s*óra|hirdetesadatok|class="[^"]*bal[^"]*pontos/i.test(
+        raw
+      );
+    if (hasVehicle) return true;
+    const loginWall =
+      /type=["']password["']/i.test(head) &&
+      /ügyfél belépés|haszn[aá]ltaut[oó]\s+ügyfél belépés/i.test(head);
+    if (loginWall) return false;
+    if (/hiba[!].*javascript|javascript\s*(engedélyez|kell)/i.test(head) && raw.length < 5000) return false;
     return Object.keys(extractMapFromHtml(raw)).length >= 4;
   }
 
@@ -359,26 +371,67 @@
     }
   }
 
+  function fetchDetailViaPopup(url) {
+    return new Promise((resolve) => {
+      let win = null;
+      let settled = false;
+      const done = (html) => {
+        if (settled) return;
+        settled = true;
+        clearInterval(poll);
+        clearTimeout(timer);
+        try {
+          if (win && !win.closed) win.close();
+        } catch {
+        }
+        resolve(html || "");
+      };
+      try {
+        win = window.open(url, "bymyHaDetail", "popup=yes,width=1100,height=900");
+      } catch {
+        done("");
+        return;
+      }
+      if (!win) {
+        done("");
+        return;
+      }
+      const timer = setTimeout(() => done(""), 18000);
+      const poll = setInterval(() => {
+        try {
+          const doc = win.document;
+          if (!doc?.body) return;
+          const html = String(doc.documentElement?.outerHTML || "");
+          if (isUsefulDetailHtml(html)) done(html);
+        } catch {
+          /* még tölt */
+        }
+      }, 400);
+    });
+  }
+
   async function fetchDetailHtml(listingId) {
     const id = clean(listingId);
     if (!id) return "";
-    const cats = ["szemelyauto", "kishaszongarmu", "motorkerekpar", "lakokocsi", "haszongepjarmu"];
-    for (const cat of cats) {
-      const urls = [
-        `https://admin.hasznaltauto.hu/gyorsnezet/${cat}/${id}`,
-        `https://admin.hasznaltauto.hu/hirdetesfeladas/${cat}?id=${id}`,
-        `https://admin.hasznaltauto.hu/hirdetesfeladas/${cat}/modositas/${id}`,
-      ];
-      for (const url of urls) {
-        // Fetch előbb (gyorsabb); iframe csak ha a válasz SPA-üres
-        const viaFetch = await tryFetchHtml(url);
-        if (viaFetch) return viaFetch;
-        const viaFrame = await fetchDetailViaIframe(url);
-        if (viaFrame) return viaFrame;
-      }
-      // Első kategóriánál ha semmi, még próbáljuk a többit; különben elég a szemelyauto
-      if (cat === "szemelyauto") continue;
-      break;
+    const primary = [
+      `https://admin.hasznaltauto.hu/gyorsnezet/szemelyauto/${id}`,
+      `https://admin.hasznaltauto.hu/hirdetesfeladas/szemelyauto?id=${id}`,
+      `https://admin.hasznaltauto.hu/hirdetesfeladas/szemelyauto/modositas/${id}`,
+    ];
+    for (const url of primary) {
+      const viaFetch = await tryFetchHtml(url);
+      if (viaFetch) return viaFetch;
+    }
+    for (const url of primary) {
+      const viaFrame = await fetchDetailViaIframe(url);
+      if (viaFrame) return viaFrame;
+    }
+    const viaPopup = await fetchDetailViaPopup(primary[0]);
+    if (viaPopup) return viaPopup;
+    for (const cat of ["kishaszongarmu", "motorkerekpar", "lakokocsi", "haszongepjarmu"]) {
+      const url = `https://admin.hasznaltauto.hu/gyorsnezet/${cat}/${id}`;
+      const viaFetch = await tryFetchHtml(url);
+      if (viaFetch) return viaFetch;
     }
     return "";
   }
@@ -1008,6 +1061,12 @@
       const text = String(val ?? "").trim();
       if (key && text && text.length < 400) map[key] = text;
     }
+    const priceSeed = String(page.price || "").replace(/\D/g, "");
+    const kmSeed = String(page.km || "").replace(/\D/g, "");
+    const yearSeed = String(page.year || "").replace(/\D/g, "").slice(0, 4);
+    if (priceSeed && !map["Vételár"]) map["Vételár"] = `${Number(priceSeed).toLocaleString("hu-HU")} Ft`;
+    if (kmSeed && !map["Km. óra állás"]) map["Km. óra állás"] = `${Number(kmSeed).toLocaleString("hu-HU")} km`;
+    if (yearSeed.length === 4 && !map["Gyártási év"]) map["Gyártási év"] = yearSeed;
     const visibleImage = hqFromSrc(page.visibleImage || page.imageUrl || page.fo_kep || "");
     const html = String(page.html || page.gyorsnezetHtml || "").slice(0, 45000);
     return {

@@ -249,7 +249,7 @@
       }
     }
     await Promise.all(Array.from({ length: limit }, () => slot()));
-    return out;
+    return out.map((item, index) => (item == null ? list[index] : item));
   }
 
   async function fetchGyorsnezetHtml(listingId) {
@@ -864,7 +864,9 @@
 
   function slimDealerPage(car) {
     const page = car || {};
-    const listingId = recoverHaId(page);
+    const listingId =
+      String(page.listingId || page.hasznaltauto_hirdetes_id || "").replace(/\D/g, "") ||
+      recoverHaId(page);
     const mapIn = page.map && typeof page.map === "object" ? page.map : {};
     const map = {};
     for (const [key, val] of Object.entries(mapIn)) {
@@ -1166,29 +1168,42 @@
     }
 
     let copied = 0;
-    const enriched = await mapPool(cars, 4, async (car) => {
-      const next = await ensureCarDescription({
+    const enriched = await mapPool(cars, 3, async (car) => {
+      const listingId = recoverHaId(car);
+      let next = {
         ...car,
-        listingId: recoverHaId(car),
+        listingId,
+        hasznaltauto_hirdetes_id: listingId,
         visibleImage: hqFromSrc(car.visibleImage || car.imageUrl || "") || car.visibleImage,
-      });
+      };
+      try {
+        next = await ensureCarDescription(next);
+      } catch {
+        /* listaadat elég a mentéshez */
+      }
+      next.listingId = listingId;
+      next.hasznaltauto_hirdetes_id = listingId;
       copied += 1;
       showProgress(copied, cars.length, `adatok ${copied}/${cars.length}`);
       return next;
     });
-    const prepared = enriched
-      .filter((car) => recoverHaId(car))
-      .map((car) =>
+    const prepared = [];
+    for (let i = 0; i < cars.length; i += 1) {
+      const listingId = recoverHaId(cars[i]) || recoverHaId(enriched[i]) || "";
+      if (!listingId) continue;
+      const car = { ...(enriched[i] || cars[i]), listingId, hasznaltauto_hirdetes_id: listingId };
+      prepared.push(
         slimDealerPage({
           ...car,
-          listingId: recoverHaId(car),
+          listingId,
           visibleImage: hqFromSrc(car.visibleImage || car.imageUrl || "") || car.visibleImage,
         })
       );
+    }
     if (!prepared.length) {
       hideProgress();
       alert(
-        `Találtunk ${cars.length} sort, de egyikről sem lett hirdetésazonosító.\nGörgess le a járműlistáig (thumbök), majd futtasd újra.`
+        `Találtunk ${cars.length} autót a listán, de a mentés előtt elveszett az azonosító.\nFrissítsd az oldalt, görgess a lista végére, futtasd újra.`
       );
       return;
     }

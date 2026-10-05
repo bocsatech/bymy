@@ -61,7 +61,6 @@ body.listings-page .ha-card-location {
 .home-grid-card-photo-img,
 .home-grid-card-photo-slide img,
 body.listings-page .ha-card-photo-img,
-.hd-stage img,
 .hd-thumb img,
 .hd-rel img,
 body.site-app .myads-thumb img,
@@ -70,6 +69,13 @@ body.site-app .myads-photo-item img {
   object-position: center center !important;
   transform: scale(1.14);
   transform-origin: center center;
+}
+
+/* Részletes oldal: ne zoomoljuk a főképet (különben csak fényszóró látszik). */
+.hd-stage img {
+  object-fit: cover !important;
+  object-position: center center !important;
+  transform: none !important;
 }
 
 html[data-theme="dark"] .hf-card--listing,

@@ -542,8 +542,9 @@
       }
     } catch {
     }
-    if (Object.keys(map).length < 3) return { ...car, html, map };
+    // map < 3 sem állítja meg: html-ből még kinyerhető leírás / felszereltség / kép
     const felszereltseg = extractEquipmentFromHtml(html);
+    const prevEquip = Array.isArray(car.felszereltseg) ? car.felszereltseg : [];
     const bodyText = html
       .replace(/<script[\s\S]*?<\/script>/gi, " ")
       .replace(/<style[\s\S]*?<\/style>/gi, " ")
@@ -562,6 +563,8 @@
     const priceDigits = String(priceRaw).replace(/\D/g, "");
     const yearRaw = map["Gyártási év"] || map["Évjárat"] || map["Evjarat"] || "";
     const yearDigits = (String(yearRaw).match(/(19|20)\d{2}/) || [])[0] || "";
+    const fuel = clean(map["Üzemanyag"] || map["Uzemanyag"] || map["Üzemanyag fajtája"] || car.fuel || "");
+    const gear = clean(map["Sebességváltó"] || map["Sebessegvalto"] || car.gear || "");
     if (!hqFromSrc(visibleImage)) {
       const m = html.match(
         /hasznaltautocdn\.com\/(?:\d{2,4}x\d{2,4}\/)?(\d{5,12})\/(\d{5,12})\.(jpe?g|png|webp)/i
@@ -580,11 +583,13 @@
       visibleImage: hqFromSrc(visibleImage) || "",
       visibleDescription,
       map,
-      felszereltseg,
+      felszereltseg: [...new Set([...prevEquip, ...felszereltseg])].slice(0, 300),
       bodyText,
       price: priceDigits || car.price || "",
       km: kmDigits || car.km || "",
       year: yearDigits || car.year || "",
+      fuel: fuel || car.fuel || "",
+      gear: gear || car.gear || "",
     };
   }
 

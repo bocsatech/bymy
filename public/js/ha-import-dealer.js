@@ -384,9 +384,9 @@
     });
   }
 
-  async function tryFetchHtml(url) {
+  async function tryFetchHtml(url, timeoutMs = 5000) {
     const controller = typeof AbortController !== "undefined" ? new AbortController() : null;
-    const timer = controller ? setTimeout(() => controller.abort(), 8000) : null;
+    const timer = controller ? setTimeout(() => controller.abort(), timeoutMs) : null;
     try {
       const res = await fetch(url, {
         credentials: "include",
@@ -404,43 +404,81 @@
     }
   }
 
-  function fetchDetailViaPopup(url) {
+  /** Egy ablak az egész batchhez — 25× window.open-t a böngésző blokkolja. */
+  let sharedDetailWin = null;
+  let sharedDetailPopupBlocked = false;
+
+  function closeSharedDetailWin() {
+    try {
+      if (sharedDetailWin && !sharedDetailWin.closed) sharedDetailWin.close();
+    } catch {
+    }
+    sharedDetailWin = null;
+  }
+
+  function fetchDetailViaSharedWindow(url) {
+    const targetUrl = String(url || "");
+    const wantId =
+      targetUrl.match(/\/(\d{5,12})\b/)?.[1] ||
+      targetUrl.match(/[?&]id=(\d{5,12})\b/i)?.[1] ||
+      "";
     return new Promise((resolve) => {
-      let win = null;
       let settled = false;
       const done = (html) => {
         if (settled) return;
         settled = true;
         clearInterval(poll);
         clearTimeout(timer);
-        try {
-          if (win && !win.closed) win.close();
-        } catch {
-        }
         resolve(html || "");
       };
+      if (sharedDetailPopupBlocked) {
+        done("");
+        return;
+      }
       try {
-        win = window.open(url, "bymyHaDetail", "popup=yes,width=1100,height=900");
+        if (!sharedDetailWin || sharedDetailWin.closed) {
+          sharedDetailWin = window.open(targetUrl, "bymyHaDetail", "popup=yes,width=1100,height=900");
+          if (!sharedDetailWin) {
+            sharedDetailPopupBlocked = true;
+            done("");
+            return;
+          }
+        } else {
+          try {
+            sharedDetailWin.location.href = targetUrl;
+          } catch {
+            sharedDetailWin = window.open(targetUrl, "bymyHaDetail", "popup=yes,width=1100,height=900");
+            if (!sharedDetailWin) {
+              sharedDetailPopupBlocked = true;
+              done("");
+              return;
+            }
+          }
+        }
       } catch {
         done("");
         return;
       }
-      if (!win) {
-        done("");
-        return;
-      }
-      const timer = setTimeout(() => done(""), 18000);
+      const timer = setTimeout(() => done(""), 22000);
       const poll = setInterval(() => {
         try {
+          const win = sharedDetailWin;
+          if (!win || win.closed) return;
+          const href = String(win.location?.href || "");
+          if (wantId && href && !href.includes(wantId)) return;
           const doc = win.document;
           if (!doc?.body) return;
           const html = String(doc.documentElement?.outerHTML || "");
           if (isUsefulDetailHtml(html)) done(html);
         } catch {
-          /* még tölt */
+          /* navigáció közben cross-origin flash */
         }
-      }, 400);
+      }, 350);
     });
+  }
+
+  function fetchDetailViaPopup(url) {
+    return fetchDetailViaSharedWindow(url);
   }
 
   function collectPublicDetailUrls(listingId, car = {}) {
@@ -479,27 +517,38 @@
       `https://admin.hasznaltauto.hu/hirdetesfeladas/szemelyauto?id=${id}`,
       `https://admin.hasznaltauto.hu/hirdetesfeladas/szemelyauto/modositas/${id}`,
     ];
+    const onAdmin = /admin\.hasznaltauto\.hu$/i.test(location.hostname || "");
+
+    // Admin listán: egy megosztott gyorsnézet-ablak (fetch gyakran üres JS-héjat ad)
+    if (onAdmin) {
+      const viaWin = await fetchDetailViaSharedWindow(primary[0]);
+      if (viaWin) return viaWin;
+    }
+
     for (const url of primary) {
-      const viaFetch = await tryFetchHtml(url);
+      const viaFetch = await tryFetchHtml(url, 4500);
       if (viaFetch) return viaFetch;
     }
-    for (const url of primary) {
+    for (const url of primary.slice(0, 2)) {
       const viaFrame = await fetchDetailViaIframe(url);
       if (viaFrame) return viaFrame;
     }
-    const viaPopup = await fetchDetailViaPopup(primary[0]);
-    if (viaPopup) return viaPopup;
+    if (!onAdmin) {
+      const viaPopup = await fetchDetailViaSharedWindow(primary[0]);
+      if (viaPopup) return viaPopup;
+    }
     for (const cat of ["kishaszongarmu", "motorkerekpar", "lakokocsi", "haszongepjarmu"]) {
       const url = `https://admin.hasznaltauto.hu/gyorsnezet/${cat}/${id}`;
-      const viaFetch = await tryFetchHtml(url);
+      if (onAdmin) {
+        const viaWin = await fetchDetailViaSharedWindow(url);
+        if (viaWin) return viaWin;
+      }
+      const viaFetch = await tryFetchHtml(url, 4000);
       if (viaFetch) return viaFetch;
     }
-    // Utolsó esély: nyilvános adatlap (slug URL, import-{id}, bejelentkezett böngésző)
     for (const url of collectPublicDetailUrls(id, car)) {
-      const viaFetch = await tryFetchHtml(url);
+      const viaFetch = await tryFetchHtml(url, 4500);
       if (viaFetch) return viaFetch;
-      const viaFrame = await fetchDetailViaIframe(url);
-      if (viaFrame) return viaFrame;
     }
     return "";
   }
@@ -583,16 +632,17 @@
     return items.slice(0, 300);
   }
 
-  /** Szerver formLooksThin-hez igazítva: km + (extrák vagy gazdag map/html). */
+  /** Van elég gyorsnézet HTML / map a szerveres teljes importhoz. */
   function carLooksReadyForImport(car = {}) {
-    const km = String(car.km || "").replace(/\D/g, "");
-    if (!km) return false;
-    const eq = Array.isArray(car.felszereltseg) ? car.felszereltseg.length : 0;
-    if (eq >= 5) return true;
-    const map = car.map && typeof car.map === "object" ? car.map : {};
-    if (Object.keys(map).length >= 5) return true;
     const html = String(car.html || car.gyorsnezetHtml || "");
-    return html.length > 800 && isUsefulDetailHtml(html);
+    if (html.length > 800 && isUsefulDetailHtml(html)) return true;
+    const km = String(car.km || "").replace(/\D/g, "");
+    const eq = Array.isArray(car.felszereltseg) ? car.felszereltseg.length : 0;
+    const map = car.map && typeof car.map === "object" ? car.map : {};
+    const mapN = Object.keys(map).length;
+    if (km && (eq >= 5 || mapN >= 5)) return true;
+    if (mapN >= 8 && (km || String(car.price || "").replace(/\D/g, ""))) return true;
+    return false;
   }
 
   async function ensureCarDescriptionWithRetry(car) {
@@ -1488,6 +1538,25 @@
       return;
     }
 
+    if (/admin\.hasznaltauto\.hu$/i.test(location.hostname || "")) {
+      showProgress(0, cars.length, "gyorsnézet ablak…");
+      // Felugró engedély a user gesture alatt (könyvjelző katt)
+      const probe = window.open(
+        "about:blank",
+        "bymyHaDetail",
+        "popup=yes,width=1100,height=900"
+      );
+      if (!probe) {
+        sharedDetailPopupBlocked = true;
+        hideProgress();
+        alert(
+          "A böngésző blokkolja a gyorsnézet ablakot.\n\nEngedd a felugró ablakokat az admin.hasznaltauto.hu-n, majd futtasd újra a könyvjelzőt.\n(Egy ablakban sorban tölti az autókat — nem kell kézzel nyitogatni.)"
+        );
+        return;
+      }
+      sharedDetailWin = probe;
+    }
+
     let copied = 0;
     let detailSkipped = 0;
     const enriched = await mapPool(cars, 1, async (car) => {
@@ -1517,6 +1586,7 @@
       );
       return next;
     });
+    closeSharedDetailWin();
     const prepared = [];
     for (let i = 0; i < cars.length; i += 1) {
       const listingId = recoverHaId(cars[i]) || recoverHaId(enriched[i]) || "";
@@ -1538,7 +1608,9 @@
       hideProgress();
       alert(
         detailSkipped
-          ? `Találtunk ${cars.length} autót, de egyiknél sem jött le a gyorsnézet (km / műszaki mezők).\nNyisd meg egy autó gyorsnézetét bejelentkezve, majd futtasd újra a könyvjelzőt.`
+          ? sharedDetailPopupBlocked
+            ? `Találtunk ${cars.length} autót, de a felugró ablak blokkolva van — így nem jön le a gyorsnézet.\nEngedd a popupot az admin.hasznaltauto.hu-n, majd futtasd újra.`
+            : `Találtunk ${cars.length} autót, de egyiknél sem jött le a gyorsnézet (km / műszaki mezők).\nEngedd a felugró ablakot, maradj bejelentkezve az adminban, majd futtasd újra a könyvjelzőt.\n(Egy ablakban automatikusan lépteti az autókat.)`
           : `Találtunk ${cars.length} autót a listán, de a mentés előtt elveszett az azonosító.\nFrissítsd az oldalt, görgess a lista végére, futtasd újra.`
       );
       return;

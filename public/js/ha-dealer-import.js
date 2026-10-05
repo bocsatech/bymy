@@ -279,19 +279,22 @@
     const raw = String(html || "");
     if (raw.length < 800) return false;
     const head = raw.slice(0, 2500);
-    if (/attention required|just a moment|challenges\.cloudflare|biztonsági ellenőrzés/i.test(head)) {
+    if (/attention required|just a moment|challenges\.cloudflare|biztonsági ellenőrzés|cf-browser-verification|cdn-cgi\/challenge/i.test(head)) {
       return false;
     }
     // Bejelentkezett admin fejlécében van „Felhasználónév” — az NEM login fal.
     // Login fal: jelszó mező + belépés, és nincs járműadat.
     const hasVehicle =
-      /v[eé]tel[aá]r|fut[aá]steljes|gy[aá]rt[aá]si|üzemanyag|uzemanyag|km\.\s*óra|hirdetesadatok|class="[^"]*bal[^"]*pontos|print-basic-info-item/i.test(
+      /v[eé]tel[aá]r|fut[aá]steljes|gy[aá]rt[aá]si|üzemanyag|uzemanyag|km\.\s*óra|hirdetesadatok|class="[^"]*bal[^"]*pontos|print-basic-info-item|kilom[eé]ter[oó]ra|henger[uű]rtartalom/i.test(
         raw
       );
     if (hasVehicle) return true;
     if (/print-basic-info-item__label|hasznaltautocdn\.com\/\d/i.test(raw)) return true;
     if (/felszerelts[eé]g|class="[^"]*extranev/i.test(raw) && raw.length > 1500) return true;
     if (/\bLeírás\b/i.test(raw) && /hasznaltautocdn/i.test(raw)) return true;
+    // Szerkesztő űrlap: sok name= mező = teljes adat (modositas)
+    const namedInputs = (raw.match(/<(?:input|select|textarea)[^>]+name=["'][^"']+/gi) || []).length;
+    if (namedInputs >= 12 && raw.length > 5000) return true;
     const loginWall =
       /type=["']password["']/i.test(head) &&
       /ügyfél belépés|haszn[aá]ltaut[oó]\s+ügyfél belépés/i.test(head);
@@ -459,13 +462,13 @@
         done("");
         return;
       }
-      const timer = setTimeout(() => done(""), 22000);
+      const timer = setTimeout(() => done(""), 12000);
       const poll = setInterval(() => {
         try {
           const win = sharedDetailWin;
           if (!win || win.closed) return;
           const href = String(win.location?.href || "");
-          if (wantId && href && !href.includes(wantId)) return;
+          if (wantId && href && href !== "about:blank" && !href.includes(wantId)) return;
           const doc = win.document;
           if (!doc?.body) return;
           const html = String(doc.documentElement?.outerHTML || "");
@@ -519,35 +522,32 @@
     ];
     const onAdmin = /admin\.hasznaltauto\.hu$/i.test(location.hostname || "");
 
-    // Admin listán: egy megosztott gyorsnézet-ablak (fetch gyakran üres JS-héjat ad)
-    if (onAdmin) {
-      const viaWin = await fetchDetailViaSharedWindow(primary[0]);
-      if (viaWin) return viaWin;
-    }
-
+    // 1) Same-origin fetch — ez működött korábban bejelentkezve (gyors)
     for (const url of primary) {
-      const viaFetch = await tryFetchHtml(url, 4500);
+      const viaFetch = await tryFetchHtml(url, 8000);
       if (viaFetch) return viaFetch;
     }
-    for (const url of primary.slice(0, 2)) {
+    // 2) iframe (ha nem XFO-zott)
+    for (const url of primary) {
       const viaFrame = await fetchDetailViaIframe(url);
       if (viaFrame) return viaFrame;
     }
-    if (!onAdmin) {
-      const viaPopup = await fetchDetailViaSharedWindow(primary[0]);
-      if (viaPopup) return viaPopup;
+    // 3) Egy megosztott ablak (nem 25× új popup)
+    {
+      const viaWin = await fetchDetailViaSharedWindow(primary[0]);
+      if (viaWin) return viaWin;
     }
     for (const cat of ["kishaszongarmu", "motorkerekpar", "lakokocsi", "haszongepjarmu"]) {
       const url = `https://admin.hasznaltauto.hu/gyorsnezet/${cat}/${id}`;
+      const viaFetch = await tryFetchHtml(url, 6000);
+      if (viaFetch) return viaFetch;
       if (onAdmin) {
         const viaWin = await fetchDetailViaSharedWindow(url);
         if (viaWin) return viaWin;
       }
-      const viaFetch = await tryFetchHtml(url, 4000);
-      if (viaFetch) return viaFetch;
     }
     for (const url of collectPublicDetailUrls(id, car)) {
-      const viaFetch = await tryFetchHtml(url, 4500);
+      const viaFetch = await tryFetchHtml(url, 6000);
       if (viaFetch) return viaFetch;
     }
     return "";
@@ -1536,25 +1536,6 @@
         "Nem találtunk autót a listán.\nGörgess le a járművekig, majd futtasd újra."
       );
       return;
-    }
-
-    if (/admin\.hasznaltauto\.hu$/i.test(location.hostname || "")) {
-      showProgress(0, cars.length, "gyorsnézet ablak…");
-      // Felugró engedély a user gesture alatt (könyvjelző katt)
-      const probe = window.open(
-        "about:blank",
-        "bymyHaDetail",
-        "popup=yes,width=1100,height=900"
-      );
-      if (!probe) {
-        sharedDetailPopupBlocked = true;
-        hideProgress();
-        alert(
-          "A böngésző blokkolja a gyorsnézet ablakot.\n\nEngedd a felugró ablakokat az admin.hasznaltauto.hu-n, majd futtasd újra a könyvjelzőt.\n(Egy ablakban sorban tölti az autókat — nem kell kézzel nyitogatni.)"
-        );
-        return;
-      }
-      sharedDetailWin = probe;
     }
 
     let copied = 0;

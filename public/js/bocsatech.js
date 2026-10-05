@@ -460,6 +460,9 @@ function vehiclePostingPreviewHref(id) {
   return `/hirdetesfeladas.html?vertical=${encodeURIComponent(vertical)}&subtype=${encodeURIComponent(id)}&start=1`;
 }
 
+/** Ha a levélküldés elhal, kód emailtől függetlenül is kérhető. */
+const OTP_FALLBACK_HINT = " Email nélkül: node scripts/level1-code.mjs (ugyanaz az adatbázis, 10 percig él a kód).";
+
 function otpSentMessage(data) {
   const to = data.emailMasked ? ` (${data.emailMasked})` : "";
   if (data.devCode) {
@@ -471,7 +474,7 @@ function otpSentMessage(data) {
   }
   devOtpCode = "";
   if (data.smtpRequired) {
-    return `Az email kód nem küldhető ki — nincs SMTP beállítás a szerveren. Kérd a rendszergazdát (SMTP_USER / SMTP_PASS).`;
+    return `Az email kód nem küldhető ki — nincs SMTP beállítás a szerveren. Kérd a rendszergazdát (SMTP_USER / SMTP_PASS).${OTP_FALLBACK_HINT}`;
   }
   if (data.otpSent === false) {
     const detail = data.smtpWarning
@@ -483,7 +486,7 @@ function otpSentMessage(data) {
     const vercelHint = hosted
       ? " Próbáld újra a kód küldését. Ha ismét elhasal, az S1 SMTP (Gmail) a küldő."
       : " A Gmail küldő fiók app jelszavát ellenőrizd (~/.autosweb/smtp.json).";
-    return `Az email kód nem ment ki${to}: ${detail}.${vercelHint}`;
+    return `Az email kód nem ment ki${to}: ${detail}.${vercelHint}${OTP_FALLBACK_HINT}`;
   }
   if (data.otpSent !== true) {
     return `Az email küldés állapota ismeretlen${to}. Próbáld újra, vagy kérj új kódot.`;

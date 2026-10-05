@@ -444,10 +444,11 @@ body.hub-page:has(.hub-hero--empty) .hub-main {
 .hub-verticals {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.7rem;
+  gap: 10px;
   align-items: stretch;
-  width: 70%;
-  max-width: 70%;
+  /* Folyamatos szélesség: 800px-en a mobil 86%-ot adja, 1200px-től a megszokott 70% */
+  width: min(868px, max(70%, calc(37.9vw + 357px)));
+  max-width: 100%;
   margin-left: auto;
   margin-right: auto;
   box-sizing: border-box;
@@ -1337,6 +1338,17 @@ body.hub-page--feed .hf-card {
   .hf-card--kategoria,
   .hf-card--ajanlas {
     flex-basis: 194px;
+  }
+}
+
+/* Kezdőlap sávok: 800px-en a mobil féloldalas kártya, 1100px-től a megszokott 220px */
+@media (min-width: 801px) {
+  body.hub-page--feed .hf-card,
+  body.hub-page--feed .hf-card--wide,
+  body.hub-page--feed .hf-card--listing,
+  body.hub-page--feed .hf-card--kategoria,
+  body.hub-page--feed .hf-card--ajanlas {
+    flex: 0 0 max(220px, calc(803px - 53vw));
   }
 }
 

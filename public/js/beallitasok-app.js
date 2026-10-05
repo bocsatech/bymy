@@ -14,7 +14,7 @@ import {
   isPrivateProfileComplete,
   resolveAccountKind,
   applyAccountKindToDocument,
-} from "./site-auth.js?v=aad32d7596";
+} from "./site-auth.js?v=de3fd03735";
 import { wirePostalCityAutofill } from "./postal-city-autofill.js?v=14f1f30116";
 import {
   getParkplatz,

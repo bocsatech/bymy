@@ -1,7 +1,7 @@
 /** Értékbecslő — a feladás teljes asztali menürendszere + piaci sáv. */
 
 import { parseKmDigits } from "./km-input.js?v=30e4feeab0";
-import { readEvRange } from "./ertekbecsles-ev-range.js?v=e56b6f04a7";
+import { readEvRange } from "./ertekbecsles-ev-range.js?v=f15cb1f40d";
 
 const DEBOUNCE_MS = 350;
 

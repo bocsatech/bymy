@@ -1,31 +1,50 @@
 /**
  * Értékbecslés: a „Gyártási év” az autós keresőével azonos tól–ig dobkerék.
- * A hirdetésfeladáson marad az év + hónap választó, ezért csak itt cseréljük.
+ * A hirdetésfeladáson marad az év + hónap választó, ezért csak itt cseréljük
+ * (ad-form-bm-pickers.js ezen az űrlapon nem építi meg a split-ym menüt).
  */
 import { buildDualRangeBlock } from "./auto-search-drums.js?v=32b8f890f2";
 import { readWheel } from "./ingatlan-wheels.js?v=6952ba469c";
 
-const YM_SELECTOR = '.ad-form-split-ym[data-range="gyartasi_ev"]';
+const NATIVE_IDS = ["gyartasi_ev", "gyartasi_honap"];
+
+/** A natív select és a hónap a DOM-ban marad (űrlap-mentés, layout), csak rejtve. */
+function stashNatives(form, field) {
+  let host = field.querySelector(".ertek-ev-range__native");
+  if (!host) {
+    host = document.createElement("div");
+    host.className = "ertek-ev-range__native";
+    host.hidden = true;
+    host.style.display = "none";
+    field.appendChild(host);
+  }
+  for (const id of NATIVE_IDS) {
+    const select = form.querySelector(`#${id}`) || document.getElementById(id);
+    if (!select || host.contains(select)) continue;
+    select.removeAttribute("required");
+    host.appendChild(select);
+  }
+  /* A split-ym menü maradéka, ha egy korábbi mount már megépítette. */
+  field.querySelector('.ad-form-split-ym[data-range="gyartasi_ev"]')?.remove();
+}
 
 export function mountErtekEvRange(form) {
   if (!form) return null;
-  const ym = form.querySelector(YM_SELECTOR);
-  const field = ym?.closest(".labeled-field, .ad-layout-item");
-  if (!ym || !field) return null;
-  if (field.dataset.ertekEvRange === "1") return field.querySelector(".ertek-ev-range");
+  const anchor = form.querySelector("#gyartasi_ev") || form.querySelector('[data-range="gyartasi_ev"]');
+  const field = anchor?.closest(".labeled-field, .ad-layout-item");
+  if (!field) return null;
 
-  const block = buildDualRangeBlock("gyartasi_ev");
-  if (!block) return null;
-  block.classList.add("ertek-ev-range");
-  /* A mezőnek már van „Gyártási év:” címkéje, a tartomány saját címsora felesleges. */
-  block.querySelector(".immo-dual-range__title")?.remove();
+  stashNatives(form, field);
 
-  /* A natív select és a hónap a DOM-ban marad (űrlap-mentés, layout), csak nem látszik. */
-  ym.hidden = true;
-  ym.setAttribute("hidden", "");
-  form.querySelector("#gyartasi_ev")?.removeAttribute("required");
-
-  field.appendChild(block);
+  let block = field.querySelector(".ertek-ev-range");
+  if (!block) {
+    block = buildDualRangeBlock("gyartasi_ev");
+    if (!block) return null;
+    block.classList.add("ertek-ev-range");
+    /* A mezőnek már van „Gyártási év:” címkéje, a tartomány saját címsora felesleges. */
+    block.querySelector(".immo-dual-range__title")?.remove();
+    field.appendChild(block);
+  }
   field.dataset.ertekEvRange = "1";
   return block;
 }

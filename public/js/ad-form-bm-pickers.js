@@ -2887,6 +2887,8 @@ async function mountAdSplitYmDrum({
   const honap = document.getElementById(honapId);
   if (!ev || !honap || ev.dataset.adSplitYm === "1") return;
   if (ev.tagName !== "SELECT" || honap.tagName !== "SELECT") return;
+  /* Értékbecslés: a gyártási év tól–ig menüt kap (ertekbecsles-ev-range.js). */
+  if (evId === "gyartasi_ev" && ev.closest("form[data-ertek-form]")) return;
 
   const field = ev.closest(".labeled-field, .md-outlined, .ad-layout-item") || ev.parentElement;
   if (!field) return;

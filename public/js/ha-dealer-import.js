@@ -229,6 +229,29 @@
         map[key] = val;
       }
     }
+    try {
+      const doc = new DOMParser().parseFromString(raw, "text/html");
+      for (const item of doc.querySelectorAll(".print-basic-info-item")) {
+        const label = stripCellHtml(
+          item.querySelector(".print-basic-info-item__label")?.innerHTML || ""
+        ).replace(/:$/, "");
+        let val = stripCellHtml(item.querySelector(".print-basic-info-item__value")?.innerHTML || "");
+        if (!val) {
+          const cols = item.querySelectorAll(".row [class*='col']");
+          if (cols.length >= 2) val = stripCellHtml(cols[1].innerHTML || "");
+        }
+        if (!val) {
+          const clone = item.cloneNode(true);
+          clone.querySelector(".print-basic-info-item__label")?.remove();
+          val = stripCellHtml(clone.innerHTML || "");
+        }
+        if (label && val && val.length <= 500 && !/^válasszon|^nincs megadva$/i.test(val) && !map[label]) {
+          map[label] = val;
+        }
+      }
+    } catch {
+      /* táblázat párok */
+    }
     return map;
   }
 
@@ -262,10 +285,13 @@
     // Bejelentkezett admin fejlécében van „Felhasználónév” — az NEM login fal.
     // Login fal: jelszó mező + belépés, és nincs járműadat.
     const hasVehicle =
-      /v[eé]tel[aá]r|fut[aá]steljes|gy[aá]rt[aá]si|üzemanyag|uzemanyag|km\.\s*óra|hirdetesadatok|class="[^"]*bal[^"]*pontos/i.test(
+      /v[eé]tel[aá]r|fut[aá]steljes|gy[aá]rt[aá]si|üzemanyag|uzemanyag|km\.\s*óra|hirdetesadatok|class="[^"]*bal[^"]*pontos|print-basic-info-item/i.test(
         raw
       );
     if (hasVehicle) return true;
+    if (/print-basic-info-item__label|hasznaltautocdn\.com\/\d/i.test(raw)) return true;
+    if (/felszerelts[eé]g|class="[^"]*extranev/i.test(raw) && raw.length > 1500) return true;
+    if (/\bLeírás\b/i.test(raw) && /hasznaltautocdn/i.test(raw)) return true;
     const loginWall =
       /type=["']password["']/i.test(head) &&
       /ügyfél belépés|haszn[aá]ltaut[oó]\s+ügyfél belépés/i.test(head);
@@ -417,8 +443,36 @@
     });
   }
 
-  async function fetchDetailHtml(listingId) {
+  function collectPublicDetailUrls(listingId, car = {}) {
+    const urls = [];
+    const push = (u) => {
+      const t = clean(u);
+      if (
+        t &&
+        /hasznaltauto\.hu\//i.test(t) &&
+        !/admin\.hasznaltauto\.hu\/hirdeteseim/i.test(t) &&
+        !urls.includes(t)
+      ) {
+        urls.push(t);
+      }
+    };
+    push(car.publicUrl);
+    push(car.forras_url);
+    push(car.clickUrl);
     const id = clean(listingId);
+    if (id) {
+      push(`https://www.hasznaltauto.hu/szemelyauto/import-${id}`);
+      push(`https://www.hasznaltauto.hu/szemelyauto/-${id}`);
+    }
+    return urls;
+  }
+
+  async function fetchDetailHtml(listingIdOrCar) {
+    const car =
+      listingIdOrCar && typeof listingIdOrCar === "object"
+        ? listingIdOrCar
+        : { listingId: listingIdOrCar };
+    const id = clean(car.listingId || listingIdOrCar);
     if (!id) return "";
     const primary = [
       `https://admin.hasznaltauto.hu/gyorsnezet/szemelyauto/${id}`,
@@ -439,6 +493,13 @@
       const url = `https://admin.hasznaltauto.hu/gyorsnezet/${cat}/${id}`;
       const viaFetch = await tryFetchHtml(url);
       if (viaFetch) return viaFetch;
+    }
+    // Utolsó esély: nyilvános adatlap (slug URL, import-{id}, bejelentkezett böngésző)
+    for (const url of collectPublicDetailUrls(id, car)) {
+      const viaFetch = await tryFetchHtml(url);
+      if (viaFetch) return viaFetch;
+      const viaFrame = await fetchDetailViaIframe(url);
+      if (viaFrame) return viaFrame;
     }
     return "";
   }
@@ -525,7 +586,9 @@
   async function ensureCarDescription(car) {
     const existingHtml = String(car.html || car.gyorsnezetHtml || "");
     const html =
-      existingHtml.length > 400 ? existingHtml : await fetchDetailHtml(car.listingId);
+      existingHtml.length > 400 && isUsefulDetailHtml(existingHtml)
+        ? existingHtml
+        : await fetchDetailHtml(car);
     if (!html || html.length <= 400) return car;
     const visibleDescription =
       normalizeImportedLeiras(car.visibleDescription || car.description || car.leiras || "") ||

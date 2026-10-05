@@ -49,12 +49,19 @@ function formatResult(data) {
   const from = data.good_price_from_formatted || data.min_price_formatted || "—";
   const to = data.good_price_to_formatted || data.max_price_formatted || "—";
   const n = data.count ?? 0;
+  const meta = [`${n} hasonló a mintában`];
+  if (data.dropped_outliers) meta.push(`${data.dropped_outliers} szélsőérték kiszűrve`);
+  if (data.source) meta.push(escapeHtml(data.source));
+  const thin = data.thin
+    ? `<p class="ertek-result__thin">${escapeHtml(data.thin_note || "Kevés hasonló hirdetés — a becslés csak tájékoztató jellegű.")}</p>`
+    : "";
   return `
     <div class="ertek-result" aria-live="polite">
       <p class="ertek-result__label">Becsült piaci érték</p>
       <p class="ertek-result__price">${escapeHtml(recom)}</p>
       <p class="ertek-result__band">Jó ár: <strong>${escapeHtml(from)}</strong> – <strong>${escapeHtml(to)}</strong></p>
-      <p class="ertek-result__meta">${n} hasonló a mintában${data.source ? ` · ${escapeHtml(data.source)}` : ""}</p>
+      <p class="ertek-result__meta">${meta.join(" · ")}</p>
+      ${thin}
     </div>`;
 }
 

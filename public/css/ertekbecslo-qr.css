@@ -276,6 +276,22 @@ html[data-theme="dark"] .bymy-qr__label {
   color: #64748b;
 }
 
+.ertek-result__thin {
+  margin: 6px 0 0;
+  padding: 6px 8px;
+  font-size: 12.5px;
+  line-height: 1.35;
+  color: #4a4133;
+  background: #fdf6e3;
+  border-left: 3px solid var(--listing-featured-yellow, #f0c14b);
+  border-radius: 6px;
+}
+
+html[data-theme="dark"] .ertek-result__thin {
+  color: #e8dcc2;
+  background: rgba(240, 193, 75, 0.1);
+}
+
 html[data-theme="dark"] .ertek-search-panel .auto-search-alap-card {
   background: #1d1d1d !important;
 }

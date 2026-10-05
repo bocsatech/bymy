@@ -1,6 +1,6 @@
 import { createAdForm } from "./form-core.js?v=f5c3cfcf0f";
 import { mountAdFormBmPickers } from "./ad-form-bm-pickers.js?v=d33b953bad";
-import { initErtekbecsloPanel } from "./ertekbecslo-app.js?v=2a8ab7d2a2";
+import { initErtekbecsloPanel } from "./ertekbecslo-app.js?v=2ebbd04858";
 
 const CATEGORY = {
   hirdetes_vertical: "auto",

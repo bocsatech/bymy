@@ -626,7 +626,11 @@
     const priceDigits = String(priceRaw).replace(/\D/g, "");
     const yearRaw = map["Gyártási év"] || map["Évjárat"] || map["Evjarat"] || "";
     const yearDigits = (String(yearRaw).match(/(19|20)\d{2}/) || [])[0] || "";
-    const fuel = clean(map["Üzemanyag"] || map["Uzemanyag"] || map["Üzemanyag fajtája"] || car.fuel || "");
+    const fuelFromMap = clean(map["Üzemanyag"] || map["Uzemanyag"] || map["Üzemanyag fajtája"] || "");
+    const fuelFromCar = clean(car.fuel || "");
+    const fuel =
+      fuelFromMap ||
+      (/^(plug-?in|hybrid|hibrid|elektromos)$/i.test(fuelFromCar) ? "" : fuelFromCar);
     const gear = clean(map["Sebességváltó"] || map["Sebessegvalto"] || car.gear || "");
     if (!hqFromSrc(visibleImage)) {
       const m = html.match(
@@ -1154,7 +1158,9 @@
     if (kmSeed && !map["Km. óra állás"]) map["Km. óra állás"] = `${Number(kmSeed).toLocaleString("hu-HU")} km`;
     if (yearSeed.length === 4 && !map["Gyártási év"]) map["Gyártási év"] = yearSeed;
     const fuelSeed = clean(page.fuel || "");
-    if (fuelSeed && !map["Üzemanyag"]) map["Üzemanyag"] = fuelSeed;
+    // Lista-címből szedett „Plug-in” / „Hybrid” nem valódi üzemanyag-mező
+    const weakFuel = /^(plug-?in|hybrid|hibrid|elektromos)$/i.test(fuelSeed);
+    if (fuelSeed && !weakFuel && !map["Üzemanyag"]) map["Üzemanyag"] = fuelSeed;
     const visibleImage = hqFromSrc(page.visibleImage || page.imageUrl || page.fo_kep || "");
     const html = String(page.html || page.gyorsnezetHtml || "").slice(0, 45000);
     return {

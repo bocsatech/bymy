@@ -1160,8 +1160,15 @@ async function init() {
   }
   try {
     let listing = readBootListing() || takePrefetchedListing(id);
-    const fromBoot = Boolean(listing?.detail);
-    if (!listing?.detail) {
+    const detailLooksThin = (d) => {
+      if (!d || typeof d !== "object") return true;
+      const km = String(d.km || "");
+      const fuel = String(d.fuel || "");
+      const eq = Array.isArray(d.equipment) ? d.equipment.length : 0;
+      return !km || km === "—" || !fuel || fuel === "—" || eq < 3;
+    };
+    const fromBoot = Boolean(listing?.detail) && !detailLooksThin(listing.detail);
+    if (!listing?.detail || detailLooksThin(listing.detail)) {
       listing = await fetchListing(id, { view: "detail" });
     } else {
       storePrefetchedListing(id, listing);

@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Bymy mobil csempe — 4 demó</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  /* ---------------------------------------------------------------
+     Alap = a mostani bymy mobil nézet (hub.css + hub-mobile-app.css
+     lényege kimásolva), a variánsok csak ezt írják felül.
+     --------------------------------------------------------------- */
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    font-family: "DM Sans", system-ui, -apple-system, sans-serif;
+    background: #fff;
+    color: #111;
+    --gutter: 16px;
+    --rail-gap: 10px;
+    --card-w: calc((100vw - (2 * var(--gutter)) - var(--rail-gap)) / 2);
+  }
+
+  .demo-flag {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px var(--gutter);
+    background: #111;
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .demo-flag span { font-weight: 500; text-transform: none; letter-spacing: 0; opacity: 0.75; }
+
+  .feed { padding: 12px 0 28px; }
+
+  .hf-section { margin: 0 0 1.75rem; padding: 0; }
+
+  .hf-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0 var(--gutter);
+    margin-bottom: 0.75rem;
+  }
+  .hf-title {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: #111;
+  }
+  .hf-all { font-size: 0.9rem; font-weight: 600; color: #111; text-decoration: none; }
+
+  .hf-rail {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    gap: var(--rail-gap);
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 0 var(--gutter) 0.35rem;
+    scrollbar-width: none;
+  }
+  .hf-rail::-webkit-scrollbar { width: 0; height: 0; }
+
+  .hf-card {
+    flex: 0 0 var(--card-w);
+    width: var(--card-w);
+    max-width: var(--card-w);
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    color: #111;
+    background: #fff;
+    border: 1px solid #d4d4d4;
+    border-radius: 9px;
+    overflow: hidden;
+  }
+  .hf-card--featured { border-color: #f0c14b; }
+
+  .hf-card-media {
+    position: relative;
+    display: block;
+    aspect-ratio: 16 / 10;
+    width: 100%;
+    flex: 0 0 auto;
+    background: #e8ebef;
+    overflow: hidden;
+  }
+  .hf-card-media img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .hf-card--kategoria .hf-card-media { background: #fff; }
+  .hf-card--kategoria .hf-card-media img { object-fit: contain; padding: 0.55rem 0.45rem; }
+
+  .badge-row { display: flex; align-items: center; gap: 8px; margin: 0.55rem 0.61rem 0; }
+  .badge {
+    display: inline-block;
+    padding: 4px 11px;
+    border-radius: 999px;
+    background: #f0c14b;
+    color: #1a1200;
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+  }
+
+  .hf-card-label {
+    margin: 0.5rem 0.72rem 0;
+    font-size: 0.95rem;
+    font-weight: 800;
+    line-height: 1.25;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .hf-card--kategoria .hf-card-label { margin: 0.55rem 0.72rem 0.6rem; }
+  .hf-card-sub {
+    margin: 0.13rem 0.72rem 0;
+    font-size: 0.78rem;
+    font-weight: 400;
+    color: #111;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .hf-card-price { display: block; margin: 0.4rem 0.72rem 0; font-size: 1.1rem; font-weight: 800; color: #0d47a1; }
+  .hf-card-specs { display: block; margin: 0.4rem 0.72rem 0.7rem; }
+  .hf-card-specs-row { display: flex; flex-wrap: nowrap; align-items: center; gap: 0.5rem; }
+  .hf-card-spec {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: #111;
+    white-space: nowrap;
+  }
+  .hf-card-spec svg { width: 12px; height: 12px; flex: 0 0 auto; color: #6b7280; }
+
+  /* ---------------- A) Willhaben-stílus: keret nélkül, szürke lap ---------------- */
+  body.v-a { background: #eef1f7; }
+  body.v-a .feed { padding: 0 0 28px; }
+  body.v-a .hf-section {
+    background: #fff;
+    margin: 0 0 10px;
+    padding: 14px 0 16px;
+  }
+  body.v-a .hf-head {
+    margin-bottom: 0.7rem;
+    padding-bottom: 0.65rem;
+    border-bottom: 1px solid #e0e6f0;
+  }
+  body.v-a .hf-all { color: #0b63c4; }
+  body.v-a .hf-card { background: transparent; border: 0; border-radius: 0; }
+  body.v-a .hf-card--kategoria .hf-card-media { background: #f4f6fb; }
+  body.v-a .hf-card-label,
+  body.v-a .hf-card-sub,
+  body.v-a .hf-card-price,
+  body.v-a .hf-card-specs { margin-left: 0; margin-right: 0; }
+  body.v-a .badge-row { margin-left: 0; margin-right: 0; }
+  body.v-a .hf-card-label { margin-top: 0.45rem; font-weight: 700; }
+  body.v-a .hf-card-sub { color: #6b7280; }
+  body.v-a .hf-card-price { color: #0b63c4; }
+
+  /* ---------------- B) Szekciósáv: a sáv háttere emeli ki a kártyát ---------------- */
+  body.v-b { background: #fff; }
+  body.v-b .hf-section {
+    background: #f4f6fb;
+    border-top: 1px solid #e6eaf2;
+    border-bottom: 1px solid #e6eaf2;
+    padding: 14px 0 16px;
+    margin: 0 0 14px;
+  }
+  body.v-b .hf-card { border-color: #dfe3ea; }
+  body.v-b .hf-card--featured { border-color: #f0c14b; }
+  body.v-b .hf-card--kategoria .hf-card-media { background: #fff; }
+
+  /* ---------------- C) Emelt kártya: árnyék, nagyobb rés, nincs keret ---------------- */
+  body.v-c { background: #f7f8fa; --rail-gap: 14px; }
+  body.v-c .hf-card {
+    border: 0;
+    border-radius: 14px;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.07), 0 8px 20px rgba(16, 24, 40, 0.09);
+  }
+  body.v-c .hf-card--featured { box-shadow: 0 0 0 1.5px #f0c14b, 0 8px 20px rgba(16, 24, 40, 0.1); }
+  body.v-c .hf-section { margin-bottom: 1.5rem; }
+  body.v-c .hf-card-specs { margin-bottom: 0.85rem; }
+
+  /* ---------------- D) Hairline lista (willhaben találati lista) ---------------- */
+  body.v-d { background: #fff; }
+  body.v-d .list { display: block; padding: 0; }
+  body.v-d .list .row {
+    display: grid;
+    grid-template-columns: 116px minmax(0, 1fr);
+    gap: 12px;
+    align-items: start;
+    padding: 12px var(--gutter);
+    border-bottom: 1px solid #e0e6f0;
+    text-decoration: none;
+    color: #111;
+  }
+  body.v-d .list .row:first-child { border-top: 1px solid #e0e6f0; }
+  body.v-d .list .thumb {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    border-radius: 6px;
+    overflow: hidden;
+    background: #e8ebef;
+  }
+  body.v-d .list .thumb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  body.v-d .list .row-title {
+    margin: 0;
+    font-size: 0.92rem;
+    font-weight: 700;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  body.v-d .list .row-sub { display: block; margin: 2px 0 0; font-size: 0.76rem; color: #6b7280; }
+  body.v-d .list .row-specs { margin: 5px 0 0; display: flex; gap: 0.6rem; font-size: 0.74rem; color: #374151; }
+  body.v-d .list .row-price { display: block; margin: 5px 0 0; font-size: 1.05rem; font-weight: 800; color: #0b63c4; }
+  body.v-d .list .badge { display: inline-block; margin: 0 0 4px; }
+  body.v-d .hf-head { align-items: center; }
+
+  /* Csak a kiválasztott variáns látszik */
+  .variant { display: none; }
+  body.v-a .variant--a,
+  body.v-b .variant--b,
+  body.v-c .variant--c,
+  body.v-d .variant--d { display: block; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-cal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <rect x="3" y="5" width="18" height="16" rx="2" /><path d="M8 3v4M16 3v4M3 11h18" />
+  </symbol>
+  <symbol id="i-km" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <path d="M4 18a8 8 0 1 1 16 0" /><path d="M12 18l4-5" />
+  </symbol>
+  <symbol id="i-le" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <circle cx="12" cy="12" r="9" /><path d="M12 7v10" />
+  </symbol>
+</svg>
+
+<div class="demo-flag" data-flag>A — Willhaben-stílus <span>keret nélküli csempe, szürke lapháttér</span></div>
+
+<main class="feed">
+  <!-- A / B / C: sávos nézet -->
+  <div class="variant variant--a variant--b variant--c" data-rails>
+    <section class="hf-section">
+      <div class="hf-head"><h2 class="hf-title">Autó kategóriák</h2><a class="hf-all" href="#">Összes</a></div>
+      <div class="hf-rail" data-rail="cat"></div>
+    </section>
+
+    <section class="hf-section">
+      <div class="hf-head"><h2 class="hf-title">Kiemelt hirdetések</h2><a class="hf-all" href="#">Összes</a></div>
+      <div class="hf-rail" data-rail="featured"></div>
+    </section>
+
+    <section class="hf-section">
+      <div class="hf-head"><h2 class="hf-title">Autók a közelben</h2><a class="hf-all" href="#">Összes</a></div>
+      <div class="hf-rail" data-rail="nearby"></div>
+    </section>
+  </div>
+
+  <!-- D: hairline lista -->
+  <div class="variant variant--d">
+    <section class="hf-section">
+      <div class="hf-head"><h2 class="hf-title">Autó kategóriák</h2><a class="hf-all" href="#">Összes</a></div>
+      <div class="hf-rail" data-rail="cat-d"></div>
+    </section>
+
+    <section class="hf-section">
+      <div class="hf-head"><h2 class="hf-title">Kiemelt hirdetések</h2><a class="hf-all" href="#">Összes</a></div>
+      <div class="list" data-list="featured"></div>
+    </section>
+
+    <section class="hf-section">
+      <div class="hf-head"><h2 class="hf-title">Autók a közelben</h2><a class="hf-all" href="#">Összes</a></div>
+      <div class="list" data-list="nearby"></div>
+    </section>
+  </div>
+</main>
+
+<script>
+  /* Valódi bymy adatok (bymy.vercel.app kezdőlap, 2026-10-05). */
+  const CATS = [
+    { label: "Új", img: "https://bymy.vercel.app/images/categories/list/uj.jpg" },
+    { label: "Benzin", img: "https://bymy.vercel.app/images/categories/list/benzin.jpg" },
+    { label: "Dízel", img: "https://bymy.vercel.app/images/categories/list/diesel.jpg" },
+    { label: "Elektromos", img: "https://bymy.vercel.app/images/categories/list/elektromos.jpg" },
+    { label: "Hybrid", img: "https://bymy.vercel.app/images/categories/list/hybrid.jpg" },
+  ];
+
+  const CARS = [
+    {
+      title: "Ford Mustang Mach-E Extended Range Premium",
+      sub: "Elektromos, Automata",
+      price: "12 499 990 Ft",
+      specs: ["2023", "66 800 km", "294 LE"],
+      img: "https://img.hasznaltautocdn.com/640x480/23602655/32242754.jpg",
+      featured: true,
+    },
+    {
+      title: "Toyota Corolla Touring Sports 1.8 Hybrid Comfort",
+      sub: "Benzin/elektromos, Automata",
+      price: "6 799 000 Ft",
+      specs: ["2023", "131 000 km", "98 LE"],
+      img: "https://img.hasznaltautocdn.com/640x480/23591690/32140095.jpg",
+      featured: true,
+    },
+    {
+      title: "Mercedes-Benz E 300 de 4Matic 9G-Tronic",
+      sub: "Dízel/elektromos, Automata",
+      price: "8 999 990 Ft",
+      specs: ["2020", "247 700 km", "194 LE"],
+      img: "https://img.hasznaltautocdn.com/640x480/23577532/31934615.jpg",
+      featured: true,
+    },
+    {
+      title: "Mercedes-Benz E 220 CDI Avantgarde",
+      sub: "Dízel, Automata",
+      price: "2 899 990 Ft",
+      specs: ["2009", "329 900 km", "170 LE"],
+      img: "https://img.hasznaltautocdn.com/640x480/23577372/31932628.jpg",
+      featured: false,
+    },
+  ];
+
+  const ICONS = ["i-cal", "i-km", "i-le"];
+  const specsHtml = (specs) =>
+    specs
+      .map(
+        (text, i) =>
+          `<span class="hf-card-spec"><svg aria-hidden="true"><use href="#${ICONS[i] || "i-cal"}"/></svg><span>${text}</span></span>`
+      )
+      .join("");
+
+  function catCard(cat) {
+    return `<a class="hf-card hf-card--kategoria" href="#">
+      <span class="hf-card-media"><img src="${cat.img}" alt="" /></span>
+      <span class="hf-card-label">${cat.label}</span>
+    </a>`;
+  }
+
+  function listingCard(car) {
+    return `<a class="hf-card hf-card--listing${car.featured ? " hf-card--featured" : ""}" href="#">
+      <span class="hf-card-media"><img src="${car.img}" alt="" /></span>
+      ${car.featured ? `<span class="badge-row"><span class="badge">KIEMELT</span></span>` : ""}
+      <span class="hf-card-label">${car.title}</span>
+      <span class="hf-card-sub">${car.sub}</span>
+      <span class="hf-card-price">${car.price}</span>
+      <span class="hf-card-specs"><span class="hf-card-specs-row">${specsHtml(car.specs)}</span></span>
+    </a>`;
+  }
+
+  function listRow(car) {
+    return `<a class="row" href="#">
+      <span class="thumb"><img src="${car.img}" alt="" /></span>
+      <span>
+        ${car.featured ? `<span class="badge">KIEMELT</span>` : ""}
+        <span class="row-title">${car.title}</span>
+        <span class="row-sub">${car.sub}</span>
+        <span class="row-specs">${car.specs.map((s) => `<span>${s}</span>`).join("")}</span>
+        <span class="row-price">${car.price}</span>
+      </span>
+    </a>`;
+  }
+
+  const FLAGS = {
+    a: ["A — Willhaben-stílus", "keret nélküli csempe, szürke lapháttér"],
+    b: ["B — Szekciósáv", "a sáv háttere választja el a csempéket"],
+    c: ["C — Emelt kártya", "árnyék + nagyobb rés, keret nélkül"],
+    d: ["D — Hairline lista", "willhaben találati lista: vékony vonal"],
+  };
+
+  const variant = (new URLSearchParams(location.search).get("v") || "a").toLowerCase();
+  document.body.classList.add(`v-${FLAGS[variant] ? variant : "a"}`);
+  const [flagTitle, flagNote] = FLAGS[variant] || FLAGS.a;
+  document.querySelector("[data-flag]").innerHTML = `${flagTitle} <span>${flagNote}</span>`;
+
+  document.querySelectorAll('[data-rail="cat"], [data-rail="cat-d"]').forEach((el) => {
+    el.innerHTML = CATS.map(catCard).join("");
+  });
+  const featured = CARS.filter((c) => c.featured);
+  const nearby = [CARS[3], CARS[1], CARS[2]];
+  document.querySelector('[data-rail="featured"]').innerHTML = featured.map(listingCard).join("");
+  document.querySelector('[data-rail="nearby"]').innerHTML = nearby.map(listingCard).join("");
+  document.querySelector('[data-list="featured"]').innerHTML = featured.map(listRow).join("");
+  document.querySelector('[data-list="nearby"]').innerHTML = nearby.map(listRow).join("");
+
+  /* Sávok kezdő scroll pozíciója: a második csempe fele látszódjon (mint élesben). */
+  for (const rail of document.querySelectorAll(".hf-rail")) rail.scrollLeft = 0;
+</script>
+</body>
+</html>

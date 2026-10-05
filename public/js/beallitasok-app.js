@@ -14,7 +14,7 @@ import {
   isPrivateProfileComplete,
   resolveAccountKind,
   applyAccountKindToDocument,
-} from "./site-auth.js?v=60a447841f";
+} from "./site-auth.js?v=aad32d7596";
 import { wirePostalCityAutofill } from "./postal-city-autofill.js?v=14f1f30116";
 import {
   getParkplatz,
@@ -27,17 +27,17 @@ import {
   addSavedSearch,
   removeSavedSearch,
   toggleSavedSearchNotify,
-} from "./fok-data.js?v=289f64e75c";
-import { savedSearchHref, summarizeSavedSearchFilters } from "./saved-search.js?v=c636db31bd";
-import { initMessagesUi } from "./messages-ui.js?v=e53019ef84";
+} from "./fok-data.js?v=favGone1";
+import { savedSearchHref, summarizeSavedSearchFilters } from "./saved-search.js?v=ae250042e8";
+import { initMessagesUi } from "./messages-ui.js?v=78e9d9204f";
 import { listConversations } from "./messages-api.js?v=5cf6493dc9";
-import { initMyAdsPanel } from "./my-ads.js?v=59581afa6c";
-import { initErtekbecsloPanel } from "./ertekbecslo-app.js?v=b586a4fc80";
+import { initMyAdsPanel } from "./my-ads.js?v=favGone1";
+import { initErtekbecsloPanel } from "./ertekbecslo-app.js?v=ertekAd1";
 import {
   consumeSettingsReturn,
   hasSettingsReturn,
 } from "./site-avatar-menu.js?v=4c911388e7";
-import { fetchListing, fetchExistingListingIds } from "./db-client.js?v=d4237f0b1b";
+import { fetchListing, fetchExistingListingIds } from "./db-client.js?v=favGone1";
 import {
   applyDeviceIdentityToPerson,
   getDeviceIdentity,
@@ -48,7 +48,7 @@ import {
   stripDeviceIdentityFormFields,
 } from "./device-contract-identity.js?v=cdac1e6ebc";
 import { fillCountrySelect, PHONE_COUNTRIES } from "./phone-lang-ui.js?v=bc55c36aef";
-import { renderPartnerManage } from "./partner-profile.js?v=0f0a6e3812";
+import { renderPartnerManage } from "./partner-profile.js?v=46ef847b6f";
 
 const PHOTO_KEY = "bymy-avatar-photos";
 const NOTIFY_KEY = "bymy-notify-prefs";
@@ -1677,30 +1677,13 @@ function initNotifyForm(email) {
     }
   });
 }
-function withTimeout(promise, ms) {
-  let timer;
-  return Promise.race([
-    Promise.resolve(promise).finally(() => clearTimeout(timer)),
-    new Promise((_, reject) => {
-      timer = setTimeout(() => reject(new Error("timeout")), ms);
-    }),
-  ]);
-}
-
 export async function initSettingsPage() {
   try {
-  let ok = false;
-  try {
-    ok = await withTimeout(requireAuthForPage(), 4000);
-  } catch {
-    ok = Boolean(getAuthUser()?.email);
-  }
-  if (!ok) {
-    if (!getAuthUser()?.email) return;
-  }
+  const ok = await requireAuthForPage();
+  if (!ok) return;
   let loadedProfile = null;
   try {
-    loadedProfile = await withTimeout(loadProfileFromServer(), 4000);
+    loadedProfile = await loadProfileFromServer();
   } catch {
   }
   const user = getAuthUser();
@@ -1727,12 +1710,57 @@ export async function initSettingsPage() {
   } else {
     const section = currentSection();
     if (section) setSection(section);
-    else if (!document.querySelector("[data-mm-panel]:not([hidden])")) {
-      clearSection();
+    else clearSection();
+  }
+  await syncParkplatzFromServer(user.email);
+  await refreshStats(user.email);
+  renderPark(user.email);
+  renderSearches(user.email);
+  const openMsgId = Number(new URLSearchParams(window.location.search).get("c"));
+  messagesUi = initMessagesUi(document.getElementById("mm-msg-root"), {
+    openConversationId: Number.isFinite(openMsgId) && openMsgId > 0 ? openMsgId : undefined,
+    onUnreadChange: (n) => {
+      const badge = document.querySelector("[data-mm-msg-count]");
+      const msgStat = document.querySelector("[data-mm-stat-msg]");
+      if (badge) {
+        badge.hidden = n === 0;
+        badge.textContent = String(n);
+      }
+      if (msgStat) msgStat.textContent = `${n} olvasatlan`;
+    },
+  });
+  fillProfileForm(user, loadedProfile);
+  initMyAdsPanel(document.getElementById("mm-ad-list")).reload();
+  requestAnimationFrame(() => fillProfileForm(getAuthUser(), loadedProfile || getProfile()));
+
+  try {
+    const localPhoto = readPhotos()[user.email];
+    const serverPhoto = String((loadedProfile || getProfile())?.avatarDataUrl || "").trim();
+    if (localPhoto && !serverPhoto) {
+      await saveAvatarPhoto(localPhoto);
+      fillProfileForm(getAuthUser(), getProfile());
+    } else if (serverPhoto && user.email) {
+      const map = readPhotos();
+      if (map[user.email] !== serverPhoto) {
+        map[user.email] = serverPhoto;
+        writePhotos(map);
+      }
     }
+  } catch {
   }
 
-  settingsNavSideEffects = (next) => {
+  initNotifyForm(user.email);
+  initPostalLookups();
+  initAreaForms();
+  initHeroSettings();
+  if (currentSection() === "megjelenes") {
+    loadHeroSettings();
+  }
+  if (currentSection() === "ertekelesek") {
+    loadReceivedRatings();
+  }
+
+  function applyNavSideEffects(next) {
     if (next === "szemelyes" || next === "fiok") {
       fillProfileForm(getAuthUser(), getProfile());
     }
@@ -1748,135 +1776,145 @@ export async function initSettingsPage() {
     if (next === "ertekelesek") {
       loadReceivedRatings();
     }
-  };
+  }
 
+  document.querySelectorAll("[data-mm-nav]").forEach((link) => {
+    if (link.hasAttribute("data-mm-subtoggle")) return;
+    link.addEventListener("click", (event) => {
+      const next = link.getAttribute("data-mm-nav");
+      if (!SECTIONS.includes(next)) return;
+      event.preventDefault();
+      setSection(next);
+      if (SETTINGS_SECTIONS.has(next) || COMPANY_SUB_SECTIONS.has(next)) {
+        expandSettingsSubnav(link.closest(".mm-nav-group"));
+      }
+      applyNavSideEffects(next);
+    });
+  });
+
+  document.querySelectorAll("[data-mm-subtoggle]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const group = btn.closest(".mm-nav-group");
+      const sub = group?.querySelector("[data-mm-sub]");
+      if (!sub) return;
+      const willOpen = sub.hidden;
+      const next = btn.getAttribute("data-mm-nav");
+      document.querySelectorAll("[data-mm-sub]").forEach((el) => {
+        el.hidden = true;
+      });
+      document.querySelectorAll("[data-mm-subtoggle]").forEach((el) => {
+        el.setAttribute("aria-expanded", "false");
+        el.classList.remove("is-active");
+      });
+      if (!willOpen) {
+        // Cégadatok bezárás: jobb oldal is üres maradjon
+        if (!next && group?.hasAttribute("data-mm-company-nav-wrap")) {
+          clearPanelsKeepCompanyNav(null);
+          collapseSettingsSubnav(group);
+        }
+        return;
+      }
+      sub.hidden = false;
+      btn.setAttribute("aria-expanded", "true");
+      btn.classList.add("is-active");
+      if (next && SECTIONS.includes(next)) {
+        setSection(next);
+        applyNavSideEffects(next);
+      } else if (group?.hasAttribute("data-mm-company-nav-wrap")) {
+        // Cégadatok: csak almenü, jobb oldal üres
+        clearPanelsKeepCompanyNav(group);
+      }
+    });
+  });
+
+  document.querySelectorAll("[data-post-ad-category]").forEach((link) => {
+    link.addEventListener("click", () => {
+      try {
+        const raw = link.getAttribute("data-post-ad-category") || "";
+        const parsed = JSON.parse(raw);
+        if (!parsed.v) parsed.v = CAT_STORAGE_VERSION;
+        sessionStorage.setItem(CAT_STORAGE_KEY, JSON.stringify(parsed));
+      } catch {
+      }
+    });
+  });
+
+  document.getElementById("mm-park-add")?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const data = new FormData(event.currentTarget);
+    addParkplatzItem(user.email, {
+      title: data.get("title"),
+      price: data.get("price"),
+    });
+    event.currentTarget.reset();
+    renderPark(user.email);
+    refreshStats(user.email);
+  });
+
+  document.getElementById("mm-search-add")?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const data = new FormData(event.currentTarget);
+    const query = String(data.get("query") || "").trim();
+    addSavedSearch(user.email, {
+      name: data.get("name"),
+      query,
+      page: "auto",
+      href: query.startsWith("/") ? query : query ? `/auto.html?q=${encodeURIComponent(query)}` : "/auto.html",
+      notify: Boolean(data.get("notify")),
+    });
+    event.currentTarget.reset();
+    renderSearches(user.email);
+    refreshStats(user.email);
+  });
+
+  const profileForm = document.getElementById("mm-profile-form");
+  syncCompanyWrap(profileForm);
+
+  document.getElementById("settings-password-form")?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const flash = document.getElementById("settings-password-flash");
+    const form = event.currentTarget;
+    const data = new FormData(form);
+    try {
+      await changePassword(data.get("current_password"), data.get("new_password"), data.get("new_password_confirm"));
+      form.reset();
+      showFlash(flash, "Jelszó sikeresen módosítva.", true);
+    } catch (error) {
+      showFlash(flash, error.message ?? "Jelszó módosítás sikertelen.", false);
+    }
+  });
+
+  const fileInput = document.getElementById("settings-avatar-file");
+  document.getElementById("settings-avatar-upload")?.addEventListener("click", () => fileInput?.click());
+  document.getElementById("settings-avatar-remove")?.addEventListener("click", () => {
+    void removeAvatarPhoto(user, document.getElementById("settings-avatar-flash"));
+  });
+  fileInput?.addEventListener("change", async () => {
+    await uploadAvatarFromInput(fileInput, user, document.getElementById("settings-avatar-flash"));
+  });
+
+  const companyFileInput = document.getElementById("settings-company-avatar-file");
+  document.getElementById("settings-company-avatar-upload")?.addEventListener("click", () => companyFileInput?.click());
+  document.getElementById("settings-company-avatar-remove")?.addEventListener("click", () => {
+    void removeAvatarPhoto(user, document.getElementById("settings-company-avatar-flash"));
+  });
+  companyFileInput?.addEventListener("change", async () => {
+    await uploadAvatarFromInput(companyFileInput, user, document.getElementById("settings-company-avatar-flash"));
+  });
+
+  document.getElementById("settings-delete-account")?.addEventListener("click", async () => {
+    if (!window.confirm("Biztosan törölni szeretnéd a fiókodat? Ez a helyi demó-fiókot törli.")) return;
+    try {
+      await deleteAccount();
+      window.location.href = "/";
+    } catch (error) {
+      window.alert(error.message ?? "Törlés sikertelen.");
+    }
+  });
+
+  window.addEventListener("popstate", () => setSection(currentSection()));
   document.documentElement.setAttribute("data-mm-settings-ready", "1");
   document.documentElement.removeAttribute("data-mm-boot-failed");
-
-  try {
-    await syncParkplatzFromServer(user.email);
-    await refreshStats(user.email);
-    renderPark(user.email);
-    renderSearches(user.email);
-    const openMsgId = Number(new URLSearchParams(window.location.search).get("c"));
-    messagesUi = initMessagesUi(document.getElementById("mm-msg-root"), {
-      openConversationId: Number.isFinite(openMsgId) && openMsgId > 0 ? openMsgId : undefined,
-      onUnreadChange: (n) => {
-        const badge = document.querySelector("[data-mm-msg-count]");
-        const msgStat = document.querySelector("[data-mm-stat-msg]");
-        if (badge) {
-          badge.hidden = n === 0;
-          badge.textContent = String(n);
-        }
-        if (msgStat) msgStat.textContent = `${n} olvasatlan`;
-      },
-    });
-    fillProfileForm(user, loadedProfile);
-    initMyAdsPanel(document.getElementById("mm-ad-list")).reload();
-    requestAnimationFrame(() => fillProfileForm(getAuthUser(), loadedProfile || getProfile()));
-
-    try {
-      const localPhoto = readPhotos()[user.email];
-      const serverPhoto = String((loadedProfile || getProfile())?.avatarDataUrl || "").trim();
-      if (localPhoto && !serverPhoto) {
-        await saveAvatarPhoto(localPhoto);
-        fillProfileForm(getAuthUser(), getProfile());
-      } else if (serverPhoto && user.email) {
-        const map = readPhotos();
-        if (map[user.email] !== serverPhoto) {
-          map[user.email] = serverPhoto;
-          writePhotos(map);
-        }
-      }
-    } catch {
-    }
-
-    initNotifyForm(user.email);
-    initPostalLookups();
-    initAreaForms();
-    initHeroSettings();
-    if (currentSection() === "megjelenes") {
-      loadHeroSettings();
-    }
-    if (currentSection() === "ertekelesek") {
-      loadReceivedRatings();
-    }
-
-    document.getElementById("mm-park-add")?.addEventListener("submit", (event) => {
-      event.preventDefault();
-      const data = new FormData(event.currentTarget);
-      addParkplatzItem(user.email, {
-        title: data.get("title"),
-        price: data.get("price"),
-      });
-      event.currentTarget.reset();
-      renderPark(user.email);
-      refreshStats(user.email);
-    });
-
-    document.getElementById("mm-search-add")?.addEventListener("submit", (event) => {
-      event.preventDefault();
-      const data = new FormData(event.currentTarget);
-      const query = String(data.get("query") || "").trim();
-      addSavedSearch(user.email, {
-        name: data.get("name"),
-        query,
-        page: "auto",
-        href: query.startsWith("/") ? query : query ? `/auto.html?q=${encodeURIComponent(query)}` : "/auto.html",
-        notify: Boolean(data.get("notify")),
-      });
-      event.currentTarget.reset();
-      renderSearches(user.email);
-      refreshStats(user.email);
-    });
-
-    const profileForm = document.getElementById("mm-profile-form");
-    syncCompanyWrap(profileForm);
-
-    document.getElementById("settings-password-form")?.addEventListener("submit", async (event) => {
-      event.preventDefault();
-      const flash = document.getElementById("settings-password-flash");
-      const form = event.currentTarget;
-      const data = new FormData(form);
-      try {
-        await changePassword(data.get("current_password"), data.get("new_password"), data.get("new_password_confirm"));
-        form.reset();
-        showFlash(flash, "Jelszó sikeresen módosítva.", true);
-      } catch (error) {
-        showFlash(flash, error.message ?? "Jelszó módosítás sikertelen.", false);
-      }
-    });
-
-    const fileInput = document.getElementById("settings-avatar-file");
-    document.getElementById("settings-avatar-upload")?.addEventListener("click", () => fileInput?.click());
-    document.getElementById("settings-avatar-remove")?.addEventListener("click", () => {
-      void removeAvatarPhoto(user, document.getElementById("settings-avatar-flash"));
-    });
-    fileInput?.addEventListener("change", async () => {
-      await uploadAvatarFromInput(fileInput, user, document.getElementById("settings-avatar-flash"));
-    });
-
-    const companyFileInput = document.getElementById("settings-company-avatar-file");
-    document.getElementById("settings-company-avatar-upload")?.addEventListener("click", () => companyFileInput?.click());
-    document.getElementById("settings-company-avatar-remove")?.addEventListener("click", () => {
-      void removeAvatarPhoto(user, document.getElementById("settings-company-avatar-flash"));
-    });
-    companyFileInput?.addEventListener("change", async () => {
-      await uploadAvatarFromInput(companyFileInput, user, document.getElementById("settings-company-avatar-flash"));
-    });
-
-    document.getElementById("settings-delete-account")?.addEventListener("click", async () => {
-      if (!window.confirm("Biztosan törölni szeretnéd a fiókodat? Ez a helyi demó-fiókot törli.")) return;
-      try {
-        await deleteAccount();
-        window.location.href = "/";
-      } catch (error) {
-        window.alert(error.message ?? "Törlés sikertelen.");
-      }
-    });
-  } catch (panelError) {
-    console.error("[beallitasok] panel init failed", panelError);
-  }
   } catch (error) {
     console.error("[beallitasok] init failed", error);
     document.documentElement.setAttribute("data-mm-boot-failed", "");
@@ -2016,86 +2054,7 @@ function bindCompanyFormEarly() {
   });
 }
 
-let settingsNavBound = false;
-let settingsNavSideEffects = null;
-
-/** Almenük API előtt: Beállítások / Cégadatok gomb ne várjon profil-fetchre. */
-function bindSettingsNavEarly() {
-  if (settingsNavBound) return;
-  settingsNavBound = true;
-
-  document.querySelectorAll("[data-mm-nav]").forEach((link) => {
-    if (link.hasAttribute("data-mm-subtoggle")) return;
-    link.addEventListener("click", (event) => {
-      const next = link.getAttribute("data-mm-nav");
-      if (!SECTIONS.includes(next)) return;
-      event.preventDefault();
-      setSection(next);
-      if (SETTINGS_SECTIONS.has(next) || COMPANY_SUB_SECTIONS.has(next)) {
-        expandSettingsSubnav(link.closest(".mm-nav-group"));
-      }
-      settingsNavSideEffects?.(next);
-    });
-  });
-
-  document.querySelectorAll("[data-mm-subtoggle]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const group = btn.closest(".mm-nav-group");
-      const sub = group?.querySelector("[data-mm-sub]");
-      if (!sub) return;
-      const willOpen = sub.hidden;
-      const next = btn.getAttribute("data-mm-nav");
-      document.querySelectorAll("[data-mm-sub]").forEach((el) => {
-        el.hidden = true;
-      });
-      document.querySelectorAll("[data-mm-subtoggle]").forEach((el) => {
-        el.setAttribute("aria-expanded", "false");
-        el.classList.remove("is-active");
-      });
-      if (!willOpen) {
-        if (!next && group?.hasAttribute("data-mm-company-nav-wrap")) {
-          clearPanelsKeepCompanyNav(null);
-          collapseSettingsSubnav(group);
-        }
-        return;
-      }
-      sub.hidden = false;
-      btn.setAttribute("aria-expanded", "true");
-      btn.classList.add("is-active");
-      if (next && SECTIONS.includes(next)) {
-        setSection(next);
-        settingsNavSideEffects?.(next);
-      } else if (group?.hasAttribute("data-mm-company-nav-wrap")) {
-        clearPanelsKeepCompanyNav(group);
-      }
-    });
-  });
-
-  document.querySelectorAll("[data-post-ad-category]").forEach((link) => {
-    link.addEventListener("click", () => {
-      try {
-        const raw = link.getAttribute("data-post-ad-category") || "";
-        const parsed = JSON.parse(raw);
-        if (!parsed.v) parsed.v = CAT_STORAGE_VERSION;
-        sessionStorage.setItem(CAT_STORAGE_KEY, JSON.stringify(parsed));
-      } catch {
-      }
-    });
-  });
-
-  window.addEventListener("popstate", () => setSection(currentSection()));
-
-  const section = currentSection();
-  if (section) setSection(section);
-  else syncSettingsSubnav();
-
-  document.documentElement.setAttribute("data-mm-settings-ready", "1");
-  document.documentElement.removeAttribute("data-mm-boot-failed");
-  document.documentElement.removeAttribute("data-mm-account-pending");
-}
-
 bindProfileFormEarly();
 bindCompanyFormEarly();
-bindSettingsNavEarly();
 initSiteAuth({ skipRefresh: true });
 initSettingsPage();

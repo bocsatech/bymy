@@ -368,3 +368,9 @@ html[data-theme="dark"] body.site-app .hub-nav-band,
 html[data-theme="dark"] body.home-page .hub-nav-band {
   border-top-color: transparent !important;
 }
+
+/* TEMP: Ingatlan főmenü elrejtve — vissza: töröld ezt a blokkot */
+a.hub-nav-link[href="/ingatlan.html"],
+a.import-nav-link[href="/ingatlan.html"] {
+  display: none !important;
+}

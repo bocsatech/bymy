@@ -7683,3 +7683,12 @@ html[data-theme="dark"] body.site-app.settings-page .settings-kicker {
   color: #fff !important;
 }
 
+/* TEMP: Ingatlan főmenü elrejtve — ne töröld a linkeket; vissza: ezt a blokkot vedd ki */
+a.hub-nav-link[href="/ingatlan.html"],
+a.import-nav-link[href="/ingatlan.html"],
+a.home-nav-link[href="/ingatlan.html"],
+a.site-app-nav-link[href="/ingatlan.html"],
+a.mw-app-pages-link[href="/ingatlan.html"] {
+  display: none !important;
+}
+

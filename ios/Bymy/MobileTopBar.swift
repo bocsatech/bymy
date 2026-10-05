@@ -79,7 +79,8 @@ struct MobileTopBar: View {
             ScrollViewReader { proxy in
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 4) {
-                        ForEach(TopPage.allCases) { page in
+                        // TEMP: Ingatlan menü elrejtve — vissza: szűrés törlése
+                        ForEach(TopPage.allCases.filter { $0 != .ingatlan }) { page in
                             Button {
                                 router.selectTop(page)
                             } label: {

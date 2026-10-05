@@ -375,7 +375,7 @@
         }
         resolve(html || "");
       };
-      const timer = setTimeout(() => finish(""), 18000);
+      const timer = setTimeout(() => finish(""), 5000);
       try {
         iframe = document.createElement("iframe");
         iframe.setAttribute("title", "bymy-ha-detail");
@@ -532,38 +532,14 @@
       `https://admin.hasznaltauto.hu/hirdetesfeladas/szemelyauto?id=${id}`,
       `https://admin.hasznaltauto.hu/hirdetesfeladas/szemelyauto/modositas/${id}`,
     ];
-    const onAdmin = /admin\.hasznaltauto\.hu$/i.test(location.hostname || "");
-
-    // 1) Same-origin gyorsnézet — bejelentkezve ez a gyors út (ne várjunk 8s×3 URL-t)
+    // Csak gyorsnézet: modositas / más kategória / www vízesés autónként 30–90s.
     {
-      const viaFetch = await tryFetchHtml(primary[0], 4500);
+      const viaFetch = await tryFetchHtml(primary[0], 3500);
       if (viaFetch) return viaFetch;
     }
-    for (const url of primary.slice(1)) {
-      const viaFetch = await tryFetchHtml(url, 4000);
-      if (viaFetch) return viaFetch;
-    }
-    // 2) iframe / megosztott ablak — csak ha a fetch nem jött be
-    for (const url of primary) {
-      const viaFrame = await fetchDetailViaIframe(url);
+    {
+      const viaFrame = await fetchDetailViaIframe(primary[0]);
       if (viaFrame) return viaFrame;
-    }
-    {
-      const viaWin = await fetchDetailViaSharedWindow(primary[0]);
-      if (viaWin) return viaWin;
-    }
-    for (const cat of ["kishaszongarmu", "motorkerekpar", "lakokocsi", "haszongepjarmu"]) {
-      const url = `https://admin.hasznaltauto.hu/gyorsnezet/${cat}/${id}`;
-      const viaFetch = await tryFetchHtml(url, 3500);
-      if (viaFetch) return viaFetch;
-      if (onAdmin) {
-        const viaWin = await fetchDetailViaSharedWindow(url);
-        if (viaWin) return viaWin;
-      }
-    }
-    for (const url of collectPublicDetailUrls(id, car)) {
-      const viaFetch = await tryFetchHtml(url, 3500);
-      if (viaFetch) return viaFetch;
     }
     return "";
   }
@@ -661,14 +637,7 @@
   }
 
   async function ensureCarDescriptionWithRetry(car) {
-    let next = await ensureCarDescription(car);
-    if (carLooksReadyForImport(next)) return next;
-    next = await ensureCarDescription({
-      ...next,
-      html: "",
-      gyorsnezetHtml: "",
-    });
-    return next;
+    return ensureCarDescription(car);
   }
 
   async function ensureCarDescription(car) {

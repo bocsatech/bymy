@@ -6,7 +6,7 @@ import {
   requireAuthForPage,
   initSiteAuth,
   ensureBookmarkletToken,
-} from "./site-auth.js?v=de3fd03735";
+} from "./site-auth.js?v=aad32d7596";
 
 const HA_POSTMESSAGE_ORIGINS = new Set([
   "https://www.hasznaltauto.hu",
@@ -87,7 +87,7 @@ function bookmarkletHref(mode) {
   const origin = location.origin;
   const isDealer = mode === "dealer";
   const src = isDealer
-    ? `${origin}/js/ha-dealer-import.js?v=fullGz17`
+    ? `${origin}/js/ha-dealer-import.js?v=fullGz18`
     : `${origin}/js/ha-import-bookmarklet.js?v=haDealerPhoto18`;
   const token = getBookmarkletToken() || getAuthToken() || "";
   const runner = isDealer ? "BymyHaDealerImport" : "BymyHaImport";

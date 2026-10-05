@@ -370,7 +370,21 @@ html[data-theme="dark"] body.home-page .hub-nav-band {
 }
 
 /* TEMP: Ingatlan főmenü elrejtve — vissza: töröld ezt a blokkot */
-a.hub-nav-link[href="/ingatlan.html"],
-a.import-nav-link[href="/ingatlan.html"] {
+html body.site-app a.hub-nav-link[href="/ingatlan.html"],
+html body.home-page a.hub-nav-link[href="/ingatlan.html"],
+html body.site-app a.import-nav-link[href="/ingatlan.html"],
+html body.home-page a.import-nav-link[href="/ingatlan.html"],
+html body a.hub-nav-link[href="/ingatlan.html"][hidden],
+html body a.import-nav-link[href="/ingatlan.html"][hidden] {
   display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  position: absolute !important;
+  width: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  border: 0 !important;
+  clip: rect(0, 0, 0, 0) !important;
 }

@@ -7,6 +7,8 @@
   var isHub = body.classList.contains("hub-page--feed") || page === "hub";
   var isFiok = body.classList.contains("fiok-page") || page === "fiok";
   var isPostAd = page === "hirdetesfeladas";
+  /* TEMP: Ingatlan menü elrejtve — vissza: false */
+  var HIDE_INGATLAN_NAV = true;
   var CSS_HREF = "/css/hub-mobile-app.css?v=navType1";
 
   function ensureCss() {
@@ -44,7 +46,8 @@
     var nav = pages
       .map(function (p) {
         var cls = "mw-app-pages-link" + (isActivePage(p.id) ? " is-active" : "");
-        return '<a class="' + cls + '" href="' + p.href + '">' + p.label + "</a>";
+        var hide = HIDE_INGATLAN_NAV && p.id === "ingatlan" ? " hidden" : "";
+        return '<a class="' + cls + '" href="' + p.href + '"' + hide + ">" + p.label + "</a>";
       })
       .join("");
 
@@ -411,7 +414,9 @@
       "</a>" +
       '<a class="hub-nav-link' +
       navActiveClass("ingatlan") +
-      '" href="/ingatlan.html">Ingatlan ' +
+      '" href="/ingatlan.html"' +
+      (HIDE_INGATLAN_NAV ? " hidden" : "") +
+      ">Ingatlan " +
       navCountHtml("ingatlan", counts) +
       "</a>" +
       '<a class="hub-nav-link' +

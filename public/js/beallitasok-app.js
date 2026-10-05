@@ -1677,13 +1677,30 @@ function initNotifyForm(email) {
     }
   });
 }
+function withTimeout(promise, ms) {
+  let timer;
+  return Promise.race([
+    Promise.resolve(promise).finally(() => clearTimeout(timer)),
+    new Promise((_, reject) => {
+      timer = setTimeout(() => reject(new Error("timeout")), ms);
+    }),
+  ]);
+}
+
 export async function initSettingsPage() {
   try {
-  const ok = await requireAuthForPage();
-  if (!ok) return;
+  let ok = false;
+  try {
+    ok = await withTimeout(requireAuthForPage(), 4000);
+  } catch {
+    ok = Boolean(getAuthUser()?.email);
+  }
+  if (!ok) {
+    if (!getAuthUser()?.email) return;
+  }
   let loadedProfile = null;
   try {
-    loadedProfile = await loadProfileFromServer();
+    loadedProfile = await withTimeout(loadProfileFromServer(), 4000);
   } catch {
   }
   const user = getAuthUser();
@@ -1710,10 +1727,12 @@ export async function initSettingsPage() {
   } else {
     const section = currentSection();
     if (section) setSection(section);
-    else clearSection();
+    else if (!document.querySelector("[data-mm-panel]:not([hidden])")) {
+      clearSection();
+    }
   }
 
-  function applyNavSideEffects(next) {
+  settingsNavSideEffects = (next) => {
     if (next === "szemelyes" || next === "fiok") {
       fillProfileForm(getAuthUser(), getProfile());
     }
@@ -1729,71 +1748,8 @@ export async function initSettingsPage() {
     if (next === "ertekelesek") {
       loadReceivedRatings();
     }
-  }
+  };
 
-  // Menük azonnal: ne várjunk parkolo/üzenet API-ra (lassú/hibás válasz = „nem nyílnak”).
-  document.querySelectorAll("[data-mm-nav]").forEach((link) => {
-    if (link.hasAttribute("data-mm-subtoggle")) return;
-    link.addEventListener("click", (event) => {
-      const next = link.getAttribute("data-mm-nav");
-      if (!SECTIONS.includes(next)) return;
-      event.preventDefault();
-      setSection(next);
-      if (SETTINGS_SECTIONS.has(next) || COMPANY_SUB_SECTIONS.has(next)) {
-        expandSettingsSubnav(link.closest(".mm-nav-group"));
-      }
-      applyNavSideEffects(next);
-    });
-  });
-
-  document.querySelectorAll("[data-mm-subtoggle]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const group = btn.closest(".mm-nav-group");
-      const sub = group?.querySelector("[data-mm-sub]");
-      if (!sub) return;
-      const willOpen = sub.hidden;
-      const next = btn.getAttribute("data-mm-nav");
-      document.querySelectorAll("[data-mm-sub]").forEach((el) => {
-        el.hidden = true;
-      });
-      document.querySelectorAll("[data-mm-subtoggle]").forEach((el) => {
-        el.setAttribute("aria-expanded", "false");
-        el.classList.remove("is-active");
-      });
-      if (!willOpen) {
-        // Cégadatok bezárás: jobb oldal is üres maradjon
-        if (!next && group?.hasAttribute("data-mm-company-nav-wrap")) {
-          clearPanelsKeepCompanyNav(null);
-          collapseSettingsSubnav(group);
-        }
-        return;
-      }
-      sub.hidden = false;
-      btn.setAttribute("aria-expanded", "true");
-      btn.classList.add("is-active");
-      if (next && SECTIONS.includes(next)) {
-        setSection(next);
-        applyNavSideEffects(next);
-      } else if (group?.hasAttribute("data-mm-company-nav-wrap")) {
-        // Cégadatok: csak almenü, jobb oldal üres
-        clearPanelsKeepCompanyNav(group);
-      }
-    });
-  });
-
-  document.querySelectorAll("[data-post-ad-category]").forEach((link) => {
-    link.addEventListener("click", () => {
-      try {
-        const raw = link.getAttribute("data-post-ad-category") || "";
-        const parsed = JSON.parse(raw);
-        if (!parsed.v) parsed.v = CAT_STORAGE_VERSION;
-        sessionStorage.setItem(CAT_STORAGE_KEY, JSON.stringify(parsed));
-      } catch {
-      }
-    });
-  });
-
-  window.addEventListener("popstate", () => setSection(currentSection()));
   document.documentElement.setAttribute("data-mm-settings-ready", "1");
   document.documentElement.removeAttribute("data-mm-boot-failed");
 
@@ -2060,7 +2016,86 @@ function bindCompanyFormEarly() {
   });
 }
 
+let settingsNavBound = false;
+let settingsNavSideEffects = null;
+
+/** Almenük API előtt: Beállítások / Cégadatok gomb ne várjon profil-fetchre. */
+function bindSettingsNavEarly() {
+  if (settingsNavBound) return;
+  settingsNavBound = true;
+
+  document.querySelectorAll("[data-mm-nav]").forEach((link) => {
+    if (link.hasAttribute("data-mm-subtoggle")) return;
+    link.addEventListener("click", (event) => {
+      const next = link.getAttribute("data-mm-nav");
+      if (!SECTIONS.includes(next)) return;
+      event.preventDefault();
+      setSection(next);
+      if (SETTINGS_SECTIONS.has(next) || COMPANY_SUB_SECTIONS.has(next)) {
+        expandSettingsSubnav(link.closest(".mm-nav-group"));
+      }
+      settingsNavSideEffects?.(next);
+    });
+  });
+
+  document.querySelectorAll("[data-mm-subtoggle]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const group = btn.closest(".mm-nav-group");
+      const sub = group?.querySelector("[data-mm-sub]");
+      if (!sub) return;
+      const willOpen = sub.hidden;
+      const next = btn.getAttribute("data-mm-nav");
+      document.querySelectorAll("[data-mm-sub]").forEach((el) => {
+        el.hidden = true;
+      });
+      document.querySelectorAll("[data-mm-subtoggle]").forEach((el) => {
+        el.setAttribute("aria-expanded", "false");
+        el.classList.remove("is-active");
+      });
+      if (!willOpen) {
+        if (!next && group?.hasAttribute("data-mm-company-nav-wrap")) {
+          clearPanelsKeepCompanyNav(null);
+          collapseSettingsSubnav(group);
+        }
+        return;
+      }
+      sub.hidden = false;
+      btn.setAttribute("aria-expanded", "true");
+      btn.classList.add("is-active");
+      if (next && SECTIONS.includes(next)) {
+        setSection(next);
+        settingsNavSideEffects?.(next);
+      } else if (group?.hasAttribute("data-mm-company-nav-wrap")) {
+        clearPanelsKeepCompanyNav(group);
+      }
+    });
+  });
+
+  document.querySelectorAll("[data-post-ad-category]").forEach((link) => {
+    link.addEventListener("click", () => {
+      try {
+        const raw = link.getAttribute("data-post-ad-category") || "";
+        const parsed = JSON.parse(raw);
+        if (!parsed.v) parsed.v = CAT_STORAGE_VERSION;
+        sessionStorage.setItem(CAT_STORAGE_KEY, JSON.stringify(parsed));
+      } catch {
+      }
+    });
+  });
+
+  window.addEventListener("popstate", () => setSection(currentSection()));
+
+  const section = currentSection();
+  if (section) setSection(section);
+  else syncSettingsSubnav();
+
+  document.documentElement.setAttribute("data-mm-settings-ready", "1");
+  document.documentElement.removeAttribute("data-mm-boot-failed");
+  document.documentElement.removeAttribute("data-mm-account-pending");
+}
+
 bindProfileFormEarly();
 bindCompanyFormEarly();
+bindSettingsNavEarly();
 initSiteAuth({ skipRefresh: true });
 initSettingsPage();

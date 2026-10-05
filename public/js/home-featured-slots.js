@@ -1,5 +1,8 @@
-/** Admin / éles: window.BYMY_FEATURED_LISTING_IDS = [123, 456, …] (max 4 slot). */
-export const FEATURED_SLOT_IDS = [null, null, null, null];
+/**
+ * Kiemelt hirdetések: minden promo_kiemelt (kép kötelező).
+ * Nincs admin ID lista, nincs max-4 kitöltés.
+ * Sorrendet a hívó adja (desk Rendezés / hub: legújabb).
+ */
 
 function listingHasPhoto(item) {
   const preview = item?.preview ?? {};
@@ -11,56 +14,22 @@ function isPromoKiemelt(item) {
   return String(item?.form?.promo_kiemelt ?? "").trim() === "1";
 }
 
-export function readConfiguredFeaturedIds() {
-  const g = globalThis.BYMY_FEATURED_LISTING_IDS;
-  if (!Array.isArray(g)) return [];
-  return g.map((x) => Number(x)).filter((n) => Number.isFinite(n) && n > 0);
-}
-
 /**
- * Csak tényleges kiemelés: admin ID-k, vagy promo_kiemelt.
- * Nincs automatikus „legújabb 4” kitöltés.
  * @param {object[]} items
- * @param {number[]} [configuredIds]
+ * @param {{ limit?: number }} [opts]
  * @returns {object[]}
  */
-export function pickFeaturedListings(items, configuredIds = readConfiguredFeaturedIds()) {
+export function pickFeaturedListings(items, opts = {}) {
   const list = Array.isArray(items) ? items : [];
-  const ids = Array.isArray(configuredIds) ? configuredIds : [];
-  const byId = new Map(list.map((item) => [Number(item.id), item]));
-  const picked = [];
-  const used = new Set();
+  const limit = Number(opts?.limit);
+  const hasLimit = Number.isFinite(limit) && limit > 0;
 
-  for (const rawId of ids) {
-    const id = Number(rawId);
-    if (!Number.isFinite(id) || id <= 0 || used.has(id)) continue;
-    const item = byId.get(id);
-    if (item && listingHasPhoto(item)) {
-      picked.push(item);
-      used.add(id);
-    }
-  }
+  const fromPromo = list.filter((item) => listingHasPhoto(item) && isPromoKiemelt(item));
 
-  if (ids.length > 0) {
-    return picked.slice(0, FEATURED_SLOT_IDS.length);
-  }
-
-  const fromPromo = list
-    .filter((item) => listingHasPhoto(item) && isPromoKiemelt(item) && !used.has(Number(item.id)))
-    .sort((a, b) => {
-      const ta = new Date(a.updated_at ?? a.created_at ?? 0).getTime();
-      const tb = new Date(b.updated_at ?? b.created_at ?? 0).getTime();
-      return tb - ta;
-    });
-
-  for (const item of fromPromo) {
-    if (picked.length >= FEATURED_SLOT_IDS.length) break;
-    picked.push(item);
-  }
-
-  return picked;
+  if (hasLimit) return fromPromo.slice(0, limit);
+  return fromPromo;
 }
 
-export function featuredListingIdSet(items, configuredIds = readConfiguredFeaturedIds()) {
-  return new Set(pickFeaturedListings(items, configuredIds).map((item) => Number(item.id)));
+export function featuredListingIdSet(items, opts = {}) {
+  return new Set(pickFeaturedListings(items, opts).map((item) => Number(item.id)));
 }

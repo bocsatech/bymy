@@ -1,5 +1,5 @@
-import { fetchListings, fetchListingsPage, fetchRelatedListings } from "./db-client.js?v=658bac0c0e";
-import { createHomeGridCard, initHomeGridCardPhotos } from "./home-grid-card.js?v=tileSwipe1";
+import { fetchListings, fetchListingsPage, fetchRelatedListings } from "./db-client.js?v=d4237f0b1b";
+import { createHomeGridCard, initHomeGridCardPhotos } from "./home-grid-card.js?v=f3c4783331";
 import { promoKiemeltActive, promoTopAjanlatActive } from "./listing-promo.js?v=a2c84c124b";
 import {
   emptyFilters,
@@ -7,18 +7,18 @@ import {
   populateFilterOptions,
   initHomeSearchSidebar,
   initHomeFilterCatalog,
-} from "./home-search-filter.js?v=kmOver1";
-import { initHomeQuickSearch } from "./home-quicksearch.js?v=mobileMore1";
-import { decodeSavedSearchParam, encodeSavedSearchParam } from "./saved-search.js?v=ae250042e8";
-import { matchDetailedSearch, hasActiveDetailedSearch } from "./auto-detailed-search.js?v=18415b7f87";
-import { updateAutoDeskResultCount, updateAutoDeskAccSummaries } from "./auto-desk-search.js?v=mobileMore1";
+} from "./home-search-filter.js?v=77d30b5c36";
+import { initHomeQuickSearch } from "./home-quicksearch.js?v=a4dfd87728";
+import { decodeSavedSearchParam, encodeSavedSearchParam } from "./saved-search.js?v=c636db31bd";
+import { matchDetailedSearch, hasActiveDetailedSearch } from "./auto-detailed-search.js?v=24928b4442";
+import { updateAutoDeskResultCount, updateAutoDeskAccSummaries } from "./auto-desk-search.js?v=f99edb6978";
 import {
   emptyIngatlanFilters,
   filterListingsByIngatlan,
   initIngatlanSearch,
-} from "./ingatlan-search.js?v=1ceac6a01b";
+} from "./ingatlan-search.js?v=b7394ccb39";
 import { normalizeIngatlanUzletag } from "./ingatlan-fields.js?v=3a43e30b61";
-import { filterByCategory, initHomeCategoryBar, renderHomeCategoryBar, HOME_CATEGORY_IDS, searchFiltersForCategory } from "./home-category-bar.js?v=933743b739";
+import { filterByCategory, initHomeCategoryBar, renderHomeCategoryBar, HOME_CATEGORY_IDS, searchFiltersForCategory } from "./home-category-bar.js?v=57b2d61f81";
 import { initHomeUnifiedScroll } from "./home-unified-scroll.js?v=19bcc2aeb6";
 import { initHomeStatsBar } from "./home-stats-bar.js?v=84ac6f75c1";
 import { buildNearbyFilter, readNearbyPrefs } from "./nearby-search.js?v=0efee20d13";
@@ -35,8 +35,8 @@ import {
   consumeMapOpenOnReturn,
 } from "./listing-return.js?v=1911f0cb28";
 import { normalizeKivitel } from "./kivitel-options.js?v=be03aefc2e";
-import { featuredListingIdSet, pickFeaturedListings } from "./home-featured-slots.js?v=58203b249c";
-import { mountSellerInventory, updateSellerInventoryCount } from "./seller-inventory.js?v=siQrAddr1";
+import { featuredListingIdSet, pickFeaturedListings } from "./home-featured-slots.js?v=76bf95d774";
+import { mountSellerInventory, updateSellerInventoryCount } from "./seller-inventory.js?v=d0f6a9227f";
 
 /** Map module is optional — only loaded when the user clicks the map button. */
 let closeSearchResultsMapFn = null;
@@ -399,7 +399,7 @@ async function syncCategoryToSearchMenu(categoryId) {
   if (!form) return;
   try {
     if (quickSearchApi?.whenReady) await quickSearchApi.whenReady;
-    const { applySavedSearchFilters } = await import("./saved-search.js?v=ae250042e8");
+    const { applySavedSearchFilters } = await import("./saved-search.js?v=c636db31bd");
     await applySavedSearchFilters(form, filters);
     updateAutoDeskAccSummaries(form);
     quickSearchFilters = { ...emptyFilters(), ...filters };
@@ -622,8 +622,7 @@ function renderListings(items, { bypassFilters = false, force = false } = {}) {
   emptyEl.hidden = filtered.length > 0;
   if (!filtered.length && bypassFilters && isFeaturedBrowseMode()) {
     emptyEl.hidden = false;
-    emptyEl.textContent =
-      "Állíts be keresési feltételeket, majd kattints a „Találatok mutatása” gombra.";
+    emptyEl.textContent = "Nincs kiemelt hirdetés.";
   } else if (!filtered.length && (statsFilter || quickRadiusFilter)) {
     emptyEl.hidden = false;
     const radiusMeta = statsFilter || quickRadiusFilter;
@@ -669,7 +668,7 @@ function renderListings(items, { bypassFilters = false, force = false } = {}) {
 }
 
 function renderFeaturedBrowse() {
-  browseFeaturedItems = pickFeaturedListings(allItems);
+  browseFeaturedItems = sortDeskListings(pickFeaturedListings(allItems));
   featuredListingIds = featuredListingIdSet(allItems);
   renderListings(browseFeaturedItems, { bypassFilters: true });
   updateFilterResultCount();
@@ -755,12 +754,9 @@ async function loadListings() {
   populateFilterOptions(allItems);
 
   if (isFeaturedBrowseMode()) {
+    // Összes kiemelt kell → lapozzuk a poolt, amíg van még oldal.
     let guard = 0;
-    while (
-      pickFeaturedListings(allItems).length < 4 &&
-      listingsHasMore &&
-      guard < FEATURED_POOL_MAX_PAGES
-    ) {
+    while (listingsHasMore && guard < FEATURED_POOL_MAX_PAGES) {
       guard += 1;
       const before = allItems.length;
       await loadMoreListings({ silent: true });
@@ -929,7 +925,7 @@ function previewFilterCountsOnly() {
   updateFilterResultCount();
   updateSearchMapButtonLabels(searchResultsCommitted || hasActiveClientFilters());
   if (isFeaturedBrowseMode()) {
-    browseFeaturedItems = pickFeaturedListings(allItems);
+    browseFeaturedItems = sortDeskListings(pickFeaturedListings(allItems));
     featuredListingIds = featuredListingIdSet(allItems);
   }
 }
@@ -1154,7 +1150,7 @@ async function ensureAllListingsLoadedForMap() {
 if (PAGE === "auto" || PAGE === "teherauto") {
   ensureMapModule = () => {
     if (!mapModulePromise) {
-      mapModulePromise = import("./search-results-map.js?v=04ea9bf4b6")
+      mapModulePromise = import("./search-results-map.js?v=d7d331ace3")
         .then((mod) => {
           updateSearchMapButtonLabels = mod.updateSearchMapButtonLabels;
           closeSearchResultsMapFn = mod.closeSearchResultsMap;

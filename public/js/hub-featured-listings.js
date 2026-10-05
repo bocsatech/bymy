@@ -1,11 +1,11 @@
-import { pickFeaturedListings } from "./home-featured-slots.js?v=58203b249c";
+import { pickFeaturedListings } from "./home-featured-slots.js?v=76bf95d774";
 import { createListingTileCard, slimListingTile } from "./listing-tile.js?v=0633cb6729";
 import { bindListingOpen, restoreListingReturn } from "./listing-return.js?v=1911f0cb28";
 import {
   TILE_PAGE_INITIAL,
   TILE_PAGE_MORE,
   fetchTilePagesUntil,
-} from "./listing-tile-pager.js?v=c8e2dddffb";
+} from "./listing-tile-pager.js?v=309c0d60d0";
 
 const SECTION = document.querySelector('[data-hf="kiemelt"]');
 const RAIL = document.getElementById("hub-featured-rail");
@@ -33,10 +33,10 @@ async function init() {
     let pool = (page.items || []).map(slimListingTile);
     let offset = page.offset;
     let hasMore = page.hasMore;
-    let picked = pickFeaturedListings(pool);
+    let picked = pickFeaturedListings(pool, { limit: TILE_PAGE_INITIAL });
 
     let guard = 0;
-    while (picked.length < 4 && hasMore && guard < 5) {
+    while (picked.length < TILE_PAGE_INITIAL && hasMore && guard < 5) {
       guard += 1;
       const more = await fetchTilePagesUntil({
         vertical: "auto",
@@ -54,7 +54,7 @@ async function init() {
         seen.add(id);
         pool.push(slimListingTile(item));
       }
-      picked = pickFeaturedListings(pool);
+      picked = pickFeaturedListings(pool, { limit: TILE_PAGE_INITIAL });
     }
 
     RAIL.innerHTML = "";
@@ -64,7 +64,7 @@ async function init() {
     }
 
     const configured = new Set(picked.map((row) => Number(row.id)));
-    picked.slice(0, TILE_PAGE_INITIAL).forEach((item, index) => {
+    picked.forEach((item, index) => {
       RAIL.appendChild(
         createListingTileCard(item, {
           featured: true,

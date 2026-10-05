@@ -227,11 +227,17 @@ html[data-theme="dark"] body.hd-page .hd-tool--fb {
 
 .hd-stage {
   position: relative;
+  flex: 0 0 auto;
+  width: 100%;
   aspect-ratio: 16 / 10;
+  min-height: 240px;
   background: #eef1f5;
+  overflow: hidden;
 }
 
 .hd-stage img {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -239,6 +245,8 @@ html[data-theme="dark"] body.hd-page .hd-tool--fb {
 }
 
 .hd-stage-open {
+  position: absolute;
+  inset: 0;
   display: block;
   width: 100%;
   height: 100%;

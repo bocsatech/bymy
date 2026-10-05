@@ -308,43 +308,50 @@
     return map;
   }
 
+  function readLiveDocHtml(doc) {
+    try {
+      if (!doc?.body) return "";
+      const html = String(doc.documentElement?.outerHTML || "");
+      return isUsefulDetailHtml(html) ? html : "";
+    } catch {
+      return "";
+    }
+  }
+
   function fetchDetailViaIframe(url) {
     return new Promise((resolve) => {
       let iframe = null;
+      let poll = null;
       let settled = false;
       const finish = (html) => {
         if (settled) return;
         settled = true;
         clearTimeout(timer);
+        if (poll) clearInterval(poll);
         try {
           if (iframe) iframe.remove();
         } catch {
         }
         resolve(html || "");
       };
-      const timer = setTimeout(() => finish(""), 16000);
+      const timer = setTimeout(() => finish(""), 18000);
       try {
         iframe = document.createElement("iframe");
         iframe.setAttribute("title", "bymy-ha-detail");
         iframe.style.cssText =
-          "position:fixed;left:-10000px;top:0;width:960px;height:1400px;opacity:0;pointer-events:none;border:0;";
-        iframe.onload = async () => {
-          try {
-            await sleep(1500);
-            const doc = iframe.contentDocument;
-            if (!doc?.body) {
-              finish("");
-              return;
-            }
-            const html = String(doc.documentElement?.outerHTML || "");
-            finish(isUsefulDetailHtml(html) ? html : "");
-          } catch {
-            finish("");
-          }
+          "position:fixed;left:-10000px;top:0;width:1100px;height:1600px;opacity:0;pointer-events:none;border:0;";
+        const tick = () => {
+          const html = readLiveDocHtml(iframe?.contentDocument);
+          if (html) finish(html);
+        };
+        iframe.onload = () => {
+          tick();
+          if (!settled) poll = setInterval(tick, 400);
         };
         iframe.onerror = () => finish("");
         iframe.src = url;
         (document.body || document.documentElement).appendChild(iframe);
+        poll = setInterval(tick, 400);
       } catch {
         finish("");
       }
@@ -808,6 +815,8 @@
         visibleTitle: extra.visibleTitle || prev.visibleTitle || "",
         price: extra.price || prev.price || "",
         km: extra.km || prev.km || "",
+        year: extra.year || prev.year || "",
+        fuel: extra.fuel || prev.fuel || "",
         photoOnly: true,
       });
     };
@@ -824,11 +833,17 @@
       const img = row.querySelector("img");
       const priceMatch = text.match(/(\d{1,3}(?:[.\s]\d{3})+|\d{5,})\s*Ft/i);
       const kmMatch = text.match(/(\d{1,3}(?:[.\s]\d{3})+|\d{4,7})\s*km\b/i);
+      const yearMatch = text.match(/\b((?:19|20)\d{2})(?:\/\d{1,2})?\b/);
+      const fuelMatch = text.match(
+        /\b(Benzin\/elektromos|Dízel\/elektromos|Benzin|Dízel|Hibrid|Hybrid|Elektromos|Plug-in|LPG|CNG)\b/i
+      );
       add(id, {
         visibleTitle: pickTitleFromRow(row),
         visibleImage: hqFromSrc(img?.currentSrc || img?.src || img?.getAttribute("data-src") || ""),
         price: priceMatch ? priceMatch[1].replace(/[.\s]/g, "") : "",
         km: kmMatch ? kmMatch[1].replace(/[.\s]/g, "") : "",
+        year: yearMatch ? yearMatch[1] : "",
+        fuel: fuelMatch ? fuelMatch[1] : "",
       });
     }
 
@@ -906,6 +921,9 @@
         visibleImage: extra.visibleImage || prev.visibleImage || "",
         visibleTitle: extra.visibleTitle || prev.visibleTitle || "",
         price: extra.price || prev.price || "",
+        km: extra.km || prev.km || "",
+        year: extra.year || prev.year || "",
+        fuel: extra.fuel || prev.fuel || "",
         photoOnly: true,
       });
     };
@@ -1067,6 +1085,8 @@
     if (priceSeed && !map["Vételár"]) map["Vételár"] = `${Number(priceSeed).toLocaleString("hu-HU")} Ft`;
     if (kmSeed && !map["Km. óra állás"]) map["Km. óra állás"] = `${Number(kmSeed).toLocaleString("hu-HU")} km`;
     if (yearSeed.length === 4 && !map["Gyártási év"]) map["Gyártási év"] = yearSeed;
+    const fuelSeed = clean(page.fuel || "");
+    if (fuelSeed && !map["Üzemanyag"]) map["Üzemanyag"] = fuelSeed;
     const visibleImage = hqFromSrc(page.visibleImage || page.imageUrl || page.fo_kep || "");
     const html = String(page.html || page.gyorsnezetHtml || "").slice(0, 45000);
     return {
@@ -1088,6 +1108,7 @@
       price: page.price || "",
       km: page.km || "",
       year: page.year || "",
+      fuel: page.fuel || "",
       map,
       felszereltseg: Array.isArray(page.felszereltseg) ? page.felszereltseg.slice(0, 300) : [],
       html: html.length > 400 ? html : "",

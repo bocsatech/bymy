@@ -256,7 +256,7 @@
     const id = clean(listingId);
     if (!id) return "";
     const controller = typeof AbortController !== "undefined" ? new AbortController() : null;
-    const timer = controller ? setTimeout(() => controller.abort(), 8000) : null;
+    const timer = controller ? setTimeout(() => controller.abort(), 15000) : null;
     try {
       const res = await fetch(`https://admin.hasznaltauto.hu/gyorsnezet/szemelyauto/${id}`, {
         credentials: "include",
@@ -368,10 +368,32 @@
       .slice(0, 25000);
     const kmRaw = map["Km. óra állás"] || map["Futásteljesítmény"] || map["Futasteljesitmeny"] || "";
     const kmDigits = String(kmRaw).replace(/\D/g, "");
+    let visibleTitle = clean(car.visibleTitle || "");
+    let visibleImage = car.visibleImage || "";
+    try {
+      const doc = new DOMParser().parseFromString(html, "text/html");
+      const h1 = clean(doc.querySelector("h1")?.innerText || doc.querySelector("h1")?.textContent || "");
+      if (h1.length >= 6 && !/hiba|javascript|gyorsnézet|hirdetés gyorsnézet/i.test(h1)) {
+        visibleTitle = h1;
+      }
+    } catch {
+    }
+    if (!hqFromSrc(visibleImage)) {
+      const m = html.match(
+        /hasznaltautocdn\.com\/(?:\d{2,4}x\d{2,4}\/)?(\d{5,12})\/(\d{5,12})\.(jpe?g|png|webp)/i
+      );
+      if (m) {
+        visibleImage = `https://img.hasznaltautocdn.com/2048x1536/${m[1]}/${m[2]}.${String(m[3] || "jpg")
+          .toLowerCase()
+          .replace("jpeg", "jpg")}`;
+      }
+    }
     return {
       ...car,
       html,
       gyorsnezetHtml: html,
+      visibleTitle: visibleTitle || car.visibleTitle || "",
+      visibleImage,
       visibleDescription,
       map,
       felszereltseg,
@@ -785,7 +807,7 @@
     });
   }
 
-  const SAVE_CHUNK = 25;
+  const SAVE_CHUNK = 5;
 
   function recoverHaId(page) {
     const blob = [
@@ -816,11 +838,8 @@
     const mapIn = page.map && typeof page.map === "object" ? page.map : {};
     const map = {};
     for (const [key, val] of Object.entries(mapIn)) {
-      if (!/állapot|kivitel|üzemanyag|sebességváltó|hajtás|szín|klíma|okmány|henger|teljesítmény|ajtó|km|évjárat|gyártási/i.test(key)) {
-        continue;
-      }
       const text = String(val ?? "").trim();
-      if (text && text.length < 200) map[key] = text;
+      if (key && text && text.length < 400) map[key] = text;
     }
     const visibleImage =
       hqFromSrc(page.visibleImage || page.imageUrl || page.fo_kep || "") ||
@@ -844,7 +863,7 @@
       tipus: page.tipus || "",
       km: page.km || "",
       map,
-      felszereltseg: Array.isArray(page.felszereltseg) ? page.felszereltseg.slice(0, 80) : [],
+      felszereltseg: Array.isArray(page.felszereltseg) ? page.felszereltseg.slice(0, 300) : [],
       html: html.length > 400 ? html : "",
     };
   }
@@ -911,7 +930,7 @@
       pages: list,
     };
     const controller = typeof AbortController !== "undefined" ? new AbortController() : null;
-    const timer = controller ? setTimeout(() => controller.abort(), 60000) : null;
+    const timer = controller ? setTimeout(() => controller.abort(), 90000) : null;
     let res;
     try {
       res = await fetch(`${origin}/api/import/extracted`, {
@@ -1116,13 +1135,33 @@
       return;
     }
 
-    const prepared = cars.map((car) =>
-      slimDealerPage({
+    let copied = 0;
+    const enriched = await mapPool(cars, 4, async (car) => {
+      const next = await ensureCarDescription({
         ...car,
         listingId: recoverHaId(car),
         visibleImage: hqFromSrc(car.visibleImage || car.imageUrl || "") || car.visibleImage,
+      });
+      copied += 1;
+      showProgress(copied, cars.length, `adatok ${copied}/${cars.length}`);
+      return next;
+    });
+    const prepared = enriched
+      .filter((car) => {
+        const id = recoverHaId(car);
+        if (!id) return false;
+        const html = String(car.html || car.gyorsnezetHtml || "");
+        const title = clean(car.visibleTitle || car.title || "");
+        const img = hqFromSrc(car.visibleImage || car.imageUrl || "");
+        return html.length > 400 || title.length >= 8 || img;
       })
-    );
+      .map((car) =>
+        slimDealerPage({
+          ...car,
+          listingId: recoverHaId(car),
+          visibleImage: hqFromSrc(car.visibleImage || car.imageUrl || "") || car.visibleImage,
+        })
+      );
     if (!prepared.length) {
       hideProgress("Nincs másolható autó a listán");
       return;
@@ -1154,44 +1193,6 @@
     let stoppedEarly = false;
     if (startOffset > 0) {
       showProgress(startOffset, prepared.length, `folytatás ${startOffset}/${prepared.length}`);
-    }
-    if (token && startOffset < prepared.length) {
-      const rest = prepared.slice(startOffset);
-      showProgress(prepared.length, prepared.length, `mentés ${rest.length} autó`);
-      try {
-        usedDirect = true;
-        const result = await savePagesWithFallback(
-          origin,
-          token,
-          rest,
-          prepared.length,
-          prepared.length,
-          chunkIndex + 1
-        );
-        const savedN = Number(result?.savedCount || 0);
-        const skippedN = Number(result?.skippedCount || 0);
-        const errN = Number(result?.errorCount || 0);
-        const skipMsg = (result?.items || []).find((it) => it?.skipped && it?.message)?.message;
-        if (result?.errors?.[0]?.message) errors.push(result.errors[0].message);
-        else if (skipMsg) errors.push(skipMsg);
-        ok += savedN;
-        skipped += skippedN;
-        fail += errN;
-        saveDealerProgress(null);
-        const parts = [];
-        if (ok) parts.push(`${ok} mentve`);
-        if (skipped) parts.push(`${skipped} kihagyva`);
-        if (fail) parts.push(`${fail} hiba`);
-        hideProgress(
-          parts.length
-            ? `Kész: ${parts.join(", ")}${errors[0] && fail ? ` — ${errors[0]}` : ""}`
-            : `Mentés sikertelen${errors[0] ? ` — ${errors[0]}` : ""}`
-        );
-        return;
-      } catch (error) {
-        hideProgress(`Mentés sikertelen — ${error.message || error}`);
-        return;
-      }
     }
     for (let offset = startOffset; offset < prepared.length; offset += SAVE_CHUNK) {
       const chunk = prepared.slice(offset, offset + SAVE_CHUNK);

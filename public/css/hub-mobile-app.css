@@ -392,8 +392,8 @@
     padding: 14px var(--hf-gutter) 16px !important;
     margin: 0 calc(var(--hf-gutter) * -1) 14px !important;
     background: #f6f5f2;
-    border-top: 1px solid #e9e7e3;
-    border-bottom: 1px solid #e9e7e3;
+    border-top: 1px solid #d2d0cc;
+    border-bottom: 1px solid #d2d0cc;
   }
 
   html[data-theme="dark"] body.hub-page--feed .hf-section {

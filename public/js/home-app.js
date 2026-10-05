@@ -754,14 +754,7 @@ async function loadListings() {
   populateFilterOptions(allItems);
 
   if (isFeaturedBrowseMode()) {
-    // Összes kiemelt kell → lapozzuk a poolt, amíg van még oldal.
-    let guard = 0;
-    while (listingsHasMore && guard < FEATURED_POOL_MAX_PAGES) {
-      guard += 1;
-      const before = allItems.length;
-      await loadMoreListings({ silent: true });
-      if (allItems.length === before) break;
-    }
+    // Először rajzoljunk — a többi lap háttérben, ne fagyjon a UI.
     if (!searchRestoreInProgress) renderFeaturedBrowse();
   } else {
     renderListings(allItems);
@@ -779,9 +772,32 @@ async function loadListings() {
     if (grew || searchRestoreInProgress) renderListings(allItems);
   }
   if (!searchRestoreInProgress) await refreshOpenMapPins();
+
+  if (isFeaturedBrowseMode()) {
+    void fillFeaturedBrowsePool();
+  }
   };
   listingsReadyPromise = run();
   return listingsReadyPromise;
+}
+
+async function fillFeaturedBrowsePool() {
+  if (!isFeaturedBrowseMode()) return;
+  let guard = 0;
+  while (listingsHasMore && guard < FEATURED_POOL_MAX_PAGES && isFeaturedBrowseMode()) {
+    guard += 1;
+    const before = allItems.length;
+    const beforeFeatured = pickFeaturedListings(allItems).length;
+    await loadMoreListings({ silent: true });
+    if (allItems.length === before) break;
+    if (!searchRestoreInProgress && isFeaturedBrowseMode()) {
+      const afterFeatured = pickFeaturedListings(allItems).length;
+      if (afterFeatured !== beforeFeatured) renderFeaturedBrowse();
+    }
+    // Engedjük a böngészőt festeni / kattintani a következő oldal előtt.
+    await new Promise((r) => window.setTimeout(r, 0));
+  }
+  if (!searchRestoreInProgress && isFeaturedBrowseMode()) renderFeaturedBrowse();
 }
 
 function mergeListings(existing, incoming) {
@@ -844,14 +860,14 @@ async function loadMoreListings({ silent = false } = {}) {
       }
       allItems = mergeListings(allItems, batch);
       featuredListingIds = featuredListingIdSet(allItems);
-      populateFilterOptions(allItems);
       if (!silent) {
+        populateFilterOptions(allItems);
         if (isFeaturedBrowseMode()) renderFeaturedBrowse();
         else renderListings(allItems);
         updateFilterResultCount();
         statsUi?.refreshActiveCount?.();
+        void refreshOpenMapPins();
       }
-      void refreshOpenMapPins();
       break;
     }
   } catch (error) {

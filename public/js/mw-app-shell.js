@@ -432,8 +432,12 @@
     }
     body.setAttribute("data-desk-hdr-ready", "1");
     pruneForeignHeaders();
+    // A sync script a body közepén fut: a későbbi <header> csak utána kerül a DOM-ba.
+    window.setTimeout(pruneForeignHeaders, 0);
     if (document.readyState === "loading") {
       document.addEventListener("DOMContentLoaded", pruneForeignHeaders);
+    } else {
+      pruneForeignHeaders();
     }
     syncAuthCache();
     ensureDeskHeaderDeps();

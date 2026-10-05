@@ -152,6 +152,12 @@
     flex: 0 0 auto !important;
   }
 
+  /* Fallback: ha a nav nincs hub-nav-band-ben, akkor is a középső cellába kerüljön */
+  body.site-app .hub-header-inner > .hub-nav,
+  body.home-page .hub-header-inner > .hub-nav {
+    grid-area: nav !important;
+  }
+
   body.site-app .hub-nav,
   body.site-app .home-nav,
   body.site-app .site-app-nav,
@@ -171,6 +177,7 @@
     right: auto !important;
     height: auto !important;
     overflow: visible !important;
+    pointer-events: auto !important;
   }
 
   body.site-app .hub-nav-link,

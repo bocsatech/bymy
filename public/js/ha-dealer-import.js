@@ -583,6 +583,29 @@
     return items.slice(0, 300);
   }
 
+  /** Szerver formLooksThin-hez igazítva: km + (extrák vagy gazdag map/html). */
+  function carLooksReadyForImport(car = {}) {
+    const km = String(car.km || "").replace(/\D/g, "");
+    if (!km) return false;
+    const eq = Array.isArray(car.felszereltseg) ? car.felszereltseg.length : 0;
+    if (eq >= 5) return true;
+    const map = car.map && typeof car.map === "object" ? car.map : {};
+    if (Object.keys(map).length >= 5) return true;
+    const html = String(car.html || car.gyorsnezetHtml || "");
+    return html.length > 800 && isUsefulDetailHtml(html);
+  }
+
+  async function ensureCarDescriptionWithRetry(car) {
+    let next = await ensureCarDescription(car);
+    if (carLooksReadyForImport(next)) return next;
+    next = await ensureCarDescription({
+      ...next,
+      html: "",
+      gyorsnezetHtml: "",
+    });
+    return next;
+  }
+
   async function ensureCarDescription(car) {
     const existingHtml = String(car.html || car.gyorsnezetHtml || "");
     const html =
@@ -1466,6 +1489,7 @@
     }
 
     let copied = 0;
+    let detailSkipped = 0;
     const enriched = await mapPool(cars, 1, async (car) => {
       const listingId = recoverHaId(car);
       let next = {
@@ -1475,20 +1499,21 @@
         visibleImage: hqFromSrc(car.visibleImage || car.imageUrl || "") || car.visibleImage,
       };
       try {
-        next = await ensureCarDescription(next);
+        next = await ensureCarDescriptionWithRetry(next);
       } catch {
-        /* listaadat elég a mentéshez */
+        /* retry után is listaadat — lent szűrjük */
       }
       next.listingId = listingId;
       next.hasznaltauto_hirdetes_id = listingId;
       copied += 1;
       const mapN = next.map && typeof next.map === "object" ? Object.keys(next.map).length : 0;
+      const ready = carLooksReadyForImport(next);
       showProgress(
         copied,
         cars.length,
-        mapN >= 3
+        ready
           ? `adatok ${copied}/${cars.length} (${mapN} mező)`
-          : `adatok ${copied}/${cars.length} (lista)`
+          : `adatok ${copied}/${cars.length} (nincs gyorsnézet)`
       );
       return next;
     });
@@ -1497,6 +1522,10 @@
       const listingId = recoverHaId(cars[i]) || recoverHaId(enriched[i]) || "";
       if (!listingId) continue;
       const car = { ...(enriched[i] || cars[i]), listingId, hasznaltauto_hirdetes_id: listingId };
+      if (!carLooksReadyForImport(car)) {
+        detailSkipped += 1;
+        continue;
+      }
       prepared.push(
         slimDealerPage({
           ...car,
@@ -1508,7 +1537,9 @@
     if (!prepared.length) {
       hideProgress();
       alert(
-        `Találtunk ${cars.length} autót a listán, de a mentés előtt elveszett az azonosító.\nFrissítsd az oldalt, görgess a lista végére, futtasd újra.`
+        detailSkipped
+          ? `Találtunk ${cars.length} autót, de egyiknél sem jött le a gyorsnézet (km / műszaki mezők).\nNyisd meg egy autó gyorsnézetét bejelentkezve, majd futtasd újra a könyvjelzőt.`
+          : `Találtunk ${cars.length} autót a listán, de a mentés előtt elveszett az azonosító.\nFrissítsd az oldalt, görgess a lista végére, futtasd újra.`
       );
       return;
     }

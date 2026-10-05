@@ -2236,6 +2236,8 @@ async function handleValuationApi(req, res, pathname) {
         ev_tol: url.searchParams.get("ev_tol"),
         ev_ig: url.searchParams.get("ev_ig"),
         km: url.searchParams.get("km"),
+        km_tol: url.searchParams.get("km_tol"),
+        km_ig: url.searchParams.get("km_ig"),
         ar: url.searchParams.get("ar"),
         requireCore: url.searchParams.get("require") === "1",
       };

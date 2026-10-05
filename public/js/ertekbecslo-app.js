@@ -1,7 +1,7 @@
 /** Értékbecslő — a feladás teljes asztali menürendszere + piaci sáv. */
 
 import { parseKmDigits } from "./km-input.js?v=30e4feeab0";
-import { readEvRange } from "./ertekbecsles-ev-range.js?v=f15cb1f40d";
+import { readEvRange, readKmRange } from "./ertekbecsles-ev-range.js?v=838d751fbd";
 
 const DEBOUNCE_MS = 350;
 
@@ -74,7 +74,7 @@ export async function initErtekbecsloPanel(root = document) {
   const form = el("[data-ertek-form]", panel) || el("#ad-form", panel);
   const kmInput = el("#km", panel) || el("[data-ertek-km]", panel);
   const out = el("[data-ertek-out]", root) || el("[data-ertek-out]", panel);
-  if (!form || !kmInput || !out) return;
+  if (!form || !out) return;
 
   if (document.body?.getAttribute("data-site-page") === "ertekbecsles") {
     document.body.classList.add("ad-form-desk-active");
@@ -86,9 +86,12 @@ export async function initErtekbecsloPanel(root = document) {
     const gyartmany = fieldValue(form, "gyartmany");
     const modell = fieldValue(form, "modell");
     const { ev_tol, ev_ig } = readEvRange(form);
+    const { km_tol, km_ig } = readKmRange(form);
     const gyartasi_ev = fieldValue(form, "gyartasi_ev");
-    const km = parseKmDigits(kmInput.value || "") || "";
-    if (!gyartmany || !modell || !km || (!gyartasi_ev && !ev_tol && !ev_ig)) {
+    const km = parseKmDigits(kmInput?.value || "") || "";
+    const hasEv = Boolean(gyartasi_ev || ev_tol || ev_ig);
+    const hasKm = Boolean(km || km_tol || km_ig);
+    if (!gyartmany || !modell || !hasEv || !hasKm) {
       out.innerHTML = "";
       return;
     }
@@ -96,13 +99,15 @@ export async function initErtekbecsloPanel(root = document) {
     const q = new URLSearchParams({
       gyartmany,
       modell,
-      km: String(km),
       require: "1",
       source: "market",
     });
     if (gyartasi_ev) q.set("gyartasi_ev", gyartasi_ev);
     if (ev_tol) q.set("ev_tol", ev_tol);
     if (ev_ig) q.set("ev_ig", ev_ig);
+    if (km) q.set("km", String(km));
+    if (km_tol) q.set("km_tol", km_tol);
+    if (km_ig) q.set("km_ig", km_ig);
     for (const id of DETAIL_FIELDS) {
       const value = fieldValue(form, id);
       if (value) q.set(id, value);
@@ -125,5 +130,5 @@ export async function initErtekbecsloPanel(root = document) {
 
   form.addEventListener("change", schedule);
   form.addEventListener("immo-wheel-change", schedule);
-  kmInput.addEventListener("input", schedule);
+  kmInput?.addEventListener("input", schedule);
 }

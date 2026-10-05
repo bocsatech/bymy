@@ -1,7 +1,7 @@
 import { createAdForm } from "./form-core.js?v=f5c3cfcf0f";
 import { mountAdFormBmPickers } from "./ad-form-bm-pickers.js?v=0773d1b64e";
-import { initErtekbecsloPanel } from "./ertekbecslo-app.js?v=09f37a1e09";
-import { mountErtekEvRange } from "./ertekbecsles-ev-range.js?v=22f98cf2ab";
+import { initErtekbecsloPanel } from "./ertekbecslo-app.js?v=83a4452583";
+import { mountErtekDualRanges } from "./ertekbecsles-ev-range.js?v=838d751fbd";
 
 const CATEGORY = {
   hirdetes_vertical: "auto",
@@ -102,17 +102,17 @@ try {
   window.dispatchEvent(new Event("ad-form-layout-refresh"));
   showValuationSteps(form);
   hidePublishChrome(form);
-  mountErtekEvRange(form);
+  mountErtekDualRanges(form);
   placeResult(form);
   window.addEventListener("ad-form-ready", () => {
     showValuationSteps(form);
     hidePublishChrome(form);
-    mountErtekEvRange(form);
+    mountErtekDualRanges(form);
     placeResult(form);
   });
   window.addEventListener("ad-form-layout-refresh", () => {
     hidePublishChrome(form);
-    mountErtekEvRange(form);
+    mountErtekDualRanges(form);
     placeResult(form);
   });
   DESK_LAYOUT_MQ.addEventListener("change", () => placeResult(form));

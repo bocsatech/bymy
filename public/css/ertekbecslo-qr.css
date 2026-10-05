@@ -276,10 +276,10 @@ html[data-theme="dark"] .bymy-qr__label {
   color: #64748b;
 }
 
-/* Gyártási év tól–ig (az autós keresőével azonos dobkerék): csukva egy sor,
-   a két kerék a sheetben jelenik meg — a mező így a többi menüvel egyforma. */
-body.site-app[data-site-page="ertekbecsles"] #ad-form .ertek-ev-range,
-body.site-app[data-site-page="ertekbecsles"] #ad-form .ertek-ev-range > .immo-dual-range {
+/* Gyártási év + km óra állás tól–ig (az autós keresőével azonos dobkerék):
+   csukva egy sor, a két kerék a sheetben jelenik meg. */
+body.site-app[data-site-page="ertekbecsles"] #ad-form .ertek-dual-range,
+body.site-app[data-site-page="ertekbecsles"] #ad-form .ertek-dual-range > .immo-dual-range {
   display: block !important;
   width: 100% !important;
   max-width: 100% !important;
@@ -292,7 +292,7 @@ body.site-app[data-site-page="ertekbecsles"] #ad-form .ertek-ev-range > .immo-du
   box-sizing: border-box !important;
 }
 
-body.site-app[data-site-page="ertekbecsles"] #ad-form .ertek-ev-range .immo-dual-range__summary {
+body.site-app[data-site-page="ertekbecsles"] #ad-form .ertek-dual-range .immo-dual-range__summary {
   appearance: none;
   display: block !important;
   width: 100% !important;
@@ -312,20 +312,20 @@ body.site-app[data-site-page="ertekbecsles"] #ad-form .ertek-ev-range .immo-dual
   min-height: 2.65rem !important;
 }
 
-body.site-app[data-site-page="ertekbecsles"] #ad-form .ertek-ev-range .immo-dual-range__summary.is-placeholder {
+body.site-app[data-site-page="ertekbecsles"] #ad-form .ertek-dual-range .immo-dual-range__summary.is-placeholder {
   color: #64748b !important;
   font-weight: 500 !important;
 }
 
-body.site-app[data-site-page="ertekbecsles"] #ad-form .ertek-ev-range .immo-dual-range__summary:focus-visible {
+body.site-app[data-site-page="ertekbecsles"] #ad-form .ertek-dual-range .immo-dual-range__summary:focus-visible {
   outline: 2px solid #2563eb;
   outline-offset: 2px;
 }
 
 /* A kerekek csukott formán rejtve — a sheet ezekből a DOM-elemekből dolgozik. */
-body.site-app[data-site-page="ertekbecsles"] #ad-form .ertek-ev-range .immo-dual-range__half,
-body.site-app[data-site-page="ertekbecsles"] #ad-form .ertek-ev-range .immo-dual-range__sep,
-body.site-app[data-site-page="ertekbecsles"] #ad-form .ertek-ev-range .immo-dual-range__unit {
+body.site-app[data-site-page="ertekbecsles"] #ad-form .ertek-dual-range .immo-dual-range__half,
+body.site-app[data-site-page="ertekbecsles"] #ad-form .ertek-dual-range .immo-dual-range__sep,
+body.site-app[data-site-page="ertekbecsles"] #ad-form .ertek-dual-range .immo-dual-range__unit {
   position: absolute !important;
   width: 1px !important;
   height: 1px !important;
@@ -338,7 +338,7 @@ body.site-app[data-site-page="ertekbecsles"] #ad-form .ertek-ev-range .immo-dual
   pointer-events: none !important;
 }
 
-html[data-theme="dark"] body.site-app[data-site-page="ertekbecsles"] #ad-form .ertek-ev-range .immo-dual-range__summary {
+html[data-theme="dark"] body.site-app[data-site-page="ertekbecsles"] #ad-form .ertek-dual-range .immo-dual-range__summary {
   color: #f9fafb !important;
   border-bottom-color: #3a4150 !important;
 }

@@ -1894,7 +1894,8 @@ html[data-theme="dark"] .auto-drum-portal--choice .auto-drum-switch {
   border-top-right-radius: 1.15rem !important;
   border-bottom-left-radius: 1.15rem !important;
   border-bottom-right-radius: 1.15rem !important;
-  background: #fff !important;
+  background: var(--drum-sheet-card-bg, #fff) !important;
+  color: var(--drum-sheet-card-fg, #111) !important;
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06) !important;
   overflow-x: hidden !important;
   overflow-y: auto !important;
@@ -1979,7 +1980,8 @@ html[data-theme="dark"] .auto-drum-portal--choice .auto-drum-switch {
   min-height: 2.75rem !important;
   font-size: 0.9375rem !important;
   font-weight: 400 !important;
-  color: #1f2937 !important;
+  color: var(--drum-sheet-card-fg, #1f2937) !important;
+  -webkit-text-fill-color: var(--drum-sheet-card-fg, #1f2937) !important;
   padding: 0 0.55rem 0 0.7rem !important;
   justify-content: space-between !important;
   text-align: left !important;
@@ -1996,8 +1998,8 @@ html[data-theme="dark"] .auto-drum-portal--choice .auto-drum-switch {
 .auto-drum-portal--sheet .immo-drum-inline-text {
   font-size: inherit !important;
   font-weight: inherit !important;
-  color: #111111 !important;
-  -webkit-text-fill-color: #111111 !important;
+  color: var(--drum-sheet-card-fg, #111111) !important;
+  -webkit-text-fill-color: var(--drum-sheet-card-fg, #111111) !important;
 }
 
 .auto-drum-portal--sheet .auto-drum-inline-item--child {
@@ -2238,8 +2240,8 @@ html[data-theme="dark"] .auto-drum-portal--choice .auto-drum-switch {
   grid-template-columns: 1fr;
   gap: 0.45rem;
   padding: 0.65rem 0.85rem 0.45rem;
-  border-bottom: 1px solid #e2e8f0;
-  background: #fff;
+  border-bottom: 1px solid var(--drum-sheet-card-line, #e2e8f0);
+  background: var(--drum-sheet-card-bg, #fff);
 }
 
 .auto-drum-portal--sheet.auto-drum-portal--ym .auto-drum-ym__heads {
@@ -2249,9 +2251,9 @@ html[data-theme="dark"] .auto-drum-portal--choice .auto-drum-switch {
   padding: 0.35rem 0.35rem 0.25rem;
   text-align: center;
   font: 650 0.78rem/1.2 system-ui, sans-serif;
-  color: #64748b;
-  border-bottom: 1px solid #e2e8f0;
-  background: #fff;
+  color: var(--drum-sheet-muted, #64748b);
+  border-bottom: 1px solid var(--drum-sheet-card-line, #e2e8f0);
+  background: var(--drum-sheet-card-bg, #fff);
 }
 
 .auto-drum-portal--sheet.auto-drum-portal--ym .auto-drum-ym__body {
@@ -2261,7 +2263,7 @@ html[data-theme="dark"] .auto-drum-portal--choice .auto-drum-switch {
   min-height: 12rem;
   max-height: 12rem;
   overflow: hidden;
-  background: #fff;
+  background: var(--drum-sheet-card-bg, #fff);
 }
 
 .auto-drum-portal--sheet.auto-drum-portal--ym .auto-drum-ym__highlight,
@@ -3188,12 +3190,23 @@ html:has(body.auto-drum-sheet-open) {
   display: none !important;
 }
 
-/* Sötét mód — sheet végleges kontraszt (utolsó a fájlban) */
+/* Sötét mód — sheet változók (a #fff !important is ezeket használja) */
+html[data-theme="dark"] .auto-drum-portal--sheet,
+html[data-theme="dark"] .auto-drum-portal--choice {
+  --drum-sheet-card-bg: #1e2836;
+  --drum-sheet-card-fg: #f3f4f6;
+  --drum-sheet-card-line: #2a3444;
+  --drum-sheet-muted: #9aa3ad;
+  --drum-sheet-head-bg: #1a2330;
+  --drum-sheet-summary-bg: #12161c;
+  --drum-sheet-highlight: rgba(255, 255, 255, 0.14);
+}
+
 html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-portal__sheet-head,
 html[data-theme="dark"] .auto-drum-portal--sheet.auto-drum-portal--ym .auto-drum-portal__sheet-head,
 html[data-theme="dark"] .auto-drum-portal--sheet.auto-drum-portal--range-sheet .auto-drum-portal__sheet-head,
 html[data-theme="dark"] .auto-drum-portal--sheet.auto-drum-portal--single-sheet .auto-drum-portal__sheet-head {
-  background: #1a2330 !important;
+  background: var(--drum-sheet-head-bg, #1a2330) !important;
 }
 
 html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-portal__sheet-title {
@@ -3202,47 +3215,45 @@ html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-portal__sheet-title 
 }
 
 html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-portal__ring--sheet,
-html[data-theme="dark"] .auto-drum-portal--sheet.auto-drum-portal--ym .auto-drum-portal__ring--sheet,
-html[data-theme="dark"] .auto-drum-portal--sheet.auto-drum-portal--range-sheet .auto-drum-portal__ring--sheet,
-html[data-theme="dark"] .auto-drum-portal--choice .auto-drum-portal__ring--sheet {
-  background: #1e2836 !important;
-  border-color: #2a3444 !important;
-}
-
+html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-portal__toolbar--sheet,
 html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-ym__chips,
 html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-ym__heads,
 html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-ym__body {
-  background: #1e2836 !important;
-  border-bottom-color: #2a3444 !important;
+  background: var(--drum-sheet-card-bg) !important;
+  border-color: var(--drum-sheet-card-line) !important;
+  border-bottom-color: var(--drum-sheet-card-line) !important;
+  color: var(--drum-sheet-card-fg) !important;
 }
 
 html[data-theme="dark"] .auto-drum-portal--sheet .immo-drum-inline-item,
 html[data-theme="dark"] .auto-drum-portal--sheet .immo-drum-inline-text,
 html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-portal__summary,
+html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-split__chip,
+html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-split__chip-label,
 html[data-theme="dark"] .auto-drum-portal--sheet .immo-drum-inline-item span,
-html[data-theme="dark"] body.site-app .auto-drum-portal--sheet :is(.immo-drum-inline-item, .immo-drum-inline-text, .auto-drum-portal__summary, span) {
-  color: #f3f4f6 !important;
-  -webkit-text-fill-color: #f3f4f6 !important;
+html[data-theme="dark"] body.site-app .auto-drum-portal--sheet :is(.immo-drum-inline-item, .immo-drum-inline-text, .auto-drum-portal__summary, .auto-drum-split__chip-label, span) {
+  color: var(--drum-sheet-card-fg) !important;
+  -webkit-text-fill-color: var(--drum-sheet-card-fg) !important;
 }
 
 html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-ym__heads,
 html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-ym__label {
-  color: #9aa3ad !important;
-  -webkit-text-fill-color: #9aa3ad !important;
+  color: var(--drum-sheet-muted) !important;
+  -webkit-text-fill-color: var(--drum-sheet-muted) !important;
 }
 
-html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-portal__summary {
-  background: #12161c !important;
-  border-color: #3b4450 !important;
+html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-portal__summary,
+html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-split__chip {
+  background: var(--drum-sheet-summary-bg) !important;
+  border-color: var(--drum-sheet-card-line) !important;
 }
 
 html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-ym__highlight,
 html[data-theme="dark"] .auto-drum-portal--sheet .immo-drum-inline-highlight,
 html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-split__highlight {
-  background: rgba(255, 255, 255, 0.14) !important;
+  background: var(--drum-sheet-highlight) !important;
 }
 
 html[data-theme="dark"] .auto-drum-portal--sheet .immo-drum-inline-item {
   opacity: 1 !important;
 }
-

@@ -956,6 +956,54 @@ function createSheetPortalShell(title) {
   };
 }
 
+
+function isDrumSheetDark() {
+  return document.documentElement.getAttribute("data-theme") === "dark";
+}
+
+/** Sötét/világos tinta a fehér sheet-kártya elemeire — ne CSS cascade-re bízzuk. */
+function paintSheetCardTheme(root) {
+  if (!root) return;
+  const dark = isDrumSheetDark();
+  const bg = dark ? "#1e2836" : "#ffffff";
+  const fg = dark ? "#f3f4f6" : "#111111";
+  const line = dark ? "#2a3444" : "#e2e8f0";
+  const muted = dark ? "#9aa3ad" : "#64748b";
+  const summaryBg = dark ? "#12161c" : "#ffffff";
+  root.style.setProperty("--drum-sheet-card-bg", bg);
+  root.style.setProperty("--drum-sheet-card-fg", fg);
+  root.style.setProperty("--drum-sheet-card-line", line);
+  root.style.setProperty("--drum-sheet-muted", muted);
+  root.style.setProperty("--drum-sheet-summary-bg", summaryBg);
+  root.style.setProperty("--drum-sheet-highlight", dark ? "rgba(255,255,255,0.14)" : "rgba(148,163,184,0.22)");
+  root.querySelectorAll(
+    ".auto-drum-portal__ring--sheet, .auto-drum-ym__chips, .auto-drum-ym__heads, .auto-drum-ym__body, .auto-drum-portal__toolbar--sheet"
+  ).forEach((el) => {
+    el.style.setProperty("background", bg, "important");
+    el.style.setProperty("color", fg, "important");
+    el.style.setProperty("border-color", line, "important");
+    el.style.setProperty("border-bottom-color", line, "important");
+  });
+  root.querySelectorAll(".auto-drum-ym__heads, .auto-drum-ym__label").forEach((el) => {
+    el.style.setProperty("color", muted, "important");
+    el.style.setProperty("-webkit-text-fill-color", muted, "important");
+  });
+  root.querySelectorAll(".auto-drum-split__chip, .auto-drum-portal__summary").forEach((el) => {
+    el.style.setProperty("background", summaryBg, "important");
+    el.style.setProperty("color", fg, "important");
+    el.style.setProperty("-webkit-text-fill-color", fg, "important");
+    el.style.setProperty("border-color", line, "important");
+  });
+  root.querySelectorAll(".immo-drum-inline-item, .immo-drum-inline-text, .auto-drum-split__chip-label").forEach((el) => {
+    el.style.setProperty("color", fg, "important");
+    el.style.setProperty("-webkit-text-fill-color", fg, "important");
+    el.style.setProperty("opacity", "1", "important");
+  });
+  root.querySelectorAll(".auto-drum-ym__highlight, .immo-drum-inline-highlight, .auto-drum-split__highlight").forEach((el) => {
+    el.style.setProperty("background", dark ? "rgba(255,255,255,0.14)" : "rgba(148,163,184,0.22)", "important");
+  });
+}
+
 function lockSheetWhiteToBlue(root, stage) {
   if (!root || !stage) return;
   const scroll = root.querySelector?.("[data-sheet-scroll]");
@@ -1000,8 +1048,7 @@ function lockSheetWhiteToBlue(root, stage) {
       scroll.style.setProperty("flex", "0 1 auto", "important");
     }
   }
-  const dark = document.documentElement.getAttribute("data-theme") === "dark";
-  const dark = document.documentElement.getAttribute("data-theme") === "dark";
+  const dark = isDrumSheetDark();
   if (ring) {
     ring.style.setProperty("width", "100%", "important");
     ring.style.setProperty("max-width", "100%", "important");
@@ -1041,6 +1088,7 @@ function lockSheetWhiteToBlue(root, stage) {
     stage.style.setProperty("flex-direction", "column", "important");
     stage.style.setProperty("overflow", "hidden", "important");
   }
+  paintSheetCardTheme(root);
 }
 
 function applySheetStageLayout(stage) {
@@ -2252,7 +2300,7 @@ function paintSplitColSync(scrollEl, ring) {
   const centerY = ringRect.top + ringRect.height / 2;
   const nearest = nearestPortalItem(scrollEl, ring);
   const sheet = Boolean(scrollEl.closest?.(".auto-drum-portal--sheet"));
-  const dark = document.documentElement.getAttribute("data-theme") === "dark";
+  const dark = isDrumSheetDark();
   const ink = sheet && dark ? "#f3f4f6" : "#111111";
   scrollEl.querySelectorAll(".immo-drum-inline-item").forEach((item) => {
     const r = item.getBoundingClientRect();
@@ -2424,6 +2472,7 @@ function openSplitRangeDrumSheet(minWheel, maxWheel, trigger) {
 
   minScroll.innerHTML = minItems.map(itemHtml).join("");
   maxScroll.innerHTML = maxItems.map(itemHtml).join("");
+  paintSheetCardTheme(root);
 
   function syncChips() {
     const minLabel = labelForWheelValue(minWheel, pendingMin, chipMinEmpty);

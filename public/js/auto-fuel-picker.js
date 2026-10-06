@@ -1,4 +1,4 @@
-import { openStandaloneSwitchSheet, closeAutoDrumSheet } from "./auto-drum-sheet.js?v=711df91eaf";
+import { openStandaloneSwitchSheet, closeAutoDrumSheet } from "./auto-drum-sheet.js?v=f9cedeaea8";
 
 const FUEL_OPTIONS = [
   { value: "Benzin", label: "Benzin" },

@@ -1,5 +1,5 @@
 import { ALLAPOT_CATEGORIES } from "./equipment-data.js?v=5a39cb5ba3";
-import { openStandaloneSwitchSheet, closeAutoDrumSheet } from "./auto-drum-sheet.js?v=711df91eaf";
+import { openStandaloneSwitchSheet, closeAutoDrumSheet } from "./auto-drum-sheet.js?v=f9cedeaea8";
 
 function labelList(items) {
   if (!items.length) return "Mindegy";

@@ -192,7 +192,7 @@ import { applySecurityHeaders } from "./lib/security-headers.mjs";
 import { turnstilePublicConfig, turnstileHealthStatus, verifyTurnstileToken } from "./lib/turnstile.mjs";
 import { recordPageVisit, visitorCookieHeader } from "./lib/site-visitors.mjs";
 import { autoBlockIp, isIpBlocked } from "./lib/site-ip-blocks.mjs";
-import { shouldAutoBlock } from "./lib/ip-abuse.mjs";
+import { shouldAutoBlock, abuseNotifyPayload, abuseNotifyAddress } from "./lib/ip-abuse.mjs";
 import { enforceMembersGate, isMembersOnlySite } from "./lib/site-gate.mjs";
 import { readJsonBody } from "./lib/read-json-body.mjs";
 import {
@@ -347,8 +347,19 @@ async function maybeAutoBlockAbusiveIp(req, pathname) {
   });
   if (!verdict) return;
   try {
-    await autoBlockIp(ip, { reason: verdict.reason });
+    const result = await autoBlockIp(ip, { reason: verdict.reason });
     console.warn(`[ip-abuse] auto-block ${ip} reason=${verdict.reason}`);
+    if (result?.created && abuseNotifyAddress()) {
+      const mail = abuseNotifyPayload({
+        ip,
+        reason: verdict.reason,
+        userAgent: String(req.headers?.["user-agent"] || ""),
+        path: pathname,
+      });
+      void sendMail(mail).catch((err) => {
+        console.warn("[ip-abuse] notify mail failed:", err?.message || err);
+      });
+    }
   } catch (err) {
     console.warn("[ip-abuse] persist failed:", err?.message || err);
   }

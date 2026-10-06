@@ -166,7 +166,7 @@
 .cp-option {
   width: 100%;
   display: grid;
-  grid-template-columns: 4px 28px 1fr auto;
+  grid-template-columns: 4px 40px 1fr auto;
   gap: 0.7rem;
   align-items: center;
   padding: 0.7rem 0.65rem;
@@ -189,8 +189,8 @@
 }
 
 .cp-option-icon {
-  width: 28px;
-  height: 28px;
+  width: 40px;
+  height: 40px;
   display: grid;
   place-items: center;
   color: var(--cp-muted);
@@ -202,8 +202,8 @@
 }
 
 .cp-option-icon--photo {
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   border-radius: 10px;
   overflow: hidden;
   background: #f3f4f6;
@@ -217,7 +217,7 @@
 }
 
 .cp-group[data-accent="immo"] .cp-option {
-  grid-template-columns: 4px 36px 1fr auto;
+  grid-template-columns: 4px 40px 1fr auto;
   align-items: center;
 }
 

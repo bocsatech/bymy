@@ -113,31 +113,33 @@ struct PostAdScreen: View {
     }
 
     private func optionRow(_ opt: PostAdCatalog.Category, accent: PostAdCatalog.Group.Accent) -> some View {
-        Button {
+        let isOn = selected?.id == opt.id
+        return Button {
             selected = opt
         } label: {
             HStack(spacing: 12) {
                 RoundedRectangle(cornerRadius: 2, style: .continuous)
                     .fill(accentColor(accent))
-                    .frame(width: 4, height: 28)
+                    .frame(width: 4, height: 36)
+                    .opacity(isOn ? 1 : 0)
 
                 optionIcon(opt, accent: accent)
-                    .frame(width: 28, height: 28)
 
                 Text(opt.label)
                     .font(.system(size: 15, weight: .semibold))
-                    .foregroundStyle(Color(red: 0.102, green: 0.114, blue: 0.141))
+                    .foregroundStyle(isOn ? accentColor(accent) : Color(red: 0.102, green: 0.114, blue: 0.141))
                     .multilineTextAlignment(.leading)
 
                 Spacer(minLength: 0)
 
                 Image(systemName: "chevron.right")
                     .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(Color(red: 0.620, green: 0.639, blue: 0.686))
+                    .foregroundStyle(isOn ? accentColor(accent) : Color(red: 0.620, green: 0.639, blue: 0.686))
             }
             .padding(.horizontal, 10)
-            .padding(.vertical, 12)
-            .background(Color.clear)
+            .padding(.vertical, 8)
+            .background(isOn ? accentSoft(accent) : Color.clear)
+            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
@@ -145,22 +147,22 @@ struct PostAdScreen: View {
 
     @ViewBuilder
     private func optionIcon(_ opt: PostAdCatalog.Category, accent: PostAdCatalog.Group.Accent) -> some View {
-        if opt.vertical == "ingatlan", !opt.imagePath.isEmpty {
+        if !opt.imagePath.isEmpty {
             AsyncImage(url: URL(string: "https://bymy.hu\(opt.imagePath)")) { phase in
                 switch phase {
                 case .success(let image):
                     image.resizable().scaledToFill()
                 default:
-                    Image(systemName: opt.systemImage)
-                        .foregroundStyle(accentColor(accent))
+                    accentSoft(accent)
                 }
             }
-            .frame(width: 28, height: 28)
-            .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+            .frame(width: 40, height: 40)
+            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
         } else {
             Image(systemName: opt.systemImage)
                 .font(.system(size: 16, weight: .semibold))
                 .foregroundStyle(accentColor(accent))
+                .frame(width: 40, height: 40)
         }
     }
 

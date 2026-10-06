@@ -1,7 +1,7 @@
 import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=aefe195fc3";
 import { refreshAdFormBmPickers, mountTireSizeSwitchPickers } from "./ad-form-bm-pickers.js?v=0773d1b64e";
 import { initTireSizes } from "./tire-sizes-ui.js?v=d01f914c82";
-import { applyAdFormDesk } from "./ad-form-desk.js?v=e21beec07b";
+import { applyAdFormDesk } from "./ad-form-desk.js?v=1b54f59eaa";
 import { markImmoPostViewReady } from "./category-picker.js?v=5d45536b6e";
 import {
   DESK_MUSZAKI_CORE_FIELD_KEYS,
@@ -94,6 +94,75 @@ function pinLeiras(form) {
   leirasCard.classList.remove("ad-immo-orphan", "ad-layout-hidden");
   leirasCard.removeAttribute("hidden");
   leirasCard.style.removeProperty("display");
+}
+
+/** Magánszemély: hitel / futamidő / részlet mezők ne jelenjenek meg feladáskor. */
+const PRIVATE_HIDDEN_FINANCE_KEYS = ["hitel", "kezdo_reszlet", "havi_reszlet", "futamido"];
+
+function isPrivateAccountKind() {
+  try {
+    const kind = document.documentElement.getAttribute("data-mm-account-kind");
+    if (kind === "company") return false;
+    if (kind === "private") return true;
+  } catch {
+    /* ignore */
+  }
+  try {
+    return localStorage.getItem("bymy-account-kind") !== "company";
+  } catch {
+    return true;
+  }
+}
+
+function applyPrivateFinanceFieldVisibility(form) {
+  if (!form) return;
+  const hide = isPrivateAccountKind();
+  form.classList.toggle("ad-form--private-no-finance", hide);
+
+  for (const key of PRIVATE_HIDDEN_FINANCE_KEYS) {
+    const input =
+      document.getElementById(key) || form.querySelector(`[name="${cssEscape(key)}"]`);
+    if (!input) continue;
+
+    const wrap =
+      input.closest(".ad-layout-item, .labeled-field, .field-stack, .md-outlined") ||
+      input.closest(".suffix-field")?.parentElement ||
+      input;
+    const label = input.id ? form.querySelector(`label[for="${cssEscape(input.id)}"]`) : null;
+
+    if (hide) {
+      if (wrap) {
+        wrap.classList.add("ad-layout-hidden", "ad-private-finance-hidden");
+        wrap.hidden = true;
+        wrap.style.setProperty("display", "none", "important");
+        setRequired(wrap, false);
+      }
+      if (label && label !== wrap && !wrap?.contains(label)) {
+        label.classList.add("ad-private-finance-hidden");
+        label.hidden = true;
+        label.style.setProperty("display", "none", "important");
+      }
+      if (input.tagName === "SELECT" || input.tagName === "INPUT" || input.tagName === "TEXTAREA") {
+        if (input.type === "checkbox" || input.type === "radio") input.checked = false;
+        else input.value = "";
+      }
+      input.disabled = true;
+    } else {
+      input.disabled = false;
+      if (wrap?.classList.contains("ad-private-finance-hidden")) {
+        wrap.classList.remove("ad-layout-hidden", "ad-private-finance-hidden");
+        wrap.hidden = false;
+        wrap.removeAttribute("hidden");
+        wrap.style.removeProperty("display");
+      }
+      if (label?.classList.contains("ad-private-finance-hidden")) {
+        label.classList.remove("ad-private-finance-hidden");
+        label.hidden = false;
+        label.removeAttribute("hidden");
+        label.style.removeProperty("display");
+      }
+    }
+  }
 }
 
 function pinExtras(form) {
@@ -1195,6 +1264,7 @@ async function applyAdFormLayout() {
         stackVehicleCanvasSingleColumn(canvasForStep(form, 1), { canonicalStep1: true });
       }, 500);
     }
+    applyPrivateFinanceFieldVisibility(form);
     if (
       isImmo &&
       document.documentElement.classList.contains("immo-ad-wizard-boot")

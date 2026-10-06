@@ -1,3 +1,31 @@
+/* Magánszemély: hitel / futamidő / részlet mezők elrejtése feladáskor */
+html[data-mm-account-kind="private"] body.site-app #ad-form .ad-layout-item:has(#hitel),
+html[data-mm-account-kind="private"] body.site-app #ad-form .ad-layout-item:has(#kezdo_reszlet),
+html[data-mm-account-kind="private"] body.site-app #ad-form .ad-layout-item:has(#havi_reszlet),
+html[data-mm-account-kind="private"] body.site-app #ad-form .ad-layout-item:has(#futamido),
+html[data-mm-account-kind="private"] body.site-app #ad-form .labeled-field:has(#hitel),
+html[data-mm-account-kind="private"] body.site-app #ad-form .labeled-field:has(#kezdo_reszlet),
+html[data-mm-account-kind="private"] body.site-app #ad-form .labeled-field:has(#havi_reszlet),
+html[data-mm-account-kind="private"] body.site-app #ad-form .labeled-field:has(#futamido),
+html[data-mm-account-kind="private"] body.site-app #ad-form .md-outlined:has(#hitel),
+html[data-mm-account-kind="private"] body.site-app #ad-form .md-outlined:has(#kezdo_reszlet),
+html[data-mm-account-kind="private"] body.site-app #ad-form .md-outlined:has(#havi_reszlet),
+html[data-mm-account-kind="private"] body.site-app #ad-form .md-outlined:has(#futamido),
+html[data-mm-account-kind="private"] body.site-app #ad-form label[for="hitel"],
+html[data-mm-account-kind="private"] body.site-app #ad-form label[for="kezdo_reszlet"],
+html[data-mm-account-kind="private"] body.site-app #ad-form label[for="havi_reszlet"],
+html[data-mm-account-kind="private"] body.site-app #ad-form label[for="futamido"],
+html[data-mm-account-kind="private"] body.site-app #ad-form #hitel,
+html[data-mm-account-kind="private"] body.site-app #ad-form #kezdo_reszlet,
+html[data-mm-account-kind="private"] body.site-app #ad-form #havi_reszlet,
+html[data-mm-account-kind="private"] body.site-app #ad-form #futamido,
+html[data-mm-account-kind="private"] body.site-app #ad-form .suffix-field:has(#kezdo_reszlet),
+html[data-mm-account-kind="private"] body.site-app #ad-form .suffix-field:has(#havi_reszlet),
+html[data-mm-account-kind="private"] body.site-app #ad-form .suffix-field:has(#futamido),
+body.site-app #ad-form.ad-form--private-no-finance .ad-private-finance-hidden {
+  display: none !important;
+}
+
 /* Közös desk jármű űrlap — accordion menü, mezők, kép/leírás (mobil + desktop) */
 html.ad-form-edit-boot body[data-site-page="hirdetesfeladas"] #category-picker-shell,
 html.ad-form-edit-boot body[data-site-page="hirdetesfeladas"] #ad-wizard-shell,

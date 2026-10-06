@@ -914,15 +914,13 @@ function hasActiveClientFilters() {
 
 function updateDeskResultCount(filtered) {
   if (PAGE !== "auto" && PAGE !== "teherauto") return;
-  if (isFeaturedBrowseMode() && browseFeaturedItems.length > 0) {
-    updateAutoDeskResultCount(browseFeaturedItems.length);
+  const total = listingsTotal != null ? Number(listingsTotal) : NaN;
+  if (Number.isFinite(total)) {
+    updateAutoDeskResultCount(total);
     return;
   }
-  if (!hasActiveClientFilters() && listingsTotal != null && searchResultsCommitted) {
-    updateAutoDeskResultCount(listingsTotal);
-    return;
-  }
-  updateAutoDeskResultCount(filtered.length);
+  const n = Array.isArray(filtered) ? filtered.length : Number(filtered) || 0;
+  updateAutoDeskResultCount(n);
 }
 
 async function fillFilteredResults() {

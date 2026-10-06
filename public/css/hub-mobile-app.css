@@ -158,6 +158,31 @@
     margin-left: auto;
   }
 
+  /* Desk „inverz” / színmód — ugyanaz a fél fehér–fél sötét gomb */
+  body.site-app .mw-app-top .hub-theme-toggle,
+  body.site-app .mw-app-top .mw-app-theme {
+    display: inline-flex !important;
+    width: var(--mw-action) !important;
+    height: var(--mw-action) !important;
+    min-width: var(--mw-action) !important;
+    min-height: var(--mw-action) !important;
+    flex: 0 0 var(--mw-action) !important;
+    border-radius: 999px !important;
+    border: 1px solid #c8c8c8 !important;
+    background: linear-gradient(90deg, #fff 50%, #4b5563 50%) !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+
+  html[data-theme="dark"] body.site-app .mw-app-top .hub-theme-toggle,
+  html[data-theme="dark"] body.site-app .mw-app-top .mw-app-theme {
+    border-color: #6b7280 !important;
+    background: linear-gradient(90deg, #e5e7eb 50%, #111827 50%) !important;
+  }
+
   body.site-app .mw-app-post {
     display: inline-flex;
     align-items: center;

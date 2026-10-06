@@ -4,6 +4,8 @@ import SwiftUI
 struct MobileTopBar: View {
     @EnvironmentObject private var auth: AuthStore
     @EnvironmentObject private var router: AppRouter
+    /// Web: `hub-theme-toggle` / Színmód (inverz)
+    @AppStorage("bymy.theme") private var theme = "light"
 
     var body: some View {
         VStack(spacing: 0) {
@@ -34,6 +36,29 @@ struct MobileTopBar: View {
                     }
                     .buttonStyle(.plain)
                     .accessibilityLabel("Új hirdetés")
+
+                    Button {
+                        theme = (theme == "dark") ? "light" : "dark"
+                    } label: {
+                        Circle()
+                            .fill(
+                                LinearGradient(
+                                    colors: [
+                                        Color.white,
+                                        Color(red: 0.294, green: 0.333, blue: 0.388)
+                                    ],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            )
+                            .overlay(
+                                Circle()
+                                    .stroke(Color(red: 0.784, green: 0.784, blue: 0.784), lineWidth: 1)
+                            )
+                            .frame(width: 34, height: 34)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(theme == "dark" ? "Váltás világos módra" : "Váltás sötét módra")
 
                     if auth.isLoggedIn {
                         Button {

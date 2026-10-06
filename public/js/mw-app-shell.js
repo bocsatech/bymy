@@ -9,7 +9,8 @@
   var isPostAd = page === "hirdetesfeladas";
   /* TEMP: Ingatlan menü elrejtve — vissza: false */
   var HIDE_INGATLAN_NAV = true;
-  var CSS_HREF = "/css/hub-mobile-app.css?v=navType1";
+  var CSS_HREF = "/css/hub-mobile-app.css?v=themeToggle1";
+  var THEME_JS = "/js/theme.js?v=4fe8a2261f";
 
   function ensureCss() {
     if (document.querySelector('link[href*="hub-mobile-app.css"]')) return;
@@ -62,6 +63,7 @@
       "</a>" +
       '<div class="mw-app-top-actions">' +
       '<a class="mw-app-post" href="/hirdetesfeladas.html" data-auth-guard aria-label="Új hirdetés" title="Új hirdetés">+</a>' +
+      '<button type="button" class="hub-theme-toggle mw-app-theme" data-theme-toggle aria-label="Színmód" title="Színmód"></button>' +
       '<a class="mw-app-msg" href="/uzenetek.html" data-auth-member hidden aria-label="Üzenetek" title="Üzenetek">' +
       msgSvg +
       "</a>" +
@@ -81,6 +83,15 @@
     body.insertAdjacentHTML("afterbegin", html);
     syncAuthCache();
     scrollActivePagesLink();
+    bindThemeToggles();
+  }
+
+  function bindThemeToggles() {
+    import(THEME_JS)
+      .then(function (mod) {
+        if (mod && typeof mod.initTheme === "function") mod.initTheme();
+      })
+      .catch(function () {});
   }
 
   function scrollActivePagesLink() {
@@ -470,7 +481,7 @@
       s.src = src;
       document.body.appendChild(s);
     }
-    addModule("/js/theme.js?v=4fe8a2261f");
+    addModule(THEME_JS);
     addModule("/js/site-avatar-menu.js?v=4c911388e7");
     addModule("/js/nav-counts.js?v=7613897d1d");
   }

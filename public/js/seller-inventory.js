@@ -480,16 +480,27 @@ function mapOpenHref(query) {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`;
 }
 
-function mapEmbedSrc(query) {
-  const q = String(query || "").trim();
-  if (!q) return "";
-  return `https://maps.google.com/maps?q=${encodeURIComponent(q)}&hl=hu&z=16&output=embed`;
-}
+let leafletPromise = null;
 
-function osmPinEmbed(lat, lon) {
-  const d = 0.012;
-  const bbox = `${lon - d},${lat - d},${lon + d},${lat + d}`;
-  return `https://www.openstreetmap.org/export/embed.html?bbox=${encodeURIComponent(bbox)}&layer=mapnik&marker=${encodeURIComponent(`${lat},${lon}`)}`;
+function loadLeaflet() {
+  if (window.L) return Promise.resolve(window.L);
+  if (leafletPromise) return leafletPromise;
+  leafletPromise = new Promise((resolve, reject) => {
+    if (!document.querySelector("link[data-leaflet-css]")) {
+      const link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.href = "/vendor/leaflet/leaflet.css";
+      link.dataset.leafletCss = "1";
+      document.head.appendChild(link);
+    }
+    const script = document.createElement("script");
+    script.src = "/vendor/leaflet/leaflet.js";
+    script.async = true;
+    script.onload = () => (window.L ? resolve(window.L) : reject(new Error("Leaflet nem töltődött.")));
+    script.onerror = () => reject(new Error("Leaflet betöltési hiba."));
+    document.head.appendChild(script);
+  });
+  return leafletPromise;
 }
 
 async function fetchSellerCoords(contact, query) {
@@ -508,17 +519,6 @@ async function fetchSellerCoords(contact, query) {
   return { lat, lon };
 }
 
-function mapFrameHtml(src) {
-  return `<iframe
-        class="seller-inv__map"
-        title="Térkép"
-        loading="lazy"
-        referrerpolicy="strict-origin-when-cross-origin"
-        allowfullscreen
-        src="${esc(src)}"
-      ></iframe>`;
-}
-
 async function fillSellerMap(panel, contact) {
   if (!panel) return;
   const q = buildMapQuery(contact);
@@ -535,18 +535,49 @@ async function fillSellerMap(panel, contact) {
   panel.innerHTML = `
     <div class="seller-inv__map-wrap">
       ${openBtn}
-      <div class="seller-inv__map" role="img" aria-label="Térkép betöltése"><p class="seller-inv__hint">Térkép betöltése…</p></div>
+      <div class="seller-inv__map" data-si-map-canvas role="img" aria-label="${esc(q)}"></div>
     </div>
   `;
-  const wrap = panel.querySelector(".seller-inv__map-wrap");
+  const canvas = panel.querySelector("[data-si-map-canvas]");
+  if (!canvas) return;
+
   let geo = null;
   try {
     geo = await fetchSellerCoords(contact, q);
   } catch {
     geo = null;
   }
-  const src = geo ? osmPinEmbed(geo.lat, geo.lon) : mapEmbedSrc(q);
-  if (wrap) wrap.innerHTML = `${openBtn}${mapFrameHtml(src)}`;
+  if (!geo) {
+    canvas.innerHTML = `<p class="seller-inv__hint">${esc(q)}</p>`;
+    return;
+  }
+
+  try {
+    const L = await loadLeaflet();
+    const map = L.map(canvas, {
+      scrollWheelZoom: false,
+      attributionControl: true,
+    }).setView([geo.lat, geo.lon], 16);
+    L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
+      maxZoom: 20,
+      subdomains: "abcd",
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+    }).addTo(map);
+    L.marker([geo.lat, geo.lon]).addTo(map);
+    const refresh = () => {
+      try {
+        map.invalidateSize({ animate: false });
+      } catch {
+        /* ignore */
+      }
+    };
+    requestAnimationFrame(refresh);
+    setTimeout(refresh, 80);
+    setTimeout(refresh, 400);
+    window.addEventListener("resize", refresh, { passive: true });
+  } catch {
+    canvas.innerHTML = `<p class="seller-inv__hint">${esc(q)}</p>`;
+  }
 }
 
 /**

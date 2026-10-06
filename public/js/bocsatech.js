@@ -1,8 +1,8 @@
-import { mountLayoutBoard } from "./bocsatech-layout.js?v=9412292d69";
+import { mountLayoutBoard } from "./bocsatech-layout.js?v=0f41dacebf";
 import {
   DESK_FUEL_PREVIEW_PROFILES,
   deskFuelPreviewFromLayoutIntent,
-} from "./ad-form-layout-fuel-preview.js?v=a8c49f2954";
+} from "./ad-form-layout-fuel-preview.js?v=196c286245";
 import { mountIngatlanWheelBoard } from "./bocsatech-ingatlan-wheels.js?v=4c5f8ba7cd";
 import {
   isIngatlanWheelAdminCategory,

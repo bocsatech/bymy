@@ -12,8 +12,8 @@ import {
   restorePinnedBlockAnchors,
   isDeskSyntheticFieldKey,
   minAnchorRow,
-} from "./ad-form-desk-pinned-blocks.js?v=b59c112e44";
-import { layoutFieldVisibleForFuelProfile } from "./ad-form-layout-fuel-preview.js?v=a8c49f2954";
+} from "./ad-form-desk-pinned-blocks.js?v=dc720507fb";
+import { layoutFieldVisibleForFuelProfile } from "./ad-form-layout-fuel-preview.js?v=196c286245";
 
 const COLS = 12;
 const ROW_PX = 64;

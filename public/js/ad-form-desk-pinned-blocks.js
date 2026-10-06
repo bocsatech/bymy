@@ -87,12 +87,27 @@ function step1FieldKey(el) {
   return el.querySelector?.("[name]")?.name || "";
 }
 
+function isErtekbecslesPage() {
+  return document.body?.getAttribute("data-site-page") === "ertekbecsles";
+}
+
+function hideErtekEgyebTipus(canvas) {
+  if (!isErtekbecslesPage()) return;
+  const input = canvas?.querySelector?.("#egyeb_tipus") || document.getElementById("egyeb_tipus");
+  const row = input?.closest(".ad-layout-item, .labeled-field, .ad-form-alap-brand-row");
+  const el = row || input;
+  if (!el) return;
+  el.hidden = true;
+  el.classList.add("ad-layout-hidden");
+}
+
 function isStep1BrandRow(el) {
   if (!el) return false;
   /* Gyártmány-pill + Egyéb típus egy fehér boxban (demó). */
   if (el.matches?.(".ad-form-bm-field--brand-model")) return true;
   if (el.querySelector?.(".ad-form-bm-field--brand-model, [data-ad-bm-for='gyartmany']")) return true;
   const key = step1FieldKey(el);
+  if (key === "egyeb_tipus" && isErtekbecslesPage()) return false;
   return key === "gyartmany" || key === "egyeb_tipus";
 }
 
@@ -126,6 +141,7 @@ function unwrapAlapScoutCard(canvas) {
 export function wrapAlapScoutCard(canvas) {
   if (!canvas || !isVehicleStep1Canvas(canvas)) return;
   unwrapAlapScoutCard(canvas);
+  hideErtekEgyebTipus(canvas);
 
   const items = [...canvas.children].filter((el) => {
     if (!el || el.hidden || el.classList?.contains("ad-layout-hidden")) return false;

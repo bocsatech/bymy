@@ -1352,6 +1352,12 @@ body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsl
   margin: 0.15rem 0 0 !important;
 }
 
+/* Értékbecslés: nincs Egyéb típus */
+body.site-app[data-site-page="ertekbecsles"] #ad-form :is(.ad-layout-item, .labeled-field, .ad-form-alap-brand-row):has(#egyeb_tipus),
+body.site-app[data-site-page="ertekbecsles"] #ad-form #egyeb_tipus {
+  display: none !important;
+}
+
 body.site-app:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form .ad-form-alap-brand-block :is(.ad-layout-item, .labeled-field, .ad-form-alap-brand-row):has(#egyeb_tipus) > label {
   font: 700 0.94rem/1.2 system-ui, sans-serif !important;
   color: #111 !important;

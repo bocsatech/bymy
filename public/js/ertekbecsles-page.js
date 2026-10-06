@@ -92,7 +92,7 @@ try {
     storageKey: "ertekbecsles-draft",
     editing: true,
   });
-  await import("./form-layout-apply.js?v=ef990d1545");
+  await import("./form-layout-apply.js?v=47a4dcd6ca");
   try {
     await mountAdFormBmPickers(form);
   } catch (pickerErr) {

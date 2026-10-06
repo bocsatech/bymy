@@ -1,7 +1,7 @@
 import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=aefe195fc3";
 import { refreshAdFormBmPickers, mountTireSizeSwitchPickers } from "./ad-form-bm-pickers.js?v=0773d1b64e";
 import { initTireSizes } from "./tire-sizes-ui.js?v=d01f914c82";
-import { applyAdFormDesk } from "./ad-form-desk.js?v=1b54f59eaa";
+import { applyAdFormDesk } from "./ad-form-desk.js?v=1c11003682";
 import { markImmoPostViewReady } from "./category-picker.js?v=5d45536b6e";
 import {
   DESK_MUSZAKI_CORE_FIELD_KEYS,
@@ -13,7 +13,7 @@ import {
   applyStep1SearchDomOrder,
   isVehicleStep1Canvas,
   stackVehicleCanvasSingleColumn,
-} from "./ad-form-desk-pinned-blocks.js?v=b59c112e44";
+} from "./ad-form-desk-pinned-blocks.js?v=dc720507fb";
 
 function cssEscape(value) {
   if (window.CSS?.escape) return window.CSS.escape(value);

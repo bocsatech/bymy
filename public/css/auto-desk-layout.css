@@ -1720,7 +1720,50 @@ html[data-theme="dark"] body.site-app > .auto-price-suggest .auto-price-suggest_
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-results-bar__tools {
+    display: flex !important;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.45rem;
+    flex: 0 0 auto;
+    min-width: 0;
+  }
+
+  /* Mobilon csak rendezés kell — rács/lista váltó felesleges. */
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-view {
     display: none !important;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-sort {
+    display: flex !important;
+    align-items: center;
+    margin: 0;
+    min-width: 0;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-sort select {
+    appearance: none;
+    -webkit-appearance: none;
+    box-sizing: border-box;
+    max-width: min(54vw, 11.75rem);
+    min-height: 2.15rem;
+    margin: 0;
+    padding: 0.45rem 1.7rem 0.45rem 0.7rem !important;
+    border: 1px solid #d0d5dd !important;
+    border-radius: 8px !important;
+    background-color: #fff !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23475567' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 0.55rem center !important;
+    background-size: 10px 7px !important;
+    color: #344054 !important;
+    font: inherit;
+    font-size: 0.8rem !important;
+    font-weight: 700 !important;
+    line-height: 1.2;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-mobile-save-search {

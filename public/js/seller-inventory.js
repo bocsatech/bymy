@@ -500,7 +500,10 @@ function paintStaticMap(canvas, lat, lon) {
   const cells = [];
   for (let dy = -1; dy <= 1; dy += 1) {
     for (let dx = -1; dx <= 1; dx += 1) {
-      const src = `https://a.basemaps.cartocdn.com/rastertiles/voyager/${z}/${x + dx}/${y + dy}@2x.png`;
+      const tx = x + dx;
+      const ty = y + dy;
+      const host = ["a", "b", "c"][Math.abs(tx) % 3];
+      const src = `https://${host}.tile.openstreetmap.fr/osmfr/${z}/${tx}/${ty}.png`;
       cells.push(`<img alt="" draggable="false" src="${esc(src)}" />`);
     }
   }

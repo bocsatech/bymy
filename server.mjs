@@ -191,7 +191,8 @@ import { rateLimit, clientIp } from "./lib/rate-limit.mjs";
 import { applySecurityHeaders } from "./lib/security-headers.mjs";
 import { turnstilePublicConfig, turnstileHealthStatus, verifyTurnstileToken } from "./lib/turnstile.mjs";
 import { recordPageVisit, visitorCookieHeader } from "./lib/site-visitors.mjs";
-import { isIpBlocked } from "./lib/site-ip-blocks.mjs";
+import { autoBlockIp, isIpBlocked } from "./lib/site-ip-blocks.mjs";
+import { shouldAutoBlock } from "./lib/ip-abuse.mjs";
 import { enforceMembersGate, isMembersOnlySite } from "./lib/site-gate.mjs";
 import { readJsonBody } from "./lib/read-json-body.mjs";
 import {
@@ -335,6 +336,22 @@ async function rejectBlockedIp(req, res, pathname) {
     res.end("Hozzáférés megtagadva.");
   }
   return true;
+}
+
+async function maybeAutoBlockAbusiveIp(req, pathname) {
+  if (adminBypassBlockedIp(pathname)) return;
+  const ip = clientIp(req);
+  const verdict = shouldAutoBlock({
+    ip,
+    userAgent: String(req.headers?.["user-agent"] || ""),
+  });
+  if (!verdict) return;
+  try {
+    await autoBlockIp(ip, { ttlMs: verdict.ttlMs, reason: verdict.reason });
+    console.warn(`[ip-abuse] auto-block ${ip} reason=${verdict.reason}`);
+  } catch (err) {
+    console.warn("[ip-abuse] persist failed:", err?.message || err);
+  }
 }
 
 function publicBaseUrl(req) {
@@ -3192,6 +3209,8 @@ export async function handleHttpRequest(req, res) {
     return;
   }
 
+  if (await rejectBlockedIp(req, res, pathname)) return;
+  await maybeAutoBlockAbusiveIp(req, pathname);
   if (await rejectBlockedIp(req, res, pathname)) return;
 
   const gate = await enforceMembersGate(req, res, pathname, {

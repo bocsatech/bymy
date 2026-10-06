@@ -1583,11 +1583,20 @@ body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-s
     padding: 12px 12px 2rem;
   }
 
-  /* Mobil: üres desk-guide keretek ne legyenek fehér szaggatott dobozok a kék háttéren */
+  /* Mobil: tippek + guide keret rejtve. Képek/leírás a Képek accordionban van (nem center-col). */
   body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout #ad-desk-center-col,
   body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout #ad-desk-tips-col,
-  body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-desk-guide-frame:not(.has-image) {
+  body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-desk-guide-frame {
     display: none !important;
+  }
+
+  /* Fallback: ha a photo-stage mégis a center-colban marad, mutasd */
+  body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) #ad-form.ad-form-desk-layout #ad-desk-center-col:has(#ad-photo-desk-stage .step-panel[data-step="4"]) {
+    display: flex !important;
+    flex-direction: column;
+    width: 100%;
+    min-width: 0;
+    gap: var(--ad-cell-gap);
   }
 
   body.site-app.ad-form-desk-active:is([data-site-page="hirdetesfeladas"], [data-site-page="ertekbecsles"]) .ad-desk-guide-frame {

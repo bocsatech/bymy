@@ -29,7 +29,13 @@ const DESK_VEHICLE_SUBTYPES = new Set([
 
 const DESK_AD_SUBTYPES = new Set([...DESK_VEHICLE_SUBTYPES, "ingatlan"]);
 
+function isDeskWide() {
+  return typeof window !== "undefined" && window.matchMedia(DESK_MQ).matches;
+}
+
 function shellAccordions() {
+  /* Mobil: Képek accordion a shellben (Extrák és Hirdetés között). Desk: külön photo-stage. */
+  if (!isDeskWide()) return ACCORDIONS;
   return ACCORDIONS.filter((item) => item.shell !== false);
 }
 
@@ -374,8 +380,8 @@ function openAccordion(form, id) {
 }
 
 function accordionForStep(step) {
-  if (step === PHOTO_STEP) return "";
-  return ACCORDIONS.find((item) => item.step === step && item.shell !== false)?.id ?? "alap";
+  if (step === PHOTO_STEP) return isDeskWide() ? "" : "kepek";
+  return ACCORDIONS.find((item) => item.step === step && (isDeskWide() ? item.shell !== false : true))?.id ?? "alap";
 }
 
 function restackCanvasItems(form) {
@@ -512,6 +518,8 @@ function migrateLegacyDeskColumns(form) {
 }
 
 function removeLegacyKepekAccordion(form) {
+  /* Mobilon a Képek accordion kell — ne töröld. */
+  if (!isDeskWide()) return;
   const kepekAcc = form.querySelector('#ad-form-desk-shell [data-desk-acc="kepek"]');
   if (!kepekAcc) return;
   const panel = kepekAcc.querySelector(`.step-panel[data-step="${PHOTO_STEP}"]`);
@@ -520,6 +528,37 @@ function removeLegacyKepekAccordion(form) {
     form.insertBefore(panel, footer || null);
   }
   kepekAcc.remove();
+}
+
+function ensureMobileKepekAccordion(form) {
+  const shell = ensureDeskShell(form);
+  let kepekAcc = shell.querySelector('[data-desk-acc="kepek"]');
+  if (kepekAcc) {
+    const hirdetes = shell.querySelector('[data-desk-acc="hirdetes"]');
+    if (hirdetes && kepekAcc.nextElementSibling !== hirdetes) {
+      shell.insertBefore(kepekAcc, hirdetes);
+    }
+    return kepekAcc;
+  }
+  kepekAcc = document.createElement("div");
+  kepekAcc.className = "auto-desk-acc";
+  kepekAcc.dataset.deskAcc = "kepek";
+  kepekAcc.setAttribute(
+    "style",
+    "width:100%;max-width:100%;min-width:0;box-sizing:border-box;align-self:stretch;margin-left:0;margin-right:0;"
+  );
+  kepekAcc.innerHTML = `
+      <button type="button" class="auto-desk-acc__head" data-desk-acc-toggle aria-expanded="false" style="width:100%;max-width:100%;box-sizing:border-box;">
+        <span>Képek</span>
+        <span class="auto-desk-acc__sum" data-desk-acc-sum></span>
+        <span class="auto-desk-acc__chev" aria-hidden="true">▼</span>
+      </button>
+      <div class="auto-desk-acc__body" style="width:100%;max-width:100%;box-sizing:border-box;"></div>
+    `;
+  const hirdetes = shell.querySelector('[data-desk-acc="hirdetes"]');
+  if (hirdetes) shell.insertBefore(kepekAcc, hirdetes);
+  else shell.appendChild(kepekAcc);
+  return kepekAcc;
 }
 
 function ensureTipsColumn(form) {
@@ -617,6 +656,17 @@ function syncLeirasInPhotoPanel(form) {
 function syncPhotoStage(form) {
   const panel = form.querySelector(`.step-panel[data-step="${PHOTO_STEP}"]`);
   if (!panel || !isAdFormDesk(form)) return;
+
+  if (!isDeskWide()) {
+    const kepekAcc = ensureMobileKepekAccordion(form);
+    const body = kepekAcc.querySelector(".auto-desk-acc__body");
+    if (body && panel.parentElement !== body) body.appendChild(panel);
+    form.querySelector("#ad-photo-desk-stage")?.remove();
+    syncPhotoGridInPanel(form);
+    syncLeirasInPhotoPanel(form);
+    window.dispatchEvent(new Event("ad-form-photo-stage-sync"));
+    return;
+  }
 
   ensureTipsColumn(form);
   const stage = ensurePhotoStage(form);
@@ -788,7 +838,11 @@ function bindDeskEvents() {
     if (step === PHOTO_STEP) {
       showDeskGuideSlot("kepek", { photoFocus: true });
       afterDeskGuideAlign(form, accId, { photoFocus: true });
-      document.getElementById("ad-photo-desk-stage")?.scrollIntoView?.({ block: "start", behavior: "smooth" });
+      if (isDeskWide()) {
+        document.getElementById("ad-photo-desk-stage")?.scrollIntoView?.({ block: "start", behavior: "smooth" });
+      } else if (accId) {
+        scrollDeskMainAccordionToStart(form, accId);
+      }
       return;
     }
     if (accId) {

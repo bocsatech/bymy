@@ -1159,8 +1159,65 @@ function convertMuszakiToDateTriple(wrap) {
   });
 }
 
+function wheelForFilterKeys(form, keys) {
+  for (const key of keys) {
+    const wheel =
+      form.querySelector(`[data-wheel="${key}"]`) ||
+      form.querySelector(`[data-filter-key="${key}"][data-wheel]`);
+    if (wheel) return wheel;
+  }
+  return null;
+}
+
+/** Mentett keresés / kezdőlap-csempe → látható dobkerék (Üzemanyag stb.), ne csak hidden input. */
+export function applyDrumSavedSearchFilters(form, filters) {
+  if (!form || !filters || typeof filters !== "object") return;
+  const asList = (...cands) => {
+    for (const cand of cands) {
+      if (Array.isArray(cand) && cand.length) return cand.map((v) => String(v).trim()).filter(Boolean);
+      if (cand != null && String(cand).trim()) return [String(cand).trim()];
+    }
+    return [];
+  };
+  const assignments = [
+    {
+      list: asList(filters.uzemanyagok, filters.uzemanyagQuick, filters.uzemanyag),
+      keys: ["uzemanyag", "uzemanyagQuick"],
+    },
+    {
+      list: asList(filters.allapotok, filters.allapot),
+      keys: ["allapot"],
+    },
+  ];
+  for (const { list, keys } of assignments) {
+    if (!list.length) continue;
+    const wheel = wheelForFilterKeys(form, keys);
+    if (!wheel) continue;
+    setWheelValue(wheel, list);
+    syncDrumWheelDisplay(wheel);
+    const hidden =
+      wheel.parentElement?.querySelector("input[type='hidden'][data-filter-key]") ||
+      wheel.closest(".immo-wheel-wrap")?.querySelector("input[type='hidden']");
+    hidden?.dispatchEvent(new Event("input", { bubbles: true }));
+    hidden?.dispatchEvent(new Event("change", { bubbles: true }));
+    wheel.dispatchEvent(
+      new CustomEvent("immo-wheel-change", { bubbles: true, detail: { value: list.join(",") } })
+    );
+  }
+}
+
+function bindDrumSavedSearch(form) {
+  if (!form || form.dataset.drumSavedSearchBound === "1") return;
+  form.dataset.drumSavedSearchBound = "1";
+  form.addEventListener("bymy-saved-search-applied", (event) => {
+    applyDrumSavedSearchFilters(form, event?.detail);
+  });
+}
+
 export async function mountAutoSearchDrums(form = document.getElementById("home-qs-form")) {
-  if (!form || form.dataset.drumsMounted === "1") return form.dataset.drumsMounted === "1";
+  if (!form) return false;
+  bindDrumSavedSearch(form);
+  if (form.dataset.drumsMounted === "1") return true;
   const page = document.body?.getAttribute("data-site-page") || "";
   const force = form.hasAttribute("data-force-drums") || form.hasAttribute("data-ertek-drums");
   if (!force && page !== "auto" && page !== "teherauto") return false;

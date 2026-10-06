@@ -126,13 +126,32 @@ export async function fetchListing(id, { view, bypassCache = false } = {}) {
 }
 
 export async function fetchRelatedListings(listingId, { limit = 24, includeSelf = false } = {}) {
-  const params = new URLSearchParams({ limit: String(limit) });
+  const page = await fetchRelatedListingsPage(listingId, { limit, includeSelf, tile: false });
+  return page.listings;
+}
+
+export async function fetchRelatedListingsPage(
+  listingId,
+  { limit = 24, offset = 0, includeSelf = false, tile = true } = {}
+) {
+  const params = new URLSearchParams({
+    limit: String(limit),
+    offset: String(Math.max(0, Number(offset) || 0)),
+  });
   if (includeSelf) params.set("includeSelf", "1");
+  if (tile) params.set("tile", "1");
   const response = await fetch(`/api/listings/${listingId}/related?${params}`, {
     credentials: "same-origin",
   });
   const data = await parseJson(response);
-  return data.listings ?? [];
+  const listings = data.listings ?? [];
+  return {
+    listings,
+    total: data.total != null ? Number(data.total) : listings.length,
+    offset: data.offset != null ? Number(data.offset) : Number(offset) || 0,
+    limit: data.limit != null ? Number(data.limit) : Number(limit) || listings.length,
+    hasMore: Boolean(data.hasMore ?? listings.length >= limit),
+  };
 }
 
 export async function revealListingContact(listingId, turnstileToken = "") {

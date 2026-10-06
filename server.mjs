@@ -23,6 +23,7 @@ import {
   recordListingView,
   listMyListings,
   listListingsByOwner,
+  countListingsByOwner,
   getListingOwnerMeta,
   updateListingStatus,
   patchListingFormFields,
@@ -1503,6 +1504,8 @@ async function handleListingsApi(req, res, pathname) {
     const includeSelf =
       url.searchParams.get("includeSelf") === "1" || url.searchParams.get("all") === "1";
     const limit = Math.min(Math.max(Number(url.searchParams.get("limit") ?? 24), 1), 500);
+    const offset = Math.max(0, Number(url.searchParams.get("offset") ?? 0) || 0);
+    const tile = url.searchParams.get("tile") === "1";
     const meta = await getListingOwnerMeta(listingId);
     const ownerId = Number(meta?.user_id || 0);
     if (!meta || !Number.isFinite(ownerId) || ownerId <= 0) {
@@ -1510,13 +1513,34 @@ async function handleListingsApi(req, res, pathname) {
       return;
     }
     // Seed lehet nem feladott — a készletben csak feladottakat adunk vissza.
-    const listings = await listListingsByOwner({
-      userId: ownerId,
-      limit,
-      excludeId: includeSelf ? null : listingId,
-      status: "feladott",
-    });
-    sendJson(res, 200, { listings: sanitizeListingList(listings) }, {
+    const excludeId = includeSelf ? null : listingId;
+    const [listings, total] = await Promise.all([
+      listListingsByOwner({
+        userId: ownerId,
+        limit: limit + 1,
+        offset,
+        excludeId,
+        status: "feladott",
+      }),
+      countListingsByOwner({
+        userId: ownerId,
+        excludeId,
+        status: "feladott",
+      }),
+    ]);
+    const hasMore = listings.length > limit;
+    const page = hasMore ? listings.slice(0, limit) : listings;
+    sendJson(
+      res,
+      200,
+      {
+        listings: sanitizeListingList(page, { tile }),
+        offset,
+        limit,
+        hasMore,
+        total,
+      },
+      {
       "Cache-Control": "public, max-age=20, s-maxage=45, stale-while-revalidate=120",
       "CDN-Cache-Control": "public, max-age=45, stale-while-revalidate=120",
       "Cloudflare-CDN-Cache-Control": "public, max-age=45, stale-while-revalidate=120",

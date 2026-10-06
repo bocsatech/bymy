@@ -1,4 +1,4 @@
-import { fetchListings, fetchListingsPage, fetchRelatedListings } from "./db-client.js?v=d4237f0b1b";
+import { fetchListings, fetchListingsPage, fetchRelatedListingsPage } from "./db-client.js?v=3baa1cfce7";
 import { createHomeGridCard, initHomeGridCardPhotos } from "./home-grid-card.js?v=f3c4783331";
 import { promoKiemeltActive, promoTopAjanlatActive } from "./listing-promo.js?v=a2c84c124b";
 import {
@@ -607,7 +607,8 @@ function renderListings(items, { bypassFilters = false, force = false } = {}) {
       ? sortDeskListings(filterItems(items))
       : applyOwnerBoostSort(filterItems(items));
   const filtered =
-    !bypassFilters && (PAGE === "auto" || PAGE === "teherauto") && searchResultsCommitted
+    isSellerMode() ||
+    (!bypassFilters && (PAGE === "auto" || PAGE === "teherauto") && searchResultsCommitted)
       ? fullFiltered.slice(0, listRenderCap)
       : fullFiltered;
 
@@ -715,16 +716,30 @@ async function loadSellerListings(fromId) {
   statsFilter = null;
   quickRadiusFilter = null;
   const shellPromise = mountSellerInventory({ fromId, count: 0 });
-  const itemsPromise = fetchRelatedListings(fromId, { limit: 500, includeSelf: true });
-  const [, items] = await Promise.all([shellPromise, itemsPromise]);
-  const active = (items || []).filter((item) => (item.status || "feladott") === "feladott");
+  listingsLoadingMore = false;
+  listingsOffset = 0;
+  listingsHasMore = false;
+  listingsTotal = null;
+  listRenderCap = LISTINGS_INITIAL;
+  const itemsPromise = fetchRelatedListingsPage(fromId, {
+    limit: LISTINGS_INITIAL,
+    offset: 0,
+    includeSelf: true,
+    tile: true,
+  });
+  const [, page] = await Promise.all([shellPromise, itemsPromise]);
+  const active = (page.listings || []).filter((item) => (item.status || "feladott") === "feladott");
   allItems = sortForHome(active);
+  listingsOffset = (Number(page.offset) || 0) + (page.listings?.length || 0);
+  listingsTotal = page.total != null ? Number(page.total) : allItems.length;
+  listingsHasMore = Boolean(page.hasMore);
   featuredListingIds = featuredListingIdSet(allItems);
   populateFilterOptions(allItems);
   renderListings(allItems);
-  updateSellerInventoryCount(allItems.length);
+  updateSellerInventoryCount(listingsTotal ?? allItems.length);
   updateFilterResultCount();
   statsUi?.refreshActiveCount?.();
+  bindListingsInfiniteScroll();
   scrollToListings();
 }
 
@@ -833,8 +848,38 @@ function mergeListings(existing, incoming) {
 }
 
 async function loadMoreListings({ silent = false } = {}) {
-  if (isSellerMode()) return;
   if (!listingsHasMore || listingsLoadingMore) return;
+  if (isSellerMode()) {
+    listingsLoadingMore = true;
+    try {
+      const fromId = sellerFromId();
+      const page = await fetchRelatedListingsPage(fromId, {
+        limit: LISTINGS_PAGE_MORE,
+        offset: listingsOffset,
+        includeSelf: true,
+        tile: true,
+      });
+      const active = (page.listings || []).filter((item) => (item.status || "feladott") === "feladott");
+      const got = Math.max(page.listings?.length || 0, 1);
+      listingsOffset = (Number(page.offset) || listingsOffset) + got;
+      if (page.total != null) listingsTotal = Number(page.total);
+      listingsHasMore = Boolean(page.hasMore);
+      if (active.length) allItems = mergeListings(allItems, filterBySitePage(active));
+      featuredListingIds = featuredListingIdSet(allItems);
+      if (!silent) {
+        listRenderCap = Math.max(listRenderCap, allItems.length);
+        renderListings(allItems, { force: true });
+        updateSellerInventoryCount(listingsTotal ?? allItems.length);
+        updateFilterResultCount();
+        statsUi?.refreshActiveCount?.();
+      }
+    } catch (error) {
+      console.warn("Készlet folytatás:", error);
+    } finally {
+      listingsLoadingMore = false;
+    }
+    return;
+  }
   if (PAGE !== "auto" && PAGE !== "teherauto" && PAGE !== "ingatlan") return;
   if (!silent && isFeaturedBrowseMode()) return;
   listingsLoadingMore = true;
@@ -1028,7 +1073,7 @@ function bindListingsInfiniteScroll() {
     if (listingsLoadingMore) return;
     if (isFeaturedBrowseMode()) return;
     const filteredN = filterItems(allItems).length;
-    if ((PAGE === "auto" || PAGE === "teherauto") && listRenderCap < filteredN) {
+    if ((isSellerMode() || PAGE === "auto" || PAGE === "teherauto") && listRenderCap < filteredN) {
       const panel = document.querySelector(".home-listings-panel");
       const nearPanel = panel && panel.scrollHeight > panel.clientHeight + 40
         ? panel.scrollHeight - panel.scrollTop - panel.clientHeight < 560

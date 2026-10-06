@@ -31,7 +31,7 @@
   }
 
   function injectTop() {
-    if (isHub || isPostAd) return;
+    if (isHub) return;
     if (document.querySelector(".mw-app-top")) return;
 
     var pages = [
@@ -120,17 +120,16 @@
     return "mw-app-tab" + (isActivePage(id) ? " is-active" : "");
   }
 
+  function dedupeTabbars() {
+    var bars = document.querySelectorAll(".mw-app-tabbar");
+    for (var i = 1; i < bars.length; i++) bars[i].remove();
+    if (bars[0]) markActiveTabs(bars[0]);
+    return bars[0] || null;
+  }
+
   function injectTabbar() {
-    if (isPostAd) {
-      document.querySelectorAll(".mw-app-tabbar").forEach(function (el) {
-        el.remove();
-      });
-      return;
-    }
-    if (document.querySelector(".mw-app-tabbar")) {
-      markActiveTabs(document.querySelector(".mw-app-tabbar"));
-      return;
-    }
+    var existing = dedupeTabbars();
+    if (existing) return;
 
     var html =
       '<nav class="mw-app-tabbar" aria-label="Mobil főmenü">' +
@@ -478,11 +477,17 @@
   scrollActivePagesLink();
   injectDeskHeader();
   injectTabbar();
-  if (!isPostAd) bindScrollHide();
+  bindScrollHide();
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", ensureDeskHeaderCss);
+    document.addEventListener("DOMContentLoaded", function () {
+      ensureDeskHeaderCss();
+      injectTop();
+      injectTabbar();
+      dedupeTabbars();
+    });
   } else {
     ensureDeskHeaderCss();
+    dedupeTabbars();
   }
 
   import("/js/hub-promo.js?v=cd36c971ed")

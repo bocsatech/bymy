@@ -87,7 +87,22 @@ function renderCenter(data, { editing = false } = {}) {
   }
 
   titleEl.textContent = data.title;
-  bodyEl.innerHTML = data.html;
+  bodyEl.innerHTML = sanitizeAdminHtml(data.html);
+}
+
+function sanitizeAdminHtml(html) {
+  const parsed = new DOMParser().parseFromString(String(html ?? ""), "text/html");
+  parsed.querySelectorAll("script, object, embed, link, meta, iframe:not(.site-video-iframe)").forEach((el) => el.remove());
+  parsed.querySelectorAll("*").forEach((el) => {
+    [...el.attributes].forEach((attr) => {
+      const name = attr.name.toLowerCase();
+      const value = String(attr.value || "");
+      if (name.startsWith("on") || (name === "href" && /^\s*javascript:/i.test(value))) {
+        el.removeAttribute(attr.name);
+      }
+    });
+  });
+  return parsed.body.innerHTML;
 }
 
 function readCenter() {

@@ -8,7 +8,7 @@ import {
   initHomeSearchSidebar,
   initHomeFilterCatalog,
 } from "./home-search-filter.js?v=77d30b5c36";
-import { initHomeQuickSearch } from "./home-quicksearch.js?v=a4dfd87728";
+import { initHomeQuickSearch } from "./home-quicksearch.js?v=545346ccbe";
 import { decodeSavedSearchParam, encodeSavedSearchParam } from "./saved-search.js?v=c636db31bd";
 import { matchDetailedSearch, hasActiveDetailedSearch } from "./auto-detailed-search.js?v=24928b4442";
 import { updateAutoDeskResultCount, updateAutoDeskAccSummaries } from "./auto-desk-search.js?v=f99edb6978";
@@ -670,6 +670,14 @@ function renderListings(items, { bypassFilters = false, force = false } = {}) {
 function renderFeaturedBrowse() {
   browseFeaturedItems = sortDeskListings(pickFeaturedListings(allItems));
   featuredListingIds = featuredListingIdSet(allItems);
+  /* Nincs kiemelt: ne hagyjunk üres rácsot 530-as számmal — mutassuk a listát. */
+  if (!browseFeaturedItems.length && allItems.length) {
+    searchResultsCommitted = true;
+    renderListings(allItems);
+    updateFilterResultCount();
+    updateSearchMapButtonLabels(true);
+    return;
+  }
   renderListings(browseFeaturedItems, { bypassFilters: true });
   updateFilterResultCount();
   updateSearchMapButtonLabels(searchResultsCommitted || hasActiveClientFilters());
@@ -906,11 +914,11 @@ function hasActiveClientFilters() {
 
 function updateDeskResultCount(filtered) {
   if (PAGE !== "auto" && PAGE !== "teherauto") return;
-  if (!hasActiveClientFilters() && listingsTotal != null && isFeaturedBrowseMode()) {
-    updateAutoDeskResultCount(listingsTotal);
+  if (isFeaturedBrowseMode() && browseFeaturedItems.length > 0) {
+    updateAutoDeskResultCount(browseFeaturedItems.length);
     return;
   }
-  if (!hasActiveClientFilters() && listingsTotal != null && !searchResultsCommitted) {
+  if (!hasActiveClientFilters() && listingsTotal != null && searchResultsCommitted) {
     updateAutoDeskResultCount(listingsTotal);
     return;
   }
@@ -1557,7 +1565,7 @@ if (PAGE !== "ingatlan") {
   }).catch((error) => console.error("Járműkatalógus (szűrő):", error));
 }
 
-import("./site-side-content.js?v=7853b0f379")
+import("./site-side-content.js?v=418fecb6a2")
   .then((mod) => mod.initSiteSideContent())
   .catch((error) => console.error("Oldalsáv betöltés:", error));
 

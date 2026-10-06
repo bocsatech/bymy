@@ -797,7 +797,7 @@
   }
 
   body.site-app {
-    padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(6.25rem + env(safe-area-inset-bottom, 0px));
   }
 
   body.site-app .site-content-bar {

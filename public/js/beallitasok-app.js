@@ -32,7 +32,7 @@ import { savedSearchHref, summarizeSavedSearchFilters } from "./saved-search.js?
 import { initMessagesUi } from "./messages-ui.js?v=ee1b57d8e5";
 import { listConversations } from "./messages-api.js?v=5cf6493dc9";
 import { initMyAdsPanel } from "./my-ads.js?v=c3cf174580";
-import { initErtekbecsloPanel } from "./ertekbecslo-app.js?v=2a8ab7d2a2";
+import { initErtekbecsloPanel } from "./ertekbecslo-app.js?v=83a4452583";
 import {
   consumeSettingsReturn,
   hasSettingsReturn,
@@ -557,7 +557,7 @@ function setSection(section) {
       nyomtatasok: "Nyomtatások",
       ertekelesek: "Értékelések",
       parkolo: "Kedvencek",
-      keresesek: "Mentett kereséseim",
+      keresesek: "Mentett keresések",
       hirdetes: "Saját hirdetések",
       megjelenes: "Megjelenés",
       fiok: "Személyes adatok",

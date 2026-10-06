@@ -24,7 +24,7 @@ function injectStylesheet() {
   if (document.querySelector('link[data-seller-inv-css]')) return;
   const link = document.createElement("link");
   link.rel = "stylesheet";
-  link.href = "/css/seller-inventory.css?v=sellerInv32";
+  link.href = "/css/seller-inventory.css?v=sellerInv33";
   link.dataset.sellerInvCss = "1";
   document.head.appendChild(link);
   if (!document.querySelector('link[data-ertek-qr-css]')) {
@@ -480,27 +480,45 @@ function mapOpenHref(query) {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`;
 }
 
-let leafletPromise = null;
+function postalFromContact(contact, query) {
+  const blob = `${query || ""} ${(Array.isArray(contact?.addressLines) ? contact.addressLines : []).join(" ")}`;
+  return (String(blob).match(/\b(\d{4})\b/) || [])[1] || "";
+}
 
-function loadLeaflet() {
-  if (window.L) return Promise.resolve(window.L);
-  if (leafletPromise) return leafletPromise;
-  leafletPromise = new Promise((resolve, reject) => {
-    if (!document.querySelector("link[data-leaflet-css]")) {
-      const link = document.createElement("link");
-      link.rel = "stylesheet";
-      link.href = "/vendor/leaflet/leaflet.css";
-      link.dataset.leafletCss = "1";
-      document.head.appendChild(link);
+function latLonToTile(lat, lon, z) {
+  const rad = (lat * Math.PI) / 180;
+  const n = 2 ** z;
+  const x = Math.floor(((lon + 180) / 360) * n);
+  const y = Math.floor((1 - Math.log(Math.tan(rad) + 1 / Math.cos(rad)) / Math.PI) / 2 * n);
+  return { x, y, z };
+}
+
+function paintStaticMap(canvas, lat, lon) {
+  if (!canvas) return;
+  const z = 15;
+  const { x, y } = latLonToTile(lat, lon, z);
+  const cells = [];
+  for (let dy = -1; dy <= 1; dy += 1) {
+    for (let dx = -1; dx <= 1; dx += 1) {
+      const src = `https://a.basemaps.cartocdn.com/rastertiles/voyager/${z}/${x + dx}/${y + dy}@2x.png`;
+      cells.push(`<img alt="" draggable="false" src="${esc(src)}" />`);
     }
-    const script = document.createElement("script");
-    script.src = "/vendor/leaflet/leaflet.js";
-    script.async = true;
-    script.onload = () => (window.L ? resolve(window.L) : reject(new Error("Leaflet nem töltődött.")));
-    script.onerror = () => reject(new Error("Leaflet betöltési hiba."));
-    document.head.appendChild(script);
+  }
+  canvas.innerHTML = `<div class="seller-inv__map-tiles">${cells.join("")}</div><span class="seller-inv__map-pin" aria-hidden="true"></span>`;
+}
+
+async function fetchPostalCoords(postal) {
+  const code = String(postal || "").replace(/\D/g, "").slice(0, 4);
+  if (code.length !== 4) return null;
+  const res = await fetch(`/api/postal-codes/lookup?postal_code=${encodeURIComponent(code)}`, {
+    credentials: "same-origin",
   });
-  return leafletPromise;
+  if (!res.ok) return null;
+  const data = await res.json().catch(() => null);
+  const lat = data?.lat != null ? Number(data.lat) : NaN;
+  const lon = data?.lon != null ? Number(data.lon) : NaN;
+  if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
+  return { lat, lon };
 }
 
 async function fetchSellerCoords(contact, query) {
@@ -541,42 +559,27 @@ async function fillSellerMap(panel, contact) {
   const canvas = panel.querySelector("[data-si-map-canvas]");
   if (!canvas) return;
 
+  const postal = postalFromContact(contact, q);
   let geo = null;
   try {
-    geo = await fetchSellerCoords(contact, q);
+    geo = await fetchPostalCoords(postal);
   } catch {
     geo = null;
   }
-  if (!geo) {
-    canvas.innerHTML = `<p class="seller-inv__hint">${esc(q)}</p>`;
-    return;
-  }
+  if (geo) paintStaticMap(canvas, geo.lat, geo.lon);
 
   try {
-    const L = await loadLeaflet();
-    const map = L.map(canvas, {
-      scrollWheelZoom: false,
-      attributionControl: true,
-    }).setView([geo.lat, geo.lon], 16);
-    L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
-      maxZoom: 20,
-      subdomains: "abcd",
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
-    }).addTo(map);
-    L.marker([geo.lat, geo.lon]).addTo(map);
-    const refresh = () => {
-      try {
-        map.invalidateSize({ animate: false });
-      } catch {
-        /* ignore */
-      }
-    };
-    requestAnimationFrame(refresh);
-    setTimeout(refresh, 80);
-    setTimeout(refresh, 400);
-    window.addEventListener("resize", refresh, { passive: true });
+    const street = await fetchSellerCoords(contact, q);
+    if (street) {
+      geo = street;
+      paintStaticMap(canvas, street.lat, street.lon);
+    }
   } catch {
-    canvas.innerHTML = `<p class="seller-inv__hint">${esc(q)}</p>`;
+    /* keep postal pin */
+  }
+
+  if (!geo) {
+    canvas.innerHTML = `<p class="seller-inv__hint">A cím térképe most nem tölthető be.</p>`;
   }
 }
 

@@ -1061,6 +1061,61 @@ body[data-site-page="teherauto"] .auto-search-tabs {
     text-shadow: none;
   }
 
+  /* Sötét mód: a fehér keresőpanel ne maradjon világos blokk */
+  html[data-theme="dark"] .auto-search-hero__stage {
+    background: #12161c !important;
+  }
+
+  html[data-theme="dark"] .auto-search-panel {
+    background: #1a1f26 !important;
+    color: #e8eaed !important;
+    border: 1px solid #2a313c;
+    box-shadow: none;
+  }
+
+  html[data-theme="dark"] .auto-search-toggle,
+  html[data-theme="dark"] .auto-search-title {
+    color: #f3f4f6 !important;
+    -webkit-text-fill-color: #f3f4f6 !important;
+  }
+
+  html[data-theme="dark"] .auto-search-toggle__chevron {
+    border-color: #f3f4f6 !important;
+  }
+
+  html[data-theme="dark"] .auto-search-save {
+    background: #111827 !important;
+    border-color: #4b5563 !important;
+    color: #e8eaed !important;
+  }
+
+  html[data-theme="dark"] .auto-search-panel.is-open .home-qs-row--actions {
+    background: linear-gradient(to top, #1a1f26 82%, rgba(26, 31, 38, 0.95) 100%) !important;
+    box-shadow: 0 -10px 20px rgba(0, 0, 0, 0.35);
+  }
+
+  html[data-theme="dark"] .auto-search-panel .home-qs-label,
+  html[data-theme="dark"] .auto-search-panel .immo-label,
+  html[data-theme="dark"] .auto-search-panel .immo-schema-label {
+    color: #9aa3ad !important;
+  }
+
+  html[data-theme="dark"] .auto-search-panel .home-qs-field,
+  html[data-theme="dark"] .auto-search-panel .immo-field {
+    background: #111827 !important;
+    border-color: #374151 !important;
+  }
+
+  html[data-theme="dark"] .auto-search-panel .home-qs-control,
+  html[data-theme="dark"] .auto-search-panel .home-qs-field input.home-qs-control,
+  html[data-theme="dark"] .auto-search-panel .home-qs-field select.home-qs-control,
+  html[data-theme="dark"] .auto-search-panel .immo-control {
+    color: #f3f4f6 !important;
+    -webkit-text-fill-color: #f3f4f6 !important;
+    background: transparent !important;
+    color-scheme: dark !important;
+  }
+
   .auto-search-panel .home-qs-layout-main,
   .auto-search-panel .home-qs-more-layout,
   .auto-search-panel .home-qs-grid {

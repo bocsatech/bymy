@@ -1702,14 +1702,28 @@ html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-portal__close {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
 }
 
-/* Fehér dob/lista kártya — sötét mód mellett is fekete szöveg (ne fehér-a-fehéren) */
+/* Sötét mód: sötét lista-kártya + világos szöveg (ne fehér kártya / ne fehér-a-fehéren) */
 html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-portal__ring--sheet,
 html[data-theme="dark"] .auto-drum-portal--sheet.auto-drum-portal--ym .auto-drum-portal__ring--sheet,
 html[data-theme="dark"] .auto-drum-portal--sheet.auto-drum-portal--range-sheet .auto-drum-portal__ring--sheet,
 html[data-theme="dark"] .auto-drum-portal--choice .auto-drum-portal__ring--sheet {
-  background: #ffffff !important;
-  border-color: #d0d5dd !important;
-  color: #111111 !important;
+  background: #1e2836 !important;
+  border-color: #2a3444 !important;
+  color: #f3f4f6 !important;
+}
+
+html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-ym__chips,
+html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-ym__heads,
+html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-ym__body,
+html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-ym__cols {
+  background: #1e2836 !important;
+  border-color: #2a3444 !important;
+}
+
+html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-ym__heads,
+html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-ym__label {
+  color: #9aa3ad !important;
+  -webkit-text-fill-color: #9aa3ad !important;
 }
 
 html[data-theme="dark"] .auto-drum-portal--sheet .immo-drum-inline-item,
@@ -1718,7 +1732,6 @@ html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-inline-item--switch,
 html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-portal__scroll,
 html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-split__col,
 html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-ym__col,
-html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-ym__label,
 html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-portal__summary,
 html[data-theme="dark"] .auto-drum-portal--sheet [data-sheet-list],
 html[data-theme="dark"] .auto-drum-portal--sheet .immo-drum-inline-item span,
@@ -1726,18 +1739,29 @@ html[data-theme="dark"] body.site-app .auto-drum-portal--sheet .immo-drum-inline
 html[data-theme="dark"] body.site-app .auto-drum-portal--sheet .immo-drum-inline-text,
 html[data-theme="dark"] body.site-app.home-page .auto-drum-portal--sheet .immo-drum-inline-item,
 html[data-theme="dark"] body.site-app.home-page .auto-drum-portal--sheet .immo-drum-inline-text {
-  color: #111111 !important;
-  -webkit-text-fill-color: #111111 !important;
+  color: #f3f4f6 !important;
+  -webkit-text-fill-color: #f3f4f6 !important;
+}
+
+html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-portal__summary {
+  background: #12161c !important;
+  border-color: #3b4450 !important;
+}
+
+html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-ym__highlight,
+html[data-theme="dark"] .auto-drum-portal--sheet .immo-drum-inline-highlight,
+html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-split__highlight {
+  background: rgba(255, 255, 255, 0.12) !important;
 }
 
 html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-portal__toolbar .auto-drum-portal__sub,
 html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-portal__toolbar .auto-drum-portal__back {
-  color: #111111 !important;
-  -webkit-text-fill-color: #111111 !important;
+  color: #f3f4f6 !important;
+  -webkit-text-fill-color: #f3f4f6 !important;
 }
 
 html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-portal__toolbar .auto-drum-portal__back {
-  background: #f1f5f9 !important;
+  background: #2a3444 !important;
 }
 
 html[data-theme="dark"] .auto-drum-portal--choice .auto-drum-switch {
@@ -1972,7 +1996,6 @@ html[data-theme="dark"] .auto-drum-portal--choice .auto-drum-switch {
 .auto-drum-portal--sheet .immo-drum-inline-text {
   font-size: inherit !important;
   font-weight: inherit !important;
-  /* Ne inherit: body sötét mód #fff — fehér kártyán olvashatatlan lenne */
   color: #111111 !important;
   -webkit-text-fill-color: #111111 !important;
 }
@@ -3165,7 +3188,7 @@ html:has(body.auto-drum-sheet-open) {
   display: none !important;
 }
 
-/* Sötét mód — sheet végleges kontraszt (utolsó a fájlban, hogy ne írja felül későbbi light rule) */
+/* Sötét mód — sheet végleges kontraszt (utolsó a fájlban) */
 html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-portal__sheet-head,
 html[data-theme="dark"] .auto-drum-portal--sheet.auto-drum-portal--ym .auto-drum-portal__sheet-head,
 html[data-theme="dark"] .auto-drum-portal--sheet.auto-drum-portal--range-sheet .auto-drum-portal__sheet-head,
@@ -3179,12 +3202,44 @@ html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-portal__sheet-title 
 }
 
 html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-portal__ring--sheet,
+html[data-theme="dark"] .auto-drum-portal--sheet.auto-drum-portal--ym .auto-drum-portal__ring--sheet,
+html[data-theme="dark"] .auto-drum-portal--sheet.auto-drum-portal--range-sheet .auto-drum-portal__ring--sheet,
+html[data-theme="dark"] .auto-drum-portal--choice .auto-drum-portal__ring--sheet {
+  background: #1e2836 !important;
+  border-color: #2a3444 !important;
+}
+
+html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-ym__chips,
+html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-ym__heads,
+html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-ym__body {
+  background: #1e2836 !important;
+  border-bottom-color: #2a3444 !important;
+}
+
 html[data-theme="dark"] .auto-drum-portal--sheet .immo-drum-inline-item,
 html[data-theme="dark"] .auto-drum-portal--sheet .immo-drum-inline-text,
-html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-ym__label,
+html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-portal__summary,
+html[data-theme="dark"] .auto-drum-portal--sheet .immo-drum-inline-item span,
+html[data-theme="dark"] body.site-app .auto-drum-portal--sheet :is(.immo-drum-inline-item, .immo-drum-inline-text, .auto-drum-portal__summary, span) {
+  color: #f3f4f6 !important;
+  -webkit-text-fill-color: #f3f4f6 !important;
+}
+
+html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-ym__heads,
+html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-ym__label {
+  color: #9aa3ad !important;
+  -webkit-text-fill-color: #9aa3ad !important;
+}
+
 html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-portal__summary {
-  color: #111111 !important;
-  -webkit-text-fill-color: #111111 !important;
+  background: #12161c !important;
+  border-color: #3b4450 !important;
+}
+
+html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-ym__highlight,
+html[data-theme="dark"] .auto-drum-portal--sheet .immo-drum-inline-highlight,
+html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-split__highlight {
+  background: rgba(255, 255, 255, 0.14) !important;
 }
 
 html[data-theme="dark"] .auto-drum-portal--sheet .immo-drum-inline-item {

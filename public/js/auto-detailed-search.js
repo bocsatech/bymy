@@ -347,7 +347,7 @@ async function openDetailedToggleSheet(field) {
     trigger.getAttribute("aria-label") ||
     "Extrák";
 
-  const { openStandaloneSwitchSheet } = await import("./auto-drum-sheet.js?v=e4dcef114a");
+  const { openStandaloneSwitchSheet } = await import("./auto-drum-sheet.js?v=711df91eaf");
   openStandaloneSwitchSheet({
     trigger,
     title,

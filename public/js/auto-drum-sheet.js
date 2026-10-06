@@ -1000,6 +1000,8 @@ function lockSheetWhiteToBlue(root, stage) {
       scroll.style.setProperty("flex", "0 1 auto", "important");
     }
   }
+  const dark = document.documentElement.getAttribute("data-theme") === "dark";
+  const dark = document.documentElement.getAttribute("data-theme") === "dark";
   if (ring) {
     ring.style.setProperty("width", "100%", "important");
     ring.style.setProperty("max-width", "100%", "important");
@@ -1010,15 +1012,17 @@ function lockSheetWhiteToBlue(root, stage) {
     ring.style.setProperty("right", "0", "important");
     ring.style.setProperty("transform", "none", "important");
     ring.style.setProperty("border-radius", "1.15rem", "important");
+    ring.style.setProperty("background", dark ? "#1e2836" : "#ffffff", "important");
+    ring.style.setProperty("border-color", dark ? "#2a3444" : "#d0d5dd", "important");
+    ring.style.setProperty("color", dark ? "#f3f4f6" : "#111111", "important");
     if (desk) {
       ring.style.setProperty("height", "auto", "important");
       ring.style.setProperty("max-height", "min(62vh, 34rem)", "important");
       ring.style.setProperty("flex", "0 1 auto", "important");
     }
   }
-  /* Felső gombsor abszolút, átlátszatlan — sötét módban sötét fej (fehér cím), világosban #e8eef3. */
+  /* Felső gombsor abszolút — sötét módban sötét fej (fehér cím), világosban #e8eef3. */
   if (head) {
-    const dark = document.documentElement.getAttribute("data-theme") === "dark";
     head.style.setProperty("position", "absolute", "important");
     head.style.setProperty("top", "0", "important");
     head.style.setProperty("left", "0", "important");
@@ -2247,17 +2251,24 @@ function paintSplitColSync(scrollEl, ring) {
   const ringRect = ring.getBoundingClientRect();
   const centerY = ringRect.top + ringRect.height / 2;
   const nearest = nearestPortalItem(scrollEl, ring);
-  /* Fehér sheet-kártyán ne fade-eljük a sorokat — sötét módban fehér-a-fehéren tűnik. */
   const sheet = Boolean(scrollEl.closest?.(".auto-drum-portal--sheet"));
+  const dark = document.documentElement.getAttribute("data-theme") === "dark";
+  const ink = sheet && dark ? "#f3f4f6" : "#111111";
   scrollEl.querySelectorAll(".immo-drum-inline-item").forEach((item) => {
     const r = item.getBoundingClientRect();
     const mid = r.top + r.height / 2;
     const dist = Math.abs(mid - centerY);
     const t = Math.min(dist / (ITEM_H * 1.15), 1);
     const isSel = item === nearest;
-    item.style.opacity = sheet ? "1" : String(Math.max(0.38, 1 - t * 0.55));
+    item.style.setProperty("opacity", sheet ? "1" : String(Math.max(0.38, 1 - t * 0.55)), sheet ? "important" : "");
     item.style.fontWeight = dist < ITEM_H * 0.42 || isSel ? "650" : "500";
-    item.style.color = "#111111";
+    item.style.setProperty("color", ink, "important");
+    item.style.setProperty("-webkit-text-fill-color", ink, "important");
+    const label = item.querySelector(".immo-drum-inline-text");
+    if (label) {
+      label.style.setProperty("color", ink, "important");
+      label.style.setProperty("-webkit-text-fill-color", ink, "important");
+    }
     item.classList.toggle("is-in-cell", isSel);
     item.classList.toggle("is-selected", isSel);
     item.setAttribute("aria-selected", isSel ? "true" : "false");

@@ -1674,12 +1674,18 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   word-break: break-word;
 }
 
-/* Sötét mód: sheet fejléc + cím kontraszt (ne fehér szöveg világos kéken) */
-html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-portal__stage--sheet {
+/* Sötét mód: sötét fej (fehér cím), fehér lista-kártya sötét szöveggel */
+html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-portal__stage--sheet,
+html[data-theme="dark"] .auto-drum-portal--sheet.auto-drum-portal--ym .auto-drum-portal__stage--sheet,
+html[data-theme="dark"] .auto-drum-portal--sheet.auto-drum-portal--range-sheet .auto-drum-portal__stage--sheet,
+html[data-theme="dark"] .auto-drum-portal--sheet.auto-drum-portal--single-sheet .auto-drum-portal__stage--sheet {
   background: #1a2330 !important;
 }
 
-html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-portal__sheet-head {
+html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-portal__sheet-head,
+html[data-theme="dark"] .auto-drum-portal--sheet.auto-drum-portal--ym .auto-drum-portal__sheet-head,
+html[data-theme="dark"] .auto-drum-portal--sheet.auto-drum-portal--range-sheet .auto-drum-portal__sheet-head,
+html[data-theme="dark"] .auto-drum-portal--sheet.auto-drum-portal--single-sheet .auto-drum-portal__sheet-head {
   background: #1a2330 !important;
 }
 
@@ -1696,33 +1702,47 @@ html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-portal__close {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
 }
 
-html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-portal__ring--sheet {
-  background: #111827 !important;
-  border-color: #374151 !important;
-  color: #f3f4f6 !important;
+/* Fehér dob/lista kártya — sötét mód mellett is fekete szöveg (ne fehér-a-fehéren) */
+html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-portal__ring--sheet,
+html[data-theme="dark"] .auto-drum-portal--sheet.auto-drum-portal--ym .auto-drum-portal__ring--sheet,
+html[data-theme="dark"] .auto-drum-portal--sheet.auto-drum-portal--range-sheet .auto-drum-portal__ring--sheet,
+html[data-theme="dark"] .auto-drum-portal--choice .auto-drum-portal__ring--sheet {
+  background: #ffffff !important;
+  border-color: #d0d5dd !important;
+  color: #111111 !important;
 }
 
 html[data-theme="dark"] .auto-drum-portal--sheet .immo-drum-inline-item,
 html[data-theme="dark"] .auto-drum-portal--sheet .immo-drum-inline-text,
 html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-inline-item--switch,
-html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-portal__scroll {
-  color: #f3f4f6 !important;
-  -webkit-text-fill-color: #f3f4f6 !important;
+html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-portal__scroll,
+html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-split__col,
+html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-ym__col,
+html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-ym__label,
+html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-portal__summary,
+html[data-theme="dark"] .auto-drum-portal--sheet [data-sheet-list],
+html[data-theme="dark"] .auto-drum-portal--sheet .immo-drum-inline-item span,
+html[data-theme="dark"] body.site-app .auto-drum-portal--sheet .immo-drum-inline-item,
+html[data-theme="dark"] body.site-app .auto-drum-portal--sheet .immo-drum-inline-text,
+html[data-theme="dark"] body.site-app.home-page .auto-drum-portal--sheet .immo-drum-inline-item,
+html[data-theme="dark"] body.site-app.home-page .auto-drum-portal--sheet .immo-drum-inline-text {
+  color: #111111 !important;
+  -webkit-text-fill-color: #111111 !important;
 }
 
 html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-portal__toolbar .auto-drum-portal__sub,
 html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-portal__toolbar .auto-drum-portal__back {
-  color: #f3f4f6 !important;
-  -webkit-text-fill-color: #f3f4f6 !important;
+  color: #111111 !important;
+  -webkit-text-fill-color: #111111 !important;
 }
 
 html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-portal__toolbar .auto-drum-portal__back {
-  background: #2a3444 !important;
+  background: #f1f5f9 !important;
 }
 
 html[data-theme="dark"] .auto-drum-portal--choice .auto-drum-switch {
-  background: #4b5563 !important;
-  border-color: #6b7280 !important;
+  background: #6b7280 !important;
+  border-color: #fff !important;
 }
 
 .auto-drum-portal--sheet .auto-drum-portal__sheet-head-spacer {

@@ -7637,6 +7637,31 @@ html[data-theme="dark"] body.site-app .auto-desk-results-bar select {
   background-color: #fff !important;
 }
 
+/* Mobil kereső accordion cím — sötét háttéren mindig tiszta fehér */
+html[data-theme="dark"] body.site-app.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel,
+html[data-theme="dark"] body.site-app:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel {
+  background: #243041 !important;
+  border: 1px solid #3b4658 !important;
+  color: #fff !important;
+}
+
+html[data-theme="dark"] body.site-app.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-toggle,
+html[data-theme="dark"] body.site-app.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-title,
+html[data-theme="dark"] body.site-app.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-toggle span,
+html[data-theme="dark"] body.site-app:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-toggle,
+html[data-theme="dark"] body.site-app:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-title,
+html[data-theme="dark"] body.site-app:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-toggle span {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  opacity: 1 !important;
+  text-shadow: none !important;
+}
+
+html[data-theme="dark"] body.site-app:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-toggle__chevron {
+  border-color: #ffffff !important;
+  opacity: 1 !important;
+}
+
 html[data-theme="dark"] body.site-app :is(
   .hf-card,
   .hf-card--listing,

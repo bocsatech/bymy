@@ -392,12 +392,12 @@
   }
 
   html[data-theme="dark"] body.site-app .mw-app-pages-link {
-    color: #9aa3ad;
+    color: #c5ccd6;
   }
 
   html[data-theme="dark"] body.site-app .mw-app-pages-link.is-active {
-    color: #e8eaed;
-    border-bottom-color: #e8eaed;
+    color: #ffffff;
+    border-bottom-color: #ffffff;
   }
 
   body.hub-page--feed {

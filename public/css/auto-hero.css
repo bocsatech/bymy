@@ -1067,20 +1067,20 @@ body[data-site-page="teherauto"] .auto-search-tabs {
   }
 
   html[data-theme="dark"] .auto-search-panel {
-    background: #1a1f26 !important;
-    color: #e8eaed !important;
-    border: 1px solid #2a313c;
+    background: #243041 !important;
+    color: #ffffff !important;
+    border: 1px solid #3b4658;
     box-shadow: none;
   }
 
   html[data-theme="dark"] .auto-search-toggle,
   html[data-theme="dark"] .auto-search-title {
-    color: #f3f4f6 !important;
-    -webkit-text-fill-color: #f3f4f6 !important;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
   }
 
   html[data-theme="dark"] .auto-search-toggle__chevron {
-    border-color: #f3f4f6 !important;
+    border-color: #ffffff !important;
   }
 
   html[data-theme="dark"] .auto-search-save {

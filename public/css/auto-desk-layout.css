@@ -1757,14 +1757,14 @@ html[data-theme="dark"] body.site-app > .auto-price-suggest .auto-price-suggest_
   }
 
   html[data-theme="dark"] body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-tab {
-    color: #9aa3ad !important;
+    color: #c5ccd6 !important;
     border-right-color: #2a313c !important;
   }
 
   html[data-theme="dark"] body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-tab:hover,
   html[data-theme="dark"] body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-tab:focus-visible {
     background: #1f2937 !important;
-    color: #e8eaed !important;
+    color: #ffffff !important;
   }
 
   html[data-theme="dark"] body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-tab.is-active {

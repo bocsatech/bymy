@@ -9,7 +9,7 @@
   var isPostAd = page === "hirdetesfeladas";
   /* TEMP: Ingatlan menü elrejtve — vissza: false */
   var HIDE_INGATLAN_NAV = true;
-  var CSS_HREF = "/css/hub-mobile-app.css?v=1dac189084";
+  var CSS_HREF = "/css/hub-mobile-app.css?v=c5c9241854";
   var THEME_JS = "/js/theme.js?v=4fe8a2261f";
 
   function ensureCss() {

@@ -247,6 +247,9 @@ export function initHomeQuickSearch({ onSearch = () => {}, onFilterPreview, onDe
         if (f.dataset.brandModelPicker !== "1" || !f.querySelector(".auto-bm-brand-block")) {
           await mountAutoBrandModelPicker(f);
         }
+        if (f.dataset.fuelPicker !== "1") {
+          await mountAutoFuelPicker(f);
+        }
         f.querySelectorAll(
           '#qs-layout-main [data-qs-field="gyartmany"], #qs-layout-main [data-qs-field="modell"], #qs-layout-main [data-qs-field="tipus"], #qs-layout-main [data-wheel="gyartmany"], #qs-layout-main [data-wheel="modell"]'
         ).forEach((el) => {
@@ -288,6 +291,11 @@ export function initHomeQuickSearch({ onSearch = () => {}, onFilterPreview, onDe
         });
       } catch (bmError) {
         console.warn("Gyártmány/Modell picker:", bmError);
+      }
+      try {
+        await mountAutoFuelPicker(f);
+      } catch (fuelError) {
+        console.warn("Üzemanyag picker:", fuelError);
       }
       try {
         refillAutoSearchRangeSelects(f);

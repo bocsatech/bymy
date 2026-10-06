@@ -8,7 +8,7 @@ import {
   initHomeSearchSidebar,
   initHomeFilterCatalog,
 } from "./home-search-filter.js?v=77d30b5c36";
-import { initHomeQuickSearch } from "./home-quicksearch.js?v=4ae9b86eb3";
+import { initHomeQuickSearch } from "./home-quicksearch.js?v=7bd4a226c6";
 import { decodeSavedSearchParam, encodeSavedSearchParam } from "./saved-search.js?v=c636db31bd";
 import { matchDetailedSearch, hasActiveDetailedSearch } from "./auto-detailed-search.js?v=24928b4442";
 import { updateAutoDeskResultCount, updateAutoDeskAccSummaries } from "./auto-desk-search.js?v=f99edb6978";
@@ -292,6 +292,7 @@ let boostOwnerIds = new Set();
 let boostListingIds = new Set();
 /** Autó/teher: találatok csak „Találatok mutatása” után; addig kiemelt csempék. */
 let searchResultsCommitted = false;
+let listRenderCap = LISTINGS_INITIAL;
 let browseFeaturedItems = [];
 
 const PAGE = document.body?.getAttribute("data-site-page") || "";
@@ -399,6 +400,10 @@ async function syncCategoryToSearchMenu(categoryId) {
   if (!form) return;
   try {
     if (quickSearchApi?.whenReady) await quickSearchApi.whenReady;
+    const { mountAutoFuelPicker } = await import("./auto-fuel-picker.js?v=fafb6e20e0");
+    if (window.matchMedia("(min-width: 901px)").matches) {
+      await mountAutoFuelPicker(form);
+    }
     const { applySavedSearchFilters } = await import("./saved-search.js?v=c636db31bd");
     await applySavedSearchFilters(form, filters);
     updateAutoDeskAccSummaries(form);
@@ -594,13 +599,17 @@ function currentFilteredListings() {
 function renderListings(items, { bypassFilters = false, force = false } = {}) {
   if (!gridTrack) return;
 
-  const filtered = bypassFilters
+  const fullFiltered = bypassFilters
     ? [...(items || [])]
     : PAGE === "auto" || PAGE === "teherauto"
       ? sortDeskListings(filterItems(items))
       : applyOwnerBoostSort(filterItems(items));
+  const filtered =
+    !bypassFilters && (PAGE === "auto" || PAGE === "teherauto") && searchResultsCommitted
+      ? fullFiltered.slice(0, listRenderCap)
+      : fullFiltered;
 
-  const renderKey = `${bypassFilters ? "b" : "f"}:${deskSort}:${searchResultsCommitted ? 1 : 0}:${filtered
+  const renderKey = `${bypassFilters ? "b" : "f"}:${deskSort}:${searchResultsCommitted ? 1 : 0}:${listRenderCap}:${fullFiltered.length}:${filtered
     .map((item) => String(item?.id ?? ""))
     .join(",")}`;
   if (
@@ -611,7 +620,7 @@ function renderListings(items, { bypassFilters = false, force = false } = {}) {
   ) {
     if (PAGE === "auto" || PAGE === "teherauto") {
       if (bypassFilters || isFeaturedBrowseMode()) updateDeskResultCount(filterItems(allItems));
-      else updateDeskResultCount(filtered);
+      else updateDeskResultCount(fullFiltered);
     }
     return;
   }
@@ -646,7 +655,7 @@ function renderListings(items, { bypassFilters = false, force = false } = {}) {
     if (bypassFilters || isFeaturedBrowseMode()) {
       updateDeskResultCount(filterItems(allItems));
     } else {
-      updateDeskResultCount(filtered);
+      updateDeskResultCount(fullFiltered);
     }
   }
   if (PAGE === "ingatlan") {
@@ -778,6 +787,7 @@ async function loadListings() {
   if (searchResultsCommitted && hasActiveClientFilters()) {
     const grew = await fillFilteredResults();
     if (grew || searchRestoreInProgress) renderListings(allItems);
+    void fillMatchPoolSilent();
   }
   if (!searchRestoreInProgress) await refreshOpenMapPins();
 
@@ -870,6 +880,7 @@ async function loadMoreListings({ silent = false } = {}) {
       featuredListingIds = featuredListingIdSet(allItems);
       if (!silent) {
         populateFilterOptions(allItems);
+        listRenderCap = Math.max(listRenderCap, LISTINGS_INITIAL);
         if (isFeaturedBrowseMode()) renderFeaturedBrowse();
         else renderListings(allItems);
         updateFilterResultCount();
@@ -914,6 +925,11 @@ function hasActiveClientFilters() {
 
 function updateDeskResultCount(filtered) {
   if (PAGE !== "auto" && PAGE !== "teherauto") return;
+  if (hasActiveClientFilters()) {
+    const n = Array.isArray(filtered) ? filtered.length : Number(filtered) || 0;
+    updateAutoDeskResultCount(n);
+    return;
+  }
   const total = listingsTotal != null ? Number(listingsTotal) : NaN;
   if (Number.isFinite(total)) {
     updateAutoDeskResultCount(total);
@@ -921,6 +937,20 @@ function updateDeskResultCount(filtered) {
   }
   const n = Array.isArray(filtered) ? filtered.length : Number(filtered) || 0;
   updateAutoDeskResultCount(n);
+}
+
+async function fillMatchPoolSilent() {
+  if (!hasActiveClientFilters()) return;
+  let guard = 0;
+  while (listingsHasMore && guard < 80) {
+    guard += 1;
+    const before = allItems.length;
+    await loadMoreListings({ silent: true });
+    if (allItems.length === before) break;
+    updateDeskResultCount(filterItems(allItems));
+    await new Promise((r) => window.setTimeout(r, 0));
+  }
+  updateDeskResultCount(filterItems(allItems));
 }
 
 async function fillFilteredResults() {
@@ -959,6 +989,7 @@ function applyFilters({ commit = false } = {}) {
   }
   if (commit && isVehicleSearchPage() && !isSellerMode()) {
     searchResultsCommitted = true;
+    listRenderCap = LISTINGS_INITIAL;
     closeSearchMapDom();
   }
 
@@ -992,8 +1023,22 @@ function bindListingsInfiniteScroll() {
   };
 
   const onScroll = () => {
-    if (!listingsHasMore || listingsLoadingMore) return;
+    if (listingsLoadingMore) return;
     if (isFeaturedBrowseMode()) return;
+    const filteredN = filterItems(allItems).length;
+    if ((PAGE === "auto" || PAGE === "teherauto") && listRenderCap < filteredN) {
+      const panel = document.querySelector(".home-listings-panel");
+      const nearPanel = panel && panel.scrollHeight > panel.clientHeight + 40
+        ? panel.scrollHeight - panel.scrollTop - panel.clientHeight < 560
+        : false;
+      const nearDoc = document.documentElement.scrollHeight - window.scrollY - window.innerHeight < 720;
+      if (nearPanel || nearDoc) {
+        listRenderCap += LISTINGS_PAGE_MORE;
+        renderListings(allItems, { force: true });
+      }
+      return;
+    }
+    if (!listingsHasMore) return;
     const panel = document.querySelector(".home-listings-panel");
     if (panel && panel.scrollHeight > panel.clientHeight + 40) {
       if (nearEnd(panel)) void loadMoreListings();
@@ -1423,6 +1468,9 @@ if (PAGE === "ingatlan") {
       deskSort = sort || readDeskSort() || "newest";
       // Boost blokk lapozása szerveren rendezett — újrarendezéskor újratöltés kell.
       void loadListings();
+    },
+    onReady: () => {
+      if (categoryFilter) void syncCategoryToSearchMenu(categoryFilter);
     },
   });
 

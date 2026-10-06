@@ -24,7 +24,7 @@ function injectStylesheet() {
   if (document.querySelector('link[data-seller-inv-css]')) return;
   const link = document.createElement("link");
   link.rel = "stylesheet";
-  link.href = "/css/seller-inventory.css?v=sellerInv33";
+  link.href = "/css/seller-inventory.css?v=sellerInv34";
   link.dataset.sellerInvCss = "1";
   document.head.appendChild(link);
   if (!document.querySelector('link[data-ertek-qr-css]')) {
@@ -485,29 +485,54 @@ function postalFromContact(contact, query) {
   return (String(blob).match(/\b(\d{4})\b/) || [])[1] || "";
 }
 
-function latLonToTile(lat, lon, z) {
-  const rad = (lat * Math.PI) / 180;
-  const n = 2 ** z;
-  const x = Math.floor(((lon + 180) / 360) * n);
-  const y = Math.floor((1 - Math.log(Math.tan(rad) + 1 / Math.cos(rad)) / Math.PI) / 2 * n);
-  return { x, y, z };
+let leafletPromise = null;
+
+function loadLeaflet() {
+  if (window.L) return Promise.resolve(window.L);
+  if (leafletPromise) return leafletPromise;
+  leafletPromise = new Promise((resolve, reject) => {
+    if (!document.querySelector("link[data-leaflet-css]")) {
+      const link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.href = "/vendor/leaflet/leaflet.css";
+      link.dataset.leafletCss = "1";
+      document.head.appendChild(link);
+    }
+    const script = document.createElement("script");
+    script.src = "/vendor/leaflet/leaflet.js";
+    script.async = true;
+    script.onload = () => (window.L ? resolve(window.L) : reject(new Error("Leaflet nem töltődött.")));
+    script.onerror = () => reject(new Error("Leaflet betöltési hiba."));
+    document.head.appendChild(script);
+  });
+  return leafletPromise;
 }
 
-function paintStaticMap(canvas, lat, lon) {
-  if (!canvas) return;
-  const z = 15;
-  const { x, y } = latLonToTile(lat, lon, z);
-  const cells = [];
-  for (let dy = -1; dy <= 1; dy += 1) {
-    for (let dx = -1; dx <= 1; dx += 1) {
-      const tx = x + dx;
-      const ty = y + dy;
-      const host = ["a", "b", "c"][Math.abs(tx) % 3];
-      const src = `https://${host}.tile.openstreetmap.fr/osmfr/${z}/${tx}/${ty}.png`;
-      cells.push(`<img alt="" draggable="false" src="${esc(src)}" />`);
-    }
+function paintSellerLeaflet(canvas, lat, lon) {
+  if (!canvas || !window.L) return;
+  const L = window.L;
+  L.Icon.Default.imagePath = "/vendor/leaflet/images/";
+  let map = canvas._siMap;
+  if (!map) {
+    canvas.innerHTML = "";
+    map = L.map(canvas, {
+      scrollWheelZoom: true,
+      zoomControl: true,
+      attributionControl: true,
+    });
+    L.tileLayer("https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png", {
+      maxZoom: 19,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    }).addTo(map);
+    canvas._siMap = map;
   }
-  canvas.innerHTML = `<div class="seller-inv__map-tiles">${cells.join("")}</div><span class="seller-inv__map-pin" aria-hidden="true"></span>`;
+  map.setView([lat, lon], 16);
+  if (canvas._siMarker) canvas._siMarker.setLatLng([lat, lon]);
+  else canvas._siMarker = L.marker([lat, lon]).addTo(map);
+  requestAnimationFrame(() => {
+    map.invalidateSize();
+    map.setView([lat, lon], 16);
+  });
 }
 
 async function fetchPostalCoords(postal) {
@@ -556,11 +581,18 @@ async function fillSellerMap(panel, contact) {
   panel.innerHTML = `
     <div class="seller-inv__map-wrap">
       ${openBtn}
-      <div class="seller-inv__map" data-si-map-canvas role="img" aria-label="${esc(q)}"></div>
+      <div class="seller-inv__map" data-si-map-canvas role="application" aria-label="${esc(q)}"></div>
     </div>
   `;
   const canvas = panel.querySelector("[data-si-map-canvas]");
   if (!canvas) return;
+
+  try {
+    await loadLeaflet();
+  } catch {
+    canvas.innerHTML = `<p class="seller-inv__hint">A térkép most nem tölthető be.</p>`;
+    return;
+  }
 
   const postal = postalFromContact(contact, q);
   let geo = null;
@@ -569,13 +601,13 @@ async function fillSellerMap(panel, contact) {
   } catch {
     geo = null;
   }
-  if (geo) paintStaticMap(canvas, geo.lat, geo.lon);
+  if (geo) paintSellerLeaflet(canvas, geo.lat, geo.lon);
 
   try {
     const street = await fetchSellerCoords(contact, q);
     if (street) {
       geo = street;
-      paintStaticMap(canvas, street.lat, street.lon);
+      paintSellerLeaflet(canvas, street.lat, street.lon);
     }
   } catch {
     /* keep postal pin */

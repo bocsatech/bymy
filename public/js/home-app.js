@@ -36,7 +36,7 @@ import {
 } from "./listing-return.js?v=1911f0cb28";
 import { normalizeKivitel } from "./kivitel-options.js?v=be03aefc2e";
 import { featuredListingIdSet, pickFeaturedListings } from "./home-featured-slots.js?v=76bf95d774";
-import { mountSellerInventory, updateSellerInventoryCount } from "./seller-inventory.js?v=f14f45fe71";
+import { mountSellerInventory, updateSellerInventoryCount } from "./seller-inventory.js?v=a92715ee70";
 
 /** Map module is optional — only loaded when the user clicks the map button. */
 let closeSearchResultsMapFn = null;

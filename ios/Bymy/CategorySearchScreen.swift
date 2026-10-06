@@ -161,49 +161,35 @@ struct CategorySearchScreen: View {
     }
 
     private var combinedBrandModel: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        let empty = brand.isEmpty
+        let summary: String = {
+            if brand.isEmpty { return "Gyártmány / Modell" }
+            if model.isEmpty { return brand }
+            return "\(brand) · \(model)"
+        }()
+        return VStack(alignment: .leading, spacing: 8) {
             Text("Gyártmány & Modell")
-                .font(.system(size: 15, weight: .bold))
+                .font(.system(size: 16, weight: .bold))
                 .foregroundStyle(AppTheme.text)
 
             Button {
                 sheet = .list(title: "Gyártmány", options: catalog.brands, selected: brand)
             } label: {
-                underlineValue(brand.isEmpty ? "Gyártmány" : brand, placeholder: brand.isEmpty)
+                Text(summary)
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundStyle(empty ? Color(red: 0.392, green: 0.455, blue: 0.545) : AppTheme.text)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.bottom, 8)
+                    .overlay(alignment: .bottom) {
+                        Rectangle()
+                            .fill(Color(red: 0.812, green: 0.839, blue: 0.867))
+                            .frame(height: 1.5)
+                    }
             }
             .buttonStyle(.plain)
-
-            Button {
-                let models = catalog.models(for: brand)
-                if models.isEmpty {
-                    sheet = .text(title: "Modell", current: model)
-                } else {
-                    sheet = .list(title: "Modell", options: models, selected: model)
-                }
-            } label: {
-                underlineValue(model.isEmpty ? "Modell" : model, placeholder: model.isEmpty)
-            }
-            .buttonStyle(.plain)
-            .disabled(false)
         }
         .padding(.horizontal, 16)
-        .padding(.vertical, 14)
-    }
-
-    private func underlineValue(_ text: String, placeholder: Bool) -> some View {
-        HStack {
-            Text(text)
-                .font(.system(size: 16, weight: placeholder ? .medium : .semibold))
-                .foregroundStyle(placeholder ? AppTheme.textSecondary : AppTheme.text)
-            Spacer()
-            Image(systemName: "chevron.right")
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundStyle(AppTheme.tabInactive)
-        }
-        .padding(.bottom, 8)
-        .overlay(alignment: .bottom) {
-            Rectangle().fill(Color(red: 0.81, green: 0.84, blue: 0.87)).frame(height: 1.5)
-        }
+        .padding(.vertical, 10)
     }
 
     private func pickerRow(_ title: String, summary: String, action: @escaping () -> Void) -> some View {
@@ -381,7 +367,15 @@ struct CategorySearchScreen: View {
             switch title {
             case "Gyártmány":
                 brand = v
-                if !v.isEmpty { model = "" }
+                if !v.isEmpty {
+                    model = ""
+                    let models = catalog.models(for: v)
+                    if !models.isEmpty {
+                        DispatchQueue.main.async {
+                            sheet = .list(title: "Modell", options: models, selected: "")
+                        }
+                    }
+                }
             case "Modell": model = v
             case "Üzemanyag": fuel = v
             case "Kivitel": bodyType = v

@@ -1404,7 +1404,7 @@ body[data-site-page="teherauto"] .auto-search-tabs {
     white-space: nowrap;
   }
 
-  /* Mobil: Gyártmány & Modell — egy pill (mint hirdetésfeladás) */
+  /* Mobil: Gyártmány & Modell — aláhúzott kombinált mező */
   body:is([data-site-page="auto"], [data-site-page="teherauto"])
     .auto-search-panel
     .auto-qs-drums
@@ -1412,8 +1412,8 @@ body[data-site-page="teherauto"] .auto-search-tabs {
     display: flex !important;
     flex-direction: column !important;
     align-items: stretch !important;
-    gap: 0.55rem !important;
-    padding: 0.15rem 0 0.35rem !important;
+    gap: 0.45rem !important;
+    padding: 0.1rem 0 0.2rem !important;
     margin: 0 !important;
     background: transparent !important;
     border: 0 !important;
@@ -1433,7 +1433,7 @@ body[data-site-page="teherauto"] .auto-search-tabs {
     padding: 0 !important;
     margin: 0 !important;
     background: transparent !important;
-    font: 700 0.94rem/1.2 system-ui, sans-serif !important;
+    font: 700 1rem/1.2 system-ui, sans-serif !important;
     color: #111 !important;
     white-space: normal !important;
   }
@@ -1446,10 +1446,10 @@ body[data-site-page="teherauto"] .auto-search-tabs {
     position: relative !important;
     display: flex !important;
     align-items: center !important;
-    gap: var(--ad-form-trail-gap, 0.55rem) !important;
+    gap: 0 !important;
     width: 100% !important;
     height: auto !important;
-    min-height: 2.65rem !important;
+    min-height: 2.5rem !important;
     max-height: none !important;
     margin: 0 !important;
     padding: 0 !important;
@@ -1481,19 +1481,19 @@ body[data-site-page="teherauto"] .auto-search-tabs {
     .auto-qs-drums
     .immo-schema-cell.auto-search-bm-combined
     .immo-wheel-trigger {
-    flex: 1 1 0% !important;
-    width: auto !important;
+    flex: 1 1 auto !important;
+    width: 100% !important;
     min-width: 0 !important;
     max-width: 100% !important;
     height: auto !important;
     min-height: 2.5rem !important;
-    padding: 0.45rem 0.1rem 0.5rem !important;
+    padding: 0.35rem 0.05rem 0.5rem !important;
     border: 0 !important;
     border-bottom: 1.5px solid #cfd6dd !important;
     border-radius: 0 !important;
     background: transparent !important;
     color: #0f172a !important;
-    font: 500 1rem/1.35 system-ui, sans-serif !important;
+    font: 600 1.05rem/1.35 system-ui, sans-serif !important;
     text-align: left !important;
   }
 
@@ -1516,29 +1516,18 @@ body[data-site-page="teherauto"] .auto-search-tabs {
     .auto-qs-drums
     .immo-schema-cell.auto-search-bm-combined
     .immo-wheel-trigger.is-placeholder {
-    color: #475569 !important;
+    color: #64748b !important;
     font-weight: 600 !important;
   }
 
-  /* Gyártmány: ugyanaz a trail slot, mint feladáson — NEM teljes szélesség */
+  /* Üres állapot: aláhúzás végig, nincs chevron / trail */
   body:is([data-site-page="auto"], [data-site-page="teherauto"])
     .auto-search-panel
     .auto-qs-drums
     .immo-schema-cell.auto-search-bm-combined
     > .immo-wheel-wrap.auto-search-bm-combined__wrap:not(.has-wheel-clear)::after {
-    content: "" !important;
-    display: block !important;
-    position: static !important;
-    top: auto !important;
-    right: auto !important;
-    transform: none !important;
-    margin: 0 !important;
-    border: 0 !important;
-    flex: 0 0 var(--ad-form-trail-slot, 1.75rem) !important;
-    width: var(--ad-form-trail-slot, 1.75rem) !important;
-    min-width: var(--ad-form-trail-slot, 1.75rem) !important;
-    height: 1px !important;
-    pointer-events: none !important;
+    content: none !important;
+    display: none !important;
   }
 
   body:is([data-site-page="auto"], [data-site-page="teherauto"])

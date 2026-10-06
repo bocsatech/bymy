@@ -180,7 +180,7 @@ export async function mountAutoBrandModelPicker(form) {
   wrap.dataset.deskQuick = "1";
   wrap.innerHTML = `
     <div class="auto-desk-field auto-bm-field auto-bm-field--combined" data-desk-field="gyartmany" data-desk-quick="1">
-      <span class="auto-desk-field__label">Gyártmány &amp; Modell: <span class="req" aria-hidden="true">*</span></span>
+      <span class="auto-desk-field__label">Gyártmány &amp; Modell</span>
       <button type="button" class="auto-bm-trigger auto-bm-trigger--pill" data-auto-bm-open="brand" aria-label="Gyártmány és modell">
         <span data-auto-bm-combined-summary class="is-placeholder">${emptyCombinedLabel}</span>
       </button>

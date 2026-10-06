@@ -8,7 +8,7 @@ import {
   initHomeSearchSidebar,
   initHomeFilterCatalog,
 } from "./home-search-filter.js?v=77d30b5c36";
-import { initHomeQuickSearch } from "./home-quicksearch.js?v=fe06ec937e";
+import { initHomeQuickSearch } from "./home-quicksearch.js?v=a571a47468";
 import { decodeSavedSearchParam, encodeSavedSearchParam } from "./saved-search.js?v=c636db31bd";
 import { matchDetailedSearch, hasActiveDetailedSearch } from "./auto-detailed-search.js?v=24928b4442";
 import { updateAutoDeskResultCount, updateAutoDeskAccSummaries } from "./auto-desk-search.js?v=f99edb6978";

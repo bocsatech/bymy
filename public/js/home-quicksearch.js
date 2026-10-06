@@ -7,7 +7,7 @@ import {
   resetDetailedSearch,
 } from "./auto-detailed-search.js?v=18415b7f87";
 import { readWheel } from "./ingatlan-wheels.js?v=6952ba469c";
-import { readBrandModelFilterValues, mountAutoBrandModelPicker } from "./auto-brand-model-picker.js?v=switchDesignAll1";
+import { readBrandModelFilterValues, mountAutoBrandModelPicker } from "./auto-brand-model-picker.js?v=de4ad6895c";
 import { readFuelFilterValues, mountAutoFuelPicker } from "./auto-fuel-picker.js?v=switchDesignAll1";
 import { readKivitelFilterValues, mountAutoKivitelPicker } from "./auto-kivitel-picker.js?v=switchDesignAll1";
 import { readAllapotFilterValues, mountAutoAllapotPicker } from "./auto-allapot-picker.js?v=switchDesignAll1";

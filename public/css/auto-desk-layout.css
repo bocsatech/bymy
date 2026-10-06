@@ -1776,11 +1776,11 @@ html[data-theme="dark"] body.site-app > .auto-price-suggest .auto-price-suggest_
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-pair.auto-bm-brand-block {
-    padding: 1.1rem 1.15rem 1.25rem;
-    background: #fff;
-    border-radius: 1.375rem;
+    padding: 0.15rem 0 0.45rem;
+    background: transparent;
+    border-radius: 0;
     border: 0;
-    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+    box-shadow: none;
     box-sizing: border-box;
   }
 
@@ -1827,14 +1827,16 @@ html[data-theme="dark"] body.site-app > .auto-price-suggest .auto-price-suggest_
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-trigger--pill {
     position: relative;
-    height: 3rem;
-    min-height: 3rem;
-    padding: 0 2.35rem 0 1.25rem;
-    border-radius: 999px;
-    border: 1px solid #d0d5dd;
-    background: #f8fafc;
-    color: #6b7280;
-    font: 500 1rem/1.2 system-ui, sans-serif;
+    height: auto;
+    min-height: 2.5rem;
+    padding: 0.4rem 0.05rem 0.55rem;
+    border: 0;
+    border-radius: 0;
+    border-bottom: 1.5px solid #cfd6dd;
+    background: transparent;
+    color: #64748b;
+    font: 600 1.05rem/1.35 system-ui, sans-serif;
+    box-shadow: none;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-trigger--pill.has-value,
@@ -1852,26 +1854,21 @@ html[data-theme="dark"] body.site-app > .auto-price-suggest .auto-price-suggest_
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-trigger--pill [data-auto-bm-combined-summary].is-placeholder {
-    color: #6b7280;
-    font-weight: 500;
+    color: #64748b;
+    font-weight: 600;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-trigger--pill::after {
-    content: "";
-    position: absolute;
-    top: 50%;
-    right: 1.05rem;
-    width: 0.42rem;
-    height: 0.42rem;
-    margin-top: -0.22rem;
-    border-top: 1.5px solid #667085;
-    border-right: 1.5px solid #667085;
-    transform: rotate(45deg);
-    pointer-events: none;
+    content: none;
+    display: none;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-trigger:hover {
     border-color: #98a2b3;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-trigger--pill:hover {
+    border-color: #94a3b8;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-trigger__chev {
@@ -1891,9 +1888,9 @@ html[data-theme="dark"] body.site-app > .auto-price-suggest .auto-price-suggest_
   }
 
   html[data-theme="dark"] body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-trigger--pill {
-    background: #111;
+    background: transparent;
     border-color: #4b5563;
-    color: #9ca3af;
+    color: #94a3b8;
   }
 
   html[data-theme="dark"] body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-trigger--pill.has-value {
@@ -1901,7 +1898,8 @@ html[data-theme="dark"] body.site-app > .auto-price-suggest .auto-price-suggest_
   }
 
   html[data-theme="dark"] body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-trigger--pill::after {
-    border-color: #9ca3af;
+    content: none;
+    display: none;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-panel {

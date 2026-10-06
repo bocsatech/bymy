@@ -130,8 +130,7 @@ export function initHomeQuickSearch({ onSearch = () => {}, onFilterPreview, onDe
   }
 
   function setQsReady(ready) {
-    // Keep form hidden on desk too until layout + pickers settle (avoids filter panel jump).
-    form.classList.toggle("auto-qs-booting", !ready && (mobile() || vehicleDesk()));
+    form.classList.toggle("auto-qs-booting", !ready && mobile());
     form.classList.toggle("is-qs-ready", ready);
   }
 

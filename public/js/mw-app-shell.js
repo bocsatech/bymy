@@ -356,8 +356,21 @@
   }
 
   function injectDeskHeader() {
-    /* Mindig ugyanaz a DOM — különben oldalanként elcsúszik a sav */
-    removeExistingDeskHeaders();
+    var existing = document.querySelector(
+      "body.site-app > .hub-header, body.site-app > header.site-app-header, body.site-app > .site-header, body.site-app > .home-header, body.site-app > .site-app-header"
+    );
+    if (existing) {
+      existing.setAttribute("data-site-desk-header", "");
+      body.setAttribute("data-desk-hdr-ready", "1");
+      pruneForeignHeaders();
+      syncAuthCache();
+      ensureDeskHeaderDeps();
+      return;
+    }
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", injectDeskHeader, { once: true });
+      return;
+    }
 
     var msgSvg =
       '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 6.8h9.5a2.2 2.2 0 0 1 2.2 2.2v4.2a2.2 2.2 0 0 1-2.2 2.2H10l-3.2 2.4V15.2H5A2.2 2.2 0 0 1 2.8 13V9a2.2 2.2 0 0 1 2.2-2.2Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M14.2 8.2h4A2.2 2.2 0 0 1 20.4 10.4v3.4a2.2 2.2 0 0 1-2.2 2.2h-.7v1.7l-2.2-1.7" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>';
@@ -436,13 +449,6 @@
     }
     body.setAttribute("data-desk-hdr-ready", "1");
     pruneForeignHeaders();
-    // A sync script a body közepén fut: a későbbi <header> csak utána kerül a DOM-ba.
-    window.setTimeout(pruneForeignHeaders, 0);
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", pruneForeignHeaders);
-    } else {
-      pruneForeignHeaders();
-    }
     syncAuthCache();
     ensureDeskHeaderDeps();
   }

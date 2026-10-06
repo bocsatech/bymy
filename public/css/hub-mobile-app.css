@@ -866,6 +866,16 @@
     box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
   }
 
+  html[data-theme="dark"] body.site-app .mw-app-tab,
+  html[data-theme="dark"] body.site-app .mw-app-tab__icon {
+    color: #9aa3ad !important;
+  }
+
+  html[data-theme="dark"] body.site-app .mw-app-tab.is-active,
+  html[data-theme="dark"] body.site-app .mw-app-tab.is-active .mw-app-tab__icon {
+    color: #f0c52c !important;
+  }
+
   body.site-app .mw-app-tab {
     flex: 1 1 0;
     display: flex;

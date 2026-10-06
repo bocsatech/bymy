@@ -1712,11 +1712,64 @@ html[data-theme="dark"] body.site-app > .auto-price-suggest .auto-price-suggest_
     border-bottom: 1px solid #e4e7ec;
   }
 
+  html[data-theme="dark"] body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-results-bar {
+    border-bottom-color: #2a313c;
+  }
+
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-results-bar__count {
     margin: 0;
     font-size: 0.92rem;
     font-weight: 700;
     color: #344054;
+  }
+
+  html[data-theme="dark"] body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-results-bar__count,
+  html[data-theme="dark"] body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-sort {
+    color: #e8eaed !important;
+  }
+
+  html[data-theme="dark"] body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-sort select {
+    color: #111 !important;
+    -webkit-text-fill-color: #111 !important;
+    border-color: #4b5563 !important;
+    background-color: #fff !important;
+    color-scheme: light !important;
+  }
+
+  html[data-theme="dark"] body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-view {
+    background: #1f2937 !important;
+    border-color: #4b5563 !important;
+  }
+
+  html[data-theme="dark"] body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-view__btn {
+    color: #9aa3ad !important;
+    border-right-color: #4b5563 !important;
+  }
+
+  html[data-theme="dark"] body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-view__btn.is-active {
+    color: #f0c52c !important;
+    background: #111827 !important;
+  }
+
+  html[data-theme="dark"] body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-tabs {
+    background: #12161c;
+    border-bottom-color: #2a313c;
+  }
+
+  html[data-theme="dark"] body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-tab {
+    color: #9aa3ad !important;
+    border-right-color: #2a313c !important;
+  }
+
+  html[data-theme="dark"] body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-tab:hover,
+  html[data-theme="dark"] body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-tab:focus-visible {
+    background: #1f2937 !important;
+    color: #e8eaed !important;
+  }
+
+  html[data-theme="dark"] body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-tab.is-active {
+    background: #1f2937 !important;
+    color: #fff !important;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-results-bar__tools {

@@ -7518,7 +7518,9 @@ html[data-theme="dark"] body.site-app[data-site-page="uzenetek"] :is(a, strong, 
 html[data-theme="dark"] body.site-app.mm-messages-open :is(a, strong, b, p, span, label, li, h1, h2, h3, h4, small, em, button),
 html[data-theme="dark"] body.site-app[data-site-page="hirdetesfeladas"] :is(a, strong, b, p, span, label, li, h1, h2, h3, h4, small, em, button),
 html[data-theme="dark"] body.site-app.hub-page--feed :is(h1, h2, h3, h4, p, span, a, label, li, small, em),
-html[data-theme="dark"] body.site-app.home-page :is(h1, h2, h3, h4, .hf-title, .hf-all, .hub-nav-link, .ajanlas-title, .ajanlas-subtitle, .ajanlas-note),
+html[data-theme="dark"] body.site-app.home-page :is(h1, h2, h3, h4, .hf-title, .hf-all, .hub-nav-link, .ajanlas-title, .ajanlas-subtitle, .ajanlas-note) {
+  color: #fff !important;
+}
 
 html[data-theme="dark"] body.site-app :is(
   input[type="text"],
@@ -7609,8 +7611,30 @@ html[data-theme="dark"] body.site-app :is(
   .home-grid-card,
   .hub-promo,
   .login-card
-) {
+),
+html[data-theme="dark"] body.site-app.home-page .home-grid-card :is(h1, h2, h3, h4, a, strong, b, p, span, label, small, em),
+html[data-theme="dark"] body.site-app.home-page .home-grid-card-title,
+html[data-theme="dark"] body.site-app.home-page .home-grid-card-sub,
+html[data-theme="dark"] body.site-app.home-page .home-grid-card-price,
+html[data-theme="dark"] body.site-app.home-page .home-grid-card-loc,
+html[data-theme="dark"] body.site-app.home-page .home-grid-card-body {
   color: #111 !important;
+  -webkit-text-fill-color: #111 !important;
+}
+
+html[data-theme="dark"] body.site-app.home-page .home-grid-card-sub {
+  color: #6b7280 !important;
+  -webkit-text-fill-color: #6b7280 !important;
+}
+
+/* Fehér hátterű select (pl. mobil Rendezés) — ne legyen fehér szöveg */
+html[data-theme="dark"] body.site-app .auto-desk-sort select,
+html[data-theme="dark"] body.site-app .auto-desk-results-bar select {
+  color: #111 !important;
+  -webkit-text-fill-color: #111 !important;
+  caret-color: #111 !important;
+  color-scheme: light !important;
+  background-color: #fff !important;
 }
 
 html[data-theme="dark"] body.site-app :is(

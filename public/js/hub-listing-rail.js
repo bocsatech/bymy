@@ -7,7 +7,7 @@ import { bindListingOpen, restoreListingReturn } from "./listing-return.js?v=191
 import {
   TILE_PAGE_INITIAL,
   TILE_PAGE_MORE,
-} from "./listing-tile-pager.js?v=c8e2dddffb";
+} from "./listing-tile-pager.js?v=309c0d60d0";
 
 const CACHE_TTL_MS = 15 * 60 * 1000;
 
@@ -147,12 +147,31 @@ export function initHubListingRail(opts) {
     }
   }
 
+  function listingKey(items) {
+    return (items || [])
+      .map((row) => String(row?.id ?? ""))
+      .filter(Boolean)
+      .join(",");
+  }
+
+  function paintedKey() {
+    return [...RAIL.querySelectorAll("[data-listing-id]")]
+      .map((el) => String(el.dataset.listingId || ""))
+      .join(",");
+  }
+
   function renderInitial(items, meta = {}) {
     nearbyItems = items;
     renderedCount = 0;
     hasAllPrompt = false;
     apiHasMore = Boolean(meta.hasMore);
     if (meta.total != null) totalCount = Number(meta.total);
+    if (items.length && listingKey(items) === paintedKey() && RAIL.querySelector(".hf-card--listing")) {
+      setCountBadge(totalCount != null ? totalCount : items.length);
+      renderedCount = RAIL.querySelectorAll(".hf-card--listing").length;
+      hasAllPrompt = Boolean(RAIL.querySelector(".hf-card--prompt-all"));
+      return;
+    }
     RAIL.innerHTML = "";
     setCountBadge(totalCount != null ? totalCount : items.length);
     appendNext(TILE_PAGE_INITIAL);
@@ -261,7 +280,8 @@ export function initHubListingRail(opts) {
     writeCache,
     async start({ postal, radiusKm }) {
       radiusLabel = radiusKm;
-      setHubSectionVisible(RAIL, false);
+      const hasCards = Boolean(RAIL.querySelector(".hf-card--listing"));
+      if (!hasCards) setHubSectionVisible(RAIL, false);
       totalCount = null;
       apiHasMore = false;
 
@@ -303,6 +323,13 @@ export function initHubListingRail(opts) {
               hasMore: fresh.hasMore,
               total: fresh.total,
             });
+            if (needsPostal && !fresh.skipCache) {
+              writeCache(postal, radiusKm, items, {
+                city: cityLabel,
+                hasMore: fresh.hasMore,
+                total: fresh.total,
+              });
+            }
             RAIL.scrollLeft = keepScroll;
           })
           .catch(() => {});

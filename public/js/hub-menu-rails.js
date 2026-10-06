@@ -1,4 +1,4 @@
-import { HOME_CATEGORIES, autoCategoryHref } from "./home-category-bar.js?v=933743b739";
+import { HOME_CATEGORIES, autoCategoryHref } from "./home-category-bar.js?v=57b2d61f81";
 import {
   categoriesForVertical,
   partnerCategoryImageUrl,
@@ -79,8 +79,13 @@ function initProgressiveRail(rail, items, createCard) {
     if (nearEnd) appendNext(SCROLL_BATCH);
   }
 
-  rail.innerHTML = "";
-  appendNext(INITIAL_COUNT);
+  const existing = rail.querySelectorAll(".hf-card").length;
+  if (existing) {
+    rendered = existing;
+  } else {
+    rail.innerHTML = "";
+    appendNext(INITIAL_COUNT);
+  }
 
   if (rail.dataset.menuLazyBound !== "1") {
     rail.dataset.menuLazyBound = "1";

@@ -11,6 +11,8 @@ const SECTION = document.querySelector('[data-hf="kiemelt"]');
 const RAIL = document.getElementById("hub-featured-rail");
 const EMPTY = document.getElementById("hub-featured-empty");
 const ALL = document.getElementById("hub-featured-all");
+const CACHE_KEY = "bymy-hub-featured-v1";
+const CACHE_TTL_MS = 15 * 60 * 1000;
 
 function setSectionVisible(hasListings) {
   if (SECTION) SECTION.hidden = !hasListings;
@@ -18,13 +20,73 @@ function setSectionVisible(hasListings) {
   if (EMPTY) EMPTY.hidden = true;
 }
 
+function listingKey(items) {
+  return (items || []).map((row) => String(row?.id ?? "")).filter(Boolean).join(",");
+}
+
+function paintedKey() {
+  if (!RAIL) return "";
+  return [...RAIL.querySelectorAll("[data-listing-id]")]
+    .map((el) => String(el.dataset.listingId || ""))
+    .join(",");
+}
+
+function readCache() {
+  try {
+    const data = JSON.parse(sessionStorage.getItem(CACHE_KEY) || "null");
+    if (!data || !Array.isArray(data.items) || !data.items.length) return null;
+    if (Date.now() - Number(data.at || 0) > CACHE_TTL_MS) return null;
+    return data.items.map(slimListingTile);
+  } catch {
+    return null;
+  }
+}
+
+function writeCache(items) {
+  try {
+    sessionStorage.setItem(
+      CACHE_KEY,
+      JSON.stringify({ at: Date.now(), items: items.slice(0, 40).map(slimListingTile) })
+    );
+  } catch {
+  }
+}
+
+function paint(picked) {
+  if (!RAIL) return;
+  if (picked.length && listingKey(picked) === paintedKey()) {
+    setSectionVisible(true);
+    return;
+  }
+  RAIL.innerHTML = "";
+  if (!picked.length) {
+    setSectionVisible(false);
+    return;
+  }
+  const configured = new Set(picked.map((row) => Number(row.id)));
+  picked.forEach((item, index) => {
+    RAIL.appendChild(
+      createListingTileCard(item, {
+        featured: true,
+        configuredFeaturedIds: configured,
+        eager: index < 4,
+      })
+    );
+  });
+  bindListingOpen(RAIL);
+  restoreListingReturn();
+  setSectionVisible(true);
+}
+
 async function init() {
   if (!RAIL || !SECTION) return;
-  setSectionVisible(false);
   if (ALL) ALL.href = "/auto.html?kiemelt=1";
 
+  const cached = readCache();
+  if (cached?.length) paint(cached);
+  else setSectionVisible(false);
+
   try {
-    // Csak csempe-oldalak — max néhány lap, amíg van elég kiemelt jelölt.
     const page = await fetchTilePagesUntil({
       vertical: "auto",
       wantCount: TILE_PAGE_INITIAL,
@@ -57,28 +119,10 @@ async function init() {
       picked = pickFeaturedListings(pool, { limit: TILE_PAGE_INITIAL });
     }
 
-    RAIL.innerHTML = "";
-    if (!picked.length) {
-      setSectionVisible(false);
-      return;
-    }
-
-    const configured = new Set(picked.map((row) => Number(row.id)));
-    picked.forEach((item, index) => {
-      RAIL.appendChild(
-        createListingTileCard(item, {
-          featured: true,
-          configuredFeaturedIds: configured,
-          eager: index < 4,
-        })
-      );
-    });
-
-    bindListingOpen(RAIL);
-    restoreListingReturn();
-    setSectionVisible(true);
+    paint(picked);
+    if (picked.length) writeCache(picked);
   } catch {
-    setSectionVisible(false);
+    if (!RAIL.querySelector(".hf-card--listing")) setSectionVisible(false);
   }
 }
 

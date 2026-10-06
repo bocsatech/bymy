@@ -143,7 +143,15 @@ function resetRailScroll(target = document) {
   }
 }
 
+function hasIntroPromos(target) {
+  return Boolean(target.querySelector(".hub-intro [data-hub-verticals] .hub-promo"));
+}
+
 function paint(target, images) {
+  if (!images && hasIntroPromos(target)) {
+    resetRailScroll(target);
+    return;
+  }
   ensurePromoRoot(target);
   const html = markupFromImages(images);
   const mounts = [...target.querySelectorAll("[data-hub-promo-root]")];
@@ -153,6 +161,7 @@ function paint(target, images) {
   const existing = [...target.querySelectorAll("[data-hub-verticals]")];
   for (const section of existing) {
     if (section.closest("[data-hub-promo-root]")) continue;
+    if (!images && section.closest(".hub-intro") && section.querySelector(".hub-promo")) continue;
     section.outerHTML = html;
   }
   resetRailScroll(target);
@@ -160,6 +169,8 @@ function paint(target, images) {
 }
 
 function paintStockFirst(target) {
+  if (hasIntroPromos(target)) return;
+  if (document.readyState === "loading" && !target.querySelector("[data-hub-verticals]")) return;
   paint(target, null);
 }
 
@@ -180,10 +191,12 @@ export async function mountHubPromos(target = document) {
   } catch {
   }
 
-  if (images) paint(target, images);
+  const custom = Array.isArray(images) && images.length && !images.every(isStockItem);
+  if (custom) paint(target, images);
 }
 
-if (typeof document !== "undefined") {
+if (typeof document !== "undefined" && !window.__bymyHubPromoInit) {
+  window.__bymyHubPromoInit = true;
   if (isPromoPage()) {
     paintStockFirst(document);
     if (document.readyState === "loading") {

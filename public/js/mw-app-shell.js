@@ -490,15 +490,19 @@
       injectTop();
       injectTabbar();
       dedupeTabbars();
+      loadHubPromos();
     });
   } else {
     ensureDeskHeaderCss();
     dedupeTabbars();
+    loadHubPromos();
   }
 
-  import("/js/hub-promo.js?v=cd36c971ed")
-    .then(function (mod) {
-      if (mod && typeof mod.mountHubPromos === "function") return mod.mountHubPromos();
-    })
-    .catch(function () {});
+  function loadHubPromos() {
+    import("/js/hub-promo.js?v=a0002d3dd4")
+      .then(function (mod) {
+        if (mod && typeof mod.mountHubPromos === "function") return mod.mountHubPromos();
+      })
+      .catch(function () {});
+  }
 })();

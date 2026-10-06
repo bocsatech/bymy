@@ -730,8 +730,8 @@ function render(view, listing, related = []) {
     <section class="hd-dealer">
       <div>
         ${
-          view.mapQuery
-            ? `<iframe class="hd-map" title="Térkép" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen src="https://maps.google.com/maps?q=${encodeURIComponent(view.mapQuery)}&hl=hu&z=15&output=embed"></iframe>`
+          navigationDestination(view)
+            ? `<iframe class="hd-map" title="Térkép" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen src="https://maps.google.com/maps?q=${encodeURIComponent(navigationDestination(view))}&hl=hu&z=16&output=embed"></iframe>`
             : ""
         }
         <form class="hd-card" id="hd-contact" style="margin-top:0.9rem" ${canMsg || own ? "hidden" : ""}>

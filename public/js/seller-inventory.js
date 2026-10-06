@@ -483,7 +483,40 @@ function mapOpenHref(query) {
 function mapEmbedSrc(query) {
   const q = String(query || "").trim();
   if (!q) return "";
-  return `https://maps.google.com/maps?q=${encodeURIComponent(q)}&hl=hu&z=15&output=embed`;
+  return `https://maps.google.com/maps?q=${encodeURIComponent(q)}&hl=hu&z=16&output=embed`;
+}
+
+function osmPinEmbed(lat, lon) {
+  const d = 0.012;
+  const bbox = `${lon - d},${lat - d},${lon + d},${lat + d}`;
+  return `https://www.openstreetmap.org/export/embed.html?bbox=${encodeURIComponent(bbox)}&layer=mapnik&marker=${encodeURIComponent(`${lat},${lon}`)}`;
+}
+
+async function fetchSellerCoords(contact, query) {
+  const lines = Array.isArray(contact?.addressLines) ? contact.addressLines : [];
+  const params = new URLSearchParams();
+  if (query) params.set("q", query);
+  if (lines.length) params.set("lines", lines.join("|"));
+  const res = await fetch(`/api/geocode?${params.toString()}`, {
+    credentials: "same-origin",
+  });
+  if (!res.ok) return null;
+  const data = await res.json().catch(() => null);
+  const lat = data?.lat != null ? Number(data.lat) : NaN;
+  const lon = data?.lon != null ? Number(data.lon) : NaN;
+  if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
+  return { lat, lon };
+}
+
+function mapFrameHtml(src) {
+  return `<iframe
+        class="seller-inv__map"
+        title="Térkép"
+        loading="lazy"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen
+        src="${esc(src)}"
+      ></iframe>`;
 }
 
 async function fillSellerMap(panel, contact) {
@@ -496,24 +529,24 @@ async function fillSellerMap(panel, contact) {
   }
   panel.hidden = false;
   const open = mapOpenHref(q);
-  const embed = mapEmbedSrc(q);
+  const openBtn = open
+    ? `<a class="seller-inv__map-open" href="${esc(open)}" target="_blank" rel="noopener noreferrer">Megnyitás a Google Térképen</a>`
+    : "";
   panel.innerHTML = `
     <div class="seller-inv__map-wrap">
-      ${
-        open
-          ? `<a class="seller-inv__map-open" href="${esc(open)}" target="_blank" rel="noopener noreferrer">Megnyitás a Google Térképen</a>`
-          : ""
-      }
-      <iframe
-        class="seller-inv__map"
-        title="Térkép"
-        loading="lazy"
-        referrerpolicy="strict-origin-when-cross-origin"
-        allowfullscreen
-        src="${esc(embed)}"
-      ></iframe>
+      ${openBtn}
+      <div class="seller-inv__map" role="img" aria-label="Térkép betöltése"><p class="seller-inv__hint">Térkép betöltése…</p></div>
     </div>
   `;
+  const wrap = panel.querySelector(".seller-inv__map-wrap");
+  let geo = null;
+  try {
+    geo = await fetchSellerCoords(contact, q);
+  } catch {
+    geo = null;
+  }
+  const src = geo ? osmPinEmbed(geo.lat, geo.lon) : mapEmbedSrc(q);
+  if (wrap) wrap.innerHTML = `${openBtn}${mapFrameHtml(src)}`;
 }
 
 /**

@@ -25,18 +25,6 @@ struct PostAdScreen: View {
 
     private var categoryPicker: some View {
         VStack(spacing: 0) {
-            HStack {
-                Button("Bezárás") {
-                    router.selectBottom(.home, isLoggedIn: true)
-                }
-                .font(.system(size: 16, weight: .semibold))
-                .foregroundStyle(AppTheme.accent)
-                Spacer()
-            }
-            .padding(.horizontal, 16)
-            .padding(.top, 12)
-            .padding(.bottom, 4)
-
             ScrollView {
                 VStack(alignment: .leading, spacing: 14) {
                     VStack(alignment: .leading, spacing: 4) {

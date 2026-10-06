@@ -162,19 +162,16 @@ final class AppRouter: ObservableObject {
         }
     }
 
-    /// Hirdetés / chat / fiók-aloldal / feladás: web szerint nincs top inject a wizardon;
-    /// Fiók megtartja a felső sávot (mint `mw-app-top` a fiok.html-en).
+    /// Hirdetés / chat / fiók-aloldal: nincs top sáv. Feladás megtartja (mint a mobil web mw-app-top).
     var showsTopChrome: Bool {
         openListingId == nil
             && openChat == nil
             && openFiokSection == nil
-            && bottomTab != .post
     }
 
     var showsBottomChrome: Bool {
         openListingId == nil
             && openChat == nil
             && openFiokSection == nil
-            && bottomTab != .post
     }
 }

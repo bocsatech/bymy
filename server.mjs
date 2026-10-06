@@ -347,7 +347,7 @@ async function maybeAutoBlockAbusiveIp(req, pathname) {
   });
   if (!verdict) return;
   try {
-    await autoBlockIp(ip, { ttlMs: verdict.ttlMs, reason: verdict.reason });
+    await autoBlockIp(ip, { reason: verdict.reason });
     console.warn(`[ip-abuse] auto-block ${ip} reason=${verdict.reason}`);
   } catch (err) {
     console.warn("[ip-abuse] persist failed:", err?.message || err);

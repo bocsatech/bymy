@@ -1,5 +1,5 @@
 import { OKMANY_JELLEG_OPTIONS, normalizeOkmanyJelleg } from "./equipment-data.js?v=5a39cb5ba3";
-import { openStandaloneSwitchSheet, closeAutoDrumSheet } from "./auto-drum-sheet.js?v=c76824c88e";
+import { openStandaloneSwitchSheet, closeAutoDrumSheet } from "./auto-drum-sheet.js?v=e4dcef114a";
 
 function labelList(items) {
   if (!items.length) return "Mindegy";

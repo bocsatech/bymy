@@ -1972,7 +1972,9 @@ html[data-theme="dark"] .auto-drum-portal--choice .auto-drum-switch {
 .auto-drum-portal--sheet .immo-drum-inline-text {
   font-size: inherit !important;
   font-weight: inherit !important;
-  color: inherit !important;
+  /* Ne inherit: body sötét mód #fff — fehér kártyán olvashatatlan lenne */
+  color: #111111 !important;
+  -webkit-text-fill-color: #111111 !important;
 }
 
 .auto-drum-portal--sheet .auto-drum-inline-item--child {
@@ -3161,5 +3163,31 @@ html:has(body.auto-drum-sheet-open) {
 
 .auto-drum-sheet {
   display: none !important;
+}
+
+/* Sötét mód — sheet végleges kontraszt (utolsó a fájlban, hogy ne írja felül későbbi light rule) */
+html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-portal__sheet-head,
+html[data-theme="dark"] .auto-drum-portal--sheet.auto-drum-portal--ym .auto-drum-portal__sheet-head,
+html[data-theme="dark"] .auto-drum-portal--sheet.auto-drum-portal--range-sheet .auto-drum-portal__sheet-head,
+html[data-theme="dark"] .auto-drum-portal--sheet.auto-drum-portal--single-sheet .auto-drum-portal__sheet-head {
+  background: #1a2330 !important;
+}
+
+html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-portal__sheet-title {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-portal__ring--sheet,
+html[data-theme="dark"] .auto-drum-portal--sheet .immo-drum-inline-item,
+html[data-theme="dark"] .auto-drum-portal--sheet .immo-drum-inline-text,
+html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-ym__label,
+html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-portal__summary {
+  color: #111111 !important;
+  -webkit-text-fill-color: #111111 !important;
+}
+
+html[data-theme="dark"] .auto-drum-portal--sheet .immo-drum-inline-item {
+  opacity: 1 !important;
 }
 

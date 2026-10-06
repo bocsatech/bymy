@@ -1016,8 +1016,9 @@ function lockSheetWhiteToBlue(root, stage) {
       ring.style.setProperty("flex", "0 1 auto", "important");
     }
   }
-  /* Felső gombsor MINDIG a kék tetején, abszolút, átlátszatlan — nem csúszhat el / nem takarodhat. */
+  /* Felső gombsor abszolút, átlátszatlan — sötét módban sötét fej (fehér cím), világosban #e8eef3. */
   if (head) {
+    const dark = document.documentElement.getAttribute("data-theme") === "dark";
     head.style.setProperty("position", "absolute", "important");
     head.style.setProperty("top", "0", "important");
     head.style.setProperty("left", "0", "important");
@@ -1025,7 +1026,7 @@ function lockSheetWhiteToBlue(root, stage) {
     head.style.setProperty("width", "100%", "important");
     head.style.setProperty("max-width", "100%", "important");
     head.style.setProperty("z-index", "30", "important");
-    head.style.setProperty("background", "#e8eef3", "important");
+    head.style.setProperty("background", dark ? "#1a2330" : "#e8eef3", "important");
     head.style.setProperty("display", "grid", "important");
     head.style.setProperty("visibility", "visible", "important");
     head.style.setProperty("opacity", "1", "important");
@@ -2246,15 +2247,17 @@ function paintSplitColSync(scrollEl, ring) {
   const ringRect = ring.getBoundingClientRect();
   const centerY = ringRect.top + ringRect.height / 2;
   const nearest = nearestPortalItem(scrollEl, ring);
+  /* Fehér sheet-kártyán ne fade-eljük a sorokat — sötét módban fehér-a-fehéren tűnik. */
+  const sheet = Boolean(scrollEl.closest?.(".auto-drum-portal--sheet"));
   scrollEl.querySelectorAll(".immo-drum-inline-item").forEach((item) => {
     const r = item.getBoundingClientRect();
     const mid = r.top + r.height / 2;
     const dist = Math.abs(mid - centerY);
     const t = Math.min(dist / (ITEM_H * 1.15), 1);
     const isSel = item === nearest;
-    item.style.opacity = String(Math.max(0.38, 1 - t * 0.55));
+    item.style.opacity = sheet ? "1" : String(Math.max(0.38, 1 - t * 0.55));
     item.style.fontWeight = dist < ITEM_H * 0.42 || isSel ? "650" : "500";
-    item.style.color = "#0f172a";
+    item.style.color = "#111111";
     item.classList.toggle("is-in-cell", isSel);
     item.classList.toggle("is-selected", isSel);
     item.setAttribute("aria-selected", isSel ? "true" : "false");

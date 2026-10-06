@@ -924,7 +924,7 @@ function createSheetPortalShell(title) {
   root.innerHTML = `
     <button type="button" class="auto-drum-portal__backdrop" aria-label="Bezárás"></button>
     <div class="auto-drum-portal__stage auto-drum-portal__stage--multi auto-drum-portal__stage--sheet" style="left:0;right:0;top:0;bottom:0;width:100%;max-width:100%;margin-left:auto;margin-right:auto;transform:none;box-sizing:border-box;">
-      <header class="auto-drum-portal__sheet-head" style="position:absolute;top:0;left:0;right:0;width:100%;max-width:100%;z-index:30;background:#e8eef3;display:grid;visibility:visible;opacity:1;">
+      <header class="auto-drum-portal__sheet-head" style="position:absolute;top:0;left:0;right:0;width:100%;max-width:100%;z-index:30;display:grid;visibility:visible;opacity:1;">
         <button type="button" class="auto-drum-portal__close" aria-label="Bezárás">×</button>
         <h2 class="auto-drum-portal__sheet-title"></h2>
         <button type="button" class="auto-drum-portal__done auto-drum-portal__done--sheet-top">Kész</button>

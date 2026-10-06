@@ -1674,6 +1674,57 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   word-break: break-word;
 }
 
+/* Sötét mód: sheet fejléc + cím kontraszt (ne fehér szöveg világos kéken) */
+html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-portal__stage--sheet {
+  background: #1a2330 !important;
+}
+
+html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-portal__sheet-head {
+  background: #1a2330 !important;
+}
+
+html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-portal__sheet-title,
+html[data-theme="dark"] body.site-app .auto-drum-portal--sheet .auto-drum-portal__sheet-title,
+html[data-theme="dark"] body.site-app.home-page .auto-drum-portal--sheet .auto-drum-portal__sheet-title {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-portal__close {
+  background: #2a3444 !important;
+  color: #ffffff !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-portal__ring--sheet {
+  background: #111827 !important;
+  border-color: #374151 !important;
+  color: #f3f4f6 !important;
+}
+
+html[data-theme="dark"] .auto-drum-portal--sheet .immo-drum-inline-item,
+html[data-theme="dark"] .auto-drum-portal--sheet .immo-drum-inline-text,
+html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-inline-item--switch,
+html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-portal__scroll {
+  color: #f3f4f6 !important;
+  -webkit-text-fill-color: #f3f4f6 !important;
+}
+
+html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-portal__toolbar .auto-drum-portal__sub,
+html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-portal__toolbar .auto-drum-portal__back {
+  color: #f3f4f6 !important;
+  -webkit-text-fill-color: #f3f4f6 !important;
+}
+
+html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-portal__toolbar .auto-drum-portal__back {
+  background: #2a3444 !important;
+}
+
+html[data-theme="dark"] .auto-drum-portal--choice .auto-drum-switch {
+  background: #4b5563 !important;
+  border-color: #6b7280 !important;
+}
+
 .auto-drum-portal--sheet .auto-drum-portal__sheet-head-spacer {
   width: 2.35rem;
   height: 2.35rem;

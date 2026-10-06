@@ -2463,6 +2463,50 @@ html[data-theme="dark"] body.site-app > .auto-price-suggest .auto-price-suggest_
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-panel .auto-bm-row + .auto-bm-row {
     border-top: 1px solid var(--ad-line, #d4d4d4);
   }
+
+  /* Mobil BM sheet sötét mód */
+  html[data-theme="dark"] body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-panel {
+    background: #1a2330 !important;
+    color: #fff !important;
+  }
+
+  html[data-theme="dark"] body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-panel .auto-bm-panel__chrome {
+    background: #1a2330 !important;
+    border-bottom-color: #2a3444 !important;
+  }
+
+  html[data-theme="dark"] body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-panel .auto-bm-panel__title,
+  html[data-theme="dark"] body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-panel .auto-bm-panel__sub,
+  html[data-theme="dark"] body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-panel .auto-bm-toggle,
+  html[data-theme="dark"] body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-panel .auto-bm-hint {
+    color: #fff !important;
+    -webkit-text-fill-color: #fff !important;
+  }
+
+  html[data-theme="dark"] body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-panel .auto-bm-panel__back {
+    color: #fff !important;
+  }
+
+  html[data-theme="dark"] body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-panel .auto-bm-group {
+    background: #111827 !important;
+    border-color: #374151 !important;
+  }
+
+  html[data-theme="dark"] body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-panel .auto-bm-row + .auto-bm-row {
+    border-top-color: #374151 !important;
+  }
+
+  html[data-theme="dark"] body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-panel .auto-bm-panel__search-input {
+    background: #111827 !important;
+    border-color: #374151 !important;
+    color: #fff !important;
+    -webkit-text-fill-color: #fff !important;
+    color-scheme: dark !important;
+  }
+
+  html[data-theme="dark"] body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-bm-panel .auto-bm-panel__search-input::placeholder {
+    color: #9aa3ad !important;
+  }
 }
 
 /* Görgetés: csak a kategória-csempék — hirdetések NEM */

@@ -24,7 +24,7 @@ function injectStylesheet() {
   if (document.querySelector('link[data-seller-inv-css]')) return;
   const link = document.createElement("link");
   link.rel = "stylesheet";
-  link.href = "/css/seller-inventory.css?v=sellerInv31";
+  link.href = "/css/seller-inventory.css?v=sellerInv32";
   link.dataset.sellerInvCss = "1";
   document.head.appendChild(link);
   if (!document.querySelector('link[data-ertek-qr-css]')) {
@@ -480,43 +480,10 @@ function mapOpenHref(query) {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`;
 }
 
-let leafletPromise = null;
-
-function loadLeaflet() {
-  if (window.L) return Promise.resolve(window.L);
-  if (leafletPromise) return leafletPromise;
-  leafletPromise = new Promise((resolve, reject) => {
-    if (!document.querySelector('link[data-leaflet-css]')) {
-      const link = document.createElement("link");
-      link.rel = "stylesheet";
-      link.href = "/vendor/leaflet/leaflet.css";
-      link.dataset.leafletCss = "1";
-      document.head.appendChild(link);
-    }
-    const script = document.createElement("script");
-    script.src = "/vendor/leaflet/leaflet.js";
-    script.async = true;
-    script.onload = () => (window.L ? resolve(window.L) : reject(new Error("Leaflet nem töltődött.")));
-    script.onerror = () => reject(new Error("Leaflet betöltési hiba."));
-    document.head.appendChild(script);
-  });
-  return leafletPromise;
-}
-
-async function fetchSellerCoords(contact, query) {
-  const lines = Array.isArray(contact?.addressLines) ? contact.addressLines : [];
-  const params = new URLSearchParams();
-  if (query) params.set("q", query);
-  if (lines.length) params.set("lines", lines.join("|"));
-  const res = await fetch(`/api/geocode?${params.toString()}`, {
-    credentials: "same-origin",
-  });
-  if (!res.ok) return null;
-  const data = await res.json().catch(() => null);
-  const lat = data?.lat != null ? Number(data.lat) : NaN;
-  const lon = data?.lon != null ? Number(data.lon) : NaN;
-  if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
-  return { lat, lon };
+function mapEmbedSrc(query) {
+  const q = String(query || "").trim();
+  if (!q) return "";
+  return `https://maps.google.com/maps?q=${encodeURIComponent(q)}&hl=hu&z=15&output=embed`;
 }
 
 async function fillSellerMap(panel, contact) {
@@ -529,6 +496,7 @@ async function fillSellerMap(panel, contact) {
   }
   panel.hidden = false;
   const open = mapOpenHref(q);
+  const embed = mapEmbedSrc(q);
   panel.innerHTML = `
     <div class="seller-inv__map-wrap">
       ${
@@ -536,49 +504,16 @@ async function fillSellerMap(panel, contact) {
           ? `<a class="seller-inv__map-open" href="${esc(open)}" target="_blank" rel="noopener noreferrer">Megnyitás a Google Térképen</a>`
           : ""
       }
-      <div class="seller-inv__map" data-si-map-canvas role="img" aria-label="Kereskedés helye"></div>
+      <iframe
+        class="seller-inv__map"
+        title="Térkép"
+        loading="lazy"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen
+        src="${esc(embed)}"
+      ></iframe>
     </div>
   `;
-  const canvas = panel.querySelector("[data-si-map-canvas]");
-  if (!canvas) return;
-
-  let geo = null;
-  try {
-    geo = await fetchSellerCoords(contact, q);
-  } catch {
-    geo = null;
-  }
-  if (!geo) {
-    canvas.innerHTML = `<p class="seller-inv__hint">A cím nem található a térképen.</p>`;
-    return;
-  }
-
-  try {
-    const L = await loadLeaflet();
-    const map = L.map(canvas, {
-      scrollWheelZoom: false,
-      attributionControl: true,
-    }).setView([geo.lat, geo.lon], 14);
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      maxZoom: 19,
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-    }).addTo(map);
-    L.marker([geo.lat, geo.lon]).addTo(map);
-    const refresh = () => {
-      try {
-        map.invalidateSize({ animate: false });
-      } catch {
-        /* ignore */
-      }
-    };
-    requestAnimationFrame(refresh);
-    setTimeout(refresh, 50);
-    setTimeout(refresh, 250);
-    setTimeout(refresh, 800);
-    window.addEventListener("resize", refresh, { passive: true });
-  } catch {
-    canvas.innerHTML = `<p class="seller-inv__hint">A térkép nem tölthető be.</p>`;
-  }
 }
 
 /**

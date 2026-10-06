@@ -731,7 +731,7 @@ function render(view, listing, related = []) {
       <div>
         ${
           view.mapQuery
-            ? `<iframe class="hd-map" title="Térkép" loading="lazy" referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox" src="https://maps.google.com/maps?q=${encodeURIComponent(view.mapQuery)}&output=embed"></iframe>`
+            ? `<iframe class="hd-map" title="Térkép" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen src="https://maps.google.com/maps?q=${encodeURIComponent(view.mapQuery)}&hl=hu&z=15&output=embed"></iframe>`
             : ""
         }
         <form class="hd-card" id="hd-contact" style="margin-top:0.9rem" ${canMsg || own ? "hidden" : ""}>

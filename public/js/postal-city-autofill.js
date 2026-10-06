@@ -93,6 +93,22 @@ function findMegyeInput(postalInput) {
   );
 }
 
+function setPostalHint(postalInput, message, { isError = false } = {}) {
+  const root = scopeRoot(postalInput);
+  const busyEl = root.querySelector("[data-city-busy]");
+  if (!busyEl) return;
+  if (!message) {
+    busyEl.hidden = true;
+    busyEl.textContent = "";
+    busyEl.classList.remove("is-error");
+    return;
+  }
+  busyEl.hidden = false;
+  busyEl.textContent = message;
+  busyEl.classList.toggle("is-error", isError);
+  busyEl.style.color = isError ? "#b42318" : "";
+}
+
 async function lookupPostal(postal) {
   const params = new URLSearchParams({ postal_code: postal });
   const res = await fetch(`/api/postal-codes/lookup?${params}`, { credentials: "same-origin" });
@@ -117,22 +133,40 @@ export function wirePostalCityAutofill(root = document) {
     const run = async () => {
       const digits = digits4(postalInput.value);
       if (postalInput.value !== digits) postalInput.value = digits;
-      if (digits.length !== 4) return;
+      const cityInput = findCityInput(postalInput);
+      if (digits.length !== 4) {
+        last = "";
+        cityInput?.setCustomValidity("");
+        setPostalHint(postalInput, "");
+        return;
+      }
       if (digits === last || busy) return;
       busy = true;
+      setPostalHint(postalInput, "…");
       try {
         const data = await lookupPostal(digits);
         last = digits;
-        if (!data?.city) return;
-        const cityInput = findCityInput(postalInput);
-        if (cityInput) {
-          delete cityInput.dataset.userEdited;
-          setValue(cityInput, data.city);
+        if (data?.city) {
+          if (cityInput) {
+            cityInput.dataset.autofilled = "1";
+            cityInput.setCustomValidity("");
+            setValue(cityInput, data.city);
+          }
+          const megyeInput = findMegyeInput(postalInput);
+          if (megyeInput && data.megye) setValue(megyeInput, data.megye);
+          setPostalHint(postalInput, "");
+          return;
         }
-        const megyeInput = findMegyeInput(postalInput);
-        if (megyeInput && data.megye) setValue(megyeInput, data.megye);
+        if (cityInput && cityInput.dataset.autofilled === "1") {
+          setValue(cityInput, "");
+          delete cityInput.dataset.autofilled;
+        }
+        cityInput?.setCustomValidity("Ismeretlen irányítószám.");
+        setPostalHint(postalInput, "ismeretlen irsz", { isError: true });
       } catch {
         last = digits;
+        cityInput?.setCustomValidity("A település most nem tölthető be.");
+        setPostalHint(postalInput, "hiba", { isError: true });
       } finally {
         busy = false;
       }

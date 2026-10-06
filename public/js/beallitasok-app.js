@@ -15,7 +15,7 @@ import {
   resolveAccountKind,
   applyAccountKindToDocument,
 } from "./site-auth.js?v=aad32d7596";
-import { wirePostalCityAutofill } from "./postal-city-autofill.js?v=14f1f30116";
+import { wirePostalCityAutofill } from "./postal-city-autofill.js?v=irszErr1";
 import {
   getParkplatz,
   pruneParkplatzMissing,

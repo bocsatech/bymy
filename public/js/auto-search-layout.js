@@ -1,7 +1,7 @@
 
 import { initVehicleCatalogSelects, fillSelect } from "./vehicle-catalog-client.js?v=5004d33efa";
 import { KIVITEL_OPTIONS } from "./kivitel-options.js?v=be03aefc2e";
-import { wirePostalCityAutofill as wireSharedPostalCityAutofill } from "./postal-city-autofill.js?v=14f1f30116";
+import { wirePostalCityAutofill as wireSharedPostalCityAutofill } from "./postal-city-autofill.js?v=irszErr1";
 import {
   flattenAllapotOptions,
   flattenSebessegvaltoOptions,

@@ -1140,6 +1140,7 @@ async function handleImport(req, res) {
   try {
     const { importListings } = await import("./lib/import-listings.mjs");
     const result = await importListings(url, {
+      userId: user.id,
       limit: body.limit ?? 20,
       autoSave: body.autoSave !== false,
       onProgress: (message) => send({ type: "log", message }),
@@ -1249,6 +1250,11 @@ async function handleListingsApi(req, res, pathname) {
   if (latestMatch && req.method === "GET") {
     const latest = await getLatestListing();
     const access = await listingAccessFlags(req);
+    const privateView = Boolean(access?.isAdmin || canManageListing(latest, access?.user));
+    if (latest && latest.status !== "feladott" && !privateView) {
+      sendJson(res, 200, { listing: null });
+      return;
+    }
     sendJson(res, 200, {
       listing: latest ? applyListingAccessPolicy(latest, access) : null,
     });
@@ -1282,7 +1288,7 @@ async function handleListingsApi(req, res, pathname) {
 
   if (listMatch && req.method === "GET") {
     const url = new URL(req.url ?? "", `http://${HOST}`);
-    const status = url.searchParams.get("status");
+    const statusRaw = String(url.searchParams.get("status") || "").trim();
     const vertical = url.searchParams.get("vertical");
     const owner = url.searchParams.get("owner") || url.searchParams.get("userId");
     if (owner) {
@@ -1298,11 +1304,13 @@ async function handleListingsApi(req, res, pathname) {
         userId: owner,
         limit,
         excludeId,
-        status: status || "feladott",
+        status: statusRaw || "feladott",
       });
       sendJson(res, 200, { listings });
       return;
     }
+    // Nyilvános feed: mindig feladott (ne lehessen ?status=mentett-tel draftot kérni)
+    const status = "feladott";
     // Opcionális bot-védő — alapból ki (CF + cache véd). Bekapcsolás: LISTINGS_PUBLIC_RATE_PER_MIN=2400
     const listRatePerMin = Number(process.env.LISTINGS_PUBLIC_RATE_PER_MIN);
     const listRate =
@@ -1845,8 +1853,10 @@ async function handleListingsApi(req, res, pathname) {
           sendJson(res, 403, { error: "A sablon nincs engedélyezve ehhez a fiókhoz.", code: "PROMO_DENIED" });
           return;
         }
-      } catch {
-        /* ignore privilege check failure → deny nothing if module missing */
+      } catch (err) {
+        console.error("[promo] privilege check failed", err);
+        sendJson(res, 403, { error: "Nincs jogosultság a mező módosításához.", code: "PROMO_DENIED" });
+        return;
       }
       const updated = await patchListingFormFields(listing.id, fields);
       sendJson(res, 200, { listing: updated });
@@ -1864,6 +1874,12 @@ async function handleListingsApi(req, res, pathname) {
       sendJson(res, 404, { error: "Nincs ilyen hirdetés." });
       return;
     }
+    const access = await listingAccessFlags(req);
+    const privateView = Boolean(access?.isAdmin || canManageListing(listing, access?.user));
+    if (listing.status !== "feladott" && !privateView) {
+      sendJson(res, 404, { error: "Nincs ilyen hirdetés." });
+      return;
+    }
     if (listing.detail) {
       listing.detail = await attachSellerProfile(listing.detail, listing.user_id);
     }
@@ -1874,9 +1890,7 @@ async function handleListingsApi(req, res, pathname) {
         listing.partner = null;
       }
     }
-    const access = await listingAccessFlags(req);
     const payload = { listing: applyListingAccessPolicy(listing, access) };
-    const privateView = Boolean(access?.isAdmin || canManageListing(listing, access?.user));
     const isPublicFeladott = listing.status === "feladott" && !privateView;
     sendJson(
       res,
@@ -2902,7 +2916,9 @@ async function handleAuthApi(req, res, pathname) {
         activationLink: mail.sent || !allowDevSecretsInResponse() ? undefined : mail.link,
         message: mail.sent
           ? `Új aktiváló emailt küldtünk: ${created.email}`
-          : `SMTP nincs beállítva. Link: ${mail.link}`,
+          : allowDevSecretsInResponse()
+            ? `SMTP nincs beállítva. Link: ${mail.link}`
+            : `Ha van ilyen fiók, küldtünk aktiváló emailt (vagy az SMTP nincs beállítva).`,
       });
       return;
     }

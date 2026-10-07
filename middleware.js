@@ -2,6 +2,8 @@
  * Vercel Edge: csak regisztrált felhasználók (HTML + API cookie ellenőrzés).
  * Nyilvános útvonalak: lib/site-gate.mjs (ugyanaz, mint S1 server.mjs).
  * Kikapcsolás: SITE_PUBLIC=1
+ *
+ * Session: nem elég a cookie létezése — /api/auth/me-vel ellenőrizzük.
  */
 
 import {
@@ -26,12 +28,29 @@ function isPublic(pathname, method) {
   return false;
 }
 
-function hasSessionCookie(request) {
+async function sessionUserEmail(request) {
   const cookie = request.headers.get("cookie") || "";
-  return /(?:^|;\s*)autosweb_session=/.test(cookie);
+  if (!/(?:^|;\s*)autosweb_session=/.test(cookie)) return "";
+  try {
+    const meUrl = new URL("/api/auth/me", request.url);
+    const res = await fetch(meUrl, {
+      method: "GET",
+      headers: {
+        cookie,
+        accept: "application/json",
+        "x-bymy-edge-gate": "1",
+      },
+      redirect: "manual",
+    });
+    if (!res.ok) return "";
+    const data = await res.json().catch(() => null);
+    return String(data?.user?.email || "").trim();
+  } catch {
+    return "";
+  }
 }
 
-export default function middleware(request) {
+export default async function middleware(request) {
   if (!isMembersOnlySite()) return;
 
   const url = new URL(request.url);
@@ -45,7 +64,8 @@ export default function middleware(request) {
     return;
   }
 
-  if (hasSessionCookie(request)) return;
+  const email = await sessionUserEmail(request);
+  if (email) return;
 
   if (pathname.startsWith("/api/")) {
     return new Response(JSON.stringify({ error: "Belépés szükséges.", code: "AUTH_REQUIRED" }), {
@@ -59,5 +79,5 @@ export default function middleware(request) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|cdn-cgi/).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
 };

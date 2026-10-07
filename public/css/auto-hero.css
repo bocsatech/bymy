@@ -3512,3 +3512,45 @@ html[data-theme="dark"] body:is([data-site-page="auto"], [data-site-page="tehera
   color: #f3f4f6 !important;
   border-color: #2a3444 !important;
 }
+
+
+/* Sötét mód mobil: BM kombinált mező címke/placeholder kontraszt */
+html[data-theme="dark"] body:is([data-site-page="auto"], [data-site-page="teherauto"])
+  .auto-search-panel
+  .auto-qs-drums
+  .immo-schema-cell.auto-search-bm-combined {
+  background: transparent !important;
+}
+
+html[data-theme="dark"] body:is([data-site-page="auto"], [data-site-page="teherauto"])
+  .auto-search-panel
+  .auto-qs-drums
+  .immo-schema-cell.auto-search-bm-combined
+  > .immo-label {
+  color: #e5e7eb !important;
+  -webkit-text-fill-color: #e5e7eb !important;
+}
+
+html[data-theme="dark"] body:is([data-site-page="auto"], [data-site-page="teherauto"])
+  .auto-search-panel
+  .auto-qs-drums
+  .immo-schema-cell.auto-search-bm-combined
+  .immo-wheel-trigger.is-placeholder {
+  color: #9aa3ad !important;
+  -webkit-text-fill-color: #9aa3ad !important;
+  border-bottom-color: #3b4450 !important;
+}
+
+html[data-theme="dark"] body:is([data-site-page="auto"], [data-site-page="teherauto"])
+  .auto-search-panel
+  .auto-qs-drums
+  .immo-schema-cell.auto-search-bm-combined.has-value
+  .immo-wheel-trigger,
+html[data-theme="dark"] body:is([data-site-page="auto"], [data-site-page="teherauto"])
+  .auto-search-panel
+  .auto-qs-drums
+  .immo-schema-cell.auto-search-bm-combined
+  .immo-wheel-trigger:not(.is-placeholder) {
+  color: #f3f4f6 !important;
+  -webkit-text-fill-color: #f3f4f6 !important;
+}

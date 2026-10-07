@@ -4018,7 +4018,9 @@ body.site-app .mm-nav-link {
   cursor: pointer;
 }
 
-body.site-app .mm-nav-link[hidden] {
+body.site-app .mm-nav-link[hidden],
+body.site-app .mm-nav-sublink[hidden],
+body.site-app .mm-card[hidden] {
   display: none !important;
 }
 

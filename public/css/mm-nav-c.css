@@ -52,6 +52,11 @@ body.site-app .mm-nav-link {
   box-sizing: border-box;
 }
 
+body.site-app .mm-nav-link[hidden],
+body.site-app .mm-nav-sublink[hidden] {
+  display: none !important;
+}
+
 body.site-app .mm-nav-link:hover {
   background: #f2f4f7;
 }

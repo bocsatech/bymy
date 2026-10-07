@@ -2515,3 +2515,56 @@ body.home-page[data-site-page="teherauto"] #home-category-bar.is-cat-scrolling {
   opacity: 0 !important;
   pointer-events: none !important;
 }
+
+
+/* Sötét mód desk: fehér accordion / mezőkártyák ne legyenek fehér-a-fehéren */
+@media (min-width: 901px) {
+  html[data-theme="dark"] body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-acc {
+    background: #1e2836 !important;
+    box-shadow: none !important;
+  }
+
+  html[data-theme="dark"] body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-acc__head {
+    color: #f3f4f6 !important;
+    border-bottom-color: #2a3444 !important;
+  }
+
+  html[data-theme="dark"] body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-acc__sum,
+  html[data-theme="dark"] body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-desk-acc__chev {
+    color: #9aa3ad !important;
+  }
+
+  html[data-theme="dark"] body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .home-qs-label,
+  html[data-theme="dark"] body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .immo-schema-label,
+  html[data-theme="dark"] body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .immo-label,
+  html[data-theme="dark"] body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .immo-dual-range__title,
+  html[data-theme="dark"] body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .qs-detailed-range__label,
+  html[data-theme="dark"] body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .qs-detailed-select__label,
+  html[data-theme="dark"] body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .qs-detailed-sheet-field__label,
+  html[data-theme="dark"] body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .auto-desk-field__label {
+    color: #e5e7eb !important;
+    -webkit-text-fill-color: #e5e7eb !important;
+    background: transparent !important;
+  }
+
+  html[data-theme="dark"] body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .immo-dual-range__summary,
+  html[data-theme="dark"] body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .immo-wheel-trigger,
+  html[data-theme="dark"] body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .home-qs-control {
+    color: #f3f4f6 !important;
+    -webkit-text-fill-color: #f3f4f6 !important;
+  }
+
+  html[data-theme="dark"] body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .qs-detailed-extra-pill {
+    background: #1e2836 !important;
+    box-shadow: none !important;
+  }
+
+  html[data-theme="dark"] body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .qs-detailed-extra-pill__title {
+    color: #f3f4f6 !important;
+  }
+
+  html[data-theme="dark"] body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .qs-detailed-extra-pill__sum,
+  html[data-theme="dark"] body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel .qs-detailed-extra-pill__chev {
+    color: #9aa3ad !important;
+  }
+}

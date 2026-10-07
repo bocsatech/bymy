@@ -22,7 +22,7 @@ import { filterByCategory, initHomeCategoryBar, renderHomeCategoryBar, HOME_CATE
 import { initHomeUnifiedScroll } from "./home-unified-scroll.js?v=19bcc2aeb6";
 import { initHomeStatsBar } from "./home-stats-bar.js?v=84ac6f75c1";
 import { buildNearbyFilter, readNearbyPrefs } from "./nearby-search.js?v=0efee20d13";
-import { getAuthUser } from "./site-auth.js?v=aad32d7596";
+import { getAuthUser } from "./site-auth.js?v=b7e73b74b0";
 import {
   bindListingOpen,
   restoreListingReturn,

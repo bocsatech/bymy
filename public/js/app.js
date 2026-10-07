@@ -19,7 +19,7 @@ import {
   loginUrl,
   initSiteAuth,
   loadProfileFromServer,
-} from "./site-auth.js?v=aad32d7596";
+} from "./site-auth.js?v=b7e73b74b0";
 import {
   applyListingAddressFromProfile,
   applyListingAddressFromProfileSync,

@@ -531,13 +531,11 @@ export function applyAccountKindToDocument(kind = resolveAccountKind()) {
 function profileSaveLooksOk(profile) {
   if (!profile) return false;
   if (profile.accountType === "business" || profile.accountType === "dealer") {
-    return Boolean(
-      String(profile.company || "").trim() ||
-        String(profile.companyTaxId || "").trim() ||
-        String(profile.companyStreet || "").trim() ||
-        String(profile.companyPostalCode || "").trim() ||
-        String(profile.firstName || "").trim()
-    );
+    const company = String(profile.company || "").trim();
+    const postal = String(profile.companyPostalCode || "").replace(/\D/g, "").slice(0, 4);
+    const city = String(profile.companyCity || "").trim();
+    const phone = String(profile.companyPhone || profile.phone || "").trim();
+    return Boolean(company && postal.length === 4 && city && phone);
   }
   return isPrivateProfileComplete(profile);
 }

@@ -14,7 +14,7 @@ import {
   isPrivateProfileComplete,
   resolveAccountKind,
   applyAccountKindToDocument,
-} from "./site-auth.js?v=aad32d7596";
+} from "./site-auth.js?v=b7e73b74b0";
 import { wirePostalCityAutofill } from "./postal-city-autofill.js?v=irszErr1";
 import {
   getParkplatz,
@@ -48,7 +48,7 @@ import {
   stripDeviceIdentityFormFields,
 } from "./device-contract-identity.js?v=cdac1e6ebc";
 import { fillCountrySelect, PHONE_COUNTRIES } from "./phone-lang-ui.js?v=bc55c36aef";
-import { renderPartnerManage } from "./partner-profile.js?v=46ef847b6f";
+import { renderPartnerManage } from "./partner-profile.js?v=c20c0f64ef";
 
 const PHOTO_KEY = "bymy-avatar-photos";
 const NOTIFY_KEY = "bymy-notify-prefs";

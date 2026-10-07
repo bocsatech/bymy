@@ -1,7 +1,7 @@
 /**
  * Hirdetésfeladás — AI leírásjavítás gomb.
  */
-import { getAuthUser } from "./site-auth.js?v=aad32d7596";
+import { getAuthUser } from "./site-auth.js?v=b7e73b74b0";
 
 function collectFormSnapshot(form) {
   const data = {};

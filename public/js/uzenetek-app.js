@@ -1,4 +1,4 @@
-import { requireAuthForPage, initSiteAuth } from "./site-auth.js?v=aad32d7596";
+import { requireAuthForPage, initSiteAuth } from "./site-auth.js?v=b7e73b74b0";
 import { initMessagesUi } from "./messages-ui.js?v=78e9d9204f";
 
 if (!(await requireAuthForPage())) {

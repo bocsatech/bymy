@@ -1,5 +1,5 @@
 import { fetchListing } from "./db-client.js?v=658bac0c0e";
-import { getAuthUser, getProfile, requireAuthForPage } from "./site-auth.js?v=aad32d7596";
+import { getAuthUser, getProfile, requireAuthForPage } from "./site-auth.js?v=b7e73b74b0";
 import { emptyPerson, isBusinessProfile, personFromProfile, vehicleFromListing } from "./adasveteli-data.js?v=4cf411f416";
 import {
   applyDeviceIdentityToPerson,

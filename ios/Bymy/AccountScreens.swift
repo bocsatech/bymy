@@ -143,7 +143,7 @@ struct AccountScreen: View {
         items.append(.link(.ajanlasokKorzet))
         items.append(.link(.jelszo))
         items.append(.link(.notify))
-        items.append(.link(.megjelenes))
+        // Megjelenés menü rejtve (web parity) — panel URL-lel még elérhető
         return items
     }
 

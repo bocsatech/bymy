@@ -4,7 +4,7 @@ import {
   TEHER_35_KIVITEL_CATEGORIES,
   flattenTeher35KivitelOptions,
 } from "./equipment-data.js?v=5a39cb5ba3";
-import { openStandaloneSwitchSheet, closeAutoDrumSheet } from "./auto-drum-sheet.js?v=f9cedeaea8";
+import { openStandaloneSwitchSheet, closeAutoDrumSheet } from "./auto-drum-sheet.js?v=310fd26631";
 
 const EMPTY_LABEL = "Mindegy";
 const SUMMARY_EMPTY = "Mindegy";

@@ -15,7 +15,7 @@ import {
   resolveAccountKind,
   applyAccountKindToDocument,
 } from "./site-auth.js?v=b7e73b74b0";
-import { wirePostalCityAutofill } from "./postal-city-autofill.js?v=irszErr1";
+import { wirePostalCityAutofill } from "./postal-city-autofill.js?v=ba74000828";
 import {
   getParkplatz,
   pruneParkplatzMissing,
@@ -28,16 +28,15 @@ import {
   removeSavedSearch,
   toggleSavedSearchNotify,
 } from "./fok-data.js?v=289f64e75c";
-import { savedSearchHref, summarizeSavedSearchFilters } from "./saved-search.js?v=c636db31bd";
-import { initMessagesUi } from "./messages-ui.js?v=ee1b57d8e5";
+import { savedSearchHref, summarizeSavedSearchFilters } from "./saved-search.js?v=787f348a6c";
+import { initMessagesUi } from "./messages-ui.js?v=4212c717fc";
 import { listConversations } from "./messages-api.js?v=5cf6493dc9";
-import { initMyAdsPanel } from "./my-ads.js?v=c3cf174580";
-import { initErtekbecsloPanel } from "./ertekbecslo-app.js?v=83a4452583";
+import { initMyAdsPanel } from "./my-ads.js?v=c7c3ad807f";
 import {
   consumeSettingsReturn,
   hasSettingsReturn,
 } from "./site-avatar-menu.js?v=4c911388e7";
-import { fetchListing, fetchExistingListingIds } from "./db-client.js?v=d4237f0b1b";
+import { fetchListing, fetchExistingListingIds } from "./db-client.js?v=2fdece240c";
 import {
   applyDeviceIdentityToPerson,
   getDeviceIdentity,
@@ -48,7 +47,7 @@ import {
   stripDeviceIdentityFormFields,
 } from "./device-contract-identity.js?v=cdac1e6ebc";
 import { fillCountrySelect, PHONE_COUNTRIES } from "./phone-lang-ui.js?v=bc55c36aef";
-import { renderPartnerManage } from "./partner-profile.js?v=c20c0f64ef";
+import { renderPartnerManage } from "./partner-profile.js?v=c6bd338877";
 
 const PHOTO_KEY = "bymy-avatar-photos";
 const NOTIFY_KEY = "bymy-notify-prefs";
@@ -573,7 +572,9 @@ function setSection(section) {
     void ensurePartnerProfilPanel();
   }
   if (next === "ertekbecslo") {
-    void initErtekbecsloPanel();
+    void import("./ertekbecslo-app.js?v=4bf694b9ae")
+      .then((mod) => mod.initErtekbecsloPanel?.())
+      .catch((err) => console.error("[beallitasok] ertekbecslo load failed", err));
   }
 }
 

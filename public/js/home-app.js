@@ -1,5 +1,5 @@
-import { fetchListings, fetchListingsPage, fetchRelatedListingsPage } from "./db-client.js?v=3baa1cfce7";
-import { createHomeGridCard, initHomeGridCardPhotos } from "./home-grid-card.js?v=f3c4783331";
+import { fetchListings, fetchListingsPage, fetchRelatedListingsPage } from "./db-client.js?v=2fdece240c";
+import { createHomeGridCard, initHomeGridCardPhotos } from "./home-grid-card.js?v=96cea3827d";
 import { promoKiemeltActive, promoTopAjanlatActive } from "./listing-promo.js?v=a2c84c124b";
 import {
   emptyFilters,
@@ -7,18 +7,18 @@ import {
   populateFilterOptions,
   initHomeSearchSidebar,
   initHomeFilterCatalog,
-} from "./home-search-filter.js?v=77d30b5c36";
-import { initHomeQuickSearch } from "./home-quicksearch.js?v=a571a47468";
-import { decodeSavedSearchParam, encodeSavedSearchParam } from "./saved-search.js?v=c636db31bd";
-import { matchDetailedSearch, hasActiveDetailedSearch } from "./auto-detailed-search.js?v=24928b4442";
+} from "./home-search-filter.js?v=09eceb25bd";
+import { initHomeQuickSearch } from "./home-quicksearch.js?v=5dec9c2aeb";
+import { decodeSavedSearchParam, encodeSavedSearchParam } from "./saved-search.js?v=787f348a6c";
+import { matchDetailedSearch, hasActiveDetailedSearch } from "./auto-detailed-search.js?v=5e6067d52f";
 import { updateAutoDeskResultCount, updateAutoDeskAccSummaries } from "./auto-desk-search.js?v=f99edb6978";
 import {
   emptyIngatlanFilters,
   filterListingsByIngatlan,
   initIngatlanSearch,
-} from "./ingatlan-search.js?v=b7394ccb39";
+} from "./ingatlan-search.js?v=ed1ec3cb23";
 import { normalizeIngatlanUzletag } from "./ingatlan-fields.js?v=3a43e30b61";
-import { filterByCategory, initHomeCategoryBar, renderHomeCategoryBar, HOME_CATEGORY_IDS, searchFiltersForCategory } from "./home-category-bar.js?v=57b2d61f81";
+import { filterByCategory, initHomeCategoryBar, renderHomeCategoryBar, HOME_CATEGORY_IDS, searchFiltersForCategory } from "./home-category-bar.js?v=c2d0d0cc4d";
 import { initHomeUnifiedScroll } from "./home-unified-scroll.js?v=19bcc2aeb6";
 import { initHomeStatsBar } from "./home-stats-bar.js?v=84ac6f75c1";
 import { buildNearbyFilter, readNearbyPrefs } from "./nearby-search.js?v=0efee20d13";
@@ -36,7 +36,7 @@ import {
 } from "./listing-return.js?v=1911f0cb28";
 import { normalizeKivitel } from "./kivitel-options.js?v=be03aefc2e";
 import { featuredListingIdSet, pickFeaturedListings } from "./home-featured-slots.js?v=76bf95d774";
-import { mountSellerInventory, updateSellerInventoryCount } from "./seller-inventory.js?v=a92715ee70";
+import { mountSellerInventory, updateSellerInventoryCount } from "./seller-inventory.js?v=65862341cb";
 
 /** Map module is optional — only loaded when the user clicks the map button. */
 let closeSearchResultsMapFn = null;
@@ -400,13 +400,13 @@ async function syncCategoryToSearchMenu(categoryId) {
   if (!form) return;
   try {
     if (quickSearchApi?.whenReady) await quickSearchApi.whenReady;
-    const { mountAutoFuelPicker } = await import("./auto-fuel-picker.js?v=fafb6e20e0");
+    const { mountAutoFuelPicker } = await import("./auto-fuel-picker.js?v=71ef0c1d8a");
     if (window.matchMedia("(min-width: 901px)").matches) {
       await mountAutoFuelPicker(form);
     }
-    const { applySavedSearchFilters } = await import("./saved-search.js?v=c636db31bd");
+    const { applySavedSearchFilters } = await import("./saved-search.js?v=787f348a6c");
     await applySavedSearchFilters(form, filters);
-    const { applyDrumSavedSearchFilters } = await import("./auto-search-drums.js?v=catFuelDrum1");
+    const { applyDrumSavedSearchFilters } = await import("./auto-search-drums.js?v=a9e74d19c3");
     applyDrumSavedSearchFilters(form, filters);
     updateAutoDeskAccSummaries(form);
     quickSearchFilters = { ...emptyFilters(), ...filters };
@@ -1264,7 +1264,7 @@ async function ensureAllListingsLoadedForMap() {
 if (PAGE === "auto" || PAGE === "teherauto") {
   ensureMapModule = () => {
     if (!mapModulePromise) {
-      mapModulePromise = import("./search-results-map.js?v=d7d331ace3")
+      mapModulePromise = import("./search-results-map.js?v=1d699792aa")
         .then((mod) => {
           updateSearchMapButtonLabels = mod.updateSearchMapButtonLabels;
           closeSearchResultsMapFn = mod.closeSearchResultsMap;

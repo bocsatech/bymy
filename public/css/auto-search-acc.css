@@ -748,9 +748,18 @@
   html[data-theme="dark"] body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
     .auto-search-desk-shell
     .auto-bm-brand-block
-    .auto-bm-trigger {
-    color: #9aa3ad !important;
-    -webkit-text-fill-color: #9aa3ad !important;
+    .auto-bm-trigger,
+  html[data-theme="dark"] body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-desk-shell
+    .auto-bm-brand-block
+    .auto-bm-trigger--pill
+    .is-placeholder,
+  html[data-theme="dark"] body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-desk-shell
+    .auto-bm-brand-block
+    [data-auto-bm-combined-summary].is-placeholder {
+    color: #cbd5e1 !important;
+    -webkit-text-fill-color: #cbd5e1 !important;
     border-bottom-color: #3b4450 !important;
   }
 
@@ -811,5 +820,43 @@
     > .auto-desk-acc[data-desk-acc="alap"].is-open
     > .auto-desk-acc__body {
     background: #12161c !important;
+  }
+
+  /* Alapadatok mezőértékek: világos tinta a sötét kártyán (győzze le a light #64748b/#0f172a !important-ot) */
+  html[data-theme="dark"] body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-desk-shell
+    .auto-desk-field
+    :is(.immo-dual-range__summary, .immo-wheel-trigger, .home-qs-control, .immo-control),
+  html[data-theme="dark"] body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-desk-shell
+    .auto-search-alap-card
+    :is(.immo-dual-range__summary, .immo-wheel-trigger, .home-qs-control, .immo-control) {
+    color: #f3f4f6 !important;
+    -webkit-text-fill-color: #f3f4f6 !important;
+    border-bottom-color: #3b4450 !important;
+  }
+
+  html[data-theme="dark"] body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-desk-shell
+    .auto-desk-field
+    :is(.immo-dual-range__summary.is-placeholder, .immo-wheel-trigger.is-placeholder),
+  html[data-theme="dark"] body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-desk-shell
+    .auto-search-alap-card
+    :is(.immo-dual-range__summary.is-placeholder, .immo-wheel-trigger.is-placeholder) {
+    color: #cbd5e1 !important;
+    -webkit-text-fill-color: #cbd5e1 !important;
+  }
+
+  html[data-theme="dark"] body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-desk-shell
+    .auto-desk-field
+    :is(.immo-label, .immo-dual-range__title, .home-qs-label, .immo-schema-label, .auto-desk-field__label),
+  html[data-theme="dark"] body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]).auto-desk-active
+    .auto-search-desk-shell
+    .auto-search-alap-card
+    :is(.immo-label, .immo-dual-range__title, .home-qs-label, .immo-schema-label, .auto-desk-field__label) {
+    color: #e5e7eb !important;
+    -webkit-text-fill-color: #e5e7eb !important;
   }
 }

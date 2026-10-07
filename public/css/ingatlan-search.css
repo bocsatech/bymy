@@ -1674,56 +1674,55 @@ body[data-site-page="ingatlan"] .immo-schema-cell:has(.telepules-suggest:not([hi
   word-break: break-word;
 }
 
-/* Sötét mód: sötét fej (fehér cím), fehér lista-kártya sötét szöveggel */
+/* Sötét mód: sheet = Állapot minta (világos fej + fehér lista-kártya + sötét tinta) */
 html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-portal__stage--sheet,
 html[data-theme="dark"] .auto-drum-portal--sheet.auto-drum-portal--ym .auto-drum-portal__stage--sheet,
 html[data-theme="dark"] .auto-drum-portal--sheet.auto-drum-portal--range-sheet .auto-drum-portal__stage--sheet,
 html[data-theme="dark"] .auto-drum-portal--sheet.auto-drum-portal--single-sheet .auto-drum-portal__stage--sheet {
-  background: #1a2330 !important;
+  background: #e8eef3 !important;
 }
 
 html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-portal__sheet-head,
 html[data-theme="dark"] .auto-drum-portal--sheet.auto-drum-portal--ym .auto-drum-portal__sheet-head,
 html[data-theme="dark"] .auto-drum-portal--sheet.auto-drum-portal--range-sheet .auto-drum-portal__sheet-head,
 html[data-theme="dark"] .auto-drum-portal--sheet.auto-drum-portal--single-sheet .auto-drum-portal__sheet-head {
-  background: #1a2330 !important;
+  background: #e8eef3 !important;
 }
 
 html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-portal__sheet-title,
 html[data-theme="dark"] body.site-app .auto-drum-portal--sheet .auto-drum-portal__sheet-title,
 html[data-theme="dark"] body.site-app.home-page .auto-drum-portal--sheet .auto-drum-portal__sheet-title {
-  color: #ffffff !important;
-  -webkit-text-fill-color: #ffffff !important;
+  color: #111111 !important;
+  -webkit-text-fill-color: #111111 !important;
 }
 
 html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-portal__close {
-  background: #2a3444 !important;
-  color: #ffffff !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+  background: #ffffff !important;
+  color: #111111 !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.12);
 }
 
-/* Sötét mód: sötét lista-kártya + világos szöveg (ne fehér kártya / ne fehér-a-fehéren) */
 html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-portal__ring--sheet,
 html[data-theme="dark"] .auto-drum-portal--sheet.auto-drum-portal--ym .auto-drum-portal__ring--sheet,
 html[data-theme="dark"] .auto-drum-portal--sheet.auto-drum-portal--range-sheet .auto-drum-portal__ring--sheet,
 html[data-theme="dark"] .auto-drum-portal--choice .auto-drum-portal__ring--sheet {
-  background: #1e2836 !important;
-  border-color: #2a3444 !important;
-  color: #f3f4f6 !important;
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  color: #111111 !important;
 }
 
 html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-ym__chips,
 html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-ym__heads,
 html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-ym__body,
 html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-ym__cols {
-  background: #1e2836 !important;
-  border-color: #2a3444 !important;
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
 }
 
 html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-ym__heads,
 html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-ym__label {
-  color: #9aa3ad !important;
-  -webkit-text-fill-color: #9aa3ad !important;
+  color: #64748b !important;
+  -webkit-text-fill-color: #64748b !important;
 }
 
 html[data-theme="dark"] .auto-drum-portal--sheet .immo-drum-inline-item,
@@ -1739,33 +1738,33 @@ html[data-theme="dark"] body.site-app .auto-drum-portal--sheet .immo-drum-inline
 html[data-theme="dark"] body.site-app .auto-drum-portal--sheet .immo-drum-inline-text,
 html[data-theme="dark"] body.site-app.home-page .auto-drum-portal--sheet .immo-drum-inline-item,
 html[data-theme="dark"] body.site-app.home-page .auto-drum-portal--sheet .immo-drum-inline-text {
-  color: #f3f4f6 !important;
-  -webkit-text-fill-color: #f3f4f6 !important;
+  color: #111111 !important;
+  -webkit-text-fill-color: #111111 !important;
 }
 
 html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-portal__summary {
-  background: #12161c !important;
-  border-color: #3b4450 !important;
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
 }
 
 html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-ym__highlight,
 html[data-theme="dark"] .auto-drum-portal--sheet .immo-drum-inline-highlight,
 html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-split__highlight {
-  background: rgba(255, 255, 255, 0.12) !important;
+  background: rgba(148, 163, 184, 0.22) !important;
 }
 
 html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-portal__toolbar .auto-drum-portal__sub,
 html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-portal__toolbar .auto-drum-portal__back {
-  color: #f3f4f6 !important;
-  -webkit-text-fill-color: #f3f4f6 !important;
+  color: #111111 !important;
+  -webkit-text-fill-color: #111111 !important;
 }
 
 html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-portal__toolbar .auto-drum-portal__back {
-  background: #2a3444 !important;
+  background: #ffffff !important;
 }
 
 html[data-theme="dark"] .auto-drum-portal--choice .auto-drum-switch {
-  background: #6b7280 !important;
+  background: #d1d5db !important;
   border-color: #fff !important;
 }
 
@@ -3190,28 +3189,28 @@ html:has(body.auto-drum-sheet-open) {
   display: none !important;
 }
 
-/* Sötét mód — sheet változók (a #fff !important is ezeket használja) */
+/* Sötét mód — sheet változók: fehér kártya + sötét tinta (Állapot minta) */
 html[data-theme="dark"] .auto-drum-portal--sheet,
 html[data-theme="dark"] .auto-drum-portal--choice {
-  --drum-sheet-card-bg: #1e2836;
-  --drum-sheet-card-fg: #f3f4f6;
-  --drum-sheet-card-line: #2a3444;
-  --drum-sheet-muted: #9aa3ad;
-  --drum-sheet-head-bg: #1a2330;
-  --drum-sheet-summary-bg: #12161c;
-  --drum-sheet-highlight: rgba(255, 255, 255, 0.14);
+  --drum-sheet-card-bg: #ffffff;
+  --drum-sheet-card-fg: #111111;
+  --drum-sheet-card-line: #e2e8f0;
+  --drum-sheet-muted: #64748b;
+  --drum-sheet-head-bg: #e8eef3;
+  --drum-sheet-summary-bg: #ffffff;
+  --drum-sheet-highlight: rgba(148, 163, 184, 0.22);
 }
 
 html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-portal__sheet-head,
 html[data-theme="dark"] .auto-drum-portal--sheet.auto-drum-portal--ym .auto-drum-portal__sheet-head,
 html[data-theme="dark"] .auto-drum-portal--sheet.auto-drum-portal--range-sheet .auto-drum-portal__sheet-head,
 html[data-theme="dark"] .auto-drum-portal--sheet.auto-drum-portal--single-sheet .auto-drum-portal__sheet-head {
-  background: var(--drum-sheet-head-bg, #1a2330) !important;
+  background: var(--drum-sheet-head-bg, #e8eef3) !important;
 }
 
 html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-portal__sheet-title {
-  color: #ffffff !important;
-  -webkit-text-fill-color: #ffffff !important;
+  color: #111111 !important;
+  -webkit-text-fill-color: #111111 !important;
 }
 
 html[data-theme="dark"] .auto-drum-portal--sheet .auto-drum-portal__ring--sheet,

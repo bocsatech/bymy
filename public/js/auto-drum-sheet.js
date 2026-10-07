@@ -961,21 +961,22 @@ function isDrumSheetDark() {
   return document.documentElement.getAttribute("data-theme") === "dark";
 }
 
-/** Sötét/világos tinta a fehér sheet-kártya elemeire — ne CSS cascade-re bízzuk. */
+/** Lista-kártya mindig fehér + sötét tinta (Állapot / Üzemanyag minta) — sötét mód mellett is. */
 function paintSheetCardTheme(root) {
   if (!root) return;
-  const dark = isDrumSheetDark();
-  const bg = dark ? "#1e2836" : "#ffffff";
-  const fg = dark ? "#f3f4f6" : "#111111";
-  const line = dark ? "#2a3444" : "#e2e8f0";
-  const muted = dark ? "#9aa3ad" : "#64748b";
-  const summaryBg = dark ? "#12161c" : "#ffffff";
+  const bg = "#ffffff";
+  const fg = "#111111";
+  const line = "#e2e8f0";
+  const muted = "#64748b";
+  const summaryBg = "#ffffff";
+  const highlight = "rgba(148,163,184,0.22)";
   root.style.setProperty("--drum-sheet-card-bg", bg);
   root.style.setProperty("--drum-sheet-card-fg", fg);
   root.style.setProperty("--drum-sheet-card-line", line);
   root.style.setProperty("--drum-sheet-muted", muted);
   root.style.setProperty("--drum-sheet-summary-bg", summaryBg);
-  root.style.setProperty("--drum-sheet-highlight", dark ? "rgba(255,255,255,0.14)" : "rgba(148,163,184,0.22)");
+  root.style.setProperty("--drum-sheet-highlight", highlight);
+  root.style.setProperty("--drum-sheet-head-bg", "#e8eef3");
   root.querySelectorAll(
     ".auto-drum-portal__ring--sheet, .auto-drum-ym__chips, .auto-drum-ym__heads, .auto-drum-ym__body, .auto-drum-portal__toolbar--sheet"
   ).forEach((el) => {
@@ -983,6 +984,17 @@ function paintSheetCardTheme(root) {
     el.style.setProperty("color", fg, "important");
     el.style.setProperty("border-color", line, "important");
     el.style.setProperty("border-bottom-color", line, "important");
+  });
+  root.querySelectorAll(".auto-drum-portal__sheet-head").forEach((el) => {
+    el.style.setProperty("background", "#e8eef3", "important");
+  });
+  root.querySelectorAll(".auto-drum-portal__sheet-title").forEach((el) => {
+    el.style.setProperty("color", "#111111", "important");
+    el.style.setProperty("-webkit-text-fill-color", "#111111", "important");
+  });
+  root.querySelectorAll(".auto-drum-portal__close").forEach((el) => {
+    el.style.setProperty("background", "#ffffff", "important");
+    el.style.setProperty("color", "#111111", "important");
   });
   root.querySelectorAll(".auto-drum-ym__heads, .auto-drum-ym__label").forEach((el) => {
     el.style.setProperty("color", muted, "important");
@@ -1000,7 +1012,7 @@ function paintSheetCardTheme(root) {
     el.style.setProperty("opacity", "1", "important");
   });
   root.querySelectorAll(".auto-drum-ym__highlight, .immo-drum-inline-highlight, .auto-drum-split__highlight").forEach((el) => {
-    el.style.setProperty("background", dark ? "rgba(255,255,255,0.14)" : "rgba(148,163,184,0.22)", "important");
+    el.style.setProperty("background", highlight, "important");
   });
 }
 
@@ -1048,7 +1060,6 @@ function lockSheetWhiteToBlue(root, stage) {
       scroll.style.setProperty("flex", "0 1 auto", "important");
     }
   }
-  const dark = isDrumSheetDark();
   if (ring) {
     ring.style.setProperty("width", "100%", "important");
     ring.style.setProperty("max-width", "100%", "important");
@@ -1059,16 +1070,16 @@ function lockSheetWhiteToBlue(root, stage) {
     ring.style.setProperty("right", "0", "important");
     ring.style.setProperty("transform", "none", "important");
     ring.style.setProperty("border-radius", "1.15rem", "important");
-    ring.style.setProperty("background", dark ? "#1e2836" : "#ffffff", "important");
-    ring.style.setProperty("border-color", dark ? "#2a3444" : "#d0d5dd", "important");
-    ring.style.setProperty("color", dark ? "#f3f4f6" : "#111111", "important");
+    ring.style.setProperty("background", "#ffffff", "important");
+    ring.style.setProperty("border-color", "#d0d5dd", "important");
+    ring.style.setProperty("color", "#111111", "important");
     if (desk) {
       ring.style.setProperty("height", "auto", "important");
       ring.style.setProperty("max-height", "min(62vh, 34rem)", "important");
       ring.style.setProperty("flex", "0 1 auto", "important");
     }
   }
-  /* Felső gombsor abszolút — sötét módban sötét fej (fehér cím), világosban #e8eef3. */
+  /* Felső gombsor abszolút — Állapot minta: #e8eef3 fej (sötét mód mellett is). */
   if (head) {
     head.style.setProperty("position", "absolute", "important");
     head.style.setProperty("top", "0", "important");
@@ -1077,7 +1088,7 @@ function lockSheetWhiteToBlue(root, stage) {
     head.style.setProperty("width", "100%", "important");
     head.style.setProperty("max-width", "100%", "important");
     head.style.setProperty("z-index", "30", "important");
-    head.style.setProperty("background", dark ? "#1a2330" : "#e8eef3", "important");
+    head.style.setProperty("background", "#e8eef3", "important");
     head.style.setProperty("display", "grid", "important");
     head.style.setProperty("visibility", "visible", "important");
     head.style.setProperty("opacity", "1", "important");
@@ -2300,8 +2311,7 @@ function paintSplitColSync(scrollEl, ring) {
   const centerY = ringRect.top + ringRect.height / 2;
   const nearest = nearestPortalItem(scrollEl, ring);
   const sheet = Boolean(scrollEl.closest?.(".auto-drum-portal--sheet"));
-  const dark = isDrumSheetDark();
-  const ink = sheet && dark ? "#f3f4f6" : "#111111";
+  const ink = "#111111";
   scrollEl.querySelectorAll(".immo-drum-inline-item").forEach((item) => {
     const r = item.getBoundingClientRect();
     const mid = r.top + r.height / 2;

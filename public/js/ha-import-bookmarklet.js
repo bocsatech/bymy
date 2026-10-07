@@ -61,7 +61,9 @@
       (/\(\d{5,}\)\s*$/.test(v) && /^(19|20)\d{2}/.test(v)) ||
       /^(benzin|d[ií]zel|elektromos|hibrid|hybrid)(\/|\s|,|$)/i.test(v) ||
       /^(módosítás|törlés|képek|felszereltség|leírás|aktív|inaktív)$/i.test(v) ||
-      /^ár egyeztetés/i.test(v)
+      /^ár egyeztetés/i.test(v) ||
+      /ártartomány|árértékelés|hirdetési ár|kiemelés/i.test(v) ||
+      /^\(?\*?\)?$/.test(v)
     );
   }
 
@@ -204,6 +206,7 @@
       src = upgradeImageUrl(src);
       if (!src.startsWith("http")) return;
       if (/close|logo|icon|sprite|placeholder|prototip|static\/images|avatar|badge|favicon|pixel/i.test(src)) return;
+      if (/adverticum|doubleclick|googlesyndication|adservice|facebook\.com\/tr|1x1|banner/i.test(src)) return;
       let score = bonus;
       if (/hasznaltauto|hazn|kep|photo|galeria|images|hasznaltautocdn/i.test(src)) score += 50000;
       if (/\/2048x1536\//i.test(src)) score += 400000;
@@ -398,19 +401,27 @@
     return "";
   }
 
+  function isPlaceholderValue(t) {
+    return /^\(?\*?\)?$|^-$|^—$|^v[aá]lasszon|^nincs megadva/i.test(clean(t));
+  }
+
   function selectedText(el) {
     if (!el) return "";
     const tag = (el.tagName || "").toUpperCase();
     if (tag === "SELECT") {
       const opt = el.selectedOptions && el.selectedOptions[0] ? el.selectedOptions[0] : el.querySelector("option[selected]");
       const t = clean((opt && (opt.textContent || opt.value)) || el.value || "");
-      if (/^v[aá]lasszon|^-$|^nincs/i.test(t)) return "";
+      if (/^v[aá]lasszon|^-$|^nincs$/i.test(t) || isPlaceholderValue(t)) return "";
       return t;
     }
-    if (tag === "INPUT" || tag === "TEXTAREA") return clean(el.value || "");
+    if (tag === "INPUT" || tag === "TEXTAREA") {
+      const t = clean(el.value || "");
+      return isPlaceholderValue(t) ? "" : t;
+    }
     const inner = el.querySelector && el.querySelector("select, input, textarea");
     if (inner) return selectedText(inner);
-    return textOf(el);
+    const t = textOf(el);
+    return isPlaceholderValue(t) ? "" : t;
   }
 
   function splitChainedValue(value) {
@@ -435,7 +446,8 @@
     const key = clean(rawKey).replace(/:$/, "");
     const value = splitChainedValue(rawValue);
     if (!key || !value || key.length > 100 || value.length > 400) return;
-    if (/válasszon/i.test(value)) return;
+    if (/válasszon/i.test(value) || isPlaceholderValue(value)) return;
+    if (/ártartomány|árértékelés|hirdetési ár/i.test(value)) return;
     if (value.length > 180 && value.split(/\s+/).length > 18) return;
     if (/^(ár|ar|ár, költségek|költségek|általános adatok|altalanos adatok|jármű adatok|jarmu adatok|motor adatok|muszaki adatok|felszereltseg|felszereltség|beltér|belter|műszaki|muszaki|kültér|kulter|egyéb|egyeb|okmányok|abroncs|hirdetés|hitel|hiba!?)$/i.test(key))
       return;
@@ -452,23 +464,42 @@
       if (!t || t.length < 2 || t.length > 90) return;
       if (/^(beltér|belter|műszaki|muszaki|kültér|kulter|multimédia|multimedia|egyéb|egyeb|egyéb információ|felszereltség|leírás|navigáció)$/i.test(t))
         return;
-      if (/:$/.test(t)) return;
+      if (/:$/.test(t) || isPlaceholderValue(t)) return;
       if (!items.includes(t)) items.push(t);
     };
+
+    // Admin Módosítás / feladás: csak BEPIPÁLT checkbox (+ label) — ne az összes opció szövege
+    const checkedBoxes = doc.querySelectorAll("input[type='checkbox']:checked");
+    if (checkedBoxes.length) {
+      for (const cb of checkedBoxes) {
+        const fromValue = clean(cb.value || "");
+        if (fromValue && fromValue.length >= 2 && fromValue.length <= 90 && !/^\d+$/.test(fromValue)) {
+          push(fromValue);
+        }
+        const lab =
+          (cb.labels && cb.labels[0] && textOf(cb.labels[0])) ||
+          textOf(cb.closest("label")) ||
+          textOf(cb.parentElement) ||
+          "";
+        const labelOnly = clean(lab.replace(fromValue, "")).replace(/^[-•·]\s*/, "");
+        if (labelOnly && labelOnly.length <= 90) push(labelOnly);
+      }
+      if (items.length) return items.slice(0, 300);
+    }
+
     for (const sel of [
       ".hirdetes-felszereltseg li",
       ".felszereltseg-list li",
       "[class*='felszer'] li",
       "[class*='extra'] li",
       "[class*='equipment'] li",
-      "ul li",
       ".extranev",
       ".extra-badge",
       ".tooltip-badge",
     ]) {
       for (const node of doc.querySelectorAll(sel)) {
         const parentText = clean(node.closest("section, .box, .card, div")?.querySelector("h2, h3, h4, strong, b")?.innerText || "");
-        if (/beltér|műszaki|kültér|multimédia|egyéb|felszereltség|navigáció/i.test(parentText) || sel !== "ul li") {
+        if (/beltér|műszaki|kültér|multimédia|egyéb|felszereltség|navigáció/i.test(parentText) || !/ul li/i.test(sel)) {
           push(node.innerText || node.textContent);
         }
       }
@@ -663,7 +694,10 @@
       "Km óra állás",
     ]);
     const yearRaw = fieldFromMap(map, ["Évjárat", "Gyártási év"]);
-    const year = (yearRaw.match(/(19|20)\d{2}/) || [])[0] || "";
+    const yearMatch = yearRaw.match(/(19|20)\d{2}/);
+    const yearNum = yearMatch ? Number(yearMatch[0]) : 0;
+    const yearMax = new Date().getFullYear() + 1;
+    const year = yearNum >= 1950 && yearNum <= yearMax ? String(yearNum) : "";
     const fuel = fieldFromMap(map, ["Üzemanyag"]);
     const rawHtml = doc.documentElement?.outerHTML || "";
     const html = rawHtml.slice(0, Object.keys(map).length >= 8 ? 40000 : 100000);
@@ -690,7 +724,11 @@
       featureLine,
       map,
       felszereltseg: felszereltseg.slice(0, 300),
-      bodyText: String(doc.body?.innerText || doc.body?.textContent || "").slice(0, 25000),
+      // Admin űrlap bodyText-je zajos (minden checkbox) — csak ha kevés map van
+      bodyText:
+        Object.keys(map).length >= 8
+          ? ""
+          : String(doc.body?.innerText || doc.body?.textContent || "").slice(0, 25000),
     };
   }
 

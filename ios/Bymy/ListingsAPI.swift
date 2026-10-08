@@ -15,6 +15,7 @@ enum ListingsAPI {
         var priceNum: Int? = nil
         var kmNum: Int? = nil
         var updatedAt: String? = nil
+        var createdAt: String? = nil
         var promoKiemelt: Bool = false
         var status: String? = nil
     }
@@ -300,6 +301,7 @@ enum ListingsAPI {
             priceNum: priceNum,
             kmNum: kmNum,
             updatedAt: row.updated_at ?? row.created_at,
+            createdAt: row.created_at ?? row.updated_at,
             promoKiemelt: promo,
             status: row.status
         )
@@ -353,6 +355,7 @@ enum ListingsAPI {
             priceNum: priceNum,
             kmNum: kmNum,
             updatedAt: stringAny(row["updated_at"]) ?? stringAny(row["created_at"]),
+            createdAt: stringAny(row["created_at"]) ?? stringAny(row["updated_at"]),
             promoKiemelt: promo,
             status: stringAny(row["status"])
         )

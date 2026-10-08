@@ -290,6 +290,17 @@
         <p class="hf-empty" id="hub-featured-empty" hidden>Még nincs kiemelt hirdetés. Nézd meg az <a href="/auto.html">autó listát</a>.</p>
       </section>
 
+      <section class="hf-section" data-hf="legujabb" hidden>
+        <div class="hf-head">
+          <h2 class="hf-title">
+            Legújabb hirdetések
+            <span class="hf-count" id="hub-latest-count" hidden></span>
+          </h2>
+          <a class="hf-all" id="hub-latest-all" href="/auto.html?sort=newest">Összes</a>
+        </div>
+        <div class="hf-rail" id="hub-latest-rail" role="list"></div>
+      </section>
+
       <section class="hf-section" data-hf="kozelben" hidden>
         <div class="hf-head">
           <h2 class="hf-title">
@@ -416,6 +427,7 @@
     <script src="/js/hub-menu-rails.js?v=9bd0435e55" type="module"></script>
     <script>window.BYMY_FEATURED_LISTING_IDS = window.BYMY_FEATURED_LISTING_IDS || [];</script>
     <script src="/js/hub-featured-listings.js?v=27f70e6f95" type="module"></script>
+    <script src="/js/hub-latest-listings.js?v=30f61fbaca" type="module"></script>
     <script src="/js/hub-nearby-cars.js?v=f1868e4d79" type="module"></script>
     <script src="/js/hub-home-extra-rails.js?v=a81c32efcb" type="module"></script>
     <script src="/js/nav-counts.js?v=7613897d1d" type="module"></script>

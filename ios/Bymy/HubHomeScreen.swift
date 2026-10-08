@@ -7,6 +7,7 @@ struct HubHomeScreen: View {
     @EnvironmentObject private var router: AppRouter
 
     @State private var featured: [ListingsAPI.Listing] = []
+    @State private var latestListings: [ListingsAPI.Listing] = []
     @State private var nearbyAutos: [ListingsAPI.Listing] = []
     @State private var nearbyFlats: [ListingsAPI.Listing] = []
     @State private var nearbyHouses: [ListingsAPI.Listing] = []
@@ -83,6 +84,12 @@ struct HubHomeScreen: View {
                 if !featured.isEmpty {
                     railHeader(title: "Kiemelt hirdetések") { router.selectTop(.auto) }
                     listingRail(items: featured)
+                }
+
+                // Legújabb hirdetések — feladás ideje (created_at)
+                if !latestListings.isEmpty {
+                    railHeader(title: "Legújabb hirdetések") { router.selectTop(.auto) }
+                    listingRail(items: latestListings)
                 }
 
                 // Autók a közelben
@@ -321,6 +328,11 @@ struct HubHomeScreen: View {
 
             // Kiemelt: promo / boost (web pickFeaturedListings)
             featured = Array(autos.filter { $0.promoKiemelt || $0.ownerBoost }.prefix(12))
+            // Legújabb: feladás ideje szerint (web hub-latest-listings)
+            latestListings = Array(
+                autos.sorted { ($0.createdAt ?? $0.updatedAt ?? "") > ($1.createdAt ?? $1.updatedAt ?? "") }
+                    .prefix(20)
+            )
             nearbyAutos = Array(autos.prefix(16))
 
             // Ingatlan: egyszerű szétválasztás cím alapján (web nearby később GPS-sel)

@@ -104,20 +104,38 @@ location / {
 }
 ```
 
-**real_ip** (csak Cloudflare IP-kről bízz meg X-Forwarded-For-ban):
+**real_ip** + **geo allowlista** (origin ne fogadjon nyers VPS IP-t):
 
 ```bash
 ./scripts/update-cloudflare-nginx-ips.sh
 # → deploy/nginx-cloudflare-realip.conf
+# → deploy/nginx-cloudflare-geo.conf
 ```
 
-Másold S1-re pl. `/etc/nginx/cloudflare-realip.conf`, majd az `http { }` blokkban:
+S1 `http { }` (általában `conf.d/`):
 
 ```nginx
 include /etc/nginx/cloudflare-realip.conf;
+include /etc/nginx/cloudflare-geo.conf;
 ```
 
-Frissítés: havonta vagy Cloudflare IP changelog után futtasd újra a scriptet.
+S1 `server { }` bymy.hu :443 elején:
+
+```nginx
+if ($is_cloudflare_edge = 0) { return 403; }
+```
+
+**Ne** `allow`/`deny` listát használj `real_ip` mellett — a `$remote_addr` a végkliens lesz, és 403-at kapsz. A geo a `$realip_remote_addr` (CF edge) alapján dönt.
+
+UFW (80/443 csak CF — SSH külön):
+
+```bash
+sudo bash scripts/sync-cloudflare-ufw.sh
+```
+
+Frissítés: havonta vagy Cloudflare IP changelog után futtasd újra a scripteket.
+
+**Levél / origin IP:** a Gmail SMTP az S1-ről a `Received:` fejlécben mutathatja a VPS IP-t (EHLO már `bymy.hu`). Aktiváló link mindig `https://bymy.hu` (`PUBLIC_BASE_URL`). Teljes elrejtés: `RESEND_API_KEY` (HTTP API).
 
 ## 8) Ellenőrző lista (éles)
 

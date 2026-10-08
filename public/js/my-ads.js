@@ -396,7 +396,7 @@ async function reload() {
   function rowHtml(item) {
     const urls = photoUrls(item);
     const thumb = urls[0] || "";
-    const count = urls.length;
+    const count = Math.max(Number(item.preview?.photoCount) || 0, urls.length);
     const views = item.views || item.preview?.views || { web: item.views_web || 0, app: item.views_app || 0 };
     const web = Number(views.web || item.views_web || 0);
     const app = Number(views.app || item.views_app || 0);

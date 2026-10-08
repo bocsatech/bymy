@@ -9,6 +9,15 @@ import {
   savePostalCode,
 } from "./partner-recommendations.js?v=fc822e523f";
 
+const PARTNER_CACHE_KEY = "bymy-ajanlas-partner-v1";
+
+function cacheAjanlasPartner(partner) {
+  try {
+    sessionStorage.setItem(PARTNER_CACHE_KEY, JSON.stringify(partner));
+  } catch {
+  }
+}
+
 const RADIUS_KEY = "bymy_partner_radius_km";
 const UI_V = "ingatlanDemoImg1";
 
@@ -246,33 +255,139 @@ function ensureCategoryShell(categories) {
   });
 }
 
-function renderPartnerCard(partner) {
+function partnerProfileHref(partner) {
+  const params = new URLSearchParams({
+    id: String(partner.id ?? ""),
+    vertical: PAGE_VERTICAL,
+  });
+  const cat = queryCategoryId();
+  if (cat) params.set("cat", cat);
+  return `/ajanlas-partner.html?${params}`;
+}
+
+function openPartnerProfile(partner) {
+  cacheAjanlasPartner({
+    ...partner,
+    services: partner.services?.length ? partner.services : [queryCategoryId()].filter(Boolean),
+  });
+  window.location.href = partnerProfileHref(partner);
+}
+
+function renderPartnerCard(partner, { linkProfile = false } = {}) {
   const article = document.createElement("article");
   article.className = "ajanlas-partner-card";
+  if (linkProfile) article.classList.add("ajanlas-partner-card--link");
   const rating = formatRating(partner);
   const phone = partner.phone ? String(partner.phone) : "";
   const maps = partner.google_maps_url ? String(partner.google_maps_url) : "";
   const dist =
-    partner.distance_km != null ? ` · ${Number(partner.distance_km).toFixed(1)} km` : "";
+    partner.distance_km != null ? `${Number(partner.distance_km).toFixed(1)} km` : "";
+  const initial = escapeHtml(String(partner.name || "P").trim().slice(0, 1).toUpperCase() || "P");
   article.innerHTML = `
-    <h3 class="ajanlas-partner-name">${escapeHtml(partner.name)}</h3>
-    <p class="ajanlas-partner-loc">${escapeHtml(partner.postal_code)} · ${escapeHtml(partner.address)}${escapeHtml(dist)}</p>
-    ${
-      partner.opening_hours
-        ? `<p class="ajanlas-partner-hours">${escapeHtml(partner.opening_hours)}</p>`
-        : ""
-    }
-    ${rating ? `<p class="ajanlas-partner-rating">${escapeHtml(rating)}</p>` : ""}
-    <div class="ajanlas-partner-actions">
-      ${phone ? `<a class="ajanlas-partner-call" href="${escapeHtml(telHref(phone))}">Hívás</a>` : ""}
+    <span class="ajanlas-partner-avatar" aria-hidden="true">${initial}</span>
+    <div class="ajanlas-partner-body">
+      <h3 class="ajanlas-partner-name">${escapeHtml(partner.name)}</h3>
+      <p class="ajanlas-partner-loc">${escapeHtml(partner.postal_code)} · ${escapeHtml(partner.address)}</p>
       ${
-        maps
-          ? `<a class="ajanlas-partner-map" href="${escapeHtml(maps)}" target="_blank" rel="noopener noreferrer">Térkép</a>`
+        partner.opening_hours
+          ? `<p class="ajanlas-partner-hours">${escapeHtml(partner.opening_hours)}</p>`
           : ""
       }
+      <div class="ajanlas-partner-meta-row">
+        ${rating ? `<span class="ajanlas-partner-rating">${escapeHtml(rating)}</span>` : ""}
+        ${dist ? `<span class="ajanlas-partner-dist">${escapeHtml(dist)}</span>` : ""}
+      </div>
+      <div class="ajanlas-partner-actions">
+        ${phone ? `<a class="ajanlas-partner-call" href="${escapeHtml(telHref(phone))}">Hívás</a>` : ""}
+        ${
+          maps
+            ? `<a class="ajanlas-partner-map" href="${escapeHtml(maps)}" target="_blank" rel="noopener noreferrer">Térkép</a>`
+            : ""
+        }
+        ${linkProfile ? `<span class="ajanlas-partner-open">Profil →</span>` : ""}
+      </div>
     </div>
   `;
+  if (linkProfile) {
+    article.tabIndex = 0;
+    article.setAttribute("role", "link");
+    article.addEventListener("click", (event) => {
+      if (event.target.closest("a")) return;
+      openPartnerProfile(partner);
+    });
+    article.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        openPartnerProfile(partner);
+      }
+    });
+  }
   return article;
+}
+
+function categoryHref(catId) {
+  const params = new URLSearchParams({ vertical: PAGE_VERTICAL, cat: catId });
+  return `/ajanlasok.html?${params}`;
+}
+
+function renderResultsList(categories, activeCatId) {
+  const listEl = document.getElementById("ajanlas-list");
+  if (!listEl) return;
+  const active =
+    categories.find((c) => c.id === activeCatId) ||
+    categories.find((c) => (c.partners?.length || 0) > 0) ||
+    categories[0];
+  if (!active) {
+    listEl.innerHTML = `<p class="ajanlas-empty ajanlas-empty--page">Nincs kategória.</p>`;
+    return;
+  }
+
+  const chips = document.createElement("div");
+  chips.className = "ajanlas-chips";
+  chips.setAttribute("role", "tablist");
+  for (const cat of categories) {
+    const a = document.createElement("a");
+    a.className = `ajanlas-chip${cat.id === active.id ? " is-active" : ""}`;
+    a.href = categoryHref(cat.id);
+    a.textContent = `${cat.label}${cat.partners?.length ? ` · ${cat.partners.length}` : ""}`;
+    chips.append(a);
+  }
+
+  const band = document.createElement("section");
+  band.className = "ajanlas-results-band";
+  const count = active.partners?.length ?? 0;
+  band.innerHTML = `
+    <div class="ajanlas-results-head">
+      <h2 class="ajanlas-results-title">
+        ${escapeHtml(active.label)}
+        <span class="ajanlas-results-count">${count}</span>
+      </h2>
+      <a class="ajanlas-results-back" href="/ajanlasok.html?vertical=${encodeURIComponent(PAGE_VERTICAL)}">← Kategóriák</a>
+    </div>
+  `;
+  const stack = document.createElement("div");
+  stack.className = "ajanlas-results-stack";
+  if (!count) {
+    const empty = document.createElement("p");
+    empty.className = "ajanlas-empty";
+    empty.textContent =
+      active.empty_message ??
+      "Ebben a kategóriában nincs partner, ez a te hirdetésed helye.";
+    stack.append(empty);
+  } else {
+    for (const partner of active.partners) {
+      stack.append(
+        renderPartnerCard(
+          { ...partner, services: partner.services?.length ? partner.services : [active.id] },
+          { linkProfile: true }
+        )
+      );
+    }
+  }
+  band.append(stack);
+
+  listEl.innerHTML = "";
+  listEl.append(chips, band);
 }
 
 function renderCategory(category, openId) {
@@ -339,8 +454,8 @@ function bindAccordion(root, preferredOpenId) {
     const section = toggle.closest(".ajanlas-category");
     const id = section?.dataset.category;
     if (!id) return;
-    openId = openId === id ? null : id;
-    apply();
+    // Találati lista oldalra navigál (kártyák + profil)
+    window.location.href = categoryHref(id);
   });
 
   apply();
@@ -373,6 +488,12 @@ export function initAjanlasokPage() {
   function render(categories, openPreferred) {
     const radiusKm = loadRadiusKm();
     const filtered = filterByRadius(ensureCategoryShell(categories), radiusKm);
+
+    // Kategória kiválasztva → találati lista (demó / hub csempe link)
+    if (preferredCat && filtered.some((c) => c.id === preferredCat)) {
+      renderResultsList(filtered, preferredCat);
+      return;
+    }
 
     listEl.innerHTML = "";
     const openId =

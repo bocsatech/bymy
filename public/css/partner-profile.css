@@ -289,6 +289,15 @@ body.partner-manage-page.mm-page {
   padding: 14px;
 }
 
+.partner-listing-vertical {
+  margin: 0 0 4px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--partner-muted);
+}
+
 .partner-listing-price {
   margin: 0 0 7px;
   color: var(--partner-brand);

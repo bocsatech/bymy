@@ -153,16 +153,20 @@ function safeUrl(value) {
   }
 }
 
+const VERTICAL_LABEL = { auto: "Autó", teher: "Teherautó", ingatlan: "Ingatlan" };
+
 function listingCard(listing) {
   const preview = listing.preview || {};
   const image = safeUrl(preview.imageUrl || listing.fo_kep);
   const title = preview.title || listing.hirdetes_cime || `Hirdetés #${listing.id}`;
   const location = preview.location || preview.telepules || "";
+  const vertical = VERTICAL_LABEL[listing.vertical] || listing.vertical || "";
   return `<article class="partner-listing">
     <a class="partner-listing-image" href="/hirdetes.html?id=${encodeURIComponent(listing.id)}">
       ${image ? `<img src="${esc(image)}" alt="" loading="lazy" />` : '<span>Nincs kép</span>'}
     </a>
     <div class="partner-listing-body">
+      ${vertical ? `<p class="partner-listing-vertical">${esc(vertical)}</p>` : ""}
       <p class="partner-listing-price">${esc(preview.price || "Ár nélkül")}</p>
       <h3><a href="/hirdetes.html?id=${encodeURIComponent(listing.id)}">${esc(title)}</a></h3>
       ${location ? `<p class="partner-listing-location">${esc(location)}</p>` : ""}
@@ -341,6 +345,7 @@ export async function renderPartnerManage(mountRoot) {
           <label>Jutalék${isCompany ? "" : " *"} (csak ingatlan kereskedők)<input name="commission" value="${esc(profile.commission)}" maxlength="80" ${isCompany ? "" : "required"} placeholder="pl. bruttó 2–4%" /></label>
           <label>Weboldal<input name="website" type="url" value="${esc(profile.website)}" placeholder="https://…" maxlength="300" /></label>
           <label>Profilkép URL<input name="logoUrl" type="url" value="${esc(profile.logo_url)}" placeholder="https://…" /></label>
+          <label>Céglogó URL<input name="companyLogoUrl" type="url" value="${esc(profile.company_logo_url)}" placeholder="https://…" /></label>
           <label>Borítókép URL<input name="coverUrl" type="url" value="${esc(profile.cover_url)}" placeholder="https://…" /></label>
           <label class="partner-form-wide">Kerület / értékesítési területek${isCompany ? "" : " *"}<input name="serviceAreas" value="${esc(profile.service_areas)}" placeholder="Például: Budapest XI., Budaörs, Érd" maxlength="1000" ${isCompany ? "" : "required"} /></label>
           <label class="partner-form-wide">Bemutatkozás<textarea name="description" maxlength="4000" placeholder="Mutasd be az irodát és a szakterületedet.">${esc(profile.description)}</textarea></label>
@@ -407,6 +412,7 @@ export async function renderPartnerManage(mountRoot) {
       commission: String(raw.commission || "").trim(),
       website: String(raw.website || "").trim(),
       logoUrl: String(raw.logoUrl || "").trim(),
+      companyLogoUrl: String(raw.companyLogoUrl || "").trim(),
       coverUrl: String(raw.coverUrl || "").trim(),
       serviceAreas: String(raw.serviceAreas || "").trim(),
       description: String(raw.description || "").trim(),
@@ -500,54 +506,8 @@ async function view() {
   if (!root) return;
   const slug = new URLSearchParams(location.search).get("slug") || location.pathname.match(/^\/partner\/([^/]+)\/?$/)?.[1];
   if (!slug) throw new Error("Hiányzó partnerazonosító.");
-  const { profile, listings = [] } = await jsonFetch(`/api/partner-profiles/${encodeURIComponent(slug)}`);
-  const logo = safeUrl(profile.logo_url);
-  const cover = safeUrl(profile.cover_url);
-  const website = safeUrl(profile.website);
-  const phone = String(profile.phone || "").trim();
-  const tel = phone.replace(/[^\d+]/g, "");
-  const commission = String(profile.commission || "").trim();
-  document.title = `${profile.display_name} — Bymy ingatlanos partner`;
-  root.innerHTML = `
-    <nav class="partner-breadcrumb"><a href="/ingatlan.html">Ingatlan</a><span>›</span><a href="/ingatlan.html#immo-partners-title">Ingatlanos partnerek</a><span>›</span><span>${esc(profile.display_name)}</span></nav>
-    <section class="partner-profile-hero ${cover ? "has-cover" : ""}" ${cover ? `data-cover="${esc(cover)}"` : ""}>
-      <div class="partner-profile-identity">
-        <span class="partner-profile-logo">${logo ? `<img src="${esc(logo)}" alt="${esc(profile.display_name)} képe" />` : `<span>${profileInitial(profile)}</span>`}</span>
-        <div>
-          <span class="partner-verified"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m6 10 2.4 2.4L14 7"/></svg>Ellenőrzött Bymy partner</span>
-          <h1>${esc(profile.display_name)}</h1>
-          ${profile.contact_person ? `<p class="partner-contact-name">${esc(profile.contact_person)}</p>` : ""}
-          ${phone ? `<p class="partner-service-area"><a href="tel:${esc(tel)}">${esc(phone)}</a></p>` : ""}
-          ${profile.service_areas ? `<p class="partner-service-area"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 18s5-5.2 5-10a5 5 0 1 0-10 0c0 4.8 5 10 5 10Z"/><circle cx="10" cy="8" r="1.8"/></svg>${esc(profile.service_areas)}</p>` : ""}
-          ${commission ? `<p class="partner-service-area">Jutalék: <strong>${esc(commission)}</strong></p>` : ""}
-        </div>
-      </div>
-    </section>
-    <div class="partner-profile-layout">
-      <div class="partner-profile-content">
-        <section class="partner-card partner-about">
-          <p class="partner-eyebrow">BEMUTATKOZÁS</p>
-          <h2>Rólunk</h2>
-          <p>${esc(profile.description || "A partner még nem adott meg bemutatkozást.")}</p>
-        </section>
-        <section class="partner-listings-section">
-          <div class="partner-section-head"><div><p class="partner-eyebrow">AKTÍV HIRDETÉSEK</p><h2>${listings.length} ingatlan</h2></div></div>
-          <div class="partner-listing-grid">${listings.length ? listings.map(listingCard).join("") : '<p class="partner-empty">A partnernek jelenleg nincs aktív hirdetése.</p>'}</div>
-        </section>
-      </div>
-      <aside class="partner-card partner-contact-card">
-        <h2>Kapcsolat</h2>
-        ${profile.contact_person ? `<div><span>Kapcsolattartó</span><strong>${esc(profile.contact_person)}</strong></div>` : ""}
-        ${phone ? `<a href="tel:${esc(tel)}"><span>Telefon</span><strong>${esc(phone)}</strong></a>` : ""}
-        ${profile.email ? `<a href="mailto:${encodeURIComponent(profile.email)}"><span>E-mail</span><strong>${esc(profile.email)}</strong></a>` : ""}
-        ${website ? `<a href="${esc(website)}" target="_blank" rel="noopener"><span>Weboldal</span><strong>Weboldal megnyitása ↗</strong></a>` : ""}
-        ${commission ? `<div><span>Jutalék</span><strong>${esc(commission)}</strong></div>` : ""}
-        <a class="partner-contact-cta" href="#partner-listings">Hirdetések megtekintése</a>
-      </aside>
-    </div>`;
-  root.querySelector(".partner-listings-section")?.setAttribute("id", "partner-listings");
-  const hero = root.querySelector("[data-cover]");
-  if (hero) hero.style.setProperty("--partner-cover", `url("${cover.replaceAll('"', "%22")}")`);
+  // Egységes Ajánlások partner profil UI
+  window.location.replace(`/ajanlas-partner.html?slug=${encodeURIComponent(slug)}`);
 }
 
 async function init() {

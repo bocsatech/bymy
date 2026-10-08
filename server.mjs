@@ -751,16 +751,20 @@ async function handleImageUploadApi(req, res) {
   const fileName = String(body.fileName ?? body.name ?? `upload-${Date.now()}`).trim() || `upload-${Date.now()}`;
 
   try {
+    const preoptimized = Boolean(body.preoptimized) || listingLike;
     const uploaded = await uploadOptimizedImage({
       fileBuffer,
       bucket,
       folder: folder || entityType,
       fileName,
       options: {
-        maxWidth: 1600,
-        jpegQuality: 85,
-        webpQuality: 78,
+        /* Kliens már tömörített listing képeknél kisebb max + nincs felesleges AVIF (R2 path). */
+        maxWidth: preoptimized ? 1280 : 1600,
+        jpegQuality: preoptimized ? 80 : 85,
+        webpQuality: preoptimized ? 76 : 78,
         avifQuality: 68,
+        minWidth: listingLike ? 320 : 640,
+        minHeight: listingLike ? 240 : 480,
       },
     });
 

@@ -3,8 +3,9 @@ import {
   updateListingStatusInDb,
   patchListingFieldsInDb,
   saveListingPhotosOrder,
+  uploadListingPhotoDataUrl,
   deleteListingFromDb,
-} from "./db-client.js?v=1c5eb11cbd";
+} from "./db-client.js?v=855f1f7e76";
 import {
   DEFAULT_PHOTO_OVERLAY_ID,
   detectBymyPhotoOverlay,
@@ -848,11 +849,45 @@ async function reload() {
         const dataUrls = await compressListingPhotos(files, undefined, ({ done, total }) => {
           setPhotoStatus(`Képek előkészítése… ${done} / ${total}`);
         });
-        for (const data of dataUrls) {
-          photoState.items.push({ data, preview: data });
-        }
+        const listingId = photoState.id;
+        const newItems = dataUrls.map((data) => ({ data, preview: data, url: null }));
+        photoState.items.push(...newItems);
         renderPhotoList();
-        setPhotoStatus(dataUrls.length ? `${dataUrls.length} kép hozzáadva. Mentés: feltöltés indul.` : "");
+        let bgDone = 0;
+        const bgTotal = newItems.length;
+        setPhotoStatus(bgTotal ? `Feltöltés… 0 / ${bgTotal}` : "");
+        const queue = [...newItems];
+        await Promise.all(
+          Array.from({ length: Math.min(4, queue.length) }, async () => {
+            while (queue.length) {
+              const item = queue.shift();
+              if (!item || !photoState || photoState.id !== listingId) return;
+              try {
+                const url = await uploadListingPhotoDataUrl(item.data, listingId);
+                if (photoState?.id === listingId) {
+                  item.url = url;
+                  item.data = null;
+                }
+              } catch (err) {
+                item._uploadError = err;
+              }
+              bgDone += 1;
+              if (photoState?.id === listingId) {
+                setPhotoStatus(`Feltöltés… ${bgDone} / ${bgTotal}`);
+              }
+            }
+          })
+        );
+        if (photoState?.id === listingId) {
+          const failed = newItems.filter((it) => it._uploadError).length;
+          if (failed) {
+            setPhotoStatus(
+              `${bgTotal - failed} kész, ${failed} sikertelen — töröld a hibásakat, vagy add hozzá újra.`
+            );
+          } else {
+            setPhotoStatus(bgTotal ? `${bgTotal} kép feltöltve — Mentés a sorrendhez.` : "");
+          }
+        }
       } catch (error) {
         alert(error.message ?? "A kép hozzáadása sikertelen.");
         setPhotoStatus("");
@@ -866,10 +901,19 @@ async function reload() {
         alert("Legalább egy kép kell.");
         return;
       }
+      const stillPending = photoState.items.some((it) => !it.url && it.data && !it._uploadError);
+      if (stillPending) {
+        setPhotoStatus("Még megy a feltöltés… várj egy pillanatot.");
+      }
+      const failed = photoState.items.filter((it) => it._uploadError);
+      if (failed.length) {
+        alert(`${failed.length} kép feltöltése sikertelen. Töröld őket, vagy add hozzá újra.`);
+        return;
+      }
       const btn = root.querySelector("[data-photo-save]");
       btn.disabled = true;
       try {
-        setPhotoStatus("Feltöltés…");
+        setPhotoStatus("Mentés…");
         await saveListingPhotosOrder(
           photoState.id,
           photoState.items.map((item) => (item.url ? { url: item.url } : { data: item.data })),

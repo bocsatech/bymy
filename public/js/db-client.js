@@ -43,8 +43,30 @@ async function parseJson(response) {
   return data ?? {};
 }
 
+const LISTING_UPLOAD_CONCURRENCY = 4;
+
+async function mapPool(items, concurrency, worker, onProgress) {
+  const list = Array.isArray(items) ? items : [];
+  if (!list.length) return [];
+  const results = new Array(list.length);
+  let cursor = 0;
+  let done = 0;
+  async function run() {
+    while (cursor < list.length) {
+      const index = cursor;
+      cursor += 1;
+      results[index] = await worker(list[index], index);
+      done += 1;
+      onProgress?.(done, list.length);
+    }
+  }
+  const n = Math.min(Math.max(1, concurrency), list.length);
+  await Promise.all(Array.from({ length: n }, () => run()));
+  return results;
+}
+
 /** Egy listing kép feltöltése /api/uploads-ra (kis body), URL-t ad vissza. */
-async function uploadListingPhotoDataUrl(dataUrl, listingId) {
+export async function uploadListingPhotoDataUrl(dataUrl, listingId) {
   const response = await fetch("/api/uploads", {
     method: "POST",
     headers: authHeaders(),
@@ -55,8 +77,9 @@ async function uploadListingPhotoDataUrl(dataUrl, listingId) {
       entityType: "listing",
       entityId: listingId,
       folder: String(listingId),
-      fileName: `listing-${listingId}-${Date.now()}.jpg`,
+      fileName: `listing-${listingId}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`,
       dataUrl,
+      preoptimized: true,
     }),
   });
   const data = await parseJson(response);
@@ -329,40 +352,50 @@ export async function patchListingFieldsInDb(id, fields) {
 export async function saveListingPhotosOrder(id, items, options = {}) {
   const onProgress = typeof options.onProgress === "function" ? options.onProgress : null;
   const list = Array.isArray(items) ? items : [];
-  const needUpload = list.filter(
-    (item) => !String(item?.url ?? "").trim() && String(item?.data ?? "").trim()
-  ).length;
-  let uploaded = 0;
-  const prepared = [];
+  const prepared = new Array(list.length);
+  const pending = [];
 
-  for (const item of list) {
+  for (let i = 0; i < list.length; i += 1) {
+    const item = list[i];
     const existing = String(item?.url ?? "").trim();
     if (existing) {
-      prepared.push({ url: existing });
+      prepared[i] = { url: existing };
       continue;
     }
     const data = String(item?.data ?? "").trim();
     if (!data) continue;
-    onProgress?.({ phase: "upload", done: uploaded, total: needUpload });
-    const url = await uploadListingPhotoDataUrl(data, id);
-    prepared.push({ url });
-    uploaded += 1;
-    onProgress?.({ phase: "upload", done: uploaded, total: needUpload });
+    pending.push({ index: i, data });
   }
 
-  if (!prepared.length) {
+  const needUpload = pending.length;
+  onProgress?.({ phase: "upload", done: 0, total: needUpload });
+  if (needUpload) {
+    await mapPool(
+      pending,
+      LISTING_UPLOAD_CONCURRENCY,
+      async (job) => {
+        const url = await uploadListingPhotoDataUrl(job.data, id);
+        prepared[job.index] = { url };
+        return url;
+      },
+      (done, total) => onProgress?.({ phase: "upload", done, total })
+    );
+  }
+
+  const urlsOnly = prepared.filter(Boolean);
+  if (!urlsOnly.length) {
     throw new Error("Legalább egy kép kell.");
   }
 
-  onProgress?.({ phase: "save", done: uploaded, total: Math.max(needUpload, 1) });
+  onProgress?.({ phase: "save", done: needUpload, total: Math.max(needUpload, 1) });
   const response = await fetch(`/api/listings/${id}/photos`, {
     method: "POST",
     headers: authHeaders(),
     credentials: "same-origin",
-    body: JSON.stringify({ items: prepared }),
+    body: JSON.stringify({ items: urlsOnly }),
   });
   const data = await parseJson(response);
-  onProgress?.({ phase: "done", done: uploaded, total: Math.max(needUpload, 1) });
+  onProgress?.({ phase: "done", done: needUpload, total: Math.max(needUpload, 1) });
   return data.listing ?? null;
 }
 

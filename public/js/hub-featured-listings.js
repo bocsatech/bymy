@@ -5,7 +5,7 @@ import {
   TILE_PAGE_INITIAL,
   TILE_PAGE_MORE,
   fetchTilePagesUntil,
-} from "./listing-tile-pager.js?v=309c0d60d0";
+} from "./listing-tile-pager.js?v=535f30dba9";
 
 const SECTION = document.querySelector('[data-hf="kiemelt"]');
 const RAIL = document.getElementById("hub-featured-rail");

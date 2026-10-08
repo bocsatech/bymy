@@ -1,5 +1,5 @@
 import { loadAdFormPartial } from "./load-ad-form.js?v=35a5d505b0";
-import { createAdForm } from "./form-core.js?v=bd54e4a176";
+import { createAdForm } from "./form-core.js?v=337c42508e";
 import { initImportPanel, getImportResults, setImportResults } from "./import.js?v=2990c2c3cf";
 import { enrichFormFromImportItem } from "./import-enrich.js?v=bd0fc1123e";
 import {
@@ -10,7 +10,7 @@ import {
   fetchListing,
   fetchDbStats,
   deleteAllListingsFromDb,
-} from "./db-client.js?v=658bac0c0e";
+} from "./db-client.js?v=855f1f7e76";
 
 const EMBEDDED_VERSION = document.querySelector('meta[name="bymy-version"]')?.content ?? "";
 const SERVER_RESTART_MSG =

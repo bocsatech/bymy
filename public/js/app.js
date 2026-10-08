@@ -4,14 +4,14 @@ import {
   fetchListing,
   saveListingPhotosOrder,
   getStoredListingId,
-} from "./db-client.js?v=658bac0c0e";
-import { createAdForm } from "./form-core.js?v=bd54e4a176";
+} from "./db-client.js?v=855f1f7e76";
+import { createAdForm } from "./form-core.js?v=337c42508e";
 import { initPriceMarketHint } from "./price-market-hint.js?v=ee49eb1a56";
-import { applyImportedVehicleToSelects } from "./vehicle-catalog-client.js?v=5004d33efa";
+import { applyImportedVehicleToSelects } from "./vehicle-catalog-client.js?v=19a6b3a4f2";
 import { initTireSizes } from "./tire-sizes-ui.js?v=d01f914c82";
 import { initPhoneLanguages } from "./phone-lang-ui.js?v=bc55c36aef";
 import { initCategoryPicker } from "./category-picker.js?v=5d45536b6e";
-import { applyAdFormDesk, clearAdFormEditBoot, isDeskVehicleSubtype, scrollAdFormPageTop } from "./ad-form-desk.js?v=004fdc722d";
+import { applyAdFormDesk, clearAdFormEditBoot, isDeskVehicleSubtype, scrollAdFormPageTop } from "./ad-form-desk.js?v=1c11003682";
 import {
   requireAuthForPage,
   getAuthUser,
@@ -25,8 +25,8 @@ import {
   applyListingAddressFromProfileSync,
   initAdLocationProfile,
   getListingAddressFromProfile,
-} from "./ad-location-profile.js?v=d0127f4d2c";
-import { initImproveDescription } from "./improve-description.js?v=2b630f62a0";
+} from "./ad-location-profile.js?v=c45d6351d5";
+import { initImproveDescription } from "./improve-description.js?v=7be6ab545d";
 
 initSiteAuth();
 /** Ne blokkolja a kategóriaválasztót — sessionStorage alapján azonnal kattintható; háttérben /api/auth/me. */
@@ -360,6 +360,6 @@ if (editing) {
   }
 }
 
-import("./site-side-content.js?v=7853b0f379")
+import("./site-side-content.js?v=418fecb6a2")
   .then((mod) => mod.initSiteSideContent())
   .catch((error) => console.error("Oldalsáv betöltés:", error));

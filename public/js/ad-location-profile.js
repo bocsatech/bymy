@@ -1,6 +1,6 @@
 import { getAuthUser, getProfile, loadProfileFromServer } from "./site-auth.js?v=b7e73b74b0";
 import { inferMegyeFromCity } from "./county-infer.js?v=08419b3916";
-import { wirePostalCityAutofill } from "./postal-city-autofill.js?v=irszErr1";
+import { wirePostalCityAutofill } from "./postal-city-autofill.js?v=ba74000828";
 
 function isBusinessProfile(profile) {
   const type = String(profile?.accountType || "").trim();

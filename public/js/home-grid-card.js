@@ -10,7 +10,7 @@ import {
   getParkplatz,
   addParkplatzItem,
   removeParkplatzItem,
-} from "./fok-data.js?v=653bb89787";
+} from "./fok-data.js?v=289f64e75c";
 import { listingFeaturedUnderPhotoHtml } from "./listing-featured-decor.js?v=e831c3517c";
 import { listingShowsKiemeltDecor, promoTopAjanlatActive } from "./listing-promo.js?v=a2c84c124b";
 import { listingImgFallbackAttr, listingImgSrcsetAttrs, listCardImageUrl } from "./image-variants.js?v=82833209fb";

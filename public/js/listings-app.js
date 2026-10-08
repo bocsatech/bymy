@@ -1,4 +1,4 @@
-import { fetchListings, fetchListing, deleteListingFromDb, deleteAllListingsFromDb, fetchDbStats, saveListingToDb, recordListingView } from "./db-client.js?v=658bac0c0e";
+import { fetchListings, fetchListing, deleteListingFromDb, deleteAllListingsFromDb, fetchDbStats, saveListingToDb, recordListingView } from "./db-client.js?v=855f1f7e76";
 import { renderListingCells } from "./cells-view.js?v=8237c0fee4";
 import { createListingCard, formatListingDisplayTitle } from "./listing-card.js?v=3e8a4a3fe2";
 import { getAuthUser } from "./site-auth.js?v=b7e73b74b0";
@@ -218,7 +218,7 @@ if (Number.isFinite(openId) && openId > 0) {
   window.location.replace(listingDetailHref(openId));
 } else {
   setActiveFilter("all");
-  import("./site-side-content.js?v=7853b0f379")
+  import("./site-side-content.js?v=418fecb6a2")
     .then((mod) => mod.initSiteSideContent())
     .catch((error) => console.error("Oldalsáv betöltés:", error));
   refreshStats().catch(console.error);

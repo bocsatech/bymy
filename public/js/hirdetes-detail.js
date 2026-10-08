@@ -6,15 +6,15 @@ import {
   revealListingContact,
   recordListingView,
   deleteListingFromDb,
-} from "./db-client.js?v=favGone1";
+} from "./db-client.js?v=855f1f7e76";
 import { getAuthUser, getDisplayName, getProfile } from "./site-auth.js?v=b7e73b74b0";
 import { mountTurnstile } from "./turnstile-ui.js?v=f0cc231f94";
 import { startConversation } from "./messages-api.js?v=5cf6493dc9";
-import { openListingMessage } from "./start-listing-message.js?v=d9c12be306";
-import { getParkplatz, addParkplatzItem, removeParkplatzItem } from "./fok-data.js?v=653bb89787";
+import { openListingMessage } from "./start-listing-message.js?v=1f7982d677";
+import { getParkplatz, addParkplatzItem, removeParkplatzItem } from "./fok-data.js?v=289f64e75c";
 import { listingReturnHref, listingDetailHref, rememberListingOpen } from "./listing-return.js?v=1911f0cb28";
 import { takePrefetchedListing, storePrefetchedListing } from "./listing-prefetch.js?v=67ac871172";
-import { qrBlockHtml, withQrSource } from "./qr-display.js?v=qr1";
+import { qrBlockHtml, withQrSource } from "./qr-display.js?v=d72223d7cd";
 
 function readBootListing() {
   try {

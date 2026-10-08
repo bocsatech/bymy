@@ -1,18 +1,4 @@
-
-html,
-body,
-* {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-html::-webkit-scrollbar,
-body::-webkit-scrollbar,
-*::-webkit-scrollbar {
-  width: 0 !important;
-  height: 0 !important;
-  display: none !important;
-  background: transparent !important;
-}
+/* Oldalsó görgetősáv látható az oldalakon (ne legyen globálisan elrejtve). */
 
 :root {
 

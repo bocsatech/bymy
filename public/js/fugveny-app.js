@@ -1,4 +1,4 @@
-import { initVehicleCatalogSelects, typeNameForField } from "./vehicle-catalog-client.js?v=1d7f7164f8";
+import { initVehicleCatalogSelects, typeNameForField } from "./vehicle-catalog-client.js?v=19a6b3a4f2";
 
 const state = {
   lists: [],

@@ -1,9 +1,9 @@
 /** „Több ettől a hirdetőtől” — kereskedő készlet (demo A), bymy menüsáv érintetlen. */
 
-import { fetchSellerContact, revealListingContact, fetchSellerRating, submitSellerRating } from "./db-client.js?v=d4237f0b1b";
+import { fetchSellerContact, revealListingContact, fetchSellerRating, submitSellerRating } from "./db-client.js?v=855f1f7e76";
 import { mountTurnstile } from "./turnstile-ui.js?v=f0cc231f94";
 import { getAuthUser } from "./site-auth.js?v=b7e73b74b0";
-import { openListingMessage, canMessageListing } from "./start-listing-message.js?v=d9c12be306";
+import { openListingMessage, canMessageListing } from "./start-listing-message.js?v=1f7982d677";
 import { getParkplatz, addParkplatzItem, removeParkplatzItem } from "./fok-data.js?v=289f64e75c";
 import { listingDetailHref } from "./listing-return.js?v=1911f0cb28";
 import { qrBlockHtml, withQrSource } from "./qr-display.js?v=d72223d7cd";

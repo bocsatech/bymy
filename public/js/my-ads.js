@@ -1,5 +1,6 @@
 import {
   fetchMyListings,
+  fetchListing,
   updateListingStatusInDb,
   patchListingFieldsInDb,
   saveListingPhotosOrder,
@@ -11,7 +12,7 @@ import {
   detectBymyPhotoOverlay,
   renderListingPhotoOverlay,
 } from "./listing-photo-overlay.js?v=1a522e09d6";
-import { compressListingPhotos } from "./listing-photo-compress.js?v=4e3ffaa60f";
+import { compressListingPhotos, MAX_LISTING_PHOTOS } from "./listing-photo-compress.js?v=4e3ffaa60f";
 import { bindListingOpen, restoreListingReturn } from "./listing-return.js?v=1911f0cb28";
 import {
   promoKiemeltActive,
@@ -59,7 +60,16 @@ function escapeHtml(value) {
 
 function photoUrls(item) {
   const preview = item.preview || {};
-  const urls = [...(preview.imageUrls || [])];
+  const detailImages = Array.isArray(item.detail?.images) ? item.detail.images : [];
+  const urls = [];
+  for (const u of detailImages) {
+    const s = String(u || "").trim();
+    if (s && !urls.includes(s)) urls.push(s);
+  }
+  for (const u of preview.imageUrls || []) {
+    const s = String(u || "").trim();
+    if (s && !urls.includes(s)) urls.push(s);
+  }
   if (preview.imageUrl && !urls.includes(preview.imageUrl)) urls.unshift(preview.imageUrl);
   if (item.fo_kep && !urls.includes(item.fo_kep)) urls.unshift(item.fo_kep);
   return urls.filter(Boolean);
@@ -626,20 +636,37 @@ async function reload() {
     sablonDetectedIds.delete(id);
   }
 
-  function openPhotos(id) {
+  async function openPhotos(id) {
     const item = items.find((row) => Number(row.id) === Number(id));
     if (!item) return;
+    const modal = root.querySelector("[data-photo-modal]");
+    const title = root.querySelector("[data-photo-title]");
     photoState = {
       id: item.id,
       title: titleOf(item),
       items: photoUrls(item).map((url) => ({ url })),
     };
-    const modal = root.querySelector("[data-photo-modal]");
-    const title = root.querySelector("[data-photo-title]");
     if (title) title.textContent = photoState.title;
-    setPhotoStatus("");
+    setPhotoStatus("Képek betöltése…");
     modal.hidden = false;
     renderPhotoList();
+    try {
+      /* A /mine lista csak feed előnézetet ad (max 5 kép) — Mentés előtt a teljes listát kell húzni. */
+      const full = await fetchListing(item.id, { view: "detail", bypassCache: true });
+      if (!photoState || Number(photoState.id) !== Number(item.id)) return;
+      if (full) {
+        item.detail = full.detail || item.detail;
+        item.preview = full.preview || item.preview;
+        item.fo_kep = full.fo_kep || item.fo_kep;
+      }
+      const urls = photoUrls(full || item);
+      photoState.items = urls.map((url) => ({ url }));
+      setPhotoStatus(urls.length ? `${urls.length} kép` : "");
+      renderPhotoList();
+    } catch (error) {
+      setPhotoStatus("");
+      console.warn("Képek detail betöltése sikertelen:", error?.message ?? error);
+    }
   }
 
   function updateBulkDeleteButton() {
@@ -711,7 +738,11 @@ async function reload() {
       });
     });
     root.querySelectorAll("[data-photos]").forEach((btn) => {
-      btn.addEventListener("click", () => openPhotos(btn.dataset.photos));
+      btn.addEventListener("click", () => {
+        openPhotos(btn.dataset.photos).catch((error) => {
+          alert(error?.message ?? "A képek megnyitása sikertelen.");
+        });
+      });
     });
     async function setPromoKindActive(item, kind, wantOn) {
       const fieldKey = kind === "top" ? "promo_top_ajanlat" : "promo_kiemelt";
@@ -842,11 +873,22 @@ async function reload() {
       const files = [...(event.target.files || [])];
       event.target.value = "";
       if (!files.length || !photoState) return;
+      const room = Math.max(0, MAX_LISTING_PHOTOS - photoState.items.length);
+      if (!room) {
+        alert(`Legfeljebb ${MAX_LISTING_PHOTOS} kép lehet egy hirdetésen.`);
+        return;
+      }
+      if (files.length > room) {
+        alert(
+          `${files.length} képet választottál; ebből ${room} fér még el (max. ${MAX_LISTING_PHOTOS} / hirdetés). Az első ${room} kerül fel.`
+        );
+      }
       const addLabel = root.querySelector(".myads-photo-add label");
       if (addLabel) addLabel.setAttribute("aria-disabled", "true");
       try {
-        setPhotoStatus(`Képek előkészítése… 0 / ${files.length}`);
-        const dataUrls = await compressListingPhotos(files, undefined, ({ done, total }) => {
+        const take = files.slice(0, room);
+        setPhotoStatus(`Képek előkészítése… 0 / ${take.length}`);
+        const dataUrls = await compressListingPhotos(take, room, ({ done, total }) => {
           setPhotoStatus(`Képek előkészítése… ${done} / ${total}`);
         });
         const listingId = photoState.id;

@@ -67,7 +67,7 @@
     <link rel="stylesheet" href="/css/hub.css?v=c3733044ea" />
     <link rel="stylesheet" href="/css/listing-photo-cover.css?v=b60e28d793" />
     <link rel="stylesheet" href="/css/listing-featured.css?v=49bf39cc29" />
-    <link rel="stylesheet" href="/css/hub-mobile-app.css?v=33bc439566" />
+    <link rel="stylesheet" href="/css/hub-mobile-app.css?v=2ed60b9353" />
     <link rel="stylesheet" href="/css/site-app.css?v=99aaad2658" />
     <link rel="manifest" href="/manifest.webmanifest" />
     <meta name="mobile-web-app-capable" content="yes" />
@@ -78,10 +78,18 @@
         body.hub-page--feed {
           --hf-gutter: 16px;
         }
-        body.hub-page--feed .hub-intro,
-        body.hub-page--feed .hub-feed {
+        body.hub-page--feed .hub-intro {
           padding-left: var(--hf-gutter) !important;
           padding-right: var(--hf-gutter) !important;
+          margin-left: 0 !important;
+          margin-right: 0 !important;
+          max-width: none !important;
+          box-sizing: border-box !important;
+          overflow-x: visible !important;
+        }
+        body.hub-page--feed .hub-feed {
+          padding-left: 0 !important;
+          padding-right: 0 !important;
           margin-left: 0 !important;
           margin-right: 0 !important;
           max-width: none !important;
@@ -95,9 +103,6 @@
           max-width: none !important;
           box-sizing: border-box !important;
         }
-        body.hub-page--feed .hub-intro {
-          overflow-x: visible !important;
-        }
         body.hub-page--feed .hf-head,
         body.hub-page--feed .hf-status {
           padding-left: 0 !important;
@@ -105,11 +110,16 @@
           margin-left: 0 !important;
           margin-right: 0 !important;
         }
-        /* Szekciósáv: lekerekített sáv, 16px inset */
+        /* Szekciósáv: mobil full-bleed */
         body.hub-page--feed .hf-section {
           padding: 14px var(--hf-gutter) 16px !important;
           margin: 0 0 28px !important;
-          border-radius: 16px !important;
+          border-radius: 0 !important;
+          border-left: none !important;
+          border-right: none !important;
+          width: 100% !important;
+          max-width: none !important;
+          box-sizing: border-box !important;
         }
         body.hub-page--feed .hf-rail {
           margin-left: 0 !important;

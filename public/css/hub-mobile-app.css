@@ -411,14 +411,18 @@
    * 2) címsorok (hf-head) NEM kapnak külön insetet
    * 3) sávok (verticals/rail) breakout + ugyanannyi padding → első csempe = cím
    */
-  body.hub-page--feed main,
-  /* Szekciósáv: a sáv halvány szürke háttere választja el a csempéket */
+  /* Szekciósáv: mobil full-bleed (kijelző széléig), belső gutter a tartalomnak */
   body.hub-page--feed .hf-section {
     padding: 14px var(--hf-gutter) 16px !important;
     margin: 0 0 28px !important;
     background: #f6f5f2;
     border: 1px solid #d2d0cc;
-    border-radius: 16px;
+    border-left: none;
+    border-right: none;
+    border-radius: 0;
+    width: 100%;
+    max-width: none;
+    box-sizing: border-box !important;
   }
 
   html[data-theme="dark"] body.hub-page--feed .hf-section {
@@ -427,13 +431,22 @@
   }
 
   body.hub-page--feed .hub-intro,
-  body.hub-page--feed .hub-feed,
   body.hub-page--feed .hub-promo-band {
     max-width: none !important;
     margin-left: 0 !important;
     margin-right: 0 !important;
     padding-left: var(--hf-gutter) !important;
     padding-right: var(--hf-gutter) !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Feed: nincs oldalsó inset — a sávok érjenek a kijelző széléig */
+  body.hub-page--feed .hub-feed {
+    max-width: none !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
     box-sizing: border-box !important;
   }
 

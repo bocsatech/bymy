@@ -1350,6 +1350,21 @@ body.hub-page--feed .hf-card {
   body.hub-page--feed .hf-card--ajanlas {
     flex: 0 0 max(220px, calc(803px - 53vw));
   }
+
+  /* Szekciósáv / csempe-közti vonalak — ugyanaz, mint mobilon (hub-mobile-app) */
+  body.hub-page--feed .hf-section {
+    padding: 1rem 0 1.15rem;
+    margin: 0 0 1.25rem;
+    background: #f6f5f2;
+    border-top: 1px solid #d2d0cc;
+    border-bottom: 1px solid #d2d0cc;
+  }
+
+  html[data-theme="dark"] body.hub-page--feed .hf-section {
+    background: #1a1f26;
+    border-top-color: rgba(255, 255, 255, 0.08);
+    border-bottom-color: rgba(255, 255, 255, 0.08);
+  }
 }
 
 .hub-intro {

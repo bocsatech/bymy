@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ajánlások — lista + partner profil (4 demó)</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ink: #111;
+      --muted: #5c6b7a;
+      --line: #d2d0cc;
+      --band: #f6f5f2;
+      --bg: #e8eaee;
+      --white: #fff;
+      --gold: #f0c52c;
+      --teal: #0d9488;
+      --accent: #e11d2e;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "DM Sans", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      padding: 28px 20px 72px;
+    }
+    h1 { margin: 0 0 6px; font-size: 1.2rem; font-weight: 800; letter-spacing: -0.02em; }
+    .lead { margin: 0 0 8px; color: var(--muted); font-size: 0.92rem; max-width: 72ch; line-height: 1.45; }
+    .toc { margin: 0 0 28px; font-size: 0.85rem; color: var(--muted); }
+    .toc a { color: var(--ink); font-weight: 700; }
+
+    .demo {
+      margin: 0 0 36px;
+      background: var(--white);
+      border: 1px solid #d8dde4;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 1px 0 rgba(15, 23, 42, 0.04);
+    }
+    .demo-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 12px;
+      padding: 12px 16px;
+      background: #f3f4f6;
+      border-bottom: 1px solid #e5e7eb;
+      font-size: 0.82rem;
+    }
+    .demo-label strong { font-weight: 800; }
+    .demo-label span { color: var(--muted); }
+    .stage {
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      background: #cfd4db;
+    }
+    .frame {
+      background: #f7f7f8;
+      border: 1px solid #b8bec8;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 12px 40px rgba(15, 23, 42, 0.12);
+    }
+    .frame--desk { width: min(980px, 100%); }
+    .frame--phone { width: 390px; max-width: 100%; border-radius: 28px; }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      background: #fff;
+      border-bottom: 1px solid var(--line);
+    }
+    .logo {
+      font-weight: 800;
+      font-size: 1.15rem;
+      letter-spacing: -0.04em;
+    }
+    .logo em { color: var(--accent); font-style: normal; }
+    .nav {
+      display: flex;
+      gap: 14px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--muted);
+    }
+    .nav .on { color: var(--ink); border-bottom: 2px solid var(--gold); padding-bottom: 2px; }
+
+    .mw-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      background: #fff;
+      border-bottom: 1px solid var(--line);
+    }
+    .mw-pages {
+      display: flex;
+      gap: 10px;
+      overflow: auto;
+      padding: 8px 14px 10px;
+      background: #fff;
+      border-bottom: 1px solid var(--line);
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .mw-pages .on { color: var(--ink); }
+
+    .content { padding: 16px; }
+    .content--desk { padding: 20px 22px 28px; }
+
+    .page-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .page-head h2 {
+      margin: 0;
+      font-size: 1.35rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+    .page-head p {
+      margin: 4px 0 0;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .chip {
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 0.35rem 0.7rem;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+    }
+    .chip.on {
+      background: var(--ink);
+      color: #fff;
+      border-color: var(--ink);
+    }
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .field {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 0.45rem 0.65rem;
+      font-size: 0.82rem;
+      font-weight: 600;
+    }
+    .field input, .field select {
+      border: 0;
+      outline: 0;
+      font: inherit;
+      background: transparent;
+      min-width: 0;
+      width: 5.5rem;
+    }
+    .btn {
+      border: 0;
+      border-radius: 10px;
+      padding: 0.5rem 0.85rem;
+      font: inherit;
+      font-weight: 700;
+      font-size: 0.82rem;
+      background: var(--gold);
+      color: #111;
+      cursor: default;
+    }
+    .btn-ghost {
+      background: #fff;
+      border: 1px solid var(--line);
+    }
+
+    .band {
+      background: var(--band);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px;
+      margin-bottom: 14px;
+    }
+    .band-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 10px;
+    }
+    .band-head h3 {
+      margin: 0;
+      font-size: 1.05rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .count {
+      display: inline-flex;
+      min-width: 1.5rem;
+      justify-content: center;
+      padding: 0.1rem 0.45rem;
+      border-radius: 999px;
+      background: var(--teal);
+      color: #fff;
+      font-size: 0.7rem;
+      font-weight: 700;
+    }
+    .all { font-size: 0.85rem; font-weight: 600; text-decoration: underline; }
+
+    .result {
+      display: grid;
+      grid-template-columns: 72px 1fr auto;
+      gap: 12px;
+      align-items: center;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 10px;
+      margin-bottom: 8px;
+    }
+    .result:last-child { margin-bottom: 0; }
+    .avatar {
+      width: 72px;
+      height: 72px;
+      border-radius: 12px;
+      object-fit: cover;
+      background: linear-gradient(135deg, #ddd, #bbb);
+      display: block;
+    }
+    .avatar--logo {
+      object-fit: contain;
+      background: #fff;
+      border: 1px solid var(--line);
+      padding: 6px;
+    }
+    .result h4 {
+      margin: 0 0 2px;
+      font-size: 0.95rem;
+      font-weight: 800;
+    }
+    .result .meta {
+      margin: 0;
+      font-size: 0.78rem;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+    .result .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 6px;
+    }
+    .tag {
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 0.15rem 0.4rem;
+      border-radius: 6px;
+      background: #eef2f4;
+      color: #334;
+    }
+    .dist {
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: var(--teal);
+      white-space: nowrap;
+    }
+    .stars { color: #eab308; font-weight: 800; font-size: 0.78rem; }
+
+    /* Profil */
+    .hero {
+      position: relative;
+      border-radius: 16px;
+      overflow: hidden;
+      background: linear-gradient(120deg, #1a2330, #2c3e50 55%, #4a6fa5);
+      min-height: 160px;
+      margin-bottom: 0;
+    }
+    .hero-cover {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(90deg, rgba(15,20,30,0.75), rgba(15,20,30,0.15)),
+        url("https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=1200&q=60") center/cover;
+      opacity: 0.95;
+    }
+    .hero-inner {
+      position: relative;
+      display: flex;
+      gap: 16px;
+      align-items: flex-end;
+      padding: 20px 18px 16px;
+      color: #fff;
+    }
+    .hero-photos {
+      display: flex;
+      align-items: flex-end;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+    .photo-person {
+      width: 88px;
+      height: 88px;
+      border-radius: 16px;
+      border: 3px solid #fff;
+      object-fit: cover;
+      background: #888;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+    }
+    .photo-logo {
+      width: 56px;
+      height: 56px;
+      border-radius: 12px;
+      border: 2px solid #fff;
+      object-fit: contain;
+      background: #fff;
+      padding: 4px;
+      margin-bottom: 4px;
+    }
+    .hero-copy h2 {
+      margin: 0 0 4px;
+      font-size: 1.35rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+    .hero-copy .role {
+      margin: 0 0 6px;
+      font-size: 0.85rem;
+      opacity: 0.92;
+      font-weight: 600;
+    }
+    .hero-copy .facts {
+      margin: 0;
+      font-size: 0.78rem;
+      opacity: 0.88;
+      line-height: 1.4;
+    }
+
+    .profile-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 14px;
+      margin-top: 14px;
+    }
+    .profile-grid--phone { grid-template-columns: 1fr; }
+
+    .card {
+      background: var(--band);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px 16px;
+    }
+    .card h3 {
+      margin: 0 0 8px;
+      font-size: 1rem;
+      font-weight: 800;
+    }
+    .card p {
+      margin: 0 0 8px;
+      font-size: 0.88rem;
+      line-height: 1.5;
+      color: #222;
+    }
+    .card p:last-child { margin-bottom: 0; }
+    .dl {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 6px 12px;
+      font-size: 0.84rem;
+      margin: 0;
+    }
+    .dl dt { color: var(--muted); font-weight: 600; }
+    .dl dd { margin: 0; font-weight: 700; }
+
+    .rail {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+    .tile {
+      flex: 0 0 168px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+    .tile-img {
+      aspect-ratio: 16/10;
+      background: #d8dde4 center/cover no-repeat;
+    }
+    .tile-body { padding: 8px 10px 10px; }
+    .tile-body strong {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 800;
+      line-height: 1.25;
+      margin-bottom: 4px;
+    }
+    .tile-body span {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .cat-pill {
+      display: inline-block;
+      font-size: 0.68rem;
+      font-weight: 700;
+      background: #111;
+      color: #fff;
+      border-radius: 6px;
+      padding: 0.12rem 0.4rem;
+      margin-bottom: 6px;
+    }
+
+    .cta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .note {
+      margin: 10px 0 0;
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <h1>Ajánlások — találati lista + partner profil</h1>
+  <p class="lead">
+    Demó a kívánt menükre: kategória után <strong>találati lista</strong> (vállalkozások),
+    kattintásra <strong>profil oldal</strong> — profilkép + céglogó, adatok, tevékenység bemutatása,
+    és ha van, a partner hirdetései bármely kategóriából.
+  </p>
+  <p class="toc">
+    <a href="#a">A · Lista desk</a> ·
+    <a href="#b">B · Lista mobil</a> ·
+    <a href="#c">C · Profil desk</a> ·
+    <a href="#d">D · Profil mobil</a>
+  </p>
+
+  <!-- A -->
+  <section class="demo" id="a">
+    <div class="demo-label">
+      <strong>A — Találati lista (asztali)</strong>
+      <span>Ajánlások → Autószerelő · ir.szám + körzet</span>
+    </div>
+    <div class="stage">
+      <div class="frame frame--desk">
+        <div class="topbar">
+          <div class="logo">bymy<em>.</em>hu</div>
+          <nav class="nav">
+            <span>Kezdőlap</span><span>Autó</span><span class="on">Ajánlások</span><span>Értékbecslés</span>
+          </nav>
+        </div>
+        <div class="content content--desk">
+          <div class="page-head">
+            <div>
+              <h2>Ajánlások</h2>
+              <p>Autó · Autószerelő · 8000 · 30 km</p>
+            </div>
+            <button class="btn btn-ghost" type="button">Frissítés</button>
+          </div>
+          <div class="chip-row">
+            <span class="chip">Átírás</span>
+            <span class="chip on">Autószerelő</span>
+            <span class="chip">Gumiszerelő</span>
+            <span class="chip">Klímaszerelő</span>
+            <span class="chip">Műszaki vizsga</span>
+          </div>
+          <div class="filters">
+            <label class="field">Irányítószám <input value="8000" readonly /></label>
+            <label class="field">Körzet
+              <select><option>30 km</option></select>
+            </label>
+            <button class="btn" type="button">Keresés</button>
+          </div>
+          <div class="band">
+            <div class="band-head">
+              <h3>Találatok <span class="count">6</span></h3>
+              <span class="all">Térkép</span>
+            </div>
+            <article class="result">
+              <img class="avatar" alt="" src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=200&h=200&fit=crop" />
+              <div>
+                <h4>Fehérvári Autószerviz Kft.</h4>
+                <p class="meta"><span class="stars">★ 4.8</span> · 126 értékelés · Székesfehérvár, Gáz u. 12.</p>
+                <div class="tags"><span class="tag">Autószerelő</span><span class="tag">Diagnosztika</span><span class="tag">3 hirdetés</span></div>
+              </div>
+              <div class="dist">1,8 km</div>
+            </article>
+            <article class="result">
+              <img class="avatar avatar--logo" alt="" src="https://images.unsplash.com/photo-1599305445671-ac291c95aaa9?w=200&h=200&fit=crop" />
+              <div>
+                <h4>MotorMaster</h4>
+                <p class="meta"><span class="stars">★ 4.5</span> · 58 értékelés · Szabadbattyán</p>
+                <div class="tags"><span class="tag">Autószerelő</span><span class="tag">Olajcsere</span></div>
+              </div>
+              <div class="dist">9,4 km</div>
+            </article>
+            <article class="result">
+              <img class="avatar" alt="" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop" />
+              <div>
+                <h4>Kiss Péter egyéni vállalkozó</h4>
+                <p class="meta"><span class="stars">★ 4.9</span> · 41 értékelés · Csór</p>
+                <div class="tags"><span class="tag">Autószerelő</span><span class="tag">Házhoz megy</span></div>
+              </div>
+              <div class="dist">14 km</div>
+            </article>
+          </div>
+          <p class="note">Kattintás → partner profil (C / D demó).</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- B -->
+  <section class="demo" id="b">
+    <div class="demo-label">
+      <strong>B — Találati lista (mobil)</strong>
+      <span>Ugyanaz a menü, féloldalas kártyák helyett lista</span>
+    </div>
+    <div class="stage">
+      <div class="frame frame--phone">
+        <div class="mw-top">
+          <div class="logo">bymy<em>.</em>hu</div>
+          <span style="font-weight:800;background:var(--gold);width:32px;height:32px;border-radius:50%;display:grid;place-items:center">+</span>
+        </div>
+        <div class="mw-pages">
+          <span>Kezdőlap</span><span>Autó</span><span class="on">Ajánlások</span><span>Értékbecslés</span>
+        </div>
+        <div class="content">
+          <div class="page-head">
+            <div>
+              <h2 style="font-size:1.2rem">Autószerelő</h2>
+              <p>8000 · 30 km · 6 találat</p>
+            </div>
+          </div>
+          <div class="filters">
+            <label class="field">8000</label>
+            <label class="field">30 km</label>
+            <button class="btn" type="button">OK</button>
+          </div>
+          <article class="result" style="grid-template-columns:64px 1fr">
+            <img class="avatar" style="width:64px;height:64px" alt="" src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=200&h=200&fit=crop" />
+            <div>
+              <h4>Fehérvári Autószerviz</h4>
+              <p class="meta">★ 4.8 · 1,8 km</p>
+              <div class="tags"><span class="tag">3 hirdetés</span></div>
+            </div>
+          </article>
+          <article class="result" style="grid-template-columns:64px 1fr">
+            <img class="avatar avatar--logo" style="width:64px;height:64px" alt="" src="https://images.unsplash.com/photo-1599305445671-ac291c95aaa9?w=200&h=200&fit=crop" />
+            <div>
+              <h4>MotorMaster</h4>
+              <p class="meta">★ 4.5 · 9,4 km</p>
+            </div>
+          </article>
+          <article class="result" style="grid-template-columns:64px 1fr;margin-bottom:0">
+            <img class="avatar" style="width:64px;height:64px" alt="" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop" />
+            <div>
+              <h4>Kiss Péter e.v.</h4>
+              <p class="meta">★ 4.9 · 14 km</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- C -->
+  <section class="demo" id="c">
+    <div class="demo-label">
+      <strong>C — Partner profil (asztali)</strong>
+      <span>Profilkép + céglogó · adatok · bemutatás · hirdetések</span>
+    </div>
+    <div class="stage">
+      <div class="frame frame--desk">
+        <div class="topbar">
+          <div class="logo">bymy<em>.</em>hu</div>
+          <nav class="nav">
+            <span>Kezdőlap</span><span>Autó</span><span class="on">Ajánlások</span>
+          </nav>
+        </div>
+        <div class="content content--desk">
+          <p class="meta" style="margin:0 0 10px;font-size:0.78rem;color:var(--muted)">
+            Ajánlások / Autószerelő / <strong style="color:var(--ink)">Fehérvári Autószerviz Kft.</strong>
+          </p>
+          <div class="hero">
+            <div class="hero-cover" aria-hidden="true"></div>
+            <div class="hero-inner">
+              <div class="hero-photos">
+                <img class="photo-person" alt="Profilkép" src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=240&h=240&fit=crop" />
+                <img class="photo-logo" alt="Céglogó" src="https://images.unsplash.com/photo-1599305445671-ac291c95aaa9?w=160&h=160&fit=crop" />
+              </div>
+              <div class="hero-copy">
+                <h2>Fehérvári Autószerviz Kft.</h2>
+                <p class="role">Autószerelő · Diagnosztika · Klíma</p>
+                <p class="facts">★ 4.8 (126) · Székesfehérvár, Gáz u. 12. · H–P 7:30–17:00 · +36 22 555 010</p>
+              </div>
+            </div>
+          </div>
+          <div class="cta-row">
+            <button class="btn" type="button">Hívás</button>
+            <button class="btn btn-ghost" type="button">Útvonal</button>
+            <button class="btn btn-ghost" type="button">Üzenet</button>
+            <button class="btn btn-ghost" type="button">Weboldal</button>
+          </div>
+          <div class="profile-grid">
+            <div class="card">
+              <h3>Tevékenység bemutatása</h3>
+              <p>
+                Családi autószerviz 1998 óta. Márkafüggetlen javítás, számítógépes diagnosztika,
+                olajcsere, fék, futómű és klíma. Előzetes időpontfoglalással dolgozunk;
+                csereautó igény szerint.
+              </p>
+              <p>Szolgáltatási terület: Székesfehérvár és 40 km-es körzet.</p>
+            </div>
+            <div class="card">
+              <h3>Vállalkozás adatai</h3>
+              <dl class="dl">
+                <dt>Cégnév</dt><dd>Fehérvári Autószerviz Kft.</dd>
+                <dt>Adószám</dt><dd>12345678-2-07</dd>
+                <dt>Kapcsolat</dt><dd>Nagy László</dd>
+                <dt>E-mail</dt><dd>info@fehervariautoszerviz.hu</dd>
+                <dt>Nyitva</dt><dd>H–P 7:30–17:00</dd>
+              </dl>
+            </div>
+          </div>
+          <div class="band" style="margin-top:14px;margin-bottom:0">
+            <div class="band-head">
+              <h3>Hirdetéseik <span class="count">3</span></h3>
+              <span class="all">Összes</span>
+            </div>
+            <div class="rail">
+              <article class="tile">
+                <div class="tile-img" style="background-image:url('https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=400&q=60')"></div>
+                <div class="tile-body">
+                  <span class="cat-pill">Autó</span>
+                  <strong>VW Golf 1.6 TDI</strong>
+                  <span>2 490 000 Ft</span>
+                </div>
+              </article>
+              <article class="tile">
+                <div class="tile-img" style="background-image:url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=60')"></div>
+                <div class="tile-body">
+                  <span class="cat-pill">Autó</span>
+                  <strong>Ford Focus 2018</strong>
+                  <span>3 150 000 Ft</span>
+                </div>
+              </article>
+              <article class="tile">
+                <div class="tile-img" style="background-image:url('https://images.unsplash.com/photo-1486006920555-c77dcf18193c?w=400&q=60')"></div>
+                <div class="tile-body">
+                  <span class="cat-pill">Szolgáltatás</span>
+                  <strong>Téli gumicsere akció</strong>
+                  <span>Ár egyeztetés szerint</span>
+                </div>
+              </article>
+            </div>
+            <p class="note">A sín minden kategóriából hozza a partner feladott hirdetéseit (autó, teher, szolgáltatás…).</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- D -->
+  <section class="demo" id="d">
+    <div class="demo-label">
+      <strong>D — Partner profil (mobil)</strong>
+      <span>Ugyanaz a tartalom, egymás alatt</span>
+    </div>
+    <div class="stage">
+      <div class="frame frame--phone">
+        <div class="mw-top">
+          <div class="logo">bymy<em>.</em>hu</div>
+          <span style="font-size:0.85rem;font-weight:700">← Lista</span>
+        </div>
+        <div class="content">
+          <div class="hero" style="min-height:140px;border-radius:14px">
+            <div class="hero-cover"></div>
+            <div class="hero-inner" style="flex-direction:column;align-items:flex-start;gap:10px;padding:14px">
+              <div class="hero-photos">
+                <img class="photo-person" style="width:72px;height:72px" alt="" src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=240&h=240&fit=crop" />
+                <img class="photo-logo" style="width:48px;height:48px" alt="" src="https://images.unsplash.com/photo-1599305445671-ac291c95aaa9?w=160&h=160&fit=crop" />
+              </div>
+              <div class="hero-copy">
+                <h2 style="font-size:1.15rem">Fehérvári Autószerviz</h2>
+                <p class="role">Autószerelő · Diagnosztika</p>
+                <p class="facts">★ 4.8 · 1,8 km · H–P 7:30–17:00</p>
+              </div>
+            </div>
+          </div>
+          <div class="cta-row">
+            <button class="btn" type="button">Hívás</button>
+            <button class="btn btn-ghost" type="button">Üzenet</button>
+            <button class="btn btn-ghost" type="button">Útvonal</button>
+          </div>
+          <div class="profile-grid profile-grid--phone">
+            <div class="card">
+              <h3>Bemutatás</h3>
+              <p>Családi autószerviz 1998 óta. Márkafüggetlen javítás, diagnosztika, olajcsere, fék, futómű.</p>
+            </div>
+            <div class="card">
+              <h3>Adatok</h3>
+              <dl class="dl">
+                <dt>Cím</dt><dd>Gáz u. 12.</dd>
+                <dt>Telefon</dt><dd>+36 22 555 010</dd>
+                <dt>Nyitva</dt><dd>H–P 7:30–17</dd>
+              </dl>
+            </div>
+          </div>
+          <div class="band" style="margin-top:12px;margin-bottom:0">
+            <div class="band-head">
+              <h3>Hirdetéseik <span class="count">3</span></h3>
+            </div>
+            <div class="rail">
+              <article class="tile" style="flex-basis:148px">
+                <div class="tile-img" style="background-image:url('https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=400&q=60')"></div>
+                <div class="tile-body"><strong>VW Golf 1.6</strong><span>2,49 M Ft</span></div>
+              </article>
+              <article class="tile" style="flex-basis:148px">
+                <div class="tile-img" style="background-image:url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=60')"></div>
+                <div class="tile-body"><strong>Ford Focus</strong><span>3,15 M Ft</span></div>
+              </article>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</body>
+</html>

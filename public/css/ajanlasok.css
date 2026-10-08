@@ -1,9 +1,15 @@
+/* Ajánlások — demó 1:1 (lista + kategória) */
 
+body.ajanlas-page {
+  background: #f7f7f8;
+}
 
 .ajanlas-main {
-  max-width: 720px;
+  max-width: 980px;
   margin: 0 auto;
-  padding: 1rem 1rem 2.5rem;
+  padding: 20px 22px 28px;
+  font-family: "DM Sans", system-ui, sans-serif;
+  color: #111;
 }
 
 .ajanlas-header {
@@ -11,45 +17,48 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 0.75rem;
-  margin-bottom: 0.65rem;
+  margin-bottom: 0.75rem;
 }
 
 .ajanlas-title {
   margin: 0;
-  font-family: "DM Sans", system-ui, sans-serif;
-  font-size: 1.45rem;
+  font-size: 1.35rem;
   font-weight: 800;
-  color: #111;
   letter-spacing: -0.02em;
+  color: #111;
 }
 
 .ajanlas-subtitle {
   margin: 0.25rem 0 0;
-  font-family: "DM Sans", system-ui, sans-serif;
-  font-size: 0.88rem;
+  font-size: 0.85rem;
   color: #5c6b7a;
 }
 
 .ajanlas-refresh {
   flex: 0 0 auto;
-  font-family: "DM Sans", system-ui, sans-serif;
-  font-size: 0.85rem;
-  font-weight: 600;
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
   color: #111;
-  background: #fff;
-  border: 1px solid #c8c8c8;
+  background: #f0c52c;
+  border: 1px solid #e0b420;
   border-radius: 10px;
-  padding: 0.45rem 0.75rem;
+  padding: 0.5rem 0.85rem;
   cursor: pointer;
 }
 
+.ajanlas-refresh--ghost,
+body.ajanlas-page--results .ajanlas-refresh {
+  background: #fff;
+  border: 1px solid #d2d0cc;
+}
+
 .ajanlas-refresh:hover {
-  background: #f7f7f7;
+  filter: brightness(0.98);
 }
 
 .ajanlas-note {
   margin: 0 0 0.85rem;
-  font-family: "DM Sans", system-ui, sans-serif;
   font-size: 0.78rem;
   color: #5c6b7a;
 }
@@ -60,8 +69,9 @@
   gap: 0.65rem;
 }
 
+/* Kategória accordion (főnézet) */
 .ajanlas-category {
-  border: 1px solid rgba(20, 32, 43, 0.12);
+  border: 1px solid #d2d0cc;
   border-radius: 14px;
   overflow: hidden;
   background: #fff;
@@ -105,7 +115,6 @@
 .ajanlas-category-label {
   flex: 1 1 auto;
   min-width: 0;
-  font-family: "DM Sans", system-ui, sans-serif;
   font-size: 1rem;
   font-weight: 700;
   color: #111;
@@ -119,7 +128,6 @@
 }
 
 .ajanlas-category-count {
-  font-family: "DM Sans", system-ui, sans-serif;
   font-size: 0.78rem;
   font-weight: 600;
   color: #5c6b7a;
@@ -152,22 +160,22 @@
   display: none;
 }
 
+/* Találati lista — demó A/B */
 .ajanlas-chips {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.45rem;
-  margin-bottom: 0.85rem;
+  gap: 8px;
+  margin-bottom: 14px;
 }
 
 .ajanlas-chip {
   display: inline-flex;
   align-items: center;
-  font-family: "DM Sans", system-ui, sans-serif;
   font-size: 0.78rem;
   font-weight: 700;
   padding: 0.35rem 0.7rem;
   border-radius: 999px;
-  border: 1px solid rgba(20, 32, 43, 0.14);
+  border: 1px solid #d2d0cc;
   background: #fff;
   color: #111;
   text-decoration: none;
@@ -179,11 +187,56 @@
   color: #fff;
 }
 
+.ajanlas-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+  align-items: center;
+}
+
+.ajanlas-field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #fff;
+  border: 1px solid #d2d0cc;
+  border-radius: 10px;
+  padding: 0.45rem 0.65rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #111;
+}
+
+.ajanlas-field input,
+.ajanlas-field select {
+  border: 0;
+  outline: 0;
+  font: inherit;
+  font-weight: 700;
+  background: transparent;
+  min-width: 0;
+  width: 5.5rem;
+  color: #111;
+}
+
+.ajanlas-btn-search {
+  border: 0;
+  border-radius: 10px;
+  padding: 0.5rem 0.85rem;
+  font: inherit;
+  font-weight: 700;
+  font-size: 0.82rem;
+  background: #f0c52c;
+  color: #111;
+  cursor: pointer;
+}
+
 .ajanlas-results-band {
   border: 1px solid #d2d0cc;
   border-radius: 16px;
   background: #f6f5f2;
-  padding: 0.9rem 0.95rem 1rem;
+  padding: 14px;
 }
 
 .ajanlas-results-head {
@@ -191,17 +244,16 @@
   align-items: baseline;
   justify-content: space-between;
   gap: 0.75rem;
-  margin-bottom: 0.75rem;
+  margin-bottom: 10px;
 }
 
 .ajanlas-results-title {
   margin: 0;
-  font-family: "DM Sans", system-ui, sans-serif;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   font-weight: 800;
   display: flex;
   align-items: center;
-  gap: 0.45rem;
+  gap: 8px;
 }
 
 .ajanlas-results-count {
@@ -216,33 +268,28 @@
   font-weight: 700;
 }
 
+.ajanlas-results-map,
 .ajanlas-results-back {
-  font-family: "DM Sans", system-ui, sans-serif;
-  font-size: 0.82rem;
+  font-size: 0.85rem;
   font-weight: 600;
-  color: #5c6b7a;
-  text-decoration: none;
-  white-space: nowrap;
-}
-
-.ajanlas-results-back:hover {
   color: #111;
   text-decoration: underline;
+  white-space: nowrap;
 }
 
 .ajanlas-results-stack {
   display: flex;
   flex-direction: column;
-  gap: 0.55rem;
+  gap: 8px;
 }
 
 .ajanlas-partner-card {
   display: grid;
-  grid-template-columns: 64px 1fr;
-  gap: 0.75rem;
+  grid-template-columns: 72px 1fr auto;
+  gap: 12px;
   align-items: center;
-  padding: 0.75rem;
-  border: 1px solid rgba(20, 32, 43, 0.12);
+  padding: 10px;
+  border: 1px solid #d2d0cc;
   border-radius: 14px;
   background: #fff;
 }
@@ -253,20 +300,30 @@
 
 .ajanlas-partner-card--link:hover {
   border-color: #b8bec8;
-  box-shadow: 0 1px 0 rgba(15, 23, 42, 0.04);
 }
 
 .ajanlas-partner-avatar {
   display: grid;
   place-items: center;
-  width: 64px;
-  height: 64px;
+  width: 72px;
+  height: 72px;
   border-radius: 12px;
-  background: linear-gradient(135deg, #e8ebef, #cfd4db);
-  font-family: "DM Sans", system-ui, sans-serif;
-  font-size: 1.25rem;
+  background: linear-gradient(135deg, #ddd, #bbb);
+  font-size: 1.35rem;
   font-weight: 800;
   color: #334;
+  object-fit: cover;
+}
+
+img.ajanlas-partner-avatar {
+  display: block;
+}
+
+img.ajanlas-partner-avatar--logo {
+  object-fit: contain;
+  background: #fff;
+  border: 1px solid #d2d0cc;
+  padding: 6px;
 }
 
 .ajanlas-partner-body {
@@ -274,84 +331,57 @@
 }
 
 .ajanlas-partner-name {
-  margin: 0;
-  font-family: "DM Sans", system-ui, sans-serif;
-  font-size: 1rem;
-  font-weight: 700;
+  margin: 0 0 2px;
+  font-size: 0.95rem;
+  font-weight: 800;
   color: #111;
 }
 
-.ajanlas-partner-loc,
-.ajanlas-partner-hours {
-  margin: 0.25rem 0 0;
-  font-family: "DM Sans", system-ui, sans-serif;
-  font-size: 0.82rem;
+.ajanlas-partner-meta {
+  margin: 0;
+  font-size: 0.78rem;
   color: #5c6b7a;
+  line-height: 1.35;
 }
 
-.ajanlas-partner-meta-row {
+.ajanlas-partner-stars {
+  color: #eab308;
+  font-weight: 800;
+}
+
+.ajanlas-partner-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.55rem;
-  margin-top: 0.3rem;
-  align-items: center;
+  gap: 4px;
+  margin-top: 6px;
 }
 
-.ajanlas-partner-rating {
-  margin: 0;
-  font-family: "DM Sans", system-ui, sans-serif;
-  font-size: 0.8rem;
+.ajanlas-partner-tag {
+  font-size: 0.68rem;
   font-weight: 700;
-  color: #ca8a04;
+  padding: 0.15rem 0.4rem;
+  border-radius: 6px;
+  background: #eef2f4;
+  color: #334;
 }
 
 .ajanlas-partner-dist {
-  font-family: "DM Sans", system-ui, sans-serif;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 800;
   color: #0d9488;
-}
-
-.ajanlas-partner-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.65rem;
-  margin-top: 0.45rem;
-  align-items: center;
-}
-
-.ajanlas-partner-open {
-  margin-left: auto;
-  font-family: "DM Sans", system-ui, sans-serif;
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: #111;
-}
-
-.ajanlas-partner-call,
-.ajanlas-partner-map {
-  font-family: "DM Sans", system-ui, sans-serif;
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: #1565c0;
-  text-decoration: none;
-}
-
-.ajanlas-partner-call:hover,
-.ajanlas-partner-map:hover {
-  text-decoration: underline;
+  white-space: nowrap;
+  text-align: right;
 }
 
 .ajanlas-empty {
   margin: 0;
-  font-family: "DM Sans", system-ui, sans-serif;
   font-size: 0.88rem;
   color: #5c6b7a;
 }
 
 .ajanlas-empty--page {
   padding: 1rem;
-  border: 1px solid rgba(20, 32, 43, 0.12);
+  border: 1px solid #d2d0cc;
   border-radius: 14px;
   background: #fff;
 }
@@ -364,14 +394,39 @@
 .ajanlas-settings-link {
   display: inline-block;
   margin-top: 1rem;
-  font-family: "DM Sans", system-ui, sans-serif;
   font-size: 0.85rem;
   font-weight: 600;
   color: #5c6b7a;
   text-decoration: none;
 }
 
+body.ajanlas-page--results .ajanlas-settings-link {
+  display: none;
+}
+
 .ajanlas-settings-link:hover {
   color: #111;
   text-decoration: underline;
+}
+
+@media (max-width: 800px) {
+  .ajanlas-main {
+    padding: 16px;
+  }
+
+  .ajanlas-partner-card {
+    grid-template-columns: 64px 1fr;
+    gap: 10px;
+  }
+
+  .ajanlas-partner-avatar {
+    width: 64px;
+    height: 64px;
+  }
+
+  .ajanlas-partner-dist {
+    grid-column: 2;
+    text-align: left;
+    margin-top: -4px;
+  }
 }

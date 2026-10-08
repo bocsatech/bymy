@@ -101,7 +101,7 @@ function renderProfile(root, partner, { listings = [], backHref = "/ajanlasok.ht
   const rating =
     partner.google_rating != null
       ? `★ ${Number(partner.google_rating).toFixed(1)}${
-          partner.google_review_count != null ? ` (${partner.google_review_count})` : ""
+          partner.google_review_count != null ? ` · ${partner.google_review_count}` : ""
         }`
       : "";
   const loc = [partner.postal_code, partner.address || partner.service_areas]
@@ -120,14 +120,17 @@ function renderProfile(root, partner, { listings = [], backHref = "/ajanlasok.ht
     ? `/ajanlasok.html?vertical=${encodeURIComponent(vertical)}&cat=${encodeURIComponent(catFromQuery)}`
     : backHref;
 
+  const defaultCover =
+    "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=1200&q=60";
+  const coverUrl = cover || defaultCover;
   root.innerHTML = `
     <p class="ap-crumb">
       <a href="/ajanlasok.html?vertical=${esc(vertical)}">Ajánlások</a>
-      ${catFromQuery ? ` · <a href="${esc(listBack)}">${esc(categoryLabel(catFromQuery))}</a>` : ""}
-      · <strong>${esc(name)}</strong>
+      ${catFromQuery ? ` / <a href="${esc(listBack)}">${esc(categoryLabel(catFromQuery))}</a>` : ""}
+      / <strong>${esc(name)}</strong>
     </p>
     <section class="ap-hero">
-      ${cover ? `<div class="ap-hero-cover" style="background-image:url('${esc(cover)}')"></div>` : ""}
+      <div class="ap-hero-cover" style="background-image:linear-gradient(90deg, rgba(15,20,30,0.75), rgba(15,20,30,0.15)), url('${esc(coverUrl)}')"></div>
       <div class="ap-hero-inner">
         <div class="ap-photos">
           <span class="ap-photo-person">${
@@ -153,7 +156,6 @@ function renderProfile(root, partner, { listings = [], backHref = "/ajanlasok.ht
       ${maps ? `<a class="ap-btn" href="${esc(maps)}" target="_blank" rel="noopener noreferrer">Útvonal</a>` : ""}
       ${email ? `<a class="ap-btn" href="mailto:${esc(email)}">Üzenet</a>` : ""}
       ${website ? `<a class="ap-btn" href="${esc(website)}" target="_blank" rel="noopener noreferrer">Weboldal</a>` : ""}
-      <a class="ap-btn" href="${esc(listBack)}">← Lista</a>
     </div>
     <div class="ap-grid">
       <section class="ap-card">
@@ -170,7 +172,7 @@ function renderProfile(root, partner, { listings = [], backHref = "/ajanlasok.ht
       <section class="ap-card">
         <h2>Vállalkozás adatai</h2>
         <dl class="ap-dl">
-          <dt>Név</dt><dd>${esc(name)}</dd>
+          <dt>Cégnév</dt><dd>${esc(name)}</dd>
           ${partner.contact_person ? `<dt>Kapcsolat</dt><dd>${esc(partner.contact_person)}</dd>` : ""}
           ${loc ? `<dt>Cím</dt><dd>${esc(loc)}</dd>` : ""}
           ${phone ? `<dt>Telefon</dt><dd>${esc(phone)}</dd>` : ""}
@@ -182,6 +184,7 @@ function renderProfile(root, partner, { listings = [], backHref = "/ajanlasok.ht
     <section class="ap-band" id="ap-listings">
       <div class="ap-band-head">
         <h2>Hirdetéseik <span class="ap-count">${listings.length}</span></h2>
+        ${listings.length ? `<a class="ap-all" href="#ap-listings">Összes</a>` : ""}
       </div>
       ${
         listings.length

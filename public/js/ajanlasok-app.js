@@ -10,6 +10,7 @@ import {
 } from "./partner-recommendations.js?v=fc822e523f";
 
 const PARTNER_CACHE_KEY = "bymy-ajanlas-partner-v1";
+let lastResultsCity = "";
 
 function cacheAjanlasPartner(partner) {
   try {
@@ -225,9 +226,25 @@ function filterByRadius(categories, radiusKm) {
 
 function formatRating(partner) {
   if (partner.google_rating == null) return "";
-  const count =
-    partner.google_review_count != null ? ` (${partner.google_review_count})` : "";
-  return `★ ${Number(partner.google_rating).toFixed(1)}${count}`;
+  const stars = `★ ${Number(partner.google_rating).toFixed(1)}`;
+  if (partner.google_review_count == null) return stars;
+  return `${stars} · ${partner.google_review_count} értékelés`;
+}
+
+function partnerAvatarHtml(partner) {
+  const url = String(
+    partner.logo_url || partner.photo_url || partner.avatar_url || partner.company_logo_url || ""
+  ).trim();
+  const initial = escapeHtml(String(partner.name || "P").trim().slice(0, 1).toUpperCase() || "P");
+  if (!url || !/^https?:\/\//i.test(url)) {
+    return `<span class="ajanlas-partner-avatar" aria-hidden="true">${initial}</span>`;
+  }
+  const isLogo = !!(partner.company_logo_url && url === partner.company_logo_url);
+  return `<img class="ajanlas-partner-avatar${isLogo ? " ajanlas-partner-avatar--logo" : ""}" src="${escapeHtml(url)}" alt="" loading="lazy" decoding="async" />`;
+}
+
+function categoryLabelById(id) {
+  return PAGE_CATEGORIES.find((c) => c.id === id)?.label || id;
 }
 
 function telHref(phone) {
@@ -273,48 +290,45 @@ function openPartnerProfile(partner) {
   window.location.href = partnerProfileHref(partner);
 }
 
-function renderPartnerCard(partner, { linkProfile = false } = {}) {
+function renderPartnerCard(partner, { linkProfile = false, categoryLabel = "" } = {}) {
   const article = document.createElement("article");
   article.className = "ajanlas-partner-card";
   if (linkProfile) article.classList.add("ajanlas-partner-card--link");
   const rating = formatRating(partner);
-  const phone = partner.phone ? String(partner.phone) : "";
-  const maps = partner.google_maps_url ? String(partner.google_maps_url) : "";
   const dist =
-    partner.distance_km != null ? `${Number(partner.distance_km).toFixed(1)} km` : "";
-  const initial = escapeHtml(String(partner.name || "P").trim().slice(0, 1).toUpperCase() || "P");
+    partner.distance_km != null
+      ? `${Number(partner.distance_km).toFixed(1).replace(".", ",")} km`
+      : "";
+  const locBits = [partner.address, partner.postal_code].filter(Boolean).join(", ");
+  const metaHtml = [
+    rating ? `<span class="ajanlas-partner-stars">${escapeHtml(rating)}</span>` : "",
+    locBits ? escapeHtml(locBits) : "",
+  ]
+    .filter(Boolean)
+    .join(" · ");
+  const serviceTags = (partner.services?.length ? partner.services : [])
+    .map((id) => categoryLabelById(id))
+    .filter(Boolean);
+  if (categoryLabel && !serviceTags.includes(categoryLabel)) serviceTags.unshift(categoryLabel);
+  const tagsHtml = serviceTags.length
+    ? `<div class="ajanlas-partner-tags">${serviceTags
+        .slice(0, 4)
+        .map((t) => `<span class="ajanlas-partner-tag">${escapeHtml(t)}</span>`)
+        .join("")}</div>`
+    : "";
   article.innerHTML = `
-    <span class="ajanlas-partner-avatar" aria-hidden="true">${initial}</span>
+    ${partnerAvatarHtml(partner)}
     <div class="ajanlas-partner-body">
       <h3 class="ajanlas-partner-name">${escapeHtml(partner.name)}</h3>
-      <p class="ajanlas-partner-loc">${escapeHtml(partner.postal_code)} · ${escapeHtml(partner.address)}</p>
-      ${
-        partner.opening_hours
-          ? `<p class="ajanlas-partner-hours">${escapeHtml(partner.opening_hours)}</p>`
-          : ""
-      }
-      <div class="ajanlas-partner-meta-row">
-        ${rating ? `<span class="ajanlas-partner-rating">${escapeHtml(rating)}</span>` : ""}
-        ${dist ? `<span class="ajanlas-partner-dist">${escapeHtml(dist)}</span>` : ""}
-      </div>
-      <div class="ajanlas-partner-actions">
-        ${phone ? `<a class="ajanlas-partner-call" href="${escapeHtml(telHref(phone))}">Hívás</a>` : ""}
-        ${
-          maps
-            ? `<a class="ajanlas-partner-map" href="${escapeHtml(maps)}" target="_blank" rel="noopener noreferrer">Térkép</a>`
-            : ""
-        }
-        ${linkProfile ? `<span class="ajanlas-partner-open">Profil →</span>` : ""}
-      </div>
+      ${metaHtml ? `<p class="ajanlas-partner-meta">${metaHtml}</p>` : ""}
+      ${tagsHtml}
     </div>
+    <div class="ajanlas-partner-dist">${dist ? escapeHtml(dist) : ""}</div>
   `;
   if (linkProfile) {
     article.tabIndex = 0;
     article.setAttribute("role", "link");
-    article.addEventListener("click", (event) => {
-      if (event.target.closest("a")) return;
-      openPartnerProfile(partner);
-    });
+    article.addEventListener("click", () => openPartnerProfile(partner));
     article.addEventListener("keydown", (event) => {
       if (event.key === "Enter" || event.key === " ") {
         event.preventDefault();
@@ -330,8 +344,12 @@ function categoryHref(catId) {
   return `/ajanlasok.html?${params}`;
 }
 
-function renderResultsList(categories, activeCatId) {
+function renderResultsList(categories, activeCatId, { postalCode = "", city = "" } = {}) {
   const listEl = document.getElementById("ajanlas-list");
+  const noteEl = document.getElementById("ajanlas-note");
+  const subtitleEl = document.getElementById("ajanlas-subtitle");
+  const titleEl = document.querySelector(".ajanlas-title");
+  const refreshBtn = document.getElementById("ajanlas-refresh");
   if (!listEl) return;
   const active =
     categories.find((c) => c.id === activeCatId) ||
@@ -342,6 +360,26 @@ function renderResultsList(categories, activeCatId) {
     return;
   }
 
+  document.body.classList.add("ajanlas-page--results");
+  const radiusKm = loadRadiusKm();
+  const place = city || postalCode || "";
+  if (titleEl) titleEl.textContent = "Ajánlások";
+  if (subtitleEl) {
+    subtitleEl.textContent = [
+      PAGE_VERTICAL === "ingatlan" ? "Ingatlan" : "Autó",
+      active.label,
+      place,
+      `${radiusKm} km`,
+    ]
+      .filter(Boolean)
+      .join(" · ");
+  }
+  if (noteEl) noteEl.hidden = true;
+  if (refreshBtn) {
+    refreshBtn.classList.add("ajanlas-refresh--ghost");
+    refreshBtn.textContent = "Frissítés";
+  }
+
   const chips = document.createElement("div");
   chips.className = "ajanlas-chips";
   chips.setAttribute("role", "tablist");
@@ -349,9 +387,40 @@ function renderResultsList(categories, activeCatId) {
     const a = document.createElement("a");
     a.className = `ajanlas-chip${cat.id === active.id ? " is-active" : ""}`;
     a.href = categoryHref(cat.id);
-    a.textContent = `${cat.label}${cat.partners?.length ? ` · ${cat.partners.length}` : ""}`;
+    a.textContent = cat.label;
     chips.append(a);
   }
+
+  const filters = document.createElement("div");
+  filters.className = "ajanlas-filters";
+  filters.innerHTML = `
+    <label class="ajanlas-field">Irányítószám
+      <input id="ajanlas-filter-postal" inputmode="numeric" maxlength="4" value="${escapeHtml(postalCode)}" />
+    </label>
+    <label class="ajanlas-field">Körzet
+      <select id="ajanlas-filter-radius">
+        ${[5, 10, 15, 20, 30]
+          .map(
+            (km) =>
+              `<option value="${km}"${km === radiusKm ? " selected" : ""}>${km} km</option>`
+          )
+          .join("")}
+      </select>
+    </label>
+    <button type="button" class="ajanlas-btn-search" id="ajanlas-filter-search">Keresés</button>
+  `;
+  filters.querySelector("#ajanlas-filter-search")?.addEventListener("click", () => {
+    const postal = String(filters.querySelector("#ajanlas-filter-postal")?.value || "")
+      .replace(/\D/g, "")
+      .slice(0, 4);
+    const radius = Number(filters.querySelector("#ajanlas-filter-radius")?.value || 30);
+      try {
+      if (postal.length === 4) savePostalCode(postal);
+      localStorage.setItem("bymy_partner_radius_km", String(Math.min(30, Math.max(5, radius))));
+    } catch {
+    }
+    window.location.reload();
+  });
 
   const band = document.createElement("section");
   band.className = "ajanlas-results-band";
@@ -359,10 +428,10 @@ function renderResultsList(categories, activeCatId) {
   band.innerHTML = `
     <div class="ajanlas-results-head">
       <h2 class="ajanlas-results-title">
-        ${escapeHtml(active.label)}
+        Találatok
         <span class="ajanlas-results-count">${count}</span>
       </h2>
-      <a class="ajanlas-results-back" href="/ajanlasok.html?vertical=${encodeURIComponent(PAGE_VERTICAL)}">← Kategóriák</a>
+      <a class="ajanlas-results-map" href="/ajanlasok.html?vertical=${encodeURIComponent(PAGE_VERTICAL)}">Térkép</a>
     </div>
   `;
   const stack = document.createElement("div");
@@ -379,7 +448,7 @@ function renderResultsList(categories, activeCatId) {
       stack.append(
         renderPartnerCard(
           { ...partner, services: partner.services?.length ? partner.services : [active.id] },
-          { linkProfile: true }
+          { linkProfile: true, categoryLabel: active.label }
         )
       );
     }
@@ -387,7 +456,7 @@ function renderResultsList(categories, activeCatId) {
   band.append(stack);
 
   listEl.innerHTML = "";
-  listEl.append(chips, band);
+  listEl.append(chips, filters, band);
 }
 
 function renderCategory(category, openId) {
@@ -491,9 +560,16 @@ export function initAjanlasokPage() {
 
     // Kategória kiválasztva → találati lista (demó / hub csempe link)
     if (preferredCat && filtered.some((c) => c.id === preferredCat)) {
-      renderResultsList(filtered, preferredCat);
+      renderResultsList(filtered, preferredCat, {
+        postalCode: String(loadSavedPostalCode() || "").replace(/\D/g, "").slice(0, 4),
+        city: lastResultsCity,
+      });
       return;
     }
+
+    document.body.classList.remove("ajanlas-page--results");
+    const noteEl = document.getElementById("ajanlas-note");
+    if (noteEl) noteEl.hidden = false;
 
     listEl.innerHTML = "";
     const openId =
@@ -529,6 +605,7 @@ export function initAjanlasokPage() {
     try {
       const data = await fetchPartnerRecommendations(postalCode, { vertical: PAGE_VERTICAL });
       savePostalCode(postalCode);
+      lastResultsCity = data.city || "";
       if (data.city) setSubtitle(`${data.city} · szolgáltatók ${radiusKm} km-en belül`);
       setNote(`Élő · ${postalCode} · ${radiusKm} km`);
       render(data.categories ?? [], true);

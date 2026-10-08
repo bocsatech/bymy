@@ -66,7 +66,7 @@ struct HubHomeScreen: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 22) {
+            VStack(alignment: .leading, spacing: 44) {
                 promoRail
 
                 // Autó kategóriák

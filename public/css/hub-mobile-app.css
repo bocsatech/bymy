@@ -415,7 +415,7 @@
   /* Szekciósáv: a sáv halvány szürke háttere választja el a csempéket */
   body.hub-page--feed .hf-section {
     padding: 14px var(--hf-gutter) 16px !important;
-    margin: 0 0 14px !important;
+    margin: 0 0 28px !important;
     background: #f6f5f2;
     border: 1px solid #d2d0cc;
     border-radius: 16px;

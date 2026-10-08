@@ -1019,7 +1019,7 @@ body.hub-page--feed .hf-card {
   box-sizing: border-box;
   background: #fff;
   border: 1px solid #d4d4d4;
-  border-radius: 9px;
+  border-radius: 14px;
   overflow: hidden;
   padding: 0 0 0.72rem;
 }
@@ -1149,7 +1149,7 @@ body.hub-page--feed .hf-card {
   box-sizing: border-box;
   background: #fff;
   border: 1px solid #d4d4d4;
-  border-radius: 9px;
+  border-radius: 14px;
   overflow: hidden;
   padding: 0 0 0.72rem;
   display: flex;

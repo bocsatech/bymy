@@ -16,6 +16,9 @@ enum ListingsAPI {
         var kmNum: Int? = nil
         var updatedAt: String? = nil
         var createdAt: String? = nil
+        var fuel: String? = nil
+        var year: Int? = nil
+        var allapot: String? = nil
         var promoKiemelt: Bool = false
         var status: String? = nil
     }
@@ -94,6 +97,7 @@ enum ListingsAPI {
         let gyartasi_ev: FlexibleNumber?
         let gyartmany: String?
         let modell: String?
+        let allapot: String?
         let owner_user_id: Int?
     }
 
@@ -302,6 +306,9 @@ enum ListingsAPI {
             kmNum: kmNum,
             updatedAt: row.updated_at ?? row.created_at,
             createdAt: row.created_at ?? row.updated_at,
+            fuel: preview?.filter?.uzemanyag.flatMap { $0.isEmpty ? nil : $0 },
+            year: preview?.filter?.gyartasi_ev?.value,
+            allapot: preview?.filter?.allapot.flatMap { $0.isEmpty ? nil : $0 },
             promoKiemelt: promo,
             status: row.status
         )
@@ -356,6 +363,9 @@ enum ListingsAPI {
             kmNum: kmNum,
             updatedAt: stringAny(row["updated_at"]) ?? stringAny(row["created_at"]),
             createdAt: stringAny(row["created_at"]) ?? stringAny(row["updated_at"]),
+            fuel: stringAny(filter["uzemanyag"]) ?? stringAny(form["uzemanyag"]),
+            year: intAny(filter["gyartasi_ev"]) ?? intAny(form["gyartasi_ev"]),
+            allapot: stringAny(filter["allapot"]) ?? stringAny(form["allapot"]),
             promoKiemelt: promo,
             status: stringAny(row["status"])
         )

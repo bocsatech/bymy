@@ -136,6 +136,17 @@ export function filterByCategory(items, categoryId) {
   return items.filter((item) => matchesCategory(item, categoryId));
 }
 
+/** Hub kategória-csempék: darabszám kategóriánként (egy autó több kategóriába is eshet). */
+export function countListingsByHomeCategory(items) {
+  const counts = Object.fromEntries(HOME_CATEGORIES.map((cat) => [cat.id, 0]));
+  for (const item of items || []) {
+    for (const cat of HOME_CATEGORIES) {
+      if (matchesCategory(item, cat.id)) counts[cat.id] += 1;
+    }
+  }
+  return counts;
+}
+
 /**
  * Kezdőoldal csempe → autó keresőmenü mezők (Üzemanyag stb.).
  * Üres objektum: nincs 1:1 mező (leasing / bérelhető / OT).

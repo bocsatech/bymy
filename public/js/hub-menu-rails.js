@@ -1,12 +1,22 @@
-import { HOME_CATEGORIES, autoCategoryHref } from "./home-category-bar.js?v=c2d0d0cc4d";
+import {
+  HOME_CATEGORIES,
+  autoCategoryHref,
+  countListingsByHomeCategory,
+} from "./home-category-bar.js?v=430eeb3e8d";
 import {
   categoriesForVertical,
   partnerCategoryImageUrl,
 } from "./partner-categories-data.js?v=b826a00c74";
+import {
+  fetchTilePagesUntil,
+} from "./listing-tile-pager.js?v=535f30dba9";
 
 const IMG_V = "menuRails1";
 const INITIAL_COUNT = 5;
 const SCROLL_BATCH = 4;
+
+/** data-auto-cat → darabszám (null = még nincs betöltve) */
+let autoCategoryCounts = null;
 
 function escapeHtml(value) {
   return String(value ?? "")
@@ -27,6 +37,25 @@ function ajanlasListImageUrl(cat) {
   return `/images/ajanlas/list/${name}.jpg`;
 }
 
+function categoryLabelText(cat) {
+  const n = autoCategoryCounts?.[cat.id];
+  if (n == null) return cat.label;
+  return `${cat.label} ${n}`;
+}
+
+function applyAutoCategoryCounts(rail, counts) {
+  if (!rail || !counts) return;
+  for (const card of rail.querySelectorAll("[data-auto-cat]")) {
+    const id = String(card.dataset.autoCat || "");
+    const cat = HOME_CATEGORIES.find((row) => row.id === id);
+    if (!cat) continue;
+    const labelEl = card.querySelector(".hf-card-label");
+    if (!labelEl) continue;
+    const n = counts[id];
+    labelEl.textContent = n == null ? cat.label : `${cat.label} ${n}`;
+  }
+}
+
 function createCategoryCard(cat, { eager = false } = {}) {
   const link = document.createElement("a");
   link.className = "hf-card hf-card--ajanlas hf-card--kategoria";
@@ -37,7 +66,7 @@ function createCategoryCard(cat, { eager = false } = {}) {
   const fetchPriority = eager ? ' fetchpriority="high"' : "";
   link.innerHTML = `
     <span class="hf-card-media"><img src="${escapeHtml(categoryListImageUrl(cat))}?v=${IMG_V}" alt="" width="360" height="220" loading="${loading}" decoding="async"${fetchPriority} /></span>
-    <span class="hf-card-label">${escapeHtml(cat.label)}</span>`;
+    <span class="hf-card-label">${escapeHtml(categoryLabelText(cat))}</span>`;
   return link;
 }
 
@@ -109,10 +138,27 @@ function initProgressiveRail(rail, items, createCard) {
   requestAnimationFrame(onScroll);
 }
 
+async function loadAutoCategoryCounts() {
+  const rail = document.getElementById("hub-auto-kategoriak-rail");
+  if (!rail) return;
+  try {
+    const page = await fetchTilePagesUntil({
+      vertical: "auto",
+      wantCount: 5000,
+      maxPages: 80,
+    });
+    autoCategoryCounts = countListingsByHomeCategory(page.items || []);
+    applyAutoCategoryCounts(rail, autoCategoryCounts);
+  } catch (error) {
+    console.warn("hub category counts:", error);
+  }
+}
+
 function initAutoCategoriesRail() {
   const rail = document.getElementById("hub-auto-kategoriak-rail");
   if (!rail) return;
   initProgressiveRail(rail, HOME_CATEGORIES, createCategoryCard);
+  void loadAutoCategoryCounts();
 }
 
 function initAjanlasRail(railId, vertical) {

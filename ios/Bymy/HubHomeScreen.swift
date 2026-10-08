@@ -17,7 +17,17 @@ struct HubHomeScreen: View {
     private let pageBg = Color(red: 0.973, green: 0.976, blue: 0.980)
     private let gutter: CGFloat = 16
 
-    private let autoCategories: [(id: String, label: String)] = [
+    private let autoCategoryDefs: [(id: String, label: String)] = [
+        ("uj", "Új"),
+        ("benzin", "Benzin"),
+        ("diesel", "Dízel"),
+        ("elektromos", "Elektromos"),
+        ("hybrid", "Hybrid"),
+        ("leasing", "Leasing"),
+        ("berelheto", "Bérelhető"),
+        ("ot", "OT"),
+    ]
+    @State private var autoCategories: [(id: String, label: String)] = [
         ("uj", "Új"),
         ("benzin", "Benzin"),
         ("diesel", "Dízel"),
@@ -305,6 +315,42 @@ struct HubHomeScreen: View {
         }
     }
 
+    /// Web `home-category-bar.js` matchesCategory — üzemanyag / új.
+    private func matchesHomeCategory(_ item: ListingsAPI.Listing, _ categoryId: String) -> Bool {
+        let fuel = (item.fuel ?? "").lowercased()
+            .folding(options: .diacriticInsensitive, locale: .current)
+        let allapot = (item.allapot ?? "").lowercased()
+        let year = item.year
+        let km = item.kmNum
+        let currentYear = Calendar.current.component(.year, from: Date())
+        let isHybrid = fuel.contains("hibrid") || fuel.contains("hybrid")
+            || fuel.contains("benzin/elektromos") || fuel.contains("dizel/elektromos")
+            || fuel.contains("diesel/elektromos")
+        let isElectric = fuel.contains("elektromos") && !isHybrid
+        let isDiesel = (fuel.contains("dizel") || fuel.contains("diesel")) && !isHybrid && !isElectric
+        let isBenzin = fuel.contains("benzin") && !isHybrid && !isDiesel && !isElectric
+
+        switch categoryId {
+        case "uj":
+            if let km, km <= 1000 { return true }
+            if allapot.range(of: #"új|uj|gyári|gyari|0 km"#, options: .regularExpression) != nil { return true }
+            if let year, year >= currentYear - 1 { return true }
+            return false
+        case "benzin":
+            return isBenzin
+        case "diesel":
+            return isDiesel
+        case "elektromos":
+            return isElectric
+        case "hybrid":
+            return isHybrid
+        case "leasing", "berelheto", "ot":
+            return false
+        default:
+            return true
+        }
+    }
+
     private func load() async {
         guard auth.token != nil else {
             errorText = "Belépés szükséges a hirdetésekhez."
@@ -315,7 +361,7 @@ struct HubHomeScreen: View {
         errorText = nil
         defer { loading = false }
         do {
-            async let a = ListingsAPI.fetchCategoryPage("auto", limit: 40, token: auth.token)
+            async let a = ListingsAPI.fetchCategoryPage("auto", limit: 100, token: auth.token)
             async let i = ListingsAPI.fetchCategory("ingatlan", limit: 40, token: auth.token)
             let (autoPage, immoList) = try await (a, i)
 
@@ -334,6 +380,10 @@ struct HubHomeScreen: View {
                     .prefix(20)
             )
             nearbyAutos = Array(autos.prefix(16))
+            autoCategories = autoCategoryDefs.map { cat in
+                let n = autos.filter { matchesHomeCategory($0, cat.id) }.count
+                return (cat.id, "\(cat.label) \(n)")
+            }
 
             // Ingatlan: egyszerű szétválasztás cím alapján (web nearby később GPS-sel)
             nearbyFlats = Array(immoList.filter {

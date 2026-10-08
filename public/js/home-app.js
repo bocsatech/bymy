@@ -18,7 +18,7 @@ import {
   initIngatlanSearch,
 } from "./ingatlan-search.js?v=ed1ec3cb23";
 import { normalizeIngatlanUzletag } from "./ingatlan-fields.js?v=3a43e30b61";
-import { filterByCategory, initHomeCategoryBar, renderHomeCategoryBar, HOME_CATEGORY_IDS, searchFiltersForCategory } from "./home-category-bar.js?v=c2d0d0cc4d";
+import { filterByCategory, initHomeCategoryBar, renderHomeCategoryBar, HOME_CATEGORY_IDS, searchFiltersForCategory } from "./home-category-bar.js?v=430eeb3e8d";
 import { initHomeUnifiedScroll } from "./home-unified-scroll.js?v=19bcc2aeb6";
 import { initHomeStatsBar } from "./home-stats-bar.js?v=84ac6f75c1";
 import { buildNearbyFilter, readNearbyPrefs } from "./nearby-search.js?v=0efee20d13";

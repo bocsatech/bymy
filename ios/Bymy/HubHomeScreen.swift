@@ -93,10 +93,12 @@ struct HubHomeScreen: View {
                                 .scaledToFit()
                         default:
                             Color(red: 0.96, green: 0.96, blue: 0.95)
-                                .aspectRatio(908 / 520, contentMode: .fit)
+                                .aspectRatio(908 / 364, contentMode: .fit)
                         }
                     }
                     .frame(maxWidth: .infinity)
+                    .aspectRatio(908 / 364, contentMode: .fit)
+                    .clipped()
                     .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                 }
                 .buttonStyle(.plain)

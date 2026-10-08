@@ -934,13 +934,18 @@ body.hub-page--feed {
   line-height: 0;
   text-decoration: none;
   color: inherit;
+  /* eredeti 908×520 → magasság −30% */
+  aspect-ratio: 908 / 364;
+  overflow: hidden;
 }
 
 .hf-banner img {
   display: block;
   width: 100%;
   max-width: 100%;
-  height: auto;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
   vertical-align: middle;
 }
 

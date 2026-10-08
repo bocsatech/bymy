@@ -701,8 +701,9 @@ async function serveStatic(path, res, req = null) {
 }
 
 async function handleImageUploadApi(req, res) {
-  if (!isSupabaseBackend()) {
-    sendJson(res, 400, { error: "A Supabase Storage csak beállított SUPABASE_* környezettel működik." });
+  const imageBackend = getImageStorageBackend();
+  if (imageBackend !== "r2" && imageBackend !== "filesystem" && !isSupabaseBackend()) {
+    sendJson(res, 400, { error: "Nincs beállított képtár (R2 / filesystem / Supabase)." });
     return;
   }
 
@@ -732,17 +733,18 @@ async function handleImageUploadApi(req, res) {
     return;
   }
 
+  const bucket = normalizeImageBucket(body.bucket ?? body.kind ?? "listing");
+  const listingLike = /listing/i.test(bucket) || /listing/i.test(String(body.entityType ?? body.entity_type ?? ""));
   const validation = await validateImageBuffer(fileBuffer, {
     maxBytes: 12 * 1024 * 1024,
-    minWidth: 640,
-    minHeight: 480,
+    /* Hirdetésképek: ugyanaz a küszöb, mint saveListingPhotos (ne essen el 640x480-on). */
+    minWidth: listingLike ? 320 : 640,
+    minHeight: listingLike ? 240 : 480,
   });
   if (!validation.ok) {
     sendJson(res, 400, { error: validation.error });
     return;
   }
-
-  const bucket = normalizeImageBucket(body.bucket ?? body.kind ?? "listing");
   const entityType = String(body.entityType ?? body.entity_type ?? "listing").trim() || "listing";
   const entityId = body.entityId ?? body.entity_id ?? null;
   const folder = String(body.folder ?? "").trim();

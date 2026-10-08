@@ -5083,6 +5083,20 @@ body.site-app .myads-modal-head h3 {
   margin: 0;
 }
 
+body.site-app .myads-photo-status {
+  margin: 0.55rem 0 0;
+  padding: 0.55rem 0.7rem;
+  border-radius: 8px;
+  background: #eef5ff;
+  color: #0b3d7a;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+body.site-app .myads-photo-status[hidden] {
+  display: none !important;
+}
+
 body.site-app .myads-photo-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));

@@ -4,7 +4,7 @@ import {
   patchListingFieldsInDb,
   saveListingPhotosOrder,
   deleteListingFromDb,
-} from "./db-client.js?v=d4237f0b1b";
+} from "./db-client.js?v=1c5eb11cbd";
 import {
   DEFAULT_PHOTO_OVERLAY_ID,
   detectBymyPhotoOverlay,
@@ -514,6 +514,7 @@ async function reload() {
             <button type="button" class="myads-link" data-photo-close>Bezárás</button>
           </header>
           <p class="myads-modal-lead" data-photo-title></p>
+          <p class="myads-photo-status" data-photo-status hidden></p>
           <div class="myads-photo-list" data-photo-list></div>
           <div class="myads-photo-add">
             <label class="site-header-btn site-header-btn--outline">
@@ -527,6 +528,19 @@ async function reload() {
         </div>
       </div>
     `;
+  }
+
+  function setPhotoStatus(text) {
+    const el = root.querySelector("[data-photo-status]");
+    if (!el) return;
+    const msg = String(text || "").trim();
+    if (!msg) {
+      el.hidden = true;
+      el.textContent = "";
+      return;
+    }
+    el.hidden = false;
+    el.textContent = msg;
   }
 
   function renderPhotoList() {
@@ -622,6 +636,7 @@ async function reload() {
     const modal = root.querySelector("[data-photo-modal]");
     const title = root.querySelector("[data-photo-title]");
     if (title) title.textContent = photoState.title;
+    setPhotoStatus("");
     modal.hidden = false;
     renderPhotoList();
   }
@@ -826,14 +841,23 @@ async function reload() {
       const files = [...(event.target.files || [])];
       event.target.value = "";
       if (!files.length || !photoState) return;
+      const addLabel = root.querySelector(".myads-photo-add label");
+      if (addLabel) addLabel.setAttribute("aria-disabled", "true");
       try {
-        const dataUrls = await compressListingPhotos(files);
+        setPhotoStatus(`Képek előkészítése… 0 / ${files.length}`);
+        const dataUrls = await compressListingPhotos(files, undefined, ({ done, total }) => {
+          setPhotoStatus(`Képek előkészítése… ${done} / ${total}`);
+        });
         for (const data of dataUrls) {
           photoState.items.push({ data, preview: data });
         }
         renderPhotoList();
+        setPhotoStatus(dataUrls.length ? `${dataUrls.length} kép hozzáadva. Mentés: feltöltés indul.` : "");
       } catch (error) {
         alert(error.message ?? "A kép hozzáadása sikertelen.");
+        setPhotoStatus("");
+      } finally {
+        if (addLabel) addLabel.removeAttribute("aria-disabled");
       }
     });
     root.querySelector("[data-photo-save]")?.addEventListener("click", async () => {
@@ -845,15 +869,29 @@ async function reload() {
       const btn = root.querySelector("[data-photo-save]");
       btn.disabled = true;
       try {
+        setPhotoStatus("Feltöltés…");
         await saveListingPhotosOrder(
           photoState.id,
-          photoState.items.map((item) => (item.url ? { url: item.url } : { data: item.data }))
+          photoState.items.map((item) => (item.url ? { url: item.url } : { data: item.data })),
+          {
+            onProgress: ({ phase, done, total }) => {
+              if (phase === "upload") {
+                setPhotoStatus(`Feltöltés… ${done} / ${total}`);
+              } else if (phase === "save") {
+                setPhotoStatus("Sorrend mentése…");
+              } else if (phase === "done") {
+                setPhotoStatus("Kész.");
+              }
+            },
+          }
         );
+        setPhotoStatus("");
         root.querySelector("[data-photo-modal]").hidden = true;
         photoState = null;
         await reload();
       } catch (error) {
         alert(error.message ?? "A képek mentése sikertelen.");
+        setPhotoStatus("");
       } finally {
         btn.disabled = false;
       }

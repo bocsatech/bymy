@@ -17,14 +17,52 @@ export function setStoredListingId(id) {
 }
 
 async function parseJson(response) {
-  const data = await response.json();
+  const text = await response.text();
+  let data = null;
+  try {
+    data = text ? JSON.parse(text) : null;
+  } catch {
+    if (response.status === 413) {
+      throw new Error("A képek együtt túl nagyok. Próbáld kevesebb képpel.");
+    }
+    if (response.status === 502 || response.status === 504) {
+      throw new Error("A szerver nem bírta a képek mentését (időtúllépés). Próbáld újra — a képek most egyesével mennek fel.");
+    }
+    throw new Error(
+      response.ok
+        ? "Érvénytelen válasz a szervertől."
+        : `Szerver hiba (${response.status}).`
+    );
+  }
   if (!response.ok) {
-    if (response.status === 404 && data.error === "Ismeretlen API.") {
+    if (response.status === 404 && data?.error === "Ismeretlen API.") {
       throw new Error("Régi Bymy szerver — futtasd: bymy/mac/frissites.command, majd indítsd újra.");
     }
-    throw new Error(data.error || "Szerver hiba");
+    throw new Error(data?.error || "Szerver hiba");
   }
-  return data;
+  return data ?? {};
+}
+
+/** Egy listing kép feltöltése /api/uploads-ra (kis body), URL-t ad vissza. */
+async function uploadListingPhotoDataUrl(dataUrl, listingId) {
+  const response = await fetch("/api/uploads", {
+    method: "POST",
+    headers: authHeaders(),
+    credentials: "same-origin",
+    body: JSON.stringify({
+      bucket: "listing-images",
+      kind: "listing",
+      entityType: "listing",
+      entityId: listingId,
+      folder: String(listingId),
+      fileName: `listing-${listingId}-${Date.now()}.jpg`,
+      dataUrl,
+    }),
+  });
+  const data = await parseJson(response);
+  const url = String(data.url || data.publicUrl || "").trim();
+  if (!url) throw new Error(data.error || "A kép feltöltése sikertelen.");
+  return url;
 }
 
 export async function fetchDbStats() {
@@ -283,14 +321,48 @@ export async function patchListingFieldsInDb(id, fields) {
   return data.listing ?? null;
 }
 
-export async function saveListingPhotosOrder(id, items) {
+/**
+ * Új (data URL) képeket egyesével feltölti, majd csak URL-listát ment.
+ * Így elkerüljük a nagy JSON POST → Cloudflare 502 hibát.
+ * @param {{ onProgress?: (p: { phase: string, done: number, total: number }) => void }} [options]
+ */
+export async function saveListingPhotosOrder(id, items, options = {}) {
+  const onProgress = typeof options.onProgress === "function" ? options.onProgress : null;
+  const list = Array.isArray(items) ? items : [];
+  const needUpload = list.filter(
+    (item) => !String(item?.url ?? "").trim() && String(item?.data ?? "").trim()
+  ).length;
+  let uploaded = 0;
+  const prepared = [];
+
+  for (const item of list) {
+    const existing = String(item?.url ?? "").trim();
+    if (existing) {
+      prepared.push({ url: existing });
+      continue;
+    }
+    const data = String(item?.data ?? "").trim();
+    if (!data) continue;
+    onProgress?.({ phase: "upload", done: uploaded, total: needUpload });
+    const url = await uploadListingPhotoDataUrl(data, id);
+    prepared.push({ url });
+    uploaded += 1;
+    onProgress?.({ phase: "upload", done: uploaded, total: needUpload });
+  }
+
+  if (!prepared.length) {
+    throw new Error("Legalább egy kép kell.");
+  }
+
+  onProgress?.({ phase: "save", done: uploaded, total: Math.max(needUpload, 1) });
   const response = await fetch(`/api/listings/${id}/photos`, {
     method: "POST",
     headers: authHeaders(),
     credentials: "same-origin",
-    body: JSON.stringify({ items }),
+    body: JSON.stringify({ items: prepared }),
   });
   const data = await parseJson(response);
+  onProgress?.({ phase: "done", done: uploaded, total: Math.max(needUpload, 1) });
   return data.listing ?? null;
 }
 
@@ -323,7 +395,7 @@ export async function deleteListingFromDb(id) {
   const data = await parseJson(response);
   await forgetNavCounts();
   try {
-    const { removeParkplatzIdEverywhere } = await import("./fok-data.js?v=favGone1");
+    const { removeParkplatzIdEverywhere } = await import("./fok-data.js?v=289f64e75c");
     removeParkplatzIdEverywhere(id);
   } catch {
   }

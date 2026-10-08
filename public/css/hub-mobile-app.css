@@ -430,31 +430,6 @@
     border-color: rgba(255, 255, 255, 0.08);
   }
 
-  body.hub-page--feed .hf-mid-banner {
-    margin: 0 0 28px !important;
-    padding: 0 var(--hf-gutter) !important;
-    width: 100%;
-    box-sizing: border-box !important;
-  }
-
-  body.hub-page--feed .hf-banner {
-    aspect-ratio: 908 / 364 !important;
-    overflow: hidden !important;
-  }
-
-  body.hub-page--feed .hf-banner,
-  body.hub-page--feed .hf-banner img {
-    width: 100% !important;
-    max-width: 100% !important;
-    display: block !important;
-  }
-
-  body.hub-page--feed .hf-banner img {
-    height: 100% !important;
-    object-fit: cover !important;
-    object-position: center !important;
-  }
-
   body.hub-page--feed .hub-intro,
   body.hub-page--feed .hub-promo-band {
     max-width: none !important;

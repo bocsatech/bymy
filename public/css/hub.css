@@ -920,35 +920,6 @@ body.hub-page--feed {
   padding: 0;
 }
 
-/* Autó kategóriák alatti promo banner — mindig a konténer szélességéhez igazodik */
-.hf-mid-banner {
-  margin: 0 0 3.5rem;
-  padding: 0;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.hf-banner {
-  display: block;
-  width: 100%;
-  line-height: 0;
-  text-decoration: none;
-  color: inherit;
-  /* eredeti 908×520 → magasság −30% */
-  aspect-ratio: 908 / 364;
-  overflow: hidden;
-}
-
-.hf-banner img {
-  display: block;
-  width: 100%;
-  max-width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-  vertical-align: middle;
-}
-
 .hf-head {
   display: flex;
   align-items: baseline;
@@ -1387,10 +1358,6 @@ body.hub-page--feed .hf-card {
     background: #f6f5f2;
     border: 1px solid #d2d0cc;
     border-radius: 16px;
-  }
-
-  body.hub-page--feed .hf-mid-banner {
-    margin: 0 0 2.5rem;
   }
 
   html[data-theme="dark"] body.hub-page--feed .hf-section {

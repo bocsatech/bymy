@@ -83,6 +83,25 @@ struct HubHomeScreen: View {
                 railHeader(title: "Autó kategóriák") { router.selectTop(.auto) }
                 categoryRail(items: autoCategories)
 
+                // Web `hf-mid-banner` — autó/teher promo a kategóriák alatt
+                Button { router.selectTop(.auto) } label: {
+                    AsyncImage(url: URL(string: "https://bymy.hu/images/hub-banner-auto-teher.png")) { phase in
+                        switch phase {
+                        case .success(let image):
+                            image
+                                .resizable()
+                                .scaledToFit()
+                        default:
+                            Color(red: 0.96, green: 0.96, blue: 0.95)
+                                .aspectRatio(908 / 520, contentMode: .fit)
+                        }
+                    }
+                    .frame(maxWidth: .infinity)
+                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                }
+                .buttonStyle(.plain)
+                .padding(.horizontal, gutter)
+
                 if let errorText {
                     Text(errorText)
                         .font(.system(size: 13))

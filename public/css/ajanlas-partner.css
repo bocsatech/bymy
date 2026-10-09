@@ -274,13 +274,18 @@
 
 .ap-hero-cta {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 8px;
   justify-content: flex-end;
   align-items: center;
   flex: 0 1 auto;
   max-width: 100%;
   padding-bottom: 2px;
+}
+
+.ap-hero-cta .ap-btn {
+  flex: 0 0 auto;
+  white-space: nowrap;
 }
 
 .ap-btn {
@@ -602,9 +607,14 @@
 
   .ap-hero-cta {
     justify-content: flex-start;
+    width: 100%;
+    gap: 6px;
   }
 
   .ap-hero-cta .ap-btn {
-    flex: 1 1 auto;
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 0.5rem 0.55rem;
+    font-size: 0.8rem;
   }
 }

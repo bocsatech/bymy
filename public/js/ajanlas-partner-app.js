@@ -395,19 +395,7 @@ function renderProfile(root, partner, opts = {}) {
       </section>
     </div>
     ${ajanlasIslandHtml(services, { canEdit })}
-    <section class="ap-band" id="ap-listings">
-      <div class="ap-band-head">
-        <h2>Hirdetéseik <span class="ap-count">${listings.length}</span></h2>
-        ${listings.length ? `<a class="ap-all" href="#ap-listings">Összes</a>` : ""}
-      </div>
-      ${
-        listings.length
-          ? `<div class="ap-rail${listings.length > 4 ? " ap-rail--wrap" : ""}">${listings
-              .map(listingTile)
-              .join("")}</div>`
-          : `<p class="ap-empty">A partnernek jelenleg nincs feladott hirdetése a Bymyn.</p>`
-      }
-    </section>
+    ${listingsBandHtml(listings, { loading: Boolean(opts.listingsLoading) })}
   `;
   document.title = `${name} — Partner profil — Bymy`;
   const editorCtx = {
@@ -419,6 +407,7 @@ function renderProfile(root, partner, opts = {}) {
     ownProfile,
     accountEdit: Boolean(opts.accountEdit),
     listingId: opts.listingId || "",
+    listingsLoading: Boolean(opts.listingsLoading),
   };
   wireHeroEditor(root, editorCtx);
   wireBioEditor(root, editorCtx);
@@ -429,6 +418,55 @@ function renderProfile(root, partner, opts = {}) {
     phone,
     canMsg,
   });
+}
+
+function listingsBandHtml(listings = [], { loading = false } = {}) {
+  const rows = Array.isArray(listings) ? listings : [];
+  return `
+    <section class="ap-band" id="ap-listings">
+      <div class="ap-band-head">
+        <h2>Hirdetéseik ${
+          loading && !rows.length
+            ? `<span class="ap-count ap-count--muted">…</span>`
+            : `<span class="ap-count">${rows.length}</span>`
+        }</h2>
+        ${rows.length ? `<a class="ap-all" href="#ap-listings">Összes</a>` : ""}
+      </div>
+      ${
+        rows.length
+          ? `<div class="ap-rail${rows.length > 4 ? " ap-rail--wrap" : ""}">${rows
+              .map(listingTile)
+              .join("")}</div>`
+          : loading
+            ? `<p class="ap-empty">Hirdetések betöltése…</p>`
+            : `<p class="ap-empty">A partnernek jelenleg nincs feladott hirdetése a Bymyn.</p>`
+      }
+    </section>
+  `;
+}
+
+function paintListings(root, listings) {
+  const band = root.querySelector("#ap-listings");
+  if (!band) return;
+  const wrap = document.createElement("div");
+  wrap.innerHTML = listingsBandHtml(listings, { loading: false }).trim();
+  const next = wrap.firstElementChild;
+  if (next) band.replaceWith(next);
+}
+
+function paintRatingMeta(root, partner) {
+  const meta = root.querySelector(".ap-meta");
+  if (!meta) return;
+  const place = formatPlaceMeta(partner);
+  meta.innerHTML = `
+    ${ratingMetaHtml(partner.google_rating, partner.google_review_count)}
+    ${place ? `<span class="ap-meta-sep" aria-hidden="true"></span>` : ""}
+    ${
+      place
+        ? `<span class="ap-meta-item">${iconPin()}<span>${esc(place)}</span></span>`
+        : ""
+    }
+  `;
 }
 
 function wireHeroCta(root, { listingId, sellerId, name, phone, canMsg }) {
@@ -683,22 +721,112 @@ async function loadListingsForSlug(slug) {
   }
 }
 
-async function resolveEditAccess({ slug = "", sellerId = 0 } = {}) {
+const SHELL_CACHE_TTL_MS = 60_000;
+
+function shellCacheKey(kind, id) {
+  return `bymy-ap-shell-v1:${kind}:${id}`;
+}
+
+function readShellCache(kind, id) {
+  try {
+    const raw = sessionStorage.getItem(shellCacheKey(kind, id));
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed?.at || Date.now() - parsed.at > SHELL_CACHE_TTL_MS) return null;
+    return parsed.partner || null;
+  } catch {
+    return null;
+  }
+}
+
+function writeShellCache(kind, id, partner) {
+  try {
+    sessionStorage.setItem(
+      shellCacheKey(kind, id),
+      JSON.stringify({ at: Date.now(), partner })
+    );
+  } catch {
+    /* quota / private */
+  }
+}
+
+function quickCanEdit(sellerId = 0, slug = "", ownSlug = "") {
+  const user = getAuthUser();
+  if (!user?.email) return false;
+  const uid = Number(user.id || user.userId || 0);
+  if (sellerId > 0 && uid > 0 && uid === Number(sellerId)) return true;
+  if (slug && ownSlug && slug === ownSlug) return true;
+  return false;
+}
+
+async function resolveEditAccess({ slug = "", sellerId = 0, ownProfile = null } = {}) {
   const user = getAuthUser();
   if (!user?.email) return { canEdit: false, ownProfile: null, accountEdit: false };
-  const own = await fetchOwnProfile().catch(() => null);
-  const uid = Number(user.id || user.userId || 0);
-  const ownsListing = sellerId > 0 && uid > 0 && uid === sellerId;
+  const own = ownProfile !== undefined ? ownProfile : await fetchOwnProfile().catch(() => null);
+  const ownsListing = quickCanEdit(sellerId);
   const ownsSlug = Boolean(slug && own?.slug && own.slug === slug);
   if (ownsSlug || ownsListing) {
     return {
       canEdit: true,
       ownProfile: own?.slug ? own : null,
-      // Listing/kereskedés oldal a fiók company*Url mezőiből olvas — mindig mentsünk oda is.
       accountEdit: true,
     };
   }
   return { canEdit: false, ownProfile: own, accountEdit: false };
+}
+
+/** Csak akkor kell a slug API, ha a seller-contact még szegényes. */
+function partnerNeedsEnrichment(partner) {
+  if (!partner?.partnerSlug) return false;
+  const hasMedia = Boolean(
+    partner.cover_url || partner.logo_url || partner.company_logo_url
+  );
+  const hasDesc = Boolean(String(partner.description || "").trim());
+  const hasServices = Array.isArray(partner.services) && partner.services.length > 0;
+  return !(hasMedia && (hasDesc || hasServices));
+}
+
+async function enrichPartnerFromSlug(partner) {
+  const slug = String(partner?.partnerSlug || "").trim();
+  if (!slug || !partnerNeedsEnrichment(partner)) {
+    return { partner, listings: null };
+  }
+  try {
+    const res = await fetch(`/api/partner-profiles/${encodeURIComponent(slug)}`, {
+      cache: "no-store",
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.profile) return { partner, listings: null };
+    const p = data.profile;
+    const keptPlace = {
+      city: partner.city,
+      county: partner.county,
+      service_areas: partner.service_areas,
+      address: partner.address,
+    };
+    return {
+      partner: {
+        ...partner,
+        name: p.display_name || partner.name,
+        phone: p.phone || partner.phone,
+        email: p.email || partner.email,
+        website: p.website || partner.website,
+        logo_url: p.logo_url || partner.logo_url,
+        company_logo_url: p.company_logo_url || partner.company_logo_url,
+        cover_url: p.cover_url || partner.cover_url,
+        contact_person: p.contact_person || partner.contact_person,
+        description: p.description || partner.description,
+        services:
+          Array.isArray(p.services) && p.services.length ? p.services : partner.services,
+        google_rating: partner.google_rating,
+        google_review_count: partner.google_review_count,
+        ...keptPlace,
+      },
+      listings: Array.isArray(data.listings) ? data.listings : null,
+    };
+  } catch {
+    return { partner, listings: null };
+  }
 }
 
 function partnerFromSellerContact(contact, rating) {
@@ -758,28 +886,195 @@ function partnerFromSellerContact(contact, rating) {
   };
 }
 
-async function loadListingSellerPage(listingId) {
-  const [contact, page] = await Promise.all([
-    fetchSellerContact(listingId),
-    fetchRelatedListingsPage(listingId, {
-      limit: 60,
-      offset: 0,
-      includeSelf: true,
-      tile: true,
-    }),
-  ]);
-  if (!contact) throw new Error("Nincs megjeleníthető kereskedés / partner.");
-  let rating = contact.rating || null;
-  if (!rating || rating.average == null) {
-    rating = await fetchSellerRating(listingId).catch(() => rating);
+function filterActiveListings(list) {
+  return (list || []).filter((item) => (item.status || "feladott") === "feladott");
+}
+
+async function initListingPartnerPage(root, listingId, wantEdit) {
+  const backHref = `/hirdetes.html?id=${encodeURIComponent(listingId)}`;
+  const cached = readShellCache("listing", listingId);
+  const loggedIn = Boolean(getAuthUser()?.email);
+
+  const contactP = fetchSellerContact(listingId);
+  const listingsP = fetchRelatedListingsPage(listingId, {
+    limit: 60,
+    offset: 0,
+    includeSelf: true,
+    tile: true,
+  });
+  const profileP = loggedIn ? loadProfileFromServer().catch(() => null) : Promise.resolve(null);
+  const ownP = loggedIn ? fetchOwnProfile().catch(() => null) : Promise.resolve(null);
+
+  // 1) Cache → azonnali shell (ha van)
+  if (cached) {
+    renderProfile(root, cached, {
+      listings: [],
+      listingsLoading: true,
+      backHref,
+      canEdit: quickCanEdit(cached.id || cached.sellerId, cached.partnerSlug || ""),
+      editMode: false,
+      ownProfile: null,
+      accountEdit: true,
+      listingId,
+    });
   }
-  const listings = (page.listings || []).filter((item) => (item.status || "feladott") === "feladott");
-  return {
-    partner: partnerFromSellerContact(contact, rating),
-    listings,
-    sellerId: Number(contact.sellerId) || 0,
-    listingId: String(listingId),
+
+  // 2) Contact megjön → első / friss shell
+  const contact = await contactP;
+  if (!contact) throw new Error("Nincs megjeleníthető kereskedés / partner.");
+  let partner = partnerFromSellerContact(contact, contact.rating || null);
+  const sellerId = Number(contact.sellerId) || 0;
+  writeShellCache("listing", listingId, partner);
+
+  const canEditQuick = quickCanEdit(sellerId, partner.partnerSlug || "");
+  renderProfile(root, partner, {
+    listings: [],
+    listingsLoading: true,
+    backHref,
+    canEdit: canEditQuick,
+    editMode: canEditQuick && wantEdit,
+    ownProfile: null,
+    accountEdit: true,
+    listingId,
+  });
+
+  // 3) Lista + auth + opcionális enrich párhuzamosan
+  const enrichP = enrichPartnerFromSlug(partner);
+  const [page, ownProfile, , enrich] = await Promise.all([
+    listingsP,
+    ownP,
+    profileP,
+    enrichP,
+  ]);
+  let listings = filterActiveListings(page?.listings);
+  let didEnrich = false;
+  if (enrich.partner !== partner) {
+    partner = enrich.partner;
+    didEnrich = true;
+    writeShellCache("listing", listingId, partner);
+    if (Array.isArray(enrich.listings) && enrich.listings.length && !listings.length) {
+      listings = filterActiveListings(enrich.listings);
+    }
+  }
+
+  const access = await resolveEditAccess({
+    slug: partner.partnerSlug || "",
+    sellerId,
+    ownProfile,
+  });
+  // Lista kész: ha csak a sín változott, ne rajzoljuk újra a teljes herót
+  if (!didEnrich && access.canEdit === canEditQuick && !access.ownProfile) {
+    paintListings(root, listings);
+  } else {
+    renderProfile(root, partner, {
+      listings,
+      listingsLoading: false,
+      backHref,
+      canEdit: access.canEdit,
+      editMode: access.canEdit && wantEdit,
+      ownProfile: access.ownProfile,
+      accountEdit: true,
+      listingId,
+    });
+  }
+
+  // 4) Rating háttérben, ha még nincs
+  if (partner.google_rating == null) {
+    fetchSellerRating(listingId)
+      .then((rating) => {
+        if (!rating || rating.average == null) return;
+        partner = {
+          ...partner,
+          google_rating: Number(rating.average),
+          google_review_count: Number(rating.count) || 0,
+        };
+        writeShellCache("listing", listingId, partner);
+        paintRatingMeta(root, partner);
+      })
+      .catch(() => {});
+  }
+}
+
+async function initSlugPartnerPage(root, slug, wantEdit) {
+  const cached = readShellCache("slug", slug);
+  const loggedIn = Boolean(getAuthUser()?.email);
+  const profileP = loggedIn ? loadProfileFromServer().catch(() => null) : Promise.resolve(null);
+  const ownP = loggedIn ? fetchOwnProfile().catch(() => null) : Promise.resolve(null);
+  const pageP = fetch(`/api/partner-profiles/${encodeURIComponent(slug)}`, {
+    cache: "no-store",
+  }).then(async (res) => {
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || "A profil nem elérhető.");
+    return data;
+  });
+
+  if (cached) {
+    renderProfile(root, cached, {
+      listings: [],
+      listingsLoading: true,
+      backHref: "/ajanlasok.html",
+      canEdit: quickCanEdit(cached.id, slug, ""),
+      editMode: false,
+      ownProfile: null,
+      accountEdit: false,
+      listingId: "",
+    });
+  }
+
+  const [data, ownProfile] = await Promise.all([pageP, ownP, profileP]);
+  const profile = data.profile || {};
+  const listings = filterActiveListings(data.listings || []);
+  const sampleListingId = listings.find((row) => Number(row?.id) > 0)?.id;
+  let partner = {
+    id: profile.user_id,
+    name: profile.display_name,
+    display_name: profile.display_name,
+    phone: profile.phone,
+    email: profile.email,
+    website: profile.website,
+    logo_url: profile.logo_url,
+    company_logo_url: profile.company_logo_url,
+    cover_url: profile.cover_url,
+    contact_person: profile.contact_person,
+    service_areas: profile.service_areas,
+    description: profile.description,
+    google_rating: null,
+    google_review_count: null,
+    services: Array.isArray(profile.services) ? profile.services.filter(Boolean) : [],
+    partnerSlug: slug,
   };
+  writeShellCache("slug", slug, partner);
+
+  const access = await resolveEditAccess({
+    slug,
+    sellerId: Number(profile.user_id) || 0,
+    ownProfile,
+  });
+  renderProfile(root, partner, {
+    listings,
+    listingsLoading: false,
+    backHref: "/ajanlasok.html",
+    canEdit: access.canEdit,
+    editMode: access.canEdit && wantEdit,
+    ownProfile: access.ownProfile,
+    accountEdit: access.accountEdit,
+    listingId: sampleListingId ? String(sampleListingId) : "",
+  });
+
+  if (sampleListingId) {
+    fetchSellerRating(sampleListingId)
+      .then((rating) => {
+        if (!rating || rating.average == null) return;
+        partner = {
+          ...partner,
+          google_rating: Number(rating.average),
+          google_review_count: Number(rating.count) || 0,
+        };
+        writeShellCache("slug", slug, partner);
+        paintRatingMeta(root, partner);
+      })
+      .catch(() => {});
+  }
 }
 
 async function init() {
@@ -793,133 +1088,23 @@ async function init() {
   const wantEdit = params.get("szerkeszt") === "1";
 
   try {
-    if (getAuthUser()?.email) {
-      await loadProfileFromServer().catch(() => null);
-    }
     if (listingId) {
-      const loaded = await loadListingSellerPage(listingId);
-      const access = await resolveEditAccess({
-        slug: loaded.partner.partnerSlug || "",
-        sellerId: loaded.sellerId,
-      });
-      // Ha van publikus partner slug és gazdagabb profil, töltsük be azt is (média/leírás).
-      if (loaded.partner.partnerSlug) {
-        try {
-          const res = await fetch(
-            `/api/partner-profiles/${encodeURIComponent(loaded.partner.partnerSlug)}`,
-            { cache: "no-store" }
-          );
-          const data = await res.json().catch(() => ({}));
-          if (res.ok && data.profile) {
-            const p = data.profile;
-            const keptRating = loaded.partner.google_rating;
-            const keptCount = loaded.partner.google_review_count;
-            const keptPlace = {
-              city: loaded.partner.city,
-              county: loaded.partner.county,
-              service_areas: loaded.partner.service_areas,
-              address: loaded.partner.address,
-            };
-            loaded.partner = {
-              ...loaded.partner,
-              name: p.display_name || loaded.partner.name,
-              phone: p.phone || loaded.partner.phone,
-              email: p.email || loaded.partner.email,
-              website: p.website || loaded.partner.website,
-              logo_url: p.logo_url || loaded.partner.logo_url,
-              company_logo_url: p.company_logo_url || loaded.partner.company_logo_url,
-              cover_url: p.cover_url || loaded.partner.cover_url,
-              contact_person: p.contact_person || loaded.partner.contact_person,
-              description: p.description || loaded.partner.description,
-              services:
-                Array.isArray(p.services) && p.services.length
-                  ? p.services
-                  : loaded.partner.services,
-              // Helyszín / értékelés: a seller-contact a forrásigazság
-              ...keptPlace,
-              google_rating: keptRating,
-              google_review_count: keptCount,
-            };
-            if (Array.isArray(data.listings) && data.listings.length) {
-              loaded.listings = data.listings;
-            }
-          }
-        } catch {
-          /* keep contact-based */
-        }
-      }
-      renderProfile(root, loaded.partner, {
-        listings: loaded.listings,
-        backHref: `/hirdetes.html?id=${encodeURIComponent(listingId)}`,
-        canEdit: access.canEdit,
-        editMode: access.canEdit && wantEdit,
-        ownProfile: access.ownProfile,
-        accountEdit: true,
-        listingId,
-      });
+      await initListingPartnerPage(root, listingId, wantEdit);
       return;
     }
 
     if (slug) {
-      const res = await fetch(`/api/partner-profiles/${encodeURIComponent(slug)}`, {
-        cache: "no-store",
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || "A profil nem elérhető.");
-      const profile = data.profile || {};
-      const listings = data.listings || [];
-      const access = await resolveEditAccess({
-        slug,
-        sellerId: Number(profile.user_id) || 0,
-      });
-      let google_rating = null;
-      let google_review_count = null;
-      const sampleListingId = listings.find((row) => Number(row?.id) > 0)?.id;
-      if (sampleListingId) {
-        try {
-          const rating = await fetchSellerRating(sampleListingId);
-          if (rating?.average != null) google_rating = Number(rating.average);
-          if (rating?.count != null) google_review_count = Number(rating.count);
-        } catch {
-          /* optional */
-        }
-      }
-      renderProfile(
-        root,
-        {
-          id: profile.user_id,
-          name: profile.display_name,
-          display_name: profile.display_name,
-          phone: profile.phone,
-          email: profile.email,
-          website: profile.website,
-          logo_url: profile.logo_url,
-          company_logo_url: profile.company_logo_url,
-          cover_url: profile.cover_url,
-          contact_person: profile.contact_person,
-          service_areas: profile.service_areas,
-          description: profile.description,
-          google_rating,
-          google_review_count,
-          services: Array.isArray(profile.services) ? profile.services.filter(Boolean) : [],
-        },
-        {
-          listings,
-          backHref: "/ajanlasok.html",
-          canEdit: access.canEdit,
-          editMode: access.canEdit && wantEdit,
-          ownProfile: access.ownProfile,
-          accountEdit: access.accountEdit,
-          listingId: sampleListingId ? String(sampleListingId) : "",
-        }
-      );
+      await initSlugPartnerPage(root, slug, wantEdit);
       return;
     }
 
     if (!id) throw new Error("Hiányzó partnerazonosító.");
 
+    const loggedIn = Boolean(getAuthUser()?.email);
+    const profileP = loggedIn ? loadProfileFromServer().catch(() => null) : Promise.resolve(null);
+    const ownP = loggedIn ? fetchOwnProfile().catch(() => null) : Promise.resolve(null);
+
     let partner = null;
-    let listings = [];
     if (/^\d+$/.test(id)) {
       const res = await fetch(`/api/partners/${encodeURIComponent(id)}`, { cache: "no-store" });
       const data = await res.json().catch(() => ({}));
@@ -931,11 +1116,26 @@ async function init() {
     const guessSlug = String(partner.slug || "")
       .trim()
       .toLowerCase();
-    if (guessSlug) listings = await loadListingsForSlug(guessSlug);
 
-    const access = await resolveEditAccess({ slug: guessSlug });
+    renderProfile(root, partner, {
+      listings: [],
+      listingsLoading: Boolean(guessSlug),
+      backHref: "/ajanlasok.html",
+      canEdit: false,
+      editMode: false,
+      ownProfile: null,
+      accountEdit: false,
+    });
+
+    const [listings, , ownProfile] = await Promise.all([
+      guessSlug ? loadListingsForSlug(guessSlug) : Promise.resolve([]),
+      profileP,
+      ownP,
+    ]);
+    const access = await resolveEditAccess({ slug: guessSlug, ownProfile });
     renderProfile(root, partner, {
       listings,
+      listingsLoading: false,
       backHref: "/ajanlasok.html",
       canEdit: access.canEdit,
       editMode: access.canEdit && wantEdit,

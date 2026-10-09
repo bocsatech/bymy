@@ -571,6 +571,10 @@
   gap: 0.45rem;
 }
 
+.ap-count--muted {
+  opacity: 0.55;
+}
+
 .ap-count {
   display: inline-flex;
   min-width: 1.5rem;

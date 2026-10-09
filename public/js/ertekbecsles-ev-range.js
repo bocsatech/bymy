@@ -2,7 +2,7 @@
  * Értékbecslés: gyártási év + km óra állás tól–ig dobkerék, mint az autós keresőben.
  * A hirdetésfeladáson marad az év+hó / natív km mező.
  */
-import { buildDualRangeBlock } from "./auto-search-drums.js?v=a9e74d19c3";
+import { buildDualRangeBlock } from "./auto-search-drums.js?v=8318908897";
 import { readWheel } from "./ingatlan-wheels.js?v=6952ba469c";
 
 function readFilter(form, key) {

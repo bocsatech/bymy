@@ -3165,8 +3165,7 @@ body.auto-drum-sheet-open {
   overflow: hidden !important;
   overflow-x: hidden !important;
   overscroll-behavior: none;
-  /* position:fixed CSAK JS lockSheetPageAxes-ben — CSS-ben bent maradva nem lehetett görgetni sheet után */
-  touch-action: none;
+  /* touch-action:none NEM — Android Chrome-on beragadhat sheet után; a portal lefedi a viewportot. */
 }
 
 html:has(body.auto-drum-portal-open),

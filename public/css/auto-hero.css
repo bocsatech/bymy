@@ -3063,6 +3063,7 @@ body[data-site-page="teherauto"] .auto-search-tabs {
 
 body.auto-drum-portal-open {
   overflow: hidden;
+  /* Ne touch-action:none — Androidon beragadhat a lapgörgetés sheet után. */
 }
 
 /* Keep floating tab bar out of picker / drum / map overlays. */

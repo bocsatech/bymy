@@ -1142,13 +1142,82 @@ let sheetScrollLockY = 0;
 let sheetScrollLocked = false;
 let sheetScrollUnlockBound = false;
 
-/** Android Chrome: position:fixed body-zárolás gyakran beragad — ott csak overflow. */
+/** Android Chrome: body overflow/touch-action zárolás gyakran beragad — ott a full-screen portal elég. */
 function isAndroidScrollLockUa() {
   try {
     return /Android/i.test(navigator.userAgent || "");
   } catch {
     return false;
   }
+}
+
+const SHEET_SCROLL_CLEAR_PROPS = [
+  "position",
+  "top",
+  "left",
+  "right",
+  "width",
+  "max-width",
+  "margin-left",
+  "margin-right",
+  "overflow",
+  "overflow-x",
+  "overflow-y",
+  "height",
+  "max-height",
+  "overscroll-behavior",
+  "touch-action",
+];
+
+function clearSheetScrollInlineStyles() {
+  const clear = (el, props) => {
+    if (!el) return;
+    for (const p of props) el.style.removeProperty(p);
+  };
+  clear(document.body, SHEET_SCROLL_CLEAR_PROPS);
+  clear(document.documentElement, [
+    "overflow",
+    "overflow-x",
+    "overflow-y",
+    "height",
+    "max-height",
+    "overscroll-behavior",
+    "touch-action",
+  ]);
+}
+
+/** Android mobil: explicit visszaengedés — a removeProperty után is beragadhat a cascade. */
+function forceAndroidPageScrollable() {
+  if (!isAndroidScrollLockUa()) return;
+  const html = document.documentElement;
+  const body = document.body;
+  if (!body) return;
+  body.classList.remove(
+    "auto-drum-portal-open",
+    "auto-drum-sheet-open",
+    "immo-scroll-locked",
+    "immo-cyl-scroll-lock",
+    "auto-drum-open"
+  );
+  html.classList.remove("immo-scroll-locked");
+  clearSheetScrollInlineStyles();
+  const blocker = document.querySelector(".immo-scroll-blocker");
+  if (blocker) {
+    blocker.hidden = true;
+    blocker.style.pointerEvents = "none";
+  }
+  /* Desk (≥901): csak takarítás — a panel-scroll layoutot ne törjük. */
+  if (window.matchMedia("(min-width: 901px)").matches) return;
+  html.style.setProperty("overflow-x", "hidden", "important");
+  html.style.setProperty("overflow-y", "auto", "important");
+  html.style.setProperty("height", "auto", "important");
+  html.style.setProperty("max-height", "none", "important");
+  body.style.setProperty("overflow-x", "hidden", "important");
+  body.style.setProperty("overflow-y", "auto", "important");
+  body.style.setProperty("height", "auto", "important");
+  body.style.setProperty("max-height", "none", "important");
+  body.style.setProperty("position", "static", "important");
+  body.style.setProperty("touch-action", "pan-y", "important");
 }
 
 function lockSheetPageAxes() {
@@ -1163,15 +1232,12 @@ function lockSheetPageAxes() {
     document.body.scrollLeft = 0;
 
     if (isAndroidScrollLockUa()) {
-      /* Android: ne legyen position:fixed — iOS-t nem érinti. */
-      document.documentElement.style.setProperty("overflow", "hidden", "important");
-      document.documentElement.style.setProperty("overflow-x", "hidden", "important");
-      document.documentElement.style.setProperty("overscroll-behavior", "none", "important");
-      document.body.style.setProperty("overflow", "hidden", "important");
-      document.body.style.setProperty("overflow-x", "hidden", "important");
-      document.body.style.setProperty("overscroll-behavior", "none", "important");
-      document.body.style.setProperty("touch-action", "none", "important");
-      /* Ne ugorjunk a tetejére — a háttér scroll pozíciója maradjon. */
+      /*
+       * Android: ne írj overflow/touch-action/position-t a body/html-re.
+       * A .auto-drum-portal fixed inset:0 lefedi a viewportot; inline zárolás
+       * sheet után gyakran beragad (Chrome / WebView).
+       * Háttérgörgetést a portal + CSS class fogja (auto-drum-portal-open).
+       */
       window.scrollTo(0, y);
     } else {
       /* iOS / egyéb: body fixed + left:0 — menü nyitáskor ne csússzon jobbra. */
@@ -1198,26 +1264,11 @@ function lockSheetPageAxes() {
 
 function unlockSheetPageAxes() {
   try {
-    const clear = (el, props) => {
-      if (!el) return;
-      for (const p of props) el.style.removeProperty(p);
-    };
-    clear(document.body, [
-      "position",
-      "top",
-      "left",
-      "right",
-      "width",
-      "max-width",
-      "margin-left",
-      "margin-right",
-      "overflow",
-      "overflow-x",
-      "overscroll-behavior",
-      "touch-action",
-    ]);
-    clear(document.documentElement, ["overflow", "overflow-x", "overscroll-behavior"]);
+    clearSheetScrollInlineStyles();
     document.body.classList.remove("auto-drum-portal-open", "auto-drum-sheet-open");
+    if (isAndroidScrollLockUa()) {
+      forceAndroidPageScrollable();
+    }
     const y = sheetScrollLockY || 0;
     sheetScrollLocked = false;
     window.scrollTo(0, y);
@@ -1228,20 +1279,68 @@ function unlockSheetPageAxes() {
   }
 }
 
+function rescueAndroidPageScrollIfNeeded() {
+  if (!isAndroidScrollLockUa()) return;
+  if (document.querySelector(".auto-drum-portal")) return;
+  const classStuck =
+    sheetScrollLocked ||
+    document.body.classList.contains("auto-drum-portal-open") ||
+    document.body.classList.contains("auto-drum-sheet-open") ||
+    document.body.classList.contains("immo-scroll-locked") ||
+    document.documentElement.classList.contains("immo-scroll-locked");
+  /* Desk Android: overflow:hidden szándékos (panel-scroll) — csak class/zárolás mentése. */
+  if (window.matchMedia("(min-width: 901px)").matches) {
+    if (!classStuck) return;
+    sheetScrollLocked = false;
+    forceAndroidPageScrollable();
+    return;
+  }
+  const stuck =
+    classStuck ||
+    /hidden/i.test(getComputedStyle(document.body).overflowY || "") ||
+    /hidden/i.test(getComputedStyle(document.documentElement).overflowY || "") ||
+    getComputedStyle(document.body).touchAction === "none";
+  if (!stuck) return;
+  sheetScrollLocked = false;
+  forceAndroidPageScrollable();
+}
+
 function bindSheetScrollUnlockSafety() {
   if (sheetScrollUnlockBound) return;
   sheetScrollUnlockBound = true;
   const rescue = () => {
-    if (!sheetScrollLocked) return;
-    /* Portal már nincs a DOM-ban, de a zárolás maradt (Android tipikus). */
-    if (!document.querySelector(".auto-drum-portal")) {
+    if (document.querySelector(".auto-drum-portal")) return;
+    if (sheetScrollLocked || isAndroidScrollLockUa()) {
       unlockSheetPageAxes();
+      rescueAndroidPageScrollIfNeeded();
     }
   };
   window.addEventListener("pagehide", rescue);
+  window.addEventListener("pageshow", rescue);
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible") rescue();
   });
+  /* Android: sheet után is ellenőrizzük — beragadt overflow/touch-action. */
+  if (isAndroidScrollLockUa()) {
+    window.setInterval(rescueAndroidPageScrollIfNeeded, 1200);
+  }
+}
+
+/* Auto/teher: Android induláskor is mentőöv (beragadt zárolás bfcache/előző session). */
+try {
+  const bootRescue = () => {
+    const page = document.body?.getAttribute?.("data-site-page") || "";
+    if (page !== "auto" && page !== "teherauto") return;
+    bindSheetScrollUnlockSafety();
+    rescueAndroidPageScrollIfNeeded();
+  };
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", bootRescue, { once: true });
+  } else {
+    bootRescue();
+  }
+} catch {
+  /* ignore */
 }
 
 function mountSheetPortalChrome(root, { stage, wrap, trigger, ring, sheetScroll }) {

@@ -1,7 +1,7 @@
-import { createAdForm } from "./form-core.js?v=337c42508e";
-import { mountAdFormBmPickers } from "./ad-form-bm-pickers.js?v=0f97eaea79";
-import { initErtekbecsloPanel } from "./ertekbecslo-app.js?v=4bf694b9ae";
-import { mountErtekDualRanges } from "./ertekbecsles-ev-range.js?v=81136e13e7";
+import { createAdForm } from "./form-core.js?v=bdf9fe8ee9";
+import { mountAdFormBmPickers } from "./ad-form-bm-pickers.js?v=f2852b7320";
+import { initErtekbecsloPanel } from "./ertekbecslo-app.js?v=503fc7a6d2";
+import { mountErtekDualRanges } from "./ertekbecsles-ev-range.js?v=fad6df8a85";
 
 const CATEGORY = {
   hirdetes_vertical: "auto",
@@ -92,7 +92,7 @@ try {
     storageKey: "ertekbecsles-draft",
     editing: true,
   });
-  await import("./form-layout-apply.js?v=ac4e9b39c6");
+  await import("./form-layout-apply.js?v=a24845f74a");
   try {
     await mountAdFormBmPickers(form);
   } catch (pickerErr) {

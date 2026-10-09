@@ -28,7 +28,7 @@ import {
   removeSavedSearch,
   toggleSavedSearchNotify,
 } from "./fok-data.js?v=289f64e75c";
-import { savedSearchHref, summarizeSavedSearchFilters } from "./saved-search.js?v=787f348a6c";
+import { savedSearchHref, summarizeSavedSearchFilters } from "./saved-search.js?v=f419ca25af";
 import { initMessagesUi } from "./messages-ui.js?v=4212c717fc";
 import { listConversations } from "./messages-api.js?v=5cf6493dc9";
 import { initMyAdsPanel } from "./my-ads.js?v=8a33a9a6fc";
@@ -47,7 +47,7 @@ import {
   stripDeviceIdentityFormFields,
 } from "./device-contract-identity.js?v=cdac1e6ebc";
 import { fillCountrySelect, PHONE_COUNTRIES } from "./phone-lang-ui.js?v=bc55c36aef";
-import { renderPartnerManage } from "./partner-profile.js?v=c6bd338877";
+import { renderPartnerManage } from "./partner-profile.js?v=c4d9a6d51d";
 
 const PHOTO_KEY = "bymy-avatar-photos";
 const NOTIFY_KEY = "bymy-notify-prefs";
@@ -572,7 +572,7 @@ function setSection(section) {
     void ensurePartnerProfilPanel();
   }
   if (next === "ertekbecslo") {
-    void import("./ertekbecslo-app.js?v=4bf694b9ae")
+    void import("./ertekbecslo-app.js?v=503fc7a6d2")
       .then((mod) => mod.initErtekbecsloPanel?.())
       .catch((err) => console.error("[beallitasok] ertekbecslo load failed", err));
   }

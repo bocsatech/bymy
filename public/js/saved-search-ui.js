@@ -5,7 +5,7 @@ import {
   buildSavedSearchUrl,
   normalizeSavedSearchFilters,
   summarizeSavedSearchFilters,
-} from "./saved-search.js?v=787f348a6c";
+} from "./saved-search.js?v=f419ca25af";
 
 function defaultSearchName(filters) {
   const summary = summarizeSavedSearchFilters(filters);

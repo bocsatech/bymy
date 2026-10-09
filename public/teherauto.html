@@ -62,11 +62,11 @@
     <link rel="stylesheet" href="/css/site-side.css?v=6f9f0965f1" />
     <link rel="stylesheet" href="/css/hub-mobile-app.css?v=2ed60b9353" />
     <link rel="stylesheet" href="/css/home.css?v=65bc6aab27" />
-    <link rel="stylesheet" href="/css/auto-hero.css?v=1e01e8181a" />
+    <link rel="stylesheet" href="/css/auto-hero.css?v=153d032723" />
     <link rel="stylesheet" href="/css/auto-desk-layout.css?v=96606da8c1" />
     <link rel="stylesheet" href="/css/listing-photo-cover.css?v=b60e28d793" />
     <link rel="stylesheet" href="/css/listing-featured.css?v=49bf39cc29" />
-    <link rel="stylesheet" href="/css/ingatlan-search.css?v=ebbd1f734a" />
+    <link rel="stylesheet" href="/css/ingatlan-search.css?v=1e783aedd0" />
     <link rel="stylesheet" href="/css/search-results-map.css?v=a6d274e296" />
     <style id="home-scroll-fix">
       
@@ -85,6 +85,18 @@
         max-width: 100% !important;
         display: block !important;
         overscroll-behavior-x: none !important;
+      }
+      /* Mobil auto/teher: lapgörgetés mindig éljen, ha nincs nyitott sheet/zárolás. */
+      @media (max-width: 900px) {
+        html:has(body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]):not(.auto-drum-portal-open):not(.auto-drum-sheet-open):not(.immo-scroll-locked)),
+        body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]):not(.auto-drum-portal-open):not(.auto-drum-sheet-open):not(.immo-scroll-locked) {
+          overflow-x: hidden !important;
+          overflow-y: auto !important;
+          height: auto !important;
+          max-height: none !important;
+          position: static !important;
+          touch-action: pan-y !important;
+        }
       }
       html.immo-scroll-locked:has(body.home-page),
       body.home-page.immo-scroll-locked {
@@ -517,7 +529,7 @@
         form.classList.add("is-qs-ready");
       }, 5500);
     </script>
-    <script src="/js/home-app.js?v=7074be974a" type="module"></script>
+    <script src="/js/home-app.js?v=5106d64cfa" type="module"></script>
     <script src="/js/auto-hero.js?v=04bb0cefdd" type="module"></script>
     <script src="/js/site-avatar-menu.js?v=4c911388e7" type="module"></script>
 

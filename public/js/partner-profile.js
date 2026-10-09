@@ -11,6 +11,7 @@ import { wirePostalCityAutofill } from "./postal-city-autofill.js?v=ba74000828";
 import { fillCountrySelect, PHONE_COUNTRIES } from "./phone-lang-ui.js?v=bc55c36aef";
 import { categoriesForVertical } from "./partner-categories-data.js?v=b826a00c74";
 import { fetchMyListings } from "./db-client.js?v=6c1aeac308";
+import { uploadImage } from "./upload-image.js?v=3b023aae7a";
 
 const pageRoot = () => document.getElementById("partner-root");
 
@@ -204,6 +205,96 @@ function readCompanyAjanlasPayload(form, ajanlasState) {
     companyAjanlasokAutoCats: autoCats,
     companyAjanlasokIngatlanCats: immoCats,
   };
+}
+
+function mediaFieldHtml({ name, label, value, round = false }) {
+  const url = String(value || "").trim();
+  return `
+    <div class="partner-media-field" data-partner-media-field>
+      <span class="partner-media-label">${esc(label)}</span>
+      <div class="partner-media-preview${round ? " is-round" : ""}" data-partner-media-preview>
+        ${
+          url
+            ? `<img src="${esc(url)}" alt="" data-partner-media-img />`
+            : `<span class="partner-media-empty">Nincs kép</span>`
+        }
+      </div>
+      <input type="hidden" name="${esc(name)}" value="${esc(url)}" data-partner-media-url />
+      <div class="partner-media-actions">
+        <button type="button" class="partner-media-upload" data-partner-media-pick>Kép feltöltése</button>
+        ${
+          url
+            ? `<button type="button" class="partner-media-clear" data-partner-media-clear>Törlés</button>`
+            : ""
+        }
+      </div>
+      <input type="file" accept="image/*" hidden data-partner-media-file />
+    </div>
+  `;
+}
+
+function wirePartnerMediaUploads(root) {
+  root.querySelectorAll("[data-partner-media-field]").forEach((field) => {
+    const fileInput = field.querySelector("[data-partner-media-file]");
+    const hidden = field.querySelector("[data-partner-media-url]");
+    const preview = field.querySelector("[data-partner-media-preview]");
+    const pickBtn = field.querySelector("[data-partner-media-pick]");
+    if (!(fileInput instanceof HTMLInputElement) || !(hidden instanceof HTMLInputElement)) return;
+
+    function setUrl(nextUrl) {
+      const url = String(nextUrl || "").trim();
+      hidden.value = url;
+      if (preview) {
+        preview.innerHTML = url
+          ? `<img src="${esc(url)}" alt="" data-partner-media-img />`
+          : `<span class="partner-media-empty">Nincs kép</span>`;
+      }
+      const clearBtn = field.querySelector("[data-partner-media-clear]");
+      if (url && !clearBtn) {
+        const actions = field.querySelector(".partner-media-actions");
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "partner-media-clear";
+        btn.setAttribute("data-partner-media-clear", "");
+        btn.textContent = "Törlés";
+        btn.addEventListener("click", () => setUrl(""));
+        actions?.appendChild(btn);
+      } else if (!url && clearBtn) {
+        clearBtn.remove();
+      }
+    }
+
+    pickBtn?.addEventListener("click", () => fileInput.click());
+    field.querySelector("[data-partner-media-clear]")?.addEventListener("click", () => setUrl(""));
+    fileInput.addEventListener("change", async () => {
+      const file = fileInput.files?.[0];
+      fileInput.value = "";
+      if (!file) return;
+      const prev = pickBtn?.textContent || "Kép feltöltése";
+      if (pickBtn) {
+        pickBtn.disabled = true;
+        pickBtn.textContent = "Feltöltés…";
+      }
+      try {
+        const uploaded = await uploadImage({
+          file,
+          kind: "profile",
+          entityType: "profile",
+          folder: "partner-profile",
+        });
+        const url = String(uploaded.url || uploaded.publicUrl || uploaded.href || "").trim();
+        if (!url) throw new Error("Nincs kép URL a feltöltés után.");
+        setUrl(url);
+      } catch (error) {
+        window.alert(error?.message || "A feltöltés sikertelen.");
+      } finally {
+        if (pickBtn) {
+          pickBtn.disabled = false;
+          pickBtn.textContent = prev;
+        }
+      }
+    });
+  });
 }
 
 function parsePhoneParts(phone) {
@@ -420,6 +511,14 @@ export async function renderPartnerManage(mountRoot) {
     : listingId
       ? `/ajanlas-partner.html?listing=${encodeURIComponent(String(listingId))}`
       : "";
+  const avatarUrl =
+    String(profile.logo_url || account.companyAvatarUrl || "").trim();
+  const companyLogoUrl =
+    String(profile.company_logo_url || account.companyLogoUrl || "").trim();
+  const coverUrl = String(profile.cover_url || account.companyCoverUrl || "").trim();
+  const descriptionText = String(
+    profile.description || account.companyDescription || ""
+  ).trim();
   if (!String(profile.phone || "").trim()) {
     profile.phone = String(account.companyPhone || account.phone || "").trim();
   }
@@ -506,6 +605,21 @@ export async function renderPartnerManage(mountRoot) {
           <label>Második e-mail<input name="companyEmail2" type="email" value="${esc(account.companyEmail2)}" maxlength="320" /></label>
         </div>
       </section>
+
+      <section class="partner-form-section">
+        <div class="partner-form-title"><div><h2>4. Publikus megjelenés</h2><p>Ezek jelennek meg a profil oldalon. Itt töltsd fel a képeket és írd át a bemutatást.</p></div></div>
+        <div class="partner-media-grid">
+          ${mediaFieldHtml({ name: "logoUrl", label: "Profilkép", value: avatarUrl, round: true })}
+          ${mediaFieldHtml({ name: "companyLogoUrl", label: "Céglogó", value: companyLogoUrl })}
+          ${mediaFieldHtml({ name: "coverUrl", label: "Háttérkép / borító", value: coverUrl })}
+        </div>
+        <div class="partner-form-grid" style="margin-top:14px">
+          <label class="partner-form-wide">Tevékenység bemutatása<textarea name="description" maxlength="4000" rows="5" placeholder="Írd le a tevékenységet, szolgáltatásokat, területet…">${esc(descriptionText)}</textarea></label>
+          <label>Weboldal<input name="website" type="url" value="${esc(profile.website || account.website || "")}" placeholder="https://…" maxlength="300" /></label>
+          <label>Publikus profilcím<span class="partner-slug"><span>bymy.hu/partner/</span><input name="slug" value="${esc(profile.slug || "")}" maxlength="100" placeholder="cegnev" /></span></label>
+        </div>
+      </section>
+
       <div class="partner-ajanlas-block">
         <div class="partner-form-actions partner-ajanlas-island" role="group" aria-label="Ajánlások">
           <button type="button" class="partner-ajanlas-btn" data-partner-ajanlas-btn>Ajánlások</button>
@@ -580,9 +694,11 @@ export async function renderPartnerManage(mountRoot) {
           <label>Publikus profilcím *<span class="partner-slug"><span>bymy.hu/partner/</span><input name="slug" value="${esc(profile.slug)}" maxlength="100" required /></span></label>
           <label>Jutalék * (csak ingatlan kereskedők)<input name="commission" value="${esc(profile.commission)}" maxlength="80" required placeholder="pl. bruttó 2–4%" /></label>
           <label>Weboldal<input name="website" type="url" value="${esc(profile.website)}" placeholder="https://…" maxlength="300" /></label>
-          <label>Profilkép URL<input name="logoUrl" type="url" value="${esc(profile.logo_url)}" placeholder="https://…" /></label>
-          <label>Céglogó URL<input name="companyLogoUrl" type="url" value="${esc(profile.company_logo_url)}" placeholder="https://…" /></label>
-          <label>Borítókép URL<input name="coverUrl" type="url" value="${esc(profile.cover_url)}" placeholder="https://…" /></label>
+          <div class="partner-form-wide partner-media-grid">
+            ${mediaFieldHtml({ name: "logoUrl", label: "Profilkép", value: profile.logo_url, round: true })}
+            ${mediaFieldHtml({ name: "companyLogoUrl", label: "Céglogó", value: profile.company_logo_url })}
+            ${mediaFieldHtml({ name: "coverUrl", label: "Háttérkép / borító", value: profile.cover_url })}
+          </div>
           <label class="partner-form-wide">Kerület / értékesítési területek *<input name="serviceAreas" value="${esc(profile.service_areas)}" placeholder="Például: Budapest XI., Budaörs, Érd" maxlength="1000" required /></label>
           <label class="partner-form-wide">Bemutatkozás<textarea name="description" maxlength="4000" placeholder="Mutasd be az irodát és a szakterületedet.">${esc(profile.description)}</textarea></label>
           <label class="partner-check partner-form-wide"><input type="checkbox" name="isPublic" ${profile.is_public !== false ? "checked" : ""} /><span>A jóváhagyás után legyen nyilvános a profilom</span></label>
@@ -613,6 +729,7 @@ export async function renderPartnerManage(mountRoot) {
   });
 
   const ajanlasState = isCompany ? wireCompanyAjanlasBlock(root, account) : null;
+  wirePartnerMediaUploads(root);
 
   root.querySelector("#partner-form")?.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -666,6 +783,13 @@ export async function renderPartnerManage(mountRoot) {
           submit.textContent = "Mentés";
           return;
         }
+        const logoUrl = String(raw.logoUrl || "").trim();
+        const companyLogoUrlVal = String(raw.companyLogoUrl || "").trim();
+        const coverUrlVal = String(raw.coverUrl || "").trim();
+        const description = String(raw.description || "").trim().slice(0, 4000);
+        const website = String(raw.website || "").trim();
+        const slug = String(raw.slug || profile.slug || "").trim();
+
         await saveProfile({
           ...getProfile(),
           company: displayName,
@@ -684,8 +808,39 @@ export async function renderPartnerManage(mountRoot) {
           companyEmail2: String(raw.companyEmail2 || "").trim(),
           salespersonName: String(raw.salespersonName || "").trim(),
           salespersonName2: String(raw.salespersonName2 || "").trim(),
+          companyAvatarUrl: logoUrl,
+          companyLogoUrl: companyLogoUrlVal,
+          companyCoverUrl: coverUrlVal,
+          companyDescription: description,
+          website,
           ...ajanlas,
         });
+
+        if (slug) {
+          try {
+            await jsonFetch("/api/partner-profiles/mine", {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                displayName,
+                slug,
+                contactPerson,
+                phone,
+                email,
+                commission: String(profile.commission || "0%").trim() || "0%",
+                website,
+                logoUrl,
+                companyLogoUrl: companyLogoUrlVal,
+                coverUrl: coverUrlVal,
+                serviceAreas: companyCity || String(profile.service_areas || "").trim(),
+                description,
+                isPublic: profile.is_public !== false,
+              }),
+            });
+          } catch {
+            /* fiókmezők mentve; partner slug opcionális */
+          }
+        }
 
         syncManageSidebar(accountType);
         status.textContent = "Mentve.";

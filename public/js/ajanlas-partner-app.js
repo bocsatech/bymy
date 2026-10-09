@@ -2,11 +2,9 @@ import {
   PARTNER_CATEGORIES,
   partnerCategoryImageUrl,
 } from "./partner-categories-data.js?v=b826a00c74";
-import { uploadImage } from "./upload-image.js?v=3b023aae7a";
 import {
   getAuthUser,
   getProfile,
-  saveProfile,
   loadProfileFromServer,
 } from "./site-auth.js?v=4588fd60ff";
 import {
@@ -222,20 +220,11 @@ function iconShareNodes() {
   return `<svg class="ap-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="12" r="2.2" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="18" cy="6.5" r="2.2" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="18" cy="17.5" r="2.2" fill="none" stroke="currentColor" stroke-width="1.8"/><path fill="none" stroke="currentColor" stroke-width="1.8" d="M8 11.2 15.8 7.4M8 12.8l7.8 3.8"/></svg>`;
 }
 
-function mediaSlot(kind, label, editMode) {
-  if (!editMode) return "";
-  return `<button type="button" class="ap-media-edit" data-ap-media="${esc(kind)}" aria-label="${esc(label)} cseréje" title="${esc(label)} cseréje">
-    <span>Csere</span>
-  </button>`;
-}
-
 function renderProfile(root, partner, opts = {}) {
   const {
     listings = [],
     backHref = "/ajanlasok.html",
-    editMode = false,
     canEdit = false,
-    ownProfile = null,
   } = opts;
   const name = partner.name || partner.display_name || "Partner";
   const phone = String(partner.phone || "").trim();
@@ -276,7 +265,7 @@ function renderProfile(root, partner, opts = {}) {
   const defaultCover =
     "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=1600&q=70";
   const coverUrl = cover || defaultCover;
-  const editClass = editMode ? " is-editing" : "";
+  const editHref = "/beallitasok.html?szekcio=partner-profil";
 
   const menuBackHref = "/beallitasok.html?szekcio=hirdetes";
   syncHubBackLink(canEdit ? menuBackHref : listBack, canEdit ? "← Saját menü" : "← Ajánlások");
@@ -295,28 +284,20 @@ function renderProfile(root, partner, opts = {}) {
       <div class="ap-toolbar-actions">
         ${
           canEdit
-            ? `<a class="ap-back-menu" href="${esc(menuBackHref)}">← Saját menü</a>`
-            : ""
-        }
-        ${
-          canEdit
-            ? `<button type="button" class="ap-edit-toggle${editMode ? " is-on" : ""}" data-ap-edit-toggle>
-                ${editMode ? "Kész" : "Szerkesztés"}
-              </button>`
+            ? `<a class="ap-back-menu" href="${esc(menuBackHref)}">← Saját menü</a>
+               <a class="ap-edit-toggle" href="${esc(editHref)}">Szerkesztés</a>`
             : ""
         }
       </div>
     </div>
-    <section class="ap-hero${editClass}" data-ap-hero>
+    <section class="ap-hero" data-ap-hero>
       <div class="ap-hero-cover" data-ap-cover style="--ap-cover:url('${esc(coverUrl)}')"></div>
       <div class="ap-hero-shade" aria-hidden="true"></div>
-      ${mediaSlot("cover", "Háttérkép", editMode)}
       <div class="ap-hero-inner">
         <div class="ap-hero-left">
           <div class="ap-photos">
             <span class="ap-photo-person" data-ap-slot="avatar">
               ${photo ? `<img src="${esc(photo)}" alt="" />` : `<span>${initial(name)}</span>`}
-              ${mediaSlot("avatar", "Profilkép", editMode)}
             </span>
             <span class="ap-photo-logo" data-ap-slot="logo">
               ${
@@ -326,7 +307,6 @@ function renderProfile(root, partner, opts = {}) {
                     ? `<img src="${esc(partnerCategoryImageUrl(services[0]))}" alt="" />`
                     : `<span>${initial(name)}</span>`
               }
-              ${mediaSlot("logo", "Céglogó", editMode)}
             </span>
           </div>
           <div class="ap-hero-copy">
@@ -363,23 +343,11 @@ function renderProfile(root, partner, opts = {}) {
           }
         </div>
       </div>
-      <input type="file" accept="image/*" hidden data-ap-file />
-      ${editMode ? `<p class="ap-edit-hint" data-ap-edit-status>Kattints a háttérre, profilképre vagy logóra a cseréhez. A bemutatást lent szerkesztheted.</p>` : ""}
     </section>
     <div class="ap-grid">
       <section class="ap-card" data-ap-bio-card>
         <h2>Tevékenység bemutatása</h2>
-        ${
-          editMode && canEdit
-            ? `<textarea class="ap-bio-input" data-ap-bio-input maxlength="4000" rows="6" placeholder="Írd le a tevékenységet, szolgáltatásokat, területet…">${esc(
-                String(partner.description || buildBio(partner))
-              )}</textarea>
-               <div class="ap-bio-actions">
-                 <button type="button" class="ap-btn ap-btn--save" data-ap-bio-save>Bemutatás mentése</button>
-                 <span class="ap-bio-status" data-ap-bio-status role="status"></span>
-               </div>`
-            : `<p data-ap-bio-text>${esc(buildBio(partner))}</p>`
-        }
+        <p data-ap-bio-text>${esc(buildBio(partner))}</p>
         ${hours ? `<p class="ap-hours">Nyitva: ${esc(hours)}</p>` : ""}
       </section>
       <section class="ap-card">
@@ -398,19 +366,6 @@ function renderProfile(root, partner, opts = {}) {
     ${listingsBandHtml(listings, { loading: Boolean(opts.listingsLoading) })}
   `;
   document.title = `${name} — Partner profil — Bymy`;
-  const editorCtx = {
-    partner,
-    listings,
-    backHref,
-    editMode,
-    canEdit,
-    ownProfile,
-    accountEdit: Boolean(opts.accountEdit),
-    listingId: opts.listingId || "",
-    listingsLoading: Boolean(opts.listingsLoading),
-  };
-  wireHeroEditor(root, editorCtx);
-  wireBioEditor(root, editorCtx);
   wireHeroCta(root, {
     listingId,
     sellerId,
@@ -512,201 +467,6 @@ async function fetchOwnProfile() {
   return data.profile || null;
 }
 
-async function saveOwnMedia(ownProfile, patch) {
-  const body = {
-    displayName: ownProfile.display_name,
-    slug: ownProfile.slug,
-    contactPerson: ownProfile.contact_person || "",
-    phone: ownProfile.phone,
-    email: ownProfile.email,
-    commission: ownProfile.commission || "0%",
-    website: ownProfile.website || "",
-    logoUrl: patch.logo_url ?? ownProfile.logo_url ?? "",
-    companyLogoUrl: patch.company_logo_url ?? ownProfile.company_logo_url ?? "",
-    coverUrl: patch.cover_url ?? ownProfile.cover_url ?? "",
-    serviceAreas: ownProfile.service_areas || "",
-    description: patch.description != null ? patch.description : ownProfile.description || "",
-    isPublic: ownProfile.is_public !== false,
-  };
-  const res = await fetch("/api/partner-profiles/mine", {
-    method: "PUT",
-    credentials: "same-origin",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error || "A mentés sikertelen.");
-  return data.profile;
-}
-
-async function saveAccountMedia(patch) {
-  try {
-    await loadProfileFromServer();
-  } catch {
-    /* local profile */
-  }
-  const cur = getProfile();
-  const next = {
-    ...cur,
-    companyCoverUrl: patch.cover_url != null ? patch.cover_url : cur.companyCoverUrl || "",
-    companyLogoUrl: patch.company_logo_url != null ? patch.company_logo_url : cur.companyLogoUrl || "",
-    companyAvatarUrl: patch.logo_url != null ? patch.logo_url : cur.companyAvatarUrl || "",
-    companyDescription:
-      patch.description != null ? patch.description : cur.companyDescription || "",
-  };
-  await saveProfile(next);
-  return next;
-}
-
-async function persistPartnerFields(ctx, patch) {
-  const errors = [];
-  let ownProfile = ctx.ownProfile;
-  // Mindig a fiókprofilba is mentünk — a listing / kereskedés oldal innen olvassa vissza.
-  if (ctx.accountEdit || ctx.listingId || !ctx.ownProfile) {
-    try {
-      await saveAccountMedia(patch);
-    } catch (error) {
-      errors.push(error?.message || "Fiókprofil mentés sikertelen.");
-    }
-  }
-  if (ctx.ownProfile) {
-    try {
-      ownProfile = await saveOwnMedia(ctx.ownProfile, {
-        logo_url: patch.logo_url ?? ctx.ownProfile.logo_url,
-        company_logo_url: patch.company_logo_url ?? ctx.ownProfile.company_logo_url,
-        cover_url: patch.cover_url ?? ctx.ownProfile.cover_url,
-        description: patch.description != null ? patch.description : ctx.ownProfile.description,
-      });
-    } catch (error) {
-      errors.push(error?.message || "Partnerprofil mentés sikertelen.");
-    }
-  }
-  if (errors.length && !ownProfile && ctx.ownProfile == null && ctx.accountEdit === false) {
-    throw new Error(errors[0]);
-  }
-  if (errors.length === 2) throw new Error(errors[0]);
-  return { ownProfile, warn: errors[0] || "" };
-}
-
-const persistMedia = persistPartnerFields;
-
-function wireHeroEditor(root, ctx) {
-  const toggle = root.querySelector("[data-ap-edit-toggle]");
-  toggle?.addEventListener("click", () => {
-    const url = new URL(location.href);
-    if (ctx.editMode) url.searchParams.delete("szerkeszt");
-    else url.searchParams.set("szerkeszt", "1");
-    history.replaceState({}, "", url);
-    renderProfile(root, ctx.partner, { ...ctx, editMode: !ctx.editMode });
-  });
-
-  const canSaveMedia = Boolean(ctx.canEdit && (ctx.ownProfile || ctx.accountEdit || ctx.listingId));
-  if (!ctx.editMode || !canSaveMedia) return;
-
-  const fileInput = root.querySelector("[data-ap-file]");
-  const status = root.querySelector("[data-ap-edit-status]");
-  let pendingKind = "";
-
-  async function applyFile(file) {
-    if (!file || !pendingKind) return;
-    const kind = pendingKind;
-    pendingKind = "";
-    if (status) status.textContent = "Feltöltés…";
-    try {
-      const uploaded = await uploadImage({
-        file,
-        kind: "profile",
-        entityType: "profile",
-        folder: "partner-profile",
-      });
-      const url = String(uploaded.url || uploaded.publicUrl || uploaded.href || "").trim();
-      if (!url) throw new Error("Nincs kép URL a feltöltés után.");
-      const patch =
-        kind === "cover"
-          ? { cover_url: url }
-          : kind === "logo"
-            ? { company_logo_url: url }
-            : { logo_url: url };
-      const { ownProfile, warn } = await persistMedia({ ...ctx, accountEdit: true }, patch);
-      const nextPartner = {
-        ...ctx.partner,
-        logo_url: patch.logo_url ?? ctx.partner.logo_url,
-        company_logo_url: patch.company_logo_url ?? ctx.partner.company_logo_url,
-        cover_url: patch.cover_url ?? ctx.partner.cover_url,
-      };
-      if (ownProfile) {
-        nextPartner.logo_url = ownProfile.logo_url || nextPartner.logo_url;
-        nextPartner.company_logo_url = ownProfile.company_logo_url || nextPartner.company_logo_url;
-        nextPartner.cover_url = ownProfile.cover_url || nextPartner.cover_url;
-      }
-      if (status) status.textContent = warn ? `Mentve (figyelem: ${warn})` : "Mentve.";
-      renderProfile(root, nextPartner, {
-        ...ctx,
-        partner: nextPartner,
-        ownProfile: ownProfile || ctx.ownProfile,
-        accountEdit: true,
-        editMode: true,
-      });
-    } catch (error) {
-      if (status) status.textContent = error.message || "Hiba a cserénél.";
-    }
-  }
-
-  fileInput?.addEventListener("change", () => {
-    const file = fileInput.files?.[0];
-    fileInput.value = "";
-    void applyFile(file);
-  });
-
-  root.querySelectorAll("[data-ap-media]").forEach((btn) => {
-    btn.addEventListener("click", (event) => {
-      event.preventDefault();
-      event.stopPropagation();
-      pendingKind = btn.getAttribute("data-ap-media") || "";
-      fileInput?.click();
-    });
-  });
-
-  root.querySelector("[data-ap-cover]")?.addEventListener("click", () => {
-    if (!ctx.editMode) return;
-    pendingKind = "cover";
-    fileInput?.click();
-  });
-}
-
-function wireBioEditor(root, ctx) {
-  const canSave = Boolean(ctx.editMode && ctx.canEdit && (ctx.ownProfile || ctx.accountEdit || ctx.listingId));
-  if (!canSave) return;
-  const input = root.querySelector("[data-ap-bio-input]");
-  const saveBtn = root.querySelector("[data-ap-bio-save]");
-  const status = root.querySelector("[data-ap-bio-status]");
-  if (!(input instanceof HTMLTextAreaElement) || !saveBtn) return;
-
-  saveBtn.addEventListener("click", async () => {
-    const text = String(input.value || "").trim().slice(0, 4000);
-    saveBtn.disabled = true;
-    if (status) status.textContent = "Mentés…";
-    try {
-      const { ownProfile, warn } = await persistPartnerFields(
-        { ...ctx, accountEdit: true },
-        { description: text }
-      );
-      const nextPartner = { ...ctx.partner, description: text };
-      if (status) status.textContent = warn ? `Mentve (figyelem: ${warn})` : "Mentve.";
-      renderProfile(root, nextPartner, {
-        ...ctx,
-        partner: nextPartner,
-        ownProfile: ownProfile || ctx.ownProfile,
-        accountEdit: true,
-        editMode: true,
-      });
-    } catch (error) {
-      if (status) status.textContent = error.message || "A mentés sikertelen.";
-      saveBtn.disabled = false;
-    }
-  });
-}
-
 async function loadListingsForSlug(slug) {
   if (!slug) return [];
   try {
@@ -768,8 +528,6 @@ async function resolveEditAccess({ slug = "", sellerId = 0, ownProfile = null } 
   if (ownsSlug || ownsListing) {
     return {
       canEdit: true,
-      ownProfile: own?.slug ? own : null,
-      accountEdit: true,
     };
   }
   return { canEdit: false, ownProfile: own, accountEdit: false };
@@ -890,7 +648,7 @@ function filterActiveListings(list) {
   return (list || []).filter((item) => (item.status || "feladott") === "feladott");
 }
 
-async function initListingPartnerPage(root, listingId, wantEdit) {
+async function initListingPartnerPage(root, listingId) {
   const backHref = `/hirdetes.html?id=${encodeURIComponent(listingId)}`;
   const cached = readShellCache("listing", listingId);
   const loggedIn = Boolean(getAuthUser()?.email);
@@ -912,9 +670,6 @@ async function initListingPartnerPage(root, listingId, wantEdit) {
       listingsLoading: true,
       backHref,
       canEdit: quickCanEdit(cached.id || cached.sellerId, cached.partnerSlug || ""),
-      editMode: false,
-      ownProfile: null,
-      accountEdit: true,
       listingId,
     });
   }
@@ -932,9 +687,6 @@ async function initListingPartnerPage(root, listingId, wantEdit) {
     listingsLoading: true,
     backHref,
     canEdit: canEditQuick,
-    editMode: canEditQuick && wantEdit,
-    ownProfile: null,
-    accountEdit: true,
     listingId,
   });
 
@@ -963,7 +715,7 @@ async function initListingPartnerPage(root, listingId, wantEdit) {
     ownProfile,
   });
   // Lista kész: ha csak a sín változott, ne rajzoljuk újra a teljes herót
-  if (!didEnrich && access.canEdit === canEditQuick && !access.ownProfile) {
+  if (!didEnrich && access.canEdit === canEditQuick) {
     paintListings(root, listings);
   } else {
     renderProfile(root, partner, {
@@ -971,9 +723,6 @@ async function initListingPartnerPage(root, listingId, wantEdit) {
       listingsLoading: false,
       backHref,
       canEdit: access.canEdit,
-      editMode: access.canEdit && wantEdit,
-      ownProfile: access.ownProfile,
-      accountEdit: true,
       listingId,
     });
   }
@@ -995,7 +744,7 @@ async function initListingPartnerPage(root, listingId, wantEdit) {
   }
 }
 
-async function initSlugPartnerPage(root, slug, wantEdit) {
+async function initSlugPartnerPage(root, slug) {
   const cached = readShellCache("slug", slug);
   const loggedIn = Boolean(getAuthUser()?.email);
   const profileP = loggedIn ? loadProfileFromServer().catch(() => null) : Promise.resolve(null);
@@ -1014,9 +763,6 @@ async function initSlugPartnerPage(root, slug, wantEdit) {
       listingsLoading: true,
       backHref: "/ajanlasok.html",
       canEdit: quickCanEdit(cached.id, slug, ""),
-      editMode: false,
-      ownProfile: null,
-      accountEdit: false,
       listingId: "",
     });
   }
@@ -1055,9 +801,6 @@ async function initSlugPartnerPage(root, slug, wantEdit) {
     listingsLoading: false,
     backHref: "/ajanlasok.html",
     canEdit: access.canEdit,
-    editMode: access.canEdit && wantEdit,
-    ownProfile: access.ownProfile,
-    accountEdit: access.accountEdit,
     listingId: sampleListingId ? String(sampleListingId) : "",
   });
 
@@ -1085,16 +828,14 @@ async function init() {
   const id = params.get("id") || "";
   const slug = params.get("slug") || "";
   const listingId = params.get("listing") || params.get("hirdeto") || "";
-  const wantEdit = params.get("szerkeszt") === "1";
-
   try {
     if (listingId) {
-      await initListingPartnerPage(root, listingId, wantEdit);
+      await initListingPartnerPage(root, listingId);
       return;
     }
 
     if (slug) {
-      await initSlugPartnerPage(root, slug, wantEdit);
+      await initSlugPartnerPage(root, slug);
       return;
     }
 
@@ -1122,9 +863,6 @@ async function init() {
       listingsLoading: Boolean(guessSlug),
       backHref: "/ajanlasok.html",
       canEdit: false,
-      editMode: false,
-      ownProfile: null,
-      accountEdit: false,
     });
 
     const [listings, , ownProfile] = await Promise.all([
@@ -1138,9 +876,6 @@ async function init() {
       listingsLoading: false,
       backHref: "/ajanlasok.html",
       canEdit: access.canEdit,
-      editMode: access.canEdit && wantEdit,
-      ownProfile: access.ownProfile,
-      accountEdit: access.accountEdit,
     });
   } catch (error) {
     root.innerHTML = `<div class="ap-error"><strong>A partnerprofil nem tölthető be.</strong><p>${esc(

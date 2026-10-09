@@ -920,23 +920,27 @@ body.hub-page--feed {
   padding: 0;
 }
 
-/* Keresés a térképen — C demó sáv a kategória-csempék alatt */
+/* Keresés a térképen — külön sáv (C demó 1:1), nem a kategóriák belsejében */
 .hub-map-strip {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin: 12px 1.25rem 0;
+  width: 100%;
+  margin: 0;
   padding: 14px;
+  min-height: 56px;
   border-radius: 14px;
   border: 1px solid #b8c0cc;
   text-decoration: none;
   color: inherit;
+  box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
   background:
     linear-gradient(90deg, rgba(247, 247, 248, 0.94) 0%, rgba(247, 247, 248, 0.78) 55%, rgba(247, 247, 248, 0.55) 100%),
     repeating-linear-gradient(0deg, transparent, transparent 18px, rgba(15, 23, 42, 0.04) 18px, rgba(15, 23, 42, 0.04) 19px),
     repeating-linear-gradient(90deg, transparent, transparent 18px, rgba(15, 23, 42, 0.04) 18px, rgba(15, 23, 42, 0.04) 19px),
     #e4e8ee;
-  box-sizing: border-box;
 }
 
 .hub-map-strip:hover {
@@ -998,10 +1002,24 @@ body.hub-page--feed {
   color: #111;
 }
 
+/* Szekció = maga a C kártya (ne legyen dupla bézs sáv keret) */
+@media (min-width: 801px) {
+  body.hub-page--feed .hf-section--map-strip {
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    padding: 0 1.25rem;
+    margin: 0 0 2.5rem;
+  }
+}
+
 @media (max-width: 800px) {
-  body.hub-page--feed .hub-map-strip {
-    margin-left: 0;
-    margin-right: 0;
+  body.hub-page--feed .hf-section--map-strip {
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    padding: 0 var(--hf-gutter, 16px) !important;
+    margin: 0 0 28px !important;
   }
 }
 

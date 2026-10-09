@@ -83,6 +83,8 @@ struct HubHomeScreen: View {
                 // Autó kategóriák
                 railHeader(title: "Autó kategóriák") { router.selectTop(.auto) }
                 categoryRail(items: autoCategories)
+
+                // Külön sáv — web C demó
                 mapSearchStrip
 
                 if let errorText {
@@ -218,7 +220,8 @@ struct HubHomeScreen: View {
         }
         .buttonStyle(.plain)
         .padding(.horizontal, gutter)
-        .padding(.top, 4)
+        .padding(.top, 8)
+        .padding(.bottom, 4)
     }
 
     // MARK: - Promo

@@ -32,13 +32,38 @@ function esc(value) {
 }
 
 function safeUrl(value) {
+  const raw = String(value || "").trim();
+  if (!raw) return "";
+  if (/^data:image\//i.test(raw)) return raw;
   try {
-    const url = new URL(String(value || ""), window.location.origin);
+    const url = new URL(raw, window.location.origin);
     if (url.protocol !== "http:" && url.protocol !== "https:") return "";
     return url.href;
   } catch {
     return "";
   }
+}
+
+function formatRatingMeta(average, count) {
+  if (average == null || average === "") return "";
+  const n = Number(average);
+  if (!Number.isFinite(n) || n <= 0) return "";
+  // Seller rating 1–10; a fejléc demó 1–5 skálát mutat
+  const stars = n > 5 ? n / 2 : n;
+  const label = stars.toFixed(1).replace(".", ",");
+  const c = Number(count);
+  if (Number.isFinite(c) && c > 0) return `${label} (${c} ajánlás)`;
+  return label;
+}
+
+function formatPlaceMeta(partner) {
+  const city = String(partner.city || "").trim();
+  const county = String(partner.county || partner.megye || "").trim();
+  if (city && county) return `${city}, ${county}`;
+  if (city) return city;
+  const areas = String(partner.service_areas || partner.address || "").trim();
+  if (areas) return areas;
+  return [partner.postal_code, partner.address].filter(Boolean).join(" ").trim();
 }
 
 function telHref(phone) {
@@ -142,23 +167,8 @@ function renderProfile(root, partner, opts = {}) {
   const companyLogo = safeUrl(partner.company_logo_url);
   const cover = safeUrl(partner.cover_url);
   const services = partner.services || [];
-  const ratingNum =
-    partner.google_rating != null ? Number(partner.google_rating).toFixed(1).replace(".", ",") : "";
-  const reviewCount = partner.google_review_count != null ? Number(partner.google_review_count) : null;
-  const ratingText =
-    ratingNum && reviewCount != null
-      ? `${ratingNum} (${reviewCount} ajánlás)`
-      : ratingNum
-        ? ratingNum
-        : "";
-  const cityLine = [partner.city || partner.service_areas, partner.county]
-    .map((s) => String(s || "").trim())
-    .filter(Boolean)
-    .join(", ");
-  const locFallback = [partner.postal_code, partner.address || partner.service_areas]
-    .filter(Boolean)
-    .join(" ");
-  const place = cityLine || locFallback;
+  const ratingText = formatRatingMeta(partner.google_rating, partner.google_review_count);
+  const place = formatPlaceMeta(partner);
   const hours = partner.opening_hours || "";
   const role = services.length
     ? services.map(categoryLabel).join(" • ")
@@ -363,6 +373,35 @@ async function saveAccountMedia(patch) {
   return next;
 }
 
+async function persistMedia(ctx, patch) {
+  const errors = [];
+  let ownProfile = ctx.ownProfile;
+  // Mindig a fiókprofilba is mentünk — a listing / kereskedés oldal innen olvassa vissza.
+  if (ctx.accountEdit || ctx.listingId || !ctx.ownProfile) {
+    try {
+      await saveAccountMedia(patch);
+    } catch (error) {
+      errors.push(error?.message || "Fiókprofil mentés sikertelen.");
+    }
+  }
+  if (ctx.ownProfile) {
+    try {
+      ownProfile = await saveOwnMedia(ctx.ownProfile, {
+        logo_url: patch.logo_url ?? ctx.ownProfile.logo_url,
+        company_logo_url: patch.company_logo_url ?? ctx.ownProfile.company_logo_url,
+        cover_url: patch.cover_url ?? ctx.ownProfile.cover_url,
+      });
+    } catch (error) {
+      errors.push(error?.message || "Partnerprofil mentés sikertelen.");
+    }
+  }
+  if (errors.length && !ownProfile && ctx.ownProfile == null && ctx.accountEdit === false) {
+    throw new Error(errors[0]);
+  }
+  if (errors.length === 2) throw new Error(errors[0]);
+  return { ownProfile, warn: errors[0] || "" };
+}
+
 function wireHeroEditor(root, ctx) {
   const toggle = root.querySelector("[data-ap-edit-toggle]");
   toggle?.addEventListener("click", () => {
@@ -373,7 +412,7 @@ function wireHeroEditor(root, ctx) {
     renderProfile(root, ctx.partner, { ...ctx, editMode: !ctx.editMode });
   });
 
-  const canSaveMedia = Boolean(ctx.ownProfile || ctx.accountEdit);
+  const canSaveMedia = Boolean(ctx.canEdit && (ctx.ownProfile || ctx.accountEdit || ctx.listingId));
   if (!ctx.editMode || !canSaveMedia) return;
 
   const fileInput = root.querySelector("[data-ap-file]");
@@ -388,11 +427,11 @@ function wireHeroEditor(root, ctx) {
     try {
       const uploaded = await uploadImage({
         file,
-        kind: "partner",
-        entityType: "partner",
+        kind: "profile",
+        entityType: "profile",
         folder: "partner-profile",
       });
-      const url = uploaded.url || uploaded.publicUrl || uploaded.href || "";
+      const url = String(uploaded.url || uploaded.publicUrl || uploaded.href || "").trim();
       if (!url) throw new Error("Nincs kép URL a feltöltés után.");
       const patch =
         kind === "cover"
@@ -400,31 +439,24 @@ function wireHeroEditor(root, ctx) {
           : kind === "logo"
             ? { company_logo_url: url }
             : { logo_url: url };
-      let nextPartner = { ...ctx.partner };
-      let ownProfile = ctx.ownProfile;
-      if (ctx.ownProfile) {
-        const saved = await saveOwnMedia(ctx.ownProfile, patch);
-        ownProfile = saved;
-        nextPartner = {
-          ...nextPartner,
-          logo_url: saved.logo_url,
-          company_logo_url: saved.company_logo_url,
-          cover_url: saved.cover_url,
-        };
-      } else {
-        await saveAccountMedia(patch);
-        nextPartner = {
-          ...nextPartner,
-          logo_url: patch.logo_url ?? nextPartner.logo_url,
-          company_logo_url: patch.company_logo_url ?? nextPartner.company_logo_url,
-          cover_url: patch.cover_url ?? nextPartner.cover_url,
-        };
+      const { ownProfile, warn } = await persistMedia({ ...ctx, accountEdit: true }, patch);
+      const nextPartner = {
+        ...ctx.partner,
+        logo_url: patch.logo_url ?? ctx.partner.logo_url,
+        company_logo_url: patch.company_logo_url ?? ctx.partner.company_logo_url,
+        cover_url: patch.cover_url ?? ctx.partner.cover_url,
+      };
+      if (ownProfile) {
+        nextPartner.logo_url = ownProfile.logo_url || nextPartner.logo_url;
+        nextPartner.company_logo_url = ownProfile.company_logo_url || nextPartner.company_logo_url;
+        nextPartner.cover_url = ownProfile.cover_url || nextPartner.cover_url;
       }
-      if (status) status.textContent = "Mentve.";
+      if (status) status.textContent = warn ? `Mentve (figyelem: ${warn})` : "Mentve.";
       renderProfile(root, nextPartner, {
         ...ctx,
         partner: nextPartner,
-        ownProfile,
+        ownProfile: ownProfile || ctx.ownProfile,
+        accountEdit: true,
         editMode: true,
       });
     } catch (error) {
@@ -472,19 +504,48 @@ async function resolveEditAccess({ slug = "", sellerId = 0 } = {}) {
   const user = getAuthUser();
   if (!user?.email) return { canEdit: false, ownProfile: null, accountEdit: false };
   const own = await fetchOwnProfile().catch(() => null);
-  if (slug && own?.slug && own.slug === slug) {
-    return { canEdit: true, ownProfile: own, accountEdit: false };
-  }
   const uid = Number(user.id || user.userId || 0);
-  if (sellerId > 0 && uid > 0 && uid === sellerId) {
-    return { canEdit: true, ownProfile: own?.slug ? own : null, accountEdit: !own?.slug };
+  const ownsListing = sellerId > 0 && uid > 0 && uid === sellerId;
+  const ownsSlug = Boolean(slug && own?.slug && own.slug === slug);
+  if (ownsSlug || ownsListing) {
+    return {
+      canEdit: true,
+      ownProfile: own?.slug ? own : null,
+      // Listing/kereskedés oldal a fiók company*Url mezőiből olvas — mindig mentsünk oda is.
+      accountEdit: true,
+    };
   }
   return { canEdit: false, ownProfile: own, accountEdit: false };
 }
 
 function partnerFromSellerContact(contact, rating) {
-  const lines = Array.isArray(contact?.addressLines) ? contact.addressLines : [];
+  const lines = Array.isArray(contact?.addressLines) ? contact.addressLines.filter(Boolean) : [];
   const place = lines.join(", ");
+  // Utolsó sor gyakran: "8000 Székesfehérvár Fejér" vagy "Székesfehérvár, Fejér"
+  let city = "";
+  let county = "";
+  const locLine = lines.length > 1 ? lines[lines.length - 1] : lines[0] || "";
+  const locParts = String(locLine)
+    .replace(/^\d{4}\s*/, "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  if (locParts.length >= 2) {
+    city = locParts[0];
+    const rawCounty = locParts[1].replace(/\s*megye$/i, "").trim();
+    county = rawCounty ? `${rawCounty} megye` : "";
+  } else if (locParts.length === 1) {
+    const bits = locParts[0].split(/\s+/).filter(Boolean);
+    if (bits.length >= 2 && /megye$/i.test(bits[bits.length - 1] || "")) {
+      county = bits[bits.length - 1];
+      city = bits.slice(0, -1).join(" ");
+    } else if (bits.length >= 2) {
+      county = `${bits[bits.length - 1]} megye`;
+      city = bits.slice(0, -1).join(" ");
+    } else {
+      city = locParts[0];
+    }
+  }
   const avg = rating?.average != null ? Number(rating.average) : null;
   const count = rating?.count != null ? Number(rating.count) : null;
   return {
@@ -500,6 +561,8 @@ function partnerFromSellerContact(contact, rating) {
     contact_person: contact?.contactPerson || "",
     service_areas: place,
     address: place,
+    city,
+    county,
     description: contact?.description || "",
     google_maps_url: contact?.mapQuery
       ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(contact.mapQuery)}`
@@ -559,6 +622,14 @@ async function init() {
           const data = await res.json().catch(() => ({}));
           if (res.ok && data.profile) {
             const p = data.profile;
+            const keptRating = loaded.partner.google_rating;
+            const keptCount = loaded.partner.google_review_count;
+            const keptPlace = {
+              city: loaded.partner.city,
+              county: loaded.partner.county,
+              service_areas: loaded.partner.service_areas,
+              address: loaded.partner.address,
+            };
             loaded.partner = {
               ...loaded.partner,
               name: p.display_name || loaded.partner.name,
@@ -569,8 +640,11 @@ async function init() {
               company_logo_url: p.company_logo_url || loaded.partner.company_logo_url,
               cover_url: p.cover_url || loaded.partner.cover_url,
               contact_person: p.contact_person || loaded.partner.contact_person,
-              service_areas: p.service_areas || loaded.partner.service_areas,
               description: p.description || loaded.partner.description,
+              // Helyszín / értékelés: a seller-contact a forrásigazság
+              ...keptPlace,
+              google_rating: keptRating,
+              google_review_count: keptCount,
             };
             if (Array.isArray(data.listings) && data.listings.length) {
               loaded.listings = data.listings;
@@ -586,7 +660,7 @@ async function init() {
         canEdit: access.canEdit,
         editMode: access.canEdit && wantEdit,
         ownProfile: access.ownProfile,
-        accountEdit: access.accountEdit,
+        accountEdit: true,
         listingId,
       });
       return;
@@ -599,7 +673,23 @@ async function init() {
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || "A profil nem elérhető.");
       const profile = data.profile || {};
-      const access = await resolveEditAccess({ slug });
+      const listings = data.listings || [];
+      const access = await resolveEditAccess({
+        slug,
+        sellerId: Number(profile.user_id) || 0,
+      });
+      let google_rating = null;
+      let google_review_count = null;
+      const sampleListingId = listings.find((row) => Number(row?.id) > 0)?.id;
+      if (sampleListingId) {
+        try {
+          const rating = await fetchSellerRating(sampleListingId);
+          if (rating?.average != null) google_rating = Number(rating.average);
+          if (rating?.count != null) google_review_count = Number(rating.count);
+        } catch {
+          /* optional */
+        }
+      }
       renderProfile(
         root,
         {
@@ -615,15 +705,18 @@ async function init() {
           contact_person: profile.contact_person,
           service_areas: profile.service_areas,
           description: profile.description,
+          google_rating,
+          google_review_count,
           services: [],
         },
         {
-          listings: data.listings || [],
+          listings,
           backHref: "/ajanlasok.html",
           canEdit: access.canEdit,
           editMode: access.canEdit && wantEdit,
           ownProfile: access.ownProfile,
           accountEdit: access.accountEdit,
+          listingId: sampleListingId ? String(sampleListingId) : "",
         }
       );
       return;

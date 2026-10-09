@@ -564,6 +564,15 @@ body.search-map-open {
   /* Inline map sits in the listings panel; keep normal page/app scroll. */
 }
 
+/* Térképnézet: találatszám / rendezés / nézetváltó és a Település kereső felesleges. */
+body.search-map-open .auto-desk-results-bar {
+  display: none !important;
+}
+
+body.search-map-open .search-map-modal__toolbar {
+  display: none !important;
+}
+
 .home-qs-action--map {
   white-space: nowrap;
 }

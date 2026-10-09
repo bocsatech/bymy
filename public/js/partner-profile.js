@@ -10,6 +10,7 @@ import {
 import { wirePostalCityAutofill } from "./postal-city-autofill.js?v=ba74000828";
 import { fillCountrySelect, PHONE_COUNTRIES } from "./phone-lang-ui.js?v=bc55c36aef";
 import { categoriesForVertical } from "./partner-categories-data.js?v=b826a00c74";
+import { fetchMyListings } from "./db-client.js?v=6c1aeac308";
 
 const pageRoot = () => document.getElementById("partner-root");
 
@@ -405,9 +406,20 @@ export async function renderPartnerManage(mountRoot) {
 
   root.innerHTML = `<div class="partner-loading">Partneri profil betöltése…</div>`;
 
-  const profileResult = await jsonFetch("/api/partner-profiles/mine");
+  const [profileResult, myListings] = await Promise.all([
+    jsonFetch("/api/partner-profiles/mine"),
+    fetchMyListings({ limit: 5 }).catch(() => []),
+  ]);
   const profile = profileResult.profile || {};
   const account = getProfile() || {};
+  const listingId = (Array.isArray(myListings) ? myListings : []).find(
+    (row) => Number(row?.id) > 0
+  )?.id;
+  const profilePageHref = profile.slug
+    ? `/ajanlas-partner.html?slug=${encodeURIComponent(profile.slug)}`
+    : listingId
+      ? `/ajanlas-partner.html?listing=${encodeURIComponent(String(listingId))}`
+      : "";
   if (!String(profile.phone || "").trim()) {
     profile.phone = String(account.companyPhone || account.phone || "").trim();
   }
@@ -439,6 +451,11 @@ export async function renderPartnerManage(mountRoot) {
         <p class="partner-eyebrow">CÉGADATOK · PARTNERI PROFIL</p>
         <h1>Partneri profil</h1>
       </div>
+      ${
+        profilePageHref
+          ? `<a class="partner-profile-page-btn" href="${esc(profilePageHref)}">profil oldal</a>`
+          : `<span class="partner-profile-page-btn is-disabled" aria-disabled="true" title="Ehhez legalább egy hirdetés vagy publikus slug kell">profil oldal</span>`
+      }
     </header>
     <form class="partner-form" id="partner-form">
       ${

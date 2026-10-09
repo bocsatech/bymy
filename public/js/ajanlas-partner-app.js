@@ -19,6 +19,13 @@ import { openListingMessage, canMessageListing } from "./start-listing-message.j
 
 const CACHE_KEY = "bymy-ajanlas-partner-v1";
 
+function syncHubBackLink(href, label) {
+  const link = document.querySelector(".hub-header-actions a.hub-btn");
+  if (!link || !href) return;
+  link.setAttribute("href", href);
+  link.textContent = label;
+}
+
 const VERTICAL_LABEL = {
   auto: "Autó",
   teher: "Teherautó",
@@ -196,20 +203,34 @@ function renderProfile(root, partner, opts = {}) {
   const coverUrl = cover || defaultCover;
   const editClass = editMode ? " is-editing" : "";
 
+  const menuBackHref = "/beallitasok.html?szekcio=hirdetes";
+  syncHubBackLink(canEdit ? menuBackHref : listBack, canEdit ? "← Saját menü" : "← Ajánlások");
+
   root.innerHTML = `
     <div class="ap-toolbar">
       <p class="ap-crumb">
-        <a href="/ajanlasok.html?vertical=${esc(vertical)}">Ajánlások</a>
-        ${catFromQuery ? ` / <a href="${esc(listBack)}">${esc(categoryLabel(catFromQuery))}</a>` : ""}
+        ${
+          canEdit
+            ? `<a href="${esc(menuBackHref)}">Saját menü</a>`
+            : `<a href="/ajanlasok.html?vertical=${esc(vertical)}">Ajánlások</a>`
+        }
+        ${!canEdit && catFromQuery ? ` / <a href="${esc(listBack)}">${esc(categoryLabel(catFromQuery))}</a>` : ""}
         / <strong>${esc(name)}</strong>
       </p>
-      ${
-        canEdit
-          ? `<button type="button" class="ap-edit-toggle${editMode ? " is-on" : ""}" data-ap-edit-toggle>
-              ${editMode ? "Kész" : "Szerkesztés"}
-            </button>`
-          : ""
-      }
+      <div class="ap-toolbar-actions">
+        ${
+          canEdit
+            ? `<a class="ap-back-menu" href="${esc(menuBackHref)}">← Saját menü</a>`
+            : ""
+        }
+        ${
+          canEdit
+            ? `<button type="button" class="ap-edit-toggle${editMode ? " is-on" : ""}" data-ap-edit-toggle>
+                ${editMode ? "Kész" : "Szerkesztés"}
+              </button>`
+            : ""
+        }
+      </div>
     </div>
     <section class="ap-hero${editClass}" data-ap-hero>
       <div class="ap-hero-cover" data-ap-cover style="--ap-cover:url('${esc(coverUrl)}')"></div>

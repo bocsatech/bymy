@@ -55,6 +55,32 @@
   text-decoration: none;
 }
 
+.ap-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ap-back-menu {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #c5d0d6;
+  border-radius: 999px;
+  background: #fff;
+  color: #14202b;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 800;
+  padding: 0.4rem 0.85rem;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.ap-back-menu:hover {
+  border-color: #9aa8b2;
+}
+
 .ap-edit-toggle {
   border: 1px solid #c5d0d6;
   border-radius: 999px;

@@ -395,6 +395,7 @@ function openTripleDateDrumSheet(yearWheel, monthWheel, dayWheel, trigger) {
   } else {
     document.body.appendChild(root);
     document.body.classList.add("auto-drum-portal-open");
+    syncDrumPortalHtmlClass();
     wrap?.classList.add("is-open", "has-drum-open");
     block?.classList.add("has-drum-open");
     block?.querySelectorAll(".immo-triple-date__half").forEach((half) => half.classList.add("is-drum-active"));
@@ -456,6 +457,7 @@ export function closeAutoDrumSheet(commit = false) {
   const resetPageAfterClose = () => {
     const restoreY = sheetScrollLockY || 0;
     document.body.classList.remove("auto-drum-portal-open", "auto-drum-sheet-open");
+    syncDrumPortalHtmlClass();
     unlockSheetPageAxes();
     const stick = () => {
       window.scrollTo(0, restoreY);
@@ -679,11 +681,18 @@ export function closeAutoDrumSheet(commit = false) {
 }
 
 function nearestPortalItem(scrollEl, ring) {
+  const items = scrollEl?.querySelectorAll?.(".immo-drum-inline-item");
+  if (!items?.length) return null;
+  /* Sheet: scrollTop + fix ITEM_H — ne N× getBoundingClientRect / frame (Chrome jank). */
+  if (scrollEl.closest?.(".auto-drum-portal--sheet")) {
+    const idx = Math.max(0, Math.min(items.length - 1, Math.round(scrollEl.scrollTop / ITEM_H)));
+    return items[idx] || null;
+  }
   const ringRect = ring.getBoundingClientRect();
   const centerY = ringRect.top + ringRect.height / 2;
   let best = null;
   let bestDist = Infinity;
-  scrollEl.querySelectorAll(".immo-drum-inline-item").forEach((item) => {
+  items.forEach((item) => {
     const r = item.getBoundingClientRect();
     const mid = r.top + r.height / 2;
     const dist = Math.abs(mid - centerY);
@@ -1160,6 +1169,7 @@ const SHEET_SCROLL_CLEAR_PROPS = [
   "max-width",
   "margin-left",
   "margin-right",
+  "padding-right",
   "overflow",
   "overflow-x",
   "overflow-y",
@@ -1168,6 +1178,14 @@ const SHEET_SCROLL_CLEAR_PROPS = [
   "overscroll-behavior",
   "touch-action",
 ];
+
+function syncDrumPortalHtmlClass() {
+  const open =
+    document.body.classList.contains("auto-drum-portal-open") ||
+    document.body.classList.contains("auto-drum-sheet-open");
+  document.documentElement.classList.toggle("auto-drum-portal-open", open);
+  document.documentElement.classList.toggle("auto-drum-sheet-open", open);
+}
 
 function clearSheetScrollInlineStyles() {
   const clear = (el, props) => {
@@ -1184,6 +1202,7 @@ function clearSheetScrollInlineStyles() {
     "overscroll-behavior",
     "touch-action",
   ]);
+  syncDrumPortalHtmlClass();
 }
 
 /** Android mobil: explicit visszaengedés — a removeProperty után is beragadhat a cascade. */
@@ -1241,15 +1260,21 @@ function lockSheetPageAxes() {
        */
       window.scrollTo(0, y);
     } else {
-      /* iOS / egyéb: body fixed + left:0 — menü nyitáskor ne csússzon jobbra. */
+      /* Desktop Chrome: a klasszikus scrollbar eltűnése + width:100% oldalcsúszást okoz. */
+      const sb = Math.max(0, window.innerWidth - document.documentElement.clientWidth);
       document.body.style.setProperty("position", "fixed", "important");
       document.body.style.setProperty("top", `-${y}px`, "important");
       document.body.style.setProperty("left", "0", "important");
       document.body.style.setProperty("right", "0", "important");
-      document.body.style.setProperty("width", "100%", "important");
       document.body.style.setProperty("max-width", "100%", "important");
       document.body.style.setProperty("margin-left", "0", "important");
       document.body.style.setProperty("margin-right", "0", "important");
+      if (sb > 0) {
+        document.body.style.setProperty("padding-right", `${sb}px`, "important");
+      } else {
+        document.body.style.removeProperty("padding-right");
+      }
+      document.body.style.removeProperty("width");
       document.body.style.setProperty("overflow", "hidden", "important");
       document.body.style.setProperty("overflow-x", "hidden", "important");
       document.documentElement.style.setProperty("overflow-x", "hidden", "important");
@@ -1265,8 +1290,9 @@ function lockSheetPageAxes() {
 
 function unlockSheetPageAxes() {
   try {
-    clearSheetScrollInlineStyles();
     document.body.classList.remove("auto-drum-portal-open", "auto-drum-sheet-open");
+    syncDrumPortalHtmlClass();
+    clearSheetScrollInlineStyles();
     if (isAndroidScrollLockUa()) {
       forceAndroidPageScrollable();
     }
@@ -1277,6 +1303,7 @@ function unlockSheetPageAxes() {
     document.body.scrollLeft = 0;
   } catch {
     sheetScrollLocked = false;
+    syncDrumPortalHtmlClass();
   }
 }
 
@@ -1357,6 +1384,7 @@ function mountSheetPortalChrome(root, { stage, wrap, trigger, ring, sheetScroll 
   root.style.setProperty("transform", "none", "important");
   document.body.appendChild(root);
   document.body.classList.add("auto-drum-portal-open", "auto-drum-sheet-open");
+  syncDrumPortalHtmlClass();
   wrap?.classList.add("is-open", "has-drum-open");
   wrap?.closest(".immo-dual-range")?.classList.add("has-drum-open");
   (wrap?.closest(".immo-dual-range__half") || wrap?.closest(".immo-schema-cell"))?.classList.add("is-drum-active");
@@ -2361,6 +2389,7 @@ export function openStandaloneSwitchSheet({
     root.remove();
     activePortal = null;
     document.body.classList.remove("auto-drum-portal-open", "auto-drum-sheet-open");
+    syncDrumPortalHtmlClass();
     const restoreY = sheetScrollLockY || 0;
     unlockSheetPageAxes();
     if (commit && typeof onDone === "function") {
@@ -2449,18 +2478,31 @@ function gyartmanySheetItems(form, wheel, emptyLabel) {
 
 function paintSplitColSync(scrollEl, ring) {
   if (!scrollEl || !ring) return;
-  const ringRect = ring.getBoundingClientRect();
-  const centerY = ringRect.top + ringRect.height / 2;
   const nearest = nearestPortalItem(scrollEl, ring);
   const sheet = Boolean(scrollEl.closest?.(".auto-drum-portal--sheet"));
   const ink = "#111111";
+  /* Sheet: csak selected osztály — ne N× layout mérés + style írás / scroll. */
+  if (sheet) {
+    scrollEl.querySelectorAll(".immo-drum-inline-item").forEach((item) => {
+      const isSel = item === nearest;
+      item.classList.toggle("is-in-cell", isSel);
+      item.classList.toggle("is-selected", isSel);
+      item.setAttribute("aria-selected", isSel ? "true" : "false");
+      if (item.style.fontWeight !== (isSel ? "650" : "500")) {
+        item.style.fontWeight = isSel ? "650" : "500";
+      }
+    });
+    return;
+  }
+  const ringRect = ring.getBoundingClientRect();
+  const centerY = ringRect.top + ringRect.height / 2;
   scrollEl.querySelectorAll(".immo-drum-inline-item").forEach((item) => {
     const r = item.getBoundingClientRect();
     const mid = r.top + r.height / 2;
     const dist = Math.abs(mid - centerY);
     const t = Math.min(dist / (ITEM_H * 1.15), 1);
     const isSel = item === nearest;
-    item.style.setProperty("opacity", sheet ? "1" : String(Math.max(0.38, 1 - t * 0.55)), sheet ? "important" : "");
+    item.style.setProperty("opacity", String(Math.max(0.38, 1 - t * 0.55)));
     item.style.fontWeight = dist < ITEM_H * 0.42 || isSel ? "650" : "500";
     item.style.setProperty("color", ink, "important");
     item.style.setProperty("-webkit-text-fill-color", ink, "important");
@@ -2782,6 +2824,7 @@ function openSplitRangeDrumSheet(minWheel, maxWheel, trigger) {
   } else {
     document.body.appendChild(root);
     document.body.classList.add("auto-drum-portal-open");
+    syncDrumPortalHtmlClass();
     wrap?.classList.add("is-open", "has-drum-open");
     dual?.classList.add("has-drum-open");
     dual?.querySelectorAll(".immo-dual-range__half").forEach((half) => half.classList.add("is-drum-active"));
@@ -3037,6 +3080,7 @@ export function openAutoDrumSheet(wheel, trigger, { sheetItems = null, form = nu
   } else {
     document.body.appendChild(root);
     document.body.classList.add("auto-drum-portal-open");
+    syncDrumPortalHtmlClass();
     wrap?.classList.add("is-open", "has-drum-open");
     wrap?.closest(".immo-dual-range")?.classList.add("has-drum-open");
     (wrap?.closest(".immo-dual-range__half") || wrap?.closest(".immo-schema-cell"))?.classList.add("is-drum-active");

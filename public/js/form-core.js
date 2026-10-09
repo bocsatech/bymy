@@ -20,13 +20,13 @@ import { initVehicleCatalogSelects } from "./vehicle-catalog-client.js?v=19a6b3a
 import { compressListingPhoto, MAX_LISTING_PHOTOS } from "./listing-photo-compress.js?v=4e3ffaa60f";
 import { uploadImage } from "./upload-image.js?v=3b023aae7a";
 import { applyListingAddressFromProfileSync } from "./ad-location-profile.js?v=296f11502f";
-import { syncIngatlanFormVisibility } from "./ingatlan-form-fields.js?v=18a867359e";
+import { syncIngatlanFormVisibility } from "./ingatlan-form-fields.js?v=dfd7255c5c";
 import {
   DEFAULT_PHOTO_OVERLAY_ID,
   renderListingPhotoOverlay,
 } from "./listing-photo-overlay.js?v=1a522e09d6";
 import { openListingPhotoEditor } from "./listing-photo-edit.js?v=985755542f";
-import { refreshAdFormBmPickers, applyAdFormBmFieldValues } from "./ad-form-bm-pickers.js?v=4b95bfb0e8";
+import { refreshAdFormBmPickers, applyAdFormBmFieldValues } from "./ad-form-bm-pickers.js?v=2ef5f0361a";
 import { applyAdFormDesk, isAdFormDesk } from "./ad-form-desk.js?v=1c11003682";
 import { placeElectricBlockAfterFuel } from "./ad-form-desk-pinned-blocks.js?v=dc720507fb";
 import { initKmInput, parseKmDigits, setKmInputValue } from "./km-input.js?v=30e4feeab0";

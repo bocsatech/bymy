@@ -3168,10 +3168,19 @@ body.auto-drum-sheet-open {
   /* touch-action:none NEM — Android Chrome-on beragadhat sheet után; a portal lefedi a viewportot. */
 }
 
+/* Explicit html class (JS sync) — olcsóbb mint html:has(body…) a portal open/close-nál */
+html.auto-drum-portal-open,
+html.auto-drum-sheet-open,
 html:has(body.auto-drum-portal-open),
 html:has(body.auto-drum-sheet-open) {
   overflow: hidden !important;
   overflow-x: hidden !important;
+}
+
+/* Chrome: tartsd a scrollbar helyét — sheet nyitáskor ne ugorjon oldalra a layout */
+html.site-app,
+html:has(body.site-app) {
+  scrollbar-gutter: stable;
 }
 
 @media (max-width: 900px) {

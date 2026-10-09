@@ -2,7 +2,7 @@ import {
   HOME_CATEGORIES,
   autoCategoryHref,
   countListingsByHomeCategory,
-} from "./home-category-bar.js?v=b19d2ba7a1";
+} from "./home-category-bar.js?v=3c1365eaf4";
 import {
   categoriesForVertical,
   partnerCategoryImageUrl,

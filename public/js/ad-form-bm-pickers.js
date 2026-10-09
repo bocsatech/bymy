@@ -2250,6 +2250,12 @@ function unmountAdSplitYmDrums(form) {
       delete honap.dataset.adSplitYm;
       inline.appendChild(honap);
     }
+    try {
+      block._adPortalObserver?.disconnect?.();
+    } catch {
+      /* ignore */
+    }
+    delete block._adPortalObserver;
     block.replaceWith(inline);
     field?.classList.remove("ad-form-bm-anchor");
     field?.querySelectorAll(":scope > .inline-2:empty").forEach((el) => el.remove());
@@ -2300,10 +2306,44 @@ export function markAdFormUiReady() {
   document.documentElement.classList.add("ad-form-ui-ready");
 }
 
+function softRefreshAdFormBmPickers(form) {
+  if (!form) return;
+  form.querySelectorAll("select").forEach((select) => {
+    try {
+      if (typeof select._adBmFillWheel === "function") select._adBmFillWheel();
+      else if (typeof select._adBmRefreshSummary === "function") select._adBmRefreshSummary();
+    } catch {
+      /* ignore */
+    }
+  });
+  form.querySelectorAll(".ad-form-split-ym__summary, .ad-form-tire-split .ad-form-split-ym__summary").forEach((btn) => {
+    const block = btn.closest(".ad-form-split-ym, .ad-form-tire-split");
+    const ev = block?.dataset?.evId ? document.getElementById(block.dataset.evId) : null;
+    if (ev && typeof ev._adBmRefreshSummary === "function") {
+      try {
+        ev._adBmRefreshSummary();
+      } catch {
+        /* ignore */
+      }
+    }
+  });
+}
+
 export async function refreshAdFormBmPickers(form, catalog = null) {
   try {
     if (catalog) cachedVehicleCatalog = catalog;
     const pending = form?._bymyLastFormData;
+    /* Chrome: full unmount/remount minden layout apply-nál → lag + üres héjak. Ha már fent van, soft refresh. */
+    if (form?.dataset.adBmPickers === "1" && form.dataset.adBmForceRemount !== "1") {
+      softRefreshAdFormBmPickers(form);
+      if (pending) {
+        applyAdFormBmFieldValues(pending);
+        requestAnimationFrame(() => applyAdFormBmFieldValues(pending));
+      }
+      markAdFormUiReady();
+      return;
+    }
+    delete form?.dataset.adBmForceRemount;
     unmountAdFormBmPickers(form);
     await mountAdFormBmPickers(form, catalog || cachedVehicleCatalog);
     if (pending) {
@@ -2419,7 +2459,7 @@ async function mountAdBrandModelCombined(form, catalog) {
   }
 
   const { fillWheel, setWheelValue, readWheel, syncHostClearButton } = await import("./ingatlan-wheels.js?v=6952ba469c");
-  const { openBrandModelCatalogSheet } = await import("./auto-drum-sheet.js?v=091abff767");
+  const { openBrandModelCatalogSheet } = await import("./auto-drum-sheet.js?v=e2b3931112");
   const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=c4c7ac29a2");
 
   const brands = [...(catalog?.gyartmanyok || [])].sort((a, b) =>
@@ -2664,7 +2704,7 @@ async function mountAdSelectDrum(select, {
   let syncDrumWheelDisplay;
   try {
     ({ fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=6952ba469c"));
-    ({ openStandaloneSwitchSheet, bindAutoDrumSheet } = await import("./auto-drum-sheet.js?v=091abff767"));
+    ({ openStandaloneSwitchSheet, bindAutoDrumSheet } = await import("./auto-drum-sheet.js?v=e2b3931112"));
     ({ initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=c4c7ac29a2"));
   } catch (error) {
     console.warn("Dobkerék betöltés:", title || select.id, error);
@@ -2906,7 +2946,7 @@ async function mountAdSplitYmDrum({
   }
 
   const { fillWheel, setWheelValue, readWheel } = await import("./ingatlan-wheels.js?v=6952ba469c");
-  const { openYmDualSheet } = await import("./auto-drum-sheet.js?v=091abff767");
+  const { openYmDualSheet } = await import("./auto-drum-sheet.js?v=e2b3931112");
   const { initDrumWheel, syncDrumWheelDisplay } = await import("./immo-drum-picker.js?v=c4c7ac29a2");
 
   const yearOpts = optionsFromSelect(ev, emptyYear);
@@ -3061,12 +3101,18 @@ async function mountAdSplitYmDrum({
     });
   });
 
+  try {
+    block._adPortalObserver?.disconnect?.();
+  } catch {
+    /* ignore */
+  }
   const onPortalGone = () => {
     if (document.body.classList.contains("auto-drum-portal-open")) return;
     refreshSummary();
   };
   const portalObserver = new MutationObserver(onPortalGone);
   portalObserver.observe(document.body, { attributes: true, attributeFilter: ["class"] });
+  block._adPortalObserver = portalObserver;
   refreshSummary();
 }
 
@@ -3282,7 +3328,7 @@ export async function mountTireSizeSwitchPickers(form) {
 
   try {
     const { fillTireSelect } = await import("./tire-sizes-ui.js?v=d01f914c82");
-    const { openTireTripleSheet } = await import("./auto-drum-sheet.js?v=091abff767");
+    const { openTireTripleSheet } = await import("./auto-drum-sheet.js?v=e2b3931112");
     const blocks = [...grid.querySelectorAll(":scope > .tire-block")];
 
     for (let index = 0; index < TIRE_ROW_SPECS.length; index += 1) {
@@ -3393,12 +3439,18 @@ export async function mountTireSizeSwitchPickers(form) {
         aspect.addEventListener("change", refreshSummary);
         rim.addEventListener("change", refreshSummary);
 
+        try {
+          block._adPortalObserver?.disconnect?.();
+        } catch {
+          /* ignore */
+        }
         const onPortalGone = () => {
           if (document.body.classList.contains("auto-drum-portal-open")) return;
           refreshSummary();
         };
         const portalObserver = new MutationObserver(onPortalGone);
         portalObserver.observe(document.body, { attributes: true, attributeFilter: ["class"] });
+        block._adPortalObserver = portalObserver;
         refreshSummary();
       } catch (rowError) {
         console.warn("Gumi méret menü:", spec.title, rowError);
@@ -3412,6 +3464,12 @@ export async function mountTireSizeSwitchPickers(form) {
 function unmountTireSizeSplitPickers(form) {
   const root = form || document;
   root.querySelectorAll?.(".ad-form-tire-split").forEach((block) => {
+    try {
+      block._adPortalObserver?.disconnect?.();
+    } catch {
+      /* ignore */
+    }
+    delete block._adPortalObserver;
     const prefix = block.dataset.tirePrefix;
     const names = prefix
       ? [`${prefix}_szelesseg`, `${prefix}_magassag`, `${prefix}_atmero`]

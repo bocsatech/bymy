@@ -1,5 +1,5 @@
-import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=18a867359e";
-import { refreshAdFormBmPickers, mountTireSizeSwitchPickers } from "./ad-form-bm-pickers.js?v=4b95bfb0e8";
+import { ensureIngatlanFormFields } from "./ingatlan-form-fields.js?v=dfd7255c5c";
+import { refreshAdFormBmPickers, mountTireSizeSwitchPickers } from "./ad-form-bm-pickers.js?v=2ef5f0361a";
 import { initTireSizes } from "./tire-sizes-ui.js?v=d01f914c82";
 import { applyAdFormDesk } from "./ad-form-desk.js?v=1c11003682";
 import { markImmoPostViewReady } from "./category-picker.js?v=5d45536b6e";
@@ -1248,21 +1248,20 @@ async function applyAdFormLayout() {
     });
     window.dispatchEvent(new Event("ad-form-sync-fuel-fields"));
     applyAdFormDesk();
-    /* Desk után is: a gumi summary ne vesszen el a layout/hide körökben. */
+    /* Desk után: gumi summary — csak ha még nincs felmountolva (ne 400ms-es dupla remount). */
     await mountTireSizeSwitchPickers(form);
-    window.setTimeout(() => {
-      mountTireSizeSwitchPickers(form).catch(() => {});
-    }, 400);
+    if (!form.querySelector(".ad-form-tire-split") && form.querySelector('select[name*="_gumi_"]')) {
+      window.setTimeout(() => {
+        mountTireSizeSwitchPickers(form).catch(() => {});
+      }, 400);
+    }
     if (!isImmo) {
       form.querySelectorAll(".ad-layout-canvas").forEach((canvas) => {
         stackVehicleCanvasSingleColumn(canvas, { canonicalStep1: isVehicleStep1Canvas(canvas) });
       });
       window.setTimeout(() => {
         stackVehicleCanvasSingleColumn(canvasForStep(form, 1), { canonicalStep1: true });
-      }, 160);
-      window.setTimeout(() => {
-        stackVehicleCanvasSingleColumn(canvasForStep(form, 1), { canonicalStep1: true });
-      }, 500);
+      }, 200);
     }
     applyPrivateFinanceFieldVisibility(form);
     if (
@@ -1346,11 +1345,35 @@ function currentLayoutCategory(form) {
   return "szemelyauto";
 }
 
+let layoutApplyInFlight = null;
+let layoutApplyQueued = false;
+let layoutApplyLateTimer = 0;
+
+/** Chrome: a 4× egymásra futó full remount beragadást / elcsúszást okoz — egy apply + egy késői retry. */
+function enqueueAdFormLayoutApply() {
+  if (layoutApplyInFlight) {
+    layoutApplyQueued = true;
+    return layoutApplyInFlight;
+  }
+  layoutApplyInFlight = Promise.resolve()
+    .then(() => applyAdFormLayout())
+    .catch(() => {})
+    .finally(() => {
+      layoutApplyInFlight = null;
+      if (layoutApplyQueued) {
+        layoutApplyQueued = false;
+        enqueueAdFormLayoutApply();
+      }
+    });
+  return layoutApplyInFlight;
+}
+
 function scheduleApply() {
-  applyAdFormLayout();
-  window.setTimeout(applyAdFormLayout, 120);
-  window.setTimeout(applyAdFormLayout, 450);
-  window.setTimeout(applyAdFormLayout, 900);
+  enqueueAdFormLayoutApply();
+  window.clearTimeout(layoutApplyLateTimer);
+  layoutApplyLateTimer = window.setTimeout(() => {
+    enqueueAdFormLayoutApply();
+  }, 400);
 }
 
 function syncAdLocationPostalVisibility(form = document.getElementById("ad-form")) {
@@ -1367,6 +1390,6 @@ if (document.readyState === "loading") {
 } else {
   scheduleApply();
 }
-window.addEventListener("ad-form-ready", applyAdFormLayout);
-window.addEventListener("ad-form-layout-refresh", applyAdFormLayout);
+window.addEventListener("ad-form-ready", () => enqueueAdFormLayoutApply());
+window.addEventListener("ad-form-layout-refresh", () => enqueueAdFormLayoutApply());
 window.addEventListener("ad-form-sync-location-postal", () => syncAdLocationPostalVisibility());

@@ -45,6 +45,9 @@
       html[data-mm-account-kind="company"] body.site-app .mm-nav > [data-mm-company-nav-wrap] {
         display: grid !important;
       }
+      html[data-mm-account-kind="company"] body.site-app [data-mm-private-only] {
+        display: none !important;
+      }
     </style>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
@@ -164,7 +167,7 @@
               <svg class="mm-nav-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </button>
             <div class="mm-nav-sub" data-mm-sub hidden>
-              <a class="mm-nav-sublink" href="/beallitasok.html?szekcio=szemelyes">
+              <a class="mm-nav-sublink" href="/beallitasok.html?szekcio=szemelyes" data-mm-private-only>
                 <span class="mm-nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.2" stroke="currentColor" stroke-width="1.7"/><path d="M5 19c1.5-3.2 4-4.8 7-4.8S17.5 15.8 19 19" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span>
                 <span class="mm-nav-text">Személyes adatok</span>
               </a>

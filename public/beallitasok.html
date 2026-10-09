@@ -80,6 +80,14 @@
       html[data-mm-account-kind="company"] body.site-app .mm-nav > [data-mm-dealer-nav-wrap] {
         display: grid !important;
       }
+      /* Cégprofilnak nincs személyes adat menüpontja. */
+      html[data-mm-account-kind="company"] body.site-app [data-mm-private-only] {
+        display: none !important;
+      }
+      body.site-app [data-mm-company-only] { display: none !important; }
+      html[data-mm-account-kind="company"] body.site-app a.mm-card[data-mm-company-only] {
+        display: flex !important;
+      }
     </style>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -213,7 +221,7 @@
               <svg class="mm-nav-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </button>
             <div class="mm-nav-sub" data-mm-sub hidden>
-              <a class="mm-nav-sublink" href="?szekcio=szemelyes" data-mm-nav="szemelyes">
+              <a class="mm-nav-sublink" href="?szekcio=szemelyes" data-mm-nav="szemelyes" data-mm-private-only>
                 <span class="mm-nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.2" stroke="currentColor" stroke-width="1.7"/><path d="M5 19c1.5-3.2 4-4.8 7-4.8S17.5 15.8 19 19" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span>
                 <span class="mm-nav-text">Személyes adatok</span>
               </a>
@@ -362,9 +370,13 @@
               <strong>Megjelenés</strong>
               <span>Autó oldal háttérkép</span>
             </a>
-            <a class="mm-card" href="?szekcio=szemelyes">
+            <a class="mm-card" href="?szekcio=szemelyes" data-mm-private-only>
               <strong>Beállítások</strong>
               <span>Személyes adatok, körzet, jelszó</span>
+            </a>
+            <a class="mm-card" href="?szekcio=keresesi-korzet" data-mm-company-only>
+              <strong>Beállítások</strong>
+              <span>Körzet, jelszó, értesítések</span>
             </a>
           </div>
         </section>
@@ -881,7 +893,7 @@
     </script>
     <script src="/js/site-avatar-menu.js?v=4c911388e7" type="module"></script>
     <script src="/js/ha-import-app.js?v=22ed3664c9" type="module"></script>
-    <script src="/js/beallitasok-app.js?v=8f782ba1fe" type="module"></script>
+    <script src="/js/beallitasok-app.js?v=416985b6e9" type="module"></script>
     <script>
       
       setTimeout(function () {

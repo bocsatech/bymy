@@ -514,10 +514,13 @@ function setSection(section) {
     clearSection();
     return;
   }
+  const accountKind = document.documentElement.getAttribute("data-mm-account-kind") || "";
+  if ((next === "szemelyes" || next === "fiok") && accountKind === "company") {
+    next = "partner-profil";
+  }
   if (next === "ertekbecslo") {
     const type = String(getProfile()?.accountType || getAuthUser()?.profile?.accountType || "").toLowerCase();
-    const kind = document.documentElement.getAttribute("data-mm-account-kind") || "";
-    if (type !== "dealer" && type !== "business" && kind !== "company") {
+    if (type !== "dealer" && type !== "business" && accountKind !== "company") {
       next = "hirdetes";
     }
   }
@@ -1069,11 +1072,13 @@ function syncSidebarAccountType(type) {
     el.textContent = accountTypeSidebarLabel(fromDb);
     el.hidden = false;
   }
-  /* Beállítások (Személyes adatok stb.) mindkét fióktípusnál az Üzenetek után marad. */
+  /* Beállítások az Üzenetek után marad; cégnél a Személyes adatok menü CSS-sel rejtve. */
   if (settingsNav) settingsNav.hidden = false;
   const section = currentSection();
   if (!companyType && (section === "partner-profil" || section === "cegadatok")) {
     clearSection();
+  } else if (companyType && (section === "szemelyes" || section === "fiok")) {
+    setSection("partner-profil");
   } else {
     syncSettingsSubnav();
   }

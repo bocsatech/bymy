@@ -298,6 +298,12 @@
   background: #fff;
   color: #111;
   white-space: nowrap;
+  cursor: pointer;
+}
+
+.ap-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 .ap-btn--primary {

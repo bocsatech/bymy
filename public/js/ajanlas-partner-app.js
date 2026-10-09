@@ -13,7 +13,9 @@ import {
   fetchSellerContact,
   fetchSellerRating,
   fetchRelatedListingsPage,
+  revealListingContact,
 } from "./db-client.js?v=6c1aeac308";
+import { openListingMessage, canMessageListing } from "./start-listing-message.js?v=d8693c3af4";
 
 const CACHE_KEY = "bymy-ajanlas-partner-v1";
 
@@ -130,10 +132,6 @@ function listingTile(listing) {
   </a>`;
 }
 
-function iconStar() {
-  return `<svg class="ap-ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2.8l2.7 5.5 6.1.9-4.4 4.3 1 6.1L12 16.7 6.6 19.6l1-6.1L3.2 9.2l6.1-.9L12 2.8z"/></svg>`;
-}
-
 function iconPin() {
   return `<svg class="ap-ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" d="M12 21s7-5.4 7-11a7 7 0 1 0-14 0c0 5.6 7 11 7 11z"/><circle cx="12" cy="10" r="2.4" fill="currentColor"/></svg>`;
 }
@@ -142,12 +140,9 @@ function iconPhone() {
   return `<svg class="ap-ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" d="M6.2 4.8c.7-.7 1.9-.7 2.6 0l1.4 1.4c.6.6.7 1.6.2 2.3l-.9 1.3a12.5 12.5 0 0 0 5.7 5.7l1.3-.9c.7-.5 1.7-.4 2.3.2l1.4 1.4c.7.7.7 1.9 0 2.6l-.8.8c-.8.8-2 1.1-3.1.7C10.5 18.4 5.6 13.5 3.7 7.7c-.4-1.1-.1-2.3.7-3.1l.8-.8z"/></svg>`;
 }
 
-function iconRoute() {
-  return `<svg class="ap-ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" d="M6 19V9a3 3 0 0 1 3-3h7m0 0 2.5 2.5M16 6l2.5-2.5M18 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM6 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/></svg>`;
-}
-
-function iconMsg() {
-  return `<svg class="ap-ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" d="M5 6.5h10.5A2.5 2.5 0 0 1 18 9v5a2.5 2.5 0 0 1-2.5 2.5H10l-3.5 2.6V16.5H5A2.5 2.5 0 0 1 2.5 14V9A2.5 2.5 0 0 1 5 6.5z"/></svg>`;
+/** Share / kapcsolódó csomópontok — Üzenet gomb a demó szerint. */
+function iconShareNodes() {
+  return `<svg class="ap-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="12" r="2.2" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="18" cy="6.5" r="2.2" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="18" cy="17.5" r="2.2" fill="none" stroke="currentColor" stroke-width="1.8"/><path fill="none" stroke="currentColor" stroke-width="1.8" d="M8 11.2 15.8 7.4M8 12.8l7.8 3.8"/></svg>`;
 }
 
 function mediaSlot(kind, label, editMode) {
@@ -168,10 +163,16 @@ function renderProfile(root, partner, opts = {}) {
   const name = partner.name || partner.display_name || "Partner";
   const phone = String(partner.phone || "").trim();
   const call = telHref(phone);
-  const maps = partner.google_maps_url || "";
-  const website = safeUrl(partner.website);
-  const email = String(partner.email || "").trim();
+  const placeForMaps = formatPlaceMeta(partner) || String(partner.service_areas || partner.address || "").trim();
+  const maps =
+    partner.google_maps_url ||
+    (placeForMaps
+      ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(placeForMaps)}`
+      : "");
   const photo = safeUrl(partner.logo_url || partner.photo_url || partner.avatar_url);
+  const listingId = opts.listingId || "";
+  const sellerId = Number(partner.id || partner.sellerId || 0);
+  const canMsg = canMessageListing(sellerId > 0 ? sellerId : undefined, { listingId });
   const companyLogo = safeUrl(partner.company_logo_url);
   const cover = safeUrl(partner.cover_url);
   const services = partner.services || [];
@@ -248,23 +249,20 @@ function renderProfile(root, partner, opts = {}) {
         <div class="ap-hero-cta">
           ${
             call
-              ? `<a class="ap-btn ap-btn--primary" href="${esc(call)}">${iconPhone()}<span>Hívás</span></a>`
-              : ""
+              ? `<a class="ap-btn ap-btn--primary" href="${esc(call)}" data-ap-call>${iconPhone()}<span>Hívás</span></a>`
+              : `<button type="button" class="ap-btn ap-btn--primary" data-ap-call ${listingId ? "" : "disabled"}>${iconPhone()}<span>Hívás</span></button>`
           }
           ${
             maps
-              ? `<a class="ap-btn ap-btn--ghost" href="${esc(maps)}" target="_blank" rel="noopener noreferrer">${iconRoute()}<span>Útvonal</span></a>`
-              : ""
+              ? `<a class="ap-btn ap-btn--ghost" href="${esc(maps)}" target="_blank" rel="noopener noreferrer"><span>Útvonal</span></a>`
+              : `<button type="button" class="ap-btn ap-btn--ghost" disabled><span>Útvonal</span></button>`
           }
           ${
-            email
-              ? `<a class="ap-btn ap-btn--ghost" href="mailto:${esc(email)}">${iconMsg()}<span>Üzenet</span></a>`
-              : ""
-          }
-          ${
-            website
-              ? `<a class="ap-btn ap-btn--ghost" href="${esc(website)}" target="_blank" rel="noopener noreferrer"><span>Weboldal</span></a>`
-              : ""
+            canMsg && listingId
+              ? `<button type="button" class="ap-btn ap-btn--ghost" data-ap-msg>${iconShareNodes()}<span>Üzenet</span></button>`
+              : partner.email
+                ? `<a class="ap-btn ap-btn--ghost" href="mailto:${esc(partner.email)}">${iconShareNodes()}<span>Üzenet</span></a>`
+                : `<button type="button" class="ap-btn ap-btn--ghost" disabled>${iconShareNodes()}<span>Üzenet</span></button>`
           }
         </div>
       </div>
@@ -333,6 +331,46 @@ function renderProfile(root, partner, opts = {}) {
   };
   wireHeroEditor(root, editorCtx);
   wireBioEditor(root, editorCtx);
+  wireHeroCta(root, {
+    listingId,
+    sellerId,
+    name,
+    phone,
+    canMsg,
+  });
+}
+
+function wireHeroCta(root, { listingId, sellerId, name, phone, canMsg }) {
+  const callBtn = root.querySelector("[data-ap-call]");
+  if (callBtn && callBtn.tagName === "BUTTON" && listingId) {
+    callBtn.addEventListener("click", async () => {
+      callBtn.disabled = true;
+      try {
+        const revealed = await revealListingContact(listingId, "");
+        const nextPhone = String(revealed.phone || revealed.phones?.[0] || "").trim();
+        const href = telHref(nextPhone);
+        if (!href) throw new Error("Nincs telefonszám.");
+        window.location.href = href;
+      } catch (error) {
+        callBtn.disabled = false;
+        window.alert(error?.message || "A hívás most nem elérhető.");
+      }
+    });
+  }
+
+  root.querySelector("[data-ap-msg]")?.addEventListener("click", async () => {
+    if (!canMsg || !listingId) return;
+    try {
+      await openListingMessage({
+        listingId,
+        sellerId,
+        sellerName: name,
+        title: name,
+      });
+    } catch (error) {
+      window.alert(error?.message || "Az üzenet indítása sikertelen.");
+    }
+  });
 }
 
 async function fetchOwnProfile() {

@@ -496,10 +496,11 @@ function buildWheelCell({
   cell.dataset.qsField = filterKey;
   cell.innerHTML = `<div class="immo-wheel-wrap">
     <span class="immo-label">${escapeHtml(label)}</span>
-    <div class="immo-wheel" data-wheel="${escapeAttr(wheelName)}" data-filter-key="${escapeAttr(filterKey)}" role="listbox" aria-label="${escapeAttr(label)}"></div>
+    <div class="immo-wheel immo-wheel--drum-source" hidden data-wheel="${escapeAttr(wheelName)}" data-filter-key="${escapeAttr(filterKey)}" role="listbox" aria-label="${escapeAttr(label)}"></div>
     <input type="hidden" name="${escapeAttr(filterKey)}" data-filter-key="${escapeAttr(filterKey)}" value="" />
   </div>`;
   const wheel = cell.querySelector("[data-wheel]");
+  /* Chrome: ne fessen 9.5rem üres dobkereket a finishWheel előtt (gyors frissítés villogás). */
   fillWheel(wheel, opts, { emptyLabel });
   finishWheel(cell, emptyLabel, {
     /* Desk autó/teher: ugyanaz a kapcsolós sheet, mint mobilon (ne single-list legyen). */
@@ -603,6 +604,7 @@ function convertRangePairToDual(wrap, cfg) {
   dual.appendChild(minCell);
   dual.appendChild(sep);
   dual.appendChild(maxCell);
+  dual.classList.add("immo-dual-range--summary");
 
   if (cfg.unit) {
     const unit = document.createElement("span");

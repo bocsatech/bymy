@@ -385,10 +385,28 @@ body[data-site-page="ingatlan"] .immo-search-tabs {
   position: absolute !important;
   width: 0 !important;
   height: 0 !important;
+  min-height: 0 !important;
   max-height: 0 !important;
   margin: 0 !important;
   padding: 0 !important;
   overflow: hidden !important;
+  border: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Összefoglaló soros tartomány: felek mindig klipelve (ne csak alap-kártya után — Chrome FOUC). */
+.auto-qs-drums--mobile .immo-dual-range.immo-dual-range--summary > .immo-dual-range__half,
+.auto-qs-drums--mobile .immo-dual-range.immo-dual-range--summary > .immo-dual-range__sep,
+.auto-qs-drums--mobile .immo-dual-range.immo-dual-range--summary > .immo-dual-range__unit {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
   border: 0 !important;
   pointer-events: none !important;
 }

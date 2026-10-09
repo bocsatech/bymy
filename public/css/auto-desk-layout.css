@@ -1465,17 +1465,38 @@
     display: none !important;
   }
 
-  /* Desk: a szűrőpanel maradjon látható frissítéskor (ne opacity:0 villanás). */
+  /* Desk: boot alatt a panel keret marad, a mezők csak kész állapotban villannak be (ne üres→select→dobkerék). */
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-qs-form.auto-qs-booting {
     opacity: 1;
     pointer-events: none;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-qs-form.auto-qs-booting #qs-layout-main,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-qs-form.auto-qs-booting #qs-more-layout,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-qs-form.auto-qs-booting .auto-search-bm-combined,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-qs-form.auto-qs-booting .auto-bm-brand-block {
+    visibility: hidden;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-qs-form.auto-qs-booting #qs-layout-main,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"])
+    .home-qs-form.auto-qs-booting
+    [data-desk-acc="alap"]
+    .auto-desk-acc__body {
+    min-height: 22rem;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-qs-form.is-qs-ready {
     opacity: 1;
     min-height: 0;
     pointer-events: auto;
-    transition: opacity 0.12s ease;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-qs-form.is-qs-ready #qs-layout-main,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-qs-form.is-qs-ready #qs-more-layout,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-qs-form.is-qs-ready .auto-search-bm-combined,
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-qs-form.is-qs-ready .auto-bm-brand-block {
+    visibility: visible;
   }
 
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-panel input.home-qs-control--price::-webkit-contacts-auto-fill-button,

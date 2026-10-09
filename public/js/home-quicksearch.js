@@ -1,6 +1,6 @@
 
 import { applyAutoSearchLayout, readLayoutFilterValues, refillAutoSearchRangeSelects, prefetchAutoSearchBoot } from "./auto-search-layout.js?v=bb243f3133";
-import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums, styleAutoSearchMoreCard, enhanceDeskDualRanges } from "./auto-search-drums.js?v=9b70a78d88";
+import { mountAutoSearchDrums, readAutoDrumFilterValues, resetAutoSearchDrums, styleAutoSearchMoreCard, enhanceDeskDualRanges } from "./auto-search-drums.js?v=9a2f9f6c79";
 import {
   mountDetailedSearch,
   readDetailedSearchValues,
@@ -130,7 +130,8 @@ export function initHomeQuickSearch({ onSearch = () => {}, onFilterPreview, onDe
   }
 
   function setQsReady(ready) {
-    form.classList.toggle("auto-qs-booting", !ready && mobile());
+    /* Desk is: boot alatt ne villogjon az üres layout → native select → dobkerék sorozat. */
+    form.classList.toggle("auto-qs-booting", !ready);
     form.classList.toggle("is-qs-ready", ready);
   }
 

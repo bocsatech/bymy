@@ -265,12 +265,22 @@ function renderProfile(root, partner, opts = {}) {
         </div>
       </div>
       <input type="file" accept="image/*" hidden data-ap-file />
-      ${editMode ? `<p class="ap-edit-hint" data-ap-edit-status>Kattints a háttérre, profilképre vagy logóra a cseréhez.</p>` : ""}
+      ${editMode ? `<p class="ap-edit-hint" data-ap-edit-status>Kattints a háttérre, profilképre vagy logóra a cseréhez. A bemutatást lent szerkesztheted.</p>` : ""}
     </section>
     <div class="ap-grid">
-      <section class="ap-card">
+      <section class="ap-card" data-ap-bio-card>
         <h2>Tevékenység bemutatása</h2>
-        <p>${esc(buildBio(partner))}</p>
+        ${
+          editMode && canEdit
+            ? `<textarea class="ap-bio-input" data-ap-bio-input maxlength="4000" rows="6" placeholder="Írd le a tevékenységet, szolgáltatásokat, területet…">${esc(
+                String(partner.description || buildBio(partner))
+              )}</textarea>
+               <div class="ap-bio-actions">
+                 <button type="button" class="ap-btn ap-btn--save" data-ap-bio-save>Bemutatás mentése</button>
+                 <span class="ap-bio-status" data-ap-bio-status role="status"></span>
+               </div>`
+            : `<p data-ap-bio-text>${esc(buildBio(partner))}</p>`
+        }
         ${
           services.length
             ? `<div class="ap-tags">${services
@@ -307,7 +317,7 @@ function renderProfile(root, partner, opts = {}) {
     </section>
   `;
   document.title = `${name} — Partner profil — Bymy`;
-  wireHeroEditor(root, {
+  const editorCtx = {
     partner,
     listings,
     backHref,
@@ -316,7 +326,9 @@ function renderProfile(root, partner, opts = {}) {
     ownProfile,
     accountEdit: Boolean(opts.accountEdit),
     listingId: opts.listingId || "",
-  });
+  };
+  wireHeroEditor(root, editorCtx);
+  wireBioEditor(root, editorCtx);
 }
 
 async function fetchOwnProfile() {
@@ -342,7 +354,7 @@ async function saveOwnMedia(ownProfile, patch) {
     companyLogoUrl: patch.company_logo_url ?? ownProfile.company_logo_url ?? "",
     coverUrl: patch.cover_url ?? ownProfile.cover_url ?? "",
     serviceAreas: ownProfile.service_areas || "",
-    description: ownProfile.description || "",
+    description: patch.description != null ? patch.description : ownProfile.description || "",
     isPublic: ownProfile.is_public !== false,
   };
   const res = await fetch("/api/partner-profiles/mine", {
@@ -368,12 +380,14 @@ async function saveAccountMedia(patch) {
     companyCoverUrl: patch.cover_url != null ? patch.cover_url : cur.companyCoverUrl || "",
     companyLogoUrl: patch.company_logo_url != null ? patch.company_logo_url : cur.companyLogoUrl || "",
     companyAvatarUrl: patch.logo_url != null ? patch.logo_url : cur.companyAvatarUrl || "",
+    companyDescription:
+      patch.description != null ? patch.description : cur.companyDescription || "",
   };
   await saveProfile(next);
   return next;
 }
 
-async function persistMedia(ctx, patch) {
+async function persistPartnerFields(ctx, patch) {
   const errors = [];
   let ownProfile = ctx.ownProfile;
   // Mindig a fiókprofilba is mentünk — a listing / kereskedés oldal innen olvassa vissza.
@@ -390,6 +404,7 @@ async function persistMedia(ctx, patch) {
         logo_url: patch.logo_url ?? ctx.ownProfile.logo_url,
         company_logo_url: patch.company_logo_url ?? ctx.ownProfile.company_logo_url,
         cover_url: patch.cover_url ?? ctx.ownProfile.cover_url,
+        description: patch.description != null ? patch.description : ctx.ownProfile.description,
       });
     } catch (error) {
       errors.push(error?.message || "Partnerprofil mentés sikertelen.");
@@ -401,6 +416,8 @@ async function persistMedia(ctx, patch) {
   if (errors.length === 2) throw new Error(errors[0]);
   return { ownProfile, warn: errors[0] || "" };
 }
+
+const persistMedia = persistPartnerFields;
 
 function wireHeroEditor(root, ctx) {
   const toggle = root.querySelector("[data-ap-edit-toggle]");
@@ -483,6 +500,39 @@ function wireHeroEditor(root, ctx) {
     if (!ctx.editMode) return;
     pendingKind = "cover";
     fileInput?.click();
+  });
+}
+
+function wireBioEditor(root, ctx) {
+  const canSave = Boolean(ctx.editMode && ctx.canEdit && (ctx.ownProfile || ctx.accountEdit || ctx.listingId));
+  if (!canSave) return;
+  const input = root.querySelector("[data-ap-bio-input]");
+  const saveBtn = root.querySelector("[data-ap-bio-save]");
+  const status = root.querySelector("[data-ap-bio-status]");
+  if (!(input instanceof HTMLTextAreaElement) || !saveBtn) return;
+
+  saveBtn.addEventListener("click", async () => {
+    const text = String(input.value || "").trim().slice(0, 4000);
+    saveBtn.disabled = true;
+    if (status) status.textContent = "Mentés…";
+    try {
+      const { ownProfile, warn } = await persistPartnerFields(
+        { ...ctx, accountEdit: true },
+        { description: text }
+      );
+      const nextPartner = { ...ctx.partner, description: text };
+      if (status) status.textContent = warn ? `Mentve (figyelem: ${warn})` : "Mentve.";
+      renderProfile(root, nextPartner, {
+        ...ctx,
+        partner: nextPartner,
+        ownProfile: ownProfile || ctx.ownProfile,
+        accountEdit: true,
+        editMode: true,
+      });
+    } catch (error) {
+      if (status) status.textContent = error.message || "A mentés sikertelen.";
+      saveBtn.disabled = false;
+    }
   });
 }
 

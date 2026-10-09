@@ -1860,19 +1860,31 @@ body.home-page[data-site-page="teherauto"] #home-category-bar.is-cat-scrolling {
 }
 
 /*
- * Android Chrome: overflow-x:auto + overflow-y:hidden a csempe képein
- * elnyeli a függőleges lapgörgetést, amint a hirdetések betöltődnek.
- * Mobilon a nyilak léptetik a képeket — a lapgörgetés a pan-y-é.
+ * Android: a csempe képsáv (overflow-x:auto) elnyeli a függőleges swipe-ot —
+ * felül (kereső/29 találat) megy a görgetés, a hirdetésen nem.
+ * Mobilon a track ne kapjon touch-ot; nyilak + scrollTo léptet.
  */
 @media (max-width: 900px) {
-  .home-grid-card-photo-track {
-    /* Függőleges swipe → lapgörgetés; képlépés a nyílgombokkal (scrollTo). */
+  .home-grid-card,
+  .home-grid-card-media,
+  .home-grid-card-photo,
+  .home-grid-card-photo-slide,
+  .home-grid-card-photo-img,
+  .home-grid-card-body {
     touch-action: pan-y !important;
-    /* overflow-y:hidden + overflow-x:auto Androidon elnyeli a page scroll-t. */
-    overflow-x: auto;
-    overflow-y: auto;
-    overscroll-behavior-x: contain;
-    overscroll-behavior-y: auto;
+  }
+
+  .home-grid-card-photo-track {
+    touch-action: pan-y !important;
+    pointer-events: none !important;
+    -webkit-overflow-scrolling: auto;
+    overscroll-behavior: auto;
+  }
+
+  .home-grid-card-photo-nav,
+  .home-grid-card-save {
+    pointer-events: auto !important;
+    touch-action: manipulation !important;
   }
 }
 

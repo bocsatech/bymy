@@ -261,6 +261,13 @@
   -webkit-overflow-scrolling: touch;
 }
 
+/* Térkép alatt: ugyanazok a nagy találati csempék, mint a listanézetben. */
+.search-map-modal__side-scroll .search-map-modal__grid.home-grid-track {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
 .search-map-modal__hint {
   margin: 0;
   font-size: 0.82rem;

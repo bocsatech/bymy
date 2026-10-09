@@ -16,6 +16,7 @@ import {
   markMapOpenOnReturn,
 } from "./listing-return.js?v=1911f0cb28";
 import { listingTileTitle, listingTilePrice } from "./listing-tile.js?v=0633cb6729";
+import { createHomeGridCard, initHomeGridCardPhotos } from "./home-grid-card.js?v=dd58b2fd8a";
 import { getAuthUser, loadProfileFromServer } from "./site-auth.js?v=b7e73b74b0";
 import { fetchListingsPage } from "./db-client.js?v=855f1f7e76";
 import {
@@ -743,15 +744,27 @@ function setMapSideVisible(side, visible) {
 function renderBrowseCityListingsSide(side, pins) {
   if (!side) return;
   setMapSideVisible(side, true);
-  const cards = (pins || [])
-    .map((pin) => pickCardHtml(pin, { selected: false, asLink: true }))
-    .join("");
+  const list = pins || [];
   side.innerHTML = `<div class="search-map-modal__side-pin">
     <button type="button" class="search-map-modal__cities-back" data-search-map-cities-back>← Térkép</button>
-    <p class="search-map-modal__route-note">${escapeHtml(selectedBrowseCity || "")} · ${pins?.length || 0} autó</p>
-    <p class="search-map-modal__hint">Csak a fő adatok — kattints a kártyára a részletekhez.</p>
+    <p class="search-map-modal__route-note">${escapeHtml(selectedBrowseCity || "")} · ${list.length} autó</p>
   </div>
-  <div class="search-map-modal__side-scroll">${cards || `<p class="search-map-modal__hint">Nincs hirdetés ezen a településen.</p>`}</div>`;
+  <div class="search-map-modal__side-scroll" data-search-map-city-cards></div>`;
+  const host = side.querySelector("[data-search-map-city-cards]");
+  if (!host) return;
+  if (!list.length) {
+    host.innerHTML = `<p class="search-map-modal__hint">Nincs hirdetés ezen a településen.</p>`;
+    return;
+  }
+  const track = document.createElement("div");
+  track.className = "home-grid-track search-map-modal__grid";
+  track.setAttribute("role", "list");
+  for (const pin of list) {
+    if (!pin?.item) continue;
+    track.appendChild(createHomeGridCard(pin.item));
+  }
+  host.appendChild(track);
+  initHomeGridCardPhotos(track);
 }
 
 function renderBrowseCitiesSide(side, _groups) {

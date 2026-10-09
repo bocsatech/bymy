@@ -12,7 +12,7 @@ import { fillCountrySelect, PHONE_COUNTRIES } from "./phone-lang-ui.js?v=bc55c36
 import { categoriesForVertical } from "./partner-categories-data.js?v=b826a00c74";
 import { fetchMyListings } from "./db-client.js?v=6c1aeac308";
 import { uploadImage } from "./upload-image.js?v=3b023aae7a";
-import { openListingPhotoEditor } from "./listing-photo-edit.js?v=2820caff5d";
+import { openListingPhotoEditor } from "./listing-photo-edit.js?v=985755542f";
 
 const pageRoot = () => document.getElementById("partner-root");
 

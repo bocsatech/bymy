@@ -75,6 +75,13 @@ function coverScale(frameW, frameH, imgW, imgH) {
   return Math.max(frameW / imgW, frameH / imgH);
 }
 
+function containScale(frameW, frameH, imgW, imgH) {
+  return Math.min(frameW / imgW, frameH / imgH);
+}
+
+/** Coverhöz képest ennyire lehet kicsinyíteni (padding a kereten belül). */
+const MIN_ZOOM_OUT_FACTOR = 0.28;
+
 function canvasToJpegFile(canvas, fileName) {
   return new Promise((resolve, reject) => {
     canvas.toBlob(
@@ -225,10 +232,20 @@ export function openListingPhotoEditor({
       const { w, h } = rotatedSize(srcW, srcH, rotation);
       const dw = w * scale;
       const dh = h * scale;
+      // Ha a kép kisebb a keretnél, középen marad; ha nagyobb, a kereten belül húzható.
       const maxX = Math.max(0, (dw - fw) / 2);
       const maxY = Math.max(0, (dh - fh) / 2);
       tx = clamp(tx, -maxX, maxX);
       ty = clamp(ty, -maxY, maxY);
+    }
+
+    function recomputeMinScale() {
+      const { fw, fh } = cropGeom();
+      const { w, h } = rotatedSize(srcW, srcH, rotation);
+      const cover = coverScale(fw, fh, w, h);
+      const contain = containScale(fw, fh, w, h);
+      minScale = Math.max(contain * 0.45, cover * MIN_ZOOM_OUT_FACTOR);
+      return cover;
     }
 
     function paint() {
@@ -248,10 +265,8 @@ export function openListingPhotoEditor({
     }
 
     function resetToCover() {
-      const { fw, fh } = cropGeom();
-      const { w, h } = rotatedSize(srcW, srcH, rotation);
-      minScale = coverScale(fw, fh, w, h);
-      scale = minScale;
+      const cover = recomputeMinScale();
+      scale = cover;
       tx = 0;
       ty = 0;
       paint();
@@ -259,9 +274,7 @@ export function openListingPhotoEditor({
 
     function onResize() {
       syncCanvasPixelSize();
-      const { fw, fh } = cropGeom();
-      const { w, h } = rotatedSize(srcW, srcH, rotation);
-      minScale = coverScale(fw, fh, w, h);
+      recomputeMinScale();
       scale = Math.max(scale, minScale);
       clampOffset();
       paint();

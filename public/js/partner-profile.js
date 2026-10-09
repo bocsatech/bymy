@@ -506,10 +506,11 @@ export async function renderPartnerManage(mountRoot) {
   const listingId = (Array.isArray(myListings) ? myListings : []).find(
     (row) => Number(row?.id) > 0
   )?.id;
-  const profilePageHref = profile.slug
-    ? `/ajanlas-partner.html?slug=${encodeURIComponent(profile.slug)}`
-    : listingId
-      ? `/ajanlas-partner.html?listing=${encodeURIComponent(String(listingId))}`
+  // Listing út stabil (seller-contact); a nyilvános slug csak jóváhagyott profilnál megy.
+  const profilePageHref = listingId
+    ? `/ajanlas-partner.html?listing=${encodeURIComponent(String(listingId))}`
+    : profile.slug
+      ? `/ajanlas-partner.html?slug=${encodeURIComponent(profile.slug)}`
       : "";
   const avatarUrl =
     String(profile.logo_url || account.companyAvatarUrl || "").trim();

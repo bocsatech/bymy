@@ -744,6 +744,34 @@ async function initListingPartnerPage(root, listingId) {
   }
 }
 
+function partnerFromOwnProfile(own, account = {}) {
+  const name =
+    own.display_name ||
+    account.companyListingName ||
+    account.company ||
+    "Partner";
+  return {
+    id: Number(own.user_id || getAuthUser()?.id || 0) || 0,
+    name,
+    display_name: name,
+    phone: own.phone || account.companyPhone || account.phone || "",
+    email: own.email || account.companyEmail || "",
+    website: own.website || account.website || "",
+    logo_url: own.logo_url || account.companyAvatarUrl || "",
+    company_logo_url: own.company_logo_url || account.companyLogoUrl || "",
+    cover_url: own.cover_url || account.companyCoverUrl || "",
+    contact_person: own.contact_person || "",
+    service_areas: own.service_areas || account.companyCity || "",
+    city: account.companyCity || "",
+    county: "",
+    description: own.description || account.companyDescription || "",
+    google_rating: null,
+    google_review_count: null,
+    services: servicesFromAccount(account),
+    partnerSlug: own.slug || "",
+  };
+}
+
 async function initSlugPartnerPage(root, slug) {
   const cached = readShellCache("slug", slug);
   const loggedIn = Boolean(getAuthUser()?.email);
@@ -753,8 +781,7 @@ async function initSlugPartnerPage(root, slug) {
     cache: "no-store",
   }).then(async (res) => {
     const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(data.error || "A profil nem elérhető.");
-    return data;
+    return { ok: res.ok, status: res.status, data };
   });
 
   if (cached) {
@@ -767,7 +794,57 @@ async function initSlugPartnerPage(root, slug) {
     });
   }
 
-  const [data, ownProfile] = await Promise.all([pageP, ownP, profileP]);
+  const [pageResult, ownProfile, accountProfile] = await Promise.all([
+    pageP,
+    ownP,
+    profileP,
+  ]);
+  const account = getProfile() || accountProfile || {};
+
+  // Nyilvános slug hiányzik / nincs jóváhagyva → saját előnézet, vagy listing fallback
+  if (!pageResult.ok) {
+    const ownsSlug = Boolean(ownProfile?.slug && ownProfile.slug === slug);
+    if (ownsSlug) {
+      let partner = partnerFromOwnProfile(ownProfile, account);
+      writeShellCache("slug", slug, partner);
+      renderProfile(root, partner, {
+        listings: [],
+        listingsLoading: true,
+        backHref: "/beallitasok.html?szekcio=partner-profil",
+        canEdit: true,
+        listingId: "",
+      });
+      try {
+        const { fetchMyListings } = await import("./db-client.js?v=6c1aeac308");
+        const mine = await fetchMyListings({ limit: 60 });
+        const listings = filterActiveListings(mine);
+        const sampleListingId = listings.find((row) => Number(row?.id) > 0)?.id;
+        if (sampleListingId) {
+          await initListingPartnerPage(root, String(sampleListingId));
+          return;
+        }
+        renderProfile(root, partner, {
+          listings,
+          listingsLoading: false,
+          backHref: "/beallitasok.html?szekcio=partner-profil",
+          canEdit: true,
+          listingId: "",
+        });
+      } catch {
+        renderProfile(root, partner, {
+          listings: [],
+          listingsLoading: false,
+          backHref: "/beallitasok.html?szekcio=partner-profil",
+          canEdit: true,
+          listingId: "",
+        });
+      }
+      return;
+    }
+    throw new Error(pageResult.data?.error || "Nincs ilyen partnerprofil.");
+  }
+
+  const data = pageResult.data || {};
   const profile = data.profile || {};
   const listings = filterActiveListings(data.listings || []);
   const sampleListingId = listings.find((row) => Number(row?.id) > 0)?.id;

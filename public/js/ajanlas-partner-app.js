@@ -92,6 +92,76 @@ function categoryLabel(id) {
   return PARTNER_CATEGORIES.find((c) => c.id === id)?.label || id;
 }
 
+function categoryMeta(id) {
+  return PARTNER_CATEGORIES.find((c) => c.id === id) || null;
+}
+
+function asIdList(value) {
+  if (Array.isArray(value)) return value.map(String).map((s) => s.trim()).filter(Boolean);
+  if (typeof value === "string") {
+    const raw = value.trim();
+    if (!raw) return [];
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return asIdList(parsed);
+    } catch {
+      /* comma */
+    }
+    return raw.split(/[,;|]+/).map((s) => s.trim()).filter(Boolean);
+  }
+  return [];
+}
+
+/** Fiók companyAjanlasok* mezőiből (tulaj / fallback). */
+function servicesFromAccount(profile) {
+  if (!profile || profile.companyAjanlasok !== true) return [];
+  const out = [];
+  if (profile.companyAjanlasokAuto === true) {
+    out.push(...asIdList(profile.companyAjanlasokAutoCats));
+  }
+  if (profile.companyAjanlasokIngatlan === true) {
+    out.push(...asIdList(profile.companyAjanlasokIngatlanCats));
+  }
+  return [...new Set(out)];
+}
+
+function ajanlasIslandHtml(serviceIds, { canEdit = false } = {}) {
+  const ids = (Array.isArray(serviceIds) ? serviceIds : []).map(String).filter(Boolean);
+  const tiles = ids
+    .map((id) => {
+      const cat = categoryMeta(id);
+      if (!cat) return "";
+      const href = `/ajanlasok.html?vertical=${encodeURIComponent(cat.vertical)}&cat=${encodeURIComponent(cat.id)}`;
+      const img = partnerCategoryImageUrl(cat);
+      return `<a class="ap-ajanlas-tile" href="${esc(href)}">
+        <span class="ap-ajanlas-tile__media"><img src="${esc(img)}" alt="" loading="lazy" decoding="async" /></span>
+        <span class="ap-ajanlas-tile__label">${esc(cat.label)}</span>
+      </a>`;
+    })
+    .filter(Boolean)
+    .join("");
+
+  if (!tiles && !canEdit) return "";
+
+  return `
+    <section class="ap-band ap-band--ajanlas" id="ap-ajanlasok">
+      <div class="ap-band-head">
+        <h2>Kiválasztott ajánlások ${ids.length ? `<span class="ap-count">${ids.length}</span>` : ""}</h2>
+        ${
+          canEdit
+            ? `<a class="ap-all" href="/beallitasok.html?szekcio=partner-profil">Szerkesztés</a>`
+            : ""
+        }
+      </div>
+      ${
+        tiles
+          ? `<div class="ap-ajanlas-rail">${tiles}</div>`
+          : `<p class="ap-empty">Még nincs kiválasztott ajánlás. A Beállításokban kapcsold be a céges ajánlásokat.</p>`
+      }
+    </section>
+  `;
+}
+
 function initial(name) {
   return esc(String(name || "P").trim().slice(0, 1).toUpperCase() || "P");
 }
@@ -183,7 +253,12 @@ function renderProfile(root, partner, opts = {}) {
   const canMsg = canMessageListing(sellerId > 0 ? sellerId : undefined, { listingId });
   const companyLogo = safeUrl(partner.company_logo_url);
   const cover = safeUrl(partner.cover_url);
-  const services = partner.services || [];
+  const services = (() => {
+    const fromPartner = Array.isArray(partner.services) ? partner.services.filter(Boolean) : [];
+    if (fromPartner.length) return fromPartner;
+    if (canEdit) return servicesFromAccount(getProfile());
+    return [];
+  })();
   const ratingHtml = ratingMetaHtml(partner.google_rating, partner.google_review_count);
   const place = formatPlaceMeta(partner);
   const hours = partner.opening_hours || "";
@@ -305,13 +380,6 @@ function renderProfile(root, partner, opts = {}) {
                </div>`
             : `<p data-ap-bio-text>${esc(buildBio(partner))}</p>`
         }
-        ${
-          services.length
-            ? `<div class="ap-tags">${services
-                .map((id) => `<span class="ap-tag">${esc(categoryLabel(id))}</span>`)
-                .join("")}</div>`
-            : ""
-        }
         ${hours ? `<p class="ap-hours">Nyitva: ${esc(hours)}</p>` : ""}
       </section>
       <section class="ap-card">
@@ -326,6 +394,7 @@ function renderProfile(root, partner, opts = {}) {
         </dl>
       </section>
     </div>
+    ${ajanlasIslandHtml(services, { canEdit })}
     <section class="ap-band" id="ap-listings">
       <div class="ap-band-head">
         <h2>Hirdetéseik <span class="ap-count">${listings.length}</span></h2>
@@ -684,7 +753,7 @@ function partnerFromSellerContact(contact, rating) {
       : "",
     google_rating: avg != null && Number.isFinite(avg) ? avg : null,
     google_review_count: count,
-    services: [],
+    services: Array.isArray(contact?.services) ? contact.services.filter(Boolean) : [],
     partnerSlug: contact?.partnerSlug || "",
   };
 }
@@ -724,6 +793,9 @@ async function init() {
   const wantEdit = params.get("szerkeszt") === "1";
 
   try {
+    if (getAuthUser()?.email) {
+      await loadProfileFromServer().catch(() => null);
+    }
     if (listingId) {
       const loaded = await loadListingSellerPage(listingId);
       const access = await resolveEditAccess({
@@ -759,6 +831,10 @@ async function init() {
               cover_url: p.cover_url || loaded.partner.cover_url,
               contact_person: p.contact_person || loaded.partner.contact_person,
               description: p.description || loaded.partner.description,
+              services:
+                Array.isArray(p.services) && p.services.length
+                  ? p.services
+                  : loaded.partner.services,
               // Helyszín / értékelés: a seller-contact a forrásigazság
               ...keptPlace,
               google_rating: keptRating,
@@ -825,7 +901,7 @@ async function init() {
           description: profile.description,
           google_rating,
           google_review_count,
-          services: [],
+          services: Array.isArray(profile.services) ? profile.services.filter(Boolean) : [],
         },
         {
           listings,

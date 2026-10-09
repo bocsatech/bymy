@@ -6,13 +6,204 @@ import {
   loadProfileFromServer,
   saveProfile,
   initSiteAuth,
-} from "./site-auth.js?v=b7e73b74b0";
+} from "./site-auth.js?v=c81778d772";
 import { wirePostalCityAutofill } from "./postal-city-autofill.js?v=ba74000828";
 import { fillCountrySelect, PHONE_COUNTRIES } from "./phone-lang-ui.js?v=bc55c36aef";
+import { categoriesForVertical } from "./partner-categories-data.js?v=b826a00c74";
 
 const pageRoot = () => document.getElementById("partner-root");
 
 const ACTIVITY_LABELS = { auto: "Autó", teherauto: "Teherautó", ingatlan: "Ingatlan" };
+
+function asIdList(value) {
+  if (Array.isArray(value)) return value.map(String).map((s) => s.trim()).filter(Boolean);
+  if (typeof value === "string") {
+    const raw = value.trim();
+    if (!raw) return [];
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return asIdList(parsed);
+    } catch {
+      /* comma list */
+    }
+    return raw.split(",").map((s) => s.trim()).filter(Boolean);
+  }
+  return [];
+}
+
+function ajanlasSummary(ids, vertical) {
+  const cats = categoriesForVertical(vertical);
+  const labels = ids
+    .map((id) => cats.find((c) => c.id === id)?.label)
+    .filter(Boolean);
+  if (!labels.length) return "Nincs kategória";
+  if (labels.length <= 2) return labels.join(" · ");
+  return `${labels.slice(0, 2).join(" · ")} +${labels.length - 2}`;
+}
+
+function openAjanlasCategorySheet({ title, vertical, selectedIds, onDone }) {
+  const cats = categoriesForVertical(vertical);
+  const selected = new Set(asIdList(selectedIds));
+  const existing = document.querySelector(".partner-ajanlas-sheet");
+  existing?.remove();
+
+  const portal = document.createElement("div");
+  portal.className = "partner-ajanlas-sheet";
+  portal.setAttribute("role", "dialog");
+  portal.setAttribute("aria-modal", "true");
+  portal.setAttribute("aria-label", title);
+
+  function paint() {
+    const list = portal.querySelector("[data-ajanlas-sheet-list]");
+    if (!list) return;
+    list.innerHTML = cats
+      .map((c) => {
+        const on = selected.has(c.id) ? " is-on" : "";
+        return `<button type="button" class="partner-ajanlas-sheet__item${on}" data-cat="${esc(c.id)}">
+          <span class="partner-ajanlas-sheet__box" aria-hidden="true"></span>
+          <span>${esc(c.label)}</span>
+        </button>`;
+      })
+      .join("");
+  }
+
+  portal.innerHTML = `
+    <button type="button" class="partner-ajanlas-sheet__backdrop" aria-label="Bezárás"></button>
+    <div class="partner-ajanlas-sheet__card">
+      <header class="partner-ajanlas-sheet__head">
+        <button type="button" class="partner-ajanlas-sheet__x" aria-label="Bezárás">×</button>
+        <h2>${esc(title)}</h2>
+        <button type="button" class="partner-ajanlas-sheet__done">Kész</button>
+      </header>
+      <div class="partner-ajanlas-sheet__list" data-ajanlas-sheet-list></div>
+    </div>`;
+  document.body.appendChild(portal);
+  document.body.classList.add("partner-ajanlas-sheet-open");
+  paint();
+
+  function close(commit) {
+    portal.remove();
+    document.body.classList.remove("partner-ajanlas-sheet-open");
+    if (commit) onDone?.([...selected]);
+  }
+
+  portal.querySelector(".partner-ajanlas-sheet__backdrop")?.addEventListener("click", () => close(false));
+  portal.querySelector(".partner-ajanlas-sheet__x")?.addEventListener("click", () => close(false));
+  portal.querySelector(".partner-ajanlas-sheet__done")?.addEventListener("click", () => close(true));
+  portal.querySelector("[data-ajanlas-sheet-list]")?.addEventListener("click", (event) => {
+    const btn = event.target?.closest?.("[data-cat]");
+    if (!btn) return;
+    const id = btn.getAttribute("data-cat") || "";
+    if (!id) return;
+    if (selected.has(id)) selected.delete(id);
+    else selected.add(id);
+    paint();
+  });
+}
+
+function wireCompanyAjanlasBlock(root, account) {
+  const masterSw = root.querySelector("[data-partner-ajanlas-switch]");
+  const masterBtn = root.querySelector("[data-partner-ajanlas-btn]");
+  const subs = root.querySelector("[data-partner-ajanlas-subs]");
+  const autoSw = root.querySelector("[data-partner-ajanlas-auto-sw]");
+  const immoSw = root.querySelector("[data-partner-ajanlas-immo-sw]");
+  const autoBtn = root.querySelector("[data-partner-ajanlas-auto-btn]");
+  const immoBtn = root.querySelector("[data-partner-ajanlas-immo-btn]");
+  const autoSum = root.querySelector("[data-partner-ajanlas-auto-sum]");
+  const immoSum = root.querySelector("[data-partner-ajanlas-immo-sum]");
+  if (!(masterSw instanceof HTMLInputElement) || !subs) return;
+
+  const state = {
+    autoOn: account.companyAjanlasokAuto === true,
+    immoOn: account.companyAjanlasokIngatlan === true,
+    autoCats: asIdList(account.companyAjanlasokAutoCats),
+    immoCats: asIdList(account.companyAjanlasokIngatlanCats),
+  };
+
+  function syncUi() {
+    const masterOn = masterSw.checked;
+    subs.hidden = !masterOn;
+    if (autoSw instanceof HTMLInputElement) autoSw.checked = state.autoOn;
+    if (immoSw instanceof HTMLInputElement) immoSw.checked = state.immoOn;
+    if (autoSum) autoSum.textContent = ajanlasSummary(state.autoCats, "auto");
+    if (immoSum) immoSum.textContent = ajanlasSummary(state.immoCats, "ingatlan");
+    autoBtn?.classList.toggle("is-active", state.autoOn);
+    immoBtn?.classList.toggle("is-active", state.immoOn);
+  }
+
+  masterBtn?.addEventListener("click", () => {
+    masterSw.checked = !masterSw.checked;
+    masterSw.dispatchEvent(new Event("change", { bubbles: true }));
+  });
+  masterSw.addEventListener("change", () => syncUi());
+
+  autoSw?.addEventListener("change", () => {
+    state.autoOn = Boolean(autoSw.checked);
+    syncUi();
+  });
+  immoSw?.addEventListener("change", () => {
+    state.immoOn = Boolean(immoSw.checked);
+    syncUi();
+  });
+
+  autoBtn?.addEventListener("click", () => {
+    if (!masterSw.checked) return;
+    openAjanlasCategorySheet({
+      title: "Autós ajánlások",
+      vertical: "auto",
+      selectedIds: state.autoCats,
+      onDone: (ids) => {
+        state.autoCats = ids;
+        syncUi();
+      },
+    });
+  });
+  immoBtn?.addEventListener("click", () => {
+    if (!masterSw.checked) return;
+    openAjanlasCategorySheet({
+      title: "Ingatlanos ajánlások",
+      vertical: "ingatlan",
+      selectedIds: state.immoCats,
+      onDone: (ids) => {
+        state.immoCats = ids;
+        syncUi();
+      },
+    });
+  });
+
+  syncUi();
+  return state;
+}
+
+function readCompanyAjanlasPayload(form, ajanlasState) {
+  const masterOn = Boolean(form.querySelector('[name="companyAjanlasok"]')?.checked);
+  if (!masterOn || !ajanlasState) {
+    return {
+      companyAjanlasok: false,
+      companyAjanlasokAuto: false,
+      companyAjanlasokIngatlan: false,
+      companyAjanlasokAutoCats: [],
+      companyAjanlasokIngatlanCats: [],
+    };
+  }
+  const autoOn = Boolean(ajanlasState.autoOn);
+  const immoOn = Boolean(ajanlasState.immoOn);
+  const autoCats = autoOn ? asIdList(ajanlasState.autoCats) : [];
+  const immoCats = immoOn ? asIdList(ajanlasState.immoCats) : [];
+  if (autoOn && !autoCats.length) {
+    return { error: "Autós ajánlásoknál válassz legalább egy kategóriát, vagy kapcsold ki." };
+  }
+  if (immoOn && !immoCats.length) {
+    return { error: "Ingatlanos ajánlásoknál válassz legalább egy kategóriát, vagy kapcsold ki." };
+  }
+  return {
+    companyAjanlasok: true,
+    companyAjanlasokAuto: autoOn,
+    companyAjanlasokIngatlan: immoOn,
+    companyAjanlasokAutoCats: autoCats,
+    companyAjanlasokIngatlanCats: immoCats,
+  };
+}
 
 function parsePhoneParts(phone) {
   const raw = String(phone || "").trim();
@@ -298,18 +489,52 @@ export async function renderPartnerManage(mountRoot) {
           <label>Második e-mail<input name="companyEmail2" type="email" value="${esc(account.companyEmail2)}" maxlength="320" /></label>
         </div>
       </section>
-      <div class="partner-form-actions partner-ajanlas-island" role="group" aria-label="Ajánlások">
-        <button type="button" class="partner-ajanlas-btn" data-partner-ajanlas-btn>Ajánlások</button>
-        <label class="partner-switch">
-          <input
-            type="checkbox"
-            name="companyAjanlasok"
-            data-partner-ajanlas-switch
-            ${account.companyAjanlasok === true ? "checked" : ""}
-            aria-label="Ajánlások bekapcsolása"
-          />
-          <span class="partner-switch__track" aria-hidden="true"></span>
-        </label>
+      <div class="partner-ajanlas-block">
+        <div class="partner-form-actions partner-ajanlas-island" role="group" aria-label="Ajánlások">
+          <button type="button" class="partner-ajanlas-btn" data-partner-ajanlas-btn>Ajánlások</button>
+          <label class="partner-switch">
+            <input
+              type="checkbox"
+              name="companyAjanlasok"
+              data-partner-ajanlas-switch
+              ${account.companyAjanlasok === true ? "checked" : ""}
+              aria-label="Ajánlások bekapcsolása"
+            />
+            <span class="partner-switch__track" aria-hidden="true"></span>
+          </label>
+        </div>
+        <div class="partner-ajanlas-subs" data-partner-ajanlas-subs ${account.companyAjanlasok === true ? "" : "hidden"}>
+          <div class="partner-form-actions partner-ajanlas-island partner-ajanlas-row">
+            <button type="button" class="partner-ajanlas-btn partner-ajanlas-btn--sub" data-partner-ajanlas-auto-btn>
+              Autós ajánlások
+              <small data-partner-ajanlas-auto-sum>${esc(ajanlasSummary(asIdList(account.companyAjanlasokAutoCats), "auto"))}</small>
+            </button>
+            <label class="partner-switch">
+              <input
+                type="checkbox"
+                data-partner-ajanlas-auto-sw
+                ${account.companyAjanlasokAuto === true ? "checked" : ""}
+                aria-label="Autós ajánlások bekapcsolása"
+              />
+              <span class="partner-switch__track" aria-hidden="true"></span>
+            </label>
+          </div>
+          <div class="partner-form-actions partner-ajanlas-island partner-ajanlas-row">
+            <button type="button" class="partner-ajanlas-btn partner-ajanlas-btn--sub" data-partner-ajanlas-immo-btn>
+              Ingatlanos ajánlások
+              <small data-partner-ajanlas-immo-sum>${esc(ajanlasSummary(asIdList(account.companyAjanlasokIngatlanCats), "ingatlan"))}</small>
+            </button>
+            <label class="partner-switch">
+              <input
+                type="checkbox"
+                data-partner-ajanlas-immo-sw
+                ${account.companyAjanlasokIngatlan === true ? "checked" : ""}
+                aria-label="Ingatlanos ajánlások bekapcsolása"
+              />
+              <span class="partner-switch__track" aria-hidden="true"></span>
+            </label>
+          </div>
+        </div>
       </div>
       `
           : `
@@ -370,12 +595,7 @@ export async function renderPartnerManage(mountRoot) {
     companyPhone3: account.companyPhone3,
   });
 
-  const ajanlasSwitch = root.querySelector("[data-partner-ajanlas-switch]");
-  root.querySelector("[data-partner-ajanlas-btn]")?.addEventListener("click", () => {
-    if (!(ajanlasSwitch instanceof HTMLInputElement)) return;
-    ajanlasSwitch.checked = !ajanlasSwitch.checked;
-    ajanlasSwitch.dispatchEvent(new Event("change", { bubbles: true }));
-  });
+  const ajanlasState = isCompany ? wireCompanyAjanlasBlock(root, account) : null;
 
   root.querySelector("#partner-form")?.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -421,6 +641,14 @@ export async function renderPartnerManage(mountRoot) {
         const companyStreet = String(raw.companyStreet || "").trim();
         const companyPostalCode = String(raw.companyPostalCode || "").replace(/\D/g, "").slice(0, 4);
         const companyCity = String(raw.companyCity || "").trim();
+        const ajanlas = readCompanyAjanlasPayload(form, ajanlasState);
+        if (ajanlas.error) {
+          status.textContent = ajanlas.error;
+          status.className = "is-error";
+          submit.disabled = false;
+          submit.textContent = "Mentés";
+          return;
+        }
         await saveProfile({
           ...getProfile(),
           company: displayName,
@@ -439,7 +667,7 @@ export async function renderPartnerManage(mountRoot) {
           companyEmail2: String(raw.companyEmail2 || "").trim(),
           salespersonName: String(raw.salespersonName || "").trim(),
           salespersonName2: String(raw.salespersonName2 || "").trim(),
-          companyAjanlasok: Boolean(form.querySelector('[name="companyAjanlasok"]')?.checked),
+          ...ajanlas,
         });
 
         syncManageSidebar(accountType);

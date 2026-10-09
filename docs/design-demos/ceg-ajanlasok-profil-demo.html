@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cégprofil — Ajánlások (működési demó)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ink: #111;
+      --muted: #5c6b7a;
+      --line: #d2d0cc;
+      --band: #e8eef3;
+      --card: #fff;
+      --brand: #126d8b;
+      --green: #34c759;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, sans-serif;
+      background: var(--band);
+      color: var(--ink);
+      padding: 28px 16px 80px;
+    }
+    h1 { margin: 0 0 6px; font-size: 1.25rem; font-weight: 800; }
+    .lead { margin: 0 0 22px; color: var(--muted); font-size: 0.92rem; max-width: 70ch; line-height: 1.45; }
+    .stage {
+      max-width: 720px;
+      margin: 0 auto 28px;
+    }
+    .section {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 1.15rem 1.25rem 1.25rem;
+      margin-bottom: 0.85rem;
+    }
+    .section h2 { margin: 0 0 0.85rem; font-size: 1.05rem; font-weight: 800; }
+    .fake-field {
+      height: 42px;
+      border: 1px solid #b9c9d1;
+      border-radius: 6px;
+      background: #f8fafc;
+      margin-bottom: 0.55rem;
+    }
+    .island {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 14px;
+      padding: 1.1rem 1.25rem;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--card);
+      margin-bottom: 0.75rem;
+    }
+    .btn {
+      border: 0;
+      border-radius: 6px;
+      background: var(--brand);
+      color: #fff;
+      padding: 12px 18px;
+      font: inherit;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .btn.is-ghost {
+      background: #edf2f4;
+      color: #334b58;
+      border: 1px solid #b9c9d1;
+    }
+    .btn.is-on {
+      box-shadow: inset 0 0 0 2px #0b4f66;
+    }
+    .btn small {
+      display: block;
+      font-size: 0.68rem;
+      font-weight: 600;
+      opacity: 0.85;
+      margin-top: 2px;
+    }
+    .switch {
+      position: relative;
+      width: 2.75rem;
+      height: 1.6rem;
+      flex: 0 0 auto;
+    }
+    .switch input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+    .track {
+      display: block;
+      width: 100%;
+      height: 100%;
+      border-radius: 999px;
+      background: #c6c6c6;
+      position: relative;
+      transition: background 0.18s ease;
+      cursor: pointer;
+    }
+    .track::after {
+      content: "";
+      position: absolute;
+      top: 0.12rem;
+      left: 0.12rem;
+      width: 1.25rem;
+      height: 1.25rem;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 1px 3px rgba(0,0,0,.28);
+      transition: transform 0.18s ease;
+    }
+    .switch input:checked + .track { background: var(--green); }
+    .switch input:checked + .track::after { transform: translateX(1.1rem); }
+    .sub {
+      display: none;
+      flex-direction: column;
+      gap: 0.65rem;
+    }
+    .sub.is-open { display: flex; }
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+      padding: 0.95rem 1.15rem;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--card);
+    }
+    .chip {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #334b58;
+      background: #edf2f4;
+      border-radius: 999px;
+      padding: 0.2rem 0.55rem;
+    }
+    .sheet {
+      display: none;
+      margin-top: 0.65rem;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(15,23,42,.12);
+    }
+    .sheet.is-open { display: block; }
+    .sheet-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid var(--line);
+      font-weight: 800;
+    }
+    .sheet-list { max-height: 240px; overflow: auto; }
+    .sheet-item {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 0;
+      border-bottom: 1px solid #eef1f4;
+      background: #fff;
+      font: inherit;
+      text-align: left;
+      cursor: pointer;
+    }
+    .sheet-item.is-on { background: #f0f9ff; font-weight: 700; }
+    .box {
+      width: 1.15rem;
+      height: 1.15rem;
+      border: 1.5px solid #98a2b3;
+      border-radius: 4px;
+      flex: 0 0 auto;
+    }
+    .sheet-item.is-on .box {
+      background: var(--brand);
+      border-color: var(--brand);
+      box-shadow: inset 0 0 0 2px #fff;
+    }
+    .legend {
+      margin: 18px auto 0;
+      max-width: 720px;
+      font-size: 0.85rem;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+    .legend strong { color: var(--ink); }
+    .steps {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin: 0 0 18px;
+      max-width: 720px;
+    }
+    .steps button {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 999px;
+      padding: 0.4rem 0.75rem;
+      font: inherit;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .steps button.is-on {
+      background: #111;
+      color: #fff;
+      border-color: #111;
+    }
+  </style>
+</head>
+<body>
+  <div class="stage">
+    <h1>Cégprofil · Ajánlások blokk (demó)</h1>
+    <p class="lead">
+      Alapból kikapcsolva. Bekapcsolás után megjelenik az autós és az ingatlanos sor
+      (gomb + kapcsoló). A gomb dobkerék-szerű többszörös kategóriaválasztót nyit.
+    </p>
+    <div class="steps" id="steps">
+      <button type="button" data-step="0" class="is-on">1 · Kikapcsolva</button>
+      <button type="button" data-step="1">2 · Fő kapcsoló be</button>
+      <button type="button" data-step="2">3 · Autó be + dobkerék</button>
+    </div>
+
+    <div class="section">
+      <h2>3. Kapcsolat</h2>
+      <div class="fake-field"></div>
+      <div class="fake-field"></div>
+    </div>
+
+    <div class="island" id="master">
+      <button type="button" class="btn" id="masterBtn">Ajánlások</button>
+      <label class="switch" title="Fő kapcsoló">
+        <input type="checkbox" id="masterSw" />
+        <span class="track"></span>
+      </label>
+    </div>
+
+    <div class="sub" id="subs">
+      <div class="row">
+        <button type="button" class="btn is-ghost" id="autoBtn">
+          Autós ajánlások
+          <small id="autoSum">Nincs kategória</small>
+        </button>
+        <label class="switch">
+          <input type="checkbox" id="autoSw" />
+          <span class="track"></span>
+        </label>
+        <span class="chip" id="autoChip" hidden>kikapcsolva</span>
+      </div>
+      <div class="sheet" id="autoSheet">
+        <div class="sheet-head">
+          <span>Autós kategóriák</span>
+          <button type="button" class="btn is-ghost" id="autoDone" style="padding:0.4rem 0.7rem;font-size:0.8rem">Kész</button>
+        </div>
+        <div class="sheet-list" id="autoList"></div>
+      </div>
+
+      <div class="row">
+        <button type="button" class="btn is-ghost" id="immoBtn">
+          Ingatlanos ajánlások
+          <small id="immoSum">Nincs kategória</small>
+        </button>
+        <label class="switch">
+          <input type="checkbox" id="immoSw" />
+          <span class="track"></span>
+        </label>
+      </div>
+      <div class="sheet" id="immoSheet">
+        <div class="sheet-head">
+          <span>Ingatlan kategóriák</span>
+          <button type="button" class="btn is-ghost" id="immoDone" style="padding:0.4rem 0.7rem;font-size:0.8rem">Kész</button>
+        </div>
+        <div class="sheet-list" id="immoList"></div>
+      </div>
+    </div>
+
+    <div class="island" style="opacity:.85">
+      <button type="button" class="btn">Mentés</button>
+    </div>
+  </div>
+
+  <p class="legend">
+    <strong>Demó lépések:</strong> 1) csak a fő Ajánlások sor · 2) autós + ingatlanos sorok ·
+    3) autós dobkerék nyitva, több kategória pipálható.
+  </p>
+
+  <script>
+    const AUTO = [
+      "Átírás ügyintézés", "Eredetvizsga", "Műszaki vizsga", "Autoátvizsgálás",
+      "Autószerelő", "Gumiszerelő", "Lakatos", "Klímaszerelő", "Autókozmetika", "Autóvillamosság"
+    ];
+    const IMMO = [
+      "Értékesítés", "Értékbecslés", "Energetikai tanúsítvány", "Szerkezeti vizsgálat",
+      "Hitelügyintézés", "Földmérés", "Tervezők", "Lakberendező", "Kertépítő", "Ügyvédek", "Közjegyzők"
+    ];
+    const autoSel = new Set(["Autószerelő", "Gumiszerelő"]);
+    const immoSel = new Set();
+
+    function fillList(el, items, selected) {
+      el.innerHTML = items.map((label) => {
+        const on = selected.has(label) ? " is-on" : "";
+        return `<button type="button" class="sheet-item${on}" data-label="${label}"><span class="box"></span><span>${label}</span></button>`;
+      }).join("");
+    }
+
+    function syncSums() {
+      autoSum.textContent = autoSel.size ? [...autoSel].slice(0, 2).join(" · ") + (autoSel.size > 2 ? ` +${autoSel.size - 2}` : "") : "Nincs kategória";
+      immoSum.textContent = immoSel.size ? [...immoSel].slice(0, 2).join(" · ") + (immoSel.size > 2 ? ` +${immoSel.size - 2}` : "") : "Nincs kategória";
+      autoBtn.classList.toggle("is-on", autoSw.checked);
+      immoBtn.classList.toggle("is-on", immoSw.checked);
+    }
+
+    const masterSw = document.getElementById("masterSw");
+    const subs = document.getElementById("subs");
+    const autoSw = document.getElementById("autoSw");
+    const immoSw = document.getElementById("immoSw");
+    const autoBtn = document.getElementById("autoBtn");
+    const immoBtn = document.getElementById("immoBtn");
+    const autoSheet = document.getElementById("autoSheet");
+    const immoSheet = document.getElementById("immoSheet");
+    const autoSum = document.getElementById("autoSum");
+    const immoSum = document.getElementById("immoSum");
+    const autoList = document.getElementById("autoList");
+    const immoList = document.getElementById("immoList");
+
+    fillList(autoList, AUTO, autoSel);
+    fillList(immoList, IMMO, immoSel);
+    syncSums();
+
+    masterSw.addEventListener("change", () => {
+      subs.classList.toggle("is-open", masterSw.checked);
+      if (!masterSw.checked) {
+        autoSheet.classList.remove("is-open");
+        immoSheet.classList.remove("is-open");
+      }
+    });
+    document.getElementById("masterBtn").addEventListener("click", () => {
+      masterSw.checked = !masterSw.checked;
+      masterSw.dispatchEvent(new Event("change"));
+    });
+
+    autoBtn.addEventListener("click", () => {
+      if (!masterSw.checked) return;
+      autoSheet.classList.toggle("is-open");
+      immoSheet.classList.remove("is-open");
+    });
+    immoBtn.addEventListener("click", () => {
+      if (!masterSw.checked) return;
+      immoSheet.classList.toggle("is-open");
+      autoSheet.classList.remove("is-open");
+    });
+    autoSw.addEventListener("change", syncSums);
+    immoSw.addEventListener("change", syncSums);
+    document.getElementById("autoDone").onclick = () => autoSheet.classList.remove("is-open");
+    document.getElementById("immoDone").onclick = () => immoSheet.classList.remove("is-open");
+
+    autoList.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-label]");
+      if (!btn) return;
+      const label = btn.dataset.label;
+      if (autoSel.has(label)) autoSel.delete(label);
+      else autoSel.add(label);
+      fillList(autoList, AUTO, autoSel);
+      syncSums();
+    });
+    immoList.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-label]");
+      if (!btn) return;
+      const label = btn.dataset.label;
+      if (immoSel.has(label)) immoSel.delete(label);
+      else immoSel.add(label);
+      fillList(immoList, IMMO, immoSel);
+      syncSums();
+    });
+
+    function goStep(n) {
+      document.querySelectorAll("#steps button").forEach((b) => b.classList.toggle("is-on", b.dataset.step === String(n)));
+      masterSw.checked = n >= 1;
+      masterSw.dispatchEvent(new Event("change"));
+      autoSw.checked = n >= 2;
+      immoSw.checked = false;
+      autoSheet.classList.toggle("is-open", n >= 2);
+      immoSheet.classList.remove("is-open");
+      syncSums();
+    }
+    document.getElementById("steps").addEventListener("click", (e) => {
+      const b = e.target.closest("[data-step]");
+      if (b) goStep(Number(b.dataset.step));
+    });
+  </script>
+</body>
+</html>

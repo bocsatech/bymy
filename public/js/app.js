@@ -5,7 +5,7 @@ import {
   saveListingPhotosOrder,
   getStoredListingId,
 } from "./db-client.js?v=855f1f7e76";
-import { createAdForm } from "./form-core.js?v=710417abc2";
+import { createAdForm } from "./form-core.js?v=e86e1a3de5";
 import { initPriceMarketHint } from "./price-market-hint.js?v=ee49eb1a56";
 import { applyImportedVehicleToSelects } from "./vehicle-catalog-client.js?v=19a6b3a4f2";
 import { initTireSizes } from "./tire-sizes-ui.js?v=d01f914c82";
@@ -19,14 +19,14 @@ import {
   loginUrl,
   initSiteAuth,
   loadProfileFromServer,
-} from "./site-auth.js?v=b7e73b74b0";
+} from "./site-auth.js?v=c81778d772";
 import {
   applyListingAddressFromProfile,
   applyListingAddressFromProfileSync,
   initAdLocationProfile,
   getListingAddressFromProfile,
-} from "./ad-location-profile.js?v=c45d6351d5";
-import { initImproveDescription } from "./improve-description.js?v=7be6ab545d";
+} from "./ad-location-profile.js?v=1a6f62334d";
+import { initImproveDescription } from "./improve-description.js?v=994ff918af";
 
 initSiteAuth();
 /** Ne blokkolja a kategóriaválasztót — sessionStorage alapján azonnal kattintható; háttérben /api/auth/me. */

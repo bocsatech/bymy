@@ -5,7 +5,7 @@ import {
   listingTilePrice,
   listingTileTitle,
 } from "./listing-tile.js?v=0633cb6729";
-import { getAuthUser } from "./site-auth.js?v=b7e73b74b0";
+import { getAuthUser } from "./site-auth.js?v=c81778d772";
 import {
   getParkplatz,
   addParkplatzItem,

@@ -1,4 +1,4 @@
-import { getAuthUser, refreshAuthSession } from "./site-auth.js?v=b7e73b74b0";
+import { getAuthUser, refreshAuthSession } from "./site-auth.js?v=c81778d772";
 import { getParkplatz, pruneParkplatzMissing, PARKPLATZ_CHANGED } from "./fok-data.js?v=289f64e75c";
 import { fetchExistingListingIds } from "./db-client.js?v=855f1f7e76";
 import {

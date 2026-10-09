@@ -1,5 +1,5 @@
 import { fetchListings, fetchListingsPage, fetchRelatedListingsPage } from "./db-client.js?v=855f1f7e76";
-import { createHomeGridCard, initHomeGridCardPhotos } from "./home-grid-card.js?v=dd58b2fd8a";
+import { createHomeGridCard, initHomeGridCardPhotos } from "./home-grid-card.js?v=f567151ea5";
 import { promoKiemeltActive, promoTopAjanlatActive } from "./listing-promo.js?v=a2c84c124b";
 import {
   emptyFilters,
@@ -22,7 +22,7 @@ import { filterByCategory, initHomeCategoryBar, renderHomeCategoryBar, HOME_CATE
 import { initHomeUnifiedScroll } from "./home-unified-scroll.js?v=19bcc2aeb6";
 import { initHomeStatsBar } from "./home-stats-bar.js?v=84ac6f75c1";
 import { buildNearbyFilter, readNearbyPrefs } from "./nearby-search.js?v=0efee20d13";
-import { getAuthUser } from "./site-auth.js?v=b7e73b74b0";
+import { getAuthUser } from "./site-auth.js?v=c81778d772";
 import {
   bindListingOpen,
   restoreListingReturn,
@@ -36,7 +36,7 @@ import {
 } from "./listing-return.js?v=1911f0cb28";
 import { normalizeKivitel } from "./kivitel-options.js?v=be03aefc2e";
 import { featuredListingIdSet, pickFeaturedListings } from "./home-featured-slots.js?v=76bf95d774";
-import { mountSellerInventory, updateSellerInventoryCount } from "./seller-inventory.js?v=370bc6ef9d";
+import { mountSellerInventory, updateSellerInventoryCount } from "./seller-inventory.js?v=d71f9f1875";
 
 /** Map module is optional — only loaded when the user clicks the map button. */
 let closeSearchResultsMapFn = null;
@@ -1264,7 +1264,7 @@ async function ensureAllListingsLoadedForMap() {
 if (PAGE === "auto" || PAGE === "teherauto") {
   ensureMapModule = () => {
     if (!mapModulePromise) {
-      mapModulePromise = import("./search-results-map.js?v=bd985df205")
+      mapModulePromise = import("./search-results-map.js?v=1c4d872dfd")
         .then((mod) => {
           updateSearchMapButtonLabels = mod.updateSearchMapButtonLabels;
           closeSearchResultsMapFn = mod.closeSearchResultsMap;

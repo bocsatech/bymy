@@ -7652,14 +7652,18 @@ html[data-theme="dark"] body.site-app.home-page:is([data-site-page="auto"], [dat
 html[data-theme="dark"] body.site-app:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-toggle,
 html[data-theme="dark"] body.site-app:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-title,
 html[data-theme="dark"] body.site-app:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-toggle span {
-  color: #ffffff !important;
-  -webkit-text-fill-color: #ffffff !important;
+  color: #111 !important;
+  -webkit-text-fill-color: #111 !important;
   opacity: 1 !important;
   text-shadow: none !important;
 }
 
+html[data-theme="dark"] body.site-app:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-toggle {
+  background: #f0c52c !important;
+}
+
 html[data-theme="dark"] body.site-app:is([data-site-page="auto"], [data-site-page="teherauto"]) .auto-search-toggle__chevron {
-  border-color: #ffffff !important;
+  border-color: #111 !important;
   opacity: 1 !important;
 }
 

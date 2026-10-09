@@ -141,6 +141,18 @@
   min-height: 250px;
 }
 
+.ap-hero-services {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  padding: 0 22px 14px;
+  color: #fff;
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1.35;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.45);
+}
+
 .ap-hero-left {
   display: flex;
   gap: 18px;
@@ -689,6 +701,11 @@
   .ap-photo-logo {
     width: 75px;
     height: 75px;
+  }
+
+  .ap-hero-services {
+    padding: 0 16px 12px;
+    font-size: 0.95rem;
   }
 
   .ap-hero-cta {

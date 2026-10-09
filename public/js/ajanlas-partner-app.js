@@ -289,11 +289,10 @@ function renderProfile(root, partner, opts = {}) {
   const ratingHtml = ratingMetaHtml(partner.google_rating, partner.google_review_count);
   const place = formatPlaceMeta(partner);
   const hours = partner.opening_hours || "";
-  const role = services.length
-    ? services.map(categoryLabel).join(" • ")
-    : partner.contact_person
-      ? String(partner.contact_person)
-      : "Ajánlott szolgáltató";
+  const role = partner.contact_person
+    ? String(partner.contact_person)
+    : "Ajánlott szolgáltató";
+  const servicesLine = services.map(categoryLabel).filter(Boolean).join(" • ");
   const catFromQuery = new URLSearchParams(location.search).get("cat") || "";
   const vertical = new URLSearchParams(location.search).get("vertical") || "auto";
   const listBack = catFromQuery
@@ -381,6 +380,11 @@ function renderProfile(root, partner, opts = {}) {
           }
         </div>
       </div>
+      ${
+        servicesLine
+          ? `<p class="ap-hero-services">${esc(servicesLine)}</p>`
+          : ""
+      }
     </section>
     <div class="ap-grid">
       <section class="ap-card" data-ap-bio-card>

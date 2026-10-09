@@ -110,10 +110,12 @@
 .ap-hero-cover {
   position: absolute;
   inset: 0;
+  background-color: #121820;
   background-image: var(--ap-cover);
-  background-size: cover;
+  /* Teljes kép látszik — nem vágjuk le a kerethez */
+  background-size: contain;
+  background-repeat: no-repeat;
   background-position: center;
-  transform: scale(1.02);
 }
 
 .ap-hero-shade {
@@ -673,6 +675,8 @@
 
   .ap-hero {
     min-height: 0;
+    /* Keret a képhez igazodik; contain → nincs levágás */
+    aspect-ratio: 16 / 9;
   }
 
   .ap-hero-inner {

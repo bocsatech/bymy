@@ -433,6 +433,17 @@
   -webkit-overflow-scrolling: touch;
 }
 
+.ap-rail--wrap {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
+  overflow: visible;
+}
+
+.ap-rail--wrap .ap-tile {
+  flex: none;
+  width: auto;
+}
+
 .ap-tile {
   flex: 0 0 168px;
   background: #fff;

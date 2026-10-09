@@ -6,7 +6,7 @@ import {
   loadProfileFromServer,
   saveProfile,
   initSiteAuth,
-} from "./site-auth.js?v=c81778d772";
+} from "./site-auth.js?v=4588fd60ff";
 import { wirePostalCityAutofill } from "./postal-city-autofill.js?v=ba74000828";
 import { fillCountrySelect, PHONE_COUNTRIES } from "./phone-lang-ui.js?v=bc55c36aef";
 import { categoriesForVertical } from "./partner-categories-data.js?v=b826a00c74";
@@ -578,7 +578,7 @@ export async function renderPartnerManage(mountRoot) {
         <button type="submit">Mentés</button>
         ${
           !isCompany && profile.application_status === "approved" && profile.slug
-            ? `<a href="/partner/${encodeURIComponent(profile.slug)}" target="_blank" rel="noopener">Publikus profil megnyitása</a>`
+            ? `<a href="/ajanlas-partner.html?slug=${encodeURIComponent(profile.slug)}" target="_blank" rel="noopener">Publikus profil megnyitása</a>`
             : ""
         }
         <p data-status role="status"></p>

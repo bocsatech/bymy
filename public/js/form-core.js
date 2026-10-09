@@ -19,7 +19,7 @@ window.addEventListener("ad-form-render-equipment", () => renderEquipmentHook?.(
 import { initVehicleCatalogSelects } from "./vehicle-catalog-client.js?v=19a6b3a4f2";
 import { compressListingPhoto, MAX_LISTING_PHOTOS } from "./listing-photo-compress.js?v=4e3ffaa60f";
 import { uploadImage } from "./upload-image.js?v=3b023aae7a";
-import { applyListingAddressFromProfileSync } from "./ad-location-profile.js?v=1a6f62334d";
+import { applyListingAddressFromProfileSync } from "./ad-location-profile.js?v=8d6dbf56cb";
 import { syncIngatlanFormVisibility } from "./ingatlan-form-fields.js?v=18a867359e";
 import {
   DEFAULT_PHOTO_OVERLAY_ID,

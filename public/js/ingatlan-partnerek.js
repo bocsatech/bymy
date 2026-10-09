@@ -12,7 +12,7 @@ function telHref(phone) {
 }
 
 function partnerCard(partner) {
-  const href = `/partner/${encodeURIComponent(partner.slug)}`;
+  const href = `/ajanlas-partner.html?slug=${encodeURIComponent(partner.slug)}`;
   const photo = partner.logo_url
     ? `<img src="${escapeHtml(partner.logo_url)}" alt="" loading="lazy" decoding="async" />`
     : `<span class="immo-partner-photo-fallback">${escapeHtml(String(partner.display_name || "P").slice(0, 1))}</span>`;

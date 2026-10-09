@@ -1,5 +1,5 @@
 
-import { getAuthUser } from "./site-auth.js?v=c81778d772";
+import { getAuthUser } from "./site-auth.js?v=4588fd60ff";
 import { addSavedSearch } from "./fok-data.js?v=289f64e75c";
 import {
   buildSavedSearchUrl,

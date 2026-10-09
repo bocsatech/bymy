@@ -2,7 +2,7 @@
  * Korai kategóriaválasztó — ne várjon az app.js teljes betöltésére.
  */
 import { initCategoryPicker } from "./category-picker.js?v=5d45536b6e";
-import { getAuthUser, loginUrl } from "./site-auth.js?v=c81778d772";
+import { getAuthUser, loginUrl } from "./site-auth.js?v=4588fd60ff";
 
 initCategoryPicker({
   requireLogin: async () => {

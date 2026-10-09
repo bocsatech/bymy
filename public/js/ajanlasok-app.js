@@ -273,6 +273,13 @@ function ensureCategoryShell(categories) {
 }
 
 function partnerProfileHref(partner) {
+  const slug = String(partner.slug || "").trim();
+  if (slug) {
+    const params = new URLSearchParams({ slug, vertical: PAGE_VERTICAL });
+    const cat = queryCategoryId();
+    if (cat) params.set("cat", cat);
+    return `/ajanlas-partner.html?${params}`;
+  }
   const params = new URLSearchParams({
     id: String(partner.id ?? ""),
     vertical: PAGE_VERTICAL,

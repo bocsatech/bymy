@@ -7,10 +7,10 @@ import {
   recordListingView,
   deleteListingFromDb,
 } from "./db-client.js?v=855f1f7e76";
-import { getAuthUser, getDisplayName, getProfile } from "./site-auth.js?v=c81778d772";
+import { getAuthUser, getDisplayName, getProfile } from "./site-auth.js?v=4588fd60ff";
 import { mountTurnstile } from "./turnstile-ui.js?v=f0cc231f94";
 import { startConversation } from "./messages-api.js?v=5cf6493dc9";
-import { openListingMessage } from "./start-listing-message.js?v=026aa4838c";
+import { openListingMessage } from "./start-listing-message.js?v=d8693c3af4";
 import { getParkplatz, addParkplatzItem, removeParkplatzItem } from "./fok-data.js?v=289f64e75c";
 import { listingReturnHref, listingDetailHref, rememberListingOpen } from "./listing-return.js?v=1911f0cb28";
 import { takePrefetchedListing, storePrefetchedListing } from "./listing-prefetch.js?v=67ac871172";
@@ -496,10 +496,8 @@ function listingVerticalFromView(view) {
 }
 
 function sellerListHref(listingId, _vertical) {
-  // Egy készletoldal: a kereskedő összes feladott hirdetése (minden vertical).
-  const url = new URL("/auto.html", window.location.origin);
-  url.searchParams.set("hirdeto", String(listingId));
-  return `${url.pathname}${url.search}`;
+  // Ugyanaz a publikus partner / kereskedés oldal, mint az Ajánlásoknál.
+  return `/ajanlas-partner.html?listing=${encodeURIComponent(String(listingId))}`;
 }
 
 function revealRelatedListings(event) {
@@ -538,8 +536,10 @@ function render(view, listing, related = []) {
   const profile = getProfile() || {};
   const partner = listing?.partner;
   const partnerHref = partner?.slug
-    ? `/partner/${encodeURIComponent(partner.slug)}`
-    : "";
+    ? `/ajanlas-partner.html?slug=${encodeURIComponent(partner.slug)}`
+    : listing?.id
+      ? `/ajanlas-partner.html?listing=${encodeURIComponent(String(listing.id))}`
+      : "";
   const loginNext = `/belepes.html?next=${encodeURIComponent(location.pathname + location.search)}`;
   root.dataset.listingId = String(view.id);
   root.dataset.listingVertical = listingVerticalFromView(view);

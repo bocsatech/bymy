@@ -350,7 +350,7 @@ async function reload() {
     const selectedCount = selectedIds.size;
     const profileListingId = items.find((row) => Number(row?.id) > 0)?.id;
     const profileHref = profileListingId
-      ? `/auto.html?hirdeto=${encodeURIComponent(String(profileListingId))}`
+      ? `/ajanlas-partner.html?listing=${encodeURIComponent(String(profileListingId))}`
       : "";
     root.innerHTML = `
       <div class="myads-shell">

@@ -3356,7 +3356,7 @@ function partnerProfilesView() {
   const rows = partnerProfiles
     .map((partner) => {
       const status = partner.application_status || "pending";
-      const profileHref = `/partner/${encodeURIComponent(partner.slug || "")}`;
+      const profileHref = `/ajanlas-partner.html?slug=${encodeURIComponent(partner.slug || "")}`;
       return `<tr>
         <td>#${partner.user_id}</td>
         <td><strong>${esc(partner.display_name)}</strong><br><small>${esc(partner.slug)}</small></td>

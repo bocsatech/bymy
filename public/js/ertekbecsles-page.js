@@ -1,4 +1,4 @@
-import { createAdForm } from "./form-core.js?v=e86e1a3de5";
+import { createAdForm } from "./form-core.js?v=74cdae3206";
 import { mountAdFormBmPickers } from "./ad-form-bm-pickers.js?v=5decf174bd";
 import { initErtekbecsloPanel } from "./ertekbecslo-app.js?v=0fc6a04fde";
 import { mountErtekDualRanges } from "./ertekbecsles-ev-range.js?v=e49298cbf2";

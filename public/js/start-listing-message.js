@@ -1,4 +1,4 @@
-import { getAuthUser, loginUrl } from "./site-auth.js?v=c81778d772";
+import { getAuthUser, loginUrl } from "./site-auth.js?v=4588fd60ff";
 import { findConversationForListing } from "./messages-api.js?v=5cf6493dc9";
 
 export function isOwnListing(sellerId) {

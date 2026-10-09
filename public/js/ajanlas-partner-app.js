@@ -3,7 +3,17 @@ import {
   partnerCategoryImageUrl,
 } from "./partner-categories-data.js?v=b826a00c74";
 import { uploadImage } from "./upload-image.js?v=3b023aae7a";
-import { getAuthUser } from "./site-auth.js?v=c81778d772";
+import {
+  getAuthUser,
+  getProfile,
+  saveProfile,
+  loadProfileFromServer,
+} from "./site-auth.js?v=4588fd60ff";
+import {
+  fetchSellerContact,
+  fetchSellerRating,
+  fetchRelatedListingsPage,
+} from "./db-client.js?v=855f1f7e76";
 
 const CACHE_KEY = "bymy-ajanlas-partner-v1";
 
@@ -176,7 +186,7 @@ function renderProfile(root, partner, opts = {}) {
       ${
         canEdit
           ? `<button type="button" class="ap-edit-toggle${editMode ? " is-on" : ""}" data-ap-edit-toggle>
-              ${editMode ? "Szerkesztőmód ki" : "Szerkesztőmód"}
+              ${editMode ? "Kész" : "Szerkesztés"}
             </button>`
           : ""
       }
@@ -279,13 +289,24 @@ function renderProfile(root, partner, opts = {}) {
       </div>
       ${
         listings.length
-          ? `<div class="ap-rail">${listings.map(listingTile).join("")}</div>`
+          ? `<div class="ap-rail${listings.length > 4 ? " ap-rail--wrap" : ""}">${listings
+              .map(listingTile)
+              .join("")}</div>`
           : `<p class="ap-empty">A partnernek jelenleg nincs feladott hirdetése a Bymyn.</p>`
       }
     </section>
   `;
-  document.title = `${name} — Ajánlások — Bymy`;
-  wireHeroEditor(root, { partner, listings, backHref, editMode, canEdit, ownProfile });
+  document.title = `${name} — Partner profil — Bymy`;
+  wireHeroEditor(root, {
+    partner,
+    listings,
+    backHref,
+    editMode,
+    canEdit,
+    ownProfile,
+    accountEdit: Boolean(opts.accountEdit),
+    listingId: opts.listingId || "",
+  });
 }
 
 async function fetchOwnProfile() {
@@ -325,6 +346,23 @@ async function saveOwnMedia(ownProfile, patch) {
   return data.profile;
 }
 
+async function saveAccountMedia(patch) {
+  try {
+    await loadProfileFromServer();
+  } catch {
+    /* local profile */
+  }
+  const cur = getProfile();
+  const next = {
+    ...cur,
+    companyCoverUrl: patch.cover_url != null ? patch.cover_url : cur.companyCoverUrl || "",
+    companyLogoUrl: patch.company_logo_url != null ? patch.company_logo_url : cur.companyLogoUrl || "",
+    companyAvatarUrl: patch.logo_url != null ? patch.logo_url : cur.companyAvatarUrl || "",
+  };
+  await saveProfile(next);
+  return next;
+}
+
 function wireHeroEditor(root, ctx) {
   const toggle = root.querySelector("[data-ap-edit-toggle]");
   toggle?.addEventListener("click", () => {
@@ -335,7 +373,8 @@ function wireHeroEditor(root, ctx) {
     renderProfile(root, ctx.partner, { ...ctx, editMode: !ctx.editMode });
   });
 
-  if (!ctx.editMode || !ctx.ownProfile) return;
+  const canSaveMedia = Boolean(ctx.ownProfile || ctx.accountEdit);
+  if (!ctx.editMode || !canSaveMedia) return;
 
   const fileInput = root.querySelector("[data-ap-file]");
   const status = root.querySelector("[data-ap-edit-status]");
@@ -361,18 +400,31 @@ function wireHeroEditor(root, ctx) {
           : kind === "logo"
             ? { company_logo_url: url }
             : { logo_url: url };
-      const saved = await saveOwnMedia(ctx.ownProfile, patch);
-      const nextPartner = {
-        ...ctx.partner,
-        logo_url: saved.logo_url,
-        company_logo_url: saved.company_logo_url,
-        cover_url: saved.cover_url,
-      };
+      let nextPartner = { ...ctx.partner };
+      let ownProfile = ctx.ownProfile;
+      if (ctx.ownProfile) {
+        const saved = await saveOwnMedia(ctx.ownProfile, patch);
+        ownProfile = saved;
+        nextPartner = {
+          ...nextPartner,
+          logo_url: saved.logo_url,
+          company_logo_url: saved.company_logo_url,
+          cover_url: saved.cover_url,
+        };
+      } else {
+        await saveAccountMedia(patch);
+        nextPartner = {
+          ...nextPartner,
+          logo_url: patch.logo_url ?? nextPartner.logo_url,
+          company_logo_url: patch.company_logo_url ?? nextPartner.company_logo_url,
+          cover_url: patch.cover_url ?? nextPartner.cover_url,
+        };
+      }
       if (status) status.textContent = "Mentve.";
       renderProfile(root, nextPartner, {
         ...ctx,
         partner: nextPartner,
-        ownProfile: saved,
+        ownProfile,
         editMode: true,
       });
     } catch (error) {
@@ -416,12 +468,68 @@ async function loadListingsForSlug(slug) {
   }
 }
 
-async function resolveEditAccess(slug) {
-  if (!getAuthUser()?.email) return { canEdit: false, ownProfile: null };
-  const own = await fetchOwnProfile();
-  if (!own?.slug) return { canEdit: false, ownProfile: null };
-  if (slug && own.slug === slug) return { canEdit: true, ownProfile: own };
-  return { canEdit: false, ownProfile: own };
+async function resolveEditAccess({ slug = "", sellerId = 0 } = {}) {
+  const user = getAuthUser();
+  if (!user?.email) return { canEdit: false, ownProfile: null, accountEdit: false };
+  const own = await fetchOwnProfile().catch(() => null);
+  if (slug && own?.slug && own.slug === slug) {
+    return { canEdit: true, ownProfile: own, accountEdit: false };
+  }
+  const uid = Number(user.id || user.userId || 0);
+  if (sellerId > 0 && uid > 0 && uid === sellerId) {
+    return { canEdit: true, ownProfile: own?.slug ? own : null, accountEdit: !own?.slug };
+  }
+  return { canEdit: false, ownProfile: own, accountEdit: false };
+}
+
+function partnerFromSellerContact(contact, rating) {
+  const lines = Array.isArray(contact?.addressLines) ? contact.addressLines : [];
+  const place = lines.join(", ");
+  const avg = rating?.average != null ? Number(rating.average) : null;
+  const count = rating?.count != null ? Number(rating.count) : null;
+  return {
+    id: contact?.sellerId || 0,
+    name: contact?.sellerName || "Hirdető",
+    display_name: contact?.sellerName || "Hirdető",
+    phone: "",
+    email: contact?.email || "",
+    website: contact?.website || "",
+    logo_url: contact?.sellerAvatarUrl || "",
+    company_logo_url: contact?.companyLogoUrl || "",
+    cover_url: contact?.coverUrl || "",
+    contact_person: contact?.contactPerson || "",
+    service_areas: place,
+    address: place,
+    description: contact?.description || "",
+    google_maps_url: contact?.mapQuery
+      ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(contact.mapQuery)}`
+      : "",
+    google_rating: avg != null && Number.isFinite(avg) ? avg : null,
+    google_review_count: count,
+    services: [],
+    partnerSlug: contact?.partnerSlug || "",
+  };
+}
+
+async function loadListingSellerPage(listingId) {
+  const [contact, rating, page] = await Promise.all([
+    fetchSellerContact(listingId),
+    fetchSellerRating(listingId).catch(() => null),
+    fetchRelatedListingsPage(listingId, {
+      limit: 60,
+      offset: 0,
+      includeSelf: true,
+      tile: true,
+    }),
+  ]);
+  if (!contact) throw new Error("Nincs megjeleníthető kereskedés / partner.");
+  const listings = (page.listings || []).filter((item) => (item.status || "feladott") === "feladott");
+  return {
+    partner: partnerFromSellerContact(contact, rating),
+    listings,
+    sellerId: Number(contact.sellerId) || 0,
+    listingId: String(listingId),
+  };
 }
 
 async function init() {
@@ -431,9 +539,59 @@ async function init() {
   const params = new URLSearchParams(location.search);
   const id = params.get("id") || "";
   const slug = params.get("slug") || "";
+  const listingId = params.get("listing") || params.get("hirdeto") || "";
   const wantEdit = params.get("szerkeszt") === "1";
 
   try {
+    if (listingId) {
+      const loaded = await loadListingSellerPage(listingId);
+      const access = await resolveEditAccess({
+        slug: loaded.partner.partnerSlug || "",
+        sellerId: loaded.sellerId,
+      });
+      // Ha van publikus partner slug és gazdagabb profil, töltsük be azt is (média/leírás).
+      if (loaded.partner.partnerSlug) {
+        try {
+          const res = await fetch(
+            `/api/partner-profiles/${encodeURIComponent(loaded.partner.partnerSlug)}`,
+            { cache: "no-store" }
+          );
+          const data = await res.json().catch(() => ({}));
+          if (res.ok && data.profile) {
+            const p = data.profile;
+            loaded.partner = {
+              ...loaded.partner,
+              name: p.display_name || loaded.partner.name,
+              phone: p.phone || loaded.partner.phone,
+              email: p.email || loaded.partner.email,
+              website: p.website || loaded.partner.website,
+              logo_url: p.logo_url || loaded.partner.logo_url,
+              company_logo_url: p.company_logo_url || loaded.partner.company_logo_url,
+              cover_url: p.cover_url || loaded.partner.cover_url,
+              contact_person: p.contact_person || loaded.partner.contact_person,
+              service_areas: p.service_areas || loaded.partner.service_areas,
+              description: p.description || loaded.partner.description,
+            };
+            if (Array.isArray(data.listings) && data.listings.length) {
+              loaded.listings = data.listings;
+            }
+          }
+        } catch {
+          /* keep contact-based */
+        }
+      }
+      renderProfile(root, loaded.partner, {
+        listings: loaded.listings,
+        backHref: `/hirdetes.html?id=${encodeURIComponent(listingId)}`,
+        canEdit: access.canEdit,
+        editMode: access.canEdit && wantEdit,
+        ownProfile: access.ownProfile,
+        accountEdit: access.accountEdit,
+        listingId,
+      });
+      return;
+    }
+
     if (slug) {
       const res = await fetch(`/api/partner-profiles/${encodeURIComponent(slug)}`, {
         cache: "no-store",
@@ -441,7 +599,7 @@ async function init() {
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || "A profil nem elérhető.");
       const profile = data.profile || {};
-      const access = await resolveEditAccess(slug);
+      const access = await resolveEditAccess({ slug });
       renderProfile(
         root,
         {
@@ -465,6 +623,7 @@ async function init() {
           canEdit: access.canEdit,
           editMode: access.canEdit && wantEdit,
           ownProfile: access.ownProfile,
+          accountEdit: access.accountEdit,
         }
       );
       return;
@@ -487,12 +646,14 @@ async function init() {
       .toLowerCase();
     if (guessSlug) listings = await loadListingsForSlug(guessSlug);
 
-    const access = guessSlug ? await resolveEditAccess(guessSlug) : { canEdit: false, ownProfile: null };
+    const access = await resolveEditAccess({ slug: guessSlug });
     renderProfile(root, partner, {
       listings,
+      backHref: "/ajanlasok.html",
       canEdit: access.canEdit,
       editMode: access.canEdit && wantEdit,
       ownProfile: access.ownProfile,
+      accountEdit: access.accountEdit,
     });
   } catch (error) {
     root.innerHTML = `<div class="ap-error"><strong>A partnerprofil nem tölthető be.</strong><p>${esc(

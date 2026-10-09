@@ -1669,8 +1669,16 @@ html[data-theme="dark"] body.site-app > .auto-price-suggest .auto-price-suggest_
   body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-grid-card-photo-slide img {
     object-fit: cover !important;
     object-position: center center !important;
-    transform: scale(1.14) !important;
+    /* Ne scale — overflow scrollportot csinál Androidon a képen. */
+    transform: none !important;
     transform-origin: center center !important;
+  }
+
+  body.home-page:is([data-site-page="auto"], [data-site-page="teherauto"]) .home-listings-panel {
+    overflow: visible !important;
+    overscroll-behavior: auto !important;
+    max-height: none !important;
+    height: auto !important;
   }
 
   /* Closed menu wheels must never paint inline next to triggers. */

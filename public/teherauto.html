@@ -61,9 +61,9 @@
     <link rel="stylesheet" href="/css/site-app.css?v=99aaad2658" />
     <link rel="stylesheet" href="/css/site-side.css?v=6f9f0965f1" />
     <link rel="stylesheet" href="/css/hub-mobile-app.css?v=67ee61af9b" />
-    <link rel="stylesheet" href="/css/home.css?v=097d894652" />
+    <link rel="stylesheet" href="/css/home.css?v=b62d5fcf9a" />
     <link rel="stylesheet" href="/css/auto-hero.css?v=153d032723" />
-    <link rel="stylesheet" href="/css/auto-desk-layout.css?v=96606da8c1" />
+    <link rel="stylesheet" href="/css/auto-desk-layout.css?v=21d78280e4" />
     <link rel="stylesheet" href="/css/listing-photo-cover.css?v=b60e28d793" />
     <link rel="stylesheet" href="/css/listing-featured.css?v=49bf39cc29" />
     <link rel="stylesheet" href="/css/ingatlan-search.css?v=1e783aedd0" />
@@ -112,8 +112,8 @@
       }
       body.home-page .home-main {
         min-height: 0 !important;
-        overflow-x: hidden !important;
-        overflow-y: visible !important;
+        /* Ne overflow-x:hidden + y:visible — a CSS y-t auto-ra számolja → nested trap. */
+        overflow: visible !important;
         max-width: 100% !important;
         display: block !important;
       }
@@ -242,15 +242,13 @@
       }
       body.home-page .home-layout {
         min-height: 0 !important;
-        overflow-x: hidden !important;
-        overflow-y: visible !important;
+        overflow: visible !important;
         max-width: 100% !important;
         align-items: start !important;
       }
       body.home-page .home-center {
         min-height: 0 !important;
-        overflow-x: hidden !important;
-        overflow-y: visible !important;
+        overflow: visible !important;
         max-width: 100% !important;
       }
       
@@ -258,10 +256,31 @@
       body.home-page .home-info-sidebar,
       body.home-page .home-partner-results,
       body.home-page .site-side-card {
-        overflow-x: hidden !important;
-        overflow-y: visible !important;
+        overflow: visible !important;
+        overscroll-behavior: auto !important;
         max-height: none !important;
         max-width: 100% !important;
+      }
+
+      /* Mobil teher: egy dokumentum-görgetés (mint a kezdőlap), ne nested panel. */
+      @media (max-width: 900px) {
+        body.home-page[data-site-page="teherauto"] .home-main,
+        body.home-page[data-site-page="teherauto"] .home-layout,
+        body.home-page[data-site-page="teherauto"] .home-center,
+        body.home-page[data-site-page="teherauto"] .home-listings-panel,
+        body.home-page[data-site-page="teherauto"] .home-grid-track {
+          overflow: visible !important;
+          overscroll-behavior: auto !important;
+          max-height: none !important;
+          height: auto !important;
+        }
+        body.home-page[data-site-page="teherauto"] .home-grid-card-media,
+        body.home-page[data-site-page="teherauto"] .home-grid-card-photo {
+          overflow: clip !important;
+        }
+        body.home-page[data-site-page="teherauto"] .home-grid-card-photo-img {
+          transform: none !important;
+        }
       }
     </style>
     <link rel="stylesheet" href="/css/bymy-logo-size.css?v=f14985a2ca" />

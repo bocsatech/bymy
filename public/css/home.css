@@ -2191,10 +2191,23 @@ body.home-page .home-info-card {
   bottom: auto;
 }
 
-body.home-page .home-listings-panel {
-  position: static;
-  overflow-y: auto;
-  overscroll-behavior: contain;
+/* Desk: panel a görgető. Mobil: NE legyen nested scrollport — Androidon contain elnyeli a lapgörgetést. */
+@media (min-width: 901px) {
+  body.home-page .home-listings-panel {
+    position: static;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+}
+
+@media (max-width: 900px) {
+  body.home-page .home-listings-panel {
+    position: static;
+    overflow: visible !important;
+    overscroll-behavior: auto !important;
+    max-height: none !important;
+    height: auto !important;
+  }
 }
 
 body.home-page .home-info-sidebar,

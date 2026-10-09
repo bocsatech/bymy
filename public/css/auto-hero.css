@@ -2189,7 +2189,7 @@ body[data-site-page="teherauto"] .auto-search-tabs {
     .auto-search-panel
     .auto-qs-drums
     :is(.auto-search-alap-card, .home-qs-more-layout)
-    .immo-schema-cell:not(.immo-dual-range__half)
+    .immo-schema-cell:not(.immo-dual-range__half):not(.auto-search-bm-combined)
     > .immo-wheel-wrap {
     position: relative !important;
     display: flex !important;
@@ -2213,7 +2213,7 @@ body[data-site-page="teherauto"] .auto-search-tabs {
     .auto-search-panel
     .auto-qs-drums
     :is(.auto-search-alap-card, .home-qs-more-layout)
-    .immo-schema-cell:not(.immo-dual-range__half)
+    .immo-schema-cell:not(.immo-dual-range__half):not(.auto-search-bm-combined)
     > .immo-wheel-wrap
     > .immo-wheel-trigger {
     flex: 1 1 0% !important;
@@ -2230,12 +2230,39 @@ body[data-site-page="teherauto"] .auto-search-tabs {
     height: auto !important;
   }
 
+  /* Gyártmány & Modell: teljes keret (ne a trail-aláhúzás írja felül). */
+  body:is([data-site-page="auto"], [data-site-page="teherauto"])
+    .auto-search-panel
+    .auto-qs-drums
+    .immo-schema-cell.auto-search-bm-combined
+    > .immo-wheel-wrap.auto-search-bm-combined__wrap {
+    border: 1.5px solid #d0d5dd !important;
+    border-radius: 10px !important;
+    background: #fff !important;
+    padding: 0.35rem 0.75rem !important;
+    min-height: 2.75rem !important;
+    box-shadow: none !important;
+  }
+
+  body:is([data-site-page="auto"], [data-site-page="teherauto"])
+    .auto-search-panel
+    .auto-qs-drums
+    .immo-schema-cell.auto-search-bm-combined
+    > .immo-wheel-wrap.auto-search-bm-combined__wrap
+    > .immo-wheel-trigger {
+    border: 0 !important;
+    border-bottom: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
   /* Üres menü: jobb oszlop mint feladás LE/X — vonal NEM teljes szélesség */
   body:is([data-site-page="auto"], [data-site-page="teherauto"])
     .auto-search-panel
     .auto-qs-drums
     :is(.auto-search-alap-card, .home-qs-more-layout)
-    .immo-schema-cell:not(.immo-dual-range__half)
+    .immo-schema-cell:not(.immo-dual-range__half):not(.auto-search-bm-combined)
     > .immo-wheel-wrap:not(.has-wheel-clear)::after {
     content: "" !important;
     display: block !important;
